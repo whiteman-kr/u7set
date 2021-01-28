@@ -31,11 +31,11 @@ ServiceWorker* ConfigurationServiceWorker::createInstance() const
 	return newInstance;
 }
 
-
 void ConfigurationServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
-	serviceInfo.set_clientrequestip(m_clientIP.address32());
-	serviceInfo.set_clientrequestport(m_clientIP.port());
+	QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::ConfigurationService, m_cfgServiceSettings);
+
+	serviceInfo.set_settingsxml(xmlString.toStdString());
 }
 
 void ConfigurationServiceWorker::onBuildPathChanged(QString newBuildPath)
@@ -115,13 +115,15 @@ bool ConfigurationServiceWorker::loadCfgServiceSettings(const QString& buildPath
 
 	QString curProfile = sessionParams().currentSettingsProfile;
 
-	m_cfgServiceSettings = softwareSettingsSet().getSettingsProfile<CfgServiceSettings>(curProfile);
+	auto ptr = softwareSettingsSet().getSettingsProfile<CfgServiceSettings>(curProfile);
 
-	if (m_cfgServiceSettings == nullptr)
+	if (ptr == nullptr)
 	{
 		DEBUG_LOG_ERR(m_logger, QString("Error loading settings for profile: %1").arg(curProfile));
 		return false;
 	}
+
+	m_cfgServiceSettings = *ptr.get();
 
 	DEBUG_LOG_MSG(m_logger, QString());
 	DEBUG_LOG_MSG(m_logger, QString("Loading settings for profile: %1 - Ok").arg(curProfile));
@@ -129,7 +131,7 @@ bool ConfigurationServiceWorker::loadCfgServiceSettings(const QString& buildPath
 
 	if (m_clientIPStr.isEmpty() == true)
 	{
-		m_clientIP = m_cfgServiceSettings->clientRequestIP;
+		m_clientIP = m_cfgServiceSettings.clientRequestIP;
 	}
 	else
 	{
@@ -167,7 +169,7 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 															  m_workDirectory,
 															  buildPath,
 															  sessionParams(),
-															  m_cfgServiceSettings->knownClients(),
+															  m_cfgServiceSettings.knownClients(),
 															  *m_cfgCheckerWorker,
 															  m_logger);
 

@@ -43,7 +43,7 @@ protected:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	virtual bool writeToXml(XmlWriteHelper& xml) = 0;
+	virtual bool writeToXml(XmlWriteHelper& xml) const = 0;
 	virtual bool readFromXml(XmlReadHelper& xml) = 0;
 
 	friend class SoftwareSettingsSet;
@@ -76,6 +76,9 @@ public:
 	E::SoftwareType softwareType() const { return m_softwareType; }
 
 	QStringList getSettingsProfiles() const;
+
+	static QString writeSettingsToXmlString(E::SoftwareType swType, const SoftwareSettings& settings);
+	static bool readSettingsFromXmlString(const QString& xmlString, SoftwareSettings* settings);
 
 private:
 	std::shared_ptr<SoftwareSettings> createAppropriateSettings();
@@ -176,7 +179,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -224,7 +227,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -263,7 +266,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -315,7 +318,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -359,7 +362,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -409,7 +412,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -449,7 +452,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -501,7 +504,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -561,7 +564,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;

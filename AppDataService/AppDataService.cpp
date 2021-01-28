@@ -41,8 +41,9 @@ ServiceWorker* AppDataServiceWorker::createInstance() const
 
 void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
-	serviceInfo.set_clientrequestip(m_curSettingsProfile.clientRequestIP.address32());
-	serviceInfo.set_clientrequestport(m_curSettingsProfile.clientRequestIP.port());
+	QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::AppDataService, m_curSettingsProfile);
+
+	serviceInfo.set_settingsxml(xmlString.toStdString());
 }
 
 bool AppDataServiceWorker::isConnectedToConfigurationService(quint32& ip, quint16& port) const

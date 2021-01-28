@@ -36,8 +36,9 @@ ServiceWorker* ArchivingService::createInstance() const
 
 void ArchivingService::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
-	serviceInfo.set_clientrequestip(m_serviceSettings.clientRequestIP.address32());
-	serviceInfo.set_clientrequestport(m_serviceSettings.clientRequestIP.port());
+	QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::ArchiveService, m_serviceSettings);
+
+	serviceInfo.set_settingsxml(xmlString.toStdString());
 }
 
 void ArchivingService::initCmdLineParser()

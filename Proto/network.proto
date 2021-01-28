@@ -241,10 +241,9 @@ message ServiceInfo
     optional int32 serviceState = 3 [default = 0];		// ServiceState::Undefined;
     optional int64 serviceUptime = 4 [default = 0];
 
-    optional uint32 clientRequestIP = 5 [default = 0];
-    optional int32 clientRequestPort = 6 [default = 0];
+	optional SessionParams sessionParams = 5;
 
-	optional SessionParams sessionParams = 7;
+	optional string settingsXml = 6;					// current service settings XML
 }
 
 message GetServiceInfoReply

@@ -66,5 +66,5 @@ private:
 
 	HostAddressPort m_clientIP;
 
-	std::shared_ptr<const CfgServiceSettings> m_cfgServiceSettings;
+	CfgServiceSettings m_cfgServiceSettings;
 };

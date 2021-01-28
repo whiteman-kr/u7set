@@ -93,8 +93,14 @@ void TuningServiceWidget::updateStateInfo()
 {
 	if (m_serviceInfo.servicestate() == ServiceState::Work)
 	{
-		quint32 ip = m_serviceInfo.clientrequestip();
-		qint32 port = m_serviceInfo.clientrequestport();
+		//		quint32 ip = m_serviceInfo.clientrequestip();
+		//qint32 port = m_serviceInfo.clientrequestport();
+
+		// Work Here
+		Q_ASSERT(false);
+
+		quint32 ip = 0;
+		qint32 port = 0;
 
 		quint32 workingIp = getWorkingClientRequestIp();
 

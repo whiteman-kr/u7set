@@ -2926,28 +2926,26 @@ class ServiceInfo : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 serviceuptime() const;
   inline void set_serviceuptime(::google::protobuf::int64 value);
 
-  // optional uint32 clientRequestIP = 5 [default = 0];
-  inline bool has_clientrequestip() const;
-  inline void clear_clientrequestip();
-  static const int kClientRequestIPFieldNumber = 5;
-  inline ::google::protobuf::uint32 clientrequestip() const;
-  inline void set_clientrequestip(::google::protobuf::uint32 value);
-
-  // optional int32 clientRequestPort = 6 [default = 0];
-  inline bool has_clientrequestport() const;
-  inline void clear_clientrequestport();
-  static const int kClientRequestPortFieldNumber = 6;
-  inline ::google::protobuf::int32 clientrequestport() const;
-  inline void set_clientrequestport(::google::protobuf::int32 value);
-
-  // optional .Network.SessionParams sessionParams = 7;
+  // optional .Network.SessionParams sessionParams = 5;
   inline bool has_sessionparams() const;
   inline void clear_sessionparams();
-  static const int kSessionParamsFieldNumber = 7;
+  static const int kSessionParamsFieldNumber = 5;
   inline const ::Network::SessionParams& sessionparams() const;
   inline ::Network::SessionParams* mutable_sessionparams();
   inline ::Network::SessionParams* release_sessionparams();
   inline void set_allocated_sessionparams(::Network::SessionParams* sessionparams);
+
+  // optional string settingsXml = 6;
+  inline bool has_settingsxml() const;
+  inline void clear_settingsxml();
+  static const int kSettingsXmlFieldNumber = 6;
+  inline const ::std::string& settingsxml() const;
+  inline void set_settingsxml(const ::std::string& value);
+  inline void set_settingsxml(const char* value);
+  inline void set_settingsxml(const char* value, size_t size);
+  inline ::std::string* mutable_settingsxml();
+  inline ::std::string* release_settingsxml();
+  inline void set_allocated_settingsxml(::std::string* settingsxml);
 
   // @@protoc_insertion_point(class_scope:Network.ServiceInfo)
  private:
@@ -2959,25 +2957,22 @@ class ServiceInfo : public ::google::protobuf::Message {
   inline void clear_has_servicestate();
   inline void set_has_serviceuptime();
   inline void clear_has_serviceuptime();
-  inline void set_has_clientrequestip();
-  inline void clear_has_clientrequestip();
-  inline void set_has_clientrequestport();
-  inline void clear_has_clientrequestport();
   inline void set_has_sessionparams();
   inline void clear_has_sessionparams();
+  inline void set_has_settingsxml();
+  inline void clear_has_settingsxml();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Network::SoftwareInfo* softwareinfo_;
   ::google::protobuf::int64 uptime_;
   ::google::protobuf::int64 serviceuptime_;
-  ::google::protobuf::int32 servicestate_;
-  ::google::protobuf::uint32 clientrequestip_;
   ::Network::SessionParams* sessionparams_;
-  ::google::protobuf::int32 clientrequestport_;
+  ::std::string* settingsxml_;
+  ::google::protobuf::int32 servicestate_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -11131,59 +11126,15 @@ inline void ServiceInfo::set_serviceuptime(::google::protobuf::int64 value) {
   serviceuptime_ = value;
 }
 
-// optional uint32 clientRequestIP = 5 [default = 0];
-inline bool ServiceInfo::has_clientrequestip() const {
+// optional .Network.SessionParams sessionParams = 5;
+inline bool ServiceInfo::has_sessionparams() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void ServiceInfo::set_has_clientrequestip() {
+inline void ServiceInfo::set_has_sessionparams() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void ServiceInfo::clear_has_clientrequestip() {
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline void ServiceInfo::clear_clientrequestip() {
-  clientrequestip_ = 0u;
-  clear_has_clientrequestip();
-}
-inline ::google::protobuf::uint32 ServiceInfo::clientrequestip() const {
-  return clientrequestip_;
-}
-inline void ServiceInfo::set_clientrequestip(::google::protobuf::uint32 value) {
-  set_has_clientrequestip();
-  clientrequestip_ = value;
-}
-
-// optional int32 clientRequestPort = 6 [default = 0];
-inline bool ServiceInfo::has_clientrequestport() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
-}
-inline void ServiceInfo::set_has_clientrequestport() {
-  _has_bits_[0] |= 0x00000020u;
-}
-inline void ServiceInfo::clear_has_clientrequestport() {
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline void ServiceInfo::clear_clientrequestport() {
-  clientrequestport_ = 0;
-  clear_has_clientrequestport();
-}
-inline ::google::protobuf::int32 ServiceInfo::clientrequestport() const {
-  return clientrequestport_;
-}
-inline void ServiceInfo::set_clientrequestport(::google::protobuf::int32 value) {
-  set_has_clientrequestport();
-  clientrequestport_ = value;
-}
-
-// optional .Network.SessionParams sessionParams = 7;
-inline bool ServiceInfo::has_sessionparams() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
-}
-inline void ServiceInfo::set_has_sessionparams() {
-  _has_bits_[0] |= 0x00000040u;
-}
 inline void ServiceInfo::clear_has_sessionparams() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void ServiceInfo::clear_sessionparams() {
   if (sessionparams_ != NULL) sessionparams_->::Network::SessionParams::Clear();
@@ -11210,6 +11161,76 @@ inline void ServiceInfo::set_allocated_sessionparams(::Network::SessionParams* s
     set_has_sessionparams();
   } else {
     clear_has_sessionparams();
+  }
+}
+
+// optional string settingsXml = 6;
+inline bool ServiceInfo::has_settingsxml() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void ServiceInfo::set_has_settingsxml() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void ServiceInfo::clear_has_settingsxml() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void ServiceInfo::clear_settingsxml() {
+  if (settingsxml_ != &::google::protobuf::internal::kEmptyString) {
+    settingsxml_->clear();
+  }
+  clear_has_settingsxml();
+}
+inline const ::std::string& ServiceInfo::settingsxml() const {
+  return *settingsxml_;
+}
+inline void ServiceInfo::set_settingsxml(const ::std::string& value) {
+  set_has_settingsxml();
+  if (settingsxml_ == &::google::protobuf::internal::kEmptyString) {
+    settingsxml_ = new ::std::string;
+  }
+  settingsxml_->assign(value);
+}
+inline void ServiceInfo::set_settingsxml(const char* value) {
+  set_has_settingsxml();
+  if (settingsxml_ == &::google::protobuf::internal::kEmptyString) {
+    settingsxml_ = new ::std::string;
+  }
+  settingsxml_->assign(value);
+}
+inline void ServiceInfo::set_settingsxml(const char* value, size_t size) {
+  set_has_settingsxml();
+  if (settingsxml_ == &::google::protobuf::internal::kEmptyString) {
+    settingsxml_ = new ::std::string;
+  }
+  settingsxml_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceInfo::mutable_settingsxml() {
+  set_has_settingsxml();
+  if (settingsxml_ == &::google::protobuf::internal::kEmptyString) {
+    settingsxml_ = new ::std::string;
+  }
+  return settingsxml_;
+}
+inline ::std::string* ServiceInfo::release_settingsxml() {
+  clear_has_settingsxml();
+  if (settingsxml_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = settingsxml_;
+    settingsxml_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ServiceInfo::set_allocated_settingsxml(::std::string* settingsxml) {
+  if (settingsxml_ != &::google::protobuf::internal::kEmptyString) {
+    delete settingsxml_;
+  }
+  if (settingsxml) {
+    set_has_settingsxml();
+    settingsxml_ = settingsxml;
+  } else {
+    clear_has_settingsxml();
+    settingsxml_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 

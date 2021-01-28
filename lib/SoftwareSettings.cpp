@@ -196,6 +196,43 @@ QStringList SoftwareSettingsSet::getSettingsProfiles() const
 	return profiles;
 }
 
+QString SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType swType, const SoftwareSettings& settings)
+{
+	QString xmlString;
+
+	XmlWriteHelper xml(&xmlString);
+
+	xml.setAutoFormatting(true);
+
+	xml.writeStartDocument();
+
+	xml.writeStartElement(XmlElement::SETTINGS_SET);
+
+	xml.writeSoftwareTypeAttribute(swType);
+	xml.writeIntAttribute(XmlAttribute::COUNT, 1);
+
+	settings.writeToXml(xml);
+
+	xml.writeEndElement();		// </SettingsSet>
+
+	return xmlString;
+}
+
+bool SoftwareSettingsSet::readSettingsFromXmlString(const QString& xmlString, SoftwareSettings* settings)
+{
+	TEST_PTR_RETURN_FALSE(settings);
+
+	XmlReadHelper xml(xmlString);
+
+	bool result = true;
+
+	result &= xml.findElement(XmlElement::SETTINGS_SET);
+
+	result &= settings->readFromXml(xml);
+
+	return result;
+}
+
 std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings()
 {
 	switch(m_softwareType)
@@ -535,7 +572,7 @@ bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_p
 //
 // -------------------------------------------------------------------------------------
 
-bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml)
+bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -719,7 +756,7 @@ QStringList CfgServiceSettings::knownClients() const
 //
 // -------------------------------------------------------------------------------------
 
-bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml)
+bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -862,7 +899,7 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-bool DiagDataServiceSettings::writeToXml(XmlWriteHelper& xml)
+bool DiagDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -987,7 +1024,7 @@ bool DiagDataServiceSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
+bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -1012,7 +1049,7 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 	for(uint i = 0; i < sources.size(); i++)
 	{
-		TuningSource& ts = sources[i];
+		const TuningSource& ts = sources[i];
 
 		xml.writeStartElement(XmlElement::TUNING_SOURCE);
 
@@ -1032,7 +1069,7 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 	for(uint i = 0; i < clients.size(); i++)
 	{
-		TuningClient& tc = clients[i];
+		const TuningClient& tc = clients[i];
 
 		xml.writeStartElement(XmlElement::TUNING_CLIENT);
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tc.equipmentID);
@@ -1404,7 +1441,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml)
+bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -1543,7 +1580,7 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-bool TestClientSettings::writeToXml(XmlWriteHelper& xml)
+bool TestClientSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -1849,7 +1886,7 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-bool MetrologySettings::writeToXml(XmlWriteHelper& xml)
+bool MetrologySettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -2048,7 +2085,7 @@ bool MetrologySettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-bool MonitorSettings::writeToXml(XmlWriteHelper& xml)
+bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -2547,7 +2584,7 @@ void MonitorSettings::clear()
 //
 // -------------------------------------------------------------------------------------
 
-bool TuningClientSettings::writeToXml(XmlWriteHelper& xml)
+bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 

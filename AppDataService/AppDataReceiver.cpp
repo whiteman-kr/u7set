@@ -173,13 +173,13 @@ void AppDataReceiverThread::receivePackets()
 		{
 			prevServerTime = serverTime;
 
-			m_receivingRate = m_receivedPerSecond;
+			m_receivingRate.store(m_receivedPerSecond);
 			m_receivedPerSecond = 0;
 
-			m_udpReceivingRate = m_udpReceivedPerSecond;
+			m_udpReceivingRate.store(m_udpReceivedPerSecond);
 			m_udpReceivedPerSecond = 0;
 
-			m_rupFramesReceivingRate = m_rupFramesReceivedPerSecond;
+			m_rupFramesReceivingRate.store(m_rupFramesReceivedPerSecond);
 			m_rupFramesReceivedPerSecond = 0;
 
 			qDebug() << C_STR(QString("Receive RUP frames %1").arg(m_rupFramesReceivingRate));

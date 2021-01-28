@@ -181,8 +181,14 @@ void BaseServiceStateWidget::updateServiceState()
 
 				m_stateTabModel->setData(m_stateTabModel->index(3, 1), srvUptimeStr);
 
-				quint32 ip = m_serviceInfo.clientrequestip();
-				qint32 port = m_serviceInfo.clientrequestport();
+				// quint32 ip = m_serviceInfo.clientrequestip();
+				// qint32 port = m_serviceInfo.clientrequestport();
+				//
+				// Work Here
+				Q_ASSERT(false);
+
+				quint32 ip = 0;
+				qint32 port = 0;
 
 				QString address = QHostAddress(ip).toString() + QString(":%1").arg(port);
 
@@ -476,14 +482,19 @@ void BaseServiceStateWidget::addClientsTab(bool showStateColumn)
 
 quint32 BaseServiceStateWidget::getWorkingClientRequestIp()
 {
-	QHostAddress address(m_serviceInfo.clientrequestip());
+	//
+	// Work Here
+	Q_ASSERT(false);
+
+/*	QHostAddress address(m_serviceInfo.clientrequestip());
 
 	if (address == QHostAddress::AnyIPv4)
 	{
 		address.setAddress(m_udpIp);
 	}
 
-	return address.toIPv4Address();
+	return address.toIPv4Address();*/
+	return 0;
 }
 
 void BaseServiceStateWidget::sendCommand(int command)

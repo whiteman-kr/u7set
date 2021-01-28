@@ -40,8 +40,9 @@ namespace Tuning
 
 	void TuningServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 	{
-		serviceInfo.set_clientrequestip(m_cfgSettings.clientRequestIP.address32());
-		serviceInfo.set_clientrequestport(m_cfgSettings.clientRequestIP.port());
+		QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::TuningService, m_cfgSettings);
+
+		serviceInfo.set_settingsxml(xmlString.toStdString());
 	}
 
 	void TuningServiceWorker::initCmdLineParser()

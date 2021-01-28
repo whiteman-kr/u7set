@@ -20,11 +20,9 @@ DiagDataServiceWorker::DiagDataServiceWorker(const SoftwareInfo& softwareInfo,
 {
 }
 
-
 DiagDataServiceWorker::~DiagDataServiceWorker()
 {
 }
-
 
 ServiceWorker* DiagDataServiceWorker::createInstance() const
 {
@@ -36,12 +34,14 @@ ServiceWorker* DiagDataServiceWorker::createInstance() const
 	return diagDataServiceWorker;
 }
 
-
 void DiagDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
-	Q_UNUSED(serviceInfo)
-}
+	TEST_PTR_RETURN(m_serviceSettings);
 
+	QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::DiagDataService, *m_serviceSettings.get());
+
+	serviceInfo.set_settingsxml(xmlString.toStdString());
+}
 
 void DiagDataServiceWorker::initCmdLineParser()
 {

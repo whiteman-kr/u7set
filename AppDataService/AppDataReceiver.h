@@ -46,21 +46,21 @@ private:
 
 	//
 
-	int m_receivingRate = 0;				// bytes per second
-	int m_udpReceivingRate = 0;				// UDP datagrams per second
-	int m_rupFramesReceivingRate = 0;		// RUP frames per second
-	qint64 m_rupFramesCount = 0;
-	qint64 m_simFramesCount = 0;
+	std::atomic<int> m_receivingRate = { 0 };				// bytes per second
+	std::atomic<int> m_udpReceivingRate = { 0 };				// UDP datagrams per second
+	std::atomic<int> m_rupFramesReceivingRate = { 0 };		// RUP frames per second
+	std::atomic<qint64> m_rupFramesCount = { 0 };
+	std::atomic<qint64> m_simFramesCount = { 0 };
 
-	qint64 m_errDatagramSize = 0;
-	qint64 m_errSimVersion = 0;
-	qint64 m_errUnknownAppDataSourceIP = 0;
-	qint64 m_errRupFrameCRC = 0;
-	qint64 m_errNotExpectedSimPacket = 0;
+	std::atomic<qint64> m_errDatagramSize = { 0 };
+	std::atomic<qint64> m_errSimVersion = { 0 };
+	std::atomic<qint64> m_errUnknownAppDataSourceIP = { 0 };
+	std::atomic<qint64> m_errRupFrameCRC = { 0 };
+	std::atomic<qint64> m_errNotExpectedSimPacket = { 0 };
 
 	//
 
-	int m_receivedPerSecond = 0;
-	int m_udpReceivedPerSecond = 0;
-	int m_rupFramesReceivedPerSecond = 0;
+	std::atomic<int> m_receivedPerSecond = 0;
+	std::atomic<int> m_udpReceivedPerSecond = 0;
+	std::atomic<int> m_rupFramesReceivedPerSecond = 0;
 };
