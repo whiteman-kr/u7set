@@ -537,6 +537,7 @@ public:
 	void reserve(int n);
 
 	void buildID2IndexMap();
+	void updateID2IndexInMap(const QString& appSignalId, int index);
 	void clearID2IndexMap() { m_strID2IndexMap.clear(); }
 	bool ID2IndexMapIsEmpty();
 

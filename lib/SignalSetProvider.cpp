@@ -435,6 +435,7 @@ void SignalPropertyManager::clear()
 {
 	m_propertyDescription = m_basicPropertyDescription;
 	m_propertyName2IndexMap.clear();
+	emit propertyCountChanged();
 }
 
 void SignalPropertyManager::init()
@@ -507,7 +508,7 @@ void SignalPropertyManager::addNewProperty(const SignalPropertyDescription& newP
 	int propertyIndex = static_cast<int>(m_propertyDescription.size());
 	m_propertyDescription.push_back(newProperty);
 	m_propertyName2IndexMap.insert(newProperty.name, propertyIndex);
-	emit propertyCountIncreased();
+	emit propertyCountChanged();
 
 	for (size_t i = 0; i < m_propertyBehaviorDescription.size(); i++)
 	{
@@ -1052,9 +1053,10 @@ void SignalSetProvider::loadSignal(int signalId)
 		return;
 	}
 	dbController()->getLatestSignal(signalId, &m_signalSet[index], m_parentWidget);
+	m_signalSet.updateID2IndexInMap(m_signalSet[index].appSignalID(), index);
 
-	signalUpdated(index);
-	signalPropertiesChanged(getLoadedSignal(index));
+	emit signalUpdated(index);
+	emit signalPropertiesChanged(getLoadedSignal(index));
 }
 
 void SignalSetProvider::loadSignals()

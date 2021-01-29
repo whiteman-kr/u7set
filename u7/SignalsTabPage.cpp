@@ -369,7 +369,7 @@ SignalsModel::SignalsModel(SignalSetProvider* signalSetProvider, SignalsTabPage*
 {
 	connect(m_signalSetProvider, &SignalSetProvider::signalCountChanged, this, &SignalsModel::changeRowCount);
 	connect(m_signalSetProvider, &SignalSetProvider::signalUpdated, this, &SignalsModel::updateSignal);
-	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountIncreased, this, &SignalsModel::changeColumnCount);
+	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountChanged, this, &SignalsModel::changeColumnCount);
 }
 
 SignalsModel::~SignalsModel()
@@ -583,10 +583,14 @@ void SignalsModel::changeColumnCount()
 		beginInsertColumns(QModelIndex(), m_columnCount, signalPropertyCount - 1);
 		m_columnCount = signalPropertyCount;
 		endInsertColumns();
+		return;
 	}
-	else
+	if (m_columnCount > signalPropertyCount)
 	{
-		assert(false);
+		beginRemoveColumns(QModelIndex(), signalPropertyCount, m_columnCount - 1);
+		m_columnCount = signalPropertyCount;
+		endRemoveColumns();
+		return;
 	}
 }
 
@@ -711,7 +715,7 @@ SignalsTabPage::SignalsTabPage(SignalSetProvider* signalSetProvider, DbControlle
 	}
 
 	m_signalsColumnVisibilityController = new TableDataVisibilityController(m_signalsView, "SignalsTabPage", defaultColumnVisibility);
-	connect(&signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountIncreased, m_signalsColumnVisibilityController, &TableDataVisibilityController::checkNewColumns);
+	connect(&signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountChanged, m_signalsColumnVisibilityController, &TableDataVisibilityController::checkNewColumns);
 
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
 	m_signalsView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
