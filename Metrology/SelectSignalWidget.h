@@ -33,8 +33,8 @@ private:
 	int m_index = -1;													// index MeasureSignal in the  SignalBase in the array SignalListForMeasure
 	int m_connectionType = Metrology::CONNECTION_TYPE_UNDEFINED;
 
-	QString m_signalId[Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT];
-	QString m_caption[Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT];
+	QString m_signalId[Metrology::ConnectionIoType::Count];
+	QString m_caption[Metrology::ConnectionIoType::Count];
 
 public:
 

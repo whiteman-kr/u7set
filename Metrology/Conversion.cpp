@@ -219,7 +219,7 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 		return val;
 	}
 
-	const Metrology::SignalParam& inParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+	const Metrology::SignalParam& inParam = ioParam.param(Metrology::ConnectionIoType::Source);
 	if (inParam.isValid() == false)
 	{
 		return val;
@@ -231,7 +231,7 @@ double conversionCalcVal(double val, ConversionCalcType calcType, int connection
 		return val;
 	}
 
-	const Metrology::SignalParam& outParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+	const Metrology::SignalParam& outParam = ioParam.param(Metrology::ConnectionIoType::Destination);
 	if (outParam.isValid() == false)
 	{
 		return val;

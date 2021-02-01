@@ -1,6 +1,8 @@
 #include "SignalSetProvider.h"
 #include "DbController.h"
 
+#include <QMessageBox>
+
 
 SignalPropertyManager* SignalPropertyManager::m_instance = nullptr;
 

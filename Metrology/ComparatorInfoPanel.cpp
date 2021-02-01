@@ -93,7 +93,7 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	const Metrology::SignalParam& inParam = signalParam(row).param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+	const Metrology::SignalParam& inParam = signalParam(row).param(Metrology::ConnectionIoType::Source);
 	if (inParam.isValid() == false)
 	{
 		return QVariant();
@@ -244,7 +244,7 @@ void ComparatorInfoTable::signalParamChanged(const QString& appSignalID)
 	int signalCount = m_signalList.count();
 	for(int c = 0; c < signalCount; c ++)
 	{
-		for(int type = 0; type < Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT; type ++)
+		for(int type = 0; type < Metrology::ConnectionIoType::Count; type ++)
 		{
 			if (m_signalList[c].param(type).appSignalID() == appSignalID)
 			{
@@ -485,10 +485,10 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 		switch (activeSignal.signalConnectionType())
 		{
 			case Metrology::CONNECTION_TYPE_UNUSED:
-				pSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).metrologySignal(c);
+				pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).metrologySignal(c);
 				break;
 			default:
-				pSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT).metrologySignal(c);
+				pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination).metrologySignal(c);
 				break;
 		}
 
@@ -499,7 +499,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 				maxComparatorCount = pSignal->param().comparatorCount();
 			}
 
-			ioParam.setParam(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT, pSignal->param());
+			ioParam.setParam(Metrology::ConnectionIoType::Source, pSignal->param());
 			ioParam.setSignalConnectionType(activeSignal.signalConnectionType());
 			ioParam.setCalibratorManager(m_pCalibratorBase->calibratorForMeasure(c));
 		}
@@ -560,7 +560,7 @@ void ComparatorInfoPanel::comparatorProperty()
 		return;
 	}
 
-	const Metrology::SignalParam& inParam = m_comparatorTable.signalParam(index).param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+	const Metrology::SignalParam& inParam = m_comparatorTable.signalParam(index).param(Metrology::ConnectionIoType::Source);
 	if (inParam.isValid() == false)
 	{
 		return;

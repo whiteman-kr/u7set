@@ -1472,32 +1472,26 @@ void SignalsTabPage::viewSignalHistory()
 	dlg.exec();
 }
 
-bool SignalsTabPage::createMetrologyDialog()
+DialogMetrologyConnection* SignalsTabPage::createMetrologyDialog()
 {
 	if (m_signalSetProvider == nullptr)
 	{
-		assert(m_signalSetProvider);
-		return false;
+		Q_ASSERT(m_signalSetProvider);
+		return nullptr;
 	}
 
-	if (m_metrologyDialog != nullptr)
+	DialogMetrologyConnection* pMetrologyDialog = new DialogMetrologyConnection(m_signalSetProvider, this);
+	if (pMetrologyDialog == nullptr)
 	{
-		delete m_metrologyDialog;
+		return nullptr;
 	}
 
-	m_metrologyDialog = new DialogMetrologyConnection(m_signalSetProvider, this);
-	if (m_metrologyDialog == nullptr)
-	{
-		return false;
-	}
+	connect(pMetrologyDialog, &QDialog::accepted, this, &SignalsTabPage::metrologyDialogClosed, Qt::QueuedConnection);
+	connect(pMetrologyDialog, &QDialog::rejected, this, &SignalsTabPage::metrologyDialogClosed, Qt::QueuedConnection);
 
-	connect(m_metrologyDialog, &QDialog::accepted, this, &SignalsTabPage::metrologyDialogClosed, Qt::QueuedConnection);
-	connect(m_metrologyDialog, &QDialog::rejected, this, &SignalsTabPage::metrologyDialogClosed, Qt::QueuedConnection);
+	pMetrologyDialog->setModal(false);
 
-
-	m_metrologyDialog->setModal(false);
-
-	return true;
+	return pMetrologyDialog;
 }
 
 void SignalsTabPage::deleteMetrologyDialog()
@@ -1507,15 +1501,15 @@ void SignalsTabPage::deleteMetrologyDialog()
 		return;
 	}
 
-	delete	m_metrologyDialog;
+	delete m_metrologyDialog;
 	m_metrologyDialog = nullptr;
 }
 
 void SignalsTabPage::openMetrologyConnections()
 {
-	if (createMetrologyDialog() == false)
+	if (m_metrologyDialog == nullptr)
 	{
-		return;
+		m_metrologyDialog = createMetrologyDialog();
 	}
 
 	if (m_metrologyDialog == nullptr)
@@ -1524,20 +1518,20 @@ void SignalsTabPage::openMetrologyConnections()
 	}
 
 	m_metrologyDialog->show();
-	m_metrologyDialog->openConnectionBase();
+	m_metrologyDialog->loadConnectionBase();
 }
 
 void SignalsTabPage::addMetrologyConnection()
 {
 	if (m_signalSetProvider == nullptr)
 	{
-		assert(m_signalSetProvider);
+		Q_ASSERT(m_signalSetProvider);
 		return;
 	}
 
 	if (m_signalsView == nullptr)
 	{
-		assert(m_signalsView);
+		Q_ASSERT(m_signalsView);
 		return;
 	}
 
@@ -1561,9 +1555,9 @@ void SignalsTabPage::addMetrologyConnection()
 		return;
 	}
 
-	if (createMetrologyDialog() == false)
+	if (m_metrologyDialog == nullptr)
 	{
-		return;
+		m_metrologyDialog = createMetrologyDialog();
 	}
 
 	if (m_metrologyDialog == nullptr)
@@ -1572,7 +1566,6 @@ void SignalsTabPage::addMetrologyConnection()
 	}
 
 	m_metrologyDialog->show();
-	m_metrologyDialog->openConnectionBase();
 	m_metrologyDialog->createConnectionBySignal(&signal);
 }
 

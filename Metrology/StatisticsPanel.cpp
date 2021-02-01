@@ -606,11 +606,11 @@ void StatisticsPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	if(m_signalConnectionType == Metrology::CONNECTION_TYPE_UNUSED)
 	{
-		pSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).firstMetrologySignal();
+		pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).firstMetrologySignal();
 	}
 	else
 	{
-		pSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT).firstMetrologySignal();
+		pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination).firstMetrologySignal();
 	}
 
 	if (pSignal == nullptr)
@@ -874,19 +874,19 @@ void StatisticsPanel::selectSignalForMeasure()
 
 	if (pSignal->param().isInput() == false)
 	{
-		int connectionIndex = theSignalBase.signalConnections().findConnectionIndex(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, pSignal);
+		int connectionIndex = theSignalBase.signalConnections().findConnectionIndex(Metrology::ConnectionIoType::Destination, pSignal);
 		if (connectionIndex == -1)
 		{
 			return;
 		}
 
-		const Metrology::SignalConnection& connection = theSignalBase.signalConnections().connection(connectionIndex);
+		const Metrology::Connection& connection = theSignalBase.signalConnections().connection(connectionIndex);
 		if (connection.isValid() == false)
 		{
 			return;
 		}
 
-		pSignal = connection.signal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+		pSignal = connection.metrologySignal(Metrology::ConnectionIoType::Source);
 		if (pSignal == nullptr || pSignal->param().isValid() == false)
 		{
 			return;

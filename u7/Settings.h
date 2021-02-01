@@ -195,6 +195,11 @@ public:
 	QByteArray m_UploadTabPageLeftSplitterState;
 	QByteArray m_UploadTabPageRightSplitterState;
 
+	// DialogMetrologyConnection
+	//
+	QMap<QString, int> m_dialogMetrologyConnectionColumnsWidth;
+	QByteArray m_dialogMetrologyConnectionGeometry;
+
 private:
 	DatabaseConnectionParam m_databaseConnection;
 	QString m_buildOutputPath;

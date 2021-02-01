@@ -404,7 +404,7 @@ public slots:
 	void checkIn();
 	void viewSignalHistory();
 
-	bool createMetrologyDialog();
+	DialogMetrologyConnection* createMetrologyDialog();
 	void deleteMetrologyDialog();
 	void openMetrologyConnections();
 	void addMetrologyConnection();

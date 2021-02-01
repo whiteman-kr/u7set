@@ -236,6 +236,9 @@ void Settings::writeUserScope() const
 	s.setValue("BuildTabPage/m_buildWarningLevel", m_buildWarningLevel);
 	s.setValue("BuildTabPage/m_buildSerachCompleter", m_buildSerachCompleter);
 
+	s.setValue("DialogMetrologyConnection/ColumnsWidth", QVariant::fromValue(m_dialogMetrologyConnectionColumnsWidth));
+	s.setValue("DialogMetrologyConnection/Geometry", m_dialogMetrologyConnectionGeometry);
+
 	return;
 }
 void Settings::loadUserScope()
@@ -359,6 +362,9 @@ void Settings::loadUserScope()
 
 	m_buildWarningLevel = s.value("BuildTabPage/m_buildWarningLevel").toBool();
 	m_buildSerachCompleter = s.value("BuildTabPage/m_buildSerachCompleter").toStringList();
+
+	m_dialogMetrologyConnectionColumnsWidth = s.value("DialogMetrologyConnection/ColumnsWidth").value<QMap<QString,int>>();
+	m_dialogMetrologyConnectionGeometry = s.value("DialogMetrologyConnection/Geometry").toByteArray();
 
 	return;
 }

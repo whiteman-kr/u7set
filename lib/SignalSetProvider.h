@@ -1,5 +1,5 @@
 #pragma once
-#include "SignalSet.h"
+#include "../Builder/SignalSet.h"
 #include "SignalProperties.h"
 #include "AppSignal.h"
 

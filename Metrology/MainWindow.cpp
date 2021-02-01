@@ -1167,7 +1167,7 @@ bool MainWindow::changeInputSignalOnInternal(const MeasureSignal& activeSignal)
 		return false;
 	}
 
-	Metrology::Signal* pInSignal = activeSignal.metrologySignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT, Metrology::Channel_0);
+	Metrology::Signal* pInSignal = activeSignal.metrologySignal(Metrology::ConnectionIoType::Source, Metrology::Channel_0);
 	if (pInSignal == nullptr || pInSignal->param().isValid() == false)
 	{
 		return false;
@@ -1183,19 +1183,19 @@ bool MainWindow::changeInputSignalOnInternal(const MeasureSignal& activeSignal)
 		return false;
 	}
 
-	int connectionIndex = theSignalBase.signalConnections().findConnectionIndex(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT, pInSignal);
+	int connectionIndex = theSignalBase.signalConnections().findConnectionIndex(Metrology::ConnectionIoType::Source, pInSignal);
 	if (connectionIndex == -1)
 	{
 		return false;
 	}
 
-	const Metrology::SignalConnection& connection = theSignalBase.signalConnections().connection(connectionIndex);
+	const Metrology::Connection& connection = theSignalBase.signalConnections().connection(connectionIndex);
 	if (connection.isValid() == false)
 	{
 		return false;
 	}
 
-	Metrology::Signal* pOutSignal = connection.signal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+	Metrology::Signal* pOutSignal = connection.metrologySignal(Metrology::ConnectionIoType::Destination);
 	if (pOutSignal == nullptr || pOutSignal->param().isValid() == false)
 	{
 		return false;
@@ -1219,8 +1219,8 @@ bool MainWindow::signalIsMeasured(const MeasureSignal& activeSignal, QString& si
 
 	switch (m_signalConnectionType)
 	{
-		case Metrology::CONNECTION_TYPE_UNUSED:	ioSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);	break;
-		default:								ioSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);	break;
+		case Metrology::CONNECTION_TYPE_UNUSED:	ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);	break;
+		default:								ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);	break;
 	}
 
 	if (ioSignal.isEmpty() == true)
@@ -1293,14 +1293,14 @@ bool MainWindow::inputsOfmoduleIsSame(const MeasureSignal& activeSignal)
 		case Metrology::CONNECTION_TYPE_INPUT_INTERNAL:
 		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
 		case Metrology::CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
-			ioSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+			ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);
 			break;
 
 		case Metrology::CONNECTION_TYPE_INPUT_OUTPUT:
 		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
 		case Metrology::CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
 		case Metrology::CONNECTION_TYPE_TUNING_OUTPUT:
-			ioSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+			ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);
 			break;
 
 		default:
@@ -1378,10 +1378,10 @@ int MainWindow::getMaxComparatorCount(const MeasureSignal& activeSignal)
 		switch (activeSignal.signalConnectionType())
 		{
 			case Metrology::CONNECTION_TYPE_UNUSED:
-				pSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).metrologySignal(ch);
+				pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).metrologySignal(ch);
 				break;
 			default:
-				pSignal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT).metrologySignal(ch);
+				pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination).metrologySignal(ch);
 				break;
 		}
 
@@ -2035,7 +2035,7 @@ void MainWindow::setAcitiveMeasureSignal(int index)
 
 	// save
 	//
-	const MultiChannelSignal& signal = measureSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+	const MultiChannelSignal& signal = measureSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);
 	if (signal.isEmpty() == true)
 	{
 		return;
@@ -2157,8 +2157,8 @@ bool MainWindow::setNextMeasureSignalFromModule()
 
 	// if module numbers not equal then disabling selection of next input
 	//
-	if (	currentActiveSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).location().chassis() != nextActiveSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).location().chassis() ||
-			currentActiveSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).location().module() != nextActiveSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).location().module())
+	if (	currentActiveSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).location().chassis() != nextActiveSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).location().chassis() ||
+			currentActiveSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).location().module() != nextActiveSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).location().module())
 	{
 		return false;
 	}
@@ -2189,7 +2189,7 @@ void MainWindow::changeActiveSignalOutput(int channel, Metrology::Signal* pOutpu
 		return;
 	}
 
-	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);
 	if (multiChannelSignal.isEmpty() == true)
 	{
 		return;
@@ -2214,7 +2214,7 @@ void MainWindow::changeActiveSignalOutput(int channel, Metrology::Signal* pOutpu
 	//
 	multiChannelSignal.setMetrologySignal(m_measureKind, channel, pOutputSignal);
 
-	measureSignal.setMultiSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, multiChannelSignal);
+	measureSignal.setMultiSignal(Metrology::ConnectionIoType::Destination, multiChannelSignal);
 
 	// set
 	//
@@ -2250,7 +2250,7 @@ void MainWindow::changeActiveSignalOutputs(int channelPrev, int channelNext)
 		return;
 	}
 
-	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);
 	if (multiChannelSignal.isEmpty() == true)
 	{
 		return;
@@ -2290,7 +2290,7 @@ void MainWindow::changeActiveSignalOutputs(int channelPrev, int channelNext)
 	multiChannelSignal.setMetrologySignal(m_measureKind, channelPrev, pOutputSignalNext);
 	multiChannelSignal.setMetrologySignal(m_measureKind, channelNext, pOutputSignalPrev);
 
-	measureSignal.setMultiSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, multiChannelSignal);
+	measureSignal.setMultiSignal(Metrology::ConnectionIoType::Destination, multiChannelSignal);
 
 	// set
 	//
@@ -2484,7 +2484,15 @@ void MainWindow::configSocketSignalBaseLoading(int persentage)
 
 void MainWindow::configSocketSignalBaseLoaded()
 {
-	loadRacksOnToolBar();
+	// loadSignalConnectionToolBar call loadRacksOnToolBar() after setCurrentIndex
+	// if m_signalConnectionType != Metrology::CONNECTION_TYPE_UNUSED
+	//
+	loadSignalConnectionToolBar();
+
+	if (m_signalConnectionType == Metrology::CONNECTION_TYPE_UNUSED)
+	{
+		loadRacksOnToolBar();
+	}
 
 	//
 	//

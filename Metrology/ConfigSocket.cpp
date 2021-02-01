@@ -393,7 +393,7 @@ bool ConfigSocket::readMetrologyConnections(const QByteArray& fileData, int file
 			break;
 		}
 
-		Metrology::SignalConnection connection;
+		Metrology::Connection connection;
 
 		// read
 		//

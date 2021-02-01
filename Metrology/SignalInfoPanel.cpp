@@ -152,11 +152,11 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 
 			if (ioParam.signalConnectionType() == Metrology::CONNECTION_TYPE_UNUSED)
 			{
-				state = theSignalBase.signalState(ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).hash());
+				state = theSignalBase.signalState(ioParam.param(Metrology::ConnectionIoType::Source).hash());
 			}
 			else
 			{
-				state = theSignalBase.signalState(ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT).hash());
+				state = theSignalBase.signalState(ioParam.param(Metrology::ConnectionIoType::Destination).hash());
 			}
 
 			if (state.flags().valid == false)
@@ -204,7 +204,7 @@ QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 
 	if (column == SIGNAL_INFO_COLUMN_STATE)
 	{
-		const Metrology::SignalParam& inParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+		const Metrology::SignalParam& inParam = ioParam.param(Metrology::ConnectionIoType::Source);
 		if (inParam.isValid() == true)
 		{
 			const Metrology::SignalState& inState = theSignalBase.signalState(inParam.hash());
@@ -213,7 +213,7 @@ QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 
 		if (ioParam.signalConnectionType() != Metrology::CONNECTION_TYPE_UNUSED)
 		{
-			const Metrology::SignalParam& outParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+			const Metrology::SignalParam& outParam = ioParam.param(Metrology::ConnectionIoType::Destination);
 			if (outParam.isValid() == true)
 			{
 				const Metrology::SignalState& outState = theSignalBase.signalState(outParam.hash());
@@ -391,7 +391,7 @@ void SignalInfoTable::signalParamChanged(const QString& appSignalID)
 	int signalCount = m_ioParamList.count();
 	for(int c = 0; c < signalCount; c ++)
 	{
-		for(int type = 0; type < Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT; type ++)
+		for(int type = 0; type < Metrology::ConnectionIoType::Count; type ++)
 		{
 			if (m_ioParamList[c].param(type).appSignalID() == appSignalID)
 			{
@@ -597,8 +597,8 @@ void SignalInfoPanel::appendSignalConnetionMenu()
 
 	const IoSignalParam& ioParam = m_signalParamTable.signalParam(index);
 
-	const Metrology::SignalParam& inParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
-	const Metrology::SignalParam& outParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+	const Metrology::SignalParam& inParam = ioParam.param(Metrology::ConnectionIoType::Source);
+	const Metrology::SignalParam& outParam = ioParam.param(Metrology::ConnectionIoType::Destination);
 
 	if (inParam.isValid() == false || outParam.isValid() == false)
 	{
@@ -798,7 +798,7 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 		IoSignalParam ioParam;
 
-		for(int type = 0; type < Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT; type ++)
+		for(int type = 0; type < Metrology::ConnectionIoType::Count; type ++)
 		{
 			Metrology::Signal* pSignal = activeSignal.multiChannelSignal(type).metrologySignal(c);
 			if (pSignal == nullptr)
@@ -991,11 +991,11 @@ void SignalInfoPanel::signalProperty()
 
 	if (m_signalConnectionType == Metrology::CONNECTION_TYPE_UNUSED)
 	{
-		param = m_signalParamTable.signalParam(index).param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+		param = m_signalParamTable.signalParam(index).param(Metrology::ConnectionIoType::Source);
 	}
 	else
 	{
-		param = m_signalParamTable.signalParam(index).param(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+		param = m_signalParamTable.signalParam(index).param(Metrology::ConnectionIoType::Destination);
 	}
 
 	if (param.isValid() == false)

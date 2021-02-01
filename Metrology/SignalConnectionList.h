@@ -56,7 +56,7 @@ public:
 private:
 
 	mutable QMutex m_connectionMutex;
-	QVector<Metrology::SignalConnection> m_connectionList;
+	QVector<Metrology::Connection> m_connectionList;
 
 	int columnCount(const QModelIndex &parent) const;
 	int rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -67,11 +67,11 @@ private:
 public:
 
 	int	connectionCount() const;
-	Metrology::SignalConnection at(int index) const;
-	void set(const QVector<Metrology::SignalConnection>& list_add);
+	Metrology::Connection at(int index) const;
+	void set(const QVector<Metrology::Connection>& list_add);
 	void clear();
 
-	QString text(int row, int column, const Metrology::SignalConnection& connection) const;
+	QString text(int row, int column, const Metrology::Connection& connection) const;
 };
 
 // ==============================================================================================
@@ -83,7 +83,7 @@ class SignalConnectionItemDialog : public QDialog
 public:
 
 	explicit SignalConnectionItemDialog(QWidget *parent = nullptr);
-	explicit SignalConnectionItemDialog(const Metrology::SignalConnection& signalConnection, QWidget *parent = nullptr);
+	explicit SignalConnectionItemDialog(const Metrology::Connection& signalConnection, QWidget *parent = nullptr);
 	virtual ~SignalConnectionItemDialog();
 
 private:
@@ -98,14 +98,14 @@ private:
 
 	QDialogButtonBox* m_buttonBox = nullptr;
 
-	Metrology::SignalConnection m_signalConnection;
+	Metrology::Connection m_signalConnection;
 
 	void createInterface();
 	void updateSignals();
 
 public:
 
-	Metrology::SignalConnection connection() const { return m_signalConnection; }
+	Metrology::Connection connection() const { return m_signalConnection; }
 
 private slots:
 

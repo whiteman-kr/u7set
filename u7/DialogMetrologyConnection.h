@@ -23,6 +23,7 @@
 #include "../lib/Signal.h"
 #include "../lib/SignalSetProvider.h"
 #include "../lib/MetrologyConnectionBase.h"
+#include "../lib/StandardColors.h"
 
 // ==============================================================================================
 
@@ -41,9 +42,9 @@ const int			METROLOGY_CONNECTION_COLUMN_IN_ID		= 0,
 
 const int			ConnectionColumnWidth[METROLOGY_CONNECTION_COLUMN_COUNT] =
 {
-                    250,	// METROLOGY_CONNECTION_COLUMN_IN_ID
+					350,	// METROLOGY_CONNECTION_COLUMN_IN_ID
 					150,	// METROLOGY_CONNECTION_COLUMN_TYPE
-                    250,	// METROLOGY_CONNECTION_COLUMN_OUT_ID
+					350,	// METROLOGY_CONNECTION_COLUMN_OUT_ID
 };
 
 // ==============================================================================================
@@ -57,25 +58,25 @@ public:
 	explicit MetrologyConnectionTable(QObject* parent = nullptr);
 	virtual ~MetrologyConnectionTable();
 
+public:
+
+	int	connectionCount() const;
+	Metrology::Connection at(int index) const;
+	void set(const QVector<Metrology::Connection>& list_add);
+	void clear();
+
+	QString text(int row, int column, const Metrology::Connection& connection) const;
+
 private:
 
 	mutable QMutex m_connectionMutex;
-	QVector<Metrology::SignalConnection> m_connectionList;
+	QVector<Metrology::Connection> m_connectionList;
 
 	int columnCount(const QModelIndex &parent) const;
 	int rowCount(const QModelIndex &parent=QModelIndex()) const;
 
 	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
 	QVariant data(const QModelIndex &index, int role) const;
-
-public:
-
-	int	connectionCount() const;
-	Metrology::SignalConnection at(int index) const;
-	void set(const QVector<Metrology::SignalConnection>& list_add);
-	void clear();
-
-	QString text(int row, int column, const Metrology::SignalConnection& connection) const;
 };
 
 // ==============================================================================================
@@ -86,8 +87,15 @@ class DialogMetrologyConnectionItem : public QDialog
 
 public:
 
-	DialogMetrologyConnectionItem(SignalSetProvider* signalSetProvider, QWidget *parent = nullptr);
-	virtual ~DialogMetrologyConnectionItem() override;
+	DialogMetrologyConnectionItem(SignalSetProvider* signalSetProvider, QWidget* parent = nullptr);
+	virtual ~DialogMetrologyConnectionItem();
+
+public:
+
+	bool isNewConnection() { return m_isNewConnection; }
+
+	void setConnection(bool newConnection, const Metrology::Connection& connection);
+	Metrology::Connection connection() const { return m_connection; }
 
 private:
 
@@ -95,24 +103,17 @@ private:
 
 	bool m_isNewConnection = false;
 
-	QComboBox* m_pTypeList = nullptr;
 	QLineEdit* m_pInputSignalIDEdit = nullptr;
+	QComboBox* m_pTypeList = nullptr;
 	QLineEdit* m_pOutputSignalIDEdit = nullptr;
 	QDialogButtonBox* m_buttonBox = nullptr;
 
-	Metrology::SignalConnection m_connection;
+	Metrology::Connection m_connection;
 
 	void createInterface();
 	void updateSignals();
 
 	bool electricLimitIsValid(Signal* pSignal);
-
-public:
-
-	bool isNewConnection() { return m_isNewConnection; }
-
-	void setConnection(bool newConnection, const Metrology::SignalConnection& connection);
-	Metrology::SignalConnection connection() const { return m_connection; }
 
 private slots:
 
@@ -131,8 +132,21 @@ class DialogMetrologyConnection : public QDialog
 
 public:
 
-	DialogMetrologyConnection(SignalSetProvider* signalSetProvider, QWidget *parent = nullptr);
-	virtual ~DialogMetrologyConnection() override;
+	DialogMetrologyConnection(SignalSetProvider* signalSetProvider, QWidget* parent = nullptr);
+	virtual ~DialogMetrologyConnection();
+
+public:
+
+	bool loadConnectionBase();
+	bool checkOutConnectionBase();
+
+	void updateList();
+
+	bool createConnectionBySignal(Signal* pSignal);
+
+protected:
+
+	void keyPressEvent(QKeyEvent* e);
 
 private:
 
@@ -148,6 +162,7 @@ private:
 	QAction* m_pEditAction = nullptr;
 	QAction* m_pCreateAction = nullptr;
 	QAction* m_pRemoveAction = nullptr;
+	QAction* m_pUnRemoveAction = nullptr;
 	QAction* m_pCheckInAction = nullptr;
 	QAction* m_pExportAction = nullptr;
 	QAction* m_pImportAction = nullptr;
@@ -172,20 +187,16 @@ private:
 	void updateCheckInStateOnToolBar();
 
 	DialogMetrologyConnectionItem* m_dialogConnectionItem = nullptr;
-	void fillConnection(bool newConnection, const Metrology::SignalConnection& connection);
+	void fillConnection(bool newConnection, const Metrology::Connection& connection);
 
-protected:
+private:
 
-	void keyPressEvent(QKeyEvent* e);
+	virtual void closeEvent(QCloseEvent * e);
+	virtual void done(int r);
 
-public:
-
-	bool openConnectionBase();
-	bool checkOutConnectionBase();
-
-	void updateList();
-
-	bool createConnectionBySignal(Signal* pSignal);
+	void saveColumnsWidth();
+	void restoreColumnsWidth();
+	void saveSettings();
 
 private slots:
 
@@ -197,6 +208,7 @@ private slots:
 	void newConnection();
 	void connectionChanged();
 	void removeConnection();
+	void unremoveConnection();
 	void checkinConnection();
 	void exportConnections();
 	void importConnections();

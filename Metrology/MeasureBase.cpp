@@ -273,7 +273,7 @@ void Measurement::setLimits(const IoSignalParam& ioParam)
 	{
 		case Metrology::CONNECTION_TYPE_UNUSED:
 			{
-				const Metrology::SignalParam& param = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+			    const Metrology::SignalParam& param = ioParam.param(Metrology::ConnectionIoType::Source);
 				if (param.isValid() == false)
 				{
 					assert(false);
@@ -296,14 +296,14 @@ void Measurement::setLimits(const IoSignalParam& ioParam)
 		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
 		case Metrology::CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
 			{
-				const Metrology::SignalParam& inParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+			    const Metrology::SignalParam& inParam = ioParam.param(Metrology::ConnectionIoType::Source);
 				if (inParam.isValid() == false)
 				{
 					assert(false);
 					break;
 				}
 
-				const Metrology::SignalParam& outParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+				const Metrology::SignalParam& outParam = ioParam.param(Metrology::ConnectionIoType::Destination);
 				if (outParam.isValid() == false)
 				{
 					assert(false);
@@ -328,7 +328,7 @@ void Measurement::setLimits(const IoSignalParam& ioParam)
 		case Metrology::CONNECTION_TYPE_INPUT_OUTPUT:
 		case Metrology::CONNECTION_TYPE_TUNING_OUTPUT:
 			{
-				const Metrology::SignalParam& param = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+			    const Metrology::SignalParam& param = ioParam.param(Metrology::ConnectionIoType::Destination);
 				if (param.isValid() == false)
 				{
 					assert(false);
@@ -963,7 +963,7 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 		return;
 	}
 
-	const Metrology::SignalParam& inParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+	const Metrology::SignalParam& inParam = ioParam.param(Metrology::ConnectionIoType::Source);
 	if (inParam.isValid() == false)
 	{
 		assert(false);
@@ -1088,14 +1088,14 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 		return;
 	}
 
-	const Metrology::SignalParam& inParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+	const Metrology::SignalParam& inParam = ioParam.param(Metrology::ConnectionIoType::Source);
 	if (inParam.isValid() == false)
 	{
 		assert(false);
 		return;
 	}
 
-	const Metrology::SignalParam& outParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+	const Metrology::SignalParam& outParam = ioParam.param(Metrology::ConnectionIoType::Destination);
 	if (outParam.isValid() == false)
 	{
 		assert(false);
@@ -1222,14 +1222,14 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 		return;
 	}
 
-	const Metrology::SignalParam& inParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+	const Metrology::SignalParam& inParam = ioParam.param(Metrology::ConnectionIoType::Source);
 	if (inParam.isValid() == false)
 	{
 		assert(false);
 		return;
 	}
 
-	const Metrology::SignalParam& outParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+	const Metrology::SignalParam& outParam = ioParam.param(Metrology::ConnectionIoType::Destination);
 	if (outParam.isValid() == false)
 	{
 		assert(false);
@@ -1470,7 +1470,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 			{
 				// this measurement have only electric input and have not electric output
 				//
-				const Metrology::SignalParam& inParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+			    const Metrology::SignalParam& inParam = ioParam.param(Metrology::ConnectionIoType::Source);
 				if (inParam.isValid() == false)
 				{
 					assert(false);
@@ -1539,7 +1539,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 			{
 				// this measurement have electric input and have electric output
 				//
-				const Metrology::SignalParam& inParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+			    const Metrology::SignalParam& inParam = ioParam.param(Metrology::ConnectionIoType::Source);
 				if (inParam.isValid() == false)
 				{
 					assert(false);
@@ -1552,7 +1552,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 					return 0;
 				}
 
-				Metrology::SignalParam outParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+				Metrology::SignalParam outParam = ioParam.param(Metrology::ConnectionIoType::Destination);
 				if (outParam.isValid() == false)
 				{
 					assert(false);
@@ -2018,7 +2018,7 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 		return;
 	}
 
-	const Metrology::SignalParam& inParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+	const Metrology::SignalParam& inParam = ioParam.param(Metrology::ConnectionIoType::Source);
 	if (inParam.isValid() == false)
 	{
 		assert(false);
@@ -2154,14 +2154,14 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 		return;
 	}
 
-	const Metrology::SignalParam& inParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+	const Metrology::SignalParam& inParam = ioParam.param(Metrology::ConnectionIoType::Source);
 	if (inParam.isValid() == false)
 	{
 		assert(false);
 		return;
 	}
 
-	const Metrology::SignalParam& outParam = ioParam.param(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+	const Metrology::SignalParam& outParam = ioParam.param(Metrology::ConnectionIoType::Destination);
 	if (outParam.isValid() == false)
 	{
 		assert(false);

@@ -32,7 +32,7 @@ void SelectSignalItem::clear()
 	m_index = -1;
 	m_connectionType = Metrology::CONNECTION_TYPE_UNDEFINED;
 
-	for(int ioType = 0; ioType < Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT; ioType++)
+	for(int ioType = 0; ioType < Metrology::ConnectionIoType::Count; ioType++)
 	{
 		m_signalId[ioType].clear();
 		m_caption[ioType].clear();
@@ -53,14 +53,14 @@ bool SelectSignalItem::isValid() const
 		return false;
 	}
 
-	if (m_signalId[Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT].isEmpty() == true)
+	if (m_signalId[Metrology::ConnectionIoType::Source].isEmpty() == true)
 	{
 		return false;
 	}
 
 	if (m_connectionType != Metrology::CONNECTION_TYPE_UNUSED)
 	{
-		if (m_signalId[Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT].isEmpty() == true)
+		if (m_signalId[Metrology::ConnectionIoType::Destination].isEmpty() == true)
 		{
 			return false;
 		}
@@ -76,7 +76,7 @@ bool SelectSignalItem::set(int index, int signalConnectionType, const MeasureSig
 	setIndex(index);
 	setConnectionType(signalConnectionType);
 
-	const MultiChannelSignal& inSignal = measureSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+	const MultiChannelSignal& inSignal = measureSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);
 	if (inSignal.isEmpty() == true)
 	{
 		return false;
@@ -87,12 +87,12 @@ bool SelectSignalItem::set(int index, int signalConnectionType, const MeasureSig
 		return false;
 	}
 
-	setSignalId(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT,inSignal.signalID());
-	setCaption(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT, inSignal.caption());
+	setSignalId(Metrology::ConnectionIoType::Source,inSignal.signalID());
+	setCaption(Metrology::ConnectionIoType::Source, inSignal.caption());
 
 	if (signalConnectionType != Metrology::CONNECTION_TYPE_UNUSED)
 	{
-		const MultiChannelSignal& outSignal = measureSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+		const MultiChannelSignal& outSignal = measureSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);
 		if (outSignal.isEmpty() == true)
 		{
 			return false;
@@ -103,8 +103,8 @@ bool SelectSignalItem::set(int index, int signalConnectionType, const MeasureSig
 			return false;
 		}
 
-		setSignalId(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, outSignal.signalID());
-		setCaption(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, outSignal.caption());
+		setSignalId(Metrology::ConnectionIoType::Destination, outSignal.signalID());
+		setCaption(Metrology::ConnectionIoType::Destination, outSignal.caption());
 	}
 
 	return true;
@@ -114,7 +114,7 @@ bool SelectSignalItem::set(int index, int signalConnectionType, const MeasureSig
 
 QString SelectSignalItem::signalId(int ioType) const
 {
-	if (ioType < 0 || ioType >= Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT)
+	if (ioType < 0 || ioType >= Metrology::ConnectionIoType::Count)
 	{
 		return QString();
 	}
@@ -126,7 +126,7 @@ QString SelectSignalItem::signalId(int ioType) const
 
 void SelectSignalItem::setSignalId(int ioType, const QString& signalId)
 {
-	if (ioType < 0 || ioType >= Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT)
+	if (ioType < 0 || ioType >= Metrology::ConnectionIoType::Count)
 	{
 		return;
 	}
@@ -138,7 +138,7 @@ void SelectSignalItem::setSignalId(int ioType, const QString& signalId)
 
 QString SelectSignalItem::caption(int ioType) const
 {
-	if (ioType < 0 || ioType >= Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT)
+	if (ioType < 0 || ioType >= Metrology::ConnectionIoType::Count)
 	{
 		return QString();
 	}
@@ -150,7 +150,7 @@ QString SelectSignalItem::caption(int ioType) const
 
 void SelectSignalItem::setCaption(int ioType, const QString& caption)
 {
-	if (ioType < 0 || ioType >= Metrology::IO_SIGNAL_CONNECTION_TYPE_COUNT)
+	if (ioType < 0 || ioType >= Metrology::ConnectionIoType::Count)
 	{
 		return;
 	}
@@ -216,7 +216,7 @@ bool SelectSignalWidget::setCurrentSignalIndex(const QString& signalId)
 			continue;
 		}
 
-		if (s.signalId(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT) == signalId)
+		if (s.signalId(Metrology::ConnectionIoType::Source) == signalId)
 		{
 			signal = s;
 			break;
@@ -238,22 +238,22 @@ bool SelectSignalWidget::setCurrentSignalIndex(const QString& signalId)
 
 	if (signal.connectionType() == Metrology::CONNECTION_TYPE_UNUSED)
 	{
-		buttonTitle = QString(" %1\n %2").arg(signal.signalId(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT)).arg(signal.caption(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT));
+		buttonTitle = QString(" %1\n %2").arg(signal.signalId(Metrology::ConnectionIoType::Source)).arg(signal.caption(Metrology::ConnectionIoType::Source));
 	}
 	else
 	{
-		buttonTitle = " " + signal.signalId(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+		buttonTitle = " " + signal.signalId(Metrology::ConnectionIoType::Source);
 
-		if (signal.caption(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).isEmpty() == false)
+		if (signal.caption(Metrology::ConnectionIoType::Source).isEmpty() == false)
 		{
-			buttonTitle += " - " + signal.caption(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+			buttonTitle += " - " + signal.caption(Metrology::ConnectionIoType::Source);
 		}
 
-		buttonTitle += "\n " + signal.signalId(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+		buttonTitle += "\n " + signal.signalId(Metrology::ConnectionIoType::Destination);
 
-		if (signal.caption(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT).isEmpty() == false)
+		if (signal.caption(Metrology::ConnectionIoType::Destination).isEmpty() == false)
 		{
-			buttonTitle += " - " + signal.caption(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+			buttonTitle += " - " + signal.caption(Metrology::ConnectionIoType::Destination);
 		}
 	}
 
@@ -374,7 +374,7 @@ void SelectSignalWidget::activeSignalChanged(const MeasureSignal& activeSignal)
 		return;
 	}
 
-	const MultiChannelSignal& signal = activeSignal.multiChannelSignal(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+	const MultiChannelSignal& signal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);
 	if (signal.isEmpty() == true)
 	{
 		return;
@@ -573,23 +573,23 @@ QVariant SelectSignalModel::data(const QModelIndex& modelIndex, int role) const
 			if (signal.connectionType() == Metrology::CONNECTION_TYPE_UNUSED)
 			{
 				str = QString(" %1\n %2").
-						arg(signal.signalId(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT)).
-						arg(signal.caption(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT));
+						arg(signal.signalId(Metrology::ConnectionIoType::Source)).
+						arg(signal.caption(Metrology::ConnectionIoType::Source));
 			}
 			else
 			{
-				str = " " + signal.signalId(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+				str = " " + signal.signalId(Metrology::ConnectionIoType::Source);
 
-				if (signal.caption(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).isEmpty() == false)
+				if (signal.caption(Metrology::ConnectionIoType::Source).isEmpty() == false)
 				{
-					str += " - " + signal.caption(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT);
+					str += " - " + signal.caption(Metrology::ConnectionIoType::Source);
 				}
 
-				str += "\n " + signal.signalId(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+				str += "\n " + signal.signalId(Metrology::ConnectionIoType::Destination);
 
-				if (signal.caption(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT).isEmpty() == false)
+				if (signal.caption(Metrology::ConnectionIoType::Destination).isEmpty() == false)
 				{
-					str += " - " + signal.caption(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT);
+					str += " - " + signal.caption(Metrology::ConnectionIoType::Destination);
 				}
 			}
 		}
@@ -631,8 +631,8 @@ int SelectSignalModel::applyFilter(QString filterText, int defaultSignalIndex)
 				if (s.connectionType() == Metrology::CONNECTION_TYPE_UNUSED)
 				{
 					if(	filterText.isEmpty() == true ||
-							s.signalId(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).contains(filterText, Qt::CaseInsensitive) ||
-							s.caption(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).contains(filterText, Qt::CaseInsensitive))
+							s.signalId(Metrology::ConnectionIoType::Source).contains(filterText, Qt::CaseInsensitive) ||
+							s.caption(Metrology::ConnectionIoType::Source).contains(filterText, Qt::CaseInsensitive))
 					{
 						m_filteredItems.push_back(i);
 
@@ -645,10 +645,10 @@ int SelectSignalModel::applyFilter(QString filterText, int defaultSignalIndex)
 				else
 				{
 					if(	filterText.isEmpty() == true ||
-							s.signalId(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).contains(filterText, Qt::CaseInsensitive) ||
-							s.caption(Metrology::IO_SIGNAL_CONNECTION_TYPE_INPUT).contains(filterText, Qt::CaseInsensitive) ||
-							s.signalId(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT).contains(filterText, Qt::CaseInsensitive) ||
-							s.caption(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT).contains(filterText, Qt::CaseInsensitive) )
+							s.signalId(Metrology::ConnectionIoType::Source).contains(filterText, Qt::CaseInsensitive) ||
+							s.caption(Metrology::ConnectionIoType::Source).contains(filterText, Qt::CaseInsensitive) ||
+							s.signalId(Metrology::ConnectionIoType::Destination).contains(filterText, Qt::CaseInsensitive) ||
+							s.caption(Metrology::ConnectionIoType::Destination).contains(filterText, Qt::CaseInsensitive) )
 					{
 						m_filteredItems.push_back(i);
 

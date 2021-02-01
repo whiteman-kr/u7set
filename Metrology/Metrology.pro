@@ -51,6 +51,7 @@ SOURCES += \
     ../lib/DbWorker.cpp \
     ../lib/MemLeaksDetection.cpp \
     ../lib/MetrologyConnectionBase.cpp \
+    ../lib/SignalSetProvider.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
@@ -132,6 +133,7 @@ HEADERS  += \
     ../lib/DbWorker.h \
 	../lib/MemLeaksDetection.h \
     ../lib/MetrologyConnectionBase.h \
+    ../lib/SignalSetProvider.h \
     MainWindow.h \
     Calibrator.h \
     CalibratorBase.h \

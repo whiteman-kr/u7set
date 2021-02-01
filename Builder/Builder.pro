@@ -88,6 +88,7 @@ SOURCES += \
     ../lib/LogicModuleSet.cpp \
     ../lib/ModuleFirmware.cpp \
     ../lib/Signal.cpp \
+    ../lib/SignalSetProvider.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/Subsystem.cpp \
     ../lib/Types.cpp \
@@ -180,6 +181,7 @@ HEADERS += \
     ../lib/PropertyObject.h \
     ../lib/ModuleFirmware.h \
     ../lib/Signal.h \
+    ../lib/SignalSetProvider.h \
     ../lib/SoftwareSettings.h \
     ../lib/Subsystem.h \
     ../lib/Types.h \

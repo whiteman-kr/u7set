@@ -2791,659 +2791,659 @@
 <context>
     <name>DbWorker</name>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="668"/>
-        <location filename="../../lib/DbWorker.cpp" line="846"/>
+        <location filename="../../lib/DbWorker.cpp" line="669"/>
+        <location filename="../../lib/DbWorker.cpp" line="847"/>
         <source>Database driver doesn&apos;t have required features.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="1038"/>
+        <location filename="../../lib/DbWorker.cpp" line="1039"/>
         <source>OpenProject error, another project is opened. To open a new project, please close the current project.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="1071"/>
+        <location filename="../../lib/DbWorker.cpp" line="1072"/>
         <source>User does not exist or the password is incorrect.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="1087"/>
+        <location filename="../../lib/DbWorker.cpp" line="1088"/>
         <source>Can&apos;t get current user id </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="1097"/>
+        <location filename="../../lib/DbWorker.cpp" line="1098"/>
         <source>Can&apos;t read user data </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="1104"/>
+        <location filename="../../lib/DbWorker.cpp" line="1105"/>
         <source>User %1 is not allowed to open the project. User is disabled, contact the project administartor.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="1146"/>
+        <location filename="../../lib/DbWorker.cpp" line="1147"/>
         <source>Can&apos;t get system files.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="1330"/>
+        <location filename="../../lib/DbWorker.cpp" line="1331"/>
         <source>Can&apos;t get system folder.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="1374"/>
+        <location filename="../../lib/DbWorker.cpp" line="1375"/>
         <source>Project is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="1385"/>
+        <location filename="../../lib/DbWorker.cpp" line="1386"/>
         <source>Project database connection is closed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="1837"/>
+        <location filename="../../lib/DbWorker.cpp" line="1838"/>
         <source>Database %1 is up to date.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="1843"/>
+        <location filename="../../lib/DbWorker.cpp" line="1844"/>
         <source>Database %1 is newer than the software version.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="1889"/>
+        <location filename="../../lib/DbWorker.cpp" line="1890"/>
         <source>Upgrading... %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="1895"/>
+        <location filename="../../lib/DbWorker.cpp" line="1896"/>
         <source>Can&apos;t open file %1. 
 %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2069"/>
+        <location filename="../../lib/DbWorker.cpp" line="2070"/>
         <source>Cannot get file data, FileInstanceID: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2079"/>
+        <location filename="../../lib/DbWorker.cpp" line="2080"/>
         <source>Cannot read file data, FileName %1, FileInstanceID %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2099"/>
+        <location filename="../../lib/DbWorker.cpp" line="2100"/>
         <source>Cannot update file details, FileInstanceID: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2133"/>
-        <location filename="../../lib/DbWorker.cpp" line="2195"/>
-        <location filename="../../lib/DbWorker.cpp" line="2248"/>
-        <location filename="../../lib/DbWorker.cpp" line="2305"/>
-        <location filename="../../lib/DbWorker.cpp" line="2363"/>
-        <location filename="../../lib/DbWorker.cpp" line="2416"/>
-        <location filename="../../lib/DbWorker.cpp" line="2528"/>
-        <location filename="../../lib/DbWorker.cpp" line="2663"/>
-        <location filename="../../lib/DbWorker.cpp" line="3291"/>
-        <location filename="../../lib/DbWorker.cpp" line="3363"/>
-        <location filename="../../lib/DbWorker.cpp" line="4201"/>
+        <location filename="../../lib/DbWorker.cpp" line="2134"/>
+        <location filename="../../lib/DbWorker.cpp" line="2196"/>
+        <location filename="../../lib/DbWorker.cpp" line="2249"/>
+        <location filename="../../lib/DbWorker.cpp" line="2306"/>
+        <location filename="../../lib/DbWorker.cpp" line="2364"/>
+        <location filename="../../lib/DbWorker.cpp" line="2417"/>
+        <location filename="../../lib/DbWorker.cpp" line="2529"/>
+        <location filename="../../lib/DbWorker.cpp" line="2664"/>
+        <location filename="../../lib/DbWorker.cpp" line="3292"/>
+        <location filename="../../lib/DbWorker.cpp" line="3364"/>
+        <location filename="../../lib/DbWorker.cpp" line="4202"/>
         <source>Database connection is not openned.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2139"/>
+        <location filename="../../lib/DbWorker.cpp" line="2140"/>
         <source>slot_setProjectProperty: propertyName &apos;%1&apos;, propertyValue &apos;%2&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2154"/>
+        <location filename="../../lib/DbWorker.cpp" line="2155"/>
         <source>Cannot set property %1, error: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2211"/>
+        <location filename="../../lib/DbWorker.cpp" line="2212"/>
         <source>Cannot get project property value %1, error: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2254"/>
+        <location filename="../../lib/DbWorker.cpp" line="2255"/>
         <source>slot_setUserProperty: propertyName &apos;%1&apos;, propertyValue &apos;%2&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2269"/>
+        <location filename="../../lib/DbWorker.cpp" line="2270"/>
         <source>Cannot set user property %1, error: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2321"/>
+        <location filename="../../lib/DbWorker.cpp" line="2322"/>
         <source>Cannot get user property value %1, error: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2379"/>
+        <location filename="../../lib/DbWorker.cpp" line="2380"/>
         <source>Cannot get user property list, template %1, error: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2431"/>
+        <location filename="../../lib/DbWorker.cpp" line="2432"/>
         <source>Cannot remove user property %1, error: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2460"/>
-        <location filename="../../lib/DbWorker.cpp" line="2611"/>
+        <location filename="../../lib/DbWorker.cpp" line="2461"/>
+        <location filename="../../lib/DbWorker.cpp" line="2612"/>
         <source>Cannot get user list. Database connection is not openned.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2466"/>
+        <location filename="../../lib/DbWorker.cpp" line="2467"/>
         <source>Current user does not have administrator privileges.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2472"/>
+        <location filename="../../lib/DbWorker.cpp" line="2473"/>
         <source>slot_createUser: Username &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2492"/>
+        <location filename="../../lib/DbWorker.cpp" line="2493"/>
         <source>Can&apos;t create user %1, error: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2535"/>
+        <location filename="../../lib/DbWorker.cpp" line="2536"/>
         <source>Only administrators can change other users&apos; details.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2541"/>
+        <location filename="../../lib/DbWorker.cpp" line="2542"/>
         <source>slot_updateUser: Username &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2561"/>
+        <location filename="../../lib/DbWorker.cpp" line="2562"/>
         <source>Can&apos;t update user %1, error: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2677"/>
+        <location filename="../../lib/DbWorker.cpp" line="2678"/>
         <source>Can&apos;t run query. Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2722"/>
-        <location filename="../../lib/DbWorker.cpp" line="2853"/>
-        <location filename="../../lib/DbWorker.cpp" line="2910"/>
-        <location filename="../../lib/DbWorker.cpp" line="2998"/>
-        <location filename="../../lib/DbWorker.cpp" line="3060"/>
-        <location filename="../../lib/DbWorker.cpp" line="4660"/>
+        <location filename="../../lib/DbWorker.cpp" line="2723"/>
+        <location filename="../../lib/DbWorker.cpp" line="2854"/>
+        <location filename="../../lib/DbWorker.cpp" line="2911"/>
+        <location filename="../../lib/DbWorker.cpp" line="2999"/>
+        <location filename="../../lib/DbWorker.cpp" line="3061"/>
+        <location filename="../../lib/DbWorker.cpp" line="4661"/>
         <source>Cannot get file list. Database connection is not openned.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2745"/>
+        <location filename="../../lib/DbWorker.cpp" line="2746"/>
         <source>Can&apos;t get file list. Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2792"/>
+        <location filename="../../lib/DbWorker.cpp" line="2793"/>
         <source>Cannot get file list tree. Database connection is not openned.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2807"/>
+        <location filename="../../lib/DbWorker.cpp" line="2808"/>
         <source>Can&apos;t get file list tree. Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2867"/>
-        <location filename="../../lib/DbWorker.cpp" line="2936"/>
-        <location filename="../../lib/DbWorker.cpp" line="3024"/>
+        <location filename="../../lib/DbWorker.cpp" line="2868"/>
+        <location filename="../../lib/DbWorker.cpp" line="2937"/>
+        <location filename="../../lib/DbWorker.cpp" line="3025"/>
         <source>Can&apos;t get file info. Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="2873"/>
+        <location filename="../../lib/DbWorker.cpp" line="2874"/>
         <source>File %1 not found, reply is empty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3143"/>
+        <location filename="../../lib/DbWorker.cpp" line="3144"/>
         <source>Can&apos;t add file. Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3149"/>
+        <location filename="../../lib/DbWorker.cpp" line="3150"/>
         <source>Can&apos;t get request result.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3185"/>
+        <location filename="../../lib/DbWorker.cpp" line="3186"/>
         <source>Cannot delete files. Database connection is not openned.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3239"/>
+        <location filename="../../lib/DbWorker.cpp" line="3240"/>
         <source>Can&apos;t delete file. Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3245"/>
+        <location filename="../../lib/DbWorker.cpp" line="3246"/>
         <source>Can&apos;t get result</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3333"/>
+        <location filename="../../lib/DbWorker.cpp" line="3334"/>
         <source>Can&apos;t move file. Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3376"/>
+        <location filename="../../lib/DbWorker.cpp" line="3377"/>
         <source>slot_renameFile: input parameters error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3400"/>
+        <location filename="../../lib/DbWorker.cpp" line="3401"/>
         <source>Can&apos;t rename file. Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3411"/>
+        <location filename="../../lib/DbWorker.cpp" line="3412"/>
         <source>Can&apos;t get return result on renaming file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3443"/>
-        <location filename="../../lib/DbWorker.cpp" line="3519"/>
-        <location filename="../../lib/DbWorker.cpp" line="3596"/>
-        <location filename="../../lib/DbWorker.cpp" line="3672"/>
-        <location filename="../../lib/DbWorker.cpp" line="3748"/>
-        <location filename="../../lib/DbWorker.cpp" line="3845"/>
-        <location filename="../../lib/DbWorker.cpp" line="3924"/>
-        <location filename="../../lib/DbWorker.cpp" line="4001"/>
-        <location filename="../../lib/DbWorker.cpp" line="4101"/>
-        <location filename="../../lib/DbWorker.cpp" line="4298"/>
-        <location filename="../../lib/DbWorker.cpp" line="6321"/>
-        <location filename="../../lib/DbWorker.cpp" line="6507"/>
+        <location filename="../../lib/DbWorker.cpp" line="3444"/>
+        <location filename="../../lib/DbWorker.cpp" line="3520"/>
+        <location filename="../../lib/DbWorker.cpp" line="3597"/>
+        <location filename="../../lib/DbWorker.cpp" line="3673"/>
+        <location filename="../../lib/DbWorker.cpp" line="3749"/>
+        <location filename="../../lib/DbWorker.cpp" line="3846"/>
+        <location filename="../../lib/DbWorker.cpp" line="3925"/>
+        <location filename="../../lib/DbWorker.cpp" line="4002"/>
+        <location filename="../../lib/DbWorker.cpp" line="4102"/>
+        <location filename="../../lib/DbWorker.cpp" line="4299"/>
+        <location filename="../../lib/DbWorker.cpp" line="6322"/>
+        <location filename="../../lib/DbWorker.cpp" line="6508"/>
         <source>Cannot get file. Database connection is not openned.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3473"/>
-        <location filename="../../lib/DbWorker.cpp" line="3537"/>
-        <location filename="../../lib/DbWorker.cpp" line="3627"/>
-        <location filename="../../lib/DbWorker.cpp" line="3702"/>
-        <location filename="../../lib/DbWorker.cpp" line="3876"/>
-        <location filename="../../lib/DbWorker.cpp" line="3955"/>
+        <location filename="../../lib/DbWorker.cpp" line="3474"/>
+        <location filename="../../lib/DbWorker.cpp" line="3538"/>
+        <location filename="../../lib/DbWorker.cpp" line="3628"/>
+        <location filename="../../lib/DbWorker.cpp" line="3703"/>
+        <location filename="../../lib/DbWorker.cpp" line="3877"/>
+        <location filename="../../lib/DbWorker.cpp" line="3956"/>
         <source>Can&apos;t get file. Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3479"/>
+        <location filename="../../lib/DbWorker.cpp" line="3480"/>
         <source>Can&apos;t find file: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3708"/>
-        <location filename="../../lib/DbWorker.cpp" line="3882"/>
-        <location filename="../../lib/DbWorker.cpp" line="3961"/>
+        <location filename="../../lib/DbWorker.cpp" line="3709"/>
+        <location filename="../../lib/DbWorker.cpp" line="3883"/>
+        <location filename="../../lib/DbWorker.cpp" line="3962"/>
         <source>Can&apos;t find workcopy for file: %1. Is file CheckedOut?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3796"/>
+        <location filename="../../lib/DbWorker.cpp" line="3797"/>
         <source>Can&apos;t save file. Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3802"/>
+        <location filename="../../lib/DbWorker.cpp" line="3803"/>
         <source>Can&apos;t get FileID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="3811"/>
+        <location filename="../../lib/DbWorker.cpp" line="3812"/>
         <source>Write file error. filename: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="4047"/>
-        <location filename="../../lib/DbWorker.cpp" line="4150"/>
+        <location filename="../../lib/DbWorker.cpp" line="4048"/>
+        <location filename="../../lib/DbWorker.cpp" line="4151"/>
         <source>Can&apos;t check in. Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="4246"/>
+        <location filename="../../lib/DbWorker.cpp" line="4247"/>
         <source>Can&apos;t check out file. Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="4343"/>
+        <location filename="../../lib/DbWorker.cpp" line="4344"/>
         <source>Can&apos;t check out. Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="4390"/>
-        <location filename="../../lib/DbWorker.cpp" line="4444"/>
-        <location filename="../../lib/DbWorker.cpp" line="4498"/>
-        <location filename="../../lib/DbWorker.cpp" line="4553"/>
-        <location filename="../../lib/DbWorker.cpp" line="4608"/>
-        <location filename="../../lib/DbWorker.cpp" line="6270"/>
+        <location filename="../../lib/DbWorker.cpp" line="4391"/>
+        <location filename="../../lib/DbWorker.cpp" line="4445"/>
+        <location filename="../../lib/DbWorker.cpp" line="4499"/>
+        <location filename="../../lib/DbWorker.cpp" line="4554"/>
+        <location filename="../../lib/DbWorker.cpp" line="4609"/>
+        <location filename="../../lib/DbWorker.cpp" line="6271"/>
         <source>Cannot execute function. Database connection is not openned.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="4405"/>
-        <location filename="../../lib/DbWorker.cpp" line="4461"/>
-        <location filename="../../lib/DbWorker.cpp" line="4516"/>
-        <location filename="../../lib/DbWorker.cpp" line="4571"/>
-        <location filename="../../lib/DbWorker.cpp" line="4623"/>
-        <location filename="../../lib/DbWorker.cpp" line="6285"/>
+        <location filename="../../lib/DbWorker.cpp" line="4406"/>
+        <location filename="../../lib/DbWorker.cpp" line="4462"/>
+        <location filename="../../lib/DbWorker.cpp" line="4517"/>
+        <location filename="../../lib/DbWorker.cpp" line="4572"/>
+        <location filename="../../lib/DbWorker.cpp" line="4624"/>
+        <location filename="../../lib/DbWorker.cpp" line="6286"/>
         <source>Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="4411"/>
-        <location filename="../../lib/DbWorker.cpp" line="4728"/>
+        <location filename="../../lib/DbWorker.cpp" line="4412"/>
+        <location filename="../../lib/DbWorker.cpp" line="4729"/>
         <source>Can&apos;t get result.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="4702"/>
+        <location filename="../../lib/DbWorker.cpp" line="4703"/>
         <source>Argument errors.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="4721"/>
+        <location filename="../../lib/DbWorker.cpp" line="4722"/>
         <source>Can&apos;t add device. Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="4785"/>
-        <location filename="../../lib/DbWorker.cpp" line="4827"/>
+        <location filename="../../lib/DbWorker.cpp" line="4786"/>
+        <location filename="../../lib/DbWorker.cpp" line="4828"/>
         <source>Cannot get signals&apos; IDs. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="4799"/>
-        <location filename="../../lib/DbWorker.cpp" line="4841"/>
+        <location filename="../../lib/DbWorker.cpp" line="4800"/>
+        <location filename="../../lib/DbWorker.cpp" line="4842"/>
         <source>Can&apos;t get signals&apos; IDs! Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="4891"/>
+        <location filename="../../lib/DbWorker.cpp" line="4892"/>
         <source>Cannot get signals. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="4923"/>
-        <location filename="../../lib/DbWorker.cpp" line="4998"/>
+        <location filename="../../lib/DbWorker.cpp" line="4924"/>
+        <location filename="../../lib/DbWorker.cpp" line="4999"/>
         <source>Can&apos;t get signal workcopy! Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="4984"/>
+        <location filename="../../lib/DbWorker.cpp" line="4985"/>
         <source>Cannot get latest signal. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5028"/>
+        <location filename="../../lib/DbWorker.cpp" line="5029"/>
         <source>Cannot get latest signals. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5064"/>
+        <location filename="../../lib/DbWorker.cpp" line="5065"/>
         <source>Can&apos;t get signals workcopy! Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5102"/>
+        <location filename="../../lib/DbWorker.cpp" line="5103"/>
         <source>Cannot get latest signals by AppSignalIDs. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5132"/>
+        <location filename="../../lib/DbWorker.cpp" line="5133"/>
         <source>Can&apos;t get_latest_signals_by_appsignalids! Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5167"/>
+        <location filename="../../lib/DbWorker.cpp" line="5168"/>
         <source>Cannot get checked out signals&apos; IDs. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5181"/>
+        <location filename="../../lib/DbWorker.cpp" line="5182"/>
         <source>Can&apos;t get checked out signals&apos; IDs! Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5308"/>
+        <location filename="../../lib/DbWorker.cpp" line="5309"/>
         <source>Cannot add signals. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5333"/>
+        <location filename="../../lib/DbWorker.cpp" line="5334"/>
         <source>Can&apos;t add new signal(s)! Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5397"/>
-        <location filename="../../lib/DbWorker.cpp" line="5608"/>
+        <location filename="../../lib/DbWorker.cpp" line="5398"/>
+        <location filename="../../lib/DbWorker.cpp" line="5609"/>
         <source>Can&apos;t get latest signal! Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5445"/>
+        <location filename="../../lib/DbWorker.cpp" line="5446"/>
         <source>Application signal with AppSignalID &apos;%1&apos; already exists!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5452"/>
+        <location filename="../../lib/DbWorker.cpp" line="5453"/>
         <source>Application signal with CustomAppSignalID &apos;%1&apos; already exists!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5504"/>
+        <location filename="../../lib/DbWorker.cpp" line="5505"/>
         <source>Cannot checkout signals. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5543"/>
+        <location filename="../../lib/DbWorker.cpp" line="5544"/>
         <source>Can&apos;t checkout signals! Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5580"/>
-        <location filename="../../lib/DbWorker.cpp" line="5632"/>
+        <location filename="../../lib/DbWorker.cpp" line="5581"/>
+        <location filename="../../lib/DbWorker.cpp" line="5633"/>
         <source>Cannot set signal workcopy. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5618"/>
+        <location filename="../../lib/DbWorker.cpp" line="5619"/>
         <source>Can&apos;t get latest signal! No data returned!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5684"/>
-        <location filename="../../lib/DbWorker.cpp" line="5996"/>
+        <location filename="../../lib/DbWorker.cpp" line="5685"/>
+        <location filename="../../lib/DbWorker.cpp" line="5997"/>
         <source>Cannot delete signal. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5705"/>
-        <location filename="../../lib/DbWorker.cpp" line="6015"/>
+        <location filename="../../lib/DbWorker.cpp" line="5706"/>
+        <location filename="../../lib/DbWorker.cpp" line="6016"/>
         <source>Can&apos;t delete signal! Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5715"/>
-        <location filename="../../lib/DbWorker.cpp" line="6025"/>
+        <location filename="../../lib/DbWorker.cpp" line="5716"/>
+        <location filename="../../lib/DbWorker.cpp" line="6026"/>
         <source>Can&apos;t delete signal! No data returned!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5735"/>
-        <location filename="../../lib/DbWorker.cpp" line="5786"/>
+        <location filename="../../lib/DbWorker.cpp" line="5736"/>
+        <location filename="../../lib/DbWorker.cpp" line="5787"/>
         <source>Cannot undo signal changes. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5756"/>
+        <location filename="../../lib/DbWorker.cpp" line="5757"/>
         <source>Can&apos;t undo signal changes! Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5766"/>
+        <location filename="../../lib/DbWorker.cpp" line="5767"/>
         <source>Can&apos;t undo signal changes! No data returned!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5830"/>
+        <location filename="../../lib/DbWorker.cpp" line="5831"/>
         <source>Can&apos;t undo signals changes! Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5866"/>
+        <location filename="../../lib/DbWorker.cpp" line="5867"/>
         <source>Cannot checkin signals. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="5910"/>
+        <location filename="../../lib/DbWorker.cpp" line="5911"/>
         <source>Can&apos;t checkin signals! Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="6037"/>
-        <location filename="../../lib/DbWorker.cpp" line="6564"/>
-        <location filename="../../lib/DbWorker.cpp" line="6610"/>
-        <location filename="../../lib/DbWorker.cpp" line="6661"/>
-        <location filename="../../lib/DbWorker.cpp" line="6699"/>
-        <location filename="../../lib/DbWorker.cpp" line="6737"/>
+        <location filename="../../lib/DbWorker.cpp" line="6038"/>
+        <location filename="../../lib/DbWorker.cpp" line="6565"/>
+        <location filename="../../lib/DbWorker.cpp" line="6611"/>
+        <location filename="../../lib/DbWorker.cpp" line="6662"/>
+        <location filename="../../lib/DbWorker.cpp" line="6700"/>
+        <location filename="../../lib/DbWorker.cpp" line="6738"/>
         <source>Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="6084"/>
+        <location filename="../../lib/DbWorker.cpp" line="6085"/>
         <source>Cannot get ignal IDs with AppSignalID. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="6125"/>
+        <location filename="../../lib/DbWorker.cpp" line="6126"/>
         <source>Cannot get ignal IDs with CustomAppSignalID. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="6166"/>
+        <location filename="../../lib/DbWorker.cpp" line="6167"/>
         <source>Cannot get ignal IDs with EquipmentID. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="6206"/>
+        <location filename="../../lib/DbWorker.cpp" line="6207"/>
         <source>Cannot get signal IDs with EquipmentID. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="6352"/>
+        <location filename="../../lib/DbWorker.cpp" line="6353"/>
         <source>Can&apos;t get signal. Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="6358"/>
+        <location filename="../../lib/DbWorker.cpp" line="6359"/>
         <source>Can&apos;t find workcopy for signalID: %1. Is signal CheckedOut?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="6384"/>
+        <location filename="../../lib/DbWorker.cpp" line="6385"/>
         <source>Cannot get specific signals by changeset ID. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="6397"/>
+        <location filename="../../lib/DbWorker.cpp" line="6398"/>
         <source>Cannot get specific signals by changeset ID. Query execution error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="6416"/>
+        <location filename="../../lib/DbWorker.cpp" line="6417"/>
         <source>Cannot get specific signals by date. Database connection is not opened.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="6430"/>
+        <location filename="../../lib/DbWorker.cpp" line="6431"/>
         <source>Cannot get specific signals by date. Query execution error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="6530"/>
+        <location filename="../../lib/DbWorker.cpp" line="6531"/>
         <source>Error calling hasCheckedOutSignals(): </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="6536"/>
+        <location filename="../../lib/DbWorker.cpp" line="6537"/>
         <source>Error hasCheckedOutSignals() result fetching</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="7516"/>
+        <location filename="../../lib/DbWorker.cpp" line="7517"/>
         <source>Can&apos;t create SignalSpecPropValues for input signal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="7527"/>
+        <location filename="../../lib/DbWorker.cpp" line="7528"/>
         <source>Can&apos;t create SignalSpecPropValues for output signal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="7537"/>
+        <location filename="../../lib/DbWorker.cpp" line="7538"/>
         <source>Can&apos;t create SignalSpecPropValues for internal signal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="7549"/>
+        <location filename="../../lib/DbWorker.cpp" line="7550"/>
         <source>Can&apos;t get_latest_signals_all! Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="7620"/>
+        <location filename="../../lib/DbWorker.cpp" line="7621"/>
         <source>Can&apos;t set signal&apos;s protoData! Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="7713"/>
+        <location filename="../../lib/DbWorker.cpp" line="7714"/>
         <source>Signal specific properties value setting error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="7724"/>
+        <location filename="../../lib/DbWorker.cpp" line="7725"/>
         <source>Can&apos;t set signal&apos;s spec prop values! Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="7742"/>
+        <location filename="../../lib/DbWorker.cpp" line="7743"/>
         <source>Can&apos;t retrieve signal instances specific properties values data.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="7767"/>
+        <location filename="../../lib/DbWorker.cpp" line="7768"/>
         <source>SignalInstance %1 specPropValues data parsing error
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="7796"/>
+        <location filename="../../lib/DbWorker.cpp" line="7797"/>
         <source>SignalInstance %1 specPropValues updating error
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="7807"/>
+        <location filename="../../lib/DbWorker.cpp" line="7808"/>
         <source>Total parsing errors: %1
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/DbWorker.cpp" line="7815"/>
+        <location filename="../../lib/DbWorker.cpp" line="7816"/>
         <source>Total updating errors: %1
 </source>
         <translation type="unfinished"></translation>
@@ -3928,8 +3928,8 @@
         <location filename="../MainWindow.cpp" line="762"/>
         <location filename="../MainWindow.cpp" line="766"/>
         <location filename="../MainWindow.cpp" line="2432"/>
-        <location filename="../MainWindow.cpp" line="2547"/>
-        <location filename="../MainWindow.cpp" line="2618"/>
+        <location filename="../MainWindow.cpp" line="2549"/>
+        <location filename="../MainWindow.cpp" line="2620"/>
         <source>Please, connect to server
 click menu &quot;Tool&quot; - &quot;Options...&quot; - &quot;Connect to server&quot;</source>
         <translation>Подключитесь к серверу
@@ -3937,14 +3937,14 @@ click menu &quot;Tool&quot; - &quot;Options...&quot; - &quot;Connect to server&q
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="760"/>
-        <location filename="../MainWindow.cpp" line="2545"/>
+        <location filename="../MainWindow.cpp" line="2547"/>
         <source> AppDataService: off </source>
         <translation> AppDataService: off </translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="764"/>
-        <location filename="../MainWindow.cpp" line="2616"/>
-        <location filename="../MainWindow.cpp" line="2647"/>
+        <location filename="../MainWindow.cpp" line="2618"/>
+        <location filename="../MainWindow.cpp" line="2649"/>
         <source> TuningService: off </source>
         <translation> TuningService: off </translation>
     </message>
@@ -4084,45 +4084,45 @@ Failed version of %1. Current version: %2. Received version: %3 </source>
         <translation>Configuration Service не обнаружил EquipmentID &quot;%1&quot; для программного обеспечения &quot;Метрология&quot;</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2526"/>
+        <location filename="../MainWindow.cpp" line="2528"/>
         <source> AppDataService: on </source>
         <translation> AppDataService: on </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2528"/>
-        <location filename="../MainWindow.cpp" line="2569"/>
+        <location filename="../MainWindow.cpp" line="2530"/>
+        <location filename="../MainWindow.cpp" line="2571"/>
         <source>Connected: %1 : %2
 </source>
         <translation>Подключено: %1 : %2
 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2571"/>
+        <location filename="../MainWindow.cpp" line="2573"/>
         <source>
 Tuning sources: %1</source>
         <translation>
 Источники тюнинга: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2572"/>
+        <location filename="../MainWindow.cpp" line="2574"/>
         <source>
 Tuning signals: %1</source>
         <translation>
 Сигналы тюнинга: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2586"/>
-        <location filename="../MainWindow.cpp" line="2637"/>
+        <location filename="../MainWindow.cpp" line="2588"/>
+        <location filename="../MainWindow.cpp" line="2639"/>
         <source> TuningService: on </source>
         <translation> TuningService: on </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2676"/>
+        <location filename="../MainWindow.cpp" line="2678"/>
         <source> Measure process is running </source>
         <translation> Процесс измерения запущен </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2695"/>
+        <location filename="../MainWindow.cpp" line="2697"/>
         <source> Measure process is stopped </source>
         <translation> Процесс измерения остановлен </translation>
     </message>
@@ -4884,52 +4884,54 @@ Do you want to repeat the preparation process in order to switch the comparator 
 <context>
     <name>MetrologyConnectionBase.h</name>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.h" line="16"/>
         <source>Input</source>
-        <translation>Входной</translation>
+        <translation type="vanished">Входной</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.h" line="17"/>
         <source>Output</source>
-        <translation>Выходной</translation>
+        <translation type="vanished">Выходной</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.h" line="30"/>
         <source>No connections</source>
-        <translation>Без соединения</translation>
+        <translation type="vanished">Без соединения</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.h" line="31"/>
+        <location filename="../../lib/MetrologyConnectionBase.h" line="21"/>
+        <source>No connections             </source>
+        <translation>Без соединения             </translation>
+    </message>
+    <message>
+        <location filename="../../lib/MetrologyConnectionBase.h" line="22"/>
         <source>Input -&gt; Internal</source>
         <translation>Входной -&gt; Внутренний</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.h" line="32"/>
+        <location filename="../../lib/MetrologyConnectionBase.h" line="23"/>
         <source>Input -&gt; Output</source>
         <translation>Входной -&gt; Выходной</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.h" line="33"/>
+        <location filename="../../lib/MetrologyConnectionBase.h" line="24"/>
         <source>Input dP -&gt; Internal F</source>
         <translation>Входной dP -&gt; Внутренний F</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.h" line="34"/>
+        <location filename="../../lib/MetrologyConnectionBase.h" line="25"/>
         <source>Input dP -&gt; Output F</source>
         <translation>Входной dP -&gt; Выходной F</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.h" line="35"/>
+        <location filename="../../lib/MetrologyConnectionBase.h" line="26"/>
         <source>Input °С -&gt; Internal °F</source>
         <translation>Входной °С -&gt; Внутренний °F</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.h" line="36"/>
+        <location filename="../../lib/MetrologyConnectionBase.h" line="27"/>
         <source>Input °С -&gt; Output °F</source>
         <translation>Входной °С -&gt; Выходной °F</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.h" line="37"/>
+        <location filename="../../lib/MetrologyConnectionBase.h" line="28"/>
         <source>Tuning -&gt; Output</source>
         <translation>Тюнинг -&gt; Выходной</translation>
     </message>
@@ -6785,25 +6787,23 @@ Please choose a different group or channel.</source>
     </message>
     <message>
         <location filename="../SignalConnectionList.cpp" line="1150"/>
-        <location filename="../SignalConnectionList.cpp" line="1164"/>
-        <location filename="../SignalConnectionList.cpp" line="1170"/>
-        <location filename="../SignalConnectionList.cpp" line="1177"/>
+        <location filename="../SignalConnectionList.cpp" line="1169"/>
+        <location filename="../SignalConnectionList.cpp" line="1176"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="1164"/>
         <source>Could not open file: Empty file name</source>
-        <translation>Невозможно открыть файл: не задано имя файла!</translation>
+        <translation type="vanished">Невозможно открыть файл: не задано имя файла!</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="1170"/>
+        <location filename="../SignalConnectionList.cpp" line="1169"/>
         <source>Could not open file: %1
 file is not found!</source>
         <translation>Невозможно открыть файл: %1 файл не найден!</translation>
     </message>
     <message>
-        <location filename="../SignalConnectionList.cpp" line="1177"/>
+        <location filename="../SignalConnectionList.cpp" line="1176"/>
         <source>Could not open file</source>
         <translation>Невозможно открыть файл</translation>
     </message>
@@ -7351,6 +7351,39 @@ Please, select output signal!</source>
         <location filename="../ObjectProperties.cpp" line="1236"/>
         <source>Precision</source>
         <translation>Точность</translation>
+    </message>
+</context>
+<context>
+    <name>SignalSetProvider</name>
+    <message>
+        <location filename="../../lib/SignalSetProvider.cpp" line="736"/>
+        <source>Signal %1 is not checked out</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/SignalSetProvider.cpp" line="737"/>
+        <source>Signal %1 is checked out by &quot;%2&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/SignalSetProvider.cpp" line="738"/>
+        <source>Signal %1 was deleted already</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/SignalSetProvider.cpp" line="739"/>
+        <source>Signal %1 not found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/SignalSetProvider.cpp" line="742"/>
+        <source>Unknown error %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/SignalSetProvider.cpp" line="1080"/>
+        <source>Could not load signals</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

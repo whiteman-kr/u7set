@@ -73,13 +73,13 @@ void StatisticsItem::setSignalConnectionType(Metrology::Signal* pSignal)
 		return;
 	}
 
-	int connectionIndex = theSignalBase.signalConnections().findConnectionIndex(Metrology::IO_SIGNAL_CONNECTION_TYPE_OUTPUT, pSignal);
+	int connectionIndex = theSignalBase.signalConnections().findConnectionIndex(Metrology::ConnectionIoType::Destination, pSignal);
 	if (connectionIndex == -1)
 	{
 		return;
 	}
 
-	const Metrology::SignalConnection& connection = theSignalBase.signalConnections().connection(connectionIndex);
+	const Metrology::Connection& connection = theSignalBase.signalConnections().connection(connectionIndex);
 	if (connection.isValid() == false)
 	{
 		return;

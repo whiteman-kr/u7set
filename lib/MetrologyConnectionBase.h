@@ -3,6 +3,7 @@
 #include "../lib/Hash.h"
 #include "../lib/MetrologySignal.h"
 #include "../lib/DbController.h"
+#include "../lib/SignalSetProvider.h"
 
 #include <QMutex>
 #include <QVector>
@@ -11,23 +12,13 @@ namespace Metrology
 {
 	// ==============================================================================================
 
-	const char* const	IoConnectionType[] =
-	{
-						QT_TRANSLATE_NOOP("MetrologyConnectionBase.h", "Input"),
-						QT_TRANSLATE_NOOP("MetrologyConnectionBase.h", "Output"),
-	};
-
-	const int			IO_SIGNAL_CONNECTION_TYPE_COUNT = sizeof(IoConnectionType)/sizeof(IoConnectionType[0]);
-
-	const int			IO_SIGNAL_CONNECTION_TYPE_UNDEFINED	= -1,
-						IO_SIGNAL_CONNECTION_TYPE_INPUT		= 0,
-						IO_SIGNAL_CONNECTION_TYPE_OUTPUT	= 1;
+	const char* const	CONNECTIONS_FILE_NAME = "MetrologyConnections.csv";
 
 	// ==============================================================================================
 
 	const char* const	ConnectionType[] =
 	{
-						QT_TRANSLATE_NOOP("MetrologyConnectionBase.h", "No connections"),
+	                    QT_TRANSLATE_NOOP("MetrologyConnectionBase.h", "No connections             "),
 						QT_TRANSLATE_NOOP("MetrologyConnectionBase.h", "Input -> Internal"),
 						QT_TRANSLATE_NOOP("MetrologyConnectionBase.h", "Input -> Output"),
 						QT_TRANSLATE_NOOP("MetrologyConnectionBase.h", "Input dP -> Internal F"),
@@ -51,70 +42,100 @@ namespace Metrology
 
 	// ==============================================================================================
 
-	const quint64		EMPTY_CONNECTION_HANDLE					= 0;
-	const quint64		SIGNAL_ID_IS_NOT_FOUND					= 0;
-
-    #pragma pack(push, 1)
-
-	    union ConnectionHandle
-		{
-			struct
-			{
-				quint64 outputID : 30;
-				quint64 inputID : 30;
-				quint64 type : 4;
-			};
-
-			quint64 state;
-		};
-
-    #pragma pack(pop)
+	enum ConnectionIoType
+	{
+		Source = 0,
+		Destination = 1,
+		Count = 2			// count of ...ConnectionIoType elements
+	};
 
 	// ==============================================================================================
 
-	class SignalConnection
+	const int SIGNAL_ID_IS_EMPTY = 0;
+
+	class ConnectionSignal
 	{
 	public:
 
-		SignalConnection();
-		virtual ~SignalConnection() {}
+		ConnectionSignal();
+		virtual ~ConnectionSignal() {}
+
+	public:
+
+		void clear();
+
+		void set(::Signal* pSignal);
+		void set(Metrology::Signal* pSignal);	// only for software Metrology
+
+		QString appSignalID() const { return m_appSignalID; }
+		void setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; }
+
+		int signalID() const { return m_signalID; }
+		void setSignalID(int id) { m_signalID = id; }
+
+		Metrology::Signal* metrologySignal() const { return m_pMetrologySignal; }
 
 	private:
 
-		ConnectionHandle m_handle;
+		QString m_appSignalID;
+		int m_signalID = SIGNAL_ID_IS_EMPTY;
 
-		QString m_appSignalID[IO_SIGNAL_CONNECTION_TYPE_COUNT];
-		Metrology::Signal* m_pSignal[IO_SIGNAL_CONNECTION_TYPE_COUNT];
+		Metrology::Signal* m_pMetrologySignal = nullptr; // only for software Metrology
+	};
+
+
+	// ==============================================================================================
+
+	class Connection
+	{
+	public:
+
+		Connection();
+		virtual ~Connection() {}
 
 	public:
 
 		bool isValid() const;
 		void clear();
 
-		ConnectionHandle handle() const { return m_handle; }
+		QString strID() const { return m_strID; }
+		void createStrID();
 
-		int type() const { return m_handle.type; }
+		ConnectionSignal connectionSignal(int ioType) const;
+
+		int type() const { return m_type; }
 		QString typeStr() const;
-		void setType(int type) { m_handle.type = static_cast<quint64>(type); }
+		void setType(int type) { m_type = type; }
 
 		QString appSignalID(int ioType) const;
 		void setAppSignalID(int ioType, const QString& appSignalID);
 
-		Metrology::Signal* signal(int ioType) const;
+		int signalID(int ioType) const;
+		void setSignalID(int ioType, int id);
+
 		void setSignal(int ioType, ::Signal* pSignal);
-		void setSignal(int ioType, Metrology::Signal* pSignal);
+		void setSignal(int ioType, Metrology::Signal* pSignal);	// only for software Metrology
 
-		SignalConnection& operator=(const SignalConnection& from);
+		const VcsItemAction& action() const { return m_action; }
+		void setAction(const VcsItemAction& action) { m_action = action; }
 
-		// serialize
+		Metrology::Signal* metrologySignal(int ioType) const;
+
+		// serialize for Build
 		//
 		bool readFromXml(XmlReadHelper& xml);
 		void writeToXml(XmlWriteHelper& xml);
+
+	private:
+
+		QString m_strID;
+
+		int m_type = CONNECTION_TYPE_UNUSED;
+
+		ConnectionSignal m_connectionSignal[ConnectionIoType::Count];
+
+		VcsItemAction m_action;
 	};
-
-	// ==============================================================================================
-
-	const char* const CONNECTIONS_FILE_NAME = "MetrologyConnections.csv";
 
 	// ==============================================================================================
 
@@ -124,41 +145,51 @@ namespace Metrology
 
 	public:
 
-		ConnectionBase(QObject *parent = nullptr);
-		ConnectionBase(DbController* db, SignalSet* signalSet, QObject *parent = nullptr);
+		ConnectionBase(QObject* parent = nullptr);
 		virtual ~ConnectionBase() {}
-
-	private:
-
-		mutable QMutex m_connectionMutex;
-		QVector<SignalConnection> m_connectionList;
 
 	public:
 
+		void setSignalSetProvider(SignalSetProvider* signalSetProvider) { m_signalSetProvider = signalSetProvider; }
+
+		//
+		//
 		void clear();
 		int count() const;
-		void sort();
 
 		//
 		//
-		bool load(DbController* db, SignalSet* signalSet);
-		bool save(DbController* db, bool checkIn, const QString &comment);
+		std::shared_ptr<DbFile> getConnectionFile(DbController* db);
 
-		bool isCheckIn(DbController* db);
-		bool сheckOut(DbController* db);
+		bool load(DbController* db);
+		bool save(bool checkIn, const QString &comment);
+
+		bool checkOut();
+		bool isCheckIn();
+
+		void setSignalIDs();
 
 		//
 		//
-		int append(const SignalConnection& connection);
+		int append(const Connection& connection);
 		void remove(int index);
+		void removeAllMarked();
 
-		SignalConnection connection(int index) const;
-		SignalConnection* connectionPtr(int index);
-		void setConnection(int index, const SignalConnection& connection);
+		Connection connection(int index) const;
+		Connection* connectionPtr(int index);
+		void setConnection(int index, const Connection& connection);
+
+		//
+		//
+		void setAction(int index, const VcsItemAction::VcsItemActionType& type);
+
+		//
+		//
+		void sort();
 
 		int findConnectionIndex(int ioType, Metrology::Signal* pSignal) const;
 		int findConnectionIndex(int connectionType, int ioType, Metrology::Signal* pSignal) const;
-		int findConnectionIndex(const SignalConnection& connection) const;
+		int findConnectionIndex(const Connection& connection) const;
 
 		int getOutputSignalCount(int connectionType, const QString& InputAppSignalID) const;
 		QVector<Metrology::Signal*> getOutputSignals(int connectionType, const QString& InputAppSignalID) const;
@@ -171,6 +202,13 @@ namespace Metrology
 		//
 		//
 		ConnectionBase&	operator=(const ConnectionBase& from);
+
+	private:
+
+		mutable QMutex m_connectionMutex;
+		QVector<Connection> m_connectionList;
+
+		SignalSetProvider* m_signalSetProvider = nullptr;
 	};
 
 	// ==============================================================================================
