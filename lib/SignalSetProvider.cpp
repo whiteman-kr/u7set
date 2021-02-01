@@ -1097,7 +1097,7 @@ void SignalSetProvider::loadSignals()
 	}
 
 	m_signalSet = std::move(signalSetForReplacement);
-	signalSetForReplacement.forget();
+	signalSetForReplacement.forget();	// Destructor will delete all Signal pointers which should be kept for m_signalSet
 
 	emit signalCountChanged();
 }
