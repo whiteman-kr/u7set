@@ -94,6 +94,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getLatestSignal, m_worker, &DbWorker::slot_getLatestSignal);
 	connect(this, &DbController::signal_getLatestSignals, m_worker, &DbWorker::slot_getLatestSignals);
 	connect(this, &DbController::signal_getLatestSignalsByAppSignalIDs, m_worker, &DbWorker::slot_getLatestSignalsByAppSignalIDs);
+	connect(this, &DbController::signal_getLatestSignalsWithUserID, m_worker, &DbWorker::slot_getLatestSignalsWithUserID);
 	connect(this, &DbController::signal_getCheckedOutSignalsIDs, m_worker, &DbWorker::slot_getCheckedOutSignalsIDs);
 	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
 	connect(this, &DbController::signal_checkoutSignals, m_worker, &DbWorker::slot_checkoutSignals);
@@ -2203,6 +2204,28 @@ bool DbController::getLatestSignalsWithoutProgress(QVector<int> signalIDs, QVect
 
 	return ok;
 }
+
+bool DbController::getLatestSignalsWithUserID(std::vector<Signal>* out, QWidget* parentWidget)
+{
+	TEST_PTR_RETURN_FALSE(out);
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getLatestSignalsWithUserID(out);
+
+	ok = waitForComplete(parentWidget, tr("Reading latest signals with UserID"));
+
+	return ok;
+
+}
+
 
 
 bool DbController::checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget)
