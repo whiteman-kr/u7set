@@ -1,0 +1,13 @@
+// Syntaxis:
+//
+// [Profile1]: Define profile "Profile1"
+//
+// EQUIPMENTID.PropertyCaption = "TextValue";	// Set property value to text
+// EQUIPMENTID.PropertyCaption = 10;			// Set property value to num
+//
+// Profile Example:
+//
+[TestProfile]
+SYSTEMID_WS00_ARCHS.AppDataReceivingIP = "192.168.12.254";
+SYSTEMID_WS00_ARCHS.AppDataReceivingPort = 2500;
+SYSTEMID_WS00_ARCHS.ArchiveLocation = "d:\arch2";

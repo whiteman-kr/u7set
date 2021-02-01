@@ -27,6 +27,7 @@ unix {
 
 SOURCES +=  \
     SimCommandTest_LM5_LM6.cpp \
+    SimProfilesTest.cpp \
     SimRamTests.cpp \
     main.cpp
 
@@ -70,6 +71,7 @@ unix {
 HEADERS += \
     ../../lib/PropertyObject.h \
     SimCommandTest_LM5_LM6.h \
+    SimProfilesTest.h \
     SimRamTests.h
 
 RESOURCES += \
