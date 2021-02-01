@@ -325,6 +325,7 @@ public:
 	~PtrOrderedHash();
 
 	virtual void clear();
+	void forget();
 
 	bool isEmpty() const;
 	int count() const;
@@ -374,8 +375,6 @@ PtrOrderedHash<KEY, VALUE>::~PtrOrderedHash()
 	clear();
 }
 
-
-
 template <typename KEY, typename VALUE>
 void PtrOrderedHash<KEY, VALUE>::clear()
 {
@@ -384,6 +383,14 @@ void PtrOrderedHash<KEY, VALUE>::clear()
 		delete value;
 	}
 
+	m_valueVector.clear();
+	m_keyVector.clear();
+	m_hash.clear();
+}
+
+template<typename KEY, typename VALUE>
+void PtrOrderedHash<KEY, VALUE>::forget()
+{
 	m_valueVector.clear();
 	m_keyVector.clear();
 	m_hash.clear();

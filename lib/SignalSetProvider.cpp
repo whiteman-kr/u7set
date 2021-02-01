@@ -433,9 +433,19 @@ void SignalPropertyManager::reloadPropertyBehaviour()
 
 void SignalPropertyManager::clear()
 {
-	m_propertyDescription = m_basicPropertyDescription;
+	if (m_propertyDescription.size() > m_basicPropertyDescription.size())
+	{
+		emit propertyCountWillDecrease(m_basicPropertyDescription.size());
+		m_propertyDescription = m_basicPropertyDescription;
+		emit propertyCountDecreased();
+	}
+	if (m_propertyDescription.size() < m_basicPropertyDescription.size())
+	{
+		emit propertyCountWillIncrease(m_basicPropertyDescription.size());
+		m_propertyDescription = m_basicPropertyDescription;
+		emit propertyCountIncreased();
+	}
 	m_propertyName2IndexMap.clear();
-	emit propertyCountChanged();
 }
 
 void SignalPropertyManager::init()
@@ -505,10 +515,12 @@ void SignalPropertyManager::addNewProperty(const SignalPropertyDescription& newP
 	{
 		return;
 	}
+
+	emit propertyCountWillIncrease(m_propertyDescription.size() + 1);
 	int propertyIndex = static_cast<int>(m_propertyDescription.size());
 	m_propertyDescription.push_back(newProperty);
 	m_propertyName2IndexMap.insert(newProperty.name, propertyIndex);
-	emit propertyCountChanged();
+	emit propertyCountIncreased();
 
 	for (size_t i = 0; i < m_propertyBehaviorDescription.size(); i++)
 	{
@@ -1066,7 +1078,6 @@ void SignalSetProvider::loadSignals()
 		m_lazyLoadSignalsTimer->stop();
 		m_partialLoading = false;
 	}
-	clearSignals();
 
 	m_propertyManager.init();
 	m_propertyManager.reloadPropertyBehaviour();
@@ -1085,7 +1096,8 @@ void SignalSetProvider::loadSignals()
 		m_propertyManager.detectNewProperties(signalSetForReplacement[i]);
 	}
 
-	std::swap(m_signalSet, signalSetForReplacement);
+	m_signalSet = std::move(signalSetForReplacement);
+	signalSetForReplacement.forget();
 
 	emit signalCountChanged();
 }
