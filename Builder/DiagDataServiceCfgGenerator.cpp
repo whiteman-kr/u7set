@@ -25,7 +25,7 @@ namespace Builder
 		return m_settingsSet.addProfile<DiagDataServiceSettings>(profile, settingsGetter);
 	}
 
-	bool DiagDataServiceCfgGenerator::generateConfiguration()
+	bool DiagDataServiceCfgGenerator::generateConfigurationStep1()
 	{
 		return true;
 	}

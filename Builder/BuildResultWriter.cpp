@@ -180,11 +180,11 @@ namespace Builder
 
 		if (subDir.isEmpty())
 		{
-			pathFileName = "/" + fName;
+			pathFileName = Separator::DIR + fName;
 		}
 		else
 		{
-			pathFileName = "/" + removeHeadTailSeparator(subDir) + "/" + fName;
+			pathFileName = Separator::DIR + removeHeadTailSeparator(subDir) + Separator::DIR + fName;
 		}
 
 		return pathFileName;

@@ -29,7 +29,7 @@ namespace Builder
 		return m_settingsSet.addProfile<AppDataServiceSettings>(profile, settingsGetter);
 	}
 
-	bool AppDataServiceCfgGenerator::generateConfiguration()
+	bool AppDataServiceCfgGenerator::generateConfigurationStep1()
 	{
 		bool result = false;
 

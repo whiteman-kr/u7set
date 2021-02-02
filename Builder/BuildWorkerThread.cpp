@@ -1595,12 +1595,14 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
+		// Software.xml file generation
+		//
 		QByteArray softwareXmlData;
 		QXmlStreamWriter softwareXml(&softwareXmlData);
 
 		softwareXml.setAutoFormatting(true);
 		softwareXml.writeStartDocument();
-		softwareXml.writeStartElement(XmlElement::SOFTWARE_ITEMS);
+		softwareXml.writeStartElement(XmlElement::SOFTWARE_ITEMS);	// <SoftwareItems>
 
 		context->m_buildResultWriter->buildInfo().writeToXml(softwareXml);
 
@@ -1608,22 +1610,52 @@ namespace Builder
 		{
 			std::shared_ptr<SoftwareCfgGenerator> swCfgGen = p.second;
 
-			result &= swCfgGen->writeConfigurationXml();		// software Configuration.xml writing
-
-			// Software.xml writing
-
-			swCfgGen->writeSoftwareSection(softwareXml, false);	// <Software>
+			// Writing settings of current software to Software.xml
+			//
+			swCfgGen->writeSoftwareSection(softwareXml, false);		// <Software>
 
 			result &= swCfgGen->getSettingsXml(softwareXml);
 
-			softwareXml.writeEndElement();	// </Software>
+			softwareXml.writeEndElement();							// </Software>
 		}
 
-		softwareXml.writeEndElement();		// </SoftwareItems>
+		softwareXml.writeEndElement();								// </SoftwareItems>
 
 		context->m_buildResultWriter->addFile(Directory::COMMON, File::SOFTWARE_XML, softwareXmlData);
 
-		context->m_buildResultWriter->writeConfigurationXmlFiles();
+		//
+		// Software items configuration generation
+		//
+
+		for(auto p : swCfgGens)
+		{
+			std::shared_ptr<SoftwareCfgGenerator> swCfgGen = p.second;
+
+			// Creating Configuration.xml for current software
+			//
+			result &= swCfgGen->createConfigurationXml();
+
+			// First step of software configuration generation
+			//
+			LOG_MESSAGE(m_log, QString(tr("Configuration generation for software item (step 1): %1")).
+						arg(swCfgGen->equipmentID()));
+
+			result &= swCfgGen->generateConfigurationStep1();
+		}
+
+		for(auto p : swCfgGens)
+		{
+			std::shared_ptr<SoftwareCfgGenerator> swCfgGen = p.second;
+
+			// Second step of software configuration generation
+			//
+			LOG_MESSAGE(m_log, QString(tr("Configuration generation for software item (step 2): %1")).
+						arg(swCfgGen->equipmentID()));
+
+			result &= swCfgGen->generateConfigurationStep2();
+		}
+
+		result &= context->m_buildResultWriter->writeConfigurationXmlFiles();
 
 		LOG_EMPTY_LINE(context->m_log);
 

@@ -58,6 +58,11 @@ namespace Builder
 		return false;
 	}
 
+	bool SoftwareCfgGenerator::generateConfigurationStep2()
+	{
+		return true;
+	}
+
 	bool SoftwareCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
 	{
 		XmlWriteHelper xml(xmlWriter);
@@ -65,7 +70,7 @@ namespace Builder
 		return m_settingsSet.writeToXml(xml);
 	}
 
-	bool SoftwareCfgGenerator::writeConfigurationXml()
+	bool SoftwareCfgGenerator::createConfigurationXml()
 	{
 		if (m_log == nullptr ||
 			m_dbController == nullptr ||
@@ -88,20 +93,12 @@ namespace Builder
 			return false;
 		}
 
-		LOG_MESSAGE(m_log, QString(tr("Generate configuration for: %1")).
-					arg(m_software->equipmentIdTemplate()));
-
 		writeSoftwareSection(m_cfgXml->xmlWriter(), true);
 
-		getSettingsXml(m_cfgXml->xmlWriter());
-
-		bool result = true;
-
-		result &= generateConfiguration();
+		bool result = getSettingsXml(m_cfgXml->xmlWriter());
 
 		return result;
 	}
-
 
 	bool SoftwareCfgGenerator::generalSoftwareCfgGeneration(Context* context)
 	{

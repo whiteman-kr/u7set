@@ -177,6 +177,8 @@ namespace XmlElement
 	inline const QString ASSOCIATED_SIGNALS("AssociatedSignals");
 
 	inline const QString SETTINGS_SET("SettingsSet");
+
+	inline const QString APP_DATA_SERVICES("AppDataServices");
 }
 
 namespace XmlAttribute
@@ -319,4 +321,6 @@ namespace Separator
 	inline const QString SEMICOLON_SPACE("; ");
 	inline const QString SEMICOLON(";");
 	inline const QString LINE("-------------------------------------------------------------------------------");
+	inline const QString DIR("/");
+	inline const QString BACK_DIR("\\");
 }

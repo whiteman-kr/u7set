@@ -14,7 +14,7 @@ namespace Builder
 		~ArchivingServiceCfgGenerator();
 
 		virtual bool createSettingsProfile(const QString& profile) override;
-		virtual bool generateConfiguration() override;
+		virtual bool generateConfigurationStep1() override;
 
 	private:
 		bool writeArchSignalsFile();

@@ -19,7 +19,7 @@ namespace Builder
 		return m_settingsSet.addProfile<TestClientSettings>(profile, settingsGetter);
 	}
 
-	bool TestClientCfgGenerator::generateConfiguration()
+	bool TestClientCfgGenerator::generateConfigurationStep1()
 	{
 		bool result = false;
 
@@ -32,6 +32,47 @@ namespace Builder
 			result = true;
 		}
 		while(false);
+
+		return result;
+	}
+
+	bool TestClientCfgGenerator::generateConfigurationStep2()
+	{
+		bool result = true;
+
+		QStringList appDataServicesIDs;
+
+		for(auto p : m_context->m_software)
+		{
+			const Hardware::Software* sw = p.second;
+
+			TEST_PTR_CONTINUE(sw);
+
+			if (sw->type() == E::SoftwareType::AppDataService)
+			{
+				appDataServicesIDs.append(sw->equipmentIdTemplate().trimmed());
+			}
+		}
+
+		//
+
+		XmlWriteHelper xml(m_cfgXml->xmlWriter());
+
+		xml.writeStartElement(XmlElement::APP_DATA_SERVICES);
+		xml.writeIntAttribute(XmlAttribute::COUNT, appDataServicesIDs.count());
+
+		QString ids = appDataServicesIDs.join(Separator::SEMICOLON);
+
+		xml.writeStringAttribute(XmlAttribute::ID, ids);
+
+		xml.writeEndElement();
+
+		// adding links to files AppDataSources.xml for each AppDataService;
+
+		for(const QString& id : appDataServicesIDs)
+		{
+			result &= m_cfgXml->addLinkToFile(id, File::APP_DATA_SOURCES_XML);
+		}
 
 		return result;
 	}
