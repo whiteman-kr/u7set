@@ -115,7 +115,10 @@ public:
 public slots:
 	void updateSignal(int signalIndex);
 	void changeRowCount();
-	void changeColumnCount();
+	void beginIncreaseColumnCount(int newColumnCount);
+	void beginDecreaseColumnCount(int newColumnCount);
+	void endIncreaseColumnCount();
+	void endDecreaseColumnCount();
 
 private:
 	// Data
