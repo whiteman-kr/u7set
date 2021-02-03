@@ -164,11 +164,10 @@ class DataSourceOnline : public DataSource
 private:
 	struct RupFrameTime
 	{
-		qint64 serverTime;
+		qint64 serverTime = 0;
+		bool isSimFrame = false;
 
 		Rup::Frame rupFrame;
-
-		void dump();
 	};
 
 	static const int APP_DATA_SOURCE_TIMEOUT = 1000;
@@ -261,7 +260,11 @@ public:
 
 	// Functions used by receiver thread
 	//
-	void pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame, const QThread* thread);
+	void pushRupFrame(qint64 serverTime,
+					  bool isSimFrame,
+					  const Rup::Frame& rupFrame,
+					  const QThread* thread);
+
 	void incFrameSizeError() { m_errorFrameSize++; }
 
 	// Functions used by data processing thread
@@ -270,7 +273,12 @@ public:
 	bool releaseProcessingOwnership(const QThread* processingThread);
 
 	bool processRupFrameTimeQueue(const QThread* thread);
-	bool getDataToParsing(Times* times, quint16* packetNo, const char** rupData, int* rupDataSize, bool* dataReceivingTimeout);
+	bool getDataToParsing(Times* times,
+						  bool* isSimPacket,
+						  quint16* packetNo,
+						  const char** rupData,
+						  int* rupDataSize,
+						  bool* dataReceivingTimeout);
 
 	bool rupFramesQueueIsEmpty() const { return m_rupFrameTimeQueue.isEmpty(QThread::currentThread()); }
 
@@ -347,6 +355,7 @@ private:
 	Rup::Header* m_rupFramesHeaders = nullptr;
 	Rup::Data* m_rupFramesData = nullptr;
 	qint64 m_frame0ServerTime = 0;
+	bool m_isSimPacket = false;
 
 	// result variables
 

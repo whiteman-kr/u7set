@@ -146,8 +146,9 @@ bool AppDataSource::parsePacket()
 	int rupDataSize = 0;
 	bool dataReceivingTimeout = false;
 	quint16 packetNo = 0;
+	bool isSimPacket = false;
 
-	bool result = getDataToParsing(&times, &packetNo, &rupData, &rupDataSize, &dataReceivingTimeout);
+	bool result = getDataToParsing(&times, &isSimPacket, &packetNo, &rupData, &rupDataSize, &dataReceivingTimeout);
 
 	if (result == false)
 	{
@@ -169,7 +170,7 @@ bool AppDataSource::parsePacket()
 		}
 		else
 		{
-			signalState->setState(times, packetNo, rupData, rupDataSize, autoArchivingGroup, m_signalStatesQueue, thread);
+			signalState->setState(times, isSimPacket, packetNo, rupData, rupDataSize, autoArchivingGroup, m_signalStatesQueue, thread);
 		}
 	}
 
