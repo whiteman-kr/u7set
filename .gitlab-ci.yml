@@ -15,6 +15,24 @@ before_script:
 #after_script:
 #  - echo after_script
 
+linux build job:
+  stage: build
+  only:
+    - master
+    - /^release.*$/
+    - develop
+    - experimental
+  tags:
+    - gcc
+  script:
+    - "pwd"
+    - "whoami"
+    - "gcc --version"
+    - "echo $CI_COMMIT_SHA"
+    - "cd $CI_PROJECT_DIR"
+    - "git status"
+    - "git log -1"
+
 windows build job:
   stage: build
   only:
