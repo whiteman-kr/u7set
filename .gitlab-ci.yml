@@ -27,10 +27,11 @@ linux build job:
   script:
     - "pwd"
     - "whoami"
+    - "gcc --version"
     - "echo $CI_COMMIT_SHA"
+    - "cd $CI_PROJECT_DIR"
     - "git status"
     - "git log -1"
-    - "gcc --version"
 
 windows build job:
   stage: build
