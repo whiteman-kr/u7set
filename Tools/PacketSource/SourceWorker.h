@@ -14,33 +14,33 @@ public:
 	explicit SourceWorker(QObject* pSource);
 	virtual ~SourceWorker();
 
-private:
-
-	QObject*			m_pSource = nullptr;
-
-	Rup::SimFrame		m_simFrame;
-
-	int					m_numerator = 0;
-	int					m_sentFrames = 0;
-
-	bool				m_finishThread = false;
-	bool				m_threadIsFinished = false;
-
 public:
 
-	int					sentFrames() { return m_sentFrames; }
+	int sentFrames() { return m_sentFrames; }
 
-	bool				isRunnig() { return !m_finishThread; }
-	void				wait() { while(m_threadIsFinished == false); }
-	void				finish() { m_finishThread = true; }
+	bool isRunnig() { return !m_finishThread; }
+	void wait() { while(m_threadIsFinished == false); }
+	void finish() { m_finishThread = true; }
+
+private:
+
+	QObject* m_pSource = nullptr;
+
+	Rup::SimFrame m_simFrame;
+
+	int m_numerator = 0;
+	int m_sentFrames = 0;
+
+	bool m_finishThread = false;
+	bool m_threadIsFinished = false;
 
 signals:
 
-	void				finished();
+	void finished();
 
 public slots:
 
-	void				process();
+	void process();
 };
 
 // ==============================================================================================

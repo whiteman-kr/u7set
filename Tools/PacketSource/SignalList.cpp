@@ -14,11 +14,9 @@ SignalTable::SignalTable(QObject *)
 
 SignalTable::~SignalTable()
 {
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		m_signalList.clear();
-
-	m_signalMutex.unlock();
+	m_signalList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -203,33 +201,23 @@ void SignalTable::updateColumn(int column)
 
 int SignalTable::signalCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
-
-		count = m_signalList.count();
-
-	m_signalMutex.unlock();
-
-	return count;
+	return m_signalList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 PS::Signal* SignalTable::signalPtr(int index) const
 {
-	PS::Signal* pSignal = nullptr;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (index < 0 || index >= m_signalList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_signalList.count())
-		{
-			 pSignal = m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return pSignal;
+	return m_signalList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------

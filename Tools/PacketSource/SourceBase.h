@@ -1,7 +1,7 @@
 #ifndef SOURCEBASE_H
 #define SOURCEBASE_H
 
-#include "BuildOpt.h"
+#include "BuildOption.h"
 
 #include "SourceWorker.h"
 #include "SignalBase.h"
@@ -35,22 +35,22 @@ namespace PS
 
 		SourceInfo();
 
-		void				clear();
+		void clear();
 
-		int					index = -1;
+		int index = -1;
 
-		QString				caption;
-		QString				equipmentID;
+		QString caption;
+		QString equipmentID;
 
-		int					moduleType = 0;
-		QString				subSystem;
-		int					frameCount = 0;
-		quint32				dataID = 0;
+		int moduleType = 0;
+		QString subSystem;
+		int frameCount = 0;
+		quint32 dataID = 0;
 
-		HostAddressPort		lmAddress;				// get from xml file
-		HostAddressPort		serverAddress;			// get from options for send UDP (this is AppDataReceivingIP of AppDataSrv)
+		HostAddressPort lmIP;				// get from CfgSrv from xml file
+		HostAddressPort appDataSrvIP;		// get from CfgSrv for send UDP (this is AppDataReceivingIP and AppDataReceivingPort of AppDataSrv)
 
-		int					signalCount = 0;
+		int signalCount = 0;
 	};
 
 	//
@@ -67,53 +67,48 @@ namespace PS
 		Source(const PS::SourceInfo& si);
 		virtual ~Source();
 
-	private:
-
-		mutable QMutex		m_sourceMutex;
-
-		QThread*			m_pThread = nullptr;
-		SourceWorker*		m_pWorker = nullptr;
-
-		PS::SourceInfo		m_si;
-		QStringList			m_associatedSignalList;
-		QVector<PS::Signal>	m_signalList;
-		FrameBase			m_frameBase;
-
 	public:
 
-		void					clear();
+		void clear();
 
 		//
 
-		PS::SourceInfo&			info() { return m_si; }
-		QStringList&			associatedSignalList()  { return m_associatedSignalList; }
-		QVector<PS::Signal>&	signalList()  { return m_signalList; }
-		FrameBase&				frameBase() { return m_frameBase; }
+		PS::SourceInfo& info() { return m_si; }
+		QStringList& associatedSignalList()  { return m_associatedSignalList; }
+		QVector<PS::Signal>& signalList()  { return m_signalList; }
+		FrameBase& frameBase() { return m_frameBase; }
 
 		//
 		//
-		bool					run();
-		bool					stop();
+		bool run();
+		bool stop();
 
-		bool					isRunning();
-		int						sentFrames();
-
-		//
-		//
-		void					loadSignals(const SignalBase& signalBase);
-		void					initSignalsState();
-
-		bool					createWorker();
-		void					deleteWorker();
+		bool isRunning();
+		int sentFrames();
 
 		//
 		//
-		Source&					operator=(const Source& from);
+		void loadSignals(const SignalBase& signalBase);
+		void initSignalsState();
 
-	signals:
+		bool createWorker();
+		void deleteWorker();
 
-	public slots:
+		//
+		//
+		Source& operator=(const Source& from);
 
+	private:
+
+		mutable QMutex m_sourceMutex;
+
+		QThread* m_pThread = nullptr;
+		SourceWorker* m_pWorker = nullptr;
+
+		PS::SourceInfo m_si;
+		QStringList m_associatedSignalList;
+		QVector<PS::Signal> m_signalList;
+		FrameBase m_frameBase;
 	};
 }
 
@@ -128,47 +123,38 @@ public:
 	explicit SourceBase(QObject *parent = nullptr);
 	virtual ~SourceBase();
 
-private:
-
-	mutable QMutex			m_sourceMutex;
-	QVector<PS::Source>		m_sourceList;
-
 public:
 
-	void					clear();
-	int						count() const;
+	void clear();
+	int count() const;
 
-	int						readFromFile(const BuildInfo& buildInfo);
+	int append(const PS::Source &source);
+	void remove(int index);
 
-	int						append(const PS::Source &source);
-	void					remove(int index);
+	PS::Source source(int index) const;
+	PS::Source* sourcePtr(int index);
+	PS::Source* sourcePtr(const QString& equipmentID);
 
-	PS::Source				source(int index) const;
-	PS::Source*				sourcePtr(int index);
-	PS::Source*				sourcePtr(const QString& equipmentID);
+	void setSource(int index, const PS::Source& source);
 
-	void					setSource(int index, const PS::Source& source);
-
-	SourceBase&				operator=(const SourceBase& from);
+	SourceBase& operator=(const SourceBase& from);
 
 	// run stop send udp trhread
 	//
-	void					runSourece(int index);
-	void					stopSourece(int index);
+	void runSourece(int index);
+	void stopSourece(int index);
 
-	void					runAllSoureces();
-	void					stopAllSoureces();
+	void runAllSoureces();
+	void stopAllSoureces();
 
 	// source id for run
 	//
-	void					runSources(const QStringList& sourceIDList);
+	void runSources(const QStringList& sourceIDList);
 
-signals:
+private:
 
-	void					sourcesLoaded();
-
-public slots:
-
+	mutable QMutex m_sourceMutex;
+	QVector<PS::Source> m_sourceList;
 };
 
 // ==============================================================================================

@@ -11,7 +11,13 @@
 
 int main(int argc, char *argv[])
 {
-	initMemoryLeaksDetection();
+	// check version of RUP packets
+	//
+	#if RUP_VERSION != PS_SUPPORT_VERSION
+		#error Current version of Rup packets is unknown
+	#endif
+
+	//initMemoryLeaksDetection();
 
 	QApplication a(argc, argv);
 
@@ -26,9 +32,13 @@ int main(int argc, char *argv[])
 	a.setApplicationVersion(QString("1.8.LOCALBUILD"));
 #endif
 
+	// init Options
+	//
 	Options options;
 	options.load();
 
+	//
+	//
 	MainWindow* pMainWindow = new MainWindow(options);
 	pMainWindow->show();
 
@@ -40,7 +50,7 @@ int main(int argc, char *argv[])
 
 	google::protobuf::ShutdownProtobufLibrary();
 
-	dumpMemoryLeaks();
+	//dumpMemoryLeaks();
 
 	return result;
 }

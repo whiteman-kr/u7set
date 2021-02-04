@@ -270,8 +270,7 @@ void FindSignalPanel::createInterface()
 
 	findToolBar->addWidget(m_findColumnCombo);
 	findToolBar->addWidget(m_findTextEdit);
-	//QAction* action = findToolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
-	QAction* action = findToolBar->addAction(tr("Find text"));
+	QAction* action = findToolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
 	connect(action, &QAction::triggered, this, &FindSignalPanel::find);
 
 	m_pFindWindow->addToolBarBreak(Qt::TopToolBarArea);
@@ -298,6 +297,7 @@ void FindSignalPanel::createInterface()
 	m_statusLabel = new QLabel(tr("Found: 0"), statusBar);
 	statusBar->addWidget(m_statusLabel);
 	statusBar->setLayoutDirection(Qt::RightToLeft);
+	statusBar->setSizeGripEnabled(false);
 
 	setWidget(m_pFindWindow);
 }
@@ -435,6 +435,12 @@ void FindSignalPanel::find()
 	if (selectedColumn == -1)
 	{
 		return;
+	}
+
+	if (m_findText.indexOf("*") == -1)
+	{
+		m_findText.insert(0, "*");
+		m_findText.append("*");
 	}
 
 	QRegExp rx(m_findText);

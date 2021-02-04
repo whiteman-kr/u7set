@@ -11,6 +11,7 @@ QT       += network
 QT       += sql
 QT       += qml
 QT       += xml
+QT       += concurrent
 
 TARGET = PacketSource
 CONFIG += gui
@@ -37,7 +38,12 @@ unix {
 }
 
 SOURCES += \
+    ../../lib/CfgServerLoader.cpp \
     ../../lib/LanControllerInfoHelper.cpp \
+    ../../lib/SoftwareSettings.cpp \
+    ../../lib/TcpFileTransfer.cpp \
+    BuildOption.cpp \
+    ConfigSocket.cpp \
     main.cpp \
     ../../Proto/network.pb.cc \
     ../../Proto/serialization.pb.cc \
@@ -72,7 +78,6 @@ SOURCES += \
     ../../lib/Tcp.cpp \
     ../../lib/BuildInfo.cpp \
     CmdLineParam.cpp \
-    BuildOpt.cpp \
     PacketSourceCore.cpp \
     MainWindow.cpp \
     Options.cpp \
@@ -90,8 +95,13 @@ SOURCES += \
     UalTesterServer.cpp
 
 HEADERS += \
+    ../../lib/CfgServerLoader.h \
     ../../lib/LanControllerInfo.h \
     ../../lib/LanControllerInfoHelper.h \
+    ../../lib/SoftwareSettings.h \
+    ../../lib/TcpFileTransfer.h \
+    BuildOption.h \
+    ConfigSocket.h \
     Stable.h \
     ../../Proto/network.pb.h \
     ../../Proto/serialization.pb.h \
@@ -131,7 +141,6 @@ HEADERS += \
     ../../lib/Tcp.h \
     ../../lib/BuildInfo.h \
     CmdLineParam.h \
-    BuildOpt.h \
     PacketSourceCore.h \
     MainWindow.h \
     Options.h \

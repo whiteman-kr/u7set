@@ -24,27 +24,27 @@ public:
 	FindItem(int row, int column, const QString& text);
 	virtual ~FindItem() {}
 
-private:
-
-	int					m_row = -1;
-	int					m_column = -1;
-
-	QString				m_text;
-
 public:
 
-	int					row() const { return m_row; }
-	void				setRow(int row) { m_row = row; }
+	int row() const { return m_row; }
+	void setRow(int row) { m_row = row; }
 
-	int					column() const { return m_column; }
-	void				setColumn(int column) { m_column = column; }
+	int column() const { return m_column; }
+	void setColumn(int column) { m_column = column; }
 
-	void				setCoordinates(int row, int column) { m_row = row; m_column = column; }
+	void setCoordinates(int row, int column) { m_row = row; m_column = column; }
 
-	QString				text() const { return m_text; }
-	void				setText(const QString& text) { m_text = text; }
+	QString text() const { return m_text; }
+	void setText(const QString& text) { m_text = text; }
 
-	FindItem&			operator=(const FindItem& from);
+	FindItem& operator=(const FindItem& from);
+
+private:
+
+	int m_row = -1;
+	int m_column = -1;
+
+	QString m_text;
 };
 
 // ==============================================================================================
@@ -83,25 +83,24 @@ public:
 	explicit FindSignalTable(QObject* parent = nullptr);
 	virtual ~FindSignalTable();
 
-private:
-
-	QVector<FindItem>	m_findItemList;
-
-	int					columnCount(const QModelIndex &parent) const;
-	int					rowCount(const QModelIndex &parent=QModelIndex()) const;
-
-	QVariant			headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant			data(const QModelIndex &index, int role) const;
-
 public:
 
-	int					count() const { return m_findItemList.count(); }
-	FindItem			at(int index) const;
-	void				set(const QVector<FindItem>& list_add);
-	void				clear();
+	int count() const { return m_findItemList.count(); }
+	FindItem at(int index) const;
+	void set(const QVector<FindItem>& list_add);
+	void clear();
 
-	QString				text(int row, int column) const;
+	QString	text(int row, int column) const;
 
+private:
+
+	QVector<FindItem> m_findItemList;
+
+	int columnCount(const QModelIndex &parent) const;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const;
+
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
+	QVariant data(const QModelIndex &index, int role) const;
 };
 
 // ==============================================================================================
@@ -119,39 +118,38 @@ public:
 	explicit FindSignalPanel(QWidget* parent = nullptr);
 	virtual ~FindSignalPanel();
 
-private:
-
-	QMainWindow*		m_pMainWindow;
-
-	QString				m_findText;
-
-	QMainWindow*		m_pFindWindow = nullptr;
-	QComboBox*			m_findColumnCombo  = nullptr;
-	QLineEdit*			m_findTextEdit  = nullptr;
-	QTableView*			m_pView = nullptr;
-	QLabel*				m_statusLabel = nullptr;
-	FindSignalTable	m_table;
-
-	QMenu*				m_pContextMenu = nullptr;
-	QAction*			m_pCopyAction = nullptr;
-	QAction*			m_pSelectAllAction = nullptr;
-
-	void				createInterface();
-	void				createContextMenu();
-	void				updateColumnsCombo();
-
-	void				loadSettings();
-	void				saveSettings();
-
 public:
 
-	void				clear() { m_table.clear(); m_statusLabel->setText(QString()); }
+	void clear() { m_table.clear(); m_statusLabel->setText(QString()); }
 
 protected:
 
-	bool				event(QEvent* e);
-	bool				eventFilter(QObject* object, QEvent* e);
+	bool event(QEvent* e);
+	bool eventFilter(QObject* object, QEvent* e);
 
+private:
+
+	QMainWindow* m_pMainWindow = nullptr;
+
+	QString m_findText;
+
+	QMainWindow* m_pFindWindow = nullptr;
+	QComboBox* m_findColumnCombo  = nullptr;
+	QLineEdit* m_findTextEdit  = nullptr;
+	QTableView* m_pView = nullptr;
+	QLabel* m_statusLabel = nullptr;
+	FindSignalTable	m_table;
+
+	QMenu* m_pContextMenu = nullptr;
+	QAction* m_pCopyAction = nullptr;
+	QAction* m_pSelectAllAction = nullptr;
+
+	void createInterface();
+	void createContextMenu();
+	void updateColumnsCombo();
+
+	void loadSettings();
+	void saveSettings();
 
 public slots:
 

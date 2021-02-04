@@ -17,11 +17,9 @@ SourceTable::~SourceTable()
 {
 	stopUpdateSourceListTimer();
 
-	m_sourceMutex.lock();
+	QMutexLocker l(&m_sourceMutex);
 
-		m_sourceList.clear();
-
-	m_sourceMutex.unlock();
+	m_sourceList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -141,13 +139,13 @@ QString SourceTable::text(int row, int column, PS::Source* pSource) const
 
 	switch (column)
 	{
-		case SOURCE_LIST_COLUMN_LM_IP:			result = pSource->info().lmAddress.addressStr() + " (" + QString::number(pSource->info().lmAddress.port()) + ")";			break;
+		case SOURCE_LIST_COLUMN_LM_IP:			result = pSource->info().lmIP.addressStr() + " (" + QString::number(pSource->info().lmIP.port()) + ")";	break;
 		case SOURCE_LIST_COLUMN_CAPTION:		result = pSource->info().caption;												break;
 		case SOURCE_LIST_COLUMN_EQUIPMENT_ID:	result = pSource->info().equipmentID;											break;
 		case SOURCE_LIST_COLUMN_MODULE_TYPE:	result = QString::number(pSource->info().moduleType);							break;
 		case SOURCE_LIST_COLUMN_SUB_SYSTEM:		result = pSource->info().subSystem;												break;
 		case SOURCE_LIST_COLUMN_FRAME_COUNT:	result = QString::number(pSource->info().frameCount);							break;
-		case SOURCE_LIST_COLUMN_STATE:			result = pSource->isRunning() ? QString::number(pSource->sentFrames()) : tr("Stopped");										break;
+		case SOURCE_LIST_COLUMN_STATE:			result = pSource->isRunning() ? QString::number(pSource->sentFrames()) : tr("Stopped");								break;
 		case SOURCE_LIST_COLUMN_SIGNAL_COUNT:	result = QString::number(pSource->info().signalCount);							break;
 		default:								assert(0);
 	}
@@ -177,33 +175,23 @@ void SourceTable::updateColumn(int column)
 
 int SourceTable::sourceCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_sourceMutex);
 
-	m_sourceMutex.lock();
-
-		count = m_sourceList.count();
-
-	m_sourceMutex.unlock();
-
-	return count;
+	return m_sourceList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 PS::Source* SourceTable::sourceAt(int index) const
 {
-	PS::Source* pSource = nullptr;
+	QMutexLocker l(&m_sourceMutex);
 
-	m_sourceMutex.lock();
+	if (index < 0 || index >= m_sourceList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_sourceList.count())
-		{
-			 pSource = m_sourceList[index];
-		}
-
-	m_sourceMutex.unlock();
-
-	return pSource;
+	return m_sourceList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------

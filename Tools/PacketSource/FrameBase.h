@@ -19,24 +19,17 @@ namespace PS
 		FrameData(const FrameData& from);
 		virtual ~FrameData();
 
-	private:
-
-		mutable QMutex		m_frameMutex;
-
-		Rup::Data			m_data;
-
 	public:
 
-		void				clear();
+		void clear();
 
-		Rup::Data&			data() { return m_data; }
+		Rup::Data& data() { return m_data; }
+		FrameData& operator=(const FrameData& from);
 
-		FrameData&			operator=(const FrameData& from);
+	private:
 
-	signals:
-
-	public slots:
-
+		mutable QMutex m_frameMutex;
+		Rup::Data m_data;
 	};
 }
 
@@ -51,27 +44,23 @@ public:
 	explicit FrameBase(QObject *parent = nullptr);
 	virtual ~FrameBase();
 
-private:
-
-	mutable QMutex			m_frameMutex;
-	QVector<PS::FrameData>	m_frameList;
-
 public:
 
-	void					clear();
-	int						count() const;
+	void clear();
+	int count() const;
 
-	bool					setFrameCount(int count);
+	bool setFrameCount(int count);
 
-	PS::FrameData			frameData(int index) const;
-	PS::FrameData*			frameDataPtr(int index);
-	void					setFrameData(int index, const PS::FrameData& frameData);
+	PS::FrameData frameData(int index) const;
+	PS::FrameData* frameDataPtr(int index);
+	void setFrameData(int index, const PS::FrameData& frameData);
 
-	FrameBase&				operator=(const FrameBase& from);
+	FrameBase& operator=(const FrameBase& from);
 
-signals:
+private:
 
-public slots:
+	mutable QMutex m_frameMutex;
+	QVector<PS::FrameData> m_frameList;
 
 };
 

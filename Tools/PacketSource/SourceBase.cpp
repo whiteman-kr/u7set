@@ -36,8 +36,8 @@ void PS::SourceInfo::clear()
 	frameCount = 0;
 	dataID = 0;
 
-	lmAddress.clear();
-	serverAddress.clear();
+	lmIP.clear();
+	appDataSrvIP.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ bool PS::Source::run()
 	bool result = createWorker();
 	if (result == true)
 	{
-		qDebug() << "Run source" << m_si.equipmentID << "-" << m_si.lmAddress.addressStr();
+		qDebug() << "Run source" << m_si.equipmentID << "-" << m_si.lmIP.addressStr();
 	}
 
 	return result;
@@ -116,7 +116,7 @@ bool PS::Source::stop()
 
 	deleteWorker();
 
-	qDebug() << "Stop source" << m_si.equipmentID << "-" << m_si.lmAddress.addressStr();
+	qDebug() << "Stop source" << m_si.equipmentID << "-" << m_si.lmIP.addressStr();
 
 	return true;
 }
@@ -154,7 +154,7 @@ bool PS::Source::createWorker()
 		return false;
 	}
 
-	if (m_si.serverAddress.isEmpty() == true)
+	if (m_si.appDataSrvIP.isEmpty() == true)
 	{
 		return false;
 	}
@@ -320,305 +320,90 @@ void SourceBase::clear()
 {
 	stopAllSoureces();
 
-	m_sourceMutex.lock();
+	QMutexLocker l(&m_sourceMutex);
 
-		m_sourceList.clear();
-
-	m_sourceMutex.unlock();
+	m_sourceList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 int SourceBase::count() const
 {
-	int count = 0;
+	QMutexLocker l(&m_sourceMutex);
 
-	m_sourceMutex.lock();
-
-		count = m_sourceList.count();
-
-	m_sourceMutex.unlock();
-
-	return count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int SourceBase::readFromFile(const BuildInfo& buildInfo)
-{
-	clear();
-
-	//
-	//
-	QString msgTitle = tr("Loading sources");
-
-	if (buildInfo.buildDirPath().isEmpty() == true)
-	{
-		QString strError = tr("Please, input path to build directory!");
-
-		#ifdef Q_CONSOLE_APP
-			qDebug() << strError;
-		#else
-			QMessageBox::information(nullptr, msgTitle, strError);
-		#endif
-
-		return 0;
-	}
-
-	// read Server IP and Server Port
-	//
-	QString fileCfg = buildInfo.buildFile(BUILD_FILE_TYPE_SOURCE_CFG).path();
-	if (fileCfg.isEmpty() == true)
-	{
-		QString strError = tr("Sources configuration file %1 - path is empty!").arg(File::CONFIGURATION_XML);
-
-		#ifdef Q_CONSOLE_APP
-			qDebug() << strError;
-		#else
-			QMessageBox::information(nullptr, msgTitle, strError);
-		#endif
-
-		return 0;
-	}
-
-	QFile cfgFileXml(fileCfg);
-	if (cfgFileXml.exists() == false)
-	{
-		QString strError = tr("File %1 is not found!").arg(fileCfg);
-
-		#ifdef Q_CONSOLE_APP
-			qDebug() << strError;
-		#else
-			QMessageBox::information(nullptr, msgTitle, strError);
-		#endif
-
-		return 0;
-	}
-
-	if (cfgFileXml.open(QIODevice::ReadOnly) == false)
-	{
-		QString strError = tr("File %1 is not opened!").arg(fileCfg);
-
-		#ifdef Q_CONSOLE_APP
-			qDebug() << strError;
-		#else
-			QMessageBox::information(nullptr, msgTitle, strError);
-		#endif
-
-		return 0;
-	}
-
-	QByteArray&& cfgData = cfgFileXml.readAll();
-
-	cfgFileXml.close();
-
-	XmlReadHelper xmlCfg(cfgData);
-
-	HostAddressPort serverAddress;
-
-	if (xmlCfg.readHostAddressPort("AppDataReceivingIP", "AppDataReceivingPort", &serverAddress) == false)
-	{
-		QString strError = tr("IP-address of AppDataSrv is not found in file %1!").arg(File::CONFIGURATION_XML);
-
-		#ifdef Q_CONSOLE_APP
-			qDebug() << strError;
-		#else
-			QMessageBox::information(nullptr, msgTitle, strError);
-		#endif
-
-		return 0;
-	}
-
-	// read Data Sources
-	//
-	QString sourcesFile = buildInfo.buildFile(BUILD_FILE_TYPE_SOURCES).path();
-	if (sourcesFile.isEmpty() == true)
-	{
-		QString strError =  tr("Sources file %1 - path is empty!").arg(File::APP_DATA_SOURCES_XML);
-
-		#ifdef Q_CONSOLE_APP
-			qDebug() << strError;
-		#else
-			QMessageBox::information(nullptr, msgTitle, strError);
-		#endif
-
-		return 0;
-	}
-
-	QFile sourcesFileXml(sourcesFile);
-	if (sourcesFileXml.exists() == false)
-	{
-		QString strError = tr("File %1 is not found!").arg(sourcesFile);
-
-		#ifdef Q_CONSOLE_APP
-			qDebug() << strError;
-		#else
-			QMessageBox::information(nullptr, msgTitle, strError);
-		#endif
-
-		return 0;
-	}
-
-	if (sourcesFileXml.open(QIODevice::ReadOnly) == false)
-	{
-		QString strError = tr("File %1 is not opened!").arg(sourcesFile);
-
-		#ifdef Q_CONSOLE_APP
-			qDebug() << strError;
-		#else
-			QMessageBox::information(nullptr, msgTitle, strError);
-		#endif
-
-		return 0;
-	}
-
-	QByteArray&& sourceData = sourcesFileXml.readAll();
-
-	sourcesFileXml.close();
-
-	//
-	//
-	QVector<DataSource> dataSources;
-
-	bool result = DataSourcesXML<DataSource>::readFromXml(sourceData, &dataSources);
-	if (result == false)
-	{
-		QString strError = tr("Error reading sources from XML-file %1 - Invalid file format!").arg(sourcesFile);
-
-		#ifdef Q_CONSOLE_APP
-			qDebug() << strError;
-		#else
-			QMessageBox::information(nullptr, msgTitle, strError);
-		#endif
-
-		return 0;
-	}
-
-	int dataSourcesCount = dataSources.count();
-	for(int i = 0; i < dataSourcesCount; i++)
-	{
-		const DataSource& ds = dataSources[i];
-
-		// Source Info
-		//
-		PS::SourceInfo si;
-
-		si.index = i;
-
-		si.caption = ds.lmCaption();
-		si.equipmentID = ds.lmEquipmentID();
-
-		si.moduleType = ds.lmModuleType();
-		si.subSystem = ds.lmSubsystemID();
-		si.frameCount = ds.lmRupFramesQuantity();
-		si.dataID = ds.lmDataID();
-
-		si.lmAddress = ds.lmAddressPort();
-		si.serverAddress = buildInfo.appDataSrvIP();
-
-		si.signalCount = ds.associatedSignals().count();
-
-		// Source
-		//
-		PS::Source source;
-
-		source.info() = si;
-		source.associatedSignalList() = ds.associatedSignals();
-		source.frameBase().setFrameCount(si.frameCount);
-
-		append(source);
-	}
-
-	emit sourcesLoaded();
-
-	return count();
+	return m_sourceList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 int SourceBase::append(const PS::Source& source)
 {
-	int index = -1;
+	QMutexLocker l(&m_sourceMutex);
 
-	m_sourceMutex.lock();
+	m_sourceList.append(source);
 
-		m_sourceList.append(source);
-		index = m_sourceList.count() - 1;
-
-	m_sourceMutex.unlock();
-
-	return index;
+	return m_sourceList.count() - 1;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SourceBase::remove(int index)
 {
-	m_sourceMutex.lock();
+	QMutexLocker l(&m_sourceMutex);
 
-		if (index >= 0 && index < m_sourceList.count())
-		{
-			m_sourceList.remove(index);
-		}
+	if (index < 0 || index >= m_sourceList.count())
+	{
+		return;
+	}
 
-	m_sourceMutex.unlock();
+	m_sourceList.remove(index);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 PS::Source SourceBase::source(int index) const
 {
-	PS::Source source;
+	QMutexLocker l(&m_sourceMutex);
 
-	m_sourceMutex.lock();
+	if (index < 0 || index >= m_sourceList.count())
+	{
+		return PS::Source();
+	}
 
-		if (index >= 0 && index < m_sourceList.count())
-		{
-			source = m_sourceList[index];
-		}
-
-	m_sourceMutex.unlock();
-
-	return source;
+	return m_sourceList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 PS::Source* SourceBase::sourcePtr(int index)
 {
-	PS::Source* pSource = nullptr;
+	QMutexLocker l(&m_sourceMutex);
 
-	m_sourceMutex.lock();
+	if (index < 0 || index >= m_sourceList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_sourceList.count())
-		{
-			pSource = &m_sourceList[index];
-		}
-
-	m_sourceMutex.unlock();
-
-	return pSource;
+	return &m_sourceList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 PS::Source* SourceBase::sourcePtr(const QString& equipmentID)
 {
+	QMutexLocker l(&m_sourceMutex);
+
 	PS::Source* pSource = nullptr;
 
-	m_sourceMutex.lock();
-
-		int sourceCount = m_sourceList.count();
-		for (int index = 0; index < sourceCount; index++)
+	int sourceCount = m_sourceList.count();
+	for (int index = 0; index < sourceCount; index++)
+	{
+		if (m_sourceList[index].info().equipmentID == equipmentID)
 		{
-			if (m_sourceList[index].info().equipmentID == equipmentID)
-			{
-				pSource = &m_sourceList[index];
-				break;
-			}
+			pSource = &m_sourceList[index];
+			break;
 		}
-
-	m_sourceMutex.unlock();
+	}
 
 	return pSource;
 }
@@ -627,25 +412,23 @@ PS::Source* SourceBase::sourcePtr(const QString& equipmentID)
 
 void SourceBase::setSource(int index, const PS::Source &source)
 {
-	m_sourceMutex.lock();
+	QMutexLocker l(&m_sourceMutex);
 
-		if (index >= 0 && index < m_sourceList.count())
-		{
-			m_sourceList[index] = source;
-		}
+	if (index < 0 || index >= m_sourceList.count())
+	{
+		return;
+	}
 
-	m_sourceMutex.unlock();
+	m_sourceList[index] = source;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 SourceBase& SourceBase::operator=(const SourceBase& from)
 {
-	m_sourceMutex.lock();
+	QMutexLocker l(&m_sourceMutex);
 
-		m_sourceList = from.m_sourceList;
-
-	m_sourceMutex.unlock();
+	m_sourceList = from.m_sourceList;
 
 	return *this;
 }
@@ -654,80 +437,74 @@ SourceBase& SourceBase::operator=(const SourceBase& from)
 
 void SourceBase::runSourece(int index)
 {
-	m_sourceMutex.lock();
+	QMutexLocker l(&m_sourceMutex);
 
-		if (index >= 0 && index < m_sourceList.count())
-		{
-			m_sourceList[index].run();
-		}
+	if (index < 0 || index >= m_sourceList.count())
+	{
+		return;
+	}
 
-	m_sourceMutex.unlock();
+	m_sourceList[index].run();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SourceBase::stopSourece(int index)
 {
-	m_sourceMutex.lock();
+	QMutexLocker l(&m_sourceMutex);
 
-		if (index >= 0 && index < m_sourceList.count())
-		{
-			m_sourceList[index].stop();
-		}
+	if (index < 0 || index >= m_sourceList.count())
+	{
+		return;
+	}
 
-	m_sourceMutex.unlock();
+	m_sourceList[index].stop();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SourceBase::runAllSoureces()
 {
-	m_sourceMutex.lock();
+	QMutexLocker l(&m_sourceMutex);
 
-		int count = m_sourceList.count();
-		for(int i = 0; i < count; i++)
-		{
-			m_sourceList[i].run();
-		}
-
-	m_sourceMutex.unlock();
+	int count = m_sourceList.count();
+	for(int i = 0; i < count; i++)
+	{
+		m_sourceList[i].run();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SourceBase::stopAllSoureces()
 {
-	m_sourceMutex.lock();
+	QMutexLocker l(&m_sourceMutex);
 
-		int count = m_sourceList.count();
-		for(int i = 0; i < count; i++)
-		{
-			m_sourceList[i].stop();
-		}
-
-	m_sourceMutex.unlock();
+	int count = m_sourceList.count();
+	for(int i = 0; i < count; i++)
+	{
+		m_sourceList[i].stop();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SourceBase::runSources(const QStringList& sourceIDList)
 {
-	m_sourceMutex.lock();
+	QMutexLocker l(&m_sourceMutex);
 
-		int count = m_sourceList.count();
-		for(int s = 0; s < count; s++)
+	int count = m_sourceList.count();
+	for(int s = 0; s < count; s++)
+	{
+		foreach (const QString& sourceID, sourceIDList)
 		{
-			foreach (const QString& sourceID, sourceIDList)
+			if(sourceID == m_sourceList[s].info().equipmentID)
 			{
-				if(sourceID == m_sourceList[s].info().equipmentID)
-				{
-					m_sourceList[s].run();
-					break;
-				}
+				m_sourceList[s].run();
+				break;
 			}
 		}
-
-	m_sourceMutex.unlock();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

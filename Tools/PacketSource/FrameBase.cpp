@@ -28,22 +28,18 @@ PS::FrameData::~FrameData()
 
 void PS::FrameData::clear()
 {
-	m_frameMutex.lock();
+	QMutexLocker l(&m_frameMutex);
 
-		memset(&m_data[0], 0, Rup::FRAME_DATA_SIZE);
-
-	m_frameMutex.unlock();
+	memset(&m_data[0], 0, Rup::FRAME_DATA_SIZE);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 PS::FrameData& PS::FrameData::operator=(const PS::FrameData& from)
 {
-	m_frameMutex.lock();
+	QMutexLocker l(&m_frameMutex);
 
-		memcpy(m_data, from.m_data, Rup::FRAME_DATA_SIZE);
-
-	m_frameMutex.unlock();
+	memcpy(m_data, from.m_data, Rup::FRAME_DATA_SIZE);
 
 	return *this;
 }
@@ -68,26 +64,18 @@ FrameBase::~FrameBase()
 
 void FrameBase::clear()
 {
-	m_frameMutex.lock();
+	QMutexLocker l(&m_frameMutex);
 
-		m_frameList.clear();
-
-	m_frameMutex.unlock();
+	m_frameList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 int FrameBase::count() const
 {
-	int count = 0;
+	QMutexLocker l(&m_frameMutex);
 
-	m_frameMutex.lock();
-
-		count = m_frameList.count();
-
-	m_frameMutex.unlock();
-
-	return count;
+	return m_frameList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -101,16 +89,13 @@ bool FrameBase::setFrameCount(int count)
 		count = 1;
 	}
 
-	m_frameMutex.lock();
+	QMutexLocker l(&m_frameMutex);
 
-		m_frameList.clear();
+	m_frameList.clear();
 
-		m_frameList.resize(count);
+	m_frameList.resize(count);
 
-		result = m_frameList.count() == count;
-
-	m_frameMutex.unlock();
-
+	result = m_frameList.count() == count;
 	return result;
 }
 
@@ -118,61 +103,51 @@ bool FrameBase::setFrameCount(int count)
 
 PS::FrameData FrameBase::frameData(int index) const
 {
-	PS::FrameData frameData;
+	QMutexLocker l(&m_frameMutex);
 
-	m_frameMutex.lock();
+	if (index < 0 || index >= m_frameList.count())
+	{
+		return PS::FrameData();
+	}
 
-		if (index >= 0 && index < m_frameList.count())
-		{
-			frameData = m_frameList[index];
-		}
-
-	m_frameMutex.unlock();
-
-	return frameData;
+	return m_frameList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 PS::FrameData* FrameBase::frameDataPtr(int index)
 {
-	PS::FrameData* pFrameData = nullptr;
+	QMutexLocker l(&m_frameMutex);
 
-	m_frameMutex.lock();
+	if (index < 0 || index >= m_frameList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_frameList.count())
-		{
-			pFrameData = &m_frameList[index];
-		}
-
-	m_frameMutex.unlock();
-
-	return pFrameData;
+	return &m_frameList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void FrameBase::setFrameData(int index, const PS::FrameData &frame)
 {
-	m_frameMutex.lock();
+	QMutexLocker l(&m_frameMutex);
 
-		if (index >= 0 && index < m_frameList.count())
-		{
-			m_frameList[index] = frame;
-		}
+	if (index < 0 || index >= m_frameList.count())
+	{
+		return;
+	}
 
-	m_frameMutex.unlock();
+	m_frameList[index] = frame;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 FrameBase& FrameBase::operator=(const FrameBase& from)
 {
-	m_frameMutex.lock();
+	QMutexLocker l(&m_frameMutex);
 
-		m_frameList = from.m_frameList;
-
-	m_frameMutex.unlock();
+	m_frameList = from.m_frameList;
 
 	return *this;
 }
