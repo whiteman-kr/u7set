@@ -56,8 +56,11 @@ void UalTester::stop()
 
 void UalTester::slot_loadConfiguration(const QByteArray configurationXmlData,
 									   const BuildFileInfoArray buildFileInfoArray,
+									   SessionParams sessionParams,
 									   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 {
+	Q_UNUSED(sessionParams);
+
 	if (m_cfgLoaderThread == nullptr)
 	{
 		return;

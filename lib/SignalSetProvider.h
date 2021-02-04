@@ -26,7 +26,10 @@ public:
 	static const E::PropertyBehaviourType defaultBehaviour = E::PropertyBehaviourType::Write;
 
 signals:
+	void propertyCountWillIncrease(int newPropertyCount);
+	void propertyCountWillDecrease(int newPropertyCount);
 	void propertyCountIncreased();
+	void propertyCountDecreased();
 
 public:
 	SignalPropertyManager(DbController* dbController, QWidget* parentWidget);

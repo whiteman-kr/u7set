@@ -220,7 +220,10 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 			if (serviceState != ServiceState::Undefined &&
 				serviceState != ServiceState::Unavailable)
 			{
-				str += tr("\nListening clients on %1:%2").arg(QHostAddress(si.clientrequestip()).toString()).arg(si.clientrequestport());
+				//	str += tr("\nListening clients on %1:%2").arg(QHostAddress(si.clientrequestip()).toString()).arg(si.clientrequestport());
+				//
+				// Work Here!
+				Q_ASSERT(false);
 			}
 			return str;
 		}

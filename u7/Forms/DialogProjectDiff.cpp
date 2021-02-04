@@ -7,177 +7,9 @@
 #include <QPrinter>
 
 //
-// DialogProjectDiffSections
-//
-
-DialogProjectDiffSections::DialogProjectDiffSections(const ProjectDiffReportParams& reportParams, QWidget *parent):
-	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	m_reportParams(reportParams)
-{
-	setWindowTitle(tr("Report Sections Page Setup"));
-	setMinimumSize(540, 350);
-
-	QGridLayout* gl = new QGridLayout();
-
-	m_treeWidget = new QTreeWidget();
-
-	QStringList l;
-	l << tr("Section");
-	l << tr("Page Size");
-	l << tr("Orientation");
-	l << tr("Margins, mm");
-	m_treeWidget->setHeaderLabels(l);
-
-	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, [this](QTreeWidgetItem *item, int column){
-		Q_UNUSED(item);
-		Q_UNUSED(column);
-		pageSetup();
-	});
-
-	QPushButton* b = new QPushButton(tr("Page Setup..."));
-	connect(b, &QPushButton::clicked, this, &DialogProjectDiffSections::pageSetup);
-
-	gl->addWidget(m_treeWidget, 0, 0);
-	gl->addWidget(b, 0, 1, Qt::AlignTop);
-
-	QHBoxLayout* buttonsLayout = new QHBoxLayout();
-	buttonsLayout->addStretch();
-
-	b = new QPushButton(tr("OK"));
-	buttonsLayout->addWidget(b);
-	connect(b, &QPushButton::clicked, this, &DialogProjectDiffSections::accept);
-
-	b = new QPushButton(tr("Cancel"));
-	buttonsLayout->addWidget(b);
-	connect(b, &QPushButton::clicked, this, &DialogProjectDiffSections::reject);
-
-	QVBoxLayout* ml = new QVBoxLayout();
-	ml->addLayout(gl);
-	ml->addLayout(buttonsLayout);
-
-	setLayout(ml);
-
-	fillTree();
-
-	return;
-}
-
-ProjectDiffReportParams DialogProjectDiffSections::reportParams() const
-{
-	return m_reportParams;
-}
-
-void DialogProjectDiffSections::pageSetup()
-{
-	QList<QTreeWidgetItem*> selectedItems =  m_treeWidget->selectedItems();
-	if (selectedItems.isEmpty() == true)
-	{
-		return;
-	}
-
-	int firstIndex = m_treeWidget->indexOfTopLevelItem(selectedItems[0]);
-	if (firstIndex < 0 || firstIndex >= m_reportParams.fileTypeParams.size())
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	const ProjectDiffFileTypeParams& firstFt = m_reportParams.fileTypeParams[firstIndex];
-
-	QPageSize pageSize = firstFt.pageSize;
-	QPageLayout::Orientation orientation = firstFt.orientation;
-	QMarginsF margins = firstFt.margins;
-
-	QPrinter printer(QPrinter::HighResolution);
-
-	QPageSize::PageSizeId id = QPageSize::id(pageSize.sizePoints(), QPageSize::FuzzyOrientationMatch);
-	if (id == QPageSize::Custom)
-	{
-		id = QPageSize::A4;
-	}
-
-	printer.setFullPage(true);
-	printer.setPageSize(QPageSize(id));
-	printer.setPageOrientation(orientation);
-	printer.setPageMargins(margins, QPageLayout::Unit::Millimeter);
-
-	QPageSetupDialog d(&printer, this);
-	if (d.exec() != QDialog::Accepted)
-	{
-		return;
-	}
-
-	id = QPageSize::id(d.printer()->pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
-
-	for (QTreeWidgetItem* item : selectedItems)
-	{
-		int itemIndex = m_treeWidget->indexOfTopLevelItem(item);
-		if (itemIndex < 0 || itemIndex >= m_reportParams.fileTypeParams.size())
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		ProjectDiffFileTypeParams& ft = m_reportParams.fileTypeParams[firstIndex];
-
-		ft.pageSize = QPageSize(id);
-		ft.orientation = d.printer()->pageLayout().orientation();
-		ft.margins = d.printer()->pageLayout().margins();
-	}
-
-	fillTree();
-
-	return;
-}
-
-void DialogProjectDiffSections::fillTree()
-{
-	if (m_treeWidget->topLevelItemCount() != m_reportParams.fileTypeParams.size())
-	{
-		m_treeWidget->clear();
-
-		for (int i = 0; i < m_reportParams.fileTypeParams.size(); i++)
-		{
-			m_treeWidget->addTopLevelItem(new QTreeWidgetItem());
-		}
-	}
-
-	int itemIndex = 0;
-
-	for (const ProjectDiffFileTypeParams& ft : m_reportParams.fileTypeParams)
-	{
-		QTreeWidgetItem* item = m_treeWidget->topLevelItem(itemIndex++);
-		if (item == nullptr)
-		{
-			Q_ASSERT(item);
-			return;
-		}
-
-		QPageSize::PageSizeId id = QPageSize::id(ft.pageSize.sizePoints(), QPageSize::FuzzyOrientationMatch);
-		if (id == QPageSize::Custom)
-		{
-			id = QPageSize::A4;
-		}
-
-		item->setText(0, ft.caption);
-		item->setText(1, QPageSize(id).name());
-		item->setText(2, ft.orientation == QPageLayout::Portrait ? tr("Portrait") : tr("Landscape"));
-		item->setText(3, tr("l%1 t%2 r%3 b%4").arg(ft.margins.left()).arg(ft.margins.top()).arg(ft.margins.right()).arg(ft.margins.bottom()));
-	}
-
-	for (int i = 0; i < m_treeWidget->columnCount(); i++)
-	{
-		m_treeWidget->resizeColumnToContents(i);
-	}
-
-	return;
-}
-
-//
 // DialogProjectDiff
 //
 
-QString DialogProjectDiff::m_fileName;
 ProjectDiffReportParams DialogProjectDiff::m_reportParams;
 
 DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
@@ -191,8 +23,12 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 
 	// --
 	//
+	QSettings s;
 
-	ui->reportFileEdit->setText(m_fileName);
+	QString defaultPath = QDir::toNativeSeparators(tr("%1%2%3").arg(qApp->applicationDirPath()).arg(QDir::separator()).arg("DiffReport.pdf"));
+	m_fileName = s.value("ProjectDiffGenerator/fileName", defaultPath).toString();
+
+	ui->reportFileEdit->setText(fileName());
 
 	QStringList versionTypes;
 
@@ -203,10 +39,22 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 	ui->sourceTypeComboBox->addItems(versionTypes);
 	ui->targetTypeComboBox->addItems(versionTypes);
 
-	ui->targetTypeComboBox->setCurrentIndex(static_cast<int>(CompareVersionType::LatestVersion));
+	int sourceTypeIndex = s.value("ProjectDiffGenerator/sourceType", static_cast<int>(CompareVersionType::Changeset)).toInt();
+	ui->sourceTypeComboBox->setCurrentIndex(sourceTypeIndex);
 
-	ui->sourceDateEdit->setDateTime(QDateTime::currentDateTime());
-	ui->targetDateEdit->setDateTime(QDateTime::currentDateTime());
+	int targetTypeIndex = s.value("ProjectDiffGenerator/targetType", static_cast<int>(CompareVersionType::LatestVersion)).toInt();
+	ui->targetTypeComboBox->setCurrentIndex(targetTypeIndex);
+
+	int sourceChangeset = s.value("ProjectDiffGenerator/sourceChangeset", 1).toInt();
+	ui->sourceChangesetLineEdit->setText(QString::number(sourceChangeset));
+
+	int targetChangeset = s.value("ProjectDiffGenerator/targetChangeset", 1).toInt();
+	ui->targetChangesetLineEdit->setText(QString::number(targetChangeset));
+
+	ui->sourceDateEdit->setDateTime(s.value("ProjectDiffGenerator/sourceDateTime", QDateTime::currentDateTime()).toDateTime());
+	ui->targetDateEdit->setDateTime(s.value("ProjectDiffGenerator/targetDateTime", QDateTime::currentDateTime()).toDateTime());
+
+	updatePageSizeInfo();
 
 	versionTypeChanged();
 
@@ -224,7 +72,7 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 
 	// Fill file types list
 	//
-	for (const ProjectDiffFileTypeParams& ft : m_reportParams.fileTypeParams)
+	for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
 	{
 		QListWidgetItem* item = new QListWidgetItem(tr("%1").arg(ft.caption));
 
@@ -240,9 +88,11 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 		ui->categoriesList->addItem(item);
 	}
 
-	ui->expertPropertiesCheck->setChecked(m_reportParams.expertProperties == true);
-
+	m_reportParams.multipleFiles = s.value("ProjectDiffGenerator/multipleFiles", false).toBool();
 	ui->multipleFilesCheck->setChecked(m_reportParams.multipleFiles == true);
+
+	m_reportParams.expertProperties = s.value("ProjectDiffGenerator/expertProperties", false).toBool();
+	ui->expertPropertiesCheck->setChecked(m_reportParams.expertProperties == true);
 
 	return;
 
@@ -250,6 +100,32 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 
 DialogProjectDiff::~DialogProjectDiff()
 {
+	QSettings s;
+
+	s.setValue("ProjectDiffGenerator/fileName", fileName());
+
+	int sourceTypeIndex = ui->sourceTypeComboBox->currentIndex();
+	s.setValue("ProjectDiffGenerator/sourceType", sourceTypeIndex);
+
+	int targetTypeIndex = ui->targetTypeComboBox->currentIndex();
+	s.setValue("ProjectDiffGenerator/targetType", targetTypeIndex);
+
+	int sourceChangeset = ui->sourceChangesetLineEdit->text().toInt();
+	s.setValue("ProjectDiffGenerator/sourceChangeset", sourceChangeset);
+
+	int targetChangeset = ui->targetChangesetLineEdit->text().toInt();
+	s.setValue("ProjectDiffGenerator/targetChangeset", targetChangeset);
+
+	QDateTime sourceDateTime = ui->sourceDateEdit->dateTime();
+	s.setValue("ProjectDiffGenerator/sourceDateTime", sourceDateTime);
+
+	QDateTime targetDateTime = ui->targetDateEdit->dateTime();
+	s.setValue("ProjectDiffGenerator/targetDateTime", targetDateTime);
+
+	s.setValue("ProjectDiffGenerator/multipleFiles", m_reportParams.multipleFiles);
+
+	s.setValue("ProjectDiffGenerator/expertProperties", m_reportParams.expertProperties);
+
 	delete ui;
 }
 
@@ -275,6 +151,126 @@ void DialogProjectDiff::showEvent(QShowEvent*)
 	move(screen.center() - rect().center());
 
 	return;
+}
+
+void DialogProjectDiff::done(int r)
+{
+	if (r == QDialog::Rejected)
+	{
+		QDialog::done(r);
+		return;
+	}
+
+	// Save Filename
+
+	if (ui->reportFileEdit->text().isEmpty() == true)
+	{
+		QMessageBox::warning(this, qAppName(), tr("Please enter report file name!"));
+		ui->reportFileEdit->setFocus();
+		return;
+	}
+
+	m_fileName = ui->reportFileEdit->text();
+
+	// Save Compare Data
+
+	CompareData compareData;
+
+	// Source
+	//
+	compareData.sourceVersionType = static_cast<CompareVersionType>(ui->sourceTypeComboBox->currentIndex());
+
+	bool sourceChangesetConversionOk = false;
+	compareData.sourceChangeset = ui->sourceChangesetLineEdit->text().toInt(&sourceChangesetConversionOk);
+
+	compareData.sourceDate = ui->sourceDateEdit->dateTime();
+
+	// Target
+	//
+	compareData.targetVersionType = static_cast<CompareVersionType>(ui->targetTypeComboBox->currentIndex());
+
+	bool targetChangesetConversionOk = false;
+	compareData.targetChangeset = ui->targetChangesetLineEdit->text().toInt(&targetChangesetConversionOk);
+
+	compareData.targetDate = ui->targetDateEdit->dateTime();
+
+	// Checks
+	//
+	if (compareData.sourceVersionType == CompareVersionType::Changeset &&
+		sourceChangesetConversionOk == false)
+	{
+		ui->sourceChangesetLineEdit->setFocus();
+		ui->sourceChangesetLineEdit->selectAll();
+		return;
+	}
+
+	if (compareData.sourceVersionType == CompareVersionType::Date &&
+		compareData.sourceDate.isValid() == false)
+	{
+		ui->sourceDateEdit->setFocus();
+		ui->sourceDateEdit->selectAll();
+		return;
+	}
+
+	if (compareData.targetVersionType == CompareVersionType::Changeset &&
+		targetChangesetConversionOk == false)
+	{
+		ui->targetChangesetLineEdit->setFocus();
+		ui->targetChangesetLineEdit->selectAll();
+		return;
+	}
+
+	if (compareData.targetVersionType == CompareVersionType::Date &&
+		compareData.targetDate.isValid() == false)
+	{
+		ui->targetDateEdit->setFocus();
+		ui->targetDateEdit->selectAll();
+		return;
+	}
+
+	if (compareData.sourceVersionType == compareData.targetVersionType &&
+		compareData.sourceDate == compareData.targetDate &&
+		compareData.sourceChangeset == compareData.targetChangeset)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Please select different changesets!"));
+		return;
+	}
+
+	m_reportParams.compareData = compareData;
+
+	// Save File Types
+
+	int selectedCount = 0;
+
+	if (ui->categoriesList->count() != m_reportParams.fileTypeParams.size())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	for (int i = 0; i < ui->categoriesList->count(); i++)
+	{
+		QListWidgetItem* item = ui->categoriesList->item(i);
+
+		m_reportParams.fileTypeParams[i].selected = item->checkState() == Qt::Checked;
+		if (m_reportParams.fileTypeParams[i].selected == true)
+		{
+			selectedCount++;
+		}
+	}
+
+	if (selectedCount == 0)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Please select at least one file category!"));
+		return;
+	}
+
+	// Save options
+
+	m_reportParams.multipleFiles = ui->multipleFilesCheck->isChecked() == true;
+	m_reportParams.expertProperties = ui->expertPropertiesCheck->isChecked() == true;
+
+	QDialog::done(r);
 }
 
 void DialogProjectDiff::versionTypeChanged()
@@ -364,118 +360,6 @@ void DialogProjectDiff::on_targetChangesetButton_clicked()
 	}
 }
 
-void DialogProjectDiff::done(int r)
-{
-	if (r == QDialog::Rejected)
-	{
-		QDialog::done(r);
-		return;
-	}
-
-	m_fileName = ui->reportFileEdit->text();
-
-	if (m_fileName.isEmpty() == true)
-	{
-		QMessageBox::warning(this, qAppName(), tr("Please enter report file name!"));
-		ui->reportFileEdit->setFocus();
-		return;
-	}
-
-	CompareData compareData;
-
-	// Source
-	//
-	compareData.sourceVersionType = static_cast<CompareVersionType>(ui->sourceTypeComboBox->currentIndex());
-
-	bool sourceChangesetConversionOk = false;
-	compareData.sourceChangeset = ui->sourceChangesetLineEdit->text().toInt(&sourceChangesetConversionOk);
-
-	compareData.sourceDate = ui->sourceDateEdit->dateTime();
-
-	// Target
-	//
-	compareData.targetVersionType = static_cast<CompareVersionType>(ui->targetTypeComboBox->currentIndex());
-
-	bool targetChangesetConversionOk = false;
-	compareData.targetChangeset = ui->targetChangesetLineEdit->text().toInt(&targetChangesetConversionOk);
-
-	compareData.targetDate = ui->targetDateEdit->dateTime();
-
-	// Checks
-	//
-	if (compareData.sourceVersionType == CompareVersionType::Changeset &&
-		sourceChangesetConversionOk == false)
-	{
-		ui->sourceChangesetLineEdit->setFocus();
-		ui->sourceChangesetLineEdit->selectAll();
-		return;
-	}
-
-	if (compareData.sourceVersionType == CompareVersionType::Date &&
-		compareData.sourceDate.isValid() == false)
-	{
-		ui->sourceDateEdit->setFocus();
-		ui->sourceDateEdit->selectAll();
-		return;
-	}
-
-	if (compareData.targetVersionType == CompareVersionType::Changeset &&
-		targetChangesetConversionOk == false)
-	{
-		ui->targetChangesetLineEdit->setFocus();
-		ui->targetChangesetLineEdit->selectAll();
-		return;
-	}
-
-	if (compareData.targetVersionType == CompareVersionType::Date &&
-		compareData.targetDate.isValid() == false)
-	{
-		ui->targetDateEdit->setFocus();
-		ui->targetDateEdit->selectAll();
-		return;
-	}
-
-	if (compareData.sourceVersionType == compareData.targetVersionType &&
-		compareData.sourceDate == compareData.targetDate &&
-		compareData.sourceChangeset == compareData.targetChangeset)
-	{
-		QMessageBox::critical(this, qAppName(), tr("Please select different changesets!"));
-		return;
-	}
-
-	m_reportParams.compareData = compareData;
-
-	int selectedCount = 0;
-
-	if (ui->categoriesList->count() != m_reportParams.fileTypeParams.size())
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	for (int i = 0; i < ui->categoriesList->count(); i++)
-	{
-		QListWidgetItem* item = ui->categoriesList->item(i);
-
-		m_reportParams.fileTypeParams[i].selected = item->checkState() == Qt::Checked;
-		if (m_reportParams.fileTypeParams[i].selected == true)
-		{
-			selectedCount++;
-		}
-	}
-
-	if (selectedCount == 0)
-	{
-		QMessageBox::critical(this, qAppName(), tr("Please select at least one file category!"));
-		return;
-	}
-
-	m_reportParams.expertProperties = ui->expertPropertiesCheck->isChecked() == true;
-	m_reportParams.multipleFiles = ui->multipleFilesCheck->isChecked() == true;
-
-	QDialog::done(r);
-}
-
 void DialogProjectDiff::on_buttonSelectAll_clicked()
 {
 	for (int i = 0; i < ui->categoriesList->count(); i++)
@@ -527,6 +411,8 @@ void DialogProjectDiff::on_fileBrowseButton_clicked()
 		return;
 	}
 
+	fileName = QDir::toNativeSeparators(fileName);
+
 	m_fileName = fileName;
 	ui->reportFileEdit->setText(fileName);
 
@@ -535,43 +421,68 @@ void DialogProjectDiff::on_fileBrowseButton_clicked()
 
 void DialogProjectDiff::on_pageSetupButton_clicked()
 {
-	if (ui->multipleFilesCheck->isChecked() == true)
+	// Single-file report
+
+	QPrinter printer(QPrinter::HighResolution);
+
+	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.m_albumPageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+	if (id == QPageSize::Custom)
 	{
-		DialogProjectDiffSections d(m_reportParams, this);
-		if (d.exec() == QDialog::Accepted)
-		{
-			m_reportParams = d.reportParams();
-		}
+		id = QPageSize::A4;
 	}
-	else
+
+	printer.setFullPage(true);
+	printer.setPageSize(QPageSize(id));
+	printer.setPageOrientation(m_reportParams.m_albumPageLayout.orientation());
+	printer.setPageMargins(m_reportParams.m_albumPageLayout.margins(), QPageLayout::Unit::Millimeter);
+
+	QPageSetupDialog d(&printer, this);
+	if (d.exec() != QDialog::Accepted)
 	{
-		// Single-file report
-
-		QPrinter printer(QPrinter::HighResolution);
-
-		QPageSize::PageSizeId id = QPageSize::id(m_reportParams.albumPageSize.sizePoints(), QPageSize::FuzzyOrientationMatch);
-		if (id == QPageSize::Custom)
-		{
-			id = QPageSize::A4;
-		}
-
-		printer.setFullPage(true);
-		printer.setPageSize(QPageSize(id));
-		printer.setPageOrientation(m_reportParams.albumOrientation);
-		printer.setPageMargins(m_reportParams.albumMargins, QPageLayout::Unit::Millimeter);
-
-		QPageSetupDialog d(&printer, this);
-		if (d.exec() != QDialog::Accepted)
-		{
-			return;
-		}
-
-		id = QPageSize::id(d.printer()->pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
-
-		m_reportParams.albumPageSize = QPageSize(id);
-		m_reportParams.albumOrientation = d.printer()->pageLayout().orientation();
-		m_reportParams.albumMargins = d.printer()->pageLayout().margins();
+		return;
 	}
+
+	id = QPageSize::id(d.printer()->pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+
+	m_reportParams.m_albumPageLayout.setPageSize(QPageSize(id));
+	m_reportParams.m_albumPageLayout.setOrientation(d.printer()->pageLayout().orientation());
+	m_reportParams.m_albumPageLayout.setMargins(d.printer()->pageLayout().margins());
+
+	updatePageSizeInfo();
 
 	return;
+}
+
+void DialogProjectDiff::on_pageSetDefault_clicked()
+{
+	m_reportParams.m_albumPageLayout = QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, QMarginsF(15, 15, 15, 15));
+	updatePageSizeInfo();
+	return;
+}
+
+void DialogProjectDiff::on_multiFilepageSetupButton_clicked()
+{
+	DialogReportFileTypeParams d(m_reportParams.fileTypeParams, ProjectDiffGenerator::defaultFileTypeParams(m_db), this);
+	if (d.exec() == QDialog::Accepted)
+	{
+		m_reportParams.fileTypeParams = d.fileTypeParams();
+	}
+}
+
+void DialogProjectDiff::updatePageSizeInfo()
+{
+	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.m_albumPageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+	if (id == QPageSize::Custom)
+	{
+		id = QPageSize::A4;
+	}
+
+	ui->labelPageSize->setText(tr("Page Size: %1, %2").arg(QPageSize(id).name())
+							   .arg(m_reportParams.m_albumPageLayout.orientation() == QPageLayout::Portrait ? tr("Portrait") : tr("Landscape")));
+
+	QMarginsF margins = m_reportParams.m_albumPageLayout.margins();
+	ui->labelPageMargins->setText(tr("Page margins, mm: l%1 t%2 r%3 b%4").arg(margins.left()).arg(margins.top()).arg(margins.right()).arg(margins.bottom()));
+
+	return;
+
 }

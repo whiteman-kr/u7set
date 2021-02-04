@@ -229,6 +229,7 @@ namespace Tuning
 
 	TuningSourceHandler::TuningSourceHandler(const TuningServiceSettings& settings,
 										   const TuningSource& source,
+										   E::SoftwareRunMode swRunMode,
 										   CircularLoggerShared logger,
 										   CircularLoggerShared tuningLog) :
 		m_logger(logger),
@@ -236,6 +237,8 @@ namespace Tuning
 		m_socket(nullptr),
 		m_replyQueue(nullptr, 10)
 {
+		m_isSimulationMode = swRunMode == E::SoftwareRunMode::Simulation;
+
 		m_sourceEquipmentID = source.lmEquipmentID();
 		m_sourceIP = source.lmAddressPort();
 		m_sourceUniqueID = source.lmUniqueID();
@@ -612,11 +615,6 @@ namespace Tuning
 		}
 	}
 
-	bool TuningSourceHandler::isSimulationMode() const
-	{
-		return m_tuningSimIP.isSet();
-	}
-
 	bool TuningSourceHandler::processWaitReply()
 	{
 		if (m_waitReply == true)
@@ -757,7 +755,7 @@ namespace Tuning
 
 		qint64 sent = 0;
 
-		if (isSimulationMode() == false)
+		if (m_isSimulationMode == false)
 		{
 			// packet sending to real LM
 			//
@@ -1630,11 +1628,13 @@ namespace Tuning
 	// ----------------------------------------------------------------------------------
 
 	TuningSourceThread::TuningSourceThread(const TuningServiceSettings& settings,
-																const TuningSource& source,
-																CircularLoggerShared logger,
-																CircularLoggerShared tuningLog) :
+											const TuningSource& source,
+											E::SoftwareRunMode swRunMode,
+											CircularLoggerShared logger,
+											CircularLoggerShared tuningLog) :
 		m_settings(settings),
 		m_source(source),
+		m_swRunMode(swRunMode),
 		m_logger(logger),
 		m_tuningLog(tuningLog)
 	{
@@ -1758,7 +1758,7 @@ namespace Tuning
 	{
 		AUTO_LOCK(m_handlerMutex);
 
-		m_handler = new TuningSourceHandler(m_settings, m_source, m_logger, m_tuningLog);
+		m_handler = new TuningSourceHandler(m_settings, m_source, m_swRunMode, m_logger, m_tuningLog);
 
 		m_handler->startHandler();
 
@@ -1925,7 +1925,14 @@ namespace Tuning
 				//
 				if (m_simMode == false)
 				{
-					Q_ASSERT(false);
+					m_errNotExpectedSimPacket++;
+
+					if ((m_errNotExpectedSimPacket % 300) == 0)
+					{
+						qDebug() << C_STR(QString("Software is not in SIMULATION mode, %1 sim packets has been ignored.").
+										  arg(m_errNotExpectedSimPacket));
+					}
+
 					continue;
 				}
 
@@ -1933,6 +1940,7 @@ namespace Tuning
 
 				if (simVersion != 1)
 				{
+					m_errSimVersion++;
 					continue;
 				}
 

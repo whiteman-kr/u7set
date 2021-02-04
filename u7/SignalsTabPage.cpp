@@ -364,11 +364,17 @@ bool SignalsDelegate::editorEvent(QEvent *event, QAbstractItemModel *, const QSt
 SignalsModel::SignalsModel(SignalSetProvider* signalSetProvider, SignalsTabPage* parent) :
 	QAbstractTableModel(parent),
 	m_signalSetProvider(signalSetProvider),
+	m_rowCount(signalSetProvider->signalCount()),
+	m_columnCount(signalSetProvider->signalPropertyManager().count()),
 	m_parentWindow(parent)
+
 {
 	connect(m_signalSetProvider, &SignalSetProvider::signalCountChanged, this, &SignalsModel::changeRowCount);
 	connect(m_signalSetProvider, &SignalSetProvider::signalUpdated, this, &SignalsModel::updateSignal);
-	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountIncreased, this, &SignalsModel::changeColumnCount);
+	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountWillIncrease, this, &SignalsModel::beginIncreaseColumnCount, Qt::DirectConnection);
+	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountWillDecrease, this, &SignalsModel::beginDecreaseColumnCount, Qt::DirectConnection);
+	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountIncreased, this, &SignalsModel::endIncreaseColumnCount, Qt::DirectConnection);
+	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountDecreased, this, &SignalsModel::endDecreaseColumnCount, Qt::DirectConnection);
 }
 
 SignalsModel::~SignalsModel()
@@ -574,19 +580,30 @@ void SignalsModel::changeRowCount()
 	}
 }
 
-void SignalsModel::changeColumnCount()
+void SignalsModel::beginIncreaseColumnCount(int newColumnCount)
 {
-	int signalPropertyCount = m_signalSetProvider->signalPropertyManager().count();
-	if (m_columnCount < signalPropertyCount)
-	{
-		beginInsertColumns(QModelIndex(), m_columnCount, signalPropertyCount - 1);
-		m_columnCount = signalPropertyCount;
-		endInsertColumns();
-	}
-	else
-	{
-		assert(false);
-	}
+	assert(newColumnCount > m_columnCount);
+
+	beginInsertColumns(QModelIndex(), m_columnCount, newColumnCount - 1);
+	m_columnCount = newColumnCount;
+}
+
+void SignalsModel::beginDecreaseColumnCount(int newColumnCount)
+{
+	assert(newColumnCount < m_columnCount);
+
+	beginRemoveColumns(QModelIndex(), newColumnCount, m_columnCount - 1);
+	m_columnCount = newColumnCount;
+}
+
+void SignalsModel::endIncreaseColumnCount()
+{
+	endInsertColumns();
+}
+
+void SignalsModel::endDecreaseColumnCount()
+{
+	endRemoveColumns();
 }
 
 

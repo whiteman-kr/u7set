@@ -31,7 +31,7 @@ namespace Builder
 		return m_settingsSet.addProfile<MetrologySettings>(profile, settingsGetter);
 	}
 
-	bool MetrologyCfgGenerator::generateConfiguration()
+	bool MetrologyCfgGenerator::generateConfigurationStep1()
 	{
 		bool result = true;
 

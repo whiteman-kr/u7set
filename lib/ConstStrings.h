@@ -76,8 +76,8 @@ namespace EquipmentPropNames
 	inline const QString SINGLE_LM_CONTROL("SingleLmControl");
 	inline const QString DISABLE_MODULES_TYPE_CHECKING("DisableModulesTypeChecking");
 
-	inline const QString TUNING_SIM_IP("TunigSimIP");
-	inline const QString TUNING_SIM_PORT("TunigSimPort");
+	inline const QString TUNING_SIM_IP("TuningSimIP");
+	inline const QString TUNING_SIM_PORT("TuningSimPort");
 
 	// TuningClient properties
 	//
@@ -177,6 +177,8 @@ namespace XmlElement
 	inline const QString ASSOCIATED_SIGNALS("AssociatedSignals");
 
 	inline const QString SETTINGS_SET("SettingsSet");
+
+	inline const QString APP_DATA_SERVICES("AppDataServices");
 }
 
 namespace XmlAttribute
@@ -264,6 +266,28 @@ namespace  SettingsProfile
 	inline const QString DEFAULT("Default");
 }
 
+namespace SoftwareSetting
+{
+	inline const QString EQUIPMENT_ID("EquipmentID");
+
+	inline const QString CFG_SERVICE_IP1("CfgServiceIP1");
+	inline const QString CFG_SERVICE_IP2("CfgServiceIP2");
+
+	inline const QString AUTOLOAD_BUILD_PATH("AutoloadBuildPath");
+	inline const QString CLIENT_REQUEST_IP("ClientRequestIP");
+	inline const QString WORK_DIRECTORY("WorkDirectory");
+	inline const QString CURRENT_PROFILE("CurrentSoftwareSettingsProfile");
+
+	inline const QString RUN_MODE("RunMode");
+	inline const QString SIMULATION("simulation");
+
+	inline const QString ARCHIVE_LOCATION("ArchiveLocation");
+	inline const QString MIN_QUEUE_SIZE_FOR_FLUSHING("MinQueueSizeForFlushing");
+
+	inline const QString PROCESSING_THREADS_COUNT("ProcessingThreadsCount");
+	inline const QString OVERRIDE_APP_DATA_RECEIVING_IP("OverrideAppDataReceivingIP");
+}
+
 namespace Directory
 {
 	inline const QString COMMON("Common");
@@ -297,4 +321,6 @@ namespace Separator
 	inline const QString SEMICOLON_SPACE("; ");
 	inline const QString SEMICOLON(";");
 	inline const QString LINE("-------------------------------------------------------------------------------");
+	inline const QString DIR("/");
+	inline const QString BACK_DIR("\\");
 }

@@ -15,6 +15,24 @@ before_script:
 #after_script:
 #  - echo after_script
 
+linux build job:
+  stage: build
+  only:
+    - master
+    - /^release.*$/
+    - develop
+    - experimental
+  tags:
+    - gcc
+  script:
+    - "pwd"
+    - "whoami"
+    - "gcc --version"
+    - "echo $CI_COMMIT_SHA"
+    - "cd $CI_PROJECT_DIR"
+    - "git status"
+    - "git log -1"
+
 windows build job:
   stage: build
   only:
@@ -217,10 +235,10 @@ test job:
     - "rem ----------------------------------------------"
     - "rem               Run Simulator AFBs tests"
     - "rem ----------------------------------------------"
-    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorConsole.exe c:\\temp\\build\\test_simulator_v339\\build %CI_PROJECT_DIR%\\Simulator\\SimProjectTests.js"
+    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorConsole.exe c:\\temp\\build\\test_simulator_v346\\build %CI_PROJECT_DIR%\\Simulator\\SimProjectTests.js"
 
 #Run ROVT to check configuration generation
     - "rem ----------------------------------------------"
     - "rem               Run ROVT tests"
     - "rem ----------------------------------------------"
-    - "C:\\ROVT\\ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v339\\build"
+    - "C:\\ROVT\\ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v346\\build"

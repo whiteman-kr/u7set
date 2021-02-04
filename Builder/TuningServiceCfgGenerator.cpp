@@ -29,7 +29,7 @@ namespace Builder
 		return m_settingsSet.addProfile<TuningServiceSettings>(profile, settingsGetter);
 	}
 
-	bool TuningServiceCfgGenerator::generateConfiguration()
+	bool TuningServiceCfgGenerator::generateConfigurationStep1()
 	{
 		if (m_tuningDataStorage == nullptr)
 		{

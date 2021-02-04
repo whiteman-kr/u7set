@@ -31,5 +31,7 @@ private:
 
 private:
 	std::shared_ptr<CircularLogger> m_logger;
+
+	std::shared_ptr<const DiagDataServiceSettings> m_serviceSettings;
 };
 

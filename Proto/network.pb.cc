@@ -94,6 +94,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* GetServiceInfoRequest_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GetServiceInfoRequest_reflection_ = NULL;
+const ::google::protobuf::Descriptor* SessionParams_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  SessionParams_reflection_ = NULL;
 const ::google::protobuf::Descriptor* ServiceInfo_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   ServiceInfo_reflection_ = NULL;
@@ -223,9 +226,6 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* GetFileReply_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   GetFileReply_reflection_ = NULL;
-const ::google::protobuf::Descriptor* GetSessionParams_descriptor_ = NULL;
-const ::google::protobuf::internal::GeneratedMessageReflection*
-  GetSessionParams_reflection_ = NULL;
 
 }  // namespace
 
@@ -490,7 +490,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetDataSourcesInfoReply));
   AppDataReceiveState_descriptor_ = file->message_type(15);
-  static const int AppDataReceiveState_offsets_[9] = {
+  static const int AppDataReceiveState_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataReceiveState, receivingrate_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataReceiveState, udpreceivingrate_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataReceiveState, rupframesreceivingrate_),
@@ -500,6 +500,7 @@ void protobuf_AssignDesc_network_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataReceiveState, errsimversion_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataReceiveState, errunknownappdatasourceip_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataReceiveState, errrupframecrc_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppDataReceiveState, errnotexpectedsimpacket_),
   };
   AppDataReceiveState_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -632,14 +633,30 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetServiceInfoRequest));
-  ServiceInfo_descriptor_ = file->message_type(21);
+  SessionParams_descriptor_ = file->message_type(21);
+  static const int SessionParams_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SessionParams, currentsettingsprofile_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SessionParams, softwarerunmode_),
+  };
+  SessionParams_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      SessionParams_descriptor_,
+      SessionParams::default_instance_,
+      SessionParams_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SessionParams, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SessionParams, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(SessionParams));
+  ServiceInfo_descriptor_ = file->message_type(22);
   static const int ServiceInfo_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, softwareinfo_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, uptime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, servicestate_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, serviceuptime_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, clientrequestip_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, clientrequestport_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, sessionparams_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, settingsxml_),
   };
   ServiceInfo_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -652,7 +669,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ServiceInfo));
-  GetServiceInfoReply_descriptor_ = file->message_type(22);
+  GetServiceInfoReply_descriptor_ = file->message_type(23);
   static const int GetServiceInfoReply_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetServiceInfoReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetServiceInfoReply, serviceinfo_),
@@ -668,7 +685,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetServiceInfoReply));
-  ConfigurationServiceState_descriptor_ = file->message_type(23);
+  ConfigurationServiceState_descriptor_ = file->message_type(24);
   static const int ConfigurationServiceState_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ConfigurationServiceState, currentbuilddirectory_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ConfigurationServiceState, checkbuildattemptquantity_),
@@ -685,7 +702,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ConfigurationServiceState));
-  ServiceClientInfo_descriptor_ = file->message_type(24);
+  ServiceClientInfo_descriptor_ = file->message_type(25);
   static const int ServiceClientInfo_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceClientInfo, ip_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceClientInfo, uptime_),
@@ -704,7 +721,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ServiceClientInfo));
-  ServiceClients_descriptor_ = file->message_type(25);
+  ServiceClients_descriptor_ = file->message_type(26);
   static const int ServiceClients_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceClients, clients_),
   };
@@ -719,7 +736,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ServiceClients));
-  BuildInfo_descriptor_ = file->message_type(26);
+  BuildInfo_descriptor_ = file->message_type(27);
   static const int BuildInfo_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BuildInfo, project_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BuildInfo, id_),
@@ -739,7 +756,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(BuildInfo));
-  ConfigurationServiceSettings_descriptor_ = file->message_type(27);
+  ConfigurationServiceSettings_descriptor_ = file->message_type(28);
   static const int ConfigurationServiceSettings_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ConfigurationServiceSettings, equipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ConfigurationServiceSettings, autoloadbuildpath_),
@@ -756,7 +773,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ConfigurationServiceSettings));
-  ServiceSettings_descriptor_ = file->message_type(28);
+  ServiceSettings_descriptor_ = file->message_type(29);
   static const int ServiceSettings_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceSettings, equipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceSettings, configip1_),
@@ -773,7 +790,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ServiceSettings));
-  GetTuningSourcesInfo_descriptor_ = file->message_type(29);
+  GetTuningSourcesInfo_descriptor_ = file->message_type(30);
   static const int GetTuningSourcesInfo_offsets_[1] = {
   };
   GetTuningSourcesInfo_reflection_ =
@@ -787,7 +804,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetTuningSourcesInfo));
-  GetTuningSourcesInfoReply_descriptor_ = file->message_type(30);
+  GetTuningSourcesInfoReply_descriptor_ = file->message_type(31);
   static const int GetTuningSourcesInfoReply_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesInfoReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesInfoReply, tuningsourceinfo_),
@@ -806,7 +823,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetTuningSourcesInfoReply));
-  GetTuningSourcesStates_descriptor_ = file->message_type(31);
+  GetTuningSourcesStates_descriptor_ = file->message_type(32);
   static const int GetTuningSourcesStates_offsets_[1] = {
   };
   GetTuningSourcesStates_reflection_ =
@@ -820,7 +837,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetTuningSourcesStates));
-  SignalsAssociatedToTuningSource_descriptor_ = file->message_type(32);
+  SignalsAssociatedToTuningSource_descriptor_ = file->message_type(33);
   static const int SignalsAssociatedToTuningSource_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SignalsAssociatedToTuningSource, sourceid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SignalsAssociatedToTuningSource, signalhash_),
@@ -836,7 +853,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SignalsAssociatedToTuningSource));
-  TuningSourceFilling_descriptor_ = file->message_type(33);
+  TuningSourceFilling_descriptor_ = file->message_type(34);
   static const int TuningSourceFilling_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceFilling, signalcount_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceFilling, signalspersource_),
@@ -852,7 +869,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSourceFilling));
-  TuningSourceState_descriptor_ = file->message_type(34);
+  TuningSourceState_descriptor_ = file->message_type(35);
   static const int TuningSourceState_offsets_[47] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, sourceid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSourceState, isreply_),
@@ -913,7 +930,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSourceState));
-  GetTuningSourcesStatesReply_descriptor_ = file->message_type(35);
+  GetTuningSourcesStatesReply_descriptor_ = file->message_type(36);
   static const int GetTuningSourcesStatesReply_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesStatesReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetTuningSourcesStatesReply, tuningsourcesstate_),
@@ -932,7 +949,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetTuningSourcesStatesReply));
-  ChangeConrolledTuningSourceRequest_descriptor_ = file->message_type(36);
+  ChangeConrolledTuningSourceRequest_descriptor_ = file->message_type(37);
   static const int ChangeConrolledTuningSourceRequest_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ChangeConrolledTuningSourceRequest, takecontrol_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ChangeConrolledTuningSourceRequest, tuningsourceequipmentid_),
@@ -949,7 +966,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ChangeConrolledTuningSourceRequest));
-  ChangeConrolledTuningSourceReply_descriptor_ = file->message_type(37);
+  ChangeConrolledTuningSourceReply_descriptor_ = file->message_type(38);
   static const int ChangeConrolledTuningSourceReply_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ChangeConrolledTuningSourceReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ChangeConrolledTuningSourceReply, controlledtuningsourceequipmentid_),
@@ -966,7 +983,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ChangeConrolledTuningSourceReply));
-  TuningSignalsRead_descriptor_ = file->message_type(38);
+  TuningSignalsRead_descriptor_ = file->message_type(39);
   static const int TuningSignalsRead_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsRead, signalhash_),
   };
@@ -981,7 +998,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSignalsRead));
-  TuningSignalState_descriptor_ = file->message_type(39);
+  TuningSignalState_descriptor_ = file->message_type(40);
   static const int TuningSignalState_offsets_[15] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, signalhash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalState, error_),
@@ -1010,7 +1027,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSignalState));
-  TuningSignalsReadReply_descriptor_ = file->message_type(40);
+  TuningSignalsReadReply_descriptor_ = file->message_type(41);
   static const int TuningSignalsReadReply_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsReadReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsReadReply, tuningsignalstate_),
@@ -1026,7 +1043,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSignalsReadReply));
-  TuningWriteCommand_descriptor_ = file->message_type(41);
+  TuningWriteCommand_descriptor_ = file->message_type(42);
   static const int TuningWriteCommand_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningWriteCommand, signalhash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningWriteCommand, value_),
@@ -1042,7 +1059,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningWriteCommand));
-  TuningSignalsWrite_descriptor_ = file->message_type(42);
+  TuningSignalsWrite_descriptor_ = file->message_type(43);
   static const int TuningSignalsWrite_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsWrite, autoapply_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsWrite, commands_),
@@ -1058,7 +1075,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSignalsWrite));
-  TuningSignalWriteResult_descriptor_ = file->message_type(43);
+  TuningSignalWriteResult_descriptor_ = file->message_type(44);
   static const int TuningSignalWriteResult_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalWriteResult, signalhash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalWriteResult, error_),
@@ -1074,7 +1091,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSignalWriteResult));
-  TuningSignalsWriteReply_descriptor_ = file->message_type(44);
+  TuningSignalsWriteReply_descriptor_ = file->message_type(45);
   static const int TuningSignalsWriteReply_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsWriteReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsWriteReply, writeresult_),
@@ -1090,7 +1107,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSignalsWriteReply));
-  TuningSignalsApply_descriptor_ = file->message_type(45);
+  TuningSignalsApply_descriptor_ = file->message_type(46);
   static const int TuningSignalsApply_offsets_[1] = {
   };
   TuningSignalsApply_reflection_ =
@@ -1104,7 +1121,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSignalsApply));
-  TuningSignalsApplyReply_descriptor_ = file->message_type(46);
+  TuningSignalsApplyReply_descriptor_ = file->message_type(47);
   static const int TuningSignalsApplyReply_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningSignalsApplyReply, error_),
   };
@@ -1119,7 +1136,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningSignalsApplyReply));
-  DataSourceWrite_descriptor_ = file->message_type(47);
+  DataSourceWrite_descriptor_ = file->message_type(48);
   static const int DataSourceWrite_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceWrite, sourceequipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceWrite, state_),
@@ -1135,7 +1152,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DataSourceWrite));
-  DataSourceWriteReply_descriptor_ = file->message_type(48);
+  DataSourceWriteReply_descriptor_ = file->message_type(49);
   static const int DataSourceWriteReply_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DataSourceWriteReply, error_),
   };
@@ -1150,7 +1167,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DataSourceWriteReply));
-  PacketSourceExit_descriptor_ = file->message_type(49);
+  PacketSourceExit_descriptor_ = file->message_type(50);
   static const int PacketSourceExit_offsets_[1] = {
   };
   PacketSourceExit_reflection_ =
@@ -1164,7 +1181,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(PacketSourceExit));
-  PacketSourceExitReply_descriptor_ = file->message_type(50);
+  PacketSourceExitReply_descriptor_ = file->message_type(51);
   static const int PacketSourceExitReply_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PacketSourceExitReply, error_),
   };
@@ -1179,7 +1196,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(PacketSourceExitReply));
-  SaveAppSignalsStatesToArchiveRequest_descriptor_ = file->message_type(51);
+  SaveAppSignalsStatesToArchiveRequest_descriptor_ = file->message_type(52);
   static const int SaveAppSignalsStatesToArchiveRequest_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SaveAppSignalsStatesToArchiveRequest, clientequipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SaveAppSignalsStatesToArchiveRequest, appsignalstates_),
@@ -1195,7 +1212,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SaveAppSignalsStatesToArchiveRequest));
-  SaveAppSignalsStatesToArchiveReply_descriptor_ = file->message_type(52);
+  SaveAppSignalsStatesToArchiveReply_descriptor_ = file->message_type(53);
   static const int SaveAppSignalsStatesToArchiveReply_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SaveAppSignalsStatesToArchiveReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SaveAppSignalsStatesToArchiveReply, archerror_),
@@ -1211,7 +1228,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SaveAppSignalsStatesToArchiveReply));
-  GetAppSignalStatesFromArchiveStartRequest_descriptor_ = file->message_type(53);
+  GetAppSignalStatesFromArchiveStartRequest_descriptor_ = file->message_type(54);
   static const int GetAppSignalStatesFromArchiveStartRequest_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartRequest, clientequipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartRequest, timetype_),
@@ -1231,7 +1248,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveStartRequest));
-  GetAppSignalStatesFromArchiveStartReply_descriptor_ = file->message_type(54);
+  GetAppSignalStatesFromArchiveStartReply_descriptor_ = file->message_type(55);
   static const int GetAppSignalStatesFromArchiveStartReply_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartReply, archerror_),
@@ -1249,7 +1266,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveStartReply));
-  GetAppSignalStatesFromArchiveNextRequest_descriptor_ = file->message_type(55);
+  GetAppSignalStatesFromArchiveNextRequest_descriptor_ = file->message_type(56);
   static const int GetAppSignalStatesFromArchiveNextRequest_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextRequest, requestid_),
   };
@@ -1264,7 +1281,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveNextRequest));
-  GetAppSignalStatesFromArchiveNextReply_descriptor_ = file->message_type(56);
+  GetAppSignalStatesFromArchiveNextReply_descriptor_ = file->message_type(57);
   static const int GetAppSignalStatesFromArchiveNextReply_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, archerror_),
@@ -1288,7 +1305,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveNextReply));
-  GetAppSignalStatesFromArchiveCancelRequest_descriptor_ = file->message_type(57);
+  GetAppSignalStatesFromArchiveCancelRequest_descriptor_ = file->message_type(58);
   static const int GetAppSignalStatesFromArchiveCancelRequest_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveCancelRequest, requestid_),
   };
@@ -1303,7 +1320,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveCancelRequest));
-  GetAppSignalStatesFromArchiveCancelReply_descriptor_ = file->message_type(58);
+  GetAppSignalStatesFromArchiveCancelReply_descriptor_ = file->message_type(59);
   static const int GetAppSignalStatesFromArchiveCancelReply_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveCancelReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveCancelReply, archerror_),
@@ -1320,7 +1337,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveCancelReply));
-  RtTrendsManagementRequest_descriptor_ = file->message_type(59);
+  RtTrendsManagementRequest_descriptor_ = file->message_type(60);
   static const int RtTrendsManagementRequest_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementRequest, clientequipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementRequest, sampleperiod_),
@@ -1338,7 +1355,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(RtTrendsManagementRequest));
-  RtTrendsManagementReply_descriptor_ = file->message_type(60);
+  RtTrendsManagementReply_descriptor_ = file->message_type(61);
   static const int RtTrendsManagementReply_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsManagementReply, errorstring_),
@@ -1356,7 +1373,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(RtTrendsManagementReply));
-  RtTrendsGetStateChangesRequest_descriptor_ = file->message_type(61);
+  RtTrendsGetStateChangesRequest_descriptor_ = file->message_type(62);
   static const int RtTrendsGetStateChangesRequest_offsets_[1] = {
   };
   RtTrendsGetStateChangesRequest_reflection_ =
@@ -1370,7 +1387,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(RtTrendsGetStateChangesRequest));
-  RtTrendsGetStateChangesReply_descriptor_ = file->message_type(62);
+  RtTrendsGetStateChangesReply_descriptor_ = file->message_type(63);
   static const int RtTrendsGetStateChangesReply_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsGetStateChangesReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RtTrendsGetStateChangesReply, errorstring_),
@@ -1387,7 +1404,7 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(RtTrendsGetStateChangesReply));
-  GetFileReply_descriptor_ = file->message_type(63);
+  GetFileReply_descriptor_ = file->message_type(64);
   static const int GetFileReply_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetFileReply, errorcode_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetFileReply, filesize_),
@@ -1408,21 +1425,6 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetFileReply));
-  GetSessionParams_descriptor_ = file->message_type(64);
-  static const int GetSessionParams_offsets_[1] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetSessionParams, currentsettingsprofile_),
-  };
-  GetSessionParams_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
-      GetSessionParams_descriptor_,
-      GetSessionParams::default_instance_,
-      GetSessionParams_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetSessionParams, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetSessionParams, _unknown_fields_),
-      -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(GetSessionParams));
 }
 
 namespace {
@@ -1477,6 +1479,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
     SoftwareInfo_descriptor_, &SoftwareInfo::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GetServiceInfoRequest_descriptor_, &GetServiceInfoRequest::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    SessionParams_descriptor_, &SessionParams::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     ServiceInfo_descriptor_, &ServiceInfo::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -1563,8 +1567,6 @@ void protobuf_RegisterTypes(const ::std::string&) {
     RtTrendsGetStateChangesReply_descriptor_, &RtTrendsGetStateChangesReply::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     GetFileReply_descriptor_, &GetFileReply::default_instance());
-  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    GetSessionParams_descriptor_, &GetSessionParams::default_instance());
 }
 
 }  // namespace
@@ -1612,6 +1614,8 @@ void protobuf_ShutdownFile_network_2eproto() {
   delete SoftwareInfo_reflection_;
   delete GetServiceInfoRequest::default_instance_;
   delete GetServiceInfoRequest_reflection_;
+  delete SessionParams::default_instance_;
+  delete SessionParams_reflection_;
   delete ServiceInfo::default_instance_;
   delete ServiceInfo_reflection_;
   delete GetServiceInfoReply::default_instance_;
@@ -1698,8 +1702,6 @@ void protobuf_ShutdownFile_network_2eproto() {
   delete RtTrendsGetStateChangesReply_reflection_;
   delete GetFileReply::default_instance_;
   delete GetFileReply_reflection_;
-  delete GetSessionParams::default_instance_;
-  delete GetSessionParams_reflection_;
 }
 
 void protobuf_AddDesc_network_2eproto() {
@@ -1747,207 +1749,208 @@ void protobuf_AddDesc_network_2eproto() {
     "ame\030\021 \001(\t\"\033\n\031GetDataSourcesInfoRequest\"\\"
     "\n\027GetDataSourcesInfoReply\022\020\n\005error\030\001 \001(\005"
     ":\0010\022/\n\016dataSourceInfo\030\002 \003(\0132\027.Network.Da"
-    "taSourceInfo\"\234\002\n\023AppDataReceiveState\022\030\n\r"
+    "taSourceInfo\"\300\002\n\023AppDataReceiveState\022\030\n\r"
     "receivingRate\030\001 \001(\005:\0010\022\033\n\020udpReceivingRa"
     "te\030\002 \001(\005:\0010\022!\n\026rupFramesReceivingRate\030\003 "
     "\001(\005:\0010\022\031\n\016rupFramesCount\030\004 \001(\003:\0010\022\031\n\016sim"
     "FramesCount\030\005 \001(\003:\0010\022\032\n\017errDatagramSize\030"
     "\006 \001(\003:\0010\022\030\n\rerrSimVersion\030\007 \001(\003:\0010\022$\n\031er"
     "rUnknownAppDataSourceIP\030\010 \001(\003:\0010\022\031\n\016errR"
-    "upFrameCRC\030\t \001(\003:\0010\"\240\007\n\022AppDataSourceSta"
-    "te\022\r\n\002id\030\001 \001(\004:\0010\022\033\n\014dataReceives\030\002 \001(\010:"
-    "\005false\022\021\n\006uptime\030\003 \001(\003:\0010\022\031\n\016receivedDat"
-    "aID\030\004 \001(\004:\0010\022 \n\025rupFramesQueueCurSize\030\005 "
-    "\001(\005:\0010\022#\n\030rupFramesQueueCurMaxSize\030\006 \001(\005"
-    ":\0010\022\034\n\021dataReceivingRate\030\007 \001(\001:\0010\022\033\n\020rec"
-    "eivedDataSize\030\010 \001(\003:\0010\022\036\n\023receivedFrames"
-    "Count\030\t \001(\003:\0010\022\036\n\023receivedPacketCount\030\n "
-    "\001(\003:\0010\022\032\n\017lostPacketCount\030\013 \001(\003:\0010\022$\n\025da"
-    "taProcessingEnabled\030\014 \001(\010:\005false\022\037\n\024proc"
-    "essedPacketCount\030\r \001(\003:\0010\022\037\n\024lastPacketS"
-    "ystemTime\030\016 \001(\003:\0010\022\034\n\021rupFramePlantTime\030"
-    "\017 \001(\003:\0010\022\034\n\021rupFrameNumerator\030\020 \001(\r:\0010\022#"
-    "\n\030signalStatesQueueCurSize\030\021 \001(\005:\0010\022&\n\033s"
-    "ignalStatesQueueCurMaxSize\030\022 \001(\005:\0010\022\037\n\024a"
-    "cquiredSignalsCount\030\023 \001(\005:\0010\022\037\n\024errorPro"
-    "tocolVersion\030\024 \001(\003:\0010\022\036\n\023errorFramesQuan"
-    "tity\030\025 \001(\003:\0010\022\027\n\014errorFrameNo\030\026 \001(\003:\0010\022\026"
-    "\n\013errorDataID\030\027 \001(\003:\0010\022\031\n\016errorFrameSize"
-    "\030\030 \001(\003:\0010\022\"\n\027errorDuplicatePlantTime\030\031 \001"
-    "(\003:\0010\022%\n\032errorNonmonotonicPlantTime\030\032 \001("
-    "\003:\0010\022\025\n\rlmEquipmentID\030\033 \001(\t\022\035\n\022rupFrames"
-    "QueueSize\030\034 \001(\005:\0010\022 \n\025signalStatesQueueS"
-    "ize\030\035 \001(\005:\0010\022\020\n\005state\030\036 \001(\005:\0010\"k\n\034GetApp"
-    "DataSourcesStatesReply\022\020\n\005error\030\001 \001(\005:\0010"
-    "\0229\n\024appDataSourcesStates\030\002 \003(\0132\033.Network"
-    ".AppDataSourceState\"\220\002\n\023AppDataServiceSt"
-    "ate\022$\n\025CfgServiceIsConnected\030\001 \002(\010:\005fals"
-    "e\022\027\n\014CfgServiceIp\030\002 \001(\r:\0010\022\031\n\016CfgService"
-    "Port\030\003 \001(\005:\0010\022(\n\031ArchiveServiceIsConnect"
-    "ed\030\004 \002(\010:\005false\022\033\n\020ArchiveServiceIp\030\005 \001("
-    "\r:\0010\022\035\n\022ArchiveServicePort\030\006 \001(\005:\0010\0229\n\023a"
-    "ppDataReceiveState\030\007 \001(\0132\034.Network.AppDa"
-    "taReceiveState\"\377\001\n\014SoftwareInfo\022\032\n\014softw"
-    "areType\030\001 \002(\005:\0048000\022\023\n\013equipmentId\030\002 \002(\t"
-    "\022\027\n\014majorVersion\030\003 \002(\005:\0010\022\027\n\014minorVersio"
-    "n\030\004 \002(\005:\0010\022\023\n\010commitNo\030\005 \002(\005:\0010\022\023\n\013build"
-    "Branch\030\006 \002(\t\022\021\n\tcommitSHA\030\007 \002(\t\022\020\n\010userN"
-    "ame\030\010 \002(\t\022\022\n\007buildNo\030\t \002(\005:\0010\022\016\n\003crc\030\n \002"
-    "(\r:\0010\022\031\n\021clientDescription\030\013 \001(\t\"\027\n\025GetS"
-    "erviceInfoRequest\"\272\001\n\013ServiceInfo\022+\n\014sof"
-    "twareInfo\030\001 \002(\0132\025.Network.SoftwareInfo\022\021"
-    "\n\006uptime\030\002 \001(\003:\0010\022\027\n\014serviceState\030\003 \001(\005:"
-    "\0010\022\030\n\rserviceUptime\030\004 \001(\003:\0010\022\032\n\017clientRe"
-    "questIP\030\005 \001(\r:\0010\022\034\n\021clientRequestPort\030\006 "
-    "\001(\005:\0010\"R\n\023GetServiceInfoReply\022\020\n\005error\030\001"
-    " \002(\005:\0010\022)\n\013serviceInfo\030\002 \002(\0132\024.Network.S"
-    "erviceInfo\"x\n\031ConfigurationServiceState\022"
-    "\035\n\025currentBuildDirectory\030\001 \002(\t\022!\n\031checkB"
-    "uildAttemptQuantity\030\002 \002(\005\022\031\n\021buildChecke"
-    "rState\030\003 \002(\005\"\205\001\n\021ServiceClientInfo\022\n\n\002ip"
-    "\030\003 \002(\005\022\016\n\006uptime\030\005 \002(\003\022\020\n\010isActual\030\006 \002(\010"
-    "\022\025\n\rreplyQuantity\030\007 \002(\003\022+\n\014softwareInfo\030"
-    "\013 \002(\0132\025.Network.SoftwareInfo\"=\n\016ServiceC"
-    "lients\022+\n\007clients\030\001 \003(\0132\032.Network.Servic"
-    "eClientInfo\"s\n\tBuildInfo\022\017\n\007project\030\001 \002("
-    "\t\022\016\n\002id\030\002 \002(\005:\002-1\022\014\n\004date\030\004 \002(\003\022\024\n\tchang"
-    "eset\030\005 \002(\005:\0010\022\014\n\004user\030\006 \002(\t\022\023\n\013workstati"
-    "on\030\007 \002(\t\"e\n\034ConfigurationServiceSettings"
-    "\022\023\n\013equipmentID\030\001 \002(\t\022\031\n\021autoloadBuildPa"
-    "th\030\002 \002(\t\022\025\n\rworkDirectory\030\003 \002(\t\"L\n\017Servi"
-    "ceSettings\022\023\n\013equipmentID\030\001 \002(\t\022\021\n\tconfi"
-    "gIP1\030\002 \002(\t\022\021\n\tconfigIP2\030\003 \002(\t\"\026\n\024GetTuni"
-    "ngSourcesInfo\"\263\001\n\031GetTuningSourcesInfoRe"
-    "ply\022\020\n\005error\030\001 \001(\005:\0010\0221\n\020tuningSourceInf"
-    "o\030\002 \003(\0132\027.Network.DataSourceInfo\022!\n\023sing"
-    "leLmControlMode\030\003 \001(\010:\004true\022\026\n\016activeCli"
-    "entID\030\004 \001(\t\022\026\n\016activeClientIP\030\005 \001(\t\"\030\n\026G"
-    "etTuningSourcesStates\"G\n\037SignalsAssociat"
-    "edToTuningSource\022\020\n\010sourceID\030\001 \002(\004\022\022\n\nsi"
-    "gnalHash\030\002 \003(\004\"n\n\023TuningSourceFilling\022\023\n"
-    "\013signalCount\030\001 \002(\004\022B\n\020signalsPerSource\030\002"
-    " \003(\0132(.Network.SignalsAssociatedToTuning"
-    "Source\"\273\013\n\021TuningSourceState\022\023\n\010sourceID"
-    "\030\001 \001(\004:\0010\022\026\n\007isReply\030\002 \001(\010:\005false\022\027\n\014req"
-    "uestCount\030\003 \001(\003:\0010\022\025\n\nreplyCount\030\004 \001(\003:\001"
-    "0\022\033\n\020commandQueueSize\030\005 \001(\005:\0010\022\034\n\021errUnt"
-    "imelyReplay\030\006 \001(\003:\0010\022\022\n\007errSent\030\007 \001(\003:\0010"
-    "\022\031\n\016errPartialSent\030\010 \001(\003:\0010\022\027\n\014errReplyS"
-    "ize\030\t \001(\003:\0010\022\025\n\nerrNoReply\030\n \001(\003:\0010\022 \n\025e"
-    "rrRupProtocolVersion\030\013 \001(\003:\0010\022\032\n\017errRupF"
-    "rameSize\030\014 \001(\003:\0010\022\036\n\023errRupNonTuningData"
-    "\030\r \001(\003:\0010\022\033\n\020errRupModuleType\030\016 \001(\003:\0010\022\037"
-    "\n\024errRupFramesQuantity\030\017 \001(\003:\0010\022\034\n\021errRu"
-    "pFrameNumber\030\020 \001(\003:\0010\022\"\n\027errFotipProtoco"
-    "lVersion\030\021 \001(\003:\0010\022\033\n\020errFotipUniqueID\030\022 "
-    "\001(\003:\0010\022\033\n\020errFotipLmNumber\030\023 \001(\003:\0010\022 \n\025e"
-    "rrFotipSubsystemCode\030\024 \001(\003:\0010\022 \n\025errFoti"
-    "pOperationCode\030\025 \001(\003:\0010\022\034\n\021errFotipFrame"
-    "Size\030\026 \001(\003:\0010\022\032\n\017errFotipRomSize\030\027 \001(\003:\001"
-    "0\022\037\n\024errFotipRomFrameSize\030\030 \001(\003:\0010\022&\n\033fo"
-    "tipFlagBoundsCheckSuccess\030\031 \001(\003:\0010\022 \n\025fo"
-    "tipFlagWriteSuccess\030\032 \001(\003:\0010\022\037\n\024fotipFla"
-    "gDataTypeErr\030\033 \001(\003:\0010\022\035\n\022fotipFlagOpCode"
-    "Err\030\034 \001(\003:\0010\022 \n\025fotipFlagStartAddrErr\030\035 "
-    "\001(\003:\0010\022\036\n\023fotipFlagRomSizeErr\030\036 \001(\003:\0010\022#"
-    "\n\030fotipFlagRomFrameSizeErr\030\037 \001(\003:\0010\022 \n\025f"
-    "otipFlagFrameSizeErr\030  \001(\003:\0010\022&\n\033fotipFl"
-    "agProtocolVersionErr\030! \001(\003:\0010\022#\n\030fotipFl"
-    "agSubsystemKeyErr\030\" \001(\003:\0010\022\036\n\023fotipFlagU"
-    "niueIDErr\030# \001(\003:\0010\022\035\n\022fotipFlagOffsetErr"
-    "\030$ \001(\003:\0010\022 \n\025fotipFlagApplySuccess\030% \001(\003"
-    ":\0010\022\032\n\017fotipFlagSetSOR\030& \001(\003:\0010\022!\n\026errAn"
-    "alogLowBoundCheck\030\' \001(\003:\0010\022\"\n\027errAnalogH"
-    "ighBoundCheck\030( \001(\003:\0010\022\024\n\terrRupCRC\030) \001("
-    "\003:\0010\022\036\n\017controlIsActive\030* \001(\010:\005false\022\025\n\006"
-    "setSOR\030+ \001(\010:\005false\022!\n\022hasUnappliedParam"
-    "s\030, \001(\010:\005false\022\036\n\017writingDisabled\030- \001(\010:"
-    "\005false\022#\n\030fotipFlagWritingDisabled\030. \001(\003"
-    ":\0010\022\037\n\024errTuningFrameUpdate\030/ \001(\003:\0010\"\272\001\n"
-    "\033GetTuningSourcesStatesReply\022\020\n\005error\030\001 "
-    "\001(\005:\0010\0226\n\022tuningSourcesState\030\002 \003(\0132\032.Net"
-    "work.TuningSourceState\022!\n\023singleLmContro"
-    "lMode\030\003 \001(\010:\004true\022\026\n\016activeClientID\030\004 \001("
-    "\t\022\026\n\016activeClientIP\030\005 \001(\t\"z\n\"ChangeConro"
-    "lledTuningSourceRequest\022\023\n\013takeControl\030\001"
-    " \001(\010\022\037\n\027tuningSourceEquipmentID\030\002 \001(\t\022\036\n"
-    "\017activateControl\030\003 \001(\010:\005false\"\177\n ChangeC"
-    "onrolledTuningSourceReply\022\020\n\005error\030\001 \001(\005"
-    ":\0010\022)\n!controlledTuningSourceEquipmentID"
-    "\030\002 \001(\t\022\036\n\017controlIsActive\030\003 \001(\010:\005false\"\'"
-    "\n\021TuningSignalsRead\022\022\n\nsignalHash\030\002 \003(\004\""
-    "\322\003\n\021TuningSignalState\022\025\n\nsignalHash\030\001 \001("
-    "\006:\0010\022\020\n\005error\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010:\005f"
-    "alse\022!\n\005value\030\004 \001(\0132\022.Proto.TuningValue\022"
-    "(\n\014readLowBound\030\005 \001(\0132\022.Proto.TuningValu"
-    "e\022)\n\rreadHighBound\030\006 \001(\0132\022.Proto.TuningV"
-    "alue\022\036\n\017writeInProgress\030\007 \001(\010:\005false\022\031\n\016"
-    "writeErrorCode\030\010 \001(\005:\0010\022\026\n\013writeClient\030\t"
-    " \001(\006:\0010\022\035\n\022successfulReadTime\030\n \001(\020:\0010\022\033"
-    "\n\020writeRequestTime\030\013 \001(\020:\0010\022\036\n\023successfu"
-    "lWriteTime\030\014 \001(\020:\0010\022 \n\025unsuccessfulWrite"
-    "Time\030\r \001(\020:\0010\022\025\n\006setSOR\030\016 \001(\010:\005false\022\036\n\017"
-    "writingDisabled\030\017 \001(\010:\005false\"a\n\026TuningSi"
-    "gnalsReadReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021tuni"
-    "ngSignalState\030\002 \003(\0132\032.Network.TuningSign"
-    "alState\"N\n\022TuningWriteCommand\022\025\n\nsignalH"
-    "ash\030\001 \001(\004:\0010\022!\n\005value\030\002 \001(\0132\022.Proto.Tuni"
-    "ngValue\"]\n\022TuningSignalsWrite\022\030\n\tautoApp"
-    "ly\030\002 \001(\010:\005false\022-\n\010commands\030\003 \003(\0132\033.Netw"
-    "ork.TuningWriteCommand\"B\n\027TuningSignalWr"
-    "iteResult\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005erro"
-    "r\030\002 \001(\005:\0010\"b\n\027TuningSignalsWriteReply\022\020\n"
-    "\005error\030\001 \001(\005:\0010\0225\n\013writeResult\030\002 \003(\0132 .N"
-    "etwork.TuningSignalWriteResult\"\024\n\022Tuning"
-    "SignalsApply\"+\n\027TuningSignalsApplyReply\022"
-    "\020\n\005error\030\001 \001(\005:\0010\"B\n\017DataSourceWrite\022\031\n\021"
-    "sourceEquipmentID\030\001 \001(\t\022\024\n\005state\030\002 \001(\010:\005"
-    "false\"(\n\024DataSourceWriteReply\022\020\n\005error\030\001"
-    " \001(\005:\0010\"\022\n\020PacketSourceExit\")\n\025PacketSou"
-    "rceExitReply\022\020\n\005error\030\001 \001(\005:\0010\"q\n$SaveAp"
-    "pSignalsStatesToArchiveRequest\022\031\n\021client"
-    "EquipmentID\030\001 \001(\t\022.\n\017appSignalStates\030\002 \003"
-    "(\0132\025.Proto.AppSignalState\"N\n\"SaveAppSign"
-    "alsStatesToArchiveReply\022\020\n\005error\030\001 \001(\005:\001"
-    "0\022\026\n\tarchError\030\002 \001(\005:\003100\"\271\001\n)GetAppSign"
-    "alStatesFromArchiveStartRequest\022\031\n\021clien"
-    "tEquipmentID\030\001 \001(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022"
-    "\024\n\tstartTime\030\003 \001(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\001"
-    "0\022\024\n\014signalHashes\030\005 \003(\004\022\034\n\016removePeriodi"
-    "c\030\006 \001(\010:\004true\"~\n\'GetAppSignalStatesFromA"
-    "rchiveStartReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tar"
-    "chError\030\002 \001(\005:\003100\022\023\n\013errorString\030\004 \001(\t\022"
-    "\024\n\trequestID\030\003 \001(\r:\0010\"@\n(GetAppSignalSta"
-    "tesFromArchiveNextRequest\022\024\n\trequestID\030\001"
-    " \001(\r:\0010\"\271\002\n&GetAppSignalStatesFromArchiv"
-    "eNextReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchErro"
-    "r\030\002 \001(\005:\003100\022\024\n\trequestID\030\003 \001(\r:\0010\022\023\n\013er"
-    "rorString\030\n \001(\t\022\030\n\tdataReady\030\004 \001(\010:\005fals"
-    "e\022\033\n\020totalStatesCount\030\005 \001(\005:\0010\022\032\n\017sentSt"
-    "atesCount\030\006 \001(\005:\0010\022\034\n\021statesInPartCount\030"
-    "\007 \001(\005:\0010\022\031\n\nisLastPart\030\010 \001(\010:\005false\022.\n\017a"
-    "ppSignalStates\030\t \003(\0132\025.Proto.AppSignalSt"
-    "ate\"B\n*GetAppSignalStatesFromArchiveCanc"
-    "elRequest\022\024\n\trequestID\030\001 \001(\r:\0010\"i\n(GetAp"
-    "pSignalStatesFromArchiveCancelReply\022\020\n\005e"
-    "rror\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n"
-    "\013errorString\030\003 \001(\t\"\204\001\n\031RtTrendsManagemen"
-    "tRequest\022\031\n\021clientEquipmentID\030\001 \001(\t\022\024\n\014s"
-    "amplePeriod\030\002 \001(\005\022\032\n\022appendSignalHashes\030"
-    "\003 \003(\004\022\032\n\022deleteSignalHashes\030\004 \003(\004\"s\n\027RtT"
-    "rendsManagementReply\022\020\n\005error\030\001 \001(\005:\0010\022\023"
-    "\n\013errorString\030\002 \001(\t\022\024\n\014samplePeriod\030\003 \001("
-    "\005\022\033\n\023trackedSignalHashes\030\004 \003(\004\" \n\036RtTren"
-    "dsGetStateChangesRequest\"r\n\034RtTrendsGetS"
-    "tateChangesReply\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013er"
-    "rorString\030\002 \001(\t\022+\n\014signalStates\030\003 \003(\0132\025."
-    "Proto.AppSignalState\"\247\001\n\014GetFileReply\022\024\n"
-    "\terrorCode\030\001 \002(\005:\0010\022\023\n\010fileSize\030\002 \001(\003:\0010"
-    "\022\025\n\ntotalParts\030\003 \001(\005:\0010\022\026\n\013currentPart\030\004"
-    " \001(\005:\0010\022\032\n\017currentPartSize\030\005 \001(\005:\0010\022\013\n\003m"
-    "d5\030\006 \001(\014\022\024\n\014filePartData\030\n \001(\014\"2\n\020GetSes"
-    "sionParams\022\036\n\026currentSettingsProfile\030\001 \001"
-    "(\t", 9482);
+    "upFrameCRC\030\t \001(\003:\0010\022\"\n\027errNotExpectedSim"
+    "Packet\030\n \001(\003:\0010\"\240\007\n\022AppDataSourceState\022\r"
+    "\n\002id\030\001 \001(\004:\0010\022\033\n\014dataReceives\030\002 \001(\010:\005fal"
+    "se\022\021\n\006uptime\030\003 \001(\003:\0010\022\031\n\016receivedDataID\030"
+    "\004 \001(\004:\0010\022 \n\025rupFramesQueueCurSize\030\005 \001(\005:"
+    "\0010\022#\n\030rupFramesQueueCurMaxSize\030\006 \001(\005:\0010\022"
+    "\034\n\021dataReceivingRate\030\007 \001(\001:\0010\022\033\n\020receive"
+    "dDataSize\030\010 \001(\003:\0010\022\036\n\023receivedFramesCoun"
+    "t\030\t \001(\003:\0010\022\036\n\023receivedPacketCount\030\n \001(\003:"
+    "\0010\022\032\n\017lostPacketCount\030\013 \001(\003:\0010\022$\n\025dataPr"
+    "ocessingEnabled\030\014 \001(\010:\005false\022\037\n\024processe"
+    "dPacketCount\030\r \001(\003:\0010\022\037\n\024lastPacketSyste"
+    "mTime\030\016 \001(\003:\0010\022\034\n\021rupFramePlantTime\030\017 \001("
+    "\003:\0010\022\034\n\021rupFrameNumerator\030\020 \001(\r:\0010\022#\n\030si"
+    "gnalStatesQueueCurSize\030\021 \001(\005:\0010\022&\n\033signa"
+    "lStatesQueueCurMaxSize\030\022 \001(\005:\0010\022\037\n\024acqui"
+    "redSignalsCount\030\023 \001(\005:\0010\022\037\n\024errorProtoco"
+    "lVersion\030\024 \001(\003:\0010\022\036\n\023errorFramesQuantity"
+    "\030\025 \001(\003:\0010\022\027\n\014errorFrameNo\030\026 \001(\003:\0010\022\026\n\013er"
+    "rorDataID\030\027 \001(\003:\0010\022\031\n\016errorFrameSize\030\030 \001"
+    "(\003:\0010\022\"\n\027errorDuplicatePlantTime\030\031 \001(\003:\001"
+    "0\022%\n\032errorNonmonotonicPlantTime\030\032 \001(\003:\0010"
+    "\022\025\n\rlmEquipmentID\030\033 \001(\t\022\035\n\022rupFramesQueu"
+    "eSize\030\034 \001(\005:\0010\022 \n\025signalStatesQueueSize\030"
+    "\035 \001(\005:\0010\022\020\n\005state\030\036 \001(\005:\0010\"k\n\034GetAppData"
+    "SourcesStatesReply\022\020\n\005error\030\001 \001(\005:\0010\0229\n\024"
+    "appDataSourcesStates\030\002 \003(\0132\033.Network.App"
+    "DataSourceState\"\220\002\n\023AppDataServiceState\022"
+    "$\n\025CfgServiceIsConnected\030\001 \002(\010:\005false\022\027\n"
+    "\014CfgServiceIp\030\002 \001(\r:\0010\022\031\n\016CfgServicePort"
+    "\030\003 \001(\005:\0010\022(\n\031ArchiveServiceIsConnected\030\004"
+    " \002(\010:\005false\022\033\n\020ArchiveServiceIp\030\005 \001(\r:\0010"
+    "\022\035\n\022ArchiveServicePort\030\006 \001(\005:\0010\0229\n\023appDa"
+    "taReceiveState\030\007 \001(\0132\034.Network.AppDataRe"
+    "ceiveState\"\377\001\n\014SoftwareInfo\022\032\n\014softwareT"
+    "ype\030\001 \002(\005:\0048000\022\023\n\013equipmentId\030\002 \002(\t\022\027\n\014"
+    "majorVersion\030\003 \002(\005:\0010\022\027\n\014minorVersion\030\004 "
+    "\002(\005:\0010\022\023\n\010commitNo\030\005 \002(\005:\0010\022\023\n\013buildBran"
+    "ch\030\006 \002(\t\022\021\n\tcommitSHA\030\007 \002(\t\022\020\n\010userName\030"
+    "\010 \002(\t\022\022\n\007buildNo\030\t \002(\005:\0010\022\016\n\003crc\030\n \002(\r:\001"
+    "0\022\031\n\021clientDescription\030\013 \001(\t\"\027\n\025GetServi"
+    "ceInfoRequest\"K\n\rSessionParams\022\036\n\026curren"
+    "tSettingsProfile\030\001 \001(\t\022\032\n\017softwareRunMod"
+    "e\030\002 \001(\005:\0010\"\304\001\n\013ServiceInfo\022+\n\014softwareIn"
+    "fo\030\001 \002(\0132\025.Network.SoftwareInfo\022\021\n\006uptim"
+    "e\030\002 \001(\003:\0010\022\027\n\014serviceState\030\003 \001(\005:\0010\022\030\n\rs"
+    "erviceUptime\030\004 \001(\003:\0010\022-\n\rsessionParams\030\005"
+    " \001(\0132\026.Network.SessionParams\022\023\n\013settings"
+    "Xml\030\006 \001(\t\"R\n\023GetServiceInfoReply\022\020\n\005erro"
+    "r\030\001 \002(\005:\0010\022)\n\013serviceInfo\030\002 \002(\0132\024.Networ"
+    "k.ServiceInfo\"x\n\031ConfigurationServiceSta"
+    "te\022\035\n\025currentBuildDirectory\030\001 \002(\t\022!\n\031che"
+    "ckBuildAttemptQuantity\030\002 \002(\005\022\031\n\021buildChe"
+    "ckerState\030\003 \002(\005\"\205\001\n\021ServiceClientInfo\022\n\n"
+    "\002ip\030\003 \002(\005\022\016\n\006uptime\030\005 \002(\003\022\020\n\010isActual\030\006 "
+    "\002(\010\022\025\n\rreplyQuantity\030\007 \002(\003\022+\n\014softwareIn"
+    "fo\030\013 \002(\0132\025.Network.SoftwareInfo\"=\n\016Servi"
+    "ceClients\022+\n\007clients\030\001 \003(\0132\032.Network.Ser"
+    "viceClientInfo\"s\n\tBuildInfo\022\017\n\007project\030\001"
+    " \002(\t\022\016\n\002id\030\002 \002(\005:\002-1\022\014\n\004date\030\004 \002(\003\022\024\n\tch"
+    "angeset\030\005 \002(\005:\0010\022\014\n\004user\030\006 \002(\t\022\023\n\013workst"
+    "ation\030\007 \002(\t\"e\n\034ConfigurationServiceSetti"
+    "ngs\022\023\n\013equipmentID\030\001 \002(\t\022\031\n\021autoloadBuil"
+    "dPath\030\002 \002(\t\022\025\n\rworkDirectory\030\003 \002(\t\"L\n\017Se"
+    "rviceSettings\022\023\n\013equipmentID\030\001 \002(\t\022\021\n\tco"
+    "nfigIP1\030\002 \002(\t\022\021\n\tconfigIP2\030\003 \002(\t\"\026\n\024GetT"
+    "uningSourcesInfo\"\263\001\n\031GetTuningSourcesInf"
+    "oReply\022\020\n\005error\030\001 \001(\005:\0010\0221\n\020tuningSource"
+    "Info\030\002 \003(\0132\027.Network.DataSourceInfo\022!\n\023s"
+    "ingleLmControlMode\030\003 \001(\010:\004true\022\026\n\016active"
+    "ClientID\030\004 \001(\t\022\026\n\016activeClientIP\030\005 \001(\t\"\030"
+    "\n\026GetTuningSourcesStates\"G\n\037SignalsAssoc"
+    "iatedToTuningSource\022\020\n\010sourceID\030\001 \002(\004\022\022\n"
+    "\nsignalHash\030\002 \003(\004\"n\n\023TuningSourceFilling"
+    "\022\023\n\013signalCount\030\001 \002(\004\022B\n\020signalsPerSourc"
+    "e\030\002 \003(\0132(.Network.SignalsAssociatedToTun"
+    "ingSource\"\273\013\n\021TuningSourceState\022\023\n\010sourc"
+    "eID\030\001 \001(\004:\0010\022\026\n\007isReply\030\002 \001(\010:\005false\022\027\n\014"
+    "requestCount\030\003 \001(\003:\0010\022\025\n\nreplyCount\030\004 \001("
+    "\003:\0010\022\033\n\020commandQueueSize\030\005 \001(\005:\0010\022\034\n\021err"
+    "UntimelyReplay\030\006 \001(\003:\0010\022\022\n\007errSent\030\007 \001(\003"
+    ":\0010\022\031\n\016errPartialSent\030\010 \001(\003:\0010\022\027\n\014errRep"
+    "lySize\030\t \001(\003:\0010\022\025\n\nerrNoReply\030\n \001(\003:\0010\022 "
+    "\n\025errRupProtocolVersion\030\013 \001(\003:\0010\022\032\n\017errR"
+    "upFrameSize\030\014 \001(\003:\0010\022\036\n\023errRupNonTuningD"
+    "ata\030\r \001(\003:\0010\022\033\n\020errRupModuleType\030\016 \001(\003:\001"
+    "0\022\037\n\024errRupFramesQuantity\030\017 \001(\003:\0010\022\034\n\021er"
+    "rRupFrameNumber\030\020 \001(\003:\0010\022\"\n\027errFotipProt"
+    "ocolVersion\030\021 \001(\003:\0010\022\033\n\020errFotipUniqueID"
+    "\030\022 \001(\003:\0010\022\033\n\020errFotipLmNumber\030\023 \001(\003:\0010\022 "
+    "\n\025errFotipSubsystemCode\030\024 \001(\003:\0010\022 \n\025errF"
+    "otipOperationCode\030\025 \001(\003:\0010\022\034\n\021errFotipFr"
+    "ameSize\030\026 \001(\003:\0010\022\032\n\017errFotipRomSize\030\027 \001("
+    "\003:\0010\022\037\n\024errFotipRomFrameSize\030\030 \001(\003:\0010\022&\n"
+    "\033fotipFlagBoundsCheckSuccess\030\031 \001(\003:\0010\022 \n"
+    "\025fotipFlagWriteSuccess\030\032 \001(\003:\0010\022\037\n\024fotip"
+    "FlagDataTypeErr\030\033 \001(\003:\0010\022\035\n\022fotipFlagOpC"
+    "odeErr\030\034 \001(\003:\0010\022 \n\025fotipFlagStartAddrErr"
+    "\030\035 \001(\003:\0010\022\036\n\023fotipFlagRomSizeErr\030\036 \001(\003:\001"
+    "0\022#\n\030fotipFlagRomFrameSizeErr\030\037 \001(\003:\0010\022 "
+    "\n\025fotipFlagFrameSizeErr\030  \001(\003:\0010\022&\n\033foti"
+    "pFlagProtocolVersionErr\030! \001(\003:\0010\022#\n\030foti"
+    "pFlagSubsystemKeyErr\030\" \001(\003:\0010\022\036\n\023fotipFl"
+    "agUniueIDErr\030# \001(\003:\0010\022\035\n\022fotipFlagOffset"
+    "Err\030$ \001(\003:\0010\022 \n\025fotipFlagApplySuccess\030% "
+    "\001(\003:\0010\022\032\n\017fotipFlagSetSOR\030& \001(\003:\0010\022!\n\026er"
+    "rAnalogLowBoundCheck\030\' \001(\003:\0010\022\"\n\027errAnal"
+    "ogHighBoundCheck\030( \001(\003:\0010\022\024\n\terrRupCRC\030)"
+    " \001(\003:\0010\022\036\n\017controlIsActive\030* \001(\010:\005false\022"
+    "\025\n\006setSOR\030+ \001(\010:\005false\022!\n\022hasUnappliedPa"
+    "rams\030, \001(\010:\005false\022\036\n\017writingDisabled\030- \001"
+    "(\010:\005false\022#\n\030fotipFlagWritingDisabled\030. "
+    "\001(\003:\0010\022\037\n\024errTuningFrameUpdate\030/ \001(\003:\0010\""
+    "\272\001\n\033GetTuningSourcesStatesReply\022\020\n\005error"
+    "\030\001 \001(\005:\0010\0226\n\022tuningSourcesState\030\002 \003(\0132\032."
+    "Network.TuningSourceState\022!\n\023singleLmCon"
+    "trolMode\030\003 \001(\010:\004true\022\026\n\016activeClientID\030\004"
+    " \001(\t\022\026\n\016activeClientIP\030\005 \001(\t\"z\n\"ChangeCo"
+    "nrolledTuningSourceRequest\022\023\n\013takeContro"
+    "l\030\001 \001(\010\022\037\n\027tuningSourceEquipmentID\030\002 \001(\t"
+    "\022\036\n\017activateControl\030\003 \001(\010:\005false\"\177\n Chan"
+    "geConrolledTuningSourceReply\022\020\n\005error\030\001 "
+    "\001(\005:\0010\022)\n!controlledTuningSourceEquipmen"
+    "tID\030\002 \001(\t\022\036\n\017controlIsActive\030\003 \001(\010:\005fals"
+    "e\"\'\n\021TuningSignalsRead\022\022\n\nsignalHash\030\002 \003"
+    "(\004\"\322\003\n\021TuningSignalState\022\025\n\nsignalHash\030\001"
+    " \001(\006:\0010\022\020\n\005error\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010"
+    ":\005false\022!\n\005value\030\004 \001(\0132\022.Proto.TuningVal"
+    "ue\022(\n\014readLowBound\030\005 \001(\0132\022.Proto.TuningV"
+    "alue\022)\n\rreadHighBound\030\006 \001(\0132\022.Proto.Tuni"
+    "ngValue\022\036\n\017writeInProgress\030\007 \001(\010:\005false\022"
+    "\031\n\016writeErrorCode\030\010 \001(\005:\0010\022\026\n\013writeClien"
+    "t\030\t \001(\006:\0010\022\035\n\022successfulReadTime\030\n \001(\020:\001"
+    "0\022\033\n\020writeRequestTime\030\013 \001(\020:\0010\022\036\n\023succes"
+    "sfulWriteTime\030\014 \001(\020:\0010\022 \n\025unsuccessfulWr"
+    "iteTime\030\r \001(\020:\0010\022\025\n\006setSOR\030\016 \001(\010:\005false\022"
+    "\036\n\017writingDisabled\030\017 \001(\010:\005false\"a\n\026Tunin"
+    "gSignalsReadReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021t"
+    "uningSignalState\030\002 \003(\0132\032.Network.TuningS"
+    "ignalState\"N\n\022TuningWriteCommand\022\025\n\nsign"
+    "alHash\030\001 \001(\004:\0010\022!\n\005value\030\002 \001(\0132\022.Proto.T"
+    "uningValue\"]\n\022TuningSignalsWrite\022\030\n\tauto"
+    "Apply\030\002 \001(\010:\005false\022-\n\010commands\030\003 \003(\0132\033.N"
+    "etwork.TuningWriteCommand\"B\n\027TuningSigna"
+    "lWriteResult\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005e"
+    "rror\030\002 \001(\005:\0010\"b\n\027TuningSignalsWriteReply"
+    "\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013writeResult\030\002 \003(\0132"
+    " .Network.TuningSignalWriteResult\"\024\n\022Tun"
+    "ingSignalsApply\"+\n\027TuningSignalsApplyRep"
+    "ly\022\020\n\005error\030\001 \001(\005:\0010\"B\n\017DataSourceWrite\022"
+    "\031\n\021sourceEquipmentID\030\001 \001(\t\022\024\n\005state\030\002 \001("
+    "\010:\005false\"(\n\024DataSourceWriteReply\022\020\n\005erro"
+    "r\030\001 \001(\005:\0010\"\022\n\020PacketSourceExit\")\n\025Packet"
+    "SourceExitReply\022\020\n\005error\030\001 \001(\005:\0010\"q\n$Sav"
+    "eAppSignalsStatesToArchiveRequest\022\031\n\021cli"
+    "entEquipmentID\030\001 \001(\t\022.\n\017appSignalStates\030"
+    "\002 \003(\0132\025.Proto.AppSignalState\"N\n\"SaveAppS"
+    "ignalsStatesToArchiveReply\022\020\n\005error\030\001 \001("
+    "\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\"\271\001\n)GetAppS"
+    "ignalStatesFromArchiveStartRequest\022\031\n\021cl"
+    "ientEquipmentID\030\001 \001(\t\022\023\n\010timeType\030\002 \001(\005:"
+    "\0011\022\024\n\tstartTime\030\003 \001(\020:\0010\022\022\n\007endTime\030\004 \001("
+    "\020:\0010\022\024\n\014signalHashes\030\005 \003(\004\022\034\n\016removePeri"
+    "odic\030\006 \001(\010:\004true\"~\n\'GetAppSignalStatesFr"
+    "omArchiveStartReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n"
+    "\tarchError\030\002 \001(\005:\003100\022\023\n\013errorString\030\004 \001"
+    "(\t\022\024\n\trequestID\030\003 \001(\r:\0010\"@\n(GetAppSignal"
+    "StatesFromArchiveNextRequest\022\024\n\trequestI"
+    "D\030\001 \001(\r:\0010\"\271\002\n&GetAppSignalStatesFromArc"
+    "hiveNextReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchE"
+    "rror\030\002 \001(\005:\003100\022\024\n\trequestID\030\003 \001(\r:\0010\022\023\n"
+    "\013errorString\030\n \001(\t\022\030\n\tdataReady\030\004 \001(\010:\005f"
+    "alse\022\033\n\020totalStatesCount\030\005 \001(\005:\0010\022\032\n\017sen"
+    "tStatesCount\030\006 \001(\005:\0010\022\034\n\021statesInPartCou"
+    "nt\030\007 \001(\005:\0010\022\031\n\nisLastPart\030\010 \001(\010:\005false\022."
+    "\n\017appSignalStates\030\t \003(\0132\025.Proto.AppSigna"
+    "lState\"B\n*GetAppSignalStatesFromArchiveC"
+    "ancelRequest\022\024\n\trequestID\030\001 \001(\r:\0010\"i\n(Ge"
+    "tAppSignalStatesFromArchiveCancelReply\022\020"
+    "\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100"
+    "\022\023\n\013errorString\030\003 \001(\t\"\204\001\n\031RtTrendsManage"
+    "mentRequest\022\031\n\021clientEquipmentID\030\001 \001(\t\022\024"
+    "\n\014samplePeriod\030\002 \001(\005\022\032\n\022appendSignalHash"
+    "es\030\003 \003(\004\022\032\n\022deleteSignalHashes\030\004 \003(\004\"s\n\027"
+    "RtTrendsManagementReply\022\020\n\005error\030\001 \001(\005:\001"
+    "0\022\023\n\013errorString\030\002 \001(\t\022\024\n\014samplePeriod\030\003"
+    " \001(\005\022\033\n\023trackedSignalHashes\030\004 \003(\004\" \n\036RtT"
+    "rendsGetStateChangesRequest\"r\n\034RtTrendsG"
+    "etStateChangesReply\022\020\n\005error\030\001 \001(\005:\0010\022\023\n"
+    "\013errorString\030\002 \001(\t\022+\n\014signalStates\030\003 \003(\013"
+    "2\025.Proto.AppSignalState\"\247\001\n\014GetFileReply"
+    "\022\024\n\terrorCode\030\001 \002(\005:\0010\022\023\n\010fileSize\030\002 \001(\003"
+    ":\0010\022\025\n\ntotalParts\030\003 \001(\005:\0010\022\026\n\013currentPar"
+    "t\030\004 \001(\005:\0010\022\032\n\017currentPartSize\030\005 \001(\005:\0010\022\013"
+    "\n\003md5\030\006 \001(\014\022\024\n\014filePartData\030\n \001(\014", 9553);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -1971,6 +1974,7 @@ void protobuf_AddDesc_network_2eproto() {
   AppDataServiceState::default_instance_ = new AppDataServiceState();
   SoftwareInfo::default_instance_ = new SoftwareInfo();
   GetServiceInfoRequest::default_instance_ = new GetServiceInfoRequest();
+  SessionParams::default_instance_ = new SessionParams();
   ServiceInfo::default_instance_ = new ServiceInfo();
   GetServiceInfoReply::default_instance_ = new GetServiceInfoReply();
   ConfigurationServiceState::default_instance_ = new ConfigurationServiceState();
@@ -2014,7 +2018,6 @@ void protobuf_AddDesc_network_2eproto() {
   RtTrendsGetStateChangesRequest::default_instance_ = new RtTrendsGetStateChangesRequest();
   RtTrendsGetStateChangesReply::default_instance_ = new RtTrendsGetStateChangesReply();
   GetFileReply::default_instance_ = new GetFileReply();
-  GetSessionParams::default_instance_ = new GetSessionParams();
   GetSignalListStartRequest::default_instance_->InitAsDefaultInstance();
   GetSignalListStartReply::default_instance_->InitAsDefaultInstance();
   GetSignalListNextRequest::default_instance_->InitAsDefaultInstance();
@@ -2036,6 +2039,7 @@ void protobuf_AddDesc_network_2eproto() {
   AppDataServiceState::default_instance_->InitAsDefaultInstance();
   SoftwareInfo::default_instance_->InitAsDefaultInstance();
   GetServiceInfoRequest::default_instance_->InitAsDefaultInstance();
+  SessionParams::default_instance_->InitAsDefaultInstance();
   ServiceInfo::default_instance_->InitAsDefaultInstance();
   GetServiceInfoReply::default_instance_->InitAsDefaultInstance();
   ConfigurationServiceState::default_instance_->InitAsDefaultInstance();
@@ -2079,7 +2083,6 @@ void protobuf_AddDesc_network_2eproto() {
   RtTrendsGetStateChangesRequest::default_instance_->InitAsDefaultInstance();
   RtTrendsGetStateChangesReply::default_instance_->InitAsDefaultInstance();
   GetFileReply::default_instance_->InitAsDefaultInstance();
-  GetSessionParams::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_network_2eproto);
 }
 
@@ -6458,6 +6461,7 @@ const int AppDataReceiveState::kErrDatagramSizeFieldNumber;
 const int AppDataReceiveState::kErrSimVersionFieldNumber;
 const int AppDataReceiveState::kErrUnknownAppDataSourceIPFieldNumber;
 const int AppDataReceiveState::kErrRupFrameCRCFieldNumber;
+const int AppDataReceiveState::kErrNotExpectedSimPacketFieldNumber;
 #endif  // !_MSC_VER
 
 AppDataReceiveState::AppDataReceiveState()
@@ -6485,6 +6489,7 @@ void AppDataReceiveState::SharedCtor() {
   errsimversion_ = GOOGLE_LONGLONG(0);
   errunknownappdatasourceip_ = GOOGLE_LONGLONG(0);
   errrupframecrc_ = GOOGLE_LONGLONG(0);
+  errnotexpectedsimpacket_ = GOOGLE_LONGLONG(0);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -6531,6 +6536,7 @@ void AppDataReceiveState::Clear() {
   }
   if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     errrupframecrc_ = GOOGLE_LONGLONG(0);
+    errnotexpectedsimpacket_ = GOOGLE_LONGLONG(0);
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -6681,6 +6687,22 @@ bool AppDataReceiveState::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(80)) goto parse_errNotExpectedSimPacket;
+        break;
+      }
+
+      // optional int64 errNotExpectedSimPacket = 10 [default = 0];
+      case 10: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_errNotExpectedSimPacket:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &errnotexpectedsimpacket_)));
+          set_has_errnotexpectedsimpacket();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -6748,6 +6770,11 @@ void AppDataReceiveState::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt64(9, this->errrupframecrc(), output);
   }
 
+  // optional int64 errNotExpectedSimPacket = 10 [default = 0];
+  if (has_errnotexpectedsimpacket()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(10, this->errnotexpectedsimpacket(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -6799,6 +6826,11 @@ void AppDataReceiveState::SerializeWithCachedSizes(
   // optional int64 errRupFrameCRC = 9 [default = 0];
   if (has_errrupframecrc()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(9, this->errrupframecrc(), target);
+  }
+
+  // optional int64 errNotExpectedSimPacket = 10 [default = 0];
+  if (has_errnotexpectedsimpacket()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(10, this->errnotexpectedsimpacket(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -6877,6 +6909,13 @@ int AppDataReceiveState::ByteSize() const {
           this->errrupframecrc());
     }
 
+    // optional int64 errNotExpectedSimPacket = 10 [default = 0];
+    if (has_errnotexpectedsimpacket()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
+          this->errnotexpectedsimpacket());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -6933,6 +6972,9 @@ void AppDataReceiveState::MergeFrom(const AppDataReceiveState& from) {
     if (from.has_errrupframecrc()) {
       set_errrupframecrc(from.errrupframecrc());
     }
+    if (from.has_errnotexpectedsimpacket()) {
+      set_errnotexpectedsimpacket(from.errnotexpectedsimpacket());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -6965,6 +7007,7 @@ void AppDataReceiveState::Swap(AppDataReceiveState* other) {
     std::swap(errsimversion_, other->errsimversion_);
     std::swap(errunknownappdatasourceip_, other->errunknownappdatasourceip_);
     std::swap(errrupframecrc_, other->errrupframecrc_);
+    std::swap(errnotexpectedsimpacket_, other->errnotexpectedsimpacket_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -9934,12 +9977,277 @@ void GetServiceInfoRequest::Swap(GetServiceInfoRequest* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
+const int SessionParams::kCurrentSettingsProfileFieldNumber;
+const int SessionParams::kSoftwareRunModeFieldNumber;
+#endif  // !_MSC_VER
+
+SessionParams::SessionParams()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void SessionParams::InitAsDefaultInstance() {
+}
+
+SessionParams::SessionParams(const SessionParams& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void SessionParams::SharedCtor() {
+  _cached_size_ = 0;
+  currentsettingsprofile_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  softwarerunmode_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+SessionParams::~SessionParams() {
+  SharedDtor();
+}
+
+void SessionParams::SharedDtor() {
+  if (currentsettingsprofile_ != &::google::protobuf::internal::kEmptyString) {
+    delete currentsettingsprofile_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void SessionParams::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* SessionParams::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return SessionParams_descriptor_;
+}
+
+const SessionParams& SessionParams::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
+  return *default_instance_;
+}
+
+SessionParams* SessionParams::default_instance_ = NULL;
+
+SessionParams* SessionParams::New() const {
+  return new SessionParams;
+}
+
+void SessionParams::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_currentsettingsprofile()) {
+      if (currentsettingsprofile_ != &::google::protobuf::internal::kEmptyString) {
+        currentsettingsprofile_->clear();
+      }
+    }
+    softwarerunmode_ = 0;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool SessionParams::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional string currentSettingsProfile = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_currentsettingsprofile()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->currentsettingsprofile().data(), this->currentsettingsprofile().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_softwareRunMode;
+        break;
+      }
+
+      // optional int32 softwareRunMode = 2 [default = 0];
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_softwareRunMode:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &softwarerunmode_)));
+          set_has_softwarerunmode();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void SessionParams::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional string currentSettingsProfile = 1;
+  if (has_currentsettingsprofile()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->currentsettingsprofile().data(), this->currentsettingsprofile().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      1, this->currentsettingsprofile(), output);
+  }
+
+  // optional int32 softwareRunMode = 2 [default = 0];
+  if (has_softwarerunmode()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->softwarerunmode(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* SessionParams::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional string currentSettingsProfile = 1;
+  if (has_currentsettingsprofile()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->currentsettingsprofile().data(), this->currentsettingsprofile().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->currentsettingsprofile(), target);
+  }
+
+  // optional int32 softwareRunMode = 2 [default = 0];
+  if (has_softwarerunmode()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->softwarerunmode(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int SessionParams::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional string currentSettingsProfile = 1;
+    if (has_currentsettingsprofile()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->currentsettingsprofile());
+    }
+
+    // optional int32 softwareRunMode = 2 [default = 0];
+    if (has_softwarerunmode()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->softwarerunmode());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void SessionParams::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const SessionParams* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const SessionParams*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void SessionParams::MergeFrom(const SessionParams& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_currentsettingsprofile()) {
+      set_currentsettingsprofile(from.currentsettingsprofile());
+    }
+    if (from.has_softwarerunmode()) {
+      set_softwarerunmode(from.softwarerunmode());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void SessionParams::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void SessionParams::CopyFrom(const SessionParams& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SessionParams::IsInitialized() const {
+
+  return true;
+}
+
+void SessionParams::Swap(SessionParams* other) {
+  if (other != this) {
+    std::swap(currentsettingsprofile_, other->currentsettingsprofile_);
+    std::swap(softwarerunmode_, other->softwarerunmode_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata SessionParams::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = SessionParams_descriptor_;
+  metadata.reflection = SessionParams_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
 const int ServiceInfo::kSoftwareInfoFieldNumber;
 const int ServiceInfo::kUptimeFieldNumber;
 const int ServiceInfo::kServiceStateFieldNumber;
 const int ServiceInfo::kServiceUptimeFieldNumber;
-const int ServiceInfo::kClientRequestIPFieldNumber;
-const int ServiceInfo::kClientRequestPortFieldNumber;
+const int ServiceInfo::kSessionParamsFieldNumber;
+const int ServiceInfo::kSettingsXmlFieldNumber;
 #endif  // !_MSC_VER
 
 ServiceInfo::ServiceInfo()
@@ -9949,6 +10257,7 @@ ServiceInfo::ServiceInfo()
 
 void ServiceInfo::InitAsDefaultInstance() {
   softwareinfo_ = const_cast< ::Network::SoftwareInfo*>(&::Network::SoftwareInfo::default_instance());
+  sessionparams_ = const_cast< ::Network::SessionParams*>(&::Network::SessionParams::default_instance());
 }
 
 ServiceInfo::ServiceInfo(const ServiceInfo& from)
@@ -9963,8 +10272,8 @@ void ServiceInfo::SharedCtor() {
   uptime_ = GOOGLE_LONGLONG(0);
   servicestate_ = 0;
   serviceuptime_ = GOOGLE_LONGLONG(0);
-  clientrequestip_ = 0u;
-  clientrequestport_ = 0;
+  sessionparams_ = NULL;
+  settingsxml_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -9973,8 +10282,12 @@ ServiceInfo::~ServiceInfo() {
 }
 
 void ServiceInfo::SharedDtor() {
+  if (settingsxml_ != &::google::protobuf::internal::kEmptyString) {
+    delete settingsxml_;
+  }
   if (this != default_instance_) {
     delete softwareinfo_;
+    delete sessionparams_;
   }
 }
 
@@ -10007,8 +10320,14 @@ void ServiceInfo::Clear() {
     uptime_ = GOOGLE_LONGLONG(0);
     servicestate_ = 0;
     serviceuptime_ = GOOGLE_LONGLONG(0);
-    clientrequestip_ = 0u;
-    clientrequestport_ = 0;
+    if (has_sessionparams()) {
+      if (sessionparams_ != NULL) sessionparams_->::Network::SessionParams::Clear();
+    }
+    if (has_settingsxml()) {
+      if (settingsxml_ != &::google::protobuf::internal::kEmptyString) {
+        settingsxml_->clear();
+      }
+    }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -10077,35 +10396,34 @@ bool ServiceInfo::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(40)) goto parse_clientRequestIP;
+        if (input->ExpectTag(42)) goto parse_sessionParams;
         break;
       }
 
-      // optional uint32 clientRequestIP = 5 [default = 0];
+      // optional .Network.SessionParams sessionParams = 5;
       case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_clientRequestIP:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &clientrequestip_)));
-          set_has_clientrequestip();
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_sessionParams:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_sessionparams()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(48)) goto parse_clientRequestPort;
+        if (input->ExpectTag(50)) goto parse_settingsXml;
         break;
       }
 
-      // optional int32 clientRequestPort = 6 [default = 0];
+      // optional string settingsXml = 6;
       case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_clientRequestPort:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &clientrequestport_)));
-          set_has_clientrequestport();
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_settingsXml:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_settingsxml()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->settingsxml().data(), this->settingsxml().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
         } else {
           goto handle_uninterpreted;
         }
@@ -10152,14 +10470,19 @@ void ServiceInfo::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt64(4, this->serviceuptime(), output);
   }
 
-  // optional uint32 clientRequestIP = 5 [default = 0];
-  if (has_clientrequestip()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(5, this->clientrequestip(), output);
+  // optional .Network.SessionParams sessionParams = 5;
+  if (has_sessionparams()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      5, this->sessionparams(), output);
   }
 
-  // optional int32 clientRequestPort = 6 [default = 0];
-  if (has_clientrequestport()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(6, this->clientrequestport(), output);
+  // optional string settingsXml = 6;
+  if (has_settingsxml()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->settingsxml().data(), this->settingsxml().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      6, this->settingsxml(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -10192,14 +10515,21 @@ void ServiceInfo::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(4, this->serviceuptime(), target);
   }
 
-  // optional uint32 clientRequestIP = 5 [default = 0];
-  if (has_clientrequestip()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(5, this->clientrequestip(), target);
+  // optional .Network.SessionParams sessionParams = 5;
+  if (has_sessionparams()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        5, this->sessionparams(), target);
   }
 
-  // optional int32 clientRequestPort = 6 [default = 0];
-  if (has_clientrequestport()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(6, this->clientrequestport(), target);
+  // optional string settingsXml = 6;
+  if (has_settingsxml()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->settingsxml().data(), this->settingsxml().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        6, this->settingsxml(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -10241,18 +10571,18 @@ int ServiceInfo::ByteSize() const {
           this->serviceuptime());
     }
 
-    // optional uint32 clientRequestIP = 5 [default = 0];
-    if (has_clientrequestip()) {
+    // optional .Network.SessionParams sessionParams = 5;
+    if (has_sessionparams()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->clientrequestip());
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->sessionparams());
     }
 
-    // optional int32 clientRequestPort = 6 [default = 0];
-    if (has_clientrequestport()) {
+    // optional string settingsXml = 6;
+    if (has_settingsxml()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->clientrequestport());
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->settingsxml());
     }
 
   }
@@ -10294,11 +10624,11 @@ void ServiceInfo::MergeFrom(const ServiceInfo& from) {
     if (from.has_serviceuptime()) {
       set_serviceuptime(from.serviceuptime());
     }
-    if (from.has_clientrequestip()) {
-      set_clientrequestip(from.clientrequestip());
+    if (from.has_sessionparams()) {
+      mutable_sessionparams()->::Network::SessionParams::MergeFrom(from.sessionparams());
     }
-    if (from.has_clientrequestport()) {
-      set_clientrequestport(from.clientrequestport());
+    if (from.has_settingsxml()) {
+      set_settingsxml(from.settingsxml());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -10331,8 +10661,8 @@ void ServiceInfo::Swap(ServiceInfo* other) {
     std::swap(uptime_, other->uptime_);
     std::swap(servicestate_, other->servicestate_);
     std::swap(serviceuptime_, other->serviceuptime_);
-    std::swap(clientrequestip_, other->clientrequestip_);
-    std::swap(clientrequestport_, other->clientrequestport_);
+    std::swap(sessionparams_, other->sessionparams_);
+    std::swap(settingsxml_, other->settingsxml_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -24577,231 +24907,6 @@ void GetFileReply::Swap(GetFileReply* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = GetFileReply_descriptor_;
   metadata.reflection = GetFileReply_reflection_;
-  return metadata;
-}
-
-
-// ===================================================================
-
-#ifndef _MSC_VER
-const int GetSessionParams::kCurrentSettingsProfileFieldNumber;
-#endif  // !_MSC_VER
-
-GetSessionParams::GetSessionParams()
-  : ::google::protobuf::Message() {
-  SharedCtor();
-}
-
-void GetSessionParams::InitAsDefaultInstance() {
-}
-
-GetSessionParams::GetSessionParams(const GetSessionParams& from)
-  : ::google::protobuf::Message() {
-  SharedCtor();
-  MergeFrom(from);
-}
-
-void GetSessionParams::SharedCtor() {
-  _cached_size_ = 0;
-  currentsettingsprofile_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  ::memset(_has_bits_, 0, sizeof(_has_bits_));
-}
-
-GetSessionParams::~GetSessionParams() {
-  SharedDtor();
-}
-
-void GetSessionParams::SharedDtor() {
-  if (currentsettingsprofile_ != &::google::protobuf::internal::kEmptyString) {
-    delete currentsettingsprofile_;
-  }
-  if (this != default_instance_) {
-  }
-}
-
-void GetSessionParams::SetCachedSize(int size) const {
-  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
-  _cached_size_ = size;
-  GOOGLE_SAFE_CONCURRENT_WRITES_END();
-}
-const ::google::protobuf::Descriptor* GetSessionParams::descriptor() {
-  protobuf_AssignDescriptorsOnce();
-  return GetSessionParams_descriptor_;
-}
-
-const GetSessionParams& GetSessionParams::default_instance() {
-  if (default_instance_ == NULL) protobuf_AddDesc_network_2eproto();
-  return *default_instance_;
-}
-
-GetSessionParams* GetSessionParams::default_instance_ = NULL;
-
-GetSessionParams* GetSessionParams::New() const {
-  return new GetSessionParams;
-}
-
-void GetSessionParams::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (has_currentsettingsprofile()) {
-      if (currentsettingsprofile_ != &::google::protobuf::internal::kEmptyString) {
-        currentsettingsprofile_->clear();
-      }
-    }
-  }
-  ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
-}
-
-bool GetSessionParams::MergePartialFromCodedStream(
-    ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
-  ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
-    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional string currentSettingsProfile = 1;
-      case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_currentsettingsprofile()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->currentsettingsprofile().data(), this->currentsettingsprofile().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectAtEnd()) return true;
-        break;
-      }
-
-      default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
-        }
-        DO_(::google::protobuf::internal::WireFormat::SkipField(
-              input, tag, mutable_unknown_fields()));
-        break;
-      }
-    }
-  }
-  return true;
-#undef DO_
-}
-
-void GetSessionParams::SerializeWithCachedSizes(
-    ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional string currentSettingsProfile = 1;
-  if (has_currentsettingsprofile()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->currentsettingsprofile().data(), this->currentsettingsprofile().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
-      1, this->currentsettingsprofile(), output);
-  }
-
-  if (!unknown_fields().empty()) {
-    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
-        unknown_fields(), output);
-  }
-}
-
-::google::protobuf::uint8* GetSessionParams::SerializeWithCachedSizesToArray(
-    ::google::protobuf::uint8* target) const {
-  // optional string currentSettingsProfile = 1;
-  if (has_currentsettingsprofile()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->currentsettingsprofile().data(), this->currentsettingsprofile().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        1, this->currentsettingsprofile(), target);
-  }
-
-  if (!unknown_fields().empty()) {
-    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
-        unknown_fields(), target);
-  }
-  return target;
-}
-
-int GetSessionParams::ByteSize() const {
-  int total_size = 0;
-
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional string currentSettingsProfile = 1;
-    if (has_currentsettingsprofile()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->currentsettingsprofile());
-    }
-
-  }
-  if (!unknown_fields().empty()) {
-    total_size +=
-      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
-        unknown_fields());
-  }
-  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
-  _cached_size_ = total_size;
-  GOOGLE_SAFE_CONCURRENT_WRITES_END();
-  return total_size;
-}
-
-void GetSessionParams::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  const GetSessionParams* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const GetSessionParams*>(
-      &from);
-  if (source == NULL) {
-    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
-  } else {
-    MergeFrom(*source);
-  }
-}
-
-void GetSessionParams::MergeFrom(const GetSessionParams& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_currentsettingsprofile()) {
-      set_currentsettingsprofile(from.currentsettingsprofile());
-    }
-  }
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
-}
-
-void GetSessionParams::CopyFrom(const ::google::protobuf::Message& from) {
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-void GetSessionParams::CopyFrom(const GetSessionParams& from) {
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-bool GetSessionParams::IsInitialized() const {
-
-  return true;
-}
-
-void GetSessionParams::Swap(GetSessionParams* other) {
-  if (other != this) {
-    std::swap(currentsettingsprofile_, other->currentsettingsprofile_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
-}
-
-::google::protobuf::Metadata GetSessionParams::GetMetadata() const {
-  protobuf_AssignDescriptorsOnce();
-  ::google::protobuf::Metadata metadata;
-  metadata.descriptor = GetSessionParams_descriptor_;
-  metadata.reflection = GetSessionParams_reflection_;
   return metadata;
 }
 

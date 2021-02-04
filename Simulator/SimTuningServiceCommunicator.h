@@ -19,7 +19,7 @@ namespace Sim
 		Q_OBJECT
 
 	public:
-		TuningServiceCommunicator(Simulator* simulator, const TuningServiceSettings& settings);
+		TuningServiceCommunicator(Simulator* simulator, const QString& tuningServiceEquipmentID);
 		virtual ~TuningServiceCommunicator();
 
 	public:
@@ -57,6 +57,8 @@ namespace Sim
 
 		void tuningModeLeft(const QString& lmEquipmentId, const QString& portEquipmentId);
 
+		QString tuningServiceEquipmentID() const;
+
 	public:
 		// Write command to LM's RAM
 		// Save returned qint64 (RecordIndex) for confirmation
@@ -71,7 +73,7 @@ namespace Sim
 	private:
 		qint64 writeTuningRecord(TuningRecord&& r);
 
-		void startProcessingThread();
+		void startProcessingThread(const QString& curProfileName);
 		void stopProcessingThread();
 
 	protected slots:
@@ -84,9 +86,8 @@ namespace Sim
 		//
 	private:
 		Simulator* m_simulator = nullptr;
+		const QString m_tuningServiceEquipmentID;
 		mutable ScopedLog m_log;
-
-		::TuningServiceSettings m_settings;
 
 		std::atomic<bool> m_enabled{true};		// Allow communication to TuningService
 
@@ -104,7 +105,10 @@ namespace Sim
 	class TuningRequestsProcessingThread : public RunOverrideThread
 	{
 	public:
-		TuningRequestsProcessingThread(TuningServiceCommunicator* tsCommunicator, const TuningServiceSettings& settings);
+		TuningRequestsProcessingThread(TuningServiceCommunicator& tsCommunicator,
+									   const QString& curProfileName,
+									   ScopedLog& log);
+
 		virtual ~TuningRequestsProcessingThread() override;
 
 		void updateTuningData(const QString& lmEquipmentID,
@@ -170,11 +174,11 @@ namespace Sim
 		};
 
 	private:
-		TuningServiceCommunicator* m_tsCommunicator = nullptr;
-		Simulator* m_sim = nullptr;
+		TuningServiceCommunicator& m_tsCommunicator;
+		QString m_curProfileName;
+		Simulator& m_sim;
 		ScopedLog& m_log;
 
-		QString m_tuningServiceEquipmentID;
 		HostAddressPort m_tuningRequestsReceivingIP;
 		HostAddressPort m_tuningRepliesSendingIP;
 
@@ -195,7 +199,7 @@ namespace Sim
 	class TuningSourceHandler
 	{
 	public:
-		TuningSourceHandler(TuningServiceCommunicator* tsCommunicator,
+		TuningSourceHandler(TuningServiceCommunicator& tsCommunicator,
 							  const QString& lmEquipmentID,
 							  const QString& portEquipmentID,
 							  const HostAddressPort& ip,
@@ -233,7 +237,7 @@ namespace Sim
 		void readFrameData(quint32 startFrameAddrW, FotipV2::Frame* reply);
 
 	private:
-		TuningServiceCommunicator* m_tsCommunicator = nullptr;
+		TuningServiceCommunicator& m_tsCommunicator;
 		QString m_lmEquipmentID;
 		QString m_portEquipmentID;
 		HostAddressPort m_tuningSourceIP;

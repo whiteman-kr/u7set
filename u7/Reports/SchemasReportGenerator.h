@@ -4,15 +4,33 @@
 class SchemasReportDialog : public QDialog
 {
 	Q_OBJECT
-public:
-	SchemasReportDialog(const QString& path, const QPageSize& pageSize, const QPageLayout::Orientation orientation, const QMarginsF& margins, QWidget *parent);
 
 public:
-	QString reportPath() const;
+	static bool getReportFileName(QString* fileName,
+							 QPageLayout* pageLayout,
+							 QWidget *parent);
 
-	QPageSize pageSize() const;
-	QPageLayout::Orientation orientation() const;
-	QMarginsF margins() const;
+	static bool getReportFilesPath(QString* path,
+							 std::vector<ReportFileTypeParams>* reportFileTypeParams,
+							 const std::vector<ReportFileTypeParams>& defaultFileTypeParams,
+							 QWidget *parent);
+private:
+	enum class Type
+	{
+		SelectFile,
+		SelectPath
+	};
+
+	SchemasReportDialog(Type type, QString* path,  QWidget *parent);
+
+	SchemasReportDialog(QString* path,
+						std::vector<ReportFileTypeParams>* reportFileTypeParams,
+						const std::vector<ReportFileTypeParams>& defaultFileTypeParams,
+						QWidget *parent);
+
+	SchemasReportDialog(QString* fileName,
+						QPageLayout* pageLayout,
+						QWidget *parent);
 
 private slots:
 	void okClicked();
@@ -20,10 +38,15 @@ private slots:
 	void pageSetupClicked();
 
 private:
-	QString m_reportPath;
-	QPageSize m_pageSize;
-	QPageLayout::Orientation m_orientation = QPageLayout::Orientation::Portrait;
-	QMarginsF m_margins;
+
+	Type m_type = Type::SelectFile;
+
+	QString* m_reportPath = nullptr;
+
+	QPageLayout* m_pageLayout = nullptr;
+
+	std::vector<ReportFileTypeParams>* m_reportFileTypeParams = nullptr;
+	std::vector<ReportFileTypeParams> m_defaultFileTypeParams;
 
 	QLineEdit* m_editReportPath = nullptr;
 };
@@ -31,7 +54,6 @@ private:
 class SchemasReportGeneratorThread
 {
 public:
-
 	SchemasReportGeneratorThread(const QString& serverIp,
 						   int serverPort,
 						   const QString& serverUserName,
@@ -41,7 +63,18 @@ public:
 						   const QString& userPassword,
 						   QWidget* parent);
 
-	void run(const std::vector<DbFileInfo>& files, bool album);
+	void exportSchemasToPdf(const QString& filePath, const std::vector<DbFileInfo>& files);
+	void exportSchemasToAlbum(const QString& filePath, const std::vector<DbFileInfo>& files, const QPageLayout& pageLayout);
+	void exportAllSchemasToAlbum(const QString& filePath, const std::vector<ReportFileTypeParams>& reportFileTypeParams);
+
+private:
+	enum class TaskType
+	{
+		ExportFilesToPdf,
+		ExportFilesToAlbum,
+		ExportAllSchemasToAlbum
+	};
+	void run(TaskType task, const QString& filePath, const std::vector<DbFileInfo>& files, const QPageLayout& albumPageLayout, const std::vector<ReportFileTypeParams>& albumsFileTypeParams);
 
 private:
 	QString m_serverIp;
@@ -54,10 +87,6 @@ private:
 	QString m_userPassword;
 
 	QWidget* m_parent = nullptr;
-
-	static QPageSize m_albumPageSize;
-	static QPageLayout::Orientation m_albumOrientation;
-	static QMarginsF m_albumMargins;
 };
 
 //
@@ -80,18 +109,17 @@ public:
 						std::vector<DbFileInfo> files,
 						const QString& filePath);
 
-
-	/*
-	SchemasReportGenerator(ReportSchemaView* schemaView,
-						std::vector<std::shared_ptr<VFrame30::Schema>> schemas,
-						std::vector<std::shared_ptr<QBuffer>>* outputBuffers,
-						bool singleFile);*/
-
 	virtual ~SchemasReportGenerator();
 
+	void setReportFileTypeParams(const std::vector<ReportFileTypeParams>& reportFileTypeParams);
+
+	static std::vector<ReportFileTypeParams> defaultFileTypeParams(DbController* db);
+
 public slots:
-	void createPDFs();
-	void createAlbum();
+	void exportFilesToPdf();
+	void exportFilesToAlbum();
+	void exportAllSchemasToAlbum();
+
 	void stop();
 	void progressRequested();
 
@@ -113,26 +141,44 @@ public:
 	WorkerStatus currentStatus() const;
 	int schemasCount() const;
 	int schemaIndex() const;
+	QString currentSchemaType() const;
 	QString currentSchemaId() const;
 
 private:
-	DbController* db();
+	struct SchemaFilesInfo
+	{
+		SchemaFilesInfo(int fileId, const QString& caption)
+		{
+			this->fileId = fileId;
+			this->caption = caption;
+		}
 
+		int fileId = -1;
+		QString caption;
+
+		std::vector<DbFileInfo> schemasFiles;
+		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;	// Key is full path to schema file
+	};
+
+private:
+	DbController* db();
 	const QString& filePath() const;
 
-	void loadSchemas();
+	void openProject();
+	void closeProject();
+	void loadSchemas(const std::vector<DbFileInfo>& files, std::map<QString, std::shared_ptr<VFrame30::Schema>>* schemas);
 
 private:
 	DbController m_db;
 
-	// Input data (files or pointer to schemas)
-	//
-	std::map<QString, std::shared_ptr<VFrame30::Schema>> m_schemas;	// Key is full path to schema file
-	std::vector<DbFileInfo> m_files;
+	std::vector<ReportFileTypeParams> m_reportFileTypeParams;
 
-	// Output data (file path or output buffers)
+	// Input files for exportFilesToPdf() and exportFilesToAlbum()
 	//
-	std::vector<std::shared_ptr<QBuffer>>* m_outputBuffers = nullptr;
+	std::vector<DbFileInfo> m_inputFiles;
+
+	// Output file path
+	//
 	QString m_filePath;
 
 	// Report parameters
@@ -161,6 +207,7 @@ private:
 	mutable QMutex m_statisticsMutex;
 	int m_schemasCount = 0;	// Calculated after text rendering
 	int m_schemaIndex = 0;
+	QString m_currentSchemaType;
 	QString m_currentSchemaId;
 
 };

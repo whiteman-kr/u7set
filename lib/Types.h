@@ -526,9 +526,17 @@ public:
 		Blocked,
 		Mismatch,
 		AboveHighLimit,
-		BelowLowLimit
+		BelowLowLimit,
+		SwSimulated
 	};
 	Q_ENUM(AppSignalStateFlagType)
+
+	enum class SoftwareRunMode
+	{
+		Normal,
+		Simulation
+	};
+	Q_ENUM(SoftwareRunMode)
 
 	// For Monitor
 	//

@@ -516,6 +516,8 @@ void AppDataServiceWidget::updateServiceState()
 	stateTabModel()->setData(stateTabModel()->index(14, 1), static_cast<qint64>(state.errsimversion()));
 	stateTabModel()->setData(stateTabModel()->index(15, 1), static_cast<qint64>(state.errunknownappdatasourceip()));
 	stateTabModel()->setData(stateTabModel()->index(16, 1), static_cast<qint64>(state.errrupframecrc()));
+
+	stateTabModel()->setData(stateTabModel()->index(17, 1), static_cast<qint64>(state.errnotexpectedsimpacket()));
 }
 
 void AppDataServiceWidget::updateStateInfo()
@@ -538,6 +540,8 @@ void AppDataServiceWidget::updateStateInfo()
 		stateTabModel()->setData(stateTabModel()->index(15, 0), "Unknown AppDataSource IP errors");
 		stateTabModel()->setData(stateTabModel()->index(16, 0), "RUP frames CRC errors");
 
+		stateTabModel()->setData(stateTabModel()->index(17, 0), "Not expected Simulated packets");
+
 		if (m_tcpClientSocket == nullptr || m_tcpClientSocket->stateIsReady() == false)
 		{
 			stateTabModel()->setData(stateTabModel()->index(6, 1), "???");
@@ -549,8 +553,14 @@ void AppDataServiceWidget::updateStateInfo()
 		}
 	}
 
-	quint32 ip = m_serviceInfo.clientrequestip();
-	qint32 port = m_serviceInfo.clientrequestport();
+	//	quint32 ip = m_serviceInfo.clientrequestip();
+	//	qint32 port = m_serviceInfo.clientrequestport();
+	//
+	// Work Here
+	Q_ASSERT(false);
+
+	quint32 ip = 0;
+	quint32 port = 0;
 
 	quint32 workingIp = getWorkingClientRequestIp();
 

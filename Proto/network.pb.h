@@ -55,6 +55,7 @@ class GetAppDataSourcesStatesReply;
 class AppDataServiceState;
 class SoftwareInfo;
 class GetServiceInfoRequest;
+class SessionParams;
 class ServiceInfo;
 class GetServiceInfoReply;
 class ConfigurationServiceState;
@@ -98,7 +99,6 @@ class RtTrendsManagementReply;
 class RtTrendsGetStateChangesRequest;
 class RtTrendsGetStateChangesReply;
 class GetFileReply;
-class GetSessionParams;
 
 // ===================================================================
 
@@ -1795,6 +1795,13 @@ class AppDataReceiveState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 errrupframecrc() const;
   inline void set_errrupframecrc(::google::protobuf::int64 value);
 
+  // optional int64 errNotExpectedSimPacket = 10 [default = 0];
+  inline bool has_errnotexpectedsimpacket() const;
+  inline void clear_errnotexpectedsimpacket();
+  static const int kErrNotExpectedSimPacketFieldNumber = 10;
+  inline ::google::protobuf::int64 errnotexpectedsimpacket() const;
+  inline void set_errnotexpectedsimpacket(::google::protobuf::int64 value);
+
   // @@protoc_insertion_point(class_scope:Network.AppDataReceiveState)
  private:
   inline void set_has_receivingrate();
@@ -1815,6 +1822,8 @@ class AppDataReceiveState : public ::google::protobuf::Message {
   inline void clear_has_errunknownappdatasourceip();
   inline void set_has_errrupframecrc();
   inline void clear_has_errrupframecrc();
+  inline void set_has_errnotexpectedsimpacket();
+  inline void clear_has_errnotexpectedsimpacket();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1826,10 +1835,11 @@ class AppDataReceiveState : public ::google::protobuf::Message {
   ::google::protobuf::int64 errsimversion_;
   ::google::protobuf::int64 errunknownappdatasourceip_;
   ::google::protobuf::int64 errrupframecrc_;
+  ::google::protobuf::int64 errnotexpectedsimpacket_;
   ::google::protobuf::int32 rupframesreceivingrate_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -2735,6 +2745,103 @@ class GetServiceInfoRequest : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class SessionParams : public ::google::protobuf::Message {
+ public:
+  SessionParams();
+  virtual ~SessionParams();
+
+  SessionParams(const SessionParams& from);
+
+  inline SessionParams& operator=(const SessionParams& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SessionParams& default_instance();
+
+  void Swap(SessionParams* other);
+
+  // implements Message ----------------------------------------------
+
+  SessionParams* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SessionParams& from);
+  void MergeFrom(const SessionParams& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string currentSettingsProfile = 1;
+  inline bool has_currentsettingsprofile() const;
+  inline void clear_currentsettingsprofile();
+  static const int kCurrentSettingsProfileFieldNumber = 1;
+  inline const ::std::string& currentsettingsprofile() const;
+  inline void set_currentsettingsprofile(const ::std::string& value);
+  inline void set_currentsettingsprofile(const char* value);
+  inline void set_currentsettingsprofile(const char* value, size_t size);
+  inline ::std::string* mutable_currentsettingsprofile();
+  inline ::std::string* release_currentsettingsprofile();
+  inline void set_allocated_currentsettingsprofile(::std::string* currentsettingsprofile);
+
+  // optional int32 softwareRunMode = 2 [default = 0];
+  inline bool has_softwarerunmode() const;
+  inline void clear_softwarerunmode();
+  static const int kSoftwareRunModeFieldNumber = 2;
+  inline ::google::protobuf::int32 softwarerunmode() const;
+  inline void set_softwarerunmode(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Network.SessionParams)
+ private:
+  inline void set_has_currentsettingsprofile();
+  inline void clear_has_currentsettingsprofile();
+  inline void set_has_softwarerunmode();
+  inline void clear_has_softwarerunmode();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* currentsettingsprofile_;
+  ::google::protobuf::int32 softwarerunmode_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static SessionParams* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class ServiceInfo : public ::google::protobuf::Message {
  public:
   ServiceInfo();
@@ -2819,19 +2926,26 @@ class ServiceInfo : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 serviceuptime() const;
   inline void set_serviceuptime(::google::protobuf::int64 value);
 
-  // optional uint32 clientRequestIP = 5 [default = 0];
-  inline bool has_clientrequestip() const;
-  inline void clear_clientrequestip();
-  static const int kClientRequestIPFieldNumber = 5;
-  inline ::google::protobuf::uint32 clientrequestip() const;
-  inline void set_clientrequestip(::google::protobuf::uint32 value);
+  // optional .Network.SessionParams sessionParams = 5;
+  inline bool has_sessionparams() const;
+  inline void clear_sessionparams();
+  static const int kSessionParamsFieldNumber = 5;
+  inline const ::Network::SessionParams& sessionparams() const;
+  inline ::Network::SessionParams* mutable_sessionparams();
+  inline ::Network::SessionParams* release_sessionparams();
+  inline void set_allocated_sessionparams(::Network::SessionParams* sessionparams);
 
-  // optional int32 clientRequestPort = 6 [default = 0];
-  inline bool has_clientrequestport() const;
-  inline void clear_clientrequestport();
-  static const int kClientRequestPortFieldNumber = 6;
-  inline ::google::protobuf::int32 clientrequestport() const;
-  inline void set_clientrequestport(::google::protobuf::int32 value);
+  // optional string settingsXml = 6;
+  inline bool has_settingsxml() const;
+  inline void clear_settingsxml();
+  static const int kSettingsXmlFieldNumber = 6;
+  inline const ::std::string& settingsxml() const;
+  inline void set_settingsxml(const ::std::string& value);
+  inline void set_settingsxml(const char* value);
+  inline void set_settingsxml(const char* value, size_t size);
+  inline ::std::string* mutable_settingsxml();
+  inline ::std::string* release_settingsxml();
+  inline void set_allocated_settingsxml(::std::string* settingsxml);
 
   // @@protoc_insertion_point(class_scope:Network.ServiceInfo)
  private:
@@ -2843,19 +2957,19 @@ class ServiceInfo : public ::google::protobuf::Message {
   inline void clear_has_servicestate();
   inline void set_has_serviceuptime();
   inline void clear_has_serviceuptime();
-  inline void set_has_clientrequestip();
-  inline void clear_has_clientrequestip();
-  inline void set_has_clientrequestport();
-  inline void clear_has_clientrequestport();
+  inline void set_has_sessionparams();
+  inline void clear_has_sessionparams();
+  inline void set_has_settingsxml();
+  inline void clear_has_settingsxml();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Network::SoftwareInfo* softwareinfo_;
   ::google::protobuf::int64 uptime_;
   ::google::protobuf::int64 serviceuptime_;
+  ::Network::SessionParams* sessionparams_;
+  ::std::string* settingsxml_;
   ::google::protobuf::int32 servicestate_;
-  ::google::protobuf::uint32 clientrequestip_;
-  ::google::protobuf::int32 clientrequestport_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
@@ -7766,93 +7880,6 @@ class GetFileReply : public ::google::protobuf::Message {
   void InitAsDefaultInstance();
   static GetFileReply* default_instance_;
 };
-// -------------------------------------------------------------------
-
-class GetSessionParams : public ::google::protobuf::Message {
- public:
-  GetSessionParams();
-  virtual ~GetSessionParams();
-
-  GetSessionParams(const GetSessionParams& from);
-
-  inline GetSessionParams& operator=(const GetSessionParams& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const GetSessionParams& default_instance();
-
-  void Swap(GetSessionParams* other);
-
-  // implements Message ----------------------------------------------
-
-  GetSessionParams* New() const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const GetSessionParams& from);
-  void MergeFrom(const GetSessionParams& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // optional string currentSettingsProfile = 1;
-  inline bool has_currentsettingsprofile() const;
-  inline void clear_currentsettingsprofile();
-  static const int kCurrentSettingsProfileFieldNumber = 1;
-  inline const ::std::string& currentsettingsprofile() const;
-  inline void set_currentsettingsprofile(const ::std::string& value);
-  inline void set_currentsettingsprofile(const char* value);
-  inline void set_currentsettingsprofile(const char* value, size_t size);
-  inline ::std::string* mutable_currentsettingsprofile();
-  inline ::std::string* release_currentsettingsprofile();
-  inline void set_allocated_currentsettingsprofile(::std::string* currentsettingsprofile);
-
-  // @@protoc_insertion_point(class_scope:Network.GetSessionParams)
- private:
-  inline void set_has_currentsettingsprofile();
-  inline void clear_has_currentsettingsprofile();
-
-  ::google::protobuf::UnknownFieldSet _unknown_fields_;
-
-  ::std::string* currentsettingsprofile_;
-
-  mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
-
-  friend void  protobuf_AddDesc_network_2eproto();
-  friend void protobuf_AssignDesc_network_2eproto();
-  friend void protobuf_ShutdownFile_network_2eproto();
-
-  void InitAsDefaultInstance();
-  static GetSessionParams* default_instance_;
-};
 // ===================================================================
 
 
@@ -9446,6 +9473,28 @@ inline void AppDataReceiveState::set_errrupframecrc(::google::protobuf::int64 va
   errrupframecrc_ = value;
 }
 
+// optional int64 errNotExpectedSimPacket = 10 [default = 0];
+inline bool AppDataReceiveState::has_errnotexpectedsimpacket() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void AppDataReceiveState::set_has_errnotexpectedsimpacket() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void AppDataReceiveState::clear_has_errnotexpectedsimpacket() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void AppDataReceiveState::clear_errnotexpectedsimpacket() {
+  errnotexpectedsimpacket_ = GOOGLE_LONGLONG(0);
+  clear_has_errnotexpectedsimpacket();
+}
+inline ::google::protobuf::int64 AppDataReceiveState::errnotexpectedsimpacket() const {
+  return errnotexpectedsimpacket_;
+}
+inline void AppDataReceiveState::set_errnotexpectedsimpacket(::google::protobuf::int64 value) {
+  set_has_errnotexpectedsimpacket();
+  errnotexpectedsimpacket_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // AppDataSourceState
@@ -10875,6 +10924,102 @@ inline void SoftwareInfo::set_allocated_clientdescription(::std::string* clientd
 
 // -------------------------------------------------------------------
 
+// SessionParams
+
+// optional string currentSettingsProfile = 1;
+inline bool SessionParams::has_currentsettingsprofile() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SessionParams::set_has_currentsettingsprofile() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SessionParams::clear_has_currentsettingsprofile() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SessionParams::clear_currentsettingsprofile() {
+  if (currentsettingsprofile_ != &::google::protobuf::internal::kEmptyString) {
+    currentsettingsprofile_->clear();
+  }
+  clear_has_currentsettingsprofile();
+}
+inline const ::std::string& SessionParams::currentsettingsprofile() const {
+  return *currentsettingsprofile_;
+}
+inline void SessionParams::set_currentsettingsprofile(const ::std::string& value) {
+  set_has_currentsettingsprofile();
+  if (currentsettingsprofile_ == &::google::protobuf::internal::kEmptyString) {
+    currentsettingsprofile_ = new ::std::string;
+  }
+  currentsettingsprofile_->assign(value);
+}
+inline void SessionParams::set_currentsettingsprofile(const char* value) {
+  set_has_currentsettingsprofile();
+  if (currentsettingsprofile_ == &::google::protobuf::internal::kEmptyString) {
+    currentsettingsprofile_ = new ::std::string;
+  }
+  currentsettingsprofile_->assign(value);
+}
+inline void SessionParams::set_currentsettingsprofile(const char* value, size_t size) {
+  set_has_currentsettingsprofile();
+  if (currentsettingsprofile_ == &::google::protobuf::internal::kEmptyString) {
+    currentsettingsprofile_ = new ::std::string;
+  }
+  currentsettingsprofile_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SessionParams::mutable_currentsettingsprofile() {
+  set_has_currentsettingsprofile();
+  if (currentsettingsprofile_ == &::google::protobuf::internal::kEmptyString) {
+    currentsettingsprofile_ = new ::std::string;
+  }
+  return currentsettingsprofile_;
+}
+inline ::std::string* SessionParams::release_currentsettingsprofile() {
+  clear_has_currentsettingsprofile();
+  if (currentsettingsprofile_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = currentsettingsprofile_;
+    currentsettingsprofile_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SessionParams::set_allocated_currentsettingsprofile(::std::string* currentsettingsprofile) {
+  if (currentsettingsprofile_ != &::google::protobuf::internal::kEmptyString) {
+    delete currentsettingsprofile_;
+  }
+  if (currentsettingsprofile) {
+    set_has_currentsettingsprofile();
+    currentsettingsprofile_ = currentsettingsprofile;
+  } else {
+    clear_has_currentsettingsprofile();
+    currentsettingsprofile_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 softwareRunMode = 2 [default = 0];
+inline bool SessionParams::has_softwarerunmode() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SessionParams::set_has_softwarerunmode() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SessionParams::clear_has_softwarerunmode() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SessionParams::clear_softwarerunmode() {
+  softwarerunmode_ = 0;
+  clear_has_softwarerunmode();
+}
+inline ::google::protobuf::int32 SessionParams::softwarerunmode() const {
+  return softwarerunmode_;
+}
+inline void SessionParams::set_softwarerunmode(::google::protobuf::int32 value) {
+  set_has_softwarerunmode();
+  softwarerunmode_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // ServiceInfo
 
 // required .Network.SoftwareInfo softwareInfo = 1;
@@ -10981,48 +11126,112 @@ inline void ServiceInfo::set_serviceuptime(::google::protobuf::int64 value) {
   serviceuptime_ = value;
 }
 
-// optional uint32 clientRequestIP = 5 [default = 0];
-inline bool ServiceInfo::has_clientrequestip() const {
+// optional .Network.SessionParams sessionParams = 5;
+inline bool ServiceInfo::has_sessionparams() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void ServiceInfo::set_has_clientrequestip() {
+inline void ServiceInfo::set_has_sessionparams() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void ServiceInfo::clear_has_clientrequestip() {
+inline void ServiceInfo::clear_has_sessionparams() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void ServiceInfo::clear_clientrequestip() {
-  clientrequestip_ = 0u;
-  clear_has_clientrequestip();
+inline void ServiceInfo::clear_sessionparams() {
+  if (sessionparams_ != NULL) sessionparams_->::Network::SessionParams::Clear();
+  clear_has_sessionparams();
 }
-inline ::google::protobuf::uint32 ServiceInfo::clientrequestip() const {
-  return clientrequestip_;
+inline const ::Network::SessionParams& ServiceInfo::sessionparams() const {
+  return sessionparams_ != NULL ? *sessionparams_ : *default_instance_->sessionparams_;
 }
-inline void ServiceInfo::set_clientrequestip(::google::protobuf::uint32 value) {
-  set_has_clientrequestip();
-  clientrequestip_ = value;
+inline ::Network::SessionParams* ServiceInfo::mutable_sessionparams() {
+  set_has_sessionparams();
+  if (sessionparams_ == NULL) sessionparams_ = new ::Network::SessionParams;
+  return sessionparams_;
+}
+inline ::Network::SessionParams* ServiceInfo::release_sessionparams() {
+  clear_has_sessionparams();
+  ::Network::SessionParams* temp = sessionparams_;
+  sessionparams_ = NULL;
+  return temp;
+}
+inline void ServiceInfo::set_allocated_sessionparams(::Network::SessionParams* sessionparams) {
+  delete sessionparams_;
+  sessionparams_ = sessionparams;
+  if (sessionparams) {
+    set_has_sessionparams();
+  } else {
+    clear_has_sessionparams();
+  }
 }
 
-// optional int32 clientRequestPort = 6 [default = 0];
-inline bool ServiceInfo::has_clientrequestport() const {
+// optional string settingsXml = 6;
+inline bool ServiceInfo::has_settingsxml() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void ServiceInfo::set_has_clientrequestport() {
+inline void ServiceInfo::set_has_settingsxml() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void ServiceInfo::clear_has_clientrequestport() {
+inline void ServiceInfo::clear_has_settingsxml() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void ServiceInfo::clear_clientrequestport() {
-  clientrequestport_ = 0;
-  clear_has_clientrequestport();
+inline void ServiceInfo::clear_settingsxml() {
+  if (settingsxml_ != &::google::protobuf::internal::kEmptyString) {
+    settingsxml_->clear();
+  }
+  clear_has_settingsxml();
 }
-inline ::google::protobuf::int32 ServiceInfo::clientrequestport() const {
-  return clientrequestport_;
+inline const ::std::string& ServiceInfo::settingsxml() const {
+  return *settingsxml_;
 }
-inline void ServiceInfo::set_clientrequestport(::google::protobuf::int32 value) {
-  set_has_clientrequestport();
-  clientrequestport_ = value;
+inline void ServiceInfo::set_settingsxml(const ::std::string& value) {
+  set_has_settingsxml();
+  if (settingsxml_ == &::google::protobuf::internal::kEmptyString) {
+    settingsxml_ = new ::std::string;
+  }
+  settingsxml_->assign(value);
+}
+inline void ServiceInfo::set_settingsxml(const char* value) {
+  set_has_settingsxml();
+  if (settingsxml_ == &::google::protobuf::internal::kEmptyString) {
+    settingsxml_ = new ::std::string;
+  }
+  settingsxml_->assign(value);
+}
+inline void ServiceInfo::set_settingsxml(const char* value, size_t size) {
+  set_has_settingsxml();
+  if (settingsxml_ == &::google::protobuf::internal::kEmptyString) {
+    settingsxml_ = new ::std::string;
+  }
+  settingsxml_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceInfo::mutable_settingsxml() {
+  set_has_settingsxml();
+  if (settingsxml_ == &::google::protobuf::internal::kEmptyString) {
+    settingsxml_ = new ::std::string;
+  }
+  return settingsxml_;
+}
+inline ::std::string* ServiceInfo::release_settingsxml() {
+  clear_has_settingsxml();
+  if (settingsxml_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = settingsxml_;
+    settingsxml_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ServiceInfo::set_allocated_settingsxml(::std::string* settingsxml) {
+  if (settingsxml_ != &::google::protobuf::internal::kEmptyString) {
+    delete settingsxml_;
+  }
+  if (settingsxml) {
+    set_has_settingsxml();
+    settingsxml_ = settingsxml;
+  } else {
+    clear_has_settingsxml();
+    settingsxml_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------
@@ -16326,80 +16535,6 @@ inline void GetFileReply::set_allocated_filepartdata(::std::string* filepartdata
   } else {
     clear_has_filepartdata();
     filepartdata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
-
-// -------------------------------------------------------------------
-
-// GetSessionParams
-
-// optional string currentSettingsProfile = 1;
-inline bool GetSessionParams::has_currentsettingsprofile() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void GetSessionParams::set_has_currentsettingsprofile() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void GetSessionParams::clear_has_currentsettingsprofile() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void GetSessionParams::clear_currentsettingsprofile() {
-  if (currentsettingsprofile_ != &::google::protobuf::internal::kEmptyString) {
-    currentsettingsprofile_->clear();
-  }
-  clear_has_currentsettingsprofile();
-}
-inline const ::std::string& GetSessionParams::currentsettingsprofile() const {
-  return *currentsettingsprofile_;
-}
-inline void GetSessionParams::set_currentsettingsprofile(const ::std::string& value) {
-  set_has_currentsettingsprofile();
-  if (currentsettingsprofile_ == &::google::protobuf::internal::kEmptyString) {
-    currentsettingsprofile_ = new ::std::string;
-  }
-  currentsettingsprofile_->assign(value);
-}
-inline void GetSessionParams::set_currentsettingsprofile(const char* value) {
-  set_has_currentsettingsprofile();
-  if (currentsettingsprofile_ == &::google::protobuf::internal::kEmptyString) {
-    currentsettingsprofile_ = new ::std::string;
-  }
-  currentsettingsprofile_->assign(value);
-}
-inline void GetSessionParams::set_currentsettingsprofile(const char* value, size_t size) {
-  set_has_currentsettingsprofile();
-  if (currentsettingsprofile_ == &::google::protobuf::internal::kEmptyString) {
-    currentsettingsprofile_ = new ::std::string;
-  }
-  currentsettingsprofile_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* GetSessionParams::mutable_currentsettingsprofile() {
-  set_has_currentsettingsprofile();
-  if (currentsettingsprofile_ == &::google::protobuf::internal::kEmptyString) {
-    currentsettingsprofile_ = new ::std::string;
-  }
-  return currentsettingsprofile_;
-}
-inline ::std::string* GetSessionParams::release_currentsettingsprofile() {
-  clear_has_currentsettingsprofile();
-  if (currentsettingsprofile_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = currentsettingsprofile_;
-    currentsettingsprofile_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void GetSessionParams::set_allocated_currentsettingsprofile(::std::string* currentsettingsprofile) {
-  if (currentsettingsprofile_ != &::google::protobuf::internal::kEmptyString) {
-    delete currentsettingsprofile_;
-  }
-  if (currentsettingsprofile) {
-    set_has_currentsettingsprofile();
-    currentsettingsprofile_ = currentsettingsprofile;
-  } else {
-    clear_has_currentsettingsprofile();
-    currentsettingsprofile_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 

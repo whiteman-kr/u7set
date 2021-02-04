@@ -26,7 +26,7 @@ namespace Builder
 		return m_settingsSet.addProfile<TuningClientSettings>(profile, settingsGetter);
 	}
 
-	bool TuningClientCfgGenerator::generateConfiguration()
+	bool TuningClientCfgGenerator::generateConfigurationStep1()
 	{
 		if (m_software == nullptr ||
 				m_software->type() != E::SoftwareType::TuningClient ||

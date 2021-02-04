@@ -11,26 +11,6 @@ namespace Ui {
 
 class DbController;
 
-class DialogProjectDiffSections : public QDialog
-{
-	Q_OBJECT
-
-public:
-	explicit DialogProjectDiffSections(const ProjectDiffReportParams& reportParams, QWidget *parent);
-
-	ProjectDiffReportParams reportParams() const;
-
-private slots:
-	void pageSetup();
-
-private:
-	void fillTree();
-
-private:
-	QTreeWidget* m_treeWidget = nullptr;
-	ProjectDiffReportParams m_reportParams;
-};
-
 class DialogProjectDiff : public QDialog
 {
 	Q_OBJECT
@@ -47,28 +27,26 @@ protected:
 
 private slots:
 	void versionTypeChanged();
-	void on_sourceChangesetButton_clicked();
-	void on_targetChangesetButton_clicked();
 
 	virtual void done(int r) override;
 
+	void on_sourceChangesetButton_clicked();
+	void on_targetChangesetButton_clicked();
 	void on_buttonSelectAll_clicked();
 	void on_buttonSelectNone_clicked();
-
 	void on_categoriesList_itemPressed(QListWidgetItem *item);
-
 	void on_fileBrowseButton_clicked();
-
 	void on_pageSetupButton_clicked();
+	void on_pageSetDefault_clicked();
+	void on_multiFilepageSetupButton_clicked();
+
+private:
+	void updatePageSizeInfo();
 
 private:
 	DbController* m_db = nullptr;
-
-
-private:
 	Ui::DialogProjectDiff *ui;
-
-	static QString m_fileName;
+	QString m_fileName;
 	static ProjectDiffReportParams m_reportParams;
 
 };

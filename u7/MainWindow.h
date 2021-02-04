@@ -88,6 +88,7 @@ protected slots:
 	void projectHistory();
 	void projectProperties();
 	void projectDifference();
+	void createSchemasAlbums();
 	void pendingChanges();
 
 private slots:
@@ -136,6 +137,7 @@ private:
 	QAction* m_projectHistoryAction = nullptr;
 	QAction* m_projectPropertiesAction = nullptr;
 	QAction* m_projectDifferenceAction = nullptr;
+	QAction* m_schemasAlbumAction = nullptr;
 	QAction* m_pendingChangesAction = nullptr;
 	QLabel* m_statusBarInfo = nullptr;
 	QLabel* m_statusBarConnectionStatistics = nullptr;

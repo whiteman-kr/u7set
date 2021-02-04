@@ -10,11 +10,6 @@
 //
 // ------------------------------------------------------------------------------------
 
-const char* const ConfigurationServiceWorker::SETTING_AUTOLOAD_BUILD_PATH = "AutoloadBuildPath";
-const char* const ConfigurationServiceWorker::SETTING_CLIENT_REQUEST_IP = "ClientRequestIP";
-const char* const ConfigurationServiceWorker::SETTING_WORK_DIRECTORY = "WorkDirectory";
-const char* const ConfigurationServiceWorker::SETTING_CURRENT_PROFILE = "CurrentSoftwareSettingsProfile";
-
 ConfigurationServiceWorker::ConfigurationServiceWorker(const SoftwareInfo& softwareInfo,
 													   const QString& serviceName,
 													   int& argc, char** argv,
@@ -36,11 +31,11 @@ ServiceWorker* ConfigurationServiceWorker::createInstance() const
 	return newInstance;
 }
 
-
 void ConfigurationServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
-	serviceInfo.set_clientrequestip(m_clientIP.address32());
-	serviceInfo.set_clientrequestport(m_clientIP.port());
+	QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::ConfigurationService, m_cfgServiceSettings);
+
+	serviceInfo.set_settingsxml(xmlString.toStdString());
 }
 
 void ConfigurationServiceWorker::onBuildPathChanged(QString newBuildPath)
@@ -63,31 +58,40 @@ void ConfigurationServiceWorker::initCmdLineParser()
 {
 	CommandLineParser& cp = cmdLineParser();
 
-	cp.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption("b", SETTING_AUTOLOAD_BUILD_PATH, "Path to RPCT project's build  for auto load.", "PathToBuild");
-	cp.addSingleValueOption("ip", SETTING_CLIENT_REQUEST_IP, "Client request IP.", "IPv4");
-	cp.addSingleValueOption("w", SETTING_WORK_DIRECTORY, "Work directory of Configuration Service.", "Path");
-	cp.addSingleValueOption("profile", SETTING_CURRENT_PROFILE, "Current software settings profile.", "ProfileID");
+	cp.addSingleValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	cp.addSingleValueOption("b", SoftwareSetting::AUTOLOAD_BUILD_PATH, "Path to RPCT project's build  for auto load.", "PathToBuild");
+	cp.addSingleValueOption("ip", SoftwareSetting::CLIENT_REQUEST_IP, "Client request IP.", "IPv4");
+	cp.addSingleValueOption("w", SoftwareSetting::WORK_DIRECTORY, "Work directory of Configuration Service.", "Path");
+	cp.addSingleValueOption("profile", SoftwareSetting::CURRENT_PROFILE, "Current software settings profile.", "ProfileID");
+	cp.addSingleValueOption("mode", SoftwareSetting::RUN_MODE, "Runs all software in simulation mode.", SoftwareSetting::SIMULATION);
 }
 
 void ConfigurationServiceWorker::loadSettings()
 {
-	m_autoloadBuildPath = getStrSetting(SETTING_AUTOLOAD_BUILD_PATH);
-	m_clientIPStr = getStrSetting(SETTING_CLIENT_REQUEST_IP);
-	m_workDirectory = getStrSetting(SETTING_WORK_DIRECTORY);
-	m_currentSettingsProfile = getStrSetting(SETTING_CURRENT_PROFILE);
+	m_autoloadBuildPath = getStrSetting(SoftwareSetting::AUTOLOAD_BUILD_PATH);
+	m_clientIPStr = getStrSetting(SoftwareSetting::CLIENT_REQUEST_IP);
+	m_workDirectory = getStrSetting(SoftwareSetting::WORK_DIRECTORY);
 
-	if (m_currentSettingsProfile.isEmpty() == true)
+	SessionParams sp;
+
+	sp.currentSettingsProfile = getStrSetting(SoftwareSetting::CURRENT_PROFILE);
+
+	if (sp.currentSettingsProfile.isEmpty() == true)
 	{
-		m_currentSettingsProfile = SettingsProfile::DEFAULT;
+		sp.currentSettingsProfile = SettingsProfile::DEFAULT;
 	}
 
+	sp.softwareRunMode = getSoftwareRunMode(getStrSetting(SoftwareSetting::RUN_MODE));
+
+	setSessionParams(sp);
+
 	DEBUG_LOG_MSG(m_logger, QString("Settings from command line or registry:"));
-	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
-	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_AUTOLOAD_BUILD_PATH).arg(m_autoloadBuildPath));
-	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_CLIENT_REQUEST_IP).arg(m_clientIPStr));
-	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_WORK_DIRECTORY).arg(m_workDirectory));
-	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_CURRENT_PROFILE).arg(m_currentSettingsProfile));
+	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
+	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::AUTOLOAD_BUILD_PATH).arg(m_autoloadBuildPath));
+	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::CLIENT_REQUEST_IP).arg(m_clientIPStr));
+	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::WORK_DIRECTORY).arg(m_workDirectory));
+	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::CURRENT_PROFILE).arg(sessionParams().currentSettingsProfile));
+	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SoftwareSetting::RUN_MODE).arg(E::valueToString<E::SoftwareRunMode>(sessionParams().softwareRunMode)));
 	DEBUG_LOG_MSG(m_logger, QString());
 }
 
@@ -109,28 +113,32 @@ bool ConfigurationServiceWorker::loadCfgServiceSettings(const QString& buildPath
 
 	bool res = softwareSettingsSet().readFromXml(cfgXmlData);
 
-	m_cfgServiceSettings = softwareSettingsSet().getSettingsProfile<CfgServiceSettings>(m_currentSettingsProfile);
+	QString curProfile = sessionParams().currentSettingsProfile;
 
-	if (m_cfgServiceSettings == nullptr)
+	auto ptr = softwareSettingsSet().getSettingsProfile<CfgServiceSettings>(curProfile);
+
+	if (ptr == nullptr)
 	{
-		DEBUG_LOG_ERR(m_logger, QString("Error loading settings for profile: %1").arg(m_currentSettingsProfile));
+		DEBUG_LOG_ERR(m_logger, QString("Error loading settings for profile: %1").arg(curProfile));
 		return false;
 	}
 
+	m_cfgServiceSettings = *ptr.get();
+
 	DEBUG_LOG_MSG(m_logger, QString());
-	DEBUG_LOG_MSG(m_logger, QString("Loading settings for profile: %1 - Ok").arg(m_currentSettingsProfile));
+	DEBUG_LOG_MSG(m_logger, QString("Loading settings for profile: %1 - Ok").arg(curProfile));
 	DEBUG_LOG_MSG(m_logger, QString());
 
 	if (m_clientIPStr.isEmpty() == true)
 	{
-		m_clientIP = m_cfgServiceSettings->clientRequestIP;
+		m_clientIP = m_cfgServiceSettings.clientRequestIP;
 	}
 	else
 	{
 		m_clientIP.setAddressPortStr(m_clientIPStr, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 	}
 
-	DEBUG_LOG_MSG(m_logger, QString("%1 is set to %2").arg(SETTING_CLIENT_REQUEST_IP).arg(m_clientIP.addressPortStr()));
+	DEBUG_LOG_MSG(m_logger, QString("%1 is set to %2").arg(SoftwareSetting::CLIENT_REQUEST_IP).arg(m_clientIP.addressPortStr()));
 
 	return res;
 }
@@ -160,8 +168,8 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 															  m_autoloadBuildPath,
 															  m_workDirectory,
 															  buildPath,
-															  m_currentSettingsProfile,
-															  m_cfgServiceSettings->knownClients(),
+															  sessionParams(),
+															  m_cfgServiceSettings.knownClients(),
 															  *m_cfgCheckerWorker,
 															  m_logger);
 
@@ -226,3 +234,14 @@ void ConfigurationServiceWorker::stopUdpThreads()
 
 	delete m_infoSocketThread;
 }
+
+E::SoftwareRunMode ConfigurationServiceWorker::getSoftwareRunMode(QString runModeStr)
+{
+	if (runModeStr.trimmed().toLower() == SoftwareSetting::SIMULATION.trimmed().toLower())
+	{
+		return E::SoftwareRunMode::Simulation;
+	}
+
+	return E::SoftwareRunMode::Normal;
+}
+

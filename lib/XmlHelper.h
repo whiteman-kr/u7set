@@ -11,6 +11,7 @@ class XmlWriteHelper
 public:
 	XmlWriteHelper(QXmlStreamWriter& xmlWriter);
 	XmlWriteHelper(QByteArray* data);
+	XmlWriteHelper(QString* xmlString);
 	~XmlWriteHelper();
 
 	QXmlStreamWriter* xmlStreamWriter() const;
@@ -52,6 +53,7 @@ class XmlReadHelper
 public:
 	XmlReadHelper(QXmlStreamReader& xmlReader);
 	XmlReadHelper(const QByteArray& data);
+	XmlReadHelper(const QString& xmlString);
 	~XmlReadHelper();
 
 	bool readNextStartElement();

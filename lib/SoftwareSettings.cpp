@@ -9,6 +9,26 @@
 
 // -------------------------------------------------------------------------------------
 //
+// SessionParams struct implementation
+//
+// -------------------------------------------------------------------------------------
+
+void SessionParams::saveTo(Network::SessionParams* sp)
+{
+	TEST_PTR_RETURN(sp);
+
+	sp->set_currentsettingsprofile(currentSettingsProfile.toStdString());
+	sp->set_softwarerunmode(static_cast<int>(softwareRunMode));
+}
+
+void SessionParams::loadFrom(const Network::SessionParams& sp)
+{
+	currentSettingsProfile = QString::fromStdString(sp.currentsettingsprofile());
+	softwareRunMode = static_cast<E::SoftwareRunMode>(sp.softwarerunmode());
+}
+
+// -------------------------------------------------------------------------------------
+//
 // SoftwareSettings class implementation
 //
 // -------------------------------------------------------------------------------------
@@ -174,6 +194,43 @@ QStringList SoftwareSettingsSet::getSettingsProfiles() const
 	}
 
 	return profiles;
+}
+
+QString SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType swType, const SoftwareSettings& settings)
+{
+	QString xmlString;
+
+	XmlWriteHelper xml(&xmlString);
+
+	xml.setAutoFormatting(true);
+
+	xml.writeStartDocument();
+
+	xml.writeStartElement(XmlElement::SETTINGS_SET);
+
+	xml.writeSoftwareTypeAttribute(swType);
+	xml.writeIntAttribute(XmlAttribute::COUNT, 1);
+
+	settings.writeToXml(xml);
+
+	xml.writeEndElement();		// </SettingsSet>
+
+	return xmlString;
+}
+
+bool SoftwareSettingsSet::readSettingsFromXmlString(const QString& xmlString, SoftwareSettings* settings)
+{
+	TEST_PTR_RETURN_FALSE(settings);
+
+	XmlReadHelper xml(xmlString);
+
+	bool result = true;
+
+	result &= xml.findElement(XmlElement::SETTINGS_SET);
+
+	result &= settings->readFromXml(xml);
+
+	return result;
 }
 
 std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings()
@@ -515,7 +572,7 @@ bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_p
 //
 // -------------------------------------------------------------------------------------
 
-bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml)
+bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -699,7 +756,7 @@ QStringList CfgServiceSettings::knownClients() const
 //
 // -------------------------------------------------------------------------------------
 
-bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml)
+bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -842,7 +899,7 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-bool DiagDataServiceSettings::writeToXml(XmlWriteHelper& xml)
+bool DiagDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -967,7 +1024,7 @@ bool DiagDataServiceSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
+bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -992,7 +1049,7 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 	for(uint i = 0; i < sources.size(); i++)
 	{
-		TuningSource& ts = sources[i];
+		const TuningSource& ts = sources[i];
 
 		xml.writeStartElement(XmlElement::TUNING_SOURCE);
 
@@ -1012,7 +1069,7 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 	for(uint i = 0; i < clients.size(); i++)
 	{
-		TuningClient& tc = clients[i];
+		const TuningClient& tc = clients[i];
 
 		xml.writeStartElement(XmlElement::TUNING_CLIENT);
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tc.equipmentID);
@@ -1167,6 +1224,12 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 		result &= DeviceHelper::getIPv4Property(software,
 												EquipmentPropNames::TUNING_DATA_NETMASK,
 												&tuningDataNetmask, false, "", log);
+
+		result &= DeviceHelper::getIpPortProperty(software,
+												  EquipmentPropNames::TUNING_SIM_IP,
+												  EquipmentPropNames::TUNING_SIM_PORT,
+												  &tuningSimIP, true, Socket::IP_LOCALHOST,
+												  PORT_LM_TUNING, log);
 
 		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::SINGLE_LM_CONTROL, &singleLmControl, log);
 		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, log);
@@ -1378,7 +1441,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml)
+bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -1517,7 +1580,7 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-bool TestClientSettings::writeToXml(XmlWriteHelper& xml)
+bool TestClientSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -1674,10 +1737,6 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										true, Socket::IP_NULL,
 										PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST,
 										E::SoftwareType::ConfigurationService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		result &= getSoftwareConnection(equipment,
 										software,
@@ -1689,10 +1748,6 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										true, Socket::IP_NULL,
 										PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST,
 										E::SoftwareType::ConfigurationService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		if (cfgService1_equipmentID.isEmpty() == true && cfgService2_equipmentID.isEmpty() == true)
 		{
@@ -1711,13 +1766,9 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										EquipmentPropNames::APP_DATA_RECEIVING_PORT,
 										&appDataService_equipmentID,
 										&appDataService_appDataReceivingIP,
-										false, Socket::IP_NULL,
+										true, Socket::IP_NULL,
 										PORT_APP_DATA_SERVICE_DATA,
 										E::SoftwareType::AppDataService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		result &= getSoftwareConnection(equipment,
 										software,
@@ -1726,13 +1777,9 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										EquipmentPropNames::CLIENT_REQUEST_PORT,
 										&appDataService_equipmentID,
 										&appDataService_clientRequestIP,
-										false, Socket::IP_NULL,
+										true, Socket::IP_NULL,
 										PORT_APP_DATA_SERVICE_CLIENT_REQUEST,
 										E::SoftwareType::AppDataService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		const Hardware::Software* appDataService = DeviceHelper::getSoftware(equipment, appDataService_equipmentID);
 
@@ -1751,13 +1798,9 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										EquipmentPropNames::APP_DATA_RECEIVING_PORT,
 										&archService_equipmentID,
 										&archService_appDataReceivingIP,
-										false, Socket::IP_NULL,
+										true, Socket::IP_NULL,
 										PORT_ARCHIVING_SERVICE_APP_DATA,
 										E::SoftwareType::ArchiveService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		result &= getSoftwareConnection(equipment,
 										appDataService,
@@ -1766,13 +1809,9 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										EquipmentPropNames::DIAG_DATA_RECEIVING_PORT,
 										&archService_equipmentID,
 										&archService_diagDataReceivingIP,
-										false, Socket::IP_NULL,
+										true, Socket::IP_NULL,
 										PORT_ARCHIVING_SERVICE_DIAG_DATA,
 										E::SoftwareType::ArchiveService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		result &= getSoftwareConnection(equipment,
 										appDataService,
@@ -1781,13 +1820,9 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										EquipmentPropNames::CLIENT_REQUEST_PORT,
 										&archService_equipmentID,
 										&archService_clientRequestIP,
-										false, Socket::IP_NULL,
+										true, Socket::IP_NULL,
 										PORT_ARCHIVING_SERVICE_CLIENT_REQUEST,
 										E::SoftwareType::ArchiveService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		// Get TuningService connection
 
@@ -1798,13 +1833,9 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										EquipmentPropNames::TUNING_DATA_PORT,
 										&tuningService_equipmentID,
 										&tuningService_tuningDataIP,
-										false, Socket::IP_NULL,
+										true, Socket::IP_NULL,
 										PORT_TUNING_SERVICE_DATA,
 										E::SoftwareType::TuningService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		result &= getSoftwareConnection(equipment,
 										software,
@@ -1813,17 +1844,13 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										EquipmentPropNames::CLIENT_REQUEST_PORT,
 										&tuningService_equipmentID,
 										&tuningService_clientRequestIP,
-										false, Socket::IP_NULL,
+										true, Socket::IP_NULL,
 										PORT_TUNING_SERVICE_CLIENT_REQUEST,
 										E::SoftwareType::TuningService, log);
 
 		result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID,
 												   &tuningService_tuningSources, log);
 
-		if (result == false)
-		{
-			return false;
-		}
 
 		// Get DiagDataService connection
 
@@ -1837,10 +1864,6 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 										true, Socket::IP_NULL,
 										PORT_DIAG_DATA_SERVICE_DATA,
 										E::SoftwareType::DiagDataService, log);
-		if (result == false)
-		{
-			return false;
-		}
 
 		result &= getSoftwareConnection(equipment,
 										software,
@@ -1863,7 +1886,7 @@ bool TestClientSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-bool MetrologySettings::writeToXml(XmlWriteHelper& xml)
+bool MetrologySettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -2062,7 +2085,7 @@ bool MetrologySettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-bool MonitorSettings::writeToXml(XmlWriteHelper& xml)
+bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
@@ -2561,7 +2584,7 @@ void MonitorSettings::clear()
 //
 // -------------------------------------------------------------------------------------
 
-bool TuningClientSettings::writeToXml(XmlWriteHelper& xml)
+bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 

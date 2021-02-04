@@ -12,23 +12,33 @@ void AppSignalStateFlags::setFlag(E::AppSignalStateFlagType flagType, quint32 va
 	case E::AppSignalStateFlagType::Validity:
 		valid = value;
 		return;
+
 	case E::AppSignalStateFlagType::StateAvailable:
 		stateAvailable = value;
 		return;
+
 	case E::AppSignalStateFlagType::Simulated:
 		simulated  = value;
 		return;
+
 	case E::AppSignalStateFlagType::Blocked:
 		blocked = value;
 		return;
+
 	case E::AppSignalStateFlagType::Mismatch:
 		mismatch = value;
 		return;
+
 	case E::AppSignalStateFlagType::AboveHighLimit:
 		aboveHighLimit = value;
 		return;
+
 	case E::AppSignalStateFlagType::BelowLowLimit:
 		belowLowLimit = value;
+		return;
+
+	case E::AppSignalStateFlagType::SwSimulated:
+		swSimulated = value;
 		return;
 	}
 
@@ -78,10 +88,10 @@ void AppSignalStateFlags::updateArchivingReasonFlags(const AppSignalStateFlags& 
 
 QString AppSignalStateFlags::print()
 {
-	return QString("Valid=%1 Avail=%2 Sim=%3 Blk=%4 Unbl=%5 HLim=%6 LLim=%7 "
-				   "[Reasons: ValCh=%8 SBUCh=%9 Lim=%10 Auto=%11 Fine=%12 Coarse=%13]").
+	return QString("Valid=%1 Avail=%2 Sim=%3 Blk=%4 Unbl=%5 HLim=%6 LLim=%7 SwSim=%8 "
+				   "[Reasons: ValCh=%9 SBUCh=%10 Lim=%11 Auto=%12 Fine=%13 Coarse=%14]").
 			arg(valid).arg(stateAvailable).arg(simulated).arg(blocked).
-			arg(mismatch).arg(aboveHighLimit).arg(belowLowLimit).
+			arg(mismatch).arg(aboveHighLimit).arg(belowLowLimit).arg(swSimulated).
 			arg(validityChange).arg(simBlockMismatchChange).arg(limitFlagsChange).
 			arg(autoPoint).arg(fineAperture).arg(coarseAperture);
 }

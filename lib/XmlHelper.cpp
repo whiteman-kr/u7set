@@ -15,7 +15,17 @@ XmlWriteHelper::XmlWriteHelper(QXmlStreamWriter& xmlWriter) :
 
 XmlWriteHelper::XmlWriteHelper(QByteArray* data)
 {
+	TEST_PTR_RETURN(data);
+
 	m_xmlLocalWriter = new QXmlStreamWriter(data);
+	m_xmlWriter = m_xmlLocalWriter;
+}
+
+XmlWriteHelper::XmlWriteHelper(QString* xmlString)
+{
+	TEST_PTR_RETURN(xmlString);
+
+	m_xmlLocalWriter = new QXmlStreamWriter(xmlString);
 	m_xmlWriter = m_xmlLocalWriter;
 }
 
@@ -181,6 +191,12 @@ XmlReadHelper::XmlReadHelper(QXmlStreamReader& xmlReader) :
 XmlReadHelper::XmlReadHelper(const QByteArray& data)
 {
 	m_xmlLocalReader = new QXmlStreamReader(data);
+	m_xmlReader = m_xmlLocalReader;
+}
+
+XmlReadHelper::XmlReadHelper(const QString& xmlString)
+{
+	m_xmlLocalReader = new QXmlStreamReader(xmlString);
 	m_xmlReader = m_xmlLocalReader;
 }
 

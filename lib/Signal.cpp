@@ -2038,9 +2038,14 @@ void SignalSet::buildID2IndexMap()
 		}
 		else
 		{
-			m_strID2IndexMap.insert(s.appSignalID(), i);
+			updateID2IndexInMap(s.appSignalID(), i);
 		}
 	}
+}
+
+void SignalSet::updateID2IndexInMap(const QString& appSignalId, int index)
+{
+	m_strID2IndexMap.insert(appSignalId, index);
 }
 
 bool SignalSet::ID2IndexMapIsEmpty()

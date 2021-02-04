@@ -16,7 +16,7 @@ namespace Builder
 		virtual ~MetrologyCfgGenerator() override;
 
 		virtual bool createSettingsProfile(const QString& profile) override;
-		virtual bool generateConfiguration() override;
+		virtual bool generateConfigurationStep1() override;
 
 	private:
 		bool writeDatabaseInfo();

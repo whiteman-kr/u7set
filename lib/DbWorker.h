@@ -161,6 +161,7 @@ public slots:
     void slot_getLatestSignal(int signalID, Signal* signal);
 	void slot_getLatestSignals(QVector<int> signalIDs, QVector<Signal>* signalsArray);
 	void slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<Signal>* signalArray);
+	void slot_getLatestSignalsWithUserID(std::vector<Signal>* out);
 	void slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs);
 	void slot_addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
 

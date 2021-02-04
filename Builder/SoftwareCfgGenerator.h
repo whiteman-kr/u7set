@@ -46,9 +46,18 @@ namespace Builder
 		virtual ~SoftwareCfgGenerator();
 
 		virtual bool createSettingsProfile(const QString& profile);
-		virtual bool generateConfiguration() = 0;
 
-		bool writeConfigurationXml();
+		virtual bool generateConfigurationStep1() = 0;		// In first will be executed for each software item in uncertain order
+															//
+															// Should be implemented in derived class
+
+		virtual bool generateConfigurationStep2();			// Will be executed in uncertain order after
+															// execution of generateConfigurationStep1 for ALL software items
+															//
+															// Required for link results of generateConfigurationStep1
+															//
+															// Implementation in derived class is not obligatory
+		bool createConfigurationXml();
 
 		bool getSettingsXml(QXmlStreamWriter& xmlWriter);
 

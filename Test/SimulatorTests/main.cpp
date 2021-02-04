@@ -1,6 +1,7 @@
 #include <QtTest>
 #include <SimRamTests.h>
 #include <SimCommandTest_LM5_LM6.h>
+#include <SimProfilesTest.h>
 
 int main(int argc, char *argv[])
 {
@@ -14,6 +15,11 @@ int main(int argc, char *argv[])
 	{
 		SimCommandTest_LM5_LM6 csm;
 		status |= QTest::qExec(&csm, argc, argv);
+	}
+
+	{
+		SimProfilesTest spt;
+		status |= QTest::qExec(&spt, argc, argv);
 	}
 
 	return status;

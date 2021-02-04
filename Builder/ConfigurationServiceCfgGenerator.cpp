@@ -25,7 +25,7 @@ namespace Builder
 		return m_settingsSet.addProfile<CfgServiceSettingsGetter>(profile, settingsGetter);
 	}
 
-	bool ConfigurationServiceCfgGenerator::generateConfiguration()
+	bool ConfigurationServiceCfgGenerator::generateConfigurationStep1()
 	{
 		bool result = false;
 

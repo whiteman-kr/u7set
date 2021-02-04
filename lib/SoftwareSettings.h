@@ -4,6 +4,7 @@
 #include "XmlHelper.h"
 #include "SocketIO.h"
 #include "WUtils.h"
+#include "../Proto/network.pb.h"
 
 #ifdef IS_BUILDER
 
@@ -13,6 +14,15 @@
 #include "../TuningService/TuningSource.h"
 
 #endif
+
+struct SessionParams
+{
+	QString currentSettingsProfile;
+	E::SoftwareRunMode softwareRunMode = E::SoftwareRunMode::Normal;
+
+	void saveTo(Network::SessionParams* sp);
+	void loadFrom(const Network::SessionParams& sp);
+};
 
 class SoftwareSettings : public QObject
 {
@@ -33,7 +43,7 @@ protected:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	virtual bool writeToXml(XmlWriteHelper& xml) = 0;
+	virtual bool writeToXml(XmlWriteHelper& xml) const = 0;
 	virtual bool readFromXml(XmlReadHelper& xml) = 0;
 
 	friend class SoftwareSettingsSet;
@@ -66,6 +76,9 @@ public:
 	E::SoftwareType softwareType() const { return m_softwareType; }
 
 	QStringList getSettingsProfiles() const;
+
+	static QString writeSettingsToXmlString(E::SoftwareType swType, const SoftwareSettings& settings);
+	static bool readSettingsFromXmlString(const QString& xmlString, SoftwareSettings* settings);
 
 private:
 	std::shared_ptr<SoftwareSettings> createAppropriateSettings();
@@ -166,7 +179,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -214,7 +227,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -253,7 +266,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -297,16 +310,15 @@ public:
 	bool singleLmControl = true;
 	bool disableModulesTypeChecking = false;
 
-	HostAddressPort tuningSimIP;			// for now this option isn't read from equipment
-	                                        // it can be initialized from TuningService cmd line option -sim
-	                                        // or inside Simulator for run TuningServiceCommunicator
+	HostAddressPort tuningSimIP;
+
 	std::vector<TuningSource> sources;
 	std::vector<TuningClient> clients;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -350,7 +362,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -400,7 +412,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -440,7 +452,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -492,7 +504,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
@@ -552,7 +564,7 @@ public:
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
-	bool writeToXml(XmlWriteHelper& xml) override;
+	bool writeToXml(XmlWriteHelper& xml) const override;
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;

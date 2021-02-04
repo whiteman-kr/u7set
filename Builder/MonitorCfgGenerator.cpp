@@ -28,7 +28,7 @@ namespace Builder
 		return m_settingsSet.addProfile<MonitorSettings>(profile, settingsGetter);
 	}
 
-	bool MonitorCfgGenerator::generateConfiguration()
+	bool MonitorCfgGenerator::generateConfigurationStep1()
 	{
 		if (m_software == nullptr ||
 			m_software->type() != E::SoftwareType::Monitor ||
