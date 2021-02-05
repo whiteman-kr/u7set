@@ -37,8 +37,8 @@ private:
 
 	mutable QMutex			m_mutex;
 
-	Metrology::SignalParam	m_param[Metrology::ConnectionIoType::Count];
-	int						m_signalConnectionType = Metrology::CONNECTION_TYPE_UNUSED;
+	Metrology::SignalParam	m_param[Metrology::ConnectionIoTypeCount];
+	int						m_signalConnectionType = Metrology::ConnectionType::Unsed;
 
 	CalibratorManager*		m_pCalibratorManager = nullptr;
 
@@ -141,7 +141,7 @@ public:
 // ==============================================================================================
 // class MeasureSignal consists array of two classes MultiChannelSignal: input and output
 //
-// MeasureSignal --- MultiChannelSignal[ConnectionIoType::Count] --- Metrology::Signal[Metrology::ChannelCount]
+// MeasureSignal --- MultiChannelSignal[ConnectionIoType::ioCount] --- Metrology::Signal[Metrology::ChannelCount]
 //
 class MeasureSignal
 {
@@ -155,10 +155,10 @@ private:
 
 	mutable QMutex			m_mutex;
 
-	int						m_signalConnectionType = Metrology::CONNECTION_TYPE_UNUSED;
+	int						m_signalConnectionType = Metrology::ConnectionType::Unsed;
 
 	int						m_channelCount = 0;
-	MultiChannelSignal		m_signal[Metrology::ConnectionIoType::Count];
+	MultiChannelSignal		m_signal[Metrology::ConnectionIoTypeCount];
 
 public:
 

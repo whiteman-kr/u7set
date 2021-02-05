@@ -71,7 +71,7 @@ bool MeasureThread::setActiveSignalParam(const MeasureSignal& activeSignal, cons
 	{
 		IoSignalParam ioParam;
 
-		for(int type = 0; type < Metrology::ConnectionIoType::Count; type ++)
+		for(int type = 0; type < Metrology::ConnectionIoTypeCount; type ++)
 		{
 			Metrology::Signal* pSignal = activeSignal.multiChannelSignal(type).metrologySignal(ch);
 			if (pSignal == nullptr)
@@ -118,7 +118,7 @@ bool MeasureThread::setActiveSignalParam(const MeasureSignal& activeSignal, cons
 
 void MeasureThread::waitMeasureTimeout()
 {
-	if (m_signalConnectionType != Metrology::CONNECTION_TYPE_TUNING_OUTPUT)
+	if (m_signalConnectionType != Metrology::ConnectionType::Tuning_Output)
 	{
 		if (getConnectedCalibrators() == 0)
 		{
@@ -244,7 +244,7 @@ bool MeasureThread::setCalibratorUnit()
 			return false;
 		}
 
-		if (m_activeIoParamList[ch].signalConnectionType() != Metrology::CONNECTION_TYPE_TUNING_OUTPUT)
+		if (m_activeIoParamList[ch].signalConnectionType() != Metrology::ConnectionType::Tuning_Output)
 		{
 			const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 			if (inParam.isValid() == false)
@@ -553,7 +553,7 @@ void MeasureThread::measureLinearity()
 
 			// set electric value or tuning value
 			//
-			if (m_activeIoParamList[ch].signalConnectionType() != Metrology::CONNECTION_TYPE_TUNING_OUTPUT)
+			if (m_activeIoParamList[ch].signalConnectionType() != Metrology::ConnectionType::Tuning_Output)
 			{
 				// at the beginning we need get engineering value because if range is not Linear (for instance Ohm or mV)
 				// then by engineering value we may get electric value
@@ -669,7 +669,7 @@ void MeasureThread::measureCompratorsInSeries()
 
 		switch (m_activeIoParamList[ch].signalConnectionType())
 		{
-			case Metrology::CONNECTION_TYPE_UNUSED:
+			case Metrology::ConnectionType::Unsed:
 				param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 				break;
 			default:
@@ -1154,7 +1154,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 		switch (m_activeIoParamList[ch].signalConnectionType())
 		{
-			case Metrology::CONNECTION_TYPE_UNUSED:
+			case Metrology::ConnectionType::Unsed:
 				param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 				break;
 			default:
@@ -1258,7 +1258,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 						switch (m_activeIoParamList[ch].signalConnectionType())
 						{
-							case Metrology::CONNECTION_TYPE_UNUSED:
+							case Metrology::ConnectionType::Unsed:
 								param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 								break;
 							default:
@@ -1429,7 +1429,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 								switch (m_activeIoParamList[ch].signalConnectionType())
 								{
-									case Metrology::CONNECTION_TYPE_UNUSED:
+									case Metrology::ConnectionType::Unsed:
 										param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 										break;
 									default:
@@ -1501,7 +1501,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 					switch (m_activeIoParamList[ch].signalConnectionType())
 					{
-						case Metrology::CONNECTION_TYPE_UNUSED:
+						case Metrology::ConnectionType::Unsed:
 							param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 							break;
 						default:
@@ -1602,7 +1602,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 					switch (m_activeIoParamList[ch].signalConnectionType())
 					{
-						case Metrology::CONNECTION_TYPE_UNUSED:
+						case Metrology::ConnectionType::Unsed:
 							param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 							break;
 						default:
@@ -1751,7 +1751,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 				switch (m_activeIoParamList[ch].signalConnectionType())
 				{
-					case Metrology::CONNECTION_TYPE_UNUSED:
+					case Metrology::ConnectionType::Unsed:
 						param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 						break;
 					default:
@@ -1801,7 +1801,7 @@ void MeasureThread::signalSocketDisconnected()
 
 void MeasureThread::tuningSocketDisconnected()
 {
-	if (m_signalConnectionType == Metrology::CONNECTION_TYPE_TUNING_OUTPUT)
+	if (m_signalConnectionType == Metrology::ConnectionType::Tuning_Output)
 	{
 		stopMeasure(MeasureThreadInfo::ExitCode::Program);
 	}
@@ -1811,7 +1811,7 @@ void MeasureThread::tuningSocketDisconnected()
 
 void MeasureThread::saveStateTunSignals()
 {
-	if (m_signalConnectionType != Metrology::CONNECTION_TYPE_TUNING_OUTPUT)
+	if (m_signalConnectionType != Metrology::ConnectionType::Tuning_Output)
 	{
 		return;
 	}
@@ -1843,7 +1843,7 @@ void MeasureThread::saveStateTunSignals()
 
 void MeasureThread::restoreStateTunSignals()
 {
-	if (m_signalConnectionType != Metrology::CONNECTION_TYPE_TUNING_OUTPUT)
+	if (m_signalConnectionType != Metrology::ConnectionType::Tuning_Output)
 	{
 		return;
 	}
@@ -1908,7 +1908,7 @@ void MeasureThread::measureKindChanged(int kind)
 
 void MeasureThread::signalConnectionTypeChanged(int type)
 {
-	if (type < 0 || type >= Metrology::CONNECTION_TYPE_COUNT)
+	if (type < 0 || type >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
@@ -1929,7 +1929,7 @@ void MeasureThread::signalParamChanged(const QString& appSignalID)
 	int channelCount = m_activeIoParamList.count();
 	for(int ch = 0; ch < channelCount; ch ++)
 	{
-		for(int type = 0; type < Metrology::ConnectionIoType::Count; type ++)
+		for(int type = 0; type < Metrology::ConnectionIoTypeCount; type ++)
 		{
 			if (m_activeIoParamList[ch].param(type).appSignalID() == appSignalID)
 			{

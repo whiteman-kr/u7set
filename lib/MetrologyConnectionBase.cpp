@@ -16,7 +16,7 @@ namespace Metrology
 	void ConnectionSignal::clear()
 	{
 		m_appSignalID.clear();
-		m_signalID = SIGNAL_ID_IS_EMPTY;
+		m_exist = false;
 
 		m_pMetrologySignal = nullptr;	// only for software Metrology
 	}
@@ -30,10 +30,10 @@ namespace Metrology
 			return;
 		}
 
-		m_appSignalID = pSignal->appSignalID();
-		m_signalID = pSignal->ID();
+		m_appSignalID = pSignal->appSignalID();			// update appSignalID from real signal
+		m_exist = true;									// signal has been found in SignalSetProvider
 
-		m_pMetrologySignal = nullptr;	// only for software Metrology
+		m_pMetrologySignal = nullptr;					// only for software Metrology
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -51,10 +51,11 @@ namespace Metrology
 			return;
 		}
 
-		m_appSignalID = param.appSignalID();
-		m_signalID = param.ID();
 
-		m_pMetrologySignal = pSignal;	// only for software Metrology
+		m_appSignalID = param.appSignalID();			// update appSignalID from real signal
+		m_exist = true;									// signal has been found in SignalBase
+
+		m_pMetrologySignal = pSignal;					// only for software Metrology
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -70,14 +71,14 @@ namespace Metrology
 
 	bool Connection::isValid() const
 	{
-		if (m_type < 0 || m_type >= CONNECTION_TYPE_COUNT)
+		if (static_cast<int>(m_type) < 0 || static_cast<int>(m_type) >= ConnectionTypeCount)
 		{
 			return false;
 		}
 
-		for(int t = 0; t < ConnectionIoType::Count; t++)
+		for(int t = 0; t < ConnectionIoTypeCount; t++)
 		{
-			if (connectionSignal(t).signalID() == SIGNAL_ID_IS_EMPTY)
+			if (connectionSignal(t).isExist() == false)		// signal has not been found in SignalSetProvider
 			{
 				return false;
 			}
@@ -90,11 +91,9 @@ namespace Metrology
 
 	void Connection::clear()
 	{
-		m_strID.clear();
+		m_type = ConnectionType::Unknown;
 
-		m_type = CONNECTION_TYPE_UNUSED;
-
-		for(int t = 0; t < ConnectionIoType::Count; t++)
+		for(int t = 0; t < ConnectionIoTypeCount; t++)
 		{
 			m_connectionSignal[t].clear();
 		}
@@ -104,18 +103,32 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Connection::createStrID()
+	QString Connection::strID(bool full) const
 	{
-		m_strID = QString("%1_%2_%3").arg(m_type, 3, 10, QChar('0')).
-				arg(m_connectionSignal[ConnectionIoType::Source].signalID(), 7, 10, QChar('0')).
-				arg(m_connectionSignal[ConnectionIoType::Destination].signalID(), 7, 10, QChar('0'));
+		QString strID;
+
+		if (full == true)
+		{
+			strID =	QString("%1_%2_%3").
+					arg(m_type, 3, 10, QChar('0')).
+					arg(m_connectionSignal[ConnectionIoType::Source].appSignalID()).
+					arg(m_connectionSignal[ConnectionIoType::Destination].appSignalID());
+		}
+		else
+		{
+			strID =	QString("%1_%2").
+					arg(m_type, 3, 10, QChar('0')).
+					arg(m_connectionSignal[ConnectionIoType::Source].appSignalID());
+		}
+
+		return strID;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	ConnectionSignal Connection::connectionSignal(int ioType) const
 	{
-		if (ioType < 0 || ioType >= ConnectionIoType::Count)
+		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
 		{
 			return ConnectionSignal();
 		}
@@ -127,19 +140,19 @@ namespace Metrology
 
 	QString Connection::typeStr() const
 	{
-		if (m_type < 0 || m_type >= CONNECTION_TYPE_COUNT)
+		if (static_cast<int>(m_type) < 0 || static_cast<int>(m_type) >= ConnectionTypeCount)
 		{
-			return QString("???");
+			return QObject::tr("Unknown");
 		}
 
-		return qApp->translate("MetrologyConnectionBase.h", ConnectionType[m_type]);
+		return ConnectionTypeCaption(m_type);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	QString Connection::appSignalID(int ioType) const
 	{
-		if (ioType < 0 || ioType >= ConnectionIoType::Count)
+		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
 		{
 			return QString();
 		}
@@ -151,7 +164,7 @@ namespace Metrology
 
 	void Connection::setAppSignalID(int ioType, const QString& appSignalID)
 	{
-		if (ioType < 0 || ioType >= ConnectionIoType::Count)
+		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
 		{
 			return;
 		}
@@ -161,35 +174,21 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	int Connection::signalID(int ioType) const
+	bool Connection::isExist(int ioType) const
 	{
-		if (ioType < 0 || ioType >= ConnectionIoType::Count)
+		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
 		{
-			return SIGNAL_ID_IS_EMPTY;
+			return false;
 		}
 
-		return m_connectionSignal[ioType].signalID();
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	void Connection::setSignalID(int ioType, int id)
-	{
-		if (ioType < 0 || ioType >= ConnectionIoType::Count)
-		{
-			return;
-		}
-
-		m_connectionSignal[ioType].setSignalID(id);
+		return m_connectionSignal[ioType].isExist();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	void Connection::setSignal(int ioType, ::Signal* pSignal)
 	{
-		m_strID.clear();
-
-		if (ioType < 0 || ioType >= ConnectionIoType::Count)
+		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
 		{
 			return;
 		}
@@ -207,16 +206,13 @@ namespace Metrology
 		}
 
 		m_connectionSignal[ioType].set(pSignal);
-		createStrID();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	void Connection::setSignal(int ioType, Metrology::Signal* pSignal)
 	{
-		m_strID.clear();
-
-		if (ioType < 0 || ioType >= ConnectionIoType::Count)
+		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
 		{
 			return;
 		}
@@ -240,14 +236,13 @@ namespace Metrology
 		}
 
 		m_connectionSignal[ioType].set(pSignal);
-		createStrID();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	Metrology::Signal* Connection::metrologySignal(int ioType) const
 	{
-		if (ioType < 0 || ioType >= ConnectionIoType::Count)
+		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
 		{
 			return nullptr;
 		}
@@ -261,7 +256,7 @@ namespace Metrology
 	{
 		bool result = true;
 
-		int type = CONNECTION_TYPE_UNDEFINED;
+		int type = ConnectionType::Unknown;
 		QString sourceAppSignalID;
 		QString destinationAppSignalID;
 
@@ -269,7 +264,7 @@ namespace Metrology
 		result &= xml.readStringAttribute(QString("SourceAppSignalID"), &sourceAppSignalID);
 		result &= xml.readStringAttribute(QString("DestinationAppSignalID"), &destinationAppSignalID);
 
-		setType(type);
+		setType(static_cast<ConnectionType>(type));
 		setAppSignalID(ConnectionIoType::Source, sourceAppSignalID);
 		setAppSignalID(ConnectionIoType::Destination, destinationAppSignalID);
 
@@ -314,6 +309,19 @@ namespace Metrology
 		QMutexLocker l(&m_connectionMutex);
 
 		return m_connectionList.count();
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void ConnectionBase::setSignalSetProvider(SignalSetProvider* signalSetProvider)
+	{
+		if (signalSetProvider == nullptr)
+		{
+			Q_ASSERT(signalSetProvider);
+			return;
+		}
+
+		m_signalSetProvider = signalSetProvider;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -398,7 +406,7 @@ namespace Metrology
 			{
 				switch (column)
 				{
-					case 0:	connection.setType(line[column].toInt());													break;
+					case 0:	connection.setType(static_cast<ConnectionType>(line[column].toInt()));						break;
 					case 1:	connection.setAppSignalID(ConnectionIoType::Source, line[column]);							break;
 					case 2:	connection.setAppSignalID(ConnectionIoType::Destination, line[column]);						break;
 					case 3:	connection.setAction(static_cast<VcsItemAction::VcsItemActionType>(line[column].toInt()));	break;
@@ -549,7 +557,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void ConnectionBase::setSignalIDs()
+	void ConnectionBase::findSignal_in_signalSet()
 	{
 		if (m_signalSetProvider == nullptr)
 		{
@@ -566,7 +574,7 @@ namespace Metrology
 
 			// init signals
 			//
-			for(int type = 0; type < ConnectionIoType::Count; type++)
+			for(int type = 0; type < ConnectionIoTypeCount; type++)
 			{
 				if (connection.appSignalID(type).isEmpty() == true)
 				{
@@ -697,7 +705,11 @@ namespace Metrology
 		{
 			for( int k = i+1; k < connectionCount; k++ )
 			{
-				if (m_connectionList[i].strID() > m_connectionList[k].strID())
+
+				QString strID1 = m_connectionList[i].strID(true);
+				QString strID2 = m_connectionList[k].strID(true);
+
+				if (strID1 > strID2)
 				{
 					Connection connection = m_connectionList[i];
 					m_connectionList[i] = m_connectionList[k];
@@ -711,7 +723,7 @@ namespace Metrology
 
 	int ConnectionBase::findConnectionIndex(int ioType, Metrology::Signal* pSignal) const
 	{
-		if (ioType < 0 || ioType >= ConnectionIoType::Count)
+		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
 		{
 			Q_ASSERT(0);
 			return -1;
@@ -748,13 +760,13 @@ namespace Metrology
 
 	int ConnectionBase::findConnectionIndex(int connectionType, int ioType, Metrology::Signal* pSignal) const
 	{
-		if (connectionType < 0 || connectionType >= CONNECTION_TYPE_COUNT)
+		if (connectionType < 0 || connectionType >= ConnectionTypeCount)
 		{
 			Q_ASSERT(0);
 			return -1;
 		}
 
-		if (ioType < 0 || ioType >= ConnectionIoType::Count)
+		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
 		{
 			Q_ASSERT(0);
 			return -1;
@@ -800,11 +812,12 @@ namespace Metrology
 
 		QMutexLocker l(&m_connectionMutex);
 
-		int count = m_connectionList.count();
+		QString strID = connection.strID(true);
 
+		int count = m_connectionList.count();
 		for(int i = 0; i < count; i ++)
 		{
-			if (m_connectionList[i].strID() == connection.strID())
+			if (m_connectionList[i].strID(true) == strID)
 			{
 				foundIndex = i;
 
@@ -819,7 +832,7 @@ namespace Metrology
 
 	int ConnectionBase::getOutputSignalCount(int connectionType, const QString& InputAppSignalID) const
 	{
-		if (connectionType < 0 || connectionType >= CONNECTION_TYPE_COUNT)
+		if (connectionType < 0 || connectionType >= ConnectionTypeCount)
 		{
 			return 0;
 		}
@@ -865,7 +878,7 @@ namespace Metrology
 
 	QVector<Metrology::Signal*> ConnectionBase::getOutputSignals(int connectionType, const QString& InputAppSignalID) const
 	{
-		if (connectionType < 0 || connectionType >= CONNECTION_TYPE_COUNT)
+		if (connectionType < 0 || connectionType >= ConnectionTypeCount)
 		{
 			return QVector<Metrology::Signal*>();
 		}
@@ -965,6 +978,31 @@ namespace Metrology
 		m_connectionList = from.m_connectionList;
 
 		return *this;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString ConnectionTypeCaption(int type)
+	{
+		QString caption;
+
+		switch (type)
+		{
+			case Unsed:					caption = QObject::tr("No connections             ");	break;
+			case Input_Internal:		caption = QObject::tr("Input -> Internal");				break;
+			case Input_Output:			caption = QObject::tr("Input -> Output");				break;
+			case Input_DP_Internal_F:	caption = QObject::tr("Input dP -> Internal F");		break;
+			case Input_DP_Output_F:		caption = QObject::tr("Input dP -> Output F");			break;
+			case Input_C_Internal_F:	caption = QObject::tr("Input °С -> Internal °F");		break;
+			case Input_C_Output_F:		caption = QObject::tr("Input °С -> Output °F");			break;
+			case Tuning_Output:			caption = QObject::tr("Tuning -> Output");				break;
+			default:					assert(0);
+
+		}
+
+		return caption;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

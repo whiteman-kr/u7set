@@ -26,7 +26,7 @@ public:
 private:
 
 	Metrology::Signal* m_pSignal = nullptr;
-	int m_signalConnectionType = Metrology::CONNECTION_TYPE_UNDEFINED;
+	int m_signalConnectionType = Metrology::ConnectionType::Unknown;
 	std::shared_ptr<Metrology::ComparatorEx> m_pComparator = nullptr;
 
 	int m_measureCount = 0;

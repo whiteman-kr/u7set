@@ -16,42 +16,32 @@ namespace Metrology
 
 	// ==============================================================================================
 
-	const char* const	ConnectionType[] =
+	enum ConnectionType
 	{
-	                    QT_TRANSLATE_NOOP("MetrologyConnectionBase.h", "No connections             "),
-						QT_TRANSLATE_NOOP("MetrologyConnectionBase.h", "Input -> Internal"),
-						QT_TRANSLATE_NOOP("MetrologyConnectionBase.h", "Input -> Output"),
-						QT_TRANSLATE_NOOP("MetrologyConnectionBase.h", "Input dP -> Internal F"),
-						QT_TRANSLATE_NOOP("MetrologyConnectionBase.h", "Input dP -> Output F"),
-						QT_TRANSLATE_NOOP("MetrologyConnectionBase.h", "Input °С -> Internal °F"),
-						QT_TRANSLATE_NOOP("MetrologyConnectionBase.h", "Input °С -> Output °F"),
-						QT_TRANSLATE_NOOP("MetrologyConnectionBase.h", "Tuning -> Output"),
+		Unknown				= -1,
+		Unsed				= 0,
+		Input_Internal		= 1,
+		Input_Output		= 2,
+		Input_DP_Internal_F	= 3,
+		Input_DP_Output_F	= 4,
+		Input_C_Internal_F	= 5,
+		Input_C_Output_F	= 6,
+		Tuning_Output		= 7,
 	};
+	const int ConnectionTypeCount = 8;			// count of ...ConnectionType elements
 
-	const int			CONNECTION_TYPE_COUNT = sizeof(ConnectionType)/sizeof(ConnectionType[0]);
-
-	const int			CONNECTION_TYPE_UNDEFINED				= -1,
-						CONNECTION_TYPE_UNUSED					= 0,
-						CONNECTION_TYPE_INPUT_INTERNAL			= 1,
-						CONNECTION_TYPE_INPUT_OUTPUT			= 2,
-						CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F	= 3,
-						CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F	= 4,
-						CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F	= 5,
-						CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F		= 6,
-						CONNECTION_TYPE_TUNING_OUTPUT			= 7;
+	QString ConnectionTypeCaption(int type);
 
 	// ==============================================================================================
 
 	enum ConnectionIoType
 	{
-		Source = 0,
-		Destination = 1,
-		Count = 2			// count of ...ConnectionIoType elements
+		Source		= 0,
+		Destination	= 1,
 	};
+	const int ConnectionIoTypeCount = 2;		// count of ...ConnectionIoType elements
 
 	// ==============================================================================================
-
-	const int SIGNAL_ID_IS_EMPTY = 0;
 
 	class ConnectionSignal
 	{
@@ -64,23 +54,22 @@ namespace Metrology
 
 		void clear();
 
-		void set(::Signal* pSignal);
-		void set(Metrology::Signal* pSignal);	// only for software Metrology
-
 		QString appSignalID() const { return m_appSignalID; }
 		void setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; }
 
-		int signalID() const { return m_signalID; }
-		void setSignalID(int id) { m_signalID = id; }
+		bool isExist() const { return m_exist; }
+
+		void set(::Signal* pSignal);
+		void set(Metrology::Signal* pSignal);
 
 		Metrology::Signal* metrologySignal() const { return m_pMetrologySignal; }
 
 	private:
 
-		QString m_appSignalID;
-		int m_signalID = SIGNAL_ID_IS_EMPTY;
+		QString m_appSignalID;								// AppSignalID from connections file
+		bool m_exist = false;								// signal has been found in SignalSetProvider
 
-		Metrology::Signal* m_pMetrologySignal = nullptr; // only for software Metrology
+		Metrology::Signal* m_pMetrologySignal = nullptr;	// only for software Metrology
 	};
 
 
@@ -98,28 +87,28 @@ namespace Metrology
 		bool isValid() const;
 		void clear();
 
-		QString strID() const { return m_strID; }
-		void createStrID();
+		QString strID(bool full) const;
 
 		ConnectionSignal connectionSignal(int ioType) const;
 
-		int type() const { return m_type; }
+		ConnectionType type() const { return m_type; }
 		QString typeStr() const;
-		void setType(int type) { m_type = type; }
+		void setType(ConnectionType type) { m_type = type; }
 
 		QString appSignalID(int ioType) const;
 		void setAppSignalID(int ioType, const QString& appSignalID);
 
-		int signalID(int ioType) const;
-		void setSignalID(int ioType, int id);
+		bool isExist(int ioType) const;							// signal has not been found in SignalSetProvider
 
 		void setSignal(int ioType, ::Signal* pSignal);
-		void setSignal(int ioType, Metrology::Signal* pSignal);	// only for software Metrology
-
-		const VcsItemAction& action() const { return m_action; }
-		void setAction(const VcsItemAction& action) { m_action = action; }
+		void setSignal(int ioType, Metrology::Signal* pSignal);
 
 		Metrology::Signal* metrologySignal(int ioType) const;
+
+		//
+		//
+		const VcsItemAction& action() const { return m_action; }
+		void setAction(const VcsItemAction& action) { m_action = action; }
 
 		// serialize for Build
 		//
@@ -128,11 +117,9 @@ namespace Metrology
 
 	private:
 
-		QString m_strID;
+		ConnectionType m_type = ConnectionType::Unknown;
 
-		int m_type = CONNECTION_TYPE_UNUSED;
-
-		ConnectionSignal m_connectionSignal[ConnectionIoType::Count];
+		ConnectionSignal m_connectionSignal[ConnectionIoTypeCount];
 
 		VcsItemAction m_action;
 	};
@@ -150,12 +137,14 @@ namespace Metrology
 
 	public:
 
-		void setSignalSetProvider(SignalSetProvider* signalSetProvider) { m_signalSetProvider = signalSetProvider; }
-
 		//
 		//
 		void clear();
 		int count() const;
+
+		//
+		//
+		void setSignalSetProvider(SignalSetProvider* signalSetProvider);
 
 		//
 		//
@@ -167,7 +156,7 @@ namespace Metrology
 		bool checkOut();
 		bool isCheckIn();
 
-		void setSignalIDs();
+		void findSignal_in_signalSet();
 
 		//
 		//

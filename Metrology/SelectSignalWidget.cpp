@@ -30,9 +30,9 @@ SelectSignalItem::SelectSignalItem(int index, int signalConnectionType, const Me
 void SelectSignalItem::clear()
 {
 	m_index = -1;
-	m_connectionType = Metrology::CONNECTION_TYPE_UNDEFINED;
+	m_connectionType = Metrology::ConnectionType::Unknown;
 
-	for(int ioType = 0; ioType < Metrology::ConnectionIoType::Count; ioType++)
+	for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
 	{
 		m_signalId[ioType].clear();
 		m_caption[ioType].clear();
@@ -48,7 +48,7 @@ bool SelectSignalItem::isValid() const
 		return false;
 	}
 
-	if (m_connectionType < 0 || m_connectionType > Metrology::CONNECTION_TYPE_COUNT)
+	if (m_connectionType < 0 || m_connectionType > Metrology::ConnectionTypeCount)
 	{
 		return false;
 	}
@@ -58,7 +58,7 @@ bool SelectSignalItem::isValid() const
 		return false;
 	}
 
-	if (m_connectionType != Metrology::CONNECTION_TYPE_UNUSED)
+	if (m_connectionType != Metrology::ConnectionType::Unsed)
 	{
 		if (m_signalId[Metrology::ConnectionIoType::Destination].isEmpty() == true)
 		{
@@ -90,7 +90,7 @@ bool SelectSignalItem::set(int index, int signalConnectionType, const MeasureSig
 	setSignalId(Metrology::ConnectionIoType::Source,inSignal.signalID());
 	setCaption(Metrology::ConnectionIoType::Source, inSignal.caption());
 
-	if (signalConnectionType != Metrology::CONNECTION_TYPE_UNUSED)
+	if (signalConnectionType != Metrology::ConnectionType::Unsed)
 	{
 		const MultiChannelSignal& outSignal = measureSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);
 		if (outSignal.isEmpty() == true)
@@ -114,7 +114,7 @@ bool SelectSignalItem::set(int index, int signalConnectionType, const MeasureSig
 
 QString SelectSignalItem::signalId(int ioType) const
 {
-	if (ioType < 0 || ioType >= Metrology::ConnectionIoType::Count)
+	if (ioType < 0 || ioType >= Metrology::ConnectionIoTypeCount)
 	{
 		return QString();
 	}
@@ -126,7 +126,7 @@ QString SelectSignalItem::signalId(int ioType) const
 
 void SelectSignalItem::setSignalId(int ioType, const QString& signalId)
 {
-	if (ioType < 0 || ioType >= Metrology::ConnectionIoType::Count)
+	if (ioType < 0 || ioType >= Metrology::ConnectionIoTypeCount)
 	{
 		return;
 	}
@@ -138,7 +138,7 @@ void SelectSignalItem::setSignalId(int ioType, const QString& signalId)
 
 QString SelectSignalItem::caption(int ioType) const
 {
-	if (ioType < 0 || ioType >= Metrology::ConnectionIoType::Count)
+	if (ioType < 0 || ioType >= Metrology::ConnectionIoTypeCount)
 	{
 		return QString();
 	}
@@ -150,7 +150,7 @@ QString SelectSignalItem::caption(int ioType) const
 
 void SelectSignalItem::setCaption(int ioType, const QString& caption)
 {
-	if (ioType < 0 || ioType >= Metrology::ConnectionIoType::Count)
+	if (ioType < 0 || ioType >= Metrology::ConnectionIoTypeCount)
 	{
 		return;
 	}
@@ -236,7 +236,7 @@ bool SelectSignalWidget::setCurrentSignalIndex(const QString& signalId)
 
 	QString buttonTitle;
 
-	if (signal.connectionType() == Metrology::CONNECTION_TYPE_UNUSED)
+	if (signal.connectionType() == Metrology::ConnectionType::Unsed)
 	{
 		buttonTitle = QString(" %1\n %2").arg(signal.signalId(Metrology::ConnectionIoType::Source)).arg(signal.caption(Metrology::ConnectionIoType::Source));
 	}
@@ -570,7 +570,7 @@ QVariant SelectSignalModel::data(const QModelIndex& modelIndex, int role) const
 
 		if (signal.isValid() == true)
 		{
-			if (signal.connectionType() == Metrology::CONNECTION_TYPE_UNUSED)
+			if (signal.connectionType() == Metrology::ConnectionType::Unsed)
 			{
 				str = QString(" %1\n %2").
 						arg(signal.signalId(Metrology::ConnectionIoType::Source)).
@@ -628,7 +628,7 @@ int SelectSignalModel::applyFilter(QString filterText, int defaultSignalIndex)
 
 			if (s.isValid() == true)
 			{
-				if (s.connectionType() == Metrology::CONNECTION_TYPE_UNUSED)
+				if (s.connectionType() == Metrology::ConnectionType::Unsed)
 				{
 					if(	filterText.isEmpty() == true ||
 							s.signalId(Metrology::ConnectionIoType::Source).contains(filterText, Qt::CaseInsensitive) ||

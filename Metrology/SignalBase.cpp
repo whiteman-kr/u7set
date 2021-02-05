@@ -28,13 +28,13 @@ bool IoSignalParam::isValid() const
 
 	bool valid = true;
 
-	if (m_signalConnectionType == Metrology::CONNECTION_TYPE_UNUSED)
+	if (m_signalConnectionType == Metrology::ConnectionType::Unsed)
 	{
 		valid = m_param[Metrology::ConnectionIoType::Source].isValid();				// only input
 	}
 	else
 	{
-		for(int type = 0; type < Metrology::ConnectionIoType::Count; type++)		// input and output
+		for(int type = 0; type < Metrology::ConnectionIoTypeCount; type++)		// input and output
 		{
 			if (m_param[type].isValid() == false)
 			{
@@ -54,12 +54,12 @@ void IoSignalParam::clear()
 {
 	QMutexLocker l(&m_mutex);
 
-	for(int type = 0; type < Metrology::ConnectionIoType::Count; type++)
+	for(int type = 0; type < Metrology::ConnectionIoTypeCount; type++)
 	{
 		m_param[type].setAppSignalID(QString());
 	}
 
-	m_signalConnectionType = Metrology::CONNECTION_TYPE_UNUSED;
+	m_signalConnectionType = Metrology::ConnectionType::Unsed;
 
 	m_pCalibratorManager = nullptr;
 
@@ -75,7 +75,7 @@ Metrology::SignalParam IoSignalParam::param(int type) const
 {
 	QMutexLocker l(&m_mutex);
 
-	if (type < 0 || type >= Metrology::ConnectionIoType::Count)
+	if (type < 0 || type >= Metrology::ConnectionIoTypeCount)
 	{
 		return Metrology::SignalParam();
 	}
@@ -87,7 +87,7 @@ Metrology::SignalParam IoSignalParam::param(int type) const
 
 bool IoSignalParam::setParam(int type, const Metrology::SignalParam& param)
 {
-	if (type < 0 || type >= Metrology::ConnectionIoType::Count)
+	if (type < 0 || type >= Metrology::ConnectionIoTypeCount)
 	{
 		return false;
 	}
@@ -112,7 +112,7 @@ QString IoSignalParam::appSignalID() const
 
 	QString result;
 
-	if (m_signalConnectionType == Metrology::CONNECTION_TYPE_UNUSED)
+	if (m_signalConnectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -146,7 +146,7 @@ QString IoSignalParam::customSignalID() const
 
 	QString result;
 
-	if (m_signalConnectionType == Metrology::CONNECTION_TYPE_UNUSED)
+	if (m_signalConnectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -180,7 +180,7 @@ QString IoSignalParam::equipmentID() const
 
 	QString result;
 
-	if (m_signalConnectionType == Metrology::CONNECTION_TYPE_UNUSED)
+	if (m_signalConnectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -221,7 +221,7 @@ QString IoSignalParam::rackCaption() const
 
 	QString result;
 
-	if (m_signalConnectionType == Metrology::CONNECTION_TYPE_UNUSED)
+	if (m_signalConnectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -262,7 +262,7 @@ QString IoSignalParam::chassisStr() const
 
 	QString result;
 
-	if (m_signalConnectionType == Metrology::CONNECTION_TYPE_UNUSED)
+	if (m_signalConnectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -303,7 +303,7 @@ QString IoSignalParam::moduleStr() const
 
 	QString result;
 
-	if (m_signalConnectionType == Metrology::CONNECTION_TYPE_UNUSED)
+	if (m_signalConnectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -344,7 +344,7 @@ QString IoSignalParam::placeStr() const
 
 	QString result;
 
-	if (m_signalConnectionType == Metrology::CONNECTION_TYPE_UNUSED)
+	if (m_signalConnectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -385,7 +385,7 @@ QString IoSignalParam::caption() const
 
 	QString result;
 
-	if (m_signalConnectionType == Metrology::CONNECTION_TYPE_UNUSED)
+	if (m_signalConnectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -428,10 +428,10 @@ QString IoSignalParam::electricRangeStr() const
 
 	switch(m_signalConnectionType)
 	{
-		case Metrology::CONNECTION_TYPE_UNUSED:
-		case Metrology::CONNECTION_TYPE_INPUT_INTERNAL:
-		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-		case Metrology::CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+		case Metrology::ConnectionType::Unsed:
+		case Metrology::ConnectionType::Input_Internal:
+		case Metrology::ConnectionType::Input_DP_Internal_F:
+		case Metrology::ConnectionType::Input_C_Internal_F:
 			{
 				const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 				if (param.isValid() == true)
@@ -442,9 +442,9 @@ QString IoSignalParam::electricRangeStr() const
 
 			break;
 
-		case Metrology::CONNECTION_TYPE_INPUT_OUTPUT:
-		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
-		case Metrology::CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+		case Metrology::ConnectionType::Input_Output:
+		case Metrology::ConnectionType::Input_DP_Output_F:
+		case Metrology::ConnectionType::Input_C_Output_F:
 			{
 				const Metrology::SignalParam& inParam = m_param[Metrology::ConnectionIoType::Source];
 				if (inParam.isValid() == true)
@@ -468,7 +468,7 @@ QString IoSignalParam::electricRangeStr() const
 
 			break;
 
-		case Metrology::CONNECTION_TYPE_TUNING_OUTPUT:
+		case Metrology::ConnectionType::Tuning_Output:
 			{
 				const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Destination];
 				if (param.isValid() == true)
@@ -496,10 +496,10 @@ QString IoSignalParam::electricSensorStr() const
 
 	switch(m_signalConnectionType)
 	{
-		case Metrology::CONNECTION_TYPE_UNUSED:
-		case Metrology::CONNECTION_TYPE_INPUT_INTERNAL:
-		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-		case Metrology::CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+		case Metrology::ConnectionType::Unsed:
+		case Metrology::ConnectionType::Input_Internal:
+		case Metrology::ConnectionType::Input_DP_Internal_F:
+		case Metrology::ConnectionType::Input_C_Internal_F:
 			{
 				const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 				if (param.isValid() == true)
@@ -510,9 +510,9 @@ QString IoSignalParam::electricSensorStr() const
 
 			break;
 
-		case Metrology::CONNECTION_TYPE_INPUT_OUTPUT:
-		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
-		case Metrology::CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+		case Metrology::ConnectionType::Input_Output:
+		case Metrology::ConnectionType::Input_DP_Output_F:
+		case Metrology::ConnectionType::Input_C_Output_F:
 			{
 				const Metrology::SignalParam& inParam = m_param[Metrology::ConnectionIoType::Source];
 				if (inParam.isValid() == true)
@@ -536,7 +536,7 @@ QString IoSignalParam::electricSensorStr() const
 
 			break;
 
-		case Metrology::CONNECTION_TYPE_TUNING_OUTPUT:
+		case Metrology::ConnectionType::Tuning_Output:
 			{
 				const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Destination];
 				if (param.isValid() == true)
@@ -561,7 +561,7 @@ QString IoSignalParam::physicalRangeStr() const
 
 	QString result;
 
-	if (m_signalConnectionType == Metrology::CONNECTION_TYPE_UNUSED)
+	if (m_signalConnectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -604,7 +604,7 @@ QString IoSignalParam::engineeringRangeStr() const
 
 	switch (m_signalConnectionType)
 	{
-		case Metrology::CONNECTION_TYPE_UNUSED:
+		case Metrology::ConnectionType::Unsed:
 			{
 				const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 				if (param.isValid() == true)
@@ -614,12 +614,12 @@ QString IoSignalParam::engineeringRangeStr() const
 			}
 			break;
 
-		case Metrology::CONNECTION_TYPE_INPUT_INTERNAL:
-		case Metrology::CONNECTION_TYPE_INPUT_OUTPUT:
-		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
-		case Metrology::CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
-		case Metrology::CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+		case Metrology::ConnectionType::Input_Internal:
+		case Metrology::ConnectionType::Input_Output:
+		case Metrology::ConnectionType::Input_DP_Internal_F:
+		case Metrology::ConnectionType::Input_DP_Output_F:
+		case Metrology::ConnectionType::Input_C_Internal_F:
+		case Metrology::ConnectionType::Input_C_Output_F:
 			{
 				const Metrology::SignalParam& inParam = m_param[Metrology::ConnectionIoType::Source];
 				if (inParam.isValid() == true)
@@ -642,7 +642,7 @@ QString IoSignalParam::engineeringRangeStr() const
 			}
 			break;
 
-		case Metrology::CONNECTION_TYPE_TUNING_OUTPUT:
+		case Metrology::ConnectionType::Tuning_Output:
 		{
 			const Metrology::SignalParam& inParam = m_param[Metrology::ConnectionIoType::Source];
 			if (inParam.isValid() == true)
@@ -690,7 +690,7 @@ IoSignalParam& IoSignalParam::operator=(const IoSignalParam& from)
 {
 	QMutexLocker l(&m_mutex);
 
-	for(int type = 0; type < Metrology::ConnectionIoType::Count; type++)
+	for(int type = 0; type < Metrology::ConnectionIoTypeCount; type++)
 	{
 		m_param[type] = from.m_param[type];
 	}
@@ -934,9 +934,9 @@ void MeasureSignal::clear()
 {
 	QMutexLocker l(&m_mutex);
 
-	m_signalConnectionType = Metrology::CONNECTION_TYPE_UNUSED;
+	m_signalConnectionType = Metrology::ConnectionType::Unsed;
 
-	for(int type = 0; type < Metrology::ConnectionIoType::Count; type++)
+	for(int type = 0; type < Metrology::ConnectionIoTypeCount; type++)
 	{
 		m_signal[type].clear();
 	}
@@ -950,7 +950,7 @@ bool MeasureSignal::isEmpty() const
 
 	bool empty = true;
 
-	for(int type = 0; type < Metrology::ConnectionIoType::Count; type++)
+	for(int type = 0; type < Metrology::ConnectionIoTypeCount; type++)
 	{
 		if (m_signal[type].isEmpty() == false)
 		{
@@ -971,7 +971,7 @@ void MeasureSignal::setChannelCount(int count)
 
 	m_channelCount = count;
 
-	for(int type = 0; type < Metrology::ConnectionIoType::Count; type++)
+	for(int type = 0; type < Metrology::ConnectionIoTypeCount; type++)
 	{
 		m_signal[type].setChannelCount(count);
 	}
@@ -981,7 +981,7 @@ void MeasureSignal::setChannelCount(int count)
 
 MultiChannelSignal MeasureSignal::multiChannelSignal(int type) const
 {
-	if (type < 0 || type >= Metrology::ConnectionIoType::Count)
+	if (type < 0 || type >= Metrology::ConnectionIoTypeCount)
 	{
 		return MultiChannelSignal();
 	}
@@ -995,7 +995,7 @@ MultiChannelSignal MeasureSignal::multiChannelSignal(int type) const
 
 bool MeasureSignal::setMultiSignal(int type, const MultiChannelSignal& signal)
 {
-	if (type < 0 || type >= Metrology::ConnectionIoType::Count)
+	if (type < 0 || type >= Metrology::ConnectionIoTypeCount)
 	{
 		return false;
 	}
@@ -1011,7 +1011,7 @@ bool MeasureSignal::setMultiSignal(int type, const MultiChannelSignal& signal)
 
 Metrology::Signal* MeasureSignal::metrologySignal(int type, int channel) const
 {
-	if (type < 0 || type >= Metrology::ConnectionIoType::Count)
+	if (type < 0 || type >= Metrology::ConnectionIoTypeCount)
 	{
 		return nullptr;
 	}
@@ -1036,7 +1036,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind, const Metrology::Connect
 		return false;
 	}
 
-	if (signalConnectionType < 0 || signalConnectionType >= Metrology::CONNECTION_TYPE_COUNT)
+	if (signalConnectionType < 0 || signalConnectionType >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return false;
@@ -1075,7 +1075,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind, const Metrology::Connect
 
 	// set output signal
 	//
-	if (signalConnectionType != Metrology::CONNECTION_TYPE_UNUSED)
+	if (signalConnectionType != Metrology::ConnectionType::Unsed)
 	{
 		Metrology::Signal* pOutSignal = nullptr;
 
@@ -1161,7 +1161,7 @@ bool MeasureSignal::contains(Metrology::Signal* pSignal) const
 
 	for(int ch = 0; ch < m_channelCount; ch++)
 	{
-		for(int t = 0; t < Metrology::ConnectionIoType::Count; t++)
+		for(int t = 0; t < Metrology::ConnectionIoTypeCount; t++)
 		{
 			if (m_signal[t].metrologySignal(ch) == pSignal)
 			{
@@ -1190,7 +1190,7 @@ MeasureSignal& MeasureSignal::operator=(const MeasureSignal& from)
 
 	m_channelCount = from.m_channelCount;
 
-	for(int type = 0; type < Metrology::ConnectionIoType::Count; type++)
+	for(int type = 0; type < Metrology::ConnectionIoTypeCount; type++)
 	{
 		m_signal[type] = from.m_signal[type];
 	}
@@ -1618,7 +1618,7 @@ bool SignalBase::enableForMeasure(int signalConnectionType, Metrology::Signal* p
 
 	switch (signalConnectionType)
 	{
-		case Metrology::CONNECTION_TYPE_UNUSED:
+		case Metrology::ConnectionType::Unsed:
 		{
 			if (param.isInput() == false)
 			{
@@ -1637,9 +1637,9 @@ bool SignalBase::enableForMeasure(int signalConnectionType, Metrology::Signal* p
 		}
 			break;
 
-		case Metrology::CONNECTION_TYPE_INPUT_INTERNAL:
-		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-		case Metrology::CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+		case Metrology::ConnectionType::Input_Internal:
+		case Metrology::ConnectionType::Input_DP_Internal_F:
+		case Metrology::ConnectionType::Input_C_Internal_F:
 		{
 			if (param.isInput() == false)
 			{
@@ -1681,9 +1681,9 @@ bool SignalBase::enableForMeasure(int signalConnectionType, Metrology::Signal* p
 		}
 			break;
 
-		case Metrology::CONNECTION_TYPE_INPUT_OUTPUT:
-		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
-		case Metrology::CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+		case Metrology::ConnectionType::Input_Output:
+		case Metrology::ConnectionType::Input_DP_Output_F:
+		case Metrology::ConnectionType::Input_C_Output_F:
 		{
 			if (param.isInput() == false)
 			{
@@ -1730,7 +1730,7 @@ bool SignalBase::enableForMeasure(int signalConnectionType, Metrology::Signal* p
 		}
 			break;
 
-		case Metrology::CONNECTION_TYPE_TUNING_OUTPUT:
+		case Metrology::ConnectionType::Tuning_Output:
 		{
 			if (param.isInternal() == false)
 			{
@@ -1891,7 +1891,7 @@ int SignalBase::createRackListForMeasure(int measureKind, int signalConnectionTy
 		return 0;
 	}
 
-	if (signalConnectionType < 0 || signalConnectionType >= Metrology::CONNECTION_TYPE_COUNT)
+	if (signalConnectionType < 0 || signalConnectionType >= Metrology::ConnectionTypeCount)
 	{
 		assert(false);
 		return 0;
@@ -2095,7 +2095,7 @@ void SignalBase::initSignalConnections()
 			continue;
 		}
 
-		for(int type = 0; type < Metrology::ConnectionIoType::Count; type++)
+		for(int type = 0; type < Metrology::ConnectionIoTypeCount; type++)
 		{
 			if (pConnection->appSignalID(type).isEmpty() == true)
 			{
@@ -2166,7 +2166,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 		return 0;
 	}
 
-	if (signalConnectionType < 0 || signalConnectionType >= Metrology::CONNECTION_TYPE_COUNT)
+	if (signalConnectionType < 0 || signalConnectionType >= Metrology::ConnectionTypeCount)
 	{
 		assert(false);
 		return 0;
@@ -2211,7 +2211,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 		{
 			case MEASURE_KIND_ONE_RACK:
 
-				if (signalConnectionType == Metrology::CONNECTION_TYPE_UNUSED)
+				if (signalConnectionType == Metrology::ConnectionType::Unsed)
 				{
 					channelCount = 1;
 				}
@@ -2481,7 +2481,7 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 
 		// if input has not output signals got to next channel
 		//
-		if (m_activeSignal.signalConnectionType() == Metrology::CONNECTION_TYPE_UNUSED)
+		if (m_activeSignal.signalConnectionType() == Metrology::ConnectionType::Unsed)
 		{
 			continue;
 		}

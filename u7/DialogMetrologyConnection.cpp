@@ -27,6 +27,19 @@ MetrologyConnectionTable::~MetrologyConnectionTable()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MetrologyConnectionTable::setSignalSetProvider(SignalSetProvider* signalSetProvider)
+{
+	if (signalSetProvider == nullptr)
+	{
+		Q_ASSERT(signalSetProvider);
+		return;
+	}
+
+	m_signalSetProvider = signalSetProvider;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 int MetrologyConnectionTable::columnCount(const QModelIndex&) const
 {
 	return METROLOGY_CONNECTION_COLUMN_COUNT;
@@ -87,6 +100,11 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 		return QVariant();
 	}
 
+	if (m_signalSetProvider == nullptr)
+	{
+		return QVariant();
+	}
+
 	const Metrology::Connection& connection = at(row);
 
 	if (role == Qt::TextAlignmentRole)
@@ -98,7 +116,8 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 	{
 		if (column == METROLOGY_CONNECTION_COLUMN_IN_ID)
 		{
-			if (connection.signalID(Metrology::ConnectionIoType::Source) == Metrology::SIGNAL_ID_IS_EMPTY)	// if input signal is not exist
+			::Signal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(Metrology::ConnectionIoType::Source));
+			if (pSignal == nullptr)	// if input signal is not exist
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
 			}
@@ -106,7 +125,8 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 
 		if (column == METROLOGY_CONNECTION_COLUMN_TYPE)
 		{
-			if (connection.type() < 0 || connection.type() >= Metrology::CONNECTION_TYPE_COUNT)
+			int type = connection.type();
+			if (type < 0 || type >= Metrology::ConnectionTypeCount)
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
 			}
@@ -114,7 +134,8 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 
 		if (column == METROLOGY_CONNECTION_COLUMN_OUT_ID)
 		{
-			if (connection.signalID(Metrology::ConnectionIoType::Destination) == Metrology::SIGNAL_ID_IS_EMPTY)	// if output signal is not exist
+			::Signal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(Metrology::ConnectionIoType::Destination));
+			if (pSignal == nullptr)	// if output signal is not exist
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
 			}
@@ -154,10 +175,7 @@ QString MetrologyConnectionTable::text(int row, int column, const Metrology::Con
 
 	bool visible = true;
 
-	if (	row > 0 &&
-	        m_connectionList[row - 1].signalID(Metrology::ConnectionIoType::Source) != Metrology::SIGNAL_ID_IS_EMPTY &&
-	        m_connectionList[row - 1].type() == connection.type() &&
-	        m_connectionList[row - 1].signalID(Metrology::ConnectionIoType::Source) == connection.signalID(Metrology::ConnectionIoType::Source))
+	if (row > 0 && m_connectionList[row - 1].strID(false) == connection.strID(false))
 	{
 		visible = false;
 	}
@@ -166,8 +184,8 @@ QString MetrologyConnectionTable::text(int row, int column, const Metrology::Con
 
 	switch (column)
 	{
-		case METROLOGY_CONNECTION_COLUMN_IN_ID:		result = visible ? connection.appSignalID( Metrology::ConnectionIoType::Source): QString();	break;
-		case METROLOGY_CONNECTION_COLUMN_TYPE:		result = visible ? connection.typeStr() : QString();												break;
+		case METROLOGY_CONNECTION_COLUMN_IN_ID:		result = visible ? connection.appSignalID(Metrology::ConnectionIoType::Source): QString();	break;
+		case METROLOGY_CONNECTION_COLUMN_TYPE:		result = visible ? connection.typeStr() : QString();										break;
 		case METROLOGY_CONNECTION_COLUMN_OUT_ID:	result = connection.appSignalID( Metrology::ConnectionIoType::Destination);					break;
 		default:									Q_ASSERT(0);
 	}
@@ -292,11 +310,11 @@ void DialogMetrologyConnectionItem::createInterface()
 
 	// fill type list
 	//
-	for (int type = 0; type < Metrology::CONNECTION_TYPE_COUNT; type++)
+	for (int type = 0; type < Metrology::ConnectionTypeCount; type++)
 	{
-		m_pTypeList->addItem(qApp->translate("MetrologyConnectionBase.h", Metrology::ConnectionType[type]), type);
+		m_pTypeList->addItem(Metrology::ConnectionTypeCaption(type), type);
 	}
-	m_pTypeList->removeItem(Metrology::CONNECTION_TYPE_UNUSED);
+	m_pTypeList->removeItem(Metrology::ConnectionType::Unsed);
 	m_pTypeList->setCurrentIndex(0);
 
 	// connects
@@ -329,11 +347,11 @@ void DialogMetrologyConnectionItem::updateSignals()
 		return;
 	}
 
-	int type = m_connection.type() ;
-	if ((type < 0 || type >= Metrology::CONNECTION_TYPE_COUNT) || type == Metrology::CONNECTION_TYPE_UNUSED)
+	int type = m_connection.type();
+	if ((type < 0 || type >= Metrology::ConnectionTypeCount) || type == Metrology::ConnectionType::Unsed)
 	{
-		type = Metrology::CONNECTION_TYPE_INPUT_INTERNAL;
-		m_connection.setType(type);
+		m_connection.setType(Metrology::ConnectionType::Input_Internal);
+		type = m_connection.type();
 	}
 
 	m_pTypeList->setCurrentIndex(type - 1);
@@ -346,12 +364,12 @@ void DialogMetrologyConnectionItem::updateSignals()
 void DialogMetrologyConnectionItem::selectedType(int)
 {
 	int type = m_pTypeList->currentData().toInt() ;
-	if (type < 0 || type >= Metrology::CONNECTION_TYPE_COUNT)
+	if (type < 0 || type >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
 
-	m_connection.setType(type);
+	m_connection.setType(static_cast<Metrology::ConnectionType>(type));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -389,7 +407,8 @@ bool DialogMetrologyConnectionItem::electricLimitIsValid(Signal* pSignal)
 	{
 		case E::SignalInOutType::Input:
 
-			if (pSignal->isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || pSignal->isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+			if (pSignal->isSpecPropExists(SignalProperties::electricLowLimitCaption) == false ||
+				pSignal->isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
 			{
 				return false;
 			}
@@ -438,7 +457,7 @@ void DialogMetrologyConnectionItem::onOk()
 	//
 
 	int type = m_connection.type();
-	if (type < 0 || type >= Metrology::CONNECTION_TYPE_COUNT)
+	if (type < 0 || type >= Metrology::ConnectionTypeCount)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select connection type!"));
 		m_pTypeList->setFocus();
@@ -512,12 +531,12 @@ void DialogMetrologyConnectionItem::onOk()
 
 	switch(type)
 	{
-		case Metrology::CONNECTION_TYPE_INPUT_INTERNAL:
-		case Metrology::CONNECTION_TYPE_INPUT_OUTPUT:
-		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
-		case Metrology::CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
-		case Metrology::CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
+		case Metrology::ConnectionType::Input_Internal:
+		case Metrology::ConnectionType::Input_Output:
+		case Metrology::ConnectionType::Input_DP_Internal_F:
+		case Metrology::ConnectionType::Input_DP_Output_F:
+		case Metrology::ConnectionType::Input_C_Internal_F:
+		case Metrology::ConnectionType::Input_C_Output_F:
 
 			if (pInSignal->isInput() == false)
 			{
@@ -541,7 +560,7 @@ void DialogMetrologyConnectionItem::onOk()
 
 			break;
 
-		case Metrology::CONNECTION_TYPE_TUNING_OUTPUT:
+		case Metrology::ConnectionType::Tuning_Output:
 
 			if (pInSignal->isInternal() == false)
 			{
@@ -571,9 +590,9 @@ void DialogMetrologyConnectionItem::onOk()
 
 	switch(type)
 	{
-		case Metrology::CONNECTION_TYPE_INPUT_INTERNAL:
-		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-		case Metrology::CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
+		case Metrology::ConnectionType::Input_Internal:
+		case Metrology::ConnectionType::Input_DP_Internal_F:
+		case Metrology::ConnectionType::Input_C_Internal_F:
 
 			if (pOutSignal->isInternal() == false)
 			{
@@ -587,10 +606,10 @@ void DialogMetrologyConnectionItem::onOk()
 
 			break;
 
-		case Metrology::CONNECTION_TYPE_INPUT_OUTPUT:
-		case Metrology::CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
-		case Metrology::CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
-		case Metrology::CONNECTION_TYPE_TUNING_OUTPUT:
+		case Metrology::ConnectionType::Input_Output:
+		case Metrology::ConnectionType::Input_DP_Output_F:
+		case Metrology::ConnectionType::Input_C_Output_F:
+		case Metrology::ConnectionType::Tuning_Output:
 
 			if (pOutSignal->isOutput() == false)
 			{
@@ -639,6 +658,7 @@ DialogMetrologyConnection::DialogMetrologyConnection(SignalSetProvider* signalSe
 		return;
 	}
 
+	m_connectionTable.setSignalSetProvider(m_signalSetProvider);
 	m_connectionBase.setSignalSetProvider(m_signalSetProvider);
 
 	createInterface();
@@ -676,7 +696,6 @@ void DialogMetrologyConnection::createInterface()
 	//
 	m_pMenuBar = new QMenuBar(this);
 	m_pConnectionMenu = new QMenu(tr("&Connection"), this);
-	m_pEditMenu = new QMenu(tr("&Edit"), this);
 
 	// actions
 	//
@@ -711,18 +730,17 @@ void DialogMetrologyConnection::createInterface()
 	m_pImportAction->setIcon(QIcon(":/Images/Images/SchemaDownload.svg"));
 	m_pImportAction->setShortcut(Qt::CTRL + Qt::Key_I);
 
-		// edit
-		//
-	m_pCopyAction = m_pEditMenu->addAction(tr("&Copy"));
+	m_pConnectionMenu->addSeparator();
+
+	m_pCopyAction = m_pConnectionMenu->addAction(tr("&Copy As Text"));
 	m_pCopyAction->setIcon(QIcon(":/Images/Images/Copy.svg"));
 	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
 
-	m_pSelectAllAction = m_pEditMenu->addAction(tr("Select &All"));
+	m_pSelectAllAction = new QAction(tr("Select &All"), this);
 	m_pSelectAllAction->setIcon(QIcon(":/Images/Images/SelectAll.svg"));
 	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
 
 	m_pMenuBar->addMenu(m_pConnectionMenu);
-	m_pMenuBar->addMenu(m_pEditMenu);
 
 	connect(m_pEditAction, &QAction::triggered, this, &DialogMetrologyConnection::editConnection);
 	connect(m_pCreateAction, &QAction::triggered, this, &DialogMetrologyConnection::newConnection);
@@ -745,11 +763,11 @@ void DialogMetrologyConnection::createInterface()
 	toolBar->addAction(m_pEditAction);
 	toolBar->addAction(m_pCreateAction);
 	toolBar->addAction(m_pRemoveAction);
-
 	toolBar->addSeparator();
-
 	toolBar->addAction(m_pCheckInAction);
-
+	toolBar->addSeparator();
+	toolBar->addAction(m_pExportAction);
+	toolBar->addAction(m_pImportAction);
 	toolBar->addSeparator();
 
 	QLabel* pFindLabel = new QLabel(this);
@@ -862,7 +880,7 @@ bool DialogMetrologyConnection::loadConnectionBase()
 		return false;
 	}
 
-	m_connectionBase.setSignalIDs();
+	m_connectionBase.findSignal_in_signalSet();
 
 	updateList();
 
@@ -991,7 +1009,7 @@ bool DialogMetrologyConnection::createConnectionBySignal(Signal* pSignal)
 	{
 		case E::SignalInOutType::Input:
 
-			connection.setType(Metrology::CONNECTION_TYPE_INPUT_INTERNAL);
+			connection.setType(Metrology::ConnectionType::Input_Internal);
 			connection.setSignal(Metrology::ConnectionIoType::Source, pSignal);
 
 			break;
@@ -1000,12 +1018,12 @@ bool DialogMetrologyConnection::createConnectionBySignal(Signal* pSignal)
 
 			if (pSignal->enableTuning() == false)
 			{
-				connection.setType(Metrology::CONNECTION_TYPE_INPUT_INTERNAL);
+				connection.setType(Metrology::ConnectionType::Input_Internal);
 				connection.setSignal(Metrology::ConnectionIoType::Destination, pSignal);
 			}
 			else
 			{
-				connection.setType(Metrology::CONNECTION_TYPE_TUNING_OUTPUT);
+				connection.setType(Metrology::ConnectionType::Tuning_Output);
 				connection.setSignal(Metrology::ConnectionIoType::Source, pSignal);
 			}
 
@@ -1013,7 +1031,7 @@ bool DialogMetrologyConnection::createConnectionBySignal(Signal* pSignal)
 
 		case E::SignalInOutType::Output:
 
-			connection.setType(Metrology::CONNECTION_TYPE_INPUT_OUTPUT);
+			connection.setType(Metrology::ConnectionType::Input_Output);
 			connection.setSignal(Metrology::ConnectionIoType::Destination, pSignal);
 			break;
 
@@ -1321,7 +1339,7 @@ void DialogMetrologyConnection::importConnections()
 		{
 			switch (column)
 			{
-				case 0:	connection.setType(line[column].toInt());											break;
+				case 0:	connection.setType(static_cast<Metrology::ConnectionType>(line[column].toInt()));	break;
 				case 1:	connection.setAppSignalID(Metrology::ConnectionIoType::Source, line[column]);		break;
 				case 2:	connection.setAppSignalID(Metrology::ConnectionIoType::Destination, line[column]);	break;
 			}
@@ -1331,7 +1349,7 @@ void DialogMetrologyConnection::importConnections()
 
 		// init signals
 		//
-		for(int type = 0; type < Metrology::ConnectionIoType::Count; type++)
+		for(int type = 0; type < Metrology::ConnectionIoTypeCount; type++)
 		{
 			if (connection.appSignalID(type).isEmpty() == true)
 			{
@@ -1396,7 +1414,7 @@ void DialogMetrologyConnection::find()
 
 		bool found = false;
 
-		for(int ioType = 0; ioType < Metrology::ConnectionIoType::Count; ioType++)
+		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
 		{
 			if(rx.exactMatch(connection.appSignalID(ioType)) == true)
 			{

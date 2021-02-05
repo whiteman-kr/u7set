@@ -175,7 +175,7 @@ namespace Builder
 
 						bool wrongConnection = false;
 
-						if (connection.type() < 0 || connection.type() >= Metrology::CONNECTION_TYPE_COUNT)
+						if (connection.type() < 0 || connection.type() >= Metrology::ConnectionTypeCount)
 						{
 							// Metrology connection with signals: %1 and %2, has wrong type of connection
 							//

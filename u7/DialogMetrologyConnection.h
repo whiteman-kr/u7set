@@ -60,6 +60,8 @@ public:
 
 public:
 
+	void setSignalSetProvider(SignalSetProvider* signalSetProvider);
+
 	int	connectionCount() const;
 	Metrology::Connection at(int index) const;
 	void set(const QVector<Metrology::Connection>& list_add);
@@ -68,6 +70,8 @@ public:
 	QString text(int row, int column, const Metrology::Connection& connection) const;
 
 private:
+
+	SignalSetProvider* m_signalSetProvider = nullptr;
 
 	mutable QMutex m_connectionMutex;
 	QVector<Metrology::Connection> m_connectionList;
@@ -156,7 +160,6 @@ private:
 
 	QMenuBar* m_pMenuBar = nullptr;
 	QMenu* m_pConnectionMenu = nullptr;
-	QMenu* m_pEditMenu = nullptr;
 	QMenu* m_pContextMenu = nullptr;
 
 	QAction* m_pEditAction = nullptr;
@@ -166,9 +169,8 @@ private:
 	QAction* m_pCheckInAction = nullptr;
 	QAction* m_pExportAction = nullptr;
 	QAction* m_pImportAction = nullptr;
-
-	QAction* m_pFindAction = nullptr;
 	QAction* m_pCopyAction = nullptr;
+	QAction* m_pFindAction = nullptr;
 	QAction* m_pSelectAllAction = nullptr;
 
 	QString m_findText;
@@ -212,11 +214,9 @@ private slots:
 	void checkinConnection();
 	void exportConnections();
 	void importConnections();
-
-	    // menu Edit
-	    //
-	void find();
 	void copy();
+
+	void find();
 	void selectAll() { m_pView->selectAll(); }
 
 	// ContextMenu

@@ -244,7 +244,7 @@ void ComparatorInfoTable::signalParamChanged(const QString& appSignalID)
 	int signalCount = m_signalList.count();
 	for(int c = 0; c < signalCount; c ++)
 	{
-		for(int type = 0; type < Metrology::ConnectionIoType::Count; type ++)
+		for(int type = 0; type < Metrology::ConnectionIoTypeCount; type ++)
 		{
 			if (m_signalList[c].param(type).appSignalID() == appSignalID)
 			{
@@ -409,7 +409,7 @@ void ComparatorInfoPanel::measureKindChanged(int kind)
 
 void ComparatorInfoPanel::signalConnectionTypeChanged(int type)
 {
-	if (type < 0 || type >= Metrology::CONNECTION_TYPE_COUNT)
+	if (type < 0 || type >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
@@ -484,7 +484,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 		switch (activeSignal.signalConnectionType())
 		{
-			case Metrology::CONNECTION_TYPE_UNUSED:
+			case Metrology::ConnectionType::Unsed:
 				pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).metrologySignal(c);
 				break;
 			default:
@@ -525,7 +525,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	//
 	QSize cellSize = QFontMetrics(m_comparatorInfo.font()).size(Qt::TextSingleLine,"A");
 
-	if (activeSignal.signalConnectionType() == Metrology::CONNECTION_TYPE_UNUSED)
+	if (activeSignal.signalConnectionType() == Metrology::ConnectionType::Unsed)
 	{
 		m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 	}

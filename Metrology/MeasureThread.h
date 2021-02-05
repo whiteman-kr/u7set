@@ -87,7 +87,7 @@ private:
 
 	int						m_measureType = MEASURE_TYPE_UNDEFINED;
 	int						m_measureKind = MEASURE_KIND_UNDEFINED;
-	int						m_signalConnectionType = Metrology::CONNECTION_TYPE_UNDEFINED;
+	int						m_signalConnectionType = Metrology::ConnectionType::Unknown;
 
 	MeasureThreadInfo		m_info;
 

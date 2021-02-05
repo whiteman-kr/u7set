@@ -48,20 +48,19 @@ void StatisticsItem::setSignal(Metrology::Signal* pSignal)
 
 QString StatisticsItem::signalConnectionTypeStr() const
 {
-	if (m_signalConnectionType < 0 || m_signalConnectionType >= Metrology::CONNECTION_TYPE_COUNT)
+	if (m_signalConnectionType < 0 || m_signalConnectionType >= Metrology::ConnectionTypeCount)
 	{
 		return QT_TRANSLATE_NOOP("StatisticBase.cpp", "Input is not set");
 	}
 
-	return qApp->translate("MetrologyConnectionBase.h", Metrology::ConnectionType[m_signalConnectionType]);
+	return Metrology::ConnectionTypeCaption(m_signalConnectionType);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void StatisticsItem::setSignalConnectionType(Metrology::Signal* pSignal)
 {
-	m_signalConnectionType = Metrology::CONNECTION_TYPE_UNDEFINED;
-
+	m_signalConnectionType = Metrology::ConnectionType::Unknown;
 	if (pSignal == nullptr || pSignal->param().isValid() == false)
 	{
 		return;
@@ -69,7 +68,7 @@ void StatisticsItem::setSignalConnectionType(Metrology::Signal* pSignal)
 
 	if (pSignal->param().isInput() == true)
 	{
-		m_signalConnectionType = Metrology::CONNECTION_TYPE_UNUSED;
+		m_signalConnectionType = Metrology::ConnectionType::Unsed;
 		return;
 	}
 
@@ -105,7 +104,7 @@ QString StatisticsItem::measureCountStr() const
 void StatisticsItem::clear()
 {
 	m_pSignal = nullptr;
-	m_signalConnectionType = Metrology::CONNECTION_TYPE_UNDEFINED;
+	m_signalConnectionType = Metrology::ConnectionType::Unknown;
 	m_pComparator = nullptr;
 
 	m_measureCount = 0;
@@ -254,7 +253,7 @@ void StatisticsBase::createSignalList()
 
 		if (param.isInternal() == true /*|| param.isOutput() == true */)
 		{
-			if (si.signalConnectionType() == Metrology::CONNECTION_TYPE_UNDEFINED)
+			if (si.signalConnectionType() == Metrology::ConnectionType::Unknown)
 			{
 				continue;
 			}
