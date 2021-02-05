@@ -1,20 +1,21 @@
 #include "DbControllerSignalManagementTests.h"
-#include <QSql>
-#include <QSqlError>
-#include <QDebug>
 
 DbControllerSignalTests::DbControllerSignalTests()
 {
-	m_dbController = new DbController();
+	qRegisterMetaType<E::SignalType>("E::SignalType");
+	qRegisterMetaType<DbUser>("DbUser");
 
 	m_databaseHost = "127.0.0.1";
-	m_databaseName = "dbcontrollersignaltesting";
+	m_projectName = "signalstests";
+	m_databaseName = "u7_" + m_projectName;
 	m_databaseUser = "u7";
 	m_adminPassword = "P2ssw0rd";
 
-	m_dbController->setHost(m_databaseHost);
-	m_dbController->setServerUsername(m_databaseUser);
-	m_dbController->setServerPassword(m_adminPassword);
+	m_db = new DbController();
+
+	m_db->setHost(m_databaseHost);
+	m_db->setServerUsername(m_databaseUser);
+	m_db->setServerPassword(m_adminPassword);
 }
 
 void DbControllerSignalTests::initTestCase()
@@ -28,47 +29,78 @@ void DbControllerSignalTests::initTestCase()
 
 	QVERIFY2 (db.open() == true, qPrintable("Error: Can not connect to postgres database! " + db.lastError().databaseText()));
 
-	QSqlQuery query, tempQuery;
-	bool ok = query.exec("SELECT datname FROM pg_database WHERE datname LIKE 'u7_%' AND NOT datname LIKE 'u7u%'");
-	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QSqlQuery q;
 
-	while (query.next() == true)
+	bool ok = q.exec("SELECT datname FROM pg_database WHERE datname LIKE 'u7_%' AND NOT datname LIKE 'u7u%'");
+
+	QVERIFY2 (ok == true, qPrintable(q.lastError().databaseText()));
+
+	while (q.next() == true)
 	{
-		if (query.value(0).toString() == "u7_" + m_databaseName)
+		if (q.value(0).toString() == m_databaseName)
 		{
-			ok = tempQuery.exec(QString("DROP DATABASE %1").arg(query.value(0).toString()));
-			QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
-			qDebug() << "Project " << query.value(0).toString() << "dropped!";
+			ok = q.exec(QString("DROP DATABASE %1").arg(m_databaseName));
+
+			QVERIFY2 (ok == true, qPrintable(lastError(q)));
+
+			qDebug() << "Project database " << m_databaseName << "dropped!";
+
+			break;
 		}
 	}
 
 	db.close();
 
-	ok = m_dbController->createProject(m_databaseName, m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not create project: " + m_dbController->lastError()));
+	ok = m_db->createProject(m_projectName, m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable("Can't create project: " + m_db->lastError()));
 
-	ok = m_dbController->upgradeProject(m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not upgrade project: " + m_dbController->lastError()));
+	ok = m_db->upgradeProject(m_projectName, m_adminPassword, true, 0);
+	QVERIFY2 (ok == true, qPrintable("Can't upgrade project: " + m_db->lastError()));
 
-	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, nullptr);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_dbController->lastError()));
+	ok = m_db->openProject(m_projectName, "Administrator", m_adminPassword, nullptr);
+	QVERIFY2 (ok == true, qPrintable("Can't open project: " + m_db->lastError()));
+
+	DbUser dbu;
+
+	dbu.setUserId(2);
+	dbu.setUsername("user2");
+	dbu.setFirstName("User");
+	dbu.setLastName("Two");
+	dbu.setNewPassword("qqq222");
+	dbu.setPassword("qqq222");
+	dbu.setAdministrator(false);
+	dbu.setReadonly(false);
+	dbu.setDisabled(false);
+
+	ok = m_db->createUser(dbu, nullptr);
+
+	QVERIFY2 (ok == true, qPrintable("Can't create user2: " + m_db->lastError()));
+
+	dbu.setUserId(3);
+	dbu.setUsername("user3");
+	dbu.setFirstName("User");
+	dbu.setLastName("Three");
+	dbu.setNewPassword("qqq333");
+	dbu.setPassword("qqq333");
+	dbu.setAdministrator(false);
+	dbu.setReadonly(false);
+	dbu.setDisabled(false);
+
+	ok = m_db->createUser(dbu, nullptr);
+
+	QVERIFY2 (ok == true, qPrintable("Can't create user3: " + m_db->lastError()));
 }
 
 void DbControllerSignalTests::addSignalTest()
 {
-	qRegisterMetaType<E::SignalType>("E::SignalType");
+	OPEN_DATABASE();
 
-	QSqlDatabase db = QSqlDatabase::database();
+	bool result = true;
 
-	db.setHostName(m_databaseHost);
-	db.setUserName(m_databaseUser);
-	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
+	result = exec_add_signal(q, ADMIN_USER_ID, E::SignalType::Discrete, 5);
 
-	QVERIFY2 (db.open() == true, qPrintable(QString("Error: Can not connect to %1 database! ").arg("u7_" + m_databaseName) + db.lastError().databaseText()));
-
-	QSqlQuery query;
-
+	QVERIFY2 (result == true, qPrintable ("SQL add_signal(...) exec error: " + lastError(q)));
+/*
 	QVector<Signal> signalsToAdd;
 
 	Signal newSignal;
@@ -84,6 +116,10 @@ void DbControllerSignalTests::addSignalTest()
 	newSignal.setDecimalPlaces(3);
 	newSignal.setEnableTuning(true);
 	newSignal.setEquipmentID("testEquipmentId");
+
+	return;
+
+
 	newSignal.setFilteringTime(7.3);
 	newSignal.setHighADC(500);
 	newSignal.setHighEngineeringUnits(3245.6);
@@ -102,8 +138,8 @@ void DbControllerSignalTests::addSignalTest()
 
 	signalsToAdd.push_back(newSignal);
 
-	bool ok = m_dbController->addSignal(E::SignalType::Discrete, &signalsToAdd, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	bool ok = m_db->addSignal(E::SignalType::Discrete, &signalsToAdd, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec("SELECT * FROM get_signals_ids(1, true) ORDER BY get_signals_ids DESC");
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -140,10 +176,11 @@ void DbControllerSignalTests::addSignalTest()
 	QVERIFY2(query.value("byteOrder").toInt() == newSignal.byteOrder(), qPrintable(QString("Error: byteOrder is wrong")));
 	QVERIFY2(query.value("enableTuning").toBool() == newSignal.enableTuning(), qPrintable(QString("Error: enableTuning is wrong")));
 	//QVERIFY2(query.value("tuningDefaultValue").toDouble() == newSignal.tuningDefaultValue(), qPrintable(QString("Error: tuningDefaultValue is wrong")));
-
+*/
 	db.close();
 }
 
+/*
 void DbControllerSignalTests::getSignalIdsTest()
 {
 	QSqlDatabase db = QSqlDatabase::database();
@@ -1049,7 +1086,7 @@ void DbControllerSignalTests::getSpecificSignalsTest()
 	}
 
 	db.close();
-}
+} */
 
 void DbControllerSignalTests::cleanupTestCase()
 {
@@ -1058,5 +1095,29 @@ void DbControllerSignalTests::cleanupTestCase()
 		QSqlDatabase::removeDatabase(connection);
 	}
 
-	m_dbController->deleteProject(m_databaseName, m_adminPassword, true, 0);
+	m_db->deleteProject(m_projectName, m_adminPassword, true, 0);
 }
+
+bool DbControllerSignalTests::openDatabase(QSqlDatabase& db)
+{
+	db = QSqlDatabase::database();
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_adminPassword);
+	db.setDatabaseName(m_databaseName);
+
+	return db.open();
+}
+
+bool DbControllerSignalTests::exec_add_signal(QSqlQuery& q, int userID, E::SignalType type, int channelCount)
+{
+	QString queryStr = QString("SELECT * FROM add_signal(%1, %2, %3)").
+								arg(userID).arg(static_cast<int>(type)).arg(channelCount);
+
+	qDebug() << qPrintable(queryStr);
+
+	return  q.exec(queryStr);
+
+}
+

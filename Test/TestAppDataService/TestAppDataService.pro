@@ -43,7 +43,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS += \
     ../../lib/Address16.h \
-    ../../lib/ServiceSettings.h \
+	../../lib/SoftwareSettings.h \
     ../../lib/SimpleMutex.h \
     ../../lib/XmlHelper.h \
     ../../lib/HostAddressPort.h \
@@ -81,7 +81,7 @@ SOURCES += \
     ../../lib/Address16.cpp \
     ../../lib/SimpleMutex.cpp \
     ../../lib/XmlHelper.cpp \
-    ../../lib/ServiceSettings.cpp \
+	../../lib/SoftwareSettings.cpp \
     ../../lib/HostAddressPort.cpp \
     ../../lib/OutputLog.cpp \
     ../../lib/DeviceHelper.cpp \

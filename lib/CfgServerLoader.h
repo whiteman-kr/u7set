@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QWaitCondition>
+
 #include "../lib/TcpFileTransfer.h"
 #include "../lib/OrderedHash.h"
 #include "../lib/BuildInfo.h"
@@ -331,6 +333,9 @@ public:
 
 	SessionParams sessionParams() const;
 
+	template<typename T>
+	std::shared_ptr<const T> getCurrentSettingsProfile() const;
+
 signals:
 	void signal_configurationChanged();
 	void signal_configurationReady(const QByteArray configurationXmlData,
@@ -361,3 +366,10 @@ private:
 	CfgLoader* m_cfgLoader = nullptr;
 	SimpleThread* m_thread = nullptr;
 };
+
+template<typename T>
+std::shared_ptr<const T> CfgLoaderThread::getCurrentSettingsProfile() const
+{
+	return m_cfgLoader->getCurrentSettingsProfile<T>();
+}
+
