@@ -284,7 +284,7 @@ SignalStateDialog::~SignalStateDialog()
 void SignalStateDialog::createInterface()
 {
 	setWindowFlags(Qt::Window  | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/InOut.png"));
+	setWindowIcon(QIcon(":/Images/Options.svg"));
 	setWindowTitle(tr("Signal state"));
 
 	if (m_pSignal == nullptr || m_pSignal->valueData() == nullptr)

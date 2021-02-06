@@ -301,7 +301,7 @@ FrameDataStateDialog::~FrameDataStateDialog()
 void FrameDataStateDialog::createInterface()
 {
 	setWindowFlags(Qt::Window  | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/InOut.png"));
+	setWindowIcon(QIcon(":/Images/FrameData.svg"));
 	setWindowTitle(tr("State"));
 
 	// main Layout

@@ -1,20 +1,18 @@
 <RCC>
     <qresource prefix="/">
-        <file>icons/Options.png</file>
-        <file>icons/About.png</file>
-        <file>icons/Start.png</file>
-        <file>icons/Stop.png</file>
-        <file>icons/SelectAll.png</file>
         <file>Images/logo.png</file>
-        <file>icons/Find.png</file>
         <file>icons/PacketSource.ico</file>
-        <file>icons/Search.png</file>
-        <file>icons/FrameData.png</file>
-        <file>icons/Init.png</file>
-        <file>icons/Export.png</file>
-        <file>icons/Import.png</file>
-        <file>icons/History.png</file>
-        <file>icons/Copy.png</file>
-        <file>icons/Reload.png</file>
+        <file>Images/Copy.svg</file>
+        <file>Images/Download.svg</file>
+        <file>Images/History.svg</file>
+        <file>Images/Run.svg</file>
+        <file>Images/SelectAll.svg</file>
+        <file>Images/Stop.svg</file>
+        <file>Images/Upload.svg</file>
+        <file>Images/Find.svg</file>
+        <file>Images/Options.svg</file>
+        <file>Images/About.svg</file>
+        <file>Images/FrameData.svg</file>
+        <file>Images/Init.svg</file>
     </qresource>
 </RCC>

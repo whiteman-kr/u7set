@@ -285,7 +285,7 @@ SignalHistoryDialog::~SignalHistoryDialog()
 void SignalHistoryDialog::createInterface()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/History.png"));
+	setWindowIcon(QIcon(":/Images/History.svg"));
 	setWindowTitle(tr("History"));
 
 	QScreen* screenAt = QGuiApplication::primaryScreen();
@@ -299,13 +299,13 @@ void SignalHistoryDialog::createInterface()
 	m_pEditMenu = new QMenu(tr("&Edit"), this);
 
 	m_pCopyAction = m_pEditMenu->addAction(tr("&Copy"));
-	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+	m_pCopyAction->setIcon(QIcon(":/Images/Copy.svg"));
 	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
 
 	m_pEditMenu->addSeparator();
 
 	m_pSelectAllAction = m_pEditMenu->addAction(tr("Select &All"));
-	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
+	m_pSelectAllAction->setIcon(QIcon(":/Images/SelectAll.svg"));
 	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
 
 	m_pMenuBar->addMenu(m_pEditMenu);

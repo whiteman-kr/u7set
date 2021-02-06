@@ -27,7 +27,7 @@ OptionsDialog::~OptionsDialog()
 bool OptionsDialog::createInterface()
 {
 	setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/Options.png"));
+	setWindowIcon(QIcon(":/Images/Options.svg"));
 	setWindowTitle(tr("Options"));
 
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());

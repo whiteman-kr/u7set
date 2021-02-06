@@ -270,7 +270,7 @@ void FindSignalPanel::createInterface()
 
 	findToolBar->addWidget(m_findColumnCombo);
 	findToolBar->addWidget(m_findTextEdit);
-	QAction* action = findToolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
+	QAction* action = findToolBar->addAction(QIcon(":/Images/Find.svg"), tr("Find text"));
 	connect(action, &QAction::triggered, this, &FindSignalPanel::find);
 
 	m_pFindWindow->addToolBarBreak(Qt::TopToolBarArea);
@@ -316,13 +316,13 @@ void FindSignalPanel::createContextMenu()
 	m_pContextMenu = new QMenu(tr("&Signal text"), m_pFindWindow);
 
 	m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
-	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+	m_pCopyAction->setIcon(QIcon(":/Images/Copy.svg"));
 	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
 
 	m_pContextMenu->addSeparator();
 
 	m_pSelectAllAction = m_pContextMenu->addAction(tr("Select &All"));
-	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
+	m_pSelectAllAction->setIcon(QIcon(":/Images/SelectAll.svg"));
 	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
 
 	connect(m_pCopyAction, &QAction::triggered, this, &FindSignalPanel::copy);

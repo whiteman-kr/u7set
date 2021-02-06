@@ -54,18 +54,18 @@ void MainWindow::createActions()
 	//
 	m_sourceStartAction = new QAction(tr("Start"), this);
 	m_sourceStartAction->setShortcut(Qt::Key_F5);
-	m_sourceStartAction->setIcon(QIcon(":/icons/Start.png"));
+	m_sourceStartAction->setIcon(QIcon(":/Images/Run.svg"));
 	m_sourceStartAction->setToolTip(tr("Start all sources"));
 	connect(m_sourceStartAction, &QAction::triggered, this, &MainWindow::startSource);
 
 	m_sourceStopAction = new QAction(tr("Stop"), this);
 	m_sourceStopAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
-	m_sourceStopAction->setIcon(QIcon(":/icons/Stop.png"));
+	m_sourceStopAction->setIcon(QIcon(":/Images/Stop.svg"));
 	m_sourceStopAction->setToolTip(tr("Stop all sources"));
 	connect(m_sourceStopAction, &QAction::triggered, this, &MainWindow::stopSource);
 
 	m_sourceSelectAllAction = new QAction(tr("Select all"), this);
-	m_sourceSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
+	m_sourceSelectAllAction->setIcon(QIcon(":/Images/SelectAll.svg"));
 	m_sourceSelectAllAction->setToolTip(tr("Select all sources"));
 	connect(m_sourceSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSources);
 
@@ -77,31 +77,31 @@ void MainWindow::createActions()
 
 	m_signalInitAction = new QAction(tr("Initialization"), this);
 	m_signalInitAction->setShortcut(Qt::CTRL + Qt::Key_I);
-	m_signalInitAction->setIcon(QIcon(":/icons/Init.png"));
+	m_signalInitAction->setIcon(QIcon(":/Images/Init.svg"));
 	m_signalInitAction->setToolTip(tr("Initialization all signals"));
 	connect(m_signalInitAction, &QAction::triggered, this, &MainWindow::initSignalsState);
 
 	m_signalHistoryAction = new QAction(tr("History ..."), this);
 	m_signalHistoryAction->setShortcut(Qt::CTRL + Qt::Key_H);
-	m_signalHistoryAction->setIcon(QIcon(":/icons/History.png"));
+	m_signalHistoryAction->setIcon(QIcon(":/Images/History.svg"));
 	m_signalHistoryAction->setToolTip(tr("Hystory of signals state"));
 	connect(m_signalHistoryAction, &QAction::triggered, this, &MainWindow::history);
 
 	m_signalSaveStatesAction = new QAction(tr("Save signals state ..."), this);
 	m_signalSaveStatesAction->setShortcut(Qt::CTRL + Qt::Key_S);
-	m_signalSaveStatesAction->setIcon(QIcon(":/icons/Import.png"));
+	m_signalSaveStatesAction->setIcon(QIcon(":/Images/Upload.svg"));
 	m_signalSaveStatesAction->setToolTip(tr("Save signals state"));
 	connect(m_signalSaveStatesAction, &QAction::triggered, this, &MainWindow::saveSignalsState);
 
 	m_signalRestoreStatesAction = new QAction(tr("Restore signals state ..."), this);
 	m_signalRestoreStatesAction->setShortcut(Qt::CTRL + Qt::Key_R);
-	m_signalRestoreStatesAction->setIcon(QIcon(":/icons/Export.png"));
+	m_signalRestoreStatesAction->setIcon(QIcon(":/Images/Download.svg"));
 	m_signalRestoreStatesAction->setToolTip(tr("Restore signals state"));
 	connect(m_signalRestoreStatesAction, &QAction::triggered, this, &MainWindow::restoreSignalsState);
 
 
 	m_signalSelectAllAction = new QAction(tr("Select all"), this);
-	m_signalSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
+	m_signalSelectAllAction->setIcon(QIcon(":/Images/SelectAll.svg"));
 	m_signalSelectAllAction->setToolTip(tr("Select all signals"));
 	connect(m_signalSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSignals);
 
@@ -109,25 +109,25 @@ void MainWindow::createActions()
 	//
 	m_optionAction = new QAction(tr("&Options"), this);
 	m_optionAction->setShortcut(Qt::CTRL + Qt::Key_O);
-	m_optionAction->setIcon(QIcon(":/icons/Options.png"));
+	m_optionAction->setIcon(QIcon(":/Images/Options.svg"));
 	m_optionAction->setToolTip(tr("Options of sources"));
 	connect(m_optionAction, &QAction::triggered, this, &MainWindow::onOptions);
 
 	m_pAboutAppAction = new QAction(tr("About ..."), this);
-	m_pAboutAppAction->setIcon(QIcon(":/icons/About.png"));
+	m_pAboutAppAction->setIcon(QIcon(":/Images/About.svg"));
 	m_pAboutAppAction->setToolTip("");
 	connect(m_pAboutAppAction, &QAction::triggered, this, &MainWindow::aboutApp);
 
 	// source contex menu
 	//
 	m_sourceTextCopyAction = new QAction(tr("&Copy"), this);
-	m_sourceTextCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+	m_sourceTextCopyAction->setIcon(QIcon(":/Images/Copy.svg"));
 	connect(m_sourceTextCopyAction, &QAction::triggered, this, &MainWindow::copySourceText);
 
 	// signal contex menu
 	//
 	m_signalTextCopyAction = new QAction(tr("&Copy"), this);
-	m_signalTextCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+	m_signalTextCopyAction->setIcon(QIcon(":/Images/Copy.svg"));
 	connect(m_signalTextCopyAction, &QAction::triggered, this, &MainWindow::copySignalText);
 }
 
@@ -222,7 +222,7 @@ void MainWindow::createPanels()
 		{
 			dataAction->setText(tr("&Frame of data ..."));
 			dataAction->setShortcut(Qt::CTRL + Qt::Key_D);
-			dataAction->setIcon(QIcon(":/icons/FrameData.png"));
+			dataAction->setIcon(QIcon(":/Images/FrameData.svg"));
 			dataAction->setToolTip(tr("Frame of data"));
 
 			if (m_signalMenu != nullptr)
@@ -253,7 +253,7 @@ void MainWindow::createPanels()
 		{
 			findAction->setText(tr("&Find ..."));
 			findAction->setShortcut(Qt::CTRL + Qt::Key_F);
-			findAction->setIcon(QIcon(":/icons/Find.png"));
+			findAction->setIcon(QIcon(":/Images/Find.svg"));
 			findAction->setToolTip(tr("Find signal"));
 
 			if (m_signalMenu != nullptr)
