@@ -499,7 +499,7 @@ include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
 # QtKeychain
 #
-INCLUDEPATH += ./qtkeychain-0.10
+INCLUDEPATH += ../Tools/qtkeychain-0.10
 include(../Tools/qtkeychain-0.10/qt5keychain.pri)
 
 DEFINES += QTKEYCHAIN_NO_EXPORT
@@ -509,7 +509,6 @@ win32 {
     LIBS += Advapi32.lib
 }
 unix {
-    LIBS += -L$$DESTDIR -lqtkeychain
 }
 
 # Simulator Lib
