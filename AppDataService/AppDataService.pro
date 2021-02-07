@@ -160,14 +160,9 @@ DEPENDPATH += ../VFrame30
 
 #protobuf
 #
-win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
-	INCLUDEPATH += ./../Protobuf
-}
-unix {
-	LIBS += -lprotobuf
-}
 
 DISTFILES += \
     ../Proto/network.proto \

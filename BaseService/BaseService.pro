@@ -80,13 +80,8 @@ CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
 #protobuf
 #
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
-win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
-	INCLUDEPATH += ./../Protobuf
-}
-unix {
-	LIBS += -lprotobuf
-}
 
 include(../qtservice/src/qtservice.pri)

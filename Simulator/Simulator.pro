@@ -229,13 +229,9 @@ HEADERS += \
 
 #protobuf
 #
-win32 {
-    LIBS += -L$$DESTDIR -lprotobuf
-    INCLUDEPATH += ./../Protobuf
-}
-unix {
-    LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
+
 
 DISTFILES += \
     Scripts/LM1_SR01_SIM.ts \

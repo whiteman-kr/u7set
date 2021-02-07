@@ -447,14 +447,8 @@ unix {
 #
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 
-win32 {
-    LIBS += -L$$DESTDIR -lprotobuf
-
-    INCLUDEPATH += ./../Protobuf
-}
-unix {
-    LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
 # QScintilla
 #
@@ -505,17 +499,17 @@ include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
 # QtKeychain
 #
+INCLUDEPATH += ./qtkeychain-0.10
+include(../Tools/qtkeychain-0.10/qt5keychain.pri)
+
+DEFINES += QTKEYCHAIN_NO_EXPORT
+DEFINES += USE_CREDENTIAL_STORE
+
 win32 {
     LIBS += Advapi32.lib
-
-    DEFINES += QTKEYCHAIN_NO_EXPORT
-    DEFINES += USE_CREDENTIAL_STORE
-
-    INCLUDEPATH += ./qtkeychain-0.10
-	include(../Tools/qtkeychain-0.10/qt5keychain.pri)
 }
 unix {
-    LIBS += -lqtkeychain
+    LIBS += -L$$DESTDIR -lqtkeychain
 }
 
 # Simulator Lib

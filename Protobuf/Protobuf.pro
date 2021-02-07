@@ -30,6 +30,12 @@ unix {
 
 INCLUDEPATH += ../protobuf
 
+gcc {
+    INCLUDEPATH += /usr/include		# pthread.h is here
+	LIBS += -lpthread
+	DEFINES += HAVE_PTHREAD
+}
+
 SOURCES += \
 	google/protobuf/io/coded_stream.cc \
 	google/protobuf/stubs/common.cc \

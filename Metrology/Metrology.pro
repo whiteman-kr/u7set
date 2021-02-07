@@ -227,14 +227,9 @@ win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 
 #protobuf
 #
-win32 {
-		LIBS += -L$$DESTDIR -lprotobuf
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
-		INCLUDEPATH += ./../Protobuf
-}
-unix {
-		LIBS += -lprotobuf
-}
 
 DISTFILES += \
     ../Proto/network.proto \

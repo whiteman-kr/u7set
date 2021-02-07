@@ -77,7 +77,8 @@ win32 {
         INCLUDEPATH += ./../Protobuf
 }
 unix {
-        LIBS += -lprotobuf -lpam -lpam_misc
+        LIBS += -L$$DESTDIR -lprotobuf -lpam -lpam_misc
+		INCLUDEPATH += ./../Protobuf
 }
 
 

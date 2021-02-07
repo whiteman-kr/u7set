@@ -147,14 +147,8 @@ win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warnin
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
 
-win32 {
-        LIBS += -L$$DESTDIR -lprotobuf
-
-        INCLUDEPATH += ./../Protobuf
-}
-unix {
-        LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

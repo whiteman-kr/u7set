@@ -2,8 +2,8 @@ TEMPLATE = subdirs
 
 CONFIG += ordered
 
-win32:SUBDIRS += Protobuf
-SUBDIRS += qtservice \
+SUBDIRS += Protobuf \
+    qtservice \
     qtpropertybrowser \
     QScintilla \
     TrendView \
