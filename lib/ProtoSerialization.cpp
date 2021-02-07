@@ -65,13 +65,13 @@ namespace Proto
 	void Read(const Proto::wstring& message, QString* dst)
 	{
 		*dst = QString::fromUtf16(reinterpret_cast<const ushort*>(message.text().data()),
-										  static_cast<int>(message.text().size() / 2) - 1);
+								  static_cast<int>(message.text().size() / 2) - 1);
 		return;
 	}
 
 	void Write(Proto::wstring* pMessage, const QString& str)
 	{
-        assert(sizeof(QChar) == 2);
+		assert(sizeof(QChar) == 2);
 
 		if (pMessage == nullptr)
 		{
@@ -79,7 +79,7 @@ namespace Proto
 			return;
 		}
 
-        pMessage->set_text(str.data(), (str.length() + 1) * sizeof(QChar));
+		pMessage->set_text(str.data(), (str.length() + 1) * sizeof(QChar));
 		return;
 	}
 
@@ -213,38 +213,38 @@ namespace Proto
 
 		switch (value.type())
 		{
-			case QVariant::Bool:
-				{
-					value = (sv == "t") ? true : false;
-					ok = true;
-				}
-				break;
-			case QVariant::Int:
-				{
-					qint32 i = sv.toInt(&ok);
-					value = QVariant(i);
-				}
-				break;
-			case QVariant::UInt:
-				{
-					quint32 ui = sv.toUInt(&ok);
-					value = QVariant(ui);
-				}
-				break;
-			case QVariant::String:
-				{
-					value = sv;
-					ok = true;
-				}
-				break;
-			case QVariant::Double:
-				{
-					double d = sv.toDouble(&ok);
-					value = QVariant(d);
-				}
-				break;
-			default:
-				assert(false);
+		case QVariant::Bool:
+			{
+				value = (sv == "t") ? true : false;
+				ok = true;
+			}
+			break;
+		case QVariant::Int:
+			{
+				qint32 i = sv.toInt(&ok);
+				value = QVariant(i);
+			}
+			break;
+		case QVariant::UInt:
+			{
+				quint32 ui = sv.toUInt(&ok);
+				value = QVariant(ui);
+			}
+			break;
+		case QVariant::String:
+			{
+				value = sv;
+				ok = true;
+			}
+			break;
+		case QVariant::Double:
+			{
+				double d = sv.toDouble(&ok);
+				value = QVariant(d);
+			}
+			break;
+		default:
+			assert(false);
 		}
 
 		if (ok == true)
@@ -255,5 +255,3 @@ namespace Proto
 		return ok;
 	}
 }
-
-
