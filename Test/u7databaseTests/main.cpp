@@ -51,8 +51,8 @@ int main(int argc, char *argv[])
 
 	// Database File functions
 	//
-	FileTests fileTests;
-	returnCode |= QTest::qExec(&fileTests, argc, argv);
+	//FileTests fileTests;
+	//returnCode |= QTest::qExec(&fileTests, argc, argv);
 
 	// Database Other functions
 	//
