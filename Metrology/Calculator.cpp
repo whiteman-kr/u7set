@@ -34,9 +34,9 @@ void Calculator::createInterface()
 	// Linearity
 	//
 	QGroupBox* linGroup = new QGroupBox(tr("Linearity"));
-	QVBoxLayout *linLayout = new QVBoxLayout;
+	QVBoxLayout* linLayout = new QVBoxLayout;
 
-	QHBoxLayout *lin_inval_Layout = new QHBoxLayout;
+	QHBoxLayout* lin_inval_Layout = new QHBoxLayout;
 
 	m_pLinInRadio = new QRadioButton(this);
 	m_pLinInValEdit = new QLineEdit("2.5", this);
@@ -49,7 +49,7 @@ void Calculator::createInterface()
 	lin_inval_Layout->addWidget(pLinInValLabel);
 	lin_inval_Layout->addStretch();
 
-	QHBoxLayout *lin_outval_Layout = new QHBoxLayout;
+	QHBoxLayout* lin_outval_Layout = new QHBoxLayout;
 
 	m_pLinOutRadio = new QRadioButton(this);
 	m_pLinOutValEdit = new QLineEdit("0", this);
@@ -62,7 +62,7 @@ void Calculator::createInterface()
 	lin_outval_Layout->addWidget(pLinOutValLabel);
 	lin_outval_Layout->addStretch();
 
-	QHBoxLayout *lin_inrange_Layout = new QHBoxLayout;
+	QHBoxLayout* lin_inrange_Layout = new QHBoxLayout;
 
 	m_pLinInLowEdit = new QLineEdit("0", this);
 	m_pLinInHighEdit = new QLineEdit("5", this);
@@ -72,7 +72,7 @@ void Calculator::createInterface()
 	lin_inrange_Layout->addWidget(new QLabel(tr("max"), this));
 	lin_inrange_Layout->addWidget(m_pLinInHighEdit);
 
-	QHBoxLayout *lin_outrange_Layout = new QHBoxLayout;
+	QHBoxLayout* lin_outrange_Layout = new QHBoxLayout;
 
 	m_pLinOutLowEdit = new QLineEdit("0", this);
 	m_pLinOutHighEdit = new QLineEdit("100", this);
@@ -92,11 +92,11 @@ void Calculator::createInterface()
 	// Thermistor
 	//
 	QGroupBox* trGroup = new QGroupBox(tr("Thermistor - GOST 6651-2009"));
-	QVBoxLayout *trLayout = new QVBoxLayout;
+	QVBoxLayout* trLayout = new QVBoxLayout;
 
 	m_pTrList = new QComboBox(this);
 
-	QHBoxLayout *tr_C_Layout = new QHBoxLayout;
+	QHBoxLayout* tr_C_Layout = new QHBoxLayout;
 
 	m_pTrDegreeRadio = new QRadioButton(this);
 	m_pTrDegreeEdit = new QLineEdit("100", this);
@@ -109,7 +109,7 @@ void Calculator::createInterface()
 	tr_C_Layout->addWidget(pTrDegreeLabel);
 	tr_C_Layout->addStretch();
 
-	QHBoxLayout *tr_Ohm_Layout = new QHBoxLayout;
+	QHBoxLayout* tr_Ohm_Layout = new QHBoxLayout;
 
 	m_pTrElectricRadio = new QRadioButton(this);
 	m_pTrElectricEdit = new QLineEdit(this);
@@ -146,11 +146,11 @@ void Calculator::createInterface()
 	// Thermocouple
 	//
 	QGroupBox* tcGroup = new QGroupBox(tr("Thermocouple - GOST 8.585-2001"));
-	QVBoxLayout *tcLayout = new QVBoxLayout;
+	QVBoxLayout* tcLayout = new QVBoxLayout;
 
 	m_pTcList = new QComboBox(this);
 
-	QHBoxLayout *tc_C_Layout = new QHBoxLayout;
+	QHBoxLayout* tc_C_Layout = new QHBoxLayout;
 
 	m_pTcDegreeRadio = new QRadioButton(this);
 	m_pTcDegreeEdit = new QLineEdit("400", this);
@@ -163,7 +163,7 @@ void Calculator::createInterface()
 	tc_C_Layout->addWidget(pTcDegreeLabel);
 	tc_C_Layout->addStretch();
 
-	QHBoxLayout *tc_mV_Layout = new QHBoxLayout;
+	QHBoxLayout* tc_mV_Layout = new QHBoxLayout;
 
 	m_pTcElectricRadio = new QRadioButton(this);
 	m_pTcElectricEdit = new QLineEdit(this);
@@ -185,9 +185,9 @@ void Calculator::createInterface()
 	// dp->F
 	//
 	QGroupBox* dpfGroup = new QGroupBox(tr("Pressure -> Flow"));
-	QVBoxLayout *dpfLayout = new QVBoxLayout;
+	QVBoxLayout* dpfLayout = new QVBoxLayout;
 
-	QHBoxLayout *dpf_inval_Layout = new QHBoxLayout;
+	QHBoxLayout* dpf_inval_Layout = new QHBoxLayout;
 
 	m_pDpfPRadio = new QRadioButton(this);
 	m_pDpfPValEdit = new QLineEdit("2.5", this);
@@ -200,7 +200,7 @@ void Calculator::createInterface()
 	dpf_inval_Layout->addWidget(pDpfInValLabel);
 	dpf_inval_Layout->addStretch();
 
-	QHBoxLayout *dpf_outval_Layout = new QHBoxLayout;
+	QHBoxLayout* dpf_outval_Layout = new QHBoxLayout;
 
 	m_pDpfFRadio = new QRadioButton(this);
 	m_pDpfFValEdit = new QLineEdit("0", this);
@@ -213,7 +213,7 @@ void Calculator::createInterface()
 	dpf_outval_Layout->addWidget(pDpfOutValLabel);
 	dpf_outval_Layout->addStretch();
 
-	QHBoxLayout *dpf_inrange_Layout = new QHBoxLayout;
+	QHBoxLayout* dpf_inrange_Layout = new QHBoxLayout;
 
 	m_pDpfPLowEdit = new QLineEdit("0", this);
 	m_pDpfPHighEdit = new QLineEdit("10", this);
@@ -223,7 +223,7 @@ void Calculator::createInterface()
 	dpf_inrange_Layout->addWidget(new QLabel(tr("max P"), this));
 	dpf_inrange_Layout->addWidget(m_pDpfPHighEdit);
 
-	QHBoxLayout *dpf_outrange_Layout = new QHBoxLayout;
+	QHBoxLayout* dpf_outrange_Layout = new QHBoxLayout;
 
 	m_pDpfFLowEdit = new QLineEdit("0", this);
 	m_pDpfFHighEdit = new QLineEdit("100", this);
@@ -243,9 +243,9 @@ void Calculator::createInterface()
 	// Degree
 	//
 	QGroupBox* drGroup = new QGroupBox(tr("Degree"));
-	QVBoxLayout *drLayout = new QVBoxLayout;
+	QVBoxLayout* drLayout = new QVBoxLayout;
 
-	QHBoxLayout *dr_C_Layout = new QHBoxLayout;
+	QHBoxLayout* dr_C_Layout = new QHBoxLayout;
 
 	m_pDrСelsiusRadio = new QRadioButton(this);
 	m_pDrСelsiusEdit = new QLineEdit("100", this);
@@ -258,7 +258,7 @@ void Calculator::createInterface()
 	dr_C_Layout->addWidget(pDrСelsiusLabel);
 	dr_C_Layout->addStretch();
 
-	QHBoxLayout *dr_F_Layout = new QHBoxLayout;
+	QHBoxLayout* dr_F_Layout = new QHBoxLayout;
 
 	m_pDrFahrenheitRadio = new QRadioButton(this);
 	m_pDrFahrenheitEdit = new QLineEdit(this);
@@ -278,7 +278,7 @@ void Calculator::createInterface()
 
 	// Main
 	//
-	QVBoxLayout *mainLayout = new QVBoxLayout;
+	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	mainLayout->addWidget(linGroup);
 	mainLayout->addWidget(trGroup);
@@ -296,7 +296,7 @@ void Calculator::createInterface()
 void Calculator::initDialog()
 {
 	QRegExp rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
-	QValidator *validator = new QRegExpValidator(rx, this);
+	QValidator* validator = new QRegExpValidator(rx, this);
 
 	// init elements of interface
 	//
@@ -511,8 +511,8 @@ void Calculator::conversionTr()
 
 	if (m_pTrDegreeRadio->isChecked() == true)
 	{
-		double degreeLowLimit = m_uc.conversionDegree(electricLimit.lowLimit * r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
-		double degreeHighLimit = m_uc.conversionDegree(electricLimit.highLimit * r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
+		double degreeLowLimit = m_uc.conversionDegree(electricLimit.lowLimit*  r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
+		double degreeHighLimit = m_uc.conversionDegree(electricLimit.highLimit*  r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
 
 		if (degreeVal < degreeLowLimit || degreeVal > degreeHighLimit)
 		{
@@ -535,7 +535,7 @@ void Calculator::conversionTr()
 
 	if (m_pTrElectricRadio->isChecked() == true)
 	{
-		if (electricVal < electricLimit.lowLimit * r0 / 100 || electricVal > electricLimit.highLimit * r0 / 100)
+		if (electricVal < electricLimit.lowLimit*  r0 / 100 || electricVal > electricLimit.highLimit*  r0 / 100)
 		{
 			m_pTrDegreeEdit->setText(	tr("Out of range: %1 .. %2").
 										arg(QString::number(electricLimit.lowLimit, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION)).
@@ -638,7 +638,7 @@ void Calculator::conversionDpf()
 
 	if (m_pDpfPRadio->isChecked() == true)
 	{
-		double val = K * sqrt(m_pDpfPValEdit->text().toDouble());
+		double val = K*  sqrt(m_pDpfPValEdit->text().toDouble());
 
 		m_pDpfPValEdit->setReadOnly(false);
 		m_pDpfFValEdit->setText(QString::number(val, 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION));

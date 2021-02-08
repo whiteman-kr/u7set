@@ -23,25 +23,6 @@ public:
 	explicit MeasureTable(QObject* parent = nullptr);
 	virtual ~MeasureTable();
 
-private:
-
-	int m_measureType = MEASURE_TYPE_UNDEFINED;
-
-	MeasureViewHeader m_header;
-
-	mutable QMutex m_measureMutex;
-	QVector<Measurement*> m_measureList;
-	int m_measureCount = 0;
-
-	int columnCount(const QModelIndex &parent) const;
-	int rowCount(const QModelIndex &parent=QModelIndex()) const;
-
-	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant data(const QModelIndex &index, int role) const;
-
-	QString textLinearity(int row, int column, Measurement* pMeasurement) const;
-	QString textComparator(int row, int column, Measurement* pMeasurement) const;
-
 public:
 
 	int measureType() const { return m_measureType; }
@@ -61,6 +42,25 @@ public:
 
 	void set(const QVector<Measurement*>& list_add);
 	void clear();
+
+private:
+
+	int m_measureType = MEASURE_TYPE_UNDEFINED;
+
+	MeasureViewHeader m_header;
+
+	mutable QMutex m_measureMutex;
+	QVector<Measurement*> m_measureList;
+	int m_measureCount = 0;
+
+	int columnCount(const QModelIndex &parent) const;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const;
+
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
+	QVariant data(const QModelIndex &index, int role) const;
+
+	QString textLinearity(int row, int column, Measurement* pMeasurement) const;
+	QString textComparator(int row, int column, Measurement* pMeasurement) const;
 };
 
 // ==============================================================================================
@@ -71,8 +71,15 @@ class MeasureView : public QTableView
 
 public:
 
-	explicit MeasureView(int measureType, QWidget *parent = nullptr);
+	explicit MeasureView(int measureType, QWidget* parent = nullptr);
 	virtual ~MeasureView();
+
+public:
+
+	int	measureType() const { return m_measureType; }
+	MeasureTable& table() { return m_table; }
+
+	void updateColumn();
 
 private:
 
@@ -83,15 +90,6 @@ private:
 	QVector<QAction*> m_actionList;
 
 	void createContextMenu();
-
-
-
-public:
-
-	int	measureType() const { return m_measureType; }
-	MeasureTable& table() { return m_table; }
-
-	void updateColumn();
 
 signals:
 
@@ -121,15 +119,15 @@ class ChartView : public QtCharts::QChartView
 
 public:
 
-	ChartView(QtCharts::QChart *chart, QWidget *parent = nullptr);
+	ChartView(QtCharts::QChart* chart, QWidget* parent = nullptr);
 
 protected:
 
-	bool viewportEvent(QEvent *event);
-	void mousePressEvent(QMouseEvent *event);
-	void mouseMoveEvent(QMouseEvent *event);
-	void mouseReleaseEvent(QMouseEvent *event);
-	void keyPressEvent(QKeyEvent *event);
+	bool viewportEvent(QEvent* event);
+	void mousePressEvent(QMouseEvent* event);
+	void mouseMoveEvent(QMouseEvent* event);
+	void mouseReleaseEvent(QMouseEvent* event);
+	void keyPressEvent(QKeyEvent* event);
 
 private:
 

@@ -44,7 +44,7 @@ double MeasurePoint::sensorValue(int sensor)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasurePointBase::MeasurePointBase(QObject *parent) :
+MeasurePointBase::MeasurePointBase(QObject* parent) :
 	QObject(parent)
 {
 }

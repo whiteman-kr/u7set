@@ -136,7 +136,7 @@ QString StatisticsItem::stateStr() const
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticsBase::StatisticsBase(QObject *parent) :
+StatisticsBase::StatisticsBase(QObject* parent) :
 	QObject(parent)
 {
 	QMutexLocker l(&m_signalMutex);

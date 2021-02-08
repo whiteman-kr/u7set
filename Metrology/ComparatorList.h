@@ -68,6 +68,15 @@ public:
 	explicit ComparatorListTable(QObject* parent = nullptr);
 	virtual ~ComparatorListTable();
 
+public:
+
+	int						comparatorCount() const;
+	std::shared_ptr<Metrology::ComparatorEx> comparator(int index) const;
+	void					set(const QVector<std::shared_ptr<Metrology::ComparatorEx> >& list_add);
+	void					clear();
+
+	QString					text(int row, int column, Metrology::Signal* pInSignal, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const;
+
 private:
 
 	mutable QMutex			m_comparatorMutex;
@@ -78,15 +87,6 @@ private:
 
 	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
 	QVariant				data(const QModelIndex &index, int role) const;
-
-public:
-
-	int						comparatorCount() const;
-	std::shared_ptr<Metrology::ComparatorEx> comparator(int index) const;
-	void					set(const QVector<std::shared_ptr<Metrology::ComparatorEx> >& list_add);
-	void					clear();
-
-	QString					text(int row, int column, Metrology::Signal* pInSignal, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const;
 };
 
 // ==============================================================================================
@@ -97,7 +97,7 @@ class ComparatorListDialog : public QDialog
 
 public:
 
-	explicit ComparatorListDialog(QWidget *parent = nullptr);
+	explicit ComparatorListDialog(QWidget* parent = nullptr);
 	virtual ~ComparatorListDialog();
 
 private:
@@ -131,7 +131,7 @@ private:
 
 protected:
 
-	bool					eventFilter(QObject *object, QEvent *event);
+	bool					eventFilter(QObject* object, QEvent* event);
 
 public slots:
 

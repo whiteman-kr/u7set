@@ -35,6 +35,34 @@ public:
 	explicit MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
 	virtual ~MainWindow();
 
+public:
+
+	int						measureType() const { return m_measureType; }
+
+	// Views
+	//
+	MeasureView*			activeMeasureView() { return measureView(m_measureType); }
+	MeasureView*			measureView(int measureType);
+	void					appendMeasureView(int measureType, MeasureView* pView);
+
+	// Sockets
+	//
+	ConfigSocket*			configSocket() { return m_pConfigSocket; }
+	SignalSocket*			signalSocket() { return m_pSignalSocket; }
+	bool					signalSocketIsConnected();
+	TuningSocket*			tuningSocket() { return m_pTuningSocket; }
+	bool					tuningSocketIsConnected();
+
+	// Threads
+	//
+	MeasureThread&			measureThread() { return m_measureThread; }
+
+	bool					signalSourceIsValid(bool showMsg);
+	bool					changeInputSignalOnInternal(const MeasureSignal& activeSignal);
+	bool					signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID);
+	bool					inputsOfmoduleIsSame(const MeasureSignal& activeSignal);					// only for mode "Single module"
+	int						getMaxComparatorCount(const MeasureSignal& activeSignal);
+
 private:
 
 	int						m_measureType = MEASURE_TYPE_UNDEFINED;
@@ -189,34 +217,6 @@ private:
 	void					loadRacksOnToolBar();
 	void					loadSignalsOnToolBar();
 
-public:
-
-	int						measureType() const { return m_measureType; }
-
-	// Views
-	//
-	MeasureView*			activeMeasureView() { return measureView(m_measureType); }
-	MeasureView*			measureView(int measureType);
-	void					appendMeasureView(int measureType, MeasureView* pView);
-
-	// Sockets
-	//
-	ConfigSocket*			configSocket() { return m_pConfigSocket; }
-	SignalSocket*			signalSocket() { return m_pSignalSocket; }
-	bool					signalSocketIsConnected();
-	TuningSocket*			tuningSocket() { return m_pTuningSocket; }
-	bool					tuningSocketIsConnected();
-
-	// Threads
-	//
-	MeasureThread&			measureThread() { return m_measureThread; }
-
-	bool					signalSourceIsValid(bool showMsg);
-	bool					changeInputSignalOnInternal(const MeasureSignal& activeSignal);
-	bool					signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID);
-	bool					inputsOfmoduleIsSame(const MeasureSignal& activeSignal);					// only for mode "Single module"
-	int						getMaxComparatorCount(const MeasureSignal& activeSignal);
-
 protected:
 
 	void					closeEvent(QCloseEvent* e);
@@ -329,7 +329,7 @@ private slots:
 	void					measureThreadStarted();
 	void					measureThreadStoped();
 	void					measureThreadInfo(const MeasureThreadInfo& info);
-	void					measureThreadMsgBox(int type, QString text, int *result = nullptr);
+	void					measureThreadMsgBox(int type, QString text, int* result = nullptr);
 	void					measureComplite(Measurement* pMeasurement);
 
 	// Slots of measure base

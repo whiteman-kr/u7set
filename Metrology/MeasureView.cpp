@@ -667,7 +667,7 @@ void MeasureTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureView::MeasureView(int measureType, QWidget *parent) :
+MeasureView::MeasureView(int measureType, QWidget* parent) :
 	QTableView(parent),
 	m_measureType(measureType)
 {
@@ -973,7 +973,7 @@ void MeasureView::showGraph(int graphType)
 
 	// QChart
 	//
-	QtCharts::QChart *pChart = new QtCharts::QChart();
+	QtCharts::QChart* pChart = new QtCharts::QChart();
 	if (pChart == nullptr)
 	{
 		return;
@@ -991,8 +991,8 @@ void MeasureView::showGraph(int graphType)
 		case MVG_TYPE_LIN_EL:
 		case MVG_TYPE_LIN_EN:
 			{
-				QtCharts::QLineSeries *pNominalSeries = new QtCharts::QLineSeries();
-				QtCharts::QLineSeries *pMeasureSeries = new QtCharts::QLineSeries();
+				QtCharts::QLineSeries* pNominalSeries = new QtCharts::QLineSeries();
+				QtCharts::QLineSeries* pMeasureSeries = new QtCharts::QLineSeries();
 
 				if (pNominalSeries == nullptr || pMeasureSeries == nullptr)
 				{
@@ -1005,8 +1005,8 @@ void MeasureView::showGraph(int graphType)
 				pMeasureSeries->setColor(Qt::red);
 				pMeasureSeries->setName(tr("Measure"));
 
-				QtCharts::QLineSeries *pLowLimitlSeries = new QtCharts::QLineSeries();
-				QtCharts::QLineSeries *pHighLimitSeries = new QtCharts::QLineSeries();
+				QtCharts::QLineSeries* pLowLimitlSeries = new QtCharts::QLineSeries();
+				QtCharts::QLineSeries* pHighLimitSeries = new QtCharts::QLineSeries();
 
 				if (pLowLimitlSeries == nullptr || pHighLimitSeries == nullptr)
 				{
@@ -1074,7 +1074,7 @@ void MeasureView::showGraph(int graphType)
 		case MVG_TYPE_20VAL_EL:
 		case MVG_TYPE_20VAL_EN:
 			{
-				QtCharts::QLineSeries *pMeasureSeries = new QtCharts::QLineSeries();
+				QtCharts::QLineSeries* pMeasureSeries = new QtCharts::QLineSeries();
 				if (pMeasureSeries == nullptr)
 				{
 					break;
@@ -1117,7 +1117,7 @@ void MeasureView::showGraph(int graphType)
 		return;
 	}
 
-	QtCharts::QValueAxis *pAxisX = dynamic_cast<QtCharts::QValueAxis*>(axisXList.at(0));
+	QtCharts::QValueAxis* pAxisX = dynamic_cast<QtCharts::QValueAxis*>(axisXList.at(0));
 	if (pAxisX == nullptr)
 	{
 		return;
@@ -1133,7 +1133,7 @@ void MeasureView::showGraph(int graphType)
 		return;
 	}
 
-	QtCharts::QValueAxis *pAxisY = dynamic_cast<QtCharts::QValueAxis*>(axisYList.at(0));
+	QtCharts::QValueAxis* pAxisY = dynamic_cast<QtCharts::QValueAxis*>(axisYList.at(0));
 	if (pAxisY == nullptr)
 	{
 		return;
@@ -1143,7 +1143,7 @@ void MeasureView::showGraph(int graphType)
 
 	// QChartView
 	//
-	ChartView *pChartView = new ChartView(pChart);
+	ChartView* pChartView = new ChartView(pChart);
 	if (pChartView == nullptr)
 	{
 		return;
@@ -1159,7 +1159,7 @@ void MeasureView::showGraph(int graphType)
 	dialog.grabGesture(Qt::PanGesture);
 	dialog.grabGesture(Qt::PinchGesture);
 
-	QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
+	QVBoxLayout* mainLayout = new QVBoxLayout(&dialog);
 	mainLayout->addWidget(pChartView);
 	dialog.setLayout(mainLayout);
 
@@ -1170,7 +1170,7 @@ void MeasureView::showGraph(int graphType)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ChartView::ChartView(QtCharts::QChart *chart, QWidget *parent) :
+ChartView::ChartView(QtCharts::QChart* chart, QWidget* parent) :
 	QChartView(chart, parent),
 	m_isTouching(false)
 {
@@ -1179,7 +1179,7 @@ ChartView::ChartView(QtCharts::QChart *chart, QWidget *parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool ChartView::viewportEvent(QEvent *event)
+bool ChartView::viewportEvent(QEvent* event)
 {
 	if (event->type() == QEvent::TouchBegin)
 	{
@@ -1193,7 +1193,7 @@ bool ChartView::viewportEvent(QEvent *event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ChartView::mousePressEvent(QMouseEvent *event)
+void ChartView::mousePressEvent(QMouseEvent* event)
 {
 	if (m_isTouching == true)
 	{
@@ -1205,7 +1205,7 @@ void ChartView::mousePressEvent(QMouseEvent *event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ChartView::mouseMoveEvent(QMouseEvent *event)
+void ChartView::mouseMoveEvent(QMouseEvent* event)
 {
 	if (m_isTouching == true)
 	{
@@ -1217,7 +1217,7 @@ void ChartView::mouseMoveEvent(QMouseEvent *event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ChartView::mouseReleaseEvent(QMouseEvent *event)
+void ChartView::mouseReleaseEvent(QMouseEvent* event)
 {
 	if (m_isTouching == true)
 	{
@@ -1230,7 +1230,7 @@ void ChartView::mouseReleaseEvent(QMouseEvent *event)
 }
 
 // -------------------------------------------------------------------------------------------------------------------
-void ChartView::keyPressEvent(QKeyEvent *event)
+void ChartView::keyPressEvent(QKeyEvent* event)
 {
 	switch (event->key())
 	{

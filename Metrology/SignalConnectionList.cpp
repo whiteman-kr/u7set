@@ -236,7 +236,7 @@ void SignalConnectionTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalConnectionItemDialog::SignalConnectionItemDialog(QWidget *parent) :
+SignalConnectionItemDialog::SignalConnectionItemDialog(QWidget* parent) :
 	QDialog(parent)
 {
 	createInterface();
@@ -246,7 +246,7 @@ SignalConnectionItemDialog::SignalConnectionItemDialog(QWidget *parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalConnectionItemDialog::SignalConnectionItemDialog(const Metrology::Connection& signalConnection, QWidget *parent) :
+SignalConnectionItemDialog::SignalConnectionItemDialog(const Metrology::Connection& signalConnection, QWidget* parent) :
 	QDialog(parent)
 {
 	m_signalConnection = signalConnection;
@@ -282,7 +282,7 @@ void SignalConnectionItemDialog::createInterface()
 
 	// signal connection type
 	//
-	QHBoxLayout *typeLayout = new QHBoxLayout;
+	QHBoxLayout* typeLayout = new QHBoxLayout;
 
 	m_pTypeList = new QComboBox(this);
 
@@ -293,11 +293,11 @@ void SignalConnectionItemDialog::createInterface()
 	// Signals
 	//
 	QGroupBox* signalGroup = new QGroupBox(QString());
-	QVBoxLayout *signalLayout = new QVBoxLayout;
+	QVBoxLayout* signalLayout = new QVBoxLayout;
 
 		// Input signal
 		//
-	QHBoxLayout *inputSignalLayout = new QHBoxLayout;
+	QHBoxLayout* inputSignalLayout = new QHBoxLayout;
 
 	QLabel* pInputSignalLabel = new QLabel(tr("AppSignalID (source)"), this);
 	m_pInputSignalIDEdit = new QLineEdit(QString(), this);
@@ -316,7 +316,7 @@ void SignalConnectionItemDialog::createInterface()
 
 		// Output signal
 		//
-	QHBoxLayout *outputSignalLayout = new QHBoxLayout;
+	QHBoxLayout* outputSignalLayout = new QHBoxLayout;
 
 	QLabel* pOutputSignalLabel = new QLabel(tr("AppSignalID (destination)"), this);
 	m_pOutputSignalIDEdit = new QLineEdit(QString(), this);
@@ -366,7 +366,7 @@ void SignalConnectionItemDialog::createInterface()
 	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &SignalConnectionItemDialog::onOk);
 	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &SignalConnectionItemDialog::reject);
 
-	QVBoxLayout *mainLayout = new QVBoxLayout;
+	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	mainLayout->addLayout(typeLayout);
 	mainLayout->addWidget(signalGroup);
@@ -669,7 +669,7 @@ void SignalConnectionItemDialog::onOk()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalConnectionDialog::SignalConnectionDialog(QWidget *parent) :
+SignalConnectionDialog::SignalConnectionDialog(QWidget* parent) :
 	QDialog(parent)
 {
 	m_connectionBase = theSignalBase.signalConnections();
@@ -680,7 +680,7 @@ SignalConnectionDialog::SignalConnectionDialog(QWidget *parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalConnectionDialog::SignalConnectionDialog(Metrology::Signal* pSignal, QWidget *parent) :
+SignalConnectionDialog::SignalConnectionDialog(Metrology::Signal* pSignal, QWidget* parent) :
 	QDialog(parent)
 {
 	m_connectionBase = theSignalBase.signalConnections();
@@ -793,7 +793,7 @@ void SignalConnectionDialog::createInterface()
 
 	connect(m_pView, &QTableView::doubleClicked , this, &SignalConnectionDialog::onListDoubleClicked);
 
-	QVBoxLayout *mainLayout = new QVBoxLayout;
+	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 

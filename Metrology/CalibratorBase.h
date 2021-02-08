@@ -52,8 +52,22 @@ class CalibratorBase : public QObject
 
 public:
 
-	explicit CalibratorBase(QObject *parent = nullptr);
+	explicit CalibratorBase(QObject* parent = nullptr);
 	virtual ~CalibratorBase();
+
+public:
+
+	void					init(const CalibratorsOption& calibratorsOption, QWidget* parent = nullptr);
+	void					showInitDialog();
+
+	int						calibratorCount() const;
+	CalibratorManager*		calibratorManager(int index) const ;
+	CalibratorManager*		firstConnectedCalibrator() const;
+	CalibratorManager*		calibratorForMeasure(int index) const;
+
+	int						connectedCalibratorsCount() const { return m_connectedCalibratorsCount; }
+
+	void					clear();
 
 private:
 
@@ -94,23 +108,9 @@ private:
 	void					setHeaderList();
 	void					updateList();
 
-public:
-
-	void					init(const CalibratorsOption& calibratorsOption, QWidget* parent = nullptr);
-	void					showInitDialog();
-
-	int						calibratorCount() const;
-	CalibratorManager*		calibratorManager(int index) const ;
-	CalibratorManager*		firstConnectedCalibrator() const;
-	CalibratorManager*		calibratorForMeasure(int index) const;
-
-	int						connectedCalibratorsCount() const { return m_connectedCalibratorsCount; }
-
-	void					clear();
-
 protected:
 
-	bool					eventFilter(QObject *object, QEvent *event);
+	bool					eventFilter(QObject* object, QEvent* event);
 
 signals:
 

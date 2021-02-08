@@ -22,10 +22,17 @@ class MeasurePointDialog : public QDialog
 
 public:
 
-	explicit MeasurePointDialog(const LinearityOption& linearity, QWidget *parent = nullptr);
+	explicit MeasurePointDialog(const LinearityOption& linearity, QWidget* parent = nullptr);
 	virtual ~MeasurePointDialog();
 
+public:
+
+	LinearityOption&	linearity() { return m_linearity; }
+	void				setLinearity(const LinearityOption&	linearity) { m_linearity = linearity; }
+
 private:
+
+	LinearityOption		m_linearity;
 
 	QAction*			m_pColumnAction[POINT_SENSOR_COUNT];
 	QMenu*				m_headerContextMenu = nullptr;
@@ -59,10 +66,6 @@ private:
 	void				clearList();
 
 	void				hideColumn(int column, bool hide);
-
-public:
-
-	LinearityOption		m_linearity;
 
 protected:
 

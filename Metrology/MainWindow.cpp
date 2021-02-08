@@ -29,7 +29,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
+MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent)
 	: QMainWindow(parent)
 	, m_softwareInfo(softwareInfo)
 {
@@ -348,7 +348,7 @@ bool MainWindow::createToolBars()
 		QComboBox* pMeasureTimeoutList = new QComboBox(m_pMeasureTimeoutToolBar);
 		QLabel* pMeasureTimeoutUnitLabel = new QLabel(m_pMeasureTimeoutToolBar);
 		QRegExp rx("^[0-9]*[.]{1}[0-9]*$");
-		QValidator *validator = new QRegExpValidator(rx, m_pMeasureTimeoutToolBar);
+		QValidator* validator = new QRegExpValidator(rx, m_pMeasureTimeoutToolBar);
 
 		m_pMeasureTimeoutToolBar->addWidget(pMeasureTimeoutLabel);
 		m_pMeasureTimeoutToolBar->addWidget(pMeasureTimeoutList);

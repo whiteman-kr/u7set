@@ -14,15 +14,6 @@ public:
 	RackGroup(const QString& caption);
 	virtual ~RackGroup() {}
 
-private:
-
-	int					m_index = -1;
-
-	Hash				m_hash = UNDEFINED_HASH;			// hash calcHash from rack group caption
-	QString				m_caption;							// rack group caption
-
-	QString				m_rackEquipmentID[Metrology::ChannelCount];
-
 public:
 
 	bool				isValid() const;
@@ -38,6 +29,15 @@ public:
 
 	QString				rackID(int channel) const;
 	void				setRackID(int channel, const QString& rackID);
+
+private:
+
+	int					m_index = -1;
+
+	Hash				m_hash = UNDEFINED_HASH;			// hash calcHash from rack group caption
+	QString				m_caption;							// rack group caption
+
+	QString				m_rackEquipmentID[Metrology::ChannelCount];
 };
 
 // ==============================================================================================
@@ -48,13 +48,8 @@ class RackGroupBase : public QObject
 
 public:
 
-	explicit RackGroupBase(QObject *parent = nullptr);
+	explicit RackGroupBase(QObject* parent = nullptr);
 	virtual ~RackGroupBase() {}
-
-private:
-
-	mutable QMutex			m_groupMutex;
-	QVector<RackGroup>		m_groupList;
 
 public:
 
@@ -73,10 +68,10 @@ public:
 
 	RackGroupBase&			operator=(const RackGroupBase& from);
 
-signals:
+private:
 
-public slots:
-
+	mutable QMutex			m_groupMutex;
+	QVector<RackGroup>		m_groupList;
 };
 
 // ==============================================================================================
@@ -87,16 +82,8 @@ class RackBase : public QObject
 
 public:
 
-	explicit RackBase(QObject *parent = nullptr);
+	explicit RackBase(QObject* parent = nullptr);
 	virtual ~RackBase() {}
-
-private:
-
-	mutable QMutex			m_rackMutex;
-	QMap<Hash, int>			m_rackHashMap;
-	QVector<Metrology::RackParam> m_rackList;
-
-	RackGroupBase			m_groupBase;
 
 public:
 
@@ -122,10 +109,13 @@ public:
 
 	RackBase&				operator=(const RackBase& from);
 
-signals:
+private:
 
-public slots:
+	mutable QMutex			m_rackMutex;
+	QMap<Hash, int>			m_rackHashMap;
+	QVector<Metrology::RackParam> m_rackList;
 
+	RackGroupBase			m_groupBase;
 };
 
 // ==============================================================================================

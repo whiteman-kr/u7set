@@ -30,6 +30,31 @@ public:
 	explicit CalibratorManager(Calibrator* pCalibrator, QWidget* parent = nullptr);
 	virtual ~CalibratorManager();
 
+public:
+
+	// calibrator
+	//
+	Calibrator*		calibrator() const { return m_pCalibrator; }
+	void			setCalibrator(Calibrator* pCalibrator) { m_pCalibrator = pCalibrator; }
+
+	bool			calibratorIsConnected() const;
+	int				calibratorChannel() const;
+	QString			calibratorPort() const;
+
+	bool			isReadyForManage() const;
+	void			setReadyForManage(bool ready);
+	void			waitReadyForManage();
+
+	// function for manage
+	//
+	bool			setUnit(int mode, int unit);
+
+	void			getValue();
+	void			setValue(double getValue);
+
+	void			stepDown();
+	void			stepUp();
+
 private:
 
 	mutable QMutex	m_mutex;
@@ -65,31 +90,6 @@ private:
 	void			updateModeList();
 	void			updateUnitList();
 	void			updateValue();
-
-public:
-
-	// calibrator
-	//
-	Calibrator*		calibrator() const { return m_pCalibrator; }
-	void			setCalibrator(Calibrator* pCalibrator) { m_pCalibrator = pCalibrator; }
-
-	bool			calibratorIsConnected() const;
-	int				calibratorChannel() const;
-	QString			calibratorPort() const;
-
-	bool			isReadyForManage() const;
-	void			setReadyForManage(bool ready);
-	void			waitReadyForManage();
-
-	// function for manage
-	//
-	bool			setUnit(int mode, int unit);
-
-	void			getValue();
-	void			setValue(double getValue);
-
-	void			stepDown();
-	void			stepUp();
 
 signals:
 

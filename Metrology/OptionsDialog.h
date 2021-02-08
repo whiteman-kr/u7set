@@ -139,6 +139,16 @@ public:
 	explicit PropertyPage(QDialog* dialog);
 	virtual ~PropertyPage();
 
+public:
+
+	QWidget*					getWidget() { return m_pWidget; }
+	int							type() const { return m_type; }
+
+	int							m_page = OPTION_PAGE_UNDEFINED;
+	QTreeWidgetItem*			m_pTreeWidgetItem = nullptr;
+
+	QtTreePropertyBrowser*		treeEditor() { return m_pEditor; }
+
 private:
 
 	int							m_type = PROPERTY_PAGE_TYPE_UNDEFINED;
@@ -154,16 +164,6 @@ private:
 	// PROPERTY_PAGE_TYPE_DIALOG
 	//
 	QDialog*					m_pDialog = nullptr;
-
-public:
-
-	QWidget*					getWidget() { return m_pWidget; }
-	int							type() const { return m_type; }
-
-	int							m_page = OPTION_PAGE_UNDEFINED;
-	QTreeWidgetItem*			m_pTreeWidgetItem = nullptr;
-
-	QtTreePropertyBrowser*		treeEditor() { return m_pEditor; }
 };
 
 // ==============================================================================================
@@ -174,8 +174,12 @@ class OptionsDialog : public QDialog
 
 public:
 
-	explicit OptionsDialog(const Options& options, QWidget *parent = nullptr);
+	explicit OptionsDialog(const Options& options, QWidget* parent = nullptr);
 	virtual ~OptionsDialog();
+
+public:
+
+	Options&					options() { return m_options; }
 
 private:
 
@@ -218,18 +222,14 @@ private:
 	void						loadSettings();
 	void						saveSettings();
 
-public:
-
-	Options&					options() { return m_options; }
-
 protected:
 
-	bool						event(QEvent * e);
+	bool						event(QEvent*  e);
 
 private slots:
 
 	void						onPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
-	void						onPropertyValueChanged(QtProperty *property, const QVariant &value);
+	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
 
 	void						onBrowserItem(QtBrowserItem*pItem);
 

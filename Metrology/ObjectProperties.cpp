@@ -15,7 +15,7 @@ bool ProjectPropertyDialog::m_showGroupHeader[PROJECT_PROPERTY_GROUP_COUNT] =
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ProjectPropertyDialog::ProjectPropertyDialog(const ProjectInfo& param, QWidget *parent) :
+ProjectPropertyDialog::ProjectPropertyDialog(const ProjectInfo& param, QWidget* parent) :
 	QDialog(parent)
 {
 	m_info = param;
@@ -66,12 +66,12 @@ void ProjectPropertyDialog::createPropertyList()
 	}
 
 
-	QVBoxLayout *mainLayout = new QVBoxLayout;
+	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	// create property list
 	//
 
-	QtVariantProperty *item = nullptr;
+	QtVariantProperty* item = nullptr;
 
 	m_pManager = new QtVariantPropertyManager;
 	m_pFactory = new QtVariantEditorFactory;
@@ -82,7 +82,7 @@ void ProjectPropertyDialog::createPropertyList()
 
 		// info group
 
-		QtProperty *infoGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Project information"));
+		QtProperty* infoGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Project information"));
 
 			item = m_pManager->addProperty(QVariant::String, tr("Project name"));
 			item->setValue(m_info.projectName());
@@ -103,7 +103,7 @@ void ProjectPropertyDialog::createPropertyList()
 
 		// host group
 
-		QtProperty *hostGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Host"));
+		QtProperty* hostGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Host"));
 
 
 			item = m_pManager->addProperty(QVariant::String, tr("User"));
@@ -120,7 +120,7 @@ void ProjectPropertyDialog::createPropertyList()
 
 		// position group
 
-		QtProperty *versionGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("File version"));
+		QtProperty* versionGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("File version"));
 
 			item = m_pManager->addProperty(QVariant::Int, tr("Database Version"));
 			item->setValue(m_info.dbVersion());
@@ -168,7 +168,7 @@ void ProjectPropertyDialog::createPropertyList()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-RackPropertyDialog::RackPropertyDialog(const Metrology::RackParam& rack, const RackBase& rackBase, QWidget *parent) :
+RackPropertyDialog::RackPropertyDialog(const Metrology::RackParam& rack, const RackBase& rackBase, QWidget* parent) :
 	QDialog(parent)
 {
 	if (rack.isValid() == false)
@@ -225,12 +225,12 @@ void RackPropertyDialog::createPropertyList()
 
 	setWindowTitle(tr("Propertу - %1").arg(m_rack.caption()));
 
-	QVBoxLayout *mainLayout = new QVBoxLayout;
+	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	// create property list
 	//
 
-	QtVariantProperty *item = nullptr;
+	QtVariantProperty* item = nullptr;
 
 	m_pManager = new QtVariantPropertyManager;
 	m_pFactory = new QtVariantEditorFactory;
@@ -238,7 +238,7 @@ void RackPropertyDialog::createPropertyList()
 
 	//
 	//
-	QtProperty *rackGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Propertу of the rack"));
+	QtProperty* rackGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Propertу of the rack"));
 
 		item = m_pManager->addProperty(QVariant::String, tr("Caption"));
 		item->setValue(m_rack.caption());
@@ -310,7 +310,7 @@ void RackPropertyDialog::createPropertyList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackPropertyDialog::onPropertyValueChanged(QtProperty *property, const QVariant &value)
+void RackPropertyDialog::onPropertyValueChanged(QtProperty* property, const QVariant &value)
 {
 	if (property == nullptr)
 	{
@@ -415,7 +415,7 @@ void RackPropertyDialog::onOk()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-RackGroupPropertyDialog::RackGroupPropertyDialog(const RackBase& rackBase, QWidget *parent) :
+RackGroupPropertyDialog::RackGroupPropertyDialog(const RackBase& rackBase, QWidget* parent) :
 	QDialog(parent)
 {
 	m_rackBase = rackBase;
@@ -498,7 +498,7 @@ void RackGroupPropertyDialog::createPropertyList()
 
 	// create property list
 	//
-	QtVariantProperty *item = nullptr;
+	QtVariantProperty* item = nullptr;
 
 	m_pManager = new QtVariantPropertyManager;
 	m_pFactory = new QtVariantEditorFactory;
@@ -506,7 +506,7 @@ void RackGroupPropertyDialog::createPropertyList()
 
 	//
 	//
-	QtProperty *racks = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Racks"));
+	QtProperty* racks = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Racks"));
 
 		for(int channel = 0; channel < Metrology::ChannelCount; channel++)
 		{
@@ -555,12 +555,12 @@ void RackGroupPropertyDialog::createPropertyList()
 
 	// add layouts
 	//
-	QHBoxLayout *listLayout = new QHBoxLayout;
+	QHBoxLayout* listLayout = new QHBoxLayout;
 
 	listLayout->addWidget(m_pGroupView);
 	listLayout->addWidget(m_pEditor);
 
-	QVBoxLayout *mainLayout = new QVBoxLayout;
+	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	mainLayout->setMenuBar(m_pMenuBar);
 	mainLayout->addLayout(listLayout);
@@ -583,7 +583,7 @@ void RackGroupPropertyDialog::updateGroupList(const Hash& hash)
 	int rowCount = m_pGroupView->rowCount();
 	for(int row = 0; row < rowCount; row++)
 	{
-		QTableWidgetItem *item = m_pGroupView->item(row, RACK_GROUP_COLUMN_CAPTION);
+		QTableWidgetItem* item = m_pGroupView->item(row, RACK_GROUP_COLUMN_CAPTION);
 		if (item != nullptr)
 		{
 			delete item;
@@ -640,7 +640,7 @@ void RackGroupPropertyDialog::updateRackList()
 		return;
 	}
 
-	QtVariantProperty *property = nullptr;
+	QtVariantProperty* property = nullptr;
 
 	for(int channel = 0; channel < Metrology::ChannelCount; channel++)
 	{
@@ -715,7 +715,7 @@ void RackGroupPropertyDialog::removeGroup()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackGroupPropertyDialog::onPropertyValueChanged(QtProperty *property, const QVariant &value)
+void RackGroupPropertyDialog::onPropertyValueChanged(QtProperty* property, const QVariant &value)
 {
 	if (property == nullptr)
 	{
@@ -992,7 +992,7 @@ bool SignalPropertyDialog::m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT] =
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalPropertyDialog::SignalPropertyDialog(const Metrology::SignalParam& param, QWidget *parent) :
+SignalPropertyDialog::SignalPropertyDialog(const Metrology::SignalParam& param, QWidget* parent) :
 	QDialog(parent)
 {
 	if (param.isValid() == false)
@@ -1055,12 +1055,12 @@ void SignalPropertyDialog::createPropertyList()
 	}
 
 
-	QVBoxLayout *mainLayout = new QVBoxLayout;
+	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	// create property list
 	//
 
-	QtVariantProperty *item = nullptr;
+	QtVariantProperty* item = nullptr;
 
 	m_pManager = new QtVariantPropertyManager;
 	m_pFactory = new QtVariantEditorFactory;
@@ -1071,7 +1071,7 @@ void SignalPropertyDialog::createPropertyList()
 
 		// id group
 
-		QtProperty *signalIdGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Signal ID"));
+		QtProperty* signalIdGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Signal ID"));
 
 			item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
 			item->setValue(m_param.appSignalID());
@@ -1103,7 +1103,7 @@ void SignalPropertyDialog::createPropertyList()
 
 		// position group
 
-		QtProperty *positionGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Position"));
+		QtProperty* positionGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Position"));
 
 			item = m_pManager->addProperty(QVariant::String, tr("Rack"));
 			item->setValue(m_param.location().rack().caption());
@@ -1129,7 +1129,7 @@ void SignalPropertyDialog::createPropertyList()
 
 		// electric range group
 
-		QtProperty *electricRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(),
+		QtProperty* electricRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(),
 																 qApp->translate(	"ObjectProperty.h",
 																					SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EL_RANGE]) +
 																					m_param.electricRangeStr());
@@ -1209,7 +1209,7 @@ void SignalPropertyDialog::createPropertyList()
 
 		// engineering range group
 
-		QtProperty *engineeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(),
+		QtProperty* engineeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(),
 																	qApp->translate("ObjectProperty.h",
 																					SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE]) +
 																					m_param.engineeringRangeStr());
@@ -1308,7 +1308,7 @@ void SignalPropertyDialog::createPropertyList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QVariant &value)
+void SignalPropertyDialog::onPropertyValueChanged(QtProperty* property, const QVariant &value)
 {
 	if (property == nullptr)
 	{
@@ -1396,7 +1396,7 @@ void SignalPropertyDialog::updateGroupHeader(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalPropertyDialog::onPropertyExpanded(QtBrowserItem *item)
+void SignalPropertyDialog::onPropertyExpanded(QtBrowserItem* item)
 {
 	if (item == nullptr)
 	{
@@ -1446,7 +1446,7 @@ bool ComparatorPropertyDialog::m_showGroupHeader[COMPARATOR_PROPERTY_GROUP_COUNT
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorPropertyDialog::ComparatorPropertyDialog(const Metrology::ComparatorEx& comparatorEx, QWidget *parent) :
+ComparatorPropertyDialog::ComparatorPropertyDialog(const Metrology::ComparatorEx& comparatorEx, QWidget* parent) :
 	QDialog(parent)
 {
 	m_comparatorEx = comparatorEx;
@@ -1496,12 +1496,12 @@ void ComparatorPropertyDialog::createPropertyList()
 		cmpTypeList.append(meu.key(u));
 	}
 
-	QVBoxLayout *mainLayout = new QVBoxLayout;
+	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	// create property list
 	//
 
-	QtVariantProperty *item = nullptr;
+	QtVariantProperty* item = nullptr;
 
 	m_pManager = new QtVariantPropertyManager;
 	m_pFactory = new QtVariantEditorFactory;
@@ -1512,7 +1512,7 @@ void ComparatorPropertyDialog::createPropertyList()
 
 		// input group
 
-		QtProperty *inputGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Input"));
+		QtProperty* inputGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Input"));
 
 			if (m_comparatorEx.inputSignal() == nullptr)
 			{
@@ -1566,7 +1566,7 @@ void ComparatorPropertyDialog::createPropertyList()
 
 		// compare group
 
-		QtProperty *compareGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(),
+		QtProperty* compareGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(),
 														   comparator().compare().isConst() == true ? tr("Compare - const") :
 																									  tr("Compare - dynamic"));
 
@@ -1660,7 +1660,7 @@ void ComparatorPropertyDialog::createPropertyList()
 
 		// hysteresis group
 
-		QtProperty *hysteresisGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), comparator().hysteresis().isConst() == true ? tr("Hysteresis - const") : tr("Hysteresis - dynamic"));
+		QtProperty* hysteresisGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), comparator().hysteresis().isConst() == true ? tr("Hysteresis - const") : tr("Hysteresis - dynamic"));
 
 			if (comparator().hysteresis().isConst() == true)
 			{
@@ -1733,7 +1733,7 @@ void ComparatorPropertyDialog::createPropertyList()
 
 		// output group
 
-		QtProperty *outputGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Output"));
+		QtProperty* outputGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Output"));
 
 		if (m_comparatorEx.outputSignal() == nullptr)
 		{
@@ -1811,7 +1811,7 @@ void ComparatorPropertyDialog::createPropertyList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, const QVariant &value)
+void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty* property, const QVariant &value)
 {
 	if (property == nullptr)
 	{
@@ -1854,7 +1854,7 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 				m_comparatorEx.compare().setConstValue(uc.conversion(value.toDouble(), UnitsConvertType::ElectricToPhysical, m_comparatorEx.inputSignal()->param()));
 				groupIndex = COMPARATOR_PROPERTY_GROUP_COMPARE;
 
-				QtVariantProperty *propertyEn = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE));
+				QtVariantProperty* propertyEn = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE));
 				if (propertyEn != nullptr)
 				{
 					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
@@ -1869,7 +1869,7 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 				m_comparatorEx.compare().setConstValue(value.toDouble());
 				groupIndex = COMPARATOR_PROPERTY_GROUP_COMPARE;
 
-				QtVariantProperty *propertyEl = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE));
+				QtVariantProperty* propertyEl = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE));
 				if (propertyEl != nullptr && m_comparatorEx.inputSignal()->param().isInput() == true)
 				{
 					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
@@ -1892,7 +1892,7 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 				m_comparatorEx.hysteresis().setConstValue(uc.conversion(value.toDouble(), UnitsConvertType::ElectricToPhysical, m_comparatorEx.inputSignal()->param()));
 				groupIndex = COMPARATOR_PROPERTY_GROUP_HYSTERESIS;
 
-				QtVariantProperty *propertyEn = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE));
+				QtVariantProperty* propertyEn = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE));
 				if (propertyEn != nullptr)
 				{
 					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
@@ -1907,7 +1907,7 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 				m_comparatorEx.hysteresis().setConstValue(value.toDouble());
 				groupIndex = COMPARATOR_PROPERTY_GROUP_HYSTERESIS;
 
-				QtVariantProperty *propertyEl = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE));
+				QtVariantProperty* propertyEl = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE));
 				if (propertyEl != nullptr && m_comparatorEx.inputSignal()->param().isInput() == true)
 				{
 					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
@@ -1926,7 +1926,7 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorPropertyDialog::onPropertyExpanded(QtBrowserItem *item)
+void ComparatorPropertyDialog::onPropertyExpanded(QtBrowserItem* item)
 {
 	if (item == nullptr)
 	{

@@ -315,7 +315,7 @@ int					SignalListDialog::m_currenIndex = 0;
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalListDialog::SignalListDialog(bool hasButtons, QWidget *parent) :
+SignalListDialog::SignalListDialog(bool hasButtons, QWidget* parent) :
 	QDialog(parent)
 {
 	createInterface(hasButtons);
@@ -426,7 +426,7 @@ void SignalListDialog::createInterface(bool hasButtons)
 
 	connect(m_pView, &QTableView::doubleClicked , this, &SignalListDialog::onListDoubleClicked);
 
-	QVBoxLayout *mainLayout = new QVBoxLayout;
+	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	mainLayout->setMenuBar(m_pMenuBar);
 	mainLayout->addWidget(m_pView);
@@ -639,11 +639,11 @@ void SignalListDialog::hideColumn(int column, bool hide)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SignalListDialog::eventFilter(QObject *object, QEvent *event)
+bool SignalListDialog::eventFilter(QObject* object, QEvent* event)
 {
 	if (event->type() == QEvent::KeyPress)
 	{
-		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
+		QKeyEvent* keyEvent = static_cast<QKeyEvent* >(event);
 
 		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{

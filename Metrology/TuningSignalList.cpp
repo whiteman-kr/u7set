@@ -603,7 +603,7 @@ bool			TuningSignalListDialog::m_showSource = false;
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSignalListDialog::TuningSignalListDialog(QWidget *parent) :
+TuningSignalListDialog::TuningSignalListDialog(QWidget* parent) :
 	QDialog(parent)
 {
 	createInterface();
@@ -734,7 +734,7 @@ void TuningSignalListDialog::createInterface()
 
 	connect(m_pSignalView, &QTableView::doubleClicked , this, &TuningSignalListDialog::onSignalListDoubleClicked);
 
-	QVBoxLayout *mainLayout = new QVBoxLayout;
+	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	mainLayout->setMenuBar(m_pMenuBar);
 	mainLayout->addWidget(m_pSourceView);
@@ -945,11 +945,11 @@ void TuningSignalListDialog::stopSignalStateTimer()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool TuningSignalListDialog::eventFilter(QObject *object, QEvent *event)
+bool TuningSignalListDialog::eventFilter(QObject* object, QEvent* event)
 {
 	if (event->type() == QEvent::KeyPress)
 	{
-		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
+		QKeyEvent* keyEvent = static_cast<QKeyEvent* >(event);
 
 		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
@@ -1108,7 +1108,7 @@ void TuningSignalListDialog::onSignalListDoubleClicked(const QModelIndex&)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSignalStateDialog::TuningSignalStateDialog(const Metrology::SignalParam& param, QWidget *parent) :
+TuningSignalStateDialog::TuningSignalStateDialog(const Metrology::SignalParam& param, QWidget* parent) :
 	QDialog(parent),
 	m_param(param)
 {
@@ -1137,7 +1137,7 @@ void TuningSignalStateDialog::createInterface()
 
 	// main Layout
 	//
-	QVBoxLayout *mainLayout = new QVBoxLayout;
+	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	switch(m_param.signalType())
 	{
@@ -1147,7 +1147,7 @@ void TuningSignalStateDialog::createInterface()
 				stateLabel->setAlignment(Qt::AlignHCenter);
 
 				QRegExp rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
-				QValidator *validator = new QRegExpValidator(rx, this);
+				QValidator* validator = new QRegExpValidator(rx, this);
 
 				m_stateEdit = new QLineEdit(QString::number(theSignalBase.signalState(m_param.hash()).value() ));
 				m_stateEdit->setAlignment(Qt::AlignHCenter);
@@ -1158,7 +1158,7 @@ void TuningSignalStateDialog::createInterface()
 
 				// buttons
 				//
-				QHBoxLayout *buttonLayout = new QHBoxLayout ;
+				QHBoxLayout* buttonLayout = new QHBoxLayout ;
 
 				QPushButton* okButton = new QPushButton(tr("Ok"));
 				QPushButton* cancelButton = new QPushButton(tr("Cancel"));
@@ -1185,7 +1185,7 @@ void TuningSignalStateDialog::createInterface()
 
 				// buttons
 				//
-				QHBoxLayout *buttonLayout = new QHBoxLayout ;
+				QHBoxLayout* buttonLayout = new QHBoxLayout ;
 
 				QPushButton* yesButton = new QPushButton(tr("Yes"));
 				QPushButton* noButton = new QPushButton(tr("No"));

@@ -15,7 +15,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorBase::CalibratorBase(QObject *parent) :
+CalibratorBase::CalibratorBase(QObject* parent) :
 	QObject(parent)
 {
 }
@@ -73,7 +73,7 @@ void CalibratorBase::createCalibrators(QWidget* parent)
 			m_calibratorManagerList.append(pManager);
 		m_mutex.unlock();
 
-		QThread *pThread = new QThread;
+		QThread* pThread = new QThread;
 		if (pThread != nullptr)
 		{
 			pCalibrator->moveToThread(pThread);
@@ -129,7 +129,7 @@ void CalibratorBase::removeCalibrators()
 			}
 		}
 
-		QThread *pThread = calibrator->thread();
+		QThread* pThread = calibrator->thread();
 		if (pThread != nullptr)
 		{
 			pThread->quit();
@@ -186,14 +186,14 @@ void CalibratorBase::createInitDialog(QWidget* parent)
 		connect(m_pSettingsAction, &QAction::triggered, this, static_cast<void (CalibratorBase::*)()>(&CalibratorBase::onSettings));
 		connect(m_pCopyAction, &QAction::triggered, this, &CalibratorBase::onCopy);
 
-		QVBoxLayout *mainLayout = new QVBoxLayout;
+		QVBoxLayout* mainLayout = new QVBoxLayout;
 		mainLayout->setMenuBar(m_pMenuBar);
 
 		m_pCalibratorView = new QTableWidget(m_pInitDialog);
 		m_pCalibratorView->setSelectionBehavior(QAbstractItemView::SelectRows);
 		m_pCalibratorProgress = new QProgressBar(m_pInitDialog);
 
-		QVBoxLayout *listLayout = new QVBoxLayout;
+		QVBoxLayout* listLayout = new QVBoxLayout;
 		listLayout->addWidget(m_pCalibratorView);
 		listLayout->addWidget(m_pCalibratorProgress);
 
@@ -534,7 +534,7 @@ void CalibratorBase::onSettings(int row, int)
 
 		// serial port
 		//
-		QHBoxLayout *portLayout = new QHBoxLayout ;
+		QHBoxLayout* portLayout = new QHBoxLayout ;
 
 		QLabel* portLabel = new QLabel;
 		portLabel->setText(tr("Serial port:"));
@@ -553,7 +553,7 @@ void CalibratorBase::onSettings(int row, int)
 
 		// calibrator type
 		//
-		QHBoxLayout *typeLayout = new QHBoxLayout ;
+		QHBoxLayout* typeLayout = new QHBoxLayout ;
 
 		QLabel* typeLabel = new QLabel;
 		typeLabel->setText(tr("Calibrator type:"));
@@ -571,7 +571,7 @@ void CalibratorBase::onSettings(int row, int)
 
 		// buttons
 		//
-		QHBoxLayout *buttonLayout = new QHBoxLayout ;
+		QHBoxLayout* buttonLayout = new QHBoxLayout ;
 
 		QPushButton* okButton = new QPushButton(tr("Ok"));
 		QPushButton* cancelButton = new QPushButton(tr("Cancel"));
@@ -584,7 +584,7 @@ void CalibratorBase::onSettings(int row, int)
 
 		// add layoyt
 		//
-		QVBoxLayout *mainLayout = new QVBoxLayout ;
+		QVBoxLayout* mainLayout = new QVBoxLayout ;
 
 		mainLayout->addLayout(portLayout);
 		mainLayout->addLayout(typeLayout);
@@ -640,7 +640,7 @@ void CalibratorBase::onCopy()
 
 void CalibratorBase::onContextMenu(QPoint)
 {
-	QMenu *menu = new QMenu(m_pCalibratorView);
+	QMenu* menu = new QMenu(m_pCalibratorView);
 
 	menu->addAction(m_pManageAction);
 	menu->addAction(m_pSettingsAction);
@@ -668,7 +668,7 @@ void CalibratorBase::onCalibratorDisconnected()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool CalibratorBase::eventFilter(QObject *object, QEvent *event)
+bool CalibratorBase::eventFilter(QObject* object, QEvent* event)
 {
 	if (event->type() == QEvent::HideToParent)
 	{
@@ -683,7 +683,7 @@ bool CalibratorBase::eventFilter(QObject *object, QEvent *event)
 
 	if (event->type() == QEvent::KeyPress)
 	{
-		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
+		QKeyEvent* keyEvent = static_cast<QKeyEvent* >(event);
 
 		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{

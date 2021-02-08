@@ -330,7 +330,7 @@ int ComparatorListDialog::m_currenIndex = 0;
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorListDialog::ComparatorListDialog(QWidget *parent) :
+ComparatorListDialog::ComparatorListDialog(QWidget* parent) :
 	QDialog(parent)
 {
 	createInterface();
@@ -405,7 +405,7 @@ void ComparatorListDialog::createInterface()
 
 	connect(m_pView, &QTableView::doubleClicked , this, &ComparatorListDialog::onListDoubleClicked);
 
-	QVBoxLayout *mainLayout = new QVBoxLayout;
+	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	mainLayout->setMenuBar(m_pMenuBar);
 	mainLayout->addWidget(m_pView);
@@ -540,11 +540,11 @@ void ComparatorListDialog::hideColumn(int column, bool hide)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool ComparatorListDialog::eventFilter(QObject *object, QEvent *event)
+bool ComparatorListDialog::eventFilter(QObject* object, QEvent* event)
 {
 	if (event->type() == QEvent::KeyPress)
 	{
-		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
+		QKeyEvent* keyEvent = static_cast<QKeyEvent* >(event);
 
 		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{

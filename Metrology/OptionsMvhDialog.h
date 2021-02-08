@@ -44,10 +44,15 @@ class OptionsMeasureViewHeaderDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit OptionsMeasureViewHeaderDialog(const MeasureViewOption& header, QWidget *parent = nullptr);
+	explicit OptionsMeasureViewHeaderDialog(const MeasureViewOption& header, QWidget* parent = nullptr);
 	virtual ~OptionsMeasureViewHeaderDialog();
 
 	MeasureViewOption	m_header;
+
+public:
+
+	int					measureType() const { return m_measureType; }
+	void				setMeasureType(int measureType);
 
 private:
 
@@ -66,11 +71,6 @@ private:
 	void				setHeaderList();
 	void				updateList();
 	void				clearList();
-
-public:
-
-	int					measureType() const { return m_measureType; }
-	void				setMeasureType(int measureType);
 
 protected:
 

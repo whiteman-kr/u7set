@@ -211,7 +211,7 @@ MeasureViewColumn& MeasureViewColumn::operator=(const MeasureViewColumn& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureViewHeader::MeasureViewHeader(QObject *parent) :
+MeasureViewHeader::MeasureViewHeader(QObject* parent) :
 	QObject(parent)
 {
 	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)

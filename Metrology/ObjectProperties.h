@@ -49,7 +49,7 @@ class ProjectPropertyDialog : public QDialog
 
 public:
 
-	explicit ProjectPropertyDialog(const ProjectInfo& info, QWidget *parent = nullptr);
+	explicit ProjectPropertyDialog(const ProjectInfo& info, QWidget* parent = nullptr);
 	virtual ~ProjectPropertyDialog();
 
 private:
@@ -70,9 +70,7 @@ private:
 	QtProperty*					m_propertyGroupList[PROJECT_PROPERTY_GROUP_COUNT];
 
 	void						createPropertyList();
-
 };
-
 
 // Rack property
 //
@@ -93,8 +91,12 @@ class RackPropertyDialog : public QDialog
 
 public:
 
-	RackPropertyDialog(const Metrology::RackParam& rack, const RackBase& rackBase, QWidget *parent = nullptr);
+	RackPropertyDialog(const Metrology::RackParam& rack, const RackBase& rackBase, QWidget* parent = nullptr);
 	virtual ~RackPropertyDialog();
+
+public:
+
+	Metrology::RackParam		rack() const { return m_rack; }
 
 private:
 
@@ -117,17 +119,12 @@ private:
 
 	bool						foundDuplicateGroups();
 
-public:
-
-	Metrology::RackParam		rack() const { return m_rack; }
-
 private slots:
 
-	void						onPropertyValueChanged(QtProperty *property, const QVariant &value);
+	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
 
 	void						onOk();
 };
-
 
 // Rack group property
 //
@@ -143,8 +140,13 @@ class RackGroupPropertyDialog : public QDialog
 
 public:
 
-	explicit RackGroupPropertyDialog(const RackBase& rackBase, QWidget *parent = nullptr);
+	explicit RackGroupPropertyDialog(const RackBase& rackBase, QWidget* parent = nullptr);
 	virtual ~RackGroupPropertyDialog();
+
+public:
+
+	RackBase&					racks() { return m_rackBase; }
+	RackGroupBase&				rackGroups() { return m_groupBase; }
 
 private:
 
@@ -184,11 +186,6 @@ private:
 
 	bool						foundDuplicateRacks();
 
-public:
-
-	RackBase&					racks() { return m_rackBase; }
-	RackGroupBase&				rackGroups() { return m_groupBase; }
-
 protected:
 
 	bool						event(QEvent* e);
@@ -202,7 +199,7 @@ private slots:
 
 	// slots of property list
 	//
-	void						onPropertyValueChanged(QtProperty *property, const QVariant &value);
+	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
 
 	// slot of view
 	//
@@ -262,8 +259,12 @@ class SignalPropertyDialog : public QDialog
 
 public:
 
-	explicit SignalPropertyDialog(const Metrology::SignalParam& param, QWidget *parent = nullptr);
+	explicit SignalPropertyDialog(const Metrology::SignalParam& param, QWidget* parent = nullptr);
 	virtual ~SignalPropertyDialog();
+
+public:
+
+	Metrology::SignalParam		param() const { return m_param; }
 
 private:
 
@@ -290,14 +291,10 @@ private:
 
 	void						updateGroupHeader(int index);
 
-public:
-
-	Metrology::SignalParam		param() const { return m_param; }
-
 private slots:
 
-	void						onPropertyValueChanged(QtProperty *property, const QVariant &value);
-	void						onPropertyExpanded(QtBrowserItem *item);
+	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
+	void						onPropertyExpanded(QtBrowserItem* item);
 
 	void						onOk();
 };
@@ -342,8 +339,12 @@ class ComparatorPropertyDialog : public QDialog
 
 public:
 
-	explicit ComparatorPropertyDialog(const Metrology::ComparatorEx& comparator, QWidget *parent = nullptr);
+	explicit ComparatorPropertyDialog(const Metrology::ComparatorEx& comparator, QWidget* parent = nullptr);
 	virtual ~ComparatorPropertyDialog();
+
+public:
+
+	Metrology::ComparatorEx		comparator() const { return m_comparatorEx; }
 
 private:
 
@@ -368,14 +369,10 @@ private:
 
 	void						createPropertyList();
 
-public:
-
-	Metrology::ComparatorEx		comparator() const { return m_comparatorEx; }
-
 private slots:
 
-	void						onPropertyValueChanged(QtProperty *property, const QVariant &value);
-	void						onPropertyExpanded(QtBrowserItem *item);
+	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
+	void						onPropertyExpanded(QtBrowserItem* item);
 
 	void						onOk();
 };

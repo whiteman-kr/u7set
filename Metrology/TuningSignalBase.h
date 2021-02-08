@@ -23,13 +23,6 @@ public:
 	TuningSourceState() {}
 	virtual ~TuningSourceState() {}
 
-private:
-
-	bool					m_isReply = false;
-	quint64					m_requestCount = 0;
-	quint64					m_replyCount = 0;
-	int						m_commandQueueSize = 0;
-
 public:
 
 	bool					isReply() const { return m_isReply; }
@@ -43,6 +36,13 @@ public:
 
 	int						commandQueueSize() const { return m_commandQueueSize; }
 	void					setCommandQueueSize(int size) { m_commandQueueSize = size; }
+
+private:
+
+	bool					m_isReply = false;
+	quint64					m_requestCount = 0;
+	quint64					m_replyCount = 0;
+	int						m_commandQueueSize = 0;
 };
 
 // ==============================================================================================
@@ -54,24 +54,6 @@ public:
 	TuningSource();
 	explicit TuningSource(const Network::DataSourceInfo& info);
 	virtual ~TuningSource() {}
-
-private:
-
-	quint64					m_sourceID = 0;
-
-	QString					m_equipmentID;
-	QString					m_caption;
-
-	QString					m_serverIP;
-	int						m_serverPort = 0;
-
-	QString					m_channel;
-
-	QString					m_subSystemID;
-
-	int						m_lmNumber = -1;
-
-	TuningSourceState		m_state;
 
 public:
 
@@ -101,6 +83,24 @@ public:
 
 	TuningSourceState&		state() { return m_state; }
 	void					setState(TuningSourceState state) { m_state = state; }
+
+private:
+
+	quint64					m_sourceID = 0;
+
+	QString					m_equipmentID;
+	QString					m_caption;
+
+	QString					m_serverIP;
+	int						m_serverPort = 0;
+
+	QString					m_channel;
+
+	QString					m_subSystemID;
+
+	int						m_lmNumber = -1;
+
+	TuningSourceState		m_state;
 };
 
 // ==============================================================================================
@@ -111,16 +111,8 @@ class TuningSourceBase : public QObject
 
 public:
 
-	explicit TuningSourceBase(QObject *parent = nullptr);
+	explicit TuningSourceBase(QObject* parent = nullptr);
 	virtual ~TuningSourceBase();
-
-private:
-
-	QStringList				m_tuningSourceEquipmentID;
-
-	mutable QMutex			m_sourceMutex;
-	QVector<TuningSource>	m_sourceList;
-	QMap<quint64, int>		m_sourceIdMap;
 
 public:
 
@@ -137,6 +129,14 @@ public:
 	void					setState(quint64 sourceID, const Network::TuningSourceState& state);
 
 	void					sortByID();
+
+private:
+
+	QStringList				m_tuningSourceEquipmentID;
+
+	mutable QMutex			m_sourceMutex;
+	QVector<TuningSource>	m_sourceList;
+	QMap<quint64, int>		m_sourceIdMap;
 };
 
 // ==============================================================================================
@@ -147,15 +147,8 @@ class TuningSignalBase : public QObject
 
 public:
 
-	explicit TuningSignalBase(QObject *parent = nullptr);
+	explicit TuningSignalBase(QObject* parent = nullptr);
 	virtual ~TuningSignalBase();
-
-private:
-
-	mutable QMutex			m_signalMutex;
-	QVector<Metrology::Signal*> m_signalList;
-	QMap<Hash, int>			m_signalHashMap;
-
 
 public:
 
@@ -174,6 +167,12 @@ public:
 
 	void					setNovalid();
 
+private:
+
+	mutable QMutex			m_signalMutex;
+	QVector<Metrology::Signal*> m_signalList;
+	QMap<Hash, int>			m_signalHashMap;
+
 signals:
 
 	void					signalsCreated();
@@ -188,12 +187,6 @@ public:
 	TuningWriteCmd() { clear(); }
 	TuningWriteCmd(const Hash &signalHash, TuningValueType type, double value) : m_signalHash (signalHash), m_type (type), m_value (value) {}
 	virtual ~TuningWriteCmd() {}
-
-private:
-
-	Hash					m_signalHash = UNDEFINED_HASH;
-	TuningValueType			m_type = TuningValueType::Discrete;
-	QVariant				m_value;
 
 public:
 
@@ -223,6 +216,12 @@ public:
 
 	QVariant				value() const { return m_value; }
 	void					setValue(QVariant value) { m_value = value; }
+
+private:
+
+	Hash					m_signalHash = UNDEFINED_HASH;
+	TuningValueType			m_type = TuningValueType::Discrete;
+	QVariant				m_value;
 };
 
 // ==============================================================================================
@@ -233,16 +232,8 @@ class TuningBase: public QObject
 
 public:
 
-	explicit TuningBase(QObject *parent = nullptr);
+	explicit TuningBase(QObject* parent = nullptr);
 	virtual ~TuningBase();
-
-private:
-
-	TuningSourceBase		m_sourceBase;
-	TuningSignalBase		m_signalsBase;
-
-	mutable QMutex			m_cmdFowWriteMutex;
-	QVector<TuningWriteCmd>	m_cmdFowWriteList;
 
 public:
 
@@ -262,11 +253,13 @@ public:
 
 	TuningWriteCmd			cmdFowWrite();
 
-signals:
+private:
 
-public slots:
+	TuningSourceBase		m_sourceBase;
+	TuningSignalBase		m_signalsBase;
 
-
+	mutable QMutex			m_cmdFowWriteMutex;
+	QVector<TuningWriteCmd>	m_cmdFowWriteList;
 };
 
 // ==============================================================================================

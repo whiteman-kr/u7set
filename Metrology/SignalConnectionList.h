@@ -53,6 +53,15 @@ public:
 	explicit SignalConnectionTable(QObject* parent = nullptr);
 	virtual ~SignalConnectionTable();
 
+public:
+
+	int	connectionCount() const;
+	Metrology::Connection at(int index) const;
+	void set(const QVector<Metrology::Connection>& list_add);
+	void clear();
+
+	QString text(int row, int column, const Metrology::Connection& connection) const;
+
 private:
 
 	mutable QMutex m_connectionMutex;
@@ -63,15 +72,6 @@ private:
 
 	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
 	QVariant data(const QModelIndex &index, int role) const;
-
-public:
-
-	int	connectionCount() const;
-	Metrology::Connection at(int index) const;
-	void set(const QVector<Metrology::Connection>& list_add);
-	void clear();
-
-	QString text(int row, int column, const Metrology::Connection& connection) const;
 };
 
 // ==============================================================================================
@@ -82,9 +82,13 @@ class SignalConnectionItemDialog : public QDialog
 
 public:
 
-	explicit SignalConnectionItemDialog(QWidget *parent = nullptr);
-	explicit SignalConnectionItemDialog(const Metrology::Connection& signalConnection, QWidget *parent = nullptr);
+	explicit SignalConnectionItemDialog(QWidget* parent = nullptr);
+	explicit SignalConnectionItemDialog(const Metrology::Connection& signalConnection, QWidget* parent = nullptr);
 	virtual ~SignalConnectionItemDialog();
+
+public:
+
+	Metrology::Connection connection() const { return m_signalConnection; }
 
 private:
 
@@ -102,10 +106,6 @@ private:
 
 	void createInterface();
 	void updateSignals();
-
-public:
-
-	Metrology::Connection connection() const { return m_signalConnection; }
 
 private slots:
 
@@ -127,9 +127,13 @@ class SignalConnectionDialog : public QDialog
 
 public:
 
-	explicit SignalConnectionDialog(QWidget *parent = nullptr);
-	explicit SignalConnectionDialog(Metrology::Signal* pSignal, QWidget *parent = nullptr);
+	explicit SignalConnectionDialog(QWidget* parent = nullptr);
+	explicit SignalConnectionDialog(Metrology::Signal* pSignal, QWidget* parent = nullptr);
 	virtual ~SignalConnectionDialog() override;
+
+public:
+
+	Metrology::ConnectionBase&	signalConnections() { return m_connectionBase; }	// signal connections
 
 private:
 
@@ -162,10 +166,6 @@ private:
 
 	Metrology::Signal*		m_pOutputSignal = nullptr;
 	bool createConnectionBySignal(Metrology::Signal* pSignal);
-
-public:
-
-	Metrology::ConnectionBase&	signalConnections() { return m_connectionBase; }	// signal connections
 
 public slots:
 

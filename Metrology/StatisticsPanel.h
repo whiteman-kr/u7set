@@ -99,6 +99,15 @@ public:
 	explicit StatisticsTable(QObject* parent = nullptr);
 	virtual ~StatisticsTable();
 
+public:
+
+	void set();
+	void clear();
+
+	QString text(int row, int column, const StatisticsItem& si) const;
+
+	void updateSignal(Hash signalHash);
+
 private:
 
 	int m_statisticsItemCount = 0;
@@ -108,15 +117,6 @@ private:
 
 	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
 	QVariant data(const QModelIndex &index, int role) const;
-
-public:
-
-	void set();
-	void clear();
-
-	QString text(int row, int column, const StatisticsItem& si) const;
-
-	void updateSignal(Hash signalHash);
 };
 
 // ==============================================================================================
@@ -129,6 +129,11 @@ public:
 
 	explicit StatisticsPanel(QWidget* parent = nullptr);
 	virtual ~StatisticsPanel();
+
+public:
+
+	void setMeasureBase(MeasureBase* pMeasureBase) { m_pMeasureBase = pMeasureBase; }
+	void setViewFont(const QFont& font);
 
 private:
 
@@ -186,12 +191,7 @@ private:
 
 protected:
 
-	bool eventFilter(QObject *object, QEvent *event);
-
-public:
-
-	void setMeasureBase(MeasureBase* pMeasureBase) { m_pMeasureBase = pMeasureBase; }
-	void setViewFont(const QFont& font);
+	bool eventFilter(QObject* object, QEvent* event);
 
 signals:
 

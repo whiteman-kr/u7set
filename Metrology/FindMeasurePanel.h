@@ -25,16 +25,6 @@ public:
 	FindItem(int row, int column, const QString& text, int beginPos, int endPos);
 	virtual ~FindItem() {}
 
-private:
-
-	int					m_row = -1;
-	int					m_column = -1;
-
-	QString				m_text;
-
-	int					m_beginPos = -1;
-	int					m_endPos = -1;
-
 public:
 
 	int					row() const { return m_row; }
@@ -57,6 +47,16 @@ public:
 	void				setPos(int beginPos, int endPos) { m_beginPos = beginPos; m_endPos = endPos; }
 
 	FindItem&			operator=(const FindItem& from);
+
+private:
+
+	int					m_row = -1;
+	int					m_column = -1;
+
+	QString				m_text;
+
+	int					m_beginPos = -1;
+	int					m_endPos = -1;
 };
 
 // ==============================================================================================
@@ -91,16 +91,6 @@ public:
 	explicit FindMeasureTable(QObject* parent = nullptr);
 	virtual ~FindMeasureTable();
 
-private:
-
-	QVector<FindItem>	m_findItemList;
-
-	int					columnCount(const QModelIndex &parent) const;
-	int					rowCount(const QModelIndex &parent=QModelIndex()) const;
-
-	QVariant			headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant			data(const QModelIndex &index, int role) const;
-
 public:
 
 	int					count() const { return m_findItemList.count(); }
@@ -110,6 +100,15 @@ public:
 
 	QString				text(int row, int column) const;
 
+private:
+
+	QVector<FindItem>	m_findItemList;
+
+	int					columnCount(const QModelIndex &parent) const;
+	int					rowCount(const QModelIndex &parent=QModelIndex()) const;
+
+	QVariant			headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
+	QVariant			data(const QModelIndex &index, int role) const;
 };
 
 // ==============================================================================================
@@ -126,6 +125,12 @@ public:
 
 	explicit FindMeasurePanel(QWidget* parent = nullptr);
 	virtual ~FindMeasurePanel();
+
+public:
+
+	void				setViewFont(const QFont& font);
+
+	void				setFindText(const QString& findText);
 
 private:
 
@@ -160,18 +165,11 @@ protected:
 	bool				event(QEvent* e);
 	bool				eventFilter(QObject* object, QEvent* e);
 
-public:
-
-	void				setViewFont(const QFont& font);
-
-	void				setFindText(const QString& findText);
-
 public slots:
 
 	void				measureViewChanged(MeasureView* pView);
 
 	void				find();
-
 
 private slots:
 

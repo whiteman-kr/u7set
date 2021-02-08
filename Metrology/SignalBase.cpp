@@ -1206,7 +1206,7 @@ SignalBase theSignalBase;
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalBase::SignalBase(QObject *parent) :
+SignalBase::SignalBase(QObject* parent) :
 	QObject(parent)
 {
 }

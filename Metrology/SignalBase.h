@@ -33,22 +33,6 @@ public:
 	IoSignalParam(const IoSignalParam& from);
 	virtual~IoSignalParam() {}
 
-private:
-
-	mutable QMutex			m_mutex;
-
-	Metrology::SignalParam	m_param[Metrology::ConnectionIoTypeCount];
-	int						m_signalConnectionType = Metrology::ConnectionType::Unsed;
-
-	CalibratorManager*		m_pCalibratorManager = nullptr;
-
-	double					m_percent = 0;					// for measuring of linearity
-	int						m_comparatorIndex = -1;			// for measuring of comparators - current cmp index
-	int						m_comparatorValueType = -1;		// for measuring of comparators - cmp or hst
-
-	bool					m_negativeRange = false;
-	double					m_tunStateForRestore = 0;		// for restore tun value after measuring
-
 public:
 
 	bool					isValid() const;
@@ -93,6 +77,22 @@ public:
 	void					setTunStateForRestore(double state) { m_tunStateForRestore = state; }
 
 	IoSignalParam&			operator=(const IoSignalParam& from);
+
+private:
+
+	mutable QMutex			m_mutex;
+
+	Metrology::SignalParam	m_param[Metrology::ConnectionIoTypeCount];
+	int						m_signalConnectionType = Metrology::ConnectionType::Unsed;
+
+	CalibratorManager*		m_pCalibratorManager = nullptr;
+
+	double					m_percent = 0;					// for measuring of linearity
+	int						m_comparatorIndex = -1;			// for measuring of comparators - current cmp index
+	int						m_comparatorValueType = -1;		// for measuring of comparators - cmp or hst
+
+	bool					m_negativeRange = false;
+	double					m_tunStateForRestore = 0;		// for restore tun value after measuring
 };
 
 // ==============================================================================================
@@ -105,17 +105,6 @@ public:
 	explicit MultiChannelSignal();
 	MultiChannelSignal(const MultiChannelSignal& from);
 	virtual ~MultiChannelSignal() {}
-
-private:
-
-	mutable QMutex				m_mutex;
-	int							m_channelCount = 0;
-	QVector<Metrology::Signal*>	m_pSignalList;
-
-	Metrology::SignalLocation	m_location;
-
-	QString						m_signalID;		// depend from SignalLocation and measureKind
-	QString						m_caption;		// depend from SignalLocation and measureKind
 
 public:
 
@@ -136,6 +125,17 @@ public:
 	QString						caption() const { return m_caption; }
 
 	MultiChannelSignal&			operator=(const MultiChannelSignal& from);
+
+private:
+
+	mutable QMutex				m_mutex;
+	int							m_channelCount = 0;
+	QVector<Metrology::Signal*>	m_pSignalList;
+
+	Metrology::SignalLocation	m_location;
+
+	QString						m_signalID;		// depend from SignalLocation and measureKind
+	QString						m_caption;		// depend from SignalLocation and measureKind
 };
 
 // ==============================================================================================
@@ -150,15 +150,6 @@ public:
 	MeasureSignal();
 	MeasureSignal(const MeasureSignal& from);
 	virtual ~MeasureSignal() {}
-
-private:
-
-	mutable QMutex			m_mutex;
-
-	int						m_signalConnectionType = Metrology::ConnectionType::Unsed;
-
-	int						m_channelCount = 0;
-	MultiChannelSignal		m_signal[Metrology::ConnectionIoTypeCount];
 
 public:
 
@@ -179,6 +170,15 @@ public:
 	bool					contains(Metrology::Signal* pSignal) const;
 
 	MeasureSignal&			operator=(const MeasureSignal& from);
+
+private:
+
+	mutable QMutex			m_mutex;
+
+	int						m_signalConnectionType = Metrology::ConnectionType::Unsed;
+
+	int						m_channelCount = 0;
+	MultiChannelSignal		m_signal[Metrology::ConnectionIoTypeCount];
 };
 
 // ==============================================================================================
@@ -193,44 +193,8 @@ class SignalBase : public QObject
 
 public:
 
-	explicit SignalBase(QObject *parent = nullptr);
+	explicit SignalBase(QObject* parent = nullptr);
 	virtual ~SignalBase() {}
-
-private:
-
-	// all racks that received form CgfSrv
-	//
-	RackBase				m_rackBase;
-
-	// all signals that received form CgfSrv
-	//
-	mutable QMutex			m_signalMutex;
-	QMap<Hash, int>			m_signalHashMap;
-	QVector<Metrology::Signal> m_signalList;
-
-	// list of hashes in order to receive signal state form AppDataSrv
-	//
-	mutable QMutex			m_stateMutex;
-	QVector<Hash>			m_requestStateList;
-
-	// list of racks form CgfSrv in order to select signal for measure
-	//
-	mutable QMutex			m_rackMutex;
-	QVector<Metrology::RackParam> m_rackList;
-
-	// list of signals for measure
-	//
-	mutable QMutex			m_signalMesaureMutex;
-	QVector<MeasureSignal>	m_signalMeasureList;
-
-	// main signal that are measuring at the current moment
-	//
-	mutable QMutex			m_activeSignalMutex;
-	MeasureSignal			m_activeSignal;
-
-	TuningBase				m_tuningBase;				// sources and signals of tuning
-	Metrology::ConnectionBase m_signalConnectionBase;	// signal connections
-	StatisticsBase			m_statisticsBase;			// statistics of measured signals
 
 public:
 
@@ -312,11 +276,47 @@ public:
 	TuningBase&				tuning() { return m_tuningBase; }							// sources and signals of tuning
 	Metrology::ConnectionBase& signalConnections() { return m_signalConnectionBase; }	// signal connections
 	StatisticsBase&			statistics() { return m_statisticsBase; }					// statistics of measured signals
-	
+
 	// comparators
 	//
 	bool					loadComparatorsInSignal(const ComparatorSet& comparatorSet);
 	bool					initComparatorSignals(Metrology::ComparatorEx* pComparatorEx);
+
+private:
+
+	// all racks that received form CgfSrv
+	//
+	RackBase				m_rackBase;
+
+	// all signals that received form CgfSrv
+	//
+	mutable QMutex			m_signalMutex;
+	QMap<Hash, int>			m_signalHashMap;
+	QVector<Metrology::Signal> m_signalList;
+
+	// list of hashes in order to receive signal state form AppDataSrv
+	//
+	mutable QMutex			m_stateMutex;
+	QVector<Hash>			m_requestStateList;
+
+	// list of racks form CgfSrv in order to select signal for measure
+	//
+	mutable QMutex			m_rackMutex;
+	QVector<Metrology::RackParam> m_rackList;
+
+	// list of signals for measure
+	//
+	mutable QMutex			m_signalMesaureMutex;
+	QVector<MeasureSignal>	m_signalMeasureList;
+
+	// main signal that are measuring at the current moment
+	//
+	mutable QMutex			m_activeSignalMutex;
+	MeasureSignal			m_activeSignal;
+
+	TuningBase				m_tuningBase;				// sources and signals of tuning
+	Metrology::ConnectionBase m_signalConnectionBase;	// signal connections
+	StatisticsBase			m_statisticsBase;			// statistics of measured signals
 
 signals:
 

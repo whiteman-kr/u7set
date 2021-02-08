@@ -233,7 +233,7 @@ void RackListTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-RackListDialog::RackListDialog(QWidget *parent) :
+RackListDialog::RackListDialog(QWidget* parent) :
 	QDialog(parent)
 {
 	m_rackBase = theSignalBase.racks();
@@ -325,7 +325,7 @@ void RackListDialog::createInterface()
 	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &RackListDialog::reject);
 
 
-	QVBoxLayout *mainLayout = new QVBoxLayout;
+	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	mainLayout->setMenuBar(m_pMenuBar);
 	mainLayout->addWidget(m_pView);
@@ -377,11 +377,11 @@ void RackListDialog::updateList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool RackListDialog::eventFilter(QObject *object, QEvent *event)
+bool RackListDialog::eventFilter(QObject* object, QEvent* event)
 {
 	if (event->type() == QEvent::KeyPress)
 	{
-		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
+		QKeyEvent* keyEvent = static_cast<QKeyEvent* >(event);
 
 		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
@@ -479,7 +479,7 @@ void RackListDialog::rackProperty()
 	pRack->setGroupIndex(groupIndex);
 	pRack->setChannel(channel);
 
-	m_rackBase.setRack(index, *pRack);
+	m_rackBase.setRack(index,* pRack);
 
 	// update group rack
 	//

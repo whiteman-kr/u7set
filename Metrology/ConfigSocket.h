@@ -28,6 +28,18 @@ public:
 
 	virtual ~ConfigSocket();
 
+public:
+
+	bool				isConnceted() { return m_connected; }
+	HostAddressPort		address() { return m_address; }
+
+	void				start();
+	void				quit();
+
+	void				reconncect(const QString& equipmentID, const HostAddressPort& serverAddressPort);
+
+	QStringList&		loadedFiles() { return m_loadedFiles; }
+
 private:
 
 	void				clearConfiguration();
@@ -52,18 +64,6 @@ private:
 	HostAddressPort		m_address;
 
 	QStringList			m_loadedFiles;
-
-public:
-
-	bool				isConnceted() { return m_connected; }
-	HostAddressPort		address() { return m_address; }
-
-	void				start();
-	void				quit();
-
-	void				reconncect(const QString& equipmentID, const HostAddressPort& serverAddressPort);
-
-	QStringList&		loadedFiles() { return m_loadedFiles; }
 
 private slots:
 

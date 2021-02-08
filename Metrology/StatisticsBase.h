@@ -23,15 +23,6 @@ public:
 		Success,
 	};
 
-private:
-
-	Metrology::Signal* m_pSignal = nullptr;
-	int m_signalConnectionType = Metrology::ConnectionType::Unknown;
-	std::shared_ptr<Metrology::ComparatorEx> m_pComparator = nullptr;
-
-	int m_measureCount = 0;
-	State m_state = State::Success;
-
 public:
 
 	void clear();
@@ -56,6 +47,15 @@ public:
 	QString stateStr() const;
 
 	bool isMeasured() const { return m_measureCount != 0; }
+
+private:
+
+	Metrology::Signal* m_pSignal = nullptr;
+	int m_signalConnectionType = Metrology::ConnectionType::Unknown;
+	std::shared_ptr<Metrology::ComparatorEx> m_pComparator = nullptr;
+
+	int m_measureCount = 0;
+	State m_state = State::Success;
 };
 
 // ==============================================================================================
@@ -70,18 +70,8 @@ class StatisticsBase : public QObject
 
 public:
 
-	explicit StatisticsBase(QObject *parent = nullptr);
+	explicit StatisticsBase(QObject* parent = nullptr);
 	virtual ~StatisticsBase();
-
-private:
-
-	int m_measureType = 0;			// measure type
-
-	mutable QMutex m_signalMutex;
-	QVector<StatisticList> m_statisticList;
-
-	int m_measuredCount = 0;
-	int m_invalidMeasureCount = 0;
 
 public:
 
@@ -107,6 +97,16 @@ public:
 	StatisticsItem* itemPtr(int measureType, int index);
 	void setItem(int measureType, int index, const StatisticsItem& item);
 
+private:
+
+	int m_measureType = 0;			// measure type
+
+	mutable QMutex m_signalMutex;
+	QVector<StatisticList> m_statisticList;
+
+	int m_measuredCount = 0;
+	int m_invalidMeasureCount = 0;
+
 public slots:
 
 	void signalBaseLoaded() {}
@@ -115,6 +115,5 @@ public slots:
 };
 
 // ==============================================================================================
-
 
 #endif // STATISTICSIGNALBASE_H

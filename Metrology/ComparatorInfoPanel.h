@@ -32,6 +32,19 @@ public:
 	explicit ComparatorInfoTable(QObject* parent = nullptr);
 	virtual ~ComparatorInfoTable();
 
+public:
+
+	void					setComparatorInfo(const ComparatorInfoOption& comparatorInfo);
+
+	int						signalCount() const { return m_signalCount; }
+	IoSignalParam			signalParam(int index) const;
+	void					set(const QVector<IoSignalParam>& signalList);
+	void					clear();
+
+	QString					text(std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const;
+
+	void					updateState();
+
 private:
 
 	ComparatorInfoOption	m_comparatorInfo;
@@ -45,19 +58,6 @@ private:
 
 	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
 	QVariant				data(const QModelIndex &index, int role) const;
-
-public:
-
-	void					setComparatorInfo(const ComparatorInfoOption& comparatorInfo);
-
-	int						signalCount() const { return m_signalCount; }
-	IoSignalParam			signalParam(int index) const;
-	void					set(const QVector<IoSignalParam>& signalList);
-	void					clear();
-
-	QString					text(std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const;
-
-	void					updateState();
 
 private slots:
 
@@ -74,6 +74,14 @@ public:
 
 	explicit ComparatorInfoPanel(const ComparatorInfoOption& comparatorInfo, QWidget* parent = nullptr);
 	virtual ~ComparatorInfoPanel();
+
+public:
+
+	void					clear() { m_comparatorTable.clear(); }
+	void					restartComparatorStateTimer(int timeout);
+
+	void					setCalibratorBase(CalibratorBase* pCalibratorBase) { m_pCalibratorBase = pCalibratorBase; }
+	void					setComparatorInfo(const ComparatorInfoOption& comparatorInfo);
 
 private:
 
@@ -104,17 +112,9 @@ private:
 	int						m_measureKind = MEASURE_KIND_UNDEFINED;
 	int						m_signalConnectionType = Metrology::ConnectionType::Unknown;
 
-public:
-
-	void					clear() { m_comparatorTable.clear(); }
-	void					restartComparatorStateTimer(int timeout);
-
-	void					setCalibratorBase(CalibratorBase* pCalibratorBase) { m_pCalibratorBase = pCalibratorBase; }
-	void					setComparatorInfo(const ComparatorInfoOption& comparatorInfo);
-
 protected:
 
-	bool					eventFilter(QObject *object, QEvent *event);
+	bool					eventFilter(QObject* object, QEvent* event);
 
 public slots:
 

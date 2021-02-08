@@ -265,7 +265,7 @@ void FindMeasurePanel::createInterface()
 {
 	m_pFindWindow = new QMainWindow;
 
-	QToolBar *toolBar = new QToolBar(m_pFindWindow);
+	QToolBar* toolBar = new QToolBar(m_pFindWindow);
 
 	m_findCompleter.create(this);
 	m_findCompleter.setFilterCount(20);
@@ -378,7 +378,7 @@ bool FindMeasurePanel::eventFilter(QObject* object, QEvent* e)
 {
 	if (e->type() == QEvent::KeyRelease)
 	{
-		QKeyEvent* ke = static_cast<QKeyEvent *>(e);
+		QKeyEvent* ke = static_cast<QKeyEvent* >(e);
 
 		if (	ke->key() == Qt::Key_Up || ke->key() == Qt::Key_Down ||
 				ke->key() == Qt::Key_PageUp || ke->key() == Qt::Key_PageDown)

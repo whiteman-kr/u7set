@@ -92,6 +92,15 @@ public:
 	explicit SignalListTable(QObject* parent = nullptr);
 	virtual ~SignalListTable();
 
+public:
+
+	int						signalCount() const;
+	Metrology::Signal*		signal(int index) const;
+	void					set(const QVector<Metrology::Signal*>& list_add);
+	void					clear();
+
+	QString					text(int row, int column, Metrology::Signal* pSignal) const;
+
 private:
 
 	mutable QMutex			m_signalMutex;
@@ -102,15 +111,6 @@ private:
 
 	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
 	QVariant				data(const QModelIndex &index, int role) const;
-
-public:
-
-	int						signalCount() const;
-	Metrology::Signal*		signal(int index) const;
-	void					set(const QVector<Metrology::Signal*>& list_add);
-	void					clear();
-
-	QString					text(int row, int column, Metrology::Signal* pSignal) const;
 };
 
 // ==============================================================================================
@@ -121,8 +121,12 @@ class SignalListDialog : public QDialog
 
 public:
 
-	explicit SignalListDialog(bool hasButtons, QWidget *parent = nullptr);
+	explicit SignalListDialog(bool hasButtons, QWidget* parent = nullptr);
 	virtual ~SignalListDialog();
+
+public:
+
+	Hash					selectedSignalHash() const { return m_selectedSignalHash; }
 
 private:
 
@@ -169,13 +173,9 @@ private:
 	void					updateVisibleColunm();
 	void					hideColumn(int column, bool hide);
 
-public:
-
-	Hash					selectedSignalHash() const { return m_selectedSignalHash; }
-
 protected:
 
-	bool					eventFilter(QObject *object, QEvent *event);
+	bool					eventFilter(QObject* object, QEvent* event);
 
 public slots:
 

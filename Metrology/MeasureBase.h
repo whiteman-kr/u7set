@@ -138,47 +138,6 @@ public:
 	explicit Measurement(int measureType = MEASURE_TYPE_UNDEFINED);
 	virtual ~Measurement();
 
-private:
-
-	int				m_measureType = MEASURE_TYPE_UNDEFINED;					// measure type
-	Hash			m_signalHash = UNDEFINED_HASH;							// hash calced from AppSignalID by function calcHash()
-
-	int				m_measureID = -1;										// primary key of record in SQL table
-	bool			m_filter = false;										// filter for record, if "true" - hide record
-
-	bool			m_signalValid = true;									// signal is valid during the measurement
-
-	QString			m_connectionAppSignalID;
-	int				m_connectionType = Metrology::ConnectionType::Unknown;
-
-	QString			m_appSignalID;
-	QString			m_customAppSignalID;
-	QString			m_equipmentID;
-	QString			m_caption;
-
-	Metrology::SignalLocation m_location;
-
-	int				m_calibratorPrecision = DEFAULT_ECLECTRIC_UNIT_PRECESION;	// precision of electric range of calibrator
-
-	double			m_nominal[MEASURE_LIMIT_TYPE_COUNT];
-	double			m_measure[MEASURE_LIMIT_TYPE_COUNT];
-
-	double			m_lowLimit[MEASURE_LIMIT_TYPE_COUNT];
-	double			m_highLimit[MEASURE_LIMIT_TYPE_COUNT];
-	QString			m_unit[MEASURE_LIMIT_TYPE_COUNT];
-	int				m_limitPrecision[MEASURE_LIMIT_TYPE_COUNT];
-
-	double			m_adjustment = 0;
-
-	double			m_error[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
-	double			m_errorLimit[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
-
-	QDateTime		m_measureTime;											// measure time
-	QString			m_calibrator;											// calibrator name and calibrator SN
-	int				m_reportType = -1;										// report type
-
-	bool			m_foundInStatistics = true;								// after loading find signal in the statistics list
-
 public:
 
 	void			virtual clear();
@@ -279,6 +238,47 @@ public:
 	Measurement*	at(int index);
 
 	Measurement&	operator=(Measurement& from);
+
+private:
+
+	int				m_measureType = MEASURE_TYPE_UNDEFINED;					// measure type
+	Hash			m_signalHash = UNDEFINED_HASH;							// hash calced from AppSignalID by function calcHash()
+
+	int				m_measureID = -1;										// primary key of record in SQL table
+	bool			m_filter = false;										// filter for record, if "true" - hide record
+
+	bool			m_signalValid = true;									// signal is valid during the measurement
+
+	QString			m_connectionAppSignalID;
+	int				m_connectionType = Metrology::ConnectionType::Unknown;
+
+	QString			m_appSignalID;
+	QString			m_customAppSignalID;
+	QString			m_equipmentID;
+	QString			m_caption;
+
+	Metrology::SignalLocation m_location;
+
+	int				m_calibratorPrecision = DEFAULT_ECLECTRIC_UNIT_PRECESION;	// precision of electric range of calibrator
+
+	double			m_nominal[MEASURE_LIMIT_TYPE_COUNT];
+	double			m_measure[MEASURE_LIMIT_TYPE_COUNT];
+
+	double			m_lowLimit[MEASURE_LIMIT_TYPE_COUNT];
+	double			m_highLimit[MEASURE_LIMIT_TYPE_COUNT];
+	QString			m_unit[MEASURE_LIMIT_TYPE_COUNT];
+	int				m_limitPrecision[MEASURE_LIMIT_TYPE_COUNT];
+
+	double			m_adjustment = 0;
+
+	double			m_error[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
+	double			m_errorLimit[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
+
+	QDateTime		m_measureTime;											// measure time
+	QString			m_calibrator;											// calibrator name and calibrator SN
+	int				m_reportType = -1;										// report type
+
+	bool			m_foundInStatistics = true;								// after loading find signal in the statistics list
 };
 
 // ==============================================================================================
@@ -291,16 +291,6 @@ public:
 	LinearityMeasurement();
 	LinearityMeasurement(const IoSignalParam& ioParam);
 	virtual ~LinearityMeasurement();
-
-private:
-
-	double			m_percent = 0;
-
-	int				m_measureCount = 0;
-	double			m_measureArray[MEASURE_LIMIT_TYPE_COUNT][MAX_MEASUREMENT_IN_POINT];
-
-	int				m_additionalParamCount = 0;
-	double			m_additionalParam[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ADDITIONAL_PARAM_COUNT];
 
 public:
 
@@ -334,6 +324,16 @@ public:
 	void			updateAdditionalParam(int limitType, Measurement* pMeasurement);
 
 	LinearityMeasurement& operator=(const LinearityMeasurement& from);
+
+private:
+
+	double			m_percent = 0;
+
+	int				m_measureCount = 0;
+	double			m_measureArray[MEASURE_LIMIT_TYPE_COUNT][MAX_MEASUREMENT_IN_POINT];
+
+	int				m_additionalParamCount = 0;
+	double			m_additionalParam[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ADDITIONAL_PARAM_COUNT];
 };
 
 // ==============================================================================================
@@ -346,14 +346,6 @@ public:
 	ComparatorMeasurement();
 	explicit ComparatorMeasurement(const IoSignalParam& ioParam);
 	virtual ~ComparatorMeasurement();
-
-private:
-
-	QString			m_compareAppSignalID;
-	QString			m_outputAppSignalID;
-
-	int				m_cmpValueType = Metrology::CmpValueTypeSetPoint;
-	E::CmpType		m_cmpType = E::CmpType::Greate;
 
 public:
 
@@ -379,6 +371,14 @@ public:
 	void			setCmpTypeInt(int cmpType) { m_cmpType = static_cast<E::CmpType>(cmpType); }
 
 	ComparatorMeasurement& operator=(const ComparatorMeasurement& from);
+
+private:
+
+	QString			m_compareAppSignalID;
+	QString			m_outputAppSignalID;
+
+	int				m_cmpValueType = Metrology::CmpValueTypeSetPoint;
+	E::CmpType		m_cmpType = E::CmpType::Greate;
 };
 
 // ==============================================================================================
@@ -389,15 +389,8 @@ class MeasureBase : public QObject
 
 public:
 
-	explicit MeasureBase(QObject *parent = nullptr);
+	explicit MeasureBase(QObject* parent = nullptr);
 	virtual ~MeasureBase();
-
-private:
-
-	int						m_measureType = MEASURE_TYPE_UNDEFINED;
-
-	mutable QMutex			m_measureMutex;
-	QVector<Measurement*>	m_measureList;
 
 public:
 
@@ -415,6 +408,13 @@ public:
 	void					updateStatisticsBase(int measureType);
 	void					updateStatisticsBase(int measureType, Hash signalHash);
 	static void				markNotExistMeasuremetsFromStatistics(MeasureBase* pThis);
+
+private:
+
+	int						m_measureType = MEASURE_TYPE_UNDEFINED;
+
+	mutable QMutex			m_measureMutex;
+	QVector<Measurement*>	m_measureList;
 
 signals:
 

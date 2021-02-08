@@ -74,7 +74,7 @@ void RackGroup::setRackID(int channel, const QString& rackID)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-RackGroupBase::RackGroupBase(QObject *parent) :
+RackGroupBase::RackGroupBase(QObject* parent) :
 	QObject(parent)
 {
 }
@@ -245,7 +245,7 @@ RackGroupBase& RackGroupBase::operator=(const RackGroupBase& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-RackBase::RackBase(QObject *parent) :
+RackBase::RackBase(QObject* parent) :
 	QObject(parent)
 {
 }

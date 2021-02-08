@@ -190,13 +190,6 @@ public:
 	SqlObjectInfo();
 	virtual ~SqlObjectInfo() {}
 
-private:
-
-	int					m_objectType = SQL_TABLE_UNKNONW;			// type of table
-	int					m_objectID = SQL_OBJECT_ID_UNKNONW;			// unique identifier of table in the database
-	QString				m_caption;									// caption of table
-	int					m_version = SQL_TABLE_VER_UNKNONW;			// table version, is read when the database initialization
-
 public:
 
 	bool				init(int objectType);
@@ -215,6 +208,13 @@ public:
 	void				setVersion(int verison) { m_version = verison; }
 
 	SqlObjectInfo&		operator=(SqlObjectInfo& from);
+
+private:
+
+	int					m_objectType = SQL_TABLE_UNKNONW;			// type of table
+	int					m_objectID = SQL_OBJECT_ID_UNKNONW;			// unique identifier of table in the database
+	QString				m_caption;									// caption of table
+	int					m_version = SQL_TABLE_VER_UNKNONW;			// table version, is read when the database initialization
 };
 
 // ==============================================================================================
@@ -227,13 +227,6 @@ public:
 	SqlHistoryDatabase();
 	SqlHistoryDatabase(int objectID, int version, const QString& event, const QString& time);
 	virtual ~SqlHistoryDatabase();
-
-private:
-
-	int					m_objectID = SQL_OBJECT_ID_UNKNONW;
-	int					m_version = SQL_TABLE_VER_UNKNONW;
-	QString				m_event;
-	QString				m_time;
 
 public:
 
@@ -250,6 +243,13 @@ public:
 	void				setTime(const QString& time) { m_time = time; }
 
 	SqlHistoryDatabase& operator=(SqlHistoryDatabase& from);
+
+private:
+
+	int					m_objectID = SQL_OBJECT_ID_UNKNONW;
+	int					m_version = SQL_TABLE_VER_UNKNONW;
+	QString				m_event;
+	QString				m_time;
 };
 
 // ==============================================================================================
@@ -264,12 +264,6 @@ public:
 
 	SqlTable();
 	virtual ~SqlTable();
-
-private:
-
-	QSqlDatabase*		m_pDatabase;
-	SqlObjectInfo		m_info;
-	SqlFieldBase		m_fieldBase;
 
 public:
 
@@ -302,6 +296,12 @@ public:
 	int					remove(const int* key, int keyCount) const;
 
 	SqlTable&			operator=(SqlTable& from);
+
+private:
+
+	QSqlDatabase*		m_pDatabase;
+	SqlObjectInfo		m_info;
+	SqlFieldBase		m_fieldBase;
 };
 
 // ==============================================================================================
@@ -314,6 +314,19 @@ public:
 
 	explicit Database(QObject* parent = nullptr);
 	virtual ~Database();
+
+public:
+
+	void				setDatabaseOption(const DatabaseOption& option) { m_databaseOption = option; }
+
+	bool				isOpen() const { return m_database.isOpen(); }
+	bool				open();
+	void				close();
+
+	SqlTable*			openTable(int objectType);
+
+	bool				appendMeasure(Measurement* pMeasurement);
+	bool				removeMeasure(int measuteType, const QVector<int>& keyList);
 
 private:
 
@@ -328,19 +341,6 @@ private:
 
 	void				initVersion();
 	void				createTables();
-
-public:
-
-	void				setDatabaseOption(const DatabaseOption& option) { m_databaseOption = option; }
-
-	bool				isOpen() const { return m_database.isOpen(); }
-	bool				open();
-	void				close();
-
-	SqlTable*			openTable(int objectType);
-
-	bool				appendMeasure(Measurement* pMeasurement);
-	bool				removeMeasure(int measuteType, const QVector<int>& keyList);
 
 public slots:
 

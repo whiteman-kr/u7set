@@ -78,20 +78,6 @@ public:
 	explicit SignalInfoTable(QObject* parent = nullptr);
 	virtual ~SignalInfoTable();
 
-private:
-
-	SignalInfoOption		m_signalInfo;
-
-	mutable QMutex			m_signalMutex;
-	int						m_signalCount = 0;
-	QVector<IoSignalParam>	m_ioParamList;
-
-	int						columnCount(const QModelIndex &parent) const;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
-
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant				data(const QModelIndex &index, int role) const;
-
 public:
 
 	void					setSignalInfo(const SignalInfoOption& signalInfo);
@@ -105,6 +91,20 @@ public:
 	QString					signalStateStr(const Metrology::SignalParam& param, const Metrology::SignalState& state) const;
 
 	void					updateColumn(int column);
+
+private:
+
+	SignalInfoOption		m_signalInfo;
+
+	mutable QMutex			m_signalMutex;
+	int						m_signalCount = 0;
+	QVector<IoSignalParam>	m_ioParamList;
+
+	int						columnCount(const QModelIndex &parent) const;
+	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
+
+	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
+	QVariant				data(const QModelIndex &index, int role) const;
 
 private slots:
 
@@ -121,6 +121,14 @@ public:
 
 	explicit SignalInfoPanel(const SignalInfoOption& signalInfo, QWidget* parent = nullptr);
 	virtual ~SignalInfoPanel();
+
+public:
+
+	void					clear() { m_signalParamTable.clear(); }
+	void					restartSignalStateTimer(int timeout);
+
+	void					setCalibratorBase(CalibratorBase* pCalibratorBase) { m_pCalibratorBase = pCalibratorBase; }
+	void					setSignalInfo(const SignalInfoOption& signalInfo);
 
 private:
 
@@ -165,17 +173,9 @@ private:
 	int						m_measureKind = MEASURE_KIND_UNDEFINED;
 	int						m_signalConnectionType = Metrology::ConnectionType::Unknown;
 
-public:
-
-	void					clear() { m_signalParamTable.clear(); }
-	void					restartSignalStateTimer(int timeout);
-
-	void					setCalibratorBase(CalibratorBase* pCalibratorBase) { m_pCalibratorBase = pCalibratorBase; }
-	void					setSignalInfo(const SignalInfoOption& signalInfo);
-
 protected:
 
-	bool					eventFilter(QObject *object, QEvent *event);
+	bool					eventFilter(QObject* object, QEvent* event);
 
 public slots:
 

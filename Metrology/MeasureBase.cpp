@@ -2348,7 +2348,7 @@ ComparatorMeasurement& ComparatorMeasurement::operator=(const ComparatorMeasurem
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureBase::MeasureBase(QObject *parent) :
+MeasureBase::MeasureBase(QObject* parent) :
 	QObject(parent)
 {
 }

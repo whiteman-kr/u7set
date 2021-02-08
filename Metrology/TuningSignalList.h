@@ -71,17 +71,6 @@ public:
 	explicit TuningSourceTable(QObject* parent = nullptr);
 	virtual ~TuningSourceTable();
 
-private:
-
-	mutable QMutex			m_sourceMutex;
-	QVector<TuningSource>	m_sourceIdList;
-
-	int						columnCount(const QModelIndex &parent) const;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
-
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant				data(const QModelIndex &index, int role) const;
-
 public:
 
 	int						sourceCount() const;
@@ -93,6 +82,16 @@ public:
 
 	void					updateColumn(int column);
 
+private:
+
+	mutable QMutex			m_sourceMutex;
+	QVector<TuningSource>	m_sourceIdList;
+
+	int						columnCount(const QModelIndex &parent) const;
+	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
+
+	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
+	QVariant				data(const QModelIndex &index, int role) const;
 };
 
 // ==============================================================================================
@@ -144,17 +143,6 @@ public:
 	explicit TuningSignalTable(QObject* parent = nullptr);
 	virtual ~TuningSignalTable();
 
-private:
-
-	mutable QMutex			m_signalMutex;
-	QVector<Metrology::Signal*>	m_signalList;
-
-	int						columnCount(const QModelIndex &parent) const;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
-
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant				data(const QModelIndex &index, int role) const;
-
 public:
 
 	int						signalCount() const;
@@ -166,6 +154,17 @@ public:
 	QString					signalStateStr(Metrology::Signal* pSignal) const;
 
 	void					updateColumn(int column);
+
+private:
+
+	mutable QMutex			m_signalMutex;
+	QVector<Metrology::Signal*>	m_signalList;
+
+	int						columnCount(const QModelIndex &parent) const;
+	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
+
+	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
+	QVariant				data(const QModelIndex &index, int role) const;
 };
 
 // ==============================================================================================
@@ -176,7 +175,7 @@ class TuningSignalListDialog : public QDialog
 
 public:
 
-	explicit TuningSignalListDialog(QWidget *parent = nullptr);
+	explicit TuningSignalListDialog(QWidget* parent = nullptr);
 	virtual ~TuningSignalListDialog();
 
 private:
@@ -224,11 +223,9 @@ private:
 	void					startSignalStateTimer();
 	void					stopSignalStateTimer();
 
-public:
-
 protected:
 
-	bool					eventFilter(QObject *object, QEvent *event);
+	bool					eventFilter(QObject* object, QEvent* event);
 
 public slots:
 
@@ -284,7 +281,7 @@ class TuningSignalStateDialog : public QDialog
 
 public:
 
-	explicit TuningSignalStateDialog(const Metrology::SignalParam& param, QWidget *parent = nullptr);
+	explicit TuningSignalStateDialog(const Metrology::SignalParam& param, QWidget* parent = nullptr);
 	virtual ~TuningSignalStateDialog();
 
 private:
@@ -294,12 +291,6 @@ private:
 	Metrology::SignalParam	m_param;
 
 	void					createInterface();
-
-public:
-
-protected:
-
-signals:
 
 private slots:
 
@@ -313,7 +304,5 @@ private slots:
 };
 
 // ==============================================================================================
-
-
 
 #endif // TUNINGSIGNALLISTDIALOG_H

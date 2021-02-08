@@ -50,6 +50,17 @@ public:
 	explicit RackListTable(QObject* parent = nullptr);
 	virtual ~RackListTable();
 
+public:
+
+	int						rackCount() const;
+	Metrology::RackParam*	rack(int index) const;
+	void					set(const QVector<Metrology::RackParam*>& list_add);
+	void					clear();
+
+	QString					text(int row, int column, const Metrology::RackParam* pRack) const;
+
+	void					setRackGroups(const RackGroupBase& rackGroups) { m_rackGroups = rackGroups; }
+
 private:
 
 	mutable QMutex			m_rackMutex;
@@ -62,20 +73,6 @@ private:
 
 	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
 	QVariant				data(const QModelIndex &index, int role) const;
-
-public:
-
-	int						rackCount() const;
-	Metrology::RackParam*	rack(int index) const;
-	void					set(const QVector<Metrology::RackParam*>& list_add);
-	void					clear();
-
-	QString					text(int row, int column, const Metrology::RackParam* pRack) const;
-
-	void					setRackGroups(const RackGroupBase& rackGroups) { m_rackGroups = rackGroups; }
-
-private slots:
-
 };
 
 // ==============================================================================================
@@ -86,8 +83,12 @@ class RackListDialog : public QDialog
 
 public:
 
-	explicit RackListDialog(QWidget *parent = nullptr);
+	explicit RackListDialog(QWidget* parent = nullptr);
 	virtual ~RackListDialog();
+
+public:
+
+	RackBase&				racks() { return m_rackBase; }
 
 private:
 
@@ -119,18 +120,13 @@ private:
 
 protected:
 
-	bool					eventFilter(QObject *object, QEvent *event);
-
-public:
-
-	RackBase&				racks() { return m_rackBase; }
+	bool					eventFilter(QObject* object, QEvent* event);
 
 public slots:
 
 	void					updateList();	// slots for updating
 
 private slots:
-
 
 	// slots of menu
 	//

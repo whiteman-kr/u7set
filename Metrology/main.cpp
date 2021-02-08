@@ -8,7 +8,7 @@
 #	include "../gitlabci_version.h"
 #endif
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 	// initMemoryLeaksDetection();
 

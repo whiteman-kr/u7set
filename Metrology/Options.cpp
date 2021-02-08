@@ -45,14 +45,14 @@ bool CalibratorOption::isValid() const
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorsOption::CalibratorsOption(QObject *parent) :
+CalibratorsOption::CalibratorsOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorsOption::CalibratorsOption(const CalibratorsOption& from, QObject *parent) :
+CalibratorsOption::CalibratorsOption(const CalibratorsOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -337,14 +337,14 @@ bool SocketClientOption::init(const MetrologySettings& settings)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SocketOption::SocketOption(QObject *parent) :
+SocketOption::SocketOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SocketOption::SocketOption(const SocketOption& from, QObject *parent) :
+SocketOption::SocketOption(const SocketOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -421,14 +421,14 @@ SocketOption& SocketOption::operator=(const SocketOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ProjectInfo::ProjectInfo(QObject *parent) :
+ProjectInfo::ProjectInfo(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ProjectInfo::ProjectInfo(const ProjectInfo& from, QObject *parent) :
+ProjectInfo::ProjectInfo(const ProjectInfo& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -520,14 +520,14 @@ ProjectInfo& ProjectInfo::operator=(const ProjectInfo& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ModuleOption::ModuleOption(QObject *parent) :
+ModuleOption::ModuleOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ModuleOption::ModuleOption(const ModuleOption& from, QObject *parent) :
+ModuleOption::ModuleOption(const ModuleOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -603,14 +603,14 @@ ModuleOption& ModuleOption::operator=(const ModuleOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearityOption::LinearityOption(QObject *parent) :
+LinearityOption::LinearityOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearityOption::LinearityOption(const LinearityOption& from, QObject *parent) :
+LinearityOption::LinearityOption(const LinearityOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -759,14 +759,14 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorOption::ComparatorOption(QObject *parent) :
+ComparatorOption::ComparatorOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorOption::ComparatorOption(const ComparatorOption& from, QObject *parent) :
+ComparatorOption::ComparatorOption(const ComparatorOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -828,14 +828,14 @@ ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ToolBarOption::ToolBarOption(QObject *parent) :
+ToolBarOption::ToolBarOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ToolBarOption::ToolBarOption(const ToolBarOption& from, QObject *parent) :
+ToolBarOption::ToolBarOption(const ToolBarOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -894,14 +894,14 @@ ToolBarOption& ToolBarOption::operator=(const ToolBarOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureViewOption::MeasureViewOption(QObject *parent) :
+MeasureViewOption::MeasureViewOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureViewOption::MeasureViewOption(const MeasureViewOption& from, QObject *parent) :
+MeasureViewOption::MeasureViewOption(const MeasureViewOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -1078,14 +1078,14 @@ MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalInfoOption::SignalInfoOption(QObject *parent) :
+SignalInfoOption::SignalInfoOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalInfoOption::SignalInfoOption(const SignalInfoOption& from, QObject *parent) :
+SignalInfoOption::SignalInfoOption(const SignalInfoOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -1156,14 +1156,14 @@ SignalInfoOption& SignalInfoOption::operator=(const SignalInfoOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorInfoOption::ComparatorInfoOption(QObject *parent) :
+ComparatorInfoOption::ComparatorInfoOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorInfoOption::ComparatorInfoOption(const ComparatorInfoOption& from, QObject *parent) :
+ComparatorInfoOption::ComparatorInfoOption(const ComparatorInfoOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -1231,14 +1231,14 @@ ComparatorInfoOption& ComparatorInfoOption::operator=(const ComparatorInfoOption
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-DatabaseOption::DatabaseOption(QObject *parent) :
+DatabaseOption::DatabaseOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-DatabaseOption::DatabaseOption(const DatabaseOption& from, QObject *parent) :
+DatabaseOption::DatabaseOption(const DatabaseOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -1296,14 +1296,14 @@ DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-LanguageOption::LanguageOption(QObject *parent) :
+LanguageOption::LanguageOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-LanguageOption::LanguageOption(const LanguageOption& from, QObject *parent) :
+LanguageOption::LanguageOption(const LanguageOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -1355,14 +1355,14 @@ bool compareDouble(double lDouble, double rDouble)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-Options::Options(QObject *parent) :
+Options::Options(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Options::Options(const Options& from, QObject *parent) :
+Options::Options(const Options& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;

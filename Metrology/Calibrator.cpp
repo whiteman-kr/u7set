@@ -71,7 +71,7 @@ bool CalibratorLimit::isValid() const
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-Calibrator::Calibrator(int channel, QObject *parent) :
+Calibrator::Calibrator(int channel, QObject* parent) :
 	QObject(parent),
 	m_channel(channel),
 	m_port(this)

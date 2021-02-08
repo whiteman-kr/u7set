@@ -7,7 +7,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasurePointDialog::MeasurePointDialog(const LinearityOption& linearity, QWidget *parent) :
+MeasurePointDialog::MeasurePointDialog(const LinearityOption& linearity, QWidget* parent) :
 	QDialog(parent),
 	m_linearity (linearity)
 {
@@ -34,7 +34,7 @@ MeasurePointDialog::MeasurePointDialog(const LinearityOption& linearity, QWidget
 	m_highRangeLabel->setText(tr("High,%"));
 
 	QRegExp rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
-	QValidator *validator = new QRegExpValidator(rx, this);
+	QValidator* validator = new QRegExpValidator(rx, this);
 
 	m_pointCountEdit->setFixedWidth(40);
 	m_pointCountEdit->setAlignment(Qt::AlignHCenter);
@@ -159,7 +159,7 @@ void MeasurePointDialog::setHeaderList()
 
 	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &MeasurePointDialog::onColumnAction);
 
-	DoubleDelegate * delegate = new DoubleDelegate(this);
+	DoubleDelegate*  delegate = new DoubleDelegate(this);
 	m_pointList->setItemDelegate(delegate);
 }
 
@@ -288,7 +288,7 @@ void MeasurePointDialog::clearList()
 	{
 		for(int row = 0; row < rowCount; row++)
 		{
-			QTableWidgetItem *item = m_pointList->item(row, column);
+			QTableWidgetItem* item = m_pointList->item(row, column);
 			if (item != nullptr)
 			{
 				delete item;
@@ -332,7 +332,7 @@ void MeasurePointDialog::onAddPoint()
 
 	updateList();
 
-	QTableWidgetItem *item = m_pointList->item(index + 1, POINT_SENSOR_PERCENT);
+	QTableWidgetItem* item = m_pointList->item(index + 1, POINT_SENSOR_PERCENT);
 	if (item == nullptr)
 	{
 		return;
@@ -603,7 +603,7 @@ void MeasurePointDialog::onColumnAction(QAction* action)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::keyPressEvent(QKeyEvent *e)
+void MeasurePointDialog::keyPressEvent(QKeyEvent* e)
 {
 	if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
 	{

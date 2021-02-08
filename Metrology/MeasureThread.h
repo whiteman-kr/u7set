@@ -42,15 +42,6 @@ public:
 			Manual = 1,
 		};
 
-private:
-
-		msgType m_type = msgType::String;
-		QString m_message;
-		int m_timeout = 0;
-
-		bool m_cmdStopMeasure = true;
-		ExitCode m_exitCode = ExitCode::Manual;
-
 public:
 
 		void init();
@@ -68,6 +59,15 @@ public:
 
 		ExitCode exitCode() const { return m_exitCode; }
 		void setExitCode(ExitCode exitCode) { m_exitCode = exitCode; }
+
+private:
+
+		msgType m_type = msgType::String;
+		QString m_message;
+		int m_timeout = 0;
+
+		bool m_cmdStopMeasure = true;
+		ExitCode m_exitCode = ExitCode::Manual;
 };
 
 Q_DECLARE_METATYPE(MeasureThreadInfo)
@@ -80,8 +80,17 @@ class MeasureThread : public QThread
 
 public:
 
-	explicit MeasureThread(QObject *parent = nullptr);
+	explicit MeasureThread(QObject* parent = nullptr);
 	virtual ~MeasureThread();
+
+public:
+
+	MeasureThreadInfo		info() const { return m_info; }
+
+	bool					setActiveSignalParam(const MeasureSignal& activeSignal, const CalibratorBase& calibratorBase);
+
+	void					setLinearityOption(const LinearityOption& option) { m_linearityOption = option; }
+	void					setComparatorOption(const ComparatorOption& option) { m_comparatorOption = option; }
 
 private:
 
@@ -119,15 +128,6 @@ private:
 	//
 	void					saveStateTunSignals();
 	void					restoreStateTunSignals();
-
-public:
-
-	MeasureThreadInfo		info() const { return m_info; }
-
-	bool					setActiveSignalParam(const MeasureSignal& activeSignal, const CalibratorBase& calibratorBase);
-
-	void					setLinearityOption(const LinearityOption& option) { m_linearityOption = option; }
-	void					setComparatorOption(const ComparatorOption& option) { m_comparatorOption = option; }
 
 protected:
 

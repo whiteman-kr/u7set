@@ -28,7 +28,7 @@ TuningSource::TuningSource(const Network::DataSourceInfo& info) :
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSourceBase::TuningSourceBase(QObject *parent) :
+TuningSourceBase::TuningSourceBase(QObject* parent) :
 	QObject(parent)
 {
 }
@@ -156,7 +156,7 @@ void TuningSourceBase::sortByID()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSignalBase::TuningSignalBase(QObject *parent) :
+TuningSignalBase::TuningSignalBase(QObject* parent) :
 	QObject(parent)
 {
 }
@@ -379,7 +379,7 @@ void TuningSignalBase::setNovalid()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningBase::TuningBase(QObject *parent) :
+TuningBase::TuningBase(QObject* parent) :
 	QObject(parent)
 {
 }

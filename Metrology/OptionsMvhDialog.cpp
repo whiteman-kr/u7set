@@ -8,7 +8,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-OptionsMeasureViewHeaderDialog::OptionsMeasureViewHeaderDialog(const MeasureViewOption& header, QWidget *parent) :
+OptionsMeasureViewHeaderDialog::OptionsMeasureViewHeaderDialog(const MeasureViewOption& header, QWidget* parent) :
 	QDialog(parent),
 	m_header(header)
 {
@@ -173,7 +173,7 @@ void OptionsMeasureViewHeaderDialog::clearList()
 	{
 		for(int row = 0; row < rowCount; row++)
 		{
-			QTableWidgetItem *item = m_columnList->item(row, column);
+			QTableWidgetItem* item = m_columnList->item(row, column);
 			if (item != nullptr)
 			{
 				delete item;
@@ -332,7 +332,7 @@ void OptionsMeasureViewHeaderDialog::onEdit(int row, int column)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsMeasureViewHeaderDialog::keyPressEvent(QKeyEvent *e)
+void OptionsMeasureViewHeaderDialog::keyPressEvent(QKeyEvent* e)
 {
 	if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
 	{

@@ -36,11 +36,6 @@ public:
 	CalibratorOption(const QString& port, int type);
 	virtual ~CalibratorOption() {}
 
-private:
-
-	QString				m_port;
-	int					m_type = CALIBRATOR_TYPE_CALYS75;
-
 public:
 
 	bool				isValid() const;
@@ -50,6 +45,11 @@ public:
 
 	int					type() const { return m_type; }
 	void				setType(int type) { m_type = type; }
+
+private:
+
+	QString				m_port;
+	int					m_type = CALIBRATOR_TYPE_CALYS75;
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -60,23 +60,27 @@ class CalibratorsOption : public QObject
 
 public:
 
-	explicit CalibratorsOption(QObject *parent = nullptr);
-	explicit CalibratorsOption(const CalibratorsOption& from, QObject *parent = nullptr);
+	explicit CalibratorsOption(QObject* parent = nullptr);
+	explicit CalibratorsOption(const CalibratorsOption& from, QObject* parent = nullptr);
 	virtual ~CalibratorsOption();
-
-private:
-
-	CalibratorOption	m_calibrator[Metrology::ChannelCount];
 
 public:
 
 	CalibratorOption	calibrator(int channel) const;
 	void				setCalibrator(int channel, const CalibratorOption& calibrator);
 
+	//
+	//
 	void				load();
 	void				save();
 
+	//
+	//
 	CalibratorsOption&	operator=(const CalibratorsOption& from);
+
+private:
+
+	CalibratorOption	m_calibrator[Metrology::ChannelCount];
 };
 
 
@@ -138,12 +142,6 @@ public:
 	SocketClientOption();
 	virtual ~SocketClientOption() {}
 
-private:
-
-	int					m_type = -1;
-
-	CONNECTION_OPTION	m_connectOption[SOCKET_SERVER_TYPE_COUNT];
-
 public:
 
 	int					socketType() const { return m_type; }
@@ -160,10 +158,18 @@ public:
 
 	HostAddressPort		address(int serverType) const;
 
+	//
+	//
 	void				load();
 	void				save();
 
 	bool				init(const MetrologySettings& settings);
+
+private:
+
+	int					m_type = -1;
+
+	CONNECTION_OPTION	m_connectOption[SOCKET_SERVER_TYPE_COUNT];
 };
 
 // ==============================================================================================
@@ -231,23 +237,27 @@ class SocketOption : public QObject
 
 public:
 
-	explicit SocketOption(QObject *parent = nullptr);
-	explicit SocketOption(const SocketOption& from, QObject *parent = nullptr);
+	explicit SocketOption(QObject* parent = nullptr);
+	explicit SocketOption(const SocketOption& from, QObject* parent = nullptr);
 	virtual ~SocketOption();
-
-private:
-
-	SocketClientOption	m_client[SOCKET_TYPE_COUNT];
 
 public:
 
 	SocketClientOption	client(int socketType) const;
 	void				setClient(int socketType, const SocketClientOption& client);
 
+	//
+	//
 	void				load();
 	void				save();
 
+	//
+	//
 	SocketOption&		operator=(const SocketOption& from);
+
+private:
+
+	SocketClientOption	m_client[SOCKET_TYPE_COUNT];
 };
 
 // ==============================================================================================
@@ -262,20 +272,9 @@ class ProjectInfo: public QObject
 
 public:
 
-	explicit ProjectInfo(QObject *parent = nullptr);
-	explicit ProjectInfo(const ProjectInfo& from, QObject *parent = nullptr);
+	explicit ProjectInfo(QObject* parent = nullptr);
+	explicit ProjectInfo(const ProjectInfo& from, QObject* parent = nullptr);
 	virtual ~ProjectInfo();
-
-private:
-
-	QString				m_projectName;
-	int					m_id = -1;
-	QString				m_date;
-	int					m_changeset = 0;
-	QString				m_user;
-	QString				m_workstation;
-	int					m_dbVersion = 0;
-	int					m_cfgFileVersion = 0;
 
 public:
 
@@ -289,11 +288,25 @@ public:
 	int					cfgFileVersion() { return m_cfgFileVersion; }
 	void				setCfgFileVersion(int version) { m_cfgFileVersion = version; }
 
+	//
+	//
 	void				save();
-
 	bool				readFromXml(const QByteArray& fileData);
 
+	//
+	//
 	ProjectInfo&		operator=(const ProjectInfo& from);
+
+private:
+
+	QString				m_projectName;
+	int					m_id = -1;
+	QString				m_date;
+	int					m_changeset = 0;
+	QString				m_user;
+	QString				m_workstation;
+	int					m_dbVersion = 0;
+	int					m_cfgFileVersion = 0;
 };
 
 // ==============================================================================================
@@ -329,21 +342,9 @@ class ModuleOption : public QObject
 
 public:
 
-	explicit ModuleOption(QObject *parent = nullptr);
-	explicit ModuleOption(const ModuleOption& from, QObject *parent = nullptr);
+	explicit ModuleOption(QObject* parent = nullptr);
+	explicit ModuleOption(const ModuleOption& from, QObject* parent = nullptr);
 	virtual ~ModuleOption();
-
-private:
-
-	QString				m_suffixSN;													// suffix to identify the signal of module serial number
-
-
-	bool				m_measureInterInsteadIn = false;							// measure internal signal instead input signal
-	bool				m_measureLinAndCmp = false;									// measure linearity and comparators together
-	bool				m_measureEntireModule = false;								// measure all inputs of module in series
-	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
-
-	int					m_maxInputCount = Metrology::InputCount;					// maximum number of inputs for input mofule
 
 public:
 
@@ -365,12 +366,26 @@ public:
 	int					maxInputCount() const { return m_maxInputCount; }
 	void				setMaxInputCount(int count);
 
-public:
-
+	//
+	//
 	void				load();
 	void				save();
 
+	//
+	//
 	ModuleOption&		operator=(const ModuleOption& from);
+
+private:
+
+	QString				m_suffixSN;													// suffix to identify the signal of module serial number
+
+
+	bool				m_measureInterInsteadIn = false;							// measure internal signal instead input signal
+	bool				m_measureLinAndCmp = false;									// measure linearity and comparators together
+	bool				m_measureEntireModule = false;								// measure all inputs of module in series
+	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
+
+	int					m_maxInputCount = Metrology::InputCount;					// maximum number of inputs for input mofule
 };
 
 // ==============================================================================================
@@ -447,26 +462,9 @@ class LinearityOption : public QObject
 
 public:
 
-	explicit LinearityOption(QObject *parent = nullptr);
-	explicit LinearityOption(const LinearityOption& from, QObject *parent = nullptr);
+	explicit LinearityOption(QObject* parent = nullptr);
+	explicit LinearityOption(const LinearityOption& from, QObject* parent = nullptr);
 	virtual ~LinearityOption();
-
-private:
-
-	MeasurePointBase	m_pointBase;												// list of measurement points
-
-	double				m_errorLimit = 0.2;											// permissible error is given by specified documents
-	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;					// type of error absolute or reduced
-	int					m_limitType = MEASURE_LIMIT_TYPE_ELECTRIC;					// type of displaing error denend on limit
-
-	int					m_measureTimeInPoint = 1;									// time, in seconds, during which will be made ​​N measurements at each point
-	int					m_measureCountInPoint = 20;									// count of measurements in a point, according to GOST MI-2002 application 7
-
-	int					m_rangeType = LO_RANGE_TYPE_MANUAL;							// type of division measure range: manual - 0 or automatic - 1
-	double				m_lowLimitRange = 5;										// lower limit of the range for automatic division
-	double				m_highLimitRange = 95;										// high limit of the range for automatic division
-
-	int					m_viewType = LO_VIEW_TYPE_SIMPLE;							// type of measurements list extended or simple
 
 public:
 
@@ -499,14 +497,33 @@ public:
 	int					viewType() const { return m_viewType; }
 	void				setViewType(int type) { m_viewType = type; }
 
-public:
-
+	//
+	//
 	void				recalcPoints(int count = -1);
 
 	void				load();
 	void				save();
 
+	//
+	//
 	LinearityOption&	operator=(const LinearityOption& from);
+
+private:
+
+	MeasurePointBase	m_pointBase;												// list of measurement points
+
+	double				m_errorLimit = 0.2;											// permissible error is given by specified documents
+	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;					// type of error absolute or reduced
+	int					m_limitType = MEASURE_LIMIT_TYPE_ELECTRIC;					// type of displaing error denend on limit
+
+	int					m_measureTimeInPoint = 1;									// time, in seconds, during which will be made ​​N measurements at each point
+	int					m_measureCountInPoint = 20;									// count of measurements in a point, according to GOST MI-2002 application 7
+
+	int					m_rangeType = LO_RANGE_TYPE_MANUAL;							// type of division measure range: manual - 0 or automatic - 1
+	double				m_lowLimitRange = 5;										// lower limit of the range for automatic division
+	double				m_highLimitRange = 95;										// high limit of the range for automatic division
+
+	int					m_viewType = LO_VIEW_TYPE_SIMPLE;							// type of measurements list extended or simple
 };
 
 // ==============================================================================================
@@ -542,20 +559,10 @@ class ComparatorOption : public QObject
 
 public:
 
-	explicit ComparatorOption(QObject *parent = nullptr);
-	explicit ComparatorOption(const ComparatorOption& from, QObject *parent = nullptr);
+	explicit ComparatorOption(QObject* parent = nullptr);
+	explicit ComparatorOption(const ComparatorOption& from, QObject* parent = nullptr);
 	virtual ~ComparatorOption();
 
-//private:
-public:
-
-	double				m_errorLimit = 0.2;										// permissible error is given by specified documents
-	double				m_startValueForCompare = 0.1;							// start value is given by metrologists
-	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;				// type of error absolute or reduced
-	int					m_limitType = MEASURE_LIMIT_TYPE_ELECTRIC;				// type of displaing error denend on limit
-
-	int					m_startComparatorIndex = 0;								// start the measurement with the сomparators under the number ...
-	bool				m_enableMeasureHysteresis = false;						// enable flag to measure hysteresis of сomparator
 
 public:
 
@@ -577,10 +584,24 @@ public:
 	bool				enableMeasureHysteresis() const { return m_enableMeasureHysteresis; }
 	void				setEnableMeasureHysteresis(bool enable) { m_enableMeasureHysteresis = enable; }
 
+	//
+	//
 	void				load();
 	void				save();
 
+	//
+	//
 	ComparatorOption&	operator=(const ComparatorOption& from);
+
+private:
+
+	double				m_errorLimit = 0.2;										// permissible error is given by specified documents
+	double				m_startValueForCompare = 0.1;							// start value is given by metrologists
+	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;				// type of error absolute or reduced
+	int					m_limitType = MEASURE_LIMIT_TYPE_ELECTRIC;				// type of displaing error denend on limit
+
+	int					m_startComparatorIndex = 0;								// start the measurement with the сomparators under the number ...
+	bool				m_enableMeasureHysteresis = false;						// enable flag to measure hysteresis of сomparator
 };
 
 // ==============================================================================================
@@ -595,18 +616,9 @@ class ToolBarOption : public QObject
 
 public:
 
-	explicit ToolBarOption(QObject *parent = nullptr);
-	explicit ToolBarOption(const ToolBarOption& from, QObject *parent = nullptr);
+	explicit ToolBarOption(QObject* parent = nullptr);
+	explicit ToolBarOption(const ToolBarOption& from, QObject* parent = nullptr);
 	virtual ~ToolBarOption();
-
-private:
-
-	int					m_measureTimeout = 0;										// in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
-	int					m_measureKind = MEASURE_KIND_ONE_RACK;						// measure kind: each channel separately - 0 or for all channels together - 1
-	int					m_signalConnectionType = Metrology::ConnectionType::Unsed;	// selected type of connection
-
-	QString				m_defaultRack;
-	QString				m_defaultSignalId;
 
 public:
 
@@ -625,10 +637,23 @@ public:
 	QString				defaultSignalId() const { return m_defaultSignalId; }
 	void				setDefaultSignalId(const QString& signalId) { m_defaultSignalId = signalId; }
 
+	//
+	//
 	void				load();
 	void				save();
 
+	//
+	//
 	ToolBarOption&		operator=(const ToolBarOption& from);
+
+private:
+
+	int					m_measureTimeout = 0;										// in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
+	int					m_measureKind = MEASURE_KIND_ONE_RACK;						// measure kind: each channel separately - 0 or for all channels together - 1
+	int					m_signalConnectionType = Metrology::ConnectionType::Unsed;	// selected type of connection
+
+	QString				m_defaultRack;
+	QString				m_defaultSignalId;
 };
 
 // ==============================================================================================
@@ -697,30 +722,14 @@ class MeasureViewOption : public QObject
 	Q_OBJECT
 
 public:
-	explicit MeasureViewOption(QObject *parent = nullptr);
-	explicit MeasureViewOption(const MeasureViewOption& from, QObject *parent = nullptr);
+	explicit MeasureViewOption(QObject* parent = nullptr);
+	explicit MeasureViewOption(const MeasureViewOption& from, QObject* parent = nullptr);
 	virtual ~MeasureViewOption();
 
 //private:
 public:
 
 	MeasureViewColumn	m_column[MEASURE_TYPE_COUNT][LANGUAGE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
-
-private:
-
-	int					m_measureType = MEASURE_TYPE_UNDEFINED;						// current, active ViewID
-
-	bool				m_updateColumnView[MEASURE_TYPE_COUNT];						// determined the need to update the view after changing settings
-
-	QFont				m_font;
-	QFont				m_fontBold;
-
-	QColor				m_colorNotError = COLOR_NOT_ERROR;
-	QColor				m_colorErrorLimit = COLOR_OVER_LIMIT_ERROR;
-	QColor				m_colorErrorControl = COLOR_OVER_CONTROL_ERROR;
-
-	bool				m_showNoValid = false;										// show measuring value if signal is not valid
-	bool				m_precesionByCalibrator = false;							// show accuracy for measure value and nominal value from calibrator
 
 public:
 
@@ -751,10 +760,30 @@ public:
 	bool				precesionByCalibrator() const { return m_precesionByCalibrator; }
 	void				setPrecesionByCalibrator(bool enable) { m_precesionByCalibrator = enable; }
 
+	//
+	//
 	void				load();
 	void				save();
 
+	//
+	//
 	MeasureViewOption&	operator=(const MeasureViewOption& from);
+
+private:
+
+	int					m_measureType = MEASURE_TYPE_UNDEFINED;						// current, active ViewID
+
+	bool				m_updateColumnView[MEASURE_TYPE_COUNT];						// determined the need to update the view after changing settings
+
+	QFont				m_font;
+	QFont				m_fontBold;
+
+	QColor				m_colorNotError = COLOR_NOT_ERROR;
+	QColor				m_colorErrorLimit = COLOR_OVER_LIMIT_ERROR;
+	QColor				m_colorErrorControl = COLOR_OVER_CONTROL_ERROR;
+
+	bool				m_showNoValid = false;										// show measuring value if signal is not valid
+	bool				m_precesionByCalibrator = false;							// show accuracy for measure value and nominal value from calibrator
 };
 
 // ==============================================================================================
@@ -798,22 +827,9 @@ class SignalInfoOption : public QObject
 
 public:
 
-	explicit SignalInfoOption(QObject *parent = nullptr);
-	explicit SignalInfoOption(const SignalInfoOption& from, QObject *parent = nullptr);
+	explicit SignalInfoOption(QObject* parent = nullptr);
+	explicit SignalInfoOption(const SignalInfoOption& from, QObject* parent = nullptr);
 	virtual ~SignalInfoOption();
-
-private:
-
-	QFont				m_font;
-
-	bool				m_showNoValid = false;										// show measuring value if signal is not valid
-	bool				m_showElectricState = false;
-
-	QColor				m_colorFlagValid = COLOR_FLAG_VALID;
-	QColor				m_colorFlagOverflow = COLOR_FLAG_OVERFLOW;
-	QColor				m_colorFlagUnderflow = COLOR_FLAG_OVERBREAK;
-
-	int					m_timeForUpdate = 250; // 250 ms
 
 public:
 
@@ -838,10 +854,27 @@ public:
 	int					timeForUpdate() const { return m_timeForUpdate; }
 	void				setTimeForUpdate(int ms) { m_timeForUpdate = ms; }
 
+	//
+	//
 	void				load();
 	void				save();
 
+	//
+	//
 	SignalInfoOption&	operator=(const SignalInfoOption& from);
+
+private:
+
+	QFont				m_font;
+
+	bool				m_showNoValid = false;										// show measuring value if signal is not valid
+	bool				m_showElectricState = false;
+
+	QColor				m_colorFlagValid = COLOR_FLAG_VALID;
+	QColor				m_colorFlagOverflow = COLOR_FLAG_OVERFLOW;
+	QColor				m_colorFlagUnderflow = COLOR_FLAG_OVERBREAK;
+
+	int					m_timeForUpdate = 250; // 250 ms
 };
 
 // ==============================================================================================
@@ -882,21 +915,9 @@ class ComparatorInfoOption : public QObject
 
 public:
 
-	explicit ComparatorInfoOption(QObject *parent = nullptr);
-	explicit ComparatorInfoOption(const ComparatorInfoOption& from, QObject *parent = nullptr);
+	explicit ComparatorInfoOption(QObject* parent = nullptr);
+	explicit ComparatorInfoOption(const ComparatorInfoOption& from, QObject* parent = nullptr);
 	virtual ~ComparatorInfoOption();
-
-private:
-
-	QFont				m_font;
-
-	QString				m_displayingStateFalse;
-	QString				m_displayingStateTrue;
-
-	QColor				m_colorStateFalse = COLOR_COMPARATOR_STATE_FALSE;
-	QColor				m_colorStateTrue = COLOR_COMPARATOR_STATE_TRUE;
-
-	int					m_timeForUpdate = 250; // 250 ms
 
 public:
 
@@ -918,10 +939,26 @@ public:
 	int					timeForUpdate() const { return m_timeForUpdate; }
 	void				setTimeForUpdate(int ms) { m_timeForUpdate = ms; }
 
+	//
+	//
 	void				load();
 	void				save();
 
+	//
+	//
 	ComparatorInfoOption&	operator=(const ComparatorInfoOption& from);
+
+private:
+
+	QFont				m_font;
+
+	QString				m_displayingStateFalse;
+	QString				m_displayingStateTrue;
+
+	QColor				m_colorStateFalse = COLOR_COMPARATOR_STATE_FALSE;
+	QColor				m_colorStateTrue = COLOR_COMPARATOR_STATE_TRUE;
+
+	int					m_timeForUpdate = 250; // 250 ms
 };
 
 // ==============================================================================================
@@ -967,18 +1004,9 @@ class DatabaseOption : public QObject
 
 public:
 
-	explicit DatabaseOption(QObject *parent = nullptr);
-	explicit DatabaseOption(const DatabaseOption& from, QObject *parent = nullptr);
+	explicit DatabaseOption(QObject* parent = nullptr);
+	explicit DatabaseOption(const DatabaseOption& from, QObject* parent = nullptr);
 	virtual ~DatabaseOption();
-
-private:
-
-	QString				m_locationPath;
-	int					m_type;
-
-	bool				m_onStart = false;
-	bool				m_onExit = true;
-	QString				m_backupPath;
 
 public:
 
@@ -997,10 +1025,23 @@ public:
 	QString				backupPath() const { return m_backupPath; }
 	void				setBackupPath(const QString& path) { m_backupPath = path; }
 
+	//
+	//
 	void				load();
 	void				save();
 
+	//
+	//
 	DatabaseOption&		operator=(const DatabaseOption& from);
+
+private:
+
+	QString				m_locationPath;
+	int					m_type;
+
+	bool				m_onStart = false;
+	bool				m_onExit = true;
+	QString				m_backupPath;
 };
 
 // ==============================================================================================
@@ -1031,23 +1072,27 @@ class LanguageOption : public QObject
 
 public:
 
-	explicit LanguageOption(QObject *parent = nullptr);
-	explicit LanguageOption(const LanguageOption& from, QObject *parent = nullptr);
+	explicit LanguageOption(QObject* parent = nullptr);
+	explicit LanguageOption(const LanguageOption& from, QObject* parent = nullptr);
 	virtual ~LanguageOption();
-
-private:
-
-	int					m_languageType = LANGUAGE_TYPE_EN;
 
 public:
 
 	int					languageType() const { return m_languageType; }
 	void				setLanguageType(int type) { m_languageType = type; }
 
+	//
+	//
 	void				load();
 	void				save();
 
+	//
+	//
 	LanguageOption&		operator=(const LanguageOption& from);
+
+private:
+
+	int					m_languageType = LANGUAGE_TYPE_EN;
 };
 
 // ==============================================================================================
@@ -1062,35 +1107,9 @@ class Options : public QObject
 
 public:
 
-	explicit Options(QObject *parent = nullptr);
-	explicit Options(const Options& from, QObject *parent = nullptr);
+	explicit Options(QObject* parent = nullptr);
+	explicit Options(const Options& from, QObject* parent = nullptr);
 	virtual ~Options();
-
-private:
-
-	QMutex					m_mutex;
-
-	CalibratorsOption		m_calibrators;
-
-	SocketOption			m_socket;
-	ProjectInfo				m_projectInfo;
-
-	MetrologySettings		m_settings;
-
-	ModuleOption			m_module;
-	LinearityOption			m_linearity;
-	ComparatorOption		m_comparator;
-
-	ToolBarOption			m_toolBar;
-	MeasureViewOption		m_measureView;
-
-	SignalInfoOption		m_signalInfo;
-	ComparatorInfoOption	m_comparatorInfo;
-
-	DatabaseOption			m_database;
-
-	LanguageOption			m_language;
-
 
 public:
 
@@ -1130,13 +1149,42 @@ public:
 	LanguageOption&			language() { return m_language; }
 	void					setLanguage(const LanguageOption& language) { m_language = language; }
 
+	//
+	//
 	void					load();
 	void					save();
 
 	bool					setMetrologySettings(std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 	bool					readFromXml(const QByteArray& fileData);
 
+	//
+	//
 	Options&				operator=(const Options& from);
+
+private:
+
+	QMutex					m_mutex;
+
+	CalibratorsOption		m_calibrators;
+
+	SocketOption			m_socket;
+	ProjectInfo				m_projectInfo;
+
+	MetrologySettings		m_settings;
+
+	ModuleOption			m_module;
+	LinearityOption			m_linearity;
+	ComparatorOption		m_comparator;
+
+	ToolBarOption			m_toolBar;
+	MeasureViewOption		m_measureView;
+
+	SignalInfoOption		m_signalInfo;
+	ComparatorInfoOption	m_comparatorInfo;
+
+	DatabaseOption			m_database;
+
+	LanguageOption			m_language;
 };
 
 // ==============================================================================================

@@ -42,13 +42,6 @@ public:
 	explicit MeasurePoint(double percent) { setPercent(percent); }
 	virtual ~MeasurePoint() {}
 
-private:
-
-	int					m_index = -1;
-
-	double				m_percentValue = 0;
-	double				m_sensorValue[POINT_SENSOR_COUNT];
-
 public:
 
 	int					Index() const { return m_index; }
@@ -58,6 +51,13 @@ public:
 	void				setPercent(double value);
 
 	double				sensorValue(int sensor);
+
+private:
+
+	int					m_index = -1;
+
+	double				m_percentValue = 0;
+	double				m_sensorValue[POINT_SENSOR_COUNT];
 };
 
 // ==============================================================================================
@@ -77,13 +77,8 @@ class MeasurePointBase : public QObject
 
 public:
 
-	explicit MeasurePointBase(QObject *parent = nullptr);
+	explicit MeasurePointBase(QObject* parent = nullptr);
 	virtual ~MeasurePointBase() {}
-
-private:
-
-	mutable QMutex m_mutex;
-	QVector<MeasurePoint> m_pointList;
 
 public:
 
@@ -106,6 +101,11 @@ public:
 	bool save();
 
 	MeasurePointBase& operator=(const MeasurePointBase& from);
+
+private:
+
+	mutable QMutex m_mutex;
+	QVector<MeasurePoint> m_pointList;
 };
 
 // ==============================================================================================

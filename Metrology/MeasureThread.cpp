@@ -47,7 +47,7 @@ void MeasureThreadInfo::setTimeout(int timeout)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureThread::MeasureThread(QObject *parent) :
+MeasureThread::MeasureThread(QObject* parent) :
 	QThread(parent)
 {
 }

@@ -28,13 +28,6 @@ public:
 	explicit CompleterData(QObject* parent = nullptr);
 	virtual ~CompleterData();
 
-private:
-
-	int				m_count = COMPLETER_STRING_COUNT;
-
-	QStringList		m_filterCompleterList;
-	QCompleter*		m_filterCompleter = nullptr;
-
 public:
 
 	int				count() const { return m_count; }
@@ -49,6 +42,13 @@ public:
 	void			save(const QString& optionsKey);
 
 	QCompleter*		completer() const { return m_filterCompleter; }
+
+private:
+
+	int				m_count = COMPLETER_STRING_COUNT;
+
+	QStringList		m_filterCompleterList;
+	QCompleter*		m_filterCompleter = nullptr;
 };
 
 // ==============================================================================================
@@ -62,6 +62,10 @@ public:
 	CopyData(QTableView* pView, bool copyHiddenColumn);
 	virtual ~CopyData();
 
+public:
+
+	void			exec();
+
 private:
 
 	QTableView*		m_pView = nullptr;
@@ -71,17 +75,10 @@ private:
 
 	bool			copyToMemory();
 
-public:
-
-	void			exec();
-
-signals:
-
 public slots:
 
 	void			copyCancel();
 	void			copyComplited();
-
 };
 
 // ==============================================================================================
@@ -99,6 +96,13 @@ public:
 	explicit FindData(QTableView* pView);
 	virtual ~FindData() override;
 
+public:
+
+	void			loadSettings();
+	void			saveSettings();
+
+	virtual void	reject() override;
+
 private:
 
 	QTableView*		m_pView = nullptr;
@@ -109,17 +113,10 @@ private:
 
 	QString			m_findText;
 
-	void			createInterface(QTableView *pView);
+	void			createInterface(QTableView* pView);
 
 	int				find(int start);
 	void			enableFindNextButton(int start);
-
-public:
-
-	void			loadSettings();
-	void			saveSettings();
-
-	virtual void	reject() override;
 
 public slots:
 
@@ -142,6 +139,10 @@ public:
 	ExportData(QTableView* pView, bool writeHiddenColumn, const QString& fileName);
 	virtual ~ExportData();
 
+public:
+
+	void			exec();
+
 private:
 
 	QTableView*		m_pView = nullptr;
@@ -154,15 +155,11 @@ private:
 
 	bool			m_exportCancel = true;
 
-	void			createProgressDialog(QTableView *pView);
+	void			createProgressDialog(QTableView* pView);
 	static void		startExportThread(ExportData* pThis, const QString& fileName);
 
 	bool			saveExcelFile(const QString& fileName);
 	bool			saveCsvFile(const QString& fileName);
-
-public:
-
-	void			exec();
 
 signals:
 

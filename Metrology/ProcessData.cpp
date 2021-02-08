@@ -183,7 +183,7 @@ void CompleterData::save(const QString& optionsKey)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-CopyData::CopyData(QTableView *pView, bool copyHiddenColumn) :
+CopyData::CopyData(QTableView* pView, bool copyHiddenColumn) :
 	QObject(pView),
 	m_pView(pView),
 	m_copyHiddenColumn(copyHiddenColumn)
@@ -269,7 +269,7 @@ bool CopyData::copyToMemory()
 		textClipboard.append("\n");
 	}
 
-	QClipboard *clipboard = QApplication::clipboard();
+	QClipboard* clipboard = QApplication::clipboard();
 	clipboard->setText(textClipboard);
 
 	return true;
@@ -293,7 +293,7 @@ void CopyData::copyComplited()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-FindData::FindData(QTableView *pView) :
+FindData::FindData(QTableView* pView) :
 	QDialog(pView->parentWidget()),
 	m_pView(pView)
 {
@@ -309,7 +309,7 @@ FindData::~FindData()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindData::createInterface(QTableView *pView)
+void FindData::createInterface(QTableView* pView)
 {
 	if (pView == nullptr)
 	{
@@ -329,7 +329,7 @@ void FindData::createInterface(QTableView *pView)
 
 	m_findNextButton = new QPushButton(tr(" Find next ..."), this);
 
-	QHBoxLayout *mainLayout = new QHBoxLayout ;
+	QHBoxLayout* mainLayout = new QHBoxLayout ;
 
 	mainLayout->addWidget(m_pFindTextEdit);
 	mainLayout->addWidget(m_findNextButton);
@@ -497,7 +497,7 @@ void FindData::reject()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ExportData::ExportData(QTableView *pView, bool writeHiddenColumn, const QString& fileName) :
+ExportData::ExportData(QTableView* pView, bool writeHiddenColumn, const QString& fileName) :
 	QObject(pView),
 	m_pView(pView),
 	m_writeHiddenColumn(writeHiddenColumn),
@@ -514,7 +514,7 @@ ExportData::~ExportData()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ExportData::createProgressDialog(QTableView *pView)
+void ExportData::createProgressDialog(QTableView* pView)
 {
 	if (pView == nullptr)
 	{
@@ -536,13 +536,13 @@ void ExportData::createProgressDialog(QTableView *pView)
 		m_cancelButton = new QPushButton;
 		m_cancelButton->setText(tr("Cancel"));
 
-		QHBoxLayout *buttonLayout = new QHBoxLayout ;
+		QHBoxLayout* buttonLayout = new QHBoxLayout ;
 
 		buttonLayout->addStretch();
 		buttonLayout->addWidget(m_cancelButton);
 		buttonLayout->addStretch();
 
-		QVBoxLayout *mainLayout = new QVBoxLayout ;
+		QVBoxLayout* mainLayout = new QVBoxLayout ;
 
 		mainLayout->addWidget(m_progress);
 		mainLayout->addLayout(buttonLayout);

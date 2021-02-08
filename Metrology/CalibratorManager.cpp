@@ -16,7 +16,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorManager::CalibratorManager(Calibrator *pCalibrator, QWidget *parent)
+CalibratorManager::CalibratorManager(Calibrator* pCalibrator, QWidget* parent)
 	: QDialog(parent)
 	, m_pCalibrator (pCalibrator)
 {
@@ -110,7 +110,7 @@ void CalibratorManager::createInterface()
 	//
 
 	QGroupBox* valueGroup = new QGroupBox(tr("Display"));
-	QVBoxLayout *valueLayout = new QVBoxLayout;
+	QVBoxLayout* valueLayout = new QVBoxLayout;
 
 	m_pMeasureLabel = new QLabel(tr("Measure"), this);
 	m_pMeasureEdit = new QLineEdit(this);
@@ -129,11 +129,11 @@ void CalibratorManager::createInterface()
 	m_pValueEdit = new QLineEdit(this);
 
 	QGroupBox* buttonGroup = new QGroupBox(tr("Control"));
-	QVBoxLayout *buttonLayout = new QVBoxLayout;
+	QVBoxLayout* buttonLayout = new QVBoxLayout;
 
 	m_pSetValueButton = new QPushButton(tr("set value"), this);
 
-	QHBoxLayout *stepButtonLayout = new QHBoxLayout;
+	QHBoxLayout* stepButtonLayout = new QHBoxLayout;
 
 	m_pStepDownButton = new QPushButton(tr("Step down"), this);
 	m_pStepUpButton = new QPushButton(tr("Step up"), this);
@@ -146,7 +146,7 @@ void CalibratorManager::createInterface()
 
 	buttonGroup->setLayout(buttonLayout);
 
-	QHBoxLayout *unitLayout = new QHBoxLayout;
+	QHBoxLayout* unitLayout = new QHBoxLayout;
 
 	m_pModeList = new QComboBox(this);
 	m_pUnitList = new QComboBox(this);
@@ -158,7 +158,7 @@ void CalibratorManager::createInterface()
 
 	m_pErrorsButton = new QPushButton(qApp->translate("CalibratorManager.h", ErrorList), this);
 
-	QVBoxLayout *mainLayout = new QVBoxLayout;
+	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	mainLayout->addWidget(valueGroup);
 	mainLayout->addWidget(m_pValueEdit);
@@ -170,7 +170,7 @@ void CalibratorManager::createInterface()
 
 	m_pErrorDialog = new QDialog(this);
 
-	QVBoxLayout *errorLayout = new QVBoxLayout;
+	QVBoxLayout* errorLayout = new QVBoxLayout;
 
 	m_pErrorList = new QTextEdit(this);
 	errorLayout->addWidget(m_pErrorList);
@@ -213,7 +213,7 @@ void CalibratorManager::initDialog()
 
 
 	QRegExp rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
-	QValidator *validator = new QRegExpValidator(rx, this);
+	QValidator* validator = new QRegExpValidator(rx, this);
 
 	m_valueCompleter.load(QString("%1Calibrator%2").arg(CALIBRATOR_OPTIONS_KEY).arg(m_pCalibrator->channel()));
 

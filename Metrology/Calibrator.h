@@ -219,8 +219,46 @@ class Calibrator : public QObject
 
 public:
 
-	explicit Calibrator(int channel = INVALID_CALIBRATOR_CHANNEL, QObject *parent = nullptr);
+	explicit Calibrator(int channel = INVALID_CALIBRATOR_CHANNEL, QObject* parent = nullptr);
 	virtual ~Calibrator();
+
+public:
+
+	CalibratorLimit getLimit(int mode, int unit);										// get claibtator limit by mode and unit
+	CalibratorLimit currentMeasureLimit();												// get claibtator limit
+	CalibratorLimit currentSourceLimit();												// get claibtator limit
+
+	bool isConnected() const { return m_connected; }
+
+	int channel() const{ return m_channel; }
+
+	bool portIsOpen() const { return m_port.isOpen(); }
+
+	QString portName() const { return m_portName; }
+	void setPortName(const QString& portName) { m_portName = portName; }
+
+	int type() const { return m_type; }
+	QString typeStr() const;
+	void setType(int type) { m_type = type; }
+
+	QString caption() const { return m_caption; }
+	QString serialNo() const { return m_serialNo; }
+
+	int timeout() const { return m_timeout;	}
+
+	int mode() const { return m_mode; }
+	int measureUnit() const { return m_measureUnit; }
+	int sourceUnit() const { return m_sourceUnit; }
+
+	double measureValue() const { return m_measureValue; }
+	double sourceValue() const { return m_sourceValue; }
+
+	QString lastError() const { return m_lastError; }
+
+	void setWaitResponse(bool enable) { m_enableWaitResponse = enable; }
+
+	bool isBusy() const { return m_busy; }
+	void setBusy(bool busy);
 
 private:
 
@@ -264,44 +302,6 @@ private:
 	bool recv();																		// receiving a response from the calibrator
 
 	void parseResponse();																// extracts from the string of the last response from the calibrator current electrical values
-
-public:
-
-	CalibratorLimit getLimit(int mode, int unit);										// get claibtator limit by mode and unit
-	CalibratorLimit currentMeasureLimit();												// get claibtator limit
-	CalibratorLimit currentSourceLimit();												// get claibtator limit
-
-	bool isConnected() const { return m_connected; }
-
-	int channel() const{ return m_channel; }
-
-	bool portIsOpen() const { return m_port.isOpen(); }
-
-	QString portName() const { return m_portName; }
-	void setPortName(const QString& portName) { m_portName = portName; }
-
-	int type() const { return m_type; }
-	QString typeStr() const;
-	void setType(int type) { m_type = type; }
-
-	QString caption() const { return m_caption; }
-	QString serialNo() const { return m_serialNo; }
-
-	int timeout() const { return m_timeout;	}
-
-	int mode() const { return m_mode; }
-	int measureUnit() const { return m_measureUnit; }
-	int sourceUnit() const { return m_sourceUnit; }
-
-	double measureValue() const { return m_measureValue; }
-	double sourceValue() const { return m_sourceValue; }
-
-	QString lastError() const { return m_lastError; }
-
-	void setWaitResponse(bool enable) { m_enableWaitResponse = enable; }
-
-	bool isBusy() const { return m_busy; }
-	void setBusy(bool busy);
 
 signals:
 
