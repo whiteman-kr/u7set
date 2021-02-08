@@ -46,7 +46,7 @@ win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 SOURCES += main.cpp \
     ../../lib/Address16.cpp \
 	#../../lib/LanControllerInfoHelper.cpp \
-	#UserPropertyTest.cpp \
+	UserPropertyTest.cpp \
 	UserTests.cpp \
 	#FileTests.cpp \
 	#OtherTests.cpp \
@@ -92,7 +92,7 @@ HEADERS += \
     ../../lib/Address16.h \
 #    ../../lib/LanControllerInfo.h \
 #    ../../lib/LanControllerInfoHelper.h \
-#    UserPropertyTest.h \
+    UserPropertyTest.h \
     UserTests.h \
 #    FileTests.h \
 #    OtherTests.h \

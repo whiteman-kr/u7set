@@ -8,7 +8,7 @@
 //#include "SignalTests.h"
 //#include "PropertyObjectTests.h"
 //#include "ProjectPropertyTests.h"
-//#include "UserPropertyTest.h"
+#include "UserPropertyTest.h"
 //#include "DbControllerProjectTests.h"
 //#include "DbControllerUserTests.h"
 //#include "DbControllerFileManagementTests.h"
@@ -64,10 +64,10 @@ int main(int argc, char *argv[])
 //	ProjectPropertyTests projectPropertyTests;
 //	returnCode |= QTest::qExec(&projectPropertyTests, argc, argv);
 
-//	// Database User Property functions
-//	//
-//	UserPropertyTests userPropertyTests;
-//	returnCode |= QTest::qExec(&userPropertyTests, argc, argv);
+	// Database User Property functions
+	//
+	UserPropertyTests userPropertyTests;
+	returnCode |= QTest::qExec(&userPropertyTests, argc, argv);
 
 //	// Property Obejct functions
 //	//
