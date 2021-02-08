@@ -61,6 +61,8 @@ OTHER_FILES += \
     ../Proto/proto_compile.sh
 
 HEADERS += VFrame30Lib_global.h \
+    ../Proto/serialization.pb.h \
+    ../Proto/trends.pb.h \
     ../lib/Address16.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
@@ -151,6 +153,8 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/OutputLog.h
 
 SOURCES += \
+    ../Proto/serialization.pb.cc \
+    ../Proto/trends.pb.cc \
     ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
