@@ -1,7 +1,3 @@
-//#include <QString>
-#include <QtTest>
-//#include <QtSql>
-//#include <QObject>
 #include "UserTests.h"
 #include "FileTests.h"
 #include "OtherTests.h"
@@ -14,8 +10,7 @@
 #include "DbControllerFileManagementTests.h"
 //#include "DbControllerSignalManagementTests.h"
 #include "DbControllerHardwareConfigurationTests.h"
-//#include "DbControllerVersionControlTests.h"
-//#include "../../lib/DbController.h"
+#include "DbControllerVersionControlTests.h"
 
 const int DatabaseProjectVersion = 326;
 
@@ -92,8 +87,8 @@ int main(int argc, char *argv[])
 	DbControllerHardwareConfigurationTests dbControllerHardwareConfigurationTests;
 	returnCode |= QTest::qExec(&dbControllerHardwareConfigurationTests, argc, argv);
 
-//	DbControllerVersionControlTests dbControllerVersionTests;
-//	returnCode |= QTest::qExec(&dbControllerVersionTests, argc, argv);
+	DbControllerVersionControlTests dbControllerVersionTests;
+	returnCode |= QTest::qExec(&dbControllerVersionTests, argc, argv);
 
 //	// Shutting down
 //	//
