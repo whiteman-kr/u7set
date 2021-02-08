@@ -33,6 +33,7 @@ linux build job:
     - "git status"
     - "git log -1"
     - "~/Qt/5.15.2/gcc_64/bin/qmake u7set.pro -spec linux-g++"
+    - "make -j6 qmake_all"
     - "make -j6"
 
 windows build job:
