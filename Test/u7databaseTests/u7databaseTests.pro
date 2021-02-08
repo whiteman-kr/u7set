@@ -68,7 +68,7 @@ SOURCES += main.cpp \
 	ProjectPropertyTests.cpp \
 	../../lib/XmlHelper.cpp \
 #    ../../lib/Queue.cpp \
-#    DbControllerFileManagementTests.cpp \
+    DbControllerFileManagementTests.cpp \
 #    ../../lib/WUtils.cpp \
 #    ../../lib/DataProtocols.cpp \
 #    ../../lib/Crc.cpp \
@@ -116,7 +116,7 @@ HEADERS += \
 	ProjectPropertyTests.h \
 	../../lib/XmlHelper.h \
 #    ../../lib/Queue.h \
-#    DbControllerFileManagementTests.h \
+    DbControllerFileManagementTests.h \
 #    ../../lib/WUtils.h \
 #    ../../lib/DataProtocols.h \
 #    ../../lib/Crc.h \

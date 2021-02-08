@@ -11,7 +11,7 @@
 #include "UserPropertyTest.h"
 #include "DbControllerProjectTests.h"
 #include "DbControllerUserTests.h"
-//#include "DbControllerFileManagementTests.h"
+#include "DbControllerFileManagementTests.h"
 //#include "DbControllerSignalManagementTests.h"
 //#include "DbControllerHardwareConfigurationTests.h"
 //#include "DbControllerVersionControlTests.h"
@@ -83,8 +83,8 @@ int main(int argc, char *argv[])
 	DbControllerUserTests dbControllerUserTests;
 	returnCode |= QTest::qExec(&dbControllerUserTests, argc, argv);
 
-//	DbControllerFileTests dbControllerFileTests;
-//	returnCode |= QTest::qExec(&dbControllerFileTests, argc, argv);
+	DbControllerFileTests dbControllerFileTests;
+	returnCode |= QTest::qExec(&dbControllerFileTests, argc, argv);
 
 //////	DbControllerSignalTests dbControllerSignalTests;
 //////	returnCode |= QTest::qExec(&dbControllerSignalTests, argc, argv);
