@@ -2,7 +2,7 @@
 #include <QtTest>
 //#include <QtSql>
 //#include <QObject>
-//#include "UserTests.h"
+#include "UserTests.h"
 //#include "FileTests.h"
 //#include "OtherTests.h"
 //#include "SignalTests.h"
@@ -44,10 +44,10 @@ int main(int argc, char *argv[])
 //	////SignalTests signalTests;
 //	////returnCode |= QTest::qExec(&signalTests, argc, argv);
 
-//	// Database User Management functions
-//	//
-//	UserTests userTests;
-//	returnCode |= QTest::qExec(&userTests, argc, argv);
+	// Database User Management functions
+	//
+	UserTests userTests;
+	returnCode |= QTest::qExec(&userTests, argc, argv);
 
 //	// Database File functions
 //	//
