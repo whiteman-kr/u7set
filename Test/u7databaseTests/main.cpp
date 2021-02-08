@@ -3,8 +3,8 @@
 //#include <QtSql>
 //#include <QObject>
 #include "UserTests.h"
-//#include "FileTests.h"
-//#include "OtherTests.h"
+#include "FileTests.h"
+#include "OtherTests.h"
 //#include "SignalTests.h"
 #include "PropertyObjectTests.h"
 #include "ProjectPropertyTests.h"
@@ -49,15 +49,15 @@ int main(int argc, char *argv[])
 	UserTests userTests;
 	returnCode |= QTest::qExec(&userTests, argc, argv);
 
-//	// Database File functions
-//	//
-//	FileTests fileTests;
-//	returnCode |= QTest::qExec(&fileTests, argc, argv);
+	// Database File functions
+	//
+	FileTests fileTests;
+	returnCode |= QTest::qExec(&fileTests, argc, argv);
 
-//	// Database Other functions
-//	//
-//	OtherTests otherTests;
-//	returnCode |= QTest::qExec(&otherTests, argc, argv);
+	// Database Other functions
+	//
+	OtherTests otherTests;
+	returnCode |= QTest::qExec(&otherTests, argc, argv);
 
 	// Database Project Property functions
 	//

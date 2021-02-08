@@ -48,8 +48,8 @@ SOURCES += main.cpp \
 	#../../lib/LanControllerInfoHelper.cpp \
 	UserPropertyTest.cpp \
 	UserTests.cpp \
-	#FileTests.cpp \
-	#OtherTests.cpp \
+	FileTests.cpp \
+	OtherTests.cpp \
 	#SignalTests.cpp \
 	../../lib/DbController.cpp \
 	../../lib/DbWorker.cpp \
@@ -94,8 +94,8 @@ HEADERS += \
 #    ../../lib/LanControllerInfoHelper.h \
     UserPropertyTest.h \
     UserTests.h \
-#    FileTests.h \
-#    OtherTests.h \
+	FileTests.h \
+	OtherTests.h \
 #    SignalTests.h \
     ../../lib/DbController.h \
 	../../lib/DbWorker.h \
