@@ -73,8 +73,8 @@ SOURCES += main.cpp \
 #    ../../lib/DataProtocols.cpp \
 #    ../../lib/Crc.cpp \
 #    DbControllerSignalManagementTests.cpp \
-#    DbControllerHardwareConfigurationTests.cpp \
-    ../../lib/HostAddressPort.cpp \
+    DbControllerHardwareConfigurationTests.cpp \
+	../../lib/HostAddressPort.cpp \
 #    DbControllerVersionControlTests.cpp \
     ../../lib/TuningValue.cpp \
 #    ../../lib/Times.cpp \
@@ -121,8 +121,8 @@ HEADERS += \
 #    ../../lib/DataProtocols.h \
 #    ../../lib/Crc.h \
 #    DbControllerSignalManagementTests.h \
-#    DbControllerHardwareConfigurationTests.h \
-    ../../lib/HostAddressPort.h \
+    DbControllerHardwareConfigurationTests.h \
+	../../lib/HostAddressPort.h \
 #    DbControllerVersionControlTests.h \
     ../../lib/TuningValue.h \
 #    ../../lib/Times.h \

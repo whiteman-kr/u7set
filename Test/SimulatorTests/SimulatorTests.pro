@@ -26,6 +26,7 @@ unix {
 
 
 SOURCES +=  \
+    ../../Proto/serialization.pb.cc \
     SimCommandTest_LM5_LM6.cpp \
     SimProfilesTest.cpp \
     SimRamTests.cpp \
@@ -69,6 +70,7 @@ unix {
 }
 
 HEADERS += \
+    ../../Proto/serialization.pb.h \
     ../../lib/PropertyObject.h \
     SimCommandTest_LM5_LM6.h \
     SimProfilesTest.h \
