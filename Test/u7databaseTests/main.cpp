@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
 
-//	Hardware::init();
+	Hardware::init();
 
 	// --
 	//
@@ -90,9 +90,9 @@ int main(int argc, char *argv[])
 	DbControllerVersionControlTests dbControllerVersionTests;
 	returnCode |= QTest::qExec(&dbControllerVersionTests, argc, argv);
 
-//	// Shutting down
-//	//
-//	Hardware::shutdown();
+	// Shutting down
+	//
+	Hardware::shutdown();
 
 	return returnCode;
 }
