@@ -257,8 +257,11 @@ void RackListDialog::createInterface()
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Rack.png"));
 	setWindowTitle(tr("Racks"));
-	resize(700, 600);
-	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
+
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	resize(static_cast<int>(screen.width() * 0.35), static_cast<int>(screen.height() * 0.4));
+	move(screen.center() - rect().center());
+
 	installEventFilter(this);
 
 	m_pMenuBar = new QMenuBar(this);

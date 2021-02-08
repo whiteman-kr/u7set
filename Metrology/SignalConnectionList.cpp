@@ -266,8 +266,10 @@ SignalConnectionItemDialog::~SignalConnectionItemDialog()
 void SignalConnectionItemDialog::createInterface()
 {
 	setWindowFlags(Qt::Window | Qt::WindowCloseButtonHint);
-	resize(400, 100);
-	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
+
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(static_cast<int>(screen.width() * 0.2), static_cast<int>(screen.height() * 0.04));
+	move(screen.center() - rect().center());
 
 	if (m_signalConnection.strID(true).isEmpty() == true)
 	{
@@ -712,8 +714,10 @@ void SignalConnectionDialog::createInterface()
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Connection.png"));
 	setWindowTitle(tr("Signal connections"));
-	resize(QGuiApplication::primaryScreen()->availableGeometry().width() - 700, 500);
-	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
+
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	resize(static_cast<int>(screen.width() * 0.36), static_cast<int>(screen.height() * 0.4));
+	move(screen.center() - rect().center());
 
 	m_pMenuBar = new QMenuBar(this);
 	m_pConnectionMenu = new QMenu(tr("&Connection"), this);

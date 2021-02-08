@@ -627,8 +627,11 @@ void TuningSignalListDialog::createInterface()
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Tuning.png"));
 	setWindowTitle(tr("Tuning signals"));
-	resize(1000, 600);
-	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
+
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	resize(static_cast<int>(screen.width() * 0.5), static_cast<int>(screen.height() * 0.4));
+	move(screen.center() - rect().center());
+
 	installEventFilter(this);
 
 	m_pMenuBar = new QMenuBar(this);

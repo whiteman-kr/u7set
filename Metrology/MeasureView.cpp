@@ -1155,7 +1155,11 @@ void MeasureView::showGraph(int graphType)
 	//
 	QDialog dialog(this, Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	dialog.setWindowTitle(tr("Graph - %1").arg(pLinearityMeasurement->appSignalID()));
-	dialog.resize(800, 300);
+
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	dialog.resize(static_cast<int>(screen.width() * 0.7), static_cast<int>(screen.height() * 0.4));
+	dialog.move(screen.center() - rect().center());
+
 	dialog.grabGesture(Qt::PanGesture);
 	dialog.grabGesture(Qt::PinchGesture);
 

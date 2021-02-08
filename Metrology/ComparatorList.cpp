@@ -350,8 +350,11 @@ void ComparatorListDialog::createInterface()
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Comparator.png"));
 	setWindowTitle(tr("Comparators"));
-	resize(QGuiApplication::primaryScreen()->availableGeometry().width() - 750, 500);
-	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
+
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	resize(static_cast<int>(screen.width() * 0.8), static_cast<int>(screen.height() * 0.4));
+	move(screen.center() - rect().center());
+
 	installEventFilter(this);
 
 	m_pMenuBar = new QMenuBar(this);

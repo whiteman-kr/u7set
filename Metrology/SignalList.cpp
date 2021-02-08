@@ -335,8 +335,11 @@ void SignalListDialog::createInterface(bool hasButtons)
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Signal.png"));
 	setWindowTitle(tr("Signals"));
-	resize(QGuiApplication::primaryScreen()->availableGeometry().width() - 200, 500);
-	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
+
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	resize(static_cast<int>(screen.width() * 0.6), static_cast<int>(screen.height() * 0.4));
+	move(screen.center() - rect().center());
+
 	installEventFilter(this);
 
 	m_pMenuBar = new QMenuBar(this);

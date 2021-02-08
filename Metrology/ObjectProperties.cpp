@@ -214,8 +214,11 @@ void RackPropertyDialog::createPropertyList()
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Propertу"));
 	setMinimumSize(400, 180);
-	resize(400, 180);
-	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
+
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.1));
+	move(screen.center() - rect().center());
+
 
 	if (m_rack.isValid() == false)
 	{
