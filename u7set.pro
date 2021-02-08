@@ -34,17 +34,18 @@ win32 {
 		./Test/u7databaseTests
 }
 unix {
-    SUBDIRS += Protobuf \
-	    qtservice \
-		qtpropertybrowser \
-		QScintilla \
-		TrendView \
-		VFrame30 \
+    SUBDIRS += ./Test/u7databaseTests
+	#Protobuf \
+	    #qtservice \
+		#qtpropertybrowser \
+		#QScintilla \
+		#TrendView \
+		#VFrame30 \
 		#ServiceControlManager \
 		#Metrology \
-		Simulator \
+		#Simulator \
 		#SimulatorConsole \
-		Builder \
+		#Builder \
 		#BuilderConsole \
 		#u7 \
 		#BaseService \
@@ -52,7 +53,7 @@ unix {
 		#ArchivingService \
 		#Monitor \
 		#PacketViewer \
-		#3TuningService \
+		#TuningService \
 		#AppDataService \
 		#DiagDataService \
 		#TuningClient \
@@ -62,5 +63,5 @@ unix {
 		#./Tools/PacketSource \
 		#./Test/UalTester \
 		#./Test/SimulatorTests \
-		./Test/u7databaseTests
+		#./Test/u7databaseTests
 }
