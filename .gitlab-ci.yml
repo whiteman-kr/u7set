@@ -43,9 +43,9 @@ linux build job:
     - "echo '#define COMPUTERNAME' \"$HOSTNAME\" >> gitlabci_version.h"
     - "echo '#define BUILD_DATE' \"$(date)\" >> gitlabci_version.h"
 #Build Project
-    - "rem ----------------------------------------------"
-    - "rem               Build Project"
-    - "rem ----------------------------------------------"    
+    - "echo ----------------------------------------------"
+    - "echo               Build Project"
+    - "echo ----------------------------------------------"    
     - "~/Qt/5.15.2/gcc_64/bin/qmake u7set.pro -spec linux-g++"
     - "make -j6"
 
