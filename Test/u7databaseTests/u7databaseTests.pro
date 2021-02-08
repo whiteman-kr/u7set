@@ -64,9 +64,9 @@ SOURCES += main.cpp \
     ../../lib/Types.cpp \
 #    ../../Proto/network.pb.cc \
     ../../Proto/serialization.pb.cc \
-#    PropertyObjectTests.cpp \
-#    ProjectPropertyTests.cpp \
-    ../../lib/XmlHelper.cpp \
+	PropertyObjectTests.cpp \
+	ProjectPropertyTests.cpp \
+	../../lib/XmlHelper.cpp \
 #    ../../lib/Queue.cpp \
 #    DbControllerFileManagementTests.cpp \
 #    ../../lib/WUtils.cpp \
@@ -112,9 +112,9 @@ HEADERS += \
 	../../lib/Types.h \
 #    ../../Proto/network.pb.h \
     ../../Proto/serialization.pb.h \
-#    PropertyObjectTests.h \
-#    ProjectPropertyTests.h \
-    ../../lib/XmlHelper.h \
+	PropertyObjectTests.h \
+	ProjectPropertyTests.h \
+	../../lib/XmlHelper.h \
 #    ../../lib/Queue.h \
 #    DbControllerFileManagementTests.h \
 #    ../../lib/WUtils.h \

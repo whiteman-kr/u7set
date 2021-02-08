@@ -6,8 +6,8 @@
 //#include "FileTests.h"
 //#include "OtherTests.h"
 //#include "SignalTests.h"
-//#include "PropertyObjectTests.h"
-//#include "ProjectPropertyTests.h"
+#include "PropertyObjectTests.h"
+#include "ProjectPropertyTests.h"
 #include "UserPropertyTest.h"
 //#include "DbControllerProjectTests.h"
 //#include "DbControllerUserTests.h"
@@ -59,20 +59,20 @@ int main(int argc, char *argv[])
 //	OtherTests otherTests;
 //	returnCode |= QTest::qExec(&otherTests, argc, argv);
 
-//	// Database Project Property functions
-//	//
-//	ProjectPropertyTests projectPropertyTests;
-//	returnCode |= QTest::qExec(&projectPropertyTests, argc, argv);
+	// Database Project Property functions
+	//
+	ProjectPropertyTests projectPropertyTests;
+	returnCode |= QTest::qExec(&projectPropertyTests, argc, argv);
 
 	// Database User Property functions
 	//
 	UserPropertyTests userPropertyTests;
 	returnCode |= QTest::qExec(&userPropertyTests, argc, argv);
 
-//	// Property Obejct functions
-//	//
-//	PropertyObjectTests propertyObjectTests;
-//	returnCode |= QTest::qExec(&propertyObjectTests, argc, argv);
+	// Property Obejct functions
+	//
+	PropertyObjectTests propertyObjectTests;
+	returnCode |= QTest::qExec(&propertyObjectTests, argc, argv);
 
 //	// --
 //	//
