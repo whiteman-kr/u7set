@@ -152,4 +152,5 @@ DISTFILES += \
     ../Proto/serialization.proto
 
 RESOURCES += \
+    ../../DatabaseUpgrade/DatabaseUpgrade.qrc \
     ../../DatabaseUpgrade/DatabaseUpgrade.qrc
