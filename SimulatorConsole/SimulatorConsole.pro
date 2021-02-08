@@ -40,9 +40,11 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 
 
 SOURCES += main.cpp \
+    ../Proto/serialization.pb.cc \
     ../lib/DomXmlHelper.cpp
 
 HEADERS += \
+    ../Proto/serialization.pb.h \
     ../lib/DomXmlHelper.h
 
 RESOURCES += \
