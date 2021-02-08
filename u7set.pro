@@ -34,7 +34,8 @@ win32 {
 		./Test/u7databaseTests
 }
 unix {
-    SUBDIRS += ./Test/u7databaseTests
+    SUBDIRS += Protobuf \
+	    ./Test/u7databaseTests
 	#Protobuf \
 	    #qtservice \
 		#qtpropertybrowser \
