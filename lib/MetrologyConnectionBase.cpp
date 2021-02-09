@@ -300,6 +300,8 @@ namespace Metrology
 		QMutexLocker l(&m_connectionMutex);
 
 		m_connectionList.clear();
+
+		m_enableEdit = true;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -366,6 +368,8 @@ namespace Metrology
 			return nullptr;
 		}
 
+		file->setState(fileList[0].state());
+
 		return file;
 	}
 
@@ -418,6 +422,18 @@ namespace Metrology
 			append(connection);
 		}
 
+		//
+		//
+		if (file->state() == VcsState::CheckedOut)
+		{
+			if (file->userId() != db->currentUser().userId())
+			{
+				m_enableEdit = false;
+			}
+
+			m_userName = db->username(file->userId());
+		}
+
 		return true;
 	}
 
@@ -435,6 +451,11 @@ namespace Metrology
 		if (db == nullptr)
 		{
 			Q_ASSERT(db);
+			return false;
+		}
+
+		if (m_enableEdit == false)
+		{
 			return false;
 		}
 

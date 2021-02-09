@@ -158,6 +158,9 @@ namespace Metrology
 
 		void findSignal_in_signalSet();
 
+		bool enableEdit() { return m_enableEdit; }
+		QString userName() { return m_userName; }
+
 		//
 		//
 		int append(const Connection& connection);
@@ -198,6 +201,9 @@ namespace Metrology
 		QVector<Connection> m_connectionList;
 
 		SignalSetProvider* m_signalSetProvider = nullptr;
+
+		bool m_enableEdit = true;
+		QString m_userName;
 	};
 
 	// ==============================================================================================

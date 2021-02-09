@@ -141,25 +141,28 @@ public:
 
 public:
 
+	static bool enableNewConnection(const Signal& signal);
+
 	bool loadConnectionBase();
+	void saveConnectionBase(bool checkIn, const QString& comment);
 	bool checkOutConnectionBase();
+
 
 	void updateList();
 
 	bool createConnectionBySignal(Signal* pSignal);
 
-protected:
-
-	void keyPressEvent(QKeyEvent* e);
-
 private:
 
+	Metrology::ConnectionBase m_connectionBase;
+	bool m_isModified = false;
+
+	//
+	//
 	const QString m_windowTitle = tr("Metrology connections");
 
 	SignalSetProvider* m_signalSetProvider = nullptr;
 
-	QMenuBar* m_pMenuBar = nullptr;
-	QMenu* m_pConnectionMenu = nullptr;
 	QMenu* m_pContextMenu = nullptr;
 
 	QAction* m_pEditAction = nullptr;
@@ -167,9 +170,9 @@ private:
 	QAction* m_pRemoveAction = nullptr;
 	QAction* m_pUnRemoveAction = nullptr;
 	QAction* m_pCheckInAction = nullptr;
+	QAction* m_pCopyAction = nullptr;
 	QAction* m_pExportAction = nullptr;
 	QAction* m_pImportAction = nullptr;
-	QAction* m_pCopyAction = nullptr;
 	QAction* m_pFindAction = nullptr;
 	QAction* m_pSelectAllAction = nullptr;
 
@@ -181,13 +184,13 @@ private:
 
 	QDialogButtonBox* m_buttonBox = nullptr;
 
-	Metrology::ConnectionBase m_connectionBase;
-
 	void createInterface();
 	void createContextMenu();
 
 	void updateCheckInStateOnToolBar();
 
+	//
+	//
 	DialogMetrologyConnectionItem* m_dialogConnectionItem = nullptr;
 	void fillConnection(bool newConnection, const Metrology::Connection& connection);
 
@@ -196,9 +199,14 @@ private:
 	virtual void closeEvent(QCloseEvent * e);
 	virtual void done(int r);
 
+	void saveChanges();
 	void saveColumnsWidth();
 	void restoreColumnsWidth();
 	void saveSettings();
+
+protected:
+
+	void keyPressEvent(QKeyEvent* e);
 
 private slots:
 
@@ -229,6 +237,32 @@ private slots:
 
 	// slots of buttons
 	//
+	void onOk();
+};
+
+// ==============================================================================================
+
+class DialogComment : public QDialog
+{
+	Q_OBJECT
+
+public:
+
+	DialogComment(QWidget* parent = nullptr);
+
+public:
+
+	QString comment() { return m_comment; }
+
+private:
+
+	QString m_comment;
+	QPlainTextEdit* m_pCommentEdit = nullptr;
+
+	void createInterface();
+
+private slots:
+
 	void onOk();
 };
 
