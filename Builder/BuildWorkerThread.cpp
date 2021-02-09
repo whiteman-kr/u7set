@@ -1444,6 +1444,8 @@ namespace Builder
 
 	bool BuildWorkerThread::generateSoftwareConfiguration()
 	{
+		SoftwareCfgGenerator::clearStaticData();
+
 		Context* context = m_context.get();
 
 		bool result = true;
