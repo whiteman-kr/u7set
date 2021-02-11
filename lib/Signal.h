@@ -39,6 +39,7 @@ class Signal
 	friend class DbWorker;
 	friend class SignalSet;
 	friend class SignalTests;
+	friend class DbControllerSignalTests;
 
 public:
 	static const QString MACRO_START_TOKEN;
