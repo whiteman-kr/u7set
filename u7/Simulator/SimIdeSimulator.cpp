@@ -51,15 +51,27 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 
 	log().writeMessage(tr("Load logic schema detais file: %1").arg(fileName));
 
-	bool ok = m_schemaDetails.Load(fileName);
-	if (ok == false)
+	bool ok = true;
+
+	if (QFile::exists(fileName) == false)
 	{
-		log().writeError(tr("File loading error, file name %1.").arg(fileName));
+		// File not exists, can happen if project does not cotaine any schemas
+		//
+		log().writeWarning(tr("Project build does not contain any schemas, file %1 not exist.").arg(fileName));
+
+		ok = true;
 	}
 	else
 	{
-		emit schemaDetailsUpdated();
+		ok = m_schemaDetails.Load(fileName);
+
+		if (ok == false)
+		{
+			log().writeError(tr("File loading error, file name %1.").arg(fileName));
+		}
 	}
+
+	emit schemaDetailsUpdated();
 
 	return ok;
 }

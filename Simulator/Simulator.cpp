@@ -238,9 +238,10 @@ namespace Sim
 		QStringList subsystems = m_firmwares.subsystems();
 		if (subsystems.isEmpty() == true)
 		{
-			m_log.writeError(QObject::tr("Bitstream file does not contain any subsystem."));
+			m_log.writeWarning(QObject::tr("Bitstream file does not contain any subsystem."));
+			m_log.writeWarning(QObject::tr("Nothing to load or simulate."));
 			clearImpl();
-			return false;
+			return true;	// Project is empty, is not an error
 		}
 
 		// Load LogicModules Descriptions
