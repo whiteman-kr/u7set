@@ -37,7 +37,7 @@ Q_DECLARE_METATYPE(ConversionCalcType)
 
 // ==============================================================================================
 
-double conversionCalcVal(double val, ConversionCalcType calcType, int connectionType, const IoSignalParam& ioParam);
+double conversionCalcVal(double val, ConversionCalcType calcType, Metrology::ConnectionType connectionType, const IoSignalParam& ioParam);
 
 // ==============================================================================================
 

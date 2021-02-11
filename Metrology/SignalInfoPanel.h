@@ -155,7 +155,7 @@ private:
 	void					createHeaderContexMenu();
 	void					initContextMenu();
 	void					createContextMenu();
-	void					appendSignalConnetionMenu();
+	void					appendMetrologyConnetionMenu();
 
 	void					hideColumn(int column, bool hide);
 
@@ -171,7 +171,7 @@ private:
 	SignalInfoOption		m_signalInfo;
 
 	int						m_measureKind = MEASURE_KIND_UNDEFINED;
-	int						m_signalConnectionType = Metrology::ConnectionType::Unknown;
+	Metrology::ConnectionType m_metrologyConnectionType = Metrology::ConnectionType::Unknown;
 
 protected:
 
@@ -180,7 +180,7 @@ protected:
 public slots:
 
 	void					measureKindChanged(int kind);
-	void					signalConnectionTypeChanged(int type);
+	void					metrologyConnectionTypeChanged(Metrology::ConnectionType type);
 
 	void					activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected
 	void					updateSignalState();										// slot informs that signal for measure has updated his state

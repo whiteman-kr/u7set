@@ -25,7 +25,7 @@ public:
 
 	explicit SelectSignalItem();
 	explicit SelectSignalItem(const SelectSignalItem& signal);
-	explicit SelectSignalItem(int index, int connectionType, const MeasureSignal& measureSignal);
+	explicit SelectSignalItem(int index, Metrology::ConnectionType connectionType, const MeasureSignal& measureSignal);
 	virtual ~SelectSignalItem() {}
 
 public:
@@ -33,13 +33,13 @@ public:
 	void clear();
 	bool isValid() const;
 
-	bool set(int index, int connectionType, const MeasureSignal& measureSignal);
+	bool set(int index, Metrology::ConnectionType connectionType, const MeasureSignal& measureSignal);
 
 	int index() const { return m_index; }
 	void setIndex(int index) { m_index = index; }
 
-	int connectionType() const { return m_connectionType; }
-	void setConnectionType(int type) { m_connectionType = type; }
+	Metrology::ConnectionType connectionType() const { return m_connectionType; }
+	void setConnectionType(Metrology::ConnectionType type) { m_connectionType = type; }
 
 	QString signalId(int ioType) const;
 	void setSignalId(int ioType, const QString& signalId);
@@ -50,7 +50,7 @@ public:
 private:
 
 	int m_index = -1;													// index MeasureSignal in the  SignalBase in the array SignalListForMeasure
-	int m_connectionType = Metrology::ConnectionType::Unknown;
+	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::Unknown;
 
 	QString m_signalId[Metrology::ConnectionIoTypeCount];
 	QString m_caption[Metrology::ConnectionIoTypeCount];

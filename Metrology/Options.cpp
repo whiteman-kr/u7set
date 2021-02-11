@@ -856,7 +856,7 @@ void ToolBarOption::load()
 
 	m_measureTimeout = s.value(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), 0).toInt();
 	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE_RACK).toInt();
-	m_signalConnectionType = s.value(QString("%1SignalConnectionType").arg(TOOLBAR_OPTIONS_KEY), Metrology::ConnectionType::Unsed).toInt();
+	m_metrologyConnectionType = s.value(QString("%1MetrologyConnectionType").arg(TOOLBAR_OPTIONS_KEY), Metrology::ConnectionType::Unsed).toInt();
 
 	m_defaultRack = s.value(QString("%1DefaultRack").arg(TOOLBAR_OPTIONS_KEY), "RACK").toString();
 	m_defaultSignalId = s.value(QString("%1DefaultSignalId").arg(TOOLBAR_OPTIONS_KEY), "SIGNAL_ID").toString();
@@ -870,7 +870,7 @@ void ToolBarOption::save()
 
 	s.setValue(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), m_measureTimeout);
 	s.setValue(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), m_measureKind);
-	s.setValue(QString("%1SignalConnectionType").arg(TOOLBAR_OPTIONS_KEY), m_signalConnectionType);
+	s.setValue(QString("%1MetrologyConnectionType").arg(TOOLBAR_OPTIONS_KEY), m_metrologyConnectionType);
 
 	s.setValue(QString("%1DefaultRack").arg(TOOLBAR_OPTIONS_KEY), m_defaultRack);
 	s.setValue(QString("%1DefaultSignalId").arg(TOOLBAR_OPTIONS_KEY), m_defaultSignalId);
@@ -882,7 +882,7 @@ ToolBarOption& ToolBarOption::operator=(const ToolBarOption& from)
 {
 	m_measureTimeout = from.m_measureTimeout;
 	m_measureKind = from.m_measureKind;
-	m_signalConnectionType = from.m_signalConnectionType;
+	m_metrologyConnectionType = from.m_metrologyConnectionType;
 
 	m_defaultRack = from.m_defaultRack;
 	m_defaultSignalId = from.m_defaultSignalId;

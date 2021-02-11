@@ -76,9 +76,9 @@ namespace Metrology
 			return false;
 		}
 
-		for(int t = 0; t < ConnectionIoTypeCount; t++)
+		for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
 		{
-			if (connectionSignal(t).isExist() == false)		// signal has not been found in SignalSetProvider
+			if (connectionSignal(ioType).isExist() == false)		// signal has not been found in SignalSetProvider
 			{
 				return false;
 			}
@@ -93,9 +93,9 @@ namespace Metrology
 	{
 		m_type = ConnectionType::Unknown;
 
-		for(int t = 0; t < ConnectionIoTypeCount; t++)
+		for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
 		{
-			m_connectionSignal[t].clear();
+			m_connectionSignal[ioType].clear();
 		}
 
 		m_action = VcsItemAction::VcsItemActionType::Unknown;
@@ -142,7 +142,7 @@ namespace Metrology
 	{
 		if (static_cast<int>(m_type) < 0 || static_cast<int>(m_type) >= ConnectionTypeCount)
 		{
-			return QObject::tr("Unknown");
+			return QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Unknown");
 		}
 
 		return ConnectionTypeCaption(m_type);
@@ -595,14 +595,14 @@ namespace Metrology
 
 			// init signals
 			//
-			for(int type = 0; type < ConnectionIoTypeCount; type++)
+			for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
 			{
-				if (connection.appSignalID(type).isEmpty() == true)
+				if (connection.appSignalID(ioType).isEmpty() == true)
 				{
 					continue;
 				}
 
-				::Signal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(type));
+				::Signal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(ioType));
 				if (pSignal == nullptr)
 				{
 					continue;
@@ -610,7 +610,7 @@ namespace Metrology
 
 				m_signalSetProvider->loadSignal(pSignal->ID());
 
-				connection.setSignal(type, pSignal);
+				connection.setSignal(ioType, pSignal);
 			}
 		}
 	}
@@ -1011,14 +1011,14 @@ namespace Metrology
 
 		switch (type)
 		{
-			case Unsed:					caption = QObject::tr("No connections             ");	break;
-			case Input_Internal:		caption = QObject::tr("Input -> Internal");				break;
-			case Input_Output:			caption = QObject::tr("Input -> Output");				break;
-			case Input_DP_Internal_F:	caption = QObject::tr("Input dP -> Internal F");		break;
-			case Input_DP_Output_F:		caption = QObject::tr("Input dP -> Output F");			break;
-			case Input_C_Internal_F:	caption = QObject::tr("Input °С -> Internal °F");		break;
-			case Input_C_Output_F:		caption = QObject::tr("Input °С -> Output °F");			break;
-			case Tuning_Output:			caption = QObject::tr("Tuning -> Output");				break;
+			case Unsed:					caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "No connections             ");	break;
+			case Input_Internal:		caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Input -> Internal");			break;
+			case Input_Output:			caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Input -> Output");				break;
+			case Input_DP_Internal_F:	caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Input dP -> Internal F");		break;
+			case Input_DP_Output_F:		caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Input dP -> Output F");			break;
+			case Input_C_Internal_F:	caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Input °С -> Internal °F");		break;
+			case Input_C_Output_F:		caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Input °С -> Output °F");		break;
+			case Tuning_Output:			caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Tuning -> Output");				break;
 			default:					assert(0);
 
 		}

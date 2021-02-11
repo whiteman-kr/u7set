@@ -18,11 +18,11 @@ SelectSignalItem::SelectSignalItem(const SelectSignalItem& signal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SelectSignalItem::SelectSignalItem(int index, int signalConnectionType, const MeasureSignal& measureSignal)
+SelectSignalItem::SelectSignalItem(int index, Metrology::ConnectionType connectionType, const MeasureSignal& measureSignal)
 {
 	clear();
 
-	set(index, signalConnectionType, measureSignal);
+	set(index, connectionType, measureSignal);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ bool SelectSignalItem::isValid() const
 		return false;
 	}
 
-	if (m_connectionType < 0 || m_connectionType > Metrology::ConnectionTypeCount)
+	if (static_cast<int>(m_connectionType) < 0 || static_cast<int>(m_connectionType) > Metrology::ConnectionTypeCount)
 	{
 		return false;
 	}
@@ -71,10 +71,10 @@ bool SelectSignalItem::isValid() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SelectSignalItem::set(int index, int signalConnectionType, const MeasureSignal& measureSignal)
+bool SelectSignalItem::set(int index, Metrology::ConnectionType connectionType, const MeasureSignal& measureSignal)
 {
 	setIndex(index);
-	setConnectionType(signalConnectionType);
+	setConnectionType(connectionType);
 
 	const MultiChannelSignal& inSignal = measureSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);
 	if (inSignal.isEmpty() == true)
@@ -90,7 +90,7 @@ bool SelectSignalItem::set(int index, int signalConnectionType, const MeasureSig
 	setSignalId(Metrology::ConnectionIoType::Source,inSignal.signalID());
 	setCaption(Metrology::ConnectionIoType::Source, inSignal.caption());
 
-	if (signalConnectionType != Metrology::ConnectionType::Unsed)
+	if (connectionType != Metrology::ConnectionType::Unsed)
 	{
 		const MultiChannelSignal& outSignal = measureSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);
 		if (outSignal.isEmpty() == true)

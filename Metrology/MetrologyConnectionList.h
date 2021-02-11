@@ -1,5 +1,5 @@
-#ifndef SIGNALCONNECTIONDIALOG_H
-#define SIGNALCONNECTIONDIALOG_H
+#ifndef METROLOGYCONNECTIONDIALOG_H
+#define METROLOGYCONNECTIONDIALOG_H
 
 #include <QDebug>
 #include <QScreen>
@@ -22,36 +22,36 @@
 
 // ==============================================================================================
 
-const char* const			SignalConnectionColumn[] =
+const char* const			MetrologyConnectionColumn[] =
 {
-							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "Type"),
-							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "AppSignalID (source)"),
-							QT_TRANSLATE_NOOP("SignalConnectionDialog.h", "AppSignalID (destination)"),
+							QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "Type"),
+							QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "AppSignalID (source)"),
+							QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "AppSignalID (destination)"),
 };
 
-const int					SIGNAL_CONNECTION_COLUMN_COUNT			= sizeof(SignalConnectionColumn)/sizeof(SignalConnectionColumn[0]);
+const int					METROLOGY_CONNECTION_COLUMN_COUNT			= sizeof(MetrologyConnectionColumn)/sizeof(MetrologyConnectionColumn[0]);
 
-const int					SIGNAL_CONNECTION_COLUMN_TYPE			= 0,
-							SIGNAL_CONNECTION_COLUMN_IN_ID			= 1,
-							SIGNAL_CONNECTION_COLUMN_OUT_ID			= 2;
+const int					METROLOGY_CONNECTION_COLUMN_TYPE			= 0,
+							METROLOGY_CONNECTION_COLUMN_IN_ID			= 1,
+							METROLOGY_CONNECTION_COLUMN_OUT_ID			= 2;
 
-const int					SignalConnectionColumnWidth[SIGNAL_CONNECTION_COLUMN_COUNT] =
+const int					MetrologyConnectionColumnWidth[METROLOGY_CONNECTION_COLUMN_COUNT] =
 {
-							150,	// SIGNAL_CONNECTION_COLUMN_TYPE
-							250,	// SIGNAL_CONNECTION_COLUMN_IN_ID
-							250,	// SIGNAL_CONNECTION_COLUMN_OUT_ID
+							150,	// METROLOGY_CONNECTION_COLUMN_TYPE
+							250,	// METROLOGY_CONNECTION_COLUMN_IN_ID
+							250,	// METROLOGY_CONNECTION_COLUMN_OUT_ID
 };
 
 // ==============================================================================================
 
-class SignalConnectionTable : public QAbstractTableModel
+class MetrologyConnectionTable : public QAbstractTableModel
 {
 	Q_OBJECT
 
 public:
 
-	explicit SignalConnectionTable(QObject* parent = nullptr);
-	virtual ~SignalConnectionTable();
+	explicit MetrologyConnectionTable(QObject* parent = nullptr);
+	virtual ~MetrologyConnectionTable();
 
 public:
 
@@ -76,19 +76,19 @@ private:
 
 // ==============================================================================================
 
-class SignalConnectionItemDialog : public QDialog
+class MetrologyConnectionItemDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit SignalConnectionItemDialog(QWidget* parent = nullptr);
-	explicit SignalConnectionItemDialog(const Metrology::Connection& signalConnection, QWidget* parent = nullptr);
-	virtual ~SignalConnectionItemDialog();
+	explicit MetrologyConnectionItemDialog(QWidget* parent = nullptr);
+	explicit MetrologyConnectionItemDialog(const Metrology::Connection& metrologyConnection, QWidget* parent = nullptr);
+	virtual ~MetrologyConnectionItemDialog();
 
 public:
 
-	Metrology::Connection connection() const { return m_signalConnection; }
+	Metrology::Connection connection() const { return m_metrologyConnection; }
 
 private:
 
@@ -102,7 +102,7 @@ private:
 
 	QDialogButtonBox* m_buttonBox = nullptr;
 
-	Metrology::Connection m_signalConnection;
+	Metrology::Connection m_metrologyConnection;
 
 	void createInterface();
 	void updateSignals();
@@ -121,19 +121,19 @@ private slots:
 
 // ==============================================================================================
 
-class SignalConnectionDialog : public QDialog
+class MetrologyConnectionDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit SignalConnectionDialog(QWidget* parent = nullptr);
-	explicit SignalConnectionDialog(Metrology::Signal* pSignal, QWidget* parent = nullptr);
-	virtual ~SignalConnectionDialog() override;
+	explicit MetrologyConnectionDialog(QWidget* parent = nullptr);
+	explicit MetrologyConnectionDialog(Metrology::Signal* pSignal, QWidget* parent = nullptr);
+	virtual ~MetrologyConnectionDialog() override;
 
 public:
 
-	Metrology::ConnectionBase&	signalConnections() { return m_connectionBase; }	// signal connections
+	Metrology::ConnectionBase&	metrologyConnections() { return m_connectionBase; }	// metrology connections
 
 private:
 
@@ -155,7 +155,7 @@ private:
 	QAction* m_pSelectAllAction = nullptr;
 
 	QTableView* m_pView = nullptr;
-	SignalConnectionTable m_connectionTable;
+	MetrologyConnectionTable m_connectionTable;
 
 	QDialogButtonBox* m_buttonBox = nullptr;
 
@@ -164,7 +164,7 @@ private:
 	void createInterface();
 	void createContextMenu();
 
-	Metrology::Signal*		m_pOutputSignal = nullptr;
+	Metrology::Signal* m_pOutputSignal = nullptr;
 	bool createConnectionBySignal(Metrology::Signal* pSignal);
 
 public slots:
@@ -209,4 +209,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // SIGNALCONNECTIONDIALOG_H
+#endif // METROLOGYCONNECTIONDIALOG_H

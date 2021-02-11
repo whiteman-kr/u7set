@@ -101,7 +101,7 @@ namespace Builder
 				//
 				xml.writeStartElement("Racks");
 				{
-					xml.writeIntAttribute("Count", racks.count());
+					xml.writeIntAttribute(XmlAttribute::COUNT, racks.count());
 
 					for(Metrology::RackParam rack : racks)
 					{
@@ -138,7 +138,7 @@ namespace Builder
 				//
 				xml.writeStartElement("TuningSources");
 				{
-					xml.writeIntAttribute("Count", tuningSourceEquipmentID.count());
+					xml.writeIntAttribute(XmlAttribute::COUNT, tuningSourceEquipmentID.count());
 
 					for(QString equipmentID : tuningSourceEquipmentID)
 					{
@@ -167,7 +167,7 @@ namespace Builder
 				xml.writeStartElement("Connections");
 				{
 					int connectionCount = connectionBase.count();
-					xml.writeIntAttribute("Count", connectionCount);
+					xml.writeIntAttribute(XmlAttribute::COUNT, connectionCount);
 
 					for(int i = 0; i < connectionCount; i++)
 					{
@@ -175,7 +175,8 @@ namespace Builder
 
 						bool wrongConnection = false;
 
-						if (connection.type() < 0 || connection.type() >= Metrology::ConnectionTypeCount)
+						int type = connection.type();
+						if (type < 0 || type >= Metrology::ConnectionTypeCount)
 						{
 							// Metrology connection with signals: %1 and %2, has wrong type of connection
 							//

@@ -262,14 +262,14 @@ void Measurement::setLimits(const IoSignalParam& ioParam)
 		return;
 	}
 
-	int signalConnectionType = ioParam.signalConnectionType();
-	if (signalConnectionType < 0 || signalConnectionType >= Metrology::ConnectionTypeCount)
+	Metrology::ConnectionType metrologyConnectionType = ioParam.metrologyConnectionType();
+	if (static_cast<int>(metrologyConnectionType) < 0 || static_cast<int>(metrologyConnectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
 	}
 
-	switch (signalConnectionType)
+	switch (metrologyConnectionType)
 	{
 		case Metrology::ConnectionType::Unsed:
 			{
@@ -718,8 +718,8 @@ void Measurement::setCalibratorData(const IoSignalParam &ioParam)
 		return;
 	}
 
-	int signalConnectionType = ioParam.signalConnectionType();
-	if (signalConnectionType < 0 || signalConnectionType >= Metrology::ConnectionTypeCount)
+	Metrology::ConnectionType metrologyConnectionType = ioParam.metrologyConnectionType();
+	if (static_cast<int>(metrologyConnectionType) < 0 || static_cast<int>(metrologyConnectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
@@ -727,7 +727,7 @@ void Measurement::setCalibratorData(const IoSignalParam &ioParam)
 
 	int precision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
 
-	switch (signalConnectionType)
+	switch (metrologyConnectionType)
 	{
 		case Metrology::ConnectionType::Unsed:
 		case Metrology::ConnectionType::Input_Internal:
@@ -877,19 +877,19 @@ LinearityMeasurement::LinearityMeasurement(const IoSignalParam &ioParam) : Measu
 		return;
 	}
 
-	int signalConnectionType = ioParam.signalConnectionType();
-	if (signalConnectionType < 0 || signalConnectionType >= Metrology::ConnectionTypeCount)
+	Metrology::ConnectionType metrologyConnectionType = ioParam.metrologyConnectionType();
+	if (static_cast<int>(metrologyConnectionType) < 0 || static_cast<int>(metrologyConnectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
 	}
 
-	switch (signalConnectionType)
+	switch (metrologyConnectionType)
 	{
 		case Metrology::ConnectionType::Unsed:					fill_measure_input(ioParam);	break;
 		case Metrology::ConnectionType::Input_Internal:
 		case Metrology::ConnectionType::Input_DP_Internal_F:
-		case Metrology::ConnectionType::Input_C_Internal_F:	fill_measure_internal(ioParam);	break;
+		case Metrology::ConnectionType::Input_C_Internal_F:		fill_measure_internal(ioParam);	break;
 		case Metrology::ConnectionType::Input_DP_Output_F:
 		case Metrology::ConnectionType::Input_C_Output_F:
 		case Metrology::ConnectionType::Input_Output:
@@ -956,8 +956,8 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 		return;
 	}
 
-	int signalConnectionType = ioParam.signalConnectionType();
-	if (signalConnectionType < 0 || signalConnectionType >= Metrology::ConnectionTypeCount)
+	Metrology::ConnectionType metrologyConnectionType = ioParam.metrologyConnectionType();
+	if (static_cast<int>(metrologyConnectionType) < 0 || static_cast<int>(metrologyConnectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
@@ -981,7 +981,7 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	//
 
 	setConnectionAppSignalID(inParam.appSignalID());
-	setConnectionType(signalConnectionType);
+	setConnectionType(metrologyConnectionType);
 
 	setAppSignalID(inParam.appSignalID());
 	setCustomAppSignalID(inParam.customAppSignalID());
@@ -1081,8 +1081,8 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 		return;
 	}
 
-	int signalConnectionType = ioParam.signalConnectionType();
-	if (signalConnectionType < 0 || signalConnectionType >= Metrology::ConnectionTypeCount)
+	Metrology::ConnectionType metrologyConnectionType = ioParam.metrologyConnectionType();
+	if (static_cast<int>(metrologyConnectionType) < 0 || static_cast<int>(metrologyConnectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
@@ -1113,7 +1113,7 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	//
 
 	setConnectionAppSignalID(inParam.appSignalID());
-	setConnectionType(signalConnectionType);
+	setConnectionType(metrologyConnectionType);
 
 	setAppSignalID(outParam.appSignalID());
 	setCustomAppSignalID(outParam.customAppSignalID());
@@ -1139,7 +1139,7 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 
 	double engineering = (ioParam.percent() * (inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) / 100) + inParam.lowEngineeringUnits();
 	double electric = uc.conversion(engineering, UnitsConvertType::PhysicalToElectric, inParam);
-	double engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Normal, ioParam.signalConnectionType(), ioParam);
+	double engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Normal, ioParam.metrologyConnectionType(), ioParam);
 
 	setPercent(ioParam.percent());
 
@@ -1161,7 +1161,7 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	for(int index = 0; index < measureCount; index++)
 	{
 		double enVal = theSignalBase.signalState(outParam.hash()).value();
-		double enCalcVal = conversionCalcVal(enVal, ConversionCalcType::Inversion, ioParam.signalConnectionType(), ioParam);
+		double enCalcVal = conversionCalcVal(enVal, ConversionCalcType::Inversion, ioParam.metrologyConnectionType(), ioParam);
 		double elVal = uc.conversion(enCalcVal, UnitsConvertType::PhysicalToElectric, inParam);
 
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ELECTRIC, index, elVal);
@@ -1215,8 +1215,8 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 		return;
 	}
 
-	int signalConnectionType = ioParam.signalConnectionType();
-	if (signalConnectionType < 0 || signalConnectionType >= Metrology::ConnectionTypeCount)
+	Metrology::ConnectionType metrologyConnectionType = ioParam.metrologyConnectionType();
+	if (static_cast<int>(metrologyConnectionType) < 0 || static_cast<int>(metrologyConnectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
@@ -1247,7 +1247,7 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 	//
 
 	setConnectionAppSignalID(inParam.appSignalID());
-	setConnectionType(signalConnectionType);
+	setConnectionType(metrologyConnectionType);
 
 	setAppSignalID(outParam.appSignalID());
 	setCustomAppSignalID(outParam.customAppSignalID());
@@ -1272,7 +1272,7 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 	//
 
 	double engineering = (ioParam.percent() * (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) / 100) + outParam.lowEngineeringUnits();
-	double engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Normal, ioParam.signalConnectionType(), ioParam);
+	double engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Normal, ioParam.metrologyConnectionType(), ioParam);
 	double electric = uc.conversion(engineeringCalc, UnitsConvertType::PhysicalToElectric, outParam);
 
 	setPercent(ioParam.percent());
@@ -1440,8 +1440,8 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 		return 0;
 	}
 
-	int signalConnectionType = ioParam.signalConnectionType();
-	if (signalConnectionType < 0 || signalConnectionType >= Metrology::ConnectionTypeCount)
+	Metrology::ConnectionType metrologyConnectionType = ioParam.metrologyConnectionType();
+	if (static_cast<int>(metrologyConnectionType) < 0 || static_cast<int>(metrologyConnectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return 0;
@@ -1461,7 +1461,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 	//
 	double uncertainty = 0;
 
-	switch (signalConnectionType)
+	switch (metrologyConnectionType)
 	{
 		case Metrology::ConnectionType::Unsed:
 		case Metrology::ConnectionType::Input_Internal:
@@ -1952,19 +1952,19 @@ ComparatorMeasurement::ComparatorMeasurement(const IoSignalParam& ioParam) : Mea
 		return;
 	}
 
-	int signalConnectionType = ioParam.signalConnectionType();
-	if (signalConnectionType < 0 || signalConnectionType >= Metrology::ConnectionTypeCount)
+	Metrology::ConnectionType metrologyConnectionType = ioParam.metrologyConnectionType();
+	if (static_cast<int>(metrologyConnectionType) < 0 || static_cast<int>(metrologyConnectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
 	}
 
-	switch (signalConnectionType)
+	switch (metrologyConnectionType)
 	{
 		case Metrology::ConnectionType::Unsed:					fill_measure_input(ioParam);	break;
 		case Metrology::ConnectionType::Input_Internal:
 		case Metrology::ConnectionType::Input_DP_Internal_F:
-		case Metrology::ConnectionType::Input_C_Internal_F:	fill_measure_internal(ioParam);	break;
+		case Metrology::ConnectionType::Input_C_Internal_F:		fill_measure_internal(ioParam);	break;
 		default:												assert(0);
 	}
 }
@@ -2011,8 +2011,8 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 		return;
 	}
 
-	int signalConnectionType = ioParam.signalConnectionType();
-	if (signalConnectionType < 0 || signalConnectionType >= Metrology::ConnectionTypeCount)
+	Metrology::ConnectionType metrologyConnectionType = ioParam.metrologyConnectionType();
+	if (static_cast<int>(metrologyConnectionType) < 0 || static_cast<int>(metrologyConnectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
@@ -2063,7 +2063,7 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	//
 
 	setConnectionAppSignalID(inParam.appSignalID());
-	setConnectionType(signalConnectionType);
+	setConnectionType(metrologyConnectionType);
 
 	setAppSignalID(inParam.appSignalID());
 	setCustomAppSignalID(inParam.customAppSignalID());
@@ -2147,8 +2147,8 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 		return;
 	}
 
-	int signalConnectionType = ioParam.signalConnectionType();
-	if (signalConnectionType < 0 || signalConnectionType >= Metrology::ConnectionTypeCount)
+	Metrology::ConnectionType metrologyConnectionType = ioParam.metrologyConnectionType();
+	if (static_cast<int>(metrologyConnectionType) < 0 || static_cast<int>(metrologyConnectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
@@ -2206,7 +2206,7 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	//
 
 	setConnectionAppSignalID(inParam.appSignalID());
-	setConnectionType(signalConnectionType);
+	setConnectionType(metrologyConnectionType);
 
 	setAppSignalID(outParam.appSignalID());
 	setCustomAppSignalID(outParam.customAppSignalID());
@@ -2241,7 +2241,7 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	setCmpType(cmpValueType, comparatorEx->cmpType());
 
 	double engineering = comparatorEx->compareOnlineValue(cmpValueType);
-	double engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Inversion, ioParam.signalConnectionType(), ioParam);
+	double engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Inversion, ioParam.metrologyConnectionType(), ioParam);
 	double electric = uc.conversion(engineeringCalc, UnitsConvertType::PhysicalToElectric, inParam);
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
@@ -2255,7 +2255,7 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 
 	electric = ioParam.isNegativeRange() ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
 	engineering = uc.conversion(electric, UnitsConvertType::ElectricToPhysical, inParam);
-	engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Normal, ioParam.signalConnectionType(), ioParam);
+	engineeringCalc = conversionCalcVal(engineering, ConversionCalcType::Normal, ioParam.metrologyConnectionType(), ioParam);
 
 	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
 	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, engineeringCalc);

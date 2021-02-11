@@ -150,7 +150,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 		{
 			Metrology::SignalState state;
 
-			if (ioParam.signalConnectionType() == Metrology::ConnectionType::Unsed)
+			if (ioParam.metrologyConnectionType() == Metrology::ConnectionType::Unsed)
 			{
 				state = theSignalBase.signalState(ioParam.param(Metrology::ConnectionIoType::Source).hash());
 			}
@@ -211,7 +211,7 @@ QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 			stateStr = signalStateStr(inParam, inState);
 		}
 
-		if (ioParam.signalConnectionType() != Metrology::ConnectionType::Unsed)
+		if (ioParam.metrologyConnectionType() != Metrology::ConnectionType::Unsed)
 		{
 			const Metrology::SignalParam& outParam = ioParam.param(Metrology::ConnectionIoType::Destination);
 			if (outParam.isValid() == true)
@@ -391,11 +391,11 @@ void SignalInfoTable::signalParamChanged(const QString& appSignalID)
 	int signalCount = m_ioParamList.count();
 	for(int c = 0; c < signalCount; c ++)
 	{
-		for(int type = 0; type < Metrology::ConnectionIoTypeCount; type ++)
+		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType ++)
 		{
-			if (m_ioParamList[c].param(type).appSignalID() == appSignalID)
+			if (m_ioParamList[c].param(ioType).appSignalID() == appSignalID)
 			{
-				m_ioParamList[c].setParam(type, theSignalBase.signalParam(appSignalID));
+				m_ioParamList[c].setParam(ioType, theSignalBase.signalParam(appSignalID));
 			}
 		}
 	}
@@ -515,11 +515,11 @@ void SignalInfoPanel::createContextMenu()
 	//
 	m_pContextMenu = new QMenu(tr(""), m_pSignalInfoWindow);
 
-	// append signal connection items
+	// append metrology connection items
 	//
 	if (m_measureKind != MEASURE_KIND_ONE_RACK)
 	{
-		appendSignalConnetionMenu();
+		appendMetrologyConnetionMenu();
 	}
 
 	//
@@ -574,9 +574,9 @@ void SignalInfoPanel::createContextMenu()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::appendSignalConnetionMenu()
+void SignalInfoPanel::appendMetrologyConnetionMenu()
 {
-	if (m_signalConnectionType == Metrology::ConnectionType::Unsed)
+	if (m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
 	{
 		return;
 	}
@@ -605,7 +605,7 @@ void SignalInfoPanel::appendSignalConnetionMenu()
 		return;
 	}
 
-	m_outputSignalsList = theSignalBase.signalConnections().getOutputSignals(m_signalConnectionType, inParam.appSignalID());
+	m_outputSignalsList = theSignalBase.metrologyConnections().getOutputSignals(m_metrologyConnectionType, inParam.appSignalID());
 
 	int outputSignalCount = m_outputSignalsList.count();
 	for (int s = 0; s < outputSignalCount; s++)
@@ -759,14 +759,14 @@ void SignalInfoPanel::measureKindChanged(int kind)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::signalConnectionTypeChanged(int type)
+void SignalInfoPanel::metrologyConnectionTypeChanged(Metrology::ConnectionType type)
 {
-	if (type < 0 || type >= Metrology::ConnectionTypeCount)
+	if (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
 
-	m_signalConnectionType = type;
+	m_metrologyConnectionType = type;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -798,9 +798,9 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 		IoSignalParam ioParam;
 
-		for(int type = 0; type < Metrology::ConnectionIoTypeCount; type ++)
+		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType ++)
 		{
-			Metrology::Signal* pSignal = activeSignal.multiChannelSignal(type).metrologySignal(c);
+			Metrology::Signal* pSignal = activeSignal.multiChannelSignal(ioType).metrologySignal(c);
 			if (pSignal == nullptr)
 			{
 				continue;
@@ -812,8 +812,8 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 				continue;
 			}
 
-			ioParam.setParam(type, param);
-			ioParam.setSignalConnectionType(activeSignal.signalConnectionType());
+			ioParam.setParam(ioType, param);
+			ioParam.setMetrologyConnectionType(activeSignal.metrologyConnectionType());
 			ioParam.setCalibratorManager(m_pCalibratorBase->calibratorForMeasure(c));
 		}
 
@@ -826,7 +826,7 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	//
 	QSize cellSize = QFontMetrics(m_signalInfo.font()).size(Qt::TextSingleLine,"A");
 
-	if (activeSignal.signalConnectionType() == Metrology::ConnectionType::Unsed)
+	if (activeSignal.metrologyConnectionType() == Metrology::ConnectionType::Unsed)
 	{
 		m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 	}
@@ -989,7 +989,7 @@ void SignalInfoPanel::signalProperty()
 
 	Metrology::SignalParam param;
 
-	if (m_signalConnectionType == Metrology::ConnectionType::Unsed)
+	if (m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
 	{
 		param = m_signalParamTable.signalParam(index).param(Metrology::ConnectionIoType::Source);
 	}

@@ -212,9 +212,9 @@ double conversion(double val, ConversionType conversionType, const E::ElectricUn
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
-double conversionCalcVal(double val, ConversionCalcType calcType, int connectionType, const IoSignalParam &ioParam)
+double conversionCalcVal(double val, ConversionCalcType calcType, Metrology::ConnectionType connectionType, const IoSignalParam &ioParam)
 {
-	if (connectionType < 0 || connectionType >= Metrology::ConnectionTypeCount)
+	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		return val;
 	}

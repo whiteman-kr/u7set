@@ -67,7 +67,7 @@ private:
 
 	int						m_measureType = MEASURE_TYPE_UNDEFINED;
 	int						m_measureKind = MEASURE_KIND_UNDEFINED;
-	int						m_signalConnectionType = Metrology::ConnectionType::Unknown;
+	Metrology::ConnectionType m_metrologyConnectionType = Metrology::ConnectionType::Unknown;
 	int						m_measureTimeout = 0;
 
 	QMap<int, MeasureView*> m_measureViewMap;
@@ -94,7 +94,7 @@ private:
 	QAction*				m_pShowSignalListAction = nullptr;
 	QAction*				m_pShowComparatorsListAction = nullptr;
 	QAction*				m_pShowTuningSignalListAction = nullptr;
-	QAction*				m_pShowSignalConnectionListAction = nullptr;
+	QAction*				m_pShowMetrologyConnectionListAction = nullptr;
 	QAction*				m_pShowGraphLinElAction = nullptr;
 	QAction*				m_pShowGraphLinEnAction = nullptr;
 	QAction*				m_pShowGraph20ElAction = nullptr;
@@ -131,13 +131,13 @@ private:
 	QToolBar*				m_pMeasureControlToolBar = nullptr;
 	QToolBar*				m_pMeasureTimeoutToolBar = nullptr;
 	QToolBar*				m_pMeasureKindToolBar = nullptr;
-	QToolBar*				m_pSignalConnectionToolBar = nullptr;
+	QToolBar*				m_pMetrologyConnectionToolBar = nullptr;
 	QToolBar*				m_pAnalogSignalToolBar = nullptr;
 
 	// Elements of interface - Items of ToolBars
 	//
 	QComboBox*				m_pMeasureKindList = nullptr;
-	QComboBox*				m_pSignalConnectionTypeList = nullptr;
+	QComboBox*				m_pMetrologyConnectionTypeList = nullptr;
 
 	QComboBox*				m_pRackCombo = nullptr;
 	SelectSignalWidget*		m_pSelectSignalWidget = nullptr;
@@ -213,7 +213,7 @@ private:
 	void					createContextMenu();
 
 	void					loadMeasureKindToolBar();
-	void					loadSignalConnectionToolBar();
+	void					loadMetrologyConnectionToolBar();
 	void					loadRacksOnToolBar();
 	void					loadSignalsOnToolBar();
 
@@ -225,11 +225,11 @@ signals:
 
 	// from ToolBars
 	//
-	void					measureViewChanged(MeasureView* pView);	// appear when changing the type of measurement
-	void					measureTimeoutChanged(int timeout);		// appear when changing the timeout of measuring
-	void					measureTypeChanged(int type);			// appear when changing the type of measurement
-	void					measureKindChanged(int kind);			// appear when changing the kind of measurement
-	void					signalConnectionTypeChanged(int type);	// appear when changing the SignalConnectionType
+	void					measureViewChanged(MeasureView* pView);							// appear when changing the type of measurement
+	void					measureTimeoutChanged(int timeout);								// appear when changing the timeout of measuring
+	void					measureTypeChanged(int type);									// appear when changing the type of measurement
+	void					measureKindChanged(int kind);									// appear when changing the kind of measurement
+	void					metrologyConnectionTypeChanged(Metrology::ConnectionType type);	// appear when changing the Metrology::ConnectionType
 
 	// from measureComplite
 	//
@@ -258,7 +258,7 @@ private slots:
 	void					showSignalList();
 	void					showComparatorsList();
 	void					showTuningSignalList();
-	void					showSignalConnectionList();
+	void					showMetrologyConnectionList();
 	void					showGraphLinEl();
 	void					showGraphLinEn();
 	void					showGraph20El();
@@ -284,7 +284,8 @@ private slots:
 	//
 	void					setMeasureTimeout(QString value);
 	void					setMeasureKind(int index);
-	void					setSignalConnectionType(int index);
+	void					setMetrologyConnectionType(int index);
+	void					setMetrologyConnectionTypeFromStatistic(Metrology::ConnectionType connectionType);
 
 	// Slots of analog signal toolbar
 	//

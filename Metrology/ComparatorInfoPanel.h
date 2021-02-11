@@ -110,7 +110,7 @@ private:
 	ComparatorInfoOption	m_comparatorInfo;
 
 	int						m_measureKind = MEASURE_KIND_UNDEFINED;
-	int						m_signalConnectionType = Metrology::ConnectionType::Unknown;
+	Metrology::ConnectionType m_metrologyConnectionType = Metrology::ConnectionType::Unknown;
 
 protected:
 
@@ -119,7 +119,7 @@ protected:
 public slots:
 
 	void					measureKindChanged(int kind);
-	void					signalConnectionTypeChanged(int type);
+	void					metrologyConnectionTypeChanged(Metrology::ConnectionType type);
 
 	void					activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected
 	void					updateComparatorState();									// slot informs that signal for measure has updated his state

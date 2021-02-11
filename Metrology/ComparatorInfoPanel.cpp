@@ -244,11 +244,11 @@ void ComparatorInfoTable::signalParamChanged(const QString& appSignalID)
 	int signalCount = m_signalList.count();
 	for(int c = 0; c < signalCount; c ++)
 	{
-		for(int type = 0; type < Metrology::ConnectionIoTypeCount; type ++)
+		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType ++)
 		{
-			if (m_signalList[c].param(type).appSignalID() == appSignalID)
+			if (m_signalList[c].param(ioType).appSignalID() == appSignalID)
 			{
-				m_signalList[c].setParam(type, theSignalBase.signalParam(appSignalID));
+				m_signalList[c].setParam(ioType, theSignalBase.signalParam(appSignalID));
 			}
 		}
 	}
@@ -407,14 +407,14 @@ void ComparatorInfoPanel::measureKindChanged(int kind)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::signalConnectionTypeChanged(int type)
+void ComparatorInfoPanel::metrologyConnectionTypeChanged(Metrology::ConnectionType type)
 {
-	if (type < 0 || type >= Metrology::ConnectionTypeCount)
+	if (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
 
-	m_signalConnectionType = type;
+	m_metrologyConnectionType = type;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -482,7 +482,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 		Metrology::Signal* pSignal = nullptr;
 
-		switch (activeSignal.signalConnectionType())
+		switch (activeSignal.metrologyConnectionType())
 		{
 			case Metrology::ConnectionType::Unsed:
 				pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).metrologySignal(c);
@@ -500,7 +500,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 			}
 
 			ioParam.setParam(Metrology::ConnectionIoType::Source, pSignal->param());
-			ioParam.setSignalConnectionType(activeSignal.signalConnectionType());
+			ioParam.setMetrologyConnectionType(activeSignal.metrologyConnectionType());
 			ioParam.setCalibratorManager(m_pCalibratorBase->calibratorForMeasure(c));
 		}
 
@@ -525,7 +525,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	//
 	QSize cellSize = QFontMetrics(m_comparatorInfo.font()).size(Qt::TextSingleLine,"A");
 
-	if (activeSignal.signalConnectionType() == Metrology::ConnectionType::Unsed)
+	if (activeSignal.metrologyConnectionType() == Metrology::ConnectionType::Unsed)
 	{
 		m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 	}

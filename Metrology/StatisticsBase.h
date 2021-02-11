@@ -30,10 +30,10 @@ public:
 	Metrology::Signal* signal() const { return m_pSignal; }
 	void setSignal(Metrology::Signal* pSignal);
 
-	int signalConnectionType() const { return m_signalConnectionType; }
-	QString signalConnectionTypeStr() const;
-	void setSignalConnectionType(int type) { m_signalConnectionType = type; }
-	void setSignalConnectionType(Metrology::Signal* pSignal);
+	Metrology::ConnectionType metrologyConnectionType() const { return m_metrologyConnectionType; }
+	QString metrlogyConnectionTypeStr() const;
+	void setMetrologyConnectionType(Metrology::ConnectionType type) { m_metrologyConnectionType = type; }
+	void setMetrologyConnectionType(Metrology::Signal* pSignal);
 
 	std::shared_ptr<Metrology::ComparatorEx> comparator() const { return m_pComparator; }
 	void setComparator(std::shared_ptr<Metrology::ComparatorEx> pComparator) { m_pComparator = pComparator; }
@@ -51,7 +51,7 @@ public:
 private:
 
 	Metrology::Signal* m_pSignal = nullptr;
-	int m_signalConnectionType = Metrology::ConnectionType::Unknown;
+	Metrology::ConnectionType m_metrologyConnectionType = Metrology::ConnectionType::Unknown;
 	std::shared_ptr<Metrology::ComparatorEx> m_pComparator = nullptr;
 
 	int m_measureCount = 0;

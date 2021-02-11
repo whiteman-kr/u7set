@@ -57,11 +57,11 @@ SOURCES += \
     CalibratorBase.cpp \
     MeasurePointBase.cpp \
     MeasurePointDialog.cpp \
+    MetrologyConnectionList.cpp \
     OptionsDialog.cpp \
     Options.cpp \
     ProcessData.cpp \
     SelectSignalWidget.cpp \
-    SignalConnectionList.cpp \
     StatisticsBase.cpp \
     StatisticsPanel.cpp \
     main.cpp \
@@ -139,6 +139,7 @@ HEADERS  += \
     CalibratorBase.h \
     MeasurePointBase.h \
     MeasurePointDialog.h \
+    MetrologyConnectionList.h \
     OptionsDialog.h \
     Options.h \
     MeasureThread.h \
@@ -153,7 +154,6 @@ HEADERS  += \
     Calculator.h \
     ProcessData.h \
     SelectSignalWidget.h \
-    SignalConnectionList.h \
     Stable.h \
     ../lib/Signal.h \
     ../lib/CUtils.h \

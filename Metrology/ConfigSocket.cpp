@@ -114,7 +114,7 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 {
 	qDebug() << __FUNCTION__ << "File count: " << buildFileInfoArray.count();
 
-	Q_UNUSED(sessionParams);
+	Q_UNUSED(sessionParams)
 
 	if (m_cfgLoaderThread == nullptr)
 	{
@@ -284,7 +284,7 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 	}
 
 	int rackCount = 0;
-	result &= xml.readIntAttribute("Count", &rackCount);
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &rackCount);
 
 	for(int r = 0; r < rackCount; r++)
 	{
@@ -336,7 +336,7 @@ bool ConfigSocket::readTuningSources(const QByteArray& fileData, int fileVersion
 	}
 
 	int tuningSourceCount = 0;
-	result &= xml.readIntAttribute("Count", &tuningSourceCount);
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &tuningSourceCount);
 
 	for(int t = 0; t < tuningSourceCount; t++)
 	{
@@ -386,7 +386,7 @@ bool ConfigSocket::readMetrologyConnections(const QByteArray& fileData, int file
 	}
 
 	int connectionCount = 0;
-	result &= xml.readIntAttribute("Count", &connectionCount);
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &connectionCount);
 
 	for(int c = 0; c < connectionCount; c++)
 	{
@@ -408,17 +408,17 @@ bool ConfigSocket::readMetrologyConnections(const QByteArray& fileData, int file
 
 		// append
 		//
-		theSignalBase.signalConnections().append(connection);
+		theSignalBase.metrologyConnections().append(connection);
 	}
 
-	if (theSignalBase.signalConnections().count() != connectionCount)
+	if (theSignalBase.metrologyConnections().count() != connectionCount)
 	{
-		qDebug() << __FUNCTION__ << "Connections loading error, loaded: " << theSignalBase.signalConnections().count() << " from " << connectionCount;
+		qDebug() << __FUNCTION__ << "Connections loading error, loaded: " << theSignalBase.metrologyConnections().count() << " from " << connectionCount;
 		assert(false);
 		return false;
 	}
 
-	qDebug() << __FUNCTION__ << "Connections were loaded: " << theSignalBase.signalConnections().count();
+	qDebug() << __FUNCTION__ << "Connections were loaded: " << theSignalBase.metrologyConnections().count();
 
 	return result;
 }

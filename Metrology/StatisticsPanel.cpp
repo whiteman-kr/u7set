@@ -1,6 +1,6 @@
 #include "StatisticsPanel.h"
 
-#include "SignalConnectionList.h"
+#include "MetrologyConnectionList.h"
 #include "ProcessData.h"
 #include "ObjectProperties.h"
 #include "Options.h"
@@ -122,7 +122,7 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::ForegroundRole)
 	{
-		if (si.signalConnectionType() == Metrology::ConnectionType::Unknown)
+		if (si.metrologyConnectionType() == Metrology::ConnectionType::Unknown)
 		{
 			if (column == STATISTICS_COLUMN_SIGNAL_TYPE || column == STATISTICS_COLUMN_SIGNAL_CONNECTION)
 			{
@@ -251,7 +251,7 @@ QString StatisticsTable::text(int row, int column, const StatisticsItem& si) con
 		case STATISTICS_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();													break;
 		case STATISTICS_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();													break;
 		case STATISTICS_COLUMN_SIGNAL_TYPE:			result = param.signalTypeStr();															break;
-		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticBase.cpp", si.signalConnectionTypeStr().toUtf8());	break;
+		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticBase.cpp", si.metrlogyConnectionTypeStr().toUtf8());	break;
 		case STATISTICS_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();															break;
 		case STATISTICS_COLUMN_STATE:				result = qApp->translate("StatisticBase.cpp", si.stateStr().toUtf8());					break;
 		default:									assert(0);
@@ -308,7 +308,7 @@ void StatisticsTable::updateSignal(Hash signalHash)
 
 int StatisticsPanel::m_measureType = MEASURE_TYPE_LINEARITY;
 int StatisticsPanel::m_measureKind = MEASURE_TYPE_UNDEFINED;
-int StatisticsPanel::m_signalConnectionType = Metrology::ConnectionType::Unknown;
+Metrology::ConnectionType StatisticsPanel::m_metrologyConnectionType = Metrology::ConnectionType::Unknown;
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -575,14 +575,14 @@ void StatisticsPanel::measureKindChanged(int kind)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::signalConnectionTypeChanged(int type)
+void StatisticsPanel::metrologyConnectionTypeChanged(Metrology::ConnectionType type)
 {
-	if (type < 0 || type >= Metrology::ConnectionTypeCount)
+	if (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
 
-	m_signalConnectionType = type;
+	m_metrologyConnectionType = type;
 
 	updateList();
 }
@@ -604,7 +604,7 @@ void StatisticsPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	Metrology::Signal* pSignal = nullptr;
 
-	if(m_signalConnectionType == Metrology::ConnectionType::Unsed)
+	if(m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
 	{
 		pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).firstMetrologySignal();
 	}
@@ -792,7 +792,7 @@ void StatisticsPanel::selectSignalForMeasure()
 	//
 	const StatisticsItem& si = theSignalBase.statistics().item(statisticItemIndex);
 
-	if (si.signalConnectionType() == Metrology::ConnectionType::Unknown)
+	if (si.metrologyConnectionType() == Metrology::ConnectionType::Unknown)
 	{
 		if (si.signal() == nullptr || si.signal()->param().isValid() == false)
 		{
@@ -804,7 +804,7 @@ void StatisticsPanel::selectSignalForMeasure()
 		str = tr("Signal %1 is \"%2\" signal.\n"
 				 "To measure this signal you have to create connection with input signal.\n"
 				 "For example, type of connection: \"Input\" -> \"%2\".\n\n"
-				 "To create a new connection between signals, select \"View\"->\"Signal connections...\"\n\n"
+				 "To create a new connection between signals, select \"View\"->\"Metrology connections...\"\n\n"
 				 "Do you want to create new connection now?")
 				.arg(si.signal()->param().appSignalID())
 				.arg(si.signal()->param().signalTypeStr());
@@ -815,17 +815,19 @@ void StatisticsPanel::selectSignalForMeasure()
 			return;
 		}
 
-		SignalConnectionDialog dialog(si.signal(), this);
+		MetrologyConnectionDialog dialog(si.signal(), this);
 		if (dialog.exec() != QDialog::Accepted)
 		{
 			return;
 		}
 
-//		if (theSignalBase.signalConnections().save() == false)
+		// if save in local file
+		//
+//		if (theSignalBase.metrologyConnections().save() == false)
 //		{
 //			QMessageBox::information(this,
 //									 windowTitle(),
-//									 tr("Attempt to save signal connections was unsuccessfully!"));
+//									 tr("Attempt to save metrology connections was unsuccessfully!"));
 //			return;
 //		}
 
@@ -874,13 +876,13 @@ void StatisticsPanel::selectSignalForMeasure()
 
 	if (pSignal->param().isInput() == false)
 	{
-		int connectionIndex = theSignalBase.signalConnections().findConnectionIndex(Metrology::ConnectionIoType::Destination, pSignal);
+		int connectionIndex = theSignalBase.metrologyConnections().findConnectionIndex(Metrology::ConnectionIoType::Destination, pSignal);
 		if (connectionIndex == -1)
 		{
 			return;
 		}
 
-		const Metrology::Connection& connection = theSignalBase.signalConnections().connection(connectionIndex);
+		const Metrology::Connection& connection = theSignalBase.metrologyConnections().connection(connectionIndex);
 		if (connection.isValid() == false)
 		{
 			return;
@@ -893,11 +895,11 @@ void StatisticsPanel::selectSignalForMeasure()
 		}
 	}
 
-	// set SignalConnectionType
+	// set MetrologyConnectionType
 	//
-	if (m_signalConnectionType != si.signalConnectionType())
+	if (m_metrologyConnectionType != si.metrologyConnectionType())
 	{
-		emit setSignalConnectionType(si.signalConnectionType());
+		emit setMetrologyConnectionType(si.metrologyConnectionType());
 	}
 
 	// find Rack
