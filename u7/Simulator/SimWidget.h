@@ -98,6 +98,9 @@ private:
 
 	std::shared_ptr<SimIdeSimulator> m_simulator;
 
+	QDockWidget* m_overridePaneDock = nullptr;
+	QDockWidget* m_outputPaneDock = nullptr;
+
 	// --
 	//
 	SimSchemaManager m_schemaManager;
@@ -124,6 +127,7 @@ private:
 
 	QAction* m_snapshotAction = nullptr;
 	QAction* m_findSignalAction = nullptr;
+
 	QAction* m_trendsAction = nullptr;
 
 	QAction* m_showControlTabAccelerator = nullptr;
