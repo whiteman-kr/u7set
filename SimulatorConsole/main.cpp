@@ -55,11 +55,10 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
 void showProgrammUsageHint()
 {
 	std::cout << "Programm usage:\n";
-	std::cout << "  SimulatorConsole <BuildDirectory>             - Run simulation for all modules from build <BuildDirectory>\n";
-	std::cout << "  SimulatorConsole <BuildDirectory> [Script.js] - Run simulation script for build <BuildDirectory>\n";
-	std::cout << "  SimulatorConsole [/create Script.js]          - Create simple example of simulation script\n";
-	std::cout << "  SimulatorConsole [-create Script.js]          - Create simple example of simulation script\n";
-
+	std::cout << "  SimulatorConsole [-build=build_dir] [-script=script_file] [-profile=profile_name]\n";
+	std::cout << "\n";
+	std::cout << "Create template simualtion script:\n";
+	std::cout << "  SimulatorConsole [-create=file_name]\n";
 	return;
 }
 
@@ -130,9 +129,11 @@ int main(int argc, char *argv[])
 
 	originalMessageHandler = qInstallMessageHandler(messageOutputHandler);
 
-	QCoreApplication a(argc, argv);
+	QCoreApplication app(argc, argv);
 
-	// --
+	// Parse arguments
+	// SimulatorConsole.exe [-build=build_dir] [-script=script_file] [-profile=profile_name]
+	// SimulatorConsole.exe [-create=file_name]
 	//
 	QStringList args = QCoreApplication::arguments();
 
@@ -142,24 +143,51 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (args[1].compare("/create", Qt::CaseInsensitive) == 0 ||
-		args[1].compare("-create", Qt::CaseInsensitive) == 0)
+	QString buildPath;
+	QString scriptFile;
+	QString profileName;
+
+	for (int argIndex = 1; argIndex < argc; argIndex++)
 	{
-		if (args.size() < 3)
+		if (args[argIndex].startsWith("-create=", Qt::CaseInsensitive) == true)
 		{
-			std::cout << " Script file name is not specified.\n";
-			return EXIT_FAILURE;
+			bool ok = generateScript(args[argIndex]);
+			return ok == true ? EXIT_SUCCESS : EXIT_FAILURE;
 		}
 
-		bool ok = generateScript(args[2]);
+		if (args[argIndex].startsWith("-build=", Qt::CaseInsensitive) == true)
+		{
+			buildPath = args[argIndex];
+			buildPath.replace("-build=", "", Qt::CaseInsensitive);
+			continue;
+		}
 
-		return ok == true ? EXIT_SUCCESS : EXIT_FAILURE;
+		if (args[argIndex].startsWith("-script=", Qt::CaseInsensitive) == true)
+		{
+			scriptFile = args[argIndex];
+			scriptFile.replace("-script=", "", Qt::CaseInsensitive);
+			continue;
+		}
+
+		if (args[argIndex].startsWith("-profile=", Qt::CaseInsensitive) == true)
+		{
+			profileName = args[argIndex];
+			profileName.replace("-profile=", "", Qt::CaseInsensitive);
+			continue;
+		}
+
+		// --
+		//
+		std::cout << "Unknown argument: " << args[argIndex].toStdString() << "\n\n";
+
+		showProgrammUsageHint();
+		return EXIT_FAILURE;
 	}
+
 
 	// --
 	//
 	Sim::Simulator simulator{nullptr, nullptr};		// Log to console
-	QString buildPath = args[1];
 
 	if (bool ok = simulator.load(buildPath);
 		ok == false)
@@ -167,24 +195,22 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
+	simulator.setCurrentProfile(profileName);
+
 	// Add modules to simulation
 	//
 	simulator.control().setRunList({});
 
 	bool ok = true;
 
-	if (args.size() > 2)
+	if (scriptFile.isEmpty() == false)
 	{
-		// Script must be run
-		//
-		QString scriptFileName = args[2];
-		qint64 timeout = 3600 * 1000;	// 1 hour, -1 means no time limit
-
-		ok &= runScript(scriptFileName, timeout, &simulator);
+		const qint64 timeout = 3600 * 1000;	// 1 hour, -1 means no time limit
+		ok &= runScript(scriptFile, timeout, &simulator);
 	}
 	else
 	{
-		// Start simulation
+		// Start timeless simulation till enter is pressed
 		//
 		ok &= simulator.control().startSimulation(std::chrono::microseconds{-1});
 		getchar();
