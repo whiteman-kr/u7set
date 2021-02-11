@@ -99,6 +99,8 @@ public:
 	bool isNewConnection() { return m_isNewConnection; }
 
 	void setConnection(bool newConnection, const Metrology::Connection& connection);
+
+	Metrology::Connection parentConnection() const { return m_parentConnection; }
 	Metrology::Connection connection() const { return m_connection; }
 
 private:
@@ -112,6 +114,7 @@ private:
 	QLineEdit* m_pOutputSignalIDEdit = nullptr;
 	QDialogButtonBox* m_buttonBox = nullptr;
 
+	Metrology::Connection m_parentConnection;
 	Metrology::Connection m_connection;
 
 	void createInterface();
@@ -143,13 +146,18 @@ public:
 
 	static bool enableNewConnection(const Signal& signal);
 
+	//
+	//
 	bool loadConnectionBase();
 	void saveConnectionBase(bool checkIn, const QString& comment);
 	bool checkOutConnectionBase();
 
-
+	//
 	void updateList();
+	void selectConnectionInList(const Metrology::Connection& connection);
 
+	//
+	//
 	bool createConnectionBySignal(Signal* pSignal);
 
 private:
@@ -224,7 +232,6 @@ private slots:
 	void importConnections();
 	void copy();
 
-	void find();
 	void selectAll() { m_pView->selectAll(); }
 
 	// ContextMenu

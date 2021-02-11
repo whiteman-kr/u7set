@@ -369,7 +369,9 @@ void DialogMetrologyConnectionItem::selectedType(int)
 
 void DialogMetrologyConnectionItem::setConnection(bool newConnection, const Metrology::Connection& connection)
 {
+	m_parentConnection = connection;
 	m_connection = connection;
+
 	m_isNewConnection = newConnection;
 
 	if (newConnection == true)
@@ -1053,17 +1055,87 @@ void DialogMetrologyConnection::createContextMenu()
 
 void DialogMetrologyConnection::updateList()
 {
-	m_connectionTable.clear();
-
 	QVector<Metrology::Connection> connectionList;
 
-	int count = m_connectionBase.count();
-	for(int i = 0; i < count; i++)
+	m_connectionTable.clear();
+
+	m_findText = m_findTextEdit->text();
+	if (m_findText.isEmpty() == true)
 	{
-		connectionList.append(m_connectionBase.connection(i));
+		int count = m_connectionBase.count();
+		for(int i = 0; i < count; i++)
+		{
+			connectionList.append(m_connectionBase.connection(i));
+		}
+	}
+	else
+	{
+		if (m_findText.indexOf("*") == -1)
+		{
+			m_findText.insert(0, "*");
+			m_findText.append("*");
+		}
+
+		QRegExp rx(m_findText);
+		rx.setPatternSyntax(QRegExp::Wildcard);
+		rx.setCaseSensitivity(Qt::CaseInsensitive);
+
+		int count = m_connectionBase.count();
+		for(int i = 0; i < count; i++)
+		{
+			const Metrology::Connection& connection = m_connectionBase.connection(i);
+
+			bool found = false;
+
+			for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+			{
+				if(rx.exactMatch(connection.appSignalID(ioType)) == true)
+				{
+					found = true;
+				}
+			}
+
+			if (found == true)
+			{
+				connectionList.append(m_connectionBase.connection(i));
+			}
+		}
 	}
 
 	m_connectionTable.set(connectionList);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogMetrologyConnection::selectConnectionInList(const Metrology::Connection& connection)
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	QSortFilterProxyModel* pSourceProxyModel = dynamic_cast<QSortFilterProxyModel*>(m_pView->model());
+	if(pSourceProxyModel == nullptr)
+	{
+		return;
+	}
+
+	int count = pSourceProxyModel->rowCount();
+	for (int i = 0; i < count; i ++)
+	{
+		QModelIndex index = m_pView->model()->index(i, 0);
+
+		int conncetionIndex = pSourceProxyModel->mapToSource(index).row();
+		if (conncetionIndex < 0 || conncetionIndex >= m_connectionTable.connectionCount())
+		{
+			continue;
+		}
+
+		if (m_connectionTable.at(conncetionIndex).strID(true) == connection.strID(true))
+		{
+			m_pView->setCurrentIndex(index);
+		}
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1238,8 +1310,7 @@ void DialogMetrologyConnection::connectionChanged()
 			int foundIndex = m_connectionBase.findConnectionIndex(connection);
 			if (foundIndex != -1)
 			{
-				m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
-
+				selectConnectionInList(connection);
 				QMessageBox::information(this, m_windowTitle, tr("Connection already exist!"));
 				return;
 			}
@@ -1252,24 +1323,19 @@ void DialogMetrologyConnection::connectionChanged()
 			}
 			else
 			{
-				int index = m_pView->currentIndex().row();
-				if (index < 0 || index >= m_connectionTable.connectionCount())
+				int connectionIndex = m_connectionBase.findConnectionIndex(m_dialogConnectionItem->parentConnection());
+				if (connectionIndex < 0 || connectionIndex >= m_connectionBase.count())
 				{
 					return;
 				}
 
 				connection.setAction(VcsItemAction::VcsItemActionType::Modified);
 
-				m_connectionBase.setConnection(index, connection);
+				m_connectionBase.setConnection(connectionIndex, connection);
 			}
 
 			updateList();
-
-			foundIndex = m_connectionBase.findConnectionIndex(connection);
-			if (foundIndex != -1)
-			{
-				m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
-			}
+			selectConnectionInList(connection);
 
 			m_isModified = true;
 		}
@@ -1311,18 +1377,22 @@ void DialogMetrologyConnection::removeConnection()
 		return;
 	}
 
-
 	for( int i = 0; i < selectedConnectionCount; i++)
 	{
-		int conncetionIndex = pSourceProxyModel->mapToSource(m_pView->selectionModel()->selectedRows().at(i)).row();
-
-		if (conncetionIndex >= 0 && conncetionIndex < m_connectionTable.connectionCount())
+		int tableIndex = pSourceProxyModel->mapToSource(m_pView->selectionModel()->selectedRows().at(i)).row();
+		if (tableIndex >= 0 && tableIndex < m_connectionTable.connectionCount())
 		{
-			if (checkOutConnectionBase() == true)
-			{
-				m_connectionBase.setAction(conncetionIndex, VcsItemAction::VcsItemActionType::Deleted);
+			const Metrology::Connection& connection = m_connectionTable.at(tableIndex);
 
-				m_isModified = true;
+			int connectionIndex = m_connectionBase.findConnectionIndex(connection);
+			if (connectionIndex >= 0 && connectionIndex < m_connectionBase.count())
+			{
+				if (checkOutConnectionBase() == true)
+				{
+					m_connectionBase.setAction(connectionIndex, VcsItemAction::VcsItemActionType::Deleted);
+
+					m_isModified = true;
+				}
 			}
 		}
 	}
@@ -1519,55 +1589,6 @@ void DialogMetrologyConnection::importConnections()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogMetrologyConnection::find()
-{
-	m_findText = m_findTextEdit->text();
-	if (m_findText.isEmpty() == true)
-	{
-		updateList();
-		return;
-	}
-
-	if (m_findText.indexOf("*") == -1)
-	{
-		m_findText.insert(0, "*");
-		m_findText.append("*");
-	}
-
-	QRegExp rx(m_findText);
-	rx.setPatternSyntax(QRegExp::Wildcard);
-	rx.setCaseSensitivity(Qt::CaseInsensitive);
-
-	m_connectionTable.clear();
-
-	QVector<Metrology::Connection> connectionList;
-
-	int count = m_connectionBase.count();
-	for(int i = 0; i < count; i++)
-	{
-		const Metrology::Connection& connection = m_connectionBase.connection(i);
-
-		bool found = false;
-
-		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
-		{
-			if(rx.exactMatch(connection.appSignalID(ioType)) == true)
-			{
-				found = true;
-			}
-		}
-
-		if (found == true)
-		{
-			connectionList.append(m_connectionBase.connection(i));
-		}
-	}
-
-	m_connectionTable.set(connectionList);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void DialogMetrologyConnection::copy()
 {
 	if (m_pView == nullptr)
@@ -1674,7 +1695,7 @@ void DialogMetrologyConnection::keyPressEvent(QKeyEvent *e)
 	{
 		if (m_findTextEdit->hasFocus() == true)
 		{
-			find();
+			updateList();
 		}
 
 		return;
