@@ -165,7 +165,7 @@ public:
 	bool setMultiSignal(int ioType, const MultiChannelSignal& signal);
 
 	Metrology::Signal* metrologySignal(int ioType, int channel) const;
-	bool setMetrologySignal(int measureKind, const Metrology::ConnectionBase& сonnectionBase, Metrology::ConnectionType connectionType, int channel, Metrology::Signal* pSignal);
+	bool setMetrologySignal(int measureKind, const Metrology::ConnectionBase& connectionBase, Metrology::ConnectionType connectionType, int channel, Metrology::Signal* pSignal);
 
 	bool contains(Metrology::Signal* pSignal) const;
 

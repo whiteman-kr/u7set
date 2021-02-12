@@ -851,52 +851,6 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	int ConnectionBase::destinationSignalCount(const QString& sourceAppSignalID, ConnectionType connectionType) const
-	{
-		if (sourceAppSignalID.isEmpty() == true)
-		{
-			return 0;
-		}
-
-		if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= ConnectionTypeCount)
-		{
-			return 0;
-		}
-
-		int destSignalCount = 0;
-
-		QMutexLocker l(&m_connectionMutex);
-
-		int count = m_connectionList.count();
-
-		for(int i = 0; i < count; i ++)
-		{
-			const Connection& connection = m_connectionList[i];
-
-			if (connection.type() != connectionType)
-			{
-				continue;
-			}
-
-			if (connection.appSignalID(ConnectionIoType::Source) != sourceAppSignalID)
-			{
-				continue;
-			}
-
-			Metrology::Signal* pDestSignal = connection.metrologySignal(ConnectionIoType::Destination);
-			if (pDestSignal == nullptr || pDestSignal->param().isValid() == false)
-			{
-				continue;
-			}
-
-			destSignalCount ++;
-		}
-
-		return destSignalCount;
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
 	QVector<Metrology::Signal*> ConnectionBase::destinationSignals(const QString& sourceAppSignalID, ConnectionType connectionType) const
 	{
 		if (sourceAppSignalID.isEmpty() == true)

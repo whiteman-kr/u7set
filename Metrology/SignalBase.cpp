@@ -1029,7 +1029,7 @@ Metrology::Signal* MeasureSignal::metrologySignal(int ioType, int channel) const
 // -------------------------------------------------------------------------------------------------------------------
 
 bool MeasureSignal::setMetrologySignal(int measureKind,
-									   const Metrology::ConnectionBase& onnectionBase,
+									   const Metrology::ConnectionBase& connectionBase,
 									   Metrology::ConnectionType connectionType,
 									   int channel,
 									   Metrology::Signal* pSignal)
@@ -1089,7 +1089,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 				{
 					// take output signals of input signal
 					//
-					QVector<Metrology::Signal*> destSignals = onnectionBase.destinationSignals(pSignal->param().appSignalID(), connectionType);
+					QVector<Metrology::Signal*> destSignals = connectionBase.destinationSignals(pSignal->param().appSignalID(), connectionType);
 					if (channel < 0 || channel >= destSignals.count())
 					{
 						break;
@@ -1104,7 +1104,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 				{
 					// find index of metrology connection in the base by input signal
 					//
-					int connectionIndex = onnectionBase.findConnectionIndex(connectionType, Metrology::ConnectionIoType::Source, pSignal);
+					int connectionIndex = connectionBase.findConnectionIndex(connectionType, Metrology::ConnectionIoType::Source, pSignal);
 					if (connectionIndex == -1)
 					{
 						break;
@@ -1112,7 +1112,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 
 					// take metrology connection in the base by index
 					//
-					const Metrology::Connection& connection = onnectionBase.connection(connectionIndex);
+					const Metrology::Connection& connection = connectionBase.connection(connectionIndex);
 					if (connection.isValid() == false)
 					{
 						break;
@@ -2221,7 +2221,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 				}
 				else
 				{
-					channelCount = m_connectionBase.destinationSignalCount(m_signalList[i].param().appSignalID(), connectionType);
+					channelCount = m_connectionBase.destinationSignals(param.appSignalID(), connectionType).count();
 				}
 				break;
 

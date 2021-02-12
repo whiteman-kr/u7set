@@ -185,7 +185,6 @@ namespace Metrology
 		int findConnectionIndex(int ioType, Metrology::Signal* pSignal) const;
 		int findConnectionIndex(int connectionType, int ioType, Metrology::Signal* pSignal) const;
 
-		int destinationSignalCount(const QString& sourceAppSignalID, ConnectionType connectionType) const;
 		QVector<Metrology::Signal*> destinationSignals(const QString& sourceAppSignalID, ConnectionType connectionType) const;
 
 		//

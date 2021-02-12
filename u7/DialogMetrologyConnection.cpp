@@ -305,7 +305,7 @@ void DialogMetrologyConnectionItem::createInterface()
 	//
 	for (int type = 0; type < Metrology::ConnectionTypeCount; type++)
 	{
-		m_pTypeList->addItem(Metrology::ConnectionTypeCaption(type), type);
+		m_pTypeList->addItem(Metrology::ConnectionTypeCaption(static_cast<Metrology::ConnectionType>(type)), type);
 	}
 	m_pTypeList->removeItem(Metrology::ConnectionType::Unsed);
 	m_pTypeList->setCurrentIndex(0);
