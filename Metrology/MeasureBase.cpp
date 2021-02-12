@@ -126,7 +126,7 @@ QString Measurement::connectionTypeStr() const
 		return QString();
 	}
 
-	return Metrology::ConnectionTypeCaption(m_connectionType);
+	return qApp->translate("MetrologyConnection", Metrology::ConnectionTypeCaption(static_cast<Metrology::ConnectionType>(m_connectionType)).toUtf8());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1139,7 +1139,7 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 
 	double engineering = (ioParam.percent() * (inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) / 100) + inParam.lowEngineeringUnits();
 	double electric = uc.conversion(engineering, UnitsConvertType::PhysicalToElectric, inParam);
-	double engineeringCalc = conversionConnection(engineering, ConversionDirection::Normal, ioParam.connectionType(), ioParam);
+	double engineeringCalc = conversionByConnection(engineering, ioParam, ConversionDirection::Normal);
 
 	setPercent(ioParam.percent());
 
@@ -1161,7 +1161,7 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	for(int index = 0; index < measureCount; index++)
 	{
 		double enVal = theSignalBase.signalState(outParam.hash()).value();
-		double enCalcVal = conversionConnection(enVal, ConversionDirection::Inversion, ioParam.connectionType(), ioParam);
+		double enCalcVal = conversionByConnection(enVal, ioParam, ConversionDirection::Inversion);
 		double elVal = uc.conversion(enCalcVal, UnitsConvertType::PhysicalToElectric, inParam);
 
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ELECTRIC, index, elVal);
@@ -1272,7 +1272,7 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 	//
 
 	double engineering = (ioParam.percent() * (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) / 100) + outParam.lowEngineeringUnits();
-	double engineeringCalc = conversionConnection(engineering, ConversionDirection::Normal, ioParam.connectionType(), ioParam);
+	double engineeringCalc = conversionByConnection(engineering, ioParam, ConversionDirection::Normal);
 	double electric = uc.conversion(engineeringCalc, UnitsConvertType::PhysicalToElectric, outParam);
 
 	setPercent(ioParam.percent());
@@ -2241,7 +2241,7 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	setCmpType(cmpValueType, comparatorEx->cmpType());
 
 	double engineering = comparatorEx->compareOnlineValue(cmpValueType);
-	double engineeringCalc = conversionConnection(engineering, ConversionDirection::Inversion, ioParam.connectionType(), ioParam);
+	double engineeringCalc = conversionByConnection(engineering, ioParam, ConversionDirection::Inversion);
 	double electric = uc.conversion(engineeringCalc, UnitsConvertType::PhysicalToElectric, inParam);
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
@@ -2255,7 +2255,7 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 
 	electric = ioParam.isNegativeRange() ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
 	engineering = uc.conversion(electric, UnitsConvertType::ElectricToPhysical, inParam);
-	engineeringCalc = conversionConnection(engineering, ConversionDirection::Normal, ioParam.connectionType(), ioParam);
+	engineeringCalc = conversionByConnection(engineering, ioParam, ConversionDirection::Normal);
 
 	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
 	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, engineeringCalc);

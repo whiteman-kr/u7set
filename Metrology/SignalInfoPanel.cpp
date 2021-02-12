@@ -605,7 +605,7 @@ void SignalInfoPanel::appendMetrologyConnetionMenu()
 		return;
 	}
 
-	m_destSignals = theSignalBase.connections().destinationSignals(m_connectionType, sourParam.appSignalID());
+	m_destSignals = theSignalBase.connections().destinationSignals(sourParam.appSignalID(), m_connectionType);
 
 	int destSignalCount = m_destSignals.count();
 	for (int s = 0; s < destSignalCount; s++)

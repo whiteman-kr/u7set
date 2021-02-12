@@ -291,7 +291,7 @@ private:
 	// all signals that received form CgfSrv
 	//
 	mutable QMutex			m_signalMutex;
-	QMap<Hash, int>			m_signalHashMap;
+	QHash<Hash, int>		m_signalHashList;
 	QVector<Metrology::Signal> m_signalList;
 
 	// list of hashes in order to receive signal state form AppDataSrv

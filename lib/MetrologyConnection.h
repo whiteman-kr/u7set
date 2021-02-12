@@ -30,7 +30,7 @@ namespace Metrology
 	};
 	const int ConnectionTypeCount = 8;			// count of ...ConnectionType elements
 
-	QString ConnectionTypeCaption(int type);
+	QString ConnectionTypeCaption(ConnectionType type);
 
 	// ==============================================================================================
 
@@ -185,8 +185,8 @@ namespace Metrology
 		int findConnectionIndex(int ioType, Metrology::Signal* pSignal) const;
 		int findConnectionIndex(int connectionType, int ioType, Metrology::Signal* pSignal) const;
 
-		int destinationSignalCount(ConnectionType connectionType, const QString& sourceAppSignalID) const;
-		QVector<Metrology::Signal*> destinationSignals(ConnectionType connectionType, const QString& sourceAppSignalID) const;
+		int destinationSignalCount(const QString& sourceAppSignalID, ConnectionType connectionType) const;
+		QVector<Metrology::Signal*> destinationSignals(const QString& sourceAppSignalID, ConnectionType connectionType) const;
 
 		//
 		//

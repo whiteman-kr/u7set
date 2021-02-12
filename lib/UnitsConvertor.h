@@ -194,6 +194,16 @@ enum class UnitsConvertType
 Q_DECLARE_METATYPE(UnitsConvertType)
 
 // ==============================================================================================
+
+enum class ConversionDirection
+{
+	Normal = 0,
+	Inversion = 1,
+};
+
+Q_DECLARE_METATYPE(ConversionDirection)
+
+// ==============================================================================================
 // class UnitsConvertor
 //
 
@@ -211,6 +221,8 @@ public:
 	double conversion(double val, const UnitsConvertType& conversionType, const Signal& signal);																				// universal conversion from electrical to physical and vice versa
 	double conversionDegree(double val, const UnitsConvertType& conversionType, const E::ElectricUnit& unitID, const E::SensorType& sensorType, double r0 = 0);					// conversion only ThermoCouple and ThermoResistor
 	double conversionDegree(double val, const UnitsConvertType& conversionType);																								// conversion only Celsius to Fahrenheit and vice versa
+
+	double conversionByConnection(double val, int connectionType, const Signal& sourSignal, const Signal& destSignal, ConversionDirection directType );							// conversion for Metrology connections
 
 	double r0_from_signal(const Signal& signal);																																// for signals of module RIM
 	bool r0_is_use(int sensorType);																																				// for signals of module RIM

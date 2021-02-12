@@ -1,5 +1,6 @@
 ﻿#include "UnitsConvertor.h"
 #include "SignalProperties.h"
+#include "MetrologyConnection.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 //
@@ -558,6 +559,159 @@ double UnitsConvertor::conversionDegree(double val, const UnitsConvertType& conv
 		case UnitsConvertType::CelsiusToFahrenheit:	retVal = (val * (9.0 / 5.0)) + 32;		break;
 		case UnitsConvertType::FahrenheitToCelsius:	retVal = ((val - 32) * (5.0 / 9.0));	break;
 		default:									assert(0);
+	}
+
+	return retVal;
+}
+
+double UnitsConvertor::conversionByConnection(double val, int connectionType, const Signal& sourSignal, const Signal& destSignal, ConversionDirection directType)
+{
+	if (connectionType < 0 || connectionType >= Metrology::ConnectionTypeCount)
+	{
+		return val;
+	}
+
+	if (sourSignal.hash() == UNDEFINED_HASH)
+	{
+		return val;
+	}
+
+	if (sourSignal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false ||
+		sourSignal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+	{
+		return val;
+	}
+
+	if (destSignal.hash() == UNDEFINED_HASH)
+	{
+		return val;
+	}
+
+	if (destSignal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false ||
+		destSignal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+	{
+		return val;
+	}
+
+	double retVal = val;
+
+	switch (directType)
+	{
+		case ConversionDirection::Normal:
+
+			switch (connectionType)
+			{
+				case Metrology::ConnectionType::Input_DP_Internal_F:
+					{
+						double K = (destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits()) /
+								sqrt(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits());
+
+						retVal = K * sqrt( val );
+					}
+					break;
+
+				case Metrology::ConnectionType::Input_DP_Output_F:
+				{
+					val = (val - destSignal.lowEngineeringUnits())*
+							(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits())/
+							(destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits()) +
+							sourSignal.lowEngineeringUnits();
+
+					double K = (destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits()) /
+							sqrt(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits());
+
+					retVal = K * sqrt( val );
+				}
+				break;
+
+				case Metrology::ConnectionType::Input_C_Internal_F:
+					{
+						retVal = conversionDegree(val, UnitsConvertType::CelsiusToFahrenheit);
+					}
+					break;
+
+				case Metrology::ConnectionType::Input_C_Output_F:
+					{
+						val = (val - destSignal.lowEngineeringUnits())*
+								(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits())/
+								(destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits()) +
+								sourSignal.lowEngineeringUnits();
+
+						retVal = conversionDegree(val, UnitsConvertType::CelsiusToFahrenheit);
+					}
+					break;
+
+				default:
+					{
+						retVal = (val - sourSignal.lowEngineeringUnits())*
+								(destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits())/
+								(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits()) +
+								destSignal.lowEngineeringUnits();
+					}
+					break;
+			}
+
+			break;
+
+		case ConversionDirection::Inversion:
+
+			switch (connectionType)
+			{
+				case Metrology::ConnectionType::Input_DP_Internal_F:
+					{
+						double K = (destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits()) /
+								sqrt(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits());
+
+						retVal = pow(val / K, 2);
+					}
+					break;
+
+				case Metrology::ConnectionType::Input_DP_Output_F:
+					{
+						val = (val - sourSignal.lowEngineeringUnits())*
+								(destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits())/
+								(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits()) +
+								destSignal.lowEngineeringUnits();
+
+						double K = (destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits()) /
+								sqrt(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits());
+
+						retVal = pow(val / K, 2);
+					}
+					break;
+
+				case Metrology::ConnectionType::Input_C_Internal_F:
+					{
+						retVal = conversionDegree(val, UnitsConvertType::FahrenheitToCelsius);
+					}
+					break;
+
+				case Metrology::ConnectionType::Input_C_Output_F:
+					{
+						val = (val - sourSignal.lowEngineeringUnits())*
+								(destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits())/
+								(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits()) +
+								destSignal.lowEngineeringUnits();
+
+						retVal = conversionDegree(val, UnitsConvertType::FahrenheitToCelsius);
+					}
+					break;
+
+				default:
+					{
+						retVal = (val - destSignal.lowEngineeringUnits())*
+								(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits())/
+								(destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits()) +
+								sourSignal.lowEngineeringUnits();
+					}
+					break;
+			}
+
+			break;
+
+		default:
+			Q_ASSERT(0);		// undefinded ConversionDirection
+			break;
 	}
 
 	return retVal;

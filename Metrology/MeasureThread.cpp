@@ -823,10 +823,9 @@ void MeasureThread::measureCompratorsInSeries()
 						}
 
 
-						double engineeringCalcVal = conversionConnection(engineeringVal,
-																	  ConversionDirection::Inversion,
-																	  m_activeIoParamList[ch].connectionType(),
-																	  m_activeIoParamList[ch]);
+						double engineeringCalcVal = conversionByConnection(	engineeringVal,
+																			m_activeIoParamList[ch],
+																			ConversionDirection::Inversion);
 
 
 						const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
@@ -1057,10 +1056,9 @@ void MeasureThread::measureCompratorsInSeries()
 						{
 							double comporatorEtalonVal = comparatorEx->compareOnlineValue(cmpValueType);		// get compare or hyst value
 
-							double engineeringEtalonCalcVal = conversionConnection(comporatorEtalonVal,
-																				ConversionDirection::Inversion,
-																				m_activeIoParamList[ch].connectionType(),
-																				m_activeIoParamList[ch]);
+							double engineeringEtalonCalcVal = conversionByConnection(	comporatorEtalonVal,
+																						m_activeIoParamList[ch],
+																						ConversionDirection::Inversion);
 
 							double electricEtalonVal = uc.conversion(engineeringEtalonCalcVal, UnitsConvertType::PhysicalToElectric, inParam);
 
@@ -1344,10 +1342,9 @@ void MeasureThread::measureCompratorsInParallel()
 						}
 
 
-						double engineeringCalcVal = conversionConnection(engineeringVal,
-																	  ConversionDirection::Inversion,
-																	  m_activeIoParamList[ch].connectionType(),
-																	  m_activeIoParamList[ch]);
+						double engineeringCalcVal = conversionByConnection(	engineeringVal,
+																			m_activeIoParamList[ch],
+																			ConversionDirection::Inversion);
 
 						double electricVal = uc.conversion(engineeringCalcVal, UnitsConvertType::PhysicalToElectric, inParam);
 
@@ -1678,10 +1675,9 @@ void MeasureThread::measureCompratorsInParallel()
 						{
 							double comporatorEtalonVal = comparatorEx->compareOnlineValue(cmpValueType);		// get compare or hyst value
 
-							double engineeringEtalonCalcVal = conversionConnection(comporatorEtalonVal,
-																				ConversionDirection::Inversion,
-																				m_activeIoParamList[ch].connectionType(),
-																				m_activeIoParamList[ch]);
+							double engineeringEtalonCalcVal = conversionByConnection(	comporatorEtalonVal,
+																						m_activeIoParamList[ch],
+																						ConversionDirection::Inversion);
 
 							double electricEtalonVal = uc.conversion(engineeringEtalonCalcVal, UnitsConvertType::PhysicalToElectric, inParam);
 

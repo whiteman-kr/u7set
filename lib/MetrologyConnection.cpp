@@ -851,19 +851,19 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	int ConnectionBase::destinationSignalCount(ConnectionType connectionType, const QString& sourceAppSignalID) const
+	int ConnectionBase::destinationSignalCount(const QString& sourceAppSignalID, ConnectionType connectionType) const
 	{
-		if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= ConnectionTypeCount)
-		{
-			return 0;
-		}
-
 		if (sourceAppSignalID.isEmpty() == true)
 		{
 			return 0;
 		}
 
-		int outputSignalCount = 0;
+		if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= ConnectionTypeCount)
+		{
+			return 0;
+		}
+
+		int destSignalCount = 0;
 
 		QMutexLocker l(&m_connectionMutex);
 
@@ -883,33 +883,33 @@ namespace Metrology
 				continue;
 			}
 
-			Metrology::Signal* pOutputSignal = m_connectionList[i].metrologySignal(ConnectionIoType::Destination);
-			if (pOutputSignal == nullptr || pOutputSignal->param().isValid() == false)
+			Metrology::Signal* pDestSignal = connection.metrologySignal(ConnectionIoType::Destination);
+			if (pDestSignal == nullptr || pDestSignal->param().isValid() == false)
 			{
 				continue;
 			}
 
-			outputSignalCount ++;
+			destSignalCount ++;
 		}
 
-		return outputSignalCount;
+		return destSignalCount;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QVector<Metrology::Signal*> ConnectionBase::destinationSignals(ConnectionType connectionType, const QString& sourceAppSignalID) const
+	QVector<Metrology::Signal*> ConnectionBase::destinationSignals(const QString& sourceAppSignalID, ConnectionType connectionType) const
 	{
-		if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= ConnectionTypeCount)
-		{
-			return QVector<Metrology::Signal*>();
-		}
-
 		if (sourceAppSignalID.isEmpty() == true)
 		{
 			return QVector<Metrology::Signal*>();
 		}
 
-		QVector<Metrology::Signal*> outputSignalsList;
+		if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= ConnectionTypeCount)
+		{
+			return QVector<Metrology::Signal*>();
+		}
+
+		QVector<Metrology::Signal*> destSignalList;
 
 		QMutexLocker l(&m_connectionMutex);
 
@@ -929,16 +929,16 @@ namespace Metrology
 				continue;
 			}
 
-			Metrology::Signal* pOutputSignal = m_connectionList[i].metrologySignal(ConnectionIoType::Destination);
-			if (pOutputSignal == nullptr || pOutputSignal->param().isValid() == false)
+			Metrology::Signal* pDestSignal = m_connectionList[i].metrologySignal(ConnectionIoType::Destination);
+			if (pDestSignal == nullptr || pDestSignal->param().isValid() == false)
 			{
 				continue;
 			}
 
-			outputSignalsList.append(pOutputSignal);
+			destSignalList.append(pDestSignal);
 		}
 
-		return outputSignalsList;
+		return destSignalList;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -1005,7 +1005,7 @@ namespace Metrology
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ConnectionTypeCaption(int type)
+	QString ConnectionTypeCaption(ConnectionType type)
 	{
 		QString caption;
 
@@ -1020,7 +1020,6 @@ namespace Metrology
 			case Input_C_Output_F:		caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Input °С -> Output °F");		break;
 			case Tuning_Output:			caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Tuning -> Output");				break;
 			default:					assert(0);
-
 		}
 
 		return caption;

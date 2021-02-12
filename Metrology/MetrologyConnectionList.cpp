@@ -347,7 +347,7 @@ void MetrologyConnectionItemDialog::createInterface()
 	//
 	for (int type = 0; type < Metrology::ConnectionTypeCount; type++)
 	{
-		m_pTypeList->addItem(qApp->translate("MetrologyConnection", Metrology::ConnectionTypeCaption(type).toUtf8()), type);
+		m_pTypeList->addItem(qApp->translate("MetrologyConnection", Metrology::ConnectionTypeCaption(static_cast<Metrology::ConnectionType>(type)).toUtf8()), type);
 	}
 	m_pTypeList->removeItem(Metrology::ConnectionType::Unsed);
 

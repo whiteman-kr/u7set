@@ -1089,7 +1089,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 				{
 					// take output signals of input signal
 					//
-					QVector<Metrology::Signal*> destSignals = onnectionBase.destinationSignals(connectionType, pSignal->param().appSignalID());
+					QVector<Metrology::Signal*> destSignals = onnectionBase.destinationSignals(pSignal->param().appSignalID(), connectionType);
 					if (channel < 0 || channel >= destSignals.count())
 					{
 						break;
@@ -1248,7 +1248,7 @@ void SignalBase::clearSignalList()
 	m_connectionBase.clear();
 	m_statisticsBase.clear();
 
-	m_signalHashMap.clear();
+	m_signalHashList.clear();
 	m_signalList.clear();
 }
 
@@ -1264,7 +1264,7 @@ int SignalBase::appendSignal(const Metrology::SignalParam& param)
 
 	QMutexLocker l(&m_signalMutex);
 
-	if (m_signalHashMap.contains(param.hash()) == true)
+	if (m_signalHashList.contains(param.hash()) == true)
 	{
 		return -1;
 	}
@@ -1276,7 +1276,7 @@ int SignalBase::appendSignal(const Metrology::SignalParam& param)
 	m_signalList.append(metrologySignal);
 	index = m_signalList.count() - 1;
 
-	m_signalHashMap.insert(param.hash(), index);
+	m_signalHashList.insert(param.hash(), index);
 
 	return index;
 }
@@ -1306,12 +1306,12 @@ Metrology::Signal* SignalBase::signalPtr(const Hash& hash)
 
 	QMutexLocker l(&m_signalMutex);
 
-	if (m_signalHashMap.contains(hash) == false)
+	if (m_signalHashList.contains(hash) == false)
 	{
 		return nullptr;
 	}
 
-	int index = m_signalHashMap[hash];
+	int index = m_signalHashList[hash];
 	if (index < 0 || index >= m_signalList.count())
 	{
 		return nullptr;
@@ -1359,12 +1359,12 @@ Metrology::Signal SignalBase::signal(const Hash& hash) const
 
 	QMutexLocker l(&m_signalMutex);
 
-	if (m_signalHashMap.contains(hash) == false)
+	if (m_signalHashList.contains(hash) == false)
 	{
 		return Metrology::Signal();
 	}
 
-	int index = m_signalHashMap[hash];
+	int index = m_signalHashList[hash];
 
 	if (index < 0 || index >= m_signalList.count())
 	{
@@ -1413,12 +1413,12 @@ Metrology::SignalParam SignalBase::signalParam(const Hash& hash) const
 
 	QMutexLocker l(&m_signalMutex);
 
-	if (m_signalHashMap.contains(hash) == false)
+	if (m_signalHashList.contains(hash) == false)
 	{
 		return Metrology::SignalParam();
 	}
 
-	int index = m_signalHashMap[hash];
+	int index = m_signalHashList[hash];
 
 	if (index < 0 || index >= m_signalList.count())
 	{
@@ -1454,12 +1454,12 @@ void SignalBase::setSignalParam(const Hash& hash, const Metrology::SignalParam& 
 
 	QMutexLocker l(&m_signalMutex);
 
-	if (m_signalHashMap.contains(hash) == false)
+	if (m_signalHashList.contains(hash) == false)
 	{
 		return;
 	}
 
-	int index = m_signalHashMap[hash];
+	int index = m_signalHashList[hash];
 
 	if (index < 0 || index >= m_signalList.count())
 	{
@@ -1512,12 +1512,12 @@ Metrology::SignalState SignalBase::signalState(const Hash& hash) const
 
 	QMutexLocker l(&m_signalMutex);
 
-	if (m_signalHashMap.contains(hash) == false)
+	if (m_signalHashList.contains(hash) == false)
 	{
 		return Metrology::SignalState();
 	}
 
-	int index = m_signalHashMap[hash];
+	int index = m_signalHashList[hash];
 
 	if (index < 0 || index >= m_signalList.count())
 	{
@@ -1566,12 +1566,12 @@ void SignalBase::setSignalState(const Hash& hash, const Metrology::SignalState &
 
 	QMutexLocker l(&m_signalMutex);
 
-	if (m_signalHashMap.contains(hash) == false)
+	if (m_signalHashList.contains(hash) == false)
 	{
 		return;
 	}
 
-	int index = m_signalHashMap[hash];
+	int index = m_signalHashList[hash];
 
 	if (index < 0 || index >= m_signalList.count())
 	{
@@ -2221,7 +2221,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 				}
 				else
 				{
-					channelCount = m_connectionBase.destinationSignalCount(connectionType, m_signalList[i].param().appSignalID());
+					channelCount = m_connectionBase.destinationSignalCount(m_signalList[i].param().appSignalID(), connectionType);
 				}
 				break;
 

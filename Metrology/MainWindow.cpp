@@ -904,7 +904,7 @@ void MainWindow::loadOnToolBar_Connection()
 				selectedItem = index + 1;	// Metrology::ConnectionType::Unsed item has already been added early, hence +1
 			}
 
-			m_pConnectionTypeList->addItem(qApp->translate("MetrologyConnection", Metrology::ConnectionTypeCaption(connectionType).toUtf8()), connectionType);
+			m_pConnectionTypeList->addItem(qApp->translate("MetrologyConnection", Metrology::ConnectionTypeCaption(static_cast<Metrology::ConnectionType>(connectionType)).toUtf8()), connectionType);
 		}
 
 	m_pConnectionTypeList->blockSignals(false);
