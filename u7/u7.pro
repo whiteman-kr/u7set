@@ -205,6 +205,7 @@ SOURCES +=\
 
 HEADERS  += \
     ../lib/ExportPrint.h \
+    ../lib/QDoublevalidatorEx.h \
     ../lib/SoftwareXmlReader.h \
     ../lib/StandardColors.h \
     ../lib/Ui/DbControllerTools.h \
