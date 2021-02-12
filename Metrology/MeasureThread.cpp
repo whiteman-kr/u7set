@@ -104,7 +104,7 @@ bool MeasureThread::setActiveSignalParam(const MeasureSignal& activeSignal, cons
 			}
 
 			ioParam.setParam(ioType, param);
-			ioParam.setMetrologyConnectionType(activeSignal.metrologyConnectionType());
+			ioParam.setConnectionType(activeSignal.connectionType());
 			ioParam.setCalibratorManager(pCalibratorManager);
 		}
 
@@ -118,7 +118,7 @@ bool MeasureThread::setActiveSignalParam(const MeasureSignal& activeSignal, cons
 
 void MeasureThread::waitMeasureTimeout()
 {
-	if (m_metrologyConnectionType != Metrology::ConnectionType::Tuning_Output)
+	if (m_connectionType != Metrology::ConnectionType::Tuning_Output)
 	{
 		if (getConnectedCalibrators() == 0)
 		{
@@ -244,7 +244,7 @@ bool MeasureThread::setCalibratorUnit()
 			return false;
 		}
 
-		if (m_activeIoParamList[ch].metrologyConnectionType() != Metrology::ConnectionType::Tuning_Output)
+		if (m_activeIoParamList[ch].connectionType() != Metrology::ConnectionType::Tuning_Output)
 		{
 			const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 			if (inParam.isValid() == false)
@@ -553,7 +553,7 @@ void MeasureThread::measureLinearity()
 
 			// set electric value or tuning value
 			//
-			if (m_activeIoParamList[ch].metrologyConnectionType() != Metrology::ConnectionType::Tuning_Output)
+			if (m_activeIoParamList[ch].connectionType() != Metrology::ConnectionType::Tuning_Output)
 			{
 				// at the beginning we need get engineering value because if range is not Linear (for instance Ohm or mV)
 				// then by engineering value we may get electric value
@@ -667,7 +667,7 @@ void MeasureThread::measureCompratorsInSeries()
 
 		Metrology::SignalParam param;
 
-		switch (m_activeIoParamList[ch].metrologyConnectionType())
+		switch (m_activeIoParamList[ch].connectionType())
 		{
 			case Metrology::ConnectionType::Unsed:
 				param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
@@ -823,9 +823,9 @@ void MeasureThread::measureCompratorsInSeries()
 						}
 
 
-						double engineeringCalcVal = conversionCalcVal(engineeringVal,
-																	  ConversionCalcType::Inversion,
-																	  m_activeIoParamList[ch].metrologyConnectionType(),
+						double engineeringCalcVal = conversionConnection(engineeringVal,
+																	  ConversionDirection::Inversion,
+																	  m_activeIoParamList[ch].connectionType(),
 																	  m_activeIoParamList[ch]);
 
 
@@ -1057,9 +1057,9 @@ void MeasureThread::measureCompratorsInSeries()
 						{
 							double comporatorEtalonVal = comparatorEx->compareOnlineValue(cmpValueType);		// get compare or hyst value
 
-							double engineeringEtalonCalcVal = conversionCalcVal(comporatorEtalonVal,
-																				ConversionCalcType::Inversion,
-																				m_activeIoParamList[ch].metrologyConnectionType(),
+							double engineeringEtalonCalcVal = conversionConnection(comporatorEtalonVal,
+																				ConversionDirection::Inversion,
+																				m_activeIoParamList[ch].connectionType(),
 																				m_activeIoParamList[ch]);
 
 							double electricEtalonVal = uc.conversion(engineeringEtalonCalcVal, UnitsConvertType::PhysicalToElectric, inParam);
@@ -1152,7 +1152,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 		Metrology::SignalParam param;
 
-		switch (m_activeIoParamList[ch].metrologyConnectionType())
+		switch (m_activeIoParamList[ch].connectionType())
 		{
 			case Metrology::ConnectionType::Unsed:
 				param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
@@ -1256,7 +1256,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 						Metrology::SignalParam param;
 
-						switch (m_activeIoParamList[ch].metrologyConnectionType())
+						switch (m_activeIoParamList[ch].connectionType())
 						{
 							case Metrology::ConnectionType::Unsed:
 								param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
@@ -1344,9 +1344,9 @@ void MeasureThread::measureCompratorsInParallel()
 						}
 
 
-						double engineeringCalcVal = conversionCalcVal(engineeringVal,
-																	  ConversionCalcType::Inversion,
-																	  m_activeIoParamList[ch].metrologyConnectionType(),
+						double engineeringCalcVal = conversionConnection(engineeringVal,
+																	  ConversionDirection::Inversion,
+																	  m_activeIoParamList[ch].connectionType(),
 																	  m_activeIoParamList[ch]);
 
 						double electricVal = uc.conversion(engineeringCalcVal, UnitsConvertType::PhysicalToElectric, inParam);
@@ -1427,7 +1427,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 								Metrology::SignalParam param;
 
-								switch (m_activeIoParamList[ch].metrologyConnectionType())
+								switch (m_activeIoParamList[ch].connectionType())
 								{
 									case Metrology::ConnectionType::Unsed:
 										param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
@@ -1499,7 +1499,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 					Metrology::SignalParam param;
 
-					switch (m_activeIoParamList[ch].metrologyConnectionType())
+					switch (m_activeIoParamList[ch].connectionType())
 					{
 						case Metrology::ConnectionType::Unsed:
 							param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
@@ -1600,7 +1600,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 					Metrology::SignalParam param;
 
-					switch (m_activeIoParamList[ch].metrologyConnectionType())
+					switch (m_activeIoParamList[ch].connectionType())
 					{
 						case Metrology::ConnectionType::Unsed:
 							param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
@@ -1678,9 +1678,9 @@ void MeasureThread::measureCompratorsInParallel()
 						{
 							double comporatorEtalonVal = comparatorEx->compareOnlineValue(cmpValueType);		// get compare or hyst value
 
-							double engineeringEtalonCalcVal = conversionCalcVal(comporatorEtalonVal,
-																				ConversionCalcType::Inversion,
-																				m_activeIoParamList[ch].metrologyConnectionType(),
+							double engineeringEtalonCalcVal = conversionConnection(comporatorEtalonVal,
+																				ConversionDirection::Inversion,
+																				m_activeIoParamList[ch].connectionType(),
 																				m_activeIoParamList[ch]);
 
 							double electricEtalonVal = uc.conversion(engineeringEtalonCalcVal, UnitsConvertType::PhysicalToElectric, inParam);
@@ -1749,7 +1749,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 				Metrology::SignalParam param;
 
-				switch (m_activeIoParamList[ch].metrologyConnectionType())
+				switch (m_activeIoParamList[ch].connectionType())
 				{
 					case Metrology::ConnectionType::Unsed:
 						param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
@@ -1801,7 +1801,7 @@ void MeasureThread::signalSocketDisconnected()
 
 void MeasureThread::tuningSocketDisconnected()
 {
-	if (m_metrologyConnectionType == Metrology::ConnectionType::Tuning_Output)
+	if (m_connectionType == Metrology::ConnectionType::Tuning_Output)
 	{
 		stopMeasure(MeasureThreadInfo::ExitCode::Program);
 	}
@@ -1811,7 +1811,7 @@ void MeasureThread::tuningSocketDisconnected()
 
 void MeasureThread::saveStateTunSignals()
 {
-	if (m_metrologyConnectionType != Metrology::ConnectionType::Tuning_Output)
+	if (m_connectionType != Metrology::ConnectionType::Tuning_Output)
 	{
 		return;
 	}
@@ -1843,7 +1843,7 @@ void MeasureThread::saveStateTunSignals()
 
 void MeasureThread::restoreStateTunSignals()
 {
-	if (m_metrologyConnectionType != Metrology::ConnectionType::Tuning_Output)
+	if (m_connectionType != Metrology::ConnectionType::Tuning_Output)
 	{
 		return;
 	}
@@ -1906,14 +1906,14 @@ void MeasureThread::measureKindChanged(int kind)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureThread::metrologyConnectionTypeChanged(Metrology::ConnectionType type)
+void MeasureThread::connectionTypeChanged(Metrology::ConnectionType type)
 {
 	if (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
 
-	m_metrologyConnectionType = type;
+	m_connectionType = type;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

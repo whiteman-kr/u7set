@@ -1,4 +1,4 @@
-#include "../lib/MetrologyConnectionBase.h"
+#include "../lib/MetrologyConnection.h"
 
 namespace Metrology
 {
@@ -142,7 +142,7 @@ namespace Metrology
 	{
 		if (static_cast<int>(m_type) < 0 || static_cast<int>(m_type) >= ConnectionTypeCount)
 		{
-			return QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Unknown");
+			return QT_TRANSLATE_NOOP("MetrologyConnection", "Unknown");
 		}
 
 		return ConnectionTypeCaption(m_type);
@@ -301,7 +301,7 @@ namespace Metrology
 
 		m_connectionList.clear();
 
-		m_enableEdit = true;
+		m_enableEditBase = true;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -428,7 +428,7 @@ namespace Metrology
 		{
 			if (file->userId() != db->currentUser().userId())
 			{
-				m_enableEdit = false;
+				m_enableEditBase = false;
 			}
 
 			m_userName = db->username(file->userId());
@@ -454,7 +454,7 @@ namespace Metrology
 			return false;
 		}
 
-		if (m_enableEdit == false)
+		if (m_enableEditBase == false)
 		{
 			return false;
 		}
@@ -742,6 +742,30 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	int ConnectionBase::findConnectionIndex(const Connection& connection) const
+	{
+		int foundIndex = -1;
+
+		QMutexLocker l(&m_connectionMutex);
+
+		QString strID = connection.strID(true);
+
+		int count = m_connectionList.count();
+		for(int i = 0; i < count; i ++)
+		{
+			if (m_connectionList[i].strID(true) == strID)
+			{
+				foundIndex = i;
+
+				break;
+			}
+		}
+
+		return foundIndex;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	int ConnectionBase::findConnectionIndex(int ioType, Metrology::Signal* pSignal) const
 	{
 		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
@@ -827,38 +851,14 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	int ConnectionBase::findConnectionIndex(const Connection& connection) const
+	int ConnectionBase::destinationSignalCount(ConnectionType connectionType, const QString& sourceAppSignalID) const
 	{
-		int foundIndex = -1;
-
-		QMutexLocker l(&m_connectionMutex);
-
-		QString strID = connection.strID(true);
-
-		int count = m_connectionList.count();
-		for(int i = 0; i < count; i ++)
-		{
-			if (m_connectionList[i].strID(true) == strID)
-			{
-				foundIndex = i;
-
-				break;
-			}
-		}
-
-		return foundIndex;
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	int ConnectionBase::getOutputSignalCount(int connectionType, const QString& InputAppSignalID) const
-	{
-		if (connectionType < 0 || connectionType >= ConnectionTypeCount)
+		if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= ConnectionTypeCount)
 		{
 			return 0;
 		}
 
-		if (InputAppSignalID.isEmpty() == true)
+		if (sourceAppSignalID.isEmpty() == true)
 		{
 			return 0;
 		}
@@ -878,7 +878,7 @@ namespace Metrology
 				continue;
 			}
 
-			if (connection.appSignalID(ConnectionIoType::Source) != InputAppSignalID)
+			if (connection.appSignalID(ConnectionIoType::Source) != sourceAppSignalID)
 			{
 				continue;
 			}
@@ -897,14 +897,14 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QVector<Metrology::Signal*> ConnectionBase::getOutputSignals(int connectionType, const QString& InputAppSignalID) const
+	QVector<Metrology::Signal*> ConnectionBase::destinationSignals(ConnectionType connectionType, const QString& sourceAppSignalID) const
 	{
-		if (connectionType < 0 || connectionType >= ConnectionTypeCount)
+		if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= ConnectionTypeCount)
 		{
 			return QVector<Metrology::Signal*>();
 		}
 
-		if (InputAppSignalID.isEmpty() == true)
+		if (sourceAppSignalID.isEmpty() == true)
 		{
 			return QVector<Metrology::Signal*>();
 		}
@@ -924,7 +924,7 @@ namespace Metrology
 				continue;
 			}
 
-			if (connection.appSignalID(ConnectionIoType::Source) != InputAppSignalID)
+			if (connection.appSignalID(ConnectionIoType::Source) != sourceAppSignalID)
 			{
 				continue;
 			}
@@ -1011,14 +1011,14 @@ namespace Metrology
 
 		switch (type)
 		{
-			case Unsed:					caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "No connections             ");	break;
-			case Input_Internal:		caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Input -> Internal");			break;
-			case Input_Output:			caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Input -> Output");				break;
-			case Input_DP_Internal_F:	caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Input dP -> Internal F");		break;
-			case Input_DP_Output_F:		caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Input dP -> Output F");			break;
-			case Input_C_Internal_F:	caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Input °С -> Internal °F");		break;
-			case Input_C_Output_F:		caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Input °С -> Output °F");		break;
-			case Tuning_Output:			caption = QT_TRANSLATE_NOOP("MetrologyConnectionBase", "Tuning -> Output");				break;
+			case Unsed:					caption = QT_TRANSLATE_NOOP("MetrologyConnection", "No connections             ");	break;
+			case Input_Internal:		caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Input -> Internal");			break;
+			case Input_Output:			caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Input -> Output");				break;
+			case Input_DP_Internal_F:	caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Input dP -> Internal F");		break;
+			case Input_DP_Output_F:		caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Input dP -> Output F");			break;
+			case Input_C_Internal_F:	caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Input °С -> Internal °F");		break;
+			case Input_C_Output_F:		caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Input °С -> Output °F");		break;
+			case Tuning_Output:			caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Tuning -> Output");				break;
 			default:					assert(0);
 
 		}

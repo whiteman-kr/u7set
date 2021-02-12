@@ -4,8 +4,6 @@
 #include <QtGlobal>
 #include <assert.h>
 
-#include "../lib/Types.h"
-
 #include "SignalBase.h"
 
 // ==============================================================================================
@@ -27,17 +25,18 @@ double conversion(double val, ConversionType conversionType, const E::ElectricUn
 
 // ==============================================================================================
 
-enum class ConversionCalcType
+enum class ConversionDirection
 {
 	Normal = 0,
 	Inversion = 1,
 };
 
-Q_DECLARE_METATYPE(ConversionCalcType)
+Q_DECLARE_METATYPE(ConversionDirection)
 
 // ==============================================================================================
 
-double conversionCalcVal(double val, ConversionCalcType calcType, Metrology::ConnectionType connectionType, const IoSignalParam& ioParam);
+double conversionConnection(double val, ConversionDirection directType, Metrology::ConnectionType connectionType, const IoSignalParam& ioParam);
+double conversionConnection(double val, ConversionDirection directType, Metrology::ConnectionType connectionType, const Signal& sourSignal, const Signal& destSignal);
 
 // ==============================================================================================
 

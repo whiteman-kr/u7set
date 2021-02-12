@@ -408,17 +408,17 @@ bool ConfigSocket::readMetrologyConnections(const QByteArray& fileData, int file
 
 		// append
 		//
-		theSignalBase.metrologyConnections().append(connection);
+		theSignalBase.connections().append(connection);
 	}
 
-	if (theSignalBase.metrologyConnections().count() != connectionCount)
+	if (theSignalBase.connections().count() != connectionCount)
 	{
-		qDebug() << __FUNCTION__ << "Connections loading error, loaded: " << theSignalBase.metrologyConnections().count() << " from " << connectionCount;
+		qDebug() << __FUNCTION__ << "Connections loading error, loaded: " << theSignalBase.connections().count() << " from " << connectionCount;
 		assert(false);
 		return false;
 	}
 
-	qDebug() << __FUNCTION__ << "Connections were loaded: " << theSignalBase.metrologyConnections().count();
+	qDebug() << __FUNCTION__ << "Connections were loaded: " << theSignalBase.connections().count();
 
 	return result;
 }

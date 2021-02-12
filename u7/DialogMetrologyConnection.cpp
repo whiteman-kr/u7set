@@ -981,7 +981,7 @@ bool DialogMetrologyConnection::loadConnectionBase()
 
 	updateCheckInStateOnToolBar();
 
-	if (m_connectionBase.enableEdit() == false)
+	if (m_connectionBase.enableEditBase() == false)
 	{
 		setWindowTitle(m_windowTitle + tr(" - View only (currently file is cheked out by user: \"%1\")").arg(m_connectionBase.userName()));
 
@@ -1002,7 +1002,7 @@ bool DialogMetrologyConnection::loadConnectionBase()
 
 void DialogMetrologyConnection::saveConnectionBase(bool checkIn, const QString& comment)
 {
-	if (m_connectionBase.enableEdit() == false)
+	if (m_connectionBase.enableEditBase() == false)
 	{
 		return;
 	}

@@ -75,7 +75,7 @@ SOURCES += \
     ../lib/DomXmlHelper.cpp \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/LogicModulesInfo.cpp \
-    ../lib/MetrologyConnectionBase.cpp \
+	../lib/MetrologyConnection.cpp \
     ../lib/OutputLog.cpp \
     ../lib/DbController.cpp \
     ../lib/DbProgress.cpp \
@@ -166,7 +166,7 @@ HEADERS += \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
     ../lib/LogicModulesInfo.h \
-    ../lib/MetrologyConnectionBase.h \
+	../lib/MetrologyConnection.h \
     ../lib/OutputLog.h \
     ../lib/DbController.h \
     ../lib/DbProgress.h \

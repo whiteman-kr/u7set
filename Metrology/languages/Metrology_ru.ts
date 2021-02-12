@@ -3898,7 +3898,7 @@
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="756"/>
-        <location filename="../MainWindow.cpp" line="2449"/>
+        <location filename="../MainWindow.cpp" line="2489"/>
         <source> ConfigurationService: off </source>
         <translation> ConfigurationService: off </translation>
     </message>
@@ -3906,9 +3906,9 @@
         <location filename="../MainWindow.cpp" line="758"/>
         <location filename="../MainWindow.cpp" line="762"/>
         <location filename="../MainWindow.cpp" line="766"/>
-        <location filename="../MainWindow.cpp" line="2451"/>
-        <location filename="../MainWindow.cpp" line="2574"/>
-        <location filename="../MainWindow.cpp" line="2645"/>
+        <location filename="../MainWindow.cpp" line="2491"/>
+        <location filename="../MainWindow.cpp" line="2614"/>
+        <location filename="../MainWindow.cpp" line="2685"/>
         <source>Please, connect to server
 click menu &quot;Tool&quot; - &quot;Options...&quot; - &quot;Connect to server&quot;</source>
         <translation>Подключитесь к серверу
@@ -3916,48 +3916,48 @@ click menu &quot;Tool&quot; - &quot;Options...&quot; - &quot;Connect to server&q
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="760"/>
-        <location filename="../MainWindow.cpp" line="2572"/>
+        <location filename="../MainWindow.cpp" line="2612"/>
         <source> AppDataService: off </source>
         <translation> AppDataService: off </translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="764"/>
-        <location filename="../MainWindow.cpp" line="2643"/>
-        <location filename="../MainWindow.cpp" line="2674"/>
+        <location filename="../MainWindow.cpp" line="2683"/>
+        <location filename="../MainWindow.cpp" line="2714"/>
         <source> TuningService: off </source>
         <translation> TuningService: off </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1147"/>
+        <location filename="../MainWindow.cpp" line="1146"/>
         <source>Proccess of measure can not start, because no connected calibrators!
 Please, make initialization calibrators!</source>
         <translation>Невозможно начать процесс измерения, потому что нет подключенных калибраторов!
 Проведите инициализацию калибраторов!</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1487"/>
+        <location filename="../MainWindow.cpp" line="1486"/>
         <source>Unable to start the measurement process!
 All electrical ranges of the inputs of the module must be the same.</source>
         <translation>Невозможно начать процесс измерения!
 Все электрические диапазоны входов  модуля, должны быть одинаковы.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1160"/>
+        <location filename="../MainWindow.cpp" line="1159"/>
         <source>No connect to Tuning Service!</source>
         <translation>Нет соединения с Tuning Service!</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1432"/>
+        <location filename="../MainWindow.cpp" line="1431"/>
         <source>Measurement process is already running</source>
         <translation>Процесс измерения уже запущен</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1438"/>
+        <location filename="../MainWindow.cpp" line="1437"/>
         <source>No connect to Application Data Service!</source>
         <translation>Нет соединения с Application Data Service!</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1504"/>
+        <location filename="../MainWindow.cpp" line="1503"/>
         <source>Following signals were measured:
 
 %1
@@ -3968,37 +3968,37 @@ Do you want to measure them again?</source>
 Вы хотите измерить их снова?</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1615"/>
+        <location filename="../MainWindow.cpp" line="1614"/>
         <source>Attempt to save rack groups was unsuccessfully!</source>
         <translation>Попытка сохранить группу шкафов закончилась неудачно!</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1946"/>
+        <location filename="../MainWindow.cpp" line="1945"/>
         <source>For measurements in several racks simultaneously, you need to combine several racks into groups.Currently, no groups have been found.
 To create a group of racks, click menu &quot;View&quot; - &quot;Racks ...&quot; .</source>
         <translation>Для измерения в нескольких шкафах одновременно, вам нужно объединить шкафы в группы. На текущий момент, ни одной созданной группы шкафов не найдено.
 Чтобы создать группу шкафов выберите меню &quot;Вид&quot; - &quot;Шкафы ...&quot;</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2348"/>
+        <location filename="../MainWindow.cpp" line="2388"/>
         <source> Connected calibrators: %1 </source>
         <translation> Подключенные калибраторы: %1 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2353"/>
+        <location filename="../MainWindow.cpp" line="2393"/>
         <source>Please, connect Calibrators
 click menu &quot;Tool&quot; - &quot;Calibrators...&quot;</source>
         <translation>Пожалуйста, подсоедините калибраторы, для этого выберите пункт меню &quot;Инструменты&quot; - &quot;Калибраторы ...&quot;</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2375"/>
+        <location filename="../MainWindow.cpp" line="2415"/>
         <source>Calibrator %1: %2, %3
 </source>
         <translation>Калибратор %1: %2, %3
 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2395"/>
+        <location filename="../MainWindow.cpp" line="2435"/>
         <source>Connected: %1 : %2
 
 </source>
@@ -4007,12 +4007,12 @@ click menu &quot;Tool&quot; - &quot;Calibrators...&quot;</source>
 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2399"/>
+        <location filename="../MainWindow.cpp" line="2439"/>
         <source>Loaded files: %1</source>
         <translation>Загружено файлов: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2406"/>
+        <location filename="../MainWindow.cpp" line="2446"/>
         <source>
 
 Loaded signals: %1</source>
@@ -4021,7 +4021,7 @@ Loaded signals: %1</source>
 Загружено сигналов: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2410"/>
+        <location filename="../MainWindow.cpp" line="2450"/>
         <source>
 
 Failed version of %1. Current version: %2. Received version: %3 </source>
@@ -4030,56 +4030,56 @@ Failed version of %1. Current version: %2. Received version: %3 </source>
 Некорректная версия %1. Текущая версия %2. Полученная версия %3 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2435"/>
-        <location filename="../MainWindow.cpp" line="2481"/>
+        <location filename="../MainWindow.cpp" line="2475"/>
+        <location filename="../MainWindow.cpp" line="2521"/>
         <source> ConfigurationService: on </source>
         <translation> ConfigurationService: on </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2462"/>
+        <location filename="../MainWindow.cpp" line="2502"/>
         <source>Configuration Service does not recognize EquipmentID &quot;%1&quot; for software &quot;Metrology&quot;</source>
         <translation>Configuration Service не обнаружил EquipmentID &quot;%1&quot; для программного обеспечения &quot;Метрология&quot;</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2553"/>
+        <location filename="../MainWindow.cpp" line="2593"/>
         <source> AppDataService: on </source>
         <translation> AppDataService: on </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2555"/>
-        <location filename="../MainWindow.cpp" line="2596"/>
+        <location filename="../MainWindow.cpp" line="2595"/>
+        <location filename="../MainWindow.cpp" line="2636"/>
         <source>Connected: %1 : %2
 </source>
         <translation>Подключено: %1 : %2
 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2598"/>
+        <location filename="../MainWindow.cpp" line="2638"/>
         <source>
 Tuning sources: %1</source>
         <translation>
 Источники тюнинга: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2599"/>
+        <location filename="../MainWindow.cpp" line="2639"/>
         <source>
 Tuning signals: %1</source>
         <translation>
 Сигналы тюнинга: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2613"/>
-        <location filename="../MainWindow.cpp" line="2664"/>
+        <location filename="../MainWindow.cpp" line="2653"/>
+        <location filename="../MainWindow.cpp" line="2704"/>
         <source> TuningService: on </source>
         <translation> TuningService: on </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2703"/>
+        <location filename="../MainWindow.cpp" line="2743"/>
         <source> Measure process is running </source>
         <translation> Процесс измерения запущен </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="2722"/>
+        <location filename="../MainWindow.cpp" line="2762"/>
         <source> Measure process is stopped </source>
         <translation> Процесс измерения остановлен </translation>
     </message>
@@ -4779,49 +4779,49 @@ Do you want to repeat the preparation process in order to switch the comparator 
     </message>
 </context>
 <context>
-    <name>MetrologyConnectionBase</name>
+    <name>MetrologyConnection</name>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.cpp" line="145"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="145"/>
         <source>Unknown</source>
         <translation>Не используется</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.cpp" line="1014"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1014"/>
         <source>No connections             </source>
         <translation>Без соединения             </translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.cpp" line="1015"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1015"/>
         <source>Input -&gt; Internal</source>
         <translation>Входной -&gt; Внутренний</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.cpp" line="1016"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1016"/>
         <source>Input -&gt; Output</source>
         <translation>Входной -&gt; Выходной</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.cpp" line="1017"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1017"/>
         <source>Input dP -&gt; Internal F</source>
         <translation>Входной dP -&gt; Внутренний F</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.cpp" line="1018"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1018"/>
         <source>Input dP -&gt; Output F</source>
         <translation>Входной dP -&gt; Выходной F</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.cpp" line="1019"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1019"/>
         <source>Input °С -&gt; Internal °F</source>
         <translation>Входной °С -&gt; Внутренний °F</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.cpp" line="1020"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1020"/>
         <source>Input °С -&gt; Output °F</source>
         <translation>Входной °С -&gt; Выходной °F</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnectionBase.cpp" line="1021"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1021"/>
         <source>Tuning -&gt; Output</source>
         <translation>Тюнинг -&gt; Выходной</translation>
     </message>

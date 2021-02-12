@@ -75,7 +75,7 @@ CONFIG(release, debug|release) {
 
 SOURCES +=\
     ../lib/ExportPrint.cpp \
-    ../lib/MetrologyConnectionBase.cpp \
+	../lib/MetrologyConnection.cpp \
     ../lib/SoftwareXmlReader.cpp \
     ../lib/Ui/DbControllerTools.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
@@ -205,7 +205,7 @@ SOURCES +=\
 
 HEADERS  += \
     ../lib/ExportPrint.h \
-    ../lib/MetrologyConnectionBase.h \
+	../lib/MetrologyConnection.h \
     ../lib/SoftwareXmlReader.h \
     ../lib/StandardColors.h \
     ../lib/Ui/DbControllerTools.h \

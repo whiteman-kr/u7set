@@ -212,7 +212,7 @@ double conversion(double val, ConversionType conversionType, const E::ElectricUn
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
-double conversionCalcVal(double val, ConversionCalcType calcType, Metrology::ConnectionType connectionType, const IoSignalParam &ioParam)
+double conversionConnection(double val, ConversionDirection directType, Metrology::ConnectionType connectionType, const IoSignalParam &ioParam)
 {
 	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
 	{
@@ -225,20 +225,43 @@ double conversionCalcVal(double val, ConversionCalcType calcType, Metrology::Con
 		return val;
 	}
 
-	if (	inParam.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false ||
-			inParam.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
-	{
-		return val;
-	}
-
 	const Metrology::SignalParam& outParam = ioParam.param(Metrology::ConnectionIoType::Destination);
 	if (outParam.isValid() == false)
 	{
 		return val;
 	}
 
-	if (	outParam.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false ||
-			outParam.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+	double retVal = conversionConnection(val, directType, connectionType, inParam, outParam);
+	return retVal;
+}
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------
+
+double conversionConnection(double val, ConversionDirection directType, Metrology::ConnectionType connectionType, const Signal& sourSignal, const Signal& destSignal)
+{
+	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
+	{
+		return val;
+	}
+
+	if (sourSignal.hash() == UNDEFINED_HASH)
+	{
+		return val;
+	}
+
+	if (	sourSignal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false ||
+			sourSignal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+	{
+		return val;
+	}
+
+	if (destSignal.hash() == UNDEFINED_HASH)
+	{
+		return val;
+	}
+
+	if (	destSignal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false ||
+			destSignal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 	{
 		return val;
 	}
@@ -247,25 +270,25 @@ double conversionCalcVal(double val, ConversionCalcType calcType, Metrology::Con
 
 	double retVal = val;
 
-	switch (calcType)
+	switch (directType)
 	{
-		case ConversionCalcType::Normal:
+		case ConversionDirection::Normal:
 
 			switch (connectionType)
 			{
 				case Metrology::ConnectionType::Input_Internal:
 					{
-						retVal = (val - inParam.lowEngineeringUnits())*
-								(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/
-								(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) +
-								outParam.lowEngineeringUnits();
+						retVal = (val - sourSignal.lowEngineeringUnits())*
+								(destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits())/
+								(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits()) +
+								destSignal.lowEngineeringUnits();
 					}
 					break;
 
 				case Metrology::ConnectionType::Input_DP_Internal_F:
 					{
-						double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) /
-								sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
+						double K = (destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits()) /
+								sqrt(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits());
 
 						retVal = K * sqrt( val );
 					}
@@ -273,13 +296,13 @@ double conversionCalcVal(double val, ConversionCalcType calcType, Metrology::Con
 
 				case Metrology::ConnectionType::Input_DP_Output_F:
 				{
-					val = (val - outParam.lowEngineeringUnits())*
-							(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/
-							(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) +
-							inParam.lowEngineeringUnits();
+					val = (val - destSignal.lowEngineeringUnits())*
+							(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits())/
+							(destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits()) +
+							sourSignal.lowEngineeringUnits();
 
-					double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) /
-							sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
+					double K = (destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits()) /
+							sqrt(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits());
 
 					retVal = K * sqrt( val );
 				}
@@ -293,10 +316,10 @@ double conversionCalcVal(double val, ConversionCalcType calcType, Metrology::Con
 
 				case Metrology::ConnectionType::Input_C_Output_F:
 					{
-						val = (val - outParam.lowEngineeringUnits())*
-								(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/
-								(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) +
-								inParam.lowEngineeringUnits();
+						val = (val - destSignal.lowEngineeringUnits())*
+								(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits())/
+								(destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits()) +
+								sourSignal.lowEngineeringUnits();
 
 						retVal = uc.conversionDegree(val, UnitsConvertType::CelsiusToFahrenheit);
 					}
@@ -305,23 +328,23 @@ double conversionCalcVal(double val, ConversionCalcType calcType, Metrology::Con
 
 			break;
 
-		case ConversionCalcType::Inversion:
+		case ConversionDirection::Inversion:
 
 			switch (connectionType)
 			{
 				case Metrology::ConnectionType::Input_Internal:
 					{
-						retVal = (val - outParam.lowEngineeringUnits())*
-								(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits())/
-								(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) +
-								inParam.lowEngineeringUnits();
+						retVal = (val - destSignal.lowEngineeringUnits())*
+								(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits())/
+								(destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits()) +
+								sourSignal.lowEngineeringUnits();
 					}
 					break;
 
 				case Metrology::ConnectionType::Input_DP_Internal_F:
 					{
-						double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) /
-								sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
+						double K = (destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits()) /
+								sqrt(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits());
 
 						retVal = pow(val / K, 2);
 					}
@@ -329,13 +352,13 @@ double conversionCalcVal(double val, ConversionCalcType calcType, Metrology::Con
 
 				case Metrology::ConnectionType::Input_DP_Output_F:
 					{
-						val = (val - inParam.lowEngineeringUnits())*
-								(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/
-								(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) +
-								outParam.lowEngineeringUnits();
+						val = (val - sourSignal.lowEngineeringUnits())*
+								(destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits())/
+								(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits()) +
+								destSignal.lowEngineeringUnits();
 
-						double K = (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) /
-								sqrt(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits());
+						double K = (destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits()) /
+								sqrt(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits());
 
 						retVal = pow(val / K, 2);
 					}
@@ -349,10 +372,10 @@ double conversionCalcVal(double val, ConversionCalcType calcType, Metrology::Con
 
 				case Metrology::ConnectionType::Input_C_Output_F:
 					{
-						val = (val - inParam.lowEngineeringUnits())*
-								(outParam.highEngineeringUnits() - outParam.lowEngineeringUnits())/
-								(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) +
-								outParam.lowEngineeringUnits();
+						val = (val - sourSignal.lowEngineeringUnits())*
+								(destSignal.highEngineeringUnits() - destSignal.lowEngineeringUnits())/
+								(sourSignal.highEngineeringUnits() - sourSignal.lowEngineeringUnits()) +
+								destSignal.lowEngineeringUnits();
 
 						retVal = uc.conversionDegree(val, UnitsConvertType::FahrenheitToCelsius);
 					}

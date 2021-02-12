@@ -96,7 +96,7 @@ private:
 
 	int						m_measureType = MEASURE_TYPE_UNDEFINED;
 	int						m_measureKind = MEASURE_KIND_UNDEFINED;
-	Metrology::ConnectionType m_metrologyConnectionType = Metrology::ConnectionType::Unknown;
+	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::Unknown;
 
 	MeasureThreadInfo		m_info;
 
@@ -148,7 +148,7 @@ public slots:
 	void					measureTimeoutChanged(int timeout);
 	void					measureTypeChanged(int type);
 	void					measureKindChanged(int kind);
-	void					metrologyConnectionTypeChanged(Metrology::ConnectionType type);
+	void					connectionTypeChanged(Metrology::ConnectionType type);
 
 	void					signalParamChanged(const QString& appSignalID);
 

@@ -628,8 +628,8 @@ public:
 	int					measureKind() const { return m_measureKind; }
 	void				setMeasureKind(int kind) { m_measureKind = kind; }
 
-	int					metrologyConnectionType() const { return m_metrologyConnectionType; }
-	void				setMetrologyConnectionType(int type) { m_metrologyConnectionType = type; }
+	int					connectionType() const { return m_connectionType; }
+	void				setConnectionType(int type) { m_connectionType = type; }
 
 	QString				defaultRack() const { return m_defaultRack; }
 	void				setDefaultRack(const QString& rack) { m_defaultRack = rack; }
@@ -650,7 +650,7 @@ private:
 
 	int					m_measureTimeout = 0;											// in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
 	int					m_measureKind = MEASURE_KIND_ONE_RACK;							// measure kind: each channel separately - 0 or for all channels together - 1
-	int					m_metrologyConnectionType = Metrology::ConnectionType::Unsed;	// selected type of connection
+	int					m_connectionType = Metrology::ConnectionType::Unsed;			// selected type of connection
 
 	QString				m_defaultRack;
 	QString				m_defaultSignalId;

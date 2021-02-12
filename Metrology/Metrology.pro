@@ -50,7 +50,7 @@ SOURCES += \
     ../lib/DbProgressDialog.cpp \
     ../lib/DbWorker.cpp \
     ../lib/MemLeaksDetection.cpp \
-    ../lib/MetrologyConnectionBase.cpp \
+    ../lib/MetrologyConnection.cpp \
     ../lib/SignalSetProvider.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
@@ -132,7 +132,7 @@ HEADERS  += \
     ../lib/DbProgressDialog.h \
     ../lib/DbWorker.h \
 	../lib/MemLeaksDetection.h \
-    ../lib/MetrologyConnectionBase.h \
+    ../lib/MetrologyConnection.h \
     ../lib/SignalSetProvider.h \
     MainWindow.h \
     Calibrator.h \

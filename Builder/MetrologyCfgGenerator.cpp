@@ -1,7 +1,7 @@
 #include "MetrologyCfgGenerator.h"
 
 #include "../lib/MetrologySignal.h"
-#include "../lib/MetrologyConnectionBase.h"
+#include "../lib/MetrologyConnection.h"
 #include "../lib/SoftwareSettings.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/SignalProperties.h"

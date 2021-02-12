@@ -150,7 +150,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 		{
 			Metrology::SignalState state;
 
-			if (ioParam.metrologyConnectionType() == Metrology::ConnectionType::Unsed)
+			if (ioParam.connectionType() == Metrology::ConnectionType::Unsed)
 			{
 				state = theSignalBase.signalState(ioParam.param(Metrology::ConnectionIoType::Source).hash());
 			}
@@ -211,7 +211,7 @@ QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 			stateStr = signalStateStr(inParam, inState);
 		}
 
-		if (ioParam.metrologyConnectionType() != Metrology::ConnectionType::Unsed)
+		if (ioParam.connectionType() != Metrology::ConnectionType::Unsed)
 		{
 			const Metrology::SignalParam& outParam = ioParam.param(Metrology::ConnectionIoType::Destination);
 			if (outParam.isValid() == true)
@@ -576,7 +576,7 @@ void SignalInfoPanel::createContextMenu()
 
 void SignalInfoPanel::appendMetrologyConnetionMenu()
 {
-	if (m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unsed)
 	{
 		return;
 	}
@@ -593,30 +593,30 @@ void SignalInfoPanel::appendMetrologyConnetionMenu()
 	}
 
 	m_pConnectionActionList.clear();
-	m_outputSignalsList.clear();
+	m_destSignals.clear();
 
 	const IoSignalParam& ioParam = m_signalParamTable.signalParam(index);
 
-	const Metrology::SignalParam& inParam = ioParam.param(Metrology::ConnectionIoType::Source);
-	const Metrology::SignalParam& outParam = ioParam.param(Metrology::ConnectionIoType::Destination);
+	const Metrology::SignalParam& sourParam = ioParam.param(Metrology::ConnectionIoType::Source);
+	const Metrology::SignalParam& destParam = ioParam.param(Metrology::ConnectionIoType::Destination);
 
-	if (inParam.isValid() == false || outParam.isValid() == false)
+	if (sourParam.isValid() == false || destParam.isValid() == false)
 	{
 		return;
 	}
 
-	m_outputSignalsList = theSignalBase.metrologyConnections().getOutputSignals(m_metrologyConnectionType, inParam.appSignalID());
+	m_destSignals = theSignalBase.connections().destinationSignals(m_connectionType, sourParam.appSignalID());
 
-	int outputSignalCount = m_outputSignalsList.count();
-	for (int s = 0; s < outputSignalCount; s++)
+	int destSignalCount = m_destSignals.count();
+	for (int s = 0; s < destSignalCount; s++)
 	{
-		Metrology::Signal* pOutputSignal = m_outputSignalsList[s];
-		if (pOutputSignal == nullptr || pOutputSignal->param().isValid() == false)
+		Metrology::Signal* pDestinationSignal = m_destSignals[s];
+		if (pDestinationSignal == nullptr || pDestinationSignal->param().isValid() == false)
 		{
 			continue;
 		}
 
-		QString strConnection = inParam.appSignalID() + " -> " + pOutputSignal->param().appSignalID();
+		QString strConnection = sourParam.appSignalID() + " -> " + pDestinationSignal->param().appSignalID();
 
 		QAction* pConnctionAction = m_pContextMenu->addAction(strConnection);
 		if (pConnctionAction != nullptr)
@@ -624,7 +624,7 @@ void SignalInfoPanel::appendMetrologyConnetionMenu()
 			pConnctionAction->setCheckable(true);
 			pConnctionAction->setChecked(false);
 
-			if (outParam.appSignalID() == pOutputSignal->param().appSignalID())
+			if (destParam.appSignalID() == pDestinationSignal->param().appSignalID())
 			{
 				pConnctionAction->setChecked(true);
 			}
@@ -759,14 +759,14 @@ void SignalInfoPanel::measureKindChanged(int kind)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::metrologyConnectionTypeChanged(Metrology::ConnectionType type)
+void SignalInfoPanel::connectionTypeChanged(Metrology::ConnectionType type)
 {
 	if (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
 
-	m_metrologyConnectionType = type;
+	m_connectionType = type;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -813,7 +813,7 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 			}
 
 			ioParam.setParam(ioType, param);
-			ioParam.setMetrologyConnectionType(activeSignal.metrologyConnectionType());
+			ioParam.setConnectionType(activeSignal.connectionType());
 			ioParam.setCalibratorManager(m_pCalibratorBase->calibratorForMeasure(c));
 		}
 
@@ -826,7 +826,7 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	//
 	QSize cellSize = QFontMetrics(m_signalInfo.font()).size(Qt::TextSingleLine,"A");
 
-	if (activeSignal.metrologyConnectionType() == Metrology::ConnectionType::Unsed)
+	if (activeSignal.connectionType() == Metrology::ConnectionType::Unsed)
 	{
 		m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 	}
@@ -852,7 +852,7 @@ void SignalInfoPanel::onConnectionAction(QAction* action)
 		return;
 	}
 
-	int outputSignalIndex = -1;
+	int destSignalIndex = -1;
 
 	int connectionActionCount = m_pConnectionActionList.count();
 	for(int i = 0; i < connectionActionCount; i++)
@@ -861,19 +861,19 @@ void SignalInfoPanel::onConnectionAction(QAction* action)
 		{
 			action->setChecked(true);
 
-			outputSignalIndex = i;
+			destSignalIndex = i;
 
 			break;
 		}
 	}
 
-	if (outputSignalIndex < 0 || outputSignalIndex >= m_outputSignalsList.count())
+	if (destSignalIndex < 0 || destSignalIndex >= m_destSignals.count())
 	{
 		return;
 	}
 
-	Metrology::Signal* pOutputSignal = m_outputSignalsList[outputSignalIndex];
-	if (pOutputSignal == nullptr || pOutputSignal->param().isValid() == false)
+	Metrology::Signal* pDestSignal = m_destSignals[destSignalIndex];
+	if (pDestSignal == nullptr || pDestSignal->param().isValid() == false)
 	{
 		return;
 	}
@@ -884,7 +884,7 @@ void SignalInfoPanel::onConnectionAction(QAction* action)
 		return;
 	}
 
-	emit changeActiveSignalOutput(channel, pOutputSignal);
+	emit changeActiveDestSignal(channel, pDestSignal);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -934,7 +934,7 @@ void SignalInfoPanel::showSignalMoveUp()
 		return;
 	}
 
-	emit changeActiveSignalOutputs(index, indexPrev);
+	emit changeActiveDestSignals(index, indexPrev);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -966,7 +966,7 @@ void SignalInfoPanel::showSignalMoveDown()
 		return;
 	}
 
-	emit changeActiveSignalOutputs(index, indexNext);
+	emit changeActiveDestSignals(index, indexNext);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -989,7 +989,7 @@ void SignalInfoPanel::signalProperty()
 
 	Metrology::SignalParam param;
 
-	if (m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unsed)
 	{
 		param = m_signalParamTable.signalParam(index).param(Metrology::ConnectionIoType::Source);
 	}

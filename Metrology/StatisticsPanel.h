@@ -177,7 +177,7 @@ private:
 
 	static int m_measureType;
 	static int m_measureKind;
-	static Metrology::ConnectionType m_metrologyConnectionType;
+	static Metrology::ConnectionType m_connectionType;
 
 
 	void createInterface();
@@ -195,7 +195,7 @@ protected:
 
 signals:
 
-	void setMetrologyConnectionType(Metrology::ConnectionType type);
+	void setConnectionType(Metrology::ConnectionType type);
 	void setRack(int index);
 	void setMeasureSignal(int index);
 
@@ -205,7 +205,7 @@ public slots:
 
 	void measureTypeChanged(int type);
 	void measureKindChanged(int kind);
-	void metrologyConnectionTypeChanged(Metrology::ConnectionType type);
+	void connectionTypeChanged(Metrology::ConnectionType type);
 
 	void activeSignalChanged(const MeasureSignal& activeSignal);	// slot informs that signal for measure was selected
 

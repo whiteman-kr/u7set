@@ -159,7 +159,7 @@ QString MetrologyConnectionTable::text(int row, int column, const Metrology::Con
 	switch (column)
 	{
 		case METROLOGY_CONNECTION_COLUMN_IN_ID:		result = visible ? connection.appSignalID(Metrology::ConnectionIoType::Source): QString();					break;
-		case METROLOGY_CONNECTION_COLUMN_TYPE:		result = visible ? qApp->translate("MetrologyConnectionBase", connection.typeStr().toUtf8()) : QString("");	break;
+		case METROLOGY_CONNECTION_COLUMN_TYPE:		result = visible ? qApp->translate("MetrologyConnection", connection.typeStr().toUtf8()) : QString("");	break;
 		case METROLOGY_CONNECTION_COLUMN_OUT_ID:	result = connection.appSignalID(Metrology::ConnectionIoType::Destination);									break;
 		default:									assert(0);
 	}
@@ -347,7 +347,7 @@ void MetrologyConnectionItemDialog::createInterface()
 	//
 	for (int type = 0; type < Metrology::ConnectionTypeCount; type++)
 	{
-		m_pTypeList->addItem(qApp->translate("MetrologyConnectionBase", Metrology::ConnectionTypeCaption(type).toUtf8()), type);
+		m_pTypeList->addItem(qApp->translate("MetrologyConnection", Metrology::ConnectionTypeCaption(type).toUtf8()), type);
 	}
 	m_pTypeList->removeItem(Metrology::ConnectionType::Unsed);
 
@@ -674,7 +674,7 @@ void MetrologyConnectionItemDialog::onOk()
 MetrologyConnectionDialog::MetrologyConnectionDialog(QWidget* parent) :
 	QDialog(parent)
 {
-	m_connectionBase = theSignalBase.metrologyConnections();
+	m_connectionBase = theSignalBase.connections();
 
 	createInterface();
 	updateList();
@@ -685,7 +685,7 @@ MetrologyConnectionDialog::MetrologyConnectionDialog(QWidget* parent) :
 MetrologyConnectionDialog::MetrologyConnectionDialog(Metrology::Signal* pSignal, QWidget* parent) :
 	QDialog(parent)
 {
-	m_connectionBase = theSignalBase.metrologyConnections();
+	m_connectionBase = theSignalBase.connections();
 
 	createInterface();
 	updateList();
@@ -840,7 +840,7 @@ void MetrologyConnectionDialog::createContextMenu()
 
 void MetrologyConnectionDialog::signalBaseLoaded()
 {
-	m_connectionBase = theSignalBase.metrologyConnections();
+	m_connectionBase = theSignalBase.connections();
 	updateList();
 }
 

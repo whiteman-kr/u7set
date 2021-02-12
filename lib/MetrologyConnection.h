@@ -158,8 +158,10 @@ namespace Metrology
 
 		void findSignal_in_signalSet();
 
-		bool enableEdit() { return m_enableEdit; }
+		// resolution on edit
+		//
 		QString userName() { return m_userName; }
+		bool enableEditBase() { return m_enableEditBase; }
 
 		//
 		//
@@ -179,12 +181,12 @@ namespace Metrology
 		//
 		void sort();
 
+		int findConnectionIndex(const Connection& connection) const;
 		int findConnectionIndex(int ioType, Metrology::Signal* pSignal) const;
 		int findConnectionIndex(int connectionType, int ioType, Metrology::Signal* pSignal) const;
-		int findConnectionIndex(const Connection& connection) const;
 
-		int getOutputSignalCount(int connectionType, const QString& InputAppSignalID) const;
-		QVector<Metrology::Signal*> getOutputSignals(int connectionType, const QString& InputAppSignalID) const;
+		int destinationSignalCount(ConnectionType connectionType, const QString& sourceAppSignalID) const;
+		QVector<Metrology::Signal*> destinationSignals(ConnectionType connectionType, const QString& sourceAppSignalID) const;
 
 		//
 		//
@@ -202,10 +204,9 @@ namespace Metrology
 
 		SignalSetProvider* m_signalSetProvider = nullptr;
 
-		bool m_enableEdit = true;
 		QString m_userName;
+		bool m_enableEditBase = true;
 	};
 
 	// ==============================================================================================
 }
-

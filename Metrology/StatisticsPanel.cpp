@@ -122,7 +122,7 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::ForegroundRole)
 	{
-		if (si.metrologyConnectionType() == Metrology::ConnectionType::Unknown)
+		if (si.connectionType() == Metrology::ConnectionType::Unknown)
 		{
 			if (column == STATISTICS_COLUMN_SIGNAL_TYPE || column == STATISTICS_COLUMN_SIGNAL_CONNECTION)
 			{
@@ -251,7 +251,7 @@ QString StatisticsTable::text(int row, int column, const StatisticsItem& si) con
 		case STATISTICS_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();													break;
 		case STATISTICS_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();													break;
 		case STATISTICS_COLUMN_SIGNAL_TYPE:			result = param.signalTypeStr();															break;
-		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticBase.cpp", si.metrlogyConnectionTypeStr().toUtf8());	break;
+		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticBase.cpp", si.connectionTypeStr().toUtf8());	break;
 		case STATISTICS_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();															break;
 		case STATISTICS_COLUMN_STATE:				result = qApp->translate("StatisticBase.cpp", si.stateStr().toUtf8());					break;
 		default:									assert(0);
@@ -308,7 +308,7 @@ void StatisticsTable::updateSignal(Hash signalHash)
 
 int StatisticsPanel::m_measureType = MEASURE_TYPE_LINEARITY;
 int StatisticsPanel::m_measureKind = MEASURE_TYPE_UNDEFINED;
-Metrology::ConnectionType StatisticsPanel::m_metrologyConnectionType = Metrology::ConnectionType::Unknown;
+Metrology::ConnectionType StatisticsPanel::m_connectionType = Metrology::ConnectionType::Unknown;
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -575,14 +575,14 @@ void StatisticsPanel::measureKindChanged(int kind)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::metrologyConnectionTypeChanged(Metrology::ConnectionType type)
+void StatisticsPanel::connectionTypeChanged(Metrology::ConnectionType type)
 {
 	if (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
 
-	m_metrologyConnectionType = type;
+	m_connectionType = type;
 
 	updateList();
 }
@@ -604,7 +604,7 @@ void StatisticsPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	Metrology::Signal* pSignal = nullptr;
 
-	if(m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
+	if(m_connectionType == Metrology::ConnectionType::Unsed)
 	{
 		pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).firstMetrologySignal();
 	}
@@ -792,7 +792,7 @@ void StatisticsPanel::selectSignalForMeasure()
 	//
 	const StatisticsItem& si = theSignalBase.statistics().item(statisticItemIndex);
 
-	if (si.metrologyConnectionType() == Metrology::ConnectionType::Unknown)
+	if (si.connectionType() == Metrology::ConnectionType::Unknown)
 	{
 		if (si.signal() == nullptr || si.signal()->param().isValid() == false)
 		{
@@ -876,13 +876,13 @@ void StatisticsPanel::selectSignalForMeasure()
 
 	if (pSignal->param().isInput() == false)
 	{
-		int connectionIndex = theSignalBase.metrologyConnections().findConnectionIndex(Metrology::ConnectionIoType::Destination, pSignal);
+		int connectionIndex = theSignalBase.connections().findConnectionIndex(Metrology::ConnectionIoType::Destination, pSignal);
 		if (connectionIndex == -1)
 		{
 			return;
 		}
 
-		const Metrology::Connection& connection = theSignalBase.metrologyConnections().connection(connectionIndex);
+		const Metrology::Connection& connection = theSignalBase.connections().connection(connectionIndex);
 		if (connection.isValid() == false)
 		{
 			return;
@@ -895,11 +895,11 @@ void StatisticsPanel::selectSignalForMeasure()
 		}
 	}
 
-	// set MetrologyConnectionType
+	// set ConnectionType in main window
 	//
-	if (m_metrologyConnectionType != si.metrologyConnectionType())
+	if (m_connectionType != si.connectionType())
 	{
-		emit setMetrologyConnectionType(si.metrologyConnectionType());
+		emit setConnectionType(si.connectionType());
 	}
 
 	// find Rack

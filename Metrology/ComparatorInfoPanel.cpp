@@ -407,14 +407,14 @@ void ComparatorInfoPanel::measureKindChanged(int kind)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::metrologyConnectionTypeChanged(Metrology::ConnectionType type)
+void ComparatorInfoPanel::connectionTypeChanged(Metrology::ConnectionType type)
 {
 	if (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
 
-	m_metrologyConnectionType = type;
+	m_connectionType = type;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -482,7 +482,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 		Metrology::Signal* pSignal = nullptr;
 
-		switch (activeSignal.metrologyConnectionType())
+		switch (activeSignal.connectionType())
 		{
 			case Metrology::ConnectionType::Unsed:
 				pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).metrologySignal(c);
@@ -500,7 +500,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 			}
 
 			ioParam.setParam(Metrology::ConnectionIoType::Source, pSignal->param());
-			ioParam.setMetrologyConnectionType(activeSignal.metrologyConnectionType());
+			ioParam.setConnectionType(activeSignal.connectionType());
 			ioParam.setCalibratorManager(m_pCalibratorBase->calibratorForMeasure(c));
 		}
 
@@ -525,7 +525,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	//
 	QSize cellSize = QFontMetrics(m_comparatorInfo.font()).size(Qt::TextSingleLine,"A");
 
-	if (activeSignal.metrologyConnectionType() == Metrology::ConnectionType::Unsed)
+	if (activeSignal.connectionType() == Metrology::ConnectionType::Unsed)
 	{
 		m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 	}

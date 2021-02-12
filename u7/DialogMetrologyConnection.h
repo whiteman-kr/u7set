@@ -22,7 +22,7 @@
 
 #include "../lib/Signal.h"
 #include "../lib/SignalSetProvider.h"
-#include "../lib/MetrologyConnectionBase.h"
+#include "../lib/MetrologyConnection.h"
 #include "../lib/StandardColors.h"
 
 // ==============================================================================================

@@ -28,7 +28,7 @@ bool IoSignalParam::isValid() const
 
 	bool valid = true;
 
-	if (m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unsed)
 	{
 		valid = m_param[Metrology::ConnectionIoType::Source].isValid();				// only input
 	}
@@ -59,7 +59,7 @@ void IoSignalParam::clear()
 		m_param[ioType].setAppSignalID(QString());
 	}
 
-	m_metrologyConnectionType = Metrology::ConnectionType::Unsed;
+	m_connectionType = Metrology::ConnectionType::Unsed;
 
 	m_pCalibratorManager = nullptr;
 
@@ -112,7 +112,7 @@ QString IoSignalParam::appSignalID() const
 
 	QString result;
 
-	if (m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -146,7 +146,7 @@ QString IoSignalParam::customSignalID() const
 
 	QString result;
 
-	if (m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -180,7 +180,7 @@ QString IoSignalParam::equipmentID() const
 
 	QString result;
 
-	if (m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -221,7 +221,7 @@ QString IoSignalParam::rackCaption() const
 
 	QString result;
 
-	if (m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -262,7 +262,7 @@ QString IoSignalParam::chassisStr() const
 
 	QString result;
 
-	if (m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -303,7 +303,7 @@ QString IoSignalParam::moduleStr() const
 
 	QString result;
 
-	if (m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -344,7 +344,7 @@ QString IoSignalParam::placeStr() const
 
 	QString result;
 
-	if (m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -385,7 +385,7 @@ QString IoSignalParam::caption() const
 
 	QString result;
 
-	if (m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -426,7 +426,7 @@ QString IoSignalParam::electricRangeStr() const
 
 	QString result;
 
-	switch(m_metrologyConnectionType)
+	switch(m_connectionType)
 	{
 		case Metrology::ConnectionType::Unsed:
 		case Metrology::ConnectionType::Input_Internal:
@@ -494,7 +494,7 @@ QString IoSignalParam::electricSensorStr() const
 
 	QString result;
 
-	switch(m_metrologyConnectionType)
+	switch(m_connectionType)
 	{
 		case Metrology::ConnectionType::Unsed:
 		case Metrology::ConnectionType::Input_Internal:
@@ -561,7 +561,7 @@ QString IoSignalParam::physicalRangeStr() const
 
 	QString result;
 
-	if (m_metrologyConnectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unsed)
 	{
 		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
 		if (param.isValid() == true)
@@ -602,7 +602,7 @@ QString IoSignalParam::engineeringRangeStr() const
 
 	QString result;
 
-	switch(m_metrologyConnectionType)
+	switch(m_connectionType)
 	{
 		case Metrology::ConnectionType::Unsed:
 			{
@@ -695,7 +695,7 @@ IoSignalParam& IoSignalParam::operator=(const IoSignalParam& from)
 		m_param[ioType] = from.m_param[ioType];
 	}
 
-	m_metrologyConnectionType = from.m_metrologyConnectionType;
+	m_connectionType = from.m_connectionType;
 
 	m_pCalibratorManager = from.m_pCalibratorManager;
 
@@ -934,7 +934,7 @@ void MeasureSignal::clear()
 {
 	QMutexLocker l(&m_mutex);
 
-	m_metrologyConnectionType = Metrology::ConnectionType::Unsed;
+	m_connectionType = Metrology::ConnectionType::Unsed;
 
 	for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
 	{
@@ -1029,8 +1029,8 @@ Metrology::Signal* MeasureSignal::metrologySignal(int ioType, int channel) const
 // -------------------------------------------------------------------------------------------------------------------
 
 bool MeasureSignal::setMetrologySignal(int measureKind,
-									   const Metrology::ConnectionBase& сonnectionBase,
-									   Metrology::ConnectionType metrologyConnectionType,
+									   const Metrology::ConnectionBase& onnectionBase,
+									   Metrology::ConnectionType connectionType,
 									   int channel,
 									   Metrology::Signal* pSignal)
 {
@@ -1040,7 +1040,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 		return false;
 	}
 
-	if (static_cast<int>(metrologyConnectionType) < 0 || static_cast<int>(metrologyConnectionType) >= Metrology::ConnectionTypeCount)
+	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return false;
@@ -1065,7 +1065,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 
 	m_mutex.lock();
 
-		m_metrologyConnectionType = metrologyConnectionType;
+		m_connectionType = connectionType;
 
 		result = m_signal[Metrology::ConnectionIoType::Source].setMetrologySignal(measureKind, channel, pSignal);
 
@@ -1079,9 +1079,9 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 
 	// set output signal
 	//
-	if (metrologyConnectionType != Metrology::ConnectionType::Unsed)
+	if (connectionType != Metrology::ConnectionType::Unsed)
 	{
-		Metrology::Signal* pOutSignal = nullptr;
+		Metrology::Signal* pDestSignal = nullptr;
 
 		switch (measureKind)
 		{
@@ -1089,13 +1089,13 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 				{
 					// take output signals of input signal
 					//
-					QVector<Metrology::Signal*> outputSignals = сonnectionBase.getOutputSignals(metrologyConnectionType, pSignal->param().appSignalID());
-					if (channel < 0 || channel >= outputSignals.count())
+					QVector<Metrology::Signal*> destSignals = onnectionBase.destinationSignals(connectionType, pSignal->param().appSignalID());
+					if (channel < 0 || channel >= destSignals.count())
 					{
 						break;
 					}
 
-					pOutSignal = outputSignals[channel];
+					pDestSignal = destSignals[channel];
 				}
 				break;
 
@@ -1104,7 +1104,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 				{
 					// find index of metrology connection in the base by input signal
 					//
-					int connectionIndex = сonnectionBase.findConnectionIndex(metrologyConnectionType, Metrology::ConnectionIoType::Source, pSignal);
+					int connectionIndex = onnectionBase.findConnectionIndex(connectionType, Metrology::ConnectionIoType::Source, pSignal);
 					if (connectionIndex == -1)
 					{
 						break;
@@ -1112,13 +1112,13 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 
 					// take metrology connection in the base by index
 					//
-					const Metrology::Connection& metrologyConnection = сonnectionBase.connection(connectionIndex);
-					if (metrologyConnection.isValid() == false)
+					const Metrology::Connection& connection = onnectionBase.connection(connectionIndex);
+					if (connection.isValid() == false)
 					{
 						break;
 					}
 
-					pOutSignal = metrologyConnection.metrologySignal(Metrology::ConnectionIoType::Destination);
+					pDestSignal = connection.metrologySignal(Metrology::ConnectionIoType::Destination);
 				}
 				break;
 
@@ -1129,7 +1129,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 				}
 		}
 
-		if (pOutSignal == nullptr || pOutSignal->param().isValid() == false)
+		if (pDestSignal == nullptr || pDestSignal->param().isValid() == false)
 		{
 			result = false;
 		}
@@ -1137,7 +1137,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 		{
 			m_mutex.lock();
 
-				result &= m_signal[Metrology::ConnectionIoType::Destination].setMetrologySignal(measureKind, channel, pOutSignal);
+				result &= m_signal[Metrology::ConnectionIoType::Destination].setMetrologySignal(measureKind, channel, pDestSignal);
 
 			m_mutex.unlock();
 		}
@@ -1190,7 +1190,7 @@ MeasureSignal& MeasureSignal::operator=(const MeasureSignal& from)
 {
 	QMutexLocker l(&m_mutex);
 
-	m_metrologyConnectionType = from.m_metrologyConnectionType;
+	m_connectionType = from.m_connectionType;
 
 	m_channelCount = from.m_channelCount;
 
@@ -1245,7 +1245,7 @@ void SignalBase::clearSignalList()
 
 	m_rackBase.clear();
 	m_tuningBase.clear();
-	m_metrologyConnectionBase.clear();
+	m_connectionBase.clear();
 	m_statisticsBase.clear();
 
 	m_signalHashMap.clear();
@@ -1597,7 +1597,7 @@ void SignalBase::setSignalState(int index, const Metrology::SignalState& state)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SignalBase::enableForMeasure(Metrology::ConnectionType metrologyConnectionType, Metrology::Signal* pSignal)
+bool SignalBase::enableForMeasure(Metrology::ConnectionType connectionType, Metrology::Signal* pSignal)
 {
 	if (pSignal == nullptr)
 	{
@@ -1620,7 +1620,7 @@ bool SignalBase::enableForMeasure(Metrology::ConnectionType metrologyConnectionT
 		return false;
 	}
 
-	switch (metrologyConnectionType)
+	switch (connectionType)
 	{
 		case Metrology::ConnectionType::Unsed:
 		{
@@ -1660,13 +1660,13 @@ bool SignalBase::enableForMeasure(Metrology::ConnectionType metrologyConnectionT
 				return false;
 			}
 
-			int connectionIndex = m_metrologyConnectionBase.findConnectionIndex(metrologyConnectionType, Metrology::ConnectionIoType::Source, pSignal);
+			int connectionIndex = m_connectionBase.findConnectionIndex(connectionType, Metrology::ConnectionIoType::Source, pSignal);
 			if (connectionIndex == -1)
 			{
 				return false;
 			}
 
-			const Metrology::Connection& connection = m_metrologyConnectionBase.connection(connectionIndex);
+			const Metrology::Connection& connection = m_connectionBase.connection(connectionIndex);
 			if (connection.isValid() == false)
 			{
 				return false;
@@ -1704,13 +1704,13 @@ bool SignalBase::enableForMeasure(Metrology::ConnectionType metrologyConnectionT
 				return false;
 			}
 
-			int connectionIndex = m_metrologyConnectionBase.findConnectionIndex(metrologyConnectionType, Metrology::ConnectionIoType::Source, pSignal);
+			int connectionIndex = m_connectionBase.findConnectionIndex(connectionType, Metrology::ConnectionIoType::Source, pSignal);
 			if (connectionIndex == -1)
 			{
 				return false;
 			}
 
-			const Metrology::Connection& connection = m_metrologyConnectionBase.connection(connectionIndex);
+			const Metrology::Connection& connection = m_connectionBase.connection(connectionIndex);
 			if (connection.isValid() == false)
 			{
 				return false;
@@ -1751,13 +1751,13 @@ bool SignalBase::enableForMeasure(Metrology::ConnectionType metrologyConnectionT
 				return false;
 			}
 
-			int connectionIndex = m_metrologyConnectionBase.findConnectionIndex(metrologyConnectionType, Metrology::ConnectionIoType::Source, pSignal);
+			int connectionIndex = m_connectionBase.findConnectionIndex(connectionType, Metrology::ConnectionIoType::Source, pSignal);
 			if (connectionIndex == -1)
 			{
 				return false;
 			}
 
-			const Metrology::Connection& connection = m_metrologyConnectionBase.connection(connectionIndex);
+			const Metrology::Connection& connection = m_connectionBase.connection(connectionIndex);
 			if (connection.isValid() == false)
 			{
 				return false;
@@ -1887,7 +1887,7 @@ QString SignalBase::findAppSignalIDforSerialNo(const QString& moduleID)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionType metrologyConnectionType)
+int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionType connectionType)
 {
 	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
 	{
@@ -1895,13 +1895,13 @@ int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionT
 		return 0;
 	}
 
-	if (static_cast<int>(metrologyConnectionType) < 0 || static_cast<int>(metrologyConnectionType) >= Metrology::ConnectionTypeCount)
+	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(false);
 		return 0;
 	}
 
-	// find all type of racks for selected metrologyConnectionType and create rackTypeList for ToolBar
+	// find all type of racks for selected connectionType and create rackTypeList for ToolBar
 	//
 	QMutexLocker l(&m_rackMutex);
 
@@ -1919,7 +1919,7 @@ int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionT
 				int signalCount = m_signalList.count();
 				for(int i = 0; i < signalCount; i ++)
 				{
-					if (enableForMeasure(metrologyConnectionType, &m_signalList[i]) == false)
+					if (enableForMeasure(connectionType, &m_signalList[i]) == false)
 					{
 						continue;
 					}
@@ -2090,10 +2090,10 @@ void SignalBase::initMetrologyConnections()
 {
 	// init signals
 	//
-	int connectionCount = m_metrologyConnectionBase.count();
+	int connectionCount = m_connectionBase.count();
 	for(int i = 0; i < connectionCount; i++)
 	{
-		Metrology::Connection* pConnection = m_metrologyConnectionBase.connectionPtr(i);
+		Metrology::Connection* pConnection = m_connectionBase.connectionPtr(i);
 		if (pConnection == nullptr)
 		{
 			continue;
@@ -2118,7 +2118,7 @@ void SignalBase::initMetrologyConnections()
 
 	// sort
 	//
-	m_metrologyConnectionBase.sort();
+	m_connectionBase.sort();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2162,7 +2162,7 @@ bool SignalBase::setSignalForMeasure(int index, const MeasureSignal& signal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalBase::createSignalListForMeasure(int measureKind, Metrology::ConnectionType metrologyConnectionType, int rackIndex)
+int SignalBase::createSignalListForMeasure(int measureKind, Metrology::ConnectionType connectionType, int rackIndex)
 {
 	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
 	{
@@ -2170,7 +2170,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 		return 0;
 	}
 
-	if (static_cast<int>(metrologyConnectionType) < 0 || static_cast<int>(metrologyConnectionType) >= Metrology::ConnectionTypeCount)
+	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(false);
 		return 0;
@@ -2196,7 +2196,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 
 	for(int i = 0; i < signalCount; i ++)
 	{
-		if (enableForMeasure(metrologyConnectionType, &m_signalList[i]) == false)
+		if (enableForMeasure(connectionType, &m_signalList[i]) == false)
 		{
 			continue;
 		}
@@ -2215,13 +2215,13 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 		{
 			case MEASURE_KIND_ONE_RACK:
 
-				if (metrologyConnectionType == Metrology::ConnectionType::Unsed)
+				if (connectionType == Metrology::ConnectionType::Unsed)
 				{
 					channelCount = 1;
 				}
 				else
 				{
-					channelCount = m_metrologyConnectionBase.getOutputSignalCount(metrologyConnectionType, m_signalList[i].param().appSignalID());
+					channelCount = m_connectionBase.destinationSignalCount(connectionType, m_signalList[i].param().appSignalID());
 				}
 				break;
 
@@ -2257,8 +2257,8 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 					for(int channel = 0; channel < measureSignal.channelCount(); channel++)
 					{
 						if (measureSignal.setMetrologySignal(measureKind,
-															 m_metrologyConnectionBase,
-															 metrologyConnectionType,
+															 m_connectionBase,
+															 connectionType,
 															 channel,
 															 &m_signalList[i]) == false)
 						{
@@ -2291,14 +2291,14 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 							int channel = param.location().place() - 1;
 							if (channel >= 0 && channel < measureSignal.channelCount())
 							{
-								if (m_signalMeasureList[index].metrologySignal(metrologyConnectionType, channel) != nullptr)
+								if (m_signalMeasureList[index].metrologySignal(connectionType, channel) != nullptr)
 								{
 									continue;
 								}
 
 								if (m_signalMeasureList[index].setMetrologySignal(measureKind,
-																				  m_metrologyConnectionBase,
-																				  metrologyConnectionType,
+																				  m_connectionBase,
+																				  connectionType,
 																				  channel,
 																				  &m_signalList[i]) == false)
 								{
@@ -2316,8 +2316,8 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 					if (channel >= 0 && channel < measureSignal.channelCount())
 					{
 						if (measureSignal.setMetrologySignal(measureKind,
-															 m_metrologyConnectionBase,
-															 metrologyConnectionType,
+															 m_connectionBase,
+															 connectionType,
 															 channel,
 															 &m_signalList[i]) == false)
 						{
@@ -2354,8 +2354,8 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 							if (channel >= 0 && channel < measureSignal.channelCount())
 							{
 								if (m_signalMeasureList[index].setMetrologySignal(measureKind,
-																				  m_metrologyConnectionBase,
-																				  metrologyConnectionType,
+																				  m_connectionBase,
+																				  connectionType,
 																				  channel,
 																				  &m_signalList[i]) == false)
 								{
@@ -2373,8 +2373,8 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 					if (channel >= 0 && channel < measureSignal.channelCount())
 					{
 						if (measureSignal.setMetrologySignal(measureKind,
-															 m_metrologyConnectionBase,
-															 metrologyConnectionType,
+															 m_connectionBase,
+															 connectionType,
 															 channel,
 															 &m_signalList[i]) == false)
 						{
@@ -2485,7 +2485,7 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 
 		// if input has not output signals got to next channel
 		//
-		if (m_activeSignal.metrologyConnectionType() == Metrology::ConnectionType::Unsed)
+		if (m_activeSignal.connectionType() == Metrology::ConnectionType::Unsed)
 		{
 			continue;
 		}
