@@ -16,11 +16,18 @@
 //
 #define TS_EXEC_QUERY(q, queryStr)				(q.exec(queryStr) == true ? QString() : \
 													QString("Error execution of query '%1':\n%2").		\
-																arg(queryStr).arg(lastError(q)))
+																arg(queryStr).arg(q.lastError().text()))
 
-#define TS_EXEC_QUERY_STR(queryStr)				(QSqlQuery q(), q.exec(queryStr) == true ? QString() : \
-													QString("Error execution of query '%1':\n%2").		\
-																arg(queryStr).arg(lastError(q)))
+#define TS_EXEC_QUERY_STR(queryStr)				[queryStr]()	\
+												{		\
+													QSqlQuery q;	\
+													if(q.exec(queryStr) == false)	\
+													{	\
+														return QString("Error execution of query '%1':\n%2").	\
+																arg(queryStr).arg(q.lastError().text());	\
+													}	\
+													return QString();	\
+												}()
 
 #define TS_VERIFY(conditionStr)					{	\
 													QString errStr = conditionStr;	\
@@ -32,7 +39,7 @@
 #define TS_EXEC_QUERY_RETURN_ERR(q, queryStr)		if (q.exec(queryStr) == false) \
 													{	\
 														return QString("Error execution of query '%1':\n%2").		\
-																	arg(queryStr).arg(lastError(q)); \
+																	arg(queryStr).arg(q.lastError().text()); \
 													}
 
 #define TS_EXEC_QUERY_STR_RETURN_ERR(queryStr)		{	\
@@ -40,13 +47,18 @@
 														if (q.exec(queryStr) == false) \
 														{	\
 															return QString("Error execution of query '%1':\n%2").	\
-																	arg(queryStr).arg(lastError(q)); \
+																	arg(queryStr).arg(q.lastError().text()); \
 														} \
 													}
 
 #define TS_VERIFY_RETURN_ERR(condition, errMsg)		if ((condition) == false) \
 													{	\
 														return errMsg; \
+													}
+
+#define TS_VERIFY_RETURN(resultStr)					if (resultStr.isEmpty() == false) \
+													{	\
+														return resultStr; \
 													}
 
 #define TS_RETURN_SUCCESS()							return QString();
@@ -65,6 +77,7 @@ private slots:
 	void addSignalTest();
 	void checkinSignalsTest();
 	void checkoutSignalsTest();
+	void deleteSignalTest();
 	void setSignalWorkcopyTest();
 
 
@@ -83,6 +96,8 @@ private slots:
 private:
 	bool openDatabase(QSqlDatabase& db);
 
+	QString applyFutureDatabaseUpgrade();
+
 	QString addSignal(int userID, E::SignalType type, int channelCount, std::vector<ObjectState>* obStates);
 
 	QString check_signalIsExist(	int userID,
@@ -91,6 +106,10 @@ private:
 								int channel,
 								int signalGroupID,
 								bool isCheckedOut);
+
+	QString getFieldValue(QString valueFiled, int* value, QString table, QString whereField, int whereValue);
+	QString getSignalGroupID(int signalID, int* signalGroupID);
+	QString getSignalInstanceID(int signalID, int* signalInstanceID);
 
 	QString setSignalWorkcopy(int userID, const Signal& s, ObjectState* obState);
 
@@ -105,6 +124,8 @@ private:
 
 	QString check_signalIsCheckedIn(int signalID);
 	QString check_signalIsCheckedOut(int signalID);
+
+	QString deleteSignal(int userID, int signalID, ObjectState* obState);
 
 	//
 

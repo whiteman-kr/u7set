@@ -43,7 +43,7 @@ void DbControllerSignalTests::initTestCase()
 
 			QVERIFY2 (ok == true, qPrintable(lastError(q)));
 
-			qDebug() << "Project database " << m_databaseName << "dropped!";
+			qDebug() << "Project database" << m_databaseName << "dropped!";
 
 			break;
 		}
@@ -56,6 +56,8 @@ void DbControllerSignalTests::initTestCase()
 
 	ok = m_db->upgradeProject(m_projectName, m_adminPassword, true, 0);
 	QVERIFY2 (ok == true, qPrintable("Can't upgrade project: " + m_db->lastError()));
+
+	TS_VERIFY(applyFutureDatabaseUpgrade());
 
 	ok = m_db->openProject(m_projectName, "Administrator", m_adminPassword, nullptr);
 	QVERIFY2 (ok == true, qPrintable("Can't open project: " + m_db->lastError()));
@@ -100,6 +102,13 @@ void DbControllerSignalTests::addSignalTest()
 	//				channel_count integer)
 	//				RETURNS SETOF objectstate
 
+
+
+
+	// CHECK SignalInstance.ACTION!!!!
+
+
+
 	OPEN_DATABASE();
 
 	// add single channel signal
@@ -126,8 +135,11 @@ void DbControllerSignalTests::addSignalTest()
 		QVERIFY(obStates[i].checkedOut == true);
 	}
 
-	TS_VERIFY(check_signalIsExist(ADMIN_ID, obStates[0].id, E::SignalType::Analog, 0, 1, true));
-	TS_VERIFY(check_signalIsExist(ADMIN_ID, obStates[1].id, E::SignalType::Analog, 1, 1, true));
+	int sg1 = 0;
+	TS_VERIFY(getSignalGroupID(obStates[0].id, &sg1));
+
+	TS_VERIFY(check_signalIsExist(ADMIN_ID, obStates[0].id, E::SignalType::Analog, 0, sg1, true));
+	TS_VERIFY(check_signalIsExist(ADMIN_ID, obStates[1].id, E::SignalType::Analog, 1, sg1, true));
 
 	// add 4 (max) channel signal
 	//
@@ -141,10 +153,13 @@ void DbControllerSignalTests::addSignalTest()
 		QVERIFY(obStates[i].checkedOut == true);
 	}
 
-	TS_VERIFY(check_signalIsExist(USER3_ID, obStates[0].id, E::SignalType::Discrete, 0, 2, true));
-	TS_VERIFY(check_signalIsExist(USER3_ID, obStates[1].id, E::SignalType::Discrete, 1, 2, true));
-	TS_VERIFY(check_signalIsExist(USER3_ID, obStates[2].id, E::SignalType::Discrete, 2, 2, true));
-	TS_VERIFY(check_signalIsExist(USER3_ID, obStates[3].id, E::SignalType::Discrete, 3, 2, true));
+	int sg2 = 0;
+	TS_VERIFY(getSignalGroupID(obStates[0].id, &sg2));
+
+	TS_VERIFY(check_signalIsExist(USER3_ID, obStates[0].id, E::SignalType::Discrete, 0, sg2, true));
+	TS_VERIFY(check_signalIsExist(USER3_ID, obStates[1].id, E::SignalType::Discrete, 1, sg2, true));
+	TS_VERIFY(check_signalIsExist(USER3_ID, obStates[2].id, E::SignalType::Discrete, 2, sg2, true));
+	TS_VERIFY(check_signalIsExist(USER3_ID, obStates[3].id, E::SignalType::Discrete, 3, sg2, true));
 
 	// add 9 (wrong) channel signal
 	//
@@ -304,7 +319,141 @@ void DbControllerSignalTests::checkoutSignalsTest()
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER);
 
-	// adfd checkout DELETED signal
+	// add checkout DELETED signal
+
+}
+
+void DbControllerSignalTests::deleteSignalTest()
+{
+	// Testing of stored procedure:
+	//
+	//	delete_signal(
+	//		user_id integer,
+	//		signal_id integer)
+	//		RETURNS objectstate
+	//
+
+	OPEN_DATABASE();
+
+	std::vector<ObjectState> obStates;
+	ObjectState obState;
+
+	// add TWO channel signal
+	// both signals are checked out and have not checked in instances
+	//
+	TS_VERIFY(addSignal(USER2_ID, E::SignalType::Discrete, 2, &obStates));
+	QVERIFY(obStates.size() == 2);
+	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
+	QVERIFY(obStates[1].errCode == ERR_SIGNAL_OK);
+
+	int id1 = obStates[0].id;
+	int id2 = obStates[1].id;
+
+	int signalGroupID1 = 0;
+
+	TS_VERIFY(getSignalGroupID(id1, &signalGroupID1));
+
+	// try delete first channel of signal by another user
+	//
+	TS_VERIFY(deleteSignal(USER3_ID, id1, &obState));
+	QVERIFY(obState.errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER);
+
+	// try delete first channel of signal
+	//
+	TS_VERIFY(deleteSignal(USER2_ID, id1, &obState));
+	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
+
+	QSqlQuery q;
+
+	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id1));
+	QVERIFY2(q.size() == 0, "SignalInstance record is not deleted");
+
+	TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id1));
+	QVERIFY2(q.size() == 0, "Signal record is not deleted");
+
+	TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id1));
+	QVERIFY2(q.size() == 0, "CheckOut record is not deleted");
+
+	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
+	QVERIFY2(q.size() == 1, "SignalGroup record is deleted");
+
+	// try delete second channel of signal
+	//
+	TS_VERIFY(deleteSignal(USER2_ID, id2, &obState));
+	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
+
+	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id1));
+	QVERIFY2(q.size() == 0, "SignalInstance record is not deleted");
+
+	TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id1));
+	QVERIFY2(q.size() == 0, "Signal record is not deleted");
+
+	TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id1));
+	QVERIFY2(q.size() == 0, "CheckOut record is not deleted");
+
+	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
+	QVERIFY2(q.size() == 0, "SignalGroup record is not deleted");
+
+	// add THREE channel signal
+	//
+	TS_VERIFY(addSignal(USER3_ID, E::SignalType::Analog, 3, &obStates));
+	QVERIFY(obStates.size() == 3);
+	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
+	QVERIFY(obStates[1].errCode == ERR_SIGNAL_OK);
+	QVERIFY(obStates[2].errCode == ERR_SIGNAL_OK);
+
+	int sid1 = obStates[0].id;
+	int sid2 = obStates[1].id;
+	int sid3 = obStates[2].id;
+
+	int sg2 = 0;
+
+	TS_VERIFY(getSignalGroupID(sid1, &sg2));
+
+	//	Check In second and third channel
+	//
+	TS_VERIFY(checkinSignals(USER3_ID, std::vector<int>({ sid2, sid3 }), "Signal check in", &obStates));
+	QVERIFY(obStates.size() == 2);
+	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
+	QVERIFY(obStates[1].errCode == ERR_SIGNAL_OK);
+
+	// check out second channel by USER3_ID and try delete by another user
+	//
+	TS_VERIFY(checkoutSignals(USER3_ID, std::vector({ sid2 }), &obStates));
+	QVERIFY(obStates.size() == 1);
+	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
+
+	TS_VERIFY(deleteSignal(USER2_ID, sid2, &obState));
+	QVERIFY(obState.errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER);
+
+	// try delete by current USER3_ID
+	//
+	TS_VERIFY(deleteSignal(USER3_ID, sid2, &obState));
+	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
+
+	TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(sid2));
+	QVERIFY(q.first() == true);
+
+	int chInInstanceID = q.value("checkedininstanceid").toInt();
+	int chOutInstanceID = q.value("checkedoutinstanceid").toInt();
+
+	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chInInstanceID));
+	QVERIFY(q.first() == true);
+
+	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chOutInstanceID));
+	QVERIFY(q.first() == true);
+	QVERIFY(q.value("action").toInt() == static_cast<int>(VcsItemAction::Deleted));
+
+	// delete checked in 3 channel
+	//
+	TS_VERIFY(deleteSignal(USER2_ID, sid3, &obState));
+	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
+
+	// signal should be automatically checked out
+	//
+	TS_VERIFY(check_signalIsCheckedOut(sid3));
+
+ssldfm sldfm sldf
 
 }
 
@@ -1368,10 +1517,37 @@ bool DbControllerSignalTests::openDatabase(QSqlDatabase& db)
 	return db.open();
 }
 
-QString DbControllerSignalTests::addSignal(int userID,
-															 E::SignalType type,
-															 int channelCount,
-															 std::vector<ObjectState>* obStates)
+QString DbControllerSignalTests::applyFutureDatabaseUpgrade()
+{
+	QSqlDatabase db;
+
+	TS_VERIFY_RETURN_ERR(openDatabase(db) == true, QString("Can't connect to database %1, error: %2" ).
+														arg(m_databaseName).arg(db.lastError().text()));
+
+	QFile upgradeFile(":/DatabaseUpgrade/FutureUpgrade.sql");
+
+	bool result = upgradeFile.open(QIODevice::ReadOnly | QIODevice::Text);
+
+	if (result == false)
+	{
+		return "Error opening FutureUpgrade.sql";
+	}
+
+	QString upgradeScript = upgradeFile.readAll();
+
+	QString res = TS_EXEC_QUERY_STR(upgradeScript);
+
+	TS_VERIFY_RETURN_ERR(res.isEmpty() == true, "Error executing FutureUpgrade.sql");
+
+	db.close();
+
+	TS_RETURN_SUCCESS();
+}
+
+QString DbControllerSignalTests::addSignal(	int userID,
+											E::SignalType type,
+											int channelCount,
+											std::vector<ObjectState>* obStates)
 {
 	QSqlQuery q;
 
@@ -1392,11 +1568,11 @@ QString DbControllerSignalTests::addSignal(int userID,
 }
 
 QString DbControllerSignalTests::check_signalIsExist(int userID,
-															 int signalID,
-															 E::SignalType type,
-															 int channel,
-															 int signalGroupID,
-															 bool isCheckedOut)
+													 int signalID,
+													 E::SignalType type,
+													 int channel,
+													 int signalGroupID,
+													 bool isCheckedOut)
 {
 	// check record in Signal table
 	//
@@ -1460,6 +1636,37 @@ QString DbControllerSignalTests::check_signalIsExist(int userID,
 		TS_VERIFY_RETURN_ERR(qCheckout.size() == 0, "Checkout records count must be 0");
 	}
 
+	TS_RETURN_SUCCESS();
+}
+
+QString DbControllerSignalTests::getFieldValue(QString valueField, int* value, QString table, QString whereField, int whereValue)
+{
+	TS_VERIFY_RETURN_ERR(value != nullptr, "NULL pointer");
+
+	QSqlQuery q;
+
+	TS_EXEC_QUERY_RETURN_ERR(q, QString("SELECT %1 FROM %2 WHERE %3=%4").
+									arg(valueField).arg(table).arg(whereField).arg(whereValue));
+
+	TS_VERIFY_RETURN_ERR(q.size() == 1, "More then one record found");
+
+	TS_VERIFY_RETURN_ERR(q.first() == true, QString("Can't get field '%1' value from table '%2'").
+												arg(valueField).arg(table));
+
+	*value = q.value(0).toInt();
+
+	TS_RETURN_SUCCESS();
+}
+
+QString DbControllerSignalTests::getSignalGroupID(int signalID, int* signalGroupID)
+{
+	TS_VERIFY_RETURN(getFieldValue("signalgroupid", signalGroupID, "signal", "signalid", signalID));
+	TS_RETURN_SUCCESS();
+}
+
+QString DbControllerSignalTests::getSignalInstanceID(int signalID, int* signalInstanceID)
+{
+	TS_VERIFY_RETURN(getFieldValue("signalginstanced", signalInstanceID, "signalinstance", "signalid", signalID));
 	TS_RETURN_SUCCESS();
 }
 
@@ -1614,6 +1821,18 @@ QString DbControllerSignalTests::check_signalIsCheckedOut(int signalID)
 	TS_RETURN_SUCCESS();
 }
 
+QString DbControllerSignalTests::deleteSignal(int userID, int signalID, ObjectState* obState)
+{
+	QSqlQuery q;
+
+	TS_EXEC_QUERY_RETURN_ERR(q, QString("SELECT * FROM delete_signal(%1, %2)").
+								arg(userID).arg(signalID));
+	TS_VERIFY_RETURN_ERR(q.first() == true, "Can't get ObjectState");
+
+	DbWorker::db_objectState(q, obState);
+
+	TS_RETURN_SUCCESS();
+}
 
 
 
