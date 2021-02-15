@@ -459,7 +459,7 @@ void RackListDialog::rackProperty()
 		QMessageBox::information(this, windowTitle(), tr("No rack groups have been found.\nTo create a group of racks, click menu \"Racks\" - \"Groups ...\""));
 	}
 
-	RackPropertyDialog dialog(*pRack, m_rackBase);
+	RackPropertyDialog dialog(*pRack, m_rackBase, this);
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;

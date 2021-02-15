@@ -230,8 +230,12 @@ void CalibratorManager::initDialog()
 	m_pRemoteControlCheck->setLayoutDirection(Qt::RightToLeft);
 	m_pRemoteControlCheck->setChecked(true);
 
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	m_pErrorDialog->setMinimumSize(static_cast<int>(screen.width() * 0.4), static_cast<int>(screen.height() * 0.1));
+	m_pErrorDialog->resize(static_cast<int>(screen.width() * 0.4), static_cast<int>(screen.height() * 0.15));
+	m_pErrorDialog->move(screen.center() - rect().center());
+
 	m_pErrorDialog->setWindowFlags(Qt::Drawer);
-	m_pErrorDialog->setMinimumSize(700, 50);
 	m_pErrorList->setReadOnly(true);
 
 	connect(m_pCalibrator, &Calibrator::connected, this, &CalibratorManager::onCalibratorConnect, Qt::QueuedConnection);

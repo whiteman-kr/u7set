@@ -7282,7 +7282,13 @@ For example, type of connection: &quot;Input&quot; -&gt; &quot;%2&quot;.
 To create a new connection between signals, select &quot;View&quot;-&gt;&quot;Metrology connections...&quot;
 
 Do you want to create new connection now?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сигнал %1 это &quot;%2&quot; сигнал.
+Для того чтобы произвести измерение ТХ этого сигнала, необходимо создать соединение со входным сигналом.
+Например, тип соединения: &quot;Входной&quot; -&gt; &quot;%2&quot;
+
+Для того чтобы создать новое соединение между сигналами, выберите &quot;Вид&quot;-&gt;&quot;Соединение сигналов ...&quot;
+
+Вы хотите создать новое соединение сейчас?</translation>
     </message>
 </context>
 <context>

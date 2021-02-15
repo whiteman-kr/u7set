@@ -60,8 +60,6 @@ public:
 	void set(const QVector<Metrology::Connection>& list_add);
 	void clear();
 
-	QString text(int row, int column, const Metrology::Connection& connection) const;
-
 private:
 
 	mutable QMutex m_connectionMutex;
@@ -72,6 +70,8 @@ private:
 
 	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
 	QVariant data(const QModelIndex &index, int role) const;
+
+	QString text(int row, int column, const Metrology::Connection& connection) const;
 };
 
 // ==============================================================================================

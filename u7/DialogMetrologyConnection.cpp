@@ -40,6 +40,71 @@ void MetrologyConnectionTable::setSignalSetProvider(SignalSetProvider* signalSet
 
 // -------------------------------------------------------------------------------------------------------------------
 
+int MetrologyConnectionTable::connectionCount() const
+{
+	QMutexLocker l(&m_connectionMutex);
+
+	return m_connectionList.count();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+Metrology::Connection MetrologyConnectionTable::at(int index) const
+{
+	QMutexLocker l(&m_connectionMutex);
+
+	if (index < 0 || index >= m_connectionList.count())
+	{
+		return Metrology::Connection();
+	}
+
+	return m_connectionList[index];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MetrologyConnectionTable::set(const QVector<Metrology::Connection>& list_add)
+{
+	int count = list_add.count();
+	if (count == 0)
+	{
+		return;
+	}
+
+	beginInsertRows(QModelIndex(), 0, count - 1);
+
+	m_connectionMutex.lock();
+
+		m_connectionList = list_add;
+
+	m_connectionMutex.unlock();
+
+	endInsertRows();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MetrologyConnectionTable::clear()
+{
+	int count = connectionCount();
+	if (count == 0)
+	{
+		return;
+	}
+
+	beginRemoveRows(QModelIndex(), 0, count - 1);
+
+	m_connectionMutex.lock();
+
+		m_connectionList.clear();
+
+	m_connectionMutex.unlock();
+
+	endRemoveRows();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 int MetrologyConnectionTable::columnCount(const QModelIndex&) const
 {
 	return METROLOGY_CONNECTION_COLUMN_COUNT;
@@ -184,71 +249,6 @@ QString MetrologyConnectionTable::text(int row, int column, const Metrology::Con
 	}
 
 	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int MetrologyConnectionTable::connectionCount() const
-{
-	QMutexLocker l(&m_connectionMutex);
-
-	return m_connectionList.count();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-Metrology::Connection MetrologyConnectionTable::at(int index) const
-{
-	QMutexLocker l(&m_connectionMutex);
-
-	if (index < 0 || index >= m_connectionList.count())
-	{
-		return Metrology::Connection();
-	}
-
-	return m_connectionList[index];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MetrologyConnectionTable::set(const QVector<Metrology::Connection>& list_add)
-{
-	int count = list_add.count();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginInsertRows(QModelIndex(), 0, count - 1);
-
-	m_connectionMutex.lock();
-
-		m_connectionList = list_add;
-
-	m_connectionMutex.unlock();
-
-	endInsertRows();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MetrologyConnectionTable::clear()
-{
-	int count = connectionCount();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginRemoveRows(QModelIndex(), 0, count - 1);
-
-	m_connectionMutex.lock();
-
-		m_connectionList.clear();
-
-	m_connectionMutex.unlock();
-
-	endRemoveRows();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

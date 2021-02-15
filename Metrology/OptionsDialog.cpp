@@ -121,8 +121,10 @@ void OptionsDialog::createInterface()
 {
 	setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Options.png"));
-	setMinimumSize(850, 400);
-	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
+
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+
+	setMinimumSize(static_cast<int>(screen.width() * 0.45), static_cast<int>(screen.height() * 0.3));
 	loadSettings();
 
 	// create interface

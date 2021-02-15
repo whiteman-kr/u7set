@@ -1870,7 +1870,7 @@ void MainWindow::showOptions()
 
 void MainWindow::aboutConnection()
 {
-	ProjectPropertyDialog dialog(theOptions.projectInfo());
+	ProjectPropertyDialog dialog(theOptions.projectInfo(), this);
 	dialog.exec();
 }
 

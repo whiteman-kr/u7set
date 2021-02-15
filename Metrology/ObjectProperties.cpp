@@ -53,8 +53,11 @@ void ProjectPropertyDialog::createPropertyList()
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Propertу"));
-	setMinimumSize(600, 300);
-	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
+
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
+	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
+	move(screen.center() - rect().center());
 
 	setWindowTitle(tr("Project - %1").arg(m_info.projectName()));
 
@@ -213,12 +216,11 @@ void RackPropertyDialog::createPropertyList()
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Propertу"));
-	setMinimumSize(400, 180);
 
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.1));
+	setMinimumSize(static_cast<int>(screen.width() * 0.15), static_cast<int>(screen.height() * 0.15));
+	resize(static_cast<int>(screen.width() * 0.15), static_cast<int>(screen.height() * 0.15));
 	move(screen.center() - rect().center());
-
 
 	if (m_rack.isValid() == false)
 	{
@@ -457,8 +459,11 @@ void RackGroupPropertyDialog::createPropertyList()
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Propertу - rack groups"));
-	setMinimumSize(600, 300);
-	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
+
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
+	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
+	move(screen.center() - rect().center());
 
 	// create menu
 	//
@@ -1039,8 +1044,11 @@ void SignalPropertyDialog::createPropertyList()
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Propertу"));
-	setMinimumSize(600, 300);
-	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
+
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
+	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
+	move(screen.center() - rect().center());
 
 	if (m_param.isValid() == false)
 	{
@@ -1487,8 +1495,11 @@ void ComparatorPropertyDialog::createPropertyList()
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
 	setWindowTitle(tr("Propertу"));
-	setMinimumSize(600, 300);
-	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
+
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
+	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
+	move(screen.center() - rect().center());
 
 	UnitsConvertor uc;
 
