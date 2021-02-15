@@ -45,7 +45,6 @@ gcc {
 SOURCES += \
 	../Proto/network.pb.cc \
 	../Proto/serialization.pb.cc \
-	../Proto/trends.pb.cc \
 	../Proto/ProtoSerialization.cpp \
 	google/protobuf/io/coded_stream.cc \
 	google/protobuf/stubs/common.cc \
@@ -84,7 +83,6 @@ SOURCES += \
 HEADERS += \
 	../Proto/network.pb.h \
 	../Proto/serialization.pb.h \
-	../Proto/trends.pb.h \
 	../Proto/ProtoSerialization.h \
 	google/protobuf/io/coded_stream.h \
 	google/protobuf/io/coded_stream_inl.h \
