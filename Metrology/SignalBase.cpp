@@ -655,7 +655,7 @@ QString IoSignalParam::engineeringRangeStr() const
 			if (outParam.isValid() == true)
 			{
 				if (compareDouble(inParam.tuningLowBound().toDouble(), outParam.lowEngineeringUnits()) == false ||
-						compareDouble(inParam.tuningHighBound().toDouble(), outParam.highEngineeringUnits()) == false)
+					compareDouble(inParam.tuningHighBound().toDouble(), outParam.highEngineeringUnits()) == false)
 				{
 					result += outParam.engineeringRangeStr();
 				}
@@ -729,7 +729,12 @@ void MultiChannelSignal::clear()
 {
 	QMutexLocker l(&m_mutex);
 
-	m_pSignalList.fill(nullptr, m_channelCount);
+	int channelCount = m_pSignalList.count();
+	for(int ch = 0; ch < channelCount; ch++)
+	{
+		m_pSignalList[ch] = nullptr;
+	}
+
 	m_location.clear();
 	m_signalID.clear();
 }
@@ -742,7 +747,8 @@ bool MultiChannelSignal::isEmpty() const
 
 	bool empty = true;
 
-	for(int ch = 0; ch < m_channelCount; ch++)
+	int channelCount = m_pSignalList.count();
+	for(int ch = 0; ch < channelCount; ch++)
 	{
 		if (m_pSignalList[ch] != nullptr)
 		{
@@ -758,11 +764,10 @@ bool MultiChannelSignal::isEmpty() const
 // -------------------------------------------------------------------------------------------------------------------
 
 
-void MultiChannelSignal::setChannelCount(int count)
+void MultiChannelSignal::setSignalCount(int count)
 {
 	QMutexLocker l(&m_mutex);
 
-	m_channelCount = count;
 	m_pSignalList.fill(nullptr, count);
 }
 
@@ -770,13 +775,13 @@ void MultiChannelSignal::setChannelCount(int count)
 
 Metrology::Signal* MultiChannelSignal::metrologySignal(int channel) const
 {
-	if (channel < 0 || channel >= m_channelCount)
+	QMutexLocker l(&m_mutex);
+
+	if (channel < 0 || channel >= m_pSignalList.count())
 	{
 		assert(0);
 		return nullptr;
 	}
-
-	QMutexLocker l(&m_mutex);
 
 	return m_pSignalList[channel];
 }
@@ -785,13 +790,15 @@ Metrology::Signal* MultiChannelSignal::metrologySignal(int channel) const
 
 bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrology::Signal* pSignal)
 {
+	QMutexLocker l(&m_mutex);
+
 	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
 	{
 		assert(0);
 		return false;
 	}
 
-	if (channel < 0 || channel >= m_channelCount)
+	if (channel < 0 || channel >= m_pSignalList.count())
 	{
 		assert(0);
 		return false;
@@ -810,8 +817,6 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 		return false;
 	}
 
-	QMutexLocker l(&m_mutex);
-
 	m_pSignalList[channel] = pSignal;
 
 	m_location.setRack(param.location().rack());
@@ -819,6 +824,8 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 	m_location.setModule(param.location().module());
 	m_location.setPlace(param.location().place());
 	m_location.setContact(param.location().contact());
+
+	m_caption.clear();
 
 	switch(measureKind)
 	{
@@ -829,7 +836,6 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 
 		case MEASURE_KIND_ONE_MODULE:
 			m_signalID = param.location().moduleID();
-			m_caption.clear();
 			break;
 
 		case MEASURE_KIND_MULTI_RACK:
@@ -885,7 +891,8 @@ Metrology::Signal* MultiChannelSignal::firstMetrologySignal() const
 
 	Metrology::Signal* pSignal = nullptr;
 
-	for(int ch = 0; ch < m_channelCount; ch++ )
+	int channelCount = m_pSignalList.count();
+	for(int ch = 0; ch < channelCount; ch++ )
 	{
 		if (m_pSignalList[ch] != nullptr)
 		{
@@ -903,7 +910,6 @@ MultiChannelSignal& MultiChannelSignal::operator=(const MultiChannelSignal& from
 {
 	QMutexLocker l(&m_mutex);
 
-	m_channelCount = from.m_channelCount;
 	m_pSignalList = from.m_pSignalList;
 	m_location = from.m_location;
 	m_signalID = from.m_signalID;
@@ -973,7 +979,7 @@ void MeasureSignal::setChannelCount(int count)
 
 	for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
 	{
-		m_signal[ioType].setChannelCount(count);
+		m_signal[ioType].setSignalCount(count);
 	}
 }
 
@@ -1089,7 +1095,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 				{
 					// take destination signals by source signal
 					//
-					QVector<Metrology::Signal*> destSignals = connectionBase.destinationSignals(pSignal->param().appSignalID(), connectionType);
+				    QVector<Metrology::Signal*> destSignals = connectionBase.destinationSignals(pSignal->param().appSignalID(), connectionType);
 					if (channel < 0 || channel >= destSignals.count())
 					{
 						break;
@@ -1104,7 +1110,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 				{
 					// find index of metrology connection in the base by source signal
 					//
-					int connectionIndex = connectionBase.findConnectionIndex(Metrology::ConnectionIoType::Source, connectionType, pSignal);
+				    int connectionIndex = connectionBase.findConnectionIndex(Metrology::ConnectionIoType::Source, connectionType, pSignal);
 					if (connectionIndex == -1)
 					{
 						break;

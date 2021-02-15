@@ -600,7 +600,7 @@ void ComparatorListDialog::comparatorProperties()
 		return;
 	}
 
-	ComparatorPropertyDialog dialog(*comparatorEx);
+	ComparatorPropertyDialog dialog(*comparatorEx, this);
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;

@@ -38,11 +38,11 @@ public:
 	bool isValid() const;
 	void clear();
 
-	Metrology::SignalParam param(int ioType) const;
-	bool setParam(int ioType, const Metrology::SignalParam& param);
-
 	Metrology::ConnectionType connectionType() const { return m_connectionType; }
 	void setConnectionType(Metrology::ConnectionType type) { m_connectionType = type; }
+
+	Metrology::SignalParam param(int ioType) const;
+	bool setParam(int ioType, const Metrology::SignalParam& param);
 
 	QString appSignalID() const;
 	QString customSignalID() const;
@@ -82,8 +82,8 @@ private:
 
 	mutable QMutex m_mutex;
 
-	Metrology::SignalParam	m_param[Metrology::ConnectionIoTypeCount];
 	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::Unsed;
+	Metrology::SignalParam m_param[Metrology::ConnectionIoTypeCount];
 
 	CalibratorManager* m_pCalibratorManager = nullptr;
 
@@ -111,8 +111,7 @@ public:
 	void clear();
 	bool isEmpty() const;
 
-	int channelCount() const { return m_channelCount; }
-	void setChannelCount(int count);
+	void setSignalCount(int count);
 
 	Metrology::Signal* metrologySignal(int channel) const;
 	bool setMetrologySignal(int measureKind, int channel, Metrology::Signal* pSignal);
@@ -129,7 +128,6 @@ public:
 private:
 
 	mutable QMutex m_mutex;
-	int m_channelCount = 0;
 	QVector<Metrology::Signal*> m_pSignalList;
 
 	Metrology::SignalLocation m_location;

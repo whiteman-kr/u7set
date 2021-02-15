@@ -1003,7 +1003,7 @@ void SignalInfoPanel::signalProperty()
 		return;
 	}
 
-	SignalPropertyDialog dialog(param);
+	SignalPropertyDialog dialog(param, this);
 	dialog.exec();
 }
 

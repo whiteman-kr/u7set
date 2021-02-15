@@ -212,8 +212,6 @@ QString MetrologyConnectionTable::text(int row, int column, const Metrology::Con
 		return QString();
 	}
 
-	bool visible = true;
-
 	QString result;
 
 	switch (column)

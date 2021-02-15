@@ -1073,7 +1073,7 @@ void StatisticsPanel::onProperty()
 					break;
 				}
 
-				SignalPropertyDialog dialog(pSignal->param());
+				SignalPropertyDialog dialog(pSignal->param(), this);
 				dialog.exec();
 			}
 			break;
@@ -1086,7 +1086,7 @@ void StatisticsPanel::onProperty()
 					break;
 				}
 
-				ComparatorPropertyDialog dialog(*comparatorEx);
+				ComparatorPropertyDialog dialog(*comparatorEx, this);
 				if (dialog.exec() != QDialog::Accepted)
 				{
 					break;

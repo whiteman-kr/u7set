@@ -712,7 +712,7 @@ void SignalListDialog::signalProperties()
 		return;
 	}
 
-	SignalPropertyDialog dialog(param);
+	SignalPropertyDialog dialog(param, this);
 	dialog.exec();
 }
 

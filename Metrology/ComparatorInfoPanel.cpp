@@ -578,7 +578,7 @@ void ComparatorInfoPanel::comparatorProperty()
 		return;
 	}
 
-	ComparatorPropertyDialog dialog(*comparatorEx);
+	ComparatorPropertyDialog dialog(*comparatorEx, this);
 	int result = dialog.exec();
 	if (result != QDialog::Accepted)
 	{

@@ -1701,6 +1701,14 @@ void MainWindow::showConnectionList()
 
 	theSignalBase.statistics().createSignalList();
 	theSignalBase.statistics().createComparatorList();
+
+	if (m_pStatisticsPanel == nullptr)
+	{
+		assert(m_pStatisticsPanel);
+		return;
+	}
+
+	m_pStatisticsPanel->updateList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2525,6 +2533,17 @@ void MainWindow::configSocketConfigurationLoaded()
 
 	m_statusLoadSignals->show();
 	m_statusLoadSignals->setValue(0);
+
+	if (m_pConfigSocket == nullptr)
+	{
+		assert(m_pConfigSocket);
+		return;
+	}
+
+	if (m_pConfigSocket->loadedFiles().count() == 0)
+	{
+		QMessageBox::critical(this, windowTitle(), tr("No loaded files from Configuration Service!"));
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -399,7 +399,7 @@ bool RackListDialog::eventFilter(QObject* object, QEvent* event)
 
 void RackListDialog::rackGroups()
 {
-	RackGroupPropertyDialog dialog(m_rackBase);
+	RackGroupPropertyDialog dialog(m_rackBase, this);
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
