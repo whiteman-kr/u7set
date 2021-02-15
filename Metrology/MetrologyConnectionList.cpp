@@ -149,18 +149,13 @@ QString MetrologyConnectionTable::text(int row, int column, const Metrology::Con
 
 	bool visible = true;
 
-	if (row > 0 && m_connectionList[row - 1].strID(false) == connection.strID(false))
-	{
-		visible = false;
-	}
-
 	QString result;
 
 	switch (column)
 	{
-		case METROLOGY_CONNECTION_COLUMN_IN_ID:		result = visible ? connection.appSignalID(Metrology::ConnectionIoType::Source): QString();					break;
-		case METROLOGY_CONNECTION_COLUMN_TYPE:		result = visible ? qApp->translate("MetrologyConnection", connection.typeStr().toUtf8()) : QString("");	break;
-		case METROLOGY_CONNECTION_COLUMN_OUT_ID:	result = connection.appSignalID(Metrology::ConnectionIoType::Destination);									break;
+		case METROLOGY_CONNECTION_COLUMN_IN_ID:		result = connection.appSignalID(Metrology::ConnectionIoType::Source);			break;
+		case METROLOGY_CONNECTION_COLUMN_TYPE:		result = qApp->translate("MetrologyConnection", connection.typeStr().toUtf8());	break;
+		case METROLOGY_CONNECTION_COLUMN_OUT_ID:	result = connection.appSignalID(Metrology::ConnectionIoType::Destination);		break;
 		default:									assert(0);
 	}
 
@@ -271,7 +266,7 @@ void MetrologyConnectionItemDialog::createInterface()
 	resize(static_cast<int>(screen.width() * 0.2), static_cast<int>(screen.height() * 0.04));
 	move(screen.center() - rect().center());
 
-	if (m_metrologyConnection.strID(true).isEmpty() == true)
+	if (m_metrologyConnection.crc().result() == 0xFFFFFFFFFFFFFFFF)
 	{
 		setWindowIcon(QIcon(":/icons/Add.png"));
 		setWindowTitle(tr("Create connection"));
@@ -663,6 +658,7 @@ void MetrologyConnectionItemDialog::onOk()
 
 	m_metrologyConnection.setSignal(Metrology::ConnectionIoType::Source, pInSignal);
 	m_metrologyConnection.setSignal(Metrology::ConnectionIoType::Destination, pOutSignal);
+	m_metrologyConnection.createCrc();
 
 	accept();
 }
@@ -1203,26 +1199,18 @@ void MetrologyConnectionDialog::importConnections()
 			}
 		}
 
-		// init metrology signals
-		//
 		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
 		{
 			if (connection.appSignalID(ioType).isEmpty() == true)
 			{
 				continue;
 			}
-
-			Metrology::Signal* pSignal = theSignalBase.signalPtr(connection.appSignalID(ioType));
-			if (pSignal == nullptr)
-			{
-				continue;
-			}
-
-			connection.setSignal(ioType, pSignal);
 		}
 
 		// append
 		//
+		connection.createCrc();
+
 		if (m_connectionBase.findConnectionIndex(connection) != -1)
 		{
 			continue;
@@ -1232,6 +1220,29 @@ void MetrologyConnectionDialog::importConnections()
 	}
 
 	file.close();
+
+	// init metrology signals
+	//
+	int connectionCount = m_connectionBase.count();
+	for (int i = 0; i < connectionCount; i++)
+	{
+		Metrology::Connection* pConnection = m_connectionBase.connectionPtr(i);
+		if (pConnection == nullptr)
+		{
+			continue;
+		}
+
+		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+		{
+			Metrology::Signal* pSignal = theSignalBase.signalPtr(pConnection->appSignalID(ioType));
+			if (pSignal == nullptr)
+			{
+				continue;
+			}
+
+			pConnection->setSignal(ioType, pSignal);
+		}
+	}
 
 	m_connectionBase.sort();
 

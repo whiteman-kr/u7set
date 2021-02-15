@@ -4,6 +4,7 @@
 #include "../lib/MetrologySignal.h"
 #include "../lib/DbController.h"
 #include "../lib/SignalSetProvider.h"
+#include "../lib/Crc.h"
 
 #include <QMutex>
 #include <QVector>
@@ -87,8 +88,15 @@ namespace Metrology
 		bool isValid() const;
 		void clear();
 
-		QString strID(bool full) const;
+		//
+		//
+		Crc64 createCrc();
+		Crc64 crc() const { return m_crc; }
 
+		QString strID() const;
+
+		//
+		//
 		ConnectionSignal connectionSignal(int ioType) const;
 
 		ConnectionType type() const { return m_type; }
@@ -117,8 +125,9 @@ namespace Metrology
 
 	private:
 
-		ConnectionType m_type = ConnectionType::Unknown;
+		Crc64 m_crc;
 
+		ConnectionType m_type = ConnectionType::Unknown;
 		ConnectionSignal m_connectionSignal[ConnectionIoTypeCount];
 
 		VcsItemAction m_action;
@@ -163,15 +172,16 @@ namespace Metrology
 		QString userName() { return m_userName; }
 		bool enableEditBase() { return m_enableEditBase; }
 
-		//
+		// modify
 		//
 		int append(const Connection& connection);
-		void remove(int index);
-		void removeAllMarked();
 
 		Connection connection(int index) const;
 		Connection* connectionPtr(int index);
 		void setConnection(int index, const Connection& connection);
+
+		void remove(int index);
+		void removeAllMarked();
 
 		//
 		//
@@ -183,7 +193,7 @@ namespace Metrology
 
 		int findConnectionIndex(const Connection& connection) const;
 		int findConnectionIndex(int ioType, Metrology::Signal* pSignal) const;
-		int findConnectionIndex(int connectionType, int ioType, Metrology::Signal* pSignal) const;
+		int findConnectionIndex(int ioType, ConnectionType connectionType, Metrology::Signal* pSignal) const;
 
 		QVector<Metrology::Signal*> destinationSignals(const QString& sourceAppSignalID, ConnectionType connectionType) const;
 
@@ -200,6 +210,9 @@ namespace Metrology
 
 		mutable QMutex m_connectionMutex;
 		QVector<Connection> m_connectionList;
+
+		QHash<quint64, int> m_connectionCrcList;
+		void updateCrcList();
 
 		SignalSetProvider* m_signalSetProvider = nullptr;
 

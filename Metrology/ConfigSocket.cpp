@@ -406,6 +406,14 @@ bool ConfigSocket::readMetrologyConnections(const QByteArray& fileData, int file
 			continue;
 		}
 
+		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+		{
+			if (connection.appSignalID(ioType).isEmpty() == true)
+			{
+				continue;
+			}
+		}
+
 		// append
 		//
 		theSignalBase.connections().append(connection);

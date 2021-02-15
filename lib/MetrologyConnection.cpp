@@ -91,6 +91,8 @@ namespace Metrology
 
 	void Connection::clear()
 	{
+		m_crc.reset();
+
 		m_type = ConnectionType::Unknown;
 
 		for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
@@ -103,23 +105,30 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString Connection::strID(bool full) const
+	Crc64 Connection::createCrc()
+	{
+		m_crc.reset();
+
+		m_crc.add(m_type);
+
+		for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
+		{
+			m_crc.add(m_connectionSignal[ioType].appSignalID());
+		}
+
+		return m_crc;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString Connection::strID() const
 	{
 		QString strID;
 
-		if (full == true)
-		{
-			strID =	QString("%1_%2_%3").
-					arg(m_type, 3, 10, QChar('0')).
-					arg(m_connectionSignal[ConnectionIoType::Source].appSignalID()).
-					arg(m_connectionSignal[ConnectionIoType::Destination].appSignalID());
-		}
-		else
-		{
-			strID =	QString("%1_%2").
-					arg(m_type, 3, 10, QChar('0')).
-					arg(m_connectionSignal[ConnectionIoType::Source].appSignalID());
-		}
+		strID =	QString("%1_%2_%3").
+				arg(m_type, 3, 10, QChar('0')).
+				arg(m_connectionSignal[ConnectionIoType::Source].appSignalID()).
+				arg(m_connectionSignal[ConnectionIoType::Destination].appSignalID());
 
 		return strID;
 	}
@@ -267,6 +276,7 @@ namespace Metrology
 		setType(static_cast<ConnectionType>(type));
 		setAppSignalID(ConnectionIoType::Source, sourceAppSignalID);
 		setAppSignalID(ConnectionIoType::Destination, destinationAppSignalID);
+		createCrc();
 
 		return result;
 	}
@@ -416,6 +426,16 @@ namespace Metrology
 					case 3:	connection.setAction(static_cast<VcsItemAction::VcsItemActionType>(line[column].toInt()));	break;
 				}
 			}
+
+			for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
+			{
+				if (connection.appSignalID(ioType).isEmpty() == true)
+				{
+					continue;
+				}
+			}
+
+			connection.createCrc();
 
 			// append to m_connectionList
 			//
@@ -622,41 +642,11 @@ namespace Metrology
 		QMutexLocker l(&m_connectionMutex);
 
 		m_connectionList.append(connection);
+		int index = m_connectionList.count() - 1;
 
-		return m_connectionList.count() - 1;
-	}
+		updateCrcList();
 
-	// -------------------------------------------------------------------------------------------------------------------
-
-	void ConnectionBase::remove(int index)
-	{
-		QMutexLocker l(&m_connectionMutex);
-
-		if (index < 0 || index >= m_connectionList.count())
-		{
-			return;
-		}
-
-		m_connectionList.remove(index);
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	void ConnectionBase::removeAllMarked()
-	{
-		QMutexLocker l(&m_connectionMutex);
-
-		int connectionCount = m_connectionList.count();
-		for(int i = connectionCount - 1; i >= 0; i--)
-		{
-			if (m_connectionList[i].action() == VcsItemAction::VcsItemActionType::Deleted)
-			{
-				m_connectionList.remove(i);
-				continue;
-			}
-
-			m_connectionList[i].setAction(VcsItemAction::VcsItemActionType::Unknown);
-		}
+		return index;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -699,6 +689,65 @@ namespace Metrology
 		}
 
 		m_connectionList[index] = connection;
+
+		updateCrcList();
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void ConnectionBase::remove(int index)
+	{
+		QMutexLocker l(&m_connectionMutex);
+
+		if (index < 0 || index >= m_connectionList.count())
+		{
+			return;
+		}
+
+		m_connectionList.remove(index);
+
+		updateCrcList();
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void ConnectionBase::removeAllMarked()
+	{
+		QMutexLocker l(&m_connectionMutex);
+
+		int connectionCount = m_connectionList.count();
+		for(int i = connectionCount - 1; i >= 0; i--)
+		{
+			if (m_connectionList[i].action() == VcsItemAction::VcsItemActionType::Deleted)
+			{
+				m_connectionList.remove(i);
+				continue;
+			}
+
+			m_connectionList[i].setAction(VcsItemAction::VcsItemActionType::Unknown);
+		}
+
+		updateCrcList();
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void ConnectionBase::updateCrcList()
+	{
+		m_connectionCrcList.clear();
+
+		int connectionCount = m_connectionList.count();
+		for(int index = 0; index < connectionCount; index++)
+		{
+			const Crc64& crc = m_connectionList[index].crc();
+
+			if (m_connectionCrcList.contains(crc.result()) == true)
+			{
+				continue;
+			}
+
+			m_connectionCrcList[crc.result()] = index;
+		}
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -726,11 +775,7 @@ namespace Metrology
 		{
 			for( int k = i+1; k < connectionCount; k++ )
 			{
-
-				QString strID1 = m_connectionList[i].strID(true);
-				QString strID2 = m_connectionList[k].strID(true);
-
-				if (strID1 > strID2)
+				if (m_connectionList[i].strID() > m_connectionList[k].strID())
 				{
 					Connection connection = m_connectionList[i];
 					m_connectionList[i] = m_connectionList[k];
@@ -738,30 +783,30 @@ namespace Metrology
 				}
 			}
 		}
+
+		updateCrcList();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	int ConnectionBase::findConnectionIndex(const Connection& connection) const
 	{
-		int foundIndex = -1;
-
 		QMutexLocker l(&m_connectionMutex);
 
-		QString strID = connection.strID(true);
+		const Crc64& crc = connection.crc();
 
-		int count = m_connectionList.count();
-		for(int i = 0; i < count; i ++)
+		if (m_connectionCrcList.contains(crc.result()) == false)
 		{
-			if (m_connectionList[i].strID(true) == strID)
-			{
-				foundIndex = i;
-
-				break;
-			}
+			return -1;
 		}
 
-		return foundIndex;
+		int index = m_connectionCrcList[crc.result()];
+		if (index < 0 || index >= m_connectionList.count())
+		{
+			return -1;
+		}
+
+		return index;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -803,15 +848,15 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	int ConnectionBase::findConnectionIndex(int connectionType, int ioType, Metrology::Signal* pSignal) const
+	int ConnectionBase::findConnectionIndex(int ioType, ConnectionType connectionType, Metrology::Signal* pSignal) const
 	{
-		if (connectionType < 0 || connectionType >= ConnectionTypeCount)
+		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
 		{
 			Q_ASSERT(0);
 			return -1;
 		}
 
-		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
+		if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= ConnectionTypeCount)
 		{
 			Q_ASSERT(0);
 			return -1;
@@ -828,15 +873,16 @@ namespace Metrology
 		QMutexLocker l(&m_connectionMutex);
 
 		int count = m_connectionList.count();
-
 		for(int i = 0; i < count; i ++)
 		{
-			if (m_connectionList[i].type() != connectionType)
+			const Connection& connection = m_connectionList[i];
+
+			if (connection.type() != connectionType)
 			{
 				continue;
 			}
 
-			if (m_connectionList[i].metrologySignal(ioType) != pSignal)
+			if (connection.metrologySignal(ioType) != pSignal)
 			{
 				continue;
 			}
@@ -868,7 +914,6 @@ namespace Metrology
 		QMutexLocker l(&m_connectionMutex);
 
 		int count = m_connectionList.count();
-
 		for(int i = 0; i < count; i ++)
 		{
 			const Connection& connection = m_connectionList[i];
@@ -903,6 +948,14 @@ namespace Metrology
 
 		for(Metrology::Connection connection : m_connectionList)
 		{
+			for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
+			{
+				if (connection.appSignalID(ioType).isEmpty() == true)
+				{
+					continue;
+				}
+			}
+
 			dataStr.append(QString::number(connection.type()));
 			dataStr.append(";");
 			dataStr.append(connection.appSignalID(Metrology::ConnectionIoType::Source));
@@ -933,8 +986,9 @@ namespace Metrology
 			return false;
 		}
 
-		qint64 writtenBytes = file.write(getCSVdata().toUtf8());
-		if (writtenBytes == 0)
+		QByteArray data = getCSVdata().toUtf8();
+		qint64 writtenBytes = file.write(data);
+		if (writtenBytes != data.count())
 		{
 			return false;
 		}

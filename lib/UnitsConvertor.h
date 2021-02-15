@@ -222,7 +222,7 @@ public:
 	double conversionDegree(double val, const UnitsConvertType& conversionType, const E::ElectricUnit& unitID, const E::SensorType& sensorType, double r0 = 0);					// conversion only ThermoCouple and ThermoResistor
 	double conversionDegree(double val, const UnitsConvertType& conversionType);																								// conversion only Celsius to Fahrenheit and vice versa
 
-	double conversionByConnection(double val, int connectionType, const Signal& sourSignal, const Signal& destSignal, ConversionDirection directType );							// conversion for Metrology connections
+	double conversionByConnection(double val, int connectionType, const Signal& sourSignal, const Signal& destSignal, ConversionDirection directType);							// conversion for Metrology connections, return converted value
 
 	double r0_from_signal(const Signal& signal);																																// for signals of module RIM
 	bool r0_is_use(int sensorType);																																				// for signals of module RIM

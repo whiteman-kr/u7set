@@ -634,6 +634,7 @@ void DialogMetrologyConnectionItem::onOk()
 
 	m_connection.setSignal(Metrology::ConnectionIoType::Source, pInSignal);
 	m_connection.setSignal(Metrology::ConnectionIoType::Destination, pOutSignal);
+	m_connection.createCrc();
 
 	accept();
 }
@@ -1131,7 +1132,7 @@ void DialogMetrologyConnection::selectConnectionInList(const Metrology::Connecti
 			continue;
 		}
 
-		if (m_connectionTable.at(conncetionIndex).strID(true) == connection.strID(true))
+		if (m_connectionTable.at(conncetionIndex).crc().result() == connection.crc().result())
 		{
 			m_pView->setCurrentIndex(index);
 		}
@@ -1550,28 +1551,19 @@ void DialogMetrologyConnection::importConnections()
 			}
 		}
 
-		connection.setAction(VcsItemAction::Added);
-
-		// init signals
-		//
-		for(int type = 0; type < Metrology::ConnectionIoTypeCount; type++)
+		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
 		{
-			if (connection.appSignalID(type).isEmpty() == true)
+			if (connection.appSignalID(ioType).isEmpty() == true)
 			{
 				continue;
 			}
-
-			Signal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(type));
-			if (pSignal == nullptr)
-			{
-				continue;
-			}
-
-			connection.setSignal(type, pSignal);
 		}
 
 		// append
 		//
+		connection.createCrc();
+		connection.setAction(VcsItemAction::Added);
+
 		if (m_connectionBase.findConnectionIndex(connection) != -1)
 		{
 			continue;
@@ -1581,6 +1573,29 @@ void DialogMetrologyConnection::importConnections()
 	}
 
 	file.close();
+
+	// init signals
+	//
+	int connectionCount = m_connectionBase.count();
+	for (int i = 0; i < connectionCount; i++)
+	{
+		Metrology::Connection* pConnection = m_connectionBase.connectionPtr(i);
+		if (pConnection == nullptr)
+		{
+			continue;
+		}
+
+		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+		{
+			Signal* pSignal = m_signalSetProvider->getSignalByStrID(pConnection->appSignalID(ioType));
+			if (pSignal == nullptr)
+			{
+				continue;
+			}
+
+			pConnection->setSignal(ioType, pSignal);
+		}
+	}
 
 	updateList();
 

@@ -1087,7 +1087,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 		{
 			case MEASURE_KIND_ONE_RACK:
 				{
-					// take output signals of input signal
+					// take destination signals by source signal
 					//
 					QVector<Metrology::Signal*> destSignals = connectionBase.destinationSignals(pSignal->param().appSignalID(), connectionType);
 					if (channel < 0 || channel >= destSignals.count())
@@ -1102,9 +1102,9 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 			case MEASURE_KIND_ONE_MODULE:
 			case MEASURE_KIND_MULTI_RACK:
 				{
-					// find index of metrology connection in the base by input signal
+					// find index of metrology connection in the base by source signal
 					//
-					int connectionIndex = connectionBase.findConnectionIndex(connectionType, Metrology::ConnectionIoType::Source, pSignal);
+					int connectionIndex = connectionBase.findConnectionIndex(Metrology::ConnectionIoType::Source, connectionType, pSignal);
 					if (connectionIndex == -1)
 					{
 						break;
@@ -1623,163 +1623,163 @@ bool SignalBase::enableForMeasure(Metrology::ConnectionType connectionType, Metr
 	switch (connectionType)
 	{
 		case Metrology::ConnectionType::Unsed:
-		{
-			if (param.isInput() == false)
 			{
-				return false;
-			}
+				if (param.isInput() == false)
+				{
+					return false;
+				}
 
-			if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
-			{
-				return false;
-			}
+				if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
+				{
+					return false;
+				}
 
-			if (param.electricRangeIsValid() == false)
-			{
-				return false;
+				if (param.electricRangeIsValid() == false)
+				{
+					return false;
+				}
 			}
-		}
 			break;
 
 		case Metrology::ConnectionType::Input_Internal:
 		case Metrology::ConnectionType::Input_DP_Internal_F:
 		case Metrology::ConnectionType::Input_C_Internal_F:
-		{
-			if (param.isInput() == false)
 			{
-				return false;
-			}
+				if (param.isInput() == false)
+				{
+					return false;
+				}
 
-			if (param.electricRangeIsValid() == false)
-			{
-				return false;
-			}
+				if (param.electricRangeIsValid() == false)
+				{
+					return false;
+				}
 
-			if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
-			{
-				return false;
-			}
+				if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
+				{
+					return false;
+				}
 
-			int connectionIndex = m_connectionBase.findConnectionIndex(connectionType, Metrology::ConnectionIoType::Source, pSignal);
-			if (connectionIndex == -1)
-			{
-				return false;
-			}
+				int connectionIndex = m_connectionBase.findConnectionIndex(Metrology::ConnectionIoType::Source, connectionType, pSignal);
+				if (connectionIndex == -1)
+				{
+					return false;
+				}
 
-			const Metrology::Connection& connection = m_connectionBase.connection(connectionIndex);
-			if (connection.isValid() == false)
-			{
-				return false;
-			}
+				const Metrology::Connection& connection = m_connectionBase.connection(connectionIndex);
+				if (connection.isValid() == false)
+				{
+					return false;
+				}
 
-			Metrology::Signal* pOutoutSignal = connection.metrologySignal(Metrology::ConnectionIoType::Destination);
-			if (pOutoutSignal == nullptr || pOutoutSignal->param().isValid() == false)
-			{
-				return false;
-			}
+				Metrology::Signal* pDestSignal = connection.metrologySignal(Metrology::ConnectionIoType::Destination);
+				if (pDestSignal == nullptr || pDestSignal->param().isValid() == false)
+				{
+					return false;
+				}
 
-			if (pOutoutSignal->param().isInternal() == false)
-			{
-				return false;
+				if (pDestSignal->param().isInternal() == false)
+				{
+					return false;
+				}
 			}
-		}
 			break;
 
 		case Metrology::ConnectionType::Input_Output:
 		case Metrology::ConnectionType::Input_DP_Output_F:
 		case Metrology::ConnectionType::Input_C_Output_F:
-		{
-			if (param.isInput() == false)
 			{
-				return false;
-			}
+				if (param.isInput() == false)
+				{
+					return false;
+				}
 
-			if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
-			{
-				return false;
-			}
+				if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
+				{
+					return false;
+				}
 
-			if (param.electricRangeIsValid() == false)
-			{
-				return false;
-			}
+				if (param.electricRangeIsValid() == false)
+				{
+					return false;
+				}
 
-			int connectionIndex = m_connectionBase.findConnectionIndex(connectionType, Metrology::ConnectionIoType::Source, pSignal);
-			if (connectionIndex == -1)
-			{
-				return false;
-			}
+				int connectionIndex = m_connectionBase.findConnectionIndex(Metrology::ConnectionIoType::Source, connectionType, pSignal);
+				if (connectionIndex == -1)
+				{
+					return false;
+				}
 
-			const Metrology::Connection& connection = m_connectionBase.connection(connectionIndex);
-			if (connection.isValid() == false)
-			{
-				return false;
-			}
+				const Metrology::Connection& connection = m_connectionBase.connection(connectionIndex);
+				if (connection.isValid() == false)
+				{
+					return false;
+				}
 
-			Metrology::Signal* pOutoutSignal = connection.metrologySignal(Metrology::ConnectionIoType::Destination);
-			if (pOutoutSignal == nullptr || pOutoutSignal->param().isValid() == false)
-			{
-				return false;
-			}
+				Metrology::Signal* pDestSignal = connection.metrologySignal(Metrology::ConnectionIoType::Destination);
+				if (pDestSignal == nullptr || pDestSignal->param().isValid() == false)
+				{
+					return false;
+				}
 
-			if (pOutoutSignal->param().isOutput() == false)
-			{
-				return false;
-			}
+				if (pDestSignal->param().isOutput() == false)
+				{
+					return false;
+				}
 
-			if (pOutoutSignal->param().electricRangeIsValid() == false)
-			{
-				return false;
+				if (pDestSignal->param().electricRangeIsValid() == false)
+				{
+					return false;
+				}
 			}
-		}
 			break;
 
 		case Metrology::ConnectionType::Tuning_Output:
-		{
-			if (param.isInternal() == false)
 			{
-				return false;
-			}
+				if (param.isInternal() == false)
+				{
+					return false;
+				}
 
-			if (param.location().chassis() == -1 || param.location().module() == -1)
-			{
-				return false;
-			}
+				if (param.location().chassis() == -1 || param.location().module() == -1)
+				{
+					return false;
+				}
 
-			if (param.enableTuning() == false)
-			{
-				return false;
-			}
+				if (param.enableTuning() == false)
+				{
+					return false;
+				}
 
-			int connectionIndex = m_connectionBase.findConnectionIndex(connectionType, Metrology::ConnectionIoType::Source, pSignal);
-			if (connectionIndex == -1)
-			{
-				return false;
-			}
+				int connectionIndex = m_connectionBase.findConnectionIndex(Metrology::ConnectionIoType::Source, connectionType, pSignal);
+				if (connectionIndex == -1)
+				{
+					return false;
+				}
 
-			const Metrology::Connection& connection = m_connectionBase.connection(connectionIndex);
-			if (connection.isValid() == false)
-			{
-				return false;
-			}
+				const Metrology::Connection& connection = m_connectionBase.connection(connectionIndex);
+				if (connection.isValid() == false)
+				{
+					return false;
+				}
 
-			Metrology::Signal* pOutoutSignal = connection.metrologySignal(Metrology::ConnectionIoType::Destination);
-			if (pOutoutSignal == nullptr || pOutoutSignal->param().isValid() == false)
-			{
-				return false;
-			}
+				Metrology::Signal* pDestSignal = connection.metrologySignal(Metrology::ConnectionIoType::Destination);
+				if (pDestSignal == nullptr || pDestSignal->param().isValid() == false)
+				{
+					return false;
+				}
 
-			if (pOutoutSignal->param().isOutput() == false)
-			{
-				return false;
-			}
+				if (pDestSignal->param().isOutput() == false)
+				{
+					return false;
+				}
 
-			if (pOutoutSignal->param().electricRangeIsValid() == false)
-			{
-				return false;
+				if (pDestSignal->param().electricRangeIsValid() == false)
+				{
+					return false;
+				}
 			}
-		}
-		break;
+			break;
 
 		default:
 			assert(0);
@@ -2050,7 +2050,7 @@ void SignalBase::initSignals()
 	initMetrologyConnections();
 	m_statisticsBase.createSignalList();
 
-	qDebug() << __FUNCTION__ << "Signals have been initialized" << " Time for load: " << responseTime.elapsed() << " ms";
+	qDebug() << __FUNCTION__ << "Signals have been initialized" << " Time for init: " << responseTime.elapsed() << " ms";
 }
 
 // -------------------------------------------------------------------------------------------------------------------
