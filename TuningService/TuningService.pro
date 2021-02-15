@@ -51,7 +51,6 @@ SOURCES += \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
     ../lib/OutputLog.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     ../lib/Signal.cpp \
     ../lib/Crc.cpp \
@@ -59,8 +58,6 @@ SOURCES += \
     ../lib/DataProtocols.cpp \
     ../Builder/IssueLogger.cpp \
     ../lib/HostAddressPort.cpp \
-    ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc \
     TcpTuningServer.cpp \
     TcpTuningClient.cpp \
     TuningSource.cpp \
@@ -105,15 +102,12 @@ HEADERS += \
     ../lib/PropertyObject.h \
     ../lib/DbStruct.h \
     ../lib/OutputLog.h \
-    ../lib/ProtoSerialization.h \
     ../lib/Types.h \
     ../lib/Signal.h \
     ../lib/Crc.h \
     ../lib/Hash.h \
     ../Builder/IssueLogger.h \
     ../lib/HostAddressPort.h \
-    ../Proto/network.pb.h \
-    ../Proto/serialization.pb.h \
     TcpTuningServer.h \
     TcpTuningClient.h \
     TuningSource.h \

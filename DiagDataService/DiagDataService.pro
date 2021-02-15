@@ -39,7 +39,6 @@ SOURCES += \
     ../lib/DataSource.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/Signal.cpp \
     ../lib/Types.cpp \
     ../lib/CfgServerLoader.cpp \
@@ -55,8 +54,6 @@ SOURCES += \
     ../lib/WUtils.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
-    ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc \
     ../lib/CommandLineParser.cpp \
     DiagDataServiceMain.cpp \
     ../lib/SoftwareInfo.cpp \
@@ -77,7 +74,6 @@ HEADERS += \
     ../lib/DataSource.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
-    ../lib/ProtoSerialization.h \
     ../lib/Signal.h \
     ../lib/CUtils.h \
     ../lib/PropertyObject.h \
@@ -95,8 +91,6 @@ HEADERS += \
     ../lib/WUtils.h \
     ../lib/Crc.h \
     ../lib/HostAddressPort.h \
-    ../Proto/network.pb.h \
-    ../Proto/serialization.pb.h \
     ../lib/CommandLineParser.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \

@@ -61,8 +61,6 @@ OTHER_FILES += \
     ../Proto/proto_compile.sh
 
 HEADERS += VFrame30Lib_global.h \
-    ../Proto/serialization.pb.h \
-    ../Proto/trends.pb.h \
     ../lib/Address16.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
@@ -118,7 +116,6 @@ HEADERS += VFrame30Lib_global.h \
     MacrosExpander.h \
     Session.h \
     ../lib/TypesAndEnums.h \
-    ../lib/ProtoSerialization.h \
     ../lib/CUtils.h \
     ../lib/DebugInstCounter.h \
     ../lib/PropertyObject.h \
@@ -137,7 +134,6 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/ITuningSignalManager.h \
     ../lib/Tuning/ITuningTcpClient.h \
-    ../Proto/network.pb.h \
     ../lib/TuningValue.h \
     TuningController.h \
     AppSignalController.h \
@@ -153,8 +149,6 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/OutputLog.h
 
 SOURCES += \
-    ../Proto/serialization.pb.cc \
-    ../Proto/trends.pb.cc \
     ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
@@ -206,7 +200,6 @@ SOURCES += \
     SchemaItemTerminator.cpp \
     MacrosExpander.cpp \
     Session.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/AppSignalManager.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/AppSignal.cpp \
@@ -218,7 +211,6 @@ SOURCES += \
     SchemaManager.cpp \
     ClientSchemaView.cpp \
     SchemaItemLoopback.cpp \
-    ../Proto/network.pb.cc \
     ../lib/TuningValue.cpp \
     TuningController.cpp \
     AppSignalController.cpp \

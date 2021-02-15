@@ -2,10 +2,10 @@
 #define BUS_H
 
 #include "VFrame30Lib_global.h"
-#include "../lib/PropertyObject.h"
-#include "../lib/ProtoSerialization.h"
 #include "../lib/Types.h"
 #include "../lib/Hash.h"
+#include "../lib/PropertyObject.h"
+#include "../Proto/ProtoSerialization.h"
 
 
 class QDomElement;

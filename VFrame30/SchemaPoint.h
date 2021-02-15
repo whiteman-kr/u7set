@@ -1,6 +1,7 @@
 #pragma once
 #include "VFrame30Lib_global.h"
 #include <QPointF>
+#include "../Proto/ProtoSerialization.h"
 
 namespace Proto
 {

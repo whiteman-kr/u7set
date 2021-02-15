@@ -17,6 +17,12 @@ msvc {
 	QMAKE_CXXFLAGS += /wd4996
 }
 
+# c++17 support -- for better compillation time, some cpps are included to this library,
+# and class PropertyObject is ussing std::clamp what is part cpp17
+#
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		# CONFIG += c++17 has no effect yet
+
 # DESTDIR
 #
 win32 {
@@ -37,6 +43,10 @@ gcc {
 }
 
 SOURCES += \
+	../Proto/network.pb.cc \
+	../Proto/serialization.pb.cc \
+	../Proto/trends.pb.cc \
+	../Proto/ProtoSerialization.cpp \
 	google/protobuf/io/coded_stream.cc \
 	google/protobuf/stubs/common.cc \
 	google/protobuf/descriptor.cc \
@@ -72,6 +82,10 @@ SOURCES += \
 	google/protobuf/stubs/stringprintf.cc
 
 HEADERS += \
+	../Proto/network.pb.h \
+	../Proto/serialization.pb.h \
+	../Proto/trends.pb.h \
+	../Proto/ProtoSerialization.h \
 	google/protobuf/io/coded_stream.h \
 	google/protobuf/io/coded_stream_inl.h \
 	google/protobuf/stubs/common.h \
@@ -118,4 +132,9 @@ gcc {
 	SOURCES += google/protobuf/stubs/atomicops_internals_x86_gcc.cc
 	HEADERS += google/protobuf/stubs/atomicops_internals_x86_gcc.h
 }
+
+DISTFILES += \
+    ../Proto/network.proto \
+    ../Proto/serialization.proto \
+    ../Proto/trends.proto
 

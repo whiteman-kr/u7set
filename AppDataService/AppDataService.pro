@@ -56,8 +56,6 @@ SOURCES += \
     AppDataProcessingThread.cpp \
     ../lib/WUtils.cpp \
     TcpAppDataServer.cpp \
-    ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc \
     ../lib/AppSignalStateFlags.cpp \
     ../lib/AppSignal.cpp \
     TcpAppDataClient.cpp \
@@ -74,7 +72,6 @@ SOURCES += \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
     RtTrendsServer.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/TuningValue.cpp \
     ../lib/SimpleMutex.cpp \
     ../lib/SimpleAppSignalState.cpp \
@@ -93,7 +90,6 @@ HEADERS += \
     ../lib/DataSource.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
-    ../lib/ProtoSerialization.h \
     ../lib/Signal.h \
     ../lib/CUtils.h \
     ../lib/PropertyObject.h \
@@ -112,9 +108,7 @@ HEADERS += \
     ../lib/OrderedHash.h \
     AppDataProcessingThread.h \
     TcpAppDataServer.h \
-    ../Proto/network.pb.h \
     ../lib/Hash.h \
-    ../Proto/serialization.pb.h \
     ../lib/AppSignalStateFlags.h \
     ../lib/AppSignal.h \
     TcpAppDataClient.h \
@@ -132,7 +126,6 @@ HEADERS += \
     ../lib/Times.h \
     ../lib/SignalProperties.h \
     RtTrendsServer.h \
-    ../lib/ProtoSerialization.h \
     ../lib/TuningValue.h \
     ../lib/SimpleMutex.h \
     ../lib/SimpleAppSignalState.h \

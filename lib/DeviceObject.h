@@ -9,8 +9,8 @@
 #include "../lib/PropertyObject.h"
 #include "../lib/Factory.h"
 #include "../lib/Types.h"
-#include "../lib/ProtoSerialization.h"
 #include "../lib/ModuleFirmware.h"
+#include "../Proto/ProtoSerialization.h"
 
 class DbController;
 

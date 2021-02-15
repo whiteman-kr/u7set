@@ -1,6 +1,6 @@
 #include "ComparatorSet.h"
 
-#include "../lib/ProtoSerialization.h"
+#include "../Proto/ProtoSerialization.h"
 #include "../lib/WUtils.h"
 
 // ------------------------------------------------------------------------------------------------

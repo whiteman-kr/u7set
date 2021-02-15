@@ -1,7 +1,6 @@
 #include "QUuid"
 
-#include "../lib/ProtoSerialization.h"
-#include "PropertyObject.h"
+#include "ProtoSerialization.h"
 
 namespace Proto
 {

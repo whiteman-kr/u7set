@@ -1,5 +1,5 @@
 #include "../lib/DeviceObject.h"
-#include "../lib/ProtoSerialization.h"
+#include "../Proto/ProtoSerialization.h"
 #include <utility>
 #include <QJSEngine>
 #include <QQmlEngine>

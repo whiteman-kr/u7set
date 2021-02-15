@@ -51,7 +51,6 @@ SOURCES += \
     TrendMainWindow.cpp \
     Trend.cpp \
     DialogTrendSignalProperties.cpp \
-    ../Proto/trends.pb.cc \
     TrendRuler.cpp \
     TrendParam.cpp \
     DialogTrendSignalPoints.cpp \
@@ -69,7 +68,6 @@ HEADERS += \
     TrendMainWindow.h \
     Trend.h \
     DialogTrendSignalProperties.h \
-    ../Proto/trends.pb.h \
     TrendRuler.h \
     TrendParam.h \
     ../lib/CUtils.h \

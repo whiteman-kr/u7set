@@ -43,10 +43,8 @@ SOURCES += main.cpp \
 	../../lib/DeviceObject.cpp \
 	../../lib/DbProgress.cpp \
 	../../lib/Signal.cpp \
-	../../lib/ProtoSerialization.cpp \
 	../../lib/DbProgressDialog.cpp \
 	../../lib/Types.cpp \
-	../../Proto/serialization.pb.cc \
 	../../lib/XmlHelper.cpp \
 	../../lib/HostAddressPort.cpp \
 	../../lib/TuningValue.cpp \
@@ -76,11 +74,9 @@ HEADERS += \
 	../../lib/Factory.h \
 	../../lib/DbProgress.h \
 	../../lib/Signal.h \
-	../../lib/ProtoSerialization.h \
 	../../lib/DbProgressDialog.h \
 	../../lib/PropertyObject.h \
 	../../lib/Types.h \
-	../../Proto/serialization.pb.h \
 	../../lib/XmlHelper.h \
 	../../lib/HostAddressPort.h \
 	../../lib/TuningValue.h \
