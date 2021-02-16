@@ -5353,7 +5353,7 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 
 	// Log action
 	//
-	QString logMessage = QString("addSignal: SiganlCount %1, SignalIDs ")
+	QString logMessage = QString("addSignal: SignalCount %1, SignalIDs ")
 						 .arg(newSignal->size());
 
 	for (const Signal& s : *newSignal)

@@ -74,11 +74,18 @@ public:
 private slots:
 	void initTestCase();
 
+	// stored procedures tests
+	//
 	void addSignalTest();
 	void checkinSignalsTest();
 	void checkoutSignalsTest();
 	void deleteSignalTest();
 	void setSignalWorkcopyTest();
+	void getSignalsIDsTests();
+
+	// DbController methods tests
+	//
+	void dbc_addSignalTest();
 
 
 /*	void getSignalIdsTest();
@@ -123,9 +130,27 @@ private:
 						   std::vector<ObjectState>* obStates);
 
 	QString check_signalIsCheckedIn(int signalID);
-	QString check_signalIsCheckedOut(int signalID);
+	QString check_signalIsCheckedOut(int signalID, VcsItemAction* action = nullptr);
 
 	QString deleteSignal(int userID, int signalID, ObjectState* obState);
+	QString deleteSignals(int userID, const std::vector<int>& ids, std::vector<ObjectState>* obStates);
+
+	QString getSignalsIDs(int userID, bool withDeleted, std::vector<int>* ids);
+
+	template <typename T>
+	std::vector<T> sets_difference(std::vector<T> set1, std::vector<T> set2);
+
+	template <typename T>
+	std::vector<T> sets_intersection(std::vector<T> set1, std::vector<T> set2);
+
+	template <typename T>
+	bool sets_intersect(std::vector<T> set1, std::vector<T> set2);
+
+	template <typename T>
+	std::vector<T> sets_union(std::vector<T> set1, std::vector<T> set2);
+
+	template <typename T>
+	bool sets_equal(std::vector<T> set1, std::vector<T> set2);
 
 	//
 
@@ -137,10 +162,88 @@ private:
 	const int USER3_ID = 3;
 
 private:
-	DbController *m_db;
+	DbController* m_db = nullptr;
 	QString m_databaseHost;
 	QString m_projectName;
 	QString m_databaseName;
 	QString m_databaseUser;
 	QString m_adminPassword;
 };
+
+template <typename T>
+std::vector<T> DbControllerSignalTests::sets_difference(std::vector<T> set1, std::vector<T> set2)
+{
+	std::sort(set1.begin(), set1.end());
+	std::sort(set2.begin(), set2.end());
+
+	std::vector<T> resultSet;
+
+	std::set_difference(set1.begin(), set1.end(),
+						set2.begin(), set2.end(),
+						std::inserter(resultSet, resultSet.begin()));
+	return resultSet;
+}
+
+template <typename T>
+std::vector<T> DbControllerSignalTests::sets_intersection(std::vector<T> set1, std::vector<T> set2)
+{
+	std::sort(set1.begin(), set1.end());
+	std::sort(set2.begin(), set2.end());
+
+	std::vector<T> resultSet;
+
+	std::set_intersection(	set1.begin(), set1.end(),
+							set2.begin(), set2.end(),
+							std::inserter(resultSet, resultSet.begin()));
+	return resultSet;
+}
+
+template <typename T>
+bool DbControllerSignalTests::sets_intersect(std::vector<T> set1, std::vector<T> set2)
+{
+	return sets_intersection(set1, set2).size() != 0;
+}
+
+template <typename T>
+std::vector<T> DbControllerSignalTests::sets_union(std::vector<T> set1, std::vector<T> set2)
+{
+	std::sort(set1.begin(), set1.end());
+	std::sort(set2.begin(), set2.end());
+
+	std::vector<T> resultSet;
+
+	std::set_union(	set1.begin(), set1.end(),
+							set2.begin(), set2.end(),
+							std::inserter(resultSet, resultSet.begin()));
+	return resultSet;
+}
+
+template <typename T>
+bool DbControllerSignalTests::sets_equal(std::vector<T> set1, std::vector<T> set2)
+{
+	int size = static_cast<int>(set1.size());
+
+	if (size != static_cast<int>(set2.size()))
+	{
+		return false;
+	}
+
+	if (size == 0)
+	{
+		return true;
+	}
+
+	std::sort(set1.begin(), set1.end());
+	std::sort(set2.begin(), set2.end());
+
+	for(int i = 0; i < size; i++)
+	{
+		if (set1[i] != set2[i])
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
