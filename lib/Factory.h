@@ -31,6 +31,17 @@ public:
 		return;
 	}
 
+	template<typename DerivedClass>
+	void isRegistered()
+	{
+		return isRegistered(CUtils::GetClassHashCode(DerivedClass::staticMetaObject.className()));
+	}
+
+	bool isRegistered(quint32 classHash) const
+	{
+		return factories.find(classHash) != factories.end();
+	}
+
 	std::shared_ptr<BaseClass> Create(quint32 classHash)
 	{
 		auto it = factories.find(classHash);

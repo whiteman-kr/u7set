@@ -65,7 +65,9 @@ public slots:
 
 	void copySelectedDevices();
 	void pasteDevices();
+	void pasteDevices(const ::Proto::EnvelopeSet& messageItems, const Proto::EnvelopeSetShortDescription& messageDescr);
 	bool canPaste() const;
+	bool canPaste(const ::Proto::EnvelopeSetShortDescription& message) const;
 
 	void deleteSelectedDevices();
 	void checkInSelectedDevices();

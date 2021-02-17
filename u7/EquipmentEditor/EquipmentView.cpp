@@ -1457,6 +1457,7 @@ void EquipmentView::copySelectedDevices()
 		device->SaveObjectTree(protoDevice);
 
 		descriptionMessage.add_classnamehash(protoDevice->classnamehash());
+		descriptionMessage.add_devicetype(static_cast<qint32>(device->deviceType()));
 	}
 
 	// Save objects (EnvelopeSet) to byte array
@@ -1553,8 +1554,8 @@ void EquipmentView::pasteDevices()
 	//
 	QByteArray cbData = mimeData->data(EquipmentView::mimeType);
 
-	::Proto::EnvelopeSet message;
-	bool ok = message.ParseFromArray(cbData.constData(), cbData.size());
+	::Proto::EnvelopeSet messageItems;
+	bool ok = messageItems.ParseFromArray(cbData.constData(), cbData.size());
 
 	if (ok == false)
 	{
@@ -1562,21 +1563,49 @@ void EquipmentView::pasteDevices()
 		return;
 	}
 
-	// --
+	// Read short description for the clipboard content
 	//
-	QModelIndex parentModelIndex;		// current is root
-	QModelIndexList selected = selectionModel()->selectedRows();
+	cbData = mimeData->data(EquipmentView::mimeTypeShortDescription);
 
-	if (selected.size() > 1)
+	::Proto::EnvelopeSetShortDescription messageDescr;
+	ok = messageDescr.ParseFromArray(cbData.constData(), cbData.size());
+
+	if (ok == false)
 	{
-		// Don't know after which item insrt new object
-		//
 		return;
 	}
 
-	if (selected.empty() == false)
+
+	// --
+	//
+	pasteDevices(messageItems, messageDescr);
+
+	return;
+}
+
+void EquipmentView::pasteDevices(const ::Proto::EnvelopeSet& messageItems, const ::Proto::EnvelopeSetShortDescription& messageDescr)
+{
+	QModelIndex parentModelIndex;		// current is root
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (isPresetMode() == true && messageDescr.presetroot() == true)
 	{
-		parentModelIndex = selected[0];
+		// insert new presets into the root
+		//
+	}
+	else
+	{
+		if (selected.size() > 1)
+		{
+			// Don't know after which item insrt new object
+			//
+			return;
+		}
+
+		if (selected.empty() == false)
+		{
+			parentModelIndex = selected[0];
+		}
 	}
 
 	// --
@@ -1601,9 +1630,9 @@ void EquipmentView::pasteDevices()
 	selectionModel()->clearSelection();
 	QModelIndex lastModelIndex;
 
-	for (int i = 0; i < message.items_size(); i++)
+	for (int i = 0; i < messageItems.items_size(); i++)
 	{
-		std::shared_ptr<Hardware::DeviceObject> object(Hardware::DeviceObject::Create(message.items(i)));
+		std::shared_ptr<Hardware::DeviceObject> object(Hardware::DeviceObject::Create(messageItems.items(i)));
 
 		if (object == nullptr)
 		{
@@ -1676,6 +1705,13 @@ bool EquipmentView::canPaste() const
 		return false;
 	}
 
+	return canPaste(message);
+}
+
+bool EquipmentView::canPaste(const ::Proto::EnvelopeSetShortDescription& message) const
+{
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
 	// Check if the copy was done from current mode, so copy possible only from editor to edir or preset editor to preset editor
 	//
 	if (isPresetMode() == true && message.preseteditor() == false)
@@ -1683,45 +1719,52 @@ bool EquipmentView::canPaste() const
 		return false;
 	}
 
+	// Allow insert new whole preset(s) in preset editor
+	//
+	if (isPresetMode() == true && message.presetroot() == true)
+	{
+		return true;
+	}
+
 	if (isConfigurationMode() == true && message.equipmenteditor() == false)
+	{
+		return false;
+	}
+
+	// Is it possible to insert it into current selection
+	//
+	if (selectedIndexList.size() != 1)
 	{
 		return false;
 	}
 
 	// --
 	//
-	if (message.classnamehash().size() == 0)
+	if (message.classnamehash().size() == 0 || message.devicetype().size() == 0)
 	{
 		assert(message.classnamehash().size() > 0);
+		assert(message.devicetype().size() > 0);
 		return false;
 	}
 
-	quint32 classNameHash = message.classnamehash(0);		// get only first, suppose all of the have the same type
+	assert(message.classnamehash().size() == message.devicetype().size());
 
-	std::shared_ptr<Hardware::DeviceObject> deviceObject = Hardware::DeviceObjectFactory.Create(classNameHash);
+	std::shared_ptr<Hardware::DeviceObject> deviceObject;
 
-	if (deviceObject == nullptr)
+	for (int i = 0; i < message.classnamehash_size(); i++)
 	{
-		assert(deviceObject);
-		return false;
-	}
+		quint32 classNameHash = message.classnamehash(i);
 
-	// Is it possible to insert it into current selection
-	//
-	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
-
-	if (selectedIndexList.size() != 1)
-	{
-		if (isPresetMode() == true && message.presetroot() == true)
+		bool canCreateInstance = Hardware::DeviceObjectFactory.isRegistered(classNameHash);
+		if (canCreateInstance == false)
 		{
-			// Allow insert new whole preset(s)
-			//
-			return true;
+			assert(canCreateInstance);
+			return false;
 		}
-
-		return false;
 	}
 
+	// Check if chese devices can be added
+	//
 	const Hardware::DeviceObject* selectedDevice = equipmentModel()->deviceObject(selectedIndexList.at(0));
 	assert(selectedDevice);
 
@@ -1731,9 +1774,14 @@ bool EquipmentView::canPaste() const
 		return false;
 	}
 
-	if (selectedDevice->canAddChild(deviceObject.get()) == false)
+	for (int i = 0; i < message.devicetype_size(); i++)
 	{
-		return false;
+		Hardware::DeviceType type = static_cast<Hardware::DeviceType>(message.devicetype(i));
+
+		if (selectedDevice->canAddChild(type) == false)
+		{
+			return false;
+		}
 	}
 
 	return true;
