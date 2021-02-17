@@ -93,7 +93,7 @@ namespace Metrology
 	{
 		m_crc.reset();
 
-		m_type = ConnectionType::Unknown;
+		m_type = ConnectionType::NoConnectionType;
 
 		for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
 		{
@@ -265,7 +265,7 @@ namespace Metrology
 	{
 		bool result = true;
 
-		int type = ConnectionType::Unknown;
+		int type = ConnectionType::NoConnectionType;
 		QString sourceAppSignalID;
 		QString destinationAppSignalID;
 
@@ -1019,7 +1019,7 @@ namespace Metrology
 
 		switch (type)
 		{
-			case Unsed:					caption = QT_TRANSLATE_NOOP("MetrologyConnection", "No connections             ");	break;
+			case Unused:				caption = QT_TRANSLATE_NOOP("MetrologyConnection", "No connections             ");	break;
 			case Input_Internal:		caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Input -> Internal");			break;
 			case Input_Output:			caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Input -> Output");				break;
 			case Input_DP_Internal_F:	caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Input dP -> Internal F");		break;
@@ -1027,7 +1027,9 @@ namespace Metrology
 			case Input_C_Internal_F:	caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Input °С -> Internal °F");		break;
 			case Input_C_Output_F:		caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Input °С -> Output °F");		break;
 			case Tuning_Output:			caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Tuning -> Output");				break;
-			default:					assert(0);
+			default:
+				Q_ASSERT(0);
+				caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Unknown");
 		}
 
 		return caption;

@@ -342,10 +342,10 @@ void MetrologyConnectionItemDialog::createInterface()
 	{
 		m_pTypeList->addItem(qApp->translate("MetrologyConnection", Metrology::ConnectionTypeCaption(static_cast<Metrology::ConnectionType>(type)).toUtf8()), type);
 	}
-	m_pTypeList->removeItem(Metrology::ConnectionType::Unsed);
+	m_pTypeList->removeItem(Metrology::ConnectionType::Unused);
 
 	int type = m_metrologyConnection.type() ;
-	if ((type < 0 || type >= Metrology::ConnectionTypeCount) || type == Metrology::ConnectionType::Unsed)
+	if ((type < 0 || type >= Metrology::ConnectionTypeCount) || type == Metrology::ConnectionType::Unused)
 	{
 		m_metrologyConnection.setType(Metrology::ConnectionType::Input_Internal);
 		type = m_metrologyConnection.type();
@@ -869,7 +869,7 @@ bool MetrologyConnectionDialog::createConnectionBySignal(Metrology::Signal* pSig
 
 	//
 	//
-	Metrology::ConnectionType type = Metrology::ConnectionType::Unknown;
+	Metrology::ConnectionType type = Metrology::ConnectionType::NoConnectionType;
 
 	switch (pSignal->param().inOutType())
 	{
@@ -877,7 +877,7 @@ bool MetrologyConnectionDialog::createConnectionBySignal(Metrology::Signal* pSig
 		case E::SignalInOutType::Output:	type = Metrology::ConnectionType::Input_Output;		break;
 	}
 
-	if (type == Metrology::ConnectionType::Unknown)
+	if (type == Metrology::ConnectionType::NoConnectionType)
 	{
 		return false;
 	}

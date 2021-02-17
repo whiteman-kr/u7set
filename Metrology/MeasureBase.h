@@ -161,9 +161,11 @@ public:
 	QString			connectionAppSignalID() const;
 	void			setConnectionAppSignalID(const QString& appSignalID) { m_connectionAppSignalID = appSignalID; }
 
-	int				connectionType() const { return m_connectionType; }
+	Metrology::ConnectionType connectionType() const { return m_connectionType; }
+	int				connectionTypeInt() const { return TO_INT(m_connectionType); }
 	QString			connectionTypeStr() const;
-	void			setConnectionType(int type) { m_connectionType = type; }
+	void			setConnectionType(Metrology::ConnectionType type) { m_connectionType = type; }
+	void			setConnectionType(int type) { m_connectionType =  static_cast<Metrology::ConnectionType>(type); }
 
 	QString			appSignalID() const { return m_appSignalID; }
 	void			setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; setSignalHash(m_appSignalID); }
@@ -250,7 +252,7 @@ private:
 	bool			m_signalValid = true;									// signal is valid during the measurement
 
 	QString			m_connectionAppSignalID;
-	int				m_connectionType = Metrology::ConnectionType::Unknown;
+	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 	QString			m_appSignalID;
 	QString			m_customAppSignalID;
@@ -360,15 +362,17 @@ public:
 	QString			outputAppSignalID() const { return m_outputAppSignalID; }
 	void			setOutputAppSignalID(const QString& appSignalID) { m_outputAppSignalID = appSignalID; }
 
-	int				cmpValueType() const { return m_cmpValueType; }
+	Metrology::CmpValueType cmpValueType() const { return m_cmpValueType; }
+	int				cmpValueTypeInt() const { return TO_INT(m_cmpValueType); }
 	QString			cmpValueTypeStr() const;
-	void			setCmpValueType(int type) { m_cmpValueType = type; }
+	void			setCmpValueType(Metrology::CmpValueType type) { m_cmpValueType = type; }
+	void			setCmpValueType(int type) { m_cmpValueType = static_cast<Metrology::CmpValueType>(type); }
 
 	E::CmpType		cmpType() const { return m_cmpType; }
 	int				cmpTypeInt() const { return TO_INT(m_cmpType); }
 	QString			cmpTypeStr() const;
-	void			setCmpType(int cmpValueType, E::CmpType cmpType);
-	void			setCmpTypeInt(int cmpType) { m_cmpType = static_cast<E::CmpType>(cmpType); }
+	void			setCmpType(Metrology::CmpValueType cmpValueType, E::CmpType cmpType);
+	void			setCmpType(int cmpType) { m_cmpType = static_cast<E::CmpType>(cmpType); }
 
 	ComparatorMeasurement& operator=(const ComparatorMeasurement& from);
 
@@ -377,7 +381,7 @@ private:
 	QString			m_compareAppSignalID;
 	QString			m_outputAppSignalID;
 
-	int				m_cmpValueType = Metrology::CmpValueTypeSetPoint;
+	Metrology::CmpValueType m_cmpValueType = Metrology::CmpValueType::NoCmpValueType;
 	E::CmpType		m_cmpType = E::CmpType::Greate;
 };
 

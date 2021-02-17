@@ -48,7 +48,7 @@ void StatisticsItem::setSignal(Metrology::Signal* pSignal)
 
 QString StatisticsItem::connectionTypeStr() const
 {
-	if (static_cast<int>(m_connectionType) < 0 || static_cast<int>(m_connectionType) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(m_connectionType) < 0 || TO_INT(m_connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		return QT_TRANSLATE_NOOP("StatisticBase.cpp", "Input is not set");
 	}
@@ -60,7 +60,7 @@ QString StatisticsItem::connectionTypeStr() const
 
 void StatisticsItem::setConnectionType(Metrology::Signal* pSignal)
 {
-	m_connectionType = Metrology::ConnectionType::Unknown;
+	m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 	if (pSignal == nullptr || pSignal->param().isValid() == false)
 	{
@@ -69,7 +69,7 @@ void StatisticsItem::setConnectionType(Metrology::Signal* pSignal)
 
 	if (pSignal->param().isInput() == true)
 	{
-		m_connectionType = Metrology::ConnectionType::Unsed;
+		m_connectionType = Metrology::ConnectionType::Unused;
 		return;
 	}
 
@@ -105,7 +105,7 @@ QString StatisticsItem::measureCountStr() const
 void StatisticsItem::clear()
 {
 	m_pSignal = nullptr;
-	m_connectionType = Metrology::ConnectionType::Unknown;
+	m_connectionType = Metrology::ConnectionType::NoConnectionType;
 	m_pComparator = nullptr;
 
 	m_measureCount = 0;
@@ -254,7 +254,8 @@ void StatisticsBase::createSignalList()
 
 		if (param.isInternal() == true /*|| param.isOutput() == true */)
 		{
-			if (si.connectionType() == Metrology::ConnectionType::Unknown)
+			int connectionType = si.connectionType();
+			if (connectionType < 0 || connectionType >= Metrology::ConnectionType::NoConnectionType)
 			{
 				continue;
 			}
@@ -338,7 +339,8 @@ void StatisticsBase::createComparatorList()
 			/*
 			if (param.isInternal() == true)
 			{
-				if (si.connectionType() == Metrology::ConnectionType::Unknown)
+				int connectionType = si.connectionType();
+				if (connectionType < 0 || connectionType >= Metrology::ConnectionType::NoConnectionType)
 				{
 					continue;
 				}

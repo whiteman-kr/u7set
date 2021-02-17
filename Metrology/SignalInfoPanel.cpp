@@ -150,7 +150,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 		{
 			Metrology::SignalState state;
 
-			if (ioParam.connectionType() == Metrology::ConnectionType::Unsed)
+			if (ioParam.connectionType() == Metrology::ConnectionType::Unused)
 			{
 				state = theSignalBase.signalState(ioParam.param(Metrology::ConnectionIoType::Source).hash());
 			}
@@ -211,7 +211,7 @@ QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 			stateStr = signalStateStr(inParam, inState);
 		}
 
-		if (ioParam.connectionType() != Metrology::ConnectionType::Unsed)
+		if (ioParam.connectionType() != Metrology::ConnectionType::Unused)
 		{
 			const Metrology::SignalParam& outParam = ioParam.param(Metrology::ConnectionIoType::Destination);
 			if (outParam.isValid() == true)
@@ -576,7 +576,7 @@ void SignalInfoPanel::createContextMenu()
 
 void SignalInfoPanel::appendMetrologyConnetionMenu()
 {
-	if (m_connectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unused)
 	{
 		return;
 	}
@@ -761,7 +761,7 @@ void SignalInfoPanel::measureKindChanged(int kind)
 
 void SignalInfoPanel::connectionTypeChanged(Metrology::ConnectionType type)
 {
-	if (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(type) < 0 || TO_INT(type) >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
@@ -826,7 +826,7 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	//
 	QSize cellSize = QFontMetrics(m_signalInfo.font()).size(Qt::TextSingleLine,"A");
 
-	if (activeSignal.connectionType() == Metrology::ConnectionType::Unsed)
+	if (activeSignal.connectionType() == Metrology::ConnectionType::Unused)
 	{
 		m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 	}
@@ -989,7 +989,7 @@ void SignalInfoPanel::signalProperty()
 
 	Metrology::SignalParam param;
 
-	if (m_connectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unused)
 	{
 		param = m_signalParamTable.signalParam(index).param(Metrology::ConnectionIoType::Source);
 	}

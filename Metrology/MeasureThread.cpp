@@ -669,7 +669,7 @@ void MeasureThread::measureCompratorsInSeries()
 
 		switch (m_activeIoParamList[ch].connectionType())
 		{
-			case Metrology::ConnectionType::Unsed:
+			case Metrology::ConnectionType::Unused:
 				param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 				break;
 			default:
@@ -712,7 +712,7 @@ void MeasureThread::measureCompratorsInSeries()
 			{
 				//
 				//
-				if (cmpValueType == Metrology::CmpValueTypeHysteresis && m_comparatorOption.enableMeasureHysteresis() == false)
+				if (cmpValueType == Metrology::CmpValueType::Hysteresis && m_comparatorOption.enableMeasureHysteresis() == false)
 				{
 					break;  // go to next comparator
 				}
@@ -723,8 +723,8 @@ void MeasureThread::measureCompratorsInSeries()
 
 				switch (cmpValueType)
 				{
-					case Metrology::CmpValueTypeSetPoint:	activeDiscreteOutputState = false;	break;
-					case Metrology::CmpValueTypeHysteresis:	activeDiscreteOutputState = true;	break;
+					case Metrology::CmpValueType::SetPoint:		activeDiscreteOutputState = false;	break;
+					case Metrology::CmpValueType::Hysteresis:	activeDiscreteOutputState = true;	break;
 				}
 
 				// phase of preparation started
@@ -741,10 +741,10 @@ void MeasureThread::measureCompratorsInSeries()
 					{
 						switch (cmpValueType)
 						{
-							case Metrology::CmpValueTypeSetPoint:
+							case Metrology::CmpValueType::SetPoint:
 								m_info.setMessage(tr("Comparator %1, Prepare %2").arg(cmp + 1).arg(pr + 1));
 								break;
-							case Metrology::CmpValueTypeHysteresis:
+							case Metrology::CmpValueType::Hysteresis:
 								m_info.setMessage(tr("Hysteresis of comparator %1, Prepare %2").arg(cmp + 1).arg(pr + 1));
 								break;
 						}
@@ -799,7 +799,7 @@ void MeasureThread::measureCompratorsInSeries()
 
 						switch (cmpValueType)
 						{
-							case Metrology::CmpValueTypeSetPoint:
+							case Metrology::CmpValueType::SetPoint:
 
 								switch (comparatorEx->cmpType())
 								{
@@ -810,7 +810,7 @@ void MeasureThread::measureCompratorsInSeries()
 
 								break;
 
-							case Metrology::CmpValueTypeHysteresis:
+							case Metrology::CmpValueType::Hysteresis:
 
 								switch (comparatorEx->cmpType())
 								{
@@ -881,10 +881,10 @@ void MeasureThread::measureCompratorsInSeries()
 						{
 							switch (cmpValueType)
 							{
-								case Metrology::CmpValueTypeSetPoint:
+								case Metrology::CmpValueType::SetPoint:
 									m_info.setMessage(tr("Comparator %1, additional delay").arg(cmp + 1));
 									break;
-								case Metrology::CmpValueTypeHysteresis:
+								case Metrology::CmpValueType::Hysteresis:
 									m_info.setMessage(tr("Hysteresis of comparator %1, additional delay").arg(cmp + 1));
 									break;
 							}
@@ -981,10 +981,10 @@ void MeasureThread::measureCompratorsInSeries()
 				{
 					switch (cmpValueType)
 					{
-						case Metrology::CmpValueTypeSetPoint:
+						case Metrology::CmpValueType::SetPoint:
 							m_info.setMessage(tr("Comparator %1, Step %2").arg(cmp + 1).arg(step + 1), msgType);
 							break;
-						case Metrology::CmpValueTypeHysteresis:
+						case Metrology::CmpValueType::Hysteresis:
 							m_info.setMessage(tr("Hysteresis of comparator %1, Step %2").arg(cmp + 1).arg(step + 1), msgType);
 							break;
 						default:
@@ -1005,7 +1005,7 @@ void MeasureThread::measureCompratorsInSeries()
 					{
 						switch (cmpValueType)
 						{
-							case Metrology::CmpValueTypeSetPoint:
+							case Metrology::CmpValueType::SetPoint:
 
 								switch (comparatorEx->cmpType())
 								{
@@ -1025,7 +1025,7 @@ void MeasureThread::measureCompratorsInSeries()
 
 								break;
 
-							case Metrology::CmpValueTypeHysteresis:
+							case Metrology::CmpValueType::Hysteresis:
 
 								switch (comparatorEx->cmpType())
 								{
@@ -1152,7 +1152,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 		switch (m_activeIoParamList[ch].connectionType())
 		{
-			case Metrology::ConnectionType::Unsed:
+			case Metrology::ConnectionType::Unused:
 				param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 				break;
 			default:
@@ -1197,7 +1197,7 @@ void MeasureThread::measureCompratorsInParallel()
 		{
 			//
 			//
-			if (cmpValueType == Metrology::CmpValueTypeHysteresis && m_comparatorOption.enableMeasureHysteresis() == false)
+			if (cmpValueType == Metrology::CmpValueType::Hysteresis && m_comparatorOption.enableMeasureHysteresis() == false)
 			{
 				break;  // go to next comparator
 			}
@@ -1208,8 +1208,8 @@ void MeasureThread::measureCompratorsInParallel()
 
 			switch (cmpValueType)
 			{
-				case Metrology::CmpValueTypeSetPoint:	activeDiscreteOutputState = false;	break;
-				case Metrology::CmpValueTypeHysteresis:	activeDiscreteOutputState = true;	break;
+				case Metrology::CmpValueType::SetPoint:		activeDiscreteOutputState = false;	break;
+				case Metrology::CmpValueType::Hysteresis:	activeDiscreteOutputState = true;	break;
 			}
 
 			// phase of preparation started
@@ -1226,10 +1226,10 @@ void MeasureThread::measureCompratorsInParallel()
 				{
 					switch (cmpValueType)
 					{
-						case Metrology::CmpValueTypeSetPoint:
+						case Metrology::CmpValueType::SetPoint:
 							m_info.setMessage(tr("Comparator %1, Prepare %2").arg(cmp + 1).arg(pr + 1));
 							break;
-						case Metrology::CmpValueTypeHysteresis:
+						case Metrology::CmpValueType::Hysteresis:
 							m_info.setMessage(tr("Hysteresis of comparator %1, Prepare %2").arg(cmp + 1).arg(pr + 1));
 							break;
 					}
@@ -1256,7 +1256,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 						switch (m_activeIoParamList[ch].connectionType())
 						{
-							case Metrology::ConnectionType::Unsed:
+							case Metrology::ConnectionType::Unused:
 								param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 								break;
 							default:
@@ -1318,7 +1318,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 						switch (cmpValueType)
 						{
-							case Metrology::CmpValueTypeSetPoint:
+							case Metrology::CmpValueType::SetPoint:
 
 								switch (comparatorEx->cmpType())
 								{
@@ -1329,7 +1329,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 								break;
 
-							case Metrology::CmpValueTypeHysteresis:
+							case Metrology::CmpValueType::Hysteresis:
 
 								switch (comparatorEx->cmpType())
 								{
@@ -1397,10 +1397,10 @@ void MeasureThread::measureCompratorsInParallel()
 					{
 						switch (cmpValueType)
 						{
-							case Metrology::CmpValueTypeSetPoint:
+							case Metrology::CmpValueType::SetPoint:
 								m_info.setMessage(tr("Comparator %1, additional delay").arg(cmp + 1));
 								break;
-							case Metrology::CmpValueTypeHysteresis:
+							case Metrology::CmpValueType::Hysteresis:
 								m_info.setMessage(tr("Hysteresis of comparator %1, additional delay").arg(cmp + 1));
 								break;
 						}
@@ -1426,7 +1426,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 								switch (m_activeIoParamList[ch].connectionType())
 								{
-									case Metrology::ConnectionType::Unsed:
+									case Metrology::ConnectionType::Unused:
 										param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 										break;
 									default:
@@ -1498,7 +1498,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 					switch (m_activeIoParamList[ch].connectionType())
 					{
-						case Metrology::ConnectionType::Unsed:
+						case Metrology::ConnectionType::Unused:
 							param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 							break;
 						default:
@@ -1574,10 +1574,10 @@ void MeasureThread::measureCompratorsInParallel()
 			{
 				switch (cmpValueType)
 				{
-					case Metrology::CmpValueTypeSetPoint:
+					case Metrology::CmpValueType::SetPoint:
 						m_info.setMessage(tr("Comparator %1, Step %2").arg(cmp + 1).arg(step + 1), msgType);
 						break;
-					case Metrology::CmpValueTypeHysteresis:
+					case Metrology::CmpValueType::Hysteresis:
 						m_info.setMessage(tr("Hysteresis of comparator %1, Step %2").arg(cmp + 1).arg(step + 1), msgType);
 						break;
 				}
@@ -1599,7 +1599,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 					switch (m_activeIoParamList[ch].connectionType())
 					{
-						case Metrology::ConnectionType::Unsed:
+						case Metrology::ConnectionType::Unused:
 							param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 							break;
 						default:
@@ -1627,7 +1627,7 @@ void MeasureThread::measureCompratorsInParallel()
 					{
 						switch (cmpValueType)
 						{
-							case Metrology::CmpValueTypeSetPoint:
+							case Metrology::CmpValueType::SetPoint:
 
 								switch (comparatorEx->cmpType())
 								{
@@ -1647,7 +1647,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 								break;
 
-							case Metrology::CmpValueTypeHysteresis:
+							case Metrology::CmpValueType::Hysteresis:
 
 								switch (comparatorEx->cmpType())
 								{
@@ -1673,7 +1673,7 @@ void MeasureThread::measureCompratorsInParallel()
 						const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 						if (inParam.isValid() == true)
 						{
-							double comporatorEtalonVal = comparatorEx->compareOnlineValue(cmpValueType);		// get compare or hyst value
+							double comporatorEtalonVal = comparatorEx->compareOnlineValue(cmpValueType);	// get compare or hyst value
 
 							double engineeringEtalonCalcVal = conversionByConnection(	comporatorEtalonVal,
 																						m_activeIoParamList[ch],
@@ -1747,7 +1747,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 				switch (m_activeIoParamList[ch].connectionType())
 				{
-					case Metrology::ConnectionType::Unsed:
+					case Metrology::ConnectionType::Unused:
 						param = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 						break;
 					default:
@@ -1904,7 +1904,7 @@ void MeasureThread::measureKindChanged(int kind)
 
 void MeasureThread::connectionTypeChanged(Metrology::ConnectionType type)
 {
-	if (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(type) < 0 || TO_INT(type) >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
