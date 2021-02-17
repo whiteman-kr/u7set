@@ -856,6 +856,24 @@ void MainWindow::loadOnToolBar_Connection()
 	}
 	m_connectionType = static_cast<Metrology::ConnectionType>(currentConnectionType);
 
+
+	// found all exist connections
+	//
+	QSet<int> metrologyConnectionSet;
+
+	int connectionCount = theSignalBase.connections().count();
+	for(int i = 0; i < connectionCount; i++)
+	{
+		int type = theSignalBase.connections().connection(i).type();
+		if (ERR_METROLOGY_CONNECTION_TYPE(type) == true)
+		{
+			continue;
+		}
+
+		metrologyConnectionSet.insert(type);
+	}
+
+
 	// fill list of metrology connections
 	//
 	m_pConnectionTypeList->blockSignals(true);
@@ -867,23 +885,6 @@ void MainWindow::loadOnToolBar_Connection()
 		m_pConnectionTypeList->addItem(qApp->translate(	"MetrologyConnection",
 														Metrology::ConnectionTypeCaption(Metrology::ConnectionType::Unused).toUtf8()),
 														Metrology::ConnectionType::Unused);
-
-		// found all exist connections
-		//
-		QSet<int> metrologyConnectionSet;
-
-		int connectionCount = theSignalBase.connections().count();
-		for(int i = 0; i < connectionCount; i++)
-		{
-			int type = theSignalBase.connections().connection(i).type();
-			if (ERR_METROLOGY_CONNECTION_TYPE(type) == true)
-			{
-				continue;
-			}
-
-			metrologyConnectionSet.insert(theSignalBase.connections().connection(i).type());
-		}
-
 		// get selectedItem
 		//
 		int selectedItem = -1;
@@ -2005,7 +2006,7 @@ void MainWindow::setConnectionType(int index)
 	//
 	m_connectionType = static_cast<Metrology::ConnectionType>(connectionType);
 
-	emit connectionTypeChanged(m_connectionType);
+	emit connectionTypeChanged(connectionType);
 
 	//
 	//
@@ -2014,7 +2015,7 @@ void MainWindow::setConnectionType(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::setConnectionTypeFromStatistic(Metrology::ConnectionType connectionType)
+void MainWindow::setConnectionTypeFromStatistic(int connectionType)
 {
 	if (m_pConnectionTypeList == nullptr)
 	{
@@ -2032,7 +2033,7 @@ void MainWindow::setConnectionTypeFromStatistic(Metrology::ConnectionType connec
 	int count = m_pConnectionTypeList->count();
 	for(int i = 0; i < count; i++)
 	{
-		if (m_pConnectionTypeList->itemData(i).toInt()	== connectionType)
+		if (m_pConnectionTypeList->itemData(i).toInt() == connectionType)
 		{
 			connectionIndex = i;
 			break;
@@ -2041,7 +2042,7 @@ void MainWindow::setConnectionTypeFromStatistic(Metrology::ConnectionType connec
 
 	if (connectionIndex == -1)
 	{
-		return;
+		connectionIndex = 0;
 	}
 
 	m_pConnectionTypeList->setCurrentIndex(connectionIndex);

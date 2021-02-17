@@ -254,8 +254,7 @@ void StatisticsBase::createSignalList()
 
 		if (param.isInternal() == true /*|| param.isOutput() == true */)
 		{
-			int connectionType = si.connectionType();
-			if (connectionType < 0 || connectionType >= Metrology::ConnectionType::NoConnectionType)
+			if (ERR_METROLOGY_CONNECTION_TYPE(si.connectionType()) == true)
 			{
 				continue;
 			}
@@ -339,8 +338,7 @@ void StatisticsBase::createComparatorList()
 			/*
 			if (param.isInternal() == true)
 			{
-				int connectionType = si.connectionType();
-				if (connectionType < 0 || connectionType >= Metrology::ConnectionType::NoConnectionType)
+				if (ERR_METROLOGY_CONNECTION_TYPE(si.connectionType()) == true)
 				{
 					continue;
 				}

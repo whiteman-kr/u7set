@@ -407,14 +407,14 @@ void ComparatorInfoPanel::measureKindChanged(int kind)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::connectionTypeChanged(Metrology::ConnectionType connectionType)
+void ComparatorInfoPanel::connectionTypeChanged(int connectionType)
 {
 	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		return;
 	}
 
-	m_connectionType = connectionType;
+	m_connectionType = static_cast<Metrology::ConnectionType>(connectionType);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

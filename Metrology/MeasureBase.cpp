@@ -2034,7 +2034,7 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	}
 
 	Metrology::CmpValueType cmpValueType = ioParam.comparatorValueType();
-	if (TO_INT(cmpValueType) < 0 || TO_INT(cmpValueType) >= Metrology::CmpValueTypeCount)
+	if (ERR_METROLOGY_CMP_VALUE_TYPE(cmpValueType) == true)
 	{
 		assert(false);
 		return;
@@ -2177,7 +2177,7 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	}
 
 	Metrology::CmpValueType cmpValueType = ioParam.comparatorValueType();
-	if (TO_INT(cmpValueType) < 0 || TO_INT(cmpValueType) >= Metrology::CmpValueTypeCount)
+	if (ERR_METROLOGY_CMP_VALUE_TYPE(cmpValueType) == true)
 	{
 		assert(false);
 		return;
@@ -2274,7 +2274,7 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 
 QString ComparatorMeasurement::cmpValueTypeStr() const
 {
-	if (TO_INT(m_cmpValueType) < 0 || TO_INT(m_cmpValueType) >= Metrology::CmpValueTypeCount)
+	if (ERR_METROLOGY_CMP_VALUE_TYPE(m_cmpValueType) == true)
 	{
 		assert(0);
 		return QString("Unknown");
@@ -2302,7 +2302,7 @@ QString ComparatorMeasurement::cmpTypeStr() const
 
 void ComparatorMeasurement::setCmpType(Metrology::CmpValueType cmpValueType, E::CmpType cmpType)
 {
-	if (TO_INT(cmpValueType) < 0 || TO_INT(cmpValueType) >= Metrology::CmpValueTypeCount)
+	if (ERR_METROLOGY_CMP_VALUE_TYPE(cmpValueType) == true)
 	{
 		assert(0);
 		return;

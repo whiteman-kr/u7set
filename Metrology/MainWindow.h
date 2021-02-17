@@ -229,7 +229,7 @@ signals:
 	void					measureTimeoutChanged(int timeout);									// appear when changing the timeout of measuring
 	void					measureTypeChanged(int type);										// appear when changing the type of measurement
 	void					measureKindChanged(int kind);										// appear when changing the kind of measurement
-	void					connectionTypeChanged(Metrology::ConnectionType connectionType);	// appear when changing the Metrology::ConnectionType
+	void					connectionTypeChanged(int connectionType);							// appear when changing the Metrology::ConnectionType
 
 	// from measureComplite
 	//
@@ -285,7 +285,7 @@ private slots:
 	void					setMeasureTimeout(QString value);
 	void					setMeasureKind(int index);
 	void					setConnectionType(int index);
-	void					setConnectionTypeFromStatistic(Metrology::ConnectionType connectionType);
+	void					setConnectionTypeFromStatistic(int connectionType);
 
 	// Slots of analog signal toolbar
 	//

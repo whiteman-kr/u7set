@@ -759,14 +759,14 @@ void SignalInfoPanel::measureKindChanged(int kind)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::connectionTypeChanged(Metrology::ConnectionType connectionType)
+void SignalInfoPanel::connectionTypeChanged(int connectionType)
 {
 	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		return;
 	}
 
-	m_connectionType = connectionType;
+	m_connectionType = static_cast<Metrology::ConnectionType>(connectionType);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

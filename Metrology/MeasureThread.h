@@ -148,7 +148,7 @@ public slots:
 	void					measureTimeoutChanged(int timeout);
 	void					measureTypeChanged(int type);
 	void					measureKindChanged(int kind);
-	void					connectionTypeChanged(Metrology::ConnectionType connectionType);
+	void					connectionTypeChanged(int connectionType);
 
 	void					signalParamChanged(const QString& appSignalID);
 

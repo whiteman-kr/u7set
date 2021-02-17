@@ -236,24 +236,24 @@ QString StatisticsTable::text(int row, int column, const StatisticsItem& si) con
 
 	switch (column)
 	{
-		case STATISTICS_COLUMN_APP_ID:				result = visible ? param.appSignalID() : QString();										break;
-		case STATISTICS_COLUMN_CUSTOM_ID:			result = visible ? param.customAppSignalID() : QString();								break;
-		case STATISTICS_COLUMN_EQUIPMENT_ID:		result = visible ? param.equipmentID() : QString();										break;
-		case STATISTICS_COLUMN_CAPTION:				result = visible ? param.caption() : QString();											break;
-		case STATISTICS_COLUMN_CMP_VALUE:			result = comparatorValue;																break;
-		case STATISTICS_COLUMN_CMP_NO:				result = comparatorNo;																	break;
-		case STATISTICS_COLUMN_CMP_OUT_ID:			result = comparatorOutputID;															break;
-		case STATISTICS_COLUMN_RACK:				result = visible ? param.location().rack().caption() : QString();						break;
-		case STATISTICS_COLUMN_CHASSIS:				result = visible ? param.location().chassisStr() : QString();							break;
-		case STATISTICS_COLUMN_MODULE:				result = visible ? param.location().moduleStr() : QString();							break;
-		case STATISTICS_COLUMN_PLACE:				result = visible ? param.location().placeStr() : QString();								break;
-		case STATISTICS_COLUMN_EL_RANGE:			result = param.electricRangeStr();														break;
-		case STATISTICS_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();													break;
-		case STATISTICS_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();													break;
-		case STATISTICS_COLUMN_SIGNAL_TYPE:			result = param.signalTypeStr();															break;
-		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticBase.cpp", si.connectionTypeStr().toUtf8());			break;
-		case STATISTICS_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();															break;
-		case STATISTICS_COLUMN_STATE:				result = qApp->translate("StatisticBase.cpp", si.stateStr().toUtf8());					break;
+		case STATISTICS_COLUMN_APP_ID:				result = visible ? param.appSignalID() : QString();											break;
+		case STATISTICS_COLUMN_CUSTOM_ID:			result = visible ? param.customAppSignalID() : QString();									break;
+		case STATISTICS_COLUMN_EQUIPMENT_ID:		result = visible ? param.equipmentID() : QString();											break;
+		case STATISTICS_COLUMN_CAPTION:				result = visible ? param.caption() : QString();												break;
+		case STATISTICS_COLUMN_CMP_VALUE:			result = comparatorValue;																	break;
+		case STATISTICS_COLUMN_CMP_NO:				result = comparatorNo;																		break;
+		case STATISTICS_COLUMN_CMP_OUT_ID:			result = comparatorOutputID;																break;
+		case STATISTICS_COLUMN_RACK:				result = visible ? param.location().rack().caption() : QString();							break;
+		case STATISTICS_COLUMN_CHASSIS:				result = visible ? param.location().chassisStr() : QString();								break;
+		case STATISTICS_COLUMN_MODULE:				result = visible ? param.location().moduleStr() : QString();								break;
+		case STATISTICS_COLUMN_PLACE:				result = visible ? param.location().placeStr() : QString();									break;
+		case STATISTICS_COLUMN_EL_RANGE:			result = param.electricRangeStr();															break;
+		case STATISTICS_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();														break;
+		case STATISTICS_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();														break;
+		case STATISTICS_COLUMN_SIGNAL_TYPE:			result = param.signalTypeStr();																break;
+		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticBase.cpp", si.connectionTypeStr().trimmed().toUtf8());	break;
+		case STATISTICS_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();																break;
+		case STATISTICS_COLUMN_STATE:				result = qApp->translate("StatisticBase.cpp", si.stateStr().toUtf8());						break;
 		default:									assert(0);
 	}
 
@@ -575,14 +575,14 @@ void StatisticsPanel::measureKindChanged(int kind)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::connectionTypeChanged(Metrology::ConnectionType connectionType)
+void StatisticsPanel::connectionTypeChanged(int connectionType)
 {
 	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		return;
 	}
 
-	m_connectionType = connectionType;
+	m_connectionType = static_cast<Metrology::ConnectionType>(connectionType);
 
 	updateList();
 }

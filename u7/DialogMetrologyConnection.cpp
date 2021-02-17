@@ -1373,6 +1373,11 @@ void DialogMetrologyConnection::removeConnection()
 		return;
 	}
 
+	if (m_connectionBase.enableEditBase() == false)
+	{
+		return;
+	}
+
 	QSortFilterProxyModel* pSourceProxyModel = dynamic_cast<QSortFilterProxyModel*>(m_pView->model());
 	if(pSourceProxyModel == nullptr)
 	{
@@ -1422,6 +1427,18 @@ void DialogMetrologyConnection::removeConnection()
 
 void DialogMetrologyConnection::unremoveConnection()
 {
+	if (m_dialogConnectionItem != nullptr)
+	{
+		m_dialogConnectionItem->show();
+		m_dialogConnectionItem->activateWindow();
+		return;
+	}
+
+	if (m_connectionBase.enableEditBase() == false)
+	{
+		return;
+	}
+
 	QSortFilterProxyModel* pSourceProxyModel = dynamic_cast<QSortFilterProxyModel*>(m_pView->model());
 	if(pSourceProxyModel == nullptr)
 	{
@@ -1457,6 +1474,13 @@ void DialogMetrologyConnection::unremoveConnection()
 
 void DialogMetrologyConnection::checkinConnection()
 {
+	if (m_dialogConnectionItem != nullptr)
+	{
+		m_dialogConnectionItem->show();
+		m_dialogConnectionItem->activateWindow();
+		return;
+	}
+
 	// if file is CheckIn, then return
 	//
 	if (m_connectionBase.isCheckIn() == true)
@@ -1694,20 +1718,23 @@ void DialogMetrologyConnection::onContextMenu(QPoint)
 		return;
 	}
 
-	//
+	// enable or disable item of menu Unremove
 	//
 	bool enableUnremove = false;
 
-	int selectedConnectionCount = m_pView->selectionModel()->selectedRows().count();
-	for( int i = 0; i < selectedConnectionCount; i++)
+	if (m_connectionBase.enableEditBase() == true)
 	{
-		int conncetionIndex = pSourceProxyModel->mapToSource(m_pView->selectionModel()->selectedRows().at(i)).row();
-
-		if (conncetionIndex >= 0 && conncetionIndex < m_connectionTable.connectionCount())
+		int selectedConnectionCount = m_pView->selectionModel()->selectedRows().count();
+		for( int i = 0; i < selectedConnectionCount; i++)
 		{
-			if (m_connectionBase.connection(conncetionIndex).action() == VcsItemAction::VcsItemActionType::Deleted)
+			int conncetionIndex = pSourceProxyModel->mapToSource(m_pView->selectionModel()->selectedRows().at(i)).row();
+
+			if (conncetionIndex >= 0 && conncetionIndex < m_connectionTable.connectionCount())
 			{
-				enableUnremove = true;
+				if (m_connectionBase.connection(conncetionIndex).action() == VcsItemAction::VcsItemActionType::Deleted)
+				{
+					enableUnremove = true;
+				}
 			}
 		}
 	}

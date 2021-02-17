@@ -195,7 +195,7 @@ protected:
 
 signals:
 
-	void setConnectionType(Metrology::ConnectionType type);
+	void setConnectionType(int connectionType);
 	void setRack(int index);
 	void setMeasureSignal(int index);
 
@@ -205,7 +205,7 @@ public slots:
 
 	void measureTypeChanged(int type);
 	void measureKindChanged(int kind);
-	void connectionTypeChanged(Metrology::ConnectionType connectionType);
+	void connectionTypeChanged(int connectionType);
 
 	void activeSignalChanged(const MeasureSignal& activeSignal);	// slot informs that signal for measure was selected
 

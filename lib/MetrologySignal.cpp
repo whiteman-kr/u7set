@@ -1060,7 +1060,7 @@ namespace Metrology
 
 	double ComparatorEx::compareOnlineValue(CmpValueType cmpValueType)
 	{
-		if (TO_INT(cmpValueType) < 0 || TO_INT(cmpValueType) >= CmpValueTypeCount)
+		if (ERR_METROLOGY_CMP_VALUE_TYPE(cmpValueType) == true)
 		{
 			return 0.0;
 		}
@@ -1130,7 +1130,7 @@ namespace Metrology
 
 	QString ComparatorEx::compareOnlineValueStr(CmpValueType cmpValueType)
 	{
-		if (TO_INT(cmpValueType) < 0 || TO_INT(cmpValueType) >= CmpValueTypeCount)
+		if (ERR_METROLOGY_CMP_VALUE_TYPE(cmpValueType) == true)
 		{
 			return QString();
 		}
