@@ -1105,7 +1105,7 @@ void SignalPropertyDialog::createPropertyList()
 			signalIdGroup->addSubProperty(item);
 
 			item = m_pManager->addProperty(QVariant::String, tr("Signal type"));
-			item->setValue(m_param.signalTypeStr());
+			item->setValue(qApp->translate("MetrologySignal", m_param.signalTypeStr().toUtf8()));
 			item->setAttribute(QLatin1String("readOnly"), true);
 			signalIdGroup->addSubProperty(item);
 
@@ -1558,7 +1558,7 @@ void ComparatorPropertyDialog::createPropertyList()
 				inputGroup->addSubProperty(item);
 
 				item = m_pManager->addProperty(QVariant::String, tr("Signal type"));
-				item->setValue(m_comparatorEx.inputSignal()->param().signalTypeStr());
+				item->setValue(qApp->translate("MetrologySignal", m_comparatorEx.inputSignal()->param().signalTypeStr().toUtf8()));
 				item->setAttribute(QLatin1String("readOnly"), true);
 				inputGroup->addSubProperty(item);
 

@@ -97,6 +97,27 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
+	if (role == Qt::TextAlignmentRole)
+	{
+		int result = Qt::AlignLeft;
+
+		switch (column)
+		{
+			case COMPARATOR_LIST_COLUMN_INPUT:			result = Qt::AlignLeft;		break;
+			case COMPARATOR_LIST_COLUMN_SETPOINT:		result = Qt::AlignLeft;		break;
+			case COMPARATOR_LIST_COLUMN_HYSTERESIS:		result = Qt::AlignLeft;		break;
+			case COMPARATOR_LIST_COLUMN_TYPE:			result = Qt::AlignCenter;	break;
+			case COMPARATOR_LIST_COLUMN_EL_RANGE:		result = Qt::AlignCenter;	break;
+			case COMPARATOR_LIST_COLUMN_EL_SENSOR:		result = Qt::AlignCenter;	break;
+			case COMPARATOR_LIST_COLUMN_EN_RANGE:		result = Qt::AlignCenter;	break;
+			case COMPARATOR_LIST_COLUMN_OUTPUT:			result = Qt::AlignLeft;		break;
+			case COMPARATOR_LIST_COLUMN_SCHEMA:			result = Qt::AlignLeft;		break;
+			default:									assert(0);
+		}
+
+		return result;
+	}
+
 	if (role == Qt::ForegroundRole)
 	{
 		if (comparatorEx->signalsIsValid()  == false)
@@ -242,15 +263,15 @@ QString ComparatorListTable::text(int row, int column, Metrology::Signal* pInSig
 
 	switch (column)
 	{
-		case COMPARATOR_LIST_COLUMN_INPUT:				result = visible ? param.appSignalID() : QString();							break;
-		case COMPARATOR_LIST_COLUMN_SETPOINT:			result = strCompareValue;													break;
-		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = qApp->translate("MetrologySignal", strHysteresisValue.toUtf8());	break;
-		case COMPARATOR_LIST_COLUMN_TYPE:				result = param.signalTypeStr();												break;
-		case COMPARATOR_LIST_COLUMN_EL_RANGE:			result = param.electricRangeStr();											break;
-		case COMPARATOR_LIST_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();										break;
-		case COMPARATOR_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();										break;
-		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->output().appSignalID();								break;
-		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();											break;
+		case COMPARATOR_LIST_COLUMN_INPUT:				result = visible ? param.appSignalID() : QString();								break;
+		case COMPARATOR_LIST_COLUMN_SETPOINT:			result = strCompareValue;														break;
+		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = qApp->translate("MetrologySignal", strHysteresisValue.toUtf8());		break;
+		case COMPARATOR_LIST_COLUMN_TYPE:				result = qApp->translate("MetrologySignal", param.signalTypeStr().toUtf8());	break;
+		case COMPARATOR_LIST_COLUMN_EL_RANGE:			result = param.electricRangeStr();												break;
+		case COMPARATOR_LIST_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();											break;
+		case COMPARATOR_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();											break;
+		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->output().appSignalID();									break;
+		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();												break;
 		default:										assert(0);
 	}
 

@@ -501,13 +501,19 @@ namespace Metrology
 
 	QString SignalParam::signalTypeStr() const
 	{
-		int type = inOutTypeInt();
-		if (type < 0 || type >= SIGANL_TYPE_COUNT)
+		QString typeCaption;
+
+		switch (inOutType())
 		{
-			return QString();
+			case E::SignalInOutType::Input:		typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Input");	break;
+			case E::SignalInOutType::Internal:	typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Internal");	break;
+			case E::SignalInOutType::Output:	typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Output");	break;
+			default:
+				Q_ASSERT(0);
+				typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Unknown");
 		}
 
-		return  qApp->translate("MeasureSignal.h", SignalTypeStr[type]);
+		return typeCaption;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -941,11 +947,11 @@ namespace Metrology
 
 		switch (type)
 		{
-			case CmpValueType::SetPoint:	caption = QT_TRANSLATE_NOOP("MetrologySignal.h", "Set point");	break;
-			case CmpValueType::Hysteresis:	caption = QT_TRANSLATE_NOOP("MetrologySignal.h", "Hysteresis");	break;
+			case CmpValueType::SetPoint:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "Set point");	break;
+			case CmpValueType::Hysteresis:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "Hysteresis");	break;
 			default:
 				Q_ASSERT(0);
-				caption = QT_TRANSLATE_NOOP("MetrologySignal.h", "Unknown");
+				caption = QT_TRANSLATE_NOOP("MetrologySignal", "Unknown");
 		}
 
 		return caption;

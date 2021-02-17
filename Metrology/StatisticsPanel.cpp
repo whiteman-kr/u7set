@@ -250,7 +250,7 @@ QString StatisticsTable::text(int row, int column, const StatisticsItem& si) con
 		case STATISTICS_COLUMN_EL_RANGE:			result = param.electricRangeStr();															break;
 		case STATISTICS_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();														break;
 		case STATISTICS_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();														break;
-		case STATISTICS_COLUMN_SIGNAL_TYPE:			result = param.signalTypeStr();																break;
+		case STATISTICS_COLUMN_SIGNAL_TYPE:			result = qApp->translate("MetrologySignal", param.signalTypeStr().toUtf8());				break;
 		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticBase.cpp", si.connectionTypeStr().trimmed().toUtf8());	break;
 		case STATISTICS_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();																break;
 		case STATISTICS_COLUMN_STATE:				result = qApp->translate("StatisticBase.cpp", si.stateStr().toUtf8());						break;
@@ -807,7 +807,7 @@ void StatisticsPanel::selectSignalForMeasure()
 				 "To create a new connection between signals, select \"View\"->\"Metrology connections...\"\n\n"
 				 "Do you want to create new connection now?")
 				.arg(si.signal()->param().appSignalID())
-				.arg(si.signal()->param().signalTypeStr());
+				.arg(qApp->translate("MetrologySignal", si.signal()->param().signalTypeStr().toUtf8()));
 
 		int result = QMessageBox::question(this, windowTitle(), str);
 		if (result == QMessageBox::No)
