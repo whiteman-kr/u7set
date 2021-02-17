@@ -850,7 +850,7 @@ void MainWindow::loadOnToolBar_Connection()
 	// get current connection type from otions
 	//
 	int currentConnectionType = theOptions.toolBar().connectionType();
-	if (currentConnectionType < 0 || currentConnectionType >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(currentConnectionType) == true)
 	{
 		currentConnectionType = Metrology::ConnectionType::Unused;
 	}
@@ -876,7 +876,7 @@ void MainWindow::loadOnToolBar_Connection()
 		for(int i = 0; i < connectionCount; i++)
 		{
 			int type = theSignalBase.connections().connection(i).type();
-			if (type < 0 || type > Metrology::ConnectionTypeCount)
+			if (ERR_METROLOGY_CONNECTION_TYPE(type) == true)
 			{
 				continue;
 			}
@@ -895,7 +895,7 @@ void MainWindow::loadOnToolBar_Connection()
 		for(int index = 0; index < connectionCount; index++)
 		{
 			int connectionType = metrologyConnectionList.at(index);
-			if (connectionType < 0 || connectionType > Metrology::ConnectionTypeCount)
+			if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 			{
 				continue;
 			}
@@ -943,7 +943,7 @@ void MainWindow::loadOnToolBar_Racks()
 		return;
 	}
 
-	if (TO_INT(m_connectionType) < 0 || TO_INT(m_connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(m_connectionType) == true)
 	{
 		return;
 	}
@@ -1010,7 +1010,7 @@ void MainWindow::loadOnToolBar_Signals()
 		return;
 	}
 
-	if (TO_INT(m_connectionType) < 0 || TO_INT(m_connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(m_connectionType) == true)
 	{
 		return;
 	}
@@ -1991,7 +1991,7 @@ void MainWindow::setConnectionType(int index)
 	}
 
 	int connectionType = m_pConnectionTypeList->itemData(index).toInt();
-	if (connectionType < 0 || connectionType >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		return;
 	}
@@ -2022,7 +2022,7 @@ void MainWindow::setConnectionTypeFromStatistic(Metrology::ConnectionType connec
 		return;
 	}
 
-	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		return;
 	}

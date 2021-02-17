@@ -71,7 +71,7 @@ namespace Metrology
 
 	bool Connection::isValid() const
 	{
-		if (static_cast<int>(m_type) < 0 || static_cast<int>(m_type) >= ConnectionTypeCount)
+		if (ERR_METROLOGY_CONNECTION_TYPE(m_type) == true)
 		{
 			return false;
 		}
@@ -149,7 +149,7 @@ namespace Metrology
 
 	QString Connection::typeStr() const
 	{
-		if (static_cast<int>(m_type) < 0 || static_cast<int>(m_type) >= ConnectionTypeCount)
+		if (ERR_METROLOGY_CONNECTION_TYPE(m_type) == true)
 		{
 			return QT_TRANSLATE_NOOP("MetrologyConnection", "Unknown");
 		}
@@ -273,7 +273,7 @@ namespace Metrology
 		result &= xml.readStringAttribute(QString("SourceAppSignalID"), &sourceAppSignalID);
 		result &= xml.readStringAttribute(QString("DestinationAppSignalID"), &destinationAppSignalID);
 
-		setType(static_cast<ConnectionType>(type));
+		setType(type);
 		setAppSignalID(ConnectionIoType::Source, sourceAppSignalID);
 		setAppSignalID(ConnectionIoType::Destination, destinationAppSignalID);
 		createCrc();
@@ -420,7 +420,7 @@ namespace Metrology
 			{
 				switch (column)
 				{
-					case 0:	connection.setType(static_cast<ConnectionType>(line[column].toInt()));						break;
+					case 0:	connection.setType(line[column].toInt());													break;
 					case 1:	connection.setAppSignalID(ConnectionIoType::Source, line[column]);							break;
 					case 2:	connection.setAppSignalID(ConnectionIoType::Destination, line[column]);						break;
 					case 3:	connection.setAction(static_cast<VcsItemAction::VcsItemActionType>(line[column].toInt()));	break;
@@ -856,7 +856,7 @@ namespace Metrology
 			return -1;
 		}
 
-		if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= ConnectionTypeCount)
+		if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 		{
 			Q_ASSERT(0);
 			return -1;
@@ -904,7 +904,7 @@ namespace Metrology
 			return QVector<Metrology::Signal*>();
 		}
 
-		if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= ConnectionTypeCount)
+		if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 		{
 			return QVector<Metrology::Signal*>();
 		}

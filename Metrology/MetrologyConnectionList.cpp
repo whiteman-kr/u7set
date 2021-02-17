@@ -171,8 +171,7 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 
 		if (column == METROLOGY_CONNECTION_COLUMN_TYPE)
 		{
-			int type = connection.type();
-			if (type < 0 || type >= Metrology::ConnectionTypeCount)
+			if (ERR_METROLOGY_CONNECTION_TYPE(connection.type()) == true)
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
 			}
@@ -345,7 +344,7 @@ void MetrologyConnectionItemDialog::createInterface()
 	m_pTypeList->removeItem(Metrology::ConnectionType::Unused);
 
 	int type = m_metrologyConnection.type() ;
-	if ((type < 0 || type >= Metrology::ConnectionTypeCount) || type == Metrology::ConnectionType::Unused)
+	if (ERR_METROLOGY_CONNECTION_TYPE(type) == true || type == Metrology::ConnectionType::Unused)
 	{
 		m_metrologyConnection.setType(Metrology::ConnectionType::Input_Internal);
 		type = m_metrologyConnection.type();
@@ -375,8 +374,7 @@ void MetrologyConnectionItemDialog::createInterface()
 
 void MetrologyConnectionItemDialog::updateSignals()
 {
-	int type = m_metrologyConnection.type();
-	if (type < 0 || type >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(m_metrologyConnection.type()) == true)
 	{
 		return;
 	}
@@ -393,13 +391,14 @@ void MetrologyConnectionItemDialog::updateSignals()
 
 void MetrologyConnectionItemDialog::selectedType(int)
 {
-	int type = m_pTypeList->currentData().toInt() ;
-	if (type < 0 || type >= Metrology::ConnectionTypeCount)
+	int type = m_pTypeList->currentData().toInt();
+
+	if (ERR_METROLOGY_CONNECTION_TYPE(type) == true)
 	{
 		return;
 	}
 
-	m_metrologyConnection.setType(static_cast<Metrology::ConnectionType>(type));
+	m_metrologyConnection.setType(type);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -464,7 +463,7 @@ void MetrologyConnectionItemDialog::selectSignal(int ioType)
 void MetrologyConnectionItemDialog::onOk()
 {
 	int type = m_metrologyConnection.type();
-	if (type < 0 || type >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(type) == true)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select connection type!"));
 		m_pTypeList->setFocus();
@@ -1191,7 +1190,7 @@ void MetrologyConnectionDialog::importConnections()
 		{
 			switch (column)
 			{
-				case 0:	connection.setType(static_cast<Metrology::ConnectionType>(line[column].toInt()));	break;
+				case 0:	connection.setType(line[column].toInt());											break;
 				case 1:	connection.setAppSignalID(Metrology::ConnectionIoType::Source, line[column]);		break;
 				case 2:	connection.setAppSignalID(Metrology::ConnectionIoType::Destination, line[column]);	break;
 			}

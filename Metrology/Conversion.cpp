@@ -5,7 +5,7 @@
 double conversionByConnection(double val, const IoSignalParam &ioParam, ConversionDirection directType)
 {
 	int connectionType = ioParam.connectionType();
-	if (connectionType < 0 || connectionType >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		return val;
 	}

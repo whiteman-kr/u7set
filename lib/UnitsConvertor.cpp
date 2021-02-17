@@ -566,7 +566,7 @@ double UnitsConvertor::conversionDegree(double val, const UnitsConvertType& conv
 
 double UnitsConvertor::conversionByConnection(double val, int connectionType, const Signal& sourSignal, const Signal& destSignal, ConversionDirection directType)
 {
-	if (connectionType < 0 || connectionType >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		return val;
 	}

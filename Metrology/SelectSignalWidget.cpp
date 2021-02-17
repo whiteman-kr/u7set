@@ -48,7 +48,7 @@ bool SelectSignalItem::isValid() const
 		return false;
 	}
 
-	if (TO_INT(m_connectionType) < 0 || TO_INT(m_connectionType) > Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(m_connectionType) == true)
 	{
 		return false;
 	}

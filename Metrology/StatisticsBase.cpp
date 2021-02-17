@@ -48,7 +48,7 @@ void StatisticsItem::setSignal(Metrology::Signal* pSignal)
 
 QString StatisticsItem::connectionTypeStr() const
 {
-	if (TO_INT(m_connectionType) < 0 || TO_INT(m_connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(m_connectionType) == true)
 	{
 		return QT_TRANSLATE_NOOP("StatisticBase.cpp", "Input is not set");
 	}

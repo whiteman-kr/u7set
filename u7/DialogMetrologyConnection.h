@@ -30,7 +30,7 @@
 const char* const	MetrologyConnectionColumn[] =
 {
 					QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "Source AppSignalID"),
-					QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "Type"),
+					QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "Connection type"),
 					QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "Destination AppSignalID"),
 };
 

@@ -190,8 +190,7 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 
 		if (column == METROLOGY_CONNECTION_COLUMN_TYPE)
 		{
-			int type = connection.type();
-			if (type < 0 || type >= Metrology::ConnectionTypeCount)
+			if (ERR_METROLOGY_CONNECTION_TYPE(connection.type()) == true)
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
 			}
@@ -341,7 +340,7 @@ void DialogMetrologyConnectionItem::updateSignals()
 	}
 
 	int type = m_connection.type();
-	if ((type < 0 || type >= Metrology::ConnectionTypeCount) || type == Metrology::ConnectionType::Unused)
+	if (ERR_METROLOGY_CONNECTION_TYPE(type) == true || type == Metrology::ConnectionType::Unused)
 	{
 		m_connection.setType(Metrology::ConnectionType::Input_Internal);
 		type = m_connection.type();
@@ -356,8 +355,9 @@ void DialogMetrologyConnectionItem::updateSignals()
 
 void DialogMetrologyConnectionItem::selectedType(int)
 {
-	int type = m_pTypeList->currentData().toInt() ;
-	if (type < 0 || type >= Metrology::ConnectionTypeCount)
+	int type = m_pTypeList->currentData().toInt();
+
+	if (ERR_METROLOGY_CONNECTION_TYPE(type) == true)
 	{
 		return;
 	}
@@ -452,7 +452,7 @@ void DialogMetrologyConnectionItem::onOk()
 	//
 
 	int type = m_connection.type();
-	if (type < 0 || type >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(type) == true)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select connection type!"));
 		m_pTypeList->setFocus();
@@ -1199,6 +1199,11 @@ bool DialogMetrologyConnection::createConnectionBySignal(Signal* pSignal)
 		loadConnectionBase();
 	}
 
+	if (m_connectionBase.enableEditBase() == false)
+	{
+		return false;
+	}
+
 	Metrology::Connection connection;
 
 	switch (pSignal->inOutType())
@@ -1251,6 +1256,11 @@ void DialogMetrologyConnection::editConnection()
 		return;
 	}
 
+	if (m_connectionBase.enableEditBase() == false)
+	{
+		return;
+	}
+
 	QSortFilterProxyModel* pSourceProxyModel = dynamic_cast<QSortFilterProxyModel*>(m_pView->model());
 	if(pSourceProxyModel == nullptr)
 	{
@@ -1284,6 +1294,11 @@ void DialogMetrologyConnection::editConnection()
 
 void DialogMetrologyConnection::newConnection()
 {
+	if (m_connectionBase.enableEditBase() == false)
+	{
+		return;
+	}
+
 	fillConnection(true, Metrology::Connection());
 }
 
@@ -1313,32 +1328,33 @@ void DialogMetrologyConnection::connectionChanged()
 			{
 				selectConnectionInList(connection);
 				QMessageBox::information(this, m_windowTitle, tr("Connection already exist!"));
-				return;
-			}
-
-			if (m_dialogConnectionItem->isNewConnection() == true)
-			{
-				connection.setAction(VcsItemAction::VcsItemActionType::Added);
-
-				m_connectionBase.append(connection);
 			}
 			else
 			{
-				int connectionIndex = m_connectionBase.findConnectionIndex(m_dialogConnectionItem->parentConnection());
-				if (connectionIndex < 0 || connectionIndex >= m_connectionBase.count())
+				if (m_dialogConnectionItem->isNewConnection() == true)
 				{
-					return;
+					connection.setAction(VcsItemAction::VcsItemActionType::Added);
+
+					m_connectionBase.append(connection);
+				}
+				else
+				{
+					int connectionIndex = m_connectionBase.findConnectionIndex(m_dialogConnectionItem->parentConnection());
+					if (connectionIndex < 0 || connectionIndex >= m_connectionBase.count())
+					{
+						return;
+					}
+
+					connection.setAction(VcsItemAction::VcsItemActionType::Modified);
+
+					m_connectionBase.setConnection(connectionIndex, connection);
 				}
 
-				connection.setAction(VcsItemAction::VcsItemActionType::Modified);
+				updateList();
+				selectConnectionInList(connection);
 
-				m_connectionBase.setConnection(connectionIndex, connection);
+				m_isModified = true;
 			}
-
-			updateList();
-			selectConnectionInList(connection);
-
-			m_isModified = true;
 		}
 	}
 
@@ -1352,6 +1368,7 @@ void DialogMetrologyConnection::removeConnection()
 {
 	if (m_dialogConnectionItem != nullptr)
 	{
+		m_dialogConnectionItem->show();
 		m_dialogConnectionItem->activateWindow();
 		return;
 	}
@@ -1426,7 +1443,7 @@ void DialogMetrologyConnection::unremoveConnection()
 		{
 			if (m_connectionBase.connection(conncetionIndex).action() == VcsItemAction::VcsItemActionType::Deleted)
 			{
-				m_connectionBase.setAction(conncetionIndex, VcsItemAction::VcsItemActionType::Modified);
+				m_connectionBase.setAction(conncetionIndex, VcsItemAction::VcsItemActionType::Unknown);
 
 				m_isModified = true;
 			}

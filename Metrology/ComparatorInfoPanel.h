@@ -119,7 +119,7 @@ protected:
 public slots:
 
 	void					measureKindChanged(int kind);
-	void					connectionTypeChanged(Metrology::ConnectionType type);
+	void					connectionTypeChanged(Metrology::ConnectionType connectionType);
 
 	void					activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected
 	void					updateComparatorState();									// slot informs that signal for measure has updated his state

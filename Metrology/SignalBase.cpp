@@ -1050,7 +1050,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 		return false;
 	}
 
-	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		assert(0);
 		return false;
@@ -1905,7 +1905,7 @@ int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionT
 		return 0;
 	}
 
-	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		assert(false);
 		return 0;
@@ -2180,7 +2180,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 		return 0;
 	}
 
-	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		assert(false);
 		return 0;

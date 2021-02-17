@@ -379,6 +379,8 @@ namespace Metrology
 
 	QString CmpValueTypeCpation(CmpValueType type);
 
+    #define ERR_CMP_VALUE_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= CmpValueTypeCount)
+
 	// ==============================================================================================
 
 	class ComparatorEx : public ::Comparator

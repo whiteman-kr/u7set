@@ -116,7 +116,7 @@ QString Measurement::connectionAppSignalID() const
 
 QString Measurement::connectionTypeStr() const
 {
-	if (m_connectionType < 0 || m_connectionType >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(m_connectionType) == true)
 	{
 		assert(0);
 		return QString("???");
@@ -264,7 +264,7 @@ void Measurement::setLimits(const IoSignalParam& ioParam)
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		assert(0);
 		return;
@@ -720,7 +720,7 @@ void Measurement::setCalibratorData(const IoSignalParam &ioParam)
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		assert(0);
 		return;
@@ -879,7 +879,7 @@ LinearityMeasurement::LinearityMeasurement(const IoSignalParam &ioParam) : Measu
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		assert(0);
 		return;
@@ -958,7 +958,7 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		assert(0);
 		return;
@@ -1083,7 +1083,7 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		assert(0);
 		return;
@@ -1217,7 +1217,7 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		assert(0);
 		return;
@@ -1442,7 +1442,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		assert(0);
 		return 0;
@@ -1954,7 +1954,7 @@ ComparatorMeasurement::ComparatorMeasurement(const IoSignalParam& ioParam) : Mea
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		assert(0);
 		return;
@@ -2013,7 +2013,7 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		assert(0);
 		return;
@@ -2149,7 +2149,7 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		assert(0);
 		return;

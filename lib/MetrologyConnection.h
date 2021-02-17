@@ -33,6 +33,8 @@ namespace Metrology
 
 	QString ConnectionTypeCaption(ConnectionType type);
 
+	#define ERR_METROLOGY_CONNECTION_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Metrology::ConnectionTypeCount)
+
 	// ==============================================================================================
 
 	enum ConnectionIoType
@@ -101,7 +103,8 @@ namespace Metrology
 
 		ConnectionType type() const { return m_type; }
 		QString typeStr() const;
-		void setType(ConnectionType type) { m_type = type; }
+		void setType(ConnectionType connectionType) { m_type = connectionType; }
+		void setType(int connectionType) { m_type = static_cast<ConnectionType>(connectionType); }
 
 		QString appSignalID(int ioType) const;
 		void setAppSignalID(int ioType, const QString& appSignalID);

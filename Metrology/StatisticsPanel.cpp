@@ -122,7 +122,7 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::ForegroundRole)
 	{
-		if (TO_INT(si.connectionType()) < 0 || TO_INT(si.connectionType()) >= Metrology::ConnectionType::NoConnectionType)
+		if (ERR_METROLOGY_CONNECTION_TYPE(si.connectionType()) == true)
 		{
 			if (column == STATISTICS_COLUMN_SIGNAL_TYPE || column == STATISTICS_COLUMN_SIGNAL_CONNECTION)
 			{
@@ -251,7 +251,7 @@ QString StatisticsTable::text(int row, int column, const StatisticsItem& si) con
 		case STATISTICS_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();													break;
 		case STATISTICS_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();													break;
 		case STATISTICS_COLUMN_SIGNAL_TYPE:			result = param.signalTypeStr();															break;
-		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticBase.cpp", si.connectionTypeStr().toUtf8());	break;
+		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticBase.cpp", si.connectionTypeStr().toUtf8());			break;
 		case STATISTICS_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();															break;
 		case STATISTICS_COLUMN_STATE:				result = qApp->translate("StatisticBase.cpp", si.stateStr().toUtf8());					break;
 		default:									assert(0);
@@ -575,14 +575,14 @@ void StatisticsPanel::measureKindChanged(int kind)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::connectionTypeChanged(Metrology::ConnectionType type)
+void StatisticsPanel::connectionTypeChanged(Metrology::ConnectionType connectionType)
 {
-	if (TO_INT(type) < 0 || TO_INT(type) >= Metrology::ConnectionTypeCount)
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		return;
 	}
 
-	m_connectionType = type;
+	m_connectionType = connectionType;
 
 	updateList();
 }
@@ -792,7 +792,7 @@ void StatisticsPanel::selectSignalForMeasure()
 	//
 	const StatisticsItem& si = theSignalBase.statistics().item(statisticItemIndex);
 
-	if (TO_INT(si.connectionType()) < 0 || TO_INT(si.connectionType()) >= Metrology::ConnectionType::NoConnectionType)
+	if (ERR_METROLOGY_CONNECTION_TYPE(si.connectionType()) == true)
 	{
 		if (si.signal() == nullptr || si.signal()->param().isValid() == false)
 		{

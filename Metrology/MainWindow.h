@@ -225,11 +225,11 @@ signals:
 
 	// from ToolBars
 	//
-	void					measureViewChanged(MeasureView* pView);							// appear when changing the type of measurement
-	void					measureTimeoutChanged(int timeout);								// appear when changing the timeout of measuring
-	void					measureTypeChanged(int type);									// appear when changing the type of measurement
-	void					measureKindChanged(int kind);									// appear when changing the kind of measurement
-	void					connectionTypeChanged(Metrology::ConnectionType type);			// appear when changing the Metrology::ConnectionType
+	void					measureViewChanged(MeasureView* pView);								// appear when changing the type of measurement
+	void					measureTimeoutChanged(int timeout);									// appear when changing the timeout of measuring
+	void					measureTypeChanged(int type);										// appear when changing the type of measurement
+	void					measureKindChanged(int kind);										// appear when changing the kind of measurement
+	void					connectionTypeChanged(Metrology::ConnectionType connectionType);	// appear when changing the Metrology::ConnectionType
 
 	// from measureComplite
 	//
