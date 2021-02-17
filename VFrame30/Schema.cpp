@@ -15,7 +15,6 @@
 #include "HorzVertLinks.h"
 #include "DrawParam.h"
 #include "PropertyNames.h"
-#include "../lib/ProtoSerialization.h"
 
 
 namespace VFrame30

@@ -58,9 +58,9 @@
 #include "../lib/Factory.h"
 #include "../lib/TypesAndEnums.h"
 #include "../lib/Types.h"
-#include "../lib/ProtoSerialization.h"
 #include "../lib/DebugInstCounter.h"
 #include "../lib/CUtils.h"
+#include "../Proto/ProtoSerialization.h"
 
 // Disable some warnings
 //

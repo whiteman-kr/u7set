@@ -32,15 +32,15 @@ SOURCES +=  \
     main.cpp
 
 
+# Add curent dir to a list of library directory paths
+#
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+
 #protobuf
 #
-win32 {
-    LIBS += -L$$DESTDIR -lprotobuf
-	INCLUDEPATH += ./../../Protobuf
-}
-unix {
-    LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../../Protobuf
 
 # VFrame30 library
 #

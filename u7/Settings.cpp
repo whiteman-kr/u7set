@@ -2,12 +2,7 @@
 #include "../lib/PropertyEditor.h"
 #include "Simulator/SimSignalSnapshot.h"
 #include "../lib/Ui/DialogSignalSearch.h"
-
-#ifdef _WIN32
 #include "keychain.h"
-#else
-#include <qtkeychain/keychain.h>
-#endif
 
 Settings theSettings;
 

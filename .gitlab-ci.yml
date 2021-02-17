@@ -32,6 +32,22 @@ linux build job:
     - "cd $CI_PROJECT_DIR"
     - "git status"
     - "git log -1"
+#generation version file
+    - "echo '#pragma once' > gitlabci_version.h"
+    - "echo >> gitlabci_version.h"
+    - "echo '#define GITLAB_CI_BUILD' >> gitlabci_version.h"
+    - echo '#define CI_BUILD_REF_SLUG' \"$CI_BUILD_REF_SLUG\" >> gitlabci_version.h
+    - echo '#define CI_COMMIT_SHA' \"$CI_COMMIT_SHA\" >> gitlabci_version.h
+    - echo '#define GITLAB_USER_NAME' \"$GITLAB_USER_NAME\" >> gitlabci_version.h
+    - echo '#define CI_PIPELINE_ID' $CI_PIPELINE_ID >> gitlabci_version.h
+    - echo '#define COMPUTERNAME' \"$HOSTNAME\" >> gitlabci_version.h
+    - echo '#define BUILD_DATE' \"$(date)\" >> gitlabci_version.h
+#Build Project
+    - "echo ----------------------------------------------"
+    - "echo               Build Project"
+    - "echo ----------------------------------------------"    
+    - "~/Qt/5.15.2/gcc_64/bin/qmake u7set.pro -spec linux-g++"
+    - "make -j6"
 
 windows build job:
   stage: build
@@ -235,7 +251,7 @@ test job:
     - "rem ----------------------------------------------"
     - "rem               Run Simulator AFBs tests"
     - "rem ----------------------------------------------"
-    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorConsole.exe c:\\temp\\build\\test_simulator_v346\\build %CI_PROJECT_DIR%\\Simulator\\SimProjectTests.js"
+    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorConsole.exe -build=c:\\temp\\build\\test_simulator_v346\\build -script=%CI_PROJECT_DIR%\\Simulator\\SimProjectTests.js"
 
 #Run ROVT to check configuration generation
     - "rem ----------------------------------------------"

@@ -1,5 +1,5 @@
 #include "../lib/DeviceObject.h"
-#include "../lib/ProtoSerialization.h"
+#include "../Proto/ProtoSerialization.h"
 #include <utility>
 #include <QJSEngine>
 #include <QQmlEngine>
@@ -1123,21 +1123,26 @@ namespace Hardware
 		return std::shared_ptr<DeviceObject>();
 	}
 
-	bool DeviceObject::canAddChild(DeviceObject* child) const
+	bool DeviceObject::canAddChild(const DeviceObject* child) const
 	{
-		if (child->deviceType() == DeviceType::Software &&
+		return canAddChild(child->deviceType());
+	}
+
+	bool DeviceObject::canAddChild(const DeviceType childType) const
+	{
+		if (childType == DeviceType::Software &&
 			deviceType() != DeviceType::Workstation &&
 			deviceType() != DeviceType::Root)
 		{
 			return false;
 		}
 
-		if (deviceType() >= child->deviceType())
+		if (deviceType() >= childType)
 		{
 			return false;
 		}
 
-		if (child->deviceType() == DeviceType::Workstation &&
+		if (childType == DeviceType::Workstation &&
 			deviceType() > DeviceType::Chassis)
 		{
 			return false;

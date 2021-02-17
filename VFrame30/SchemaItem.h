@@ -4,9 +4,9 @@
 #include "SchemaPoint.h"
 #include "../lib/TypesAndEnums.h"
 #include "../lib/PropertyObject.h"
-#include "../lib/ProtoSerialization.h"
 #include "../lib/DebugInstCounter.h"
 #include "../lib/OutputLog.h"
+#include "../Proto/ProtoSerialization.h"
 #include <QJSValue>
 
 

@@ -83,14 +83,11 @@ SOURCES += main.cpp \
     MonitorSchemaWidget.cpp \
     ../lib/Types.cpp \
     MonitorConfigController.cpp \
-    ../Proto/network.pb.cc \
     TcpSignalClient.cpp \
-    ../Proto/serialization.pb.cc \
     ../lib/Signal.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/AppSignal.cpp \
     ../lib/AppSignalManager.cpp \
     Statistics.cpp \
@@ -160,16 +157,13 @@ HEADERS  += \
     MonitorSchemaWidget.h \
     ../lib/Types.h \
     MonitorConfigController.h \
-    ../Proto/network.pb.h \
     TcpSignalClient.h \
     ../lib/Hash.h \
-    ../Proto/serialization.pb.h \
     ../lib/Signal.h \
     ../lib/PropertyObject.h \
     ../lib/XmlHelper.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
-    ../lib/ProtoSerialization.h \
     ../lib/AppSignal.h \
     ../lib/AppSignalManager.h \
     Statistics.h \
@@ -265,14 +259,9 @@ win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 
 #protobuf
 #
-win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
-	INCLUDEPATH += ./../Protobuf
-}
-unix {
-	LIBS += -lprotobuf
-}
 
 RESOURCES += \
     Monitor.qrc

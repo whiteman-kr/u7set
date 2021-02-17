@@ -1,21 +1,16 @@
-#include <QString>
-#include <QtTest>
-#include <QtSql>
-#include <QObject>
 #include "UserTests.h"
 #include "FileTests.h"
 #include "OtherTests.h"
-#include "SignalTests.h"
+//#include "SignalTests.h"
 #include "PropertyObjectTests.h"
 #include "ProjectPropertyTests.h"
 #include "UserPropertyTest.h"
 #include "DbControllerProjectTests.h"
 #include "DbControllerUserTests.h"
 #include "DbControllerFileManagementTests.h"
-#include "DbControllerSignalManagementTests.h"
+//#include "DbControllerSignalManagementTests.h"
 #include "DbControllerHardwareConfigurationTests.h"
 #include "DbControllerVersionControlTests.h"
-#include "../../lib/DbController.h"
 
 const int DatabaseProjectVersion = 326;
 
@@ -38,11 +33,11 @@ int main(int argc, char *argv[])
 	//
 	int returnCode = 0;
 
-	//
-	// Database Signal functions
-	//
-	////SignalTests signalTests;
-	////returnCode |= QTest::qExec(&signalTests, argc, argv);
+//	//
+//	// Database Signal functions
+//	//
+//	////SignalTests signalTests;
+//	////returnCode |= QTest::qExec(&signalTests, argc, argv);
 
 	// Database User Management functions
 	//
@@ -86,8 +81,8 @@ int main(int argc, char *argv[])
 	DbControllerFileTests dbControllerFileTests;
 	returnCode |= QTest::qExec(&dbControllerFileTests, argc, argv);
 
-////	DbControllerSignalTests dbControllerSignalTests;
-////	returnCode |= QTest::qExec(&dbControllerSignalTests, argc, argv);
+//////	DbControllerSignalTests dbControllerSignalTests;
+//////	returnCode |= QTest::qExec(&dbControllerSignalTests, argc, argv);
 
 	DbControllerHardwareConfigurationTests dbControllerHardwareConfigurationTests;
 	returnCode |= QTest::qExec(&dbControllerHardwareConfigurationTests, argc, argv);

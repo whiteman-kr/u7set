@@ -79,7 +79,6 @@ SOURCES += \
     ../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/ModuleFirmware.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/SocketIO.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/HostAddressPort.cpp \
@@ -87,8 +86,6 @@ SOURCES += \
     SignalSocket.cpp \
     ../lib/Tcp.cpp \
     SignalBase.cpp \
-    ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc \
     ../lib/AppSignal.cpp \
     SignalList.cpp \
     FindMeasurePanel.cpp \
@@ -162,7 +159,6 @@ HEADERS  += \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
     ../lib/ModuleFirmware.h \
-    ../lib/ProtoSerialization.h \
     ../lib/Types.h \
     ../lib/OrderedHash.h \
     ../lib/SocketIO.h \
@@ -173,8 +169,6 @@ HEADERS  += \
     SignalSocket.h \
     ../lib/Tcp.h \
     SignalBase.h \
-    ../Proto/network.pb.h \
-    ../Proto/serialization.pb.h \
     ../lib/AppSignal.h \
     SignalList.h \
     FindMeasurePanel.h \
@@ -237,14 +231,9 @@ win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 
 #protobuf
 #
-win32 {
-		LIBS += -L$$DESTDIR -lprotobuf
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
-		INCLUDEPATH += ./../Protobuf
-}
-unix {
-		LIBS += -lprotobuf
-}
 
 DISTFILES += \
     ../Proto/network.proto \
