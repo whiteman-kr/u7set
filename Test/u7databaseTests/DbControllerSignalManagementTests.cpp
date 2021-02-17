@@ -95,7 +95,7 @@ void DbControllerSignalTests::initTestCase()
 	std::srand(static_cast<unsigned>(QDateTime::currentMSecsSinceEpoch()));
 }
 
-void DbControllerSignalTests::addSignalTest()
+void DbControllerSignalTests::test_addSignal()
 {
 	// Testing of stored procedure:
 	//
@@ -164,7 +164,7 @@ void DbControllerSignalTests::addSignalTest()
 	db.close();
 }
 
-void DbControllerSignalTests::checkinSignalsTest()
+void DbControllerSignalTests::test_checkinSignals()
 {
 	// Testing of stored procedure:
 	//
@@ -276,7 +276,7 @@ void DbControllerSignalTests::checkinSignalsTest()
 
 }
 
-void DbControllerSignalTests::checkoutSignalsTest()
+void DbControllerSignalTests::test_checkoutSignals()
 {
 	OPEN_DATABASE();
 
@@ -348,7 +348,7 @@ void DbControllerSignalTests::checkoutSignalsTest()
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_DELETED);
 }
 
-void DbControllerSignalTests::deleteSignalTest()
+void DbControllerSignalTests::test_deleteSignal()
 {
 	// Testing of stored procedure:
 	//
@@ -481,7 +481,7 @@ void DbControllerSignalTests::deleteSignalTest()
 	QVERIFY(action == VcsItemAction::Deleted);
 }
 
-void DbControllerSignalTests::setSignalWorkcopyTest()
+void DbControllerSignalTests::test_setSignalWorkcopy()
 {
 	// Testing of stored procedure:
 	//
@@ -634,7 +634,7 @@ void DbControllerSignalTests::setSignalWorkcopyTest()
 	db.close();
 }
 
-void DbControllerSignalTests::getSignalsIDsTests()
+void DbControllerSignalTests::test_getSignalsIDs()
 {
 	// Testing of stored procedure:
 	//
@@ -647,67 +647,35 @@ void DbControllerSignalTests::getSignalsIDsTests()
 	//
 	QSqlQuery q;
 
-	TS_EXEC_QUERY(q, "SELECT signalid FROM Signal");
+//	TS_EXEC_QUERY(q, "SELECT signalid FROM Signal");
 
 	std::vector<int> initialIDs;
 
-	while(q.next() == true)
+	TS_VERIFY(getAllSignalIDs(&initialIDs));
+/*	while(q.next() == true)
 	{
 		initialIDs.push_back(q.value(0).toInt());
-	}
+	}*/
+
+	std::vector<ObjectState> obStates;
 
 	// add signals by user ADMIN_ID
 	//
-	std::vector<ObjectState> obStates;
-
-	int count = 5;// + (std::rand() % 5);
-
 	std::vector<int> adminSignalsIDs;
 
-	for(int i = 0; i < count; i++)
-	{
-		TS_VERIFY(addSignal(ADMIN_ID, E::SignalType::Bus, 1, &obStates));
-		QVERIFY(obStates.size() == 1);
-
-		adminSignalsIDs.push_back(obStates[0].id);
-	}
-
-	std::sort(adminSignalsIDs.begin(), adminSignalsIDs.end());
+	TS_VERIFY(addTestSignals(ADMIN_ID, E::SignalType::Bus, 1, 5 + rand0to(4), &adminSignalsIDs));
 
 	// add signals by user USER2_ID
 	//
 	std::vector<int> user2SignalsIDs;
 
-	count = 4;// + (std::rand() % 6);
-
-	for(int i = 0; i < count; i++)
-	{
-		TS_VERIFY(addSignal(USER2_ID, E::SignalType::Discrete, 2, &obStates));
-		QVERIFY(obStates.size() == 2);
-
-		user2SignalsIDs.push_back(obStates[0].id);
-		user2SignalsIDs.push_back(obStates[1].id);
-	}
-
-	std::sort(user2SignalsIDs.begin(), user2SignalsIDs.end());
+	TS_VERIFY(addTestSignals(USER2_ID, E::SignalType::Discrete, 2, 4 + rand0to(5), &user2SignalsIDs));
 
 	// add signals by user USER3_ID
 	//
 	std::vector<int> user3SignalsIDs;
 
-	count = 2;// + (std::rand() % 3);
-
-	for(int i = 0; i < count; i++)
-	{
-		TS_VERIFY(addSignal(USER3_ID, E::SignalType::Analog, 3, &obStates));
-		QVERIFY(obStates.size() == 3);
-
-		user3SignalsIDs.push_back(obStates[0].id);
-		user3SignalsIDs.push_back(obStates[1].id);
-		user3SignalsIDs.push_back(obStates[2].id);
-	}
-
-	std::sort(user3SignalsIDs.begin(), user3SignalsIDs.end());
+	TS_VERIFY(addTestSignals(USER3_ID, E::SignalType::Analog, 3, 2 + rand0to(2), &user3SignalsIDs));
 
 	// checking that sets is NOT intersect
 	//
@@ -797,7 +765,19 @@ void DbControllerSignalTests::getSignalsIDsTests()
 	db.close();
 }
 
-void DbControllerSignalTests::dbc_addSignalTest()
+void DbControllerSignalTests::test_getSignalsIDAppSignalID()
+{
+	OPEN_DATABASE();
+
+	std::vector<int> ids;
+
+	TS_VERIFY(getSignalsIDs(ADMIN_ID, true, &ids));
+
+
+	db.close();
+}
+
+void DbControllerSignalTests::dbcTest_addSignal()
 {
 	// Testing of:
 	//
@@ -1931,7 +1911,7 @@ QString DbControllerSignalTests::check_signalIsExist(int userID,
 
 QString DbControllerSignalTests::getFieldValue(QString valueField, int* value, QString table, QString whereField, int whereValue)
 {
-	TS_VERIFY_RETURN_ERR(value != nullptr, "NULL pointer");
+	TS_TEST_PTR_RETURN(value);
 
 	QSqlQuery q;
 
@@ -2131,10 +2111,7 @@ QString DbControllerSignalTests::deleteSignal(int userID, int signalID, ObjectSt
 
 QString DbControllerSignalTests::deleteSignals(int userID, const std::vector<int>& ids, std::vector<ObjectState>* obStates)
 {
-	if (obStates == nullptr)
-	{
-		return "NULL pointer";
-	}
+	TS_TEST_PTR_RETURN(obStates);
 
 	obStates->clear();
 
@@ -2152,7 +2129,7 @@ QString DbControllerSignalTests::deleteSignals(int userID, const std::vector<int
 
 QString DbControllerSignalTests::getSignalsIDs(int userID, bool withDeleted, std::vector<int>* ids)
 {
-	TS_VERIFY_RETURN_ERR(ids != nullptr, "NULL ptr");
+	TS_TEST_PTR_RETURN(ids);
 
 	QSqlQuery q;
 
@@ -2168,4 +2145,58 @@ QString DbControllerSignalTests::getSignalsIDs(int userID, bool withDeleted, std
 
 	TS_RETURN_SUCCESS();
 }
+
+QString DbControllerSignalTests::addTestSignals(int userID,
+												E::SignalType signalType,
+											   int channelCount,
+											   int signalCount,
+												std::vector<int>* addedSignalsIDsSorted)
+{
+	TS_TEST_PTR_RETURN(addedSignalsIDsSorted);
+
+	addedSignalsIDsSorted->clear();
+
+	std::vector<ObjectState> obStates;
+
+	for(int i = 0; i < signalCount; i++)
+	{
+		TS_VERIFY_RETURN(addSignal(userID, signalType, channelCount, &obStates));
+		TS_VERIFY_RETURN_ERR(obStates.size() == channelCount, "ChannelCount error");
+
+		for(int ch = 0; ch < channelCount; ch++)
+		{
+			addedSignalsIDsSorted->push_back(obStates[ch].id);
+		}
+	}
+
+	std::sort(addedSignalsIDsSorted->begin(), addedSignalsIDsSorted->end());
+
+	TS_RETURN_SUCCESS();
+}
+
+QString DbControllerSignalTests::getAllSignalIDs(std::vector<int>* allSignalIDsSorted)
+{
+	TS_TEST_PTR_RETURN(allSignalIDsSorted);
+
+	allSignalIDsSorted->clear();
+
+	QSqlQuery q;
+
+	TS_EXEC_QUERY_RETURN_ERR(q, "SELECT signalid FROM Signal ORDER BY signalid ASC");
+
+	while(q.next() == true)
+	{
+		allSignalIDsSorted->push_back(q.value(0).toInt());
+	}
+
+	TS_RETURN_SUCCESS();
+}
+
+int DbControllerSignalTests::rand0to(int upRange) const
+{
+	Q_ASSERT(upRange > 0 && upRange <= RAND_MAX);
+
+	return std::rand() % (upRange + 1);
+}
+
 

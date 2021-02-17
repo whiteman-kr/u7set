@@ -63,6 +63,9 @@
 
 #define TS_RETURN_SUCCESS()							return QString();
 
+#define TS_TEST_PTR_RETURN(ptr)						if (ptr == NULL) { Q_ASSERT(false); return "NULL pointer"; }
+
+
 
 class DbControllerSignalTests : public QObject
 {
@@ -76,16 +79,17 @@ private slots:
 
 	// stored procedures tests
 	//
-	void addSignalTest();
-	void checkinSignalsTest();
-	void checkoutSignalsTest();
-	void deleteSignalTest();
-	void setSignalWorkcopyTest();
-	void getSignalsIDsTests();
+	void test_addSignal();
+	void test_checkinSignals();
+	void test_checkoutSignals();
+	void test_deleteSignal();
+	void test_setSignalWorkcopy();
+	void test_getSignalsIDs();
+	void test_getSignalsIDAppSignalID();
 
 	// DbController methods tests
 	//
-	void dbc_addSignalTest();
+	void dbcTest_addSignal();
 
 
 /*	void getSignalIdsTest();
@@ -136,6 +140,15 @@ private:
 	QString deleteSignals(int userID, const std::vector<int>& ids, std::vector<ObjectState>* obStates);
 
 	QString getSignalsIDs(int userID, bool withDeleted, std::vector<int>* ids);
+
+	QString addTestSignals(int userID,
+						   E::SignalType signalType,
+						   int channelCount,
+						   int signalCount, std::vector<int>* addedSignalsIDsSorted);
+
+	QString getAllSignalIDs(std::vector<int>* allSignalIDsSorted);
+
+	int rand0to(int upRange) const;
 
 	template <typename T>
 	std::vector<T> sets_difference(std::vector<T> set1, std::vector<T> set2);
