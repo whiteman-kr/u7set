@@ -40,6 +40,7 @@ public:
 
 	Metrology::ConnectionType connectionType() const { return m_connectionType; }
 	void setConnectionType(Metrology::ConnectionType type) { m_connectionType = type; }
+	void setConnectionType(int type) { m_connectionType = static_cast<Metrology::ConnectionType>(type); }
 
 	Metrology::SignalParam param(int ioType) const;
 	bool setParam(int ioType, const Metrology::SignalParam& param);
@@ -67,8 +68,9 @@ public:
 	int comparatorIndex() const { return m_comparatorIndex; }
 	void setComparatorIndex(int index) { m_comparatorIndex = index; }
 
-	int comparatorValueType() const { return m_comparatorValueType; }
-	void setComparatorValueType(int type) { m_comparatorValueType = type; }
+	Metrology::CmpValueType comparatorValueType() const { return m_comparatorValueType; }
+	void setComparatorValueType(Metrology::CmpValueType type) { m_comparatorValueType = type; }
+	void setComparatorValueType(int type) { m_comparatorValueType = static_cast<Metrology::CmpValueType>(type); }
 
 	bool isNegativeRange() const { return m_negativeRange; }
 	void setNegativeRange(bool negativeRange) { m_negativeRange = negativeRange; }
@@ -82,17 +84,17 @@ private:
 
 	mutable QMutex m_mutex;
 
-	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::Unsed;
+	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 	Metrology::SignalParam m_param[Metrology::ConnectionIoTypeCount];
 
 	CalibratorManager* m_pCalibratorManager = nullptr;
 
-	double m_percent = 0;					// for measuring of linearity
-	int m_comparatorIndex = -1;				// for measuring of comparators - current cmp index
-	int m_comparatorValueType = -1;			// for measuring of comparators - cmp or hst
+	double m_percent = 0;																		// for measuring of linearity
+	int m_comparatorIndex = -1;																	// for measuring of comparators - current cmp index
+	Metrology::CmpValueType m_comparatorValueType = Metrology::CmpValueType::NoCmpValueType;	// for measuring of comparators - cmp or hst
 
 	bool m_negativeRange = false;
-	double m_tunStateForRestore = 0;		// for restore tun value after measuring
+	double m_tunStateForRestore = 0;															// for restore tun value after measuring
 };
 
 // ==============================================================================================
@@ -173,7 +175,7 @@ private:
 
 	mutable QMutex m_mutex;
 
-	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::Unsed;
+	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 	int m_channelCount = 0;
 	MultiChannelSignal m_signal[Metrology::ConnectionIoTypeCount];
@@ -253,8 +255,8 @@ public:
 	// signals for measure
 	//
 	void					initSignals();
-	void					updateRackParam();
-	void					initMetrologyConnections();
+	void					initRackParam();
+	void					initConnectionSignals();
 
 	int						createSignalListForMeasure(int measureKind, Metrology::ConnectionType connectionType, int rackIndex);
 	void					clearSignalListForMeasure();

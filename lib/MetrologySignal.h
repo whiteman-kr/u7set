@@ -367,16 +367,16 @@ namespace Metrology
 
 	// ==============================================================================================
 
-	const char* const CmpValueType[] =
+	enum CmpValueType
 	{
-				QT_TRANSLATE_NOOP("MetrologySignal.h", "Set point"),
-				QT_TRANSLATE_NOOP("MetrologySignal.h", "Hysteresis"),
+		NoCmpValueType	= -1,
+		SetPoint		= 0,
+		Hysteresis		= 1,
 	};
 
-	const int	CmpValueTypeCount		= sizeof(CmpValueType)/sizeof(CmpValueType[0]);
+	const int CmpValueTypeCount	= 2;
 
-	const int	CmpValueTypeSetPoint	= 0,
-				CmpValueTypeHysteresis	= 1;
+	QString CmpValueTypeCpation(CmpValueType type);
 
 	// ==============================================================================================
 
@@ -436,14 +436,16 @@ namespace Metrology
 
 		int valuePrecision() const;
 
-		double compareOnlineValue(int cmpValueType);			// current online (run time) value: return value of set point or hysteresis, depended from cmpValueType
-		QString compareOnlineValueStr(int cmpValueType);		// str current oline (run time) value
-		double compareConstValue() const;						// default offine value
-		QString compareDefaultValueStr() const;					// str default offine value
+		double compareOnlineValue(int cmpValueType);
+		double compareOnlineValue(CmpValueType cmpValueType);			// current online (run time) value: return value of set point or hysteresis, depended from cmpValueType
+		QString compareOnlineValueStr(int cmpValueType);
+		QString compareOnlineValueStr(CmpValueType cmpValueType);		// str current oline (run time) value
+		double compareConstValue() const;								// default offine value
+		QString compareDefaultValueStr() const;							// str default offine value
 
-		double hysteresisOnlineValue();							// current oline (run time) value
-		QString hysteresisOnlineValueStr();						// str current oline (run time) value
-		QString hysteresisDefaultValueStr() const;				// str default offine value
+		double hysteresisOnlineValue();									// current oline (run time) value
+		QString hysteresisOnlineValueStr();								// str current oline (run time) value
+		QString hysteresisDefaultValueStr() const;						// str default offine value
 
 		bool outputState() const;
 		QString outputStateStr() const;

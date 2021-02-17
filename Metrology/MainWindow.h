@@ -65,10 +65,10 @@ public:
 
 private:
 
+	int						m_measureTimeout = 0;
 	int						m_measureType = MEASURE_TYPE_UNDEFINED;
 	int						m_measureKind = MEASURE_KIND_UNDEFINED;
-	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::Unknown;
-	int						m_measureTimeout = 0;
+	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 	QMap<int, MeasureView*> m_measureViewMap;
 

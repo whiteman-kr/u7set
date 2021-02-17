@@ -158,7 +158,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<Metrology::ComparatorEx> compa
 
 	stateStr += comparatorEx->cmpTypeStr();
 	stateStr += " ";
-	stateStr += comparatorEx->compareOnlineValueStr(Metrology::CmpValueTypeSetPoint);
+	stateStr += comparatorEx->compareOnlineValueStr(Metrology::CmpValueType::SetPoint);
 	stateStr += " : ";
 	stateStr += comparatorEx->outputStateStr(m_comparatorInfo.displayingStateTrue(), m_comparatorInfo.displayingStateFalse());
 
@@ -409,7 +409,7 @@ void ComparatorInfoPanel::measureKindChanged(int kind)
 
 void ComparatorInfoPanel::connectionTypeChanged(Metrology::ConnectionType type)
 {
-	if (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(type) < 0 || TO_INT(type) >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
@@ -484,7 +484,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 		switch (activeSignal.connectionType())
 		{
-			case Metrology::ConnectionType::Unsed:
+			case Metrology::ConnectionType::Unused:
 				pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).metrologySignal(c);
 				break;
 			default:
@@ -525,7 +525,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	//
 	QSize cellSize = QFontMetrics(m_comparatorInfo.font()).size(Qt::TextSingleLine,"A");
 
-	if (activeSignal.connectionType() == Metrology::ConnectionType::Unsed)
+	if (activeSignal.connectionType() == Metrology::ConnectionType::Unused)
 	{
 		m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 	}

@@ -110,7 +110,7 @@ private:
 	ComparatorInfoOption	m_comparatorInfo;
 
 	int						m_measureKind = MEASURE_KIND_UNDEFINED;
-	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::Unknown;
+	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 protected:
 

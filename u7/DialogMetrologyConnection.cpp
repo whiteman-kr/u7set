@@ -307,7 +307,7 @@ void DialogMetrologyConnectionItem::createInterface()
 	{
 		m_pTypeList->addItem(Metrology::ConnectionTypeCaption(static_cast<Metrology::ConnectionType>(type)), type);
 	}
-	m_pTypeList->removeItem(Metrology::ConnectionType::Unsed);
+	m_pTypeList->removeItem(Metrology::ConnectionType::Unused);
 	m_pTypeList->setCurrentIndex(0);
 
 	// connects
@@ -341,7 +341,7 @@ void DialogMetrologyConnectionItem::updateSignals()
 	}
 
 	int type = m_connection.type();
-	if ((type < 0 || type >= Metrology::ConnectionTypeCount) || type == Metrology::ConnectionType::Unsed)
+	if ((type < 0 || type >= Metrology::ConnectionTypeCount) || type == Metrology::ConnectionType::Unused)
 	{
 		m_connection.setType(Metrology::ConnectionType::Input_Internal);
 		type = m_connection.type();
@@ -735,7 +735,7 @@ void DialogMetrologyConnection::createInterface()
 	connect(m_pCopyAction, &QAction::triggered, this, &DialogMetrologyConnection::copy);
 	connect(m_pExportAction, &QAction::triggered, this, &DialogMetrologyConnection::exportConnections);
 	connect(m_pImportAction, &QAction::triggered, this, &DialogMetrologyConnection::importConnections);
-		connect(m_pSelectAllAction, &QAction::triggered, this, &DialogMetrologyConnection::selectAll);
+	connect(m_pSelectAllAction, &QAction::triggered, this, &DialogMetrologyConnection::selectAll);
 
 	// toolBar
 	//
@@ -772,7 +772,7 @@ void DialogMetrologyConnection::createInterface()
 	connect(action, &QAction::triggered, this, &DialogMetrologyConnection::find);
 
 	toolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-	toolBar->setWindowTitle(tr("Search connections ToolBar"));
+	toolBar->setWindowTitle(tr("Connections ToolBar"));
 
 	// view
 	//

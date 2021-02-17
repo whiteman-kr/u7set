@@ -852,7 +852,7 @@ void MainWindow::loadOnToolBar_Connection()
 	int currentConnectionType = theOptions.toolBar().connectionType();
 	if (currentConnectionType < 0 || currentConnectionType >= Metrology::ConnectionTypeCount)
 	{
-		currentConnectionType = Metrology::ConnectionType::Unsed;
+		currentConnectionType = Metrology::ConnectionType::Unused;
 	}
 	m_connectionType = static_cast<Metrology::ConnectionType>(currentConnectionType);
 
@@ -862,10 +862,11 @@ void MainWindow::loadOnToolBar_Connection()
 
 		m_pConnectionTypeList->clear();
 
-		// append Metrology::ConnectionType::Unsed
+		// append Metrology::ConnectionType::Unused
 		//
-		m_pConnectionTypeList->addItem(qApp->translate("MetrologyConnection", Metrology::ConnectionTypeCaption(Metrology::ConnectionType::Unsed).toUtf8()),
-												Metrology::ConnectionType::Unsed);
+		m_pConnectionTypeList->addItem(qApp->translate(	"MetrologyConnection",
+														Metrology::ConnectionTypeCaption(Metrology::ConnectionType::Unused).toUtf8()),
+														Metrology::ConnectionType::Unused);
 
 		// found all exist connections
 		//
@@ -901,7 +902,7 @@ void MainWindow::loadOnToolBar_Connection()
 
 			if (connectionType == currentConnectionType)
 			{
-				selectedItem = index + 1;	// Metrology::ConnectionType::Unsed item has already been added early, hence +1
+				selectedItem = index + 1;	// Metrology::ConnectionType::Unused item has already been added early, hence +1
 			}
 
 			m_pConnectionTypeList->addItem(qApp->translate("MetrologyConnection", Metrology::ConnectionTypeCaption(static_cast<Metrology::ConnectionType>(connectionType)).toUtf8()), connectionType);
@@ -913,8 +914,8 @@ void MainWindow::loadOnToolBar_Connection()
 	//
 	if (selectedItem == -1)
 	{
-		selectedItem = 0;	// first element - this is Metrology::ConnectionType::Unsed
-		m_connectionType = Metrology::ConnectionType::Unsed;
+		selectedItem = 0;	// first element - this is Metrology::ConnectionType::Unused
+		m_connectionType = Metrology::ConnectionType::Unused;
 	}
 
 	//
@@ -942,7 +943,7 @@ void MainWindow::loadOnToolBar_Racks()
 		return;
 	}
 
-	if (static_cast<int>(m_connectionType) < 0 || static_cast<int>(m_connectionType) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(m_connectionType) < 0 || TO_INT(m_connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
@@ -1009,7 +1010,7 @@ void MainWindow::loadOnToolBar_Signals()
 		return;
 	}
 
-	if (static_cast<int>(m_connectionType) < 0 || static_cast<int>(m_connectionType) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(m_connectionType) < 0 || TO_INT(m_connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
@@ -1196,7 +1197,7 @@ bool MainWindow::changeInputSignalOnInternal(const MeasureSignal& activeSignal)
 		return false;
 	}
 
-	if (activeSignal.connectionType() != Metrology::ConnectionType::Unsed)
+	if (activeSignal.connectionType() != Metrology::ConnectionType::Unused)
 	{
 		return false;
 	}
@@ -1237,7 +1238,7 @@ bool MainWindow::signalIsMeasured(const MeasureSignal& activeSignal, QString& si
 
 	switch (m_connectionType)
 	{
-		case Metrology::ConnectionType::Unsed:	ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);	break;
+		case Metrology::ConnectionType::Unused:	ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);	break;
 		default:								ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);	break;
 	}
 
@@ -1307,7 +1308,7 @@ bool MainWindow::inputsOfmoduleIsSame(const MeasureSignal& activeSignal)
 
 	switch (m_connectionType)
 	{
-		case Metrology::ConnectionType::Unsed:
+		case Metrology::ConnectionType::Unused:
 		case Metrology::ConnectionType::Input_Internal:
 		case Metrology::ConnectionType::Input_DP_Internal_F:
 		case Metrology::ConnectionType::Input_C_Internal_F:
@@ -1395,7 +1396,7 @@ int MainWindow::getMaxComparatorCount(const MeasureSignal& activeSignal)
 
 		switch (activeSignal.connectionType())
 		{
-			case Metrology::ConnectionType::Unsed:
+			case Metrology::ConnectionType::Unused:
 				pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).metrologySignal(ch);
 				break;
 			default:
@@ -1617,7 +1618,7 @@ void MainWindow::showRackList()
 
 	loadOnToolBar_MeasureKind();
 
-	theSignalBase.updateRackParam();
+	theSignalBase.initRackParam();
 
 	if (m_measureKind == MEASURE_KIND_MULTI_RACK)
 	{
@@ -2021,7 +2022,7 @@ void MainWindow::setConnectionTypeFromStatistic(Metrology::ConnectionType connec
 		return;
 	}
 
-	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
@@ -2563,11 +2564,11 @@ void MainWindow::configSocketSignalBaseLoading(int persentage)
 void MainWindow::configSocketSignalBaseLoaded()
 {
 	// loadOnToolBar_Connection call loadOnToolBar_Racks() after setCurrentIndex
-	// if m_connectionType != Metrology::ConnectionType::Unsed
+	// if m_connectionType != Metrology::ConnectionType::Unused
 	//
 	loadOnToolBar_Connection();
 
-	if (m_connectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unused)
 	{
 		loadOnToolBar_Racks();
 	}

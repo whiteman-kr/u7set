@@ -171,7 +171,7 @@ private:
 	SignalInfoOption		m_signalInfo;
 
 	int						m_measureKind = MEASURE_KIND_UNDEFINED;
-	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::Unknown;
+	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 protected:
 

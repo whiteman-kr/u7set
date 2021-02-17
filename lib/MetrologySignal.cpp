@@ -274,7 +274,7 @@ namespace Metrology
 
 	bool SignalParam::isValid() const
 	{
-		if (appSignalID().isEmpty() == true || hash() == 0)
+		if (appSignalID().isEmpty() == true || hash() == UNDEFINED_HASH)
 		{
 			return false;
 		}
@@ -935,6 +935,26 @@ namespace Metrology
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
+	QString CmpValueTypeCpation(CmpValueType type)
+	{
+		QString caption;
+
+		switch (type)
+		{
+			case CmpValueType::SetPoint:	caption = QT_TRANSLATE_NOOP("MetrologySignal.h", "Set point");	break;
+			case CmpValueType::Hysteresis:	caption = QT_TRANSLATE_NOOP("MetrologySignal.h", "Hysteresis");	break;
+			default:
+				Q_ASSERT(0);
+				caption = QT_TRANSLATE_NOOP("MetrologySignal.h", "Unknown");
+		}
+
+		return caption;
+	};
+
+	// -------------------------------------------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------------------------------------------------
+
 	ComparatorEx::ComparatorEx(::Comparator* pComparator)
 	{
 		if (pComparator == nullptr)
@@ -1033,7 +1053,14 @@ namespace Metrology
 
 	double ComparatorEx::compareOnlineValue(int cmpValueType)
 	{
-		if (cmpValueType < 0 || cmpValueType >= CmpValueTypeCount)
+		return compareOnlineValue(static_cast<CmpValueType>(cmpValueType));
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	double ComparatorEx::compareOnlineValue(CmpValueType cmpValueType)
+	{
+		if (TO_INT(cmpValueType) < 0 || TO_INT(cmpValueType) >= CmpValueTypeCount)
 		{
 			return 0.0;
 		}
@@ -1048,7 +1075,7 @@ namespace Metrology
 		{
 			case DeviationType::Unused:													// for comparators: Less and Greate
 
-				if (cmpValueType == CmpValueTypeHysteresis)
+				if (cmpValueType == CmpValueType::Hysteresis)
 				{
 					switch (cmpType())
 					{
@@ -1096,7 +1123,14 @@ namespace Metrology
 
 	QString ComparatorEx::compareOnlineValueStr(int cmpValueType)
 	{
-		if (cmpValueType < 0 || cmpValueType >= CmpValueTypeCount)
+		return compareOnlineValueStr(static_cast<CmpValueType>(cmpValueType));
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString ComparatorEx::compareOnlineValueStr(CmpValueType cmpValueType)
+	{
+		if (TO_INT(cmpValueType) < 0 || TO_INT(cmpValueType) >= CmpValueTypeCount)
 		{
 			return QString();
 		}

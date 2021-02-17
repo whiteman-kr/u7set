@@ -30,7 +30,7 @@ SelectSignalItem::SelectSignalItem(int index, Metrology::ConnectionType connecti
 void SelectSignalItem::clear()
 {
 	m_index = -1;
-	m_connectionType = Metrology::ConnectionType::Unknown;
+	m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 	for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
 	{
@@ -48,7 +48,7 @@ bool SelectSignalItem::isValid() const
 		return false;
 	}
 
-	if (static_cast<int>(m_connectionType) < 0 || static_cast<int>(m_connectionType) > Metrology::ConnectionTypeCount)
+	if (TO_INT(m_connectionType) < 0 || TO_INT(m_connectionType) > Metrology::ConnectionTypeCount)
 	{
 		return false;
 	}
@@ -58,7 +58,7 @@ bool SelectSignalItem::isValid() const
 		return false;
 	}
 
-	if (m_connectionType != Metrology::ConnectionType::Unsed)
+	if (m_connectionType != Metrology::ConnectionType::Unused)
 	{
 		if (m_signalId[Metrology::ConnectionIoType::Destination].isEmpty() == true)
 		{
@@ -90,7 +90,7 @@ bool SelectSignalItem::set(int index, Metrology::ConnectionType connectionType, 
 	setSignalId(Metrology::ConnectionIoType::Source,inSignal.signalID());
 	setCaption(Metrology::ConnectionIoType::Source, inSignal.caption());
 
-	if (connectionType != Metrology::ConnectionType::Unsed)
+	if (connectionType != Metrology::ConnectionType::Unused)
 	{
 		const MultiChannelSignal& outSignal = measureSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);
 		if (outSignal.isEmpty() == true)
@@ -236,7 +236,7 @@ bool SelectSignalWidget::setCurrentSignalIndex(const QString& signalId)
 
 	QString buttonTitle;
 
-	if (signal.connectionType() == Metrology::ConnectionType::Unsed)
+	if (signal.connectionType() == Metrology::ConnectionType::Unused)
 	{
 		buttonTitle = QString(" %1\n %2").arg(signal.signalId(Metrology::ConnectionIoType::Source)).arg(signal.caption(Metrology::ConnectionIoType::Source));
 	}
@@ -570,7 +570,7 @@ QVariant SelectSignalModel::data(const QModelIndex& modelIndex, int role) const
 
 		if (signal.isValid() == true)
 		{
-			if (signal.connectionType() == Metrology::ConnectionType::Unsed)
+			if (signal.connectionType() == Metrology::ConnectionType::Unused)
 			{
 				str = QString(" %1\n %2").
 						arg(signal.signalId(Metrology::ConnectionIoType::Source)).
@@ -628,7 +628,7 @@ int SelectSignalModel::applyFilter(QString filterText, int defaultSignalIndex)
 
 			if (s.isValid() == true)
 			{
-				if (s.connectionType() == Metrology::ConnectionType::Unsed)
+				if (s.connectionType() == Metrology::ConnectionType::Unused)
 				{
 					if(	filterText.isEmpty() == true ||
 							s.signalId(Metrology::ConnectionIoType::Source).contains(filterText, Qt::CaseInsensitive) ||

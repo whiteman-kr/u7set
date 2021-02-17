@@ -19,8 +19,8 @@ namespace Metrology
 
 	enum ConnectionType
 	{
-		Unknown				= -1,
-		Unsed				= 0,
+		NoConnectionType	= -1,
+		Unused				= 0,
 		Input_Internal		= 1,
 		Input_Output		= 2,
 		Input_DP_Internal_F	= 3,
@@ -127,7 +127,7 @@ namespace Metrology
 
 		Crc64 m_crc;
 
-		ConnectionType m_type = ConnectionType::Unknown;
+		ConnectionType m_type = ConnectionType::NoConnectionType;
 		ConnectionSignal m_connectionSignal[ConnectionIoTypeCount];
 
 		VcsItemAction m_action;

@@ -948,7 +948,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setOutputAppSignalID(query.value(field++).toString());
 
 					measure->setCmpValueType(query.value(field++).toInt());
-					measure->setCmpTypeInt(query.value(field++).toInt());
+					measure->setCmpType(query.value(field++).toInt());
 
 					measure->setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, query.value(field++).toDouble());
 					measure->setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, query.value(field++).toDouble());

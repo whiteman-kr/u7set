@@ -14,10 +14,11 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-Measurement::Measurement(int measureType) :
-	m_measureType (measureType)
+Measurement::Measurement(int measureType)
 {
 	clear();
+
+	m_measureType = measureType;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -41,7 +42,7 @@ void Measurement::clear()
 	//
 	//
 	m_connectionAppSignalID.clear();
-	m_connectionType = Metrology::ConnectionType::Unknown;
+	m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 	m_appSignalID.clear();
 	m_customAppSignalID.clear();
@@ -103,7 +104,7 @@ QString Measurement::measureTimeStr() const
 
 QString Measurement::connectionAppSignalID() const
 {
-	if (m_connectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unused)
 	{
 		return QString();
 	}
@@ -121,7 +122,7 @@ QString Measurement::connectionTypeStr() const
 		return QString("???");
 	}
 
-	if (m_connectionType == Metrology::ConnectionType::Unsed)
+	if (m_connectionType == Metrology::ConnectionType::Unused)
 	{
 		return QString();
 	}
@@ -263,7 +264,7 @@ void Measurement::setLimits(const IoSignalParam& ioParam)
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
@@ -271,7 +272,7 @@ void Measurement::setLimits(const IoSignalParam& ioParam)
 
 	switch (connectionType)
 	{
-		case Metrology::ConnectionType::Unsed:
+		case Metrology::ConnectionType::Unused:
 			{
 				const Metrology::SignalParam& param = ioParam.param(Metrology::ConnectionIoType::Source);
 				if (param.isValid() == false)
@@ -719,7 +720,7 @@ void Measurement::setCalibratorData(const IoSignalParam &ioParam)
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
@@ -729,7 +730,7 @@ void Measurement::setCalibratorData(const IoSignalParam &ioParam)
 
 	switch (connectionType)
 	{
-		case Metrology::ConnectionType::Unsed:
+		case Metrology::ConnectionType::Unused:
 		case Metrology::ConnectionType::Input_Internal:
 		case Metrology::ConnectionType::Input_DP_Internal_F:
 		case Metrology::ConnectionType::Input_C_Internal_F:
@@ -878,7 +879,7 @@ LinearityMeasurement::LinearityMeasurement(const IoSignalParam &ioParam) : Measu
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
@@ -886,7 +887,7 @@ LinearityMeasurement::LinearityMeasurement(const IoSignalParam &ioParam) : Measu
 
 	switch (connectionType)
 	{
-		case Metrology::ConnectionType::Unsed:					fill_measure_input(ioParam);	break;
+		case Metrology::ConnectionType::Unused:					fill_measure_input(ioParam);	break;
 		case Metrology::ConnectionType::Input_Internal:
 		case Metrology::ConnectionType::Input_DP_Internal_F:
 		case Metrology::ConnectionType::Input_C_Internal_F:		fill_measure_internal(ioParam);	break;
@@ -957,7 +958,7 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
@@ -1082,7 +1083,7 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
@@ -1216,7 +1217,7 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
@@ -1441,7 +1442,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return 0;
@@ -1463,7 +1464,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 
 	switch (connectionType)
 	{
-		case Metrology::ConnectionType::Unsed:
+		case Metrology::ConnectionType::Unused:
 		case Metrology::ConnectionType::Input_Internal:
 		case Metrology::ConnectionType::Input_DP_Internal_F:
 		case Metrology::ConnectionType::Input_C_Internal_F:
@@ -1953,7 +1954,7 @@ ComparatorMeasurement::ComparatorMeasurement(const IoSignalParam& ioParam) : Mea
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
@@ -1961,7 +1962,7 @@ ComparatorMeasurement::ComparatorMeasurement(const IoSignalParam& ioParam) : Mea
 
 	switch (connectionType)
 	{
-		case Metrology::ConnectionType::Unsed:					fill_measure_input(ioParam);	break;
+		case Metrology::ConnectionType::Unused:					fill_measure_input(ioParam);	break;
 		case Metrology::ConnectionType::Input_Internal:
 		case Metrology::ConnectionType::Input_DP_Internal_F:
 		case Metrology::ConnectionType::Input_C_Internal_F:		fill_measure_internal(ioParam);	break;
@@ -1984,7 +1985,7 @@ void ComparatorMeasurement::clear()
 	m_compareAppSignalID.clear();
 	m_outputAppSignalID.clear();
 
-	m_cmpValueType = Metrology::CmpValueTypeSetPoint;
+	m_cmpValueType = Metrology::CmpValueType::NoCmpValueType;
 	m_cmpType = E::CmpType::Greate;
 }
 
@@ -2012,7 +2013,7 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
@@ -2032,8 +2033,8 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 		return;
 	}
 
-	int cmpValueType = ioParam.comparatorValueType();
-	if (cmpValueType < 0 || cmpValueType >= Metrology::CmpValueTypeCount)
+	Metrology::CmpValueType cmpValueType = ioParam.comparatorValueType();
+	if (TO_INT(cmpValueType) < 0 || TO_INT(cmpValueType) >= Metrology::CmpValueTypeCount)
 	{
 		assert(false);
 		return;
@@ -2148,7 +2149,7 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	}
 
 	Metrology::ConnectionType connectionType = ioParam.connectionType();
-	if (static_cast<int>(connectionType) < 0 || static_cast<int>(connectionType) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(connectionType) < 0 || TO_INT(connectionType) >= Metrology::ConnectionTypeCount)
 	{
 		assert(0);
 		return;
@@ -2175,8 +2176,8 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 		return;
 	}
 
-	int cmpValueType = ioParam.comparatorValueType();
-	if (cmpValueType < 0 || cmpValueType >= Metrology::CmpValueTypeCount)
+	Metrology::CmpValueType cmpValueType = ioParam.comparatorValueType();
+	if (TO_INT(cmpValueType) < 0 || TO_INT(cmpValueType) >= Metrology::CmpValueTypeCount)
 	{
 		assert(false);
 		return;
@@ -2273,13 +2274,13 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 
 QString ComparatorMeasurement::cmpValueTypeStr() const
 {
-	if (m_cmpValueType < 0 || m_cmpValueType >= Metrology::CmpValueTypeCount)
+	if (TO_INT(m_cmpValueType) < 0 || TO_INT(m_cmpValueType) >= Metrology::CmpValueTypeCount)
 	{
 		assert(0);
-		return QString("N/A");
+		return QString("Unknown");
 	}
 
-	return qApp->translate("MetrologySignal.h", Metrology::CmpValueType[m_cmpValueType]);
+	return qApp->translate("MetrologySignal.h", Metrology::CmpValueTypeCpation(m_cmpValueType).toUtf8());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2299,9 +2300,9 @@ QString ComparatorMeasurement::cmpTypeStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorMeasurement::setCmpType(int cmpValueType, E::CmpType cmpType)
+void ComparatorMeasurement::setCmpType(Metrology::CmpValueType cmpValueType, E::CmpType cmpType)
 {
-	if (cmpValueType < 0 || cmpValueType >= Metrology::CmpValueTypeCount)
+	if (TO_INT(cmpValueType) < 0 || TO_INT(cmpValueType) >= Metrology::CmpValueTypeCount)
 	{
 		assert(0);
 		return;
@@ -2309,13 +2310,13 @@ void ComparatorMeasurement::setCmpType(int cmpValueType, E::CmpType cmpType)
 
 	switch (cmpValueType)
 	{
-		case Metrology::CmpValueTypeSetPoint:
+		case Metrology::CmpValueType::SetPoint:
 
 			m_cmpType = cmpType;
 
 			break;
 
-		case Metrology::CmpValueTypeHysteresis:
+		case Metrology::CmpValueType::Hysteresis:
 
 			switch (cmpType)
 			{
@@ -2950,7 +2951,7 @@ void MeasureBase::updateStatisticsItem(int measureType, StatisticsItem& si)
 					break;
 				}
 
-				if (pComparatorMeasurement->cmpValueType() == Metrology::CmpValueTypeHysteresis)
+				if (pComparatorMeasurement->cmpValueType() == Metrology::CmpValueType::Hysteresis)
 				{
 					break;
 				}

@@ -122,7 +122,7 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::ForegroundRole)
 	{
-		if (si.connectionType() == Metrology::ConnectionType::Unknown)
+		if (TO_INT(si.connectionType()) < 0 || TO_INT(si.connectionType()) >= Metrology::ConnectionType::NoConnectionType)
 		{
 			if (column == STATISTICS_COLUMN_SIGNAL_TYPE || column == STATISTICS_COLUMN_SIGNAL_CONNECTION)
 			{
@@ -308,7 +308,7 @@ void StatisticsTable::updateSignal(Hash signalHash)
 
 int StatisticsPanel::m_measureType = MEASURE_TYPE_LINEARITY;
 int StatisticsPanel::m_measureKind = MEASURE_TYPE_UNDEFINED;
-Metrology::ConnectionType StatisticsPanel::m_connectionType = Metrology::ConnectionType::Unknown;
+Metrology::ConnectionType StatisticsPanel::m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -577,7 +577,7 @@ void StatisticsPanel::measureKindChanged(int kind)
 
 void StatisticsPanel::connectionTypeChanged(Metrology::ConnectionType type)
 {
-	if (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionTypeCount)
+	if (TO_INT(type) < 0 || TO_INT(type) >= Metrology::ConnectionTypeCount)
 	{
 		return;
 	}
@@ -604,7 +604,7 @@ void StatisticsPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	Metrology::Signal* pSignal = nullptr;
 
-	if(m_connectionType == Metrology::ConnectionType::Unsed)
+	if(m_connectionType == Metrology::ConnectionType::Unused)
 	{
 		pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).firstMetrologySignal();
 	}
@@ -792,7 +792,7 @@ void StatisticsPanel::selectSignalForMeasure()
 	//
 	const StatisticsItem& si = theSignalBase.statistics().item(statisticItemIndex);
 
-	if (si.connectionType() == Metrology::ConnectionType::Unknown)
+	if (TO_INT(si.connectionType()) < 0 || TO_INT(si.connectionType()) >= Metrology::ConnectionType::NoConnectionType)
 	{
 		if (si.signal() == nullptr || si.signal()->param().isValid() == false)
 		{
