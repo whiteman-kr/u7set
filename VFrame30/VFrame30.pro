@@ -116,7 +116,6 @@ HEADERS += VFrame30Lib_global.h \
     MacrosExpander.h \
     Session.h \
     ../lib/TypesAndEnums.h \
-    ../lib/ProtoSerialization.h \
     ../lib/CUtils.h \
     ../lib/DebugInstCounter.h \
     ../lib/PropertyObject.h \
@@ -135,7 +134,6 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/ITuningSignalManager.h \
     ../lib/Tuning/ITuningTcpClient.h \
-    ../Proto/network.pb.h \
     ../lib/TuningValue.h \
     TuningController.h \
     AppSignalController.h \
@@ -202,7 +200,6 @@ SOURCES += \
     SchemaItemTerminator.cpp \
     MacrosExpander.cpp \
     Session.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/AppSignalManager.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/AppSignal.cpp \
@@ -214,7 +211,6 @@ SOURCES += \
     SchemaManager.cpp \
     ClientSchemaView.cpp \
     SchemaItemLoopback.cpp \
-    ../Proto/network.pb.cc \
     ../lib/TuningValue.cpp \
     TuningController.cpp \
     AppSignalController.cpp \
@@ -248,14 +244,8 @@ unix {
 
 #protobuf
 #
-win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
-
-	INCLUDEPATH += ./../Protobuf
-}
-unix {
-	LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
 # Protobuf
 #

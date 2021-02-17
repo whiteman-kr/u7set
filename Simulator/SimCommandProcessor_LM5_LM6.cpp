@@ -3502,16 +3502,53 @@ namespace Sim
 				result.mulFloatingPoint(*k1);
 				result.addFloatingPoint(*k2);
 
-				if (result.floatValue() > std::numeric_limits<quint16>().max())
+				const float floatValue = result.floatValue();
+
+				// Rounding to the nearest even number
+				//
+				int oldRound = std::fegetround();
+				std::fesetround(FE_TONEAREST);
+
+				qint64 intValue64 = std::llrint(floatValue);
+				quint16 uintValue16 = static_cast<quint16>(intValue64);
+
+				std::fesetround(oldRound);
+
+				// Check limits, nan, +/-inf,
+				//
+				if (intValue64 > std::numeric_limits<quint16>().max())
 				{
-					// Overflow
-					//
 					result.setMathOverflow(1);
+					uintValue16 = std::numeric_limits<quint16>().max();
+				}
+
+				if (intValue64 < std::numeric_limits<quint16>().lowest())
+				{
+					result.setMathOverflow(1);
+					uintValue16 = std::numeric_limits<quint16>().lowest();
+				}
+
+				if (std::isinf(floatValue) == true)
+				{
+					result.setMathOverflow(1);
+					uintValue16 = std::signbit(floatValue) ?
+									 std::numeric_limits<quint16>().lowest() :
+									 std::numeric_limits<quint16>().max();
+				}
+
+				if (result.mathNan())
+				{
+					uintValue16 = 0;
+				}
+
+				if (uintValue16 == 0)
+				{
+					result.setMathZero(1);
 				}
 
 				// Save result
 				//
-				instance->addParamWord(o_ui_result, static_cast<quint16>(result.floatValue()));
+				instance->addParamWord(o_ui_result, uintValue16);
 			}
 			break;
 		case 8: // 32(FP)/32(SI)
@@ -3522,16 +3559,53 @@ namespace Sim
 				result.mulFloatingPoint(*k1);
 				result.addFloatingPoint(*k2);
 
-				if (result.floatValue() > static_cast<float>(std::numeric_limits<qint32>().max()))
+				const float floatValue = result.floatValue();
+
+				// Rounding to the nearest even number
+				//
+				int oldRound = std::fegetround();
+				std::fesetround(FE_TONEAREST);
+
+				qint64 intValue64 = std::llrint(floatValue);
+				qint32 intValue32 = static_cast<qint32>(intValue64);
+
+				std::fesetround(oldRound);
+
+				// Check limits, nan, +/-inf,
+				//
+				if (intValue64 > std::numeric_limits<qint32>().max())
 				{
-					// Overflow
-					//
 					result.setMathOverflow(1);
+					intValue32 = std::numeric_limits<qint32>().max();
+				}
+
+				if (intValue64 < std::numeric_limits<qint32>().lowest())
+				{
+					result.setMathOverflow(1);
+					intValue32 = std::numeric_limits<qint32>().lowest();
+				}
+
+				if (std::isinf(floatValue) == true)
+				{
+					result.setMathOverflow(1);
+					intValue32 = std::signbit(floatValue) ?
+									 std::numeric_limits<qint32>().lowest() :
+									 std::numeric_limits<qint32>().max();
+				}
+
+				if (result.mathNan())
+				{
+					intValue32 = 0;
+				}
+
+				if (intValue32 == 0)
+				{
+					result.setMathZero(1);
 				}
 
 				// Save result
 				//
-				instance->addParamSignedInt(o_si_fp_result, static_cast<qint32>(result.floatValue()));
+				instance->addParamSignedInt(o_si_fp_result, intValue32);
 			}
 			break;
 		case 9: // 16(UI)/32(FP)
@@ -5716,53 +5790,57 @@ namespace Sim
 
 		case 4: // FP32 -> SI32
 			{
-				float input = instance->param(i_data_32)->floatValue();
+				const float input = instance->param(i_data_32)->floatValue();
 
-				qint32 result = static_cast<qint32>(input);
+				// Rounding to the nearest even number
+				//
+				int oldRound = std::fegetround();
+				std::fesetround(FE_TONEAREST);
+
+				qint64 result64 = std::llrint(input);
+				qint32 result32 = static_cast<qint32>(result64);
+
+				std::fesetround(oldRound);
 
 				// Flags
 				//
 				quint16 overflow = 0x0000;
-				if (static_cast<qint64>(input) > std::numeric_limits<qint32>::max())
+				if (result64 > std::numeric_limits<qint32>::max())
 				{
 					overflow = 0x0001;
-					result = std::numeric_limits<qint32>::max();
+					result32 = std::numeric_limits<qint32>::max();
 				}
 
-				if (static_cast<qint64>(input) < std::numeric_limits<qint32>::lowest())
+				if (result64 < std::numeric_limits<qint32>::lowest())
 				{
 					overflow = 0x0001;
-					result = std::numeric_limits<qint32>::lowest();
+					result32 = std::numeric_limits<qint32>::lowest();
 				}
 
 				if (std::isinf(input) == true)
 				{
-					if (std::signbit(input) == true)
-					{
-						result = std::numeric_limits<qint32>::lowest();
-					}
-					else
-					{
-						result = std::numeric_limits<qint32>::max();
-					}
+					overflow = 0x0001;
+					result32 = std::signbit(input) ?
+								 result32 = std::numeric_limits<qint32>::lowest() :
+								 result32 = std::numeric_limits<qint32>::max();
 				}
 
 				quint16 underflow = (std::fpclassify(input) == FP_SUBNORMAL) ? 0x0001 : 0x0000;
 				if (underflow == 0x0001)
 				{
-					result = 0;
+					result32 = 0;
 				}
 
 				quint16 nan = std::isnan(input);
 				if (nan == 0x0001)
 				{
-					result = 0;
+					result32 = 0;
 					overflow = 0;
 				}
 
 				// Set result
 				//
-				instance->addParamSignedInt(o_data_32, result);
+				instance->addParamSignedInt(o_data_32, result32);
 				instance->addParamWord(o_overflow, overflow);
 				instance->addParamWord(o_underflow, underflow);
 				instance->addParamWord(o_nan, nan);

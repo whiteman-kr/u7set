@@ -1,11 +1,7 @@
-#include <QString>
-#include <QtTest>
-#include <QtSql>
-#include <QObject>
 #include "UserTests.h"
 #include "FileTests.h"
 #include "OtherTests.h"
-#include "SignalTests.h"
+//#include "SignalTests.h"
 #include "PropertyObjectTests.h"
 #include "ProjectPropertyTests.h"
 #include "UserPropertyTest.h"
@@ -15,7 +11,6 @@
 #include "DbControllerSignalManagementTests.h"
 #include "DbControllerHardwareConfigurationTests.h"
 #include "DbControllerVersionControlTests.h"
-#include "../../lib/DbController.h"
 
 const int DatabaseProjectVersion = 326;
 
@@ -60,8 +55,8 @@ int main(int argc, char *argv[])
 	//
 	// Database Signal functions
 	//
-	////SignalTests signalTests;
-	////returnCode |= QTest::qExec(&signalTests, argc, argv);
+	// SignalTests signalTests;
+	// returnCode |= QTest::qExec(&signalTests, argc, argv);
 
 	// Database User Management functions
 	//

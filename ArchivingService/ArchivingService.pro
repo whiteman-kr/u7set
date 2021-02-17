@@ -49,15 +49,12 @@ SOURCES += \
     ../lib/Tcp.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/CfgServerLoader.cpp \
-    ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc \
     ../lib/UdpSocket.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/CircularLogger.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     ../lib/CommandLineParser.cpp \
     ArchServiceMain.cpp \
@@ -98,15 +95,12 @@ HEADERS += \
     ../lib/Tcp.h \
     ../lib/XmlHelper.h \
     ../lib/CfgServerLoader.h \
-    ../Proto/network.pb.h \
-    ../Proto/serialization.pb.h \
     ../lib/UdpSocket.h \
     ../lib/BuildInfo.h \
     ../lib/CircularLogger.h \
     ../lib/TcpFileTransfer.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
-    ../lib/ProtoSerialization.h \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
     ../lib/CommandLineParser.h \
@@ -147,14 +141,8 @@ win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warnin
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
 
-win32 {
-        LIBS += -L$$DESTDIR -lprotobuf
-
-        INCLUDEPATH += ./../Protobuf
-}
-unix {
-        LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

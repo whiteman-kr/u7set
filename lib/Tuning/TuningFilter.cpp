@@ -44,6 +44,7 @@ namespace TuningTags
 	static const QLatin1String prop_CustomAppSignalMasks = QLatin1String("CustomAppSignalMasks");
 	static const QLatin1String prop_AppSignalMasks = QLatin1String("AppSignalMasks");
 	static const QLatin1String prop_EquipmentIDMasks = QLatin1String("EquipmentIDMasks");
+	static const QLatin1String prop_AppSignalTags = QLatin1String("AppSignalTags");
 
 	static const QLatin1String prop_UseColors = QLatin1String("UseColors");
 
@@ -223,6 +224,9 @@ TuningFilter::TuningFilter()
 	propMask->setCategory("Masks");
 
 	propMask = ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_EquipmentIDMasks, true, TuningFilter::equipmentIDMask, TuningFilter::setEquipmentIDMask);
+	propMask->setCategory("Masks");
+
+	propMask = ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_AppSignalTags, true, TuningFilter::appSignalTags, TuningFilter::setAppSignalTags);
 	propMask->setCategory("Masks");
 
 	auto propUseColors = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_UseColors, true, TuningFilter::useColors, TuningFilter::setUseColors);
@@ -431,6 +435,11 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 		if (reader.attributes().hasAttribute(TuningTags::prop_EquipmentIDMasks))
 		{
 			setEquipmentIDMask(reader.attributes().value(TuningTags::prop_EquipmentIDMasks).toString());
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_AppSignalTags))
+		{
+			setAppSignalTags(reader.attributes().value(TuningTags::prop_AppSignalTags).toString());
 		}
 
 		if (reader.attributes().hasAttribute(TuningTags::prop_SignalType))
@@ -772,6 +781,7 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 	writer.writeAttribute(TuningTags::prop_CustomAppSignalMasks, customAppSignalIDMask());
 	writer.writeAttribute(TuningTags::prop_AppSignalMasks, appSignalIDMask());
 	writer.writeAttribute(TuningTags::prop_EquipmentIDMasks, equipmentIDMask());
+	writer.writeAttribute(TuningTags::prop_AppSignalTags, appSignalTags());
 
 	writer.writeAttribute(TuningTags::prop_SignalType, E::valueToString<SignalType>(static_cast<int>(signalType())));
 	writer.writeAttribute(TuningTags::prop_Source, E::valueToString<Source>(static_cast<int>(source())));
@@ -868,6 +878,27 @@ bool TuningFilter::match(const AppSignalParam& object) const
 	if (processMaskList(object.customSignalId(), m_customAppSignalIDMasks) == false)
 	{
 		return false;
+	}
+
+	if (m_appSignalTags.isEmpty() == false)
+	{
+		bool tagsFound = false;
+
+		const std::set<QString>& objectTags = object.tags();
+
+		for (const QString& tag : m_appSignalTags)
+		{
+			if (objectTags.find(tag) != objectTags.end())
+			{
+				tagsFound = true;
+				break;
+			}
+		}
+
+		if (tagsFound == false)
+		{
+			return false;
+		}
 	}
 
 	TuningFilter* parent = parentFilter();
@@ -1190,6 +1221,29 @@ void TuningFilter::setAppSignalIDMask(const QString& value)
 	}
 }
 
+QString TuningFilter::appSignalTags() const
+{
+	QString result;
+	for (auto s : m_appSignalTags)
+	{
+		result += s + ';';
+	}
+	result.remove(result.length() - 1, 1);
+
+	return result;
+}
+
+void TuningFilter::setAppSignalTags(const QString& value)
+{
+	if (value.isEmpty() == true)
+	{
+		m_appSignalTags.clear();
+	}
+	else
+	{
+		m_appSignalTags = value.split(';', Qt::SkipEmptyParts);
+	}
+}
 
 std::vector <TuningFilterSignal> TuningFilter::getFilterSignals() const
 {
@@ -1459,11 +1513,12 @@ TuningFilter* TuningFilter::parentFilter() const
 bool TuningFilter::isEmpty() const
 {
 	if (m_signalType == SignalType::All &&
-			filterSignalsCount() == 0 &&
-			m_appSignalIDMasks.empty() == true &&
-			m_customAppSignalIDMasks.empty() == true &&
-			m_equipmentIDMasks.empty() == true
-			)
+		filterSignalsCount() == 0 &&
+		m_appSignalIDMasks.empty() == true &&
+		m_customAppSignalIDMasks.empty() == true &&
+		m_equipmentIDMasks.empty() == true &&
+		m_appSignalTags.empty() == true
+		)
 	{
 		return true;
 	}
@@ -1732,6 +1787,7 @@ void TuningFilter::copy(const TuningFilter& That)
 	m_customAppSignalIDMasks = That.m_customAppSignalIDMasks;
 	m_equipmentIDMasks = That.m_equipmentIDMasks;
 	m_appSignalIDMasks = That.m_appSignalIDMasks;
+	m_appSignalTags = That.m_appSignalTags;
 
 	m_signalValuesMap = That.m_signalValuesMap;
 

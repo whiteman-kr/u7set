@@ -1,11 +1,11 @@
-#ifndef DIALOGCHOOSEPRESET_H
-#define DIALOGCHOOSEPRESET_H
-
-#include "../lib/DbController.h"
+#pragma once
+#include "../../lib/DeviceObject.h"
 
 namespace Ui {
 class DialogChoosePreset;
 }
+
+class DbController;
 
 class DialogChoosePreset : public QDialog
 {
@@ -38,5 +38,3 @@ private:
 	static QString m_lastSelectedPreset;
 	static Qt::SortOrder m_lastSortOrder;
 };
-
-#endif // DIALOGCHOOSEPRESET_H

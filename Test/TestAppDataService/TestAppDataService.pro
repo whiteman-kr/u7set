@@ -53,7 +53,6 @@ HEADERS += \
     ../../Builder/IssueLogger.h \
     ../../Builder/ModulesRawData.h \
     ../../lib/DbStruct.h \
-    ../../lib/ProtoSerialization.h \
     ../../lib/Types.h \
     ../../lib/PropertyObject.h \
     ../../lib/DataSource.h \
@@ -89,9 +88,7 @@ SOURCES += \
     ../../Builder/IssueLogger.cpp \
     ../../Builder/ModulesRawData.cpp \
     ../../lib/DbStruct.cpp \
-    ../../lib/ProtoSerialization.cpp \
     ../../lib/Types.cpp \
-#    ../../lib/PropertyObject.cpp \
     ../../lib/DataSource.cpp \
     ../../lib/Crc.cpp \
     ../../lib/Queue.cpp \

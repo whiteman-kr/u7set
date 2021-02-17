@@ -211,9 +211,7 @@ private:
 
 	std::shared_ptr<TuningFilter> m_pageFilter = nullptr;
 
-	int m_sortColumn = 0;
-
-	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
+	std::map<QString, std::pair<int, Qt::SortOrder>> m_sortData;
 
 	static int m_instanceCounter;
 

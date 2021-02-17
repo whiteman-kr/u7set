@@ -90,7 +90,6 @@ SOURCES += \
     ../lib/SoftwareSettings.cpp \
     ../lib/Subsystem.cpp \
     ../lib/Types.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/TuningValue.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/SignalProperties.cpp \
@@ -141,8 +140,6 @@ SOURCES += \
     FbParamCalculation.cpp \
     TuningBuilder.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
-    ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc \
     ../lib/Address16.cpp \
     ../lib/Times.cpp \
     ../lib/DataProtocols.cpp \
@@ -181,7 +178,6 @@ HEADERS += \
     ../lib/SoftwareSettings.h \
     ../lib/Subsystem.h \
     ../lib/Types.h \
-    ../lib/ProtoSerialization.h \
     ../lib/TuningValue.h \
     ../lib/XmlHelper.h \
     ../lib/SignalProperties.h \
@@ -234,8 +230,6 @@ HEADERS += \
     LmDescriptionSet.h \
     BdfFile.h \
     ../lib/Tuning/TuningSignalState.h \
-    ../Proto/network.pb.h \
-    ../Proto/serialization.pb.h \
     ../lib/Address16.h \
     ../lib/Times.h \
     ../lib/DataProtocols.h \
@@ -257,13 +251,9 @@ unix {
 
 # protobuf
 #
-win32 {
-    LIBS += -L$$DESTDIR -lprotobuf
-    INCLUDEPATH += ./../Protobuf
-}
-unix {
-    LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
+
 
 DISTFILES += \
     ../Proto/network.proto \
