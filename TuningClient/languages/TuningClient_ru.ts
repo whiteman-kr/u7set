@@ -1417,7 +1417,7 @@ Data will not be available at the time of reconnection.</source>
     <message>
         <location filename="../MainWindow.cpp" line="504"/>
         <source>Schemas</source>
-        <translation>Алгоритмы</translation>
+        <translation>Схемы</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="140"/>
@@ -3160,7 +3160,7 @@ Are you sure you want to take control and %1 the source %2?</source>
     <message>
         <location filename="../TuningWorkspace.cpp" line="1028"/>
         <source>Schemas</source>
-        <translation>Алгоритмы</translation>
+        <translation>Схемы</translation>
     </message>
     <message>
         <location filename="../TuningWorkspace.cpp" line="1397"/>

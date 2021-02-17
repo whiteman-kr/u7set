@@ -38,7 +38,6 @@ SOURCES += main.cpp\
     ../lib/Signal.cpp \
     ../lib/SocketIO.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtoSerialization.cpp \
     PacketBufferTableModel.cpp \
     SignalTableModel.cpp \
     ../lib/Types.cpp \
@@ -70,7 +69,6 @@ HEADERS  += SourceListWidget.h \
     Stable.h \
     ../lib/SocketIO.h \
     ../lib/DbStruct.h \
-    ../lib/ProtoSerialization.h \
     PacketBufferTableModel.h \
     ../lib/PropertyObject.h \
     SignalTableModel.h \
@@ -100,11 +98,6 @@ win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 
 #protobuf
 #
-win32 {
-        LIBS += -L$$DESTDIR -lprotobuf
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
-        INCLUDEPATH += ./../Protobuf
-}
-unix {
-        LIBS += -lprotobuf
-}

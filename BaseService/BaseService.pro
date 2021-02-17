@@ -42,8 +42,6 @@ SOURCES += \
     ../lib/Service.cpp \
     ../lib/SimpleThread.cpp \
     ../lib/HostAddressPort.cpp \
-    ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc \
     ../lib/CommandLineParser.cpp \
     ../lib/WUtils.cpp \
     ../lib/XmlHelper.cpp \
@@ -62,8 +60,6 @@ HEADERS += \
     ../lib/Service.h \
     ../lib/SimpleThread.h \
     ../lib/HostAddressPort.h \
-    ../Proto/network.pb.h \
-    ../Proto/serialization.pb.h \
     ../lib/CommandLineParser.h \
     ../lib/WUtils.h \
     ../lib/SoftwareInfo.h \
@@ -80,13 +76,8 @@ CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
 #protobuf
 #
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
-win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
-	INCLUDEPATH += ./../Protobuf
-}
-unix {
-	LIBS += -lprotobuf
-}
 
 include(../qtservice/src/qtservice.pri)

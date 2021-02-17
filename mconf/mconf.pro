@@ -65,8 +65,6 @@ HEADERS += \
         ../lib/DbStruct.h \
     ../lib/DeviceObject.h \
     ../lib/OutputLog.h \
-    ../Proto/serialization.pb.h \
-    ../lib/ProtoSerialization.h \
     Settings.h \
     ApplicationTabPage.h \
     DiagTabPage.h \
@@ -85,8 +83,6 @@ SOURCES += \
 	../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/OutputLog.cpp \
-    ../Proto/serialization.pb.cc \
-    ../lib/ProtoSerialization.cpp \
     Settings.cpp \
     ApplicationTabPage.cpp \
     DiagTabPage.cpp \
@@ -131,14 +127,8 @@ unix {
 
 #protobuf
 #
-win32 {
-        LIBS += -L$$DESTDIR -lprotobuf
-
-        INCLUDEPATH += ./../Protobuf
-}
-unix {
-	LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
 DISTFILES += \
     Images/Logo.png \

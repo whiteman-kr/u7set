@@ -30,9 +30,7 @@ SOURCES +=\
 	../lib/DeviceObject.cpp \
 	../lib/OutputLog.cpp \
 	../lib/DbStruct.cpp \
-	../Proto/serialization.pb.cc \
 	../lib/Types.cpp \
-	../lib/ProtoSerialization.cpp \
 	../lib/Service.cpp \
 	../lib/DataProtocols.cpp \
 	../lib/DataSource.cpp \
@@ -50,7 +48,6 @@ SOURCES +=\
     TuningIPENService.cpp \
     ../Builder/IssueLogger.cpp \
     ../lib/HostAddressPort.cpp \
-    ../Proto/network.pb.cc \
     DiscreteSignalSetter.cpp \
     TripleChannelSignalsModel.cpp \
     TuningIPENSocket.cpp \
@@ -81,9 +78,7 @@ HEADERS  += TuningMainWindow.h \
 	../lib/PropertyObject.h \
 	../lib/OutputLog.h \
 	../lib/DbStruct.h \
-	../Proto/serialization.pb.h \
 	../lib/Types.h \
-	../lib/ProtoSerialization.h \
 	../lib/Service.h \
 	../lib/DataProtocols.h \
 	../lib/DataSource.h \
@@ -101,7 +96,6 @@ HEADERS  += TuningMainWindow.h \
     TuningIPENService.h \
     ../Builder/IssueLogger.h \
     ../lib/HostAddressPort.h \
-    ../Proto/network.pb.h \
     DiscreteSignalSetter.h \
     TripleChannelSignalsModel.h \
     TuningIPENSocket.h \
@@ -162,14 +156,8 @@ CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 #
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 
-win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
-
-	INCLUDEPATH += ./../Protobuf
-}
-unix {
-	LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
 RESOURCES += \
     TuningIPEN.qrc

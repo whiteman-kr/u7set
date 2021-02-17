@@ -178,6 +178,9 @@ public:
 	QString appSignalIDMask() const;
 	void setAppSignalIDMask(const QString& value);
 
+	QString appSignalTags() const;
+	void setAppSignalTags(const QString& value);
+
 	// FilterSignals
 	//
 	std::vector <TuningFilterSignal> getFilterSignals() const;
@@ -316,6 +319,7 @@ private:
 	QStringList m_customAppSignalIDMasks;
 	QStringList m_equipmentIDMasks;
 	QStringList m_appSignalIDMasks;
+	QStringList m_appSignalTags;
 
 	// Tab appearance
 	//

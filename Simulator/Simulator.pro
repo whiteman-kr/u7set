@@ -85,7 +85,6 @@ SOURCES += \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
 	../lib/LogicModulesInfo.cpp \
-    ../lib/ProtoSerialization.cpp \
 	../lib/SimpleMutex.cpp \
 	../lib/SimpleThread.cpp \
     ../lib/SoftwareSettings.cpp \
@@ -131,7 +130,6 @@ SOURCES += \
     ../lib/TuningValue.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/HostAddressPort.cpp \
-    ../Proto/network.pb.cc \
     SimAfb.cpp \
     SimLogicModule.cpp \
     SimCommandProcessor.cpp \
@@ -180,7 +178,6 @@ HEADERS += \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
     ../lib/PropertyObject.h \
-    ../lib/ProtoSerialization.h \
     ../lib/Types.h \
     ../lib/ModuleFirmware.h \
     Simulator.h \
@@ -203,7 +200,6 @@ HEADERS += \
     ../lib/TuningValue.h \
     ../lib/XmlHelper.h \
     ../lib/HostAddressPort.h \
-    ../Proto/network.pb.h \
     SimAfb.h \
     SimLogicModule.h \
     SimCommandProcessor.h \
@@ -229,13 +225,9 @@ HEADERS += \
 
 #protobuf
 #
-win32 {
-    LIBS += -L$$DESTDIR -lprotobuf
-    INCLUDEPATH += ./../Protobuf
-}
-unix {
-    LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
+
 
 DISTFILES += \
     Scripts/LM1_SR01_SIM.ts \

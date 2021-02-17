@@ -34,6 +34,11 @@ unix {
 # /DESTDIR
 #
 
+# Add curent dir to a list of library directory paths
+#
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+
 SOURCES += main.cpp \
     ../lib/DomXmlHelper.cpp
 
@@ -75,11 +80,7 @@ DEPENDPATH += ../VFrame30
 
 #protobuf
 #
-win32 {
-    LIBS += -L$$DESTDIR -lprotobuf
-	INCLUDEPATH += ./../Protobuf
-}
-unix {
-    LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
+
 
