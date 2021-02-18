@@ -263,7 +263,7 @@ void MetrologyConnectionItemDialog::createInterface()
 	resize(static_cast<int>(screen.width() * 0.2), static_cast<int>(screen.height() * 0.04));
 	move(screen.center() - rect().center());
 
-	if (m_metrologyConnection.crc().result() == 0xFFFFFFFFFFFFFFFF)
+	if (m_metrologyConnection == Metrology::Connection())
 	{
 		setWindowIcon(QIcon(":/icons/Add.png"));
 		setWindowTitle(tr("Create connection"));
@@ -655,7 +655,6 @@ void MetrologyConnectionItemDialog::onOk()
 
 	m_metrologyConnection.setSignal(Metrology::ConnectionIoType::Source, pInSignal);
 	m_metrologyConnection.setSignal(Metrology::ConnectionIoType::Destination, pOutSignal);
-	m_metrologyConnection.createCrc();
 
 	accept();
 }
@@ -1143,7 +1142,7 @@ void MetrologyConnectionDialog::exportConnections()
 		return;
 	}
 
-	bool result = m_connectionBase.exportToFile(fileName);
+	bool result = m_connectionBase.exportConnectionsToFile(fileName);
 	if (result == false)
 	{
 		QMessageBox::critical(this, tr("Error"), tr("Failed to export!"));
@@ -1206,8 +1205,6 @@ void MetrologyConnectionDialog::importConnections()
 
 		// append
 		//
-		connection.createCrc();
-
 		if (m_connectionBase.findConnectionIndex(connection) != -1)
 		{
 			continue;

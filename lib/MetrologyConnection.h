@@ -94,9 +94,6 @@ namespace Metrology
 
 		//
 		//
-		Crc64 createCrc();
-		Crc64 crc() const { return m_crc; }
-
 		QString strID() const;
 
 		//
@@ -123,19 +120,27 @@ namespace Metrology
 		const VcsItemAction& action() const { return m_action; }
 		void setAction(const VcsItemAction& action) { m_action = action; }
 
+		//
+		//
+		int restoreID() const { return m_restoreID; }
+		void setRestoreID(int restoreID) { m_restoreID = restoreID; }	// will be update on check in during save
+
 		// serialize for Build
 		//
 		bool readFromXml(XmlReadHelper& xml);
 		void writeToXml(XmlWriteHelper& xml);
 
-	private:
+		//
+		//
+		bool operator == (const Connection& connection) const;
 
-		Crc64 m_crc;
+	private:
 
 		ConnectionType m_type = ConnectionType::NoConnectionType;
 		ConnectionSignal m_connectionSignal[ConnectionIoTypeCount];
 
 		VcsItemAction m_action;
+		int m_restoreID = -1;
 	};
 
 	// ==============================================================================================
@@ -194,6 +199,11 @@ namespace Metrology
 
 		//
 		//
+		void updateRestoreIDs();				// will be update all resotoreID  on check in during save connection
+		int restoreConnection(int restoreID);	// restore connection from last check in, return index of restore connection
+
+		//
+		//
 		void sort();
 
 		int findConnectionIndex(const Connection& connection) const;
@@ -202,10 +212,12 @@ namespace Metrology
 
 		QVector<Metrology::Signal*> destinationSignals(const QString& sourceAppSignalID, ConnectionType connectionType) const;
 
+		// CSV-data
 		//
-		//
-		QString getCSVdata();
-		bool exportToFile(const QString& fileName);
+		QByteArray csvDataFromConnections();
+		QVector<Connection> connectionsFromCsvData(const QByteArray& data) const;
+
+		bool exportConnectionsToFile(const QString& fileName);
 
 		//
 		//
@@ -215,9 +227,6 @@ namespace Metrology
 
 		mutable QMutex m_connectionMutex;
 		QVector<Connection> m_connectionList;
-
-		QHash<quint64, int> m_connectionCrcList;
-		void updateCrcList();
 
 		SignalSetProvider* m_signalSetProvider = nullptr;
 

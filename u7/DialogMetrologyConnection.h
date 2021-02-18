@@ -177,6 +177,7 @@ private:
 	QAction* m_pCreateAction = nullptr;
 	QAction* m_pRemoveAction = nullptr;
 	QAction* m_pUnRemoveAction = nullptr;
+	QAction* m_pRestoreAction = nullptr;
 	QAction* m_pCheckInAction = nullptr;
 	QAction* m_pCopyAction = nullptr;
 	QAction* m_pExportAction = nullptr;
@@ -227,6 +228,7 @@ private slots:
 	void connectionChanged();
 	void removeConnection();
 	void unremoveConnection();
+	void restoreConnection();
 	void checkinConnection();
 	void exportConnections();
 	void importConnections();
