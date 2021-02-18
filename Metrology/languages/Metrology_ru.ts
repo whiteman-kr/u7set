@@ -1850,54 +1850,62 @@
     </message>
 </context>
 <context>
-    <name>Calibrator.h</name>
+    <name>Calibrator</name>
     <message>
-        <location filename="../Calibrator.h" line="36"/>
+        <location filename="../Calibrator.cpp" line="1513"/>
+        <location filename="../Calibrator.cpp" line="1530"/>
+        <location filename="../Calibrator.cpp" line="1546"/>
+        <location filename="../Calibrator.cpp" line="1568"/>
+        <source>Unknown</source>
+        <translation>Не определено</translation>
+    </message>
+    <message>
+        <location filename="../Calibrator.cpp" line="1542"/>
         <source>Measure</source>
         <translation>Измерение</translation>
     </message>
     <message>
-        <location filename="../Calibrator.h" line="37"/>
+        <location filename="../Calibrator.cpp" line="1543"/>
         <source>Source</source>
         <translation>Источник</translation>
     </message>
     <message>
-        <location filename="../Calibrator.h" line="50"/>
+        <location filename="../Calibrator.cpp" line="1558"/>
         <source>mV</source>
         <translation>мВ</translation>
     </message>
     <message>
-        <location filename="../Calibrator.h" line="51"/>
+        <location filename="../Calibrator.cpp" line="1559"/>
         <source>mA</source>
         <translation>мА</translation>
     </message>
     <message>
-        <location filename="../Calibrator.h" line="55"/>
-        <source>Hz</source>
-        <translation>Гц</translation>
-    </message>
-    <message>
-        <location filename="../Calibrator.h" line="52"/>
+        <location filename="../Calibrator.cpp" line="1560"/>
         <source>μA</source>
         <translation>μA</translation>
     </message>
     <message>
-        <location filename="../Calibrator.h" line="53"/>
+        <location filename="../Calibrator.cpp" line="1561"/>
         <source>nA</source>
         <translation>нА</translation>
     </message>
     <message>
-        <location filename="../Calibrator.h" line="54"/>
+        <location filename="../Calibrator.cpp" line="1562"/>
         <source>V</source>
         <translation>В</translation>
     </message>
     <message>
-        <location filename="../Calibrator.h" line="56"/>
+        <location filename="../Calibrator.cpp" line="1563"/>
+        <source>Hz</source>
+        <translation>Гц</translation>
+    </message>
+    <message>
+        <location filename="../Calibrator.cpp" line="1564"/>
         <source>Ohm (Low)</source>
         <translation>Ом (low)</translation>
     </message>
     <message>
-        <location filename="../Calibrator.h" line="57"/>
+        <location filename="../Calibrator.cpp" line="1565"/>
         <source>Ohm (High)</source>
         <translation>Ом (High)</translation>
     </message>
@@ -7294,7 +7302,7 @@ For example, type of connection: &quot;Input&quot; -&gt; &quot;%2&quot;.
 To create a new connection between signals, select &quot;View&quot;-&gt;&quot;Metrology connections...&quot;
 
 Do you want to create new connection now?</source>
-        <translation type="unfinished">Сигнал %1 это &quot;%2&quot; сигнал.
+        <translation>Сигнал %1 это &quot;%2&quot; сигнал.
 Для того чтобы произвести измерение ТХ этого сигнала, необходимо создать соединение со входным сигналом.
 Например, тип соединения: &quot;Входной&quot; -&gt; &quot;%2&quot;
 

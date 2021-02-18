@@ -560,9 +560,9 @@ void CalibratorBase::onSettings(int row, int)
 
 		QComboBox* typeCombo = new QComboBox;
 
-		for (int t = 0; t < CALIBRATOR_TYPE_COUNT; t ++)
+		for (int t = 0; t < CalibratorTypeCount; t ++)
 		{
-			typeCombo->addItem(CalibratorType[t]);
+			typeCombo->addItem(CalibratorTypeCaption(t));
 		}
 		typeCombo->setCurrentIndex(calibrator->type());
 
@@ -608,7 +608,7 @@ void CalibratorBase::onSettings(int row, int)
 	}
 
 	int type = typeCombo->currentIndex();
-	if (type < 0 || type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(type) == true)
 	{
 		return;
 	}

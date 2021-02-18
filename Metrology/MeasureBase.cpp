@@ -51,7 +51,7 @@ void Measurement::clear()
 
 	m_location.clear();
 
-	m_calibratorPrecision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
+	m_calibratorPrecision = DefaultElectricUnitPrecesion;
 
 	for(int t = 0; t < MeasureLimitTypeCount; t++)
 	{
@@ -147,7 +147,7 @@ double Measurement::nominal(int limitType) const
 
 QString Measurement::nominalStr(int limitType) const
 {
-	int precision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
+	int precision = DefaultElectricUnitPrecesion;
 
 	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
@@ -206,7 +206,7 @@ QString Measurement::measureStr(int limitType) const
 		}
 	}
 
-	int precision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
+	int precision = DefaultElectricUnitPrecesion;
 
 	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
@@ -522,7 +522,7 @@ QString Measurement::errorStr() const
 		}
 	}
 
-	int precision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
+	int precision = DefaultElectricUnitPrecesion;
 
 	int limitType = theOptions.linearity().limitType();
 	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
@@ -726,7 +726,7 @@ void Measurement::setCalibratorData(const IoSignalParam &ioParam)
 		return;
 	}
 
-	int precision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
+	int precision = DefaultElectricUnitPrecesion;
 
 	switch (connectionType)
 	{
@@ -1713,7 +1713,7 @@ QString LinearityMeasurement::measureItemStr(int limitType, int index) const
 		}
 	}
 
-	int precision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
+	int precision = DefaultElectricUnitPrecesion;
 
 	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{

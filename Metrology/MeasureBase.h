@@ -256,7 +256,7 @@ private:
 
 	Metrology::SignalLocation m_location;
 
-	int				m_calibratorPrecision = DEFAULT_ECLECTRIC_UNIT_PRECESION;	// precision of electric range of calibrator
+	int				m_calibratorPrecision = DefaultElectricUnitPrecesion;	// precision of electric range of calibrator
 
 	double			m_nominal[MeasureLimitTypeCount];
 	double			m_measure[MeasureLimitTypeCount];

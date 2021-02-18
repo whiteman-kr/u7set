@@ -253,7 +253,7 @@ bool MeasureThread::setCalibratorUnit()
 			}
 
 			if (prepareCalibrator(pCalibratorManager,
-								  CALIBRATOR_MODE_SOURCE,
+								  CalibratorMode::Source,
 								  inParam.electricUnitID(),
 								  inParam.electricHighLimit()) == false)
 			{
@@ -276,7 +276,7 @@ bool MeasureThread::setCalibratorUnit()
 			}
 
 			if (prepareCalibrator(pCalibratorManager,
-								  CALIBRATOR_MODE_MEASURE,
+								  CalibratorMode::Measure,
 								  outParam.electricUnitID(),
 								  outParam.electricHighLimit()) == false)
 			{
@@ -302,7 +302,7 @@ bool MeasureThread::setCalibratorUnit()
 			}
 
 			if (prepareCalibrator(pCalibratorManager,
-								  CALIBRATOR_MODE_MEASURE,
+								  CalibratorMode::Measure,
 								  outParam.electricUnitID(),
 								  outParam.electricHighLimit()) == false)
 			{
@@ -320,7 +320,7 @@ bool MeasureThread::setCalibratorUnit()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit)
+bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, CalibratorMode calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit)
 {
 	if (pCalibratorManager == nullptr)
 	{
@@ -333,32 +333,32 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
 		return false;
 	}
 
-	if (calibratorMode < 0 || calibratorMode >= CALIBRATOR_MODE_COUNT)
+	if (ERR_CALIBRATOR_MODE(calibratorMode) == true)
 	{
 		assert(0);
 		return false;
 	}
 
-	int calibratorUnit = CALIBRATOR_UNIT_UNDEFINED;
+	CalibratorUnit calibratorUnit = CalibratorUnit::NoUnit;
 
 	switch(signalUnit)
 	{
-		case E::ElectricUnit::mA:	calibratorUnit = CALIBRATOR_UNIT_MA;	break;
-		case E::ElectricUnit::uA:	calibratorUnit = CALIBRATOR_UNIT_UA;	break;
-		case E::ElectricUnit::mV:	calibratorUnit = CALIBRATOR_UNIT_MV;	break;
-		case E::ElectricUnit::V:	calibratorUnit = CALIBRATOR_UNIT_V;		break;
-		case E::ElectricUnit::Hz:	calibratorUnit = CALIBRATOR_UNIT_HZ;	break;
+		case E::ElectricUnit::mA:	calibratorUnit = CalibratorUnit::mA;	break;
+		case E::ElectricUnit::uA:	calibratorUnit = CalibratorUnit::uA;	break;
+		case E::ElectricUnit::mV:	calibratorUnit = CalibratorUnit::mV;	break;
+		case E::ElectricUnit::V:	calibratorUnit = CalibratorUnit::V;		break;
+		case E::ElectricUnit::Hz:	calibratorUnit = CalibratorUnit::Hz;	break;
 		case E::ElectricUnit::Ohm:
 			{
 				// Minimal range for calibrators TRX-II and Calys75 this is 400 Ohm
 				//
-				if (electricHighLimit <= CALIBRATOR_MINIMAL_RANGE_OHM)
+				if (electricHighLimit <= CalibratorMinimalRangeOhm)
 				{
-					calibratorUnit = CALIBRATOR_UNIT_LOW_OHM;
+					calibratorUnit = CalibratorUnit::OhmLow;
 				}
 				else
 				{
-					calibratorUnit = CALIBRATOR_UNIT_HIGH_OHM;
+					calibratorUnit = CalibratorUnit::OhmHigh;
 				}
 			}
 
@@ -368,7 +368,7 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
 			assert(0);
 	}
 
-	if (calibratorUnit < 0 || calibratorUnit >= CALIBRATOR_UNIT_COUNT)
+	if (ERR_CALIBRATOR_UNIT(calibratorUnit) == true)
 	{
 		assert(0);
 		return false;
@@ -380,7 +380,7 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
 		emit msgBox(QMessageBox::Critical,	tr("Calibrator: %1 - %2 can not set unit \"%3\".").
 											arg(pCalibrator->typeStr()).
 											arg(pCalibrator->portName()).
-											arg(qApp->translate("Calibrator.h", CalibratorUnit[calibratorUnit])));
+											arg(qApp->translate("Calibrator", CalibratorUnitCaption(calibratorUnit).toUtf8())));
 		return false;
 	}
 
@@ -392,9 +392,9 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
 
 	switch (pCalibrator->type())
 	{
-		case CALIBRATOR_TYPE_TRXII:		QThread::msleep(1000);	break;
-		case CALIBRATOR_TYPE_CALYS75:	QThread::msleep(500);	break;
-		case CALIBRATOR_TYPE_KTHL6221:	QThread::msleep(500);	break;
+		case CalibratorType::TrxII:		QThread::msleep(1000);	break;
+		case CalibratorType::Calys75:	QThread::msleep(500);	break;
+		case CalibratorType::Ktl6221:	QThread::msleep(500);	break;
 		default: assert(0); break;
 	}
 
@@ -416,14 +416,14 @@ void MeasureThread::polarityTest(double electricVal, IoSignalParam& ioParam)
 		return;
 	}
 
-	if (pCalibrator->type() == CALIBRATOR_TYPE_KTHL6221)
+	if (pCalibrator->type() == CalibratorType::Ktl6221)
 	{
 		return;
 	}
 
 	double negativeLimit = 0;
 
-	if (pCalibrator->mode() == CALIBRATOR_MODE_SOURCE && pCalibrator->sourceUnit() == CALIBRATOR_UNIT_MV)
+	if (pCalibrator->mode() == CalibratorMode::Source && pCalibrator->sourceUnit() == CalibratorUnit::mV)
 	{
 		negativeLimit = -10;
 	}

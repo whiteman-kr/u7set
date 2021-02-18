@@ -9,7 +9,7 @@
 
 bool CalibratorParam::isValid() const
 {
-	if (type < 0 || type > CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(type) == true)
 	{
 		return false;
 	}
@@ -39,12 +39,12 @@ bool CalibratorParam::isValid() const
 
 bool CalibratorLimit::isValid() const
 {
-	if (type < 0 || type > CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(type) == true)
 	{
 		return false;
 	}
 
-	if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
+	if (ERR_CALIBRATOR_MODE(mode) == true)
 	{
 		return false;
 	}
@@ -54,7 +54,7 @@ bool CalibratorLimit::isValid() const
 		return false;
 	}
 
-	if (unit < 0 || unit >= CALIBRATOR_UNIT_COUNT)
+	if (ERR_CALIBRATOR_UNIT(unit) == true)
 	{
 		return false;
 	}
@@ -104,9 +104,9 @@ void Calibrator::clear()
 
 	m_timeout = 0;
 
-	m_mode = CALIBRATOR_MODE_UNDEFINED;
-	m_measureUnit = CALIBRATOR_UNIT_UNDEFINED;
-	m_sourceUnit = CALIBRATOR_UNIT_UNDEFINED;
+	m_mode = CalibratorMode::NoMode;
+	m_measureUnit = CalibratorUnit::NoUnit;
+	m_sourceUnit = CalibratorUnit::NoUnit;
 
 	m_measureValue = 0;
 	m_sourceValue = 0;
@@ -151,7 +151,7 @@ bool Calibrator::open()
 		return false;
 	}
 
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -184,7 +184,7 @@ bool Calibrator::open()
 
 bool Calibrator::openPort()
 {
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -287,11 +287,11 @@ bool Calibrator::getIDN()
 		return false;
 	}
 
-	for(int type = 0; type < CALIBRATOR_TYPE_COUNT; type++)
+	for(int type = 0; type < CalibratorTypeCount; type++)
 	{
-		if (m_caption == CalibratorIdnCaption[type])
+		if (m_caption == CalibratorIdnCaption(type))
 		{
-			m_type = type;
+			m_type = static_cast<CalibratorType>(type);
 			break;
 		}
 	}
@@ -323,14 +323,14 @@ bool Calibrator::getIDN()
 
 CalibratorParam Calibrator::getParam(int type)
 {
-	if (type < 0 || type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(type) == true)
 	{
 		return CalibratorParam();
 	}
 
 	CalibratorParam param;
 
-	for (int t = 0; t < CALIBRATOR_TYPE_COUNT; t++)
+	for (int t = 0; t < CalibratorTypeCount; t++)
 	{
 		const CalibratorParam& cp = CalibratorParams[t];
 		if (cp.isValid() == false)
@@ -353,7 +353,7 @@ CalibratorParam Calibrator::getParam(int type)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorLimit Calibrator::getLimit(int mode, int unit)
+CalibratorLimit Calibrator::getLimit(CalibratorMode mode, CalibratorUnit unit)
 {
 	if (m_port.isOpen() == false)
 	{
@@ -367,7 +367,7 @@ CalibratorLimit Calibrator::getLimit(int mode, int unit)
 		return CalibratorLimit();
 	}
 
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -379,12 +379,12 @@ CalibratorLimit Calibrator::getLimit(int mode, int unit)
 		return CalibratorLimit();
 	}
 
-	if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
+	if (ERR_CALIBRATOR_MODE(mode) == true)
 	{
 		return CalibratorLimit();
 	}
 
-	if (unit < 0 || unit >= CALIBRATOR_UNIT_COUNT)
+	if (ERR_CALIBRATOR_UNIT(unit) == true)
 	{
 		return CalibratorLimit();
 	}
@@ -438,7 +438,7 @@ CalibratorLimit Calibrator::currentMeasureLimit()
 		return CalibratorLimit();
 	}
 
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -450,12 +450,12 @@ CalibratorLimit Calibrator::currentMeasureLimit()
 		return CalibratorLimit();
 	}
 
-	if (m_measureUnit < 0 || m_measureUnit >= CALIBRATOR_UNIT_COUNT)
+	if (ERR_CALIBRATOR_UNIT(m_measureUnit) == true)
 	{
 		return CalibratorLimit();
 	}
 
-	return getLimit(CALIBRATOR_MODE_MEASURE, m_measureUnit);
+	return getLimit(CalibratorMode::Measure, m_measureUnit);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -474,7 +474,7 @@ CalibratorLimit Calibrator::currentSourceLimit()
 		return CalibratorLimit();
 	}
 
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -486,12 +486,12 @@ CalibratorLimit Calibrator::currentSourceLimit()
 		return CalibratorLimit();
 	}
 
-	if (m_sourceUnit < 0 || m_sourceUnit >= CALIBRATOR_UNIT_COUNT)
+	if (ERR_CALIBRATOR_UNIT(m_sourceUnit) == true)
 	{
 		return CalibratorLimit();
 	}
 
-	return getLimit(CALIBRATOR_MODE_SOURCE, m_sourceUnit);
+	return getLimit(CalibratorMode::Source, m_sourceUnit);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -510,7 +510,7 @@ bool Calibrator::send(QString cmd)
 		return false;
 	}
 
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -584,7 +584,7 @@ bool Calibrator::recv()
 		return false;
 	}
 
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -664,12 +664,12 @@ bool Calibrator::recv()
 
 QString Calibrator::typeStr() const
 {
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		return QString ();
 	}
 
-	return CalibratorType[ m_type ];
+	return CalibratorTypeCaption(m_type);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -688,7 +688,7 @@ bool Calibrator::setUnit(int mode, int unit)
 		return false;
 	}
 
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -700,7 +700,7 @@ bool Calibrator::setUnit(int mode, int unit)
 		return false;
 	}
 
-	if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
+	if (ERR_CALIBRATOR_MODE(mode) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -711,7 +711,7 @@ bool Calibrator::setUnit(int mode, int unit)
 		return false;
 	}
 
-	if (unit < 0 || unit >= CALIBRATOR_UNIT_COUNT)
+	if (ERR_CALIBRATOR_UNIT(unit) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -723,7 +723,7 @@ bool Calibrator::setUnit(int mode, int unit)
 		return false;
 	}
 
-	CalibratorLimit limit = getLimit(mode, unit);
+	CalibratorLimit limit = getLimit(static_cast<CalibratorMode>(mode), static_cast<CalibratorUnit>(unit));
 	if (limit.isValid() == false)
 	{
 		m_lastError = QString("Calibrator error! "
@@ -763,26 +763,26 @@ bool Calibrator::setUnit(int mode, int unit)
 
 	switch(mode)
 	{
-		case CALIBRATOR_MODE_MEASURE:
+		case CalibratorMode::Measure:
 
-			m_mode = mode;
-			m_measureUnit = unit;
+			m_mode = static_cast<CalibratorMode>(mode);
+			m_measureUnit = static_cast<CalibratorUnit>(unit);
 			break;
 
-		case CALIBRATOR_MODE_SOURCE:
+		case CalibratorMode::Source:
 
-			m_mode = mode;
-			m_sourceUnit = unit;
+			m_mode = static_cast<CalibratorMode>(mode);
+			m_sourceUnit = static_cast<CalibratorUnit>(unit);
 			break;
 
 		default:
 
 			assert(false);
-			m_mode = CALIBRATOR_MODE_UNDEFINED;
+			m_mode = CalibratorMode::NoMode;
 			return false;
 	}
 
-	//qDebug("Function: %s, Serial port: " + m_portName.toLocal8Bit() + ", Mode: %s, Unit: %s", __FUNCTION__, CalibratorMode[mode], CalibratorUnit[unit]);
+	//qDebug("Function: %s, Serial port: " + m_portName.toLocal8Bit() + ", Mode: %s, Unit: %s", __FUNCTION__, CalibratorModeCaption(mode), CalibratorUnitCaption(unit));
 
 	emit unitIsChanged();
 
@@ -805,7 +805,7 @@ bool Calibrator::setValue(double value)
 		return false;
 	}
 
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -817,7 +817,7 @@ bool Calibrator::setValue(double value)
 		return false;
 	}
 
-	if (m_mode < 0 || m_mode >= CALIBRATOR_MODE_COUNT)
+	if (ERR_CALIBRATOR_MODE(m_mode) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -829,7 +829,7 @@ bool Calibrator::setValue(double value)
 		return false;
 	}
 
-	if (m_sourceUnit < 0 || m_sourceUnit >= CALIBRATOR_UNIT_COUNT)
+	if (ERR_CALIBRATOR_UNIT(m_sourceUnit) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -864,17 +864,17 @@ bool Calibrator::setValue(double value)
 
 	switch(m_type)
 	{
-		case CALIBRATOR_TYPE_TRXII:
+		case CalibratorType::TrxII:
 			{
 				cmdSetValue = QString("%1%2").arg(param.cmdSetValue).arg(QString::number(value, 'f', limit.precesion));
 			}
 			break;
 
-		case CALIBRATOR_TYPE_CALYS75:
+		case CalibratorType::Calys75:
 			{
 				switch (m_sourceUnit)
 				{
-					case CALIBRATOR_UNIT_HZ:
+					case CalibratorUnit::Hz:
 						cmdSetValue = QString("%1%2").arg(param.cmdSetValue).arg(QString::number(value/1000, 'f', 4));
 						break;
 
@@ -885,15 +885,15 @@ bool Calibrator::setValue(double value)
 			}
 			break;
 
-		case CALIBRATOR_TYPE_KTHL6221:
+		case CalibratorType::Ktl6221:
 			{
 				int decimal = 0;
 
 				switch (m_sourceUnit)
 				{
-					case CALIBRATOR_UNIT_MA:	decimal = 3;	break;
-					case CALIBRATOR_UNIT_UA:	decimal = 6;	break;
-					case CALIBRATOR_UNIT_NA:	decimal = 9;	break;
+					case CalibratorUnit::mA:	decimal = 3;	break;
+					case CalibratorUnit::uA:	decimal = 6;	break;
+					case CalibratorUnit::nA:	decimal = 9;	break;
 				}
 
 				if (decimal == 0)
@@ -955,7 +955,7 @@ bool Calibrator::stepDown()
 		return false;
 	}
 
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -967,7 +967,7 @@ bool Calibrator::stepDown()
 		return false;
 	}
 
-	if (m_mode < 0 || m_mode >= CALIBRATOR_MODE_COUNT)
+	if (ERR_CALIBRATOR_MODE(m_mode) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -979,7 +979,7 @@ bool Calibrator::stepDown()
 		return false;
 	}
 
-	if (m_sourceUnit < 0 || m_sourceUnit >= CALIBRATOR_UNIT_COUNT)
+	if (ERR_CALIBRATOR_UNIT(m_sourceUnit) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -1010,20 +1010,20 @@ bool Calibrator::stepDown()
 
 	switch (m_type)
 	{
-		case CALIBRATOR_TYPE_TRXII:
-		case CALIBRATOR_TYPE_CALYS75:
+		case CalibratorType::TrxII:
+		case CalibratorType::Calys75:
 
 			switch(m_sourceUnit)
 			{
-				case CALIBRATOR_UNIT_HZ:		m_sourceValue -= 1;		break;
-				case CALIBRATOR_UNIT_LOW_OHM:	m_sourceValue -= 0.01;	break;
-				case CALIBRATOR_UNIT_HIGH_OHM:	m_sourceValue -= 0.1;	break;
+				case CalibratorUnit::Hz:		m_sourceValue -= 5;		break;
+				case CalibratorUnit::OhmLow:	m_sourceValue -= 0.01;	break;
+				case CalibratorUnit::OhmHigh:	m_sourceValue -= 0.1;	break;
 				default:						m_sourceValue -= 0.001;	break;
 			}
 
 			break;
 
-		case CALIBRATOR_TYPE_KTHL6221:
+		case CalibratorType::Ktl6221:
 
 			if (m_sourceValue > KTHL6221_LIMIT_FOR_SWITCH)
 			{
@@ -1060,7 +1060,7 @@ bool Calibrator::stepUp()
 		return false;
 	}
 
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -1072,7 +1072,7 @@ bool Calibrator::stepUp()
 		return false;
 	}
 
-	if (m_mode < 0 || m_mode >= CALIBRATOR_MODE_COUNT)
+	if (ERR_CALIBRATOR_MODE(m_mode) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -1084,7 +1084,7 @@ bool Calibrator::stepUp()
 		return false;
 	}
 
-	if (m_sourceUnit < 0 || m_sourceUnit >= CALIBRATOR_UNIT_COUNT)
+	if (ERR_CALIBRATOR_UNIT(m_sourceUnit) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -1114,20 +1114,20 @@ bool Calibrator::stepUp()
 
 	switch (m_type)
 	{
-		case CALIBRATOR_TYPE_TRXII:
-		case CALIBRATOR_TYPE_CALYS75:
+		case CalibratorType::TrxII:
+		case CalibratorType::Calys75:
 
 			switch(m_sourceUnit)
 			{
-				case CALIBRATOR_UNIT_HZ:		m_sourceValue += 1;		break;
-				case CALIBRATOR_UNIT_LOW_OHM:	m_sourceValue += 0.01;	break;
-				case CALIBRATOR_UNIT_HIGH_OHM:	m_sourceValue += 0.1;	break;
+				case CalibratorUnit::Hz:		m_sourceValue += 5;		break;
+				case CalibratorUnit::OhmLow:	m_sourceValue += 0.01;	break;
+				case CalibratorUnit::OhmHigh:	m_sourceValue += 0.1;	break;
 				default:						m_sourceValue += 0.001;	break;
 			}
 
 			break;
 
-		case CALIBRATOR_TYPE_KTHL6221:
+		case CalibratorType::Ktl6221:
 
 			if (m_sourceValue >= KTHL6221_LIMIT_FOR_SWITCH)
 			{
@@ -1164,7 +1164,7 @@ double Calibrator::getValue()
 		return 0;
 	}
 
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -1306,7 +1306,7 @@ bool Calibrator::reset()
 
 bool Calibrator::setRemoteControl(bool enable)
 {
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -1322,9 +1322,9 @@ bool Calibrator::setRemoteControl(bool enable)
 
 	switch (m_type)
 	{
-		case CALIBRATOR_TYPE_TRXII:		return true;
-		case CALIBRATOR_TYPE_CALYS75:	cmd = enable == true ? CALYS75_REMOTE_CONTROL : CALYS75_MANUAL_CONTROL;	break;
-		case CALIBRATOR_TYPE_KTHL6221:	cmd = enable == true ? KTHL6221_OUTPUT_ON : cmd = KTHL6221_OUTPUT_OFF;	break;
+		case CalibratorType::TrxII:		return true;
+		case CalibratorType::Calys75:	cmd = enable == true ? CALYS75_REMOTE_CONTROL : CALYS75_MANUAL_CONTROL;	break;
+		case CalibratorType::Ktl6221:	cmd = enable == true ? KTHL6221_OUTPUT_ON : cmd = KTHL6221_OUTPUT_OFF;	break;
 		default:						assert(0);																break;
 	}
 
@@ -1353,7 +1353,7 @@ bool Calibrator::setRemoteControl(bool enable)
 
 void Calibrator::parseResponse()
 {
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
@@ -1389,7 +1389,7 @@ void Calibrator::parseResponse()
 	//
 	switch(m_type)
 	{
-		case CALIBRATOR_TYPE_TRXII:
+		case CalibratorType::TrxII:
 
 			value = m_lastResponse;
 			value.remove(' ');
@@ -1408,7 +1408,7 @@ void Calibrator::parseResponse()
 
 			break;
 
-		case CALIBRATOR_TYPE_CALYS75:
+		case CalibratorType::Calys75:
 
 			value = m_lastResponse;
 
@@ -1452,12 +1452,12 @@ void Calibrator::parseResponse()
 
 			switch (m_sourceUnit)
 			{
-				case CALIBRATOR_UNIT_HZ:	m_sourceValue *= 1000; break;
+				case CalibratorUnit::Hz:	m_sourceValue *= 1000; break;
 			}
 
 			break;
 
-		case CALIBRATOR_TYPE_KTHL6221:
+		case CalibratorType::Ktl6221:
 
 			value = m_lastResponse;
 			value.remove(" \n\r");
@@ -1467,9 +1467,9 @@ void Calibrator::parseResponse()
 
 			switch (m_sourceUnit)
 			{
-				case CALIBRATOR_UNIT_MA:	m_sourceValue *= 1e+3;		break;
-				case CALIBRATOR_UNIT_UA:	m_sourceValue *= 1e+6;		break;
-				case CALIBRATOR_UNIT_NA:	m_sourceValue *= 1e+9;		break;
+				case CalibratorUnit::mA:	m_sourceValue *= 1e+3;		break;
+				case CalibratorUnit::uA:	m_sourceValue *= 1e+6;		break;
+				case CalibratorUnit::nA:	m_sourceValue *= 1e+9;		break;
 			}
 
 			break;
@@ -1495,6 +1495,84 @@ void Calibrator::close()
 	setConnected(false);
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+QString CalibratorTypeCaption(int сalibratorType)
+{
+	QString caption;
+
+	switch (сalibratorType)
+	{
+		case CalibratorType::TrxII:		caption = "TRX-II";			break;
+		case CalibratorType::Calys75:	caption = "CALYS-75";		break;
+		case CalibratorType::Ktl6221:	caption = "KEITHLEY-6221";	break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("Calibrator", "Unknown");
+	}
+
+	return caption;
+};
+
+QString CalibratorIdnCaption(int сalibratorType)
+{
+	QString caption;
+
+	switch (сalibratorType)
+	{
+		case CalibratorType::TrxII:		caption = "TRX-IIR";		break;
+		case CalibratorType::Calys75:	caption = "Calys 75";		break;
+		case CalibratorType::Ktl6221:	caption = "MODEL 6221";		break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("Calibrator", "Unknown");
+	}
+
+	return caption;
+};
+
+QString CalibratorModeCaption(int сalibratorMode)
+{
+	QString caption;
+
+	switch (сalibratorMode)
+	{
+		case CalibratorMode::Measure:	caption = QT_TRANSLATE_NOOP("Calibrator", "Measure");	break;
+		case CalibratorMode::Source:	caption = QT_TRANSLATE_NOOP("Calibrator", "Source");	break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("Calibrator", "Unknown");
+	}
+
+	return caption;
+};
+
+QString CalibratorUnitCaption(int сalibratorUnit)
+{
+	QString caption;
+
+	switch (сalibratorUnit)
+	{
+		case CalibratorUnit::mV:		caption = QT_TRANSLATE_NOOP("Calibrator", "mV");			break;
+		case CalibratorUnit::mA:		caption = QT_TRANSLATE_NOOP("Calibrator", "mA");			break;
+		case CalibratorUnit::uA:		caption = QT_TRANSLATE_NOOP("Calibrator", "μA");			break;
+		case CalibratorUnit::nA:		caption = QT_TRANSLATE_NOOP("Calibrator", "nA");			break;
+		case CalibratorUnit::V:			caption = QT_TRANSLATE_NOOP("Calibrator", "V");				break;
+		case CalibratorUnit::Hz:		caption = QT_TRANSLATE_NOOP("Calibrator", "Hz");			break;
+		case CalibratorUnit::OhmLow:	caption = QT_TRANSLATE_NOOP("Calibrator", "Ohm (Low)");		break;
+		case CalibratorUnit::OhmHigh:	caption = QT_TRANSLATE_NOOP("Calibrator", "Ohm (High)");	break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("Calibrator", "Unknown");
+	}
+
+	return caption;
+};
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
 

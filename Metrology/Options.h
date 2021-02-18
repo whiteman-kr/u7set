@@ -49,7 +49,7 @@ public:
 private:
 
 	QString				m_port;
-	int					m_type = CALIBRATOR_TYPE_CALYS75;
+	int					m_type = CalibratorType::Calys75;
 };
 
 // ----------------------------------------------------------------------------------------------

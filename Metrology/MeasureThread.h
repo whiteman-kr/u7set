@@ -110,7 +110,7 @@ private:
 	bool					calibratorIsValid(CalibratorManager* pCalibratorManager);
 	int						getConnectedCalibrators();
 	bool					setCalibratorUnit();
-	bool					prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
+	bool					prepareCalibrator(CalibratorManager* pCalibratorManager, CalibratorMode calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
 	void					polarityTest(double electricVal, IoSignalParam& ioParam);
 
 	// Options

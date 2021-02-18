@@ -335,7 +335,7 @@ void CalibratorManager::enableInterface(bool enable)
 		return;
 	}
 
-	if (m_pCalibrator->mode() != CALIBRATOR_MODE_SOURCE || m_pCalibrator->sourceUnit() == CALIBRATOR_UNIT_UNDEFINED)
+	if (m_pCalibrator->mode() != CalibratorMode::Source || m_pCalibrator->sourceUnit() == CalibratorUnit::NoUnit)
 	{
 		m_pSetValueButton->setEnabled(false);
 		m_pStepDownButton->setEnabled(false);
@@ -348,11 +348,11 @@ void CalibratorManager::enableInterface(bool enable)
 
 	switch (m_pCalibrator->type())
 	{
-		case CALIBRATOR_TYPE_CALYS75:
+		case CalibratorType::Calys75:
 			m_pRemoteControlCheck->setText(tr("Remote control"));
 			m_pRemoteControlCheck->setVisible(true);
 			break;
-		case CALIBRATOR_TYPE_KTHL6221:
+		case CalibratorType::Ktl6221:
 			m_pRemoteControlCheck->setText(tr("Output ON/OFF"));
 			m_pRemoteControlCheck->setVisible(true);
 			break;
@@ -386,20 +386,20 @@ void CalibratorManager::updateModeList()
 			continue;
 		}
 
-		if (cl.mode < 0 || cl.mode > CALIBRATOR_MODE_COUNT)
+		if (ERR_CALIBRATOR_MODE(cl.mode) == true)
 		{
 			continue;
 		}
 
-		if (m_pModeList->findText(qApp->translate("Calibrator.h", CalibratorMode[cl.mode])) != -1)
+		if (m_pModeList->findText(qApp->translate("Calibrator", CalibratorModeCaption(cl.mode).toUtf8())) != -1)
 		{
 			continue;
 		}
 
-		m_pModeList->addItem(qApp->translate("Calibrator.h", CalibratorMode[cl.mode]), cl.mode);
+		m_pModeList->addItem(qApp->translate("Calibrator", CalibratorModeCaption(cl.mode).toUtf8()), cl.mode);
 	}
 
-	m_pModeList->setCurrentIndex(CALIBRATOR_MODE_UNDEFINED);
+	m_pModeList->setCurrentIndex(CalibratorMode::NoMode);
 
 	m_pModeList->blockSignals(false);
 }
@@ -422,7 +422,7 @@ void CalibratorManager::updateUnitList()
 	}
 
 	int mode = m_pModeList->itemData(modeIndex).toInt();
-	if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
+	if (ERR_CALIBRATOR_MODE(mode) == true)
 	{
 		return;
 	}
@@ -447,15 +447,15 @@ void CalibratorManager::updateUnitList()
 			continue;
 		}
 
-		if (m_pUnitList->findText(qApp->translate("Calibrator.h", CalibratorUnit[cl.unit])) != -1)
+		if (m_pUnitList->findText(qApp->translate("Calibrator", CalibratorUnitCaption(cl.unit).toUtf8())) != -1)
 		{
 			continue;
 		}
 
-		m_pUnitList->addItem(qApp->translate("Calibrator.h", CalibratorUnit[cl.unit]), cl.unit);
+		m_pUnitList->addItem(qApp->translate("Calibrator", CalibratorUnitCaption(cl.unit).toUtf8()), cl.unit);
 	}
 
-	m_pUnitList->setCurrentIndex(CALIBRATOR_UNIT_UNDEFINED);
+	m_pUnitList->setCurrentIndex(CalibratorUnit::NoUnit);
 
 	m_pUnitList->blockSignals(false);
 }
@@ -477,11 +477,11 @@ void CalibratorManager::updateValue()
 
 	if (measureLimit.isValid() == false)
 	{
-		measureValue = QString::number(m_pCalibrator->measureValue(), 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION);
+		measureValue = QString::number(m_pCalibrator->measureValue(), 'f', DefaultElectricUnitPrecesion);
 	}
 	else
 	{
-		measureValue = QString::number(m_pCalibrator->measureValue(), 'f', measureLimit.precesion) + " " + CalibratorUnit[measureLimit.unit];
+		measureValue = QString::number(m_pCalibrator->measureValue(), 'f', measureLimit.precesion) + " " + CalibratorUnitCaption(measureLimit.unit);
 	}
 
 	m_pMeasureEdit->setText(measureValue);
@@ -495,11 +495,11 @@ void CalibratorManager::updateValue()
 
 	if (sourceLimit.isValid() == false)
 	{
-		sourceValue = QString::number(m_pCalibrator->sourceValue(), 'f', DEFAULT_ECLECTRIC_UNIT_PRECESION);
+		sourceValue = QString::number(m_pCalibrator->sourceValue(), 'f', DefaultElectricUnitPrecesion);
 	}
 	else
 	{
-		sourceValue = QString::number(m_pCalibrator->sourceValue(), 'f', sourceLimit.precesion) + " " + CalibratorUnit[sourceLimit.unit];
+		sourceValue = QString::number(m_pCalibrator->sourceValue(), 'f', sourceLimit.precesion) + " " + CalibratorUnitCaption(sourceLimit.unit);
 	}
 
 	m_pSourceEdit->setText(sourceValue);
@@ -561,7 +561,7 @@ bool CalibratorManager::setUnit(int mode, int unit)
 		return false;
 	}
 
-	if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
+	if (ERR_CALIBRATOR_MODE(mode) == true)
 	{
 		return false;
 	}
@@ -581,7 +581,7 @@ bool CalibratorManager::setUnit(int mode, int unit)
 		}
 	}
 
-	if (unit < 0 || unit >= CALIBRATOR_UNIT_COUNT)
+	if (ERR_CALIBRATOR_UNIT(unit) == true)
 	{
 		return false;
 	}
@@ -619,7 +619,7 @@ void CalibratorManager::onSetMode(int modeIndex)
 	}
 
 	int mode = m_pModeList->itemData(modeIndex).toInt();
-	if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
+	if (ERR_CALIBRATOR_MODE(mode) == true)
 	{
 		return;
 	}
@@ -642,12 +642,12 @@ void CalibratorManager::onSetUnit(int unitIndex)
 	}
 
 	int mode = m_pModeList->itemData(modeIndex).toInt();
-	if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
+	if (ERR_CALIBRATOR_MODE(mode) == true)
 	{
 		return;
 	}
 
-	if (mode == CALIBRATOR_MODE_SOURCE)
+	if (mode == CalibratorMode::Source)
 	{
 		m_pSetValueButton->setEnabled(true);
 		m_pStepDownButton->setEnabled(true);
@@ -660,7 +660,7 @@ void CalibratorManager::onSetUnit(int unitIndex)
 	}
 
 	int unit = m_pUnitList->itemData(unitIndex).toInt();
-	if (unit < 0 || unit >= CALIBRATOR_UNIT_COUNT)
+	if (ERR_CALIBRATOR_UNIT(unit) == true)
 	{
 		return;
 	}

@@ -33,7 +33,7 @@ bool CalibratorOption::isValid() const
 		return false;
 	}
 
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		return false;
 	}
@@ -102,7 +102,7 @@ void CalibratorsOption::load()
 		QString defaultPort = QString("COM%1").arg(QString::number(c+1));
 
 		QString port = s.value(QString("%1Calibrator%2/Port").arg(CALIBRATOR_OPTIONS_KEY).arg(c), defaultPort).toString();
-		int type = s.value(QString("%1Calibrator%2/Type").arg(CALIBRATOR_OPTIONS_KEY).arg(c), CALIBRATOR_TYPE_CALYS75).toInt();
+		int type = s.value(QString("%1Calibrator%2/Type").arg(CALIBRATOR_OPTIONS_KEY).arg(c), CalibratorType::Calys75).toInt();
 
 		m_calibrator[c].setPort(port);
 		m_calibrator[c].setType(type);

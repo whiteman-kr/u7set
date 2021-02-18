@@ -8,75 +8,65 @@
 
 // ==============================================================================================
 
-const char* const CalibratorType[] =
+enum CalibratorType
 {
-				"TRX-II",
-				"CALYS-75",
-				"KEITHLEY-6221",
+	NoType	= -1,
+	TrxII	= 0,
+	Calys75	= 1,
+	Ktl6221	= 2,
 };
 
-const int		CALIBRATOR_TYPE_COUNT		= sizeof(CalibratorType)/sizeof(CalibratorType[0]);
+const int CalibratorTypeCount = 3;
 
-const int		CALIBRATOR_TYPE_UNDEFINED	= -1,
-				CALIBRATOR_TYPE_TRXII		= 0,
-				CALIBRATOR_TYPE_CALYS75		= 1,
-				CALIBRATOR_TYPE_KTHL6221	= 2;
+#define ERR_CALIBRATOR_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= CalibratorTypeCount)
 
-const char* const CalibratorIdnCaption[CALIBRATOR_TYPE_COUNT] =
-{
-				"TRX-IIR",
-				"Calys 75",
-				"MODEL 6221",
-};
+QString CalibratorTypeCaption(int сalibratorType);
+QString CalibratorIdnCaption(int сalibratorType);
 
 // ----------------------------------------------------------------------------------------------
 
-const char* const CalibratorMode[] =
+enum CalibratorMode
 {
-				QT_TRANSLATE_NOOP("Calibrator.h", "Measure"),
-				QT_TRANSLATE_NOOP("Calibrator.h", "Source"),
+	NoMode	= -1,
+	Measure	= 0,
+	Source	= 1,
 };
 
-const int		CALIBRATOR_MODE_COUNT		= sizeof(CalibratorMode)/sizeof(CalibratorMode[0]);
+const int CalibratorModeCount = 2;
 
-const int		CALIBRATOR_MODE_UNDEFINED	= -1,
-				CALIBRATOR_MODE_MEASURE		= 0,
-				CALIBRATOR_MODE_SOURCE		= 1;
+#define ERR_CALIBRATOR_MODE(mode) (static_cast<int>(mode) < 0 || static_cast<int>(mode) >= CalibratorModeCount)
+
+QString CalibratorModeCaption(int сalibratorType);
 
 // ----------------------------------------------------------------------------------------------
 
-const char* const CalibratorUnit[] =
+enum CalibratorUnit
 {
-				QT_TRANSLATE_NOOP("Calibrator.h", "mV"),
-				QT_TRANSLATE_NOOP("Calibrator.h", "mA"),
-				QT_TRANSLATE_NOOP("Calibrator.h", "μA"),
-				QT_TRANSLATE_NOOP("Calibrator.h", "nA"),
-				QT_TRANSLATE_NOOP("Calibrator.h", "V"),
-				QT_TRANSLATE_NOOP("Calibrator.h", "Hz"),
-				QT_TRANSLATE_NOOP("Calibrator.h", "Ohm (Low)"),
-				QT_TRANSLATE_NOOP("Calibrator.h", "Ohm (High)"),
+	NoUnit	= -1,
+	mV		= 0,
+	mA		= 1,
+	uA		= 2,
+	nA		= 3,
+	V		= 4,
+	Hz		= 5,
+	OhmLow	= 6,
+	OhmHigh	= 7,
 };
 
-const int		CALIBRATOR_UNIT_COUNT		= sizeof(CalibratorUnit)/sizeof(CalibratorUnit[0]);
+const int CalibratorUnitCount = 8;
 
-const int		CALIBRATOR_UNIT_UNDEFINED	= -1,
-				CALIBRATOR_UNIT_MV			= 0,
-				CALIBRATOR_UNIT_MA			= 1,
-				CALIBRATOR_UNIT_UA			= 2,
-				CALIBRATOR_UNIT_NA			= 3,
-				CALIBRATOR_UNIT_V			= 4,
-				CALIBRATOR_UNIT_HZ			= 5,
-				CALIBRATOR_UNIT_LOW_OHM		= 6,
-				CALIBRATOR_UNIT_HIGH_OHM	= 7;
+#define ERR_CALIBRATOR_UNIT(unit) (static_cast<int>(unit) < 0 || static_cast<int>(unit) >= CalibratorUnitCount)
+
+QString CalibratorUnitCaption(int сalibratorUnit);
 
 // ----------------------------------------------------------------------------------------------
 // Minimal range for calibrators TRX-II and Calys75 this is 400 Ohm
 //
-const double	CALIBRATOR_MINIMAL_RANGE_OHM	= 400;
+const double	CalibratorMinimalRangeOhm	= 400;
 
 // ----------------------------------------------------------------------------------------------
 
-const int		DEFAULT_ECLECTRIC_UNIT_PRECESION = 4;
+const int		DefaultElectricUnitPrecesion = 4;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -120,7 +110,7 @@ struct CalibratorParam
 {
 	bool isValid() const;
 
-	int type = CALIBRATOR_TYPE_UNDEFINED;
+	int type = CalibratorType::NoType;
 
 	int baudRate = 0;
 
@@ -130,11 +120,11 @@ struct CalibratorParam
 	QString terminamtor;
 };
 
-const CalibratorParam CalibratorParams[CALIBRATOR_TYPE_COUNT] =
+const CalibratorParam CalibratorParams[CalibratorTypeCount] =
 {
-	{ CALIBRATOR_TYPE_TRXII,	QSerialPort::Baud9600,		":SAMPLE",	":PT ",		"\n\r"	},
-	{ CALIBRATOR_TYPE_CALYS75,	QSerialPort::Baud115200,	"DISP?",	"SOUR ",	"\r\n"	},
-	{ CALIBRATOR_TYPE_KTHL6221,	QSerialPort::Baud9600,		"CURR?",	"CURR ",	"\n\r"	},
+	{ CalibratorType::TrxII,	QSerialPort::Baud9600,		":SAMPLE",	":PT ",		"\n\r"	},
+	{ CalibratorType::Calys75,	QSerialPort::Baud115200,	"DISP?",	"SOUR ",	"\r\n"	},
+	{ CalibratorType::Ktl6221,	QSerialPort::Baud9600,		"CURR?",	"CURR ",	"\n\r"	},
 };
 
 // ==============================================================================================
@@ -143,13 +133,13 @@ struct CalibratorLimit
 {
 	bool isValid() const;
 
-	int type = CALIBRATOR_TYPE_UNDEFINED;
-	int mode = CALIBRATOR_MODE_UNDEFINED;
+	int type = CalibratorType::NoType;
+	int mode = CalibratorMode::NoMode;
 
 	double lowLimit = 0;
 	double highLimit = 0;
-	int unit = CALIBRATOR_UNIT_UNDEFINED;
-	int precesion = DEFAULT_ECLECTRIC_UNIT_PRECESION;
+	int unit = CalibratorUnit::NoUnit;
+	int precesion = DefaultElectricUnitPrecesion;
 
 	double ac0 = 0;
 	double ac1 = 0;
@@ -163,50 +153,50 @@ const CalibratorLimit CalibratorLimits[] =
 	//
 		// Measure
 		//
-	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_MEASURE,	0,	 100,	CALIBRATOR_UNIT_MV,			3,	0.02,	0.01	,":MEASURE:MV"},
-	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_MEASURE,	0,	  60,	CALIBRATOR_UNIT_V,			4,	0.05,	0.005	,":MEASURE:VOLT"},
-	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_MEASURE,	0,	  52,	CALIBRATOR_UNIT_MA,			3,	0.01,	0.01	,":MEASURE:MA"},
-	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_MEASURE,	0, 20000,	CALIBRATOR_UNIT_HZ,			0,	0.00,	0.00	,":MEASURE:FREQ Hz,5.00"},
-	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_MEASURE,	0,	 400,	CALIBRATOR_UNIT_LOW_OHM,	2,	0.05,	0.02	,":MEASURE:OHM"},
-	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_MEASURE,	0,  2000,	CALIBRATOR_UNIT_HIGH_OHM,	1,	0.02,	0.015	,":MEASURE:OHM"},
+	{ CalibratorType::TrxII,	CalibratorMode::Measure,	0,	 100,	CalibratorUnit::mV,			3,	0.02,	0.01	,":MEASURE:MV"},
+	{ CalibratorType::TrxII,	CalibratorMode::Measure,	0,	  60,	CalibratorUnit::V,			4,	0.05,	0.005	,":MEASURE:VOLT"},
+	{ CalibratorType::TrxII,	CalibratorMode::Measure,	0,	  52,	CalibratorUnit::mA,			3,	0.01,	0.01	,":MEASURE:MA"},
+	{ CalibratorType::TrxII,	CalibratorMode::Measure,	0, 20000,	CalibratorUnit::Hz,			0,	0.00,	0.00	,":MEASURE:FREQ Hz,5.00"},
+	{ CalibratorType::TrxII,	CalibratorMode::Measure,	0,	 400,	CalibratorUnit::OhmLow,		2,	0.05,	0.02	,":MEASURE:OHM"},
+	{ CalibratorType::TrxII,	CalibratorMode::Measure,	0,  2000,	CalibratorUnit::OhmHigh,	1,	0.02,	0.015	,":MEASURE:OHM"},
 
 		// Source
 		//
-	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_SOURCE,		0,	 100,	CALIBRATOR_UNIT_MV,			3,	0.01,	0.005	,":SOURCE:MV:DIRECT"},
-	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_SOURCE,		0,	  12,	CALIBRATOR_UNIT_V,			4,	0.01,	0.005	,":SOURCE:VOLT:DIRECT"},
-	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_SOURCE,		0,	  24,	CALIBRATOR_UNIT_MA,			3,	0.01,	0.02	,":SOURCE:MA:DIRECT"},
-	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_SOURCE,		0, 20000,	CALIBRATOR_UNIT_HZ,			0,	0.00,	0.00	,":SOURCE:FREQ 20kHz,10.0"},
-	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_SOURCE,		0,	 400,	CALIBRATOR_UNIT_LOW_OHM,	2,	0.005,	0.02	,":SOURCE:OHM LO:DIRECT"},
-	{ CALIBRATOR_TYPE_TRXII,	CALIBRATOR_MODE_SOURCE,		0,  2000,	CALIBRATOR_UNIT_HIGH_OHM,	1,	0.02,	0.015	,":SOURCE:OHM HI:DIRECT"},
+	{ CalibratorType::TrxII,	CalibratorMode::Source,		0,	 100,	CalibratorUnit::mV,			3,	0.01,	0.005	,":SOURCE:MV:DIRECT"},
+	{ CalibratorType::TrxII,	CalibratorMode::Source,		0,	  12,	CalibratorUnit::V,			4,	0.01,	0.005	,":SOURCE:VOLT:DIRECT"},
+	{ CalibratorType::TrxII,	CalibratorMode::Source,		0,	  24,	CalibratorUnit::mA,			3,	0.01,	0.02	,":SOURCE:MA:DIRECT"},
+	{ CalibratorType::TrxII,	CalibratorMode::Source,		0, 20000,	CalibratorUnit::Hz,			0,	0.00,	0.00	,":SOURCE:FREQ 20kHz,10.0"},
+	{ CalibratorType::TrxII,	CalibratorMode::Source,		0,	 400,	CalibratorUnit::OhmLow,		2,	0.005,	0.02	,":SOURCE:OHM LO:DIRECT"},
+	{ CalibratorType::TrxII,	CalibratorMode::Source,		0,  2000,	CalibratorUnit::OhmHigh,	1,	0.02,	0.015	,":SOURCE:OHM HI:DIRECT"},
 
 
 	// Calys 75
 	//
 		// Measure
 		//
-	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_MEASURE,	0,	 100,	CALIBRATOR_UNIT_MV,			3,	0.013,	0.003	,"SENS:FUNC VOLT\r\nSENS:VOLT:RANG 100mV"},			// 0.013% +- 3 microV - i.e.  3 microV * 100% / 100 mV = 0.003%
-	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_MEASURE,	0,	  50,	CALIBRATOR_UNIT_V,			3,	0.015,	0.004	,"SENS:FUNC VOLT\r\nSENS:VOLT:RANG 50V"},			// 0.015% +- 2 mV - i.e.  2 mV * 100% / 50 V = 0.004%
-	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_MEASURE,	0,	  50,	CALIBRATOR_UNIT_MA,			3,	0.018,	0.004	,"SENS:FUNC CURR\r\nSENS:CURR:RANG 50mA"},			// 0.018% +- 2 microA - i.e.  2 microA * 100% / 50 mA = 0.004%
-	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_MEASURE,	0, 20000,	CALIBRATOR_UNIT_HZ,			0,	0.000,	0.000	,"SENS:FUNC FREQ\r\nSENS:FREQ:RANG 20KHZ"},			//
-	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_MEASURE,	0,	 400,	CALIBRATOR_UNIT_LOW_OHM,	2,	0.012,	0.0025	,"SENS:FUNC RES\r\nSENS:RES:RANG 400"},				// 0.012% +- 10 mOhm - i.e.  10 mOhm * 100% / 400 Ohm = 0.0025%
-	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_MEASURE,	0,  4000,	CALIBRATOR_UNIT_HIGH_OHM,	1,	0.012,	0.0025	,"SENS:FUNC RES\r\nSENS:RES:RANG 4000"},			// 0.012% +- 100 mOhm - i.e.  100 mOhm * 100% / 4000 Ohm = 0.0025%
+	{ CalibratorType::Calys75,	CalibratorMode::Measure,	0,	 100,	CalibratorUnit::mV,			3,	0.013,	0.003	,"SENS:FUNC VOLT\r\nSENS:VOLT:RANG 100mV"},			// 0.013% +- 3 microV - i.e.  3 microV * 100% / 100 mV = 0.003%
+	{ CalibratorType::Calys75,	CalibratorMode::Measure,	0,	  50,	CalibratorUnit::V,			3,	0.015,	0.004	,"SENS:FUNC VOLT\r\nSENS:VOLT:RANG 50V"},			// 0.015% +- 2 mV - i.e.  2 mV * 100% / 50 V = 0.004%
+	{ CalibratorType::Calys75,	CalibratorMode::Measure,	0,	  50,	CalibratorUnit::mA,			3,	0.018,	0.004	,"SENS:FUNC CURR\r\nSENS:CURR:RANG 50mA"},			// 0.018% +- 2 microA - i.e.  2 microA * 100% / 50 mA = 0.004%
+	{ CalibratorType::Calys75,	CalibratorMode::Measure,	0, 20000,	CalibratorUnit::Hz,			0,	0.000,	0.000	,"SENS:FUNC FREQ\r\nSENS:FREQ:RANG 20KHZ"},			//
+	{ CalibratorType::Calys75,	CalibratorMode::Measure,	0,	 400,	CalibratorUnit::OhmLow,		2,	0.012,	0.0025	,"SENS:FUNC RES\r\nSENS:RES:RANG 400"},				// 0.012% +- 10 mOhm - i.e.  10 mOhm * 100% / 400 Ohm = 0.0025%
+	{ CalibratorType::Calys75,	CalibratorMode::Measure,	0,  4000,	CalibratorUnit::OhmHigh,	1,	0.012,	0.0025	,"SENS:FUNC RES\r\nSENS:RES:RANG 4000"},			// 0.012% +- 100 mOhm - i.e.  100 mOhm * 100% / 4000 Ohm = 0.0025%
 
 		// Source
 		//
-	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_SOURCE,		0,	 100,	CALIBRATOR_UNIT_MV,			3,	0.013,	0.003	,"SOUR:FUNC VOLT\r\nSOUR:VOLT:RANG 100mV"},			// 0.013% +- 3 microV - i.e.  3 microV * 100% / 100 mV = 0.003%
-	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_SOURCE,		0,	  50,	CALIBRATOR_UNIT_V,			3,	0.015,	0.004	,"SOUR:FUNC VOLT\r\nSOUR:VOLT:RANG 50V"},			// 0.015% +- 2 mV - i.e.  2 mV * 100% / 50 V = 0.004%
-	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_SOURCE,		0,	  24,	CALIBRATOR_UNIT_MA,			3,	0.018,	0.0083	,"SOUR:FUNC CURR\r\nSOUR:CURR:RANG 24mA"},			// 0.018% +- 2 microA - i.e.  2 microA * 100% / 24 mA = 0.008%
-	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_SOURCE,		0, 10000,	CALIBRATOR_UNIT_HZ,			0,	0.000,	0.000	,"SOUR:FUNC FREQ\r\nSOUR:FREQ:RANG 10KHZ"},			//
-	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_SOURCE,		0,	 400,	CALIBRATOR_UNIT_LOW_OHM,	2,	0.014,	0.0075	,"SOUR:FUNC RES\r\nSOUR:RES:RANG 400,1mA"},			// 0.014% +- 30 mOhm - i.e.  30 mOhm * 100% / 400 Ohm = 0.0075%
-	{ CALIBRATOR_TYPE_CALYS75,	CALIBRATOR_MODE_SOURCE,		0,  4000,	CALIBRATOR_UNIT_HIGH_OHM,	1,	0.014,	0.0075	,"SOUR:FUNC RES\r\nSOUR:RES:RANG 4000,1mA"},		// 0.014% +- 300 mOhm - i.e.  300 mOhm * 100% / 4000 Ohm = 0.0075%
+	{ CalibratorType::Calys75,	CalibratorMode::Source,		0,	 100,	CalibratorUnit::mV,			3,	0.013,	0.003	,"SOUR:FUNC VOLT\r\nSOUR:VOLT:RANG 100mV"},			// 0.013% +- 3 microV - i.e.  3 microV * 100% / 100 mV = 0.003%
+	{ CalibratorType::Calys75,	CalibratorMode::Source,		0,	  50,	CalibratorUnit::V,			3,	0.015,	0.004	,"SOUR:FUNC VOLT\r\nSOUR:VOLT:RANG 50V"},			// 0.015% +- 2 mV - i.e.  2 mV * 100% / 50 V = 0.004%
+	{ CalibratorType::Calys75,	CalibratorMode::Source,		0,	  24,	CalibratorUnit::mA,			3,	0.018,	0.0083	,"SOUR:FUNC CURR\r\nSOUR:CURR:RANG 24mA"},			// 0.018% +- 2 microA - i.e.  2 microA * 100% / 24 mA = 0.008%
+	{ CalibratorType::Calys75,	CalibratorMode::Source,		0, 10000,	CalibratorUnit::Hz,			0,	0.000,	0.000	,"SOUR:FUNC FREQ\r\nSOUR:FREQ:RANG 10KHZ"},			//
+	{ CalibratorType::Calys75,	CalibratorMode::Source,		0,	 400,	CalibratorUnit::OhmLow,		2,	0.014,	0.0075	,"SOUR:FUNC RES\r\nSOUR:RES:RANG 400,1mA"},			// 0.014% +- 30 mOhm - i.e.  30 mOhm * 100% / 400 Ohm = 0.0075%
+	{ CalibratorType::Calys75,	CalibratorMode::Source,		0,  4000,	CalibratorUnit::OhmHigh,	1,	0.014,	0.0075	,"SOUR:FUNC RES\r\nSOUR:RES:RANG 4000,1mA"},		// 0.014% +- 300 mOhm - i.e.  300 mOhm * 100% / 4000 Ohm = 0.0075%
 
 	// KEITHLEY-6221
 	//
 		// Source
 		//
-	{ CALIBRATOR_TYPE_KTHL6221,	CALIBRATOR_MODE_SOURCE,		0,	 20,	CALIBRATOR_UNIT_MA,			3,	0.050,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-3"},					// 0.05% +- 10 microA - i.e.  10 microA * 100% / 20 mА = 0.05%
-	{ CALIBRATOR_TYPE_KTHL6221,	CALIBRATOR_MODE_SOURCE,		0,	 20,	CALIBRATOR_UNIT_UA,			3,	0.050,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-6"},					// 0.05% +- 10 nanoA - i.e.  10 nanoA * 100% / 20 microА = 0.05%
-	{ CALIBRATOR_TYPE_KTHL6221,	CALIBRATOR_MODE_SOURCE,		0,	 20,	CALIBRATOR_UNIT_NA,			3,	0.300,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-9"},					// 0.05% +- 10 picoA - i.e.  10 picoA * 100% / 20 nanoА = 0.05%
+	{ CalibratorType::Ktl6221,	CalibratorMode::Source,		0,	 20,	CalibratorUnit::mA,			3,	0.050,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-3"},					// 0.05% +- 10 microA - i.e.  10 microA * 100% / 20 mА = 0.05%
+	{ CalibratorType::Ktl6221,	CalibratorMode::Source,		0,	 20,	CalibratorUnit::uA,			3,	0.050,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-6"},					// 0.05% +- 10 nanoA - i.e.  10 nanoA * 100% / 20 microА = 0.05%
+	{ CalibratorType::Ktl6221,	CalibratorMode::Source,		0,	 20,	CalibratorUnit::nA,			3,	0.300,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-9"},					// 0.05% +- 10 picoA - i.e.  10 picoA * 100% / 20 nanoА = 0.05%
 };
 
 const int CalibratorLimitCount = sizeof(CalibratorLimits) / sizeof(CalibratorLimits[0]);
@@ -224,7 +214,7 @@ public:
 
 public:
 
-	CalibratorLimit getLimit(int mode, int unit);										// get claibtator limit by mode and unit
+	CalibratorLimit getLimit(CalibratorMode mode, CalibratorUnit unit);					// get claibtator limit by mode and unit
 	CalibratorLimit currentMeasureLimit();												// get claibtator limit
 	CalibratorLimit currentSourceLimit();												// get claibtator limit
 
@@ -237,18 +227,19 @@ public:
 	QString portName() const { return m_portName; }
 	void setPortName(const QString& portName) { m_portName = portName; }
 
-	int type() const { return m_type; }
+	CalibratorType type() const { return m_type; }
 	QString typeStr() const;
-	void setType(int type) { m_type = type; }
+	void setType(CalibratorType type) { m_type = type; }
+	void setType(int type) { m_type = static_cast<CalibratorType>(type); }
 
 	QString caption() const { return m_caption; }
 	QString serialNo() const { return m_serialNo; }
 
 	int timeout() const { return m_timeout;	}
 
-	int mode() const { return m_mode; }
-	int measureUnit() const { return m_measureUnit; }
-	int sourceUnit() const { return m_sourceUnit; }
+	CalibratorMode mode() const { return m_mode; }
+	CalibratorUnit measureUnit() const { return m_measureUnit; }
+	CalibratorUnit sourceUnit() const { return m_sourceUnit; }
 
 	double measureValue() const { return m_measureValue; }
 	double sourceValue() const { return m_sourceValue; }
@@ -269,15 +260,15 @@ private:
 
 	bool m_connected = false;
 
-	int m_type = CALIBRATOR_TYPE_UNDEFINED;												// calibrator type: 0 - CALIBRATOR_TYPE_TRXII or 1 - CALIBRATOR_TYPE_CALYS75
+	CalibratorType m_type = CalibratorType::NoType;										// calibrator type: 0 - CalibratorType::TrxII or 1 - CalibratorType::Calys75
 	QString m_caption;																	// name of calibrator
 	QString m_serialNo;																	// serial number of calibrator
 
 	int m_timeout = 0;																	// time counter waits for a response from the calibrator
 
-	int m_mode = CALIBRATOR_MODE_UNDEFINED;												// calibrator mode: 0 - CALIBRATOR_MODE_MEASURE or 1 - CALIBRATOR_MODE_SOURCE
-	int m_measureUnit = 0;																// measure unit: mA, mV and etc.
-	int m_sourceUnit = 0;																// source unit: mA, mV and etc.
+	CalibratorMode m_mode = CalibratorMode::NoMode;										// calibrator mode: 0 - CalibratorMode::Measure or 1 - CalibratorMode::Source
+	CalibratorUnit m_measureUnit = CalibratorUnit::NoUnit;								// measure unit: mA, mV and etc.
+	CalibratorUnit m_sourceUnit = CalibratorUnit::NoUnit;								// source unit: mA, mV and etc.
 
 	double m_measureValue = 0;															// contains measured electrical value of the calibrator
 	double m_sourceValue = 0;															// contains installed electrical value of the calibrator
@@ -320,7 +311,7 @@ public slots:
 
 	bool open();																	// initialization of the calibrator
 
-	bool setUnit(int mode, int unit);												// select mode: measure - 0 (CALIBRATOR_MODE_MEASURE) or source - 1 (CALIBRATOR_MODE_SOURCE)
+	bool setUnit(int mode, int unit);												// select mode: measure - 0 (CalibratorMode::Measure) or source - 1 (CalibratorMode::Source)
 																					// select unit: mA, mV and etc.
 	bool setValue(double value);													// set value
 	bool stepDown();																// decrease the value on the calibrator
