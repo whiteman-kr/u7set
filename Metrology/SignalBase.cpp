@@ -30,7 +30,7 @@ bool IoSignalParam::isValid() const
 
 	if (m_connectionType == Metrology::ConnectionType::Unused)
 	{
-		valid = m_param[Metrology::ConnectionIoType::Source].isValid();				// only input
+		valid = m_param[Metrology::ConnectionIoType::Source].isValid();					// only input
 	}
 	else
 	{
@@ -796,7 +796,7 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 {
 	QMutexLocker l(&m_mutex);
 
-	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
 		assert(0);
 		return false;
@@ -833,16 +833,16 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 
 	switch(measureKind)
 	{
-		case MEASURE_KIND_ONE_RACK:
+		case MeasureKind::OneRack:
 			m_signalID = param.appSignalID();
 			m_caption = param.caption();
 			break;
 
-		case MEASURE_KIND_ONE_MODULE:
+		case MeasureKind::OneModule:
 			m_signalID = param.location().moduleID();
 			break;
 
-		case MEASURE_KIND_MULTI_RACK:
+		case MeasureKind::MultiRack:
 
 			switch (param.inOutType())
 			{
@@ -1044,7 +1044,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 									   int channel,
 									   Metrology::Signal* pSignal)
 {
-	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
 		assert(0);
 		return false;
@@ -1095,7 +1095,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 
 		switch (measureKind)
 		{
-			case MEASURE_KIND_ONE_RACK:
+			case MeasureKind::OneRack:
 				{
 					// take destination signals by source signal
 					//
@@ -1109,8 +1109,8 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 				}
 				break;
 
-			case MEASURE_KIND_ONE_MODULE:
-			case MEASURE_KIND_MULTI_RACK:
+			case MeasureKind::OneModule:
+			case MeasureKind::MultiRack:
 				{
 					// find index of metrology connection in the base by source signal
 					//
@@ -1899,7 +1899,7 @@ QString SignalBase::findAppSignalIDforSerialNo(const QString& moduleID)
 
 int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionType connectionType)
 {
-	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
 		assert(false);
 		return 0;
@@ -1919,8 +1919,8 @@ int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionT
 
 	switch (measureKind)
 	{
-		case MEASURE_KIND_ONE_RACK:
-		case MEASURE_KIND_ONE_MODULE:
+		case MeasureKind::OneRack:
+		case MeasureKind::OneModule:
 			{
 				// select racks that has signals, other racks ignore
 				//
@@ -1972,7 +1972,7 @@ int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionT
 			}
 			break;
 
-		case MEASURE_KIND_MULTI_RACK:
+		case MeasureKind::MultiRack:
 			{
 				// select racks from tables
 				//
@@ -2174,7 +2174,7 @@ bool SignalBase::setSignalForMeasure(int index, const MeasureSignal& signal)
 
 int SignalBase::createSignalListForMeasure(int measureKind, Metrology::ConnectionType connectionType, int rackIndex)
 {
-	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
 		assert(false);
 		return 0;
@@ -2223,7 +2223,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 
 		switch(measureKind)
 		{
-			case MEASURE_KIND_ONE_RACK:
+			case MeasureKind::OneRack:
 
 				if (connectionType == Metrology::ConnectionType::Unused)
 				{
@@ -2235,12 +2235,12 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 				}
 				break;
 
-			case MEASURE_KIND_ONE_MODULE:
+			case MeasureKind::OneModule:
 
 				channelCount = theOptions.module().maxInputCount();
 				break;
 
-			case MEASURE_KIND_MULTI_RACK:
+			case MeasureKind::MultiRack:
 
 				channelCount = Metrology::ChannelCount;
 				break;
@@ -2257,7 +2257,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 		//
 		switch(measureKind)
 		{
-			case MEASURE_KIND_ONE_RACK:
+			case MeasureKind::OneRack:
 				{
 					if (param.location().rack().index() != rackIndex)
 					{
@@ -2278,7 +2278,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 				}
 				break;
 
-			case MEASURE_KIND_ONE_MODULE:
+			case MeasureKind::OneModule:
 				{
 					if (param.location().rack().index() != rackIndex)
 					{
@@ -2338,7 +2338,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 				}
 				break;
 
-			case MEASURE_KIND_MULTI_RACK:
+			case MeasureKind::MultiRack:
 				{
 					if (param.location().rack().groupIndex() != rackIndex)
 					{

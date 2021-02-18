@@ -203,7 +203,7 @@ int MeasureThread::getConnectedCalibrators()
 
 bool MeasureThread::setCalibratorUnit()
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		assert(0);
 		return false;
@@ -220,7 +220,7 @@ bool MeasureThread::setCalibratorUnit()
 
 	int channelCount = m_activeIoParamList.count();
 
-	if (m_measureKind == MEASURE_KIND_ONE_RACK || m_measureKind == MEASURE_KIND_ONE_MODULE)
+	if (m_measureKind == MeasureKind::OneRack || m_measureKind == MeasureKind::OneModule)
 	{
 		channelCount = 1;
 	}
@@ -451,7 +451,7 @@ void MeasureThread::polarityTest(double electricVal, IoSignalParam& ioParam)
 
 void MeasureThread::run()
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		assert(0);
 		return;
@@ -470,20 +470,20 @@ void MeasureThread::run()
 	//
 	switch (m_measureType)
 	{
-		case MEASURE_TYPE_LINEARITY:
+		case MeasureType::Linearity:
 			measureLinearity();
 			break;
 
-		case MEASURE_TYPE_COMPARATOR:
+		case MeasureType::Comparators:
 
 			switch (m_measureKind)
 			{
-				case MEASURE_KIND_ONE_RACK:
-				case MEASURE_KIND_ONE_MODULE:
+				case MeasureKind::OneRack:
+				case MeasureKind::OneModule:
 					measureCompratorsInSeries();
 					break;
 
-				case MEASURE_KIND_MULTI_RACK:
+				case MeasureKind::MultiRack:
 					measureCompratorsInParallel();
 					break;
 
@@ -527,7 +527,7 @@ void MeasureThread::measureLinearity()
 		//
 		int channelCount = m_activeIoParamList.count();
 
-		if (m_measureKind == MEASURE_KIND_ONE_RACK || m_measureKind == MEASURE_KIND_ONE_MODULE)
+		if (m_measureKind == MeasureKind::OneRack || m_measureKind == MeasureKind::OneModule)
 		{
 			channelCount = 1;
 		}
@@ -1878,26 +1878,26 @@ void MeasureThread::measureTimeoutChanged(int timeout)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureThread::measureTypeChanged(int type)
+void MeasureThread::measureTypeChanged(int measureType)
 {
-	if (type < 0 || type >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return;
 	}
 
-	m_measureType = type;
+	m_measureType = static_cast<MeasureType>(measureType);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureThread::measureKindChanged(int kind)
+void MeasureThread::measureKindChanged(int measureKind)
 {
-	if (kind < 0 || kind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
 		return;
 	}
 
-	m_measureKind = kind;
+	m_measureKind = static_cast<MeasureKind>(measureKind);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

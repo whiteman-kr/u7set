@@ -37,7 +37,7 @@ public:
 
 public:
 
-	int						measureType() const { return m_measureType; }
+	MeasureType				measureType() const { return m_measureType; }
 
 	// Views
 	//
@@ -66,8 +66,8 @@ public:
 private:
 
 	int						m_measureTimeout = 0;
-	int						m_measureType = MEASURE_TYPE_UNDEFINED;
-	int						m_measureKind = MEASURE_KIND_UNDEFINED;
+	MeasureType				m_measureType = MeasureType::NoMeasureType;
+	MeasureKind				m_measureKind = MeasureKind::NoMeasureKind;
 	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 	QMap<int, MeasureView*> m_measureViewMap;
@@ -227,7 +227,7 @@ signals:
 	//
 	void					measureViewChanged(MeasureView* pView);								// appear when changing the type of measurement
 	void					measureTimeoutChanged(int timeout);									// appear when changing the timeout of measuring
-	void					measureTypeChanged(int type);										// appear when changing the type of measurement
+	void					measureTypeChanged(int measureType);								// appear when changing the type of measurement
 	void					measureKindChanged(int kind);										// appear when changing the kind of measurement
 	void					connectionTypeChanged(int connectionType);							// appear when changing the Metrology::ConnectionType
 

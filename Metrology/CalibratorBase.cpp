@@ -376,7 +376,7 @@ CalibratorManager* CalibratorBase::firstConnectedCalibrator() const
 
 CalibratorManager* CalibratorBase::calibratorForMeasure(int index) const
 {
-	if (m_measureKind < 0 || m_measureKind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(m_measureKind) == true)
 	{
 		return nullptr;
 	}
@@ -385,9 +385,9 @@ CalibratorManager* CalibratorBase::calibratorForMeasure(int index) const
 
 	switch(m_measureKind)
 	{
-		case MEASURE_KIND_ONE_RACK:
-		case MEASURE_KIND_ONE_MODULE:	pManager = firstConnectedCalibrator();	break;	// we need only one - connected;
-		case MEASURE_KIND_MULTI_RACK:	pManager = calibratorManager(index);	break;
+		case MeasureKind::OneRack:
+		case MeasureKind::OneModule:	pManager = firstConnectedCalibrator();	break;	// we need only one - connected;
+		case MeasureKind::MultiRack:	pManager = calibratorManager(index);	break;
 		default:						assert(0);
 	}
 
@@ -433,14 +433,14 @@ void CalibratorBase::onInitialization()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorBase::measureKindChanged(int kind)
+void CalibratorBase::measureKindChanged(int measureKind)
 {
-	if (kind < 0 || kind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
 		return;
 	}
 
-	m_measureKind = kind;
+	m_measureKind = static_cast<MeasureKind>(measureKind);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

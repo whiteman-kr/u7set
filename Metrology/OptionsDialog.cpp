@@ -100,9 +100,9 @@ OptionsDialog::OptionsDialog(const Options& options, QWidget* parent) :
 	QDialog(parent),
 	m_options(options)
 {
-	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+	for(int measureType = 0; measureType < MeasureTypeCount; measureType++)
 	{
-		m_options.measureView().setUpdateColumnView(type, false);
+		m_options.measureView().setUpdateColumnView(measureType, false);
 	}
 
 	createInterface();
@@ -431,9 +431,9 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LinearityParamName[LO_PARAM_ERROR_TYPE]));
 					QStringList errorTypeList;
-					for(int e = 0; e < MEASURE_ERROR_TYPE_COUNT; e++)
+					for(int e = 0; e < MeasureErrorTypeCount; e++)
 					{
-						errorTypeList.append(qApp->translate("MeasureBase.h", MeasureErrorType[e]));
+						errorTypeList.append(qApp->translate("MeasureBase", MeasureErrorTypeCaption(e).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), errorTypeList);
 					item->setValue(m_options.linearity().errorType());
@@ -442,9 +442,9 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LinearityParamName[LO_PARAM_SHOW_ERROR_FROM_LIMIT]));
 					QStringList showErrorFromLimitList;
-					for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
+					for(int t = 0; t < MeasureLimitTypeCount; t++)
 					{
-						showErrorFromLimitList.append(qApp->translate("MeasureBase.h", MeasureLimitType[t]));
+						showErrorFromLimitList.append(qApp->translate("MeasureBase", MeasureLimitTypeCaption(t).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
 					item->setValue(m_options.linearity().limitType());
@@ -567,9 +567,9 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", ComparatorParamName[CO_PARAM_ERROR_TYPE]));
 					QStringList errorTypeList;
-					for(int e = 0; e < MEASURE_ERROR_TYPE_COUNT; e++)
+					for(int e = 0; e < MeasureErrorTypeCount; e++)
 					{
-						errorTypeList.append(qApp->translate("MeasureBase.h", MeasureErrorType[e]));
+						errorTypeList.append(qApp->translate("MeasureBase", MeasureErrorTypeCaption(e).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), errorTypeList);
 					item->setValue(m_options.comparator().errorType());
@@ -578,9 +578,9 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", ComparatorParamName[CO_PARAM_SHOW_ERROR_FROM_LIMIT]));
 					QStringList showErrorFromLimitList;
-					for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
+					for(int t = 0; t < MeasureLimitTypeCount; t++)
 					{
-						showErrorFromLimitList.append(qApp->translate("MeasureBase.h", MeasureLimitType[t]));
+						showErrorFromLimitList.append(qApp->translate("MeasureBase", MeasureLimitTypeCaption(t).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
 					item->setValue(m_options.comparator().limitType());
@@ -1176,9 +1176,9 @@ void OptionsDialog::applyProperty()
 				{
 					case LO_PARAM_ERROR_LIMIT:				m_options.linearity().setErrorLimit(value.toDouble());						break;
 					case LO_PARAM_ERROR_TYPE:				m_options.linearity().setErrorType(value.toInt());
-															m_options.measureView().setUpdateColumnView(MEASURE_TYPE_LINEARITY, true);	break;
+															m_options.measureView().setUpdateColumnView(MeasureType::Linearity, true);	break;
 					case LO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.linearity().setLimitType(value.toInt());
-															m_options.measureView().setUpdateColumnView(MEASURE_TYPE_LINEARITY, true);	break;
+															m_options.measureView().setUpdateColumnView(MeasureType::Linearity, true);	break;
 					case LO_PARAM_MEASURE_TIME:				m_options.linearity().setMeasureTimeInPoint(value.toInt());					break;
 					case LO_PARAM_MEASURE_IN_POINT:			m_options.linearity().setMeasureCountInPoint(value.toInt());				break;
 					case LO_PARAM_RANGE_TYPE:				m_options.linearity().setRangeType(value.toInt());
@@ -1194,7 +1194,7 @@ void OptionsDialog::applyProperty()
 															updateLinearityPage(false);													break;
 					case LO_PARAM_VALUE_POINTS:				setActivePage(OPTION_PAGE_LINEARITY_POINT);									break;
 					case LO_PARAM_LIST_TYPE:				m_options.linearity().setViewType(value.toInt());
-															m_options.measureView().setUpdateColumnView(MEASURE_TYPE_LINEARITY,true);	break;
+															m_options.measureView().setUpdateColumnView(MeasureType::Linearity,true);	break;
 					default:								assert(0);
 				}
 			}
@@ -1208,7 +1208,7 @@ void OptionsDialog::applyProperty()
 					case CO_PARAM_START_VALUE:				m_options.comparator().setStartValueForCompare(value.toDouble());			break;
 					case CO_PARAM_ERROR_TYPE:				m_options.comparator().setErrorType(value.toInt());							break;
 					case CO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.comparator().setLimitType(value.toInt());
-															m_options.measureView().setUpdateColumnView(MEASURE_TYPE_COMPARATOR, true);	break;
+															m_options.measureView().setUpdateColumnView(MeasureType::Comparators, true);	break;
 					case CO_PARAM_COMPARATOR_INDEX:			m_options.comparator().setStartComparatorIndex(value.toInt() - 1);			break;
 					case CO_PARAM_ENABLE_HYSTERESIS:		m_options.comparator().setEnableMeasureHysteresis(value.toBool());			break;
 					default:								assert(0);
@@ -1229,9 +1229,9 @@ void OptionsDialog::applyProperty()
 					default:								assert(0);
 				}
 
-				for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+				for(int measureType = 0; measureType < MeasureTypeCount; measureType++)
 				{
-					m_options.measureView().setUpdateColumnView(type, true);
+					m_options.measureView().setUpdateColumnView(measureType, true);
 				}
 			}
 			break;
@@ -1431,8 +1431,8 @@ void OptionsDialog::updateMeasureViewPage(bool isDialog)
 		//
 		m_options.setMeasureView(dialog->m_header);
 
-		int measureType = dialog->measureType();
-		if (measureType >= 0 && measureType < MEASURE_TYPE_COUNT)
+		MeasureType measureType = dialog->measureType();
+		if (ERR_MEASURE_TYPE(measureType) == false)
 		{
 			m_options.measureView().setUpdateColumnView(measureType, true);
 		}

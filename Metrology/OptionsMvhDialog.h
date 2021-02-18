@@ -51,12 +51,11 @@ public:
 
 public:
 
-	int					measureType() const { return m_measureType; }
-	void				setMeasureType(int measureType);
+	MeasureType			measureType() const { return m_measureType; }
 
 private:
 
-	int					m_measureType = MEASURE_TYPE_LINEARITY;
+	MeasureType			m_measureType = MeasureType::Linearity;
 	int					m_languageType = LANGUAGE_TYPE_EN;
 
 	// elements of interface
@@ -82,6 +81,8 @@ signals:
 	void				updateMeasureViewPage(bool isDialog);
 
 private slots:
+
+	void				setMeasureType(int measureType);
 
 	void				cellChanged(int,int);
 	void				currentCellChanged(int,int,int,int);

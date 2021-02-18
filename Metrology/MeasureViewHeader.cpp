@@ -9,7 +9,7 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT] =
+MeasureViewColumn MeasureViewHeader::m_column[MeasureTypeCount][MEASURE_VIEW_COLUMN_COUNT] =
 {
 	// Measurements of linearity
 	{
@@ -214,9 +214,9 @@ MeasureViewColumn& MeasureViewColumn::operator=(const MeasureViewColumn& from)
 MeasureViewHeader::MeasureViewHeader(QObject* parent) :
 	QObject(parent)
 {
-	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+	for(int measureType = 0; measureType < MeasureTypeCount; measureType++)
 	{
-		m_columnCount[type] = 0;
+		m_columnCount[measureType] = 0;
 	}
 }
 
@@ -228,9 +228,9 @@ MeasureViewHeader::~MeasureViewHeader()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewHeader::setMeasureType(int measureType)
+void MeasureViewHeader::setMeasureType(MeasureType measureType)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return;
 	}
@@ -251,9 +251,9 @@ void MeasureViewHeader::setMeasureType(int measureType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewHeader::init(int measureType)
+void MeasureViewHeader::init(MeasureType measureType)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return;
 	}
@@ -285,7 +285,7 @@ void MeasureViewHeader::init(int measureType)
 
 int MeasureViewHeader::count() const
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return 0;
 	}
@@ -297,7 +297,7 @@ int MeasureViewHeader::count() const
 
 MeasureViewColumn* MeasureViewHeader::column(int index) const
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return nullptr;
 	}
@@ -314,14 +314,14 @@ MeasureViewColumn* MeasureViewHeader::column(int index) const
 
 void MeasureViewHeader::updateColumnState()
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return;
 	}
 
 	switch (m_measureType)
 	{
-		case MEASURE_TYPE_LINEARITY:
+		case MeasureType::Linearity:
 			{
 				// list type
 				//
@@ -394,7 +394,7 @@ void MeasureViewHeader::updateColumnState()
 			}
 			break;
 
-		case MEASURE_TYPE_COMPARATOR:
+		case MeasureType::Comparators:
 			{
 				// show  or hide columns
 				//
@@ -411,7 +411,7 @@ void MeasureViewHeader::updateColumnState()
 
 void MeasureViewHeader::setColumnTitle(int column, const QString& title)
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return;
 	}
@@ -428,7 +428,7 @@ void MeasureViewHeader::setColumnTitle(int column, const QString& title)
 
 void MeasureViewHeader::setColumnVisible(int column, bool visible)
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return;
 	}

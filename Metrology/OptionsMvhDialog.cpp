@@ -20,9 +20,9 @@ OptionsMeasureViewHeaderDialog::OptionsMeasureViewHeaderDialog(const MeasureView
 
 	m_measureTypeList = new QComboBox(this);
 
-	for(int t = 0; t < MEASURE_TYPE_COUNT; t++)
+	for(int measureType = 0; measureType < MeasureTypeCount; measureType++)
 	{
-		m_measureTypeList->addItem(qApp->translate("MeasureBase.h", MeasureType[t]));
+		m_measureTypeList->addItem(qApp->translate("MeasureBase", MeasureTypeCaption(measureType).toUtf8()));
 	}
 	m_measureTypeList->setCurrentIndex(m_measureType);
 
@@ -89,7 +89,7 @@ void OptionsMeasureViewHeaderDialog::updateList()
 {
 	clearList();
 
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return;
 	}
@@ -186,12 +186,12 @@ void OptionsMeasureViewHeaderDialog::clearList()
 
 void OptionsMeasureViewHeaderDialog::setMeasureType(int measureType)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return;
 	}
 
-	m_measureType = measureType;
+	m_measureType = static_cast<MeasureType>(measureType);
 
 	updateList();
 }
@@ -205,7 +205,7 @@ void OptionsMeasureViewHeaderDialog::cellChanged(int row, int column)
 		return;
 	}
 
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return;
 	}
@@ -290,7 +290,7 @@ void OptionsMeasureViewHeaderDialog::onEdit(int row, int column)
 		return;
 	}
 
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return;
 	}

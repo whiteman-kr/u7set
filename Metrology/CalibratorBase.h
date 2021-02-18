@@ -72,7 +72,7 @@ public:
 private:
 
 	CalibratorsOption		m_calibratorsOption;
-	int						m_measureKind = MEASURE_KIND_UNDEFINED;
+	MeasureKind				m_measureKind = MeasureKind::NoMeasureKind;
 
 	QTimer					m_timer;
 	int						m_timeout = 0;
@@ -121,7 +121,7 @@ signals:
 
 public slots:
 
-	void					measureKindChanged(int kind);
+	void					measureKindChanged(int measureKind);
 
 	void					timeoutInitialization();				// Slot of timer
 

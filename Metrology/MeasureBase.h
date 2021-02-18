@@ -8,25 +8,101 @@
 
 // ==============================================================================================
 
-const char* const MeasureType[] =
+enum MeasureType
 {
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Measurements of linearity"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Measurements of comparators"),
+	NoMeasureType	= -1,
+	Linearity		= 0,
+	Comparators		= 1,
 };
 
-const int	MEASURE_TYPE_COUNT = sizeof(MeasureType)/sizeof(MeasureType[0]);
+const int MeasureTypeCount	= 2;
 
-const int	MEASURE_TYPE_UNDEFINED	= -1,
-			MEASURE_TYPE_LINEARITY	= 0,
-			MEASURE_TYPE_COMPARATOR	= 1;
+#define ERR_MEASURE_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= MeasureTypeCount)
 
-// ----------------------------------------------------------------------------------------------
+QString MeasureTypeCaption(int measureType);
 
-const char* const MeasureFileName[MEASURE_TYPE_COUNT] =
+// ==============================================================================================
+
+enum MeasureKind
 {
-			"Linearity",
-			"Comparators",
+	NoMeasureKind	= -1,
+	OneRack			= 0,
+	OneModule		= 1,
+	MultiRack		= 2,
 };
+
+const int MeasureKindCount	= 3;
+
+#define ERR_MEASURE_KIND(kind) (TO_INT(kind) < 0 || TO_INT(kind) >= MeasureKindCount)
+
+QString MeasureKindCaption(int measureKind);
+
+// ==============================================================================================
+
+enum MeasureLimitType
+{
+	NoMeasureLimitType	= -1,
+	Electric			= 0,
+	Engineering			= 1,
+};
+
+const int MeasureLimitTypeCount	= 2;
+
+#define ERR_MEASURE_LIMIT_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= MeasureLimitTypeCount)
+
+QString MeasureLimitTypeCaption(int measureType);
+
+// ==============================================================================================
+
+enum MeasureErrorType
+{
+	NoMeasureErrorType	= -1,
+	Absolute			= 0,
+	Reduce				= 1,
+	Relative			= 2,
+};
+
+const int MeasureErrorTypeCount	= 3;
+
+#define ERR_MEASURE_ERROR_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= MeasureErrorTypeCount)
+
+QString MeasureErrorTypeCaption(int errorType);
+
+// ==============================================================================================
+
+enum MeasureErrorResult
+{
+	NoMeasureErrorResult	= -1,
+	Ok						= 0,
+	Failed					= 1,
+};
+
+const int MeasureErrorResultCount = 2;
+
+#define ERR_MEASURE_ERROR_RESULT(result) (TO_INT(result) < 0 || TO_INT(result) >= MeasureErrorResultCount)
+
+QString MeasureErrorResultCaption(int errorResult);
+
+// ==============================================================================================
+
+enum MeasureAdditionalParam
+{
+	NoMeasureAdditionalParam	= -1,
+	MaxValue					= 0,
+	SystemDeviation				= 1,
+	StandardDeviation			= 2,
+	LowHighBorder				= 3,
+	Uncertainty					= 4,
+};
+
+const int MeasureAdditionalParamCount = 5;
+
+			// now used 5 (1 .. 5)
+			// maximum 16 items (0 .. 15)
+
+#define ERR_MEASURE_ADDITIONAL_PARAM(param) (TO_INT(param) < 0 || TO_INT(param) >= MeasureAdditionalParamCount)
+
+QString MeasureAdditionalParamCaption(int param);
 
 // ==============================================================================================
 
@@ -36,89 +112,6 @@ const int	MeasureTimeout[] =
 };
 
 const int	MeasureTimeoutCount = sizeof(MeasureTimeout)/sizeof(MeasureTimeout[0]);
-
-// ==============================================================================================
-
-const char* const	MeasureKind[] =
-{
-			QT_TRANSLATE_NOOP("MeasureBase.h", " Single channel"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", " Single module"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", " Multi channel"),
-};
-
-const int	MEASURE_KIND_COUNT		= sizeof(MeasureKind)/sizeof(MeasureKind[0]);
-
-const int	MEASURE_KIND_UNDEFINED	= -1,
-			MEASURE_KIND_ONE_RACK	= 0,
-			MEASURE_KIND_ONE_MODULE	= 1,
-			MEASURE_KIND_MULTI_RACK	= 2;
-
-// ==============================================================================================
-
-const char* const MeasureLimitType[] =
-{
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Electric"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Engineering"),
-};
-
-const int	MEASURE_LIMIT_TYPE_COUNT		= sizeof(MeasureLimitType)/sizeof(MeasureLimitType[0]);
-
-const int	MEASURE_LIMIT_TYPE_UNDEFINED	= -1,
-			MEASURE_LIMIT_TYPE_ELECTRIC		= 0,
-			MEASURE_LIMIT_TYPE_ENGINEER		= 1;
-
-// ==============================================================================================
-
-const char* const MeasureErrorType[] =
-{
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Absolute"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Reduced"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Relative"),
-};
-
-const int	MEASURE_ERROR_TYPE_COUNT	= sizeof(MeasureErrorType)/sizeof(MeasureErrorType[0]);
-
-const int	MEASURE_ERROR_TYPE_UNDEFINED	= -1,
-			MEASURE_ERROR_TYPE_ABSOLUTE		= 0,
-			MEASURE_ERROR_TYPE_REDUCE		= 1,
-			MEASURE_ERROR_TYPE_RELATIVE		= 2;
-
-// ==============================================================================================
-
-const char* const ErrorResult[] =
-{
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Ok"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Failed"),
-};
-
-const int	MEASURE_ERROR_RESULT_COUNT	= sizeof(ErrorResult)/sizeof(ErrorResult[0]);
-
-const int	MEASURE_ERROR_RESULT_UNDEFINED		= -1,
-			MEASURE_ERROR_RESULT_OK				= 0,
-			MEASURE_ERROR_RESULT_FAILED			= 1;
-
-// ==============================================================================================
-
-const char* const MeasureAdditionalParam[] =
-{
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Measure value max"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "System deviation"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Standard deviation"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Low High border"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Uncertainty"),
-};
-
-const int	MEASURE_ADDITIONAL_PARAM_COUNT				= sizeof(MeasureAdditionalParam)/sizeof(MeasureAdditionalParam[0]);
-
-const int	MEASURE_ADDITIONAL_PARAM_UNDEFINED			= -1,
-			MEASURE_ADDITIONAL_PARAM_MAX_VALUE			= 0,
-			MEASURE_ADDITIONAL_PARAM_SYSTEM_DEVIATION	= 1,
-			MEASURE_ADDITIONAL_PARAM_SD					= 2,
-			MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER	= 3,
-			MEASURE_ADDITIONAL_PARAM_UNCERTAINTY		= 4;
-
-			// maximum 16 items (0 .. 15)
-			// now used 5 (1 .. 5)
 
 // ==============================================================================================
 
@@ -135,15 +128,17 @@ class Measurement
 
 public:
 
-	explicit Measurement(int measureType = MEASURE_TYPE_UNDEFINED);
+	explicit Measurement(MeasureType measureType = MeasureType::NoMeasureType);
 	virtual ~Measurement();
 
 public:
 
 	void			virtual clear();
 
-	int				measureType() const { return m_measureType; }
-	void			setMeasureType(int type) { m_measureType = type; }
+	MeasureType		measureType() const { return m_measureType; }
+	int				measureTypeInt() const { return TO_INT(m_measureType); }
+	void			setMeasureType(MeasureType type) { m_measureType = type; }
+	void			setMeasureType(int type) { m_measureType = static_cast<MeasureType>(type); }
 
 	Hash			signalHash() const { return m_signalHash; }
 	void			setSignalHash(const Hash& hash) { m_signalHash = hash; }
@@ -211,13 +206,13 @@ public:
 
 	void			calcError();
 
-	double			error(int limitType, int errotType) const;
+	double			error(int limitType, int errorType) const;
 	QString			errorStr() const;
-	void			setError(int limitType, int errotType, double value);
+	void			setError(int limitType, int errorType, double value);
 
-	double			errorLimit(int limitType, int errotType) const;
+	double			errorLimit(int limitType, int errorType) const;
 	QString			errorLimitStr() const;
-	void			setErrorLimit(int limitType, int errotType, double value);
+	void			setErrorLimit(int limitType, int errorType, double value);
 
 	int				errorResult() const;
 	QString			errorResultStr() const;
@@ -243,7 +238,7 @@ public:
 
 private:
 
-	int				m_measureType = MEASURE_TYPE_UNDEFINED;					// measure type
+	MeasureType		m_measureType = MeasureType::NoMeasureType;				// measure type
 	Hash			m_signalHash = UNDEFINED_HASH;							// hash calced from AppSignalID by function calcHash()
 
 	int				m_measureID = -1;										// primary key of record in SQL table
@@ -263,18 +258,18 @@ private:
 
 	int				m_calibratorPrecision = DEFAULT_ECLECTRIC_UNIT_PRECESION;	// precision of electric range of calibrator
 
-	double			m_nominal[MEASURE_LIMIT_TYPE_COUNT];
-	double			m_measure[MEASURE_LIMIT_TYPE_COUNT];
+	double			m_nominal[MeasureLimitTypeCount];
+	double			m_measure[MeasureLimitTypeCount];
 
-	double			m_lowLimit[MEASURE_LIMIT_TYPE_COUNT];
-	double			m_highLimit[MEASURE_LIMIT_TYPE_COUNT];
-	QString			m_unit[MEASURE_LIMIT_TYPE_COUNT];
-	int				m_limitPrecision[MEASURE_LIMIT_TYPE_COUNT];
+	double			m_lowLimit[MeasureLimitTypeCount];
+	double			m_highLimit[MeasureLimitTypeCount];
+	QString			m_unit[MeasureLimitTypeCount];
+	int				m_limitPrecision[MeasureLimitTypeCount];
 
 	double			m_adjustment = 0;
 
-	double			m_error[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
-	double			m_errorLimit[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
+	double			m_error[MeasureLimitTypeCount][MeasureErrorTypeCount];
+	double			m_errorLimit[MeasureLimitTypeCount][MeasureErrorTypeCount];
 
 	QDateTime		m_measureTime;											// measure time
 	QString			m_calibrator;											// calibrator name and calibrator SN
@@ -332,10 +327,10 @@ private:
 	double			m_percent = 0;
 
 	int				m_measureCount = 0;
-	double			m_measureArray[MEASURE_LIMIT_TYPE_COUNT][MAX_MEASUREMENT_IN_POINT];
+	double			m_measureArray[MeasureLimitTypeCount][MAX_MEASUREMENT_IN_POINT];
 
 	int				m_additionalParamCount = 0;
-	double			m_additionalParam[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ADDITIONAL_PARAM_COUNT];
+	double			m_additionalParam[MeasureLimitTypeCount][MeasureAdditionalParamCount];
 };
 
 // ==============================================================================================
@@ -401,21 +396,21 @@ public:
 	int						count() const;
 	void					clear(bool removeData = true);
 
-	int						load(int measureType);
+	int						load(MeasureType measureType);
 
 	int						append(Measurement* pMeasurement);
 	Measurement*			measurement(int index) const;
 	bool					remove(int index, bool removeData = true);
 	bool					remove(int measureType, const QVector<int>& keyList);
 
-	void					updateStatisticsItem(int measureType, StatisticsItem& si);
-	void					updateStatisticsBase(int measureType);
-	void					updateStatisticsBase(int measureType, Hash signalHash);
+	void					updateStatisticsItem(MeasureType measureType, StatisticsItem& si);
+	void					updateStatisticsBase(MeasureType measureType);
+	void					updateStatisticsBase(MeasureType measureType, Hash signalHash);
 	static void				markNotExistMeasuremetsFromStatistics(MeasureBase* pThis);
 
 private:
 
-	int						m_measureType = MEASURE_TYPE_UNDEFINED;
+	MeasureType				m_measureType = MeasureType::NoMeasureType;
 
 	mutable QMutex			m_measureMutex;
 	QVector<Measurement*>	m_measureList;

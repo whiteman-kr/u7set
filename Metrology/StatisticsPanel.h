@@ -175,8 +175,8 @@ private:
 
 	MeasureBase* m_pMeasureBase = nullptr;
 
-	static int m_measureType;
-	static int m_measureKind;
+	static MeasureType m_measureType;
+	static MeasureKind m_measureKind;
 	static Metrology::ConnectionType m_connectionType;
 
 
@@ -203,8 +203,8 @@ signals:
 
 public slots:
 
-	void measureTypeChanged(int type);
-	void measureKindChanged(int kind);
+	void measureTypeChanged(int measureType);
+	void measureKindChanged(int measureKind);
 	void connectionTypeChanged(int connectionType);
 
 	void activeSignalChanged(const MeasureSignal& activeSignal);	// slot informs that signal for measure was selected

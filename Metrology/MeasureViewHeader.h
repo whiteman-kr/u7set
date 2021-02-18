@@ -82,9 +82,9 @@ public:
 
 public:
 
-	void				setMeasureType(int measureType);
+	void				setMeasureType(MeasureType measureType);
 
-	void				init(int type);
+	void				init(MeasureType measureType);
 
 	int					count() const;
 	MeasureViewColumn*	column(int index) const;
@@ -96,15 +96,15 @@ public:
 
 private:
 
-	static				MeasureViewColumn m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
+	static				MeasureViewColumn m_column[MeasureTypeCount][MEASURE_VIEW_COLUMN_COUNT];
 
-	int					m_measureType = MEASURE_TYPE_UNDEFINED;
+	MeasureType			m_measureType = MeasureType::NoMeasureType;
 
-	int					m_columnCount[MEASURE_TYPE_COUNT];
+	int					m_columnCount[MeasureTypeCount];
 };
 
 // ==============================================================================================
-// MEASURE_TYPE_LINEARITY
+// MeasureType::Linearity
 //
 const int				MVC_CMN_L_INDEX				= 0,
 						MVC_CMN_L_MODULE_SN			= 1,
@@ -157,7 +157,7 @@ const int				MVC_CMN_L_INDEX				= 0,
 						MVC_CMN_L_CALIBRATOR		= 48;
 
 // ==============================================================================================
-// MEASURE_TYPE_COMPARATOR
+// MeasureType::Comparators
 //
 const int				MVC_CMN_C_INDEX				= 0,
 						MVC_CMN_C_MODULE_SN			= 1,

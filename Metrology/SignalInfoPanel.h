@@ -170,7 +170,7 @@ private:
 	CalibratorBase*			m_pCalibratorBase = nullptr;
 	SignalInfoOption		m_signalInfo;
 
-	int						m_measureKind = MEASURE_KIND_UNDEFINED;
+	MeasureKind				m_measureKind = MeasureKind::NoMeasureKind;
 	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 protected:
@@ -179,7 +179,7 @@ protected:
 
 public slots:
 
-	void					measureKindChanged(int kind);
+	void					measureKindChanged(int measureKind);
 	void					connectionTypeChanged(int connectionType);
 
 	void					activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected

@@ -513,8 +513,8 @@ private:
 	MeasurePointBase	m_pointBase;												// list of measurement points
 
 	double				m_errorLimit = 0.2;											// permissible error is given by specified documents
-	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;					// type of error absolute or reduced
-	int					m_limitType = MEASURE_LIMIT_TYPE_ELECTRIC;					// type of displaing error denend on limit
+	int					m_errorType = MeasureErrorType::Reduce;					// type of error absolute or reduced
+	int					m_limitType = MeasureLimitType::Electric;					// type of displaing error denend on limit
 
 	int					m_measureTimeInPoint = 1;									// time, in seconds, during which will be made ​​N measurements at each point
 	int					m_measureCountInPoint = 20;									// count of measurements in a point, according to GOST MI-2002 application 7
@@ -597,8 +597,8 @@ private:
 
 	double				m_errorLimit = 0.2;										// permissible error is given by specified documents
 	double				m_startValueForCompare = 0.1;							// start value is given by metrologists
-	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;				// type of error absolute or reduced
-	int					m_limitType = MEASURE_LIMIT_TYPE_ELECTRIC;				// type of displaing error denend on limit
+	int					m_errorType = MeasureErrorType::Reduce;				// type of error absolute or reduced
+	int					m_limitType = MeasureLimitType::Electric;				// type of displaing error denend on limit
 
 	int					m_startComparatorIndex = 0;								// start the measurement with the сomparators under the number ...
 	bool				m_enableMeasureHysteresis = false;						// enable flag to measure hysteresis of сomparator
@@ -649,7 +649,7 @@ public:
 private:
 
 	int					m_measureTimeout = 0;											// in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
-	int					m_measureKind = MEASURE_KIND_ONE_RACK;							// measure kind: each channel separately - 0 or for all channels together - 1
+	int					m_measureKind = MeasureKind::OneRack;							// measure kind: each channel separately - 0 or for all channels together - 1
 	int					m_connectionType = Metrology::ConnectionType::Unused;			// selected type of connection
 
 	QString				m_defaultRack;
@@ -729,7 +729,7 @@ public:
 //private:
 public:
 
-	MeasureViewColumn	m_column[MEASURE_TYPE_COUNT][LANGUAGE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
+	MeasureViewColumn	m_column[MeasureTypeCount][LANGUAGE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
 
 public:
 
@@ -771,9 +771,9 @@ public:
 
 private:
 
-	int					m_measureType = MEASURE_TYPE_UNDEFINED;						// current, active ViewID
+	int					m_measureType = MeasureType::NoMeasureType;						// current, active ViewID
 
-	bool				m_updateColumnView[MEASURE_TYPE_COUNT];						// determined the need to update the view after changing settings
+	bool				m_updateColumnView[MeasureTypeCount];						// determined the need to update the view after changing settings
 
 	QFont				m_font;
 	QFont				m_fontBold;

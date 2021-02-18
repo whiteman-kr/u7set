@@ -394,14 +394,14 @@ void ComparatorInfoPanel::restartComparatorStateTimer(int timeout)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::measureKindChanged(int kind)
+void ComparatorInfoPanel::measureKindChanged(int measureKind)
 {
-	if (kind < 0 || kind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
 		return;
 	}
 
-	m_measureKind = kind;
+	m_measureKind = static_cast<MeasureKind>(measureKind);
 }
 
 

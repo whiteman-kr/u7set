@@ -56,9 +56,9 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent)
 	//
 	theOptions.linearity().points().load();
 
-	for (int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType++)
+	for(int measureType = 0; measureType < MeasureTypeCount; measureType++)
 	{
-		m_measureBase.load(measureType);
+		m_measureBase.load(static_cast<MeasureType>(measureType));
 	}
 	connect(this, &MainWindow::appendMeasure, &m_measureBase, &MeasureBase::appendToBase, Qt::QueuedConnection);
 	connect(&m_measureBase, &MeasureBase::updateMeasureView, this, &MainWindow::updateMeasureView, Qt::QueuedConnection);
@@ -94,7 +94,7 @@ bool MainWindow::createInterface()
 
 	loadSettings();
 
-	setMeasureType(MEASURE_TYPE_LINEARITY);
+	setMeasureType(MeasureType::Linearity);
 
 	m_pCalculator = new Calculator(this);	// calculator
 
@@ -633,9 +633,9 @@ void MainWindow::createMeasureViews()
 	m_pMainTab = new QTabWidget();
 	m_pMainTab->setTabPosition(QTabWidget::South);
 
-	for(int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType++)
+	for(int measureType = 0; measureType < MeasureTypeCount; measureType++)
 	{
-		MeasureView* pView = new MeasureView(measureType, this);
+		MeasureView* pView = new MeasureView(static_cast<MeasureType>(measureType), this);
 		if (pView == nullptr)
 		{
 			continue;
@@ -643,7 +643,7 @@ void MainWindow::createMeasureViews()
 
 		pView->loadMeasurements(m_measureBase);
 
-		m_pMainTab->addTab(pView, qApp->translate("MeasureBase.h", MeasureType[measureType]));
+		m_pMainTab->addTab(pView, qApp->translate("MeasureBase", MeasureTypeCaption(measureType).toUtf8()));
 
 		pView->setFrameStyle(QFrame::NoFrame);
 
@@ -667,7 +667,7 @@ void MainWindow::createMeasureViews()
 
 MeasureView* MainWindow::measureView(int measureType)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		assert(false);
 		return nullptr;
@@ -686,7 +686,7 @@ MeasureView* MainWindow::measureView(int measureType)
 
 void MainWindow::appendMeasureView(int measureType, MeasureView* pView)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		assert(0);
 		return;
@@ -780,9 +780,9 @@ void MainWindow::createContextMenu()
 
 	// init context menu
 	//
-	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+	for(int measureType = 0; measureType < MeasureTypeCount; measureType++)
 	{
-		MeasureView* pView = measureView(type);
+		MeasureView* pView = measureView(measureType);
 		if (pView == nullptr)
 		{
 			continue;
@@ -802,16 +802,18 @@ void MainWindow::loadOnToolBar_MeasureKind()
 		return;
 	}
 
+	int selectedItem = -1;
+	int curerentMeasureKind = theOptions.toolBar().measureKind();
+
+	m_measureKind = static_cast<MeasureKind>(curerentMeasureKind);
+
 	m_pMeasureKindList->blockSignals(true);
 
 		m_pMeasureKindList->clear();
 
-		int selectedItem = -1;
-		m_measureKind = theOptions.toolBar().measureKind();
-
-		for(int kind = 0; kind < MEASURE_KIND_COUNT; kind++)
+		for(int measureKind = 0; measureKind < MeasureKindCount; measureKind++)
 		{
-			if (kind == MEASURE_KIND_MULTI_RACK)
+			if (measureKind == MeasureKind::MultiRack)
 			{
 				if (theSignalBase.racks().groups().count() == 0)
 				{
@@ -819,12 +821,12 @@ void MainWindow::loadOnToolBar_MeasureKind()
 				}
 			}
 
-			if (kind == m_measureKind)
+			if (measureKind == curerentMeasureKind)
 			{
-				selectedItem = kind;
+				selectedItem = measureKind;
 			}
 
-			m_pMeasureKindList->addItem(qApp->translate("MeasureBase.h", MeasureKind[kind]), kind);
+			m_pMeasureKindList->addItem(qApp->translate("MeasureBase", MeasureKindCaption(measureKind).toUtf8()), measureKind);
 		}
 
 	m_pMeasureKindList->blockSignals(false);
@@ -832,7 +834,7 @@ void MainWindow::loadOnToolBar_MeasureKind()
 	if (selectedItem == -1)
 	{
 		selectedItem = 0;
-		m_measureKind = MEASURE_KIND_ONE_RACK;
+		m_measureKind = MeasureKind::OneRack;
 	}
 
 	m_pMeasureKindList->setCurrentIndex(selectedItem);
@@ -939,7 +941,7 @@ void MainWindow::loadOnToolBar_Racks()
 	m_pSelectSignalWidget->clear();
 	updatePrevNextSignalActions(0);
 
-	if (m_measureKind < 0 || m_measureKind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(m_measureKind) == true)
 	{
 		return;
 	}
@@ -1006,7 +1008,7 @@ void MainWindow::loadOnToolBar_Signals()
 	m_pSelectSignalWidget->clear();
 	updatePrevNextSignalActions(0);
 
-	if (m_measureKind < 0 || m_measureKind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(m_measureKind) == true)
 	{
 		return;
 	}
@@ -1060,16 +1062,18 @@ void MainWindow::loadOnToolBar_Signals()
 
 void MainWindow::setMeasureType(int measureType)
 {
+	if (ERR_MEASURE_TYPE(measureType) == true)
+	{
+		return;
+	}
+
 	if (m_measureThread.isRunning() == true)
 	{
 		return;
 	}
 
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
-	{
-		return;
-	}
-
+	//
+	//
 	MeasureView* pView = measureView(measureType);
 	if (pView == nullptr)
 	{
@@ -1078,8 +1082,8 @@ void MainWindow::setMeasureType(int measureType)
 
 	switch(measureType)
 	{
-		case MEASURE_TYPE_LINEARITY:
-		case MEASURE_TYPE_COMPARATOR:
+		case MeasureType::Linearity:
+		case MeasureType::Comparators:
 
 			m_pMeasureKindToolBar->show();
 			m_pConnectionToolBar->show();
@@ -1095,10 +1099,14 @@ void MainWindow::setMeasureType(int measureType)
 			break;
 	}
 
-	m_measureType = measureType;
+	//
+	//
+	m_measureType = static_cast<MeasureType>(measureType);
 
+	//
+	//
 	emit measureViewChanged(pView);
-	emit measureTypeChanged(m_measureType);
+	emit measureTypeChanged(measureType);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1177,7 +1185,7 @@ bool MainWindow::changeInputSignalOnInternal(const MeasureSignal& activeSignal)
 		return false;
 	}
 
-	if (m_measureKind != MEASURE_KIND_ONE_RACK)
+	if (m_measureKind != MeasureKind::OneRack)
 	{
 		return false;
 	}
@@ -1263,13 +1271,13 @@ bool MainWindow::signalIsMeasured(const MeasureSignal& activeSignal, QString& si
 
 		switch (m_measureType)
 		{
-			case MEASURE_TYPE_LINEARITY:
+			case MeasureType::Linearity:
 				{
 					si.setSignal(pMetrologySignal);
 				}
 				break;
 
-			case MEASURE_TYPE_COMPARATOR:
+			case MeasureType::Comparators:
 				{
 					si.setSignal(pMetrologySignal);
 
@@ -1423,7 +1431,7 @@ int MainWindow::getMaxComparatorCount(const MeasureSignal& activeSignal)
 
 void MainWindow::startMeasure()
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return;
 	}
@@ -1455,7 +1463,7 @@ void MainWindow::startMeasure()
 
 	if (theOptions.module().measureInterInsteadIn() == true)
 	{
-		if (m_measureKind == MEASURE_KIND_ONE_RACK)
+		if (m_measureKind == MeasureKind::OneRack)
 		{
 			if (changeInputSignalOnInternal(activeSignal) == true)
 			{
@@ -1465,7 +1473,7 @@ void MainWindow::startMeasure()
 		}
 	}
 
-	if (m_measureType == MEASURE_TYPE_COMPARATOR)
+	if (m_measureType == MeasureType::Comparators)
 	{
 		int comparatorCount = getMaxComparatorCount(activeSignal);
 		if (comparatorCount == 0)
@@ -1479,7 +1487,7 @@ void MainWindow::startMeasure()
 	// if we check in single module mode
 	// all module inputs must be the same
 	//
-	if (m_measureKind == MEASURE_KIND_ONE_MODULE)
+	if (m_measureKind == MeasureKind::OneModule)
 	{
 		if (inputsOfmoduleIsSame(activeSignal) == false)
 		{
@@ -1544,12 +1552,26 @@ void MainWindow::exportMeasure()
 		return;
 	}
 
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return;
 	}
 
-	ExportData* dialog = new ExportData(pMeasureView, false, MeasureFileName[m_measureType]);
+	QString fileName;
+
+	switch (m_measureType)
+	{
+		case MeasureType::Linearity:	fileName = "Linearity";		break;
+		case MeasureType::Comparators:	fileName = "Comparators";	break;
+		default:						assert(0);
+	}
+
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	ExportData* dialog = new ExportData(pMeasureView, false, fileName);
 	dialog->exec();
 }
 
@@ -1621,7 +1643,7 @@ void MainWindow::showRackList()
 
 	theSignalBase.initRackParam();
 
-	if (m_measureKind == MEASURE_KIND_MULTI_RACK)
+	if (m_measureKind == MeasureKind::MultiRack)
 	{
 		loadOnToolBar_Racks();
 	}
@@ -1833,14 +1855,14 @@ void MainWindow::showOptions()
 
 	// update columns in the measure views
 	//
-	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+	for(int measureType = 0; measureType < MeasureTypeCount; measureType++)
 	{
-		if (theOptions.measureView().updateColumnView(type) == false)
+		if (theOptions.measureView().updateColumnView(measureType) == false)
 		{
 			continue;
 		}
 
-		MeasureView* pView = measureView(type);
+		MeasureView* pView = measureView(measureType);
 		if (pView == nullptr)
 		{
 			continue;
@@ -1936,18 +1958,18 @@ void MainWindow::setMeasureKind(int index)
 		return;
 	}
 
-	int kind = m_pMeasureKindList->itemData(index).toInt();
-	if (kind < 0 || kind >= MEASURE_KIND_COUNT)
+	int measureKind = m_pMeasureKindList->itemData(index).toInt();
+	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
 		return;
 	}
 
-	if (kind == MEASURE_KIND_MULTI_RACK)
+	if (measureKind == MeasureKind::MultiRack)
 	{
 		if (theSignalBase.racks().groups().count() == 0)
 		{
 			m_pMeasureKindList->blockSignals(true);
-			m_pMeasureKindList->setCurrentIndex(m_measureKind);
+			m_pMeasureKindList->setCurrentIndex(0);
 			m_pMeasureKindList->blockSignals(false);
 
 			QMessageBox::information(this,
@@ -1962,14 +1984,14 @@ void MainWindow::setMeasureKind(int index)
 
 	//
 	//
-	m_measureKind = kind;
+	m_measureKind = static_cast<MeasureKind>(measureKind);
 
 	//
 	//
-	theOptions.toolBar().setMeasureKind(m_measureKind);
+	theOptions.toolBar().setMeasureKind(measureKind);
 	theOptions.toolBar().save();
 
-	emit measureKindChanged(m_measureKind);
+	emit measureKindChanged(measureKind);
 
 	//
 	//
@@ -2017,14 +2039,13 @@ void MainWindow::setConnectionType(int index)
 
 void MainWindow::setConnectionTypeFromStatistic(int connectionType)
 {
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
+	{
+		return;
+	}
 	if (m_pConnectionTypeList == nullptr)
 	{
 		assert(m_pConnectionTypeList);
-		return;
-	}
-
-	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
-	{
 		return;
 	}
 
@@ -2264,7 +2285,7 @@ void MainWindow::changeActiveDestSignal(int channel, Metrology::Signal* pDestSig
 		return;
 	}
 
-	if (m_measureKind < 0 || m_measureKind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(m_measureKind) == true)
 	{
 		return;
 	}
@@ -2325,7 +2346,7 @@ void MainWindow::changeActiveDestSignals(int channelPrev, int channelNext)
 		return;
 	}
 
-	if (m_measureKind < 0 || m_measureKind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(m_measureKind) == true)
 	{
 		return;
 	}
@@ -2802,7 +2823,7 @@ void MainWindow::measureThreadStoped()
 	{
 		switch (m_measureType)
 		{
-			case MEASURE_TYPE_LINEARITY:
+			case MeasureType::Linearity:
 				{
 					int comparatorCount = getMaxComparatorCount(activeSignal);
 					if (comparatorCount == 0)
@@ -2810,14 +2831,14 @@ void MainWindow::measureThreadStoped()
 						break;
 					}
 
-					m_pMainTab->setCurrentIndex(MEASURE_TYPE_COMPARATOR);
+					m_pMainTab->setCurrentIndex(MeasureType::Comparators);
 
 					emit startMeasure();
 					return;
 				}
-			case MEASURE_TYPE_COMPARATOR:
+			case MeasureType::Comparators:
 				{
-					m_pMainTab->setCurrentIndex(MEASURE_TYPE_LINEARITY);
+					m_pMainTab->setCurrentIndex(MeasureType::Linearity);
 				}
 				break;
 			default:
@@ -2924,8 +2945,7 @@ void MainWindow::measureComplite(Measurement* pMeasurement)
 		return;
 	}
 
-	int type = pMeasurement->measureType();
-	if (type < 0 || type >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(pMeasurement->measureType()) == true)
 	{
 		return;
 	}
@@ -2958,7 +2978,7 @@ void MainWindow::updateStartStopActions()
 	m_pStartMeasureAction->setEnabled(false);
 	m_pStopMeasureAction->setEnabled(false);
 
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return;
 	}

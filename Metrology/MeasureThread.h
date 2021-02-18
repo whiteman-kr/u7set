@@ -94,8 +94,8 @@ public:
 
 private:
 
-	int						m_measureType = MEASURE_TYPE_UNDEFINED;
-	int						m_measureKind = MEASURE_KIND_UNDEFINED;
+	MeasureType				m_measureType = MeasureType::NoMeasureType;
+	MeasureKind				m_measureKind = MeasureKind::NoMeasureKind;
 	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 	MeasureThreadInfo		m_info;
@@ -146,8 +146,8 @@ public slots:
 	void					tuningSocketDisconnected();
 
 	void					measureTimeoutChanged(int timeout);
-	void					measureTypeChanged(int type);
-	void					measureKindChanged(int kind);
+	void					measureTypeChanged(int measureType);
+	void					measureKindChanged(int measureKind);
 	void					connectionTypeChanged(int connectionType);
 
 	void					signalParamChanged(const QString& appSignalID);

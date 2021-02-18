@@ -45,7 +45,7 @@ public:
 
 private:
 
-	int m_measureType = MEASURE_TYPE_UNDEFINED;
+	int m_measureType = MeasureType::NoMeasureType;
 
 	MeasureViewHeader m_header;
 
@@ -71,19 +71,19 @@ class MeasureView : public QTableView
 
 public:
 
-	explicit MeasureView(int measureType, QWidget* parent = nullptr);
+	explicit MeasureView(MeasureType measureType, QWidget* parent = nullptr);
 	virtual ~MeasureView();
 
 public:
 
-	int	measureType() const { return m_measureType; }
+	MeasureType	measureType() const { return m_measureType; }
 	MeasureTable& table() { return m_table; }
 
 	void updateColumn();
 
 private:
 
-	int	m_measureType = MEASURE_TYPE_UNDEFINED;
+	MeasureType	m_measureType = MeasureType::NoMeasureType;
 	MeasureTable m_table;
 
 	QMenu* m_headerContextMenu = nullptr;

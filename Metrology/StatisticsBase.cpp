@@ -142,7 +142,7 @@ StatisticsBase::StatisticsBase(QObject* parent) :
 {
 	QMutexLocker l(&m_signalMutex);
 
-	m_statisticList.resize(MEASURE_TYPE_COUNT);
+	m_statisticList.resize(MeasureTypeCount);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -171,7 +171,7 @@ void StatisticsBase::clear()
 
 int StatisticsBase::count() const
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return 0;
 	}
@@ -185,7 +185,7 @@ int StatisticsBase::count() const
 
 int StatisticsBase::count(int measureType) const
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return 0;
 	}
@@ -202,12 +202,12 @@ void StatisticsBase::createSignalList()
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (m_statisticList.count() <= MEASURE_TYPE_LINEARITY)
+	if (m_statisticList.count() <= MeasureType::Linearity)
 	{
 		return;
 	}
 
-	m_statisticList[MEASURE_TYPE_LINEARITY].clear();
+	m_statisticList[MeasureType::Linearity].clear();
 
 	QElapsedTimer responseTime;
 	responseTime.start();
@@ -260,7 +260,7 @@ void StatisticsBase::createSignalList()
 			}
 		}
 
-		m_statisticList[MEASURE_TYPE_LINEARITY].append(si);
+		m_statisticList[MeasureType::Linearity].append(si);
 	}
 
 	qDebug() << __FUNCTION__ << " Time for create: " << responseTime.elapsed() << " ms";
@@ -272,12 +272,12 @@ void StatisticsBase::createComparatorList()
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (m_statisticList.count() <= MEASURE_TYPE_COMPARATOR)
+	if (m_statisticList.count() <= MeasureType::Comparators)
 	{
 		return;
 	}
 
-	m_statisticList[MEASURE_TYPE_COMPARATOR].clear();
+	m_statisticList[MeasureType::Comparators].clear();
 
 	QElapsedTimer responseTime;
 	responseTime.start();
@@ -345,7 +345,7 @@ void StatisticsBase::createComparatorList()
 			}
 			*/
 
-			m_statisticList[MEASURE_TYPE_COMPARATOR].append(si);
+			m_statisticList[MeasureType::Comparators].append(si);
 		}
 	}
 
@@ -373,7 +373,7 @@ void StatisticsBase::updateConnections()
 
 StatisticsItem StatisticsBase::item(int index) const
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return StatisticsItem();
 	}
@@ -392,7 +392,7 @@ StatisticsItem StatisticsBase::item(int index) const
 
 StatisticsItem StatisticsBase::item(int measureType, int index) const
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return StatisticsItem();
 	}
@@ -411,7 +411,7 @@ StatisticsItem StatisticsBase::item(int measureType, int index) const
 
 StatisticsItem* StatisticsBase::itemPtr(int measureType, int index)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return nullptr;
 	}
@@ -430,7 +430,7 @@ StatisticsItem* StatisticsBase::itemPtr(int measureType, int index)
 
 void StatisticsBase::setItem(int measureType, int index, const StatisticsItem& item)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return;
 	}

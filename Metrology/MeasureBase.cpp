@@ -14,7 +14,7 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-Measurement::Measurement(int measureType)
+Measurement::Measurement(MeasureType measureType)
 {
 	clear();
 
@@ -31,7 +31,7 @@ Measurement::~Measurement()
 
 void Measurement::clear()
 {
-	m_measureType = MEASURE_TYPE_UNDEFINED;
+	m_measureType = MeasureType::NoMeasureType;
 	m_signalHash = UNDEFINED_HASH;
 
 	m_measureID = -1;
@@ -53,7 +53,7 @@ void Measurement::clear()
 
 	m_calibratorPrecision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
 
-	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
+	for(int t = 0; t < MeasureLimitTypeCount; t++)
 	{
 		m_nominal[t] = 0;
 		m_measure[t] = 0;
@@ -63,7 +63,7 @@ void Measurement::clear()
 		m_unit[t].clear();
 		m_limitPrecision[t] = 0;
 
-		for(int e = 0; e < MEASURE_ERROR_TYPE_COUNT; e++)
+		for(int e = 0; e < MeasureErrorTypeCount; e++)
 		{
 			m_error[t][e] = 0;
 			m_errorLimit[t][e] = 0;
@@ -134,7 +134,7 @@ QString Measurement::connectionTypeStr() const
 
 double Measurement::nominal(int limitType) const
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return 0;
@@ -149,7 +149,7 @@ QString Measurement::nominalStr(int limitType) const
 {
 	int precision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
 
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return QString();
@@ -159,7 +159,7 @@ QString Measurement::nominalStr(int limitType) const
 
 	if (theOptions.measureView().precesionByCalibrator() == true)
 	{
-		if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+		if (limitType == MeasureLimitType::Electric)
 		{
 			precision = calibratorPrecision();
 		}
@@ -172,7 +172,7 @@ QString Measurement::nominalStr(int limitType) const
 
 void Measurement::setNominal(int limitType, double value)
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return;
@@ -185,7 +185,7 @@ void Measurement::setNominal(int limitType, double value)
 
 double Measurement::measure(int limitType) const
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return 0;
@@ -208,7 +208,7 @@ QString Measurement::measureStr(int limitType) const
 
 	int precision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
 
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return QString();
@@ -218,7 +218,7 @@ QString Measurement::measureStr(int limitType) const
 
 	if (theOptions.measureView().precesionByCalibrator() == true)
 	{
-		if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+		if (limitType == MeasureLimitType::Electric)
 		{
 			precision = calibratorPrecision();
 		}
@@ -231,7 +231,7 @@ QString Measurement::measureStr(int limitType) const
 
 void Measurement::setMeasure(int limitType, double value)
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return;
@@ -281,15 +281,15 @@ void Measurement::setLimits(const IoSignalParam& ioParam)
 					break;
 				}
 
-				setLowLimit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricLowLimit());
-				setHighLimit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricHighLimit());
-				setUnit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricUnitStr());
-				setLimitPrecision(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricPrecision());
+				setLowLimit(MeasureLimitType::Electric, param.electricLowLimit());
+				setHighLimit(MeasureLimitType::Electric, param.electricHighLimit());
+				setUnit(MeasureLimitType::Electric, param.electricUnitStr());
+				setLimitPrecision(MeasureLimitType::Electric, param.electricPrecision());
 
-				setLowLimit(MEASURE_LIMIT_TYPE_ENGINEER, param.lowEngineeringUnits());
-				setHighLimit(MEASURE_LIMIT_TYPE_ENGINEER, param.highEngineeringUnits());
-				setUnit(MEASURE_LIMIT_TYPE_ENGINEER, param.unit());
-				setLimitPrecision(MEASURE_LIMIT_TYPE_ENGINEER, param.decimalPlaces());
+				setLowLimit(MeasureLimitType::Engineering, param.lowEngineeringUnits());
+				setHighLimit(MeasureLimitType::Engineering, param.highEngineeringUnits());
+				setUnit(MeasureLimitType::Engineering, param.unit());
+				setLimitPrecision(MeasureLimitType::Engineering, param.decimalPlaces());
 			}
 			break;
 
@@ -311,15 +311,15 @@ void Measurement::setLimits(const IoSignalParam& ioParam)
 					break;
 				}
 
-				setLowLimit(MEASURE_LIMIT_TYPE_ELECTRIC, inParam.electricLowLimit());
-				setHighLimit(MEASURE_LIMIT_TYPE_ELECTRIC, inParam.electricHighLimit());
-				setUnit(MEASURE_LIMIT_TYPE_ELECTRIC, inParam.electricUnitStr());
-				setLimitPrecision(MEASURE_LIMIT_TYPE_ELECTRIC, inParam.electricPrecision());
+				setLowLimit(MeasureLimitType::Electric, inParam.electricLowLimit());
+				setHighLimit(MeasureLimitType::Electric, inParam.electricHighLimit());
+				setUnit(MeasureLimitType::Electric, inParam.electricUnitStr());
+				setLimitPrecision(MeasureLimitType::Electric, inParam.electricPrecision());
 
-				setLowLimit(MEASURE_LIMIT_TYPE_ENGINEER, outParam.lowEngineeringUnits());
-				setHighLimit(MEASURE_LIMIT_TYPE_ENGINEER, outParam.highEngineeringUnits());
-				setUnit(MEASURE_LIMIT_TYPE_ENGINEER, outParam.unit());
-				setLimitPrecision(MEASURE_LIMIT_TYPE_ENGINEER, outParam.decimalPlaces());
+				setLowLimit(MeasureLimitType::Engineering, outParam.lowEngineeringUnits());
+				setHighLimit(MeasureLimitType::Engineering, outParam.highEngineeringUnits());
+				setUnit(MeasureLimitType::Engineering, outParam.unit());
+				setLimitPrecision(MeasureLimitType::Engineering, outParam.decimalPlaces());
 			}
 			break;
 
@@ -336,15 +336,15 @@ void Measurement::setLimits(const IoSignalParam& ioParam)
 					break;
 				}
 
-				setLowLimit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricLowLimit());
-				setHighLimit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricHighLimit());
-				setUnit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricUnitStr());
-				setLimitPrecision(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricPrecision());
+				setLowLimit(MeasureLimitType::Electric, param.electricLowLimit());
+				setHighLimit(MeasureLimitType::Electric, param.electricHighLimit());
+				setUnit(MeasureLimitType::Electric, param.electricUnitStr());
+				setLimitPrecision(MeasureLimitType::Electric, param.electricPrecision());
 
-				setLowLimit(MEASURE_LIMIT_TYPE_ENGINEER, param.lowEngineeringUnits());
-				setHighLimit(MEASURE_LIMIT_TYPE_ENGINEER, param.highEngineeringUnits());
-				setUnit(MEASURE_LIMIT_TYPE_ENGINEER, param.unit());
-				setLimitPrecision(MEASURE_LIMIT_TYPE_ENGINEER, param.decimalPlaces());
+				setLowLimit(MeasureLimitType::Engineering, param.lowEngineeringUnits());
+				setHighLimit(MeasureLimitType::Engineering, param.highEngineeringUnits());
+				setUnit(MeasureLimitType::Engineering, param.unit());
+				setLimitPrecision(MeasureLimitType::Engineering, param.decimalPlaces());
 			}
 			break;
 
@@ -357,7 +357,7 @@ void Measurement::setLimits(const IoSignalParam& ioParam)
 
 double Measurement::lowLimit(int limitType) const
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return 0;
@@ -370,7 +370,7 @@ double Measurement::lowLimit(int limitType) const
 
 void Measurement::setLowLimit(int limitType, double lowLimit)
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return;
@@ -383,7 +383,7 @@ void Measurement::setLowLimit(int limitType, double lowLimit)
 
 double Measurement::highLimit(int limitType) const
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return 0;
@@ -396,7 +396,7 @@ double Measurement::highLimit(int limitType) const
 
 void Measurement::setHighLimit(int limitType, double highLimit)
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return;
@@ -409,7 +409,7 @@ void Measurement::setHighLimit(int limitType, double highLimit)
 
 QString Measurement::unit(int limitType) const
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return QString();
@@ -422,7 +422,7 @@ QString Measurement::unit(int limitType) const
 
 void Measurement::setUnit(int limitType, QString unit)
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return;
@@ -435,7 +435,7 @@ void Measurement::setUnit(int limitType, QString unit)
 
 int Measurement::limitPrecision(int limitType) const
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return 0;
@@ -448,7 +448,7 @@ int Measurement::limitPrecision(int limitType) const
 
 void Measurement::setLimitPrecision(int limitType, int precision)
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return;
@@ -461,7 +461,7 @@ void Measurement::setLimitPrecision(int limitType, int precision)
 
 QString Measurement::limitStr(int limitType) const
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return QString();
@@ -479,35 +479,35 @@ void Measurement::calcError()
 {
 	double errorLimit = theOptions.linearity().errorLimit();
 
-	for(int limitType = 0; limitType < MEASURE_LIMIT_TYPE_COUNT; limitType++)
+	for(int limitType = 0; limitType < MeasureLimitTypeCount; limitType++)
 	{
-		setError(limitType, MEASURE_ERROR_TYPE_ABSOLUTE,		std::abs(nominal(limitType)-measure(limitType)));
-		setError(limitType, MEASURE_ERROR_TYPE_REDUCE,			std::abs(((nominal(limitType)-measure(limitType)) / (highLimit(limitType) - lowLimit(limitType))) * 100.0));
-		setError(limitType, MEASURE_ERROR_TYPE_RELATIVE,		std::abs(((nominal(limitType)-measure(limitType)) / nominal(limitType)) * 100.0));
+		setError(limitType, MeasureErrorType::Absolute,		std::abs(nominal(limitType)-measure(limitType)));
+		setError(limitType, MeasureErrorType::Reduce,			std::abs(((nominal(limitType)-measure(limitType)) / (highLimit(limitType) - lowLimit(limitType))) * 100.0));
+		setError(limitType, MeasureErrorType::Relative,		std::abs(((nominal(limitType)-measure(limitType)) / nominal(limitType)) * 100.0));
 
-		setErrorLimit(limitType, MEASURE_ERROR_TYPE_ABSOLUTE,	std::abs((highLimit(limitType) - lowLimit(limitType)) * errorLimit / 100.0));
-		setErrorLimit(limitType, MEASURE_ERROR_TYPE_REDUCE,		errorLimit);
-		setErrorLimit(limitType, MEASURE_ERROR_TYPE_RELATIVE,	errorLimit);
+		setErrorLimit(limitType, MeasureErrorType::Absolute,	std::abs((highLimit(limitType) - lowLimit(limitType)) * errorLimit / 100.0));
+		setErrorLimit(limitType, MeasureErrorType::Reduce,		errorLimit);
+		setErrorLimit(limitType, MeasureErrorType::Relative,	errorLimit);
 	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-double Measurement::error(int limitType, int errotType) const
+double Measurement::error(int limitType, int errorType) const
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return 0;
 	}
 
-	if (errotType < 0 || errotType >= MEASURE_ERROR_TYPE_COUNT)
+	if (ERR_MEASURE_ERROR_TYPE(errorType) == true)
 	{
 		assert(0);
 		return 0;
 	}
 
-	return m_error[limitType][errotType];
+	return m_error[limitType][errorType];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -525,7 +525,7 @@ QString Measurement::errorStr() const
 	int precision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
 
 	int limitType = theOptions.linearity().limitType();
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return QString();
@@ -535,14 +535,14 @@ QString Measurement::errorStr() const
 
 	if (theOptions.measureView().precesionByCalibrator() == true)
 	{
-		if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+		if (limitType == MeasureLimitType::Electric)
 		{
 			precision = calibratorPrecision();
 		}
 	}
 
 	int errorType = theOptions.linearity().errorType();
-	if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
+	if (ERR_MEASURE_ERROR_TYPE(errorType) == true)
 	{
 		assert(0);
 		return QString();
@@ -552,9 +552,9 @@ QString Measurement::errorStr() const
 
 	switch(errorType)
 	{
-		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_error[limitType][errorType], 'f', precision) + " " + m_unit[limitType];	break;
-		case MEASURE_ERROR_TYPE_REDUCE:
-		case MEASURE_ERROR_TYPE_RELATIVE:	str = QString::number(m_error[limitType][errorType], 'f', 3) + " %" ;							break;
+		case MeasureErrorType::Absolute:	str = QString::number(m_error[limitType][errorType], 'f', precision) + " " + m_unit[limitType];	break;
+		case MeasureErrorType::Reduce:
+		case MeasureErrorType::Relative:	str = QString::number(m_error[limitType][errorType], 'f', 3) + " %" ;							break;
 		default:							assert(0);
 	}
 
@@ -563,40 +563,40 @@ QString Measurement::errorStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Measurement::setError(int limitType, int errotType, double value)
+void Measurement::setError(int limitType, int errorType, double value)
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return;
 	}
 
-	if (errotType < 0 || errotType >= MEASURE_ERROR_TYPE_COUNT)
+	if (ERR_MEASURE_ERROR_TYPE(errorType) == true)
 	{
 		assert(0);
 		return;
 	}
 
-	m_error[limitType][errotType] = value;
+	m_error[limitType][errorType] = value;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-double Measurement::errorLimit(int limitType, int errotType) const
+double Measurement::errorLimit(int limitType, int errorType) const
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return 0;
 	}
 
-	if (errotType < 0 || errotType >= MEASURE_ERROR_TYPE_COUNT)
+	if (ERR_MEASURE_ERROR_TYPE(errorType) == true)
 	{
 		assert(0);
 		return 0;
 	}
 
-	return m_errorLimit[limitType][errotType];
+	return m_errorLimit[limitType][errorType];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -604,14 +604,14 @@ double Measurement::errorLimit(int limitType, int errotType) const
 QString Measurement::errorLimitStr() const
 {
 	int limitType = theOptions.linearity().limitType();
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return QString();
 	}
 
 	int errorType = theOptions.linearity().errorType();
-	if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
+	if (ERR_MEASURE_ERROR_TYPE(errorType) == true)
 	{
 		assert(0);
 		return QString();
@@ -621,9 +621,9 @@ QString Measurement::errorLimitStr() const
 
 	switch(errorType)
 	{
-		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_errorLimit[limitType][errorType], 'f', m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
-		case MEASURE_ERROR_TYPE_REDUCE:
-		case MEASURE_ERROR_TYPE_RELATIVE:	str = QString::number(m_errorLimit[limitType][errorType], 'f', 3) + " %";												break;
+		case MeasureErrorType::Absolute:	str = QString::number(m_errorLimit[limitType][errorType], 'f', m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
+		case MeasureErrorType::Reduce:
+		case MeasureErrorType::Relative:	str = QString::number(m_errorLimit[limitType][errorType], 'f', 3) + " %";												break;
 		default:							assert(0);
 	}
 
@@ -632,21 +632,21 @@ QString Measurement::errorLimitStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Measurement::setErrorLimit(int limitType, int errotType, double value)
+void Measurement::setErrorLimit(int limitType, int errorType, double value)
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return;
 	}
 
-	if (errotType < 0 || errotType >= MEASURE_ERROR_TYPE_COUNT)
+	if (ERR_MEASURE_ERROR_TYPE(errorType) == true)
 	{
 		assert(0);
 		return;
 	}
 
-	m_errorLimit[limitType][errotType] = value;
+	m_errorLimit[limitType][errorType] = value;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -654,25 +654,25 @@ void Measurement::setErrorLimit(int limitType, int errotType, double value)
 int Measurement::errorResult() const
 {
 	int limitType = theOptions.linearity().limitType();
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
-		return MEASURE_ERROR_RESULT_UNDEFINED;
+		return MeasureErrorResult::NoMeasureErrorResult;
 	}
 
 	int errorType = theOptions.linearity().errorType();
-	if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
+	if (ERR_MEASURE_ERROR_TYPE(errorType) == true)
 	{
 		assert(0);
-		return MEASURE_ERROR_RESULT_UNDEFINED;
+		return MeasureErrorResult::NoMeasureErrorResult;
 	}
 
 	if (m_error[limitType][errorType] > m_errorLimit[limitType][errorType])
 	{
-		return MEASURE_ERROR_RESULT_FAILED;
+		return MeasureErrorResult::Failed;
 	}
 
-	return MEASURE_ERROR_RESULT_OK;
+	return MeasureErrorResult::Ok;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -688,12 +688,12 @@ QString Measurement::errorResultStr() const
 	}
 
 	int errResult = errorResult();
-	if (errResult < 0 || errResult > MEASURE_ERROR_RESULT_COUNT)
+	if (ERR_MEASURE_ERROR_RESULT(errResult) == true)
 	{
 		return QString();
 	}
 
-	return qApp->translate("MeasureBase.h", ErrorResult[errResult]);
+	return qApp->translate("MeasureBase", MeasureErrorResultCaption(errResult).toUtf8());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -779,8 +779,8 @@ Measurement* Measurement::at(int index)
 
 	switch(m_measureType)
 	{
-		case MEASURE_TYPE_LINEARITY:	pMeasurement = static_cast<LinearityMeasurement*> (this) + index;	break;
-		case MEASURE_TYPE_COMPARATOR:	pMeasurement = static_cast<ComparatorMeasurement*> (this) + index;	break;
+		case MeasureType::Linearity:	pMeasurement = static_cast<LinearityMeasurement*> (this) + index;	break;
+		case MeasureType::Comparators:	pMeasurement = static_cast<ComparatorMeasurement*> (this) + index;	break;
 		default:						assert(0);
 	}
 
@@ -813,7 +813,7 @@ Measurement& Measurement::operator=(Measurement& from)
 
 	m_calibratorPrecision = from.m_calibratorPrecision;
 
-	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
+	for(int t = 0; t < MeasureLimitTypeCount; t++)
 	{
 		m_nominal[t] = from.m_nominal[t];
 		m_measure[t] = from.m_measure[t];
@@ -823,7 +823,7 @@ Measurement& Measurement::operator=(Measurement& from)
 		m_unit[t] = from.m_unit[t];
 		m_limitPrecision[t] = from.m_limitPrecision[t];
 
-		for(int e = 0; e < MEASURE_ERROR_TYPE_COUNT; e++)
+		for(int e = 0; e < MeasureErrorTypeCount; e++)
 		{
 			m_error[t][e] = from.m_error[t][e];
 			m_errorLimit[t][e] = from.m_errorLimit[t][e];
@@ -844,8 +844,8 @@ Measurement& Measurement::operator=(Measurement& from)
 	//
 	switch(m_measureType)
 	{
-		case MEASURE_TYPE_LINEARITY:	*static_cast<LinearityMeasurement*> (this) = *static_cast <LinearityMeasurement*> (&from);		break;
-		case MEASURE_TYPE_COMPARATOR:	*static_cast<ComparatorMeasurement*> (this) = *static_cast <ComparatorMeasurement*> (&from);	break;
+		case MeasureType::Linearity:	*static_cast<LinearityMeasurement*> (this) = *static_cast <LinearityMeasurement*> (&from);		break;
+		case MeasureType::Comparators:	*static_cast<ComparatorMeasurement*> (this) = *static_cast <ComparatorMeasurement*> (&from);	break;
 		default:						assert(0);
 	}
 
@@ -856,14 +856,14 @@ Measurement& Measurement::operator=(Measurement& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearityMeasurement::LinearityMeasurement() : Measurement(MEASURE_TYPE_LINEARITY)
+LinearityMeasurement::LinearityMeasurement() : Measurement(MeasureType::Linearity)
 {
 	clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearityMeasurement::LinearityMeasurement(const IoSignalParam &ioParam) : Measurement(MEASURE_TYPE_LINEARITY)
+LinearityMeasurement::LinearityMeasurement(const IoSignalParam &ioParam) : Measurement(MeasureType::Linearity)
 {
 	clear();
 
@@ -909,11 +909,11 @@ LinearityMeasurement::~LinearityMeasurement()
 
 void LinearityMeasurement::clear()
 {
-	setMeasureType(MEASURE_TYPE_LINEARITY);
+	setMeasureType(MeasureType::Linearity);
 
 	m_percent = 0;
 
-	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
+	for(int t = 0; t < MeasureLimitTypeCount; t++)
 	{
 		for(int m = 0; m < MAX_MEASUREMENT_IN_POINT; m++)
 		{
@@ -925,9 +925,9 @@ void LinearityMeasurement::clear()
 
 	m_additionalParamCount = 0;
 
-	for(int l = 0; l < MEASURE_LIMIT_TYPE_COUNT; l++)
+	for(int l = 0; l < MeasureLimitTypeCount; l++)
 	{
-		for(int a = 0; a < MEASURE_ADDITIONAL_PARAM_COUNT; a++)
+		for(int a = 0; a < MeasureAdditionalParamCount; a++)
 		{
 			m_additionalParam[l][a] = 0;
 		}
@@ -976,7 +976,7 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	//
 	//
 
-	setMeasureType(MEASURE_TYPE_LINEARITY);
+	setMeasureType(MeasureType::Linearity);
 
 	// features
 	//
@@ -1011,8 +1011,8 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 
 	setPercent(((engineering - inParam.lowEngineeringUnits()) * 100)/(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()));
 
-	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
-	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
+	setNominal(MeasureLimitType::Electric, electric);
+	setNominal(MeasureLimitType::Engineering, engineering);
 
 	// measure
 	//
@@ -1031,8 +1031,8 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 		double enVal = theSignalBase.signalState(inParam.hash()).value();
 		double elVal = uc.conversion(enVal, UnitsConvertType::PhysicalToElectric, inParam);
 
-		setMeasureItemArray(MEASURE_LIMIT_TYPE_ELECTRIC, index, elVal);
-		setMeasureItemArray(MEASURE_LIMIT_TYPE_ENGINEER, index, enVal);
+		setMeasureItemArray(MeasureLimitType::Electric, index, elVal);
+		setMeasureItemArray(MeasureLimitType::Engineering, index, enVal);
 
 		averageElVal += elVal;
 		averageEnVal += enVal;
@@ -1043,8 +1043,8 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	averageElVal /= measureCount;
 	averageEnVal /= measureCount;
 
-	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, averageElVal);
-	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, averageEnVal);
+	setMeasure(MeasureLimitType::Electric, averageElVal);
+	setMeasure(MeasureLimitType::Engineering, averageEnVal);
 
 	// limits
 	//
@@ -1108,7 +1108,7 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	//
 	//
 
-	setMeasureType(MEASURE_TYPE_LINEARITY);
+	setMeasureType(MeasureType::Linearity);
 
 	// features
 	//
@@ -1144,8 +1144,8 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 
 	setPercent(ioParam.percent());
 
-	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
-	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineeringCalc);
+	setNominal(MeasureLimitType::Electric, electric);
+	setNominal(MeasureLimitType::Engineering, engineeringCalc);
 
 	// measure
 	//
@@ -1165,8 +1165,8 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 		double enCalcVal = conversionByConnection(enVal, ioParam, ConversionDirection::Inversion);
 		double elVal = uc.conversion(enCalcVal, UnitsConvertType::PhysicalToElectric, inParam);
 
-		setMeasureItemArray(MEASURE_LIMIT_TYPE_ELECTRIC, index, elVal);
-		setMeasureItemArray(MEASURE_LIMIT_TYPE_ENGINEER, index, enVal);
+		setMeasureItemArray(MeasureLimitType::Electric, index, elVal);
+		setMeasureItemArray(MeasureLimitType::Engineering, index, enVal);
 
 		averageElVal += elVal;
 		averagePhVal += enVal;
@@ -1177,8 +1177,8 @@ void LinearityMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	averageElVal /= measureCount;
 	averagePhVal /= measureCount;
 
-	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, averageElVal);
-	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, averagePhVal);
+	setMeasure(MeasureLimitType::Electric, averageElVal);
+	setMeasure(MeasureLimitType::Engineering, averagePhVal);
 
 	// limits
 	//
@@ -1242,7 +1242,7 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 	//
 	//
 
-	setMeasureType(MEASURE_TYPE_LINEARITY);
+	setMeasureType(MeasureType::Linearity);
 
 	// features
 	//
@@ -1278,8 +1278,8 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 
 	setPercent(ioParam.percent());
 
-	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
-	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineeringCalc);
+	setNominal(MeasureLimitType::Electric, electric);
+	setNominal(MeasureLimitType::Engineering, engineeringCalc);
 
 	// measure
 	//
@@ -1306,8 +1306,8 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 			elVal = pCalibrator->measureValue();
 		}
 
-		setMeasureItemArray(MEASURE_LIMIT_TYPE_ELECTRIC, index, elVal);
-		setMeasureItemArray(MEASURE_LIMIT_TYPE_ENGINEER, index, enVal);
+		setMeasureItemArray(MeasureLimitType::Electric, index, elVal);
+		setMeasureItemArray(MeasureLimitType::Engineering, index, enVal);
 
 		averageElVal += elVal;
 		averagePhVal += enVal;
@@ -1318,8 +1318,8 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 	averageElVal /= measureCount;
 	averagePhVal /= measureCount;
 
-	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, averageElVal);
-	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, averagePhVal);
+	setMeasure(MeasureLimitType::Electric, averageElVal);
+	setMeasure(MeasureLimitType::Engineering, averagePhVal);
 
 	// limits
 	//
@@ -1347,12 +1347,12 @@ void LinearityMeasurement::calcAdditionalParam(const IoSignalParam &ioParam)
 	//
 	//
 
-	for(int limitType = 0; limitType < MEASURE_LIMIT_TYPE_COUNT; limitType ++)
+	for(int limitType = 0; limitType < MeasureLimitTypeCount; limitType ++)
 	{
 		// calc additional parameters
 		//
 
-		setAdditionalParamCount(MEASURE_ADDITIONAL_PARAM_COUNT);
+		setAdditionalParamCount(MeasureAdditionalParamCount);
 
 			// max deviation
 			//
@@ -1368,14 +1368,14 @@ void LinearityMeasurement::calcAdditionalParam(const IoSignalParam &ioParam)
 			}
 		}
 
-		setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_MAX_VALUE, measureItemArray(limitType, maxDeviationIndex));
+		setAdditionalParam(limitType, MeasureAdditionalParam::MaxValue, measureItemArray(limitType, maxDeviationIndex));
 
 
 			// according to GOST 8.508-84 paragraph 3.4.1 formula 42
 			//
 		double systemError = std::abs(measure(limitType) - nominal(limitType));
 
-		setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SYSTEM_DEVIATION, systemError);
+		setAdditionalParam(limitType, MeasureAdditionalParam::SystemDeviation, systemError);
 
 
 			// according to GOST 8.736-2011 paragraph 5.3 formula 3
@@ -1390,7 +1390,7 @@ void LinearityMeasurement::calcAdditionalParam(const IoSignalParam &ioParam)
 		sumDeviation /= static_cast<double>(measureCount() - 1);									// 2. divide on (count of measure - 1)
 		double sco = sqrt(sumDeviation);															// 3. sqrt
 
-		setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SD, sco);
+		setAdditionalParam(limitType, MeasureAdditionalParam::StandardDeviation, sco);
 
 
 			// according to GOST 8.207-76 paragraph 2.4
@@ -1407,14 +1407,14 @@ void LinearityMeasurement::calcAdditionalParam(const IoSignalParam &ioParam)
 			//
 		double border = k_student * estimateSCO;
 
-		setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER, border);
+		setAdditionalParam(limitType, MeasureAdditionalParam::LowHighBorder, border);
 
 
 			// Uncertainty of measurement to Document: EA-04/02 M:2013
 			//
 		double uncertainty = calcUcertainty(ioParam, limitType);
 
-		setAdditionalParam(limitType, MEASURE_ADDITIONAL_PARAM_UNCERTAINTY, uncertainty);
+		setAdditionalParam(limitType, MeasureAdditionalParam::Uncertainty, uncertainty);
 	}
 }
 
@@ -1448,7 +1448,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 		return 0;
 	}
 
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(false);
 		return 0;
@@ -1456,7 +1456,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 
 	// sco
 	//
-	double sco = additionalParam(limitType, MEASURE_ADDITIONAL_PARAM_SD);
+	double sco = additionalParam(limitType, MeasureAdditionalParam::StandardDeviation);
 
 	// Uncertainty of measurement to Document: EA-04/02 M:2013
 	//
@@ -1490,7 +1490,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 
 				switch (limitType)
 				{
-					case MEASURE_LIMIT_TYPE_ELECTRIC:		// input electric
+					case MeasureLimitType::Electric:		// input electric
 						{
 							double MPe = 1 / pow(10.0, sourceLimit.precesion);
 
@@ -1500,7 +1500,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 						}
 						break;
 
-					case MEASURE_LIMIT_TYPE_ENGINEER:
+					case MeasureLimitType::Engineering:
 						{
 							double Kxj = 0;
 
@@ -1508,16 +1508,16 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 							{
 								// for linear electrical ranges (mA and V) Kxj is calculated differently
 								//
-								Kxj = (highLimit(MEASURE_LIMIT_TYPE_ENGINEER) - lowLimit(MEASURE_LIMIT_TYPE_ENGINEER)) / (inParam.electricHighLimit() - inParam.electricLowLimit());
+								Kxj = (highLimit(MeasureLimitType::Engineering) - lowLimit(MeasureLimitType::Engineering)) / (inParam.electricHighLimit() - inParam.electricLowLimit());
 							}
 							else
 							{
 								// for non-linear electrical ranges (mV and Ohms) Kxj is calculated differently
 								//
-								Kxj = measure(MEASURE_LIMIT_TYPE_ENGINEER) / pCalibrator->sourceValue();
+								Kxj = measure(MeasureLimitType::Engineering) / pCalibrator->sourceValue();
 							}
 
-							double MPx = 1 / pow(10.0, limitPrecision(MEASURE_LIMIT_TYPE_ENGINEER));
+							double MPx = 1 / pow(10.0, limitPrecision(MeasureLimitType::Engineering));
 
 							// this is formula for case 1 from documet about uncertainty
 							//
@@ -1570,11 +1570,11 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 
 				double dEj = (sourceLimit.ac0 * pCalibrator->sourceValue() + sourceLimit.ac1 * sourceLimit.highLimit) / 100.0;
 
-				double dIj = (measureLimit.ac0 * measure(MEASURE_LIMIT_TYPE_ELECTRIC) + measureLimit.ac1 * measureLimit.highLimit) / 100.0;
+				double dIj = (measureLimit.ac0 * measure(MeasureLimitType::Electric) + measureLimit.ac1 * measureLimit.highLimit) / 100.0;
 
 				switch (limitType)
 				{
-					case MEASURE_LIMIT_TYPE_ELECTRIC:		// output electric
+					case MeasureLimitType::Electric:		// output electric
 						{
 							double Kij = 0;
 
@@ -1590,7 +1590,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 								// for non-linear electrical ranges (mV and Ohms) Kij is calculated differently
 								// Output measure avg mA or V / Input source mV or Ohms
 								//
-								Kij = measure(MEASURE_LIMIT_TYPE_ELECTRIC) / pCalibrator->sourceValue();
+								Kij = measure(MeasureLimitType::Electric) / pCalibrator->sourceValue();
 
 							}
 
@@ -1602,7 +1602,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 						}
 						break;
 
-					case MEASURE_LIMIT_TYPE_ENGINEER:
+					case MeasureLimitType::Engineering:
 						{
 							double Kxj = 0;
 
@@ -1610,17 +1610,17 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 							{
 								// for linear electrical ranges (mA and V) Kxj is calculated differently
 								//
-								Kxj = (highLimit(MEASURE_LIMIT_TYPE_ENGINEER) - lowLimit(MEASURE_LIMIT_TYPE_ENGINEER)) / (inParam.electricHighLimit() - inParam.electricLowLimit());
+								Kxj = (highLimit(MeasureLimitType::Engineering) - lowLimit(MeasureLimitType::Engineering)) / (inParam.electricHighLimit() - inParam.electricLowLimit());
 							}
 							else
 							{
 								// for non-linear electrical ranges (mV and Ohms) Kxj is calculated differently
 								// Output measure avg ENGINEER / Input source mV or Ohms
 								//
-								Kxj = measure(MEASURE_LIMIT_TYPE_ENGINEER) / pCalibrator->sourceValue();
+								Kxj = measure(MeasureLimitType::Engineering) / pCalibrator->sourceValue();
 							}
 
-							double MPx = 1 / pow(10.0, limitPrecision(MEASURE_LIMIT_TYPE_ENGINEER));
+							double MPx = 1 / pow(10.0, limitPrecision(MeasureLimitType::Engineering));
 
 							// this is formula for case 1 from documet about uncertainty
 							//
@@ -1649,12 +1649,12 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 
 				double Kox = 2;
 
-				double dIj = (measureLimit.ac0 * measure(MEASURE_LIMIT_TYPE_ELECTRIC) + measureLimit.ac1 * measureLimit.highLimit) / 100.0;
+				double dIj = (measureLimit.ac0 * measure(MeasureLimitType::Electric) + measureLimit.ac1 * measureLimit.highLimit) / 100.0;
 
 				switch (limitType)
 				{
-					case MEASURE_LIMIT_TYPE_ELECTRIC:		// output electric
-					case MEASURE_LIMIT_TYPE_ENGINEER:		// because we have not input therefore uncertainty we will be calc by electric
+					case MeasureLimitType::Electric:		// output electric
+					case MeasureLimitType::Engineering:		// because we have not input therefore uncertainty we will be calc by electric
 						{
 							// this is formula for case 4 from documet about uncertainty
 							//
@@ -1686,7 +1686,7 @@ double LinearityMeasurement::calcUcertainty(const IoSignalParam &ioParam, int li
 
 double LinearityMeasurement::measureItemArray(int limitType, int index) const
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return 0;
@@ -1715,7 +1715,7 @@ QString LinearityMeasurement::measureItemStr(int limitType, int index) const
 
 	int precision = DEFAULT_ECLECTRIC_UNIT_PRECESION;
 
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return QString();
@@ -1725,7 +1725,7 @@ QString LinearityMeasurement::measureItemStr(int limitType, int index) const
 
 	if (theOptions.measureView().precesionByCalibrator() == true)
 	{
-		if (limitType == MEASURE_LIMIT_TYPE_ELECTRIC)
+		if (limitType == MeasureLimitType::Electric)
 		{
 			precision = calibratorPrecision();
 		}
@@ -1745,7 +1745,7 @@ QString LinearityMeasurement::measureItemStr(int limitType, int index) const
 
 void LinearityMeasurement::setMeasureItemArray(int limitType, int index, double value)
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return;
@@ -1764,13 +1764,13 @@ void LinearityMeasurement::setMeasureItemArray(int limitType, int index, double 
 
 double LinearityMeasurement::additionalParam(int limitType, int paramType) const
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return 0;
 	}
 
-	if (paramType < 0 || paramType >= MEASURE_ADDITIONAL_PARAM_COUNT)
+	if (ERR_MEASURE_ADDITIONAL_PARAM(paramType) == true)
 	{
 		assert(0);
 		return 0;
@@ -1783,7 +1783,7 @@ double LinearityMeasurement::additionalParam(int limitType, int paramType) const
 
 QString LinearityMeasurement::additionalParamStr(int limitType, int paramType) const
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return QString();
@@ -1797,7 +1797,7 @@ QString LinearityMeasurement::additionalParamStr(int limitType, int paramType) c
 		}
 	}
 
-	if (paramType < 0 || paramType >= MEASURE_ADDITIONAL_PARAM_COUNT)
+	if (ERR_MEASURE_ADDITIONAL_PARAM(paramType) == true)
 	{
 		assert(0);
 		return QString();
@@ -1805,7 +1805,7 @@ QString LinearityMeasurement::additionalParamStr(int limitType, int paramType) c
 
 	QString valueStr = QString::number(m_additionalParam[limitType][paramType], 'f', 4);
 
-	if (paramType == MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER)
+	if (paramType == MeasureAdditionalParam::LowHighBorder)
 	{
 		valueStr.insert(0, "± ");
 	}
@@ -1817,13 +1817,13 @@ QString LinearityMeasurement::additionalParamStr(int limitType, int paramType) c
 
 void LinearityMeasurement::setAdditionalParam(int limitType, int paramType, double value)
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return;
 	}
 
-	if (paramType < 0 || paramType >= MEASURE_ADDITIONAL_PARAM_COUNT)
+	if (ERR_MEASURE_ADDITIONAL_PARAM(paramType) == true)
 	{
 		assert(0);
 		return;
@@ -1836,7 +1836,7 @@ void LinearityMeasurement::setAdditionalParam(int limitType, int paramType, doub
 
 void LinearityMeasurement::updateMeasureArray(int limitType, Measurement* pMeasurement)
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		return;
 	}
@@ -1846,8 +1846,7 @@ void LinearityMeasurement::updateMeasureArray(int limitType, Measurement* pMeasu
 		return;
 	}
 
-	int measureType = pMeasurement->measureType();
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(pMeasurement->measureType()) == true)
 	{
 		return;
 	}
@@ -1870,7 +1869,7 @@ void LinearityMeasurement::updateMeasureArray(int limitType, Measurement* pMeasu
 
 void LinearityMeasurement::updateAdditionalParam(int limitType, Measurement* pMeasurement)
 {
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		return;
 	}
@@ -1880,8 +1879,7 @@ void LinearityMeasurement::updateAdditionalParam(int limitType, Measurement* pMe
 		return;
 	}
 
-	int measureType = pMeasurement->measureType();
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(pMeasurement->measureType()) == true)
 	{
 		return;
 	}
@@ -1892,7 +1890,7 @@ void LinearityMeasurement::updateAdditionalParam(int limitType, Measurement* pMe
 		return;
 	}
 
-	for(int a = 0; a < MEASURE_ADDITIONAL_PARAM_COUNT; a++)
+	for(int a = 0; a < MeasureAdditionalParamCount; a++)
 	{
 		m_additionalParam[limitType][a] = pLinearityMeasureItem->additionalParam(limitType, a);
 	}
@@ -1904,7 +1902,7 @@ LinearityMeasurement& LinearityMeasurement::operator=(const LinearityMeasurement
 {
 	m_percent = from.m_percent;
 
-	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
+	for(int t = 0; t < MeasureLimitTypeCount; t++)
 	{
 		for(int m = 0; m < MAX_MEASUREMENT_IN_POINT; m++)
 		{
@@ -1916,9 +1914,9 @@ LinearityMeasurement& LinearityMeasurement::operator=(const LinearityMeasurement
 
 	m_additionalParamCount = from.m_additionalParamCount;
 
-	for(int l = 0; l < MEASURE_LIMIT_TYPE_COUNT; l++)
+	for(int l = 0; l < MeasureLimitTypeCount; l++)
 	{
-		for(int a = 0; a < MEASURE_ADDITIONAL_PARAM_COUNT; a++)
+		for(int a = 0; a < MeasureAdditionalParamCount; a++)
 		{
 			m_additionalParam[l][a] = from.m_additionalParam[l][a];
 		}
@@ -1931,14 +1929,14 @@ LinearityMeasurement& LinearityMeasurement::operator=(const LinearityMeasurement
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorMeasurement::ComparatorMeasurement() : Measurement(MEASURE_TYPE_COMPARATOR)
+ComparatorMeasurement::ComparatorMeasurement() : Measurement(MeasureType::Comparators)
 {
 	clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorMeasurement::ComparatorMeasurement(const IoSignalParam& ioParam) : Measurement(MEASURE_TYPE_COMPARATOR)
+ComparatorMeasurement::ComparatorMeasurement(const IoSignalParam& ioParam) : Measurement(MeasureType::Comparators)
 {
 	clear();
 
@@ -1980,7 +1978,7 @@ ComparatorMeasurement::~ComparatorMeasurement()
 
 void ComparatorMeasurement::clear()
 {
-	setMeasureType(MEASURE_TYPE_COMPARATOR);
+	setMeasureType(MeasureType::Comparators);
 
 	m_compareAppSignalID.clear();
 	m_outputAppSignalID.clear();
@@ -2058,7 +2056,7 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	//
 	//
 
-	setMeasureType(MEASURE_TYPE_COMPARATOR);
+	setMeasureType(MeasureType::Comparators);
 
 	// features
 	//
@@ -2101,8 +2099,8 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	double engineering = comparatorEx->compareOnlineValue(cmpValueType);
 	double electric = uc.conversion(engineering, UnitsConvertType::PhysicalToElectric, inParam);
 
-	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
-	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
+	setNominal(MeasureLimitType::Electric, electric);
+	setNominal(MeasureLimitType::Engineering, engineering);
 
 	// measure
 	//
@@ -2113,8 +2111,8 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	electric = ioParam.isNegativeRange() ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
 	engineering = uc.conversion(electric, UnitsConvertType::ElectricToPhysical, inParam);
 
-	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
-	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
+	setMeasure(MeasureLimitType::Electric, electric);
+	setMeasure(MeasureLimitType::Engineering, engineering);
 
 	// limits
 	//
@@ -2201,7 +2199,7 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	//
 	//
 
-	setMeasureType(MEASURE_TYPE_COMPARATOR);
+	setMeasureType(MeasureType::Comparators);
 
 	// features
 	//
@@ -2245,8 +2243,8 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	double engineeringCalc = conversionByConnection(engineering, ioParam, ConversionDirection::Inversion);
 	double electric = uc.conversion(engineeringCalc, UnitsConvertType::PhysicalToElectric, inParam);
 
-	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
-	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
+	setNominal(MeasureLimitType::Electric, electric);
+	setNominal(MeasureLimitType::Engineering, engineering);
 
 	// measure
 	//
@@ -2258,8 +2256,8 @@ void ComparatorMeasurement::fill_measure_internal(const IoSignalParam &ioParam)
 	engineering = uc.conversion(electric, UnitsConvertType::ElectricToPhysical, inParam);
 	engineeringCalc = conversionByConnection(engineering, ioParam, ConversionDirection::Normal);
 
-	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
-	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, engineeringCalc);
+	setMeasure(MeasureLimitType::Electric, electric);
+	setMeasure(MeasureLimitType::Engineering, engineeringCalc);
 
 	// limits
 	//
@@ -2386,7 +2384,7 @@ void MeasureBase::clear(bool removeData)
 
 			switch(pMeasurement->measureType())
 			{
-				case MEASURE_TYPE_LINEARITY:
+				case MeasureType::Linearity:
 					{
 						LinearityMeasurement* pLinearityMeasurement = dynamic_cast<LinearityMeasurement*>(pMeasurement);
 						if (pLinearityMeasurement == nullptr)
@@ -2400,7 +2398,7 @@ void MeasureBase::clear(bool removeData)
 					}
 					break;
 
-				case MEASURE_TYPE_COMPARATOR:
+				case MeasureType::Comparators:
 					{
 						ComparatorMeasurement* pComparatorMeasurement = dynamic_cast<ComparatorMeasurement*>(pMeasurement);
 						if (pComparatorMeasurement == nullptr)
@@ -2431,9 +2429,9 @@ void MeasureBase::clear(bool removeData)
 // firstly read data from the main table, and additional sub tables in memory
 // later update the data in the main table from sub tables
 //
-int MeasureBase::load(int measureType)
+int MeasureBase::load(MeasureType measureType)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return -1;
 	}
@@ -2473,8 +2471,8 @@ int MeasureBase::load(int measureType)
 
 				switch(measureType)
 				{
-					case MEASURE_TYPE_LINEARITY:			data.pMeasurement = new LinearityMeasurement[static_cast<quint64>(data.recordCount)];	break;
-					case MEASURE_TYPE_COMPARATOR:			data.pMeasurement = new ComparatorMeasurement[static_cast<quint64>(data.recordCount)];	break;
+					case MeasureType::Linearity:			data.pMeasurement = new LinearityMeasurement[static_cast<quint64>(data.recordCount)];	break;
+					case MeasureType::Comparators:			data.pMeasurement = new ComparatorMeasurement[static_cast<quint64>(data.recordCount)];	break;
 					default:								assert(0);
 				}
 
@@ -2494,8 +2492,8 @@ int MeasureBase::load(int measureType)
 				{
 					switch(measureType)
 					{
-						case MEASURE_TYPE_LINEARITY:	delete [] static_cast<LinearityMeasurement*> (data.pMeasurement);	break;
-						case MEASURE_TYPE_COMPARATOR:	delete [] static_cast<ComparatorMeasurement*> (data.pMeasurement);	break;
+						case MeasureType::Linearity:	delete [] static_cast<LinearityMeasurement*> (data.pMeasurement);	break;
+						case MeasureType::Comparators:	delete [] static_cast<ComparatorMeasurement*> (data.pMeasurement);	break;
 						default:						assert(0);
 					}
 				}
@@ -2549,7 +2547,7 @@ int MeasureBase::load(int measureType)
 
 				switch (pMainMeasure->measureType())
 				{
-					case MEASURE_TYPE_LINEARITY:
+					case MeasureType::Linearity:
 						{
 							LinearityMeasurement* pSupMeasurement = dynamic_cast<LinearityMeasurement*>(pMainMeasure);
 							if (pSupMeasurement == nullptr)
@@ -2559,15 +2557,15 @@ int MeasureBase::load(int measureType)
 
 							switch(subTable.tableType)
 							{
-								case SQL_TABLE_LINEARITY_ADD_VAL_EL:	pSupMeasurement->updateAdditionalParam(MEASURE_LIMIT_TYPE_ELECTRIC, pSubMeasure);	break;
-								case SQL_TABLE_LINEARITY_ADD_VAL_EN:	pSupMeasurement->updateAdditionalParam(MEASURE_LIMIT_TYPE_ENGINEER, pSubMeasure);	break;
-								case SQL_TABLE_LINEARITY_20_EL:			pSupMeasurement->updateMeasureArray(MEASURE_LIMIT_TYPE_ELECTRIC, pSubMeasure);		break;
-								case SQL_TABLE_LINEARITY_20_EN:			pSupMeasurement->updateMeasureArray(MEASURE_LIMIT_TYPE_ENGINEER, pSubMeasure);		break;
+								case SQL_TABLE_LINEARITY_ADD_VAL_EL:	pSupMeasurement->updateAdditionalParam(MeasureLimitType::Electric, pSubMeasure);	break;
+								case SQL_TABLE_LINEARITY_ADD_VAL_EN:	pSupMeasurement->updateAdditionalParam(MeasureLimitType::Engineering, pSubMeasure);	break;
+								case SQL_TABLE_LINEARITY_20_EL:			pSupMeasurement->updateMeasureArray(MeasureLimitType::Electric, pSubMeasure);		break;
+								case SQL_TABLE_LINEARITY_20_EN:			pSupMeasurement->updateMeasureArray(MeasureLimitType::Engineering, pSubMeasure);		break;
 							}
 						}
 						break;
 
-					case MEASURE_TYPE_COMPARATOR:
+					case MeasureType::Comparators:
 						{
 							ComparatorMeasurement* pSupMeasurement = dynamic_cast<ComparatorMeasurement*>(pMainMeasure);
 							if (pSupMeasurement == nullptr)
@@ -2603,8 +2601,8 @@ int MeasureBase::load(int measureType)
 
 		switch(measureType)
 		{
-			case MEASURE_TYPE_LINEARITY:	pMeasureAppend = new LinearityMeasurement;	break;
-			case MEASURE_TYPE_COMPARATOR:	pMeasureAppend = new ComparatorMeasurement;	break;
+			case MeasureType::Linearity:	pMeasureAppend = new LinearityMeasurement;	break;
+			case MeasureType::Comparators:	pMeasureAppend = new ComparatorMeasurement;	break;
 			default:						assert(0);									break;
 		}
 
@@ -2684,8 +2682,8 @@ int MeasureBase::load(int measureType)
 
 		switch(measureType)
 		{
-			case MEASURE_TYPE_LINEARITY:	delete [] static_cast<LinearityMeasurement*> (table.pMeasurement);	break;
-			case MEASURE_TYPE_COMPARATOR:	delete [] static_cast<ComparatorMeasurement*> (table.pMeasurement);	break;
+			case MeasureType::Linearity:	delete [] static_cast<LinearityMeasurement*> (table.pMeasurement);	break;
+			case MeasureType::Comparators:	delete [] static_cast<ComparatorMeasurement*> (table.pMeasurement);	break;
 			default:						assert(0);
 		}
 	}
@@ -2795,7 +2793,7 @@ bool MeasureBase::remove(int index, bool removeData)
 
 bool MeasureBase::remove(int measureType, const QVector<int>& keyList)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return false;
 	}
@@ -2864,9 +2862,9 @@ void MeasureBase::removeFromBase(int measureType, const QVector<int>& keyList)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureBase::updateStatisticsItem(int measureType, StatisticsItem& si)
+void MeasureBase::updateStatisticsItem(MeasureType measureType, StatisticsItem& si)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		assert(0);
 		return;
@@ -2886,14 +2884,14 @@ void MeasureBase::updateStatisticsItem(int measureType, StatisticsItem& si)
 	}
 
 	int limitType = theOptions.linearity().limitType();
-	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 	{
 		assert(0);
 		return;
 	}
 
 	int errorType = theOptions.linearity().errorType();
-	if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
+	if (ERR_MEASURE_ERROR_TYPE(errorType) == true)
 	{
 		assert(0);
 		return;
@@ -2925,7 +2923,7 @@ void MeasureBase::updateStatisticsItem(int measureType, StatisticsItem& si)
 
 		switch(measureType)
 		{
-			case MEASURE_TYPE_LINEARITY:
+			case MeasureType::Linearity:
 			{
 				LinearityMeasurement* pLinearityMeasurement = dynamic_cast<LinearityMeasurement*>(pMeasurement);
 				if (pLinearityMeasurement == nullptr)
@@ -2943,7 +2941,7 @@ void MeasureBase::updateStatisticsItem(int measureType, StatisticsItem& si)
 
 			break;
 
-			case MEASURE_TYPE_COMPARATOR:
+			case MeasureType::Comparators:
 			{
 				ComparatorMeasurement* pComparatorMeasurement = dynamic_cast<ComparatorMeasurement*>(pMeasurement);
 				if (pComparatorMeasurement == nullptr)
@@ -2969,7 +2967,7 @@ void MeasureBase::updateStatisticsItem(int measureType, StatisticsItem& si)
 
 				if (comparatorEx->compare().isConst() == true)
 				{
-					if (compareDouble(comparatorEx->compareConstValue(), pComparatorMeasurement->nominal(MEASURE_LIMIT_TYPE_ENGINEER)) == false)
+					if (compareDouble(comparatorEx->compareConstValue(), pComparatorMeasurement->nominal(MeasureLimitType::Engineering)) == false)
 					{
 						break;
 					}
@@ -3000,9 +2998,9 @@ void MeasureBase::updateStatisticsItem(int measureType, StatisticsItem& si)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureBase::updateStatisticsBase(int measureType)
+void MeasureBase::updateStatisticsBase(MeasureType measureType)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return;
 	}
@@ -3043,9 +3041,9 @@ void MeasureBase::updateStatisticsBase(int measureType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureBase::updateStatisticsBase(int measureType, Hash signalHash)
+void MeasureBase::updateStatisticsBase(MeasureType measureType, Hash signalHash)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return;
 	}
@@ -3130,8 +3128,8 @@ void MeasureBase::markNotExistMeasuremetsFromStatistics(MeasureBase* pThis)
 			continue;
 		}
 
-		int measureType = pMeasurement->measureType();
-		if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+		MeasureType measureType = pMeasurement->measureType();
+		if (ERR_MEASURE_TYPE(measureType) == true)
 		{
 			continue;
 		}
@@ -3153,7 +3151,7 @@ void MeasureBase::markNotExistMeasuremetsFromStatistics(MeasureBase* pThis)
 
 			switch (measureType)
 			{
-				case MEASURE_TYPE_LINEARITY:
+				case MeasureType::Linearity:
 					{
 						LinearityMeasurement* pLinearityMeasurement = dynamic_cast<LinearityMeasurement*>(pMeasurement);
 						if (pLinearityMeasurement == nullptr)
@@ -3170,7 +3168,7 @@ void MeasureBase::markNotExistMeasuremetsFromStatistics(MeasureBase* pThis)
 					}
 					break;
 
-				case MEASURE_TYPE_COMPARATOR:
+				case MeasureType::Comparators:
 					{
 						std::shared_ptr<Metrology::ComparatorEx> comparatorEx = si.comparator();
 						if (comparatorEx == nullptr)
@@ -3211,6 +3209,113 @@ void MeasureBase::markNotExistMeasuremetsFromStatistics(MeasureBase* pThis)
 
 	qDebug() << __FUNCTION__ << "- Signals were marked, " << " Time for marked: " << responseTime.elapsed() << " ms";
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureTypeCaption(int measureType)
+{
+	QString caption;
+
+	switch (measureType)
+	{
+		case MeasureType::Linearity:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Measurements of linearity");	break;
+		case MeasureType::Comparators:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Measurements of comparators");	break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
+	}
+
+	return caption;
+};
+
+QString MeasureKindCaption(int measureKind)
+{
+	QString caption;
+
+	switch (measureKind)
+	{
+
+		case MeasureKind::OneRack:		caption = QT_TRANSLATE_NOOP("MeasureBase", " Single channel");	break;
+		case MeasureKind::OneModule:	caption = QT_TRANSLATE_NOOP("MeasureBase", " Single module");	break;
+		case MeasureKind::MultiRack:	caption = QT_TRANSLATE_NOOP("MeasureBase", " Multi channel");	break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
+	}
+
+	return caption;
+};
+
+QString MeasureLimitTypeCaption(int measureLimitType)
+{
+	QString caption;
+
+	switch (measureLimitType)
+	{
+		case MeasureLimitType::Electric:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Electric");		break;
+		case MeasureLimitType::Engineering:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Engineering");	break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
+	}
+
+	return caption;
+};
+
+QString MeasureErrorTypeCaption(int errorType)
+{
+	QString caption;
+
+	switch (errorType)
+	{
+		case MeasureErrorType::Absolute:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Absolute");	break;
+		case MeasureErrorType::Reduce:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Reduce");	break;
+		case MeasureErrorType::Relative:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Relative");	break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
+	}
+
+	return caption;
+};
+
+
+QString MeasureErrorResultCaption(int errorResult)
+{
+	QString caption;
+
+	switch (errorResult)
+	{
+		case MeasureErrorResult::Ok:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Ok");		break;
+		case MeasureErrorResult::Failed:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Failed");	break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
+	}
+
+	return caption;
+};
+
+QString MeasureAdditionalParamCaption(int param)
+{
+	QString caption;
+
+	switch (param)
+	{
+		case MeasureAdditionalParam::MaxValue:			caption = QT_TRANSLATE_NOOP("MeasureBase", "Measure value max");	break;
+		case MeasureAdditionalParam::SystemDeviation:	caption = QT_TRANSLATE_NOOP("MeasureBase", "System deviation");		break;
+		case MeasureAdditionalParam::StandardDeviation:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Standard deviation");	break;
+		case MeasureAdditionalParam::LowHighBorder:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Low High border");		break;
+		case MeasureAdditionalParam::Uncertainty:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Uncertainty");			break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
+	}
+
+	return caption;
+};
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------

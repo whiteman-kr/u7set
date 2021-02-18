@@ -517,7 +517,7 @@ void SignalInfoPanel::createContextMenu()
 
 	// append metrology connection items
 	//
-	if (m_measureKind != MEASURE_KIND_ONE_RACK)
+	if (m_measureKind != MeasureKind::OneRack)
 	{
 		appendMetrologyConnetionMenu();
 	}
@@ -534,7 +534,7 @@ void SignalInfoPanel::createContextMenu()
 	m_pShowElectricValueAction->setCheckable(true);
 	m_pShowElectricValueAction->setChecked(m_signalInfo.showElectricState());
 
-	if (m_measureKind == MEASURE_KIND_ONE_RACK)
+	if (m_measureKind == MeasureKind::OneRack)
 	{
 		if (m_signalParamTable.signalCount() > 1)
 		{
@@ -747,14 +747,14 @@ bool SignalInfoPanel::eventFilter(QObject* object, QEvent* event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::measureKindChanged(int kind)
+void SignalInfoPanel::measureKindChanged(int measureKind)
 {
-	if (kind < 0 || kind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
 		return;
 	}
 
-	m_measureKind = kind;
+	m_measureKind = static_cast<MeasureKind>(measureKind);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

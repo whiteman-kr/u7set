@@ -700,8 +700,8 @@ void LinearityOption::load()
 	QSettings s;
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), 0.2).toDouble();
-	m_errorType = s.value(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
-	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(LINEARITY_OPTIONS_KEY), MEASURE_LIMIT_TYPE_ELECTRIC).toInt();
+	m_errorType = s.value(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), MeasureErrorType::Reduce).toInt();
+	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(LINEARITY_OPTIONS_KEY), MeasureLimitType::Electric).toInt();
 
 	m_measureTimeInPoint = s.value(QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
 	m_measureCountInPoint = s.value(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), 20).toInt();
@@ -787,8 +787,8 @@ void ComparatorOption::load()
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(COMPARATOR_OPTIONS_KEY), 0.2).toDouble();
 	m_startValueForCompare = s.value(QString("%1StartValueForCompare").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
-	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
-	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(COMPARATOR_OPTIONS_KEY), MEASURE_LIMIT_TYPE_ELECTRIC).toInt();
+	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), MeasureErrorType::Reduce).toInt();
+	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(COMPARATOR_OPTIONS_KEY), MeasureLimitType::Electric).toInt();
 
 	m_startComparatorIndex = s.value(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
 	m_enableMeasureHysteresis = s.value(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
@@ -855,7 +855,7 @@ void ToolBarOption::load()
 	QSettings s;
 
 	m_measureTimeout = s.value(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), 0).toInt();
-	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE_RACK).toInt();
+	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MeasureKind::OneRack).toInt();
 	m_connectionType = s.value(QString("%1ConnectionType").arg(TOOLBAR_OPTIONS_KEY), Metrology::ConnectionType::Unused).toInt();
 
 	m_defaultRack = s.value(QString("%1DefaultRack").arg(TOOLBAR_OPTIONS_KEY), "RACK").toString();
@@ -918,7 +918,7 @@ MeasureViewOption::~MeasureViewOption()
 
 bool MeasureViewOption::updateColumnView(int measureType) const
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return false;
 	}
@@ -930,7 +930,7 @@ bool MeasureViewOption::updateColumnView(int measureType) const
 
 void MeasureViewOption::setUpdateColumnView(int measureType, bool state)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return;
 	}
@@ -953,9 +953,9 @@ void MeasureViewOption::load()
 		//
 		MeasureViewHeader header;
 
-		for(int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType ++)
+		for(int measureType = 0; measureType < MeasureTypeCount; measureType ++)
 		{
-			header.setMeasureType(measureType);
+			header.setMeasureType(static_cast<MeasureType>(measureType));
 
 			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 			{
@@ -971,7 +971,7 @@ void MeasureViewOption::load()
 
 		// load
 		//
-		for(int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType ++)
+		for(int measureType = 0; measureType < MeasureTypeCount; measureType ++)
 		{
 			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 			{
@@ -981,9 +981,11 @@ void MeasureViewOption::load()
 					continue;
 				}
 
-				m_column[measureType][languageType][column].setTitle(s.value(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.title()).toString());
-				m_column[measureType][languageType][column].setWidth(s.value(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.width()).toInt());
-				m_column[measureType][languageType][column].setVisible(s.value(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.enableVisible()).toBool());
+				QString caption = MeasureTypeCaption(measureType);
+
+				m_column[measureType][languageType][column].setTitle(s.value(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.title()).toString());
+				m_column[measureType][languageType][column].setWidth(s.value(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.width()).toInt());
+				m_column[measureType][languageType][column].setVisible(s.value(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.enableVisible()).toBool());
 			}
 		}
 	}
@@ -1013,7 +1015,7 @@ void MeasureViewOption::save()
 	int languageType = theOptions.language().languageType();
 	if (languageType >= 0 && languageType < LANGUAGE_TYPE_COUNT)
 	{
-		for(int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType ++)
+		for(int measureType = 0; measureType < MeasureTypeCount; measureType ++)
 		{
 			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 			{
@@ -1024,9 +1026,11 @@ void MeasureViewOption::save()
 					continue;
 				}
 
-				s.setValue(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.title());
-				s.setValue(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.width());
-				s.setValue(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.enableVisible());
+				QString caption = MeasureTypeCaption(measureType);
+
+				s.setValue(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.title());
+				s.setValue(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.width());
+				s.setValue(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.enableVisible());
 			}
 		}
 	}
@@ -1047,7 +1051,7 @@ void MeasureViewOption::save()
 
 MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 {
-	for(int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType ++)
+	for(int measureType = 0; measureType < MeasureTypeCount; measureType ++)
 	{
 		m_updateColumnView[measureType] = from.m_updateColumnView[measureType];
 
