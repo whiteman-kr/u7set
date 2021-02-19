@@ -106,7 +106,10 @@ INCLUDEPATH += $$PWD/../../Protobuf
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
 DISTFILES += \
-    ../../Proto/serialization.proto
+    ../../Proto/serialization.proto \
+    FutureUpgrade.sql
 
 RESOURCES += \
-    ../../DatabaseUpgrade/DatabaseUpgrade.qrc
+    ../../DatabaseUpgrade/DatabaseUpgrade.qrc \
+    FutureDatabaseUpgrade.qrc \
+    FutureDatabaseUpgrade.qrc

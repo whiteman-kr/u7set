@@ -95,3 +95,56 @@ BEGIN
 	END IF;
 END
 $BODY$;
+
+CREATE OR REPLACE FUNCTION get_signals_id_appsignalid (user_id INTEGER, with_deleted BOOLEAN) RETURNS SETOF signal_id_appsignalid
+LANGUAGE PLPGSQL
+AS $plpgsql$
+DECLARE
+  userIsAdmin BOOLEAN;
+BEGIN
+  -- select IDs and AppSignalIDs of signals
+  -- that checked in and/or checked out by user_id
+  -- Signal must have corresponding SignalInstance
+
+  SELECT
+	is_admin(user_id) INTO userIsAdmin;
+
+  RETURN QUERY
+
+  SELECT
+	S.SignalID,
+	SI.AppSignalID
+  FROM Signal AS S,
+	   SignalInstance AS SI,
+	   Changeset AS CS
+  WHERE SI.SignalID = S.SignalID
+	AND (S.Deleted = FALSE OR with_deleted = TRUE)
+	AND SI.ChangesetID = CS.ChangesetID
+	AND SI.SignalInstanceID IN (SELECT
+	  SG.CheckedInInstanceID
+	FROM Signal AS SG
+	WHERE (SG.CheckedOutInstanceID IS NULL
+	OR (SG.UserID <> user_id
+	AND userIsAdmin = FALSE)))
+
+  UNION ALL
+
+  SELECT
+	S.SignalID,
+	SI.AppSignalID
+  FROM Signal AS S,
+	   SignalInstance AS SI
+  WHERE SI.SignalID = S.SignalID
+  AND (S.Deleted = FALSE OR with_deleted = TRUE)
+  AND SI.SignalInstanceID IN (SELECT
+	  SG.CheckedOutInstanceID
+	FROM Signal AS SG
+	WHERE (SG.CheckedOutInstanceID IS NOT NULL
+	AND (SG.UserID = user_id
+	OR userIsAdmin = TRUE)))
+
+  ORDER BY SignalID ASC;
+END
+$plpgsql$;
+
+

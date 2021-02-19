@@ -141,12 +141,28 @@ private:
 
 	QString getSignalsIDs(int userID, bool withDeleted, std::vector<int>* ids);
 
+	QString getSignalsIDAppSignalID(int userID,
+									 bool withDeleted,
+									 std::vector<std::pair<int, QString>>* ids);
+
 	QString addTestSignals(int userID,
 						   E::SignalType signalType,
 						   int channelCount,
-						   int signalCount, std::vector<int>* addedSignalsIDsSorted);
+						   int signalCount,
+						   std::vector<int>* addedSignalsIDsSorted);
 
 	QString getAllSignalIDs(std::vector<int>* allSignalIDsSorted);
+
+	QString removePairsWithID(std::vector<std::pair<int, QString>>* pairs,
+								const std::vector<int>& idsToRemove);
+
+	bool findPairWithID(int id,
+							const std::vector<std::pair<int, QString>>& pairs,
+							std::pair<int, QString>* pair);
+
+	QString checkSignalIDsAppSignalID(std::vector<int> ids,
+									const std::vector<std::pair<int, QString>>& pairs);
+
 
 	int rand0to(int upRange) const;
 

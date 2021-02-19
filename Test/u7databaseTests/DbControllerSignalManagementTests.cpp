@@ -512,8 +512,7 @@ void DbControllerSignalTests::test_setSignalWorkcopy()
 
 	s.setID(id1);
 
-	s.setCreated(QDateTime::currentDateTime());
-	s.setInstanceCreated(QDateTime::currentDateTime());
+	s.initCreatedDates();
 
 	s.setAppSignalID(appSignalID1);
 	s.setCustomAppSignalID(customAppSignalID1);
@@ -769,10 +768,129 @@ void DbControllerSignalTests::test_getSignalsIDAppSignalID()
 {
 	OPEN_DATABASE();
 
-	std::vector<int> ids;
+	std::vector<int> initialIDs;
 
-	TS_VERIFY(getSignalsIDs(ADMIN_ID, true, &ids));
+	TS_VERIFY(getAllSignalIDs(&initialIDs));
 
+	std::vector<int> adminSignalsIDs;
+
+	TS_VERIFY(addTestSignals(ADMIN_ID, E::SignalType::Discrete, 2, 2 + rand0to(3), &adminSignalsIDs));
+
+	std::vector<int> user2SignalsIDs;
+
+	TS_VERIFY(addTestSignals(USER2_ID, E::SignalType::Analog, 1, 5 + rand0to(2), &user2SignalsIDs));
+
+	std::vector<std::pair<int,QString>> result;
+
+	// Admin should see all signals
+	//
+	TS_VERIFY(getSignalsIDAppSignalID(ADMIN_ID, false, &result));
+	TS_VERIFY(removePairsWithID(&result, initialIDs));
+
+	QVERIFY(result.size() == adminSignalsIDs.size() + user2SignalsIDs.size());
+	TS_VERIFY(checkSignalIDsAppSignalID(sets_union(adminSignalsIDs, user2SignalsIDs), result));
+
+	// User2 should see only their signals
+	//
+	TS_VERIFY(getSignalsIDAppSignalID(USER2_ID, false, &result));
+	TS_VERIFY(removePairsWithID(&result, initialIDs));
+
+	QVERIFY(result.size() == user2SignalsIDs.size());
+	TS_VERIFY(checkSignalIDsAppSignalID(user2SignalsIDs, result));
+
+	// Checkin Admin's signals
+	//
+	TS_VERIFY(checkinSignals(ADMIN_ID, adminSignalsIDs, "checkin admin signals", nullptr));
+
+	// User2 should see their signals and Admin's signals
+	//
+	TS_VERIFY(getSignalsIDAppSignalID(USER2_ID, false, &result));
+	TS_VERIFY(removePairsWithID(&result, initialIDs));
+
+	QVERIFY(result.size() == adminSignalsIDs.size() + user2SignalsIDs.size());
+	TS_VERIFY(checkSignalIDsAppSignalID(sets_union(adminSignalsIDs, user2SignalsIDs), result));
+
+	// Delete Admin's signals
+	//
+	TS_VERIFY(deleteSignals(ADMIN_ID, adminSignalsIDs, nullptr));
+	TS_VERIFY(checkinSignals(ADMIN_ID, adminSignalsIDs, "checkin admin deleted signals", nullptr));
+
+	// withDeleted == false, User2 should see only their signals
+	//
+	TS_VERIFY(getSignalsIDAppSignalID(USER2_ID, false, &result));
+	TS_VERIFY(removePairsWithID(&result, initialIDs));
+
+	QVERIFY(result.size() == user2SignalsIDs.size());
+	TS_VERIFY(checkSignalIDsAppSignalID(user2SignalsIDs, result));
+
+	// withDeleted == true, User2 should see their signals and Admin's signals
+	//
+	TS_VERIFY(getSignalsIDAppSignalID(USER2_ID, true, &result));
+	TS_VERIFY(removePairsWithID(&result, initialIDs));
+
+	QVERIFY(result.size() == adminSignalsIDs.size() + user2SignalsIDs.size());
+	TS_VERIFY(checkSignalIDsAppSignalID(sets_union(adminSignalsIDs, user2SignalsIDs), result));
+
+	int id = user2SignalsIDs[0];
+
+	std::pair<int, QString> p;
+
+	QVERIFY(findPairWithID(id, result, &p));
+
+	const QString OLD_APP_SIGNAL_ID(p.second);
+
+	TS_VERIFY(checkinSignals(USER2_ID, std::vector<int>({id}), "checkin user2 signal", nullptr));
+
+	TS_VERIFY(getSignalsIDAppSignalID(USER2_ID, true, &result));
+
+	QVERIFY(findPairWithID(id, result, &p) == true);
+	QVERIFY(p.second == OLD_APP_SIGNAL_ID);
+
+	// try change AppSignalID under User3
+	//
+	Signal s;
+
+	const QString NEW_APP_SIGNAL_ID("#USER3_TEST_SIGNAL_APP_SIGNAL_ID_4567");
+
+	s.initCreatedDates();
+
+	s.setID(id);
+	s.setAppSignalID(NEW_APP_SIGNAL_ID);
+
+	TS_VERIFY(checkoutSignals(USER3_ID, std::vector<int>({id}), nullptr));
+	TS_VERIFY(setSignalWorkcopy(USER3_ID, s,nullptr));
+
+	// under User2, should see OLD_APP_SIGNAL_ID
+	//
+	TS_VERIFY(getSignalsIDAppSignalID(USER2_ID, true, &result));
+	QVERIFY(findPairWithID(id, result, &p) == true);
+	QVERIFY(p.second == OLD_APP_SIGNAL_ID);
+
+	// under Admin and User3, should see NEW_APP_SIGNAL_ID
+	//
+	TS_VERIFY(getSignalsIDAppSignalID(ADMIN_ID, true, &result));
+	QVERIFY(findPairWithID(id, result, &p) == true);
+	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+
+	TS_VERIFY(getSignalsIDAppSignalID(USER3_ID, true, &result));
+	QVERIFY(findPairWithID(id, result, &p) == true);
+	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+
+	TS_VERIFY(checkinSignals(USER3_ID, std::vector<int>({id}), "checkin user3 signal", nullptr));
+
+	// All should see NEW_APP_SIGNAL_ID
+	//
+	TS_VERIFY(getSignalsIDAppSignalID(ADMIN_ID, true, &result));
+	QVERIFY(findPairWithID(id, result, &p) == true);
+	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+
+	TS_VERIFY(getSignalsIDAppSignalID(USER2_ID, true, &result));
+	QVERIFY(findPairWithID(id, result, &p) == true);
+	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+
+	TS_VERIFY(getSignalsIDAppSignalID(USER3_ID, true, &result));
+	QVERIFY(findPairWithID(id, result, &p) == true);
+	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
 
 	db.close();
 }
@@ -1794,7 +1912,7 @@ QString DbControllerSignalTests::applyFutureDatabaseUpgrade()
 	TS_VERIFY_RETURN_ERR(openDatabase(db) == true, QString("Can't connect to database %1, error: %2" ).
 														arg(m_databaseName).arg(db.lastError().text()));
 
-	QFile upgradeFile(":/DatabaseUpgrade/FutureUpgrade.sql");
+	QFile upgradeFile(":/FutureDatabaseUpgrade/FutureUpgrade.sql");
 
 	bool result = upgradeFile.open(QIODevice::ReadOnly | QIODevice::Text);
 
@@ -1949,7 +2067,10 @@ QString DbControllerSignalTests::setSignalWorkcopy(int userID, const Signal& s, 
 
 	q.first();
 
-	DbWorker::db_objectState(q, obState);
+	if (obState != nullptr)
+	{
+		DbWorker::db_objectState(q, obState);
+	}
 
 	TS_RETURN_SUCCESS();
 }
@@ -1966,12 +2087,17 @@ QString DbControllerSignalTests::checkinSignals(int userID,
 		idsList.append(QString::number(id));
 	}
 
-	obStates->clear();
+	if (obStates != nullptr)
+	{
+		obStates->clear();
+	}
 
 	QSqlQuery q;
 
 	TS_EXEC_QUERY_RETURN_ERR(q, QString("SELECT * FROM checkin_signals(%1, ARRAY[%2], '%3')").
 								arg(userID).arg(idsList.join(",")).arg(comment));
+
+	int count = 0;
 
 	while(q.next() == true)
 	{
@@ -1979,8 +2105,15 @@ QString DbControllerSignalTests::checkinSignals(int userID,
 
 		DbWorker::db_objectState(q, &obState);
 
-		obStates->push_back(obState);
+		count++;
+
+		if (obStates != nullptr)
+		{
+			obStates->push_back(obState);
+		}
 	}
+
+	TS_VERIFY_RETURN_ERR(count == static_cast<int>(ids.size()), "ObjectStates.size() error");
 
 	TS_RETURN_SUCCESS();
 }
@@ -1996,7 +2129,10 @@ QString DbControllerSignalTests::checkoutSignals(int userID,
 		idsList.append(QString::number(id));
 	}
 
-	obStates->clear();
+	if (obStates != nullptr)
+	{
+		obStates->clear();
+	}
 
 	QSqlQuery q;
 
@@ -2009,7 +2145,10 @@ QString DbControllerSignalTests::checkoutSignals(int userID,
 
 		DbWorker::db_objectState(q, &obState);
 
-		obStates->push_back(obState);
+		if (obStates != nullptr)
+		{
+			obStates->push_back(obState);
+		}
 	}
 
 	TS_RETURN_SUCCESS();
@@ -2111,9 +2250,10 @@ QString DbControllerSignalTests::deleteSignal(int userID, int signalID, ObjectSt
 
 QString DbControllerSignalTests::deleteSignals(int userID, const std::vector<int>& ids, std::vector<ObjectState>* obStates)
 {
-	TS_TEST_PTR_RETURN(obStates);
-
-	obStates->clear();
+	if (obStates != nullptr)
+	{
+		obStates->clear();
+	}
 
 	for(int id : ids)
 	{
@@ -2121,7 +2261,10 @@ QString DbControllerSignalTests::deleteSignals(int userID, const std::vector<int
 
 		TS_VERIFY_RETURN(deleteSignal(userID, id, &obState));
 
-		obStates->push_back(obState);
+		if (obStates != nullptr)
+		{
+			obStates->push_back(obState);
+		}
 	}
 
 	TS_RETURN_SUCCESS();
@@ -2141,6 +2284,31 @@ QString DbControllerSignalTests::getSignalsIDs(int userID, bool withDeleted, std
 	while(q.next() == true)
 	{
 		ids->push_back(q.value(0).toInt());
+	}
+
+	TS_RETURN_SUCCESS();
+}
+
+QString DbControllerSignalTests::getSignalsIDAppSignalID(int userID,
+														 bool withDeleted,
+														 std::vector<std::pair<int, QString>>* ids)
+{
+	TS_TEST_PTR_RETURN(ids);
+
+	ids->clear();
+
+	QSqlQuery q;
+
+	TS_EXEC_QUERY_RETURN_ERR(q, QString("SELECT * FROM get_signals_id_appsignalid(%1, %2)").
+												arg(userID).arg(withDeleted == true ? "true" : "false"));
+	while(q.next() == true)
+	{
+		std::pair<int, QString> p;
+
+		p.first = q.value(0).toInt();
+		p.second = q.value(1).toString();
+
+		ids->push_back(p);
 	}
 
 	TS_RETURN_SUCCESS();
@@ -2187,6 +2355,61 @@ QString DbControllerSignalTests::getAllSignalIDs(std::vector<int>* allSignalIDsS
 	while(q.next() == true)
 	{
 		allSignalIDsSorted->push_back(q.value(0).toInt());
+	}
+
+	TS_RETURN_SUCCESS();
+}
+
+QString DbControllerSignalTests::removePairsWithID(std::vector<std::pair<int, QString>>* pairs,
+												   const std::vector<int>& idsToRemove)
+{
+	TS_TEST_PTR_RETURN(pairs);
+
+	for(int idToRemove : idsToRemove)
+	{
+		for(auto it = pairs->begin(); it != pairs->end(); it++)
+		{
+			if (it->first == idToRemove)
+			{
+				pairs->erase(it, it + 1);
+				break;
+			}
+		}
+	}
+
+	TS_RETURN_SUCCESS();
+}
+
+bool DbControllerSignalTests::findPairWithID(	int id,
+												const std::vector<std::pair<int, QString>>& pairs,
+												std::pair<int, QString>* pair)
+{
+	TEST_PTR_RETURN_FALSE(pair);
+
+	for(auto p : pairs)
+	{
+		if (p.first == id)
+		{
+			*pair = p;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+QString DbControllerSignalTests::checkSignalIDsAppSignalID(std::vector<int> ids,
+								const std::vector<std::pair<int, QString>>& pairs)
+{
+	for(int id : ids)
+	{
+		std::pair<int, QString> p;
+
+		bool find = findPairWithID(id, pairs, &p);
+
+		TS_VERIFY_RETURN_ERR(find == true, "Pair SignalID + AppSignalID is not found");
+
+		TS_VERIFY_RETURN_ERR(p.second.startsWith(QString("#SIGNAL%1").arg(id)) == true, "AppSignalID is wrong");
 	}
 
 	TS_RETURN_SUCCESS();
