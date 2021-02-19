@@ -158,7 +158,7 @@ void DbControllerSignalTests::test_addSignal()
 
 	// add 9 (wrong) channel signal
 	//
-	QString errStr = addSignal(ADMIN_ID, E::SignalType::Discrete, 9, &obStates).isEmpty() == false;
+	QString errStr = addSignal(ADMIN_ID, E::SignalType::Discrete, 9, &obStates);
 	QVERIFY2(errStr.isEmpty() == false, "Error should be rised!");
 
 	db.close();
