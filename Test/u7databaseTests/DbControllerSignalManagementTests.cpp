@@ -1923,6 +1923,11 @@ QString DbControllerSignalTests::applyFutureDatabaseUpgrade()
 
 	QString upgradeScript = upgradeFile.readAll();
 
+	if (upgradeScript.trimmed().isEmpty() == true)
+	{
+		TS_RETURN_SUCCESS();
+	}
+
 	QString res = TS_EXEC_QUERY_STR(upgradeScript);
 
 	TS_VERIFY_RETURN_ERR(res.isEmpty() == true, "Error executing FutureUpgrade.sql");

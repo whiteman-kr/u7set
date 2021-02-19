@@ -364,6 +364,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0344.sql", "Upgrade to version 344, All configuration scripts use let instead of var declarations"},
 	{":/DatabaseUpgrade/Upgrade0345.sql", "Upgrade to version 345, Simulation properties added to TuningService preset"},
 	{":/DatabaseUpgrade/Upgrade0346.sql", "Upgrade to version 346, Add function get_latest_signals_all_with_user_id"},
+	{":/DatabaseUpgrade/Upgrade0347.sql", "Upgrade to version 347, Changes in functions delete_signal(), get_signals_id_appsignalid()"},
 };
 
 int DbWorker::counter = 0;
