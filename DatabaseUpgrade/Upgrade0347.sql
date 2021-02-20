@@ -96,53 +96,83 @@ BEGIN
 END
 $BODY$;
 
-CREATE OR REPLACE FUNCTION get_signals_id_appsignalid (user_id INTEGER, with_deleted BOOLEAN) RETURNS SETOF signal_id_appsignalid
+
+CREATE OR REPLACE FUNCTION get_signals_actual_signalinstanceid(user_id INTEGER, with_deleted BOOLEAN) RETURNS SETOF integer
 LANGUAGE PLPGSQL
 AS $plpgsql$
 DECLARE
   userIsAdmin BOOLEAN;
 BEGIN
-  -- select IDs and AppSignalIDs of signals
-  -- that checked in and/or checked out by user_id
-  -- Signal must have corresponding SignalInstance
-
   SELECT
 	is_admin(user_id) INTO userIsAdmin;
 
   RETURN QUERY
 
-  SELECT
-	S.SignalID,
-	SI.AppSignalID
-  FROM Signal AS S,
-	   SignalInstance AS SI,
-	   Changeset AS CS
-  WHERE SI.SignalID = S.SignalID
-	AND (S.Deleted = FALSE OR with_deleted = TRUE)
-	AND SI.ChangesetID = CS.ChangesetID
-	AND SI.SignalInstanceID IN (SELECT
-	  SG.CheckedInInstanceID
-	FROM Signal AS SG
-	WHERE (SG.CheckedOutInstanceID IS NULL
-	OR (SG.UserID <> user_id
-	AND userIsAdmin = FALSE)))
+		  SELECT
+			SI.SignalInstanceID
+		  FROM Signal AS S,
+			   SignalInstance AS SI,
+			   Changeset AS CS
+		  WHERE SI.SignalID = S.SignalID
+			AND (S.Deleted = FALSE OR with_deleted = TRUE)
+			AND SI.ChangesetID = CS.ChangesetID
+			AND SI.SignalInstanceID IN (SELECT
+			  SG.CheckedInInstanceID
+			FROM Signal AS SG
+			WHERE (SG.CheckedOutInstanceID IS NULL
+			OR (SG.UserID <> user_id
+			AND userIsAdmin = FALSE)))
 
-  UNION ALL
+		  UNION ALL
 
-  SELECT
-	S.SignalID,
-	SI.AppSignalID
-  FROM Signal AS S,
-	   SignalInstance AS SI
-  WHERE SI.SignalID = S.SignalID
-  AND (S.Deleted = FALSE OR with_deleted = TRUE)
-  AND SI.SignalInstanceID IN (SELECT
-	  SG.CheckedOutInstanceID
-	FROM Signal AS SG
-	WHERE (SG.CheckedOutInstanceID IS NOT NULL
-	AND (SG.UserID = user_id
-	OR userIsAdmin = TRUE)))
+		  SELECT
+			SI.SignalInstanceID
+		  FROM Signal AS S,
+			   SignalInstance AS SI
+		  WHERE SI.SignalID = S.SignalID
+		  AND (S.Deleted = FALSE OR with_deleted = TRUE)
+		  AND SI.SignalInstanceID IN (SELECT
+			  SG.CheckedOutInstanceID
+			FROM Signal AS SG
+			WHERE (SG.CheckedOutInstanceID IS NOT NULL
+			AND (SG.UserID = user_id
+			OR userIsAdmin = TRUE)));
+END
+$plpgsql$;
 
-  ORDER BY SignalID ASC;
+
+CREATE OR REPLACE FUNCTION public.get_signals_id_appsignalid(
+	user_id integer,
+	with_deleted boolean)
+	RETURNS SETOF signal_id_appsignalid
+	LANGUAGE 'plpgsql'
+
+	COST 100
+	VOLATILE
+	ROWS 1000
+AS $BODY$
+BEGIN
+	RETURN QUERY
+		SELECT SI.SignalID, SI.AppSignalID
+		FROM
+			SignalInstance AS SI
+		WHERE
+			SI.SignalInstanceID IN
+			(SELECT * FROM get_signals_actual_signalinstanceid(user_id, with_deleted))
+		ORDER BY
+			SI.SignalID ASC;
+END
+$BODY$;
+
+
+CREATE OR REPLACE FUNCTION get_signals_unique_specpropstructs (user_id INTEGER, with_deleted BOOLEAN) RETURNS SETOF text
+LANGUAGE PLPGSQL
+AS $plpgsql$
+BEGIN
+  RETURN QUERY
+	  SELECT DISTINCT TRIM(BOTH FROM SINST.specpropstruct) FROM signalinstance AS SINST
+			WHERE (SINST.specpropstruct IS NOT NULL) AND SINST.specpropstruct!='' AND
+				SINST.signalinstanceid IN
+					(SELECT * FROM get_signals_actual_signalinstanceid(user_id, with_deleted));
 END
 $plpgsql$;
