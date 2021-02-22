@@ -85,12 +85,13 @@ private slots:
 	void test_deleteSignal();
 	void test_setSignalWorkcopy();
 	void test_getSignalsIDs();
+	void test_getSignalsActualSignalInstanceID();
 	void test_getSignalsIDAppSignalID();
+	void test_getLatestSignal();
 
 	// DbController methods tests
 	//
 	void dbcTest_addSignal();
-
 
 /*	void getSignalIdsTest();
 	void checkInCheckOutSignalsTest();
@@ -152,6 +153,10 @@ private:
 						   std::vector<int>* addedSignalsIDsSorted);
 
 	QString getAllSignalIDs(std::vector<int>* allSignalIDsSorted);
+	QString getAllSignalsInstancesIDs(std::vector<int>* allSignalsInstancesIDsSorted);
+
+	QString getActualSignalsSignalInstanceID(int userID, bool with_deleted, std::vector<int>* ids);
+	QString getLatestSignal(int userID, int signalID, Signal* s);
 
 	QString removePairsWithID(std::vector<std::pair<int, QString>>* pairs,
 								const std::vector<int>& idsToRemove);
@@ -162,7 +167,6 @@ private:
 
 	QString checkSignalIDsAppSignalID(std::vector<int> ids,
 									const std::vector<std::pair<int, QString>>& pairs);
-
 
 	int rand0to(int upRange) const;
 

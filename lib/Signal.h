@@ -52,6 +52,8 @@ public:
 	Signal(const Hardware::DeviceSignal& deviceSignal, QString* errMsg);
 	virtual ~Signal();
 
+	void clear();
+
 	void initSpecificProperties();
 
 	bool isLoaded() const { return m_isLoaded; }

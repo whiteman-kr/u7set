@@ -646,15 +646,9 @@ void DbControllerSignalTests::test_getSignalsIDs()
 	//
 	QSqlQuery q;
 
-//	TS_EXEC_QUERY(q, "SELECT signalid FROM Signal");
-
 	std::vector<int> initialIDs;
 
 	TS_VERIFY(getAllSignalIDs(&initialIDs));
-/*	while(q.next() == true)
-	{
-		initialIDs.push_back(q.value(0).toInt());
-	}*/
 
 	std::vector<ObjectState> obStates;
 
@@ -764,8 +758,186 @@ void DbControllerSignalTests::test_getSignalsIDs()
 	db.close();
 }
 
+void DbControllerSignalTests::test_getSignalsActualSignalInstanceID()
+{
+	// Testing of stored procedure:
+	//
+	//	get_signals_actual_signalinstanceid(user_id INTEGER, with_deleted BOOLEAN) RETURNS SETOF integer
+	//
+
+	OPEN_DATABASE();
+
+	std::vector<int> initialInstances;
+
+	TS_VERIFY(getAllSignalsInstancesIDs(&initialInstances));
+
+	// add User2 signals
+	//
+	std::vector<int> user2SignalsIDs;
+
+	TS_VERIFY(addTestSignals(USER2_ID, E::SignalType::Discrete, 3, 4 + rand0to(3), &user2SignalsIDs));
+
+	std::vector<int> user2Instances;
+
+	TS_VERIFY(getAllSignalsInstancesIDs(&user2Instances));
+	user2Instances = sets_difference<int>(user2Instances, initialInstances);
+
+	// add Admin signals
+	//
+	std::vector<int> adminSignalsIDs;
+
+	TS_VERIFY(addTestSignals(ADMIN_ID, E::SignalType::Bus, 1, 3 + rand0to(5), &adminSignalsIDs));
+
+	std::vector<int> adminInstances;
+
+	TS_VERIFY(getAllSignalsInstancesIDs(&adminInstances));
+	adminInstances = sets_difference<int>(adminInstances,
+										  sets_union(initialInstances, user2Instances));
+
+	// get actual instances by User3
+	//
+	// User3 shouldn't see Admin and User 2 signals instances
+	//
+	std::vector<int> user3Instances;
+
+	TS_VERIFY(getActualSignalsSignalInstanceID(USER3_ID, false, &user3Instances));
+	user3Instances = sets_difference<int>(user3Instances, initialInstances);
+
+	QVERIFY(user3Instances.size() == 0);
+
+	// checkin Admin's signals
+	//
+	TS_VERIFY(checkinSignals(ADMIN_ID, adminSignalsIDs, "admin signals checkin", nullptr));
+
+	// get actual instances by User3
+	//
+	// Now User3 should see Admin signals instances
+	//
+	TS_VERIFY(getActualSignalsSignalInstanceID(USER3_ID, false, &user3Instances));
+	user3Instances = sets_difference<int>(user3Instances, initialInstances);
+
+	QVERIFY(sets_equal(user3Instances, adminInstances));
+
+	// get actual instances by User2
+	//
+	// User2 should see User2 and Admin checkedin instances
+	//
+	std::vector<int> user2InstancesAfterCheckin;
+
+	TS_VERIFY(getActualSignalsSignalInstanceID(USER2_ID, false, &user2InstancesAfterCheckin));
+	user2InstancesAfterCheckin = sets_difference<int>(user2InstancesAfterCheckin, initialInstances);
+
+	QVERIFY(sets_equal(user2InstancesAfterCheckin, sets_union(user2Instances, adminInstances)));
+
+	// checkout Admin signals by User3
+	//
+	std::vector<int> user3SignalsIDs = adminSignalsIDs;
+	TS_VERIFY(checkoutSignals(USER3_ID, user3SignalsIDs, nullptr));
+
+	// get actual instances by User3
+	//
+	// Now User3 should see only their newly checkedout signals instances
+	//
+	TS_VERIFY(getActualSignalsSignalInstanceID(USER3_ID, false, &user3Instances));
+	user3Instances = sets_difference<int>(user3Instances, initialInstances);
+
+	QVERIFY(sets_intersect(user3Instances, adminInstances) == false);
+	QVERIFY(sets_intersect(user3Instances, user2Instances) == false);
+
+	// get actual instances by Admin
+	//
+	// Admin should see User2 and User3 checked out signals instances
+	//
+	std::vector<int> newAdminInstances;
+
+	TS_VERIFY(getActualSignalsSignalInstanceID(ADMIN_ID, false, &newAdminInstances));
+	newAdminInstances = sets_difference<int>(newAdminInstances, initialInstances);
+
+	QVERIFY(sets_equal(newAdminInstances, sets_union(user2Instances, user3Instances)));
+
+	// get actual instances by User2
+	//
+	// User2 should see User2 and Admin checkedin signals instances
+	//
+	std::vector<int> newUser2Instances;
+
+	TS_VERIFY(getActualSignalsSignalInstanceID(USER2_ID, false, &newUser2Instances));
+	newUser2Instances = sets_difference<int>(newUser2Instances, initialInstances);
+
+	QVERIFY(sets_equal(newUser2Instances, sets_union(user2Instances, adminInstances)));
+
+	// delete and checkin User3 signals
+	//
+	TS_VERIFY(deleteSignals(USER3_ID, user3SignalsIDs, nullptr));
+	TS_VERIFY(checkinSignals(USER3_ID, user3SignalsIDs, "user3 signals checkin", nullptr));
+
+	// get actual instances by User2, with_deleted == false
+	//
+	// User2 should see only their signals instances
+	//
+	TS_VERIFY(getActualSignalsSignalInstanceID(USER2_ID, false, &newUser2Instances));
+	newUser2Instances = sets_difference<int>(newUser2Instances, initialInstances);
+
+	QVERIFY(sets_equal(newUser2Instances, user2Instances));
+
+	// get actual instances by Admin, with_deleted == false
+	//
+	// Admin should see only User2 signals instances
+	//
+	TS_VERIFY(getActualSignalsSignalInstanceID(ADMIN_ID, false, &newAdminInstances));
+	newAdminInstances = sets_difference<int>(newAdminInstances, initialInstances);
+
+	QVERIFY(sets_equal(newAdminInstances, user2Instances));
+
+	// get actual instances by User3, with_deleted == false
+	//
+	// User3 shouldn't see any signals instances
+	//
+	std::vector<int> newUser3Instances;
+
+	TS_VERIFY(getActualSignalsSignalInstanceID(USER3_ID, false, &newUser3Instances));
+	newUser3Instances = sets_difference<int>(newUser3Instances, initialInstances);
+
+	QVERIFY(newUser3Instances.size() == 0);
+
+	// get actual instances by User2, with_deleted == true
+	//
+	// User2 should see their signals instances and signal instances deleted by User3
+	//
+	TS_VERIFY(getActualSignalsSignalInstanceID(USER2_ID, true, &newUser2Instances));
+	newUser2Instances = sets_difference<int>(newUser2Instances, initialInstances);
+
+	QVERIFY(sets_equal(newUser2Instances, sets_union(user2Instances, user3Instances)));
+
+	// get actual instances by Admin, with_deleted == true
+	//
+	// Admin should see User2 signals instances and signal instances deleted by User3
+	//
+	TS_VERIFY(getActualSignalsSignalInstanceID(ADMIN_ID, true, &newAdminInstances));
+	newAdminInstances = sets_difference<int>(newAdminInstances, initialInstances);
+
+	QVERIFY(sets_equal(newAdminInstances, sets_union(user2Instances, user3Instances)));
+
+	// get actual instances by User2, with_deleted == true
+	//
+	// User3 should see User3 deleted signal instances
+	//
+	TS_VERIFY(getActualSignalsSignalInstanceID(USER3_ID, true, &newUser3Instances));
+	newUser3Instances = sets_difference<int>(newUser3Instances, initialInstances);
+
+	QVERIFY(sets_equal(newUser3Instances, user3Instances));
+
+	db.close();
+}
+
 void DbControllerSignalTests::test_getSignalsIDAppSignalID()
 {
+	// Testing of stored procedure:
+	//
+	//	get_signals_id_appsignalid(	user_id integer,
+	//								with_deleted boolean)
+	//									RETURNS SETOF signal_id_appsignalid
+
 	OPEN_DATABASE();
 
 	std::vector<int> initialIDs;
@@ -891,6 +1063,114 @@ void DbControllerSignalTests::test_getSignalsIDAppSignalID()
 	TS_VERIFY(getSignalsIDAppSignalID(USER3_ID, true, &result));
 	QVERIFY(findPairWithID(id, result, &p) == true);
 	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+
+	db.close();
+}
+
+void DbControllerSignalTests::test_getLatestSignal()
+{
+	// Testing of:
+	//
+	//	bool get_latest_signal(user_id integer,	signal_id integer) RETURNS SETOF signaldata
+	//
+
+	OPEN_DATABASE();
+
+	std::vector<int> adminSignals;
+
+	TS_VERIFY(addTestSignals(ADMIN_ID, E::SignalType::Analog, 1, 2, &adminSignals));
+	QVERIFY(adminSignals.size() == 2);
+
+	int id1 = adminSignals[0];
+	int id2 = adminSignals[1];
+
+	Signal s1, s2;
+	QString res;
+
+	// Admin should see both his signals
+	//
+	TS_VERIFY(getLatestSignal(ADMIN_ID, id1, &s1));
+	TS_VERIFY(getLatestSignal(ADMIN_ID, id2, &s2));
+
+	// change signal fields of signal2
+	//
+	s2.setAppSignalID("#NEW12319283_APP_SIGNALID");
+	s2.setCustomAppSignalID("NEW12319283_CUSTOM_APP_SIGNALID");
+	s2.setCaption("NEW12319283 Caption");
+	TS_VERIFY(setSignalWorkcopy(ADMIN_ID, s2, nullptr));
+
+	Signal s;
+
+	TS_VERIFY(getLatestSignal(ADMIN_ID, id2, &s));
+	QVERIFY(s.appSignalID() == s2.appSignalID());
+	QVERIFY(s.customAppSignalID() == s2.customAppSignalID());
+	QVERIFY(s.caption() == s2.caption());
+
+	// No latest signal should be return
+	//
+	res = getLatestSignal(USER3_ID, id2, &s);
+	QVERIFY2(res.isEmpty() == false, "Error should be returned");
+
+	// checkin signal2
+	//
+	TS_VERIFY(checkinSignals(ADMIN_ID, std::vector<int>({id2}), "admin signal2 commit", nullptr));
+
+	// User3 should see checked in signal2
+	//
+	s.clear();
+
+	TS_VERIFY(getLatestSignal(USER3_ID, id2, &s));
+	QVERIFY(s.appSignalID() == s2.appSignalID());
+	QVERIFY(s.customAppSignalID() == s2.customAppSignalID());
+	QVERIFY(s.caption() == s2.caption());
+
+	// checkin signal1
+	//
+	TS_VERIFY(checkinSignals(ADMIN_ID, std::vector<int>({id1}), "admin signal1 checkin", nullptr));
+
+	// get latest signals1,2 by User2
+	//
+	s.clear();
+
+	TS_VERIFY(getLatestSignal(USER2_ID, id1, &s));
+	QVERIFY(s.appSignalID() == s1.appSignalID());
+	QVERIFY(s.customAppSignalID() == s1.customAppSignalID());
+	QVERIFY(s.caption() == s1.caption());
+
+	TS_VERIFY(getLatestSignal(USER2_ID, id2, &s));
+	QVERIFY(s.appSignalID() == s2.appSignalID());
+	QVERIFY(s.customAppSignalID() == s2.customAppSignalID());
+	QVERIFY(s.caption() == s2.caption());
+
+	// delete signal2 by User2
+	//
+	TS_VERIFY(deleteSignal(USER2_ID, id2, nullptr));
+
+	// Admin and User3 should see signal1, signal2
+	//
+	TS_VERIFY(getLatestSignal(ADMIN_ID, id1, &s));
+	TS_VERIFY(getLatestSignal(USER2_ID, id1, &s));
+	TS_VERIFY(getLatestSignal(ADMIN_ID, id2, &s));
+	TS_VERIFY(getLatestSignal(USER2_ID, id2, &s));
+
+	// checkin deleted signals
+	//
+	TS_VERIFY(checkinSignals(USER2_ID, std::vector<int>({id2}), "checkin deletedsignals", nullptr));
+
+	// All users should see only signal1
+	//
+	TS_VERIFY(getLatestSignal(ADMIN_ID, id1, &s));
+	TS_VERIFY(getLatestSignal(USER2_ID, id1, &s));
+	TS_VERIFY(getLatestSignal(USER3_ID, id1, &s));
+
+	res = getLatestSignal(ADMIN_ID, id2, &s);
+	QVERIFY2(res.isEmpty() == false, "Error should be returned");
+
+	res = getLatestSignal(USER3_ID, id2, &s);
+	QVERIFY2(res.isEmpty() == false, "Error should be returned");
+
+	res = getLatestSignal(USER3_ID, id2, &s);
+	QVERIFY2(res.isEmpty() == false, "Error should be returned");
 
 	db.close();
 }
@@ -2248,7 +2528,10 @@ QString DbControllerSignalTests::deleteSignal(int userID, int signalID, ObjectSt
 								arg(userID).arg(signalID));
 	TS_VERIFY_RETURN_ERR(q.first() == true, "Can't get ObjectState");
 
-	DbWorker::db_objectState(q, obState);
+	if (obState != nullptr)
+	{
+		DbWorker::db_objectState(q, obState);
+	}
 
 	TS_RETURN_SUCCESS();
 }
@@ -2364,6 +2647,62 @@ QString DbControllerSignalTests::getAllSignalIDs(std::vector<int>* allSignalIDsS
 
 	TS_RETURN_SUCCESS();
 }
+
+QString DbControllerSignalTests::getAllSignalsInstancesIDs(std::vector<int>* allSignalsInstancesIDsSorted)
+{
+	TS_TEST_PTR_RETURN(allSignalsInstancesIDsSorted);
+
+	allSignalsInstancesIDsSorted->clear();
+
+	QSqlQuery q;
+
+	TS_EXEC_QUERY_RETURN_ERR(q, "SELECT signalinstanceid FROM SignalInstance ORDER BY signalinstanceid ASC");
+
+	while(q.next() == true)
+	{
+		allSignalsInstancesIDsSorted->push_back(q.value(0).toInt());
+	}
+
+	TS_RETURN_SUCCESS();
+}
+
+QString DbControllerSignalTests::getActualSignalsSignalInstanceID(int userID, bool with_deleted, std::vector<int>* ids)
+{
+	TS_TEST_PTR_RETURN(ids);
+
+	ids->clear();
+
+	QSqlQuery q;
+
+	TS_EXEC_QUERY_RETURN_ERR(q, QString("SELECT * FROM get_signals_actual_signalinstanceid(%1, %2)").
+										arg(userID).arg(with_deleted == true ? "TRUE" : "FALSE"));
+
+	while(q.next() == true)
+	{
+		ids->push_back(q.value(0).toInt());
+	}
+
+	std::sort(ids->begin(), ids->end());
+
+	TS_RETURN_SUCCESS();
+}
+
+QString DbControllerSignalTests::getLatestSignal(int userID, int signalID, Signal* s)
+{
+	TS_TEST_PTR_RETURN(s);
+
+	QSqlQuery q;
+
+	TS_EXEC_QUERY_RETURN_ERR(q, QString("SELECT * FROM get_latest_signal(%1, %2)").
+										arg(userID).arg(signalID));
+
+	TS_VERIFY_RETURN_ERR(q.first() == true, "Can't get Signal record");
+
+	DbWorker::getSignalData(q, *s);
+
+	TS_RETURN_SUCCESS();
+}
+
 
 QString DbControllerSignalTests::removePairsWithID(std::vector<std::pair<int, QString>>* pairs,
 												   const std::vector<int>& idsToRemove)
