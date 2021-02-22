@@ -432,8 +432,8 @@ void DataSourcesStateModel::reloadList()
 }
 
 
-AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget *parent) :
-	BaseServiceStateWidget(softwareInfo, udpIp, udpPort, parent),
+AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent) :
+	BaseServiceStateWidget(softwareInfo, service, udpIp, udpPort, parent),
 	m_tcpClientSocket(nullptr),
 	m_tcpClientThread(nullptr)
 {
@@ -522,7 +522,7 @@ void AppDataServiceWidget::updateServiceState()
 
 void AppDataServiceWidget::updateStateInfo()
 {
-	if (m_serviceInfo.servicestate() == ServiceState::Work)
+	if (m_service.information.servicestate() == ServiceState::Work)
 	{
 		stateTabModel()->setData(stateTabModel()->index(5, 0), "Connected client quantity");
 		stateTabModel()->setData(stateTabModel()->index(6, 0), "Connected to CfgService");

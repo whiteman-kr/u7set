@@ -71,7 +71,7 @@ class AppDataServiceWidget : public BaseServiceStateWidget
 {
 	Q_OBJECT
 public:
-	AppDataServiceWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget *parent = nullptr);
+	AppDataServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent = nullptr);
 	~AppDataServiceWidget();
 
 signals:

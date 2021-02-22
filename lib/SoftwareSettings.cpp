@@ -233,9 +233,9 @@ bool SoftwareSettingsSet::readSettingsFromXmlString(const QString& xmlString, So
 	return result;
 }
 
-std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings()
+std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings(E::SoftwareType softwareType)
 {
-	switch(m_softwareType)
+	switch(softwareType)
 	{
 	case E::SoftwareType::Monitor:
 		return std::make_shared<MonitorSettings>();
@@ -273,6 +273,11 @@ std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings
 	}
 
 	return nullptr;
+}
+
+std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings()
+{
+	return createAppropriateSettings(m_softwareType);
 }
 
 bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_ptr<SoftwareSettings> sharedSettings)

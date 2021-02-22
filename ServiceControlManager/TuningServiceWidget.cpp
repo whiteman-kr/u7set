@@ -4,8 +4,8 @@
 #include <QStandardItemModel>
 #include <QTableView>
 
-TuningServiceWidget::TuningServiceWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget *parent) :
-	BaseServiceStateWidget(softwareInfo, udpIp, udpPort, parent)
+TuningServiceWidget::TuningServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent) :
+	BaseServiceStateWidget(softwareInfo, service, udpIp, udpPort, parent)
 {
 	connect(this, &BaseServiceStateWidget::connectionStatisticChanged, this, &TuningServiceWidget::updateStateInfo);
 
@@ -91,7 +91,7 @@ TuningServiceWidget::~TuningServiceWidget()
 
 void TuningServiceWidget::updateStateInfo()
 {
-	if (m_serviceInfo.servicestate() == ServiceState::Work)
+	if (m_service.information.servicestate() == ServiceState::Work)
 	{
 		//		quint32 ip = m_serviceInfo.clientrequestip();
 		//qint32 port = m_serviceInfo.clientrequestport();
