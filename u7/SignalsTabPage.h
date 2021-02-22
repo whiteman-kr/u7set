@@ -104,12 +104,7 @@ public:
 	SignalsTabPage* parentWindow() { return m_parentWindow; }
 
 	void prepareForReset() { beginResetModel(); }
-	void finishReset()
-	{
-		m_rowCount = 0;
-		m_columnCount = 0;
-		endResetModel();
-	}
+	void finishReset();
 
 
 public slots:

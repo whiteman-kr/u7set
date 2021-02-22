@@ -1224,8 +1224,8 @@ void SignalSetProvider::clearSignals()
 {
 	if (m_signalSet.count() != 0)
 	{
-		m_signalSet.clear();
 		m_propertyManager.clear();
+		m_signalSet.clear();
 		emit signalCountChanged();
 	}
 }

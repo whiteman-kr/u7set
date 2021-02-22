@@ -564,6 +564,13 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 	}
 }
 
+void SignalsModel::finishReset()
+{
+	m_rowCount = m_signalSetProvider->signalCount();
+	m_columnCount = m_signalSetProvider->signalPropertyManager().count();
+	endResetModel();
+}
+
 void SignalsModel::updateSignal(int signalIndex)
 {
 	assert(signalIndex < m_rowCount);
