@@ -1888,21 +1888,10 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 	{
 	case CompareVersionType::LatestVersion:
 		{
-			SignalSet signalsSet;
-
-			ok = db()->getSignals(&signalsSet, true/*excludeDeleted*/, nullptr);
+			ok = db()->getLatestSignalsWithUserID(&sourceSignalsVec, nullptr);
 			if (ok == false)
 			{
-				throw(tr("DbController::getSignals failed."));
-			}
-
-			int count = signalsSet.count();
-
-			sourceSignalsVec.reserve(count);
-
-			for (int i = 0; i < count; i++)
-			{
-				sourceSignalsVec.push_back(sourceSignalsVec[i]);
+				throw(tr("DbController::getLatestSignalsWithUserID failed."));
 			}
 		}
 		break;
@@ -1938,21 +1927,10 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 	{
 	case CompareVersionType::LatestVersion:
 		{
-			SignalSet signalsSet;
-
-			ok = db()->getSignals(&signalsSet, true/*excludeDeleted*/, nullptr);
+			ok = db()->getLatestSignalsWithUserID(&targetSignalsVec, nullptr);
 			if (ok == false)
 			{
 				throw(tr("DbController::getSignals failed."));
-			}
-
-			int count = signalsSet.count();
-
-			targetSignalsVec.reserve(count);
-
-			for (int i = 0; i < count; i++)
-			{
-				targetSignalsVec.push_back(signalsSet[i]);
 			}
 		}
 		break;

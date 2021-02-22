@@ -455,7 +455,7 @@ void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 
 	if (m_cfgFilesInfo.contains(fileName) == false)
 	{
-		m_lastError = Tcp::FileTransferResult::NotFoundRemoteFile;
+		m_lastError = Tcp::FileTransferResult::FileIsNotAccessible;
 		emitFileReady();
 		return;
 	}

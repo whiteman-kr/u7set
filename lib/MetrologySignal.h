@@ -8,8 +8,7 @@
 #include "../lib/DeviceObject.h"
 #include "../lib/XmlHelper.h"
 
-#include "../lib/ProtoSerialization.h"
-#include "../Proto/serialization.pb.h"
+#include "../Proto/ProtoSerialization.h"
 
 // Attention !!!
 // If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_ITEMS

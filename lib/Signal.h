@@ -39,6 +39,7 @@ class Signal
 	friend class DbWorker;
 	friend class SignalSet;
 	friend class SignalTests;
+	friend class DbControllerSignalTests;
 
 public:
 	static const QString MACRO_START_TOKEN;
@@ -402,6 +403,7 @@ private:
 	void setInstanceCreated(const QDateTime& instanceCreated) { m_instanceCreated = instanceCreated; }
 	void setInstanceCreated(const QString& instanceCreatedStr) { m_instanceCreated = QDateTime::fromString(instanceCreatedStr, DATE_TIME_FORMAT_STR); }
 	void setInstanceAction(VcsItemAction action) { m_instanceAction = action; }
+	void initCreatedDates();
 
 	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
 

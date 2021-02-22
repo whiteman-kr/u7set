@@ -43,6 +43,7 @@ class ImageItem;
 class Envelope;
 class EnvelopeSet;
 class EnvelopeSetShortDescription;
+class ExportedDevicePreset;
 class Configuration;
 class AfbElementCollection;
 class AfbElementXml;
@@ -1244,6 +1245,18 @@ class EnvelopeSetShortDescription : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
       mutable_classnamehash();
 
+  // repeated int32 devicetype = 10;
+  inline int devicetype_size() const;
+  inline void clear_devicetype();
+  static const int kDevicetypeFieldNumber = 10;
+  inline ::google::protobuf::int32 devicetype(int index) const;
+  inline void set_devicetype(int index, ::google::protobuf::int32 value);
+  inline void add_devicetype(::google::protobuf::int32 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::int32 >&
+      devicetype() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
+      mutable_devicetype();
+
   // optional bool equipmentEditor = 3;
   inline bool has_equipmenteditor() const;
   inline void clear_equipmenteditor();
@@ -1279,13 +1292,14 @@ class EnvelopeSetShortDescription : public ::google::protobuf::Message {
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedField< ::google::protobuf::uint32 > classnamehash_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::int32 > devicetype_;
   ::google::protobuf::uint32 projectdbversion_;
   bool equipmenteditor_;
   bool preseteditor_;
   bool presetroot_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -1293,6 +1307,102 @@ class EnvelopeSetShortDescription : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static EnvelopeSetShortDescription* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ExportedDevicePreset : public ::google::protobuf::Message {
+ public:
+  ExportedDevicePreset();
+  virtual ~ExportedDevicePreset();
+
+  ExportedDevicePreset(const ExportedDevicePreset& from);
+
+  inline ExportedDevicePreset& operator=(const ExportedDevicePreset& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ExportedDevicePreset& default_instance();
+
+  void Swap(ExportedDevicePreset* other);
+
+  // implements Message ----------------------------------------------
+
+  ExportedDevicePreset* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ExportedDevicePreset& from);
+  void MergeFrom(const ExportedDevicePreset& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .Proto.EnvelopeSetShortDescription description = 1;
+  inline bool has_description() const;
+  inline void clear_description();
+  static const int kDescriptionFieldNumber = 1;
+  inline const ::Proto::EnvelopeSetShortDescription& description() const;
+  inline ::Proto::EnvelopeSetShortDescription* mutable_description();
+  inline ::Proto::EnvelopeSetShortDescription* release_description();
+  inline void set_allocated_description(::Proto::EnvelopeSetShortDescription* description);
+
+  // optional .Proto.EnvelopeSet items = 2;
+  inline bool has_items() const;
+  inline void clear_items();
+  static const int kItemsFieldNumber = 2;
+  inline const ::Proto::EnvelopeSet& items() const;
+  inline ::Proto::EnvelopeSet* mutable_items();
+  inline ::Proto::EnvelopeSet* release_items();
+  inline void set_allocated_items(::Proto::EnvelopeSet* items);
+
+  // @@protoc_insertion_point(class_scope:Proto.ExportedDevicePreset)
+ private:
+  inline void set_has_description();
+  inline void clear_has_description();
+  inline void set_has_items();
+  inline void clear_has_items();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::Proto::EnvelopeSetShortDescription* description_;
+  ::Proto::EnvelopeSet* items_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static ExportedDevicePreset* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -15856,15 +15966,40 @@ EnvelopeSetShortDescription::mutable_classnamehash() {
   return &classnamehash_;
 }
 
+// repeated int32 devicetype = 10;
+inline int EnvelopeSetShortDescription::devicetype_size() const {
+  return devicetype_.size();
+}
+inline void EnvelopeSetShortDescription::clear_devicetype() {
+  devicetype_.Clear();
+}
+inline ::google::protobuf::int32 EnvelopeSetShortDescription::devicetype(int index) const {
+  return devicetype_.Get(index);
+}
+inline void EnvelopeSetShortDescription::set_devicetype(int index, ::google::protobuf::int32 value) {
+  devicetype_.Set(index, value);
+}
+inline void EnvelopeSetShortDescription::add_devicetype(::google::protobuf::int32 value) {
+  devicetype_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::int32 >&
+EnvelopeSetShortDescription::devicetype() const {
+  return devicetype_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
+EnvelopeSetShortDescription::mutable_devicetype() {
+  return &devicetype_;
+}
+
 // optional bool equipmentEditor = 3;
 inline bool EnvelopeSetShortDescription::has_equipmenteditor() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void EnvelopeSetShortDescription::set_has_equipmenteditor() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void EnvelopeSetShortDescription::clear_has_equipmenteditor() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void EnvelopeSetShortDescription::clear_equipmenteditor() {
   equipmenteditor_ = false;
@@ -15880,13 +16015,13 @@ inline void EnvelopeSetShortDescription::set_equipmenteditor(bool value) {
 
 // optional bool presetEditor = 4;
 inline bool EnvelopeSetShortDescription::has_preseteditor() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void EnvelopeSetShortDescription::set_has_preseteditor() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void EnvelopeSetShortDescription::clear_has_preseteditor() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void EnvelopeSetShortDescription::clear_preseteditor() {
   preseteditor_ = false;
@@ -15902,13 +16037,13 @@ inline void EnvelopeSetShortDescription::set_preseteditor(bool value) {
 
 // optional bool presetRoot = 5;
 inline bool EnvelopeSetShortDescription::has_presetroot() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void EnvelopeSetShortDescription::set_has_presetroot() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void EnvelopeSetShortDescription::clear_has_presetroot() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void EnvelopeSetShortDescription::clear_presetroot() {
   presetroot_ = false;
@@ -15920,6 +16055,86 @@ inline bool EnvelopeSetShortDescription::presetroot() const {
 inline void EnvelopeSetShortDescription::set_presetroot(bool value) {
   set_has_presetroot();
   presetroot_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ExportedDevicePreset
+
+// optional .Proto.EnvelopeSetShortDescription description = 1;
+inline bool ExportedDevicePreset::has_description() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ExportedDevicePreset::set_has_description() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ExportedDevicePreset::clear_has_description() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ExportedDevicePreset::clear_description() {
+  if (description_ != NULL) description_->::Proto::EnvelopeSetShortDescription::Clear();
+  clear_has_description();
+}
+inline const ::Proto::EnvelopeSetShortDescription& ExportedDevicePreset::description() const {
+  return description_ != NULL ? *description_ : *default_instance_->description_;
+}
+inline ::Proto::EnvelopeSetShortDescription* ExportedDevicePreset::mutable_description() {
+  set_has_description();
+  if (description_ == NULL) description_ = new ::Proto::EnvelopeSetShortDescription;
+  return description_;
+}
+inline ::Proto::EnvelopeSetShortDescription* ExportedDevicePreset::release_description() {
+  clear_has_description();
+  ::Proto::EnvelopeSetShortDescription* temp = description_;
+  description_ = NULL;
+  return temp;
+}
+inline void ExportedDevicePreset::set_allocated_description(::Proto::EnvelopeSetShortDescription* description) {
+  delete description_;
+  description_ = description;
+  if (description) {
+    set_has_description();
+  } else {
+    clear_has_description();
+  }
+}
+
+// optional .Proto.EnvelopeSet items = 2;
+inline bool ExportedDevicePreset::has_items() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ExportedDevicePreset::set_has_items() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ExportedDevicePreset::clear_has_items() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ExportedDevicePreset::clear_items() {
+  if (items_ != NULL) items_->::Proto::EnvelopeSet::Clear();
+  clear_has_items();
+}
+inline const ::Proto::EnvelopeSet& ExportedDevicePreset::items() const {
+  return items_ != NULL ? *items_ : *default_instance_->items_;
+}
+inline ::Proto::EnvelopeSet* ExportedDevicePreset::mutable_items() {
+  set_has_items();
+  if (items_ == NULL) items_ = new ::Proto::EnvelopeSet;
+  return items_;
+}
+inline ::Proto::EnvelopeSet* ExportedDevicePreset::release_items() {
+  clear_has_items();
+  ::Proto::EnvelopeSet* temp = items_;
+  items_ = NULL;
+  return temp;
+}
+inline void ExportedDevicePreset::set_allocated_items(::Proto::EnvelopeSet* items) {
+  delete items_;
+  items_ = items;
+  if (items) {
+    set_has_items();
+  } else {
+    clear_has_items();
+  }
 }
 
 // -------------------------------------------------------------------

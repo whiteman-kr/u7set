@@ -92,6 +92,8 @@ SOURCES +=\
     DialogSettings.cpp \
     DialogTagsEditor.cpp \
     EditEngine/EditEngineNop.cpp \
+    EquipmentEditor/EquipmentModel.cpp \
+    EquipmentEditor/EquipmentView.cpp \
     FilesTabPage.cpp \
     ../lib/Ui/DialogProgress.cpp \
     Forms/DialogProjectDiff.cpp \
@@ -120,7 +122,7 @@ SOURCES +=\
     TestsTabPage.cpp \
     UserManagementDialog.cpp \
     ../lib/DbProgressDialog.cpp \
-    EquipmentTabPage.cpp \
+	EquipmentEditor/EquipmentTabPage.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
     SignalsTabPage.cpp \
@@ -134,7 +136,7 @@ SOURCES +=\
     BuildTabPage.cpp \
     DialogFileEditor.cpp \
     DialogSubsystemListEditor.cpp \
-    EquipmentVcsDialog.cpp \
+	EquipmentEditor/EquipmentVcsDialog.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     GlobalMessanger.cpp \
@@ -146,7 +148,7 @@ SOURCES +=\
     EditEngine/EditEngineSetSchemaProperty.cpp \
     EditEngine/EditEngineSetOrder.cpp \
     UploadTabPage.cpp \
-    DialogChoosePreset.cpp \
+	EquipmentEditor/DialogChoosePreset.cpp \
     ../lib/Configurator.cpp \
     DialogSettingsConfigurator.cpp \
     Forms/ChooseUfbDialog.cpp \
@@ -203,6 +205,7 @@ SOURCES +=\
 
 HEADERS  += \
     ../lib/ExportPrint.h \
+    ../lib/QDoublevalidatorEx.h \
     ../lib/SoftwareXmlReader.h \
     ../lib/StandardColors.h \
     ../lib/Ui/DbControllerTools.h \
@@ -221,6 +224,8 @@ HEADERS  += \
     DialogSettings.h \
     DialogTagsEditor.h \
     EditEngine/EditEngineNop.h \
+	EquipmentEditor/EquipmentModel.h \
+    EquipmentEditor/EquipmentView.h \
     FilesTabPage.h \
     ../lib/Ui/DialogProgress.h \
     Forms/DialogProjectDiff.h \
@@ -252,7 +257,7 @@ HEADERS  += \
     ../lib/Factory.h \
     ../lib/CUtils.h \
     ../lib/OrderedHash.h \
-    EquipmentTabPage.h \
+	EquipmentEditor/EquipmentTabPage.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
     SignalsTabPage.h \
@@ -267,7 +272,7 @@ HEADERS  += \
     DialogFileEditor.h \
     DialogSubsystemListEditor.h \
     Forms/ChooseAfbDialog.h \
-    EquipmentVcsDialog.h \
+	EquipmentEditor/EquipmentVcsDialog.h \
     ../lib/PropertyObject.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
@@ -281,7 +286,7 @@ HEADERS  += \
     EditEngine/EditEngineSetSchemaProperty.h \
     EditEngine/EditEngineSetOrder.h \
     UploadTabPage.h \
-    DialogChoosePreset.h \
+	EquipmentEditor/DialogChoosePreset.h \
     ../lib/Configurator.h \
     DialogSettingsConfigurator.h \
     Forms/ChooseUfbDialog.h \
@@ -329,7 +334,7 @@ HEADERS  += \
     ../lib/SimpleMutex.h \
     ../lib/Ui/TextEditCompleter.h \
     ../lib/QScintillaLexers/LexerJavaScript.h \
-    ../lib/QScintillaLexers/LexerXML.h \
+	../lib/QScintillaLexers/LexerXML.h \
     DialogShortcuts.h \
     ../lib/Ui/UiTools.h \
     SvgEditor.h \
@@ -350,12 +355,12 @@ FORMS    += \
     CheckInDialog.ui \
     DialogSubsystemListEditor.ui \
     Forms/ChooseAfbDialog.ui \
-    EquipmentVcsDialog.ui \
+	EquipmentEditor/EquipmentVcsDialog.ui \
 	SchemaEditor/CreateSchemaDialog.ui \
 	SchemaEditor/SchemaLayersDialog.ui \
 	SchemaEditor/SchemaPropertiesDialog.ui \
 	SchemaEditor/SchemaItemPropertiesDialog.ui \
-    DialogChoosePreset.ui \
+	EquipmentEditor/DialogChoosePreset.ui \
     DialogSettingsConfigurator.ui \
     Forms/ChooseUfbDialog.ui \
     Forms/SelectChangesetDialog.ui \
@@ -443,14 +448,8 @@ unix {
 #
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 
-win32 {
-    LIBS += -L$$DESTDIR -lprotobuf
-
-    INCLUDEPATH += ./../Protobuf
-}
-unix {
-    LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
 # QScintilla
 #
@@ -501,17 +500,16 @@ include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
 # QtKeychain
 #
+INCLUDEPATH += ../Tools/qtkeychain-0.10
+include(../Tools/qtkeychain-0.10/qt5keychain.pri)
+
+DEFINES += QTKEYCHAIN_NO_EXPORT
+DEFINES += USE_CREDENTIAL_STORE
+
 win32 {
     LIBS += Advapi32.lib
-
-    DEFINES += QTKEYCHAIN_NO_EXPORT
-    DEFINES += USE_CREDENTIAL_STORE
-
-    INCLUDEPATH += ./qtkeychain-0.10
-	include(../Tools/qtkeychain-0.10/qt5keychain.pri)
 }
 unix {
-    LIBS += -lqtkeychain
 }
 
 # Simulator Lib

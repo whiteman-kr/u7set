@@ -397,6 +397,11 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 	if (frameNumber == 0)
 	{
 		m_frame0ServerTime = rupFrameTime.serverTime;
+		m_isSimPacket = rupFrameTime.isSimFrame;
+	}
+	else
+	{
+		m_isSimPacket |= rupFrameTime.isSimFrame;
 	}
 
 	// copy RUP frame header
@@ -458,7 +463,12 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 	return true;
 }
 
-bool DataSourceOnline::getDataToParsing(Times* times, quint16* packetNo, const char** rupData, int* rupDataSize, bool* dataReceivingTimeout)
+bool DataSourceOnline::getDataToParsing(Times* times,
+										bool* isSimPacket,
+										quint16* packetNo,
+										const char** rupData,
+										int* rupDataSize,
+										bool* dataReceivingTimeout)
 {
 	if (m_dataReadyToParsing == false)
 	{
@@ -477,6 +487,7 @@ bool DataSourceOnline::getDataToParsing(Times* times, quint16* packetNo, const c
 #endif
 
 	*times = m_rupDataTimes;
+	*isSimPacket = m_isSimPacket;
 	*packetNo = m_packetNo;
 	*rupData = reinterpret_cast<const char*>(m_rupFramesData);
 	*rupDataSize = m_rupDataSize;
@@ -577,28 +588,17 @@ QString DataSourceOnline::getTimeStr(qint64 timeMs) const
 				arg(date.year(), 4, 10, QLatin1Char('0'));
 }
 
-/*
-void DataSourceOnline::stop()
-{
-	setState(E::DataSourceState::Stopped);
-	m_dataReceivingRate = 0;
-	m_receivedDataSize = 0;
-}
-
-
-void DataSourceOnline::resume()
-{
-	setState(E::DataSourceState::NoData);
-}*/
-
-
-void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame, const QThread* thread)
+void DataSourceOnline::pushRupFrame(qint64 serverTime,
+									bool isSimFrame,
+									const Rup::Frame& rupFrame,
+									const QThread* thread)
 {
 	RupFrameTime* rupFrameTime = m_rupFrameTimeQueue.beginPush(thread);
 
 	if (rupFrameTime != nullptr)
 	{
 		rupFrameTime->serverTime = serverTime;
+		rupFrameTime->isSimFrame = isSimFrame;
 		memcpy(&rupFrameTime->rupFrame, &rupFrame, sizeof(rupFrame));
 	}
 	else

@@ -149,6 +149,7 @@ public:
 	bool getCheckedOutSignalsIDs(QVector<int>* signalIDs, QWidget* parentWidget);
 	bool addSignal(E::SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget);
 	bool getLatestSignalsWithoutProgress(QVector<int> signalIDs, QVector<Signal>* signalsArray, QWidget* parentWidget);
+	bool getLatestSignalsWithUserID(std::vector<Signal>* out, QWidget* parentWidget);
 
 	bool checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
 	bool setSignalWorkcopy(Signal* signal, ObjectState* objectState, QWidget* parentWidget);
@@ -267,6 +268,7 @@ signals:
 	void signal_getLatestSignal(int signalID, Signal* signal);
 	void signal_getLatestSignals(QVector<int> signalIDs, QVector<Signal>* signalsArray);
 	void signal_getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray);
+	void signal_getLatestSignalsWithUserID(std::vector<Signal>* out);
 	void signal_getCheckedOutSignalsIDs(QVector<int>* signalIDs);
 	void signal_addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
 

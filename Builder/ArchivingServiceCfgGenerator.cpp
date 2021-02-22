@@ -25,7 +25,7 @@ namespace Builder
 		return m_settingsSet.addProfile<ArchivingServiceSettingsGetter>(profile, settingsGetter);
 	}
 
-	bool ArchivingServiceCfgGenerator::generateConfiguration()
+	bool ArchivingServiceCfgGenerator::generateConfigurationStep1()
 	{
 		bool result = false;
 

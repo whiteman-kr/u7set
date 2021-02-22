@@ -135,8 +135,12 @@ namespace Tcp
 			str = QString(tr("Not connected to server"));
 			break;
 
-		case FileTransferResult::NotFoundRemoteFile:
-			str = QString(tr("Not found remote file"));
+		case FileTransferResult::FileIsNotAccessible:
+			str = QString(tr("File isn't enumerated in <files> section of Configuration.xml"));
+			break;
+
+		case FileTransferResult::RemoteFileIsNotExists:
+			str = QString(tr("Remote file is not exists"));
 			break;
 
 		case FileTransferResult::CantOpenRemoteFile:
@@ -519,7 +523,7 @@ namespace Tcp
 
 		if (m_file.exists() == false)
 		{
-			m_reply.set_errorcode(static_cast<int>(FileTransferResult::NotFoundRemoteFile));
+			m_reply.set_errorcode(static_cast<int>(FileTransferResult::RemoteFileIsNotExists));
 			sendReply(m_reply);
 			init();
 			return;

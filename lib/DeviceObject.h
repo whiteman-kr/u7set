@@ -9,8 +9,8 @@
 #include "../lib/PropertyObject.h"
 #include "../lib/Factory.h"
 #include "../lib/Types.h"
-#include "../lib/ProtoSerialization.h"
 #include "../lib/ModuleFirmware.h"
+#include "../Proto/ProtoSerialization.h"
 
 class DbController;
 
@@ -243,7 +243,8 @@ namespace Hardware
 		std::shared_ptr<DeviceObject> childSharedPtr(QUuid uuid);
 		std::shared_ptr<DeviceObject> childSharedPtrByPresetUuid(QUuid presetObjectUuid);
 
-		bool canAddChild(DeviceObject* child) const;
+		bool canAddChild(const DeviceObject* child) const;
+		bool canAddChild(const DeviceType childType) const;
 
 		void addChild(std::shared_ptr<DeviceObject> child);
 		void deleteChild(DeviceObject* child);

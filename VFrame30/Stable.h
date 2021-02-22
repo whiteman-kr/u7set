@@ -96,8 +96,9 @@
 #include "../lib/TypesAndEnums.h"
 #include "../lib/Types.h"
 #include "../lib/CUtils.h"
-#include "../lib/ProtoSerialization.h"
 #include "../lib/DebugInstCounter.h"
+#include "../lib/PropertyObject.h"
+#include "../Proto/ProtoSerialization.h"
 
 #ifdef _MSC_VER
 	#pragma warning(disable : 4482)

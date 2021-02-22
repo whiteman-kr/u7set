@@ -1556,6 +1556,12 @@ const Hardware::DeviceObject* Signal::getParentDeviceObjectOfType(const Hardware
 	return nullptr;
 }
 
+void Signal::initCreatedDates()
+{
+	m_created = QDateTime::currentDateTime();
+	m_instanceCreated = QDateTime::currentDateTime();
+}
+
 bool Signal::isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const
 {
 	if (m_signalType != signalType)

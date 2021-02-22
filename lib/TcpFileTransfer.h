@@ -19,7 +19,8 @@ namespace Tcp
 
 		NotConnectedToServer,
 
-		NotFoundRemoteFile,
+		FileIsNotAccessible,
+		RemoteFileIsNotExists,
 		CantOpenRemoteFile,
 		CantReadRemoteFile,
 

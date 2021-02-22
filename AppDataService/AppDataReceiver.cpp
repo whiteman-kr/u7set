@@ -165,6 +165,8 @@ void AppDataReceiverThread::receivePackets()
 	qint64 prevServerTime = QDateTime::currentMSecsSinceEpoch();
 	qint64 lastPacketTime = prevServerTime;
 
+	bool isSimFrame = false;
+
 	while(isQuitRequested() == false)
 	{
 		qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
@@ -207,6 +209,8 @@ void AppDataReceiverThread::receivePackets()
 
 		quint32 ip = 0;
 
+		isSimFrame = false;
+
 		if (size == sizeof(Rup::Frame))
 		{
 			ip = from.toIPv4Address();
@@ -239,6 +243,8 @@ void AppDataReceiverThread::receivePackets()
 				ip = reverseUint32(simFrame.sourceIP);
 
 				m_simFramesCount++;
+
+				isSimFrame = true;
 			}
 			else
 			{
@@ -272,6 +278,6 @@ void AppDataReceiverThread::receivePackets()
 			continue;
 		}
 
-		dataSource->pushRupFrame(serverTime, simFrame.rupFrame, m_thisThread);
+		dataSource->pushRupFrame(serverTime, isSimFrame, simFrame.rupFrame, m_thisThread);
 	}
 }

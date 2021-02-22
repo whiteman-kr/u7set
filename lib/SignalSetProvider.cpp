@@ -435,13 +435,13 @@ void SignalPropertyManager::clear()
 {
 	if (m_propertyDescription.size() > m_basicPropertyDescription.size())
 	{
-		emit propertyCountWillDecrease(m_basicPropertyDescription.size());
+		emit propertyCountWillDecrease(static_cast<int>(m_basicPropertyDescription.size()));
 		m_propertyDescription = m_basicPropertyDescription;
 		emit propertyCountDecreased();
 	}
 	if (m_propertyDescription.size() < m_basicPropertyDescription.size())
 	{
-		emit propertyCountWillIncrease(m_basicPropertyDescription.size());
+		emit propertyCountWillIncrease(static_cast<int>(m_basicPropertyDescription.size()));
 		m_propertyDescription = m_basicPropertyDescription;
 		emit propertyCountIncreased();
 	}
@@ -516,7 +516,7 @@ void SignalPropertyManager::addNewProperty(const SignalPropertyDescription& newP
 		return;
 	}
 
-	emit propertyCountWillIncrease(m_propertyDescription.size() + 1);
+	emit propertyCountWillIncrease(static_cast<int>(m_propertyDescription.size() + 1));
 	int propertyIndex = static_cast<int>(m_propertyDescription.size());
 	m_propertyDescription.push_back(newProperty);
 	m_propertyName2IndexMap.insert(newProperty.name, propertyIndex);

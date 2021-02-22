@@ -526,7 +526,8 @@ public:
 		Blocked,
 		Mismatch,
 		AboveHighLimit,
-		BelowLowLimit
+		BelowLowLimit,
+		SwSimulated
 	};
 	Q_ENUM(AppSignalStateFlagType)
 
