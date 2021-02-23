@@ -12,7 +12,6 @@ const int ProtocolMaxVersion = 1;					// The maximum protocol version, changing 
 
 const uint16_t ConfigurationUartMask = 0x000F;		// The least 4bit of CONF_HEADER::moduleUartId
 const uint16_t ConfigurationUartValue = 0x0003;		// The least 4bit of CONF_HEADER::moduleUartId
-const uint16_t ConfigurationMultiUartFlag = 0x8000;	// 15th  bit means that module supports MultiUart protocol
 
 const uint16_t IdentificationFrameIndex = 0x0000;	// Frame index for security data
 const uint16_t ConfiguartionFrameIndex = 0x0001;	// Frame index for configuration data (CONF_SERVICE_DATA)
@@ -22,7 +21,8 @@ enum ConfigureCommand
 {
 	Read = 0x0001,
 	Write = 0x0002,
-	Nop = 0x004
+	Nop = 0x0004,
+	Nop2 = 0x0008
 };
 
 enum HeaderFlag
@@ -246,13 +246,19 @@ protected:
 
 //	bool send(HANDLE hDevice, int moduleUartId, ConfigureCommand opcode, uint16_t frameIndex, uint16_t blockSize, const std::vector<uint8_t>& requestData, CONF_HEADER* pReceivedHeader, std::vector<uint8_t>* replyData);
 
+	bool pingModule(int* protocolVersion, std::vector<int>* moduleUarts);
+
+
 	bool loadBinaryFileWorker(const QString& fileName, ModuleFirmwareStorage* storage, bool loadBinaryData);
 	void uploadFirmwareWorker(ModuleFirmwareStorage* storage, const QString& subsystemId);
 
 	void readServiceInformationWorker(int param);
-	bool readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxFrameCount);
+	bool readFirmwareWorker(std::vector<ModuleFirmwareData>* firmwareDataArray, int maxFrameCount);
 
 	void dumpIdentificationData(const std::vector<quint8> &identificationData, int blockSize, QStringList &out);
+
+	bool getUartsList(std::vector<int>* moduleUarts);
+
 	// Slots
 	//
 public slots:
@@ -314,7 +320,7 @@ private:
 
 	bool m_verify = true;
 
-	int m_currentUartId = -1;
+	//int m_currentUartId = -1;
 
 	QString m_fileName;
 };
