@@ -418,6 +418,7 @@ public slots:
 	void setSelection(const QVector<int> &selectedRowsSignalID, int focusedCellSignalID = -1);
 	void saveSelection();
 	void restoreSelection(int focusedSignalId = -1);
+	void onSignalSelectionChanged();
 
 	void changeSignalTypeFilter(int selectedType);
 	void changeSignalIdFilter(QStringList strIds, bool refreshSignalList);
@@ -446,6 +447,7 @@ private:
 	int m_lastHorizontalScrollPosition = -1;
 	FindSignalDialog* m_findSignalDialog = nullptr;
 	DialogMetrologyConnection* m_metrologyDialog = nullptr;
+	QAction* m_addMetrologyConnectionAction = nullptr;
 
 	QVector<int> m_selectedRowsSignalID;
 	int m_focusedCellSignalID = -1;

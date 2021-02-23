@@ -739,6 +739,7 @@ SignalsTabPage::SignalsTabPage(SignalSetProvider* signalSetProvider, DbControlle
 	connect(m_signalTypeFilterCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SignalsTabPage::changeSignalTypeFilter);
 
 	connect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &SignalsTabPage::changeLazySignalLoadingSequence);
+	connect(m_signalsView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SignalsTabPage::onSignalSelectionChanged);
 
 	connect(signalSetProvider, &SignalSetProvider::error, this, &SignalsTabPage::showError);
 
@@ -1044,9 +1045,9 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	connect(action, &QAction::triggered, this, &SignalsTabPage::openMetrologyConnections);
 	toolBar->addAction(action);
 
-	action = new QAction(QIcon(":/Images/Images/MetrologyConnection.svg"), tr("New metrology connection ..."), this);
-	connect(action, &QAction::triggered, this, &SignalsTabPage::addMetrologyConnection);
-	m_signalsView->addAction(action);
+	m_addMetrologyConnectionAction = new QAction(QIcon(":/Images/Images/MetrologyConnection.svg"), tr("New metrology connection ..."), this);
+	connect(m_addMetrologyConnectionAction, &QAction::triggered, this, &SignalsTabPage::addMetrologyConnection);
+	m_signalsView->addAction(m_addMetrologyConnectionAction);
 
 }
 
@@ -1663,6 +1664,27 @@ void SignalsTabPage::restoreSelection(int focusedSignalId)
 	m_signalsView->verticalScrollBar()->setValue(m_lastVerticalScrollPosition);
 
 	m_signalsView->scrollTo(currentProxyIndex);
+}
+
+// Checks only first selected signal, because Metrology editor reads only first signal
+//
+void SignalsTabPage::onSignalSelectionChanged()
+{
+	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
+	if (selection.count() == 0)
+	{
+		m_addMetrologyConnectionAction->setEnabled(false);
+		return;
+	}
+	int row = m_signalsProxyModel->mapToSource(selection[0]).row();
+	if (m_signalSetProvider->getLoadedSignal(row).isAnalog())
+	{
+		m_addMetrologyConnectionAction->setEnabled(true);
+	}
+	else
+	{
+		m_addMetrologyConnectionAction->setEnabled(false);
+	}
 }
 
 void SignalsTabPage::changeSignalTypeFilter(int selectedType)
