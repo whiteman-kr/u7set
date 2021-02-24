@@ -66,7 +66,6 @@
 #define TS_TEST_PTR_RETURN(ptr)						if (ptr == NULL) { Q_ASSERT(false); return "NULL pointer"; }
 
 
-
 class DbControllerSignalTests : public QObject
 {
 	Q_OBJECT
@@ -92,6 +91,10 @@ private slots:
 	// DbController methods tests
 	//
 	void dbcTest_addSignal();
+	void dbcTest_checkinSignals();
+	void dbcTest_checkoutSignals();
+	void dbcTest_deleteSignal();
+	void dbcTest_setSignalWorkcopy();
 
 /*	void getSignalIdsTest();
 	void checkInCheckOutSignalsTest();
@@ -111,6 +114,8 @@ private:
 	QString applyFutureDatabaseUpgrade();
 
 	QString addSignal(int userID, E::SignalType type, int channelCount, std::vector<ObjectState>* obStates);
+	QString dbc_addSignal(DbController* dbc, E::SignalType type, QStringList& appSignalIDs, std::vector<int>* addedIDs);
+	QString dbc_addSignal(DbController* dbc, E::SignalType type, int channelCount, std::vector<int>* addedIDs);
 
 	QString check_signalIsExist(	int userID,
 								int signalID,
@@ -185,6 +190,12 @@ private:
 	template <typename T>
 	bool sets_equal(std::vector<T> set1, std::vector<T> set2);
 
+	template <typename T>
+	QVector<T> toQVector(const std::vector<T>& v);
+
+	template <typename T>
+	std::vector<T> toStdVector(const QVector<T>& v);
+
 	//
 
 	QString lastError(const QSqlQuery& q) const { return q.lastError().text(); }
@@ -194,8 +205,15 @@ private:
 	const int USER2_ID = 2;
 	const int USER3_ID = 3;
 
+	const int USERS_COUNT = 3;
+
 private:
-	DbController* m_db = nullptr;
+	DbController* m_dbc[3];
+
+	DbController* m_dbcAdmin = nullptr;
+	DbController* m_dbcUser2 = nullptr;
+	DbController* m_dbcUser3 = nullptr;
+
 	QString m_databaseHost;
 	QString m_projectName;
 	QString m_databaseName;
@@ -279,4 +297,32 @@ bool DbControllerSignalTests::sets_equal(std::vector<T> set1, std::vector<T> set
 
 	return true;
 }
+
+template <typename T>
+QVector<T> DbControllerSignalTests::toQVector(const std::vector<T>& v)
+{
+	QVector<T> result;
+
+	for(const T& t : v)
+	{
+		result.append(t);
+	}
+
+	return result;
+}
+
+template <typename T>
+std::vector<T> DbControllerSignalTests::toStdVector(const QVector<T>& v)
+{
+	std::vector<T> result;
+
+	for(const T& t : v)
+	{
+		result.push_back(t);
+	}
+
+	return result;
+}
+
+
 
