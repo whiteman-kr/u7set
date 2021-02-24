@@ -790,6 +790,7 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, Tunin
 									   bool typeButtonEnabled,
 									   bool typeTabEnabled,
 									   bool typeCounterEnabled,
+									   bool typeSchemasTabsEnabled,
 									   TuningFilter::Source source,
 									   QByteArray mainSplitterState,
 									   int propertyEditorSplitterPos):
@@ -801,6 +802,7 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, Tunin
 	m_typeButtonEnabled(typeButtonEnabled),
 	m_typeTabEnabled(typeTabEnabled),
 	m_typeCounterEnabled(typeCounterEnabled),
+	m_typeSchemasTabsEnabled(typeSchemasTabsEnabled),
 	m_source(source)
 {
 
@@ -913,10 +915,11 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 
 	// Allow items
 
-	bool allowTree = (selectedFilter == nullptr || selectedFilter->interfaceType() == TuningFilter::InterfaceType::Tree);
-	bool allowTabs = (selectedFilter == nullptr || selectedFilter->interfaceType() == TuningFilter::InterfaceType::Button);
-	bool allowButtons = (selectedFilter == nullptr || selectedFilter->interfaceType() == TuningFilter::InterfaceType::Tab);
+	bool allowTree = (selectedFilter == nullptr || selectedFilter->isTree());
+	bool allowTabs = (selectedFilter == nullptr || selectedFilter->isButton());
+	bool allowButtons = (selectedFilter == nullptr || selectedFilter->isTab());
 	bool allowCounters = (selectedFilter == nullptr);
+	bool allowSchemasTabs = (selectedFilter == nullptr);
 
 	if (selectedFilter == nullptr)
 	{
@@ -934,12 +937,12 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 				 return;
 			 }
 
-			 if (f->interfaceType() == TuningFilter::InterfaceType::Button)
+			 if (f->isButton())
 			 {
 				 allowTabs = false;
 			 }
 
-			 if (f->interfaceType() == TuningFilter::InterfaceType::Tab)
+			 if (f->isTab())
 			 {
 				 allowButtons = false;
 			 }
@@ -952,8 +955,13 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 	allowTabs &= m_typeTabEnabled;
 	allowButtons &= m_typeButtonEnabled;
 	allowCounters &= m_typeCounterEnabled;
+	allowSchemasTabs &= m_typeSchemasTabsEnabled;
 
-	if (m_typeTabEnabled == false && m_typeButtonEnabled == false && m_typeCounterEnabled == false && allowTree == true)
+	if (m_typeTabEnabled == false &&
+		m_typeButtonEnabled == false &&
+		m_typeCounterEnabled == false &&
+		m_typeSchemasTabsEnabled == false &&
+		allowTree == true)
 	{
 		// This is made for TuningClient
 
@@ -1021,6 +1029,21 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 		connect(action, &QAction::triggered, this, f);
 
 		action->setEnabled(allowCounters);
+
+		menu.addAction(action);
+	}
+
+	{
+		// Counter
+		QAction* action = new QAction(tr("Schemas Tab"), &menu);
+
+		auto f = [this]() -> void
+		{
+				addPreset(TuningFilter::InterfaceType::SchemasTab);
+		};
+		connect(action, &QAction::triggered, this, f);
+
+		action->setEnabled(allowSchemasTabs);
 
 		menu.addAction(action);
 	}

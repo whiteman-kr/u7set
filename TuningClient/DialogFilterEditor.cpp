@@ -21,6 +21,7 @@ DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager,
 												  false,		/*typeButtonEnabled*/
 												  false,		/*typeTabEnabled*/
 												  false,		/*typeCounterEnabled*/
+												  false,		/*typeSchemasTabsEnabled*/
 												  TuningFilter::Source::User,
 												  theSettings.m_dialogFiltersEditorSplitterPosition,
 												  theSettings.m_dialogFiltersEditorPropertyEditorSplitterPosition

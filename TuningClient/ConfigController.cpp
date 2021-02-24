@@ -443,7 +443,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		{
 			if (buildFileInfo.ID == si.m_schemaId)
 			{
-				SchemaSettings s(si.m_schemaId, si.m_caption);
+				SchemaInfo s(si.m_schemaId, si.m_caption, si.tags());
 				readSettings.schemas.push_back(s);
 			}
 		}

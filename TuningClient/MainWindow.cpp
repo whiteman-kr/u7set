@@ -278,27 +278,30 @@ void MainWindow::createStatusBar()
 
 void MainWindow::keyPressEvent(QKeyEvent* event)
 {
-	if (m_schemasWorkspace != nullptr && m_schemasWorkspace->isVisible() == true)
+	for (SchemasWorkspace* sw : m_schemasWorkspaces)
 	{
-		if (event->matches(QKeySequence::ZoomIn))
+		if (sw->isVisible() == true)
 		{
-			m_schemasWorkspace->zoomIn();
-			return;
-		}
-		if (event->matches(QKeySequence::ZoomOut))
-		{
-			m_schemasWorkspace->zoomOut();
-			return;
-		}
-		if (event->key() == Qt::Key_Asterisk && (event->modifiers() & Qt::ControlModifier))
-		{
-			m_schemasWorkspace->zoom100();
-			return;
-		}
-		if (event->key() == Qt::Key_Slash && (event->modifiers() & Qt::ControlModifier))
-		{
-			m_schemasWorkspace->zoomToFit();
-			return;
+			if (event->matches(QKeySequence::ZoomIn))
+			{
+				sw->zoomIn();
+				return;
+			}
+			if (event->matches(QKeySequence::ZoomOut))
+			{
+				sw->zoomOut();
+				return;
+			}
+			if (event->key() == Qt::Key_Asterisk && (event->modifiers() & Qt::ControlModifier))
+			{
+				sw->zoom100();
+				return;
+			}
+			if (event->key() == Qt::Key_Slash && (event->modifiers() & Qt::ControlModifier))
+			{
+				sw->zoomToFit();
+				return;
+			}
 		}
 	}
 
@@ -406,7 +409,7 @@ void MainWindow::createAndCheckFiltersHashes(bool userFiltersOnly)
 
 void MainWindow::createWorkspace()
 {
-	if (m_tuningWorkspace != nullptr || m_schemasWorkspace != nullptr)
+	if (m_tuningWorkspace != nullptr || m_schemasWorkspaces.empty() == false)
 	{
 		QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
 	}
@@ -441,10 +444,13 @@ void MainWindow::createWorkspace()
 		m_tuningWorkspace = nullptr;
 	}
 
-	if (m_schemasWorkspace != nullptr)
+	if (m_schemasWorkspaces.empty() == false)
 	{
-		delete m_schemasWorkspace;
-		m_schemasWorkspace = nullptr;
+		for (SchemasWorkspace* sw : m_schemasWorkspaces)
+		{
+			delete sw;
+		}
+		m_schemasWorkspaces.clear();
 	}
 
 	if (m_tabWidget != nullptr)
@@ -459,7 +465,49 @@ void MainWindow::createWorkspace()
 
 	if (theConfigSettings.clientSettings.showSchemas == true && theConfigSettings.schemas.empty() == false)
 	{
-		m_schemasWorkspace = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, m_tcpClient, this);
+		bool schemaFiltersFound = false;
+
+		std::shared_ptr<TuningFilter> rootFilter = m_filterStorage.root();
+		if (rootFilter == nullptr)
+		{
+			Q_ASSERT(rootFilter);
+			return;
+		}
+
+		int count = rootFilter->childFiltersCount();
+		for (int i = 0; i < count; i++)
+		{
+			std::shared_ptr<TuningFilter> childFilter = rootFilter->childFilter(i);
+			if (childFilter == nullptr)
+			{
+				Q_ASSERT(childFilter);
+				continue;
+			}
+
+			if (childFilter->isSchemasTab() == true)
+			{
+				schemaFiltersFound = true;
+
+				SchemasWorkspace* sw = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, m_tcpClient,
+															childFilter->caption(),
+															childFilter->tagsList(),
+															childFilter->startSchemaId(),
+															theLogFile,
+															this);
+				m_schemasWorkspaces.push_back(sw);
+			}
+		}
+
+		if (schemaFiltersFound == false)
+		{
+			SchemasWorkspace* sw = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, m_tcpClient,
+														tr("Schemas"),
+														{},
+														theConfigSettings.clientSettings.startSchemaID,
+														theLogFile,
+														this);
+			m_schemasWorkspaces.push_back(sw);
+		}
 	}
 
 	if (theConfigSettings.clientSettings.showSignals == true)
@@ -480,36 +528,44 @@ void MainWindow::createWorkspace()
 
 	// Now choose, what workspace to display. If both exists, create a tab page.
 
-	if (m_schemasWorkspace == nullptr && m_tuningWorkspace != nullptr)
+	if (m_schemasWorkspaces.empty() == true && m_tuningWorkspace == nullptr)
 	{
-		// Show Tuning Workspace
-		//
-		m_mainLayout->addWidget(m_tuningWorkspace, 2);
+		m_noWorkspaceLabel = new QLabel("No workspaces exist, configuration error.");
+		m_mainLayout->addWidget(m_noWorkspaceLabel);
 	}
 	else
 	{
-		if (m_schemasWorkspace != nullptr && m_tuningWorkspace == nullptr)
+		if (m_schemasWorkspaces.empty() == true && m_tuningWorkspace != nullptr)
 		{
-			// Show Schemas Workspace
+			// Show One Tuning Workspace
 			//
-			m_mainLayout->addWidget(m_schemasWorkspace, 2);
+			m_mainLayout->addWidget(m_tuningWorkspace, 2);
 		}
 		else
 		{
-			if (m_schemasWorkspace != nullptr && m_tuningWorkspace != nullptr)
+			if (m_schemasWorkspaces.size() == 1 && m_tuningWorkspace == nullptr)
+			{
+				// Show One Schemas Workspace
+				//
+				m_mainLayout->addWidget(m_schemasWorkspaces[0], 2);
+			}
+			else
 			{
 				// Show both Workspaces
 				//
 				m_tabWidget = new QTabWidget();
-				m_tabWidget->addTab(m_schemasWorkspace, tr("Schemas"));
-				m_tabWidget->addTab(m_tuningWorkspace, tr("Signals"));
+
+				for (SchemasWorkspace* sw : m_schemasWorkspaces)
+				{
+					m_tabWidget->addTab(sw, sw->caption());
+				}
+
+				if (m_tuningWorkspace != nullptr)
+				{
+					m_tabWidget->addTab(m_tuningWorkspace, tr("Signals"));
+				}
 
 				m_mainLayout->addWidget(m_tabWidget, 2);
-			}
-			else
-			{
-				m_noWorkspaceLabel = new QLabel("No workspaces exist, configuration error.");
-				m_mainLayout->addWidget(m_noWorkspaceLabel);
 			}
 		}
 	}
