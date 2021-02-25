@@ -168,7 +168,8 @@ void BaseServiceStateWidget::updateServiceState()
 	{
 		case ServiceState::Work:
 			{
-				runningStateStr = tr("Running");
+				SessionParams& session = m_service.sessionParams;
+				runningStateStr = tr("Running in ") + E::valueToString(session.softwareRunMode) + tr(" mode with ") + session.currentSettingsProfile + tr(" profile");
 
 				m_stateTabModel->setData(m_stateTabModel->index(3, 0), "Runing time");
 

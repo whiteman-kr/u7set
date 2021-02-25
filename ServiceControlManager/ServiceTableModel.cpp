@@ -210,7 +210,7 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 					qint64 s = time % 60; time /= 60;
 					qint64 m = time % 60; time /= 60;
 					qint64 h = time % 24; time /= 24;
-					str += tr("Running") + QString(" (%1d %2:%3:%4)").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
+					str += tr("Running in ") + E::valueToString(service.sessionParams.softwareRunMode) + QString(" mode (%1d %2:%3:%4)").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
 				} break;
 				case ServiceState::Stopped: str += tr("Stopped"); break;
 				case ServiceState::Unavailable: str += tr("Unavailable"); break;
@@ -231,7 +231,7 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 			switch(serviceState)
 			{
 				case ServiceState::Work:
-					return QBrush(QColor(0x7f,0xff,0x7f));
+					return QBrush((service.sessionParams.softwareRunMode == E::SoftwareRunMode::Normal) ? QColor(0x7f,0xff,0x7f) : QColor(0x7f,0x7f,0xff)) ;
 				case ServiceState::Starts:
 				case ServiceState::Stops:
 				case ServiceState::Stopped:
