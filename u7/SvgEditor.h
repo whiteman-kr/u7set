@@ -41,6 +41,8 @@ public:
 	bool readOnly() const override;
 	void setReadOnly(bool value) override;
 
+	bool externalOkCancelButtons() const override;
+
 private slots:
 	void onTextChanged();
 
@@ -57,6 +59,9 @@ private:
 
 	QSplitter* m_topSplitter = nullptr;
 	SvgWidget m_svgWidget;
+
+	QPushButton* m_okButton = nullptr;
+	QPushButton* m_cancelButton = nullptr;
 
 	QWidget* m_parent = nullptr;
 };

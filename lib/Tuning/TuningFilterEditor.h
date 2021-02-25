@@ -43,6 +43,9 @@ public:
 	};
 
 public:
+	bool readOnly() const;
+	void setReadOnly(bool value);
+
 	void setFilter(std::shared_ptr<TuningFilter> selectedFilter);
 
 signals:
@@ -83,19 +86,11 @@ private:
 
 	QTreeWidget* m_filterValuesTree = nullptr;
 
-	QPushButton* m_moveUp = nullptr;
-	QPushButton* m_moveDown = nullptr;
-
 	QPushButton* m_setValue = nullptr;
 	QPushButton* m_setCurrent = nullptr;
 
-	QAction* m_moveUpAction = nullptr;
-	QAction* m_moveDownAction = nullptr;
-
-	QAction* m_setValueAction = nullptr;
-	QAction* m_setCurrentAction = nullptr;
-
 	//
+	bool m_readOnly = false;
 
 private slots:
 
@@ -114,10 +109,6 @@ private slots:
 	void on_m_baseSignalsTable_doubleClicked(const QModelIndex& index);
 
 	void on_m_filterValuesTree_doubleClicked(const QModelIndex& index);
-
-	void on_m_moveUp_clicked();
-
-	void on_m_moveDown_clicked();
 
 	void on_m_add_clicked();
 
@@ -148,7 +139,10 @@ public:
 
 	~TuningFilterEditor();
 
-	 void saveUserInterfaceSettings(QByteArray* mainSplitterState, int* propertyEditorSplitterPos);
+	bool readOnly() const;
+	void setReadOnly(bool value);
+
+	void saveUserInterfaceSettings(QByteArray* mainSplitterState, int* propertyEditorSplitterPos);
 
 signals:
 
