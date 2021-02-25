@@ -49,7 +49,7 @@ public:
 	Signal();
 	Signal(const Signal& s);
 	Signal(const ID_AppSignalID& ids);
-	Signal(const Hardware::DeviceSignal& deviceSignal, QString* errMsg);
+	Signal(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg);
 	virtual ~Signal();
 
 	void clear();
@@ -411,10 +411,10 @@ private:
 
 	void updateTuningValuesType();
 
-	void initIDsAndCaption(const Hardware::DeviceSignal& deviceSignal,
+	void initIDsAndCaption(const Hardware::DeviceAppSignal& deviceSignal,
 							QString* errMsg);
 
-	void checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSignal, QString* errMsg);
+	void checkAndInitTuningSettings(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg);
 
 	QString specPropNotExistErr(const QString &propName) const;
 

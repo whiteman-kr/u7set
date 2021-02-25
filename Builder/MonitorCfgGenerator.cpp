@@ -31,13 +31,13 @@ namespace Builder
 	bool MonitorCfgGenerator::generateConfigurationStep1()
 	{
 		if (m_software == nullptr ||
-			m_software->type() != E::SoftwareType::Monitor ||
+			m_software->softwareType() != E::SoftwareType::Monitor ||
 			m_equipment == nullptr ||
 			m_cfgXml == nullptr ||
 			m_buildResultWriter == nullptr)
 		{
 			Q_ASSERT(m_software);
-			Q_ASSERT(m_software->type() == E::SoftwareType::Monitor);
+			Q_ASSERT(m_software->softwareType() == E::SoftwareType::Monitor);
 			Q_ASSERT(m_equipment);
 			Q_ASSERT(m_cfgXml);
 			Q_ASSERT(m_buildResultWriter);

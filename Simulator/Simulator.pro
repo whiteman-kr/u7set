@@ -85,6 +85,7 @@ SOURCES += \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
 	../lib/LogicModulesInfo.cpp \
+    ../lib/ScriptDeviceObject.cpp \
 	../lib/SimpleMutex.cpp \
 	../lib/SimpleThread.cpp \
     ../lib/SoftwareSettings.cpp \
@@ -148,6 +149,7 @@ HEADERS += \
 	../lib/LanControllerInfo.h \
 	../lib/LanControllerInfoHelper.h \
 	../lib/LogicModulesInfo.h \
+    ../lib/ScriptDeviceObject.h \
 	../lib/SimpleMutex.h \
 	../lib/SimpleThread.h \
     ../lib/SoftwareSettings.h \

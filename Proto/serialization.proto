@@ -958,7 +958,7 @@ message DeviceObject
 	optional DeviceChassis Chassis = 103;
 	optional DeviceModule Module = 104;
 	optional DeviceController Controller = 105;
-	optional DeviceSignal Signal = 106;
+	optional DeviceAppSignal AppSignal = 106;
 	optional Workstation Workstation = 107;
 	optional Software Software = 108;
 
@@ -998,7 +998,7 @@ message DeviceController
 {
 }
 
-message DeviceSignal
+message DeviceAppSignal
 {
 	optional int32 obsoletetype = 1 [default = 0];			// old type format, not used anymore, RPCT-345
 

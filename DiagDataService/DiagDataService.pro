@@ -32,6 +32,7 @@ unix {
 SOURCES += \
     ../lib/Address16.cpp \
 	../lib/MemLeaksDetection.cpp \
+    ../lib/ScriptDeviceObject.cpp \
 	../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
 	../lib/SocketIO.cpp \
@@ -66,6 +67,7 @@ HEADERS += \
     ../lib/Address16.h \
 	../lib/LanControllerInfo.h \
 	../lib/MemLeaksDetection.h \
+    ../lib/ScriptDeviceObject.h \
 	Stable.h \
 	../lib/SocketIO.h \
 	../lib/UdpSocket.h \

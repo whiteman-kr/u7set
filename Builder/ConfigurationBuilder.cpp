@@ -2,6 +2,7 @@
 
 #include "../lib/DbController.h"
 #include "../lib/DeviceObject.h"
+#include "../lib/ScriptDeviceObject.h"
 #include "../lib/Crc.h"
 #include "../lib/SignalProperties.h"
 #include "../lib/Connection.h"
@@ -58,10 +59,10 @@ namespace Builder
 	// ------------------------------------------------------------------------
 
 	ConfigurationBuilder::ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, Context* context):
-		m_buildWorkerThread(buildWorkerThread),
 		m_buildResultWriter(context->m_buildResultWriter.get()),
+		m_buildWorkerThread(buildWorkerThread),
 		m_db(&context->m_db),
-		m_deviceRoot(context->m_equipmentSet->root()),
+		m_deviceRoot(context->m_equipmentSet->root().get()),
 		m_fscModules(context->m_fscModules),
 		m_lmDescriptions(context->m_fscDescriptions.get()),
 		m_signalSet(context->m_signalSet.get()),
@@ -434,26 +435,21 @@ namespace Builder
 		QJSValue jsBuilder = jsEngine->newQObject(this);
 		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
 
-		QJSValue jsRoot = jsEngine->newQObject(m_deviceRoot);
-		QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
+		QJSValue jsRoot = jsEngine->newQObject(new Hardware::ScriptDeviceObject{m_deviceRoot->sharedPtr()});
 
 		QJSValue jsLogicModules = jsEngine->newArray((int)subsystemModules.size());
 		for (int i = 0; i < subsystemModules.size(); i++)
 		{
-			assert(jsLogicModules.isArray());
-
-			QJSValue module = jsEngine->newQObject(subsystemModules[i]);
-			QQmlEngine::setObjectOwnership(subsystemModules[i], QQmlEngine::CppOwnership);
+			Hardware::ScriptDeviceModule* m = new Hardware::ScriptDeviceModule{subsystemModules[i]->toModule()};
+			QJSValue module = jsEngine->newQObject(m);
 
 			jsLogicModules.setProperty(i, module);
 		}
 
 		int frameSize = lmDescription->flashMemory().m_configFramePayload;
-
 		int frameCount = lmDescription->flashMemory().m_configFrameCount;
 
 		QString subsysStrID = subsystemModules[0]->propertyValue("SubsystemID").toString();
-
 		int subsysID = m_subsystems->ssKey(subsysStrID);
 
 		int configUartId = lmDescription->flashMemory().m_configUartId;
@@ -489,7 +485,6 @@ namespace Builder
 
 		// Run script
 		//
-
 		QJSValue jsEval = jsEngine->evaluate(contents);
 		if (jsEval.isError() == true)
 		{
@@ -620,7 +615,7 @@ namespace Builder
 		int childCount = object->childrenCount();
 		for (int i = 0; i < childCount; i++)
 		{
-			writeDeviceObjectToJson(object->child(i), jObjects);
+			writeDeviceObjectToJson(object->child(i).get(), jObjects);
 		}
 
 		if (jObjects.count() != 0)

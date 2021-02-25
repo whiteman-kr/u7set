@@ -1841,6 +1841,8 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 		return false;
 	}
 
+	out->reset();
+
 	// 1. Get files
 	//
 
@@ -1922,34 +1924,31 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 
 	// 2.2 Set child to items
 	//
-	bool rootWasFound = false;
-	for (const auto& pair : objectsMap)
+	for (auto [fileId, deviceObject] : objectsMap)
 	{
 		// Get parentId
 		//
-		int fileId = pair.second->fileInfo().fileId();
-		int parentId = pair.second->fileInfo().parentId();
+		assert(fileId == deviceObject->fileInfo().fileId());
+		int parentId = deviceObject->fileInfo().parentId();
 
 		auto parentIterator = objectsMap.find(parentId);
 		if (parentIterator == objectsMap.end())
 		{
 			// Apparently it is the root item, so, we have to check it and set flag that we already found it
 			//
-			assert(rootWasFound == false);
+			assert(out->get() == nullptr);
 			assert(file.fileId() == fileId);
 
-			*out = objectsMap[fileId];	// !!! HOW TO USE parentIterator->second; ?????
-			rootWasFound = true;
-
+			*out = deviceObject;
 			continue;
 		}
 
-		(*parentIterator).second->addChild(pair.second);
+		(*parentIterator).second->addChild(deviceObject);
 	}
 
-	if (rootWasFound == false)
+	if (out->get() == nullptr)
 	{
-		assert(rootWasFound == true);
+		assert(out->get());
 		return false;
 	}
 
@@ -2406,7 +2405,7 @@ bool DbController::checkinSignals(QVector<int>* signalIDs, QString comment, QVec
 
 
 
-bool DbController::autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, std::vector<Signal>* addedSignals, QWidget* parentWidget)
+bool DbController::autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<Signal>* addedSignals, QWidget* parentWidget)
 {
 	if (deviceSignals == nullptr)
 	{
@@ -2431,7 +2430,7 @@ bool DbController::autoAddSignals(const std::vector<Hardware::DeviceSignal*>* de
 }
 
 
-bool DbController::autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, QWidget* parentWidget)
+bool DbController::autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, QWidget* parentWidget)
 {
 	if (deviceSignals == nullptr)
 	{

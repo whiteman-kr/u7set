@@ -34,6 +34,7 @@ unix {
 
 SOURCES += \
     ../../lib/Address16.cpp \
+    ../../lib/ScriptDeviceObject.cpp \
         main.cpp \
     UalTester.cpp \
     ../../lib/CommandLineParser.cpp \
@@ -73,6 +74,7 @@ SOURCES += \
 HEADERS += \
     ../../lib/Address16.h \
 	../../lib/ConstStrings.h \
+    ../../lib/ScriptDeviceObject.h \
 	UalTester.h \
     ../../lib/CommandLineParser.h \
     ../../lib/OrderedHash.h \
