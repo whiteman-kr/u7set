@@ -156,6 +156,11 @@ Signal::~Signal()
 {
 }
 
+void Signal::clear()
+{
+	*this = Signal();
+}
+
 void Signal::initSpecificProperties()
 {
 	QString specPropStruct;

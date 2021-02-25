@@ -5929,7 +5929,6 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 	QString request = QString("SELECT * FROM checkin_signals(%1, ARRAY[")
 		.arg(currentUser().userId());
 
-
 	for(int i=0; i < count; i++)
 	{
 		if (i < count-1)
