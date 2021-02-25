@@ -769,8 +769,6 @@ SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 
 	assert(m_parent);
 
-	setHasOkCancelButtons(false);
-
 	// Create property list
 	//
 	m_propertiesTable = new QTableView();
@@ -814,14 +812,14 @@ SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 
 	buttonLayout->addStretch();
 
-	QPushButton* okButton = new QPushButton(tr("OK"));
-	okButton->setDefault(true);
-	connect(okButton, &QPushButton::clicked, this, &SpecificPropertiesEditor::onOkClicked);
-	buttonLayout->addWidget(okButton);
+	m_okButton = new QPushButton(tr("OK"));
+	m_okButton->setDefault(true);
+	connect(m_okButton, &QPushButton::clicked, this, &SpecificPropertiesEditor::onOkClicked);
+	buttonLayout->addWidget(m_okButton);
 
-	QPushButton* cancelButton = new QPushButton(tr("Cancel"));
-	connect(cancelButton, &QPushButton::clicked, this, &SpecificPropertiesEditor::onCancelClicked);
-	buttonLayout->addWidget(cancelButton);
+	m_cancelButton = new QPushButton(tr("Cancel"));
+	connect(m_cancelButton, &QPushButton::clicked, this, &SpecificPropertiesEditor::onCancelClicked);
+	buttonLayout->addWidget(m_cancelButton);
 
 	// Top Layout
 	//
@@ -1051,7 +1049,15 @@ bool SpecificPropertiesEditor::readOnly() const
 void SpecificPropertiesEditor::setReadOnly(bool value)
 {
 	m_propertyEditor->setReadOnly(value);
+	m_addButton->setEnabled(value == false);
+	m_cloneButton->setEnabled(value == false);
 	m_removeButton->setEnabled(value == false);
+	m_okButton->setEnabled(value == false);
+}
+
+bool SpecificPropertiesEditor::externalOkCancelButtons() const
+{
+	return false;
 }
 
 void SpecificPropertiesEditor::tableSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)

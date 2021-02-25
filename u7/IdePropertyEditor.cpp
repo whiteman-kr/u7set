@@ -233,11 +233,11 @@ DialogFindReplace::DialogFindReplace(QWidget* parent)
 
 	// Replace menu
 
-	m_replaceSelectedAction = new QAction("Process Selected Text");
+	m_replaceSelectedAction = new QAction("Process Selected Text", this);
 	connect(m_replaceSelectedAction, &QAction::triggered, [this](){onReplaceAll(true/*selectedOnly*/);});
 	m_replaceMenu.addAction(m_replaceSelectedAction);
 
-	m_replaceAllAction = new QAction("Process All Text");
+	m_replaceAllAction = new QAction("Process All Text", this);
 	connect(m_replaceAllAction, &QAction::triggered, [this](){onReplaceAll(false/*selectedOnly*/);});
 	m_replaceMenu.addAction(m_replaceAllAction);
 
@@ -558,11 +558,15 @@ void IdeCodeEditor::setReadOnly(bool value)
 	m_textEdit->setReadOnly(value);
 }
 
+bool IdeCodeEditor::externalOkCancelButtons() const
+{
+	return true;
+}
+
 void IdeCodeEditor::activateEditor()
 {
 	m_textEdit->setFocus();
 }
-
 
 void IdeCodeEditor::setCustomMenuActions(QList<QAction*> actions)
 {
@@ -912,7 +916,12 @@ bool IdeTuningFiltersEditor::readOnly() const
 
 void IdeTuningFiltersEditor::setReadOnly(bool value)
 {
-    Q_UNUSED(value);
+	m_tuningFilterEditor->setReadOnly(value);
 
+}
+
+bool IdeTuningFiltersEditor::externalOkCancelButtons() const
+{
+	return true;
 }
 
