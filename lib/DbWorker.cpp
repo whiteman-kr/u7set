@@ -4767,7 +4767,7 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 	return;
 }
 
-void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
+void DbWorker::slot_getSignalsIDs(QVector<int>* signalsIDs)
 {
 	AUTO_COMPLETE
 
@@ -4778,6 +4778,8 @@ void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
 		assert(signalsIDs != nullptr);
 		return;
 	}
+
+	signalsIDs->clear();
 
 	// Operation
 	//
@@ -4820,6 +4822,8 @@ void DbWorker::slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAp
 	// Check parameters
 	//
 	TEST_PTR_RETURN(signalsIDAppSignalID);
+
+	signalsIDAppSignalID->clear();
 
 	// Operation
 	//
