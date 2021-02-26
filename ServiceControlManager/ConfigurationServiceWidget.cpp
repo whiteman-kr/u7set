@@ -29,18 +29,30 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(const SoftwareInfo& softw
 	m_buildTabModel->setData(m_buildTabModel->index(0, 1), "Not loaded");
 
 	//----------------------------------------------------------------------------------------------------
+	QTableView* parametersTableView = addTabWithTableView(250, "Parameters");
+
+	m_parametersTabModel = new QStandardItemModel(4, 2, this);
+	parametersTableView->setModel(m_parametersTabModel);
+
+	m_parametersTabModel->setHeaderData(0, Qt::Horizontal, "Property");
+	m_parametersTabModel->setHeaderData(1, Qt::Horizontal, "Value");
+
+	m_parametersTabModel->setData(m_parametersTabModel->index(0, 0), "EquipmentID");
+	m_parametersTabModel->setData(m_parametersTabModel->index(1, 0), "AutoloadBuildPath");
+	m_parametersTabModel->setData(m_parametersTabModel->index(2, 0), "ClientRequestIP");
+	m_parametersTabModel->setData(m_parametersTabModel->index(3, 0), "WorkDirectory");
+
+	//----------------------------------------------------------------------------------------------------
 	QTableView* settingsTableView = addTabWithTableView(250, "Settings");
 
-	m_settingsTabModel = new QStandardItemModel(4, 2, this);
+	m_settingsTabModel = new QStandardItemModel(2, 2, this);
 	settingsTableView->setModel(m_settingsTabModel);
 
 	m_settingsTabModel->setHeaderData(0, Qt::Horizontal, "Property");
 	m_settingsTabModel->setHeaderData(1, Qt::Horizontal, "Value");
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(0, 0), "EquipmentID");
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 0), "AutoloadBuildPath");
-	m_settingsTabModel->setData(m_settingsTabModel->index(2, 0), "ClientRequestIP");
-	m_settingsTabModel->setData(m_settingsTabModel->index(3, 0), "WorkDirectory");
+	m_settingsTabModel->setData(m_settingsTabModel->index(0, 0), "Client Request IP");
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 0), "Client Request NetMask");
 
 	//----------------------------------------------------------------------------------------------------
 	addTabWithTableView(250, "Log");
@@ -82,7 +94,7 @@ void ConfigurationServiceWidget::updateStateInfo()
 			ip = workingIp;
 		}
 
-		m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), address);
+		m_parametersTabModel->setData(m_parametersTabModel->index(2, 1), address);
 
 		if (m_tcpClientSocket != nullptr)
 		{
@@ -116,6 +128,16 @@ void ConfigurationServiceWidget::updateServiceState()
 	stateTabModel()->setData(stateTabModel()->index(5, 1), QString::fromStdString(s.currentbuilddirectory()));
 	stateTabModel()->setData(stateTabModel()->index(6, 1), s.checkbuildattemptquantity());
 	stateTabModel()->setData(stateTabModel()->index(7, 1), E::valueToString<E::ConfigCheckerState>(s.buildcheckerstate()));
+
+	auto cfgSettings = std::dynamic_pointer_cast<CfgServiceSettings>(m_service.settings);
+
+	if (cfgSettings == nullptr)
+	{
+		return;
+	}
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), cfgSettings->clientRequestIP.addressStr());
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), cfgSettings->clientRequestNetmask.toString());
 }
 
 void ConfigurationServiceWidget::updateClientsInfo()
@@ -166,20 +188,20 @@ void ConfigurationServiceWidget::updateBuildInfo()
 	m_buildTabModel->setData(m_buildTabModel->index(7, 1), b.workstation);
 }
 
-void ConfigurationServiceWidget::updateServiceSettings()
+void ConfigurationServiceWidget::updateServiceParameters()
 {
 	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->settingsIsReady() == false)
 	{
-		for (int i = 0; i < m_settingsTabModel->rowCount(); i++)
+		for (int i = 0; i < m_parametersTabModel->rowCount(); i++)
 		{
-			m_settingsTabModel->setData(m_settingsTabModel->index(i, 1), "???");
+			m_parametersTabModel->setData(m_parametersTabModel->index(i, 1), "???");
 		}
 		return;
 	}
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), m_tcpClientSocket->equipmentID());
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), m_tcpClientSocket->autoloadBuildPath());
-	m_settingsTabModel->setData(m_settingsTabModel->index(3, 1), m_tcpClientSocket->workDirectory());
+	m_parametersTabModel->setData(m_parametersTabModel->index(0, 1), m_tcpClientSocket->equipmentID());
+	m_parametersTabModel->setData(m_parametersTabModel->index(1, 1), m_tcpClientSocket->autoloadBuildPath());
+	m_parametersTabModel->setData(m_parametersTabModel->index(3, 1), m_tcpClientSocket->workDirectory());
 }
 
 void ConfigurationServiceWidget::clearServiceData()
@@ -191,7 +213,7 @@ void ConfigurationServiceWidget::clearServiceData()
 
 	for (int i = 0; i < m_settingsTabModel->rowCount(); i++)
 	{
-		m_settingsTabModel->setData(m_settingsTabModel->index(i, 1), "???");
+		m_parametersTabModel->setData(m_parametersTabModel->index(i, 1), "???");
 	}
 }
 
@@ -203,7 +225,7 @@ void ConfigurationServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::serviceStateLoaded, this, &ConfigurationServiceWidget::updateServiceState);
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::clientsLoaded, this, &ConfigurationServiceWidget::updateClientsInfo);
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::buildInfoLoaded, this, &ConfigurationServiceWidget::updateBuildInfo);
-	connect(m_tcpClientSocket, &TcpConfigServiceClient::settingsLoaded, this, &ConfigurationServiceWidget::updateServiceSettings);
+	connect(m_tcpClientSocket, &TcpConfigServiceClient::settingsLoaded, this, &ConfigurationServiceWidget::updateServiceParameters);
 
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::disconnected, this, &ConfigurationServiceWidget::clearServiceData);
 

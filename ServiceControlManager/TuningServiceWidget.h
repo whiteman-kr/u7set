@@ -62,7 +62,7 @@ signals:
 public slots:
 	void updateStateInfo();
 	void updateClientsInfo();
-	void updateServiceSettings();
+	void updateServiceParameters();
 	void reloadTuningSourcesList();
 	void updateTuningSourcesState();
 	void reloadTuningSignalsList();
@@ -79,6 +79,7 @@ protected:
 	void dropTcpConnection() override;
 
 private:
+	QStandardItemModel* m_parametersTabModel = nullptr;
 	QStandardItemModel* m_settingsTabModel = nullptr;
 	QStandardItemModel* m_tuningSourcesTabModel = nullptr;
 	QStandardItemModel* m_tuningSignalsTabModel = nullptr;
