@@ -1764,6 +1764,267 @@ void DbControllerSignalTests::dbcTest_setSignalWorkcopy()
 	db.close();
 }
 
+void DbControllerSignalTests::dbcTest_getSignalsIDs()
+{
+	// Testing of stored procedure:
+	//
+	//	get_signals_ids (user_id INTEGER, with_deleted BOOLEAN) RETURNS SETOF INTEGER
+	//
+
+	OPEN_DATABASE();
+
+	// Request ALL exists signals IDs for now
+	//
+	QSqlQuery q;
+
+	std::vector<int> initialIDs;
+
+	TS_VERIFY(getAllSignalIDs(&initialIDs));
+
+	std::vector<ObjectState> obStates;
+
+	// add signals by user ADMIN_ID
+	//
+	std::vector<int> stdAdminSignalsIDs;
+
+	TS_VERIFY(addTestSignals(ADMIN_ID, E::SignalType::Bus, 1, 5 + rand0to(4), &stdAdminSignalsIDs));
+
+	// add signals by user USER2_ID
+	//
+	std::vector<int> stdUser2SignalsIDs;
+
+	TS_VERIFY(addTestSignals(USER2_ID, E::SignalType::Discrete, 2, 4 + rand0to(5), &stdUser2SignalsIDs));
+
+	// add signals by user USER3_ID
+	//
+	std::vector<int> stdUser3SignalsIDs;
+
+	TS_VERIFY(addTestSignals(USER3_ID, E::SignalType::Analog, 3, 2 + rand0to(2), &stdUser3SignalsIDs));
+
+	// checking that sets is NOT intersect
+	//
+	QVERIFY(sets_intersect<int>(stdAdminSignalsIDs, stdUser2SignalsIDs) == false);
+	QVERIFY(sets_intersect<int>(stdAdminSignalsIDs, stdUser3SignalsIDs) == false);
+	QVERIFY(sets_intersect<int>(stdUser2SignalsIDs, stdUser3SignalsIDs) == false);
+
+	QVector<int> ids;
+	std::vector<int> stdIds;
+
+	// request IDs under Admin
+	// signals added by Admin, User2 and User3 should  be visible
+	//
+	QVERIFY(m_dbcAdmin->getSignalsIDs(&ids, nullptr) == true);
+
+	stdIds = sets_difference<int>(toStdVector<int>(ids), initialIDs);
+
+	QVERIFY(sets_equal(stdIds, sets_union(stdAdminSignalsIDs, sets_union(stdUser2SignalsIDs, stdUser3SignalsIDs))) == true);
+
+	// request IDs under User2
+	// only signals added by User2 should  be visible
+	//
+	QVERIFY(m_dbcUser2->getSignalsIDs(&ids, nullptr) == true);
+
+	stdIds = sets_difference<int>(toStdVector(ids), initialIDs);
+
+	QVERIFY(sets_equal(stdIds, stdUser2SignalsIDs) == true);
+
+	// checkin signals added by User2
+	//
+	TS_VERIFY(checkinSignals(USER2_ID, stdUser2SignalsIDs, "user2 checkin", &obStates));
+
+	// request IDs under User3
+	// signals added by User3 and checked in by User2 should  be visible
+	//
+	QVERIFY(m_dbcUser3->getSignalsIDs(&ids, nullptr) == true);
+
+	stdIds = sets_difference<int>(toStdVector<int>(ids), initialIDs);
+
+	QVERIFY(sets_equal(stdIds, sets_union(stdUser2SignalsIDs, stdUser3SignalsIDs)));
+
+	// request IDs under Admin
+	// signals added by Admin, User3 and checked in by User2 should  be visible
+	//
+	QVERIFY(m_dbcAdmin->getSignalsIDs(&ids, nullptr) == true);
+
+	stdIds = sets_difference<int>(toStdVector(ids), initialIDs);
+
+	QVERIFY(sets_equal(stdIds, sets_union(stdAdminSignalsIDs, sets_union(stdUser2SignalsIDs, stdUser3SignalsIDs))) == true);
+
+	// checkin signals added by Admin and User3
+	//
+	TS_VERIFY(checkinSignals(ADMIN_ID, stdAdminSignalsIDs, "admin checkin", &obStates));
+	TS_VERIFY(checkinSignals(USER3_ID, stdUser3SignalsIDs, "user3 checkin", &obStates));
+
+	// request IDs under User2
+	// signals added by Admin, User2 and User3 should  be visible
+	//
+	QVERIFY(m_dbcUser2->getSignalsIDs(&ids, nullptr) == true);
+
+	stdIds = sets_difference<int>(toStdVector(ids), initialIDs);
+
+	QVERIFY(sets_equal(stdIds, sets_union(stdAdminSignalsIDs, sets_union(stdUser2SignalsIDs, stdUser3SignalsIDs))) == true);
+
+	// Delete and checkin signals added by User2
+	//
+	TS_VERIFY(deleteSignals(USER2_ID, stdUser2SignalsIDs, &obStates));
+	TS_VERIFY(checkinSignals(USER2_ID, stdUser2SignalsIDs, "checkin deleted", &obStates));
+
+	// DbControlle::getSignalsIDs() always return IDs withDeleted == false
+	// Admin, User3 signals should be visible, User2 (deleted) - not
+	//
+	QVERIFY(m_dbcUser3->getSignalsIDs(&ids, nullptr) == true);
+
+	stdIds = sets_difference<int>(toStdVector(ids), initialIDs);
+
+	QVERIFY(sets_equal(stdIds, sets_union(stdAdminSignalsIDs, stdUser3SignalsIDs)) == true);
+
+	db.close();
+}
+
+void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
+{
+	OPEN_DATABASE();
+
+	std::vector<int> initialIDs;
+
+	TS_VERIFY(getAllSignalIDs(&initialIDs));
+
+	std::vector<int> stdAdminSignalsIDs;
+
+	TS_VERIFY(addTestSignals(ADMIN_ID, E::SignalType::Discrete, 2, 2 + rand0to(3), &stdAdminSignalsIDs));
+
+	std::vector<int> stdUser2SignalsIDs;
+
+	TS_VERIFY(addTestSignals(USER2_ID, E::SignalType::Analog, 1, 5 + rand0to(2), &stdUser2SignalsIDs));
+
+	QVector<ID_AppSignalID> qvResult;
+	std::vector<std::pair<int, QString>> result;
+
+	// Admin should see all signals
+	//
+	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&qvResult, nullptr));
+	result = toPairsVector(qvResult);
+
+	TS_VERIFY(removePairsWithID(&result, initialIDs));
+
+	QVERIFY(result.size() == stdAdminSignalsIDs.size() + stdUser2SignalsIDs.size());
+	TS_VERIFY(checkSignalIDsAppSignalID(sets_union(stdAdminSignalsIDs, stdUser2SignalsIDs), result));
+
+	// User2 should see only their signals
+	//
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
+	result = toPairsVector(qvResult);
+
+	TS_VERIFY(removePairsWithID(&result, initialIDs));
+
+	QVERIFY(result.size() == stdUser2SignalsIDs.size());
+	TS_VERIFY(checkSignalIDsAppSignalID(stdUser2SignalsIDs, result));
+
+	// Checkin Admin's signals
+	//
+	TS_VERIFY(checkinSignals(ADMIN_ID, stdAdminSignalsIDs, "checkin admin signals", nullptr));
+
+	// User2 should see their signals and Admin's signals
+	//
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
+	result = toPairsVector(qvResult);
+
+	TS_VERIFY(removePairsWithID(&result, initialIDs));
+
+	QVERIFY(result.size() == stdAdminSignalsIDs.size() + stdUser2SignalsIDs.size());
+	TS_VERIFY(checkSignalIDsAppSignalID(sets_union(stdAdminSignalsIDs, stdUser2SignalsIDs), result));
+
+	// Delete Admin's signals
+	//
+	TS_VERIFY(deleteSignals(ADMIN_ID, stdAdminSignalsIDs, nullptr));
+	TS_VERIFY(checkinSignals(ADMIN_ID, stdAdminSignalsIDs, "checkin admin deleted signals", nullptr));
+
+	// DbController::getSignalsIDAppSignalID() always return withDeleted == false,
+	// User2 should see only their signals
+	//
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
+	result = toPairsVector(qvResult);
+
+	TS_VERIFY(removePairsWithID(&result, initialIDs));
+
+	QVERIFY(result.size() == stdUser2SignalsIDs.size());
+	TS_VERIFY(checkSignalIDsAppSignalID(stdUser2SignalsIDs, result));
+
+	int id = stdUser2SignalsIDs[0];
+
+	std::pair<int, QString> p;
+
+	QVERIFY(findPairWithID(id, result, &p));
+
+	const QString OLD_APP_SIGNAL_ID(p.second);
+
+	TS_VERIFY(checkinSignals(USER2_ID, std::vector<int>({id}), "checkin user2 signal", nullptr));
+
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
+
+	QVERIFY(findPairWithID(id, result, &p) == true);
+	QVERIFY(p.second == OLD_APP_SIGNAL_ID);
+
+	// try change AppSignalID under User3
+	//
+	Signal s;
+
+	const QString NEW_APP_SIGNAL_ID("#DBC_USER3_TEST_SIGNAL_APP_SIGNAL_ID_4567");
+
+	s.initCreatedDates();
+
+	s.setID(id);
+	s.setAppSignalID(NEW_APP_SIGNAL_ID);
+	s.setCustomAppSignalID(QString(NEW_APP_SIGNAL_ID).replace("#", ""));
+
+	TS_VERIFY(checkoutSignals(USER3_ID, std::vector<int>({id}), nullptr));
+	TS_VERIFY(setSignalWorkcopy(USER3_ID, s, nullptr));
+
+	// under User2, should see OLD_APP_SIGNAL_ID
+	//
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
+	result = toPairsVector(qvResult);
+
+	QVERIFY(findPairWithID(id, result, &p) == true);
+	QVERIFY(p.second == OLD_APP_SIGNAL_ID);
+
+	// under Admin and User3, should see NEW_APP_SIGNAL_ID
+	//
+	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
+	result = toPairsVector(qvResult);
+
+	QVERIFY(findPairWithID(id, result, &p) == true);
+	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+
+	QVERIFY(m_dbcUser3->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
+
+	result = toPairsVector(qvResult);
+
+	QVERIFY(findPairWithID(id, result, &p) == true);
+	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+
+	TS_VERIFY(checkinSignals(USER3_ID, std::vector<int>({id}), "checkin user3 signal", nullptr));
+
+	// All should see NEW_APP_SIGNAL_ID
+	//
+	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
+	result = toPairsVector(qvResult);
+	QVERIFY(findPairWithID(id, result, &p) == true);
+	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
+	result = toPairsVector(qvResult);
+	QVERIFY(findPairWithID(id, result, &p) == true);
+	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+
+	QVERIFY(m_dbcUser3->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
+	result = toPairsVector(qvResult);
+	QVERIFY(findPairWithID(id, result, &p) == true);
+	QVERIFY(p.second == NEW_APP_SIGNAL_ID);
+
+	db.close();
+}
+
 void DbControllerSignalTests::cleanupTestCase()
 {
 	QVERIFY(m_dbcUser3->closeProject(nullptr) == true);
@@ -2380,7 +2641,6 @@ QString DbControllerSignalTests::getLatestSignal(int userID, int signalID, Signa
 	TS_RETURN_SUCCESS();
 }
 
-
 QString DbControllerSignalTests::removePairsWithID(std::vector<std::pair<int, QString>>* pairs,
 												   const std::vector<int>& idsToRemove)
 {
@@ -2399,6 +2659,18 @@ QString DbControllerSignalTests::removePairsWithID(std::vector<std::pair<int, QS
 	}
 
 	TS_RETURN_SUCCESS();
+}
+
+std::vector<std::pair<int, QString>> DbControllerSignalTests::toPairsVector(const QVector<ID_AppSignalID>& qv)
+{
+	std::vector<std::pair<int, QString>> result;
+
+	for(const ID_AppSignalID& v : qv)
+	{
+		result.push_back({v.ID, v.appSignalID});
+	}
+
+	return result;
 }
 
 bool DbControllerSignalTests::findPairWithID(	int id,

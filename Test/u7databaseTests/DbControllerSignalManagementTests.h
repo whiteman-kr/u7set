@@ -95,6 +95,11 @@ private slots:
 	void dbcTest_checkoutSignals();
 	void dbcTest_deleteSignal();
 	void dbcTest_setSignalWorkcopy();
+	void dbcTest_getSignalsIDs();
+	// void test_getSignalsActualSignalInstanceID();		Not implemented in DbController
+	void dbcTest_getSignalsIDAppSignalID();
+
+
 
 /*	void getSignalIdsTest();
 	void checkInCheckOutSignalsTest();
@@ -165,6 +170,8 @@ private:
 
 	QString removePairsWithID(std::vector<std::pair<int, QString>>* pairs,
 								const std::vector<int>& idsToRemove);
+
+	std::vector<std::pair<int, QString>> toPairsVector(const QVector<ID_AppSignalID>& qv);
 
 	bool findPairWithID(int id,
 							const std::vector<std::pair<int, QString>>& pairs,
