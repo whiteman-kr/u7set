@@ -3,24 +3,6 @@
 //
 function generate_waim(confFirmware, module, LMNumber, frame, log, signalSet, opticModuleStorage)
 {
-	if (module.propertyValue("EquipmentID") == undefined)
-	{
-		log.errCFG3000("EquipmentID", "Module_WAIM");
-		return false;
-	}
-	
-	let equipmentID = module.propertyValue("EquipmentID");
-	
-	let checkProperties = ["Place", "ModuleVersion"];
-	for (let cp = 0; cp < checkProperties.length; cp++)
-	{
-		if (module.propertyValue(checkProperties[cp]) == undefined)
-		{
-			log.errCFG3000(checkProperties[cp], equipmentID);
-			return false;
-		}
-	}
-
     let ptr = 0;
     
     let WAIMSignalMaxCount = 32;
@@ -34,12 +16,14 @@ function generate_waim(confFirmware, module, LMNumber, frame, log, signalSet, op
 	let defaultK2 = 0.0;
     let defaultSpreadTolerance = Math.round((0xffff - 0) * 0.005);		// 2% = 328h
     
-    let inController = module.jsFindChildObjectByMask(equipmentID + "_CTRLIN");
-    if (inController == null)
+    let inControllerObject = module.childByEquipmentId(module.equipmentId + "_CTRLIN");
+    if (inControllerObject == null || inControllerObject.isController() == false)
     {
-		log.errCFG3004(equipmentID + "_CTRLIN", equipmentID);
+		log.errCFG3004(module.equipmentId + "_CTRLIN",module.equipmentId);
 		return false;
     }
+
+    let inController =  inControllerObject.toController();
 	
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
     //
@@ -48,7 +32,7 @@ function generate_waim(confFirmware, module, LMNumber, frame, log, signalSet, op
     {
         // find a signal with Place = i
         //
-		let signalStrId = inController.propertyValue("EquipmentID") + "_IN";
+		let signalStrId = inController.equipmentId + "_IN";
 		
 		let entry = i + 1;
 		if (entry < 10)
@@ -77,38 +61,38 @@ function generate_waim(confFirmware, module, LMNumber, frame, log, signalSet, op
 			"; [" + frame + ":" + (ptr + 16) + "] LowValidRange = " + defaultLowBound +
 			"; [" + frame + ":" + (ptr + 24) + "] WordOfFlags = " + 0 + "\r\n");
             
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Tf", defaultTf) == false)          // InA Filtering time constant
+            if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "Tf", defaultTf) == false)          // InA Filtering time constant
 			{
 				return false;
 			}
             ptr += 2;
 
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "SpreadTolerance", defaultSpreadTolerance) == false)      // InA SpreadTolerance
+            if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "SpreadTolerance", defaultSpreadTolerance) == false)      // InA SpreadTolerance
 			{
 				return false;
 			}
             ptr += 2;
 
-            if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "K1", defaultK1) == false)      // InA DefaultK1
+            if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K1", defaultK1) == false)      // InA DefaultK1
 			{
 				return false;
 			}
             ptr += 4;
 
-            if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "K2", defaultK2) == false)      // InA DefaultK2
+            if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K2", defaultK2) == false)      // InA DefaultK2
 			{
 				return false;
 			}
             ptr += 4;
 
 
-            if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "HighValidRange", defaultHighBound) == false)         // InA High bound
+            if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "HighValidRange", defaultHighBound) == false)         // InA High bound
 			{
 				return false;
 			}
             ptr += 4;
 			
-            if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "LowValidRange", defaultLowBound) == false)          // InA Low Bound
+            if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LowValidRange", defaultLowBound) == false)          // InA Low Bound
 			{
 				return false;
 			}
@@ -116,7 +100,7 @@ function generate_waim(confFirmware, module, LMNumber, frame, log, signalSet, op
 			
 			ptr += 4;	// Reserved
 			
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "WordOfFlags", 0) == false)      // InA DefaultWordOfFlags
+            if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "WordOfFlags", 0) == false)      // InA DefaultWordOfFlags
 			{
 				return false;
 			}
@@ -247,52 +231,52 @@ function generate_waim(confFirmware, module, LMNumber, frame, log, signalSet, op
 		
 			if (signalA.highValidRange() != signalB.highValidRange())
 			{
-				log.errCFG3028(signalStrIdA, signalStrIdB, module.propertyValue("EquipmentID"), "HighValidRange");
+				log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, "HighValidRange");
 			}
 
 			if (signalA.lowValidRange() != signalB.lowValidRange())
 			{
-				log.errCFG3028(signalStrIdA, signalStrIdB, module.propertyValue("EquipmentID"), "LowValidRange");
+				log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, "LowValidRange");
 			}
 
 			if (electricHighLimit != electricHighLimitB)
 			{
-				log.errCFG3028(signalStrIdA, signalStrIdB, module.propertyValue("EquipmentID"), "ElectricHighLimit");
+				log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, "ElectricHighLimit");
 			}
 
 			if (electricLowLimit != electricLowLimitB)
 			{
-				log.errCFG3028(signalStrIdA, signalStrIdB, module.propertyValue("EquipmentID"), "ElectricLowLimit");
+				log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, "ElectricLowLimit");
 			}
 
 			if (electricUnit != electricUnitB)
 			{
-				log.errCFG3028(signalStrIdA, signalStrIdB, module.propertyValue("EquipmentID"), "ElectricUnit");
+				log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, "ElectricUnit");
 			}
 
 			if (sensorType != sensorTypeB)
 			{
-				log.errCFG3028(signalStrIdA, signalStrIdB, module.propertyValue("EquipmentID"), "SensorType");
+				log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, "SensorType");
 			}
 
 			if (signalA.highEngineeringUnits() != signalB.highEngineeringUnits())
 			{
-				log.errCFG3028(signalStrIdA, signalStrIdB, module.propertyValue("EquipmentID"), "HighEngineeringUnits");
+				log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, "HighEngineeringUnits");
 			}
 
 			if (signalA.lowEngineeringUnits() != signalB.lowEngineeringUnits())
 			{
-				log.errCFG3028(signalStrIdA, signalStrIdB, module.propertyValue("EquipmentID"), "LowEngineeringUnits");
+				log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, "LowEngineeringUnits");
 			}
 
 			if (signalA.filteringTime() != signalB.filteringTime())
 			{
-				log.errCFG3028(signalStrIdA, signalStrIdB, module.propertyValue("EquipmentID"), "FilteringTime");
+				log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, "FilteringTime");
 			}
 
 			if (signalA.spreadTolerance() != signalB.spreadTolerance())
 			{
-				log.errCFG3028(signalStrIdA, signalStrIdB, module.propertyValue("EquipmentID"), "SpreadTolerance");
+				log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, "SpreadTolerance");
 			}
 			
 			// Convert electric to physical
@@ -306,7 +290,7 @@ function generate_waim(confFirmware, module, LMNumber, frame, log, signalSet, op
 				{
 					case UnitsConvertorErrorCode.ErrorGeneric:
 					{
-						log.errINT1001(highPhysical.errorMessage + ", module " + module.propertyValue("EquipmentID") + ", signal " + signalStrIdA);
+						log.errINT1001(highPhysical.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrIdA);
 					}
 						break;
 					case UnitsConvertorErrorCode.LowLimitOutOfRange:
@@ -329,7 +313,7 @@ function generate_waim(confFirmware, module, LMNumber, frame, log, signalSet, op
 				{
 					case UnitsConvertorErrorCode.ErrorGeneric:
 					{
-						log.errINT1001(lowPhysical.errorMessage + ", module " + module.propertyValue("EquipmentID") + ", signal " + signalStrIdA);
+						log.errINT1001(lowPhysical.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrIdA);
 					}
 						break;
 					case UnitsConvertorErrorCode.LowLimitOutOfRange:
@@ -422,39 +406,39 @@ function generate_waim(confFirmware, module, LMNumber, frame, log, signalSet, op
 			"; [" + frame + ":" + (ptr + 16) + "] LowValidRange = " + lowValidRange +
 			"; [" + frame + ":" + (ptr + 24) + "] WordOfFlags = " + flags + "\r\n");
 
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "FilteringTime", filteringTime) == false)          // InA Filtering time constant
+            if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "FilteringTime", filteringTime) == false)          // InA Filtering time constant
 			{
 				return false;
 			}
             ptr += 2;
 
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "SpreadTolerance", spreadTolerance) == false)      // InA SpreadTolerance
+            if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "SpreadTolerance", spreadTolerance) == false)      // InA SpreadTolerance
 			{
 				return false;
 			}
             ptr += 2;
 
-			if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "K1", k1) == false)         // K1
+			if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K1", k1) == false)         // K1
 			{
 				return false;
 			}
             ptr += 4;
 			
             
-			if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "K1", k2) == false)         // K2
+			if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K1", k2) == false)         // K2
 			{
 				return false;
 			}
             ptr += 4;
 			
             
-            if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "HighValidRange", highValidRange) == false)         // InA High bound
+            if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "HighValidRange", highValidRange) == false)         // InA High bound
 			{
 				return false;
 			}
             ptr += 4;
 			
-            if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "LowValidRange", lowValidRange) == false)          // InA Low Bound
+            if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LowValidRange", lowValidRange) == false)          // InA Low Bound
 			{
 				return false;
 			}
@@ -462,7 +446,7 @@ function generate_waim(confFirmware, module, LMNumber, frame, log, signalSet, op
 			
 			ptr += 4;	// Reserved
 			
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "WordOfFlags", flags) == false)      // InA WordOfFlags
+            if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "WordOfFlags", flags) == false)      // InA WordOfFlags
 			{
 				return false;
 			}
@@ -474,7 +458,7 @@ function generate_waim(confFirmware, module, LMNumber, frame, log, signalSet, op
     ptr = 888;
    
     // final crc
-    let stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
+    let stringCrc64 = storeCrc64(confFirmware, log, LMNumber, module.equipmentId, frame, 0, ptr, ptr);   //CRC-64
 	if (stringCrc64 == "")
 	{
 		return false;
@@ -498,9 +482,9 @@ function generate_waim(confFirmware, module, LMNumber, frame, log, signalSet, op
     let configFramesQuantity = 7;
     let dataFramesQuantity = 0;
  
-    let txId = module.propertyValue("ModuleFamily") + module.propertyValue("ModuleVersion");
-    
-    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
+	let txId = module.moduleFamily + module.moduleVersion;
+   
+    if (generate_txRxIoConfig(confFirmware, module.equipmentId, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
 	{
 		return false;
 	}

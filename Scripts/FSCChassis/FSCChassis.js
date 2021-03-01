@@ -1,3 +1,5 @@
+// ChildRestriction chassis script
+//
 (function(child)
 {
 	let FamilyLM = 0x1100;
@@ -23,19 +25,20 @@
 	{ 
 		return false; 
 	}
-
-	// Get module family, version and place
-	//
-
-	let family = child.jsModuleFamily();
-	let version = child.moduleVersion();
-	let place = child.jsPlace();
 	
-	// LM should be on place 0
+	// Get module family, version and place
+	//	
+	let module = child.toModule();
+
+	let family = module.moduleFamily;
+	let version = module.moduleVersion;
+	let place = module.place;
+	
+	// LM must be on place 0
 	//
-	if (family == FamilyLM)
+	if (family === FamilyLM)
 	{
-		if (place == LMPlace)
+		if (place === LMPlace)
 		{
 			return true;
 		}
@@ -47,7 +50,7 @@
 	
 	// Input/Output modules should be on places IOPlaceMin..IOPlaceMax
 	//
-	if(place < IOPlaceMin || place > IOPlaceMax)
+	if (place < IOPlaceMin || place > IOPlaceMax)
 	{
 		 return false; 
 	} 
@@ -56,47 +59,43 @@
 	//
 	let lmVersion = -1;
 	
-	let chassis = child.jsParent();
-	if (chassis == null)
-	{
-		return false;
-	}
-	if (chassis.isChassis() == false)
+	let chassis = child.parent();
+	if (chassis == null || chassis.isChassis() === false)
 	{
 		return false;
 	}
 	
-	let childrenCount = chassis.childrenCount();
+	let childrenCount = chassis.childrenCount;
 	for (let i = 0; i < childrenCount; i++)
 	{
-		let childModule = chassis.jsChild(i);
+		let childModule = chassis.child(i);
 		if (childModule == null)
 		{
 			return false;
 		}
-		if (childModule.isModule() == false)
+		if (childModule.isModule() === false)
 		{
 			continue;
 		}
-		if (childModule.jsModuleFamily() == FamilyLM)
+		if (childModule.moduleFamily === FamilyLM)
 		{
-			lmVersion = childModule.moduleVersion();
+			lmVersion = childModule.moduleVersion;
 			break;
 		}
 	}
 	
 	// Check compatibility for LMs
 	
-	if (lmVersion == LMVersionPhase3)
+	if (lmVersion === LMVersionPhase3)
 	{
 		// LM1-SF00
 		//
-		if ((family== FamilyAIM && version == 0) ||		//AIM
-			(family == FamilyAOM && version == 0) ||	//AOM
-			(family == FamilyDIM && version == 0) ||	//DIM
-			(family == FamilyDOM && version == 0) ||	//DOM
-			(family == FamilyAIFM && version == 0) ||	//AIFM
-			(family == FamilyOCM && version == 1))		//OCM
+		if ((family === FamilyAIM && version === 0) ||	//AIM
+			(family === FamilyAOM && version === 0) ||	//AOM
+			(family === FamilyDIM && version === 0) ||	//DIM
+			(family === FamilyDOM && version === 0) ||	//DOM
+			(family === FamilyAIFM && version === 0) ||	//AIFM
+			(family === FamilyOCM && version === 1))	//OCM
 		{
 			return true; 
 		} 
@@ -105,20 +104,20 @@
 			return false;
 		}
 	}
-	if (lmVersion == LMVersionPhase4)
+	if (lmVersion === LMVersionPhase4)
 	{
 		// LM1-SF40-4PH
 		//
-		if ((family== FamilyAIM && version == 1) ||		//AIM
-			(family == FamilyAOM && version == 1) ||	//AOM
-			(family == FamilyDIM && version == 0) ||	//DIM
-			(family == FamilyDOM && version == 0) ||	//DOM
-			(family == FamilyAIFM && version == 0) ||	//AIFM
-			(family == FamilyOCM && version == 1) ||	//OCM
-			(family == FamilyWAIM && version == 0) ||	//WAIM
-			(family == FamilyTIM && version == 0) ||	//TIM
-			(family == FamilyFIM && version == 0) ||	//FIM
-			(family == FamilyRIM && version == 0))		//RIM
+		if ((family === FamilyAIM && version === 1) ||	//AIM
+			(family === FamilyAOM && version === 1) ||	//AOM
+			(family === FamilyDIM && version === 0) ||	//DIM
+			(family === FamilyDOM && version === 0) ||	//DOM
+			(family === FamilyAIFM && version === 0) ||	//AIFM
+			(family === FamilyOCM && version === 1) ||	//OCM
+			(family === FamilyWAIM && version === 0) ||	//WAIM
+			(family === FamilyTIM && version === 0) ||	//TIM
+			(family === FamilyFIM && version === 0) ||	//FIM
+			(family === FamilyRIM && version === 0))	//RIM
 		{
 			return true; 
 		} 

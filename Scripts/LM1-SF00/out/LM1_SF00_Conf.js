@@ -139,7 +139,8 @@ let LMNumberCount = 0;
 //let configScriptVersion: number = 37;		// Add setDataFloat function
 //let configScriptVersion: number = 38;		// If TuningEnable/AppDataEnable/DiagDataEnable flag is false, IP address is zero
 //let configScriptVersion: number = 39;		// Description is added for LmNumberCount and UniqueID
-let configScriptVersion = 40; // Let is used instead of var
+//let configScriptVersion: number = 40;		// Let is used instead of var
+let configScriptVersion = 41; // ScriptDeviceObject is used
 //
 function main(builder, root, logicModules, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (logicModules.length != 0) {
@@ -317,14 +318,12 @@ function generate_lm_1_rev3(builder, root, module, confFirmware, log, signalSet,
     //
     let frameStorageConfig = 1;
     let ptr = 0;
-    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameStorageConfig, ptr, "Marker", 0xca70) == false) //CFG_Marker
-     {
+    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameStorageConfig, ptr, "Marker", 0xca70) == false) {
         return false;
     }
     confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] CFG_Marker = 0xca70" + "\r\n");
     ptr += 2;
-    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameStorageConfig, ptr, "Version", 0x0001) == false) //CFG_Version
-     {
+    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameStorageConfig, ptr, "Version", 0x0001) == false) {
         return false;
     }
     confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] CFG_Version = 0x0001" + "\r\n");
@@ -364,14 +363,12 @@ function generate_lm_1_rev3(builder, root, module, confFirmware, log, signalSet,
     confFirmware.writeLog("Writing service information.\r\n");
     let frameServiceConfig = configFrame;
     ptr = 0;
-    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "ServiceVersion", 0x0001) == false) //CFG_Ch_Vers
-     {
+    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "ServiceVersion", 0x0001) == false) {
         return false;
     }
     confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] CFG_Ch_Vers = 0x0001\r\n");
     ptr += 2;
-    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "UartID", uartId) == false) //CFG_Ch_Dtype == UARTID?
-     {
+    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "UartID", uartId) == false) {
         return false;
     }
     confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] uartId = " + uartId + "\r\n");
@@ -435,11 +432,12 @@ function generate_lm_1_rev3(builder, root, module, confFirmware, log, signalSet,
     // Tuning
     //
     let ethernetcontrollerId = "_ETHERNET01";
-    let ethernetController = module.childByEquipmentId(module.equipmentId + ethernetcontrollerId).toController();
-    if (ethernetController == null) {
+    let ethernetControllerObject = module.childByEquipmentId(module.equipmentId + ethernetcontrollerId);
+    if (ethernetControllerObject == null || ethernetControllerObject.isController() == false) {
         log.errCFG3004(module.equipmentId + ethernetcontrollerId, module.equipmentId);
         return false;
     }
+    let ethernetController = ethernetControllerObject.toController();
     let checkTuningProperties = ["TuningServiceID", "TuningEnable", "TuningIP", "TuningPort", "OverrideTuningDataWordCount"];
     for (let cp = 0; cp < checkTuningProperties.length; cp++) {
         if (ethernetController.propertyValue(checkTuningProperties[cp]) == undefined) {
@@ -461,13 +459,14 @@ function generate_lm_1_rev3(builder, root, module, confFirmware, log, signalSet,
     if (ethernetController.propertyBool("TuningEnable") == true) {
         tuningIP = ethernetController.propertyIP("TuningIP");
         tuningPort = ethernetController.propertyInt("TuningPort");
-        let service = root.childByEquipmentId(serviceID).toSoftware();
-        if (service == null) {
+        let serviceObject = root.childByEquipmentId(serviceID);
+        if (serviceObject == null || serviceObject.isSoftware() == false) {
             log.wrnCFG3008(serviceID, module.equipmentId);
         }
         else {
             // Check software type
             //
+            let service = serviceObject.toSoftware();
             if (service.softwareType != SoftwareType.TuningService) {
                 log.errCFG3017(ethernetController.equipmentId, "Type", service.equipmentId);
                 return false;
@@ -491,8 +490,7 @@ function generate_lm_1_rev3(builder, root, module, confFirmware, log, signalSet,
         controllerTuningWordsCount = overrideTuningWordsCount;
         tuningDataID = 0;
     }
-    if (generate_LANConfiguration(confFirmware, log, lanFrame, module, ethernetController, controllerTuningWordsCount, tuningIP, tuningPort, tuningServiceIP, tuningServicePort, tuningDataID, 0, 0, 0, 0, 0, 0) == false) //Subnet2 is not used
-     {
+    if (generate_LANConfiguration(confFirmware, log, lanFrame, module, ethernetController, controllerTuningWordsCount, tuningIP, tuningPort, tuningServiceIP, tuningServicePort, tuningDataID, 0, 0, 0, 0, 0, 0) == false) {
         return false;
     }
     lanFrame++;
@@ -500,11 +498,12 @@ function generate_lm_1_rev3(builder, root, module, confFirmware, log, signalSet,
     //
     for (let i = 0; i < 2; i++) {
         ethernetcontrollerId = "_ETHERNET0" + (i + 2);
-        ethernetController = module.childByEquipmentId(module.equipmentId + ethernetcontrollerId);
-        if (ethernetController == null) {
+        ethernetControllerObject = module.childByEquipmentId(module.equipmentId + ethernetcontrollerId);
+        if (ethernetControllerObject == null || ethernetControllerObject.isController() == false) {
             log.errCFG3004(module.equipmentId + ethernetcontrollerId, module.equipmentId);
             return false;
         }
+        ethernetController = ethernetControllerObject.toController();
         let checkProperties = ["AppDataServiceID", "AppDataEnable", "AppDataIP", "AppDataPort",
             "DiagDataServiceID", "DiagDataEnable", "DiagDataIP", "DiagDataPort",
             "OverrideAppDataWordCount", "OverrideDiagDataWordCount"];
@@ -526,18 +525,15 @@ function generate_lm_1_rev3(builder, root, module, confFirmware, log, signalSet,
             if (ethernetController.propertyBool(servicesName[s] + "DataEnable") == true) {
                 ip[s] = ethernetController.propertyIP(servicesName[s] + "DataIP");
                 port[s] = ethernetController.propertyInt(servicesName[s] + "DataPort");
-                let service = root.childByEquipmentId(serviceID).toSoftware();
-                if (service == null) {
+                let serviceObject = root.childByEquipmentId(serviceID);
+                if (serviceObject == null || serviceObject.isSoftware() == false) {
                     log.wrnCFG3008(serviceID, module.equipmentId);
-                    if (i == 0) // in Ethernet port 1, if service was not found, use default IP addresses
-                     {
-                        if (s == 0) // this is App
-                         {
+                    if (i == 0) {
+                        if (s == 0) {
                             serviceIP[s] = 0xc0a80bfe; //	192.168.11.254
                             servicePort[s] = 13322;
                         }
-                        if (s == 1) // this is Diag
-                         {
+                        if (s == 1) {
                             serviceIP[s] = 0xc0a815fe; //	192.168.21.254
                             servicePort[s] = 13352;
                         }
@@ -549,6 +545,7 @@ function generate_lm_1_rev3(builder, root, module, confFirmware, log, signalSet,
                 else {
                     // Check software type
                     //
+                    let service = serviceObject.toSoftware();
                     if ((s == 0 && service.softwareType != SoftwareType.AppDataService) ||
                         (s == 1 && service.softwareType != SoftwareType.DiagDataService)) {
                         log.errCFG3017(ethernetController.equipmentId, "Type", service.equipmentId);
@@ -611,23 +608,19 @@ function generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, offse
         "; [" + frame + ":" + (ptr + 2) + "] ConfigFrames = " + configFrames +
         "; [" + frame + ":" + (ptr + 4) + "] DataFrames = " + dataFrames +
         "; [" + frame + ":" + (ptr + 6) + "] ModuleId = " + moduleId + "\r\n");
-    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "TxRxFlags", flags) == false) // Flags word
-     {
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "TxRxFlags", flags) == false) {
         return false;
     }
     ptr += 2;
-    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Configuration words quantity", configFrames) == false) // Configuration words quantity
-     {
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Configuration words quantity", configFrames) == false) {
         return false;
     }
     ptr += 2;
-    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Data words quantity", dataFrames) == false) // Data words quantity
-     {
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Data words quantity", dataFrames) == false) {
         return false;
     }
     ptr += 2;
-    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "ModuleID", moduleId) == false) // Tx ID
-     {
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "ModuleID", moduleId) == false) {
         return false;
     }
     ptr += 2;
@@ -751,11 +744,12 @@ function generate_lmTxRxOptoConfiguration(confFirmware, log, frame, module, LMNu
     for (let p = 0; p < portCount; p++) {
         let controllerID = module.equipmentId + "_OPTOPORT0";
         controllerID = controllerID + (p + 1);
-        let controller = module.childByEquipmentId(controllerID).toController();
-        if (controller == null) {
+        let controllerObject = module.childByEquipmentId(controllerID);
+        if (controllerObject == null || controllerObject.isController() == false) {
             log.errCFG3004(controllerID, module.equipmentId);
             return false;
         }
+        let controller = controllerObject.toController();
         let optoPort = opticModuleStorage.jsGetOptoPort(controller.equipmentId);
         if (optoPort == null) {
             continue;

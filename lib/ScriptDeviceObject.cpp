@@ -61,6 +61,10 @@ namespace Hardware
 	QJSValue ScriptDeviceObject::childByEquipmentId(QString id)
 	{
 		auto child = m_deviceObject->childByEquipmentId(id);
+		if (child == nullptr)
+		{
+			return {};
+		}
 
 		QJSEngine* engine = qjsEngine(this);
 		if (engine == nullptr)
@@ -81,6 +85,12 @@ namespace Hardware
 			return {};
 		}
 
+		if (m_deviceObject->isSystem() == false)
+		{
+			engine->throwError(tr("Cannot construct ScriptDeviceSystem from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
+			return {};
+		}
+
 		auto s = new ScriptDeviceSystem(m_deviceObject->toSystem());
 		assert(s);
 
@@ -93,6 +103,12 @@ namespace Hardware
 		if (engine == nullptr)
 		{
 			Q_ASSERT(engine);
+			return {};
+		}
+
+		if (m_deviceObject->isRack() == false)
+		{
+			engine->throwError(tr("Cannot construct ScriptDeviceRack from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
 			return {};
 		}
 
@@ -111,6 +127,12 @@ namespace Hardware
 			return {};
 		}
 
+		if (m_deviceObject->isChassis() == false)
+		{
+			engine->throwError(tr("Cannot construct ScriptDeviceChassis from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
+			return {};
+		}
+
 		auto ch = new ScriptDeviceChassis(m_deviceObject->toChassis());
 		assert(ch);
 
@@ -123,6 +145,12 @@ namespace Hardware
 		if (engine == nullptr)
 		{
 			Q_ASSERT(engine);
+			return {};
+		}
+
+		if (m_deviceObject->isModule() == false)
+		{
+			engine->throwError(tr("Cannot construct ScriptDeviceModule from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
 			return {};
 		}
 
@@ -141,6 +169,12 @@ namespace Hardware
 			return {};
 		}
 
+		if (m_deviceObject->isController() == false)
+		{
+			engine->throwError(tr("Cannot construct ScriptDeviceController from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
+			return {};
+		}
+
 		auto c = new ScriptDeviceController(m_deviceObject->toController());
 		assert(c);
 
@@ -153,6 +187,12 @@ namespace Hardware
 		if (engine == nullptr)
 		{
 			Q_ASSERT(engine);
+			return {};
+		}
+
+		if (m_deviceObject->isWorkstation() == false)
+		{
+			engine->throwError(tr("Cannot construct ScriptDeviceWorkstation from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
 			return {};
 		}
 
@@ -171,6 +211,12 @@ namespace Hardware
 			return {};
 		}
 
+		if (m_deviceObject->isSoftware() == false)
+		{
+			engine->throwError(tr("Cannot construct ScriptDeviceSoftware from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
+			return {};
+		}
+
 		auto sw = new ScriptDeviceSoftware(m_deviceObject->toSoftware());
 		assert(sw);
 
@@ -183,6 +229,12 @@ namespace Hardware
 		if (engine == nullptr)
 		{
 			Q_ASSERT(engine);
+			return {};
+		}
+
+		if (m_deviceObject->isAppSignal() == false)
+		{
+			engine->throwError(tr("Cannot construct ScriptDeviceAppSignal from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
 			return {};
 		}
 
