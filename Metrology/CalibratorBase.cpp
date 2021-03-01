@@ -28,6 +28,15 @@ CalibratorBase::~CalibratorBase()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void CalibratorBase::clear()
+{
+	emit calibratorClose();		// close all calibratоrs
+
+	removeCalibrators();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void CalibratorBase::init(const CalibratorsOption& calibratorsOption, QWidget* parent)
 {
 	m_calibratorsOption = calibratorsOption;
@@ -699,12 +708,5 @@ bool CalibratorBase::eventFilter(QObject* object, QEvent* event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorBase::clear()
-{
-	emit calibratorClose();		// close all calibratirs
 
-	removeCalibrators();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
 

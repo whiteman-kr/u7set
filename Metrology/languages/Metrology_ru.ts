@@ -1852,60 +1852,60 @@
 <context>
     <name>Calibrator</name>
     <message>
-        <location filename="../Calibrator.cpp" line="1513"/>
-        <location filename="../Calibrator.cpp" line="1530"/>
-        <location filename="../Calibrator.cpp" line="1546"/>
-        <location filename="../Calibrator.cpp" line="1568"/>
+        <location filename="../Calibrator.cpp" line="1514"/>
+        <location filename="../Calibrator.cpp" line="1531"/>
+        <location filename="../Calibrator.cpp" line="1547"/>
+        <location filename="../Calibrator.cpp" line="1569"/>
         <source>Unknown</source>
         <translation>Не определено</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1542"/>
+        <location filename="../Calibrator.cpp" line="1543"/>
         <source>Measure</source>
         <translation>Измерение</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1543"/>
+        <location filename="../Calibrator.cpp" line="1544"/>
         <source>Source</source>
         <translation>Источник</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1558"/>
+        <location filename="../Calibrator.cpp" line="1559"/>
         <source>mV</source>
         <translation>мВ</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1559"/>
+        <location filename="../Calibrator.cpp" line="1560"/>
         <source>mA</source>
         <translation>мА</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1560"/>
+        <location filename="../Calibrator.cpp" line="1561"/>
         <source>μA</source>
         <translation>μA</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1561"/>
+        <location filename="../Calibrator.cpp" line="1562"/>
         <source>nA</source>
         <translation>нА</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1562"/>
+        <location filename="../Calibrator.cpp" line="1563"/>
         <source>V</source>
         <translation>В</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1563"/>
+        <location filename="../Calibrator.cpp" line="1564"/>
         <source>Hz</source>
         <translation>Гц</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1564"/>
+        <location filename="../Calibrator.cpp" line="1565"/>
         <source>Ohm (Low)</source>
         <translation>Ом (low)</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1565"/>
+        <location filename="../Calibrator.cpp" line="1566"/>
         <source>Ohm (High)</source>
         <translation>Ом (High)</translation>
     </message>
@@ -1913,82 +1913,82 @@
 <context>
     <name>CalibratorBase</name>
     <message>
-        <location filename="../CalibratorBase.cpp" line="156"/>
+        <location filename="../CalibratorBase.cpp" line="165"/>
         <source>Calibrators initialization</source>
         <translation>Инициализация калибраторов</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="160"/>
+        <location filename="../CalibratorBase.cpp" line="169"/>
         <source>&amp;Calibrators</source>
         <translation>&amp;Калибраторы</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="162"/>
+        <location filename="../CalibratorBase.cpp" line="171"/>
         <source>&amp;Initialization</source>
         <translation>&amp;Инициализация</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="168"/>
+        <location filename="../CalibratorBase.cpp" line="177"/>
         <source>&amp;Manage ...</source>
         <translation>&amp;Управление ...</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="172"/>
+        <location filename="../CalibratorBase.cpp" line="181"/>
         <source>&amp;Settings ...</source>
         <translation>&amp;Настройки ...</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="178"/>
+        <location filename="../CalibratorBase.cpp" line="187"/>
         <source>&amp;Copy</source>
         <translation>&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="229"/>
+        <location filename="../CalibratorBase.cpp" line="238"/>
         <source>Calibrator %1</source>
         <translation>Калибратор %1</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="283"/>
+        <location filename="../CalibratorBase.cpp" line="292"/>
         <source>Yes</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="283"/>
+        <location filename="../CalibratorBase.cpp" line="292"/>
         <source>No</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="476"/>
+        <location filename="../CalibratorBase.cpp" line="485"/>
         <source>Please, select calibrator for manage!</source>
         <translation>Выберите калибратор для управления!</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="497"/>
+        <location filename="../CalibratorBase.cpp" line="506"/>
         <source>Please, select calibrator for edit settings!</source>
         <translation>Выберите калибратор для редактирования настроек!</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="532"/>
+        <location filename="../CalibratorBase.cpp" line="541"/>
         <source>Settings calibrator %1</source>
         <translation>Настройки калибратора %1</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="540"/>
+        <location filename="../CalibratorBase.cpp" line="549"/>
         <source>Serial port:</source>
         <translation>Порт:</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="559"/>
+        <location filename="../CalibratorBase.cpp" line="568"/>
         <source>Calibrator type:</source>
         <translation>Тип калибратора:</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="576"/>
+        <location filename="../CalibratorBase.cpp" line="585"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="577"/>
+        <location filename="../CalibratorBase.cpp" line="586"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
@@ -4100,175 +4100,180 @@ Tuning signals: %1</source>
 <context>
     <name>MeasureBase</name>
     <message>
-        <location filename="../MeasureBase.cpp" line="3223"/>
+        <location filename="../MeasureBase.cpp" line="3227"/>
         <source>Measurements of linearity</source>
         <translation>Измерения линейности</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3224"/>
+        <location filename="../MeasureBase.cpp" line="3228"/>
         <source>Measurements of comparators</source>
         <translation>Измерения уставок</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3227"/>
-        <location filename="../MeasureBase.cpp" line="3245"/>
-        <location filename="../MeasureBase.cpp" line="3261"/>
-        <location filename="../MeasureBase.cpp" line="3278"/>
-        <location filename="../MeasureBase.cpp" line="3295"/>
-        <location filename="../MeasureBase.cpp" line="3314"/>
+        <location filename="../MeasureBase.cpp" line="3231"/>
+        <location filename="../MeasureBase.cpp" line="3249"/>
+        <location filename="../MeasureBase.cpp" line="3265"/>
+        <location filename="../MeasureBase.cpp" line="3282"/>
+        <location filename="../MeasureBase.cpp" line="3299"/>
+        <location filename="../MeasureBase.cpp" line="3318"/>
         <source>Unknown</source>
         <translation>Не определено</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3240"/>
+        <location filename="../MeasureBase.cpp" line="3244"/>
         <source> Single channel</source>
         <translation>По одному каналу</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3241"/>
+        <location filename="../MeasureBase.cpp" line="3245"/>
         <source> Single module</source>
         <translation>В одном модуле</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3242"/>
+        <location filename="../MeasureBase.cpp" line="3246"/>
         <source> Multi channel</source>
         <translation>Во всех каналах</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3257"/>
+        <location filename="../MeasureBase.cpp" line="3261"/>
         <source>Electric</source>
         <translation>Электрический</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3258"/>
+        <location filename="../MeasureBase.cpp" line="3262"/>
         <source>Engineering</source>
         <translation>Физический</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3273"/>
+        <location filename="../MeasureBase.cpp" line="3277"/>
         <source>Absolute</source>
         <translation>Абсолютная</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3274"/>
+        <location filename="../MeasureBase.cpp" line="3278"/>
         <source>Reduce</source>
         <translation>Приведенная</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3275"/>
+        <location filename="../MeasureBase.cpp" line="3279"/>
         <source>Relative</source>
         <translation>Относительная</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3291"/>
+        <location filename="../MeasureBase.cpp" line="3295"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3292"/>
+        <location filename="../MeasureBase.cpp" line="3296"/>
         <source>Failed</source>
         <translation>Не годен</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3307"/>
+        <location filename="../MeasureBase.cpp" line="3311"/>
         <source>Measure value max</source>
         <translation>Максимальное измеренное значение</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3308"/>
+        <location filename="../MeasureBase.cpp" line="3312"/>
         <source>System deviation</source>
         <translation>Системное отклонение</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3309"/>
+        <location filename="../MeasureBase.cpp" line="3313"/>
         <source>Standard deviation</source>
         <translation>СКО</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3310"/>
+        <location filename="../MeasureBase.cpp" line="3314"/>
         <source>Low High border</source>
         <translation>Нижняя и верхняя границы</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="3311"/>
+        <location filename="../MeasureBase.cpp" line="3315"/>
         <source>Uncertainty</source>
         <translation>Неопределенность</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="2740"/>
+        <location filename="../MeasureBase.cpp" line="2744"/>
         <source>Save measurements</source>
         <translation>Сохранение измерений</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="2740"/>
+        <location filename="../MeasureBase.cpp" line="2744"/>
         <source>Error saving measurements to memory</source>
         <translation>Ошибка при сохранении измерений в памяти</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="2859"/>
+        <location filename="../MeasureBase.cpp" line="2863"/>
         <source>Delete measurements</source>
         <translation>Удаление измерений</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="2859"/>
+        <location filename="../MeasureBase.cpp" line="2863"/>
         <source>Error remove measurements from memory</source>
         <translation>Ошибка при удалении измерений из памяти</translation>
     </message>
 </context>
 <context>
-    <name>MeasurePointBase.cpp</name>
+    <name>MeasurePointBase</name>
     <message>
-        <location filename="../MeasurePointBase.cpp" line="164"/>
-        <source>The measurement points are not set</source>
-        <translation>Точки измерения не заданы</translation>
-    </message>
-</context>
-<context>
-    <name>MeasurePointBase.h</name>
-    <message>
-        <location filename="../MeasurePointBase.h" line="11"/>
+        <location filename="../MeasurePointBase.cpp" line="295"/>
         <source>%</source>
         <translation>%</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.h" line="12"/>
+        <location filename="../MeasurePointBase.cpp" line="297"/>
         <source>0 .. 5 V</source>
         <translation>0 .. 5 В</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.h" line="13"/>
+        <location filename="../MeasurePointBase.cpp" line="298"/>
         <source>-10 .. 10 V</source>
         <translation>- 10 .. 10 В</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.h" line="14"/>
+        <location filename="../MeasurePointBase.cpp" line="300"/>
         <source>0 .. 5 mA</source>
         <translation>0 .. 5 мА</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.h" line="15"/>
+        <location filename="../MeasurePointBase.cpp" line="301"/>
         <source>4 .. 20 mA</source>
         <translation>4 .. 20 мА</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.h" line="16"/>
+        <location filename="../MeasurePointBase.cpp" line="303"/>
         <source>0 .. 100 °C</source>
         <translation>0 .. 100 °C</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.h" line="17"/>
+        <location filename="../MeasurePointBase.cpp" line="304"/>
         <source>0 .. 150 °C</source>
         <translation>0 .. 150 °C</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.h" line="18"/>
+        <location filename="../MeasurePointBase.cpp" line="305"/>
         <source>0 .. 200 °C</source>
         <translation>0 .. 200 °C</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.h" line="19"/>
+        <location filename="../MeasurePointBase.cpp" line="306"/>
         <source>0 .. 400 °C</source>
         <translation>0 .. 400 °C</translation>
+    </message>
+    <message>
+        <location filename="../MeasurePointBase.cpp" line="310"/>
+        <source>Unknown</source>
+        <translation>Не определено</translation>
+    </message>
+</context>
+<context>
+    <name>MeasurePointBase.cpp</name>
+    <message>
+        <location filename="../MeasurePointBase.cpp" line="167"/>
+        <source>The measurement points are not set</source>
+        <translation>Точки измерения не заданы</translation>
     </message>
 </context>
 <context>
@@ -4786,48 +4791,48 @@ Do you want to repeat the preparation process in order to switch the comparator 
 <context>
     <name>MetrologyConnection</name>
     <message>
-        <location filename="../../lib/MetrologyConnection.cpp" line="138"/>
-        <location filename="../../lib/MetrologyConnection.cpp" line="1138"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="215"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1235"/>
         <source>Unknown</source>
         <translation>Не используется</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnection.cpp" line="1128"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1225"/>
         <source>No connections             </source>
         <translation>Без соединения             </translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnection.cpp" line="1129"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1226"/>
         <source>Input -&gt; Internal</source>
         <translation>Входной -&gt; Внутренний</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnection.cpp" line="1130"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1227"/>
         <source>Input -&gt; Output</source>
         <translation>Входной -&gt; Выходной</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnection.cpp" line="1131"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1228"/>
         <source>Input dP -&gt; Internal F</source>
         <translation>Входной dP -&gt; Внутренний F</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnection.cpp" line="1132"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1229"/>
         <source>Input dP -&gt; Output F</source>
         <translation>Входной dP -&gt; Выходной F</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnection.cpp" line="1133"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1230"/>
         <source>Input °С -&gt; Internal °F</source>
         <translation>Входной °С -&gt; Внутренний °F</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnection.cpp" line="1134"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1231"/>
         <source>Input °С -&gt; Output °F</source>
         <translation>Входной °С -&gt; Выходной °F</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologyConnection.cpp" line="1135"/>
+        <location filename="../../lib/MetrologyConnection.cpp" line="1232"/>
         <source>Tuning -&gt; Output</source>
         <translation>Тюнинг -&gt; Выходной</translation>
     </message>

@@ -110,9 +110,9 @@ void MeasurePointDialog::setHeaderList()
 {
 	QStringList horizontalHeaderLabels;
 
-	for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
+	for(int sensor = 0; sensor < PointSensorCount; sensor++)
 	{
-		horizontalHeaderLabels.append(qApp->translate("MeasurePointBase.h", MeasurePointSensor[sensor]));
+		horizontalHeaderLabels.append(qApp->translate("MeasurePointBase", PointSensorCaption(sensor).toUtf8()));
 	}
 
 	m_pointList->setColumnCount(horizontalHeaderLabels.count());
@@ -120,12 +120,12 @@ void MeasurePointDialog::setHeaderList()
 
 	for(int column = 0; column < m_pointList->columnCount(); column++)
 	{
-		if (column != POINT_SENSOR_PERCENT)
+		if (column != PointSensor::Percent)
 		{
 			m_pointList->horizontalHeaderItem(column)->setForeground(Qt::darkGray);
 		}
 
-		if (column > POINT_SENSOR_I_4_20_MA)
+		if (column > PointSensor::I_4_20_mA)
 		{
 			m_pointList->hideColumn(column);
 		}
@@ -142,18 +142,18 @@ void MeasurePointDialog::setHeaderList()
 
 	m_headerContextMenu = new QMenu(m_pointList);
 
-	for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
+	for(int sensor = 0; sensor < PointSensorCount; sensor++)
 	{
-		if (sensor == POINT_SENSOR_PERCENT)
+		if (sensor == PointSensor::Percent)
 		{
 			continue;
 		}
 
-		m_pColumnAction[sensor] = m_headerContextMenu->addAction(qApp->translate("MeasurePointBase.h", MeasurePointSensor[sensor]));
+		m_pColumnAction[sensor] = m_headerContextMenu->addAction(qApp->translate("MeasurePointBase", PointSensorCaption(sensor).toUtf8()));
 		if (m_pColumnAction[sensor] != nullptr)
 		{
 			m_pColumnAction[sensor]->setCheckable(true);
-			m_pColumnAction[sensor]->setChecked(sensor > POINT_SENSOR_I_4_20_MA ? false : true);
+			m_pColumnAction[sensor]->setChecked(sensor > PointSensor::I_4_20_mA ? false : true);
 		}
 	}
 
@@ -238,13 +238,13 @@ void MeasurePointDialog::updateList()
 
 		verticalHeaderLabels.append(QString("%1").arg(point.Index() + 1));
 
-		for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
+		for(int sensor = 0; sensor < PointSensorCount; sensor++)
 		{
 			cell = new QTableWidgetItem(QString::number(point.sensorValue(sensor), 'f', 3));
 			cell->setTextAlignment(Qt::AlignHCenter);
 			m_pointList->setItem(index, sensor, cell);
 
-			if (sensor != POINT_SENSOR_PERCENT)
+			if (sensor != PointSensor::Percent)
 			{
 				cell->setForeground(Qt::darkGray);
 			}
@@ -332,7 +332,7 @@ void MeasurePointDialog::onAddPoint()
 
 	updateList();
 
-	QTableWidgetItem* item = m_pointList->item(index + 1, POINT_SENSOR_PERCENT);
+	QTableWidgetItem* item = m_pointList->item(index + 1, PointSensor::Percent);
 	if (item == nullptr)
 	{
 		return;
@@ -350,7 +350,7 @@ void MeasurePointDialog::cellChanged(int row, int column)
 		return;
 	}
 
-	if (column != POINT_SENSOR_PERCENT)
+	if (column != PointSensor::Percent)
 	{
 		return;
 	}
@@ -385,7 +385,7 @@ void MeasurePointDialog::cellChanged(int row, int column)
 
 void MeasurePointDialog::currentCellChanged(int, int column, int, int)
 {
-	if (column == POINT_SENSOR_PERCENT)
+	if (column == PointSensor::Percent)
 	{
 		m_pointList->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::AnyKeyPressed);
 	}
@@ -405,7 +405,7 @@ void MeasurePointDialog::onEditPoint()
 		return;
 	}
 
-	QTableWidgetItem* item = m_pointList->item(row, POINT_SENSOR_PERCENT);
+	QTableWidgetItem* item = m_pointList->item(row, PointSensor::Percent);
 	if (item == nullptr)
 	{
 		return;
@@ -423,7 +423,7 @@ void MeasurePointDialog::onRemovePoint()
 	{
 		bool removePt = false;
 
-		for(int column = 0; column < POINT_SENSOR_COUNT; column++)
+		for(int column = 0; column < PointSensorCount; column++)
 		{
 			if (m_pointList->item(row, column)->isSelected() == true)
 			{
@@ -590,7 +590,7 @@ void MeasurePointDialog::onColumnAction(QAction* action)
 		return;
 	}
 
-	for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
+	for(int sensor = 0; sensor < PointSensorCount; sensor++)
 	{
 		if (m_pColumnAction[sensor] == action)
 		{

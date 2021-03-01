@@ -37,10 +37,6 @@ const UnitSensorTypePair SensorTypeByUnit[] =
 
 	// types of thermocouple
 	//
-	{ E::ElectricUnit::mV,		E::SensorType::mV_K_TXA },
-	{ E::ElectricUnit::mV,		E::SensorType::mV_L_TXK },
-	{ E::ElectricUnit::mV,		E::SensorType::mV_N_THH },
-
 	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_B },
 	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_E },
 	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_J },

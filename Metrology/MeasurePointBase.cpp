@@ -8,23 +8,28 @@
 
 void MeasurePoint::setPercent(double value)
 {
-	m_percentValue = value;
-
-	for(int s = 0; s < POINT_SENSOR_COUNT; s++)
+	for(int sensor = 0; sensor < PointSensorCount; sensor++)
 	{
-		switch(s)
+		double sensorValue = 0;
+
+		switch(sensor)
 		{
-			case POINT_SENSOR_PERCENT:		m_sensorValue[s] = value;						break;
-			case POINT_SENSOR_U_0_5_V:		m_sensorValue[s] = value * 5 / 100;				break;
-			case POINT_SENSOR_U_m10_10_V:	m_sensorValue[s] = value * 20 / 100 + (-10);	break;
-			case POINT_SENSOR_I_0_5_MA:		m_sensorValue[s] = value * 5 / 100;				break;
-			case POINT_SENSOR_I_4_20_MA:	m_sensorValue[s] = value * 16 / 100 + 4;		break;
-			case POINT_SENSOR_T_0_100_C:	m_sensorValue[s] = value * 100 / 100;			break;
-			case POINT_SENSOR_T_0_150_C:	m_sensorValue[s] = value * 150 / 100;			break;
-			case POINT_SENSOR_T_0_200_C:	m_sensorValue[s] = value * 200 / 100;			break;
-			case POINT_SENSOR_T_0_400_C:	m_sensorValue[s] = value * 400 / 100;			break;
+			case PointSensor::Percent:		sensorValue = value;					break;
+
+			case PointSensor::U_0_5_V:		sensorValue = value * 5 / 100;			break;
+			case PointSensor::U_m10_10_V:	sensorValue = value * 20 / 100 + (-10);	break;
+
+			case PointSensor::I_0_5_mA:		sensorValue = value * 5 / 100;			break;
+			case PointSensor::I_4_20_mA:	sensorValue = value * 16 / 100 + 4;		break;
+
+			case PointSensor::T_0_100_C:	sensorValue = value * 100 / 100;		break;
+			case PointSensor::T_0_150_C:	sensorValue = value * 150 / 100;		break;
+			case PointSensor::T_0_200_C:	sensorValue = value * 200 / 100;		break;
+			case PointSensor::T_0_400_C:	sensorValue = value * 400 / 100;		break;
 			default:						assert(0);
 		}
+
+		m_sensorValue[sensor] = sensorValue;
 	}
 }
 
@@ -32,7 +37,7 @@ void MeasurePoint::setPercent(double value)
 
 double MeasurePoint::sensorValue(int sensor)
 {
-	if (sensor < 0 || sensor >= POINT_SENSOR_COUNT)
+	if (ERR_POINT_SENSOR(sensor) == true)
 	{
 		return 0;
 	}
@@ -279,4 +284,37 @@ MeasurePointBase& MeasurePointBase::operator=(const MeasurePointBase& from)
 	return *this;
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+QString PointSensorCaption(int sensor)
+{
+	QString caption;
+
+	switch (sensor)
+	{
+		case PointSensor::Percent:		caption = QT_TRANSLATE_NOOP("MeasurePointBase", "%");			break;
+
+		case PointSensor::U_0_5_V:		caption = QT_TRANSLATE_NOOP("MeasurePointBase", "0 .. 5 V");	break;
+		case PointSensor::U_m10_10_V:	caption = QT_TRANSLATE_NOOP("MeasurePointBase", "-10 .. 10 V");	break;
+
+		case PointSensor::I_0_5_mA:		caption = QT_TRANSLATE_NOOP("MeasurePointBase", "0 .. 5 mA");	break;
+		case PointSensor::I_4_20_mA:	caption = QT_TRANSLATE_NOOP("MeasurePointBase", "4 .. 20 mA");	break;
+
+		case PointSensor::T_0_100_C:	caption = QT_TRANSLATE_NOOP("MeasurePointBase", "0 .. 100 °C");	break;
+		case PointSensor::T_0_150_C:	caption = QT_TRANSLATE_NOOP("MeasurePointBase", "0 .. 150 °C");	break;
+		case PointSensor::T_0_200_C:	caption = QT_TRANSLATE_NOOP("MeasurePointBase", "0 .. 200 °C");	break;
+		case PointSensor::T_0_400_C:	caption = QT_TRANSLATE_NOOP("MeasurePointBase", "0 .. 400 °C");	break;
+
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("MeasurePointBase", "Unknown");
+	}
+
+	return caption;
+};
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------

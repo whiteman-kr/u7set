@@ -909,6 +909,8 @@ LinearityMeasurement::~LinearityMeasurement()
 
 void LinearityMeasurement::clear()
 {
+	::Measurement::clear();
+
 	setMeasureType(MeasureType::Linearity);
 
 	m_percent = 0;
@@ -1978,6 +1980,8 @@ ComparatorMeasurement::~ComparatorMeasurement()
 
 void ComparatorMeasurement::clear()
 {
+	::Measurement::clear();
+
 	setMeasureType(MeasureType::Comparators);
 
 	m_compareAppSignalID.clear();

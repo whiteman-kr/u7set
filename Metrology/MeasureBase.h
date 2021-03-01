@@ -287,11 +287,11 @@ public:
 
 	LinearityMeasurement();
 	LinearityMeasurement(const IoSignalParam& ioParam);
-	virtual ~LinearityMeasurement();
+	~LinearityMeasurement() override;
 
 public:
 
-	void			virtual clear();
+	void			clear() override;
 
 	void			fill_measure_input(const IoSignalParam& ioParam);
 	void			fill_measure_internal(const IoSignalParam& ioParam);
@@ -342,11 +342,11 @@ public:
 
 	ComparatorMeasurement();
 	explicit ComparatorMeasurement(const IoSignalParam& ioParam);
-	virtual ~ComparatorMeasurement();
+	~ComparatorMeasurement() override;
 
 public:
 
-	void			virtual clear();
+	void			clear() override;
 
 	void			fill_measure_input(const IoSignalParam& ioParam);
 	void			fill_measure_internal(const IoSignalParam &ioParam);

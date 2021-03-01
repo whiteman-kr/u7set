@@ -57,6 +57,8 @@ public:
 
 public:
 
+	void					clear();
+
 	void					init(const CalibratorsOption& calibratorsOption, QWidget* parent = nullptr);
 	void					showInitDialog();
 
@@ -66,8 +68,6 @@ public:
 	CalibratorManager*		calibratorForMeasure(int index) const;
 
 	int						connectedCalibratorsCount() const { return m_connectedCalibratorsCount; }
-
-	void					clear();
 
 private:
 
