@@ -251,10 +251,10 @@ test job:
     - "rem ----------------------------------------------"
     - "rem               Run Simulator AFBs tests"
     - "rem ----------------------------------------------"
-    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorConsole.exe -build=c:\\temp\\build\\test_simulator_v346\\build -script=%CI_PROJECT_DIR%\\Simulator\\SimProjectTests.js"
+    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorConsole.exe -build=c:\\temp\\build\\test_simulator_v348\\build -script=%CI_PROJECT_DIR%\\Simulator\\SimProjectTests.js"
 
 #Run ROVT to check configuration generation
     - "rem ----------------------------------------------"
     - "rem               Run ROVT tests"
     - "rem ----------------------------------------------"
-    - "C:\\ROVT\\ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v346\\build"
+    - "C:\\ROVT\\ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v348\\build"
