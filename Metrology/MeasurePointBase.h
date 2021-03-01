@@ -6,31 +6,12 @@
 
 // ==============================================================================================
 
-//const char* const		MeasurePointSensor[] =
-//{
-//						QT_TRANSLATE_NOOP("MeasurePointBase.h", "%"),
-//						QT_TRANSLATE_NOOP("MeasurePointBase.h", "0 .. 5 V"),
-//						QT_TRANSLATE_NOOP("MeasurePointBase.h", "-10 .. 10 V"),
-//						QT_TRANSLATE_NOOP("MeasurePointBase.h", "0 .. 5 mA"),
-//						QT_TRANSLATE_NOOP("MeasurePointBase.h", "4 .. 20 mA"),
-//						QT_TRANSLATE_NOOP("MeasurePointBase.h", "0 .. 100 °C"),
-//						QT_TRANSLATE_NOOP("MeasurePointBase.h", "0 .. 150 °C"),
-//						QT_TRANSLATE_NOOP("MeasurePointBase.h", "0 .. 200 °C"),
-//						QT_TRANSLATE_NOOP("MeasurePointBase.h", "0 .. 400 °C"),
-//};
+const double MeasurePointValue[] =
+{
+	5, 20, 40, 50, 60, 80, 95
+};
 
-//const int				POINT_SENSOR_COUNT			= sizeof(MeasurePointSensor)/sizeof(MeasurePointSensor[0]);
-
-//const int				POINT_SENSOR_UNDEFINED		= -1,
-//						PointSensor::Percent		= 0,
-//						POINT_SENSOR_U_0_5_V		= 1,
-//						POINT_SENSOR_U_m10_10_V		= 2,
-//						POINT_SENSOR_I_0_5_MA		= 3,
-//						PointSensor::I_4_20_mA		= 4,
-//						POINT_SENSOR_T_0_100_C		= 5,
-//						POINT_SENSOR_T_0_150_C		= 6,
-//						POINT_SENSOR_T_0_200_C		= 7,
-//						POINT_SENSOR_T_0_400_C		= 8;
+const int MeasurePointValueCount = sizeof(MeasurePointValue)/sizeof(MeasurePointValue[0]);
 
 // ==============================================================================================
 
@@ -66,31 +47,22 @@ public:
 
 public:
 
-	int					Index() const { return m_index; }
-	void				setIndex(int index) { m_index = index; }
+	int Index() const { return m_index; }
+	void setIndex(int index) { m_index = index; }
 
-	double				percent() const {return m_sensorValue[PointSensor::Percent]; }
-	void				setPercent(double value);
+	double percent() const {return m_sensorValue[PointSensor::Percent]; }
+	void setPercent(double value);
 
-	double				sensorValue(int sensor);
+	double sensorValue(int sensor);
 
 private:
 
-	int					m_index = -1;
+	int m_index = -1;
 
-	double				m_sensorValue[PointSensorCount];
+	double m_sensorValue[PointSensorCount];
 };
 
 // ==============================================================================================
-
-const double			MeasurePointValue[] =
-{
-						5, 20, 40, 50, 60, 80, 95
-};
-
-const int				MeasurePointValueCount = sizeof(MeasurePointValue)/sizeof(MeasurePointValue[0]);
-
-// ----------------------------------------------------------------------------------------------
 
 class MeasurePointBase : public QObject
 {
