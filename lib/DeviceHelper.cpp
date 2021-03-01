@@ -434,7 +434,7 @@ Hardware::DeviceObject* DeviceHelper::getChildDeviceObjectBySuffix(const Hardwar
 
 	for(int i = 0; i < childrenCount; i++)
 	{
-		Hardware::DeviceObject* object = device->child(i);
+		Hardware::DeviceObject* object = device->child(i).get();
 
 		if (object == nullptr)
 		{
@@ -476,7 +476,7 @@ Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardw
 		return nullptr;
 	}
 
-	Hardware::DeviceController* deviceController = deviceObject->toController();
+	Hardware::DeviceController* deviceController = deviceObject->toController().get();
 
 	if (deviceController != nullptr)
 	{
@@ -522,7 +522,7 @@ const Hardware::DeviceModule *DeviceHelper::getModuleOnPlace(const Hardware::Dev
 
 	for(int i = 0; i < count; i++)
 	{
-		Hardware::DeviceObject* device = chassis->child(i);
+		Hardware::DeviceObject* device = chassis->child(i).get();
 
 		if (device == nullptr)
 		{
@@ -535,7 +535,7 @@ const Hardware::DeviceModule *DeviceHelper::getModuleOnPlace(const Hardware::Dev
 			continue;
 		}
 
-		const Hardware::DeviceModule* module = device->toModule();
+		const Hardware::DeviceModule* module = device->toModule().get();
 
 		if (module == nullptr)
 		{
@@ -567,7 +567,7 @@ const Hardware::DeviceModule* DeviceHelper::getLm(const Hardware::DeviceChassis*
 
 	for(int i = 0; i < count; i++)
 	{
-		Hardware::DeviceObject* device = chassis->child(i);
+		Hardware::DeviceObject* device = chassis->child(i).get();
 
 		if (device == nullptr)
 		{
@@ -580,7 +580,7 @@ const Hardware::DeviceModule* DeviceHelper::getLm(const Hardware::DeviceChassis*
 			continue;
 		}
 
-		Hardware::DeviceModule* module =  device->toModule();
+		Hardware::DeviceModule* module =  device->toModule().get();
 
 		if (module == nullptr)
 		{
@@ -615,7 +615,7 @@ const Hardware::DeviceModule* DeviceHelper::getLmOrBvb(const Hardware::DeviceCha
 
 	for(int i = 0; i < count; i++)
 	{
-		Hardware::DeviceObject* device = chassis->child(i);
+		Hardware::DeviceObject* device = chassis->child(i).get();
 
 		if (device == nullptr)
 		{
@@ -628,7 +628,7 @@ const Hardware::DeviceModule* DeviceHelper::getLmOrBvb(const Hardware::DeviceCha
 			continue;
 		}
 
-		Hardware::DeviceModule* module =  device->toModule();
+		Hardware::DeviceModule* module =  device->toModule().get();
 
 		if (module == nullptr)
 		{
@@ -701,14 +701,14 @@ const Hardware::Software* DeviceHelper::getSoftware(const Hardware::EquipmentSet
 		return nullptr;
 	}
 
-	const Hardware::DeviceObject* device = equipment->deviceObject(softwareID);
+	const Hardware::DeviceObject* device = equipment->deviceObject(softwareID).get();
 
 	if (device == nullptr)
 	{
 		return nullptr;
 	}
 
-	return device->toSoftware();
+	return device->toSoftware().get();
 }
 
 void DeviceHelper::logPropertyNotFoundError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)

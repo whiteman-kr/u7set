@@ -4,33 +4,16 @@
 		
 function generate_aom4ph(confFirmware, module, LMNumber, frame, log, signalSet, opticModuleStorage)
 {
-	
-	if (module.propertyValue("EquipmentID") == undefined)
-	{
-		log.errCFG3000("EquipmentID", "Module_AOM4PH");
-		return false;
-	}
-	
-	let equipmentID = module.propertyValue("EquipmentID");
-	
-	let checkProperties = ["Place", "ModuleVersion"];
-	for (let cp = 0; cp < checkProperties.length; cp++)
-	{
-		if (module.propertyValue(checkProperties[cp]) == undefined)
-		{
-			log.errCFG3000(checkProperties[cp], equipmentID);
-			return false;
-		}
-	}
-
     let ptr = 0;
     
-    let outController = module.jsFindChildObjectByMask(equipmentID + "_CTRLOUT");
-    if (outController == null)
+    let outControllerObject = module.childByEquipmentId(module.equipmentId + "_CTRLOUT");
+    if (outControllerObject == null || outControllerObject.isController() == false)
     {
-		log.errCFG3004(equipmentID + "_CTRLOUT", equipmentID);
+		log.errCFG3004(module.equipmentId + "_CTRLOUT",module.equipmentId);
 		return false;
     }
+
+    let outController =  outControllerObject.toController();
 	
     let moduleSignalsCount = 32;
 	let defaultFlags = 0x0;
@@ -42,7 +25,7 @@ function generate_aom4ph(confFirmware, module, LMNumber, frame, log, signalSet, 
 
     for (let i = 1; i <= moduleSignalsCount; i++)
     {
-		let signalStrId = equipmentID + "_CTRLOUT";
+		let signalStrId = module.equipmentId + "_CTRLOUT";
 		if (i < 10)
 		{
 			signalStrId += "_OUT0" + i;
@@ -67,31 +50,31 @@ function generate_aom4ph(confFirmware, module, LMNumber, frame, log, signalSet, 
 			"; [" + frame + ":" + (ptr + 12) + "] K2 ADC = " + defaultK2 +
 			"; [" + frame + ":" + (ptr + 16) + "] Flags = " + defaultFlags + "\r\n");
             
-            if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "K1 DAC", defaultK1) == false)      // DefaultK1 DAC
+            if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K1 DAC", defaultK1) == false)      // DefaultK1 DAC
 			{
 				return false;
 			}
             ptr += 4;
 
-            if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "K2 DAC", defaultK2) == false)      // DefaultK2 DAC
+            if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K2 DAC", defaultK2) == false)      // DefaultK2 DAC
 			{
 				return false;
 			}
             ptr += 4;
 	
-            if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "K1 ADC", defaultK1) == false)      // DefaultK1 ADC
+            if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K1 ADC", defaultK1) == false)      // DefaultK1 ADC
 			{
 				return false;
 			}
             ptr += 4;
 
-            if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "K2 ADC", defaultK2) == false)      // DefaultK2 ADC
+            if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K2 ADC", defaultK2) == false)      // DefaultK2 ADC
 			{
 				return false;
 			}
             ptr += 4;
 			
-			if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "WordOfFlags", defaultFlags) == false)      // DefaultWordOfFlags
+			if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "WordOfFlags", defaultFlags) == false)      // DefaultWordOfFlags
 			{
 				return false;
 			}
@@ -181,7 +164,7 @@ function generate_aom4ph(confFirmware, module, LMNumber, frame, log, signalSet, 
 				{
 					case UnitsConvertorErrorCode.ErrorGeneric:
 					{
-						log.errINT1001(highPhysical.errorMessage + ", module " + module.propertyValue("EquipmentID") + ", signal " + signalStrId);
+						log.errINT1001(highPhysical.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrId);
 					}
 						break;
 					case UnitsConvertorErrorCode.LowLimitOutOfRange:
@@ -204,7 +187,7 @@ function generate_aom4ph(confFirmware, module, LMNumber, frame, log, signalSet, 
 				{
 					case UnitsConvertorErrorCode.ErrorGeneric:
 					{
-						log.errINT1001(lowPhysical.errorMessage + ", module " + module.propertyValue("EquipmentID") + ", signal " + signalStrId);
+						log.errINT1001(lowPhysical.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrId);
 					}
 						break;
 					case UnitsConvertorErrorCode.LowLimitOutOfRange:
@@ -280,31 +263,31 @@ function generate_aom4ph(confFirmware, module, LMNumber, frame, log, signalSet, 
 			"; LowPhysicalRange = " + lowPhysical.toDouble +
 			"; [" + frame + ":" + (ptr + 16) + "] Flags = " + flags + "\r\n");
 
-			if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "K1 DAC", k1DAC) == false)         // K1
+			if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K1 DAC", k1DAC) == false)         // K1
 			{
 				return false;
 			}
             ptr += 4;
             
-			if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "K2 DAC", k2DAC) == false)         // K2
+			if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K2 DAC", k2DAC) == false)         // K2
 			{
 				return false;
 			}
             ptr += 4;
 			
-			if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "K1 ADC", k1ADC) == false)         // K1
+			if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K1 ADC", k1ADC) == false)         // K1
 			{
 				return false;
 			}
             ptr += 4;
             
-			if (setDataFloat(confFirmware, log, LMNumber, equipmentID, frame, ptr, "K2 ADC", k2ADC) == false)         // K2
+			if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K2 ADC", k2ADC) == false)         // K2
 			{
 				return false;
 			}
             ptr += 4;
 
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "WordOfFlags", flags) == false)      // InA WordOfFlags
+            if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "WordOfFlags", flags) == false)      // InA WordOfFlags
 			{
 				return false;
 			}
@@ -320,7 +303,7 @@ function generate_aom4ph(confFirmware, module, LMNumber, frame, log, signalSet, 
 	
 	ptr = 760;
 	
-    let stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
+    let stringCrc64 = storeCrc64(confFirmware, log, LMNumber, module.equipmentId, frame, 0, ptr, ptr);   //CRC-64
 	if (stringCrc64 == "")
 	{
 		return false;
@@ -344,9 +327,9 @@ function generate_aom4ph(confFirmware, module, LMNumber, frame, log, signalSet, 
     let configFramesQuantity = 6;
     let dataFramesQuantity = 1;
  
-    let txId = module.jsModuleFamily() + module.propertyValue("ModuleVersion");
+    let txId = module.moduleFamily + module.moduleVersion;
     
-    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
+    if (generate_txRxIoConfig(confFirmware, module.equipmentId, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
 	{
 		return false;
 	}

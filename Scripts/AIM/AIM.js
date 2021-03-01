@@ -3,24 +3,6 @@
 //
 function generate_aim(confFirmware, module, LMNumber, frame, log, signalSet, opticModuleStorage)
 {
-	if (module.propertyValue("EquipmentID") == undefined)
-	{
-		log.errCFG3000("EquipmentID", "Module_AIM");
-		return false;
-	}
-	
-	let equipmentID = module.propertyValue("EquipmentID");
-	
-	let checkProperties = ["Place", "ModuleVersion"];
-	for (let cp = 0; cp < checkProperties.length; cp++)
-	{
-		if (module.propertyValue(checkProperties[cp]) == undefined)
-		{
-			log.errCFG3000(checkProperties[cp], equipmentID);
-			return false;
-		}
-	}
-
     let ptr = 0;
     
     let AIMSignalMaxCount = 64;
@@ -32,12 +14,14 @@ function generate_aim(confFirmware, module, LMNumber, frame, log, signalSet, opt
     let defaultLowBound = valToADC(0, 0, 5.1, 0, 0xffff);
     let defaultSpreadTolerance = Math.round((0xffff - 0) * 0.005);		// 2%
     
-    let inController = module.jsFindChildObjectByMask(equipmentID + "_CTRLIN");
-    if (inController == null)
+    let inControllerObject = module.childByEquipmentId(module.equipmentId + "_CTRLIN");
+    if (inControllerObject == null || inControllerObject.isController() == false)
     {
-		log.errCFG3004(equipmentID + "_CTRLIN", equipmentID);
+		log.errCFG3004(module.equipmentId + "_CTRLIN",module.equipmentId);
 		return false;
     }
+
+    let inController =  inControllerObject.toController();
 	
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
     //
@@ -51,7 +35,7 @@ function generate_aim(confFirmware, module, LMNumber, frame, log, signalSet, opt
         // find a signal with Place = i
         //
         //let signal = findSignalByPlace(inController, i, Analog, Input, signalSet, log);
-		let signalStrId = inController.propertyValue("EquipmentID") + "_IN";
+		let signalStrId = inController.equipmentId + "_IN";
 		
 		let entry = Math.floor(i / 2) + 1;
 		if (entry < 10)
@@ -91,22 +75,22 @@ function generate_aim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			"; [" + frame + ":" + (ptr + 4) + "] LowADC = " + defaultLowBound +
 			"; [" + frame + ":" + (ptr + 6) + "] SpreadTolerance = " + defaultSpreadTolerance + "\r\n");
             
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultTf", defaultTf) == false)          // InA Filtering time constant
+            if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "DefaultTf", defaultTf) == false)          // InA Filtering time constant
 			{
 				return false;
 			}
             ptr += 2;
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultHighBound", defaultHighBound) == false)         // InA High bound
+            if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "DefaultHighBound", defaultHighBound) == false)         // InA High bound
 			{
 				return false;
 			}
             ptr += 2;
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultLowBound", defaultLowBound) == false)          // InA Low Bound
+            if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "DefaultLowBound", defaultLowBound) == false)          // InA Low Bound
 			{
 				return false;
 			}
             ptr += 2;
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "DefaultSpreadTolerance", defaultSpreadTolerance) == false)      // InA SpreadTolerance
+            if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "DefaultSpreadTolerance", defaultSpreadTolerance) == false)      // InA SpreadTolerance
 			{
 				return false;
 			}
@@ -198,7 +182,7 @@ function generate_aim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 					// this is B input, next to saved A
 					if (spreadTolerance != channelASpreadTolerance)
 					{
-						log.errCFG3009(channelAStrID, signal.appSignalID(), module.propertyValue("EquipmentID"));
+						log.errCFG3009(channelAStrID, signal.appSignalID(), module.equipmentId);
 						return false;
 					}
 				}
@@ -209,22 +193,22 @@ function generate_aim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			"; [" + frame + ":" + (ptr + 4) + "] LowValidRangeADC = " + lowValidRangeADC +
 			"; [" + frame + ":" + (ptr + 6) + "] SpreadTolerance = " + spreadTolerance + "\r\n");
 
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "FilteringTime", filteringTime) == false)          // InA Filtering time constant
+            if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "FilteringTime", filteringTime) == false)          // InA Filtering time constant
 			{
 				return false;
 			}
             ptr += 2;
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "HighValidRangeADC", highValidRangeADC) == false)         // InA High bound
+            if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "HighValidRangeADC", highValidRangeADC) == false)         // InA High bound
 			{
 				return false;
 			}
             ptr += 2;
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "LowValidRangeADC", lowValidRangeADC) == false)          // InA Low Bound
+            if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LowValidRangeADC", lowValidRangeADC) == false)          // InA Low Bound
 			{
 				return false;
 			}
             ptr += 2;
-            if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "SpreadTolerance", spreadTolerance) == false)      // InA SpreadTolerance
+            if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "SpreadTolerance", spreadTolerance) == false)      // InA SpreadTolerance
 			{
 				return false;
 			}
@@ -236,7 +220,7 @@ function generate_aim(confFirmware, module, LMNumber, frame, log, signalSet, opt
     ptr += 120;
    
     // final crc
-    let stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
+    let stringCrc64 = storeCrc64(confFirmware, log, LMNumber, module.equipmentId, frame, 0, ptr, ptr);   //CRC-64
 	if (stringCrc64 == "")
 	{
 		return false;
@@ -261,9 +245,9 @@ function generate_aim(confFirmware, module, LMNumber, frame, log, signalSet, opt
     let configFramesQuantity = 5;
     let dataFramesQuantity = 0;
  
-    let txId = module.propertyValue("ModuleFamily") + module.propertyValue("ModuleVersion");
+    let txId = module.moduleFamily + module.moduleVersion;
     
-    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
+    if (generate_txRxIoConfig(confFirmware, module.equipmentId, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
 	{
 		return false;
 	}

@@ -49,9 +49,9 @@ protected:
 	}
 
 public:
-	static void PrintRefCounter(const char* className)
+	static void PrintRefCounter()
 	{
-		qDebug() << QString(className) << "\t" << "InstanceCounter: " << InstanceCounter << "\t\t" << "MaxInstanceCounter: " << MaxInstanceCounter;
+		qDebug() << typeid(ClassType).name() << "\t" << "InstanceCounter: " << InstanceCounter << "\t\t" << "MaxInstanceCounter: " << MaxInstanceCounter;
 	}
 
 private:

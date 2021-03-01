@@ -46,6 +46,7 @@ unix {
 SOURCES += \
     ../lib/Address16.cpp \
     ../lib/MemLeaksDetection.cpp \
+    ../lib/ScriptDeviceObject.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
@@ -120,6 +121,7 @@ SOURCES += \
 HEADERS  += \
     ../lib/Address16.h \
 	../lib/MemLeaksDetection.h \
+    ../lib/ScriptDeviceObject.h \
     MainWindow.h \
     Calibrator.h \
     CalibratorBase.h \

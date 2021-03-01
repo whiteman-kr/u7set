@@ -40,6 +40,7 @@ SOURCES += \
     ../lib/Address16.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/MemLeaksDetection.cpp \
+    ../lib/ScriptDeviceObject.cpp \
     ArchivingService.cpp \
     ../lib/Queue.cpp \
     ../lib/Service.cpp \
@@ -83,6 +84,7 @@ HEADERS += \
     ../lib/Address16.h \
     ../lib/HostAddressPort.h \
     ../lib/MemLeaksDetection.h \
+    ../lib/ScriptDeviceObject.h \
     ArchivingService.h \
     Stable.h \
     ../lib/Queue.h \

@@ -3,34 +3,16 @@
 //
 function generate_aifm(confFirmware, module, LMNumber, frame, log, signalSet, opticModuleStorage)
 {
-	if (module.propertyValue("EquipmentID") == undefined)
-	{
-		log.errCFG3000("EquipmentID", "Module_AIFM");
-		return false;
-	}
-	
-	let equipmentID = module.propertyValue("EquipmentID");
-	
-	let checkProperties = ["Place", "ModuleVersion"];
-	for (let cp = 0; cp < checkProperties.length; cp++)
-	{
-		if (module.propertyValue(checkProperties[cp]) == undefined)
-		{
-			log.errCFG3000(checkProperties[cp], module.propertyValue("EquipmentID"));
-			return false;
-		}
-	}
-
-	
     let ptr = 0;
-    
  
-    let inController = module.jsFindChildObjectByMask(module.propertyValue("EquipmentID") + "_CTRLIN");
-    if (inController == null)
+    let inControllerObject = module.childByEquipmentId(module.equipmentId + "_CTRLIN");
+    if (inControllerObject == null || inControllerObject.isController() == false)
     {
-		log.errCFG3004(module.propertyValue("EquipmentID") + "_CTRLIN", module.propertyValue("EquipmentID"));
+		log.errCFG3004(module.equipmentId + "_CTRLIN",module.equipmentId);
 		return false;
     }
+
+    let inController =  inControllerObject.toController();
 	
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
     //
@@ -45,26 +27,32 @@ function generate_aifm(confFirmware, module, LMNumber, frame, log, signalSet, op
 	{
 		for (let i = 0; i < aifmChannelCount; i++)
 		{
-			let signalID = inController.propertyValue("EquipmentID") + "_IN0" + (i + 1) + koeffs[k];
-			let signal = inController.jsFindChildObjectByMask(signalID);
+			let signalID = inController.equipmentId + "_IN0" + (i + 1) + koeffs[k];
+			let signal = inController.childByEquipmentId(signalID).toAppSignal();
 			let value = 1;
 			if (signal == null)
 			{
-				log.wrnCFG3005(signalID, inController.propertyValue("EquipmentID"));
+				log.wrnCFG3005(signalID, inController.equipmentId);
 			}
 			else
 			{
-				if (signal.propertyExists("PowerCoefficient") == true)
+				value = signal.propertyValue("PowerCoefficient");
+				if (value == null)
 				{
-					value = signal.propertyValue("PowerCoefficient");
-				}
-				else
-				{
-					log.errCFG3000("PowerCoefficient", signal.propertyValue("EquipmentID"));
+					log.errCFG3000("PowerCoefficient", signal.equipmentId);
 					return false;
 				}
 			}
+
+			confFirmware.writeLog("    IN" + i + koeffs[k] + " : [" + frame + ":" + ptr + "] PowerCoefficient = " + value + "\r\n");
 			
+			if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, signalID, value) == false)         // K2
+			{
+				return false;
+			}
+            ptr += 4;
+			
+			/*
 			let v = 0;
 			let mantissa = 0;
 			let exponent = 0;
@@ -77,17 +65,18 @@ function generate_aifm(confFirmware, module, LMNumber, frame, log, signalSet, op
 				
 			confFirmware.writeLog("    IN" + i + koeffs[k] + " : [" + frame + ":" + ptr + "] PowerCoefficient = " + value + " [" + mantissa + "^" + exponent + "]\r\n");
 	
-			if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_mantissa", mantissa) == false)
+			if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, signalID + "_mantissa", mantissa) == false)
 			{
 				return false;
 			}
 			
 			ptr += 2;
-			if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_exponent", exponent) == false)
+			if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, signalID + "_exponent", exponent) == false)
 			{
 				return false;
 			}
 			ptr += 2;
+			*/
 		}
 	}
 	
@@ -105,28 +94,34 @@ function generate_aifm(confFirmware, module, LMNumber, frame, log, signalSet, op
 			{
 				for (let p = 0; p < setPointCount; p++)
 				{
-					let signalID = inController.propertyValue("EquipmentID") + "_IN0" + (i + 1) + koeffs[k] + modeNames[m];
-					let signal = inController.jsFindChildObjectByMask(signalID);
+					let signalID = inController.equipmentId + "_IN0" + (i + 1) + koeffs[k] + modeNames[m];
+					let signal = inController.childByEquipmentId(signalID).toAppSignal();
 					let value = 1;
 					if (signal == null)
 					{
-						log.wrnCFG3005(signalID, inController.propertyValue("EquipmentID"));
+						log.wrnCFG3005(signalID, inController.equipmentId);
 					}
 					else
 					{
 						let setPointName = "SetPoint0" + (p + 1);
 						
-						if (signal.propertyExists(setPointName) == true)
+						value = signal.propertyValue(setPointName);
+						if (value == null)
 						{
-							value = signal.propertyValue(setPointName);
-						}
-						else
-						{
-							log.errCFG3000(setPointName, signal.propertyValue("EquipmentID"));
+							log.errCFG3000(setPointName, signal.equipmentId);
 							return false;
 						}
 					}
 					
+					confFirmware.writeLog("    IN" + (i + 1) + koeffs[k] + modeNames[m] + " : [" + frame + ":" + ptr + "] PowerCoefficient = " + value + "\r\n");
+			
+					if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, signalID, value) == false)         // K2
+					{
+						return false;
+					}
+					ptr += 4;
+					
+					/*
 					let v = 0;
 					let mantissa =  0;
 					let exponent = 0;
@@ -139,17 +134,17 @@ function generate_aifm(confFirmware, module, LMNumber, frame, log, signalSet, op
 						
 					confFirmware.writeLog("    IN" + (i + 1) + koeffs[k] + modeNames[m] + " : [" + frame + ":" + ptr + "] PowerCoefficient = " + value + " [" + mantissa + "^" + exponent + "]\r\n");
 			
-					if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_mantissa", mantissa) == false)
+					if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, signalID + "_mantissa", mantissa) == false)
 					{
 						return false;
 					}
 
 					ptr += 2;
-					if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, signalID + "_exponent", exponent) == false)
+					if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, signalID + "_exponent", exponent) == false)
 					{
 						return false;
 					}
-					ptr += 2;
+					ptr += 2;*/
 				}
 			}
 			ptr += 2; //reserved
@@ -160,7 +155,7 @@ function generate_aifm(confFirmware, module, LMNumber, frame, log, signalSet, op
 	ptr = 632;
 	
     // final crc
-    let stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
+    let stringCrc64 = storeCrc64(confFirmware, log, LMNumber, module.equipmentId, frame, 0, ptr, ptr);   //CRC-64
 	if (stringCrc64 == "")
 	{
 		return false;
@@ -185,9 +180,9 @@ function generate_aifm(confFirmware, module, LMNumber, frame, log, signalSet, op
     let configFramesQuantity = 5;
     let dataFramesQuantity = 1;
 
-    let txId = module.propertyValue("ModuleFamily") + module.propertyValue("ModuleVersion");
+    let txId = module.moduleFamily + module.moduleVersion;
     
-    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
+    if (generate_txRxIoConfig(confFirmware, module.equipmentId, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
 	{
 		return false;
 	}

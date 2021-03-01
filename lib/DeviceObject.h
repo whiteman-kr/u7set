@@ -16,11 +16,13 @@ class DbController;
 
 namespace Hardware
 {
-	extern const std::array<QString, 9> DeviceObjectExtensions;
-	extern const std::array<QString, 9> DeviceTypeNames;
+	extern const std::array<QString, 10> DeviceObjectExtensions;
+	extern const std::array<QString, 10> DeviceTypeNames;
+
 
 	void init();
 	void shutdown();
+
 
 	class DeviceObject;
 	class DeviceRoot;
@@ -31,7 +33,9 @@ namespace Hardware
 	class DeviceController;
 	class Workstation;
 	class Software;
-	class DeviceSignal;
+	class DeviceAppSignal;
+	class DeviceDiagSignal;
+
 
 	// Device type, for defining hierrarche, don't save these data to file, can be changed (new level) later
 	// If you add or change order in this enum, DO NOT FORGET TO CHANGE !!!!DeviceObjectExtensions!!!!
@@ -49,7 +53,8 @@ namespace Hardware
 
 		Controller,
 
-		Signal,
+		AppSignal,
+		DiagSignal,
 
 		DeviceTypeCount
 	};
@@ -102,10 +107,6 @@ namespace Hardware
 		static const QString categoryAppSignal;
 	};
 
-	// Forward declarations
-	//
-	class DeviceSignal;
-
 	//
 	//
 	// DeviceObject
@@ -114,18 +115,24 @@ namespace Hardware
 	class DeviceObject :
 		public PropertyObject,
 		public Proto::ObjectSerialization<DeviceObject>,
-		public DebugInstCounter<DeviceObject>
+		public DebugInstCounter<DeviceObject>,
+		public std::enable_shared_from_this<DeviceObject>
 	{
 		Q_OBJECT
 
 	protected:
-		explicit DeviceObject(bool preset = false) noexcept;
+		DeviceObject() = delete;
+		explicit DeviceObject(DeviceType deviceType, bool preset = false) noexcept;
 
 	public:
 		virtual ~DeviceObject();
 
+		std::shared_ptr<const DeviceObject> sharedPtr() const;
+		std::shared_ptr<DeviceObject> sharedPtr();
+
 		// Serialization
 		//
+	public:
 		friend Proto::ObjectSerialization<DeviceObject>;	// for call CreateObject from Proto::ObjectSerialization
 
 		static std::shared_ptr<DeviceObject> fromDbFile(const DbFile& file);
@@ -156,7 +163,8 @@ namespace Hardware
 		virtual void expandEquipmentId();
 
 		// Get all signals, including signals from child items
-		std::vector<std::shared_ptr<DeviceSignal>> getAllSignals() const;
+		//
+		std::vector<std::shared_ptr<DeviceAppSignal>> getAllSignals() const;
 
 		virtual bool event(QEvent* e) override;
 
@@ -166,57 +174,71 @@ namespace Hardware
 
 		// Get all signals, including signals from child items
 		//
-		void getAllSignalsRecursive(std::vector<std::shared_ptr<DeviceSignal>>* deviceSignals) const;
+		void getAllSignalsRecursive(std::vector<std::shared_ptr<DeviceAppSignal>>* deviceSignals) const;
 
 		// Properties, etc
 		//
 	public:
-		DeviceObject* parent() noexcept;
-		const DeviceObject* parent() const noexcept;
-		Q_INVOKABLE QObject* jsParent() const;
+		bool hasParent() const noexcept;
 
-		Q_INVOKABLE int jsPropertyInt(QString name) const;
-		Q_INVOKABLE bool jsPropertyBool(QString name) const;
-		Q_INVOKABLE QString jsPropertyString(QString name) const;
-		Q_INVOKABLE quint32 jsPropertyIP(QString name) const;
+		std::shared_ptr<DeviceObject> parent() noexcept;
+		const std::shared_ptr<DeviceObject> parent() const noexcept;
 
-		virtual DeviceType deviceType() const;
-		Q_INVOKABLE int jsDeviceType() const;
+		DeviceType deviceType() const noexcept;
 
-		Q_INVOKABLE bool isRoot() const;
-		Q_INVOKABLE bool isSystem() const;
-		Q_INVOKABLE bool isRack() const;
-		Q_INVOKABLE bool isChassis() const;
-		Q_INVOKABLE bool isModule() const;
-		Q_INVOKABLE bool isController() const;
-		Q_INVOKABLE bool isWorkstation() const;
-		Q_INVOKABLE bool isSoftware() const;
-		Q_INVOKABLE bool isSignal() const;
+		bool isRoot() const noexcept;
+		bool isSystem() const noexcept;
+		bool isRack() const noexcept;
+		bool isChassis() const noexcept;
+		bool isModule() const noexcept;
+		bool isController() const noexcept;
+		bool isWorkstation() const noexcept;
+		bool isSoftware() const noexcept;
+		bool isAppSignal() const noexcept;
 
-		const Hardware::DeviceRoot* toRoot() const;
-		Hardware::DeviceRoot* toRoot();
+		std::shared_ptr<const Hardware::DeviceRoot> toRoot() const noexcept;
+		std::shared_ptr<Hardware::DeviceRoot> toRoot() noexcept;
 
-		const Hardware::DeviceSystem* toSystem() const;
-		Hardware::DeviceSystem* toSystem();
+		std::shared_ptr<const Hardware::DeviceSystem> toSystem() const noexcept;
+		std::shared_ptr<Hardware::DeviceSystem> toSystem() noexcept;
 
-		const Hardware::DeviceRack* toRack() const;
-		Hardware::DeviceRack* toRack();
+		std::shared_ptr<const Hardware::DeviceRack> toRack() const noexcept;
+		std::shared_ptr<Hardware::DeviceRack> toRack() noexcept;
 
-		const Hardware::DeviceChassis* toChassis() const;
-		Hardware::DeviceChassis* toChassis();
+		std::shared_ptr<const Hardware::DeviceChassis> toChassis() const noexcept;
+		std::shared_ptr<Hardware::DeviceChassis> toChassis() noexcept;
 
-		const Hardware::DeviceModule* toModule() const;
-		Hardware::DeviceModule* toModule();
+		std::shared_ptr<const Hardware::DeviceModule> toModule() const noexcept;
+		std::shared_ptr<Hardware::DeviceModule> toModule() noexcept;
 
-		const Hardware::DeviceController* toController() const;
-		Hardware::DeviceController* toController();
+		std::shared_ptr<const Hardware::DeviceController> toController() const noexcept;
+		std::shared_ptr<Hardware::DeviceController> toController() noexcept;
 
-		const Hardware::DeviceSignal* toSignal() const;
-		Hardware::DeviceSignal* toSignal();
+		std::shared_ptr<const Hardware::DeviceAppSignal> toAppSignal() const noexcept;
+		std::shared_ptr<Hardware::DeviceAppSignal> toAppSignal() noexcept;
 
-		const Hardware::Software* toSoftware() const;
-		Hardware::Software* toSoftware();
+		std::shared_ptr<const Hardware::Workstation> toWorkstation() const noexcept;
+		std::shared_ptr<Hardware::Workstation> toWorkstation() noexcept;
 
+		std::shared_ptr<const Hardware::Software> toSoftware() const noexcept;
+		std::shared_ptr<Hardware::Software> toSoftware() noexcept;
+
+	private:
+		template <typename DT>
+		std::shared_ptr<const DT> toType() const noexcept
+		{
+			std::shared_ptr<const DT> result = std::dynamic_pointer_cast<const DT>(shared_from_this());
+			return result;
+		}
+
+		template <typename DT>
+		std::shared_ptr<DT> toType() noexcept
+		{
+			std::shared_ptr<DT> result = std::dynamic_pointer_cast<DT>(shared_from_this());
+			return result;
+		}
+
+	public:
 		const Hardware::DeviceController* getParentController() const;
 		const Hardware::DeviceModule* getParentModule() const;
 		const Hardware::DeviceChassis* getParentChassis() const;
@@ -224,6 +246,7 @@ namespace Hardware
 		const Hardware::DeviceSystem* getParentSystem() const;
 		const Hardware::DeviceRoot* getParentRoot() const;
 
+	public:
 		QString fileExtension() const;
 		static QString fileExtension(DeviceType device);
 
@@ -231,36 +254,31 @@ namespace Hardware
 
 		// Children care
 		//
-		Q_INVOKABLE int childrenCount() const;
+		int childrenCount() const;
+		int childIndex(const std::shared_ptr<const DeviceObject>& child) const;
 
-		DeviceObject* child(int index) const;
-		DeviceObject* child(QUuid uuid) const;
-		Q_INVOKABLE QObject* jsChild(int index) const;
+		const std::shared_ptr<DeviceObject>& child(int index) const;
+		std::shared_ptr<DeviceObject> child(const QUuid& uuid) const;
+		std::shared_ptr<DeviceObject> childByPresetUuid(const QUuid& presetObjectUuid) const;
+		std::shared_ptr<DeviceObject> childByEquipmentId(const QString& id);
 
-		int childIndex(DeviceObject* child) const;
-
-		std::shared_ptr<DeviceObject> childSharedPtr(int index);
-		std::shared_ptr<DeviceObject> childSharedPtr(QUuid uuid);
-		std::shared_ptr<DeviceObject> childSharedPtrByPresetUuid(QUuid presetObjectUuid);
-
-		bool canAddChild(const DeviceObject* child) const;
 		bool canAddChild(const DeviceType childType) const;
 
 		void addChild(std::shared_ptr<DeviceObject> child);
-		void deleteChild(DeviceObject* child);
+		void deleteChild(std::shared_ptr<DeviceObject> child);
 		void deleteAllChildren();
 
-        bool checkChild(DeviceObject *child, QString* errorMessage);
+		bool checkChild(std::shared_ptr<DeviceObject> child, QString* errorMessage);
 
 		void sortByPlace(Qt::SortOrder order);
 		void sortByEquipmentId(Qt::SortOrder order);
 		void sortByCaption(Qt::SortOrder order);
+		void sortByType(Qt::SortOrder order);
 		void sortByState(Qt::SortOrder order);
 		void sortByUser(Qt::SortOrder order, const std::map<int, QString>& users);
 
-		std::vector<DeviceObject*> findChildObjectsByMask(const QString& mask);
-		void findChildObjectsByMask(const QString& mask, std::vector<DeviceObject*>& list);
-		Q_INVOKABLE QObject* jsFindChildObjectByMask(const QString& mask);
+//		std::vector<std::shared_ptr<DeviceObject>> findChildObjectsByMask(const QString& mask);
+//		void findChildObjectsByMask(const QString& mask, std::vector<std::shared_ptr<DeviceObject>>& result);
 
 		static QString replaceEngeneeringToEngineering(const QString& data);
 
@@ -291,7 +309,6 @@ namespace Hardware
 		void setSpecificProperties(QString value);
 
 		int place() const;
-		Q_INVOKABLE int jsPlace() const;
 		void setPlace(int value);
 
 		QString details() const;		// JSON short description, uuid, equipmentId, caption, place, etc
@@ -312,7 +329,9 @@ namespace Hardware
 		// Data
 		//
 	protected:
-		DeviceObject* m_parent = nullptr;
+		const DeviceType m_deviceType = DeviceType::Root;
+
+		std::weak_ptr<DeviceObject> m_parent;
 		std::vector<std::shared_ptr<DeviceObject>> m_children;
 
 		QUuid m_uuid;
@@ -349,12 +368,6 @@ namespace Hardware
 	public:
 		explicit DeviceRoot(bool preset = false);
 		virtual ~DeviceRoot();
-
-	public:
-		virtual DeviceType deviceType() const override;
-
-	private:
-		static const DeviceType m_deviceType = DeviceType::Root;
 	};
 
 
@@ -376,12 +389,6 @@ namespace Hardware
 	protected:
 		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
-
-	public:
-		virtual DeviceType deviceType() const override;
-
-	private:
-		static const DeviceType m_deviceType = DeviceType::System;
 	};
 
 
@@ -403,12 +410,6 @@ namespace Hardware
 	protected:
 		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
-
-	public:
-		virtual DeviceType deviceType() const override;
-
-	private:
-		static const DeviceType m_deviceType = DeviceType::Rack;
 	};
 
 
@@ -432,9 +433,7 @@ namespace Hardware
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
-		virtual DeviceType deviceType() const override;
-
-		std::shared_ptr<DeviceModule> getLogicModuleSharedPointer();
+		std::shared_ptr<DeviceModule> findLogicModule();
 
 		// Properties
 		//
@@ -445,8 +444,6 @@ namespace Hardware
 		// Data
 		//
 	private:
-		static const DeviceType m_deviceType = DeviceType::Chassis;
-
 		int m_type = 0;
 	};
 
@@ -492,9 +489,6 @@ namespace Hardware
 		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
-	public:
-		virtual DeviceType deviceType() const override;
-
 		// Public Methods
 		//
 	public:
@@ -502,15 +496,13 @@ namespace Hardware
 		// Properties
 		//
 	public:
-		Q_INVOKABLE int jsModuleFamily() const;
-
 		FamilyType moduleFamily() const;
 		void setModuleFamily(FamilyType value);
 
 		int customModuleFamily() const;
 		void setCustomModuleFamily(int value);
 
-		Q_INVOKABLE int moduleVersion() const;
+		int moduleVersion() const;
 		void setModuleVersion(int value);
 
 		QString configurationScript() const;
@@ -533,8 +525,6 @@ namespace Hardware
 		// Data
 		//
 	private:
-		static const DeviceType m_deviceType = DeviceType::Module;
-
 		uint16_t m_type = 0;	// high byte is family type, low byte is module version
 
 		uint16_t m_customModuleFamily = 0;
@@ -561,27 +551,21 @@ namespace Hardware
 	protected:
 		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
-
-	public:
-		virtual DeviceType deviceType() const override;
-
-	private:
-		static const DeviceType m_deviceType = DeviceType::Controller;
 	};
 
 
 	//
 	//
-	// DeviceDiagSignal
+	// DeviceAppSignal
 	//
 	//
-	class DeviceSignal : public DeviceObject
+	class DeviceAppSignal : public DeviceObject
 	{
 		Q_OBJECT
 
 	public:
-		explicit DeviceSignal(bool preset = false) noexcept;
-		virtual ~DeviceSignal();
+		explicit DeviceAppSignal(bool preset = false) noexcept;
+		virtual ~DeviceAppSignal();
 
 	protected:
 		virtual void propertyDemand(const QString& prop) override;
@@ -597,20 +581,13 @@ namespace Hardware
 	public:
 		virtual void expandEquipmentId() override;
 
-	public:
-		virtual DeviceType deviceType() const override;
-
-		Q_INVOKABLE quint32 valueToMantExp1616(double value);
-
 		// Properties
 		//
 	public:
-		E::SignalType type() const;
-		Q_INVOKABLE int jsType() const;
-		void setType(E::SignalType value);
+		E::SignalType signalType() const;
+		void setSignalType(E::SignalType value);
 
 		E::SignalFunction function() const;
-		Q_INVOKABLE int jsFunction() const;
 		void setFunction(E::SignalFunction value);
 
 		E::ByteOrder byteOrder() const;
@@ -666,9 +643,7 @@ namespace Hardware
 		// Data
 		//
 	private:
-		static const DeviceType m_deviceType = DeviceType::Signal;
-
-		E::SignalType m_type = E::SignalType::Discrete;
+		E::SignalType m_signalType = E::SignalType::Discrete;
 		E::SignalFunction m_function = E::SignalFunction::Input;
 
 		E::ByteOrder m_byteOrder = E::ByteOrder::LittleEndian;
@@ -716,9 +691,6 @@ namespace Hardware
 		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
-	public:
-		virtual DeviceType deviceType() const override;
-
 		// Public Methods
 		//
 	public:
@@ -732,8 +704,6 @@ namespace Hardware
 		// Data
 		//
 	private:
-		static const DeviceType m_deviceType = DeviceType::Workstation;
-
 		int m_type = 0;
 	};
 
@@ -757,9 +727,6 @@ namespace Hardware
 		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
-	public:
-		virtual DeviceType deviceType() const override;
-
 		// Public Methods
 		//
 	public:
@@ -767,15 +734,13 @@ namespace Hardware
 		// Properties
 		//
 	public:
-		E::SoftwareType type() const;
-		void setType(E::SoftwareType value);
+		E::SoftwareType softwareType() const;
+		void setSoftwareType(E::SoftwareType value);
 
 		// Data
 		//
 	private:
-		static const DeviceType m_deviceType = DeviceType::Software;
-
-		E::SoftwareType m_type = E::SoftwareType::Monitor;
+		E::SoftwareType m_softwareType = E::SoftwareType::Monitor;
 	};
 
 	//
@@ -787,30 +752,91 @@ namespace Hardware
 	{
 	public:
 		EquipmentSet() = default;
-		EquipmentSet(std::shared_ptr<DeviceObject> root);
+		EquipmentSet(std::shared_ptr<DeviceRoot> root);
 		~EquipmentSet();
 
 	public:
-		void set(std::shared_ptr<DeviceObject> root);
+		void set(std::shared_ptr<DeviceRoot> root);
 
-		DeviceObject* deviceObject(const QString& equipmentId);
-		const DeviceObject* deviceObject(const QString& equipmentId) const;
+		std::shared_ptr<DeviceObject> deviceObject(const QString& equipmentId);
+		const std::shared_ptr<DeviceObject> deviceObject(const QString& equipmentId) const;
 
 		std::shared_ptr<DeviceObject> deviceObjectSharedPointer(const QString& equipmentId);
 
-		DeviceRoot* root();
-		const DeviceRoot* root() const;
+		std::shared_ptr<DeviceRoot> root();
+		const std::shared_ptr<DeviceRoot> root() const;
 
 	private:
 		void addDeviceChildrenToHashTable(std::shared_ptr<DeviceObject> parent);
 
 	private:
-		std::shared_ptr<DeviceObject> m_root;
+		std::shared_ptr<DeviceRoot> m_root;
 		QHash<QString, std::shared_ptr<DeviceObject>> m_deviceTable;
 	};
 
+//	//
+//	// Scripting wrappers
+//	//
+//	class ScriptDeviceObject : public QObject
+//	{
+//		Q_OBJECT
 
-	extern Factory<Hardware::DeviceObject> DeviceObjectFactory;
+//		//Q_PROPERTY(QString equipmentID READ equipmentId)
+
+//	public:
+//		ScriptDeviceObject() = delete;
+//		ScriptDeviceObject(const ScriptDeviceObject& src);
+//		explicit ScriptDeviceObject(std::shared_ptr<DeviceObject> deviceObject);
+
+//		ScriptDeviceObject& operator=(const ScriptDeviceObject& src);
+
+//	public slots:
+//		QJSValue parent() const;
+
+//		int propertyInt(QString name) const;
+//		bool propertyBool(QString name) const;
+//		QString propertyString(QString name) const;
+//		quint32 propertyIP(QString name) const;
+
+//		int deviceType() const;
+
+//		bool isRoot() const;
+//		bool isSystem() const;
+//		bool isRack() const;
+//		bool isChassis() const;
+//		bool isModule() const;
+//		bool isController() const;
+//		bool isWorkstation() const;
+//		bool isSoftware() const;
+//		bool isAppSignal() const;
+
+//		int childrenCount() const;
+
+//		QJSValue child(int index) const;
+//		QJSValue childByMask(QString mask);
+
+//		int place() const;
+
+//		// Module specific
+//		//
+//		int moduleFamily() const;
+//		int moduleVersion() const;
+
+//		// AppSignal specific
+//		//
+//		quint32 valueToMantExp1616(double value);
+//		//int jsType() const;
+//		//int jsFunction() const;
+
+//	private:
+//		std::shared_ptr<DeviceObject> m_deviceObject;
+//	};
+
+
+	//
+	// Factory
+	//
+	extern Factory<DeviceObject> DeviceObjectFactory;
 
 	namespace Obsolete
 	{
@@ -825,6 +851,8 @@ namespace Hardware
 		};
 	}
 
+	// Walk through equipment tree
+	//
 	// Walk through equipment tree
 	//
 	void equipmentWalker(Hardware::DeviceObject* currentDevice, std::function<void(Hardware::DeviceObject* device)> processBeforeChildren, std::function<void(Hardware::DeviceObject* device)> processAfterChildren);

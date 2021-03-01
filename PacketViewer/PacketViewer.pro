@@ -30,6 +30,7 @@ unix {
 SOURCES += main.cpp\
     ../lib/Address16.cpp \
     ../lib/LanControllerInfoHelper.cpp \
+    ../lib/ScriptDeviceObject.cpp \
         SourceListWidget.cpp \
     PacketSourceModel.cpp \
     SourceStatusWidget.cpp \
@@ -61,6 +62,7 @@ HEADERS  += SourceListWidget.h \
     ../lib/Address16.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
+    ../lib/ScriptDeviceObject.h \
     PacketSourceModel.h \
     SourceStatusWidget.h \
     ../lib/DataSource.h \

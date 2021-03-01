@@ -178,8 +178,8 @@ public slots:
 
     void slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
 
-	void slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, std::vector<Signal>* addedSignals);
-    void slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals);
+	void slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<Signal>* addedSignals);
+    void slot_autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals);
 
 	bool isSignalWithEquipmentIDExists(const QString& equipmentID);
 

@@ -16,6 +16,11 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 {
 	assert(dbcontroller != nullptr);
 
+	// For saving to QSettings
+	//
+	qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
+	qRegisterMetaTypeStreamOperators<QMap<QString,int>>("QMap<QString,int>");
+
 	//
 	// Controls
 	//
@@ -112,13 +117,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_splitter = new QSplitter(this);
 
 	m_propertyEditor = new IdePropertyEditor(m_splitter, dbcontroller);
-    m_propertyEditor->setSplitterPosition(theSettings.m_equipmentTabPagePropertiesSplitterState);
-
 	m_propertyTable = new IdePropertyTable(this, dbcontroller);
-	m_propertyTable->setPropertyFilter(theSettings.m_equipmentTabPagePropertiesMask);
-	m_propertyTable->setColumnsWidth(theSettings.m_equipmentTabPagePropertiesColumnsWidth);
-	m_propertyTable->setGroupByCategory(theSettings.m_equipmentTabPagePropertiesGroupByCategory);
-
 
 	QTabWidget* tabWidget = new QTabWidget();
 	tabWidget->addTab(m_propertyEditor, "Tree view");
@@ -131,8 +130,6 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	m_splitter->setStretchFactor(0, 2);
 	m_splitter->setStretchFactor(1, 1);
-
-	m_splitter->restoreState(theSettings.m_equipmentTabPageSplitterState);
 
 	// ToolBar
 	//
@@ -174,6 +171,20 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	setLayout(pMainLayout);
 
+	// Restore state
+	//
+	{
+		QSettings s;
+
+		m_equipmentView->header()->restoreState(s.value("EquipmentTabPage/m_equipmentView/header").toByteArray());
+		m_splitter->restoreState(s.value("EquipmentTabPage/m_splitter").toByteArray());
+
+		m_propertyEditor->setSplitterPosition(s.value("EquipmentTabPage/m_propertyEditor/splitterPosition", 150).toInt());
+		m_propertyTable->setPropertyFilter(s.value("EquipmentTabPage/m_propertyTable/propertyFilter").toString());
+		m_propertyTable->setColumnsWidth(s.value("EquipmentTabPage/m_propertyTable/getColumnsWidth").value<QMap<QString,int>>());
+		m_propertyTable->setGroupByCategory(s.value("EquipmentTabPage/m_propertyTable/groupByCategory").toBool());
+	}
+
 	// --
 	//
 	connect(QApplication::clipboard(), &QClipboard::dataChanged, this, &EquipmentTabPage::clipboardChanged);
@@ -200,12 +211,15 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 EquipmentTabPage::~EquipmentTabPage()
 {
-	theSettings.m_equipmentTabPageSplitterState = m_splitter->saveState();
-    theSettings.m_equipmentTabPagePropertiesSplitterState = m_propertyEditor->splitterPosition();
-	theSettings.m_equipmentTabPagePropertiesMask = m_propertyTable->propertyFilter();
-	theSettings.m_equipmentTabPagePropertiesColumnsWidth = m_propertyTable->getColumnsWidth();
-	theSettings.m_equipmentTabPagePropertiesGroupByCategory = m_propertyTable->groupByCategory();
-	theSettings.writeUserScope();
+	QSettings s;
+	s.setValue("EquipmentTabPage/m_equipmentView/header", m_equipmentView->header()->saveState());
+	s.setValue("EquipmentTabPage/m_splitter", m_splitter->saveState());
+	s.setValue("EquipmentTabPage/m_propertyEditor/splitterPosition", m_propertyEditor->splitterPosition());
+	s.setValue("EquipmentTabPage/m_propertyTable/propertyFilter", m_propertyTable->propertyFilter());
+	s.setValue("EquipmentTabPage/m_propertyTable/getColumnsWidth", QVariant::fromValue(m_propertyTable->getColumnsWidth()));
+	s.setValue("EquipmentTabPage/m_propertyTable/groupByCategory", m_propertyTable->groupByCategory());
+
+	return;
 }
 
 void EquipmentTabPage::CreateActions()
@@ -645,25 +659,25 @@ void EquipmentTabPage::setActionState()
 	if (isConfigurationMode() == true &&
 		selectedIndexList.size() == 1)
 	{
-		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(selectedIndexList.front());
+		auto device = m_equipmentModel->deviceObject(selectedIndexList.front());
 		assert(device);
 
-		const Hardware::DeviceModule* module = dynamic_cast<const Hardware::DeviceModule*>(device);
-
-		if (module != nullptr)
+		if (device->isModule() == true)
 		{
+			auto module = device->toModule();
+			assert(module);
+
 			// Allow to add signals for any module
 			// it comes from MUM, it is not IO module, it is control
 			//
 			m_inOutsToSignals->setEnabled(true);
 			m_inOutsToSignals->setVisible(true);
-		}
 
-		if (module != nullptr &&
-			module->isLogicModule())
-		{
-			m_addAppSignal->setEnabled(true);
-			m_addAppSignal->setVisible(true);
+			if (module->isLogicModule() == true)
+			{
+				m_addAppSignal->setEnabled(true);
+				m_addAppSignal->setVisible(true);
+			}
 		}
 
 		if (device->presetRoot() == true)
@@ -683,7 +697,7 @@ void EquipmentTabPage::setActionState()
 
 		for (const QModelIndex& mi : selectedIndexList)
 		{
-			const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
+			auto device = m_equipmentModel->deviceObject(mi);
 			assert(device);
 
 			if (device->isModule() == true &&
@@ -722,16 +736,17 @@ void EquipmentTabPage::setActionState()
 	if (isConfigurationMode() == true &&
 		selectedIndexList.size() == 1)
 	{
-		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(selectedIndexList.front());
+		auto device = m_equipmentModel->deviceObject(selectedIndexList.front());
 		assert(device);
 
-		const Hardware::DeviceModule* module = dynamic_cast<const Hardware::DeviceModule*>(device);
-
-		if (module != nullptr &&
-			module->isLogicModule() == true)
+		if (device->isModule() == true)
 		{
-			m_showLmsLogicSchemas->setEnabled(true);
-			m_showLmsLogicSchemas->setVisible(true);
+			if (auto module = device->toModule();
+				module->isLogicModule() == true)
+			{
+				m_showLmsLogicSchemas->setEnabled(true);
+				m_showLmsLogicSchemas->setVisible(true);
+			}
 		}
 	}
 
@@ -740,29 +755,32 @@ void EquipmentTabPage::setActionState()
 	if (isConfigurationMode() == true &&
 		selectedIndexList.size() == 1)
 	{
-		const Hardware::DeviceController* controller1 = dynamic_cast<const Hardware::DeviceController*>(m_equipmentModel->deviceObject(selectedIndexList.front()));
+		auto controller1 = m_equipmentModel->deviceObject(selectedIndexList.front())->toController();
 
 		if (controller1 != nullptr)
 		{
 			// If parent is LM or OCM
 			//
-			const Hardware::DeviceModule* parent1 = dynamic_cast<const Hardware::DeviceModule*>(controller1->parent());
-
-			if (parent1 != nullptr &&
-				(parent1->isLogicModule() == true || parent1->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM))
+			if (controller1->parent()->isModule() == true)
 			{
-				// If id ends with _OPTOPORTXX
-				//
-				QString id1 = controller1->equipmentIdTemplate();
-				if (id1.size() > 10)
-				{
-					id1.replace(id1.size() - 2, 2, QLatin1String("##"));
-				}
+				auto parent1 = controller1->parent()->toModule();
+				assert(parent1);
 
-				if (id1.endsWith("_OPTOPORT##") == true)
+				if (parent1->isLogicModule() == true || parent1->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM)
 				{
-					m_addOptoConnection->setEnabled(true);
-					m_addOptoConnection->setVisible(true);
+					// If id ends with _OPTOPORTXX
+					//
+					QString id1 = controller1->equipmentIdTemplate();
+					if (id1.size() > 10)
+					{
+						id1.replace(id1.size() - 2, 2, QLatin1String("##"));
+					}
+
+					if (id1.endsWith("_OPTOPORT##") == true)
+					{
+						m_addOptoConnection->setEnabled(true);
+						m_addOptoConnection->setVisible(true);
+					}
 				}
 			}
 		}
@@ -771,15 +789,15 @@ void EquipmentTabPage::setActionState()
 	if (isConfigurationMode() == true &&
 		selectedIndexList.size() == 2)
 	{
-		const Hardware::DeviceController* controller1 = dynamic_cast<const Hardware::DeviceController*>(m_equipmentModel->deviceObject(selectedIndexList.front()));
-		const Hardware::DeviceController* controller2 = dynamic_cast<const Hardware::DeviceController*>(m_equipmentModel->deviceObject(selectedIndexList.back()));
+		auto controller1 = m_equipmentModel->deviceObject(selectedIndexList.front())->toController();
+		auto controller2 = m_equipmentModel->deviceObject(selectedIndexList.back())->toController();
 
 		if (controller1 != nullptr && controller2 != nullptr)
 		{
 			// If parent is LM or OCM
 			//
-			const Hardware::DeviceModule* parent1 = dynamic_cast<const Hardware::DeviceModule*>(controller1->parent());
-			const Hardware::DeviceModule* parent2 = dynamic_cast<const Hardware::DeviceModule*>(controller2->parent());
+			auto parent1 = controller1->parent()->toModule();
+			auto parent2 = controller2->parent()->toModule();
 
 			if (parent1 != nullptr && parent2 != nullptr &&
 				(parent1->isLogicModule() == true || parent1->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM) &&
@@ -839,7 +857,7 @@ void EquipmentTabPage::setActionState()
 
 		for (auto sli : selectedIndexList)
 		{
-			const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(sli);
+			auto device = m_equipmentModel->deviceObject(sli);
 			assert(device);
 
 			if (device == nullptr ||
@@ -861,7 +879,7 @@ void EquipmentTabPage::setActionState()
 
 	for (const QModelIndex& mi : selectedIndexList)
 	{
-		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
+		auto device = m_equipmentModel->deviceObject(mi);
 		assert(device);
 
 		if (device->fileInfo().state() == VcsState::CheckedOut &&
@@ -907,7 +925,7 @@ void EquipmentTabPage::setActionState()
 		{
 			QModelIndex singleSelectedIndex = selectedIndexList[0];
 
-			Hardware::DeviceObject* selectedObject = m_equipmentModel->deviceObject(singleSelectedIndex);
+			auto selectedObject = m_equipmentModel->deviceObject(singleSelectedIndex);
 			assert(selectedObject != nullptr);
 
 			if (isPresetMode() == true && selectedObject->preset() == false)
@@ -1000,7 +1018,7 @@ void EquipmentTabPage::setActionState()
 				m_addSignalAction->setEnabled(true);
 				break;
 
-			case Hardware::DeviceType::Signal:
+			case Hardware::DeviceType::AppSignal:
 				break;
 
 			default:
@@ -1030,14 +1048,14 @@ void EquipmentTabPage::setActionState()
 
 		bool allowCopyToClipboard = true;	// allow copy if all selected objects are the same type
 
-		const Hardware::DeviceObject* firstSelectedDevice = m_equipmentModel->deviceObject(selectedIndexList.first());
+		auto firstSelectedDevice = m_equipmentModel->deviceObject(selectedIndexList.first());
 		Q_ASSERT(firstSelectedDevice);
 
 		Hardware::DeviceType type = firstSelectedDevice->deviceType();
 
 		for (const QModelIndex& mi : selectedIndexList)
 		{
-			const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
+			auto device = m_equipmentModel->deviceObject(mi);
 			Q_ASSERT(device);
 
 			// System can be very big so forbid it's copying
@@ -1214,7 +1232,7 @@ void EquipmentTabPage::setProperties()
 
 	for (QModelIndex& mi : selectedIndexList)
 	{
-		std::shared_ptr<Hardware::DeviceObject> device = m_equipmentModel->deviceObjectSharedPtr(mi);
+		std::shared_ptr<Hardware::DeviceObject> device = m_equipmentModel->deviceObject(mi);
 		assert(device);
 
 		if (device->fileInfo().state() == VcsState::CheckedOut)
@@ -1542,7 +1560,7 @@ void EquipmentTabPage::exportPreset()
 
 	for (const QModelIndex& mi : selectedIndexList)
 	{
-		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
+		auto device = m_equipmentModel->deviceObject(mi);
 
 		if (device == nullptr ||
 			device->preset() != true ||
@@ -1563,7 +1581,7 @@ void EquipmentTabPage::exportPreset()
 
 		allObjectsArePresetRoots &= device->presetRoot() & device->preset();
 
-		devices.push_back(device);
+		devices.push_back(device.get());
 	}
 
 	// --

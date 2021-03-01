@@ -1,21 +1,21 @@
-// Generate configuration for module RIM
+// Generate configuration for module FIM
 //
 //
-function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opticModuleStorage)
+function generate_fim(confFirmware, module, LMNumber, frame, log, signalSet, opticModuleStorage)
 {
     let ptr = 0;
     
-    let RIMSignalMaxCount = 8;
+    let FIMSignalMaxCount = 8;
 	
-	let tsConstant = 2000 * 0.000001;	// 2000 us = 2 ms
+	let tsConstant = 200 * 0.000001;	// 200 us
     
-    let defaultTf = valToADC(0.1 / tsConstant, 0, 65535, 0, 0xffff);
-    let defaultHighBound = 100;
-    let defaultLowBound = 0;
+    let defaultTf = valToADC(0 / tsConstant, 0, 65535, 0, 0xffff);
+    let defaultHighBound = 5000;
+    let defaultLowBound = 50;
 	let defaultK1 = 1.0;
 	let defaultK2 = 0.0;
-	let defaultR0 = 100;
-	let defaultWordOfFlags = 16;
+	let defaultMaxFrequency = 5000;
+	let defaultWordOfFlags = 0;
     let defaultSpreadTolerance = Math.round((0xffff - 0) * 0.005);		// 2% = 328h
     
     let inControllerObject = module.childByEquipmentId(module.equipmentId + "_CTRLIN");
@@ -30,11 +30,11 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
     //
 
-    for (let i = 0; i < RIMSignalMaxCount; i++)
+    for (let i = 0; i < FIMSignalMaxCount; i++)
     {
         // find a signal with Place = i
         //
-		let signalStrId = inController.equipmentId+ "_IN";
+		let signalStrId = inController.equipmentId + "_IN";
 		
 		let entry = i + 1;
 		if (entry < 10)
@@ -61,7 +61,7 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			"; [" + frame + ":" + (ptr + 8) + "] K2 = " + defaultK2 +
 			"; [" + frame + ":" + (ptr + 12) + "] HighValidRange = " + defaultHighBound +
 			"; [" + frame + ":" + (ptr + 16) + "] LowValidRange = " + defaultLowBound +
-			"; [" + frame + ":" + (ptr + 20) + "] R0 = " + defaultR0 +
+			"; [" + frame + ":" + (ptr + 20) + "] MaxFrequency = " + defaultMaxFrequency +
 			"; [" + frame + ":" + (ptr + 24) + "] WordOfFlags = " + defaultWordOfFlags + "\r\n");
             
             if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "Tf", defaultTf) == false)          // InA Filtering time constant
@@ -101,7 +101,7 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			}
             ptr += 4;
 			
-            if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "R0_Ohm", defaultR0) == false)          // R0
+            if (setData32(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "MaxFrequency", defaultMaxFrequency) == false)          // R0
 			{
 				return false;
 			}
@@ -167,24 +167,10 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			let highValidRange = signalA.highValidRange();
 			let lowValidRange = signalA.lowValidRange();
 
-			let R0A = signalA.propertyValue("R0_Ohm");
-			if (R0A == undefined) 
+			let maxFrequencyA = signalA.propertyValue("MaxFrequency");
+			if (maxFrequencyA == undefined) 
 			{
-				log.errCFG3000("R0_Ohm", signalStrIdA);
-				return false;
-			}
-
-			let RTDConfModeA = signalA.propertyValue("RTDConfMode");
-			if (RTDConfModeA == undefined) 
-			{
-				log.errCFG3000("RTDConfMode", signalStrIdA);
-				return false;
-			}
-
-			let PGAGainA = signalA.propertyValue("PGAGain");
-			if (PGAGainA == undefined) 
-			{
-				log.errCFG3000("PGAGain", signalStrIdA);
+				log.errCFG3000("MaxFrequency", signalStrIdA);
 				return false;
 			}
 
@@ -222,27 +208,12 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			let highValidRangeB = signalB.highValidRange();
 			let lowValidRangeB = signalB.lowValidRange();
 
-			let R0B = signalB.propertyValue("R0_Ohm");
-			if (R0B == undefined) 
+			let maxFrequencyB = signalB.propertyValue("MaxFrequency");
+			if (maxFrequencyA == undefined) 
 			{
-				log.errCFG3000("R0_Ohm", signalStrIdB);
+				log.errCFG3000("MaxFrequency", signalStrIdB);
 				return false;
 			}
-
-			let RTDConfModeB = signalB.propertyValue("RTDConfMode");
-			if (RTDConfModeB == undefined) 
-			{
-				log.errCFG3000("RTDConfMode", signalStrIdB);
-				return false;
-			}
-
-			let PGAGainB = signalB.propertyValue("PGAGain");
-			if (PGAGainB == undefined) 
-			{
-				log.errCFG3000("PGAGain", signalStrIdB);
-				return false;
-			}
-			
 
 			if (electricHighLimit < electricLowLimit)
 			{
@@ -327,25 +298,15 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 				log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, "SpreadTolerance");
 			}
 
-			if (R0A != R0B)
+			if (maxFrequencyA != maxFrequencyB)
 			{
-				log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, "R0_Ohm");
-			}
-
-			if (PGAGainA != PGAGainB)
-			{
-				log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, "PGAGain");
-			}
-
-			if (RTDConfModeA != RTDConfModeB)
-			{
-				log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, "RTDConfMode");
+				log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, "MaxFrequency");
 			}
 
 			// Convert electric to physical
 			
-			let highPhysical = unitsConvertor.electricToPhysical_ThermoResistor(electricHighLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType, R0A);
-			let lowPhysical = unitsConvertor.electricToPhysical_ThermoResistor(electricLowLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType, R0A);
+			let highPhysical = unitsConvertor.electricToPhysical_Input(electricHighLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType, 0);
+			let lowPhysical = unitsConvertor.electricToPhysical_Input(electricLowLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType, 0);
 			
 			if (highPhysical.ok == false)
 			{
@@ -436,106 +397,16 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			let k1 = (y2 - y1) / (x2 - x1);	// K
 			let k2 = y1 - k1 * x1;			// B
 
-			let sensorTypeCode = 0;
-			
-			let decimalPlaces = signalA.propertyValue("DecimalPlaces");
-			
-			let PGAGainCode = PGAGainA;
-			
-			let PGAGainCode_AUTO = 255;
+			let lowValidRangeMin = 50;
+			let highValidRangeMax = 50000;
 
-			let highValidRangeMax = 0;
-			let lowValidRangeMin = 0;
-			
-			switch (sensorType)
-			{
-				case SensorType.Ohm_Pt_a_385:		
-					sensorTypeCode = 0;	
-					highValidRangeMax = 850;
-					lowValidRangeMin = -200;
-					
-					if (PGAGainA == PGAGainCode_AUTO) // AUTO
-					{
-						if (R0A > 200) PGAGainCode = 0;					//6.25	
-						if (R0A > 100 && R0A <= 200) PGAGainCode = 1;	//12.5	
-						if (R0A >= 50 && R0A <= 100) PGAGainCode = 2;	//25	
-						if (R0A < 50) PGAGainCode = 3;					//50	
-					}
-				
-				break;
-				case SensorType.Ohm_Pt_a_391:		
-					sensorTypeCode = 1;	
-					highValidRangeMax = 850;
-					lowValidRangeMin = -200;
-
-					if (PGAGainA == PGAGainCode_AUTO) // AUTO
-					{
-						if (R0A > 200) PGAGainCode = 0;					//6.25	
-						if (R0A > 100 && R0A <= 200) PGAGainCode = 1;	//12.5	
-						if (R0A >= 50 && R0A <= 100) PGAGainCode = 2;	//25	
-						if (R0A < 50) PGAGainCode = 3;					//50	
-					}
-						
-				break;
-				case SensorType.Ohm_Cu_a_428:		
-					sensorTypeCode = 2;	
-					highValidRangeMax = 200;
-					lowValidRangeMin = -180;
-
-					if (PGAGainA == PGAGainCode_AUTO) // AUTO
-					{
-						if (R0A > 200) PGAGainCode = 1;					//12.5	
-						if (R0A > 100 && R0A <= 200) PGAGainCode = 2;	//25	
-						if (R0A <= 100) PGAGainCode = 3;				//50	
-					}
-
-				break;
-				case SensorType.Ohm_Cu_a_426:		
-					sensorTypeCode = 3;	
-					highValidRangeMax = 200;
-					lowValidRangeMin = -50;
-
-					if (PGAGainA == PGAGainCode_AUTO) // AUTO
-					{
-						if (R0A > 200) PGAGainCode = 1;					//12.5	
-						if (R0A > 100 && R0A <= 200) PGAGainCode = 2;	//25	
-						if (R0A <= 100) PGAGainCode = 3;				//50	
-					}
-
-				break;
-				case SensorType.Ohm_Ni_a_617:		
-					sensorTypeCode = 4;	
-					highValidRangeMax = 180;
-					lowValidRangeMin = -60;
-
-					if (PGAGainA == PGAGainCode_AUTO) // AUTO
-					{
-						if (R0A > 170) PGAGainCode = 1;					//12.5	
-						if (R0A > 80 && R0A <= 170) PGAGainCode = 2;	//25	
-						if (R0A <= 80) PGAGainCode = 3;					//50	
-					}
-	
-				break;
-				case SensorType.Ohm_Raw:		
-					sensorTypeCode = 5;	
-					highValidRangeMax = 1500;
-					lowValidRangeMin = 5;
-					if (PGAGainA == PGAGainCode_AUTO) // AUTO
-					{
-						log.errCFG3041("PGAGain", "Auto", "Gain x6,25..Gain x50", signalStrIdA);
-					}
-				break;
-				default:
-				{
-					log.errINT1001("Unknown sensor type " + sensorType + " in " + signalStrIdA);
-				}
-			}
-			
 			let lowValidRangeMinEngineering = lowValidRangeMin * k1 + k2;
 			let highValidRangeMaxEngineering = highValidRangeMax * k1 + k2;
 			
 			// Round this value to supplied decimal places
 			
+			let decimalPlaces = signalA.propertyValue("DecimalPlaces");
+
 			lowValidRangeMinEngineering = parseFloat(lowValidRangeMinEngineering.toFixed(decimalPlaces));
 			highValidRangeMaxEngineering = parseFloat(highValidRangeMaxEngineering.toFixed(decimalPlaces));
 			
@@ -552,8 +423,8 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			
 			//
 
-			let flags = (RTDConfModeA << 8) | (PGAGainCode << 4) | sensorTypeCode;
-
+			let flags = 0;
+			
 			confFirmware.writeLog("    in" + i + ": [" + frame + ":" + ptr + "] Tf = " + filteringTime + 
 			"; [" + frame + ":" + (ptr + 2) + "] SpreadTolerance = " + spreadTolerance +
 			"; [" + frame + ":" + (ptr + 4) + "] K1 = " + k1 +
@@ -562,7 +433,7 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			"; LowPhysicalRange = " + lowPhysical.toDouble +
 			"; [" + frame + ":" + (ptr + 12) + "] HighValidRange = " + highValidRange +
 			"; [" + frame + ":" + (ptr + 16) + "] LowValidRange = " + lowValidRange +
-			"; [" + frame + ":" + (ptr + 20) + "] R0 = " + R0A +
+			"; [" + frame + ":" + (ptr + 20) + "] MaxFrequency = " + maxFrequencyA +
 			"; [" + frame + ":" + (ptr + 24) + "] WordOfFlags = " + flags + "\r\n");
 
             if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "FilteringTime", filteringTime) == false)          // InA Filtering time constant
@@ -603,7 +474,7 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			}
             ptr += 4;
 			
-            if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "R0_Ohm", R0A) == false)          // InA Low Bound
+            if (setData32(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "MaxFrequency", maxFrequencyA) == false)          // InA Low Bound
 			{
 				return false;
 			}
@@ -632,7 +503,7 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 
     // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
     //
-    let dataTransmittingEnableFlag = false;
+    let dataTransmittingEnableFlag = true;
     let dataReceiveEnableFlag = true;
     
     let flags = 0;
@@ -642,10 +513,10 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
         flags |= 2;
     
     let configFramesQuantity = 2;
-    let dataFramesQuantity = 0;
+    let dataFramesQuantity = 1;
  
-    let txId = module.moduleFamily + module.moduleVersion;
-    
+	let txId = module.moduleFamily + module.moduleVersion;
+     
     if (generate_txRxIoConfig(confFirmware, module.equipmentId, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
 	{
 		return false;

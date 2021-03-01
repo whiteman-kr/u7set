@@ -3,28 +3,10 @@
 //
 function generate_dom(confFirmware, module, LMNumber, frame, log, signalSet, opticModuleStorage)
 {
-	if (module.propertyValue("EquipmentID") == undefined)
-	{
-		log.errCFG3000("EquipmentID", "Module_DOM");
-		return false;
-	}
-	
-	let equipmentID = module.propertyValue("EquipmentID");
-	
-	let checkProperties = ["Place", "ModuleVersion"];
-	for (let cp = 0; cp < checkProperties.length; cp++)
-	{
-		if (module.propertyValue(checkProperties[cp]) == undefined)
-		{
-			log.errCFG3000(checkProperties[cp], equipmentID);
-			return false;
-		}
-	}
-
     let ptr = 120;
     
     // crc
-    let stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
+    let stringCrc64 = storeCrc64(confFirmware, log, LMNumber, module.equipmentId, frame, 0, ptr, ptr);   //CRC-64
 	if (stringCrc64 == "")
 	{
 		return false;
@@ -49,9 +31,9 @@ function generate_dom(confFirmware, module, LMNumber, frame, log, signalSet, opt
     let configFramesQuantity = 1;
     let dataFramesQuantity = 1;
 
-    let txId = module.propertyValue("ModuleFamily") + module.propertyValue("ModuleVersion");
+    let txId = module.moduleFamily + module.moduleVersion;
     
-    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
+    if (generate_txRxIoConfig(confFirmware, module.equipmentId, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
 	{
 		return false;
 	}

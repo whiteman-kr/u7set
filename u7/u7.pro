@@ -388,6 +388,7 @@ DISTFILES += \
     ../Scripts/AOM/AOM.js \
     ../Scripts/AOM_4PH/AOM_4PH.js \
     ../Scripts/BVB15/BVB15Conf0000.ts \
+    ../Scripts/ChildRestriction/ChildRestriction.js \
     ../Scripts/DIM/DIM.js \
     ../Scripts/DOM/DOM.js \
     ../Scripts/FSCChassis/FSCChassis.js \

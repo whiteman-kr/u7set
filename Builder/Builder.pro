@@ -86,6 +86,7 @@ SOURCES += \
     ../TuningService/TuningSource.cpp \
     ../lib/LogicModuleSet.cpp \
     ../lib/ModuleFirmware.cpp \
+    ../lib/ScriptDeviceObject.cpp \
     ../lib/Signal.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/Subsystem.cpp \
@@ -174,6 +175,7 @@ HEADERS += \
     ../lib/LogicModuleSet.h \
     ../lib/PropertyObject.h \
     ../lib/ModuleFirmware.h \
+    ../lib/ScriptDeviceObject.h \
     ../lib/Signal.h \
     ../lib/SoftwareSettings.h \
     ../lib/Subsystem.h \
