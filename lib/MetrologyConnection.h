@@ -96,6 +96,8 @@ namespace Metrology
 		//
 		QString strID() const;
 
+		static bool signalIsOk(const ::Signal& signal);
+
 		//
 		//
 		ConnectionSignal connectionSignal(int ioType) const;
@@ -181,6 +183,7 @@ namespace Metrology
 		//
 		QString userName() { return m_userName; }
 		bool enableEditBase() { return m_enableEditBase; }
+		bool userIsAdmin() { return m_userIsAdmin; }
 
 		// modify
 		//
@@ -199,8 +202,9 @@ namespace Metrology
 
 		//
 		//
-		void updateRestoreIDs();				// will be update all resotoreID  on check in during save connection
-		int restoreConnection(int restoreID);	// restore connection from last check in, return index of restore connection
+		void updateRestoreIDs();									// will be update all resotoreID  on check in during save connection
+		Connection connectionFromChekedIn(int restoreID);			// get connection from last check in
+		int restoreConnection(int restoreID);						// restore connection from last check in, return index of restore connection
 
 		//
 		//
@@ -232,6 +236,7 @@ namespace Metrology
 
 		QString m_userName;
 		bool m_enableEditBase = true;
+		bool m_userIsAdmin = false;
 	};
 
 	// ==============================================================================================

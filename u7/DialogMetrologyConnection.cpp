@@ -705,10 +705,8 @@ void DialogMetrologyConnection::createInterface()
 	m_pRemoveAction->setShortcut(Qt::Key_Delete);
 
 	m_pUnRemoveAction = new QAction(tr("&Undo delete"), this);
-	m_pUnRemoveAction->setIcon(QIcon(":/Images/Images/SchemaUndo.svg"));
 
 	m_pRestoreAction = new QAction(tr("&Restore from last Check In"), this);
-	m_pRestoreAction->setIcon(QIcon(":/Images/Images/SchemaUndo.svg"));
 
 	m_pCheckInAction = new QAction(tr("&Check In ..."), this);
 	m_pCheckInAction->setIcon(QIcon(":/Images/Images/SchemaCheckIn.svg"));
@@ -751,10 +749,7 @@ void DialogMetrologyConnection::createInterface()
 	toolBar->addAction(m_pCreateAction);
 	toolBar->addAction(m_pRemoveAction);
 	toolBar->addSeparator();
-	toolBar->addAction(m_pRestoreAction);
 	toolBar->addAction(m_pCheckInAction);
-	toolBar->addSeparator();
-	toolBar->addAction(m_pCopyAction);
 	toolBar->addSeparator();
 	toolBar->addAction(m_pExportAction);
 	toolBar->addAction(m_pImportAction);
@@ -837,88 +832,61 @@ void DialogMetrologyConnection::updateCheckInStateOnToolBar()
 {
 	bool fileIsCheckIn = m_connectionBase.isCheckIn();
 
-	// update
-	//
-	m_pRestoreAction->setDisabled(fileIsCheckIn);
-	m_pCheckInAction->setDisabled(fileIsCheckIn);
-
-	if (fileIsCheckIn == false)
+	if (m_connectionBase.enableEditBase() == false)
 	{
-		setWindowTitle(m_windowTitle + " - Checked Out");
+		setWindowTitle(m_windowTitle + tr(" - View only (currently file is cheked out by user: \"%1\")").arg(m_connectionBase.userName()));
+
+		// only admin can do check in
+		//
+		if (m_connectionBase.userIsAdmin() == true)
+		{
+			m_pCheckInAction->setDisabled(fileIsCheckIn);
+		}
+		else
+		{
+			m_pCheckInAction->setDisabled(true);
+		}
 	}
 	else
 	{
-		setWindowTitle(m_windowTitle + " - Checked In");
+		setWindowTitle(QString("%1 - Checked %2").arg(m_windowTitle).arg(fileIsCheckIn ? "In" : "Out"));
+
+		m_pCheckInAction->setDisabled(fileIsCheckIn);
 	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool DialogMetrologyConnection::enableNewConnection(const Signal& signal)
+void DialogMetrologyConnection::enableButtonsOnToolBar()
 {
-	if (signal.isAnalog() == false)
+	if (m_connectionBase.enableEditBase() == false)
 	{
-		return false;
+		m_pEditAction->setDisabled(true);
+		m_pCreateAction->setDisabled(true);
+		m_pRemoveAction->setDisabled(true);
+		m_pUnRemoveAction->setDisabled(true);
+		m_pRestoreAction->setDisabled(true);
+		m_pImportAction->setDisabled(true);
+
+		//
+		//
+		m_buttonBox->hide();
+	}
+	else
+	{
+		m_pEditAction->setDisabled(false);
+		m_pCreateAction->setDisabled(false);
+		m_pRemoveAction->setDisabled(false);
+		m_pUnRemoveAction->setDisabled(false);
+		m_pRestoreAction->setDisabled(false);
+		m_pImportAction->setDisabled(false);
+
+		//
+		//
+		m_buttonBox->show();
 	}
 
-	if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
-	{
-		return false;
-	}
-
-	if (signal.lowEngineeringUnits() == 0.0 && signal.highEngineeringUnits() == 0.0)
-	{
-		return false;
-	}
-
-	switch (signal.inOutType())
-	{
-		case E::SignalInOutType::Input:
-
-			if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
-			{
-				return false;
-			}
-
-			if (signal.electricLowLimit() == 0.0 && signal.electricHighLimit() == 0.0)
-			{
-				return false;
-			}
-
-			if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
-			{
-				return false;
-			}
-
-			if (signal.electricUnit() == E::ElectricUnit::NoUnit)
-			{
-				return false;
-			}
-
-			if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
-			{
-				return false;
-			}
-
-			break;
-
-		case E::SignalInOutType::Output:
-
-
-			if (signal.isSpecPropExists(SignalProperties::outputModeCaption) == false)
-			{
-				return false;
-			}
-
-			break;
-
-		default:
-
-			Q_ASSERT(0);
-			return false;
-	}
-
-	return true;
+	updateCheckInStateOnToolBar();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -950,42 +918,32 @@ bool DialogMetrologyConnection::loadConnectionBase()
 
 	m_connectionBase.findSignal_in_signalSet();
 
+	enableButtonsOnToolBar();
 	updateList();
-
-	updateCheckInStateOnToolBar();
-
-	if (m_connectionBase.enableEditBase() == false)
-	{
-		setWindowTitle(m_windowTitle + tr(" - View only (currently file is cheked out by user: \"%1\")").arg(m_connectionBase.userName()));
-
-		m_pEditAction->setDisabled(true);
-		m_pCreateAction->setDisabled(true);
-		m_pRemoveAction->setDisabled(true);
-		m_pUnRemoveAction->setDisabled(true);
-		m_pRestoreAction->setDisabled(true);
-		m_pCheckInAction->setDisabled(true);
-		m_pImportAction->setDisabled(true);
-
-		m_buttonBox->hide();
-	}
 
 	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogMetrologyConnection::saveConnectionBase(bool checkIn, const QString& comment)
+bool DialogMetrologyConnection::saveConnectionBase(bool checkIn, const QString& comment)
 {
 	if (m_connectionBase.enableEditBase() == false)
 	{
-		return;
+		if (m_connectionBase.userIsAdmin() == false)
+		{
+			return false;
+		}
 	}
 
 	bool resultSave = m_connectionBase.save(checkIn, comment);
 	if (resultSave == false)
 	{
 		QMessageBox::critical(this, m_windowTitle, QString("Error: Failed to save metrology connections file: %1 to database!").arg(Metrology::CONNECTIONS_FILE_NAME));
+		return false;
 	}
+
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1297,38 +1255,34 @@ void DialogMetrologyConnection::connectionChanged()
 				return;
 			}
 
-			int foundIndex = m_connectionBase.findConnectionIndex(connection);
-			if (foundIndex != -1)
+			if (m_dialogConnectionItem->isNewConnection() == true)
 			{
-				selectConnectionInList(connection);
-				QMessageBox::information(this, m_windowTitle, tr("Connection already exist!"));
-			}
-			else
-			{
-				if (m_dialogConnectionItem->isNewConnection() == true)
+				int connectionIndex = m_connectionBase.findConnectionIndex(connection);
+				if (connectionIndex >= 0 && connectionIndex < m_connectionBase.count())
 				{
-					connection.setAction(VcsItemAction::VcsItemActionType::Added);
-
-					m_connectionBase.append(connection);
+					selectConnectionInList(connection);
+					QMessageBox::information(this, m_windowTitle, tr("Connection already exist!"));
 				}
 				else
 				{
-					int connectionIndex = m_connectionBase.findConnectionIndex(m_dialogConnectionItem->parentConnection());
-					if (connectionIndex < 0 || connectionIndex >= m_connectionBase.count())
-					{
-						return;
-					}
-
+					connection.setAction(VcsItemAction::VcsItemActionType::Added);
+					m_connectionBase.append(connection);
+				}
+			}
+			else
+			{
+				int connectionIndex = m_connectionBase.findConnectionIndex(m_dialogConnectionItem->parentConnection());
+				if (connectionIndex >= 0 && connectionIndex < m_connectionBase.count())
+				{
 					connection.setAction(VcsItemAction::VcsItemActionType::Modified);
-
 					m_connectionBase.setConnection(connectionIndex, connection);
 				}
-
-				updateList();
-				selectConnectionInList(connection);
-
-				m_isModified = true;
 			}
+
+			updateList();
+			selectConnectionInList(connection);
+
+			m_isModified = true;
 		}
 	}
 
@@ -1374,24 +1328,48 @@ void DialogMetrologyConnection::removeConnection()
 		return;
 	}
 
+	QVector<int> removeIndexList;
+
 	for( int i = 0; i < selectedConnectionCount; i++)
 	{
 		int tableIndex = pSourceProxyModel->mapToSource(m_pView->selectionModel()->selectedRows().at(i)).row();
-		if (tableIndex >= 0 && tableIndex < m_connectionTable.connectionCount())
+		if (tableIndex < 0 && tableIndex >= m_connectionTable.connectionCount())
 		{
-			const Metrology::Connection& connection = m_connectionTable.at(tableIndex);
-
-			int connectionIndex = m_connectionBase.findConnectionIndex(connection);
-			if (connectionIndex >= 0 && connectionIndex < m_connectionBase.count())
-			{
-				if (checkOutConnectionBase() == true)
-				{
-					m_connectionBase.setAction(connectionIndex, VcsItemAction::VcsItemActionType::Deleted);
-
-					m_isModified = true;
-				}
-			}
+			continue;
 		}
+
+		const Metrology::Connection& connection = m_connectionTable.at(tableIndex);
+
+		if (connection.action() == VcsItemAction::VcsItemActionType::Deleted)
+		{
+			continue;
+		}
+
+		int connectionIndex = m_connectionBase.findConnectionIndex(connection);
+		if (connectionIndex == -1)
+		{
+			continue;
+		}
+
+		removeIndexList.append(connectionIndex);
+
+	}
+
+	if (checkOutConnectionBase() == false)
+	{
+		return;
+	}
+
+	for(int connectionIndex: removeIndexList)
+	{
+		if (connectionIndex < 0 && connectionIndex >= m_connectionBase.count())
+		{
+			continue;
+		}
+
+		m_connectionBase.setAction(connectionIndex, VcsItemAction::VcsItemActionType::Deleted);
+
+		m_isModified = true;
 	}
 
 	updateList();
@@ -1428,17 +1406,39 @@ void DialogMetrologyConnection::unremoveConnection()
 
 	for( int i = 0; i < selectedConnectionCount; i++)
 	{
-		int conncetionIndex = pSourceProxyModel->mapToSource(m_pView->selectionModel()->selectedRows().at(i)).row();
-
-		if (conncetionIndex >= 0 && conncetionIndex < m_connectionTable.connectionCount())
+		int tableIndex = pSourceProxyModel->mapToSource(m_pView->selectionModel()->selectedRows().at(i)).row();
+		if (tableIndex < 0 && tableIndex >= m_connectionTable.connectionCount())
 		{
-			if (m_connectionBase.connection(conncetionIndex).action() == VcsItemAction::VcsItemActionType::Deleted)
-			{
-				m_connectionBase.setAction(conncetionIndex, VcsItemAction::VcsItemActionType::Unknown);
-
-				m_isModified = true;
-			}
+			continue;
 		}
+
+		const Metrology::Connection& connection = m_connectionTable.at(tableIndex);
+
+		if (connection.action() != VcsItemAction::VcsItemActionType::Deleted)
+		{
+			continue;
+		}
+
+		VcsItemAction::VcsItemActionType actionType;
+
+		if (connection == m_connectionBase.connectionFromChekedIn(connection.restoreID()))
+		{
+			actionType = VcsItemAction::VcsItemActionType::Unknown;
+		}
+		else
+		{
+			actionType = VcsItemAction::VcsItemActionType::Modified;
+		}
+
+		int connectionIndex = m_connectionBase.findConnectionIndex(connection);
+		if (connectionIndex == -1)
+		{
+			continue;
+		}
+
+		m_connectionBase.setAction(connectionIndex, actionType);
+
+		m_isModified = true;
 	}
 
 	updateList();
@@ -1526,6 +1526,7 @@ void DialogMetrologyConnection::checkinConnection()
 	//
 	if (m_connectionBase.isCheckIn() == true)
 	{
+
 		return;
 	}
 
@@ -1546,9 +1547,13 @@ void DialogMetrologyConnection::checkinConnection()
 		return;
 	}
 
-	saveConnectionBase(true, comment);
+	bool ok = saveConnectionBase(true, comment);
+	if (ok == false)
+	{
+		return;
+	}
 
-	updateCheckInStateOnToolBar();
+	enableButtonsOnToolBar();
 
 	updateList();
 
@@ -1759,19 +1764,28 @@ void DialogMetrologyConnection::onContextMenu(QPoint)
 	}
 
 	// enable or disable item of menu Unremove
+	// enable or disable item of menu Restore
 	//
 	bool enableUnremove = false;
+	bool enableRestore = false;
 
-	if (m_connectionBase.enableEditBase() == true)
+	int selectedConnectionCount = m_pView->selectionModel()->selectedRows().count();
+	for( int i = 0; i < selectedConnectionCount; i++)
 	{
-		int selectedConnectionCount = m_pView->selectionModel()->selectedRows().count();
-		for( int i = 0; i < selectedConnectionCount; i++)
-		{
-			int conncetionIndex = pSourceProxyModel->mapToSource(m_pView->selectionModel()->selectedRows().at(i)).row();
+		int conncetionIndex = pSourceProxyModel->mapToSource(m_pView->selectionModel()->selectedRows().at(i)).row();
 
-			if (conncetionIndex >= 0 && conncetionIndex < m_connectionTable.connectionCount())
+		if (conncetionIndex >= 0 && conncetionIndex < m_connectionTable.connectionCount())
+		{
+			if (m_connectionBase.connection(conncetionIndex).action() == VcsItemAction::VcsItemActionType::Modified)
 			{
-				if (m_connectionBase.connection(conncetionIndex).action() == VcsItemAction::VcsItemActionType::Deleted)
+				enableRestore = true;
+			}
+
+			if (m_connectionBase.connection(conncetionIndex).action() == VcsItemAction::VcsItemActionType::Deleted)
+			{
+				enableRestore = true;
+
+				if (m_connectionBase.enableEditBase() == true)
 				{
 					enableUnremove = true;
 				}
@@ -1780,6 +1794,7 @@ void DialogMetrologyConnection::onContextMenu(QPoint)
 	}
 
 	m_pUnRemoveAction->setEnabled(enableUnremove);
+	m_pRestoreAction->setEnabled(enableRestore);
 
 	//
 	//

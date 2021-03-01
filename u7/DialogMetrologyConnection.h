@@ -144,12 +144,10 @@ public:
 
 public:
 
-	static bool enableNewConnection(const Signal& signal);
-
 	//
 	//
 	bool loadConnectionBase();
-	void saveConnectionBase(bool checkIn, const QString& comment);
+	bool saveConnectionBase(bool checkIn, const QString& comment);
 	bool checkOutConnectionBase();
 
 	//
@@ -197,6 +195,7 @@ private:
 	void createContextMenu();
 
 	void updateCheckInStateOnToolBar();
+	void enableButtonsOnToolBar();
 
 	//
 	//

@@ -119,6 +119,83 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	bool Connection::signalIsOk(const ::Signal& signal)
+	{
+		if (signal.isAnalog() == false)
+		{
+			return false;
+		}
+
+		// Engineering range
+		//
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return false;
+		}
+
+		if (signal.lowEngineeringUnits() == 0.0 && signal.highEngineeringUnits() == 0.0)
+		{
+			return false;
+		}
+
+		// Electric range
+		//
+		if (signal.isInput() == true || signal.isOutput() == true)
+		{
+			if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+			{
+				return false;
+			}
+
+			if (signal.electricLowLimit() == 0.0 && signal.electricHighLimit() == 0.0)
+			{
+				return false;
+			}
+
+			if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+			{
+				return false;
+			}
+
+			if (signal.electricUnit() == E::ElectricUnit::NoUnit)
+			{
+				return false;
+			}
+		}
+
+		// Unique fields
+		//
+		switch (signal.inOutType())
+		{
+			case E::SignalInOutType::Input:
+
+				if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+				{
+					return true; // some modules do not have a sensor type
+				}
+
+				if (signal.sensorType() == E::SensorType::NoSensor)
+				{
+					return false;
+				}
+
+				break;
+
+			case E::SignalInOutType::Output:
+
+				if (signal.isSpecPropExists(SignalProperties::outputModeCaption) == false)
+				{
+					return false;
+				}
+
+				break;
+		}
+
+		return true;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	ConnectionSignal Connection::connectionSignal(int ioType) const
 	{
 		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
@@ -193,7 +270,7 @@ namespace Metrology
 			return;
 		}
 
-		if (pSignal->isAnalog() == false)
+		if (signalIsOk(*pSignal) == false)
 		{
 			return;
 		}
@@ -315,6 +392,7 @@ namespace Metrology
 		m_connectionList.clear();
 
 		m_enableEditBase = true;
+		m_userIsAdmin = false;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -408,12 +486,21 @@ namespace Metrology
 		//
 		if (file->state() == VcsState::CheckedOut)
 		{
-			if (file->userId() != db->currentUser().userId())
+			int userId = file->userId();
+
+			// currentUser
+			//
+			if (userId != db->currentUser().userId())
 			{
 				m_enableEditBase = false;
 			}
 
-			m_userName = db->username(file->userId());
+			m_userIsAdmin = db->currentUser().isAdminstrator();
+
+			// user of file
+			//
+			m_userName = db->username(userId);
+
 		}
 
 		// read CSV-data from file
@@ -421,7 +508,7 @@ namespace Metrology
 		QByteArray data;
 		file->swapData(data);
 
-		// load record from CSV-data
+		// load connections from CSV-data
 		//
 		m_connectionMutex.lock();
 			m_connectionList = connectionsFromCsvData(data);
@@ -447,9 +534,14 @@ namespace Metrology
 			return false;
 		}
 
+		// only Admin can do changes if base is Checked Out
+		//
 		if (m_enableEditBase == false)
 		{
-			return false;
+			if (m_userIsAdmin == false)
+			{
+				return false;
+			}
 		}
 
 		// open connection file
@@ -460,18 +552,15 @@ namespace Metrology
 			return false;
 		}
 
-		// check out file, if file was check in
+		// file must be check out, after save
 		//
 		if (file->state() != VcsState::CheckedOut)
 		{
-			if (db->checkOut(*file, nullptr) == false)
-			{
-				return false;
-			}
+			return true;
 		}
 
-		// delete all records as VcsItemAction::VcsItemActionType::Deleted
-		// update restoreID
+		// delete all connections that marked as VcsItemAction::VcsItemActionType::Deleted
+		// update all restoreID
 		//
 		if (checkIn == true)
 		{
@@ -498,6 +587,10 @@ namespace Metrology
 			if (db->checkIn(*file, comment, nullptr) == false)
 			{
 				return false;
+			}
+			else
+			{
+				m_enableEditBase = true;
 			}
 		}
 
@@ -725,34 +818,27 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	int ConnectionBase::restoreConnection(int restoreID)
+	Connection ConnectionBase::connectionFromChekedIn(int restoreID)
 	{
 		if (m_signalSetProvider == nullptr)
 		{
 			Q_ASSERT(m_signalSetProvider);
-			return -1;
+			return Connection();
 		}
 
 		DbController* db = m_signalSetProvider->dbController();
 		if (db == nullptr)
 		{
 			Q_ASSERT(db);
-			return -1;
+			return Connection();
 		}
 
-		// file must be Check out
+		// file
 		//
 		std::shared_ptr<DbFile> file = getConnectionFile(db);
 		if (file == nullptr)
 		{
-			return -1;
-		}
-
-		// file must be Check out
-		//
-		if (file->state() == VcsState::CheckedIn)
-		{
-			return -1;
+			return Connection();
 		}
 
 		// get last changeset of file
@@ -762,20 +848,20 @@ namespace Metrology
 
 		if (changesetList.size() == 0)
 		{
-			return -1;
+			return Connection();
 		}
 
-		// read Checked In file
+		// read last Checked In file
 		//
 		std::shared_ptr<DbFile> fileOut;
 
 		bool result = db->getSpecificCopy(*file, changesetList[0].changeset(), &fileOut, nullptr);
 		if (result == false)
 		{
-			return -1;
+			return Connection();
 		}
 
-		// load Connection from CSV-data
+		// load connections from CSV-data
 		//
 		QByteArray data;
 		fileOut->swapData(data);
@@ -795,17 +881,28 @@ namespace Metrology
 			}
 		}
 
-		// if connection for restore in not found
+		return connectionForRestore;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	int ConnectionBase::restoreConnection(int restoreID)
+	{
+		// find connection with restoreID
+		//
+		Connection connectionForRestore = connectionFromChekedIn(restoreID);
+
+		// if connection is empty
 		//
 		if (connectionForRestore == Connection())
 		{
 			return -1;
 		}
 
-		int connectionIndex = -1;
-
 		// find and update connection
 		//
+		int connectionIndex = -1;
+
 		QMutexLocker l(&m_connectionMutex);
 
 		int connectionCount = m_connectionList.count();
