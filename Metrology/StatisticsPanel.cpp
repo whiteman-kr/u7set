@@ -214,7 +214,7 @@ QString StatisticsTable::text(int row, int column, const StatisticsItem& si) con
 	QString comparatorNo;
 	QString comparatorOutputID;
 
-	if (theSignalBase.statistics().measureType() == MeasureType::Comparators)
+	if (theSignalBase.statistics().measureType() == Measure::Type::Comparators)
 	{
 		std::shared_ptr<Metrology::ComparatorEx> comparator = si.comparator();
 		if (comparator != nullptr)
@@ -306,8 +306,8 @@ void StatisticsTable::updateSignal(Hash signalHash)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureType StatisticsPanel::m_measureType = MeasureType::Linearity;
-MeasureKind StatisticsPanel::m_measureKind = MeasureKind::NoMeasureKind;
+Measure::Type StatisticsPanel::m_measureType = Measure::Type::Linearity;
+Measure::Kind StatisticsPanel::m_measureKind = Measure::Kind::NoMeasureKind;
 Metrology::ConnectionType StatisticsPanel::m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -554,7 +554,7 @@ void StatisticsPanel::measureTypeChanged(int measureType)
 		return;
 	}
 
-	m_measureType = static_cast<MeasureType>(measureType);
+	m_measureType = static_cast<Measure::Type>(measureType);
 
 	theSignalBase.statistics().setMeasureType(m_measureType);
 
@@ -570,7 +570,7 @@ void StatisticsPanel::measureKindChanged(int measureKind)
 		return;
 	}
 
-	m_measureKind = static_cast<MeasureKind>(measureKind);
+	m_measureKind = static_cast<Measure::Kind>(measureKind);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -729,8 +729,8 @@ void StatisticsPanel::updateVisibleColunm()
 
 	hideColumn(STATISTICS_COLUMN_CUSTOM_ID, true);
 	hideColumn(STATISTICS_COLUMN_EQUIPMENT_ID, true);
-	hideColumn(STATISTICS_COLUMN_CMP_VALUE, m_measureType != MeasureType::Comparators);
-	hideColumn(STATISTICS_COLUMN_CMP_NO, m_measureType != MeasureType::Comparators);
+	hideColumn(STATISTICS_COLUMN_CMP_VALUE, m_measureType != Measure::Type::Comparators);
+	hideColumn(STATISTICS_COLUMN_CMP_NO, m_measureType != Measure::Type::Comparators);
 	hideColumn(STATISTICS_COLUMN_CMP_OUT_ID, true);
 	hideColumn(STATISTICS_COLUMN_CHASSIS, true);
 	hideColumn(STATISTICS_COLUMN_MODULE, true);
@@ -846,13 +846,13 @@ void StatisticsPanel::selectSignalForMeasure()
 
 	switch (m_measureType)
 	{
-		case MeasureType::Linearity:
+		case Measure::Type::Linearity:
 			{
 				pSignal = si.signal();
 			}
 			break;
 
-		case MeasureType::Comparators:
+		case Measure::Type::Comparators:
 			{
 				std::shared_ptr<Metrology::ComparatorEx> comparatorEx = si.comparator();
 				if (comparatorEx == nullptr)
@@ -917,8 +917,8 @@ void StatisticsPanel::selectSignalForMeasure()
 
 		switch (m_measureKind)
 		{
-			case MeasureKind::OneRack:
-			case MeasureKind::OneModule:
+			case Measure::Kind::OneRack:
+			case Measure::Kind::OneModule:
 
 				if (rack.index() != pSignal->param().location().rack().index())
 				{
@@ -928,7 +928,7 @@ void StatisticsPanel::selectSignalForMeasure()
 				rackIndex = i;
 				break;
 
-			case MeasureKind::MultiRack:
+			case Measure::Kind::MultiRack:
 
 				if (rack.index() != pSignal->param().location().rack().groupIndex())
 				{
@@ -1065,7 +1065,7 @@ void StatisticsPanel::onProperty()
 
 	switch (m_measureType)
 	{
-		case MeasureType::Linearity:
+		case Measure::Type::Linearity:
 			{
 				Metrology::Signal* pSignal = si.signal();
 				if (pSignal == nullptr || pSignal->param().isValid() == false)
@@ -1078,7 +1078,7 @@ void StatisticsPanel::onProperty()
 			}
 			break;
 
-		case MeasureType::Comparators:
+		case Measure::Type::Comparators:
 			{
 				std::shared_ptr<Metrology::ComparatorEx> comparatorEx = si.comparator();
 				if (comparatorEx == nullptr)
@@ -1206,9 +1206,9 @@ void StatisticsPanel::onHeaderContextMenu(QPoint)
 		return;
 	}
 
-	m_pColumnAction[STATISTICS_COLUMN_CMP_VALUE]->setDisabled(m_measureType != MeasureType::Comparators);
-	m_pColumnAction[STATISTICS_COLUMN_CMP_NO]->setDisabled(m_measureType != MeasureType::Comparators);
-	m_pColumnAction[STATISTICS_COLUMN_CMP_OUT_ID]->setDisabled(m_measureType != MeasureType::Comparators);
+	m_pColumnAction[STATISTICS_COLUMN_CMP_VALUE]->setDisabled(m_measureType != Measure::Type::Comparators);
+	m_pColumnAction[STATISTICS_COLUMN_CMP_NO]->setDisabled(m_measureType != Measure::Type::Comparators);
+	m_pColumnAction[STATISTICS_COLUMN_CMP_OUT_ID]->setDisabled(m_measureType != Measure::Type::Comparators);
 
 	m_headerContextMenu->exec(QCursor::pos());
 }

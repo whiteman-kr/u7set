@@ -468,7 +468,7 @@ void FindMeasurePanel::find()
 				continue;
 			}
 
-			Measurement* pMeasurement = m_pMeasureView->table().at(row);
+			Measure::Item* pMeasurement = m_pMeasureView->table().at(row);
 			if (pMeasurement == nullptr)
 			{
 				continue;

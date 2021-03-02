@@ -17,7 +17,7 @@
 //						SignalInfoPanel
 //						ComparatorInfoPanel
 //						MeasureThread
-//						MeasureBase
+//						Measure::Base
 //
 // ----------------------------------------------------------------------------------------------
 
@@ -314,8 +314,8 @@ private:
 	mutable QMutex			m_activeSignalMutex;
 	MeasureSignal			m_activeSignal;
 
-	TuningBase				m_tuningBase;					// sources and signals of tuning
-	Metrology::ConnectionBase m_connectionBase;				// metrology connections
+	TuningBase				m_tuningBase;					// sources and signals of tuning that received form CgfSrv
+	Metrology::ConnectionBase m_connectionBase;				// metrology connections that received form CgfSrv
 	StatisticsBase			m_statisticsBase;				// statistics of measured signals
 
 signals:

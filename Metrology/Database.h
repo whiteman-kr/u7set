@@ -132,20 +132,20 @@ const int				SQL_TABLE_IS_MAIN	= 0,
 
 const int				SqlTableByMeasureType[SQL_TABLE_COUNT] =
 {
-						MeasureType::NoMeasureType,				//	SQL_TABLE_DATABASE_INFO						// SQL_TABLE_CONFIG
-						MeasureType::NoMeasureType,				//	SQL_TABLE_HISTORY							// SQL_TABLE_CONFIG
+						Measure::Type::NoMeasureType,			//	SQL_TABLE_DATABASE_INFO						// SQL_TABLE_CONFIG
+						Measure::Type::NoMeasureType,			//	SQL_TABLE_HISTORY							// SQL_TABLE_CONFIG
 
-						MeasureType::Linearity,				//	SQL_TABLE_LINEARITY							// SQL_TABLE_MEASURE_MAIN
-						MeasureType::Linearity,				//	SQL_TABLE_LINEARITY_ADD_EL_VAL				// SQL_TABLE_MEASURE_SUB
-						MeasureType::Linearity,				//	SQL_TABLE_LINEARITY_ADD_EN_VAL				// SQL_TABLE_MEASURE_SUB
-						MeasureType::Linearity,				//	SQL_TABLE_LINEARITY_20_EL					// SQL_TABLE_MEASURE_SUB
-						MeasureType::Linearity,				//	SQL_TABLE_LINEARITY_20_EN					// SQL_TABLE_MEASURE_SUB
-						MeasureType::NoMeasureType,				//	SQL_TABLE_LINEARITY_POINT					// SQL_TABLE_CONFIG
+						Measure::Type::Linearity,				//	SQL_TABLE_LINEARITY							// SQL_TABLE_MEASURE_MAIN
+						Measure::Type::Linearity,				//	SQL_TABLE_LINEARITY_ADD_EL_VAL				// SQL_TABLE_MEASURE_SUB
+						Measure::Type::Linearity,				//	SQL_TABLE_LINEARITY_ADD_EN_VAL				// SQL_TABLE_MEASURE_SUB
+						Measure::Type::Linearity,				//	SQL_TABLE_LINEARITY_20_EL					// SQL_TABLE_MEASURE_SUB
+						Measure::Type::Linearity,				//	SQL_TABLE_LINEARITY_20_EN					// SQL_TABLE_MEASURE_SUB
+						Measure::Type::NoMeasureType,			//	SQL_TABLE_LINEARITY_POINT					// SQL_TABLE_CONFIG
 
-						MeasureType::Comparators,			//	SQL_TABLE_COMPARATOR						// SQL_TABLE_MEASURE_MAIN
+						Measure::Type::Comparators,				//	SQL_TABLE_COMPARATOR						// SQL_TABLE_MEASURE_MAIN
 
-						MeasureType::NoMeasureType,				//	SQL_TABLE_REPORT_HEADER						// SQL_TABLE_CONFIG
-						MeasureType::NoMeasureType,				//	SQL_TABLE_RACK_GROUP						// SQL_TABLE_CONFIG
+						Measure::Type::NoMeasureType,			//	SQL_TABLE_REPORT_HEADER						// SQL_TABLE_CONFIG
+						Measure::Type::NoMeasureType,			//	SQL_TABLE_RACK_GROUP						// SQL_TABLE_CONFIG
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -325,8 +325,8 @@ public:
 
 	SqlTable*			openTable(int objectType);
 
-	bool				appendMeasure(Measurement* pMeasurement);
-	bool				removeMeasure(int measuteType, const QVector<int>& keyList);
+	bool				appendMeasure(Measure::Item* pMeasurement);
+	bool				removeMeasure(Measure::Type measuteType, const QVector<int>& keyList);
 
 private:
 
@@ -344,7 +344,7 @@ private:
 
 public slots:
 
-	void				appendToBase(Measurement* pMeasurement);
+	void				appendToBase(Measure::Item* pMeasurement);
 	void				removeFromBase(int measureType, const QVector<int>& keyList);
 };
 

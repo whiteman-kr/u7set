@@ -51,12 +51,12 @@ public:
 
 public:
 
-	MeasureType			measureType() const { return m_measureType; }
+	Measure::Type		measureType() const { return m_measureType; }
 
 private:
 
-	MeasureType			m_measureType = MeasureType::Linearity;
-	int					m_languageType = LANGUAGE_TYPE_EN;
+	Measure::Type		m_measureType = Measure::Type::Linearity;
+	LanguageType		m_languageType = LanguageType::English;
 
 	// elements of interface
 	//

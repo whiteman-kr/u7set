@@ -9,7 +9,7 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureViewColumn MeasureViewHeader::m_column[MeasureTypeCount][MEASURE_VIEW_COLUMN_COUNT] =
+MeasureViewColumn MeasureViewHeader::m_column[Measure::TypeCount][MEASURE_VIEW_COLUMN_COUNT] =
 {
 	// Measurements of linearity
 	{
@@ -214,7 +214,7 @@ MeasureViewColumn& MeasureViewColumn::operator=(const MeasureViewColumn& from)
 MeasureViewHeader::MeasureViewHeader(QObject* parent) :
 	QObject(parent)
 {
-	for(int measureType = 0; measureType < MeasureTypeCount; measureType++)
+	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
 	{
 		m_columnCount[measureType] = 0;
 	}
@@ -228,7 +228,7 @@ MeasureViewHeader::~MeasureViewHeader()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewHeader::setMeasureType(MeasureType measureType)
+void MeasureViewHeader::setMeasureType(Measure::Type measureType)
 {
 	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
@@ -251,7 +251,7 @@ void MeasureViewHeader::setMeasureType(MeasureType measureType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewHeader::init(MeasureType measureType)
+void MeasureViewHeader::init(Measure::Type measureType)
 {
 	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
@@ -259,7 +259,7 @@ void MeasureViewHeader::init(MeasureType measureType)
 	}
 
 	int languageType = theOptions.language().languageType();
-	if (languageType < 0 || languageType >= LANGUAGE_TYPE_COUNT)
+	if (ERR_LANGUAGE_TYPE(languageType) == true)
 	{
 		return;
 	}
@@ -321,13 +321,13 @@ void MeasureViewHeader::updateColumnState()
 
 	switch (m_measureType)
 	{
-		case MeasureType::Linearity:
+		case Measure::Type::Linearity:
 			{
 				// list type
 				//
 				switch(theOptions.linearity().viewType())
 				{
-					case LO_VIEW_TYPE_SIMPLE:
+					case LinearityViewType::Simple:
 
 						setColumnVisible(MVC_CMN_L_PERCENT, false);
 						setColumnVisible(MVC_CMN_L_SYSTEM_DEVIATION, false);
@@ -335,7 +335,7 @@ void MeasureViewHeader::updateColumnState()
 						setColumnVisible(MVC_CMN_L_BORDER, false);
 						setColumnVisible(MVC_CMN_L_UNCERTAINTY, false);
 
-						for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
+						for (int m = 0; m < Measure::MaxMeasurementInPoint; m ++)
 						{
 							setColumnVisible(m + MVC_CMN_L_VALUE_0, false);
 						}
@@ -347,7 +347,7 @@ void MeasureViewHeader::updateColumnState()
 
 						break;
 
-					case LO_VIEW_TYPE_EXTENDED:
+					case LinearityViewType::Extended:
 
 						setColumnVisible(MVC_CMN_L_PERCENT, true);
 						setColumnVisible(MVC_CMN_L_SYSTEM_DEVIATION, true);
@@ -355,7 +355,7 @@ void MeasureViewHeader::updateColumnState()
 						setColumnVisible(MVC_CMN_L_BORDER, true);
 						setColumnVisible(MVC_CMN_L_UNCERTAINTY, true);
 
-						for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
+						for (int m = 0; m < Measure::MaxMeasurementInPoint; m ++)
 						{
 							setColumnVisible(m + MVC_CMN_L_VALUE_0, false);
 						}
@@ -367,8 +367,8 @@ void MeasureViewHeader::updateColumnState()
 
 						break;
 
-					case LO_VIEW_TYPE_DETAIL_ELRCTRIC:
-					case LO_VIEW_TYPE_DETAIL_ENGINEERING:
+					case LinearityViewType::DetailElectric:
+					case LinearityViewType::DetailEngineering:
 
 						setColumnVisible(MVC_CMN_L_PERCENT, false);
 						setColumnVisible(MVC_CMN_L_SYSTEM_DEVIATION, false);
@@ -376,7 +376,7 @@ void MeasureViewHeader::updateColumnState()
 						setColumnVisible(MVC_CMN_L_BORDER, false);
 						setColumnVisible(MVC_CMN_L_UNCERTAINTY, false);
 
-						for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
+						for (int m = 0; m < Measure::MaxMeasurementInPoint; m ++)
 						{
 							setColumnVisible(m + MVC_CMN_L_VALUE_0, true);
 						}
@@ -394,7 +394,7 @@ void MeasureViewHeader::updateColumnState()
 			}
 			break;
 
-		case MeasureType::Comparators:
+		case Measure::Type::Comparators:
 			{
 				// show  or hide columns
 				//

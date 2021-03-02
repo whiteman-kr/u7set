@@ -401,7 +401,7 @@ void ComparatorInfoPanel::measureKindChanged(int measureKind)
 		return;
 	}
 
-	m_measureKind = static_cast<MeasureKind>(measureKind);
+	m_measureKind = static_cast<Measure::Kind>(measureKind);
 }
 
 

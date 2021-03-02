@@ -632,9 +632,9 @@ int LinearityOption::measureCountInPoint()
 		m_measureCountInPoint = 1;
 	}
 
-	if (m_measureCountInPoint > MAX_MEASUREMENT_IN_POINT)
+	if (m_measureCountInPoint > Measure::MaxMeasurementInPoint)
 	{
-		m_measureCountInPoint = MAX_MEASUREMENT_IN_POINT;
+		m_measureCountInPoint = Measure::MaxMeasurementInPoint;
 	}
 
 	return m_measureCountInPoint;
@@ -649,9 +649,9 @@ void LinearityOption::setMeasureCountInPoint(int measureCount)
 		measureCount = 1;
 	}
 
-	if (measureCount > MAX_MEASUREMENT_IN_POINT)
+	if (measureCount > Measure::MaxMeasurementInPoint)
 	{
-		measureCount = MAX_MEASUREMENT_IN_POINT;
+		measureCount = Measure::MaxMeasurementInPoint;
 	}
 
 	m_measureCountInPoint = measureCount;
@@ -661,7 +661,7 @@ void LinearityOption::setMeasureCountInPoint(int measureCount)
 
 void LinearityOption::recalcPoints(int count)
 {
-	if (m_rangeType != LO_RANGE_TYPE_AUTOMATIC)
+	if (m_divisionType != Measure::LinearityDivision::Automatic)
 	{
 		return;
 	}
@@ -680,7 +680,7 @@ void LinearityOption::recalcPoints(int count)
 
 	if (count == 1)
 	{
-		m_pointBase.append(MeasurePoint((m_lowLimitRange + m_highLimitRange) / 2));
+		m_pointBase.append(Measure::Point((m_lowLimitRange + m_highLimitRange) / 2));
 	}
 	else
 	{
@@ -688,7 +688,7 @@ void LinearityOption::recalcPoints(int count)
 
 		for (int p = 0; p < count ; p++)
 		{
-			m_pointBase.append(MeasurePoint(m_lowLimitRange + (p * value)));
+			m_pointBase.append(Measure::Point(m_lowLimitRange + (p * value)));
 		}
 	}
 }
@@ -700,17 +700,17 @@ void LinearityOption::load()
 	QSettings s;
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), 0.2).toDouble();
-	m_errorType = s.value(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), MeasureErrorType::Reduce).toInt();
-	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(LINEARITY_OPTIONS_KEY), MeasureLimitType::Electric).toInt();
+	m_errorType = s.value(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), Measure::ErrorType::Reduce).toInt();
+	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(LINEARITY_OPTIONS_KEY), Measure::LimitType::Electric).toInt();
 
 	m_measureTimeInPoint = s.value(QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
-	m_measureCountInPoint = s.value(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), 20).toInt();
+	m_measureCountInPoint = s.value(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), Measure::MaxMeasurementInPoint).toInt();
 
-	m_rangeType = s.value(QString("%1RangeType").arg(LINEARITY_OPTIONS_KEY), LO_RANGE_TYPE_MANUAL).toInt();
-	m_lowLimitRange = s.value(QString("%1LowLimitRange").arg(LINEARITY_OPTIONS_KEY), 5).toDouble();
-	m_highLimitRange = s.value(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), 95).toDouble();
+	m_divisionType = s.value(QString("%1RangeType").arg(LINEARITY_OPTIONS_KEY), Measure::LinearityDivision::Manual).toInt();
+	m_lowLimitRange = s.value(QString("%1LowLimitRange").arg(LINEARITY_OPTIONS_KEY), Measure::LinearityRangeLow).toDouble();
+	m_highLimitRange = s.value(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), Measure::LinearityRangeHigh).toDouble();
 
-	m_viewType = s.value(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), LO_VIEW_TYPE_SIMPLE).toInt();
+	m_viewType = s.value(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), LinearityViewType::Simple).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -726,7 +726,7 @@ void LinearityOption::save()
 	s.setValue(QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureTimeInPoint);
 	s.setValue(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureCountInPoint);
 
-	s.setValue(QString("%1RangeType").arg(LINEARITY_OPTIONS_KEY), m_rangeType);
+	s.setValue(QString("%1RangeType").arg(LINEARITY_OPTIONS_KEY), m_divisionType);
 	s.setValue(QString("%1LowLimitRange").arg(LINEARITY_OPTIONS_KEY), m_lowLimitRange);
 	s.setValue(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), m_highLimitRange);
 
@@ -746,7 +746,7 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 	m_measureTimeInPoint = from.m_measureTimeInPoint;
 	m_measureCountInPoint = from.m_measureCountInPoint;
 
-	m_rangeType = from.m_rangeType;
+	m_divisionType = from.m_divisionType;
 	m_lowLimitRange = from.m_lowLimitRange;
 	m_highLimitRange = from.m_highLimitRange;
 
@@ -754,6 +754,26 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 
 	return *this;
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString LinearityViewTypeCaption(int type)
+{
+	QString caption;
+
+	switch (type)
+	{
+		case LinearityViewType::Simple:				caption = QT_TRANSLATE_NOOP("Options", "Simple");													break;
+		case LinearityViewType::Extended:			caption = QT_TRANSLATE_NOOP("Options", "Extended (show columns for metrological certification)");	break;
+		case LinearityViewType::DetailElectric:		caption = QT_TRANSLATE_NOOP("Options", "Detail electric (show all measurements at one point)");		break;
+		case LinearityViewType::DetailEngineering:	caption = QT_TRANSLATE_NOOP("Options", "Detail engineering (show all measurements at one point)");	break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return caption;
+};
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -787,8 +807,8 @@ void ComparatorOption::load()
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(COMPARATOR_OPTIONS_KEY), 0.2).toDouble();
 	m_startValueForCompare = s.value(QString("%1StartValueForCompare").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
-	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), MeasureErrorType::Reduce).toInt();
-	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(COMPARATOR_OPTIONS_KEY), MeasureLimitType::Electric).toInt();
+	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), Measure::ErrorType::Reduce).toInt();
+	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(COMPARATOR_OPTIONS_KEY), Measure::LimitType::Electric).toInt();
 
 	m_startComparatorIndex = s.value(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
 	m_enableMeasureHysteresis = s.value(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
@@ -855,7 +875,7 @@ void ToolBarOption::load()
 	QSettings s;
 
 	m_measureTimeout = s.value(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), 0).toInt();
-	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MeasureKind::OneRack).toInt();
+	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), Measure::Kind::OneRack).toInt();
 	m_connectionType = s.value(QString("%1ConnectionType").arg(TOOLBAR_OPTIONS_KEY), Metrology::ConnectionType::Unused).toInt();
 
 	m_defaultRack = s.value(QString("%1DefaultRack").arg(TOOLBAR_OPTIONS_KEY), "RACK").toString();
@@ -947,15 +967,15 @@ void MeasureViewOption::load()
 	// properties of columns
 	//
 	int languageType = theOptions.language().languageType();
-	if (languageType >= 0 && languageType < LANGUAGE_TYPE_COUNT)
+	if (ERR_LANGUAGE_TYPE(languageType) == false)
 	{
 		// init
 		//
 		MeasureViewHeader header;
 
-		for(int measureType = 0; measureType < MeasureTypeCount; measureType ++)
+		for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
 		{
-			header.setMeasureType(static_cast<MeasureType>(measureType));
+			header.setMeasureType(static_cast<Measure::Type>(measureType));
 
 			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 			{
@@ -971,7 +991,7 @@ void MeasureViewOption::load()
 
 		// load
 		//
-		for(int measureType = 0; measureType < MeasureTypeCount; measureType ++)
+		for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
 		{
 			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 			{
@@ -981,11 +1001,12 @@ void MeasureViewOption::load()
 					continue;
 				}
 
-				QString caption = MeasureTypeCaption(measureType);
+				QString caption = Measure::TypeCaption(measureType);
+				QString language = qApp->translate("Options", LanguageTypeCaption(languageType).toUtf8());
 
-				m_column[measureType][languageType][column].setTitle(s.value(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.title()).toString());
-				m_column[measureType][languageType][column].setWidth(s.value(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.width()).toInt());
-				m_column[measureType][languageType][column].setVisible(s.value(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.enableVisible()).toBool());
+				m_column[measureType][languageType][column].setTitle(s.value(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.title()).toString());
+				m_column[measureType][languageType][column].setWidth(s.value(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.width()).toInt());
+				m_column[measureType][languageType][column].setVisible(s.value(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.enableVisible()).toBool());
 			}
 		}
 	}
@@ -1013,9 +1034,9 @@ void MeasureViewOption::save()
 	// properties of columns
 	//
 	int languageType = theOptions.language().languageType();
-	if (languageType >= 0 && languageType < LANGUAGE_TYPE_COUNT)
+	if (ERR_LANGUAGE_TYPE(languageType) == false)
 	{
-		for(int measureType = 0; measureType < MeasureTypeCount; measureType ++)
+		for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
 		{
 			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 			{
@@ -1026,11 +1047,12 @@ void MeasureViewOption::save()
 					continue;
 				}
 
-				QString caption = MeasureTypeCaption(measureType);
+				QString caption = Measure::TypeCaption(measureType);
+				QString language = qApp->translate("Options", LanguageTypeCaption(languageType).toUtf8());
 
-				s.setValue(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.title());
-				s.setValue(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.width());
-				s.setValue(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.enableVisible());
+				s.setValue(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.title());
+				s.setValue(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.width());
+				s.setValue(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.enableVisible());
 			}
 		}
 	}
@@ -1051,11 +1073,11 @@ void MeasureViewOption::save()
 
 MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 {
-	for(int measureType = 0; measureType < MeasureTypeCount; measureType ++)
+	for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
 	{
 		m_updateColumnView[measureType] = from.m_updateColumnView[measureType];
 
-		for(int languageType = 0; languageType < LANGUAGE_TYPE_COUNT; languageType ++)
+		for(int languageType = 0; languageType < LanguageTypeCount; languageType ++)
 		{
 			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
 			{
@@ -1325,7 +1347,7 @@ void LanguageOption::load()
 {
 	QSettings s;
 
-	m_languageType = s.value(QString("%1Language").arg(LANGUAGE_OPTIONS_REG_KEY), LANGUAGE_TYPE_EN).toInt();
+	m_languageType = s.value(QString("%1Language").arg(LANGUAGE_OPTIONS_REG_KEY), LanguageType::English).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1345,6 +1367,24 @@ LanguageOption& LanguageOption::operator=(const LanguageOption& from)
 
 	return *this;
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString LanguageTypeCaption(int type)
+{
+	QString caption;
+
+	switch (type)
+	{
+		case LanguageType::English:	caption = QT_TRANSLATE_NOOP("Options", "English");	break;
+		case LanguageType::Russian:	caption = QT_TRANSLATE_NOOP("Options", "Russian");	break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return caption;
+};
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------

@@ -142,7 +142,7 @@ StatisticsBase::StatisticsBase(QObject* parent) :
 {
 	QMutexLocker l(&m_signalMutex);
 
-	m_statisticList.resize(MeasureTypeCount);
+	m_statisticList.resize(Measure::TypeCount);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -202,12 +202,12 @@ void StatisticsBase::createSignalList()
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (m_statisticList.count() <= MeasureType::Linearity)
+	if (m_statisticList.count() <= Measure::Type::Linearity)
 	{
 		return;
 	}
 
-	m_statisticList[MeasureType::Linearity].clear();
+	m_statisticList[Measure::Type::Linearity].clear();
 
 	QElapsedTimer responseTime;
 	responseTime.start();
@@ -260,7 +260,7 @@ void StatisticsBase::createSignalList()
 			}
 		}
 
-		m_statisticList[MeasureType::Linearity].append(si);
+		m_statisticList[Measure::Type::Linearity].append(si);
 	}
 
 	qDebug() << __FUNCTION__ << " Time for create: " << responseTime.elapsed() << " ms";
@@ -272,12 +272,12 @@ void StatisticsBase::createComparatorList()
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (m_statisticList.count() <= MeasureType::Comparators)
+	if (m_statisticList.count() <= Measure::Type::Comparators)
 	{
 		return;
 	}
 
-	m_statisticList[MeasureType::Comparators].clear();
+	m_statisticList[Measure::Type::Comparators].clear();
 
 	QElapsedTimer responseTime;
 	responseTime.start();
@@ -345,7 +345,7 @@ void StatisticsBase::createComparatorList()
 			}
 			*/
 
-			m_statisticList[MeasureType::Comparators].append(si);
+			m_statisticList[Measure::Type::Comparators].append(si);
 		}
 	}
 

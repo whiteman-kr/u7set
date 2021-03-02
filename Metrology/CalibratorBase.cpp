@@ -394,9 +394,9 @@ CalibratorManager* CalibratorBase::calibratorForMeasure(int index) const
 
 	switch(m_measureKind)
 	{
-		case MeasureKind::OneRack:
-		case MeasureKind::OneModule:	pManager = firstConnectedCalibrator();	break;	// we need only one - connected;
-		case MeasureKind::MultiRack:	pManager = calibratorManager(index);	break;
+		case Measure::Kind::OneRack:
+		case Measure::Kind::OneModule:	pManager = firstConnectedCalibrator();	break;	// we need only one - connected;
+		case Measure::Kind::MultiRack:	pManager = calibratorManager(index);	break;
 		default:						assert(0);
 	}
 
@@ -449,7 +449,7 @@ void CalibratorBase::measureKindChanged(int measureKind)
 		return;
 	}
 
-	m_measureKind = static_cast<MeasureKind>(measureKind);
+	m_measureKind = static_cast<Measure::Kind>(measureKind);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

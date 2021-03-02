@@ -17,9 +17,9 @@ MeasurePointDialog::MeasurePointDialog(const LinearityOption& linearity, QWidget
 
 	m_rangeTypeList = new QComboBox;
 
-	for(int t = 0; t < LO_RANGE_TYPE_COUNT; t++)
+	for(int t = 0; t < Measure::LinearityDivisionCount; t++)
 	{
-		m_rangeTypeList->addItem(qApp->translate("Options.h", LinearityRangeTypeStr[t]));
+		m_rangeTypeList->addItem(qApp->translate("MeasurePointBase", Measure::LinearityDivisionCaption(t).toUtf8()));
 	}
 
 	m_pointCountLabel = new QLabel;
@@ -110,9 +110,9 @@ void MeasurePointDialog::setHeaderList()
 {
 	QStringList horizontalHeaderLabels;
 
-	for(int sensor = 0; sensor < PointSensorCount; sensor++)
+	for(int sensor = 0; sensor < Measure::PointSensorCount; sensor++)
 	{
-		horizontalHeaderLabels.append(qApp->translate("MeasurePointBase", PointSensorCaption(sensor).toUtf8()));
+		horizontalHeaderLabels.append(qApp->translate("MeasurePointBase", Measure::PointSensorCaption(sensor).toUtf8()));
 	}
 
 	m_pointList->setColumnCount(horizontalHeaderLabels.count());
@@ -120,12 +120,12 @@ void MeasurePointDialog::setHeaderList()
 
 	for(int column = 0; column < m_pointList->columnCount(); column++)
 	{
-		if (column != PointSensor::Percent)
+		if (column != Measure::PointSensor::Percent)
 		{
 			m_pointList->horizontalHeaderItem(column)->setForeground(Qt::darkGray);
 		}
 
-		if (column > PointSensor::I_4_20_mA)
+		if (column > Measure::PointSensor::I_4_20_mA)
 		{
 			m_pointList->hideColumn(column);
 		}
@@ -142,18 +142,18 @@ void MeasurePointDialog::setHeaderList()
 
 	m_headerContextMenu = new QMenu(m_pointList);
 
-	for(int sensor = 0; sensor < PointSensorCount; sensor++)
+	for(int sensor = 0; sensor < Measure::PointSensorCount; sensor++)
 	{
-		if (sensor == PointSensor::Percent)
+		if (sensor == Measure::PointSensor::Percent)
 		{
 			continue;
 		}
 
-		m_pColumnAction[sensor] = m_headerContextMenu->addAction(qApp->translate("MeasurePointBase", PointSensorCaption(sensor).toUtf8()));
+		m_pColumnAction[sensor] = m_headerContextMenu->addAction(qApp->translate("MeasurePointBase", Measure::PointSensorCaption(sensor).toUtf8()));
 		if (m_pColumnAction[sensor] != nullptr)
 		{
 			m_pColumnAction[sensor]->setCheckable(true);
-			m_pColumnAction[sensor]->setChecked(sensor > PointSensor::I_4_20_mA ? false : true);
+			m_pColumnAction[sensor]->setChecked(sensor > Measure::PointSensor::I_4_20_mA ? false : true);
 		}
 	}
 
@@ -167,9 +167,9 @@ void MeasurePointDialog::setHeaderList()
 
 void MeasurePointDialog::updateRangeType()
 {
-	switch(m_linearity.rangeType())
+	switch(m_linearity.divisionType())
 	{
-		case LO_RANGE_TYPE_MANUAL:
+		case Measure::LinearityDivision::Manual:
 
 			m_pointCountLabel->hide();
 			m_pointCountEdit->hide();
@@ -186,7 +186,7 @@ void MeasurePointDialog::updateRangeType()
 
 			break;
 
-		case LO_RANGE_TYPE_AUTOMATIC:
+		case Measure::LinearityDivision::Automatic:
 
 			m_pointCountLabel->show();
 			m_pointCountEdit->show();
@@ -232,19 +232,19 @@ void MeasurePointDialog::updateList()
 	//
 	for(int index = 0; index < rowCount; index++)
 	{
-		MeasurePoint point = m_linearity.points().point(index);
+		Measure::Point point = m_linearity.points().point(index);
 
 		point.setIndex(index);
 
 		verticalHeaderLabels.append(QString("%1").arg(point.Index() + 1));
 
-		for(int sensor = 0; sensor < PointSensorCount; sensor++)
+		for(int sensor = 0; sensor < Measure::PointSensorCount; sensor++)
 		{
 			cell = new QTableWidgetItem(QString::number(point.sensorValue(sensor), 'f', 3));
 			cell->setTextAlignment(Qt::AlignHCenter);
 			m_pointList->setItem(index, sensor, cell);
 
-			if (sensor != PointSensor::Percent)
+			if (sensor != Measure::PointSensor::Percent)
 			{
 				cell->setForeground(Qt::darkGray);
 			}
@@ -328,11 +328,11 @@ void MeasurePointDialog::onAddPoint()
 		index = m_linearity.points().count() - 1;
 	}
 
-	m_linearity.points().insert(index + 1, MeasurePoint());
+	m_linearity.points().insert(index + 1, Measure::Point());
 
 	updateList();
 
-	QTableWidgetItem* item = m_pointList->item(index + 1, PointSensor::Percent);
+	QTableWidgetItem* item = m_pointList->item(index + 1, Measure::PointSensor::Percent);
 	if (item == nullptr)
 	{
 		return;
@@ -350,7 +350,7 @@ void MeasurePointDialog::cellChanged(int row, int column)
 		return;
 	}
 
-	if (column != PointSensor::Percent)
+	if (column != Measure::PointSensor::Percent)
 	{
 		return;
 	}
@@ -370,7 +370,7 @@ void MeasurePointDialog::cellChanged(int row, int column)
 
 	QString value = pItem->text();
 
-	MeasurePoint point = m_linearity.points().point(index);
+	Measure::Point point = m_linearity.points().point(index);
 	point.setPercent(value.toDouble());
 	m_linearity.points().setPoint(index, point);
 
@@ -385,7 +385,7 @@ void MeasurePointDialog::cellChanged(int row, int column)
 
 void MeasurePointDialog::currentCellChanged(int, int column, int, int)
 {
-	if (column == PointSensor::Percent)
+	if (column == Measure::PointSensor::Percent)
 	{
 		m_pointList->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::AnyKeyPressed);
 	}
@@ -405,7 +405,7 @@ void MeasurePointDialog::onEditPoint()
 		return;
 	}
 
-	QTableWidgetItem* item = m_pointList->item(row, PointSensor::Percent);
+	QTableWidgetItem* item = m_pointList->item(row, Measure::PointSensor::Percent);
 	if (item == nullptr)
 	{
 		return;
@@ -423,7 +423,7 @@ void MeasurePointDialog::onRemovePoint()
 	{
 		bool removePt = false;
 
-		for(int column = 0; column < PointSensorCount; column++)
+		for(int column = 0; column < Measure::PointSensorCount; column++)
 		{
 			if (m_pointList->item(row, column)->isSelected() == true)
 			{
@@ -499,12 +499,12 @@ void MeasurePointDialog::onDownPoint()
 
 void MeasurePointDialog::onRangeType(int type)
 {
-	if (type < 0 || type >= LO_RANGE_TYPE_COUNT)
+	if (type < 0 || type >= Measure::LinearityDivisionCount)
 	{
 		return;
 	}
 
-	m_linearity.setRangeType(type);
+	m_linearity.setDivisionType(type);
 
 	updateRangeType();
 
@@ -515,7 +515,7 @@ void MeasurePointDialog::onRangeType(int type)
 
 void MeasurePointDialog::onAutomaticCalculatePoints()
 {
-	if (m_linearity.rangeType() != LO_RANGE_TYPE_AUTOMATIC)
+	if (m_linearity.divisionType() != Measure::LinearityDivision::Automatic)
 	{
 		return;
 	}
@@ -590,7 +590,7 @@ void MeasurePointDialog::onColumnAction(QAction* action)
 		return;
 	}
 
-	for(int sensor = 0; sensor < PointSensorCount; sensor++)
+	for(int sensor = 0; sensor < Measure::PointSensorCount; sensor++)
 	{
 		if (m_pColumnAction[sensor] == action)
 		{
@@ -624,7 +624,7 @@ void MeasurePointDialog::keyPressEvent(QKeyEvent* e)
 
 void MeasurePointDialog::showEvent(QShowEvent* e)
 {
-	m_rangeTypeList->setCurrentIndex(m_linearity.rangeType());
+	m_rangeTypeList->setCurrentIndex(m_linearity.divisionType());
 	updateRangeType();
 	updateList();
 

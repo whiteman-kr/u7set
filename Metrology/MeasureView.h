@@ -33,24 +33,24 @@ public:
 	MeasureViewHeader& header() { return m_header; }
 	bool columnIsVisible(int column);
 
-	QColor backgroundColor(int row, int column, Measurement* pMeasurement) const;
-	QString text(int row, int column, Measurement* pMeasurement) const;
+	QColor backgroundColor(int row, int column, Measure::Item* pMeasurement) const;
+	QString text(int row, int column, Measure::Item* pMeasurement) const;
 
-	bool append(Measurement* pMeasurement);
-	Measurement* at(int index) const;
+	bool append(Measure::Item* pMeasurement);
+	Measure::Item* at(int index) const;
 	void remove(const QVector<int>& removeIndexList);
 
-	void set(const QVector<Measurement*>& list_add);
+	void set(const QVector<Measure::Item*>& list_add);
 	void clear();
 
 private:
 
-	int m_measureType = MeasureType::NoMeasureType;
+	int m_measureType = Measure::Type::NoMeasureType;
 
 	MeasureViewHeader m_header;
 
 	mutable QMutex m_measureMutex;
-	QVector<Measurement*> m_measureList;
+	QVector<Measure::Item*> m_measureList;
 	int m_measureCount = 0;
 
 	int columnCount(const QModelIndex &parent) const;
@@ -59,8 +59,8 @@ private:
 	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
 	QVariant data(const QModelIndex &index, int role) const;
 
-	QString textLinearity(int row, int column, Measurement* pMeasurement) const;
-	QString textComparator(int row, int column, Measurement* pMeasurement) const;
+	QString textLinearity(int row, int column, Measure::Item* pMeasurement) const;
+	QString textComparator(int row, int column, Measure::Item* pMeasurement) const;
 };
 
 // ==============================================================================================
@@ -71,19 +71,19 @@ class MeasureView : public QTableView
 
 public:
 
-	explicit MeasureView(MeasureType measureType, QWidget* parent = nullptr);
+	explicit MeasureView(Measure::Type measureType, QWidget* parent = nullptr);
 	virtual ~MeasureView();
 
 public:
 
-	MeasureType	measureType() const { return m_measureType; }
+	Measure::Type measureType() const { return m_measureType; }
 	MeasureTable& table() { return m_table; }
 
 	void updateColumn();
 
 private:
 
-	MeasureType	m_measureType = MeasureType::NoMeasureType;
+	Measure::Type m_measureType = Measure::Type::NoMeasureType;
 	MeasureTable m_table;
 
 	QMenu* m_headerContextMenu = nullptr;
@@ -102,9 +102,9 @@ public slots:
 
 	void onColumnResized(int index, int, int width);
 
-	void loadMeasurements(const MeasureBase& measureBase);
+	void loadMeasurements(const Measure::Base& measureBase);
 
-	void appendMeasure(Measurement* pMeasurement);
+	void appendMeasure(Measure::Item* pMeasurement);
 	void removeMeasure();
 
 	void copy();

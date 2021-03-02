@@ -41,9 +41,9 @@ void Calibrator::clear()
 
 	m_timeout = 0;
 
-	m_mode = CalibratorMode::NoMode;
-	m_measureUnit = CalibratorUnit::NoUnit;
-	m_sourceUnit = CalibratorUnit::NoUnit;
+	m_mode = CalibratorMode::NoCalibratorMode;
+	m_measureUnit = CalibratorUnit::NoCalibratorUnit;
+	m_sourceUnit = CalibratorUnit::NoCalibratorUnit;
 
 	m_measureValue = 0;
 	m_sourceValue = 0;
@@ -392,7 +392,7 @@ CalibratorLimit Calibrator::currentMeasureLimit()
 		return CalibratorLimit();
 	}
 
-	return getLimit(CalibratorMode::Measure, m_measureUnit);
+	return getLimit(CalibratorMode::MeasureMode, m_measureUnit);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -428,7 +428,7 @@ CalibratorLimit Calibrator::currentSourceLimit()
 		return CalibratorLimit();
 	}
 
-	return getLimit(CalibratorMode::Source, m_sourceUnit);
+	return getLimit(CalibratorMode::SourceMode, m_sourceUnit);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -700,13 +700,13 @@ bool Calibrator::setUnit(int mode, int unit)
 
 	switch(mode)
 	{
-		case CalibratorMode::Measure:
+		case CalibratorMode::MeasureMode:
 
 			m_mode = static_cast<CalibratorMode>(mode);
 			m_measureUnit = static_cast<CalibratorUnit>(unit);
 			break;
 
-		case CalibratorMode::Source:
+		case CalibratorMode::SourceMode:
 
 			m_mode = static_cast<CalibratorMode>(mode);
 			m_sourceUnit = static_cast<CalibratorUnit>(unit);
@@ -715,7 +715,7 @@ bool Calibrator::setUnit(int mode, int unit)
 		default:
 
 			assert(false);
-			m_mode = CalibratorMode::NoMode;
+			m_mode = CalibratorMode::NoCalibratorMode;
 			return false;
 	}
 
@@ -1540,8 +1540,8 @@ QString CalibratorModeCaption(int сalibratorMode)
 
 	switch (сalibratorMode)
 	{
-		case CalibratorMode::Measure:	caption = QT_TRANSLATE_NOOP("Calibrator", "Measure");	break;
-		case CalibratorMode::Source:	caption = QT_TRANSLATE_NOOP("Calibrator", "Source");	break;
+		case CalibratorMode::MeasureMode:	caption = QT_TRANSLATE_NOOP("Calibrator", "Measure");	break;
+		case CalibratorMode::SourceMode:	caption = QT_TRANSLATE_NOOP("Calibrator", "Source");	break;
 		default:
 			Q_ASSERT(0);
 			caption = QT_TRANSLATE_NOOP("Calibrator", "Unknown");

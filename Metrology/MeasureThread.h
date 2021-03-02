@@ -94,8 +94,8 @@ public:
 
 private:
 
-	MeasureType				m_measureType = MeasureType::NoMeasureType;
-	MeasureKind				m_measureKind = MeasureKind::NoMeasureKind;
+	Measure::Type			m_measureType = Measure::Type::NoMeasureType;
+	Measure::Kind			m_measureKind = Measure::Kind::NoMeasureKind;
 	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 	MeasureThreadInfo		m_info;
@@ -138,7 +138,7 @@ signals:
 	void					sendMeasureInfo(const MeasureThreadInfo& info);
 	void					msgBox(int type, QString text, int* result = nullptr);
 
-	void					measureComplite(Measurement*);
+	void					measureComplite(Measure::Item*);
 
 public slots:
 

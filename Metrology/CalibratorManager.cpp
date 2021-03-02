@@ -335,7 +335,7 @@ void CalibratorManager::enableInterface(bool enable)
 		return;
 	}
 
-	if (m_pCalibrator->mode() != CalibratorMode::Source || m_pCalibrator->sourceUnit() == CalibratorUnit::NoUnit)
+	if (m_pCalibrator->mode() != CalibratorMode::SourceMode || m_pCalibrator->sourceUnit() == CalibratorUnit::NoCalibratorUnit)
 	{
 		m_pSetValueButton->setEnabled(false);
 		m_pStepDownButton->setEnabled(false);
@@ -399,7 +399,7 @@ void CalibratorManager::updateModeList()
 		m_pModeList->addItem(qApp->translate("Calibrator", CalibratorModeCaption(cl.mode).toUtf8()), cl.mode);
 	}
 
-	m_pModeList->setCurrentIndex(CalibratorMode::NoMode);
+	m_pModeList->setCurrentIndex(CalibratorMode::NoCalibratorMode);
 
 	m_pModeList->blockSignals(false);
 }
@@ -455,7 +455,7 @@ void CalibratorManager::updateUnitList()
 		m_pUnitList->addItem(qApp->translate("Calibrator", CalibratorUnitCaption(cl.unit).toUtf8()), cl.unit);
 	}
 
-	m_pUnitList->setCurrentIndex(CalibratorUnit::NoUnit);
+	m_pUnitList->setCurrentIndex(CalibratorUnit::NoCalibratorUnit);
 
 	m_pUnitList->blockSignals(false);
 }
@@ -647,7 +647,7 @@ void CalibratorManager::onSetUnit(int unitIndex)
 		return;
 	}
 
-	if (mode == CalibratorMode::Source)
+	if (mode == CalibratorMode::SourceMode)
 	{
 		m_pSetValueButton->setEnabled(true);
 		m_pStepDownButton->setEnabled(true);

@@ -72,7 +72,7 @@ public:
 private:
 
 	CalibratorsOption		m_calibratorsOption;
-	MeasureKind				m_measureKind = MeasureKind::NoMeasureKind;
+	Measure::Kind			m_measureKind = Measure::Kind::NoMeasureKind;
 
 	QTimer					m_timer;
 	int						m_timeout = 0;

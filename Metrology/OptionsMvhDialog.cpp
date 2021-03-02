@@ -20,9 +20,9 @@ OptionsMeasureViewHeaderDialog::OptionsMeasureViewHeaderDialog(const MeasureView
 
 	m_measureTypeList = new QComboBox(this);
 
-	for(int measureType = 0; measureType < MeasureTypeCount; measureType++)
+	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
 	{
-		m_measureTypeList->addItem(qApp->translate("MeasureBase", MeasureTypeCaption(measureType).toUtf8()));
+		m_measureTypeList->addItem(qApp->translate("MeasureBase", Measure::TypeCaption(measureType).toUtf8()));
 	}
 	m_measureTypeList->setCurrentIndex(m_measureType);
 
@@ -30,7 +30,7 @@ OptionsMeasureViewHeaderDialog::OptionsMeasureViewHeaderDialog(const MeasureView
 	measureTypeLayout->addWidget(m_measureTypeList);
 	measureTypeLayout->addStretch();
 
-	m_languageType = theOptions.language().languageType();
+	m_languageType = static_cast<LanguageType>(theOptions.language().languageType());
 
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 
@@ -94,7 +94,7 @@ void OptionsMeasureViewHeaderDialog::updateList()
 		return;
 	}
 
-	if (m_languageType < 0 || m_languageType >= LANGUAGE_TYPE_COUNT)
+	if (ERR_LANGUAGE_TYPE(m_languageType) == true)
 	{
 		return;
 	}
@@ -191,7 +191,7 @@ void OptionsMeasureViewHeaderDialog::setMeasureType(int measureType)
 		return;
 	}
 
-	m_measureType = static_cast<MeasureType>(measureType);
+	m_measureType = static_cast<Measure::Type>(measureType);
 
 	updateList();
 }
@@ -210,7 +210,7 @@ void OptionsMeasureViewHeaderDialog::cellChanged(int row, int column)
 		return;
 	}
 
-	if (m_languageType < 0 || m_languageType >= LANGUAGE_TYPE_COUNT)
+	if (ERR_LANGUAGE_TYPE(m_languageType) == true)
 	{
 		return;
 	}
@@ -295,7 +295,7 @@ void OptionsMeasureViewHeaderDialog::onEdit(int row, int column)
 		return;
 	}
 
-	if (m_languageType < 0 || m_languageType >= LANGUAGE_TYPE_COUNT)
+	if (ERR_LANGUAGE_TYPE(m_languageType) == true)
 	{
 		return;
 	}

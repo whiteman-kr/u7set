@@ -110,7 +110,7 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	Measurement* pMeasurement = at(rowIndex);
+	Measure::Item* pMeasurement = at(rowIndex);
 	if (pMeasurement == nullptr)
 	{
 		return QVariant();
@@ -137,7 +137,7 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 	{
 		switch(m_measureType)
 		{
-			case MeasureType::Linearity:
+			case Measure::Type::Linearity:
 
 				if (columnIndex == MVC_CMN_L_APP_ID || columnIndex == MVC_CMN_L_ERROR_RESULT)
 				{
@@ -146,7 +146,7 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
 				break;
 
-			case MeasureType::Comparators:
+			case Measure::Type::Comparators:
 
 				if (columnIndex == MVC_CMN_C_APP_ID || columnIndex == MVC_CMN_C_ERROR_RESULT)
 				{
@@ -184,7 +184,7 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QColor MeasureTable::backgroundColor(int row, int column, Measurement* pMeasurement) const
+QColor MeasureTable::backgroundColor(int row, int column, Measure::Item* pMeasurement) const
 {
 	if (row < 0 || row >= m_measureCount)
 	{
@@ -205,14 +205,14 @@ QColor MeasureTable::backgroundColor(int row, int column, Measurement* pMeasurem
 
 	switch(m_measureType)
 	{
-		case MeasureType::Linearity:
+		case Measure::Type::Linearity:
 			{
 				if (column != MVC_CMN_L_ERROR_RESULT)
 				{
 					break;
 				}
 
-				LinearityMeasurement* pLinearityMeasurement = static_cast<LinearityMeasurement*> (pMeasurement);
+				Measure::LinearityItem* pLinearityMeasurement = static_cast<Measure::LinearityItem*> (pMeasurement);
 				if (pLinearityMeasurement == nullptr)
 				{
 					break;
@@ -227,7 +227,7 @@ QColor MeasureTable::backgroundColor(int row, int column, Measurement* pMeasurem
 					}
 				}
 
-				if (pLinearityMeasurement->errorResult() != MeasureErrorResult::Ok)
+				if (pLinearityMeasurement->errorResult() != Measure::ErrorResult::Ok)
 				{
 					result = theOptions.measureView().colorErrorLimit();
 					break;
@@ -237,14 +237,14 @@ QColor MeasureTable::backgroundColor(int row, int column, Measurement* pMeasurem
 			}
 			break;
 
-		case MeasureType::Comparators:
+		case Measure::Type::Comparators:
 			{
 				if (column != MVC_CMN_C_ERROR_RESULT)
 				{
 					break;
 				}
 
-				ComparatorMeasurement* pComparatorMeasurement = static_cast<ComparatorMeasurement*> (pMeasurement);
+				Measure::ComparatorItem* pComparatorMeasurement = static_cast<Measure::ComparatorItem*> (pMeasurement);
 				if (pComparatorMeasurement == nullptr)
 				{
 					break;
@@ -259,7 +259,7 @@ QColor MeasureTable::backgroundColor(int row, int column, Measurement* pMeasurem
 					}
 				}
 
-				if (pComparatorMeasurement->errorResult() != MeasureErrorResult::Ok)
+				if (pComparatorMeasurement->errorResult() != Measure::ErrorResult::Ok)
 				{
 					result = theOptions.measureView().colorErrorLimit();
 					break;
@@ -278,7 +278,7 @@ QColor MeasureTable::backgroundColor(int row, int column, Measurement* pMeasurem
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureTable::text(int row, int column, Measurement* pMeasurement) const
+QString MeasureTable::text(int row, int column, Measure::Item* pMeasurement) const
 {
 	if (row < 0 || row >= m_measureCount)
 	{
@@ -304,9 +304,9 @@ QString MeasureTable::text(int row, int column, Measurement* pMeasurement) const
 
 	switch(m_measureType)
 	{
-		case MeasureType::Linearity:	result = textLinearity(row, column, pMeasurement);	break;
-		case MeasureType::Comparators:	result = textComparator(row, column, pMeasurement);	break;
-		default:						result.clear();
+		case Measure::Type::Linearity:		result = textLinearity(row, column, pMeasurement);	break;
+		case Measure::Type::Comparators:	result = textComparator(row, column, pMeasurement);	break;
+		default:							result.clear();
 	}
 
 	return result;
@@ -315,7 +315,7 @@ QString MeasureTable::text(int row, int column, Measurement* pMeasurement) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasurement) const
+QString MeasureTable::textLinearity(int row, int column, Measure::Item* pMeasurement) const
 {
 	if (row < 0 || row >= m_measureCount)
 	{
@@ -338,24 +338,26 @@ QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasureme
 		return QString();
 	}
 
-	LinearityMeasurement* m = static_cast<LinearityMeasurement*> (pMeasurement);
+	Measure::LinearityItem* m = static_cast<Measure::LinearityItem*> (pMeasurement);
 	if (m == nullptr)
 	{
 		return QString();
 	}
 
-	int limitType = MeasureLimitType::NoMeasureLimitType;
+	Measure::LimitType limitType = Measure::LimitType::NoLimitType;
 
 	switch (theOptions.linearity().viewType())
 	{
-		case LO_VIEW_TYPE_SIMPLE:
-		case LO_VIEW_TYPE_EXTENDED:				limitType = theOptions.linearity().limitType();	break;
-		case LO_VIEW_TYPE_DETAIL_ELRCTRIC:		limitType = MeasureLimitType::Electric;		break;
-		case LO_VIEW_TYPE_DETAIL_ENGINEERING:	limitType = MeasureLimitType::Engineering;		break;
-		default:								return QString();
+		case LinearityViewType::Simple:
+		case LinearityViewType::Extended:			limitType = static_cast<Measure::LimitType>(theOptions.linearity().limitType());	break;
+		case LinearityViewType::DetailElectric:		limitType = Measure::LimitType::Electric;											break;
+		case LinearityViewType::DetailEngineering:	limitType = Measure::LimitType::Engineering;										break;
+		default:
+			assert(0);
+			return QString();
 	}
 
-	if (limitType == MeasureLimitType::NoMeasureLimitType)
+	if (limitType == Measure::LimitType::NoLimitType)
 	{
 		return QString();
 	}
@@ -379,16 +381,16 @@ QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasureme
 		case MVC_CMN_L_MODULE:					result = m->location().moduleStr(); break;
 		case MVC_CMN_L_PLACE:					result = m->location().placeStr(); break;
 
-		case MVC_CMN_L_EL_NOMINAL:				result = m->nominalStr(MeasureLimitType::Electric); break;
-		case MVC_CMN_L_EN_NOMINAL:				result = m->nominalStr(MeasureLimitType::Engineering); break;
+		case MVC_CMN_L_EL_NOMINAL:				result = m->nominalStr(Measure::LimitType::Electric); break;
+		case MVC_CMN_L_EN_NOMINAL:				result = m->nominalStr(Measure::LimitType::Engineering); break;
 
 		case MVC_CMN_L_PERCENT:					result = QString::number(m->percent(), 'f', 2); break;
 
-		case MVC_CMN_L_EL_MEASURE:				result = m->measureStr(MeasureLimitType::Electric); break;
-		case MVC_CMN_L_EN_MEASURE:				result = m->measureStr(MeasureLimitType::Engineering); break;
+		case MVC_CMN_L_EL_MEASURE:				result = m->measureStr(Measure::LimitType::Electric); break;
+		case MVC_CMN_L_EN_MEASURE:				result = m->measureStr(Measure::LimitType::Engineering); break;
 
-		case MVC_CMN_L_EL_RANGE:				result = m->limitStr(MeasureLimitType::Electric); break;
-		case MVC_CMN_L_EN_RANGE:				result = m->limitStr(MeasureLimitType::Engineering); break;
+		case MVC_CMN_L_EL_RANGE:				result = m->limitStr(Measure::LimitType::Electric); break;
+		case MVC_CMN_L_EN_RANGE:				result = m->limitStr(Measure::LimitType::Engineering); break;
 
 		case MVC_CMN_L_VALUE_COUNT:				result = QString::number(m->measureCount()); break;
 		case MVC_CMN_L_VALUE_0:					result = m->measureItemStr(limitType, 0); break;
@@ -412,10 +414,10 @@ QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasureme
 		case MVC_CMN_L_VALUE_18:				result = m->measureItemStr(limitType, 18); break;
 		case MVC_CMN_L_VALUE_19:				result = m->measureItemStr(limitType, 19); break;
 
-		case MVC_CMN_L_SYSTEM_DEVIATION:		result = m->additionalParamStr(limitType, MeasureAdditionalParam::SystemDeviation); break;
-		case MVC_CMN_L_SD:						result = m->additionalParamStr(limitType, MeasureAdditionalParam::StandardDeviation); break;
-		case MVC_CMN_L_BORDER:					result = m->additionalParamStr(limitType, MeasureAdditionalParam::LowHighBorder); break;
-		case MVC_CMN_L_UNCERTAINTY:				result = m->additionalParamStr(limitType, MeasureAdditionalParam::Uncertainty); break;
+		case MVC_CMN_L_SYSTEM_DEVIATION:		result = m->additionalParamStr(limitType, Measure::AdditionalParam::SystemDeviation); break;
+		case MVC_CMN_L_SD:						result = m->additionalParamStr(limitType, Measure::AdditionalParam::StandardDeviation); break;
+		case MVC_CMN_L_BORDER:					result = m->additionalParamStr(limitType, Measure::AdditionalParam::LowHighBorder); break;
+		case MVC_CMN_L_UNCERTAINTY:				result = m->additionalParamStr(limitType, Measure::AdditionalParam::Uncertainty); break;
 
 		case MVC_CMN_L_ERROR:					result = m->errorStr(); break;
 		case MVC_CMN_L_ERROR_LIMIT:				result = m->errorLimitStr(); break;
@@ -429,7 +431,7 @@ QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasureme
 
 	if (row > 0)
 	{
-		Measurement* prev_m = m_measureList[row - 1];
+		Measure::Item* prev_m = m_measureList[row - 1];
 		if (prev_m != nullptr)
 		{
 			if (prev_m->signalHash() == m->signalHash())
@@ -447,7 +449,7 @@ QString MeasureTable::textLinearity(int row, int column, Measurement* pMeasureme
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureTable::textComparator(int row, int column, Measurement* pMeasurement) const
+QString MeasureTable::textComparator(int row, int column, Measure::Item* pMeasurement) const
 {
 	if (row < 0 || row >= m_measureCount)
 	{
@@ -470,7 +472,7 @@ QString MeasureTable::textComparator(int row, int column, Measurement* pMeasurem
 		return QString();
 	}
 
-	ComparatorMeasurement* m = static_cast<ComparatorMeasurement*> (pMeasurement);
+	Measure::ComparatorItem* m = static_cast<Measure::ComparatorItem*> (pMeasurement);
 	if (m == nullptr)
 	{
 		return QString();
@@ -498,14 +500,14 @@ QString MeasureTable::textComparator(int row, int column, Measurement* pMeasurem
 		case MVC_CMN_C_SP_TYPE:					result = m->cmpValueTypeStr(); break;
 		case MVC_CMN_C_CMP_TYPE:				result = m->cmpTypeStr(); break;
 
-		case MVC_CMN_C_EL_NOMINAL:				result = m->nominalStr(MeasureLimitType::Electric); break;
-		case MVC_CMN_C_EN_NOMINAL:				result = m->nominalStr(MeasureLimitType::Engineering); break;
+		case MVC_CMN_C_EL_NOMINAL:				result = m->nominalStr(Measure::LimitType::Electric); break;
+		case MVC_CMN_C_EN_NOMINAL:				result = m->nominalStr(Measure::LimitType::Engineering); break;
 
-		case MVC_CMN_C_EL_MEASURE:				result = m->measureStr(MeasureLimitType::Electric); break;
-		case MVC_CMN_C_EN_MEASURE:				result = m->measureStr(MeasureLimitType::Engineering); break;
+		case MVC_CMN_C_EL_MEASURE:				result = m->measureStr(Measure::LimitType::Electric); break;
+		case MVC_CMN_C_EN_MEASURE:				result = m->measureStr(Measure::LimitType::Engineering); break;
 
-		case MVC_CMN_C_EL_RANGE:				result = m->limitStr(MeasureLimitType::Electric); break;
-		case MVC_CMN_C_EN_RANGE:				result = m->limitStr(MeasureLimitType::Engineering); break;
+		case MVC_CMN_C_EL_RANGE:				result = m->limitStr(Measure::LimitType::Electric); break;
+		case MVC_CMN_C_EN_RANGE:				result = m->limitStr(Measure::LimitType::Engineering); break;
 
 		case MVC_CMN_C_CMP_ID:					result = m->compareAppSignalID(); break;
 		case MVC_CMN_C_OUT_ID:					result = m->outputAppSignalID(); break;
@@ -522,7 +524,7 @@ QString MeasureTable::textComparator(int row, int column, Measurement* pMeasurem
 
 	if (row > 0)
 	{
-		Measurement* prev_m = m_measureList[row - 1];
+		Measure::Item* prev_m = m_measureList[row - 1];
 		if (prev_m != nullptr)
 		{
 			if (prev_m->signalHash() == m->signalHash())
@@ -540,7 +542,7 @@ QString MeasureTable::textComparator(int row, int column, Measurement* pMeasurem
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureTable::append(Measurement* pMeasurement)
+bool MeasureTable::append(Measure::Item* pMeasurement)
 {
 	if (pMeasurement == nullptr)
 	{
@@ -572,7 +574,7 @@ bool MeasureTable::append(Measurement* pMeasurement)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Measurement* MeasureTable::at(int index) const
+Measure::Item* MeasureTable::at(int index) const
 {
 	QMutexLocker l(&m_measureMutex);
 
@@ -595,7 +597,7 @@ void MeasureTable::remove(const QVector<int>& removeIndexList)
 	{
 		int removeIndex = removeIndexList.at(index);
 
-		Measurement* pMeasurement = at(removeIndex);
+		Measure::Item* pMeasurement = at(removeIndex);
 		if (pMeasurement == nullptr)
 		{
 			continue;
@@ -621,7 +623,7 @@ void MeasureTable::remove(const QVector<int>& removeIndexList)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureTable::set(const QVector<Measurement*>& list_add)
+void MeasureTable::set(const QVector<Measure::Item*>& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -667,7 +669,7 @@ void MeasureTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureView::MeasureView(MeasureType measureType, QWidget* parent) :
+MeasureView::MeasureView(Measure::Type measureType, QWidget* parent) :
 	QTableView(parent),
 	m_measureType(measureType)
 {
@@ -743,16 +745,16 @@ void MeasureView::updateColumn()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureView::loadMeasurements(const MeasureBase& measureBase)
+void MeasureView::loadMeasurements(const Measure::Base& measureBase)
 {
 	m_table.clear();
 
-	QVector<Measurement*> measureList;
+	QVector<Measure::Item*> measureList;
 
 	int measureCount = measureBase.count();
 	for (int i = 0; i < measureCount; i++)
 	{
-		Measurement* pMeasurement = measureBase.measurement(i);
+		Measure::Item* pMeasurement = measureBase.measurement(i);
 		if (pMeasurement == nullptr)
 		{
 			continue;
@@ -830,7 +832,7 @@ void MeasureView::onColumnResized(int index, int, int width)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureView::appendMeasure(Measurement* pMeasurement)
+void MeasureView::appendMeasure(Measure::Item* pMeasurement)
 {
 	if (pMeasurement == nullptr)
 	{
@@ -874,7 +876,7 @@ void MeasureView::removeMeasure()
 			continue;
 		}
 
-		Measurement* pMeasuremet = m_table.at(index);
+		Measure::Item* pMeasuremet = m_table.at(index);
 		if (pMeasuremet == nullptr)
 		{
 			continue;
@@ -941,13 +943,13 @@ void MeasureView::showGraph(int graphType)
 		return;
 	}
 
-	Measurement* pMeasurement = m_table.at(index);
+	Measure::Item* pMeasurement = m_table.at(index);
 	if (pMeasurement == nullptr)
 	{
 		return;
 	}
 
-	LinearityMeasurement* pLinearityMeasurement = dynamic_cast<LinearityMeasurement*>(pMeasurement);
+	Measure::LinearityItem* pLinearityMeasurement = dynamic_cast<Measure::LinearityItem*>(pMeasurement);
 	if (pLinearityMeasurement == nullptr)
 	{
 		return;
@@ -955,18 +957,20 @@ void MeasureView::showGraph(int graphType)
 
 	// select limit type
 	//
-	int limitType = MeasureLimitType::NoMeasureLimitType;
+	int limitType = Measure::LimitType::NoLimitType;
 
 	switch (graphType)
 	{
 		case MVG_TYPE_LIN_EL:
-		case MVG_TYPE_20VAL_EL:	limitType = MeasureLimitType::Electric;	break;
+		case MVG_TYPE_20VAL_EL:	limitType = Measure::LimitType::Electric;		break;
 		case MVG_TYPE_LIN_EN:
-		case MVG_TYPE_20VAL_EN:	limitType = MeasureLimitType::Engineering;	break;
-		default:				assert(0);									break;
+		case MVG_TYPE_20VAL_EN:	limitType = Measure::LimitType::Engineering;	break;
+
+		default:
+			assert(0);
 	}
 
-	if (limitType == MeasureLimitType::NoMeasureLimitType)
+	if (limitType == Measure::LimitType::NoLimitType)
 	{
 		return;
 	}
@@ -1021,7 +1025,7 @@ void MeasureView::showGraph(int graphType)
 
 				for (int i = 0; i < measureCount; i++)
 				{
-					Measurement* pMeasurementI = m_table.at(i);
+					Measure::Item* pMeasurementI = m_table.at(i);
 					if (pMeasurementI == nullptr)
 					{
 						continue;
@@ -1032,7 +1036,7 @@ void MeasureView::showGraph(int graphType)
 						continue;
 					}
 
-					LinearityMeasurement* pLinearityMeasurementI = dynamic_cast<LinearityMeasurement*>(pMeasurementI);
+					Measure::LinearityItem* pLinearityMeasurementI = dynamic_cast<Measure::LinearityItem*>(pMeasurementI);
 					if (pLinearityMeasurementI == nullptr)
 					{
 						continue;
@@ -1046,18 +1050,18 @@ void MeasureView::showGraph(int graphType)
 
 					if (pLinearityMeasurement->nominal(limitType) >= 0)
 					{
-						QPointF pLL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) + pLinearityMeasurementI->errorLimit(limitType, MeasureErrorType::Absolute));
+						QPointF pLL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) + pLinearityMeasurementI->errorLimit(limitType, Measure::ErrorType::Absolute));
 						*pLowLimitlSeries << pLL;
 
-						QPointF pHL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) - pLinearityMeasurementI->errorLimit(limitType, MeasureErrorType::Absolute));
+						QPointF pHL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) - pLinearityMeasurementI->errorLimit(limitType, Measure::ErrorType::Absolute));
 						*pHighLimitSeries << pHL;
 					}
 					else
 					{
-						QPointF pLL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) - pLinearityMeasurementI->errorLimit(limitType, MeasureErrorType::Absolute));
+						QPointF pLL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) - pLinearityMeasurementI->errorLimit(limitType, Measure::ErrorType::Absolute));
 						*pLowLimitlSeries << pLL;
 
-						QPointF pHL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) + pLinearityMeasurementI->errorLimit(limitType, MeasureErrorType::Absolute));
+						QPointF pHL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) + pLinearityMeasurementI->errorLimit(limitType, Measure::ErrorType::Absolute));
 						*pHighLimitSeries << pHL;
 					}
 

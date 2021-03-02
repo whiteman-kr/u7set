@@ -132,7 +132,7 @@ public:
 
 public:
 
-	void setMeasureBase(MeasureBase* pMeasureBase) { m_pMeasureBase = pMeasureBase; }
+	void setMeasureBase(Measure::Base* pMeasureBase) { m_pMeasureBase = pMeasureBase; }
 	void setViewFont(const QFont& font);
 
 private:
@@ -173,10 +173,10 @@ private:
 	QAction* m_pColumnAction[STATISTICS_COLUMN_COUNT];
 	QMenu* m_headerContextMenu = nullptr;
 
-	MeasureBase* m_pMeasureBase = nullptr;
+	Measure::Base* m_pMeasureBase = nullptr;
 
-	static MeasureType m_measureType;
-	static MeasureKind m_measureKind;
+	static Measure::Type m_measureType;
+	static Measure::Kind m_measureKind;
 	static Metrology::ConnectionType m_connectionType;
 
 

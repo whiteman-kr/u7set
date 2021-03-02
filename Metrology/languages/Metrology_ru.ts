@@ -4098,180 +4098,194 @@ Tuning signals: %1</source>
     </message>
 </context>
 <context>
-    <name>MeasureBase</name>
+    <name>Measure::Base</name>
     <message>
-        <location filename="../MeasureBase.cpp" line="3227"/>
-        <source>Measurements of linearity</source>
-        <translation>Измерения линейности</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3228"/>
-        <source>Measurements of comparators</source>
-        <translation>Измерения уставок</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3231"/>
-        <location filename="../MeasureBase.cpp" line="3249"/>
-        <location filename="../MeasureBase.cpp" line="3265"/>
-        <location filename="../MeasureBase.cpp" line="3282"/>
-        <location filename="../MeasureBase.cpp" line="3299"/>
-        <location filename="../MeasureBase.cpp" line="3318"/>
-        <source>Unknown</source>
-        <translation>Не определено</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3244"/>
-        <source> Single channel</source>
-        <translation>По одному каналу</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3245"/>
-        <source> Single module</source>
-        <translation>В одном модуле</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3246"/>
-        <source> Multi channel</source>
-        <translation>Во всех каналах</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3261"/>
-        <source>Electric</source>
-        <translation>Электрический</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3262"/>
-        <source>Engineering</source>
-        <translation>Физический</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3277"/>
-        <source>Absolute</source>
-        <translation>Абсолютная</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3278"/>
-        <source>Reduce</source>
-        <translation>Приведенная</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3279"/>
-        <source>Relative</source>
-        <translation>Относительная</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3295"/>
-        <source>Ok</source>
-        <translation>Ok</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3296"/>
-        <source>Failed</source>
-        <translation>Не годен</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3311"/>
-        <source>Measure value max</source>
-        <translation>Максимальное измеренное значение</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3312"/>
-        <source>System deviation</source>
-        <translation>Системное отклонение</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3313"/>
-        <source>Standard deviation</source>
-        <translation>СКО</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3314"/>
-        <source>Low High border</source>
-        <translation>Нижняя и верхняя границы</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="3315"/>
-        <source>Uncertainty</source>
-        <translation>Неопределенность</translation>
-    </message>
-    <message>
-        <location filename="../MeasureBase.cpp" line="2744"/>
+        <location filename="../MeasureBase.cpp" line="2746"/>
         <source>Save measurements</source>
         <translation>Сохранение измерений</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="2744"/>
+        <location filename="../MeasureBase.cpp" line="2746"/>
         <source>Error saving measurements to memory</source>
         <translation>Ошибка при сохранении измерений в памяти</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="2863"/>
+        <location filename="../MeasureBase.cpp" line="2865"/>
         <source>Delete measurements</source>
         <translation>Удаление измерений</translation>
     </message>
     <message>
-        <location filename="../MeasureBase.cpp" line="2863"/>
+        <location filename="../MeasureBase.cpp" line="2865"/>
         <source>Error remove measurements from memory</source>
         <translation>Ошибка при удалении измерений из памяти</translation>
     </message>
 </context>
 <context>
+    <name>MeasureBase</name>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3229"/>
+        <source>Measurements of linearity</source>
+        <translation>Измерения линейности</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3230"/>
+        <source>Measurements of comparators</source>
+        <translation>Измерения уставок</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3233"/>
+        <location filename="../MeasureBase.cpp" line="3251"/>
+        <location filename="../MeasureBase.cpp" line="3267"/>
+        <location filename="../MeasureBase.cpp" line="3284"/>
+        <location filename="../MeasureBase.cpp" line="3300"/>
+        <location filename="../MeasureBase.cpp" line="3319"/>
+        <source>Unknown</source>
+        <translation>Не определено</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3246"/>
+        <source> Single channel</source>
+        <translation>По одному каналу</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3247"/>
+        <source> Single module</source>
+        <translation>В одном модуле</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3248"/>
+        <source> Multi channel</source>
+        <translation>Во всех каналах</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3263"/>
+        <source>Electric</source>
+        <translation>Электрический</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3264"/>
+        <source>Engineering</source>
+        <translation>Физический</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3279"/>
+        <source>Absolute</source>
+        <translation>Абсолютная</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3280"/>
+        <source>Reduce</source>
+        <translation>Приведенная</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3281"/>
+        <source>Relative</source>
+        <translation>Относительная</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3296"/>
+        <source>Ok</source>
+        <translation>Ok</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3297"/>
+        <source>Failed</source>
+        <translation>Не годен</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3312"/>
+        <source>Measure value max</source>
+        <translation>Максимальное измеренное значение</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3313"/>
+        <source>System deviation</source>
+        <translation>Системное отклонение</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3314"/>
+        <source>Standard deviation</source>
+        <translation>СКО</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3315"/>
+        <source>Low High border</source>
+        <translation>Нижняя и верхняя границы</translation>
+    </message>
+    <message>
+        <location filename="../MeasureBase.cpp" line="3316"/>
+        <source>Uncertainty</source>
+        <translation>Неопределенность</translation>
+    </message>
+</context>
+<context>
     <name>MeasurePointBase</name>
     <message>
-        <location filename="../MeasurePointBase.cpp" line="295"/>
+        <location filename="../MeasurePointBase.cpp" line="300"/>
         <source>%</source>
         <translation>%</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.cpp" line="297"/>
+        <location filename="../MeasurePointBase.cpp" line="302"/>
         <source>0 .. 5 V</source>
         <translation>0 .. 5 В</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.cpp" line="298"/>
+        <location filename="../MeasurePointBase.cpp" line="303"/>
         <source>-10 .. 10 V</source>
         <translation>- 10 .. 10 В</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.cpp" line="300"/>
+        <location filename="../MeasurePointBase.cpp" line="305"/>
         <source>0 .. 5 mA</source>
         <translation>0 .. 5 мА</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.cpp" line="301"/>
+        <location filename="../MeasurePointBase.cpp" line="306"/>
         <source>4 .. 20 mA</source>
         <translation>4 .. 20 мА</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.cpp" line="303"/>
+        <location filename="../MeasurePointBase.cpp" line="308"/>
         <source>0 .. 100 °C</source>
         <translation>0 .. 100 °C</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.cpp" line="304"/>
+        <location filename="../MeasurePointBase.cpp" line="309"/>
         <source>0 .. 150 °C</source>
         <translation>0 .. 150 °C</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.cpp" line="305"/>
+        <location filename="../MeasurePointBase.cpp" line="310"/>
         <source>0 .. 200 °C</source>
         <translation>0 .. 200 °C</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.cpp" line="306"/>
+        <location filename="../MeasurePointBase.cpp" line="311"/>
         <source>0 .. 400 °C</source>
         <translation>0 .. 400 °C</translation>
     </message>
     <message>
-        <location filename="../MeasurePointBase.cpp" line="310"/>
+        <location filename="../MeasurePointBase.cpp" line="315"/>
+        <location filename="../MeasurePointBase.cpp" line="334"/>
         <source>Unknown</source>
         <translation>Не определено</translation>
+    </message>
+    <message>
+        <location filename="../MeasurePointBase.cpp" line="329"/>
+        <source>Manual division of the measure range</source>
+        <translation>Ручная разбивка диапазона измерения</translation>
+    </message>
+    <message>
+        <location filename="../MeasurePointBase.cpp" line="330"/>
+        <source>Automatic division of the measure range</source>
+        <translation>Автоматическая разбивка диапазона измерения</translation>
     </message>
 </context>
 <context>
     <name>MeasurePointBase.cpp</name>
     <message>
-        <location filename="../MeasurePointBase.cpp" line="167"/>
+        <location filename="../MeasurePointBase.cpp" line="172"/>
         <source>The measurement points are not set</source>
         <translation>Точки измерения не заданы</translation>
     </message>
@@ -4467,32 +4481,32 @@ Do you want to repeat the preparation process in order to switch the comparator 
         <translation>Вы хотите удалить %1 измерений?</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="1003"/>
+        <location filename="../MeasureView.cpp" line="1005"/>
         <source>Nominal</source>
         <translation>Номинал</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="1006"/>
+        <location filename="../MeasureView.cpp" line="1008"/>
         <source>Measure</source>
         <translation>Измеренное</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="1017"/>
+        <location filename="../MeasureView.cpp" line="1019"/>
         <source>Low limit</source>
         <translation>Верхний предел</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="1020"/>
+        <location filename="../MeasureView.cpp" line="1022"/>
         <source>High limit</source>
         <translation>Нижний предел</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="1084"/>
+        <location filename="../MeasureView.cpp" line="1086"/>
         <source>Measure (Nominal = %1)</source>
         <translation>Измеренное (Номинал = %1)</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="1157"/>
+        <location filename="../MeasureView.cpp" line="1159"/>
         <source>Graph - %1</source>
         <translation>График - %1</translation>
     </message>
@@ -5192,19 +5206,58 @@ Please, select output signal!</source>
     </message>
 </context>
 <context>
+    <name>Options</name>
+    <message>
+        <location filename="../Options.cpp" line="766"/>
+        <source>Simple</source>
+        <translation>Простой</translation>
+    </message>
+    <message>
+        <location filename="../Options.cpp" line="767"/>
+        <source>Extended (show columns for metrological certification)</source>
+        <translation>Расширенный (отображаются значения для аттестации)</translation>
+    </message>
+    <message>
+        <location filename="../Options.cpp" line="768"/>
+        <source>Detail electric (show all measurements at one point)</source>
+        <translation>Детальный электрический (отображаются все измерения в точке)</translation>
+    </message>
+    <message>
+        <location filename="../Options.cpp" line="769"/>
+        <source>Detail engineering (show all measurements at one point)</source>
+        <translation>Детальный физический (отображаются все измерения в точке)</translation>
+    </message>
+    <message>
+        <location filename="../Options.cpp" line="1379"/>
+        <source>English</source>
+        <translation>Английский</translation>
+    </message>
+    <message>
+        <location filename="../Options.cpp" line="1380"/>
+        <source>Russian</source>
+        <translation>Русский</translation>
+    </message>
+    <message>
+        <location filename="../Options.cpp" line="772"/>
+        <location filename="../Options.cpp" line="1383"/>
+        <source>Unknown</source>
+        <translation>Не определен</translation>
+    </message>
+</context>
+<context>
     <name>Options.h</name>
     <message>
-        <location filename="../Options.h" line="973"/>
+        <location filename="../Options.h" line="961"/>
         <source>Type</source>
         <translation>Тип базы данных</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="976"/>
+        <location filename="../Options.h" line="964"/>
         <source>Path for backup</source>
         <translation>Путь для резервных копий</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="991"/>
+        <location filename="../Options.h" line="979"/>
         <source>SQLite</source>
         <translation>SQLite</translation>
     </message>
@@ -5221,7 +5274,7 @@ Please, select output signal!</source>
     <message>
         <location filename="../Options.h" line="108"/>
         <location filename="../Options.h" line="111"/>
-        <location filename="../Options.h" line="703"/>
+        <location filename="../Options.h" line="691"/>
         <source>EquipmentID</source>
         <translation>EquipmentID</translation>
     </message>
@@ -5329,93 +5382,93 @@ Please, select output signal!</source>
         <translation>Максимальное число входов для входных модулей</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="680"/>
+        <location filename="../Options.h" line="668"/>
         <source>Font of measurements list</source>
         <translation>Шрифт списка измерений</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="681"/>
+        <location filename="../Options.h" line="669"/>
         <source>Color measurement that has not error</source>
         <translation>Цвет измерения в границах допуска</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="682"/>
+        <location filename="../Options.h" line="670"/>
         <source>Color measurement over limit error</source>
         <translation>Цвет измерения за границами допуска</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="683"/>
+        <location filename="../Options.h" line="671"/>
         <source>Color measurement over control error</source>
         <translation>Цвет измерения за пределами контрольного допуска</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="685"/>
+        <location filename="../Options.h" line="673"/>
         <source>Show accuracy for measure value and nominal value from calibrator</source>
         <translation>Отображать точность измеренного и номинального значения от калибратора</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="701"/>
+        <location filename="../Options.h" line="689"/>
         <source>AppSignalID</source>
         <translation>AppSignalID</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="702"/>
+        <location filename="../Options.h" line="690"/>
         <source>CustomAppSignalID</source>
         <translation>CustomAppSignalID</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="797"/>
-        <location filename="../Options.h" line="888"/>
+        <location filename="../Options.h" line="785"/>
+        <location filename="../Options.h" line="876"/>
         <source>Font of signal information list</source>
         <translation>Шрифт панели информации о сигнале</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="799"/>
+        <location filename="../Options.h" line="787"/>
         <source>Show electric state</source>
         <translation>Отображать электрическое значение</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="800"/>
+        <location filename="../Options.h" line="788"/>
         <source>Color flag no validity</source>
         <translation>Цвет флага не валидности</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="801"/>
+        <location filename="../Options.h" line="789"/>
         <source>Color flag overflow</source>
         <translation>Цвет флага превышения</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="802"/>
+        <location filename="../Options.h" line="790"/>
         <source>Color flag underflow</source>
         <translation>Цвет флага обрыва</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="803"/>
+        <location filename="../Options.h" line="791"/>
         <source>Time for updating state of signal (ms)</source>
         <translation>Время обновления состояния сигнала (мсек)</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="891"/>
+        <location filename="../Options.h" line="879"/>
         <source>Color, if comparator has state &quot;logical 0&quot;</source>
         <translation>Цвет, если уставка в состоянии лог. &quot;0&quot;</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="892"/>
+        <location filename="../Options.h" line="880"/>
         <source>Color, if comparator has state &quot;logical 1&quot;</source>
         <translation>Цвет, если уставка в состоянии лог. &quot;1&quot;</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="889"/>
+        <location filename="../Options.h" line="877"/>
         <source>Displaying text, if comparator has state &quot;logical 0&quot;</source>
         <translation>Отображаемый текст, если уставка в состоянии лог. &quot;0&quot;</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="890"/>
+        <location filename="../Options.h" line="878"/>
         <source>Displaying text, if comparator has state &quot;logical 1&quot;</source>
         <translation>Отображаемый текст, если уставка в состоянии лог. &quot;1&quot;</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="893"/>
+        <location filename="../Options.h" line="881"/>
         <source>Time for updating state of comparator (ms)</source>
         <translation>Время обновления состояния уставки (мсек)</translation>
     </message>
@@ -5435,14 +5488,14 @@ Please, select output signal!</source>
         <translation>Выводить предупреждение если сигнал уже измерен</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="684"/>
-        <location filename="../Options.h" line="798"/>
+        <location filename="../Options.h" line="672"/>
+        <location filename="../Options.h" line="786"/>
         <source>Show measuring value if signal is not valid</source>
         <translation>Отображать значение, если сигнал не валиден</translation>
     </message>
     <message>
         <location filename="../Options.h" line="399"/>
-        <location filename="../Options.h" line="537"/>
+        <location filename="../Options.h" line="524"/>
         <source>Limit of error (%)</source>
         <translation>Допустимая погрешность (%)</translation>
     </message>
@@ -5453,7 +5506,7 @@ Please, select output signal!</source>
     </message>
     <message>
         <location filename="../Options.h" line="401"/>
-        <location filename="../Options.h" line="540"/>
+        <location filename="../Options.h" line="527"/>
         <source>Show error from limit</source>
         <translation>Отображение типа диапазона погрешности</translation>
     </message>
@@ -5499,83 +5552,63 @@ Please, select output signal!</source>
     </message>
     <message>
         <location filename="../Options.h" line="430"/>
-        <source>Manual division of the measure range</source>
-        <translation>Ручная разбивка диапазона измерения</translation>
-    </message>
-    <message>
-        <location filename="../Options.h" line="431"/>
-        <source>Automatic division of the measure range</source>
-        <translation>Автоматическая разбивка диапазона измерения</translation>
-    </message>
-    <message>
-        <location filename="../Options.h" line="443"/>
         <source>Simple</source>
         <translation>Простой</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="444"/>
+        <location filename="../Options.h" line="431"/>
         <source>Extended (show columns for metrological certification)</source>
         <translation>Расширенный (отображаются значения для аттестации)</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="445"/>
+        <location filename="../Options.h" line="432"/>
         <source>Detail electric (show all measurements at one point)</source>
         <translation>Детальный электрический (отображаются все измерения в точке)</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="446"/>
+        <location filename="../Options.h" line="433"/>
         <source>Detail engineering (show all measurements at one point)</source>
         <translation>Детальный физический (отображаются все измерения в точке)</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="538"/>
+        <location filename="../Options.h" line="525"/>
         <source>Start value (%)</source>
         <translation>Стартовое значение (%)</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="539"/>
+        <location filename="../Options.h" line="526"/>
         <source>Error type</source>
         <translation>Тип погрешности</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="541"/>
+        <location filename="../Options.h" line="528"/>
         <source>Start measurement from the сomparator</source>
         <translation>Начать измерение с уставки</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="542"/>
+        <location filename="../Options.h" line="529"/>
         <source>Enable to measure hysteresis of comparators</source>
         <translation>Разрешить измерять зону возврата</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="972"/>
+        <location filename="../Options.h" line="960"/>
         <source>Location path</source>
         <translation>Путь к базе данных на диске</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="974"/>
+        <location filename="../Options.h" line="962"/>
         <source>On start application</source>
         <translation>При запуске приложения</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="975"/>
+        <location filename="../Options.h" line="963"/>
         <source>On exit application</source>
         <translation>При завершении приложения</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="1055"/>
+        <location filename="../Options.h" line="1043"/>
         <source>Language</source>
         <translation>Язык</translation>
-    </message>
-    <message>
-        <location filename="../Options.h" line="667"/>
-        <source>English</source>
-        <translation>Английский</translation>
-    </message>
-    <message>
-        <location filename="../Options.h" line="668"/>
-        <source>Russian</source>
-        <translation>Русский</translation>
     </message>
 </context>
 <context>

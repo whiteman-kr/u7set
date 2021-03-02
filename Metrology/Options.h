@@ -425,34 +425,20 @@ const int				LO_PARAM_ERROR_LIMIT			= 0,
 
 // ----------------------------------------------------------------------------------------------
 
-const char* const		LinearityRangeTypeStr[] =
+enum LinearityViewType
 {
-						QT_TRANSLATE_NOOP("Options.h", "Manual division of the measure range"),
-						QT_TRANSLATE_NOOP("Options.h", "Automatic division of the measure range"),
+	NoLinearityViewType	= -1,
+	Simple				= 0,
+	Extended			= 1,
+	DetailElectric		= 2,
+	DetailEngineering	= 3,
 };
 
-const int				LO_RANGE_TYPE_COUNT			= sizeof(LinearityRangeTypeStr)/sizeof(LinearityRangeTypeStr[0]);
+const int LinearityViewTypeCount = 4;
 
-const int				LO_RANGE_TYPE_MANUAL		= 0,
-						LO_RANGE_TYPE_AUTOMATIC		= 1;
+#define ERR_LINEARITY_VIEW_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= LinearityViewTypeCount)
 
-// ----------------------------------------------------------------------------------------------
-
-const char* const		LinearityViewTypeStr[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "Simple"),
-						QT_TRANSLATE_NOOP("Options.h", "Extended (show columns for metrological certification)"),
-						QT_TRANSLATE_NOOP("Options.h", "Detail electric (show all measurements at one point)"),
-						QT_TRANSLATE_NOOP("Options.h", "Detail engineering (show all measurements at one point)"),
-};
-
-const int				LO_VIEW_TYPE_COUNT				= sizeof(LinearityViewTypeStr)/sizeof(LinearityViewTypeStr[0]);
-
-const int				LO_VIEW_TYPE_UNDEFINED			= -1,
-						LO_VIEW_TYPE_SIMPLE				= 0,
-						LO_VIEW_TYPE_EXTENDED			= 1,
-						LO_VIEW_TYPE_DETAIL_ELRCTRIC	= 2,
-						LO_VIEW_TYPE_DETAIL_ENGINEERING	= 3;
+QString LinearityViewTypeCaption(int type);
 
 // ----------------------------------------------------------------------------------------------
 
@@ -468,7 +454,7 @@ public:
 
 public:
 
-	MeasurePointBase&	points() { return m_pointBase; }
+	Measure::PointBase&	points() { return m_pointBase; }
 
 	double				errorLimit() const { return m_errorLimit; }
 	void				setErrorLimit(double errorLimit) { m_errorLimit = errorLimit; }
@@ -485,8 +471,8 @@ public:
 	int					measureCountInPoint();
 	void				setMeasureCountInPoint(int measureCount);
 
-	int					rangeType() const { return m_rangeType; }
-	void				setRangeType(int type) { m_rangeType = type; }
+	int					divisionType() const { return m_divisionType; }
+	void				setDivisionType(int type) { m_divisionType = type; }
 
 	double				lowLimitRange() const { return m_lowLimitRange; }
 	void				setLowLimitRange(double lowLimit) { m_lowLimitRange = lowLimit; }
@@ -510,20 +496,20 @@ public:
 
 private:
 
-	MeasurePointBase	m_pointBase;												// list of measurement points
+	Measure::PointBase	m_pointBase;												// list of measurement points
 
 	double				m_errorLimit = 0.2;											// permissible error is given by specified documents
-	int					m_errorType = MeasureErrorType::Reduce;					// type of error absolute or reduced
-	int					m_limitType = MeasureLimitType::Electric;					// type of displaing error denend on limit
+	int					m_errorType = Measure::ErrorType::Reduce;					// type of error absolute or reduced
+	int					m_limitType = Measure::LimitType::Electric;					// type of displaing error denend on limit
 
 	int					m_measureTimeInPoint = 1;									// time, in seconds, during which will be made ​​N measurements at each point
-	int					m_measureCountInPoint = 20;									// count of measurements in a point, according to GOST MI-2002 application 7
+	int					m_measureCountInPoint = Measure::MaxMeasurementInPoint;		// count of measurements in a point, according to GOST MI-2002 application 7
 
-	int					m_rangeType = LO_RANGE_TYPE_MANUAL;							// type of division measure range: manual - 0 or automatic - 1
-	double				m_lowLimitRange = 5;										// lower limit of the range for automatic division
-	double				m_highLimitRange = 95;										// high limit of the range for automatic division
+	int					m_divisionType = Measure::LinearityDivision::Manual;		// type of division measure range: manual - 0 or automatic - 1
+	double				m_lowLimitRange = Measure::LinearityRangeLow;				// lower limit of the range for automatic division
+	double				m_highLimitRange = Measure::LinearityRangeHigh;				// high limit of the range for automatic division
 
-	int					m_viewType = LO_VIEW_TYPE_SIMPLE;							// type of measurements list extended or simple
+	int					m_viewType = LinearityViewType::Simple;						// type of measurements list extended or simple
 };
 
 // ==============================================================================================
@@ -597,8 +583,8 @@ private:
 
 	double				m_errorLimit = 0.2;										// permissible error is given by specified documents
 	double				m_startValueForCompare = 0.1;							// start value is given by metrologists
-	int					m_errorType = MeasureErrorType::Reduce;				// type of error absolute or reduced
-	int					m_limitType = MeasureLimitType::Electric;				// type of displaing error denend on limit
+	int					m_errorType = Measure::ErrorType::Reduce;					// type of error absolute or reduced
+	int					m_limitType = Measure::LimitType::Electric;				// type of displaing error denend on limit
 
 	int					m_startComparatorIndex = 0;								// start the measurement with the сomparators under the number ...
 	bool				m_enableMeasureHysteresis = false;						// enable flag to measure hysteresis of сomparator
@@ -649,7 +635,7 @@ public:
 private:
 
 	int					m_measureTimeout = 0;											// in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
-	int					m_measureKind = MeasureKind::OneRack;							// measure kind: each channel separately - 0 or for all channels together - 1
+	int					m_measureKind = Measure::Kind::OneRack;							// measure kind: each channel separately - 0 or for all channels together - 1
 	int					m_connectionType = Metrology::ConnectionType::Unused;			// selected type of connection
 
 	QString				m_defaultRack;
@@ -662,16 +648,17 @@ private:
 
 // ----------------------------------------------------------------------------------------------
 
-const char* const		LanguageTypeStr[] =
+enum LanguageType
 {
-						QT_TRANSLATE_NOOP("Options.h", "English"),
-						QT_TRANSLATE_NOOP("Options.h", "Russian"),
+	English	= 0,
+	Russian	= 1,
 };
 
-const int				LANGUAGE_TYPE_COUNT	= sizeof(LanguageTypeStr)/sizeof(LanguageTypeStr[0]);
+const int LanguageTypeCount = 2;
 
-const int				LANGUAGE_TYPE_EN	= 0,
-						LANGUAGE_TYPE_RU	= 1;
+#define ERR_LANGUAGE_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= LanguageTypeCount)
+
+QString LanguageTypeCaption(int type);
 
 // ----------------------------------------------------------------------------------------------
 
@@ -729,7 +716,7 @@ public:
 //private:
 public:
 
-	MeasureViewColumn	m_column[MeasureTypeCount][LANGUAGE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
+	MeasureViewColumn	m_column[Measure::TypeCount][LanguageTypeCount][MEASURE_VIEW_COLUMN_COUNT];
 
 public:
 
@@ -771,9 +758,9 @@ public:
 
 private:
 
-	int					m_measureType = MeasureType::NoMeasureType;						// current, active ViewID
+	int					m_measureType = Measure::Type::NoMeasureType;				// current, active ViewID
 
-	bool				m_updateColumnView[MeasureTypeCount];						// determined the need to update the view after changing settings
+	bool				m_updateColumnView[Measure::TypeCount];						// determined the need to update the view after changing settings
 
 	QFont				m_font;
 	QFont				m_fontBold;
@@ -1092,7 +1079,7 @@ public:
 
 private:
 
-	int					m_languageType = LANGUAGE_TYPE_EN;
+	int					m_languageType = LanguageType::English;
 };
 
 // ==============================================================================================

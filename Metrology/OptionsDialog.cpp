@@ -100,7 +100,7 @@ OptionsDialog::OptionsDialog(const Options& options, QWidget* parent) :
 	QDialog(parent),
 	m_options(options)
 {
-	for(int measureType = 0; measureType < MeasureTypeCount; measureType++)
+	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
 	{
 		m_options.measureView().setUpdateColumnView(measureType, false);
 	}
@@ -431,9 +431,9 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LinearityParamName[LO_PARAM_ERROR_TYPE]));
 					QStringList errorTypeList;
-					for(int e = 0; e < MeasureErrorTypeCount; e++)
+					for(int e = 0; e < Measure::ErrorTypeCount; e++)
 					{
-						errorTypeList.append(qApp->translate("MeasureBase", MeasureErrorTypeCaption(e).toUtf8()));
+						errorTypeList.append(qApp->translate("MeasureBase", Measure::ErrorTypeCaption(e).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), errorTypeList);
 					item->setValue(m_options.linearity().errorType());
@@ -442,9 +442,9 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LinearityParamName[LO_PARAM_SHOW_ERROR_FROM_LIMIT]));
 					QStringList showErrorFromLimitList;
-					for(int t = 0; t < MeasureLimitTypeCount; t++)
+					for(int t = 0; t < Measure::LimitTypeCount; t++)
 					{
-						showErrorFromLimitList.append(qApp->translate("MeasureBase", MeasureLimitTypeCaption(t).toUtf8()));
+						showErrorFromLimitList.append(qApp->translate("MeasureBase", Measure::LimitTypeCaption(t).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
 					item->setValue(m_options.linearity().limitType());
@@ -464,7 +464,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", LinearityParamName[LO_PARAM_MEASURE_IN_POINT]));
 					item->setValue(m_options.linearity().measureCountInPoint());
 					item->setAttribute(QLatin1String("minimum"), 1);
-					item->setAttribute(QLatin1String("maximum"), MAX_MEASUREMENT_IN_POINT);
+					item->setAttribute(QLatin1String("maximum"), Measure::MaxMeasurementInPoint);
 					item->setAttribute(QLatin1String("singleStep"), 1);
 					appendProperty(item, page, LO_PARAM_MEASURE_IN_POINT);
 					measureGroup->addSubProperty(item);
@@ -473,22 +473,22 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LinearityParamName[LO_PARAM_RANGE_TYPE]));
 					QStringList rangeTypeList;
-					for(int r = 0; r < LO_RANGE_TYPE_COUNT; r++)
+					for(int r = 0; r < Measure::LinearityDivisionCount; r++)
 					{
-						rangeTypeList.append(qApp->translate("Options.h", LinearityRangeTypeStr[r]));
+						rangeTypeList.append(qApp->translate("MeasurePointBase", Measure::LinearityDivisionCaption(r).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), rangeTypeList);
-					item->setValue(m_options.linearity().rangeType());
+					item->setValue(m_options.linearity().divisionType());
 					appendProperty(item, page, LO_PARAM_RANGE_TYPE);
 					pointGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", LinearityParamName[LO_PARAM_POINT_COUNT]));
 					item->setValue(m_options.linearity().points().count());
-					switch(m_options.linearity().rangeType())
+					switch(m_options.linearity().divisionType())
 					{
-						case LO_RANGE_TYPE_MANUAL:		item->setEnabled(false);	break;
-						case LO_RANGE_TYPE_AUTOMATIC:	item->setEnabled(true);		break;
-						default:						assert(0);
+						case Measure::LinearityDivision::Manual:	item->setEnabled(false);	break;
+						case Measure::LinearityDivision::Automatic:	item->setEnabled(true);		break;
+						default:									assert(0);
 					}
 					appendProperty(item, page, LO_PARAM_POINT_COUNT);
 					pointGroup->addSubProperty(item);
@@ -497,11 +497,11 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					item->setValue(m_options.linearity().lowLimitRange());
 					item->setAttribute(QLatin1String("singleStep"), 1);
 					item->setAttribute(QLatin1String("decimals"), 1);
-					switch(m_options.linearity().rangeType())
+					switch(m_options.linearity().divisionType())
 					{
-						case LO_RANGE_TYPE_MANUAL:		item->setEnabled(false);	break;
-						case LO_RANGE_TYPE_AUTOMATIC:	item->setEnabled(true);		break;
-						default:						assert(0);
+						case Measure::LinearityDivision::Manual:	item->setEnabled(false);	break;
+						case Measure::LinearityDivision::Automatic:	item->setEnabled(true);		break;
+						default:									assert(0);
 					}
 					appendProperty(item, page, LO_PARAM_LOW_RANGE);
 					pointGroup->addSubProperty(item);
@@ -510,11 +510,11 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					item->setValue(m_options.linearity().highLimitRange());
 					item->setAttribute(QLatin1String("singleStep"), 1);
 					item->setAttribute(QLatin1String("decimals"), 1);
-					switch(m_options.linearity().rangeType())
+					switch(m_options.linearity().divisionType())
 					{
-						case LO_RANGE_TYPE_MANUAL:		item->setEnabled(false);	break;
-						case LO_RANGE_TYPE_AUTOMATIC:	item->setEnabled(true);		break;
-						default:						assert(0);
+						case Measure::LinearityDivision::Manual:	item->setEnabled(false);	break;
+						case Measure::LinearityDivision::Automatic:	item->setEnabled(true);		break;
+						default:									assert(0);
 					}
 					appendProperty(item, page, LO_PARAM_HIGH_RANGE);
 					pointGroup->addSubProperty(item);
@@ -529,9 +529,9 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LinearityParamName[LO_PARAM_LIST_TYPE]));
 					QStringList listTypeList;
-					for(int r = 0; r < LO_VIEW_TYPE_COUNT; r++)
+					for(int r = 0; r < LinearityViewTypeCount; r++)
 					{
-						listTypeList.append(qApp->translate("Options.h", LinearityViewTypeStr[r]));
+						listTypeList.append(qApp->translate("Options", LinearityViewTypeCaption(r).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), listTypeList);
 					item->setValue(m_options.linearity().viewType());
@@ -567,9 +567,9 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", ComparatorParamName[CO_PARAM_ERROR_TYPE]));
 					QStringList errorTypeList;
-					for(int e = 0; e < MeasureErrorTypeCount; e++)
+					for(int e = 0; e < Measure::ErrorTypeCount; e++)
 					{
-						errorTypeList.append(qApp->translate("MeasureBase", MeasureErrorTypeCaption(e).toUtf8()));
+						errorTypeList.append(qApp->translate("MeasureBase", Measure::ErrorTypeCaption(e).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), errorTypeList);
 					item->setValue(m_options.comparator().errorType());
@@ -578,9 +578,9 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", ComparatorParamName[CO_PARAM_SHOW_ERROR_FROM_LIMIT]));
 					QStringList showErrorFromLimitList;
-					for(int t = 0; t < MeasureLimitTypeCount; t++)
+					for(int t = 0; t < Measure::LimitTypeCount; t++)
 					{
-						showErrorFromLimitList.append(qApp->translate("MeasureBase", MeasureLimitTypeCaption(t).toUtf8()));
+						showErrorFromLimitList.append(qApp->translate("MeasureBase", Measure::LimitTypeCaption(t).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
 					item->setValue(m_options.comparator().limitType());
@@ -833,9 +833,9 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LanguageParam[LNO_PARAM_LANGUAGE_TYPE]));
 					QStringList valueTypeList;
-					for(int t = 0; t < LANGUAGE_TYPE_COUNT; t++)
+					for(int t = 0; t < LanguageTypeCount; t++)
 					{
-						valueTypeList.append(qApp->translate("Options.h", LanguageTypeStr[t]));
+						valueTypeList.append(qApp->translate("Options", LanguageTypeCaption(t).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), valueTypeList);
 					item->setValue(m_options.language().languageType());
@@ -1176,12 +1176,12 @@ void OptionsDialog::applyProperty()
 				{
 					case LO_PARAM_ERROR_LIMIT:				m_options.linearity().setErrorLimit(value.toDouble());						break;
 					case LO_PARAM_ERROR_TYPE:				m_options.linearity().setErrorType(value.toInt());
-															m_options.measureView().setUpdateColumnView(MeasureType::Linearity, true);	break;
+															m_options.measureView().setUpdateColumnView(Measure::Type::Linearity, true);break;
 					case LO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.linearity().setLimitType(value.toInt());
-															m_options.measureView().setUpdateColumnView(MeasureType::Linearity, true);	break;
+															m_options.measureView().setUpdateColumnView(Measure::Type::Linearity, true);break;
 					case LO_PARAM_MEASURE_TIME:				m_options.linearity().setMeasureTimeInPoint(value.toInt());					break;
 					case LO_PARAM_MEASURE_IN_POINT:			m_options.linearity().setMeasureCountInPoint(value.toInt());				break;
-					case LO_PARAM_RANGE_TYPE:				m_options.linearity().setRangeType(value.toInt());
+					case LO_PARAM_RANGE_TYPE:				m_options.linearity().setDivisionType(value.toInt());
 															m_options.linearity().recalcPoints();
 															updateLinearityPage(false);													break;
 					case LO_PARAM_POINT_COUNT:				m_options.linearity().recalcPoints(value.toInt());
@@ -1194,7 +1194,7 @@ void OptionsDialog::applyProperty()
 															updateLinearityPage(false);													break;
 					case LO_PARAM_VALUE_POINTS:				setActivePage(OPTION_PAGE_LINEARITY_POINT);									break;
 					case LO_PARAM_LIST_TYPE:				m_options.linearity().setViewType(value.toInt());
-															m_options.measureView().setUpdateColumnView(MeasureType::Linearity,true);	break;
+															m_options.measureView().setUpdateColumnView(Measure::Type::Linearity,true);	break;
 					default:								assert(0);
 				}
 			}
@@ -1208,7 +1208,7 @@ void OptionsDialog::applyProperty()
 					case CO_PARAM_START_VALUE:				m_options.comparator().setStartValueForCompare(value.toDouble());			break;
 					case CO_PARAM_ERROR_TYPE:				m_options.comparator().setErrorType(value.toInt());							break;
 					case CO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.comparator().setLimitType(value.toInt());
-															m_options.measureView().setUpdateColumnView(MeasureType::Comparators, true);	break;
+															m_options.measureView().setUpdateColumnView(Measure::Type::Comparators, true);	break;
 					case CO_PARAM_COMPARATOR_INDEX:			m_options.comparator().setStartComparatorIndex(value.toInt() - 1);			break;
 					case CO_PARAM_ENABLE_HYSTERESIS:		m_options.comparator().setEnableMeasureHysteresis(value.toBool());			break;
 					default:								assert(0);
@@ -1229,7 +1229,7 @@ void OptionsDialog::applyProperty()
 					default:								assert(0);
 				}
 
-				for(int measureType = 0; measureType < MeasureTypeCount; measureType++)
+				for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
 				{
 					m_options.measureView().setUpdateColumnView(measureType, true);
 				}
@@ -1288,7 +1288,7 @@ void OptionsDialog::applyProperty()
 				{
 					case DBO_PARAM_ON_START:			m_options.database().setOnStart(value.toBool());								break;
 					case DBO_PARAM_ON_EXIT:				m_options.database().setOnExit(value.toBool());									break;
-					case DBO_PARAM_COPY_PATH:			m_options.database().setBackupPath(value.toString());								break;
+					case DBO_PARAM_COPY_PATH:			m_options.database().setBackupPath(value.toString());							break;
 					default:							assert(0);
 				}
 			}
@@ -1359,7 +1359,7 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_RANGE_TYPE));
 	if (property != nullptr)
 	{
-		property->setValue(m_options.linearity().rangeType());
+		property->setValue(m_options.linearity().divisionType());
 	}
 
 	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_POINT_COUNT));
@@ -1367,11 +1367,11 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 	{
 		property->setValue(m_options.linearity().points().count());
 
-		switch(m_options.linearity().rangeType())
+		switch(m_options.linearity().divisionType())
 		{
-			case LO_RANGE_TYPE_MANUAL:		property->setEnabled(false);	break;
-			case LO_RANGE_TYPE_AUTOMATIC:	property->setEnabled(true);		break;
-			default:						assert(0);
+			case Measure::LinearityDivision::Manual:	property->setEnabled(false);	break;
+			case Measure::LinearityDivision::Automatic:	property->setEnabled(true);		break;
+			default:									assert(0);
 		}
 	}
 
@@ -1380,11 +1380,11 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 	{
 		property->setValue(m_options.linearity().lowLimitRange());
 
-		switch(m_options.linearity().rangeType())
+		switch(m_options.linearity().divisionType())
 		{
-			case LO_RANGE_TYPE_MANUAL:		property->setEnabled(false);	break;
-			case LO_RANGE_TYPE_AUTOMATIC:	property->setEnabled(true);		break;
-			default:						assert(0);
+			case Measure::LinearityDivision::Manual:	property->setEnabled(false);	break;
+			case Measure::LinearityDivision::Automatic:	property->setEnabled(true);		break;
+			default:									assert(0);
 		}
 	}
 
@@ -1393,11 +1393,11 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 	{
 		property->setValue(m_options.linearity().highLimitRange());
 
-		switch(m_options.linearity().rangeType())
+		switch(m_options.linearity().divisionType())
 		{
-			case LO_RANGE_TYPE_MANUAL:		property->setEnabled(false);	break;
-			case LO_RANGE_TYPE_AUTOMATIC:	property->setEnabled(true);		break;
-			default:						assert(0);
+			case Measure::LinearityDivision::Manual:	property->setEnabled(false);	break;
+			case Measure::LinearityDivision::Automatic:	property->setEnabled(true);		break;
+			default:									assert(0);
 		}
 
 	}
@@ -1431,7 +1431,7 @@ void OptionsDialog::updateMeasureViewPage(bool isDialog)
 		//
 		m_options.setMeasureView(dialog->m_header);
 
-		MeasureType measureType = dialog->measureType();
+		Measure::Type measureType = dialog->measureType();
 		if (ERR_MEASURE_TYPE(measureType) == false)
 		{
 			m_options.measureView().setUpdateColumnView(measureType, true);

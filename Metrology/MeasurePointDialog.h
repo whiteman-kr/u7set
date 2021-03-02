@@ -34,7 +34,7 @@ private:
 
 	LinearityOption		m_linearity;
 
-	QAction*			m_pColumnAction[PointSensorCount];
+	QAction*			m_pColumnAction[Measure::PointSensorCount];
 	QMenu*				m_headerContextMenu = nullptr;
 
 	// elements of interface

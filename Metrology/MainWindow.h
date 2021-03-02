@@ -37,7 +37,7 @@ public:
 
 public:
 
-	MeasureType				measureType() const { return m_measureType; }
+	Measure::Type			measureType() const { return m_measureType; }
 
 	// Views
 	//
@@ -66,8 +66,8 @@ public:
 private:
 
 	int						m_measureTimeout = 0;
-	MeasureType				m_measureType = MeasureType::NoMeasureType;
-	MeasureKind				m_measureKind = MeasureKind::NoMeasureKind;
+	Measure::Type			m_measureType = Measure::Type::NoMeasureType;
+	Measure::Kind			m_measureKind = Measure::Kind::NoMeasureKind;
 	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 	QMap<int, MeasureView*> m_measureViewMap;
@@ -171,7 +171,7 @@ private:
 	SoftwareInfo			m_softwareInfo;
 
 	CalibratorBase			m_calibratorBase;
-	MeasureBase				m_measureBase;
+	Measure::Base			m_measureBase;
 
 	ConfigSocket*			m_pConfigSocket = nullptr;
 	void					runConfigSocket();
@@ -233,7 +233,7 @@ signals:
 
 	// from measureComplite
 	//
-	void					appendMeasure(Measurement*);
+	void					appendMeasure(Measure::Item*);
 
 private slots:
 
@@ -331,7 +331,7 @@ private slots:
 	void					measureThreadStoped();
 	void					measureThreadInfo(const MeasureThreadInfo& info);
 	void					measureThreadMsgBox(int type, QString text, int* result = nullptr);
-	void					measureComplite(Measurement* pMeasurement);
+	void					measureComplite(Measure::Item* pMeasurement);
 
 	// Slots of measure base
 	//

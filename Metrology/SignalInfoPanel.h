@@ -170,7 +170,7 @@ private:
 	CalibratorBase*			m_pCalibratorBase = nullptr;
 	SignalInfoOption		m_signalInfo;
 
-	MeasureKind				m_measureKind = MeasureKind::NoMeasureKind;
+	Measure::Kind			m_measureKind = Measure::Kind::NoMeasureKind;
 	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 protected:

@@ -220,7 +220,7 @@ bool MeasureThread::setCalibratorUnit()
 
 	int channelCount = m_activeIoParamList.count();
 
-	if (m_measureKind == MeasureKind::OneRack || m_measureKind == MeasureKind::OneModule)
+	if (m_measureKind == Measure::Kind::OneRack || m_measureKind == Measure::Kind::OneModule)
 	{
 		channelCount = 1;
 	}
@@ -253,7 +253,7 @@ bool MeasureThread::setCalibratorUnit()
 			}
 
 			if (prepareCalibrator(pCalibratorManager,
-								  CalibratorMode::Source,
+								  CalibratorMode::SourceMode,
 								  inParam.electricUnitID(),
 								  inParam.electricHighLimit()) == false)
 			{
@@ -276,7 +276,7 @@ bool MeasureThread::setCalibratorUnit()
 			}
 
 			if (prepareCalibrator(pCalibratorManager,
-								  CalibratorMode::Measure,
+								  CalibratorMode::MeasureMode,
 								  outParam.electricUnitID(),
 								  outParam.electricHighLimit()) == false)
 			{
@@ -302,7 +302,7 @@ bool MeasureThread::setCalibratorUnit()
 			}
 
 			if (prepareCalibrator(pCalibratorManager,
-								  CalibratorMode::Measure,
+								  CalibratorMode::MeasureMode,
 								  outParam.electricUnitID(),
 								  outParam.electricHighLimit()) == false)
 			{
@@ -339,7 +339,7 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, Cal
 		return false;
 	}
 
-	CalibratorUnit calibratorUnit = CalibratorUnit::NoUnit;
+	CalibratorUnit calibratorUnit = CalibratorUnit::NoCalibratorUnit;
 
 	switch(signalUnit)
 	{
@@ -423,7 +423,7 @@ void MeasureThread::polarityTest(double electricVal, IoSignalParam& ioParam)
 
 	double negativeLimit = 0;
 
-	if (pCalibrator->mode() == CalibratorMode::Source && pCalibrator->sourceUnit() == CalibratorUnit::mV)
+	if (pCalibrator->mode() == CalibratorMode::SourceMode && pCalibrator->sourceUnit() == CalibratorUnit::mV)
 	{
 		negativeLimit = -10;
 	}
@@ -470,20 +470,20 @@ void MeasureThread::run()
 	//
 	switch (m_measureType)
 	{
-		case MeasureType::Linearity:
+		case Measure::Type::Linearity:
 			measureLinearity();
 			break;
 
-		case MeasureType::Comparators:
+		case Measure::Type::Comparators:
 
 			switch (m_measureKind)
 			{
-				case MeasureKind::OneRack:
-				case MeasureKind::OneModule:
+				case Measure::Kind::OneRack:
+				case Measure::Kind::OneModule:
 					measureCompratorsInSeries();
 					break;
 
-				case MeasureKind::MultiRack:
+				case Measure::Kind::MultiRack:
 					measureCompratorsInParallel();
 					break;
 
@@ -518,7 +518,7 @@ void MeasureThread::measureLinearity()
 
 	for(int pt = 0; pt < pointCount; pt++)
 	{
-		MeasurePoint point = m_linearityOption.points().point(pt);
+		Measure::Point point = m_linearityOption.points().point(pt);
 
 		m_info.setMessage(tr("Point %1 / %2 ").arg(pt + 1).arg(pointCount));
 		emit sendMeasureInfo(m_info);
@@ -527,7 +527,7 @@ void MeasureThread::measureLinearity()
 		//
 		int channelCount = m_activeIoParamList.count();
 
-		if (m_measureKind == MeasureKind::OneRack || m_measureKind == MeasureKind::OneModule)
+		if (m_measureKind == Measure::Kind::OneRack || m_measureKind == Measure::Kind::OneModule)
 		{
 			channelCount = 1;
 		}
@@ -628,7 +628,7 @@ void MeasureThread::measureLinearity()
 
 			m_activeIoParamList[ch].setPercent(point.percent());
 
-			LinearityMeasurement* pMeasurement = new LinearityMeasurement(m_activeIoParamList[ch]);
+			Measure::LinearityItem* pMeasurement = new Measure::LinearityItem(m_activeIoParamList[ch]);
 			if (pMeasurement == nullptr)
 			{
 				continue;
@@ -1112,7 +1112,7 @@ void MeasureThread::measureCompratorsInSeries()
 				m_activeIoParamList[ch].setComparatorIndex(cmp);
 				m_activeIoParamList[ch].setComparatorValueType(cmpValueType);
 
-				ComparatorMeasurement* pMeasurement = new ComparatorMeasurement(m_activeIoParamList[ch]);
+				Measure::ComparatorItem* pMeasurement = new Measure::ComparatorItem(m_activeIoParamList[ch]);
 				if (pMeasurement == nullptr)
 				{
 					continue;
@@ -1769,7 +1769,7 @@ void MeasureThread::measureCompratorsInParallel()
 				m_activeIoParamList[ch].setComparatorIndex(cmp);
 				m_activeIoParamList[ch].setComparatorValueType(cmpValueType);
 
-				ComparatorMeasurement* pMeasurement = new ComparatorMeasurement(m_activeIoParamList[ch]);
+				Measure::ComparatorItem* pMeasurement = new Measure::ComparatorItem(m_activeIoParamList[ch]);
 				if (pMeasurement == nullptr)
 				{
 					continue;
@@ -1885,7 +1885,7 @@ void MeasureThread::measureTypeChanged(int measureType)
 		return;
 	}
 
-	m_measureType = static_cast<MeasureType>(measureType);
+	m_measureType = static_cast<Measure::Type>(measureType);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1897,7 +1897,7 @@ void MeasureThread::measureKindChanged(int measureKind)
 		return;
 	}
 
-	m_measureKind = static_cast<MeasureKind>(measureKind);
+	m_measureKind = static_cast<Measure::Kind>(measureKind);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
