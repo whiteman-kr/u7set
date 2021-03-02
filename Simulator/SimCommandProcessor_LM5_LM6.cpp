@@ -1505,22 +1505,18 @@ namespace Sim
 				if (currentInputValue == 1)
 				{
 					result = 1;
-					counter = 0;
+					counter = time;
 				}
 				else
 				{
-					// InputValue == 0
-					//
-					counter += m_cycleDurationMs;
-
-					if (counter > static_cast<quint32>(time))
+					if (counter == 0)
 					{
 						result = 0;
-						counter = time;		// It keeps counter from overflow and getting to 0
 					}
 					else
 					{
 						result = 1;
+						counter -= m_cycleDurationMs;
 					}
 				}
 			}
@@ -1703,22 +1699,18 @@ namespace Sim
 				if (currentInputValue == 1)
 				{
 					result = 1;
-					counter = 0;
+					counter = time;
 				}
 				else
 				{
-					// InputValue == 0
-					//
-					counter += m_cycleDurationMs;
-
-					if (counter > static_cast<quint32>(time))
+					if (counter == 0)
 					{
 						result = 0;
-						counter = time;		// It keeps counter from overflow and getting to 0
 					}
 					else
 					{
 						result = 1;
+						counter -= m_cycleDurationMs;
 					}
 				}
 			}
@@ -1928,22 +1920,18 @@ namespace Sim
 				if (currentInputValue == 1)
 				{
 					result = 1;
-					counter = 0;
+					counter = time;
 				}
 				else
 				{
-					// InputValue == 0
-					//
-					counter += m_cycleDurationMs;
-
-					if (counter > static_cast<quint32>(time))
+					if (counter == 0)
 					{
 						result = 0;
-						counter = time;		// It keeps counter from overflow and getting to 0
 					}
 					else
 					{
 						result = 1;
+						counter -= m_cycleDurationMs;
 					}
 				}
 			}
