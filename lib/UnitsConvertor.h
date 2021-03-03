@@ -78,7 +78,7 @@ struct SignalElectricLimit
 
 	// Hz
 	//
-	{   50,		50000,	E::ElectricUnit::Hz,	E::SensorType::Hz_50_50000,		},						// module FIM
+	{  0.05,	50000,	E::ElectricUnit::Hz,	E::SensorType::Hz_005_50000,	},						// module FIM
 };
 
 const int SignalElectricLimitCount = sizeof(SignalElectricLimits) / sizeof(SignalElectricLimits[0]);

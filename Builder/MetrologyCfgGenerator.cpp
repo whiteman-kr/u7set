@@ -756,7 +756,7 @@ namespace Builder
 		}
 		else
 		{
-			if (signal.sensorType() != E::SensorType::Hz_50_50000)
+			if (signal.sensorType() != E::SensorType::Hz_005_50000)
 			{
 				return false;
 			}
