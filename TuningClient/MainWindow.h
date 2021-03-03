@@ -53,7 +53,7 @@ private:
 
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 
-	SchemasWorkspace* m_schemasWorkspace = nullptr;
+	std::vector<SchemasWorkspace*> m_schemasWorkspaces;
 
 	QLabel* m_noWorkspaceLabel = nullptr;
 

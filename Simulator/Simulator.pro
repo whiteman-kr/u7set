@@ -85,7 +85,7 @@ SOURCES += \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
 	../lib/LogicModulesInfo.cpp \
-    ../lib/ProtoSerialization.cpp \
+    ../lib/ScriptDeviceObject.cpp \
 	../lib/SimpleMutex.cpp \
 	../lib/SimpleThread.cpp \
     ../lib/SoftwareSettings.cpp \
@@ -131,7 +131,6 @@ SOURCES += \
     ../lib/TuningValue.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/HostAddressPort.cpp \
-    ../Proto/network.pb.cc \
     SimAfb.cpp \
     SimLogicModule.cpp \
     SimCommandProcessor.cpp \
@@ -150,6 +149,7 @@ HEADERS += \
 	../lib/LanControllerInfo.h \
 	../lib/LanControllerInfoHelper.h \
 	../lib/LogicModulesInfo.h \
+    ../lib/ScriptDeviceObject.h \
 	../lib/SimpleMutex.h \
 	../lib/SimpleThread.h \
     ../lib/SoftwareSettings.h \
@@ -180,7 +180,6 @@ HEADERS += \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
     ../lib/PropertyObject.h \
-    ../lib/ProtoSerialization.h \
     ../lib/Types.h \
     ../lib/ModuleFirmware.h \
     Simulator.h \
@@ -203,7 +202,6 @@ HEADERS += \
     ../lib/TuningValue.h \
     ../lib/XmlHelper.h \
     ../lib/HostAddressPort.h \
-    ../Proto/network.pb.h \
     SimAfb.h \
     SimLogicModule.h \
     SimCommandProcessor.h \

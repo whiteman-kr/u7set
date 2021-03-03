@@ -100,6 +100,7 @@ CONFIG(release, debug|release) {
 SOURCES +=\
     ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
+    ../lib/ScriptDeviceObject.cpp \
     ../lib/SoftwareSettings.cpp \
         MainWindow.cpp \
     TuningPage.cpp \
@@ -116,9 +117,7 @@ SOURCES +=\
     ../lib/Crc.cpp \
     ../lib/SocketIO.cpp \
     DialogSettings.cpp \
-    ../Proto/network.pb.cc \
     ../lib/AppSignal.cpp \
-    ../Proto/serialization.pb.cc \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     ../lib/LogFile.cpp \
@@ -140,7 +139,6 @@ SOURCES +=\
     ../lib/XmlHelper.cpp \
     ../lib/Types.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     DialogFilterEditor.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
@@ -167,6 +165,7 @@ HEADERS  += MainWindow.h \
     ../lib/ClientBehavior.h \
     ../lib/ConstStrings.h \
     ../lib/ILogFile.h \
+    ../lib/ScriptDeviceObject.h \
     ../lib/SoftwareSettings.h \
     Stable.h \
     TuningPage.h \
@@ -183,9 +182,7 @@ HEADERS  += MainWindow.h \
     ../lib/Crc.h \
     ../lib/SocketIO.h \
     DialogSettings.h \
-    ../Proto/network.pb.h \
     ../lib/AppSignal.h \
-    ../Proto/serialization.pb.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/PropertyObject.h \
@@ -207,7 +204,6 @@ HEADERS  += MainWindow.h \
     ../lib/XmlHelper.h \
     ../lib/Types.h \
     ../lib/DbStruct.h \
-    ../lib/ProtoSerialization.h \
     ../lib/Tuning/TuningSignalState.h \
     DialogFilterEditor.h \
     ../lib/Tuning/TuningTcpClient.h \

@@ -225,15 +225,18 @@ void TestAppDataService::initTestCase()
 		data = configurationXmlData;
 		waiter.quit();
 	});
+
 	connect(&timeoutChecker, &QTimer::timeout, &waiter, &QEventLoop::quit);
 	timeoutChecker.start(10 * 1000);
 	waiter.exec();
 
 	QVERIFY2(timeoutChecker.isActive(), "Timeout of reading Configuration.xml");
 
-	XmlReadHelper configXml(data);
+	std::shared_ptr<const TestClientSettings> curSettingsPtr = cfgLoader.getCurrentSettingsProfile<TestClientSettings>();
 
-	QVERIFY2(m_cfgSettings.readFromXml(configXml), "Could not understand config file Configuration.xml");
+	QVERIFY2(curSettingsPtr != nullptr, "Error getting current settings profile!");
+
+	m_cfgSettings = *curSettingsPtr.get();
 
 	initTcpClient();
 

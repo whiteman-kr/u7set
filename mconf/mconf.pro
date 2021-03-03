@@ -59,14 +59,13 @@ DEFINES += QT_DLL QT_WIDGETS_LIB QT_NETWORK_LIB QT_SQL_LIB QT_XML_LIB
 #win32:LIBS += advapi32.lib
 
 HEADERS += \
+    ../lib/ScriptDeviceObject.h \
     ../lib/Ui/DialogAbout.h \
 	Stable.h \
 	ftdi/ftd2xx.h \
         ../lib/DbStruct.h \
     ../lib/DeviceObject.h \
     ../lib/OutputLog.h \
-    ../Proto/serialization.pb.h \
-    ../lib/ProtoSerialization.h \
     Settings.h \
     ApplicationTabPage.h \
     DiagTabPage.h \
@@ -80,13 +79,12 @@ HEADERS += \
     ../lib/ModuleFirmware.h
 
 SOURCES += \
+    ../lib/ScriptDeviceObject.cpp \
     ../lib/Ui/DialogAbout.cpp \
 	main.cpp \
 	../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/OutputLog.cpp \
-    ../Proto/serialization.pb.cc \
-    ../lib/ProtoSerialization.cpp \
     Settings.cpp \
     ApplicationTabPage.cpp \
     DiagTabPage.cpp \

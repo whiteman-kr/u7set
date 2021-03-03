@@ -37,6 +37,7 @@
 #include "../lib/SignalSetProvider.h"
 #include "../lib/QScintillaLexers/LexerJavaScript.h"
 #include "../lib/Ui/TextEditCompleter.h"
+#include "../lib/QDoublevalidatorEx.h"
 #include <cfloat>
 
 
@@ -5239,7 +5240,7 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 
 	QLabel* floatValueLabel = new QLabel("FloatValue:");
 	QLineEdit* floatValueEdit = new QLineEdit(locale.toString(floatValue));
-	floatValueEdit->setValidator(new QDoubleValidator(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), 1000, floatValueEdit));
+	floatValueEdit->setValidator(new QDoubleValidatorEx(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), 1000, floatValueEdit));
 
 	if (type != VFrame30::SchemaItemConst::ConstType::FloatType)
 	{

@@ -65,7 +65,9 @@ public slots:
 
 	void copySelectedDevices();
 	void pasteDevices();
+	void pasteDevices(const ::Proto::EnvelopeSet& messageItems, const Proto::EnvelopeSetShortDescription& messageDescr);
 	bool canPaste() const;
+	bool canPaste(const ::Proto::EnvelopeSetShortDescription& message) const;
 
 	void deleteSelectedDevices();
 	void checkInSelectedDevices();
@@ -85,7 +87,7 @@ public slots:
 								std::vector<std::shared_ptr<Hardware::DeviceObject>>* updateDeviceList,
 								std::vector<Hardware::DeviceObject*>* deleteDeviceList,
 								std::vector<std::pair<int, int>>* addDeviceList,
-								QVector<Hardware::DeviceSignal*>* deviceSignalsToUpdateAppSignals);
+								QVector<Hardware::DeviceAppSignal*>* deviceSignalsToUpdateAppSignals);
 
 	// Events
 	//

@@ -141,6 +141,8 @@ public:
 
 	VcsItemActionType value() const noexcept;
 
+	void setValue(int intVal);
+
 private:
 	VcsItemActionType m_action;
 

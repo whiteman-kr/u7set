@@ -205,6 +205,7 @@ SOURCES +=\
 
 HEADERS  += \
     ../lib/ExportPrint.h \
+    ../lib/QDoublevalidatorEx.h \
     ../lib/SoftwareXmlReader.h \
     ../lib/StandardColors.h \
     ../lib/Ui/DbControllerTools.h \
@@ -381,6 +382,24 @@ OTHER_FILES += \
 
 DISTFILES += \
     ../Etc/ClientBehavior/ClientBehavior.xml \
+    ../Scripts/AIFM/AIFM.js \
+    ../Scripts/AIM/AIM.js \
+    ../Scripts/AIM_4PH/AIM_4PH.js \
+    ../Scripts/AOM/AOM.js \
+    ../Scripts/AOM_4PH/AOM_4PH.js \
+    ../Scripts/BVB15/BVB15Conf0000.ts \
+    ../Scripts/ChildRestriction/ChildRestriction.js \
+    ../Scripts/DIM/DIM.js \
+    ../Scripts/DOM/DOM.js \
+    ../Scripts/FSCChassis/FSCChassis.js \
+    ../Scripts/LM1-SF00/LM1_SF00_Conf.ts \
+    ../Scripts/MSO3/MSO3Conf0000.ts \
+    ../Scripts/MSO4/MSO4_SR21_Conf.ts \
+    ../Scripts/OCM/OCM.js \
+    ../Scripts/OCMN/OCMN.js \
+    ../Scripts/RIM/RIM.js \
+    ../Scripts/TIM/TIM.js \
+    ../Scripts/WAIM/WAIM.js \
     LogicModuleConfiguration.js \
     Afbl/_convert_all.bat \
     Afbl/bcomp_great_v1.afb \

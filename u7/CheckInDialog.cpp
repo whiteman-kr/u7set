@@ -14,22 +14,43 @@ CheckInDialog::CheckInDialog(const std::vector<DbFileInfo>& files, bool treeChec
 	//
 	assert(m_files.empty() == false);
 
+	std::sort(m_files.begin(), m_files.end(), [](const DbFileInfo& f1, const DbFileInfo& f2) {	return f1.fileId() < f2.fileId();});
+
 	ui->fileListEditBox->setReadOnly(true);
 
-	QString fileListStr;
-	for (size_t i = 0; i < m_files.size(); i++)
-	{
-		QString fileName = m_files[i].fileName();
+	QStringList fileList;
+	fileList.reserve(files.size());
 
-		if (fileName.isEmpty() == true)
+	for (const DbFileInfo& file : m_files)
+	{
+		QString fileNameRecord = file.fileName();
+		if (fileNameRecord.isEmpty() == true)
 		{
-			fileName = tr("Not defined yet.");
+			fileNameRecord = tr("Not defined yet.");
 		}
 
-		fileListStr += fileName + "\n";
+		QJsonDocument jsdoc = QJsonDocument::fromJson(file.details().toUtf8());
+		QJsonObject jsobject = jsdoc.object();
+
+		if (jsobject.isEmpty() == false && jsobject.contains("SchemaID"))
+		{
+			fileNameRecord.append(QString("  |  SchemaID: %1").arg(jsobject.value("SchemaID").toString()));
+		}
+
+		if (jsobject.isEmpty() == false && jsobject.contains("EquipmentID"))
+		{
+			fileNameRecord.append(QString("  |  EquipmentID: %1").arg(jsobject.value("EquipmentID").toString()));
+		}
+
+		if (jsobject.isEmpty() == false && jsobject.contains("Place"))
+		{
+			fileNameRecord.append(QString("  |  Place: %1").arg(jsobject.value("Place").toInt()));
+		}
+
+		fileList.push_back(fileNameRecord);
 	}
 
-	ui->fileListEditBox->setText(fileListStr);
+	ui->fileListEditBox->setText(fileList.join('\n'));
 
 	return;
 }

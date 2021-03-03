@@ -42,6 +42,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ../Proto/trends.pb.cc \
     TrendScale.cpp \
     Forms/DialogChooseTrendSignals.cpp \
     TrendWidget.cpp \
@@ -51,13 +52,13 @@ SOURCES += \
     TrendMainWindow.cpp \
     Trend.cpp \
     DialogTrendSignalProperties.cpp \
-    ../Proto/trends.pb.cc \
     TrendRuler.cpp \
     TrendParam.cpp \
     DialogTrendSignalPoints.cpp \
     DialogTrendSignalPoint.cpp
 
 HEADERS += \
+    ../Proto/trends.pb.h \
     Forms/DialogChooseTrendSignals.h \
     Stable.h \
     TrendScale.h \
@@ -69,7 +70,6 @@ HEADERS += \
     TrendMainWindow.h \
     Trend.h \
     DialogTrendSignalProperties.h \
-    ../Proto/trends.pb.h \
     TrendRuler.h \
     TrendParam.h \
     ../lib/CUtils.h \

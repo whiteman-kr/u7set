@@ -62,6 +62,7 @@ SOURCES += main.cpp \
     ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
+    ../lib/ScriptDeviceObject.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DragDropHelper.cpp \
@@ -83,14 +84,11 @@ SOURCES += main.cpp \
     MonitorSchemaWidget.cpp \
     ../lib/Types.cpp \
     MonitorConfigController.cpp \
-    ../Proto/network.pb.cc \
     TcpSignalClient.cpp \
-    ../Proto/serialization.pb.cc \
     ../lib/Signal.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/AppSignal.cpp \
     ../lib/AppSignalManager.cpp \
     Statistics.cpp \
@@ -138,6 +136,7 @@ HEADERS  += \
     ../lib/ComparatorSet.h \
     ../lib/ConstStrings.h \
     ../lib/ILogFile.h \
+    ../lib/ScriptDeviceObject.h \
     ../lib/SoftwareSettings.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DragDropHelper.h \
@@ -160,16 +159,13 @@ HEADERS  += \
     MonitorSchemaWidget.h \
     ../lib/Types.h \
     MonitorConfigController.h \
-    ../Proto/network.pb.h \
     TcpSignalClient.h \
     ../lib/Hash.h \
-    ../Proto/serialization.pb.h \
     ../lib/Signal.h \
     ../lib/PropertyObject.h \
     ../lib/XmlHelper.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
-    ../lib/ProtoSerialization.h \
     ../lib/AppSignal.h \
     ../lib/AppSignalManager.h \
     Statistics.h \

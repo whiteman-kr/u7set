@@ -1687,16 +1687,6 @@ namespace ExtWidgets
 		return m_modified;
 	}
 
-	bool PropertyTextEditor::hasOkCancelButtons()
-	{
-		return m_hasOkCancelButtons;
-	}
-
-	void PropertyTextEditor::setHasOkCancelButtons(bool value)
-	{
-		m_hasOkCancelButtons = value;
-	}
-
 	void PropertyTextEditor::textChanged()
 	{
 		m_modified = true;
@@ -1766,6 +1756,11 @@ namespace ExtWidgets
 	void PropertyPlainTextEditor::setReadOnly(bool value)
 	{
 		m_plainTextEdit->setReadOnly(value);
+	}
+
+	bool PropertyPlainTextEditor::externalOkCancelButtons() const
+	{
+		return true;
 	}
 
 	bool PropertyPlainTextEditor::eventFilter(QObject* obj, QEvent* event)
@@ -2169,12 +2164,20 @@ namespace ExtWidgets
 	//
 	// ---------MultiTextEditorDialog----------
 	//
-	MultiTextEditorDialog::MultiTextEditorDialog(PropertyEditorBase* propertyEditorBase, QWidget* parent, const QString &text, std::shared_ptr<Property> p):
+	MultiTextEditorDialog::MultiTextEditorDialog(PropertyEditorBase* propertyEditorBase, QWidget* parent, const QString &text, std::shared_ptr<Property> p, bool readOnly):
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint),
 		m_propertyEditorBase(propertyEditorBase),
 		m_property(p)
 	{
-		setWindowTitle(p->caption());
+		if (readOnly == true)
+		{
+			setWindowTitle(p->caption() + tr(" (Read-Only)"));
+		}
+		else
+		{
+			setWindowTitle(p->caption());
+		}
+
 
 		if (m_propertyEditorBase->restorePropertyTextEditorSize(m_property, this) == false)
 		{
@@ -2189,13 +2192,15 @@ namespace ExtWidgets
 			}
 		}
 
-		QVBoxLayout* vl = new QVBoxLayout();
+		QVBoxLayout* mainLayout = new QVBoxLayout();
 
 		// Create Editor
 
 		m_editor = m_propertyEditorBase->createPropertyTextEditor(m_property, this);
 
 		m_editor->setText(text);
+
+		m_editor->setReadOnly(readOnly);
 
 		if (m_property->validator().isEmpty() == false)
 		{
@@ -2204,40 +2209,21 @@ namespace ExtWidgets
 
 		connect(m_editor, &PropertyTextEditor::escapePressed, this, &MultiTextEditorDialog::reject);
 
+		mainLayout->addWidget(m_editor);
+
 		// Buttons
 
+		QPushButton* scriptHelpButton = nullptr;
 		QPushButton* okButton = nullptr;
 		QPushButton* cancelButton = nullptr;
 
-		if (m_editor->hasOkCancelButtons() == true)
-		{
-			okButton = new QPushButton(tr("OK"), this);
-			cancelButton = new QPushButton(tr("Cancel"), this);
-
-			okButton->setDefault(true);
-
-			connect(okButton, &QPushButton::clicked, this, &MultiTextEditorDialog::accept);
-			connect(cancelButton, &QPushButton::clicked, this, &MultiTextEditorDialog::reject);
-		}
-		else
-		{
-			connect(m_editor, &PropertyTextEditor::okPressed, this, &MultiTextEditorDialog::accept);
-			connect(m_editor, &PropertyTextEditor::cancelPressed, this, &MultiTextEditorDialog::reject);
-		}
-
-		connect(this, &QDialog::finished, this, &MultiTextEditorDialog::finished);
-
-		QHBoxLayout* hl = new QHBoxLayout();
-
 		// Property Editor help
-
+		//
 		if (p->isScript() && m_propertyEditorBase->scriptHelpFile().isEmpty() == false)
 		{
-			QPushButton* helpButton = new QPushButton("?", this);
+			scriptHelpButton = new QPushButton("?", this);
 
-			hl->addWidget(helpButton);
-
-			connect(helpButton, &QPushButton::clicked, [this] ()
+			connect(scriptHelpButton, &QPushButton::clicked, [this] ()
 			{
 				UiTools::openHelp(m_propertyEditorBase->scriptHelpFile(), this);
 			});
@@ -2251,21 +2237,57 @@ namespace ExtWidgets
 			});
 		}
 
-		hl->addStretch();
-		if (okButton != nullptr)
+		// OK and Cancel buttons
+		//
+		if (m_editor->externalOkCancelButtons() == true)
 		{
-			hl->addWidget(okButton);
+			okButton = new QPushButton(tr("OK"), this);
+			okButton->setDefault(true);
+			okButton->setEnabled(readOnly == false);
+
+			cancelButton = new QPushButton(tr("Cancel"), this);
+
+			if (readOnly == false)
+			{
+				connect(okButton, &QPushButton::clicked, this, &MultiTextEditorDialog::accept);
+			}
+			connect(cancelButton, &QPushButton::clicked, this, &MultiTextEditorDialog::reject);
 		}
-		if (cancelButton != nullptr)
+		else
 		{
-			hl->addWidget(cancelButton);
+			if (readOnly == false)
+			{
+				connect(m_editor, &PropertyTextEditor::okPressed, this, &MultiTextEditorDialog::accept);
+			}
+			connect(m_editor, &PropertyTextEditor::cancelPressed, this, &MultiTextEditorDialog::reject);
 		}
 
+		connect(this, &QDialog::finished, this, &MultiTextEditorDialog::finished);
 
-		vl->addWidget(m_editor);
-		vl->addLayout(hl);
+		if (scriptHelpButton != nullptr || okButton != nullptr || cancelButton != nullptr)
+		{
+			QHBoxLayout* buttonsLayout = new QHBoxLayout();
 
-		setLayout(vl);
+			if (scriptHelpButton != nullptr)
+			{
+				buttonsLayout->addWidget(scriptHelpButton);
+			}
+
+			buttonsLayout->addStretch();
+
+			if (okButton != nullptr)
+			{
+				buttonsLayout->addWidget(okButton);
+			}
+			if (cancelButton != nullptr)
+			{
+				buttonsLayout->addWidget(cancelButton);
+			}
+
+			mainLayout->addLayout(buttonsLayout);
+		}
+
+		setLayout(mainLayout);
 	}
 
 	QString MultiTextEditorDialog::text()
@@ -2331,11 +2353,13 @@ namespace ExtWidgets
 
 	MultiTextEdit::MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, int row, bool readOnly, QWidget* parent):
 		PropertyEditCellWidget(parent),
+		m_propertyEditorBase(propertyEditorBase),
 		m_property(p),
 		m_row(row),
-		m_userType(p->value().userType()),
-		m_propertyEditorBase(propertyEditorBase)
+		m_readOnly(readOnly),
+		m_userType(p->value().userType())
 	{
+
 		if (p == nullptr || m_propertyEditorBase == nullptr)
 		{
 			assert(p);
@@ -2353,10 +2377,47 @@ namespace ExtWidgets
 			m_oldValue = p->value();	// Save type of Tuning Value for future setting
 		}
 
+		// Create Line Edit
+		//
 		m_lineEdit = new QLineEdit(parent);
+
+		if (p->password() == true)
+		{
+			if (m_userType == QVariant::String)
+			{
+				m_lineEdit->setEchoMode(QLineEdit::Password);
+			}
+		}
+
+		if (m_userType == QVariant::ByteArray || m_userType == QVariant::Image)
+		{
+			m_lineEdit->setReadOnly(true);
+		}
+		else
+		{
+			m_lineEdit->setReadOnly(m_readOnly == true);
+		}
+
 		connect(m_lineEdit, &QLineEdit::editingFinished, this, &MultiTextEdit::onEditingFinished);
 		connect(m_lineEdit, &QLineEdit::textEdited, this, &MultiTextEdit::onTextEdited);
 
+		m_lineEdit->installEventFilter(this);
+
+		// Add Validator
+		//
+		if (p->validator().isEmpty() == false)
+		{
+			if (m_property->specificEditor() != E::PropertySpecificEditor::LoadFileDialog)// for LoadFileDialog, Validator is used as mask
+			{
+				QRegExp regexp(p->validator());
+				QRegExpValidator* v = new QRegExpValidator(regexp, this);
+				m_lineEdit->setValidator(v);
+			}
+		}
+
+
+		// Create Button for File, ByteArray, Strings and String List
+		//
 		if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog ||
 				m_userType == QVariant::ByteArray ||
 				(m_userType == QVariant::String && p->password() == false) ||
@@ -2365,9 +2426,17 @@ namespace ExtWidgets
 			m_button = new QToolButton(parent);
 			m_button->setText("...");
 
+			if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog)
+			{
+				// If property is read-only, button is enabled except for LoadFileDialog
+				m_button->setEnabled(m_readOnly == false);
+			}
+
 			connect(m_button, &QToolButton::clicked, this, &MultiTextEdit::onButtonPressed);
 		}
 
+		// Add items to layout
+		//
 		QHBoxLayout* lt = new QHBoxLayout;
 		lt->setContentsMargins(0, 0, 0, 0);
 		lt->setSpacing(0);
@@ -2378,33 +2447,6 @@ namespace ExtWidgets
 		}
 
 		setLayout(lt);
-
-		m_lineEdit->installEventFilter(this);
-
-		if (m_property->specificEditor() != E::PropertySpecificEditor::LoadFileDialog &&	// for LoadFileDialog, Validator is used as mask
-				p->validator().isEmpty() == false)
-		{
-			QRegExp regexp(p->validator());
-			QRegExpValidator* v = new QRegExpValidator(regexp, this);
-			m_lineEdit->setValidator(v);
-		}
-
-		if (m_userType == QVariant::String && p->password() == true)
-		{
-			m_lineEdit->setEchoMode(QLineEdit::Password);
-		}
-
-		m_lineEdit->setReadOnly(readOnly == true);
-
-		if (m_userType == QVariant::ByteArray || m_userType == QVariant::Image)
-		{
-			m_lineEdit->setReadOnly(true);
-		}
-
-		if (m_button != nullptr)
-		{
-			m_button->setEnabled(readOnly == false);
-		}
 
 		QTimer::singleShot(0, m_lineEdit, SLOT(setFocus()));
 	}
@@ -2460,8 +2502,13 @@ namespace ExtWidgets
 				return;
 			}
 
-			MultiTextEditorDialog multlLineEdit(m_propertyEditorBase, this, m_oldValue.toString(), m_property);
+			MultiTextEditorDialog multlLineEdit(m_propertyEditorBase, this, m_oldValue.toString(), m_property, m_readOnly);
 			if (multlLineEdit.exec() != QDialog::Accepted)
+			{
+				return;
+			}
+
+			if (m_readOnly == true)
 			{
 				return;
 			}
@@ -2655,11 +2702,6 @@ namespace ExtWidgets
 				assert(false);
 				return;
 			}
-		}
-
-		if (m_button != nullptr)
-		{
-			m_button->setEnabled(readOnly == false);
 		}
 	}
 

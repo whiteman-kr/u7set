@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/FutureDatabaseUpgrade">
+        <file>FutureUpgrade.sql</file>
+    </qresource>
+</RCC>

@@ -364,6 +364,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0344.sql", "Upgrade to version 344, All configuration scripts use let instead of var declarations"},
 	{":/DatabaseUpgrade/Upgrade0345.sql", "Upgrade to version 345, Simulation properties added to TuningService preset"},
 	{":/DatabaseUpgrade/Upgrade0346.sql", "Upgrade to version 346, Add function get_latest_signals_all_with_user_id"},
+	{":/DatabaseUpgrade/Upgrade0347.sql", "Upgrade to version 347, Changes in functions delete_signal(), get_signals_id_appsignalid()"},
+	{":/DatabaseUpgrade/Upgrade0348.sql", "Upgrade to version 348, All scripts use ScriptDeviceObject class"},
 };
 
 int DbWorker::counter = 0;
@@ -4681,8 +4683,8 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 			(Hardware::DeviceObject* current, int parentId)
 	{
 		if (nesting >= static_cast<int>(Hardware::DeviceType::DeviceTypeCount) ||
-				current == nullptr ||
-				parentId == -1)
+			current == nullptr ||
+			parentId == -1)
 		{
 			assert(nesting < static_cast<int>(Hardware::DeviceType::DeviceTypeCount));
 			assert(current != nullptr);
@@ -4741,7 +4743,7 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 		//
 		for (int i = 0; i < current->childrenCount(); i++)
 		{
-			result = addDevice(current->child(i), current->fileInfo().fileId());
+			result = addDevice(current->child(i).get(), current->fileInfo().fileId());
 			if (result == false)
 			{
 				nesting --;
@@ -4766,7 +4768,7 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 	return;
 }
 
-void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
+void DbWorker::slot_getSignalsIDs(QVector<int>* signalsIDs)
 {
 	AUTO_COMPLETE
 
@@ -4777,6 +4779,8 @@ void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
 		assert(signalsIDs != nullptr);
 		return;
 	}
+
+	signalsIDs->clear();
 
 	// Operation
 	//
@@ -4819,6 +4823,8 @@ void DbWorker::slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAp
 	// Check parameters
 	//
 	TEST_PTR_RETURN(signalsIDAppSignalID);
+
+	signalsIDAppSignalID->clear();
 
 	// Operation
 	//
@@ -5353,7 +5359,7 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 
 	// Log action
 	//
-	QString logMessage = QString("addSignal: SiganlCount %1, SignalIDs ")
+	QString logMessage = QString("addSignal: SignalCount %1, SignalIDs ")
 						 .arg(newSignal->size());
 
 	for (const Signal& s : *newSignal)
@@ -5928,7 +5934,6 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 	QString request = QString("SELECT * FROM checkin_signals(%1, ARRAY[")
 		.arg(currentUser().userId());
 
-
 	for(int i=0; i < count; i++)
 	{
 		if (i < count-1)
@@ -5964,7 +5969,7 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 }
 
 
-void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals,
+void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals,
 								   std::vector<Signal>* addedSignals)
 {
 	AUTO_COMPLETE
@@ -5985,7 +5990,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 			m_progress->setValue((i * 100) / signalCount);
 		}
 
-		const Hardware::DeviceSignal* deviceSignal = deviceSignals->at(i);
+		const Hardware::DeviceAppSignal* deviceSignal = deviceSignals->at(i);
 
 		if (deviceSignal == nullptr)
 		{
@@ -6025,7 +6030,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 }
 
 
-void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals)
+void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals)
 {
 	AUTO_COMPLETE
 
@@ -6043,7 +6048,7 @@ void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>
 	//
 	ObjectState os;
 
-	for(Hardware::DeviceSignal* deviceSignal : *deviceSignals)
+	for(Hardware::DeviceAppSignal* deviceSignal : *deviceSignals)
 	{
 		QString request = QString("SELECT * FROM delete_signal_by_equipmentid(%1, '%2')")
 			.arg(currentUser().userId()).arg(toSqlStr(deviceSignal->equipmentIdTemplate()));

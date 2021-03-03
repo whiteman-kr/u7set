@@ -56,10 +56,12 @@ protected slots:
 	void addNewPresetTriggered();
 
 	void pendingChanges();
-
 	void objectVcsStateChanged();
 
 	void compareObject(DbChangesetObject object, CompareData compareData);
+
+	void exportPreset();
+	void importPreset();
 
 	// Data
 	//
@@ -126,6 +128,12 @@ private:
 	QAction* m_switchModeAction = nullptr;
 	QAction* m_pendingChangesAction = nullptr;
 	QAction* m_SeparatorAction4 = nullptr;
+
+	// --
+	//
+	QAction* m_separatorPresetExportImport = nullptr;
+	QAction* m_exportPresetAction = nullptr;
+	QAction* m_importPresetAction = nullptr;
 
 	//--
 	//

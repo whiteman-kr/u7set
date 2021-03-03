@@ -20,21 +20,17 @@ namespace VFrame30
 	SchemaItemSignal::SchemaItemSignal(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		Property* prop = nullptr;
+		addProperty<QString, SchemaItemSignal, &SchemaItemSignal::appSignalIds, &SchemaItemSignal::setAppSignalIds>(PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true)
+			->setValidator(PropertyNames::appSignalIDsValidator);
 
-		prop = addProperty<QString, SchemaItemSignal, &SchemaItemSignal::appSignalIds, &SchemaItemSignal::setAppSignalIds>(PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true);
-		prop->setValidator(PropertyNames::appSignalIDsValidator);
-
-		prop = addProperty<QString, SchemaItemSignal, &SchemaItemSignal::impactAppSignalIds, &SchemaItemSignal::setImpactAppSignalIds>(PropertyNames::impactAppSignalIDs, PropertyNames::functionalCategory, true);
-		prop->setValidator(PropertyNames::appSignalIDsValidator);
+		addProperty<QString, SchemaItemSignal, &SchemaItemSignal::impactAppSignalIds, &SchemaItemSignal::setImpactAppSignalIds>(PropertyNames::impactAppSignalIDs, PropertyNames::functionalCategory, true)
+			->setValidator(PropertyNames::appSignalIDsValidator);
 
 		addProperty<bool, SchemaItemSignal, &SchemaItemSignal::multiLine, &SchemaItemSignal::setMultiLine>(PropertyNames::multiLine, PropertyNames::appearanceCategory, true);
 		addProperty<int, SchemaItemSignal, &SchemaItemSignal::precision, &SchemaItemSignal::setPrecision>(PropertyNames::precision, PropertyNames::monitorCategory, true);
 		addProperty<E::AnalogFormat, SchemaItemSignal, &SchemaItemSignal::analogFormat, &SchemaItemSignal::setAnalogFormat>(PropertyNames::analogFormat, PropertyNames::monitorCategory, true);
 		addProperty<QString, SchemaItemSignal, &SchemaItemSignal::customText, &SchemaItemSignal::setCustomText>(PropertyNames::customText, PropertyNames::monitorCategory, true);
 		addProperty<int, SchemaItemSignal, &SchemaItemSignal::columnCount, &SchemaItemSignal::setColumnCount>(PropertyNames::columnCount, PropertyNames::monitorCategory, true);
-
-		createColumnProperties();
 
 		return;
 	}
@@ -1655,6 +1651,8 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		c1.data = E::ColumnData::State;
 		c1.horzAlign = E::HorzAlign::AlignHCenter;
 
+		createColumnProperties();
+
 		addOutput();
 		setAppSignalIds("#IN_STRID");
 	}
@@ -1756,6 +1754,8 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		c1.width = 80;
 		c1.data = E::ColumnData::AppSignalID;
 		c1.horzAlign = E::HorzAlign::AlignLeft;
+
+		createColumnProperties();
 
 		addInput();
 		setAppSignalIds("#OUT_STRID");

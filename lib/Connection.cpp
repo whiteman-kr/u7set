@@ -5,7 +5,7 @@
 
 #include "../lib/CUtils.h"
 #include "../lib/WUtils.h"
-#include "../lib/ProtoSerialization.h"
+#include "../Proto/ProtoSerialization.h"
 
 #include "Connection.h"
 

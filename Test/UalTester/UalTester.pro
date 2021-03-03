@@ -34,6 +34,7 @@ unix {
 
 SOURCES += \
     ../../lib/Address16.cpp \
+    ../../lib/ScriptDeviceObject.cpp \
         main.cpp \
     UalTester.cpp \
     ../../lib/CommandLineParser.cpp \
@@ -43,13 +44,10 @@ SOURCES += \
     ../../lib/HostAddressPort.cpp \
     ../../lib/SocketIO.cpp \
     ../../lib/CfgServerLoader.cpp \
-    ../../Proto/network.pb.cc \
-    ../../Proto/serialization.pb.cc \
     ../../lib/BuildInfo.cpp \
     ../../lib/Tcp.cpp \
     ../../lib/TcpFileTransfer.cpp \
     ../../lib/Types.cpp \
-    ../../lib/ProtoSerialization.cpp \
     ../../lib/SoftwareInfo.cpp \
 	../../lib/XmlHelper.cpp \
 	../../lib/SoftwareSettings.cpp \
@@ -76,6 +74,7 @@ SOURCES += \
 HEADERS += \
     ../../lib/Address16.h \
 	../../lib/ConstStrings.h \
+    ../../lib/ScriptDeviceObject.h \
 	UalTester.h \
     ../../lib/CommandLineParser.h \
     ../../lib/OrderedHash.h \
@@ -85,13 +84,10 @@ HEADERS += \
     ../../lib/HostAddressPort.h \
     ../../lib/SocketIO.h \
     ../../lib/CfgServerLoader.h \
-    ../../Proto/network.pb.h \
-    ../../Proto/serialization.pb.h \
     ../../lib/BuildInfo.h \
     ../../lib/Tcp.h \
     ../../lib/TcpFileTransfer.h \
     ../../lib/Types.h \
-    ../../lib/ProtoSerialization.h \
     ../../lib/SoftwareInfo.h \
 	../../lib/XmlHelper.h \
 	../../lib/SoftwareSettings.h \

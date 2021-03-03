@@ -159,8 +159,10 @@ public:
 	void getCursorPosition(int* line, int* index) const;
 	void setCursorPosition(int line, int index);
 
-	virtual bool readOnly() const override;
-	virtual void setReadOnly(bool value) override;
+	bool readOnly() const override;
+	void setReadOnly(bool value) override;
+
+	bool externalOkCancelButtons() const override;
 
 	void activateEditor();
 	void setCustomMenuActions(QList<QAction*> actions);
@@ -227,6 +229,8 @@ public:
 
 	bool readOnly() const override;
     void setReadOnly(bool value) override;
+
+	bool externalOkCancelButtons() const override;
 
 private:
     TuningFilterEditor* m_tuningFilterEditor = nullptr;

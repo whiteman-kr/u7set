@@ -39,7 +39,7 @@ namespace Builder
 		m_loopbacks(*this)
 	{
 		m_equipmentSet = appLogicCompiler.equipmentSet();
-		m_deviceRoot = m_equipmentSet->root();
+		m_deviceRoot = m_equipmentSet->root().get();
 		m_signals = appLogicCompiler.signalSet();
 
 		m_lmDescription = appLogicCompiler.lmDescriptions()->get(lm);
@@ -424,11 +424,11 @@ namespace Builder
 				continue;
 			}
 
-			Hardware::DeviceSignal* deviceSignal = nullptr;
+			Hardware::DeviceAppSignal* deviceAppSignal = nullptr;
 
 			bool isIoSignal = false;
 
-			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(s.equipmentID());
+			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(s.equipmentID()).get();
 
 			if (device == nullptr)
 			{
@@ -439,7 +439,7 @@ namespace Builder
 			{
 			case Hardware::DeviceType::Module:
 				{
-					Hardware::DeviceModule* deviceModule = device->toModule();
+					Hardware::DeviceModule* deviceModule = device->toModule().get();
 
 					if (deviceModule == nullptr)
 					{
@@ -464,17 +464,17 @@ namespace Builder
 				}
 				break;
 
-			case Hardware::DeviceType::Signal:
+			case Hardware::DeviceType::AppSignal:
 				{
-					deviceSignal = device->toSignal();
+					deviceAppSignal = device->toAppSignal().get();
 
-					if (deviceSignal == nullptr)
+					if (deviceAppSignal == nullptr)
 					{
 						assert(false);
 						continue;
 					}
 
-					const Hardware::DeviceChassis* chassis = deviceSignal->getParentChassis();
+					const Hardware::DeviceChassis* chassis = deviceAppSignal->getParentChassis();
 
 					if (chassis == nullptr)
 					{
@@ -511,9 +511,9 @@ namespace Builder
 			{
 				m_ioSignals.insert(s.appSignalID(), &s);
 
-				if (deviceSignal != nullptr)
+				if (deviceAppSignal != nullptr)
 				{
-					m_equipmentSignals.insert(deviceSignal->equipmentIdTemplate(), &s);
+					m_equipmentSignals.insert(deviceAppSignal->equipmentIdTemplate(), &s);
 				}
 				else
 				{
@@ -2672,15 +2672,15 @@ namespace Builder
 
 			assert(s->isInput() == true || s->isOutput() == true);
 
-			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(signalEquipmentID);
+			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(signalEquipmentID).get();
 
 			TEST_PTR_CONTINUE(device);
 
-			Hardware::DeviceSignal* deviceSignal = device->toSignal();
+			Hardware::DeviceAppSignal* deviceAppSignal = device->toAppSignal().get();
 
-			TEST_PTR_CONTINUE(deviceSignal);
+			TEST_PTR_CONTINUE(deviceAppSignal);
 
-			QString validitySignalEquipmentID = deviceSignal->validitySignalId();
+			QString validitySignalEquipmentID = deviceAppSignal->validitySignalId();
 
 			if (validitySignalEquipmentID.isEmpty() == true)
 			{
@@ -5313,7 +5313,7 @@ namespace Builder
 
 			// retrieve linked device
 			//
-			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(s->equipmentID());
+			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(s->equipmentID()).get();
 
 			if (device == nullptr)
 			{
@@ -5321,15 +5321,15 @@ namespace Builder
 				continue;
 			}
 
-			if (device->isSignal() == false)
+			if (device->isAppSignal() == false)
 			{
 				assert(false);
 				continue;
 			}
 
-			Hardware::DeviceSignal* deviceSignal = device->toSignal();
+			Hardware::DeviceAppSignal* deviceAppSignal = device->toAppSignal().get();
 
-			if (deviceSignal == nullptr)
+			if (deviceAppSignal == nullptr)
 			{
 				assert(false);
 				continue;
@@ -5337,7 +5337,7 @@ namespace Builder
 
 			// retrieve associated module
 			//
-			const Hardware::DeviceModule* deviceModule = deviceSignal->getParentModule();
+			const Hardware::DeviceModule* deviceModule = deviceAppSignal->getParentModule();
 
 			if (deviceModule == nullptr)
 			{
@@ -5353,11 +5353,11 @@ namespace Builder
 
 			Module module = m_modules.value(deviceModule->equipmentIdTemplate());
 
-			Address16 ioBufAddr(module.moduleDataOffset, deviceSignal->valueBit());
+			Address16 ioBufAddr(module.moduleDataOffset, deviceAppSignal->valueBit());
 
-			ioBufAddr.addWord(deviceSignal->valueOffset());
+			ioBufAddr.addWord(deviceAppSignal->valueOffset());
 
-			switch(deviceSignal->memoryArea())
+			switch(deviceAppSignal->memoryArea())
 			{
 			case E::MemoryArea::ApplicationData:
 
@@ -5897,7 +5897,7 @@ namespace Builder
 		assert(signal.isInput());
 		assert(signal.equipmentID().isEmpty() == false);
 
-		Hardware::DeviceObject* deviceObject = m_equipmentSet->deviceObject(signal.equipmentID());
+		Hardware::DeviceObject* deviceObject = m_equipmentSet->deviceObject(signal.equipmentID()).get();
 
 		if (deviceObject == nullptr)
 		{
@@ -5907,9 +5907,9 @@ namespace Builder
 			return false;
 		}
 
-		Hardware::DeviceSignal* deviceSignal = deviceObject->toSignal();
+		Hardware::DeviceAppSignal* deviceAppSignal = deviceObject->toAppSignal().get();
 
-		if (deviceSignal == nullptr)
+		if (deviceAppSignal == nullptr)
 		{
 			// Input/output application signal '%1' should be bound to equipment signal.
 			//
@@ -5917,7 +5917,7 @@ namespace Builder
 			return false;
 		}
 
-		bool signalsIsCompatible = isDeviceAndAppSignalsIsCompatible(*deviceSignal, signal);
+		bool signalsIsCompatible = isDeviceAndAppSignalsIsCompatible(*deviceAppSignal, signal);
 
 		if (signalsIsCompatible == true)
 		{
@@ -5931,10 +5931,10 @@ namespace Builder
 		QString errorMsg;
 		bool result = true;
 
-		QString inFormat = getFormatStr(*deviceSignal);
+		QString inFormat = getFormatStr(*deviceAppSignal);
 		QString outFormat = getFormatStr(signal);
 
-		if (deviceSignal->format() == E::DataFormat::UnsignedInt && deviceSignal->size() == SIZE_16BIT)
+		if (deviceAppSignal->format() == E::DataFormat::UnsignedInt && deviceAppSignal->size() == SIZE_16BIT)
 		{
 			// Unsigned Int 16 bit conversion
 			//
@@ -6006,7 +6006,7 @@ namespace Builder
 			}
 		}
 
-		if (deviceSignal->format() == E::DataFormat::Float && deviceSignal->size() == SIZE_32BIT)
+		if (deviceAppSignal->format() == E::DataFormat::Float && deviceAppSignal->size() == SIZE_32BIT)
 		{
 			// Float 32 conversion
 			//
@@ -6035,7 +6035,7 @@ namespace Builder
 			}
 		}
 
-		if (deviceSignal->format() == E::DataFormat::SignedInt && deviceSignal->size() == SIZE_32BIT)
+		if (deviceAppSignal->format() == E::DataFormat::SignedInt && deviceAppSignal->size() == SIZE_32BIT)
 		{
 			// SignedInt 32 conversion
 			//
@@ -6081,7 +6081,7 @@ namespace Builder
 		assert(signal.isOutput());
 		assert(signal.equipmentID().isEmpty() == false);
 
-		Hardware::DeviceObject* deviceObject = m_equipmentSet->deviceObject(signal.equipmentID());
+		Hardware::DeviceObject* deviceObject = m_equipmentSet->deviceObject(signal.equipmentID()).get();
 
 		if (deviceObject == nullptr)
 		{
@@ -6091,9 +6091,9 @@ namespace Builder
 			return false;
 		}
 
-		Hardware::DeviceSignal* deviceSignal = deviceObject->toSignal();
+		Hardware::DeviceAppSignal* deviceAppSignal = deviceObject->toAppSignal().get();
 
-		if (deviceSignal == nullptr)
+		if (deviceAppSignal == nullptr)
 		{
 			// Input/output application signal '%1' should be bound to equipment signal.
 			//
@@ -6101,7 +6101,7 @@ namespace Builder
 			return false;
 		}
 
-		bool signalsIsCompatible = isDeviceAndAppSignalsIsCompatible(*deviceSignal, signal);
+		bool signalsIsCompatible = isDeviceAndAppSignalsIsCompatible(*deviceAppSignal, signal);
 
 		if (signalsIsCompatible == true)
 		{
@@ -6116,9 +6116,9 @@ namespace Builder
 		bool result = true;
 
 		QString inFormat = getFormatStr(signal);
-		QString outFormat = getFormatStr(*deviceSignal);
+		QString outFormat = getFormatStr(*deviceAppSignal);
 
-		if (deviceSignal->format() == E::DataFormat::UnsignedInt && deviceSignal->size() == SIZE_16BIT)
+		if (deviceAppSignal->format() == E::DataFormat::UnsignedInt && deviceAppSignal->size() == SIZE_16BIT)
 		{
 			double x1 = signal.lowEngineeringUnits();
 			double x2 = signal.highEngineeringUnits();
@@ -6188,7 +6188,7 @@ namespace Builder
 			}
 		}
 
-		if (deviceSignal->format() == E::DataFormat::Float && deviceSignal->size() == SIZE_32BIT)
+		if (deviceAppSignal->format() == E::DataFormat::Float && deviceAppSignal->size() == SIZE_32BIT)
 		{
 			// Float 32 conversion
 			//
@@ -6217,7 +6217,7 @@ namespace Builder
 			}
 		}
 
-		if (deviceSignal->format() == E::DataFormat::SignedInt && deviceSignal->size() == SIZE_32BIT)
+		if (deviceAppSignal->format() == E::DataFormat::SignedInt && deviceAppSignal->size() == SIZE_32BIT)
 		{
 			// Signed Int 32 conversion
 			//
@@ -6257,13 +6257,13 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceSignal& deviceSignal, const Signal& appSignal)
+	bool ModuleLogicCompiler::isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceAppSignal& deviceAppSignal, const Signal& appSignal)
 	{
-		switch(deviceSignal.format())
+		switch(deviceAppSignal.format())
 		{
 		case E::DataFormat::Float:
 
-			if (deviceSignal.size() == SIZE_32BIT && appSignal.analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
+			if (deviceAppSignal.size() == SIZE_32BIT && appSignal.analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
 			{
 				return true;
 			}
@@ -6272,7 +6272,7 @@ namespace Builder
 
 		case E::DataFormat::SignedInt:
 
-			if (deviceSignal.size() == SIZE_32BIT && appSignal.analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
+			if (deviceAppSignal.size() == SIZE_32BIT && appSignal.analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
 			{
 				return true;
 			}
@@ -9863,7 +9863,7 @@ namespace Builder
 		//
 		for(Afb::AfbParam pv : appFb->logicFb().params())
 		{
-			if (pv.opName() == "i_conf") // set comparator type: =(1(SI)), > (2(SI)), < (3(SI)), â‰  (4(SI)),= (5(FP)), > (6(FP)), < (7(FP)), â‰  (8(FP))
+			if (pv.opName() == "i_conf") // set comparator type: =(1(SI)), > (2(SI)), < (3(SI)), â‰  (4(SI)),= (5(FP)), > (6(FP)), < (7(FP)), â‰  (8(FP))
 			{
 				switch (pv.value().toInt())
 				{
@@ -10867,8 +10867,8 @@ namespace Builder
 			return false;
 		}
 
-		Hardware::DeviceSignal* lmOut1 = lmOut1Object->toSignal();
-		Hardware::DeviceSignal* lmOut6 = lmOut6Object->toSignal();
+		Hardware::DeviceAppSignal* lmOut1 = lmOut1Object->toAppSignal().get();
+		Hardware::DeviceAppSignal* lmOut6 = lmOut6Object->toAppSignal().get();
 
 		if (lmOut1 == nullptr || lmOut6 == nullptr)
 		{
@@ -13819,9 +13819,9 @@ namespace Builder
 		return cmd;
 	}
 
-	QString ModuleLogicCompiler::getFormatStr(const Hardware::DeviceSignal& ds)
+	QString ModuleLogicCompiler::getFormatStr(const Hardware::DeviceAppSignal& ds)
 	{
-		return getFormatStr(ds.type(), ds.format(), ds.size(), ds.byteOrder());
+		return getFormatStr(ds.signalType(), ds.format(), ds.size(), ds.byteOrder());
 	}
 
 	QString ModuleLogicCompiler::getFormatStr(const Signal& s)

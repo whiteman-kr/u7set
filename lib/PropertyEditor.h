@@ -221,14 +221,11 @@ namespace ExtWidgets
 		virtual bool readOnly() const = 0;
 		virtual void setReadOnly(bool value) = 0;
 
+		virtual bool externalOkCancelButtons() const = 0;
+
 		void setValidator(const QString& validator);
 
 		bool modified();
-
-		bool hasOkCancelButtons();
-
-	protected:
-		void setHasOkCancelButtons(bool value);
 
 	signals:
 		void escapePressed();
@@ -247,8 +244,6 @@ namespace ExtWidgets
 
 	private:
 		bool m_modified = false;
-
-		bool m_hasOkCancelButtons = true;
 	};
 
 	//
@@ -262,11 +257,13 @@ namespace ExtWidgets
 	public:
 		PropertyPlainTextEditor(QWidget* parent);
 
-		virtual QString text() const override;
-		virtual void setText(const QString& text) override;
+		QString text() const override;
+		void setText(const QString& text) override;
 
-		virtual bool readOnly() const override;
-		virtual void setReadOnly(bool value) override;
+		bool readOnly() const override;
+		void setReadOnly(bool value) override;
+
+		bool externalOkCancelButtons() const override;
 
 	protected:
 		bool eventFilter(QObject* obj, QEvent* event);
@@ -406,7 +403,7 @@ namespace ExtWidgets
 		Q_OBJECT
 
 	public:
-		MultiTextEditorDialog(PropertyEditorBase* propertyEditorBase, QWidget* parent, const QString& text, std::shared_ptr<Property> p);
+		MultiTextEditorDialog(PropertyEditorBase* propertyEditorBase, QWidget* parent, const QString& text, std::shared_ptr<Property> p, bool readOnly);
 		QString text();
 
 	private slots:
@@ -516,6 +513,7 @@ namespace ExtWidgets
 		std::shared_ptr<Property> m_property;
 		int m_row = -1;
 		int m_userType = 0;
+		bool m_readOnly = false;
 
 		PropertyEditorBase* m_propertyEditorBase = nullptr;
 	};

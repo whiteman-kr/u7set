@@ -38,9 +38,8 @@ unix {
 
 SOURCES += \
     ../../lib/LanControllerInfoHelper.cpp \
+    ../../lib/ScriptDeviceObject.cpp \
     main.cpp \
-    ../../Proto/network.pb.cc \
-    ../../Proto/serialization.pb.cc \
     ../../Builder/IssueLogger.cpp \
     ../../lib/MemLeaksDetection.cpp \
     ../../lib/CommandLineParser.cpp \
@@ -59,7 +58,6 @@ SOURCES += \
     ../../lib/DeviceObject.cpp \
     ../../lib/TuningValue.cpp \
     ../../lib/Types.cpp \
-    ../../lib/ProtoSerialization.cpp \
     ../../lib/ModuleFirmware.cpp \
     ../../lib/SignalProperties.cpp \
     ../../lib/DataSource.cpp \
@@ -92,9 +90,8 @@ SOURCES += \
 HEADERS += \
     ../../lib/LanControllerInfo.h \
     ../../lib/LanControllerInfoHelper.h \
+    ../../lib/ScriptDeviceObject.h \
     Stable.h \
-    ../../Proto/network.pb.h \
-    ../../Proto/serialization.pb.h \
     ../../Builder/IssueLogger.h \
     ../../lib/MemLeaksDetection.h \
     ../../lib/CommandLineParser.h \
@@ -114,7 +111,6 @@ HEADERS += \
     ../../lib/Hash.h \
     ../../lib/TuningValue.h \
     ../../lib/Types.h \
-    ../../lib/ProtoSerialization.h \
     ../../lib/PropertyObject.h \
     ../../lib/Factory.h \
     ../../lib/ModuleFirmware.h \

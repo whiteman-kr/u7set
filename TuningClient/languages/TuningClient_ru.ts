@@ -4,37 +4,37 @@
 <context>
     <name>CfgLoader</name>
     <message>
-        <location filename="../../lib/CfgServerLoader.cpp" line="269"/>
+        <location filename="../../lib/CfgServerLoader.cpp" line="297"/>
         <source>File reading timeout</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/CfgServerLoader.cpp" line="304"/>
+        <location filename="../../lib/CfgServerLoader.cpp" line="332"/>
         <source>File with ID = &apos;%1&apos; not found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/CfgServerLoader.cpp" line="342"/>
+        <location filename="../../lib/CfgServerLoader.cpp" line="394"/>
         <source>Try connect to CfgService on %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/CfgServerLoader.cpp" line="346"/>
+        <location filename="../../lib/CfgServerLoader.cpp" line="398"/>
         <source>IP address of CfgService is NOT SET! Configuration loading is impossible!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/CfgServerLoader.cpp" line="361"/>
+        <location filename="../../lib/CfgServerLoader.cpp" line="413"/>
         <source>CfgLoader disconnected from server %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/CfgServerLoader.cpp" line="367"/>
+        <location filename="../../lib/CfgServerLoader.cpp" line="419"/>
         <source>Start download: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/CfgServerLoader.cpp" line="352"/>
+        <location filename="../../lib/CfgServerLoader.cpp" line="404"/>
         <source>CfgLoader connected to server %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -42,12 +42,12 @@
 <context>
     <name>CfgServer</name>
     <message>
-        <location filename="../../lib/CfgServerLoader.cpp" line="56"/>
+        <location filename="../../lib/CfgServerLoader.cpp" line="82"/>
         <source>CfgServer new connection #%1 accepted from %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/CfgServerLoader.cpp" line="61"/>
+        <location filename="../../lib/CfgServerLoader.cpp" line="87"/>
         <source>CfgServer connection #%1 closed</source>
         <translation type="unfinished"></translation>
     </message>
@@ -206,29 +206,34 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="351"/>
-        <location filename="../ConfigController.cpp" line="368"/>
-        <location filename="../ConfigController.cpp" line="384"/>
-        <location filename="../ConfigController.cpp" line="400"/>
+        <location filename="../ConfigController.cpp" line="356"/>
+        <location filename="../ConfigController.cpp" line="373"/>
+        <location filename="../ConfigController.cpp" line="389"/>
+        <location filename="../ConfigController.cpp" line="405"/>
         <source>ConfigController::getFileBlockedById: Get %1 file error:
 %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="520"/>
+        <location filename="../ConfigController.cpp" line="469"/>
+        <source>New configuration: connection parameters updated</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ConfigController.cpp" line="518"/>
         <source>ConfigController::getFileBlocked: Can&apos;t get file </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="539"/>
+        <location filename="../ConfigController.cpp" line="537"/>
         <source>ConfigController::getFileBlocked: Can&apos;t get file with ID </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="353"/>
-        <location filename="../ConfigController.cpp" line="370"/>
-        <location filename="../ConfigController.cpp" line="386"/>
-        <location filename="../ConfigController.cpp" line="402"/>
+        <location filename="../ConfigController.cpp" line="358"/>
+        <location filename="../ConfigController.cpp" line="375"/>
+        <location filename="../ConfigController.cpp" line="391"/>
+        <location filename="../ConfigController.cpp" line="407"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
@@ -281,15 +286,21 @@ Error: %1</source>
         <translation>не установлено</translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="237"/>
+        <location filename="../ConfigController.cpp" line="242"/>
         <source>Parsing Software node error.
 </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="275"/>
+        <location filename="../ConfigController.cpp" line="280"/>
         <source>New configuration arrived</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="../ConfigController.cpp" line="626"/>
+        <source>Settings applying error!
+</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ConfigController.cpp" line="161"/>
@@ -297,59 +308,48 @@ Error: %1</source>
         <translation>Соединение: </translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="223"/>
+        <location filename="../ConfigController.cpp" line="228"/>
         <source>%1, line %2, column %3</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="249"/>
+        <location filename="../ConfigController.cpp" line="254"/>
         <source>Parsing BuildInfo node error.
 </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="266"/>
+        <location filename="../ConfigController.cpp" line="271"/>
         <source>Parsing configuration file error:
 %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="276"/>
+        <location filename="../ConfigController.cpp" line="281"/>
         <source>TUNS1 (id, ip, port): %1, %2, %3</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="343"/>
+        <location filename="../ConfigController.cpp" line="348"/>
         <source>New configuration: file &apos;%1&apos; updated</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="466"/>
+        <location filename="../ConfigController.cpp" line="461"/>
         <source>New configuration: appearance updated</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="476"/>
-        <source>New configuration: servers updated</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ConfigController.cpp" line="596"/>
+        <location filename="../ConfigController.cpp" line="594"/>
         <source>The received file has different EquipmentID then expected.
 </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="608"/>
+        <location filename="../ConfigController.cpp" line="606"/>
         <source>The received file has different software type then expected.
 </source>
         <translation></translation>
-    </message>
-    <message>
-        <location filename="../ConfigController.cpp" line="631"/>
-        <source>Error reading &lt;Settings&gt; section from file configuration.xml
-</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -811,7 +811,7 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>ExtWidgets::MultiFilePathEdit</name>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1914"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1925"/>
         <source>Select file</source>
         <translation>Выбор файла</translation>
     </message>
@@ -819,36 +819,36 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>ExtWidgets::MultiTextEdit</name>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2428"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2439"/>
         <source>Select File</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2437"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2448"/>
         <source>File loading error!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2477"/>
-        <location filename="../../lib/PropertyEditor.cpp" line="2554"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2488"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2565"/>
         <source>Data &lt;%1 bytes&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2487"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2498"/>
         <source>Image loading error!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2498"/>
-        <location filename="../../lib/PropertyEditor.cpp" line="2563"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2509"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2574"/>
         <source>Image &lt;Width = %1 Height = %2&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2521"/>
-        <location filename="../../lib/PropertyEditor.cpp" line="2576"/>
-        <location filename="../../lib/PropertyEditor.cpp" line="2601"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2532"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2587"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2612"/>
         <source>&lt;%1 bytes&gt;</source>
         <translation></translation>
     </message>
@@ -856,12 +856,12 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>ExtWidgets::MultiTextEditorDialog</name>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2203"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2214"/>
         <source>OK</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2204"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2215"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
@@ -870,7 +870,7 @@ Data will not be available at the time of reconnection.</source>
         <translation type="vanished">Справка</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2294"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2305"/>
         <source>Do you want to save your changes?</source>
         <translation>Хотите ли вы сохранить изменения?</translation>
     </message>
@@ -878,42 +878,42 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>ExtWidgets::PropertyArrayEditorDialog</name>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="660"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="671"/>
         <source>Property</source>
         <translation>Свойство</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="676"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="687"/>
         <source>Up</source>
         <translation>Вверх</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="680"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="691"/>
         <source>Down</source>
         <translation>Вниз</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="690"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="701"/>
         <source>Add</source>
         <translation>Создать</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="694"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="705"/>
         <source>Remove</source>
         <translation>Удалить</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="728"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="739"/>
         <source>OK</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="732"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="743"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1018"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1029"/>
         <source>%1 - %2</source>
         <translation></translation>
     </message>
@@ -921,22 +921,22 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>ExtWidgets::PropertyEditor</name>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="3346"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="3369"/>
         <source>Property</source>
         <translation type="unfinished">Свойство</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="3347"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="3370"/>
         <source>Value</source>
         <translation type="unfinished">Значение</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="3517"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="3540"/>
         <source>&lt;PropertyVector&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="3522"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="3545"/>
         <source>&lt;PropertyList&gt;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -944,47 +944,47 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>ExtWidgets::VectorEditorDialog</name>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1217"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1228"/>
         <source>Strings</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1221"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1232"/>
         <source>Colors</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1237"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1248"/>
         <source>Add</source>
         <translation>Создать</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1241"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1252"/>
         <source>Remove</source>
         <translation>Удалить</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1245"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1256"/>
         <source>Up</source>
         <translation>Вверх</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1249"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1260"/>
         <source>Down</source>
         <translation>Вниз</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1269"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1280"/>
         <source>OK</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1273"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1284"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1341"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1352"/>
         <source>String - %1</source>
         <translation></translation>
     </message>
@@ -1417,7 +1417,7 @@ Data will not be available at the time of reconnection.</source>
     <message>
         <location filename="../MainWindow.cpp" line="504"/>
         <source>Schemas</source>
-        <translation>Алгоритмы</translation>
+        <translation>Схемы</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="140"/>
@@ -1468,7 +1468,7 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>MonitorSettingsGetter</name>
     <message>
-        <location filename="../../lib/SoftwareSettings.cpp" line="1868"/>
+        <location filename="../../lib/SoftwareSettings.cpp" line="2300"/>
         <source>Monitor configuration error %1, property startSchemaId is invalid</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1607,37 +1607,37 @@ Colld not save crash dump file:
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="93"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="36"/>
         <source>PropertyVector [%1 items]</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="108"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="51"/>
         <source>PropertyList [%1 items]</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="127"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="70"/>
         <source>QStringList [%1 items]</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="234"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="182"/>
         <source>&lt;%1 bytes&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="281"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="229"/>
         <source>Data &lt;%1 bytes&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="288"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="236"/>
         <source>Image &lt;Width = %1 Height = %2&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/UiTools.cpp" line="84"/>
+        <location filename="../../lib/Ui/UiTools.cpp" line="88"/>
         <source>Help file &apos;%1&apos; does not exist!</source>
         <translation>Файл справки %1 не существует!</translation>
     </message>
@@ -1839,87 +1839,92 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
 <context>
     <name>Tcp::FileClient</name>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="327"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="135"/>
         <source>Not connected to server</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="331"/>
-        <source>Not found remote file</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="335"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="147"/>
         <source>Can&apos;t open remote file</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="339"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="151"/>
         <source>Can&apos;t read remote file</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="343"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="155"/>
         <source>Local folder is not writeable</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="347"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="159"/>
         <source>Can&apos;t create local folder</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="351"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="163"/>
         <source>Already download file now</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="355"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="167"/>
         <source>Can&apos;t send request</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="359"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="171"/>
         <source>Can&apos;t create local file</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="363"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="175"/>
         <source>File data corrupted</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="367"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="179"/>
         <source>Can&apos;t write local file</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="379"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="191"/>
         <source>File transferring is not started</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="387"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="199"/>
         <source>Unknown client&apos;s EquipmentID</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="391"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="203"/>
         <source>Internal error</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="371"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="183"/>
         <source>Local file reading error</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="375"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="139"/>
+        <source>File isn&apos;t enumerated in &lt;files&gt; section of Configuration.xml</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="143"/>
+        <source>Remote file is not exists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="187"/>
         <source>Server reply timeout</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="383"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="195"/>
         <source>Configuration is not ready</source>
         <translation></translation>
     </message>
@@ -1927,7 +1932,7 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
 <context>
     <name>Tcp::FileServer</name>
     <message>
-        <location filename="../../lib/TcpFileTransfer.cpp" line="446"/>
+        <location filename="../../lib/TcpFileTransfer.cpp" line="449"/>
         <source>File &apos;%1&apos; has been sent to %2</source>
         <translation></translation>
     </message>
@@ -3155,7 +3160,7 @@ Are you sure you want to take control and %1 the source %2?</source>
     <message>
         <location filename="../TuningWorkspace.cpp" line="1028"/>
         <source>Schemas</source>
-        <translation>Алгоритмы</translation>
+        <translation>Схемы</translation>
     </message>
     <message>
         <location filename="../TuningWorkspace.cpp" line="1397"/>

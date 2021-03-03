@@ -34,7 +34,7 @@ SOURCES += MainWindow.cpp \
     ../lib/Address16.cpp \
     ../lib/LanControllerInfoHelper.cpp \
 	../lib/MemLeaksDetection.cpp \
-    ../lib/ProtoSerialization.cpp \
+    ../lib/ScriptDeviceObject.cpp \
 	../lib/SoftwareSettings.cpp \
     ScanOptionsWidget.cpp \
 	ScmMain.cpp \
@@ -52,9 +52,7 @@ SOURCES += MainWindow.cpp \
     ../lib/WUtils.cpp \
     ../lib/Crc.cpp \
     ../lib/Tcp.cpp \
-    ../Proto/network.pb.cc \
     ../lib/Signal.cpp \
-    ../Proto/serialization.pb.cc \
     ../lib/AppSignal.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/Types.cpp \
@@ -93,7 +91,7 @@ HEADERS  += MainWindow.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
     ../lib/MemLeaksDetection.h \
-    ../lib/ProtoSerialization.h \
+    ../lib/ScriptDeviceObject.h \
     ../lib/SoftwareSettings.h \
     ScanOptionsWidget.h \
     ScmTcpAppDataClient.h \
@@ -111,11 +109,9 @@ HEADERS  += MainWindow.h \
     ../lib/Crc.h \
     Stable.h \
     ../lib/Tcp.h \
-    ../Proto/network.pb.h \
     ../lib/Signal.h \
     ../lib/PropertyObject.h \
-    ../Proto/serialization.pb.h \
-    ../lib/AppSignal.h \
+	 ../lib/AppSignal.h \
     ../lib/DeviceObject.h \
     ../lib/Types.h \
     ../lib/DbStruct.h \

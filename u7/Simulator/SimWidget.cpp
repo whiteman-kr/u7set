@@ -51,8 +51,8 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	QVBoxLayout* layout = new QVBoxLayout;
 	centralWidget()->setLayout(layout);
 
-	createToolBar();
 	createDocks();
+	createToolBar();
 
 	updateActions();
 
@@ -299,8 +299,6 @@ void SimWidget::createToolBar()
 
 void SimWidget::createDocks()
 {
-	qDebug() << "SimWidget::createDocks()";
-
 	setCorner(Qt::Corner::BottomLeftCorner, Qt::DockWidgetArea::LeftDockWidgetArea);
 	setCorner(Qt::Corner::BottomRightCorner, Qt::DockWidgetArea::BottomDockWidgetArea);
 	setCorner(Qt::Corner::TopRightCorner, Qt::DockWidgetArea::RightDockWidgetArea);
@@ -327,27 +325,26 @@ void SimWidget::createDocks()
 
 	// Overriden Signals dock
 	//
-	QDockWidget* overrideDock = new QDockWidget{"Override", this};
-	overrideDock->setObjectName("SimOverridenSignals");
-	overrideDock->setWidget(new SimOverridePane{m_simulator.get(), dbc(), overrideDock});
-	overrideDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+	m_overridePaneDock = new QDockWidget{"Overrides", this};
+	m_overridePaneDock->setObjectName("SimOverridenSignals");
+	m_overridePaneDock->setWidget(new SimOverridePane{m_simulator.get(), dbc(), m_overridePaneDock});
+	m_overridePaneDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
-	addDockWidget(Qt::BottomDockWidgetArea, overrideDock);
+	addDockWidget(Qt::BottomDockWidgetArea, m_overridePaneDock);
 
 	// OutputLog dock
 	//
-	QDockWidget* outputDock = nullptr;
 	if (m_slaveWindow == false)
 	{
-		outputDock = new QDockWidget{"Output", this};
-		outputDock->setObjectName("SimOutputWidget");
+		m_outputPaneDock = new QDockWidget{"Output", this};
+		m_outputPaneDock->setObjectName("SimOutputWidget");
 
-		m_outputWidget = new SimOutputWidget{outputDock};
+		m_outputWidget = new SimOutputWidget{m_outputPaneDock};
 
-		outputDock->setWidget(m_outputWidget);
-		outputDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+		m_outputPaneDock->setWidget(m_outputWidget);
+		m_outputPaneDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
-		addDockWidget(Qt::BottomDockWidgetArea, outputDock);
+		addDockWidget(Qt::BottomDockWidgetArea, m_outputPaneDock);
 	}
 
 	// Memory Widget - at least one defaullt memory widget
@@ -402,11 +399,7 @@ void SimWidget::showEvent(QShowEvent* e)
 	QMainWindow::showEvent(e);
 	e->ignore();
 
-	m_showEventFired = true;
-
-static bool firstEvent = true;
-
-	if (firstEvent == true)
+	if (m_showEventFired == false)
 	{
 		// Restore docks states only after show event, otherwise the _floated_ docks will be behind main window
 		//
@@ -427,9 +420,10 @@ static bool firstEvent = true;
 
 			m_toolBar->setVisible(true);
 		}
-
-		firstEvent = false;
 	}
+
+	m_showEventFired = true;
+
 	return;
 }
 

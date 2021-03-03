@@ -159,13 +159,13 @@ namespace Metrology
 				setModule(pDeviceObject->place());
 				break;
 
-			case Hardware::DeviceType::Signal:
+			case Hardware::DeviceType::AppSignal:
 				setPlace(pDeviceObject->place());
 				setContact(pDeviceObject->equipmentId().remove(pDeviceObject->parent()->equipmentId()));
 				break;
 		}
 
-		getParentObject(pDeviceObject->parent());
+		getParentObject(pDeviceObject->parent().get());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
