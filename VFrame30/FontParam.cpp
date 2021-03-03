@@ -1,5 +1,4 @@
 #include "FontParam.h"
-#include "../lib/ProtoSerialization.h"
 
 namespace VFrame30
 {

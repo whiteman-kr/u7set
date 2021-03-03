@@ -56,21 +56,31 @@ struct BuildInfo
 // SchemaSettings
 //
 
-struct SchemaSettings
+struct SchemaInfo
 {
-	SchemaSettings()
-	{
-
-	}
-
-	SchemaSettings(const QString& id, const QString& caption)
+	SchemaInfo(const QString& id, const QString& caption, const std::set<QString>& tags)
 	{
 		m_id = id;
 		m_caption = caption;
+		m_tags = tags;
+	}
+
+	bool hasAnyTag(const QStringList& tags) const
+	{
+		for (const QString& tag : tags)
+		{
+			if (m_tags.find(tag.trimmed().toLower()) != m_tags.end())
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	QString m_id;
 	QString m_caption;
+	std::set<QString> m_tags;
 };
 
 //
@@ -83,7 +93,7 @@ struct ConfigSettings
 
 	ConfigConnection serviceAddress;				// Tuning Service connection params
 
-	std::vector<SchemaSettings> schemas;
+	std::vector<SchemaInfo> schemas;
 
 	BuildInfo buildInfo;
 

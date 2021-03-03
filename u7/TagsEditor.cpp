@@ -13,8 +13,6 @@ TagsEditor::TagsEditor(DbController* dbController, QWidget* parent):
 		return;
 	}
 
-	setHasOkCancelButtons(false);
-
 	// TextEditor
 	//
 	m_textEdit = new QLineEdit();
@@ -48,13 +46,13 @@ TagsEditor::TagsEditor(DbController* dbController, QWidget* parent):
 
 	buttonsLayout->addStretch();
 
-	QPushButton* b = new QPushButton(tr("OK"));
-	connect(b, &QPushButton::clicked, this, &TagsEditor::okButtonPressed);
-	buttonsLayout->addWidget(b);
+	m_okButton = new QPushButton(tr("OK"));
+	connect(m_okButton, &QPushButton::clicked, this, &TagsEditor::okButtonPressed);
+	buttonsLayout->addWidget(m_okButton);
 
-	b = new QPushButton(tr("Cancel"));
-	connect(b, &QPushButton::clicked, this, &TagsEditor::cancelButtonPressed);
-	buttonsLayout->addWidget(b);
+	m_cancelButton = new QPushButton(tr("Cancel"));
+	connect(m_cancelButton, &QPushButton::clicked, this, &TagsEditor::cancelButtonPressed);
+	buttonsLayout->addWidget(m_cancelButton);
 
 	// Main Layout
 	//
@@ -106,7 +104,14 @@ bool TagsEditor::readOnly() const
 void TagsEditor::setReadOnly(bool value)
 {
 	m_textEdit->setReadOnly(value);
+	m_okButton->setEnabled(value == false);
 }
+
+bool TagsEditor::externalOkCancelButtons() const
+{
+	return false;
+}
+
 
 void TagsEditor::tagsTextChanged(const QString& text)
 {

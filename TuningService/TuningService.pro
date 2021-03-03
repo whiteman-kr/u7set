@@ -36,6 +36,7 @@ SOURCES += \
     ../lib/CircularLogger.cpp \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/MemLeaksDetection.cpp \
+    ../lib/ScriptDeviceObject.cpp \
     ../lib/Service.cpp \
     ../lib/SocketIO.cpp \
     ../lib/UdpSocket.cpp \
@@ -51,7 +52,6 @@ SOURCES += \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
     ../lib/OutputLog.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     ../lib/Signal.cpp \
     ../lib/Crc.cpp \
@@ -59,8 +59,6 @@ SOURCES += \
     ../lib/DataProtocols.cpp \
     ../Builder/IssueLogger.cpp \
     ../lib/HostAddressPort.cpp \
-    ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc \
     TcpTuningServer.cpp \
     TcpTuningClient.cpp \
     TuningSource.cpp \
@@ -87,6 +85,7 @@ HEADERS += \
     ../lib/LanControllerInfoHelper.h \
     ../lib/MemLeaksDetection.h \
     ../lib/OrderedHash.h \
+    ../lib/ScriptDeviceObject.h \
     ../lib/Service.h \
     ../lib/SocketIO.h \
     ../lib/UdpSocket.h \
@@ -105,15 +104,12 @@ HEADERS += \
     ../lib/PropertyObject.h \
     ../lib/DbStruct.h \
     ../lib/OutputLog.h \
-    ../lib/ProtoSerialization.h \
     ../lib/Types.h \
     ../lib/Signal.h \
     ../lib/Crc.h \
     ../lib/Hash.h \
     ../Builder/IssueLogger.h \
     ../lib/HostAddressPort.h \
-    ../Proto/network.pb.h \
-    ../Proto/serialization.pb.h \
     TcpTuningServer.h \
     TcpTuningClient.h \
     TuningSource.h \
@@ -142,14 +138,8 @@ CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 #
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 
-win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
-
-	INCLUDEPATH += ./../Protobuf
-}
-unix {
-	LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
 DISTFILES += \
     ../Proto/network.proto \

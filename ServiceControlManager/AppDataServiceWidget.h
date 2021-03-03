@@ -71,7 +71,7 @@ class AppDataServiceWidget : public BaseServiceStateWidget
 {
 	Q_OBJECT
 public:
-	AppDataServiceWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget *parent = nullptr);
+	AppDataServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent = nullptr);
 	~AppDataServiceWidget();
 
 signals:
@@ -91,7 +91,7 @@ public slots:
 
 	void updateClientsInfo();
 
-	void updateSettings();
+	void updateServiceParameters();
 
 	void clearServiceData();
 
@@ -106,6 +106,7 @@ protected:
 private:
 	DataSourcesStateModel* m_dataSourcesStateModel = nullptr;
 	SignalStateModel* m_signalStateModel = nullptr;
+	QStandardItemModel* m_parametersTabModel = nullptr;
 	QStandardItemModel* m_settingsTabModel = nullptr;
 
 	QTableView* m_dataSourcesView = nullptr;

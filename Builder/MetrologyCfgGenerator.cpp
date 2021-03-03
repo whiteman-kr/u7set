@@ -75,7 +75,7 @@ namespace Builder
 				int systemsCount = m_equipment->root()->childrenCount();
 				for (int s = 0; s < systemsCount; s++)
 				{
-					Hardware::DeviceObject* pSystem = m_equipment->root()->child(s);
+					Hardware::DeviceObject* pSystem = m_equipment->root()->child(s).get();
 					if (pSystem == nullptr || pSystem->isSystem() == false)
 					{
 						continue;
@@ -86,7 +86,7 @@ namespace Builder
 					int racksCount = pSystem->childrenCount();
 					for (int r = 0; r < racksCount; r++)
 					{
-						Hardware::DeviceObject* pRack = pSystem->child(r);
+						Hardware::DeviceObject* pRack = pSystem->child(r).get();
 						if (pRack == nullptr || pRack->isRack() == false)
 						{
 							continue;
@@ -119,7 +119,7 @@ namespace Builder
 				//
 				QStringList tuningSourceEquipmentID;
 
-				Hardware::DeviceObject* pObjectSoftware = m_equipment->deviceObject(m_software->equipmentId());
+				Hardware::DeviceObject* pObjectSoftware = m_equipment->deviceObject(m_software->equipmentId()).get();
 				if (pObjectSoftware != nullptr && pObjectSoftware->isSoftware() == true)
 				{
 					QString propertyValue;
@@ -275,7 +275,7 @@ namespace Builder
 
 			// find location of signal in the equipment Tree by signal equipmentID
 			//
-			Metrology::SignalLocation location(m_equipment->deviceObject(signal.equipmentID()), showOnSchemas);
+			Metrology::SignalLocation location(m_equipment->deviceObject(signal.equipmentID()).get(), showOnSchemas);
 
 			// append signal into list
 			//
@@ -756,7 +756,7 @@ namespace Builder
 		}
 		else
 		{
-			if (signal.sensorType() != E::SensorType::Hz_50_50000)
+			if (signal.sensorType() != E::SensorType::Hz_005_50000)
 			{
 				return false;
 			}

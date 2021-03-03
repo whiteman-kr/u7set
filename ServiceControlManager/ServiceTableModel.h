@@ -19,10 +19,17 @@ struct ServiceData
 {
 	Network::ServiceInfo information;
 
+	quint32 clientRequestIp;
+	quint16 clientRequestPort;
+	SessionParams sessionParams;
+	std::shared_ptr<SoftwareSettings> settings;
+	E::SoftwareType type = E::SoftwareType::Unknown;
+
 	UdpClientSocket* clientSocket = nullptr;
 	QWidget* statusWidget = nullptr;
 
 	ServiceData();
+	void parseServiceInfo();
 };
 
 struct HostInfo
@@ -76,10 +83,8 @@ private:
 	void restartUdpSocketThread();
 
 	void setServiceState(quint32 ip, quint16 port, ServiceState state);
-	QPair<int,int> getServiceState(quint32 ip, quint16 port);
+	void getServiceState(quint32 ip, quint16 port, int& hostIndex, int& portIndex);
 	void checkForDeletingSocket(UdpClientSocket* socket);
-
-
 };
 
 #endif // SERVICETABLEMODEL_H

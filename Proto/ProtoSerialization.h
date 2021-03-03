@@ -6,7 +6,7 @@
 #include <QtCore/QUuid>
 #include <QVariant>
 
-#include "PropertyObject.h"
+#include "../lib/PropertyObject.h"
 
 #ifdef Q_OS_WIN
 #pragma warning (push)
@@ -19,7 +19,7 @@
 #pragma warning(disable : 4996)
 #endif // Q_OS_WIN
 
-#include "../Proto/serialization.pb.h"
+#include "serialization.pb.h"
 #ifdef Q_OS_WIN
 #pragma warning (pop)
 #endif // Q_OS_WIN

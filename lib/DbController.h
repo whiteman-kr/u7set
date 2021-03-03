@@ -161,8 +161,8 @@ public:
 
 	bool checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState, QWidget* parentWidget);
 
-	bool autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, std::vector<Signal>* addedSignals, QWidget* parentWidget);
-	bool autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, QWidget* parentWidget);
+	bool autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<Signal>* addedSignals, QWidget* parentWidget);
+	bool autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, QWidget* parentWidget);
 
 	bool getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs, QWidget* parentWidget);
 	bool getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs, QWidget* parentWidget);
@@ -280,8 +280,8 @@ signals:
 	bool signal_undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectState>* objectStates);
 	void signal_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
 
-	void signal_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, std::vector<Signal>* addedSignals);
-	void signal_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals);
+	void signal_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<Signal>* addedSignals);
+	void signal_autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals);
 
 	void signal_getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs);
 	void signal_getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs);

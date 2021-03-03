@@ -39,6 +39,7 @@ class Signal
 	friend class DbWorker;
 	friend class SignalSet;
 	friend class SignalTests;
+	friend class DbControllerSignalTests;
 
 public:
 	static const QString MACRO_START_TOKEN;
@@ -48,8 +49,10 @@ public:
 	Signal();
 	Signal(const Signal& s);
 	Signal(const ID_AppSignalID& ids);
-	Signal(const Hardware::DeviceSignal& deviceSignal, QString* errMsg);
+	Signal(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg);
 	virtual ~Signal();
+
+	void clear();
 
 	void initSpecificProperties();
 
@@ -402,15 +405,16 @@ private:
 	void setInstanceCreated(const QDateTime& instanceCreated) { m_instanceCreated = instanceCreated; }
 	void setInstanceCreated(const QString& instanceCreatedStr) { m_instanceCreated = QDateTime::fromString(instanceCreatedStr, DATE_TIME_FORMAT_STR); }
 	void setInstanceAction(VcsItemAction action) { m_instanceAction = action; }
+	void initCreatedDates();
 
 	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
 
 	void updateTuningValuesType();
 
-	void initIDsAndCaption(const Hardware::DeviceSignal& deviceSignal,
+	void initIDsAndCaption(const Hardware::DeviceAppSignal& deviceSignal,
 							QString* errMsg);
 
-	void checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSignal, QString* errMsg);
+	void checkAndInitTuningSettings(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg);
 
 	QString specPropNotExistErr(const QString &propName) const;
 

@@ -2,7 +2,7 @@
 
 #include "MainWindow.h"
 #include "Options.h"
-#include "../../lib/ProtoSerialization.h"
+#include "../Proto/ProtoSerialization.h"
 #include "../../lib/MemLeaksDetection.h"
 
 #if __has_include("../../gitlabci_version.h")

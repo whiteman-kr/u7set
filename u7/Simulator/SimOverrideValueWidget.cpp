@@ -115,24 +115,6 @@ namespace SimOverrideUI
 		return;
 	}
 
-	QDoubleValidatorEx::QDoubleValidatorEx(QObject* parent) :
-		QDoubleValidator(parent)
-	{
-
-	}
-
-	QDoubleValidatorEx::QDoubleValidatorEx(double bottom, double top, int decimals, QObject* parent) :
-		QDoubleValidator(bottom, top, decimals, parent)
-	{
-	}
-
-	QValidator::State QDoubleValidatorEx::validate(QString& str, int& npos) const
-	{
-		str.replace('.', QLocale{}.decimalPoint());
-		str.replace('E', QLocale{}.exponential(), Qt::CaseInsensitive);
-		return QDoubleValidator::validate(str, npos);
-	}
-
 	//
 	// ValueMethodWidget
 	//

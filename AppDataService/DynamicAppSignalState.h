@@ -24,6 +24,7 @@ public:
 	void setSignalParams(const Signal* signal, const AppSignals& appSignals);
 
 	bool setState(const Times& time,
+				  bool isSimPacket,
 				  quint16 packetNo,
 				  const char* rupData,
 				  int rupDataSize,

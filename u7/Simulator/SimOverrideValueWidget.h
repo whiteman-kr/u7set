@@ -4,7 +4,7 @@
 #include "../../QScintilla/Qt4Qt5/Qsci/qsciscintilla.h"
 #include "../../lib/QScintillaLexers/LexerJavaScript.h"
 #include "../../lib/DbController.h"
-
+#include "../../lib/QDoublevalidatorEx.h"
 
 
 namespace SimOverrideUI
@@ -60,17 +60,6 @@ namespace SimOverrideUI
 		int m_currentBase = 10;											// Base for integer signals: 10, 16
 		E::AnalogFormat m_analogFormat = E::AnalogFormat::g_9_or_9e;	// Current format for floating point signals
 		int m_precision = -1;											// Current procision for floating point signals
-	};
-
-	class QDoubleValidatorEx : public QDoubleValidator
-	{
-		Q_OBJECT
-
-	public:
-		explicit QDoubleValidatorEx(QObject* parent = nullptr);
-		QDoubleValidatorEx(double bottom, double top, int decimals, QObject* parent = nullptr);
-
-		virtual QValidator::State validate(QString &, int &) const override;
 	};
 
 	//

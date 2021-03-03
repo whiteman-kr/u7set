@@ -80,6 +80,8 @@
         <file>Images/PreviousIssue.svg</file>
         <file>Images/ClearLog.svg</file>
         <file>Images/SimProfileEditor.svg</file>
+        <file>Images/ExportPreset.svg</file>
+        <file>Images/ImportPreset.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>
@@ -93,3 +95,4 @@
         <file>Simulator/ScriptSample.js</file>
     </qresource>
 </RCC>
+    

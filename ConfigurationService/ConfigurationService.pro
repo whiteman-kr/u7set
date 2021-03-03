@@ -39,6 +39,7 @@ SOURCES += \
     ../lib/Address16.cpp \
     ../lib/CfgServerLoader.cpp \
 	../lib/MemLeaksDetection.cpp \
+    ../lib/ScriptDeviceObject.cpp \
     ../lib/Tcp.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/SimpleThread.cpp \
@@ -49,8 +50,6 @@ SOURCES += \
     ../lib/UdpSocket.cpp \
     ../lib/CircularLogger.cpp \
     ../lib/HostAddressPort.cpp \
-    ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc \
     ../lib/CommandLineParser.cpp \
     CfgServiceMain.cpp \
     ../lib/XmlHelper.cpp \
@@ -59,13 +58,13 @@ SOURCES += \
     ../lib/SoftwareInfo.cpp \
 	../lib/SoftwareSettings.cpp \
 	../lib/DeviceObject.cpp \
-    ../lib/DbStruct.cpp \
-    ../lib/ProtoSerialization.cpp
+	../lib/DbStruct.cpp
 
 HEADERS += \
     ../lib/Address16.h \
     ../lib/CfgServerLoader.h \
 	../lib/MemLeaksDetection.h \
+    ../lib/ScriptDeviceObject.h \
     ../lib/Tcp.h \
     ../lib/TcpFileTransfer.h \
     ../lib/SimpleThread.h \
@@ -76,8 +75,6 @@ HEADERS += \
     ../lib/UdpSocket.h \
     ../lib/CircularLogger.h \
     ../lib/HostAddressPort.h \
-    ../Proto/network.pb.h \
-    ../Proto/serialization.pb.h \
     ../lib/CommandLineParser.h \
     ../lib/XmlHelper.h \
     CfgChecker.h \
@@ -88,7 +85,6 @@ HEADERS += \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
     ../lib/PropertyObject.h \
-    ../lib/ProtoSerialization.h \
 	Stable.h
 
 CONFIG += precompile_header
@@ -102,14 +98,9 @@ CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 #
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 
-win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
-	INCLUDEPATH += ./../Protobuf
-}
-unix {
-	LIBS += -lprotobuf
-}
 
 DISTFILES += \
     ../Proto/network.proto

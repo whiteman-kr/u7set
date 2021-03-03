@@ -99,6 +99,7 @@ void DynamicAppSignalState::setSignalParams(const Signal* signal, const AppSigna
 }
 
 bool DynamicAppSignalState::setState(const Times& time,
+								bool isSimPacket,
 								quint16 packetNo,
 								const char* rupData,
 								int rupDataSize,
@@ -118,6 +119,7 @@ bool DynamicAppSignalState::setState(const Times& time,
 	curState.packetNo = packetNo;
 
 	curState.flags.stateAvailable = 1;
+	curState.flags.swSimulated = isSimPacket;
 
 	// update validity flag
 
@@ -141,11 +143,6 @@ bool DynamicAppSignalState::setState(const Times& time,
 	result = getValue(rupData, rupDataSize, value);
 
 	RETURN_IF_FALSE(result);
-
-/*	if (m_prevValidity == validity && m_prevValue == value)
-	{
-		return false;
-	}*/
 
 	curState.value = value;
 
@@ -322,8 +319,6 @@ bool DynamicAppSignalState::setState(const Times& time,
 	if (m_autoArchivingGroup == autoArchivingGroup)
 	{
 		curState.flags.autoPoint = 1;
-
-//		qDebug() << "auto" << appSignalID();
 	}
 
 	curState.flags.updateArchivingReasonFlags(prevState.flags);

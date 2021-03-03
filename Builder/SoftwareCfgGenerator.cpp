@@ -23,7 +23,7 @@ namespace Builder
 		m_equipment(context->m_equipmentSet.get()),
 		m_buildResultWriter(context->m_buildResultWriter.get()),
 		m_log(context->m_log),
-		m_settingsSet(software->type())
+		m_settingsSet(software->softwareType())
 	{
 		assert(context);
 	}
@@ -53,7 +53,7 @@ namespace Builder
 		Q_UNUSED(profile);
 
 		LOG_INTERNAL_ERROR_MSG(m_log, QString("Method createSettingsProfile(...) is not implemented for software %1 (type %2)").
-									arg(equipmentID()).arg(E::valueToString<E::SoftwareType>(m_software->type())));
+									arg(equipmentID()).arg(E::valueToString<E::SoftwareType>(m_software->softwareType())));
 
 		return false;
 	}
@@ -525,7 +525,7 @@ namespace Builder
 
 		xmlWriter.writeAttribute(XmlAttribute::CAPTION, m_software->caption());
 		xmlWriter.writeAttribute(XmlAttribute::ID, m_software->equipmentIdTemplate());
-		xmlWriter.writeAttribute(XmlAttribute::TYPE, QString("%1").arg(static_cast<int>(m_software->type())));
+		xmlWriter.writeAttribute(XmlAttribute::TYPE, QString("%1").arg(static_cast<int>(m_software->softwareType())));
 
 		if (finalizeSection == true)
 		{
@@ -608,7 +608,7 @@ namespace Builder
 						{
 							software = sw->second;
 
-							if (software->type() != E::SoftwareType::TuningService)
+							if (software->softwareType() != E::SoftwareType::TuningService)
 							{
 								// Property '%1.%2' is linked to not compatible software '%3'.
 								//
@@ -647,7 +647,7 @@ namespace Builder
 						{
 							software = sw->second;
 
-							if (software->type() != E::SoftwareType::AppDataService)
+							if (software->softwareType() != E::SoftwareType::AppDataService)
 							{
 								// Property '%1.%2' is linked to not compatible software '%3'.
 								//
@@ -686,7 +686,7 @@ namespace Builder
 						{
 							software = sw->second;
 
-							if (software->type() != E::SoftwareType::DiagDataService)
+							if (software->softwareType() != E::SoftwareType::DiagDataService)
 							{
 								// Property '%1.%2' is linked to not compatible software '%3'.
 								//

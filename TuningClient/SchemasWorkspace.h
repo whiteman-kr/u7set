@@ -17,8 +17,14 @@ public:
 	SchemasWorkspace(ConfigController* configController,
 					 TuningSignalManager* tuningSignalManager,
 					 TuningClientTcpClient* tuningTcpClient,
+					 const QString& caption,
+					 const QStringList& schemasTags,
+					 QString startSchemaId,
+					 ILogFile* logFile,
 					 QWidget* parent);
 	virtual ~SchemasWorkspace();
+
+	const QString& caption() const;
 
 private slots:
 	void slot_itemSelectionChanged();
@@ -31,14 +37,23 @@ public:
 	void zoomToFit();
 
 private:
+
+	void createSchemasList();
+	void createSchemasTabs();
+	void createSchemasView();
+
 	TuningSchemaWidget* activeSchemaWidget();
 
 private:
 	TuningClientTuningController m_tuningController;
 	VFrame30::LogController m_logController;
 	TuningSignalManager* m_tuningSignalManager = nullptr;
-	TuningClientTcpClient* m_tuninTcpClient = nullptr;
+	TuningClientTcpClient* m_tuningTcpClient = nullptr;
 	TuningSchemaManager m_schemaManager;
+
+	QString m_caption;
+	QString m_startSchemaId;
+	QStringList m_schemasTags;
 
 	QTabWidget* m_tabWidget = nullptr;				// This is used only with TAB mode!
 

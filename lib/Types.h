@@ -355,7 +355,7 @@ public:
 
 		uA_m20_p20 = 34,
 
-		Hz_50_50000 = 35,
+		Hz_005_50000 = 35,
 	};
 	Q_ENUM(SensorType)
 
@@ -526,7 +526,8 @@ public:
 		Blocked,
 		Mismatch,
 		AboveHighLimit,
-		BelowLowLimit
+		BelowLowLimit,
+		SwSimulated
 	};
 	Q_ENUM(AppSignalStateFlagType)
 
