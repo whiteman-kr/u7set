@@ -95,6 +95,14 @@ VcsItemAction::VcsItemActionType VcsItemAction::value() const noexcept
 	return m_action;
 }
 
+void VcsItemAction::setValue(int intVal)
+{
+	Q_ASSERT(intVal >= static_cast<int>(VcsItemActionType::Unknown));
+	Q_ASSERT(intVal <= static_cast<int>(VcsItemActionType::Deleted));
+
+	m_action = static_cast<VcsItemActionType>(intVal);
+}
+
 bool operator== (const VcsItemAction& s1, const VcsItemAction& s2) noexcept
 {
 	return s1.m_action == s2.m_action;

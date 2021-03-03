@@ -105,12 +105,7 @@ public:
 	SignalsTabPage* parentWindow() { return m_parentWindow; }
 
 	void prepareForReset() { beginResetModel(); }
-	void finishReset()
-	{
-		m_rowCount = 0;
-		m_columnCount = 0;
-		endResetModel();
-	}
+	void finishReset();
 
 
 public slots:
@@ -376,7 +371,7 @@ public:
 	SignalsTabPage(SignalSetProvider* signalSetProvider, DbController* dbController, QWidget* parent);
 	virtual ~SignalsTabPage() override;
 
-	static bool updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties);
+	static bool updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceAppSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties);
 	int getMiddleVisibleRow();
 	bool editSignals(QVector<int> ids);
 

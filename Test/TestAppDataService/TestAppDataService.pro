@@ -43,7 +43,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS += \
     ../../lib/Address16.h \
-    ../../lib/ServiceSettings.h \
+	../../lib/SoftwareSettings.h \
     ../../lib/SimpleMutex.h \
     ../../lib/XmlHelper.h \
     ../../lib/HostAddressPort.h \
@@ -53,7 +53,6 @@ HEADERS += \
     ../../Builder/IssueLogger.h \
     ../../Builder/ModulesRawData.h \
     ../../lib/DbStruct.h \
-    ../../lib/ProtoSerialization.h \
     ../../lib/Types.h \
     ../../lib/PropertyObject.h \
     ../../lib/DataSource.h \
@@ -81,7 +80,7 @@ SOURCES += \
     ../../lib/Address16.cpp \
     ../../lib/SimpleMutex.cpp \
     ../../lib/XmlHelper.cpp \
-    ../../lib/ServiceSettings.cpp \
+	../../lib/SoftwareSettings.cpp \
     ../../lib/HostAddressPort.cpp \
     ../../lib/OutputLog.cpp \
     ../../lib/DeviceHelper.cpp \
@@ -89,9 +88,7 @@ SOURCES += \
     ../../Builder/IssueLogger.cpp \
     ../../Builder/ModulesRawData.cpp \
     ../../lib/DbStruct.cpp \
-    ../../lib/ProtoSerialization.cpp \
     ../../lib/Types.cpp \
-#    ../../lib/PropertyObject.cpp \
     ../../lib/DataSource.cpp \
     ../../lib/Crc.cpp \
     ../../lib/Queue.cpp \

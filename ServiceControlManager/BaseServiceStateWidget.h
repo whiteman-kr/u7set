@@ -5,6 +5,7 @@
 #include "../lib/UdpSocket.h"
 #include "../lib/Service.h"
 #include "../lib/Tcp.h"
+#include "ServiceTableModel.h"
 
 class QAction;
 class QLabel;
@@ -15,7 +16,7 @@ class BaseServiceStateWidget : public QMainWindow
 {
 	Q_OBJECT
 public:
-	explicit BaseServiceStateWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget* parent = nullptr);
+	explicit BaseServiceStateWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget* parent = nullptr);
 	virtual ~BaseServiceStateWidget();
 
 	int addTab(QWidget* page, const QString& label);
@@ -58,9 +59,9 @@ protected:
 	quint32 m_udpIp = 0;
 	int m_udpPort = -1;
 
-	SoftwareInfo m_softwareInfo;
+	ServiceData m_service;
 
-	Network::ServiceInfo m_serviceInfo;
+	SoftwareInfo m_softwareInfo;
 
 private:
 	void sendCommand(int command);

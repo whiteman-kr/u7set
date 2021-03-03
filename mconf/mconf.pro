@@ -59,6 +59,7 @@ DEFINES += QT_DLL QT_WIDGETS_LIB QT_NETWORK_LIB QT_SQL_LIB QT_XML_LIB
 #win32:LIBS += advapi32.lib
 
 HEADERS += \
+    ../lib/ScriptDeviceObject.h \
     ../lib/Ui/DialogAbout.h \
 	Stable.h \
 	ftdi/ftd2xx.h \
@@ -78,6 +79,7 @@ HEADERS += \
     ../lib/ModuleFirmware.h
 
 SOURCES += \
+    ../lib/ScriptDeviceObject.cpp \
     ../lib/Ui/DialogAbout.cpp \
 	main.cpp \
 	../lib/DbStruct.cpp \

@@ -447,7 +447,7 @@ namespace Builder
 		LOG_EMPTY_LINE(m_context->m_log);
 		LOG_MESSAGE(m_context->m_log, tr("Getting equipment"));
 
-		std::shared_ptr<Hardware::DeviceObject> deviceRoot = std::make_shared<Hardware::DeviceRoot>();
+		std::shared_ptr<Hardware::DeviceRoot> deviceRoot = std::make_shared<Hardware::DeviceRoot>();
 
 		int rootFileId = m_context->m_db.hcFileId();
 		deviceRoot->fileInfo().setFileId(rootFileId);
@@ -491,7 +491,7 @@ namespace Builder
 		LOG_EMPTY_LINE(m_context->m_log);
 		LOG_MESSAGE(m_context->m_log, tr("Checking for same Uuids and StrIds"));
 
-		if (bool ok = checkUuidAndStrId(m_context->m_equipmentSet->root());
+		if (bool ok = checkUuidAndStrId(m_context->m_equipmentSet->root().get());
 			ok == false)
 		{
 			return false;
@@ -580,7 +580,7 @@ namespace Builder
 
 		for (int i = 0; i < object->childrenCount(); i++)
 		{
-			Hardware::DeviceObject* child = object->child(i);
+			Hardware::DeviceObject* child = object->child(i).get();
 
 			if (child->deviceType() == Hardware::DeviceType::Module)
 			{
@@ -613,7 +613,7 @@ namespace Builder
 
 		for (int i = 0; i < object->childrenCount(); i++)
 		{
-			Hardware::DeviceObject* child = object->child(i);
+			Hardware::DeviceObject* child = object->child(i).get();
 
 			if (child->deviceType() == Hardware::DeviceType::Module)
 			{
@@ -887,14 +887,14 @@ namespace Builder
 
 		for (int i = 0; i < childCount; i++)
 		{
-			ok &= checkUuidAndStrIdWorker(device->child(i), uuidMap, strIdMap);
+			ok &= checkUuidAndStrIdWorker(device->child(i).get(), uuidMap, strIdMap);
 		}
 
 		return ok;
 	}
 
 
-	bool BuildWorkerThread::checkChildRestrictions(Hardware::DeviceObject* root)
+	bool BuildWorkerThread::checkChildRestrictions(std::shared_ptr<Hardware::DeviceObject> root)
 	{
 		if (root == nullptr)
 		{
@@ -904,13 +904,12 @@ namespace Builder
 
 		// Recursive function
 		//
-
 		bool ok = checkChildRestrictionsWorker(root);
 
 		return ok;
 	}
 
-	bool BuildWorkerThread::checkChildRestrictionsWorker(Hardware::DeviceObject* device)
+	bool BuildWorkerThread::checkChildRestrictionsWorker(std::shared_ptr<Hardware::DeviceObject> device)
 	{
 		assert(device != nullptr);
 
@@ -920,7 +919,7 @@ namespace Builder
 
 		for (int i = 0; i < childrenCount; i++)
 		{
-			Hardware::DeviceObject* child = device->child(i);
+			auto child = device->child(i);
 
 			if (child == nullptr)
 			{
@@ -932,6 +931,11 @@ namespace Builder
 
 			if (allowed == false)
 			{
+				if (errorMessage.isEmpty() == false)
+				{
+					m_context->m_log->errINT1001(errorMessage);
+				}
+
 				m_context->m_log->errEQP6008(device->equipmentId(), child->equipmentId(), child->place());
 				return false;
 			}
@@ -1063,10 +1067,10 @@ namespace Builder
 		m_context->m_lmDescriptions = std::make_shared<LmDescriptionSet>();
 		m_context->m_fscDescriptions = std::make_shared<LmDescriptionSet>();
 
-		findModulesByFamily(m_context->m_equipmentSet->root(), &m_context->m_lmModules, Hardware::DeviceModule::FamilyType::LM);
+		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_lmModules, Hardware::DeviceModule::FamilyType::LM);
 
-		findModulesByFamily(m_context->m_equipmentSet->root(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::LM);
-		findModulesByFamily(m_context->m_equipmentSet->root(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::BVB);
+		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::LM);
+		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::BVB);
 
 		bool ok = true;
 		for (Hardware::DeviceModule* lm : m_context->m_lmAndBvbModules)
@@ -1079,7 +1083,7 @@ namespace Builder
 			return false;
 		}
 
-		findFSCConfigurationModules(m_context->m_equipmentSet->root(), &m_context->m_fscModules);
+		findFSCConfigurationModules(m_context->m_equipmentSet->root().get(), &m_context->m_fscModules);
 
 		ok = true;
 		for (Hardware::DeviceModule* lm : m_context->m_fscModules)
@@ -1490,7 +1494,7 @@ namespace Builder
 
 			std::shared_ptr<SoftwareCfgGenerator> swCfgGen;
 
-			switch(software->type())
+			switch(software->softwareType())
 			{
 			case E::SoftwareType::AppDataService:
 				swCfgGen = std::make_shared<AppDataServiceCfgGenerator>(context, software);
@@ -1945,7 +1949,7 @@ namespace Builder
 
 		bool result = true;
 
-		equipmentWalker(equipment->root(), [context, &result](Hardware::DeviceObject* currentDevice)
+		equipmentWalker(equipment->root().get(), [context, &result](Hardware::DeviceObject* currentDevice)
 			{
 				if (currentDevice == nullptr)
 				{
@@ -1959,7 +1963,7 @@ namespace Builder
 					return;
 				}
 
-				Hardware::Software* software = currentDevice->toSoftware();
+				Hardware::Software* software = currentDevice->toSoftware().get();
 
 				if (software == nullptr)
 				{

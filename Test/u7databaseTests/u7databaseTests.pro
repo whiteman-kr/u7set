@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core sql testlib network qml widgets xml
+QT       += core sql testlib network widgets xml qml
 QT       -= gui
 
 TARGET = u7databasetests
@@ -33,7 +33,6 @@ gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 #	SignalTests.cpp \
-#    DbControllerSignalManagementTests.cpp \
 
 SOURCES += main.cpp \
     ../../lib/Address16.cpp \
@@ -42,6 +41,7 @@ SOURCES += main.cpp \
 	../../lib/DbStruct.cpp \
 	../../lib/DeviceObject.cpp \
 	../../lib/DbProgress.cpp \
+    ../../lib/ScriptDeviceObject.cpp \
 	../../lib/Signal.cpp \
 	../../lib/DbProgressDialog.cpp \
 	../../lib/Types.cpp \
@@ -58,12 +58,12 @@ SOURCES += main.cpp \
 	DbControllerFileManagementTests.cpp \
 	DbControllerHardwareConfigurationTests.cpp \
 	DbControllerVersionControlTests.cpp \
+	DbControllerSignalManagementTests.cpp \
 	TestDbBase.cpp \
 	DbControllerUserTests.cpp \
 	DbControllerProjectTests.cpp
 
 #    SignalTests.h \
-#    DbControllerSignalManagementTests.h \
 
 HEADERS += \
     ../../lib/Address16.h \
@@ -73,6 +73,7 @@ HEADERS += \
 	../../lib/DeviceObject.h \
 	../../lib/Factory.h \
 	../../lib/DbProgress.h \
+    ../../lib/ScriptDeviceObject.h \
 	../../lib/Signal.h \
 	../../lib/DbProgressDialog.h \
 	../../lib/PropertyObject.h \
@@ -90,6 +91,7 @@ HEADERS += \
 	DbControllerFileManagementTests.h \
 	DbControllerHardwareConfigurationTests.h \
 	DbControllerVersionControlTests.h \
+	DbControllerSignalManagementTests.h \
 	TestDbBase.h \
 	DbControllerUserTests.h \
 	DbControllerProjectTests.h
@@ -109,4 +111,5 @@ DISTFILES += \
     ../../Proto/serialization.proto
 
 RESOURCES += \
-    ../../DatabaseUpgrade/DatabaseUpgrade.qrc
+    ../../DatabaseUpgrade/DatabaseUpgrade.qrc \
+    FutureDatabaseUpgrade.qrc

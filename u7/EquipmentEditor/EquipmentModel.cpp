@@ -46,7 +46,7 @@ QModelIndex EquipmentModel::index(int row, int column, const QModelIndex& parent
 	//
 	if (parentIndex.isValid() == false)
 	{
-		return createIndex(row, column, const_cast<Hardware::DeviceObject*>(m_root->child(row)));
+		return createIndex(row, column, const_cast<Hardware::DeviceObject*>(m_root->child(row).get()));
 	}
 
 	Hardware::DeviceObject* parent = static_cast<Hardware::DeviceObject*>(parentIndex.internalPointer());
@@ -57,7 +57,7 @@ QModelIndex EquipmentModel::index(int row, int column, const QModelIndex& parent
 		return QModelIndex();
 	}
 
-	QModelIndex resultIndex = createIndex(row, column, parent->child(row));
+	QModelIndex resultIndex = createIndex(row, column, parent->child(row).get());
 	return resultIndex;
 }
 
@@ -68,14 +68,14 @@ QModelIndex EquipmentModel::parent(const QModelIndex& childIndex) const
 		return QModelIndex();
 	}
 
-	Hardware::DeviceObject* child = static_cast<Hardware::DeviceObject*>(childIndex.internalPointer());
+	std::shared_ptr<Hardware::DeviceObject> child = static_cast<Hardware::DeviceObject*>(childIndex.internalPointer())->sharedPtr();
 	if (child == nullptr)
 	{
 		assert(child != nullptr);
 		return QModelIndex();
 	}
 
-	if (child->parent() == nullptr || child->parent() == m_root.get())
+	if (child->parent() == nullptr || child->parent() == m_root)
 	{
 		return QModelIndex();
 	}
@@ -91,7 +91,7 @@ QModelIndex EquipmentModel::parent(const QModelIndex& childIndex) const
 			return QModelIndex();
 		}
 
-		return createIndex(row, 0, child->parent());
+		return createIndex(row, 0, child->parent().get());
 	}
 	else
 	{
@@ -102,13 +102,13 @@ QModelIndex EquipmentModel::parent(const QModelIndex& childIndex) const
 			return QModelIndex();
 		}
 
-		return createIndex(row, 0, child->parent());
+		return createIndex(row, 0, child->parent().get());
 	}
 }
 
 int EquipmentModel::rowCount(const QModelIndex& parentIndex) const
 {
-	const Hardware::DeviceObject* parent = deviceObject(parentIndex);
+	std::shared_ptr<const Hardware::DeviceObject> parent = deviceObject(parentIndex);
 
 	if (parent == nullptr)
 	{
@@ -147,6 +147,10 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 			{
 			case ObjectNameColumn:
 				v.setValue<QString>(device->caption());
+				break;
+
+			case ObjectTypeColumn:
+				v.setValue<QString>(Hardware::DeviceTypeNames[static_cast<size_t>(device->deviceType())]);
 				break;
 
 			case ObjectEquipmentIdColumn:
@@ -191,10 +195,12 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 		break;
 
 	case Qt::TextAlignmentRole:
-		{
-			return Qt::AlignLeft + Qt::AlignVCenter;
-		}
-		break;
+		return Qt::AlignLeft + Qt::AlignVCenter;
+
+	case Qt::ForegroundRole:
+		return QBrush{index.column() == ObjectTypeColumn ?
+						Qt::darkGray :
+						Qt::black};
 
 	case Qt::BackgroundRole:
 		{
@@ -204,6 +210,9 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 
 				switch (static_cast<VcsItemAction::VcsItemActionType>(devieFileInfo.action().toInt()))
 				{
+				case VcsItemAction::Unknown:
+					b.setColor(StandardColors::VcsCheckedIn);
+					break;
 				case VcsItemAction::Added:
 					b.setColor(StandardColors::VcsAdded);
 					break;
@@ -234,6 +243,9 @@ QVariant EquipmentModel::headerData(int section, Qt::Orientation orientation, in
 			case ObjectNameColumn:
 				return QObject::tr("Object");
 
+			case ObjectTypeColumn:
+				return QObject::tr("Type");
+
 			case ObjectEquipmentIdColumn:
 				return QObject::tr("EquipmentIDTemplate");
 
@@ -262,14 +274,14 @@ bool EquipmentModel::hasChildren(const QModelIndex& parentIndex) const
 		return false;
 	}
 
-	const Hardware::DeviceObject* object = deviceObject(parentIndex);
-
+	std::shared_ptr<const Hardware::DeviceObject> object = deviceObject(parentIndex);
 	if (object->childrenCount() > 0)
 	{
-		return true;	// seems that we already got file list for this object
+		return true;	// Already have file list for this object
 	}
 
-	if (object->deviceType() == Hardware::DeviceType::Signal)
+	if (object->deviceType() == Hardware::DeviceType::AppSignal ||
+		object->deviceType() == Hardware::DeviceType::DiagSignal)
 	{
 		return false;	// DeviceType::DiagSignal cannot have children
 	}
@@ -296,16 +308,17 @@ bool EquipmentModel::canFetchMore(const QModelIndex& parent) const
 		return false;
 	}
 
-	const Hardware::DeviceObject* object = deviceObject(parent);
+	std::shared_ptr<const Hardware::DeviceObject> object = deviceObject(parent);
 
 	if (object->childrenCount() > 0)
 	{
 		return false;	// seems that we already got file list for this object
 	}
 
-	if (object->deviceType() == Hardware::DeviceType::Signal)
+	if (object->deviceType() == Hardware::DeviceType::AppSignal ||
+		object->deviceType() == Hardware::DeviceType::DiagSignal)
 	{
-		return false;	// DeviceType::DiagSignal cannot have children
+		return false;	// AppSignal/DiagSignal cannot have children
 	}
 
 	bool hasChildren = false;
@@ -328,7 +341,7 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 		return;
 	}
 
-	Hardware::DeviceObject* parentObject = deviceObject(const_cast<QModelIndex&>(parentIndex));
+	std::shared_ptr<Hardware::DeviceObject> parentObject = deviceObject(const_cast<QModelIndex&>(parentIndex));
 
 	std::vector<DbFileInfo> files;
 
@@ -370,7 +383,7 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 	return;
 }
 
-void EquipmentModel::sortDeviceObject(Hardware::DeviceObject* object, int column, Qt::SortOrder order)
+void EquipmentModel::sortDeviceObject(std::shared_ptr<Hardware::DeviceObject>& object, int column, Qt::SortOrder order)
 {
 	if (object == nullptr)
 	{
@@ -382,6 +395,9 @@ void EquipmentModel::sortDeviceObject(Hardware::DeviceObject* object, int column
 	{
 	case ObjectNameColumn:
 		object->sortByCaption(order);
+		break;
+	case ObjectTypeColumn:
+		object->sortByType(order);
 		break;
 	case ObjectEquipmentIdColumn:
 		object->sortByEquipmentId(order);
@@ -403,9 +419,9 @@ void EquipmentModel::sortDeviceObject(Hardware::DeviceObject* object, int column
 
 	for (int i = 0; i < childCont; i++)
 	{
-		Hardware::DeviceObject* child = object->child(i);
+		std::shared_ptr<Hardware::DeviceObject> child = object->child(i);
 
-		if (child->deviceType() != Hardware::DeviceType::Signal)
+		if (child->deviceType() != Hardware::DeviceType::AppSignal)
 		{
 			sortDeviceObject(child, column, order);
 		}
@@ -424,17 +440,17 @@ void EquipmentModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder
 
 	// Sort
 	//
-	sortDeviceObject(m_configuration.get(), column, order);
-	sortDeviceObject(m_preset.get(), column, order);
+	sortDeviceObject(m_configuration, column, order);
+	sortDeviceObject(m_preset, column, order);
 
 	// Move pers indexes
 	//
 	for (QModelIndex& oldIndex : pers)
 	{
-		Hardware::DeviceObject* device = deviceObject(oldIndex);
+		std::shared_ptr<Hardware::DeviceObject> device = deviceObject(oldIndex);
 		assert(device);
 
-		Hardware::DeviceObject* parentDevice = device->parent();
+		std::shared_ptr<Hardware::DeviceObject> parentDevice = device->parent();
 		assert(parentDevice);
 
 		QModelIndex newIndex = index(parentDevice->childIndex(device), oldIndex.column(), oldIndex.parent());
@@ -452,7 +468,7 @@ void EquipmentModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder
 
 bool EquipmentModel::insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentIndex)
 {
-	Hardware::DeviceObject* parent = deviceObject(parentIndex);
+	std::shared_ptr<Hardware::DeviceObject> parent = deviceObject(parentIndex);
 
 	// Insert
 	//
@@ -470,13 +486,14 @@ bool EquipmentModel::insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> 
 void EquipmentModel::deleteDeviceObject(const QModelIndexList& rowList)
 {
 	std::vector<Hardware::DeviceObject*> devices;
+	devices.reserve(16);
 
 	for (QModelIndex index : rowList)
 	{
-		Hardware::DeviceObject* d = deviceObject(index);
+		std::shared_ptr<Hardware::DeviceObject> d = deviceObject(index);
 		assert(d);
 
-		devices.push_back(d);
+		devices.push_back(d.get());
 	}
 
 	bool result = dbController()->deleteDeviceObjects(devices, m_parentWidget);
@@ -494,8 +511,8 @@ void EquipmentModel::deleteDeviceObject(const QModelIndexList& rowList)
 	std::sort(sortedRowList.begin(), sortedRowList.end(),
 			  [this](QModelIndex& m1, QModelIndex m2)
 			  {
-					Hardware::DeviceObject* d1 = deviceObject(m1);
-					Hardware::DeviceObject* d2 = deviceObject(m2);
+					std::shared_ptr<Hardware::DeviceObject> d1 = deviceObject(m1);
+					std::shared_ptr<Hardware::DeviceObject> d2 = deviceObject(m2);
 
 					return d1->fileInfo().fileId() >= d2->fileInfo().fileId();
 			  });
@@ -504,13 +521,13 @@ void EquipmentModel::deleteDeviceObject(const QModelIndexList& rowList)
 	//
 	for (QModelIndex& index : sortedRowList)
 	{
-		Hardware::DeviceObject* d = deviceObject(index);
+		std::shared_ptr<Hardware::DeviceObject> d = deviceObject(index);
 		assert(d);
 
 		if (d->fileInfo().deleted() == true)
 		{
 			QModelIndex pi = index.parent();
-			Hardware::DeviceObject* po = deviceObject(pi);
+			std::shared_ptr<Hardware::DeviceObject> po = deviceObject(pi);
 			assert(po);
 
 			int childIndex = po->childIndex(d);
@@ -550,7 +567,7 @@ void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::m
 
 	// --
 	//
-	Hardware::DeviceObject* device = this->deviceObject(modelIndex);
+	std::shared_ptr<Hardware::DeviceObject> device = this->deviceObject(modelIndex);
 	assert(device);
 	assert(device->fileInfo().fileId() != -1);
 
@@ -558,7 +575,7 @@ void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::m
 	//
 	for (int childRow = device->childrenCount() - 1; childRow >= 0; childRow--)
 	{
-		if (updatedModelIndexes.find(device->child(childRow)) != updatedModelIndexes.end())
+		if (updatedModelIndexes.find(device->child(childRow).get()) != updatedModelIndexes.end())
 		{
 			// skip, it was already processed
 			//
@@ -572,11 +589,11 @@ void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::m
 			break;
 		}
 
-		Hardware::DeviceObject* childDevice = this->deviceObject(childIndex);
-		Q_UNUSED(childDevice);
-
+#ifdef Q_DEBUG
+		std::shared_ptr<Hardware::DeviceObject> childDevice = this->deviceObject(childIndex);
 		assert(childDevice);
 		assert(childDevice == device->child(childRow));
+#endif
 
 		updateRowFuncOnCheckIn(childIndex, updateFiles, updatedModelIndexes);
 	}
@@ -595,7 +612,7 @@ void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::m
 			(device->fileInfo().action() == VcsItemAction::Deleted && device->fileInfo().state() == VcsState::CheckedIn))
 		{
 			QModelIndex pi = modelIndex.parent();
-			Hardware::DeviceObject* po = this->deviceObject(pi);
+			std::shared_ptr<Hardware::DeviceObject> po = this->deviceObject(pi);
 			assert(po);
 
 			int childIndex = po->childIndex(device);
@@ -625,7 +642,7 @@ void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
 
 	for (QModelIndex& index : rowList)
 	{
-		Hardware::DeviceObject* d = deviceObject(index);
+		std::shared_ptr<Hardware::DeviceObject> d = deviceObject(index);
 		assert(d);
 
 		files.push_back(d->fileInfo());
@@ -676,11 +693,10 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 	objects.reserve(rowList.size());
 
 	QModelIndexList checkedInList;
-	//DbUser currentUser = dbController()->currentUser();
 
 	for (QModelIndex& index : rowList)
 	{
-		Hardware::DeviceObject* d = deviceObject(index);
+		std::shared_ptr<Hardware::DeviceObject> d = deviceObject(index);
 		assert(d);
 
 		if (d->fileInfo().state() == VcsState::CheckedIn)
@@ -688,7 +704,7 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 			files.push_back(d->fileInfo());
 			checkedInList.push_back(index);
 
-			objects.push_back(deviceObjectSharedPtr(index));
+			objects.push_back(d);
 		}
 	}
 
@@ -712,7 +728,7 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 
 	for (QModelIndex& index : rowList)
 	{
-		Hardware::DeviceObject* d = deviceObject(index);
+		std::shared_ptr<Hardware::DeviceObject> d = deviceObject(index);
 
 		if (d == nullptr)
 		{
@@ -774,8 +790,8 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 	std::sort(rowList.begin(), rowList.end(),
 		[this](const QModelIndex& m1, const QModelIndex& m2)
 		{
-			const Hardware::DeviceObject* d1 = this->deviceObject(m1);
-			const Hardware::DeviceObject* d2 = this->deviceObject(m2);
+			std::shared_ptr<const Hardware::DeviceObject> d1 = this->deviceObject(m1);
+			std::shared_ptr<const Hardware::DeviceObject> d2 = this->deviceObject(m2);
 
 			return d1->fileInfo().fileId() >= d2->fileInfo().fileId();
 		});
@@ -788,7 +804,7 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 
 	for (QModelIndex& index : rowList)
 	{
-		Hardware::DeviceObject* d = deviceObject(index);
+		std::shared_ptr<Hardware::DeviceObject> d = deviceObject(index);
 		assert(d);
 
 		if (d->fileInfo().state() == VcsState::CheckedOut &&
@@ -846,7 +862,7 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 	//
 	for (QModelIndex& index : checkedOutList)
 	{
-		Hardware::DeviceObject* d = deviceObject(index);
+		std::shared_ptr<Hardware::DeviceObject> d = deviceObject(index);
 		assert(d);
 
 		// Set latest version to the object
@@ -880,7 +896,7 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 				if (fi.deleted() == true)
 				{
 					QModelIndex pi = index.parent();
-					Hardware::DeviceObject* po = deviceObject(pi);
+					std::shared_ptr<Hardware::DeviceObject> po = deviceObject(pi);
 					assert(po);
 
 					int childIndex = po->childIndex(d);
@@ -924,7 +940,7 @@ void EquipmentModel::refreshDeviceObject(QModelIndexList& rowList)
 	//
 	for (QModelIndex& index : rowList)
 	{
-		Hardware::DeviceObject* d = deviceObject(index);
+		std::shared_ptr<Hardware::DeviceObject> d = deviceObject(index);
 		assert(d);
 
 		if (d->childrenCount() > 0)
@@ -964,13 +980,13 @@ void EquipmentModel::updateDeviceObject(QModelIndexList& rowList)
 
 	// --
 	//
-	std::set<Hardware::DeviceObject*> updatedParents;
+	std::set<std::shared_ptr<Hardware::DeviceObject>> updatedParents;
 
 	for (QModelIndex& i : rowList)
 	{
 		QModelIndex parentIndex = i.parent();
 
-		Hardware::DeviceObject* parentDevice = deviceObject(parentIndex);
+		std::shared_ptr<Hardware::DeviceObject> parentDevice = deviceObject(parentIndex);
 		assert(parentDevice);
 
 		if (updatedParents.count(parentDevice) == 0)
@@ -985,10 +1001,10 @@ void EquipmentModel::updateDeviceObject(QModelIndexList& rowList)
 
 	for (QModelIndex& oldIndex : pers)
 	{
-		Hardware::DeviceObject* device = deviceObject(oldIndex);
+		std::shared_ptr<Hardware::DeviceObject> device = deviceObject(oldIndex);
 		assert(device);
 
-		Hardware::DeviceObject* parentDevice = device->parent();
+		std::shared_ptr<Hardware::DeviceObject> parentDevice = device->parent();
 		assert(parentDevice);
 
 		QModelIndex newIndex = index(parentDevice->childIndex(device), oldIndex.column(), oldIndex.parent());
@@ -1004,7 +1020,7 @@ void EquipmentModel::updateDeviceObject(QModelIndexList& rowList)
 	return;
 }
 
-Hardware::DeviceObject* EquipmentModel::deviceObject(QModelIndex& index)
+std::shared_ptr<Hardware::DeviceObject> EquipmentModel::deviceObject(QModelIndex& index)
 {
 	Hardware::DeviceObject* object = nullptr;
 
@@ -1018,62 +1034,27 @@ Hardware::DeviceObject* EquipmentModel::deviceObject(QModelIndex& index)
 	}
 
 	assert(object != nullptr);
-	return object;
+	return object->sharedPtr();
 }
 
-const Hardware::DeviceObject* EquipmentModel::deviceObject(const QModelIndex& index) const
+std::shared_ptr<const Hardware::DeviceObject> EquipmentModel::deviceObject(const QModelIndex& index) const
 {
-	const Hardware::DeviceObject* object = nullptr;
+	std::shared_ptr<const Hardware::DeviceObject> object;
 
 	if (index.isValid() == false)
 	{
-		object = m_root.get();
+		object = m_root;
 	}
 	else
 	{
-		object = static_cast<const Hardware::DeviceObject*>(index.internalPointer());
+		object = static_cast<const Hardware::DeviceObject*>(index.internalPointer())->sharedPtr();
 	}
 
 	assert(object != nullptr);
-	return object;
-}
+	assert(object->isRoot() == true || (object->isRoot() == false && object->parent() != nullptr));
+	assert(object->isRoot() == true || (object->isRoot() == false && object->parent()->childIndex(object) != -1));
 
-std::shared_ptr<Hardware::DeviceObject> EquipmentModel::deviceObjectSharedPtr(QModelIndex& index)
-{
-	Hardware::DeviceObject* rawPtr = nullptr;
-
-	if (index.isValid() == false)
-	{
-		rawPtr = m_root.get();
-	}
-	else
-	{
-		rawPtr = static_cast<Hardware::DeviceObject*>(index.internalPointer());
-	}
-
-	if (rawPtr == nullptr)
-	{
-		assert(rawPtr);
-		return std::shared_ptr<Hardware::DeviceObject>();
-	}
-
-	if (rawPtr->parent() == nullptr)
-	{
-		assert(rawPtr->parent() != nullptr);
-		return std::shared_ptr<Hardware::DeviceObject>();
-	}
-
-	int childIndex = rawPtr->parent()->childIndex(rawPtr);
-	if (childIndex == -1)
-	{
-		assert(childIndex != -1);
-		return std::shared_ptr<Hardware::DeviceObject>();
-	}
-
-	std::shared_ptr<Hardware::DeviceObject> object = rawPtr->parent()->childSharedPtr(childIndex);
-
-	assert(object != nullptr);
-	return object;
+	return object->sharedPtr();
 }
 
 QString EquipmentModel::usernameById(int userId) const

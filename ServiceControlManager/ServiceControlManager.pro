@@ -34,6 +34,7 @@ SOURCES += MainWindow.cpp \
     ../lib/Address16.cpp \
     ../lib/LanControllerInfoHelper.cpp \
 	../lib/MemLeaksDetection.cpp \
+    ../lib/ScriptDeviceObject.cpp \
 	../lib/SoftwareSettings.cpp \
     ScanOptionsWidget.cpp \
 	ScmMain.cpp \
@@ -90,6 +91,7 @@ HEADERS  += MainWindow.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
     ../lib/MemLeaksDetection.h \
+    ../lib/ScriptDeviceObject.h \
     ../lib/SoftwareSettings.h \
     ScanOptionsWidget.h \
     ScmTcpAppDataClient.h \

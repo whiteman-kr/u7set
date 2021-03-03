@@ -79,6 +79,7 @@ public:
 
 	static QString writeSettingsToXmlString(E::SoftwareType swType, const SoftwareSettings& settings);
 	static bool readSettingsFromXmlString(const QString& xmlString, SoftwareSettings* settings);
+	static std::shared_ptr<SoftwareSettings> createAppropriateSettings(E::SoftwareType softwareType);
 
 private:
 	std::shared_ptr<SoftwareSettings> createAppropriateSettings();

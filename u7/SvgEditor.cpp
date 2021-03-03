@@ -100,8 +100,6 @@ SvgEditor::SvgEditor(QWidget* parent):
 		return;
 	}
 
-	setHasOkCancelButtons(false);
-
 	// TextEditor
 	//
 	m_textEdit = new QsciScintilla();
@@ -147,14 +145,14 @@ SvgEditor::SvgEditor(QWidget* parent):
 
 	buttonLayout->addStretch();
 
-	QPushButton* okButton = new QPushButton(tr("OK"));
-	okButton->setDefault(true);
-	connect(okButton, &QPushButton::clicked, this, &SvgEditor::onOkClicked);
-	buttonLayout->addWidget(okButton);
+	m_okButton = new QPushButton(tr("OK"));
+	m_okButton->setDefault(true);
+	connect(m_okButton, &QPushButton::clicked, this, &SvgEditor::onOkClicked);
+	buttonLayout->addWidget(m_okButton);
 
-	QPushButton* cancelButton = new QPushButton(tr("Cancel"));
-	connect(cancelButton, &QPushButton::clicked, this, &SvgEditor::onCancelClicked);
-	buttonLayout->addWidget(cancelButton);
+	m_cancelButton = new QPushButton(tr("Cancel"));
+	connect(m_cancelButton, &QPushButton::clicked, this, &SvgEditor::onCancelClicked);
+	buttonLayout->addWidget(m_cancelButton);
 
 	// Main Layout
 	//
@@ -197,6 +195,12 @@ bool SvgEditor::readOnly() const
 void SvgEditor::setReadOnly(bool value)
 {
 	m_textEdit->setReadOnly(value);
+	m_okButton->setEnabled(value == false);
+}
+
+bool SvgEditor::externalOkCancelButtons() const
+{
+	return false;
 }
 
 void SvgEditor::onTextChanged()

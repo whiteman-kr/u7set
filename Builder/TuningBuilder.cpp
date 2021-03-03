@@ -11,7 +11,7 @@ namespace Builder
 		QObject(nullptr),
 		m_firmwareWriter(context->m_buildResultWriter->firmwareWriter()),
 		m_db(&context->m_db),
-		m_deviceRoot(context->m_equipmentSet->root()),
+		m_deviceRoot(context->m_equipmentSet->root().get()),
 		m_signalSet(context->m_signalSet.get()),
 		m_subsystems(context->m_subsystems.get()),
 		m_tuningDataStorage(context->m_tuningDataStorage.get()),

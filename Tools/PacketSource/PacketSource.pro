@@ -38,6 +38,7 @@ unix {
 
 SOURCES += \
     ../../lib/LanControllerInfoHelper.cpp \
+    ../../lib/ScriptDeviceObject.cpp \
     main.cpp \
     ../../Builder/IssueLogger.cpp \
     ../../lib/MemLeaksDetection.cpp \
@@ -89,6 +90,7 @@ SOURCES += \
 HEADERS += \
     ../../lib/LanControllerInfo.h \
     ../../lib/LanControllerInfoHelper.h \
+    ../../lib/ScriptDeviceObject.h \
     Stable.h \
     ../../Builder/IssueLogger.h \
     ../../lib/MemLeaksDetection.h \

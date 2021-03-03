@@ -62,6 +62,7 @@ SOURCES += main.cpp \
     ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
+    ../lib/ScriptDeviceObject.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DragDropHelper.cpp \
@@ -135,6 +136,7 @@ HEADERS  += \
     ../lib/ComparatorSet.h \
     ../lib/ConstStrings.h \
     ../lib/ILogFile.h \
+    ../lib/ScriptDeviceObject.h \
     ../lib/SoftwareSettings.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DragDropHelper.h \

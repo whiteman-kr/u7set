@@ -52,6 +52,7 @@ SOURCES += \
     ../lib/MemLeaksDetection.cpp \
     ../lib/MetrologyConnection.cpp \
     ../lib/SignalSetProvider.cpp \
+    ../lib/ScriptDeviceObject.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
@@ -131,6 +132,7 @@ HEADERS  += \
 	../lib/MemLeaksDetection.h \
     ../lib/MetrologyConnection.h \
     ../lib/SignalSetProvider.h \
+    ../lib/ScriptDeviceObject.h \
     MainWindow.h \
     Calibrator.h \
     CalibratorBase.h \

@@ -48,7 +48,7 @@ namespace Builder
 
 			TEST_PTR_CONTINUE(sw);
 
-			if (sw->type() == E::SoftwareType::AppDataService)
+			if (sw->softwareType() == E::SoftwareType::AppDataService)
 			{
 				appDataServicesIDs.append(sw->equipmentIdTemplate().trimmed());
 			}

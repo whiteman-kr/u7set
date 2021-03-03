@@ -65,6 +65,7 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
     ../lib/ILogFile.h \
+    ../lib/ScriptDeviceObject.h \
     Indicator.h \
     IndicatorArrowIndicator.h \
     IndicatorHistogramVert.h \
@@ -152,6 +153,7 @@ SOURCES += \
     ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
+    ../lib/ScriptDeviceObject.cpp \
     Indicator.cpp \
     IndicatorArrowIndicator.cpp \
     IndicatorHistogramVert.cpp \

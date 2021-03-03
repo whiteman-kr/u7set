@@ -563,6 +563,13 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 	}
 }
 
+void SignalsModel::finishReset()
+{
+	m_rowCount = m_signalSetProvider->signalCount();
+	m_columnCount = m_signalSetProvider->signalPropertyManager().count();
+	endResetModel();
+}
+
 void SignalsModel::updateSignal(int signalIndex)
 {
 	assert(signalIndex < m_rowCount);
@@ -785,7 +792,7 @@ SignalsTabPage::~SignalsTabPage()
 	deleteMetrologyDialog();
 }
 
-bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties)
+bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceAppSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties)
 {
 	Q_UNUSED(forceUpdateProperties)
 
@@ -793,7 +800,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 
 	QStringList equipmentIDs;
 
-	for(const Hardware::DeviceSignal* deviceSignal: deviceSignalsToUpdate)
+	for(const Hardware::DeviceAppSignal* deviceSignal: deviceSignalsToUpdate)
 	{
 		TEST_PTR_CONTINUE(deviceSignal)
 		equipmentIDs.append(deviceSignal->equipmentId());
@@ -811,7 +818,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 	QVector<int> checkoutSignalIDs;
 	QVector<Signal> newSignalWorkcopies;
 
-	for(const Hardware::DeviceSignal* deviceSignal: deviceSignalsToUpdate)
+	for(const Hardware::DeviceAppSignal* deviceSignal: deviceSignalsToUpdate)
 	{
 		TEST_PTR_CONTINUE(deviceSignal)
 

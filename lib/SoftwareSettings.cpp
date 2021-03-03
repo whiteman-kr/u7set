@@ -233,9 +233,9 @@ bool SoftwareSettingsSet::readSettingsFromXmlString(const QString& xmlString, So
 	return result;
 }
 
-std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings()
+std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings(E::SoftwareType softwareType)
 {
-	switch(m_softwareType)
+	switch(softwareType)
 	{
 	case E::SoftwareType::Monitor:
 		return std::make_shared<MonitorSettings>();
@@ -273,6 +273,11 @@ std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings
 	}
 
 	return nullptr;
+}
+
+std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings()
+{
+	return createAppropriateSettings(m_softwareType);
 }
 
 bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_ptr<SoftwareSettings> sharedSettings)
@@ -380,7 +385,7 @@ bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_p
 
 		if (requiredSoftwareType != E::SoftwareType::Unknown)
 		{
-			if (connectedSoftware->type() != requiredSoftwareType)
+			if (connectedSoftware->softwareType() != requiredSoftwareType)
 			{
 				// Property %1.%2 is linked to not compatible software ID %3.
 				//
@@ -741,7 +746,7 @@ QStringList CfgServiceSettings::knownClients() const
 
 			if (ID1 == cfgService->equipmentIdTemplate() || ID2 == cfgService->equipmentIdTemplate())
 			{
-				clients.append(QPair<QString, E::SoftwareType>(software->equipmentIdTemplate(), software->type()));
+				clients.append(QPair<QString, E::SoftwareType>(software->equipmentIdTemplate(), software->softwareType()));
 			}
 		}
 
@@ -1368,10 +1373,10 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 					return;
 				}
 
-				if (tuningClient->type() != E::SoftwareType::TuningClient &&
-					tuningClient->type() != E::SoftwareType::Metrology &&
-					tuningClient->type() != E::SoftwareType::Monitor &&
-					tuningClient->type() != E::SoftwareType::TestClient)
+				if (tuningClient->softwareType() != E::SoftwareType::TuningClient &&
+					tuningClient->softwareType() != E::SoftwareType::Metrology &&
+					tuningClient->softwareType() != E::SoftwareType::Monitor &&
+					tuningClient->softwareType() != E::SoftwareType::TestClient)
 				{
 					return;
 				}
@@ -1408,7 +1413,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 						return;
 					}
 
-					if (tuningClient->type() == E::SoftwareType::Monitor && singleLmControlEnabled == true)
+					if (tuningClient->softwareType() == E::SoftwareType::Monitor && singleLmControlEnabled == true)
 					{
 						// Monitor %1 cannot be connected to TuningService %2 with enabled SingleLmControl mode.
 						//
@@ -2364,7 +2369,7 @@ void MonitorSettings::clear()
 
 		if (appDataServiceID1.isEmpty() == false)
 		{
-			appDataService1 = dynamic_cast<const Hardware::Software*>(equipment->deviceObject(appDataServiceID1));
+			appDataService1 = equipment->deviceObject(appDataServiceID1)->toSoftware().get();
 
 			if (appDataService1 == nullptr)
 			{
@@ -2374,7 +2379,7 @@ void MonitorSettings::clear()
 			}
 			else
 			{
-				if (appDataService1->type() != E::SoftwareType::AppDataService)
+				if (appDataService1->softwareType() != E::SoftwareType::AppDataService)
 				{
 					log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_ID1, appDataServiceID1);
 
@@ -2387,7 +2392,7 @@ void MonitorSettings::clear()
 
 		if (appDataServiceID2.isEmpty() == false)
 		{
-			appDataService2 = dynamic_cast<const Hardware::Software*>(equipment->deviceObject(appDataServiceID2));
+			appDataService2 = equipment->deviceObject(appDataServiceID2)->toSoftware().get();
 
 			if (appDataService2 == nullptr)
 			{
@@ -2397,7 +2402,7 @@ void MonitorSettings::clear()
 			}
 			else
 			{
-				if (appDataService2->type() != E::SoftwareType::AppDataService)
+				if (appDataService2->softwareType() != E::SoftwareType::AppDataService)
 				{
 					log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_ID2, appDataServiceID2);
 
@@ -2516,7 +2521,7 @@ void MonitorSettings::clear()
 										log);
 		RETURN_IF_FALSE(result);
 
-		const Hardware::Software* tuningServiceObject = dynamic_cast<const Hardware::Software*>(equipment->deviceObject(tuningServiceID));
+		const Hardware::Software* tuningServiceObject = equipment->deviceObject(tuningServiceID)->toSoftware().get();
 
 		if (tuningServiceObject == nullptr)			// WTF?
 		{

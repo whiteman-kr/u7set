@@ -311,7 +311,7 @@ namespace Builder
 
 	bool AppDataServiceCfgGenerator::findAppDataSourceAssociatedSignals(DataSource& appDataSource)
 	{
-		Hardware::DeviceObject* lm = m_equipment->deviceObject(appDataSource.lmEquipmentID());
+		Hardware::DeviceObject* lm = m_equipment->deviceObject(appDataSource.lmEquipmentID()).get();
 
 		if (lm == nullptr)
 		{
@@ -334,7 +334,7 @@ namespace Builder
 				continue;
 			}
 
-			Hardware::DeviceObject* device = m_equipment->deviceObject(appSignalEquipmentID);
+			Hardware::DeviceObject* device = m_equipment->deviceObject(appSignalEquipmentID).get();
 
 			if (device == nullptr)
 			{

@@ -37,7 +37,7 @@ Signal::Signal(const ID_AppSignalID& ids)
 	m_isLoaded = false;
 }
 
-Signal::Signal(	const Hardware::DeviceSignal& deviceSignal,
+Signal::Signal(	const Hardware::DeviceAppSignal& deviceSignal,
 				QString* errMsg)
 {
 	TEST_PTR_RETURN(errMsg);
@@ -59,7 +59,7 @@ Signal::Signal(	const Hardware::DeviceSignal& deviceSignal,
 
 	//
 
-	m_signalType = deviceSignal.type();
+	m_signalType = deviceSignal.signalType();
 
 	switch(m_signalType)
 	{
@@ -154,6 +154,11 @@ Signal::Signal(	const Hardware::DeviceSignal& deviceSignal,
 
 Signal::~Signal()
 {
+}
+
+void Signal::clear()
+{
+	*this = Signal();
 }
 
 void Signal::initSpecificProperties()
@@ -1521,7 +1526,7 @@ const Hardware::DeviceObject* Signal::getParentDeviceObjectOfType(const Hardware
 			std::make_pair(QString("workstation"), Hardware::DeviceType::Workstation),
 			std::make_pair(QString("software"), Hardware::DeviceType::Software),
 			std::make_pair(QString("controller"), Hardware::DeviceType::Controller),
-			std::make_pair(QString("signal"), Hardware::DeviceType::Signal),
+			std::make_pair(QString("signal"), Hardware::DeviceType::AppSignal),
 	};
 
 	std::map<QString, Hardware::DeviceType>::const_iterator it = objectTypes.find(parentObjectType.toLower());
@@ -1549,11 +1554,17 @@ const Hardware::DeviceObject* Signal::getParentDeviceObjectOfType(const Hardware
 			return parent;
 		}
 
-		parent = parent->parent();
+		parent = parent->parent().get();
 	}
 	while(true);
 
 	return nullptr;
+}
+
+void Signal::initCreatedDates()
+{
+	m_created = QDateTime::currentDateTime();
+	m_instanceCreated = QDateTime::currentDateTime();
 }
 
 bool Signal::isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const
@@ -1606,7 +1617,7 @@ void Signal::updateTuningValuesType()
 	m_tuningHighBound.setType(tvType);
 }
 
-void Signal::initIDsAndCaption(	const Hardware::DeviceSignal& deviceSignal,
+void Signal::initIDsAndCaption(	const Hardware::DeviceAppSignal& deviceSignal,
 								QString* errMsg)
 {
 	TEST_PTR_RETURN(errMsg);
@@ -1658,7 +1669,7 @@ void Signal::initIDsAndCaption(	const Hardware::DeviceSignal& deviceSignal,
 	}
 }
 
-void Signal::checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSignal, QString* errMsg)
+void Signal::checkAndInitTuningSettings(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg)
 {
 	if (deviceSignal.propertyExists(SignalProperties::enableTuningCaption) == false)
 	{
@@ -1674,7 +1685,7 @@ void Signal::checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSign
 		return;
 	}
 
-	switch(deviceSignal.type())
+	switch(deviceSignal.signalType())
 	{
 	case E::SignalType::Analog:
 	case E::SignalType::Discrete:
