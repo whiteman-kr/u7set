@@ -45,7 +45,7 @@ const int					SourceListColumnWidth[SOURCE_LIST_COLUMN_COUNT] =
 
 // ==============================================================================================
 
-const int					UPDATE_SOURCE_STATE_TIMEOUT		= 250; // 250 ms
+const int UPDATE_SOURCE_STATE_TIMEOUT = 250; // 250 ms
 
 // ==============================================================================================
 
@@ -57,6 +57,17 @@ public:
 
 	explicit SourceTable(QObject* parent = nullptr);
 	virtual ~SourceTable();
+
+public:
+
+	int sourceCount() const;
+	PS::Source* sourceAt(int index) const;
+	void set(const QVector<PS::Source*> list_add);
+	void clear();
+
+	QString text(int row, int column, PS::Source *pSource) const;
+
+	void updateColumn(int column);
 
 private:
 
@@ -72,17 +83,6 @@ private:
 	QTimer*					m_updateSourceListTimer = nullptr;
 	void					startUpdateSourceListTimer();
 	void					stopUpdateSourceListTimer();
-
-public:
-
-	int						sourceCount() const;
-	PS::Source*				sourceAt(int index) const;
-	void					set(const QVector<PS::Source*> list_add);
-	void					clear();
-
-	QString					text(int row, int column, PS::Source *pSource) const;
-
-	void					updateColumn(int column);
 
 private slots:
 

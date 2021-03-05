@@ -11,15 +11,15 @@ MainWindow::MainWindow(const Options& options, QMainWindow* parent)
 	: QMainWindow(parent)
 	, m_options(options)
 {
+	runConfigSocket();					// init config socket thread
+
 	createInterface();					// init interface
 	restoreWindowState();
 
-	connect(&m_pscore.sourceBase(), &SourceBase::sourcesLoaded, this, &MainWindow::sourcesLoaded, Qt::QueuedConnection);
-	connect(&m_pscore, &PacketSourceCore::signalsLoaded, this, &MainWindow::signalsLoaded, Qt::QueuedConnection);
+	connect(&m_pscore, &PacketSourceCore::signalsLoadedInSources, this, &MainWindow::signalsLoadedInSources, Qt::QueuedConnection);
 	connect(&m_pscore, &PacketSourceCore::ualTesterSocketConnect, this, &MainWindow::ualTesterSocketConnect, Qt::QueuedConnection);
 
-	m_pscore.setBuildInfo(m_options.build().info());
-	m_pscore.start();
+	m_pscore.setBuildOption(m_options.build());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -54,23 +54,18 @@ void MainWindow::createActions()
 	//
 	m_sourceStartAction = new QAction(tr("Start"), this);
 	m_sourceStartAction->setShortcut(Qt::Key_F5);
-	m_sourceStartAction->setIcon(QIcon(":/icons/Start.png"));
+	m_sourceStartAction->setIcon(QIcon(":/Images/Run.svg"));
 	m_sourceStartAction->setToolTip(tr("Start all sources"));
 	connect(m_sourceStartAction, &QAction::triggered, this, &MainWindow::startSource);
 
 	m_sourceStopAction = new QAction(tr("Stop"), this);
 	m_sourceStopAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
-	m_sourceStopAction->setIcon(QIcon(":/icons/Stop.png"));
+	m_sourceStopAction->setIcon(QIcon(":/Images/Stop.svg"));
 	m_sourceStopAction->setToolTip(tr("Stop all sources"));
 	connect(m_sourceStopAction, &QAction::triggered, this, &MainWindow::stopSource);
 
-	m_sourceReloadAction = new QAction(tr("Reload"), this);
-	m_sourceReloadAction->setIcon(QIcon(":/icons/Reload.png"));
-	m_sourceReloadAction->setToolTip(tr("Reload all sources and signals"));
-	connect(m_sourceReloadAction, &QAction::triggered, &m_pscore, &PacketSourceCore::reloadSource);
-
 	m_sourceSelectAllAction = new QAction(tr("Select all"), this);
-	m_sourceSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
+	m_sourceSelectAllAction->setIcon(QIcon(":/Images/SelectAll.svg"));
 	m_sourceSelectAllAction->setToolTip(tr("Select all sources"));
 	connect(m_sourceSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSources);
 
@@ -82,31 +77,31 @@ void MainWindow::createActions()
 
 	m_signalInitAction = new QAction(tr("Initialization"), this);
 	m_signalInitAction->setShortcut(Qt::CTRL + Qt::Key_I);
-	m_signalInitAction->setIcon(QIcon(":/icons/Init.png"));
+	m_signalInitAction->setIcon(QIcon(":/Images/Init.svg"));
 	m_signalInitAction->setToolTip(tr("Initialization all signals"));
 	connect(m_signalInitAction, &QAction::triggered, this, &MainWindow::initSignalsState);
 
 	m_signalHistoryAction = new QAction(tr("History ..."), this);
 	m_signalHistoryAction->setShortcut(Qt::CTRL + Qt::Key_H);
-	m_signalHistoryAction->setIcon(QIcon(":/icons/History.png"));
+	m_signalHistoryAction->setIcon(QIcon(":/Images/History.svg"));
 	m_signalHistoryAction->setToolTip(tr("Hystory of signals state"));
 	connect(m_signalHistoryAction, &QAction::triggered, this, &MainWindow::history);
 
 	m_signalSaveStatesAction = new QAction(tr("Save signals state ..."), this);
 	m_signalSaveStatesAction->setShortcut(Qt::CTRL + Qt::Key_S);
-	m_signalSaveStatesAction->setIcon(QIcon(":/icons/Import.png"));
+	m_signalSaveStatesAction->setIcon(QIcon(":/Images/Upload.svg"));
 	m_signalSaveStatesAction->setToolTip(tr("Save signals state"));
 	connect(m_signalSaveStatesAction, &QAction::triggered, this, &MainWindow::saveSignalsState);
 
 	m_signalRestoreStatesAction = new QAction(tr("Restore signals state ..."), this);
 	m_signalRestoreStatesAction->setShortcut(Qt::CTRL + Qt::Key_R);
-	m_signalRestoreStatesAction->setIcon(QIcon(":/icons/Export.png"));
+	m_signalRestoreStatesAction->setIcon(QIcon(":/Images/Download.svg"));
 	m_signalRestoreStatesAction->setToolTip(tr("Restore signals state"));
 	connect(m_signalRestoreStatesAction, &QAction::triggered, this, &MainWindow::restoreSignalsState);
 
 
 	m_signalSelectAllAction = new QAction(tr("Select all"), this);
-	m_signalSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
+	m_signalSelectAllAction->setIcon(QIcon(":/Images/SelectAll.svg"));
 	m_signalSelectAllAction->setToolTip(tr("Select all signals"));
 	connect(m_signalSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSignals);
 
@@ -114,25 +109,25 @@ void MainWindow::createActions()
 	//
 	m_optionAction = new QAction(tr("&Options"), this);
 	m_optionAction->setShortcut(Qt::CTRL + Qt::Key_O);
-	m_optionAction->setIcon(QIcon(":/icons/Options.png"));
+	m_optionAction->setIcon(QIcon(":/Images/Options.svg"));
 	m_optionAction->setToolTip(tr("Options of sources"));
 	connect(m_optionAction, &QAction::triggered, this, &MainWindow::onOptions);
 
 	m_pAboutAppAction = new QAction(tr("About ..."), this);
-	m_pAboutAppAction->setIcon(QIcon(":/icons/About.png"));
+	m_pAboutAppAction->setIcon(QIcon(":/Images/About.svg"));
 	m_pAboutAppAction->setToolTip("");
 	connect(m_pAboutAppAction, &QAction::triggered, this, &MainWindow::aboutApp);
 
 	// source contex menu
 	//
 	m_sourceTextCopyAction = new QAction(tr("&Copy"), this);
-	m_sourceTextCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+	m_sourceTextCopyAction->setIcon(QIcon(":/Images/Copy.svg"));
 	connect(m_sourceTextCopyAction, &QAction::triggered, this, &MainWindow::copySourceText);
 
 	// signal contex menu
 	//
 	m_signalTextCopyAction = new QAction(tr("&Copy"), this);
-	m_signalTextCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+	m_signalTextCopyAction->setIcon(QIcon(":/Images/Copy.svg"));
 	connect(m_signalTextCopyAction, &QAction::triggered, this, &MainWindow::copySignalText);
 }
 
@@ -152,8 +147,6 @@ void MainWindow::createMenu()
 
 	m_sourceMenu->addAction(m_sourceStartAction);
 	m_sourceMenu->addAction(m_sourceStopAction);
-	m_sourceMenu->addSeparator();
-	m_sourceMenu->addAction(m_sourceReloadAction);
 	m_sourceMenu->addSeparator();
 	m_sourceMenu->addAction(m_sourceSelectAllAction);
 
@@ -229,7 +222,7 @@ void MainWindow::createPanels()
 		{
 			dataAction->setText(tr("&Frame of data ..."));
 			dataAction->setShortcut(Qt::CTRL + Qt::Key_D);
-			dataAction->setIcon(QIcon(":/icons/FrameData.png"));
+			dataAction->setIcon(QIcon(":/Images/FrameData.svg"));
 			dataAction->setToolTip(tr("Frame of data"));
 
 			if (m_signalMenu != nullptr)
@@ -260,7 +253,7 @@ void MainWindow::createPanels()
 		{
 			findAction->setText(tr("&Find ..."));
 			findAction->setShortcut(Qt::CTRL + Qt::Key_F);
-			findAction->setIcon(QIcon(":/icons/Find.png"));
+			findAction->setIcon(QIcon(":/Images/Find.svg"));
 			findAction->setToolTip(tr("Find signal"));
 
 			if (m_signalMenu != nullptr)
@@ -362,8 +355,6 @@ void MainWindow::createContextMenu()
 	m_sourceContextMenu->addAction(m_sourceStartAction);
 	m_sourceContextMenu->addAction(m_sourceStopAction);
 	m_sourceContextMenu->addSeparator();
-	m_sourceContextMenu->addAction(m_sourceReloadAction);
-	m_sourceContextMenu->addSeparator();
 	m_sourceContextMenu->addAction(m_sourceTextCopyAction);
 
 	m_pSourceView->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -439,18 +430,269 @@ void MainWindow::createStatusBar()
 	}
 
 	m_statusEmpty = new QLabel(m_statusBar);
+	m_statusLoadSignals = new QProgressBar(m_statusBar);
+	m_statusConnectToConfigServer = new QLabel(m_statusBar);
+	m_statusSendToAppDaraServer = new QLabel(m_statusBar);
 	m_statusUalTesterClient = new QLabel(m_statusBar);
+
+	m_statusLoadSignals->hide();
+	m_statusLoadSignals->setRange(0, 100);
+	m_statusLoadSignals->setFixedWidth(100);
+	m_statusLoadSignals->setFixedHeight(10);
+	m_statusLoadSignals->setLayoutDirection(Qt::LeftToRight);
+
 	m_statusBar->addWidget(m_statusUalTesterClient);
+	m_statusBar->addWidget(m_statusSendToAppDaraServer);
+	m_statusBar->addWidget(m_statusConnectToConfigServer);
+	m_statusBar->addWidget(m_statusLoadSignals);
 	m_statusBar->addWidget(m_statusEmpty);
 
 	m_statusBar->setLayoutDirection(Qt::RightToLeft);
 
 	m_statusEmpty->setText(QString());
 
+	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: off "));
+	m_statusConnectToConfigServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\""));
+
+	m_statusSendToAppDaraServer->setText(tr(" AppDataService: off "));
+	m_statusSendToAppDaraServer->setToolTip("Equipment ID: Not loaded\nPackets send to: Not loaded");
+
 	m_statusUalTesterClient->setText(tr(" UalTester: off "));
-	m_statusUalTesterClient->setStyleSheet("color: rgb(160, 160, 160);");
 
 	m_statusEmpty->setText(QString());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::runConfigSocket()
+{
+	// init SoftwareInfo
+	//
+	SoftwareInfo si;
+
+	QString equipmentID = m_options.build().cfgSrvEquipmentID();
+	si.init(E::SoftwareType::TestClient, equipmentID, 1, 0);
+
+	// create config socket thread
+	//
+	HostAddressPort configSocketAddress = m_options.build().cfgSrvIP();
+	m_pConfigSocket = new ConfigSocket(si, configSocketAddress, &m_pscore);
+
+	// connect
+	//
+	connect(m_pConfigSocket, &ConfigSocket::socketConnected, this, &MainWindow::configSocketConnected, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::socketDisconnected, this, &MainWindow::configSocketDisconnected, Qt::QueuedConnection);
+
+	connect(m_pConfigSocket, &ConfigSocket::unknownClient, this, &MainWindow::configSocketUnknownClient, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::unknownAdsEquipmentID, this, &MainWindow::configSocketUnknownAdsEquipmentID, Qt::QueuedConnection);
+
+	// loading
+	//
+	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &MainWindow::configSocketConfigurationLoaded, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::sourceBaseLoaded, this, &MainWindow::sourcesLoaded, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoading, this, &MainWindow::configSocketSignalBaseLoading, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, this, &MainWindow::configSocketSignalBaseLoaded, Qt::QueuedConnection);
+
+	// start
+	//
+	m_pConfigSocket->start();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::stopConfigSocket()
+{
+	if (m_pConfigSocket == nullptr)
+	{
+		return;
+	}
+
+	delete m_pConfigSocket;
+	m_pConfigSocket = nullptr;
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketConnected()
+{
+	if (m_pConfigSocket == nullptr)
+	{
+		return;
+	}
+
+	if (m_statusConnectToConfigServer == nullptr)
+	{
+		return;
+	}
+
+	HostAddressPort configSocketAddress = m_pConfigSocket->cfgSrvIP();
+
+	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: on "));
+	m_statusConnectToConfigServer->setToolTip(m_pConfigSocket->cfgSrvInfo());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketDisconnected()
+{
+	if (m_pConfigSocket == nullptr)
+	{
+		return;
+	}
+
+	if (m_statusLoadSignals == nullptr || m_statusConnectToConfigServer == nullptr || m_statusSendToAppDaraServer == nullptr)
+	{
+		return;
+	}
+
+	m_statusLoadSignals->hide();
+
+	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: off "));
+	m_statusConnectToConfigServer->setToolTip(m_pConfigSocket->cfgSrvInfo());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketUnknownClient()
+{
+	QMessageBox::critical(this,
+						  windowTitle(),
+						  tr("Configuration Service does not recognize EquipmentID \"%1\" for software \"PacketSource\"")
+						  .arg(m_options.build().cfgSrvEquipmentID()));
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketUnknownAdsEquipmentID(const QStringList& adsIDList)
+{
+	QString adsEquipmentID = m_options.build().appDataSrvEquipmentID();
+
+	// create dialog for comment
+	//
+	QDialog* pSelectIdDialog = new QDialog(this);
+	if (pSelectIdDialog == nullptr)
+	{
+		return;
+	}
+		pSelectIdDialog->setWindowTitle(tr("Select EquipmentID"));
+		pSelectIdDialog->setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
+
+		QRect screen = QDesktopWidget().availableGeometry(this);
+		pSelectIdDialog->resize(static_cast<int>(screen.width() * 0.20), static_cast<int>(screen.height() * 0.02));
+		pSelectIdDialog->move(screen.center() - pSelectIdDialog->rect().center());
+
+
+		QLabel* pCommentLabel = new QLabel(	tr("App Data Service EquipmentID \"%1\" is wrong!\n"
+											   "Please select EquipmentID from list:").arg(adsEquipmentID), this);
+
+		QComboBox* pEquipmentIdCombo = new QComboBox(pSelectIdDialog);
+		for(QString adsID : adsIDList)
+		{
+			pEquipmentIdCombo->addItem(adsID);
+		}
+
+		QHBoxLayout *buttonLayout = new QHBoxLayout;
+
+		QPushButton* pSelectButton = new QPushButton(tr("Select"), pSelectIdDialog);
+		QPushButton* pCancelButton = new QPushButton(tr("Cancel"), pSelectIdDialog);
+
+		buttonLayout->addStretch();
+		buttonLayout->addWidget(pSelectButton);
+		buttonLayout->addWidget(pCancelButton);
+
+		QVBoxLayout *mainLayout = new QVBoxLayout;
+
+		mainLayout->addWidget(pCommentLabel);
+		mainLayout->addWidget(pEquipmentIdCombo);
+		mainLayout->addLayout(buttonLayout);
+
+		pSelectIdDialog->setLayout(mainLayout);
+		pSelectIdDialog->setModal(true);
+
+		connect(pSelectButton, &QPushButton::clicked, pSelectIdDialog, &QDialog::accept);
+		connect(pCancelButton, &QPushButton::clicked, pSelectIdDialog, &QDialog::reject);
+
+		int result = pSelectIdDialog->exec();
+		if (result == QDialog::Accepted)
+		{
+			adsEquipmentID = pEquipmentIdCombo->currentText();
+		}
+
+	delete pSelectIdDialog;
+
+	clearViews();
+
+	// save new options
+	//
+	m_options.build().setAppDataSrvEquipmentID(adsEquipmentID);
+	m_options.build().save();
+
+	// restart
+	//
+	m_pscore.clear();
+	m_pscore.setBuildOption(m_options.build());
+
+	// recconect
+	//
+	if (m_pConfigSocket == nullptr)
+	{
+		return;
+	}
+
+	m_pConfigSocket->reconncect();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketConfigurationLoaded()
+{
+	if (m_pConfigSocket == nullptr)
+	{
+		return;
+	}
+
+	//
+	//
+	if (m_statusLoadSignals == nullptr || m_statusConnectToConfigServer == nullptr || m_statusSendToAppDaraServer == nullptr)
+	{
+		return;
+	}
+
+	m_statusLoadSignals->show();
+	m_statusLoadSignals->setValue(0);
+
+	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: on "));
+	m_statusConnectToConfigServer->setToolTip(m_pConfigSocket->cfgSrvInfo());
+
+	//
+	//
+	m_statusSendToAppDaraServer->setText(tr(" AppDataService: on "));
+	m_statusSendToAppDaraServer->setToolTip(m_pConfigSocket->appDataSrvInfo());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketSignalBaseLoading(int persentage)
+{
+	if (m_statusLoadSignals == nullptr)
+	{
+		return;
+	}
+
+	m_statusLoadSignals->setValue(persentage);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketSignalBaseLoaded()
+{
+	if (m_statusLoadSignals == nullptr)
+	{
+		return;
+	}
+
+	m_statusLoadSignals->hide();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -480,7 +722,7 @@ void MainWindow::sourcesLoaded()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::signalsLoaded()
+void MainWindow::signalsLoadedInSources()
 {
 	m_pSourceView->setCurrentIndex(m_selectedSourceIndex);
 	onSourceListClicked(m_selectedSourceIndex);
@@ -865,7 +1107,7 @@ void MainWindow::selectAllSignals()
 
 void MainWindow::onOptions()
 {
-	OptionsDialog dialog(m_options.build().info(), this);
+	OptionsDialog dialog(m_options.build(), this);
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
@@ -875,14 +1117,22 @@ void MainWindow::onOptions()
 
 	// save new options
 	//
-	m_options.build().setInfo(dialog.buildInfo());
+	m_options.setBuild(dialog.buildOption());
 	m_options.build().save();
 
 	// restart
 	//
-	m_pscore.stop();
-	m_pscore.setBuildInfo(m_options.build().info());
-	m_pscore.start();
+	m_pscore.clear();
+	m_pscore.setBuildOption(m_options.build());
+
+	// recconect
+	//
+	if (m_pConfigSocket == nullptr)
+	{
+		return;
+	}
+
+	m_pConfigSocket->reconncect();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1281,15 +1531,18 @@ void MainWindow::onSignalListDoubleClicked(const QModelIndex& index)
 
 void MainWindow::ualTesterSocketConnect(bool isConnect)
 {
+	if (m_statusUalTesterClient == nullptr)
+	{
+		return;
+	}
+
 	if (isConnect == true)
 	{
 		m_statusUalTesterClient->setText(tr(" UalTester: on "));
-		m_statusUalTesterClient->setStyleSheet("color: rgb(255, 0, 0);");
 	}
 	else
 	{
 		m_statusUalTesterClient->setText(tr(" UalTester: off "));
-		m_statusUalTesterClient->setStyleSheet("color: rgb(160, 160, 160);");
 	}
 }
 
@@ -1331,9 +1584,11 @@ void MainWindow::restoreWindowState()
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
+	stopConfigSocket();
+
 	clearViews();
 
-	m_pscore.stop();
+	m_pscore.clear();
 
 	saveWindowState();
 

@@ -71,27 +71,27 @@ public:
 	explicit SignalHistoryTable(QObject* parent = nullptr);
 	virtual ~SignalHistoryTable();
 
-private:
-
-	mutable QMutex			m_signalMutex;
-	QVector<SignalForLog*>	m_signalList;
-
-	int						columnCount(const QModelIndex &parent) const;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
-
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant				data(const QModelIndex &index, int role) const;
-
 public:
 
-	int						signalCount() const;
-	SignalForLog*			signalPtr(int index) const;
-	void					set(const QVector<SignalForLog*> list_add);
-	void					clear();
+	int signalCount() const;
+	SignalForLog* signalPtr(int index) const;
+	void set(const QVector<SignalForLog*> list_add);
+	void clear();
 
-	QString					text(int row, int column, SignalForLog *pSignal) const;
+	QString text(int row, int column, SignalForLog *pSignal) const;
 
-	void					updateColumn(int column);
+	void updateColumn(int column);
+
+private:
+
+	mutable QMutex m_signalMutex;
+	QVector<SignalForLog*> m_signalList;
+
+	int columnCount(const QModelIndex &parent) const;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const;
+
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
+	QVariant data(const QModelIndex &index, int role) const;
 };
 
 // ==============================================================================================
@@ -107,49 +107,46 @@ public:
 
 private:
 
-	SignalHistory*			m_pLog = nullptr;
+	SignalHistory* m_pLog = nullptr;
 
-	QMenuBar*				m_pMenuBar = nullptr;
-	QMenu*					m_pEditMenu = nullptr;
-	QMenu*					m_pContextMenu = nullptr;
+	QMenuBar* m_pMenuBar = nullptr;
+	QMenu* m_pEditMenu = nullptr;
+	QMenu* m_pContextMenu = nullptr;
 
-	QAction*				m_pCopyAction = nullptr;
-	QAction*				m_pSelectAllAction = nullptr;
+	QAction* m_pCopyAction = nullptr;
+	QAction* m_pSelectAllAction = nullptr;
 
-	QTableView*				m_pView = nullptr;
-	SignalHistoryTable		m_signalTable;
+	QTableView* m_pView = nullptr;
+	SignalHistoryTable m_signalTable;
 
-	QAction*				m_pColumnAction[SIGNAL_HISTORY_LIST_COLUMN_COUNT];
-	QMenu*					m_headerContextMenu = nullptr;
+	QAction* m_pColumnAction[SIGNAL_HISTORY_LIST_COLUMN_COUNT];
+	QMenu* m_headerContextMenu = nullptr;
 
-	void					createInterface();
-	void					createHeaderContexMenu();
-	void					createContextMenu();
+	void createInterface();
+	void createHeaderContexMenu();
+	void createContextMenu();
 
-	void					hideColumn(int column, bool hide);
-
-signals:
+	void hideColumn(int column, bool hide);
 
 private slots:
 
 	// slots for updating
 	//
-	void					updateList();
+	void updateList();
 
 	// slots of menu
 	//
+		// Edit
+		//
+	void copy();
+	void selectAll() { m_pView->selectAll(); }
 
-							// Edit
-							//
-	void					copy();
-	void					selectAll() { m_pView->selectAll(); }
-
-	void					onContextMenu(QPoint);
+	void onContextMenu(QPoint);
 
 	// slots for list header, to hide or show columns
 	//
-	void					onHeaderContextMenu(QPoint);
-	void					onColumnAction(QAction* action);
+	void onHeaderContextMenu(QPoint);
+	void onColumnAction(QAction* action);
 };
 
 // ==============================================================================================

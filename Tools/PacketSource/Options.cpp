@@ -2,90 +2,6 @@
 
 #include <QSettings>
 
-#include "../../lib/SocketIO.h"
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-BuildOption::BuildOption(QObject *parent) :
-	QObject(parent)
-{
-	clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-BuildOption::BuildOption(const BuildOption& from, QObject *parent) :
-	QObject(parent)
-{
-	*this = from;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-BuildOption::~BuildOption()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void BuildOption::clear()
-{
-	m_buildInfo.clear();
-	m_signalsStatePath.clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void BuildOption::load()
-{
-	QSettings s;
-
-	m_buildInfo.setBuildDirPath(s.value(QString("%1BuildDirPath").arg(BUILD_REG_KEY), QString()).toString());
-
-	m_buildInfo.setEnableReload(s.value(QString("%1EnableReloadBuildFiles").arg(BUILD_REG_KEY), true).toBool());
-	m_buildInfo.setTimeoutReload(s.value(QString("%1TimeoutReloadBuildFiles").arg(BUILD_REG_KEY), BUILD_INFO_RELOAD_TIMEOUT).toInt());
-
-	m_buildInfo.setAppDataSrvIP(	HostAddressPort(	s.value(QString("%1AppDataSrvIP").arg(BUILD_REG_KEY), QString("127.0.0.1")).toString(),
-														s.value(QString("%1AppDataSrvPort").arg(BUILD_REG_KEY), PORT_APP_DATA_SERVICE_DATA).toInt()));
-
-	m_buildInfo.setUalTesterIP(		HostAddressPort(	s.value(QString("%1UalTesterIP").arg(BUILD_REG_KEY), QString("127.0.0.1")).toString(),
-														s.value(QString("%1UalTesterPort").arg(BUILD_REG_KEY), PORT_TUNING_SERVICE_CLIENT_REQUEST).toInt()));
-
-	m_signalsStatePath = s.value(QString("%1SignalsStatePath").arg(BUILD_REG_KEY), QString("SignalStates.csv")).toString();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void BuildOption::save()
-{
-	QSettings s;
-
-	s.setValue(QString("%1BuildDirPath").arg(BUILD_REG_KEY), m_buildInfo.buildDirPath());
-
-	s.setValue(QString("%1EnableReloadBuildFiles").arg(BUILD_REG_KEY), m_buildInfo.enableReload());
-	s.setValue(QString("%1TimeoutReloadBuildFiles").arg(BUILD_REG_KEY), m_buildInfo.timeoutReload());
-
-	s.setValue(QString("%1AppDataSrvIP").arg(BUILD_REG_KEY), m_buildInfo.appDataSrvIP().address().toString());
-	s.setValue(QString("%1AppDataSrvPort").arg(BUILD_REG_KEY), m_buildInfo.appDataSrvIP().port());
-
-	s.setValue(QString("%1UalTesterIP").arg(BUILD_REG_KEY), m_buildInfo.ualTesterIP().address().toString());
-	s.setValue(QString("%1UalTesterPort").arg(BUILD_REG_KEY), m_buildInfo.ualTesterIP().port());
-
-	s.setValue(QString("%1SignalsStatePath").arg(BUILD_REG_KEY), m_signalsStatePath);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-BuildOption& BuildOption::operator=(const BuildOption& from)
-{
-	m_buildInfo = from.m_buildInfo;
-	m_signalsStatePath = from.m_signalsStatePath;
-
-	return *this;
-}
-
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -218,12 +134,10 @@ bool Options::readFromXml()
 
 Options& Options::operator=(const Options& from)
 {
-	m_mutex.lock();
+	QMutexLocker l(&m_mutex);
 
-		m_build = from.m_build;
-		m_windows = from.m_windows;
-
-	m_mutex.unlock();
+	m_build = from.m_build;
+	m_windows = from.m_windows;
 
 	return *this;
 }

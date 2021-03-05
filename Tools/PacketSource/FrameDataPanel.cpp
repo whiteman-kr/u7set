@@ -22,11 +22,9 @@ FrameDataTable::FrameDataTable(QObject *)
 
 FrameDataTable::~FrameDataTable()
 {
-	m_frameMutex.lock();
+	QMutexLocker l(&m_frameMutex);
 
-		m_frameList.clear();
-
-	m_frameMutex.unlock();
+	m_frameList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -168,33 +166,23 @@ void FrameDataTable::updateColumn(int column)
 
 int FrameDataTable::dataSize() const
 {
-	int count = 0;
+	QMutexLocker l(&m_frameMutex);
 
-	m_frameMutex.lock();
-
-		count = m_frameList.count() * Rup::FRAME_DATA_SIZE;
-
-	m_frameMutex.unlock();
-
-	return count;
+	return m_frameList.count() * Rup::FRAME_DATA_SIZE;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 PS::FrameData* FrameDataTable::frame(int index) const
 {
-	PS::FrameData* pData = nullptr;
+	QMutexLocker l(&m_frameMutex);
 
-	m_frameMutex.lock();
+	if (index < 0 || index >= m_frameList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_frameList.count())
-		{
-			 pData = m_frameList[index];
-		}
-
-	m_frameMutex.unlock();
-
-	return pData;
+	return m_frameList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -313,7 +301,7 @@ FrameDataStateDialog::~FrameDataStateDialog()
 void FrameDataStateDialog::createInterface()
 {
 	setWindowFlags(Qt::Window  | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/InOut.png"));
+	setWindowIcon(QIcon(":/Images/FrameData.svg"));
 	setWindowTitle(tr("State"));
 
 	// main Layout

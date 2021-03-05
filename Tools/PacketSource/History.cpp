@@ -103,16 +103,14 @@ QString SignalForLog::stateStr(double state) const
 
 SignalForLog& SignalForLog::operator=(const SignalForLog& from)
 {
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		m_time = from.m_time;
+	m_time = from.m_time;
 
-		m_pSignal = from.m_pSignal;
+	m_pSignal = from.m_pSignal;
 
-		m_prevState = from.m_prevState;
-		m_state = from.m_state;
-
-	m_signalMutex.unlock();
+	m_prevState = from.m_prevState;
+	m_state = from.m_state;
 
 	return *this;
 }
@@ -137,11 +135,9 @@ SignalHistory::~SignalHistory()
 
 void SignalHistory::clear()
 {
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		m_signalList.clear();
-
-	m_signalMutex.unlock();
+	m_signalList.clear();
 
 	emit signalCountChanged();
 }
@@ -150,15 +146,9 @@ void SignalHistory::clear()
 
 int SignalHistory::count() const
 {
-	int count = 0;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
-
-		count = m_signalList.count();
-
-	m_signalMutex.unlock();
-
-	return count;
+	return m_signalList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -180,12 +170,10 @@ int SignalHistory::append(const SignalForLog& signalLog)
 
 	int index = -1;
 
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		m_signalList.append(signalLog);
-		index = m_signalList.count() - 1;
-
-	m_signalMutex.unlock();
+	m_signalList.append(signalLog);
+	index = m_signalList.count() - 1;
 
 	emit signalCountChanged();
 
@@ -196,47 +184,37 @@ int SignalHistory::append(const SignalForLog& signalLog)
 
 SignalForLog* SignalHistory::signalPtr(int index) const
 {
-	SignalForLog* pSignal = nullptr;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (index < 0 || index >= m_signalList.count())
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_signalList.count())
-		{
-			pSignal = (SignalForLog*) &m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return pSignal;
+	return const_cast<SignalForLog*>(&m_signalList[index]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalForLog SignalHistory::signal(int index) const
 {
-	SignalForLog signal;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (index < 0 || index >= m_signalList.count())
+	{
+		return SignalForLog();
+	}
 
-		if (index >= 0 && index < m_signalList.count())
-		{
-			signal = m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return signal;
+	return m_signalList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalHistory& SignalHistory::operator=(const SignalHistory& from)
 {
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		m_signalList = from.m_signalList;
-
-	m_signalMutex.unlock();
+	m_signalList = from.m_signalList;
 
 	return *this;
 }
