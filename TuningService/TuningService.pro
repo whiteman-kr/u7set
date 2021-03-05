@@ -36,6 +36,7 @@ SOURCES += \
     ../lib/CircularLogger.cpp \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/MemLeaksDetection.cpp \
+    ../lib/ScriptDeviceObject.cpp \
     ../lib/Service.cpp \
     ../lib/SocketIO.cpp \
     ../lib/UdpSocket.cpp \
@@ -84,6 +85,7 @@ HEADERS += \
     ../lib/LanControllerInfoHelper.h \
     ../lib/MemLeaksDetection.h \
     ../lib/OrderedHash.h \
+    ../lib/ScriptDeviceObject.h \
     ../lib/Service.h \
     ../lib/SocketIO.h \
     ../lib/UdpSocket.h \

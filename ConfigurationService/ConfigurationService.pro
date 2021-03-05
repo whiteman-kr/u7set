@@ -39,6 +39,7 @@ SOURCES += \
     ../lib/Address16.cpp \
     ../lib/CfgServerLoader.cpp \
 	../lib/MemLeaksDetection.cpp \
+    ../lib/ScriptDeviceObject.cpp \
     ../lib/Tcp.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/SimpleThread.cpp \
@@ -63,6 +64,7 @@ HEADERS += \
     ../lib/Address16.h \
     ../lib/CfgServerLoader.h \
 	../lib/MemLeaksDetection.h \
+    ../lib/ScriptDeviceObject.h \
     ../lib/Tcp.h \
     ../lib/TcpFileTransfer.h \
     ../lib/SimpleThread.h \

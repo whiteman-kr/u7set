@@ -101,20 +101,6 @@ public:
 	//
 	QByteArray m_configurationTabPageSplitterState;
 
-	// Equipment Tab Page
-	//
-	QByteArray m_equipmentTabPageSplitterState;
-
-    int m_equipmentTabPagePropertiesSplitterState = 0;
-
-	QString m_equipmentTabPagePropertiesMask;
-	QMap<QString, int> m_equipmentTabPagePropertiesColumnsWidth;
-	bool m_equipmentTabPagePropertiesGroupByCategory = false;
-
-	// Signals Tab Page
-	//
-	//QByteArray m_equipmentTabPageSplitterState;
-
 	// Build Tab Page
 	//
 	QByteArray m_buildTabPageSplitterState;

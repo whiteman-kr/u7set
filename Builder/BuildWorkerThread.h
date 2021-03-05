@@ -53,8 +53,8 @@ namespace Builder
 										 std::map<QUuid, Hardware::DeviceObject*>& uuidMap,
 										 std::map<QString, Hardware::DeviceObject*>& strIdMap);
 
-		bool checkChildRestrictions(Hardware::DeviceObject* root);
-		bool checkChildRestrictionsWorker(Hardware::DeviceObject* device);
+		bool checkChildRestrictions(std::shared_ptr<Hardware::DeviceObject> root);
+		bool checkChildRestrictionsWorker(std::shared_ptr<Hardware::DeviceObject> device);
 
 		// Load Application Logic signals
 		//

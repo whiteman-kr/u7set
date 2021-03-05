@@ -100,6 +100,7 @@ CONFIG(release, debug|release) {
 SOURCES +=\
     ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
+    ../lib/ScriptDeviceObject.cpp \
     ../lib/SoftwareSettings.cpp \
         MainWindow.cpp \
     TuningPage.cpp \
@@ -164,6 +165,7 @@ HEADERS  += MainWindow.h \
     ../lib/ClientBehavior.h \
     ../lib/ConstStrings.h \
     ../lib/ILogFile.h \
+    ../lib/ScriptDeviceObject.h \
     ../lib/SoftwareSettings.h \
     Stable.h \
     TuningPage.h \

@@ -10,35 +10,19 @@ function generate_aom(confFirmware, module, LMNumber, frame, log, signalSet, opt
 	let Mode_10V = 2;
 	let Mode_05mA = 3;
 
-	if (module.propertyValue("EquipmentID") == undefined)
-	{
-		log.errCFG3000("EquipmentID", "Module_AOM");
-		return false;
-	}
-	
-	let equipmentID = module.propertyValue("EquipmentID");
-	
-	let checkProperties = ["Place", "ModuleVersion"];
-	for (let cp = 0; cp < checkProperties.length; cp++)
-	{
-		if (module.propertyValue(checkProperties[cp]) == undefined)
-		{
-			log.errCFG3000(checkProperties[cp], module.propertyValue("EquipmentID"));
-			return false;
-		}
-	}
-
     let ptr = 0;
     
     let AOMWordCount = 4;                       // total words count
     let AOMSignalsInWordCount = 8;              // signals in a word count
     
-    let outController = module.jsFindChildObjectByMask(module.propertyValue("EquipmentID") + "_CTRLOUT");
-    if (outController == null)
+    let outControllerObject = module.childByEquipmentId(module.equipmentId + "_CTRLOUT");
+    if (outControllerObject == null || outControllerObject.isController() == false)
     {
-		log.errCFG3004(module.propertyValue("EquipmentID") + "_CTRLOUT", module.propertyValue("EquipmentID"));
+		log.errCFG3004(module.equipmentId + "_CTRLOUT",module.equipmentId);
 		return false;
     }
+
+    let outController =  outControllerObject.toController();
 
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
     //
@@ -53,7 +37,7 @@ function generate_aom(confFirmware, module, LMNumber, frame, log, signalSet, opt
             let mode = Mode_05V;    //default
 
             //let signal = findSignalByPlace(outController, place, Analog, Output, signalSet, log);
-			let signalStrId = outController.propertyValue("EquipmentID") + "_OUT";
+			let signalStrId = outController.equipmentId + "_OUT";
 			
 			let entry = place + 1;
 			if (entry < 10)
@@ -87,7 +71,7 @@ function generate_aom(confFirmware, module, LMNumber, frame, log, signalSet, opt
             data |= (mode << bit);
         }
         
-        if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr + w * 2, "OutputModeFlags" + w, data) == false)
+        if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr + w * 2, "OutputModeFlags" + w, data) == false)
 		{
 			return false;
 		}
@@ -97,7 +81,7 @@ function generate_aom(confFirmware, module, LMNumber, frame, log, signalSet, opt
     ptr += 120;
     
     // crc
-    let stringCrc64 = storeCrc64(confFirmware, log, LMNumber, equipmentID, frame, 0, ptr, ptr);   //CRC-64
+    let stringCrc64 = storeCrc64(confFirmware, log, LMNumber, module.equipmentId, frame, 0, ptr, ptr);   //CRC-64
 	if (stringCrc64 == "")
 	{
 		return false;
@@ -122,9 +106,9 @@ function generate_aom(confFirmware, module, LMNumber, frame, log, signalSet, opt
     let configFramesQuantity = 1;
     let dataFramesQuantity = 1;
 
-    let txId = module.propertyValue("ModuleFamily") + module.propertyValue("ModuleVersion");
+    let txId = module.moduleFamily + module.moduleVersion;
     
-    if (generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
+    if (generate_txRxIoConfig(confFirmware, module.equipmentId, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
 	{
 		return false;
 	}

@@ -56,7 +56,7 @@ namespace Builder
 
 		*ok = true;
 
-		Hardware::DeviceObject* object = m_equipment->deviceObject(strId);
+		Hardware::DeviceObject* object = m_equipment->deviceObject(strId).get();
 		if (object == nullptr)
 		{
 			m_log->errCFG3021(m_software->equipmentId(), property, strId);

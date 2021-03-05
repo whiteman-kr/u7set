@@ -3150,7 +3150,7 @@ namespace Builder
 
 		for (QString eqid : equipmentIds)
 		{
-			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(eqid);
+			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(eqid).get();
 
 			if (device == nullptr)
 			{
@@ -3175,7 +3175,7 @@ namespace Builder
 			{
 				// Is module, check if it is LM family
 				//
-				Hardware::DeviceModule* module = device->toModule();
+				Hardware::DeviceModule* module = device->toModule().get();
 				Q_ASSERT(module);
 
 				if (module != nullptr &&
@@ -3209,13 +3209,13 @@ namespace Builder
 			return false;
 		}
 
-		QStringList equipmentIds = logicSchema->equipmentIdList();
+		const QStringList equipmentIds = logicSchema->equipmentIdList();
 
 		bool ok = true;
 
-		for (QString eqid : equipmentIds)
+		for (const QString& eqid : equipmentIds)
 		{
-			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(eqid);
+			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(eqid).get();
 
 			if (device == nullptr)
 			{
@@ -3231,7 +3231,7 @@ namespace Builder
 				continue;	// The error will fire in another checks;
 			}
 
-			Hardware::DeviceModule* module = device->toModule();
+			Hardware::DeviceModule* module = device->toModule().get();
 			Q_ASSERT(module);
 
 			if (module == nullptr || module->isLogicModule() == false)

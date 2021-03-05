@@ -23,6 +23,7 @@ SOURCES +=\
     ../lib/Address16.cpp \
     ../lib/LanControllerInfoHelper.cpp \
 	../lib/MemLeaksDetection.cpp \
+    ../lib/ScriptDeviceObject.cpp \
 	TuningMainWindow.cpp \
 	../lib/SoftwareSettings.cpp \
 	../lib/DeviceHelper.cpp \
@@ -71,6 +72,7 @@ HEADERS  += TuningMainWindow.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
 	../lib/MemLeaksDetection.h \
+    ../lib/ScriptDeviceObject.h \
 	../lib/SoftwareSettings.h \
 	../lib/DeviceHelper.h \
 	../lib/XmlHelper.h \

@@ -745,7 +745,7 @@ UnitsConvertModule UnitsConvertor::getModuleType(int unitID, int sensorType)
 
 			switch (sensorType)
 			{
-				case E::SensorType::Hz_50_50000:	moduleType = UnitsConvertModule::FIM;	break;
+				case E::SensorType::Hz_005_50000:	moduleType = UnitsConvertModule::FIM;	break;
 			}
 
 			break;
@@ -821,7 +821,7 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double
 
 		case E::ElectricUnit::Hz:
 			{
-				if (sensorType != E::SensorType::Hz_50_50000)
+				if (sensorType != E::SensorType::Hz_005_50000)
 				{
 					return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for Hz"));
 				}

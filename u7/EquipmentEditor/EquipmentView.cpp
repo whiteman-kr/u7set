@@ -234,7 +234,7 @@ void EquipmentView::addSignal()
 
 	// --
 	//
-	std::shared_ptr<Hardware::DeviceObject> signal = std::make_shared<Hardware::DeviceSignal>(isPresetMode());
+	std::shared_ptr<Hardware::DeviceObject> signal = std::make_shared<Hardware::DeviceAppSignal>(isPresetMode());
 
 	signal->setEquipmentIdTemplate("$(PARENT)_SIGNAL");
 	signal->setCaption(tr("Signal"));
@@ -323,7 +323,7 @@ void EquipmentView::addPreset()
 	{
 		QModelIndex singleSelectedIndex = selectedIndexList[0];
 
-		Hardware::DeviceObject* selectedObject = equipmentModel()->deviceObject(singleSelectedIndex);
+		auto selectedObject = equipmentModel()->deviceObject(singleSelectedIndex);
 		if (selectedObject == nullptr)
 		{
 			Q_ASSERT(selectedObject != nullptr);
@@ -359,7 +359,7 @@ void EquipmentView::replaceObject()
 
 	QModelIndex singleSelectedIndex = selectedIndexList[0];
 
-	Hardware::DeviceObject* selectedObject = equipmentModel()->deviceObject(singleSelectedIndex);
+	auto selectedObject = equipmentModel()->deviceObject(singleSelectedIndex);
 	if (selectedObject == nullptr)
 	{
 		assert(selectedObject != nullptr);
@@ -448,7 +448,7 @@ void EquipmentView::replaceObject()
 
 				for (int childIndex = 0; childIndex < dst->childrenCount(); childIndex++)
 				{
-					Hardware::DeviceObject* dstChild = dst->child(childIndex);
+					auto dstChild = dst->child(childIndex);
 					assert(dstChild);
 
 					QString dstChildTemplateId = dstChild->equipmentIdTemplate();
@@ -457,12 +457,12 @@ void EquipmentView::replaceObject()
 					//
 					for (int srcChildIndex = 0; srcChildIndex < src->childrenCount(); srcChildIndex++)
 					{
-						Hardware::DeviceObject* srcChild = src->child(srcChildIndex);
+						auto srcChild = src->child(srcChildIndex);
 						assert(srcChild);
 
 						if (srcChild->equipmentIdTemplate() == dstChildTemplateId)
 						{
-							updatePropertuFunc(dstChild, srcChild);
+							updatePropertuFunc(dstChild.get(), srcChild.get());
 							break;
 						}
 					}
@@ -745,7 +745,7 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentView::addPresetToConfiguration(
 	//
 	if (device->isModule() == true)
 	{
-		Hardware::DeviceModule* module = device->toModule();
+		auto module = device->toModule();
 
 		if (module != nullptr && module->isFSCConfigurationModule() == true)
 		{
@@ -836,7 +836,7 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 
 			for (int i = 0; i < object->childrenCount(); i++)
 			{
-				setUuid(object->child(i));
+				setUuid(object->child(i).get());
 			}
 		};
 
@@ -844,7 +844,7 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 
 	// Set Parent
 	//
-	Hardware::DeviceObject* parentObject = nullptr;
+	std::shared_ptr<Hardware::DeviceObject> parentObject = nullptr;
 	//QModelIndex parentIndex;	// Currently it is root;
 
 	if (isPresetMode() == true &&
@@ -932,7 +932,7 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 
 	equipmentModel()->insertDeviceObject(object, parentModelIndex);
 
-	QModelIndex objectModelIndex = equipmentModel()->index(parentObject->childIndex(object.get()), parentModelIndex);
+	QModelIndex objectModelIndex = equipmentModel()->index(parentObject->childIndex(object), parentModelIndex);
 
 	if (clearPrevSelection == true)
 	{
@@ -959,11 +959,14 @@ void EquipmentView::addInOutsToSignals()
 		return;
 	}
 
-	Hardware::DeviceObject* device = equipmentModel()->deviceObject(selectedIndexList.front());
-	assert(device);
+	auto device = equipmentModel()->deviceObject(selectedIndexList.front());
+	if (device == nullptr)
+	{
+		assert(device);
+		return;
+	}
 
-	Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(device);
-
+	auto module = device->toModule();
 	if (module == nullptr)
 	{
 		assert(module);
@@ -972,7 +975,7 @@ void EquipmentView::addInOutsToSignals()
 
 	// Check if the Place property is correct for the object and all it's parents
 	//
-	Hardware::DeviceObject* checkPlaceObject = module;
+	std::shared_ptr<Hardware::DeviceObject> checkPlaceObject = module;
 
 	while (checkPlaceObject != nullptr)
 	{
@@ -1002,14 +1005,14 @@ void EquipmentView::addInOutsToSignals()
 
 	// Get all hardware inputs outputs from the module
 	//
-	std::vector<Hardware::DeviceSignal*> inOuts;
+	std::vector<Hardware::DeviceAppSignal*> inOuts;
 
 	std::function<void(Hardware::DeviceObject*)> getInOuts =
 		[&inOuts, &getInOuts](Hardware::DeviceObject* device)
 		{
-			if (device->deviceType() == Hardware::DeviceType::Signal)
+			if (device->deviceType() == Hardware::DeviceType::AppSignal)
 			{
-				Hardware::DeviceSignal* signal = dynamic_cast<Hardware::DeviceSignal*>(device);
+				Hardware::DeviceAppSignal* signal = dynamic_cast<Hardware::DeviceAppSignal*>(device);
 				assert(signal);
 
 				if (signal->function() == E::SignalFunction::Input ||
@@ -1024,7 +1027,7 @@ void EquipmentView::addInOutsToSignals()
 
 			for (int i = 0; i < device->childrenCount(); i++)
 			{
-				getInOuts(device->child(i));
+				getInOuts(device->child(i).get());
 			}
 		};
 
@@ -1040,7 +1043,7 @@ void EquipmentView::addInOutsToSignals()
 	//
 	std::list<std::shared_ptr<Hardware::DeviceObject>> equipmentDevices;
 
-	Hardware::DeviceObject* equipmentDevice = module;
+	std::shared_ptr<Hardware::DeviceObject> equipmentDevice = module;
 	while (equipmentDevice != nullptr)
 	{
 		if (equipmentDevice != module)
@@ -1142,7 +1145,7 @@ void EquipmentView::showAppSignals(bool refreshSignalList /*= false*/)
 
 	for (const QModelIndex& mi : selectedIndexList)
 	{
-		const Hardware::DeviceObject* device = equipmentModel()->deviceObject(mi);
+		auto device = equipmentModel()->deviceObject(mi);
 		assert(device);
 
 		if (device != nullptr)
@@ -1168,11 +1171,14 @@ void EquipmentView::addAppSignal()
 		return;
 	}
 
-	Hardware::DeviceObject* device = equipmentModel()->deviceObject(selectedIndexList.front());
-	assert(device);
+	auto device = equipmentModel()->deviceObject(selectedIndexList.front());
+	if (device == nullptr)
+	{
+		assert(device);
+		return;
+	}
 
-	Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(device);
-
+	auto module = device->toModule();
 	if (module == nullptr || module->isLogicModule() == false)
 	{
 		assert(module);
@@ -1207,7 +1213,7 @@ void EquipmentView::addLogicSchemaToLm()
 
 	for (const QModelIndex& mi : selectedIndexList)
 	{
-		const Hardware::DeviceObject* device = equipmentModel()->deviceObject(mi);
+		auto device = equipmentModel()->deviceObject(mi);
 		assert(device);
 
 		deviceStrIds.push_back(device->equipmentId());
@@ -1255,11 +1261,10 @@ void EquipmentView::showLogicSchemaForLm()
 		return;
 	}
 
-	Hardware::DeviceObject* device = equipmentModel()->deviceObject(selectedIndexList.front());
+	auto device = equipmentModel()->deviceObject(selectedIndexList.front());
 	assert(device);
 
-	Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(device);
-
+	auto module = device->toModule();
 	if (module == nullptr || module->isLogicModule() == false)
 	{
 		assert(module);
@@ -1288,14 +1293,13 @@ void EquipmentView::addOptoConnection()
 		return;
 	}
 
-	const Hardware::DeviceController* controller1 = dynamic_cast<const Hardware::DeviceController*>(equipmentModel()->deviceObject(selectedIndexList.front()));
-	const Hardware::DeviceController* controller2 = dynamic_cast<const Hardware::DeviceController*>(equipmentModel()->deviceObject(selectedIndexList.back()));
+	const auto controller1 = equipmentModel()->deviceObject(selectedIndexList.front())->toController();
+	const auto controller2 = equipmentModel()->deviceObject(selectedIndexList.back())->toController();
 
 	if (controller1 == nullptr || controller2 == nullptr)
 	{
 		assert(controller1);
 		assert(controller2);
-
 		return;
 	}
 
@@ -1346,8 +1350,7 @@ void EquipmentView::showObjectConnections()
 	QString filter;
 	for (auto mi : selectedIndexList)
 	{
-		Hardware::DeviceObject* device = equipmentModel()->deviceObject(mi);
-
+		auto device = equipmentModel()->deviceObject(mi);
 		if (device == nullptr)
 		{
 			assert(device);
@@ -1392,7 +1395,7 @@ void EquipmentView::copySelectedDevices()
 
 	// Check if all selected equipmnet has the same type
 	//
-	const Hardware::DeviceObject* firstDevice = equipmentModel()->deviceObject(selected.first());
+	auto firstDevice = equipmentModel()->deviceObject(selected.first());
 	assert(firstDevice);
 
 	Hardware::DeviceType type = firstDevice->deviceType();
@@ -1403,7 +1406,7 @@ void EquipmentView::copySelectedDevices()
 
 	for (const QModelIndex& mi : selected)
 	{
-		const Hardware::DeviceObject* device = equipmentModel()->deviceObject(mi);
+		const auto device = equipmentModel()->deviceObject(mi);
 		assert(device);
 
 		if (type != device->deviceType())
@@ -1414,7 +1417,7 @@ void EquipmentView::copySelectedDevices()
 
 		allObjectsArePresetRoots &= device->presetRoot() & device->preset();
 
-		devices.push_back(device);
+		devices.push_back(device.get());
 	}
 
 	// Read devices from the project database
@@ -1623,7 +1626,7 @@ void EquipmentView::pasteDevices(const ::Proto::EnvelopeSet& messageItems, const
 
 			for (int i = 0; i < object->childrenCount(); i++)
 			{
-				setUuid(object->child(i));
+				setUuid(object->child(i).get());
 			}
 		};
 
@@ -1765,7 +1768,7 @@ bool EquipmentView::canPaste(const ::Proto::EnvelopeSetShortDescription& message
 
 	// Check if chese devices can be added
 	//
-	const Hardware::DeviceObject* selectedDevice = equipmentModel()->deviceObject(selectedIndexList.at(0));
+	auto selectedDevice = equipmentModel()->deviceObject(selectedIndexList.at(0));
 	assert(selectedDevice);
 
 	if (selectedDevice == nullptr)
@@ -1886,8 +1889,7 @@ void EquipmentView::showHistory()
 
 	// --
 	//
-	Hardware::DeviceObject* device = equipmentModel()->deviceObject(selected.front());
-
+	auto device = equipmentModel()->deviceObject(selected.front());
 	if (device == nullptr)
 	{
 		assert(device);
@@ -1922,8 +1924,7 @@ void EquipmentView::compare()
 
 	// --
 	//
-	Hardware::DeviceObject* device = equipmentModel()->deviceObject(selected.front());
-
+	auto device = equipmentModel()->deviceObject(selected.front());
 	if (device == nullptr)
 	{
 		assert(device);
@@ -2008,7 +2009,7 @@ void EquipmentView::updateFromPreset()
 
 	for (int i = 0; i < presetRoot->childrenCount(); i++)
 	{
-		std::shared_ptr<Hardware::DeviceObject> preset = presetRoot->childSharedPtr(i);
+		std::shared_ptr<Hardware::DeviceObject> preset = presetRoot->child(i);
 
 		if (preset.get() == nullptr || preset->presetRoot() == false)
 		{
@@ -2092,7 +2093,7 @@ void EquipmentView::updateFromPreset()
 
 			for (int i = 0; i < object->childrenCount(); i++)
 			{
-				getPresetFiles(object->childSharedPtr(i));
+				getPresetFiles(object->child(i));
 			}
 		};
 
@@ -2127,8 +2128,8 @@ void EquipmentView::updateFromPreset()
 	std::vector<Hardware::DeviceObject*> deleteDeviceList;
 	std::vector<std::pair<int, int>> addDeviceList;		// first: parent fileId, second: preset file id
 
-	QVector<Hardware::DeviceSignal*> deviceSignalsToUpdateAppSignals;	// This array will be passed to application signals to
-																		// to updater them
+	QVector<Hardware::DeviceAppSignal*> deviceSignalsToUpdateAppSignals;	// This array will be passed to application signals to
+																			// to updater them
 
 	updateDeviceList.reserve(65536 * 2);
 	deleteDeviceList.reserve(65536);
@@ -2278,7 +2279,7 @@ void EquipmentView::updateFromPreset()
 
 				for (int i = 0; i < object->childrenCount(); i++)
 				{
-					setUuid(object->child(i));
+					setUuid(object->child(i).get());
 				}
 			};
 
@@ -2315,7 +2316,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 										   std::vector<std::shared_ptr<Hardware::DeviceObject>>* updateDeviceList,
 										   std::vector<Hardware::DeviceObject*>* deleteDeviceList,	// Devices to delete after update
 										   std::vector<std::pair<int, int>>* addDeviceList,			// Devices to add aftre update
-										   QVector<Hardware::DeviceSignal*>* deviceSignalsToUpdateAppSignals)	// DeviceSignal list to updateA ppSignals
+										   QVector<Hardware::DeviceAppSignal*>* deviceSignalsToUpdateAppSignals)	// DeviceSignal list to updateA ppSignals
 {
 	if (updateDeviceList == nullptr ||
 		deleteDeviceList == nullptr ||
@@ -2361,11 +2362,11 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	{
 		if (presetsToUpdate.contains(device->presetName()) == true)
 		{
-			if (device->isSignal() == true)
+			if (device->isAppSignal() == true)
 			{
 				// Collect all update DeviceSignals, so AppSignals can be update from them
 				//
-				deviceSignalsToUpdateAppSignals->push_back(device->toSignal());
+				deviceSignalsToUpdateAppSignals->push_back(device->toAppSignal().get());
 			}
 
 			// Update device object properties
@@ -2485,8 +2486,8 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		//
 		for (int i = 0; i < device->childrenCount(); i++)
 		{
-			std::shared_ptr<Hardware::DeviceObject> deviceChild = device->childSharedPtr(i);
-			std::shared_ptr<Hardware::DeviceObject> presetChild = preset->childSharedPtr(deviceChild->presetObjectUuid());
+			std::shared_ptr<Hardware::DeviceObject> deviceChild = device->child(i);
+			std::shared_ptr<Hardware::DeviceObject> presetChild = preset->child(deviceChild->presetObjectUuid());
 
 			// WARNING, in the nex condition we cannot check for presetsToUpdate, as in this case we cannot go deeper as presetChild is nullptr and
 			// we will have assert in the begining of updateDeviceFromPreset(). So deleted child will be removed from instance even though the prteset
@@ -2505,7 +2506,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 							for (int i = 0; i < device->childrenCount(); i++)
 							{
-								deleteDevices(device->child(i), deleteDeviceList);
+								deleteDevices(device->child(i).get(), deleteDeviceList);
 							}
 						};
 
@@ -2533,8 +2534,8 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		//
 		for (int i = 0; i < preset->childrenCount(); i++)
 		{
-			std::shared_ptr<Hardware::DeviceObject> presetChild = preset->childSharedPtr(i);
-			std::shared_ptr<Hardware::DeviceObject> deviceChild = device->childSharedPtrByPresetUuid(presetChild->presetObjectUuid());
+			std::shared_ptr<Hardware::DeviceObject> presetChild = preset->child(i);
+			std::shared_ptr<Hardware::DeviceObject> deviceChild = device->childByPresetUuid(presetChild->presetObjectUuid());
 
 			if (deviceChild == nullptr)
 			{
@@ -2549,7 +2550,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	//
 	for (int i = 0; i < device->childrenCount(); i++)
 	{
-		std::shared_ptr<Hardware::DeviceObject> deviceChild = device->childSharedPtr(i);
+		std::shared_ptr<Hardware::DeviceObject> deviceChild = device->child(i);
 
 		if (deviceChild->preset() == false)
 		{

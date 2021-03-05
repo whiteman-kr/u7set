@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core sql testlib network qml widgets xml
+QT       += core sql testlib network widgets xml qml
 QT       -= gui
 
 TARGET = u7databasetests
@@ -41,6 +41,7 @@ SOURCES += main.cpp \
 	../../lib/DbStruct.cpp \
 	../../lib/DeviceObject.cpp \
 	../../lib/DbProgress.cpp \
+    ../../lib/ScriptDeviceObject.cpp \
 	../../lib/Signal.cpp \
 	../../lib/DbProgressDialog.cpp \
 	../../lib/Types.cpp \
@@ -72,6 +73,7 @@ HEADERS += \
 	../../lib/DeviceObject.h \
 	../../lib/Factory.h \
 	../../lib/DbProgress.h \
+    ../../lib/ScriptDeviceObject.h \
 	../../lib/Signal.h \
 	../../lib/DbProgressDialog.h \
 	../../lib/PropertyObject.h \

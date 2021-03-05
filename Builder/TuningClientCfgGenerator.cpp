@@ -29,14 +29,14 @@ namespace Builder
 	bool TuningClientCfgGenerator::generateConfigurationStep1()
 	{
 		if (m_software == nullptr ||
-				m_software->type() != E::SoftwareType::TuningClient ||
+				m_software->softwareType() != E::SoftwareType::TuningClient ||
 				m_equipment == nullptr ||
 				m_cfgXml == nullptr ||
 				m_buildResultWriter == nullptr ||
 				m_subsystems == nullptr)
 		{
 			assert(m_software);
-			assert(m_software->type() == E::SoftwareType::Monitor);
+			assert(m_software->softwareType() == E::SoftwareType::Monitor);
 			assert(m_equipment);
 			assert(m_cfgXml);
 			assert(m_buildResultWriter);

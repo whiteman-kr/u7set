@@ -370,7 +370,7 @@ public:
 	SignalsTabPage(SignalSetProvider* signalSetProvider, DbController* dbController, QWidget* parent);
 	virtual ~SignalsTabPage() override;
 
-	static bool updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties);
+	static bool updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceAppSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties);
 	int getMiddleVisibleRow();
 	bool editSignals(QVector<int> ids);
 

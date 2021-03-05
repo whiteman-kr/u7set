@@ -102,7 +102,7 @@ class DeviceRack;
 class DeviceChassis;
 class DeviceModule;
 class DeviceController;
-class DeviceSignal;
+class DeviceAppSignal;
 class Workstation;
 class Software;
 class ModuleConfiguration;
@@ -8719,14 +8719,14 @@ class DeviceObject : public ::google::protobuf::Message {
   inline ::Proto::DeviceController* release_controller();
   inline void set_allocated_controller(::Proto::DeviceController* controller);
 
-  // optional .Proto.DeviceSignal Signal = 106;
-  inline bool has_signal() const;
-  inline void clear_signal();
-  static const int kSignalFieldNumber = 106;
-  inline const ::Proto::DeviceSignal& signal() const;
-  inline ::Proto::DeviceSignal* mutable_signal();
-  inline ::Proto::DeviceSignal* release_signal();
-  inline void set_allocated_signal(::Proto::DeviceSignal* signal);
+  // optional .Proto.DeviceAppSignal AppSignal = 106;
+  inline bool has_appsignal() const;
+  inline void clear_appsignal();
+  static const int kAppSignalFieldNumber = 106;
+  inline const ::Proto::DeviceAppSignal& appsignal() const;
+  inline ::Proto::DeviceAppSignal* mutable_appsignal();
+  inline ::Proto::DeviceAppSignal* release_appsignal();
+  inline void set_allocated_appsignal(::Proto::DeviceAppSignal* appsignal);
 
   // optional .Proto.Workstation Workstation = 107;
   inline bool has_workstation() const;
@@ -8794,8 +8794,8 @@ class DeviceObject : public ::google::protobuf::Message {
   inline void clear_has_module();
   inline void set_has_controller();
   inline void clear_has_controller();
-  inline void set_has_signal();
-  inline void clear_has_signal();
+  inline void set_has_appsignal();
+  inline void clear_has_appsignal();
   inline void set_has_workstation();
   inline void clear_has_workstation();
   inline void set_has_software();
@@ -8820,7 +8820,7 @@ class DeviceObject : public ::google::protobuf::Message {
   ::Proto::DeviceChassis* chassis_;
   ::Proto::DeviceModule* module_;
   ::Proto::DeviceController* controller_;
-  ::Proto::DeviceSignal* signal_;
+  ::Proto::DeviceAppSignal* appsignal_;
   ::Proto::Workstation* workstation_;
   ::Proto::Software* software_;
   ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > children_;
@@ -9340,14 +9340,14 @@ class DeviceController : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class DeviceSignal : public ::google::protobuf::Message {
+class DeviceAppSignal : public ::google::protobuf::Message {
  public:
-  DeviceSignal();
-  virtual ~DeviceSignal();
+  DeviceAppSignal();
+  virtual ~DeviceAppSignal();
 
-  DeviceSignal(const DeviceSignal& from);
+  DeviceAppSignal(const DeviceAppSignal& from);
 
-  inline DeviceSignal& operator=(const DeviceSignal& from) {
+  inline DeviceAppSignal& operator=(const DeviceAppSignal& from) {
     CopyFrom(from);
     return *this;
   }
@@ -9361,17 +9361,17 @@ class DeviceSignal : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const DeviceSignal& default_instance();
+  static const DeviceAppSignal& default_instance();
 
-  void Swap(DeviceSignal* other);
+  void Swap(DeviceAppSignal* other);
 
   // implements Message ----------------------------------------------
 
-  DeviceSignal* New() const;
+  DeviceAppSignal* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const DeviceSignal& from);
-  void MergeFrom(const DeviceSignal& from);
+  void CopyFrom(const DeviceAppSignal& from);
+  void MergeFrom(const DeviceAppSignal& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -9535,7 +9535,7 @@ class DeviceSignal : public ::google::protobuf::Message {
   inline bool signalspecpropsstructwasfixed() const;
   inline void set_signalspecpropsstructwasfixed(bool value);
 
-  // @@protoc_insertion_point(class_scope:Proto.DeviceSignal)
+  // @@protoc_insertion_point(class_scope:Proto.DeviceAppSignal)
  private:
   inline void set_has_obsoletetype();
   inline void clear_has_obsoletetype();
@@ -9603,7 +9603,7 @@ class DeviceSignal : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static DeviceSignal* default_instance_;
+  static DeviceAppSignal* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -27034,41 +27034,41 @@ inline void DeviceObject::set_allocated_controller(::Proto::DeviceController* co
   }
 }
 
-// optional .Proto.DeviceSignal Signal = 106;
-inline bool DeviceObject::has_signal() const {
+// optional .Proto.DeviceAppSignal AppSignal = 106;
+inline bool DeviceObject::has_appsignal() const {
   return (_has_bits_[0] & 0x00040000u) != 0;
 }
-inline void DeviceObject::set_has_signal() {
+inline void DeviceObject::set_has_appsignal() {
   _has_bits_[0] |= 0x00040000u;
 }
-inline void DeviceObject::clear_has_signal() {
+inline void DeviceObject::clear_has_appsignal() {
   _has_bits_[0] &= ~0x00040000u;
 }
-inline void DeviceObject::clear_signal() {
-  if (signal_ != NULL) signal_->::Proto::DeviceSignal::Clear();
-  clear_has_signal();
+inline void DeviceObject::clear_appsignal() {
+  if (appsignal_ != NULL) appsignal_->::Proto::DeviceAppSignal::Clear();
+  clear_has_appsignal();
 }
-inline const ::Proto::DeviceSignal& DeviceObject::signal() const {
-  return signal_ != NULL ? *signal_ : *default_instance_->signal_;
+inline const ::Proto::DeviceAppSignal& DeviceObject::appsignal() const {
+  return appsignal_ != NULL ? *appsignal_ : *default_instance_->appsignal_;
 }
-inline ::Proto::DeviceSignal* DeviceObject::mutable_signal() {
-  set_has_signal();
-  if (signal_ == NULL) signal_ = new ::Proto::DeviceSignal;
-  return signal_;
+inline ::Proto::DeviceAppSignal* DeviceObject::mutable_appsignal() {
+  set_has_appsignal();
+  if (appsignal_ == NULL) appsignal_ = new ::Proto::DeviceAppSignal;
+  return appsignal_;
 }
-inline ::Proto::DeviceSignal* DeviceObject::release_signal() {
-  clear_has_signal();
-  ::Proto::DeviceSignal* temp = signal_;
-  signal_ = NULL;
+inline ::Proto::DeviceAppSignal* DeviceObject::release_appsignal() {
+  clear_has_appsignal();
+  ::Proto::DeviceAppSignal* temp = appsignal_;
+  appsignal_ = NULL;
   return temp;
 }
-inline void DeviceObject::set_allocated_signal(::Proto::DeviceSignal* signal) {
-  delete signal_;
-  signal_ = signal;
-  if (signal) {
-    set_has_signal();
+inline void DeviceObject::set_allocated_appsignal(::Proto::DeviceAppSignal* appsignal) {
+  delete appsignal_;
+  appsignal_ = appsignal;
+  if (appsignal) {
+    set_has_appsignal();
   } else {
-    clear_has_signal();
+    clear_has_appsignal();
   }
 }
 
@@ -27427,364 +27427,364 @@ inline void DeviceModule::set_custommodulefamily(::google::protobuf::int32 value
 
 // -------------------------------------------------------------------
 
-// DeviceSignal
+// DeviceAppSignal
 
 // optional int32 obsoletetype = 1 [default = 0];
-inline bool DeviceSignal::has_obsoletetype() const {
+inline bool DeviceAppSignal::has_obsoletetype() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void DeviceSignal::set_has_obsoletetype() {
+inline void DeviceAppSignal::set_has_obsoletetype() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void DeviceSignal::clear_has_obsoletetype() {
+inline void DeviceAppSignal::clear_has_obsoletetype() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void DeviceSignal::clear_obsoletetype() {
+inline void DeviceAppSignal::clear_obsoletetype() {
   obsoletetype_ = 0;
   clear_has_obsoletetype();
 }
-inline ::google::protobuf::int32 DeviceSignal::obsoletetype() const {
+inline ::google::protobuf::int32 DeviceAppSignal::obsoletetype() const {
   return obsoletetype_;
 }
-inline void DeviceSignal::set_obsoletetype(::google::protobuf::int32 value) {
+inline void DeviceAppSignal::set_obsoletetype(::google::protobuf::int32 value) {
   set_has_obsoletetype();
   obsoletetype_ = value;
 }
 
 // optional int32 byteOrder = 2 [default = 0];
-inline bool DeviceSignal::has_byteorder() const {
+inline bool DeviceAppSignal::has_byteorder() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void DeviceSignal::set_has_byteorder() {
+inline void DeviceAppSignal::set_has_byteorder() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void DeviceSignal::clear_has_byteorder() {
+inline void DeviceAppSignal::clear_has_byteorder() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void DeviceSignal::clear_byteorder() {
+inline void DeviceAppSignal::clear_byteorder() {
   byteorder_ = 0;
   clear_has_byteorder();
 }
-inline ::google::protobuf::int32 DeviceSignal::byteorder() const {
+inline ::google::protobuf::int32 DeviceAppSignal::byteorder() const {
   return byteorder_;
 }
-inline void DeviceSignal::set_byteorder(::google::protobuf::int32 value) {
+inline void DeviceAppSignal::set_byteorder(::google::protobuf::int32 value) {
   set_has_byteorder();
   byteorder_ = value;
 }
 
 // optional int32 format = 3 [default = 0];
-inline bool DeviceSignal::has_format() const {
+inline bool DeviceAppSignal::has_format() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void DeviceSignal::set_has_format() {
+inline void DeviceAppSignal::set_has_format() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void DeviceSignal::clear_has_format() {
+inline void DeviceAppSignal::clear_has_format() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void DeviceSignal::clear_format() {
+inline void DeviceAppSignal::clear_format() {
   format_ = 0;
   clear_has_format();
 }
-inline ::google::protobuf::int32 DeviceSignal::format() const {
+inline ::google::protobuf::int32 DeviceAppSignal::format() const {
   return format_;
 }
-inline void DeviceSignal::set_format(::google::protobuf::int32 value) {
+inline void DeviceAppSignal::set_format(::google::protobuf::int32 value) {
   set_has_format();
   format_ = value;
 }
 
 // optional int32 size = 4 [default = 0];
-inline bool DeviceSignal::has_size() const {
+inline bool DeviceAppSignal::has_size() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void DeviceSignal::set_has_size() {
+inline void DeviceAppSignal::set_has_size() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void DeviceSignal::clear_has_size() {
+inline void DeviceAppSignal::clear_has_size() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void DeviceSignal::clear_size() {
+inline void DeviceAppSignal::clear_size() {
   size_ = 0;
   clear_has_size();
 }
-inline ::google::protobuf::int32 DeviceSignal::size() const {
+inline ::google::protobuf::int32 DeviceAppSignal::size() const {
   return size_;
 }
-inline void DeviceSignal::set_size(::google::protobuf::int32 value) {
+inline void DeviceAppSignal::set_size(::google::protobuf::int32 value) {
   set_has_size();
   size_ = value;
 }
 
 // optional int32 valueOffset = 7 [default = 0];
-inline bool DeviceSignal::has_valueoffset() const {
+inline bool DeviceAppSignal::has_valueoffset() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void DeviceSignal::set_has_valueoffset() {
+inline void DeviceAppSignal::set_has_valueoffset() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void DeviceSignal::clear_has_valueoffset() {
+inline void DeviceAppSignal::clear_has_valueoffset() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void DeviceSignal::clear_valueoffset() {
+inline void DeviceAppSignal::clear_valueoffset() {
   valueoffset_ = 0;
   clear_has_valueoffset();
 }
-inline ::google::protobuf::int32 DeviceSignal::valueoffset() const {
+inline ::google::protobuf::int32 DeviceAppSignal::valueoffset() const {
   return valueoffset_;
 }
-inline void DeviceSignal::set_valueoffset(::google::protobuf::int32 value) {
+inline void DeviceAppSignal::set_valueoffset(::google::protobuf::int32 value) {
   set_has_valueoffset();
   valueoffset_ = value;
 }
 
 // optional int32 valueBit = 8 [default = 0];
-inline bool DeviceSignal::has_valuebit() const {
+inline bool DeviceAppSignal::has_valuebit() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void DeviceSignal::set_has_valuebit() {
+inline void DeviceAppSignal::set_has_valuebit() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void DeviceSignal::clear_has_valuebit() {
+inline void DeviceAppSignal::clear_has_valuebit() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void DeviceSignal::clear_valuebit() {
+inline void DeviceAppSignal::clear_valuebit() {
   valuebit_ = 0;
   clear_has_valuebit();
 }
-inline ::google::protobuf::int32 DeviceSignal::valuebit() const {
+inline ::google::protobuf::int32 DeviceAppSignal::valuebit() const {
   return valuebit_;
 }
-inline void DeviceSignal::set_valuebit(::google::protobuf::int32 value) {
+inline void DeviceAppSignal::set_valuebit(::google::protobuf::int32 value) {
   set_has_valuebit();
   valuebit_ = value;
 }
 
 // optional int32 type = 9 [default = 0];
-inline bool DeviceSignal::has_type() const {
+inline bool DeviceAppSignal::has_type() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void DeviceSignal::set_has_type() {
+inline void DeviceAppSignal::set_has_type() {
   _has_bits_[0] |= 0x00000040u;
 }
-inline void DeviceSignal::clear_has_type() {
+inline void DeviceAppSignal::clear_has_type() {
   _has_bits_[0] &= ~0x00000040u;
 }
-inline void DeviceSignal::clear_type() {
+inline void DeviceAppSignal::clear_type() {
   type_ = 0;
   clear_has_type();
 }
-inline ::google::protobuf::int32 DeviceSignal::type() const {
+inline ::google::protobuf::int32 DeviceAppSignal::type() const {
   return type_;
 }
-inline void DeviceSignal::set_type(::google::protobuf::int32 value) {
+inline void DeviceAppSignal::set_type(::google::protobuf::int32 value) {
   set_has_type();
   type_ = value;
 }
 
 // optional int32 function = 10 [default = 0];
-inline bool DeviceSignal::has_function() const {
+inline bool DeviceAppSignal::has_function() const {
   return (_has_bits_[0] & 0x00000080u) != 0;
 }
-inline void DeviceSignal::set_has_function() {
+inline void DeviceAppSignal::set_has_function() {
   _has_bits_[0] |= 0x00000080u;
 }
-inline void DeviceSignal::clear_has_function() {
+inline void DeviceAppSignal::clear_has_function() {
   _has_bits_[0] &= ~0x00000080u;
 }
-inline void DeviceSignal::clear_function() {
+inline void DeviceAppSignal::clear_function() {
   function_ = 0;
   clear_has_function();
 }
-inline ::google::protobuf::int32 DeviceSignal::function() const {
+inline ::google::protobuf::int32 DeviceAppSignal::function() const {
   return function_;
 }
-inline void DeviceSignal::set_function(::google::protobuf::int32 value) {
+inline void DeviceAppSignal::set_function(::google::protobuf::int32 value) {
   set_has_function();
   function_ = value;
 }
 
 // optional int32 memoryArea = 11 [default = 0];
-inline bool DeviceSignal::has_memoryarea() const {
+inline bool DeviceAppSignal::has_memoryarea() const {
   return (_has_bits_[0] & 0x00000100u) != 0;
 }
-inline void DeviceSignal::set_has_memoryarea() {
+inline void DeviceAppSignal::set_has_memoryarea() {
   _has_bits_[0] |= 0x00000100u;
 }
-inline void DeviceSignal::clear_has_memoryarea() {
+inline void DeviceAppSignal::clear_has_memoryarea() {
   _has_bits_[0] &= ~0x00000100u;
 }
-inline void DeviceSignal::clear_memoryarea() {
+inline void DeviceAppSignal::clear_memoryarea() {
   memoryarea_ = 0;
   clear_has_memoryarea();
 }
-inline ::google::protobuf::int32 DeviceSignal::memoryarea() const {
+inline ::google::protobuf::int32 DeviceAppSignal::memoryarea() const {
   return memoryarea_;
 }
-inline void DeviceSignal::set_memoryarea(::google::protobuf::int32 value) {
+inline void DeviceAppSignal::set_memoryarea(::google::protobuf::int32 value) {
   set_has_memoryarea();
   memoryarea_ = value;
 }
 
 // optional int32 appSignalLowAdc = 12 [default = 0];
-inline bool DeviceSignal::has_appsignallowadc() const {
+inline bool DeviceAppSignal::has_appsignallowadc() const {
   return (_has_bits_[0] & 0x00000200u) != 0;
 }
-inline void DeviceSignal::set_has_appsignallowadc() {
+inline void DeviceAppSignal::set_has_appsignallowadc() {
   _has_bits_[0] |= 0x00000200u;
 }
-inline void DeviceSignal::clear_has_appsignallowadc() {
+inline void DeviceAppSignal::clear_has_appsignallowadc() {
   _has_bits_[0] &= ~0x00000200u;
 }
-inline void DeviceSignal::clear_appsignallowadc() {
+inline void DeviceAppSignal::clear_appsignallowadc() {
   appsignallowadc_ = 0;
   clear_has_appsignallowadc();
 }
-inline ::google::protobuf::int32 DeviceSignal::appsignallowadc() const {
+inline ::google::protobuf::int32 DeviceAppSignal::appsignallowadc() const {
   return appsignallowadc_;
 }
-inline void DeviceSignal::set_appsignallowadc(::google::protobuf::int32 value) {
+inline void DeviceAppSignal::set_appsignallowadc(::google::protobuf::int32 value) {
   set_has_appsignallowadc();
   appsignallowadc_ = value;
 }
 
 // optional int32 appSignalHighAdc = 13 [default = 65535];
-inline bool DeviceSignal::has_appsignalhighadc() const {
+inline bool DeviceAppSignal::has_appsignalhighadc() const {
   return (_has_bits_[0] & 0x00000400u) != 0;
 }
-inline void DeviceSignal::set_has_appsignalhighadc() {
+inline void DeviceAppSignal::set_has_appsignalhighadc() {
   _has_bits_[0] |= 0x00000400u;
 }
-inline void DeviceSignal::clear_has_appsignalhighadc() {
+inline void DeviceAppSignal::clear_has_appsignalhighadc() {
   _has_bits_[0] &= ~0x00000400u;
 }
-inline void DeviceSignal::clear_appsignalhighadc() {
+inline void DeviceAppSignal::clear_appsignalhighadc() {
   appsignalhighadc_ = 65535;
   clear_has_appsignalhighadc();
 }
-inline ::google::protobuf::int32 DeviceSignal::appsignalhighadc() const {
+inline ::google::protobuf::int32 DeviceAppSignal::appsignalhighadc() const {
   return appsignalhighadc_;
 }
-inline void DeviceSignal::set_appsignalhighadc(::google::protobuf::int32 value) {
+inline void DeviceAppSignal::set_appsignalhighadc(::google::protobuf::int32 value) {
   set_has_appsignalhighadc();
   appsignalhighadc_ = value;
 }
 
 // optional double appSignalLowEngUnits = 14 [default = 0];
-inline bool DeviceSignal::has_appsignallowengunits() const {
+inline bool DeviceAppSignal::has_appsignallowengunits() const {
   return (_has_bits_[0] & 0x00000800u) != 0;
 }
-inline void DeviceSignal::set_has_appsignallowengunits() {
+inline void DeviceAppSignal::set_has_appsignallowengunits() {
   _has_bits_[0] |= 0x00000800u;
 }
-inline void DeviceSignal::clear_has_appsignallowengunits() {
+inline void DeviceAppSignal::clear_has_appsignallowengunits() {
   _has_bits_[0] &= ~0x00000800u;
 }
-inline void DeviceSignal::clear_appsignallowengunits() {
+inline void DeviceAppSignal::clear_appsignallowengunits() {
   appsignallowengunits_ = 0;
   clear_has_appsignallowengunits();
 }
-inline double DeviceSignal::appsignallowengunits() const {
+inline double DeviceAppSignal::appsignallowengunits() const {
   return appsignallowengunits_;
 }
-inline void DeviceSignal::set_appsignallowengunits(double value) {
+inline void DeviceAppSignal::set_appsignallowengunits(double value) {
   set_has_appsignallowengunits();
   appsignallowengunits_ = value;
 }
 
 // optional double appSignalHighEngUnits = 15 [default = 100];
-inline bool DeviceSignal::has_appsignalhighengunits() const {
+inline bool DeviceAppSignal::has_appsignalhighengunits() const {
   return (_has_bits_[0] & 0x00001000u) != 0;
 }
-inline void DeviceSignal::set_has_appsignalhighengunits() {
+inline void DeviceAppSignal::set_has_appsignalhighengunits() {
   _has_bits_[0] |= 0x00001000u;
 }
-inline void DeviceSignal::clear_has_appsignalhighengunits() {
+inline void DeviceAppSignal::clear_has_appsignalhighengunits() {
   _has_bits_[0] &= ~0x00001000u;
 }
-inline void DeviceSignal::clear_appsignalhighengunits() {
+inline void DeviceAppSignal::clear_appsignalhighengunits() {
   appsignalhighengunits_ = 100;
   clear_has_appsignalhighengunits();
 }
-inline double DeviceSignal::appsignalhighengunits() const {
+inline double DeviceAppSignal::appsignalhighengunits() const {
   return appsignalhighengunits_;
 }
-inline void DeviceSignal::set_appsignalhighengunits(double value) {
+inline void DeviceAppSignal::set_appsignalhighengunits(double value) {
   set_has_appsignalhighengunits();
   appsignalhighengunits_ = value;
 }
 
 // optional int32 appSignalDataFormat = 16 [default = 2];
-inline bool DeviceSignal::has_appsignaldataformat() const {
+inline bool DeviceAppSignal::has_appsignaldataformat() const {
   return (_has_bits_[0] & 0x00002000u) != 0;
 }
-inline void DeviceSignal::set_has_appsignaldataformat() {
+inline void DeviceAppSignal::set_has_appsignaldataformat() {
   _has_bits_[0] |= 0x00002000u;
 }
-inline void DeviceSignal::clear_has_appsignaldataformat() {
+inline void DeviceAppSignal::clear_has_appsignaldataformat() {
   _has_bits_[0] &= ~0x00002000u;
 }
-inline void DeviceSignal::clear_appsignaldataformat() {
+inline void DeviceAppSignal::clear_appsignaldataformat() {
   appsignaldataformat_ = 2;
   clear_has_appsignaldataformat();
 }
-inline ::google::protobuf::int32 DeviceSignal::appsignaldataformat() const {
+inline ::google::protobuf::int32 DeviceAppSignal::appsignaldataformat() const {
   return appsignaldataformat_;
 }
-inline void DeviceSignal::set_appsignaldataformat(::google::protobuf::int32 value) {
+inline void DeviceAppSignal::set_appsignaldataformat(::google::protobuf::int32 value) {
   set_has_appsignaldataformat();
   appsignaldataformat_ = value;
 }
 
 // optional string validitySignalId = 20;
-inline bool DeviceSignal::has_validitysignalid() const {
+inline bool DeviceAppSignal::has_validitysignalid() const {
   return (_has_bits_[0] & 0x00004000u) != 0;
 }
-inline void DeviceSignal::set_has_validitysignalid() {
+inline void DeviceAppSignal::set_has_validitysignalid() {
   _has_bits_[0] |= 0x00004000u;
 }
-inline void DeviceSignal::clear_has_validitysignalid() {
+inline void DeviceAppSignal::clear_has_validitysignalid() {
   _has_bits_[0] &= ~0x00004000u;
 }
-inline void DeviceSignal::clear_validitysignalid() {
+inline void DeviceAppSignal::clear_validitysignalid() {
   if (validitysignalid_ != &::google::protobuf::internal::kEmptyString) {
     validitysignalid_->clear();
   }
   clear_has_validitysignalid();
 }
-inline const ::std::string& DeviceSignal::validitysignalid() const {
+inline const ::std::string& DeviceAppSignal::validitysignalid() const {
   return *validitysignalid_;
 }
-inline void DeviceSignal::set_validitysignalid(const ::std::string& value) {
+inline void DeviceAppSignal::set_validitysignalid(const ::std::string& value) {
   set_has_validitysignalid();
   if (validitysignalid_ == &::google::protobuf::internal::kEmptyString) {
     validitysignalid_ = new ::std::string;
   }
   validitysignalid_->assign(value);
 }
-inline void DeviceSignal::set_validitysignalid(const char* value) {
+inline void DeviceAppSignal::set_validitysignalid(const char* value) {
   set_has_validitysignalid();
   if (validitysignalid_ == &::google::protobuf::internal::kEmptyString) {
     validitysignalid_ = new ::std::string;
   }
   validitysignalid_->assign(value);
 }
-inline void DeviceSignal::set_validitysignalid(const char* value, size_t size) {
+inline void DeviceAppSignal::set_validitysignalid(const char* value, size_t size) {
   set_has_validitysignalid();
   if (validitysignalid_ == &::google::protobuf::internal::kEmptyString) {
     validitysignalid_ = new ::std::string;
   }
   validitysignalid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* DeviceSignal::mutable_validitysignalid() {
+inline ::std::string* DeviceAppSignal::mutable_validitysignalid() {
   set_has_validitysignalid();
   if (validitysignalid_ == &::google::protobuf::internal::kEmptyString) {
     validitysignalid_ = new ::std::string;
   }
   return validitysignalid_;
 }
-inline ::std::string* DeviceSignal::release_validitysignalid() {
+inline ::std::string* DeviceAppSignal::release_validitysignalid() {
   clear_has_validitysignalid();
   if (validitysignalid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
@@ -27794,7 +27794,7 @@ inline ::std::string* DeviceSignal::release_validitysignalid() {
     return temp;
   }
 }
-inline void DeviceSignal::set_allocated_validitysignalid(::std::string* validitysignalid) {
+inline void DeviceAppSignal::set_allocated_validitysignalid(::std::string* validitysignalid) {
   if (validitysignalid_ != &::google::protobuf::internal::kEmptyString) {
     delete validitysignalid_;
   }
@@ -27808,53 +27808,53 @@ inline void DeviceSignal::set_allocated_validitysignalid(::std::string* validity
 }
 
 // optional string appSignalBusTypeId = 26;
-inline bool DeviceSignal::has_appsignalbustypeid() const {
+inline bool DeviceAppSignal::has_appsignalbustypeid() const {
   return (_has_bits_[0] & 0x00008000u) != 0;
 }
-inline void DeviceSignal::set_has_appsignalbustypeid() {
+inline void DeviceAppSignal::set_has_appsignalbustypeid() {
   _has_bits_[0] |= 0x00008000u;
 }
-inline void DeviceSignal::clear_has_appsignalbustypeid() {
+inline void DeviceAppSignal::clear_has_appsignalbustypeid() {
   _has_bits_[0] &= ~0x00008000u;
 }
-inline void DeviceSignal::clear_appsignalbustypeid() {
+inline void DeviceAppSignal::clear_appsignalbustypeid() {
   if (appsignalbustypeid_ != &::google::protobuf::internal::kEmptyString) {
     appsignalbustypeid_->clear();
   }
   clear_has_appsignalbustypeid();
 }
-inline const ::std::string& DeviceSignal::appsignalbustypeid() const {
+inline const ::std::string& DeviceAppSignal::appsignalbustypeid() const {
   return *appsignalbustypeid_;
 }
-inline void DeviceSignal::set_appsignalbustypeid(const ::std::string& value) {
+inline void DeviceAppSignal::set_appsignalbustypeid(const ::std::string& value) {
   set_has_appsignalbustypeid();
   if (appsignalbustypeid_ == &::google::protobuf::internal::kEmptyString) {
     appsignalbustypeid_ = new ::std::string;
   }
   appsignalbustypeid_->assign(value);
 }
-inline void DeviceSignal::set_appsignalbustypeid(const char* value) {
+inline void DeviceAppSignal::set_appsignalbustypeid(const char* value) {
   set_has_appsignalbustypeid();
   if (appsignalbustypeid_ == &::google::protobuf::internal::kEmptyString) {
     appsignalbustypeid_ = new ::std::string;
   }
   appsignalbustypeid_->assign(value);
 }
-inline void DeviceSignal::set_appsignalbustypeid(const char* value, size_t size) {
+inline void DeviceAppSignal::set_appsignalbustypeid(const char* value, size_t size) {
   set_has_appsignalbustypeid();
   if (appsignalbustypeid_ == &::google::protobuf::internal::kEmptyString) {
     appsignalbustypeid_ = new ::std::string;
   }
   appsignalbustypeid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* DeviceSignal::mutable_appsignalbustypeid() {
+inline ::std::string* DeviceAppSignal::mutable_appsignalbustypeid() {
   set_has_appsignalbustypeid();
   if (appsignalbustypeid_ == &::google::protobuf::internal::kEmptyString) {
     appsignalbustypeid_ = new ::std::string;
   }
   return appsignalbustypeid_;
 }
-inline ::std::string* DeviceSignal::release_appsignalbustypeid() {
+inline ::std::string* DeviceAppSignal::release_appsignalbustypeid() {
   clear_has_appsignalbustypeid();
   if (appsignalbustypeid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
@@ -27864,7 +27864,7 @@ inline ::std::string* DeviceSignal::release_appsignalbustypeid() {
     return temp;
   }
 }
-inline void DeviceSignal::set_allocated_appsignalbustypeid(::std::string* appsignalbustypeid) {
+inline void DeviceAppSignal::set_allocated_appsignalbustypeid(::std::string* appsignalbustypeid) {
   if (appsignalbustypeid_ != &::google::protobuf::internal::kEmptyString) {
     delete appsignalbustypeid_;
   }
@@ -27878,53 +27878,53 @@ inline void DeviceSignal::set_allocated_appsignalbustypeid(::std::string* appsig
 }
 
 // optional string signalSpecPropsStruct = 40;
-inline bool DeviceSignal::has_signalspecpropsstruct() const {
+inline bool DeviceAppSignal::has_signalspecpropsstruct() const {
   return (_has_bits_[0] & 0x00010000u) != 0;
 }
-inline void DeviceSignal::set_has_signalspecpropsstruct() {
+inline void DeviceAppSignal::set_has_signalspecpropsstruct() {
   _has_bits_[0] |= 0x00010000u;
 }
-inline void DeviceSignal::clear_has_signalspecpropsstruct() {
+inline void DeviceAppSignal::clear_has_signalspecpropsstruct() {
   _has_bits_[0] &= ~0x00010000u;
 }
-inline void DeviceSignal::clear_signalspecpropsstruct() {
+inline void DeviceAppSignal::clear_signalspecpropsstruct() {
   if (signalspecpropsstruct_ != &::google::protobuf::internal::kEmptyString) {
     signalspecpropsstruct_->clear();
   }
   clear_has_signalspecpropsstruct();
 }
-inline const ::std::string& DeviceSignal::signalspecpropsstruct() const {
+inline const ::std::string& DeviceAppSignal::signalspecpropsstruct() const {
   return *signalspecpropsstruct_;
 }
-inline void DeviceSignal::set_signalspecpropsstruct(const ::std::string& value) {
+inline void DeviceAppSignal::set_signalspecpropsstruct(const ::std::string& value) {
   set_has_signalspecpropsstruct();
   if (signalspecpropsstruct_ == &::google::protobuf::internal::kEmptyString) {
     signalspecpropsstruct_ = new ::std::string;
   }
   signalspecpropsstruct_->assign(value);
 }
-inline void DeviceSignal::set_signalspecpropsstruct(const char* value) {
+inline void DeviceAppSignal::set_signalspecpropsstruct(const char* value) {
   set_has_signalspecpropsstruct();
   if (signalspecpropsstruct_ == &::google::protobuf::internal::kEmptyString) {
     signalspecpropsstruct_ = new ::std::string;
   }
   signalspecpropsstruct_->assign(value);
 }
-inline void DeviceSignal::set_signalspecpropsstruct(const char* value, size_t size) {
+inline void DeviceAppSignal::set_signalspecpropsstruct(const char* value, size_t size) {
   set_has_signalspecpropsstruct();
   if (signalspecpropsstruct_ == &::google::protobuf::internal::kEmptyString) {
     signalspecpropsstruct_ = new ::std::string;
   }
   signalspecpropsstruct_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* DeviceSignal::mutable_signalspecpropsstruct() {
+inline ::std::string* DeviceAppSignal::mutable_signalspecpropsstruct() {
   set_has_signalspecpropsstruct();
   if (signalspecpropsstruct_ == &::google::protobuf::internal::kEmptyString) {
     signalspecpropsstruct_ = new ::std::string;
   }
   return signalspecpropsstruct_;
 }
-inline ::std::string* DeviceSignal::release_signalspecpropsstruct() {
+inline ::std::string* DeviceAppSignal::release_signalspecpropsstruct() {
   clear_has_signalspecpropsstruct();
   if (signalspecpropsstruct_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
@@ -27934,7 +27934,7 @@ inline ::std::string* DeviceSignal::release_signalspecpropsstruct() {
     return temp;
   }
 }
-inline void DeviceSignal::set_allocated_signalspecpropsstruct(::std::string* signalspecpropsstruct) {
+inline void DeviceAppSignal::set_allocated_signalspecpropsstruct(::std::string* signalspecpropsstruct) {
   if (signalspecpropsstruct_ != &::google::protobuf::internal::kEmptyString) {
     delete signalspecpropsstruct_;
   }
@@ -27948,23 +27948,23 @@ inline void DeviceSignal::set_allocated_signalspecpropsstruct(::std::string* sig
 }
 
 // optional bool signalSpecPropsStructWasFixed = 41 [default = false];
-inline bool DeviceSignal::has_signalspecpropsstructwasfixed() const {
+inline bool DeviceAppSignal::has_signalspecpropsstructwasfixed() const {
   return (_has_bits_[0] & 0x00020000u) != 0;
 }
-inline void DeviceSignal::set_has_signalspecpropsstructwasfixed() {
+inline void DeviceAppSignal::set_has_signalspecpropsstructwasfixed() {
   _has_bits_[0] |= 0x00020000u;
 }
-inline void DeviceSignal::clear_has_signalspecpropsstructwasfixed() {
+inline void DeviceAppSignal::clear_has_signalspecpropsstructwasfixed() {
   _has_bits_[0] &= ~0x00020000u;
 }
-inline void DeviceSignal::clear_signalspecpropsstructwasfixed() {
+inline void DeviceAppSignal::clear_signalspecpropsstructwasfixed() {
   signalspecpropsstructwasfixed_ = false;
   clear_has_signalspecpropsstructwasfixed();
 }
-inline bool DeviceSignal::signalspecpropsstructwasfixed() const {
+inline bool DeviceAppSignal::signalspecpropsstructwasfixed() const {
   return signalspecpropsstructwasfixed_;
 }
-inline void DeviceSignal::set_signalspecpropsstructwasfixed(bool value) {
+inline void DeviceAppSignal::set_signalspecpropsstructwasfixed(bool value) {
   set_has_signalspecpropsstructwasfixed();
   signalspecpropsstructwasfixed_ = value;
 }

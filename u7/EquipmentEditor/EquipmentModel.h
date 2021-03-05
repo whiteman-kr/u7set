@@ -37,7 +37,7 @@ public:
 	virtual bool canFetchMore(const QModelIndex& parent) const override;
 	virtual void fetchMore(const QModelIndex& parent) override;
 
-	void sortDeviceObject(Hardware::DeviceObject* object, int column, Qt::SortOrder order);
+	void sortDeviceObject(std::shared_ptr<Hardware::DeviceObject>& object, int column, Qt::SortOrder order);
 	virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
 	// --
@@ -57,10 +57,8 @@ public:
 	void refreshDeviceObject(QModelIndexList& rowList);
 	void updateDeviceObject(QModelIndexList& rowList);
 
-	Hardware::DeviceObject* deviceObject(QModelIndex& index);
-	const Hardware::DeviceObject* deviceObject(const QModelIndex& index) const;
-
-	std::shared_ptr<Hardware::DeviceObject> deviceObjectSharedPtr(QModelIndex& index);
+	std::shared_ptr<Hardware::DeviceObject> deviceObject(QModelIndex& index);
+	std::shared_ptr<const Hardware::DeviceObject> deviceObject(const QModelIndex& index) const;
 
 	QString usernameById(int userId) const;
 
@@ -90,6 +88,7 @@ public:
 	enum Columns
 	{
 		ObjectNameColumn,
+		ObjectTypeColumn,
 		ObjectEquipmentIdColumn,
 		ObjectPlaceColumn,
 		ObjectStateColumn,
@@ -104,13 +103,13 @@ public:
 	//
 private:
 	DbController* m_dbController;
-	QWidget* m_parentWidget;
+	QWidget* m_parentWidget;			// Access to DbController requires widget for showing progress bar
 
 	std::shared_ptr<Hardware::DeviceObject> m_root;
 	std::shared_ptr<Hardware::DeviceObject> m_configuration;
 	std::shared_ptr<Hardware::DeviceObject> m_preset;
 
-	int m_sortColumn = ObjectPlaceColumn ;
+	int m_sortColumn = ObjectPlaceColumn;
 	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 
 	std::map<int, QString> m_users;

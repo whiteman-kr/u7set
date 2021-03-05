@@ -57,7 +57,7 @@ namespace Builder
 
 		*ok = true;
 
-		Hardware::DeviceObject* object = m_equipment->deviceObject(strId);
+		Hardware::DeviceObject* object = m_equipment->deviceObject(strId).get();
 		if (object == nullptr)
 		{
 			QString errorStr = tr("Object %1 is not found")

@@ -20,7 +20,7 @@ public slots:
 	void updateServiceState();
 	void updateClientsInfo();
 	void updateBuildInfo();
-	void updateServiceSettings();
+	void updateServiceParameters();
 
 	void clearServiceData();
 
@@ -31,6 +31,7 @@ protected:
 private:
 	QStandardItemModel* m_buildTabModel = nullptr;
 	QStandardItemModel* m_settingsTabModel = nullptr;
+	QStandardItemModel* m_parametersTabModel = nullptr;
 	TcpConfigServiceClient* m_tcpClientSocket = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
 };
