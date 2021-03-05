@@ -1766,11 +1766,6 @@ void DbControllerSignalTests::dbcTest_setSignalWorkcopy()
 
 void DbControllerSignalTests::dbcTest_getSignalsIDs()
 {
-	// Testing of stored procedure:
-	//
-	//	get_signals_ids (user_id INTEGER, with_deleted BOOLEAN) RETURNS SETOF INTEGER
-	//
-
 	OPEN_DATABASE();
 
 	// Request ALL exists signals IDs for now
