@@ -570,7 +570,7 @@ namespace Metrology
 
 		// create CSV-data and write to file
 		//
-		QByteArray data = csvDataFromConnections();
+		QByteArray data = csvDataFromConnections(true);
 		file->swapData(data);
 
 		// save file to database
@@ -1096,7 +1096,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QByteArray ConnectionBase::csvDataFromConnections()
+	QByteArray ConnectionBase::csvDataFromConnections(bool full)
 	{
 		QString dataStr;
 
@@ -1116,10 +1116,15 @@ namespace Metrology
 			dataStr.append(";");
 			dataStr.append(connection.appSignalID(Metrology::ConnectionIoType::Destination));
 			dataStr.append(";");
-			dataStr.append(QString::number(connection.action().toInt()));
-			dataStr.append(";");
-			dataStr.append(QString::number(connection.restoreID()));
-			dataStr.append(";");
+
+			if (full == true)
+			{
+				dataStr.append(QString::number(connection.action().toInt()));
+				dataStr.append(";");
+				dataStr.append(QString::number(connection.restoreID()));
+				dataStr.append(";");
+			}
+
 			dataStr.append("\n");
 		}
 
@@ -1184,7 +1189,7 @@ namespace Metrology
 			return false;
 		}
 
-		QByteArray data = csvDataFromConnections();
+		QByteArray data = csvDataFromConnections(false);
 		if (data.isEmpty() == true)
 		{
 			return false;

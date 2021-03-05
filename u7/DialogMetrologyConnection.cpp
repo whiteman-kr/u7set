@@ -762,7 +762,7 @@ void DialogMetrologyConnection::createInterface()
 
 
 	m_findTextEdit = new QLineEdit(m_findText, toolBar);
-	m_findTextEdit->setPlaceholderText(tr("#SYSTEM_RACK_CH*_MD*_IN??"));
+	m_findTextEdit->setPlaceholderText(tr("Example: #SYSTEM_RACK_CH*_MD*_IN??"));
 	m_findTextEdit->setFixedWidth(static_cast<int>(screen.width() * 0.25));
 	//m_findTextEdit->setClearButtonEnabled(true);
 
@@ -1271,11 +1271,14 @@ void DialogMetrologyConnection::connectionChanged()
 			}
 			else
 			{
-				int connectionIndex = m_connectionBase.findConnectionIndex(m_dialogConnectionItem->parentConnection());
-				if (connectionIndex >= 0 && connectionIndex < m_connectionBase.count())
+				if ((connection == m_dialogConnectionItem->parentConnection()) == false)
 				{
-					connection.setAction(VcsItemAction::VcsItemActionType::Modified);
-					m_connectionBase.setConnection(connectionIndex, connection);
+					int connectionIndex = m_connectionBase.findConnectionIndex(m_dialogConnectionItem->parentConnection());
+					if (connectionIndex >= 0 && connectionIndex < m_connectionBase.count())
+					{
+						connection.setAction(VcsItemAction::VcsItemActionType::Modified);
+						m_connectionBase.setConnection(connectionIndex, connection);
+					}
 				}
 			}
 

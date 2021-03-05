@@ -218,7 +218,7 @@ namespace Metrology
 
 		// CSV-data
 		//
-		QByteArray csvDataFromConnections();
+		QByteArray csvDataFromConnections(bool full);
 		QVector<Connection> connectionsFromCsvData(const QByteArray& data) const;
 
 		bool exportConnectionsToFile(const QString& fileName);
