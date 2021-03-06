@@ -1,5 +1,5 @@
-#ifndef STATISTICPANEL_H
-#define STATISTICPANEL_H
+#ifndef PANELSTATISTICS_H
+#define PANELSTATISTICS_H
 
 #include <QDebug>
 #include <QDockWidget>
@@ -22,24 +22,24 @@
 
 const char* const			StatisticsColumn[] =
 {
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "AppSignalID"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "CustomSignalID"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "EquipmentID"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Caption"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Comparator value"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Comparator No"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Comparator Output ID"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Rack"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Chassis"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Module"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Place"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Electric range"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Electric sensor"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Engineering range"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Signal type"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Connection"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Measure count"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "State"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "AppSignalID"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "CustomSignalID"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "EquipmentID"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Caption"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Comparator value"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Comparator No"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Comparator Output ID"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Rack"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Chassis"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Module"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Place"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Electric range"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Electric sensor"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Engineering range"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Signal type"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Connection"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Measure count"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "State"),
 
 };
 
@@ -121,14 +121,14 @@ private:
 
 // ==============================================================================================
 
-class StatisticsPanel : public QDockWidget
+class PanelStatistics : public QDockWidget
 {
 	Q_OBJECT
 
 public:
 
-	explicit StatisticsPanel(QWidget* parent = nullptr);
-	virtual ~StatisticsPanel();
+	explicit PanelStatistics(QWidget* parent = nullptr);
+	virtual ~PanelStatistics();
 
 public:
 
@@ -249,4 +249,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // STATISTICPANEL_H
+#endif // PANELSTATISTICS_H

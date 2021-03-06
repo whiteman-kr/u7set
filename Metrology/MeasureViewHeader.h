@@ -19,89 +19,92 @@
 
 // ==============================================================================================
 
-class MeasureViewColumn
+namespace Measure
 {
-public:
+	class HeaderColumn
+	{
+	public:
 
-	MeasureViewColumn();
-	MeasureViewColumn(const MeasureViewColumn& from);
-	MeasureViewColumn(const QString& uniqueTitle, const QString& title, int width, bool visible, int alignment, bool duplicate);
-	virtual ~MeasureViewColumn();
+		HeaderColumn();
+		HeaderColumn(const HeaderColumn& from);
+		HeaderColumn(const QString& uniqueTitle, const QString& title, int width, bool visible, int alignment, bool duplicate);
+		virtual ~HeaderColumn();
 
-public:
+	public:
 
-	int					index() const { return m_index; }
-	void				setIndex(int index) { m_index = index; }
+		int					index() const { return m_index; }
+		void				setIndex(int index) { m_index = index; }
 
-	QString				uniqueTitle() const { return m_uniqueTitle; }
-	void				setUniqueTitle(const QString& title) { m_uniqueTitle = title; }
+		QString				uniqueTitle() const { return m_uniqueTitle; }
+		void				setUniqueTitle(const QString& title) { m_uniqueTitle = title; }
 
-	QString				title() const;
-	void				setTitle(const QString& title) { m_title = title; }
+		QString				title() const;
+		void				setTitle(const QString& title) { m_title = title; }
 
-	int					width() const { return m_width; }
-	void				setWidth(int width) { m_width = width; }
+		int					width() const { return m_width; }
+		void				setWidth(int width) { m_width = width; }
 
-	bool				enableVisible() const { return m_enableVisible; }
-	void				setVisible(bool enable) { m_enableVisible = enable; }
+		bool				enableVisible() const { return m_enableVisible; }
+		void				setVisible(bool enable) { m_enableVisible = enable; }
 
-	int					alignment() const { return m_alignment; }
+		int					alignment() const { return m_alignment; }
 
-	bool				enableDuplicate() const { return m_enableDuplicate; }
+		bool				enableDuplicate() const { return m_enableDuplicate; }
 
-	MeasureViewColumn&	operator=(const MeasureViewColumn& from);
+		HeaderColumn&		operator=(const HeaderColumn& from);
 
-private:
+	private:
 
-	int					m_index = -1;
+		int					m_index = -1;
 
-	QString				m_uniqueTitle;
-	QString				m_title;
-	int					m_width = 100;
-	bool				m_enableVisible = MVC_CMN_SHOW;
+		QString				m_uniqueTitle;
+		QString				m_title;
+		int					m_width = 100;
+		bool				m_enableVisible = MVC_CMN_SHOW;
 
-	int					m_alignment = Qt::AlignLeft;
+		int					m_alignment = Qt::AlignLeft;
 
-	bool				m_enableDuplicate = MVC_CMN_ENABLE_DUPLICATE;
-};
+		bool				m_enableDuplicate = MVC_CMN_ENABLE_DUPLICATE;
+	};
 
-// ==============================================================================================
+	// ==============================================================================================
 
-const int				MEASURE_VIEW_COLUMN_COUNT	= 64;
+	const int				MaxColumnCount	= 64;
 
-// ==============================================================================================
+	// ==============================================================================================
 
-class MeasureViewHeader : public QObject
-{
-	Q_OBJECT
+	class ViewHeader : public QObject
+	{
+		Q_OBJECT
 
-public:
+	public:
 
-	explicit MeasureViewHeader(QObject* parent = nullptr);
-	virtual ~MeasureViewHeader();
+		explicit ViewHeader(QObject* parent = nullptr);
+		virtual ~ViewHeader();
 
-public:
+	public:
 
-	void				setMeasureType(Measure::Type measureType);
+		void				setMeasureType(Measure::Type measureType);
 
-	void				init(Measure::Type measureType);
+		void				init(Measure::Type measureType);
 
-	int					count() const;
-	MeasureViewColumn*	column(int index) const;
+		int					count() const;
+		HeaderColumn*		column(int index) const;
 
-	void				updateColumnState();
+		void				updateColumnState();
 
-	void				setColumnTitle(int column, const QString& title);
-	void				setColumnVisible(int column, bool visible);
+		void				setColumnTitle(int column, const QString& title);
+		void				setColumnVisible(int column, bool visible);
 
-private:
+	private:
 
-	static				MeasureViewColumn m_column[Measure::TypeCount][MEASURE_VIEW_COLUMN_COUNT];
+		static				HeaderColumn m_column[Measure::TypeCount][MaxColumnCount];
 
-	Measure::Type		m_measureType = Measure::Type::NoMeasureType;
+		Measure::Type		m_measureType = Measure::Type::NoMeasureType;
 
-	int					m_columnCount[Measure::TypeCount];
-};
+		int					m_columnCount[Measure::TypeCount];
+	};
+}
 
 // ==============================================================================================
 // Measure::Type::Linearity

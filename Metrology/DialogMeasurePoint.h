@@ -1,5 +1,5 @@
-#ifndef OPTIONSPOINTSDIALOG_H
-#define OPTIONSPOINTSDIALOG_H
+#ifndef DIALOGOPTIONSPOINT_H
+#define DIALOGOPTIONSPOINT_H
 
 #include <QDialog>
 #include <QMenu>
@@ -16,14 +16,14 @@
 
 // ==============================================================================================
 
-class MeasurePointDialog : public QDialog
+class DialogMeasurePoint : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit MeasurePointDialog(const LinearityOption& linearity, QWidget* parent = nullptr);
-	virtual ~MeasurePointDialog();
+	explicit DialogMeasurePoint(const LinearityOption& linearity, QWidget* parent = nullptr);
+	virtual ~DialogMeasurePoint();
 
 public:
 
@@ -95,4 +95,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // OPTIONSPOINTSDIALOG_H
+#endif // DIALOGOPTIONSPOINT_H

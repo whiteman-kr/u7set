@@ -1,5 +1,5 @@
-#ifndef RACKLISTDIALOG_H
-#define RACKLISTDIALOG_H
+#ifndef DIALOGRACKLIST_H
+#define DIALOGRACKLIST_H
 
 #include <QDebug>
 #include <QScreen>
@@ -18,10 +18,10 @@
 
 const char* const			RackListColumn[] =
 {
-							QT_TRANSLATE_NOOP("RackListDialog.h", "Caption"),
-							QT_TRANSLATE_NOOP("RackListDialog.h", "EquipmentID"),
-							QT_TRANSLATE_NOOP("RackListDialog.h", "Group"),
-							QT_TRANSLATE_NOOP("RackListDialog.h", "Channel"),
+							QT_TRANSLATE_NOOP("DialogRackList", "Caption"),
+							QT_TRANSLATE_NOOP("DialogRackList", "EquipmentID"),
+							QT_TRANSLATE_NOOP("DialogRackList", "Group"),
+							QT_TRANSLATE_NOOP("DialogRackList", "Channel"),
 };
 
 const int					RACK_LIST_COLUMN_COUNT			= sizeof(RackListColumn)/sizeof(RackListColumn[0]);
@@ -77,14 +77,14 @@ private:
 
 // ==============================================================================================
 
-class RackListDialog : public QDialog
+class DialogRackList : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit RackListDialog(QWidget* parent = nullptr);
-	virtual ~RackListDialog();
+	explicit DialogRackList(QWidget* parent = nullptr);
+	virtual ~DialogRackList();
 
 public:
 
@@ -154,4 +154,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // RACKLISTDIALOG_H
+#endif // DIALOGRACKLISTDIALOG_H

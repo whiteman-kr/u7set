@@ -12,105 +12,108 @@
 #include "MeasureViewHeader.h"
 #include "MeasureBase.h"
 
-// ==============================================================================================
-
-class MeasureTable : public QAbstractTableModel
+namespace Measure
 {
-	Q_OBJECT
+	// ==============================================================================================
 
-public:
+	class Table : public QAbstractTableModel
+	{
+		Q_OBJECT
 
-	explicit MeasureTable(QObject* parent = nullptr);
-	virtual ~MeasureTable();
+	public:
 
-public:
+		explicit Table(QObject* parent = nullptr);
+		virtual ~Table();
 
-	int measureType() const { return m_measureType; }
-	void setMeasureType(int measureType) { m_measureType = measureType; }
+	public:
 
-	int count() const { return m_measureCount; }
+		int measureType() const { return m_measureType; }
+		void setMeasureType(int measureType) { m_measureType = measureType; }
 
-	MeasureViewHeader& header() { return m_header; }
-	bool columnIsVisible(int column);
+		int count() const { return m_measureCount; }
 
-	QColor backgroundColor(int row, int column, Measure::Item* pMeasurement) const;
-	QString text(int row, int column, Measure::Item* pMeasurement) const;
+		ViewHeader& header() { return m_header; }
+		bool columnIsVisible(int column);
 
-	bool append(Measure::Item* pMeasurement);
-	Measure::Item* at(int index) const;
-	void remove(const QVector<int>& removeIndexList);
+		QColor backgroundColor(int row, int column, Measure::Item* pMeasurement) const;
+		QString text(int row, int column, Measure::Item* pMeasurement) const;
 
-	void set(const QVector<Measure::Item*>& list_add);
-	void clear();
+		bool append(Measure::Item* pMeasurement);
+		Measure::Item* at(int index) const;
+		void remove(const QVector<int>& removeIndexList);
 
-private:
+		void set(const QVector<Measure::Item*>& list_add);
+		void clear();
 
-	int m_measureType = Measure::Type::NoMeasureType;
+	private:
 
-	MeasureViewHeader m_header;
+		int m_measureType = Measure::Type::NoMeasureType;
 
-	mutable QMutex m_measureMutex;
-	QVector<Measure::Item*> m_measureList;
-	int m_measureCount = 0;
+		ViewHeader m_header;
 
-	int columnCount(const QModelIndex &parent) const;
-	int rowCount(const QModelIndex &parent=QModelIndex()) const;
+		mutable QMutex m_measureMutex;
+		QVector<Measure::Item*> m_measureList;
+		int m_measureCount = 0;
 
-	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant data(const QModelIndex &index, int role) const;
+		int columnCount(const QModelIndex &parent) const;
+		int rowCount(const QModelIndex &parent=QModelIndex()) const;
 
-	QString textLinearity(int row, int column, Measure::Item* pMeasurement) const;
-	QString textComparator(int row, int column, Measure::Item* pMeasurement) const;
-};
+		QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
+		QVariant data(const QModelIndex &index, int role) const;
 
-// ==============================================================================================
+		QString textLinearity(int row, int column, Measure::Item* pMeasurement) const;
+		QString textComparator(int row, int column, Measure::Item* pMeasurement) const;
+	};
 
-class MeasureView : public QTableView
-{
-	Q_OBJECT
+	// ==============================================================================================
 
-public:
+	class View : public QTableView
+	{
+		Q_OBJECT
 
-	explicit MeasureView(Measure::Type measureType, QWidget* parent = nullptr);
-	virtual ~MeasureView();
+	public:
 
-public:
+		explicit View(Measure::Type measureType, QWidget* parent = nullptr);
+		virtual ~View();
 
-	Measure::Type measureType() const { return m_measureType; }
-	MeasureTable& table() { return m_table; }
+	public:
 
-	void updateColumn();
+		Measure::Type measureType() const { return m_measureType; }
+		Table& table() { return m_table; }
 
-private:
+		void updateColumn();
 
-	Measure::Type m_measureType = Measure::Type::NoMeasureType;
-	MeasureTable m_table;
+	private:
 
-	QMenu* m_headerContextMenu = nullptr;
-	QVector<QAction*> m_actionList;
+		Measure::Type m_measureType = Measure::Type::NoMeasureType;
+		Table m_table;
 
-	void createContextMenu();
+		QMenu* m_headerContextMenu = nullptr;
+		QVector<QAction*> m_actionList;
 
-signals:
+		void createContextMenu();
 
-	void removeFromBase(int measureType, const QVector<int>& keyList);
+	signals:
 
-public slots:
+		void removeFromBase(int measureType, const QVector<int>& keyList);
 
-	void onHeaderContextMenu(QPoint);
-	void onHeaderContextAction(QAction* action);
+	public slots:
 
-	void onColumnResized(int index, int, int width);
+		void onHeaderContextMenu(QPoint);
+		void onHeaderContextAction(QAction* action);
 
-	void loadMeasurements(const Measure::Base& measureBase);
+		void onColumnResized(int index, int, int width);
 
-	void appendMeasure(Measure::Item* pMeasurement);
-	void removeMeasure();
+		void loadMeasurements(const Measure::Base& measureBase);
 
-	void copy();
+		void appendMeasure(Measure::Item* pMeasurement);
+		void removeMeasure();
 
-	void showGraph(int graphType);
-};
+		void copy();
+
+		void showGraph(int graphType);
+	};
+}
 
 // ==============================================================================================
 

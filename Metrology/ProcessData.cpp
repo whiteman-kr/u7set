@@ -525,7 +525,7 @@ void ExportData::createProgressDialog(QTableView* pView)
 
 	m_pProgressDialog->setWindowFlags(Qt::Drawer);
 	m_pProgressDialog->setFixedSize(300, 70);
-	m_pProgressDialog->setWindowTitle(qApp->translate("ExportData.h", EXPORT_WINDOW_TITLE));
+	m_pProgressDialog->setWindowTitle(qApp->translate("ExportData", EXPORT_WINDOW_TITLE));
 	m_pProgressDialog->setWindowIcon(QIcon(":/icons/Export.png"));
 
 		m_progress = new QProgressBar;
@@ -580,7 +580,7 @@ void ExportData::exec()
 	if (m_pView->model()->rowCount() == 0)
 	{
 		QMessageBox::information(m_pProgressDialog,
-								 qApp->translate("ExportData.h", EXPORT_WINDOW_TITLE),
+								 qApp->translate("ExportData", EXPORT_WINDOW_TITLE),
 								 tr("Data is absent!"));
 		return;
 	}
@@ -589,7 +589,7 @@ void ExportData::exec()
 	QString filter = tr("CSV files (*.csv)");
 
 	QString fileName = QFileDialog::getSaveFileName(m_pProgressDialog,
-													qApp->translate("ExportData.h", EXPORT_WINDOW_TITLE),
+													qApp->translate("ExportData", EXPORT_WINDOW_TITLE),
 													m_fileName,
 													filter);
 	if (fileName.isEmpty() == true)
@@ -785,7 +785,7 @@ void ExportData::exportCancel()
 void ExportData::exportComplited()
 {
 	QMessageBox::information(m_pProgressDialog,
-							 qApp->translate("ExportData.h", EXPORT_WINDOW_TITLE),
+							 qApp->translate("ExportData", EXPORT_WINDOW_TITLE),
 							 tr("Export is complited!"));
 }
 

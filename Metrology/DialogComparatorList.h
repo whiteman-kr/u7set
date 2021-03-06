@@ -1,5 +1,5 @@
-#ifndef COMPARATORLISTDIALOG_H
-#define COMPARATORLISTDIALOG_H
+#ifndef DIALOGCOMPARATORLIST_H
+#define DIALOGCOMPARATORLIST_H
 
 #include <QDebug>
 #include <QScreen>
@@ -20,15 +20,15 @@
 
 const char* const			ComparatorListColumn[] =
 {
-							QT_TRANSLATE_NOOP("ComparatorList.h", "AppSignalID (Input/Internal)"),
-							QT_TRANSLATE_NOOP("ComparatorList.h", "Set point"),
-							QT_TRANSLATE_NOOP("ComparatorList.h", "Hysteresis"),
-							QT_TRANSLATE_NOOP("ComparatorList.h", "Signal type"),
-							QT_TRANSLATE_NOOP("ComparatorList.h", "Electric range"),
-							QT_TRANSLATE_NOOP("ComparatorList.h", "Electric sensor"),
-							QT_TRANSLATE_NOOP("ComparatorList.h", "Engineering range"),
-							QT_TRANSLATE_NOOP("ComparatorList.h", "AppSignalID (Discrete)"),
-							QT_TRANSLATE_NOOP("ComparatorList.h", "Schema"),
+							QT_TRANSLATE_NOOP("DialogComparatorList", "AppSignalID (Input/Internal)"),
+							QT_TRANSLATE_NOOP("DialogComparatorList", "Set point"),
+							QT_TRANSLATE_NOOP("DialogComparatorList", "Hysteresis"),
+							QT_TRANSLATE_NOOP("DialogComparatorList", "Signal type"),
+							QT_TRANSLATE_NOOP("DialogComparatorList", "Electric range"),
+							QT_TRANSLATE_NOOP("DialogComparatorList", "Electric sensor"),
+							QT_TRANSLATE_NOOP("DialogComparatorList", "Engineering range"),
+							QT_TRANSLATE_NOOP("DialogComparatorList", "AppSignalID (Discrete)"),
+							QT_TRANSLATE_NOOP("DialogComparatorList", "Schema"),
 };
 
 const int					COMPARATOR_LIST_COLUMN_COUNT			= sizeof(ComparatorListColumn)/sizeof(ComparatorListColumn[0]);
@@ -91,14 +91,14 @@ private:
 
 // ==============================================================================================
 
-class ComparatorListDialog : public QDialog
+class DialogComparatorList : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit ComparatorListDialog(QWidget* parent = nullptr);
-	virtual ~ComparatorListDialog();
+	explicit DialogComparatorList(QWidget* parent = nullptr);
+	virtual ~DialogComparatorList();
 
 private:
 
@@ -166,4 +166,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // COMPARATORLISTDIALOG_H
+#endif // DIALOGCOMPARATORLIST_H

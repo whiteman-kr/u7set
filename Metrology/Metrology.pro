@@ -53,29 +53,37 @@ SOURCES += \
     ../lib/MetrologyConnection.cpp \
     ../lib/SignalSetProvider.cpp \
     ../lib/ScriptDeviceObject.cpp \
+    DialogCalculator.cpp \
+    DialogComparatorList.cpp \
+    DialogMeasurePoint.cpp \
+    DialogMetrologyConnectionList.cpp \
+    DialogObjectProperties.cpp \
+    DialogOptions.cpp \
+    DialogOptionsMvh.cpp \
+    DialogRackList.cpp \
+    DialogSignalList.cpp \
+    DialogTuningSignalList.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
     MeasurePointBase.cpp \
-    MeasurePointDialog.cpp \
-    MetrologyConnectionList.cpp \
-    OptionsDialog.cpp \
     Options.cpp \
+    PanelComparatorInfo.cpp \
+    PanelFindMeasure.cpp \
+    PanelSignalInfo.cpp \
+    PanelStatistics.cpp \
     ProcessData.cpp \
     SelectSignalWidget.cpp \
     StatisticsBase.cpp \
-    StatisticsPanel.cpp \
     main.cpp \
     MeasureThread.cpp \
     CalibratorManager.cpp \
     MeasureViewHeader.cpp \
     MeasureView.cpp \
-    OptionsMvhDialog.cpp \
     Delegate.cpp \
     FolderPropertyManager.cpp \
     Database.cpp \
     Conversion.cpp \
-    Calculator.cpp \
     ../lib/Crc.cpp \
     ../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
@@ -88,12 +96,8 @@ SOURCES += \
     ../lib/Tcp.cpp \
     SignalBase.cpp \
     ../lib/AppSignal.cpp \
-    SignalList.cpp \
-    FindMeasurePanel.cpp \
-    SignalInfoPanel.cpp \
     TuningSocket.cpp \
     TuningSignalBase.cpp \
-    TuningSignalList.cpp \
     ConfigSocket.cpp \
     ../lib/CfgServerLoader.cpp \
     ../lib/BuildInfo.cpp \
@@ -104,8 +108,6 @@ SOURCES += \
     ../Builder/IssueLogger.cpp \
     ../lib/OutputLog.cpp \
     ../lib/MetrologySignal.cpp \
-    RackList.cpp \
-    ObjectProperties.cpp \
     RackBase.cpp \
     MeasureBase.cpp \
     ../lib/CircularLogger.cpp \
@@ -117,9 +119,7 @@ SOURCES += \
     ../lib/Ui/DialogAbout.cpp \
 	../lib/UnitsConvertor.cpp \
     ../lib/UnitsConvertorTable.cpp \
-    ../lib/ComparatorSet.cpp \
-    ComparatorList.cpp \
-	ComparatorInfoPanel.cpp
+    ../lib/ComparatorSet.cpp
 
 #../lib/ExcelHelper.cpp
 
@@ -133,24 +133,33 @@ HEADERS  += \
     ../lib/MetrologyConnection.h \
     ../lib/SignalSetProvider.h \
     ../lib/ScriptDeviceObject.h \
+    DialogCalculator.h \
+    DialogComparatorList.h \
+    DialogMeasurePoint.h \
+    DialogMetrologyConnectionList.h \
+    DialogObjectProperties.h \
+    DialogOptions.h \
+    DialogOptionsMvh.h \
+    DialogRackList.h \
+    DialogSignalList.h \
+    DialogTuningSignalList.h \
     MainWindow.h \
     Calibrator.h \
     CalibratorBase.h \
     MeasurePointBase.h \
-    MeasurePointDialog.h \
-    MetrologyConnectionList.h \
-    OptionsDialog.h \
     Options.h \
     MeasureThread.h \
     CalibratorManager.h \
     MeasureViewHeader.h \
     MeasureView.h \
-    OptionsMvhDialog.h \
     Delegate.h \
     FolderPropertyManager.h \
     Database.h \
     Conversion.h \
-    Calculator.h \
+    PanelComparatorInfo.h \
+    PanelFindMeasure.h \
+    PanelSignalInfo.h \
+    PanelStatistics.h \
     ProcessData.h \
     SelectSignalWidget.h \
     Stable.h \
@@ -172,14 +181,9 @@ HEADERS  += \
     ../lib/Tcp.h \
     SignalBase.h \
     ../lib/AppSignal.h \
-    SignalList.h \
-    FindMeasurePanel.h \
-    SignalInfoPanel.h \
     StatisticsBase.h \
-    StatisticsPanel.h \
     TuningSocket.h \
     TuningSignalBase.h \
-    TuningSignalList.h \
     ConfigSocket.h \
     ../lib/CfgServerLoader.h \
     ../lib/BuildInfo.h \
@@ -190,8 +194,6 @@ HEADERS  += \
     ../Builder/IssueLogger.h \
     ../lib/OutputLog.h \
     ../lib/MetrologySignal.h \
-    RackList.h \
-    ObjectProperties.h \
     RackBase.h \
     MeasureBase.h \
     ../lib/CircularLogger.h \
@@ -203,9 +205,7 @@ HEADERS  += \
 	../lib/UnitsConvertor.h \
     ../lib/UnitsConvertorTable.h \
 #../lib/ExcelHelper.h
-    ../lib/ComparatorSet.h \
-    ComparatorList.h \
-	ComparatorInfoPanel.h
+    ../lib/ComparatorSet.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

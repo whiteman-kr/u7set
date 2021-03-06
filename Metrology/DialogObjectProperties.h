@@ -1,5 +1,5 @@
-#ifndef OBJECTPROPERTYDIALOG_H
-#define OBJECTPROPERTYDIALOG_H
+#ifndef DIALOGOBJECTPROPERTY_H
+#define DIALOGOBJECTPROPERTY_H
 
 #include <QDebug>
 #include <QScreen>
@@ -30,9 +30,9 @@
 
 const char* const				ProjectPropertyGroup[] =
 {
-								QT_TRANSLATE_NOOP("ObjectProperty.h", "Project"),
-								QT_TRANSLATE_NOOP("ObjectProperty.h", "Host"),
-								QT_TRANSLATE_NOOP("ObjectProperty.h", "File version"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "Project"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "Host"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "File version"),
 };
 
 const int						PROJECT_PROPERTY_GROUP_COUNT			= sizeof(ProjectPropertyGroup)/sizeof(ProjectPropertyGroup[0]);
@@ -43,14 +43,14 @@ const int						PROJECT_PROPERTY_GROUP_INFO				= 0,
 
 // ----------------------------------------------------------------------------------------------
 
-class ProjectPropertyDialog : public QDialog
+class DialogProjectProperty : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit ProjectPropertyDialog(const ProjectInfo& info, QWidget* parent = nullptr);
-	virtual ~ProjectPropertyDialog();
+	explicit DialogProjectProperty(const ProjectInfo& info, QWidget* parent = nullptr);
+	virtual ~DialogProjectProperty();
 
 private:
 
@@ -85,14 +85,14 @@ const int						RACK_PROPERTY_ITEM_COUNT	= 4;
 
 // ----------------------------------------------------------------------------------------------
 
-class RackPropertyDialog : public QDialog
+class DialogRackProperty : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	RackPropertyDialog(const Metrology::RackParam& rack, const RackBase& rackBase, QWidget* parent = nullptr);
-	virtual ~RackPropertyDialog();
+	DialogRackProperty(const Metrology::RackParam& rack, const RackBase& rackBase, QWidget* parent = nullptr);
+	virtual ~DialogRackProperty();
 
 public:
 
@@ -134,14 +134,14 @@ const int						RACK_GROUP_COLUMN_CAPTION = 0;
 
 // ----------------------------------------------------------------------------------------------
 
-class RackGroupPropertyDialog : public QDialog
+class DialogRackGroupProperty : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit RackGroupPropertyDialog(const RackBase& rackBase, QWidget* parent = nullptr);
-	virtual ~RackGroupPropertyDialog();
+	explicit DialogRackGroupProperty(const RackBase& rackBase, QWidget* parent = nullptr);
+	virtual ~DialogRackGroupProperty();
 
 public:
 
@@ -218,10 +218,10 @@ private slots:
 
 const char* const				SignalPropertyGroup[] =
 {
-								QT_TRANSLATE_NOOP("ObjectProperty.h", "Signal ID"),
-								QT_TRANSLATE_NOOP("ObjectProperty.h", "Position"),
-								QT_TRANSLATE_NOOP("ObjectProperty.h", "Electric range: "),
-								QT_TRANSLATE_NOOP("ObjectProperty.h", "Engineering range: "),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "Signal ID"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "Position"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "Electric range: "),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "Engineering range: "),
 };
 
 const int						SIGNAL_PROPERTY_GROUP_COUNT				= sizeof(SignalPropertyGroup)/sizeof(SignalPropertyGroup[0]);
@@ -253,14 +253,14 @@ const int						SIGNAL_PROPERTY_ITEM_COUNT				= 13;
 
 // ----------------------------------------------------------------------------------------------
 
-class SignalPropertyDialog : public QDialog
+class DialogSignalProperty : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit SignalPropertyDialog(const Metrology::SignalParam& param, QWidget* parent = nullptr);
-	virtual ~SignalPropertyDialog();
+	explicit DialogSignalProperty(const Metrology::SignalParam& param, QWidget* parent = nullptr);
+	virtual ~DialogSignalProperty();
 
 public:
 
@@ -305,10 +305,10 @@ private slots:
 
 const char* const				ComparatorPropertyGroup[] =
 {
-								QT_TRANSLATE_NOOP("ObjectProperty.h", "Signal ID"),
-								QT_TRANSLATE_NOOP("ObjectProperty.h", "Position"),
-								QT_TRANSLATE_NOOP("ObjectProperty.h", "Electric range: "),
-								QT_TRANSLATE_NOOP("ObjectProperty.h", "Engineering range: "),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "Signal ID"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "Position"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "Electric range: "),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "Engineering range: "),
 };
 
 const int						COMPARATOR_PROPERTY_GROUP_COUNT				= sizeof(ComparatorPropertyGroup)/sizeof(ComparatorPropertyGroup[0]);
@@ -333,14 +333,14 @@ const int						COMPARATOR_PROPERTY_ITEM_COUNT				= 6;
 
 // ----------------------------------------------------------------------------------------------
 
-class ComparatorPropertyDialog : public QDialog
+class DialogComparatorProperty : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit ComparatorPropertyDialog(const Metrology::ComparatorEx& comparator, QWidget* parent = nullptr);
-	virtual ~ComparatorPropertyDialog();
+	explicit DialogComparatorProperty(const Metrology::ComparatorEx& comparator, QWidget* parent = nullptr);
+	virtual ~DialogComparatorProperty();
 
 public:
 
@@ -379,4 +379,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // OBJECTPROPERTYDIALOG_H
+#endif // DIALOGOBJECTPROPERTY_H

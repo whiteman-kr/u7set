@@ -1,5 +1,5 @@
-#ifndef OPTIONSDIALOG_H
-#define OPTIONSDIALOG_H
+#ifndef DIALOGOPTIONS_H
+#define DIALOGOPTIONS_H
 
 #include <QDialog>
 #include <QTreeWidget>
@@ -19,14 +19,14 @@
 
 const char* const				OptionGroupTitle[] =
 {
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Connect to server"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Module"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Linearity"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Comparators"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "List of measurements"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Panels information"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Database"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Language"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Connect to server"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Module"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Linearity"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Comparators"),
+								QT_TRANSLATE_NOOP("DialogOptions", "List of measurements"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Panels information"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Database"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Language"),
 };
 
 const int						OPTION_GROUP_COUNT			= sizeof(OptionGroupTitle)/sizeof(OptionGroupTitle[0]);
@@ -45,20 +45,20 @@ const int						OPTION_GROUP_UNDEFINED		= -1,
 
 const char* const				OptionPageTitle[] =
 {
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Connection to Config Server - TCP/IP"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Connection to Application Data Server - TCP/IP"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Connection to Tuning Server - TCP/IP"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Measuring of module"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Measurements of linearity"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Point of linearity"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Measure comparators"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Displaying data in the list of measurements"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Displaying columns in the list of measurements"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Displaying information of signals"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Displaying information of сomparators"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Database location"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Database backup"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Language of application"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Connection to Config Server - TCP/IP"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Connection to Application Data Server - TCP/IP"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Connection to Tuning Server - TCP/IP"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Measuring of module"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Measurements of linearity"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Point of linearity"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Measure comparators"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Displaying data in the list of measurements"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Displaying columns in the list of measurements"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Displaying information of signals"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Displaying information of сomparators"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Database location"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Database backup"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Language of application"),
 };
 
 const int						OPTION_PAGE_COUNT				= sizeof(OptionPageTitle)/sizeof(OptionPageTitle[0]);
@@ -83,20 +83,20 @@ const int						OPTION_PAGE_UNDEFINED			= -1,
 
 const char* const				OptionPageShortTitle[OPTION_PAGE_COUNT] =
 {
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "ConfigurationService"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "AppDataService"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "TuningService"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Measuring"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Measurements"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Points"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Measurements"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Displaying"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Columns"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Signal information"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Comparator information"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Location"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Backup"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Language of application "),
+								QT_TRANSLATE_NOOP("DialogOptions", "ConfigurationService"),
+								QT_TRANSLATE_NOOP("DialogOptions", "AppDataService"),
+								QT_TRANSLATE_NOOP("DialogOptions", "TuningService"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Measuring"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Measurements"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Points"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Measurements"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Displaying"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Columns"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Signal information"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Comparator information"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Location"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Backup"),
+								QT_TRANSLATE_NOOP("DialogOptions", "Language of application "),
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -168,14 +168,14 @@ private:
 
 // ==============================================================================================
 
-class OptionsDialog : public QDialog
+class DialogOptions : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit OptionsDialog(const Options& options, QWidget* parent = nullptr);
-	virtual ~OptionsDialog();
+	explicit DialogOptions(const Options& options, QWidget* parent = nullptr);
+	virtual ~DialogOptions();
 
 public:
 
@@ -242,4 +242,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // OPTIONSDIALOG_H
+#endif // DIALOGOPTIONS_H

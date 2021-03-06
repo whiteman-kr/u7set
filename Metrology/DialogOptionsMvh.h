@@ -1,5 +1,5 @@
-#ifndef OPTIONSMEASUREVIEWHEADERDIALOG_H
-#define OPTIONSMEASUREVIEWHEADERDIALOG_H
+#ifndef DIALOGOPTIONSMEASUREVIEWHEADER_H
+#define DIALOGOPTIONSMEASUREVIEWHEADER_H
 
 #include <QDebug>
 #include <QDialog>
@@ -17,9 +17,9 @@
 
 const char* const		MvhColumn[] =
 {
-						QT_TRANSLATE_NOOP("OptionsMvhDialog.h", "Title"),
-						QT_TRANSLATE_NOOP("OptionsMvhDialog.h", "Visible"),
-						QT_TRANSLATE_NOOP("OptionsMvhDialog.h", "Width"),
+						QT_TRANSLATE_NOOP("DialogOptionsMvh", "Title"),
+						QT_TRANSLATE_NOOP("DialogOptionsMvh", "Visible"),
+						QT_TRANSLATE_NOOP("DialogOptionsMvh", "Width"),
 };
 
 const int				MVH_COLUMN_COUNT	= sizeof(MvhColumn)/sizeof(MvhColumn[0]);
@@ -39,13 +39,13 @@ const int				MvhColumnWidth[MVH_COLUMN_COUNT] =
 
 // ==============================================================================================
 
-class OptionsMeasureViewHeaderDialog : public QDialog
+class DialogOptionsMeasureViewHeader : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit OptionsMeasureViewHeaderDialog(const MeasureViewOption& header, QWidget* parent = nullptr);
-	virtual ~OptionsMeasureViewHeaderDialog();
+	explicit DialogOptionsMeasureViewHeader(const MeasureViewOption& header, QWidget* parent = nullptr);
+	virtual ~DialogOptionsMeasureViewHeader();
 
 	MeasureViewOption	m_header;
 
@@ -92,4 +92,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // OPTIONSMEASUREVIEWHEADERDIALOG_H
+#endif // DIALOGOPTIONSMEASUREVIEWHEADER_H

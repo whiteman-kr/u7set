@@ -1,5 +1,5 @@
-#ifndef CALCULATOR_H
-#define CALCULATOR_H
+#ifndef DIALOGCALCULATOR_H
+#define DIALOGCALCULATOR_H
 
 #include <QObject>
 #include <QDialog>
@@ -51,14 +51,14 @@ const int	SENSOR_TYPE_BY_UNIT_COUNT = sizeof(SensorTypeByUnit) / sizeof(SensorTy
 
 // ==============================================================================================
 
-class Calculator : public QDialog
+class DialogCalculator : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit Calculator(QWidget* parent = nullptr);
-	virtual ~Calculator();
+	explicit DialogCalculator(QWidget* parent = nullptr);
+	virtual ~DialogCalculator();
 
 private:
 
@@ -135,4 +135,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // CALCULATOR_H
+#endif // DIALOGCALCULATOR_H

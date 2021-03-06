@@ -1,10 +1,10 @@
-#include "Calculator.h"
+#include "DialogCalculator.h"
 
 #include "Calibrator.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Calculator::Calculator(QWidget* parent) :
+DialogCalculator::DialogCalculator(QWidget* parent) :
 	QDialog(parent)
 {
 	createInterface();
@@ -13,7 +13,7 @@ Calculator::Calculator(QWidget* parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Calculator::~Calculator()
+DialogCalculator::~DialogCalculator()
 {
 	if (m_digitFont != nullptr)
 	{
@@ -24,7 +24,7 @@ Calculator::~Calculator()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Calculator::createInterface()
+void DialogCalculator::createInterface()
 {
 	// create elements of interface
 	//
@@ -293,7 +293,7 @@ void Calculator::createInterface()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Calculator::initDialog()
+void DialogCalculator::initDialog()
 {
 	QRegExp rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
 	QValidator* validator = new QRegExpValidator(rx, this);
@@ -318,14 +318,14 @@ void Calculator::initDialog()
 	m_pLinOutLowEdit->setValidator(validator);
 	m_pLinOutHighEdit->setValidator(validator);
 
-	connect(m_pLinInRadio, &QRadioButton::clicked, this, &Calculator::onLinRadio);
-	connect(m_pLinInValEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
-	connect(m_pLinOutRadio, &QRadioButton::clicked, this, &Calculator::onLinRadio);
-	connect(m_pLinOutValEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
-	connect(m_pLinInLowEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
-	connect(m_pLinInHighEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
-	connect(m_pLinOutLowEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
-	connect(m_pLinOutHighEdit, &QLineEdit::textChanged, this, &Calculator::onLinValue);
+	connect(m_pLinInRadio, &QRadioButton::clicked, this, &DialogCalculator::onLinRadio);
+	connect(m_pLinInValEdit, &QLineEdit::textChanged, this, &DialogCalculator::onLinValue);
+	connect(m_pLinOutRadio, &QRadioButton::clicked, this, &DialogCalculator::onLinRadio);
+	connect(m_pLinOutValEdit, &QLineEdit::textChanged, this, &DialogCalculator::onLinValue);
+	connect(m_pLinInLowEdit, &QLineEdit::textChanged, this, &DialogCalculator::onLinValue);
+	connect(m_pLinInHighEdit, &QLineEdit::textChanged, this, &DialogCalculator::onLinValue);
+	connect(m_pLinOutLowEdit, &QLineEdit::textChanged, this, &DialogCalculator::onLinValue);
+	connect(m_pLinOutHighEdit, &QLineEdit::textChanged, this, &DialogCalculator::onLinValue);
 
 	conversionLin();
 
@@ -355,12 +355,12 @@ void Calculator::initDialog()
 	}
 	m_pTrList->setCurrentIndex(0);
 
-	connect(m_pTrList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &Calculator::onTrSensorTypeChanged);
-	connect(m_pTrDegreeRadio, &QRadioButton::clicked, this, &Calculator::onTrRadio);
-	connect(m_pTrDegreeEdit, &QLineEdit::textChanged, this, &Calculator::onTrValue);
-	connect(m_pTrElectricRadio, &QRadioButton::clicked, this, &Calculator::onTrRadio);
-	connect(m_pTrElectricEdit, &QLineEdit::textChanged, this, &Calculator::onTrValue);
-	connect(m_pTrR0Edit, &QLineEdit::textChanged, this, &Calculator::onTrValue);
+	connect(m_pTrList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogCalculator::onTrSensorTypeChanged);
+	connect(m_pTrDegreeRadio, &QRadioButton::clicked, this, &DialogCalculator::onTrRadio);
+	connect(m_pTrDegreeEdit, &QLineEdit::textChanged, this, &DialogCalculator::onTrValue);
+	connect(m_pTrElectricRadio, &QRadioButton::clicked, this, &DialogCalculator::onTrRadio);
+	connect(m_pTrElectricEdit, &QLineEdit::textChanged, this, &DialogCalculator::onTrValue);
+	connect(m_pTrR0Edit, &QLineEdit::textChanged, this, &DialogCalculator::onTrValue);
 
 	m_pTrDegreeEdit->setValidator(validator);
 	m_pTrElectricEdit->setValidator(validator);
@@ -395,11 +395,11 @@ void Calculator::initDialog()
 	m_pTcList->setCurrentIndex(0);
 
 
-	connect(m_pTcList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &Calculator::onTcSensorTypeChanged);
-	connect(m_pTcDegreeRadio, &QRadioButton::clicked, this, &Calculator::onTcRadio);
-	connect(m_pTcDegreeEdit, &QLineEdit::textChanged, this, &Calculator::onTcValue);
-	connect(m_pTcElectricRadio, &QRadioButton::clicked, this, &Calculator::onTcRadio);
-	connect(m_pTcElectricEdit, &QLineEdit::textChanged, this, &Calculator::onTcValue);
+	connect(m_pTcList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogCalculator::onTcSensorTypeChanged);
+	connect(m_pTcDegreeRadio, &QRadioButton::clicked, this, &DialogCalculator::onTcRadio);
+	connect(m_pTcDegreeEdit, &QLineEdit::textChanged, this, &DialogCalculator::onTcValue);
+	connect(m_pTcElectricRadio, &QRadioButton::clicked, this, &DialogCalculator::onTcRadio);
+	connect(m_pTcElectricEdit, &QLineEdit::textChanged, this, &DialogCalculator::onTcValue);
 
 	m_pTcDegreeEdit->setValidator(validator);
 	m_pTcElectricEdit->setValidator(validator);
@@ -417,14 +417,14 @@ void Calculator::initDialog()
 	m_pDpfFLowEdit->setValidator(validator);
 	m_pDpfFHighEdit->setValidator(validator);
 
-	connect(m_pDpfPRadio, &QRadioButton::clicked, this, &Calculator::onDpfRadio);
-	connect(m_pDpfPValEdit, &QLineEdit::textChanged, this, &Calculator::onDpfValue);
-	connect(m_pDpfFRadio, &QRadioButton::clicked, this, &Calculator::onDpfRadio);
-	connect(m_pDpfFValEdit, &QLineEdit::textChanged, this, &Calculator::onDpfValue);
-	connect(m_pDpfPLowEdit, &QLineEdit::textChanged, this, &Calculator::onDpfValue);
-	connect(m_pDpfPHighEdit, &QLineEdit::textChanged, this, &Calculator::onDpfValue);
-	connect(m_pDpfFLowEdit, &QLineEdit::textChanged, this, &Calculator::onDpfValue);
-	connect(m_pDpfFHighEdit, &QLineEdit::textChanged, this, &Calculator::onDpfValue);
+	connect(m_pDpfPRadio, &QRadioButton::clicked, this, &DialogCalculator::onDpfRadio);
+	connect(m_pDpfPValEdit, &QLineEdit::textChanged, this, &DialogCalculator::onDpfValue);
+	connect(m_pDpfFRadio, &QRadioButton::clicked, this, &DialogCalculator::onDpfRadio);
+	connect(m_pDpfFValEdit, &QLineEdit::textChanged, this, &DialogCalculator::onDpfValue);
+	connect(m_pDpfPLowEdit, &QLineEdit::textChanged, this, &DialogCalculator::onDpfValue);
+	connect(m_pDpfPHighEdit, &QLineEdit::textChanged, this, &DialogCalculator::onDpfValue);
+	connect(m_pDpfFLowEdit, &QLineEdit::textChanged, this, &DialogCalculator::onDpfValue);
+	connect(m_pDpfFHighEdit, &QLineEdit::textChanged, this, &DialogCalculator::onDpfValue);
 
 	conversionDpf();
 
@@ -432,10 +432,10 @@ void Calculator::initDialog()
 	//
 	m_pDrСelsiusRadio->setChecked(true);
 
-	connect(m_pDrСelsiusRadio, &QRadioButton::clicked, this, &Calculator::onDrRadio);
-	connect(m_pDrСelsiusEdit, &QLineEdit::textChanged, this, &Calculator::onDrValue);
-	connect(m_pDrFahrenheitRadio, &QRadioButton::clicked, this, &Calculator::onDrRadio);
-	connect(m_pDrFahrenheitEdit, &QLineEdit::textChanged, this, &Calculator::onDrValue);
+	connect(m_pDrСelsiusRadio, &QRadioButton::clicked, this, &DialogCalculator::onDrRadio);
+	connect(m_pDrСelsiusEdit, &QLineEdit::textChanged, this, &DialogCalculator::onDrValue);
+	connect(m_pDrFahrenheitRadio, &QRadioButton::clicked, this, &DialogCalculator::onDrRadio);
+	connect(m_pDrFahrenheitEdit, &QLineEdit::textChanged, this, &DialogCalculator::onDrValue);
 
 	m_pDrСelsiusEdit->setValidator(validator);
 	m_pDrFahrenheitEdit->setValidator(validator);
@@ -449,7 +449,7 @@ void Calculator::initDialog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Calculator::conversionLin()
+void DialogCalculator::conversionLin()
 {
 	double irl = m_pLinInLowEdit->text().toDouble();
 	double irh = m_pLinInHighEdit->text().toDouble();
@@ -477,7 +477,7 @@ void Calculator::conversionLin()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Calculator::conversionTr()
+void DialogCalculator::conversionTr()
 {
 	int index = m_pTrList->currentIndex();
 	if (index == -1)
@@ -557,7 +557,7 @@ void Calculator::conversionTr()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Calculator::conversionTc()
+void DialogCalculator::conversionTc()
 {
 	int index = m_pTcList->currentIndex();
 	if (index == -1)
@@ -627,7 +627,7 @@ void Calculator::conversionTc()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Calculator::conversionDpf()
+void DialogCalculator::conversionDpf()
 {
 	double prl = m_pDpfPLowEdit->text().toDouble();
 	double prh = m_pDpfPHighEdit->text().toDouble();
@@ -657,7 +657,7 @@ void Calculator::conversionDpf()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Calculator::conversionDr()
+void DialogCalculator::conversionDr()
 {
 	if (m_pDrСelsiusRadio->isChecked() == true)
 	{

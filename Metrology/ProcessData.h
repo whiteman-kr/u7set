@@ -126,7 +126,7 @@ public slots:
 
 // ==============================================================================================
 
-#define EXPORT_WINDOW_TITLE QT_TRANSLATE_NOOP("ExportData.h", "Export data")
+#define EXPORT_WINDOW_TITLE QT_TRANSLATE_NOOP("ExportData", "Export data")
 
 // ----------------------------------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
-#include "RackList.h"
+#include "DialogRackList.h"
 
 #include "ProcessData.h"
-#include "ObjectProperties.h"
+#include "DialogObjectProperties.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ QVariant RackListTable::headerData(int section, Qt::Orientation orientation, int
 	{
 		if (section >= 0 && section < RACK_LIST_COLUMN_COUNT)
 		{
-			result = qApp->translate("RackListDialog.h", RackListColumn[section]);
+			result = qApp->translate("DialogRackList", RackListColumn[section]);
 		}
 	}
 
@@ -233,7 +233,7 @@ void RackListTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-RackListDialog::RackListDialog(QWidget* parent) :
+DialogRackList::DialogRackList(QWidget* parent) :
 	QDialog(parent)
 {
 	m_rackBase = theSignalBase.racks();
@@ -246,13 +246,13 @@ RackListDialog::RackListDialog(QWidget* parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-RackListDialog::~RackListDialog()
+DialogRackList::~DialogRackList()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackListDialog::createInterface()
+void DialogRackList::createInterface()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Rack.png"));
@@ -298,13 +298,13 @@ void RackListDialog::createInterface()
 	m_pMenuBar->addMenu(m_pRackMenu);
 	m_pMenuBar->addMenu(m_pEditMenu);
 
-	connect(m_pRackGroupsAction, &QAction::triggered, this, &RackListDialog::rackGroups);
-	connect(m_pExportAction, &QAction::triggered, this, &RackListDialog::exportRacks);
+	connect(m_pRackGroupsAction, &QAction::triggered, this, &DialogRackList::rackGroups);
+	connect(m_pExportAction, &QAction::triggered, this, &DialogRackList::exportRacks);
 
-	connect(m_pFindAction, &QAction::triggered, this, &RackListDialog::find);
-	connect(m_pCopyAction, &QAction::triggered, this, &RackListDialog::copy);
-	connect(m_pSelectAllAction, &QAction::triggered, this, &RackListDialog::selectAll);
-	connect(m_pRackPropertyAction, &QAction::triggered, this, &RackListDialog::rackProperty);
+	connect(m_pFindAction, &QAction::triggered, this, &DialogRackList::find);
+	connect(m_pCopyAction, &QAction::triggered, this, &DialogRackList::copy);
+	connect(m_pSelectAllAction, &QAction::triggered, this, &DialogRackList::selectAll);
+	connect(m_pRackPropertyAction, &QAction::triggered, this, &DialogRackList::rackProperty);
 
 	m_pView = new QTableView(this);
 	m_pView->setModel(&m_rackTable);
@@ -319,13 +319,13 @@ void RackListDialog::createInterface()
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_pView->setWordWrap(false);
 
-	connect(m_pView, &QTableView::doubleClicked , this, &RackListDialog::onListDoubleClicked);
+	connect(m_pView, &QTableView::doubleClicked , this, &DialogRackList::onListDoubleClicked);
 
 
 	m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 
-	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &RackListDialog::onOk);
-	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &RackListDialog::reject);
+	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &DialogRackList::onOk);
+	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &DialogRackList::reject);
 
 
 	QVBoxLayout* mainLayout = new QVBoxLayout;
@@ -339,7 +339,7 @@ void RackListDialog::createInterface()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackListDialog::createContextMenu()
+void DialogRackList::createContextMenu()
 {
 	// create context menu
 	//
@@ -352,12 +352,12 @@ void RackListDialog::createContextMenu()
 	// init context menu
 	//
 	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &RackListDialog::onContextMenu);
+	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &DialogRackList::onContextMenu);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackListDialog::updateList()
+void DialogRackList::updateList()
 {
 	m_rackTable.clear();
 
@@ -380,7 +380,7 @@ void RackListDialog::updateList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool RackListDialog::eventFilter(QObject* object, QEvent* event)
+bool DialogRackList::eventFilter(QObject* object, QEvent* event)
 {
 	if (event->type() == QEvent::KeyPress)
 	{
@@ -397,9 +397,9 @@ bool RackListDialog::eventFilter(QObject* object, QEvent* event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackListDialog::rackGroups()
+void DialogRackList::rackGroups()
 {
-	RackGroupPropertyDialog dialog(m_rackBase, this);
+	DialogRackGroupProperty dialog(m_rackBase, this);
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
@@ -416,7 +416,7 @@ void RackListDialog::rackGroups()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackListDialog::exportRacks()
+void DialogRackList::exportRacks()
 {
 	ExportData* dialog = new ExportData(m_pView, false, "Racks");
 	dialog->exec();
@@ -424,7 +424,7 @@ void RackListDialog::exportRacks()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackListDialog::find()
+void DialogRackList::find()
 {
 	FindData* dialog = new FindData(m_pView);
 	dialog->exec();
@@ -432,7 +432,7 @@ void RackListDialog::find()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackListDialog::copy()
+void DialogRackList::copy()
 {
 	CopyData copyData(m_pView, false);
 	copyData.exec();
@@ -440,7 +440,7 @@ void RackListDialog::copy()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackListDialog::rackProperty()
+void DialogRackList::rackProperty()
 {
 	int index = m_pView->currentIndex().row();
 	if (index < 0 || index >= m_rackTable.rackCount())
@@ -459,7 +459,7 @@ void RackListDialog::rackProperty()
 		QMessageBox::information(this, windowTitle(), tr("No rack groups have been found.\nTo create a group of racks, click menu \"Racks\" - \"Groups ...\""));
 	}
 
-	RackPropertyDialog dialog(*pRack, m_rackBase, this);
+	DialogRackProperty dialog(*pRack, m_rackBase, this);
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
@@ -499,21 +499,21 @@ void RackListDialog::rackProperty()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackListDialog::onContextMenu(QPoint)
+void DialogRackList::onContextMenu(QPoint)
 {
 	m_pContextMenu->exec(QCursor::pos());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackListDialog::onListDoubleClicked(const QModelIndex&)
+void DialogRackList::onListDoubleClicked(const QModelIndex&)
 {
 	rackProperty();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackListDialog::onOk()
+void DialogRackList::onOk()
 {
 	accept();
 }

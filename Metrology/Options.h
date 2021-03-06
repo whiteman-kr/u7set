@@ -716,15 +716,15 @@ public:
 //private:
 public:
 
-	MeasureViewColumn	m_column[Measure::TypeCount][LanguageTypeCount][MEASURE_VIEW_COLUMN_COUNT];
+	Measure::HeaderColumn	m_column[Measure::TypeCount][LanguageTypeCount][Measure::MaxColumnCount];
 
 public:
 
 	int					measureType() const { return m_measureType; }
 	void				setMeasureType(int measureType) { m_measureType = measureType; }
 
-	bool				updateColumnView(int measureType) const;
-	void				setUpdateColumnView(int measureType, bool state);
+	bool				updateColumnView(Measure::Type measureType) const;
+	void				setUpdateColumnView(Measure::Type measureType, bool state);
 
 	QFont				font() const { return m_font; }
 	void				setFont(const QString& fontStr)	{ m_font.fromString(fontStr); }

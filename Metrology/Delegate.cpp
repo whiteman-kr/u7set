@@ -1,6 +1,6 @@
 #include "Delegate.h"
 
-#include "FindMeasurePanel.h"
+#include "PanelFindMeasure.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------

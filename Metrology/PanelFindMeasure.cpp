@@ -1,4 +1,4 @@
-#include "FindMeasurePanel.h"
+#include "PanelFindMeasure.h"
 
 #include <QApplication>
 #include <QSettings>
@@ -92,7 +92,7 @@ QVariant FindMeasureTable::headerData(int section, Qt::Orientation orientation, 
 	{
 		if (section >= 0 && section < FIND_MEASURE_COLUMN_COUNT)
 		{
-			result = qApp->translate("FindMeasurePanel.h", FindMeasureColumn[section]);
+			result = qApp->translate("PanelFindMeasure", FindMeasureColumn[section]);
 		}
 	}
 
@@ -234,7 +234,7 @@ void FindMeasureTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-FindMeasurePanel::FindMeasurePanel(QWidget* parent) :
+PanelFindMeasure::PanelFindMeasure(QWidget* parent) :
 	QDockWidget(parent)
 {
 	setWindowTitle(tr("Search measurements panel"));
@@ -247,13 +247,13 @@ FindMeasurePanel::FindMeasurePanel(QWidget* parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-FindMeasurePanel::~FindMeasurePanel()
+PanelFindMeasure::~PanelFindMeasure()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasurePanel::clear()
+void PanelFindMeasure::clear()
 {
 	m_table.clear();
 	m_statusLabel->setText(QString());
@@ -261,7 +261,7 @@ void FindMeasurePanel::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasurePanel::createInterface()
+void PanelFindMeasure::createInterface()
 {
 	m_pFindWindow = new QMainWindow;
 
@@ -277,7 +277,7 @@ void FindMeasurePanel::createInterface()
 
 	toolBar->addWidget(m_findTextEdit);
 	QAction* action = toolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
-	connect(action, &QAction::triggered, this, &FindMeasurePanel::find);
+	connect(action, &QAction::triggered, this, &PanelFindMeasure::find);
 
 	toolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
 	toolBar->setWindowTitle(tr("Search measurements ToolBar"));
@@ -293,7 +293,7 @@ void FindMeasurePanel::createInterface()
 
 	m_pView->setColumnWidth(FIND_MEASURE_COLUMN_ROW, FIND_MEASURE_COLUMN_ROW_WIDTH);
 
-	connect(m_pView, &QTableView::clicked, this, &FindMeasurePanel::selectItemInMeasureView);
+	connect(m_pView, &QTableView::clicked, this, &PanelFindMeasure::selectItemInMeasureView);
 	m_pView->installEventFilter(this);
 
 	FindTextDelegate* textDelegate = new FindTextDelegate(this);
@@ -314,7 +314,7 @@ void FindMeasurePanel::createInterface()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasurePanel::createContextMenu()
+void PanelFindMeasure::createContextMenu()
 {
 	// create context menu
 	//
@@ -328,18 +328,18 @@ void FindMeasurePanel::createContextMenu()
 	m_pSelectAllAction = m_pContextMenu->addAction(tr("Select &All"));
 	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
 
-	connect(m_pCopyAction, &QAction::triggered, this, &FindMeasurePanel::copy);
-	connect(m_pSelectAllAction, &QAction::triggered, this, &FindMeasurePanel::selectAll);
+	connect(m_pCopyAction, &QAction::triggered, this, &PanelFindMeasure::copy);
+	connect(m_pSelectAllAction, &QAction::triggered, this, &PanelFindMeasure::selectAll);
 
 	// init context menu
 	//
 	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &FindMeasurePanel::onContextMenu);
+	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &PanelFindMeasure::onContextMenu);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool FindMeasurePanel::event(QEvent* e)
+bool PanelFindMeasure::event(QEvent* e)
 {
 	if (e->type() == QEvent::Hide)
 	{
@@ -374,7 +374,7 @@ bool FindMeasurePanel::event(QEvent* e)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool FindMeasurePanel::eventFilter(QObject* object, QEvent* e)
+bool PanelFindMeasure::eventFilter(QObject* object, QEvent* e)
 {
 	if (e->type() == QEvent::KeyRelease)
 	{
@@ -392,7 +392,7 @@ bool FindMeasurePanel::eventFilter(QObject* object, QEvent* e)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasurePanel::setViewFont(const QFont& font)
+void PanelFindMeasure::setViewFont(const QFont& font)
 {
 	if (m_pView == nullptr)
 	{
@@ -406,7 +406,7 @@ void FindMeasurePanel::setViewFont(const QFont& font)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasurePanel::measureViewChanged(MeasureView* pView)
+void PanelFindMeasure::measureViewChanged(Measure::View* pView)
 {
 	if (pView == nullptr)
 	{
@@ -428,14 +428,14 @@ void FindMeasurePanel::measureViewChanged(MeasureView* pView)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasurePanel::setFindText(const QString& findText)
+void PanelFindMeasure::setFindText(const QString& findText)
 {
 	m_findTextEdit->setText(findText);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasurePanel::find()
+void PanelFindMeasure::find()
 {
 	m_findText = m_findTextEdit->text();
 	if (m_findText.isEmpty() == true)
@@ -508,7 +508,7 @@ void FindMeasurePanel::find()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasurePanel::selectItemInMeasureView()
+void PanelFindMeasure::selectItemInMeasureView()
 {
 	if (m_pMeasureView == nullptr)
 	{
@@ -541,14 +541,14 @@ void FindMeasurePanel::selectItemInMeasureView()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasurePanel::onContextMenu(QPoint)
+void PanelFindMeasure::onContextMenu(QPoint)
 {
 	m_pContextMenu->exec(QCursor::pos());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasurePanel::copy()
+void PanelFindMeasure::copy()
 {
 	CopyData copyData(m_pView, false);
 	copyData.exec();
@@ -556,7 +556,7 @@ void FindMeasurePanel::copy()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasurePanel::loadSettings()
+void PanelFindMeasure::loadSettings()
 {
 	QSettings s;
 
@@ -567,7 +567,7 @@ void FindMeasurePanel::loadSettings()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasurePanel::saveSettings()
+void PanelFindMeasure::saveSettings()
 {
 	QSettings s;
 

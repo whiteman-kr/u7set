@@ -1,4 +1,4 @@
-#include "OptionsMvhDialog.h"
+#include "DialogOptionsMvh.h"
 
 #include <QColorDialog>
 #include <QHeaderView>
@@ -8,7 +8,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-OptionsMeasureViewHeaderDialog::OptionsMeasureViewHeaderDialog(const MeasureViewOption& header, QWidget* parent) :
+DialogOptionsMeasureViewHeader::DialogOptionsMeasureViewHeader(const MeasureViewOption& header, QWidget* parent) :
 	QDialog(parent),
 	m_header(header)
 {
@@ -43,27 +43,27 @@ OptionsMeasureViewHeaderDialog::OptionsMeasureViewHeaderDialog(const MeasureView
 
 	setLayout(mainLayout);
 
-	connect(m_measureTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &OptionsMeasureViewHeaderDialog::setMeasureType);
+	connect(m_measureTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogOptionsMeasureViewHeader::setMeasureType);
 
 	setHeaderList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-OptionsMeasureViewHeaderDialog::~OptionsMeasureViewHeaderDialog()
+DialogOptionsMeasureViewHeader::~DialogOptionsMeasureViewHeader()
 {
 	clearList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsMeasureViewHeaderDialog::setHeaderList()
+void DialogOptionsMeasureViewHeader::setHeaderList()
 {
 	QStringList horizontalHeaderLabels;
 
 	for(int c = 0; c < MVH_COLUMN_COUNT; c++)
 	{
-		horizontalHeaderLabels.append(qApp->translate("OptionsMvhDialog.h", MvhColumn[c]));
+		horizontalHeaderLabels.append(qApp->translate("DialogOptionsMvh", MvhColumn[c]));
 	}
 
 	m_columnList->setColumnCount(horizontalHeaderLabels.count());
@@ -75,9 +75,9 @@ void OptionsMeasureViewHeaderDialog::setHeaderList()
 		m_columnList->setColumnWidth(c, MvhColumnWidth[c]);
 	}
 
-	connect(m_columnList, &QTableWidget::cellDoubleClicked, this, &OptionsMeasureViewHeaderDialog::onEdit);
-	connect(m_columnList, &QTableWidget::cellChanged, this, &OptionsMeasureViewHeaderDialog::cellChanged);
-	connect(m_columnList, &QTableWidget::currentCellChanged, this, &OptionsMeasureViewHeaderDialog::currentCellChanged);
+	connect(m_columnList, &QTableWidget::cellDoubleClicked, this, &DialogOptionsMeasureViewHeader::onEdit);
+	connect(m_columnList, &QTableWidget::cellChanged, this, &DialogOptionsMeasureViewHeader::cellChanged);
+	connect(m_columnList, &QTableWidget::currentCellChanged, this, &DialogOptionsMeasureViewHeader::currentCellChanged);
 
 	IntDelegate* delegate = new IntDelegate(this);
 	m_columnList->setItemDelegateForColumn(MVH_COLUMN_WIDTH, delegate);
@@ -85,7 +85,7 @@ void OptionsMeasureViewHeaderDialog::setHeaderList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsMeasureViewHeaderDialog::updateList()
+void DialogOptionsMeasureViewHeader::updateList()
 {
 	clearList();
 
@@ -101,7 +101,7 @@ void OptionsMeasureViewHeaderDialog::updateList()
 
 	int rowCount = 0;
 
-	for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+	for(int column = 0; column < Measure::MaxColumnCount; column++)
 	{
 		if (m_header.m_column[m_measureType][m_languageType][column].title().isEmpty() == true)
 		{
@@ -124,7 +124,7 @@ void OptionsMeasureViewHeaderDialog::updateList()
 	{
 		verticalHeaderLabels.append(QString("%1").arg(index + 1));
 
-		MeasureViewColumn& column = m_header.m_column[m_measureType][m_languageType][index];
+		Measure::HeaderColumn& column = m_header.m_column[m_measureType][m_languageType][index];
 
 		bool visible = column.enableVisible();
 
@@ -164,7 +164,7 @@ void OptionsMeasureViewHeaderDialog::updateList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsMeasureViewHeaderDialog::clearList()
+void DialogOptionsMeasureViewHeader::clearList()
 {
 	int columnCount = m_columnList->columnCount();
 	int rowCount = m_columnList->rowCount();
@@ -184,7 +184,7 @@ void OptionsMeasureViewHeaderDialog::clearList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsMeasureViewHeaderDialog::setMeasureType(int measureType)
+void DialogOptionsMeasureViewHeader::setMeasureType(int measureType)
 {
 	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
@@ -198,7 +198,7 @@ void OptionsMeasureViewHeaderDialog::setMeasureType(int measureType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsMeasureViewHeaderDialog::cellChanged(int row, int column)
+void DialogOptionsMeasureViewHeader::cellChanged(int row, int column)
 {
 	if (m_updatingList == true)
 	{
@@ -253,7 +253,7 @@ void OptionsMeasureViewHeaderDialog::cellChanged(int row, int column)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsMeasureViewHeaderDialog::currentCellChanged(int, int column, int, int)
+void DialogOptionsMeasureViewHeader::currentCellChanged(int, int column, int, int)
 {
 	if (column == MVH_COLUMN_WIDTH)
 	{
@@ -267,7 +267,7 @@ void OptionsMeasureViewHeaderDialog::currentCellChanged(int, int column, int, in
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsMeasureViewHeaderDialog::onEdit(int row, int column)
+void DialogOptionsMeasureViewHeader::onEdit(int row, int column)
 {
 	if (row < 0 || row >= m_columnList->rowCount())
 	{
@@ -300,7 +300,7 @@ void OptionsMeasureViewHeaderDialog::onEdit(int row, int column)
 		return;
 	}
 
-	MeasureViewColumn& headerColumn = m_header.m_column[m_measureType][m_languageType][row];
+	Measure::HeaderColumn& headerColumn = m_header.m_column[m_measureType][m_languageType][row];
 
 	switch(column)
 	{
@@ -332,7 +332,7 @@ void OptionsMeasureViewHeaderDialog::onEdit(int row, int column)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsMeasureViewHeaderDialog::keyPressEvent(QKeyEvent* e)
+void DialogOptionsMeasureViewHeader::keyPressEvent(QKeyEvent* e)
 {
 	if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
 	{
@@ -348,7 +348,7 @@ void OptionsMeasureViewHeaderDialog::keyPressEvent(QKeyEvent* e)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsMeasureViewHeaderDialog::showEvent(QShowEvent* e)
+void DialogOptionsMeasureViewHeader::showEvent(QShowEvent* e)
 {
 	updateList();
 

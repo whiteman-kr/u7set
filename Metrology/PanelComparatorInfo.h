@@ -1,5 +1,5 @@
-#ifndef COMPARATORINFOPANEL_H
-#define COMPARATORINFOPANEL_H
+#ifndef PANELCOMPARATORINFO_H
+#define PANELCOMPARATORINFO_H
 
 #include <QMainWindow>
 #include <QDockWidget>
@@ -66,14 +66,14 @@ private slots:
 
 // ==============================================================================================
 
-class ComparatorInfoPanel : public QDockWidget
+class PanelComparatorInfo : public QDockWidget
 {
 	Q_OBJECT
 
 public:
 
-	explicit ComparatorInfoPanel(const ComparatorInfoOption& comparatorInfo, QWidget* parent = nullptr);
-	virtual ~ComparatorInfoPanel();
+	explicit PanelComparatorInfo(const ComparatorInfoOption& comparatorInfo, QWidget* parent = nullptr);
+	virtual ~PanelComparatorInfo();
 
 public:
 
@@ -140,4 +140,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // COMPARATORINFOPANEL_H
+#endif // PANELCOMPARATORINFO_H

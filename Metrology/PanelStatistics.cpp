@@ -1,8 +1,8 @@
-#include "StatisticsPanel.h"
+#include "PanelStatistics.h"
 
-#include "MetrologyConnectionList.h"
+#include "DialogMetrologyConnectionList.h"
 #include "ProcessData.h"
-#include "ObjectProperties.h"
+#include "DialogObjectProperties.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ QVariant StatisticsTable::headerData(int section, Qt::Orientation orientation, i
 	{
 		if (section >= 0 && section < STATISTICS_COLUMN_COUNT)
 		{
-			result = qApp->translate("StatisticDialog.h", StatisticsColumn[section]);
+			result = qApp->translate("PanelStatistics", StatisticsColumn[section]);
 		}
 	}
 
@@ -306,13 +306,13 @@ void StatisticsTable::updateSignal(Hash signalHash)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-Measure::Type StatisticsPanel::m_measureType = Measure::Type::Linearity;
-Measure::Kind StatisticsPanel::m_measureKind = Measure::Kind::NoMeasureKind;
-Metrology::ConnectionType StatisticsPanel::m_connectionType = Metrology::ConnectionType::NoConnectionType;
+Measure::Type PanelStatistics::m_measureType = Measure::Type::Linearity;
+Measure::Kind PanelStatistics::m_measureKind = Measure::Kind::NoMeasureKind;
+Metrology::ConnectionType PanelStatistics::m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticsPanel::StatisticsPanel(QWidget* parent) :
+PanelStatistics::PanelStatistics(QWidget* parent) :
 	QDockWidget(parent)
 {
 	setWindowTitle(tr("Panel statistics (Checklist)"));
@@ -325,13 +325,13 @@ StatisticsPanel::StatisticsPanel(QWidget* parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticsPanel::~StatisticsPanel()
+PanelStatistics::~PanelStatistics()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::createInterface()
+void PanelStatistics::createInterface()
 {
 	m_pStatisticsWindow = new QMainWindow;
 	if (m_pStatisticsWindow == nullptr)
@@ -381,15 +381,15 @@ void StatisticsPanel::createInterface()
 	m_pMenuBar->addMenu(m_pEditMenu);
 	m_pMenuBar->addMenu(m_pViewMenu);
 
-	connect(m_pExportAction, &QAction::triggered, this, &StatisticsPanel::exportSignal);
+	connect(m_pExportAction, &QAction::triggered, this, &PanelStatistics::exportSignal);
 
-	connect(m_pFindAction, &QAction::triggered, this, &StatisticsPanel::find);
-	connect(m_pCopyAction, &QAction::triggered, this, &StatisticsPanel::copy);
-	connect(m_pSelectAllAction, &QAction::triggered, this, &StatisticsPanel::selectAll);
-	connect(m_pSignalPropertyAction, &QAction::triggered, this, &StatisticsPanel::onProperty);
+	connect(m_pFindAction, &QAction::triggered, this, &PanelStatistics::find);
+	connect(m_pCopyAction, &QAction::triggered, this, &PanelStatistics::copy);
+	connect(m_pSelectAllAction, &QAction::triggered, this, &PanelStatistics::selectAll);
+	connect(m_pSignalPropertyAction, &QAction::triggered, this, &PanelStatistics::onProperty);
 
-	connect(m_pGotoNextNotMeasuredAction, &QAction::triggered, this, &StatisticsPanel::gotoNextNotMeasured);
-	connect(m_pGotoNextInvalidAction, &QAction::triggered, this, &StatisticsPanel::gotoNextInvalid);
+	connect(m_pGotoNextNotMeasuredAction, &QAction::triggered, this, &PanelStatistics::gotoNextNotMeasured);
+	connect(m_pGotoNextInvalidAction, &QAction::triggered, this, &PanelStatistics::gotoNextInvalid);
 
 	m_pStatisticsWindow->setMenuBar(m_pMenuBar);
 
@@ -408,7 +408,7 @@ void StatisticsPanel::createInterface()
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_pView->setWordWrap(false);
 
-	connect(m_pView, &QTableView::doubleClicked , this, &StatisticsPanel::onListDoubleClicked);
+	connect(m_pView, &QTableView::doubleClicked , this, &PanelStatistics::onListDoubleClicked);
 
 	m_pStatisticsWindow->setCentralWidget(m_pView);
 
@@ -419,7 +419,7 @@ void StatisticsPanel::createInterface()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::createHeaderContexMenu()
+void PanelStatistics::createHeaderContexMenu()
 {
 	if (m_pView == nullptr)
 	{
@@ -430,13 +430,13 @@ void StatisticsPanel::createHeaderContexMenu()
 	//
 	m_pView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_pView->horizontalHeader(), &QHeaderView::customContextMenuRequested,
-			this, &StatisticsPanel::onHeaderContextMenu);
+			this, &PanelStatistics::onHeaderContextMenu);
 
 	m_headerContextMenu = new QMenu(m_pView);
 
 	for(int column = 0; column < STATISTICS_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("StatisticDialog.h",
+		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("PanelStatistics",
 																				 StatisticsColumn[column]));
 		if (m_pColumnAction[column] != nullptr)
 		{
@@ -446,12 +446,12 @@ void StatisticsPanel::createHeaderContexMenu()
 	}
 
 	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered),
-			this, &StatisticsPanel::onColumnAction);
+			this, &PanelStatistics::onColumnAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::createContextMenu()
+void PanelStatistics::createContextMenu()
 {
 	if (m_pStatisticsWindow == nullptr)
 	{
@@ -481,16 +481,16 @@ void StatisticsPanel::createContextMenu()
 	// init context menu
 	//
 	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &StatisticsPanel::onContextMenu);
+	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &PanelStatistics::onContextMenu);
 
-	connect(m_pSelectSignalForMeasure, &QAction::triggered, this, &StatisticsPanel::selectSignalForMeasure);
-	connect(m_pFindSignalInStatisticsList, &QAction::triggered, this, &StatisticsPanel::findSignalInStatisticsList);
-	connect(m_pFindSignalInMeasureList, &QAction::triggered, this, &StatisticsPanel::findSignalInMeasureList);
+	connect(m_pSelectSignalForMeasure, &QAction::triggered, this, &PanelStatistics::selectSignalForMeasure);
+	connect(m_pFindSignalInStatisticsList, &QAction::triggered, this, &PanelStatistics::findSignalInStatisticsList);
+	connect(m_pFindSignalInMeasureList, &QAction::triggered, this, &PanelStatistics::findSignalInMeasureList);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::createStatusBar()
+void PanelStatistics::createStatusBar()
 {
 	if (m_pStatisticsWindow == nullptr)
 	{
@@ -516,7 +516,7 @@ void StatisticsPanel::createStatusBar()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool StatisticsPanel::eventFilter(QObject* object, QEvent* event)
+bool PanelStatistics::eventFilter(QObject* object, QEvent* event)
 {
 	if (event->type() == QEvent::KeyPress)
 	{
@@ -533,7 +533,7 @@ bool StatisticsPanel::eventFilter(QObject* object, QEvent* event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::setViewFont(const QFont& font)
+void PanelStatistics::setViewFont(const QFont& font)
 {
 	if (m_pView == nullptr)
 	{
@@ -547,7 +547,7 @@ void StatisticsPanel::setViewFont(const QFont& font)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::measureTypeChanged(int measureType)
+void PanelStatistics::measureTypeChanged(int measureType)
 {
 	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
@@ -563,7 +563,7 @@ void StatisticsPanel::measureTypeChanged(int measureType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::measureKindChanged(int measureKind)
+void PanelStatistics::measureKindChanged(int measureKind)
 {
 	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
@@ -575,7 +575,7 @@ void StatisticsPanel::measureKindChanged(int measureKind)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::connectionTypeChanged(int connectionType)
+void PanelStatistics::connectionTypeChanged(int connectionType)
 {
 	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
@@ -589,7 +589,7 @@ void StatisticsPanel::connectionTypeChanged(int connectionType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::activeSignalChanged(const MeasureSignal& activeSignal)
+void PanelStatistics::activeSignalChanged(const MeasureSignal& activeSignal)
 {
 	if (activeSignal.isEmpty() == true)
 	{
@@ -646,7 +646,7 @@ void StatisticsPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::updateList()
+void PanelStatistics::updateList()
 {
 	if (m_pMeasureBase == nullptr)
 	{
@@ -671,7 +671,7 @@ void StatisticsPanel::updateList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::updateSignalInList(Hash signalHash)
+void PanelStatistics::updateSignalInList(Hash signalHash)
 {
 	if (m_pMeasureBase == nullptr)
 	{
@@ -697,7 +697,7 @@ void StatisticsPanel::updateSignalInList(Hash signalHash)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::updateStatusBar()
+void PanelStatistics::updateStatusBar()
 {
 	m_statusMeasureInavlid->setText(tr(" Invalid: %1").
 									arg(theSignalBase.statistics().
@@ -720,7 +720,7 @@ void StatisticsPanel::updateStatusBar()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::updateVisibleColunm()
+void PanelStatistics::updateVisibleColunm()
 {
 	for(int c = 0; c < STATISTICS_COLUMN_COUNT; c++)
 	{
@@ -741,7 +741,7 @@ void StatisticsPanel::updateVisibleColunm()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::hideColumn(int column, bool hide)
+void PanelStatistics::hideColumn(int column, bool hide)
 {
 	if (m_pView == nullptr)
 	{
@@ -767,7 +767,7 @@ void StatisticsPanel::hideColumn(int column, bool hide)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::exportSignal()
+void PanelStatistics::exportSignal()
 {
 	ExportData* dialog = new ExportData(m_pView, false, "Statistics");
 	dialog->exec();
@@ -775,7 +775,7 @@ void StatisticsPanel::exportSignal()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::selectSignalForMeasure()
+void PanelStatistics::selectSignalForMeasure()
 {
 	if (m_pView == nullptr)
 	{
@@ -815,7 +815,7 @@ void StatisticsPanel::selectSignalForMeasure()
 			return;
 		}
 
-		MetrologyConnectionDialog dialog(si.signal(), this);
+		DialogMetrologyConnection dialog(si.signal(), this);
 		if (dialog.exec() != QDialog::Accepted)
 		{
 			return;
@@ -990,14 +990,14 @@ void StatisticsPanel::selectSignalForMeasure()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::findSignalInStatisticsList()
+void PanelStatistics::findSignalInStatisticsList()
 {
 	find();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::findSignalInMeasureList()
+void PanelStatistics::findSignalInMeasureList()
 {
 	int statisticItemIndex = m_pView->currentIndex().row();
 	if (statisticItemIndex < 0 || statisticItemIndex >= theSignalBase.statistics().count())
@@ -1020,7 +1020,7 @@ void StatisticsPanel::findSignalInMeasureList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::find()
+void PanelStatistics::find()
 {
 	if (m_pView == nullptr)
 	{
@@ -1033,7 +1033,7 @@ void StatisticsPanel::find()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::copy()
+void PanelStatistics::copy()
 {
 	CopyData copyData(m_pView, false);
 	copyData.exec();
@@ -1041,7 +1041,7 @@ void StatisticsPanel::copy()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::selectAll()
+void PanelStatistics::selectAll()
 {
 	if (m_pView == nullptr)
 	{
@@ -1053,7 +1053,7 @@ void StatisticsPanel::selectAll()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::onProperty()
+void PanelStatistics::onProperty()
 {
 	int index = m_pView->currentIndex().row();
 	if (index < 0 || index >= theSignalBase.statistics().count())
@@ -1073,7 +1073,7 @@ void StatisticsPanel::onProperty()
 					break;
 				}
 
-				SignalPropertyDialog dialog(pSignal->param(), this);
+				DialogSignalProperty dialog(pSignal->param(), this);
 				dialog.exec();
 			}
 			break;
@@ -1086,7 +1086,7 @@ void StatisticsPanel::onProperty()
 					break;
 				}
 
-				ComparatorPropertyDialog dialog(*comparatorEx, this);
+				DialogComparatorProperty dialog(*comparatorEx, this);
 				if (dialog.exec() != QDialog::Accepted)
 				{
 					break;
@@ -1104,7 +1104,7 @@ void StatisticsPanel::onProperty()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::gotoNextNotMeasured()
+void PanelStatistics::gotoNextNotMeasured()
 {
 	if (m_pView == nullptr)
 	{
@@ -1140,7 +1140,7 @@ void StatisticsPanel::gotoNextNotMeasured()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::gotoNextInvalid()
+void PanelStatistics::gotoNextInvalid()
 {
 	if (m_pView == nullptr)
 	{
@@ -1176,7 +1176,7 @@ void StatisticsPanel::gotoNextInvalid()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::onContextMenu(QPoint)
+void PanelStatistics::onContextMenu(QPoint)
 {
 	if (m_pContextMenu == nullptr)
 	{
@@ -1199,7 +1199,7 @@ void StatisticsPanel::onContextMenu(QPoint)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::onHeaderContextMenu(QPoint)
+void PanelStatistics::onHeaderContextMenu(QPoint)
 {
 	if (m_headerContextMenu == nullptr)
 	{
@@ -1215,7 +1215,7 @@ void StatisticsPanel::onHeaderContextMenu(QPoint)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsPanel::onColumnAction(QAction* action)
+void PanelStatistics::onColumnAction(QAction* action)
 {
 	if (action == nullptr)
 	{

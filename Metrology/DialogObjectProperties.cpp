@@ -1,4 +1,4 @@
-#include "ObjectProperties.h"
+#include "DialogObjectProperties.h"
 
 #include "../lib/UnitsConvertor.h"
 
@@ -6,7 +6,7 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-bool ProjectPropertyDialog::m_showGroupHeader[PROJECT_PROPERTY_GROUP_COUNT] =
+bool DialogProjectProperty::m_showGroupHeader[PROJECT_PROPERTY_GROUP_COUNT] =
 {
 	true,	//	PROJECT_PROPERTY_GROUP_INFO
 	true,	//	PROJECT_PROPERTY_GROUP_DEVELOP
@@ -15,7 +15,7 @@ bool ProjectPropertyDialog::m_showGroupHeader[PROJECT_PROPERTY_GROUP_COUNT] =
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ProjectPropertyDialog::ProjectPropertyDialog(const ProjectInfo& param, QWidget* parent) :
+DialogProjectProperty::DialogProjectProperty(const ProjectInfo& param, QWidget* parent) :
 	QDialog(parent)
 {
 	m_info = param;
@@ -25,7 +25,7 @@ ProjectPropertyDialog::ProjectPropertyDialog(const ProjectInfo& param, QWidget* 
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ProjectPropertyDialog::~ProjectPropertyDialog()
+DialogProjectProperty::~DialogProjectProperty()
 {
 	if (m_pManager != nullptr)
 	{
@@ -48,7 +48,7 @@ ProjectPropertyDialog::~ProjectPropertyDialog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ProjectPropertyDialog::createPropertyList()
+void DialogProjectProperty::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
@@ -171,7 +171,7 @@ void ProjectPropertyDialog::createPropertyList()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-RackPropertyDialog::RackPropertyDialog(const Metrology::RackParam& rack, const RackBase& rackBase, QWidget* parent) :
+DialogRackProperty::DialogRackProperty(const Metrology::RackParam& rack, const RackBase& rackBase, QWidget* parent) :
 	QDialog(parent)
 {
 	if (rack.isValid() == false)
@@ -188,7 +188,7 @@ RackPropertyDialog::RackPropertyDialog(const Metrology::RackParam& rack, const R
 
 // -------------------------------------------------------------------------------------------------------------------
 
-RackPropertyDialog::~RackPropertyDialog()
+DialogRackProperty::~DialogRackProperty()
 {
 	if (m_pManager != nullptr)
 	{
@@ -211,7 +211,7 @@ RackPropertyDialog::~RackPropertyDialog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackPropertyDialog::createPropertyList()
+void DialogRackProperty::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
@@ -296,14 +296,14 @@ void RackPropertyDialog::createPropertyList()
 	m_pEditor->setPropertiesWithoutValueMarked(true);
 	m_pEditor->setRootIsDecorated(false);
 
-	connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &RackPropertyDialog::onPropertyValueChanged);
+	connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogRackProperty::onPropertyValueChanged);
 
 	// create buttons ok and cancel
 	//
 	m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 
-	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &RackPropertyDialog::onOk);
-	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &RackPropertyDialog::reject);
+	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &DialogRackProperty::onOk);
+	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &DialogRackProperty::reject);
 
 	// add layouts
 	//
@@ -315,7 +315,7 @@ void RackPropertyDialog::createPropertyList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackPropertyDialog::onPropertyValueChanged(QtProperty* property, const QVariant &value)
+void DialogRackProperty::onPropertyValueChanged(QtProperty* property, const QVariant &value)
 {
 	if (property == nullptr)
 	{
@@ -354,7 +354,7 @@ void RackPropertyDialog::onPropertyValueChanged(QtProperty* property, const QVar
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool RackPropertyDialog::foundDuplicateGroups()
+bool DialogRackProperty::foundDuplicateGroups()
 {
 	bool result = false;
 
@@ -394,7 +394,7 @@ bool RackPropertyDialog::foundDuplicateGroups()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackPropertyDialog::onOk()
+void DialogRackProperty::onOk()
 {
 	if (m_rack.isValid() == false)
 	{
@@ -420,7 +420,7 @@ void RackPropertyDialog::onOk()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-RackGroupPropertyDialog::RackGroupPropertyDialog(const RackBase& rackBase, QWidget* parent) :
+DialogRackGroupProperty::DialogRackGroupProperty(const RackBase& rackBase, QWidget* parent) :
 	QDialog(parent)
 {
 	m_rackBase = rackBase;
@@ -431,7 +431,7 @@ RackGroupPropertyDialog::RackGroupPropertyDialog(const RackBase& rackBase, QWidg
 
 // -------------------------------------------------------------------------------------------------------------------
 
-RackGroupPropertyDialog::~RackGroupPropertyDialog()
+DialogRackGroupProperty::~DialogRackGroupProperty()
 {
 	if (m_pManager != nullptr)
 	{
@@ -454,7 +454,7 @@ RackGroupPropertyDialog::~RackGroupPropertyDialog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackGroupPropertyDialog::createPropertyList()
+void DialogRackGroupProperty::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
@@ -478,8 +478,8 @@ void RackGroupPropertyDialog::createPropertyList()
 
 	m_pMenuBar->addMenu(m_pGroupMenu);
 
-	connect(m_pAppendGroupAction, &QAction::triggered, this, &RackGroupPropertyDialog::appendGroup);
-	connect(m_pRemoveGroupAction, &QAction::triggered, this, &RackGroupPropertyDialog::removeGroup);
+	connect(m_pAppendGroupAction, &QAction::triggered, this, &DialogRackGroupProperty::appendGroup);
+	connect(m_pRemoveGroupAction, &QAction::triggered, this, &DialogRackGroupProperty::removeGroup);
 
 	// create rack group view
 	//
@@ -499,10 +499,10 @@ void RackGroupPropertyDialog::createPropertyList()
 	// init context menu
 	//
 	m_pGroupView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pGroupView, &QTableWidget::customContextMenuRequested, this, &RackGroupPropertyDialog::onContextMenu);
+	connect(m_pGroupView, &QTableWidget::customContextMenuRequested, this, &DialogRackGroupProperty::onContextMenu);
 
-	connect(m_pGroupView, &QTableWidget::cellChanged, this, &RackGroupPropertyDialog::captionGroupChanged);
-	connect(m_pGroupView, &QTableWidget::itemSelectionChanged, this, &RackGroupPropertyDialog::groupSelected);
+	connect(m_pGroupView, &QTableWidget::cellChanged, this, &DialogRackGroupProperty::captionGroupChanged);
+	connect(m_pGroupView, &QTableWidget::itemSelectionChanged, this, &DialogRackGroupProperty::groupSelected);
 
 	// create property list
 	//
@@ -552,14 +552,14 @@ void RackGroupPropertyDialog::createPropertyList()
 	m_pEditor->setPropertiesWithoutValueMarked(true);
 	m_pEditor->setRootIsDecorated(false);
 
-	connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &RackGroupPropertyDialog::onPropertyValueChanged);
+	connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogRackGroupProperty::onPropertyValueChanged);
 
 	// create buttons ok and cancel
 	//
 	m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 
-	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &RackGroupPropertyDialog::onOk);
-	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &RackGroupPropertyDialog::reject);
+	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &DialogRackGroupProperty::onOk);
+	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &DialogRackGroupProperty::reject);
 
 	// add layouts
 	//
@@ -582,7 +582,7 @@ void RackGroupPropertyDialog::createPropertyList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackGroupPropertyDialog::updateGroupList(const Hash& hash)
+void DialogRackGroupProperty::updateGroupList(const Hash& hash)
 {
 	m_pGroupView->blockSignals(true);
 
@@ -634,7 +634,7 @@ void RackGroupPropertyDialog::updateGroupList(const Hash& hash)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackGroupPropertyDialog::updateRackList()
+void DialogRackGroupProperty::updateRackList()
 {
 	int index = m_pGroupView->currentIndex().row();
 	if (index < 0 || index > m_groupBase.count())
@@ -678,7 +678,7 @@ void RackGroupPropertyDialog::updateRackList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackGroupPropertyDialog::appendGroup()
+void DialogRackGroupProperty::appendGroup()
 {
 	QString caption = QString("Rack group %1").arg(m_groupBase.count() + 1);
 
@@ -694,7 +694,7 @@ void RackGroupPropertyDialog::appendGroup()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackGroupPropertyDialog::removeGroup()
+void DialogRackGroupProperty::removeGroup()
 {
 	int index = m_pGroupView->currentIndex().row();
 	if (index < 0 || index > m_groupBase.count())
@@ -723,7 +723,7 @@ void RackGroupPropertyDialog::removeGroup()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackGroupPropertyDialog::onPropertyValueChanged(QtProperty* property, const QVariant &value)
+void DialogRackGroupProperty::onPropertyValueChanged(QtProperty* property, const QVariant &value)
 {
 	if (property == nullptr)
 	{
@@ -786,7 +786,7 @@ void RackGroupPropertyDialog::onPropertyValueChanged(QtProperty* property, const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool RackGroupPropertyDialog::event(QEvent* e)
+bool DialogRackGroupProperty::event(QEvent* e)
 {
 	if (e->type() == QEvent::Resize)
 	{
@@ -798,14 +798,14 @@ bool RackGroupPropertyDialog::event(QEvent* e)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackGroupPropertyDialog::onContextMenu(QPoint)
+void DialogRackGroupProperty::onContextMenu(QPoint)
 {
 	m_pGroupMenu->exec(QCursor::pos());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackGroupPropertyDialog::captionGroupChanged(int row, int column)
+void DialogRackGroupProperty::captionGroupChanged(int row, int column)
 {
 	Q_UNUSED(column)
 
@@ -852,7 +852,7 @@ void RackGroupPropertyDialog::captionGroupChanged(int row, int column)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackGroupPropertyDialog::groupSelected()
+void DialogRackGroupProperty::groupSelected()
 {
 	int index = m_pGroupView->currentIndex().row();
 	if (index < 0 || index > m_groupBase.count())
@@ -873,7 +873,7 @@ void RackGroupPropertyDialog::groupSelected()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool RackGroupPropertyDialog::foundDuplicateRacks()
+bool DialogRackGroupProperty::foundDuplicateRacks()
 {
 	struct Duplicate
 	{
@@ -976,7 +976,7 @@ bool RackGroupPropertyDialog::foundDuplicateRacks()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackGroupPropertyDialog::onOk()
+void DialogRackGroupProperty::onOk()
 {
 	if (foundDuplicateRacks() == true)
 	{
@@ -990,7 +990,7 @@ void RackGroupPropertyDialog::onOk()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SignalPropertyDialog::m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT] =
+bool DialogSignalProperty::m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT] =
 {
 	true,	//	SIGNAL_PROPERTY_GROUP_ID
 	false,	//	SIGNAL_PROPERTY_GROUP_POSITION
@@ -1000,7 +1000,7 @@ bool SignalPropertyDialog::m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT] =
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalPropertyDialog::SignalPropertyDialog(const Metrology::SignalParam& param, QWidget* parent) :
+DialogSignalProperty::DialogSignalProperty(const Metrology::SignalParam& param, QWidget* parent) :
 	QDialog(parent)
 {
 	if (param.isValid() == false)
@@ -1016,7 +1016,7 @@ SignalPropertyDialog::SignalPropertyDialog(const Metrology::SignalParam& param, 
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalPropertyDialog::~SignalPropertyDialog()
+DialogSignalProperty::~DialogSignalProperty()
 {
 	if (m_pManager != nullptr)
 	{
@@ -1039,7 +1039,7 @@ SignalPropertyDialog::~SignalPropertyDialog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalPropertyDialog::createPropertyList()
+void DialogSignalProperty::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
@@ -1141,7 +1141,7 @@ void SignalPropertyDialog::createPropertyList()
 		// electric range group
 
 		QtProperty* electricRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(),
-																 qApp->translate(	"ObjectProperty.h",
+																 qApp->translate(	"DialogObjectProperty",
 																					SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EL_RANGE]) +
 																					m_param.electricRangeStr());
 
@@ -1221,7 +1221,7 @@ void SignalPropertyDialog::createPropertyList()
 		// engineering range group
 
 		QtProperty* engineeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(),
-																	qApp->translate("ObjectProperty.h",
+																	qApp->translate("DialogObjectProperty",
 																					SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE]) +
 																					m_param.engineeringRangeStr());
 
@@ -1299,15 +1299,15 @@ void SignalPropertyDialog::createPropertyList()
 	m_pEditor->setPropertiesWithoutValueMarked(true);
 	m_pEditor->setRootIsDecorated(false);
 
-	connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &SignalPropertyDialog::onPropertyValueChanged);
-	connect(m_pEditor, &QtTreePropertyBrowser::expanded, this, &SignalPropertyDialog::onPropertyExpanded);
+	connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogSignalProperty::onPropertyValueChanged);
+	connect(m_pEditor, &QtTreePropertyBrowser::expanded, this, &DialogSignalProperty::onPropertyExpanded);
 
 	// create buttons ok and cancel
 	//
 	m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 
-	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &SignalPropertyDialog::onOk);
-	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &SignalPropertyDialog::reject);
+	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &DialogSignalProperty::onOk);
+	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &DialogSignalProperty::reject);
 
 	// add layouts
 	//
@@ -1319,7 +1319,7 @@ void SignalPropertyDialog::createPropertyList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalPropertyDialog::onPropertyValueChanged(QtProperty* property, const QVariant &value)
+void DialogSignalProperty::onPropertyValueChanged(QtProperty* property, const QVariant &value)
 {
 	if (property == nullptr)
 	{
@@ -1372,7 +1372,7 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty* property, const QV
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalPropertyDialog::updateGroupHeader(int index)
+void DialogSignalProperty::updateGroupHeader(int index)
 {
 	if (index < 0 || index >= SIGNAL_PROPERTY_GROUP_COUNT)
 	{
@@ -1407,7 +1407,7 @@ void SignalPropertyDialog::updateGroupHeader(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalPropertyDialog::onPropertyExpanded(QtBrowserItem* item)
+void DialogSignalProperty::onPropertyExpanded(QtBrowserItem* item)
 {
 	if (item == nullptr)
 	{
@@ -1430,7 +1430,7 @@ void SignalPropertyDialog::onPropertyExpanded(QtBrowserItem* item)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalPropertyDialog::onOk()
+void DialogSignalProperty::onOk()
 {
 	if (m_param.isValid() == false)
 	{
@@ -1447,7 +1447,7 @@ void SignalPropertyDialog::onOk()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-bool ComparatorPropertyDialog::m_showGroupHeader[COMPARATOR_PROPERTY_GROUP_COUNT] =
+bool DialogComparatorProperty::m_showGroupHeader[COMPARATOR_PROPERTY_GROUP_COUNT] =
 {
 	true,	//	COMPARATOR_PROPERTY_GROUP_INPUT
 	false,	//	COMPARATOR_PROPERTY_GROUP_COMPARE
@@ -1457,7 +1457,7 @@ bool ComparatorPropertyDialog::m_showGroupHeader[COMPARATOR_PROPERTY_GROUP_COUNT
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorPropertyDialog::ComparatorPropertyDialog(const Metrology::ComparatorEx& comparatorEx, QWidget* parent) :
+DialogComparatorProperty::DialogComparatorProperty(const Metrology::ComparatorEx& comparatorEx, QWidget* parent) :
 	QDialog(parent)
 {
 	m_comparatorEx = comparatorEx;
@@ -1467,7 +1467,7 @@ ComparatorPropertyDialog::ComparatorPropertyDialog(const Metrology::ComparatorEx
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorPropertyDialog::~ComparatorPropertyDialog()
+DialogComparatorProperty::~DialogComparatorProperty()
 {
 	if (m_pManager != nullptr)
 	{
@@ -1490,7 +1490,7 @@ ComparatorPropertyDialog::~ComparatorPropertyDialog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorPropertyDialog::createPropertyList()
+void DialogComparatorProperty::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
@@ -1805,15 +1805,15 @@ void ComparatorPropertyDialog::createPropertyList()
 	m_pEditor->setPropertiesWithoutValueMarked(true);
 	m_pEditor->setRootIsDecorated(false);
 
-	connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
-	connect(m_pEditor, &QtTreePropertyBrowser::expanded, this, &ComparatorPropertyDialog::onPropertyExpanded);
+	connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogComparatorProperty::onPropertyValueChanged);
+	connect(m_pEditor, &QtTreePropertyBrowser::expanded, this, &DialogComparatorProperty::onPropertyExpanded);
 
 	// create buttons ok and cancel
 	//
 	m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 
-	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &ComparatorPropertyDialog::onOk);
-	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &ComparatorPropertyDialog::reject);
+	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &DialogComparatorProperty::onOk);
+	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &DialogComparatorProperty::reject);
 
 	// add layouts
 	//
@@ -1825,7 +1825,7 @@ void ComparatorPropertyDialog::createPropertyList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty* property, const QVariant &value)
+void DialogComparatorProperty::onPropertyValueChanged(QtProperty* property, const QVariant &value)
 {
 	if (property == nullptr)
 	{
@@ -1871,9 +1871,9 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty* property, cons
 				QtVariantProperty* propertyEn = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE));
 				if (propertyEn != nullptr)
 				{
-					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
+					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogComparatorProperty::onPropertyValueChanged);
 					propertyEn->setValue(m_comparatorEx.compare().constValue());
-					connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
+					connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogComparatorProperty::onPropertyValueChanged);
 				}
 			}
 			break;
@@ -1886,9 +1886,9 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty* property, cons
 				QtVariantProperty* propertyEl = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE));
 				if (propertyEl != nullptr && m_comparatorEx.inputSignal()->param().isInput() == true)
 				{
-					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
+					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogComparatorProperty::onPropertyValueChanged);
 					propertyEl->setValue(uc.conversion(m_comparatorEx.compare().constValue(), UnitsConvertType::PhysicalToElectric, m_comparatorEx.inputSignal()->param()));
-					connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
+					connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogComparatorProperty::onPropertyValueChanged);
 				}
 			}
 			break;
@@ -1909,9 +1909,9 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty* property, cons
 				QtVariantProperty* propertyEn = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE));
 				if (propertyEn != nullptr)
 				{
-					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
+					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogComparatorProperty::onPropertyValueChanged);
 					propertyEn->setValue(m_comparatorEx.hysteresisOnlineValue());
-					connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
+					connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogComparatorProperty::onPropertyValueChanged);
 				}
 			}
 			break;
@@ -1924,9 +1924,9 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty* property, cons
 				QtVariantProperty* propertyEl = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE));
 				if (propertyEl != nullptr && m_comparatorEx.inputSignal()->param().isInput() == true)
 				{
-					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
+					disconnect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogComparatorProperty::onPropertyValueChanged);
 					propertyEl->setValue(uc.conversion(m_comparatorEx.hysteresis().constValue(), UnitsConvertType::PhysicalToElectric, m_comparatorEx.inputSignal()->param()));
-					connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
+					connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogComparatorProperty::onPropertyValueChanged);
 				}
 			}
 			break;
@@ -1940,7 +1940,7 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty* property, cons
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorPropertyDialog::onPropertyExpanded(QtBrowserItem* item)
+void DialogComparatorProperty::onPropertyExpanded(QtBrowserItem* item)
 {
 	if (item == nullptr)
 	{
@@ -1963,7 +1963,7 @@ void ComparatorPropertyDialog::onPropertyExpanded(QtBrowserItem* item)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorPropertyDialog::onOk()
+void DialogComparatorProperty::onOk()
 {
 	accept();
 }

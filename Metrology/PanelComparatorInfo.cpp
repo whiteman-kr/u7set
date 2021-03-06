@@ -1,4 +1,4 @@
-#include "ComparatorInfoPanel.h"
+#include "PanelComparatorInfo.h"
 
 #include <QApplication>
 #include <QIcon>
@@ -7,7 +7,7 @@
 #include <QKeyEvent>
 
 #include "ProcessData.h"
-#include "ObjectProperties.h"
+#include "DialogObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -258,7 +258,7 @@ void ComparatorInfoTable::signalParamChanged(const QString& appSignalID)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorInfoPanel::ComparatorInfoPanel(const ComparatorInfoOption& comparatorInfo, QWidget* parent) :
+PanelComparatorInfo::PanelComparatorInfo(const ComparatorInfoOption& comparatorInfo, QWidget* parent) :
 	QDockWidget(parent),
 	m_comparatorInfo(comparatorInfo)
 {
@@ -268,21 +268,21 @@ ComparatorInfoPanel::ComparatorInfoPanel(const ComparatorInfoOption& comparatorI
 	createInterface();
 	createContextMenu();
 
-	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &ComparatorInfoPanel::activeSignalChanged, Qt::QueuedConnection);
+	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &PanelComparatorInfo::activeSignalChanged, Qt::QueuedConnection);
 
 	startComparatorStateTimer(m_comparatorInfo.timeForUpdate());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorInfoPanel::~ComparatorInfoPanel()
+PanelComparatorInfo::~PanelComparatorInfo()
 {
 	stopComparatorStateTimer();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::createInterface()
+void PanelComparatorInfo::createInterface()
 {
 	m_pComparatorInfoWindow = new QMainWindow;
 
@@ -304,14 +304,14 @@ void ComparatorInfoPanel::createInterface()
 
 	m_pView->setWordWrap(false);
 
-	connect(m_pView, &QTableView::doubleClicked , this, &ComparatorInfoPanel::onListDoubleClicked);
+	connect(m_pView, &QTableView::doubleClicked , this, &PanelComparatorInfo::onListDoubleClicked);
 
 	setWidget(m_pComparatorInfoWindow);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::createContextMenu()
+void PanelComparatorInfo::createContextMenu()
 {
 	// create context menu
 	//
@@ -325,18 +325,18 @@ void ComparatorInfoPanel::createContextMenu()
 	m_pComparatorPropertyAction = m_pContextMenu->addAction(tr("Propertу ..."));
 	m_pComparatorPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
-//	connect(m_pCopyAction, &QAction::triggered, this, &ComparatorInfoPanel::copy);
-	connect(m_pComparatorPropertyAction, &QAction::triggered, this, &ComparatorInfoPanel::comparatorProperty);
+//	connect(m_pCopyAction, &QAction::triggered, this, &PanelComparatorInfo::copy);
+	connect(m_pComparatorPropertyAction, &QAction::triggered, this, &PanelComparatorInfo::comparatorProperty);
 
 	// init context menu
 	//
 	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &ComparatorInfoPanel::onContextMenu);
+	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &PanelComparatorInfo::onContextMenu);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::hideColumn(int column, bool hide)
+void PanelComparatorInfo::hideColumn(int column, bool hide)
 {
 	if (column < 0 || column >= Metrology::ComparatorCount)
 	{
@@ -355,12 +355,12 @@ void ComparatorInfoPanel::hideColumn(int column, bool hide)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::startComparatorStateTimer(int timeout)
+void PanelComparatorInfo::startComparatorStateTimer(int timeout)
 {
 	if (m_updateComparatorStateTimer == nullptr)
 	{
 		m_updateComparatorStateTimer = new QTimer(this);
-		connect(m_updateComparatorStateTimer, &QTimer::timeout, this, &ComparatorInfoPanel::updateComparatorState);
+		connect(m_updateComparatorStateTimer, &QTimer::timeout, this, &PanelComparatorInfo::updateComparatorState);
 	}
 
 	m_updateComparatorStateTimer->start(timeout);
@@ -368,7 +368,7 @@ void ComparatorInfoPanel::startComparatorStateTimer(int timeout)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::stopComparatorStateTimer()
+void PanelComparatorInfo::stopComparatorStateTimer()
 {
 	if (m_updateComparatorStateTimer != nullptr)
 	{
@@ -378,7 +378,7 @@ void ComparatorInfoPanel::stopComparatorStateTimer()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::restartComparatorStateTimer(int timeout)
+void PanelComparatorInfo::restartComparatorStateTimer(int timeout)
 {
 	if (m_updateComparatorStateTimer != nullptr)
 	{
@@ -394,7 +394,7 @@ void ComparatorInfoPanel::restartComparatorStateTimer(int timeout)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::measureKindChanged(int measureKind)
+void PanelComparatorInfo::measureKindChanged(int measureKind)
 {
 	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
@@ -407,7 +407,7 @@ void ComparatorInfoPanel::measureKindChanged(int measureKind)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::connectionTypeChanged(int connectionType)
+void PanelComparatorInfo::connectionTypeChanged(int connectionType)
 {
 	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
@@ -419,7 +419,7 @@ void ComparatorInfoPanel::connectionTypeChanged(int connectionType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::setComparatorInfo(const ComparatorInfoOption& comparatorInfo)
+void PanelComparatorInfo::setComparatorInfo(const ComparatorInfoOption& comparatorInfo)
 {
 	m_comparatorInfo = comparatorInfo;
 	m_comparatorTable.setComparatorInfo(m_comparatorInfo);
@@ -428,14 +428,14 @@ void ComparatorInfoPanel::setComparatorInfo(const ComparatorInfoOption& comparat
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::onContextMenu(QPoint)
+void PanelComparatorInfo::onContextMenu(QPoint)
 {
 	m_pContextMenu->exec(QCursor::pos());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool ComparatorInfoPanel::eventFilter(QObject* object, QEvent* event)
+bool PanelComparatorInfo::eventFilter(QObject* object, QEvent* event)
 {
 	if (event->type() == QEvent::KeyPress)
 	{
@@ -452,7 +452,7 @@ bool ComparatorInfoPanel::eventFilter(QObject* object, QEvent* event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
+void PanelComparatorInfo::activeSignalChanged(const MeasureSignal& activeSignal)
 {
 	clear();
 
@@ -537,14 +537,14 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::updateComparatorState()
+void PanelComparatorInfo::updateComparatorState()
 {
 	m_comparatorTable.updateState();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::copy()
+void PanelComparatorInfo::copy()
 {
 	CopyData copyData(m_pView, false);
 	copyData.exec();
@@ -552,7 +552,7 @@ void ComparatorInfoPanel::copy()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoPanel::comparatorProperty()
+void PanelComparatorInfo::comparatorProperty()
 {
 	int index = m_pView->currentIndex().row();
 	if (index < 0 || index >= m_comparatorTable.signalCount())
@@ -578,7 +578,7 @@ void ComparatorInfoPanel::comparatorProperty()
 		return;
 	}
 
-	ComparatorPropertyDialog dialog(*comparatorEx, this);
+	DialogComparatorProperty dialog(*comparatorEx, this);
 	int result = dialog.exec();
 	if (result != QDialog::Accepted)
 	{

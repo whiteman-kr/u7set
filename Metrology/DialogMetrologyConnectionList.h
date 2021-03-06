@@ -1,5 +1,5 @@
-#ifndef METROLOGYCONNECTIONDIALOG_H
-#define METROLOGYCONNECTIONDIALOG_H
+#ifndef DIALOGMETROLOGYCONNECTION_H
+#define DIALOGMETROLOGYCONNECTION_H
 
 #include <QDebug>
 #include <QScreen>
@@ -24,9 +24,9 @@
 
 const char* const			MetrologyConnectionColumn[] =
 {
-							QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "Type"),
-							QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "AppSignalID (source)"),
-							QT_TRANSLATE_NOOP("MetrologyConnectionDialog.h", "AppSignalID (destination)"),
+							QT_TRANSLATE_NOOP("DialogMetrologyConnection", "Type"),
+							QT_TRANSLATE_NOOP("DialogMetrologyConnection", "AppSignalID (source)"),
+							QT_TRANSLATE_NOOP("DialogMetrologyConnection", "AppSignalID (destination)"),
 };
 
 const int					METROLOGY_CONNECTION_COLUMN_COUNT			= sizeof(MetrologyConnectionColumn)/sizeof(MetrologyConnectionColumn[0]);
@@ -76,15 +76,15 @@ private:
 
 // ==============================================================================================
 
-class MetrologyConnectionItemDialog : public QDialog
+class DialogMetrologyConnectionItem : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit MetrologyConnectionItemDialog(QWidget* parent = nullptr);
-	explicit MetrologyConnectionItemDialog(const Metrology::Connection& metrologyConnection, QWidget* parent = nullptr);
-	virtual ~MetrologyConnectionItemDialog();
+	explicit DialogMetrologyConnectionItem(QWidget* parent = nullptr);
+	explicit DialogMetrologyConnectionItem(const Metrology::Connection& metrologyConnection, QWidget* parent = nullptr);
+	virtual ~DialogMetrologyConnectionItem();
 
 public:
 
@@ -121,15 +121,15 @@ private slots:
 
 // ==============================================================================================
 
-class MetrologyConnectionDialog : public QDialog
+class DialogMetrologyConnection : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit MetrologyConnectionDialog(QWidget* parent = nullptr);
-	explicit MetrologyConnectionDialog(Metrology::Signal* pSignal, QWidget* parent = nullptr);
-	virtual ~MetrologyConnectionDialog() override;
+	explicit DialogMetrologyConnection(QWidget* parent = nullptr);
+	explicit DialogMetrologyConnection(Metrology::Signal* pSignal, QWidget* parent = nullptr);
+	virtual ~DialogMetrologyConnection() override;
 
 public:
 
@@ -209,4 +209,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // METROLOGYCONNECTIONDIALOG_H
+#endif // DIALOGMETROLOGYCONNECTION_H

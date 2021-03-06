@@ -1,7 +1,7 @@
-#include "TuningSignalList.h"
+#include "DialogTuningSignalList.h"
 
 #include "ProcessData.h"
-#include "ObjectProperties.h"
+#include "DialogObjectProperties.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ QVariant TuningSourceTable::headerData(int section, Qt::Orientation orientation,
 	{
 		if (section >= 0 && section < TUN_SOURCE_LIST_COLUMN_COUNT)
 		{
-			result = qApp->translate("TuningSignalListDialog.h", TuningSourceColumn[section]);
+			result = qApp->translate("DialogTuningSignalList", TuningSourceColumn[section]);
 		}
 	}
 
@@ -324,7 +324,7 @@ QVariant TuningSignalTable::headerData(int section, Qt::Orientation orientation,
 	{
 		if (section >= 0 && section < TUN_SIGNAL_LIST_COLUMN_COUNT)
 		{
-			result = qApp->translate("TuningSignalListDialog.h", TuningSignalColumn[section]);
+			result = qApp->translate("DialogTuningSignalList", TuningSignalColumn[section]);
 		}
 	}
 
@@ -598,12 +598,12 @@ void TuningSignalTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-E::SignalType	TuningSignalListDialog::m_typeAD = E::SignalType::Analog;
-bool			TuningSignalListDialog::m_showSource = false;
+E::SignalType	DialogTuningSignalList::m_typeAD = E::SignalType::Analog;
+bool			DialogTuningSignalList::m_showSource = false;
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSignalListDialog::TuningSignalListDialog(QWidget* parent) :
+DialogTuningSignalList::DialogTuningSignalList(QWidget* parent) :
 	QDialog(parent)
 {
 	createInterface();
@@ -615,14 +615,14 @@ TuningSignalListDialog::TuningSignalListDialog(QWidget* parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSignalListDialog::~TuningSignalListDialog()
+DialogTuningSignalList::~DialogTuningSignalList()
 {
 	stopSignalStateTimer();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::createInterface()
+void DialogTuningSignalList::createInterface()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Tuning.png"));
@@ -690,17 +690,17 @@ void TuningSignalListDialog::createInterface()
 	m_pMenuBar->addMenu(m_pEditMenu);
 	m_pMenuBar->addMenu(m_pViewMenu);
 
-	connect(m_pSetValueAction, &QAction::triggered, this, &TuningSignalListDialog::setSignalState);
-	connect(m_pExportAction, &QAction::triggered, this, &TuningSignalListDialog::exportSignal);
+	connect(m_pSetValueAction, &QAction::triggered, this, &DialogTuningSignalList::setSignalState);
+	connect(m_pExportAction, &QAction::triggered, this, &DialogTuningSignalList::exportSignal);
 
-	connect(m_pFindAction, &QAction::triggered, this, &TuningSignalListDialog::find);
-	connect(m_pCopyAction, &QAction::triggered, this, &TuningSignalListDialog::copy);
-	connect(m_pSelectAllAction, &QAction::triggered, this, &TuningSignalListDialog::selectAll);
+	connect(m_pFindAction, &QAction::triggered, this, &DialogTuningSignalList::find);
+	connect(m_pCopyAction, &QAction::triggered, this, &DialogTuningSignalList::copy);
+	connect(m_pSelectAllAction, &QAction::triggered, this, &DialogTuningSignalList::selectAll);
 
-	connect(m_pTypeAnalogAction, &QAction::triggered, this, &TuningSignalListDialog::showTypeAnalog);
-	connect(m_pTypeDiscreteAction, &QAction::triggered, this, &TuningSignalListDialog::showTypeDiscrete);
-	connect(m_pTypeBusAction, &QAction::triggered, this, &TuningSignalListDialog::showTypeBus);
-	connect(m_pShowSoucreAction, &QAction::triggered, this, &TuningSignalListDialog::showSources);
+	connect(m_pTypeAnalogAction, &QAction::triggered, this, &DialogTuningSignalList::showTypeAnalog);
+	connect(m_pTypeDiscreteAction, &QAction::triggered, this, &DialogTuningSignalList::showTypeDiscrete);
+	connect(m_pTypeBusAction, &QAction::triggered, this, &DialogTuningSignalList::showTypeBus);
+	connect(m_pShowSoucreAction, &QAction::triggered, this, &DialogTuningSignalList::showSources);
 
 
 	m_pSourceView = new QTableView(this);
@@ -735,7 +735,7 @@ void TuningSignalListDialog::createInterface()
 	m_pSignalView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_pSignalView->setWordWrap(false);
 
-	connect(m_pSignalView, &QTableView::doubleClicked , this, &TuningSignalListDialog::onSignalListDoubleClicked);
+	connect(m_pSignalView, &QTableView::doubleClicked , this, &DialogTuningSignalList::onSignalListDoubleClicked);
 
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 
@@ -751,19 +751,19 @@ void TuningSignalListDialog::createInterface()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::createHeaderContexMenu()
+void DialogTuningSignalList::createHeaderContexMenu()
 {
 	// init header context menu
 	//
 	m_pSignalView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_pSignalView->horizontalHeader(), &QHeaderView::customContextMenuRequested,
-			this, &TuningSignalListDialog::onHeaderContextMenu);
+			this, &DialogTuningSignalList::onHeaderContextMenu);
 
 	m_headerContextMenu = new QMenu(m_pSignalView);
 
 	for(int column = 0; column < TUN_SIGNAL_LIST_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("TuningSignalListDialog.h",
+		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("DialogTuningSignalList",
 																				 TuningSignalColumn[column]));
 		if (m_pColumnAction[column] != nullptr)
 		{
@@ -773,12 +773,12 @@ void TuningSignalListDialog::createHeaderContexMenu()
 	}
 
 	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered),
-			this, &TuningSignalListDialog::onColumnAction);
+			this, &DialogTuningSignalList::onColumnAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::createContextMenu()
+void DialogTuningSignalList::createContextMenu()
 {
 	// create context menu
 	//
@@ -793,12 +793,12 @@ void TuningSignalListDialog::createContextMenu()
 	// init context menu
 	//
 	m_pSignalView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pSignalView, &QTableWidget::customContextMenuRequested, this, &TuningSignalListDialog::onContextMenu);
+	connect(m_pSignalView, &QTableWidget::customContextMenuRequested, this, &DialogTuningSignalList::onContextMenu);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::updateSourceList()
+void DialogTuningSignalList::updateSourceList()
 {
 	// update source list
 	//
@@ -823,7 +823,7 @@ void TuningSignalListDialog::updateSourceList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::updateSignalList()
+void DialogTuningSignalList::updateSignalList()
 {
 	updateVisibleColunm();
 
@@ -861,7 +861,7 @@ void TuningSignalListDialog::updateSignalList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::updateState()
+void DialogTuningSignalList::updateState()
 {
 	m_sourceTable.updateColumn(TUN_SOURCE_LIST_COLUMN_IS_REPLY);
 	m_sourceTable.updateColumn(TUN_SOURCE_LIST_COLUMN_REQUESTS);
@@ -873,7 +873,7 @@ void TuningSignalListDialog::updateState()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::updateVisibleColunm()
+void DialogTuningSignalList::updateVisibleColunm()
 {
 	m_pTypeAnalogAction->setChecked(m_typeAD == E::SignalType::Analog);
 	m_pTypeDiscreteAction->setChecked(m_typeAD == E::SignalType::Discrete);
@@ -904,7 +904,7 @@ void TuningSignalListDialog::updateVisibleColunm()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::hideColumn(int column, bool hide)
+void DialogTuningSignalList::hideColumn(int column, bool hide)
 {
 	if (column < 0 || column >= TUN_SIGNAL_LIST_COLUMN_COUNT)
 	{
@@ -925,12 +925,12 @@ void TuningSignalListDialog::hideColumn(int column, bool hide)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::startSignalStateTimer()
+void DialogTuningSignalList::startSignalStateTimer()
 {
 	if (m_updateSignalStateTimer == nullptr)
 	{
 		m_updateSignalStateTimer = new QTimer(this);
-		connect(m_updateSignalStateTimer, &QTimer::timeout, this, &TuningSignalListDialog::updateState);
+		connect(m_updateSignalStateTimer, &QTimer::timeout, this, &DialogTuningSignalList::updateState);
 	}
 
 	m_updateSignalStateTimer->start(250); // 250 ms
@@ -938,7 +938,7 @@ void TuningSignalListDialog::startSignalStateTimer()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::stopSignalStateTimer()
+void DialogTuningSignalList::stopSignalStateTimer()
 {
 	if (m_updateSignalStateTimer != nullptr)
 	{
@@ -948,7 +948,7 @@ void TuningSignalListDialog::stopSignalStateTimer()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool TuningSignalListDialog::eventFilter(QObject* object, QEvent* event)
+bool DialogTuningSignalList::eventFilter(QObject* object, QEvent* event)
 {
 	if (event->type() == QEvent::KeyPress)
 	{
@@ -965,7 +965,7 @@ bool TuningSignalListDialog::eventFilter(QObject* object, QEvent* event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::setSignalState()
+void DialogTuningSignalList::setSignalState()
 {
 	int index = m_pSignalView->currentIndex().row();
 	if (index < 0 || index >= m_signalTable.signalCount())
@@ -990,13 +990,13 @@ void TuningSignalListDialog::setSignalState()
 		return;
 	}
 
-	TuningSignalStateDialog* dialog = new TuningSignalStateDialog(param);
+	DialogTuningSignalState* dialog = new DialogTuningSignalState(param);
 	dialog->exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::exportSignal()
+void DialogTuningSignalList::exportSignal()
 {
 	ExportData* dialog = new ExportData(m_pSignalView, false, "TuningSignals");
 	dialog->exec();
@@ -1004,7 +1004,7 @@ void TuningSignalListDialog::exportSignal()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::find()
+void DialogTuningSignalList::find()
 {
 	FindData* dialog = new FindData(m_pSignalView);
 	dialog->exec();
@@ -1012,7 +1012,7 @@ void TuningSignalListDialog::find()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::copy()
+void DialogTuningSignalList::copy()
 {
 	CopyData copyData(m_pSignalView, false);
 	copyData.exec();
@@ -1020,7 +1020,7 @@ void TuningSignalListDialog::copy()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::showTypeAnalog()
+void DialogTuningSignalList::showTypeAnalog()
 {
 	m_typeAD = E::SignalType::Analog;
 
@@ -1029,7 +1029,7 @@ void TuningSignalListDialog::showTypeAnalog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::showTypeDiscrete()
+void DialogTuningSignalList::showTypeDiscrete()
 {
 	m_typeAD = E::SignalType::Discrete;
 
@@ -1038,7 +1038,7 @@ void TuningSignalListDialog::showTypeDiscrete()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::showTypeBus()
+void DialogTuningSignalList::showTypeBus()
 {
 	m_typeAD = E::SignalType::Bus;
 
@@ -1047,7 +1047,7 @@ void TuningSignalListDialog::showTypeBus()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::showSources()
+void DialogTuningSignalList::showSources()
 {
 	m_showSource = m_pShowSoucreAction->isChecked();
 
@@ -1063,14 +1063,14 @@ void TuningSignalListDialog::showSources()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::onContextMenu(QPoint)
+void DialogTuningSignalList::onContextMenu(QPoint)
 {
 	m_pContextMenu->exec(QCursor::pos());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::onHeaderContextMenu(QPoint)
+void DialogTuningSignalList::onHeaderContextMenu(QPoint)
 {
 	if (m_headerContextMenu == nullptr)
 	{
@@ -1082,7 +1082,7 @@ void TuningSignalListDialog::onHeaderContextMenu(QPoint)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::onColumnAction(QAction* action)
+void DialogTuningSignalList::onColumnAction(QAction* action)
 {
 	if (action == nullptr)
 	{
@@ -1102,7 +1102,7 @@ void TuningSignalListDialog::onColumnAction(QAction* action)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::onSignalListDoubleClicked(const QModelIndex&)
+void DialogTuningSignalList::onSignalListDoubleClicked(const QModelIndex&)
 {
 	setSignalState();
 }
@@ -1111,7 +1111,7 @@ void TuningSignalListDialog::onSignalListDoubleClicked(const QModelIndex&)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSignalStateDialog::TuningSignalStateDialog(const Metrology::SignalParam& param, QWidget* parent) :
+DialogTuningSignalState::DialogTuningSignalState(const Metrology::SignalParam& param, QWidget* parent) :
 	QDialog(parent),
 	m_param(param)
 {
@@ -1120,13 +1120,13 @@ TuningSignalStateDialog::TuningSignalStateDialog(const Metrology::SignalParam& p
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSignalStateDialog::~TuningSignalStateDialog()
+DialogTuningSignalState::~DialogTuningSignalState()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalStateDialog::createInterface()
+void DialogTuningSignalState::createInterface()
 {
 	setWindowFlags(Qt::Window  | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Tuning.png"));
@@ -1166,8 +1166,8 @@ void TuningSignalStateDialog::createInterface()
 				QPushButton* okButton = new QPushButton(tr("Ok"));
 				QPushButton* cancelButton = new QPushButton(tr("Cancel"));
 
-				connect(okButton, &QPushButton::clicked, this, &TuningSignalStateDialog::onOk);
-				connect(cancelButton, &QPushButton::clicked, this, &TuningSignalStateDialog::reject);
+				connect(okButton, &QPushButton::clicked, this, &DialogTuningSignalState::onOk);
+				connect(cancelButton, &QPushButton::clicked, this, &DialogTuningSignalState::reject);
 
 				buttonLayout->addWidget(okButton);
 				buttonLayout->addWidget(cancelButton);
@@ -1193,8 +1193,8 @@ void TuningSignalStateDialog::createInterface()
 				QPushButton* yesButton = new QPushButton(tr("Yes"));
 				QPushButton* noButton = new QPushButton(tr("No"));
 
-				connect(yesButton, &QPushButton::clicked, this, &TuningSignalStateDialog::onYes);
-				connect(noButton, &QPushButton::clicked, this, &TuningSignalStateDialog::onNo);
+				connect(yesButton, &QPushButton::clicked, this, &DialogTuningSignalState::onYes);
+				connect(noButton, &QPushButton::clicked, this, &DialogTuningSignalState::onNo);
 
 				buttonLayout->addWidget(yesButton);
 				buttonLayout->addWidget(noButton);
@@ -1215,7 +1215,7 @@ void TuningSignalStateDialog::createInterface()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalStateDialog::onOk()
+void DialogTuningSignalState::onOk()
 {
 	double state = m_stateEdit->text().toDouble();
 
@@ -1239,7 +1239,7 @@ void TuningSignalStateDialog::onOk()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalStateDialog::onYes()
+void DialogTuningSignalState::onYes()
 {
 	theSignalBase.tuning().appendCmdFowWrite(m_param.hash(), m_param.tuningValueType(), 1);
 
@@ -1248,7 +1248,7 @@ void TuningSignalStateDialog::onYes()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalStateDialog::onNo()
+void DialogTuningSignalState::onNo()
 {
 	theSignalBase.tuning().appendCmdFowWrite(m_param.hash(), m_param.tuningValueType(), 0);
 

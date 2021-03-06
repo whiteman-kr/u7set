@@ -936,7 +936,7 @@ MeasureViewOption::~MeasureViewOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureViewOption::updateColumnView(int measureType) const
+bool MeasureViewOption::updateColumnView(Measure::Type measureType) const
 {
 	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
@@ -948,7 +948,7 @@ bool MeasureViewOption::updateColumnView(int measureType) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewOption::setUpdateColumnView(int measureType, bool state)
+void MeasureViewOption::setUpdateColumnView(Measure::Type measureType, bool state)
 {
 	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
@@ -971,15 +971,15 @@ void MeasureViewOption::load()
 	{
 		// init
 		//
-		MeasureViewHeader header;
+		Measure::ViewHeader header;
 
 		for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
 		{
 			header.setMeasureType(static_cast<Measure::Type>(measureType));
 
-			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+			for(int column = 0; column < Measure::MaxColumnCount; column++)
 			{
-				MeasureViewColumn* pColumn = header.column(column);
+				Measure::HeaderColumn* pColumn = header.column(column);
 				if (pColumn == nullptr)
 				{
 					continue;
@@ -993,9 +993,9 @@ void MeasureViewOption::load()
 		//
 		for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
 		{
-			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+			for(int column = 0; column < Measure::MaxColumnCount; column++)
 			{
-				const MeasureViewColumn& c = m_column[measureType][languageType][column];
+				const Measure::HeaderColumn& c = m_column[measureType][languageType][column];
 				if (c.title().isEmpty() == true)
 				{
 					continue;
@@ -1038,9 +1038,9 @@ void MeasureViewOption::save()
 	{
 		for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
 		{
-			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+			for(int column = 0; column < Measure::MaxColumnCount; column++)
 			{
-				const MeasureViewColumn& c = m_column[measureType][languageType][column];
+				const Measure::HeaderColumn& c = m_column[measureType][languageType][column];
 
 				if (c.title().isEmpty() == true)
 				{
@@ -1079,7 +1079,7 @@ MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 
 		for(int languageType = 0; languageType < LanguageTypeCount; languageType ++)
 		{
-			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+			for(int column = 0; column < Measure::MaxColumnCount; column++)
 			{
 				m_column[measureType][languageType][column] = from.m_column[measureType][languageType][column];
 			}

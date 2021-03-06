@@ -1,4 +1,4 @@
-#include "OptionsDialog.h"
+#include "DialogOptions.h"
 
 #include <QApplication>
 #include <QScreen>
@@ -10,8 +10,8 @@
 #include <assert.h>
 
 #include "FolderPropertyManager.h"
-#include "MeasurePointDialog.h"
-#include "OptionsMvhDialog.h"
+#include "DialogMeasurePoint.h"
+#include "DialogOptionsMvh.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -92,17 +92,17 @@ PropertyPage::~PropertyPage()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-int OptionsDialog::m_activePage = OPTION_PAGE_LINEARITY_MEASURE;
+int DialogOptions::m_activePage = OPTION_PAGE_LINEARITY_MEASURE;
 
 // -------------------------------------------------------------------------------------------------------------------
 
-OptionsDialog::OptionsDialog(const Options& options, QWidget* parent) :
+DialogOptions::DialogOptions(const Options& options, QWidget* parent) :
 	QDialog(parent),
 	m_options(options)
 {
 	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
 	{
-		m_options.measureView().setUpdateColumnView(measureType, false);
+		m_options.measureView().setUpdateColumnView(static_cast<Measure::Type>(measureType), false);
 	}
 
 	createInterface();
@@ -110,14 +110,14 @@ OptionsDialog::OptionsDialog(const Options& options, QWidget* parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-OptionsDialog::~OptionsDialog()
+DialogOptions::~DialogOptions()
 {
 	removePages();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::createInterface()
+void DialogOptions::createInterface()
 {
 	setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Options.png"));
@@ -146,7 +146,7 @@ void OptionsDialog::createInterface()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QHBoxLayout* OptionsDialog::createPages()
+QHBoxLayout* DialogOptions::createPages()
 {
 	QHBoxLayout* pagesLayout = new QHBoxLayout ;
 
@@ -160,7 +160,7 @@ QHBoxLayout* OptionsDialog::createPages()
 	for(int group = 0; group < OPTION_GROUP_COUNT; group++)
 	{
 		QTreeWidgetItem* groupTreeItem = new QTreeWidgetItem;
-		groupTreeItem->setText(0, qApp->translate("OptionsDialog.h", OptionGroupTitle[group]));
+		groupTreeItem->setText(0, qApp->translate("DialogOptions", OptionGroupTitle[group]));
 		m_pPageTree->addTopLevelItem(groupTreeItem);
 
 		groupList.append(groupTreeItem);
@@ -177,7 +177,7 @@ QHBoxLayout* OptionsDialog::createPages()
 		QTreeWidgetItem* groupTreeItem = groupList.at(groupIndex);
 
 		QTreeWidgetItem* pageTreeItem = new QTreeWidgetItem;
-		pageTreeItem->setText(0, qApp->translate("OptionsDialog.h", OptionPageShortTitle[page]));
+		pageTreeItem->setText(0, qApp->translate("DialogOptions", OptionPageShortTitle[page]));
 		pageTreeItem->setData(0, Qt::UserRole, page);
 
 		groupTreeItem->addChild(pageTreeItem);
@@ -192,7 +192,7 @@ QHBoxLayout* OptionsDialog::createPages()
 		m_pageList.append(pPropertyPage);
 	}
 
-	connect(m_pPageTree, &QTreeWidget::currentItemChanged , this, &OptionsDialog::onPageChanged);
+	connect(m_pPageTree, &QTreeWidget::currentItemChanged , this, &DialogOptions::onPageChanged);
 
 	pagesLayout->addWidget(m_pPageTree);
 
@@ -201,7 +201,7 @@ QHBoxLayout* OptionsDialog::createPages()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::removePages()
+void DialogOptions::removePages()
 {
 	m_propertyItemList.clear();
 	m_propertyValueList.clear();
@@ -221,7 +221,7 @@ void OptionsDialog::removePages()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QHBoxLayout* OptionsDialog::createButtons()
+QHBoxLayout* DialogOptions::createButtons()
 {
 	QHBoxLayout* buttonsLayout = new QHBoxLayout ;
 
@@ -232,15 +232,15 @@ QHBoxLayout* OptionsDialog::createButtons()
 	buttonsLayout->addWidget(okButton);
 	buttonsLayout->addWidget(cancelButton);
 
-	connect(okButton, &QPushButton::clicked, this, &OptionsDialog::onOk);
-	connect(cancelButton, &QPushButton::clicked, this, &OptionsDialog::reject);
+	connect(okButton, &QPushButton::clicked, this, &DialogOptions::onOk);
+	connect(cancelButton, &QPushButton::clicked, this, &DialogOptions::reject);
 
 	return buttonsLayout;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPage* OptionsDialog::createPage(int page)
+PropertyPage* DialogOptions::createPage(int page)
 {
 	if (page < 0 || page >= OPTION_PAGE_COUNT)
 	{
@@ -273,7 +273,7 @@ PropertyPage* OptionsDialog::createPage(int page)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPage* OptionsDialog::createPropertyList(int page)
+PropertyPage* DialogOptions::createPropertyList(int page)
 {
 	if (page < 0 || page >= OPTION_PAGE_COUNT)
 	{
@@ -856,15 +856,15 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 	editor->setPropertiesWithoutValueMarked(true);
 	editor->setRootIsDecorated(false);
 
-	connect(manager, &QtVariantPropertyManager::valueChanged, this, &OptionsDialog::onPropertyValueChanged);
-	connect(editor, &QtTreePropertyBrowser::currentItemChanged, this, &OptionsDialog::onBrowserItem);
+	connect(manager, &QtVariantPropertyManager::valueChanged, this, &DialogOptions::onPropertyValueChanged);
+	connect(editor, &QtTreePropertyBrowser::currentItemChanged, this, &DialogOptions::onBrowserItem);
 
 	return (new PropertyPage(manager, factory, editor));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPage* OptionsDialog::createPropertyDialog(int page)
+PropertyPage* DialogOptions::createPropertyDialog(int page)
 {
 	if (page < 0 || page >= OPTION_PAGE_COUNT)
 	{
@@ -877,8 +877,8 @@ PropertyPage* OptionsDialog::createPropertyDialog(int page)
 	{
 		case OPTION_PAGE_LINEARITY_POINT:
 			{
-				MeasurePointDialog* dialog = new MeasurePointDialog(m_options.linearity());
-				connect(dialog, &MeasurePointDialog::updateLinearityPage, this, &OptionsDialog::updateLinearityPage);
+				DialogMeasurePoint* dialog = new DialogMeasurePoint(m_options.linearity());
+				connect(dialog, &DialogMeasurePoint::updateLinearityPage, this, &DialogOptions::updateLinearityPage);
 
 				pDialogPage = dialog;
 			}
@@ -886,8 +886,8 @@ PropertyPage* OptionsDialog::createPropertyDialog(int page)
 
 		case OPTION_PAGE_MEASURE_VIEW_COLUMN:
 			{
-				OptionsMeasureViewHeaderDialog* dialog = new OptionsMeasureViewHeaderDialog(m_options.measureView());
-				connect(dialog, &OptionsMeasureViewHeaderDialog::updateMeasureViewPage, this, &OptionsDialog::updateMeasureViewPage);
+				DialogOptionsMeasureViewHeader* dialog = new DialogOptionsMeasureViewHeader(m_options.measureView());
+				connect(dialog, &DialogOptionsMeasureViewHeader::updateMeasureViewPage, this, &DialogOptions::updateMeasureViewPage);
 
 				pDialogPage = dialog;
 			}
@@ -900,7 +900,7 @@ PropertyPage* OptionsDialog::createPropertyDialog(int page)
 
 	if (pDialogPage != nullptr)
 	{
-		pDialogPage->setWindowTitle(qApp->translate("OptionsDialog.h", OptionPageTitle[page]));
+		pDialogPage->setWindowTitle(qApp->translate("DialogOptions", OptionPageTitle[page]));
 	}
 
 	return (new PropertyPage(pDialogPage));
@@ -908,7 +908,7 @@ PropertyPage* OptionsDialog::createPropertyDialog(int page)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::appendProperty(QtProperty* property, int page, int param)
+void DialogOptions::appendProperty(QtProperty* property, int page, int param)
 {
 	if (property == nullptr)
 	{
@@ -926,7 +926,7 @@ void OptionsDialog::appendProperty(QtProperty* property, int page, int param)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::expandProperty(QtTreePropertyBrowser* pEditor, int page, int param, bool expanded)
+void DialogOptions::expandProperty(QtTreePropertyBrowser* pEditor, int page, int param, bool expanded)
 {
 	if (pEditor == nullptr)
 	{
@@ -949,7 +949,7 @@ void OptionsDialog::expandProperty(QtTreePropertyBrowser* pEditor, int page, int
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::onPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous)
+void DialogOptions::onPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous)
 {
 	if (current == nullptr || previous == nullptr)
 	{
@@ -975,7 +975,7 @@ void OptionsDialog::onPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* pre
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool OptionsDialog::setActivePage(int page)
+bool DialogOptions::setActivePage(int page)
 {
 	if (page < 0 || page >= m_pageList.count())
 	{
@@ -1006,7 +1006,7 @@ bool OptionsDialog::setActivePage(int page)
 		QWidget* pWidget = pActivePage->getWidget();
 		if (pWidget != nullptr)
 		{
-			setWindowTitle(tr("Options - %1").arg(qApp->translate("OptionsDialog.h", OptionPageTitle[page])));
+			setWindowTitle(tr("Options - %1").arg(qApp->translate("DialogOptions", OptionPageTitle[page])));
 
 			m_pagesLayout->addWidget(pWidget);
 			pWidget->show();
@@ -1030,7 +1030,7 @@ bool OptionsDialog::setActivePage(int page)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::onPropertyValueChanged(QtProperty* property, const QVariant &value)
+void DialogOptions::onPropertyValueChanged(QtProperty* property, const QVariant &value)
 {
 	if (property == nullptr)
 	{
@@ -1060,14 +1060,14 @@ void OptionsDialog::onPropertyValueChanged(QtProperty* property, const QVariant 
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::onBrowserItem(QtBrowserItem*)
+void DialogOptions::onBrowserItem(QtBrowserItem*)
 {
 	restoreProperty();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::restoreProperty()
+void DialogOptions::restoreProperty()
 {
 	QtProperty* property = m_currentPropertyItem;
 	if (property == nullptr)
@@ -1087,7 +1087,7 @@ void OptionsDialog::restoreProperty()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::applyProperty()
+void DialogOptions::applyProperty()
 {
 	QtProperty* property = m_currentPropertyItem;
 	if (property == nullptr)
@@ -1231,7 +1231,7 @@ void OptionsDialog::applyProperty()
 
 				for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
 				{
-					m_options.measureView().setUpdateColumnView(measureType, true);
+					m_options.measureView().setUpdateColumnView(static_cast<Measure::Type>(measureType), true);
 				}
 			}
 			break;
@@ -1314,7 +1314,7 @@ void OptionsDialog::applyProperty()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::updateServerPage()
+void DialogOptions::updateServerPage()
 {
 	QtVariantProperty* property = nullptr;
 
@@ -1327,7 +1327,7 @@ void OptionsDialog::updateServerPage()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::updateLinearityPage(bool isDialog)
+void DialogOptions::updateLinearityPage(bool isDialog)
 {
 	PropertyPage* page = m_pageList[OPTION_PAGE_LINEARITY_POINT];
 	if (page == nullptr)
@@ -1335,7 +1335,7 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 		return;
 	}
 
-	MeasurePointDialog* dialog = dynamic_cast<MeasurePointDialog*>(page->getWidget());
+	DialogMeasurePoint* dialog = dynamic_cast<DialogMeasurePoint*>(page->getWidget());
 	if (dialog == nullptr)
 	{
 		return;
@@ -1411,7 +1411,7 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::updateMeasureViewPage(bool isDialog)
+void DialogOptions::updateMeasureViewPage(bool isDialog)
 {
 	PropertyPage* page = m_pageList[OPTION_PAGE_MEASURE_VIEW_COLUMN];
 	if (page == nullptr)
@@ -1419,7 +1419,7 @@ void OptionsDialog::updateMeasureViewPage(bool isDialog)
 		return;
 	}
 
-	OptionsMeasureViewHeaderDialog* dialog = dynamic_cast<OptionsMeasureViewHeaderDialog*> (page->getWidget());
+	DialogOptionsMeasureViewHeader* dialog = dynamic_cast<DialogOptionsMeasureViewHeader*> (page->getWidget());
 	if (dialog == nullptr)
 	{
 		return;
@@ -1447,7 +1447,7 @@ void OptionsDialog::updateMeasureViewPage(bool isDialog)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::loadSettings()
+void DialogOptions::loadSettings()
 {
 	QSettings s;
 
@@ -1459,7 +1459,7 @@ void OptionsDialog::loadSettings()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::saveSettings()
+void DialogOptions::saveSettings()
 {
 	QSettings s;
 
@@ -1469,14 +1469,14 @@ void OptionsDialog::saveSettings()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::onOk()
+void DialogOptions::onOk()
 {
 	accept();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool OptionsDialog::event(QEvent*  e)
+bool DialogOptions::event(QEvent*  e)
 {
 	if (e->type() == QEvent::Hide)
 	{

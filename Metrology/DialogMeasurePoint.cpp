@@ -1,4 +1,4 @@
-#include "MeasurePointDialog.h"
+#include "DialogMeasurePoint.h"
 
 #include <QMessageBox>
 #include <QHeaderView>
@@ -7,7 +7,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasurePointDialog::MeasurePointDialog(const LinearityOption& linearity, QWidget* parent) :
+DialogMeasurePoint::DialogMeasurePoint(const LinearityOption& linearity, QWidget* parent) :
 	QDialog(parent),
 	m_linearity (linearity)
 {
@@ -86,27 +86,27 @@ MeasurePointDialog::MeasurePointDialog(const LinearityOption& linearity, QWidget
 
 	setHeaderList();
 
-	connect(m_addButton, &QPushButton::clicked, this, &MeasurePointDialog::onAddPoint);
-	connect(m_editButton, &QPushButton::clicked, this, &MeasurePointDialog::onEditPoint);
-	connect(m_removeButton, &QPushButton::clicked, this, &MeasurePointDialog::onRemovePoint);
-	connect(m_upButton, &QPushButton::clicked, this, &MeasurePointDialog::onUpPoint);
-	connect(m_downButton, &QPushButton::clicked, this, &MeasurePointDialog::onDownPoint);
-	connect(m_rangeTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MeasurePointDialog::onRangeType);
-	connect(m_pointCountEdit, &QLineEdit::textChanged, this, &MeasurePointDialog::onAutomaticCalculatePoints);
-	connect(m_lowRangeEdit, &QLineEdit::textChanged, this, &MeasurePointDialog::onAutomaticCalculatePoints);
-	connect(m_highRangeEdit, &QLineEdit::textChanged, this, &MeasurePointDialog::onAutomaticCalculatePoints);
+	connect(m_addButton, &QPushButton::clicked, this, &DialogMeasurePoint::onAddPoint);
+	connect(m_editButton, &QPushButton::clicked, this, &DialogMeasurePoint::onEditPoint);
+	connect(m_removeButton, &QPushButton::clicked, this, &DialogMeasurePoint::onRemovePoint);
+	connect(m_upButton, &QPushButton::clicked, this, &DialogMeasurePoint::onUpPoint);
+	connect(m_downButton, &QPushButton::clicked, this, &DialogMeasurePoint::onDownPoint);
+	connect(m_rangeTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogMeasurePoint::onRangeType);
+	connect(m_pointCountEdit, &QLineEdit::textChanged, this, &DialogMeasurePoint::onAutomaticCalculatePoints);
+	connect(m_lowRangeEdit, &QLineEdit::textChanged, this, &DialogMeasurePoint::onAutomaticCalculatePoints);
+	connect(m_highRangeEdit, &QLineEdit::textChanged, this, &DialogMeasurePoint::onAutomaticCalculatePoints);
  }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasurePointDialog::~MeasurePointDialog()
+DialogMeasurePoint::~DialogMeasurePoint()
 {
 	clearList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::setHeaderList()
+void DialogMeasurePoint::setHeaderList()
 {
 	QStringList horizontalHeaderLabels;
 
@@ -131,14 +131,14 @@ void MeasurePointDialog::setHeaderList()
 		}
 	}
 
-	connect(m_pointList, &QTableWidget::cellDoubleClicked, this, &MeasurePointDialog::onEditPoint);
-	connect(m_pointList, &QTableWidget::cellChanged, this, &MeasurePointDialog::cellChanged);
-	connect(m_pointList, &QTableWidget::currentCellChanged, this, &MeasurePointDialog::currentCellChanged);
+	connect(m_pointList, &QTableWidget::cellDoubleClicked, this, &DialogMeasurePoint::onEditPoint);
+	connect(m_pointList, &QTableWidget::cellChanged, this, &DialogMeasurePoint::cellChanged);
+	connect(m_pointList, &QTableWidget::currentCellChanged, this, &DialogMeasurePoint::currentCellChanged);
 
 	// init context menu
 	//
 	m_pointList->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pointList->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &MeasurePointDialog::onHeaderContextMenu);
+	connect(m_pointList->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &DialogMeasurePoint::onHeaderContextMenu);
 
 	m_headerContextMenu = new QMenu(m_pointList);
 
@@ -157,7 +157,7 @@ void MeasurePointDialog::setHeaderList()
 		}
 	}
 
-	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &MeasurePointDialog::onColumnAction);
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &DialogMeasurePoint::onColumnAction);
 
 	DoubleDelegate*  delegate = new DoubleDelegate(this);
 	m_pointList->setItemDelegate(delegate);
@@ -165,7 +165,7 @@ void MeasurePointDialog::setHeaderList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::updateRangeType()
+void DialogMeasurePoint::updateRangeType()
 {
 	switch(m_linearity.divisionType())
 	{
@@ -215,7 +215,7 @@ void MeasurePointDialog::updateRangeType()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::updateList()
+void DialogMeasurePoint::updateList()
 {
 	clearList();
 
@@ -277,7 +277,7 @@ void MeasurePointDialog::updateList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::clearList()
+void DialogMeasurePoint::clearList()
 {
 	m_updatingList = true;
 
@@ -301,7 +301,7 @@ void MeasurePointDialog::clearList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::hideColumn(int column, bool hide)
+void DialogMeasurePoint::hideColumn(int column, bool hide)
 {
 	if (column < 0 || column >= m_pointList->columnCount())
 	{
@@ -320,7 +320,7 @@ void MeasurePointDialog::hideColumn(int column, bool hide)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::onAddPoint()
+void DialogMeasurePoint::onAddPoint()
 {
 	int index = m_pointList->currentRow();
 	if (index == -1)
@@ -343,7 +343,7 @@ void MeasurePointDialog::onAddPoint()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::cellChanged(int row, int column)
+void DialogMeasurePoint::cellChanged(int row, int column)
 {
 	if (m_updatingList == true)
 	{
@@ -383,7 +383,7 @@ void MeasurePointDialog::cellChanged(int row, int column)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::currentCellChanged(int, int column, int, int)
+void DialogMeasurePoint::currentCellChanged(int, int column, int, int)
 {
 	if (column == Measure::PointSensor::Percent)
 	{
@@ -397,7 +397,7 @@ void MeasurePointDialog::currentCellChanged(int, int column, int, int)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::onEditPoint()
+void DialogMeasurePoint::onEditPoint()
 {
 	int row = m_pointList->currentRow();
 	if (row == -1)
@@ -416,7 +416,7 @@ void MeasurePointDialog::onEditPoint()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::onRemovePoint()
+void DialogMeasurePoint::onRemovePoint()
 {
 	int pointCount = m_linearity.points().count();
 	for(int row = pointCount - 1; row >= 0; row --)
@@ -446,7 +446,7 @@ void MeasurePointDialog::onRemovePoint()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::onUpPoint()
+void DialogMeasurePoint::onUpPoint()
 {
 	int index = m_pointList->currentRow();
 	if (index < 0 || index >= m_linearity.points().count())
@@ -471,7 +471,7 @@ void MeasurePointDialog::onUpPoint()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::onDownPoint()
+void DialogMeasurePoint::onDownPoint()
 {
 	int index = m_pointList->currentRow();
 	if (index < 0 || index >= m_linearity.points().count())
@@ -497,7 +497,7 @@ void MeasurePointDialog::onDownPoint()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::onRangeType(int type)
+void DialogMeasurePoint::onRangeType(int type)
 {
 	if (type < 0 || type >= Measure::LinearityDivisionCount)
 	{
@@ -513,7 +513,7 @@ void MeasurePointDialog::onRangeType(int type)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::onAutomaticCalculatePoints()
+void DialogMeasurePoint::onAutomaticCalculatePoints()
 {
 	if (m_linearity.divisionType() != Measure::LinearityDivision::Automatic)
 	{
@@ -571,7 +571,7 @@ void MeasurePointDialog::onAutomaticCalculatePoints()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::onHeaderContextMenu(QPoint)
+void DialogMeasurePoint::onHeaderContextMenu(QPoint)
 {
 	if (m_headerContextMenu == nullptr)
 	{
@@ -583,7 +583,7 @@ void MeasurePointDialog::onHeaderContextMenu(QPoint)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::onColumnAction(QAction* action)
+void DialogMeasurePoint::onColumnAction(QAction* action)
 {
 	if (action == nullptr)
 	{
@@ -603,7 +603,7 @@ void MeasurePointDialog::onColumnAction(QAction* action)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::keyPressEvent(QKeyEvent* e)
+void DialogMeasurePoint::keyPressEvent(QKeyEvent* e)
 {
 	if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
 	{
@@ -622,7 +622,7 @@ void MeasurePointDialog::keyPressEvent(QKeyEvent* e)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurePointDialog::showEvent(QShowEvent* e)
+void DialogMeasurePoint::showEvent(QShowEvent* e)
 {
 	m_rangeTypeList->setCurrentIndex(m_linearity.divisionType());
 	updateRangeType();

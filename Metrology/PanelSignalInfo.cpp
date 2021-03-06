@@ -1,4 +1,4 @@
-#include "SignalInfoPanel.h"
+#include "PanelSignalInfo.h"
 
 #include <QApplication>
 #include <QIcon>
@@ -9,7 +9,7 @@
 #include "../lib/UnitsConvertor.h"
 
 #include "ProcessData.h"
-#include "ObjectProperties.h"
+#include "DialogObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ QVariant SignalInfoTable::headerData(int section, Qt::Orientation orientation, i
 	{
 		if (section >= 0 && section < SIGNAL_INFO_COLUMN_COUNT)
 		{
-			result = qApp->translate("SignalInfoMeasure.h", SignalInfoColumn[section]);
+			result = qApp->translate("PanelSignalInfo", SignalInfoColumn[section]);
 		}
 	}
 
@@ -405,7 +405,7 @@ void SignalInfoTable::signalParamChanged(const QString& appSignalID)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalInfoPanel::SignalInfoPanel(const SignalInfoOption& signalInfo, QWidget* parent) :
+PanelSignalInfo::PanelSignalInfo(const SignalInfoOption& signalInfo, QWidget* parent) :
 	QDockWidget(parent),
 	m_signalInfo(signalInfo)
 {
@@ -417,7 +417,7 @@ SignalInfoPanel::SignalInfoPanel(const SignalInfoOption& signalInfo, QWidget* pa
 	initContextMenu();
 
 	connect(&theSignalBase, &SignalBase::activeSignalChanged,
-			this, &SignalInfoPanel::activeSignalChanged, Qt::QueuedConnection);
+			this, &PanelSignalInfo::activeSignalChanged, Qt::QueuedConnection);
 
 	hideColumn(SIGNAL_INFO_COLUMN_CUSTOM_ID, true);
 	hideColumn(SIGNAL_INFO_COLUMN_EQUIPMENT_ID, true);
@@ -432,14 +432,14 @@ SignalInfoPanel::SignalInfoPanel(const SignalInfoOption& signalInfo, QWidget* pa
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalInfoPanel::~SignalInfoPanel()
+PanelSignalInfo::~PanelSignalInfo()
 {
 	stopSignalStateTimer();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::createInterface()
+void PanelSignalInfo::createInterface()
 {
 	m_pSignalInfoWindow = new QMainWindow;
 
@@ -462,25 +462,25 @@ void SignalInfoPanel::createInterface()
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_pView->setWordWrap(false);
 
-	connect(m_pView, &QTableView::doubleClicked , this, &SignalInfoPanel::onListDoubleClicked);
+	connect(m_pView, &QTableView::doubleClicked , this, &PanelSignalInfo::onListDoubleClicked);
 
 	setWidget(m_pSignalInfoWindow);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::createHeaderContexMenu()
+void PanelSignalInfo::createHeaderContexMenu()
 {
 	// init header context menu
 	//
 	m_pView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &SignalInfoPanel::onHeaderContextMenu);
+	connect(m_pView->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &PanelSignalInfo::onHeaderContextMenu);
 
 	m_headerContextMenu = new QMenu(m_pView);
 
 	for(int column = 0; column < SIGNAL_INFO_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("SignalInfoMeasure.h", SignalInfoColumn[column]));
+		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("PanelSignalInfo", SignalInfoColumn[column]));
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
@@ -488,22 +488,22 @@ void SignalInfoPanel::createHeaderContexMenu()
 		}
 	}
 
-	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &SignalInfoPanel::onColumnAction);
+	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &PanelSignalInfo::onColumnAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::initContextMenu()
+void PanelSignalInfo::initContextMenu()
 {
 	// init context menu
 	//
 	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &SignalInfoPanel::onContextMenu);
+	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &PanelSignalInfo::onContextMenu);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::createContextMenu()
+void PanelSignalInfo::createContextMenu()
 {
 	if (m_pContextMenu != nullptr)
 	{
@@ -543,13 +543,13 @@ void SignalInfoPanel::createContextMenu()
 			if ( m_pView->currentIndex().row() > 0)
 			{
 				m_pShowSignalMoveUpAction = m_pShowMenu->addAction(tr("Move Up"));
-				connect(m_pShowSignalMoveUpAction, &QAction::triggered, this, &SignalInfoPanel::showSignalMoveUp);
+				connect(m_pShowSignalMoveUpAction, &QAction::triggered, this, &PanelSignalInfo::showSignalMoveUp);
 			}
 
 			if ( m_pView->currentIndex().row() < m_signalParamTable.signalCount() - 1)
 			{
 				m_pShowSignalMoveDownAction = m_pShowMenu->addAction(tr("Move Down"));
-				connect(m_pShowSignalMoveDownAction, &QAction::triggered, this, &SignalInfoPanel::showSignalMoveDown);
+				connect(m_pShowSignalMoveDownAction, &QAction::triggered, this, &PanelSignalInfo::showSignalMoveDown);
 			}
 		}
 	}
@@ -566,15 +566,15 @@ void SignalInfoPanel::createContextMenu()
 	m_pSignalPropertyAction = m_pContextMenu->addAction(tr("Propertу ..."));
 	m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
-	connect(m_pShowNoValidAction, &QAction::triggered, this, &SignalInfoPanel::showNoValid);
-	connect(m_pShowElectricValueAction, &QAction::triggered, this, &SignalInfoPanel::showElectricValue);
-	connect(m_pCopyAction, &QAction::triggered, this, &SignalInfoPanel::copy);
-	connect(m_pSignalPropertyAction, &QAction::triggered, this, &SignalInfoPanel::signalProperty);
+	connect(m_pShowNoValidAction, &QAction::triggered, this, &PanelSignalInfo::showNoValid);
+	connect(m_pShowElectricValueAction, &QAction::triggered, this, &PanelSignalInfo::showElectricValue);
+	connect(m_pCopyAction, &QAction::triggered, this, &PanelSignalInfo::copy);
+	connect(m_pSignalPropertyAction, &QAction::triggered, this, &PanelSignalInfo::signalProperty);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::appendMetrologyConnetionMenu()
+void PanelSignalInfo::appendMetrologyConnetionMenu()
 {
 	if (m_connectionType == Metrology::ConnectionType::Unused)
 	{
@@ -639,7 +639,7 @@ void SignalInfoPanel::appendMetrologyConnetionMenu()
 	}
 
 	connect(m_pContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered),
-			this, &SignalInfoPanel::onConnectionAction);
+			this, &PanelSignalInfo::onConnectionAction);
 
 	m_pContextMenu->addSeparator();
 }
@@ -647,7 +647,7 @@ void SignalInfoPanel::appendMetrologyConnetionMenu()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::hideColumn(int column, bool hide)
+void PanelSignalInfo::hideColumn(int column, bool hide)
 {
 	if (column < 0 || column >= SIGNAL_INFO_COLUMN_COUNT)
 	{
@@ -668,12 +668,12 @@ void SignalInfoPanel::hideColumn(int column, bool hide)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::startSignalStateTimer(int timeout)
+void PanelSignalInfo::startSignalStateTimer(int timeout)
 {
 	if (m_updateSignalStateTimer == nullptr)
 	{
 		m_updateSignalStateTimer = new QTimer(this);
-		connect(m_updateSignalStateTimer, &QTimer::timeout, this, &SignalInfoPanel::updateSignalState);
+		connect(m_updateSignalStateTimer, &QTimer::timeout, this, &PanelSignalInfo::updateSignalState);
 	}
 
 	m_updateSignalStateTimer->start(timeout);
@@ -681,7 +681,7 @@ void SignalInfoPanel::startSignalStateTimer(int timeout)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::stopSignalStateTimer()
+void PanelSignalInfo::stopSignalStateTimer()
 {
 	if (m_updateSignalStateTimer != nullptr)
 	{
@@ -691,7 +691,7 @@ void SignalInfoPanel::stopSignalStateTimer()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::restartSignalStateTimer(int timeout)
+void PanelSignalInfo::restartSignalStateTimer(int timeout)
 {
 	if (m_updateSignalStateTimer != nullptr)
 	{
@@ -707,7 +707,7 @@ void SignalInfoPanel::restartSignalStateTimer(int timeout)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::setSignalInfo(const SignalInfoOption& signalInfo)
+void PanelSignalInfo::setSignalInfo(const SignalInfoOption& signalInfo)
 {
 	m_signalInfo = signalInfo;
 	m_signalParamTable.setSignalInfo(m_signalInfo);
@@ -716,7 +716,7 @@ void SignalInfoPanel::setSignalInfo(const SignalInfoOption& signalInfo)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::onContextMenu(QPoint)
+void PanelSignalInfo::onContextMenu(QPoint)
 {
 	createContextMenu();
 
@@ -730,7 +730,7 @@ void SignalInfoPanel::onContextMenu(QPoint)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SignalInfoPanel::eventFilter(QObject* object, QEvent* event)
+bool PanelSignalInfo::eventFilter(QObject* object, QEvent* event)
 {
 	if (event->type() == QEvent::KeyPress)
 	{
@@ -747,7 +747,7 @@ bool SignalInfoPanel::eventFilter(QObject* object, QEvent* event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::measureKindChanged(int measureKind)
+void PanelSignalInfo::measureKindChanged(int measureKind)
 {
 	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
@@ -759,7 +759,7 @@ void SignalInfoPanel::measureKindChanged(int measureKind)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::connectionTypeChanged(int connectionType)
+void PanelSignalInfo::connectionTypeChanged(int connectionType)
 {
 	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
@@ -771,7 +771,7 @@ void SignalInfoPanel::connectionTypeChanged(int connectionType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
+void PanelSignalInfo::activeSignalChanged(const MeasureSignal& activeSignal)
 {
 	clear();
 
@@ -838,14 +838,14 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::updateSignalState()
+void PanelSignalInfo::updateSignalState()
 {
 	m_signalParamTable.updateColumn(SIGNAL_INFO_COLUMN_STATE);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::onConnectionAction(QAction* action)
+void PanelSignalInfo::onConnectionAction(QAction* action)
 {
 	if (action == nullptr)
 	{
@@ -889,7 +889,7 @@ void SignalInfoPanel::onConnectionAction(QAction* action)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::showNoValid()
+void PanelSignalInfo::showNoValid()
 {
 	m_signalInfo.setShowNoValid(m_pShowNoValidAction->isChecked());
 	m_signalParamTable.setSignalInfo(m_signalInfo);
@@ -898,7 +898,7 @@ void SignalInfoPanel::showNoValid()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::showElectricValue()
+void PanelSignalInfo::showElectricValue()
 {
 	m_signalInfo.setShowElectricState(m_pShowElectricValueAction->isChecked());
 	m_signalParamTable.setSignalInfo(m_signalInfo);
@@ -907,7 +907,7 @@ void SignalInfoPanel::showElectricValue()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::showSignalMoveUp()
+void PanelSignalInfo::showSignalMoveUp()
 {
 	int index = m_pView->currentIndex().row();
 	if (index < 0 || index >= m_signalParamTable.signalCount())
@@ -939,7 +939,7 @@ void SignalInfoPanel::showSignalMoveUp()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::showSignalMoveDown()
+void PanelSignalInfo::showSignalMoveDown()
 {
 	int index = m_pView->currentIndex().row();
 	if (index < 0 || index >= m_signalParamTable.signalCount())
@@ -971,7 +971,7 @@ void SignalInfoPanel::showSignalMoveDown()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::copy()
+void PanelSignalInfo::copy()
 {
 	CopyData copyData(m_pView, false);
 	copyData.exec();
@@ -979,7 +979,7 @@ void SignalInfoPanel::copy()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::signalProperty()
+void PanelSignalInfo::signalProperty()
 {
 	int index = m_pView->currentIndex().row();
 	if (index < 0 || index >= m_signalParamTable.signalCount())
@@ -1003,13 +1003,13 @@ void SignalInfoPanel::signalProperty()
 		return;
 	}
 
-	SignalPropertyDialog dialog(param, this);
+	DialogSignalProperty dialog(param, this);
 	dialog.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::onHeaderContextMenu(QPoint)
+void PanelSignalInfo::onHeaderContextMenu(QPoint)
 {
 	if (m_headerContextMenu == nullptr)
 	{
@@ -1021,7 +1021,7 @@ void SignalInfoPanel::onHeaderContextMenu(QPoint)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::onColumnAction(QAction* action)
+void PanelSignalInfo::onColumnAction(QAction* action)
 {
 	if (action == nullptr)
 	{

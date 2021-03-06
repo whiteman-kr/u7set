@@ -18,7 +18,7 @@ MeasureThreadInfo::MeasureThreadInfo()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureThreadInfo::init()
+void MeasureThreadInfo::clear()
 {
 	m_message.clear();
 	m_timeout = 0;
@@ -457,7 +457,7 @@ void MeasureThread::run()
 		return;
 	}
 
-	m_info.init();
+	m_info.clear();
 
 	// set unit and mode on calibrators
 	//
@@ -1880,7 +1880,7 @@ void MeasureThread::measureTimeoutChanged(int timeout)
 
 void MeasureThread::measureTypeChanged(int measureType)
 {
-	if (ERR_MEASURE_TYPE(m_measureType) == true)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return;
 	}

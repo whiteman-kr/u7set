@@ -1,5 +1,5 @@
-#ifndef SIGNALLISTDIALOG_H
-#define SIGNALLISTDIALOG_H
+#ifndef DIALOGSIGNALLIST_H
+#define DIALOGSIGNALLIST_H
 
 #include <QDebug>
 #include <QScreen>
@@ -21,23 +21,23 @@
 
 const char* const			SignalListColumn[] =
 {
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "AppSignalID"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "CustomSignalID"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "EquipmentID"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Caption"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Rack"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Chassis"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Module"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Place"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Shown on schemas"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "ADC range"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Electric range"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Electric sensor"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Physical range"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Engineering range"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Tuning"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Default value"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Tuning range"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "AppSignalID"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "CustomSignalID"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "EquipmentID"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "Caption"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "Rack"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "Chassis"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "Module"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "Place"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "Shown on schemas"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "ADC range"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "Electric range"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "Electric sensor"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "Physical range"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "Engineering range"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "Tuning"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "Default value"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "Tuning range"),
 };
 
 const int					SIGNAL_LIST_COLUMN_COUNT			= sizeof(SignalListColumn)/sizeof(SignalListColumn[0]);
@@ -115,14 +115,14 @@ private:
 
 // ==============================================================================================
 
-class SignalListDialog : public QDialog
+class DialogSignalList : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit SignalListDialog(bool hasButtons, QWidget* parent = nullptr);
-	virtual ~SignalListDialog();
+	explicit DialogSignalList(bool hasButtons, QWidget* parent = nullptr);
+	virtual ~DialogSignalList();
 
 public:
 

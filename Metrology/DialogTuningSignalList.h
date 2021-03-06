@@ -1,5 +1,5 @@
-#ifndef TUNINGSIGNALLISTDIALOG_H
-#define TUNINGSIGNALLISTDIALOG_H
+#ifndef DIALOGTUNINGSIGNALLIST_H
+#define DIALOGTUNINGSIGNALLIST_H
 
 #include <QDebug>
 #include <QScreen>
@@ -20,16 +20,16 @@
 
 const char* const			TuningSourceColumn[] =
 {
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "EquipmentID"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Caption"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "IP"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Channel"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Subsytem"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "LM number"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "isReply"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Request count"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Reply count"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Cmd queue size"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "EquipmentID"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "Caption"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "IP"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "Channel"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "Subsytem"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "LM number"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "isReply"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "Request count"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "Reply count"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "Cmd queue size"),
 };
 
 const int					TUN_SOURCE_LIST_COLUMN_COUNT		= sizeof(TuningSourceColumn)/sizeof(TuningSourceColumn[0]);
@@ -98,14 +98,14 @@ private:
 
 const char* const			TuningSignalColumn[] =
 {
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Rack"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "AppSignalID"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "CustomSignalID"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "EquipmentID"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Caption"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "State"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Default"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Range"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "Rack"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "AppSignalID"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "CustomSignalID"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "EquipmentID"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "Caption"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "State"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "Default"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "Range"),
 };
 
 const int					TUN_SIGNAL_LIST_COLUMN_COUNT		= sizeof(TuningSignalColumn)/sizeof(TuningSignalColumn[0]);
@@ -169,14 +169,14 @@ private:
 
 // ==============================================================================================
 
-class TuningSignalListDialog : public QDialog
+class DialogTuningSignalList : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit TuningSignalListDialog(QWidget* parent = nullptr);
-	virtual ~TuningSignalListDialog();
+	explicit DialogTuningSignalList(QWidget* parent = nullptr);
+	virtual ~DialogTuningSignalList();
 
 private:
 
@@ -275,14 +275,14 @@ private slots:
 
 // ==============================================================================================
 
-class TuningSignalStateDialog : public QDialog
+class DialogTuningSignalState : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit TuningSignalStateDialog(const Metrology::SignalParam& param, QWidget* parent = nullptr);
-	virtual ~TuningSignalStateDialog();
+	explicit DialogTuningSignalState(const Metrology::SignalParam& param, QWidget* parent = nullptr);
+	virtual ~DialogTuningSignalState();
 
 private:
 
@@ -305,4 +305,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // TUNINGSIGNALLISTDIALOG_H
+#endif // DIALOGTUNINGSIGNALLIST_H

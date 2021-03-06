@@ -44,7 +44,7 @@ public:
 
 public:
 
-		void init();
+		void clear();
 
 		msgType type() const { return m_type; }
 

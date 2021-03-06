@@ -1,5 +1,5 @@
-#ifndef SIGNALINFOPANEL_H
-#define SIGNALINFOPANEL_H
+#ifndef PANELSIGNALINFO_H
+#define PANELSIGNALINFO_H
 
 #include <QMainWindow>
 #include <QDockWidget>
@@ -15,19 +15,19 @@
 
 const char* const			SignalInfoColumn[] =
 {
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "AppSignalID"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "CustomSignalID"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "EquipmentID"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Caption"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "State"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Rack"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Chassis"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Module"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Place"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Electric range"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Electric sensor"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Engineering range"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Calibrator"),
+							QT_TRANSLATE_NOOP("PanelSignalInfo", "AppSignalID"),
+							QT_TRANSLATE_NOOP("PanelSignalInfo", "CustomSignalID"),
+							QT_TRANSLATE_NOOP("PanelSignalInfo", "EquipmentID"),
+							QT_TRANSLATE_NOOP("PanelSignalInfo", "Caption"),
+							QT_TRANSLATE_NOOP("PanelSignalInfo", "State"),
+							QT_TRANSLATE_NOOP("PanelSignalInfo", "Rack"),
+							QT_TRANSLATE_NOOP("PanelSignalInfo", "Chassis"),
+							QT_TRANSLATE_NOOP("PanelSignalInfo", "Module"),
+							QT_TRANSLATE_NOOP("PanelSignalInfo", "Place"),
+							QT_TRANSLATE_NOOP("PanelSignalInfo", "Electric range"),
+							QT_TRANSLATE_NOOP("PanelSignalInfo", "Electric sensor"),
+							QT_TRANSLATE_NOOP("PanelSignalInfo", "Engineering range"),
+							QT_TRANSLATE_NOOP("PanelSignalInfo", "Calibrator"),
 };
 
 const int					SIGNAL_INFO_COLUMN_COUNT		= sizeof(SignalInfoColumn)/sizeof(SignalInfoColumn[0]);
@@ -113,14 +113,14 @@ private slots:
 
 // ==============================================================================================
 
-class SignalInfoPanel : public QDockWidget
+class PanelSignalInfo : public QDockWidget
 {
 	Q_OBJECT
 
 public:
 
-	explicit SignalInfoPanel(const SignalInfoOption& signalInfo, QWidget* parent = nullptr);
-	virtual ~SignalInfoPanel();
+	explicit PanelSignalInfo(const SignalInfoOption& signalInfo, QWidget* parent = nullptr);
+	virtual ~PanelSignalInfo();
 
 public:
 
@@ -215,4 +215,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // SIGNALINFOPANELPANEL_H
+#endif // PANELSIGNALINFO_H

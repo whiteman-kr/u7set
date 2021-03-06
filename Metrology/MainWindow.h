@@ -19,11 +19,11 @@
 #include "SelectSignalWidget.h"
 #include "MeasureView.h"
 #include "MeasureThread.h"
-#include "FindMeasurePanel.h"
-#include "StatisticsPanel.h"
-#include "SignalInfoPanel.h"
-#include "ComparatorInfoPanel.h"
-#include "Calculator.h"
+#include "PanelFindMeasure.h"
+#include "PanelStatistics.h"
+#include "PanelSignalInfo.h"
+#include "PanelComparatorInfo.h"
+#include "DialogCalculator.h"
 
 // ==============================================================================================
 
@@ -41,9 +41,9 @@ public:
 
 	// Views
 	//
-	MeasureView*			activeMeasureView() { return measureView(m_measureType); }
-	MeasureView*			measureView(int measureType);
-	void					appendMeasureView(int measureType, MeasureView* pView);
+	Measure::View*			activeMeasureView() { return measureView(m_measureType); }
+	Measure::View*			measureView(Measure::Type measureType);
+	void					appendMeasureView(int measureType, Measure::View* pView);
 
 	// Sockets
 	//
@@ -70,7 +70,7 @@ private:
 	Measure::Kind			m_measureKind = Measure::Kind::NoMeasureKind;
 	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
-	QMap<int, MeasureView*> m_measureViewMap;
+	QMap<int, Measure::View*> m_measureViewMap;
 
 	// Actions of main menu
 	//
@@ -148,10 +148,10 @@ private:
 
 	// Elements of interface - Panels
 	//
-	FindMeasurePanel*		m_pFindMeasurePanel = nullptr;
-	StatisticsPanel*		m_pStatisticsPanel = nullptr;
-	SignalInfoPanel*		m_pSignalInfoPanel = nullptr;
-	ComparatorInfoPanel*	m_pComparatorInfoPanel = nullptr;
+	PanelFindMeasure*		m_pFindMeasurePanel = nullptr;
+	PanelStatistics*		m_pStatisticsPanel = nullptr;
+	PanelSignalInfo*		m_pSignalInfoPanel = nullptr;
+	PanelComparatorInfo*	m_pComparatorInfoPanel = nullptr;
 	QTableView*				m_pComparatorInfoView = nullptr;
 
 	// Elements of interface - StatusBar
@@ -195,7 +195,7 @@ private:
 
 private:
 
-	Calculator*				m_pCalculator = nullptr;
+	DialogCalculator*		m_pCalculator = nullptr;
 
 	void					loadSettings();
 	void					saveSettings();
@@ -225,7 +225,7 @@ signals:
 
 	// from ToolBars
 	//
-	void					measureViewChanged(MeasureView* pView);								// appear when changing the type of measurement
+	void					measureViewChanged(Measure::View* pView);							// appear when changing the type of measurement
 	void					measureTimeoutChanged(int timeout);									// appear when changing the timeout of measuring
 	void					measureTypeChanged(int measureType);								// appear when changing the type of measurement
 	void					measureKindChanged(int kind);										// appear when changing the kind of measurement
