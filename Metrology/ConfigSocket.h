@@ -26,7 +26,7 @@ public:
 				 const HostAddressPort& serverAddressPort1,
 				 const HostAddressPort& serverAddressPort2);
 
-	virtual ~ConfigSocket();
+	virtual ~ConfigSocket() override;
 
 public:
 

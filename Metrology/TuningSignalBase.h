@@ -112,7 +112,7 @@ class TuningSourceBase : public QObject
 public:
 
 	explicit TuningSourceBase(QObject* parent = nullptr);
-	virtual ~TuningSourceBase();
+	virtual ~TuningSourceBase() override;
 
 public:
 
@@ -148,7 +148,7 @@ class TuningSignalBase : public QObject
 public:
 
 	explicit TuningSignalBase(QObject* parent = nullptr);
-	virtual ~TuningSignalBase();
+	virtual ~TuningSignalBase() override;
 
 public:
 
@@ -233,7 +233,7 @@ class TuningBase: public QObject
 public:
 
 	explicit TuningBase(QObject* parent = nullptr);
-	virtual ~TuningBase();
+	virtual ~TuningBase() override;
 
 public:
 

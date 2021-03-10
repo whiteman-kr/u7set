@@ -33,7 +33,7 @@ class MainWindow : public QMainWindow
 
 public:
 	explicit MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
-	virtual ~MainWindow();
+	virtual ~MainWindow() override;
 
 public:
 
@@ -152,7 +152,6 @@ private:
 	PanelStatistics*		m_pStatisticsPanel = nullptr;
 	PanelSignalInfo*		m_pSignalInfoPanel = nullptr;
 	PanelComparatorInfo*	m_pComparatorInfoPanel = nullptr;
-	QTableView*				m_pComparatorInfoView = nullptr;
 
 	// Elements of interface - StatusBar
 	//
@@ -219,7 +218,7 @@ private:
 
 protected:
 
-	void					closeEvent(QCloseEvent* e);
+	void					closeEvent(QCloseEvent* e) override;
 
 signals:
 

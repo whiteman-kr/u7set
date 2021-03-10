@@ -50,7 +50,7 @@ QString StatisticsItem::connectionTypeStr() const
 {
 	if (ERR_METROLOGY_CONNECTION_TYPE(m_connectionType) == true)
 	{
-		return QT_TRANSLATE_NOOP("StatisticBase.cpp", "Input is not set");
+		return QT_TRANSLATE_NOOP("StatisticBase", "Input is not set");
 	}
 
 	return qApp->translate("MetrologyConnection", Metrology::ConnectionTypeCaption(m_connectionType).toUtf8());
@@ -118,15 +118,15 @@ QString StatisticsItem::stateStr() const
 {
 	if (m_measureCount == 0)
 	{
-		return QT_TRANSLATE_NOOP("StatisticBase.cpp", "Not measured");
+		return QT_TRANSLATE_NOOP("StatisticBase", "Not measured");
 	}
 
 	QString state;
 
 	switch (m_state)
 	{
-		case State::Failed:		state = QT_TRANSLATE_NOOP("StatisticBase.cpp", "Failed");	break;
-		case State::Success:	state = QT_TRANSLATE_NOOP("StatisticBase.cpp", "Ok");		break;
+		case State::Failed:		state = QT_TRANSLATE_NOOP("StatisticBase", "Failed");	break;
+		case State::Success:	state = QT_TRANSLATE_NOOP("StatisticBase", "Ok");		break;
 		default:				assert(0);
 	}
 
@@ -350,23 +350,6 @@ void StatisticsBase::createComparatorList()
 	}
 
 	qDebug() << __FUNCTION__ << " Time for create: " << responseTime.elapsed() << " ms";
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void StatisticsBase::updateConnections()
-{
-	QMutexLocker l(&m_signalMutex);
-
-	int listCount = m_statisticList.count();
-	for(int n = 0; n < listCount; n++)
-	{
-		int itemCount = m_statisticList[n].count();
-		for(int i = 0; i < itemCount; i++)
-		{
-			m_statisticList[n][i].setConnectionType(m_statisticList[n][i].signal());
-		}
-	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

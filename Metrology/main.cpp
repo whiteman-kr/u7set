@@ -10,7 +10,7 @@
 
 int main(int argc, char* argv[])
 {
-	// initMemoryLeaksDetection();
+	initMemoryLeaksDetection();
 
     QApplication a(argc, argv);
 
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 
 	google::protobuf::ShutdownProtobufLibrary();
 
-	// dumpMemoryLeaks();
+	dumpMemoryLeaks();
 
     return result;
 }

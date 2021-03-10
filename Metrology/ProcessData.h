@@ -26,7 +26,7 @@ class CompleterData : public QObject
 public:
 
 	explicit CompleterData(QObject* parent = nullptr);
-	virtual ~CompleterData();
+	virtual ~CompleterData() override;
 
 public:
 
@@ -60,7 +60,7 @@ class CopyData : public QObject
 public:
 
 	CopyData(QTableView* pView, bool copyHiddenColumn);
-	virtual ~CopyData();
+	virtual ~CopyData() override;
 
 public:
 
@@ -137,7 +137,7 @@ class ExportData : public QObject
 public:
 
 	ExportData(QTableView* pView, bool writeHiddenColumn, const QString& fileName);
-	virtual ~ExportData();
+	virtual ~ExportData() override;
 
 public:
 

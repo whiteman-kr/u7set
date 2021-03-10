@@ -2885,7 +2885,7 @@ namespace Measure
 		Hash signalHash = si.signal()->param().hash();
 		if (signalHash == UNDEFINED_HASH)
 		{
-			assert(signalHash != UNDEFINED_HASH);
+			assert(signalHash);
 			return;
 		}
 

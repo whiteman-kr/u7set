@@ -28,7 +28,7 @@ class CalibratorManager : public QDialog
 public:
 
 	explicit CalibratorManager(Calibrator* pCalibrator, QWidget* parent = nullptr);
-	virtual ~CalibratorManager();
+	virtual ~CalibratorManager() override;
 
 public:
 

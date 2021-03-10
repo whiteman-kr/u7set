@@ -1,11 +1,10 @@
-#include "DialogMetrologyConnectionList.h"
+#include "DialogMetrologyConnection.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "ProcessData.h"
 #include "DialogSignalList.h"
-#include "Options.h"
+#include "SignalBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -664,23 +663,23 @@ void DialogMetrologyConnectionItem::onOk()
 // -------------------------------------------------------------------------------------------------------------------
 
 DialogMetrologyConnection::DialogMetrologyConnection(QWidget* parent) :
-	QDialog(parent)
+	DialogList(0.36, 0.4, true, parent)
 {
 	m_connectionBase = theSignalBase.connections();
 
 	createInterface();
-	updateList();
+	DialogMetrologyConnection::updateList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 DialogMetrologyConnection::DialogMetrologyConnection(Metrology::Signal* pSignal, QWidget* parent) :
-	QDialog(parent)
+	DialogList(0.36, 0.4, true, parent)
 {
 	m_connectionBase = theSignalBase.connections();
 
 	createInterface();
-	updateList();
+	DialogMetrologyConnection::updateList();
 
 	if (pSignal == nullptr || pSignal->param().isValid() == false)
 	{
@@ -703,18 +702,15 @@ DialogMetrologyConnection::~DialogMetrologyConnection()
 
 void DialogMetrologyConnection::createInterface()
 {
-	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/Connection.png"));
 	setWindowTitle(tr("Metrology connections"));
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	resize(static_cast<int>(screen.width() * 0.36), static_cast<int>(screen.height() * 0.4));
-	move(screen.center() - rect().center());
-
-	m_pMenuBar = new QMenuBar(this);
+	// menu
+	//
 	m_pConnectionMenu = new QMenu(tr("&Connection"), this);
 	m_pEditMenu = new QMenu(tr("&Edit"), this);
 
+	// action
+	//
 	m_pCreateAction = m_pConnectionMenu->addAction(tr("&Create ..."));
 	m_pCreateAction->setIcon(QIcon(":/icons/Add.png"));
 	m_pCreateAction->setShortcut(Qt::Key_Insert);
@@ -736,71 +732,37 @@ void DialogMetrologyConnection::createInterface()
 
 	m_pConnectionMenu->addSeparator();
 
-	m_pExportAction = m_pConnectionMenu->addAction(tr("&Export ..."));
-	m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
-	m_pExportAction->setShortcut(Qt::CTRL + Qt::Key_E);
+	m_pConnectionMenu->addAction(m_pExportAction);
 
 	m_pImportAction = m_pConnectionMenu->addAction(tr("&Import ..."));
 	m_pImportAction->setIcon(QIcon(":/icons/Import.png"));
 	m_pImportAction->setShortcut(Qt::CTRL + Qt::Key_I);
 
-	m_pFindAction = m_pEditMenu->addAction(tr("&Find ..."));
-	m_pFindAction->setIcon(QIcon(":/icons/Find.png"));
-	m_pFindAction->setShortcut(Qt::CTRL + Qt::Key_F);
-
+	m_pEditMenu->addAction(m_pFindAction);
 	m_pEditMenu->addSeparator();
+	m_pEditMenu->addAction(m_pCopyAction);
+	m_pEditMenu->addAction(m_pSelectAllAction);
 
-	m_pCopyAction = m_pEditMenu->addAction(tr("&Copy"));
-	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
-	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
+	//
+	//
+	addMenu(m_pConnectionMenu);
+	addMenu(m_pEditMenu);
 
-	m_pSelectAllAction = m_pEditMenu->addAction(tr("Select &All"));
-	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
-	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
+	//
+	//
+	connect(m_pCreateAction, &QAction::triggered, this, &DialogMetrologyConnection::OnNew);
+	connect(m_pEditAction, &QAction::triggered, this, &DialogMetrologyConnection::onEdit);
+	connect(m_pRemoveAction, &QAction::triggered, this, &DialogMetrologyConnection::onRremove);
+	connect(m_pMoveUpAction, &QAction::triggered, this, &DialogMetrologyConnection::onMoveUp);
+	connect(m_pMoveDownAction, &QAction::triggered, this, &DialogMetrologyConnection::onMoveDown);
+	connect(m_pImportAction, &QAction::triggered, this, &DialogMetrologyConnection::onImport);
 
-	m_pMenuBar->addMenu(m_pConnectionMenu);
-	m_pMenuBar->addMenu(m_pEditMenu);
+	//
+	//
+	setModel(&m_connectionTable);
+	DialogList::createHeaderContexMenu(METROLOGY_CONNECTION_COLUMN_COUNT, MetrologyConnectionColumn, MetrologyConnectionColumnWidth);
 
-	connect(m_pCreateAction, &QAction::triggered, this, &DialogMetrologyConnection::createConnection);
-	connect(m_pEditAction, &QAction::triggered, this, &DialogMetrologyConnection::editConnection);
-	connect(m_pRemoveAction, &QAction::triggered, this, &DialogMetrologyConnection::removeConnection);
-	connect(m_pMoveUpAction, &QAction::triggered, this, &DialogMetrologyConnection::moveUpConnection);
-	connect(m_pMoveDownAction, &QAction::triggered, this, &DialogMetrologyConnection::moveDownConnection);
-	connect(m_pExportAction, &QAction::triggered, this, &DialogMetrologyConnection::exportConnections);
-	connect(m_pImportAction, &QAction::triggered, this, &DialogMetrologyConnection::importConnections);
-
-	connect(m_pFindAction, &QAction::triggered, this, &DialogMetrologyConnection::find);
-	connect(m_pCopyAction, &QAction::triggered, this, &DialogMetrologyConnection::copy);
-	connect(m_pSelectAllAction, &QAction::triggered, this, &DialogMetrologyConnection::selectAll);
-
-
-	m_pView = new QTableView(this);
-	m_pView->setModel(&m_connectionTable);
-	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
-	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
-
-	for(int column = 0; column < METROLOGY_CONNECTION_COLUMN_COUNT; column++)
-	{
-		m_pView->setColumnWidth(column, MetrologyConnectionColumnWidth[column]);
-	}
-
-	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_pView->setWordWrap(false);
-
-	connect(m_pView, &QTableView::doubleClicked , this, &DialogMetrologyConnection::onListDoubleClicked);
-
-	QVBoxLayout* mainLayout = new QVBoxLayout;
-
-	m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
-
-	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &DialogMetrologyConnection::onOk);
-	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &DialogMetrologyConnection::reject);
-
-	mainLayout->setMenuBar(m_pMenuBar);
-	mainLayout->addWidget(m_pView);
-	mainLayout->addWidget(m_buttonBox);
-
-	setLayout(mainLayout);
+	connect(view(), &QTableView::doubleClicked , this, &DialogMetrologyConnection::onListDoubleClicked);
 
 	createContextMenu();
 }
@@ -809,23 +771,14 @@ void DialogMetrologyConnection::createInterface()
 
 void DialogMetrologyConnection::createContextMenu()
 {
-	// create context menu
-	//
-	m_pContextMenu = new QMenu(tr(""), this);
-
-	m_pContextMenu->addAction(m_pCreateAction);
-	m_pContextMenu->addAction(m_pEditAction);
-	m_pContextMenu->addAction(m_pRemoveAction);
-	m_pContextMenu->addSeparator();
-	m_pContextMenu->addAction(m_pMoveUpAction);
-	m_pContextMenu->addAction(m_pMoveDownAction);
-	m_pContextMenu->addSeparator();
-	m_pContextMenu->addAction(m_pCopyAction);
-
-	// init context menu
-	//
-	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &DialogMetrologyConnection::onContextMenu);
+	addContextAction(m_pCreateAction);
+	addContextAction(m_pEditAction);
+	addContextAction(m_pRemoveAction);
+	addContextSeparator();
+	addContextAction(m_pMoveUpAction);
+	addContextAction(m_pMoveDownAction);
+	addContextSeparator();
+	addContextAction(m_pCopyAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -898,10 +851,16 @@ bool DialogMetrologyConnection::createConnectionBySignal(Metrology::Signal* pSig
 		return false;
 	}
 
+	QTableView* pView = view();
+	if (pView == nullptr)
+	{
+		return false;
+	}
+
 	int foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
-		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
+		pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
 
 		QMessageBox::information(this, windowTitle(), tr("Connection already exist!"));
 		return false;
@@ -910,12 +869,12 @@ bool DialogMetrologyConnection::createConnectionBySignal(Metrology::Signal* pSig
 	m_connectionBase.append(connection);
 	m_connectionBase.sort();
 
-	updateList();
+	DialogMetrologyConnection::updateList();
 
 	foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
-		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
+		pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
 	}
 
 	return true;
@@ -923,7 +882,7 @@ bool DialogMetrologyConnection::createConnectionBySignal(Metrology::Signal* pSig
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogMetrologyConnection::createConnection()
+void DialogMetrologyConnection::OnNew()
 {
 	DialogMetrologyConnectionItem dialog(this);
 	if (dialog.exec() != QDialog::Accepted)
@@ -937,10 +896,16 @@ void DialogMetrologyConnection::createConnection()
 		return;
 	}
 
+	QTableView* pView = view();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
 	int foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
-		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
+		pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
 
 		QMessageBox::information(this, windowTitle(), tr("Connection already exist!"));
 		return;
@@ -954,15 +919,21 @@ void DialogMetrologyConnection::createConnection()
 	foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
-		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
+		pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
 	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogMetrologyConnection::editConnection()
+void DialogMetrologyConnection::onEdit()
 {
-	int index = m_pView->currentIndex().row();
+	QTableView* pView = view();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	int index = pView->currentIndex().row();
 	if (index < 0 || index >= m_connectionTable.connectionCount())
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select сonnection for edit!"));
@@ -984,7 +955,7 @@ void DialogMetrologyConnection::editConnection()
 	int foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
-		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
+		pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
 
 		QMessageBox::information(this, windowTitle(), tr("Connection already exist!"));
 		return;
@@ -998,15 +969,21 @@ void DialogMetrologyConnection::editConnection()
 	foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
-		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
+		pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
 	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogMetrologyConnection::removeConnection()
+void DialogMetrologyConnection::onRremove()
 {
-	int selectedConnectionCount = m_pView->selectionModel()->selectedRows().count();
+	QTableView* pView = view();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	int selectedConnectionCount = pView->selectionModel()->selectedRows().count();
 	if (selectedConnectionCount == 0)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select connection for remove!"));
@@ -1023,7 +1000,7 @@ void DialogMetrologyConnection::removeConnection()
 	int count = m_connectionTable.connectionCount();
 	for(int index = count - 1; index >= 0; index --)
 	{
-		if (m_pView->selectionModel()->isRowSelected(index, QModelIndex()) == true)
+		if (pView->selectionModel()->isRowSelected(index, QModelIndex()) == true)
 		{
 			if (index >= 0 && index < m_connectionTable.connectionCount())
 			{
@@ -1037,9 +1014,15 @@ void DialogMetrologyConnection::removeConnection()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogMetrologyConnection::moveUpConnection()
+void DialogMetrologyConnection::onMoveUp()
 {
-	int index = m_pView->currentIndex().row();
+	QTableView* pView = view();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	int index = pView->currentIndex().row();
 	if (index < 0 || index >= m_connectionTable.connectionCount())
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select сonnection for move!"));
@@ -1077,15 +1060,21 @@ void DialogMetrologyConnection::moveUpConnection()
 	int foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
-		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
+		pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
 	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogMetrologyConnection::moveDownConnection()
+void DialogMetrologyConnection::onMoveDown()
 {
-	int index = m_pView->currentIndex().row();
+	QTableView* pView = view();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	int index = pView->currentIndex().row();
 	if (index < 0 || index >= m_connectionTable.connectionCount())
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select сonnection for move!"));
@@ -1123,13 +1112,13 @@ void DialogMetrologyConnection::moveDownConnection()
 	int foundIndex = m_connectionBase.findConnectionIndex(connection);
 	if (foundIndex != -1)
 	{
-		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
+		pView->setCurrentIndex(m_connectionTable.index(foundIndex, METROLOGY_CONNECTION_COLUMN_TYPE));
 	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogMetrologyConnection::exportConnections()
+void DialogMetrologyConnection::onExport()
 {
 	QString filter = tr("CSV files (*.csv)");
 
@@ -1151,7 +1140,7 @@ void DialogMetrologyConnection::exportConnections()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogMetrologyConnection::importConnections()
+void DialogMetrologyConnection::onImport()
 {
 	QString fileName = QFileDialog::getOpenFileName(this,
 													tr("Import from file"),
@@ -1174,8 +1163,6 @@ void DialogMetrologyConnection::importConnections()
 		QMessageBox::critical(this, tr("Error"), tr("Could not open file"));
 		return;
 	}
-
-	QVector<Metrology::Connection> connectionList;
 
 	// read data
 	//
@@ -1245,32 +1232,11 @@ void DialogMetrologyConnection::importConnections()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogMetrologyConnection::find()
+void DialogMetrologyConnection::onListDoubleClicked(const QModelIndex&)
 {
-	FindData* dialog = new FindData(m_pView);
-	dialog->exec();
+	onEdit();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
-
-void DialogMetrologyConnection::copy()
-{
-	CopyData copyData(m_pView, false);
-	copyData.exec();
-}
-
 // -------------------------------------------------------------------------------------------------------------------
-
-void DialogMetrologyConnection::onContextMenu(QPoint)
-{
-	m_pContextMenu->exec(QCursor::pos());
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogMetrologyConnection::onOk()
-{
-	accept();
-}
-
 // -------------------------------------------------------------------------------------------------------------------

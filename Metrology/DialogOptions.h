@@ -137,7 +137,7 @@ public:
 
 	PropertyPage(QtVariantPropertyManager* manager, QtVariantEditorFactory* factory, QtTreePropertyBrowser* editor);
 	explicit PropertyPage(QDialog* dialog);
-	virtual ~PropertyPage();
+	virtual ~PropertyPage() override;
 
 public:
 
@@ -175,7 +175,7 @@ class DialogOptions : public QDialog
 public:
 
 	explicit DialogOptions(const Options& options, QWidget* parent = nullptr);
-	virtual ~DialogOptions();
+	virtual ~DialogOptions() override;
 
 public:
 
@@ -224,7 +224,7 @@ private:
 
 protected:
 
-	bool						event(QEvent*  e);
+	bool						event(QEvent*  e) override;
 
 private slots:
 

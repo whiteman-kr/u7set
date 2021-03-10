@@ -1,8 +1,8 @@
 #include "PanelStatistics.h"
 
-#include "DialogMetrologyConnectionList.h"
-#include "ProcessData.h"
+#include "DialogMetrologyConnection.h"
 #include "DialogObjectProperties.h"
+#include "ProcessData.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -251,9 +251,9 @@ QString StatisticsTable::text(int row, int column, const StatisticsItem& si) con
 		case STATISTICS_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();														break;
 		case STATISTICS_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();														break;
 		case STATISTICS_COLUMN_SIGNAL_TYPE:			result = qApp->translate("MetrologySignal", param.signalTypeStr().toUtf8());				break;
-		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticBase.cpp", si.connectionTypeStr().trimmed().toUtf8());	break;
+		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticBase", si.connectionTypeStr().trimmed().toUtf8());		break;
 		case STATISTICS_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();																break;
-		case STATISTICS_COLUMN_STATE:				result = qApp->translate("StatisticBase.cpp", si.stateStr().toUtf8());						break;
+		case STATISTICS_COLUMN_STATE:				result = qApp->translate("StatisticBase", si.stateStr().toUtf8());							break;
 		default:									assert(0);
 	}
 
@@ -662,7 +662,7 @@ void PanelStatistics::updateList()
 
 	m_signalTable.clear();
 
-	m_pMeasureBase->updateStatisticsBase(m_measureType);
+		m_pMeasureBase->updateStatisticsBase(m_measureType);
 
 	m_signalTable.set();
 

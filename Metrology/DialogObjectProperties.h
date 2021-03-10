@@ -21,7 +21,6 @@
 #include "../qtpropertybrowser/src/qtvariantproperty.h"
 #include "../qtpropertybrowser/src/qttreepropertybrowser.h"
 
-#include "SignalBase.h"
 #include "Options.h"
 
 // Project property
@@ -92,7 +91,7 @@ class DialogRackProperty : public QDialog
 public:
 
 	DialogRackProperty(const Metrology::RackParam& rack, const RackBase& rackBase, QWidget* parent = nullptr);
-	virtual ~DialogRackProperty();
+	virtual ~DialogRackProperty() override;
 
 public:
 
@@ -141,7 +140,7 @@ class DialogRackGroupProperty : public QDialog
 public:
 
 	explicit DialogRackGroupProperty(const RackBase& rackBase, QWidget* parent = nullptr);
-	virtual ~DialogRackGroupProperty();
+	virtual ~DialogRackGroupProperty() override;
 
 public:
 
@@ -188,7 +187,7 @@ private:
 
 protected:
 
-	bool						event(QEvent* e);
+	bool						event(QEvent* e) override;
 
 private slots:
 
@@ -260,7 +259,7 @@ class DialogSignalProperty : public QDialog
 public:
 
 	explicit DialogSignalProperty(const Metrology::SignalParam& param, QWidget* parent = nullptr);
-	virtual ~DialogSignalProperty();
+	virtual ~DialogSignalProperty() override;
 
 public:
 
@@ -340,7 +339,7 @@ class DialogComparatorProperty : public QDialog
 public:
 
 	explicit DialogComparatorProperty(const Metrology::ComparatorEx& comparator, QWidget* parent = nullptr);
-	virtual ~DialogComparatorProperty();
+	virtual ~DialogComparatorProperty() override;
 
 public:
 

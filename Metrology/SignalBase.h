@@ -194,7 +194,7 @@ class SignalBase : public QObject
 public:
 
 	explicit SignalBase(QObject* parent = nullptr);
-	virtual ~SignalBase() {}
+	virtual ~SignalBase() override {}
 
 public:
 

@@ -23,7 +23,7 @@ namespace Measure
 	public:
 
 		explicit Table(QObject* parent = nullptr);
-		virtual ~Table();
+		virtual ~Table() override;
 
 	public:
 
@@ -55,11 +55,11 @@ namespace Measure
 		QVector<Measure::Item*> m_measureList;
 		int m_measureCount = 0;
 
-		int columnCount(const QModelIndex &parent) const;
-		int rowCount(const QModelIndex &parent=QModelIndex()) const;
+		int columnCount(const QModelIndex &parent) const override;
+		int rowCount(const QModelIndex &parent=QModelIndex()) const override;
 
-		QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-		QVariant data(const QModelIndex &index, int role) const;
+		QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+		QVariant data(const QModelIndex &index, int role) const override;
 
 		QString textLinearity(int row, int column, Measure::Item* pMeasurement) const;
 		QString textComparator(int row, int column, Measure::Item* pMeasurement) const;
@@ -74,7 +74,7 @@ namespace Measure
 	public:
 
 		explicit View(Measure::Type measureType, QWidget* parent = nullptr);
-		virtual ~View();
+		virtual ~View() override;
 
 	public:
 
@@ -126,11 +126,11 @@ public:
 
 protected:
 
-	bool viewportEvent(QEvent* event);
-	void mousePressEvent(QMouseEvent* event);
-	void mouseMoveEvent(QMouseEvent* event);
-	void mouseReleaseEvent(QMouseEvent* event);
-	void keyPressEvent(QKeyEvent* event);
+	bool viewportEvent(QEvent* event) override;
+	void mousePressEvent(QMouseEvent* event) override;
+	void mouseMoveEvent(QMouseEvent* event) override;
+	void mouseReleaseEvent(QMouseEvent* event) override;
+	void keyPressEvent(QKeyEvent* event) override;
 
 private:
 

@@ -391,7 +391,7 @@ namespace Measure
 	public:
 
 		explicit Base(QObject* parent = nullptr);
-		virtual ~Base();
+		virtual ~Base() override;
 
 	public:
 

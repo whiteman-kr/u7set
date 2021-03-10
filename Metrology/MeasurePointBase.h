@@ -98,7 +98,7 @@ namespace Measure
 	public:
 
 		explicit PointBase(QObject* parent = nullptr);
-		virtual ~PointBase() {}
+		virtual ~PointBase() override {}
 
 	public:
 

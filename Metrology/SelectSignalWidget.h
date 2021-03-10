@@ -69,7 +69,7 @@ class SelectSignalWidget : public QWidget
 public:
 
 	SelectSignalWidget(QWidget* parent = nullptr);
-	virtual ~SelectSignalWidget() {}
+	virtual ~SelectSignalWidget() override {}
 
 public:
 

@@ -313,7 +313,7 @@ class Database : public QObject
 public:
 
 	explicit Database(QObject* parent = nullptr);
-	virtual ~Database();
+	virtual ~Database() override;
 
 public:
 

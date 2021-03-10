@@ -45,16 +45,16 @@ const char* const			StatisticsColumn[] =
 
 const int					STATISTICS_COLUMN_COUNT				= sizeof(StatisticsColumn)/sizeof(StatisticsColumn[0]);
 
-const int					STATISTICS_COLUMN_APP_ID				= 0,
+const int					STATISTICS_COLUMN_APP_ID			= 0,
 							STATISTICS_COLUMN_CUSTOM_ID			= 1,
 							STATISTICS_COLUMN_EQUIPMENT_ID		= 2,
 							STATISTICS_COLUMN_CAPTION			= 3,
 							STATISTICS_COLUMN_CMP_VALUE			= 4,
-							STATISTICS_COLUMN_CMP_NO				= 5,
-							STATISTICS_COLUMN_CMP_OUT_ID			= 6,
+							STATISTICS_COLUMN_CMP_NO			= 5,
+							STATISTICS_COLUMN_CMP_OUT_ID		= 6,
 							STATISTICS_COLUMN_RACK				= 7,
 							STATISTICS_COLUMN_CHASSIS			= 8,
-							STATISTICS_COLUMN_MODULE				= 9,
+							STATISTICS_COLUMN_MODULE			= 9,
 							STATISTICS_COLUMN_PLACE				= 10,
 							STATISTICS_COLUMN_EL_RANGE			= 11,
 							STATISTICS_COLUMN_EL_SENSOR			= 12,
@@ -97,7 +97,7 @@ class StatisticsTable : public QAbstractTableModel
 public:
 
 	explicit StatisticsTable(QObject* parent = nullptr);
-	virtual ~StatisticsTable();
+	virtual ~StatisticsTable() override;
 
 public:
 
@@ -112,11 +112,11 @@ private:
 
 	int m_statisticsItemCount = 0;
 
-	int columnCount(const QModelIndex &parent) const;
-	int rowCount(const QModelIndex &parent=QModelIndex()) const;
+	int columnCount(const QModelIndex &parent) const override;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const override;
 
-	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant data(const QModelIndex &index, int role) const;
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
 };
 
 // ==============================================================================================
@@ -128,7 +128,7 @@ class PanelStatistics : public QDockWidget
 public:
 
 	explicit PanelStatistics(QWidget* parent = nullptr);
-	virtual ~PanelStatistics();
+	virtual ~PanelStatistics() override;
 
 public:
 
@@ -191,7 +191,7 @@ private:
 
 protected:
 
-	bool eventFilter(QObject* object, QEvent* event);
+	bool eventFilter(QObject* object, QEvent* event) override;
 
 signals:
 

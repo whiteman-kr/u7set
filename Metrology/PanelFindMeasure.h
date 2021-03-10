@@ -89,7 +89,7 @@ class FindMeasureTable : public QAbstractTableModel
 public:
 
 	explicit FindMeasureTable(QObject* parent = nullptr);
-	virtual ~FindMeasureTable();
+	virtual ~FindMeasureTable() override;
 
 public:
 
@@ -104,11 +104,11 @@ private:
 
 	QVector<FindItem> m_findItemList;
 
-	int columnCount(const QModelIndex &parent) const;
-	int rowCount(const QModelIndex &parent=QModelIndex()) const;
+	int columnCount(const QModelIndex &parent) const override;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const override;
 
-	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant data(const QModelIndex &index, int role) const;
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
 };
 
 // ==============================================================================================
@@ -124,7 +124,7 @@ class PanelFindMeasure : public QDockWidget
 public:
 
 	explicit PanelFindMeasure(QWidget* parent = nullptr);
-	virtual ~PanelFindMeasure();
+	virtual ~PanelFindMeasure() override;
 
 public:
 
@@ -162,8 +162,8 @@ private:
 
 protected:
 
-	bool event(QEvent* e);
-	bool eventFilter(QObject* object, QEvent* e);
+	bool event(QEvent* e) override;
+	bool eventFilter(QObject* object, QEvent* e) override;
 
 public slots:
 

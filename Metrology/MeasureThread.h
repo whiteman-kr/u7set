@@ -81,7 +81,7 @@ class MeasureThread : public QThread
 public:
 
 	explicit MeasureThread(QObject* parent = nullptr);
-	virtual ~MeasureThread();
+	virtual ~MeasureThread() override;
 
 public:
 
@@ -131,7 +131,7 @@ private:
 
 protected:
 
-	void					run();
+	void					run() override;
 
 signals:
 

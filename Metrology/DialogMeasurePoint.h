@@ -23,7 +23,7 @@ class DialogMeasurePoint : public QDialog
 public:
 
 	explicit DialogMeasurePoint(const LinearityOption& linearity, QWidget* parent = nullptr);
-	virtual ~DialogMeasurePoint();
+	virtual ~DialogMeasurePoint() override;
 
 public:
 
@@ -69,8 +69,8 @@ private:
 
 protected:
 
-	void				keyPressEvent(QKeyEvent* e);
-	void				showEvent(QShowEvent* e);
+	void				keyPressEvent(QKeyEvent* e) override;
+	void				showEvent(QShowEvent* e) override;
 
 signals:
 

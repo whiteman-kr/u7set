@@ -22,7 +22,7 @@
 #include "DialogSignalList.h"
 #include "DialogComparatorList.h"
 #include "DialogTuningSignalList.h"
-#include "DialogMetrologyConnectionList.h"
+#include "DialogMetrologyConnection.h"
 #include "DialogObjectProperties.h"
 #include "Options.h"
 #include "DialogOptions.h"

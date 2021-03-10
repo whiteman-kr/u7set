@@ -1,18 +1,10 @@
 #ifndef DIALOGRACKLIST_H
 #define DIALOGRACKLIST_H
 
-#include <QDebug>
-#include <QScreen>
-#include <QDialog>
-#include <QMenu>
-#include <QMenuBar>
-#include <QAction>
-#include <QVBoxLayout>
-#include <QTableView>
-#include <QDialogButtonBox>
-#include <QKeyEvent>
+#include "../lib/MetrologySignal.h"
 
-#include "SignalBase.h"
+#include "RackBase.h"
+#include "DialogList.h"
 
 // ==============================================================================================
 
@@ -48,7 +40,7 @@ class RackListTable : public QAbstractTableModel
 public:
 
 	explicit RackListTable(QObject* parent = nullptr);
-	virtual ~RackListTable();
+	virtual ~RackListTable() override;
 
 public:
 
@@ -68,16 +60,16 @@ private:
 
 	RackGroupBase			m_rackGroups;
 
-	int						columnCount(const QModelIndex &parent) const;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
+	int						columnCount(const QModelIndex &parent) const override;
+	int						rowCount(const QModelIndex &parent=QModelIndex()) const override;
 
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant				data(const QModelIndex &index, int role) const;
+	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+	QVariant				data(const QModelIndex &index, int role) const override;
 };
 
 // ==============================================================================================
 
-class DialogRackList : public QDialog
+class DialogRackList : public DialogList
 {
 	Q_OBJECT
 
@@ -94,37 +86,19 @@ private:
 
 	RackBase				m_rackBase;
 
-	QMenuBar*				m_pMenuBar = nullptr;
 	QMenu*					m_pRackMenu = nullptr;
 	QMenu*					m_pEditMenu = nullptr;
-	QMenu*					m_pContextMenu = nullptr;
 
 	QAction*				m_pRackGroupsAction = nullptr;
-	QAction*				m_pExportAction = nullptr;
 
-	QAction*				m_pFindAction = nullptr;
-	QAction*				m_pCopyAction = nullptr;
-	QAction*				m_pSelectAllAction = nullptr;
-	QAction*				m_pRackPropertyAction = nullptr;
-
-	QTableView*				m_pView = nullptr;
 	RackListTable			m_rackTable;
-
-	QDialogButtonBox*		m_buttonBox = nullptr;
-
-	QAction*				m_pColumnAction[RACK_LIST_COLUMN_COUNT];
-	QMenu*					m_headerContextMenu = nullptr;
 
 	void					createInterface();
 	void					createContextMenu();
 
-protected:
-
-	bool					eventFilter(QObject* object, QEvent* event);
-
 public slots:
 
-	void					updateList();	// slots for updating
+	void					updateList() override;	// slots for updating
 
 private slots:
 
@@ -133,23 +107,10 @@ private slots:
 							// Rack
 							//
 	void					rackGroups();
-	void					exportRacks();
 
 							// Edit
 							//
-	void					find();
-	void					copy();
-	void					selectAll() { m_pView->selectAll(); }
-	void					rackProperty();
-
-	// slots for list
-	//
-	void					onContextMenu(QPoint);
-	void					onListDoubleClicked(const QModelIndex&);
-
-	// slots of buttons
-	//
-	void					onOk();
+	void					onProperties() override;
 };
 
 // ==============================================================================================

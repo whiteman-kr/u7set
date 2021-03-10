@@ -3445,6 +3445,39 @@
     </message>
 </context>
 <context>
+    <name>DialogList</name>
+    <message>
+        <location filename="../DialogList.cpp" line="33"/>
+        <source>List</source>
+        <translation>Список</translation>
+    </message>
+    <message>
+        <location filename="../DialogList.cpp" line="47"/>
+        <source>&amp;Export ...</source>
+        <translation>&amp;Экспорт ...</translation>
+    </message>
+    <message>
+        <location filename="../DialogList.cpp" line="51"/>
+        <source>&amp;Find ...</source>
+        <translation>&amp;Найти ...</translation>
+    </message>
+    <message>
+        <location filename="../DialogList.cpp" line="55"/>
+        <source>&amp;Copy</source>
+        <translation>&amp;Копировать</translation>
+    </message>
+    <message>
+        <location filename="../DialogList.cpp" line="59"/>
+        <source>Select &amp;All</source>
+        <translation>Выделить &amp;все</translation>
+    </message>
+    <message>
+        <location filename="../DialogList.cpp" line="63"/>
+        <source>Propertу ...</source>
+        <translation>Свойства ...</translation>
+    </message>
+</context>
+<context>
     <name>DialogMeasurePoint</name>
     <message>
         <location filename="../DialogMeasurePoint.cpp" line="32"/>
@@ -4384,172 +4417,167 @@ Please choose a different group or channel.</source>
 <context>
     <name>DialogSignalList</name>
     <message>
-        <location filename="../DialogSignalList.cpp" line="337"/>
+        <location filename="../DialogSignalList.cpp" line="334"/>
         <source>Signals</source>
         <translation>Сигналы</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="346"/>
+        <location filename="../DialogSignalList.cpp" line="338"/>
         <source>&amp;Signal</source>
         <translation>&amp;Сигнал</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="347"/>
+        <location filename="../DialogSignalList.cpp" line="339"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="348"/>
+        <location filename="../DialogSignalList.cpp" line="340"/>
         <source>&amp;View</source>
         <translation>&amp;Вид</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="350"/>
         <source>&amp;Export ...</source>
-        <translation>&amp;Экспорт ...</translation>
+        <translation type="vanished">&amp;Экспорт ...</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="354"/>
         <source>&amp;Find ...</source>
-        <translation>&amp;Найти ...</translation>
+        <translation type="vanished">&amp;Найти ...</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="360"/>
         <source>&amp;Copy</source>
-        <translation>&amp;Копировать</translation>
+        <translation type="vanished">&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="364"/>
         <source>Select &amp;All</source>
-        <translation>Выделить &amp;все</translation>
+        <translation type="vanished">Выделить &amp;все</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="370"/>
         <source>Propertу ...</source>
-        <translation>Свойства ...</translation>
+        <translation type="vanished">Свойства ...</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="373"/>
+        <location filename="../DialogSignalList.cpp" line="341"/>
         <source>Type A/D</source>
         <translation>Тип аналоговый/дискретный</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="374"/>
+        <location filename="../DialogSignalList.cpp" line="355"/>
         <source>Analog</source>
         <translation>Аналоговые</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="377"/>
+        <location filename="../DialogSignalList.cpp" line="358"/>
         <source>Discrete</source>
         <translation>Дискретные</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="380"/>
+        <location filename="../DialogSignalList.cpp" line="361"/>
         <source>Bus</source>
         <translation>Шина</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="384"/>
+        <location filename="../DialogSignalList.cpp" line="342"/>
         <source>Type I/O</source>
         <translation>Типы вход/выход</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="385"/>
+        <location filename="../DialogSignalList.cpp" line="365"/>
         <source>Input</source>
         <translation>Входные</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="388"/>
+        <location filename="../DialogSignalList.cpp" line="368"/>
         <source>Internal</source>
         <translation>Внутренние</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.cpp" line="391"/>
+        <location filename="../DialogSignalList.cpp" line="371"/>
         <source>Output</source>
         <translation>Выходные</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="24"/>
+        <location filename="../DialogSignalList.h" line="25"/>
         <source>AppSignalID</source>
         <translation>AppSignalID</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="25"/>
+        <location filename="../DialogSignalList.h" line="26"/>
         <source>CustomSignalID</source>
         <translation>CustomSignalID</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="26"/>
+        <location filename="../DialogSignalList.h" line="27"/>
         <source>EquipmentID</source>
         <translation>EquipmentID</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="27"/>
+        <location filename="../DialogSignalList.h" line="28"/>
         <source>Caption</source>
         <translation>Наименование</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="28"/>
+        <location filename="../DialogSignalList.h" line="29"/>
         <source>Rack</source>
         <translation>Шкаф</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="29"/>
+        <location filename="../DialogSignalList.h" line="30"/>
         <source>Chassis</source>
         <translation>Корзина</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="30"/>
+        <location filename="../DialogSignalList.h" line="31"/>
         <source>Module</source>
         <translation>Модуль</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="31"/>
+        <location filename="../DialogSignalList.h" line="32"/>
         <source>Place</source>
         <translation>Место</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="32"/>
+        <location filename="../DialogSignalList.h" line="33"/>
         <source>Shown on schemas</source>
         <translation>Отображен на схемах</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="33"/>
+        <location filename="../DialogSignalList.h" line="34"/>
         <source>ADC range</source>
         <translation>Диапазон ADC</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="34"/>
+        <location filename="../DialogSignalList.h" line="35"/>
         <source>Electric range</source>
         <translation>Электрический диапазон</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="35"/>
+        <location filename="../DialogSignalList.h" line="36"/>
         <source>Electric sensor</source>
         <translation>Тип датчика</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="36"/>
+        <location filename="../DialogSignalList.h" line="37"/>
         <source>Physical range</source>
         <translation>Промежуточный диапазон</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="37"/>
+        <location filename="../DialogSignalList.h" line="38"/>
         <source>Engineering range</source>
         <translation>Физический диапазон</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="38"/>
+        <location filename="../DialogSignalList.h" line="39"/>
         <source>Tuning</source>
         <translation>Тюнинг</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="39"/>
+        <location filename="../DialogSignalList.h" line="40"/>
         <source>Default value</source>
         <translation>По умолчанию</translation>
     </message>
     <message>
-        <location filename="../DialogSignalList.h" line="40"/>
+        <location filename="../DialogSignalList.h" line="41"/>
         <source>Tuning range</source>
         <translation>Диапазон тюнинга</translation>
     </message>
@@ -7629,7 +7657,7 @@ Do you want to create new connection now?</source>
     </message>
 </context>
 <context>
-    <name>StatisticBase.cpp</name>
+    <name>StatisticBase</name>
     <message>
         <location filename="../StatisticsBase.cpp" line="53"/>
         <source>Input is not set</source>

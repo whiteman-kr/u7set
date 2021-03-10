@@ -16,7 +16,7 @@ public:
 
 	IntDelegate(QObject* parent);
 
-	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& /* option */, const QModelIndex& /* index */) const;
+	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& /* option */, const QModelIndex& /* index */) const override;
 };
 
 // ==============================================================================================
@@ -29,7 +29,7 @@ public:
 
 	DoubleDelegate(QObject* parent);
 
-	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& /* option */, const QModelIndex& /* index */) const;
+	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& /* option */, const QModelIndex& /* index */) const override;
 };
 
 // ==============================================================================================
@@ -42,7 +42,7 @@ public:
 
 	ColorDelegate(QObject* parent);
 
-	void paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+	void paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 };
 
 // ==============================================================================================
@@ -55,7 +55,7 @@ public:
 
 	FindTextDelegate(QObject* parent);
 
-	void paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+	void paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 };
 
 // ==============================================================================================

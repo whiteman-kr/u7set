@@ -210,7 +210,7 @@ class Calibrator : public QObject
 public:
 
 	explicit Calibrator(int channel = INVALID_CALIBRATOR_CHANNEL, QObject* parent = nullptr);
-	virtual ~Calibrator();
+	virtual ~Calibrator() override;
 
 public:
 

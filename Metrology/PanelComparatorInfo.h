@@ -30,7 +30,7 @@ class ComparatorInfoTable : public QAbstractTableModel
 public:
 
 	explicit ComparatorInfoTable(QObject* parent = nullptr);
-	virtual ~ComparatorInfoTable();
+	virtual ~ComparatorInfoTable() override;
 
 public:
 
@@ -73,7 +73,7 @@ class PanelComparatorInfo : public QDockWidget
 public:
 
 	explicit PanelComparatorInfo(const ComparatorInfoOption& comparatorInfo, QWidget* parent = nullptr);
-	virtual ~PanelComparatorInfo();
+	virtual ~PanelComparatorInfo() override;
 
 public:
 
@@ -114,7 +114,7 @@ private:
 
 protected:
 
-	bool					eventFilter(QObject* object, QEvent* event);
+	bool					eventFilter(QObject* object, QEvent* event) override;
 
 public slots:
 

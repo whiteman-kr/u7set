@@ -62,7 +62,7 @@ public:
 
 	explicit CalibratorsOption(QObject* parent = nullptr);
 	explicit CalibratorsOption(const CalibratorsOption& from, QObject* parent = nullptr);
-	virtual ~CalibratorsOption();
+	virtual ~CalibratorsOption() override;
 
 public:
 
@@ -239,7 +239,7 @@ public:
 
 	explicit SocketOption(QObject* parent = nullptr);
 	explicit SocketOption(const SocketOption& from, QObject* parent = nullptr);
-	virtual ~SocketOption();
+	virtual ~SocketOption() override;
 
 public:
 
@@ -274,7 +274,7 @@ public:
 
 	explicit ProjectInfo(QObject* parent = nullptr);
 	explicit ProjectInfo(const ProjectInfo& from, QObject* parent = nullptr);
-	virtual ~ProjectInfo();
+	virtual ~ProjectInfo() override;
 
 public:
 
@@ -344,7 +344,7 @@ public:
 
 	explicit ModuleOption(QObject* parent = nullptr);
 	explicit ModuleOption(const ModuleOption& from, QObject* parent = nullptr);
-	virtual ~ModuleOption();
+	virtual ~ModuleOption() override;
 
 public:
 
@@ -450,7 +450,7 @@ public:
 
 	explicit LinearityOption(QObject* parent = nullptr);
 	explicit LinearityOption(const LinearityOption& from, QObject* parent = nullptr);
-	virtual ~LinearityOption();
+	virtual ~LinearityOption() override;
 
 public:
 
@@ -547,7 +547,7 @@ public:
 
 	explicit ComparatorOption(QObject* parent = nullptr);
 	explicit ComparatorOption(const ComparatorOption& from, QObject* parent = nullptr);
-	virtual ~ComparatorOption();
+	virtual ~ComparatorOption() override;
 
 
 public:
@@ -604,7 +604,7 @@ public:
 
 	explicit ToolBarOption(QObject* parent = nullptr);
 	explicit ToolBarOption(const ToolBarOption& from, QObject* parent = nullptr);
-	virtual ~ToolBarOption();
+	virtual ~ToolBarOption() override;
 
 public:
 
@@ -711,7 +711,7 @@ class MeasureViewOption : public QObject
 public:
 	explicit MeasureViewOption(QObject* parent = nullptr);
 	explicit MeasureViewOption(const MeasureViewOption& from, QObject* parent = nullptr);
-	virtual ~MeasureViewOption();
+	virtual ~MeasureViewOption() override;
 
 //private:
 public:
@@ -816,7 +816,7 @@ public:
 
 	explicit SignalInfoOption(QObject* parent = nullptr);
 	explicit SignalInfoOption(const SignalInfoOption& from, QObject* parent = nullptr);
-	virtual ~SignalInfoOption();
+	virtual ~SignalInfoOption() override;
 
 public:
 
@@ -904,7 +904,7 @@ public:
 
 	explicit ComparatorInfoOption(QObject* parent = nullptr);
 	explicit ComparatorInfoOption(const ComparatorInfoOption& from, QObject* parent = nullptr);
-	virtual ~ComparatorInfoOption();
+	virtual ~ComparatorInfoOption() override;
 
 public:
 
@@ -993,7 +993,7 @@ public:
 
 	explicit DatabaseOption(QObject* parent = nullptr);
 	explicit DatabaseOption(const DatabaseOption& from, QObject* parent = nullptr);
-	virtual ~DatabaseOption();
+	virtual ~DatabaseOption() override;
 
 public:
 
@@ -1061,7 +1061,7 @@ public:
 
 	explicit LanguageOption(QObject* parent = nullptr);
 	explicit LanguageOption(const LanguageOption& from, QObject* parent = nullptr);
-	virtual ~LanguageOption();
+	virtual ~LanguageOption() override;
 
 public:
 
@@ -1096,7 +1096,7 @@ public:
 
 	explicit Options(QObject* parent = nullptr);
 	explicit Options(const Options& from, QObject* parent = nullptr);
-	virtual ~Options();
+	virtual ~Options() override;
 
 public:
 

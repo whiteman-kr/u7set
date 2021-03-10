@@ -45,7 +45,7 @@ class DialogOptionsMeasureViewHeader : public QDialog
 
 public:
 	explicit DialogOptionsMeasureViewHeader(const MeasureViewOption& header, QWidget* parent = nullptr);
-	virtual ~DialogOptionsMeasureViewHeader();
+	virtual ~DialogOptionsMeasureViewHeader() override;
 
 	MeasureViewOption	m_header;
 
@@ -73,8 +73,8 @@ private:
 
 protected:
 
-	void				keyPressEvent(QKeyEvent* e);
-	void				showEvent(QShowEvent* e);
+	void				keyPressEvent(QKeyEvent* e) override;
+	void				showEvent(QShowEvent* e) override;
 
 signals:
 

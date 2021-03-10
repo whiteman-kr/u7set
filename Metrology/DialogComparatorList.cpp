@@ -2,9 +2,7 @@
 
 #include "../lib/UnitsConvertor.h"
 
-#include "ProcessData.h"
-#include "DialogObjectProperties.h"
-#include "Options.h"
+#include "SignalBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -347,15 +345,11 @@ void ComparatorListTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-int DialogComparatorList::m_currenIndex = 0;
-
-// -------------------------------------------------------------------------------------------------------------------
-
 DialogComparatorList::DialogComparatorList(QWidget* parent) :
-	QDialog(parent)
+	DialogList(0.8, 0.4, false, parent)
 {
 	createInterface();
-	updateList();
+	DialogComparatorList::updateList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -368,125 +362,64 @@ DialogComparatorList::~DialogComparatorList()
 
 void DialogComparatorList::createInterface()
 {
-	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/Comparator.png"));
 	setWindowTitle(tr("Comparators"));
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	resize(static_cast<int>(screen.width() * 0.8), static_cast<int>(screen.height() * 0.4));
-	move(screen.center() - rect().center());
-
-	installEventFilter(this);
-
-	m_pMenuBar = new QMenuBar(this);
+	// menu
+	//
 	m_pComparatorMenu = new QMenu(tr("&Comparator"), this);
 	m_pEditMenu = new QMenu(tr("&Edit"), this);
 
-	m_pExportAction = m_pComparatorMenu->addAction(tr("&Export ..."));
-	m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
-	m_pExportAction->setShortcut(Qt::CTRL + Qt::Key_E);
-
-	m_pFindAction = m_pEditMenu->addAction(tr("&Find ..."));
-	m_pFindAction->setIcon(QIcon(":/icons/Find.png"));
-	m_pFindAction->setShortcut(Qt::CTRL + Qt::Key_F);
-
-	m_pEditMenu->addSeparator();
-
-	m_pCopyAction = m_pEditMenu->addAction(tr("&Copy"));
-	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
-	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
-
-	m_pSelectAllAction = m_pEditMenu->addAction(tr("Select &All"));
-	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
-
-	m_pEditMenu->addSeparator();
-
-	m_pSignalPropertyAction = m_pEditMenu->addAction(tr("Propertу ..."));
-	m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
-
-	m_pMenuBar->addMenu(m_pComparatorMenu);
-	m_pMenuBar->addMenu(m_pEditMenu);
-
-	connect(m_pExportAction, &QAction::triggered, this, &DialogComparatorList::exportComparator);
-
-	connect(m_pFindAction, &QAction::triggered, this, &DialogComparatorList::find);
-	connect(m_pCopyAction, &QAction::triggered, this, &DialogComparatorList::copy);
-	connect(m_pSelectAllAction, &QAction::triggered, this, &DialogComparatorList::selectAll);
-	connect(m_pSignalPropertyAction, &QAction::triggered, this, &DialogComparatorList::comparatorProperties);
-
-	m_pView = new QTableView(this);
-	m_pView->setModel(&m_comparatorTable);
-	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
-	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
-
-	for(int column = 0; column < COMPARATOR_LIST_COLUMN_COUNT; column++)
-	{
-		m_pView->setColumnWidth(column, ComparatorListColumnWidth[column]);
-	}
-
-	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_pView->setWordWrap(false);
-
-	connect(m_pView, &QTableView::doubleClicked , this, &DialogComparatorList::onListDoubleClicked);
-
-	QVBoxLayout* mainLayout = new QVBoxLayout;
-
-	mainLayout->setMenuBar(m_pMenuBar);
-	mainLayout->addWidget(m_pView);
-
-	setLayout(mainLayout);
-
-	createHeaderContexMenu();
-	createContextMenu();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogComparatorList::createHeaderContexMenu()
-{
-	// init header context menu
+	// action
 	//
-	m_pView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &DialogComparatorList::onHeaderContextMenu);
+	m_pComparatorMenu->addAction(m_pExportAction);
 
-	m_headerContextMenu = new QMenu(m_pView);
+	m_pEditMenu->addAction(m_pFindAction);
+	m_pEditMenu->addSeparator();
+	m_pEditMenu->addAction(m_pCopyAction);
+	m_pEditMenu->addAction(m_pSelectAllAction);
+	m_pEditMenu->addSeparator();
+	m_pEditMenu->addAction(m_pPropertyAction);
 
-	for(int column = 0; column < COMPARATOR_LIST_COLUMN_COUNT; column++)
-	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("DialogComparatorList", ComparatorListColumn[column]));
-		if (m_pColumnAction[column] != nullptr)
-		{
-			m_pColumnAction[column]->setCheckable(true);
-			m_pColumnAction[column]->setChecked(true);
-		}
-	}
+	//
+	//
+	addMenu(m_pComparatorMenu);
+	addMenu(m_pEditMenu);
 
-	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &DialogComparatorList::onColumnAction);
+	//
+	//
+	setModel(&m_comparatorTable);
+	DialogList::createHeaderContexMenu(COMPARATOR_LIST_COLUMN_COUNT, ComparatorListColumn, ComparatorListColumnWidth);
+
+	createContextMenu();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void DialogComparatorList::createContextMenu()
 {
-	// create context menu
-	//
-	m_pContextMenu = new QMenu(tr(""), this);
+	addContextAction(m_pCopyAction);
+	addContextSeparator();
+	addContextAction(m_pPropertyAction);
+}
 
-	m_pContextMenu->addAction(m_pCopyAction);
-	m_pContextMenu->addSeparator();
-	m_pContextMenu->addAction(m_pSignalPropertyAction);
+// -------------------------------------------------------------------------------------------------------------------
 
-	// init context menu
-	//
-	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &DialogComparatorList::onContextMenu);
+void DialogComparatorList::updateVisibleColunm()
+{
+	for(int c = 0; c < COMPARATOR_LIST_COLUMN_COUNT; c++)
+	{
+		hideColumn(c, false);
+	}
+
+	hideColumn(COMPARATOR_LIST_COLUMN_EL_SENSOR, true);
+	hideColumn(COMPARATOR_LIST_COLUMN_SCHEMA, true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void DialogComparatorList::updateList()
 {
-	updateVisibleColunm();
+	DialogComparatorList::updateVisibleColunm();
 
 	m_comparatorTable.clear();
 
@@ -530,84 +463,15 @@ void DialogComparatorList::updateList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogComparatorList::updateVisibleColunm()
+void DialogComparatorList::onProperties()
 {
-	for(int c = 0; c < COMPARATOR_LIST_COLUMN_COUNT; c++)
-	{
-		hideColumn(c, false);
-	}
-
-	hideColumn(COMPARATOR_LIST_COLUMN_EL_SENSOR, true);
-	hideColumn(COMPARATOR_LIST_COLUMN_SCHEMA, true);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogComparatorList::hideColumn(int column, bool hide)
-{
-	if (column < 0 || column >= COMPARATOR_LIST_COLUMN_COUNT)
+	QTableView* pView = view();
+	if (pView == nullptr)
 	{
 		return;
 	}
 
-	if (hide == true)
-	{
-		m_pView->hideColumn(column);
-		m_pColumnAction[column]->setChecked(false);
-	}
-	else
-	{
-		m_pView->showColumn(column);
-		m_pColumnAction[column]->setChecked(true);
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool DialogComparatorList::eventFilter(QObject* object, QEvent* event)
-{
-	if (event->type() == QEvent::KeyPress)
-	{
-		QKeyEvent* keyEvent = static_cast<QKeyEvent* >(event);
-
-		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
-		{
-			comparatorProperties();
-		}
-	}
-
-	return QObject::eventFilter(object, event);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogComparatorList::exportComparator()
-{
-	ExportData* dialog = new ExportData(m_pView, false, "Comparators");
-	dialog->exec();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogComparatorList::find()
-{
-	FindData* dialog = new FindData(m_pView);
-	dialog->exec();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogComparatorList::copy()
-{
-	CopyData copyData(m_pView, false);
-	copyData.exec();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogComparatorList::comparatorProperties()
-{
-	QModelIndex visibleIndex = m_pView->currentIndex();
+	QModelIndex visibleIndex = pView->currentIndex();
 
 	int index = visibleIndex .row();
 	if (index < 0 || index >= m_comparatorTable.comparatorCount())
@@ -631,49 +495,5 @@ void DialogComparatorList::comparatorProperties()
 }
 
 // -------------------------------------------------------------------------------------------------------------------
-
-void DialogComparatorList::onContextMenu(QPoint)
-{
-	m_pContextMenu->exec(QCursor::pos());
-}
-
 // -------------------------------------------------------------------------------------------------------------------
-
-void DialogComparatorList::onHeaderContextMenu(QPoint)
-{
-	if (m_headerContextMenu == nullptr)
-	{
-		return;
-	}
-
-	m_headerContextMenu->exec(QCursor::pos());
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogComparatorList::onColumnAction(QAction* action)
-{
-	if (action == nullptr)
-	{
-		return;
-	}
-
-	for(int column = 0; column < COMPARATOR_LIST_COLUMN_COUNT; column++)
-	{
-		if (m_pColumnAction[column] == action)
-		{
-			hideColumn(column, !action->isChecked());
-
-			break;
-		}
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogComparatorList::onListDoubleClicked(const QModelIndex&)
-{
-	comparatorProperties();
-}
-
 // -------------------------------------------------------------------------------------------------------------------

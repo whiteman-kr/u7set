@@ -1,8 +1,6 @@
 #include "DialogSignalList.h"
 
-#include "ProcessData.h"
-#include "DialogObjectProperties.h"
-#include "Options.h"
+#include "SignalBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -309,17 +307,16 @@ void SignalListTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-E::SignalType		DialogSignalList::m_typeAD		= E::SignalType::Analog;
-E::SignalInOutType	DialogSignalList::m_typeIO		= E::SignalInOutType::Input;
-int					DialogSignalList::m_currenIndex = 0;
+E::SignalType		DialogSignalList::m_typeAD = E::SignalType::Analog;
+E::SignalInOutType	DialogSignalList::m_typeIO = E::SignalInOutType::Input;
 
 // -------------------------------------------------------------------------------------------------------------------
 
 DialogSignalList::DialogSignalList(bool hasButtons, QWidget* parent) :
-	QDialog(parent)
+	DialogList(0.6, 0.4, hasButtons, parent)
 {
-	createInterface(hasButtons);
-	updateList();
+	createInterface();
+	DialogSignalList::updateList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -330,47 +327,29 @@ DialogSignalList::~DialogSignalList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogSignalList::createInterface(bool hasButtons)
+void DialogSignalList::createInterface()
 {
-	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/Signal.png"));
 	setWindowTitle(tr("Signals"));
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	resize(static_cast<int>(screen.width() * 0.6), static_cast<int>(screen.height() * 0.4));
-	move(screen.center() - rect().center());
-
-	installEventFilter(this);
-
-	m_pMenuBar = new QMenuBar(this);
+	// menu
+	//
 	m_pSignalMenu = new QMenu(tr("&Signal"), this);
 	m_pEditMenu = new QMenu(tr("&Edit"), this);
 	m_pViewMenu = new QMenu(tr("&View"), this);
-
-	m_pExportAction = m_pSignalMenu->addAction(tr("&Export ..."));
-	m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
-	m_pExportAction->setShortcut(Qt::CTRL + Qt::Key_E);
-
-	m_pFindAction = m_pEditMenu->addAction(tr("&Find ..."));
-	m_pFindAction->setIcon(QIcon(":/icons/Find.png"));
-	m_pFindAction->setShortcut(Qt::CTRL + Qt::Key_F);
-
-	m_pEditMenu->addSeparator();
-
-	m_pCopyAction = m_pEditMenu->addAction(tr("&Copy"));
-	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
-	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
-
-	m_pSelectAllAction = m_pEditMenu->addAction(tr("Select &All"));
-	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
-	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
-
-	m_pEditMenu->addSeparator();
-
-	m_pSignalPropertyAction = m_pEditMenu->addAction(tr("Propertу ..."));
-	m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
-
 	m_pViewTypeADMenu = new QMenu(tr("Type A/D"), this);
+	m_pViewTypeIOMenu = new QMenu(tr("Type I/O"), this);
+
+	// action
+	//
+	m_pSignalMenu->addAction(m_pExportAction);
+
+	m_pEditMenu->addAction(m_pFindAction);
+	m_pEditMenu->addSeparator();
+	m_pEditMenu->addAction(m_pCopyAction);
+	m_pEditMenu->addAction(m_pSelectAllAction);
+	m_pEditMenu->addSeparator();
+	m_pEditMenu->addAction(m_pPropertyAction);
+
 	m_pTypeAnalogAction = m_pViewTypeADMenu->addAction(tr("Analog"));
 	m_pTypeAnalogAction->setCheckable(true);
 	m_pTypeAnalogAction->setChecked(m_typeAD == E::SignalType::Analog);
@@ -381,7 +360,6 @@ void DialogSignalList::createInterface(bool hasButtons)
 	m_pTypeBusAction->setCheckable(true);
 	m_pTypeBusAction->setChecked(m_typeAD == E::SignalType::Bus);
 
-	m_pViewTypeIOMenu = new QMenu(tr("Type I/O"), this);
 	m_pTypeInputAction = m_pViewTypeIOMenu->addAction(tr("Input"));
 	m_pTypeInputAction->setCheckable(true);
 	m_pTypeInputAction->setChecked(m_typeIO == E::SignalInOutType::Input);
@@ -395,17 +373,14 @@ void DialogSignalList::createInterface(bool hasButtons)
 	m_pViewMenu->addMenu(m_pViewTypeADMenu);
 	m_pViewMenu->addMenu(m_pViewTypeIOMenu);
 
-	m_pMenuBar->addMenu(m_pSignalMenu);
-	m_pMenuBar->addMenu(m_pEditMenu);
-	m_pMenuBar->addMenu(m_pViewMenu);
+	//
+	//
+	addMenu(m_pSignalMenu);
+	addMenu(m_pEditMenu);
+	addMenu(m_pViewMenu);
 
-	connect(m_pExportAction, &QAction::triggered, this, &DialogSignalList::exportSignal);
-
-	connect(m_pFindAction, &QAction::triggered, this, &DialogSignalList::find);
-	connect(m_pCopyAction, &QAction::triggered, this, &DialogSignalList::copy);
-	connect(m_pSelectAllAction, &QAction::triggered, this, &DialogSignalList::selectAll);
-	connect(m_pSignalPropertyAction, &QAction::triggered, this, &DialogSignalList::signalProperties);
-
+	//
+	//
 	connect(m_pTypeAnalogAction, &QAction::triggered, this, &DialogSignalList::showTypeAnalog);
 	connect(m_pTypeDiscreteAction, &QAction::triggered, this, &DialogSignalList::showTypeDiscrete);
 	connect(m_pTypeBusAction, &QAction::triggered, this, &DialogSignalList::showTypeBus);
@@ -413,127 +388,24 @@ void DialogSignalList::createInterface(bool hasButtons)
 	connect(m_pTypeInternalAction, &QAction::triggered, this, &DialogSignalList::showTypeInternal);
 	connect(m_pTypeOutputAction, &QAction::triggered, this, &DialogSignalList::showTypeOutput);
 
-
-	m_pView = new QTableView(this);
-	m_pView->setModel(&m_signalTable);
-	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
-	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
-
-	for(int column = 0; column < SIGNAL_LIST_COLUMN_COUNT; column++)
-	{
-		m_pView->setColumnWidth(column, SignalListColumnWidth[column]);
-	}
-
-	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_pView->setWordWrap(false);
-
-	connect(m_pView, &QTableView::doubleClicked , this, &DialogSignalList::onListDoubleClicked);
-
-	QVBoxLayout* mainLayout = new QVBoxLayout;
-
-	mainLayout->setMenuBar(m_pMenuBar);
-	mainLayout->addWidget(m_pView);
-
-	if (hasButtons == true)
-	{
-		m_pView->setSelectionMode(QAbstractItemView::SingleSelection);
-
-		m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
-
-		connect(m_buttonBox, &QDialogButtonBox::accepted, this, &DialogSignalList::onOk);
-		connect(m_buttonBox, &QDialogButtonBox::rejected, this, &DialogSignalList::reject);
-
-		mainLayout->addWidget(m_buttonBox);
-	}
-
-	setLayout(mainLayout);
-
-	createHeaderContexMenu();
-	createContextMenu();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogSignalList::createHeaderContexMenu()
-{
-	// init header context menu
 	//
-	m_pView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView->horizontalHeader(), &QHeaderView::customContextMenuRequested,
-			this, &DialogSignalList::onHeaderContextMenu);
+	//
+	setModel(&m_signalTable);
+	DialogList::createHeaderContexMenu(SIGNAL_LIST_COLUMN_COUNT, SignalListColumn, SignalListColumnWidth);
 
-	m_headerContextMenu = new QMenu(m_pView);
-
-	for(int column = 0; column < SIGNAL_LIST_COLUMN_COUNT; column++)
-	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(qApp->translate("DialogSignalList",
-																				 SignalListColumn[column]));
-		if (m_pColumnAction[column] != nullptr)
-		{
-			m_pColumnAction[column]->setCheckable(true);
-			m_pColumnAction[column]->setChecked(true);
-		}
-	}
-
-	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered),
-			this, &DialogSignalList::onColumnAction);
+	createContextMenu();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void DialogSignalList::createContextMenu()
 {
-	// create context menu
-	//
-	m_pContextMenu = new QMenu(tr(""), this);
-
-	m_pContextMenu->addMenu(m_pViewTypeADMenu);
-	m_pContextMenu->addMenu(m_pViewTypeIOMenu);
-	m_pContextMenu->addSeparator();
-	m_pContextMenu->addAction(m_pCopyAction);
-	m_pContextMenu->addSeparator();
-	m_pContextMenu->addAction(m_pSignalPropertyAction);
-
-	// init context menu
-	//
-	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &DialogSignalList::onContextMenu);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogSignalList::updateList()
-{
-	updateVisibleColunm();
-
-	m_signalTable.clear();
-
-	QVector<Metrology::Signal*> signalList;
-
-	int count = theSignalBase.signalCount();
-	for(int i = 0; i < count; i++)
-	{
-		Metrology::Signal* pSignal = theSignalBase.signalPtr(i);
-		if (pSignal == nullptr)
-		{
-			continue;
-		}
-
-		Metrology::SignalParam& param = pSignal->param();
-		if (param.isValid() == false)
-		{
-			continue;
-		}
-
-		if (param.signalType() != m_typeAD || param.inOutType() != m_typeIO)
-		{
-			continue;
-		}
-
-		signalList.append(pSignal);
-	}
-
-	m_signalTable.set(signalList);
+	addContextMenu(m_pViewTypeADMenu);
+	addContextMenu(m_pViewTypeIOMenu);
+	addContextSeparator();
+	addContextAction(m_pCopyAction);
+	addContextSeparator();
+	addContextAction(m_pPropertyAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -621,78 +493,51 @@ void DialogSignalList::updateVisibleColunm()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogSignalList::hideColumn(int column, bool hide)
+void DialogSignalList::updateList()
 {
-	if (column < 0 || column >= SIGNAL_LIST_COLUMN_COUNT)
+	updateVisibleColunm();
+
+	m_signalTable.clear();
+
+	QVector<Metrology::Signal*> signalList;
+
+	int count = theSignalBase.signalCount();
+	for(int i = 0; i < count; i++)
+	{
+		Metrology::Signal* pSignal = theSignalBase.signalPtr(i);
+		if (pSignal == nullptr)
+		{
+			continue;
+		}
+
+		Metrology::SignalParam& param = pSignal->param();
+		if (param.isValid() == false)
+		{
+			continue;
+		}
+
+		if (param.signalType() != m_typeAD || param.inOutType() != m_typeIO)
+		{
+			continue;
+		}
+
+		signalList.append(pSignal);
+	}
+
+	m_signalTable.set(signalList);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogSignalList::onProperties()
+{
+	QTableView* pView = view();
+	if (pView == nullptr)
 	{
 		return;
 	}
 
-	if (hide == true)
-	{
-		m_pView->hideColumn(column);
-		m_pColumnAction[column]->setChecked(false);
-	}
-	else
-	{
-		m_pView->showColumn(column);
-		m_pColumnAction[column]->setChecked(true);
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool DialogSignalList::eventFilter(QObject* object, QEvent* event)
-{
-	if (event->type() == QEvent::KeyPress)
-	{
-		QKeyEvent* keyEvent = static_cast<QKeyEvent* >(event);
-
-		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
-		{
-			if (m_buttonBox == nullptr)
-			{
-				signalProperties();
-			}
-			else
-			{
-				emit onOk();
-			}
-		}
-	}
-
-	return QObject::eventFilter(object, event);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogSignalList::exportSignal()
-{
-	ExportData* dialog = new ExportData(m_pView, false, "Signals");
-	dialog->exec();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogSignalList::find()
-{
-	FindData* dialog = new FindData(m_pView);
-	dialog->exec();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogSignalList::copy()
-{
-	CopyData copyData(m_pView, false);
-	copyData.exec();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogSignalList::signalProperties()
-{
-	QModelIndex visibleIndex = m_pView->currentIndex();
+	QModelIndex visibleIndex = pView->currentIndex();
 
 	int index = visibleIndex .row();
 	if (index < 0 || index >= m_signalTable.signalCount())
@@ -773,62 +618,15 @@ void DialogSignalList::showTypeOutput()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogSignalList::onContextMenu(QPoint)
-{
-	m_pContextMenu->exec(QCursor::pos());
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogSignalList::onHeaderContextMenu(QPoint)
-{
-	if (m_headerContextMenu == nullptr)
-	{
-		return;
-	}
-
-	m_headerContextMenu->exec(QCursor::pos());
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogSignalList::onColumnAction(QAction* action)
-{
-	if (action == nullptr)
-	{
-		return;
-	}
-
-	for(int column = 0; column < SIGNAL_LIST_COLUMN_COUNT; column++)
-	{
-		if (m_pColumnAction[column] == action)
-		{
-			hideColumn(column, !action->isChecked());
-
-			break;
-		}
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogSignalList::onListDoubleClicked(const QModelIndex&)
-{
-	if (m_buttonBox == nullptr)
-	{
-		signalProperties();
-	}
-	else
-	{
-		emit onOk();
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void DialogSignalList::onOk()
 {
-	int index = m_pView->currentIndex().row();
+	QTableView* pView = view();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	int index = pView->currentIndex().row();
 	if (index < 0 || index >= m_signalTable.signalCount())
 	{
 		return;

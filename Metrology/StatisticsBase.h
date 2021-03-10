@@ -71,7 +71,7 @@ class StatisticsBase : public QObject
 public:
 
 	explicit StatisticsBase(QObject* parent = nullptr);
-	virtual ~StatisticsBase();
+	virtual ~StatisticsBase() override;
 
 public:
 
@@ -90,7 +90,6 @@ public:
 
 	void createSignalList();
 	void createComparatorList();
-	void updateConnections();
 
 	StatisticsItem item(int index) const;
 	StatisticsItem item(int measureType, int index) const;

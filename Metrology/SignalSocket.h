@@ -31,7 +31,7 @@ public:
 				 const HostAddressPort& serverAddressPort1,
 				 const HostAddressPort& serverAddressPort2);
 
-	virtual ~SignalSocket();
+	virtual ~SignalSocket() override;
 
 public:
 

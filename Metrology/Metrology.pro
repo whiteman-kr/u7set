@@ -55,8 +55,9 @@ SOURCES += \
     ../lib/ScriptDeviceObject.cpp \
     DialogCalculator.cpp \
     DialogComparatorList.cpp \
+    DialogList.cpp \
     DialogMeasurePoint.cpp \
-    DialogMetrologyConnectionList.cpp \
+    DialogMetrologyConnection.cpp \
     DialogObjectProperties.cpp \
     DialogOptions.cpp \
     DialogOptionsMvh.cpp \
@@ -135,8 +136,9 @@ HEADERS  += \
     ../lib/ScriptDeviceObject.h \
     DialogCalculator.h \
     DialogComparatorList.h \
+    DialogList.h \
     DialogMeasurePoint.h \
-    DialogMetrologyConnectionList.h \
+    DialogMetrologyConnection.h \
     DialogObjectProperties.h \
     DialogOptions.h \
     DialogOptionsMvh.h \

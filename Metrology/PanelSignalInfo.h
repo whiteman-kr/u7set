@@ -76,7 +76,7 @@ class SignalInfoTable : public QAbstractTableModel
 public:
 
 	explicit SignalInfoTable(QObject* parent = nullptr);
-	virtual ~SignalInfoTable();
+	virtual ~SignalInfoTable() override;
 
 public:
 
@@ -100,11 +100,11 @@ private:
 	int						m_signalCount = 0;
 	QVector<IoSignalParam>	m_ioParamList;
 
-	int						columnCount(const QModelIndex &parent) const;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
+	int						columnCount(const QModelIndex &parent) const override;
+	int						rowCount(const QModelIndex &parent=QModelIndex()) const override;
 
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant				data(const QModelIndex &index, int role) const;
+	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+	QVariant				data(const QModelIndex &index, int role) const override;
 
 private slots:
 
@@ -120,7 +120,7 @@ class PanelSignalInfo : public QDockWidget
 public:
 
 	explicit PanelSignalInfo(const SignalInfoOption& signalInfo, QWidget* parent = nullptr);
-	virtual ~PanelSignalInfo();
+	virtual ~PanelSignalInfo() override;
 
 public:
 
@@ -175,7 +175,7 @@ private:
 
 protected:
 
-	bool					eventFilter(QObject* object, QEvent* event);
+	bool					eventFilter(QObject* object, QEvent* event) override;
 
 public slots:
 

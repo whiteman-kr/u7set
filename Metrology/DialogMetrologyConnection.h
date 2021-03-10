@@ -1,24 +1,9 @@
 #ifndef DIALOGMETROLOGYCONNECTION_H
 #define DIALOGMETROLOGYCONNECTION_H
 
-#include <QDebug>
-#include <QScreen>
-#include <QDialog>
-#include <QMenu>
-#include <QMenuBar>
-#include <QAction>
-#include <QVBoxLayout>
-#include <QHeaderView>
-#include <QTableView>
-#include <QTableWidget>
-#include <QGroupBox>
-#include <QComboBox>
-#include <QCheckBox>
-#include <QDialogButtonBox>
+#include "../lib/MetrologySignal.h"
 
-#include "../lib/Signal.h"
-
-#include "SignalBase.h"
+#include "DialogList.h"
 
 // ==============================================================================================
 
@@ -51,7 +36,7 @@ class MetrologyConnectionTable : public QAbstractTableModel
 public:
 
 	explicit MetrologyConnectionTable(QObject* parent = nullptr);
-	virtual ~MetrologyConnectionTable();
+	virtual ~MetrologyConnectionTable() override;
 
 public:
 
@@ -65,11 +50,11 @@ private:
 	mutable QMutex m_connectionMutex;
 	QVector<Metrology::Connection> m_connectionList;
 
-	int columnCount(const QModelIndex &parent) const;
-	int rowCount(const QModelIndex &parent=QModelIndex()) const;
+	int columnCount(const QModelIndex &parent) const override;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const override;
 
-	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant data(const QModelIndex &index, int role) const;
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
 
 	QString text(int row, int column, const Metrology::Connection& connection) const;
 };
@@ -84,7 +69,7 @@ public:
 
 	explicit DialogMetrologyConnectionItem(QWidget* parent = nullptr);
 	explicit DialogMetrologyConnectionItem(const Metrology::Connection& metrologyConnection, QWidget* parent = nullptr);
-	virtual ~DialogMetrologyConnectionItem();
+	virtual ~DialogMetrologyConnectionItem() override;
 
 public:
 
@@ -121,7 +106,7 @@ private slots:
 
 // ==============================================================================================
 
-class DialogMetrologyConnection : public QDialog
+class DialogMetrologyConnection : public DialogList
 {
 	Q_OBJECT
 
@@ -137,27 +122,18 @@ public:
 
 private:
 
-	QMenuBar* m_pMenuBar = nullptr;
 	QMenu* m_pConnectionMenu = nullptr;
 	QMenu* m_pEditMenu = nullptr;
-	QMenu* m_pContextMenu = nullptr;
 
 	QAction* m_pCreateAction = nullptr;
 	QAction* m_pEditAction = nullptr;
 	QAction* m_pRemoveAction = nullptr;
 	QAction* m_pMoveUpAction = nullptr;
 	QAction* m_pMoveDownAction = nullptr;
-	QAction* m_pExportAction = nullptr;
 	QAction* m_pImportAction = nullptr;
 
-	QAction* m_pFindAction = nullptr;
-	QAction* m_pCopyAction = nullptr;
-	QAction* m_pSelectAllAction = nullptr;
 
-	QTableView* m_pView = nullptr;
 	MetrologyConnectionTable m_connectionTable;
-
-	QDialogButtonBox* m_buttonBox = nullptr;
 
 	Metrology::ConnectionBase m_connectionBase;
 
@@ -172,39 +148,26 @@ public slots:
 	// slots for updating
 	//
 	void signalBaseLoaded();
-	void updateList();
+	void updateList() override;
 
 private slots:
 
 	// slots of menu
 	//
-		// Signal
+		// Connections
 		//
-	void createConnection();
-	void editConnection();
-	void removeConnection();
-	void moveUpConnection();
-	void moveDownConnection();
-	void exportConnections();
-	void importConnections();
-
-		// Edit
-		//
-	void find();
-	void copy();
-	void selectAll() { m_pView->selectAll(); }
-
-	// ContextMenu
-	//
-	void onContextMenu(QPoint);
+	void OnNew();
+	void onEdit();
+	void onRremove();
+	void onMoveUp();
+	void onMoveDown();
+	void onExport() override;
+	void onImport();
 
 	// slots for list
 	//
-	void onListDoubleClicked(const QModelIndex&) { editConnection(); }
+	void onListDoubleClicked(const QModelIndex&);
 
-	// slots of buttons
-	//
-	void onOk();
 };
 
 // ==============================================================================================

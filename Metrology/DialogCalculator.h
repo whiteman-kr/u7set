@@ -58,7 +58,7 @@ class DialogCalculator : public QDialog
 public:
 
 	explicit DialogCalculator(QWidget* parent = nullptr);
-	virtual ~DialogCalculator();
+	virtual ~DialogCalculator() override;
 
 private:
 

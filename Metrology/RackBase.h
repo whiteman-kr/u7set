@@ -49,7 +49,7 @@ class RackGroupBase : public QObject
 public:
 
 	explicit RackGroupBase(QObject* parent = nullptr);
-	virtual ~RackGroupBase() {}
+	virtual ~RackGroupBase() override {}
 
 public:
 
@@ -83,7 +83,7 @@ class RackBase : public QObject
 public:
 
 	explicit RackBase(QObject* parent = nullptr);
-	virtual ~RackBase() {}
+	virtual ~RackBase() override {}
 
 public:
 

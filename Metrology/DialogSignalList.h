@@ -1,21 +1,9 @@
 #ifndef DIALOGSIGNALLIST_H
 #define DIALOGSIGNALLIST_H
 
-#include <QDebug>
-#include <QScreen>
-#include <QDialog>
-#include <QMenu>
-#include <QMenuBar>
-#include <QAction>
-#include <QVBoxLayout>
-#include <QTableView>
-#include <QDialogButtonBox>
-#include <QKeyEvent>
-#include <QMutex>
+#include "../lib/MetrologySignal.h"
 
-#include "../lib/Signal.h"
-
-#include "SignalBase.h"
+#include "DialogList.h"
 
 // ==============================================================================================
 
@@ -90,7 +78,7 @@ class SignalListTable : public QAbstractTableModel
 public:
 
 	explicit SignalListTable(QObject* parent = nullptr);
-	virtual ~SignalListTable();
+	virtual ~SignalListTable() override;
 
 public:
 
@@ -106,23 +94,23 @@ private:
 	mutable QMutex			m_signalMutex;
 	QVector<Metrology::Signal*> m_signalList;
 
-	int						columnCount(const QModelIndex &parent) const;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
+	int						columnCount(const QModelIndex &parent) const override;
+	int						rowCount(const QModelIndex &parent=QModelIndex()) const override;
 
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant				data(const QModelIndex &index, int role) const;
+	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+	QVariant				data(const QModelIndex &index, int role) const override;
 };
 
 // ==============================================================================================
 
-class DialogSignalList : public QDialog
+class DialogSignalList : public DialogList
 {
 	Q_OBJECT
 
 public:
 
 	explicit DialogSignalList(bool hasButtons, QWidget* parent = nullptr);
-	virtual ~DialogSignalList();
+	virtual ~DialogSignalList() override;
 
 public:
 
@@ -130,20 +118,11 @@ public:
 
 private:
 
-	QMenuBar*				m_pMenuBar = nullptr;
 	QMenu*					m_pSignalMenu = nullptr;
 	QMenu*					m_pEditMenu = nullptr;
 	QMenu*					m_pViewMenu = nullptr;
 	QMenu*					m_pViewTypeADMenu = nullptr;
 	QMenu*					m_pViewTypeIOMenu = nullptr;
-	QMenu*					m_pContextMenu = nullptr;
-
-	QAction*				m_pExportAction = nullptr;
-
-	QAction*				m_pFindAction = nullptr;
-	QAction*				m_pCopyAction = nullptr;
-	QAction*				m_pSelectAllAction = nullptr;
-	QAction*				m_pSignalPropertyAction = nullptr;
 
 	QAction*				m_pTypeAnalogAction = nullptr;
 	QAction*				m_pTypeDiscreteAction = nullptr;
@@ -152,50 +131,26 @@ private:
 	QAction*				m_pTypeInternalAction = nullptr;
 	QAction*				m_pTypeOutputAction = nullptr;
 
-	QTableView*				m_pView = nullptr;
 	SignalListTable			m_signalTable;
-
-	QDialogButtonBox*		m_buttonBox = nullptr;
-
-	QAction*				m_pColumnAction[SIGNAL_LIST_COLUMN_COUNT];
-	QMenu*					m_headerContextMenu = nullptr;
 
 	static E::SignalType	m_typeAD;
 	static E::SignalInOutType m_typeIO;
-	static int				m_currenIndex;
 
 	Hash					m_selectedSignalHash = UNDEFINED_HASH;
 
-	void					createInterface(bool hasButtons);
-	void					createHeaderContexMenu();
+	void					createInterface();
 	void					createContextMenu();
-
-	void					updateVisibleColunm();
-	void					hideColumn(int column, bool hide);
-
-protected:
-
-	bool					eventFilter(QObject* object, QEvent* event);
 
 public slots:
 
-	void					updateList();	// slots for updating
+	void					updateVisibleColunm() override;
+	void					updateList() override;	// slots for updating
 
 private slots:
 
 	// slots of menu
 	//
-							// Signal
-							//
-	void					exportSignal();
-
-							// Edit
-							//
-	void					find();
-	void					copy();
-	void					selectAll() { m_pView->selectAll(); }
-	void					signalProperties();
-
+	void					onProperties() override;
 
 							// View
 							//
@@ -207,22 +162,11 @@ private slots:
 	void					showTypeInternal();
 	void					showTypeOutput();
 
-	void					onContextMenu(QPoint);
-
-	// slots for list header, to hide or show columns
-	//
-	void					onHeaderContextMenu(QPoint);
-	void					onColumnAction(QAction* action);
-
-	// slots for list
-	//
-	void					onListDoubleClicked(const QModelIndex&);
-
 	// slots of buttons
 	//
-	void					onOk();
+	void					onOk() override;
 };
 
 // ==============================================================================================
 
-#endif // SIGNALLISTDIALOG_H
+#endif // DIALOGSIGNALLIST_H
