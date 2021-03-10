@@ -226,8 +226,8 @@ bool ConfigSocket::readMetrologyItems(const QByteArray& fileData)
 	responseTime.start();
 
 	result &= readRacks(fileData, fileVersion);
-	result &= readTuningSources(fileData, fileVersion);
 	result &= readMetrologyConnections(fileData, fileVersion);
+	result &= readTuningSources(fileData, fileVersion);
 
 	qDebug() << __FUNCTION__ << " Time for read: " << responseTime.elapsed() << " ms";
 
@@ -321,56 +321,6 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool ConfigSocket::readTuningSources(const QByteArray& fileData, int fileVersion)
-{
-	Q_UNUSED(fileVersion)
-
-	bool result = true;
-
-	XmlReadHelper xml(fileData);
-
-	if (xml.findElement("TuningSources") == false)
-	{
-		qDebug() << __FUNCTION__ << "TuningSources section not found";
-		return false;
-	}
-
-	int tuningSourceCount = 0;
-	result &= xml.readIntAttribute(XmlAttribute::COUNT, &tuningSourceCount);
-
-	for(int t = 0; t < tuningSourceCount; t++)
-	{
-		if (xml.findElement("TuningSource") == false)
-		{
-			result = false;
-			break;
-		}
-
-		QString equipmentID;
-
-		result &= xml.readStringAttribute("EquipmentID", &equipmentID);
-
-		theSignalBase.tuning().sourceBase().sourceEquipmentID().append(equipmentID);
-	}
-
-	if (tuningSourceCount != theSignalBase.tuning().sourceBase().sourceEquipmentID().count())
-	{
-		qDebug() << __FUNCTION__ << "Tuning sources loading error, loaded: " <<
-					theSignalBase.tuning().sourceBase().sourceEquipmentID().count() <<
-					" from " <<
-					tuningSourceCount;
-
-		assert(false);
-		return false;
-	}
-
-	qDebug() << __FUNCTION__ << "Tuning sources were loaded: " << theSignalBase.tuning().sourceBase().sourceEquipmentID().count();
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 bool ConfigSocket::readMetrologyConnections(const QByteArray& fileData, int fileVersion)
 {
 	Q_UNUSED(fileVersion)
@@ -427,6 +377,56 @@ bool ConfigSocket::readMetrologyConnections(const QByteArray& fileData, int file
 	}
 
 	qDebug() << __FUNCTION__ << "Connections were loaded: " << theSignalBase.connections().count();
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool ConfigSocket::readTuningSources(const QByteArray& fileData, int fileVersion)
+{
+	Q_UNUSED(fileVersion)
+
+	bool result = true;
+
+	XmlReadHelper xml(fileData);
+
+	if (xml.findElement("TuningSources") == false)
+	{
+		qDebug() << __FUNCTION__ << "TuningSources section not found";
+		return false;
+	}
+
+	int tuningSourceCount = 0;
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &tuningSourceCount);
+
+	for(int t = 0; t < tuningSourceCount; t++)
+	{
+		if (xml.findElement("TuningSource") == false)
+		{
+			result = false;
+			break;
+		}
+
+		QString equipmentID;
+
+		result &= xml.readStringAttribute("EquipmentID", &equipmentID);
+
+		theSignalBase.tuning().sourceBase().sourceEquipmentID().append(equipmentID);
+	}
+
+	if (tuningSourceCount != theSignalBase.tuning().sourceBase().sourceEquipmentID().count())
+	{
+		qDebug() << __FUNCTION__ << "Tuning sources loading error, loaded: " <<
+					theSignalBase.tuning().sourceBase().sourceEquipmentID().count() <<
+					" from " <<
+					tuningSourceCount;
+
+		assert(false);
+		return false;
+	}
+
+	qDebug() << __FUNCTION__ << "Tuning sources were loaded: " << theSignalBase.tuning().sourceBase().sourceEquipmentID().count();
 
 	return result;
 }

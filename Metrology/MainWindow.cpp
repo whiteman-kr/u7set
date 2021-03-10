@@ -21,6 +21,7 @@
 #include "DialogRackList.h"
 #include "DialogSignalList.h"
 #include "DialogComparatorList.h"
+#include "DialogTuningSourceList.h"
 #include "DialogTuningSignalList.h"
 #include "DialogMetrologyConnection.h"
 #include "DialogObjectProperties.h"
@@ -174,15 +175,20 @@ void MainWindow::createActions()
 	m_pShowComparatorsListAction->setToolTip(QString());
 	connect(m_pShowComparatorsListAction, &QAction::triggered, this, &MainWindow::showComparatorsList);
 
-	m_pShowTuningSignalListAction = new QAction(tr("Tuning signals ..."), this);
-	m_pShowTuningSignalListAction->setIcon(QIcon(":/icons/Tuning.png"));
-	m_pShowTuningSignalListAction->setToolTip(QString());
-	connect(m_pShowTuningSignalListAction, &QAction::triggered, this, &MainWindow::showTuningSignalList);
-
 	m_pShowConnectionListAction = new QAction(tr("Metrology connections ..."), this);
 	m_pShowConnectionListAction->setIcon(QIcon(":/icons/Connection.png"));
 	m_pShowConnectionListAction->setToolTip(QString());
 	connect(m_pShowConnectionListAction, &QAction::triggered, this, &MainWindow::showConnectionList);
+
+	m_pShowTuningSourceListAction = new QAction(tr("Sources ..."), this);
+	m_pShowTuningSourceListAction->setIcon(QIcon(":/icons/Tuning.png"));
+	m_pShowTuningSourceListAction->setToolTip(QString());
+	connect(m_pShowTuningSourceListAction, &QAction::triggered, this, &MainWindow::showTuningSourceList);
+
+	m_pShowTuningSignalListAction = new QAction(tr("Signals ..."), this);
+	m_pShowTuningSignalListAction->setIcon(QIcon(":/icons/Tuning.png"));
+	m_pShowTuningSignalListAction->setToolTip(QString());
+	connect(m_pShowTuningSignalListAction, &QAction::triggered, this, &MainWindow::showTuningSignalList);
 
 	m_pShowGraphLinElAction = new QAction(tr("Linearity: electric range ..."), this);
 	m_pShowGraphLinElAction->setIcon(QIcon(":/icons/Graph.png"));
@@ -274,6 +280,7 @@ void MainWindow::createMenu()
 	//
 	m_pViewMenu = pMenuBar->addMenu(tr("&View"));
 	m_pViewPanelMenu = new QMenu(tr("&Panels"), m_pViewMenu);
+	m_pViewTuningMenu = new QMenu(tr("&Tuning"), m_pViewMenu);
 	m_pViewGraphMenu = new QMenu(tr("&Graphs of linearity"), m_pViewMenu);
 
 	m_pViewMenu->addMenu(m_pViewPanelMenu);
@@ -281,8 +288,10 @@ void MainWindow::createMenu()
 	m_pViewMenu->addAction(m_pShowRackListAction);
 	m_pViewMenu->addAction(m_pShowSignalListAction);
 	m_pViewMenu->addAction(m_pShowComparatorsListAction);
-	m_pViewMenu->addAction(m_pShowTuningSignalListAction);
 	m_pViewMenu->addAction(m_pShowConnectionListAction);
+	m_pViewTuningMenu->addAction(m_pShowTuningSourceListAction);
+	m_pViewTuningMenu->addAction(m_pShowTuningSignalListAction);
+	m_pViewMenu->addMenu(m_pViewTuningMenu);
 	m_pViewMenu->addSeparator();
 	m_pViewGraphMenu->addAction(m_pShowGraphLinElAction);
 	m_pViewGraphMenu->addAction(m_pShowGraphLinEnAction);
@@ -1681,24 +1690,6 @@ void MainWindow::showComparatorsList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::showTuningSignalList()
-{
-	if (m_pConfigSocket == nullptr || m_pTuningSocket == nullptr)
-	{
-		return;
-	}
-
-	DialogTuningSignalList dialog(this);
-
-	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &DialogTuningSignalList::updateSignalList, Qt::QueuedConnection);
-	connect(m_pTuningSocket, &TuningSocket::sourcesLoaded, &dialog, &DialogTuningSignalList::updateSourceList, Qt::QueuedConnection);
-	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, &dialog, &DialogTuningSignalList::updateSourceList, Qt::QueuedConnection);
-
-	dialog.exec();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void MainWindow::showConnectionList()
 {
 	if (m_pConfigSocket == nullptr)
@@ -1731,6 +1722,42 @@ void MainWindow::showConnectionList()
 	}
 
 	m_pStatisticsPanel->updateList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showTuningSourceList()
+{
+	if (m_pConfigSocket == nullptr || m_pTuningSocket == nullptr)
+	{
+		return;
+	}
+
+	DialogTuningSourceList dialog(this);
+
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &DialogTuningSourceList::updateList, Qt::QueuedConnection);
+	connect(m_pTuningSocket, &TuningSocket::sourcesLoaded, &dialog, &DialogTuningSourceList::updateList, Qt::QueuedConnection);
+	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, &dialog, &DialogTuningSourceList::updateList, Qt::QueuedConnection);
+
+	dialog.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showTuningSignalList()
+{
+	if (m_pConfigSocket == nullptr || m_pTuningSocket == nullptr)
+	{
+		return;
+	}
+
+	DialogTuningSignalList dialog(this);
+
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &DialogTuningSignalList::updateList, Qt::QueuedConnection);
+	connect(m_pTuningSocket, &TuningSocket::sourcesLoaded, &dialog, &DialogTuningSignalList::updateList, Qt::QueuedConnection);
+	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, &dialog, &DialogTuningSignalList::updateList, Qt::QueuedConnection);
+
+	dialog.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

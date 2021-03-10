@@ -64,6 +64,7 @@ SOURCES += \
     DialogRackList.cpp \
     DialogSignalList.cpp \
     DialogTuningSignalList.cpp \
+    DialogTuningSourceList.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
@@ -145,6 +146,7 @@ HEADERS  += \
     DialogRackList.h \
     DialogSignalList.h \
     DialogTuningSignalList.h \
+    DialogTuningSourceList.h \
     MainWindow.h \
     Calibrator.h \
     CalibratorBase.h \

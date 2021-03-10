@@ -80,8 +80,8 @@ private slots:
 	bool				readComparatorSet(const QByteArray& fileData);
 
 	bool				readRacks(const QByteArray& fileData, int fileVersion);
-	bool				readTuningSources(const QByteArray& fileData, int fileVersion);
 	bool				readMetrologyConnections(const QByteArray& fileData, int fileVersion);
+	bool				readTuningSources(const QByteArray& fileData, int fileVersion);
 
 	static void			loadSignalBase(ConfigSocket* pThis);
 
