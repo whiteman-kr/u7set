@@ -13572,7 +13572,7 @@ namespace Builder
 
 	std::shared_ptr<Hardware::DeviceObject> ModuleLogicCompiler::getDeviceSharedPtr(const QString& deviceEquipmentID)
 	{
-		return m_equipmentSet->deviceObjectSharedPointer(deviceEquipmentID);
+		return m_equipmentSet->deviceObject(deviceEquipmentID);
 	}
 
 	void ModuleLogicCompiler::dumpApplicationLogicItems()

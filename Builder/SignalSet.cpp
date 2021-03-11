@@ -231,7 +231,7 @@ namespace Builder
 				continue;
 			}
 
-			std::shared_ptr<Hardware::DeviceObject> device = equipment->deviceObjectSharedPointer(s.equipmentID());
+			std::shared_ptr<Hardware::DeviceObject> device = equipment->deviceObject(s.equipmentID());
 
 			if (device == nullptr)
 			{

@@ -49,6 +49,7 @@ SOURCES += main.cpp \
 	../../lib/HostAddressPort.cpp \
 	../../lib/TuningValue.cpp \
 	../../lib/SignalProperties.cpp \
+    DeviceObjectTests.cpp \
 	UserPropertyTest.cpp \
 	UserTests.cpp \
 	FileTests.cpp \
@@ -82,6 +83,7 @@ HEADERS += \
 	../../lib/HostAddressPort.h \
 	../../lib/TuningValue.h \
 	../../lib/SignalProperties.h \
+    DeviceObjectTests.h \
 	UserPropertyTest.h \
 	UserTests.h \
 	FileTests.h \

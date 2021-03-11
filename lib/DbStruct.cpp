@@ -123,10 +123,6 @@ DbProject::DbProject() :
 {
 }
 
-DbProject::~DbProject()
-{
-}
-
 QString DbProject::databaseName() const
 {
 	return m_databaseName;
@@ -530,12 +526,12 @@ DbFileTree::DbFileTree(const std::map<int, std::shared_ptr<DbFileInfo>>& files, 
 	return;
 }
 
-DbFileTree::DbFileTree(DbFileTree&& src)
+DbFileTree::DbFileTree(DbFileTree&& src) noexcept
 {
 	operator=(std::move(src));
 }
 
-DbFileTree& DbFileTree::operator=(DbFileTree&& src)
+DbFileTree& DbFileTree::operator=(DbFileTree&& src) noexcept
 {
 	m_fileIdToChildren = std::move(src.m_fileIdToChildren);
 	m_files = std::move(src.m_files);
@@ -1116,10 +1112,6 @@ DbFileInfo::DbFileInfo(int fileId) noexcept :
 }
 
 
-DbFileInfo::~DbFileInfo()
-{
-}
-
 void DbFileInfo::trace() const
 {
 	qDebug() << "File:";
@@ -1544,10 +1536,6 @@ DbChangeset::DbChangeset()
 {
 }
 
-DbChangeset::~DbChangeset()
-{
-}
-
 int DbChangeset::changeset() const
 {
 	return m_changesetId;
@@ -1624,10 +1612,6 @@ DbChangesetDetails::DbChangesetDetails() :
 	m_objects.reserve(64);
 }
 
-DbChangesetDetails::~DbChangesetDetails()
-{
-}
-
 const std::vector<DbChangesetObject>& DbChangesetDetails::objects() const
 {
 	return m_objects;
@@ -1662,10 +1646,6 @@ DbChangesetObject::DbChangesetObject(const Signal& signal) :
 {
 }
 
-
-DbChangesetObject::~DbChangesetObject()
-{
-}
 
 DbChangesetObject::Type DbChangesetObject::type() const
 {

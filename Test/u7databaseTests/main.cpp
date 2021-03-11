@@ -11,6 +11,7 @@
 #include "DbControllerSignalManagementTests.h"
 #include "DbControllerHardwareConfigurationTests.h"
 #include "DbControllerVersionControlTests.h"
+#include "DeviceObjectTests.h"
 
 const int DatabaseProjectVersion = 326;
 
@@ -51,6 +52,11 @@ int main(int argc, char *argv[])
 	}
 
 	Hardware::init();
+
+	// DeviceObject tests
+	//
+	DeviceObjectTests deviceObjectTests;
+	returnCode |= QTest::qExec(&deviceObjectTests, cmdLineArgs);
 
 	//
 	// Database Signal functions
@@ -161,7 +167,7 @@ int runSpecificTest(const QStringList& cmdLineArgs, QStringList& specificArgs, b
 
 	QObject* testObject = nullptr;
 
-	for(const QString specArg : specificArgs)
+	for(const QString& specArg : specificArgs)
 	{
 		if (specArg == ARG_SIGNAL_TESTS)
 		{
