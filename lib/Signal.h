@@ -488,7 +488,7 @@ private:
 	QDateTime m_created;
 	bool m_deleted = false;
 	QDateTime m_instanceCreated;
-	VcsItemAction m_instanceAction = VcsItemAction::Added;
+	VcsItemAction m_instanceAction{VcsItemAction::Added};
 
 	// Signal properties calculated in compile-time
 	//

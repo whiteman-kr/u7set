@@ -1398,7 +1398,7 @@ namespace Builder
 			{
 				// Get device object from the EquipmentSet
 				//
-				std::shared_ptr<Hardware::DeviceObject> object = m_context->m_equipmentSet->deviceObjectSharedPointer(equipmentId);
+				std::shared_ptr<Hardware::DeviceObject> object = m_context->m_equipmentSet->deviceObject(equipmentId);
 				if (object == nullptr)
 				{
 					m_log->errEQP6011(equipmentId, QString("appling %1 SimProfile").arg(profileName));
@@ -1564,7 +1564,7 @@ namespace Builder
 
 			for(const QString& profileEquipmentID : profileEquipmentIDs)
 			{
-				std::shared_ptr<Hardware::DeviceObject> deviceObject = context->m_equipmentSet->deviceObjectSharedPointer(profileEquipmentID);
+				std::shared_ptr<Hardware::DeviceObject> deviceObject = context->m_equipmentSet->deviceObject(profileEquipmentID);
 
 				if (deviceObject == nullptr)
 				{
@@ -1702,7 +1702,7 @@ namespace Builder
 
 			for(const QString& profileEquipmentID : profileEquipmentIDs)
 			{
-				std::shared_ptr<Hardware::DeviceObject> deviceObject = context->m_equipmentSet->deviceObjectSharedPointer(profileEquipmentID);
+				std::shared_ptr<Hardware::DeviceObject> deviceObject = context->m_equipmentSet->deviceObject(profileEquipmentID);
 
 				if (deviceObject == nullptr)
 				{

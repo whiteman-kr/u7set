@@ -9,6 +9,11 @@ template<typename BaseClass>
 class Factory
 {
 public:
+	void clear()
+	{
+		factories.clear();
+	}
+
 	template<typename DerivedClass>
 	void Register(const std::string& className)
 	{
@@ -37,7 +42,7 @@ public:
 		return isRegistered(CUtils::GetClassHashCode(DerivedClass::staticMetaObject.className()));
 	}
 
-	bool isRegistered(quint32 classHash) const
+	[[nodiscard]] bool isRegistered(quint32 classHash) const
 	{
 		return factories.find(classHash) != factories.end();
 	}

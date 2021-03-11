@@ -17,9 +17,9 @@ namespace Db
 {
 	class ProjectProperty
 	{
+	public:
 		ProjectProperty() = delete;
 
-	public:
 		constexpr static const char* Description = "Description";
 		constexpr static const char* SafetyProject = "Safety Project";
 		constexpr static const char* SuppressWarnings = "SuppressWarnings";						// A list of suppressed warnings on build
@@ -33,9 +33,9 @@ namespace Db
 
 	class File
 	{
+	public:
 		File() = delete;
 
-	public:
 		constexpr static const char* RootFileName = "$root$";						// root file name
 		constexpr static const char* AfblFileName = "$root$/AFBL";					// Application Functional Block Library
 
@@ -101,8 +101,8 @@ public:
 	VcsState() noexcept;
 	VcsState(VcsStateType s) noexcept;
 
-	QString text() const noexcept;
-	VcsStateType value() const noexcept;
+	[[nodiscard]] QString text() const noexcept;
+	[[nodiscard]] VcsStateType value() const noexcept;
 
 private:
 	VcsStateType m_state;
@@ -136,10 +136,10 @@ public:
 	VcsItemAction() noexcept;
 	VcsItemAction(VcsItemActionType s) noexcept;
 
-	QString text() const noexcept;
-	int toInt() const noexcept;
+	[[nodiscard]] QString text() const noexcept;
+	[[nodiscard]] int toInt() const noexcept;
 
-	VcsItemActionType value() const noexcept;
+	[[nodiscard]] VcsItemActionType value() const noexcept;
 
 	void setValue(int intVal);
 
@@ -182,25 +182,25 @@ class DbProject
 {
 public:
 	DbProject();
-	virtual ~DbProject();
+	virtual ~DbProject() = default;
 
 public:
-	QString databaseName() const;
+	[[nodiscard]] QString databaseName() const;
 	void setDatabaseName(const QString& databaseName);
 
-	QString projectName() const;
+	[[nodiscard]] QString projectName() const;
 	void setProjectName(const QString& projectName);
 
-	QString description() const;
+	[[nodiscard]] QString description() const;
 	void setDescription(const QString& description);
 
-	bool safetyProject() const;
+	[[nodiscard]] bool safetyProject() const;
 	void setSafetyProject(bool value);
 
-	int version() const;
+	[[nodiscard]] int version() const;
 	void setVersion(int value);
 
-	bool uppercaseAppSignalId() const;
+	[[nodiscard]] bool uppercaseAppSignalId() const;
 	void setUppercaseAppSignalId(bool value);
 
 protected:
@@ -227,32 +227,32 @@ public:
 	DbProjectProperties();
 
 public:
-	QString description() const;
+	[[nodiscard]] QString description() const;
 	void setDescription(const QString& value);
 
-	bool safetyProject() const;
+	[[nodiscard]] bool safetyProject() const;
 	void setSafetyProject(bool value);
 
-	std::vector<int> suppressWarnings() const;
-	QString suppressWarningsAsString() const;
+	[[nodiscard]] std::vector<int> suppressWarnings() const;
+	[[nodiscard]] QString suppressWarningsAsString() const;
 	void setSuppressWarnings(const QString& value);
 
-	bool runSimTestsOnBuild() const;
+	[[nodiscard]] bool runSimTestsOnBuild() const;
 	void setRunSimTestsOnBuild(bool value);
 
-	int simTestsTimeout() const;
+	[[nodiscard]] int simTestsTimeout() const;
 	void setSimTestsTimeout(int value);
 
-	bool uppercaseAppSignalId() const;
+	[[nodiscard]] bool uppercaseAppSignalId() const;
 	void setUppercaseAppSignalId(bool value);
 
-	bool generateAppSignalsXml() const;
+	[[nodiscard]] bool generateAppSignalsXml() const;
 	void setGenerateAppSignalsXml(bool value);
 
-	bool generateAppLogicDrawings() const;
+	[[nodiscard]] bool generateAppLogicDrawings() const;
 	void setGenerateAppLogicDrawings(bool value);
 
-	bool generateExtraDebugInfo() const;
+	[[nodiscard]] bool generateExtraDebugInfo() const;
 	void setGenerateExtraDebugInfo(bool value);
 
 private:
@@ -284,35 +284,35 @@ public:
 	bool operator!= (const DbUser& u) const;
 
 public:
-	int userId() const;
+	[[nodiscard]] int userId() const;
 	void setUserId(int value);
 
-	const QDateTime& date() const;
+	[[nodiscard]] const QDateTime& date() const;
 	void setDate(const QDateTime& value);
 	void setDate(const QString& value);
 
-	const QString& username() const;
+	[[nodiscard]] const QString& username() const;
 	void setUsername(const QString& value);
 
-	const QString& firstName() const;
+	[[nodiscard]] const QString& firstName() const;
 	void setFirstName(const QString& value);
 
-	const QString& lastName() const;
+	[[nodiscard]] const QString& lastName() const;
 	void setLastName(const QString& value);
 
-	const QString& password() const;
+	[[nodiscard]] const QString& password() const;
 	void setPassword(const QString& value);
 
-	const QString& newPassword() const;
+	[[nodiscard]] const QString& newPassword() const;
 	void setNewPassword(const QString& value);
 
-	bool isAdminstrator() const;
+	[[nodiscard]] bool isAdminstrator() const;
 	void setAdministrator(bool value);
 
-	bool isReadonly() const;
+	[[nodiscard]] bool isReadonly() const;
 	void setReadonly(bool value);
 
-	bool isDisabled() const;
+	[[nodiscard]] bool isDisabled() const;
 	void setDisabled(bool value);
 
 private:
@@ -343,61 +343,61 @@ public:
 	DbFileTree() = default;
 	DbFileTree(const DbFileTree&) = default;
 	DbFileTree& operator=(const DbFileTree&) = default;
-	DbFileTree(const std::vector<std::shared_ptr<DbFileInfo>>& files, int rootFileId);
-	DbFileTree(const std::map<int, std::shared_ptr<DbFileInfo>>& files, int rootFileId);
+	explicit DbFileTree(const std::vector<std::shared_ptr<DbFileInfo>>& files, int rootFileId);
+	explicit DbFileTree(const std::map<int, std::shared_ptr<DbFileInfo>>& files, int rootFileId);
 
-	DbFileTree(DbFileTree&& src);
-	DbFileTree& operator=(DbFileTree&& src);
+	DbFileTree(DbFileTree&& src) noexcept;
+	DbFileTree& operator=(DbFileTree&& src) noexcept;
 
 public:
 	void clear();
 
-	int size() const;
-	bool empty() const;
+	[[nodiscard]] int size() const;
+	[[nodiscard]] bool empty() const;
 
-	bool isDbFile() const;		// true if contains DbFile whith data or tree is empty
-	bool isDbFileInfo() const;	// true if contains DbFileInfo or tree is empty
+	[[nodiscard]] bool isDbFile() const;		// true if contains DbFile whith data or tree is empty
+	[[nodiscard]] bool isDbFileInfo() const;	// true if contains DbFileInfo or tree is empty
 
-	bool isRoot(int fileId) const;
-	bool isRoot(const DbFileInfo& fileInfo) const;
+	[[nodiscard]] bool isRoot(int fileId) const;
+	[[nodiscard]] bool isRoot(const DbFileInfo& fileInfo) const;
 
-	bool hasFile(int fileId) const;
+	[[nodiscard]] bool hasFile(int fileId) const;
 
-	std::shared_ptr<DbFileInfo> rootFile();
-	std::shared_ptr<DbFileInfo> rootFile() const;
+	[[nodiscard]] std::shared_ptr<DbFileInfo> rootFile();
+	[[nodiscard]] std::shared_ptr<DbFileInfo> rootFile() const;
 
-	std::shared_ptr<DbFileInfo> file(int fileId);
-	std::shared_ptr<DbFileInfo> file(int fileId) const;
+	[[nodiscard]] std::shared_ptr<DbFileInfo> file(int fileId);
+	[[nodiscard]] std::shared_ptr<DbFileInfo> file(int fileId) const;
 
-	QString filePath(int fileId) const;		// Return file path "/ABC/DEF/", "/"
+	[[nodiscard]] QString filePath(int fileId) const;		// Return file path "/ABC/DEF/", "/"
 
-	const std::map<int, std::shared_ptr<DbFileInfo>>& files() const;
-	std::vector<DbFileInfo> toVector(bool excludeRoot) const;
-	std::vector<DbFileInfo> toVectorIf(std::function<bool(const DbFileInfo&)> pred) const;
-	std::vector<std::shared_ptr<DbFileInfo>> toVectorOfSharedPointers(bool excludeRoot) const;
+	[[nodiscard]] const std::map<int, std::shared_ptr<DbFileInfo>>& files() const;
+	[[nodiscard]] std::vector<DbFileInfo> toVector(bool excludeRoot) const;
+	[[nodiscard]] std::vector<DbFileInfo> toVectorIf(std::function<bool(const DbFileInfo&)> pred) const;
+	[[nodiscard]] std::vector<std::shared_ptr<DbFileInfo>> toVectorOfSharedPointers(bool excludeRoot) const;
 
-	bool hasChildren(int fileId) const;
+	[[nodiscard]] bool hasChildren(int fileId) const;
 
-	const std::vector<std::shared_ptr<DbFileInfo>>& children(int parentId) const;
-	const std::vector<std::shared_ptr<DbFileInfo>>& children(const DbFileInfo& fileInfo) const;
-	const std::vector<std::shared_ptr<DbFileInfo>>& children(const std::shared_ptr<DbFileInfo>& fileInfo) const;
+	[[nodiscard]] const std::vector<std::shared_ptr<DbFileInfo>>& children(int parentId) const;
+	[[nodiscard]] const std::vector<std::shared_ptr<DbFileInfo>>& children(const DbFileInfo& fileInfo) const;
+	[[nodiscard]] const std::vector<std::shared_ptr<DbFileInfo>>& children(const std::shared_ptr<DbFileInfo>& fileInfo) const;
 
-	std::shared_ptr<DbFileInfo> child(int parentId, int index) const;
-	std::shared_ptr<DbFileInfo> child(const DbFileInfo& parentFileInfo, int index) const;
-	std::shared_ptr<DbFileInfo> child(const std::shared_ptr<DbFileInfo>& parentFileInfo, int index) const;
+	[[nodiscard]] std::shared_ptr<DbFileInfo> child(int parentId, int index) const;
+	[[nodiscard]] std::shared_ptr<DbFileInfo> child(const DbFileInfo& parentFileInfo, int index) const;
+	[[nodiscard]] std::shared_ptr<DbFileInfo> child(const std::shared_ptr<DbFileInfo>& parentFileInfo, int index) const;
 
-	int rootChildrenCount() const;
-	int childrenCount(int parentFileId) const;
+	[[nodiscard]] int rootChildrenCount() const;
+	[[nodiscard]] int childrenCount(int parentFileId) const;
 
-	int indexInParent(int fileId) const;
-	int indexInParent(const DbFileInfo& fileId) const;
+	[[nodiscard]] int indexInParent(int fileId) const;
+	[[nodiscard]] int indexInParent(const DbFileInfo& fileId) const;
 
 	int calcIf(int startFromFileId, std::function<int(const DbFileInfo&)> pred) const;
 
 	// Modifying structure
 	//
 	void setRoot(int rootFileId);
-	int rootFileId() const;
+	[[nodiscard]] int rootFileId() const;
 
 	void addFile(const DbFileInfo& fileInfo);
 	void addFile(std::shared_ptr<DbFileInfo> fileInfo);
@@ -441,7 +441,7 @@ public:
 	DbFileInfo(const DbFileInfo& fileInfo) noexcept = default;
 	explicit DbFileInfo(const DbFile& file) noexcept;
 	explicit DbFileInfo(int fileId) noexcept;
-	virtual ~DbFileInfo();
+	virtual ~DbFileInfo() = default;
 
 	// Methods
 	//
@@ -451,57 +451,57 @@ public:
 	// Properties
 	//
 public:
-	const QString& fileName() const noexcept;
+	[[nodiscard]] const QString& fileName() const noexcept;
 	void setFileName(const QString& value);
 
-	QString extension() const noexcept;
+	[[nodiscard]] QString extension() const noexcept;
 
-	int fileId() const noexcept;
+	[[nodiscard]] int fileId() const noexcept;
 	void setFileId(int value);
 	void resetFileId();
-	bool hasFileId() const;
+	[[nodiscard]] bool hasFileId() const;
 
-	bool isNull() const noexcept;
+	[[nodiscard]] bool isNull() const noexcept;
 
-	int parentId() const noexcept;
+	[[nodiscard]] int parentId() const noexcept;
 	void setParentId(int value);
 
-	virtual int size() const;
+	[[nodiscard]] virtual int size() const;
 	void setSize(int size);
 
-	bool deleted() const;
+	[[nodiscard]] bool deleted() const;
 	void setDeleted(bool value);
 
-	int changeset() const noexcept;
+	[[nodiscard]] int changeset() const noexcept;
 	void setChangeset(int value);
 
-	QDateTime created() const;
+	[[nodiscard]] QDateTime created() const;
 	void setCreated(const QDateTime& value);
 	void setCreated(const QString& value);
 
-	QDateTime lastCheckIn() const;
+	[[nodiscard]] QDateTime lastCheckIn() const;
 	void setLastCheckIn(const QDateTime& value);
 	void setLastCheckIn(const QString& value);
 
-	const VcsState& state() const noexcept;
+	[[nodiscard]] const VcsState& state() const noexcept;
 	void setState(const VcsState& state);
 
-	const VcsItemAction& action() const noexcept;
+	[[nodiscard]] const VcsItemAction& action() const noexcept;
 	void setAction(const VcsItemAction& action);
 
-	int userId() const noexcept;
+	[[nodiscard]] int userId() const noexcept;
 	void setUserId(int value);
 
-	const QString& details() const noexcept;
+	[[nodiscard]] const QString& details() const noexcept;
 	void setDetails(const QString& value);		// Value must be valid JSON, Example: "{}"
 
 	// File Attributes
 	//
-	qint32 attributes() const;
+	[[nodiscard]] qint32 attributes() const;
 	void setAttributes(qint32 value);
 
-	bool isFolder() const;
-	bool directoryAttribute() const;
+	[[nodiscard]] bool isFolder() const;
+	[[nodiscard]] bool directoryAttribute() const;
 	void setDirectoryAttribute(bool value);
 
 	// Data
@@ -568,14 +568,13 @@ public:
 	// Properties
 	//
 public:
-	const QByteArray& data() const;
-	//QByteArray& data();				// Commented, as this function cannot set size after changing data
+	[[nodiscard]] const QByteArray& data() const;
 	void setData(const QByteArray& data);
 	void setData(QByteArray&& data);
 	void swapData(QByteArray& data);
 	void clearData();
 
-	virtual int size() const override;
+	[[nodiscard]] virtual int size() const override;
 
 	// Data
 	//
@@ -593,28 +592,28 @@ class DbChangeset
 {
 public:
 	DbChangeset();
-	virtual ~DbChangeset();
+	virtual ~DbChangeset() = default;
 
 	// Properties
 	//
 public:
-	int changeset() const;
+	[[nodiscard]] int changeset() const;
 	void setChangeset(int value);
 
-	QDateTime date() const;
+	[[nodiscard]] QDateTime date() const;
 	void setDate(const QDateTime& value);
 	void setDate(const QString& value);
 
-	int userId() const;
+	[[nodiscard]] int userId() const;
 	void setUserId(int value);
 
-	const QString& username() const;
+	[[nodiscard]] const QString& username() const;
 	void setUsername(const QString& value);
 
-	const QString& comment() const;
+	[[nodiscard]] const QString& comment() const;
 	void setComment(const QString& value);
 
-	const VcsItemAction& action() const;
+	[[nodiscard]] const VcsItemAction& action() const;
 	void setAction(const VcsItemAction& value);
 
 	// Data
@@ -639,10 +638,10 @@ class DbChangesetDetails : public DbChangeset
 {
 public:
 	DbChangesetDetails();
-	virtual ~DbChangesetDetails();
+	virtual ~DbChangesetDetails() = default;
 
 public:
-	const std::vector<DbChangesetObject>& objects() const;
+	[[nodiscard]] const std::vector<DbChangesetObject>& objects() const;
 	void addObject(const DbChangesetObject& object);
 
 private:
@@ -656,7 +655,7 @@ public:
 	DbChangesetObject();
 	explicit DbChangesetObject(const DbFileInfo& file);
 	explicit DbChangesetObject(const Signal& signal);
-	virtual ~DbChangesetObject();
+	virtual ~DbChangesetObject() = default;
 
 public:
 	enum class Type
@@ -666,31 +665,31 @@ public:
 	};
 
 public:
-	DbChangesetObject::Type type() const;
+	[[nodiscard]] DbChangesetObject::Type type() const;
 	void setType(DbChangesetObject::Type value);
 
-	bool isFile() const;
-	bool isSignal() const;
+	[[nodiscard]] bool isFile() const;
+	[[nodiscard]] bool isSignal() const;
 
-	int id() const;
+	[[nodiscard]] int id() const;
 	void setId(int value);
 
-	QString name() const;
+	[[nodiscard]] QString name() const;
 	void setName(const QString& value);
 
-	QString caption() const;
+	[[nodiscard]] QString caption() const;
 	void setCaption(const QString& value);
 
-	VcsItemAction action() const;
+	[[nodiscard]] VcsItemAction action() const;
 	void setAction(VcsItemAction value);
 
-	QString parent() const;
+	[[nodiscard]] QString parent() const;
 	void setParent(const QString& value);
 
-	QString fileMoveText() const;
+	[[nodiscard]] QString fileMoveText() const;
 	void setFileMoveText(const QString& value);
 
-	QString fileRenameText() const;
+	[[nodiscard]] QString fileRenameText() const;
 	void setFileRenameText(const QString& value);
 
 private:
@@ -698,7 +697,7 @@ private:
 	int m_id = -1;				// File.FileID or Signal.SignalsID
 	QString m_name;				// FileName or AppSignalID
 	QString m_caption;
-	VcsItemAction m_action = VcsItemAction::Added;
+	VcsItemAction m_action{VcsItemAction::Added};
 	QString m_parent;
 	QString m_fileMoveText;
 	QString m_fileRenameText;
