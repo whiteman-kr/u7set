@@ -479,8 +479,7 @@ namespace Sim
 		return;
 	}
 
-	AfbComponentInstance::AfbComponentInstance(const std::shared_ptr<const Afb::AfbComponent>& afbComp,
-											   quint16 instanceNo) :
+	AfbComponentInstance::AfbComponentInstance(const std::shared_ptr<const Afb::AfbComponent>& afbComp, quint16 instanceNo) :
 		m_afbComp(afbComp),
 		m_instanceNo(instanceNo)
 	{
@@ -499,25 +498,13 @@ namespace Sim
 
 	bool AfbComponentInstance::addParam(const AfbComponentParam& param)
 	{
-		if (param.opIndex() >= m_params_a.size())				// NOLINT
+		if (param.opIndex() >= m_params_a.size())
 		{
-			Q_ASSERT(param.opIndex() < m_params_a.size());		// NOLINT
+			Q_ASSERT(param.opIndex() < m_params_a.size());
 			return false;
 		}
 
 		m_params_a[param.opIndex()] = param;
-		return true;
-	}
-
-	bool AfbComponentInstance::addParam(AfbComponentParam&& param)
-	{
-		if (param.opIndex() >= m_params_a.size())					// NOLINT
-		{
-			Q_ASSERT(param.opIndex() < m_params_a.size());			// NOLINT
-			return false;
-		}
-
-		m_params_a[param.opIndex()] = std::move(param);
 		return true;
 	}
 
