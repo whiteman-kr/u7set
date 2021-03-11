@@ -8,62 +8,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorListTable::ComparatorListTable(QObject*)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ComparatorListTable::~ComparatorListTable()
-{
-	QMutexLocker l(&m_comparatorMutex);
-
-	m_comparatorList.clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int ComparatorListTable::columnCount(const QModelIndex&) const
-{
-	return COMPARATOR_LIST_COLUMN_COUNT;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int ComparatorListTable::rowCount(const QModelIndex&) const
-{
-	return comparatorCount();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QVariant ComparatorListTable::headerData(int section, Qt::Orientation orientation, int role) const
-{
-	if (role != Qt::DisplayRole)
-	{
-		return QVariant();
-	}
-
-	QVariant result = QVariant();
-
-	if (orientation == Qt::Horizontal)
-	{
-		if (section >= 0 && section < COMPARATOR_LIST_COLUMN_COUNT)
-		{
-			result = qApp->translate("DialogComparatorList", ComparatorListColumn[section]);
-		}
-	}
-
-	if (orientation == Qt::Vertical)
-	{
-		result = QString("%1").arg(section + 1);
-	}
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 {
 	if (index.isValid() == false)
@@ -72,18 +16,18 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 	}
 
 	int row = index.row();
-	if (row < 0 || row >= comparatorCount())
+	if (row < 0 || row >= count())
 	{
 		return QVariant();
 	}
 
 	int column = index.column();
-	if (column < 0 || column > COMPARATOR_LIST_COLUMN_COUNT)
+	if (column < 0 || column > m_columnCount)
 	{
 		return QVariant();
 	}
 
-	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = comparator(row);
+	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = at(row);
 	if (comparatorEx == nullptr)
 	{
 		return QVariant();
@@ -172,12 +116,12 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 
 QString ComparatorListTable::text(int row, int column, Metrology::Signal* pInSignal, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const
 {
-	if (row < 0 || row >= comparatorCount())
+	if (row < 0 || row >= count())
 	{
 		return QString();
 	}
 
-	if (column < 0 || column > COMPARATOR_LIST_COLUMN_COUNT)
+	if (column < 0 || column > m_columnCount)
 	{
 		return QString();
 	}
@@ -202,7 +146,7 @@ QString ComparatorListTable::text(int row, int column, Metrology::Signal* pInSig
 
 	if (row > 0)
 	{
-		std::shared_ptr<Metrology::ComparatorEx> prevComparatorEx = comparator(row - 1);
+		std::shared_ptr<Metrology::ComparatorEx> prevComparatorEx = at(row - 1);
 		if (prevComparatorEx != nullptr)
 		{
 			if (prevComparatorEx->input().appSignalID() == param.appSignalID())
@@ -277,71 +221,6 @@ QString ComparatorListTable::text(int row, int column, Metrology::Signal* pInSig
 }
 
 // -------------------------------------------------------------------------------------------------------------------
-
-int ComparatorListTable::comparatorCount() const
-{
-	QMutexLocker l(&m_comparatorMutex);
-
-	return m_comparatorList.count();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-std::shared_ptr<Metrology::ComparatorEx> ComparatorListTable::comparator(int index) const
-{
-	QMutexLocker l(&m_comparatorMutex);
-
-	if (index < 0 || index >= m_comparatorList.count())
-	{
-		return nullptr;
-	}
-
-	return m_comparatorList[index];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ComparatorListTable::set(const QVector<std::shared_ptr<Metrology::ComparatorEx>>& list_add)
-{
-	int count = list_add.count();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginInsertRows(QModelIndex(), 0, count - 1);
-
-		m_comparatorMutex.lock();
-
-			m_comparatorList = list_add;
-
-		m_comparatorMutex.unlock();
-
-	endInsertRows();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ComparatorListTable::clear()
-{
-	int count = comparatorCount();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginRemoveRows(QModelIndex(), 0, count - 1);
-
-		m_comparatorMutex.lock();
-
-			m_comparatorList.clear();
-
-		m_comparatorMutex.unlock();
-
-	endRemoveRows();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -387,9 +266,12 @@ void DialogComparatorList::createInterface()
 
 	//
 	//
+	m_comparatorTable.setColumnCaption(metaObject()->className(), COMPARATOR_LIST_COLUMN_COUNT, ComparatorListColumn);
 	setModel(&m_comparatorTable);
-	DialogList::createHeaderContexMenu(COMPARATOR_LIST_COLUMN_COUNT, ComparatorListColumn, ComparatorListColumnWidth);
 
+	//
+	//
+	DialogList::createHeaderContexMenu(COMPARATOR_LIST_COLUMN_COUNT, ComparatorListColumn, ComparatorListColumnWidth);
 	createContextMenu();
 }
 
@@ -474,12 +356,12 @@ void DialogComparatorList::onProperties()
 	QModelIndex visibleIndex = pView->currentIndex();
 
 	int index = visibleIndex .row();
-	if (index < 0 || index >= m_comparatorTable.comparatorCount())
+	if (index < 0 || index >= m_comparatorTable.count())
 	{
 		return;
 	}
 
-	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = m_comparatorTable.comparator(index);
+	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = m_comparatorTable.at(index);
 	if (comparatorEx == nullptr)
 	{
 		return;

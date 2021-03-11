@@ -49,35 +49,21 @@ const int					TuningSourceColumnWidth[TUN_SOURCE_LIST_COLUMN_COUNT] =
 
 // ==============================================================================================
 
-class TuningSourceTable : public QAbstractTableModel
+class TuningSourceTable : public ListTable<TuningSource>
 {
 	Q_OBJECT
 
 public:
 
-	explicit TuningSourceTable(QObject* parent = nullptr);
-	virtual ~TuningSourceTable() override;
+	explicit TuningSourceTable(QObject* parent = nullptr) { Q_UNUSED(parent) }
+	virtual ~TuningSourceTable() override {}
 
 public:
 
-	int						sourceCount() const;
-	TuningSource			source(int index) const;
-	void					set(const QVector<TuningSource>& list_add);
-	void					clear();
-
 	QString					text(int row, int column, const TuningSource& source, const TuningSourceState& state) const;
-
-	void					updateColumn(int column);
 
 private:
 
-	mutable QMutex			m_sourceMutex;
-	QVector<TuningSource>	m_sourceIdList;
-
-	int						columnCount(const QModelIndex &parent) const override;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const override;
-
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
 	QVariant				data(const QModelIndex &index, int role) const override;
 };
 

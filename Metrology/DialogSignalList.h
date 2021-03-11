@@ -71,33 +71,21 @@ const int					SignalListColumnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 
 // ==============================================================================================
 
-class SignalListTable : public QAbstractTableModel
+class SignalListTable : public ListTable<Metrology::Signal*>
 {
 	Q_OBJECT
 
 public:
 
-	explicit SignalListTable(QObject* parent = nullptr);
-	virtual ~SignalListTable() override;
+	explicit SignalListTable(QObject* parent = nullptr) { Q_UNUSED(parent) }
+	virtual ~SignalListTable() override {}
 
 public:
-
-	int						signalCount() const;
-	Metrology::Signal*		signal(int index) const;
-	void					set(const QVector<Metrology::Signal*>& list_add);
-	void					clear();
 
 	QString					text(int row, int column, Metrology::Signal* pSignal) const;
 
 private:
 
-	mutable QMutex			m_signalMutex;
-	QVector<Metrology::Signal*> m_signalList;
-
-	int						columnCount(const QModelIndex &parent) const override;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const override;
-
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
 	QVariant				data(const QModelIndex &index, int role) const override;
 };
 

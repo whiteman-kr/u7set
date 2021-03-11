@@ -6,62 +6,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-RackListTable::RackListTable(QObject*)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-RackListTable::~RackListTable()
-{
-	QMutexLocker l(&m_rackMutex);
-
-	m_rackList.clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int RackListTable::columnCount(const QModelIndex&) const
-{
-	return RACK_LIST_COLUMN_COUNT;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int RackListTable::rowCount(const QModelIndex&) const
-{
-	return rackCount();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QVariant RackListTable::headerData(int section, Qt::Orientation orientation, int role) const
-{
-	if (role != Qt::DisplayRole)
-	{
-		return QVariant();
-	}
-
-	QVariant result = QVariant();
-
-	if (orientation == Qt::Horizontal)
-	{
-		if (section >= 0 && section < RACK_LIST_COLUMN_COUNT)
-		{
-			result = qApp->translate("DialogRackList", RackListColumn[section]);
-		}
-	}
-
-	if (orientation == Qt::Vertical)
-	{
-		result = QString("%1").arg(section + 1);
-	}
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 QVariant RackListTable::data(const QModelIndex &index, int role) const
 {
 	if (index.isValid() == false)
@@ -70,18 +14,18 @@ QVariant RackListTable::data(const QModelIndex &index, int role) const
 	}
 
 	int row = index.row();
-	if (row < 0 || row >= rackCount())
+	if (row < 0 || row >= count())
 	{
 		return QVariant();
 	}
 
 	int column = index.column();
-	if (column < 0 || column > RACK_LIST_COLUMN_COUNT)
+	if (column < 0 || column > m_columnCount)
 	{
 		return QVariant();
 	}
 
-	Metrology::RackParam* pRack = rack(row);
+	Metrology::RackParam* pRack = at(row);
 	if (pRack == nullptr)
 	{
 		return QVariant();
@@ -120,12 +64,12 @@ QVariant RackListTable::data(const QModelIndex &index, int role) const
 
 QString RackListTable::text(int row, int column, const Metrology::RackParam* pRack) const
 {
-	if (row < 0 || row >= rackCount())
+	if (row < 0 || row >= count())
 	{
 		return QString();
 	}
 
-	if (column < 0 || column > RACK_LIST_COLUMN_COUNT)
+	if (column < 0 || column > m_columnCount)
 	{
 		return QString();
 	}
@@ -160,71 +104,6 @@ QString RackListTable::text(int row, int column, const Metrology::RackParam* pRa
 	}
 
 	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int RackListTable::rackCount() const
-{
-	QMutexLocker l(&m_rackMutex);
-
-	return m_rackList.count();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-Metrology::RackParam* RackListTable::rack(int index) const
-{
-	QMutexLocker l(&m_rackMutex);
-
-	if (index < 0 || index >= m_rackList.count())
-	{
-		return nullptr;
-	}
-
-	return m_rackList[index];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void RackListTable::set(const QVector<Metrology::RackParam*>& list_add)
-{
-	int count = list_add.count();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginInsertRows(QModelIndex(), 0, count - 1);
-
-		m_rackMutex.lock();
-
-			m_rackList = list_add;
-
-		m_rackMutex.unlock();
-
-	endInsertRows();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void RackListTable::clear()
-{
-	int count = rackCount();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginRemoveRows(QModelIndex(), 0, count - 1);
-
-		m_rackMutex.lock();
-
-			m_rackList.clear();
-
-		m_rackMutex.unlock();
-
-	endRemoveRows();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -281,13 +160,12 @@ void DialogRackList::createInterface()
 
 	//
 	//
+	m_rackTable.setColumnCaption(metaObject()->className(), RACK_LIST_COLUMN_COUNT, RackListColumn);
 	setModel(&m_rackTable);
 
 	//
 	//
-	setModel(&m_rackTable);
 	DialogList::createHeaderContexMenu(RACK_LIST_COLUMN_COUNT, RackListColumn, RackListColumnWidth);
-
 	createContextMenu();
 }
 
@@ -353,12 +231,12 @@ void DialogRackList::onProperties()
 	}
 
 	int index = pView->currentIndex().row();
-	if (index < 0 || index >= m_rackTable.rackCount())
+	if (index < 0 || index >= m_rackTable.count())
 	{
 		return;
 	}
 
-	Metrology::RackParam* pRack = m_rackTable.rack(index);
+	Metrology::RackParam* pRack = m_rackTable.at(index);
 	if (pRack == nullptr || pRack->isValid() == false)
 	{
 		return;

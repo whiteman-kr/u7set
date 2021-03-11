@@ -4,62 +4,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSourceTable::TuningSourceTable(QObject*)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-TuningSourceTable::~TuningSourceTable()
-{
-	QMutexLocker l(&m_sourceMutex);
-
-	m_sourceIdList.clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int TuningSourceTable::columnCount(const QModelIndex&) const
-{
-	return TUN_SOURCE_LIST_COLUMN_COUNT;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int TuningSourceTable::rowCount(const QModelIndex&) const
-{
-	return sourceCount();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QVariant TuningSourceTable::headerData(int section, Qt::Orientation orientation, int role) const
-{
-	if (role != Qt::DisplayRole)
-	{
-		return QVariant();
-	}
-
-	QVariant result = QVariant();
-
-	if (orientation == Qt::Horizontal)
-	{
-		if (section >= 0 && section < TUN_SOURCE_LIST_COLUMN_COUNT)
-		{
-			result = qApp->translate("DialogTuningSourceList", TuningSourceColumn[section]);
-		}
-	}
-
-	if (orientation == Qt::Vertical)
-	{
-		result = QString("%1").arg(section + 1);
-	}
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 QVariant TuningSourceTable::data(const QModelIndex &index, int role) const
 {
 	if (index.isValid() == false)
@@ -68,18 +12,18 @@ QVariant TuningSourceTable::data(const QModelIndex &index, int role) const
 	}
 
 	int row = index.row();
-	if (row < 0 || row >= sourceCount())
+	if (row < 0 || row >= count())
 	{
 		return QVariant();
 	}
 
 	int column = index.column();
-	if (column < 0 || column > TUN_SOURCE_LIST_COLUMN_COUNT)
+	if (column < 0 || column > m_columnCount)
 	{
 		return QVariant();
 	}
 
-	TuningSource src = source(row);
+	TuningSource src = at(row);
 
 	TuningSourceState sourceState = src.state();
 
@@ -160,12 +104,12 @@ QVariant TuningSourceTable::data(const QModelIndex &index, int role) const
 
 QString TuningSourceTable::text(int row, int column, const TuningSource& source, const TuningSourceState& state) const
 {
-	if (row < 0 || row >= sourceCount())
+	if (row < 0 || row >= count())
 	{
 		return QString();
 	}
 
-	if (column < 0 || column > TUN_SOURCE_LIST_COLUMN_COUNT)
+	if (column < 0 || column > m_columnCount)
 	{
 		return QString();
 	}
@@ -191,90 +135,6 @@ QString TuningSourceTable::text(int row, int column, const TuningSource& source,
 }
 
 // -------------------------------------------------------------------------------------------------------------------
-
-void TuningSourceTable::updateColumn(int column)
-{
-	if (column < 0 || column >= TUN_SOURCE_LIST_COLUMN_COUNT)
-	{
-		return;
-	}
-
-	int count = rowCount();
-
-	for (int row = 0; row < count; row ++)
-	{
-		QModelIndex cellIndex = index(row, column);
-
-		emit dataChanged(cellIndex, cellIndex, QVector<int>() << Qt::DisplayRole);
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int TuningSourceTable::sourceCount() const
-{
-	QMutexLocker l(&m_sourceMutex);
-
-	return m_sourceIdList.count();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-TuningSource TuningSourceTable::source(int index) const
-{
-	QMutexLocker l(&m_sourceMutex);
-
-	if (index < 0 || index >= m_sourceIdList.count())
-	{
-		return TuningSource();
-	}
-
-	return m_sourceIdList[index];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void TuningSourceTable::set(const QVector<TuningSource>& list_add)
-{
-	int count = list_add.count();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginInsertRows(QModelIndex(), 0, count - 1);
-
-		m_sourceMutex.lock();
-
-			m_sourceIdList = list_add;
-
-		m_sourceMutex.unlock();
-
-	endInsertRows();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void TuningSourceTable::clear()
-{
-	int count = m_sourceIdList.count();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginRemoveRows(QModelIndex(), 0, count - 1);
-
-		m_sourceMutex.lock();
-
-			m_sourceIdList.clear();
-
-		m_sourceMutex.unlock();
-
-	endRemoveRows();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -282,7 +142,7 @@ DialogTuningSourceList::DialogTuningSourceList(QWidget* parent) :
 	DialogList(0.7, 0.4, false, parent)
 {
 	createInterface();
-	updateList();
+	DialogTuningSourceList::updateList();
 
 	startSourceStateTimer();
 }
@@ -322,9 +182,12 @@ void DialogTuningSourceList::createInterface()
 
 	//
 	//
+	m_sourceTable.setColumnCaption(metaObject()->className(), TUN_SOURCE_LIST_COLUMN_COUNT, TuningSourceColumn);
 	setModel(&m_sourceTable);
-	DialogList::createHeaderContexMenu(TUN_SOURCE_LIST_COLUMN_COUNT, TuningSourceColumn, TuningSourceColumnWidth);
 
+	//
+	//
+	DialogList::createHeaderContexMenu(TUN_SOURCE_LIST_COLUMN_COUNT, TuningSourceColumn, TuningSourceColumnWidth);
 	createContextMenu();
 }
 

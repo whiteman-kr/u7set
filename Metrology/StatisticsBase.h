@@ -39,12 +39,12 @@ public:
 	void setComparator(std::shared_ptr<Metrology::ComparatorEx> pComparator) { m_pComparator = pComparator; }
 
 	int measureCount() const { return m_measureCount; }
-	void setMeasureCount(int count) { m_measureCount = count; }
 	QString measureCountStr() const;
+	void setMeasureCount(int count) { m_measureCount = count; }
 
 	State state() const { return m_state; }
-	void setState(State state) { m_state = state; }
 	QString stateStr() const;
+	void setState(State state) { m_state = state; }
 
 	bool isMeasured() const { return m_measureCount != 0; }
 

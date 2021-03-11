@@ -6,62 +6,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalListTable::SignalListTable(QObject*)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-SignalListTable::~SignalListTable()
-{
-	QMutexLocker l(&m_signalMutex);
-
-	m_signalList.clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int SignalListTable::columnCount(const QModelIndex&) const
-{
-	return SIGNAL_LIST_COLUMN_COUNT;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int SignalListTable::rowCount(const QModelIndex&) const
-{
-	return signalCount();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QVariant SignalListTable::headerData(int section, Qt::Orientation orientation, int role) const
-{
-	if (role != Qt::DisplayRole)
-	{
-		return QVariant();
-	}
-
-	QVariant result = QVariant();
-
-	if (orientation == Qt::Horizontal)
-	{
-		if (section >= 0 && section < SIGNAL_LIST_COLUMN_COUNT)
-		{
-			result = qApp->translate("DialogSignalList", SignalListColumn[section]);
-		}
-	}
-
-	if (orientation == Qt::Vertical)
-	{
-		result = QString("%1").arg(section + 1);
-	}
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 QVariant SignalListTable::data(const QModelIndex &index, int role) const
 {
 	if (index.isValid() == false)
@@ -70,18 +14,18 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 	}
 
 	int row = index.row();
-	if (row < 0 || row >= signalCount())
+	if (row < 0 || row >= count())
 	{
 		return QVariant();
 	}
 
 	int column = index.column();
-	if (column < 0 || column > SIGNAL_LIST_COLUMN_COUNT)
+	if (column < 0 || column > m_columnCount)
 	{
 		return QVariant();
 	}
 
-	Metrology::Signal* pSignal = signal(row);
+	Metrology::Signal* pSignal = at(row);
 	if (pSignal == nullptr || pSignal->param().isValid() == false)
 	{
 		return QVariant();
@@ -190,12 +134,12 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 
 QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) const
 {
-	if (row < 0 || row >= signalCount())
+	if (row < 0 || row >= count())
 	{
 		return QString();
 	}
 
-	if (column < 0 || column > SIGNAL_LIST_COLUMN_COUNT)
+	if (column < 0 || column > m_columnCount)
 	{
 		return QString();
 	}
@@ -230,77 +174,12 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 		case SIGNAL_LIST_COLUMN_PH_RANGE:			result = param.physicalRangeStr();				break;
 		case SIGNAL_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();			break;
 		case SIGNAL_LIST_COLUMN_TUN_SIGNAL:			result = param.enableTuningStr();				break;
-		case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:	result = param.tuningDefaultValueStr();			break;
+		case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:	result = qApp->translate("MetrologySignal", param.tuningDefaultValueStr().toUtf8());break;
 		case SIGNAL_LIST_COLUMN_TUN_RANGE:			result = param.tuningRangeStr();				break;
 		default:									assert(0);
 	}
 
 	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int SignalListTable::signalCount() const
-{
-	QMutexLocker l(&m_signalMutex);
-
-	return m_signalList.count();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-Metrology::Signal* SignalListTable::signal(int index) const
-{
-	QMutexLocker l(&m_signalMutex);
-
-	if (index < 0 || index >= m_signalList.count())
-	{
-		return nullptr;
-	}
-
-	return m_signalList[index];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalListTable::set(const QVector<Metrology::Signal*>& list_add)
-{
-	int count = list_add.count();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginInsertRows(QModelIndex(), 0, count - 1);
-
-		m_signalMutex.lock();
-
-			m_signalList = list_add;
-
-		m_signalMutex.unlock();
-
-	endInsertRows();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalListTable::clear()
-{
-	int count = signalCount();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginRemoveRows(QModelIndex(), 0, count - 1);
-
-		m_signalMutex.lock();
-
-			m_signalList.clear();
-
-		m_signalMutex.unlock();
-
-	endRemoveRows();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -390,9 +269,12 @@ void DialogSignalList::createInterface()
 
 	//
 	//
+	m_signalTable.setColumnCaption(metaObject()->className(), SIGNAL_LIST_COLUMN_COUNT, SignalListColumn);
 	setModel(&m_signalTable);
-	DialogList::createHeaderContexMenu(SIGNAL_LIST_COLUMN_COUNT, SignalListColumn, SignalListColumnWidth);
 
+	//
+	//
+	DialogList::createHeaderContexMenu(SIGNAL_LIST_COLUMN_COUNT, SignalListColumn, SignalListColumnWidth);
 	createContextMenu();
 }
 
@@ -540,12 +422,12 @@ void DialogSignalList::onProperties()
 	QModelIndex visibleIndex = pView->currentIndex();
 
 	int index = visibleIndex .row();
-	if (index < 0 || index >= m_signalTable.signalCount())
+	if (index < 0 || index >= m_signalTable.count())
 	{
 		return;
 	}
 
-	Metrology::Signal* pSignal = m_signalTable.signal(index);
+	Metrology::Signal* pSignal = m_signalTable.at(index);
 	if (pSignal == nullptr)
 	{
 		return;
@@ -627,12 +509,12 @@ void DialogSignalList::onOk()
 	}
 
 	int index = pView->currentIndex().row();
-	if (index < 0 || index >= m_signalTable.signalCount())
+	if (index < 0 || index >= m_signalTable.count())
 	{
 		return;
 	}
 
-	Metrology::Signal* pSignal = m_signalTable.signal(index);
+	Metrology::Signal* pSignal = m_signalTable.at(index);
 	if (pSignal == nullptr)
 	{
 		return;

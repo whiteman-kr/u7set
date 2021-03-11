@@ -4,62 +4,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSignalTable::TuningSignalTable(QObject*)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-TuningSignalTable::~TuningSignalTable()
-{
-	QMutexLocker l(&m_signalMutex);
-
-	m_signalList.clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int TuningSignalTable::columnCount(const QModelIndex&) const
-{
-	return TUN_SIGNAL_LIST_COLUMN_COUNT;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int TuningSignalTable::rowCount(const QModelIndex&) const
-{
-	return signalCount();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QVariant TuningSignalTable::headerData(int section, Qt::Orientation orientation, int role) const
-{
-	if (role != Qt::DisplayRole)
-	{
-		return QVariant();
-	}
-
-	QVariant result = QVariant();
-
-	if (orientation == Qt::Horizontal)
-	{
-		if (section >= 0 && section < TUN_SIGNAL_LIST_COLUMN_COUNT)
-		{
-			result = qApp->translate("DialogTuningSignalList", TuningSignalColumn[section]);
-		}
-	}
-
-	if (orientation == Qt::Vertical)
-	{
-		result = QString("%1").arg(section + 1);
-	}
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 QVariant TuningSignalTable::data(const QModelIndex &index, int role) const
 {
 	if (index.isValid() == false)
@@ -68,18 +12,18 @@ QVariant TuningSignalTable::data(const QModelIndex &index, int role) const
 	}
 
 	int row = index.row();
-	if (row < 0 || row >= signalCount())
+	if (row < 0 || row >= count())
 	{
 		return QVariant();
 	}
 
 	int column = index.column();
-	if (column < 0 || column > TUN_SIGNAL_LIST_COLUMN_COUNT)
+	if (column < 0 || column > m_columnCount)
 	{
 		return QVariant();
 	}
 
-	Metrology::Signal* pSignal = signal(row);
+	Metrology::Signal* pSignal = at(row);
 	if (pSignal == nullptr || pSignal->param().isValid() == false)
 	{
 		return QVariant();
@@ -141,12 +85,12 @@ QVariant TuningSignalTable::data(const QModelIndex &index, int role) const
 
 QString TuningSignalTable::text(int row, int column, Metrology::Signal* pSignal) const
 {
-	if (row < 0 || row >= signalCount())
+	if (row < 0 || row >= count())
 	{
 		return QString();
 	}
 
-	if (column < 0 || column > TUN_SIGNAL_LIST_COLUMN_COUNT)
+	if (column < 0 || column > m_columnCount)
 	{
 		return QString();
 	}
@@ -172,7 +116,7 @@ QString TuningSignalTable::text(int row, int column, Metrology::Signal* pSignal)
 		case TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID:	result = param.equipmentID();				break;
 		case TUN_SIGNAL_LIST_COLUMN_CAPTION:		result = param.caption();					break;
 		case TUN_SIGNAL_LIST_COLUMN_STATE:			result = signalStateStr(pSignal);			break;
-		case TUN_SIGNAL_LIST_COLUMN_DEFAULT:		result = param.tuningDefaultValueStr();		break;
+		case TUN_SIGNAL_LIST_COLUMN_DEFAULT:		result = qApp->translate("MetrologySignal", param.tuningDefaultValueStr().toUtf8());break;
 		case TUN_SIGNAL_LIST_COLUMN_RANGE:			result = param.tuningRangeStr();			break;
 		default:									assert(0);
 	}
@@ -197,7 +141,7 @@ QString TuningSignalTable::signalStateStr(Metrology::Signal* pSignal) const
 
 	if (pSignal->state().valid() == false)
 	{
-		return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
+		return qApp->translate("MetrologySignal", Metrology::SignalNoValid);
 	}
 
 	QString stateStr, formatStr;
@@ -214,7 +158,7 @@ QString TuningSignalTable::signalStateStr(Metrology::Signal* pSignal) const
 
 		case E::SignalType::Discrete:
 
-			stateStr = pSignal->state().value() == 0.0 ? QString("No") : QString("Yes");
+			stateStr = pSignal->state().value() == 0.0 ? tr("No") : tr("Yes");
 
 			break;
 
@@ -231,91 +175,6 @@ QString TuningSignalTable::signalStateStr(Metrology::Signal* pSignal) const
 	return stateStr;
 }
 
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void TuningSignalTable::updateColumn(int column)
-{
-	if (column < 0 || column >= TUN_SIGNAL_LIST_COLUMN_COUNT)
-	{
-		return;
-	}
-
-	int count = rowCount();
-
-	for (int row = 0; row < count; row ++)
-	{
-		QModelIndex cellIndex = index(row, column);
-
-		emit dataChanged(cellIndex, cellIndex, QVector<int>() << Qt::DisplayRole);
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int TuningSignalTable::signalCount() const
-{
-	QMutexLocker l(&m_signalMutex);
-
-	return m_signalList.count();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-Metrology::Signal* TuningSignalTable::signal(int index) const
-{
-	QMutexLocker l(&m_signalMutex);
-
-	if (index < 0 || index >= m_signalList.count())
-	{
-		return nullptr;
-	}
-
-	return m_signalList[index];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void TuningSignalTable::set(const QVector<Metrology::Signal*>& list_add)
-{
-	int count = list_add.count();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginInsertRows(QModelIndex(), 0, count - 1);
-
-		m_signalMutex.lock();
-
-			m_signalList = list_add;
-
-		m_signalMutex.unlock();
-
-	endInsertRows();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void TuningSignalTable::clear()
-{
-	int count = signalCount();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginRemoveRows(QModelIndex(), 0, count - 1);
-
-		m_signalMutex.lock();
-
-			m_signalList.clear();
-
-		m_signalMutex.unlock();
-
-	endRemoveRows();
-}
-
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -328,7 +187,7 @@ DialogTuningSignalList::DialogTuningSignalList(QWidget* parent) :
 	DialogList(0.5, 0.4, false, parent)
 {
 	createInterface();
-	updateList();
+	DialogTuningSignalList::updateList();
 
 	startSignalStateTimer();
 }
@@ -395,9 +254,12 @@ void DialogTuningSignalList::createInterface()
 
 	//
 	//
+	m_signalTable.setColumnCaption(metaObject()->className(), TUN_SIGNAL_LIST_COLUMN_COUNT, TuningSignalColumn);
 	setModel(&m_signalTable);
-	DialogList::createHeaderContexMenu(TUN_SIGNAL_LIST_COLUMN_COUNT, TuningSignalColumn, TuningSignalColumnWidth);
 
+	//
+	//
+	DialogList::createHeaderContexMenu(TUN_SIGNAL_LIST_COLUMN_COUNT, TuningSignalColumn, TuningSignalColumnWidth);
 	createContextMenu();
 }
 
@@ -521,12 +383,12 @@ void DialogTuningSignalList::onProperties()
 	}
 
 	int index = pView->currentIndex().row();
-	if (index < 0 || index >= m_signalTable.signalCount())
+	if (index < 0 || index >= m_signalTable.count())
 	{
 		return;
 	}
 
-	Metrology::Signal* pSignal = m_signalTable.signal(index);
+	Metrology::Signal* pSignal = m_signalTable.at(index);
 	if (pSignal == nullptr)
 	{
 		return;

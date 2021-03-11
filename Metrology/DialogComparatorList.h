@@ -48,33 +48,21 @@ const int					ComparatorListColumnWidth[COMPARATOR_LIST_COLUMN_COUNT] =
 
 // ==============================================================================================
 
-class ComparatorListTable : public QAbstractTableModel
+class ComparatorListTable : public ListTable<std::shared_ptr<Metrology::ComparatorEx>>
 {
 	Q_OBJECT
 
 public:
 
-	explicit ComparatorListTable(QObject* parent = nullptr);
-	virtual ~ComparatorListTable() override;
+	explicit ComparatorListTable(QObject* parent = nullptr) { Q_UNUSED(parent) }
+	virtual ~ComparatorListTable() override {}
 
 public:
-
-	int						comparatorCount() const;
-	std::shared_ptr<Metrology::ComparatorEx> comparator(int index) const;
-	void					set(const QVector<std::shared_ptr<Metrology::ComparatorEx> >& list_add);
-	void					clear();
 
 	QString					text(int row, int column, Metrology::Signal* pInSignal, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const;
 
 private:
 
-	mutable QMutex			m_comparatorMutex;
-	QVector<std::shared_ptr<Metrology::ComparatorEx>> m_comparatorList;
-
-	int						columnCount(const QModelIndex &parent) const override;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const override;
-
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
 	QVariant				data(const QModelIndex &index, int role) const override;
 };
 

@@ -157,7 +157,7 @@ void DialogList::createHeaderContexMenu(int columnCount, const char* const* colu
 	{
 		m_pView->setColumnWidth(column, columnWidth[column]);
 
-		QAction* pAction = m_headerContextMenu->addAction(qApp->translate(this->metaObject()->className(), QString(columnCaption[column]).toUtf8()));
+		QAction* pAction = m_headerContextMenu->addAction(qApp->translate(metaObject()->className(), columnCaption[column]));
 		if (pAction == nullptr)
 		{
 			continue;
@@ -302,14 +302,8 @@ bool DialogList::eventFilter(QObject* object, QEvent* event)
 
 		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
-			if (m_buttonBox == nullptr)
-			{
-				onProperties();
-			}
-			else
-			{
-				emit onOk();
-			}
+			onProperties();
+			return true;
 		}
 	}
 

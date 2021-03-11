@@ -10,126 +10,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MetrologyConnectionTable::MetrologyConnectionTable(QObject*)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-MetrologyConnectionTable::~MetrologyConnectionTable()
-{
-	QMutexLocker l(&m_connectionMutex);
-
-	m_connectionList.clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int MetrologyConnectionTable::connectionCount() const
-{
-	QMutexLocker l(&m_connectionMutex);
-
-	return m_connectionList.count();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-Metrology::Connection MetrologyConnectionTable::at(int index) const
-{
-	QMutexLocker l(&m_connectionMutex);
-
-	if (index < 0 || index >= m_connectionList.count())
-	{
-		return Metrology::Connection();
-	}
-
-	return m_connectionList[index];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MetrologyConnectionTable::set(const QVector<Metrology::Connection>& list_add)
-{
-	int count = list_add.count();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginInsertRows(QModelIndex(), 0, count - 1);
-
-		m_connectionMutex.lock();
-
-			m_connectionList = list_add;
-
-		m_connectionMutex.unlock();
-
-	endInsertRows();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MetrologyConnectionTable::clear()
-{
-	int count = connectionCount();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginRemoveRows(QModelIndex(), 0, count - 1);
-
-		m_connectionMutex.lock();
-
-			m_connectionList.clear();
-
-		m_connectionMutex.unlock();
-
-	endRemoveRows();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int MetrologyConnectionTable::columnCount(const QModelIndex&) const
-{
-	return METROLOGY_CONNECTION_COLUMN_COUNT;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int MetrologyConnectionTable::rowCount(const QModelIndex&) const
-{
-	return connectionCount();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QVariant MetrologyConnectionTable::headerData(int section, Qt::Orientation orientation, int role) const
-{
-	if (role != Qt::DisplayRole)
-	{
-		return QVariant();
-	}
-
-	QVariant result = QVariant();
-
-	if (orientation == Qt::Horizontal)
-	{
-		if (section >= 0 && section < METROLOGY_CONNECTION_COLUMN_COUNT)
-		{
-			result = qApp->translate("DialogMetrologyConnection", MetrologyConnectionColumn[section]);
-		}
-	}
-
-	if (orientation == Qt::Vertical)
-	{
-		result = QString("%1").arg(section + 1);
-	}
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
 
 QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) const
 {
@@ -139,13 +19,13 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 	}
 
 	int row = index.row();
-	if (row < 0 || row >= connectionCount())
+	if (row < 0 || row >= count())
 	{
 		return QVariant();
 	}
 
 	int column = index.column();
-	if (column < 0 || column > METROLOGY_CONNECTION_COLUMN_COUNT)
+	if (column < 0 || column > m_columnCount)
 	{
 		return QVariant();
 	}
@@ -200,12 +80,12 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 
 QString MetrologyConnectionTable::text(int row, int column, const Metrology::Connection& connection) const
 {
-	if (row < 0 || row >= connectionCount())
+	if (row < 0 || row >= count())
 	{
 		return QString();
 	}
 
-	if (column < 0 || column > METROLOGY_CONNECTION_COLUMN_COUNT)
+	if (column < 0 || column > m_columnCount)
 	{
 		return QString();
 	}
@@ -759,11 +639,12 @@ void DialogMetrologyConnection::createInterface()
 
 	//
 	//
+	m_connectionTable.setColumnCaption(metaObject()->className(), METROLOGY_CONNECTION_COLUMN_COUNT, MetrologyConnectionColumn);
 	setModel(&m_connectionTable);
+
+	//
+	//
 	DialogList::createHeaderContexMenu(METROLOGY_CONNECTION_COLUMN_COUNT, MetrologyConnectionColumn, MetrologyConnectionColumnWidth);
-
-	connect(view(), &QTableView::doubleClicked , this, &DialogMetrologyConnection::onListDoubleClicked);
-
 	createContextMenu();
 }
 
@@ -934,7 +815,7 @@ void DialogMetrologyConnection::onEdit()
 	}
 
 	int index = pView->currentIndex().row();
-	if (index < 0 || index >= m_connectionTable.connectionCount())
+	if (index < 0 || index >= m_connectionTable.count())
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select сonnection for edit!"));
 		return;
@@ -997,12 +878,12 @@ void DialogMetrologyConnection::onRremove()
 		return;
 	}
 
-	int count = m_connectionTable.connectionCount();
+	int count = m_connectionTable.count();
 	for(int index = count - 1; index >= 0; index --)
 	{
 		if (pView->selectionModel()->isRowSelected(index, QModelIndex()) == true)
 		{
-			if (index >= 0 && index < m_connectionTable.connectionCount())
+			if (index >= 0 && index < m_connectionTable.count())
 			{
 				m_connectionBase.remove(index);
 			}
@@ -1023,7 +904,7 @@ void DialogMetrologyConnection::onMoveUp()
 	}
 
 	int index = pView->currentIndex().row();
-	if (index < 0 || index >= m_connectionTable.connectionCount())
+	if (index < 0 || index >= m_connectionTable.count())
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select сonnection for move!"));
 		return;
@@ -1036,7 +917,7 @@ void DialogMetrologyConnection::onMoveUp()
 	}
 
 	int indexPrev = index - 1;
-	if (indexPrev < 0 || indexPrev >= m_connectionTable.connectionCount())
+	if (indexPrev < 0 || indexPrev >= m_connectionTable.count())
 	{
 		return;
 	}
@@ -1075,7 +956,7 @@ void DialogMetrologyConnection::onMoveDown()
 	}
 
 	int index = pView->currentIndex().row();
-	if (index < 0 || index >= m_connectionTable.connectionCount())
+	if (index < 0 || index >= m_connectionTable.count())
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select сonnection for move!"));
 		return;
@@ -1088,7 +969,7 @@ void DialogMetrologyConnection::onMoveDown()
 	}
 
 	int indexNext = index + 1;
-	if (indexNext < 0 || indexNext >= m_connectionTable.connectionCount())
+	if (indexNext < 0 || indexNext >= m_connectionTable.count())
 	{
 		return;
 	}
@@ -1232,7 +1113,7 @@ void DialogMetrologyConnection::onImport()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogMetrologyConnection::onListDoubleClicked(const QModelIndex&)
+void DialogMetrologyConnection::onProperties()
 {
 	onEdit();
 }

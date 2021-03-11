@@ -290,7 +290,7 @@ namespace Metrology
 
 	// ==============================================================================================
 
-	const char* const SignalNoValid		= QT_TRANSLATE_NOOP("MeasureSignal.h", "No valid");
+	const char* const SignalNoValid		= QT_TRANSLATE_NOOP("MetrologySignal", "No valid");
 
 	// ==============================================================================================
 

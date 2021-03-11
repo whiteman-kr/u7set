@@ -204,7 +204,7 @@ namespace Measure
 		{
 			if (isSignalValid() == false)
 			{
-				return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
+				return qApp->translate("MetrologySignal", Metrology::SignalNoValid);
 			}
 		}
 
@@ -520,7 +520,7 @@ namespace Measure
 		{
 			if (isSignalValid() == false)
 			{
-				return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
+				return qApp->translate("MetrologySignal", Metrology::SignalNoValid);
 			}
 		}
 
@@ -685,7 +685,7 @@ namespace Measure
 		{
 			if (isSignalValid() == false)
 			{
-				return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
+				return qApp->translate("MetrologySignal", Metrology::SignalNoValid);
 			}
 		}
 
@@ -1713,7 +1713,7 @@ namespace Measure
 		{
 			if (isSignalValid() == false)
 			{
-				return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
+				return qApp->translate("MetrologySignal", Metrology::SignalNoValid);
 			}
 		}
 
@@ -1797,7 +1797,7 @@ namespace Measure
 		{
 			if (isSignalValid() == false)
 			{
-				return qApp->translate("MeasureSignal.h", Metrology::SignalNoValid);
+				return qApp->translate("MetrologySignal", Metrology::SignalNoValid);
 			}
 		}
 

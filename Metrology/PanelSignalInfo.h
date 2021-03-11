@@ -9,6 +9,7 @@
 
 #include "CalibratorBase.h"
 #include "SignalBase.h"
+#include "DialogList.h"
 #include "Options.h"
 
 // ==============================================================================================
@@ -69,46 +70,31 @@ const int					SIGNAL_INFO_UPDATE_TIMER		= 250;	//	250 ms
 
 // ==============================================================================================
 
-class SignalInfoTable : public QAbstractTableModel
+class SignalInfoTable : public ListTable<IoSignalParam>
 {
 	Q_OBJECT
 
 public:
 
-	explicit SignalInfoTable(QObject* parent = nullptr);
-	virtual ~SignalInfoTable() override;
+	explicit SignalInfoTable(QObject* parent = nullptr) { Q_UNUSED(parent) }
+	virtual ~SignalInfoTable() override {}
 
 public:
 
-	void					setSignalInfo(const SignalInfoOption& signalInfo);
+	void setSignalInfo(const SignalInfoOption& signalInfo) { m_signalInfo = signalInfo; }
 
-	int						signalCount() const { return m_signalCount; }
-	IoSignalParam			signalParam(int index) const;
-	void					set(const QVector<IoSignalParam>& ioParamList);
-	void					clear();
-
-	QString					text(int column, const IoSignalParam& ioParam) const;
-	QString					signalStateStr(const Metrology::SignalParam& param, const Metrology::SignalState& state) const;
-
-	void					updateColumn(int column);
+	QString signalStateStr(const Metrology::SignalParam& param, const Metrology::SignalState& state) const;
+	QString text(int column, const IoSignalParam& ioParam) const;
 
 private:
 
-	SignalInfoOption		m_signalInfo;
+	SignalInfoOption m_signalInfo;
 
-	mutable QMutex			m_signalMutex;
-	int						m_signalCount = 0;
-	QVector<IoSignalParam>	m_ioParamList;
+	QVariant data(const QModelIndex &index, int role) const override;
 
-	int						columnCount(const QModelIndex &parent) const override;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const override;
+public slots:
 
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
-	QVariant				data(const QModelIndex &index, int role) const override;
-
-private slots:
-
-	void					signalParamChanged(const QString& appSignalID);
+	void signalParamChanged(const QString& appSignalID);
 };
 
 // ==============================================================================================
@@ -124,93 +110,93 @@ public:
 
 public:
 
-	void					clear() { m_signalParamTable.clear(); }
-	void					restartSignalStateTimer(int timeout);
+	void clear() { m_signalParamTable.clear(); }
+	void restartSignalStateTimer(int timeout);
 
-	void					setCalibratorBase(CalibratorBase* pCalibratorBase) { m_pCalibratorBase = pCalibratorBase; }
-	void					setSignalInfo(const SignalInfoOption& signalInfo);
+	void setCalibratorBase(CalibratorBase* pCalibratorBase) { m_pCalibratorBase = pCalibratorBase; }
+	void setSignalInfo(const SignalInfoOption& signalInfo);
 
 private:
 
 	// elements of interface
 	//
-	QMainWindow*			m_pSignalInfoWindow = nullptr;
-	QTableView*				m_pView = nullptr;
-	SignalInfoTable			m_signalParamTable;
+	QMainWindow* m_pSignalInfoWindow = nullptr;
+	QTableView* m_pView = nullptr;
+	SignalInfoTable m_signalParamTable;
 
-	QVector<QAction*>		m_pConnectionActionList;
-	QMenu*					m_pShowMenu = nullptr;
-	QMenu*					m_pContextMenu = nullptr;
-	QAction*				m_pShowNoValidAction = nullptr;
-	QAction*				m_pShowElectricValueAction = nullptr;
-	QAction*				m_pShowSignalMoveUpAction = nullptr;
-	QAction*				m_pShowSignalMoveDownAction = nullptr;
-	QAction*				m_pCopyAction = nullptr;
-	QAction*				m_pSignalPropertyAction = nullptr;
+	QVector<QAction*> m_pConnectionActionList;
+	QMenu* m_pShowMenu = nullptr;
+	QMenu* m_pContextMenu = nullptr;
+	QAction* m_pShowNoValidAction = nullptr;
+	QAction* m_pShowElectricValueAction = nullptr;
+	QAction* m_pShowSignalMoveUpAction = nullptr;
+	QAction* m_pShowSignalMoveDownAction = nullptr;
+	QAction* m_pCopyAction = nullptr;
+	QAction* m_pSignalPropertyAction = nullptr;
 
-	QAction*				m_pColumnAction[SIGNAL_INFO_COLUMN_COUNT];
-	QMenu*					m_headerContextMenu = nullptr;
+	QAction* m_pColumnAction[SIGNAL_INFO_COLUMN_COUNT];
+	QMenu* m_headerContextMenu = nullptr;
 
-	void					createInterface();
-	void					createHeaderContexMenu();
-	void					initContextMenu();
-	void					createContextMenu();
-	void					appendMetrologyConnetionMenu();
+	void createInterface();
+	void createHeaderContexMenu();
+	void initContextMenu();
+	void createContextMenu();
+	void appendMetrologyConnetionMenu();
 
-	void					hideColumn(int column, bool hide);
+	void hideColumn(int column, bool hide);
 
-	QTimer*					m_updateSignalStateTimer = nullptr;
-	void					startSignalStateTimer(int timeout);
-	void					stopSignalStateTimer();
+	QTimer* m_updateSignalStateTimer = nullptr;
+	void startSignalStateTimer(int timeout);
+	void stopSignalStateTimer();
 
 	//
 	//
 	QVector<Metrology::Signal*> m_destSignals;
 
-	CalibratorBase*			m_pCalibratorBase = nullptr;
-	SignalInfoOption		m_signalInfo;
+	CalibratorBase* m_pCalibratorBase = nullptr;
+	SignalInfoOption m_signalInfo;
 
-	Measure::Kind			m_measureKind = Measure::Kind::NoMeasureKind;
+	Measure::Kind m_measureKind = Measure::Kind::NoMeasureKind;
 	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 protected:
 
-	bool					eventFilter(QObject* object, QEvent* event) override;
+	bool eventFilter(QObject* object, QEvent* event) override;
 
 public slots:
 
-	void					measureKindChanged(int measureKind);
-	void					connectionTypeChanged(int connectionType);
+	void measureKindChanged(int measureKind);
+	void connectionTypeChanged(int connectionType);
 
-	void					activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected
-	void					updateSignalState();										// slot informs that signal for measure has updated his state
+	void activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected
+	void updateSignalState();										// slot informs that signal for measure has updated his state
 
 signals:
 
-	void					changeActiveDestSignal(int channel, Metrology::Signal* pDestSignal);
-	void					changeActiveDestSignals(int channelPrev, int channelNext);
+	void changeActiveDestSignal(int channel, Metrology::Signal* pDestSignal);
+	void changeActiveDestSignals(int channelPrev, int channelNext);
 
 private slots:
 
 	// slots of menu
 	//
-	void					onConnectionAction(QAction* action);
-	void					showNoValid();
-	void					showElectricValue();
-	void					showSignalMoveUp();
-	void					showSignalMoveDown();
-	void					copy();
-	void					signalProperty();
+	void onConnectionAction(QAction* action);
+	void showNoValid();
+	void showElectricValue();
+	void showSignalMoveUp();
+	void showSignalMoveDown();
+	void copy();
+	void signalProperty();
 
-	void					onContextMenu(QPoint);
+	void onContextMenu(QPoint);
 
 	// slots for list header, to hide or show columns
 	//
-	void					onHeaderContextMenu(QPoint);
-	void					onColumnAction(QAction* action);
+	void onHeaderContextMenu(QPoint);
+	void onColumnAction(QAction* action);
 	// slots for list
 	//
-	void					onListDoubleClicked(const QModelIndex&) { signalProperty(); }
+	void onListDoubleClicked(const QModelIndex&) { signalProperty(); }
 };
 
 // ==============================================================================================

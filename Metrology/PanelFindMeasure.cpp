@@ -52,60 +52,6 @@ FindItem& FindItem::operator=(const FindItem& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-FindMeasureTable::FindMeasureTable(QObject*)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-FindMeasureTable::~FindMeasureTable()
-{
-	m_findItemList.clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int FindMeasureTable::columnCount(const QModelIndex&) const
-{
-	return FIND_MEASURE_COLUMN_COUNT;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int FindMeasureTable::rowCount(const QModelIndex&) const
-{
-	return m_findItemList.count();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QVariant FindMeasureTable::headerData(int section, Qt::Orientation orientation, int role) const
-{
-	if (role != Qt::DisplayRole)
-	{
-		return QVariant();
-	}
-
-	QVariant result = QVariant();
-
-	if (orientation == Qt::Horizontal)
-	{
-		if (section >= 0 && section < FIND_MEASURE_COLUMN_COUNT)
-		{
-			result = qApp->translate("PanelFindMeasure", FindMeasureColumn[section]);
-		}
-	}
-
-	if (orientation == Qt::Vertical)
-	{
-		result = QString("%1").arg(section + 1);
-	}
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 QVariant FindMeasureTable::data(const QModelIndex &index, int role) const
 {
 	if (index.isValid() == false)
@@ -114,13 +60,13 @@ QVariant FindMeasureTable::data(const QModelIndex &index, int role) const
 	}
 
 	int row = index.row();
-	if (row < 0 || row >= m_findItemList.count())
+	if (row < 0 || row >= count())
 	{
 		return QVariant();
 	}
 
 	int column = index.column();
-	if (column < 0 || column > FIND_MEASURE_COLUMN_COUNT)
+	if (column < 0 || column > m_columnCount)
 	{
 		return QVariant();
 	}
@@ -143,7 +89,7 @@ QVariant FindMeasureTable::data(const QModelIndex &index, int role) const
 	if (role == Qt::UserRole)
 	{
 		QVariant var;
-		var.setValue(m_findItemList.at(row));
+		var.setValue(at(row));
 		return var;
 	}
 
@@ -159,17 +105,17 @@ QVariant FindMeasureTable::data(const QModelIndex &index, int role) const
 
 QString FindMeasureTable::text(int row, int column) const
 {
-	if (row < 0 || row >= m_findItemList.count())
+	if (row < 0 || row >= count())
 	{
 		return QString();
 	}
 
-	if (column < 0 || column > FIND_MEASURE_COLUMN_COUNT)
+	if (column < 0 || column > m_columnCount)
 	{
 		return QString();
 	}
 
-	FindItem item = m_findItemList.at(row);
+	FindItem item = at(row);
 
 	QString result;
 
@@ -181,53 +127,6 @@ QString FindMeasureTable::text(int row, int column) const
 	}
 
 	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-
-FindItem FindMeasureTable::at(int index) const
-{
-	if (index < 0 || index >= count())
-	{
-		return FindItem();
-	}
-
-	return m_findItemList.at(index);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void FindMeasureTable::set(const QVector<FindItem>& list_add)
-{
-	int count = list_add.count();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginInsertRows(QModelIndex(), 0, count - 1);
-
-		m_findItemList = list_add;
-
-	endInsertRows();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void FindMeasureTable::clear()
-{
-	int count = m_findItemList.count();
-	if (count == 0)
-	{
-		return;
-	}
-
-	beginRemoveRows(QModelIndex(), 0, count - 1);
-
-		m_findItemList.clear();
-
-	endRemoveRows();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -283,6 +182,8 @@ void PanelFindMeasure::createInterface()
 	toolBar->setWindowTitle(tr("Search measurements ToolBar"));
 	m_pFindWindow->addToolBarBreak(Qt::TopToolBarArea);
 	m_pFindWindow->addToolBar(toolBar);
+
+	m_table.setColumnCaption(metaObject()->className(), FIND_MEASURE_COLUMN_COUNT, FindMeasureColumn);
 
 	m_pView = new QTableView(m_pFindWindow);
 	m_pView->setModel(&m_table);

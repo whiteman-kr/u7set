@@ -13,67 +13,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorInfoTable::ComparatorInfoTable(QObject*)
-{
-	connect(&theSignalBase, &SignalBase::signalParamChanged, this, &ComparatorInfoTable::signalParamChanged, Qt::QueuedConnection);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ComparatorInfoTable::~ComparatorInfoTable()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ComparatorInfoTable::setComparatorInfo(const ComparatorInfoOption& comparatorInfo)
-{
-	m_comparatorInfo = comparatorInfo;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int ComparatorInfoTable::columnCount(const QModelIndex&) const
-{
-	return Metrology::ComparatorCount;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int ComparatorInfoTable::rowCount(const QModelIndex&) const
-{
-	return m_signalCount;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QVariant ComparatorInfoTable::headerData(int section, Qt::Orientation orientation, int role) const
-{
-	if (role != Qt::DisplayRole)
-	{
-		return QVariant();
-	}
-
-	QVariant result = QVariant();
-
-	if (orientation == Qt::Horizontal)
-	{
-		if (section >= 0 && section < Metrology::ComparatorCount)
-		{
-			result = tr("Comparator %1").arg(section + 1);
-		}
-	}
-
-	if (orientation == Qt::Vertical)
-	{
-		result = QString("%1").arg(section + 1);
-	}
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 {
 	if (index.isValid() == false)
@@ -82,7 +21,7 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 	}
 
 	int row = index.row();
-	if (row < 0 || row >= m_signalCount)
+	if (row < 0 || row >= count())
 	{
 		return QVariant();
 	}
@@ -93,7 +32,7 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	const Metrology::SignalParam& inParam = signalParam(row).param(Metrology::ConnectionIoType::Source);
+	const Metrology::SignalParam& inParam = at(row).param(Metrology::ConnectionIoType::Source);
 	if (inParam.isValid() == false)
 	{
 		return QVariant();
@@ -169,64 +108,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<Metrology::ComparatorEx> compa
 
 void ComparatorInfoTable::updateState()
 {
-	emit dataChanged(index(0, 0), index(m_signalCount - 1, Metrology::ComparatorCount - 1), QVector<int>() << Qt::DisplayRole);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-IoSignalParam ComparatorInfoTable::signalParam(int index) const
-{
-	if (index < 0 || index >= m_signalCount)
-	{
-		return IoSignalParam();
-	}
-
-	QMutexLocker l(&m_signalMutex);
-
-	return m_signalList[index];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ComparatorInfoTable::set(const QVector<IoSignalParam>& signalList)
-{
-	int signalCount = signalList.count();
-	if (signalCount == 0)
-	{
-		return;
-	}
-
-	beginInsertRows(QModelIndex(), 0, signalCount - 1);
-
-		m_signalMutex.lock();
-
-			m_signalList = signalList;
-			m_signalCount = signalCount;
-
-		m_signalMutex.unlock();
-
-	endInsertRows();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ComparatorInfoTable::clear()
-{
-	if (m_signalCount == 0)
-	{
-		return;
-	}
-
-	beginRemoveRows(QModelIndex(), 0, m_signalCount - 1);
-
-		m_signalMutex.lock();
-
-			m_signalCount = 0;
-			m_signalList.clear();
-
-		m_signalMutex.unlock();
-
-	endRemoveRows();
+	emit dataChanged(index(0, 0), index(count() - 1, Metrology::ComparatorCount - 1), QVector<int>() << Qt::DisplayRole);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -239,16 +121,16 @@ void ComparatorInfoTable::signalParamChanged(const QString& appSignalID)
 		return;
 	}
 
-	QMutexLocker l(&m_signalMutex);
+	QMutexLocker l(&m_mutex);
 
-	int signalCount = m_signalList.count();
+	int signalCount = m_list.count();
 	for(int c = 0; c < signalCount; c ++)
 	{
 		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType ++)
 		{
-			if (m_signalList[c].param(ioType).appSignalID() == appSignalID)
+			if (m_list[c].param(ioType).appSignalID() == appSignalID)
 			{
-				m_signalList[c].setParam(ioType, theSignalBase.signalParam(appSignalID));
+				m_list[c].setParam(ioType, theSignalBase.signalParam(appSignalID));
 			}
 		}
 	}
@@ -288,7 +170,15 @@ void PanelComparatorInfo::createInterface()
 
 	m_pComparatorInfoWindow->installEventFilter(this);
 
+	for(int column = 0; column < Metrology::ComparatorCount; column++)
+	{
+		qstrcpy(m_comparatorInfoColumn[column], tr("Comparator %1").arg(column + 1).toUtf8());
+		m_ptrComparatorInfoColumn[column] = m_comparatorInfoColumn[column];
+	}
+
+	m_comparatorTable.setColumnCaption(metaObject()->className(), Metrology::ComparatorCount, m_ptrComparatorInfoColumn);
 	m_comparatorTable.setComparatorInfo(m_comparatorInfo);
+	connect(&theSignalBase, &SignalBase::signalParamChanged, &m_comparatorTable, &ComparatorInfoTable::signalParamChanged, Qt::QueuedConnection);
 
 	m_pView = new QTableView(m_pComparatorInfoWindow);
 	m_pView->setModel(&m_comparatorTable);
@@ -555,12 +445,12 @@ void PanelComparatorInfo::copy()
 void PanelComparatorInfo::comparatorProperty()
 {
 	int index = m_pView->currentIndex().row();
-	if (index < 0 || index >= m_comparatorTable.signalCount())
+	if (index < 0 || index >= m_comparatorTable.count())
 	{
 		return;
 	}
 
-	const Metrology::SignalParam& inParam = m_comparatorTable.signalParam(index).param(Metrology::ConnectionIoType::Source);
+	const Metrology::SignalParam& inParam = m_comparatorTable.at(index).param(Metrology::ConnectionIoType::Source);
 	if (inParam.isValid() == false)
 	{
 		return;

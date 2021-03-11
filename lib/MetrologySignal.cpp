@@ -835,7 +835,7 @@ namespace Metrology
 
 			case E::SignalType::Discrete:
 
-				stateStr = tuningDefaultValue().toDouble() == 0.0 ? QString("No") : QString("Yes");
+				stateStr = tuningDefaultValue().toDouble() == 0.0 ? QT_TRANSLATE_NOOP("MetrologySignal", "No") : QT_TRANSLATE_NOOP("MetrologySignal", "Yes");
 
 				break;
 

@@ -33,38 +33,26 @@ const int					RackListColumnWidth[RACK_LIST_COLUMN_COUNT] =
 
 // ==============================================================================================
 
-class RackListTable : public QAbstractTableModel
+class RackListTable : public ListTable<Metrology::RackParam*>
 {
 	Q_OBJECT
 
 public:
 
-	explicit RackListTable(QObject* parent = nullptr);
-	virtual ~RackListTable() override;
+	explicit RackListTable(QObject* parent = nullptr) { Q_UNUSED(parent) }
+	virtual ~RackListTable() override {}
 
 public:
 
-	int						rackCount() const;
-	Metrology::RackParam*	rack(int index) const;
-	void					set(const QVector<Metrology::RackParam*>& list_add);
-	void					clear();
+	void setRackGroups(const RackGroupBase& rackGroups) { m_rackGroups = rackGroups; }
 
-	QString					text(int row, int column, const Metrology::RackParam* pRack) const;
-
-	void					setRackGroups(const RackGroupBase& rackGroups) { m_rackGroups = rackGroups; }
+	QString text(int row, int column, const Metrology::RackParam* pRack) const;
 
 private:
 
-	mutable QMutex			m_rackMutex;
-	QVector<Metrology::RackParam*> m_rackList;
+	RackGroupBase m_rackGroups;
 
-	RackGroupBase			m_rackGroups;
-
-	int						columnCount(const QModelIndex &parent) const override;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const override;
-
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
-	QVariant				data(const QModelIndex &index, int role) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
 };
 
 // ==============================================================================================
@@ -76,41 +64,41 @@ class DialogRackList : public DialogList
 public:
 
 	explicit DialogRackList(QWidget* parent = nullptr);
-	virtual ~DialogRackList();
+	virtual ~DialogRackList() override;
 
 public:
 
-	RackBase&				racks() { return m_rackBase; }
+	RackBase& racks() { return m_rackBase; }
 
 private:
 
-	RackBase				m_rackBase;
+	RackBase m_rackBase;
 
-	QMenu*					m_pRackMenu = nullptr;
-	QMenu*					m_pEditMenu = nullptr;
+	QMenu* m_pRackMenu = nullptr;
+	QMenu* m_pEditMenu = nullptr;
 
-	QAction*				m_pRackGroupsAction = nullptr;
+	QAction* m_pRackGroupsAction = nullptr;
 
-	RackListTable			m_rackTable;
+	RackListTable m_rackTable;
 
-	void					createInterface();
-	void					createContextMenu();
+	void createInterface();
+	void createContextMenu();
 
 public slots:
 
-	void					updateList() override;	// slots for updating
+	void updateList() override;	// slots for updating
 
 private slots:
 
 	// slots of menu
 	//
-							// Rack
-							//
-	void					rackGroups();
+		// Rack
+		//
+	void rackGroups();
 
-							// Edit
-							//
-	void					onProperties() override;
+		// Edit
+		//
+	void onProperties() override;
 };
 
 // ==============================================================================================

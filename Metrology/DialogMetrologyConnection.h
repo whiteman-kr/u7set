@@ -29,34 +29,23 @@ const int					MetrologyConnectionColumnWidth[METROLOGY_CONNECTION_COLUMN_COUNT] 
 
 // ==============================================================================================
 
-class MetrologyConnectionTable : public QAbstractTableModel
+class MetrologyConnectionTable : public ListTable<Metrology::Connection>
 {
 	Q_OBJECT
 
 public:
 
-	explicit MetrologyConnectionTable(QObject* parent = nullptr);
-	virtual ~MetrologyConnectionTable() override;
+	explicit MetrologyConnectionTable(QObject* parent = nullptr) { Q_UNUSED(parent) }
+	virtual ~MetrologyConnectionTable() override {}
 
 public:
 
-	int	connectionCount() const;
-	Metrology::Connection at(int index) const;
-	void set(const QVector<Metrology::Connection>& list_add);
-	void clear();
+	QString text(int row, int column, const Metrology::Connection& connection) const;
 
 private:
 
-	mutable QMutex m_connectionMutex;
-	QVector<Metrology::Connection> m_connectionList;
-
-	int columnCount(const QModelIndex &parent) const override;
-	int rowCount(const QModelIndex &parent=QModelIndex()) const override;
-
-	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
 	QVariant data(const QModelIndex &index, int role) const override;
 
-	QString text(int row, int column, const Metrology::Connection& connection) const;
 };
 
 // ==============================================================================================
@@ -166,7 +155,7 @@ private slots:
 
 	// slots for list
 	//
-	void onListDoubleClicked(const QModelIndex&);
+	void onProperties() override;
 
 };
 

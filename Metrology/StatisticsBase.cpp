@@ -50,7 +50,7 @@ QString StatisticsItem::connectionTypeStr() const
 {
 	if (ERR_METROLOGY_CONNECTION_TYPE(m_connectionType) == true)
 	{
-		return QT_TRANSLATE_NOOP("StatisticBase", "Input is not set");
+		return QT_TRANSLATE_NOOP("StatisticsBase", "Input is not set");
 	}
 
 	return qApp->translate("MetrologyConnection", Metrology::ConnectionTypeCaption(m_connectionType).toUtf8());
@@ -118,16 +118,18 @@ QString StatisticsItem::stateStr() const
 {
 	if (m_measureCount == 0)
 	{
-		return QT_TRANSLATE_NOOP("StatisticBase", "Not measured");
+		return QT_TRANSLATE_NOOP("StatisticsBase", "Not measured");
 	}
 
 	QString state;
 
 	switch (m_state)
 	{
-		case State::Failed:		state = QT_TRANSLATE_NOOP("StatisticBase", "Failed");	break;
-		case State::Success:	state = QT_TRANSLATE_NOOP("StatisticBase", "Ok");		break;
-		default:				assert(0);
+		case State::Failed:		state = QT_TRANSLATE_NOOP("StatisticsBase", "Failed");	break;
+		case State::Success:	state = QT_TRANSLATE_NOOP("StatisticsBase", "Ok");		break;
+		default:
+			assert(0);
+			state = QT_TRANSLATE_NOOP("StatisticsBase", "Unknown");
 	}
 
 	return state;

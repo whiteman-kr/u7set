@@ -43,36 +43,23 @@ const int					TuningSignalColumnWidth[TUN_SIGNAL_LIST_COLUMN_COUNT] =
 
 // ==============================================================================================
 
-class TuningSignalTable : public QAbstractTableModel
+class TuningSignalTable : public ListTable<Metrology::Signal*>
 {
 	Q_OBJECT
 
 public:
 
-	explicit TuningSignalTable(QObject* parent = nullptr);
-	virtual ~TuningSignalTable() override;
+	explicit TuningSignalTable(QObject* parent = nullptr) { Q_UNUSED(parent) }
+	virtual ~TuningSignalTable() override {}
 
 public:
 
-	int						signalCount() const;
-	Metrology::Signal*		signal(int index) const;
-	void					set(const QVector<Metrology::Signal*>& list_add);
-	void					clear();
 
-	QString					text(int row, int column, Metrology::Signal* pSignal) const;
 	QString					signalStateStr(Metrology::Signal* pSignal) const;
-
-	void					updateColumn(int column);
+	QString					text(int row, int column, Metrology::Signal* pSignal) const;
 
 private:
 
-	mutable QMutex			m_signalMutex;
-	QVector<Metrology::Signal*>	m_signalList;
-
-	int						columnCount(const QModelIndex &parent) const override;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const override;
-
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
 	QVariant				data(const QModelIndex &index, int role) const override;
 };
 
@@ -146,7 +133,7 @@ class DialogTuningSignalState : public QDialog
 public:
 
 	explicit DialogTuningSignalState(const Metrology::SignalParam& param, QWidget* parent = nullptr);
-	virtual ~DialogTuningSignalState();
+	virtual ~DialogTuningSignalState() override;
 
 private:
 

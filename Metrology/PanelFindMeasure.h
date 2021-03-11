@@ -14,6 +14,7 @@
 #include "MeasureBase.h"
 #include "MeasureView.h"
 #include "ProcessData.h"
+#include "DialogList.h"
 
 // ==============================================================================================
 
@@ -65,49 +66,38 @@ Q_DECLARE_METATYPE(FindItem)	// for type QVariant
 
 // ==============================================================================================
 
-const char* const		FindMeasureColumn[] =
+const char* const FindMeasureColumn[] =
 {
-						QT_TRANSLATE_NOOP("PanelFindMeasure", "Row"),
-						QT_TRANSLATE_NOOP("PanelFindMeasure", "Text"),
+	QT_TRANSLATE_NOOP("PanelFindMeasure", "Row"),
+	QT_TRANSLATE_NOOP("PanelFindMeasure", "Text"),
 };
 
-const int				FIND_MEASURE_COLUMN_COUNT		= sizeof(FindMeasureColumn)/sizeof(FindMeasureColumn[0]);
+const int	FIND_MEASURE_COLUMN_COUNT	= sizeof(FindMeasureColumn)/sizeof(FindMeasureColumn[0]);
 
-const int				FIND_MEASURE_COLUMN_ROW			= 0,
-						FIND_MEASURE_COLUMN_TEXT		= 1;
-
-// ==============================================================================================
-
-const int				FIND_MEASURE_COLUMN_ROW_WIDTH	= 50;
+const int	FIND_MEASURE_COLUMN_ROW		= 0,
+			FIND_MEASURE_COLUMN_TEXT	= 1;
 
 // ==============================================================================================
 
-class FindMeasureTable : public QAbstractTableModel
+const int FIND_MEASURE_COLUMN_ROW_WIDTH	= 50;
+
+// ==============================================================================================
+
+class FindMeasureTable : public ListTable<FindItem>
 {
 	Q_OBJECT
 
 public:
 
-	explicit FindMeasureTable(QObject* parent = nullptr);
-	virtual ~FindMeasureTable() override;
+	explicit FindMeasureTable(QObject* parent = nullptr)  { Q_UNUSED(parent) }
+	virtual ~FindMeasureTable() override {}
 
 public:
-
-	int count() const { return m_findItemList.count(); }
-	FindItem at(int index) const;
-	void set(const QVector<FindItem>& list_add);
-	void clear();
 
 	QString text(int row, int column) const;
 
 private:
 
-	QVector<FindItem> m_findItemList;
-
-	int columnCount(const QModelIndex &parent) const override;
-	int rowCount(const QModelIndex &parent=QModelIndex()) const override;
-
-	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
 	QVariant data(const QModelIndex &index, int role) const override;
 };
 
