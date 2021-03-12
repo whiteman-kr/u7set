@@ -9,9 +9,9 @@ struct Times
 	TimeStamp local;
 	TimeStamp plant;
 
-	QDateTime systemToDateTime() const;
-	QDateTime localToDateTime() const;
-	QDateTime plantToDateTime() const;
+	[[nodiscard]] QDateTime systemToDateTime() const;
+	[[nodiscard]] QDateTime localToDateTime() const;
+	[[nodiscard]] QDateTime plantToDateTime() const;
 
 	Times& operator += (qint64 timeSpan);
 };

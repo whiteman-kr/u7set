@@ -15,10 +15,6 @@ namespace Sim
 	{
 	}
 
-	CommandProcessor_LM5_LM6::~CommandProcessor_LM5_LM6()
-	{
-	}
-
 	void CommandProcessor_LM5_LM6::beforeAppLogicParse()
 	{
 		m_parseMemorySanitizer.clear();
@@ -309,7 +305,7 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_not_implemented(const DeviceCommand& command)
 	{
-		SimException::raise(QString("Command %1 is not implemented yet").arg(command.caption()), Q_FUNC_INFO);
+		SimException::raise(QStringLiteral("Command %1 is not implemented yet").arg(command.caption()), Q_FUNC_INFO);
 		return;
 	}
 
@@ -345,7 +341,7 @@ namespace Sim
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance);
 		if (afb.simulationFunc().isEmpty() == true)
 		{
-			SimException::raise(QString("Simultaion function for AFB %1 is not found")
+			SimException::raise(QStringLiteral("Simultaion function for AFB %1 is not found")
 									.arg(afb.caption()),
 								Q_FUNC_INFO);
 		}
@@ -363,7 +359,7 @@ namespace Sim
 		auto it = m_nameToFuncAfb.find(afb.simulationFunc());
 		if (it == m_nameToFuncAfb.end())
 		{
-			SimException::raise(QString("Cannot find AFB func %1").arg(afb.simulationFunc()), Q_FUNC_INFO);
+			SimException::raise(QStringLiteral("Cannot find AFB func %1").arg(afb.simulationFunc()), Q_FUNC_INFO);
 		}
 
 		SimAfbFuncCast pcast;
@@ -380,7 +376,7 @@ namespace Sim
 
 		if (afbInstance == nullptr)
 		{
-			SimException::raise(QString("Cannot find afbInstance with OpCode %1, InstanceNo %2")
+			SimException::raise(QStringLiteral("Cannot find afbInstance with OpCode %1, InstanceNo %2")
 									.arg(command.m_afbOpCode)
 									.arg(command.m_afbInstance),
 								Q_FUNC_INFO);
@@ -426,7 +422,7 @@ namespace Sim
 			return;
 		}
 
-		SimException::raise(QString("Command stop is cannot be run in current phase: %1")
+		SimException::raise(QStringLiteral("Command stop is cannot be run in current phase: %1")
 								.arg(static_cast<int>(m_device->phase())),
 							Q_FUNC_INFO);
 		return;
@@ -626,10 +622,10 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(AfbComponentParam{command.m_afbPinOpCode, data});
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
-								.arg(command.m_afbPinOpCode)
-								.arg(command.m_afbOpCode)
-								.arg(command.m_afbInstance));
+			m_device->SIM_FAULT(QStringLiteral("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+									.arg(command.m_afbPinOpCode)
+									.arg(command.m_afbOpCode)
+									.arg(command.m_afbInstance));
 		}
 
 		return;
@@ -717,10 +713,10 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(command.m_afbParam);
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
-								.arg(command.m_afbPinOpCode)
-								.arg(command.m_afbOpCode)
-								.arg(command.m_afbInstance));
+			m_device->SIM_FAULT(QStringLiteral("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+									.arg(command.m_afbPinOpCode)
+									.arg(command.m_afbOpCode)
+									.arg(command.m_afbInstance));
 		}
 
 		return;
@@ -768,10 +764,10 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(AfbComponentParam{command.m_afbPinOpCode, data});
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
-								.arg(command.m_afbPinOpCode)
-								.arg(command.m_afbOpCode)
-								.arg(command.m_afbInstance));
+			m_device->SIM_FAULT(QStringLiteral("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+									.arg(command.m_afbPinOpCode)
+									.arg(command.m_afbOpCode)
+									.arg(command.m_afbInstance));
 		}
 
 		return;
@@ -1066,10 +1062,10 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(param);
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString::fromLatin1("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
-								.arg(command.m_afbPinOpCode)
-								.arg(command.m_afbOpCode)
-								.arg(command.m_afbInstance));
+			m_device->SIM_FAULT(QStringLiteral("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+									.arg(command.m_afbPinOpCode)
+									.arg(command.m_afbOpCode)
+									.arg(command.m_afbInstance));
 		}
 
 		return;
@@ -1159,10 +1155,10 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(command.m_afbParam);
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
-								.arg(command.m_afbPinOpCode)
-								.arg(command.m_afbOpCode)
-								.arg(command.m_afbInstance))
+			m_device->SIM_FAULT(QStringLiteral("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+									.arg(command.m_afbPinOpCode)
+									.arg(command.m_afbOpCode)
+									.arg(command.m_afbInstance))
 		}
 
 		return;
@@ -1400,7 +1396,7 @@ namespace Sim
 				}
 				break;
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		// Save result
@@ -1607,7 +1603,7 @@ namespace Sim
 			break;
 
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
 									.arg(conf), Q_FUNC_INFO);
 		}
 
@@ -1828,7 +1824,7 @@ namespace Sim
 			break;
 
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
 									.arg(conf), Q_FUNC_INFO);
 		}
 
@@ -2049,7 +2045,7 @@ namespace Sim
 			break;
 
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
 									.arg(conf),
 								Q_FUNC_INFO);
 		}
@@ -2234,7 +2230,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		// Save result
@@ -2301,7 +2297,7 @@ namespace Sim
 				}
 				break;
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 			}
 		}
 
@@ -2499,7 +2495,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		// Save result
@@ -2548,7 +2544,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		return;
@@ -2692,7 +2688,7 @@ namespace Sim
 				break;
 
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 			}
 
 			return;
@@ -2842,13 +2838,13 @@ namespace Sim
 				}
 				break;
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 			}
 
 			return;
 		}
 
-		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+		SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		return;
 	}
 
@@ -3122,7 +3118,7 @@ namespace Sim
 
 			default:
 				std::sort(std::begin(operands), std::begin(operands) + operandCount,
-							[](const Operand& a, const Operand& b)
+							[](const Operand a, const Operand b)
 							{
 								return a.value < b.value;
 							});
@@ -3321,7 +3317,7 @@ namespace Sim
 				operand1.divFloatingPoint(operand2);
 				break;
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
 										.arg(conf->wordValue()),
 									Q_FUNC_INFO);
 		}
@@ -3736,7 +3732,7 @@ namespace Sim
 				}
 
 				// what type og float is it ?
-				SimException::raise(QString("Specific type of float: %1, %2.")
+				SimException::raise(QStringLiteral("Specific type of float: %1, %2.")
 									.arg(floatData),
 									Q_FUNC_INFO);
 			}
@@ -3769,7 +3765,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
 								.arg(conf),
 								Q_FUNC_INFO);
 		}
@@ -4272,13 +4268,13 @@ namespace Sim
 				break;
 
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 			}
 
 			return;
 		}
 
-		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+		SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		return;
 	}
 
@@ -4446,7 +4442,7 @@ namespace Sim
 				break;
 
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 			}
 
 			return;
@@ -4596,13 +4592,13 @@ namespace Sim
 				break;
 
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 			}
 
 			return;
 		}
 
-		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+		SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		return;
 	}
 
@@ -4854,7 +4850,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		return;
@@ -5065,7 +5061,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		return;
@@ -5172,7 +5168,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
 								.arg(conf),
 								Q_FUNC_INFO);
 		}
@@ -5194,13 +5190,13 @@ namespace Sim
 	//
 	void CommandProcessor_LM5_LM6::fb_deadzone_v5(AfbComponentInstance* /*instance*/)
 	{
-		SimException::raise(QString("fb_deadzone_v5: Is not implemented as hardware vesrion of this AFB has a number of error. Wait for version 7."),
+		SimException::raise(QStringLiteral("fb_deadzone_v5: Is not implemented as hardware vesrion of this AFB has a number of error. Wait for version 7."),
 							Q_FUNC_INFO);
 	}
 
 	void CommandProcessor_LM5_LM6::fb_deadzone_v6(AfbComponentInstance* /*instance*/)
 	{
-		SimException::raise(QString("fb_deadzone_v6: Is not implemented as hardware vesrion of this AFB has a number of error. Wait for version 7."),
+		SimException::raise(QStringLiteral("fb_deadzone_v6: Is not implemented as hardware vesrion of this AFB has a number of error. Wait for version 7."),
 							Q_FUNC_INFO);
 	}
 
@@ -5527,7 +5523,7 @@ namespace Sim
 			afb_mismatch_impl_fp(instance, version);
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
 								.arg(conf),
 								Q_FUNC_INFO);
 		}
@@ -5940,8 +5936,8 @@ namespace Sim
 				{
 					overflow = 0x0001;
 					result32 = std::signbit(input) ?
-								 result32 = std::numeric_limits<qint32>::lowest() :
-								 result32 = std::numeric_limits<qint32>::max();
+								   std::numeric_limits<qint32>::lowest() :
+								   std::numeric_limits<qint32>::max();
 				}
 
 				quint16 underflow = (std::fpclassify(input) == FP_SUBNORMAL) ? 0x0001 : 0x0000;
@@ -5967,7 +5963,7 @@ namespace Sim
 			break;
 
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		return;
@@ -6209,7 +6205,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		return;
