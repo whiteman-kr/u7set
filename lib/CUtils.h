@@ -369,7 +369,7 @@ public:
 		return;
 	}
 
-	static QPointF snapToGrid(const QPointF& pt, double gridSize)
+	static QPointF snapToGrid(QPointF pt, double gridSize)
 	{
 		QPointF result;
 

@@ -48,7 +48,7 @@ namespace Sim
 
 		bool load(QString fileName);
 
-		void setData(const QString& equipmentId, const Sim::Ram& ram, TimeStamp plantTime, TimeStamp systemTime, TimeStamp localTime);
+		void setData(const QString& equipmentId, const Sim::Ram& ram, TimeStamp plantTime, TimeStamp localTime, TimeStamp systemTime);
 		std::shared_ptr<TrendLib::RealtimeData> trendData(const QString& trendId,
 														  const std::vector<Hash>& trendSignals,
 														  TrendLib::TrendStateItem* minState,

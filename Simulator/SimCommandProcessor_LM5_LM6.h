@@ -13,7 +13,7 @@ namespace Sim
 
 	public:
 		explicit CommandProcessor_LM5_LM6(DeviceEmulator* device);
-		virtual ~CommandProcessor_LM5_LM6();
+		virtual ~CommandProcessor_LM5_LM6() = default;
 
 	public:
 		virtual void beforeAppLogicParse() override;

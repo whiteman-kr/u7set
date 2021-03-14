@@ -1,7 +1,7 @@
 #pragma once
 
 #include <type_traits>
-#include <assert.h>
+#include <cassert>
 #include <QObject>
 #include <QMetaEnum>
 #include <QVariant>

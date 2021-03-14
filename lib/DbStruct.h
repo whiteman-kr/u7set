@@ -223,6 +223,8 @@ struct UpgradeItem
 //
 class DbProjectProperties : public PropertyObject
 {
+	Q_OBJECT
+
 public:
 	DbProjectProperties();
 
