@@ -182,39 +182,39 @@ namespace Measure
 		int calibratorPrecision() const { return m_calibratorPrecision; }
 		void setCalibratorPrecision(int precision) { m_calibratorPrecision = precision; }
 
-		double nominal(int limitType) const;
-		QString nominalStr(int limitType) const;
-		void setNominal(int limitType, double value);
+		double nominal(LimitType limitType) const;
+		QString nominalStr(LimitType limitType) const;
+		void setNominal(LimitType limitType, double value);
 
-		double measure(int limitType) const;
-		QString measureStr(int limitType) const;
-		void setMeasure(int limitType, double value);
+		double measure(LimitType limitType) const;
+		QString measureStr(LimitType limitType) const;
+		void setMeasure(LimitType limitType, double value);
 
 		void setLimits(const IoSignalParam &ioParam);
 
-		double lowLimit(int limitType) const;
-		void setLowLimit(int limitType, double lowLimit);
+		double lowLimit(LimitType limitType) const;
+		void setLowLimit(LimitType limitType, double lowLimit);
 
-		double highLimit(int limitType) const;
-		void setHighLimit(int limitType, double highLimit);
+		double highLimit(LimitType limitType) const;
+		void setHighLimit(LimitType limitType, double highLimit);
 
-		QString unit(int limitType) const;
-		void setUnit(int limitType, QString unit);
+		QString unit(LimitType limitType) const;
+		void setUnit(LimitType limitType, QString unit);
 
-		int limitPrecision(int limitType) const;
-		void setLimitPrecision(int limitType, int precision);
+		int limitPrecision(LimitType limitType) const;
+		void setLimitPrecision(LimitType limitType, int precision);
 
-		QString limitStr(int limitType) const;
+		QString limitStr(LimitType limitType) const;
 
 		void calcError();
 
-		double error(int limitType, int errorType) const;
+		double error(LimitType limitType, ErrorType errorType) const;
 		QString errorStr() const;
-		void setError(int limitType, int errorType, double value);
+		void setError(LimitType limitType, ErrorType errorType, double value);
 
-		double errorLimit(int limitType, int errorType) const;
+		double errorLimit(LimitType limitType, ErrorType errorType) const;
 		QString errorLimitStr() const;
-		void setErrorLimit(int limitType, int errorType, double value);
+		void setErrorLimit(LimitType limitType, ErrorType errorType, double value);
 
 		int errorResult() const;
 		QString errorResultStr() const;
@@ -232,9 +232,12 @@ namespace Measure
 		void setReportType(int type) { m_reportType = type; }
 
 		bool foundInStatistics() const { return m_foundInStatistics; }
-		void setFoundInStatistics(int signalIsfound) { m_foundInStatistics = signalIsfound; }
+		void setFoundInStatistics(bool signalIsfound) { m_foundInStatistics = signalIsfound; }
 
 		Item* at(int index);
+
+		virtual bool findInStatisticsItem(const StatisticsItem& si);
+		virtual void updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si);
 
 		Item& operator=(Item& from);
 
@@ -300,7 +303,7 @@ namespace Measure
 		void fill_measure_output(const IoSignalParam& ioParam);
 
 		void calcAdditionalParam(const IoSignalParam &ioParam);
-		double calcUcertainty(const IoSignalParam &ioParam, int limitType) const;
+		double calcUcertainty(const IoSignalParam &ioParam, LimitType limitType) const;
 
 		double percent() const { return m_percent; }
 		void setPercent(double percent) { m_percent = percent; }
@@ -308,19 +311,22 @@ namespace Measure
 		int measureCount() const { return m_measureCount; }
 		void setMeasureCount(int count) { m_measureCount = count; }
 
-		double measureItemArray(int limitType, int index) const;
-		QString measureItemStr(int limitType, int index) const;
-		void setMeasureItemArray(int limitType, int index, double value);
+		double measureItemArray(LimitType limitType, int index) const;
+		QString measureItemStr(LimitType limitType, int index) const;
+		void setMeasureItemArray(LimitType limitType, int index, double value);
 
 		int additionalParamCount() const { return m_additionalParamCount; }
 		void setAdditionalParamCount(int count) { m_additionalParamCount = count; }
 
-		double additionalParam(int limitType, int paramType) const;
-		QString additionalParamStr(int limitType, int paramType) const;
-		void setAdditionalParam(int limitType, int paramType, double value);
+		double additionalParam(LimitType limitType, int paramType) const;
+		QString additionalParamStr(LimitType limitType, int paramType) const;
+		void setAdditionalParam(LimitType limitType, int paramType, double value);
 
-		void updateMeasureArray(int limitType, Item* pMeasurement);
-		void updateAdditionalParam(int limitType, Item* pMeasurement);
+		void updateMeasureArray(LimitType limitType, Item* pMeasurement);
+		void updateAdditionalParam(LimitType limitType, Item* pMeasurement);
+
+		bool findInStatisticsItem(const StatisticsItem& si) override;
+		void updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si) override;
 
 		LinearityItem& operator=(const LinearityItem& from);
 
@@ -371,6 +377,9 @@ namespace Measure
 		void setCmpType(Metrology::CmpValueType cmpValueType, E::CmpType cmpType);
 		void setCmpType(int cmpType) { m_cmpType = static_cast<E::CmpType>(cmpType); }
 
+		bool findInStatisticsItem(const StatisticsItem& si) override;
+		void updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si) override;
+
 		ComparatorItem& operator=(const ComparatorItem& from);
 
 	private:
@@ -396,15 +405,17 @@ namespace Measure
 	public:
 
 		int count() const;
-		void clear(bool removeData = true);
+		void clear();
 
 		int load(Measure::Type measureType);
 
 		int append(Measure::Item* pMeasurement);
 		Measure::Item* measurement(int index) const;
 		bool remove(int index);
-		bool remove(Measure::Type measureType, const QVector<int>& keyList);
+		bool remove(Measure::Type measureType, const QVector<int>& keyList);	// keyList this is list of measureID
 
+		// Statistics
+		//
 		void updateStatisticsItem(Measure::Type measureType, StatisticsItem& si);
 		void updateStatisticsBase(Measure::Type measureType);
 		void updateStatisticsBase(Measure::Type measureType, Hash signalHash);

@@ -134,7 +134,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double Item::nominal(int limitType) const
+	double Item::nominal(LimitType limitType) const
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -147,7 +147,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString Item::nominalStr(int limitType) const
+	QString Item::nominalStr(LimitType limitType) const
 	{
 		int precision = DefaultElectricUnitPrecesion;
 
@@ -172,7 +172,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Item::setNominal(int limitType, double value)
+	void Item::setNominal(LimitType limitType, double value)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -185,7 +185,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double Item::measure(int limitType) const
+	double Item::measure(LimitType limitType) const
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -198,7 +198,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString Item::measureStr(int limitType) const
+	QString Item::measureStr(LimitType limitType) const
 	{
 		if (theOptions.measureView().showNoValid() == false)
 		{
@@ -231,7 +231,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Item::setMeasure(int limitType, double value)
+	void Item::setMeasure(LimitType limitType, double value)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -357,7 +357,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double Item::lowLimit(int limitType) const
+	double Item::lowLimit(LimitType limitType) const
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -370,7 +370,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Item::setLowLimit(int limitType, double lowLimit)
+	void Item::setLowLimit(LimitType limitType, double lowLimit)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -383,7 +383,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double Item::highLimit(int limitType) const
+	double Item::highLimit(LimitType limitType) const
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -396,7 +396,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Item::setHighLimit(int limitType, double highLimit)
+	void Item::setHighLimit(LimitType limitType, double highLimit)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -409,7 +409,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString Item::unit(int limitType) const
+	QString Item::unit(LimitType limitType) const
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -422,7 +422,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Item::setUnit(int limitType, QString unit)
+	void Item::setUnit(LimitType limitType, QString unit)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -435,7 +435,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	int Item::limitPrecision(int limitType) const
+	int Item::limitPrecision(LimitType limitType) const
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -448,7 +448,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Item::setLimitPrecision(int limitType, int precision)
+	void Item::setLimitPrecision(LimitType limitType, int precision)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -461,7 +461,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString Item::limitStr(int limitType) const
+	QString Item::limitStr(LimitType limitType) const
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -481,8 +481,10 @@ namespace Measure
 	{
 		double errorLimit = theOptions.linearity().errorLimit();
 
-		for(int limitType = 0; limitType < Measure::LimitTypeCount; limitType++)
+		for(int type = 0; type < Measure::LimitTypeCount; type++)
 		{
+			LimitType limitType = static_cast<LimitType>(type);
+
 			setError(limitType, Measure::ErrorType::Absolute,		std::abs(nominal(limitType)-measure(limitType)));
 			setError(limitType, Measure::ErrorType::Reduce,			std::abs(((nominal(limitType)-measure(limitType)) / (highLimit(limitType) - lowLimit(limitType))) * 100.0));
 			setError(limitType, Measure::ErrorType::Relative,		std::abs(((nominal(limitType)-measure(limitType)) / nominal(limitType)) * 100.0));
@@ -495,7 +497,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double Item::error(int limitType, int errorType) const
+	double Item::error(LimitType limitType, ErrorType errorType) const
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -526,7 +528,7 @@ namespace Measure
 
 		int precision = DefaultElectricUnitPrecesion;
 
-		int limitType = theOptions.linearity().limitType();
+		LimitType limitType = static_cast<LimitType>(theOptions.linearity().limitType());
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
 			assert(0);
@@ -565,7 +567,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Item::setError(int limitType, int errorType, double value)
+	void Item::setError(LimitType limitType, ErrorType errorType, double value)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -584,7 +586,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double Item::errorLimit(int limitType, int errorType) const
+	double Item::errorLimit(LimitType limitType, ErrorType errorType) const
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -634,7 +636,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Item::setErrorLimit(int limitType, int errorType, double value)
+	void Item::setErrorLimit(LimitType limitType, ErrorType errorType, double value)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -787,6 +789,46 @@ namespace Measure
 		}
 
 		return pMeasurement;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	bool Item::findInStatisticsItem(const StatisticsItem& si)
+	{
+		Metrology::Signal* pSignal = si.signal();
+		if (pSignal == nullptr || pSignal->param().isValid() == false)
+		{
+			return false;
+		}
+
+		if (appSignalID() != pSignal->param().appSignalID())
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void Item::updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si)
+	{
+		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
+		{
+			return;
+		}
+
+		if (ERR_MEASURE_ERROR_TYPE(errorType) == true)
+		{
+			return;
+		}
+
+		si.setMeasureCount(si.measureCount() + 1);
+
+		if (error(limitType, errorType) > errorLimit(limitType, errorType))
+		{
+			si.setState(StatisticsItem::State::Failed);
+		}
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -1351,8 +1393,10 @@ namespace Measure
 		//
 		//
 
-		for(int limitType = 0; limitType < Measure::LimitTypeCount; limitType ++)
+		for(int type = 0; type < Measure::LimitTypeCount; type++)
 		{
+			LimitType limitType = static_cast<LimitType>(type);
+
 			// calc additional parameters
 			//
 
@@ -1424,7 +1468,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double LinearityItem::calcUcertainty(const IoSignalParam &ioParam, int limitType) const
+	double LinearityItem::calcUcertainty(const IoSignalParam &ioParam, LimitType limitType) const
 	{
 		if (ioParam.isValid() == false)
 		{
@@ -1688,7 +1732,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double LinearityItem::measureItemArray(int limitType, int index) const
+	double LinearityItem::measureItemArray(LimitType limitType, int index) const
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -1707,7 +1751,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString LinearityItem::measureItemStr(int limitType, int index) const
+	QString LinearityItem::measureItemStr(LimitType limitType, int index) const
 	{
 		if (theOptions.measureView().showNoValid() == false)
 		{
@@ -1747,7 +1791,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void LinearityItem::setMeasureItemArray(int limitType, int index, double value)
+	void LinearityItem::setMeasureItemArray(LimitType limitType, int index, double value)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -1766,7 +1810,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double LinearityItem::additionalParam(int limitType, int paramType) const
+	double LinearityItem::additionalParam(LimitType limitType, int paramType) const
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -1785,7 +1829,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString LinearityItem::additionalParamStr(int limitType, int paramType) const
+	QString LinearityItem::additionalParamStr(LimitType limitType, int paramType) const
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -1819,7 +1863,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void LinearityItem::setAdditionalParam(int limitType, int paramType, double value)
+	void LinearityItem::setAdditionalParam(LimitType limitType, int paramType, double value)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -1838,7 +1882,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void LinearityItem::updateMeasureArray(int limitType, Item* pMeasurement)
+	void LinearityItem::updateMeasureArray(LimitType limitType, Item* pMeasurement)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -1871,7 +1915,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void LinearityItem::updateAdditionalParam(int limitType, Item* pMeasurement)
+	void LinearityItem::updateAdditionalParam(LimitType limitType, Item* pMeasurement)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -1898,6 +1942,20 @@ namespace Measure
 		{
 			m_additionalParam[limitType][a] = pLinearityMeasureItem->additionalParam(limitType, a);
 		}
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	bool LinearityItem::findInStatisticsItem(const StatisticsItem& si)
+	{
+		return Item::findInStatisticsItem(si);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void LinearityItem::updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si)
+	{
+		Item::updateStatisticsItem(limitType, errorType, si);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -2338,6 +2396,77 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	bool ComparatorItem::findInStatisticsItem(const StatisticsItem& si)
+	{
+		if (Item::findInStatisticsItem(si) == false)
+		{
+			return false;
+		}
+
+		std::shared_ptr<Metrology::ComparatorEx> comparatorEx = si.comparator();
+		if (comparatorEx == nullptr)
+		{
+			return false;
+		}
+
+		if (outputAppSignalID() != comparatorEx->output().appSignalID())
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void ComparatorItem::updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si)
+	{
+		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
+		{
+			return;
+		}
+
+		if (ERR_MEASURE_ERROR_TYPE(errorType) == true)
+		{
+			return;
+		}
+
+		if (m_cmpValueType == Metrology::CmpValueType::Hysteresis)
+		{
+			return;
+		}
+
+		std::shared_ptr<Metrology::ComparatorEx> comparatorEx = si.comparator();
+		if (comparatorEx == nullptr)
+		{
+			return;
+		}
+
+		if (comparatorEx->cmpType() != m_cmpType)
+		{
+			return;
+		}
+
+		if (comparatorEx->compare().isConst() == true)
+		{
+			if (compareDouble(comparatorEx->compareConstValue(), nominal(Measure::LimitType::Engineering)) == false)
+			{
+				return;
+			}
+		}
+		else
+		{
+			if (comparatorEx->output().appSignalID() != outputAppSignalID())
+			{
+				return;
+			}
+		}
+
+		Item::updateStatisticsItem(limitType, errorType, si);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	ComparatorItem& ComparatorItem::operator=(const ComparatorItem& from)
 	{
 		m_compareAppSignalID = from.m_compareAppSignalID;
@@ -2375,56 +2504,18 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Base::clear(bool removeData)
+	void Base::clear()
 	{
 		QMutexLocker locker(&m_measureMutex);
 
-		if (removeData == true)
+		for(auto pMeasurement: m_measureList)
 		{
-			for(Item* pMeasurement: m_measureList)
+			if (pMeasurement == nullptr)
 			{
-				if (pMeasurement == nullptr)
-				{
-					continue;
-				}
-
-				switch(pMeasurement->measureType())
-				{
-					case Measure::Type::Linearity:
-						{
-							LinearityItem* pLinearityMeasurement = dynamic_cast<LinearityItem*>(pMeasurement);
-							if (pLinearityMeasurement == nullptr)
-							{
-								assert(0);
-								delete pMeasurement;
-								break;
-							}
-
-							delete pLinearityMeasurement;
-						}
-						break;
-
-					case Measure::Type::Comparators:
-						{
-							ComparatorItem* pComparatorMeasurement = dynamic_cast<ComparatorItem*>(pMeasurement);
-							if (pComparatorMeasurement == nullptr)
-							{
-								assert(0);
-								delete pMeasurement;
-								break;
-							}
-
-							delete pComparatorMeasurement;
-						}
-
-						break;
-
-					default:
-						assert(0);
-						delete pMeasurement;
-						break;
-				}
+				continue;
 			}
+
+			delete pMeasurement;
 		}
 
 		m_measureList.clear();
@@ -2563,9 +2654,9 @@ namespace Measure
 
 								switch(subTable.tableType)
 								{
-									case SQL_TABLE_LINEARITY_ADD_VAL_EL:	pSupMeasurement->updateAdditionalParam(Measure::LimitType::Electric, pSubMeasure);	break;
+									case SQL_TABLE_LINEARITY_ADD_VAL_EL:	pSupMeasurement->updateAdditionalParam(Measure::LimitType::Electric, pSubMeasure);		break;
 									case SQL_TABLE_LINEARITY_ADD_VAL_EN:	pSupMeasurement->updateAdditionalParam(Measure::LimitType::Engineering, pSubMeasure);	break;
-									case SQL_TABLE_LINEARITY_20_EL:			pSupMeasurement->updateMeasureArray(Measure::LimitType::Electric, pSubMeasure);		break;
+									case SQL_TABLE_LINEARITY_20_EL:			pSupMeasurement->updateMeasureArray(Measure::LimitType::Electric, pSubMeasure);			break;
 									case SQL_TABLE_LINEARITY_20_EN:			pSupMeasurement->updateMeasureArray(Measure::LimitType::Engineering, pSubMeasure);		break;
 								}
 							}
@@ -2688,7 +2779,7 @@ namespace Measure
 
 			switch(measureType)
 			{
-				case Measure::Type::Linearity:		delete [] static_cast<LinearityItem*> (table.pMeasurement);	break;
+				case Measure::Type::Linearity:		delete [] static_cast<LinearityItem*> (table.pMeasurement);		break;
 				case Measure::Type::Comparators:	delete [] static_cast<ComparatorItem*> (table.pMeasurement);	break;
 				default:							assert(0);
 			}
@@ -2766,28 +2857,29 @@ namespace Measure
 
 	bool Base::remove(int index)
 	{
-		if (index < 0 || index >= count())
+		QMutexLocker locker(&m_measureMutex);
+
+		if (index < 0 || index >= m_measureList.count())
 		{
 			return false;
 		}
 
 		Hash signalHash = UNDEFINED_HASH;
 
-		m_measureMutex.lock();
+		auto pMeasurement = m_measureList[index];
+		if (pMeasurement != nullptr)
+		{
+			signalHash = pMeasurement->signalHash();
 
-			Item* pMeasurement = m_measureList[index];
-			if (pMeasurement != nullptr)
-			{
-				signalHash = pMeasurement->signalHash();
+			delete pMeasurement;
+		}
 
-				delete pMeasurement;
-			}
+		m_measureList.remove(index);
 
-			m_measureList.remove(index);
-
-		m_measureMutex.unlock();
-
-		emit updatedMeasureBase(signalHash);
+		if (signalHash != UNDEFINED_HASH)
+		{
+			emit updatedMeasureBase(signalHash);
+		}
 
 		return true;
 	}
@@ -2886,14 +2978,14 @@ namespace Measure
 			return;
 		}
 
-		int limitType = theOptions.linearity().limitType();
+		LimitType limitType = static_cast<LimitType>(theOptions.linearity().limitType());
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
 			assert(0);
 			return;
 		}
 
-		int errorType = theOptions.linearity().errorType();
+		ErrorType errorType = static_cast<ErrorType>(theOptions.linearity().errorType());
 		if (ERR_MEASURE_ERROR_TYPE(errorType) == true)
 		{
 			assert(0);
@@ -2924,78 +3016,7 @@ namespace Measure
 				continue;
 			}
 
-			switch(measureType)
-			{
-				case Measure::Type::Linearity:
-				{
-					LinearityItem* pLinearityMeasurement = dynamic_cast<LinearityItem*>(pMeasurement);
-					if (pLinearityMeasurement == nullptr)
-					{
-						break;
-					}
-
-					si.setMeasureCount(si.measureCount() + 1);
-
-					if (pLinearityMeasurement->error(limitType, errorType) > pLinearityMeasurement->errorLimit(limitType, errorType))
-					{
-						si.setState(StatisticsItem::State::Failed);
-					}
-				}
-
-				break;
-
-				case Measure::Type::Comparators:
-				{
-					ComparatorItem* pComparatorMeasurement = dynamic_cast<ComparatorItem*>(pMeasurement);
-					if (pComparatorMeasurement == nullptr)
-					{
-						break;
-					}
-
-					if (pComparatorMeasurement->cmpValueType() == Metrology::CmpValueType::Hysteresis)
-					{
-						break;
-					}
-
-					std::shared_ptr<Metrology::ComparatorEx> comparatorEx = si.comparator();
-					if (comparatorEx == nullptr)
-					{
-						break;
-					}
-
-					if (comparatorEx->cmpType() != pComparatorMeasurement->cmpType())
-					{
-						break;
-					}
-
-					if (comparatorEx->compare().isConst() == true)
-					{
-						if (compareDouble(comparatorEx->compareConstValue(), pComparatorMeasurement->nominal(Measure::LimitType::Engineering)) == false)
-						{
-							break;
-						}
-					}
-					else
-					{
-						if (comparatorEx->output().appSignalID() != pComparatorMeasurement->outputAppSignalID())
-						{
-							break;
-						}
-					}
-
-					si.setMeasureCount(si.measureCount() + 1);
-
-					if (pComparatorMeasurement->error(limitType, errorType) > pComparatorMeasurement->errorLimit(limitType, errorType))
-					{
-						si.setState(StatisticsItem::State::Failed);
-					}
-				}
-
-				break;
-
-				default:
-					assert(0);
-			}
+			pMeasurement->updateStatisticsItem(limitType, errorType, si);
 		}
 	}
 
@@ -3056,6 +3077,9 @@ namespace Measure
 			return;
 		}
 
+		QElapsedTimer responseTime;
+		responseTime.start();
+
 		int count = theSignalBase.statistics().count(measureType);
 		for(int i = 0; i < count; i++)
 		{
@@ -3076,9 +3100,6 @@ namespace Measure
 				updateStatisticsItem(measureType, *pSI);
 			}
 		}
-
-		QElapsedTimer responseTime;
-		responseTime.start();
 
 		int measuredCount = 0;
 		int invalidMeasureCount = 0;
@@ -3122,10 +3143,8 @@ namespace Measure
 
 		QMutexLocker l(&pThis->m_measureMutex);
 
-		int measureCount = pThis->m_measureList.count();
-		for (int m = 0; m < measureCount; m++)
+		for (Item* pMeasurement : pThis->m_measureList)
 		{
-			Item* pMeasurement = pThis->m_measureList[m];
 			if (pMeasurement == nullptr)
 			{
 				continue;
@@ -3144,67 +3163,10 @@ namespace Measure
 			{
 				const StatisticsItem& si = theSignalBase.statistics().item(measureType, s);
 
-				Metrology::Signal* pSignal = si.signal();
-				if (pSignal == nullptr || pSignal->param().isValid() == false)
+				if (pMeasurement->findInStatisticsItem(si) == true)
 				{
-					continue;
+					pMeasurement->setFoundInStatistics(true);
 				}
-
-				bool measurementIsFound = false;
-
-				switch (measureType)
-				{
-					case Measure::Type::Linearity:
-						{
-							LinearityItem* pLinearityMeasurement = dynamic_cast<LinearityItem*>(pMeasurement);
-							if (pLinearityMeasurement == nullptr)
-							{
-								continue;
-							}
-
-							if (pLinearityMeasurement->appSignalID() != pSignal->param().appSignalID())
-							{
-								continue;
-							}
-
-							measurementIsFound = true;
-						}
-						break;
-
-					case Measure::Type::Comparators:
-						{
-							std::shared_ptr<Metrology::ComparatorEx> comparatorEx = si.comparator();
-							if (comparatorEx == nullptr)
-							{
-								continue;
-							}
-
-							ComparatorItem* pComparatorMeasurement = dynamic_cast<ComparatorItem*>(pMeasurement);
-							if (pComparatorMeasurement == nullptr)
-							{
-								continue;
-							}
-
-							if (pComparatorMeasurement->appSignalID() != pSignal->param().appSignalID())
-							{
-								continue;
-							}
-
-							if (pComparatorMeasurement->outputAppSignalID() != comparatorEx->output().appSignalID())
-							{
-								continue;
-							}
-
-							measurementIsFound = true;
-						}
-						break;
-
-					default:
-						assert(0);
-						break;
-				}
-
-				pMeasurement->setFoundInStatistics(measurementIsFound);
 			}
 		}
 

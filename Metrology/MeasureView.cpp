@@ -959,7 +959,7 @@ namespace Measure
 
 		// select limit type
 		//
-		int limitType = Measure::LimitType::NoLimitType;
+		Measure::LimitType limitType = Measure::LimitType::NoLimitType;
 
 		switch (graphType)
 		{

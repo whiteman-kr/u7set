@@ -87,8 +87,6 @@ void CalibratorBase::createCalibrators(QWidget* parent)
 		{
 			pCalibrator->moveToThread(pThread);
 
-			connect(pThread, &QThread::finished, pCalibrator.get(), &Calibrator::deleteLater);
-
 			pThread->start();
 		}
 
@@ -143,9 +141,10 @@ void CalibratorBase::removeCalibrators()
 		{
 			pThread->quit();
 			pThread->wait();
-			pThread->deleteLater();
+			delete pThread;
 		}
 
+		calibrator.reset();
 		manager.reset();
 	}
 

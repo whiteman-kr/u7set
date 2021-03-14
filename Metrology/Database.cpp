@@ -818,7 +818,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 			case SQL_TABLE_LINEARITY_ADD_VAL_EL:
 			case SQL_TABLE_LINEARITY_ADD_VAL_EN:
 				{
-					int limitType = Measure::LimitType::NoLimitType;
+					Measure::LimitType limitType = Measure::LimitType::NoLimitType;
 
 					switch(m_info.objectType())
 					{
@@ -853,7 +853,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 			case SQL_TABLE_LINEARITY_20_EL:
 			case SQL_TABLE_LINEARITY_20_EN:
 				{
-					int limitType = Measure::LimitType::NoLimitType;
+					Measure::LimitType limitType = Measure::LimitType::NoLimitType;
 
 					switch(m_info.objectType())
 					{
@@ -1218,7 +1218,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 			case SQL_TABLE_LINEARITY_ADD_VAL_EL:
 			case SQL_TABLE_LINEARITY_ADD_VAL_EN:
 				{
-					int limitType = Measure::LimitType::NoLimitType;
+					Measure::LimitType limitType = Measure::LimitType::NoLimitType;
 
 					switch(m_info.objectType())
 					{
@@ -1264,7 +1264,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 			case SQL_TABLE_LINEARITY_20_EL:
 			case SQL_TABLE_LINEARITY_20_EN:
 				{
-					int limitType = Measure::LimitType::NoLimitType;
+					Measure::LimitType limitType = Measure::LimitType::NoLimitType;
 
 					switch(m_info.objectType())
 					{

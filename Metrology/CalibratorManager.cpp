@@ -35,7 +35,7 @@ CalibratorManager::~CalibratorManager()
 
 	setReadyForManage(false);
 
-	m_pCalibrator = nullptr;
+	m_pCalibrator.reset();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

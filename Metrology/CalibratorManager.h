@@ -59,7 +59,7 @@ private:
 
 	mutable QMutex	m_mutex;
 
-	std::shared_ptr<Calibrator> m_pCalibrator = nullptr;
+	std::shared_ptr<Calibrator> m_pCalibrator;
 	bool			m_readyForManage = false;
 
 	// elements of interface - Menu
