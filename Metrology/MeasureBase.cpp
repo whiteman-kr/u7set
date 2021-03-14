@@ -258,7 +258,7 @@ namespace Measure
 			return;
 		}
 
-		Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+		std::shared_ptr<Calibrator> pCalibrator = ioParam.calibratorManager()->calibrator();
 		if (pCalibrator == nullptr)
 		{
 			assert(false);
@@ -714,7 +714,7 @@ namespace Measure
 			return;
 		}
 
-		Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+		std::shared_ptr<Calibrator> pCalibrator = ioParam.calibratorManager()->calibrator();
 		if (pCalibrator == nullptr)
 		{
 			assert(false);
@@ -954,7 +954,7 @@ namespace Measure
 			return;
 		}
 
-		Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+		std::shared_ptr<Calibrator> pCalibrator = ioParam.calibratorManager()->calibrator();
 		if (pCalibrator == nullptr)
 		{
 			assert(false);
@@ -1079,7 +1079,7 @@ namespace Measure
 			return;
 		}
 
-		Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+		std::shared_ptr<Calibrator> pCalibrator = ioParam.calibratorManager()->calibrator();
 		if (pCalibrator == nullptr)
 		{
 			assert(false);
@@ -1213,7 +1213,7 @@ namespace Measure
 			return;
 		}
 
-		Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+		std::shared_ptr<Calibrator> pCalibrator = ioParam.calibratorManager()->calibrator();
 		if (pCalibrator == nullptr)
 		{
 			assert(false);
@@ -1438,7 +1438,7 @@ namespace Measure
 			return 0;
 		}
 
-		Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+		std::shared_ptr<Calibrator> pCalibrator = ioParam.calibratorManager()->calibrator();
 		if (pCalibrator == nullptr)
 		{
 			assert(false);
@@ -2009,7 +2009,7 @@ namespace Measure
 			return;
 		}
 
-		Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+		std::shared_ptr<Calibrator> pCalibrator = ioParam.calibratorManager()->calibrator();
 		if (pCalibrator == nullptr)
 		{
 			assert(false);
@@ -2145,7 +2145,7 @@ namespace Measure
 			return;
 		}
 
-		Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+		std::shared_ptr<Calibrator> pCalibrator = ioParam.calibratorManager()->calibrator();
 		if (pCalibrator == nullptr)
 		{
 			assert(false);
@@ -2439,7 +2439,7 @@ namespace Measure
 	{
 		if (ERR_MEASURE_TYPE(measureType) == true)
 		{
-			return -1;
+			return 0;
 		}
 
 		m_measureType = measureType;
@@ -2449,9 +2449,9 @@ namespace Measure
 
 		struct rawTableData
 		{
-			int				tableType;
+			int		tableType;
 			Item*	pMeasurement;
-			int				recordCount;
+			int		recordCount;
 		};
 
 		QVector<rawTableData> loadedTablesInMemory;
@@ -2764,7 +2764,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	bool Base::remove(int index, bool removeData)
+	bool Base::remove(int index)
 	{
 		if (index < 0 || index >= count())
 		{
@@ -2780,10 +2780,7 @@ namespace Measure
 			{
 				signalHash = pMeasurement->signalHash();
 
-				if (removeData == true)
-				{
-					delete pMeasurement;
-				}
+				delete pMeasurement;
 			}
 
 			m_measureList.remove(index);

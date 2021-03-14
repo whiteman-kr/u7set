@@ -2461,7 +2461,7 @@ void MainWindow::calibratorConnectedChanged(int count)
 				continue;
 			}
 
-			Calibrator* pCalibrator = m_calibratorBase.calibratorManager(i)->calibrator();
+			std::shared_ptr<Calibrator> pCalibrator = m_calibratorBase.calibratorManager(i)->calibrator();
 			if (pCalibrator == nullptr || pCalibrator->isConnected() == false)
 			{
 				continue;

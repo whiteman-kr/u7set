@@ -27,15 +27,15 @@ class CalibratorManager : public QDialog
 
 public:
 
-	explicit CalibratorManager(Calibrator* pCalibrator, QWidget* parent = nullptr);
+	explicit CalibratorManager(std::shared_ptr<Calibrator> pCalibrator, QWidget* parent = nullptr);
 	virtual ~CalibratorManager() override;
 
 public:
 
 	// calibrator
 	//
-	Calibrator*		calibrator() const { return m_pCalibrator; }
-	void			setCalibrator(Calibrator* pCalibrator) { m_pCalibrator = pCalibrator; }
+	std::shared_ptr<Calibrator> calibrator() const { return m_pCalibrator; }
+	void			setCalibrator(std::shared_ptr<Calibrator> pCalibrator) { m_pCalibrator = pCalibrator; }
 
 	bool			calibratorIsConnected() const;
 	int				calibratorChannel() const;
@@ -59,7 +59,7 @@ private:
 
 	mutable QMutex	m_mutex;
 
-	Calibrator*		m_pCalibrator = nullptr;
+	std::shared_ptr<Calibrator> m_pCalibrator = nullptr;
 	bool			m_readyForManage = false;
 
 	// elements of interface - Menu

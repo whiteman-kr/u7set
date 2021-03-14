@@ -107,10 +107,10 @@ private:
 
 	// calibrators
 	//
-	bool					calibratorIsValid(CalibratorManager* pCalibratorManager);
+	bool					calibratorIsValid(std::shared_ptr<CalibratorManager> pCalibratorManager);
 	int						getConnectedCalibrators();
 	bool					setCalibratorUnit();
-	bool					prepareCalibrator(CalibratorManager* pCalibratorManager, CalibratorMode calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
+	bool					prepareCalibrator(std::shared_ptr<CalibratorManager> pCalibratorManager, CalibratorMode calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
 	void					polarityTest(double electricVal, IoSignalParam& ioParam);
 
 	// Options

@@ -35,7 +35,7 @@ public:
 
 // ==============================================================================================
 
-const char* const		SqlTabletName[] =
+const char* const		SqlTableName[] =
 {
 						"DatabaseInfo",
 						"History",
@@ -53,7 +53,7 @@ const char* const		SqlTabletName[] =
 						"RackGroup",
 };
 
-const int				SQL_TABLE_COUNT							= sizeof(SqlTabletName)/sizeof(SqlTabletName[0]);
+const int				SQL_TABLE_COUNT							= sizeof(SqlTableName)/sizeof(SqlTableName[0]);
 
 const int				SQL_TABLE_UNKNONW						= -1,
 						SQL_TABLE_DATABASE_INFO					= 0,
@@ -140,6 +140,7 @@ const int				SqlTableByMeasureType[SQL_TABLE_COUNT] =
 						Measure::Type::Linearity,				//	SQL_TABLE_LINEARITY_ADD_EN_VAL				// SQL_TABLE_MEASURE_SUB
 						Measure::Type::Linearity,				//	SQL_TABLE_LINEARITY_20_EL					// SQL_TABLE_MEASURE_SUB
 						Measure::Type::Linearity,				//	SQL_TABLE_LINEARITY_20_EN					// SQL_TABLE_MEASURE_SUB
+
 						Measure::Type::NoMeasureType,			//	SQL_TABLE_LINEARITY_POINT					// SQL_TABLE_CONFIG
 
 						Measure::Type::Comparators,				//	SQL_TABLE_COMPARATOR						// SQL_TABLE_MEASURE_MAIN
@@ -160,6 +161,7 @@ const int				SqlTableAppointType[SQL_TABLE_COUNT] =
 						SQL_TABLE_IS_SUB,					//	SQL_TABLE_LINEARITY_ADD_EN_VAL
 						SQL_TABLE_IS_SUB,					//	SQL_TABLE_LINEARITY_20_EL
 						SQL_TABLE_IS_SUB,					//	SQL_TABLE_LINEARITY_20_EN
+
 						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_LINEARITY_POINT
 
 						SQL_TABLE_IS_MAIN,					//	SQL_TABLE_COMPARATOR

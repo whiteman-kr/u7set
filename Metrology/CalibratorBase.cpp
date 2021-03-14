@@ -57,7 +57,7 @@ void CalibratorBase::createCalibrators(QWidget* parent)
 {
 	for(int channel = 0; channel < Metrology::ChannelCount; channel++)
 	{
-		Calibrator* pCalibrator = new Calibrator(channel);
+		std::shared_ptr<Calibrator> pCalibrator(new Calibrator(channel));
 		if (pCalibrator == nullptr)
 		{
 			continue;
@@ -72,7 +72,7 @@ void CalibratorBase::createCalibrators(QWidget* parent)
 		pCalibrator->setPortName(calibratorOption.port());
 		pCalibrator->setType(calibratorOption.type());
 
-		CalibratorManager* pManager = new CalibratorManager(pCalibrator, parent);
+		std::shared_ptr<CalibratorManager> pManager(new CalibratorManager(pCalibrator, parent));
 		if (pManager == nullptr)
 		{
 			continue;
@@ -87,15 +87,15 @@ void CalibratorBase::createCalibrators(QWidget* parent)
 		{
 			pCalibrator->moveToThread(pThread);
 
-			connect(pThread, &QThread::finished, pCalibrator, &Calibrator::deleteLater);
+			connect(pThread, &QThread::finished, pCalibrator.get(), &Calibrator::deleteLater);
 
 			pThread->start();
 		}
 
-		connect(this, &CalibratorBase::calibratorOpen, pCalibrator, &Calibrator::open, Qt::QueuedConnection);
-		connect(this, &CalibratorBase::calibratorClose, pCalibrator, &Calibrator::close, Qt::QueuedConnection);
-		connect(pCalibrator, &Calibrator::connected, this, &CalibratorBase::onCalibratorConnected, Qt::QueuedConnection);
-		connect(pCalibrator, &Calibrator::disconnected, this, &CalibratorBase::onCalibratorDisconnected, Qt::QueuedConnection);
+		connect(this, &CalibratorBase::calibratorOpen, pCalibrator.get(), &Calibrator::open, Qt::QueuedConnection);
+		connect(this, &CalibratorBase::calibratorClose, pCalibrator.get(), &Calibrator::close, Qt::QueuedConnection);
+		connect(pCalibrator.get(), &Calibrator::connected, this, &CalibratorBase::onCalibratorConnected, Qt::QueuedConnection);
+		connect(pCalibrator.get(), &Calibrator::disconnected, this, &CalibratorBase::onCalibratorDisconnected, Qt::QueuedConnection);
 
 		emit pCalibrator->disconnected();
 	}
@@ -108,13 +108,13 @@ void CalibratorBase::removeCalibrators()
 	int count = calibratorCount();
 	for(int index = 0; index < count; index++)
 	{
-		CalibratorManager* manager = calibratorManager(index);
+		std::shared_ptr<CalibratorManager> manager = calibratorManager(index);
 		if (manager == nullptr)
 		{
 			continue;
 		}
 
-		Calibrator* calibrator = manager->calibrator();
+		std::shared_ptr<Calibrator> calibrator = manager->calibrator();
 		if (calibrator == nullptr)
 		{
 			continue;
@@ -146,7 +146,7 @@ void CalibratorBase::removeCalibrators()
 			pThread->deleteLater();
 		}
 
-		delete manager;
+		manager.reset();
 	}
 
 	m_mutex.lock();
@@ -275,13 +275,13 @@ void CalibratorBase::updateList()
 	int count = calibratorCount();
 	for(int index = 0; index < count; index++)
 	{
-		CalibratorManager* manager = calibratorManager(index);
+		std::shared_ptr<CalibratorManager> manager = calibratorManager(index);
 		if (manager == nullptr)
 		{
 			continue;
 		}
 
-		Calibrator* pCalibrator = manager->calibrator();
+		std::shared_ptr<Calibrator> pCalibrator = manager->calibrator();
 		if (pCalibrator == nullptr)
 		{
 			continue;
@@ -307,7 +307,7 @@ void CalibratorBase::updateConnectedCalibrators()
 	int count = calibratorCount();
 	for(int index = 0; index < count; index++)
 	{
-		CalibratorManager* manager = calibratorManager(index);
+		std::shared_ptr<CalibratorManager> manager = calibratorManager(index);
 		if (manager == nullptr)
 		{
 			continue;
@@ -343,7 +343,7 @@ int CalibratorBase::calibratorCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorManager* CalibratorBase::calibratorManager(int index) const
+std::shared_ptr<CalibratorManager> CalibratorBase::calibratorManager(int index) const
 {
 	QMutexLocker l(&m_mutex);
 
@@ -357,14 +357,14 @@ CalibratorManager* CalibratorBase::calibratorManager(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorManager* CalibratorBase::firstConnectedCalibrator() const
+std::shared_ptr<CalibratorManager> CalibratorBase::firstConnectedCalibrator() const
 {
-	CalibratorManager* pFirstConnected = nullptr;
+	std::shared_ptr<CalibratorManager> pFirstConnected;
 
 	int count = calibratorCount();
 	for(int index = 0; index < count; index++)
 	{
-		CalibratorManager* pManager = calibratorManager(index);
+		std::shared_ptr<CalibratorManager> pManager = calibratorManager(index);
 		if (pManager == nullptr)
 		{
 			continue;
@@ -383,14 +383,14 @@ CalibratorManager* CalibratorBase::firstConnectedCalibrator() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorManager* CalibratorBase::calibratorForMeasure(int index) const
+std::shared_ptr<CalibratorManager> CalibratorBase::calibratorForMeasure(int index) const
 {
 	if (ERR_MEASURE_KIND(m_measureKind) == true)
 	{
 		return nullptr;
 	}
 
-	CalibratorManager* pManager = nullptr;
+	std::shared_ptr<CalibratorManager> pManager;
 
 	switch(m_measureKind)
 	{
@@ -417,13 +417,13 @@ void CalibratorBase::onInitialization()
 	int count = calibratorCount();
 	for(int index = 0; index < count; index++)
 	{
-		CalibratorManager* manager = calibratorManager(index);
+		std::shared_ptr<CalibratorManager> manager = calibratorManager(index);
 		if (manager == nullptr)
 		{
 			continue;
 		}
 
-		Calibrator* calibrator = manager->calibrator();
+		std::shared_ptr<Calibrator> calibrator = manager->calibrator();
 		if (calibrator == nullptr)
 		{
 			continue;
@@ -486,7 +486,7 @@ void CalibratorBase::onManage()
 		return;
 	}
 
-	CalibratorManager* manager = calibratorManager(index);
+	std::shared_ptr<CalibratorManager> manager = calibratorManager(index);
 	if (manager == nullptr)
 	{
 		return;
@@ -520,13 +520,13 @@ void CalibratorBase::onSettings(int row, int)
 		return;
 	}
 
-	CalibratorManager* manager = calibratorManager(index);
+	std::shared_ptr<CalibratorManager> manager = calibratorManager(index);
 	if (manager == nullptr)
 	{
 		return;
 	}
 
-	Calibrator* calibrator = manager->calibrator();
+	std::shared_ptr<Calibrator> calibrator = manager->calibrator();
 	if (calibrator == nullptr)
 	{
 		return;

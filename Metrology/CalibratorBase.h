@@ -53,87 +53,87 @@ class CalibratorBase : public QObject
 public:
 
 	explicit CalibratorBase(QObject* parent = nullptr);
-	virtual ~CalibratorBase();
+	virtual ~CalibratorBase() override;
 
 public:
 
-	void					clear();
+	void clear();
 
-	void					init(const CalibratorsOption& calibratorsOption, QWidget* parent = nullptr);
-	void					showInitDialog();
+	void init(const CalibratorsOption& calibratorsOption, QWidget* parent = nullptr);
+	void showInitDialog();
 
-	int						calibratorCount() const;
-	CalibratorManager*		calibratorManager(int index) const ;
-	CalibratorManager*		firstConnectedCalibrator() const;
-	CalibratorManager*		calibratorForMeasure(int index) const;
+	int	 calibratorCount() const;
+	std::shared_ptr<CalibratorManager> calibratorManager(int index) const ;
+	std::shared_ptr<CalibratorManager> firstConnectedCalibrator() const;
+	std::shared_ptr<CalibratorManager> calibratorForMeasure(int index) const;
 
-	int						connectedCalibratorsCount() const { return m_connectedCalibratorsCount; }
+	int connectedCalibratorsCount() const { return m_connectedCalibratorsCount; }
 
 private:
 
-	CalibratorsOption		m_calibratorsOption;
-	Measure::Kind			m_measureKind = Measure::Kind::NoMeasureKind;
+	CalibratorsOption m_calibratorsOption;
+	Measure::Kind m_measureKind = Measure::Kind::NoMeasureKind;
 
-	QTimer					m_timer;
-	int						m_timeout = 0;
+	QTimer m_timer;
+	int m_timeout = 0;
 
-	mutable QMutex			m_mutex;
-	QVector<CalibratorManager*> m_calibratorManagerList;
+	mutable QMutex m_mutex;
+	QVector<std::shared_ptr<CalibratorManager>> m_calibratorManagerList;
 
-	void					createCalibrators(QWidget* parent);
-	void					removeCalibrators();
+	void createCalibrators(QWidget* parent);
+	void removeCalibrators();
 
-	int						m_connectedCalibratorsCount = 0;
+	int m_connectedCalibratorsCount = 0;
 
-	void					updateConnectedCalibrators();
+	void updateConnectedCalibrators();
 
 private:
 
 	// Elements of interface
 	//
-	QDialog*				m_pInitDialog = nullptr;
+	QDialog* m_pInitDialog = nullptr;
 
-	QMenuBar*				m_pMenuBar = nullptr;
-	QMenu*					m_pCalibratorMenu = nullptr;
-	QAction*				m_pInitAction = nullptr;
-	QAction*				m_pManageAction = nullptr;
-	QAction*				m_pSettingsAction = nullptr;
-	QAction*				m_pCopyAction = nullptr;
+	QMenuBar* m_pMenuBar = nullptr;
+	QMenu* m_pCalibratorMenu = nullptr;
+	QAction* m_pInitAction = nullptr;
+	QAction* m_pManageAction = nullptr;
+	QAction* m_pSettingsAction = nullptr;
+	QAction* m_pCopyAction = nullptr;
 
-	QTableWidget*			m_pCalibratorView = nullptr;
-	QProgressBar*			m_pCalibratorProgress = nullptr;
+	QTableWidget* m_pCalibratorView = nullptr;
+	QProgressBar* m_pCalibratorProgress = nullptr;
 
-	void					createInitDialog(QWidget* parent);
+	void createInitDialog(QWidget* parent);
 
-	void					setHeaderList();
-	void					updateList();
+	void setHeaderList();
+	void updateList();
 
 protected:
 
-	bool					eventFilter(QObject* object, QEvent* event) override;
+	bool eventFilter(QObject* object, QEvent* event) override;
 
 signals:
 
-	void					calibratorOpen();
-	void					calibratorClose();
+	void calibratorOpen();
+	void calibratorClose();
 
-	void					calibratorConnectedChanged(int);
+	void calibratorConnectedChanged(int);
 
 public slots:
 
-	void					measureKindChanged(Measure::Kind measureKind);
+	void measureKindChanged(Measure::Kind measureKind);
 
-	void					timeoutInitialization();				// Slot of timer
+	void timeoutInitialization();				// Slot of timer
 
-	void					onInitialization();						// Slot of calibrator menu - Initialization
-	void					onManage();								// Slot of calibrator menu - Manage
-	void					onSettings();							// Slot of calibrator menu - Edit setting
-	void					onSettings(int row, int);				// Slot for edit serial port and type of calibrator
-	void					onCopy();								// Slot of calibrator menu - Copy serail number
-	void					onContextMenu(QPoint);					// Slot of context menu
+	void onInitialization();					// Slot of calibrator menu - Initialization
+	void onManage();							// Slot of calibrator menu - Manage
+	void onSettings();							// Slot of calibrator menu - Edit setting
+	void onSettings(int row, int);				// Slot for edit serial port and type of calibrator
+	void onCopy();								// Slot of calibrator menu - Copy serail number
+	void onContextMenu(QPoint);					// Slot of context menu
 
-	void					onCalibratorConnected();				// Slots events from calibrator
-	void					onCalibratorDisconnected();				// Slots events from calibrator
+	void onCalibratorConnected();				// Slots events from calibrator
+	void onCalibratorDisconnected();			// Slots events from calibrator
 };
 
 // ==============================================================================================

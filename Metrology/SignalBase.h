@@ -58,9 +58,9 @@ public:
 	QString physicalRangeStr() const;
 	QString engineeringRangeStr() const;
 
-	CalibratorManager* calibratorManager() const { return m_pCalibratorManager; }
+	std::shared_ptr<CalibratorManager> calibratorManager() const { return m_pCalibratorManager; }
 	QString calibratorStr() const;
-	void setCalibratorManager(CalibratorManager* pCalibratorManager) { m_pCalibratorManager = pCalibratorManager; }
+	void setCalibratorManager(std::shared_ptr<CalibratorManager> pCalibratorManager) { m_pCalibratorManager = pCalibratorManager; }
 
 	double percent() const { return m_percent; }
 	void setPercent(double percent) { m_percent = percent; }
@@ -87,7 +87,7 @@ private:
 	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 	Metrology::SignalParam m_param[Metrology::ConnectionIoTypeCount];
 
-	CalibratorManager* m_pCalibratorManager = nullptr;
+	std::shared_ptr<CalibratorManager> m_pCalibratorManager;
 
 	double m_percent = 0;																		// for measuring of linearity
 	int m_comparatorIndex = -1;																	// for measuring of comparators - current cmp index

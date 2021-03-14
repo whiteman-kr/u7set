@@ -97,7 +97,7 @@ bool MeasureThread::setActiveSignalParam(const MeasureSignal& activeSignal, cons
 //				continue;
 //			}
 
-			CalibratorManager* pCalibratorManager = calibratorBase.calibratorForMeasure(ch);
+			std::shared_ptr<CalibratorManager> pCalibratorManager = calibratorBase.calibratorForMeasure(ch);
 			if (pCalibratorManager == nullptr || pCalibratorManager->calibratorIsConnected() == false)
 			{
 				continue;
@@ -147,7 +147,7 @@ void MeasureThread::waitMeasureTimeout()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureThread::calibratorIsValid(CalibratorManager* pCalibratorManager)
+bool MeasureThread::calibratorIsValid(std::shared_ptr<CalibratorManager> pCalibratorManager)
 {
 	if (pCalibratorManager == nullptr)
 	{
@@ -181,7 +181,7 @@ int MeasureThread::getConnectedCalibrators()
 	int channelCount = m_activeIoParamList.count();
 	for(int ch = 0; ch < channelCount; ch ++)
 	{
-		CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+		std::shared_ptr<CalibratorManager> pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 		if (pCalibratorManager == nullptr || pCalibratorManager->calibratorIsConnected() == false)
 		{
 			continue;
@@ -232,13 +232,13 @@ bool MeasureThread::setCalibratorUnit()
 			continue;
 		}
 
-		CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+		std::shared_ptr<CalibratorManager> pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 		if (pCalibratorManager == nullptr)
 		{
 			continue;
 		}
 
-		Calibrator*	pCalibrator = pCalibratorManager->calibrator();
+		std::shared_ptr<Calibrator>	pCalibrator = pCalibratorManager->calibrator();
 		if (pCalibrator == nullptr || pCalibrator->isConnected() == false)
 		{
 			return false;
@@ -320,14 +320,14 @@ bool MeasureThread::setCalibratorUnit()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, CalibratorMode calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit)
+bool MeasureThread::prepareCalibrator(std::shared_ptr<CalibratorManager> pCalibratorManager, CalibratorMode calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit)
 {
 	if (pCalibratorManager == nullptr)
 	{
 		return false;
 	}
 
-	Calibrator*	pCalibrator = pCalibratorManager->calibrator();
+	std::shared_ptr<Calibrator>	pCalibrator = pCalibratorManager->calibrator();
 	if (pCalibrator == nullptr || pCalibrator->isConnected() == false)
 	{
 		return false;
@@ -410,7 +410,7 @@ void MeasureThread::polarityTest(double electricVal, IoSignalParam& ioParam)
 		return;
 	}
 
-	Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+	std::shared_ptr<Calibrator> pCalibrator = ioParam.calibratorManager()->calibrator();
 	if (pCalibrator == nullptr)
 	{
 		return;
@@ -534,7 +534,7 @@ void MeasureThread::measureLinearity()
 
 		for(int ch = 0; ch < channelCount; ch ++)
 		{
-			CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+			std::shared_ptr<CalibratorManager> pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 			if (calibratorIsValid(pCalibratorManager) == false)
 			{
 				continue;
@@ -583,7 +583,7 @@ void MeasureThread::measureLinearity()
 		//
 		for(int ch = 0; ch < channelCount; ch ++)
 		{
-			CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+			std::shared_ptr<CalibratorManager> pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 			if (calibratorIsValid(pCalibratorManager) == false)
 			{
 				continue;
@@ -615,7 +615,7 @@ void MeasureThread::measureLinearity()
 		channelCount = m_activeIoParamList.count();
 		for(int ch = 0; ch < channelCount; ch ++)
 		{
-			CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+			std::shared_ptr<CalibratorManager> pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 			if (calibratorIsValid(pCalibratorManager) == false)
 			{
 				continue;
@@ -655,7 +655,7 @@ void MeasureThread::measureCompratorsInSeries()
 	int channelCount = m_activeIoParamList.count();
 	for(int ch = 0; ch < channelCount; ch ++)
 	{
-		CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+		std::shared_ptr<CalibratorManager> pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 		if (calibratorIsValid(pCalibratorManager) == false)
 		{
 			continue;
@@ -1240,7 +1240,7 @@ void MeasureThread::measureCompratorsInParallel()
 					//
 					for(int ch = 0; ch < channelCount; ch ++)
 					{
-						CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+						std::shared_ptr<CalibratorManager> pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 						if (calibratorIsValid(pCalibratorManager) == false)
 						{
 							continue;
@@ -1368,7 +1368,7 @@ void MeasureThread::measureCompratorsInParallel()
 					//
 					for(int ch = 0; ch < channelCount; ch ++)
 					{
-						CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+						std::shared_ptr<CalibratorManager> pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 						if (calibratorIsValid(pCalibratorManager) == false)
 						{
 							continue;
@@ -1415,7 +1415,7 @@ void MeasureThread::measureCompratorsInParallel()
 						{
 							for(int ch = 0; ch < channelCount; ch ++)
 							{
-								CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+								std::shared_ptr<CalibratorManager> pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 								if (calibratorIsValid(pCalibratorManager) == false)
 								{
 									currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
@@ -1487,7 +1487,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 				for(int ch = 0; ch < channelCount; ch ++)
 				{
-					CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+					std::shared_ptr<CalibratorManager> pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 					if (calibratorIsValid(pCalibratorManager) == false)
 					{
 						currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
@@ -1588,7 +1588,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 				for(int ch = 0; ch < channelCount; ch ++)
 				{
-					CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+					std::shared_ptr<CalibratorManager> pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 					if (calibratorIsValid(pCalibratorManager) == false)
 					{
 						currentStateComparatorsInAllChannels |= (0x1ULL << ch);
@@ -1704,7 +1704,7 @@ void MeasureThread::measureCompratorsInParallel()
 				//
 				for(int ch = 0; ch < channelCount; ch ++)
 				{
-					CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+					std::shared_ptr<CalibratorManager> pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 					if (calibratorIsValid(pCalibratorManager) == false)
 					{
 						continue;
@@ -1737,7 +1737,7 @@ void MeasureThread::measureCompratorsInParallel()
 			channelCount = m_activeIoParamList.count();
 			for(int ch = 0; ch < channelCount; ch ++)
 			{
-				CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+				std::shared_ptr<CalibratorManager> pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 				if (calibratorIsValid(pCalibratorManager) == false)
 				{
 					continue;

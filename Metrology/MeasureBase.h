@@ -402,7 +402,7 @@ namespace Measure
 
 		int append(Measure::Item* pMeasurement);
 		Measure::Item* measurement(int index) const;
-		bool remove(int index, bool removeData = true);
+		bool remove(int index);
 		bool remove(Measure::Type measureType, const QVector<int>& keyList);
 
 		void updateStatisticsItem(Measure::Type measureType, StatisticsItem& si);

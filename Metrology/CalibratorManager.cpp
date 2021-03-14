@@ -16,7 +16,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorManager::CalibratorManager(Calibrator* pCalibrator, QWidget* parent)
+CalibratorManager::CalibratorManager(std::shared_ptr<Calibrator> pCalibrator, QWidget* parent)
 	: QDialog(parent)
 	, m_pCalibrator (pCalibrator)
 {
@@ -238,30 +238,30 @@ void CalibratorManager::initDialog()
 	m_pErrorDialog->setWindowFlags(Qt::Drawer);
 	m_pErrorList->setReadOnly(true);
 
-	connect(m_pCalibrator, &Calibrator::connected, this, &CalibratorManager::onCalibratorConnect, Qt::QueuedConnection);
-	connect(m_pCalibrator, &Calibrator::disconnected, this, &CalibratorManager::onCalibratorDisconnect, Qt::QueuedConnection);
-	connect(m_pCalibrator, &Calibrator::unitIsChanged, this, &CalibratorManager::onUnitChanged, Qt::QueuedConnection);
-	connect(m_pCalibrator, &Calibrator::valueIsRequested , this, &CalibratorManager::onValueChanging, Qt::QueuedConnection);
-	connect(m_pCalibrator, &Calibrator::valueIsReceived, this, &CalibratorManager::onValueChanged, Qt::QueuedConnection);
-	connect(m_pCalibrator, &Calibrator::error, this, &CalibratorManager::onCalibratorError, Qt::QueuedConnection);
+	connect(m_pCalibrator.get(), &Calibrator::connected, this, &CalibratorManager::onCalibratorConnect, Qt::QueuedConnection);
+	connect(m_pCalibrator.get(), &Calibrator::disconnected, this, &CalibratorManager::onCalibratorDisconnect, Qt::QueuedConnection);
+	connect(m_pCalibrator.get(), &Calibrator::unitIsChanged, this, &CalibratorManager::onUnitChanged, Qt::QueuedConnection);
+	connect(m_pCalibrator.get(), &Calibrator::valueIsRequested , this, &CalibratorManager::onValueChanging, Qt::QueuedConnection);
+	connect(m_pCalibrator.get(), &Calibrator::valueIsReceived, this, &CalibratorManager::onValueChanged, Qt::QueuedConnection);
+	connect(m_pCalibrator.get(), &Calibrator::error, this, &CalibratorManager::onCalibratorError, Qt::QueuedConnection);
 
-	connect(this, &CalibratorManager::calibratorGetValue, m_pCalibrator, &Calibrator::getValue, Qt::QueuedConnection);
+	connect(this, &CalibratorManager::calibratorGetValue, m_pCalibrator.get(), &Calibrator::getValue, Qt::QueuedConnection);
 
 	connect(m_pSetValueButton, &QPushButton::clicked, this, &CalibratorManager::onSetValue);
-	connect(this, &CalibratorManager::calibratorSetValue, m_pCalibrator, &Calibrator::setValue, Qt::QueuedConnection);
+	connect(this, &CalibratorManager::calibratorSetValue, m_pCalibrator.get(), &Calibrator::setValue, Qt::QueuedConnection);
 	connect(m_pStepDownButton, &QPushButton::clicked, this, &CalibratorManager::onStepDown);
-	connect(this, &CalibratorManager::calibratorStepDown, m_pCalibrator, &Calibrator::stepDown, Qt::QueuedConnection);
+	connect(this, &CalibratorManager::calibratorStepDown, m_pCalibrator.get(), &Calibrator::stepDown, Qt::QueuedConnection);
 	connect(m_pStepUpButton, &QPushButton::clicked, this, &CalibratorManager::onStepUp);
-	connect(this, &CalibratorManager::calibratorStepUp, m_pCalibrator, &Calibrator::stepUp, Qt::QueuedConnection);
+	connect(this, &CalibratorManager::calibratorStepUp, m_pCalibrator.get(), &Calibrator::stepUp, Qt::QueuedConnection);
 
 	connect(m_pModeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &CalibratorManager::onSetMode);
 	connect(m_pUnitList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &CalibratorManager::onSetUnit);
-	connect(this, &CalibratorManager::calibratorSetUnit, m_pCalibrator, &Calibrator::setUnit, Qt::QueuedConnection);
+	connect(this, &CalibratorManager::calibratorSetUnit, m_pCalibrator.get(), &Calibrator::setUnit, Qt::QueuedConnection);
 
 	connect(m_pErrorsButton, &QPushButton::clicked, this, &CalibratorManager::onErrorList);
 
 	connect(m_pRemoteControlCheck, &QCheckBox::clicked, this, &CalibratorManager::onRemoveControl);
-	connect(this, &CalibratorManager::calibratorRemoveControl, m_pCalibrator, &Calibrator::setRemoteControl, Qt::QueuedConnection);
+	connect(this, &CalibratorManager::calibratorRemoveControl, m_pCalibrator.get(), &Calibrator::setRemoteControl, Qt::QueuedConnection);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

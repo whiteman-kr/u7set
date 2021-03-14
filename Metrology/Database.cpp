@@ -351,7 +351,7 @@ bool SqlObjectInfo::init(int objectType)
 
 	m_objectType = objectType;
 	m_objectID = SqlObjectID[objectType];
-	m_caption = SqlTabletName[objectType];
+	m_caption = SqlTableName[objectType];
 	m_version = SqlTableVersion[objectType];
 
 	return true;
@@ -526,7 +526,7 @@ bool SqlTable::isExist() const
 	int existTableCount = m_pDatabase->tables().count();
 	for(int et = 0; et < existTableCount; et++)
 	{
-		if (m_pDatabase->tables().at(et).compare(SqlTabletName[type]) == 0)
+		if (m_pDatabase->tables().at(et).compare(SqlTableName[type]) == 0)
 		{
 			tableIsExist = true;
 			break;
@@ -594,7 +594,7 @@ bool SqlTable::create()
 				case SQL_TABLE_LINEARITY_ADD_VAL_EN:
 				case SQL_TABLE_LINEARITY_20_EL:
 				case SQL_TABLE_LINEARITY_20_EN:
-					request.append(QString(" REFERENCES %1(MeasureID) ON DELETE CASCADE").arg(SqlTabletName[SQL_TABLE_LINEARITY]));
+					request.append(QString(" REFERENCES %1(MeasureID) ON DELETE CASCADE").arg(SqlTableName[SQL_TABLE_LINEARITY]));
 					break;
 			}
 		}
