@@ -412,7 +412,7 @@ bool MainWindow::createToolBars()
 					this, &MainWindow::setMeasureKind);
 
 			m_calibratorBase.measureKindChanged(m_measureKind);
-			connect(this, &MainWindow::measureKindChanged, &m_calibratorBase, &CalibratorBase::measureKindChanged, Qt::QueuedConnection);
+			connect(this, &MainWindow::measureKindChanged, &m_calibratorBase, &CalibratorBase::measureKindChanged);
 		}
 	}
 
@@ -560,9 +560,9 @@ void MainWindow::createPanels()
 		connect(&theSignalBase, &SignalBase::activeSignalChanged, m_pStatisticsPanel, &PanelStatistics::activeSignalChanged, Qt::QueuedConnection);
 		connect(&m_measureBase, &Measure::Base::updatedMeasureBase, m_pStatisticsPanel, &PanelStatistics::updateSignalInList, Qt::QueuedConnection);
 
-		connect(this, &MainWindow::measureTypeChanged, m_pStatisticsPanel, &PanelStatistics::measureTypeChanged, Qt::QueuedConnection);
-		connect(this, &MainWindow::measureKindChanged, m_pStatisticsPanel, &PanelStatistics::measureKindChanged, Qt::QueuedConnection);
-		connect(this, &MainWindow::connectionTypeChanged, m_pStatisticsPanel, &PanelStatistics::connectionTypeChanged, Qt::QueuedConnection);
+		connect(this, &MainWindow::measureTypeChanged, m_pStatisticsPanel, &PanelStatistics::measureTypeChanged);
+		connect(this, &MainWindow::measureKindChanged, m_pStatisticsPanel, &PanelStatistics::measureKindChanged);
+		connect(this, &MainWindow::connectionTypeChanged, m_pStatisticsPanel, &PanelStatistics::connectionTypeChanged);
 
 		connect(m_pStatisticsPanel, &PanelStatistics::setConnectionType, this, &MainWindow::setConnectionTypeFromStatistic);
 		connect(m_pStatisticsPanel, &PanelStatistics::setRack, m_pRackCombo, &QComboBox::setCurrentIndex);
@@ -599,8 +599,8 @@ void MainWindow::createPanels()
 		m_pSignalInfoPanel->measureKindChanged(m_measureKind);
 		m_pSignalInfoPanel->connectionTypeChanged(m_connectionType);
 
-		connect(this, &MainWindow::measureKindChanged, m_pSignalInfoPanel, &PanelSignalInfo::measureKindChanged, Qt::QueuedConnection);
-		connect(this, &MainWindow::connectionTypeChanged, m_pSignalInfoPanel, &PanelSignalInfo::connectionTypeChanged, Qt::QueuedConnection);
+		connect(this, &MainWindow::measureKindChanged, m_pSignalInfoPanel, &PanelSignalInfo::measureKindChanged);
+		connect(this, &MainWindow::connectionTypeChanged, m_pSignalInfoPanel, &PanelSignalInfo::connectionTypeChanged);
 
 		connect(m_pSignalInfoPanel, &PanelSignalInfo::changeActiveDestSignal, this, &MainWindow::changeActiveDestSignal, Qt::QueuedConnection);
 		connect(m_pSignalInfoPanel, &PanelSignalInfo::changeActiveDestSignals, this, &MainWindow::changeActiveDestSignals, Qt::QueuedConnection);
@@ -627,11 +627,8 @@ void MainWindow::createPanels()
 		m_pComparatorInfoPanel->measureKindChanged(m_measureKind);
 		m_pComparatorInfoPanel->connectionTypeChanged(m_connectionType);
 
-		connect(this, &MainWindow::measureKindChanged,
-				m_pComparatorInfoPanel, &PanelComparatorInfo::measureKindChanged, Qt::QueuedConnection);
-
-		connect(this, &MainWindow::connectionTypeChanged,
-				m_pComparatorInfoPanel, &PanelComparatorInfo::connectionTypeChanged, Qt::QueuedConnection);
+		connect(this, &MainWindow::measureKindChanged, m_pComparatorInfoPanel, &PanelComparatorInfo::measureKindChanged);
+		connect(this, &MainWindow::connectionTypeChanged, m_pComparatorInfoPanel, &PanelComparatorInfo::connectionTypeChanged);
 	}
 }
 
@@ -661,8 +658,8 @@ void MainWindow::createMeasureViews()
 		//
 		//
 
-		connect(pView, &Measure::View::removeFromBase, &theDatabase, &Database::removeFromBase, Qt::QueuedConnection);
-		connect(pView, &Measure::View::removeFromBase, &m_measureBase, &Measure::Base::removeFromBase, Qt::QueuedConnection);
+		connect(pView, &Measure::View::removeFromBase, &theDatabase, &Database::removeFromBase);
+		connect(pView, &Measure::View::removeFromBase, &m_measureBase, &Measure::Base::removeFromBase);
 
 		connect(this, &MainWindow::appendMeasure, pView, &Measure::View::appendMeasure, Qt::QueuedConnection);
 	}
@@ -1989,7 +1986,11 @@ void MainWindow::setMeasureKind(int index)
 		return;
 	}
 
-	if (measureKind == Measure::Kind::MultiRack)
+	m_measureKind = static_cast<Measure::Kind>(measureKind);
+
+	//
+	//
+	if (m_measureKind == Measure::Kind::MultiRack)
 	{
 		if (theSignalBase.racks().groups().count() == 0)
 		{
@@ -2009,14 +2010,12 @@ void MainWindow::setMeasureKind(int index)
 
 	//
 	//
-	m_measureKind = static_cast<Measure::Kind>(measureKind);
-
-	//
-	//
 	theOptions.toolBar().setMeasureKind(measureKind);
 	theOptions.toolBar().save();
 
-	emit measureKindChanged(measureKind);
+	//
+	//
+	emit measureKindChanged(m_measureKind);
 
 	//
 	//
@@ -2044,6 +2043,8 @@ void MainWindow::setConnectionType(int index)
 		return;
 	}
 
+	m_connectionType = static_cast<Metrology::ConnectionType>(connectionType);
+
 	//
 	//
 	theOptions.toolBar().setConnectionType(connectionType);
@@ -2051,9 +2052,7 @@ void MainWindow::setConnectionType(int index)
 
 	//
 	//
-	m_connectionType = static_cast<Metrology::ConnectionType>(connectionType);
-
-	emit connectionTypeChanged(connectionType);
+	emit connectionTypeChanged(m_connectionType);
 
 	//
 	//
@@ -3186,10 +3185,10 @@ void MainWindow::runMeasureThread()
 	m_measureThread.measureKindChanged(m_measureKind);
 	m_measureThread.connectionTypeChanged(m_connectionType);
 
-	connect(this, &MainWindow::measureTypeChanged, &m_measureThread, &MeasureThread::measureTypeChanged, Qt::QueuedConnection);
-	connect(this, &MainWindow::measureTimeoutChanged, &m_measureThread, &MeasureThread::measureTimeoutChanged, Qt::QueuedConnection);
-	connect(this, &MainWindow::measureKindChanged, &m_measureThread, &MeasureThread::measureKindChanged, Qt::QueuedConnection);
-	connect(this, &MainWindow::connectionTypeChanged, &m_measureThread, &MeasureThread::connectionTypeChanged, Qt::QueuedConnection);
+	connect(this, &MainWindow::measureTimeoutChanged, &m_measureThread, &MeasureThread::measureTimeoutChanged);
+	connect(this, &MainWindow::measureTypeChanged, &m_measureThread, &MeasureThread::measureTypeChanged);
+	connect(this, &MainWindow::measureKindChanged, &m_measureThread, &MeasureThread::measureKindChanged);
+	connect(this, &MainWindow::connectionTypeChanged, &m_measureThread, &MeasureThread::connectionTypeChanged);
 
 	connect(&theSignalBase, &SignalBase::signalParamChanged, &m_measureThread, &MeasureThread::signalParamChanged, Qt::QueuedConnection);
 

@@ -108,8 +108,8 @@ protected:
 
 public slots:
 
-	void measureKindChanged(int measureKind);
-	void connectionTypeChanged(int connectionType);
+	void measureKindChanged(Measure::Kind measureKind);
+	void connectionTypeChanged(Metrology::ConnectionType connectionType);
 
 	void activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected
 	void updateComparatorState();										// slot informs that signal for measure has updated his state

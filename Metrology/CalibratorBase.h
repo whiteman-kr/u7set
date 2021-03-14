@@ -121,7 +121,7 @@ signals:
 
 public slots:
 
-	void					measureKindChanged(int measureKind);
+	void					measureKindChanged(Measure::Kind measureKind);
 
 	void					timeoutInitialization();				// Slot of timer
 

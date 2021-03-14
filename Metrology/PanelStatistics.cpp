@@ -547,14 +547,14 @@ void PanelStatistics::setViewFont(const QFont& font)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelStatistics::measureTypeChanged(int measureType)
+void PanelStatistics::measureTypeChanged(Measure::Type measureType)
 {
 	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return;
 	}
 
-	m_measureType = static_cast<Measure::Type>(measureType);
+	m_measureType = measureType;
 
 	theSignalBase.statistics().setMeasureType(m_measureType);
 
@@ -563,26 +563,26 @@ void PanelStatistics::measureTypeChanged(int measureType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelStatistics::measureKindChanged(int measureKind)
+void PanelStatistics::measureKindChanged(Measure::Kind measureKind)
 {
 	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
 		return;
 	}
 
-	m_measureKind = static_cast<Measure::Kind>(measureKind);
+	m_measureKind = measureKind;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelStatistics::connectionTypeChanged(int connectionType)
+void PanelStatistics::connectionTypeChanged(Metrology::ConnectionType connectionType)
 {
 	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		return;
 	}
 
-	m_connectionType = static_cast<Metrology::ConnectionType>(connectionType);
+	m_connectionType = connectionType;
 
 	updateList();
 }

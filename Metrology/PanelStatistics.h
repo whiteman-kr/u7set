@@ -203,9 +203,9 @@ signals:
 
 public slots:
 
-	void measureTypeChanged(int measureType);
-	void measureKindChanged(int measureKind);
-	void connectionTypeChanged(int connectionType);
+	void measureTypeChanged(Measure::Type measureType);
+	void measureKindChanged(Measure::Kind measureKind);
+	void connectionTypeChanged(Metrology::ConnectionType connectionType);
 
 	void activeSignalChanged(const MeasureSignal& activeSignal);	// slot informs that signal for measure was selected
 

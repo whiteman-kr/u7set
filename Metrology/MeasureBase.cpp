@@ -2607,9 +2607,9 @@ namespace Measure
 
 			switch(measureType)
 			{
-				case Measure::Type::Linearity:		pMeasureAppend = new LinearityItem;	break;
+				case Measure::Type::Linearity:		pMeasureAppend = new LinearityItem;		break;
 				case Measure::Type::Comparators:	pMeasureAppend = new ComparatorItem;	break;
-				default:							assert(0);									break;
+				default:							assert(0);								break;
 			}
 
 			if (pMeasureAppend == nullptr)
@@ -2857,7 +2857,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Base::removeFromBase(int measureType, const QVector<int>& keyList)
+	void Base::removeFromBase(Measure::Type measureType, const QVector<int>& keyList)
 	{
 		bool result = remove(static_cast<Measure::Type>(measureType), keyList);
 		if (result == false)

@@ -284,27 +284,27 @@ void PanelComparatorInfo::restartComparatorStateTimer(int timeout)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelComparatorInfo::measureKindChanged(int measureKind)
+void PanelComparatorInfo::measureKindChanged(Measure::Kind measureKind)
 {
 	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
 		return;
 	}
 
-	m_measureKind = static_cast<Measure::Kind>(measureKind);
+	m_measureKind = measureKind;
 }
 
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelComparatorInfo::connectionTypeChanged(int connectionType)
+void PanelComparatorInfo::connectionTypeChanged(Metrology::ConnectionType connectionType)
 {
 	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		return;
 	}
 
-	m_connectionType = static_cast<Metrology::ConnectionType>(connectionType);
+	m_connectionType = connectionType;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -442,14 +442,14 @@ void CalibratorBase::onInitialization()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorBase::measureKindChanged(int measureKind)
+void CalibratorBase::measureKindChanged(Measure::Kind measureKind)
 {
 	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
 		return;
 	}
 
-	m_measureKind = static_cast<Measure::Kind>(measureKind);
+	m_measureKind = measureKind;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

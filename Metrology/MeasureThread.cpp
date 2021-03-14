@@ -1878,38 +1878,38 @@ void MeasureThread::measureTimeoutChanged(int timeout)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureThread::measureTypeChanged(int measureType)
+void MeasureThread::measureTypeChanged(Measure::Type measureType)
 {
 	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return;
 	}
 
-	m_measureType = static_cast<Measure::Type>(measureType);
+	m_measureType = measureType;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureThread::measureKindChanged(int measureKind)
+void MeasureThread::measureKindChanged(Measure::Kind measureKind)
 {
 	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
 		return;
 	}
 
-	m_measureKind = static_cast<Measure::Kind>(measureKind);
+	m_measureKind = measureKind;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureThread::connectionTypeChanged(int connectionType)
+void MeasureThread::connectionTypeChanged(Metrology::ConnectionType connectionType)
 {
 	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		return;
 	}
 
-	m_connectionType = static_cast<Metrology::ConnectionType>(connectionType);
+	m_connectionType = connectionType;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

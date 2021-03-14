@@ -1889,7 +1889,7 @@ bool Database::removeMeasure(Measure::Type measuteType, const QVector<int>& keyL
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Database::removeFromBase(int measureType, const QVector<int>& keyList)
+void Database::removeFromBase(Measure::Type measureType, const QVector<int>& keyList)
 {
 	bool result = removeMeasure(static_cast<Measure::Type>(measureType), keyList);
 	if (result == false)

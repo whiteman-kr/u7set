@@ -427,7 +427,7 @@ namespace Measure
 		void signalBaseLoaded();
 
 		void appendToBase(Measure::Item* pMeasurement);
-		void removeFromBase(int measureType, const QVector<int>& keyList);
+		void removeFromBase(Measure::Type measureType, const QVector<int>& keyList);
 	};
 }
 

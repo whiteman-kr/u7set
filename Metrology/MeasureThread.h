@@ -146,9 +146,9 @@ public slots:
 	void					tuningSocketDisconnected();
 
 	void					measureTimeoutChanged(int timeout);
-	void					measureTypeChanged(int measureType);
-	void					measureKindChanged(int measureKind);
-	void					connectionTypeChanged(int connectionType);
+	void					measureTypeChanged(Measure::Type measureType);
+	void					measureKindChanged(Measure::Kind measureKind);
+	void					connectionTypeChanged(Metrology::ConnectionType connectionType);
 
 	void					signalParamChanged(const QString& appSignalID);
 

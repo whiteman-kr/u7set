@@ -907,13 +907,13 @@ namespace Measure
 			return;
 		}
 
-		// remove from Database and MesaureBase
-		//
-		emit removeFromBase(m_measureType, keyList);
-
 		// remove from MeasureTable
 		//
 		m_table.remove(removeIndexList);
+
+		// remove from Database and MesaureBase
+		//
+		emit removeFromBase(m_measureType, keyList);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
