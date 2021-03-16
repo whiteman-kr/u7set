@@ -33,6 +33,11 @@ This manual is divided in the following sections:
  */
 
 /**
+ *  @defgroup appLogicSchemaItems Application Logic Items
+ *  \ingroup groupSchemaScripts
+ */
+
+/**
  *  @defgroup widgets Schema Widgets
  *  \ingroup groupSchemaScripts
  */
@@ -69,9 +74,12 @@ Scripts are written in JavaScript language.
 MATS schema items emit events on different user and system actions. The set of events depends on item's type.
 
 Dynamic schema items like 
-\ref VFrame30::SchemaItemValue "SchemaItemValue" 
-or 
-\ref VFrame30::SchemaItemImageValue "SchemaItemImageValue" 
+\ref VFrame30::SchemaItemValue "SchemaItemValue"
+, 
+\ref VFrame30::SchemaItemImageValue "SchemaItemImageValue"
+or
+\ref VFrame30::SchemaItemSignal "SchemaItemSignal"
+
 usually process pre-draw event to define item apperance depending on some signals values.
 
 Properties of static schema items like 
