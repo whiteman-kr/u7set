@@ -1,5 +1,4 @@
-#ifndef DEVICEEMULATOR_H
-#define DEVICEEMULATOR_H
+#pragma once
 
 #include <memory>
 #include <functional>
@@ -28,7 +27,7 @@
 	#ifdef WIN32   //WINDOWS
 		#define __FUNCTION_NAME__   __FUNCTION__
 	#else          //*NIX
-		#define __FUNCTION_NAME__   __func__
+		#define __FUNCTION_NAME__   __PRETTY_FUNCTION__
 	#endif
 #endif
 
@@ -413,5 +412,3 @@ namespace Sim
 		std::unordered_map<int, size_t> m_cachedOffsetToCommand;	// key: command offset, value: index in m_commands
 	};
 }
-
-#endif // DEVICEEMULATOR_H
