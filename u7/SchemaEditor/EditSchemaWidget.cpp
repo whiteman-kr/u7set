@@ -3873,7 +3873,7 @@ bool EditSchemaWidget::loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::Afb
 
 	std::vector<DbFileInfo> fileList;
 
-	bool result = db()->getFileList(&fileList, db()->afblFileId(), LmDescriptionFile, true, this);
+	bool result = db()->getFileList(&fileList, DbDir::AfblDir, LmDescriptionFile, true, this);
 	if (result == false)
 	{
 		return false;
@@ -3932,7 +3932,7 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 	//
 	DbFileTree filesTree;
 
-	bool ok = db()->getFileListTree(&filesTree, db()->ufblFileId(), "%", true, this);
+	bool ok = db()->getFileListTree(&filesTree, DbDir::UfblDir, "%", true, this);
 	if (ok == false)
 	{
 		return false;
@@ -4039,7 +4039,7 @@ bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* 
 	//
 	DbFileTree filesTree;
 
-	bool ok = db->getFileListTree(&filesTree, db->busTypesFileId(), QString(".") + Db::File::BusFileExtension, true, parentWidget);
+	bool ok = db->getFileListTree(&filesTree, DbDir::BusTypesDir, QString(".") + Db::File::BusFileExtension, true, parentWidget);
 	if (ok == false)
 	{
 		return false;
@@ -4050,9 +4050,11 @@ bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* 
 	std::vector<DbFileInfo> fileList;
 	fileList.reserve(fileMap.size());
 
+	int busTypesFileId = db->systemFileId(DbDir::BusTypesDir);
+
 	for (auto&[fileId, fileInfo] : fileMap)
 	{
-		if (fileId != db->busTypesFileId())
+		if (fileId != busTypesFileId)
 		{
 			fileList.push_back(*fileInfo);
 		}

@@ -1696,7 +1696,7 @@ void TestsWidget::moveSelectedFiles()
 		}
 	}
 
-	m_testsTreeView->moveFile(db()->testsFileId());
+	m_testsTreeView->moveFile(db()->systemFileId(DbDir::TestsDir));
 }
 
 void TestsWidget::refreshFileTree()
@@ -1715,7 +1715,7 @@ void TestsWidget::runAllTestFiles()
 	// Find all files with scripts extention
 	DbFileTree testsTree;
 
-	bool ok = db()->getFileListTree(&testsTree, db()->testsFileId(), true, parentWidget());
+	bool ok = db()->getFileListTree(&testsTree, DbDir::TestsDir, true, parentWidget());
 	if (ok == false)
 	{
 		return;
@@ -2895,7 +2895,7 @@ void TestsWidget::createTestsDock()
 	QVBoxLayout* testsLayout = new QVBoxLayout(testsWidget);
 	testsLayout->setContentsMargins(6, 0, 6, 6);
 
-	m_testsTreeModel = new TestsFileTreeModel(db(), DbFileInfo::fullPathToFileName(Db::File::TestsFileName), this, this);
+	m_testsTreeModel = new TestsFileTreeModel(db(), Db::File::systemDirToName(DbDir::TestsDir), this, this);
 
 #ifdef _DEBUG
 	[[maybe_unused]]QAbstractItemModelTester* modelTester = new QAbstractItemModelTester(m_testsTreeModel,

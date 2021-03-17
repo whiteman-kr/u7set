@@ -314,16 +314,10 @@ void SignalPropertyManager::reloadPropertyBehaviour()
 		return;
 	}
 
-	DbFileInfo mcInfo = m_dbController->systemFileInfo(m_dbController->etcFileId());
-
-	if (mcInfo.isNull() == true)
-	{
-		QMessageBox::critical(m_parentWidget, "Error", QString("File \"%1\" is not found!").arg(Db::File::EtcFileName));
-		return;
-	}
+	int etcFileId = m_dbController->systemFileId(DbDir::EtcDir);
 
 	DbFileInfo propertyBehaviorFile;
-	m_dbController->getFileInfo(mcInfo.fileId(), QString(Db::File::SignalPropertyBehaviorFileName), &propertyBehaviorFile, m_parentWidget);
+	m_dbController->getFileInfo(etcFileId, QString(Db::File::SignalPropertyBehaviorFileName), &propertyBehaviorFile, m_parentWidget);
 
 	if (propertyBehaviorFile.isNull() == true)
 	{

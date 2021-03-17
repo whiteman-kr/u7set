@@ -2748,7 +2748,10 @@ namespace Builder
 
 	bool Parser::loadUfbFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out)
 	{
-		bool ok = loadSchemaFiles<VFrame30::UfbSchema>(db, out, db->ufblFileId(), QLatin1String(".") + Db::File::UfbFileExtension);
+		int ufblFileId = m_db->systemFileId(DbDir::UfblDir);
+
+		bool ok = loadSchemaFiles<VFrame30::UfbSchema>(db, out, ufblFileId, QLatin1String(".") + Db::File::UfbFileExtension);
+
 		m_log->writeMessage(tr("Loaded %1 UFB logic file(s).").arg(out->size()));
 		m_log->writeMessage("");
 		return ok;
@@ -2756,7 +2759,9 @@ namespace Builder
 
 	bool Parser::loadAppLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicSchema>>* out)
 	{
-		bool ok = loadSchemaFiles<VFrame30::LogicSchema>(db, out, db->alFileId(), QLatin1String(".") + Db::File::AlFileExtension);
+		int alFileId = m_db->systemFileId(DbDir::AppLogicDir);
+
+		bool ok = loadSchemaFiles<VFrame30::LogicSchema>(db, out, alFileId, QLatin1String(".") + Db::File::AlFileExtension);
 		m_log->writeMessage(tr("Loaded %1 Application Logic file(s).").arg(out->size()));
 		m_log->writeMessage("");
 		return ok;
@@ -2819,7 +2824,7 @@ namespace Builder
 		{
 			// Error of getting file list from the database, parent file ID %1, filter '%2', database message %3.
 			//
-			m_log->errPDB2001(db->alFileId(), endsWithFilter, db->lastError());
+			m_log->errPDB2001(parentFileId, endsWithFilter, db->lastError());
 			return false;
 		}
 

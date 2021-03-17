@@ -118,14 +118,14 @@ void FileTests::api_set_file_attributes()
 		QSqlQuery query;
 		bool ok = query.exec(QString("SELECT api.set_file_attributes('%1', '%2', 123);")
 							 .arg(session_key)
-							 .arg(Db::File::AlFileName)	// "$root$/Schemas/ApplicationLogic"
+							 .arg(Db::File::systemDirToName(DbDir::AppLogicDir))	// "$root$/Schemas/ApplicationLogic"
 							 );
 
 		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 		ok = query.exec(QString("SELECT F.Attributes FROM File F WHERE FileID = (SELECT api.get_file_id('%1', '%2'));")
 						.arg(session_key)
-						.arg(Db::File::AlFileName)	// "$root$/Schemas/ApplicationLogic"
+						.arg(Db::File::systemDirToName(DbDir::AppLogicDir))	// "$root$/Schemas/ApplicationLogic"
 						);
 
 		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -139,14 +139,14 @@ void FileTests::api_set_file_attributes()
 		QSqlQuery query;
 		bool ok = query.exec(QString("SELECT api.set_file_attributes('%1', (SELECT api.get_file_id('%1', '%2')), 225);")
 							 .arg(session_key)
-							 .arg(Db::File::AlFileName)	// "$root$/Schemas/ApplicationLogic"
+							 .arg(Db::File::systemDirToName(DbDir::AppLogicDir))	// "$root$/Schemas/ApplicationLogic"
 							 );
 
 		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 		ok = query.exec(QString("SELECT F.Attributes FROM File F WHERE FileID = (SELECT api.get_file_id('%1', '%2'));")
 						.arg(session_key)
-						.arg(Db::File::AlFileName)	// "$root$/Schemas/ApplicationLogic"
+						.arg(Db::File::systemDirToName(DbDir::AppLogicDir))	// "$root$/Schemas/ApplicationLogic"
 						);
 
 		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -188,7 +188,7 @@ void FileTests::api_add_file()
 		bool ok = query.exec(QString("SELECT * FROM api.add_file('%1', '%2', (SELECT api.get_file_id('%1', '%3')), '1234567890', '{}', %4);")
 							 .arg(session_key)
 							 .arg(fileName)
-							 .arg(Db::File::AlFileName)	// "$root$/Schemas/ApplicationLogic"
+							 .arg(Db::File::systemDirToName(DbDir::AppLogicDir))	// "$root$/Schemas/ApplicationLogic"
 							 .arg(attributes)
 							 );
 
@@ -209,7 +209,7 @@ void FileTests::api_add_file()
 		//
 		ok = query.exec(QString("SELECT * FROM api.get_file_info('%1', '%2');")
 						.arg(session_key)
-						.arg(QString(Db::File::AlFileName) + "/" + fileName)	// "$root$/Schemas/ApplicationLogic/AddFileTest.txt"
+						.arg(QString(Db::File::systemDirToName(DbDir::AppLogicDir)) + "/" + fileName)	// "$root$/Schemas/ApplicationLogic/AddFileTest.txt"
 						);
 
 		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -271,8 +271,8 @@ void FileTests::api_move_file()
 		QString fileNameParent = "MoveFileTestParent.txt";
 		QString fileNameParentChild = "MoveFileTestParentChild.txt";
 
-		QString moveFileFrom = Db::File::AlFileName;	// "$root$/Schemas/ApplicationLogic"
-		QString moveFileTo = Db::File::MvsFileName;		// "$root$/Schemas/Monitor"
+		QString moveFileFrom = Db::File::systemDirToName(DbDir::AppLogicDir);		// "$root$/Schemas/ApplicationLogic"
+		QString moveFileTo = Db::File::systemDirToName(DbDir::MonitorSchemasDir);	// "$root$/Schemas/Monitor"
 
 		int moveFileFromId = -1;
 		int moveFileToId = -1;
@@ -500,9 +500,10 @@ void FileTests::api_undo_changes_after_move_file()
 
 	// --
 	//
-	QString moveFileFrom = Db::File::AlFileName;	// "$root$/Schemas/ApplicationLogic"
-	QString moveFileTo = Db::File::MvsFileName;		// "$root$/Schemas/Monitor"
-	QString moveFileTo2 = Db::File::UfblFileName;	// "$root$/Schemas/UFBL"
+	QString moveFileFrom = Db::File::systemDirToName(DbDir::AppLogicDir);		// "$root$/Schemas/ApplicationLogic"
+	QString moveFileTo = Db::File::systemDirToName(DbDir::MonitorSchemasDir);	// "$root$/Schemas/Monitor"
+	QString moveFileTo2 = Db::File::systemDirToName(DbDir::UfblDir);			// "$root$/Schemas/UFBL"
+
 	int moveFileFromId = -1;
 	int moveFileToId = -1;
 	int moveFileTo2Id = -1;
@@ -763,7 +764,7 @@ void FileTests::api_rename_file()
 		QString fileName1 = "RenameTest1.txt";
 		QString fileName2 = "RenameTest2.txt";
 
-		QString parentFileName = Db::File::AlFileName;
+		QString parentFileName = Db::File::systemDirToName(DbDir::AppLogicDir);
 		int parentFileId = -1;
 
 		QSqlQuery query;
@@ -909,7 +910,7 @@ void FileTests::api_undo_changes_after_rename_file()
 		QString fileName1 = "RenameTest1_undoTest.txt";
 		QString fileName2 = "RenameTest2_undoTest.txt";
 
-		QString parentFileName = Db::File::AlFileName;
+		QString parentFileName = Db::File::systemDirToName(DbDir::AppLogicDir);
 		int parentFileId = -1;
 
 		QSqlQuery query;

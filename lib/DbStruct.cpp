@@ -6,6 +6,16 @@
 #include <QDebug>
 #include "Signal.h"
 
+namespace Db
+{
+	QString File::systemDirToName(DbDir systemDir)
+	{
+		auto it = s_dirToName.find(systemDir);
+		return it != s_dirToName.end() ? it->second : QString{};
+	}
+}
+
+
 //
 //
 //	VcsState

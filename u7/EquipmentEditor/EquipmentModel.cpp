@@ -1092,8 +1092,11 @@ void EquipmentModel::projectOpened()
 
 	beginResetModel();
 
-	m_configuration->fileInfo().setFileId(dbController()->hcFileId());
-	m_preset->fileInfo().setFileId(dbController()->hpFileId());
+	int hcFileId = dbController()->systemFileId(DbDir::HardwareConfigurationDir);
+	int hpFileId = dbController()->systemFileId(DbDir::HardwarePresetsDir);
+
+	m_configuration->fileInfo().setFileId(hcFileId);
+	m_preset->fileInfo().setFileId(hpFileId);
 
 	// Fill user list
 	//

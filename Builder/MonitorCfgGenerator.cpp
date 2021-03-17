@@ -299,8 +299,9 @@ namespace Builder
 		ClientBehaviorStorage allBehaviorStorage;
 		QString errorCode;
 		QByteArray dbData;
+		int etcFileId = m_dbController->systemFileId(DbDir::EtcDir);
 
-		bool result = loadFileFromDatabase(m_dbController, m_dbController->etcFileId(), allBehaviorStorage.dbFileName(), &errorCode, &dbData);
+		bool result = loadFileFromDatabase(m_dbController, etcFileId, allBehaviorStorage.dbFileName(), &errorCode, &dbData);
 		if (result == false)
 		{
 			m_log->errPDB2002(-1, allBehaviorStorage.dbFileName(), errorCode);

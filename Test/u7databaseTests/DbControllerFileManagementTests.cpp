@@ -2358,7 +2358,7 @@ void DbControllerFileTests::systemFilesTest()
 	int al = 0;
 	int mc = 0;
 	int mvs = 0;
-	//int dvs = 0;
+	int dvs = 0;
 	int hc = 0;
 	int hp = 0;
 
@@ -2386,11 +2386,11 @@ void DbControllerFileTests::systemFilesTest()
 
 	mvs = query.value("fileId").toInt();
 
-//	ok = query.exec("SELECT * FROM file WHERE name = 'DVS'");
-//	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
-//	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
+	ok = query.exec("SELECT * FROM file WHERE name = 'Diagnostics'");
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
 
-//	dvs = query.value("fileId").toInt();
+	dvs = query.value("fileId").toInt();
 
 	ok = query.exec("SELECT * FROM file WHERE name = 'HC'");
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
@@ -2405,13 +2405,13 @@ void DbControllerFileTests::systemFilesTest()
 	hp = query.value("fileId").toInt();
 
 	QVERIFY2 (m_db->rootFileId() == 0, qPrintable("Error: root fileId must be 0, function returned wrong id"));
-	QVERIFY2 (m_db->afblFileId() == afbl, qPrintable("Error: Wrong AFBL id returned"));
-	QVERIFY2 (m_db->alFileId() == al, qPrintable("Error: Wrong AL id returned"));
-	QVERIFY2 (m_db->mcFileId() == mc, qPrintable("Error: Wrong MC id returned"));
-	QVERIFY2 (m_db->mvsFileId() == mvs, qPrintable("Error: Wrong MVS id returned"));
-	//QVERIFY2 (m_db->dvsFileId() == dvs, qPrintable("Error: Wrong DVS id returned"));
-	QVERIFY2 (m_db->hcFileId() == hc, qPrintable("Error: Wrong HC id returned"));
-	QVERIFY2 (m_db->hpFileId() == hp, qPrintable("Error: Wrong HP id returned"));
+	QVERIFY2 (m_db->systemFileId(DbDir::AfblDir) == afbl, qPrintable("Error: Wrong AFBL id returned"));
+	QVERIFY2 (m_db->systemFileId(DbDir::AppLogicDir) == al, qPrintable("Error: Wrong AL id returned"));
+	QVERIFY2 (m_db->systemFileId(DbDir::ModuleConfigurationDir) == mc, qPrintable("Error: Wrong MC id returned"));
+	QVERIFY2 (m_db->systemFileId(DbDir::MonitorSchemasDir) == mvs, qPrintable("Error: Wrong MVS id returned"));
+	QVERIFY2 (m_db->systemFileId(DbDir::DiagnosticsSchemasDir) == dvs, qPrintable("Error: Wrong DVS id returned"));
+	QVERIFY2 (m_db->systemFileId(DbDir::HardwareConfigurationDir) == hc, qPrintable("Error: Wrong HC id returned"));
+	QVERIFY2 (m_db->systemFileId(DbDir::HardwarePresetsDir) == hp, qPrintable("Error: Wrong HP id returned"));
 
 	std::vector<DbFileInfo> systemFiles;
 	QVector<int> fileIds;

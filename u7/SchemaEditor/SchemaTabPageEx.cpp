@@ -1159,7 +1159,7 @@ void SchemaListModelEx::refresh()
 
 void SchemaListModelEx::projectOpened(DbProject /*project*/)
 {
-	m_parentFile = db()->systemFileInfo(Db::File::SchemasFileName);
+	m_parentFile = db()->systemFileInfo(DbDir::SchemasDir);
 	Q_ASSERT(m_parentFile.fileId() != -1);
 
 	std::vector<DbFileInfo> systemFiles = db()->systemFiles();
@@ -2454,22 +2454,22 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPageEx::createSchema(const DbF
 	DbFileInfo lookForSystemParent = parentFile;
 	do
 	{
-		if (lookForSystemParent.fileId() == db()->alFileId())
+		if (lookForSystemParent.fileId() == db()->systemFileId(DbDir::AppLogicDir))
 		{
 			return createAppLogicSchema();
 		}
 
-		if (lookForSystemParent.fileId() == db()->mvsFileId())
+		if (lookForSystemParent.fileId() == db()->systemFileId(DbDir::MonitorSchemasDir))
 		{
 			return createMonitorSchema();
 		}
 
-		if (lookForSystemParent.fileId() == db()->tvsFileId())
+		if (lookForSystemParent.fileId() == db()->systemFileId(DbDir::TuningSchemasDir))
 		{
 			return createTuningSchema();
 		}
 
-		if (lookForSystemParent.fileId() == db()->ufblFileId())
+		if (lookForSystemParent.fileId() == db()->systemFileId(DbDir::UfblDir))
 		{
 			return createUfbSchema();
 		}
@@ -2567,7 +2567,7 @@ void SchemaControlTabPageEx::detachOrAttachWindow(EditSchemaTabPageEx* editTabPa
 
 void SchemaControlTabPageEx::projectOpened()
 {
-	m_lastSelectedNewSchemaForLmFileId = db()->alFileId();
+	m_lastSelectedNewSchemaForLmFileId = db()->systemFileId(DbDir::AppLogicDir);
 	setEnabled(true);
 }
 
@@ -2951,7 +2951,7 @@ void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 
 void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile)
 {
-	int parentFileId = showSelectFolderDialog(dbc()->alFileId(), m_lastSelectedNewSchemaForLmFileId, true);
+	int parentFileId = showSelectFolderDialog(dbc()->systemFileId(DbDir::AppLogicDir), m_lastSelectedNewSchemaForLmFileId, true);
 	if (parentFileId == -1)
 	{
 		return;
@@ -2972,7 +2972,10 @@ void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lm
 	std::shared_ptr<VFrame30::Schema> schema = createSchema(parentFile);
 	if (schema->isLogicSchema() == false)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Can add Logic Schema only to '%1' or it's descendands.").arg(Db::File::AlFileName));
+		QMessageBox::critical(this,
+							  qAppName(),
+							  tr("Can add Logic Schema only to '%1' or it's descendands.")
+								.arg(Db::File::systemDirToName(DbDir::AppLogicDir)));
 		return;
 	}
 
@@ -3227,7 +3230,7 @@ void SchemaControlTabPageEx::addSchemaFileToDb(std::shared_ptr<VFrame30::Schema>
 		parentFileId = static_cast<int>(parentIndex.internalId());
 	}
 
-	if (bool ok = db()->addUniqueFile(file, parentFileId, db()->schemaFileId(), this);
+	if (bool ok = db()->addUniqueFile(file, parentFileId, db()->systemFileId(DbDir::SchemasDir), this);
 		ok == false)
 	{
 		return;
@@ -3461,7 +3464,7 @@ void SchemaControlTabPageEx::cloneFile()
 
 	// Get folder for clonned schema
 	//
-	int parentFileId = showSelectFolderDialog(dbc()->schemaFileId(), fileToClone.parentId(), false);
+	int parentFileId = showSelectFolderDialog(dbc()->systemFileId(DbDir::SchemasDir), fileToClone.parentId(), false);
 	if (parentFileId == -1)
 	{
 		return;
@@ -3626,7 +3629,7 @@ void SchemaControlTabPageEx::moveFiles()
 
 	// Get destination folder
 	//
-	int moveToFileId = showSelectFolderDialog(dbc()->schemaFileId(), filesToMove.front().parentId(), false);
+	int moveToFileId = showSelectFolderDialog(dbc()->systemFileId(DbDir::SchemasDir), filesToMove.front().parentId(), false);
 	if (moveToFileId == -1)
 	{
 		return;

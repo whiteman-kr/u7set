@@ -43,7 +43,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	{
 		idLabel = "AppSchemaID";
 
-		tempateParentFileId = db->alFileId();
+		tempateParentFileId = db->systemFileId(DbDir::AppLogicDir);
 		templateFileExtension = Db::File::AlTemplExtension;
 
 		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
@@ -60,7 +60,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	{
 		idLabel = "UserFunctionalBlock ID";
 
-		tempateParentFileId = db->ufblFileId();
+		tempateParentFileId = db->systemFileId(DbDir::UfblDir);
 		templateFileExtension = Db::File::UfbTemplExtension;
 
 		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
@@ -77,7 +77,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	{
 		idLabel = "MonitorSchemaID";
 
-		tempateParentFileId = db->mvsFileId();
+		tempateParentFileId = db->systemFileId(DbDir::MonitorSchemasDir);
 		templateFileExtension = Db::File::MvsTemplExtension;
 
 		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
@@ -96,7 +96,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	{
 		idLabel = "TuningSchemaID";
 
-		tempateParentFileId = db->tvsFileId();
+		tempateParentFileId = db->systemFileId(DbDir::TuningSchemasDir);
 		templateFileExtension = Db::File::TvsTemplExtension;
 
 		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
@@ -183,7 +183,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 		std::vector<DbFileInfo> files;
 		QStringList fileNameList;
-		bool ok = db->getFileList(&files, db->afblFileId(), "%.xml", true, this);
+		bool ok = db->getFileList(&files, DbDir::AfblDir, "%.xml", true, this);
 
 		if (ok == true)
 		{

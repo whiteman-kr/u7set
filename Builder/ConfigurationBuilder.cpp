@@ -402,7 +402,7 @@ namespace Builder
 		//
 		std::vector<DbFileInfo> fileList;
 
-		ok = db()->getFileList(&fileList, db()->mcFileId(), lmDescription->configurationStringFile(), true, nullptr);
+		ok = db()->getFileList(&fileList, DbDir::ModuleConfigurationDir, lmDescription->configurationStringFile(), true, nullptr);
 
 		if (ok == false || fileList.size() != 1)
 		{

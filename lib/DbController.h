@@ -2,11 +2,11 @@
 
 #include <QVector>
 #include <QThread>
-
 #include "../lib/DbStruct.h"
 #include "../lib/DbWorker.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/DbProgress.h"
+
 
 class DbController : public QObject
 {
@@ -71,10 +71,15 @@ public:
 	bool isFileExists(QString fileName, int parentId, int* fileId, QWidget* parentWidget);
 
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, bool removeDeleted, QWidget* parentWidget);
+	bool getFileList(std::vector<DbFileInfo>* files, DbDir systemDir, bool removeDeleted, QWidget* parentWidget);
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget);
+	bool getFileList(std::vector<DbFileInfo>* files, DbDir systemDir, QString filter, bool removeDeleted, QWidget* parentWidget);
 
 	bool getFileListTree(DbFileTree* filesTree, int parentId, bool removeDeleted, QWidget* parentWidget);
+	bool getFileListTree(DbFileTree* filesTree, DbDir parentSystemDir, bool removeDeleted, QWidget* parentWidget);
+
 	bool getFileListTree(DbFileTree* filesTree, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget);
+	bool getFileListTree(DbFileTree* filesTree, DbDir parentSystemDir, QString filter, bool removeDeleted, QWidget* parentWidget);
 
 	bool getFileInfo(int parentId, QString fileName, DbFileInfo* out, QWidget* parentWidget);
 	bool getFileInfo(int fileId, DbFileInfo* out, QWidget* parentWidget);
@@ -86,6 +91,8 @@ public:
 	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId, QWidget* parentWidget);
 	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, QWidget* parentWidget);
 	bool addFile(const std::shared_ptr<DbFile>& file, int parentId, QWidget* parentWidget);
+	bool addFile(const std::shared_ptr<DbFile>& file, DbDir systemDir, QWidget* parentWidget);
+
 	bool addUniqueFile(const std::shared_ptr<DbFile>& file, int parentId, int uniqueFromFileId, QWidget* parentWidget);
 
 	bool deleteFiles(std::vector<std::shared_ptr<DbFileInfo> >* files, QWidget* parentWidget);
@@ -346,21 +353,9 @@ public:
 	void setCurrentProject(const DbProject& project);
 
 	int rootFileId() const;			// Root file
-	int schemaFileId() const;		// $root$/Schemas file id
-	int afblFileId() const;			// Application Functional Block Library
-	int ufblFileId() const;			// User Functional Block Library
-	int alFileId() const;			// Application Logic
-	int hcFileId() const;			// Hardware Configuration
-	int hpFileId() const;			// Hadware Presets
-	int mcFileId() const;			// Module Configuration
-	int mvsFileId() const;			// Monitor Video Schemas
-	int tvsFileId() const;			// Tuning Video Schemas
-	int dvsFileId() const;			// Diaginostics Video Schemas
-	int connectionsFileId() const;	// Connections
-	int busTypesFileId() const;		// BusTypes
-	int etcFileId() const;			//
-	int testsFileId() const;		// Folder for tests ($root$/Tests)
-	int simTestsFileId() const;		// Folder for sim tests ($root$/Tests/SimTests)
+
+	int systemFileId(DbDir dir) const;				// Get project fileId for dir
+	DbFileInfo systemFileInfo(DbDir dir) const;		// Get project fileId for dir
 
 	std::vector<DbFileInfo> systemFiles() const;
 
