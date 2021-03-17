@@ -310,7 +310,7 @@ void PanelSignalInfo::createInterface()
 
 	m_pSignalInfoWindow->installEventFilter(this);
 
-	m_signalParamTable.setColumnCaption(metaObject()->className(), SIGNAL_INFO_COLUMN_COUNT, SignalInfoColumn);
+	m_signalParamTable.setColumnCaption(PanelSignalInfo::metaObject()->className(), SIGNAL_INFO_COLUMN_COUNT, SignalInfoColumn);
 	m_signalParamTable.setSignalInfo(m_signalInfo);
 	connect(&theSignalBase, &SignalBase::signalParamChanged, &m_signalParamTable, &SignalInfoTable::signalParamChanged, Qt::QueuedConnection);
 

@@ -18,7 +18,7 @@ namespace Measure
 
 	Item::Item(Measure::Type measureType)
 	{
-		clear();
+		Item::clear();
 
 		m_measureType = measureType;
 	}
@@ -167,7 +167,7 @@ namespace Measure
 			}
 		}
 
-		return QString("%1 %2").arg(QString::number(m_nominal[limitType], 'f', precision)).arg(m_unit[limitType]);
+		return QString("%1 %2").arg(QString::number(m_nominal[limitType], 'f', precision), m_unit[limitType]);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -226,7 +226,7 @@ namespace Measure
 			}
 		}
 
-		return QString("%1 %2").arg(QString::number(m_measure[limitType], 'f', precision)).arg(m_unit[limitType]);
+		return QString("%1 %2").arg(QString::number(m_measure[limitType], 'f', precision), m_unit[limitType]);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -472,7 +472,7 @@ namespace Measure
 		QString low = QString::number(m_lowLimit[limitType], 'f', m_limitPrecision[limitType]);
 		QString high = QString::number(m_highLimit[limitType], 'f', m_limitPrecision[limitType]);
 
-		return QString("%1 .. %2 %3").arg(low).arg(high).arg(m_unit[limitType]);
+		return QString("%1 .. %2 %3").arg(low, high, m_unit[limitType]);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -902,14 +902,14 @@ namespace Measure
 
 	LinearityItem::LinearityItem() : Item(Measure::Type::Linearity)
 	{
-		clear();
+		LinearityItem::clear();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	LinearityItem::LinearityItem(const IoSignalParam &ioParam) : Item(Measure::Type::Linearity)
 	{
-		clear();
+		LinearityItem::clear();
 
 		if (ioParam.calibratorManager() == nullptr)
 		{
@@ -1993,14 +1993,14 @@ namespace Measure
 
 	ComparatorItem::ComparatorItem() : Item(Measure::Type::Comparators)
 	{
-		clear();
+		ComparatorItem::clear();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	ComparatorItem::ComparatorItem(const IoSignalParam& ioParam) : Item(Measure::Type::Comparators)
 	{
-		clear();
+		ComparatorItem::clear();
 
 		if (ioParam.calibratorManager() == nullptr)
 		{
@@ -3143,7 +3143,7 @@ namespace Measure
 
 		QMutexLocker l(&pThis->m_measureMutex);
 
-		for (Item* pMeasurement : pThis->m_measureList)
+		for (auto pMeasurement : pThis->m_measureList)
 		{
 			if (pMeasurement == nullptr)
 			{

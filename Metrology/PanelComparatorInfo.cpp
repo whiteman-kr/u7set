@@ -176,7 +176,7 @@ void PanelComparatorInfo::createInterface()
 		m_ptrComparatorInfoColumn[column] = m_comparatorInfoColumn[column];
 	}
 
-	m_comparatorTable.setColumnCaption(metaObject()->className(), Metrology::ComparatorCount, m_ptrComparatorInfoColumn);
+	m_comparatorTable.setColumnCaption(PanelComparatorInfo::metaObject()->className(), Metrology::ComparatorCount, m_ptrComparatorInfoColumn);
 	m_comparatorTable.setComparatorInfo(m_comparatorInfo);
 	connect(&theSignalBase, &SignalBase::signalParamChanged, &m_comparatorTable, &ComparatorInfoTable::signalParamChanged, Qt::QueuedConnection);
 

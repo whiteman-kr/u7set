@@ -183,7 +183,7 @@ void PanelFindMeasure::createInterface()
 	m_pFindWindow->addToolBarBreak(Qt::TopToolBarArea);
 	m_pFindWindow->addToolBar(toolBar);
 
-	m_table.setColumnCaption(metaObject()->className(), FIND_MEASURE_COLUMN_COUNT, FindMeasureColumn);
+	m_table.setColumnCaption(PanelFindMeasure::metaObject()->className(), FIND_MEASURE_COLUMN_COUNT, FindMeasureColumn);
 
 	m_pView = new QTableView(m_pFindWindow);
 	m_pView->setModel(&m_table);

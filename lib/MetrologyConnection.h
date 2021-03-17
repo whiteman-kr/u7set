@@ -154,7 +154,7 @@ namespace Metrology
 	public:
 
 		ConnectionBase(QObject* parent = nullptr);
-		virtual ~ConnectionBase() {}
+		virtual ~ConnectionBase() override {}
 
 	public:
 

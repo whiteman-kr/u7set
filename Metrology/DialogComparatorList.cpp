@@ -266,7 +266,7 @@ void DialogComparatorList::createInterface()
 
 	//
 	//
-	m_comparatorTable.setColumnCaption(metaObject()->className(), COMPARATOR_LIST_COLUMN_COUNT, ComparatorListColumn);
+	m_comparatorTable.setColumnCaption(DialogComparatorList::metaObject()->className(), COMPARATOR_LIST_COLUMN_COUNT, ComparatorListColumn);
 	setModel(&m_comparatorTable);
 
 	//

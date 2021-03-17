@@ -160,7 +160,7 @@ void DialogRackList::createInterface()
 
 	//
 	//
-	m_rackTable.setColumnCaption(metaObject()->className(), RACK_LIST_COLUMN_COUNT, RackListColumn);
+	m_rackTable.setColumnCaption(DialogRackList::metaObject()->className(), RACK_LIST_COLUMN_COUNT, RackListColumn);
 	setModel(&m_rackTable);
 
 	//

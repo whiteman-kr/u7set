@@ -26,7 +26,7 @@ public:
 
 public:
 
-	void setColumnCaption(QString className, int columnCount, const char* const* pColumnCaption);
+	void setColumnCaption(const QString& className, int columnCount, const char* const* pColumnCaption);
 
 	void clear();
 	void set(const QVector<TYPE>& list_add);
@@ -77,7 +77,7 @@ ListTable<TYPE>::~ListTable()
 // ----------------------------------------------------------------------------------------------
 
 template <typename TYPE>
-void ListTable<TYPE>::setColumnCaption(QString className, int columnCount, const char* const* pColumnCaption)
+void ListTable<TYPE>::setColumnCaption(const QString& className, int columnCount, const char* const* pColumnCaption)
 {
 	if(pColumnCaption == nullptr)
 	{

@@ -182,7 +182,7 @@ void DialogTuningSourceList::createInterface()
 
 	//
 	//
-	m_sourceTable.setColumnCaption(metaObject()->className(), TUN_SOURCE_LIST_COLUMN_COUNT, TuningSourceColumn);
+	m_sourceTable.setColumnCaption(DialogTuningSourceList::metaObject()->className(), TUN_SOURCE_LIST_COLUMN_COUNT, TuningSourceColumn);
 	setModel(&m_sourceTable);
 
 	//

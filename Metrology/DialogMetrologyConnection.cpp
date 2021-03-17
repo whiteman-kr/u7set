@@ -639,7 +639,7 @@ void DialogMetrologyConnection::createInterface()
 
 	//
 	//
-	m_connectionTable.setColumnCaption(metaObject()->className(), METROLOGY_CONNECTION_COLUMN_COUNT, MetrologyConnectionColumn);
+	m_connectionTable.setColumnCaption(DialogMetrologyConnection::metaObject()->className(), METROLOGY_CONNECTION_COLUMN_COUNT, MetrologyConnectionColumn);
 	setModel(&m_connectionTable);
 
 	//

@@ -254,7 +254,7 @@ void DialogTuningSignalList::createInterface()
 
 	//
 	//
-	m_signalTable.setColumnCaption(metaObject()->className(), TUN_SIGNAL_LIST_COLUMN_COUNT, TuningSignalColumn);
+	m_signalTable.setColumnCaption(DialogTuningSignalList::metaObject()->className(), TUN_SIGNAL_LIST_COLUMN_COUNT, TuningSignalColumn);
 	setModel(&m_signalTable);
 
 	//

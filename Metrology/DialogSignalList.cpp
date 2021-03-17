@@ -269,7 +269,7 @@ void DialogSignalList::createInterface()
 
 	//
 	//
-	m_signalTable.setColumnCaption(metaObject()->className(), SIGNAL_LIST_COLUMN_COUNT, SignalListColumn);
+	m_signalTable.setColumnCaption(DialogSignalList::metaObject()->className(), SIGNAL_LIST_COLUMN_COUNT, SignalListColumn);
 	setModel(&m_signalTable);
 
 	//

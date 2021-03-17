@@ -445,6 +445,17 @@ void MeasureThread::polarityTest(double electricVal, IoSignalParam& ioParam)
 					   "You have used the positive (+) part of the electrical range.").
 					arg(ioParam.calibratorManager()->calibratorChannel() + 1));
 	}
+
+	// Since only one calibrator is used for Measure::Kind::OneModule, then changes need to be made in all channels
+	//
+	if (m_measureKind == Measure::Kind::OneModule)
+	{
+		int channelCount = m_activeIoParamList.count();
+		for(int ch = 0; ch < channelCount; ch ++)
+		{
+			m_activeIoParamList[ch].setNegativeRange(ioParam.isNegativeRange());
+		}
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
