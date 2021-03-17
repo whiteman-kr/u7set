@@ -779,7 +779,7 @@ namespace Hardware
     //
 
 	ConnectionStorage::ConnectionStorage(DbController* db)
-		 :DbObjectStorage(db, db->connectionsFileId())
+		 : DbObjectStorage(db, db->systemFileId(DbDir::ConnectionsDir))
     {
     }
 
@@ -926,7 +926,6 @@ namespace Hardware
 
 		// save to db
 		//
-
 		DbFileInfo fi = fileInfo(connection->uuid());
 
 		if (fi.isNull() == true)
@@ -942,7 +941,7 @@ namespace Hardware
 			file->setFileName(fileName);
 			file->swapData(data);
 
-			if (m_db->addFile(file, m_db->connectionsFileId(), nullptr) == false)
+			if (m_db->addFile(file, DbDir::ConnectionsDir, nullptr) == false)
 			{
 				*errorMessage = m_db->lastError();
 				return false;
@@ -996,7 +995,8 @@ namespace Hardware
         // Load the file from the database
         //
 		std::vector<DbFileInfo> fileList;
-		bool ok = m_db->getFileList(&fileList, m_db->connectionsFileId(), Db::File::OclFileExtension, true, nullptr);
+
+		bool ok = m_db->getFileList(&fileList, DbDir::ConnectionsDir, Db::File::OclFileExtension, true, nullptr);
         if (ok == false)
         {
 			*errorMessage = m_db->lastError();
@@ -1042,9 +1042,9 @@ namespace Hardware
 
         // Load the file from the database
         //
-
         std::vector<DbFileInfo> fileList;
-		bool ok = m_db->getFileList(&fileList, m_db->mcFileId(), "Connections.xml", true, nullptr);
+
+		bool ok = m_db->getFileList(&fileList, DbDir::ModuleConfigurationDir, "Connections.xml", true, nullptr);
         if (ok == false || fileList.size() != 1)
         {
 			*errorMessage = m_db->lastError();
@@ -1117,7 +1117,8 @@ namespace Hardware
         // Load the file from the database
         //
         std::vector<DbFileInfo> fileList;
-		bool ok = m_db->getFileList(&fileList, m_db->mcFileId(), "Connections.xml", true, nullptr);
+
+		bool ok = m_db->getFileList(&fileList, DbDir::ModuleConfigurationDir, "Connections.xml", true, nullptr);
         if (ok == false || fileList.size() != 1)
         {
 			*errorMessage = m_db->lastError();

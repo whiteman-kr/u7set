@@ -5,7 +5,7 @@
 //
 
 BusStorage::BusStorage(DbController* db)
-	: DbObjectStorage(db, db->busTypesFileId())
+	: DbObjectStorage(db, db->systemFileId(DbDir::BusTypesDir))
 {
 
 }
@@ -24,7 +24,7 @@ bool BusStorage::load(QString* errorMessage)
 	//
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = m_db->getFileList(&fileList, m_db->busTypesFileId(), Db::File::BusFileExtension, true, nullptr);
+	bool ok = m_db->getFileList(&fileList, DbDir::BusTypesDir, Db::File::BusFileExtension, true, nullptr);
 	if (ok == false)
 	{
 		*errorMessage = m_db->lastError();
@@ -162,7 +162,7 @@ bool BusStorage::save(const QUuid& uuid, QString* errorMessage)
 		file->setFileName(fileName);
 		file->swapData(data);
 
-		ok = m_db->addFile(file, m_db->busTypesFileId(), nullptr);
+		ok = m_db->addFile(file, DbDir::BusTypesDir, nullptr);
 
 		if (ok == false)
 		{

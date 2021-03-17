@@ -26,7 +26,11 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 	//
 	// Controls
 	//
-	m_fileModel = new FileTreeModel(dbcontroller, DbFileInfo::fullPathToFileName(Db::File::RootFileName), this, this);
+	m_fileModel = new FileTreeModel(dbcontroller,
+									Db::File::systemDirToName(DbDir::RootDir),
+									this,
+									this);
+
 #ifdef _DEBUG
 	[[maybe_unused]]QAbstractItemModelTester* modelTester = new QAbstractItemModelTester(m_fileModel,
 																		 QAbstractItemModelTester::FailureReportingMode::Fatal,

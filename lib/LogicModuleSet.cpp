@@ -30,14 +30,15 @@ bool LogicModuleSet::loadFile(DbController* db, QString fileName, QString* error
 	}
 
 	std::vector<DbFileInfo> fileList;
+	int afblFileId = db->systemFileId(DbDir::AfblDir);
 
-	bool result = db->getFileList(&fileList, db->afblFileId(), fileName, true, nullptr);
+	bool result = db->getFileList(&fileList, afblFileId, fileName, true, nullptr);
 	if (result == false)
 	{
 		if (errorString != nullptr)
 		{
 			*errorString = tr("Error of getting file list from the database, parent file ID %1, filter '%2', database message '%3'.")
-							  .arg(db->afblFileId())
+							  .arg(afblFileId)
 							  .arg(fileName)
 							  .arg(db->lastError());
 		}

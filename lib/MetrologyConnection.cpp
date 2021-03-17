@@ -430,9 +430,10 @@ namespace Metrology
 		bool result = false;
 
 		std::shared_ptr<DbFile> file;
-
 		std::vector<DbFileInfo> fileList;
-		result = db->getFileList(&fileList, db->etcFileId(), CONNECTIONS_FILE_NAME, true, nullptr);
+		int etcFileId = db->systemFileId(DbDir::EtcDir);
+
+		result = db->getFileList(&fileList, etcFileId, CONNECTIONS_FILE_NAME, true, nullptr);
 		if (result == false || fileList.size() != 1)
 		{
 			// if it does not exists, then create a file
@@ -440,13 +441,13 @@ namespace Metrology
 			std::shared_ptr<DbFile> newFile = std::make_shared<DbFile>();
 			newFile->setFileName(CONNECTIONS_FILE_NAME);
 
-			result = db->addFile(newFile, db->etcFileId(), nullptr);
+			result = db->addFile(newFile, etcFileId, nullptr);
 			if (result == false)
 			{
 				return nullptr;
 			}
 
-			result = db->getFileList(&fileList, db->etcFileId(), CONNECTIONS_FILE_NAME, true, nullptr);
+			result = db->getFileList(&fileList, etcFileId, CONNECTIONS_FILE_NAME, true, nullptr);
 			if (result == false || fileList.size() != 1)
 			{
 				return nullptr;

@@ -13,6 +13,27 @@
 
 class Signal;
 
+enum class DbDir
+{
+	RootDir,					// $root$
+	AfblDir,					// $root$/AFBL
+	SchemasDir,					// $root$/Schemas
+	UfblDir,					// $root$/Schemas/UFBL
+	AppLogicDir,				// $root$/Schemas/ApplicationLogic
+	MonitorSchemasDir,			// $root$/Schemas/Monitor
+	TuningSchemasDir,			// $root$/Schemas/Tuning
+	DiagnosticsSchemasDir,		// $root$/Schemas/Diagnostics
+	HardwareConfigurationDir,	// $root$/HC
+	HardwarePresetsDir,			// $root$/HP
+	ModuleConfigurationDir,		// $root$/MC
+	ConnectionsDir,				// $root$/CONNECTIONS
+	BusTypesDir,				// $root$/BUSTYPES
+	EtcDir,						// $root$/ETC
+	TestsDir,					// $root$/Tests
+	SimTestsDir,				// $root$/Tests/SimTests
+	DiagSignalTypesDir			// $root$/DiagSignalTypes
+};
+
 namespace Db
 {
 	class ProjectProperty
@@ -36,25 +57,29 @@ namespace Db
 	public:
 		File() = delete;
 
-		constexpr static const char* RootFileName = "$root$";						// root file name
-		constexpr static const char* AfblFileName = "$root$/AFBL";					// Application Functional Block Library
+		inline static const std::map<DbDir, QString> s_dirToName =
+			{
+		        {DbDir::RootDir, QStringLiteral("$root$")},										// Root
+				{DbDir::AfblDir, QStringLiteral("$root$/AFBL")},								// Application Functional Block Library
 
-		constexpr static const char* SchemasFileName = "$root$/Schemas";			// Schemas root fie
-		constexpr static const char* UfblFileName = "$root$/Schemas/UFBL";			// User Functional Block Library
-		constexpr static const char* AlFileName = "$root$/Schemas/ApplicationLogic";// Application Logic Schemas
-		constexpr static const char* MvsFileName = "$root$/Schemas/Monitor";		// Monitor Video Schemas
-		constexpr static const char* TvsFileName = "$root$/Schemas/Tuning";			// TuningClient Video Schemas;			// Tuning Video Schemas
-		constexpr static const char* DvsFileName = "$root$/Diagnostics";			// Diagnostics Video Schemas -> will be moved to $root$/Schemas,  see update 235
+				{DbDir::SchemasDir, QStringLiteral("$root$/Schemas")},							// Schemas root fie
+				{DbDir::UfblDir, QStringLiteral("$root$/Schemas/UFBL")},						// User Functional Block Library
+				{DbDir::AppLogicDir, QStringLiteral("$root$/Schemas/ApplicationLogic")},		// Application Logic Schemas
+				{DbDir::MonitorSchemasDir, QStringLiteral("$root$/Schemas/Monitor")},			// Monitor Video Schemas
+				{DbDir::TuningSchemasDir, QStringLiteral("$root$/Schemas/Tuning")},				// TuningClient Schemas
+				{DbDir::DiagnosticsSchemasDir, QStringLiteral("$root$/Schemas/Diagnostics")},	// Diagnostics Schemas
+				{DbDir::HardwareConfigurationDir, QStringLiteral("$root$/HC")},					// Hardware Configuratiun
+				{DbDir::HardwarePresetsDir, QStringLiteral("$root$/HP")},						// Hardware Presets
+				{DbDir::ModuleConfigurationDir, QStringLiteral("$root$/MC")},					// Module Configuration
+				{DbDir::ConnectionsDir, QStringLiteral("$root$/CONNECTIONS")},					// Connections
+				{DbDir::BusTypesDir, QStringLiteral("$root$/BUSTYPES")},						// Bus Types
+				{DbDir::EtcDir, QStringLiteral("$root$/ETC")},									// ETC
+				{DbDir::TestsDir, QStringLiteral("$root$/Tests")},								// Tests
+				{DbDir::SimTestsDir, QStringLiteral("$root$/Tests/SimTests")},					// Simulator based tests
+				{DbDir::DiagSignalTypesDir, QStringLiteral("$root$/DiagSignalTypes")},			// Signal types for diagnostcics signals
+			};
 
-		constexpr static const char* HcFileName = "$root$/HC";						// Hardware Configuratiun
-		constexpr static const char* HpFileName = "$root$/HP";						// Hardware Presets
-		constexpr static const char* McFileName = "$root$/MC";						// Module Configuration
-		constexpr static const char* ConnectionsFileName = "$root$/CONNECTIONS";	// Connections
-		constexpr static const char* BusTypesFileName = "$root$/BUSTYPES";			// BustTypes
-		constexpr static const char* EtcFileName = "$root$/ETC";					// Etc file name
-
-		constexpr static const char* TestsFileName = "$root$/Tests";				// Tests folder
-		constexpr static const char* SimTestsFileName = "$root$/Tests/SimTests";	// SimTests folder
+		static QString systemDirToName(DbDir systemDir);
 
 		constexpr static const char* SignalPropertyBehaviorFileName = "SignalPropertyBehavior.csv";
 		constexpr static const char* TagsFileName = "Tags.csv";

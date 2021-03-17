@@ -132,7 +132,7 @@ DialogAfbLibraryCheck::DialogAfbLibraryCheck(DbController* db, QWidget* parent)
 	// Fill XML ComboBox
 
 	std::vector<DbFileInfo> files;
-	bool ok = db->getFileList(&files, db->afblFileId(), "%.xml", true, this);
+	bool ok = db->getFileList(&files, DbDir::AfblDir, "%.xml", true, this);
 
 	if (ok == true)
 	{
@@ -167,7 +167,7 @@ void DialogAfbLibraryCheck::libraryFileChanged(const QString& fileName)
 		return;
 	}
 
-	bool result = m_db->getFileList(&fileList, m_db->afblFileId(), LmDescriptionFile, true, this);
+	bool result = m_db->getFileList(&fileList, DbDir::AfblDir, LmDescriptionFile, true, this);
 	if (result == false)
 	{
 		return;

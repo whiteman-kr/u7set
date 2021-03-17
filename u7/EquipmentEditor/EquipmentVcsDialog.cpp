@@ -58,7 +58,7 @@ void EquipmentVcsDialog::on_m_refresh_clicked()
 {
 	ui->m_treeWidget->clear();
 
-	if (m_db->isProjectOpened() == false || m_db->hcFileId() == -1)
+	if (m_db->isProjectOpened() == false)
 	{
 		return;
 	}

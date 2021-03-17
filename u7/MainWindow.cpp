@@ -716,7 +716,7 @@ void MainWindow::updateUfbsAfbsBusses()
 	QStringList checkedOutFiles;
 
 	DbFileTree filesTree;
-	db()->getFileListTree(&filesTree, db()->ufblFileId(), "%", true, this);
+	db()->getFileListTree(&filesTree, DbDir::UfblDir, "%", true, this);
 
 	std::vector<DbFileInfo>	ufbSchemaFileInfos = filesTree.toVectorIf(
 		[](const DbFileInfo& file)
@@ -736,7 +736,7 @@ void MainWindow::updateUfbsAfbsBusses()
 	// Get ApplicationLogic schema list
 	//
 	filesTree.clear();
-	db()->getFileListTree(&filesTree, db()->alFileId(), "%", true, this);
+	db()->getFileListTree(&filesTree, DbDir::AppLogicDir, "%", true, this);
 
 	std::vector<DbFileInfo>	alSchemaFileInfos = filesTree.toVectorIf(
 		[](const DbFileInfo& file)

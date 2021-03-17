@@ -390,11 +390,11 @@ std::vector<ReportFileTypeParams> SchemasReportGenerator::defaultFileTypeParams(
 		return result;
 	}
 
-	result.push_back({db->mvsFileId(),		QObject::tr("Monitor Schemas"),			true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->tvsFileId(),		QObject::tr("Tuning Schemas"),			true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->dvsFileId(),		QObject::tr("Diagnostics Schemas"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->alFileId(),		QObject::tr("Application Logic"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->ufblFileId(),		QObject::tr("UFBL Descriptions"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->systemFileId(DbDir::MonitorSchemasDir), QObject::tr("Monitor Schemas"),			true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->systemFileId(DbDir::TuningSchemasDir), QObject::tr("Tuning Schemas"),			true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir), QObject::tr("Diagnostics Schemas"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->systemFileId(DbDir::AppLogicDir), QObject::tr("Application Logic"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->systemFileId(DbDir::UfblDir), QObject::tr("UFBL Descriptions"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
 
 	return result;
 }
@@ -581,11 +581,11 @@ void SchemasReportGenerator::exportAllSchemasToAlbum()
 	{
 		openProject();
 
-		schemaFilesInfo.push_back({db()->alFileId(), tr("ApplicationLogic")});
-		schemaFilesInfo.push_back({db()->mvsFileId(), tr("MonitorSchemas")});
-		schemaFilesInfo.push_back({db()->tvsFileId(), tr("TunungSchemas")});
-		schemaFilesInfo.push_back({db()->dvsFileId(), tr("DiagnosticsSchemas")});
-		schemaFilesInfo.push_back({db()->ufblFileId(), tr("UFBSchemas")});
+		schemaFilesInfo.push_back({db()->systemFileId(DbDir::AppLogicDir), tr("ApplicationLogic")});
+		schemaFilesInfo.push_back({db()->systemFileId(DbDir::MonitorSchemasDir), tr("MonitorSchemas")});
+		schemaFilesInfo.push_back({db()->systemFileId(DbDir::TuningSchemasDir), tr("TunungSchemas")});
+		schemaFilesInfo.push_back({db()->systemFileId(DbDir::DiagnosticsSchemasDir), tr("DiagnosticsSchemas")});
+		schemaFilesInfo.push_back({db()->systemFileId(DbDir::UfblDir), tr("UFBSchemas")});
 
 		for (SchemaFilesInfo& sfi : schemaFilesInfo)
 		{
@@ -604,7 +604,7 @@ void SchemasReportGenerator::exportAllSchemasToAlbum()
 			bool ok = db()->getFileListTree(&fileTree, sfi.fileId, true/*removeDeleted*/, nullptr);
 			if (ok == false)
 			{
-				throw(tr("DbController::getFileListTree failed on fileId = %1").arg(db()->schemaFileId()));
+				throw(tr("DbController::getFileListTree failed on fileId = %1").arg(db()->systemFileId(DbDir::SchemasDir)));
 			}
 
 			const std::map<int, std::shared_ptr<DbFileInfo>>  files = fileTree.files();

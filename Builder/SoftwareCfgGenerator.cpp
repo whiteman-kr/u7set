@@ -168,11 +168,12 @@ namespace Builder
 		// --
 		//
 		DbFileTree filesTree;									// Filed in loadAllSchemas
+		int schemaFileId = db.systemFileId(DbDir::SchemasDir);
 
-		if (bool ok = db.getFileListTree(&filesTree, db.schemaFileId(), "%", true, nullptr);
+		if (bool ok = db.getFileListTree(&filesTree, schemaFileId, "%", true, nullptr);
 			ok == false)
 		{
-			log->errPDB2001(db.schemaFileId(), "%", db.lastError());
+			log->errPDB2001(schemaFileId, "%", db.lastError());
 			return false;
 		}
 

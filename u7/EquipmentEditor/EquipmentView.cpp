@@ -660,7 +660,7 @@ void EquipmentView::choosePreset(Hardware::DeviceType type)
 
 	bool ok = db()->getFileList(
 				&fileList,
-				db()->hpFileId(),
+				db()->systemFileId(DbDir::HardwarePresetsDir),
 				Hardware::DeviceObject::fileExtension(type),
 				true,
 				this);
@@ -721,7 +721,7 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentView::addPresetToConfiguration(
 {
 	assert(fileInfo.fileId() != -1);
 	assert(fileInfo.parentId() != -1);
-	assert(fileInfo.parentId() == db()->hpFileId());
+	assert(fileInfo.parentId() == db()->systemFileId(DbDir::HardwarePresetsDir));
 
 	// Read all preset tree and add it to the hardware configuration
 	//
@@ -1967,7 +1967,7 @@ void EquipmentView::updateFromPreset()
 
 	// Check if some files are checked out
 	//
-	DbFileInfo hcFileInfo = db()->systemFileInfo(db()->hcFileId());
+	DbFileInfo hcFileInfo = db()->systemFileInfo(db()->systemFileId(DbDir::HardwareConfigurationDir));
 	assert(hcFileInfo.isNull() == false);
 
 //	std::vector<DbFileInfo> checkedOutHcFiles;
@@ -1987,7 +1987,7 @@ void EquipmentView::updateFromPreset()
 
 	// Get all presets
 	//
-	DbFileInfo hpFileInfo = db()->systemFileInfo(db()->hpFileId());		//	hp -- stands for Hardware Presets
+	DbFileInfo hpFileInfo = db()->systemFileInfo(DbDir::HardwarePresetsDir); 	//	hp -- stands for Hardware Presets
 	assert(hpFileInfo.isNull() == false);
 
 	std::shared_ptr<Hardware::DeviceObject> presetRoot;

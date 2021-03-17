@@ -359,27 +359,27 @@ std::vector<ReportFileTypeParams> ProjectDiffGenerator::defaultFileTypeParams(Db
 		return result;
 	}
 
-	result.push_back({db->hcFileId(),				QObject::tr("Hardware Configuration"),	true});
+	result.push_back({db->systemFileId(DbDir::HardwareConfigurationDir), QObject::tr("Hardware Configuration"),	true});
 
-	result.push_back({applicationSignalsTypeId(),	QObject::tr("Application Signals"),		true});
+	result.push_back({applicationSignalsTypeId(), QObject::tr("Application Signals"), true});
 
 
 	//Schemas
-	result.push_back({db->mvsFileId(),				QObject::tr("Monitor Schemas"),			true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->tvsFileId(),				QObject::tr("Tuning Schemas"),			true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->dvsFileId(),				QObject::tr("Diagnostics Schemas"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->alFileId(),				QObject::tr("Application Logic"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->ufblFileId(),				QObject::tr("UFBL Descriptions"),		true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->systemFileId(DbDir::MonitorSchemasDir), QObject::tr("Monitor Schemas"), true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->systemFileId(DbDir::TuningSchemasDir), QObject::tr("Tuning Schemas"),	true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir), QObject::tr("Diagnostics Schemas"), true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->systemFileId(DbDir::AppLogicDir), QObject::tr("Application Logic"), true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
+	result.push_back({db->systemFileId(DbDir::UfblDir), QObject::tr("UFBL Descriptions"), true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
 
-	result.push_back({db->busTypesFileId(),			QObject::tr("Busses"),					true});
-	result.push_back({db->connectionsFileId(),		QObject::tr("Connections"),				true});
+	result.push_back({db->systemFileId(DbDir::BusTypesDir),	QObject::tr("Busses"), true});
+	result.push_back({db->systemFileId(DbDir::ConnectionsDir), QObject::tr("Connections"), true});
 
-	result.push_back({db->simTestsFileId(),			QObject::tr("Simulator Tests"),			true});
+	result.push_back({db->systemFileId(DbDir::SimTestsDir),	QObject::tr("Simulator Tests"), true});
 
-	result.push_back({db->afblFileId(),				QObject::tr("AFBL Descriptions"),		false});
-	result.push_back({db->hpFileId(),				QObject::tr("Hardware Presets"),		false});
-	result.push_back({db->mcFileId(),				QObject::tr("Module Configuration"),	false});
-	result.push_back({db->etcFileId(),				QObject::tr("Other Files"),				false});
+	result.push_back({db->systemFileId(DbDir::AfblDir),	QObject::tr("AFBL Descriptions"), false});
+	result.push_back({db->systemFileId(DbDir::HardwarePresetsDir), QObject::tr("Hardware Presets"),	false});
+	result.push_back({db->systemFileId(DbDir::ModuleConfigurationDir), QObject::tr("Module Configuration"), false});
+	result.push_back({db->systemFileId(DbDir::EtcDir), QObject::tr("Other Files"), false});
 
 	return result;
 
@@ -1032,7 +1032,7 @@ void ProjectDiffGenerator::compareFileContents(int rootFileId,
 	//
 	if (hardwareObject == true)
 	{
-		bool preset = rootFileId == db()->hpFileId();
+		bool preset = rootFileId == db()->systemFileId(DbDir::HardwarePresetsDir);
 
 		compareDeviceObjects(sourceFile, targetFile, sourceObject, targetObject, headerTable, sectionsArray, preset);
 		return;

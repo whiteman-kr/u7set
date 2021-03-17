@@ -109,7 +109,7 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	
 	//
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = m_db->getFileList(&fileList, m_db->etcFileId(), Db::File::SimProfilesFileName, true, this);
+	bool ok = m_db->getFileList(&fileList, DbDir::EtcDir, Db::File::SimProfilesFileName, true, this);
 
 	if (ok == true && fileList.size() == 1)
 	{
@@ -256,7 +256,7 @@ bool SimProfileEditor::saveChanges()
 	//
 	std::vector<DbFileInfo> fileList;
 
-	ok = m_db->getFileList(&fileList, m_db->etcFileId(), Db::File::SimProfilesFileName, true, this);
+	ok = m_db->getFileList(&fileList, DbDir::EtcDir, Db::File::SimProfilesFileName, true, this);
 	if (ok == false || fileList.size() != 1)
 	{
 		// create a file, if it does not exists
@@ -264,12 +264,12 @@ bool SimProfileEditor::saveChanges()
 		std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
 		pf->setFileName(Db::File::SimProfilesFileName);
 
-		if (m_db->addFile(pf, m_db->etcFileId(), this) == false)
+		if (m_db->addFile(pf, DbDir::EtcDir, this) == false)
 		{
 			return false;
 		}
 
-		ok = m_db->getFileList(&fileList, m_db->etcFileId(), Db::File::SimProfilesFileName, true, this);
+		ok = m_db->getFileList(&fileList, DbDir::EtcDir, Db::File::SimProfilesFileName, true, this);
 		if (ok == false || fileList.size() != 1)
 		{
 			return false;

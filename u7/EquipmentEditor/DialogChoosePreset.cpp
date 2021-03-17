@@ -31,11 +31,7 @@ DialogChoosePreset::DialogChoosePreset(QWidget* parent, DbController* db, Hardwa
 	//
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = m_db->getFileList(
-				&fileList,
-				m_db->hpFileId(),
-				true,
-				this);
+	bool ok = m_db->getFileList(&fileList, DbDir::HardwarePresetsDir, true, this);
 
 	if (ok == false || fileList.empty() == true)
 	{

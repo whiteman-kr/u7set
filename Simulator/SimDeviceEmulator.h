@@ -1,5 +1,4 @@
-#ifndef DEVICEEMULATOR_H
-#define DEVICEEMULATOR_H
+#pragma once
 
 #include <memory>
 #include <functional>
@@ -26,9 +25,9 @@
 
 #ifndef __FUNCTION_NAME__
 	#ifdef WIN32   //WINDOWS
-		#define __FUNCTION_NAME__   __FUNCTION__
+		#define __FUNCTION_NAME__ __FUNCTION__
 	#else          //*NIX
-		#define __FUNCTION_NAME__   __func__
+		#define __FUNCTION_NAME__ __FUNCTION__
 	#endif
 #endif
 
@@ -37,7 +36,7 @@ class SimCommandTest_LM5_LM6;
 // class DeviceEmulator has function DeviceEmulator::fault
 // this is convenient call of this func
 //
-#define SIM_FAULT(message) fault(message, QStringLiteral(__FUNCTION_NAME__));
+#define SIM_FAULT(message) fault(message, QLatin1String(__FUNCTION_NAME__));
 
 namespace Sim
 {
@@ -413,5 +412,3 @@ namespace Sim
 		std::unordered_map<int, size_t> m_cachedOffsetToCommand;	// key: command offset, value: index in m_commands
 	};
 }
-
-#endif // DEVICEEMULATOR_H

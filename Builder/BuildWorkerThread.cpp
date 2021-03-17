@@ -449,7 +449,7 @@ namespace Builder
 
 		std::shared_ptr<Hardware::DeviceRoot> deviceRoot = std::make_shared<Hardware::DeviceRoot>();
 
-		int rootFileId = m_context->m_db.hcFileId();
+		int rootFileId = m_context->m_db.systemFileId(DbDir::HardwareConfigurationDir);
 		deviceRoot->fileInfo().setFileId(rootFileId);
 
 		if (bool ok = getEquipment(deviceRoot.get());
@@ -1009,7 +1009,7 @@ namespace Builder
 		//
 		std::vector<DbFileInfo> fileList;
 
-		bool ok = m_context->m_db.getFileList(&fileList, m_context->m_db.busTypesFileId(), Db::File::BusFileExtension, true, nullptr);
+		bool ok = m_context->m_db.getFileList(&fileList, DbDir::BusTypesDir, Db::File::BusFileExtension, true, nullptr);
 		if (ok == false)
 		{
 			return false;
@@ -1183,10 +1183,10 @@ namespace Builder
 
 		DbFileTree fileTree;
 
-		if (bool ok = db->getFileListTree(&fileTree, db->schemaFileId(), true, nullptr);
+		if (bool ok = db->getFileListTree(&fileTree, DbDir::SchemasDir, true, nullptr);
 			ok == false)
 		{
-			m_context->m_log->errPDB2001(db->schemaFileId(), "", db->lastError());
+			m_context->m_log->errPDB2001(db->systemFileId(DbDir::SchemasDir), "", db->lastError());
 			return false;
 		}
 
@@ -1335,11 +1335,11 @@ namespace Builder
 		QByteArray fileContent;
 
 		std::vector<DbFileInfo> fileList;
-		bool ok = db.getFileList(&fileList, db.etcFileId(), Db::File::SimProfilesFileName, true, nullptr);
 
+		bool ok = db.getFileList(&fileList, DbDir::EtcDir, Db::File::SimProfilesFileName, true, nullptr);
 		if (ok == false)
 		{
-			log->errPDB2001(db.etcFileId(), Db::File::SimProfilesFileName, db.lastError());
+			log->errPDB2001(db.systemFileId(DbDir::EtcDir), Db::File::SimProfilesFileName, db.lastError());
 			return false;
 		}
 
@@ -2000,14 +2000,17 @@ namespace Builder
 		LOG_MESSAGE(m_context->m_log, tr(""));
 		LOG_MESSAGE(m_context->m_log, tr("Run simulator-based tests..."));
 
+		DbController& db = m_context->m_db;
+
 		// Get test scripts
 		//
 		DbFileTree scriptFilesTree;
+		int simTestsFileId = db.systemFileId(DbDir::SimTestsDir);
 
-		bool ok = m_context->m_db.getFileListTree(&scriptFilesTree, m_context->m_db.testsFileId(), true, nullptr);
+		bool ok = db.getFileListTree(&scriptFilesTree, simTestsFileId, true, nullptr);
 		if (ok == false)
 		{
-			m_context->m_log->errPDB2001(m_context->m_db.testsFileId(), "", m_context->m_db.lastError());
+			m_context->m_log->errPDB2001(simTestsFileId, "", db.lastError());
 			return false;
 		}
 
@@ -2035,10 +2038,10 @@ namespace Builder
 
 		std::vector<std::shared_ptr<DbFile>> files;
 
-		ok = m_context->m_db.getLatestVersion(fileInfos, &files, nullptr);
+		ok = db.getLatestVersion(fileInfos, &files, nullptr);
 		if (ok == false)
 		{
-			m_context->m_log->errPDB2001(m_context->m_db.testsFileId(), "", m_context->m_db.lastError());
+			m_context->m_log->errPDB2001(simTestsFileId, "", db.lastError());
 			return false;
 		}
 
@@ -2052,7 +2055,7 @@ namespace Builder
 		std::vector<Sim::SimScriptItem> testScripts;
 		testScripts.reserve(files.size());
 
-		for (std::shared_ptr<DbFile> f : files)
+		for (const std::shared_ptr<DbFile>& f : files)
 		{
 			testScripts.emplace_back(Sim::SimScriptItem{f->data(), scriptFilesTree.filePath(f->fileId()) + "/" + f->fileName()});
 		}

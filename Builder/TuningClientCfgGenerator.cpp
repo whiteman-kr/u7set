@@ -477,12 +477,11 @@ namespace Builder
 		// Load all clients behavior
 		//
 		ClientBehaviorStorage allBehaviorStorage;
-
 		QString errorCode;
-
 		QByteArray dbData;
+		int etcFileId = m_dbController->systemFileId(DbDir::EtcDir);
 
-		bool result = loadFileFromDatabase(m_dbController, m_dbController->etcFileId(), allBehaviorStorage.dbFileName(), &errorCode, &dbData);
+		bool result = loadFileFromDatabase(m_dbController, etcFileId, allBehaviorStorage.dbFileName(), &errorCode, &dbData);
 		if (result == false)
 		{
 			m_log->errCMN0010(allBehaviorStorage.dbFileName());
