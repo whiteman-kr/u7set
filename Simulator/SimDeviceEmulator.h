@@ -36,7 +36,7 @@ class SimCommandTest_LM5_LM6;
 // class DeviceEmulator has function DeviceEmulator::fault
 // this is convenient call of this func
 //
-#define SIM_FAULT(message) fault(message, QStringLiteral(__FUNCTION_NAME__));
+#define SIM_FAULT(message) fault(message, QLatin1String(__FUNCTION_NAME__));
 
 namespace Sim
 {
