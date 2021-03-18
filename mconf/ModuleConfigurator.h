@@ -7,6 +7,8 @@
 #include "../lib/OutputLog.h"
 #include "Settings.h"
 
+#include <optional>
+
 class QLineEdit;
 class QPushButton;
 class QTextEdit;
@@ -41,25 +43,25 @@ private slots:
     void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
 
 signals:
-	void setCommunicationSettings(QString device, bool useMultipleUartProtocol, bool showDebugInfo, bool verify);
+	void setCommunicationSettings(QString device, bool showDebugInfo, bool verify);
 	
 	void readServiceInformation(int);
-	void readFirmware(QString fileName);
+	void readFirmware(QString fileName, std::optional<std::vector<int>> selectedUarts);
 
-	void detectSubsystem();
     void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
-	void writeConfData(ModuleFirmwareStorage *storage, const QString& subsystemId);
-	void eraseFlashMemory(int);
+	void writeConfData(ModuleFirmwareStorage *storage, const QString& subsystemId, std::optional<std::vector<int>> selectedUarts);
+	void eraseFlashMemory(int, std::optional<std::vector<int>> selectedUarts);
 	
 private:
 	Ui::ModuleConfiguratorClass ui;
 	Settings m_settings;
 
+	QSplitter* m_pSplitter = nullptr;
+
 	QTabWidget* m_tabWidget = nullptr;
 
 	QTextEdit* m_pLog = nullptr;
 
-	QPushButton* m_pDetectSubsystemButton = nullptr;
 	QPushButton* m_pReadButton = nullptr;
 	QPushButton* m_pConfigureButton = nullptr;
 	QPushButton* m_pEraseButton = nullptr;

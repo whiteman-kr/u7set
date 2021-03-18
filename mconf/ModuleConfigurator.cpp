@@ -23,11 +23,19 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	//
 	m_tabWidget = new QTabWidget(this);
 	
-	ApplicationTabPage* appTabPage = new ApplicationTabPage();
+	ApplicationTabPage* appTabPage = new ApplicationTabPage(m_settings.expertMode());
 	DiagTabPage* diagTabPage = new DiagTabPage();
 
 	m_tabWidget->addTab(appTabPage, "Output Bitstream Files");
 	m_tabWidget->addTab(diagTabPage, "Service Information");
+
+	connect(m_tabWidget, &QTabWidget::currentChanged, [this](int tabIndex)
+	{
+		if (m_pEraseButton != nullptr)
+		{
+			m_pEraseButton->setEnabled(tabIndex == 0);
+		}
+	});
 
 	// Log
 	//
@@ -41,8 +49,6 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	//
 	m_pReadButton = new QPushButton(tr("&Read"));
 
-	m_pDetectSubsystemButton = new QPushButton(tr("Detect Subsystem"));
-
 	// Write Data to module (Configure)
 	//
 	m_pConfigureButton = new QPushButton(tr("&Configure"));
@@ -50,7 +56,10 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 
 	// Erase flash memory
 	//
-	m_pEraseButton = new QPushButton(tr("&Erase"));
+	if (m_settings.expertMode() == true)
+	{
+		m_pEraseButton = new QPushButton(tr("&Erase"));
+	}
 
 	// Show setting dialog
 	//
@@ -66,18 +75,19 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 
 	// Left Layout (Edit controls)
 	//
-	QVBoxLayout* pLeftLayout = new QVBoxLayout();
-	
-	pLeftLayout->addWidget(m_tabWidget);
+
+	m_pSplitter = new QSplitter();
+	m_pSplitter->addWidget(m_tabWidget);
+	m_pSplitter->addWidget(m_pLog);
+	m_pSplitter->setChildrenCollapsible(false);
 		
 	// Right Layout (buttons)
 	//
 	QVBoxLayout* pRightLayout = new QVBoxLayout();
-	pRightLayout->addWidget(m_pDetectSubsystemButton);
 	pRightLayout->addWidget(m_pConfigureButton);
 	pRightLayout->addWidget(m_pReadButton);
 
-	if (m_settings.expertMode() == true)
+	if (m_pEraseButton != nullptr)
 	{
 		pRightLayout->addWidget(m_pEraseButton);
 	}
@@ -90,8 +100,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	// Main, dialog layout
 	//
 	QHBoxLayout* pMainLayout = new QHBoxLayout();
-	pMainLayout->addLayout(pLeftLayout, 1);
-	pMainLayout->addWidget(m_pLog, 2);
+	pMainLayout->addWidget(m_pSplitter);
 	pMainLayout->addLayout(pRightLayout);
 	
 	QWidget* pCentralWidget = new QWidget();
@@ -101,7 +110,6 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 
 	// GUI
 	//
-	connect(m_pDetectSubsystemButton, &QAbstractButton::clicked, this, &ModuleConfigurator::detectSubsystem);
 	connect(m_pConfigureButton, &QAbstractButton::clicked, this, &ModuleConfigurator::configureClicked);
 	connect(m_pReadButton, &QAbstractButton::clicked, this, &ModuleConfigurator::readClicked);
 
@@ -116,6 +124,8 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	// Logic
 	//
 	qRegisterMetaType<std::vector<uint8_t>>("std::vector<uint8_t>");
+	qRegisterMetaType<std::vector<int>>("std::vector<int>");
+	qRegisterMetaType<std::optional<std::vector<int>>>("std::optional<std::vector<int>>");
 
 	m_pConfigurator = new Configurator(m_settings.serialPort(), &theLog);
 	m_pConfigurationThread = new QThread(this);
@@ -126,7 +136,6 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	connect(this, &ModuleConfigurator::readFirmware, m_pConfigurator, &Configurator::readFirmware);
 
 	//connect(this, SIGNAL(writeDiagData(quint32, QDate, quint32, quint32)), m_pConfigurator, SLOT(writeDiagData(quint32, QDate, quint32, quint32)));
-	connect(this, &ModuleConfigurator::detectSubsystem, m_pConfigurator, &Configurator::detectSubsystem_v1);
 	connect(this, &ModuleConfigurator::writeConfData, m_pConfigurator, &Configurator::uploadFirmware);
 	connect(this, &ModuleConfigurator::writeDiagData, m_pConfigurator, &Configurator::uploadServiceInformation);	// Template version in 5.0.1 has a bug, will be resolved in 5.0.2
 	connect(this, &ModuleConfigurator::eraseFlashMemory, m_pConfigurator, &Configurator::eraseFlashMemory);
@@ -135,10 +144,13 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	connect(m_pConfigurator, &Configurator::operationFinished, this, &ModuleConfigurator::enableControls);
 	connect(m_pConfigurator, &Configurator::operationFinished, appTabPage, &ApplicationTabPage::enableControls);
 	connect(m_pConfigurator, &Configurator::detectSubsystemComplete, appTabPage, &ApplicationTabPage::detectSubsystemComplete);
+	connect(m_pConfigurator, &Configurator::detectUartsComplete, appTabPage, &ApplicationTabPage::detectUartsComplete);
 
 	connect(m_pConfigurator, &Configurator::communicationReadFinished, this, &ModuleConfigurator::communicationReadFinished);
 
 	connect(appTabPage, &ApplicationTabPage::loadBinaryFile, m_pConfigurator, &Configurator::loadBinaryFile);
+	connect(appTabPage, &ApplicationTabPage::detectSubsystem, m_pConfigurator, &Configurator::detectSubsystem_v1);
+	connect(appTabPage, &ApplicationTabPage::detectUarts, m_pConfigurator, &Configurator::detectUarts);
 
 	connect(m_pConfigurator, &Configurator::loadBinaryFileHeaderComplete, appTabPage, &ApplicationTabPage::loadBinaryFileHeaderComplete);
 	connect(m_pConfigurator, &Configurator::uartOperationStart, appTabPage, &ApplicationTabPage::uartOperationStart);
@@ -150,13 +162,39 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 
 	m_pConfigurationThread->start();
 
-	emit setCommunicationSettings(m_settings.serialPort(), m_settings.useMultipleUartProtocol(), m_settings.showDebugInfo(), m_settings.verify());
+	emit setCommunicationSettings(m_settings.serialPort(), m_settings.showDebugInfo(), m_settings.verify());
 
 	// Start Timer
 	//
 	m_logTimerId = startTimer(2);
 
 	setMinimumSize(1280, 768);
+
+	// Restore window and splitter state
+	//
+	QByteArray data = QSettings().value("m_splitterState").toByteArray();
+	if (data.isEmpty() == false)
+	{
+		m_pSplitter->restoreState(data);
+	}
+	else
+	{
+		m_pSplitter->setStretchFactor(0, 30);
+		m_pSplitter->setStretchFactor(1, 70);
+	}
+
+
+	data = QSettings().value("m_windowState").toByteArray();
+	if (data.isEmpty() == false)
+	{
+		restoreState(data);
+	}
+
+	data = QSettings().value("m_windowGeometry").toByteArray();
+	if (data.isEmpty() == false)
+	{
+		restoreGeometry(data);
+	}
 
 	// --
 	//
@@ -183,6 +221,12 @@ ModuleConfigurator::~ModuleConfigurator()
 		m_pConfigurationThread->exit();
 		m_pConfigurationThread->wait(10000);
 	}
+
+	// Save window and splitter state
+	//
+	QSettings().setValue("m_splitterState", m_pSplitter->saveState());
+	QSettings().setValue("m_windowState", saveState());
+	QSettings().setValue("m_windowGeometry", saveGeometry());
 }
 
 void ModuleConfigurator::timerEvent(QTimerEvent* pTimerEvent)
@@ -294,7 +338,7 @@ void ModuleConfigurator::configureClicked()
 			//
 			disableControls();
 
-			emit writeConfData(page->configuration(), page->selectedSubsystem());
+			emit writeConfData(page->configuration(), page->selectedSubsystem(), page->selectedUarts());
 		}
 	}
 	catch(QString message)
@@ -328,7 +372,7 @@ void ModuleConfigurator::readClicked()
 
 		if (dynamic_cast<ApplicationTabPage*>(m_tabWidget->currentWidget()) != nullptr)
 		{
-			//ApplicationTabPage* page = dynamic_cast<ApplicationTabPage*>(m_tabWidget->currentWidget());
+			ApplicationTabPage* page = dynamic_cast<ApplicationTabPage*>(m_tabWidget->currentWidget());
 
 			QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"));
 
@@ -344,7 +388,7 @@ void ModuleConfigurator::readClicked()
 			//
 			disableControls();
 
-			emit readFirmware(fileName);
+			emit readFirmware(fileName, page->selectedUarts());
 		}
 
 	}
@@ -386,7 +430,17 @@ void ModuleConfigurator::eraseClicked()
 		//
 		disableControls();
 
-		emit eraseFlashMemory(0);
+		if (dynamic_cast<ApplicationTabPage*>(m_tabWidget->currentWidget()) != nullptr)
+		{
+			ApplicationTabPage* page = dynamic_cast<ApplicationTabPage*>(m_tabWidget->currentWidget());
+
+			emit eraseFlashMemory(0, page->selectedUarts());
+		}
+		else
+		{
+			Q_ASSERT(false);
+			throw (tr("Attempt to erase service information"));
+		}
 	}
 	catch(QString message)
 	{
@@ -407,7 +461,7 @@ void ModuleConfigurator::settingsClicked()
 		m_settings = settingsForm.settings();
 		m_settings.save();
 
-		emit setCommunicationSettings(m_settings.serialPort(), m_settings.useMultipleUartProtocol(), m_settings.showDebugInfo(), m_settings.verify());
+		emit setCommunicationSettings(m_settings.serialPort(), m_settings.showDebugInfo(), m_settings.verify());
 	}
 
 	return;
@@ -432,9 +486,8 @@ void ModuleConfigurator::disableControls()
 
 	m_pReadButton->setEnabled(false);
 	m_pConfigureButton->setEnabled(false);
-	m_pDetectSubsystemButton->setEnabled(false);
 	
-	if (m_pEraseButton != nullptr)
+	if (m_tabWidget->currentIndex() == 0 && m_pEraseButton != nullptr)
 	{
 		m_pEraseButton->setEnabled(false);
 	}
@@ -449,9 +502,8 @@ void ModuleConfigurator::enableControls()
 
 	m_pReadButton->setEnabled(true);
 	m_pConfigureButton->setEnabled(true);
-	m_pDetectSubsystemButton->setEnabled(true);
 
-	if (m_pEraseButton != nullptr)
+	if (m_tabWidget->currentIndex() == 0 && m_pEraseButton != nullptr)
 	{
 		m_pEraseButton->setEnabled(true);
 	}

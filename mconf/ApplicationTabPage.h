@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "../lib/ModuleFirmware.h"
 
+#include <optional>
 using namespace Hardware;
 
 class ApplicationTabPage : public QWidget
@@ -11,33 +12,42 @@ class ApplicationTabPage : public QWidget
 	Q_OBJECT
 
 public:
-	ApplicationTabPage(QWidget* parent = 0);
+	ApplicationTabPage(bool expertMode, QWidget* parent = 0);
 	~ApplicationTabPage();
 
 	bool isFileLoaded() const;
 
 	Hardware::ModuleFirmwareStorage* configuration();
-	QString selectedSubsystem();
+
+	QString selectedSubsystem() const;
 	void selectSubsystem(const QString& id);
+
+	std::optional<std::vector<int>> selectedUarts() const;
 
 signals:
 	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
+	void detectSubsystem();
+	void detectUarts();
 
 private slots:
 	void subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* item2);
 	void openFileClicked();
-	void on_resetCountersButton_clicked();
+	void resetCountersClicked();
+	void detectSubsystemsClicked();
+	void detectUartsClicked();
 
 public slots:
 	void loadBinaryFileHeaderComplete();
 	void uartOperationStart(int uartID, QString operation);
 	void uploadComplete(int uartID);
 	void detectSubsystemComplete(int selectedSubsystem);
+	void detectUartsComplete(std::vector<int> uartIds);
 
 	void enableControls();
 
 private:
 	void clearSubsystemsUartData();
+	void fillUartsList();
 
 	const int columnSubsysId = 0;
 
@@ -47,14 +57,25 @@ private:
 	const int columnUartStatus = 3;
 
 private:
+	bool m_expertMode = false;
 
-	QLineEdit* m_pFileNameEdit = nullptr;
+	enum class UartListColumn
+	{
+		Id,
+		Process
+	};
 
-	QTreeWidget* m_pSubsystemsListWidget = nullptr;
+	QLineEdit* m_fileNameEdit = nullptr;
 
-	QTreeWidget* m_pUartListWidget = nullptr;
+	QTreeWidget* m_subsystemsListTree = nullptr;
+
+	QTreeWidget* m_bitstreamUartListTree = nullptr;
+
+	QTreeWidget* m_pUartsListTree = nullptr;
 
 	ModuleFirmwareStorage m_firmware;
+
+	std::vector<int> m_uartIds;
 };
 
 #endif // APPLICATIONTABPAGE_H

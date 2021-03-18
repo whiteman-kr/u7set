@@ -472,7 +472,7 @@ void UploadTabPage::read()
 		m_outputLog.writeMessage("");
 		m_outputLog.writeMessage(tr("Reading firmware to file %1...").arg(fileName));
 
-		emit readFirmware(fileName);
+		emit readFirmware(fileName, {});
 
 	}
 	catch(QString message)
@@ -494,7 +494,7 @@ void UploadTabPage::upload()
 
 	try
 	{
-		emit uploadFirmware(&m_firmware, subsysId);
+		emit uploadFirmware(&m_firmware, subsysId, {});
 	}
 	catch(QString message)
 	{
@@ -532,7 +532,7 @@ void UploadTabPage::erase()
 		//
 		//disableControls();
 
-		emit eraseFlashMemory(0);
+		emit eraseFlashMemory(0, {});
 	}
 	catch(QString message)
 	{

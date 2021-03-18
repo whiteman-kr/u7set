@@ -16,7 +16,6 @@ public:
 
 private slots:
 	void currentSerialPortChanged(const QString & text);
-	void useMultipleUartProtocolChanged(int state);
 	void showDebugInfoChanged(int state);
 	void verifyChanged(int state);
 	void expertModeChanged(int state);
@@ -29,7 +28,6 @@ private:
 	QComboBox* m_pSerialPort = nullptr;
 	QLabel* m_pSerialPortLabel = nullptr;
 
-	QCheckBox* m_pUseMultipleUartProtocol = nullptr;
 	QCheckBox* m_pShowDebugInfo = nullptr;
 	QCheckBox* m_pVerify = nullptr;
 	QCheckBox* m_pExpertMode = nullptr;
