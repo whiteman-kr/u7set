@@ -17,11 +17,11 @@ msvc {
 	QMAKE_CXXFLAGS += /wd4996
 }
 
-# c++17 support -- for better compillation time, some cpps are included to this library,
+# c++20 support -- for better compillation time, some cpps are included to this library,
 # and class PropertyObject is ussing std::clamp what is part cpp17
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		# CONFIG += c++17 has no effect yet
+gcc:CONFIG += c++20
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 # DESTDIR
 #

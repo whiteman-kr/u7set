@@ -17,10 +17,10 @@ TARGET = PacketSource
 CONFIG += gui
 TEMPLATE = app
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+gcc:CONFIG += c++20
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../../warnings.pri)
 
@@ -47,7 +47,6 @@ SOURCES += \
     ../../lib/ScriptDeviceObject.cpp \
     main.cpp \
     ../../Builder/IssueLogger.cpp \
-    ../../lib/MemLeaksDetection.cpp \
     ../../lib/CommandLineParser.cpp \
     ../../lib/XmlHelper.cpp \
     ../../lib/SocketIO.cpp \
@@ -103,7 +102,6 @@ HEADERS += \
     ../../lib/ScriptDeviceObject.h \
     Stable.h \
     ../../Builder/IssueLogger.h \
-    ../../lib/MemLeaksDetection.h \
     ../../lib/CommandLineParser.h \
     ../../lib/XmlHelper.h \
     ../../lib/SocketIO.h \
@@ -160,21 +158,7 @@ RESOURCES += \
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-
-# Q_DEBUG define
-#
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
-
-# _DEBUG define, Windows memmory detection leak depends on it
-#
-CONFIG(debug, debug|release): DEFINES += _DEBUG
-
-
-# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
-#
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
-
-#protobuf
+# Protobuf
 #
 LIBS += -L$$DESTDIR -lprotobuf
 INCLUDEPATH += ./../../Protobuf
@@ -183,3 +167,9 @@ DISTFILES += \
 	../../Proto/network.proto \
     ../../Proto/serialization.proto
 
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

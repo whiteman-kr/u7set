@@ -61,7 +61,7 @@ void DynamicAppSignalState::setSignalParams(const Signal* signal, const AppSigna
 
 			fspi.flagType = flagType;
 
-#ifdef Q_DEBUG
+#ifdef QT_DEBUG
 			fspi.flagSignalID = flagSignal->appSignalID();				// required for debugging only
 #endif
 

@@ -8,6 +8,7 @@ SUBDIRS += Protobuf \
 	QScintilla \
 	TrendView \
 	VFrame30 \
+	BaseService \
 	ServiceControlManager \
 	Metrology \
 	Simulator \
@@ -15,7 +16,6 @@ SUBDIRS += Protobuf \
 	Builder \
 	BuilderConsole \
 	u7 \
-	BaseService \
 	ConfigurationService \
 	ArchivingService \
 	Monitor \
@@ -24,7 +24,6 @@ SUBDIRS += Protobuf \
 	AppDataService \
 	DiagDataService \
 	TuningClient \
-	TuningIPEN \
 	mconf \
 	./Tools/CommView \
 	./Tools/PacketSource \

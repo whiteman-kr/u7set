@@ -1,10 +1,7 @@
 #include "TuningService.h"
-#include "../lib/MemLeaksDetection.h"
 
 int main(int argc, char *argv[])
 {
-	initMemoryLeaksDetection();
-
 	QCoreApplication app(argc, argv);
 
 	CircularLoggerShared logger = std::make_shared<CircularLogger>();
@@ -36,8 +33,6 @@ int main(int argc, char *argv[])
 	LOGGER_SHUTDOWN(tuningLog);
 
 	LOGGER_SHUTDOWN(logger);
-
-	dumpMemoryLeaks();
 
 	return result;
 }

@@ -11,10 +11,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = PacketViewer
 TEMPLATE = app
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+gcc:CONFIG += c++20
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 # DESTDIR
 #
@@ -94,12 +94,14 @@ HEADERS  += SourceListWidget.h \
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
-#
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
-
-#protobuf
+# Protobuf
 #
 LIBS += -L$$DESTDIR -lprotobuf
 INCLUDEPATH += ./../Protobuf
 
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

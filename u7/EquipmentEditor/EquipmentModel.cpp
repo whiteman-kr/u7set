@@ -589,7 +589,7 @@ void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::m
 			break;
 		}
 
-#ifdef Q_DEBUG
+#ifdef QT_DEBUG
 		std::shared_ptr<Hardware::DeviceObject> childDevice = this->deviceObject(childIndex);
 		assert(childDevice);
 		assert(childDevice == device->child(childRow));

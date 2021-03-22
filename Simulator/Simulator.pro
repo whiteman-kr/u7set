@@ -11,11 +11,12 @@ TARGET = Simulator
 TEMPLATE = lib
 CONFIG += staticlib
 
-# C++17 support is enabled.
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17
-win32:QMAKE_CXXFLAGS += /analyze		# Static code analyze
+gcc:CONFIG += c++20
+win32:QMAKE_CXXFLAGS += /std:c++latest
+
+include(../warnings.pri)
 
 # Optimization flags
 #
@@ -27,8 +28,6 @@ unix {
     CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
 	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
 }
-
-CONFIG += warn_on				# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
@@ -209,35 +208,18 @@ HEADERS += \
     SimOverrideSignals.h \
 	../lib/SignalProperties.h
 
-
-## VFrame30 library
-## $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
-##
-#win32 {
-#    CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
-#    CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
-#}
-#unix {
-#    CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
-#    CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
-#}
-
-#INCLUDEPATH += ../VFrame30
-#DEPENDPATH += ../VFrame30
-
-#protobuf
+# Protobuf
 #
 LIBS += -L$$DESTDIR -lprotobuf
 INCLUDEPATH += ./../Protobuf
 
-
 DISTFILES += \
-    Scripts/LM1_SR01_SIM.ts \
-    Scripts/tsconfig.json \
-    Scripts/build.bat \
-    Scripts/out/LM1_SR01_SIM.js \
     SimProjectTests.js
 
 
-
-
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

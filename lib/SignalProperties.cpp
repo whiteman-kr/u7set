@@ -499,13 +499,11 @@ bool SignalSpecPropValue::load(const Proto::SignalSpecPropValue& protoValue)
 
 	m_isEnum = protoValue.isenum();
 
-#ifdef Q_DEBUG
-
+#ifdef QT_DEBUG
 	if (m_isEnum == true && type != QVariant::Int)
 	{
 		assert(false);
 	}
-
 #endif
 
 	switch(type)

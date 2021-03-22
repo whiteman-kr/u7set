@@ -25,21 +25,12 @@ win32:LIBS += -lGdi32
 
 INCLUDEPATH += $$PWD
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
-win32:QMAKE_CXXFLAGS += /analyze		# Static code analyze
+gcc:CONFIG += c++20
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
-# Warning level
-#
-gcc:CONFIG += warn_on
-
-win32:CONFIG -= warn_on				# warn_on is level 3 warnings
-win32:QMAKE_CXXFLAGS += /W4			# CONFIG += warn_on is just W3 level, so set level 4
-win32:QMAKE_CXXFLAGS += /wd4201		# Disable warning: C4201: nonstandard extension used: nameless struct/union
-win32:QMAKE_CXXFLAGS += /wd4458		# Disable warning: C4458: declaration of 'selectionPen' hides class member
-win32:QMAKE_CXXFLAGS += /wd4275		# Disable warning: C4275: non - DLL-interface class 'class_1' used as base for DLL-interface class 'class_2'
+include(../warnings.pri)
 
 #Application icon
 win32:RC_ICONS += Images/u7.ico
@@ -442,20 +433,10 @@ DISTFILES += \
     LogicModuleDescription/LM1_SR03.xml \
     LogicModuleDescription/LM1_SF40.xml
 
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
-
-win32 {
-    #CONFIG(debug, debug|release): DEFINES += _CRTDBG_MAP_ALLOC
-    #CONFIG(debug, debug|release): DEFINES += "DBG_NEW=new(_NORMAL_BLOCK,__FILE__,__LINE__)"
-    #CONFIG(debug, debug|release): DEFINES += "new=DBG_NEW"
-}
-
-
-
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-#Optimization flags
+# Optimization flags
 #
 win32 {
     CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -Od
@@ -466,10 +447,8 @@ unix {
     CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
 }
 
-#protobuf
+# Protobuf
 #
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
-
 LIBS += -L$$DESTDIR -lprotobuf
 INCLUDEPATH += ./../Protobuf
 
@@ -563,3 +542,10 @@ else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../Tren
 else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/release/TrendView.lib
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/debug/TrendView.lib
 else:unix:!macx: PRE_TARGETDEPS += $$OUT_PWD/../TrendView/libTrendView.a
+
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

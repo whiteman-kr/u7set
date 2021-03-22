@@ -11,10 +11,10 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+gcc:CONFIG += c++20
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../warnings.pri)
 
@@ -31,7 +31,6 @@ unix {
 
 SOURCES += \
     ../lib/Address16.cpp \
-	../lib/MemLeaksDetection.cpp \
     ../lib/ScriptDeviceObject.cpp \
 	../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
@@ -66,7 +65,6 @@ SOURCES += \
 HEADERS += \
     ../lib/Address16.h \
 	../lib/LanControllerInfo.h \
-	../lib/MemLeaksDetection.h \
     ../lib/ScriptDeviceObject.h \
 	Stable.h \
 	../lib/SocketIO.h \
@@ -105,12 +103,14 @@ include(../qtservice/src/qtservice.pri)
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-#protobuf
+# Protobuf
 #
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
-
 LIBS += -L$$DESTDIR -lprotobuf
 INCLUDEPATH += ./../Protobuf
 
-
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

@@ -12,10 +12,10 @@ QT       += widgets
 TARGET = CommView
 TEMPLATE = app
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+gcc:CONFIG += c++20
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../../warnings.pri)
 
@@ -42,8 +42,7 @@ SOURCES += main.cpp\
 	../../lib/Crc.cpp \
     WorkerBase.cpp \
     TestResultDialog.cpp \
-    OptionDialog.cpp \
-    ../../lib/MemLeaksDetection.cpp
+	OptionDialog.cpp
 
 HEADERS  += MainWindow.h \
     Options.h \
@@ -55,8 +54,7 @@ HEADERS  += MainWindow.h \
     WorkerBase.h \
     TestResultDialog.h \
     OptionDialog.h \
-    Stable.h \
-    ../../lib/MemLeaksDetection.h
+	Stable.h
 
 RESOURCES += \
 	resources.qrc
@@ -65,3 +63,11 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 DISTFILES +=
+
+
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

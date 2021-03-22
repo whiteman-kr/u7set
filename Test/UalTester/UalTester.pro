@@ -11,10 +11,10 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+gcc:CONFIG += c++20
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../../warnings.pri)
 
@@ -67,7 +67,6 @@ SOURCES += \
 	TestFile.cpp \
 	TuningSocket.cpp \
 	CmdLineParam.cpp \
-	../../lib/MemLeaksDetection.cpp \
     TuningSourceBase.cpp
 
 
@@ -110,7 +109,6 @@ HEADERS += \
     TuningSocket.h \
 	CmdLineParam.h \
 	Stable.h \
-	../../lib/MemLeaksDetection.h \
     TuningSourceBase.h
 
 
@@ -120,12 +118,7 @@ PRECOMPILED_HEADER = Stable.h
 RESOURCES += \
     Resources.qrc
 
-
-# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
-#
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
-
-#protobuf
+# Protobuf
 #
 LIBS += -L$$DESTDIR -lprotobuf
 INCLUDEPATH += ./../../Protobuf
@@ -134,3 +127,10 @@ INCLUDEPATH += ./../../Protobuf
 DISTFILES += \
 	../../Proto/network.proto \
 	../../Proto/serialization.proto
+
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

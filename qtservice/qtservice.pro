@@ -3,4 +3,8 @@ CONFIG += ordered
 include(common.pri)
 qtservice-uselib:SUBDIRS=buildlib
 
-win32:QMAKE_CXXFLAGS += /std:c++17
+# c++20 support
+#
+gcc:CONFIG += c++20
+win32:QMAKE_CXXFLAGS += /std:c++latest
+

@@ -4,10 +4,12 @@ QT       += qml sql xml widgets
 CONFIG += console
 CONFIG -= app_bundle
 
-# c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17
+gcc:CONFIG += c++20
+win32:QMAKE_CXXFLAGS += /std:c++latest
+
+include(../warnings.pri)
 
 # DESTDIR
 #
@@ -104,3 +106,12 @@ unix {
 }
 
 DISTFILES +=
+
+
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}
+

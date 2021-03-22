@@ -1,17 +1,17 @@
 #include <QCoreApplication>
 #include <QDebug>
 
-// For detecting memory leaks
+// Visual Leak Detector
 //
-#if defined (Q_OS_WIN) && defined (Q_DEBUG)
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-   #ifndef DBG_NEW
-	  #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
-	  #define new DBG_NEW
-   #endif
+#if defined(Q_OS_WIN) && defined(QT_DEBUG)
+#if __has_include("C:/Program Files (x86)/Visual Leak Detector/include/vld.h")
+	#include "C:/Program Files (x86)/Visual Leak Detector/include/vld.h"
+#else
+	#if __has_include("D:/Program Files (x86)/Visual Leak Detector/include/vld.h")
+		#include "D:/Program Files (x86)/Visual Leak Detector/include/vld.h"
+	#endif
 #endif
-
+#endif	// Visual Leak Detector
 
 #include "../Simulator/Simulator.h"
 
@@ -25,7 +25,7 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
 		QByteArray localMsg = msg.toLocal8Bit();
 		switch (type)	// NOLINT
 		{
-#ifdef Q_DEBUG
+#ifdef QT_DEBUG
 		case QtDebugMsg:
 			fprintf(stderr, "dbg: %s\n", localMsg.constData());
 			break;
@@ -121,12 +121,6 @@ bool runScript(QString scriptFileName, qint64 timeout, Sim::Simulator* simulator
 
 int main(int argc, char *argv[])
 {
-#if defined (Q_OS_WIN) && defined(Q_DEBUG)
-	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-	// To see all memory leaks, not only in the own code, comment the next line
-	prevHook = _CrtSetReportHook(reportingHook);
-#endif
-
 	originalMessageHandler = qInstallMessageHandler(messageOutputHandler);
 
 	QCoreApplication app(argc, argv);

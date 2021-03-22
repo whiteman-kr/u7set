@@ -3,7 +3,6 @@
 #include "MainWindow.h"
 #include "Options.h"
 #include "../Proto/ProtoSerialization.h"
-#include "../../lib/MemLeaksDetection.h"
 
 #if __has_include("../../gitlabci_version.h")
 #	include "../../gitlabci_version.h"
@@ -16,8 +15,6 @@ int main(int argc, char *argv[])
 	#if RUP_VERSION != PS_SUPPORT_VERSION
 		#error Current version of Rup packets is unknown
 	#endif
-
-	initMemoryLeaksDetection();
 
 	QApplication a(argc, argv);
 
@@ -49,8 +46,6 @@ int main(int argc, char *argv[])
 	options.unload();
 
 	google::protobuf::ShutdownProtobufLibrary();
-
-	dumpMemoryLeaks();
 
 	return result;
 }

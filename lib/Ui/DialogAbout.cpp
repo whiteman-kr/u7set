@@ -27,7 +27,7 @@ void DialogAbout::show(QWidget* parent, const QString& description, const QStrin
 
 	QString text = "<h3>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h3>";
 
-#ifndef Q_DEBUG
+#ifndef QT_DEBUG
 	text += "Build: Release";
 #else
 	text += "Build: Debug";
