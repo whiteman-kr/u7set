@@ -5,36 +5,29 @@ AppSignalManager::AppSignalManager(QObject* parent) :
 	QObject(parent)
 {
 	{
-		QMutexLocker l(&m_paramsMutex);
+		QWriteLocker wl(&m_paramsLocker);
 		m_signalParams.reserve(128000);
+		m_signalParamByEquipmentId.reserve(128000);
 	}
 
 	{
-		QMutexLocker l(&m_statesMutex);
+		QWriteLocker wl(&m_statesLocker);
 		m_signalStates.reserve(128000);
 	}
 
 	return;
 }
 
-AppSignalManager::~AppSignalManager()
-{
-}
-
 void AppSignalManager::reset()
 {
 	{
-		QMutexLocker l(&m_unitsMutex);
-		m_units.clear();
-	}
-
-	{
-		QMutexLocker l(&m_paramsMutex);
+		QWriteLocker wl(&m_paramsLocker);
 		m_signalParams.clear();
+		m_signalParamByEquipmentId.clear();
 	}
 
 	{
-		QMutexLocker l(&m_statesMutex);
+		QWriteLocker wl(&m_statesLocker);
 		m_signalStates.clear();
 	}
 
@@ -57,18 +50,25 @@ void AppSignalManager::reset()
 
 void AppSignalManager::addSignal(const AppSignalParam& appSignal)
 {
-	QMutexLocker l(&m_paramsMutex);
+	QWriteLocker wl(&m_paramsLocker);
 	m_signalParams[appSignal.hash()] = appSignal;
+
+	// Actually, EquipmentID does not starts from the symbol '@',
+	// but we need it particularly for Monitor to distinct AppSignalID from EquimpentID.
+	//
+	m_signalParamByEquipmentId[QStringLiteral("@") + appSignal.equipmentId()] = appSignal.hash();
+
 	return;
 }
 
 void AppSignalManager::addSignals(const std::vector<AppSignalParam>& appSignals)
 {
-	QMutexLocker l(&m_paramsMutex);
+	QWriteLocker wl(&m_paramsLocker);
 
 	for (const AppSignalParam& s : appSignals)
 	{
 		m_signalParams[s.hash()] = s;
+		m_signalParamByEquipmentId[s.equipmentId()] = s.hash();
 	}
 
 	return;
@@ -76,7 +76,7 @@ void AppSignalManager::addSignals(const std::vector<AppSignalParam>& appSignals)
 
 std::vector<Hash> AppSignalManager::signalHashes() const
 {
-	QMutexLocker l(&m_paramsMutex);
+	QReadLocker rl(&m_paramsLocker);
 
 	std::vector<Hash> result;
 	result.reserve(m_signalParams.size());
@@ -91,7 +91,7 @@ std::vector<Hash> AppSignalManager::signalHashes() const
 
 void AppSignalManager::invalidateSignalStates()
 {
-	QMutexLocker l(&m_statesMutex);
+	QWriteLocker wl(&m_statesLocker);
 
 	for (auto it = m_signalStates.begin(); it != m_signalStates.end(); ++it)
 	{
@@ -115,7 +115,7 @@ void AppSignalManager::setState(Hash signalHash, const AppSignalState& state)
 		return;
 	}
 
-	QMutexLocker l(&m_statesMutex);
+	QWriteLocker wl(&m_statesLocker);
 
 	AppSignalState& storedState = m_signalStates[signalHash];
 
@@ -140,7 +140,7 @@ void AppSignalManager::setState(Hash signalHash, const AppSignalState& state)
 
 void AppSignalManager::setState(const std::vector<AppSignalState>& states)
 {
-	QMutexLocker l(&m_statesMutex);
+	QWriteLocker wl(&m_statesLocker);
 
 	for (const AppSignalState& state : states)
 	{
@@ -188,7 +188,7 @@ void AppSignalManager::setSetpoints(const ComparatorSet& setpoints)
 
 bool AppSignalManager::signalExists(Hash hash) const
 {
-	QMutexLocker l(&m_paramsMutex);
+	QReadLocker rl(&m_paramsLocker);
 
 	auto result = m_signalParams.find(hash);
 	return result != m_signalParams.end();
@@ -196,7 +196,7 @@ bool AppSignalManager::signalExists(Hash hash) const
 
 std::vector<AppSignalParam> AppSignalManager::signalList() const
 {
-	QMutexLocker l(&m_paramsMutex);
+	QReadLocker rl(&m_paramsLocker);
 
 	std::vector<AppSignalParam> result;
 	result.reserve(m_signalParams.size());
@@ -217,7 +217,7 @@ bool AppSignalManager::signalExists(const QString& appSignalId) const
 
 AppSignalParam AppSignalManager::signalParam(Hash signalHash, bool* found) const
 {
-	QMutexLocker l(&m_paramsMutex);
+	QReadLocker rl(&m_paramsLocker);
 
 	auto result = m_signalParams.find(signalHash);
 
@@ -254,7 +254,7 @@ AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found) const
 
 	emit addSignalToPriorityList(signalHash);
 
-	QMutexLocker l(&m_statesMutex);
+	QReadLocker rl(&m_statesLocker);
 
 	auto foundState = m_signalStates.find(signalHash);
 
@@ -295,7 +295,7 @@ void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std
 
 	emit addSignalsToPriorityList(QVector<Hash>{appSignalHashes.begin(), appSignalHashes.end()});
 
-	QMutexLocker l(&m_statesMutex);
+		QReadLocker rl(&m_statesLocker);
 
 	int foundCount = 0;
 
@@ -350,7 +350,7 @@ QStringList AppSignalManager::signalTags(Hash signalHash) const
 {
 	QStringList result;
 
-	QMutexLocker l(&m_paramsMutex);
+	QReadLocker rl(&m_paramsLocker);
 
 	if (auto it = m_signalParams.find(signalHash);
 		it != m_signalParams.end())
@@ -368,7 +368,7 @@ QStringList AppSignalManager::signalTags(const QString& appSignalId) const
 
 bool AppSignalManager::signalHasTag(Hash signalHash, const QString& tag) const
 {
-	QMutexLocker l(&m_paramsMutex);
+	QReadLocker rl(&m_paramsLocker);
 
 	auto result = m_signalParams.find(signalHash);
 	return result == m_signalParams.end() ? false : result->second.hasTag(tag);
@@ -393,4 +393,22 @@ std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSigna
 	}
 
 	return result;
+}
+
+AppSignalParam AppSignalManager::signalParamByEquipemntId(const QString& equipmentId, bool* found) const
+{
+	return {};
+
+//	{
+//		QReadLocker rl(&m_paramsLocker);
+
+//		auto it = m_signalParamByEquipmentId.find(equipmentId);
+//		if (it )
+//	}
+
+
+//	lock
+//	find
+//	report
+//	return ;
 }

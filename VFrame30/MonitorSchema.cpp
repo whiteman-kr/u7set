@@ -33,11 +33,11 @@ namespace VFrame30
 	{
 		std::set<QString> signalMap;	// signal ids can be duplicated, std::set removes dupilcates
 
-		for (std::shared_ptr<SchemaLayer> layer : Layers)
+		for (const std::shared_ptr<SchemaLayer>& layer : Layers)
 		{
 			// Get all signals
 			//
-			for (std::shared_ptr<SchemaItem> item : layer->Items)
+			for (const std::shared_ptr<SchemaItem>& item : layer->Items)
 			{
 				if (item->isType<VFrame30::SchemaItemValue>() == true)
 				{

@@ -135,26 +135,26 @@ public:
 	AppSignalState& operator= (const AppSignalState& state) = default;
 	AppSignalState& operator= (const SimpleAppSignalState& smState);
 
-	Hash hash() const;
-	const Times& time() const;
-	const TimeStamp& time(E::TimeType timeType) const;
-	double value() const noexcept;
+	[[nodiscard]] Hash hash() const;
+	[[nodiscard]] const Times& time() const;
+	[[nodiscard]] const TimeStamp& time(E::TimeType timeType) const;
+	[[nodiscard]] double value() const noexcept;
 
-	bool isValid() const noexcept;
-	bool isStateAvailable() const;
-	bool isSimulated() const;
-	bool isBlocked() const;
-	bool isMismatch() const;
-	bool isAboveHighLimit() const;
-	bool isBelowLowLimit() const;
-	bool isOutOfLimits() const;		//  isAboveHighLimit() || isBelowLowLimit()
+	[[nodiscard]] bool isValid() const noexcept;
+	[[nodiscard]] bool isStateAvailable() const;
+	[[nodiscard]] bool isSimulated() const;
+	[[nodiscard]] bool isBlocked() const;
+	[[nodiscard]] bool isMismatch() const;
+	[[nodiscard]] bool isAboveHighLimit() const;
+	[[nodiscard]] bool isBelowLowLimit() const;
+	[[nodiscard]] bool isOutOfLimits() const;		//  isAboveHighLimit() || isBelowLowLimit()
 
 	void save(Proto::AppSignalState* protoState);
 	Hash load(const Proto::AppSignalState& protoState);
 
-	bool hasSameValue(const AppSignalState& b) const;
+	[[nodiscard]] bool hasSameValue(const AppSignalState& b) const;
 
-	static QString toString(double value, E::ValueViewType viewType, E::AnalogFormat analogFormat, int precision);
+	[[nodiscard]] static QString toString(double value, E::ValueViewType viewType, E::AnalogFormat analogFormat, int precision);
 
 public:
 	Hash m_hash = 0;					// == ::calcHash(AppSignalID)
@@ -328,7 +328,7 @@ class AppSignalParam
 	Q_PROPERTY(bool IsDiscrete READ isDiscrete)
 
 public:
-	AppSignalParam();
+	AppSignalParam() = default;
 	AppSignalParam(const AppSignalParam&) = default;
 	AppSignalParam(const Signal& signal);
 
@@ -339,108 +339,108 @@ public:
 	// Properties
 	//
 public:
-	Hash hash() const;
+	[[nodiscard]] Hash hash() const;
 	void setHash(Hash value);
 
-	QString appSignalId() const;
+	[[nodiscard]] const QString& appSignalId() const;
 	void setAppSignalId(const QString& value);
 
-	QString customSignalId() const;
+	[[nodiscard]] const QString& customSignalId() const;
 	void setCustomSignalId(const QString& value);
 
-	QString caption() const;
+	[[nodiscard]] const QString& caption() const;
 	void setCaption(const QString& value);
 
-	QString equipmentId() const;
+	[[nodiscard]] const QString& equipmentId() const;
 	void setEquipmentId(const QString& value);
 
-	QString lmEquipmentId() const;
+	[[nodiscard]] const QString& lmEquipmentId() const;
 	void setLmEquipmentId(const QString& value);
 
-	E::Channel channel() const;
+	[[nodiscard]] E::Channel channel() const;
 	void setChannel(E::Channel value);
 
-	bool isInput() const;
-	bool isOutput() const;
-	bool isInternal() const;
-	E::SignalInOutType inOutType() const;
+	[[nodiscard]] bool isInput() const;
+	[[nodiscard]] bool isOutput() const;
+	[[nodiscard]] bool isInternal() const;
+	[[nodiscard]] E::SignalInOutType inOutType() const;
 	void setInOutType(E::SignalInOutType value);
 
-	bool isAnalog() const;
-	bool isDiscrete() const;
-	E::SignalType type() const;
+	[[nodiscard]] bool isAnalog() const;
+	[[nodiscard]] bool isDiscrete() const;
+	[[nodiscard]] E::SignalType type() const;
 	void setType(E::SignalType value);
 
-	TuningValueType tuningType() const;
+	[[nodiscard]] TuningValueType tuningType() const;
 
-	E::AnalogAppSignalFormat analogSignalFormat() const;
+	[[nodiscard]] E::AnalogAppSignalFormat analogSignalFormat() const;
 	void setAnalogSignalFormat(E::AnalogAppSignalFormat value);
 
-	E::ByteOrder byteOrder() const;
+	[[nodiscard]] E::ByteOrder byteOrder() const;
 	void setByteOrder(E::ByteOrder value);
 
-	int unitId() const;
+	[[nodiscard]] int unitId() const;
 	void setUnitId(int value);
 
-	QString unit() const;
+	[[nodiscard]] const QString& unit() const;
 	void setUnit(QString value);
 
-	double lowValidRange() const;
-	double highValidRange() const;
+	[[nodiscard]] double lowValidRange() const;
+	[[nodiscard]] double highValidRange() const;
 
-	double lowEngineeringUnits() const;
+	[[nodiscard]] double lowEngineeringUnits() const;
 	void setLowEngineeringUnits(double value);
 
-	double highEngineeringUnits() const;
+	[[nodiscard]] double highEngineeringUnits() const;
 	void setHighEngineeringUnits(double value);
 
-	double inputLowLimit() const;
-	double inputHighLimit() const;
-	E::ElectricUnit inputUnitId() const;
-	E::SensorType inputSensorType() const;
+	[[nodiscard]] double inputLowLimit() const;
+	[[nodiscard]] double inputHighLimit() const;
+	[[nodiscard]] E::ElectricUnit inputUnitId() const;
+	[[nodiscard]] E::SensorType inputSensorType() const;
 
-	double outputLowLimit() const;
-	double outputHighLimit() const;
-	int outputUnitId() const;
-	E::OutputMode outputMode() const;
-	E::SensorType outputSensorType() const;
+	[[nodiscard]] double outputLowLimit() const;
+	[[nodiscard]] double outputHighLimit() const;
+	[[nodiscard]] int outputUnitId() const;
+	[[nodiscard]] E::OutputMode outputMode() const;
+	[[nodiscard]] E::SensorType outputSensorType() const;
 
-	int precision() const;
+	[[nodiscard]] int precision() const;
 	void setPrecision(int value);
 
-	double aperture();
+	[[nodiscard]] double aperture();
 	void setAperture(double value);
 
-	double filteringTime();
+	[[nodiscard]] double filteringTime();
 	void setFilteringTime(double value);
 
-	double spreadTolerance();
+	[[nodiscard]] double spreadTolerance();
 	void setSpreadTolerance(double value);
 
-	bool enableTuning() const;
+	[[nodiscard]] bool enableTuning() const;
 	void setEnableTuning(bool value);
 
-	TuningValue tuningDefaultValue() const;
-	QVariant tuningDefaultValueToVariant() const;
+	[[nodiscard]] TuningValue tuningDefaultValue() const;
+	[[nodiscard]] QVariant tuningDefaultValueToVariant() const;
 	void setTuningDefaultValue(const TuningValue& value);
 
-	TuningValue tuningLowBound() const;
-	QVariant tuningLowBoundToVariant() const;
+	[[nodiscard]] TuningValue tuningLowBound() const;
+	[[nodiscard]] QVariant tuningLowBoundToVariant() const;
 	void setTuningLowBound(const TuningValue& value);
 
-	TuningValue tuningHighBound() const;
-	QVariant tuningHighBoundToVariant() const;
+	[[nodiscard]] TuningValue tuningHighBound() const;
+	[[nodiscard]] QVariant tuningHighBoundToVariant() const;
 	void setTuningHighBound(const TuningValue& value);
 
-	const std::set<QString>& tags() const;
-	std::set<QString>& tags();
-	QStringList tagStringList() const;
+	[[nodiscard]] const std::set<QString>& tags() const;
+	[[nodiscard]] std::set<QString>& mutableTags();
+	[[nodiscard]] QStringList tagStringList() const;
 
 	void setTags(std::set<QString> tags);
 
 public slots:
 	/// \brief Check if signal has specified tag
-	bool hasTag(const QString& tag) const;
+	[[nodiscard]] bool hasTag(const QString& tag) const;
 
 public:
 	static const int NO_UNIT_ID = 1;
