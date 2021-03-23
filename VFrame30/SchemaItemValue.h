@@ -154,7 +154,10 @@ namespace VFrame30
 	public:
 		SchemaItemValue(void);
 		explicit SchemaItemValue(SchemaUnit unit);
-		virtual ~SchemaItemValue(void);
+		virtual ~SchemaItemValue(void) = default;
+
+	protected:
+		virtual void propertyDemand(const QString& prop) override;
 
 		// Serialization
 		//

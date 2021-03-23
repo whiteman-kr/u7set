@@ -1,12 +1,8 @@
 #include <QCoreApplication>
 #include <UalTester.h>
 
-#include "../../lib/MemLeaksDetection.h"
-
 int main(int argc, char *argv[])
 {
-	initMemoryLeaksDetection();
-
 	QCoreApplication a(argc, argv);
 
 	a.setApplicationName("UalTester");
@@ -39,8 +35,6 @@ int main(int argc, char *argv[])
 	QThread::msleep(500);			// waiting while logger flush buffers
 
 	google::protobuf::ShutdownProtobufLibrary();
-
-	dumpMemoryLeaks();
 
 	return result;
 }

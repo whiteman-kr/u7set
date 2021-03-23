@@ -22,10 +22,10 @@ TEMPLATE = app
 
 include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../warnings.pri)
 
@@ -49,7 +49,6 @@ SOURCES += \
     ../lib/DbProgress.cpp \
     ../lib/DbProgressDialog.cpp \
     ../lib/DbWorker.cpp \
-    ../lib/MemLeaksDetection.cpp \
     ../lib/MetrologyConnection.cpp \
     ../lib/SignalSetProvider.cpp \
     ../lib/ScriptDeviceObject.cpp \
@@ -131,7 +130,6 @@ HEADERS  += \
     ../lib/DbProgress.h \
     ../lib/DbProgressDialog.h \
     ../lib/DbWorker.h \
-	../lib/MemLeaksDetection.h \
     ../lib/MetrologyConnection.h \
     ../lib/SignalSetProvider.h \
     ../lib/ScriptDeviceObject.h \
@@ -222,19 +220,6 @@ RESOURCES += \
 TRANSLATIONS = languages/Metrology_ru.ts \
     languages/Metrology_ru.qm
 
-# Q_DEBUG define
-#
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
-
-# _DEBUG define, Windows memmory detection leak depends on it
-#
-CONFIG(debug, debug|release): DEFINES += _DEBUG
-
-
-# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
-#
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
-
 #protobuf
 #
 LIBS += -L$$DESTDIR -lprotobuf
@@ -244,3 +229,11 @@ INCLUDEPATH += ./../Protobuf
 DISTFILES += \
     ../Proto/network.proto \
 	../Proto/serialization.proto
+
+
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

@@ -86,7 +86,7 @@ private:
 private:
 	struct FlagSignalParceInfo
 	{
-#ifdef Q_DEBUG
+#ifdef QT_DEBUG
 		QString flagSignalID;				// required for debugging only
 #endif
 

@@ -12,10 +12,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = TuningIPEN
 TEMPLATE = app
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+gcc:CONFIG += c++20
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../warnings.pri)
 
@@ -147,12 +147,12 @@ CONFIG(release, debug|release) {
 }
 
 
-#c++11 support for GCC
+# c++20 support
 #
-unix:QMAKE_CXXFLAGS += -std=c++11
-win32:QMAKE_CXXFLAGS += /std:c++17
+gcc:CONFIG += c++20
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+include(../warnings.pri)
 
 #protobuf
 #

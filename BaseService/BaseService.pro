@@ -11,11 +11,10 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
-win32:QMAKE_CXXFLAGS += /analyze
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../warnings.pri)
 
@@ -33,7 +32,6 @@ unix {
 
 SOURCES += \
     ../lib/Address16.cpp \
-    ../lib/MemLeaksDetection.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/Types.cpp \
     ../lib/UdpSocket.cpp \
@@ -50,7 +48,6 @@ SOURCES += \
 
 HEADERS += \
 	../lib/Address16.h \
-	../lib/MemLeaksDetection.h \
     ../lib/SocketIO.h \
 	../lib/SoftwareSettings.h \
 	../lib/Types.h \
@@ -70,14 +67,17 @@ HEADERS += \
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
-
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
-
-#protobuf
+# Protobuf
 #
 LIBS += -L$$DESTDIR -lprotobuf
 INCLUDEPATH += ./../Protobuf
 
 
 include(../qtservice/src/qtservice.pri)
+
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

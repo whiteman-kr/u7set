@@ -1,5 +1,4 @@
-#ifndef TIMESTAMP_H
-#define TIMESTAMP_H
+#pragma once
 
 #include <QtGlobal>
 #include <QMetaType>
@@ -128,4 +127,3 @@ struct TimeSpan
 Q_DECLARE_METATYPE(TimeSpan)
 
 
-#endif //TIMESTAMP_H

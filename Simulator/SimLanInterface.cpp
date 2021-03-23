@@ -28,7 +28,7 @@ namespace Sim
 
 	bool LanInterface::enabled() const
 	{
-		return m_enabled.load(std::memory_order::memory_order_relaxed);
+		return m_enabled.load(std::memory_order::relaxed);
 	}
 
 	void LanInterface::setEnabled(bool value)

@@ -27,10 +27,11 @@ unix {
     CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
 }
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
+
 
 #	SignalTests.cpp \
 
@@ -98,16 +99,10 @@ HEADERS += \
 	DbControllerUserTests.h \
 	DbControllerProjectTests.h
 
-# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
-#
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
-
-#protobuf
+# Protobuf
 #
 LIBS += -L$$DESTDIR/. -lprotobuf
 INCLUDEPATH += $$PWD/../../Protobuf
-
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
 DISTFILES += \
     ../../Proto/serialization.proto

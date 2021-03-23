@@ -3,12 +3,9 @@
 #include "MainWindow.h"
 #include "Options.h"
 
-#include "../../lib/MemLeaksDetection.h"
 
 int main(int argc, char *argv[])
 {
-	initMemoryLeaksDetection();
-
 	QApplication a(argc, argv);
 
 	a.setApplicationName("CommView");
@@ -26,8 +23,5 @@ int main(int argc, char *argv[])
 
 	theOptions.unload();
 
-	dumpMemoryLeaks();
-
 	return result;
-
 }

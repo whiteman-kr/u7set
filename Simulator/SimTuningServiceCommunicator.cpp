@@ -414,7 +414,7 @@ namespace Sim
 
 			QVariant currentBufSize = m_socket->socketOption(QAbstractSocket::ReceiveBufferSizeSocketOption);
 
-#ifdef Q_DEBUG
+#ifdef QT_DEBUG
 			if (newRecvBufSize.toInt() != currentBufSize.toInt())
 			{
 				m_log.writeWarning(QString("Tuning simulation receive buffer size is not changed to required size."));

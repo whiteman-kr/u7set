@@ -4,7 +4,7 @@
 #include "Simulator/SimSelectBuildDialog.h"
 
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 	#include <QAbstractItemModelTester>
 #endif
 //
@@ -2897,7 +2897,7 @@ void TestsWidget::createTestsDock()
 
 	m_testsTreeModel = new TestsFileTreeModel(db(), Db::File::systemDirToName(DbDir::TestsDir), this, this);
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 	[[maybe_unused]]QAbstractItemModelTester* modelTester = new QAbstractItemModelTester(m_testsTreeModel,
 																	 QAbstractItemModelTester::FailureReportingMode::Fatal,
 																		 this);

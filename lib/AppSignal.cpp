@@ -202,15 +202,10 @@ QString AppSignalState::toString(double value, E::ValueViewType viewType, E::Ana
 //
 // -------------------------------------------------------------------------------------------------
 
-AppSignalParam::AppSignalParam()
-{
-}
-
 AppSignalParam::AppSignalParam(const Signal& signal)
 {
 	load(signal);
 }
-
 
 bool AppSignalParam::load(const ::Proto::AppSignal& message)
 {
@@ -325,7 +320,7 @@ void AppSignalParam::setHash(Hash value)
 	m_hash = value;
 }
 
-QString AppSignalParam::appSignalId() const
+const QString& AppSignalParam::appSignalId() const
 {
 	return m_appSignalId;
 }
@@ -335,7 +330,7 @@ void AppSignalParam::setAppSignalId(const QString& value)
 	m_appSignalId = value;
 }
 
-QString AppSignalParam::customSignalId() const
+const QString& AppSignalParam::customSignalId() const
 {
 	return m_customSignalId;
 }
@@ -345,7 +340,7 @@ void AppSignalParam::setCustomSignalId(const QString& value)
 	m_customSignalId = value;
 }
 
-QString AppSignalParam::caption() const
+const QString& AppSignalParam::caption() const
 {
 	return m_caption;
 }
@@ -356,7 +351,7 @@ void AppSignalParam::setCaption(const QString& value)
 }
 
 
-QString AppSignalParam::equipmentId() const
+const QString& AppSignalParam::equipmentId() const
 {
 	return m_equipmentId;
 }
@@ -366,7 +361,7 @@ void AppSignalParam::setEquipmentId(const QString& value)
 	m_equipmentId = value;
 }
 
-QString AppSignalParam::lmEquipmentId() const
+const QString& AppSignalParam::lmEquipmentId() const
 {
 	return m_lmEquipmentId;
 }
@@ -481,7 +476,7 @@ void AppSignalParam::AppSignalParam::setByteOrder(E::ByteOrder value)
 	m_byteOrder = value;
 }
 
-QString AppSignalParam::unit() const
+const QString& AppSignalParam::unit() const
 {
 	return m_unit;
 }
@@ -666,7 +661,7 @@ const std::set<QString>& AppSignalParam::tags() const
 	return m_tags;
 }
 
-std::set<QString>& AppSignalParam::tags()
+std::set<QString>& AppSignalParam::mutableTags()
 {
 	return m_tags;
 }
@@ -684,12 +679,12 @@ QStringList AppSignalParam::tagStringList() const
 	return result;
 }
 
-void AppSignalParam::setTags(const std::set<QString> tags)
+void AppSignalParam::setTags(std::set<QString> tags)
 {
 	m_tags = std::move(tags);
 }
 
 bool AppSignalParam::hasTag(const QString& tag) const
 {
-	return m_tags.find(tag) != m_tags.end();
+	return m_tags.contains(tag);
 }

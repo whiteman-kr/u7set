@@ -1987,7 +1987,7 @@ namespace Sim
 
 	bool DeviceEmulator::armingKey() const
 	{
-		return m_armingKey.load(std::memory_order::memory_order_relaxed);
+		return m_armingKey.load(std::memory_order::relaxed);
 	}
 
 	void DeviceEmulator::setArmingKey(bool value)
@@ -1997,7 +1997,7 @@ namespace Sim
 
 	bool DeviceEmulator::tuningKey() const
 	{
-		return m_tuningKey.load(std::memory_order::memory_order_relaxed);
+		return m_tuningKey.load(std::memory_order::relaxed);
 	}
 
 	void DeviceEmulator::setTuningKey(bool value)
@@ -2007,7 +2007,7 @@ namespace Sim
 
 	bool DeviceEmulator::sorIsSet() const
 	{
-		return m_sorIsSet.load(std::memory_order::memory_order_relaxed);
+		return m_sorIsSet.load(std::memory_order::relaxed);
 	}
 
 	void DeviceEmulator::setSorIsSet(bool value)
@@ -2017,7 +2017,7 @@ namespace Sim
 
 	bool DeviceEmulator::sorSetSwitch1() const
 	{
-		return m_sorSetSwitch1.load(std::memory_order::memory_order_relaxed);
+		return m_sorSetSwitch1.load(std::memory_order::relaxed);
 	}
 
 	void DeviceEmulator::setSorSetSwitch1(bool value)
@@ -2027,7 +2027,7 @@ namespace Sim
 
 	bool DeviceEmulator::sorSetSwitch2() const
 	{
-		return m_sorSetSwitch2.load(std::memory_order::memory_order_relaxed);
+		return m_sorSetSwitch2.load(std::memory_order::relaxed);
 	}
 
 	void DeviceEmulator::setSorSetSwitch2(bool value)
@@ -2037,7 +2037,7 @@ namespace Sim
 
 	bool DeviceEmulator::sorSetSwitch3() const
 	{
-		return m_sorSetSwitch3.load(std::memory_order::memory_order_relaxed);
+		return m_sorSetSwitch3.load(std::memory_order::relaxed);
 	}
 
 	void DeviceEmulator::setSorSetSwitch3(bool value)
@@ -2047,7 +2047,7 @@ namespace Sim
 
 	bool DeviceEmulator::testSorResetSwitch(bool newValue)
 	{
-		return m_sorResetSwitch.exchange(newValue, std::memory_order::memory_order_relaxed);
+		return m_sorResetSwitch.exchange(newValue, std::memory_order::relaxed);
 	}
 
 }

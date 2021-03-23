@@ -1,12 +1,9 @@
 #include "ConfigurationService.h"
-#include "../lib/MemLeaksDetection.h"
 
 #define CIRCULAR_LOGGER_PTR_ASSERTING
 
 int main(int argc, char *argv[])
 {
-	initMemoryLeaksDetection();
-
 	QCoreApplication app(argc, argv);
 
 	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
@@ -30,8 +27,6 @@ int main(int argc, char *argv[])
 	google::protobuf::ShutdownProtobufLibrary();
 
 	LOGGER_SHUTDOWN(logger);
-
-	dumpMemoryLeaks();
 
 	return result;
 }
