@@ -65,7 +65,7 @@ namespace PS
 		Source();
 		Source(const Source& from);
 		Source(const PS::SourceInfo& si);
-		virtual ~Source();
+		virtual ~Source() override;
 
 	public:
 
@@ -75,7 +75,7 @@ namespace PS
 
 		PS::SourceInfo& info() { return m_si; }
 		QStringList& associatedSignalList()  { return m_associatedSignalList; }
-		QVector<PS::Signal>& signalList()  { return m_signalList; }
+		std::vector<PS::Signal>& signalList()  { return m_signalList; }
 		FrameBase& frameBase() { return m_frameBase; }
 
 		//
@@ -107,7 +107,7 @@ namespace PS
 
 		PS::SourceInfo m_si;
 		QStringList m_associatedSignalList;
-		QVector<PS::Signal> m_signalList;
+		std::vector<PS::Signal> m_signalList;
 		FrameBase m_frameBase;
 	};
 }
@@ -121,7 +121,7 @@ class SourceBase : public QObject
 public:
 
 	explicit SourceBase(QObject *parent = nullptr);
-	virtual ~SourceBase();
+	virtual ~SourceBase() override;
 
 public:
 
@@ -154,7 +154,7 @@ public:
 private:
 
 	mutable QMutex m_sourceMutex;
-	QVector<PS::Source> m_sourceList;
+	std::vector<PS::Source> m_sourceList;
 };
 
 // ==============================================================================================

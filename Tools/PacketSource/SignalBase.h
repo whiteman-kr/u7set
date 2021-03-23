@@ -16,7 +16,7 @@ namespace PS
 
 		Signal();
 		Signal(const PS::Signal& from);
-		virtual ~Signal();
+		virtual ~Signal() override;
 
 	public:
 
@@ -65,7 +65,7 @@ class SignalBase : public QObject
 public:
 
 	explicit SignalBase(QObject *parent = nullptr);
-	virtual ~SignalBase();
+	virtual ~SignalBase() override;
 
 public:
 
@@ -92,10 +92,10 @@ public:
 
 private:
 
-	mutable QMutex			m_signalMutex;
+	mutable QMutex m_signalMutex;
 
-	QVector<PS::Signal>		m_signalList;
-	QMap<Hash, int>			m_signalHashMap;
+	std::vector<PS::Signal> m_signalList;
+	QMap<Hash, int> m_signalHashMap;
 
 	// for save and restore state after reload bases, maybe reconnect
 	//
@@ -105,7 +105,7 @@ private:
 		double state = 0;
 	};
 
-	QVector<SignalState>	m_signalStateList;
+	std::vector<SignalState> m_signalStateList;
 };
 
 // ==============================================================================================

@@ -587,7 +587,7 @@ void MainWindow::configSocketUnknownAdsEquipmentID(const QStringList& adsIDList)
 											   "Please select EquipmentID from list:").arg(adsEquipmentID), this);
 
 		QComboBox* pEquipmentIdCombo = new QComboBox(pSelectIdDialog);
-		for(QString adsID : adsIDList)
+		for(const QString& adsID : adsIDList)
 		{
 			pEquipmentIdCombo->addItem(adsID);
 		}
@@ -703,7 +703,7 @@ void MainWindow::sourcesLoaded()
 
 	// load sources
 	//
-	QVector<PS::Source*> ptrSourceList;
+	std::vector<PS::Source*> ptrSourceList;
 
 	int sourceCount = m_pscore.sourceBase().count();
 	for(int i = 0; i < sourceCount; i++)
@@ -714,7 +714,7 @@ void MainWindow::sourcesLoaded()
 			continue;
 		}
 
-		ptrSourceList.append(pSource);
+		ptrSourceList.push_back(pSource);
 	}
 
 	m_sourceTable.set(ptrSourceList);		// set sources
@@ -1005,24 +1005,17 @@ void MainWindow::saveSignalsState()
 			continue;
 		}
 
-		int sigalCount = pSource->signalList().count();
-		for(int i = 0; i < sigalCount; i++)
+		for(PS::Signal& signal : pSource->signalList())
 		{
-			PS::Signal* pSignal = &pSource->signalList()[i];
-			if ( pSignal == nullptr)
+			if (signal.regValueAddr().offset() == BAD_ADDRESS || signal.regValueAddr().bit() == BAD_ADDRESS)
 			{
 				continue;
 			}
 
-			if (pSignal->regValueAddr().offset() == BAD_ADDRESS || pSignal->regValueAddr().bit() == BAD_ADDRESS)
-			{
-				continue;
-			}
-
-			file.write(pSignal->appSignalID().toLocal8Bit());
+			file.write(signal.appSignalID().toLocal8Bit());
 			file.write(";");
 
-			file.write(QString::number(pSignal->state(), 'f', 10).toLocal8Bit());
+			file.write(QString::number(signal.state(), 'f', 10).toLocal8Bit());
 			file.write(";");
 
 			file.write("\n");
@@ -1214,20 +1207,13 @@ void MainWindow::updateSignalList(PS::Source* pSource)
 		return;
 	}
 
-	QVector<PS::Signal*> signalList;
+	std::vector<PS::Signal*> signalList;
 
 	m_signalTable.clear();
 
-	int count = pSource->signalList().count();
-	for(int i = 0; i < count; i++)
+	for(PS::Signal& signal : pSource->signalList())
 	{
-		PS::Signal* pSignal = &pSource->signalList()[i];
-		if ( pSignal == nullptr)
-		{
-			continue;
-		}
-
-		signalList.append(pSignal);
+		signalList.push_back(&signal);
 	}
 
 	m_signalTable.set(signalList);
@@ -1247,7 +1233,7 @@ void MainWindow::updateFrameDataList(PS::Source* pSource)
 		return;
 	}
 
-	QVector<PS::FrameData*> frameDataList;
+	std::vector<PS::FrameData*> frameDataList;
 
 	m_pFrameDataPanel->clear();
 
@@ -1260,7 +1246,7 @@ void MainWindow::updateFrameDataList(PS::Source* pSource)
 			continue;
 		}
 
-		frameDataList.append(pFrameData);
+		frameDataList.push_back(pFrameData);
 	}
 
 	m_pFrameDataPanel->set(frameDataList);

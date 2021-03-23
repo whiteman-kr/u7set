@@ -81,26 +81,26 @@ class FindSignalTable : public QAbstractTableModel
 public:
 
 	explicit FindSignalTable(QObject* parent = nullptr);
-	virtual ~FindSignalTable();
+	virtual ~FindSignalTable() override;
 
 public:
 
-	int count() const { return m_findItemList.count(); }
+	int count() const;
 	FindItem at(int index) const;
-	void set(const QVector<FindItem>& list_add);
+	void set(const std::vector<FindItem>& list_add);
 	void clear();
 
 	QString	text(int row, int column) const;
 
 private:
 
-	QVector<FindItem> m_findItemList;
+	std::vector<FindItem> m_findItemList;
 
-	int columnCount(const QModelIndex &parent) const;
-	int rowCount(const QModelIndex &parent=QModelIndex()) const;
+	int columnCount(const QModelIndex &parent) const override;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const override;
 
-	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant data(const QModelIndex &index, int role) const;
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
 };
 
 // ==============================================================================================
@@ -116,16 +116,16 @@ class FindSignalPanel : public QDockWidget
 public:
 
 	explicit FindSignalPanel(QWidget* parent = nullptr);
-	virtual ~FindSignalPanel();
+	virtual ~FindSignalPanel() override;
 
 public:
 
-	void clear() { m_table.clear(); m_statusLabel->setText(QString()); }
+	void clear();
 
 protected:
 
-	bool event(QEvent* e);
-	bool eventFilter(QObject* object, QEvent* e);
+	bool event(QEvent* e) override;
+	bool eventFilter(QObject* object, QEvent* e) override;
 
 private:
 
@@ -153,16 +153,16 @@ private:
 
 public slots:
 
-	void				find();
+	void find();
 
 private slots:
 
-	void				selectItemInSignalView();
+	void selectItemInSignalView();
 
-	void				onContextMenu(QPoint);
+	void onContextMenu(QPoint);
 
-	void				copy();
-	void				selectAll() { m_pView->selectAll(); }
+	void copy();
+	void selectAll();
 };
 
 // ==============================================================================================

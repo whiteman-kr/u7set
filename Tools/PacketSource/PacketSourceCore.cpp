@@ -242,21 +242,14 @@ void PacketSourceCore::saveSourceState()
 
 		// save state of signals
 		//
-		int signalCount = pSource->signalList().count();
-		for(int i = 0; i < signalCount; i++)
+		for(PS::Signal& signal : pSource->signalList())
 		{
-			PS::Signal* pSignal = &pSource->signalList()[i];
-			if ( pSignal == nullptr)
+			if (signal.regValueAddr().offset() == BAD_ADDRESS || signal.regValueAddr().bit() == BAD_ADDRESS)
 			{
 				continue;
 			}
 
-			if (pSignal->regValueAddr().offset() == BAD_ADDRESS || pSignal->regValueAddr().bit() == BAD_ADDRESS)
-			{
-				continue;
-			}
-
-			m_signalBase.saveSignalState(pSignal);
+			m_signalBase.saveSignalState(&signal);
 		}
 	}
 }

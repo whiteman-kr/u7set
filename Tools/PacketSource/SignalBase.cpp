@@ -96,7 +96,8 @@ QString PS::Signal::engineeringRangeStr() const
 	{
 		case E::AnalogAppSignalFormat::SignedInt32:	formatStr = QString::asprintf("%%.%df", 0);					break;
 		case E::AnalogAppSignalFormat::Float32:		formatStr = QString::asprintf("%%.%df", decimalPlaces());	break;
-		default:									assert(0);
+		default:
+			assert(0);
 	}
 
 	range = QString::asprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngineeringUnits(), highEngineeringUnits());
@@ -161,7 +162,8 @@ QString PS::Signal::stateStr() const
 			{
 				case E::AnalogAppSignalFormat::SignedInt32:		formatStr = QString::asprintf("%%.%df", 0);					break;
 				case E::AnalogAppSignalFormat::Float32:			formatStr = QString::asprintf("%%.%df", decimalPlaces());	break;
-				default:										assert(0);										break;
+				default:
+					assert(0);
 			}
 
 			str = QString::asprintf(formatStr.toLocal8Bit(), state());
@@ -233,7 +235,8 @@ double PS::Signal::state() const
 
 					break;
 
-				default: assert(0);
+				default:
+					assert(0);
 			}
 
 			break;
@@ -321,7 +324,8 @@ bool PS::Signal::setState(double state)
 
 					break;
 
-				default: assert(0); break;
+				default:
+					assert(0);
 			}
 
 			break;
@@ -411,7 +415,7 @@ int SignalBase::count() const
 {
 	QMutexLocker l(&m_signalMutex);
 
-	return m_signalList.count();
+	return TO_INT(m_signalList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -431,8 +435,8 @@ int SignalBase::append(const PS::Signal& signal)
 		return -1;
 	}
 
-	m_signalList.append(signal);
-	int index = m_signalList.count() - 1;
+	m_signalList.push_back(signal);
+	int index = TO_INT(m_signalList.size() - 1);
 
 	m_signalHashMap.insert(signal.hash(), index);
 
@@ -470,12 +474,12 @@ PS::Signal* SignalBase::signalPtr(const Hash& hash) const
 	}
 
 	int index = m_signalHashMap[hash];
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return nullptr;
 	}
 
-	PS::Signal* pSignal = (PS::Signal*) &m_signalList[index];
+	PS::Signal* pSignal = (PS::Signal*) &m_signalList[static_cast<quint64>(index)];
 	return pSignal;
 }
 
@@ -485,12 +489,12 @@ PS::Signal* SignalBase::signalPtr(int index) const
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return nullptr;
 	}
 
-	PS::Signal* pSignal = (PS::Signal*) &m_signalList[index];
+	PS::Signal* pSignal = (PS::Signal*) &m_signalList[static_cast<quint64>(index)];
 	return pSignal;
 }
 
@@ -501,12 +505,12 @@ PS::Signal SignalBase::signal(const Hash& hash) const
 	QMutexLocker l(&m_signalMutex);
 
 	int index = m_signalHashMap[hash];
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return PS::Signal();
 	}
 
-	return m_signalList[index];
+	return m_signalList[static_cast<quint64>(index)];
 }
 
 
@@ -516,12 +520,12 @@ PS::Signal SignalBase::signal(int index) const
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return PS::Signal();
 	}
 
-	return m_signalList[index];
+	return m_signalList[static_cast<quint64>(index)];
 }
 
 
@@ -531,12 +535,12 @@ void SignalBase::setSignal(int index, const PS::Signal &signal)
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return;
 	}
 
-	m_signalList[index] = signal;
+	m_signalList[static_cast<quint64>(index)] = signal;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -553,23 +557,22 @@ void SignalBase::saveSignalState(PS::Signal* pSignal)
 	ss.appSignalID = pSignal->appSignalID();
 	ss.state = pSignal->state();
 
-	m_signalStateList.append(ss);
+	m_signalStateList.push_back(ss);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalBase::restoreSignalsState()
 {
-	int count = m_signalStateList.count();
-	for(int i = 0; i < count; i++)
+	for(SignalState& ss : m_signalStateList)
 	{
-		PS::Signal* pSignal = signalPtr(m_signalStateList[i].appSignalID);
+		PS::Signal* pSignal = signalPtr(ss.appSignalID);
 		if (pSignal == nullptr)
 		{
 			continue;
 		}
 
-		pSignal->setState(m_signalStateList[i].state);
+		pSignal->setState(ss.state);
 	}
 
 	m_signalStateList.clear();

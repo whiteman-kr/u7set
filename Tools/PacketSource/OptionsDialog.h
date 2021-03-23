@@ -24,7 +24,7 @@ class OptionsDialog : public QDialog
 public:
 
 	explicit OptionsDialog(const BuildOption& buildOption, QWidget *parent = nullptr);
-	virtual ~OptionsDialog();
+	virtual ~OptionsDialog() override;
 
 public:
 

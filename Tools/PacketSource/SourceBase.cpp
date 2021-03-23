@@ -218,7 +218,7 @@ void PS::Source::loadSignals(const SignalBase& signalBase)
 			PS::Signal signal;
 			signal.setAppSignalID(m_associatedSignalList[i]);
 			qDebug() << "Signal:" << m_associatedSignalList[i] << "has not been found";
-			m_signalList.append(signal);
+			m_signalList.push_back(signal);
 		}
 		else
 		{
@@ -237,7 +237,7 @@ void PS::Source::loadSignals(const SignalBase& signalBase)
 				}
 			}
 
-			m_signalList.append(*pSignal);
+			m_signalList.push_back(*pSignal);
 		}
 	}
 }
@@ -246,35 +246,28 @@ void PS::Source::loadSignals(const SignalBase& signalBase)
 
 void PS::Source::initSignalsState()
 {
-	int sigalCount = m_signalList.count();
-	for(int i = 0; i < sigalCount; i++)
+	for(PS::Signal& signal : m_signalList)
 	{
-		PS::Signal* pSignal = &m_signalList[i];
-		if ( pSignal == nullptr)
+		if (signal.isDiscrete() == true)
 		{
-			continue;
-		}
-
-		if (pSignal->isDiscrete() == true)
-		{
-			if (pSignal->equipmentID().endsWith("VALID") == true)
+			if (signal.equipmentID().endsWith("VALID") == true)
 			{
-				pSignal->setState(true);
+				signal.setState(true);
 			}
 			else
 			{
-				pSignal->setState(false);
+				signal.setState(false);
 			}
 		}
 
-		if (pSignal->isAnalog() == true)
+		if (signal.isAnalog() == true)
 		{
-			pSignal->setState(pSignal->lowEngineeringUnits());
+			signal.setState(signal.lowEngineeringUnits());
 		}
 
-		if (pSignal->enableTuning() == true)
+		if (signal.enableTuning() == true)
 		{
-			pSignal->setState(pSignal->tuningDefaultValue().toDouble());
+			signal.setState(signal.tuningDefaultValue().toDouble());
 		}
 	}
 }
@@ -331,7 +324,7 @@ int SourceBase::count() const
 {
 	QMutexLocker l(&m_sourceMutex);
 
-	return m_sourceList.count();
+	return TO_INT(m_sourceList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -340,9 +333,9 @@ int SourceBase::append(const PS::Source& source)
 {
 	QMutexLocker l(&m_sourceMutex);
 
-	m_sourceList.append(source);
+	m_sourceList.push_back(source);
 
-	return m_sourceList.count() - 1;
+	return TO_INT(m_sourceList.size() - 1);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -351,12 +344,12 @@ void SourceBase::remove(int index)
 {
 	QMutexLocker l(&m_sourceMutex);
 
-	if (index < 0 || index >= m_sourceList.count())
+	if (index < 0 || index >= TO_INT(m_sourceList.size()))
 	{
 		return;
 	}
 
-	m_sourceList.remove(index);
+	m_sourceList.erase(m_sourceList.cbegin() + index);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -365,12 +358,12 @@ PS::Source SourceBase::source(int index) const
 {
 	QMutexLocker l(&m_sourceMutex);
 
-	if (index < 0 || index >= m_sourceList.count())
+	if (index < 0 || index >= TO_INT(m_sourceList.size()))
 	{
 		return PS::Source();
 	}
 
-	return m_sourceList[index];
+	return m_sourceList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -379,12 +372,12 @@ PS::Source* SourceBase::sourcePtr(int index)
 {
 	QMutexLocker l(&m_sourceMutex);
 
-	if (index < 0 || index >= m_sourceList.count())
+	if (index < 0 || index >= TO_INT(m_sourceList.size()))
 	{
 		return nullptr;
 	}
 
-	return &m_sourceList[index];
+	return &m_sourceList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -395,12 +388,11 @@ PS::Source* SourceBase::sourcePtr(const QString& equipmentID)
 
 	PS::Source* pSource = nullptr;
 
-	int sourceCount = m_sourceList.count();
-	for (int index = 0; index < sourceCount; index++)
+	for (PS::Source& source : m_sourceList)
 	{
-		if (m_sourceList[index].info().equipmentID == equipmentID)
+		if (source.info().equipmentID == equipmentID)
 		{
-			pSource = &m_sourceList[index];
+			pSource = &source;
 			break;
 		}
 	}
@@ -414,12 +406,12 @@ void SourceBase::setSource(int index, const PS::Source &source)
 {
 	QMutexLocker l(&m_sourceMutex);
 
-	if (index < 0 || index >= m_sourceList.count())
+	if (index < 0 || index >= TO_INT(m_sourceList.size()))
 	{
 		return;
 	}
 
-	m_sourceList[index] = source;
+	m_sourceList[static_cast<quint64>(index)] = source;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -439,12 +431,12 @@ void SourceBase::runSourece(int index)
 {
 	QMutexLocker l(&m_sourceMutex);
 
-	if (index < 0 || index >= m_sourceList.count())
+	if (index < 0 || index >= TO_INT(m_sourceList.size()))
 	{
 		return;
 	}
 
-	m_sourceList[index].run();
+	m_sourceList[static_cast<quint64>(index)].run();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -453,12 +445,12 @@ void SourceBase::stopSourece(int index)
 {
 	QMutexLocker l(&m_sourceMutex);
 
-	if (index < 0 || index >= m_sourceList.count())
+	if (index < 0 || index >= TO_INT(m_sourceList.size()))
 	{
 		return;
 	}
 
-	m_sourceList[index].stop();
+	m_sourceList[static_cast<quint64>(index)].stop();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -467,10 +459,9 @@ void SourceBase::runAllSoureces()
 {
 	QMutexLocker l(&m_sourceMutex);
 
-	int count = m_sourceList.count();
-	for(int i = 0; i < count; i++)
+	for (PS::Source& source : m_sourceList)
 	{
-		m_sourceList[i].run();
+		source.run();
 	}
 }
 
@@ -480,10 +471,9 @@ void SourceBase::stopAllSoureces()
 {
 	QMutexLocker l(&m_sourceMutex);
 
-	int count = m_sourceList.count();
-	for(int i = 0; i < count; i++)
+	for (PS::Source& source : m_sourceList)
 	{
-		m_sourceList[i].stop();
+		source.stop();
 	}
 }
 
@@ -493,14 +483,13 @@ void SourceBase::runSources(const QStringList& sourceIDList)
 {
 	QMutexLocker l(&m_sourceMutex);
 
-	int count = m_sourceList.count();
-	for(int s = 0; s < count; s++)
+	for (PS::Source& source : m_sourceList)
 	{
 		foreach (const QString& sourceID, sourceIDList)
 		{
-			if(sourceID == m_sourceList[s].info().equipmentID)
+			if(sourceID == source.info().equipmentID)
 			{
-				m_sourceList[s].run();
+				source.run();
 				break;
 			}
 		}

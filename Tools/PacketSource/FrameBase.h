@@ -17,7 +17,7 @@ namespace PS
 
 		FrameData();
 		FrameData(const FrameData& from);
-		virtual ~FrameData();
+		virtual ~FrameData() override;
 
 	public:
 
@@ -42,7 +42,7 @@ class FrameBase : public QObject
 public:
 
 	explicit FrameBase(QObject *parent = nullptr);
-	virtual ~FrameBase();
+	virtual ~FrameBase() override;
 
 public:
 
@@ -60,7 +60,7 @@ public:
 private:
 
 	mutable QMutex m_frameMutex;
-	QVector<PS::FrameData> m_frameList;
+	std::vector<PS::FrameData> m_frameList;
 
 };
 

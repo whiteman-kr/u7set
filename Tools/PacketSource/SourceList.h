@@ -56,13 +56,13 @@ class SourceTable : public QAbstractTableModel
 public:
 
 	explicit SourceTable(QObject* parent = nullptr);
-	virtual ~SourceTable();
+	virtual ~SourceTable() override;
 
 public:
 
 	int sourceCount() const;
 	PS::Source* sourceAt(int index) const;
-	void set(const QVector<PS::Source*> list_add);
+	void set(const std::vector<PS::Source*> list_add);
 	void clear();
 
 	QString text(int row, int column, PS::Source *pSource) const;
@@ -71,22 +71,22 @@ public:
 
 private:
 
-	mutable QMutex			m_sourceMutex;
-	QVector<PS::Source*>	m_sourceList;
+	mutable QMutex m_sourceMutex;
+	std::vector<PS::Source*> m_sourceList;
 
-	int						columnCount(const QModelIndex &parent) const;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
+	int columnCount(const QModelIndex &parent) const override;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const override;
 
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant				data(const QModelIndex &index, int role) const;
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
 
-	QTimer*					m_updateSourceListTimer = nullptr;
-	void					startUpdateSourceListTimer();
-	void					stopUpdateSourceListTimer();
+	QTimer* m_updateSourceListTimer = nullptr;
+	void startUpdateSourceListTimer();
+	void stopUpdateSourceListTimer();
 
 private slots:
 
-	void					updateSourceState();
+	void updateSourceState();
 };
 
 // ==============================================================================================

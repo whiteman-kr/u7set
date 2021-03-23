@@ -158,12 +158,12 @@ QString SignalHistoryTable::text(int row, int column, SignalForLog* pSignalLog) 
 	switch (column)
 	{
 		case SIGNAL_HISTORY_LIST_COLUMN_TIME:			result = pSignalLog->time();							break;
-		case SIGNAL_HISTORY_LIST_COLUMN_CUSTOM_ID:	result = pSignal->customAppSignalID();					break;
+		case SIGNAL_HISTORY_LIST_COLUMN_CUSTOM_ID:		result = pSignal->customAppSignalID();					break;
 		case SIGNAL_HISTORY_LIST_COLUMN_EQUIPMENT_ID:	result = pSignal->equipmentID();						break;
-		case SIGNAL_HISTORY_LIST_COLUMN_APP_ID:		result = pSignal->appSignalID();						break;
+		case SIGNAL_HISTORY_LIST_COLUMN_APP_ID:			result = pSignal->appSignalID();						break;
 		case SIGNAL_HISTORY_LIST_COLUMN_CAPTION:		result = pSignal->caption();							break;
-		case SIGNAL_HISTORY_LIST_COLUMN_PREV_STATE:	result = pSignalLog->stateStr(pSignalLog->prevState());	break;
-		case SIGNAL_HISTORY_LIST_COLUMN_STATE:		result = pSignalLog->stateStr(pSignalLog->state());		break;
+		case SIGNAL_HISTORY_LIST_COLUMN_PREV_STATE:		result = pSignalLog->stateStr(pSignalLog->prevState());	break;
+		case SIGNAL_HISTORY_LIST_COLUMN_STATE:			result = pSignalLog->stateStr(pSignalLog->state());		break;
 		case SIGNAL_HISTORY_LIST_COLUMN_EN_RANGE:		result = pSignal->engineeringRangeStr();				break;
 		default:										assert(0);
 	}
@@ -196,7 +196,7 @@ int SignalHistoryTable::signalCount() const
 {
 	QMutexLocker l(&m_signalMutex);
 
-	return m_signalList.count();
+	return TO_INT(m_signalList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -205,19 +205,19 @@ SignalForLog* SignalHistoryTable::signalPtr(int index) const
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return nullptr;
 	}
 
-	return m_signalList[index];
+	return m_signalList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalHistoryTable::set(const QVector<SignalForLog*> list_add)
+void SignalHistoryTable::set(const std::vector<SignalForLog*> list_add)
 {
-	int count = list_add.count();
+	int count = TO_INT(list_add.size());
 	if (count == 0)
 	{
 		return;
@@ -238,7 +238,7 @@ void SignalHistoryTable::set(const QVector<SignalForLog*> list_add)
 
 void SignalHistoryTable::clear()
 {
-	int count = m_signalList.count();
+	int count = TO_INT(m_signalList.size());
 	if (count == 0)
 	{
 		return;
@@ -393,7 +393,7 @@ void SignalHistoryDialog::updateList()
 
 	m_signalTable.clear();
 
-	QVector<SignalForLog*> signalList;
+	std::vector<SignalForLog*> signalList;
 
 	int count = m_pLog->count();
 	for(int i = 0; i < count; i++)
@@ -409,7 +409,7 @@ void SignalHistoryDialog::updateList()
 			continue;
 		}
 
-		signalList.append(pSignalLog);
+		signalList.push_back(pSignalLog);
 	}
 
 	m_signalTable.set(signalList);
@@ -474,6 +474,18 @@ void SignalHistoryDialog::copy()
 
 	QClipboard *clipboard = QApplication::clipboard();
 	clipboard->setText(textClipboard);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalHistoryDialog::selectAll()
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	m_pView->selectAll();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

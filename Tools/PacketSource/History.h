@@ -57,7 +57,7 @@ class SignalHistory : public QObject
 public:
 
 	explicit SignalHistory(QObject *parent = nullptr);
-	virtual ~SignalHistory();
+	virtual ~SignalHistory() override;
 
 public:
 
@@ -74,7 +74,7 @@ public:
 private:
 
 	mutable QMutex m_signalMutex;
-	QVector<SignalForLog> m_signalList;
+	std::vector<SignalForLog> m_signalList;
 
 signals:
 

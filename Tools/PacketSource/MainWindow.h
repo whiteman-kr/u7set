@@ -35,7 +35,7 @@ class MainWindow : public QMainWindow
 public:
 
 	explicit MainWindow(const Options& options, QMainWindow* parent = nullptr);
-	virtual ~MainWindow();
+	virtual ~MainWindow() override;
 
 public:
 
@@ -148,7 +148,7 @@ private:
 
 protected:
 
-	void					closeEvent(QCloseEvent* e);
+	void					closeEvent(QCloseEvent* e) override;
 
 signals:
 

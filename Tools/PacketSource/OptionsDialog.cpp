@@ -93,6 +93,7 @@ bool OptionsDialog::createInterface()
 	//
 	m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &OptionsDialog::onOk);
+	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &OptionsDialog::reject);
 
 	// Main Layout
 	//

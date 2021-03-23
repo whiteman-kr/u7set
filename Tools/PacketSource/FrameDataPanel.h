@@ -46,13 +46,13 @@ class FrameDataTable : public QAbstractTableModel
 public:
 
 	explicit FrameDataTable(QObject* parent = nullptr);
-	virtual ~FrameDataTable();
+	virtual ~FrameDataTable() override;
 
 public:
 
 	int	dataSize() const;
 	PS::FrameData* frame(int index) const;
-	void set(const QVector<PS::FrameData*>& list_add);
+	void set(const std::vector<PS::FrameData*>& list_add);
 	void clear();
 
 	quint8 byte(int index) const;
@@ -65,13 +65,13 @@ public:
 private:
 
 	mutable QMutex m_frameMutex;
-	QVector<PS::FrameData*>	m_frameList;
+	std::vector<PS::FrameData*>	m_frameList;
 
-	int columnCount(const QModelIndex &parent) const;
-	int rowCount(const QModelIndex &parent=QModelIndex()) const;
+	int columnCount(const QModelIndex &parent) const override;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const override;
 
-	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant data(const QModelIndex &index, int role) const;
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
 };
 
 // ==============================================================================================
@@ -83,7 +83,7 @@ class FrameDataStateDialog : public QDialog
 public:
 
 	explicit FrameDataStateDialog(quint8 byte, QWidget *parent = nullptr);
-	virtual ~FrameDataStateDialog();
+	virtual ~FrameDataStateDialog() override;
 
 public:
 
@@ -112,12 +112,12 @@ class FrameDataPanel : public QDockWidget
 public:
 
 	explicit FrameDataPanel(QWidget* parent = nullptr);
-	virtual ~FrameDataPanel();
+	virtual ~FrameDataPanel()  override;
 
 public:
 
 	void clear();
-	void set(const QVector<PS::FrameData*>& list_add);
+	void set(const std::vector<PS::FrameData*>& list_add);
 
 	void setState();
 
@@ -137,7 +137,7 @@ private:
 
 protected:
 
-	bool event(QEvent* e);
+	bool event(QEvent* e) override;
 
 private slots:
 

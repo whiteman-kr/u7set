@@ -67,7 +67,7 @@ int FindSignalTable::columnCount(const QModelIndex&) const
 
 int FindSignalTable::rowCount(const QModelIndex&) const
 {
-	return m_findItemList.count();
+	return static_cast<int>(m_findItemList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ QVariant FindSignalTable::data(const QModelIndex &index, int role) const
 	}
 
 	int row = index.row();
-	if (row < 0 || row >= m_findItemList.count())
+	if (row < 0 || row >= static_cast<int>(m_findItemList.size()))
 	{
 		return QVariant();
 	}
@@ -136,7 +136,7 @@ QVariant FindSignalTable::data(const QModelIndex &index, int role) const
 	if (role == Qt::UserRole)
 	{
 		QVariant var;
-		var.setValue(m_findItemList.at(row));
+		var.setValue(m_findItemList.at(static_cast<quint64>(row)));
 		return var;
 	}
 
@@ -152,7 +152,7 @@ QVariant FindSignalTable::data(const QModelIndex &index, int role) const
 
 QString FindSignalTable::text(int row, int column) const
 {
-	if (row < 0 || row >= m_findItemList.count())
+	if (row < 0 || row >= static_cast<int>(m_findItemList.size()))
 	{
 		return QString();
 	}
@@ -162,7 +162,7 @@ QString FindSignalTable::text(int row, int column) const
 		return QString();
 	}
 
-	FindItem item = m_findItemList.at(row);
+	FindItem item = m_findItemList.at(static_cast<quint64>(row));
 
 	QString result;
 
@@ -178,6 +178,12 @@ QString FindSignalTable::text(int row, int column) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
+int FindSignalTable::count() const
+{
+	return TO_INT(m_findItemList.size());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
 
 FindItem FindSignalTable::at(int index) const
 {
@@ -186,14 +192,14 @@ FindItem FindSignalTable::at(int index) const
 		return FindItem();
 	}
 
-	return m_findItemList.at(index);
+	return m_findItemList.at(static_cast<quint64>(index));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindSignalTable::set(const QVector<FindItem>& list_add)
+void FindSignalTable::set(const std::vector<FindItem>& list_add)
 {
-	int count = list_add.count();
+	int count = TO_INT(list_add.size());
 	if (count == 0)
 	{
 		return;
@@ -210,7 +216,7 @@ void FindSignalTable::set(const QVector<FindItem>& list_add)
 
 void FindSignalTable::clear()
 {
-	int count = m_findItemList.count();
+	int count = TO_INT(m_findItemList.size());
 	if (count == 0)
 	{
 		return;
@@ -249,6 +255,14 @@ FindSignalPanel::FindSignalPanel(QWidget* parent) :
 
 FindSignalPanel::~FindSignalPanel()
 {
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void FindSignalPanel::clear()
+{
+	m_table.clear();
+	m_statusLabel->setText(QString());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -447,7 +461,7 @@ void FindSignalPanel::find()
 	rx.setPatternSyntax(QRegExp::Wildcard);
 	rx.setCaseSensitivity(Qt::CaseInsensitive);
 
-	QVector<FindItem> findItemList;
+	std::vector<FindItem> findItemList;
 
 	int rowCount = pSignalView->model()->rowCount();
 	int columnCount = pSignalView->model()->columnCount();
@@ -480,13 +494,13 @@ void FindSignalPanel::find()
 				continue;
 			}
 
-			findItemList.append(FindItem(row, column, text));
+			findItemList.push_back(FindItem(row, column, text));
 		}
 	}
 
-	m_statusLabel->setText(QString("Found: %1").arg(findItemList.count()));
+	m_statusLabel->setText(QString("Found: %1").arg(findItemList.size()));
 
-	if (findItemList.count() == 0)
+	if (findItemList.size() == 0)
 	{
 		//QMessageBox::information(this, windowTitle(), tr("Text \"%1\" was not found!").arg(m_findText));
 		return;
@@ -583,6 +597,18 @@ void FindSignalPanel::copy()
 
 	QClipboard *clipboard = QApplication::clipboard();
 	clipboard->setText(textClipboard);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void FindSignalPanel::selectAll()
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	m_pView->selectAll();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

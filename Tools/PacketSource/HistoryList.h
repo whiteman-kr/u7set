@@ -69,13 +69,13 @@ class SignalHistoryTable : public QAbstractTableModel
 public:
 
 	explicit SignalHistoryTable(QObject* parent = nullptr);
-	virtual ~SignalHistoryTable();
+	virtual ~SignalHistoryTable() override;
 
 public:
 
 	int signalCount() const;
 	SignalForLog* signalPtr(int index) const;
-	void set(const QVector<SignalForLog*> list_add);
+	void set(const std::vector<SignalForLog*> list_add);
 	void clear();
 
 	QString text(int row, int column, SignalForLog *pSignal) const;
@@ -85,13 +85,13 @@ public:
 private:
 
 	mutable QMutex m_signalMutex;
-	QVector<SignalForLog*> m_signalList;
+	std::vector<SignalForLog*> m_signalList;
 
-	int columnCount(const QModelIndex &parent) const;
-	int rowCount(const QModelIndex &parent=QModelIndex()) const;
+	int columnCount(const QModelIndex &parent) const override;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const override;
 
-	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant data(const QModelIndex &index, int role) const;
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
 };
 
 // ==============================================================================================
@@ -103,7 +103,7 @@ class SignalHistoryDialog : public QDialog
 public:
 
 	explicit SignalHistoryDialog(SignalHistory* pLog, QWidget *parent = nullptr);
-	virtual ~SignalHistoryDialog();
+	virtual ~SignalHistoryDialog() override;
 
 private:
 
@@ -139,7 +139,7 @@ private slots:
 		// Edit
 		//
 	void copy();
-	void selectAll() { m_pView->selectAll(); }
+	void selectAll();
 
 	void onContextMenu(QPoint);
 

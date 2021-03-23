@@ -17,7 +17,7 @@ public:
 
 	BuildOption(QObject *parent = nullptr);
 	BuildOption(const BuildOption& from, QObject *parent = nullptr);
-	virtual ~BuildOption();
+	virtual ~BuildOption() override;
 
 public:
 

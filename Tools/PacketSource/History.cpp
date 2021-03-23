@@ -76,7 +76,8 @@ QString SignalForLog::stateStr(double state) const
 			{
 				case E::AnalogAppSignalFormat::SignedInt32:		formatStr = QString::asprintf("%%.%df", 0);								break;
 				case E::AnalogAppSignalFormat::Float32:			formatStr = QString::asprintf("%%.%df", m_pSignal->decimalPlaces());	break;
-				default:										assert(0);													break;
+				default:
+					assert(0);
 			}
 
 			str = QString::asprintf(formatStr.toLocal8Bit(), state);
@@ -148,7 +149,7 @@ int SignalHistory::count() const
 {
 	QMutexLocker l(&m_signalMutex);
 
-	return m_signalList.count();
+	return TO_INT(m_signalList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -172,8 +173,8 @@ int SignalHistory::append(const SignalForLog& signalLog)
 
 	QMutexLocker l(&m_signalMutex);
 
-	m_signalList.append(signalLog);
-	index = m_signalList.count() - 1;
+	m_signalList.push_back(signalLog);
+	index = TO_INT(m_signalList.size() - 1);
 
 	emit signalCountChanged();
 
@@ -186,12 +187,12 @@ SignalForLog* SignalHistory::signalPtr(int index) const
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return nullptr;
 	}
 
-	return const_cast<SignalForLog*>(&m_signalList[index]);
+	return const_cast<SignalForLog*>(&m_signalList[static_cast<quint64>(index)]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -200,12 +201,12 @@ SignalForLog SignalHistory::signal(int index) const
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return SignalForLog();
 	}
 
-	return m_signalList[index];
+	return m_signalList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------

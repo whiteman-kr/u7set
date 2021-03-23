@@ -260,7 +260,7 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 		m_loadedFiles.append(bfi.pathFileName);
 	}
 
-	qDebug() << "Read configuration - Time for read:" << responseTime.elapsed() << "ms";
+	qDebug() << "Read configuration - Time for read:" << responseTime.elapsed() << "ms" << result;
 
 	emit configurationLoaded();
 
@@ -439,7 +439,6 @@ void ConfigSocket::loadSignalBase(ConfigSocket* pThis)
 
 	pThis->m_pscore->signalBase().clear();	// clear signals
 
-	QString strProgressLabel;
 	int signalCount = pThis->m_protoAppSignalSet.appsignal_size();
 
 	#ifndef Q_CONSOLE_APP

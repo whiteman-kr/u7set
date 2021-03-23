@@ -29,7 +29,7 @@ public:
 				 const HostAddressPort& serverAddressPort2,
 				 PacketSourceCore* pscore);
 
-	virtual ~ConfigSocket();
+	virtual ~ConfigSocket() override;
 
 public:
 

@@ -177,7 +177,7 @@ int SourceTable::sourceCount() const
 {
 	QMutexLocker l(&m_sourceMutex);
 
-	return m_sourceList.count();
+	return TO_INT(m_sourceList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -186,19 +186,19 @@ PS::Source* SourceTable::sourceAt(int index) const
 {
 	QMutexLocker l(&m_sourceMutex);
 
-	if (index < 0 || index >= m_sourceList.count())
+	if (index < 0 || index >= TO_INT(m_sourceList.size()))
 	{
 		return nullptr;
 	}
 
-	return m_sourceList[index];
+	return m_sourceList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SourceTable::set(const QVector<PS::Source*> list_add)
+void SourceTable::set(const std::vector<PS::Source*> list_add)
 {
-	int count = list_add.count();
+	int count = TO_INT(list_add.size());
 	if (count == 0)
 	{
 		return;
@@ -219,7 +219,7 @@ void SourceTable::set(const QVector<PS::Source*> list_add)
 
 void SourceTable::clear()
 {
-	int count = m_sourceList.count();
+	int count = TO_INT(m_sourceList.size());
 	if (count == 0)
 	{
 		return;

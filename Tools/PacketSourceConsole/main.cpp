@@ -1,6 +1,5 @@
 #include <QCoreApplication>
 
-#include "../../lib/MemLeaksDetection.h"
 #include "../../Proto/network.pb.h"
 
 #include "../PacketSource/ConfigSocket.h"
@@ -24,8 +23,6 @@
 
 int main(int argc, char *argv[])
 {
-	initMemoryLeaksDetection();
-
 	// check version of RUP packets
 	//
 	#if RUP_VERSION != PS_SUPPORT_VERSION
@@ -77,8 +74,6 @@ int main(int argc, char *argv[])
 	ps.clear();
 
 	google::protobuf::ShutdownProtobufLibrary();
-
-	dumpMemoryLeaks();
 
 	return result;
 }

@@ -34,7 +34,7 @@ public:
 
 	explicit PacketSourceCore(QObject *parent = nullptr);
 	PacketSourceCore(const CmdLineParam& cmdLine, QObject *parent = nullptr);
-	virtual ~PacketSourceCore();
+	virtual ~PacketSourceCore() override;
 
 public:
 

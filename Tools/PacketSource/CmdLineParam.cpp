@@ -124,13 +124,13 @@ bool CmdLineParam::parse()
 
 			args.insert(0, QCoreApplication::applicationFilePath());
 
-			QVector<char*> argv;
+			std::vector<char*> argv;
 			for (int i = 0; i < args.count(); i++)
 			{
 				unsigned int strLen = static_cast<unsigned int>(args[i].length()) + 1;
 				char* pArg = new char[strLen];
 				memcpy(pArg, args[i].toLatin1().data(), strLen);
-				argv.append(pArg);
+				argv.push_back(pArg);
 			}
 
 			m_cmdLineParser.setCmdLineArgs(args.count(), argv.data());

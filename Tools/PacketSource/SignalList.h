@@ -73,13 +73,13 @@ class SignalTable : public QAbstractTableModel
 public:
 
 	explicit SignalTable(QObject* parent = nullptr);
-	virtual ~SignalTable();
+	virtual ~SignalTable() override;
 
 public:
 
 	int signalCount() const;
 	PS::Signal* signalPtr(int index) const;
-	void set(const QVector<PS::Signal*> list_add);
+	void set(const std::vector<PS::Signal*> list_add);
 	void clear();
 
 	QString text(int row, int column, PS::Signal *pSignal) const;
@@ -89,13 +89,13 @@ public:
 private:
 
 	mutable QMutex m_signalMutex;
-	QVector<PS::Signal*> m_signalList;
+	std::vector<PS::Signal*> m_signalList;
 
-	int columnCount(const QModelIndex &parent) const;
-	int rowCount(const QModelIndex &parent=QModelIndex()) const;
+	int columnCount(const QModelIndex &parent) const override;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const override;
 
-	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant data(const QModelIndex &index, int role) const;
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
 };
 
 // ==============================================================================================
@@ -107,7 +107,7 @@ class SignalStateDialog : public QDialog
 public:
 
 	explicit SignalStateDialog(PS::Signal* pSignal, QWidget *parent = nullptr);
-	virtual ~SignalStateDialog();
+	virtual ~SignalStateDialog() override;
 
 public:
 

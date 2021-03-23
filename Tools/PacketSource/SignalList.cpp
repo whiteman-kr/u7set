@@ -203,7 +203,7 @@ int SignalTable::signalCount() const
 {
 	QMutexLocker l(&m_signalMutex);
 
-	return m_signalList.count();
+	return TO_INT(m_signalList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -212,19 +212,19 @@ PS::Signal* SignalTable::signalPtr(int index) const
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return nullptr;
 	}
 
-	return m_signalList[index];
+	return m_signalList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalTable::set(const QVector<PS::Signal*> list_add)
+void SignalTable::set(const std::vector<PS::Signal*> list_add)
 {
-	int count = list_add.count();
+	int count = TO_INT(list_add.size());
 	if (count == 0)
 	{
 		return;
@@ -245,7 +245,7 @@ void SignalTable::set(const QVector<PS::Signal*> list_add)
 
 void SignalTable::clear()
 {
-	int count = m_signalList.count();
+	int count = TO_INT(m_signalList.size());
 	if (count == 0)
 	{
 		return;
@@ -312,7 +312,8 @@ void SignalStateDialog::createInterface()
 				{
 					case E::AnalogAppSignalFormat::SignedInt32:		formatStr = QString::asprintf("%%.%df", 0);								break;
 					case E::AnalogAppSignalFormat::Float32:			formatStr = QString::asprintf("%%.%df", m_pSignal->decimalPlaces());	break;
-					default:										assert(0);													break;
+					default:
+						assert(0);
 				}
 				strState = QString::asprintf(formatStr.toLocal8Bit(), m_pSignal->state());
 

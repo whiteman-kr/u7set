@@ -9,10 +9,10 @@ TEMPLATE = app
 
 DEFINES += Q_CONSOLE_APP
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../../warnings.pri)
 
@@ -31,11 +31,12 @@ unix {
 }
 
 SOURCES += \
+    ../../Proto/ProtoSerialization.cpp \
+    ../../lib/ScriptDeviceObject.cpp \
     main.cpp \
     ../../Proto/network.pb.cc \
     ../../Proto/serialization.pb.cc \
     ../../lib/CfgServerLoader.cpp \
-    ../../lib/MemLeaksDetection.cpp \
     ../../lib/CommandLineParser.cpp \
     ../../lib/HostAddressPort.cpp \
     ../../lib/SimpleThread.cpp \
@@ -58,7 +59,6 @@ SOURCES += \
     ../../lib/DeviceHelper.cpp \
     ../../lib/DeviceObject.cpp \
     ../../lib/ModuleFirmware.cpp \
-    ../../lib/ProtoSerialization.cpp \
     ../../lib/DbStruct.cpp \
     ../../lib/SimpleMutex.cpp \
     ../../lib/Times.cpp \
@@ -77,14 +77,15 @@ SOURCES += \
     ../PacketSource/PacketSourceCore.cpp
 
 HEADERS += \
+    ../../Proto/ProtoSerialization.h \
     ../../Proto/network.pb.h \
     ../../Proto/serialization.pb.h \
     ../../Builder/CfgFiles.h \
     ../../lib/CfgServerLoader.h \
-    ../../lib/MemLeaksDetection.h \
     ../../lib/CommandLineParser.h \
     ../../lib/OrderedHash.h \
     ../../lib/HostAddressPort.h \
+    ../../lib/ScriptDeviceObject.h \
     ../../lib/SimpleThread.h \
     ../../lib/CircularLogger.h \
     ../../lib/SocketIO.h \
@@ -109,7 +110,6 @@ HEADERS += \
     ../../lib/Factory.h \
     ../../lib/ModuleFirmware.h \
     ../../lib/PropertyObject.h \
-    ../../lib/ProtoSerialization.h \
     ../../lib/DbStruct.h \
     ../../lib/SimpleMutex.h \
     ../../lib/Times.h \

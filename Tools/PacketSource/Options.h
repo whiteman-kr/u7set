@@ -17,7 +17,7 @@ public:
 
 	explicit WindowsOption(QObject *parent = nullptr);
 	WindowsOption(const WindowsOption& from, QObject *parent = nullptr);
-	virtual ~WindowsOption();
+	virtual ~WindowsOption() override;
 
 public:
 
@@ -52,7 +52,7 @@ public:
 
 	explicit Options(QObject *parent = nullptr);
 	Options(const Options& from, QObject *parent = nullptr);
-	virtual ~Options();
+	virtual ~Options() override;
 
 public:
 

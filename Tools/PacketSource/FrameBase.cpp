@@ -75,7 +75,7 @@ int FrameBase::count() const
 {
 	QMutexLocker l(&m_frameMutex);
 
-	return m_frameList.count();
+	return TO_INT(m_frameList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -93,9 +93,9 @@ bool FrameBase::setFrameCount(int count)
 
 	m_frameList.clear();
 
-	m_frameList.resize(count);
+	m_frameList.resize(static_cast<quint64>(count));
 
-	result = m_frameList.count() == count;
+	result = TO_INT(m_frameList.size()) == count;
 	return result;
 }
 
@@ -105,12 +105,12 @@ PS::FrameData FrameBase::frameData(int index) const
 {
 	QMutexLocker l(&m_frameMutex);
 
-	if (index < 0 || index >= m_frameList.count())
+	if (index < 0 || index >= TO_INT(m_frameList.size()))
 	{
 		return PS::FrameData();
 	}
 
-	return m_frameList[index];
+	return m_frameList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -119,12 +119,12 @@ PS::FrameData* FrameBase::frameDataPtr(int index)
 {
 	QMutexLocker l(&m_frameMutex);
 
-	if (index < 0 || index >= m_frameList.count())
+	if (index < 0 || index >= TO_INT(m_frameList.size()))
 	{
 		return nullptr;
 	}
 
-	return &m_frameList[index];
+	return &m_frameList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -133,12 +133,12 @@ void FrameBase::setFrameData(int index, const PS::FrameData &frame)
 {
 	QMutexLocker l(&m_frameMutex);
 
-	if (index < 0 || index >= m_frameList.count())
+	if (index < 0 || index >= TO_INT(m_frameList.size()))
 	{
 		return;
 	}
 
-	m_frameList[index] = frame;
+	m_frameList[static_cast<quint64>(index)] = frame;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

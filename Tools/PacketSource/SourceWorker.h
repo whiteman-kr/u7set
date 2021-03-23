@@ -12,7 +12,7 @@ class SourceWorker : public QObject
 public:
 
 	explicit SourceWorker(QObject* pSource);
-	virtual ~SourceWorker();
+	virtual ~SourceWorker() override;
 
 public:
 
