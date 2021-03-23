@@ -60,7 +60,7 @@ private:
 
 // ==============================================================================================
 
-typedef QVector<StatisticsItem> StatisticList;
+typedef std::vector<StatisticsItem> StatisticList;
 
 // ==============================================================================================
 
@@ -101,7 +101,7 @@ private:
 	int m_measureType = 0;			// measure type
 
 	mutable QMutex m_signalMutex;
-	QVector<StatisticList> m_statisticList;
+	std::vector<StatisticList> m_statisticList;
 
 	int m_measuredCount = 0;
 	int m_invalidMeasureCount = 0;

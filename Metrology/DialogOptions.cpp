@@ -155,7 +155,7 @@ QHBoxLayout* DialogOptions::createPages()
 	m_pPageTree->setHeaderHidden(true);
 	m_pPageTree->setFixedWidth(200);
 
-	QVector<QTreeWidgetItem*> groupList;
+	std::vector<QTreeWidgetItem*> groupList;
 
 	for(int group = 0; group < OPTION_GROUP_COUNT; group++)
 	{
@@ -163,18 +163,18 @@ QHBoxLayout* DialogOptions::createPages()
 		groupTreeItem->setText(0, qApp->translate("DialogOptions", OptionGroupTitle[group]));
 		m_pPageTree->addTopLevelItem(groupTreeItem);
 
-		groupList.append(groupTreeItem);
+		groupList.push_back(groupTreeItem);
 	}
 
 	for(int page = 0; page < OPTION_PAGE_COUNT; page++)
 	{
 		int groupIndex = OptionGroupPage[page];
-		if (groupIndex < 0 || groupIndex >= groupList.count())
+		if (groupIndex < 0 || groupIndex >= TO_INT(groupList.size()))
 		{
 			continue;
 		}
 
-		QTreeWidgetItem* groupTreeItem = groupList.at(groupIndex);
+		QTreeWidgetItem* groupTreeItem = groupList.at(static_cast<quint64>(groupIndex));
 
 		QTreeWidgetItem* pageTreeItem = new QTreeWidgetItem;
 		pageTreeItem->setText(0, qApp->translate("DialogOptions", OptionPageShortTitle[page]));
@@ -189,7 +189,7 @@ QHBoxLayout* DialogOptions::createPages()
 			pPropertyPage->m_pTreeWidgetItem = pageTreeItem;
 		}
 
-		m_pageList.append(pPropertyPage);
+		m_pageList.push_back(pPropertyPage);
 	}
 
 	connect(m_pPageTree, &QTreeWidget::currentItemChanged , this, &DialogOptions::onPageChanged);
@@ -206,10 +206,8 @@ void DialogOptions::removePages()
 	m_propertyItemList.clear();
 	m_propertyValueList.clear();
 
-	int count = m_pageList.count();
-	for(int i = 0; i < count; i++)
+	for(PropertyPage* pPropertyPage : m_pageList)
 	{
-		PropertyPage* pPropertyPage = m_pageList.at(i);
 		if (pPropertyPage == nullptr)
 		{
 			continue;
@@ -965,7 +963,7 @@ void DialogOptions::onPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* pre
 	}
 
 	int page = current->data(0, Qt::UserRole).toInt();
-	if (page < 0 || page >= m_pageList.count())
+	if (page < 0 || page >= TO_INT(m_pageList.size()))
 	{
 		return;
 	}
@@ -977,16 +975,16 @@ void DialogOptions::onPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* pre
 
 bool DialogOptions::setActivePage(int page)
 {
-	if (page < 0 || page >= m_pageList.count())
+	if (page < 0 || page >= TO_INT(m_pageList.size()))
 	{
 		return false;
 	}
 
 	// hide current page
 	//
-	if (m_activePage >= 0 && m_activePage < m_pageList.count())
+	if (m_activePage >= 0 && m_activePage < TO_INT(m_pageList.size()))
 	{
-		PropertyPage* pCurrentPage = m_pageList.at(m_activePage);
+		PropertyPage* pCurrentPage = m_pageList.at(static_cast<quint64>(m_activePage));
 		if (pCurrentPage != nullptr)
 		{
 			QWidget* pWidget = pCurrentPage->getWidget();
@@ -1000,7 +998,7 @@ bool DialogOptions::setActivePage(int page)
 
 	// show new page
 	//
-	PropertyPage* pActivePage = m_pageList.at(page);
+	PropertyPage* pActivePage = m_pageList.at(static_cast<quint64>(page));
 	if (pActivePage != nullptr)
 	{
 		QWidget* pWidget = pActivePage->getWidget();
@@ -1485,7 +1483,7 @@ bool DialogOptions::event(QEvent*  e)
 
 	if (e->type() == QEvent::KeyRelease)
 	{
-		if (m_activePage >= 0 && m_activePage < m_pageList.count())
+		if (m_activePage >= 0 && m_activePage < TO_INT(m_pageList.size()))
 		{
 			PropertyPage* pActivePage = m_pageList.at(m_activePage);
 			if (pActivePage != nullptr)

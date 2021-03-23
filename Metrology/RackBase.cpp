@@ -94,7 +94,7 @@ int RackGroupBase::count() const
 {
 	QMutexLocker l(&m_groupMutex);
 
-	return m_groupList.count();
+	return TO_INT(m_groupList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -109,9 +109,9 @@ int RackGroupBase::append(const RackGroup& group)
 
 	QMutexLocker l(&m_groupMutex);
 
-	m_groupList.append(group);
+	m_groupList.push_back(group);
 
-	return m_groupList.count() - 1;
+	return TO_INT(m_groupList.size() - 1);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -120,12 +120,12 @@ RackGroup RackGroupBase::group(int index) const
 {
 	QMutexLocker l(&m_groupMutex);
 
-	if (index < 0 || index >= m_groupList.count())
+	if (index < 0 || index >= TO_INT(m_groupList.size()))
 	{
 		return RackGroup();
 	}
 
-	return m_groupList[index];
+	return m_groupList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -134,12 +134,12 @@ bool RackGroupBase::setGroup(int index, const RackGroup& group)
 {
 	QMutexLocker l(&m_groupMutex);
 
-	if (index < 0 || index >= m_groupList.count())
+	if (index < 0 || index >= TO_INT(m_groupList.size()))
 	{
 		return false;
 	}
 
-	m_groupList[index] = group;
+	m_groupList[static_cast<quint64>(index)] = group;
 
 	return true;
 }
@@ -150,12 +150,12 @@ bool RackGroupBase::remove(int index)
 {
 	QMutexLocker l(&m_groupMutex);
 
-	if (index < 0 || index >= m_groupList.count())
+	if (index < 0 || index >= TO_INT(m_groupList.size()))
 	{
 		return false;
 	}
 
-	m_groupList.remove(index);
+	m_groupList.erase(m_groupList.begin() + index);
 
 	return true;
 }
@@ -177,7 +177,7 @@ int RackGroupBase::load()
 
 	m_groupMutex.lock();
 
-		m_groupList.resize(table->recordCount());
+		m_groupList.resize(static_cast<quint64>(table->recordCount()));
 
 		readedRecordCount = table->read(m_groupList.data());
 
@@ -214,7 +214,7 @@ bool RackGroupBase::save()
 
 	m_groupMutex.lock();
 
-		writtenRecordCount = table->write(m_groupList.data(), m_groupList.count());
+		writtenRecordCount = table->write(m_groupList.data(), TO_INT(m_groupList.size()));
 
 	m_groupMutex.unlock();
 
@@ -267,7 +267,7 @@ int RackBase::count() const
 {
 	QMutexLocker l(&m_rackMutex);
 
-	return m_rackList.count();
+	return TO_INT(m_rackList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -286,8 +286,8 @@ int RackBase::append(const Metrology::RackParam& rack)
 
 	if (m_rackHashMap.contains(rack.hash()) == false)
 	{
-		m_rackList.append(rack);
-		index = m_rackList.count() - 1;
+		m_rackList.push_back(rack);
+		index = TO_INT(m_rackList.size() - 1);
 
 		m_rackHashMap.insert(rack.hash(), index);
 	}
@@ -326,9 +326,9 @@ Metrology::RackParam* RackBase::rackPtr(const Hash& hash)
 	{
 		int index = m_rackHashMap[hash];
 
-		if (index >= 0 && index < m_rackList.count())
+		if (index >= 0 && index < TO_INT(m_rackList.size()))
 		{
-			pRack = &m_rackList[index];
+			pRack = &m_rackList[static_cast<quint64>(index)];
 		}
 	}
 
@@ -341,12 +341,12 @@ Metrology::RackParam* RackBase::rackPtr(int index)
 {
 	QMutexLocker l(&m_rackMutex);
 
-	if (index < 0 || index >= m_rackList.count())
+	if (index < 0 || index >= TO_INT(m_rackList.size()))
 	{
 		return nullptr;
 	}
 
-	return &m_rackList[index];
+	return &m_rackList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -380,9 +380,9 @@ Metrology::RackParam RackBase::rack(const Hash& hash)
 		{
 			int index = m_rackHashMap[hash];
 
-			if (index >= 0 && index < m_rackList.count())
+			if (index >= 0 && index < TO_INT(m_rackList.size()))
 			{
-				rack = m_rackList[index];
+				rack = m_rackList[static_cast<quint64>(index)];
 			}
 		}
 
@@ -397,12 +397,12 @@ Metrology::RackParam RackBase::rack(int index)
 {
 	QMutexLocker l(&m_rackMutex);
 
-	if (index < 0 || index >= m_rackList.count())
+	if (index < 0 || index >= TO_INT(m_rackList.size()))
 	{
 		return Metrology::RackParam();
 	}
 
-	return m_rackList[index];
+	return m_rackList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -444,9 +444,9 @@ void RackBase::setRack(const Hash& hash, const Metrology::RackParam& rack)
 	{
 		int index = m_rackHashMap[rack.hash()];
 
-		if (index >= 0 && index < m_rackList.count())
+		if (index >= 0 && index < TO_INT(m_rackList.size()))
 		{
-			m_rackList[index] = rack;
+			m_rackList[static_cast<quint64>(index)] = rack;
 		}
 	}
 }
@@ -462,12 +462,12 @@ void RackBase::setRack(int index, const Metrology::RackParam& rack)
 
 	QMutexLocker l(&m_rackMutex);
 
-	if (index < 0 || index >= m_rackList.count())
+	if (index < 0 || index >= TO_INT(m_rackList.size()))
 	{
 		return;
 	}
 
-	m_rackList[index] = rack;
+	m_rackList[static_cast<quint64>(index)] = rack;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -478,17 +478,15 @@ void RackBase::updateParamFromGroups()
 	//
 	m_rackMutex.lock();
 
-		int rackCount = m_rackList.count();
-		for(int i = 0; i < rackCount; i++)
+		for(Metrology::RackParam& rack : m_rackList)
 		{
-			Metrology::RackParam& r = m_rackList[i];
-			if (r.isValid() == false)
+			if (rack.isValid() == false)
 			{
 				continue;
 			}
 
-			r.setGroupIndex(-1);
-			r.setChannel(-1);
+			rack.setGroupIndex(-1);
+			rack.setChannel(-1);
 		}
 
 	m_rackMutex.unlock();

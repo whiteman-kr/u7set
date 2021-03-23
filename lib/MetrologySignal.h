@@ -183,7 +183,7 @@ namespace Metrology
 
 		SignalParam() {}
 		SignalParam(const ::Signal& signal, const SignalLocation& location);
-		virtual ~SignalParam() {}
+		virtual ~SignalParam() override {}
 
 	private:
 
@@ -202,7 +202,7 @@ namespace Metrology
 		double					m_physicalLowLimit = 0;
 		double					m_physicalHighLimit = 0;
 
-		QVector<std::shared_ptr<ComparatorEx>> m_comparatorList;
+		std::vector<std::shared_ptr<ComparatorEx>> m_comparatorList;
 		int						m_comparatorCount = 0;
 
 	public:
@@ -278,7 +278,7 @@ namespace Metrology
 		// comparators
 		//
 		std::shared_ptr<ComparatorEx> comparator(int index) const;
-		void					setComparatorList(const QVector<std::shared_ptr<ComparatorEx>>& comparators);
+		void					setComparatorList(const std::vector<std::shared_ptr<ComparatorEx> >& comparators);
 		int						comparatorCount() const { return m_comparatorCount; }
 		bool					hasComparators() const { return m_comparatorCount != 0; }
 

@@ -1052,19 +1052,19 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QVector<Metrology::Signal*> ConnectionBase::destinationSignals(const QString& sourceAppSignalID, ConnectionType connectionType) const
+	std::vector<Metrology::Signal*> ConnectionBase::destinationSignals(const QString& sourceAppSignalID, ConnectionType connectionType) const
 	{
 		if (sourceAppSignalID.isEmpty() == true)
 		{
-			return QVector<Metrology::Signal*>();
+			return std::vector<Metrology::Signal*>();
 		}
 
 		if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 		{
-			return QVector<Metrology::Signal*>();
+			return std::vector<Metrology::Signal*>();
 		}
 
-		QVector<Metrology::Signal*> destSignalList;
+		std::vector<Metrology::Signal*> destSignalList;
 
 		QMutexLocker l(&m_connectionMutex);
 
@@ -1089,7 +1089,7 @@ namespace Metrology
 				continue;
 			}
 
-			destSignalList.append(pDestSignal);
+			destSignalList.push_back(pDestSignal);
 		}
 
 		return destSignalList;

@@ -676,12 +676,12 @@ void DialogMetrologyConnection::updateList()
 {
 	m_connectionTable.clear();
 
-	QVector<Metrology::Connection> connectionList;
+	std::vector<Metrology::Connection> connectionList;
 
 	int count = m_connectionBase.count();
 	for(int i = 0; i < count; i++)
 	{
-		connectionList.append(m_connectionBase.connection(i));
+		connectionList.push_back(m_connectionBase.connection(i));
 	}
 
 	m_connectionTable.set(connectionList);

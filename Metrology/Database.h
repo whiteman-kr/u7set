@@ -328,7 +328,7 @@ public:
 	SqlTable*			openTable(int objectType);
 
 	bool				appendMeasure(Measure::Item* pMeasurement);
-	bool				removeMeasure(Measure::Type measuteType, const QVector<int>& keyList);
+	bool				removeMeasure(Measure::Type measuteType, const std::vector<int>& keyList);
 
 private:
 
@@ -347,7 +347,7 @@ private:
 public slots:
 
 	void				appendToBase(Measure::Item* pMeasurement);
-	void				removeFromBase(Measure::Type measureType, const QVector<int>& keyList);
+	void				removeFromBase(Measure::Type measureType, const std::vector<int>& keyList);
 };
 
 // ==============================================================================================

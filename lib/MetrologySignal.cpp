@@ -917,15 +917,15 @@ namespace Metrology
 			return nullptr;
 		}
 
-		return m_comparatorList[index];
+		return m_comparatorList[static_cast<quint64>(index)];
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void SignalParam::setComparatorList(const QVector<std::shared_ptr<ComparatorEx>>& comparators)
+	void SignalParam::setComparatorList(const std::vector<std::shared_ptr<ComparatorEx>>& comparators)
 	{
 		m_comparatorList = comparators;
-		m_comparatorCount = m_comparatorList.count();
+		m_comparatorCount = TO_INT(m_comparatorList.size());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

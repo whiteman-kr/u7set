@@ -125,7 +125,7 @@ namespace Measure
 	private:
 
 		mutable QMutex m_mutex;
-		QVector<Point> m_pointList;
+		std::vector<Point> m_pointList;
 	};
 
 	// ==============================================================================================

@@ -159,8 +159,8 @@ void StatisticsBase::clear()
 {
 	QMutexLocker l(&m_signalMutex);
 
-	int listCount = m_statisticList.count();
-	for(int i = 0; i < listCount; i++)
+	quint64 listCount = m_statisticList.size();
+	for(quint64 i = 0; i < listCount; i++)
 	{
 		m_statisticList[i].clear();
 	}
@@ -180,7 +180,7 @@ int StatisticsBase::count() const
 
 	QMutexLocker l(&m_signalMutex);
 
-	return m_statisticList[m_measureType].count();
+	return TO_INT(m_statisticList[static_cast<quint64>(m_measureType)].size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -194,7 +194,7 @@ int StatisticsBase::count(int measureType) const
 
 	QMutexLocker l(&m_signalMutex);
 
-	return m_statisticList[measureType].count();
+	return TO_INT(m_statisticList[static_cast<quint64>(measureType)].size());
 }
 
 
@@ -204,7 +204,7 @@ void StatisticsBase::createSignalList()
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (m_statisticList.count() <= Measure::Type::Linearity)
+	if (m_statisticList.size() <= Measure::Type::Linearity)
 	{
 		return;
 	}
@@ -262,7 +262,7 @@ void StatisticsBase::createSignalList()
 			}
 		}
 
-		m_statisticList[Measure::Type::Linearity].append(si);
+		m_statisticList[Measure::Type::Linearity].push_back(si);
 	}
 
 	qDebug() << __FUNCTION__ << " Time for create: " << responseTime.elapsed() << " ms";
@@ -274,7 +274,7 @@ void StatisticsBase::createComparatorList()
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (m_statisticList.count() <= Measure::Type::Comparators)
+	if (m_statisticList.size() <= Measure::Type::Comparators)
 	{
 		return;
 	}
@@ -347,7 +347,7 @@ void StatisticsBase::createComparatorList()
 			}
 			*/
 
-			m_statisticList[Measure::Type::Comparators].append(si);
+			m_statisticList[Measure::Type::Comparators].push_back(si);
 		}
 	}
 
@@ -365,12 +365,12 @@ StatisticsItem StatisticsBase::item(int index) const
 
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_statisticList[m_measureType].count())
+	if (index < 0 || index >= TO_INT(m_statisticList[static_cast<quint64>(m_measureType)].size()))
 	{
 		return StatisticsItem();
 	}
 
-	return m_statisticList[m_measureType][index];
+	return m_statisticList[static_cast<quint64>(m_measureType)][static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -384,12 +384,12 @@ StatisticsItem StatisticsBase::item(int measureType, int index) const
 
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_statisticList[measureType].count())
+	if (index < 0 || index >= TO_INT(m_statisticList[static_cast<quint64>(measureType)].size()))
 	{
 		return StatisticsItem();
 	}
 
-	return m_statisticList[measureType][index];
+	return m_statisticList[static_cast<quint64>(measureType)][static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -403,12 +403,12 @@ StatisticsItem* StatisticsBase::itemPtr(int measureType, int index)
 
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_statisticList[measureType].count())
+	if (index < 0 || index >= TO_INT(m_statisticList[static_cast<quint64>(measureType)].size()))
 	{
 		return nullptr;
 	}
 
-	return &m_statisticList[measureType][index];
+	return &m_statisticList[static_cast<quint64>(measureType)][static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -422,12 +422,12 @@ void StatisticsBase::setItem(int measureType, int index, const StatisticsItem& i
 
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_statisticList[measureType].count())
+	if (index < 0 || index >= TO_INT(m_statisticList[static_cast<quint64>(measureType)].size()))
 	{
 		return;
 	}
 
-	m_statisticList[measureType][index] = item;
+	m_statisticList[static_cast<quint64>(measureType)][static_cast<quint64>(index)] = item;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

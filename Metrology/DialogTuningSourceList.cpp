@@ -206,7 +206,7 @@ void DialogTuningSourceList::updateList()
 	//
 	m_sourceTable.clear();
 
-	QVector<TuningSource> sourceList;
+	std::vector<TuningSource> sourceList;
 
 	int souceCount = theSignalBase.tuning().sourceBase().count();
 	for(int i = 0; i < souceCount; i++)
@@ -217,7 +217,7 @@ void DialogTuningSourceList::updateList()
 			continue;
 		}
 
-		sourceList.append(src);
+		sourceList.push_back(src);
 	}
 
 	m_sourceTable.set(sourceList);

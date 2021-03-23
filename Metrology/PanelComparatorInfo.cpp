@@ -123,8 +123,8 @@ void ComparatorInfoTable::signalParamChanged(const QString& appSignalID)
 
 	QMutexLocker l(&m_mutex);
 
-	int signalCount = m_list.count();
-	for(int c = 0; c < signalCount; c ++)
+	quint64 signalCount = m_list.size();
+	for(quint64 c = 0; c < signalCount; c ++)
 	{
 		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType ++)
 		{
@@ -364,7 +364,7 @@ void PanelComparatorInfo::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	int maxComparatorCount = 0;
 
-	QVector<IoSignalParam> ioParamList;
+	std::vector<IoSignalParam> ioParamList;
 
 	for(int c = 0; c < signalCount; c ++)
 	{
@@ -394,7 +394,7 @@ void PanelComparatorInfo::activeSignalChanged(const MeasureSignal& activeSignal)
 			ioParam.setCalibratorManager(m_pCalibratorBase->calibratorForMeasure(c));
 		}
 
-		ioParamList.append(ioParam);
+		ioParamList.push_back(ioParam);
 	}
 
 	m_comparatorTable.set(ioParamList);

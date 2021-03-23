@@ -130,7 +130,7 @@ public:
 private:
 
 	mutable QMutex m_mutex;
-	QVector<Metrology::Signal*> m_pSignalList;
+	QVector<Metrology::Signal*> m_signalList;
 
 	Metrology::SignalLocation m_location;
 
@@ -292,22 +292,22 @@ private:
 	//
 	mutable QMutex			m_signalMutex;
 	QHash<Hash, int>		m_signalHashList;
-	QVector<Metrology::Signal> m_signalList;
+	std::vector<Metrology::Signal> m_signalList;
 
 	// list of hashes in order to receive signal state form AppDataSrv
 	//
 	mutable QMutex			m_stateMutex;
-	QVector<Hash>			m_requestStateList;
+	std::vector<Hash>		m_requestStateList;
 
 	// list of racks form CgfSrv in order to select signal for measure
 	//
 	mutable QMutex			m_rackMutex;
-	QVector<Metrology::RackParam> m_rackList;
+	std::vector<Metrology::RackParam> m_rackList;
 
 	// list of signals for measure
 	//
 	mutable QMutex			m_signalMesaureMutex;
-	QVector<MeasureSignal>	m_signalMeasureList;
+	std::vector<MeasureSignal>	m_signalMeasureList;
 
 	// main signal that are measuring at the current moment
 	//

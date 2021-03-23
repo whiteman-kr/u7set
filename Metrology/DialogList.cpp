@@ -166,7 +166,7 @@ void DialogList::createHeaderContexMenu(int columnCount, const char* const* colu
 		pAction->setCheckable(true);
 		pAction->setChecked(true);
 
-		m_pColumnActionList.append(pAction);
+		m_pColumnActionList.push_back(pAction);
 	}
 
 	connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered),	this, &DialogList::onColumnAction);
@@ -274,7 +274,7 @@ void DialogList::updateVisibleColunm()
 
 void DialogList::hideColumn(int column, bool hide)
 {
-	int columnCount = m_pColumnActionList.count();
+	int columnCount = TO_INT(m_pColumnActionList.size());
 	if (column < 0 || column >= columnCount)
 	{
 		return;
@@ -283,12 +283,12 @@ void DialogList::hideColumn(int column, bool hide)
 	if (hide == true)
 	{
 		m_pView->hideColumn(column);
-		m_pColumnActionList[column]->setChecked(false);
+		m_pColumnActionList[static_cast<quint64>(column)]->setChecked(false);
 	}
 	else
 	{
 		m_pView->showColumn(column);
-		m_pColumnActionList[column]->setChecked(true);
+		m_pColumnActionList[static_cast<quint64>(column)]->setChecked(true);
 	}
 }
 
@@ -373,10 +373,10 @@ void DialogList::onColumnAction(QAction* action)
 		return;
 	}
 
-	int columnCount = m_pColumnActionList.count();
+	int columnCount = TO_INT(m_pColumnActionList.size());
 	for(int column = 0; column < columnCount; column++)
 	{
-		if (m_pColumnActionList[column] == action)
+		if (m_pColumnActionList[static_cast<quint64>(column)] == action)
 		{
 			hideColumn(column, !action->isChecked());
 

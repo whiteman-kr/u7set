@@ -5,7 +5,6 @@
 
 #include <QObject>
 #include <QMutex>
-#include <QVector>
 #include <QFont>
 #include <QColor>
 

@@ -1687,7 +1687,7 @@ void Database::initVersion()
 		return;
 	}
 
-	QVector<SqlObjectInfo> info;
+	std::vector<SqlObjectInfo> info;
 
 	if (table.isExist() == false)
 	{
@@ -1697,26 +1697,26 @@ void Database::initVersion()
 
 			for(int t = 0; t < SQL_TABLE_COUNT; t++)
 			{
-				info[t] = m_table[t].info();
+				info[static_cast<quint64>(t)] = m_table[t].info();
 			}
 
-			table.write(info.data(), info.count());
+			table.write(info.data(), TO_INT(info.size()));
 		}
 	}
 	else
 	{
 		if (table.open() == true)
 		{
-			info.resize(table.recordCount());
+			info.resize(static_cast<quint64>(table.recordCount()));
 
 			int count = table.read(info.data());
 			for (int i = 0; i < count; i++)
 			{
 				for(int t = 0; t < SQL_TABLE_COUNT; t++)
 				{
-					if (m_table[t].info().objectID() == info[i].objectID())
+					if (m_table[t].info().objectID() == info[static_cast<quint64>(i)].objectID())
 					{
-						m_table[t].info().setVersion(info[i].version());
+						m_table[t].info().setVersion(info[static_cast<quint64>(i)].version());
 						break;
 					}
 				}
@@ -1856,7 +1856,7 @@ void Database::appendToBase(Measure::Item* pMeasurement)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool Database::removeMeasure(Measure::Type measuteType, const QVector<int>& keyList)
+bool Database::removeMeasure(Measure::Type measuteType, const std::vector<int>& keyList)
 {
 	bool result = false;
 
@@ -1874,7 +1874,7 @@ bool Database::removeMeasure(Measure::Type measuteType, const QVector<int>& keyL
 			continue;
 		}
 
-		if (table.remove(keyList.data(), keyList.count()) == keyList.count())
+		if (table.remove(keyList.data(), TO_INT(keyList.size())) == TO_INT(keyList.size()))
 		{
 			result = true;
 		}
@@ -1889,7 +1889,7 @@ bool Database::removeMeasure(Measure::Type measuteType, const QVector<int>& keyL
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Database::removeFromBase(Measure::Type measureType, const QVector<int>& keyList)
+void Database::removeFromBase(Measure::Type measureType, const std::vector<int>& keyList)
 {
 	bool result = removeMeasure(static_cast<Measure::Type>(measureType), keyList);
 	if (result == false)

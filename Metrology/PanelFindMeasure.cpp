@@ -353,7 +353,7 @@ void PanelFindMeasure::find()
 
 	saveSettings();
 
-	QVector<FindItem> findItemList;
+	std::vector<FindItem> findItemList;
 
 	m_table.clear();
 
@@ -387,13 +387,13 @@ void PanelFindMeasure::find()
 				continue;
 			}
 
-			findItemList.append(FindItem(row, column, text, pos, pos + m_findText.count()));
+			findItemList.push_back(FindItem(row, column, text, pos, pos + m_findText.count()));
 		}
 	}
 
-	m_statusLabel->setText(QString("Found: %1").arg(findItemList.count()));
+	m_statusLabel->setText(QString("Found: %1").arg(findItemList.size()));
 
-	if (findItemList.count() == 0)
+	if (findItemList.size() == 0)
 	{
 		//QMessageBox::information(this, windowTitle(), tr("Text \"%1\" was not found!").arg(m_findText));
 		return;

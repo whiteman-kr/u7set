@@ -269,7 +269,7 @@ void StatisticsTable::updateSignal(Hash signalHash)
 		return;
 	}
 
-	QVector<int> rowList;
+	std::vector<int> rowList;
 
 	int count = theSignalBase.statistics().count();
 	for(int i = 0; i < count; i++)
@@ -284,18 +284,15 @@ void StatisticsTable::updateSignal(Hash signalHash)
 
 		if (signalHash == pSignal->param().hash())
 		{
-			rowList.append(i);
+			rowList.push_back(i);
 		}
 	}
 
-	int rowCount = rowList.count();
-	for(int i = 0; i < rowCount; i++)
+	for(int row : rowList)
 	{
-		int row1 = rowList[i];
-
 		for (int column = 0; column < STATISTICS_COLUMN_COUNT; column ++)
 		{
-			QModelIndex cellIndex = index(row1, column);
+			QModelIndex cellIndex = index(row, column);
 
 			emit dataChanged(cellIndex, cellIndex, QVector<int>() << Qt::DisplayRole);
 		}

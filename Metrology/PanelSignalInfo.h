@@ -124,7 +124,7 @@ private:
 	QTableView* m_pView = nullptr;
 	SignalInfoTable m_signalParamTable;
 
-	QVector<QAction*> m_pConnectionActionList;
+	std::vector<QAction*> m_pConnectionActionList;
 	QMenu* m_pShowMenu = nullptr;
 	QMenu* m_pContextMenu = nullptr;
 	QAction* m_pShowNoValidAction = nullptr;
@@ -151,7 +151,7 @@ private:
 
 	//
 	//
-	QVector<Metrology::Signal*> m_destSignals;
+	std::vector<Metrology::Signal*> m_destSignals;
 
 	CalibratorBase* m_pCalibratorBase = nullptr;
 	SignalInfoOption m_signalInfo;

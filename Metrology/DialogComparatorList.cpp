@@ -305,7 +305,7 @@ void DialogComparatorList::updateList()
 
 	m_comparatorTable.clear();
 
-	QVector<std::shared_ptr<Metrology::ComparatorEx>> comparatorList;
+	std::vector<std::shared_ptr<Metrology::ComparatorEx>> comparatorList;
 
 	int count = theSignalBase.signalCount();
 	for(int i = 0; i < count; i++)
@@ -336,7 +336,7 @@ void DialogComparatorList::updateList()
 				continue;
 			}
 
-			comparatorList.append(pSignal->param().comparator(c));
+			comparatorList.push_back(pSignal->param().comparator(c));
 		}
 	}
 

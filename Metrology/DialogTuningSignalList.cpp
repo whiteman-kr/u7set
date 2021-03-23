@@ -314,7 +314,7 @@ void DialogTuningSignalList::updateList()
 
 	m_signalTable.clear();
 
-	QVector<Metrology::Signal*> signalList;
+	std::vector<Metrology::Signal*> signalList;
 
 	int signalCount = theSignalBase.tuning().signalBase().count();
 	for(int i = 0; i < signalCount; i++)
@@ -336,7 +336,7 @@ void DialogTuningSignalList::updateList()
 			continue;
 		}
 
-		signalList.append(pSignal);
+		signalList.push_back(pSignal);
 	}
 
 	m_signalTable.set(signalList);

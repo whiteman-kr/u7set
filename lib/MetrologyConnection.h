@@ -214,7 +214,7 @@ namespace Metrology
 		int findConnectionIndex(int ioType, Metrology::Signal* pSignal) const;
 		int findConnectionIndex(int ioType, ConnectionType connectionType, Metrology::Signal* pSignal) const;
 
-		QVector<Metrology::Signal*> destinationSignals(const QString& sourceAppSignalID, ConnectionType connectionType) const;
+		std::vector<Metrology::Signal*> destinationSignals(const QString& sourceAppSignalID, ConnectionType connectionType) const;
 
 		// CSV-data
 		//

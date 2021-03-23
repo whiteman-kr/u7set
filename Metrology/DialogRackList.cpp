@@ -184,7 +184,7 @@ void DialogRackList::updateList()
 {
 	m_rackTable.clear();
 
-	QVector<Metrology::RackParam*> rackList;
+	std::vector<Metrology::RackParam*> rackList;
 
 	int count = m_rackBase.count();
 	for(int i = 0; i < count; i++)
@@ -195,7 +195,7 @@ void DialogRackList::updateList()
 			continue;
 		}
 
-		rackList.append(pRack);
+		rackList.push_back(pRack);
 	}
 
 	m_rackTable.set(rackList);

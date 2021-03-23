@@ -55,6 +55,10 @@ void CalibratorBase::init(const CalibratorsOption& calibratorsOption, QWidget* p
 
 void CalibratorBase::createCalibrators(QWidget* parent)
 {
+	m_mutex.lock();
+		m_calibratorManagerList.reserve(Metrology::ChannelCount);
+	m_mutex.unlock();
+
 	for(int channel = 0; channel < Metrology::ChannelCount; channel++)
 	{
 		std::shared_ptr<Calibrator> pCalibrator(new Calibrator(channel));
@@ -79,7 +83,7 @@ void CalibratorBase::createCalibrators(QWidget* parent)
 		}
 
 		m_mutex.lock();
-			m_calibratorManagerList.append(pManager);
+			m_calibratorManagerList.push_back(pManager);
 		m_mutex.unlock();
 
 		QThread* pThread = new QThread;
@@ -337,7 +341,7 @@ int CalibratorBase::calibratorCount() const
 {
 	QMutexLocker l(&m_mutex);
 
-	return m_calibratorManagerList.count();
+	return TO_INT(m_calibratorManagerList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -346,12 +350,12 @@ std::shared_ptr<CalibratorManager> CalibratorBase::calibratorManager(int index) 
 {
 	QMutexLocker l(&m_mutex);
 
-	if (index < 0 || index >= m_calibratorManagerList.count())
+	if (index < 0 || index >= TO_INT(m_calibratorManagerList.size()))
 	{
 		return nullptr;
 	}
 
-	return m_calibratorManagerList[index];
+	return m_calibratorManagerList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------

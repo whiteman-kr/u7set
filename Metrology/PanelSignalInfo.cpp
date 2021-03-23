@@ -253,8 +253,8 @@ void SignalInfoTable::signalParamChanged(const QString& appSignalID)
 
 	QMutexLocker l(&m_mutex);
 
-	int signalCount = m_list.count();
-	for(int c = 0; c < signalCount; c ++)
+	quint64 signalCount = m_list.size();
+	for(quint64 c = 0; c < signalCount; c ++)
 	{
 		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType ++)
 		{
@@ -474,8 +474,8 @@ void PanelSignalInfo::appendMetrologyConnetionMenu()
 
 	m_destSignals = theSignalBase.connections().destinationSignals(sourParam.appSignalID(), m_connectionType);
 
-	int destSignalCount = m_destSignals.count();
-	for (int s = 0; s < destSignalCount; s++)
+	quint64 destSignalCount = m_destSignals.size();
+	for (quint64 s = 0; s < destSignalCount; s++)
 	{
 		Metrology::Signal* pDestinationSignal = m_destSignals[s];
 		if (pDestinationSignal == nullptr || pDestinationSignal->param().isValid() == false)
@@ -496,11 +496,11 @@ void PanelSignalInfo::appendMetrologyConnetionMenu()
 				pConnctionAction->setChecked(true);
 			}
 
-			m_pConnectionActionList.append(pConnctionAction);
+			m_pConnectionActionList.push_back(pConnctionAction);
 		}
 	}
 
-	if (m_pConnectionActionList.isEmpty() == true)
+	if (m_pConnectionActionList.size() == 0)
 	{
 		return;
 	}
@@ -658,11 +658,10 @@ void PanelSignalInfo::activeSignalChanged(const MeasureSignal& activeSignal)
 		return;
 	}
 
-	QVector<IoSignalParam> ioParamList;
+	std::vector<IoSignalParam> ioParamList;
 
 	for(int c = 0; c < signalCount; c ++)
 	{
-
 		IoSignalParam ioParam;
 
 		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType ++)
@@ -684,7 +683,7 @@ void PanelSignalInfo::activeSignalChanged(const MeasureSignal& activeSignal)
 			ioParam.setCalibratorManager(m_pCalibratorBase->calibratorForMeasure(c));
 		}
 
-		ioParamList.append(ioParam);
+		ioParamList.push_back(ioParam);
 	}
 
 	m_signalParamTable.set(ioParamList);
@@ -719,10 +718,10 @@ void PanelSignalInfo::onConnectionAction(QAction* action)
 		return;
 	}
 
-	int destSignalIndex = -1;
+	quint64 destSignalIndex = ULLONG_MAX;
 
-	int connectionActionCount = m_pConnectionActionList.count();
-	for(int i = 0; i < connectionActionCount; i++)
+	quint64 connectionActionCount = m_pConnectionActionList.size();
+	for(quint64 i = 0; i < connectionActionCount; i++)
 	{
 		if (m_pConnectionActionList[i] == action)
 		{
@@ -734,7 +733,7 @@ void PanelSignalInfo::onConnectionAction(QAction* action)
 		}
 	}
 
-	if (destSignalIndex < 0 || destSignalIndex >= m_destSignals.count())
+	if (destSignalIndex >= m_destSignals.size())
 	{
 		return;
 	}

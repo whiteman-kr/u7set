@@ -887,7 +887,7 @@ bool DialogRackGroupProperty::foundDuplicateRacks()
 		int			channel2 =-1;
 	};
 
-	QVector<Duplicate> duplicateList;
+	std::vector<Duplicate> duplicateList;
 	QMap<Hash, int> duplicateMap;
 
 	int groupCount = m_groupBase.count();
@@ -918,16 +918,16 @@ bool DialogRackGroupProperty::foundDuplicateRacks()
 				duplicate.groupCaption1 = group.caption();
 				duplicate.channel1 = channel+1;
 
-				duplicateList.append(duplicate);
+				duplicateList.push_back(duplicate);
 
-				duplicateMap[hash] = duplicateList.count() - 1;
+				duplicateMap[hash] = TO_INT(duplicateList.size() - 1);
 			}
 			else
 			{
 				int index = duplicateMap[hash];
-				if (index >= 0 && index < duplicateList.count())
+				if (index >= 0 && index < TO_INT(duplicateList.size()))
 				{
-					Duplicate& duplicate = duplicateList[index];
+					Duplicate& duplicate = duplicateList[static_cast<quint64>(index)];
 
 					duplicate.isDuplicate = true;
 					duplicate.groupCaption2 = group.caption();
@@ -939,11 +939,8 @@ bool DialogRackGroupProperty::foundDuplicateRacks()
 
 	QString strDuplicates;
 
-	int count = duplicateList.count();
-	for(int i = 0; i < count; i ++)
+	for(const Duplicate& duplicate : duplicateList)
 	{
-		Duplicate duplicate = duplicateList[i];
-
 		if (duplicate.isDuplicate == true)
 		{
 			if (duplicate.groupCaption1 == duplicate.groupCaption2)

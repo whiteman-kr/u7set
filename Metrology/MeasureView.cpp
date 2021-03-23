@@ -61,7 +61,7 @@ namespace Measure
 
 	int Table::rowCount(const QModelIndex&) const
 	{
-		return m_measureCount;
+		return TO_INT(m_measureCount);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ namespace Measure
 		}
 
 		int rowIndex = index.row();
-		if (rowIndex < 0 || rowIndex >= m_measureCount)
+		if (rowIndex < 0 || rowIndex >= TO_INT(m_measureCount))
 		{
 			return QVariant();
 		}
@@ -188,7 +188,7 @@ namespace Measure
 
 	QColor Table::backgroundColor(int row, int column, Measure::Item* pMeasurement) const
 	{
-		if (row < 0 || row >= m_measureCount)
+		if (row < 0 || row >= TO_INT(m_measureCount))
 		{
 			return Qt::white;
 		}
@@ -282,7 +282,7 @@ namespace Measure
 
 	QString Table::text(int row, int column, Measure::Item* pMeasurement) const
 	{
-		if (row < 0 || row >= m_measureCount)
+		if (row < 0 || row >= TO_INT(m_measureCount))
 		{
 			return QString();
 		}
@@ -319,7 +319,7 @@ namespace Measure
 
 	QString Table::textLinearity(int row, int column, Measure::Item* pMeasurement) const
 	{
-		if (row < 0 || row >= m_measureCount)
+		if (row < 0 || row >= TO_INT(m_measureCount))
 		{
 			return QString();
 		}
@@ -433,7 +433,7 @@ namespace Measure
 
 		if (row > 0)
 		{
-			Measure::Item* prev_m = m_measureList[row - 1];
+			Measure::Item* prev_m = m_measureList[static_cast<quint64>(row - 1)];
 			if (prev_m != nullptr)
 			{
 				if (prev_m->signalHash() == m->signalHash())
@@ -453,7 +453,7 @@ namespace Measure
 
 	QString Table::textComparator(int row, int column, Measure::Item* pMeasurement) const
 	{
-		if (row < 0 || row >= m_measureCount)
+		if (row < 0 || row >= TO_INT(m_measureCount))
 		{
 			return QString();
 		}
@@ -526,7 +526,7 @@ namespace Measure
 
 		if (row > 0)
 		{
-			Measure::Item* prev_m = m_measureList[row - 1];
+			Measure::Item* prev_m = m_measureList[static_cast<quint64>(row - 1)];
 			if (prev_m != nullptr)
 			{
 				if (prev_m->signalHash() == m->signalHash())
@@ -558,14 +558,14 @@ namespace Measure
 
 		// append into MeasureTable
 		//
-		int indexTable = m_measureCount;
+		int indexTable = TO_INT(m_measureCount);
 
 		beginInsertRows(QModelIndex(), indexTable, indexTable);
 
 			m_measureMutex.lock();
 
-				m_measureList.append(pMeasurement);
-				m_measureCount = m_measureList.count();
+				m_measureList.push_back(pMeasurement);
+				m_measureCount = m_measureList.size();
 
 			m_measureMutex.unlock();
 
@@ -580,24 +580,24 @@ namespace Measure
 	{
 		QMutexLocker l(&m_measureMutex);
 
-		if (index < 0 || index >= m_measureCount)
+		if (index < 0 || index >= TO_INT(m_measureCount))
 		{
 			return nullptr;
 		}
 
-		return m_measureList[index];
+		return m_measureList[static_cast<quint64>(index)];
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Table::remove(const QVector<int>& removeIndexList)
+	void Table::remove(const std::vector<int>& removeIndexList)
 	{
 		// remove from MeasureTable
 		//
-		int count = removeIndexList.count();
+		int count = TO_INT(removeIndexList.size());
 		for(int index = count-1; index >= 0; index--)
 		{
-			int removeIndex = removeIndexList.at(index);
+			int removeIndex = removeIndexList.at(static_cast<quint64>(index));
 
 			Measure::Item* pMeasurement = at(removeIndex);
 			if (pMeasurement == nullptr)
@@ -614,8 +614,8 @@ namespace Measure
 
 				m_measureMutex.lock();
 
-					m_measureList.remove(removeIndex);
-					m_measureCount = m_measureList.count();
+					m_measureList.erase(m_measureList.begin() + removeIndex);
+					m_measureCount = m_measureList.size();
 
 				m_measureMutex.unlock();
 
@@ -625,20 +625,20 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Table::set(const QVector<Measure::Item*>& list_add)
+	void Table::set(const std::vector<Measure::Item*>& list_add)
 	{
-		int count = list_add.count();
+		quint64 count = list_add.size();
 		if (count == 0)
 		{
 			return;
 		}
 
-		beginInsertRows(QModelIndex(), 0, count - 1);
+		beginInsertRows(QModelIndex(), 0, TO_INT(count - 1));
 
 			m_measureMutex.lock();
 
 				m_measureList = list_add;
-				m_measureCount = m_measureList.count();
+				m_measureCount = m_measureList.size();
 
 			m_measureMutex.unlock();
 
@@ -649,18 +649,18 @@ namespace Measure
 
 	void Table::clear()
 	{
-		int count = m_measureCount;
+		quint64 count = m_measureCount;
 		if (count == 0)
 		{
 			return;
 		}
 
-		beginRemoveRows(QModelIndex(), 0, count - 1);
+		beginRemoveRows(QModelIndex(), 0,TO_INT(count - 1));
 
 			m_measureMutex.lock();
 
 				m_measureList.clear();
-				m_measureCount = m_measureList.count();
+				m_measureCount = m_measureList.size();
 
 			m_measureMutex.unlock();
 
@@ -751,7 +751,7 @@ namespace Measure
 	{
 		m_table.clear();
 
-		QVector<Measure::Item*> measureList;
+		std::vector<Measure::Item*> measureList;
 
 		int measureCount = measureBase.count();
 		for (int i = 0; i < measureCount; i++)
@@ -767,7 +767,7 @@ namespace Measure
 				continue;
 			}
 
-			measureList.append(pMeasurement);
+			measureList.push_back(pMeasurement);
 		}
 
 		m_table.set(measureList);
@@ -868,8 +868,8 @@ namespace Measure
 			return;
 		}
 
-		QVector<int> keyList;
-		QVector<int> removeIndexList;
+		std::vector<int> keyList;
+		std::vector<int> removeIndexList;
 
 		for(int index = 0; index < measureCount; index++)
 		{
@@ -889,12 +889,12 @@ namespace Measure
 				continue;
 			}
 
-			keyList.append(pMeasuremet->measureID());
+			keyList.push_back(pMeasuremet->measureID());
 
-			removeIndexList.append(index);
+			removeIndexList.push_back(index);
 		}
 
-		if (removeIndexList.count() == 0)
+		if (removeIndexList.size() == 0)
 		{
 			return;
 		}
@@ -902,7 +902,7 @@ namespace Measure
 		if (QMessageBox::question(this,
 								  windowTitle(),
 								  tr("Do you want delete %1 measurement(s)?").
-								  arg(removeIndexList.count())) == QMessageBox::No)
+								  arg(removeIndexList.size())) == QMessageBox::No)
 		{
 			return;
 		}

@@ -2499,7 +2499,7 @@ namespace Measure
 	{
 		QMutexLocker locker(&m_measureMutex);
 
-		return m_measureList.count();
+		return TO_INT(m_measureList.size());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -2508,17 +2508,7 @@ namespace Measure
 	{
 		QMutexLocker locker(&m_measureMutex);
 
-		for(auto pMeasurement: m_measureList)
-		{
-			if (pMeasurement == nullptr)
-			{
-				continue;
-			}
-
-			delete pMeasurement;
-		}
-
-		m_measureList.clear();
+		qDeleteAll(m_measureList);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -2545,7 +2535,7 @@ namespace Measure
 			int		recordCount;
 		};
 
-		QVector<rawTableData> loadedTablesInMemory;
+		std::vector<rawTableData> loadedTablesInMemory;
 
 		// read all tables for current measureType in memory
 		//
@@ -2583,7 +2573,7 @@ namespace Measure
 
 					if (table->read(data.pMeasurement) == data.recordCount)
 					{
-						loadedTablesInMemory.append(data);
+						loadedTablesInMemory.push_back(data);
 					}
 					else
 					{
@@ -2603,7 +2593,7 @@ namespace Measure
 
 		// if tables for current measureType is not exist, then exit
 		//
-		int tableInMemoryCount = loadedTablesInMemory.count();
+		quint64 tableInMemoryCount = loadedTablesInMemory.size();
 		if (tableInMemoryCount == 0)
 		{
 			return 0;
@@ -2623,7 +2613,7 @@ namespace Measure
 				continue;
 			}
 
-			for(int tableInMemory = SQL_TABLE_IS_SUB; tableInMemory < tableInMemoryCount; tableInMemory++)
+			for(quint64 tableInMemory = SQL_TABLE_IS_SUB; tableInMemory < tableInMemoryCount; tableInMemory++)
 			{
 				rawTableData subTable = loadedTablesInMemory[tableInMemory];
 
@@ -2717,11 +2707,11 @@ namespace Measure
 		// need remove this measurement in sub table
 		// remove nonexistent indexes-measurements-ID in sub tables
 		//
-		for(int tableInMemory = SQL_TABLE_IS_SUB; tableInMemory < tableInMemoryCount; tableInMemory++)
+		for(quint64 tableInMemory = SQL_TABLE_IS_SUB; tableInMemory < tableInMemoryCount; tableInMemory++)
 		{
 			rawTableData subTable = loadedTablesInMemory[tableInMemory];
 
-			QVector<int> removeKeyList;
+			std::vector<int> removeKeyList;
 
 			for(int subIndex = 0; subIndex < subTable.recordCount; subIndex++)
 			{
@@ -2752,7 +2742,7 @@ namespace Measure
 				//
 				if (foundMeasure == false)
 				{
-					removeKeyList.append(pSubMeasure->measureID());
+					removeKeyList.push_back(pSubMeasure->measureID());
 				}
 			}
 
@@ -2761,14 +2751,14 @@ namespace Measure
 			SqlTable* table = theDatabase.openTable(subTable.tableType);
 			if (table != nullptr)
 			{
-				table->remove(removeKeyList.data(), removeKeyList.count());
+				table->remove(removeKeyList.data(), TO_INT(removeKeyList.size()));
 				table->close();
 			}
 		}
 
 		// remove raw table data from memory
 		//
-		for(int tableInMemory = 0; tableInMemory < tableInMemoryCount; tableInMemory++)
+		for(quint64 tableInMemory = 0; tableInMemory < tableInMemoryCount; tableInMemory++)
 		{
 			rawTableData table = loadedTablesInMemory[tableInMemory];
 
@@ -2812,8 +2802,8 @@ namespace Measure
 
 		m_measureMutex.lock();
 
-			m_measureList.append(pMeasurement);
-			index = m_measureList.count() - 1;
+			m_measureList.push_back(pMeasurement);
+			index = TO_INT(m_measureList.size() - 1);
 
 		m_measureMutex.unlock();
 
@@ -2845,12 +2835,12 @@ namespace Measure
 	{
 		QMutexLocker locker(&m_measureMutex);
 
-		if (index < 0 || index >= m_measureList.count())
+		if (index < 0 || index >= TO_INT(m_measureList.size()))
 		{
 			return nullptr;
 		}
 
-		return m_measureList[index];
+		return m_measureList[static_cast<quint64>(index)];
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -2859,14 +2849,18 @@ namespace Measure
 	{
 		QMutexLocker locker(&m_measureMutex);
 
-		if (index < 0 || index >= m_measureList.count())
+		if (index < 0 || index >= TO_INT(m_measureList.size()))
 		{
 			return false;
 		}
 
+		auto it = m_measureList.cbegin();
+
+		std::advance(it, index);
+
 		Hash signalHash = UNDEFINED_HASH;
 
-		auto pMeasurement = m_measureList[index];
+		auto pMeasurement = *it;
 		if (pMeasurement != nullptr)
 		{
 			signalHash = pMeasurement->signalHash();
@@ -2874,7 +2868,7 @@ namespace Measure
 			delete pMeasurement;
 		}
 
-		m_measureList.remove(index);
+		m_measureList.erase(it);
 
 		if (signalHash != UNDEFINED_HASH)
 		{
@@ -2886,14 +2880,14 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	bool Base::remove(Measure::Type measureType, const QVector<int>& keyList)
+	bool Base::remove(Measure::Type measureType, const std::vector<int>& keyList)
 	{
 		if (ERR_MEASURE_TYPE(measureType) == true)
 		{
 			return false;
 		}
 
-		int keyCount = keyList.count();
+		int keyCount = TO_INT(keyList.size());
 		if (keyCount == 0)
 		{
 			return false;
@@ -2922,7 +2916,7 @@ namespace Measure
 					continue;
 				}
 
-				if (pMeasurement->measureID() != keyList[k])
+				if (pMeasurement->measureID() != keyList[static_cast<quint64>(k)])
 				{
 					continue;
 				}
@@ -2946,7 +2940,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Base::removeFromBase(Measure::Type measureType, const QVector<int>& keyList)
+	void Base::removeFromBase(Measure::Type measureType, const std::vector<int>& keyList)
 	{
 		bool result = remove(static_cast<Measure::Type>(measureType), keyList);
 		if (result == false)
@@ -2997,10 +2991,10 @@ namespace Measure
 		si.setMeasureCount(0);
 		si.setState(StatisticsItem::State::Success);
 
-		int measureCount = m_measureList.count();
+		int measureCount = TO_INT(m_measureList.size());
 		for(int i = 0; i < measureCount; i ++)
 		{
-			Item* pMeasurement = m_measureList[i];
+			Item* pMeasurement = m_measureList[static_cast<quint64>(i)];
 			if (pMeasurement == nullptr)
 			{
 				continue;

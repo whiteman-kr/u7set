@@ -85,74 +85,74 @@ public:
 
 public:
 
-	MeasureThreadInfo		info() const { return m_info; }
+	MeasureThreadInfo info() const { return m_info; }
 
-	bool					setActiveSignalParam(const MeasureSignal& activeSignal, const CalibratorBase& calibratorBase);
+	bool setActiveSignalParam(const MeasureSignal& activeSignal, const CalibratorBase& calibratorBase);
 
-	void					setLinearityOption(const LinearityOption& option) { m_linearityOption = option; }
-	void					setComparatorOption(const ComparatorOption& option) { m_comparatorOption = option; }
+	void setLinearityOption(const LinearityOption& option) { m_linearityOption = option; }
+	void setComparatorOption(const ComparatorOption& option) { m_comparatorOption = option; }
 
 private:
 
-	Measure::Type			m_measureType = Measure::Type::NoMeasureType;
-	Measure::Kind			m_measureKind = Measure::Kind::NoMeasureKind;
+	Measure::Type m_measureType = Measure::Type::NoMeasureType;
+	Measure::Kind m_measureKind = Measure::Kind::NoMeasureKind;
 	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
-	MeasureThreadInfo		m_info;
+	MeasureThreadInfo m_info;
 
-	QVector<IoSignalParam>	m_activeIoParamList;
+	std::vector<IoSignalParam> m_activeIoParamList;
 
-	int						m_measureTimeout = 0;
-	void					waitMeasureTimeout();
+	int m_measureTimeout = 0;
+	void waitMeasureTimeout();
 
 	// calibrators
 	//
-	bool					calibratorIsValid(std::shared_ptr<CalibratorManager> pCalibratorManager);
-	int						getConnectedCalibrators();
-	bool					setCalibratorUnit();
-	bool					prepareCalibrator(std::shared_ptr<CalibratorManager> pCalibratorManager, CalibratorMode calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
-	void					polarityTest(double electricVal, IoSignalParam& ioParam);
+	bool calibratorIsValid(std::shared_ptr<CalibratorManager> pCalibratorManager);
+	int	getConnectedCalibrators();
+	bool setCalibratorUnit();
+	bool prepareCalibrator(std::shared_ptr<CalibratorManager> pCalibratorManager, CalibratorMode calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
+	void polarityTest(double electricVal, IoSignalParam& ioParam);
 
 	// Options
 	//
-	LinearityOption			m_linearityOption;
-	ComparatorOption		m_comparatorOption;
+	LinearityOption m_linearityOption;
+	ComparatorOption m_comparatorOption;
 
 	// function of measure
 	//
-	void					measureLinearity();
-	void					measureCompratorsInSeries();
-	void					measureCompratorsInParallel();
+	void measureLinearity();
+	void measureCompratorsInSeries();
+	void measureCompratorsInParallel();
 
 	// function for tunning signal
 	//
-	void					saveStateTunSignals();
-	void					restoreStateTunSignals();
+	void saveStateTunSignals();
+	void restoreStateTunSignals();
 
 protected:
 
-	void					run() override;
+	void run() override;
 
 signals:
 
-	void					sendMeasureInfo(const MeasureThreadInfo& info);
-	void					msgBox(int type, QString text, int* result = nullptr);
+	void sendMeasureInfo(const MeasureThreadInfo& info);
+	void msgBox(int type, QString text, int* result = nullptr);
 
-	void					measureComplite(Measure::Item*);
+	void measureComplite(Measure::Item*);
 
 public slots:
 
-	void					signalSocketDisconnected();
-	void					tuningSocketDisconnected();
+	void signalSocketDisconnected();
+	void tuningSocketDisconnected();
 
-	void					measureTimeoutChanged(int timeout);
-	void					measureTypeChanged(Measure::Type measureType);
-	void					measureKindChanged(Measure::Kind measureKind);
-	void					connectionTypeChanged(Metrology::ConnectionType connectionType);
+	void measureTimeoutChanged(int timeout);
+	void measureTypeChanged(Measure::Type measureType);
+	void measureKindChanged(Measure::Kind measureKind);
+	void connectionTypeChanged(Metrology::ConnectionType connectionType);
 
-	void					signalParamChanged(const QString& appSignalID);
+	void signalParamChanged(const QString& appSignalID);
 
-	void					stopMeasure(MeasureThreadInfo::ExitCode exitCode);
+	void stopMeasure(MeasureThreadInfo::ExitCode exitCode);
 };
 
 // ==============================================================================================

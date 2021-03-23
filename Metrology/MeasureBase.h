@@ -412,7 +412,7 @@ namespace Measure
 		int append(Measure::Item* pMeasurement);
 		Measure::Item* measurement(int index) const;
 		bool remove(int index);
-		bool remove(Measure::Type measureType, const QVector<int>& keyList);	// keyList this is list of measureID
+		bool remove(Measure::Type measureType, const std::vector<int>& keyList);	// keyList this is list of measureID
 
 		// Statistics
 		//
@@ -426,7 +426,7 @@ namespace Measure
 		Measure::Type m_measureType = Measure::Type::NoMeasureType;
 
 		mutable QMutex m_measureMutex;
-		QVector<Item*> m_measureList;
+		std::vector<Item*> m_measureList;
 
 	signals:
 
@@ -438,7 +438,7 @@ namespace Measure
 		void signalBaseLoaded();
 
 		void appendToBase(Measure::Item* pMeasurement);
-		void removeFromBase(Measure::Type measureType, const QVector<int>& keyList);
+		void removeFromBase(Measure::Type measureType, const std::vector<int>& keyList);
 	};
 }
 

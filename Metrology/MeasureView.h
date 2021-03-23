@@ -40,9 +40,9 @@ namespace Measure
 
 		bool append(Measure::Item* pMeasurement);
 		Measure::Item* at(int index) const;
-		void remove(const QVector<int>& removeIndexList);
+		void remove(const std::vector<int>& removeIndexList);
 
-		void set(const QVector<Measure::Item*>& list_add);
+		void set(const std::vector<Item*>& list_add);
 		void clear();
 
 	private:
@@ -52,8 +52,8 @@ namespace Measure
 		ViewHeader m_header;
 
 		mutable QMutex m_measureMutex;
-		QVector<Measure::Item*> m_measureList;
-		int m_measureCount = 0;
+		std::vector<Measure::Item*> m_measureList;
+		quint64 m_measureCount = 0;
 
 		int columnCount(const QModelIndex &parent) const override;
 		int rowCount(const QModelIndex &parent=QModelIndex()) const override;
@@ -89,13 +89,12 @@ namespace Measure
 		Table m_table;
 
 		QMenu* m_headerContextMenu = nullptr;
-		QVector<QAction*> m_actionList;
 
 		void createContextMenu();
 
 	signals:
 
-		void removeFromBase(Measure::Type measureType, const QVector<int>& keyList);
+		void removeFromBase(Measure::Type measureType, const std::vector<int>& keyList);
 
 	public slots:
 

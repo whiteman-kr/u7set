@@ -72,7 +72,7 @@ namespace Measure
 	{
 		QMutexLocker l(&m_mutex);
 
-		return  m_pointList.count();
+		return TO_INT(m_pointList.size());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ namespace Measure
 	{
 		QMutexLocker l(&m_mutex);
 
-		m_pointList.append(point);
+		m_pointList.push_back(point);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -90,12 +90,12 @@ namespace Measure
 	{
 		QMutexLocker l(&m_mutex);
 
-		if (index < 0 || index > m_pointList.count())
+		if (index < 0 || index > TO_INT(m_pointList.size()))
 		{
 			return;
 		}
 
-		m_pointList.insert(index, point);
+		m_pointList.insert(m_pointList.begin() + index, point);
 	}
 
 
@@ -105,12 +105,12 @@ namespace Measure
 	{
 		QMutexLocker l(&m_mutex);
 
-		if (index < 0 || index > m_pointList.count())
+		if (index < 0 || index > TO_INT(m_pointList.size()))
 		{
 			return false;
 		}
 
-		m_pointList.remove(index);
+		m_pointList.erase(m_pointList.begin() + index);
 
 		return true;
 	}
@@ -121,14 +121,14 @@ namespace Measure
 	{
 		QMutexLocker l(&m_mutex);
 
-		if ((i < 0 || i >= m_pointList.count()) || (j < 0 || j >= m_pointList.count()))
+		if ((i < 0 || i >= TO_INT(m_pointList.size())) || (j < 0 || j >= TO_INT(m_pointList.size())))
 		{
 			return;
 		}
 
-		Point point	= m_pointList[j];
-		m_pointList[j]	= m_pointList[i];
-		m_pointList[i]	= point;
+		Point point	= m_pointList[static_cast<quint64>(j)];
+		m_pointList[static_cast<quint64>(j)] = m_pointList[static_cast<quint64>(i)];
+		m_pointList[static_cast<quint64>(i)] = point;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -137,12 +137,12 @@ namespace Measure
 	{
 		QMutexLocker l(&m_mutex);
 
-		if (index < 0 || index > m_pointList.count())
+		if (index < 0 || index > TO_INT(m_pointList.size()))
 		{
 			return Point();
 		}
 
-		return  m_pointList[index];
+		return  m_pointList[static_cast<quint64>(index)];
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -151,12 +151,12 @@ namespace Measure
 	{
 		QMutexLocker l(&m_mutex);
 
-		if (index < 0 || index > m_pointList.count())
+		if (index < 0 || index > TO_INT(m_pointList.size()))
 		{
 			return;
 		}
 
-		m_pointList[index] = point;
+		m_pointList[static_cast<quint64>(index)] = point;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -167,14 +167,14 @@ namespace Measure
 
 		QString result;
 
-		if (m_pointList.isEmpty() == true)
+		quint64 pointCount = m_pointList.size();
+		if (pointCount == 0)
 		{
 			result = QT_TRANSLATE_NOOP("MeasurePointBase.cpp", "The measurement points are not set");
 		}
 		else
 		{
-			int pointCount = m_pointList.count();
-			for(int index = 0; index < pointCount; index++)
+			for(quint64 index = 0; index < pointCount; index++)
 			{
 				result.append(QString("%1%").arg(QString::number(m_pointList[index].percent(), 'f', 1)));
 
@@ -200,7 +200,7 @@ namespace Measure
 			point.setIndex(index);
 			point.setPercent(PointValue[index]);
 
-			m_pointList.append(point);
+			m_pointList.push_back(point);
 		}
 	}
 
@@ -230,13 +230,13 @@ namespace Measure
 
 				// update table
 				//
-				pTable->write(m_pointList.data(), m_pointList.count());
+				pTable->write(m_pointList.data(), TO_INT(m_pointList.size()));
 			}
 			else
 			{
 				// if table is not empty then read data from table
 				//
-				m_pointList.resize(recordCount);
+				m_pointList.resize(static_cast<quint64>(recordCount));
 				pTable->read(m_pointList.data());
 			}
 
@@ -266,7 +266,7 @@ namespace Measure
 
 			if (pTable->clear() == true)
 			{
-				pTable->write(m_pointList.data(), m_pointList.count());
+				pTable->write(m_pointList.data(), TO_INT(m_pointList.size()));
 			}
 
 		m_mutex.unlock();

@@ -733,10 +733,10 @@ void MultiChannelSignal::clear()
 {
 	QMutexLocker l(&m_mutex);
 
-	int channelCount = m_pSignalList.count();
+	int channelCount = m_signalList.count();
 	for(int ch = 0; ch < channelCount; ch++)
 	{
-		m_pSignalList[ch] = nullptr;
+		m_signalList[ch] = nullptr;
 	}
 
 	m_location.clear();
@@ -751,10 +751,10 @@ bool MultiChannelSignal::isEmpty() const
 
 	bool empty = true;
 
-	int channelCount = m_pSignalList.count();
+	int channelCount = m_signalList.count();
 	for(int ch = 0; ch < channelCount; ch++)
 	{
-		if (m_pSignalList[ch] != nullptr)
+		if (m_signalList[ch] != nullptr)
 		{
 			empty = false;
 
@@ -772,7 +772,7 @@ void MultiChannelSignal::setSignalCount(int count)
 {
 	QMutexLocker l(&m_mutex);
 
-	m_pSignalList.fill(nullptr, count);
+	m_signalList.fill(nullptr, count);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -781,13 +781,13 @@ Metrology::Signal* MultiChannelSignal::metrologySignal(int channel) const
 {
 	QMutexLocker l(&m_mutex);
 
-	if (channel < 0 || channel >= m_pSignalList.count())
+	if (channel < 0 || channel >= m_signalList.count())
 	{
 		assert(0);
 		return nullptr;
 	}
 
-	return m_pSignalList[channel];
+	return m_signalList[channel];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -802,7 +802,7 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 		return false;
 	}
 
-	if (channel < 0 || channel >= m_pSignalList.count())
+	if (channel < 0 || channel >= m_signalList.count())
 	{
 		assert(0);
 		return false;
@@ -821,7 +821,7 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 		return false;
 	}
 
-	m_pSignalList[channel] = pSignal;
+	m_signalList[channel] = pSignal;
 
 	m_location.setRack(param.location().rack());
 	m_location.setChassis(param.location().chassis());
@@ -895,12 +895,12 @@ Metrology::Signal* MultiChannelSignal::firstMetrologySignal() const
 
 	Metrology::Signal* pSignal = nullptr;
 
-	int channelCount = m_pSignalList.count();
+	int channelCount = m_signalList.count();
 	for(int ch = 0; ch < channelCount; ch++ )
 	{
-		if (m_pSignalList[ch] != nullptr)
+		if (m_signalList[ch] != nullptr)
 		{
-			pSignal = m_pSignalList[ch];
+			pSignal = m_signalList[ch];
 			break;
 		}
 	}
@@ -914,7 +914,7 @@ MultiChannelSignal& MultiChannelSignal::operator=(const MultiChannelSignal& from
 {
 	QMutexLocker l(&m_mutex);
 
-	m_pSignalList = from.m_pSignalList;
+	m_signalList = from.m_signalList;
 	m_location = from.m_location;
 	m_signalID = from.m_signalID;
 	m_caption = from.m_caption;
@@ -1099,13 +1099,13 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 				{
 					// take destination signals by source signal
 					//
-				    QVector<Metrology::Signal*> destSignals = connectionBase.destinationSignals(pSignal->param().appSignalID(), connectionType);
-					if (channel < 0 || channel >= destSignals.count())
+					std::vector<Metrology::Signal*> destSignals = connectionBase.destinationSignals(pSignal->param().appSignalID(), connectionType);
+					if (channel < 0 || channel >= TO_INT(destSignals.size()))
 					{
 						break;
 					}
 
-					pDestSignal = destSignals[channel];
+					pDestSignal = destSignals[static_cast<quint64>(channel)];
 				}
 				break;
 
@@ -1244,7 +1244,7 @@ int SignalBase::signalCount() const
 {
 	QMutexLocker l(&m_signalMutex);
 
-	return m_signalList.count();
+	return TO_INT(m_signalList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1283,8 +1283,8 @@ int SignalBase::appendSignal(const Metrology::SignalParam& param)
 
 	Metrology::Signal metrologySignal(param);
 
-	m_signalList.append(metrologySignal);
-	index = m_signalList.count() - 1;
+	m_signalList.push_back(metrologySignal);
+	index = TO_INT(m_signalList.size() - 1);
 
 	m_signalHashList.insert(param.hash(), index);
 
@@ -1322,12 +1322,12 @@ Metrology::Signal* SignalBase::signalPtr(const Hash& hash)
 	}
 
 	int index = m_signalHashList[hash];
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return nullptr;
 	}
 
-	return &m_signalList[index];
+	return &m_signalList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1336,12 +1336,12 @@ Metrology::Signal* SignalBase::signalPtr(int index)
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return nullptr;
 	}
 
-	return &m_signalList[index];
+	return &m_signalList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1376,12 +1376,12 @@ Metrology::Signal SignalBase::signal(const Hash& hash) const
 
 	int index = m_signalHashList[hash];
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return Metrology::Signal();
 	}
 
-	return m_signalList[index];
+	return m_signalList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1390,12 +1390,12 @@ Metrology::Signal SignalBase::signal(int index) const
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return Metrology::Signal();
 	}
 
-	return m_signalList[index];
+	return m_signalList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1430,12 +1430,12 @@ Metrology::SignalParam SignalBase::signalParam(const Hash& hash) const
 
 	int index = m_signalHashList[hash];
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return Metrology::SignalParam();
 	}
 
-	return m_signalList[index].param();
+	return m_signalList[static_cast<quint64>(index)].param();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1444,12 +1444,12 @@ Metrology::SignalParam SignalBase::signalParam(int index) const
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return Metrology::SignalParam();
 	}
 
-	return m_signalList[index].param();
+	return m_signalList[static_cast<quint64>(index)].param();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1471,12 +1471,12 @@ void SignalBase::setSignalParam(const Hash& hash, const Metrology::SignalParam& 
 
 	int index = m_signalHashList[hash];
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return;
 	}
 
-	m_signalList[index].setParam(param);
+	m_signalList[static_cast<quint64>(index)].setParam(param);
 
 	emit signalParamChanged(param.appSignalID());
 }
@@ -1487,12 +1487,12 @@ void SignalBase::setSignalParam(int index, const Metrology::SignalParam& param)
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return;
 	}
 
-	m_signalList[index].setParam(param);
+	m_signalList[static_cast<quint64>(index)].setParam(param);
 
 	emit signalParamChanged(param.appSignalID());
 }
@@ -1529,12 +1529,12 @@ Metrology::SignalState SignalBase::signalState(const Hash& hash) const
 
 	int index = m_signalHashList[hash];
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return Metrology::SignalState();
 	}
 
-	return m_signalList[index].state();
+	return m_signalList[static_cast<quint64>(index)].state();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1543,12 +1543,12 @@ Metrology::SignalState SignalBase::signalState(int index) const
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return Metrology::SignalState();
 	}
 
-	return m_signalList[index].state();
+	return m_signalList[static_cast<quint64>(index)].state();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1583,12 +1583,12 @@ void SignalBase::setSignalState(const Hash& hash, const Metrology::SignalState &
 
 	int index = m_signalHashList[hash];
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return;
 	}
 
-	m_signalList[index].setState(state);
+	m_signalList[static_cast<quint64>(index)].setState(state);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1597,12 +1597,12 @@ void SignalBase::setSignalState(int index, const Metrology::SignalState& state)
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_signalList.count())
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
 		return;
 	}
 
-	m_signalList[index].setState(state);
+	m_signalList[static_cast<quint64>(index)].setState(state);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1805,7 +1805,7 @@ int SignalBase::hashForRequestStateCount() const
 {
 	QMutexLocker l(&m_stateMutex);
 
-	return m_requestStateList.count();
+	return TO_INT(m_requestStateList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1814,12 +1814,12 @@ Hash SignalBase::hashForRequestState(int index)
 {
 	QMutexLocker l(&m_stateMutex);
 
-	if (index < 0 || index >= m_requestStateList.count())
+	if (index < 0 || index >= TO_INT(m_requestStateList.size()))
 	{
 		return UNDEFINED_HASH;
 	}
 
-	return m_requestStateList[index];
+	return m_requestStateList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1828,7 +1828,7 @@ int SignalBase::rackForMeasureCount() const
 {
 	QMutexLocker l(&m_rackMutex);
 
-	return m_rackList.count();
+	return TO_INT(m_rackList.size());
 }
 
 
@@ -1838,12 +1838,12 @@ Metrology::RackParam SignalBase::rackForMeasure(int index) const
 {
 	QMutexLocker l(&m_rackMutex);
 
-	if (index < 0 || index >= m_rackList.count())
+	if (index < 0 || index >= TO_INT(m_rackList.size()))
 	{
 		return Metrology::RackParam();
 	}
 
-	return m_rackList[index];
+	return m_rackList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1852,8 +1852,8 @@ QString SignalBase::findAppSignalIDforSerialNo(const QString& moduleID)
 {
 	QString appSignalID;
 
-	int signalCount = m_signalList.count();
-	for(int i = 0; i < signalCount; i++)
+	quint64 signalCount = m_signalList.size();
+	for(quint64 i = 0; i < signalCount; i++)
 	{
 		Metrology::Signal& signal = m_signalList[i];
 
@@ -1926,8 +1926,8 @@ int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionT
 				//
 				QMap<Hash, int> rackHashMap;
 
-				int signalCount = m_signalList.count();
-				for(int i = 0; i < signalCount; i ++)
+				quint64 signalCount = m_signalList.size();
+				for(quint64 i = 0; i < signalCount; i ++)
 				{
 					if (enableForMeasure(connectionType, &m_signalList[i]) == false)
 					{
@@ -1950,25 +1950,17 @@ int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionT
 					{
 						rackHashMap.insert(rackHash, param.location().rack().index());
 
-						m_rackList.append(param.location().rack());
+						m_rackList.push_back(param.location().rack());
 					}
 				}
 
 				// sort by index
 				//
-				int rackCount = m_rackList.count();
-				for(int i = 0; i < rackCount - 1; i++)
-				{
-					for(int j = i+1; j < rackCount; j++)
-					{
-						if (m_rackList[i].index() > m_rackList[j].index())
+				std::sort(m_rackList.begin(), m_rackList.end(),
+						[](const Metrology::RackParam& rack1, const Metrology::RackParam& rack2) -> bool
 						{
-							Metrology::RackParam rack	= m_rackList[ i ];
-							m_rackList[ i ]				= m_rackList[ j ];
-							m_rackList[ j ]				= rack;
-						}
-					}
-				}
+							return rack1.index() < rack2.index();
+						});
 			}
 			break;
 
@@ -1994,7 +1986,7 @@ int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionT
 
 					Metrology::RackParam rack(g, QString("GROUP_%1").arg(g), group.caption());
 
-					m_rackList.append(rack);
+					m_rackList.push_back(rack);
 				}
 			}
 			break;
@@ -2004,7 +1996,7 @@ int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionT
 	}
 
 
-	return m_rackList.count();
+	return TO_INT(m_rackList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2029,9 +2021,8 @@ void SignalBase::initSignals()
 
 	m_signalMutex.lock();
 
-		int count = m_signalList.count();
-
-		for(int i = 0; i < count; i ++)
+		quint64 count = m_signalList.size();
+		for(quint64 i = 0; i < count; i ++)
 		{
 			Metrology::SignalParam& param = m_signalList[i].param();
 			if (param.isValid() == false)
@@ -2069,9 +2060,8 @@ void SignalBase::initRackParam()
 {
 	QMutexLocker l(&m_signalMutex);
 
-	int count = m_signalList.count();
-
-	for(int i = 0; i < count; i ++)
+	quint64 count = m_signalList.size();
+	for(quint64 i = 0; i < count; i ++)
 	{
 		Metrology::SignalParam& param = m_signalList[i].param();
 		if (param.isValid() == false)
@@ -2137,7 +2127,7 @@ int SignalBase::signalForMeasureCount() const
 {
 	QMutexLocker l(&m_signalMesaureMutex);
 
-	return m_signalMeasureList.count();
+	return TO_INT(m_signalMeasureList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2146,12 +2136,12 @@ MeasureSignal SignalBase::signalForMeasure(int index) const
 {
 	QMutexLocker l(&m_signalMesaureMutex);
 
-	if (index < 0 || index >= m_signalMeasureList.count())
+	if (index < 0 || index >= TO_INT(m_signalMeasureList.size()))
 	{
 		return MeasureSignal();
 	}
 
-	return m_signalMeasureList[index];
+	return m_signalMeasureList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2160,12 +2150,12 @@ bool SignalBase::setSignalForMeasure(int index, const MeasureSignal& signal)
 {
 	QMutexLocker l(&m_signalMesaureMutex);
 
-	if (index < 0 || index >= m_signalMeasureList.count())
+	if (index < 0 || index >= TO_INT(m_signalMeasureList.size()))
 	{
 		return false;
 	}
 
-	m_signalMeasureList[index] = signal;
+	m_signalMeasureList[static_cast<quint64>(index)] = signal;
 
 	return true;
 }
@@ -2192,9 +2182,9 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 		return 0;
 	}
 
-	int signalIndex = 0;
+	quint64 signalIndex = 0;
 	MeasureSignal measureSignal;
-	QMap<Hash, int>	mesaureSignalMap;
+	QMap<Hash, quint64>	mesaureSignalMap;
 
 	// find all signals for selected rack or group and create Measure Signal List map for ToolBar
 	//
@@ -2202,9 +2192,8 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 
 	m_signalMeasureList.clear();
 
-	int signalCount = m_signalList.count();
-
-	for(int i = 0; i < signalCount; i ++)
+	quint64 signalCount = m_signalList.size();
+	for(quint64 i = 0; i < signalCount; i ++)
 	{
 		if (enableForMeasure(connectionType, &m_signalList[i]) == false)
 		{
@@ -2231,7 +2220,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 				}
 				else
 				{
-					channelCount = m_connectionBase.destinationSignals(param.appSignalID(), connectionType).count();
+					channelCount = TO_INT(m_connectionBase.destinationSignals(param.appSignalID(), connectionType).size());
 				}
 				break;
 
@@ -2295,8 +2284,8 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 
 					if (mesaureSignalMap.contains(hashid) == true)
 					{
-						int index = mesaureSignalMap[hashid];
-						if (index >= 0 && index < m_signalMeasureList.count())
+						quint64 index = mesaureSignalMap[hashid];
+						if (index < m_signalMeasureList.size())
 						{
 							int channel = param.location().place() - 1;
 							if (channel >= 0 && channel < measureSignal.channelCount())
@@ -2357,8 +2346,8 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 
 					if (mesaureSignalMap.contains(hashid) == true)
 					{
-						int index = mesaureSignalMap[hashid];
-						if (index >= 0 && index < m_signalMeasureList.count())
+						quint64 index = mesaureSignalMap[hashid];
+						if (index < m_signalMeasureList.size())
 						{
 							int channel = param.location().rack().channel();
 							if (channel >= 0 && channel < measureSignal.channelCount())
@@ -2405,12 +2394,12 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 			continue;
 		}
 
-		m_signalMeasureList.append(measureSignal);
+		m_signalMeasureList.push_back(measureSignal);
 
 		signalIndex++;
 	}
 
-	return signalIndex;
+	return TO_INT(signalIndex);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2453,7 +2442,7 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 			continue;
 		}
 
-		m_requestStateList.append(pSignal->param().hash());
+		m_requestStateList.push_back(pSignal->param().hash());
 
 		// append hash of signal that contains ID of module for input signal - Serial Number
 		//
@@ -2461,7 +2450,7 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 		if (appSignalID_of_SerialNo.isEmpty() == false)
 		{
 			pSignal->param().location().setModuleSerialNoID(appSignalID_of_SerialNo);
-			m_requestStateList.append(calcHash(appSignalID_of_SerialNo));
+			m_requestStateList.push_back(calcHash(appSignalID_of_SerialNo));
 		}
 
 		// append hash of comparators input signal
@@ -2482,15 +2471,15 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 
 			if (comparatorEx->compare().isConst() == false)
 			{
-				m_requestStateList.append(comparatorEx->compareSignal()->param().hash());
+				m_requestStateList.push_back(comparatorEx->compareSignal()->param().hash());
 			}
 
 			if (comparatorEx->hysteresis().isConst() == false)
 			{
-				m_requestStateList.append(comparatorEx->hysteresisSignal()->param().hash());
+				m_requestStateList.push_back(comparatorEx->hysteresisSignal()->param().hash());
 			}
 
-			m_requestStateList.append(comparatorEx->outputSignal()->param().hash());
+			m_requestStateList.push_back(comparatorEx->outputSignal()->param().hash());
 		}
 
 		// if input has not output signals got to next channel
@@ -2508,7 +2497,7 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 			continue;
 		}
 
-		m_requestStateList.append(pSignal->param().hash());
+		m_requestStateList.push_back(pSignal->param().hash());
 
 		// append hash of signal that contains ID of module for output signal
 		//
@@ -2516,7 +2505,7 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 		if (appSignalID_of_SerialNo.isEmpty() == false)
 		{
 			pSignal->param().location().setModuleSerialNoID(appSignalID_of_SerialNo);
-			m_requestStateList.append(calcHash(appSignalID_of_SerialNo));
+			m_requestStateList.push_back(calcHash(appSignalID_of_SerialNo));
 		}
 
 		// append hash of comparators output signal
@@ -2537,15 +2526,15 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 
 			if (comparatorEx->compare().isConst() == false)
 			{
-				m_requestStateList.append(comparatorEx->compareSignal()->param().hash());
+				m_requestStateList.push_back(comparatorEx->compareSignal()->param().hash());
 			}
 
 			if (comparatorEx->hysteresis().isConst() == false)
 			{
-				m_requestStateList.append(comparatorEx->hysteresisSignal()->param().hash());
+				m_requestStateList.push_back(comparatorEx->hysteresisSignal()->param().hash());
 			}
 
-			m_requestStateList.append(comparatorEx->outputSignal()->param().hash());
+			m_requestStateList.push_back(comparatorEx->outputSignal()->param().hash());
 		}
 	}
 
@@ -2586,7 +2575,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 			continue;
 		}
 
-		QVector<std::shared_ptr<Metrology::ComparatorEx>> metrologyComparatorList;
+		std::vector<std::shared_ptr<Metrology::ComparatorEx>> metrologyComparatorList;
 
 		QVector<std::shared_ptr<Comparator>> comparatorList = comparatorSet.getByInputSignalID(appSignalID);
 		for(std::shared_ptr<Comparator> comparator : comparatorList)
@@ -2601,25 +2590,25 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 						//
 						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
-						comparatorEx->setIndex(metrologyComparatorList.count());
+						comparatorEx->setIndex(TO_INT(metrologyComparatorList.size()));
 						initComparatorSignals(comparatorEx.get());
 
 						comparatorEx->setCmpType(E::CmpType::Less);
 						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Up);
 
-						metrologyComparatorList.append(comparatorEx);
+						metrologyComparatorList.push_back(comparatorEx);
 
 						//
 						//
 						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
-						comparatorEx->setIndex(metrologyComparatorList.count());
+						comparatorEx->setIndex(TO_INT(metrologyComparatorList.size()));
 						initComparatorSignals(comparatorEx.get());
 
 						comparatorEx->setCmpType(E::CmpType::Greate);
 						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Down);
 
-						metrologyComparatorList.append(comparatorEx);
+						metrologyComparatorList.push_back(comparatorEx);
 					}
 
 					break;
@@ -2630,25 +2619,25 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 						//
 						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
-						comparatorEx->setIndex(metrologyComparatorList.count());
+						comparatorEx->setIndex(TO_INT(metrologyComparatorList.size()));
 						initComparatorSignals(comparatorEx.get());
 
 						comparatorEx->setCmpType(E::CmpType::Greate);
 						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Up);
 
-						metrologyComparatorList.append(comparatorEx);
+						metrologyComparatorList.push_back(comparatorEx);
 
 						//
 						//
 						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
-						comparatorEx->setIndex(metrologyComparatorList.count());
+						comparatorEx->setIndex(TO_INT(metrologyComparatorList.size()));
 						initComparatorSignals(comparatorEx.get());
 
 						comparatorEx->setCmpType(E::CmpType::Less);
 						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Down);
 
-						metrologyComparatorList.append(comparatorEx);
+						metrologyComparatorList.push_back(comparatorEx);
 					}
 
 					break;
@@ -2657,9 +2646,9 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 					{
 						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
-						comparatorEx->setIndex(metrologyComparatorList.count());
+						comparatorEx->setIndex(TO_INT(metrologyComparatorList.size()));
 						initComparatorSignals(comparatorEx.get());
-						metrologyComparatorList.append(comparatorEx);
+						metrologyComparatorList.push_back(comparatorEx);
 					}
 
 					break;

@@ -29,7 +29,7 @@ public:
 	void setColumnCaption(const QString& className, int columnCount, const char* const* pColumnCaption);
 
 	void clear();
-	void set(const QVector<TYPE>& list_add);
+	void set(const std::vector<TYPE>& list_add);
 
 	int count() const;
 	TYPE at(int index) const;
@@ -42,7 +42,7 @@ protected:
 	int m_columnCount = 0;
 
 	mutable QMutex m_mutex;
-	QVector<TYPE> m_list;
+	std::vector<TYPE> m_list;
 
 private:
 
@@ -117,9 +117,9 @@ void ListTable<TYPE>::clear()
 // ----------------------------------------------------------------------------------------------
 
 template <typename TYPE>
-void ListTable<TYPE>::set(const QVector<TYPE>& list_add)
+void ListTable<TYPE>::set(const std::vector<TYPE>& list_add)
 {
-	int itemCount = list_add.count();
+	int itemCount = TO_INT(list_add.size());
 	if (itemCount == 0)
 	{
 		return;
@@ -152,7 +152,7 @@ TYPE ListTable<TYPE>::at(int index) const
 {
 	QMutexLocker l(&m_mutex);
 
-	if (index < 0 || index >= m_list.count())
+	if (index < 0 || index >= m_list.size())
 	{
 		return TYPE();
 	}
@@ -274,7 +274,7 @@ private:
 
 	QDialogButtonBox*		m_buttonBox = nullptr;
 
-	QVector<QAction*>		m_pColumnActionList;
+	std::vector<QAction*>	m_pColumnActionList;
 	QMenu*					m_headerContextMenu = nullptr;
 
 	void					createInterface(double width, double height, bool hasButtons);

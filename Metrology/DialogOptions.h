@@ -199,7 +199,7 @@ private:
 
 	QHBoxLayout*				createButtons();
 
-	QVector<PropertyPage*>		m_pageList;
+	std::vector<PropertyPage*>	m_pageList;
 
 	PropertyPage*				createPage(int page);
 	PropertyPage*				createPropertyList(int page);

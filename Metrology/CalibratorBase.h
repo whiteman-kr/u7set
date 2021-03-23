@@ -78,7 +78,7 @@ private:
 	int m_timeout = 0;
 
 	mutable QMutex m_mutex;
-	QVector<std::shared_ptr<CalibratorManager>> m_calibratorManagerList;
+	std::vector<std::shared_ptr<CalibratorManager>> m_calibratorManagerList;
 
 	void createCalibrators(QWidget* parent);
 	void removeCalibrators();
