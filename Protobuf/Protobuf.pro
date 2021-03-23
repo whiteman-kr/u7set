@@ -20,7 +20,7 @@ msvc {
 # c++20 support -- for better compillation time, some cpps are included to this library,
 # and class PropertyObject is ussing std::clamp what is part cpp17
 #
-gcc:CONFIG += c++20
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
 win32:QMAKE_CXXFLAGS += /std:c++latest
 
 # DESTDIR
