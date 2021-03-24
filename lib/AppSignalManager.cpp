@@ -382,7 +382,7 @@ bool AppSignalManager::signalHasTag(const QString& appSignalId, const QString& t
 
 std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSignalId(const QString& appSignalId) const
 {
-	QVector<std::shared_ptr<Comparator>> comparators = m_setpoints.getByInputSignalID(appSignalId);
+	std::vector<std::shared_ptr<Comparator>> comparators = m_setpoints.getByInputSignalID(appSignalId);
 
 	std::vector<std::shared_ptr<Comparator>> result;
 	result.reserve(comparators.size());

@@ -2577,7 +2577,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 
 		std::vector<std::shared_ptr<Metrology::ComparatorEx>> metrologyComparatorList;
 
-		QVector<std::shared_ptr<Comparator>> comparatorList = comparatorSet.getByInputSignalID(appSignalID);
+		std::vector<std::shared_ptr<Comparator>> comparatorList = comparatorSet.getByInputSignalID(appSignalID);
 		for(std::shared_ptr<Comparator> comparator : comparatorList)
 		{
 			std::shared_ptr<Metrology::ComparatorEx> comparatorEx;

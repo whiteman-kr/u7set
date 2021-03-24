@@ -30,6 +30,7 @@ win32:QMAKE_CXXFLAGS += /std:c++latest
 include(../warnings.pri)
 
 #Application icon
+#
 win32:RC_ICONS += icons/Metrology.ico
 
 # DESTDIR
@@ -122,8 +123,6 @@ SOURCES += \
     ../lib/UnitsConvertorTable.cpp \
     ../lib/ComparatorSet.cpp
 
-#../lib/ExcelHelper.cpp
-
 HEADERS  += \
     ../lib/Address16.h \
     ../lib/DbController.h \
@@ -206,7 +205,6 @@ HEADERS  += \
     ../lib/Ui/DialogAbout.h \
 	../lib/UnitsConvertor.h \
     ../lib/UnitsConvertorTable.h \
-#../lib/ExcelHelper.h
     ../lib/ComparatorSet.h
 
 CONFIG += precompile_header
