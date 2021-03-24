@@ -174,7 +174,7 @@ namespace VFrame30
 		void initDrawingResources() const;
 		void drawText(CDrawParam* drawParam, const QRectF& rect) const;
 
-		bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
+		bool getSignalState(QString appSignalId, CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
 
 		QString parseText(QString text, CDrawParam* drawParam, const AppSignalParam& signal, const AppSignalState& signalState) const;
 		QString formatNumber(double value, const AppSignalParam& signal) const;

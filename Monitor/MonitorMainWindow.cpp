@@ -128,7 +128,10 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 	m_schemaListDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar);
 	m_schemaListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
 
-	SchemaListWidget* schemaListWidget = new SchemaListWidget{{SchemaListTreeColumns::SchemaID, SchemaListTreeColumns::Caption}, m_schemaListDock};
+	SchemaListWidget* schemaListWidget = new SchemaListWidget(
+												 std::vector{SchemaListTreeColumns::SchemaID, SchemaListTreeColumns::Caption},
+												 false,
+												 m_schemaListDock);
 	m_schemaListDock->setWidget(schemaListWidget);
 
 	addDockWidget(Qt::LeftDockWidgetArea, m_schemaListDock);

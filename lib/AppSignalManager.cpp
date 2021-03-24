@@ -56,7 +56,7 @@ void AppSignalManager::addSignal(const AppSignalParam& appSignal)
 	// Actually, EquipmentID does not starts from the symbol '@',
 	// but we need it particularly for Monitor to distinct AppSignalID from EquimpentID.
 	//
-	m_signalParamByEquipmentId[QStringLiteral("@") + appSignal.equipmentId()] = appSignal.hash();
+	m_signalParamByEquipmentId[QStringLiteral("@") + appSignal.equipmentId()] = appSignal.appSignalId();
 
 	return;
 }
@@ -68,7 +68,11 @@ void AppSignalManager::addSignals(const std::vector<AppSignalParam>& appSignals)
 	for (const AppSignalParam& s : appSignals)
 	{
 		m_signalParams[s.hash()] = s;
-		m_signalParamByEquipmentId[s.equipmentId()] = s.hash();
+
+		// Actually, EquipmentID does not starts from the symbol '@',
+		// but we need it particularly for Monitor to distinct AppSignalID from EquimpentID.
+		//
+		m_signalParamByEquipmentId[QStringLiteral("@") + s.equipmentId()] = s.appSignalId();
 	}
 
 	return;
@@ -295,25 +299,27 @@ void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std
 
 	emit addSignalsToPriorityList(QVector<Hash>{appSignalHashes.begin(), appSignalHashes.end()});
 
-		QReadLocker rl(&m_statesLocker);
-
 	int foundCount = 0;
 
-	for (const Hash& signalHash : appSignalHashes)
 	{
-		auto foundState = m_signalStates.find(signalHash);
+		QReadLocker rl(&m_statesLocker);
 
-		if (foundState != m_signalStates.end())
+		for (Hash signalHash : appSignalHashes)
 		{
-			result->push_back(foundState->second);
-			foundCount ++;
-		}
-		else
-		{
-			AppSignalState state;				// Non valid state, hash will be 0 or something like UNDEFINED
-			state.m_flags.valid = false;
+			auto foundState = m_signalStates.find(signalHash);
 
-			result->push_back(state);
+			if (foundState != m_signalStates.end())
+			{
+				result->push_back(foundState->second);
+				foundCount ++;
+			}
+			else
+			{
+				AppSignalState state;				// Non valid state, hash will be 0 or something like UNDEFINED
+				state.m_flags.valid = false;
+
+				result->push_back(state);
+			}
 		}
 	}
 
@@ -379,6 +385,23 @@ bool AppSignalManager::signalHasTag(const QString& appSignalId, const QString& t
 	return signalHasTag(::calcHash(appSignalId), tag);
 }
 
+QString AppSignalManager::equipmentToAppSiganlId(const QString& equipmentId) const
+{
+	QString result;
+
+	{
+		QReadLocker rl(&m_paramsLocker);
+
+		auto it = m_signalParamByEquipmentId.find(equipmentId);
+		if (it != m_signalParamByEquipmentId.end())
+		{
+			result = it->second;
+		}
+	}
+
+	return result;
+}
+
 
 std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSignalId(const QString& appSignalId) const
 {
@@ -397,18 +420,17 @@ std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSigna
 
 AppSignalParam AppSignalManager::signalParamByEquipemntId(const QString& equipmentId, bool* found) const
 {
-	return {};
+	Hash appSignalIdHash = UNDEFINED_HASH;
 
-//	{
-//		QReadLocker rl(&m_paramsLocker);
+	{
+		QReadLocker rl(&m_paramsLocker);
 
-//		auto it = m_signalParamByEquipmentId.find(equipmentId);
-//		if (it )
-//	}
+		auto it = m_signalParamByEquipmentId.find(equipmentId);
+		if (it != m_signalParamByEquipmentId.end())
+		{
+			appSignalIdHash = ::calcHash(it->second);
+		}
+	}
 
-
-//	lock
-//	find
-//	report
-//	return ;
+	return signalParam(appSignalIdHash, found);
 }

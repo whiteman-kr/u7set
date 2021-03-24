@@ -5,13 +5,10 @@
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
 
+
 class MonitorView;
 struct SchemaHistoryItem;
 
-namespace VFrame30
-{
-	class SchemaItem;
-}
 
 //
 //
@@ -41,19 +38,11 @@ protected:
 	//
 public:
 
-	// --
-	//
-protected:
-
-	// Signals
-	//
-signals:
-
 	// Slots
 	//
 public slots:
 	void contextMenuRequested(const QPoint& pos);
-	void signalContextMenu(const QStringList& appSignals, const QStringList& impactSignals, const QList<QMenu*> customMenu);
+	void signalContextMenu(const QStringList& appSignals, const QStringList& impactSignals, const QList<QMenu*>& customMenu);
 	void signalInfo(QString appSignalId);
 
 	// Properties

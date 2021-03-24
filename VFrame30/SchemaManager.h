@@ -1,5 +1,4 @@
-#ifndef SCHEMAMANAGER_H
-#define SCHEMAMANAGER_H
+#pragma once
 
 #include "Schema.h"
 #include "VFrame30Lib_global.h"
@@ -53,4 +52,4 @@ namespace VFrame30
 
 }
 
-#endif // SCHEMAMANAGER_H
+

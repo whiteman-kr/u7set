@@ -32,6 +32,8 @@ public:
 	virtual bool signalHasTag(Hash signalHash, const QString& tag) const = 0;
 	virtual bool signalHasTag(const QString& appSignalId, const QString& tag) const = 0;
 
+	virtual QString equipmentToAppSiganlId(const QString& equipmentId) const = 0;
+
 	// Setpoints
 	//
 	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const = 0;

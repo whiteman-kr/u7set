@@ -267,13 +267,17 @@ namespace VFrame30
 				AppSignalState signalState;
 				TuningSignalState tuningSignalState;
 
+				QString signalId;
+
 				if (signalIds().empty() == false)
 				{
-					signalParam.setAppSignalId(signalIds().front());
-					signalParam.setCustomSignalId(signalIds().front());
+					signalId = signalIds().front();
+
+					signalParam.setAppSignalId(signalId);
+					signalParam.setCustomSignalId(signalId);
 				}
 
-				getSignalState(drawParam, &signalParam, &signalState, &tuningSignalState);
+				getSignalState(signalId, drawParam, &signalParam, &signalState, &tuningSignalState);
 
 				text = parseText(m_text, drawParam, signalParam, signalState);
 			}
@@ -420,7 +424,7 @@ namespace VFrame30
 		return QString::number(value, static_cast<char>(analogFormat()), p);
 	}
 
-	bool SchemaItemValue::getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
+	bool SchemaItemValue::getSignalState(QString appSignalId, CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
 	{
 		if (drawParam == nullptr ||
 			signalParam == nullptr ||
@@ -439,13 +443,19 @@ namespace VFrame30
 		switch (signalSource())
 		{
 		case E::SignalSource::AppDataService:
-			if (drawParam->appSignalController() == nullptr)
+			if (auto appSignalController = drawParam->appSignalController();
+				appSignalController == nullptr)
 			{
 			}
 			else
 			{
-				*signalParam = drawParam->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
-				*appSignalState = drawParam->appSignalController()->signalState(signalParam->appSignalId(), nullptr);
+				if (appSignalId.startsWith('@') == true)
+				{
+					appSignalId = appSignalController->appSignalManager()->equipmentToAppSiganlId(appSignalId);
+				}
+
+				*signalParam = drawParam->appSignalController()->signalParam(appSignalId, &ok);
+				*appSignalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);
 			}
 			break;
 
@@ -455,8 +465,8 @@ namespace VFrame30
 			}
 			else
 			{
-				*signalParam = drawParam->tuningController()->signalParam(signalParam->appSignalId(), &ok);
-				*tuningSignalState = drawParam->tuningController()->signalState(signalParam->appSignalId(), nullptr);
+				*signalParam = drawParam->tuningController()->signalParam(appSignalId, &ok);
+				*tuningSignalState = drawParam->tuningController()->signalState(appSignalId, nullptr);
 
 				appSignalState->m_hash = signalParam->hash();
 				appSignalState->m_flags.valid = tuningSignalState->valid();
