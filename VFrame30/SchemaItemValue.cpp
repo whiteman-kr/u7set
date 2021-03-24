@@ -498,7 +498,7 @@ namespace VFrame30
 
 	QString SchemaItemValue::signalIdsString() const
 	{
-		QString result = m_signalIds.join(QChar::LineFeed);
+		QStringList resultList = m_signalIds;
 
 		// Expand variables in AppSignalIDs in MonitorMode, if applicable (m_drawParam is set and is monitor mode)
 		//
@@ -506,10 +506,15 @@ namespace VFrame30
 			m_drawParam->isMonitorMode() == true &&
 			m_drawParam->clientSchemaView() != nullptr)
 		{
-			result = MacrosExpander::parse(result, m_drawParam, this);
+			resultList = MacrosExpander::parse(resultList, m_drawParam, this);
+
+			for (QString& s : resultList)
+			{
+				s = m_drawParam->clientSchemaView()->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+			}
 		}
 
-		return result;
+		return resultList.join(QChar::LineFeed);
 	}
 
 	void SchemaItemValue::setSignalIdsString(const QString& value)
@@ -528,6 +533,11 @@ namespace VFrame30
 			m_drawParam->clientSchemaView() != nullptr)
 		{
 			resultList = MacrosExpander::parse(resultList, m_drawParam, this);
+
+			for (QString& s : resultList)
+			{
+				s = m_drawParam->clientSchemaView()->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+			}
 		}
 
 		return resultList;
