@@ -829,12 +829,14 @@ bool Configurator::requestUartInfo(CONF_HEADER* pingReceivedHeader, std::vector<
 	//
 	std::vector<quint8> nopReply;
 
+	int protocolVersion = 0;
+
 	if (send(0, Nop2, 0, Nop2BlockSize, std::vector<quint8>(), pingReceivedHeader, &nopReply) == false)
 	{
 		return false;
 	}
 
-	int protocolVersion = pingReceivedHeader->version;
+	protocolVersion = pingReceivedHeader->version;
 
 	switch (protocolVersion)
 	{
