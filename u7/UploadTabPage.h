@@ -35,7 +35,7 @@ protected slots:
 	void subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* item2);
 
 signals:
-	void setCommunicationSettings(QString device, bool useMultipleUartProtocol, bool showDebugInfo, bool verify);
+	void setCommunicationSettings(QString device, bool showDebugInfo, bool verify);
 
 	void readConfiguration(int);
 	void readFirmware(QString fileName, std::optional<std::vector<int>> selectedUarts);
@@ -63,6 +63,7 @@ public slots:
 	void cancel();
 	void clearLog();
 	void settings();
+	void mconf();
 
 	void disableControls();
 	void enableControls();
@@ -116,6 +117,7 @@ private:
 	QPushButton* m_pReadToFileButton = nullptr;
 	QPushButton* m_pConfigureButton = nullptr;
 	QPushButton* m_pEraseButton = nullptr;
+	QPushButton* m_pMconfButton = nullptr;
 
 	QPushButton* m_pSettingsButton = nullptr;
 	QPushButton* m_pClearLogButton = nullptr;

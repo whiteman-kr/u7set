@@ -605,7 +605,7 @@ bool Configurator::send(int moduleUartId,
 
 			if (showDebugInfo() == true)
 			{
-				m_Log->writeMessage("");
+				m_Log->writeEmptyLine();
 				m_Log->writeMessage(tr("Sending header, opcode Read:"));
 				readHeader.dump(m_Log);
 			}
@@ -636,9 +636,8 @@ bool Configurator::send(int moduleUartId,
 
 			if (showDebugInfo() == true)
 			{
-				m_Log->writeMessage("");
+				m_Log->writeEmptyLine();
 				m_Log->writeMessage(tr("Sending header, opcode Write:"));
-
 				writeHeader.dump(m_Log);
 				m_Log->writeDump(requestData);
 			}
@@ -661,7 +660,7 @@ bool Configurator::send(int moduleUartId,
 
 			if (showDebugInfo() == true)
 			{
-				m_Log->writeMessage("");
+				m_Log->writeEmptyLine();
 				m_Log->writeMessage(tr("Sending header, opcode Nop"));
 				nopHeader.dump(m_Log);
 			}
@@ -686,7 +685,7 @@ bool Configurator::send(int moduleUartId,
 
 			if (showDebugInfo() == true)
 			{
-				m_Log->writeMessage("");
+				m_Log->writeEmptyLine();
 				m_Log->writeMessage(tr("Sending header, opcode Nop2:"));
 				nop2Header.dump(m_Log);
 			}
@@ -748,10 +747,17 @@ bool Configurator::send(int moduleUartId,
 		}
 	}
 
-	if (recBuffer.size() != recSize)
+	if (opcode == Nop2 && recBuffer.size() == headerSize)
 	{
-		m_Log->writeError(tr("Received ") + QString().setNum(recBuffer.size()) + " bytes, expected " + QString().setNum(recSize) + ".");
-		return false;
+		expecetedDataBytes = 0; // We have received correct header and 0 data bytes on Nop2 request, possibly this command is not supported
+	}
+	else
+	{
+		if (recBuffer.size() != recSize)
+		{
+			m_Log->writeError(tr("Received ") + QString().setNum(recBuffer.size()) + " bytes, expected " + QString().setNum(recSize) + ".");
+			return false;
+		}
 	}
 
 	std::vector<quint8> recHeaderBuffer;
@@ -997,8 +1003,6 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 
 	//emit uploadFirmwareComplete(0x101);
 	//return;
-
-	m_cancelFlag = false;
 
 	// Open port
 	//
@@ -1249,14 +1253,18 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 			{
 			case 1:
 				{
-					m_Log->writeMessage("Write configuration...");
-
 					for (uint16_t i = 0; i < conf.eepromFrameCount(moduleUartId); i++)
 					{
 						if (m_cancelFlag == true)
 						{
 							m_Log->writeMessage("Write configuration cancelled.");
-							break;
+
+							if (closeConnection() == false)
+							{
+								m_Log->writeError(tr("CloseConnection failed."));
+							}
+
+							return;
 						}
 
 						uint16_t frameIndex = i;
@@ -1525,7 +1533,7 @@ void Configurator::readServiceInformationWorker(int /*param*/)
 	return;
 }
 
-bool Configurator::readFirmwareWorker(std::vector<ModuleFirmwareData>* firmwareDataArray, int maxFrameCount, std::optional<std::vector<int>> selectedUarts)
+bool Configurator::readFirmwareWorker(std::vector<ModuleFirmwareData>* firmwareDataArray, bool logIdentificationData, int maxFrameCount, std::optional<std::vector<int>> selectedUarts)
 {
 	if (firmwareDataArray == nullptr)
 	{
@@ -1676,8 +1684,14 @@ bool Configurator::readFirmwareWorker(std::vector<ModuleFirmwareData>* firmwareD
 						if (m_cancelFlag == true)
 						{
 							m_Log->writeMessage(tr("Firmware reading cancelled."));
-							break;
+
+							if (closeConnection() == false)
+							{
+								m_Log->writeError(tr("CloseConnection failed."));
+							}
+							return false;
 						}
+
 
 						if (maxFrameCount != -1 && i >= maxFrameCount)
 						{
@@ -1697,7 +1711,7 @@ bool Configurator::readFirmwareWorker(std::vector<ModuleFirmwareData>* firmwareD
 
 						assert(protocolVersion == readReceivedHeader.version);
 
-						if (i == 0)
+						if (i == 0 && logIdentificationData == true)
 						{
 							QStringList dumpLog;
 							bool identificationError = false;
@@ -2099,9 +2113,12 @@ void Configurator::readFirmware(const QString& fileName, std::optional<std::vect
 
 	QTextStream out(&file);
 
+	const bool logIdentificationData = true;
+	const int readFramesCount = -1;	// Read all frames
+
 	std::vector<ModuleFirmwareData> fdArray;
 
-	if (readFirmwareWorker(&fdArray, -1, selectedUarts) == false)
+	if (readFirmwareWorker(&fdArray, logIdentificationData, readFramesCount, selectedUarts) == false)
 	{
 		emit operationFinished();
 		return;
@@ -2290,7 +2307,14 @@ void Configurator::eraseFlashMemory(int, std::optional<std::vector<int>> selecte
 						if (m_cancelFlag == true)
 						{
 							m_Log->writeMessage("Memory erasing cancelled.");
-							break;
+
+							if (closeConnection() == false)
+							{
+								m_Log->writeError(tr("CloseConnection failed."));
+							}
+
+							emit operationFinished();
+							return;
 						}
 
 						if (i == IdentificationFrameIndex)
@@ -2359,7 +2383,7 @@ void Configurator::eraseFlashMemory(int, std::optional<std::vector<int>> selecte
 	return;
 }
 
-void Configurator::detectSubsystem_v1()
+void Configurator::detectSubsystem()
 {
 	m_cancelFlag = false;
 
@@ -2367,9 +2391,10 @@ void Configurator::detectSubsystem_v1()
 
 	std::vector<ModuleFirmwareData> fdArray;
 
+	const bool logIdentificationData = false;
 	const int readFramesCount = 2;
 
-	if (readFirmwareWorker(&fdArray, readFramesCount, {}) == false)
+	if (readFirmwareWorker(&fdArray, logIdentificationData, readFramesCount, {}) == false)
 	{
 		emit operationFinished();
 		return;
@@ -2421,7 +2446,7 @@ void Configurator::detectSubsystem_v1()
 		{
 			if (ssKey != ssKeyGlobal)
 			{
-				m_Log->writeError(QString("Subsystem key is not the same in EEPROM areas."));
+				m_Log->writeError(QString("Subsystem key is not the same."));
 				emit operationFinished();
 				return;
 			}
@@ -2436,8 +2461,6 @@ void Configurator::detectSubsystem_v1()
 
 void Configurator::detectUarts()
 {
-	m_Log->writeMessage(tr("Detecting UARTs supported by module..."));
-
 	m_cancelFlag = false;
 
 	emit operationStarted();

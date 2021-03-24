@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>163</height>
+    <height>148</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,13 +25,6 @@
      </item>
      <item>
       <widget class="QComboBox" name="serialPortCombo"/>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="useMultiUart">
-       <property name="text">
-        <string>Use Multiple-UART Protocol if possible</string>
-       </property>
-      </widget>
      </item>
      <item>
       <widget class="QCheckBox" name="showDebugInfo">
@@ -76,7 +69,6 @@
  </widget>
  <tabstops>
   <tabstop>serialPortCombo</tabstop>
-  <tabstop>useMultiUart</tabstop>
   <tabstop>showDebugInfo</tabstop>
   <tabstop>verifyData</tabstop>
  </tabstops>

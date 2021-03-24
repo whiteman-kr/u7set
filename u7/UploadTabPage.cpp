@@ -140,6 +140,16 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_pSettingsButton = new QPushButton(tr("&Settings..."));
 	pButtonsLayout->addWidget(m_pSettingsButton);
 
+	if (theSettings.isExpertMode() == true)
+	{
+		QString mconfPath = QApplication::applicationDirPath() + "/mconf.exe";
+		if (QFile::exists(mconfPath) == true)
+		{
+			m_pMconfButton = new QPushButton(tr("&Run mconf..."));
+			pButtonsLayout->addWidget(m_pMconfButton);
+		}
+	}
+
 	pButtonsLayout->addStretch();
 
 	m_pDetectSubsystemButton = new QPushButton(tr("Detect Subsystem"));
@@ -196,6 +206,10 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	{
 		connect(m_pEraseButton, &QAbstractButton::clicked, this, &UploadTabPage::erase);
 	}
+	if (m_pMconfButton != nullptr)
+	{
+		connect(m_pMconfButton, &QAbstractButton::clicked, this, &UploadTabPage::mconf);
+	}
 	connect(m_pCancelButton, &QAbstractButton::clicked, this, &UploadTabPage::cancel);
 	connect(m_pClearLogButton, &QAbstractButton::clicked, this, &UploadTabPage::clearLog);
 	connect(m_pSettingsButton, &QAbstractButton::clicked, this, &UploadTabPage::settings);
@@ -216,7 +230,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(this, &UploadTabPage::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);
 
 	connect(this, &UploadTabPage::readFirmware, m_pConfigurator, &Configurator::readFirmware);
-	connect(this, &UploadTabPage::detectSubsystem, m_pConfigurator, &Configurator::detectSubsystem_v1);
+	connect(this, &UploadTabPage::detectSubsystem, m_pConfigurator, &Configurator::detectSubsystem);
 
 	connect(this, &UploadTabPage::loadBinaryFile, m_pConfigurator, &Configurator::loadBinaryFile);
 	connect(this, &UploadTabPage::uploadFirmware, m_pConfigurator, &Configurator::uploadFirmware);
@@ -237,7 +251,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	m_pConfigurationThread->start();
 
-	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.m_configuratorUseMultiUart, theSettings.m_configuratorShowDebugInfo, theSettings.m_configuratorVerify);
+	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.m_configuratorShowDebugInfo, theSettings.m_configuratorVerify);
 
 	// Start Timer
 	//
@@ -567,7 +581,24 @@ void UploadTabPage::settings()
 		return;
 	}
 
-	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.m_configuratorUseMultiUart, theSettings.m_configuratorShowDebugInfo, theSettings.m_configuratorVerify);
+	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.m_configuratorShowDebugInfo, theSettings.m_configuratorVerify);
+}
+
+void UploadTabPage::mconf()
+{
+	QString mconfPath = QApplication::applicationDirPath() + "/mconf.exe";
+
+	if (QFile::exists(mconfPath) == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("File mconf.exe does not exist!"));
+		return;
+	}
+
+	if (QProcess::startDetached(mconfPath, {}) == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Could not run mconf.exe!"));
+		return;
+	}
 }
 
 void UploadTabPage::disableControls()
@@ -582,6 +613,10 @@ void UploadTabPage::disableControls()
 	if (m_pEraseButton)
 	{
 		m_pEraseButton->setEnabled(enable);
+	}
+	if (m_pMconfButton)
+	{
+		m_pMconfButton->setEnabled(enable);
 	}
 	m_pSettingsButton->setEnabled(enable);
 	m_pCancelButton->setEnabled(!enable);
@@ -601,6 +636,10 @@ void UploadTabPage::enableControls()
 	if (m_pEraseButton)
 	{
 		m_pEraseButton->setEnabled(enable);
+	}
+	if (m_pMconfButton)
+	{
+		m_pMconfButton->setEnabled(enable);
 	}
 	m_pSettingsButton->setEnabled(enable);
 	m_pCancelButton->setEnabled(!enable);

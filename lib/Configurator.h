@@ -253,7 +253,7 @@ protected:
 	void uploadFirmwareWorker(ModuleFirmwareStorage* storage, const QString& subsystemId, std::optional<std::vector<int>> selectedUarts);
 
 	void readServiceInformationWorker(int param);
-	bool readFirmwareWorker(std::vector<ModuleFirmwareData>* firmwareDataArray, int maxFrameCount, std::optional<std::vector<int>> selectedUarts);
+	bool readFirmwareWorker(std::vector<ModuleFirmwareData>* firmwareDataArray, bool logIdentificationData, int maxFrameCount, std::optional<std::vector<int>> selectedUarts);
 
 	void dumpIdentificationData(const std::vector<quint8> &identificationData, int blockSize, QStringList& out, bool* error);
 
@@ -275,7 +275,8 @@ public slots:
 
 	void eraseFlashMemory(int param, std::optional<std::vector<int>> selectedUarts);
 
-	void detectSubsystem_v1();
+	void detectSubsystem();
+
 	void detectUarts();
 
 	// Signals

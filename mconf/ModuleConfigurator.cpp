@@ -61,6 +61,9 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 		m_pEraseButton = new QPushButton(tr("&Erase"));
 	}
 
+	m_pCancelButton = new QPushButton(tr("Cancel"));
+	m_pCancelButton->setEnabled(false);
+
 	// Show setting dialog
 	//
 	m_pSettingsButton = new QPushButton(tr("&Settings..."));
@@ -92,6 +95,8 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 		pRightLayout->addWidget(m_pEraseButton);
 	}
 
+	pRightLayout->addWidget(m_pCancelButton);
+
 	pRightLayout->addStretch();
 
 	pRightLayout->addWidget(m_pSettingsButton);
@@ -117,7 +122,9 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	{
 		connect(m_pEraseButton, &QAbstractButton::clicked, this, &ModuleConfigurator::eraseClicked);
 	}
-	
+
+	connect(m_pCancelButton, &QAbstractButton::clicked, this, &ModuleConfigurator::cancelClicked);
+
 	connect(m_pSettingsButton, &QAbstractButton::clicked, this, &ModuleConfigurator::settingsClicked);
 	connect(m_pClearLogButton, &QAbstractButton::clicked, this, &ModuleConfigurator::clearLogClicked);
 
@@ -149,7 +156,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	connect(m_pConfigurator, &Configurator::communicationReadFinished, this, &ModuleConfigurator::communicationReadFinished);
 
 	connect(appTabPage, &ApplicationTabPage::loadBinaryFile, m_pConfigurator, &Configurator::loadBinaryFile);
-	connect(appTabPage, &ApplicationTabPage::detectSubsystem, m_pConfigurator, &Configurator::detectSubsystem_v1);
+	connect(appTabPage, &ApplicationTabPage::detectSubsystem, m_pConfigurator, &Configurator::detectSubsystem);
 	connect(appTabPage, &ApplicationTabPage::detectUarts, m_pConfigurator, &Configurator::detectUarts);
 
 	connect(m_pConfigurator, &Configurator::loadBinaryFileHeaderComplete, appTabPage, &ApplicationTabPage::loadBinaryFileHeaderComplete);
@@ -307,7 +314,7 @@ void ModuleConfigurator::configureClicked()
 			// --
 			//
             theLog.writeMessage("");
-            theLog.writeMessage(tr("Writing configuration..."));
+			theLog.writeMessage(tr("Writing service information..."));
 
 			// send write in commuinication thread...
 			//
@@ -334,11 +341,22 @@ void ModuleConfigurator::configureClicked()
 				return;
 			}
 
+			std::optional<std::vector<int>> selectedUarts = page->selectedUarts();
+
+			if (selectedUarts.has_value() == true && selectedUarts.value().empty() == true)
+			{
+				QMessageBox::critical(this, qApp->applicationName(), tr("Please select at least one UartID."));
+				return;
+			}
+
+			theLog.writeMessage("");
+			theLog.writeMessage(tr("Writing configuration..."));
+
 			// send write in commuinication thread...
 			//
 			disableControls();
 
-			emit writeConfData(page->configuration(), page->selectedSubsystem(), page->selectedUarts());
+			emit writeConfData(page->configuration(), page->selectedSubsystem(), selectedUarts);
 		}
 	}
 	catch(QString message)
@@ -361,7 +379,7 @@ void ModuleConfigurator::readClicked()
 			//DiagTabPage* page = dynamic_cast<DiagTabPage*>(m_tabWidget->currentWidget());
 
             theLog.writeMessage("");
-            theLog.writeMessage(tr("Reading configuration..."));
+			theLog.writeMessage(tr("Reading service information..."));
 
 			// Read
 			//
@@ -381,14 +399,22 @@ void ModuleConfigurator::readClicked()
 				return;
 			}
 
+			std::optional<std::vector<int>> selectedUarts = page->selectedUarts();
+
+			if (selectedUarts.has_value() == true && selectedUarts.value().empty() == true)
+			{
+				QMessageBox::critical(this, qApp->applicationName(), tr("Please select at least one UartID."));
+				return;
+			}
+
 			theLog.writeMessage("");
-			theLog.writeMessage(tr("Reading firmware to file %1...").arg(fileName));
+			theLog.writeMessage(tr("Reading configuration to file %1...").arg(fileName));
 
 			// Read
 			//
 			disableControls();
 
-			emit readFirmware(fileName, page->selectedUarts());
+			emit readFirmware(fileName, selectedUarts);
 		}
 
 	}
@@ -413,6 +439,7 @@ void ModuleConfigurator::eraseClicked()
 	mb.setInformativeText(tr("All data will be lost."));
 	mb.addButton(tr("Cancel"), QMessageBox::RejectRole);
 	mb.addButton(tr("Erase"), QMessageBox::AcceptRole);
+	mb.setIcon(QMessageBox::Warning);
 	
 	if (mb.exec() == QMessageBox::Rejected)
 	{
@@ -428,13 +455,22 @@ void ModuleConfigurator::eraseClicked()
 		
 		// Read
 		//
-		disableControls();
 
 		if (dynamic_cast<ApplicationTabPage*>(m_tabWidget->currentWidget()) != nullptr)
 		{
 			ApplicationTabPage* page = dynamic_cast<ApplicationTabPage*>(m_tabWidget->currentWidget());
 
-			emit eraseFlashMemory(0, page->selectedUarts());
+			std::optional<std::vector<int>> selectedUarts = page->selectedUarts();
+
+			if (selectedUarts.has_value() == true && selectedUarts.value().empty() == true)
+			{
+				QMessageBox::critical(this, qApp->applicationName(), tr("Please select at least one UartID."));
+				return;
+			}
+
+			disableControls();
+
+			emit eraseFlashMemory(0, selectedUarts);
 		}
 		else
 		{
@@ -449,6 +485,12 @@ void ModuleConfigurator::eraseClicked()
 	}
 	
 	return;
+}
+
+void ModuleConfigurator::cancelClicked()
+{
+	m_pConfigurator->cancelOperation();
+
 }
 
 void ModuleConfigurator::settingsClicked()
@@ -487,9 +529,14 @@ void ModuleConfigurator::disableControls()
 	m_pReadButton->setEnabled(false);
 	m_pConfigureButton->setEnabled(false);
 	
-	if (m_tabWidget->currentIndex() == 0 && m_pEraseButton != nullptr)
+	if (m_tabWidget->currentIndex() == 0)
 	{
-		m_pEraseButton->setEnabled(false);
+		if (m_pEraseButton != nullptr)
+		{
+			m_pEraseButton->setEnabled(false);
+		}
+
+		m_pCancelButton->setEnabled(true);
 	}
 
 	m_pSettingsButton->setEnabled(false);
@@ -503,9 +550,14 @@ void ModuleConfigurator::enableControls()
 	m_pReadButton->setEnabled(true);
 	m_pConfigureButton->setEnabled(true);
 
-	if (m_tabWidget->currentIndex() == 0 && m_pEraseButton != nullptr)
+	if (m_tabWidget->currentIndex() == 0)
 	{
-		m_pEraseButton->setEnabled(true);
+		if (m_pEraseButton != nullptr)
+		{
+			m_pEraseButton->setEnabled(true);
+		}
+
+		m_pCancelButton->setEnabled(false);
 	}
 
 	m_pSettingsButton->setEnabled(true);

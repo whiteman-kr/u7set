@@ -62,6 +62,7 @@ private:
 	enum class UartListColumn
 	{
 		Id,
+		Type,
 		Process
 	};
 
@@ -76,6 +77,8 @@ private:
 	ModuleFirmwareStorage m_firmware;
 
 	std::vector<int> m_uartIds;
+
+	std::map<int, QString> m_uartIdTypes;
 };
 
 #endif // APPLICATIONTABPAGE_H

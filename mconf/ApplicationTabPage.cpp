@@ -94,6 +94,11 @@ ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget *parent)
 	{
 		// UART List Widget
 
+		m_uartIdTypes[0x101] = tr("AppLogic");
+		m_uartIdTypes[0x102] = tr("Configuration");
+		m_uartIdTypes[0x103] = tr("Service");
+		m_uartIdTypes[0x104] = tr("Tuning");
+
 		pLeftLayout->addWidget(new QLabel(tr("Module UART List:")));
 		m_pUartsListTree = new QTreeWidget();
 		m_pUartsListTree->setRootIsDecorated(false);
@@ -101,6 +106,7 @@ ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget *parent)
 
 		l.clear();
 		l << tr("UartID");
+		l << tr("Type");
 		l << tr("Process");
 
 		m_pUartsListTree->setColumnCount(l.size());
@@ -108,13 +114,13 @@ ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget *parent)
 
 		il = 0;
 		m_pUartsListTree->setColumnWidth(il++, 80);
+		m_pUartsListTree->setColumnWidth(il++, 100);
 		m_pUartsListTree->setColumnWidth(il++, 80);
 
 		// Add an empty item
 		//
 		QTreeWidgetItem* item = new QTreeWidgetItem();
 		item->setText(static_cast<int>(UartListColumn::Id), tr("Default"));
-		item->setText(static_cast<int>(UartListColumn::Process), tr("Default"));
 		item->setData(static_cast<int>(UartListColumn::Id), Qt::UserRole, -1);
 		m_pUartsListTree->addTopLevelItem(item);
 
@@ -186,9 +192,20 @@ void ApplicationTabPage::selectSubsystem(const QString& id)
 	}
 }
 
-std::optional<std::vector<int> > ApplicationTabPage::selectedUarts() const
+std::optional<std::vector<int>> ApplicationTabPage::selectedUarts() const
 {
+	if (m_expertMode == false)
+	{
+		return {};
+	}
+
 	std::vector<int> selectedUarts;
+
+	if ( m_pUartsListTree == nullptr)
+	{
+		Q_ASSERT(m_pUartsListTree);
+		return {};
+	}
 
 	int count = m_pUartsListTree->topLevelItemCount();
 	if (count == 0)
@@ -355,11 +372,17 @@ void ApplicationTabPage::resetCountersClicked()
 
 void ApplicationTabPage::detectSubsystemsClicked()
 {
+	theLog.writeMessage("");
+	theLog.writeMessage(tr("Detecting Subsystem..."));
+
 	emit detectSubsystem();
 }
 
 void ApplicationTabPage::detectUartsClicked()
 {
+	theLog.writeMessage("");
+	theLog.writeMessage(tr("Detecting UARTs supported by module..."));
+
 	emit detectUarts();
 }
 
@@ -548,13 +571,22 @@ void ApplicationTabPage::fillUartsList()
 
 			QString numberStr = QString::number(uartId, 16) + "h";
 
+			QString typeStr = tr("Custom");
+
+			auto typeIt = m_uartIdTypes.find(uartId);
+			if (typeIt != m_uartIdTypes.end())
+			{
+				typeStr = typeIt->second;
+			}
+
 			QTreeWidgetItem* item = new QTreeWidgetItem();
 			item->setText(static_cast<int>(UartListColumn::Id), numberStr);
+			item->setText(static_cast<int>(UartListColumn::Type), typeStr);
 			item->setData(static_cast<int>(UartListColumn::Id), Qt::UserRole, uartId);
 
 			if (uartId == ConfigurationUartId)
 			{
-				item->setText(static_cast<int>(UartListColumn::Process), "N/A (Service)");
+				item->setText(static_cast<int>(UartListColumn::Process), "N/A");
 			}
 			else
 			{

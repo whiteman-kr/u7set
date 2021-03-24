@@ -12,6 +12,7 @@
 #include "../Builder/Builder.h"
 #include "../lib/Signal.h"
 #include <QList>
+#include <optional>
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -130,6 +131,7 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<QVector<int>>();
 	qRegisterMetaType<ID_AppSignalID>();
 	qRegisterMetaType<QVector<ID_AppSignalID>>();
+	qRegisterMetaType<std::optional<std::vector<int>>>("std::optional<std::vector<int>>");
 
 	// Init TrendLib resources
 	//

@@ -34,6 +34,7 @@ private slots:
 	void configureClicked();
 	void readClicked();
 	void eraseClicked();
+	void cancelClicked();
 	void settingsClicked();
 	void clearLogClicked();
 
@@ -65,6 +66,7 @@ private:
 	QPushButton* m_pReadButton = nullptr;
 	QPushButton* m_pConfigureButton = nullptr;
 	QPushButton* m_pEraseButton = nullptr;
+	QPushButton* m_pCancelButton = nullptr;
 
 	QPushButton* m_pSettingsButton = nullptr;
 	QPushButton* m_pClearLogButton = nullptr;
