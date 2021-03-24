@@ -42,8 +42,6 @@ namespace Sim
 			CommandProcessor* result = it->second(device);
 			Q_ASSERT(result);
 
-			result->setOutputScope(equipmentId);
-
 			return result;
 		}
 	}
@@ -56,6 +54,14 @@ namespace Sim
 		//
 		Q_ASSERT(false);
 		return false;
+	}
+
+	quint16 CommandProcessor::signalSetSorChassis() const
+	{
+		// Must be implemented in derived class
+		//
+		Q_ASSERT(false);
+		return 0;
 	}
 
 	bool CommandProcessor::parseFunc(QString parseFunc, DeviceCommand* command)

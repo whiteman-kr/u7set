@@ -6,24 +6,20 @@
 namespace VFrame30
 {
 
-	MonitorSchema::MonitorSchema(void)
+	MonitorSchema::MonitorSchema(void) :
+		Schema()
 	{
-		//qDebug() << "MonitorSchema::MonitorSchema(void)";
+		setUnit(SchemaUnit::Inch);
 
-		setUnit(SchemaUnit::Display);
-
-		setGridSize(Settings::defaultGridSize(unit()));
-		setPinGridStep(20);
-
-		setDocWidth(1000);
-		setDocHeight(750);
+		setDocWidth(mm2in(420));
+		setDocHeight(mm2in(297));
 
 		setBackgroundColor(qRgb(0xF8, 0xF8, 0xF8));
 
 		Layers.push_back(std::make_shared<SchemaLayer>("Drawing", true));
 		Layers.push_back(std::make_shared<SchemaLayer>("Notes", false));
 
-		setTagsList(QStringList{"Monitor"});
+		setTagsList(QStringList{"monitor"});
 
 		return;
 	}
@@ -37,11 +33,11 @@ namespace VFrame30
 	{
 		std::set<QString> signalMap;	// signal ids can be duplicated, std::set removes dupilcates
 
-		for (std::shared_ptr<SchemaLayer> layer : Layers)
+		for (const std::shared_ptr<SchemaLayer>& layer : Layers)
 		{
 			// Get all signals
 			//
-			for (std::shared_ptr<SchemaItem> item : layer->Items)
+			for (const std::shared_ptr<SchemaItem>& item : layer->Items)
 			{
 				if (item->isType<VFrame30::SchemaItemValue>() == true)
 				{

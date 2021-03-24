@@ -4,7 +4,7 @@
 #include "../../QScintilla/Qt4Qt5/Qsci/qsciscintilla.h"
 #include "../../lib/QScintillaLexers/LexerJavaScript.h"
 #include "../../lib/DbController.h"
-
+#include "../../lib/QDoublevalidatorEx.h"
 
 
 namespace SimOverrideUI
@@ -91,7 +91,7 @@ namespace SimOverrideUI
 		QWidget* m_edit = nullptr;
 
 		QLineEdit* m_floatEdit = nullptr;
-		QDoubleValidator* m_floatEditValidator = nullptr;
+		QDoubleValidatorEx* m_floatEditValidator = nullptr;
 
 		QDoubleSpinBox* m_doubleSpinBox = nullptr;
 		QSpinBox* m_intSpinBox = nullptr;

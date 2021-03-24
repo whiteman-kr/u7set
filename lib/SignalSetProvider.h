@@ -1,5 +1,5 @@
 #pragma once
-#include "SignalSet.h"
+#include "../Builder/SignalSet.h"
 #include "SignalProperties.h"
 #include "AppSignal.h"
 
@@ -26,7 +26,10 @@ public:
 	static const E::PropertyBehaviourType defaultBehaviour = E::PropertyBehaviourType::Write;
 
 signals:
+	void propertyCountWillIncrease(int newPropertyCount);
+	void propertyCountWillDecrease(int newPropertyCount);
 	void propertyCountIncreased();
+	void propertyCountDecreased();
 
 public:
 	SignalPropertyManager(DbController* dbController, QWidget* parentWidget);
@@ -151,7 +154,9 @@ public:
 	QVector<int> getSameChannelSignals(int index);
 
 	const Signal& getLoadedSignal(int index);
+
 	AppSignalParam getAppSignalParam(int index);
+	AppSignalParam getAppSignalParam(QString appSignalId);
 
 	bool isEditableSignal(int index) const { return isEditableSignal(m_signalSet[index]); }
 	bool isEditableSignal(const Signal& signal) const;

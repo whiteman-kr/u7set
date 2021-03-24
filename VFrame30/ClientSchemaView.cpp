@@ -133,7 +133,7 @@ namespace VFrame30
 
 	bool ScriptSchemaView::questionMessageBox(QString text)
 	{
-		int result = QMessageBox::question(m_clientSchemaView, qAppName(), text);
+		int result = QMessageBox::question(m_clientSchemaView, qAppName(), text,  QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 		return result == QMessageBox::Yes;
 	}
 
@@ -226,8 +226,34 @@ namespace VFrame30
 	{
 	}
 
-	void ClientSchemaView::paintEvent(QPaintEvent*)
+	void ClientSchemaView::paintEvent(QPaintEvent* paintEvent)
 	{
+		// Draw schema
+		//
+		QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
+
+		if (schema() != nullptr && m_infoMode  == false)
+		{
+			int dpiX = logicalDpiX();
+			int dpiY = logicalDpiY();
+
+			QRect updateRect = paintEvent->rect();
+			updateRect.adjust(-dpiX, -dpiY / 4, dpiX, dpiY / 4);	// -one inch, to draw pin names
+
+			QPointF cls;
+			QPointF clf;
+
+			bool mok = true;
+			mok &= MousePosToDocPoint(updateRect.topLeft(), &cls, dpiX, dpiY);
+			mok &= MousePosToDocPoint(updateRect.bottomRight(), &clf, dpiX, dpiY);
+
+			if (mok == true)
+			{
+				clipRect.setTopLeft(cls);
+				clipRect.setSize({clf.x() - cls.x(), clf.y() - cls.y()});
+			}
+		}
+
 		// Draw Schema
 		//
 		QPainter p;
@@ -249,7 +275,7 @@ namespace VFrame30
 
 		// Draw schema
 		//
-		SchemaView::draw(drawParam);
+		SchemaView::draw(drawParam, clipRect);
 
 		// Calc size
 		//
@@ -298,7 +324,7 @@ namespace VFrame30
 			return;
 		}
 
-		if (event->buttons().testFlag(Qt::MidButton) == true)
+		if (event->buttons().testFlag(Qt::MiddleButton) == true)
 		{
 			// It is scrolling by midbutton, let scroll view process it
 			//
@@ -356,7 +382,7 @@ namespace VFrame30
 
 	void ClientSchemaView::mouseReleaseEvent(QMouseEvent* event)
 	{
-		if (event->buttons().testFlag(Qt::MidButton) == true)
+		if (event->buttons().testFlag(Qt::MiddleButton) == true)
 		{
 			// It is scrolling by midbutton, let scroll view process it
 			//
@@ -533,6 +559,22 @@ namespace VFrame30
 		return;
 	}
 
+	LogController* ClientSchemaView::logController()
+	{
+		return m_logController;
+	}
+
+	const LogController* ClientSchemaView::logController() const
+	{
+		return m_logController;
+	}
+
+	void ClientSchemaView::setLogController(LogController* value)
+	{
+		m_logController = value;
+		m_jsEngineGlobalsWereCreated = false;	// it will make jsEngine() to initialize global script vars again
+	}
+
 	QJSEngine* ClientSchemaView::jsEngine()
 	{
 		if (m_schemaManager == nullptr)
@@ -570,6 +612,15 @@ namespace VFrame30
 				QQmlEngine::setObjectOwnership(m_scriptAppSignalController.get(), QQmlEngine::CppOwnership);
 
 				m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableSignals, jsSignals);
+			}
+
+			// Create global variable "log"
+			//
+			{
+				QJSValue jsLog = m_jsEngine.newQObject(m_logController);
+				QQmlEngine::setObjectOwnership(m_logController, QQmlEngine::CppOwnership);
+
+				m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableLog, jsLog);
 			}
 
 			// Evaluate global script
@@ -698,7 +749,7 @@ namespace VFrame30
 		m_variables = values;
 	}
 
-	const MonitorBehavior& ClientSchemaView::monitorBehavor() const
+	const MonitorBehavior& ClientSchemaView::monitorBehavor() const noexcept
 	{
 		return m_monitorBehavior;
 	}
@@ -713,7 +764,7 @@ namespace VFrame30
 		m_monitorBehavior = std::move(src);
 	}
 
-	const TuningClientBehavior& ClientSchemaView::tuningClientBehavior() const
+	const TuningClientBehavior& ClientSchemaView::tuningClientBehavior() const noexcept
 	{
 		return m_tuningClientBehavior;
 	}

@@ -122,10 +122,38 @@ namespace Sim
 
 	void AfbComponentParam::subSignedInteger(const AfbComponentParam& operand)
 	{
-		AfbComponentParam negativeParam = operand;
-		negativeParam.setSignedIntValue(negativeParam.signedIntValue() * (-1));
+		// Signed integer overflow in c++ is undefined behavior, so we extend sinå32 to sint64
+		//
+		qint32 op1 = this->signedIntValue();
+		qint32 op2 = operand.signedIntValue();
+		qint32 result = op1 - op2;
 
-		return addSignedInteger(negativeParam);
+		qint64 wideResult = static_cast<qint64>(op1) - static_cast<qint64>(op2);
+
+		if (wideResult > std::numeric_limits<qint32>::max())
+		{
+			result = std::numeric_limits<qint32>::max();
+		}
+
+		if (wideResult < std::numeric_limits<qint32>::min())
+		{
+			result = std::numeric_limits<qint32>::min();
+		}
+
+		setSignedIntValue(result);
+
+		// Setting math flags, matters only:
+		// overflow
+		// zero
+		//
+		resetMathFlags();
+
+		m_mathFlags.overflow = wideResult > std::numeric_limits<qint32>::max() ||
+							   wideResult < std::numeric_limits<qint32>::min();
+
+		m_mathFlags.zero = (result == 0);
+
+		return;
 	}
 
 	void AfbComponentParam::mulSignedInteger(const AfbComponentParam& operand)
@@ -451,8 +479,7 @@ namespace Sim
 		return;
 	}
 
-	AfbComponentInstance::AfbComponentInstance(const std::shared_ptr<const Afb::AfbComponent>& afbComp,
-											   quint16 instanceNo) :
+	AfbComponentInstance::AfbComponentInstance(const std::shared_ptr<const Afb::AfbComponent>& afbComp, quint16 instanceNo) :
 		m_afbComp(afbComp),
 		m_instanceNo(instanceNo)
 	{
@@ -471,25 +498,13 @@ namespace Sim
 
 	bool AfbComponentInstance::addParam(const AfbComponentParam& param)
 	{
-		if (param.opIndex() >= m_params_a.size())				// NOLINT
+		if (param.opIndex() >= m_params_a.size())
 		{
-			Q_ASSERT(param.opIndex() < m_params_a.size());		// NOLINT
+			Q_ASSERT(param.opIndex() < m_params_a.size());
 			return false;
 		}
 
 		m_params_a[param.opIndex()] = param;
-		return true;
-	}
-
-	bool AfbComponentInstance::addParam(AfbComponentParam&& param)
-	{
-		if (param.opIndex() >= m_params_a.size())					// NOLINT
-		{
-			Q_ASSERT(param.opIndex() < m_params_a.size());			// NOLINT
-			return false;
-		}
-
-		m_params_a[param.opIndex()] = std::move(param);
 		return true;
 	}
 

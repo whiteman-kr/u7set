@@ -1,5 +1,5 @@
 #include "EditEngineSetOrder.h"
-#include "EditSchemaWidget.h"
+#include "SchemaEditor/EditSchemaWidget.h"
 
 namespace EditEngine
 {
@@ -28,7 +28,6 @@ namespace EditEngine
 			const std::vector<SchemaItemPtr>& /*items*/,
 			const std::list<SchemaItemPtr>& /*layerItems*/)
 	{
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		return true;
 /*
 		if (items.empty() == true ||

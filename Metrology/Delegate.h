@@ -14,9 +14,9 @@ class IntDelegate : public QItemDelegate
 
 public:
 
-	IntDelegate(QObject *parent);
+	IntDelegate(QObject* parent);
 
-	QWidget*	createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const;
+	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& /* option */, const QModelIndex& /* index */) const override;
 };
 
 // ==============================================================================================
@@ -27,9 +27,9 @@ class DoubleDelegate : public QItemDelegate
 
 public:
 
-	DoubleDelegate(QObject *parent);
+	DoubleDelegate(QObject* parent);
 
-	QWidget*	createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const;
+	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& /* option */, const QModelIndex& /* index */) const override;
 };
 
 // ==============================================================================================
@@ -40,9 +40,9 @@ class ColorDelegate : public QStyledItemDelegate
 
 public:
 
-	ColorDelegate(QObject *parent);
+	ColorDelegate(QObject* parent);
 
-	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+	void paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 };
 
 // ==============================================================================================
@@ -53,26 +53,11 @@ class FindTextDelegate : public QStyledItemDelegate
 
 public:
 
-	FindTextDelegate(QObject *parent);
+	FindTextDelegate(QObject* parent);
 
-	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+	void paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 };
 
 // ==============================================================================================
-
-class StatisticsStateDelegate : public QStyledItemDelegate
-{
-	Q_OBJECT
-
-public:
-
-	StatisticsStateDelegate(QObject *parent);
-
-	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-};
-
-// ==============================================================================================
-
-
 
 #endif // DELEGATE_H

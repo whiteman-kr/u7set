@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/DataSource.h"
 #include "../lib/Service.h"
 #include "TuningIPENSource.h"

@@ -12,8 +12,10 @@ class FilesTabPage;
 class BuildTabPage;
 class UploadTabPage;
 class SimulatorTabPage;
+class TestsTabPage;
 class DialogShortcuts;
 class SignalSetProvider;
+class ProjectDiffGenerator;
 
 namespace Ui {
 class MainWindow;
@@ -75,17 +77,23 @@ protected slots:
 	void runSubsystemListEditor();
     void runConnectionsEditor();
 	void runBusEditor();
+	void runTagsEditor();
+	void runSimulationProfilesEditor();
 	void updateUfbsAfbsBusses();
 	void afbLibraryCheck();
     void showAbout();
+	void showAboutQt();
 	void debug();
 	void startBuild();
 	void projectHistory();
 	void projectProperties();
+	void projectDifference();
+	void createSchemasAlbums();
 	void pendingChanges();
 
 private slots:
 	void projectOpened(DbProject project);
+	void projectAboutToBeClosed();
 	void projectClosed();
 
 	void buildStarted();
@@ -118,13 +126,18 @@ private:
 	QAction* m_subsystemListEditorAction = nullptr;
     QAction* m_connectionsEditorAction = nullptr;
 	QAction* m_busEditorAction = nullptr;
+	QAction* m_tagsEditorAction = nullptr;
+	QAction* m_simProfilesEditorAction = nullptr;
 	QAction* m_updateUfbsAfbs = nullptr;
 	QAction* m_AfbLibraryCheck = nullptr;
 	QAction* m_aboutAction = nullptr;
+	QAction* m_aboutQtAction = nullptr;
 	QAction* m_debugAction = nullptr;
 	QAction* m_startBuildAction = nullptr;
 	QAction* m_projectHistoryAction = nullptr;
 	QAction* m_projectPropertiesAction = nullptr;
+	QAction* m_projectDifferenceAction = nullptr;
+	QAction* m_schemasAlbumAction = nullptr;
 	QAction* m_pendingChangesAction = nullptr;
 	QLabel* m_statusBarInfo = nullptr;
 	QLabel* m_statusBarConnectionStatistics = nullptr;
@@ -138,6 +151,7 @@ private:
 	BuildTabPage* m_buildTabPage = nullptr;
 	UploadTabPage* m_uploadTabPage = nullptr;
 	SimulatorTabPage* m_simulatorTabPage = nullptr;
+	TestsTabPage* m_testsTabPage = nullptr;
 
 	DbController* m_dbController = nullptr;
 	SignalSetProvider* m_signalSetProvider = nullptr;

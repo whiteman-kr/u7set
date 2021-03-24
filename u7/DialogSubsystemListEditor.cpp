@@ -255,7 +255,7 @@ bool DialogSubsystemListEditor::saveChanges()
     }
     if (comment.isEmpty())
     {
-        QMessageBox::warning(this, "Subsystem List Editor", "No comment supplied!");
+		QMessageBox::warning(this, "Subsystem List Editor", "No comment supplied! Please provide a comment.");
         return false;
     }
 
@@ -368,7 +368,8 @@ void DialogSubsystemListEditor::on_m_remove_clicked()
 		index = items[0]->data(0, Qt::UserRole).toInt();
 	}
 
-	ui->m_list->takeTopLevelItem(index);
+	QTreeWidgetItem* deletedItem = ui->m_list->takeTopLevelItem(index);
+	delete deletedItem;
 
 	// Renumber indexes
 	//

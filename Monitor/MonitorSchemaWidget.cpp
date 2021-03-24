@@ -21,8 +21,9 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 										 MonitorSchemaManager* schemaManager,
 										 VFrame30::AppSignalController* appSignalController,
 										 VFrame30::TuningController* tuningController,
+                                         VFrame30::LogController* logController,
 										 QWidget* parent) :
-	VFrame30::ClientSchemaWidget(new MonitorView{schemaManager, appSignalController, tuningController},
+    VFrame30::ClientSchemaWidget(new MonitorView{schemaManager, appSignalController, tuningController, logController},
 								 schema,
 								 schemaManager,
 								 parent)
@@ -154,10 +155,7 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 		{
 			auto f = [this, schemaId, &appSignals, &impactSignals]() -> void
 					 {
-						if (schemaId != this->schemaId())
-						{
-							setSchema(schemaId, appSignals + impactSignals);
-						}
+						setSchema(schemaId, appSignals + impactSignals);
 					 };
 
 			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;

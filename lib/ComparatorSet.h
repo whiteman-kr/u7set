@@ -9,13 +9,14 @@
 
 // ------------------------------------------------------------------------------------------------
 //
-//	Comparator class declaration
+//	ComparatorSignal class declaration
 //
 // ------------------------------------------------------------------------------------------------
 
 class ComparatorSignal
 {
 public:
+
 	void setSignalParams(const QString& appSignalID, bool isAcquired, bool isConst, double constValue);
 	void setConstValue(double constValue);
 
@@ -30,6 +31,7 @@ public:
 	void dump() const;
 
 private:
+
 	bool m_isConst = true;
 	double m_constValue = 0;						// if m_isConst == true
 	QString m_appSignalID;							// if m_isConst == false
@@ -45,6 +47,7 @@ private:
 class Comparator
 {
 public:
+
 	E::CmpType cmpType() const;
 	void setCmpType(E::CmpType cmpType);
 
@@ -85,6 +88,7 @@ public:
 	void dump() const;
 
 private:
+
 	E::CmpType m_cmpType = E::CmpType::Equal;
 	E::AnalogAppSignalFormat m_inAnalogSignalFormat = E::AnalogAppSignalFormat::SignedInt32;
 
@@ -114,6 +118,7 @@ private:
 class LmComparatorSet
 {
 public:
+
 	LmComparatorSet();
 	LmComparatorSet(const QString& lmID, std::shared_ptr<Comparator> omparator);
 	~LmComparatorSet();
@@ -127,6 +132,7 @@ public:
 	const QVector<std::shared_ptr<Comparator>>& comparators() const;
 
 private:
+
 	QString m_lmID;
 	QVector<std::shared_ptr<Comparator>> m_comparatorList;
 };

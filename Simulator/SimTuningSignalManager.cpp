@@ -4,11 +4,11 @@ namespace Sim
 {
 
 	//
-	//TuningSignalManager
+	// TuningSignalManager
 	//
-	TuningSignalManager::TuningSignalManager(QObject* parent) :
+	TuningSignalManager::TuningSignalManager(ScopedLog log, QObject* parent) :
 		::TuningSignalManager(parent),
-		Output("TuningSignalManager")
+		m_log(log, "TuningSignalManager")
 	{
 	}
 

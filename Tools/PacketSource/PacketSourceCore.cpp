@@ -21,10 +21,18 @@ PacketSourceCore::PacketSourceCore(const CmdLineParam& cmdLine, QObject *parent)
 {
 	clear();
 
-	m_buildInfo.setBuildDirPath(cmdLine.buildDir());
-	m_buildInfo.setAppDataSrvIP(cmdLine.appDataSrvIP());
-	m_buildInfo.setUalTesterIP(cmdLine.ualTesterIP());
-	m_buildInfo.setSourcesForRunList(cmdLine.sourcesForRunList());
+	m_buildOption.setСfgSrvEquipmentID(cmdLine.cfgEquipmentID());
+	m_buildOption.setCfgSrvIP(cmdLine.cfgServIP());
+	m_buildOption.setAppDataSrvEquipmentID(cmdLine.adsEquipmentID());
+	m_buildOption.setUalTesterIP(cmdLine.ualTesterIP());
+	m_buildOption.setSourcesForRunList(cmdLine.sourcesForRunList());
+
+	// check build params
+	//
+	if (buildOptionIsValid() == false)
+	{
+		return;
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -37,8 +45,19 @@ PacketSourceCore::~PacketSourceCore()
 
 void PacketSourceCore::clear()
 {
-	m_buildInfo.clear();
+	m_buildOption.clear();
 
+	stopUalTesterServerThread();
+
+	clearAllBases();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PacketSourceCore::clearAllBases()
+{
+	// clear all bases
+	//
 	m_signalBase.clear();
 	m_sourceBase.clear();
 	m_signalHistory.clear();
@@ -46,57 +65,28 @@ void PacketSourceCore::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool PacketSourceCore::buildInfoIsValid()
+bool PacketSourceCore::buildOptionIsValid()
 {
-	// check params
-	//
 	QString msgTitle = tr("Loading options");
 
-	if (m_buildInfo.buildDirPath().isEmpty() == true)
+	// check params
+	//
+	if (m_buildOption.cfgSrvEquipmentID().isEmpty() == true)
 	{
-		QString strError = tr("Error: Build directory is epmpty");
+		QString strError = tr("Error: Configuration Service EquipmentID is empty");
 
 		#ifdef Q_CONSOLE_APP
-			qDebug() << strError;
-		#else
-			QMessageBox::information(nullptr, msgTitle, strError);
-		#endif
-
-		return false;
-	}
-
-	if (QDir(m_buildInfo.buildDirPath()).exists() == false)
-	{
-		QString strError = tr("Error: Build directory is not exist");
-
-		#ifdef Q_CONSOLE_APP
-			qDebug() << strError;
-		#else
-			QMessageBox::information(nullptr, msgTitle, strError);
-		#endif
-
-		return false;
-	}
-
-	for (int type = 0; type < BUILD_FILE_TYPE_COUNT; type ++)
-	{
-		if (QFile::exists(m_buildInfo.buildFile(type).path()) == false)
-		{
-			QString strError = tr("File %1 is not found!").arg(m_buildInfo.buildFile(type).path());
-
-			#ifdef Q_CONSOLE_APP
 				qDebug() << strError;
-			#else
+		#else
 				QMessageBox::information(nullptr, msgTitle, strError);
-			#endif
+		#endif
 
-			return false;
-		}
+		return false;
 	}
 
-	if (m_buildInfo.appDataSrvIP().isValidIPv4(m_buildInfo.appDataSrvIP().addressStr()) == false)
+	if (m_buildOption.cfgSrvIP().isValidIPv4(m_buildOption.cfgSrvIP().addressStr()) == false)
 	{
-		QString strError = tr("Error: IP-addres (AppDataReceivingIP) for send packets to AppDataSrv is not valid");
+		QString strError = tr("Error: IP-addres of Configuration Service is not valid");
 
 		#ifdef Q_CONSOLE_APP
 			qDebug() << strError;
@@ -107,7 +97,20 @@ bool PacketSourceCore::buildInfoIsValid()
 		return false;
 	}
 
-	if (m_buildInfo.ualTesterIP().isValidIPv4(m_buildInfo.ualTesterIP().addressStr()) == false)
+	if (m_buildOption.appDataSrvEquipmentID().isEmpty() == true)
+	{
+		QString strError = tr("Error: Application Data Service EquipmentID is empty");
+
+		#ifdef Q_CONSOLE_APP
+				qDebug() << strError;
+		#else
+				QMessageBox::information(nullptr, msgTitle, strError);
+		#endif
+
+		return false;
+	}
+
+	if (m_buildOption.ualTesterIP().isValidIPv4(m_buildOption.ualTesterIP().addressStr()) == false)
 	{
 		QString strError = tr("Error: IP-addres for listening commands from UalTester is not valid");
 
@@ -125,52 +128,15 @@ bool PacketSourceCore::buildInfoIsValid()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool PacketSourceCore::start()
-{
-	// check version of RUP packets
-	//
-	#if RUP_VERSION != PS_SUPPORT_VERSION
-		#error Current version of Rup packets is unknown
-	#endif
-
-	// check build params
-	//
-	if (buildInfoIsValid() == false)
-	{
-		return false;
-	}
-
-	// load sources
-	//
-	connect(&m_sourceBase, &SourceBase::sourcesLoaded, this, &PacketSourceCore::loadSignals, Qt::QueuedConnection);
-	connect(&m_signalBase, &SignalBase::signalsLoaded, this, &PacketSourceCore::loadSignalsInSources, Qt::QueuedConnection);
-
-	bool result = loadSources();
-	if (result == false)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void PacketSourceCore::stop()
-{
-	disconnect(&m_sourceBase, &SourceBase::sourcesLoaded, this, &PacketSourceCore::loadSignals);
-	disconnect(&m_signalBase, &SignalBase::signalsLoaded, this, &PacketSourceCore::loadSignalsInSources);
-
-	stopUpdateBuildFilesTimer();
-	stopUalTesterServerThread();
-
-	clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 bool PacketSourceCore::runUalTesterServerThread()
 {
+	stopUalTesterServerThread();
+
+	if (m_signalBase.count() == 0)
+	{
+		return false;
+	}
+
 	SoftwareInfo si;
 	si.init(E::SoftwareType::TestClient, "TEST_SERVER_ID", 1, 0);
 
@@ -184,7 +150,7 @@ bool PacketSourceCore::runUalTesterServerThread()
 	connect(m_ualTesterSever, &UalTesterServer::signalStateChanged, this, &PacketSourceCore::signalStateChanged, Qt::QueuedConnection);
 	connect(m_ualTesterSever, &UalTesterServer::exitApplication, this, &PacketSourceCore::exitApplication, Qt::QueuedConnection);
 
-	m_ualTesterServerThread = new UalTesterServerThread(m_buildInfo.ualTesterIP(), m_ualTesterSever, nullptr);
+	m_ualTesterServerThread = new UalTesterServerThread(m_buildOption.ualTesterIP(), m_ualTesterSever, nullptr);
 	if (m_ualTesterServerThread == nullptr)
 	{
 		return false;
@@ -192,7 +158,8 @@ bool PacketSourceCore::runUalTesterServerThread()
 
 	m_ualTesterServerThread->start();
 
-	qDebug() << "Wait for UalTester to connect and will listen:" << m_buildInfo.ualTesterIP().addressStr() << ":" << m_buildInfo.ualTesterIP().port();
+	qDebug() << "Wait for UalTester to connect and will listen:"	<< m_buildOption.ualTesterIP().addressStr()
+																	<< ":" << m_buildOption.ualTesterIP().port();
 
 	return true;
 }
@@ -217,35 +184,6 @@ void PacketSourceCore::stopUalTesterServerThread()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool PacketSourceCore::loadSources()
-{
-	m_signalBase.clear();	// clear signals
-
-	int sourceCount = m_sourceBase.readFromFile(m_buildInfo);
-
-	qDebug() << "Loaded sources:" << sourceCount;
-
-	return sourceCount != 0;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void PacketSourceCore::loadSignals()
-{
-	int signalCount = m_signalBase.readFromFile(m_buildInfo);
-
-	qDebug() << "Loaded signals:" << signalCount;
-
-	if (signalCount == 0)
-	{
-		return;
-	}
-
-	runUalTesterServerThread();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void PacketSourceCore::loadSignalsInSources()
 {
 	int sourceCount = m_sourceBase.count();
@@ -264,29 +202,22 @@ void PacketSourceCore::loadSignalsInSources()
 	// if reload bases if build has been updated
 	//
 	m_signalBase.restoreSignalsState();							// restore states signals
-	m_sourceBase.runSources(m_buildInfo.sourcesForRunList());	// restore states sources
+	m_sourceBase.runSources(m_buildOption.sourcesForRunList());	// restore states sources
 
-	// run timers for update build files
-	//
-	startUpdateBuildFilesTimer();
-
-	emit signalsLoaded();
+	emit signalsLoadedInSources();
 
 	qDebug() << "Ready";
+
+	runUalTesterServerThread();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PacketSourceCore::reloadSource()
+void PacketSourceCore::saveSourceState()
 {
-	// reload build files
+	// for reload sources
 	//
-	m_buildInfo.loadBuildFiles();						// reload new build files
-	m_buildInfo.setSourcesForRunList(QStringList());	// clear list of sources id for run
-
-	// stop timers for update build files
-	//
-	stopUpdateBuildFilesTimer();
+	m_buildOption.setSourcesForRunList(QStringList());	// clear list of sources id for run
 
 	// save states sources and signals
 	//
@@ -305,139 +236,21 @@ void PacketSourceCore::reloadSource()
 		{
 			if (pSource->info().equipmentID.isEmpty() == false)
 			{
-				m_buildInfo.appendSourcesForRunToList(pSource->info().equipmentID);
+				m_buildOption.appendSourcesForRunToList(pSource->info().equipmentID);
 			}
 		}
 
 		// save state of signals
 		//
-		int signalCount = pSource->signalList().count();
-		for(int i = 0; i < signalCount; i++)
+		for(PS::Signal& signal : pSource->signalList())
 		{
-			PS::Signal* pSignal = &pSource->signalList()[i];
-			if ( pSignal == nullptr)
+			if (signal.regValueAddr().offset() == BAD_ADDRESS || signal.regValueAddr().bit() == BAD_ADDRESS)
 			{
 				continue;
 			}
 
-			if (pSignal->regValueAddr().offset() == BAD_ADDRESS || pSignal->regValueAddr().bit() == BAD_ADDRESS)
-			{
-				continue;
-			}
-
-			m_signalBase.saveSignalState(pSignal);
+			m_signalBase.saveSignalState(&signal);
 		}
-	}
-
-	// reload sources
-	//
-	loadSources();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void PacketSourceCore::startUpdateBuildFilesTimer()
-{
-	if (m_buildInfo.enableReload() == false)
-	{
-		return;
-	}
-
-	if (m_updateBuildFilesTimer == nullptr)
-	{
-		m_updateBuildFilesTimer = new QTimer(this);
-		connect(m_updateBuildFilesTimer, &QTimer::timeout, this, &PacketSourceCore::updateBuildFiles);
-	}
-
-	m_updateBuildFilesTimer->start(m_buildInfo.timeoutReload() * 1000);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void PacketSourceCore::stopUpdateBuildFilesTimer()
-{
-	if (m_updateBuildFilesTimer == nullptr)
-	{
-		return;
-	}
-
-	disconnect(m_updateBuildFilesTimer, &QTimer::timeout, this, &PacketSourceCore::updateBuildFiles);
-
-	m_updateBuildFilesTimer->stop();
-	delete m_updateBuildFilesTimer;
-	m_updateBuildFilesTimer = nullptr;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void PacketSourceCore::updateBuildFiles()
-{
-	QString buidFileName = m_buildInfo.buildDirPath() + BUILD_FILE_SEPARATOR + "build.xml";
-	if (buidFileName.isEmpty() == true)
-	{
-		return;
-	}
-
-	if (QFile::exists(buidFileName) == false)
-	{
-		return;
-	}
-
-	QFile file(buidFileName);
-
-	if (file.size() == 0)
-	{
-		return;
-	}
-
-	if (file.open(QIODevice::ReadOnly) == false)
-	{
-		return;
-	}
-
-	QByteArray&& bulidData = file.readAll();
-
-	file.close();
-
-	bool reloadBuildFiles = false;
-
-	QXmlStreamReader m_xmlReader(bulidData);
-	Builder::BuildFileInfo buildFileInfo;
-
-	while(m_xmlReader.atEnd() == false)
-	{
-		if (m_xmlReader.readNextStartElement() == false)
-		{
-			continue;
-		}
-
-		if (m_xmlReader.name() == "File")
-		{
-			buildFileInfo.readFromXml(m_xmlReader);
-
-			for (int type = 0; type < BUILD_FILE_TYPE_COUNT; type ++)
-			{
-				if (buildFileInfo.pathFileName == m_buildInfo.buildFile(type).fileName())
-				{
-					if (buildFileInfo.size != m_buildInfo.buildFile(type).size())
-					{
-						reloadBuildFiles = true;
-					}
-
-					if (buildFileInfo.md5 != m_buildInfo.buildFile(type).md5())
-					{
-						reloadBuildFiles = true;
-					}
-				}
-			}
-		}
-	}
-
-	if (reloadBuildFiles == true)
-	{
-		qDebug() << "Build has been updated";
-
-		emit reloadSource();
 	}
 }
 

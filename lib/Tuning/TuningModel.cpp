@@ -125,8 +125,8 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 		break;
 	case TuningModelColumns::Type:
 		{
-			v1 = static_cast<int>(asp1.toTuningType());
-			v2 = static_cast<int>(asp2.toTuningType());
+			v1 = static_cast<int>(asp1.tuningType());
+			v2 = static_cast<int>(asp2.tuningType());
 		}
 		break;
 

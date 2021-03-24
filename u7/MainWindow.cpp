@@ -4,29 +4,35 @@
 #include "Settings.h"
 #include "DialogSettings.h"
 #include "../lib/DbController.h"
+#include "../lib/Ui/DialogAbout.h"
+#include "../lib/LogicModuleSet.h"
+#include "../lib/Ui/UiTools.h"
+#include "../lib/SignalSetProvider.h"
 #include "UserManagementDialog.h"
 #include "ProjectsTabPage.h"
 #include "FilesTabPage.h"
-#include "SchemaTabPageEx.h"
-#include "EquipmentTabPage.h"
 #include "SignalsTabPage.h"
 #include "DialogSubsystemListEditor.h"
 #include "DialogConnections.h"
 #include "DialogBusEditor.h"
+#include "DialogTagsEditor.h"
 #include "DialogAfbLibraryCheck.h"
 #include "BuildTabPage.h"
 #include "UploadTabPage.h"
 #include "SimulatorTabPage.h"
+#include "TestsTabPage.h"
 #include "GlobalMessanger.h"
-#include "Forms/FileHistoryDialog.h"
-#include "Forms/ProjectPropertiesForm.h"
-#include "Forms/PendingChangesDialog.h"
-#include "../lib/Ui/DialogAbout.h"
-#include "../VFrame30/VFrame30.h"
-#include "../lib/LogicModuleSet.h"
+#include "Forms/DialogProjectDiff.h"
+#include "Reports/ProjectDiffGenerator.h"
+#include "Reports/SchemasReportGenerator.h"
 #include "DialogShortcuts.h"
-#include "../lib/Ui/UiTools.h"
-#include "../lib/SignalSetProvider.h"
+#include "../VFrame30/VFrame30.h"
+#include "./Forms/FileHistoryDialog.h"
+#include "./Forms/ProjectPropertiesForm.h"
+#include "./Forms/PendingChangesDialog.h"
+#include "./SchemaEditor/SchemaTabPageEx.h"
+#include "./EquipmentEditor/EquipmentTabPage.h"
+#include "./Simulator/SimProfileEditor.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -60,6 +66,8 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	// Add main tab pages
 	//
 	m_projectsTab = new ProjectsTabPage(dbController(), nullptr);
+	connect(m_projectsTab, &ProjectsTabPage::projectAboutToBeClosed, this, &MainWindow::projectAboutToBeClosed, Qt::DirectConnection);
+
 	m_equipmentTab = new EquipmentTabPage(dbController(), nullptr);
 	m_signalsTab = new SignalsTabPage(m_signalSetProvider, dbController(), nullptr);
 
@@ -75,17 +83,20 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
 	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
 
-	m_editSchemaTabPage = new SchemasTabPageEx{db(), this};
+	m_editSchemaTabPage = new SchemasTabPageEx{db(), m_signalSetProvider, this};
 	getCentralWidget()->addTabPage(m_editSchemaTabPage, tr("Schemas"));
 
 	m_buildTabPage = new BuildTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(m_buildTabPage, tr("Build"));
 
-	m_uploadTabPage = new UploadTabPage(dbController(), nullptr);
-	getCentralWidget()->addTabPage(m_uploadTabPage, tr("Upload"));
-
 	m_simulatorTabPage = new SimulatorTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(m_simulatorTabPage, tr("Simulator"));
+
+	m_testsTabPage = new TestsTabPage(dbController(), nullptr);
+	getCentralWidget()->addTabPage(m_testsTabPage, tr("Tests"));
+
+	m_uploadTabPage = new UploadTabPage(dbController(), nullptr);
+	getCentralWidget()->addTabPage(m_uploadTabPage, tr("Upload"));
 
 	// --
 	//
@@ -120,19 +131,20 @@ void MainWindow::closeEvent(QCloseEvent* e)
 		assert(m_buildTabPage);
 	}
 
-	// check if any schema is not saved
+	// check if any schema or test is not saved
 	//
-	if (m_editSchemaTabPage == nullptr)
+	if (m_editSchemaTabPage == nullptr || m_testsTabPage == nullptr)
 	{
 		assert(m_editSchemaTabPage);
+		assert(m_testsTabPage);
 		e->accept();
 		return;
 	}
 
-	if (m_editSchemaTabPage->hasUnsavedSchemas() == true)
+	if (m_editSchemaTabPage->hasUnsavedSchemas() == true || m_testsTabPage->hasUnsavedTests() == true)
 	{
 		QMessageBox::StandardButton result = QMessageBox::question(this, QApplication::applicationName(),
-																   tr("Some schemas have unsaved changes."),
+																   tr("Some items on Schemas and Tests tab pages have unsaved changes."),
 																   QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel,
 																   QMessageBox::SaveAll);
 
@@ -145,12 +157,14 @@ void MainWindow::closeEvent(QCloseEvent* e)
 		if (result == QMessageBox::SaveAll)
 		{
 			m_editSchemaTabPage->saveUnsavedSchemas();	// It will reset modified flag
+			m_testsTabPage->saveUnsavedTests();	// It will reset modified flag
 		}
 
 		if (result == QMessageBox::Discard)
 		{
 			m_editSchemaTabPage->resetModified();		// Reset modidied flag for all opened files, so on closeEvent for tese files
 														// prompt to save them will not be shown
+			m_testsTabPage->resetModified();
 		}
 	}
 
@@ -294,6 +308,16 @@ void MainWindow::createActions()
 	m_busEditorAction->setEnabled(false);
 	connect(m_busEditorAction, &QAction::triggered, this, &MainWindow::runBusEditor);
 
+	m_tagsEditorAction = new QAction(tr("Tags Editor..."), this);
+	m_tagsEditorAction->setStatusTip(tr("Run Tags Editor"));
+	m_tagsEditorAction->setEnabled(false);
+	connect(m_tagsEditorAction, &QAction::triggered, this, &MainWindow::runTagsEditor);
+
+	m_simProfilesEditorAction = new QAction(tr("Simulator Profiles Editor..."), this);
+	m_simProfilesEditorAction->setStatusTip(tr("Run Simulator Profiles Editor"));
+	m_simProfilesEditorAction->setEnabled(false);
+	connect(m_simProfilesEditorAction, &QAction::triggered, this, &MainWindow::runSimulationProfilesEditor);
+
 	m_updateUfbsAfbs = new QAction(tr("Update AFBs/UFBs/Busses..."), this);
 	m_updateUfbsAfbs->setStatusTip(tr("Update AFBs/UFBs/Busses on all schemas"));
 	m_updateUfbsAfbs->setEnabled(false);
@@ -304,7 +328,12 @@ void MainWindow::createActions()
 	m_AfbLibraryCheck->setEnabled(false);
 	connect(m_AfbLibraryCheck, &QAction::triggered, this, &MainWindow::afbLibraryCheck);
 
-	m_aboutAction = new QAction(tr("About..."), this);
+	m_aboutQtAction = new QAction(tr("About Qt..."), this);
+	m_aboutQtAction->setStatusTip(tr("Show Qt information"));
+	//m_pAboutAction->setEnabled(true);
+	connect(m_aboutQtAction, &QAction::triggered, this, &MainWindow::showAboutQt);
+
+	m_aboutAction = new QAction(tr("About u7..."), this);
 	m_aboutAction->setStatusTip(tr("Show application information"));
 	//m_pAboutAction->setEnabled(true);
 	connect(m_aboutAction, &QAction::triggered, this, &MainWindow::showAbout);
@@ -345,6 +374,19 @@ void MainWindow::createActions()
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectPropertiesAction->setEnabled(true);});
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectPropertiesAction->setEnabled(false);});
 
+	m_projectDifferenceAction = new QAction(tr("Project Diff..."), this);
+	m_projectDifferenceAction->setEnabled(false);
+	connect(m_projectDifferenceAction, &QAction::triggered, this, &MainWindow::projectDifference);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectDifferenceAction->setEnabled(true);});
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectDifferenceAction->setEnabled(false);});
+
+	m_schemasAlbumAction = new QAction(tr("Create Schemas Albums..."), this);
+	m_schemasAlbumAction->setStatusTip(tr("Create PDF albums with all project schemas"));
+	m_schemasAlbumAction->setEnabled(false);
+	connect(m_schemasAlbumAction, &QAction::triggered, this, &MainWindow::createSchemasAlbums);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_schemasAlbumAction->setEnabled(true);});
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_schemasAlbumAction->setEnabled(false);});
+
 	m_pendingChangesAction = new QAction(tr("Pending Changes..."), this);
 	m_pendingChangesAction->setEnabled(false);
 	connect(m_pendingChangesAction, &QAction::triggered, this, &MainWindow::pendingChanges);
@@ -373,9 +415,13 @@ void MainWindow::createMenus()
 	//
 	QMenu* pProjectMenu = menuBar()->addMenu(tr("Project"));		// Alt+P now switching to the Projects tab page, don't use &
 	pProjectMenu->addAction(m_projectHistoryAction);
-	pProjectMenu->addAction(m_projectPropertiesAction);
-	pProjectMenu->addAction(m_startBuildAction);
 	pProjectMenu->addAction(m_pendingChangesAction);
+	pProjectMenu->addAction(m_projectDifferenceAction);
+	pProjectMenu->addSeparator();
+	pProjectMenu->addAction(m_schemasAlbumAction);
+	pProjectMenu->addAction(m_startBuildAction);
+	pProjectMenu->addSeparator();
+	pProjectMenu->addAction(m_projectPropertiesAction);
 
 	// Tools
 	//
@@ -384,6 +430,8 @@ void MainWindow::createMenus()
 	pToolsMenu->addAction(m_subsystemListEditorAction);
 	pToolsMenu->addAction(m_connectionsEditorAction);
 	pToolsMenu->addAction(m_busEditorAction);
+	pToolsMenu->addAction(m_tagsEditorAction);
+	pToolsMenu->addAction(m_simProfilesEditorAction);
 
 	pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_updateUfbsAfbs);
@@ -401,16 +449,13 @@ void MainWindow::createMenus()
 	menuBar()->addSeparator();
 	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
 
+	pHelpMenu->addAction(m_manualAfblAction);
 	pHelpMenu->addAction(m_manualRpctAction);
-
-	QMenu* rpctHelpMenu = pHelpMenu->addMenu(tr("RPCT User Manual Appendixes"));
-
-	rpctHelpMenu->addAction(m_manualRpctAppendixAAction);
-	rpctHelpMenu->addAction(m_scriptHelpAction);
+	pHelpMenu->addAction(m_manualRpctAppendixAAction);
 
 	pHelpMenu->addSeparator();
 
-	pHelpMenu->addAction(m_manualAfblAction);
+	pHelpMenu->addAction(m_scriptHelpAction);
 
 	pHelpMenu->addSeparator();
 
@@ -420,6 +465,10 @@ void MainWindow::createMenus()
 	pHelpMenu->addSeparator();
 
 	pHelpMenu->addAction(m_shortcutsAction);
+
+	pHelpMenu->addSeparator();
+
+	pHelpMenu->addAction(m_aboutQtAction);
 	pHelpMenu->addAction(m_aboutAction);
 
 	return;
@@ -608,7 +657,26 @@ void MainWindow::runBusEditor()
 	}
 }
 
+void MainWindow::runTagsEditor()
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
 
+	DialogTagsEditor d(dbController(), this);
+	d.exec();
+}
+
+void MainWindow::runSimulationProfilesEditor()
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	SimProfileEditor::run(dbController(), this);
+}
 
 void MainWindow::updateUfbsAfbsBusses()
 {
@@ -648,7 +716,7 @@ void MainWindow::updateUfbsAfbsBusses()
 	QStringList checkedOutFiles;
 
 	DbFileTree filesTree;
-	db()->getFileListTree(&filesTree, db()->ufblFileId(), "%", true, this);
+	db()->getFileListTree(&filesTree, DbDir::UfblDir, "%", true, this);
 
 	std::vector<DbFileInfo>	ufbSchemaFileInfos = filesTree.toVectorIf(
 		[](const DbFileInfo& file)
@@ -668,7 +736,7 @@ void MainWindow::updateUfbsAfbsBusses()
 	// Get ApplicationLogic schema list
 	//
 	filesTree.clear();
-	db()->getFileListTree(&filesTree, db()->alFileId(), "%", true, this);
+	db()->getFileListTree(&filesTree, DbDir::AppLogicDir, "%", true, this);
 
 	std::vector<DbFileInfo>	alSchemaFileInfos = filesTree.toVectorIf(
 		[](const DbFileInfo& file)
@@ -950,6 +1018,13 @@ void MainWindow::showAbout()
 	return;
 }
 
+void MainWindow::showAboutQt()
+{
+	QMessageBox::aboutQt(this, qAppName());
+
+	return;
+}
+
 void MainWindow::debug()
 {
 	theSettings.setDebugMode(!theSettings.isDebugMode());
@@ -1025,6 +1100,64 @@ void MainWindow::projectProperties()
 	return;
 }
 
+void MainWindow::projectDifference()
+{
+	if (m_dbController == nullptr)
+	{
+		assert(m_dbController);
+		return;
+	}
+
+	if (m_dbController->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	DialogProjectDiff dialog(db(), this);
+
+	if (dialog.exec() == QDialog::Accepted)
+	{
+		ProjectDiffGeneratorThread::run(dialog.fileName(),
+										dialog.reportParams(),
+										db()->currentProject().projectName(),
+										db()->currentUser().username(),
+										db()->currentUser().password(),
+										this);
+	}
+
+	return;
+}
+
+void MainWindow::createSchemasAlbums()
+{
+	QString albumPath = QSettings{}.value("MainWindow/Export/AlbumPath").toString();
+
+	static std::vector<ReportFileTypeParams> albumFileTypeParams = {};
+	if (albumFileTypeParams.empty() == true)
+	{
+		albumFileTypeParams = SchemasReportGenerator::defaultFileTypeParams(db());
+	}
+
+	if (SchemasReportDialog::getReportFilesPath(&albumPath, &albumFileTypeParams, SchemasReportGenerator::defaultFileTypeParams(db()), this) == false)
+	{
+		return;
+	}
+
+	QSettings{}.setValue("MainWindow/Export/AlbumPath", albumPath);
+
+	SchemasReportGeneratorThread r(theSettings.serverIpAddress(),
+							 theSettings.serverPort(),
+							 theSettings.serverUsername(),
+							 theSettings.serverPassword(),
+							 db()->currentProject().projectName(),
+							 db()->currentUser().username(),
+							 db()->currentUser().password(),
+							 this);
+
+	r.exportAllSchemasToAlbum(albumPath, albumFileTypeParams);
+	return;
+}
+
 void MainWindow::pendingChanges()
 {
 	PendingChangesDialog::show(db(), this);
@@ -1049,6 +1182,8 @@ void MainWindow::projectOpened(DbProject project)
 	m_subsystemListEditorAction->setEnabled(true);
     m_connectionsEditorAction->setEnabled(true);
 	m_busEditorAction->setEnabled(true);
+	m_tagsEditorAction->setEnabled(true);
+	m_simProfilesEditorAction->setEnabled(true);
 	m_updateUfbsAfbs->setEnabled(true);
 	m_AfbLibraryCheck->setEnabled(true);
 
@@ -1068,6 +1203,17 @@ void MainWindow::projectOpened(DbProject project)
 	return;
 }
 
+void MainWindow::projectAboutToBeClosed()
+{
+	if (m_testsTabPage == nullptr)
+	{
+		Q_ASSERT(m_testsTabPage);
+		return;
+	}
+
+	m_testsTabPage->saveUnsavedTests();
+}
+
 void MainWindow::projectClosed()
 {
 	setWindowTitle(qApp->applicationName());
@@ -1080,6 +1226,8 @@ void MainWindow::projectClosed()
 	m_subsystemListEditorAction->setEnabled(false);
     m_connectionsEditorAction->setEnabled(false);
 	m_busEditorAction->setEnabled(false);
+	m_tagsEditorAction->setEnabled(false);
+	m_simProfilesEditorAction->setEnabled(false);
 	m_updateUfbsAfbs->setEnabled(false);
 	m_AfbLibraryCheck->setEnabled(false);
 

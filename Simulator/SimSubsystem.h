@@ -2,7 +2,7 @@
 
 #include <map>
 #include <memory>
-#include "SimOutput.h"
+#include "SimScopedLog.h"
 #include "SimEeprom.h"
 #include "SimLogicModule.h"
 
@@ -14,21 +14,23 @@ namespace Hardware
 
 namespace Sim
 {
+	class Simulator;
 	class Connections;
 
-
-	class Subsystem : protected Output
+	class Subsystem
 	{
 	public:
 		Subsystem() = delete;
 		Subsystem(const Subsystem&) = delete;
-		explicit Subsystem(QString subsystemId);
 		Subsystem& operator=(const Subsystem&) = delete;
+
+		explicit Subsystem(QString subsystemId, Simulator* simulator);
 
 	public:
 		bool load(const Hardware::ModuleFirmware& firmware,
 				  const LmDescription& lmDescription,
-				  const Connections& connections);
+				  const Connections& connections,
+				  const LogicModulesInfo& logicModulesExtraInfo);
 
 	private:
 		std::vector<Hardware::LogicModuleInfo> logicModulesInfo() const;
@@ -43,6 +45,9 @@ namespace Sim
 		 std::shared_ptr<LogicModule> logicModule(QString equipmentId);
 
 	private:
+		Simulator* m_simulator = nullptr;
+		mutable ScopedLog m_log;
+
 		QString m_subsystemId;
 		LmDescription m_lmDescription;
 

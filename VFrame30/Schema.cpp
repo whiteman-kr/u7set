@@ -15,7 +15,6 @@
 #include "HorzVertLinks.h"
 #include "DrawParam.h"
 #include "PropertyNames.h"
-#include "../lib/ProtoSerialization.h"
 
 
 namespace VFrame30
@@ -92,7 +91,8 @@ namespace VFrame30
 		ADD_PROPERTY_GETTER(int, "Changeset", true, Schema::changeset);
 		ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, Schema::caption, Schema::setCaption);
 
-		ADD_PROPERTY_GETTER_SETTER(QString, "Tags", true, Schema::tagsAsString, Schema::setTags);
+		auto tagsProp = ADD_PROPERTY_GETTER_SETTER(QString, "Tags", true, Schema::tagsAsString, Schema::setTags);
+		tagsProp->setSpecificEditor(E::PropertySpecificEditor::Tags);
 
 		ADD_PROPERTY_GETTER_SETTER(bool, "ExcludeFromBuild", true, Schema::excludeFromBuild, Schema::setExcludeFromBuild);
 		ADD_PROPERTY_GETTER_SETTER(double, "SchemaWidth", true, Schema::docWidthRegional, Schema::setDocWidthRegional);
@@ -222,7 +222,7 @@ namespace VFrame30
 
 		m_width = schema.width();
 		m_height = schema.height();
-		m_unit = static_cast<SchemaUnit>(schema.unit());
+		setUnit(static_cast<SchemaUnit>(schema.unit()));
 		m_excludeFromBuild = schema.excludefrombuild();
 
 		if (schema.has_backgroundcolor() == true)
@@ -318,6 +318,9 @@ namespace VFrame30
 		double clipWidth = clipRect.width();
 		double clipHeight = clipRect.height();
 
+		QElapsedTimer timer;
+		timer.start();
+
 		for (auto layer : Layers)
 		{
 			Q_ASSERT(layer);
@@ -333,15 +336,14 @@ namespace VFrame30
 				continue;
 			}
 
-			for (auto vi = layer->Items.cbegin(); vi != layer->Items.cend(); ++vi)
+			for (const SchemaItemPtr& item : layer->Items)
 			{
-				const std::shared_ptr<SchemaItem>& item = *vi;
 				Q_ASSERT(item);
-
-				item->setDrawParam(drawParam);
 
 				if (item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
+					item->setDrawParam(drawParam);
+
 					if (drawParam->isMonitorMode() == true)
 					{
 						ClientSchemaView* view = drawParam->clientSchemaView();
@@ -373,6 +375,8 @@ namespace VFrame30
 				item->setDrawParam(nullptr);
 			}
 		}
+
+		//qDebug() << "Schema::Draw " << timer.elapsed();
 
 		return;
 	}
@@ -906,7 +910,7 @@ namespace VFrame30
 
 	// Guid
 	//
-	QUuid Schema::guid() const
+	QUuid Schema::guid() const noexcept
 	{
 		return m_guid;
 	}
@@ -919,7 +923,7 @@ namespace VFrame30
 
 	// SchemaID
 	//
-	QString Schema::schemaId() const
+	QString Schema::schemaId() const noexcept
 	{
 		return m_schemaID;
 	}
@@ -931,7 +935,7 @@ namespace VFrame30
 
 	// Caption
 	//
-	QString Schema::caption() const
+	QString Schema::caption() const noexcept
 	{
 		return m_caption;
 	}
@@ -943,7 +947,7 @@ namespace VFrame30
 
 	// Tags
 	//
-	QString Schema::tagsAsString() const
+	QString Schema::tagsAsString() const noexcept
 	{
 		QString result;
 
@@ -962,7 +966,7 @@ namespace VFrame30
 		return result;
 	}
 
-	QStringList Schema::tagsAsList() const
+	QStringList Schema::tagsAsList() const noexcept
 	{
 		QStringList result;
 		result.reserve(m_tags.size());
@@ -1223,14 +1227,26 @@ namespace VFrame30
 
 	// Unit
 	//
-	SchemaUnit Schema::unit() const
+	SchemaUnit Schema::unit() const noexcept
 	{
 		return m_unit;
 	}
 
-	void Schema::setUnit(SchemaUnit value)
+	void Schema::setUnit(SchemaUnit value) noexcept
 	{
+		Q_ASSERT(value == SchemaUnit::Display || value == SchemaUnit::Inch);
+
 		m_unit = value;
+		setGridSize(Settings::defaultGridSize(value));
+
+		if (value == SchemaUnit::Display)
+		{
+			setPinGridStep(20);
+		}
+		else
+		{
+			setPinGridStep(4);
+		}
 	}
 
 	int Schema::activeLayerIndex() const
@@ -1281,7 +1297,7 @@ namespace VFrame30
 		return;
 	}
 
-	double Schema::gridSize() const
+	double Schema::gridSize() const noexcept
 	{
 		return m_gridSize;
 	}
@@ -1291,7 +1307,7 @@ namespace VFrame30
 		m_gridSize = value;
 	}
 
-	int Schema::pinGridStep() const
+	int Schema::pinGridStep() const noexcept
 	{
 		return m_pinGridStep;
 	}
@@ -1301,7 +1317,7 @@ namespace VFrame30
 		m_pinGridStep = value;
 	}
 
-	bool Schema::excludeFromBuild() const
+	bool Schema::excludeFromBuild() const noexcept
 	{
 		return m_excludeFromBuild;
 	}
@@ -1311,7 +1327,7 @@ namespace VFrame30
 		m_excludeFromBuild = value;
 	}
 
-	QColor Schema::backgroundColor() const
+	QColor Schema::backgroundColor() const noexcept
 	{
 		return m_backgroundColor;
 	}
@@ -1321,52 +1337,52 @@ namespace VFrame30
 		m_backgroundColor = value;
 	}
 
-	bool Schema::isLogicSchema() const
+	bool Schema::isLogicSchema() const noexcept
 	{
 		return dynamic_cast<const VFrame30::LogicSchema*>(this) != nullptr;
 	}
 
-	bool Schema::isUfbSchema() const
+	bool Schema::isUfbSchema() const noexcept
 	{
 		return dynamic_cast<const VFrame30::UfbSchema*>(this) != nullptr;
 	}
 
-	bool Schema::isMonitorSchema() const
+	bool Schema::isMonitorSchema() const noexcept
 	{
 		return dynamic_cast<const VFrame30::MonitorSchema*>(this) != nullptr;
 	}
 
-	bool Schema::isTuningSchema() const
+	bool Schema::isTuningSchema() const noexcept
 	{
 		return dynamic_cast<const VFrame30::TuningSchema*>(this) != nullptr;
 	}
 
-	bool Schema::isDiagSchema() const
+	bool Schema::isDiagSchema() const noexcept
 	{
 		return dynamic_cast<const VFrame30::DiagSchema*>(this) != nullptr;
 	}
 
-	LogicSchema* Schema::toLogicSchema()
+	LogicSchema* Schema::toLogicSchema() noexcept
 	{
 		return dynamic_cast<VFrame30::LogicSchema*>(this);
 	}
 
-	const LogicSchema* Schema::toLogicSchema() const
+	const LogicSchema* Schema::toLogicSchema() const noexcept
 	{
 		return dynamic_cast<const VFrame30::LogicSchema*>(this);
 	}
 
-	UfbSchema* Schema::toUfbSchema()
+	UfbSchema* Schema::toUfbSchema() noexcept
 	{
 		return dynamic_cast<VFrame30::UfbSchema*>(this);
 	}
 
-	const UfbSchema* Schema::toUfbSchema() const
+	const UfbSchema* Schema::toUfbSchema() const noexcept
 	{
 		return dynamic_cast<const VFrame30::UfbSchema*>(this);
 	}
 
-	int Schema::changeset() const
+	int Schema::changeset() const noexcept
 	{
 		return m_changeset;
 	}
@@ -1424,36 +1440,30 @@ namespace VFrame30
 
 		if (schema->isLogicSchema() == true)
 		{
-			for (std::shared_ptr<SchemaLayer> layer : schema->Layers)
+			for (const std::shared_ptr<SchemaLayer>& layer : schema->Layers)
 			{
 				if (layer->compile() == true)
 				{
-					for (std::shared_ptr<SchemaItem> item : layer->Items)
+					for (const std::shared_ptr<SchemaItem>& item : layer->Items)
 					{
-						if (item->isType<SchemaItemConnection>() == true)
+						if (const SchemaItemConnection* connItem = item->toType<SchemaItemConnection>();
+							connItem != nullptr)
 						{
-							const SchemaItemConnection* connItem = item->toType<SchemaItemConnection>();
-							assert(connItem);
-
 							connections.insert(connItem->connectionIds());
 						}
 
-						if (item->isType<SchemaItemReceiver>() == true)
+						if (const SchemaItemReceiver* receiver = item->toType<SchemaItemReceiver>();
+							receiver != nullptr)
 						{
-							const SchemaItemReceiver* receiver = item->toType<SchemaItemReceiver>();
-							Q_ASSERT(receiver);
-
 							for (const QString& appSignalId : receiver->appSignalIdsAsList())
 							{
 								signalIds << appSignalId;
 							}
 						}
 
-						if (item->isType<SchemaItemLoopback>() == true)
+						if (const SchemaItemLoopback* lb = item->toType<SchemaItemLoopback>();
+							lb != nullptr)
 						{
-							const SchemaItemLoopback* lb = item->toType<SchemaItemLoopback>();
-							Q_ASSERT(lb);
-
 							loopbacks << lb->loopbackId();
 						}
 					}

@@ -2,8 +2,7 @@
 
 #include "MainWindow.h"
 #include "Options.h"
-#include "../../lib/ProtoSerialization.h"
-#include "../../lib/MemLeaksDetection.h"
+#include "../Proto/ProtoSerialization.h"
 
 #if __has_include("../../gitlabci_version.h")
 #	include "../../gitlabci_version.h"
@@ -11,7 +10,11 @@
 
 int main(int argc, char *argv[])
 {
-	initMemoryLeaksDetection();
+	// check version of RUP packets
+	//
+	#if RUP_VERSION != PS_SUPPORT_VERSION
+		#error Current version of Rup packets is unknown
+	#endif
 
 	QApplication a(argc, argv);
 
@@ -26,9 +29,13 @@ int main(int argc, char *argv[])
 	a.setApplicationVersion(QString("1.8.LOCALBUILD"));
 #endif
 
+	// init Options
+	//
 	Options options;
 	options.load();
 
+	//
+	//
 	MainWindow* pMainWindow = new MainWindow(options);
 	pMainWindow->show();
 
@@ -39,8 +46,6 @@ int main(int argc, char *argv[])
 	options.unload();
 
 	google::protobuf::ShutdownProtobufLibrary();
-
-	dumpMemoryLeaks();
 
 	return result;
 }

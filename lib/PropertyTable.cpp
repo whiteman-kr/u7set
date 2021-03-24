@@ -569,7 +569,7 @@ namespace ExtWidgets
 				return QVariant();
 			}
 
-			return PropertyEditorBase::propertyValueText(p.get(), row);
+			return PropertyTools::propertyValueText(p.get(), row);
 		}
 
 		return QVariant();
@@ -634,6 +634,15 @@ namespace ExtWidgets
 			if (event->key() == Qt::Key_Space)
 			{
 				emit spaceKeyPressed();
+				return;
+			}
+
+			if ((event->key() == Qt::Key_Up ||
+				 event->key() == Qt::Key_Down ||
+				 event->key() == Qt::Key_PageUp ||
+				 event->key() == Qt::Key_PageDown)
+				&& indexWidget(currentIndex()) != nullptr)
+			{
 				return;
 			}
 

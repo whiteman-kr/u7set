@@ -5,14 +5,16 @@
 namespace Sim
 {
 	ScriptWorkerThread::ScriptWorkerThread(ScriptSimulator* scriptSimulator) :
-		QThread(),
-		m_scriptSimulator{scriptSimulator}
+		QThread{},
+		m_scriptSimulator{scriptSimulator},
+		m_log{m_scriptSimulator->log()}
 	{
 		assert(m_scriptSimulator);
 
 		setObjectName("Sim::ScriptWorkerThread");
 
-		m_jsEngine.installExtensions(QJSEngine::ConsoleExtension);
+		connect(this, &QThread::started, scriptSimulator->simulator(), &Simulator::scriptStarted);
+		connect(this, &QThread::finished, scriptSimulator->simulator(), &Simulator::scriptFinished);
 
 		return;
 	}
@@ -23,116 +25,160 @@ namespace Sim
 
 		if (m_scriptSimulator == nullptr)
 		{
-			writeError(tr("Internal error: m_scriptSimulator == nullptr"));
+			m_log.writeError(tr("Internal error: m_scriptSimulator == nullptr"));
 			m_result = false;
 			return;
 		}
 
-		writeMessage(tr("********** Start testing of %1 **********").arg(m_testName));
-
-        m_jsThis = m_jsEngine.newQObject(m_scriptSimulator);
-        QQmlEngine::setObjectOwnership(m_scriptSimulator, QQmlEngine::CppOwnership);
-
-		// Evaluate script
+		// Run watchdog thread
 		//
-		QJSValue scriptValue = m_jsEngine.evaluate(m_script);
+		QtConcurrent::run(
+					[waitThread = this,
+					timeout = this->m_scriptSimulator->executionTimeout(),
+					log = ScopedLog{m_log}]
+					() mutable
+					{
+						bool ok = waitThread->wait(static_cast<unsigned long>(timeout));
+						if (ok == false)
+						{
+							log.writeError("Script execution timeout.");
+							waitThread->interruptScript();
+						}
+					});
 
-		if (scriptValue.isError() == true)
+		// --
+		//
+		int totalFailed = 0;
+
+		try		// runScriptFunction() can throw an expception in case of script interruption
 		{
-			writeError(tr("Script evaluate error at line %1\n"
-						 "\tClass: %2\n"
-						 "\tStack: %3\n"
-						 "\tMessage: %4")
-					  .arg(scriptValue.property("lineNumber").toInt())
-					  .arg(metaObject()->className())
-					  .arg(scriptValue.property("stack").toString())
-					  .arg(scriptValue.toString()));
+			for (const SimScriptItem& script : m_scripts)
+			{
+				m_jsEngine = std::make_unique<QJSEngine>();						// Creating new QJSEngine clears all old context
+				m_jsEngine->installExtensions(QJSEngine::ConsoleExtension);
 
+				m_log.writeMessage(tr("********** Start testing of %1 **********").arg(script.scriptCaption));
+
+				m_jsThis = m_jsEngine->newQObject(m_scriptSimulator);
+				QQmlEngine::setObjectOwnership(m_scriptSimulator, QQmlEngine::CppOwnership);
+
+				m_jsLog = m_jsEngine->newQObject(&m_log);
+				QQmlEngine::setObjectOwnership(&m_log, QQmlEngine::CppOwnership);
+
+				m_jsEngine->globalObject().setProperty("log", m_jsLog);
+
+				// Evaluate script
+				//
+				QJSValue scriptValue = m_jsEngine->evaluate(script.script);
+
+				if (scriptValue.isError() == true)
+				{
+					m_log.writeError(tr("Script %1 evaluate error at line %2\n"
+										"\tClass: %3\n"
+										"\tStack: %4\n"
+										"\tMessage: %5")
+									 .arg(script.scriptCaption)
+									 .arg(scriptValue.property("lineNumber").toInt())
+									 .arg(metaObject()->className())
+									 .arg(scriptValue.property("stack").toString())
+									 .arg(scriptValue.toString()));
+
+					m_result = false;
+					return;
+				}
+
+				// initTestCase() - will be called before the first test function is executed.
+				// cleanupTestCase() - will be called after the last test function was executed.
+				// init() - will be called before each test function is executed.
+				// cleanup() - will be called after every test function.
+				//
+
+				QElapsedTimer timer;
+				timer.start();
+
+				// initTestCase() - will be called before the first test function is executed.
+				//
+				m_result = runScriptFunction("initTestCase");
+				if (m_result == false)
+				{
+					return;
+				}
+
+				// Call all functions which starts from 'test', like 'testAfbNot()'
+				//
+				QStringList testList;
+
+				QJSValueIterator it(m_jsEngine->globalObject());
+				while (it.hasNext() == true)
+				{
+					it.next();
+
+					if (it.name().startsWith("test"))
+					{
+						testList.push_back(it.name());
+					}
+				}
+
+				std::sort(testList.begin(), testList.end());
+
+				int failed = 0;
+				for (const QString& testFunc : testList)
+				{
+					// init() - called before each test function is executed.
+					//
+					runScriptFunction("init");
+
+					if (bool testOk = runScriptFunction(testFunc);
+						testOk == true)
+					{
+						m_log.writeMessage(testFunc + ": ok");
+					}
+					else
+					{
+						failed ++;
+						totalFailed ++;
+						m_log.writeError(testFunc + ": FAILED");
+					}
+
+					// cleanup() - called after every test function.
+					//
+					runScriptFunction("cleanup");
+				}
+
+				// cleanup() - will be called after every test function.
+				//
+				runScriptFunction("cleanupTestCase");
+
+				qint64 elapsedMsTotal = timer.elapsed();
+
+				if (failed != 0)
+				{
+					m_log.writeError(tr("Totals: %1 tests, %2 failed, %3ms").arg(testList.size()).arg(failed).arg(elapsedMsTotal));
+				}
+				else
+				{
+					m_log.writeMessage(tr("Totals: %1 tests, %2 failed, %3ms").arg(testList.size()).arg(failed).arg(elapsedMsTotal));
+				}
+
+				m_log.writeMessage(tr("********** Finished testing of %1 **********").arg(script.scriptCaption));
+			}
+		}
+		catch(...)
+		{
+			m_log.writeText(tr("Interrupted..."));
 			m_result = false;
-			return;
 		}
 
-        // initTestCase() - will be called before the first test function is executed.
-        // cleanupTestCase() - will be called after the last test function was executed.
-        // init() - will be called before each test function is executed.
-        // cleanup() - will be called after every test function.
-        //
+		m_scriptSimulator->simulator()->control().stop();
+		m_scriptSimulator->simulator()->clear();
 
-		QElapsedTimer timer;
-		timer.start();
-
-        // initTestCase() - will be called before the first test function is executed.
-        //
-		m_result = runScriptFunction("initTestCase");
-		if (m_result == false)
-		{
-			return;
-		}
-
-        // Call all functions which starts from 'test', like 'testAfbNot()'
-        //
-        QStringList testList;
-
-        QJSValueIterator it(m_jsEngine.globalObject());
-        while (it.hasNext() == true)
-        {
-            it.next();
-
-			if (it.name().startsWith("test"))
-            {
-				testList.push_back(it.name());
-            }
-        }
-
-		std::sort(testList.begin(), testList.end());
-
-		int failed = 0;
-		for (const QString& testFunc : testList)
-		{
-			// init() - called before each test function is executed.
-			//
-			runScriptFunction("init");
-
-			if (bool testOk = runScriptFunction(testFunc);
-				testOk == true)
-			{
-				writeMessage(testFunc + ": ok");
-			}
-			else
-			{
-				failed ++;
-				writeError(testFunc + ": FAILED");
-			}
-
-			// cleanup() - called after every test function.
-			//
-			runScriptFunction("cleanup");
-		}
-
-		// cleanup() - will be called after every test function.
-		//
-		runScriptFunction("cleanupTestCase");
-
-		qint64 elapsedMsTotal = timer.elapsed();
-
-		if (failed != 0)
-		{
-			writeError(tr("Totals: %1 tests, %2 failed, %3ms").arg(testList.size()).arg(failed).arg(elapsedMsTotal));
-		}
-		else
-		{
-			writeMessage(tr("Totals: %1 tests, %2 failed, %3ms").arg(testList.size()).arg(failed).arg(elapsedMsTotal));
-		}
-
-		writeMessage(tr("********** Finished testing of %1 **********").arg(m_testName));
-
-		m_result = (failed == 0);
+		m_result = (totalFailed == 0);
 		return;
 	}
 
     bool ScriptWorkerThread::runScriptFunction(const QString& functionName)
     {
-        QJSValue funcProp = m_jsEngine.globalObject().property(functionName);
+		QJSValue funcProp = m_jsEngine->globalObject().property(functionName);
         if (funcProp.isUndefined() == true)
         {
             return false;
@@ -140,15 +186,21 @@ namespace Sim
 
         if (funcProp.isCallable() == false)
         {
-            writeError(tr("%1 is callable function").arg(functionName));
+			m_log.writeError(tr("%1 is callable function").arg(functionName));
             return false;
         }
 
         Q_ASSERT(m_jsThis.isUndefined() == false && m_jsThis.isObject() == true);
+		Q_ASSERT(m_jsLog.isUndefined() == false && m_jsLog.isObject() == true);
 
         // Run script function
         //
         QJSValue result = funcProp.call(QJSValueList{} << m_jsThis);
+
+		if (m_jsEngine->isInterrupted())
+		{
+			throw 1;
+		}
 
         // Log errors and exit
         //
@@ -158,18 +210,18 @@ namespace Sim
 			{
 				// Assume that JS code must report about the error
 				//
-				writeError(tr("Error, stack trace: %1\n\tMessage: %2")
-						   .arg(result.property("stack").toString())
-						   .arg(result.toString()));
+				m_log.writeError(tr("Error, stack trace: %1\n\tMessage: %2")
+								 .arg(result.property("stack").toString())
+								 .arg(result.toString()));
 			}
 			else
 			{
-				writeError(tr("Error at line %1\n"
-							 "\tStack: %2\n"
-							 "\tMessage: %3")
-						  .arg(result.property("lineNumber").toInt())
-						  .arg(result.property("stack").toString())
-						  .arg(result.toString()));
+				m_log.writeError(tr("Error at line %1\n"
+									"\tStack: %2\n"
+									"\tMessage: %3")
+								 .arg(result.property("lineNumber").toInt())
+								 .arg(result.property("stack").toString())
+								 .arg(result.toString()));
 			}
 
             return false;
@@ -180,7 +232,6 @@ namespace Sim
 
 	void ScriptWorkerThread::start(QThread::Priority priority/* = InheritPriority*/)
 	{
-		m_jsEngine.moveToThread(this);
 		m_result = true;
 
 		QThread::start(priority);
@@ -189,12 +240,15 @@ namespace Sim
 
 	bool ScriptWorkerThread::interruptScript()
 	{
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
-		m_jsEngine.setInterrupted(true);
+		qDebug() << "ScriptWorkerThread::interruptScript()";
+
+		m_jsEngine->setInterrupted(true);
+
+		// Wait for thread finishing
+		//
+		wait(20'000);	// timeout is 20s
+
 		return true;
-#else
-		return false;
-#endif
 	}
 
 	bool ScriptWorkerThread::result() const
@@ -202,29 +256,35 @@ namespace Sim
 		return m_result;
 	}
 
-	void ScriptWorkerThread::setScript(QString value)
+	void ScriptWorkerThread::setScripts(const std::vector<SimScriptItem>& scripts)
 	{
-		m_script = value;
-	}
+		m_scripts = scripts;
 
-	void ScriptWorkerThread::setTestName(QString value)
-	{
-		m_testName = value;
+		std::sort(m_scripts.begin(),
+				  m_scripts.end(),
+				  [](const auto& s1, const auto& s2)
+				  {
+						return s1.scriptCaption < s2.scriptCaption;
+				  }
+			);
+
+		return;
 	}
 
 	ScriptSimulator::ScriptSimulator(Simulator* simulator, QObject* parent) :
 		QObject(parent),
-		Output(),
-		m_simulator(simulator)
+		m_simulator(simulator),
+		m_log(simulator->log())
 	{
 		assert(m_simulator);
 	}
 
 	ScriptSimulator::~ScriptSimulator()
 	{
+		stopScript();
 	}
 
-	bool ScriptSimulator::runScript(QString script, QString testName)
+	bool ScriptSimulator::runScripts(const std::vector<SimScriptItem>& scripts)
 	{
 		if (m_simulator == nullptr)
 		{
@@ -234,23 +294,23 @@ namespace Sim
 
 		if (m_simulator->isLoaded() == false)
 		{
-			writeError(tr("Script start error: project is not loaded."));
+			m_log.writeError(tr("Script start error: project is not loaded."));
 			return false;
 		}
 
-		if (script.isEmpty())
+		if (scripts.empty() == true)
 		{
 			// It is not an error, just warn user about empty script and return true
 			//
-			writeWaning(tr("Script is empty."));
+			m_log.writeWarning(tr("Script is empty."));
 			return true;
 		}
 
-		writeDebug(tr("Start script"));
+		m_log.writeDebug(tr("Start script(s)"));
 
-		m_workerThread.setScript(script);
-		m_workerThread.setTestName(testName);
-
+		// Set script and start thread
+		//
+		m_workerThread.setScripts(scripts);
 		m_workerThread.start();
 
 		return true;
@@ -281,7 +341,7 @@ namespace Sim
 	{
 		if (isRunning() == true)
 		{
-			writeError("Cannot get script result, script is still running.");
+			m_log.writeError("Cannot get script result, script is still running.");
 			return false;
 		}
 
@@ -324,7 +384,7 @@ namespace Sim
 
 		if (m_simulator->isRunning() == true)
 		{
-			writeWaning(tr("Simulation already running"));
+			m_log.writeWarning(tr("Simulation already running"));
 			return false;
 		}
 
@@ -529,19 +589,34 @@ namespace Sim
 		return ScriptDevUtils{m_simulator};
 	}
 
+	ScopedLog& ScriptSimulator::log()
+	{
+		return m_log;
+	}
+
 	QString ScriptSimulator::buildPath() const
 	{
 		return m_simulator->buildPath();
 	}
 
-	qint64 ScriptSimulator::executionTimeOut() const
+	qint64 ScriptSimulator::executionTimeout() const
 	{
-		return m_executionTimeOut;
+		return m_executionTimeout;
 	}
 
-	void ScriptSimulator::setExecutionTimeOut(qint64 value)
+	void ScriptSimulator::setExecutionTimeout(qint64 value)
 	{
-		m_executionTimeOut = value;
+		m_executionTimeout = value;
+	}
+
+	Simulator* ScriptSimulator::simulator()
+	{
+		return m_simulator;
+	}
+
+	const Simulator* ScriptSimulator::simulator() const
+	{
+		return m_simulator;
 	}
 
 	bool ScriptSimulator::unlockTimer() const
@@ -554,13 +629,13 @@ namespace Sim
 		m_simulator->control().setUnlockTimer(value);
 	}
 
-	bool ScriptSimulator::appDataTrasmittion() const
+	bool ScriptSimulator::enabledLanComm() const
 	{
-		return m_simulator->appDataTransmitter().enabled();
+		return m_simulator->software().enabled();
 	}
 
-	void ScriptSimulator::setAppDataTrasmittion(bool value)
+	void ScriptSimulator::setEnabledLanComm(bool value)
 	{
-		m_simulator->appDataTransmitter().setEnabled(value);
+		m_simulator->software().setEnabled(value);
 	}
 }

@@ -62,7 +62,7 @@ const int					SignalListColumnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 
 // ==============================================================================================
 
-const int					UPDATE_SIGNAL_STATE_TIMEOUT		= 250; // 250 ms
+const int UPDATE_SIGNAL_STATE_TIMEOUT = 250; // 250 ms
 
 // ==============================================================================================
 
@@ -73,29 +73,29 @@ class SignalTable : public QAbstractTableModel
 public:
 
 	explicit SignalTable(QObject* parent = nullptr);
-	virtual ~SignalTable();
-
-private:
-
-	mutable QMutex			m_signalMutex;
-	QVector<PS::Signal*>	m_signalList;
-
-	int						columnCount(const QModelIndex &parent) const;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
-
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant				data(const QModelIndex &index, int role) const;
+	virtual ~SignalTable() override;
 
 public:
 
-	int						signalCount() const;
-	PS::Signal*				signalPtr(int index) const;
-	void					set(const QVector<PS::Signal*> list_add);
-	void					clear();
+	int signalCount() const;
+	PS::Signal* signalPtr(int index) const;
+	void set(const std::vector<PS::Signal*> list_add);
+	void clear();
 
-	QString					text(int row, int column, PS::Signal *pSignal) const;
+	QString text(int row, int column, PS::Signal *pSignal) const;
 
-	void					updateColumn(int column);
+	void updateColumn(int column);
+
+private:
+
+	mutable QMutex m_signalMutex;
+	std::vector<PS::Signal*> m_signalList;
+
+	int columnCount(const QModelIndex &parent) const override;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const override;
+
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
 };
 
 // ==============================================================================================
@@ -107,36 +107,31 @@ class SignalStateDialog : public QDialog
 public:
 
 	explicit SignalStateDialog(PS::Signal* pSignal, QWidget *parent = nullptr);
-	virtual ~SignalStateDialog();
-
-private:
-
-	QLineEdit*				m_stateEdit = nullptr;
-
-	PS::Signal*				m_pSignal = nullptr;
-
-	double					m_state = 0;
-
-	void					createInterface();
+	virtual ~SignalStateDialog() override;
 
 public:
 
-	double					state() const { return m_state; }
-	void					setState(double state) { m_state = state; }
+	double state() const { return m_state; }
+	void setState(double state) { m_state = state; }
 
-protected:
+private:
 
-signals:
+	QLineEdit* m_stateEdit = nullptr;
+
+	PS::Signal* m_pSignal = nullptr;
+
+	double m_state = 0;
+
+	void createInterface();
 
 private slots:
 
 	// slots of buttons
 	//
-	void					onOk();		// for analog signal
+	void onOk();		// for analog signal
 
-	void					onYes();	// for discrete signal
-	void					onNo();		// for discrete signal
-
+	void onYes();		// for discrete signal
+	void onNo();		// for discrete signal
 };
 
 // ==============================================================================================

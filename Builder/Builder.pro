@@ -4,24 +4,12 @@ TARGET = Builder
 TEMPLATE = lib
 CONFIG += staticlib
 
-# c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17
-win32:QMAKE_CXXFLAGS += /analyze		# Static code analyze
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
-# Warning level
-#
-gcc:CONFIG += warn_on
-
-win32:CONFIG -= warn_on				# warn_on is level 3 warnings
-win32:QMAKE_CXXFLAGS += /W4			# CONFIG += warn_on is just W3 level, so set level 4
-win32:QMAKE_CXXFLAGS += /wd4201		# Disable warning: C4201: nonstandard extension used: nameless struct/union
-win32:QMAKE_CXXFLAGS += /wd4458		# Disable warning: C4458: declaration of 'selectionPen' hides class member
-win32:QMAKE_CXXFLAGS += /wd4275		# Disable warning: C4275: non - DLL-interface class 'class_1' used as base for DLL-interface class 'class_2'
-
-
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+include(../warnings.pri)
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
@@ -71,9 +59,11 @@ DEFINES += IS_BUILDER
 
 SOURCES += \
     ../lib/ClientBehavior.cpp \
+    ../lib/DeviceHelper.cpp \
     ../lib/DomXmlHelper.cpp \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/LogicModulesInfo.cpp \
+	../lib/MetrologyConnection.cpp \
     ../lib/OutputLog.cpp \
     ../lib/DbController.cpp \
     ../lib/DbProgress.cpp \
@@ -85,18 +75,18 @@ SOURCES += \
     ../TuningService/TuningSource.cpp \
     ../lib/LogicModuleSet.cpp \
     ../lib/ModuleFirmware.cpp \
+    ../lib/ScriptDeviceObject.cpp \
     ../lib/Signal.cpp \
+    ../lib/SignalSetProvider.cpp \
+    ../lib/SoftwareSettings.cpp \
     ../lib/Subsystem.cpp \
     ../lib/Types.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/TuningValue.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/SignalProperties.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/DeviceHelper.cpp \
     ../lib/DataSource.cpp \
-    ../lib/ServiceSettings.cpp \
     ../lib/Queue.cpp \
     ../lib/WUtils.cpp \
     ../lib/CsvFile.cpp \
@@ -141,12 +131,10 @@ SOURCES += \
     FbParamCalculation.cpp \
     TuningBuilder.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
-    ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc \
     ../lib/Address16.cpp \
     ../lib/Times.cpp \
     ../lib/DataProtocols.cpp \
-    ../lib/DbProgressDialog.cpp \
+	../lib/DbProgressDialog.cpp \
     ../lib/MetrologySignal.cpp \
     RunOrder.cpp \
     TestClientCfgGenerator.cpp \
@@ -159,10 +147,12 @@ SOURCES += \
 HEADERS += \
     ../lib/ClientBehavior.h \
     ../lib/ConstStrings.h \
+    ../lib/DeviceHelper.h \
     ../lib/DomXmlHelper.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
     ../lib/LogicModulesInfo.h \
+	../lib/MetrologyConnection.h \
     ../lib/OutputLog.h \
     ../lib/DbController.h \
     ../lib/DbProgress.h \
@@ -173,24 +163,22 @@ HEADERS += \
     ../lib/Connection.h \
     ../TuningService/TuningSource.h \
     ../TuningService/TuningDataStorage.h \
-    ../TuningService/TuningSource.h \
-    ../lib/CommonTypes.h \
     ../lib/LogicModuleSet.h \
     ../lib/PropertyObject.h \
     ../lib/ModuleFirmware.h \
+    ../lib/ScriptDeviceObject.h \
     ../lib/Signal.h \
+    ../lib/SignalSetProvider.h \
+    ../lib/SoftwareSettings.h \
     ../lib/Subsystem.h \
     ../lib/Types.h \
-    ../lib/ProtoSerialization.h \
     ../lib/TuningValue.h \
     ../lib/XmlHelper.h \
     ../lib/SignalProperties.h \
     ../lib/Crc.h \
     ../lib/Hash.h \
     ../lib/HostAddressPort.h \
-    ../lib/DeviceHelper.h \
     ../lib/DataSource.h \
-    ../lib/ServiceSettings.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
     ../lib/CsvFile.h \
@@ -209,7 +197,6 @@ HEADERS += \
     IssueLogger.h \
     BuildWorkerThread.h \
     BuildResultWriter.h \
-    CfgFiles.h \
     ModuleFirmwareWriter.h \
     Parser.h \
     SignalSet.h \
@@ -237,8 +224,6 @@ HEADERS += \
     LmDescriptionSet.h \
     BdfFile.h \
     ../lib/Tuning/TuningSignalState.h \
-    ../Proto/network.pb.h \
-    ../Proto/serialization.pb.h \
     ../lib/Address16.h \
     ../lib/Times.h \
     ../lib/DataProtocols.h \
@@ -257,17 +242,22 @@ unix {
     INSTALLS += target
 }
 
+
 # protobuf
 #
-win32 {
-    LIBS += -L$$DESTDIR -lprotobuf
-    INCLUDEPATH += ./../Protobuf
-}
-unix {
-    LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
+
 
 DISTFILES += \
     ../Proto/network.proto \
     ../Proto/serialization.proto \
     ../Test/CompilerTests/CompilerTests.js
+
+
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

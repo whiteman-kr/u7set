@@ -59,7 +59,7 @@ namespace TuningIPEN
 
 		quint16* ptr = reinterpret_cast<quint16*>(sr.fotipData);
 
-		for(int i = 0; i < sizeof(sr.fotipData) / sizeof(quint16); i++)
+		for(unsigned int i = 0; i < sizeof(sr.fotipData) / sizeof(quint16); i++)
 		{
 			*ptr = reverseBytes<quint16>(*ptr);
 
@@ -72,7 +72,7 @@ namespace TuningIPEN
 	{
 		quint16* ptr = reinterpret_cast<quint16*>(sr.fotipData);
 
-		for(int i = 0; i < sizeof(sr.fotipData) / sizeof(quint16); i++)
+		for(unsigned int i = 0; i < sizeof(sr.fotipData) / sizeof(quint16); i++)
 		{
 			*ptr = reverseBytes<quint16>(*ptr);
 
@@ -115,9 +115,22 @@ namespace TuningIPEN
 
 		cfgXmlData = file.readAll();
 
+		SoftwareSettingsSet settingsSet;
+
+		result &= settingsSet.readFromXml(cfgXmlData);
+
+		std::shared_ptr<const TuningServiceSettings> ptr = settingsSet.getSettingsDefaultProfile<TuningServiceSettings>();
+
+		if (ptr == nullptr)
+		{
+			qDebug() << C_STR(QString("Loading configuration error from file: %1").arg(fileName));
+			return false;
+		}
+
+		m_tuningSettings = *ptr.get();
+
 		XmlReadHelper xml(cfgXmlData);
 
-		result &= m_tuningSettings.readFromXml(xml);
 		result &= readTuningDataSources(xml);
 
 		m_dataSources.buildIP2DataSourceMap();
@@ -162,7 +175,7 @@ namespace TuningIPEN
 
 		for(int i = 0; i < sourceCount; i++)
 		{
-			result = xml.findElement(DataSource::ELEMENT_DATA_SOURCE);
+			result = xml.findElement(XmlElement::DATA_SOURCE);
 
 			if (result == false)
 			{

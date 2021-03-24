@@ -4,9 +4,9 @@
 #include <optional>
 #include <QObject>
 #include <QReadWriteLock>
-#include "SimOutput.h"
 #include "../lib/Types.h"
 #include "../lib/Signal.h"
+#include "SimScopedLog.h"
 
 
 class QJSValue;
@@ -159,7 +159,7 @@ R"+++((function(lastOverrideValue, workcycle)
 	};
 
 
-	class OverrideSignals : public QObject, protected Output
+	class OverrideSignals : public QObject
 	{
 		Q_OBJECT
 
@@ -197,6 +197,7 @@ R"+++((function(lastOverrideValue, workcycle)
 
 		std::optional<OverrideSignalParam> overrideSignal(QString appSignalId) const;
 		std::vector<OverrideSignalParam> overrideSignals() const;
+		QStringList overrideSignalIds() const;
 
 		int changesCounter() const;
 
@@ -204,6 +205,7 @@ R"+++((function(lastOverrideValue, workcycle)
 
 	private:
 		Sim::Simulator* m_simulator = nullptr;
+		mutable ScopedLog m_log;
 
 		mutable QReadWriteLock m_lock;
 		std::map<QString, OverrideSignalParam> m_signals;	// Key is AppSignalID

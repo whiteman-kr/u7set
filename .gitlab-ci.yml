@@ -15,20 +15,54 @@ before_script:
 #after_script:
 #  - echo after_script
 
+linux build job:
+  stage: build
+  only:
+    - master
+    - /^release.*$/
+    - develop
+    - /experimental/
+  tags:
+    - gcc
+  script:
+    - "pwd"
+    - "whoami"
+    - "gcc --version"
+    - "echo $CI_COMMIT_SHA"
+    - "cd $CI_PROJECT_DIR"
+    - "git status"
+    - "git log -1"
+#generation version file
+    - "echo '#pragma once' > gitlabci_version.h"
+    - "echo >> gitlabci_version.h"
+    - "echo '#define GITLAB_CI_BUILD' >> gitlabci_version.h"
+    - echo '#define CI_BUILD_REF_SLUG' \"$CI_BUILD_REF_SLUG\" >> gitlabci_version.h
+    - echo '#define CI_COMMIT_SHA' \"$CI_COMMIT_SHA\" >> gitlabci_version.h
+    - echo '#define GITLAB_USER_NAME' \"$GITLAB_USER_NAME\" >> gitlabci_version.h
+    - echo '#define CI_PIPELINE_ID' $CI_PIPELINE_ID >> gitlabci_version.h
+    - echo '#define COMPUTERNAME' \"$HOSTNAME\" >> gitlabci_version.h
+    - echo '#define BUILD_DATE' \"$(date)\" >> gitlabci_version.h
+#Build Project
+    - "echo ----------------------------------------------"
+    - "echo               Build Project"
+    - "echo ----------------------------------------------"    
+    - "~/Qt/5.15.2/gcc_64/bin/qmake u7set.pro -spec linux-g++"
+    - "make -j6"
+
 windows build job:
   stage: build
   only:
     - master
     - /^release.*$/
     - develop
-    - experimental
+    - /experimental/
   tags:
     - vs2017
   script:
     - "echo %CI_COMMIT_SHA%"
     - "git status"
     - "git log -1"
-    - "set QT_BIN_DIR=C:\\Qt\\5.15.0\\msvc2019_64"
+    - "set QT_BIN_DIR=C:\\Qt\\5.15.2\\msvc2019_64"
 #generation version file
     - "echo #pragma once > gitlabci_version.h"
     - "echo. >> gitlabci_version.h"
@@ -70,6 +104,7 @@ windows build job:
     - "copy %QT_BIN_DIR%\\bin\\Qt5Widgets.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy %QT_BIN_DIR%\\bin\\Qt5WinExtras.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy %QT_BIN_DIR%\\bin\\Qt5Xml.dll \"%CI_PROJECT_DIR%/bin/release/\""
+    - "copy %QT_BIN_DIR%\\bin\\Qt5Charts.dll \"%CI_PROJECT_DIR%/bin/release/\""
 # Copy Qt plugins
     - "mkdir \"%CI_PROJECT_DIR%/bin/release/bearer\""
     - "copy %QT_BIN_DIR%\\plugins\\bearer\\qgenericbearer.dll \"%CI_PROJECT_DIR%/bin/release/bearer/\""
@@ -184,7 +219,7 @@ test job:
     - master
     - /^release.*$/
     - develop
-    - experimental
+    - /experimental/
   script:
     - "echo %CI_COMMIT_SHA%"
     - "git status"
@@ -216,10 +251,10 @@ test job:
     - "rem ----------------------------------------------"
     - "rem               Run Simulator AFBs tests"
     - "rem ----------------------------------------------"
-    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorConsole.exe c:\\temp\\build\\test_simulator_v337\\build %CI_PROJECT_DIR%\\Simulator\\SimProjectTests.js"
+    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorConsole.exe -build=c:\\temp\\build\\test_simulator_v349\\build -script=%CI_PROJECT_DIR%\\Simulator\\SimProjectTests.js"
 
 #Run ROVT to check configuration generation
     - "rem ----------------------------------------------"
     - "rem               Run ROVT tests"
     - "rem ----------------------------------------------"
-    - "C:\\ROVT\\ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v337\\build"
+    - "C:\\ROVT\\ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v349\\build"

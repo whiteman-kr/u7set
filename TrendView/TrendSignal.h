@@ -49,7 +49,7 @@ namespace TrendLib
 			value = 0;
 		}
 
-		bool isValid() const
+		[[nodiscard]] bool isValid() const
 		{
 			return (flags & 0x00000001);
 		}
@@ -66,7 +66,7 @@ namespace TrendLib
 			}
 		}
 
-		bool isRealtimePoint() const
+		[[nodiscard]] bool isRealtimePoint() const
 		{
 			return (flags & 0x80000000) ? true : false;
 		}
@@ -81,7 +81,7 @@ namespace TrendLib
 			flags &= ~0x80000000;
 		}
 
-		TimeStamp getTime(const E::TimeType& timeType) const
+		[[nodiscard]] TimeStamp getTime(E::TimeType timeType) const
 		{
 			switch (timeType)
 			{
@@ -172,63 +172,63 @@ namespace TrendLib
 		// Methods
 		//
 	public:
-		AppSignalParam toAppSignalParam() const;
+		[[nodiscard]] AppSignalParam toAppSignalParam() const;
 
 		// Properties
 		//
 	public:
-		QString signalId() const;
+		[[nodiscard]] QString signalId() const;
 		void setSignalId(const QString& value);
 
-		QString appSignalId() const;
+		[[nodiscard]] QString appSignalId() const;
 		void setAppSignalId(const QString& value);
 
-		Hash appSignalHash() const;
+		[[nodiscard]] Hash appSignalHash() const;
 
-		QString caption() const;
+		[[nodiscard]] QString caption() const;
 		void setCaption(const QString& value);
 
-		QString equipmnetId() const;
+		[[nodiscard]] QString equipmnetId() const;
 		void setEquipmnetId(const QString& value);
 
-		bool isAnalog() const;
-		bool isDiscrete() const;
-		E::SignalType type() const;
+		[[nodiscard]] bool isAnalog() const;
+		[[nodiscard]] bool isDiscrete() const;
+		[[nodiscard]] E::SignalType type() const;
 		void setType(E::SignalType value);
 
-		QString unit() const;
+		[[nodiscard]] QString unit() const;
 		void setUnit(const QString& value);
 
-		E::AnalogFormat analogFormat() const;
+		[[nodiscard]] E::AnalogFormat analogFormat() const;
 		void setAnalogFormat(E::AnalogFormat analogFormat);
 
-		int precision() const;
+		[[nodiscard]] int precision() const;
 		void setPrecision(int value);
 
-		double lineWeight() const;
+		[[nodiscard]] double lineWeight() const;
 		void setLineWeight(double value);
 
-		double highLimit() const;
+		[[nodiscard]] double highLimit() const;
 		void setHighLimit(double value);
 
-		double lowLimit() const;
+		[[nodiscard]] double lowLimit() const;
 		void setLowLimit(double value);
 
-		double viewHighLimit(E::TrendScaleType scaleType) const;
+		[[nodiscard]] double viewHighLimit(E::TrendScaleType scaleType) const;
 		void setViewHighLimit(E::TrendScaleType scaleType, double value);
 
-		double viewLowLimit(E::TrendScaleType scaleType) const;
+		[[nodiscard]] double viewLowLimit(E::TrendScaleType scaleType) const;
 		void setViewLowLimit(E::TrendScaleType scaleType, double value);
 
-		TrendColor color() const;
+		[[nodiscard]] TrendColor color() const;
 		void setColor(const TrendColor& value);
 
 		// Temporary variables properties
 		//
-		int tempSignalIndex() const;
+		[[nodiscard]] int tempSignalIndex() const;
 		void setTempSignalIndex(int value);
 
-		QRectF tempDrawRect() const;
+		[[nodiscard]] QRectF tempDrawRect() const;
 		void setTempDrawRect(const QRectF& value);
 
 		// Data
@@ -276,17 +276,17 @@ namespace TrendLib
 		bool addSignal(const TrendSignalParam& signal);
 		void removeSignal(QString appSignalId);
 
-		TrendLib::TrendSignalParam signalParam(const QString& appSignalId, bool* ok) const;
+		[[nodiscard]] TrendLib::TrendSignalParam signalParam(const QString& appSignalId, bool* ok) const;
 		bool setSignalParam(const TrendLib::TrendSignalParam& signalParam);		// Update data
 
-		std::vector<TrendLib::TrendSignalParam> trendSignals() const;
-		std::vector<TrendLib::TrendSignalParam> analogSignals() const;
-		std::vector<TrendLib::TrendSignalParam> discreteSignals() const;
+		[[nodiscard]] std::vector<TrendLib::TrendSignalParam> trendSignals() const;
+		[[nodiscard]] std::vector<TrendLib::TrendSignalParam> analogSignals() const;
+		[[nodiscard]] std::vector<TrendLib::TrendSignalParam> discreteSignals() const;
 
-		std::vector<Hash> trendSignalsHashes(const QString& equipmentId = QString()) const;
+		[[nodiscard]] std::vector<Hash> trendSignalsHashes(const QString& equipmentId = QString()) const;
 
-		int discretesSignalsCount() const;
-		int analogSignalsCount() const;
+		[[nodiscard]] int discretesSignalsCount() const;
+		[[nodiscard]] int analogSignalsCount() const;
 
 		bool getFullExistingTrendData(QString appSignalId, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
 		bool getExistingTrendData(QString appSignalId, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;

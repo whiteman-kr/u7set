@@ -11,15 +11,16 @@ QT       += network
 QT       += sql
 QT       += qml
 QT       += xml
+QT       += concurrent
 
 TARGET = PacketSource
 CONFIG += gui
 TEMPLATE = app
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../../warnings.pri)
 
@@ -37,12 +38,15 @@ unix {
 }
 
 SOURCES += \
+    ../../lib/CfgServerLoader.cpp \
     ../../lib/LanControllerInfoHelper.cpp \
+    ../../lib/SoftwareSettings.cpp \
+    ../../lib/TcpFileTransfer.cpp \
+    BuildOption.cpp \
+    ConfigSocket.cpp \
+    ../../lib/ScriptDeviceObject.cpp \
     main.cpp \
-    ../../Proto/network.pb.cc \
-    ../../Proto/serialization.pb.cc \
     ../../Builder/IssueLogger.cpp \
-    ../../lib/MemLeaksDetection.cpp \
     ../../lib/CommandLineParser.cpp \
     ../../lib/XmlHelper.cpp \
     ../../lib/SocketIO.cpp \
@@ -59,7 +63,6 @@ SOURCES += \
     ../../lib/DeviceObject.cpp \
     ../../lib/TuningValue.cpp \
     ../../lib/Types.cpp \
-    ../../lib/ProtoSerialization.cpp \
     ../../lib/ModuleFirmware.cpp \
     ../../lib/SignalProperties.cpp \
     ../../lib/DataSource.cpp \
@@ -72,7 +75,6 @@ SOURCES += \
     ../../lib/Tcp.cpp \
     ../../lib/BuildInfo.cpp \
     CmdLineParam.cpp \
-    BuildOpt.cpp \
     PacketSourceCore.cpp \
     MainWindow.cpp \
     Options.cpp \
@@ -90,14 +92,16 @@ SOURCES += \
     UalTesterServer.cpp
 
 HEADERS += \
+    ../../lib/CfgServerLoader.h \
     ../../lib/LanControllerInfo.h \
     ../../lib/LanControllerInfoHelper.h \
+    ../../lib/SoftwareSettings.h \
+    ../../lib/TcpFileTransfer.h \
+    BuildOption.h \
+    ConfigSocket.h \
+    ../../lib/ScriptDeviceObject.h \
     Stable.h \
-    ../../Proto/network.pb.h \
-    ../../Proto/serialization.pb.h \
-    ../../Builder/CfgFiles.h \
     ../../Builder/IssueLogger.h \
-    ../../lib/MemLeaksDetection.h \
     ../../lib/CommandLineParser.h \
     ../../lib/XmlHelper.h \
     ../../lib/SocketIO.h \
@@ -115,7 +119,6 @@ HEADERS += \
     ../../lib/Hash.h \
     ../../lib/TuningValue.h \
     ../../lib/Types.h \
-    ../../lib/ProtoSerialization.h \
     ../../lib/PropertyObject.h \
     ../../lib/Factory.h \
     ../../lib/ModuleFirmware.h \
@@ -132,7 +135,6 @@ HEADERS += \
     ../../lib/Tcp.h \
     ../../lib/BuildInfo.h \
     CmdLineParam.h \
-    BuildOpt.h \
     PacketSourceCore.h \
     MainWindow.h \
     Options.h \
@@ -156,32 +158,18 @@ RESOURCES += \
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-
-# Q_DEBUG define
+# Protobuf
 #
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
-
-# _DEBUG define, Windows memmory detection leak depends on it
-#
-CONFIG(debug, debug|release): DEFINES += _DEBUG
-
-
-# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
-#
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
-
-#protobuf
-#
-win32 {
-		LIBS += -L$$DESTDIR -lprotobuf
-
-		INCLUDEPATH += ./../../Protobuf
-}
-unix {
-		LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../../Protobuf
 
 DISTFILES += \
 	../../Proto/network.proto \
     ../../Proto/serialization.proto
 
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

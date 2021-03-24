@@ -3,9 +3,9 @@
 
 #include <QObject>
 #include <QtSql>
-#include <QMutex>
 
 #include "MeasureBase.h"
+#include "Options.h"
 
 // ==============================================================================================
 
@@ -35,49 +35,39 @@ public:
 
 // ==============================================================================================
 
-const char* const		SqlTabletName[] =
+const char* const		SqlTableName[] =
 {
-						QT_TRANSLATE_NOOP("Database.h", "DatabaseInfo"),
-						QT_TRANSLATE_NOOP("Database.h", "History"),
+						"DatabaseInfo",
+						"History",
 
-						QT_TRANSLATE_NOOP("Database.h", "LinearityMeasure"),
-						QT_TRANSLATE_NOOP("Database.h", "LinearityMeasureAddVal"),
-						QT_TRANSLATE_NOOP("Database.h", "LinearityMeasure20El"),
-						QT_TRANSLATE_NOOP("Database.h", "LinearityMeasure20En"),
-						QT_TRANSLATE_NOOP("Database.h", "LinearityPoint"),
+						"LinearityMeasure",
+						"LinearityMeasureAddValEl",
+						"LinearityMeasureAddValEn",
+						"LinearityMeasure20El",
+						"LinearityMeasure20En",
+						"LinearityPoint",
 
-						QT_TRANSLATE_NOOP("Database.h", "ComparatorMeasure"),
-						QT_TRANSLATE_NOOP("Database.h", "ComparatorHysteresis"),
+						"ComparatorMeasure",
 
-						QT_TRANSLATE_NOOP("Database.h", "ComplexComparatorMeasure"),
-						QT_TRANSLATE_NOOP("Database.h", "ComplexComparatorHysteresis"),
-						QT_TRANSLATE_NOOP("Database.h", "ComplexComparatorPoint"),
-						QT_TRANSLATE_NOOP("Database.h", "ComplexComparatorSignal"),
-
-						QT_TRANSLATE_NOOP("Database.h", "ReportOption"),
-						QT_TRANSLATE_NOOP("Database.h", "RackGroup"),
-						QT_TRANSLATE_NOOP("Database.h", "SignalConnection"),
+						"ReportOption",
+						"RackGroup",
 };
 
-const int				SQL_TABLE_COUNT							= sizeof(SqlTabletName)/sizeof(SqlTabletName[0]);
+const int				SQL_TABLE_COUNT							= sizeof(SqlTableName)/sizeof(SqlTableName[0]);
 
 const int				SQL_TABLE_UNKNONW						= -1,
 						SQL_TABLE_DATABASE_INFO					= 0,
 						SQL_TABLE_HISTORY						= 1,
 						SQL_TABLE_LINEARITY						= 2,
-						SQL_TABLE_LINEARITY_ADD_VAL				= 3,
-						SQL_TABLE_LINEARITY_20_EL				= 4,
-						SQL_TABLE_LINEARITY_20_EN				= 5,
-						SQL_TABLE_LINEARITY_POINT				= 6,
-						SQL_TABLE_COMPARATOR					= 7,
-						SQL_TABLE_COMPARATOR_HYSTERESIS			= 8,
-						SQL_TABLE_COMPLEX_COMPARATOR			= 9,
-						SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS	= 10,
-						SQL_TABLE_COMPLEX_COMPARATOR_POINT		= 11,
-						SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL		= 12,
-						SQL_TABLE_REPORT_HEADER					= 13,
-						SQL_TABLE_RACK_GROUP					= 14,
-						SQL_TABLE_SIGNAL_CONNECTION				= 15;
+						SQL_TABLE_LINEARITY_ADD_VAL_EL			= 3,
+						SQL_TABLE_LINEARITY_ADD_VAL_EN			= 4,
+						SQL_TABLE_LINEARITY_20_EL				= 5,
+						SQL_TABLE_LINEARITY_20_EN				= 6,
+						SQL_TABLE_LINEARITY_POINT				= 7,
+						SQL_TABLE_COMPARATOR					= 8,
+						SQL_TABLE_REPORT_HEADER					= 9,
+						SQL_TABLE_RACK_GROUP					= 10;
+
 
 // ==============================================================================================
 
@@ -93,22 +83,16 @@ const int				SqlTableVersion[SQL_TABLE_COUNT] =
 						0,					//	SQL_TABLE_HISTORY
 
 						0,					//	SQL_TABLE_LINEARITY
-						0,					//	SQL_TABLE_LINEARITY_ADD_VAL
+						0,					//	SQL_TABLE_LINEARITY_ADD_EL_VAL
+						0,					//	SQL_TABLE_LINEARITY_ADD_EN_VAL
 						0,					//	SQL_TABLE_LINEARITY_20_EL
 						0,					//	SQL_TABLE_LINEARITY_20_EN
 						0,					//	SQL_TABLE_LINEARITY_POINT
 
 						0,					//	SQL_TABLE_COMPARATOR
-						0,					//	SQL_TABLE_COMPARATOR_HYSTERESIS
-
-						0,					//	SQL_TABLE_COMPLEX_COMPARATOR
-						0,					//	SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS
-						0,					//	SQL_TABLE_COMPLEX_COMPARATOR_POINT
-						0,					//	SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL
 
 						0,					//	SQL_TABLE_REPORT_HEADER
 						0,					//	SQL_TABLE_RACK_GROUP
-						0,					//	SQL_TABLE_SIGNAL_CONNECTION
 };
 
 // ==============================================================================================
@@ -118,7 +102,6 @@ const int				SQL_OBJECT_ID_UNKNONW = -1;
 // ----------------------------------------------------------------------------------------------
 //
 // unique object ID in the database
-// x00 - measurements, x10 - points, x20 - signals, , x30 - racks
 //
 const int				SqlObjectID[SQL_TABLE_COUNT] =
 {
@@ -126,22 +109,17 @@ const int				SqlObjectID[SQL_TABLE_COUNT] =
 						1,			//	SQL_TABLE_HISTORY
 
 						100,		//	SQL_TABLE_LINEARITY
-						101,		//	SQL_TABLE_LINEARITY_ADD_VAL
-						102,		//	SQL_TABLE_LINEARITY_20_EL
-						103,		//	SQL_TABLE_LINEARITY_20_EN
-						110,		//	SQL_TABLE_LINEARITY_POINT
+						110,		//	SQL_TABLE_LINEARITY_ADD_EL_VAL
+						111,		//	SQL_TABLE_LINEARITY_ADD_EN_VAL
+						120,		//	SQL_TABLE_LINEARITY_20_EL
+						121,		//	SQL_TABLE_LINEARITY_20_EN
+						130,		//	SQL_TABLE_LINEARITY_POINT
 
 						200,		//	SQL_TABLE_COMPARATOR
-						201,		//	SQL_TABLE_COMPARATOR_HYSTERESIS
-
-						300,		//	SQL_TABLE_COMPLEX_COMPARATOR
-						301,		//	SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS
-						310,		//	SQL_TABLE_COMPLEX_COMPARATOR_POINT
-						320,		//	SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL
 
 						400,		//	SQL_TABLE_REPORT_HEADER
-						530,		//	SQL_TABLE_RACK_GROUP
-						620,		//	SQL_TABLE_SIGNAL_CONNECTION
+
+						500,		//	SQL_TABLE_RACK_GROUP
 };
 
 // ==============================================================================================
@@ -154,26 +132,21 @@ const int				SQL_TABLE_IS_MAIN	= 0,
 
 const int				SqlTableByMeasureType[SQL_TABLE_COUNT] =
 {
-						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_DATABASE_INFO						// SQL_TABLE_CONFIG
-						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_HISTORY							// SQL_TABLE_CONFIG
+						Measure::Type::NoMeasureType,			//	SQL_TABLE_DATABASE_INFO						// SQL_TABLE_CONFIG
+						Measure::Type::NoMeasureType,			//	SQL_TABLE_HISTORY							// SQL_TABLE_CONFIG
 
-						MEASURE_TYPE_LINEARITY,				//	SQL_TABLE_LINEARITY							// SQL_TABLE_MEASURE_MAIN
-						MEASURE_TYPE_LINEARITY,				//	SQL_TABLE_LINEARITY_ADD_VAL					// SQL_TABLE_MEASURE_SUB
-						MEASURE_TYPE_LINEARITY,				//	SQL_TABLE_LINEARITY_20_EL					// SQL_TABLE_MEASURE_SUB
-						MEASURE_TYPE_LINEARITY,				//	SQL_TABLE_LINEARITY_20_EN					// SQL_TABLE_MEASURE_SUB
-						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_LINEARITY_POINT					// SQL_TABLE_CONFIG
+						Measure::Type::Linearity,				//	SQL_TABLE_LINEARITY							// SQL_TABLE_MEASURE_MAIN
+						Measure::Type::Linearity,				//	SQL_TABLE_LINEARITY_ADD_EL_VAL				// SQL_TABLE_MEASURE_SUB
+						Measure::Type::Linearity,				//	SQL_TABLE_LINEARITY_ADD_EN_VAL				// SQL_TABLE_MEASURE_SUB
+						Measure::Type::Linearity,				//	SQL_TABLE_LINEARITY_20_EL					// SQL_TABLE_MEASURE_SUB
+						Measure::Type::Linearity,				//	SQL_TABLE_LINEARITY_20_EN					// SQL_TABLE_MEASURE_SUB
 
-						MEASURE_TYPE_COMPARATOR,			//	SQL_TABLE_COMPARATOR						// SQL_TABLE_MEASURE_MAIN
-						MEASURE_TYPE_COMPARATOR,			//	SQL_TABLE_COMPARATOR_HYSTERESIS				// SQL_TABLE_MEASURE_SUB
+						Measure::Type::NoMeasureType,			//	SQL_TABLE_LINEARITY_POINT					// SQL_TABLE_CONFIG
 
-						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_COMPLEX_COMPARATOR				// SQL_TABLE_MEASURE_MAIN
-						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS		// SQL_TABLE_MEASURE_SUB
-						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_COMPLEX_COMPARATOR_POINT			// SQL_TABLE_CONFIG
-						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL			// SQL_TABLE_CONFIG
+						Measure::Type::Comparators,				//	SQL_TABLE_COMPARATOR						// SQL_TABLE_MEASURE_MAIN
 
-						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_REPORT_HEADER						// SQL_TABLE_CONFIG
-						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_RACK_GROUP						// SQL_TABLE_CONFIG
-						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_SIGNAL_CONNECTION					// SQL_TABLE_CONFIG
+						Measure::Type::NoMeasureType,			//	SQL_TABLE_REPORT_HEADER						// SQL_TABLE_CONFIG
+						Measure::Type::NoMeasureType,			//	SQL_TABLE_RACK_GROUP						// SQL_TABLE_CONFIG
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -184,22 +157,17 @@ const int				SqlTableAppointType[SQL_TABLE_COUNT] =
 						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_HISTORY
 
 						SQL_TABLE_IS_MAIN,					//	SQL_TABLE_LINEARITY
-						SQL_TABLE_IS_SUB,					//	SQL_TABLE_LINEARITY_ADD_VAL
+						SQL_TABLE_IS_SUB,					//	SQL_TABLE_LINEARITY_ADD_EL_VAL
+						SQL_TABLE_IS_SUB,					//	SQL_TABLE_LINEARITY_ADD_EN_VAL
 						SQL_TABLE_IS_SUB,					//	SQL_TABLE_LINEARITY_20_EL
 						SQL_TABLE_IS_SUB,					//	SQL_TABLE_LINEARITY_20_EN
+
 						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_LINEARITY_POINT
 
 						SQL_TABLE_IS_MAIN,					//	SQL_TABLE_COMPARATOR
-						SQL_TABLE_IS_SUB,					//	SQL_TABLE_COMPARATOR_HYSTERESIS
-
-						SQL_TABLE_IS_MAIN,					//	SQL_TABLE_COMPLEX_COMPARATOR
-						SQL_TABLE_IS_SUB,					//	SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS
-						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_COMPLEX_COMPARATOR_POINT
-						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL
 
 						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_REPORT_HEADER
 						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_RACK_GROUP
-						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_SIGNAL_CONNECTION
 };
 
 // ==============================================================================================
@@ -224,13 +192,6 @@ public:
 	SqlObjectInfo();
 	virtual ~SqlObjectInfo() {}
 
-private:
-
-	int					m_objectType = SQL_TABLE_UNKNONW;			// type of table
-	int					m_objectID = SQL_OBJECT_ID_UNKNONW;			// unique identifier of table in the database
-	QString				m_caption;									// caption of table
-	int					m_version = SQL_TABLE_VER_UNKNONW;			// table version, is read when the database initialization
-
 public:
 
 	bool				init(int objectType);
@@ -249,6 +210,13 @@ public:
 	void				setVersion(int verison) { m_version = verison; }
 
 	SqlObjectInfo&		operator=(SqlObjectInfo& from);
+
+private:
+
+	int					m_objectType = SQL_TABLE_UNKNONW;			// type of table
+	int					m_objectID = SQL_OBJECT_ID_UNKNONW;			// unique identifier of table in the database
+	QString				m_caption;									// caption of table
+	int					m_version = SQL_TABLE_VER_UNKNONW;			// table version, is read when the database initialization
 };
 
 // ==============================================================================================
@@ -261,13 +229,6 @@ public:
 	SqlHistoryDatabase();
 	SqlHistoryDatabase(int objectID, int version, const QString& event, const QString& time);
 	virtual ~SqlHistoryDatabase();
-
-private:
-
-	int					m_objectID = SQL_OBJECT_ID_UNKNONW;
-	int					m_version = SQL_TABLE_VER_UNKNONW;
-	QString				m_event;
-	QString				m_time;
 
 public:
 
@@ -284,6 +245,13 @@ public:
 	void				setTime(const QString& time) { m_time = time; }
 
 	SqlHistoryDatabase& operator=(SqlHistoryDatabase& from);
+
+private:
+
+	int					m_objectID = SQL_OBJECT_ID_UNKNONW;
+	int					m_version = SQL_TABLE_VER_UNKNONW;
+	QString				m_event;
+	QString				m_time;
 };
 
 // ==============================================================================================
@@ -298,12 +266,6 @@ public:
 
 	SqlTable();
 	virtual ~SqlTable();
-
-private:
-
-	QSqlDatabase*		m_pDatabase;
-	SqlObjectInfo		m_info;
-	SqlFieldBase		m_fieldBase;
 
 public:
 
@@ -336,6 +298,12 @@ public:
 	int					remove(const int* key, int keyCount) const;
 
 	SqlTable&			operator=(SqlTable& from);
+
+private:
+
+	QSqlDatabase*		m_pDatabase;
+	SqlObjectInfo		m_info;
+	SqlFieldBase		m_fieldBase;
 };
 
 // ==============================================================================================
@@ -347,19 +315,11 @@ class Database : public QObject
 public:
 
 	explicit Database(QObject* parent = nullptr);
-	virtual ~Database();
-
-private:
-
-	QSqlDatabase		m_database;
-	SqlTable			m_table[SQL_TABLE_COUNT];
-
-	static SqlHistoryDatabase m_history[DATABASE_VERSION + 1];
-
-	void				initVersion();
-	void				createTables();
+	virtual ~Database() override;
 
 public:
+
+	void				setDatabaseOption(const DatabaseOption& option) { m_databaseOption = option; }
 
 	bool				isOpen() const { return m_database.isOpen(); }
 	bool				open();
@@ -367,13 +327,32 @@ public:
 
 	SqlTable*			openTable(int objectType);
 
-	bool				appendMeasure(Measurement* pMeasurement);
-	bool				removeMeasure(int measuteType, const QVector<int>& keyList);
+	bool				appendMeasure(Measure::Item* pMeasurement);
+	bool				removeMeasure(Measure::Type measuteType, const std::vector<int>& keyList);
+
+private:
+
+	QSqlDatabase		m_database;
+	SqlTable			m_table[SQL_TABLE_COUNT];
+
+	DatabaseOption		m_databaseOption;
+
+	static SqlHistoryDatabase m_history[DATABASE_VERSION + 1];
+
+	bool				createBackup();
+
+	void				initVersion();
+	void				createTables();
+
+public slots:
+
+	void				appendToBase(Measure::Item* pMeasurement);
+	void				removeFromBase(Measure::Type measureType, const std::vector<int>& keyList);
 };
 
 // ==============================================================================================
 
-extern Database*		thePtrDB;
+extern Database theDatabase;
 
 // ==============================================================================================
 

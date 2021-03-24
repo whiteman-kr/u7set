@@ -77,7 +77,7 @@ namespace VFrame30
 
 		// Draw comment "dim"
 		//
-		virtual void drawCommentDim(CDrawParam* drawParam) const;
+		virtual void drawCommentDim(CDrawParam* drawParam) const override;
 
 		// Determine and Calculation Functions
 		//
@@ -89,7 +89,7 @@ namespace VFrame30
 
 		// Get SchemaItem bounding rectangle in itemUnit()
 		//
-		virtual QRectF boundingRectInDocPt(CDrawParam* drawParam) const override;
+		virtual QRectF boundingRectInDocPt(const CDrawParam* drawParam) const override;
 
 		// IPosLine
 		//

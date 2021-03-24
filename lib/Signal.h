@@ -39,6 +39,7 @@ class Signal
 	friend class DbWorker;
 	friend class SignalSet;
 	friend class SignalTests;
+	friend class DbControllerSignalTests;
 
 public:
 	static const QString MACRO_START_TOKEN;
@@ -48,8 +49,10 @@ public:
 	Signal();
 	Signal(const Signal& s);
 	Signal(const ID_AppSignalID& ids);
-	Signal(const Hardware::DeviceSignal& deviceSignal, QString* errMsg);
+	Signal(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg);
 	virtual ~Signal();
+
+	void clear();
 
 	void initSpecificProperties();
 
@@ -133,62 +136,63 @@ public:
 
 	// Analog signal properties
 
-	int lowADC() const;
+	int lowADC(QString* err = nullptr) const;
 	void setLowADC(int lowADC);
 
-	int highADC() const;
+	int highADC(QString* err = nullptr) const;
 	void setHighADC(int highADC);
 
-	int lowDAC() const;
+	int lowDAC(QString* err = nullptr) const;
 	void setLowDAC(int lowDAC);
 
-	int highDAC() const;
+	int highDAC(QString* err = nullptr) const;
 	void setHighDAC(int highDAC);
 
-	double lowEngineeringUnits() const;
+	double lowEngineeringUnits(QString* err = nullptr) const;
 	void setLowEngineeringUnits(double lowEngineeringUnits);
 
-	double highEngineeringUnits() const;
+	double highEngineeringUnits(QString* err = nullptr) const;
 	void setHighEngineeringUnits(double highEngineeringUnits);
 
-	double lowValidRange() const;
+	double lowValidRange(QString* err = nullptr) const;
 	void setLowValidRange(double lowValidRange);
 
-	double highValidRange() const;
+	double highValidRange(QString* err = nullptr) const;
 	void setHighValidRange(double highValidRange);
 
-	double filteringTime() const;
+	double filteringTime(QString* err = nullptr) const;
 	void setFilteringTime(double filteringTime);
 
-	double spreadTolerance() const;
+	double spreadTolerance(QString* err = nullptr) const;
 	void setSpreadTolerance(double spreadTolerance);
 
 	// Analog input/output signal properties
 
-	double electricLowLimit() const;
+	double electricLowLimit(QString* err = nullptr) const;
 	void setElectricLowLimit(double electricLowLimit);
 
-	double electricHighLimit() const;
+	double electricHighLimit(QString* err = nullptr) const;
 	void setElectricHighLimit(double electricHighLimit);
 
-	E::ElectricUnit electricUnit() const;
+	E::ElectricUnit electricUnit(QString* err = nullptr) const;
 	void setElectricUnit(E::ElectricUnit electricUnit);
 
-	double rload_Ohm() const;
+	double rload_Ohm(QString* err = nullptr) const;
 	void setRload_Ohm(double rload_Ohm);
 
-	E::SensorType sensorType() const;
+	E::SensorType sensorType(QString* err = nullptr) const;
 	void setSensorType(E::SensorType sensorType);
 
-	E::OutputMode outputMode() const;
+	E::OutputMode outputMode(QString* err = nullptr) const;
 	void setOutputMode(E::OutputMode outputMode);
 
-	double r0_Ohm() const;
+	double r0_Ohm(QString* err = nullptr) const;
 	void setR0_Ohm(double r0_Ohm);
 
 	// Tuning signal properties
 
 	bool enableTuning() const { return m_enableTuning; }
+	bool isTunable() const { return m_enableTuning; }
 	void setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
 
 	TuningValue tuningDefaultValue() const { return m_tuningDefaultValue; }
@@ -236,11 +240,11 @@ public:
 
 	void cacheSpecPropValues();
 
-	double getSpecPropDouble(const QString& name) const;
-	int getSpecPropInt(const QString& name) const;
-	unsigned int getSpecPropUInt(const QString& name) const;
-	int getSpecPropEnum(const QString& name) const;
-	bool getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) const;
+	double getSpecPropDouble(const QString& name, QString* err) const;
+	int getSpecPropInt(const QString& name, QString* err) const;
+	unsigned int getSpecPropUInt(const QString& name, QString* err) const;
+	int getSpecPropEnum(const QString& name, QString* err) const;
+	bool getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum, QString* err) const;
 	bool isSpecPropExists(const QString& name) const;
 
 	bool setSpecPropDouble(const QString& name, double value);
@@ -325,6 +329,8 @@ public:
 	Address16 regValidityAddr() const { return m_regValidityAddr; }
 	void setRegValidityAddr(const Address16& addr) { m_regValidityAddr = addr; }
 
+	Address16 actualAddr(E::LogicModuleRamAccess* lmRamAccess = nullptr) const;
+
 	void resetAddresses();
 
 	E::LogicModuleRamAccess lmRamAccess() const { return m_lmRamAccess; }
@@ -334,9 +340,6 @@ public:
 
 	bool needConversion() const { return m_needConversion; }
 	void setNeedConversion(bool need) { m_needConversion = need; }
-
-	std::shared_ptr<Hardware::DeviceModule> lm() const { return m_lm; }
-	void setLm(std::shared_ptr<Hardware::DeviceModule> lm);
 
 	bool isConst() const { return m_isConst; }
 	void setIsConst(bool isConst) { m_isConst = isConst; }
@@ -369,11 +372,12 @@ public:
 
 	void initTuningValues();
 
-	void setLog(Builder::IssueLogger* log) { m_log = log; }
-
 	static QString expandDeviceSignalTemplate(	const Hardware::DeviceObject& startDeviceObject,
 												const QString& templateStr,
 												QString* errMsg);
+
+	std::shared_ptr<Hardware::DeviceModule> lm() const { return m_lm; }
+	void setLm(std::shared_ptr<Hardware::DeviceModule> lm);
 
 private:
 
@@ -385,7 +389,7 @@ private:
 															  const QString& parentObjectType,
 															  QString* errMsg);
 
-	// Private setters for fields, witch can't be changed outside DB engine
+	// Private setters for fields, wich can't be changed outside DB engine
 	// Should be used only by friends
 	//
 	void setID(int signalID) { m_ID = signalID; }
@@ -401,15 +405,18 @@ private:
 	void setInstanceCreated(const QDateTime& instanceCreated) { m_instanceCreated = instanceCreated; }
 	void setInstanceCreated(const QString& instanceCreatedStr) { m_instanceCreated = QDateTime::fromString(instanceCreatedStr, DATE_TIME_FORMAT_STR); }
 	void setInstanceAction(VcsItemAction action) { m_instanceAction = action; }
+	void initCreatedDates();
 
 	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
 
 	void updateTuningValuesType();
 
-	void initIDsAndCaption(const Hardware::DeviceSignal& deviceSignal,
+	void initIDsAndCaption(const Hardware::DeviceAppSignal& deviceSignal,
 							QString* errMsg);
 
-	void checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSignal, QString* errMsg);
+	void checkAndInitTuningSettings(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg);
+
+	QString specPropNotExistErr(const QString &propName) const;
 
 private:
 	bool m_isLoaded = false;										// == false - only m_ID and m_appSignalID fields is initialized from database
@@ -481,7 +488,7 @@ private:
 	QDateTime m_created;
 	bool m_deleted = false;
 	QDateTime m_instanceCreated;
-	VcsItemAction m_instanceAction = VcsItemAction::Added;
+	VcsItemAction m_instanceAction{VcsItemAction::Added};
 
 	// Signal properties calculated in compile-time
 	//
@@ -516,8 +523,9 @@ private:
 
 	bool m_needConversion = false;
 
-	std::shared_ptr<Hardware::DeviceModule> m_lm;		// valid in compile-time only
-	Builder::IssueLogger* m_log = nullptr;
+	// specific build-time fields
+	//
+	std::shared_ptr<Hardware::DeviceModule> m_lm;
 };
 
 typedef PtrOrderedHash<int, Signal> SignalPtrOrderedHash;
@@ -533,6 +541,7 @@ public:
 	void reserve(int n);
 
 	void buildID2IndexMap();
+	void updateID2IndexInMap(const QString& appSignalId, int index);
 	void clearID2IndexMap() { m_strID2IndexMap.clear(); }
 	bool ID2IndexMapIsEmpty();
 
@@ -556,8 +565,6 @@ public:
 	QStringList appSignalIdsList(bool removeNumberSign, bool sort) const;
 
 	void replaceOrAppendIfNotExists(int signalID, const Signal& s);
-
-	void setLog(Builder::IssueLogger* log);
 
 private:
 	QMultiHash<int, int> m_groupSignals;

@@ -22,21 +22,12 @@ QT += core sql network xml widgets gui serialport qml
 TARGET = mconf
 TEMPLATE = app
 
-# c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		# CONFIG += c++17 has no effect yet
-win32:QMAKE_CXXFLAGS += /analyze		# Static code analyze
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
-# Warning level
-#
-gcc:CONFIG += warn_on
-
-win32:CONFIG -= warn_on				# warn_on is level 3 warnings
-win32:QMAKE_CXXFLAGS += /W4			# CONFIG += warn_on is just W3 level, so set level 4
-win32:QMAKE_CXXFLAGS += /wd4201		# Disable warning: C4201: nonstandard extension used: nameless struct/union
-win32:QMAKE_CXXFLAGS += /wd4458		# Disable warning: C4458: declaration of 'selectionPen' hides class member
-win32:QMAKE_CXXFLAGS += /wd4275		# Disable warning: C4275: non - DLL-interface class 'class_1' used as base for DLL-interface class 'class_2'
+include(../warnings.pri)
 
 #Application icon
 win32:RC_ICONS += Images/MConf.ico
@@ -59,13 +50,13 @@ DEFINES += QT_DLL QT_WIDGETS_LIB QT_NETWORK_LIB QT_SQL_LIB QT_XML_LIB
 #win32:LIBS += advapi32.lib
 
 HEADERS += \
+    ../lib/ScriptDeviceObject.h \
+    ../lib/Ui/DialogAbout.h \
 	Stable.h \
 	ftdi/ftd2xx.h \
         ../lib/DbStruct.h \
     ../lib/DeviceObject.h \
     ../lib/OutputLog.h \
-    ../Proto/serialization.pb.h \
-    ../lib/ProtoSerialization.h \
     Settings.h \
     ApplicationTabPage.h \
     DiagTabPage.h \
@@ -79,12 +70,12 @@ HEADERS += \
     ../lib/ModuleFirmware.h
 
 SOURCES += \
+    ../lib/ScriptDeviceObject.cpp \
+    ../lib/Ui/DialogAbout.cpp \
 	main.cpp \
 	../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/OutputLog.cpp \
-    ../Proto/serialization.pb.cc \
-    ../lib/ProtoSerialization.cpp \
     Settings.cpp \
     ApplicationTabPage.cpp \
     DiagTabPage.cpp \
@@ -111,11 +102,6 @@ win32: LIBS += -L$$PWD/ftdi64 -lftd2xx
 INCLUDEPATH += $$PWD/ftdi
 DEPENDPATH += $$PWD/ftdi
 
-# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
-#
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
-
-
 #Optimization flags
 #
 win32 {
@@ -127,17 +113,18 @@ unix {
 	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
 }
 
-#protobuf
+# Protobuf
 #
-win32 {
-        LIBS += -L$$DESTDIR -lprotobuf
-
-        INCLUDEPATH += ./../Protobuf
-}
-unix {
-	LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
 DISTFILES += \
+    Images/Logo.png \
     Images/MConf.ico
 
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

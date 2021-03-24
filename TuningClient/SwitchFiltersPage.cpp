@@ -165,7 +165,7 @@ void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
 
 	// Apply Button
 	//
-	if (theConfigSettings.autoApply == false &&
+	if (theConfigSettings.clientSettings.autoApply == false &&
 			(m_buttonFilters.empty() == false || m_listFilters.empty() == false))
 	{
 		m_applyButton = new QPushButton(tr("Apply"), this);
@@ -573,7 +573,7 @@ bool SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 			continue;
 		}
 
-		if (asp.toTuningType() != TuningValueType::Discrete)
+		if (asp.tuningType() != TuningValueType::Discrete)
 		{
 			continue;
 		}
@@ -652,7 +652,7 @@ int SwitchFiltersPage::countDiscretes(TuningFilter* filter)
 			continue;
 		}
 
-		if (asp.toTuningType() == TuningValueType::Discrete)
+		if (asp.tuningType() == TuningValueType::Discrete)
 		{
 			result++;
 		}
@@ -683,7 +683,7 @@ int SwitchFiltersPage::countWritingEnabled(TuningFilter* filter)
 			continue;
 		}
 
-		if (asp.toTuningType() != TuningValueType::Discrete)
+		if (asp.tuningType() != TuningValueType::Discrete)
 		{
 			continue;
 		}

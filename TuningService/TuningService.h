@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../lib/Service.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/CfgServerLoader.h"
 #include "TuningSource.h"
 #include "TcpTuningServer.h"
@@ -27,7 +27,7 @@ namespace Tuning
 		~TuningServiceWorker();
 
 		virtual ServiceWorker* createInstance() const override;
-		virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const;
+		virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
 
 		const TuningClientContext* getClientContext(QString clientID) const;
 		const TuningClientContext* getClientContext(const std::string& clientID) const;
@@ -91,8 +91,13 @@ namespace Tuning
 		void setSourceThreadInTuningClientContexts(TuningSourceThread* thread);
 		void removeSourceThreadFromTuningClientContexts(TuningSourceThread* thread);
 
+		bool isSimulationMode() const;
+
 	private slots:
-		void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+		void onConfigurationReady(const QByteArray configurationXmlData,
+								  const BuildFileInfoArray buildFileInfoArray,
+								  SessionParams sessionParams,
+								  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 
 	private:
 		CircularLoggerShared m_logger;

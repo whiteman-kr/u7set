@@ -47,7 +47,7 @@ bool DbProgress::run(QWidget* parentWidget, const QString& description)
 		isGuiThread = QThread::currentThread() == QCoreApplication::instance()->thread();
 	}
 
-	if (m_progressEnabled == true)
+	if (isProgressEnabled() == true)
 	{
 		assert(isGuiThread == true);
 		ProgressDialog::showProgressDialog(parentWidget, description, this);
@@ -97,7 +97,7 @@ DbProgress::~DbProgress()
 
 bool DbProgress::completed() const
 {
-	return m_completed;
+	return m_completed.load(std::memory_order::relaxed);
 }
 
 void DbProgress::setCompleted(bool value)
@@ -107,7 +107,7 @@ void DbProgress::setCompleted(bool value)
 
 bool DbProgress::wasCanceled() const
 {
-	return m_cancel;
+	return m_cancel.load(std::memory_order::relaxed);
 }
 
 void DbProgress::setCancel(bool value)
@@ -129,7 +129,7 @@ void DbProgress::setCurrentOperation(const QString& value)
 
 int DbProgress::value() const
 {
-	return m_value;
+	return m_value.load(std::memory_order::relaxed);
 }
 
 void DbProgress::setValue(int value)
@@ -185,6 +185,6 @@ void DbProgress::disableProgress()
 
 bool DbProgress::isProgressEnabled() const
 {
-	return m_progressEnabled;
+	return m_progressEnabled.load(std::memory_order::relaxed);
 }
 

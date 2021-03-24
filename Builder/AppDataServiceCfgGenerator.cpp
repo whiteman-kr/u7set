@@ -7,27 +7,34 @@ class DataSource;
 namespace Builder
 {
 	AppDataServiceCfgGenerator::AppDataServiceCfgGenerator(Context* context,
-														   Hardware::Software* software,
-														   const QHash<QString, quint64>& lmUniqueIdMap) :
-		SoftwareCfgGenerator(context, software),
-		m_lmUniqueIdMap(lmUniqueIdMap)
+														   Hardware::Software* software) :
+		SoftwareCfgGenerator(context, software)
 	{
-		assert(context);
-
-		initSubsystemKeyMap(&m_subsystemKeyMap, context->m_subsystems.get());
+		Q_ASSERT(context != nullptr);
 	}
 
 	AppDataServiceCfgGenerator::~AppDataServiceCfgGenerator()
 	{
 	}
 
-	bool AppDataServiceCfgGenerator::generateConfiguration()
+	bool AppDataServiceCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		AppDataServiceSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<AppDataServiceSettings>(profile, settingsGetter);
+	}
+
+	bool AppDataServiceCfgGenerator::generateConfigurationStep1()
 	{
 		bool result = false;
 
 		do
 		{
-			if (writeSettings() == false) break;
 			if (writeAppDataSourcesXml() == false) break;
 			if (writeAppSignalsXml() == false) break;
 			if (addLinkToAppSignalsFile() == false) break;
@@ -41,19 +48,6 @@ namespace Builder
 		return result;
 	}
 
-	bool AppDataServiceCfgGenerator::writeSettings()
-	{
-		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
-
-		RETURN_IF_FALSE(result);
-
-		XmlWriteHelper xml(m_cfgXml->xmlWriter());
-
-		result = m_settings.writeToXml(xml);
-
-		return result;
-	}
-
 	bool AppDataServiceCfgGenerator::writeAppDataSourcesXml()
 	{
 		bool result = true;
@@ -62,11 +56,15 @@ namespace Builder
 
 		QVector<DataSource> dataSources;
 
-		quint32 receivingNetmask = m_settings.appDataReceivingNetmask.toIPv4Address();
+		std::shared_ptr<const AppDataServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<AppDataServiceSettings>();
 
-		quint32 receivingSubnet = m_settings.appDataReceivingIP.address32() & receivingNetmask;
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 
-		for(Hardware::DeviceModule* lm : m_lmList)
+		quint32 receivingNetmask = settings->appDataReceivingNetmask.toIPv4Address();
+
+		quint32 receivingSubnet = settings->appDataReceivingIP.address32() & receivingNetmask;
+
+		for(Hardware::DeviceModule* lm : m_context->m_lmModules)
 		{
 			if (lm == nullptr)
 			{
@@ -97,13 +95,11 @@ namespace Builder
 
 				DataSource ds;
 
-				result &= ds.getLmPropertiesFromDevice(lm, DataSource::DataType::App,
-				                                       lanController.m_place,
-				                                       lanController.m_type,
-													   *m_equipment,
-				                                       m_subsystemKeyMap,
-													   m_lmUniqueIdMap,
-													   m_log);
+				result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm, DataSource::DataType::App,
+																			lanController.m_place,
+																			lanController.m_type,
+																			m_context,
+																			&ds);
 
 				if (ds.lmDataEnable() == false || ds.serviceID() != m_software->equipmentIdTemplate())
 				{
@@ -125,7 +121,7 @@ namespace Builder
 					//
 					m_log->errCFG3043(ds.lmAddress().toString(),
 									  ds.lmAdapterID(),
-									  m_settings.appDataReceivingIP.addressStr(),
+									  settings->appDataReceivingIP.addressStr(),
 									  equipmentID());
 					result = false;
 					continue;
@@ -150,7 +146,7 @@ namespace Builder
 
 		//
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_APP_DATA_SOURCES_XML, CFG_FILE_ID_APP_DATA_SOURCES, "", fileData);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::APP_DATA_SOURCES_XML, CfgFileId::APP_DATA_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{
@@ -237,7 +233,7 @@ namespace Builder
 		xml.writeEndElement();	// </AppSignals>
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "AppSignals.xml", CFG_FILE_ID_APP_SIGNALS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), "AppSignals.xml", CfgFileId::APP_SIGNALS, "",  data);
 
 		if (buildFile == nullptr)
 		{
@@ -254,7 +250,7 @@ namespace Builder
 		// After task RPCT-2170 resolving (separate signalset files for each AppDataService)
 		// this link should be removed !!!
 
-		BuildFile* buildFile = m_buildResultWriter->getBuildFileByID(DIR_COMMON, CFG_FILE_ID_APP_SIGNAL_SET);
+		BuildFile* buildFile = m_buildResultWriter->getBuildFileByID(Directory::COMMON, CfgFileId::APP_SIGNAL_SET);
 
 		if (buildFile == nullptr)
 		{
@@ -282,7 +278,7 @@ namespace Builder
 		}
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
@@ -306,7 +302,7 @@ namespace Builder
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
@@ -315,7 +311,7 @@ namespace Builder
 
 	bool AppDataServiceCfgGenerator::findAppDataSourceAssociatedSignals(DataSource& appDataSource)
 	{
-		Hardware::DeviceObject* lm = m_equipment->deviceObject(appDataSource.lmEquipmentID());
+		Hardware::DeviceObject* lm = m_equipment->deviceObject(appDataSource.lmEquipmentID()).get();
 
 		if (lm == nullptr)
 		{
@@ -338,7 +334,7 @@ namespace Builder
 				continue;
 			}
 
-			Hardware::DeviceObject* device = m_equipment->deviceObject(appSignalEquipmentID);
+			Hardware::DeviceObject* device = m_equipment->deviceObject(appSignalEquipmentID).get();
 
 			if (device == nullptr)
 			{

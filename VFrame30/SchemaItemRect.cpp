@@ -26,6 +26,8 @@ namespace VFrame30
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fill, PropertyNames::appearanceCategory, true, SchemaItemRect::fill, SchemaItemRect::setFill);
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::drawRect, PropertyNames::appearanceCategory, true, SchemaItemRect::drawRect, SchemaItemRect::setDrawRect);
 
+		ADD_PROPERTY_GET_SET_CAT(E::LineStyle, PropertyNames::lineStyle, PropertyNames::appearanceCategory, true, SchemaItemRect::lineStyle, SchemaItemRect::setLineStyle);
+
 		// Text Category Properties
 		//
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColor, PropertyNames::textCategory, true, SchemaItemRect::textColor, SchemaItemRect::setTextColor);
@@ -90,6 +92,8 @@ namespace VFrame30
 		rectMessage->set_fill(m_fill);
 		rectMessage->set_drawrect(m_drawRect);
 
+		rectMessage->set_linestyle(static_cast<int>(m_lineStyle));
+
 		rectMessage->set_horzalign(static_cast<int32_t>(m_horzAlign));
 		rectMessage->set_vertalign(static_cast<int32_t>(m_vertAlign));
 
@@ -136,6 +140,8 @@ namespace VFrame30
 		m_textColor = QColor::fromRgba(rectMessage.textcolor());
 		m_drawRect = rectMessage.drawrect();
 
+		m_lineStyle = static_cast<E::LineStyle>(rectMessage.linestyle());
+
 		m_horzAlign = static_cast<E::HorzAlign>(rectMessage.horzalign());
 		m_vertAlign = static_cast<E::VertAlign>(rectMessage.vertalign());
 
@@ -163,47 +169,39 @@ namespace VFrame30
 			m_rectPen = std::make_shared<QPen>();
 		}
 
-		QColor qlinecolor(lineColor());
-		if (m_rectPen->color() !=qlinecolor )
+		if (m_rectPen->color() != m_lineColor)
 		{
-			m_rectPen->setColor(qlinecolor);
+			m_rectPen->setColor(m_lineColor);
 		}
 
-		if (m_fillBrush.get() == nullptr)
+		if (m_fillBrush == nullptr)
 		{
-			m_fillBrush = std::make_shared<QBrush>(Qt::SolidPattern);
+			m_fillBrush = std::make_shared<QBrush>(m_fillColor, Qt::SolidPattern);
+		}
+
+		if (m_fillBrush->color() != m_fillColor)
+		{
+			m_fillBrush->setColor(m_fillColor);
 		}
 						
 		// Calculate rectangle
 		//
-		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-
-		r.setTopRight(drawParam->gridToDpi(r.topRight()));
-		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
-
-		if (std::abs(r.left() - r.right()) < 0.000001)
-		{
-			r.setRight(r.left() + 0.000001f);
-		}
-
-		if (std::abs(r.bottom() - r.top()) < 0.000001)
-		{
-			r.setBottom(r.top() + 0.000001f);
-		}
+		QRectF r = boundingRectInDocPt(drawParam);
 
 		// Filling rect 
 		//
 		if (fill() == true)
 		{
-			QPainter::RenderHints oldrenderhints = p->renderHints();
-			p->setRenderHint(QPainter::Antialiasing, false);
+			p->setBrush(*m_fillBrush);
 
-			QColor qfillcolor(fillColor());
-
-			m_fillBrush->setColor(qfillcolor);
-			p->fillRect(r, *m_fillBrush);		// 22% если использовать Qcolor и намного меньше если использовать готовый Brush
-
-			p->setRenderHints(oldrenderhints);
+			if (drawRect() == false)
+			{
+				p->fillRect(r, *m_fillBrush);
+			}
+		}
+		else
+		{
+			p->setBrush(Qt::NoBrush);
 		}
 
 		// Drawing rect 
@@ -211,6 +209,7 @@ namespace VFrame30
 		if (drawRect() == true)
 		{
 			m_rectPen->setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
+			m_rectPen->setStyle(static_cast<Qt::PenStyle>(m_lineStyle));
 
 			p->setPen(*m_rectPen);
 			p->drawRect(r);
@@ -222,7 +221,8 @@ namespace VFrame30
 
 		// --
 		//
-		p->setPen(textColor());
+		p->setPen(m_textColor);
+
 		DrawHelper::drawText(p,
 							 m_font,
 							 itemUnit(),
@@ -312,6 +312,18 @@ namespace VFrame30
 	void SchemaItemRect::setTextColor(QColor color)
 	{
 		m_textColor = color;
+	}
+
+	// LineStyle property
+	//
+	E::LineStyle SchemaItemRect::lineStyle() const
+	{
+		return m_lineStyle;
+	}
+
+	void SchemaItemRect::setLineStyle(E::LineStyle value)
+	{
+		m_lineStyle = value;
 	}
 
 	// Text property

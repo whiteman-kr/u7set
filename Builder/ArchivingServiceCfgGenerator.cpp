@@ -13,37 +13,31 @@ namespace Builder
 	{
 	}
 
-	bool ArchivingServiceCfgGenerator::generateConfiguration()
+	bool ArchivingServiceCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		ArchivingServiceSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<ArchivingServiceSettingsGetter>(profile, settingsGetter);
+	}
+
+	bool ArchivingServiceCfgGenerator::generateConfigurationStep1()
 	{
 		bool result = false;
 
 		do
 		{
-			if (writeSettings() == false) break;
+			if (writeArchSignalsFile() == false) break;
 			if (writeBatFile() == false) break;
 			if (writeShFile() == false) break;
 
 			result = true;
 		}
 		while(false);
-
-		return result;
-	}
-
-	bool ArchivingServiceCfgGenerator::writeSettings()
-	{
-		bool result = true;
-
-		result &= m_settings.readFromDevice(m_software, m_log);
-		result &= m_settings.checkSettings(m_software, m_log);
-
-		RETURN_IF_FALSE(result);
-
-		XmlWriteHelper xml(m_cfgXml->xmlWriter());
-
-		result &= m_settings.writeToXml(xml);
-
-		result &= writeArchSignalsFile();
 
 		return result;
 	}
@@ -102,11 +96,15 @@ namespace Builder
 			return false;
 		}
 
-		parameters += QString(" -location=%1").arg(m_settings.archiveLocation);
+		std::shared_ptr<const ArchivingServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<ArchivingServiceSettings>();
+
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
+		parameters += QString(" -location=%1").arg(settings->archiveLocation);
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(Builder::DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
@@ -128,11 +126,15 @@ namespace Builder
 			return false;
 		}
 
-		parameters += QString(" -location=%1").arg(m_settings.archiveLocation);
+		std::shared_ptr<const ArchivingServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<ArchivingServiceSettings>();
+
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
+		parameters += QString(" -location=%1").arg(settings->archiveLocation);
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(Builder::DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 

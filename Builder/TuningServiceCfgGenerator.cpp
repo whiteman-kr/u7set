@@ -6,13 +6,10 @@
 namespace Builder
 {
 	TuningServiceCfgGenerator::TuningServiceCfgGenerator(Context* context,
-														 Hardware::Software* software,
-														 const LmsUniqueIdMap& lmsUniqueIdMap) :
+														 Hardware::Software* software) :
 		SoftwareCfgGenerator(context, software),
-		m_lmsUniqueIdMap(lmsUniqueIdMap),
 		m_tuningDataStorage(context->m_tuningDataStorage.get())
 	{
-		initSubsystemKeyMap(&m_subsystemKeyMap, context->m_subsystems.get());
 	}
 
 
@@ -20,7 +17,19 @@ namespace Builder
 	{
 	}
 
-	bool TuningServiceCfgGenerator::generateConfiguration()
+	bool TuningServiceCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		TuningServiceSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<TuningServiceSettings>(profile, settingsGetter);
+	}
+
+	bool TuningServiceCfgGenerator::generateConfigurationStep1()
 	{
 		if (m_tuningDataStorage == nullptr)
 		{
@@ -32,7 +41,6 @@ namespace Builder
 
 		do
 		{
-			if (writeSettings() == false) break;
 			if (writeTuningSources() == false) break;
 			if (writeBatFile() == false) break;
 			if (writeShFile() == false) break;
@@ -44,42 +52,23 @@ namespace Builder
 		return result;
 	}
 
-	bool TuningServiceCfgGenerator::writeSettings()
-	{
-		TEST_PTR_RETURN_FALSE(m_log);
-		TEST_PTR_LOG_RETURN_FALSE(m_context, m_log);
-
-		bool result = m_settings.readFromDevice(m_software, m_log);
-
-		RETURN_IF_FALSE(result);
-
-		if (m_context->m_projectProperties.safetyProject() == true && m_settings.singleLmControl == false)
-		{
-			// TuningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behaviour in menu Project->Project Properties...->Safety Project.
-			//
-			m_log->errEQP6201(equipmentID());
-			return false;
-		}
-
-		XmlWriteHelper xml(m_cfgXml->xmlWriter());
-
-		result = m_settings.writeToXml(xml);
-
-		return result;
-	}
-
-
 	bool TuningServiceCfgGenerator::writeTuningSources()
 	{
+		std::shared_ptr<const TuningServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningServiceSettings>();
+
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
+		QByteArray fileData;
+
 		bool result = true;
 
 		QVector<Tuning::TuningSource> tuningSources;
 
-		quint32 receivingNetmask = m_settings.tuningDataNetmask.toIPv4Address();
+		quint32 receivingNetmask = settings->tuningDataNetmask.toIPv4Address();
 
-		quint32 receivingSubnet = m_settings.tuningDataIP.address32() & receivingNetmask;
+		quint32 receivingSubnet = settings->tuningDataIP.address32() & receivingNetmask;
 
-		for(Hardware::DeviceModule* lm : m_lmList)
+		for(Hardware::DeviceModule* lm : m_context->m_lmModules)
 		{
 			if (lm == nullptr)
 			{
@@ -108,13 +97,11 @@ namespace Builder
 
 				Tuning::TuningSource ts;
 
-				result &= ts.getLmPropertiesFromDevice(lm, DataSource::DataType::Tuning,
+				result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm, DataSource::DataType::Tuning,
 													   lanController.m_place,
 													   lanController.m_type,
-				                                       *m_equipment,
-													   m_subsystemKeyMap,
-													   m_lmsUniqueIdMap,
-													   m_log);
+													   m_context,
+													   &ts);
 				if (result == false)
 				{
 					continue;
@@ -131,13 +118,13 @@ namespace Builder
 					//
 					m_log->errCFG3043(ts.lmAddress().toString(),
 									  ts.lmAdapterID(),
-									  m_settings.tuningDataIP.addressStr(),
-									  equipmentID());
+									  settings->tuningDataIP.addressStr(),
+									  m_software->equipmentIdTemplate());
 					result = false;
 					continue;
 				}
 
-				Tuning::TuningData* tuningData = m_tuningDataStorage->value(lm->equipmentId(), nullptr);
+				Tuning::TuningData* tuningData = m_context->m_tuningDataStorage->value(lm->equipmentId(), nullptr);
 
 				if(tuningData != nullptr)
 				{
@@ -145,25 +132,22 @@ namespace Builder
 				}
 				else
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-									   QString(tr("Tuning data for LM '%1' is not found")).arg(lm->equipmentIdTemplate()));
+					LOG_INTERNAL_ERROR_MSG(m_log, QString(tr("Tuning data for LM '%1' is not found")).
+														arg(lm->equipmentIdTemplate()));
 					result = false;
 				}
 
-				tuningSources.append(ts);
+				tuningSources.push_back(ts);
 			}
 		}
 
-		RETURN_IF_FALSE(result)
-
-		QByteArray fileData;
 		result &= DataSourcesXML<Tuning::TuningSource>::writeToXml(tuningSources, &fileData);
 
 		RETURN_IF_FALSE(result)
 
 		//
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_TUNING_SOURCES_XML, CFG_FILE_ID_TUNING_SOURCES, "", fileData);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::TUNING_SOURCES_XML, CfgFileId::TUNING_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{
@@ -174,7 +158,6 @@ namespace Builder
 
 		return result;
 	}
-
 
 	bool TuningServiceCfgGenerator::writeBatFile()
 	{
@@ -193,7 +176,7 @@ namespace Builder
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
@@ -217,7 +200,7 @@ namespace Builder
 
 		content += parameters;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 

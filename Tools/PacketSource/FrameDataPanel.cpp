@@ -22,11 +22,9 @@ FrameDataTable::FrameDataTable(QObject *)
 
 FrameDataTable::~FrameDataTable()
 {
-	m_frameMutex.lock();
+	QMutexLocker l(&m_frameMutex);
 
-		m_frameList.clear();
-
-	m_frameMutex.unlock();
+	m_frameList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -168,33 +166,23 @@ void FrameDataTable::updateColumn(int column)
 
 int FrameDataTable::dataSize() const
 {
-	int count = 0;
+	QMutexLocker l(&m_frameMutex);
 
-	m_frameMutex.lock();
-
-		count = m_frameList.count() * Rup::FRAME_DATA_SIZE;
-
-	m_frameMutex.unlock();
-
-	return count;
+	return TO_INT(m_frameList.size()) * Rup::FRAME_DATA_SIZE;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 PS::FrameData* FrameDataTable::frame(int index) const
 {
-	PS::FrameData* pData = nullptr;
+	QMutexLocker l(&m_frameMutex);
 
-	m_frameMutex.lock();
+	if (index < 0 || index >= TO_INT(m_frameList.size()))
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_frameList.count())
-		{
-			 pData = m_frameList[index];
-		}
-
-	m_frameMutex.unlock();
-
-	return pData;
+	return m_frameList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -251,9 +239,9 @@ void FrameDataTable::setByte(int index, quint8 byte)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FrameDataTable::set(const QVector<PS::FrameData*>& list_add)
+void FrameDataTable::set(const std::vector<PS::FrameData*>& list_add)
 {
-	int count = list_add.count() * Rup::FRAME_DATA_SIZE;
+	int count = TO_INT(list_add.size()) * Rup::FRAME_DATA_SIZE;
 	if (count == 0)
 	{
 		return;
@@ -313,7 +301,7 @@ FrameDataStateDialog::~FrameDataStateDialog()
 void FrameDataStateDialog::createInterface()
 {
 	setWindowFlags(Qt::Window  | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/InOut.png"));
+	setWindowIcon(QIcon(":/Images/FrameData.svg"));
 	setWindowTitle(tr("State"));
 
 	// main Layout
@@ -445,7 +433,7 @@ void FrameDataPanel::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FrameDataPanel::set(const QVector<PS::FrameData*>& list_add)
+void FrameDataPanel::set(const std::vector<PS::FrameData*>& list_add)
 {
 	m_frameDataTable.set(list_add);
 }
@@ -533,7 +521,7 @@ void FrameDataPanel::onSetStateAction()
 
 void FrameDataPanel::onListDoubleClicked(const QModelIndex& index)
 {
-	Q_UNUSED(index);
+	Q_UNUSED(index)
 
 	setState();
 }

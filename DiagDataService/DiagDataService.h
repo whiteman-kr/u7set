@@ -4,7 +4,7 @@
 #include "../lib/DataSource.h"
 #include "../lib/Signal.h"
 #include "../lib/CfgServerLoader.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 
 
 class DiagDataServiceWorker : public ServiceWorker
@@ -31,5 +31,7 @@ private:
 
 private:
 	std::shared_ptr<CircularLogger> m_logger;
+
+	std::shared_ptr<const DiagDataServiceSettings> m_serviceSettings;
 };
 

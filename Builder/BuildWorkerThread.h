@@ -3,7 +3,6 @@
 
 #include <QJSEngine>
 #include "../lib/Subsystem.h"
-#include "../lib/CommonTypes.h"
 #include "../TuningService/TuningDataStorage.h"
 #include "Context.h"
 #include "TuningBuilder.h"
@@ -54,8 +53,8 @@ namespace Builder
 										 std::map<QUuid, Hardware::DeviceObject*>& uuidMap,
 										 std::map<QString, Hardware::DeviceObject*>& strIdMap);
 
-		bool checkChildRestrictions(Hardware::DeviceObject* root);
-		bool checkChildRestrictionsWorker(Hardware::DeviceObject* device);
+		bool checkChildRestrictions(std::shared_ptr<Hardware::DeviceObject> root);
+		bool checkChildRestrictionsWorker(std::shared_ptr<Hardware::DeviceObject> device);
 
 		// Load Application Logic signals
 		//
@@ -90,9 +89,15 @@ namespace Builder
 		//
 		bool compileApplicationLogic();
 
+		// Load Sim Profiles
+		//
+		bool loadSimProfiles();
+
 		// Generate MATS software configurations
 		//
-		bool generateSoftwareConfiguration(const LmsUniqueIdMap& lmsUniqueIdMap);
+		bool generateSoftwareConfiguration();
+
+		bool checkProfiles();
 
 		bool writeFirmwareStatistics(BuildResultWriter& buildResultWriter);
 
@@ -101,9 +106,15 @@ namespace Builder
 		void generateModulesInformation(BuildResultWriter& buildWriter,
 								   const std::vector<Hardware::DeviceModule *>& lmModules);
 
-		void generateLmsUniqueID(BuildResultWriter& buildWriter,
-								 const std::vector<Hardware::DeviceModule *>& lmModules,
-								 LmsUniqueIdMap& lmsUniqueIdMap);
+		bool generateLmsUniqueIDs(Context* context);
+
+		bool writeLogicModulesInfoXml(Context* context);
+
+		bool buildSoftwareList(Context* context);
+
+		// Run simulator-based script tests
+		//
+		bool runSimTests();
 
 	signals:
 		void runOrderReady(RunOrder runOrder);
@@ -125,8 +136,6 @@ namespace Builder
 
 		QString serverPassword() const;
 		void setServerPassword(QString value);
-
-		DbProjectProperties projectProperties() const;
 
 		void setIssueLog(IssueLogger* value);
 
@@ -158,8 +167,6 @@ namespace Builder
 
 		QString m_projectUserName;
 		QString m_projectUserPassword;
-
-		DbProjectProperties m_projectProperties;
 
 		QString m_buildOutputPath;
 

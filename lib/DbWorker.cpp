@@ -356,6 +356,17 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0336.sql", "Upgrade to version 336, Updated schema templates, set default font to Arial"},
 	{":/DatabaseUpgrade/Upgrade0337.sql", "Upgrade to version 337, TuningClient preset update (StartSchemaID and ConfigurationArrivedScript added)"},
 	{":/DatabaseUpgrade/Upgrade0338.sql", "Upgrade to version 338, Reduced number of AFBs instance counters for MSO4_SR21"},
+	{":/DatabaseUpgrade/Upgrade0339.sql", "Upgrade to version 339, Added project property -Run Simulator Tests on Build-, -Simulator Tests Timeout-"},
+	{":/DatabaseUpgrade/Upgrade0340.sql", "Upgrade to version 340, Tags were changed on schema templates, applogic and ufb"},
+	{":/DatabaseUpgrade/Upgrade0341.sql", "Upgrade to version 341, Changes in get_checked_out_files, getting all (inc. dangling) checked out files for root"},
+	{":/DatabaseUpgrade/Upgrade0342.sql", "Upgrade to version 342, Fixed undo_changes, added undo on delete to just added file"},
+	{":/DatabaseUpgrade/Upgrade0343.sql", "Upgrade to version 343, Add functions get_specific_signals_all_*"},
+	{":/DatabaseUpgrade/Upgrade0344.sql", "Upgrade to version 344, All configuration scripts use let instead of var declarations"},
+	{":/DatabaseUpgrade/Upgrade0345.sql", "Upgrade to version 345, Simulation properties added to TuningService preset"},
+	{":/DatabaseUpgrade/Upgrade0346.sql", "Upgrade to version 346, Add function get_latest_signals_all_with_user_id"},
+	{":/DatabaseUpgrade/Upgrade0347.sql", "Upgrade to version 347, Changes in functions delete_signal(), get_signals_id_appsignalid()"},
+	{":/DatabaseUpgrade/Upgrade0348.sql", "Upgrade to version 348, All scripts use ScriptDeviceObject class"},
+	{":/DatabaseUpgrade/Upgrade0349.sql", "Upgrade to version 349, Added folder $root$/DiagSignalTypes"},
 };
 
 int DbWorker::counter = 0;
@@ -490,104 +501,40 @@ int DbWorker::rootFileId() const
 	return 0;	// For now, $root$ fileId is always 0, as it was created first
 }
 
-int DbWorker::afblFileId() const
+int DbWorker::systemFileId(DbDir dir) const
 {
-	QMutexLocker m(&m_mutex);
-	return m_afblFileId;
+	QReadLocker rl(&m_lock);
+
+	auto it = m_systemFiles.find(dir);
+	Q_ASSERT(it != m_systemFiles.end());
+
+	return (it != m_systemFiles.end()) ? it->second.fileId() : -1;
 }
 
-int DbWorker::schemasFileId() const
+DbFileInfo DbWorker::systemFileInfo(DbDir dir) const
 {
-	QMutexLocker m(&m_mutex);
-	return m_schemasFileId;
+	QReadLocker rl(&m_lock);
+
+	auto it = m_systemFiles.find(dir);
+	Q_ASSERT(it != m_systemFiles.end());
+
+	return (it != m_systemFiles.end()) ? it->second : DbFileInfo{};
 }
 
-int DbWorker::ufblFileId() const
-{
-	QMutexLocker m(&m_mutex);
-	return m_ufblFileId;
-}
-
-int DbWorker::alFileId() const
-{
-	QMutexLocker m(&m_mutex);
-	return m_alFileId;
-}
-
-int DbWorker::hcFileId() const
-{
-	QMutexLocker m(&m_mutex);
-	return m_hcFileId;
-}
-
-int DbWorker::hpFileId() const
-{
-	QMutexLocker m(&m_mutex);
-	return m_hpFileId;
-}
-
-int DbWorker::mvsFileId() const
-{
-	QMutexLocker m(&m_mutex);
-	return m_mvsFileId;
-}
-
-int DbWorker::tvsFileId() const
-{
-	QMutexLocker m(&m_mutex);
-	return m_tvsFileId;
-}
-
-int DbWorker::dvsFileId() const
-{
-	QMutexLocker m(&m_mutex);
-	return m_dvsFileId;
-}
-
-int DbWorker::mcFileId() const
-{
-	QMutexLocker m(&m_mutex);
-	return m_mcFileId;
-}
-
-int DbWorker::connectionsFileId() const
-{
-	QMutexLocker m(&m_mutex);
-	return m_connectionsFileId;
-}
-
-int DbWorker::busTypesFileId() const
-{
-	QMutexLocker m(&m_mutex);
-	return m_busTypesFileId;
-}
-
-int DbWorker::etcFileId() const
-{
-	QMutexLocker m(&m_mutex);
-	return m_etcFileId;
-}
-
-int DbWorker::testsFileId() const
-{
-	QMutexLocker m(&m_mutex);
-	return m_testsFileId;
-}
-
-int DbWorker::simTestsFileId() const
-{
-	QMutexLocker m(&m_mutex);
-	return m_simTestsFileId;
-}
 
 std::vector<DbFileInfo> DbWorker::systemFiles() const
 {
-	QMutexLocker m(&m_mutex);
+	QReadLocker rl(&m_lock);
 
-	std::vector<DbFileInfo> copy;
-	copy.assign(m_systemFiles.begin(),m_systemFiles.end());
+	std::vector<DbFileInfo> result;
+	result.reserve(m_systemFiles.size());
 
-	return copy;
+	for (const auto&[dir, fi] : m_systemFiles)
+	{
+		result.emplace_back(fi);
+	}
+
+	return result;
 }
 
 QString DbWorker::toSqlStr(const QString& str)
@@ -1126,206 +1073,37 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	setCurrentProject(project);
 
-	// Set System Folders File ID
+	// Get System Folders FileInfos
 	//
-	std::vector<DbFileInfo> systemFiles;
-	std::vector<QString> systemFileNames = {Db::File::AfblFileName, Db::File::SchemasFileName, Db::File::UfblFileName, Db::File::AlFileName, Db::File::HcFileName,
-											Db::File::HpFileName, Db::File::MvsFileName, Db::File::TvsFileName, Db::File::DvsFileName, Db::File::McFileName,
-											Db::File::ConnectionsFileName, Db::File::BusTypesFileName, Db::File::EtcFileName,
-											Db::File::TestsFileName, Db::File::SimTestsFileName};
-
-	bool ok = worker_getFilesInfo(systemFileNames, &systemFiles);
-	if (ok == false)
 	{
-		emitError(db, tr("Can't get system files.") + db.lastError().text());
-		db.close();
-		return;
-	}
-
-	{
-		QMutexLocker locker(&m_mutex);
-
-		m_afblFileId = -1;
-		m_schemasFileId = -1;
-		m_ufblFileId = -1;
-		m_alFileId = -1;
-		m_hcFileId = -1;
-		m_hpFileId = -1;
-		m_mvsFileId = -1;
-		m_tvsFileId = -1;
-		m_dvsFileId = -1;
-		m_mcFileId = -1;
-		m_connectionsFileId = -1;
-		m_busTypesFileId = -1;
-		m_etcFileId = -1;
-		m_testsFileId = -1;
-		m_simTestsFileId = -1;
-
+		QWriteLocker wl(&m_lock);
 		m_systemFiles.clear();
 	}
 
-	// Root file is filled manually
-	//
+	for (auto[dbDir, dirFullPath] : Db::File::s_dirToName)
 	{
-		QMutexLocker locker(&m_mutex);
+		DbFileInfo fi;
 
-		DbFileInfo rfi;
-		rfi.setFileId(rootFileId());
-		rfi.setFileName(Db::File::RootFileName);
-		m_systemFiles.push_back(rfi);
-	}
-
-	for (const DbFileInfo& fi : systemFiles)
-	{
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::AfblFileName))
+		if (dbDir == DbDir::RootDir)
 		{
-			QMutexLocker locker(&m_mutex);
-			m_afblFileId = fi.fileId();
-			m_systemFiles.push_back(fi);
-			continue;
+			fi.setFileId(0);
+			fi.setFileName("$root$");
+		}
+		else
+		{
+			bool ok = worker_getFileInfo(dirFullPath, &fi);
+			if (ok == false)
+			{
+				emitError(db, tr("Can't get system file.") + db.lastError().text());
+				db.close();
+				return;
+			}
 		}
 
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::SchemasFileName))
 		{
-			QMutexLocker locker(&m_mutex);
-			m_schemasFileId = fi.fileId();
-			m_systemFiles.push_back(fi);
-			continue;
+			QWriteLocker wl(&m_lock);
+			m_systemFiles.emplace(dbDir, fi);
 		}
-
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::UfblFileName))
-		{
-			QMutexLocker locker(&m_mutex);
-			m_ufblFileId = fi.fileId();
-			m_systemFiles.push_back(fi);
-			continue;
-		}
-
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::AlFileName))
-		{
-			QMutexLocker locker(&m_mutex);
-			m_alFileId = fi.fileId();
-			m_systemFiles.push_back(fi);
-			continue;
-		}
-
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::HcFileName))
-		{
-			QMutexLocker locker(&m_mutex);
-			m_hcFileId = fi.fileId();
-			m_systemFiles.push_back(fi);
-			continue;
-		}
-
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::HpFileName))
-		{
-			QMutexLocker locker(&m_mutex);
-			m_hpFileId = fi.fileId();
-			m_systemFiles.push_back(fi);
-			continue;
-		}
-
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::MvsFileName))
-		{
-			QMutexLocker locker(&m_mutex);
-			m_mvsFileId = fi.fileId();
-			m_systemFiles.push_back(fi);
-			continue;
-		}
-
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::TvsFileName))
-		{
-			QMutexLocker locker(&m_mutex);
-			m_tvsFileId = fi.fileId();
-			m_systemFiles.push_back(fi);
-			continue;
-		}
-
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::DvsFileName))
-		{
-			QMutexLocker locker(&m_mutex);
-			m_dvsFileId = fi.fileId();
-			m_systemFiles.push_back(fi);
-			continue;
-		}
-
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::McFileName))
-		{
-			QMutexLocker locker(&m_mutex);
-			m_mcFileId = fi.fileId();
-			m_systemFiles.push_back(fi);
-			continue;
-		}
-
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::ConnectionsFileName))
-		{
-			QMutexLocker locker(&m_mutex);
-			m_connectionsFileId = fi.fileId();
-			m_systemFiles.push_back(fi);
-			continue;
-		}
-
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::BusTypesFileName))
-		{
-			QMutexLocker locker(&m_mutex);
-			m_busTypesFileId = fi.fileId();
-			m_systemFiles.push_back(fi);
-			continue;
-		}
-
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::EtcFileName))
-		{
-			QMutexLocker locker(&m_mutex);
-			m_etcFileId = fi.fileId();
-			m_systemFiles.push_back(fi);
-			continue;
-		}
-
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::TestsFileName))
-		{
-			QMutexLocker locker(&m_mutex);
-			m_testsFileId = fi.fileId();
-			m_systemFiles.push_back(fi);
-			continue;
-		}
-
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::SimTestsFileName))
-		{
-			QMutexLocker locker(&m_mutex);
-			m_simTestsFileId = fi.fileId();
-			m_systemFiles.push_back(fi);
-			continue;
-		}
-	}
-
-
-	{
-		QMutexLocker locker(&m_mutex);
-
-		result = m_afblFileId != -1;
-		result &= m_schemasFileId != -1;
-		result &= m_ufblFileId != -1;
-		result &= m_alFileId != -1;
-		result &= m_hcFileId != -1;
-		result &= m_hpFileId != -1;
-		result &= m_mvsFileId != -1;
-		result &= m_tvsFileId != -1;
-		result &= m_dvsFileId != -1;
-		result &= m_mcFileId != -1;
-		result &= m_connectionsFileId != -1;
-		result &= m_busTypesFileId != -1;
-		result &= m_etcFileId != -1;
-		result &= m_testsFileId != -1;
-		result &= m_simTestsFileId != -1;
-	}
-
-	if (result == false)
-	{
-		emitError(db, tr("Can't get system folder.") + db.lastError().text());
-		db.close();
-
-		assert(result);
-		return;
 	}
 
 	// Add log record
@@ -3028,6 +2806,51 @@ bool DbWorker::worker_getFilesInfo(const std::vector<QString>& fullPathFileNames
 	return true;
 }
 
+bool DbWorker::worker_getFileInfo(const QString& fullPathFileName, DbFileInfo* out)
+{
+	// Check parameters
+	//
+	if (fullPathFileName.isEmpty() == true ||
+		out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	*out = DbFileInfo();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get file list. Database connection is not openned."));
+		return false;
+	}
+
+	QString request = QString("SELECT * FROM api.get_file_info('%1', '%2');")
+			.arg(sessionKey())
+			.arg(fullPathFileName);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+	if (result == false)
+	{
+		emitError(db, tr("Can't get file info. Error: ") +  q.lastError().text());
+		return false;
+	}
+
+	if (q.next() == true)
+	{
+		return db_dbFileInfo(q, out);
+	}
+	else
+	{
+		return false;
+	}
+}
+
 void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId)
 {
 	// Init automitic varaiables
@@ -4669,12 +4492,12 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 	int nesting = 0;
 
 	std::function<bool(Hardware::DeviceObject*, int)> addDevice =
-			[&addDevice, &db, device, this, &nesting]
+			[&addDevice, &db, this, &nesting]
 			(Hardware::DeviceObject* current, int parentId)
 	{
 		if (nesting >= static_cast<int>(Hardware::DeviceType::DeviceTypeCount) ||
-				current == nullptr ||
-				parentId == -1)
+			current == nullptr ||
+			parentId == -1)
 		{
 			assert(nesting < static_cast<int>(Hardware::DeviceType::DeviceTypeCount));
 			assert(current != nullptr);
@@ -4733,7 +4556,7 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 		//
 		for (int i = 0; i < current->childrenCount(); i++)
 		{
-			result = addDevice(current->child(i), current->fileInfo().fileId());
+			result = addDevice(current->child(i).get(), current->fileInfo().fileId());
 			if (result == false)
 			{
 				nesting --;
@@ -4758,7 +4581,7 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 	return;
 }
 
-void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
+void DbWorker::slot_getSignalsIDs(QVector<int>* signalsIDs)
 {
 	AUTO_COMPLETE
 
@@ -4769,6 +4592,8 @@ void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
 		assert(signalsIDs != nullptr);
 		return;
 	}
+
+	signalsIDs->clear();
 
 	// Operation
 	//
@@ -4811,6 +4636,8 @@ void DbWorker::slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAp
 	// Check parameters
 	//
 	TEST_PTR_RETURN(signalsIDAppSignalID);
+
+	signalsIDAppSignalID->clear();
 
 	// Operation
 	//
@@ -5137,7 +4964,47 @@ void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVe
 	}
 
 	return;
+}
 
+void DbWorker::slot_getLatestSignalsWithUserID(std::vector<Signal>* out)
+{
+	AUTO_COMPLETE
+
+	if (out == nullptr)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	out->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get latest signals with UserID. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM get_latest_signals_all_with_user_id(%1)")
+		.arg(currentUser().userId());
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(db, tr("Can't get_latest_signals_all_with_user_id! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	readSignalsToVector(q, out);
+
+	return;
 }
 
 void DbWorker::slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs)
@@ -5305,7 +5172,7 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 
 	// Log action
 	//
-	QString logMessage = QString("addSignal: SiganlCount %1, SignalIDs ")
+	QString logMessage = QString("addSignal: SignalCount %1, SignalIDs ")
 						 .arg(newSignal->size());
 
 	for (const Signal& s : *newSignal)
@@ -5332,6 +5199,11 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 
 	int readed = 0;
 
+	int errCount = 0;
+	int moreErrCount = 0;
+
+	QString resultErrMsg;
+
 	while(q.next() != false)
 	{
 		ObjectState os;
@@ -5346,15 +5218,32 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 		signal.setCreated(QDateTime::currentDateTime());
 		signal.setInstanceCreated(QDateTime::currentDateTime());
 
-		QString errMsg;
 		ObjectState objectState;
+		QString errMsg;
 
 		result = setSignalWorkcopy(db, signal, objectState, errMsg);
 
 		if (result == false)
 		{
-			emitError(db, errMsg);
-			return false;
+			errCount++;
+
+			if (errCount > 5)
+			{
+				moreErrCount++;
+			}
+			else
+			{
+				resultErrMsg += errMsg + "\n";
+			}
+
+			QString delRequestStr = QString("SELECT * FROM delete_signal(%1, %2)")
+				.arg(currentUser().userId()).arg(signalID);
+
+			QSqlQuery delRequest(db);
+
+			result = delRequest.exec(delRequestStr);
+
+			continue;
 		}
 
 		QString request2 = QString("SELECT * FROM get_latest_signal(%1, %2)")
@@ -5379,11 +5268,21 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 		i++;
 	}
 
+	if (errCount > 0)
+	{
+		if (moreErrCount > 0)
+		{
+			resultErrMsg += QString("\nAnd %1 other error(s)").arg(moreErrCount);
+		}
+
+		emitError(db, resultErrMsg);
+		return false;
+	}
+
 	assert(i == readed);
 
 	return true;
 }
-
 
 bool DbWorker::setSignalWorkcopy(QSqlDatabase& db, const Signal& s, ObjectState& objectState, QString& errMsg)
 {
@@ -5848,7 +5747,6 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 	QString request = QString("SELECT * FROM checkin_signals(%1, ARRAY[")
 		.arg(currentUser().userId());
 
-
 	for(int i=0; i < count; i++)
 	{
 		if (i < count-1)
@@ -5884,7 +5782,7 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 }
 
 
-void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals,
+void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals,
 								   std::vector<Signal>* addedSignals)
 {
 	AUTO_COMPLETE
@@ -5905,7 +5803,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 			m_progress->setValue((i * 100) / signalCount);
 		}
 
-		const Hardware::DeviceSignal* deviceSignal = deviceSignals->at(i);
+		const Hardware::DeviceAppSignal* deviceSignal = deviceSignals->at(i);
 
 		if (deviceSignal == nullptr)
 		{
@@ -5945,7 +5843,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 }
 
 
-void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals)
+void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals)
 {
 	AUTO_COMPLETE
 
@@ -5963,7 +5861,7 @@ void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>
 	//
 	ObjectState os;
 
-	for(Hardware::DeviceSignal* deviceSignal : *deviceSignals)
+	for(Hardware::DeviceAppSignal* deviceSignal : *deviceSignals)
 	{
 		QString request = QString("SELECT * FROM delete_signal_by_equipmentid(%1, '%2')")
 			.arg(currentUser().userId()).arg(toSqlStr(deviceSignal->equipmentIdTemplate()));
@@ -6259,7 +6157,6 @@ void DbWorker::slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out
 	return;
 }
 
-
 void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out)
 {
 	AUTO_COMPLETE
@@ -6332,6 +6229,120 @@ void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int ch
 	return;
 }
 
+void DbWorker::slot_getSpecificSignals(int changesetId, std::vector<Signal>* out)
+{
+	AUTO_COMPLETE
+
+	TEST_PTR_RETURN(out);
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get specific signals by changeset ID. Database connection is not opened."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM get_specific_signals_all_by_changeset_id(%1, %2)")
+		.arg(currentUser().userId()).arg(changesetId);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(db, tr("Cannot get specific signals by changeset ID. Query execution error."));
+		return;
+	}
+
+	readSignalsToVector(q, out);
+}
+
+void DbWorker::slot_getSpecificSignals(QDateTime date, std::vector<Signal>* out)
+{
+	AUTO_COMPLETE
+
+	TEST_PTR_RETURN(out);
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get specific signals by date. Database connection is not opened."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM get_specific_signals_all_by_date(%1, '%2'::timestamp with time zone)").
+							arg(currentUser().userId()).
+							arg(date.toString("yyyy-MM-dd HH:mm:ss"));
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(db, tr("Cannot get specific signals by date. Query execution error."));
+		return;
+	}
+
+	readSignalsToVector(q, out);
+}
+
+void DbWorker::readSignalsToVector(QSqlQuery& q, std::vector<Signal>* out)
+{
+	TEST_PTR_RETURN(out);
+
+	out->clear();
+
+	int dProgress = 0;
+	int signalCount = q.size();
+
+	if (signalCount != -1)
+	{
+		out->resize(signalCount);
+
+		if (signalCount != 0)
+		{
+			dProgress = signalCount / 20;
+		}
+	}
+
+	int n = 0;
+
+	while(q.next() != false)
+	{
+		if (signalCount != -1)
+		{
+			if (n < signalCount)
+			{
+				getSignalData(q, out->at(n));
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+		}
+		else
+		{
+			getSignalData(q, *out->emplace(out->end()));
+		}
+
+		n++;
+
+		if (dProgress != 0 && (n % dProgress) == 0)
+		{
+			m_progress->setValue((n / dProgress) * 5);
+		}
+	}
+
+	m_progress->setValue(100);
+}
 
 void DbWorker::slot_hasCheckedOutSignals(bool* hasCheckedOut)
 {
@@ -7155,73 +7166,73 @@ bool DbWorker::db_dbChangesetObject(const QSqlQuery& q, DbChangesetDetails* dest
 
 const QString& DbWorker::host() const
 {
-	QMutexLocker locker(&m_mutex);
+	QReadLocker rl(&m_lock);
 	return m_host;
 }
 
 void DbWorker::setHost(const QString& host)
 {
-	QMutexLocker locker(&m_mutex);
+	QWriteLocker wl(&m_lock);
 	m_host = host;
 }
 
 int DbWorker::port() const
 {
-	QMutexLocker locker(&m_mutex);
+	QReadLocker rl(&m_lock);
 	return m_port;
 }
 
 void DbWorker::setPort(int port)
 {
-	QMutexLocker locker(&m_mutex);
+	QWriteLocker wl(&m_lock);
 	m_port = port;
 }
 
 const QString& DbWorker::serverUsername() const
 {
-	QMutexLocker locker(&m_mutex);
+	QReadLocker rl(&m_lock);
 	return m_serverUsername;
 }
 
 void DbWorker::setServerUsername(const QString& username)
 {
-	QMutexLocker locker(&m_mutex);
+	QWriteLocker wl(&m_lock);
 	m_serverUsername = username;
 }
 
 const QString& DbWorker::serverPassword() const
 {
-	QMutexLocker locker(&m_mutex);
+	QReadLocker rl(&m_lock);
 	return m_serverPassword;
 }
 
 void DbWorker::setServerPassword(const QString& password)
 {
-	QMutexLocker locker(&m_mutex);
+	QWriteLocker wl(&m_lock);
 	m_serverPassword = password;
 }
 
 DbUser DbWorker::currentUser() const
 {
-	QMutexLocker locker(&m_mutex);
+	QReadLocker rl(&m_lock);
 	return m_currentUser;
 }
 
 void DbWorker::setCurrentUser(const DbUser& user)
 {
-	QMutexLocker locker(&m_mutex);
+	QWriteLocker wl(&m_lock);
 	m_currentUser = user;
 }
 
 DbProject DbWorker::currentProject() const
 {
-	QMutexLocker locker(&m_mutex);
+	QReadLocker rl(&m_lock);
 	return m_currentProject;
 }
 
 void DbWorker::setCurrentProject(const DbProject& project)
 {
-	QMutexLocker locker(&m_mutex);
+	QWriteLocker wl(&m_lock);
 	m_currentProject = project;
 }
 

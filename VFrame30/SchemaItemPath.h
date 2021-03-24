@@ -86,8 +86,30 @@ namespace VFrame30
 		QColor lineColor() const;
 		void setLineColor(QColor color);
 
+		E::LineStyle lineStyle() const;
+		void setLineStyle(E::LineStyle value);
+
+		E::LineStyleCap lineStyleCap() const;
+		void setLineStyleCap(E::LineStyleCap value);
+
+		E::LineCap lineCapStart() const;
+		void setLineCapStart(E::LineCap value);
+
+		E::LineCap lineCapEnd() const;
+		void setLineCapEnd(E::LineCap value);
+
+		double lineCapFactor() const;
+		void setLineCapFactor(double value);
+
 	private:
 		double m_weight;					// Толщина линии, хранится в точках или дюймах в зависимости от UnitDocPt
 		QColor m_lineColor;
+		E::LineStyle m_lineStyle = E::SolidLine;
+
+		E::LineStyleCap m_lineStyleCap = E::LineStyleCap::SquareCap;
+
+		E::LineCap m_lineCapStart = E::LineCap::NoCap;
+		E::LineCap m_lineCapEnd = E::LineCap::NoCap;
+		double m_lineCapFactor = 2.0;
 	};
 }

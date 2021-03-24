@@ -99,7 +99,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 		}
 
 		TuningValue tvDefault(defaultValue(asp));
-		tvDefault.setType(asp.toTuningType());
+		tvDefault.setType(asp.tuningType());
 
 		if (tvDefault != state.value())
 		{
@@ -469,7 +469,7 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 				return false;
 			}
 
-			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), v));
+			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.tuningType(), v));
 			return true;
 		}
 
@@ -480,12 +480,12 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 		{
 			if ((Qt::CheckState)value.toInt() == Qt::Checked)
 			{
-				m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), 1));
+				m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.tuningType(), 1));
 				return true;
 			}
 			else
 			{
-				m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), 0));
+				m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.tuningType(), 0));
 				return true;
 			}
 		}
@@ -705,7 +705,7 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 
 	if (m_pageFilter == nullptr)
 	{
-		assert(m_pageFilter);
+		Q_ASSERT(m_pageFilter);
 		return;
 	}
 
@@ -894,7 +894,7 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 	m_bottomLayout->addWidget(m_undoButton);
 	connect(m_undoButton, &QPushButton::clicked, this, &TuningPage::slot_undo);
 
-	if (theConfigSettings.autoApply == false)
+	if (theConfigSettings.clientSettings.autoApply == false)
 	{
 		m_applyButton = new QPushButton(tr("Apply"));
 		connect(m_applyButton, &QPushButton::clicked, this, &TuningPage::slot_Apply);
@@ -972,19 +972,19 @@ TuningPage::~TuningPage()
 
 	// Save masks
 	//
+
 	if (m_pageFilter == nullptr)
 	{
 		Q_ASSERT(m_pageFilter);
+		return;
 	}
-	else
+
+	QStringList masks;
+	for (int i = 0; i < m_filterTextCombo->count(); i++)
 	{
-		QStringList masks;
-		for (int i = 0; i < m_filterTextCombo->count(); i++)
-		{
-			masks.push_back(m_filterTextCombo->itemText(i));
-		}
-		settings.setValue(QString("Masks/%1").arg(m_pageFilter->ID()), masks);
+		masks.push_back(m_filterTextCombo->itemText(i));
 	}
+	settings.setValue(QString("Masks/%1").arg(m_pageFilter->ID()), masks);
 
 	m_instanceCounter--;
 	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
@@ -992,10 +992,6 @@ TuningPage::~TuningPage()
 
 void TuningPage::fillObjectsList()
 {
-	std::vector<Hash> hashes;
-
-	std::vector<Hash> pageHashes;
-
 	//qDebug() << "FillObjectsList";
 
 	//if (m_pageFilter != nullptr)
@@ -1003,10 +999,15 @@ void TuningPage::fillObjectsList()
 //		qDebug() << "Button " << m_pageFilter->caption();
 //	}
 
-	if (m_pageFilter != nullptr)
+	if (m_pageFilter == nullptr)
 	{
-		pageHashes = m_pageFilter->signalsHashes();
+		Q_ASSERT(m_pageFilter);
+		return;
 	}
+
+	std::vector<Hash> hashes;
+
+	std::vector<Hash> pageHashes = m_pageFilter->signalsHashes();
 
 	//qDebug() << "pageHashes.size() = " << pageHashes.size();
 
@@ -1124,26 +1125,29 @@ void TuningPage::fillObjectsList()
 		}
 		else
 		{
-			if (m_pageFilter != nullptr)
+			// Modify the default value from page filter
+			//
+			if (m_pageFilter == nullptr)
 			{
-				// Modify the default value from page filter
-				//
-				if (m_pageFilter->filterSignalExists(hash) == true)
+				Q_ASSERT(m_pageFilter);
+				return;
+			}
+
+			if (m_pageFilter->filterSignalExists(hash) == true)
+			{
+				TuningFilterSignal filterSignal;
+
+				ok = m_pageFilter->filterSignal(hash, filterSignal);
+				if (ok == false)
 				{
-					TuningFilterSignal filterSignal;
+					Q_ASSERT(false);
+					return;
+				}
 
-					ok = m_pageFilter->filterSignal(hash, filterSignal);
-					if (ok == false)
-					{
-						Q_ASSERT(false);
-						return;
-					}
-
-					if (filterSignal.useValue() == true)
-					{
-						modifyDefaultValue = true;
-						modifiedDefaultValue = filterSignal.value();
-					}
+				if (filterSignal.useValue() == true)
+				{
+					modifyDefaultValue = true;
+					modifiedDefaultValue = filterSignal.value();
 				}
 			}
 		}
@@ -1165,7 +1169,7 @@ void TuningPage::fillObjectsList()
 				}
 
 				TuningValue tvDefault(m_model->defaultValue(asp));
-				tvDefault.setType(asp.toTuningType());
+				tvDefault.setType(asp.tuningType());
 
 				if (tvDefault == state.value())
 				{
@@ -1265,10 +1269,23 @@ void TuningPage::fillObjectsList()
 	}
 
 	m_model->setHashes(filteredHashes);
-
 	m_model->setDefaultValues(defaultValues);
 
-	m_objectList->sortByColumn(m_sortColumn, m_sortOrder);
+	// Sort list
+	//
+	try
+	{
+		const std::pair<int, Qt::SortOrder>& sortData = m_sortData.at(m_pageFilter->ID());
+		m_objectList->sortByColumn(sortData.first, sortData.second);
+	}
+	catch (std::out_of_range)
+	{
+		const std::pair<int, Qt::SortOrder> sortData = std::make_pair(0, Qt::AscendingOrder);
+		m_sortData[m_pageFilter->ID()] = sortData;
+		m_objectList->sortByColumn(sortData.first, sortData.second);
+	}
+
+	return;
 }
 
 bool TuningPage::hasPendingChanges()
@@ -1483,10 +1500,16 @@ void TuningPage::undo()
 
 void TuningPage::sortIndicatorChanged(int column, Qt::SortOrder order)
 {
-	m_sortColumn = column;
-	m_sortOrder = order;
+	if (m_pageFilter == nullptr)
+	{
+		Q_ASSERT(m_pageFilter);
+		return;
+	}
 
-	m_model->sort(column, order);
+	m_sortData[m_pageFilter->ID()] = std::make_pair(column, order);
+	m_objectList->sortByColumn(column, order);
+
+	return;
 }
 
 void TuningPage::slot_setValue()
@@ -1566,7 +1589,7 @@ void TuningPage::slot_setValue()
 			}
 			else
 			{
-				if (asp.toTuningType() != value.type())
+				if (asp.tuningType() != value.type())
 				{
 					QMessageBox::warning(this, tr("Set Value"), tr("Please select objects of the same type."));
 					return;
@@ -1936,6 +1959,12 @@ void TuningPage::slot_treeFilterSelectionChanged(std::shared_ptr<TuningFilter> f
 
 void TuningPage::slot_pageFilterChanged(std::shared_ptr<TuningFilter> filter)
 {
+	if (filter == nullptr)
+	{
+		Q_ASSERT(filter);
+		return;
+	}
+
 	m_pageFilter = filter;
 
 	fillObjectsList();

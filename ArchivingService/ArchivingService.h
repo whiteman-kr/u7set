@@ -2,7 +2,7 @@
 
 #include "../lib/Service.h"
 #include "../lib/CfgServerLoader.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/Queue.h"
 
 #include "TcpAppDataServer.h"
@@ -48,15 +48,16 @@ private:
 	void startTcpArchRequestsServerThread();
 	void stopTcpArchiveRequestsServerThread();
 
-	bool loadConfigurationXml(const QByteArray& fileData, ArchivingServiceSettings* settings);
-
 	bool loadArchSignalsProto(const QByteArray& fileData);
 	void deleteArchSignalsProto();
 
 	void logFileLoadResult(bool loadOk, const QString& fileName);
 
 private slots:
-	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void onConfigurationReady(const QByteArray configurationXmlData,
+							  const BuildFileInfoArray buildFileInfoArray,
+							  SessionParams sessionParams,
+							  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 
 private:
 	QString m_overwriteArchiveLocation;
@@ -73,7 +74,4 @@ private:
 	Tcp::ServerThread* m_tcpArchRequestsServerThread = nullptr;
 
 	Archive* m_archive = nullptr;
-
-	static const char* const SETTING_ARCHIVE_LOCATION;
-	static const char* const SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING;
 };

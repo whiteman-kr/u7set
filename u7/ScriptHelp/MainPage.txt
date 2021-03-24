@@ -1,5 +1,66 @@
-
 /** \mainpage
+
+The following manual describes RPCT scripting tools. Using scripts project developer can automate and customize
+different tasks for MATS user interface, application logic testing and more.
+
+This manual is divided in the following sections:
+- \subpage schemaScripts describes Schema scripts API used for developing MATS user interface.
+- \subpage testsScripts describes Testing scripts API used for automated application logic simulation and testing.
+
+*/
+
+/** \defgroup groupSchemaScripts Schema Scripts
+  */
+
+/**
+ *  @defgroup controllers Controllers
+ *  \ingroup groupSchemaScripts
+ */
+
+/**
+ *  @defgroup staticSchemaItems Static Schema Items
+ *  \ingroup groupSchemaScripts
+ */
+
+/**
+ *  @defgroup dynamicSchemaItems Dynamic Schema Items
+ *  \ingroup groupSchemaScripts
+ */
+
+/**
+ *  @defgroup controlSchemaItems Control Schema Items
+ *  \ingroup groupSchemaScripts
+ */
+
+/**
+ *  @defgroup appLogicSchemaItems Application Logic Items
+ *  \ingroup groupSchemaScripts
+ */
+
+/**
+ *  @defgroup widgets Schema Widgets
+ *  \ingroup groupSchemaScripts
+ */
+
+/**
+ *  @defgroup groupParamsStates Signal Parameters and States
+ *  \ingroup groupSchemaScripts
+ */
+
+/** \defgroup testsScripts Tests Scripts
+ */
+
+/** @addtogroup simulator Core Objects
+  * \ingroup testsScripts
+  *  @{ */
+
+  // classes, etc.
+
+  /** @} */
+
+
+/*! @page schemaScripts Schema Scripts Introduction
+
 Using scripts, project designer can customize appearance of MATS schema items and implement advanced logic 
 in MATS user interface. 
 
@@ -13,9 +74,12 @@ Scripts are written in JavaScript language.
 MATS schema items emit events on different user and system actions. The set of events depends on item's type.
 
 Dynamic schema items like 
-\ref VFrame30::SchemaItemValue "SchemaItemValue" 
-or 
-\ref VFrame30::SchemaItemImageValue "SchemaItemImageValue" 
+\ref VFrame30::SchemaItemValue "SchemaItemValue"
+, 
+\ref VFrame30::SchemaItemImageValue "SchemaItemImageValue"
+or
+\ref VFrame30::SchemaItemSignal "SchemaItemSignal"
+
 usually process pre-draw event to define item apperance depending on some signals values.
 
 Properties of static schema items like 
@@ -52,34 +116,39 @@ signal parameters (AppSignalParam) and values (AppSignalState) received from <b>
 - \ref VFrame30::TuningController "TuningController" class (<b>tuning</b> object) is used to access tunable 
 signal parameters (AppSignalParam), requesting and setting tunable values (TuningSignalState) using <b>TuningService</b>.
 
+- \ref VFrame30::LogController "LogController" class (<b>log</b> object) is used to write messages and alerts
+to application's log file.
+
 Script code error messages are displayed directly on appropriate schema item when script is executed.
+
 */
 
-/**
- *  @defgroup view Schema View
- */
+/*! @page testsScripts Tests Scripts Introduction
 
-/**
- *  @defgroup controllers Controllers
- */
+During project development it is necessary to test its correctness. For example, project designer has
+to check if required signals were not deleted or application logic still performs correct calculations
+before uploading the executable code into logic modules.
 
-/**
- *  @defgroup staticSchemaItems Static Items
- */
+Testing can be performed using RPCT simulation tools. Ttis approach does not require physical hardware. 
+RPCT simulates application logic of the project just on developer's computer. Simulator can set
+required input signal values and allows to see how logic works. Simulation tools cover all AFBL library elements,
+connections, busses and other parts of the project.
 
-/**
- *  @defgroup dynamicSchemaItems Dynamic Items
- */
+Testing can be automated by scripts. Testing scripts are written in JavaScript language using special simulator API
+and stored in project's database. They can be executed after each successful build.
 
-/**
- *  @defgroup controlSchemaItems Control Items
- */
+Testin scripts can perform following actions:
 
-/**
- *  @defgroup widgets Widgets
- */
+- access Logic Modules descriptions;
+- access Connections descriptions;
+- access Application Signals descriptions;
+- read signals values;
+- override signals values;
+- start and stop Application Logic simulation;
+- send signal data to Application Data Service
+.... and more features will be added!
 
-/**
- *  @defgroup groupParamsStates Signal Parameters and States
- */
+The following classes are used to perform testing:
 
+- \ref Sim::ScriptSimulator "ScriptSimulator" is s class that runs all simulations on compiled project. 
+*/

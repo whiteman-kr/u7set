@@ -281,6 +281,11 @@ namespace Sim
 	//
 	// Sim::Connections
 	//
+	Connections::Connections(QObject* parent) :
+		QObject(parent)
+	{
+	}
+
 	void Connections::clear()
 	{
 		m_buildConnections = {};

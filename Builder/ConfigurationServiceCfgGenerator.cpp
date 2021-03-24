@@ -13,43 +13,30 @@ namespace Builder
 	{
 	}
 
-	bool ConfigurationServiceCfgGenerator::generateConfiguration()
+	bool ConfigurationServiceCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		CfgServiceSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<CfgServiceSettingsGetter>(profile, settingsGetter);
+	}
+
+	bool ConfigurationServiceCfgGenerator::generateConfigurationStep1()
 	{
 		bool result = false;
 
 		do
 		{
-			if (writeSettings() == false) break;
 			if (writeBatFile() == false) break;
 			if (writeShFile() == false) break;
 
 			result = true;
 		}
 		while(false);
-
-		return result;
-	}
-
-	bool ConfigurationServiceCfgGenerator::writeSettings()
-	{
-		CfgServiceSettings settings;
-
-		bool result = true;
-
-		result &= DeviceHelper::getIpPortProperty(m_software, EquipmentPropNames::CLIENT_REQUEST_IP,
-		                                          EquipmentPropNames::CLIENT_REQUEST_PORT, &settings.clientRequestIP, false, "", 0, m_log);
-		result &= DeviceHelper::getIPv4Property(m_software, EquipmentPropNames::CLIENT_REQUEST_NETMASK, &settings.clientRequestNetmask, false, "", m_log);
-
-		result &= buildClientsList(&settings);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		XmlWriteHelper xml(m_cfgXml->xmlWriter());
-
-		result = settings.writeToXml(xml);
 
 		return result;
 	}
@@ -93,7 +80,7 @@ namespace Builder
 
 		content += " -ip=" + clientRequestIP.addressPortStr() + "\n";
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
@@ -139,58 +126,11 @@ namespace Builder
 
 		content += " -ip=" + clientRequestIP.addressPortStr() + "\n";
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 
 		return true;
-	}
-
-	bool ConfigurationServiceCfgGenerator::buildClientsList(CfgServiceSettings* settings)
-	{
-		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
-
-		const QString PROP_CFG_SERVICE_ID1(EquipmentPropNames::CFG_SERVICE_ID1);
-		const QString PROP_CFG_SERVICE_ID2(EquipmentPropNames::CFG_SERVICE_ID2);
-
-		bool result = true;
-
-		settings->clients.clear();
-
-		for(Hardware::Software* software : m_softwareList)
-		{
-			if (software == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			if (software->equipmentIdTemplate() == equipmentID())
-			{
-				continue;			// exclude yourself
-			}
-
-			QString ID1;
-
-			if (DeviceHelper::isPropertyExists(software, PROP_CFG_SERVICE_ID1) == true)
-			{
-				result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID1, &ID1, m_log);
-			}
-
-			QString ID2;
-
-			if (DeviceHelper::isPropertyExists(software, PROP_CFG_SERVICE_ID2) == true)
-			{
-				result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID2, &ID2, m_log);
-			}
-
-			if (ID1 == m_software->equipmentIdTemplate() || ID2 == m_software->equipmentIdTemplate())
-			{
-				settings->clients.append(QPair<QString, E::SoftwareType>(software->equipmentIdTemplate(), software->type()));
-			}
-		}
-
-		return result;
 	}
 
 }

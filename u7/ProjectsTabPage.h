@@ -8,6 +8,7 @@ class DbController;
 
 class ProjectsTabPage : public MainTabPage
 {
+	Q_OBJECT
 public:
 	ProjectsTabPage(DbController* dbcontroller, QWidget* parent);
 
@@ -15,11 +16,14 @@ protected:
 	virtual void resizeEvent(QResizeEvent* event) override;
 	virtual void showEvent(QShowEvent* event) override;
 
+signals:
+	void projectAboutToBeClosed();
+
 public slots:
 	void projectOpened(DbProject project);
 	void projectClosed();
 
-private slots:
+	private slots:
 	void createProject();
 	void openProject();
 	void closeProject();

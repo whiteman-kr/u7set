@@ -8,11 +8,9 @@ namespace Sim
 {
 
 	AppDataTransmitter::AppDataTransmitter(Simulator* simulator) :
-		Output("AppDataTransmitter"),
-		m_simulator(simulator)
+		m_simulator(simulator),
+		m_log(m_simulator->log(), "AppDataTransmitter")
 	{
-		Q_ASSERT(m_simulator);
-
 		connect(m_simulator, &Simulator::projectUpdated, this, &AppDataTransmitter::projectUpdated);
 	}
 
@@ -21,11 +19,11 @@ namespace Sim
 		shutdownTransmitterThread();
 	}
 
-	bool AppDataTransmitter::startSimulation()
+	bool AppDataTransmitter::startSimulation(QString profileName)
 	{
 		TEST_PTR_RETURN_FALSE(m_simulator);
 
-		m_transmitterThread = new AppDataTransmitterThread(*m_simulator);
+		m_transmitterThread = new AppDataTransmitterThread(*m_simulator, profileName, m_log);
 		m_transmitterThread->start();
 
 		return true;
@@ -38,11 +36,16 @@ namespace Sim
 		return true;
 	}
 
-	bool AppDataTransmitter::sendData(const QString& lmEquipmentId, QByteArray&& data, TimeStamp timeStamp)
+	bool AppDataTransmitter::sendData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp)
 	{
+		if (softwareEnabled() == false)
+		{
+			return true;
+		}
+
 		TEST_PTR_RETURN_FALSE(m_transmitterThread);
 
-		return m_transmitterThread->sendAppData(lmEquipmentId, data, timeStamp);
+		return m_transmitterThread->sendAppData(lmEquipmentId, portEquipmentId, data, timeStamp);
 	}
 
 	void AppDataTransmitter::projectUpdated()
@@ -52,14 +55,9 @@ namespace Sim
 		//
 	}
 
-	bool AppDataTransmitter::enabled() const
+	bool AppDataTransmitter::softwareEnabled() const
 	{
-		return m_enabled;
-	}
-
-	void AppDataTransmitter::setEnabled(bool value)
-	{
-		m_enabled = value;
+		return m_simulator->software().enabled();
 	}
 
 	void AppDataTransmitter::shutdownTransmitterThread()
@@ -78,8 +76,12 @@ namespace Sim
 	//
 	// --------------------------------------------------------------------------------------------------
 
-	AppDataTransmitterThread::AppDataTransmitterThread(const Simulator& simulator) :
-		m_simulator(simulator)
+	AppDataTransmitterThread::AppDataTransmitterThread(const Simulator& simulator,
+													   const QString& curProfileName,
+													   ScopedLog& log) :
+		m_simulator(simulator),
+		m_curProfileName(curProfileName),
+		m_log(log)
 	{
 	}
 
@@ -87,20 +89,18 @@ namespace Sim
 	{
 	}
 
-	bool AppDataTransmitterThread::sendAppData(const QString& lmEquipmentId, QByteArray& data, TimeStamp timeStamp)
+	bool AppDataTransmitterThread::sendAppData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp)
 	{
 		QThread* curThread = QThread::currentThread();
 
 		m_appDataQueueMutex.lock(curThread);
 
-		ExtAppData extAppData;
+		ExtAppData& extAppData = m_appDataQueue.emplace();
 
 		extAppData.lmEquipmentID = lmEquipmentId;
+		extAppData.appData = data;
+		extAppData.portEquipmentID = portEquipmentId;
 		extAppData.timeStamp = timeStamp;
-
-		m_appDataQueue.push(extAppData);
-
-		m_appDataQueue.back().appData.swap(data);			// !
 
 		m_appDataQueueMutex.unlock(curThread);
 
@@ -126,6 +126,7 @@ namespace Sim
 				ExtAppData& queueAppData = m_appDataQueue.front();
 
 				extAppData.lmEquipmentID = queueAppData.lmEquipmentID;
+				extAppData.portEquipmentID = queueAppData.portEquipmentID;
 				extAppData.timeStamp = queueAppData.timeStamp;
 				extAppData.appData.swap(queueAppData.appData);
 
@@ -161,49 +162,56 @@ namespace Sim
 				continue;
 			}
 
-			AppDataSourceInfo adsi;
-
-			adsi.appDataUID = lmi.appDataUID;
-			adsi.appDataSizeBytes = lmi.appDataSizeBytes;
-
-			adsi.moduleType = lmi.moduleType();
-
-			adsi.rupFramesCount = (adsi.appDataSizeBytes / sizeof(Rup::Data)) +
-									((adsi.appDataSizeBytes % sizeof(Rup::Data)) == 0 ? 0 : 1);
-
 			for(LanControllerInfo lci : lmi.lanControllers)
 			{
 				if (lci.appDataProvided == true && lci.appDataEnable == true)
 				{
-					LanController lanController;
+					AppDataSourcePortInfo adspi;
 
-					lanController.sourceIP = QHostAddress(lci.appDataIP);
-					lanController.sourcePort = lci.appDataPort;
+					adspi.equipmentID = lci.equipmentID;
 
-					lanController.destinationIP = QHostAddress(lci.appDataServiceIP);
-					lanController.destinationPort = lci.appDataServicePort;
+					adspi.appDataUID = lmi.appDataUID;
+					adspi.appDataSizeBytes = lmi.appDataSizeBytes;
 
-					adsi.lanControllers.push_back(lanController);
+					adspi.moduleType = lmi.moduleType();
+
+					adspi.rupFramesCount = (adspi.appDataSizeBytes / sizeof(Rup::Data)) +
+											((adspi.appDataSizeBytes % sizeof(Rup::Data)) == 0 ? 0 : 1);
+
+					adspi.lanSourceIP = QHostAddress(lci.appDataIP);
+					adspi.lanSourcePort = lci.appDataPort;
+
+					std::shared_ptr<const AppDataServiceSettings> settings =
+							m_simulator.software().getSettingsProfile<AppDataServiceSettings>(lci.appDataServiceID, m_curProfileName);
+
+					if (settings == nullptr)
+					{
+						m_log.writeError(QString("Settings profile '%1' is not found for AppDataService %2").
+														arg(m_curProfileName).arg(lci.appDataServiceID));
+						continue;
+					}
+
+					adspi.lanDestinationIP = settings->appDataReceivingIP.address();
+					adspi.lanDestinationPort = settings->appDataReceivingIP.port();
+
+					m_appDataSourcePorts.insert({lci.equipmentID, adspi});
 				}
 			}
-
-			m_appDataSources.insert({lmi.equipmentID, adsi});
 		}
 	}
 
 	void AppDataTransmitterThread::privateSendAppData(const ExtAppData& extAppData)
 	{
-		auto item = m_appDataSources.find(extAppData.lmEquipmentID);
+		auto item = m_appDataSourcePorts.find(extAppData.portEquipmentID);
 
-		if (item == m_appDataSources.end())
+		if (item == m_appDataSourcePorts.end())
 		{
-			Q_ASSERT(false);
 			return;
 		}
 
-		AppDataSourceInfo& adsi = item->second;
+		AppDataSourcePortInfo& adspi = item->second;
 
-		Q_ASSERT(extAppData.appData.size() == adsi.appDataSizeBytes);
+		Q_ASSERT(extAppData.appData.size() == adspi.appDataSizeBytes);
 
 		Rup::SimFrame simFrame;
 
@@ -219,10 +227,10 @@ namespace Sim
 		rupHeader.flags.all = 0;
 		rupHeader.flags.appData = 1;
 
-		rupHeader.dataId = adsi.appDataUID;
-		rupHeader.moduleType = static_cast<quint16>(adsi.moduleType);
-		rupHeader.numerator = adsi.rupFramesNumerator;
-		rupHeader.framesQuantity = adsi.rupFramesCount;
+		rupHeader.dataId = adspi.appDataUID;
+		rupHeader.moduleType = static_cast<quint16>(adspi.moduleType);
+		rupHeader.numerator = adspi.rupFramesNumerator;
+		rupHeader.framesQuantity = adspi.rupFramesCount;
 
 		QDateTime dt = extAppData.timeStamp.toDateTime();
 
@@ -239,7 +247,7 @@ namespace Sim
 
 		const int RUP_FRAME_DATA_SIZE = sizeof(rupFrame.data);
 
-		for(int frameNo = 0; frameNo < adsi.rupFramesCount; frameNo++)
+		for(int frameNo = 0; frameNo < adspi.rupFramesCount; frameNo++)
 		{
 			rupHeader.frameNumber = reverseUint16(static_cast<quint16>(frameNo));
 
@@ -259,17 +267,14 @@ namespace Sim
 
 			rupFrame.calcCRC64();
 
-			for(LanController& lanController: adsi.lanControllers)
-			{
-				simFrame.sourceIP = reverseUint32(lanController.sourceIP.toIPv4Address());
+			simFrame.sourceIP = reverseUint32(adspi.lanSourceIP.toIPv4Address());
 
-				m_socket->writeDatagram(reinterpret_cast<const char*>(&simFrame),
-										sizeof(simFrame),
-										lanController.destinationIP,
-										lanController.destinationPort);
-			}
+			m_socket->writeDatagram(reinterpret_cast<const char*>(&simFrame),
+									sizeof(simFrame),
+									adspi.lanDestinationIP,
+									adspi.lanDestinationPort);
 		}
 
-		adsi.rupFramesNumerator++;
+		adspi.rupFramesNumerator++;
 	}
 }

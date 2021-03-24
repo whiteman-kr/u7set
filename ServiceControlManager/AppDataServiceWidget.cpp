@@ -55,12 +55,31 @@ DSC_COUNT = 41;
 const int dataSourceStateColumn[] =
 {
 	DSC_STATE,
+	DSC_RECEIVES_DATA,
 	DSC_UPTIME,
+	DSC_RECEIVED_DATA_ID,
+	DSC_RUP_FRAME_PLANT_TIME,
+	DSC_RUP_FRAMES_QUEUE_SIZE,
+	DSC_RUP_FRAMES_QUEUE_MAX_SIZE,
 	DSC_RECEIVED,
 	DSC_SPEED,
+	DSC_RECEIVED_FRAMES_COUNT,
+	DSC_RECEIVED_PACKET_COUNT,
+	DSC_DATA_PROCESSING_ENABLED,
+	DSC_PROCESSED_PACKET_COUNT,
+	DSC_LAST_PACKET_SYSTEM_TIME,
+	DSC_RUP_FRAME_PLANT_TIME,
+	DSC_RUP_FRAME_NUMERATOR,
+	DSC_SIGNAL_STATES_QUEUE_SIZE,
+	DSC_SIGNAL_STATES_QUEUE_MAX_SIZE,
+	DSC_ACQUIRED_SIGNALS_COUNT,
 	DSC_ERROR_PROTOCOL_VERSION,
 	DSC_ERROR_FRAMES_QUANTITY,
 	DSC_ERROR_FRAME_NOMBER,
+	DSC_ERROR_DATA_ID,
+	DSC_ERROR_BAD_FRAME_SIZE,
+	DSC_ERROR_DUPLICATE_PLANT_TIME,
+	DSC_ERROR_NONMONOTONIC_PLANT_TIME,
 	DSC_LOST_PACKET_COUNT,
 };
 
@@ -163,7 +182,6 @@ SC_REG_VALIDITY_ADDR = 28,
 SC_LOW_VALID_RANGE = 29,
 SC_HIGH_VALID_RANGE = 30,
 
-SC_FIRST_STATE_COLUMN = 31,
 SC_VALUE = 31,
 SC_IS_VALID = 32,
 SC_IS_FINE_APERTURE = 33,
@@ -174,6 +192,22 @@ SC_SYSTEM_TIME = 37,
 SC_LOCAL_TIME = 38,
 SC_PLANT_TIME = 39,
 SC_COUNT = 40;
+
+const int signalStateColumn[] =
+{
+	SC_VALUE,
+	SC_IS_VALID,
+	SC_IS_FINE_APERTURE,
+	SC_IS_COARSE_APERTURE,
+	SC_IS_AUTO_POINT,
+	SC_IS_VALIDITY_CHANGE,
+	SC_SYSTEM_TIME,
+	SC_LOCAL_TIME,
+	SC_PLANT_TIME,
+};
+
+const int SIGNAL_STATE_COLUMN_COUNT = sizeof(signalStateColumn) / sizeof(signalStateColumn[0]);
+
 
 const char* const signalColumnStr[] =
 {
@@ -227,7 +261,6 @@ const QVector<int> defaultSignalColumnVisibility =
 {
 	SC_APP_SIGNAL_ID,
 	SC_CAPTION,
-	SC_FIRST_STATE_COLUMN,
 	SC_VALUE,
 	SC_IS_VALID,
 	SC_UNIT,
@@ -284,7 +317,7 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_MODULE_NUMBER: return source.lmNumber();
 				case DSC_MODULE_TYPE: return source.lmModuleType();
 				case DSC_SUBSYSTEM_ID: return source.lmSubsystemKey();
-				case DSC_SUBSYSTEM_CAPTION: return source.lmSubsystem();
+			    case DSC_SUBSYSTEM_CAPTION: return source.lmSubsystemID();
 				case DSC_SUBSYSTEM_CHANNEL: return source.lmSubsystemChannel();
 				case DSC_ADAPTER_ID: return source.lmAdapterID();
 				case DSC_ENABLE_DATA: return source.lmDataEnable();
@@ -312,8 +345,8 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_RECEIVED_PACKET_COUNT: return source.receivedPacketCount();
 				case DSC_DATA_PROCESSING_ENABLED: return source.dataProcessingEnabled();
 				case DSC_PROCESSED_PACKET_COUNT: return source.processedPacketCount();
-				case DSC_LAST_PACKET_SYSTEM_TIME: return QDateTime::fromMSecsSinceEpoch(source.lastPacketSystemTime());
-				case DSC_RUP_FRAME_PLANT_TIME: return QDateTime::fromMSecsSinceEpoch(source.rupFramePlantTime());
+				case DSC_LAST_PACKET_SYSTEM_TIME: return source.lastPacketSystemTimeStr();
+				case DSC_RUP_FRAME_PLANT_TIME: return source.rupFramePlantTimeStr();
 				case DSC_RUP_FRAME_NUMERATOR: return source.rupFrameNumerator();
 				case DSC_SIGNAL_STATES_QUEUE_SIZE: return QString("%1 (%2%%)").arg(source.signalStatesQueueCurSize()).arg(0.01 * source.signalStatesQueueCurSize() / source.signalStatesQueueSize());
 				case DSC_SIGNAL_STATES_QUEUE_MAX_SIZE: return QString("%1 (%2%%)").arg(source.signalStatesQueueCurMaxSize()).arg(0.01 * source.signalStatesQueueCurMaxSize() / source.signalStatesQueueSize());
@@ -399,8 +432,8 @@ void DataSourcesStateModel::reloadList()
 }
 
 
-AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget *parent) :
-	BaseServiceStateWidget(softwareInfo, udpIp, udpPort, parent),
+AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent) :
+	BaseServiceStateWidget(softwareInfo, service, udpIp, udpPort, parent),
 	m_tcpClientSocket(nullptr),
 	m_tcpClientThread(nullptr)
 {
@@ -433,18 +466,46 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, qui
 	// Clients
 	addClientsTab(false);
 
+	// Parameters
+	QTableView* parametersTableView = addTabWithTableView(250, "Parameters");
+
+	m_parametersTabModel = new QStandardItemModel(3, 2, this);
+	parametersTableView->setModel(m_parametersTabModel);
+
+	m_parametersTabModel->setHeaderData(0, Qt::Horizontal, "Property");
+	m_parametersTabModel->setHeaderData(1, Qt::Horizontal, "Value");
+
+	m_parametersTabModel->setData(m_parametersTabModel->index(0, 0), "Equipment ID");
+	m_parametersTabModel->setData(m_parametersTabModel->index(1, 0), "Configuration IP 1");
+	m_parametersTabModel->setData(m_parametersTabModel->index(2, 0), "Configuration IP 2");
+
 	// Settings
 	QTableView* settingsTableView = addTabWithTableView(250, "Settings");
 
-	m_settingsTabModel = new QStandardItemModel(3, 2, this);
+	m_settingsTabModel = new QStandardItemModel(12, 2, this);
 	settingsTableView->setModel(m_settingsTabModel);
 
 	m_settingsTabModel->setHeaderData(0, Qt::Horizontal, "Property");
 	m_settingsTabModel->setHeaderData(1, Qt::Horizontal, "Value");
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(0, 0), "Equipment ID");
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 0), "Configuration IP 1");
-	m_settingsTabModel->setData(m_settingsTabModel->index(2, 0), "Configuration IP 2");
+	m_settingsTabModel->setData(m_settingsTabModel->index(0, 0), "ConfigService1 ID");
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 0), "ConfigService1 IP");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 0), "ConfigService2 ID");
+	m_settingsTabModel->setData(m_settingsTabModel->index(3, 0), "ConfigService2 IP");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(4, 0), "AppData Receiving IP");
+	m_settingsTabModel->setData(m_settingsTabModel->index(5, 0), "AppData Receiving NetMask");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(6, 0), "AutoArchive Interval");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(7, 0), "ArchService ID");
+	m_settingsTabModel->setData(m_settingsTabModel->index(8, 0), "ArchService IP");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(9, 0), "Client Request IP");
+	m_settingsTabModel->setData(m_settingsTabModel->index(10, 0), "Client Request NetMask");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(11, 0), "Realtime Trends Request IP");
 
 	// Log
 	addTab(new QTableView(this), tr("Log"));
@@ -483,11 +544,39 @@ void AppDataServiceWidget::updateServiceState()
 	stateTabModel()->setData(stateTabModel()->index(14, 1), static_cast<qint64>(state.errsimversion()));
 	stateTabModel()->setData(stateTabModel()->index(15, 1), static_cast<qint64>(state.errunknownappdatasourceip()));
 	stateTabModel()->setData(stateTabModel()->index(16, 1), static_cast<qint64>(state.errrupframecrc()));
+
+	stateTabModel()->setData(stateTabModel()->index(17, 1), static_cast<qint64>(state.errnotexpectedsimpacket()));
+
+	auto appDataSettings = std::dynamic_pointer_cast<AppDataServiceSettings>(m_service.settings);
+
+	if (appDataSettings == nullptr)
+	{
+		return;
+	}
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), appDataSettings->cfgServiceID1);
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), appDataSettings->cfgServiceIP1.addressStr());
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), appDataSettings->cfgServiceID2);
+	m_settingsTabModel->setData(m_settingsTabModel->index(3, 1), appDataSettings->cfgServiceIP2.addressStr());
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(4, 1), appDataSettings->appDataReceivingIP.addressStr());
+	m_settingsTabModel->setData(m_settingsTabModel->index(5, 1), appDataSettings->appDataReceivingNetmask.toString());
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(6, 1), QString::number(appDataSettings->autoArchiveInterval));
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(7, 1), appDataSettings->archServiceID);
+	m_settingsTabModel->setData(m_settingsTabModel->index(8, 1), appDataSettings->archServiceIP.addressStr());
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(9, 1), appDataSettings->clientRequestIP.addressStr());
+	m_settingsTabModel->setData(m_settingsTabModel->index(10, 1), appDataSettings->clientRequestNetmask.toString());
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(11, 1), appDataSettings->rtTrendsRequestIP.addressStr());
 }
 
 void AppDataServiceWidget::updateStateInfo()
 {
-	if (m_serviceInfo.servicestate() == ServiceState::Work)
+	if (m_service.information.servicestate() == ServiceState::Work)
 	{
 		stateTabModel()->setData(stateTabModel()->index(5, 0), "Connected client quantity");
 		stateTabModel()->setData(stateTabModel()->index(6, 0), "Connected to CfgService");
@@ -505,6 +594,8 @@ void AppDataServiceWidget::updateStateInfo()
 		stateTabModel()->setData(stateTabModel()->index(15, 0), "Unknown AppDataSource IP errors");
 		stateTabModel()->setData(stateTabModel()->index(16, 0), "RUP frames CRC errors");
 
+		stateTabModel()->setData(stateTabModel()->index(17, 0), "Not expected Simulated packets");
+
 		if (m_tcpClientSocket == nullptr || m_tcpClientSocket->stateIsReady() == false)
 		{
 			stateTabModel()->setData(stateTabModel()->index(6, 1), "???");
@@ -516,8 +607,8 @@ void AppDataServiceWidget::updateStateInfo()
 		}
 	}
 
-	quint32 ip = m_serviceInfo.clientrequestip();
-	qint32 port = m_serviceInfo.clientrequestport();
+	quint32 ip = m_service.clientRequestIp;
+	qint32 port = m_service.clientRequestPort;
 
 	quint32 workingIp = getWorkingClientRequestIp();
 
@@ -556,56 +647,41 @@ void AppDataServiceWidget::updateSignalInfo()
 void AppDataServiceWidget::updateSourceStateColumns()
 {
 	int firstVisibleRow = m_dataSourcesView->rowAt(0);
-	int lastVisibleRow = m_dataSourcesView->rowAt(m_signalsView->height());
+
+	int lastVisibleRow = m_dataSourcesView->rowAt(m_dataSourcesView->height());
 	if (lastVisibleRow == -1)
 	{
 		lastVisibleRow = m_dataSourcesStateModel->rowCount() - 1;
 	}
 
-	int firstVisibleColumn = m_dataSourcesView->columnAt(0);
-	int lastVisibleColumn = m_dataSourcesView->columnAt(m_dataSourcesView->width());
-	if (lastVisibleColumn == -1)
-	{
-		lastVisibleColumn = m_dataSourcesStateModel->columnCount() - 1;
-	}
-
 	for (int i = 0; i < DATA_SOURCE_STATE_COLUMN_COUNT; i++)
 	{
 		int currentColumn = dataSourceStateColumn[i];
-		if (currentColumn >= firstVisibleColumn && currentColumn <= lastVisibleColumn)
-		{
-			m_dataSourcesStateModel->updateData(firstVisibleRow,
-												lastVisibleRow,
-												currentColumn,
-												currentColumn);
-		}
+		m_dataSourcesStateModel->updateData(firstVisibleRow,
+											lastVisibleRow,
+											currentColumn,
+											currentColumn);
 	}
 }
 
 void AppDataServiceWidget::updateSignalStateColumns()
 {
 	int firstRow = m_signalsView->rowAt(0);
-	int lastColumn = m_signalsView->columnAt(m_signalsView->width());
-	if (lastColumn == -1)
-	{
-		lastColumn = m_signalStateModel->columnCount() - 1;
-	}
 
-	int firstColumn = m_signalsView->columnAt(0);
-	if (lastColumn < SC_FIRST_STATE_COLUMN)
-	{
-		return;
-	}
 	int lastRow = m_signalsView->rowAt(m_signalsView->height());
 	if (lastRow == -1)
 	{
 		lastRow = m_signalStateModel->rowCount() - 1;
 	}
 
-	m_signalStateModel->updateData(firstRow,
-								   lastRow,
-								   std::max(firstColumn, SC_FIRST_STATE_COLUMN),
-								   lastColumn);
+	for (int i = 0; i < SIGNAL_STATE_COLUMN_COUNT; i++)
+	{
+		int currentColumn = signalStateColumn[i];
+		m_signalStateModel->updateData(firstRow,
+									   lastRow,
+									   currentColumn,
+									   currentColumn);
+	}
 }
 
 void AppDataServiceWidget::updateClientsInfo()
@@ -619,16 +695,16 @@ void AppDataServiceWidget::updateClientsInfo()
 	updateClientsModel(m_tcpClientSocket->clients());
 }
 
-void AppDataServiceWidget::updateSettings()
+void AppDataServiceWidget::updateServiceParameters()
 {
 	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->settingsIsReady() == false)
 	{
 		assert(false);
 		return;
 	}
-	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), m_tcpClientSocket->equipmentID());
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), m_tcpClientSocket->configIP1());
-	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), m_tcpClientSocket->configIP2());
+	m_parametersTabModel->setData(m_parametersTabModel->index(0, 1), m_tcpClientSocket->equipmentID());
+	m_parametersTabModel->setData(m_parametersTabModel->index(1, 1), m_tcpClientSocket->configIP1());
+	m_parametersTabModel->setData(m_parametersTabModel->index(2, 1), m_tcpClientSocket->configIP2());
 }
 
 void AppDataServiceWidget::clearServiceData()
@@ -636,9 +712,9 @@ void AppDataServiceWidget::clearServiceData()
 	stateTabModel()->setData(stateTabModel()->index(6, 1), "???");
 	stateTabModel()->setData(stateTabModel()->index(7, 1), "???");
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), "???");
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), "???");
-	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), "???");
+	m_parametersTabModel->setData(m_parametersTabModel->index(0, 1), "???");
+	m_parametersTabModel->setData(m_parametersTabModel->index(1, 1), "???");
+	m_parametersTabModel->setData(m_parametersTabModel->index(2, 1), "???");
 }
 
 void AppDataServiceWidget::onAppDataSourceDoubleClicked(const QModelIndex &index)
@@ -706,7 +782,7 @@ void AppDataServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 
 	connect(m_tcpClientSocket, &TcpAppDataClient::stateLoaded, this, &AppDataServiceWidget::updateServiceState);
 
-	connect(m_tcpClientSocket, &TcpAppDataClient::settingsLoaded, this, &AppDataServiceWidget::updateSettings);
+	connect(m_tcpClientSocket, &TcpAppDataClient::settingsLoaded, this, &AppDataServiceWidget::updateServiceParameters);
 
 	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, this, &AppDataServiceWidget::clearServiceData);
 

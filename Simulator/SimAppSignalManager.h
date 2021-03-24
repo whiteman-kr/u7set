@@ -4,7 +4,7 @@
 #include "../lib/AppSignalManager.h"
 #include "../TrendView/TrendSignal.h"
 #include "SimRam.h"
-#include "SimOutput.h"
+#include "SimScopedLog.h"
 
 
 namespace Sim
@@ -12,7 +12,7 @@ namespace Sim
 	class Simulator;
 
 
-	struct FlagsReadStruct : Sim::Output
+	struct FlagsReadStruct
 	{
 		size_t flagCount = 0;
 		std::array<std::pair<E::AppSignalStateFlagType, Address16>, sizeof AppSignalStateFlags::all * 8> flagsSignalAddresses;
@@ -20,9 +20,9 @@ namespace Sim
 		size_t flagConstsCount = 0;
 		std::array<std::pair<E::AppSignalStateFlagType, quint32>, sizeof AppSignalStateFlags::all * 8> flagsConsts;
 
-		bool create(const Signal& s, const std::unordered_map<Hash, Signal>& signalParams);
+		bool create(const Signal& s, const std::unordered_map<Hash, Signal>& signalParams, ScopedLog& log);
 
-		AppSignalStateFlags signalFlags(const Ram& ram) const;
+		AppSignalStateFlags signalFlags(const Ram& ram, ScopedLog& log) const;
 	};
 
 
@@ -31,7 +31,7 @@ namespace Sim
 	//	AppSignalManager
 	//
 	//
-	class AppSignalManager : public QObject, public IAppSignalManager, protected Sim::Output
+	class AppSignalManager : public QObject, public IAppSignalManager
 	{
 		Q_OBJECT
 
@@ -48,7 +48,7 @@ namespace Sim
 
 		bool load(QString fileName);
 
-		void setData(const QString& equipmentId, const Sim::Ram& ram, TimeStamp plantTime, TimeStamp systemTime, TimeStamp localTime);
+		void setData(const QString& equipmentId, const Sim::Ram& ram, TimeStamp plantTime, TimeStamp localTime, TimeStamp systemTime);
 		std::shared_ptr<TrendLib::RealtimeData> trendData(const QString& trendId,
 														  const std::vector<Hash>& trendSignals,
 														  TrendLib::TrendStateItem* minState,
@@ -101,6 +101,7 @@ namespace Sim
 		//
 	private:
 		Simulator* m_simulator = nullptr;
+		mutable ScopedLog m_log;
 
 		mutable QReadWriteLock m_signalParamLock{QReadWriteLock::Recursive};
 		std::unordered_map<Hash, AppSignalParam> m_signalParams;

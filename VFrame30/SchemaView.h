@@ -10,7 +10,7 @@ namespace VFrame30
 	class SchemaItem;
 	class CDrawParam;
 
-	static const double ZoomStep = 10;
+	static constexpr double ZoomStep = 10;
 
 	class VFRAME30LIBSHARED_EXPORT SchemaView : public QWidget
 	{
@@ -28,7 +28,7 @@ namespace VFrame30
 		//
 	protected:
 		virtual void paintEvent(QPaintEvent*) override;
-		void draw(CDrawParam& drawParam);
+		void draw(CDrawParam& drawParam, const QRectF& clipRect);
 
 		void Ajust(QPainter* painter, double startX, double startY, double zoom) const;
 

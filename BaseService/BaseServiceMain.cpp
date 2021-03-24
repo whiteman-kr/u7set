@@ -1,7 +1,6 @@
 #include "../lib/Service.h"
 #include "../lib/WUtils.h"
 #include "../lib/CircularLogger.h"
-#include "../lib/MemLeaksDetection.h"
 
 class BaseServiceWorker : public ServiceWorker
 {
@@ -59,8 +58,6 @@ private:
 
 int main(int argc, char *argv[])
 {
-	initMemoryLeaksDetection();
-
 	QCoreApplication app(argc, argv);
 
 	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
@@ -74,7 +71,7 @@ int main(int argc, char *argv[])
 	si.init(E::SoftwareType::BaseService, "", 1, 0);			// EquipmentID will be set after command line args processing
 
 	BaseServiceWorker baseServiceWorker(si,
-										Service::getServiceInstanceName("RPCT Base Service", argc, argv),
+										Service::getServiceInstanceName("Base Service", argc, argv),
 										argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, baseServiceWorker, logger);
@@ -84,8 +81,6 @@ int main(int argc, char *argv[])
 	google::protobuf::ShutdownProtobufLibrary();
 
 	LOGGER_SHUTDOWN(logger);
-
-	dumpMemoryLeaks();
 
 	return result;
 }

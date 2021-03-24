@@ -11,11 +11,12 @@ TARGET = Simulator
 TEMPLATE = lib
 CONFIG += staticlib
 
-# C++17 support is enabled.
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17
-win32:QMAKE_CXXFLAGS += /analyze		# Static code analyze
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
+
+include(../warnings.pri)
 
 # Optimization flags
 #
@@ -27,8 +28,6 @@ unix {
     CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
 	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
 }
-
-CONFIG += warn_on				# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
@@ -85,15 +84,23 @@ SOURCES += \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
 	../lib/LogicModulesInfo.cpp \
-    ../lib/ProtoSerialization.cpp \
+    ../lib/ScriptDeviceObject.cpp \
 	../lib/SimpleMutex.cpp \
 	../lib/SimpleThread.cpp \
+    ../lib/SoftwareSettings.cpp \
+    ../lib/SoftwareXmlReader.cpp \
     ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
 	../lib/WUtils.cpp \
+    SimAppDataLanInterface.cpp \
     SimAppDataTransmitter.cpp \
     SimCommandProcessor_LM5_LM6.cpp \
     SimConnections.cpp \
+    SimDiagDataLanInterface.cpp \
+    SimLanInterface.cpp \
+    SimLans.cpp \
+    SimProfiles.cpp \
+    SimScopedLog.cpp \
     SimScriptConnection.cpp \
     SimScriptDevUtils.cpp \
 	SimScriptLmDescription.cpp \
@@ -101,9 +108,12 @@ SOURCES += \
     SimScriptRamAddress.cpp \
     SimScriptSignal.cpp \
     SimScriptSimulator.cpp \
+    SimSoftware.cpp \
+    SimTuningLanInterface.cpp \
+    SimTuningRecord.cpp \
+    SimTuningServiceCommunicator.cpp \
     Simulator.cpp \
     ../lib/Crc.cpp \
-    SimOutput.cpp \
     SimRam.cpp \
     SimEeprom.cpp \
     SimSubsystem.cpp \
@@ -120,33 +130,39 @@ SOURCES += \
     ../lib/TuningValue.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/HostAddressPort.cpp \
-    ../Proto/network.pb.cc \
     SimAfb.cpp \
     SimLogicModule.cpp \
     SimCommandProcessor.cpp \
     SimException.cpp \
     SimOverrideSignals.cpp \
-	../lib/SignalProperties.cpp \
-   ../Builder/IssueLogger.cpp \
-   ../lib/OutputLog.cpp
+	../lib/SignalProperties.cpp
 
 HEADERS += \
-    ../Builder/CfgFiles.h \
     ../lib/Address16.h \
     ../lib/AppSignalStateFlags.h \
     ../lib/ConnectionsInfo.h \
 	../lib/DataProtocols.h \
     ../lib/DomXmlHelper.h \
     ../lib/Hash.h \
+    ../lib/ILogFile.h \
 	../lib/LanControllerInfo.h \
 	../lib/LanControllerInfoHelper.h \
 	../lib/LogicModulesInfo.h \
+    ../lib/ScriptDeviceObject.h \
 	../lib/SimpleMutex.h \
 	../lib/SimpleThread.h \
+    ../lib/SoftwareSettings.h \
+    ../lib/SoftwareXmlReader.h \
 	../lib/WUtils.h \
+    SimAppDataLanInterface.h \
     SimAppDataTransmitter.h \
     SimCommandProcessor_LM5_LM6.h \
     SimConnections.h \
+    SimDiagDataLanInterface.h \
+    SimLanInterface.h \
+    SimLans.h \
+    SimProfiles.h \
+    SimScopedLog.h \
     SimScriptConnection.h \
     SimScriptDevUtils.h \
 	SimScriptLmDescription.h \
@@ -154,17 +170,19 @@ HEADERS += \
     SimScriptRamAddress.h \
     SimScriptSignal.h \
     SimScriptSimulator.h \
+    SimSoftware.h \
+    SimTuningLanInterface.h \
+    SimTuningRecord.h \
+    SimTuningServiceCommunicator.h \
     Stable.h \
     ../lib/LmDescription.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
     ../lib/PropertyObject.h \
-    ../lib/ProtoSerialization.h \
     ../lib/Types.h \
     ../lib/ModuleFirmware.h \
     Simulator.h \
     ../lib/Crc.h \
-    SimOutput.h \
     SimRam.h \
     SimEeprom.h \
     SimSubsystem.h \
@@ -183,49 +201,25 @@ HEADERS += \
     ../lib/TuningValue.h \
     ../lib/XmlHelper.h \
     ../lib/HostAddressPort.h \
-    ../Proto/network.pb.h \
     SimAfb.h \
     SimLogicModule.h \
     SimCommandProcessor.h \
     SimException.h \
     SimOverrideSignals.h \
-	../lib/SignalProperties.h \
-	../Builder/IssueLogger.h \
-	../lib/OutputLog.h
+	../lib/SignalProperties.h
 
-
-## VFrame30 library
-## $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
-##
-#win32 {
-#    CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
-#    CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
-#}
-#unix {
-#    CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
-#    CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
-#}
-
-#INCLUDEPATH += ../VFrame30
-#DEPENDPATH += ../VFrame30
-
-#protobuf
+# Protobuf
 #
-win32 {
-    LIBS += -L$$DESTDIR -lprotobuf
-    INCLUDEPATH += ./../Protobuf
-}
-unix {
-    LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
 DISTFILES += \
-    Scripts/LM1_SR01_SIM.ts \
-    Scripts/tsconfig.json \
-    Scripts/build.bat \
-    Scripts/out/LM1_SR01_SIM.js \
     SimProjectTests.js
 
 
-
-
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

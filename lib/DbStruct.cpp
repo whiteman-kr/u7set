@@ -6,6 +6,16 @@
 #include <QDebug>
 #include "Signal.h"
 
+namespace Db
+{
+	QString File::systemDirToName(DbDir systemDir)
+	{
+		auto it = s_dirToName.find(systemDir);
+		return it != s_dirToName.end() ? it->second : QString{};
+	}
+}
+
+
 //
 //
 //	VcsState
@@ -95,6 +105,14 @@ VcsItemAction::VcsItemActionType VcsItemAction::value() const noexcept
 	return m_action;
 }
 
+void VcsItemAction::setValue(int intVal)
+{
+	Q_ASSERT(intVal >= static_cast<int>(VcsItemActionType::Unknown));
+	Q_ASSERT(intVal <= static_cast<int>(VcsItemActionType::Deleted));
+
+	m_action = static_cast<VcsItemActionType>(intVal);
+}
+
 bool operator== (const VcsItemAction& s1, const VcsItemAction& s2) noexcept
 {
 	return s1.m_action == s2.m_action;
@@ -112,10 +130,6 @@ bool operator!= (const VcsItemAction& s1, const VcsItemAction& s2) noexcept
 //
 DbProject::DbProject() :
 	m_version(0)
-{
-}
-
-DbProject::~DbProject()
 {
 }
 
@@ -194,6 +208,8 @@ DbProjectProperties::DbProjectProperties()
 	p->setCategory("Project");
 	p->setDescription("Safety Propject");
 
+	// --
+	//
 	p = ADD_PROPERTY_GETTER_SETTER(QString, Db::ProjectProperty::SuppressWarnings, true, DbProjectProperties::suppressWarningsAsString, DbProjectProperties::setSuppressWarnings);
 	p->setCategory("Build");
 	p->setDescription("Comma separated suppress warning list. Example: 4004, 4005, 2000");
@@ -206,9 +222,23 @@ DbProjectProperties::DbProjectProperties()
 	p->setCategory("Build");
 	p->setDescription("Generate file AppSignals.xml on build");
 
+	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateAppLogicDrawings, true, DbProjectProperties::generateAppLogicDrawings, DbProjectProperties::setGenerateAppLogicDrawings);
+	p->setCategory("Build");
+	p->setDescription("Generate file AppLogicDrawings.pdf on build");
+
 	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateExtraDebugInfo, true, DbProjectProperties::generateExtraDebugInfo, DbProjectProperties::setGenerateExtraDebugInfo);
 	p->setCategory("Build");
 	p->setDescription("Generate extra debug information on build");
+
+	// --
+	//
+	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::RunSimTestsOnBuild, true, DbProjectProperties::runSimTestsOnBuild, DbProjectProperties::setRunSimTestsOnBuild);
+	p->setCategory("Tests");
+	p->setDescription("Run simulator based tests on project build");
+
+	p = ADD_PROPERTY_GETTER_SETTER(int, Db::ProjectProperty::SimulatorTestsTimeout, true, DbProjectProperties::simTestsTimeout, DbProjectProperties::setSimTestsTimeout);
+	p->setCategory("Tests");
+	p->setDescription("Timeout (in ms) for running simulator based script tests, -1 no timeout");
 
 	return;
 }
@@ -275,6 +305,26 @@ void DbProjectProperties::setSuppressWarnings(const QString& value)
 	return;
 }
 
+bool DbProjectProperties::runSimTestsOnBuild() const
+{
+	return m_runSimTestsOnBuild;
+}
+
+void DbProjectProperties::setRunSimTestsOnBuild(bool value)
+{
+	m_runSimTestsOnBuild = value;
+}
+
+int DbProjectProperties::simTestsTimeout() const
+{
+	return m_simTestsTimeout;
+}
+
+void DbProjectProperties::setSimTestsTimeout(int value)
+{
+	m_simTestsTimeout = value;
+}
+
 bool DbProjectProperties::uppercaseAppSignalId() const
 {
 	return m_uppercaseAppSignalId;
@@ -293,6 +343,16 @@ bool DbProjectProperties::generateAppSignalsXml() const
 void DbProjectProperties::setGenerateAppSignalsXml(bool value)
 {
 	m_generateAppSignalsXml = value;
+}
+
+bool DbProjectProperties::generateAppLogicDrawings() const
+{
+	return m_generateAppLogicDrawings;
+}
+
+void DbProjectProperties::setGenerateAppLogicDrawings(bool value)
+{
+	m_generateAppLogicDrawings = value;
 }
 
 bool DbProjectProperties::generateExtraDebugInfo() const
@@ -476,12 +536,12 @@ DbFileTree::DbFileTree(const std::map<int, std::shared_ptr<DbFileInfo>>& files, 
 	return;
 }
 
-DbFileTree::DbFileTree(DbFileTree&& src)
+DbFileTree::DbFileTree(DbFileTree&& src) noexcept
 {
 	operator=(std::move(src));
 }
 
-DbFileTree& DbFileTree::operator=(DbFileTree&& src)
+DbFileTree& DbFileTree::operator=(DbFileTree&& src) noexcept
 {
 	m_fileIdToChildren = std::move(src.m_fileIdToChildren);
 	m_files = std::move(src.m_files);
@@ -1062,10 +1122,6 @@ DbFileInfo::DbFileInfo(int fileId) noexcept :
 }
 
 
-DbFileInfo::~DbFileInfo()
-{
-}
-
 void DbFileInfo::trace() const
 {
 	qDebug() << "File:";
@@ -1490,10 +1546,6 @@ DbChangeset::DbChangeset()
 {
 }
 
-DbChangeset::~DbChangeset()
-{
-}
-
 int DbChangeset::changeset() const
 {
 	return m_changesetId;
@@ -1570,10 +1622,6 @@ DbChangesetDetails::DbChangesetDetails() :
 	m_objects.reserve(64);
 }
 
-DbChangesetDetails::~DbChangesetDetails()
-{
-}
-
 const std::vector<DbChangesetObject>& DbChangesetDetails::objects() const
 {
 	return m_objects;
@@ -1608,10 +1656,6 @@ DbChangesetObject::DbChangesetObject(const Signal& signal) :
 {
 }
 
-
-DbChangesetObject::~DbChangesetObject()
-{
-}
 
 DbChangesetObject::Type DbChangesetObject::type() const
 {

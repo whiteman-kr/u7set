@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
-#include "../lib/XmlHelper.h"
+#include "../lib/SoftwareSettings.h"
 
 namespace Builder
 {
@@ -13,18 +13,16 @@ namespace Builder
 		MonitorCfgGenerator(Context* context, Hardware::Software* software);
 		~MonitorCfgGenerator();
 
-		virtual bool generateConfiguration() override;
+		virtual bool createSettingsProfile(const QString& profile) override;
+		virtual bool generateConfigurationStep1() override;
 
 	protected:
-		bool writeMonitorSettings();
+		bool initSchemaTagsAndTuningSources();
 
 		bool saveScriptProperties(QString scriptProperty, QString fileName);
 
 		bool writeSchemasByTags();
 
-		bool writeAppDataServiceSection(QXmlStreamWriter& xmlWriter);
-		bool writeArchiveServiceSection(QXmlStreamWriter& xmlWriter);
-		bool writeTuningServiceSection(QXmlStreamWriter& xmlWriter);
 		void writeErrorSection(QXmlStreamWriter& xmlWriter, QString error);
 
 		template <typename TYPE>
@@ -40,7 +38,7 @@ namespace Builder
 		bool writeMonitorLogo();
 
 	private:
-		bool m_tuningEnabled = false;
+//		bool m_tuningEnabled = false;
 		QStringList m_tuningSources;
 
 		QStringList m_schemaTagList;		// Generated in writeMonitorSettings
@@ -58,7 +56,7 @@ namespace Builder
 
 		*ok = true;
 
-		Hardware::DeviceObject* object = m_equipment->deviceObject(strId);
+		Hardware::DeviceObject* object = m_equipment->deviceObject(strId).get();
 		if (object == nullptr)
 		{
 			m_log->errCFG3021(m_software->equipmentId(), property, strId);

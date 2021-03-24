@@ -69,8 +69,8 @@ namespace VFrame30
 		{
 			// Get signals states
 			//
-			var activeSignalState = signals.signalState(activeSignalId);
-			var upSignalState = signals.signalState(upSignalId);
+			let activeSignalState = signals.signalState(activeSignalId);
+			let upSignalState = signals.signalState(upSignalId);
 
 			// Check for validity
 			//
@@ -126,8 +126,8 @@ namespace VFrame30
 			// Get identifiers and call the function from global script
 			//
 
-			var activeSignalId = schemaItem.AppSignalIDs[0];
-			var upSignalId = schemaItem.AppSignalIDs[1];
+			let activeSignalId = schemaItem.AppSignalIDs[0];
+			let upSignalId = schemaItem.AppSignalIDs[1];
 
 			RodSwitchLogic(schemaItem, activeSignalId, upSignalId);
 

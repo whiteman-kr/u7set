@@ -153,7 +153,7 @@ void AppDataServiceClient::ensureConnectedToService(bool& result)
 	}
 
 	m_tcpSocket->connectToHost(m_serverAddressPort.address(), m_serverAddressPort.port());
-	VERIFY_STATEMENT_STR(m_tcpSocket->waitForConnected(Tcp::TCP_ON_CLIENT_REQUEST_REPLY_TIMEOUT),
+	VERIFY_STATEMENT_STR(m_tcpSocket->waitForConnected(Tcp::TCP_SERVER_REPLY_TIMEOUT),
 						 "Could not make tcp connection to " + m_serverAddressPort.addressPortStr());
 
 	Network::SoftwareInfo message;
@@ -175,7 +175,7 @@ void AppDataServiceClient::socketWrite(const char* data, quint32 dataSize, bool&
 						 .arg(writtenQuantity)
 						 .arg(dataSize));
 
-	QTimer::singleShot(Tcp::TCP_BYTES_WRITTEN_TIMEOUT, &m_signalWaiter, SLOT(quit()));
+	QTimer::singleShot(1000, &m_signalWaiter, SLOT(quit()));
 	m_signalWaiter.exec();
 
 	VERIFY_STATEMENT(m_tcpSocket->bytesToWrite() == 0, "Socket write timeout");
@@ -187,7 +187,7 @@ void AppDataServiceClient::socketRead(char* data, quint32 dataSize, bool& result
 
 	while (totalBytesRead < dataSize)
 	{
-		QTimer::singleShot(Tcp::TCP_ON_CLIENT_REQUEST_REPLY_TIMEOUT, &m_signalWaiter, SLOT(quit()));
+		QTimer::singleShot(Tcp::TCP_CLIENT_REQUEST_TIMEOUT, &m_signalWaiter, SLOT(quit()));
 		m_signalWaiter.exec();
 
 		qint64 bytesAvailable = m_tcpSocket->bytesAvailable();

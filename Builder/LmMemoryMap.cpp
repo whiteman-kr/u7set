@@ -92,6 +92,36 @@ namespace Builder
 		return signalAddress;
 	}
 
+	bool MemoryArea::appendSignalWithFixedAddress(const UalSignal* ualSignal)
+	{
+		if (ualSignal == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (ualSignal->ualAddr().isValid() == false)
+		{
+			assert(false);
+			return false;
+		}
+
+		int startBitAddress = m_startAddress * SIZE_16BIT;
+		int endBitAddress = (m_startAddress + m_sizeW) * SIZE_16BIT;
+
+		if (ualSignal->ualAddr().bitAddress() < startBitAddress ||
+			ualSignal->ualAddr().bitAddress() >= endBitAddress)
+		{
+			return false;
+		}
+
+		SignalAddress16 sa(ualSignal->appSignalID(), ualSignal->ualAddr(), ualSignal->sizeW(), ualSignal->signalType());
+
+		m_signals.append(sa);
+
+		return true;
+	}
+
 	QVector<MemoryArea::SignalAddress16> MemoryArea::getSignalsJoined() const
 	{
 		QVector<SignalAddress16> array;
@@ -145,12 +175,12 @@ namespace Builder
 			{
 				if (s->isAcquired() == true)
 				{
-					m_signals.append(SignalAddress16(s->appSignalID(), addr16, s->sizeW(), s->isDiscrete()));
+					m_signals.append(SignalAddress16(s->appSignalID(), addr16, s->sizeW(), s->signalType()));
 				}
 			}
 			else
 			{
-				m_signals.append(SignalAddress16(s->appSignalID(), addr16, s->sizeW(), s->isDiscrete()));
+				m_signals.append(SignalAddress16(s->appSignalID(), addr16, s->sizeW(), s->signalType()));
 			}
 		}
 	}
@@ -423,8 +453,9 @@ namespace Builder
 
 		//
 
-		addSection(memFile, m_tuningInterface.memory, "Tuning interface memory");
-		memFile.append("");
+		addSection(memFile, m_tuningInterface.memory, "Tuning interface memory", m_tuningInterface.memory.startAddress());
+
+		addRecordSignals(memFile, m_tuningInterface.memory,  "tunable signals");
 
 		//
 
@@ -673,6 +704,11 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool LmMemoryMap::appendTuningSignal(const UalSignal* tuningSignal)
+	{
+		return m_tuningInterface.memory.appendSignalWithFixedAddress(tuningSignal);
 	}
 
 	bool LmMemoryMap::appendAcquiredDiscreteStrictOutputSignals(const QVector<UalSignal*>& ualSignals)

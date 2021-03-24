@@ -2,12 +2,13 @@
 #include "IdePropertyEditor.h"
 #include "SpecificPropertiesEditor.h"
 #include "SvgEditor.h"
+#include "TagsEditor.h"
 
 //
 // IdePropertyEditorHelper
 //
 
-ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent, DbController* dbController)
+ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, DbController* dbController, QWidget* parent)
 {
 	if (propertyPtr == nullptr || parent == nullptr)
 	{
@@ -41,21 +42,77 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEdito
 
 	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::Svg)
 	{
-		// This is Specific Properties
+		// This is SVG
 		//
 
 		SvgEditor* editor = new SvgEditor(parent);
 		return editor;
 	}
 
-	if (propertyPtr->isScript() == false)
+	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::Tags)
 	{
-		return new ExtWidgets::PropertyPlainTextEditor(parent);
+		// This is Tags
+		//
+		if (dbController == nullptr)
+		{
+			Q_ASSERT(dbController);
+			return new ExtWidgets::PropertyPlainTextEditor(parent);
+		}
+
+		TagsEditor* editor = new TagsEditor(dbController, parent);
+		return editor;
 	}
-	else
+
+	if (propertyPtr->isScript() == true)
 	{
+		// This is Script
+		//
 		return new IdeCodeEditor(CodeType::JavaScript, parent);
 	}
+
+	return new ExtWidgets::PropertyPlainTextEditor(parent);
+}
+
+bool IdePropertyEditorHelper::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+{
+	if (propertyPtr == nullptr || dialog == nullptr)
+	{
+		Q_ASSERT(propertyPtr);
+		Q_ASSERT(dialog);
+		return false;
+	}
+
+	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::Tags)
+	{
+		// Resize depends on monitor size, DPI, resolution
+		//
+		QRect screen = QDesktopWidget().availableGeometry(dialog->parentWidget());
+
+		dialog->resize(static_cast<int>(screen.width() * 0.20),
+			   static_cast<int>(screen.height() * 0.30));
+		dialog->move(screen.center() - dialog->rect().center());
+
+		return true;
+	}
+
+	return false;
+}
+
+bool IdePropertyEditorHelper::storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+{
+	if (propertyPtr == nullptr || dialog == nullptr)
+	{
+		Q_ASSERT(propertyPtr);
+		Q_ASSERT(dialog);
+		return false;
+	}
+
+	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::Tags)
+	{
+		return true;	// Do not save Tags editor size
+	}
+
+	return false;
 }
 
 
@@ -82,8 +139,19 @@ ExtWidgets::PropertyEditor* IdePropertyEditor::createChildPropertyEditor(QWidget
 
 ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
 {
-	return IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, parent, m_dbController);
+	return IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, m_dbController, parent);
 }
+
+bool IdePropertyEditor::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+{
+	return IdePropertyEditorHelper::restorePropertyTextEditorSize(propertyPtr, dialog);
+}
+
+bool IdePropertyEditor::storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+{
+	return IdePropertyEditorHelper::storePropertyTextEditorSize(propertyPtr, dialog);
+}
+
 
 //
 // IdePropertyTable
@@ -109,13 +177,24 @@ ExtWidgets::PropertyEditor* IdePropertyTable::createChildPropertyEditor(QWidget*
 
 ExtWidgets::PropertyTextEditor* IdePropertyTable::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
 {
-	return IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, parent, m_dbController);
+	return IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, m_dbController, parent);
 }
 
+bool IdePropertyTable::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+{
+	return IdePropertyEditorHelper::restorePropertyTextEditorSize(propertyPtr, dialog);
+}
+
+bool IdePropertyTable::storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+{
+	return IdePropertyEditorHelper::storePropertyTextEditorSize(propertyPtr, dialog);
+}
 
 //
 // DialogFindReplace
 //
+
+bool DialogFindReplace::m_caseSensitive = false;
 
 DialogFindReplace::DialogFindReplace(QWidget* parent)
 	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
@@ -150,7 +229,20 @@ DialogFindReplace::DialogFindReplace(QWidget* parent)
 
     connect(m_findButton, &QPushButton::clicked, this, &DialogFindReplace::onFind);
     connect(m_replaceButton, &QPushButton::clicked, this, &DialogFindReplace::onReplace);
-    connect(m_replaceAllButton, &QPushButton::clicked, this, &DialogFindReplace::onReplaceAll);
+	connect(m_replaceAllButton, &QPushButton::clicked, this, &DialogFindReplace::onReplaceAllButton);
+
+	// Replace menu
+
+	m_replaceSelectedAction = new QAction("Process Selected Text", this);
+	connect(m_replaceSelectedAction, &QAction::triggered, [this](){onReplaceAll(true/*selectedOnly*/);});
+	m_replaceMenu.addAction(m_replaceSelectedAction);
+
+	m_replaceAllAction = new QAction("Process All Text", this);
+	connect(m_replaceAllAction, &QAction::triggered, [this](){onReplaceAll(false/*selectedOnly*/);});
+	m_replaceMenu.addAction(m_replaceAllAction);
+
+	m_caseSensitiveCheck = new QCheckBox(tr("Case Sensitive"));
+	m_caseSensitiveCheck->setChecked(m_caseSensitive);
 
 	// Layout
 
@@ -162,6 +254,7 @@ DialogFindReplace::DialogFindReplace(QWidget* parent)
     gridLayout->addWidget(m_replaceEdit, 1, 1);
 
     QHBoxLayout* buttonsLayout = new QHBoxLayout();
+	buttonsLayout->addWidget(m_caseSensitiveCheck);
     buttonsLayout->addStretch();
     buttonsLayout->addWidget(m_findButton);
     buttonsLayout->addWidget(m_replaceButton);
@@ -179,6 +272,7 @@ DialogFindReplace::DialogFindReplace(QWidget* parent)
 
 DialogFindReplace::~DialogFindReplace()
 {
+	m_caseSensitive = m_caseSensitiveCheck->isChecked();
 }
 
 void DialogFindReplace::onFind()
@@ -191,7 +285,7 @@ void DialogFindReplace::onFind()
 
 	saveCompleters();
 
-    emit findFirst(text);
+	emit findFirst(text, m_caseSensitiveCheck->isChecked());
 }
 
 void DialogFindReplace::onReplace()
@@ -210,26 +304,42 @@ void DialogFindReplace::onReplace()
 
 	saveCompleters();
 
-    emit replace(textFind, textReplace);
+	emit replace(textFind, textReplace, m_caseSensitiveCheck->isChecked());
 }
 
-void DialogFindReplace::onReplaceAll()
+void DialogFindReplace::onReplaceAllButton()
 {
-    QString textFind = m_findEdit->text();
-    if (textFind.isEmpty() == true)
-    {
-        return;
-    }
+	bool hasSelection = false;
 
-    QString textReplace = m_replaceEdit->text();
-    if (textReplace.isEmpty() == true)
-    {
-        return;
-    }
+	emit hasSelectedText(&hasSelection);
+
+	if (hasSelection == true)
+	{
+		m_replaceMenu.popup(QCursor::pos());
+	}
+	else
+	{
+		onReplaceAll(false/*selectedOnly*/);
+	}
+}
+
+void DialogFindReplace::onReplaceAll(bool selectedOnly)
+{
+	QString textFind = m_findEdit->text();
+	if (textFind.isEmpty() == true)
+	{
+		return;
+	}
+
+	QString textReplace = m_replaceEdit->text();
+	if (textReplace.isEmpty() == true)
+	{
+		return;
+	}
 
 	saveCompleters();
 
-    emit replaceAll(textFind, textReplace);
+	emit replaceAll(textFind, textReplace, selectedOnly, m_caseSensitiveCheck->isChecked());
 }
 
 void DialogFindReplace::saveCompleters()
@@ -274,18 +384,60 @@ void DialogFindReplace::saveCompleters()
 }
 
 //
+// IdeQsciScintilla
+//
+IdeQsciScintilla::IdeQsciScintilla():
+	QsciScintilla()
+{
+
+}
+
+IdeQsciScintilla::~IdeQsciScintilla()
+{
+
+}
+
+void IdeQsciScintilla::setCustomMenuActions(QList<QAction*> actions)
+{
+	m_customMenuActions = actions;
+}
+
+void IdeQsciScintilla::contextMenuEvent (QContextMenuEvent *e)
+{
+	QMenu* menu = createStandardContextMenu();
+
+	if (m_customMenuActions.empty() == false)
+	{
+		emit customContextMenuAboutToBeShown();
+
+		menu->addSeparator();
+		menu->addActions(m_customMenuActions);
+	}
+	menu->exec(e->globalPos());
+}
+
+//
 // IdeCodeEditor
 //
 
 QString IdeCodeEditor::m_findText;
 
+bool IdeCodeEditor::m_findCaseSensitive = false;
+
 IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
     PropertyTextEditor(parent),
-    m_parent(parent)
+	m_codeType(codeType),
+	m_parent(parent)
 {
-    m_textEdit = new QsciScintilla();
+	m_textEdit = new IdeQsciScintilla();
 
     m_textEdit->setUtf8(true);
+	m_textEdit->setCaretLineVisible(true);
+	m_textEdit->setCaretLineBackgroundColor("#f0f0f0");
+	m_textEdit->setCaretWidth(2);
+
+	connect(m_textEdit, &IdeQsciScintilla::customContextMenuAboutToBeShown, this, &IdeCodeEditor::onCustomContextMenuAboutToBeShown, Qt::DirectConnection);
+
 
     m_textEdit->installEventFilter(this);
 
@@ -326,7 +478,13 @@ IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
 	if (codeType == CodeType::JavaScript || codeType == CodeType::Xml)
     {
         m_textEdit->setMarginType(0, QsciScintilla::NumberMargin);
-        m_textEdit->setMarginWidth(0, 40);
+
+		QFontMetrics fm(f);
+		int width = static_cast<int>(fm.boundingRect("0000").width() * 1.2);
+
+		m_textEdit->setMarginWidth(0, width);
+		m_textEdit->setMarginsForegroundColor(QColor("#c0c0c0"));
+		m_textEdit->setMarginsBackgroundColor(QColor("#f0f0f0"));
     }
     else
     {
@@ -340,10 +498,19 @@ IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
     m_textEdit->setAutoIndent(true);
 
     connect(m_textEdit, &QsciScintilla::textChanged, this, &PropertyTextEditor::textChanged);
+
+	connect(m_textEdit, &QsciScintilla::textChanged, this, &IdeCodeEditor::onTextChanged);
+	connect(m_textEdit, &QsciScintilla::cursorPositionChanged, this, &IdeCodeEditor::onCursorPositionChanged);
+
 }
 
 IdeCodeEditor::~IdeCodeEditor()
 {
+}
+
+QString IdeCodeEditor::text() const
+{
+	return m_textEdit->text();
 }
 
 void IdeCodeEditor::setText(const QString& text)
@@ -354,12 +521,36 @@ void IdeCodeEditor::setText(const QString& text)
 
 	m_textEdit->blockSignals(false);
 
-	adjustMarginWidth();
+	if (m_codeType == CodeType::JavaScript || m_codeType == CodeType::Xml)
+	{
+		if (m_textEdit->lexer() == nullptr)
+		{
+			Q_ASSERT(m_textEdit->lexer());
+			return;
+		}
+
+		adjustMarginWidth();
+	}
 }
 
-QString IdeCodeEditor::text()
+int IdeCodeEditor::lines() const
 {
-	return m_textEdit->text();
+	return m_textEdit->lines();
+}
+
+void IdeCodeEditor::getCursorPosition(int* line, int* index) const
+{
+	m_textEdit->getCursorPosition(line, index);
+}
+
+void IdeCodeEditor::setCursorPosition(int line, int index)
+{
+	m_textEdit->setCursorPosition(line, index);
+}
+
+bool IdeCodeEditor::readOnly() const
+{
+	return m_textEdit->isReadOnly();
 }
 
 void IdeCodeEditor::setReadOnly(bool value)
@@ -367,7 +558,23 @@ void IdeCodeEditor::setReadOnly(bool value)
 	m_textEdit->setReadOnly(value);
 }
 
-void IdeCodeEditor::findFirst(QString findText)
+bool IdeCodeEditor::externalOkCancelButtons() const
+{
+	return true;
+}
+
+void IdeCodeEditor::activateEditor()
+{
+	m_textEdit->setFocus();
+}
+
+void IdeCodeEditor::setCustomMenuActions(QList<QAction*> actions)
+{
+	m_textEdit->setCustomMenuActions(actions);
+	return;
+}
+
+void IdeCodeEditor::findFirst(QString findText, bool caseSensitive)
 {
 	if (findText.isEmpty() == true)
 	{
@@ -376,13 +583,26 @@ void IdeCodeEditor::findFirst(QString findText)
 
 	bool result = false;
 
-	if (m_findText == findText)
+	if (m_findText == findText && caseSensitive == m_findCaseSensitive)
 	{
 		result = m_textEdit->findNext();
 	}
 	else
 	{
-		result = m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/);
+		result = m_textEdit->findFirst(findText, false/*regular*/, caseSensitive, false/*whole*/, true/*wrap*/);
+
+		m_findCaseSensitive = caseSensitive;
+
+		m_findText = findText;
+	}
+
+	if (result == false)
+	{
+		m_textEdit->selectAll(false);
+
+		result = m_textEdit->findFirst(findText, false/*regular*/, caseSensitive, false/*whole*/, true/*wrap*/);
+
+		m_findCaseSensitive = caseSensitive;
 
 		m_findText = findText;
 	}
@@ -404,7 +624,7 @@ void IdeCodeEditor::findNext()
 	{
 		m_findFirst = false;
 
-		bool result = m_textEdit->findFirst(m_findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/);
+		bool result = m_textEdit->findFirst(m_findText, false/*regular*/, m_findCaseSensitive, false/*whole*/, true/*wrap*/);
 
 		if (result == false)
 		{
@@ -419,7 +639,7 @@ void IdeCodeEditor::findNext()
 	return;
 }
 
-void IdeCodeEditor::replace(QString findText, QString replaceText)
+void IdeCodeEditor::replace(QString findText, QString replaceText, bool caseSensitive)
 {
 	if (findText.isEmpty() || replaceText.isEmpty())
 	{
@@ -434,7 +654,7 @@ void IdeCodeEditor::replace(QString findText, QString replaceText)
 
 	m_findText = findText;
 
-	if (m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/) == false)
+	if (m_textEdit->findFirst(findText, false/*regular*/, caseSensitive, false/*whole*/, true/*wrap*/) == false)
 	{
 		return;
 	}
@@ -442,42 +662,57 @@ void IdeCodeEditor::replace(QString findText, QString replaceText)
 	m_textEdit->replace(replaceText);
 }
 
-void IdeCodeEditor::replaceAll(QString findText, QString replaceText)
+
+void IdeCodeEditor::replaceAll(QString findText, QString replaceText, bool selectedOnly, bool caseSensitive)
 {
 	if (findText.isEmpty() || replaceText.isEmpty())
 	{
 		return;
 	}
 
-	int counter = 0;
+	QString selectedText;
 
-	m_findText = findText;
-
-	if (m_textEdit->findFirst(findText, false/*regular*/, false/*caseSens*/, false/*whole*/, true/*wrap*/) == false)
+	if (selectedOnly == true)
 	{
+		selectedText = m_textEdit->selectedText();
+	}
+	else
+	{
+		selectedText = m_textEdit->text();
+	}
+
+	int counter = selectedText.count(findText, caseSensitive == true ? Qt::CaseSensitive : Qt::CaseInsensitive);
+
+	if (counter == 0)
+	{
+		QMessageBox::information(this, qAppName(), tr("Text was not found."));
 		return;
 	}
 
-	while (counter < 1000)
+	selectedText.replace(findText, replaceText, caseSensitive == true ? Qt::CaseSensitive : Qt::CaseInsensitive);
+
+	if (selectedOnly == true)
 	{
-		m_textEdit->replace(replaceText);
-
-		counter++;
-
-		if (m_textEdit->findNext() == false)
-		{
-			break;
-		}
-
-		if (counter >= 1000)
-		{
-			// for not to hang
-			assert(false);
-			break;
-		}
+		m_textEdit->replaceSelectedText(selectedText);
+	}
+	else
+	{
+		m_textEdit->setText(selectedText);
 	}
 
 	QMessageBox::information(this, qAppName(), tr("%1 replacements occured.").arg(counter));
+}
+
+  void IdeCodeEditor::hasSelectedText(bool* result)
+{
+	if (result == nullptr)
+	{
+		Q_ASSERT(result);
+		return;
+	}
+
+	*result = m_textEdit->hasSelectedText();
+	return;
 }
 
 bool IdeCodeEditor::eventFilter(QObject* obj, QEvent* event)
@@ -502,6 +737,7 @@ bool IdeCodeEditor::eventFilter(QObject* obj, QEvent* event)
 					connect(m_findReplace, &DialogFindReplace::findFirst, this, &IdeCodeEditor::findFirst);
 					connect(m_findReplace, &DialogFindReplace::replace, this, &IdeCodeEditor::replace);
 					connect(m_findReplace, &DialogFindReplace::replaceAll, this, &IdeCodeEditor::replaceAll);
+					connect(m_findReplace, &DialogFindReplace::hasSelectedText, this, &IdeCodeEditor::hasSelectedText, Qt::DirectConnection);
 				}
 
 				m_findReplace->show();
@@ -514,11 +750,42 @@ bool IdeCodeEditor::eventFilter(QObject* obj, QEvent* event)
 				findNext();
 				return true;
 			}
+
+			if (keyEvent->key() == Qt::Key_Tab && (keyEvent->modifiers() & Qt::ControlModifier))
+			{
+				emit ctrlTabKeyPressed();
+				return true;
+			}
+
+			if (keyEvent->key() == Qt::Key_S && (keyEvent->modifiers() & Qt::ControlModifier))
+			{
+				emit saveKeyPressed();
+			}
+
+			if (keyEvent->key() == Qt::Key_W && (keyEvent->modifiers() & Qt::ControlModifier))
+			{
+				emit closeKeyPressed();
+			}
 		}
 	}
 
-    // pass the event on to the parent class
-    return PropertyTextEditor::eventFilter(obj, event);
+	// pass the event on to the parent class
+	return PropertyTextEditor::eventFilter(obj, event);
+}
+
+void IdeCodeEditor::onCustomContextMenuAboutToBeShown()
+{
+	emit customContextMenuAboutToBeShown();
+}
+
+void IdeCodeEditor::onCursorPositionChanged(int line, int index)
+{
+	emit cursorPositionChanged(line, index);
+}
+
+void IdeCodeEditor::onTextChanged()
+{
+	emit textChanged();
 }
 
 void IdeCodeEditor::adjustMarginWidth()
@@ -613,6 +880,7 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 												  true,		/*typeButtonEnabled*/
 												  true,		/*typeTabEnabled*/
 												  true,		/*typeCounterEnabled*/
+												  true,		/*typeSchemasTabsEnabled*/
 												  TuningFilter::Source::Project,
 												  theSettings.m_tuningFiltersSplitterPosition,
 												  theSettings.m_tuningFiltersPropertyEditorSplitterPos
@@ -624,7 +892,7 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 
 }
 
-QString IdeTuningFiltersEditor::text()
+QString IdeTuningFiltersEditor::text() const
 {
     QByteArray data;
 
@@ -641,9 +909,19 @@ QString IdeTuningFiltersEditor::text()
     return QString();
 }
 
+bool IdeTuningFiltersEditor::readOnly() const
+{
+	return false;
+}
+
 void IdeTuningFiltersEditor::setReadOnly(bool value)
 {
-    Q_UNUSED(value);
+	m_tuningFilterEditor->setReadOnly(value);
 
+}
+
+bool IdeTuningFiltersEditor::externalOkCancelButtons() const
+{
+	return true;
 }
 

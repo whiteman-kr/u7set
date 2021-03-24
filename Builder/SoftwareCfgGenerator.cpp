@@ -1,7 +1,7 @@
 #include "SoftwareCfgGenerator.h"
 #include "ApplicationLogicCompiler.h"
 #include "../lib/DeviceHelper.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/LanControllerInfoHelper.h"
 
 
@@ -13,19 +13,17 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------
 
-	HashedVector<QString, Hardware::DeviceModule*> SoftwareCfgGenerator::m_lmList;
-	HashedVector<QString, Hardware::Software*> SoftwareCfgGenerator::m_softwareList;
 	std::multimap<QString, std::shared_ptr<SoftwareCfgGenerator::SchemaFile>> SoftwareCfgGenerator::m_schemaTagToFile;
-
 
 	SoftwareCfgGenerator::SoftwareCfgGenerator(Context* context, Hardware::Software* software) :
 		m_context(context),
-		m_dbController(&context->m_db),
 		m_software(software),
+		m_dbController(&context->m_db),
 		m_signalSet(context->m_signalSet.get()),
 		m_equipment(context->m_equipmentSet.get()),
 		m_buildResultWriter(context->m_buildResultWriter.get()),
-		m_log(context->m_log)
+		m_log(context->m_log),
+		m_settingsSet(software->softwareType())
 	{
 		assert(context);
 	}
@@ -34,7 +32,45 @@ namespace Builder
 	{
 	}
 
-	bool SoftwareCfgGenerator::run()
+	bool SoftwareCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_software, m_log);
+
+		// Method should be override in classes derived from SoftwareCfgGenerator like this:
+		//
+		//	Specific_SettingsGetter settingsGetter;
+		//
+		//	if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		//	{
+		//		return false;
+		//	}
+		//
+		//	return m_settingsSet.addProfile<Specific_Settings>(profile, &settingsGetter);
+		//
+		//
+
+		Q_UNUSED(profile);
+
+		LOG_INTERNAL_ERROR_MSG(m_log, QString("Method createSettingsProfile(...) is not implemented for software %1 (type %2)").
+									arg(equipmentID()).arg(E::valueToString<E::SoftwareType>(m_software->softwareType())));
+
+		return false;
+	}
+
+	bool SoftwareCfgGenerator::generateConfigurationStep2()
+	{
+		return true;
+	}
+
+	bool SoftwareCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
+	{
+		XmlWriteHelper xml(xmlWriter);
+
+		return m_settingsSet.writeToXml(xml);
+	}
+
+	bool SoftwareCfgGenerator::createConfigurationXml()
 	{
 		if (m_log == nullptr ||
 			m_dbController == nullptr ||
@@ -47,17 +83,7 @@ namespace Builder
 			return false;
 		}
 
-		m_deviceRoot = m_equipment->root();
-
-		if (m_deviceRoot == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		m_subDir = m_software->equipmentIdTemplate();
-
-		m_cfgXml = m_buildResultWriter->createConfigurationXmlFile(m_subDir);
+		m_cfgXml = m_buildResultWriter->createConfigurationXmlFile(softwareCfgSubdir());
 
 		if (m_cfgXml == nullptr)
 		{
@@ -67,24 +93,12 @@ namespace Builder
 			return false;
 		}
 
-		LOG_MESSAGE(m_log, QString(tr("Generate configuration for: %1")).
-					arg(m_software->equipmentIdTemplate()));
+		writeSoftwareSection(m_cfgXml->xmlWriter(), true);
 
-		m_cfgXml->xmlWriter().writeStartElement("Software");
-
-		m_cfgXml->xmlWriter().writeAttribute("Caption", m_software->caption());
-		m_cfgXml->xmlWriter().writeAttribute("ID", m_software->equipmentIdTemplate());
-		m_cfgXml->xmlWriter().writeAttribute("Type", QString("%1").arg(static_cast<int>(m_software->type())));
-
-		m_cfgXml->xmlWriter().writeEndElement();	// </Software>
-
-		bool result = true;
-
-		result &= generateConfiguration();
+		bool result = getSettingsXml(m_cfgXml->xmlWriter());
 
 		return result;
 	}
-
 
 	bool SoftwareCfgGenerator::generalSoftwareCfgGeneration(Context* context)
 	{
@@ -120,10 +134,6 @@ namespace Builder
 
 		// add general software cfg generation here:
 		//
-		result &= buildLmList(context->m_equipmentSet.get(), log);
-
-		result &= buildSoftwareList(context->m_equipmentSet.get(), log);
-
 		result &= checkLmToSoftwareLinks(context);
 
 		// Add Schemas to Build result
@@ -158,11 +168,12 @@ namespace Builder
 		// --
 		//
 		DbFileTree filesTree;									// Filed in loadAllSchemas
+		int schemaFileId = db.systemFileId(DbDir::SchemasDir);
 
-		if (bool ok = db.getFileListTree(&filesTree, db.schemaFileId(), "%", true, nullptr);
+		if (bool ok = db.getFileListTree(&filesTree, schemaFileId, "%", true, nullptr);
 			ok == false)
 		{
-			log->errPDB2001(db.schemaFileId(), "%", db.lastError());
+			log->errPDB2001(schemaFileId, "%", db.lastError());
 			return false;
 		}
 
@@ -504,36 +515,22 @@ namespace Builder
 
 	void SoftwareCfgGenerator::clearStaticData()
 	{
-		m_lmList.clear();
-		m_softwareList.clear();
 		m_schemaTagToFile.clear();
 
 		return;
 	}
 
-	void SoftwareCfgGenerator::initSubsystemKeyMap(SubsystemKeyMap* subsystemKeyMap, const Hardware::SubsystemStorage* subsystems)
+	void SoftwareCfgGenerator::writeSoftwareSection(QXmlStreamWriter& xmlWriter, bool finalizeSection)
 	{
-		if (subsystemKeyMap == nullptr || subsystems == nullptr)
+		xmlWriter.writeStartElement(XmlElement::SOFTWARE);
+
+		xmlWriter.writeAttribute(XmlAttribute::CAPTION, m_software->caption());
+		xmlWriter.writeAttribute(XmlAttribute::ID, m_software->equipmentIdTemplate());
+		xmlWriter.writeAttribute(XmlAttribute::TYPE, QString("%1").arg(static_cast<int>(m_software->softwareType())));
+
+		if (finalizeSection == true)
 		{
-			assert(false);
-			return;
-		}
-
-		subsystemKeyMap->clear();
-
-		int subsystemsCount = subsystems->count();
-
-		for(int i = 0; i < subsystemsCount; i++)
-		{
-			std::shared_ptr<Hardware::Subsystem> subsystem = subsystems->get(i);
-
-			if (subsystem == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			subsystemKeyMap->insert(subsystem->subsystemId(), subsystem->key());
+			xmlWriter.writeEndElement();	// </Software>
 		}
 	}
 
@@ -548,107 +545,6 @@ namespace Builder
 		return m_software->equipmentIdTemplate();
 	}
 
-	bool SoftwareCfgGenerator::buildLmList(Hardware::EquipmentSet* equipment, IssueLogger* log)
-	{
-		if (equipment == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		bool result = true;
-
-		m_lmList.clear();
-
-		equipmentWalker(equipment->root(), [&result](Hardware::DeviceObject* currentDevice)
-			{
-				if (currentDevice == nullptr)
-				{
-					assert(false);
-					result = false;
-					return;
-				}
-
-				if (currentDevice->isModule() == false)
-				{
-					return;
-				}
-
-				Hardware::DeviceModule* module = currentDevice->toModule();
-
-				if (module->isLogicModule() == false)
-				{
-					return;
-				}
-
-				m_lmList.insert(module->equipmentId(), module);
-			}
-		);
-
-		if (result == true)
-		{
-			LOG_MESSAGE(log, QString(tr("Logic Modules list building... OK")));
-		}
-		else
-		{
-			LOG_ERROR_OBSOLETE(log, IssuePrefix::NotDefined, QString(tr("Can't build Logic Modules list")));
-		}
-
-		return result;
-	}
-
-
-	bool SoftwareCfgGenerator::buildSoftwareList(Hardware::EquipmentSet *equipment, IssueLogger* log)
-	{
-		if (equipment == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		bool result = true;
-
-		m_softwareList.clear();
-
-		equipmentWalker(equipment->root(), [&result](Hardware::DeviceObject* currentDevice)
-			{
-				if (currentDevice == nullptr)
-				{
-					assert(false);
-					result = false;
-					return;
-				}
-
-				if (currentDevice->isSoftware() == false)
-				{
-					return;
-				}
-
-				Hardware::Software* software = currentDevice->toSoftware();
-
-				if (software == nullptr)
-				{
-					assert(false);
-					result = false;
-					return;
-				}
-
-				m_softwareList.insert(software->equipmentId(), software);
-			}
-		);
-
-		if (result == true)
-		{
-			LOG_MESSAGE(log, QString(tr("Software list building... OK")));
-		}
-		else
-		{
-			LOG_ERROR_OBSOLETE(log, IssuePrefix::NotDefined, QString(tr("Can't build software list")));
-		}
-
-		return result;
-	}
-
 	bool SoftwareCfgGenerator::checkLmToSoftwareLinks(Context* context)
 	{
 		TEST_PTR_RETURN_FALSE(context);
@@ -659,7 +555,9 @@ namespace Builder
 
 		bool result = true;
 
-		for(Hardware::DeviceModule* lm : m_lmList)
+		const std::map<QString, Hardware::Software*>& softwareList = context->m_software;
+
+		for(Hardware::DeviceModule* lm : context->m_lmModules)
 		{
 			std::shared_ptr<LmDescription> lmDescription = context->m_lmDescriptions->get(lm);
 
@@ -697,7 +595,9 @@ namespace Builder
 					}
 					else
 					{
-						if (m_softwareList.contains(lanControllerInfo.tuningServiceID) == false)
+						auto sw = softwareList.find(lanControllerInfo.tuningServiceID);
+
+						if (sw == softwareList.end())
 						{
 							// Property '%1.%2' is linked to undefined software ID '%3'.
 							//
@@ -707,9 +607,9 @@ namespace Builder
 						}
 						else
 						{
-							software = m_softwareList[lanControllerInfo.tuningServiceID];
+							software = sw->second;
 
-							if (software->type() != E::SoftwareType::TuningService)
+							if (software->softwareType() != E::SoftwareType::TuningService)
 							{
 								// Property '%1.%2' is linked to not compatible software '%3'.
 								//
@@ -734,7 +634,9 @@ namespace Builder
 					}
 					else
 					{
-						if (m_softwareList.contains(lanControllerInfo.appDataServiceID) == false)
+						auto sw = softwareList.find(lanControllerInfo.appDataServiceID);
+
+						if (sw == softwareList.end())
 						{
 							// Property '%1.%2' is linked to undefined software ID '%3'.
 							//
@@ -744,9 +646,9 @@ namespace Builder
 						}
 						else
 						{
-							software = m_softwareList[lanControllerInfo.appDataServiceID];
+							software = sw->second;
 
-							if (software->type() != E::SoftwareType::AppDataService)
+							if (software->softwareType() != E::SoftwareType::AppDataService)
 							{
 								// Property '%1.%2' is linked to not compatible software '%3'.
 								//
@@ -771,7 +673,9 @@ namespace Builder
 					}
 					else
 					{
-						if (m_softwareList.contains(lanControllerInfo.diagDataServiceID) == false)
+						auto sw = softwareList.find(lanControllerInfo.diagDataServiceID);
+
+						if (sw == softwareList.end())
 						{
 							// Property '%1.%2' is linked to undefined software ID '%3'.
 							//
@@ -781,9 +685,9 @@ namespace Builder
 						}
 						else
 						{
-							software = m_softwareList[lanControllerInfo.diagDataServiceID];
+							software = sw->second;
 
-							if (software->type() != E::SoftwareType::DiagDataService)
+							if (software->softwareType() != E::SoftwareType::DiagDataService)
 							{
 								// Property '%1.%2' is linked to not compatible software '%3'.
 								//
@@ -799,113 +703,6 @@ namespace Builder
 		}
 
 		return result;
-	}
-
-	QString SoftwareCfgGenerator::getBuildInfoCommentsForBat()
-	{
-		BuildInfo&& b = m_buildResultWriter->buildInfo();
-
-		QString comments = "@rem Project: " + b.project + "\n";
-		comments += "@rem BuildNo: " + QString::number(b.id) + "\n";
-		comments += "@rem Date: " + b.dateStr() + "\n";
-		comments += "@rem Changeset: " + QString::number(b.changeset) + "\n";
-		comments += "@rem User: " + b.user + "\n";
-		comments += "@rem Workstation: " + b.workstation + "\n\n";
-
-		return comments;
-	}
-
-	QString SoftwareCfgGenerator::getBuildInfoCommentsForSh()
-	{
-		BuildInfo&& b = m_buildResultWriter->buildInfo();
-
-		QString comments = "#!/bin/bash\n\n";
-
-		comments += "# Project: " + b.project + "\n";
-		comments += "# BuildNo: " + QString::number(b.id) + "\n";
-		comments += "# Date: " + b.dateStr() + "\n";
-		comments += "# Changeset: " + QString::number(b.changeset) + "\n";
-		comments += "# User: " + b.user + "\n";
-		comments += "# Workstation: " + b.workstation + "\n\n";
-
-		return comments;
-	}
-
-	bool SoftwareCfgGenerator::getConfigIp(QString* cfgIP1, QString* cfgIP2)
-	{
-		TEST_PTR_RETURN_FALSE(m_log);
-
-		TEST_PTR_LOG_RETURN_FALSE(m_equipment, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(m_software, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(cfgIP1, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(cfgIP2, m_log);
-
-		cfgIP1->clear();
-		cfgIP2->clear();
-
-		QString cfgServiceID1;
-		QString cfgServiceID2;
-
-		HostAddressPort cfgServiceIP1;
-		HostAddressPort cfgServiceIP2;
-
-		bool result = true;
-
-		result = ServiceSettings::getCfgServiceConnection(m_equipment, m_software,
-														   &cfgServiceID1, &cfgServiceIP1,
-														   &cfgServiceID2, &cfgServiceIP2,
-														   m_log);
-		if (result == false)
-		{
-			return false;
-		}
-
-		if (cfgServiceID1.isEmpty() == false)
-		{
-			*cfgIP1 = cfgServiceIP1.addressPortStr();
-		}
-
-		if (cfgServiceID2.isEmpty() == false)
-		{
-			*cfgIP2 = cfgServiceIP2.addressPortStr();
-		}
-
-		return true;
-	}
-
-	bool SoftwareCfgGenerator::getServiceParameters(QString& parameters)
-	{
-		parameters += " -e";
-
-		QString cfgIP1;
-		QString cfgIP2;
-		
-		if (getConfigIp(&cfgIP1, &cfgIP2) == false)
-		{
-			return false;
-		}
-
-		if (cfgIP1.isEmpty() == true && cfgIP2.isEmpty() == true)
-		{
-			m_log->errALC5140(m_software->equipmentIdTemplate());
-			return false;
-		}
-
-		if (cfgIP1.isEmpty() == true)
-		{
-			cfgIP1 = cfgIP2;
-		}
-
-		if (cfgIP2.isEmpty() == true)
-		{
-			cfgIP2 = cfgIP1;
-		}
-
-		parameters += " -cfgip1=" + cfgIP1 + " -cfgip2=" + cfgIP2;
-
-		parameters += " -id=" + m_software->equipmentIdTemplate();
-
-		return true;
 	}
 
 	bool SoftwareCfgGenerator::joinSchemas(Context* context, VFrame30::Schema* schema, const VFrame30::Schema* pannel, Qt::Edge edge)
@@ -1119,6 +916,113 @@ namespace Builder
 		}
 
 		file->swapData(*data);
+
+		return true;
+	}
+
+	QString SoftwareCfgGenerator::getBuildInfoCommentsForBat()
+	{
+		BuildInfo&& b = m_buildResultWriter->buildInfo();
+
+		QString comments = "@rem Project: " + b.project + "\n";
+		comments += "@rem BuildNo: " + QString::number(b.id) + "\n";
+		comments += "@rem Date: " + b.dateStr() + "\n";
+		comments += "@rem Changeset: " + QString::number(b.changeset) + "\n";
+		comments += "@rem User: " + b.user + "\n";
+		comments += "@rem Workstation: " + b.workstation + "\n\n";
+
+		return comments;
+	}
+
+	QString SoftwareCfgGenerator::getBuildInfoCommentsForSh()
+	{
+		BuildInfo&& b = m_buildResultWriter->buildInfo();
+
+		QString comments = "#!/bin/bash\n\n";
+
+		comments += "# Project: " + b.project + "\n";
+		comments += "# BuildNo: " + QString::number(b.id) + "\n";
+		comments += "# Date: " + b.dateStr() + "\n";
+		comments += "# Changeset: " + QString::number(b.changeset) + "\n";
+		comments += "# User: " + b.user + "\n";
+		comments += "# Workstation: " + b.workstation + "\n\n";
+
+		return comments;
+	}
+
+	bool SoftwareCfgGenerator::getConfigIp(QString* cfgIP1, QString* cfgIP2)
+	{
+		TEST_PTR_RETURN_FALSE(m_log);
+
+		TEST_PTR_LOG_RETURN_FALSE(m_equipment, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_software, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(cfgIP1, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(cfgIP2, m_log);
+
+		cfgIP1->clear();
+		cfgIP2->clear();
+
+		QString cfgServiceID1;
+		QString cfgServiceID2;
+
+		HostAddressPort cfgServiceIP1;
+		HostAddressPort cfgServiceIP2;
+
+		bool result = true;
+
+		result = SoftwareSettingsGetter::getCfgServiceConnection(m_equipment, m_software,
+														   &cfgServiceID1, &cfgServiceIP1,
+														   &cfgServiceID2, &cfgServiceIP2,
+														   m_log);
+		if (result == false)
+		{
+			return false;
+		}
+
+		if (cfgServiceID1.isEmpty() == false)
+		{
+			*cfgIP1 = cfgServiceIP1.addressPortStr();
+		}
+
+		if (cfgServiceID2.isEmpty() == false)
+		{
+			*cfgIP2 = cfgServiceIP2.addressPortStr();
+		}
+
+		return true;
+	}
+
+	bool SoftwareCfgGenerator::getServiceParameters(QString& parameters)
+	{
+		parameters += " -e";
+
+		QString cfgIP1;
+		QString cfgIP2;
+
+		if (getConfigIp(&cfgIP1, &cfgIP2) == false)
+		{
+			return false;
+		}
+
+		if (cfgIP1.isEmpty() == true && cfgIP2.isEmpty() == true)
+		{
+			m_log->errALC5140(m_software->equipmentIdTemplate());
+			return false;
+		}
+
+		if (cfgIP1.isEmpty() == true)
+		{
+			cfgIP1 = cfgIP2;
+		}
+
+		if (cfgIP2.isEmpty() == true)
+		{
+			cfgIP2 = cfgIP1;
+		}
+
+		parameters += " -cfgip1=" + cfgIP1 + " -cfgip2=" + cfgIP2;
+
+		parameters += " -id=" + m_software->equipmentIdTemplate();
 
 		return true;
 	}

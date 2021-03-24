@@ -28,7 +28,7 @@ TuningSource::TuningSource(const Network::DataSourceInfo& info) :
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSourceBase::TuningSourceBase(QObject *parent) :
+TuningSourceBase::TuningSourceBase(QObject* parent) :
 	QObject(parent)
 {
 }
@@ -43,49 +43,38 @@ TuningSourceBase::~TuningSourceBase()
 
 void TuningSourceBase::clear()
 {
-	m_sourceMutex.lock();
+	QMutexLocker l(&m_sourceMutex);
 
-		m_tuningSourceEquipmentID.clear();
+	m_tuningSourceEquipmentID.clear();
 
-		m_sourceList.clear();
-		m_sourceIdMap.clear();
-
-	m_sourceMutex.unlock();
+	m_sourceList.clear();
+	m_sourceIdMap.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 int TuningSourceBase::count() const
 {
-	int count = 0;
+	QMutexLocker l(&m_sourceMutex);
 
-	m_sourceMutex.lock();
-
-		count = m_sourceList.count();
-
-	m_sourceMutex.unlock();
-
-	return count;
+	return TO_INT(m_sourceList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 int TuningSourceBase::append(const TuningSource& source)
 {
-	int index = -1;
+	QMutexLocker l(&m_sourceMutex);
 
-	m_sourceMutex.lock();
+	if (m_sourceIdMap.contains(source.sourceID()) == true)
+	{
+		return -1;
+	}
 
-		if (m_sourceIdMap.contains(source.sourceID()) == false)
-		{
-			m_sourceList.append(source);
+	m_sourceList.push_back(source);
+	int index = TO_INT(m_sourceList.size() - 1);
 
-			index = m_sourceList.count() - 1;
-
-			m_sourceIdMap[source.sourceID() ] = index;
-		}
-
-	m_sourceMutex.unlock();
+	m_sourceIdMap[source.sourceID()] = index;
 
 	return index;
 }
@@ -94,65 +83,61 @@ int TuningSourceBase::append(const TuningSource& source)
 
 TuningSource TuningSourceBase::source(int index) const
 {
-	TuningSource source;
+	QMutexLocker l(&m_sourceMutex);
 
-	m_sourceMutex.lock();
+	if (index < 0 || index >= TO_INT(m_sourceList.size()))
+	{
+		return TuningSource();
+	}
 
-		if (index >= 0 && index < m_sourceList.count())
-		{
-			source = m_sourceList[index];
-		}
-
-	m_sourceMutex.unlock();
-
-	return source;
+	return m_sourceList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 TuningSourceState TuningSourceBase::state(quint64 sourceID)
 {
-	TuningSourceState state;
+	QMutexLocker l(&m_sourceMutex);
 
-	m_sourceMutex.lock();
+	if (m_sourceIdMap.contains(sourceID) == false)
+	{
+		return TuningSourceState();
+	}
 
-		if (m_sourceIdMap.contains(sourceID) == true)
-		{
-			int index = m_sourceIdMap[sourceID];
+	int index = m_sourceIdMap[sourceID];
 
-			if (index >= 0 && index < m_sourceList.count())
-			{
-				state = m_sourceList[index].state();
-			}
-		}
+	if (index < 0 || index >= TO_INT(m_sourceList.size()))
+	{
+		return TuningSourceState();
+	}
 
-	m_sourceMutex.unlock();
-
-	return state;
+	return m_sourceList[static_cast<quint64>(index)].state();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void TuningSourceBase::setState(quint64 sourceID, const Network::TuningSourceState& state)
 {
-	m_sourceMutex.lock();
+	QMutexLocker l(&m_sourceMutex);
 
-		if (m_sourceIdMap.contains(sourceID) == true)
-		{
-			int index = m_sourceIdMap[sourceID];
+	if (m_sourceIdMap.contains(sourceID) == false)
+	{
+		return;
+	}
 
-			if (index >= 0 && index < m_sourceList.count())
-			{
-				TuningSourceState& sourceState = m_sourceList[index].state();
+	int index = m_sourceIdMap[sourceID];
 
-				sourceState.setIsReply(state.isreply());
-				sourceState.setRequestCount(static_cast<quint64>(state.requestcount()));
-				sourceState.setReplyCount(static_cast<quint64>(state.replycount()));
-				sourceState.setCommandQueueSize(state.commandqueuesize());
-			}
-		}
+	if (index < 0 || index >= TO_INT(m_sourceList.size()))
+	{
+		return;
+	}
 
-	m_sourceMutex.unlock();
+	TuningSourceState& sourceState = m_sourceList[static_cast<quint64>(index)].state();
+
+	sourceState.setIsReply(state.isreply());
+	sourceState.setRequestCount(static_cast<quint64>(state.requestcount()));
+	sourceState.setReplyCount(static_cast<quint64>(state.replycount()));
+	sourceState.setCommandQueueSize(state.commandqueuesize());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -170,7 +155,7 @@ void TuningSourceBase::sortByID()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSignalBase::TuningSignalBase(QObject *parent) :
+TuningSignalBase::TuningSignalBase(QObject* parent) :
 	QObject(parent)
 {
 }
@@ -185,27 +170,19 @@ TuningSignalBase::~TuningSignalBase()
 
 void TuningSignalBase::clear()
 {
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		m_signalList.clear();
-		m_signalHashMap.clear();
-
-	m_signalMutex.unlock();
+	m_signalList.clear();
+	m_signalHashMap.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 int TuningSignalBase::count() const
 {
-	int count = 0;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
-
-		count = m_signalList.count();
-
-	m_signalMutex.unlock();
-
-	return count;
+	return TO_INT(m_signalList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -254,19 +231,17 @@ int TuningSignalBase::append(Metrology::Signal* pSignal)
 		return -1;
 	}
 
-	int index = -1;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (m_signalHashMap.contains(param.hash()) == true)
+	{
+		return -1;
+	}
 
-		if (m_signalHashMap.contains(param.hash()) == false)
-		{
-			m_signalList.append(pSignal);
-			index = m_signalList.count() - 1;
+	m_signalList.push_back(pSignal);
+	int index = TO_INT(m_signalList.size() - 1);
 
-			m_signalHashMap[param.hash()] = index;
-		}
-
-	m_signalMutex.unlock();
+	m_signalHashMap[param.hash()] = index;
 
 	return index;
 }
@@ -281,46 +256,39 @@ Metrology::Signal* TuningSignalBase::signal(const Hash& hash) const
 		return nullptr;
 	}
 
-	Metrology::Signal* pSignal = nullptr;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (m_signalHashMap.contains(hash) == false)
+	{
+		return nullptr;
+	}
+	int index = m_signalHashMap[hash];
 
-		if (m_signalHashMap.contains(hash) == true)
-		{
-			int index = m_signalHashMap[hash];
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
+	{
+		return nullptr;
+	}
 
-			if (index >= 0 && index < m_signalList.count())
-			{
-				pSignal = m_signalList[index];
-			}
-		}
-
-	m_signalMutex.unlock();
-
-	return pSignal;
+	return m_signalList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 Metrology::Signal* TuningSignalBase::signal(int index) const
 {
-	Metrology::Signal* pSignal = nullptr;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_signalList.count())
-		{
-			pSignal = m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return pSignal;
+	return m_signalList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::SignalState TuningSignalBase::state(const Hash& hash)
+Metrology::SignalState TuningSignalBase::state(const Hash& hash) const
 {
 	if (hash == UNDEFINED_HASH)
 	{
@@ -328,27 +296,27 @@ Metrology::SignalState TuningSignalBase::state(const Hash& hash)
 		return Metrology::SignalState();
 	}
 
-	Metrology::SignalState state;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (m_signalHashMap.contains(hash) == false)
+	{
+		return Metrology::SignalState();
+	}
 
-		if (m_signalHashMap.contains(hash) == true)
-		{
-			int index = m_signalHashMap[hash];
+	int index = m_signalHashMap[hash];
 
-			if (index >= 0 && index < m_signalList.count())
-			{
-				Metrology::Signal* pSignal = m_signalList[index];
-				if (pSignal != nullptr)
-				{
-					state = pSignal->state();
-				}
-			}
-		}
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
+	{
+		return Metrology::SignalState();
+	}
 
-	m_signalMutex.unlock();
+	Metrology::Signal* pSignal = m_signalList[static_cast<quint64>(index)];
+	if (pSignal == nullptr)
+	{
+		return Metrology::SignalState();
+	}
 
-	return state;
+	return pSignal->state();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -361,55 +329,56 @@ void TuningSignalBase::setState(const Network::TuningSignalState& state)
 		return;
 	}
 
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		if (m_signalHashMap.contains(state.signalhash()) == true)
-		{
-			int index = m_signalHashMap[state.signalhash()];
+	if (m_signalHashMap.contains(state.signalhash()) == false)
+	{
+		return;
+	}
 
-			if (index >= 0 && index < m_signalList.count())
-			{
-				Metrology::Signal* pSignal = m_signalList[index];
+	int index = m_signalHashMap[state.signalhash()];
 
-				if (pSignal != nullptr)
-				{
-					pSignal->state().setValid(state.valid());
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
+	{
+		return;
+	}
 
-					pSignal->state().setValue(TuningSignalState(state).toDouble());
-				}
-			}
-		}
+	Metrology::Signal* pSignal = m_signalList[static_cast<quint64>(index)];
+	if (pSignal == nullptr)
+	{
+		return;
+	}
 
-	m_signalMutex.unlock();
+	pSignal->state().setValid(state.valid());
+
+	pSignal->state().setValue(TuningSignalState(state).toDouble());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void TuningSignalBase::setNovalid()
 {
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		int count = m_signalList.count();
+	quint64 count = m_signalList.size();
 
-		for(int i = 0; i < count; i++)
+	for(quint64 i = 0; i < count; i++)
+	{
+		Metrology::Signal* pSignal = m_signalList[i];
+		if (pSignal == nullptr)
 		{
-			Metrology::Signal* pSignal = m_signalList[i];
-			if (pSignal == nullptr)
-			{
-				continue;
-			}
-
-			pSignal->state().setValid(false);
+			continue;
 		}
 
-	m_signalMutex.unlock();
+		pSignal->state().setValid(false);
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningBase::TuningBase(QObject *parent) :
+TuningBase::TuningBase(QObject* parent) :
 	QObject(parent)
 {
 }
@@ -425,26 +394,18 @@ void TuningBase::clear()
 	m_sourceBase.clear();
 	m_signalsBase.clear();
 
-	m_cmdFowWriteMutex.lock();
+	QMutexLocker l(&m_cmdFowWriteMutex);
 
-		m_cmdFowWriteList.clear();
-
-	m_cmdFowWriteMutex.unlock();
+	m_cmdFowWriteList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 int TuningBase::cmdFowWriteCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_cmdFowWriteMutex);
 
-	m_cmdFowWriteMutex.lock();
-
-		count = m_cmdFowWriteList.count();
-
-	m_cmdFowWriteMutex.unlock();
-
-	return count;
+	return TO_INT(m_cmdFowWriteList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -457,13 +418,10 @@ void TuningBase::appendCmdFowWrite(const TuningWriteCmd& cmd)
 		return;
 	}
 
-	m_cmdFowWriteMutex.lock();
+	QMutexLocker l(&m_cmdFowWriteMutex);
 
-		m_cmdFowWriteList.append(cmd);
-
-	m_cmdFowWriteMutex.unlock();
+	m_cmdFowWriteList.push_back(cmd);
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -475,35 +433,33 @@ void TuningBase::appendCmdFowWrite(const Hash& signalHash, TuningValueType type,
 		return;
 	}
 
-	m_cmdFowWriteMutex.lock();
+	QMutexLocker l(&m_cmdFowWriteMutex);
 
-		TuningWriteCmd cmd;
+	TuningWriteCmd cmd;
 
-		cmd.setSignalHash(signalHash);
-		cmd.setType(type);
-		cmd.setValue(value);
+	cmd.setSignalHash(signalHash);
+	cmd.setType(type);
+	cmd.setValue(value);
 
-		m_cmdFowWriteList.append(cmd);
-
-	m_cmdFowWriteMutex.unlock();
+	m_cmdFowWriteList.push_back(cmd);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 TuningWriteCmd TuningBase::cmdFowWrite()
 {
-	TuningWriteCmd cmd;
+	QMutexLocker l(&m_cmdFowWriteMutex);
 
-	m_cmdFowWriteMutex.lock();
+	if (m_cmdFowWriteList.size() == 0)
+	{
+		return TuningWriteCmd();
+	}
 
-		if (m_cmdFowWriteList.isEmpty() == false)
-		{
-			cmd = m_cmdFowWriteList[0];
+	auto firstCmd = m_cmdFowWriteList.begin();
 
-			m_cmdFowWriteList.remove(0);
-		}
+	TuningWriteCmd cmd = *firstCmd;
 
-	m_cmdFowWriteMutex.unlock();
+	m_cmdFowWriteList.erase(firstCmd);
 
 	return cmd;
 }

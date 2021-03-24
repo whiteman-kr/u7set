@@ -1,16 +1,14 @@
 #include "MainWindow.h"
 #include "Options.h"
-#include "../lib/ProtoSerialization.h"
-#include "../lib/MemLeaksDetection.h"
+
+#include "../Proto/ProtoSerialization.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
 #endif
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-	initMemoryLeaksDetection();
-
     QApplication a(argc, argv);
 
     a.setApplicationName("Metrology");
@@ -18,20 +16,33 @@ int main(int argc, char *argv[])
     a.setOrganizationDomain("radiy.com");
 
 #ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("1.9.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));
+	a.setApplicationVersion(QString("2.0.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));
 #else
-	a.setApplicationVersion(QString("1.9.LOCALBUILD"));
+	a.setApplicationVersion(QString("2.0.LOCALBUILD"));
 #endif
 
+	theOptions.load();
+
+	// select language
+	//
 	QTranslator translator;
-	if (translator.load("Metrology_ru.qm", QApplication::applicationDirPath() + "/translations") == false)
+
+	if (theOptions.language().languageType() == LanguageType::Russian)
 	{
-		qDebug() << "Options::loadLanguage() - didn't load language file";
+		if (translator.load(QString(":%1/%2").arg(LANGUAGE_OPTIONS_DIR).arg(LANGUAGE_OPTIONS_FILE_RU)) == true)
+		{
+			qApp->installTranslator(&translator);
+		}
+		else
+		{
+			QString languageFilePath = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/" + LANGUAGE_OPTIONS_FILE_RU;
+			QMessageBox::critical(nullptr, "Russian language", QString("Didn't load russian language:\n%1").arg(languageFilePath));
+			theOptions.language().setLanguageType(LanguageType::English);
+		}
 	}
-	qApp->installTranslator(&translator);
 
-    theOptions.load();
-
+	// init SoftwareInfo
+	//
 	SoftwareInfo si;
 
 	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);
@@ -49,11 +60,7 @@ int main(int argc, char *argv[])
 
 	delete pMainWindow;
 
-    theOptions.unload();
-
-    google::protobuf::ShutdownProtobufLibrary();
-
-	dumpMemoryLeaks();
+	google::protobuf::ShutdownProtobufLibrary();
 
     return result;
 }

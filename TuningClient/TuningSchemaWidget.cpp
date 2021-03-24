@@ -29,6 +29,7 @@ bool TuningClientTuningController::writingEnabled() const
 
 TuningSchemaWidget::TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
 									   TuningClientTuningController* tuningController,
+									   VFrame30::LogController* logController,
 									   std::shared_ptr<VFrame30::Schema> schema,
                                        TuningSchemaManager* schemaManager,
                                        QWidget* parent) :
@@ -41,6 +42,7 @@ TuningSchemaWidget::TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
 	Q_UNUSED(tuningSignalManager);
 
 	clientSchemaView()->setTuningController(tuningController);
+	clientSchemaView()->setLogController(logController);
 	clientSchemaView()->setZoom(100, false);
 
 	return;

@@ -10,38 +10,9 @@
 //
 // -----------------------------------------------------------------------------
 
-const char* const DataSource::ELEMENT_DATA_SOURCES = "DataSources";
-const char* const DataSource::ELEMENT_DATA_SOURCE = "DataSource";
-const char* const DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS = "AssociatedSignals";
-
-const char* DataSource::DATA_TYPE_APP = "App";
-const char* DataSource::DATA_TYPE_DIAG = "Diag";
-const char* DataSource::DATA_TYPE_TUNING = "Tuning";
-
-const char* DataSource::PROP_DEVICE_LM_NUMBER = "LMNumber";
-const char* DataSource::PROP_DEVICE_SUBSYSTEM_CHANNEL = "SubsystemChannel";
-const char* DataSource::PROP_DEVICE_SUBSYSTEM_ID = "SubsystemID";
-
-const char* DataSource::PROP_LM_DATA_TYPE = "LmDataType";
-const char* DataSource::PROP_LM_ID = "LmEquipmentID";
-const char* DataSource::PROP_LM_PRESET_NAME = "LmPresetName";
-const char* DataSource::PROP_LM_NUMBER = "LmNumber";
-const char* DataSource::PROP_LM_CHANNEL = "LmChannel";
-const char* DataSource::PROP_LM_SUBSYSTEM_KEY = "LmSubsystemKey";
-const char* DataSource::PROP_LM_SUBSYSTEM_ID = "LmSubsystemID";
-const char* DataSource::PROP_LM_MODULE_TYPE = "LmModuleType";
-const char* DataSource::PROP_LM_CAPTION = "LmCaption";
-const char* DataSource::PROP_LM_ADAPTER_ID = "LmAdapterID";
-const char* DataSource::PROP_LM_DATA_ENABLE = "LmDataEnable";
-const char* DataSource::PROP_LM_DATA_IP = "LmDataIP";
-const char* DataSource::PROP_LM_DATA_PORT = "LmDataPort";
-const char* DataSource::PROP_LM_DATA_SIZE = "LmDataSize";
-const char* DataSource::PROP_LM_RUP_FRAMES_QUANTITY = "LmRupFramesQuantity";
-const char* DataSource::PROP_LM_DATA_ID = "LmDataID";
-const char* DataSource::PROP_LM_UNIQUE_ID = "LmUniqueID";
-const char* DataSource::PROP_SERVICE_ID = "ServiceID";
-const char* DataSource::PROP_COUNT = "Count";
-
+const QString DataSource::DATA_TYPE_APP("App");
+const QString DataSource::DATA_TYPE_DIAG("Diag");
+const QString DataSource::DATA_TYPE_TUNING("Tuning");
 
 DataSource::DataSource()
 {
@@ -51,91 +22,6 @@ DataSource::~DataSource()
 {
 }
 
-bool DataSource::getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
-										   DataType dataType,
-										   int adapterNo,
-										   E::LanControllerType lanControllerType,
-                                           const Hardware::EquipmentSet& equipmentSet,
-										   const SubsystemKeyMap& subsystemKeyMap,
-										   const QHash<QString, quint64>& lmUniqueIdMap,
-										   Builder::IssueLogger* log)
-{
-	TEST_PTR_RETURN_FALSE(log);
-	TEST_PTR_LOG_RETURN_FALSE(lm, log);
-
-	m_lmDataType = dataType;
-	m_lmEquipmentID = lm->equipmentIdTemplate();
-	m_lmPresetName = lm->presetName();
-	m_lmModuleType = lm->moduleType();
-	m_lmCaption = lm->caption();
-
-	bool result = true;
-
-	result &= DeviceHelper::getIntProperty(lm, PROP_DEVICE_LM_NUMBER, &m_lmNumber, log);
-	result &= DeviceHelper::getStrProperty(lm, PROP_DEVICE_SUBSYSTEM_CHANNEL, &m_lmSubsystemChannel, log);
-	result &= DeviceHelper::getStrProperty(lm, PROP_DEVICE_SUBSYSTEM_ID, &m_lmSubsystemID, log);
-
-	if (subsystemKeyMap.contains(m_lmSubsystemID) == false)
-	{
-		// Subsystem '%1' is not found in subsystem set (Logic Module '%2')
-		//
-		log->errCFG3001(m_lmSubsystemID, lm->equipmentIdTemplate());
-		return false;
-	}
-
-	m_lmSubsystemKey = subsystemKeyMap.value(m_lmSubsystemID);
-	m_lmUniqueID = lmUniqueIdMap.value(lm->equipmentIdTemplate(), 0);
-
-	LanControllerInfo lanControllerInfo;
-
-	result &= LanControllerInfoHelper::getInfo(*lm, adapterNo, lanControllerType, &lanControllerInfo, equipmentSet, log);
-
-	m_lmAdapterID = lanControllerInfo.equipmentID;
-
-	switch(m_lmDataType)
-	{
-	case DataType::App:
-
-		assert(lanControllerType == E::LanControllerType::AppData || lanControllerType == E::LanControllerType::AppAndDiagData);
-
-		m_lmDataEnable = lanControllerInfo.appDataEnable;
-		m_lmAddressPort.setAddressPort(lanControllerInfo.appDataIP, lanControllerInfo.appDataPort);
-		m_lmDataID = lanControllerInfo.appDataUID;
-		m_lmDataSize = lanControllerInfo.appDataSizeBytes;
-		m_lmRupFramesQuantity = lanControllerInfo.appDataFramesQuantity;
-		m_serviceID = lanControllerInfo.appDataServiceID;
-		break;
-
-	case DataType::Diag:
-
-		assert(lanControllerType == E::LanControllerType::DiagData || lanControllerType == E::LanControllerType::AppAndDiagData);
-
-		m_lmDataEnable = lanControllerInfo.diagDataEnable;
-		m_lmAddressPort.setAddressPort(lanControllerInfo.diagDataIP, lanControllerInfo.diagDataPort);
-		m_lmDataID = lanControllerInfo.diagDataUID;
-		m_lmDataSize = lanControllerInfo.diagDataSizeBytes;
-		m_lmRupFramesQuantity = lanControllerInfo.diagDataFramesQuantity;
-		m_serviceID = lanControllerInfo.diagDataServiceID;
-		break;
-
-	case DataType::Tuning:
-
-		assert(lanControllerType == E::LanControllerType::Tuning);
-
-		m_lmDataEnable = lanControllerInfo.tuningEnable;
-		m_lmAddressPort.setAddressPort(lanControllerInfo.tuningIP, lanControllerInfo.tuningPort);
-		m_lmDataID = 0;
-		m_lmDataSize = 0;
-		m_lmRupFramesQuantity = 0;
-		m_serviceID = lanControllerInfo.tuningServiceID;
-		break;
-
-	default:
-		assert(false);
-	}
-
-	return result;
-}
 
 QString DataSource::dataTypeToString(DataType dataType)
 {
@@ -181,33 +67,33 @@ DataSource::DataType DataSource::stringToDataType(const QString& dataTypeStr)
 
 void DataSource::writeToXml(XmlWriteHelper& xml) const
 {
-	xml.writeStartElement(ELEMENT_DATA_SOURCE);
+	xml.writeStartElement(XmlElement::DATA_SOURCE);
 
-	xml.writeStringAttribute(PROP_LM_DATA_TYPE, dataTypeToString(m_lmDataType));
-	xml.writeStringAttribute(PROP_LM_ID, m_lmEquipmentID);
-	xml.writeStringAttribute(PROP_LM_PRESET_NAME, m_lmPresetName);
+	xml.writeStringAttribute(XmlAttribute::LM_DATA_TYPE, dataTypeToString(m_lmDataType));
+	xml.writeStringAttribute(XmlAttribute::LM_ID, m_lmEquipmentID);
+	xml.writeStringAttribute(XmlAttribute::LM_PRESET_NAME, m_lmPresetName);
 
-	xml.writeIntAttribute(PROP_LM_MODULE_TYPE, m_lmModuleType, true);
-	xml.writeStringAttribute(PROP_LM_SUBSYSTEM_ID, m_lmSubsystemID);
-	xml.writeIntAttribute(PROP_LM_SUBSYSTEM_KEY, m_lmSubsystemKey);
-	xml.writeIntAttribute(PROP_LM_NUMBER, m_lmNumber);
-	xml.writeStringAttribute(PROP_LM_CHANNEL, m_lmSubsystemChannel);
+	xml.writeIntAttribute(XmlAttribute::LM_MODULE_TYPE, m_lmModuleType, true);
+	xml.writeStringAttribute(XmlAttribute::LM_SUBSYSTEM_ID, m_lmSubsystemID);
+	xml.writeIntAttribute(XmlAttribute::LM_SUBSYSTEM_KEY, m_lmSubsystemKey);
+	xml.writeIntAttribute(XmlAttribute::LM_NUMBER, m_lmNumber);
+	xml.writeStringAttribute(XmlAttribute::LM_CHANNEL, m_lmSubsystemChannel);
 
-	xml.writeStringAttribute(PROP_LM_CAPTION, m_lmCaption);
-	xml.writeStringAttribute(PROP_LM_ADAPTER_ID, m_lmAdapterID);
-	xml.writeBoolAttribute(PROP_LM_DATA_ENABLE, m_lmDataEnable);
-	xml.writeStringAttribute(PROP_LM_DATA_IP, m_lmAddressPort.addressStr());
-	xml.writeIntAttribute(PROP_LM_DATA_PORT, m_lmAddressPort.port());
-	xml.writeIntAttribute(PROP_LM_DATA_SIZE, m_lmDataSize);
-	xml.writeIntAttribute(PROP_LM_RUP_FRAMES_QUANTITY, m_lmRupFramesQuantity);
-	xml.writeUInt32Attribute(PROP_LM_DATA_ID, m_lmDataID, true);
-	xml.writeUInt64Attribute(PROP_LM_UNIQUE_ID, m_lmUniqueID, true);
+	xml.writeStringAttribute(XmlAttribute::LM_CAPTION, m_lmCaption);
+	xml.writeStringAttribute(XmlAttribute::LM_ADAPTER_ID, m_lmAdapterID);
+	xml.writeBoolAttribute(XmlAttribute::LM_DATA_ENABLE, m_lmDataEnable);
+	xml.writeStringAttribute(XmlAttribute::LM_DATA_IP, m_lmAddressPort.addressStr());
+	xml.writeIntAttribute(XmlAttribute::LM_DATA_PORT, m_lmAddressPort.port());
+	xml.writeIntAttribute(XmlAttribute::LM_DATA_SIZE, m_lmDataSize);
+	xml.writeIntAttribute(XmlAttribute::LM_RUP_FRAMES_QUANTITY, m_lmRupFramesQuantity);
+	xml.writeUInt32Attribute(XmlAttribute::LM_DATA_ID, m_lmDataID, true);
+	xml.writeUInt64Attribute(XmlAttribute::LM_UNIQUE_ID, m_lmUniqueID, true);
 
-	xml.writeStringAttribute(PROP_SERVICE_ID, m_serviceID);
+	xml.writeStringAttribute(XmlAttribute::SERVICE_ID, m_serviceID);
 
-	xml.writeStartElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS);
+	xml.writeStartElement(XmlElement::ASSOCIATED_SIGNALS);
 
-	xml.writeIntAttribute(PROP_COUNT, m_associatedSignals.count());
+	xml.writeIntAttribute(XmlAttribute::COUNT, m_associatedSignals.count());
 
 	xml.writeString(m_associatedSignals.join(","));
 
@@ -220,7 +106,7 @@ void DataSource::writeToXml(XmlWriteHelper& xml) const
 
 bool DataSource::readFromXml(XmlReadHelper& xml)
 {
-	if (xml.findElement(ELEMENT_DATA_SOURCE) == false)
+	if (xml.findElement(XmlElement::DATA_SOURCE) == false)
 	{
 		return false;
 	}
@@ -229,51 +115,51 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 	QString str;
 
-	result &= xml.readStringAttribute(PROP_LM_DATA_TYPE, &str);
+	result &= xml.readStringAttribute(XmlAttribute::LM_DATA_TYPE, &str);
 	m_lmDataType = stringToDataType(str);
 
-	result &= xml.readStringAttribute(PROP_LM_ID, &m_lmEquipmentID);
-	result &= xml.readStringAttribute(PROP_LM_PRESET_NAME, &m_lmPresetName);
+	result &= xml.readStringAttribute(XmlAttribute::LM_ID, &m_lmEquipmentID);
+	result &= xml.readStringAttribute(XmlAttribute::LM_PRESET_NAME, &m_lmPresetName);
 
-	result &= xml.readIntAttribute(PROP_LM_MODULE_TYPE, &m_lmModuleType);
-	result &= xml.readStringAttribute(PROP_LM_SUBSYSTEM_ID,&m_lmSubsystemID);
-	result &= xml.readIntAttribute(PROP_LM_SUBSYSTEM_KEY, &m_lmSubsystemKey);
-	result &= xml.readIntAttribute(PROP_LM_NUMBER, &m_lmNumber);
-	result &= xml.readStringAttribute(PROP_LM_CHANNEL,&m_lmSubsystemChannel);
+	result &= xml.readIntAttribute(XmlAttribute::LM_MODULE_TYPE, &m_lmModuleType);
+	result &= xml.readStringAttribute(XmlAttribute::LM_SUBSYSTEM_ID,&m_lmSubsystemID);
+	result &= xml.readIntAttribute(XmlAttribute::LM_SUBSYSTEM_KEY, &m_lmSubsystemKey);
+	result &= xml.readIntAttribute(XmlAttribute::LM_NUMBER, &m_lmNumber);
+	result &= xml.readStringAttribute(XmlAttribute::LM_CHANNEL,&m_lmSubsystemChannel);
 
-	result &= xml.readStringAttribute(PROP_LM_CAPTION, &m_lmCaption);
-	result &= xml.readStringAttribute(PROP_LM_ADAPTER_ID, &m_lmAdapterID);
-	result &= xml.readBoolAttribute(PROP_LM_DATA_ENABLE, &m_lmDataEnable);
+	result &= xml.readStringAttribute(XmlAttribute::LM_CAPTION, &m_lmCaption);
+	result &= xml.readStringAttribute(XmlAttribute::LM_ADAPTER_ID, &m_lmAdapterID);
+	result &= xml.readBoolAttribute(XmlAttribute::LM_DATA_ENABLE, &m_lmDataEnable);
 
 	QString ipStr;
 	int port = 0;
 
-	result &= xml.readStringAttribute(PROP_LM_DATA_IP, &ipStr);
-	result &= xml.readIntAttribute(PROP_LM_DATA_PORT, &port);
+	result &= xml.readStringAttribute(XmlAttribute::LM_DATA_IP, &ipStr);
+	result &= xml.readIntAttribute(XmlAttribute::LM_DATA_PORT, &port);
 
 	m_lmAddressPort.setAddress(ipStr);
 	m_lmAddressPort.setPort(port);
 
-	result &= xml.readIntAttribute(PROP_LM_DATA_SIZE, &m_lmDataSize);
-	result &= xml.readIntAttribute(PROP_LM_RUP_FRAMES_QUANTITY, &m_lmRupFramesQuantity);
+	result &= xml.readIntAttribute(XmlAttribute::LM_DATA_SIZE, &m_lmDataSize);
+	result &= xml.readIntAttribute(XmlAttribute::LM_RUP_FRAMES_QUANTITY, &m_lmRupFramesQuantity);
 
-	result &= xml.readUInt32Attribute(PROP_LM_DATA_ID, &m_lmDataID);
-	result &= xml.readUInt64Attribute(PROP_LM_UNIQUE_ID, &m_lmUniqueID);
+	result &= xml.readUInt32Attribute(XmlAttribute::LM_DATA_ID, &m_lmDataID);
+	result &= xml.readUInt64Attribute(XmlAttribute::LM_UNIQUE_ID, &m_lmUniqueID);
 
-	result &= xml.readStringAttribute(PROP_SERVICE_ID, &m_lmCaption);
+	result &= xml.readStringAttribute(XmlAttribute::SERVICE_ID, &m_lmCaption);
 
-	if (xml.findElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS) == false)
+	if (xml.findElement(XmlElement::ASSOCIATED_SIGNALS) == false)
 	{
 		return false;
 	}
 
 	int signalCount = 0;
 
-	result &= xml.readIntAttribute(PROP_COUNT, &signalCount);
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &signalCount);
 
 	QString signalIDs;
 
-	result &= xml.readStringElement(ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS, &signalIDs);
+	result &= xml.readStringElement(XmlElement::ASSOCIATED_SIGNALS, &signalIDs);
 
 	m_associatedSignals = signalIDs.split(",", Qt::SkipEmptyParts);
 
@@ -414,13 +300,13 @@ quint64 DataSource::generateID() const
 }
 
 
-
-
 // -----------------------------------------------------------------------------
 //
 // DataSourceOnline class implementation
 //
 // -----------------------------------------------------------------------------
+
+const QString DataSourceOnline::DATE_TIME_FORMAT_STR("%1:%2:%3.%4 %5/%6/%7");
 
 DataSourceOnline::DataSourceOnline() :
 	m_rupFrameTimeQueue(10)
@@ -440,11 +326,18 @@ DataSourceOnline::~DataSourceOnline()
 	}
 }
 
-bool DataSourceOnline::init()
+bool DataSourceOnline::initQueue()
 {
-	m_rupFrameTimeQueue.resize(lmRupFramesQuantity() * 200 * 5);			// 5 seconds queue
+	int queueSize = FastThreadSafeQueue<RupFrameTime>::MIN_QUEUE_SIZE;
 
-	setRupFramesQueueSize(m_rupFrameTimeQueue.queueSize(QThread::currentThread()));
+	if (lmRupFramesQuantity() > 0)
+	{
+		queueSize = lmRupFramesQuantity() * 200 * 3;	// 3 seconds queue;
+	}
+
+	m_rupFrameTimeQueue.resize(queueSize);
+
+	setRupFramesQueueSize(queueSize);
 
 	return true;
 }
@@ -459,6 +352,16 @@ void DataSourceOnline::updateUptime()
 	{
 		m_uptime = (m_lastPacketSystemTime - m_firstPacketSystemTime) / 1000;
 	}
+}
+
+QString DataSourceOnline::rupFramePlantTimeStr() const
+{
+	return getTimeStr(m_rupFramePlantTime);
+}
+
+QString DataSourceOnline::lastPacketSystemTimeStr() const
+{
+	return getTimeStr(m_lastPacketSystemTime);
 }
 
 bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
@@ -494,6 +397,11 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 	if (frameNumber == 0)
 	{
 		m_frame0ServerTime = rupFrameTime.serverTime;
+		m_isSimPacket = rupFrameTime.isSimFrame;
+	}
+	else
+	{
+		m_isSimPacket |= rupFrameTime.isSimFrame;
 	}
 
 	// copy RUP frame header
@@ -555,7 +463,12 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 	return true;
 }
 
-bool DataSourceOnline::getDataToParsing(Times* times, quint16* packetNo, const char** rupData, int* rupDataSize, bool* dataReceivingTimeout)
+bool DataSourceOnline::getDataToParsing(Times* times,
+										bool* isSimPacket,
+										quint16* packetNo,
+										const char** rupData,
+										int* rupDataSize,
+										bool* dataReceivingTimeout)
 {
 	if (m_dataReadyToParsing == false)
 	{
@@ -574,6 +487,7 @@ bool DataSourceOnline::getDataToParsing(Times* times, quint16* packetNo, const c
 #endif
 
 	*times = m_rupDataTimes;
+	*isSimPacket = m_isSimPacket;
 	*packetNo = m_packetNo;
 	*rupData = reinterpret_cast<const char*>(m_rupFramesData);
 	*rupDataSize = m_rupDataSize;
@@ -657,29 +571,34 @@ void DataSourceOnline::calcDataReceivingRate()
 	return;
 }
 
-
-/*
-void DataSourceOnline::stop()
+QString DataSourceOnline::getTimeStr(qint64 timeMs) const
 {
-	setState(E::DataSourceState::Stopped);
-	m_dataReceivingRate = 0;
-	m_receivedDataSize = 0;
+	QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, Qt::UTC, 0);
+
+	QDate date = dt.date();
+	QTime time = dt.time();
+
+	return 	QString(DATE_TIME_FORMAT_STR).
+				arg(time.hour(), 2, 10, QLatin1Char('0')).
+				arg(time.minute(), 2, 10, QLatin1Char('0')).
+				arg(time.second(), 2, 10, QLatin1Char('0')).
+				arg(time.msec(), 3, 10, QLatin1Char('0')).
+				arg(date.day(), 2, 10, QLatin1Char('0')).
+				arg(date.month(), 2, 10, QLatin1Char('0')).
+				arg(date.year(), 4, 10, QLatin1Char('0'));
 }
 
-
-void DataSourceOnline::resume()
-{
-	setState(E::DataSourceState::NoData);
-}*/
-
-
-void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame, const QThread* thread)
+void DataSourceOnline::pushRupFrame(qint64 serverTime,
+									bool isSimFrame,
+									const Rup::Frame& rupFrame,
+									const QThread* thread)
 {
 	RupFrameTime* rupFrameTime = m_rupFrameTimeQueue.beginPush(thread);
 
 	if (rupFrameTime != nullptr)
 	{
 		rupFrameTime->serverTime = serverTime;
+		rupFrameTime->isSimFrame = isSimFrame;
 		memcpy(&rupFrameTime->rupFrame, &rupFrame, sizeof(rupFrame));
 	}
 	else
@@ -745,9 +664,8 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 					m_firstPacketSystemTime = 0;
 					m_lastPacketSystemTime = 0;
 
-					m_processedPacketCount = 0;
-					m_receivedDataSize = 0;
 					m_dataReceivingRate = 0;
+
 					m_prevCalcTime = -1;
 
 					updateUptime();
@@ -767,11 +685,27 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 
 		updateUptime();
 
+		if (m_state == E::DataSourceState::NoData)
+		{
+			m_receivedDataSize = 0;
+			m_receivedFramesCount = 0;
+			m_receivedPacketCount = 0;
+			m_lostPacketCount = 0;
+			m_processedPacketCount = 0;
+
+			m_errorProtocolVersion = 0;
+			m_errorFramesQuantity = 0;
+			m_errorFrameNo = 0;
+			m_errorDataID = 0;
+			m_errorFrameSize = 0;
+			m_errorDuplicatePlantTime = 0;
+			m_errorNonmonotonicPlantTime = 0;
+		}
+
 		m_state = E::DataSourceState::ReceiveData;
 
 		m_dataRecevingTimeout = false;
 		m_dataReceives = true;
-		m_receivedFramesCount++;
 		m_receivedDataSize += sizeof(Rup::Frame);
 
 		calcDataReceivingRate();

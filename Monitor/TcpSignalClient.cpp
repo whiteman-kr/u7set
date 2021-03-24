@@ -338,21 +338,18 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 	{
 		const ::Proto::AppSignal& protoSignal = m_getSignalParamReply.appsignals(i);
 
-		AppSignalParam s;
+		AppSignalParam& s = appSignals.emplace_back();
 		s.load(protoSignal);
 
-		if (s.hash() == 0)
+		if (s.hash() == 0 || s.appSignalId().isEmpty() == true)
 		{
 			qDebug() << s.appSignalId();
 			qDebug() << s.caption();
-		}
 
-		Q_ASSERT(s.hash() != 0);
-		Q_ASSERT(s.appSignalId().isEmpty() == false);
+			Q_ASSERT(s.hash() != 0);
+			Q_ASSERT(s.appSignalId().isEmpty() == false);
 
-		if (s.hash() != 0 && s.appSignalId().isEmpty() == false)
-		{
-			appSignals.push_back(s);
+			appSignals.pop_back();
 		}
 	}
 

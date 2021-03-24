@@ -2,6 +2,7 @@
 
 #include "../lib/DbController.h"
 #include "../lib/DeviceObject.h"
+#include "../lib/ScriptDeviceObject.h"
 #include "../lib/Crc.h"
 #include "../lib/SignalProperties.h"
 #include "../lib/Connection.h"
@@ -58,11 +59,10 @@ namespace Builder
 	// ------------------------------------------------------------------------
 
 	ConfigurationBuilder::ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, Context* context):
-		m_buildWorkerThread(buildWorkerThread),
 		m_buildResultWriter(context->m_buildResultWriter.get()),
-		m_jsEngine(&context->m_jsEngine),
+		m_buildWorkerThread(buildWorkerThread),
 		m_db(&context->m_db),
-		m_deviceRoot(context->m_equipmentSet->root()),
+		m_deviceRoot(context->m_equipmentSet->root().get()),
 		m_fscModules(context->m_fscModules),
 		m_lmDescriptions(context->m_fscDescriptions.get()),
 		m_signalSet(context->m_signalSet.get()),
@@ -322,7 +322,8 @@ namespace Builder
 		QByteArray lmReportData;
 		for (QString s : lmReport)
 		{
-			lmReportData.append(s + "\r\n");
+			lmReportData.append(s.toUtf8());
+			lmReportData.append(QChar::LineFeed);
 		}
 
 		if (m_buildResultWriter->addFile("Reports", "LmJumpers.txt", lmReportData) == nullptr)
@@ -401,7 +402,7 @@ namespace Builder
 		//
 		std::vector<DbFileInfo> fileList;
 
-		ok = db()->getFileList(&fileList, db()->mcFileId(), lmDescription->configurationStringFile(), true, nullptr);
+		ok = db()->getFileList(&fileList, DbDir::ModuleConfigurationDir, lmDescription->configurationStringFile(), true, nullptr);
 
 		if (ok == false || fileList.size() != 1)
 		{
@@ -424,33 +425,31 @@ namespace Builder
 
 		// Attach objects
 		//
-		m_jsEngine->installExtensions(QJSEngine::ConsoleExtension);
+
+		std::unique_ptr<QJSEngine> jsEngine = std::make_unique<QJSEngine>();
+
+		jsEngine->installExtensions(QJSEngine::ConsoleExtension);
 
 		JsSignalSet jsSignalSet(m_signalSet);
 
-		QJSValue jsBuilder = m_jsEngine->newQObject(this);
+		QJSValue jsBuilder = jsEngine->newQObject(this);
 		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
 
-		QJSValue jsRoot = m_jsEngine->newQObject(m_deviceRoot);
-		QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
+		QJSValue jsRoot = jsEngine->newQObject(new Hardware::ScriptDeviceObject{m_deviceRoot->sharedPtr()});
 
-		QJSValue jsLogicModules = m_jsEngine->newArray((int)subsystemModules.size());
+		QJSValue jsLogicModules = jsEngine->newArray((int)subsystemModules.size());
 		for (int i = 0; i < subsystemModules.size(); i++)
 		{
-			assert(jsLogicModules.isArray());
-
-			QJSValue module = m_jsEngine->newQObject(subsystemModules[i]);
-			QQmlEngine::setObjectOwnership(subsystemModules[i], QQmlEngine::CppOwnership);
+			Hardware::ScriptDeviceModule* m = new Hardware::ScriptDeviceModule{subsystemModules[i]->toModule()};
+			QJSValue module = jsEngine->newQObject(m);
 
 			jsLogicModules.setProperty(i, module);
 		}
 
 		int frameSize = lmDescription->flashMemory().m_configFramePayload;
-
 		int frameCount = lmDescription->flashMemory().m_configFrameCount;
 
 		QString subsysStrID = subsystemModules[0]->propertyValue("SubsystemID").toString();
-
 		int subsysID = m_subsystems->ssKey(subsysStrID);
 
 		int configUartId = lmDescription->flashMemory().m_configUartId;
@@ -466,41 +465,40 @@ namespace Builder
 
 		m_buildResultWriter->firmwareWriter()->setScriptFirmware(subsysStrID, configUartId);
 
-		QJSValue jsFirmware = m_jsEngine->newQObject(m_buildResultWriter->firmwareWriter());
+		QJSValue jsFirmware = jsEngine->newQObject(m_buildResultWriter->firmwareWriter());
 		QQmlEngine::setObjectOwnership(m_buildResultWriter->firmwareWriter(), QQmlEngine::CppOwnership);
 
-		QJSValue jsLog = m_jsEngine->newQObject(m_log);
+		QJSValue jsLog = jsEngine->newQObject(m_log);
 		QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
 
-		QJSValue jsSignalSetObject = m_jsEngine->newQObject(&jsSignalSet);
+		QJSValue jsSignalSetObject = jsEngine->newQObject(&jsSignalSet);
 		QQmlEngine::setObjectOwnership(&jsSignalSet, QQmlEngine::CppOwnership);
 
-		QJSValue jsSubsystems = m_jsEngine->newQObject(m_subsystems);
+		QJSValue jsSubsystems = jsEngine->newQObject(m_subsystems);
 		QQmlEngine::setObjectOwnership(m_subsystems, QQmlEngine::CppOwnership);
 
-		QJSValue jsOpticModuleStorage = m_jsEngine->newQObject(m_opticModuleStorage);
+		QJSValue jsOpticModuleStorage = jsEngine->newQObject(m_opticModuleStorage);
 		QQmlEngine::setObjectOwnership(m_opticModuleStorage, QQmlEngine::CppOwnership);
 
-		QJSValue jsLogicModuleDescription = m_jsEngine->newQObject(lmDescription);
+		QJSValue jsLogicModuleDescription = jsEngine->newQObject(lmDescription);
 		QQmlEngine::setObjectOwnership(lmDescription, QQmlEngine::CppOwnership);
 
 		// Run script
 		//
-
-		QJSValue jsEval = m_jsEngine->evaluate(contents);
+		QJSValue jsEval = jsEngine->evaluate(contents);
 		if (jsEval.isError() == true)
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Module configuration script '%1' evaluation failed at line %2: %3").arg(lmDescription->configurationStringFile()).arg(jsEval.property("lineNumber").toInt()).arg(jsEval.toString()));
 			return false;
 		}
 
-		if (!m_jsEngine->globalObject().hasProperty("main"))
+		if (!jsEngine->globalObject().hasProperty("main"))
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Script has no \"main\" function"));
 			return false;
 		}
 
-		if (!m_jsEngine->globalObject().property("main").isCallable())
+		if (!jsEngine->globalObject().property("main").isCallable())
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("\"main\" property of script is not callable"));
 			return false;
@@ -518,7 +516,7 @@ namespace Builder
 		args << jsOpticModuleStorage;
 		args << jsLogicModuleDescription;
 
-		QJSValue jsResult = m_jsEngine->globalObject().property("main").call(args);
+		QJSValue jsResult = jsEngine->globalObject().property("main").call(args);
 
 		if (jsResult.isError() == true)
 		{
@@ -617,7 +615,7 @@ namespace Builder
 		int childCount = object->childrenCount();
 		for (int i = 0; i < childCount; i++)
 		{
-			writeDeviceObjectToJson(object->child(i), jObjects);
+			writeDeviceObjectToJson(object->child(i).get(), jObjects);
 		}
 
 		if (jObjects.count() != 0)

@@ -1,6 +1,8 @@
 #include "MetrologyCfgGenerator.h"
+
 #include "../lib/MetrologySignal.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/MetrologyConnection.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/SignalProperties.h"
 
@@ -13,179 +15,42 @@ namespace Builder
 	{
 	}
 
-
 	MetrologyCfgGenerator::~MetrologyCfgGenerator()
 	{
 	}
 
+	bool MetrologyCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		MetrologySettingsGetter settingsGetter;
 
-	bool MetrologyCfgGenerator::generateConfiguration()
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<MetrologySettings>(profile, settingsGetter);
+	}
+
+	bool MetrologyCfgGenerator::generateConfigurationStep1()
 	{
 		bool result = true;
 
-		result &= writeSettings();
+		result &= writeDatabaseInfo();
 		result &= writeMetrologyItemsXml();
 		result &= writeMetrologySignalSet();
 
 		return result;
 	}
 
-	bool MetrologyCfgGenerator::writeSettings()
+	bool MetrologyCfgGenerator::writeDatabaseInfo()
 	{
 		QXmlStreamWriter& xmlWriter = m_cfgXml->xmlWriter();
 
-		//
-		//
 		xmlWriter.writeStartElement("DatabaseInfo");
 		{
 			xmlWriter.writeAttribute("Version", QString::number(m_dbController->databaseVersion()));
 		}
 		xmlWriter.writeEndElement();
-
-		//
-		//
-
-		Hardware::DeviceObject* pObjectSoftware = m_equipment->deviceObject(m_software->equipmentId());
-		if (pObjectSoftware == nullptr || pObjectSoftware->isSoftware() == false)
-		{
-			// Unknown software type (Software object StrID '%1').
-			//
-			m_log->errEQP6100(m_software->equipmentId(), m_software->uuid());
-			xmlWriter.writeTextElement("Error", tr("Software Metrology (%1) not found").arg(m_software->equipmentId()));
-			return false;
-		}
-
-		//
-		//
-
-		xmlWriter.writeStartElement("Settings");
-		{
-			bool result = true;
-
-
-			// AppDataService
-			//
-
-			QString appDataServiceId1;
-			QString appDataServiceId2;
-
-			result &= DeviceHelper::getStrProperty(pObjectSoftware, "AppDataServiceID1" , &appDataServiceId1, m_log);
-			result &= DeviceHelper::getStrProperty(pObjectSoftware, "AppDataServiceID2" , &appDataServiceId2, m_log);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			if (appDataServiceId1.isEmpty() == true &&
-				appDataServiceId2.isEmpty() == true)
-			{
-				// Property '%1.%2' is empty.
-				//
-				m_log->errCFG3022(m_software->equipmentId(), "AppDataServiceID1");
-				m_log->errCFG3022(m_software->equipmentId(), "AppDataServiceID2");
-
-				xmlWriter.writeTextElement("Error", tr("Property AppDataServiceID1 and AppDataServiceID2 is empty"));
-				return false;
-			}
-
-			bool appDataPropertyIsValid1 = false;
-			bool appDataPropertyIsValid2 = false;
-
-			AppDataServiceSettings adsSettings1;
-			AppDataServiceSettings adsSettings2;
-
-			if (appDataServiceId1.isEmpty() == false)
-			{
-				Hardware::Software* appDataObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId1));
-
-				if (appDataObject1 == nullptr)
-				{
-					// Property '%1.%2' is linked to undefined software ID '%3'.
-					//
-					m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID1", appDataServiceId1);
-				}
-				else
-				{
-					adsSettings1.readFromDevice(m_equipment, appDataObject1, m_log);
-					appDataPropertyIsValid1 = true;
-				}
-			}
-
-			if (appDataServiceId2.isEmpty() == false)
-			{
-				Hardware::Software* appDataObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId2));
-
-				if (appDataObject2 == nullptr)
-				{
-					// Property '%1.%2' is linked to undefined software ID '%3'.
-					//
-					m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID2", appDataServiceId2);
-				}
-				else
-				{
-					adsSettings2.readFromDevice(m_equipment, appDataObject2, m_log);
-					appDataPropertyIsValid2 = true;
-				}
-			}
-
-			xmlWriter.writeStartElement("AppDataService");
-			{
-				xmlWriter.writeAttribute("PropertyIsValid1", appDataPropertyIsValid1 == true ? tr("true") : tr("false"));
-				xmlWriter.writeAttribute("AppDataServiceID1", appDataServiceId1);
-				xmlWriter.writeAttribute("ip1", adsSettings1.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port1", QString::number(adsSettings1.clientRequestIP.port()));
-
-				xmlWriter.writeAttribute("PropertyIsValid2", appDataPropertyIsValid2 == true ? tr("true") : tr("false"));
-				xmlWriter.writeAttribute("AppDataServiceID2", appDataServiceId2);
-				xmlWriter.writeAttribute("ip2", adsSettings2.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port2", QString::number(adsSettings2.clientRequestIP.port()));
-			}
-			xmlWriter.writeEndElement(); // </AppDataService>
-
-
-			// TuningService
-			//
-
-			QString tuningServiceId;
-
-			result &= DeviceHelper::getStrProperty(pObjectSoftware, "TuningServiceID" , &tuningServiceId, m_log);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			bool tuningPropertyIsValid = false;
-
-			TuningServiceSettings tuningSettings;
-
-			if (tuningServiceId.isEmpty() == false)
-			{
-				Hardware::Software* tuningObject = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(tuningServiceId));
-
-				if (tuningObject == nullptr)
-				{
-					// Property '%1.%2' is linked to undefined software ID '%3'.
-					//
-					m_log->wrnCFG3015(m_software->equipmentId(), "TuningServiceID", tuningServiceId);
-				}
-				else
-				{
-					tuningSettings.readFromDevice(tuningObject, m_log);
-					tuningPropertyIsValid = true;
-				}
-			}
-
-			xmlWriter.writeStartElement("TuningService");
-			{
-				xmlWriter.writeAttribute("PropertyIsValid", tuningPropertyIsValid == true ? tr("true") : tr("false"));
-				xmlWriter.writeAttribute("SoftwareMetrologyID", m_software->equipmentId());
-				xmlWriter.writeAttribute("ip", tuningSettings.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port", QString::number(tuningSettings.clientRequestIP.port()));
-			}
-			xmlWriter.writeEndElement(); // </TuningService>
-		} // </Settings>
 
 		return true;
 	}
@@ -211,7 +76,7 @@ namespace Builder
 				int systemsCount = m_equipment->root()->childrenCount();
 				for (int s = 0; s < systemsCount; s++)
 				{
-					Hardware::DeviceObject* pSystem = m_equipment->root()->child(s);
+					Hardware::DeviceObject* pSystem = m_equipment->root()->child(s).get();
 					if (pSystem == nullptr || pSystem->isSystem() == false)
 					{
 						continue;
@@ -222,7 +87,7 @@ namespace Builder
 					int racksCount = pSystem->childrenCount();
 					for (int r = 0; r < racksCount; r++)
 					{
-						Hardware::DeviceObject* pRack = pSystem->child(r);
+						Hardware::DeviceObject* pRack = pSystem->child(r).get();
 						if (pRack == nullptr || pRack->isRack() == false)
 						{
 							continue;
@@ -236,7 +101,7 @@ namespace Builder
 				//
 				xml.writeStartElement("Racks");
 				{
-					xml.writeIntAttribute("Count", racks.count());
+					xml.writeIntAttribute(XmlAttribute::COUNT, racks.count());
 
 					for(Metrology::RackParam rack : racks)
 					{
@@ -248,14 +113,14 @@ namespace Builder
 						rack.writeToXml(xml);
 					}
 				}
-				xml.writeEndElement();
+				xml.writeEndElement(); // Metrology::RackParam
 
 
 				// Creating tuning sources list from software property
 				//
 				QStringList tuningSourceEquipmentID;
 
-				Hardware::DeviceObject* pObjectSoftware = m_equipment->deviceObject(m_software->equipmentId());
+				Hardware::DeviceObject* pObjectSoftware = m_equipment->deviceObject(m_software->equipmentId()).get();
 				if (pObjectSoftware != nullptr && pObjectSoftware->isSoftware() == true)
 				{
 					QString propertyValue;
@@ -273,7 +138,7 @@ namespace Builder
 				//
 				xml.writeStartElement("TuningSources");
 				{
-					xml.writeIntAttribute("Count", tuningSourceEquipmentID.count());
+					xml.writeIntAttribute(XmlAttribute::COUNT, tuningSourceEquipmentID.count());
 
 					for(QString equipmentID : tuningSourceEquipmentID)
 					{
@@ -289,26 +154,90 @@ namespace Builder
 						xml.writeEndElement();
 					}
 				}
-				xml.writeEndElement();
+				xml.writeEndElement(); // TuningSourceEquipmentID
+
+
+				// Creating metrology connections list from DbController
+				//
+				Metrology::ConnectionBase connectionBase;
+				connectionBase.load(m_dbController);
+
+				// Writing metrology connections
+				//
+				xml.writeStartElement("Connections");
+				{
+					int connectionCount = connectionBase.count();
+					xml.writeIntAttribute(XmlAttribute::COUNT, connectionCount);
+
+					for(int i = 0; i < connectionCount; i++)
+					{
+						Metrology::Connection connection = connectionBase.connection(i);
+
+						bool wrongConnection = false;
+
+						if (ERR_METROLOGY_CONNECTION_TYPE(connection.type()) == true)
+						{
+							// Metrology connection with signals: %1 and %2, has wrong type of connection
+							//
+							m_log->errEQP6120(connection.appSignalID(Metrology::ConnectionIoType::Source),
+											  connection.appSignalID(Metrology::ConnectionIoType::Destination));
+
+							wrongConnection = true;
+						}
+
+						Signal* pInSignal = m_signalSet->getSignal(connection.appSignalID(Metrology::ConnectionIoType::Source));
+						if (pInSignal == nullptr)
+						{
+							// Metrology connections contain a non-existent source signal: %1
+							//
+							m_log->errEQP6121(connection.appSignalID(Metrology::ConnectionIoType::Source));
+
+							wrongConnection = true;
+						}
+
+						Signal* pOutSignal = m_signalSet->getSignal(connection.appSignalID(Metrology::ConnectionIoType::Destination));
+						if (pOutSignal == nullptr)
+						{
+							// Metrology connections contain a non-existent destination signal: %1
+							//
+							m_log->errEQP6122(connection.appSignalID(Metrology::ConnectionIoType::Destination));
+
+							wrongConnection = true;
+						}
+
+						if (wrongConnection == true)
+						{
+							continue;
+						}
+
+						connection.writeToXml(xml);
+					}
+				}
+				xml.writeEndElement();  // Metrology::Connection
+
 			}
 			xml.writeEndElement();	// </MetrologyItems>
-
 		}
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_METROLOGY_ITEMS_XML, CFG_FILE_ID_METROLOGY_ITEMS, "",  data);
+
+		// Create and write build file MetrologySignals.xml
+		//
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::METROLOGY_ITEMS_XML, CfgFileId::METROLOGY_ITEMS, "",  data);
 
 		if (buildFile == nullptr)
 		{
 			return false;
 		}
 
+		// add link to file MetrologySignals.xml in Configuration.xml
+		//
 		bool result = m_cfgXml->addLinkToFile(buildFile);
 		if (result == false)
 		{
 			// Can't link build file %1 into /%2/MetrologySignals.xml.
 			//
-			m_log->errCMN0018(QString("%1").arg(FILE_METROLOGY_ITEMS_XML), equipmentID());
+			m_log->errCMN0018(QString("%1").arg(File::METROLOGY_ITEMS_XML), equipmentID());
 			return false;
 		}
 
@@ -341,7 +270,7 @@ namespace Builder
 					{
 						case E::ElectricUnit::mA:
 
-							if (testElectricRange_Input_mA(signal) == false)
+							if (testElectricLimit_Input_mA(signal) == false)
 							{
 								hasWrongField = true;
 							}
@@ -349,7 +278,7 @@ namespace Builder
 
 						case E::ElectricUnit::mV:
 
-							if (testElectricRange_ThermoCouple(signal) == false)
+							if (testElectricLimit_Input_mV(signal) == false)
 							{
 								hasWrongField = true;
 							}
@@ -357,7 +286,31 @@ namespace Builder
 
 						case E::ElectricUnit::Ohm:
 
-							if (testElectricRange_ThermoResistor(signal) == false)
+							if (testElectricLimit_Input_Ohm(signal) == false)
+							{
+								hasWrongField = true;
+							}
+							break;
+
+						case E::ElectricUnit::V:
+
+							if (testElectricLimit_Input_V(signal) == false)
+							{
+								hasWrongField = true;
+							}
+							break;
+
+						case E::ElectricUnit::uA:
+
+							if (testElectricLimit_Input_uA(signal) == false)
+							{
+								hasWrongField = true;
+							}
+							break;
+
+						case E::ElectricUnit::Hz:
+
+							if (testElectricLimit_Input_Hz(signal) == false)
 							{
 								hasWrongField = true;
 							}
@@ -382,7 +335,7 @@ namespace Builder
 
 			// find location of signal in the equipment Tree by signal equipmentID
 			//
-			Metrology::SignalLocation location(m_equipment->deviceObject(signal.equipmentID()), showOnSchemas);
+			Metrology::SignalLocation location(m_equipment->deviceObject(signal.equipmentID()).get(), showOnSchemas);
 
 			// append signal into list
 			//
@@ -407,7 +360,7 @@ namespace Builder
 
 		protoMetrologySignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_METROLOGY_SIGNAL_SET, CFG_FILE_ID_METROLOGY_SIGNAL_SET, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::METROLOGY_SIGNAL_SET, CfgFileId::METROLOGY_SIGNAL_SET, "",  data);
 		if (buildFile == nullptr)
 		{
 			return false;
@@ -418,25 +371,126 @@ namespace Builder
 		{
 			// Can't link build file %1 into /%2/MetrologySignals.set.
 			//
-			m_log->errCMN0018(QString("%1").arg(FILE_METROLOGY_SIGNAL_SET), equipmentID());
+			m_log->errCMN0018(QString("%1").arg(File::METROLOGY_SIGNAL_SET), equipmentID());
 			return false;
 		}
 
-		result = m_cfgXml->addLinkToFile(DIR_COMMON, FILE_COMPARATORS_SET);
+		result = m_cfgXml->addLinkToFile(Directory::COMMON, File::COMPARATORS_SET);
 		if (result == false)
 		{
 			// Can't link build file %1 into /%2/Comparators.set.xml.
 			//
-			m_log->errCMN0018(QString("%1\\%2").arg(DIR_COMMON).arg(FILE_COMPARATORS_SET), equipmentID());
+			m_log->errCMN0018(QString("%1\\%2").arg(Directory::COMMON).arg(File::COMPARATORS_SET), equipmentID());
 			return false;
 		}
 
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testElectricRange_Input_mA(const Signal& signal)
+	bool MetrologyCfgGenerator::testElectricLimit(const Signal& signal, double lowLimit, double highLimit)
 	{
-		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return false;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return false;
+		}
+
+		QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
+
+		if (signal.electricLowLimit() < lowLimit || signal.electricLowLimit() > highLimit)
+		{
+			//  Signal %1 has wrong low electric limit: %2 %5. Electric limit: %3 .. %4 %5.
+			//
+			m_log->errEQP6116(signal.appSignalID(), signal.electricLowLimit(), lowLimit, highLimit, meu.key(signal.electricUnit()), 4);
+
+			return false;
+		}
+
+		if (signal.electricHighLimit() < lowLimit || signal.electricHighLimit() > highLimit)
+		{
+			//  Signal %1 has wrong high electric limit: %2 %5. Electric limit: %3 .. %4 %5.
+			//
+			m_log->errEQP6117(signal.appSignalID(), signal.electricHighLimit(), lowLimit, highLimit, meu.key(signal.electricUnit()), 4);
+
+			return false;
+		}
+
+		return true;
+	}
+
+	bool MetrologyCfgGenerator::testEngineeringLimit(const Signal& signal, double lowLimit, double highLimit)
+	{
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return false;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return false;
+		}
+
+		QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
+
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return false;
+		}
+
+		UnitsConvertor uc;
+
+		double lowEngineeringLimit = uc.conversion(lowLimit, UnitsConvertType::ElectricToPhysical, signal);
+		double highEngineeringLimit = uc.conversion(highLimit, UnitsConvertType::ElectricToPhysical, signal);
+
+		if (signal.lowEngineeringUnits() < lowEngineeringLimit || signal.lowEngineeringUnits() > highEngineeringLimit)
+		{
+			//  Signal %1 has wrong low engineering limit: %2 %5. Engineering limit: %3 .. %4 %5.
+			//
+			m_log->errEQP6118(signal.appSignalID(), signal.lowEngineeringUnits(), lowEngineeringLimit, highEngineeringLimit, signal.unit(), signal.decimalPlaces());
+
+			return false;
+		}
+
+		if (signal.highEngineeringUnits() < lowEngineeringLimit || signal.highEngineeringUnits() > highEngineeringLimit)
+		{
+			//  Signal %1 has wrong high engineering limit: %2 %5. Engineering limit: %3 .. %4 %5.
+			//
+			m_log->errEQP6119(signal.appSignalID(), signal.highEngineeringUnits(), lowEngineeringLimit, highEngineeringLimit, signal.unit(), signal.decimalPlaces());
+
+			return false;
+		}
+
+		// get current electric limit from current engineeringUnits and round to 4 digit after point
+		//
+		double lowElectricVal = floor(uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal) * 10000 + 0.5) / 10000;
+		double highElectricVal = floor(uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal) * 10000 + 0.5) / 10000;
+
+		if ((std::nextafter(lowElectricVal, std::numeric_limits<double>::lowest()) <= signal.electricLowLimit() && std::nextafter(lowElectricVal, std::numeric_limits<double>::max()) >= signal.electricLowLimit()) == false)
+		{
+			// Signal %1 - low engineering limit mismatch low electrical limit: %2 %4, set low electrical Limit: %3 %4.
+			//
+			m_log->errEQP6112(signal.appSignalID(), signal.electricLowLimit(), lowElectricVal, meu.key(signal.electricUnit()), 4);
+			return false;
+		}
+
+		if ((std::nextafter(highElectricVal, std::numeric_limits<double>::lowest()) <= signal.electricHighLimit() && std::nextafter(highElectricVal, std::numeric_limits<double>::max()) >= signal.electricHighLimit()) == false)
+		{
+			// Signal %1 - high engineering limit mismatch high electrical limit: %2 %4, set high electrical Limit: %3 %4.
+			//
+			m_log->errEQP6113(signal.appSignalID(), signal.electricHighLimit(), highElectricVal, meu.key(signal.electricUnit()), 4);
+			return false;
+		}
+
+		return true;
+	}
+
+	bool MetrologyCfgGenerator::testElectricLimit_Input_mA(const Signal& signal)
+	{
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 		{
 			return true;
 		}
@@ -446,53 +500,67 @@ namespace Builder
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
 		{
 			return true;
+		}
+		else
+		{
+			if (signal.electricUnit() != E::ElectricUnit::mA)
+			{
+				return false;
+			}
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.sensorType() != E::SensorType::V_0_5)
+			{
+				return false;
+			}
 		}
 
 		if (signal.isSpecPropExists(SignalProperties::rload_OhmCaption) == false)
 		{
 			return true;
 		}
-
-		if (signal.electricUnit() != E::ElectricUnit::mA)
+		else
 		{
-			return false;
-		}
-
-		if (signal.sensorType() != E::SensorType::V_0_5)
-		{
-			return false;
+			if (signal.rload_Ohm() < RLOAD_OHM_LOW_LIMIT || signal.rload_Ohm() > RLOAD_OHM_HIGH_LIMIT)
+			{
+				// Signal %1 has wrong RLoad (mA).
+				//
+				m_log->errEQP6115(signal.appSignalID());
+				return false;
+			}
 		}
 
 		UnitsConvertor uc;
 
-		UnitsConvertResult physicalLowLimit = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), signal.rload_Ohm());
-		UnitsConvertResult physicalHighLimit = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), signal.rload_Ohm());
-
-		if (physicalLowLimit.ok() == false)
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
 		{
-			// Signal %1 has wrong physical low Limit
-			//
-			m_log->errEQP6110(signal.customAppSignalID());
 			return false;
 		}
 
-		if (physicalHighLimit.ok() == false)
+		double lowLimit = electricLimit.lowLimit  / signal.rload_Ohm() * RLOAD_OHM_HIGH_LIMIT;
+		double highLimit = electricLimit.highLimit / signal.rload_Ohm() * RLOAD_OHM_HIGH_LIMIT;
+
+		if (testElectricLimit(signal, lowLimit, highLimit) == false)
 		{
-			// Signal %1 has wrong physical high Limit
-			//
-			m_log->errEQP6111(signal.customAppSignalID());
 			return false;
 		}
 
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testElectricRange_ThermoCouple(const Signal& signal)
+	bool MetrologyCfgGenerator::testElectricLimit_Input_mV(const Signal& signal)
 	{
-		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 		{
 			return true;
 		}
@@ -502,97 +570,48 @@ namespace Builder
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.electricUnit() != E::ElectricUnit::mV)
+			{
+				return false;
+			}
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
 		{
 			return true;
 		}
 
-		if (signal.electricUnit() != E::ElectricUnit::mV)
+		UnitsConvertor uc;
+
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
 		{
 			return false;
 		}
 
-		UnitsConvertor uc;
-
-		switch (signal.sensorType())
+		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
 		{
-			case E::SensorType::mV_K_TXA:
-			case E::SensorType::mV_L_TXK:
-			case E::SensorType::mV_N_THH:
+			return false;
+		}
 
-			case E::SensorType::mV_Type_B:
-			case E::SensorType::mV_Type_E:
-			case E::SensorType::mV_Type_J:
-			case E::SensorType::mV_Type_K:
-			case E::SensorType::mV_Type_N:
-			case E::SensorType::mV_Type_R:
-			case E::SensorType::mV_Type_S:
-			case E::SensorType::mV_Type_T:
-				{
-					UnitsConvertResult physicalLowLimit = uc.electricToPhysical_ThermoCouple(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
-					UnitsConvertResult physicalHighLimit = uc.electricToPhysical_ThermoCouple(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
-
-					if (physicalLowLimit.ok() == false)
-					{
-						// Signal %1 has wrong physical low Limit
-						//
-						m_log->errEQP6110(signal.customAppSignalID());
-						return false;
-					}
-
-					if (physicalHighLimit.ok() == false)
-					{
-						// Signal %1 has wrong physical high Limit
-						//
-						m_log->errEQP6111(signal.customAppSignalID());
-						return false;
-					}
-
-
-					// get electric limit from EngineeringUnits and round to 4 digit after point
-					//
-					double lowElVal = floor(uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType()) * 10000 + 0.5) / 10000;
-
-					if ((std::nextafter(lowElVal, std::numeric_limits<double>::lowest()) <= signal.electricLowLimit() && std::nextafter(lowElVal, std::numeric_limits<double>::max()) >= signal.electricLowLimit()) == false)
-					{
-						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
-						QString nowElValStr, newElValStr;
-						nowElValStr = QString::asprintf("%0.4f ", signal.electricLowLimit()) +  meu.key(signal.electricUnit());
-						newElValStr = QString::asprintf("%0.4f ", lowElVal) +  meu.key(signal.electricUnit());
-
-						// Signal %1 has wrong engineering low Limit
-						//
-						m_log->errEQP6112(signal.customAppSignalID(), nowElValStr, newElValStr);
-						return false;
-					}
-
-
-					// get electric limit from EngineeringUnits and round to 4 digit after point
-					//
-					double highElVal = floor(uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType()) * 10000 + 0.5) / 10000;
-
-					if ((std::nextafter(highElVal, std::numeric_limits<double>::lowest()) <= signal.electricHighLimit() && std::nextafter(highElVal, std::numeric_limits<double>::max()) >= signal.electricHighLimit()) == false)
-					{
-						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
-						QString nowElValStr, newElValStr;
-						nowElValStr = QString::asprintf("%0.4f ", signal.electricHighLimit()) +  meu.key(signal.electricUnit());
-						newElValStr = QString::asprintf("%0.4f ", highElVal) +  meu.key(signal.electricUnit());
-
-						// Signal %1 has wrong engineering high Limit
-						//
-						m_log->errEQP6113(signal.customAppSignalID(), nowElValStr, newElValStr);
-						return false;
-					}
-				}
-				break;
+		if (testEngineeringLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
+		{
+			return false;
 		}
 
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testElectricRange_ThermoResistor(const Signal& signal)
+
+	bool MetrologyCfgGenerator::testElectricLimit_Input_Ohm(const Signal& signal)
 	{
-		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 		{
 			return true;
 		}
@@ -602,99 +621,222 @@ namespace Builder
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.electricUnit() != E::ElectricUnit::Ohm)
+			{
+				return false;
+			}
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::R0_OhmCaption) == false)
+		E::SensorType sensorType = signal.sensorType();
+
+
+		UnitsConvertor uc;
+
+		double r0 = uc.r0_from_signal(signal);
+
+		if (uc.r0_is_use(sensorType) == true && r0 == 0.0)
 		{
-			return true;
+			// Signal %1 has wrong R0 (ThermoResistor)
+			//
+			m_log->errEQP6114(signal.appSignalID());
+			return false;
 		}
 
-		if (signal.electricUnit() != E::ElectricUnit::Ohm)
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
 		{
 			return false;
 		}
 
-		UnitsConvertor uc;
+		double lowLimit = electricLimit.lowLimit;
+		double highLimit = electricLimit.highLimit;
 
-		switch (signal.sensorType())
+		if (uc.r0_is_use(sensorType) == true)
 		{
-			case E::SensorType::Ohm_Pt_a_391:
-			case E::SensorType::Ohm_Pt_a_385:
-			case E::SensorType::Ohm_Cu_a_428:
-			case E::SensorType::Ohm_Cu_a_426:
-			case E::SensorType::Ohm_Ni_a_617:
-				{
-					if (signal.r0_Ohm() == 0.0)
-					{
-						// Signal %1 has wrong R0 (ThermoResistor)
-						//
-						m_log->errEQP6114(signal.customAppSignalID());
-						return false;
-					}
+			lowLimit = lowLimit * r0 / 100;
+			highLimit = highLimit * r0 / 100;
+		}
 
-					UnitsConvertResult physicalLowLimit = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), signal.r0_Ohm());
-					UnitsConvertResult physicalHighLimit = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), signal.r0_Ohm());
+		if (testElectricLimit(signal, lowLimit, highLimit) == false)
+		{
+			return false;
+		}
 
-					if (physicalLowLimit.ok() == false)
-					{
-						// Signal %1 has wrong physical low Limit
-						//
-						m_log->errEQP6110(signal.customAppSignalID());
-						return false;
-					}
-
-					if (physicalHighLimit.ok() == false)
-					{
-						// Signal %1 has wrong physical high Limit
-						//
-						m_log->errEQP6111(signal.customAppSignalID());
-						return false;
-					}
-
-					// get electric limit from EngineeringUnits and round to 4 digit after point
-					//
-					double lowElVal = floor(uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), signal.r0_Ohm()) * 10000 + 0.5) / 10000;
-
-					if ((std::nextafter(lowElVal, std::numeric_limits<double>::lowest()) <= signal.electricLowLimit() && std::nextafter(lowElVal, std::numeric_limits<double>::max()) >= signal.electricLowLimit()) == false)
-					{
-						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
-						QString nowElValStr, newElValStr;
-						nowElValStr = QString::asprintf("%0.4f ", signal.electricLowLimit()) +  meu.key(signal.electricUnit());
-						newElValStr = QString::asprintf("%0.4f ", lowElVal) +  meu.key(signal.electricUnit());
-
-						// Signal %1 - engineering low Limit mismatch electrical low Limit
-						//
-						m_log->errEQP6112(signal.customAppSignalID(), nowElValStr, newElValStr);
-						return false;
-					}
-
-					// get electric limit from EngineeringUnits and round to 4 digit after point
-					//
-					double highElVal = floor(uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), signal.r0_Ohm()) * 10000 + 0.5) / 10000;
-
-					if ((std::nextafter(highElVal, std::numeric_limits<double>::lowest()) <= signal.electricHighLimit() && std::nextafter(highElVal, std::numeric_limits<double>::max()) >= signal.electricHighLimit()) == false)
-					{
-						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
-						QString nowElValStr, newElValStr;
-						nowElValStr = QString::asprintf("%0.4f ", signal.electricHighLimit()) +  meu.key(signal.electricUnit());
-						newElValStr = QString::asprintf("%0.4f ", highElVal) +  meu.key(signal.electricUnit());
-
-						// SSignal %1 - engineering high Limit mismatch electrical high Limit
-						//
-						m_log->errEQP6113(signal.customAppSignalID(), nowElValStr, newElValStr);
-						return false;
-					}
-
-				}
-				break;
+		if (testEngineeringLimit(signal, lowLimit, highLimit) == false)
+		{
+			return false;
 		}
 
 		return true;
 	}
 
+	bool MetrologyCfgGenerator::testElectricLimit_Input_V(const Signal& signal)
+	{
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.electricUnit() != E::ElectricUnit::V)
+			{
+				return false;
+			}
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.sensorType() != E::SensorType::V_0_5 && signal.sensorType() != E::SensorType::V_m10_p10)
+			{
+				return false;
+			}
+		}
+
+		UnitsConvertor uc;
+
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
+		{
+			return false;
+		}
+
+		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool MetrologyCfgGenerator::testElectricLimit_Input_uA(const Signal& signal)
+	{
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.electricUnit() != E::ElectricUnit::uA)
+			{
+				return false;
+			}
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.sensorType() != E::SensorType::uA_m20_p20)
+			{
+				return false;
+			}
+		}
+
+		UnitsConvertor uc;
+
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
+		{
+			return false;
+		}
+
+		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+
+	bool MetrologyCfgGenerator::testElectricLimit_Input_Hz(const Signal& signal)
+	{
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.electricUnit() != E::ElectricUnit::Hz)
+			{
+				return false;
+			}
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.sensorType() != E::SensorType::Hz_005_50000)
+			{
+				return false;
+			}
+		}
+
+		UnitsConvertor uc;
+
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
+		{
+			return false;
+		}
+
+		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
 }
 
 

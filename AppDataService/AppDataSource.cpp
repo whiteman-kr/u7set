@@ -65,16 +65,23 @@ const Signal* AppSignals::getSignal(Hash hash) const
 // AppDataSource class implementation
 //
 // -------------------------------------------------------------------------------
-
-AppDataSource::AppDataSource() :
-	m_signalStatesQueue(10 * 1000)
+AppDataSource::AppDataSource(const DataSource& dataSource) :
+	m_signalStatesQueue(3)
 {
+	// copy DataSource properties to THIS object
+	//
+	*(reinterpret_cast<DataSource*>(this)) = dataSource;
+
+	initQueue();
 }
 
-AppDataSource::AppDataSource(const DataSource& dataSource) :
-	m_signalStatesQueue(10)
+// Contructor for object NOT really used for packet receiving.
+// This object used in SCM for AppDataSource state data displaying only.
+//
+AppDataSource::AppDataSource(const Network::DataSourceInfo& proto) :
+	m_signalStatesQueue(3)
 {
-	*(reinterpret_cast<DataSource*>(this)) = dataSource;
+	setInfo(proto);
 }
 
 void AppDataSource::prepare(const AppSignals& appSignals, DynamicAppSignalStates* signalStates, int autoArchivingGroupsCount)
@@ -139,8 +146,9 @@ bool AppDataSource::parsePacket()
 	int rupDataSize = 0;
 	bool dataReceivingTimeout = false;
 	quint16 packetNo = 0;
+	bool isSimPacket = false;
 
-	bool result = getDataToParsing(&times, &packetNo, &rupData, &rupDataSize, &dataReceivingTimeout);
+	bool result = getDataToParsing(&times, &isSimPacket, &packetNo, &rupData, &rupDataSize, &dataReceivingTimeout);
 
 	if (result == false)
 	{
@@ -162,7 +170,7 @@ bool AppDataSource::parsePacket()
 		}
 		else
 		{
-			signalState->setState(times, packetNo, rupData, rupDataSize, autoArchivingGroup, m_signalStatesQueue, thread);
+			signalState->setState(times, isSimPacket, packetNo, rupData, rupDataSize, autoArchivingGroup, m_signalStatesQueue, thread);
 		}
 	}
 

@@ -230,20 +230,14 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 {
 	QVBoxLayout* vl = new QVBoxLayout;
 
-	m_propertyEditor = new IdePropertyEditor(this);
+	m_propertyEditor = new IdePropertyEditor(this, dbController);
 
 	m_propertyEditor->setExpertMode(theSettings.isExpertMode());
 
-	DbFileInfo mcInfo = dbController->systemFileInfo(dbController->etcFileId());
-
-	if (mcInfo.isNull() == true)
-	{
-		QMessageBox::critical(parent, "Error", QString("File \"%1\" is not found!").arg(Db::File::EtcFileName));
-		return;
-	}
+	int etcFileId = dbController->systemFileId(DbDir::EtcDir);
 
 	DbFileInfo propertyBehaviorFile;
-	dbController->getFileInfo(mcInfo.fileId(), QString(Db::File::SignalPropertyBehaviorFileName), &propertyBehaviorFile, parent);
+	dbController->getFileInfo(etcFileId, QString(Db::File::SignalPropertyBehaviorFileName), &propertyBehaviorFile, parent);
 
 	if (propertyBehaviorFile.isNull() == true)
 	{

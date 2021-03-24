@@ -7,13 +7,12 @@ SelectChangesetDialog::SelectChangesetDialog()
 	assert(false);
 }
 
-SelectChangesetDialog::SelectChangesetDialog(QString title, DbController* db, DbChangesetObject object, const std::vector<DbChangeset>& history, QWidget* parent) :
+SelectChangesetDialog::SelectChangesetDialog(QString title, DbController* db, const std::vector<DbChangeset>& history, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::SelectChangesetDialog),
 	m_db(db),
 	m_history(history),
-	m_changeset(-1),
-	m_object(object)
+	m_changeset(-1)
 {
 	assert(m_db);
 
@@ -117,7 +116,7 @@ int SelectChangesetDialog::getFileChangeset(DbController* db, const DbFileInfo& 
 
 	DbChangesetObject object(file);
 
-	SelectChangesetDialog cd("Select Changeset - " + file.fileName(), db, object, fileHistory, parent);
+	SelectChangesetDialog cd("Select Changeset - " + file.fileName(), db, fileHistory, parent);
 
 	int result = cd.exec();
 
@@ -144,8 +143,41 @@ int SelectChangesetDialog::getSignalChangeset(DbController* db, DbChangesetObjec
 	std::vector<DbChangeset> signalHistory;
 	db->getSignalHistory(signal.id(), &signalHistory, parent);
 
-	SelectChangesetDialog cd("Select Changeset - " + signal.name(), db, signal, signalHistory, parent);
+	SelectChangesetDialog cd("Select Changeset - " + signal.name(), db, signalHistory, parent);
 	//cd.setFile(file);
+
+	int result = cd.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		return cd.changeset();
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+int SelectChangesetDialog::getProjectChangeset(DbController* db, QWidget* parent)
+{
+	if (db == nullptr)
+	{
+		assert(db);
+		return -1;
+	}
+
+	std::vector<DbChangeset> history;
+
+	bool ok = db->getProjectHistory(&history, parent);
+	if (ok == false)
+	{
+		return -1;
+	}
+
+	// Get project history
+	//
+
+	SelectChangesetDialog cd("Select Project Changeset", db, history, parent);
 
 	int result = cd.exec();
 

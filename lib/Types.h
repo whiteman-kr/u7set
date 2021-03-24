@@ -1,7 +1,7 @@
 #pragma once
 
 #include <type_traits>
-#include <assert.h>
+#include <cassert>
 #include <QObject>
 #include <QMetaEnum>
 #include <QVariant>
@@ -62,6 +62,43 @@ public:
 		AlignBaseline = Qt::AlignBaseline		/**< AlignBaseline = 0x100*/
 	};
 	Q_ENUM(VertAlign)
+
+
+	/** \brief This enum type defines the line styles that can be drawn.
+	 */
+	enum LineStyle
+	{
+		NoPen = Qt::NoPen,						/**< NoPen = 0. No line at all, for example rect fills but does not draw any boundary line.*/
+		SolidLine = Qt::SolidLine,				/**< SolidLine = 1. A plain line.*/
+		DashLine = Qt::DashLine,				/**< DashLine = 2. Dashes separated by a few pixels.*/
+		DotLine = Qt::DotLine,					/**< DotLine = 3. Dots separated by a few pixels.*/
+		DashDotLine = Qt::DashDotLine,			/**< DashDotLine = 4. Alternate dots and dashes.*/
+		DashDotDotLine = Qt::DashDotDotLine,	/**< DashDotDotLine = 5. One dash, two dots, one dash, two dots.*/
+	};
+	Q_ENUM(LineStyle)
+
+	/** \brief This enum type defines the line cap styles that can be drawn at the end of line.
+	 */
+	enum LineCap
+	{
+		NoCap = 0,							/**< NoCap = 0. No cap is drawn. */
+		BarCap = 1,							/**< BarCap = 1. A filled bar at the line end. LineCapFactor can be applied.*/
+		CircleCap = 2,						/**< CircleCap = 2. A filled circle at the line end. LineCapFactor can be applied.*/
+		Arrow1Cap = 3,						/**< Arrow1Cap = 3. An arrow at the line end. LineCapFactor can be applied.*/
+		Arrow2Cap = 4,						/**< Arrow2Cap = 4. An arrow at the line end. LineCapFactor can be applied.*/
+	};
+	Q_ENUM(LineCap)
+
+	/** \brief This enum type defines the line ending style that can be drawn at the end of line.
+	 */
+	enum LineStyleCap
+	{
+		FlatCap = Qt::FlatCap,					/**< FlatCap = 0. A square line end that does not cover the end point of the line.*/
+		SquareCap = Qt::SquareCap,				/**< SquareCap = 16. A square line end that covers the end point and extends beyond it by half the line width.*/
+		RoundCap = Qt::RoundCap,				/**< RoundCap = 32. A rounded line end.*/
+	};
+	Q_ENUM(LineStyleCap)
+
 
 	// UserTextPos
 	//
@@ -199,6 +236,7 @@ public:
 	Q_ENUM(LogicModuleRamAccess)
 
 	// Lan Controller Type Identifiers
+	// These values can be combined, Example: (2 | 4) = AppData and DiagData
 	//
 	enum class LanControllerType
 	{
@@ -251,6 +289,8 @@ public:
 		mV = 2,
 		Ohm = 3,
 		V = 4,
+		uA = 5,
+		Hz = 6,
 
 		// oder version
 		// NoInputUnit = 1,
@@ -267,15 +307,17 @@ public:
 	{
 		NoSensor = 0,
 
+		// for non platform module
+
 		Ohm_Pt50_W1391 = 1,
 		Ohm_Pt100_W1391 = 2,
 		Ohm_Pt50_W1385 = 3,
 		Ohm_Pt100_W1385 = 4,
 
-		Ohm_Cu_50_W1428 = 5,
-		Ohm_Cu_100_W1428 = 6,
-		Ohm_Cu_50_W1426 = 7,
-		Ohm_Cu_100_W1426 = 8,
+		Ohm_Cu50_W1428 = 5,
+		Ohm_Cu100_W1428 = 6,
+		Ohm_Cu50_W1426 = 7,
+		Ohm_Cu100_W1426 = 8,
 
 		Ohm_Pt21 = 9,
 		Ohm_Cu23 = 10,
@@ -284,7 +326,7 @@ public:
 		mV_L_TXK = 12,
 		mV_N_THH = 13,
 
-        //
+		// for platform module
 
         mV_Type_B = 14,
         mV_Type_E = 15,
@@ -310,6 +352,10 @@ public:
 		Ohm_Cu_a_426 = 31,
 		Ohm_Ni_a_617 = 32,
 		Ohm_Raw = 33,
+
+		uA_m20_p20 = 34,
+
+		Hz_005_50000 = 35,
 	};
 	Q_ENUM(SensorType)
 
@@ -426,7 +472,8 @@ public:
 		TuningFilter,
 		SpecificPropertyStruct,
 		LoadFileDialog,
-		Svg
+		Svg,
+		Tags
 	};
 	Q_ENUM(PropertySpecificEditor)
 
@@ -479,9 +526,17 @@ public:
 		Blocked,
 		Mismatch,
 		AboveHighLimit,
-		BelowLowLimit
+		BelowLowLimit,
+		SwSimulated
 	};
 	Q_ENUM(AppSignalStateFlagType)
+
+	enum class SoftwareRunMode
+	{
+		Normal,
+		Simulation
+	};
+	Q_ENUM(SoftwareRunMode)
 
 	// For Monitor
 	//

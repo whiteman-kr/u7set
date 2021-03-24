@@ -705,7 +705,7 @@ bool DialogClientBehavior::saveChanges()
 	}
 	if (comment.isEmpty())
 	{
-		QMessageBox::warning(this, "Client Behavior Editor", "No comment supplied!");
+		QMessageBox::warning(this, "Client Behavior Editor", "No comment supplied! Please provide a comment.");
 		return false;
 	}
 
@@ -740,9 +740,9 @@ bool DialogClientBehavior::loadFileFromDatabase(DbController* db, const QString&
 
 	// Load the file from the database
 	//
-
 	std::vector<DbFileInfo> fileList;
-	bool ok = db->getFileList(&fileList, db->etcFileId(), fileName, true, nullptr);
+
+	bool ok = db->getFileList(&fileList, DbDir::EtcDir, fileName, true, nullptr);
 	if (ok == false || fileList.size() != 1)
 	{
 		*errorCode = QObject::tr("File %1 is not found.").arg(fileName);
@@ -773,10 +773,10 @@ bool DialogClientBehavior::saveFileToDatabase(const QByteArray& data, DbControll
 	// save to db
 	//
 	std::shared_ptr<DbFile> file = nullptr;
-
 	std::vector<DbFileInfo> fileList;
+	int etcFileId = db->systemFileId(DbDir::EtcDir);
 
-	bool ok = db->getFileList(&fileList, db->etcFileId(), fileName, true, nullptr);
+	bool ok = db->getFileList(&fileList, etcFileId, fileName, true, nullptr);
 
 	if (ok == false || fileList.size() != 1)
 	{
@@ -785,12 +785,12 @@ bool DialogClientBehavior::saveFileToDatabase(const QByteArray& data, DbControll
 		std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
 		pf->setFileName(fileName);
 
-		if (db->addFile(pf, db->etcFileId(), nullptr) == false)
+		if (db->addFile(pf, etcFileId, nullptr) == false)
 		{
 			return false;
 		}
 
-		ok = db->getFileList(&fileList, db->etcFileId(), fileName, true, nullptr);
+		ok = db->getFileList(&fileList, etcFileId, fileName, true, nullptr);
 		if (ok == false || fileList.size() != 1)
 		{
 			return false;
@@ -939,7 +939,7 @@ void DialogClientBehavior::addBehavior(const std::shared_ptr<ClientBehavior> beh
 	}
 
 	const std::vector<std::shared_ptr<ClientBehavior>> behaviors = m_behaviorStorage.behaviors();
-	for (const auto existingBehavior : behaviors)
+	for (const auto& existingBehavior : behaviors)
 	{
 		if (existingBehavior->behaviorId() == id)
 		{

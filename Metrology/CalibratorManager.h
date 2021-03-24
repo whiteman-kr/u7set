@@ -11,6 +11,13 @@
 #include <QMutex>
 
 #include "Calibrator.h"
+#include "ProcessData.h"
+
+// ==============================================================================================
+
+const char* const	ErrorList =					QT_TRANSLATE_NOOP("CalibratorManager.h", "Error list");
+const char* const	CalibratorNotConnected =	QT_TRANSLATE_NOOP("CalibratorManager.h", "Not connected");
+const char* const	CalibratorStr =				QT_TRANSLATE_NOOP("CalibratorManager.h", "Calibrator");
 
 // ==============================================================================================
 
@@ -20,30 +27,40 @@ class CalibratorManager : public QDialog
 
 public:
 
-	explicit CalibratorManager(Calibrator* pCalibrator, QWidget* parent = nullptr);
-	virtual ~CalibratorManager();
-
-private:
-
-	mutable QMutex	m_mutex;
-
-	Calibrator*		m_pCalibrator = nullptr;
-	bool			m_readyForManage = false;
+	explicit CalibratorManager(std::shared_ptr<Calibrator> pCalibrator, QWidget* parent = nullptr);
+	virtual ~CalibratorManager() override;
 
 public:
 
 	// calibrator
 	//
-	Calibrator*		calibrator() const { return m_pCalibrator; }
-	void			setCalibrator(Calibrator* pCalibrator) { m_pCalibrator = pCalibrator;	}
+	std::shared_ptr<Calibrator> calibrator() const { return m_pCalibrator; }
+	void			setCalibrator(std::shared_ptr<Calibrator> pCalibrator) { m_pCalibrator = pCalibrator; }
 
-	bool			calibratorIsConnected();
+	bool			calibratorIsConnected() const;
 	int				calibratorChannel() const;
 	QString			calibratorPort() const;
 
 	bool			isReadyForManage() const;
 	void			setReadyForManage(bool ready);
 	void			waitReadyForManage();
+
+	// function for manage
+	//
+	bool			setUnit(int mode, int unit);
+
+	void			getValue();
+	void			setValue(double getValue);
+
+	void			stepDown();
+	void			stepUp();
+
+private:
+
+	mutable QMutex	m_mutex;
+
+	std::shared_ptr<Calibrator> m_pCalibrator;
+	bool			m_readyForManage = false;
 
 	// elements of interface - Menu
 	//
@@ -52,6 +69,7 @@ public:
 	QLineEdit*		m_pMeasureEdit = nullptr;
 	QLabel*			m_pSourceLabel = nullptr;
 	QLineEdit*		m_pSourceEdit = nullptr;
+	CompleterData	m_valueCompleter;
 	QLineEdit*		m_pValueEdit = nullptr;
 	QPushButton*	m_pSetValueButton = nullptr;
 	QPushButton*	m_pStepDownButton = nullptr;
@@ -64,31 +82,19 @@ public:
 	QDialog*		m_pErrorDialog = nullptr;
 	QTextEdit*		m_pErrorList = nullptr;
 
-	void			createManageDialog();
+	void			createInterface();
 	void			initDialog();
+	void			setWindowCaption();
 	void			enableInterface(bool enable);
 
-	// function for manage
-	//
-
-	bool			setUnit(int mode, int unit);
-
+	void			updateModeList();
+	void			updateUnitList();
 	void			updateValue();
-	void			value();
-	void			setValue(double value);
-
-	void			stepDown();
-	void			stepUp();
-
-	// options
-	//
-	void			loadSettings(Calibrator* pCalibrator);
-	void			saveSettings(Calibrator* pCalibrator);
 
 signals:
 
 	void			calibratorSetUnit(int mode, int unit);
-	void			calibratorSetValue(double value);
+	void			calibratorSetValue(double getValue);
 	void			calibratorStepDown();
 	void			calibratorStepUp();
 	void			calibratorGetValue();
@@ -96,20 +102,21 @@ signals:
 
 private slots:
 
-	void			onCalibratorError(QString text);
+	void			onCalibratorError(QString errorText);
 
 	void			onCalibratorConnect();
 	void			onCalibratorDisconnect();
 
+	void			onSetMode(int modeIndex);
+	void			onSetUnit(int unitIndex);
 	void			onUnitChanged();
-	void			onModeUnitList(int);
-
-	void			onValueChanging();
-	void			onValueChanged();
 
 	void			onSetValue();
 	void			onStepDown();
 	void			onStepUp();
+
+	void			onValueChanging();
+	void			onValueChanged();
 
 	void			onErrorList();
 

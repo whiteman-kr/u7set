@@ -5,7 +5,7 @@
 #include <vector>
 #include "../lib/ModuleFirmware.h"
 #include "../lib/LmDescription.h"
-#include "SimOutput.h"
+#include "../lib/ILogFile.h"
 #include "SimSubsystem.h"
 #include "SimControl.h"
 #include "SimAppSignalManager.h"
@@ -13,7 +13,10 @@
 #include "SimOverrideSignals.h"
 #include "SimConnections.h"
 #include "SimScriptSimulator.h"
-#include "SimAppDataTransmitter.h"
+#include "SimLans.h"
+#include "SimSoftware.h"
+#include "SimProfiles.h"
+#include "SimScopedLog.h"
 
 
 class QTextStream;
@@ -24,25 +27,30 @@ namespace Sim
 	class LogicModule;
 
 
-	class Simulator : public QObject, protected Output
+	class Simulator : public QObject
 	{
 		Q_OBJECT
 
 	public:
-		explicit Simulator(QObject* parent = nullptr);
+		explicit Simulator(ILogFile* log, QObject* parent);		// if log is nullptr then log to console
 		virtual ~Simulator();
 
 	public:
 		bool load(QString buildPath);
 		void clear();
 
-		bool isRunning() const;
-		bool isPaused() const;
-		bool isStopped() const;
+		// Flow control
+		//
+		[[nodiscard]] bool isRunning() const;
+		[[nodiscard]] bool isPaused() const;
+		[[nodiscard]] bool isStopped() const;
 
-		bool runScript(QString script, QString testName);	// Starts script in separate thread and returns immediately
-		bool stopScript();									// Stops script if it is running
-		bool waitScript(unsigned long msecs = ULONG_MAX);		// Wait script to stop
+		// Script Tests
+		//
+		bool runScript(const SimScriptItem& script, qint64 timeout);				// Starts one script in separate thread and returns immediately
+		bool runScripts(const std::vector<SimScriptItem>& scripts, qint64 timeout);// Starts a pack of scripts in separate thread and returns immediately
+		bool stopScript();														// Stops script if it is running
+		bool waitScript(unsigned long msecs = ULONG_MAX);						// Wait script to stop
 		bool scriptResult();
 
 	private:
@@ -56,52 +64,74 @@ namespace Sim
 	signals:
 		void projectUpdated();				// Project was loaded or cleared
 
+		void scriptStarted();
+		void scriptFinished();
+
 	public:
-		bool isLoaded() const;
-		QString buildPath() const;
+		[[nodiscard]] ScopedLog& log();
 
-		QString projectName() const;
+		[[nodiscard]] bool isLoaded() const;
+		[[nodiscard]] QString buildPath() const;
 
-		const Sim::Connections& connections() const;
-		Sim::Connections& connections();
+		[[nodiscard]] QString projectName() const;
 
-		std::vector<std::shared_ptr<Subsystem>> subsystems() const;
-		std::shared_ptr<LogicModule> logicModule(QString equipmentId) const;
-		std::vector<std::shared_ptr<LogicModule>> logicModules() const;
+		[[nodiscard]] const Sim::Connections& connections() const;
+		[[nodiscard]] Sim::Connections& connections();
 
-		Sim::AppDataTransmitter& appDataTransmitter();
-		const Sim::AppDataTransmitter& appDataTransmitter() const;
+		[[nodiscard]] std::vector<std::shared_ptr<Subsystem>> subsystems() const;
+		[[nodiscard]] std::shared_ptr<LogicModule> logicModule(QString equipmentId) const;
+		[[nodiscard]] std::vector<std::shared_ptr<LogicModule>> logicModules() const;
 
-		Sim::AppSignalManager& appSignalManager();
-		const Sim::AppSignalManager& appSignalManager() const;
+		[[nodiscard]] Sim::AppSignalManager& appSignalManager();
+		[[nodiscard]] const Sim::AppSignalManager& appSignalManager() const;
 
-		Sim::TuningSignalManager& tuningSignalManager();
-		const Sim::TuningSignalManager& tuningSignalManager() const;
+		[[nodiscard]] Sim::TuningSignalManager& tuningSignalManager();
+		[[nodiscard]] const Sim::TuningSignalManager& tuningSignalManager() const;
 
-		Sim::OverrideSignals& overrideSignals();
-		const Sim::OverrideSignals& overrideSignals() const;
+		[[nodiscard]] Sim::OverrideSignals& overrideSignals();
+		[[nodiscard]] const Sim::OverrideSignals& overrideSignals() const;
 
-		Sim::Control& control();
-		const Sim::Control& control() const;
+		[[nodiscard]] Sim::Software& software();
+		[[nodiscard]] const Sim::Software& software() const;
+
+		[[nodiscard]] Sim::Profiles& profiles();
+		[[nodiscard]] const Sim::Profiles& profiles() const;
+
+		bool setCurrentProfile(QString profileName);
+		[[nodiscard]] QString currentProfileName() const;
+		[[nodiscard]] const Sim::Profile& currentProfile() const;
+
+		[[nodiscard]] Sim::Control& control();
+		[[nodiscard]] const Sim::Control& control() const;
 
 	private:
+		mutable ScopedLog m_log;
+
 		QString m_buildPath;
-		Hardware::ModuleFirmwareStorage m_firmwares;	// Loaded bts file
+		Hardware::ModuleFirmwareStorage m_firmwares;						// Loaded bts file
 
 		Sim::Connections m_connections;
 
 		std::map<QString, std::shared_ptr<LmDescription>> m_lmDescriptions;	// Key is filename
 		std::map<QString, std::shared_ptr<Subsystem>> m_subsystems;			// Key is SubsystemID
 
-
 		// Signals Management
 		//
-		Sim::AppDataTransmitter m_appDataTransmitter{this};
-
 		Sim::AppSignalManager m_appSignalManager{this};
 		Sim::TuningSignalManager m_tuningSignalManager;
 
 		Sim::OverrideSignals m_overrideSignals{this};
+
+		// Software Info
+		//
+		Sim::Software m_software;
+
+		// Software profiles - different software settings can be applied via these profiles
+		//
+		static const QString DefaultProfileName;
+
+		Sim::Profiles m_profiles;
+		QString m_currentProfileName = DefaultProfileName;
 
 		// Control thread
 		//

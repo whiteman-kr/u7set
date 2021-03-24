@@ -34,24 +34,27 @@ namespace VFrame30
 		// The problem was, to get QWindow from widget it must be native window, as I don't want to make
 		// BaseSchemaWidget native, I have created this small invisible wiget
 		//
-		QWidget* dummyNativeWidget = new QWidget(this);
-		dummyNativeWidget->setAttribute(Qt::WA_NativeWindow, true);
+		// UPDATE: Unfortuanatelly this native window makes flicking on moving slider of docking widget with schema
+		//         list while. So it is commented ((
+		//
 
-		if (dummyNativeWidget->windowHandle() != nullptr)
-		{
-			connect(dummyNativeWidget->windowHandle(), &QWindow::screenChanged, this, &BaseSchemaWidget::screenChanged);
-		}
-		else
-		{
-			assert(dummyNativeWidget->windowHandle());
-		}
+//		QWidget* dummyNativeWidget = new QWidget(this);
+//		dummyNativeWidget->setAttribute(Qt::WA_NativeWindow, true);
+
+//		if (dummyNativeWidget->windowHandle() != nullptr)
+//		{
+//			connect(dummyNativeWidget->windowHandle(), &QWindow::screenChanged, this, &BaseSchemaWidget::screenChanged);
+//		}
+//		else
+//		{
+//			assert(dummyNativeWidget->windowHandle());
+//		}
 
 		return;
 	}
 
 	BaseSchemaWidget::~BaseSchemaWidget()
 	{
-
 	}
 
 	void BaseSchemaWidget::createActions()
@@ -67,7 +70,7 @@ namespace VFrame30
 
 		// While midButton is pressed, this is move mode, don't change zoom
 		//
-		if (event->buttons().testFlag(Qt::MidButton))
+		if (event->buttons().testFlag(Qt::MiddleButton))
 		{
 			return;
 		}
@@ -87,7 +90,7 @@ namespace VFrame30
 
 	void BaseSchemaWidget::mousePressEvent(QMouseEvent* event)
 	{
-		if (event->button() == Qt::MidButton)
+		if (event->button() == Qt::MiddleButton)
 		{
 			// Enter to scrolling mode
 			//
@@ -110,7 +113,7 @@ namespace VFrame30
 
 	void BaseSchemaWidget::mouseReleaseEvent(QMouseEvent* event)
 	{
-		if (event->button() == Qt::MidButton)
+		if (event->button() == Qt::MiddleButton)
 		{
 			// Leave scrolling mode;
 			//
@@ -125,7 +128,7 @@ namespace VFrame30
 
 	void BaseSchemaWidget::mouseMoveEvent(QMouseEvent* event)
 	{
-		if (event->buttons().testFlag(Qt::MidButton) == true)
+		if (event->buttons().testFlag(Qt::MiddleButton) == true)
 		{
 			// Scrolling mode
 			//
@@ -191,8 +194,8 @@ namespace VFrame30
 			startY = -verticalScrollBar()->value();
 		}
 
-		double x = widgetPoint.x() - startX;		// position in points
-		double y = widgetPoint.y() - startY;
+		const double x = widgetPoint.x() - startX;		// position in points
+		const double y = widgetPoint.y() - startY;
 
 		// Scaling to zoom factor
 		//
@@ -221,7 +224,7 @@ namespace VFrame30
 		dpiX = dpiX == 0 ? logicalDpiX() : dpiX;
 		dpiY = dpiY == 0 ? logicalDpiY() : dpiY;
 
-		double zoom = schemaView()->zoom();
+		const double zoom = schemaView()->zoom();
 
 		int widthInPixels = schema()->GetDocumentWidth(dpiX, zoom);
 		int heightInPixels = schema()->GetDocumentHeight(dpiY, zoom);
@@ -249,8 +252,8 @@ namespace VFrame30
 			startY = -verticalScrollBar()->value();
 		}
 
-		int x = mousePos.x() - startX;
-		int y = mousePos.y() - startY;
+		const int x = mousePos.x() - startX;
+		const int y = mousePos.y() - startY;
 
 		if (schema()->unit() == VFrame30::SchemaUnit::Display)
 		{

@@ -2,20 +2,21 @@
 
 #include <queue>
 #include <QUdpSocket>
-
-#include "SimOutput.h"
 #include "../lib/TimeStamp.h"
 #include "../lib/SocketIO.h"
 #include "../lib/SimpleThread.h"
 #include "../lib/WUtils.h"
 #include "../lib/SimpleMutex.h"
+#include "../lib/ILogFile.h"
+#include "SimScopedLog.h"
+
 
 namespace Sim
 {
 	class Simulator;
 	class AppDataTransmitterThread;
 
-	class AppDataTransmitter : public QObject, protected Output
+	class AppDataTransmitter : public QObject
 	{
 		Q_OBJECT
 
@@ -24,29 +25,25 @@ namespace Sim
 		virtual ~AppDataTransmitter();
 
 	public:
-		bool startSimulation();
+		bool startSimulation(QString profileName);
 		bool stopSimulation();
-		bool sendData(const QString& lmEquipmentId, QByteArray&& data, TimeStamp timeStamp);
+		bool sendData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp);
 
 	protected slots:
-		void projectUpdated();		// Project was loaded or cleared
+		void projectUpdated();					// Project was loaded or cleared
 
 	public:
-		bool enabled() const;
-		void setEnabled(bool value);
+		bool softwareEnabled() const;			// Global enable for all LogicModules AppData LANs
 
 	private:
 		void shutdownTransmitterThread();
 
 	private:
-		Simulator* m_simulator;
-		std::atomic<bool> m_enabled{false};			// Allow AppData trasmittion to AppDataSrv
+		Simulator* m_simulator = nullptr;
+		mutable ScopedLog m_log;
 
 		AppDataTransmitterThread* m_transmitterThread = nullptr;
-
 	};
-
-	//
 
 	class AppDataTransmitterThread : public RunOverrideThread
 	{
@@ -54,36 +51,38 @@ namespace Sim
 		struct ExtAppData
 		{
 			QString lmEquipmentID;
+			QString portEquipmentID;
 			QByteArray appData;
 			TimeStamp timeStamp;
 		};
 
-		struct LanController
+		struct AppDataSourcePortInfo
 		{
-			QHostAddress sourceIP;
-			int sourcePort = 0;
+			QString equipmentID;
 
-			QHostAddress destinationIP;
-			int destinationPort = 0;
-		};
-
-		struct AppDataSourceInfo
-		{
 			quint32 appDataUID = 0;
 			int appDataSizeBytes = 0;
 			int moduleType = 0;
 
-			std::vector<LanController> lanControllers;
+			//
+
+			QHostAddress lanSourceIP;
+			int lanSourcePort = 0;
+
+			QHostAddress lanDestinationIP;
+			int lanDestinationPort = 0;
+
+			//
 
 			quint16 rupFramesNumerator = 0;
 			int rupFramesCount = 0;
 		};
 
 	public:
-		AppDataTransmitterThread(const Simulator& simulator);
+		AppDataTransmitterThread(const Simulator& simulator, const QString& curProfileName, ScopedLog& log);
 		virtual ~AppDataTransmitterThread();
 
-		bool sendAppData(const QString& lmEquipmentId, QByteArray& data, TimeStamp timeStamp);
+		bool sendAppData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp);
 
 		virtual void run();
 
@@ -93,11 +92,13 @@ namespace Sim
 
 	private:
 		const Simulator& m_simulator;
+		const QString m_curProfileName;
+		ScopedLog m_log;
 
 		mutable SimpleMutex m_appDataQueueMutex;
 		std::queue<ExtAppData> m_appDataQueue;
 
-		std::unordered_map<QString, AppDataSourceInfo> m_appDataSources;
+		std::unordered_map<QString, AppDataSourcePortInfo> m_appDataSourcePorts;
 
 		QUdpSocket* m_socket = nullptr;
 	};

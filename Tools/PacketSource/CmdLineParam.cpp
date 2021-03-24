@@ -14,18 +14,18 @@
 
 // main keys
 //
-const char* const CmdLineParam::SETTING_BUILD_DIR = "BuildDir";
-const char* const CmdLineParam::SETTING_APP_DATA_SERVICE_IP = "AppDataServiceIP";
+const char* const CmdLineParam::SETTING_CFG_EQUIPMENT_ID = "EquipmentID of CfgService";
+const char* const CmdLineParam::SETTING_CFG_SERVICE_IP = "CfgServiceIP";
+const char* const CmdLineParam::SETTING_ADS_EQUIPMENT_ID = "EquipmentID of AppDataService";
 const char* const CmdLineParam::SETTING_UAL_TESTER_IP = "UalTesterIP";
-
 
 // optional keys
 //
 const char* const CmdLineParam::SETTING_SOURCES_FOR_RUN  = "EquipmentID";
 const char* const CmdLineParam::SETTING_OPTION_FILENAME = "OptionFileName";
 
-const char* const CmdLineParam::REQUIRED_OPTIONS =	"Options: \"-builddir\", \"-adsip\" and \"-utip\" - must be filled!\n" \
-													"For example: -builddir=C:\\BuildDir -adsip=127.0.0.1 -utip=127.0.0.1\n";
+const char* const CmdLineParam::REQUIRED_OPTIONS =	"Options: \"-cfgid\", \"-cfgip\", \"-adsid\" and \"-utip\" - must be filled!\n" \
+													"For example: -cfgid=EQUIPMENT_ID_CFG -cfgip=127.0.0.1 -adsid=EQUIPMENT_ID_ADS -utip=127.0.0.1\n";
 
 CmdLineParam::CmdLineParam()
 {
@@ -49,8 +49,9 @@ void CmdLineParam::getParams(int& argc, char** argv)
 	m_cmdLineParser.addSimpleOption("h", "Print this help.");
 		// main keys
 		//
-	m_cmdLineParser.addSingleValueOption("builddir", SETTING_BUILD_DIR, "Build directory", "C:\\BuildDir");
-	m_cmdLineParser.addSingleValueOption("adsip", SETTING_APP_DATA_SERVICE_IP, "IP-addres (AppDataReceivingIP) for send packets to AppDataSrv.", "IPv4");
+	m_cmdLineParser.addSingleValueOption("cfgid", SETTING_CFG_EQUIPMENT_ID, "EquipmentID of software \"Configuration Service\".", "EQUIPMENT_ID_CFG");
+	m_cmdLineParser.addSingleValueOption("cfgip", SETTING_CFG_SERVICE_IP, "IP-address of software \"Configuration Service\".", "IPv4");
+	m_cmdLineParser.addSingleValueOption("adsid", SETTING_ADS_EQUIPMENT_ID, "EquipmentID of software \"Application Data Service\".", "EQUIPMENT_ID_ADS");
 	m_cmdLineParser.addSingleValueOption("utip", SETTING_UAL_TESTER_IP, "IP-addres for listening commands from UalTester.", "IPv4");
 
 		// optional keys
@@ -123,13 +124,13 @@ bool CmdLineParam::parse()
 
 			args.insert(0, QCoreApplication::applicationFilePath());
 
-			QVector<char*> argv;
+			std::vector<char*> argv;
 			for (int i = 0; i < args.count(); i++)
 			{
 				unsigned int strLen = static_cast<unsigned int>(args[i].length()) + 1;
 				char* pArg = new char[strLen];
 				memcpy(pArg, args[i].toLatin1().data(), strLen);
-				argv.append(pArg);
+				argv.push_back(pArg);
 			}
 
 			m_cmdLineParser.setCmdLineArgs(args.count(), argv.data());
@@ -141,8 +142,9 @@ bool CmdLineParam::parse()
 	//
 		// main keys
 		//
-	m_buildDir = m_cmdLineParser.settingValue(SETTING_BUILD_DIR);
-	m_adsIP = m_cmdLineParser.settingValue(SETTING_APP_DATA_SERVICE_IP);
+	m_cfgEquipmentID = m_cmdLineParser.settingValue(SETTING_CFG_EQUIPMENT_ID);
+	m_cfgIP = m_cmdLineParser.settingValue(SETTING_CFG_SERVICE_IP);
+	m_adsEquipmentID = m_cmdLineParser.settingValue(SETTING_ADS_EQUIPMENT_ID);
 	m_utIP = m_cmdLineParser.settingValue(SETTING_UAL_TESTER_IP);
 
 		// optional keys
@@ -153,32 +155,32 @@ bool CmdLineParam::parse()
 	//
 		// parse main settings
 		//
-	if (m_buildDir.isEmpty() == true)
+	if (m_cfgEquipmentID.isEmpty() == true)
 	{
-		std::cout << "Error: Build directory is epmpty" << std::endl;
+		std::cout << "Error: Configuration Service EquipmentID is empty" << std::endl;
 		std::cout << REQUIRED_OPTIONS;
 		return false;
 	}
 
-	if (QDir(m_buildDir).exists() == false)
+	if (m_cfgIP.isEmpty() == true)
 	{
-		std::cout << "Error: Build directory is not exist" << std::endl;
+		std::cout << "Error: IP-addres of Configuration Service is empty" << std::endl;
 		std::cout << REQUIRED_OPTIONS;
 		return false;
 	}
 
-	if (m_adsIP.isEmpty() == true)
+	m_cfgSrvIP.setAddressPortStr(m_cfgIP, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
+
+	if (m_cfgSrvIP.isValidIPv4(m_cfgSrvIP.addressStr()) == false)
 	{
-		std::cout << "Error: IP-addres (AppDataReceivingIP) for send packets to AppDataSrv is empty" << std::endl;
+		std::cout << "Error: IP-addres of Configuration Service is not valid" << std::endl;
 		std::cout << REQUIRED_OPTIONS;
 		return false;
 	}
 
-	m_appDataSrvIP.setAddressPortStr(m_adsIP, PORT_APP_DATA_SERVICE_DATA);
-
-	if (m_appDataSrvIP.isValidIPv4(m_appDataSrvIP.addressStr()) == false)
+	if (m_adsEquipmentID.isEmpty() == true)
 	{
-		std::cout << "Error: IP-addres (AppDataReceivingIP) for send packets to AppDataSrv is not valid" << std::endl;
+		std::cout << "Error: Application Data Service EquipmentID is empty" << std::endl;
 		std::cout << REQUIRED_OPTIONS;
 		return false;
 	}

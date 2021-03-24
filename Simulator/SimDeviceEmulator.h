@@ -1,5 +1,4 @@
-#ifndef DEVICEEMULATOR_H
-#define DEVICEEMULATOR_H
+#pragma once
 
 #include <memory>
 #include <functional>
@@ -15,21 +14,20 @@
 #include "../lib/LmDescription.h"
 #include "../lib/ModuleFirmware.h"
 #include "../lib/LogicModulesInfo.h"
-#include "SimOutput.h"
 #include "SimEeprom.h"
 #include "SimRam.h"
 #include "SimConnections.h"
 #include "SimAfb.h"
 #include "SimOverrideSignals.h"
 #include "SimAppSignalManager.h"
-#include "SimAppDataTransmitter.h"
+#include "SimLans.h"
 
 
 #ifndef __FUNCTION_NAME__
 	#ifdef WIN32   //WINDOWS
-		#define __FUNCTION_NAME__   __FUNCTION__
+		#define __FUNCTION_NAME__ __FUNCTION__
 	#else          //*NIX
-		#define __FUNCTION_NAME__   __func__
+		#define __FUNCTION_NAME__ __FUNCTION__
 	#endif
 #endif
 
@@ -38,13 +36,13 @@ class SimCommandTest_LM5_LM6;
 // class DeviceEmulator has function DeviceEmulator::fault
 // this is convenient call of this func
 //
-#define SIM_FAULT(message) fault(message, __FUNCTION_NAME__);
+#define SIM_FAULT(message) fault(message, QLatin1String(__FUNCTION_NAME__));
 
 namespace Sim
 {
 	Q_NAMESPACE
 
-	enum class DeviceMode
+	enum class DeviceState
 	{
 		Off,
 		Start,
@@ -52,8 +50,23 @@ namespace Sim
 		Operate
 	};
 
-	Q_ENUM_NS(DeviceMode)
+	Q_ENUM_NS(DeviceState)
 
+	// --
+	//
+	enum class RuntimeMode
+	{
+		StartupMode,
+		ConfigurationMode,
+		RunSafeMode,
+		RunMode,
+		TuningMode,
+		FaultedMode,
+		PoweredOffMode,
+	};
+
+	// --
+	//
 	enum class CyclePhase
 	{
 		IdrPhase,
@@ -64,10 +77,11 @@ namespace Sim
 }
 
 Q_DECLARE_METATYPE(Sim::CyclePhase)
-Q_DECLARE_METATYPE(Sim::DeviceMode)
+Q_DECLARE_METATYPE(Sim::DeviceState)
 
 namespace Sim
 {
+	class Simulator;
 	class CommandProcessor;
 
 	struct LogicUnitData
@@ -93,7 +107,9 @@ namespace Sim
 		NoCommandProcessor,
 		AfbComponentNotFound,
 		InitEepromError,
-		ParsingAppLogicError
+		ParsingAppLogicError,
+		ModuleExtraInfoNotFound,
+		LanControllerError
 	};
 
 
@@ -149,14 +165,14 @@ namespace Sim
 	//
 	// DeviceEmulator
 	//
-    class DeviceEmulator : public QObject, protected Output
+	class DeviceEmulator : public QObject
 	{
 		Q_OBJECT
 
 		friend SimCommandTest_LM5_LM6;
 
 	public:
-		DeviceEmulator();
+		explicit DeviceEmulator(Simulator* simulator);
 		virtual ~DeviceEmulator();
 
 	public:
@@ -166,7 +182,8 @@ namespace Sim
 						 const Eeprom& tuningEeprom,
 						 const Eeprom& confEeprom,
 						 const Eeprom& appLogicEeprom,
-						 const Connections& connections);
+						 const Connections& connections,
+						 const LogicModulesInfo& logicModulesExtraInfo);
 
 		bool powerOff();
 		bool reset();
@@ -235,6 +252,9 @@ namespace Sim
 		quint16 getWord(int wordOffset) const;
 		quint32 getDword(int wordOffset) const;
 
+	private:
+		RamArea tuningRamArea() const;		// Returns copy of Tuning RAM area
+
 		// --
 		//
 	private:
@@ -259,6 +279,10 @@ namespace Sim
 		bool receiveConnectionsData(std::chrono::microseconds currentTime);	// This one is public to be called from Sim::Control
 		bool sendConnectionsData(std::chrono::microseconds currentTime);	// Actually this one is private
 
+		bool tuningEnterTuningMode(TimeStamp timeStamp);
+		bool tuningLeaveTuningMode();
+		bool tuningApplyCommand();
+
 	private:
 		// Getting data from m_plainAppLogic
 		//
@@ -268,6 +292,8 @@ namespace Sim
 		// Props
 		//
 	public:
+		ScopedLog& log();
+
 		const QString& equipmentId() const;
 
 		int buildNo() const;
@@ -280,31 +306,53 @@ namespace Sim
 
 		const LmDescription& lmDescription() const;
 
-		void setOverrideSignals(OverrideSignals* overrideSignals);
-		void setAppSignalManager(AppSignalManager* appSignalManager);
-		void setAppDataTransmitter(AppDataTransmitter* appDataTransmitter);
-
 		std::vector<DeviceCommand> commands() const;
 		std::unordered_map<int, size_t> offsetToCommands() const;
 
 		const Ram& ram() const;
 		Ram& mutableRam();
 
-		DeviceMode currentMode() const;
+		const Lans& lans() const;
 
+		[[nodiscard]] RuntimeMode runtimeMode() const;
+		void setRuntimeMode(RuntimeMode value);
+
+		[[nodiscard]] DeviceState deviceState() const;
 	private:
-		void setCurrentMode(DeviceMode value);
+		void setDeviceState(DeviceState value);
+
+		// Tuning
+		//
+	public:
+		[[nodiscard]] bool armingKey() const;
+		void setArmingKey(bool value);
+
+		[[nodiscard]] bool tuningKey() const;
+		void setTuningKey(bool value);
+
+		[[nodiscard]] bool sorIsSet() const;
+		void setSorIsSet(bool value);
+
+		[[nodiscard]] bool sorSetSwitch1() const;
+		void setSorSetSwitch1(bool value);
+
+		[[nodiscard]] bool sorSetSwitch2() const;
+		void setSorSetSwitch2(bool value);
+
+		[[nodiscard]] bool sorSetSwitch3() const;
+		void setSorSetSwitch3(bool value);
+
+		[[nodiscard]] bool testSorResetSwitch(bool newValue);
 
 		// Data
 		//
 	private:
+		class Simulator* m_simulator = nullptr;
+		mutable ScopedLog m_log;
+
 		Hardware::LogicModuleInfo m_logicModuleInfo;
 		LmDescription m_lmDescription;
 		::LogicModuleInfo m_logicModuleExtraInfo;
-
-		OverrideSignals* m_overrideSignals = nullptr;
-		AppSignalManager* m_appSignalManager = nullptr;
-		AppDataTransmitter* m_appDataTransmitter = nullptr;
 
 		std::unique_ptr<CommandProcessor> m_commandProcessor;
 
@@ -317,18 +365,42 @@ namespace Sim
 
 		// Current state
 		//
-		std::atomic<DeviceMode> m_currentMode = DeviceMode::Off;	// The only place where it can be accessed in concurrent mode is powerOff/reset
-																	// powerOff can be called while simulation is running
-																	// reset can be called to restart module after powerOff
+		std::atomic<RuntimeMode> m_runtimeMode = RuntimeMode::PoweredOffMode;
+		std::atomic<DeviceState> m_deviceState = DeviceState::Off;	// The only place where it can be accessed in concurrent mode is powerOff/reset
+																			// powerOff can be called while simulation is running
+																			// reset can be called to restart module after powerOff
+
+
 		Ram m_ram;
 		LogicUnitData m_logicUnit;
 		std::vector<ConnectionPtr> m_connections;
 
 		std::vector<DeviceCommand> m_commands;
-		std::vector<int> m_offsetToCommand;						// index: command offset, value: index in m_commands
-																// empty offsets is -1
-																// Programm memory is not so big, max
+		std::vector<int> m_offsetToCommand;				// index: command offset, value: index in m_commands
+														// empty offsets is -1
+														// Programm memory is not so big, max
 		AfbComponentSet m_afbComponents;
+
+		Lans m_lans{this, m_simulator};					// Device LAN Interfaces, based on m_logicModuleExtraInfo
+
+		// Tuning
+		//
+		std::atomic<bool> m_armingKey{false};			// External Key
+		std::atomic<bool> m_tuningKey{false};			// Extrenal Key
+
+		RamArea	m_tuningRamArea{false};		// The copy of tuning ram area at the momemt device entered the TuningMode,
+											// On command 'Apply' RAM memory is copied into this area
+											// On leaving tuning mode this area is copied back to RAM
+
+		// External SOR Set Keys
+		//
+		std::atomic<bool> m_sorIsSet{false};			// Cached value of signal SOR is Set from module RAM
+
+		std::atomic<bool> m_sorSetSwitch1{false};		// External Key
+		std::atomic<bool> m_sorSetSwitch2{false};		// External Key
+		std::atomic<bool> m_sorSetSwitch3{false};		// External Key
+
+		std::atomic<bool> m_sorResetSwitch{false};		// External Key
 
 		// Cached state
 		//
@@ -340,5 +412,3 @@ namespace Sim
 		std::unordered_map<int, size_t> m_cachedOffsetToCommand;	// key: command offset, value: index in m_commands
 	};
 }
-
-#endif // DEVICEEMULATOR_H

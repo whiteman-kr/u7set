@@ -6,12 +6,12 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-# C++17 support is enabled.
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
-CONFIG += warn_off				# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
+include(../../warnings.pri)
 
 # DESTDIR
 #
@@ -27,19 +27,20 @@ unix {
 
 SOURCES +=  \
     SimCommandTest_LM5_LM6.cpp \
+    SimProfilesTest.cpp \
     SimRamTests.cpp \
     main.cpp
 
 
+# Add curent dir to a list of library directory paths
+#
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+
 #protobuf
 #
-win32 {
-    LIBS += -L$$DESTDIR -lprotobuf
-	INCLUDEPATH += ./../../Protobuf
-}
-unix {
-    LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../../Protobuf
 
 # VFrame30 library
 #
@@ -70,7 +71,15 @@ unix {
 HEADERS += \
     ../../lib/PropertyObject.h \
     SimCommandTest_LM5_LM6.h \
+    SimProfilesTest.h \
     SimRamTests.h
 
 RESOURCES += \
     Resources.qrc
+
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

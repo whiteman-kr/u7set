@@ -1,22 +1,22 @@
 #include "Delegate.h"
 
-#include "FindMeasurePanel.h"
+#include "PanelFindMeasure.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-IntDelegate::IntDelegate(QObject *parent) :
+IntDelegate::IntDelegate(QObject* parent) :
 	QItemDelegate(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QWidget * IntDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const
+QWidget* IntDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /* option */, const QModelIndex& /* index */) const
 {
-	QLineEdit *editor = new QLineEdit(parent);
+	QLineEdit* editor = new QLineEdit(parent);
 
 	editor->setValidator(new QIntValidator(editor));
 
@@ -27,16 +27,16 @@ QWidget * IntDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-DoubleDelegate::DoubleDelegate(QObject *parent) :
+DoubleDelegate::DoubleDelegate(QObject* parent) :
 	QItemDelegate(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QWidget * DoubleDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const
+QWidget* DoubleDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /* option */, const QModelIndex& /* index */) const
 {
-	QLineEdit *editor = new QLineEdit(parent);
+	QLineEdit* editor = new QLineEdit(parent);
 
 	editor->setValidator(new QRegExpValidator(QRegExp("^[-]{0,1}[0-9]*[.]{0,1}[0-9]*$"),editor));
 
@@ -47,14 +47,14 @@ QWidget * DoubleDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ColorDelegate::ColorDelegate(QObject *parent) :
+ColorDelegate::ColorDelegate(QObject* parent) :
 	QStyledItemDelegate(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void ColorDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
 	QRect colorRect = option.rect;
 	colorRect.adjust(2,2,-2,-2);
@@ -98,14 +98,14 @@ void ColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-FindTextDelegate::FindTextDelegate(QObject *parent) :
+FindTextDelegate::FindTextDelegate(QObject* parent) :
 	QStyledItemDelegate(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindTextDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void FindTextDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
 	QRect textRect = option.rect;
 	QRect selectTextRect;
@@ -138,69 +138,6 @@ void FindTextDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 	painter->setPen(option.palette.text().color());
 	painter->drawText(textRect, Qt::AlignLeft, item.text());
 }
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-StatisticsStateDelegate::StatisticsStateDelegate(QObject *parent) :
-	QStyledItemDelegate(parent)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void StatisticsStateDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
-{
-	int row = index.row();
-	if (row < 0 || row >= theSignalBase.statistic().signalCount())
-	{
-		QStyledItemDelegate::paint(painter, option, index);
-		return;
-	}
-
-	Metrology::Signal* pSignal = theSignalBase.statistic().signal(row);
-	if (pSignal == nullptr || pSignal->param().isValid() == false)
-	{
-		QStyledItemDelegate::paint(painter, option, index);
-		return;
-	}
-
-	if (pSignal->statistic().isMeasured() == false)
-	{
-		QStyledItemDelegate::paint(painter, option, index);
-		return;
-	}
-
-//	if ((option.state & QStyle::State_Selected) != 0)
-//	{
-//		if ((option.state & QStyle::State_HasFocus) != 0)
-//		{
-//			painter->fillRect(option.rect, option.palette.highlight());
-//		}
-//		else
-//		{
-//			painter->fillRect(option.rect, option.palette.window());
-//		}
-//	}
-
-	switch (pSignal->statistic().state())
-	{
-		case Metrology::SignalStatistic::State::Failed:
-			painter->fillRect(option.rect, theOptions.measureView().colorErrorLimit());
-			//painter->drawImage(QPointF(option.rect.right() - 20, option.rect.top()), QImage(":/icons/CheckRed.png"));
-			break;
-		case Metrology::SignalStatistic::State::Success:
-			painter->fillRect(option.rect, theOptions.measureView().colorNotError());
-			painter->drawImage(QPointF(option.rect.right() - 20, option.rect.top()), QImage(":/icons/CheckGreen.png"));
-			break;
-	}
-
-	QRect textRect = option.rect;
-	textRect.setRect(option.rect.left() + 3, option.rect.top() + 3, option.rect.width() - 3, option.rect.height() - 3);
-	painter->drawText(textRect, Qt::AlignLeft, pSignal->param().appSignalID());
-}
-
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------

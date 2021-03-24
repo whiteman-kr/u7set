@@ -166,17 +166,18 @@ public:
 	explicit SpecificPropertiesEditor(QWidget* parent);
 	virtual ~SpecificPropertiesEditor();
 
+	QString text() const override;
 	void setText(const QString& text) override;
-	QString text() override;
 
+	bool readOnly() const override;
 	void setReadOnly(bool value) override;
+
+	bool externalOkCancelButtons() const override;
 
 private slots:
 	void tableSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 	void onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
 	void sortIndicatorChanged(int column, Qt::SortOrder order);
-
-
 
 	void onAddProperty();
 	void onCloneProperty();
@@ -197,6 +198,9 @@ private:
 	QPushButton* m_addButton = nullptr;
 	QPushButton* m_cloneButton = nullptr;
 	QPushButton* m_removeButton = nullptr;
+
+	QPushButton* m_okButton = nullptr;
+	QPushButton* m_cancelButton = nullptr;
 
 	QWidget* m_parent = nullptr;
 

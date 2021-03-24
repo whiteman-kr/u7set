@@ -425,7 +425,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 
 		// Access (?)
 
-		if (theConfigSettings.lmStatusFlagMode == LmStatusFlagMode::AccessKey)
+		if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey)
 		{
 			headerLabels << tr("Access");
 			m_columnAccessIndex = columnIndex;
@@ -434,7 +434,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 
 		// SOR (?)
 
-		if (theConfigSettings.lmStatusFlagMode == LmStatusFlagMode::SOR)
+		if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::SOR)
 		{
 			headerLabels << tr("SOR");
 			m_columnSorIndex = columnIndex;
@@ -713,7 +713,7 @@ void TuningWorkspace::createButtons()
 
 	if (m_filterButtons.empty() == false)
 	{
-		QButtonGroup* filterButtonGroup = new QButtonGroup();
+		QButtonGroup* filterButtonGroup = new QButtonGroup(this);
 
 		filterButtonGroup->setExclusive(true);
 
@@ -1226,7 +1226,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 		// SOR Column
 
-		if (m_columnSorIndex != -1 && theConfigSettings.lmStatusFlagMode == LmStatusFlagMode::SOR)
+		if (m_columnSorIndex != -1 && theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::SOR)
 		{
 			QColor backColor;
 			QColor textColor;
@@ -1335,7 +1335,7 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 		controlIsEnabled = ts.state.controlisactive();
 		hasUnappliedParams = ts.state.hasunappliedparams();
 
-		if (theConfigSettings.lmStatusFlagMode == LmStatusFlagMode::AccessKey &&
+		if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey &&
             valid == true &&
             controlIsEnabled == true &&
             ts.state.isreply() == true)

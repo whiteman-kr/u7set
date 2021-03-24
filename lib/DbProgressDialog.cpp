@@ -22,7 +22,6 @@ ProgressDialog::ProgressDialog(QWidget* parent, const QString& description, DbPr
     assert(m_progress);
 
     setWindowTitle(tr("u7"));
-    setMinimumWidth(400);
 
 	// Create all widgets and layouts
 	//
@@ -48,6 +47,9 @@ ProgressDialog::ProgressDialog(QWidget* parent, const QString& description, DbPr
     vLayout->addLayout(hLayout);
 
     setLayout(vLayout);
+
+	setMinimumWidth(400);
+	setMinimumHeight(minimumSizeHint().height());
 
 	connect(m_cancelButton, &QPushButton::clicked, this, &ProgressDialog::reject);
 

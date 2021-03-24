@@ -4,49 +4,10 @@
 #include <QtGlobal>
 #include <assert.h>
 
-#include "../lib/Types.h"
-#include "../lib/UnitsConvertorTable.h"
-
-
 #include "SignalBase.h"
 
-// ==============================================================================================
+#include "../lib/UnitsConvertor.h"
 
-const int	CT_PHYSICAL_TO_ELECTRIC	= 0,
-			CT_ELECTRIC_TO_PHYSICAL	= 1,
-
-			CT_ENGINEER_TO_ELECTRIC	= 2,
-			CT_ELECTRIC_TO_ENGINEER	= 3;
-
-const int	CT_COUNT                = 4;
-
-// ==============================================================================================
-
-double		conversion(double val, int conversionType, const Metrology::SignalParam& param);
-double		conversion(double val, int conversionType, const E::ElectricUnit unitID, const E::SensorType sensorType, double r0 = 0);
-
-// ==============================================================================================
-
-const int	CT_DEGREE_C_TO_F		= 0,
-			CT_DEGREE_F_TO_C		= 1;
-
-const int	CT_DEGREE_COUNT         = 2;
-
-// ==============================================================================================
-
-double		conversionDegree(double val, int conversionType);
-
-// ==============================================================================================
-
-const int	CT_CALC_VAL_NORMAL			= 0,
-			CT_CALC_VAL_INVERSION		= 1;
-
-const int	CT_CALC_VAL_COUNT			= 2;
-
-// ==============================================================================================
-
-double		conversionCalcVal(double val, int calcType, int connectionType, const IoSignalParam& ioParam);
-
-// ==============================================================================================
+double conversionByConnection(double val, const IoSignalParam& ioParam, ConversionDirection directType);
 
 #endif // CONVERSION_H

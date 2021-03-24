@@ -182,6 +182,8 @@ namespace Builder
 
 		BusShared getBusShared(const QString& busTypeID);
 
+		Builder::Context* builderContext() const { return m_context; }
+
 	private:
 		// pass #1 compilation functions
 		//
@@ -353,7 +355,7 @@ namespace Builder
 
 		bool calculateIoSignalsAddresses();
 
-		bool setTunableSignalsUalAddresses();
+		bool disposeTunableSignalsUalAddresses();
 
 		// disposing discrete signals in memory
 		//
@@ -379,7 +381,7 @@ namespace Builder
 		bool findFbsForAnalogInOutSignalsConversion();
 		bool createAfbForAnalogInputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion);
 		bool createFbForAnalogOutputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion);
-		bool isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceSignal& deviceSignal, const Signal& appSignal);
+		bool isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceAppSignal& deviceAppSignal, const Signal& appSignal);
 
 		UalAfb* createUalAfb(const UalItem& appItem);
 		bool setOutputSignalsAsComputed();
@@ -600,7 +602,7 @@ namespace Builder
 
 		UalSignalsMap& ualSignals() { return m_ualSignals; }
 
-		QString getFormatStr(const Hardware::DeviceSignal& ds);
+		QString getFormatStr(const Hardware::DeviceAppSignal& ds);
 		QString getFormatStr(const Signal& s);
 		QString getFormatStr(E::SignalType signalType, E::DataFormat dataFormat, int dataSizeBits, E::ByteOrder byteOrder);
 

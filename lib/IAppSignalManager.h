@@ -1,10 +1,11 @@
-#ifndef IAPPSIGNALMANAGER_H
-#define IAPPSIGNALMANAGER_H
+#pragma once
 
 #include <vector>
 #include "AppSignal.h"
 
+
 class Comparator;
+
 
 class IAppSignalManager
 {
@@ -36,4 +37,3 @@ public:
 	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const = 0;
 };
 
-#endif // IAPPSIGNALMANAGER_H

@@ -450,7 +450,6 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 	emit writeRecord(record);
 }
 
-
 bool circularLoggerInit(std::shared_ptr<CircularLogger> logger,
 						const QString& logName,
 						const QString& instanceID,

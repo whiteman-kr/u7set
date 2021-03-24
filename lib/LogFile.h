@@ -2,6 +2,7 @@
 #define LOGFILE_H
 
 #include "SimpleThread.h"
+#include "../lib/ILogFile.h"
 
 #include <QTimer>
 #include <QDateTime>
@@ -223,7 +224,7 @@ namespace Log
 		void onExport();
 	};
 
-	class LogFile : public QObject
+	class LogFile : public QObject, public ILogFile
 	{
 		Q_OBJECT
 	public:
@@ -231,11 +232,12 @@ namespace Log
 		LogFile(const QString& logName, const QString& path = QString(), int maxFileSize = 1048576, int maxFilesCount = 3);
 		virtual ~LogFile();
 
-		bool writeMessage(const QString& text);
-		bool writeAlert(const QString& text);
-		bool writeError(const QString& text);
-		bool writeWarning(const QString& text);
-		bool writeText(const QString& text);
+		virtual bool writeMessage(const QString& text) override;
+		virtual bool writeAlert(const QString& text) override;
+		virtual bool writeError(const QString& text) override;
+		virtual bool writeWarning(const QString& text) override;
+		virtual bool writeText(const QString& text) override;
+
 		bool writeArray(const QStringList& textArray);
 
 		bool write(MessageType type, const QString& text);
@@ -269,9 +271,10 @@ namespace Log
 		int m_errorAckCounter = 0;
 		int m_warningAckCounter = 0;
 	};
-
-	Q_DECLARE_METATYPE(LogFileRecord)
 }
+
+Q_DECLARE_METATYPE(Log::LogFileRecord)
+
 
 #endif // LOGFILE_H
 

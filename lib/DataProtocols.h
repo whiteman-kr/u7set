@@ -89,7 +89,7 @@ namespace Rup
 	{
 		Rup::Frame rupFrame;
 
-		quint16 simVersion;
+		quint16 simVersion;			// == 1
 		quint32 sourceIP;
 	};
 }
@@ -221,6 +221,8 @@ namespace FotipV2
 		// helper functions
 
 		QString valueStr(bool reverseValue);
+
+		bool isDiscreteData();
 	};
 }
 
@@ -234,6 +236,14 @@ struct RupFotipV2
 
 	void calcCRC64();
 	bool checkCRC64();
+};
+
+struct SimRupFotipV2
+{
+	RupFotipV2 rupFotipV2;
+
+	quint16 simVersion;		// == 1
+	quint32 tuningSourceIP;
 };
 
 

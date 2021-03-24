@@ -24,6 +24,9 @@ ComparePropertyObjectDialog::ComparePropertyObjectDialog(QString source, QString
 
 	ui->source->setReadOnly(true);
 
+	const QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+	ui->source->setFont(fixedFont);
+
 	std::wstring sourceStd = source.toStdWString();
 	std::wstring targetStd = target.toStdWString();
 

@@ -4,8 +4,8 @@
 #include <QStandardItemModel>
 #include <QTableView>
 
-TuningServiceWidget::TuningServiceWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget *parent) :
-	BaseServiceStateWidget(softwareInfo, udpIp, udpPort, parent)
+TuningServiceWidget::TuningServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent) :
+	BaseServiceStateWidget(softwareInfo, service, udpIp, udpPort, parent)
 {
 	connect(this, &BaseServiceStateWidget::connectionStatisticChanged, this, &TuningServiceWidget::updateStateInfo);
 
@@ -13,17 +13,39 @@ TuningServiceWidget::TuningServiceWidget(const SoftwareInfo& softwareInfo, quint
 	addClientsTab();
 
 	//----------------------------------------------------------------------------------------------------
+	QTableView* parametersTableView = addTabWithTableView(250, "Parameters");
+
+	m_parametersTabModel = new QStandardItemModel(3, 2, this);
+	parametersTableView->setModel(m_parametersTabModel);
+
+	m_parametersTabModel->setHeaderData(0, Qt::Horizontal, "Property");
+	m_parametersTabModel->setHeaderData(1, Qt::Horizontal, "Value");
+
+	m_parametersTabModel->setData(m_parametersTabModel->index(0, 0), "Equipment ID");
+	m_parametersTabModel->setData(m_parametersTabModel->index(1, 0), "Configuration IP 1");
+	m_parametersTabModel->setData(m_parametersTabModel->index(2, 0), "Configuration IP 2");
+
+	//----------------------------------------------------------------------------------------------------
 	QTableView* settingsTableView = addTabWithTableView(250, "Settings");
 
-	m_settingsTabModel = new QStandardItemModel(3, 2, this);
+	m_settingsTabModel = new QStandardItemModel(8, 2, this);
 	settingsTableView->setModel(m_settingsTabModel);
 
 	m_settingsTabModel->setHeaderData(0, Qt::Horizontal, "Property");
 	m_settingsTabModel->setHeaderData(1, Qt::Horizontal, "Value");
 
 	m_settingsTabModel->setData(m_settingsTabModel->index(0, 0), "Equipment ID");
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 0), "Configuration IP 1");
-	m_settingsTabModel->setData(m_settingsTabModel->index(2, 0), "Configuration IP 2");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 0), "Client Request IP");
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 0), "Client Request NetMask");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(3, 0), "Tuning Data IP");
+	m_settingsTabModel->setData(m_settingsTabModel->index(4, 0), "Tuning Data NetMask");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(5, 0), "Signle LM Control");
+	m_settingsTabModel->setData(m_settingsTabModel->index(6, 0), "Disable modules Type checking");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(7, 0), "Tuning Sim IP");
 
 	//----------------------------------------------------------------------------------------------------
 	QTableView* tuningSourcesTableView = addTabWithTableView(125, "Tuning Sources");
@@ -91,10 +113,10 @@ TuningServiceWidget::~TuningServiceWidget()
 
 void TuningServiceWidget::updateStateInfo()
 {
-	if (m_serviceInfo.servicestate() == ServiceState::Work)
+	if (m_service.information.servicestate() == ServiceState::Work)
 	{
-		quint32 ip = m_serviceInfo.clientrequestip();
-		qint32 port = m_serviceInfo.clientrequestport();
+		quint32 ip = m_service.clientRequestIp;
+		qint32 port = m_service.clientRequestPort;
 
 		quint32 workingIp = getWorkingClientRequestIp();
 
@@ -118,6 +140,26 @@ void TuningServiceWidget::updateStateInfo()
 			createTcpConnection(getWorkingClientRequestIp(), static_cast<quint16>(port));
 		}
 	}
+
+	auto tuningSettings = std::dynamic_pointer_cast<TuningServiceSettings>(m_service.settings);
+
+	if (tuningSettings == nullptr)
+	{
+		return;
+	}
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), tuningSettings->equipmentID);
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), tuningSettings->clientRequestIP.addressStr());
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), tuningSettings->clientRequestNetmask.toString());
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(3, 1), tuningSettings->tuningDataIP.addressStr());
+	m_settingsTabModel->setData(m_settingsTabModel->index(4, 1), tuningSettings->tuningDataNetmask.toString());
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(5, 1), tuningSettings->singleLmControl ? tr("True") : tr("False"));
+	m_settingsTabModel->setData(m_settingsTabModel->index(6, 1), tuningSettings->disableModulesTypeChecking ? tr("True") : tr("False"));
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(7, 1), tuningSettings->tuningSimIP.addressStr());
 }
 
 void TuningServiceWidget::createTcpConnection(quint32 ip, quint16 port)
@@ -126,7 +168,7 @@ void TuningServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 	m_tcpClientThread = new SimpleThread(m_tcpClientSocket);
 
 	connect(m_tcpClientSocket, &TcpTuningServiceClient::clientsLoaded, this, &TuningServiceWidget::updateClientsInfo);
-	connect(m_tcpClientSocket, &TcpTuningServiceClient::settingsLoaded, this, &TuningServiceWidget::updateServiceSettings);
+	connect(m_tcpClientSocket, &TcpTuningServiceClient::settingsLoaded, this, &TuningServiceWidget::updateServiceParameters);
 	connect(m_tcpClientSocket, &TcpTuningServiceClient::tuningSourcesInfoLoaded, this, &TuningServiceWidget::reloadTuningSourcesList);
 	connect(m_tcpClientSocket, &TcpTuningServiceClient::tuningSoursesStateUpdated, this, &TuningServiceWidget::updateTuningSourcesState);
 	connect(m_tcpClientSocket, &TcpTuningServiceClient::tuningSignalsInfoLoaded, this, &TuningServiceWidget::reloadTuningSignalsList);
@@ -164,20 +206,20 @@ void TuningServiceWidget::updateClientsInfo()
 	updateClientsModel(m_tcpClientSocket->clients());
 }
 
-void TuningServiceWidget::updateServiceSettings()
+void TuningServiceWidget::updateServiceParameters()
 {
 	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->settingsIsReady() == false)
 	{
-		for (int i = 0; i < m_settingsTabModel->rowCount(); i++)
+		for (int i = 0; i < m_parametersTabModel->rowCount(); i++)
 		{
-			m_settingsTabModel->setData(m_settingsTabModel->index(i, 1), "???");
+			m_parametersTabModel->setData(m_parametersTabModel->index(i, 1), "???");
 		}
 		return;
 	}
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), m_tcpClientSocket->equipmentID());
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), m_tcpClientSocket->configIP1());
-	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), m_tcpClientSocket->configIP2());
+	m_parametersTabModel->setData(m_parametersTabModel->index(0, 1), m_tcpClientSocket->equipmentID());
+	m_parametersTabModel->setData(m_parametersTabModel->index(1, 1), m_tcpClientSocket->configIP1());
+	m_parametersTabModel->setData(m_parametersTabModel->index(2, 1), m_tcpClientSocket->configIP2());
 }
 
 void TuningServiceWidget::reloadTuningSourcesList()
@@ -312,9 +354,9 @@ void TuningServiceWidget::clearServiceData()
 {
 	clientsTabModel()->setRowCount(0);
 
-	for (int i = 0; i < m_settingsTabModel->rowCount(); i++)
+	for (int i = 0; i < m_parametersTabModel->rowCount(); i++)
 	{
-		m_settingsTabModel->setData(m_settingsTabModel->index(i, 1), "???");
+		m_parametersTabModel->setData(m_parametersTabModel->index(i, 1), "???");
 	}
 
 	m_tuningSourcesTabModel->setRowCount(0);

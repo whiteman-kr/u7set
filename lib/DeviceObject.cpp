@@ -1,5 +1,6 @@
-#include "../lib/DeviceObject.h"
-#include "../lib/ProtoSerialization.h"
+#include "DeviceObject.h"
+#include "ScriptDeviceObject.h"
+#include "../Proto/ProtoSerialization.h"
 #include <utility>
 #include <QJSEngine>
 #include <QQmlEngine>
@@ -15,7 +16,7 @@
 
 namespace Hardware
 {
-	const std::array<QString, 9> DeviceObjectExtensions =
+	const std::array<QString, 10> DeviceObjectExtensions =
 		{
 			".hrt",			// Root
 			".hsm",			// System
@@ -25,10 +26,11 @@ namespace Hardware
 			".hws",			// Workstation
 			".hsw",			// Software
 			".hcr",			// Controller
-			".hds",			// Signal
+			".hds",			// AppSignal
+			".hdds",		// DiagSignal
 		};
 
-	extern const std::array<QString, 9> DeviceTypeNames =
+	extern const std::array<QString, 10> DeviceTypeNames =
 		{
 			"Root",			// Root
 			"System",		// System
@@ -38,10 +40,11 @@ namespace Hardware
 			"Workstation",	// Workstation
 			"Software",		// Software
 			"Controller",	// Controller
-			"Signal",		// Signal
+			"AppSignal",	// Signal
+			"DiagSignal",	// Signal
 		};
 
-	Factory<Hardware::DeviceObject> DeviceObjectFactory;
+	Factory<DeviceObject> DeviceObjectFactory;
 
 	void init()
 	{
@@ -54,8 +57,10 @@ namespace Hardware
 		static bool firstRun = false;
 		if (firstRun)
 		{
-			assert(false);
+			Q_ASSERT(false);
+			Hardware::DeviceObjectFactory.clear();
 		}
+
 		firstRun = true;
 
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRoot>();
@@ -64,7 +69,8 @@ namespace Hardware
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceChassis>();
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceModule>();
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceController>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceSignal>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceAppSignal>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceAppSignal>("DeviceSignal");		// DeviceAppSignal used to be DeviceSignal, so create fabrica for DeviceSignal too
 		Hardware::DeviceObjectFactory.Register<Hardware::Workstation>();
 		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
 
@@ -79,7 +85,7 @@ namespace Hardware
 		qDebug() << "Hardware::Shutdown" << " not VFrame30 instance";
 #endif
 
-		DeviceObject::PrintRefCounter("DeviceObject");
+		DeviceObject::PrintRefCounter();
 
 		return;
 	}
@@ -130,7 +136,9 @@ namespace Hardware
 	// DeviceObject
 	//
 	//
-	DeviceObject::DeviceObject(bool preset /*= false*/) noexcept :
+	DeviceObject::DeviceObject(DeviceType deviceType, bool preset /*= false*/, QObject* parent /*= nullptr*/) noexcept :
+		PropertyObject(parent),
+		m_deviceType(deviceType),
 		m_preset(preset)
 	{
 		auto fileIdProp = ADD_PROPERTY_GETTER(int, PropertyNames::fileId, true, DeviceObject::fileId);
@@ -140,7 +148,7 @@ namespace Hardware
 		uuidProp->setExpert(true);
 
 		auto equipmentIdTemplateProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::equipmentIdTemplate, true, DeviceObject::equipmentIdTemplate, DeviceObject::setEquipmentIdTemplate);
-		equipmentIdTemplateProp->setValidator("^[a-zA-Z0-9#$_()]*$");
+		equipmentIdTemplateProp->setValidator(QLatin1String("^[a-zA-Z0-9#$_()]*$"));
 
 		auto equipmentIdProp = ADD_PROPERTY_GETTER(QString, PropertyNames::equipmentId, true, DeviceObject::equipmentId);
 		equipmentIdProp->setReadOnly(true);
@@ -179,25 +187,90 @@ namespace Hardware
 		return;
 	}
 
-	DeviceObject::~DeviceObject()
+	void DeviceObject::dump(bool dumpProps, bool dumpTree, QString* out, int nesting /*= 0*/) const
 	{
+		auto print = [out](const QString& str, int nesting) mutable
+		{
+			QString r = QString("\n%1%2").arg("", nesting * 4).arg(str);
+
+			if (out == nullptr)
+			{
+				qDebug().noquote() << r;
+			}
+			else
+			{
+				*out += r;
+			}
+		};
+
+		print(equipmentId() + " " + metaObject()->className(), nesting);
+
+		if (dumpProps == true)
+		{
+			auto props = properties();
+
+			// Sort properties by caption
+			//
+			std::sort(props.begin(), props.end(), [](const auto& p1, const auto& p2) { return p1->caption() < p2->caption(); });
+
+			for (const auto& p : props)
+			{
+				print(QStringLiteral("|") + p->caption() + ": " + p->value().toString(), nesting);
+			}
+		}
+
+		if (dumpTree == true)
+		{
+			// Sort children by place + caption
+			//
+			auto children = m_children;
+			std::sort(children.begin(), children.end(),
+			[](const auto& ch1, const auto& ch2)
+			{
+				if (ch1->place() != ch2->place())
+				{
+					return ch1->place() < ch2->place();
+
+				}
+				else
+				{
+					return ch1->caption() < ch2->caption();
+				}
+			});
+
+			for (const auto& child : children)
+			{
+				child->dump(dumpProps, true, out, nesting + 1);
+			}
+		}
+
+		return;
+	}
+
+	std::shared_ptr<const DeviceObject> DeviceObject::sharedPtr() const
+	{
+		return shared_from_this();
+	}
+
+	std::shared_ptr<DeviceObject> DeviceObject::sharedPtr()
+	{
+		return shared_from_this();
 	}
 
 	std::shared_ptr<DeviceObject> DeviceObject::fromDbFile(const DbFile& file)
 	{
 		std::shared_ptr<DeviceObject> object = DeviceObject::Create(file.data());
+		Q_ASSERT(object != nullptr);
 
-		if (object == nullptr)
+		if (object != nullptr)
 		{
-			assert(object != nullptr);
-			return nullptr;
+			object->setFileInfo(file);
 		}
 
-		object->setFileInfo(file);
 		return object;
 	}
 
-	std::vector<std::shared_ptr<DeviceObject>> DeviceObject::fromDbFiles(std::vector<std::shared_ptr<DbFile>> files)
+	std::vector<std::shared_ptr<DeviceObject>> DeviceObject::fromDbFiles(const std::vector<std::shared_ptr<DbFile>>& files)
 	{
 		std::vector<std::shared_ptr<DeviceObject>> result;
 		result.reserve(files.size());
@@ -247,7 +320,7 @@ namespace Hardware
 		//
 		std::vector<std::shared_ptr<Property>> props = this->properties();
 
-		for (auto p : props)
+		for (const auto& p : props)
 		{
 			if (p->specific() == true)
 			{
@@ -271,10 +344,10 @@ namespace Hardware
 		//
 		if (saveTree == true)
 		{
-			for (std::shared_ptr<DeviceObject> child : m_children)
+			for (const std::shared_ptr<DeviceObject>& child : m_children)
 			{
 				::Proto::Envelope* childMessage = mutableDeviceObject->add_children();
-				assert(childMessage);
+				Q_ASSERT(childMessage);
 
 				child->SaveData(childMessage, saveTree);
 			}
@@ -287,14 +360,14 @@ namespace Hardware
 	{
 		if (message.has_deviceobject() == false)
 		{
-			assert(message.has_deviceobject());
+			Q_ASSERT(message.has_deviceobject());
 			return false;
 		}
 
 		const Proto::DeviceObject& deviceobject = message.deviceobject();
 
 		m_uuid = Proto::Read(deviceobject.uuid());
-		assert(m_uuid.isNull() == false);
+		Q_ASSERT(m_uuid.isNull() == false);
 
 		Proto::Read(deviceobject.equipmentid(), &m_equipmentId);
 		Proto::Read(deviceobject.caption(), &m_caption);
@@ -332,7 +405,7 @@ namespace Hardware
 		for (const ::Proto::Property& p :  deviceobject.properties())
 		{
 			auto it = std::find_if(specificProps.begin(), specificProps.end(),
-				[p](std::shared_ptr<Property> dp)
+				[p](std::shared_ptr<Property>& dp)
 				{
 					return dp->caption().toStdString() == p.name();
 				});
@@ -343,20 +416,19 @@ namespace Hardware
 			}
 			else
 			{
-				std::shared_ptr<Property> property = *it;
+				std::shared_ptr<Property>& property = *it;
 
-				assert(property->specific() == true);	// it's suppose to be specific property;
+				Q_ASSERT(property->specific() == true);	// it's suppose to be specific property;
 
 				bool loadOk = Proto::loadProperty(p, property);
 
 				Q_UNUSED(loadOk);
-				assert(loadOk);
+				Q_ASSERT(loadOk);
 			}
 		}
 
 		// --
 		//
-
 		if (deviceobject.has_preset() == true && deviceobject.preset() == true)
 		{
 			m_preset = deviceobject.preset();
@@ -367,46 +439,36 @@ namespace Hardware
 				presetNameProp->setExpert(true);
 			}
 
-			assert(deviceobject.has_presetroot() == true);
 			if (deviceobject.has_presetroot() == true)
 			{
 				m_presetRoot = deviceobject.presetroot();
 			}
+			else
+			{
+				Q_ASSERT(deviceobject.has_presetroot());
+			}
 
-			assert(deviceobject.has_presetname());
 			if (deviceobject.has_presetname() == true)
 			{
 				Proto::Read(deviceobject.presetname(), &m_presetName);
 			}
+			else
+			{
+				Q_ASSERT(deviceobject.has_presetname());
+			}
 
-			assert(deviceobject.has_presetobjectuuid());
 			if (deviceobject.has_presetobjectuuid() == true)
 			{
 				m_presetObjectUuid = Proto::Read(deviceobject.presetobjectuuid());
 			}
-
+			else
+			{
+				Q_ASSERT(deviceobject.has_presetobjectuuid());
+			}
 		}
 
 		// Load children if all tree was saved
 		//
-//		m_children.clear();
-//		m_children.reserve(deviceobject.children_size());
-
-//		for (int childIndex = 0; childIndex < deviceobject.children_size(); childIndex++)
-//		{
-//			const ::Proto::Envelope& childMessage = deviceobject.children(childIndex);
-
-//			std::shared_ptr<DeviceObject> child(DeviceObject::Create(childMessage));
-
-//			if (child == nullptr)
-//			{
-//				assert(child);
-//				continue;
-//			}
-
-//			m_children.push_back(child);
-//		}
-
 		if (this->isRack() == true && deviceobject.children_size() > 0)
 		{
 			// Multithread reading
@@ -429,11 +491,11 @@ namespace Hardware
 
 				if (child == nullptr)
 				{
-					assert(child);
+					Q_ASSERT(child);
 					continue;
 				}
 
-				m_children.push_back(child);
+				addChild(child);
 			}
 		}
 		else
@@ -446,11 +508,11 @@ namespace Hardware
 
 				if (child == nullptr)
 				{
-					assert(child);
+					Q_ASSERT(child);
 					continue;
 				}
 
-				m_children.push_back(child);
+				addChild(child);
 			}
 		}
 
@@ -463,16 +525,16 @@ namespace Hardware
 		//
 		if (message.has_deviceobject() == false)
 		{
-			assert(message.has_deviceobject());
+			Q_ASSERT(message.has_deviceobject());
 			return nullptr;
 		}
 
 		quint32 classNameHash = message.classnamehash();
 		std::shared_ptr<DeviceObject> deviceObject = DeviceObjectFactory.Create(classNameHash);
 
-		if (deviceObject.get() == nullptr)
+		if (deviceObject == nullptr)
 		{
-			assert(deviceObject);
+			Q_ASSERT(deviceObject);
 			return deviceObject;
 		}
 
@@ -485,7 +547,7 @@ namespace Hardware
 	{
 		if (message == nullptr)
 		{
-			assert(message);
+			Q_ASSERT(message);
 			return false;
 		}
 
@@ -496,7 +558,7 @@ namespace Hardware
 		}
 		catch (...)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 	}
@@ -505,16 +567,16 @@ namespace Hardware
 	{
 		// The same procedure is done in expandEquipmentId, keep it in mind if add any new macroses
 		//
-		if (parent() != nullptr)
+		if (hasParent() == true)
 		{
 			m_equipmentId.replace(QLatin1String("$(PARENT)"), parent()->equipmentIdTemplate(), Qt::CaseInsensitive);
 		}
 
 		m_equipmentId.replace(QLatin1String("$(PLACE)"), QString::number(place()).rightJustified(2, '0'), Qt::CaseInsensitive);
 
-		for (int i = 0; i < childrenCount(); i++)
+		for (auto& child : m_children)
 		{
-			child(i)->expandEquipmentId();
+			child->expandEquipmentId();
 		}
 
 		return;
@@ -522,12 +584,12 @@ namespace Hardware
 
 	// Get all signals, including signals from child items
 	//
-	std::vector<std::shared_ptr<DeviceSignal>> DeviceObject::getAllSignals() const
+	std::vector<std::shared_ptr<DeviceAppSignal>> DeviceObject::getAllAppSignals() const
 	{
-		std::vector<std::shared_ptr<DeviceSignal>> deviceSignals;
+		std::vector<std::shared_ptr<DeviceAppSignal>> deviceSignals;
 		deviceSignals.reserve(128);
 
-		getAllSignalsRecursive(&deviceSignals);
+		getAllAppSignalsRecursive(&deviceSignals);
 
 		return deviceSignals;
 	}
@@ -543,330 +605,184 @@ namespace Hardware
 
 	// Get all signals, including signals from child items
 	//
-	void DeviceObject::getAllSignalsRecursive(std::vector<std::shared_ptr<DeviceSignal>>* deviceSignals) const
+	void DeviceObject::getAllAppSignalsRecursive(std::vector<std::shared_ptr<DeviceAppSignal>>* deviceSignals) const
 	{
 		if (deviceSignals == nullptr)
 		{
-			assert(deviceSignals);
+			Q_ASSERT(deviceSignals);
 			return;
 		}
 
 		for (const std::shared_ptr<DeviceObject>& child : m_children)
 		{
-			if (child->deviceType() == DeviceType::Signal)
+			if (child->deviceType() == DeviceType::AppSignal)
 			{
-				deviceSignals->push_back(std::dynamic_pointer_cast<DeviceSignal>(child));
-				assert(dynamic_cast<DeviceSignal*>(deviceSignals->back().get()) != nullptr);
+				deviceSignals->push_back(std::dynamic_pointer_cast<DeviceAppSignal>(child));
+				Q_ASSERT(dynamic_cast<DeviceAppSignal*>(deviceSignals->back().get()) != nullptr);
 			}
 			else
 			{
-				child->getAllSignalsRecursive(deviceSignals);
+				child->getAllAppSignalsRecursive(deviceSignals);
 			}
 		}
 
 		return;
 	}
 
-	DeviceObject* DeviceObject::parent() noexcept
+	bool DeviceObject::hasParent() const noexcept
 	{
-		return m_parent;
+		return m_parent.expired() == false;
 	}
 
-	const DeviceObject* DeviceObject::parent() const noexcept
+	std::shared_ptr<DeviceObject> DeviceObject::parent() noexcept
 	{
-		return m_parent;
+		return m_parent.lock();
 	}
 
-	QObject* DeviceObject::jsParent() const
+	const std::shared_ptr<DeviceObject> DeviceObject::parent() const noexcept
 	{
-		QObject* c = m_parent;
-		QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
-		return c;
+		return m_parent.lock();
 	}
 
-	int DeviceObject::jsPropertyInt(QString name) const
+	DeviceType DeviceObject::deviceType() const noexcept
 	{
-		const std::shared_ptr<Property> p = propertyByCaption(name);
-		if (p == nullptr)
-		{
-			assert(false);
-			return 0;
-		}
-
-		QVariant v = p->value();
-		if (v.isValid() == false)
-		{
-			assert(v.isValid());
-			return 0;
-		}
-
-		return v.toInt();
+		return m_deviceType;
 	}
 
-	bool DeviceObject::jsPropertyBool(QString name) const
-	{
-		const std::shared_ptr<Property> p = propertyByCaption(name);
-		if (p == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		QVariant v = p->value();
-		if (v.isValid() == false)
-		{
-			assert(v.isValid());
-			return false;
-		}
-
-		return v.toBool();
-	}
-
-	QString DeviceObject::jsPropertyString(QString name) const
-	{
-		const std::shared_ptr<Property> p = propertyByCaption(name);
-		if (p == nullptr)
-		{
-			assert(false);
-			return QString();
-		}
-
-		QVariant v = p->value();
-		if (v.isValid() == false)
-		{
-			assert(v.isValid());
-			return QString();
-		}
-
-		return v.toString();
-	}
-
-	quint32 DeviceObject::jsPropertyIP(QString name) const
-	{
-		const std::shared_ptr<Property> p = propertyByCaption(name);
-		if (p == nullptr)
-		{
-			assert(false);
-			return 0;
-		}
-
-		QVariant v = p->value();
-		if (v.isValid() == false)
-		{
-			assert(v.isValid());
-			return 0;
-		}
-
-		QString s = v.toString();
-		QStringList l = s.split(".");
-		if (l.size() != 4)
-		{
-			return 0;
-		}
-
-		quint32 result = 0;
-		for (int i = 0; i < 4; i++)
-		{
-			bool ok = false;
-			quint8 b = static_cast<quint8>(l[i].toInt(&ok));
-
-			if (ok == false)
-			{
-				return 0;
-			}
-
-			result |= b;
-			if (i < 3)
-			{
-				result <<= 8;
-			}
-		}
-
-		return result;
-	}
-
-	DeviceType DeviceObject::deviceType() const
-	{
-		assert(false);
-		return DeviceType::Root;
-	}
-
-	int DeviceObject::jsDeviceType() const
-	{
-		return static_cast<int>(deviceType());
-	}
-
-	bool DeviceObject::isRoot() const
+	bool DeviceObject::isRoot() const noexcept
 	{
 		return deviceType() == DeviceType::Root;
 	}
 
-	bool DeviceObject::isSystem() const
+	bool DeviceObject::isSystem() const noexcept
 	{
 		return deviceType() == DeviceType::System;
 	}
 
-	bool DeviceObject::isRack() const
+	bool DeviceObject::isRack() const noexcept
 	{
 		return deviceType() == DeviceType::Rack;
 	}
 
-	bool DeviceObject::isChassis() const
+	bool DeviceObject::isChassis() const noexcept
 	{
 		return deviceType() == DeviceType::Chassis;
 	}
 
-	bool DeviceObject::isModule() const
+	bool DeviceObject::isModule() const noexcept
 	{
 		return deviceType() == DeviceType::Module;
 	}
 
-	bool DeviceObject::isController() const
+	bool DeviceObject::isController() const noexcept
 	{
 		return deviceType() == DeviceType::Controller;
 	}
 
-	bool DeviceObject::isWorkstation() const
+	bool DeviceObject::isWorkstation() const noexcept
 	{
 		return deviceType() == DeviceType::Workstation;
 	}
 
-	bool DeviceObject::isSoftware() const
+	bool DeviceObject::isSoftware() const noexcept
 	{
 		return deviceType() == DeviceType::Software;
 	}
 
-	bool DeviceObject::isSignal() const
+	bool DeviceObject::isAppSignal() const noexcept
 	{
-		return deviceType() == DeviceType::Signal;
+		return deviceType() == DeviceType::AppSignal;
 	}
 
-	const Hardware::DeviceRoot* DeviceObject::toRoot() const
+	std::shared_ptr<const DeviceRoot> DeviceObject::toRoot() const noexcept
 	{
-		const Hardware::DeviceRoot* r = dynamic_cast<const Hardware::DeviceRoot*>(this);
-		assert(r != nullptr);
-
-		return r;
+		Q_ASSERT(isRoot());
+		return toType<DeviceRoot>();
 	}
 
-	Hardware::DeviceRoot* DeviceObject::toRoot()
+	std::shared_ptr<Hardware::DeviceRoot> DeviceObject::toRoot() noexcept
 	{
-		Hardware::DeviceRoot* r = dynamic_cast<Hardware::DeviceRoot*>(this);
-		assert(r != nullptr);
-
-		return r;
+		return toType<DeviceRoot>();
 	}
 
-	const Hardware::DeviceSystem* DeviceObject::toSystem() const
+	std::shared_ptr<const DeviceSystem> DeviceObject::toSystem() const noexcept
 	{
-		const Hardware::DeviceSystem* d = dynamic_cast<const Hardware::DeviceSystem*>(this);
-		assert(d != nullptr);
-
-		return d;
+		return toType<DeviceSystem>();
 	}
 
-	Hardware::DeviceSystem* DeviceObject::toSystem()
+	std::shared_ptr<DeviceSystem> DeviceObject::toSystem() noexcept
 	{
-		Hardware::DeviceSystem* d = dynamic_cast<Hardware::DeviceSystem*>(this);
-		assert(d != nullptr);
-
-		return d;
+		return toType<DeviceSystem>();
 	}
 
-	const Hardware::DeviceRack* DeviceObject::toRack() const
+	std::shared_ptr<const DeviceRack> DeviceObject::toRack() const noexcept
 	{
-		const Hardware::DeviceRack* d = dynamic_cast<const Hardware::DeviceRack*>(this);
-		assert(d != nullptr);
-
-		return d;
+		return toType<DeviceRack>();
 	}
 
-	Hardware::DeviceRack* DeviceObject::toRack()
+	std::shared_ptr<DeviceRack> DeviceObject::toRack() noexcept
 	{
-		Hardware::DeviceRack* d = dynamic_cast<Hardware::DeviceRack*>(this);
-		assert(d != nullptr);
-
-		return d;
+		return toType<DeviceRack>();
 	}
 
-	const Hardware::DeviceChassis* DeviceObject::toChassis() const
+	std::shared_ptr<const DeviceChassis> DeviceObject::toChassis() const noexcept
 	{
-		const Hardware::DeviceChassis* d = dynamic_cast<const Hardware::DeviceChassis*>(this);
-		assert(d != nullptr);
-
-		return d;
+		return toType<DeviceChassis>();
 	}
 
-	Hardware::DeviceChassis* DeviceObject::toChassis()
+	std::shared_ptr<DeviceChassis> DeviceObject::toChassis() noexcept
 	{
-		Hardware::DeviceChassis* d = dynamic_cast<Hardware::DeviceChassis*>(this);
-		assert(d != nullptr);
-
-		return d;
+		return toType<DeviceChassis>();
 	}
 
-	const Hardware::DeviceModule* DeviceObject::toModule() const
+	std::shared_ptr<const DeviceModule> DeviceObject::toModule() const noexcept
 	{
-		const Hardware::DeviceModule* d = dynamic_cast<const Hardware::DeviceModule*>(this);
-		assert(d != nullptr);
-
-		return d;
+		return toType<const DeviceModule>();
 	}
 
-	Hardware::DeviceModule* DeviceObject::toModule()
+	std::shared_ptr<DeviceModule> DeviceObject::toModule() noexcept
 	{
-		Hardware::DeviceModule* d = dynamic_cast<Hardware::DeviceModule*>(this);
-		assert(d != nullptr);
-
-		return d;
+		return toType<DeviceModule>();
 	}
 
-	const Hardware::DeviceController* DeviceObject::toController() const
+	std::shared_ptr<const DeviceController> DeviceObject::toController() const noexcept
 	{
-		const Hardware::DeviceController* d = dynamic_cast<const Hardware::DeviceController*>(this);
-		assert(d != nullptr);
-
-		return d;
+		return toType<const DeviceController>();
 	}
 
-	Hardware::DeviceController* DeviceObject::toController()
+	std::shared_ptr<DeviceController> DeviceObject::toController() noexcept
 	{
-		Hardware::DeviceController* d = dynamic_cast<Hardware::DeviceController*>(this);
-		assert(d != nullptr);
-
-		return d;
+		return toType<DeviceController>();
 	}
 
-	const Hardware::DeviceSignal* DeviceObject::toSignal() const
+	std::shared_ptr<const DeviceAppSignal> DeviceObject::toAppSignal() const noexcept
 	{
-		const Hardware::DeviceSignal* d = dynamic_cast<const Hardware::DeviceSignal*>(this);
-		assert(d != nullptr);
-
-		return d;
+		return toType<const DeviceAppSignal>();
 	}
 
-	Hardware::DeviceSignal* DeviceObject::toSignal()
+	std::shared_ptr<DeviceAppSignal> DeviceObject::toAppSignal() noexcept
 	{
-		Hardware::DeviceSignal* d = dynamic_cast<Hardware::DeviceSignal*>(this);
-		assert(d != nullptr);
-
-		return d;
+		return toType<DeviceAppSignal>();
 	}
 
-	const Hardware::Software* DeviceObject::toSoftware() const
+	std::shared_ptr<const Workstation> DeviceObject::toWorkstation() const noexcept
 	{
-		const Hardware::Software* d = dynamic_cast<const Hardware::Software*>(this);
-		assert(d != nullptr);
-
-		return d;
+		return toType<const Workstation>();
 	}
 
-	Hardware::Software* DeviceObject::toSoftware()
+	std::shared_ptr<Workstation> DeviceObject::toWorkstation() noexcept
 	{
-		Hardware::Software* d = dynamic_cast<Hardware::Software*>(this);
-		assert(d != nullptr);
+		return toType<Workstation>();
+	}
 
-		return d;
+	std::shared_ptr<const Software> DeviceObject::toSoftware() const noexcept
+	{
+		return toType<const Software>();
+	}
+
+	std::shared_ptr<Software> DeviceObject::toSoftware() noexcept
+	{
+		return toType<Software>();
 	}
 
 	const Hardware::DeviceController* DeviceObject::getParentController() const
@@ -875,7 +791,7 @@ namespace Hardware
 
 		do
 		{
-			deviceObject = deviceObject->parent();
+			deviceObject = deviceObject->parent().get();
 
 			if (deviceObject == nullptr)
 			{
@@ -884,7 +800,7 @@ namespace Hardware
 
 			if (deviceObject->isController())
 			{
-				return deviceObject->toController();
+				return deviceObject->toController().get();
 			}
 		}
 		while(deviceObject != nullptr);
@@ -898,7 +814,7 @@ namespace Hardware
 
 		do
 		{
-			deviceObject = deviceObject->parent();
+			deviceObject = deviceObject->parent().get();
 
 			if (deviceObject == nullptr)
 			{
@@ -907,7 +823,7 @@ namespace Hardware
 
 			if (deviceObject->isModule())
 			{
-				return deviceObject->toModule();
+				return deviceObject->toModule().get();
 			}
 		}
 		while(deviceObject != nullptr);
@@ -921,7 +837,7 @@ namespace Hardware
 
 		do
 		{
-			deviceObject = deviceObject->parent();
+			deviceObject = deviceObject->parent().get();
 
 			if (deviceObject == nullptr)
 			{
@@ -930,7 +846,7 @@ namespace Hardware
 
 			if (deviceObject->isChassis())
 			{
-				return deviceObject->toChassis();
+				return deviceObject->toChassis().get();
 			}
 		}
 		while(deviceObject != nullptr);
@@ -944,7 +860,7 @@ namespace Hardware
 
 		do
 		{
-			deviceObject = deviceObject->parent();
+			deviceObject = deviceObject->parent().get();
 
 			if (deviceObject == nullptr)
 			{
@@ -953,7 +869,7 @@ namespace Hardware
 
 			if (deviceObject->isRack())
 			{
-				return deviceObject->toRack();
+				return deviceObject->toRack().get();
 			}
 		}
 		while(deviceObject != nullptr);
@@ -967,7 +883,7 @@ namespace Hardware
 
 		do
 		{
-			deviceObject = deviceObject->parent();
+			deviceObject = deviceObject->parent().get();
 
 			if (deviceObject == nullptr)
 			{
@@ -976,7 +892,7 @@ namespace Hardware
 
 			if (deviceObject->isSystem())
 			{
-				return deviceObject->toSystem();
+				return deviceObject->toSystem().get();
 			}
 		}
 		while(deviceObject != nullptr);
@@ -990,7 +906,7 @@ namespace Hardware
 
 		do
 		{
-			deviceObject = deviceObject->parent();
+			deviceObject = deviceObject->parent().get();
 
 			if (deviceObject == nullptr)
 			{
@@ -999,7 +915,7 @@ namespace Hardware
 
 			if (deviceObject->isRoot())
 			{
-				return deviceObject->toRoot();
+				return deviceObject->toRoot().get();
 			}
 		}
 		while(deviceObject != nullptr);
@@ -1009,8 +925,11 @@ namespace Hardware
 
 	QString DeviceObject::fileExtension() const
 	{
+		static_assert(std::size(Hardware::DeviceObjectExtensions) == static_cast<size_t>(DeviceType::DeviceTypeCount));
+		static_assert(std::size(Hardware::DeviceTypeNames) == static_cast<size_t>(DeviceType::DeviceTypeCount));
+
 		size_t index = static_cast<size_t>(deviceType());
-		assert(index < sizeof(Hardware::DeviceObjectExtensions) / sizeof(Hardware::DeviceObjectExtensions[0]));
+		Q_ASSERT(index < std::size(Hardware::DeviceObjectExtensions));
 
 		QString result = Hardware::DeviceObjectExtensions[index];
 		return result;
@@ -1018,7 +937,7 @@ namespace Hardware
 
 	QString DeviceObject::fileExtension(DeviceType device)
 	{
-		QString result = Hardware::DeviceObjectExtensions[static_cast<int>(device)];
+		QString result = Hardware::DeviceObjectExtensions[static_cast<size_t>(device)];
 		return result;
 	}
 
@@ -1039,7 +958,7 @@ namespace Hardware
 		}
 		else
 		{
-			assert(prop);
+			Q_ASSERT(prop);
 		}
 
 		return;
@@ -1050,94 +969,105 @@ namespace Hardware
 		return static_cast<int>(m_children.size());
 	}
 
-	DeviceObject* DeviceObject::child(int index) const
-	{
-		return m_children.at(index).get();
-	}
-
-	DeviceObject* DeviceObject::child(QUuid uuid) const
-	{
-		for (std::shared_ptr<Hardware::DeviceObject> child : m_children)
-		{
-			if (child->uuid() == uuid)
-			{
-				return child.get();
-			}
-		}
-
-		return nullptr;
-	}
-
-	QObject* DeviceObject::jsChild(int index) const
-	{
-		QObject* c = m_children.at(index).get();
-		QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
-		return c;
-	}
-
-	int DeviceObject::childIndex(DeviceObject* child) const
+	int DeviceObject::childIndex(const std::shared_ptr<const DeviceObject>& child) const
 	{
 		// Manual search for an index is 1.6 times faster than std::find
 		//
-		size_t childCount = m_children.size();
-		for (size_t i = 0; i < childCount; i++)
+		int result = -1;
+
+		for (size_t i = 0, childCount = m_children.size(); i < childCount; i++)
 		{
-			if (m_children[i].get() == child)
+			if (m_children[i] == child)
 			{
-				return static_cast<int>(i);
+				result = static_cast<int>(i);
+				break;
 			}
 		}
 
-		return -1;
+		return result;
 	}
 
-	std::shared_ptr<DeviceObject> DeviceObject::childSharedPtr(int index)
+	const std::shared_ptr<DeviceObject>& DeviceObject::child(int index) const
 	{
-		std::shared_ptr<DeviceObject> sp = m_children.at(index);
-		return sp;
+		return m_children.at(index);
 	}
 
-	std::shared_ptr<DeviceObject> DeviceObject::childSharedPtr(QUuid uuid)
+	std::shared_ptr<DeviceObject> DeviceObject::child(const QUuid& uuid) const
 	{
-		for (std::shared_ptr<Hardware::DeviceObject> child : m_children)
+		std::shared_ptr<DeviceObject> result;
+
+		for (const std::shared_ptr<DeviceObject>& child : m_children)
 		{
 			if (child->uuid() == uuid)
 			{
-				return child;
+				result = child;
+				break;
 			}
 		}
 
-		return std::shared_ptr<DeviceObject>();
+		return result;
 	}
 
-	std::shared_ptr<DeviceObject> DeviceObject::childSharedPtrByPresetUuid(QUuid presetObjectUuid)
+	std::shared_ptr<DeviceObject> DeviceObject::childByPresetUuid(const QUuid& presetObjectUuid) const
 	{
-		for (std::shared_ptr<Hardware::DeviceObject> child : m_children)
+		std::shared_ptr<DeviceObject> result;
+
+		for (const std::shared_ptr<DeviceObject>& child : m_children)
 		{
 			if (child->presetObjectUuid() == presetObjectUuid)
 			{
-				return child;
+				result = child;
+				break;
 			}
 		}
 
-		return std::shared_ptr<DeviceObject>();
+		return result;
 	}
 
-	bool DeviceObject::canAddChild(DeviceObject* child) const
+	std::shared_ptr<DeviceObject> DeviceObject::childByEquipmentId(const QString& id)
 	{
-		if (child->deviceType() == DeviceType::Software &&
+		if (equipmentId() == id)
+		{
+			return this->shared_from_this();
+		}
+
+		for (const auto& child : m_children)
+		{
+			auto r = child->childByEquipmentId(id);
+			if (r != nullptr)
+			{
+				return r;
+			}
+		}
+
+		return {};
+	}
+
+	bool DeviceObject::canAddChild(const DeviceType childType) const
+	{
+		if (childType == DeviceType::Software &&
 			deviceType() != DeviceType::Workstation &&
 			deviceType() != DeviceType::Root)
 		{
 			return false;
 		}
 
-		if (deviceType() >= child->deviceType())
+		if (deviceType() == DeviceType::Software)
 		{
 			return false;
 		}
 
-		if (child->deviceType() == DeviceType::Workstation &&
+		if (deviceType() == DeviceType::Workstation)
+		{
+			return childType == DeviceType::Software;
+		}
+
+		if (deviceType() >= childType)
+		{
+			return false;
+		}
+
+		if (childType == DeviceType::Workstation &&
 			deviceType() > DeviceType::Chassis)
 		{
 			return false;
@@ -1146,34 +1076,36 @@ namespace Hardware
 		return true;
 	}
 
-	void DeviceObject::addChild(std::shared_ptr<DeviceObject> child)
+	void DeviceObject::addChild(const std::shared_ptr<Hardware::DeviceObject>& child)
 	{
-		if (child.get() == nullptr)
+		if (child == nullptr)
 		{
-			assert(child);
+			Q_ASSERT(child);
 			return;
 		}
 
-		if (canAddChild(child.get()) == false)
+		if (canAddChild(child->deviceType()) == false)
 		{
-			assert(canAddChild(child.get()) == true);
+			Q_ASSERT(canAddChild(child->deviceType()));
 			return;
 		}
 
-		child->m_parent = this;
+		child->m_parent = shared_from_this();
 		m_children.push_back(child);
+
+		return;
 	}
 
-	void DeviceObject::deleteChild(DeviceObject* child)
+	void DeviceObject::deleteChild(std::shared_ptr<DeviceObject> child)
 	{
 		auto found = std::find_if(m_children.begin(), m_children.end(), [child](decltype(m_children)::const_reference c)
 			{
-				return c.get() == child;
+				return c == child;
 			});
 
 		if (found == m_children.end())
 		{
-			assert(found != m_children.end());
+			Q_ASSERT(found != m_children.end());
 			return;
 		}
 
@@ -1186,13 +1118,13 @@ namespace Hardware
 		m_children.clear();
 	}
 
-    bool DeviceObject::checkChild(DeviceObject* child, QString* errorMessage)
+	bool DeviceObject::checkChild(std::shared_ptr<DeviceObject> child, QString* errorMessage)
 	{
 		if (child == nullptr ||
 			errorMessage == nullptr)
 		{
-			assert(child);
-			assert(errorMessage);
+			Q_ASSERT(child);
+			Q_ASSERT(errorMessage);
 			return false;
 		}
 
@@ -1211,34 +1143,30 @@ namespace Hardware
 			return true;
 		}
 
-		// Create a copy of child, will be deleted by jsEngine on destroying.
-		// It is because QJSEngine::newQObject makes value with JavaEngine ownership
-		// and it cannot be changed (((
-		// In QQmlEngine (derived from QJSEngine) it can be changed by calling QQmlEngine::setObjectOwnership(???, QQmlEngine::CppOwnership);
-		// also, QScriptEngine::QtOwnership can help.
-		// Hopefully in future Qt releases it might be changed, that ownership can be chnged from QJSEngine or QJSValue.
-		//
-
-		//QByteArray data;
-		//child->Save(data);
-
-		//DeviceObject* childCopy = DeviceObject::Create(data);
-		//data.clear();
-
 		// Run m_childRestriction script
 		//
-		QJSEngine jsEngine;
+		QJSEngine engine;
 
-		//QJSValue arg = jsEngine.newQObject(childCopy);
-		QJSValue arg = jsEngine.newQObject(child);
-		QQmlEngine::setObjectOwnership(child, QQmlEngine::CppOwnership);
+		QJSValue function = engine.evaluate(m_childRestriction);
+		if (function.isError())
+		{
+			qDebug() << "Script evaluate error at line " << function.property("lineNumber").toInt();
+			qDebug() << "\tClass: " << metaObject()->className();
+			qDebug() << "\tStack: " << function.property("stack").toString();
+			qDebug() << "\tMessage: " << function.toString();
 
-		QJSValue function = jsEngine.evaluate(m_childRestriction);
+			*errorMessage += tr("DeviceObject::childRestriction script evaluation error, object %1, error %2, line %3")
+							 .arg(equipmentId())
+							 .arg(function.toString())
+							 .arg(function.property("lineNumber").toInt());
+			return false;
+		}
+
+		QJSValue arg = engine.newQObject(new ScriptDeviceObject(child));
 		QJSValue result = function.call(QJSValueList() << arg);
-
 		if (result.isError() == true)
 		{
-			*errorMessage = tr("Script error:").arg(result.toString());
+			*errorMessage = tr("Script error: ").arg(result.toString());
 			return false;
 		}
 
@@ -1335,6 +1263,34 @@ namespace Hardware
 		return;
 	}
 
+	void DeviceObject::sortByType(Qt::SortOrder order)
+	{
+		std::sort(std::begin(m_children), std::end(m_children),
+			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
+			{
+				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+
+				if (ref1->deviceType() < ref2->deviceType())
+				{
+					return true;
+				}
+				else
+				{
+					if (ref1->deviceType() == ref2->deviceType())
+					{
+						return ref1->m_equipmentId < ref2->m_equipmentId;
+					}
+					else
+					{
+						return false;
+					}
+				}
+			});
+
+		return;
+	}
+
 	void DeviceObject::sortByState(Qt::SortOrder order)
 	{
 		std::sort(std::begin(m_children), std::end(m_children),
@@ -1397,57 +1353,12 @@ namespace Hardware
 		return;
 	}
 
-	std::vector<DeviceObject*> DeviceObject::findChildObjectsByMask(const QString& mask)
-	{
-		std::vector<DeviceObject*> list;
-		if (mask.isEmpty() == false)
-		{
-			findChildObjectsByMask(mask, list);
-		}
-		return list;
-	}
-
-	void DeviceObject::findChildObjectsByMask(const QString& mask, std::vector<DeviceObject*>& list)
-	{
-		if (mask.isEmpty() == true)
-		{
-			return;
-		}
-
-		for (auto c : m_children)
-		{
-			if (CUtils::processDiagSignalMask(mask, c->equipmentIdTemplate()) == true)
-			{
-				list.push_back(c.get());
-			}
-			c->findChildObjectsByMask(mask, list);
-		}
-	}
-
-	QObject* DeviceObject::jsFindChildObjectByMask(const QString& mask)
-	{
-		if (mask.isEmpty() == true)
-		{
-			return nullptr;
-		}
-
-		std::vector<DeviceObject*> list = findChildObjectsByMask(mask);
-		if (list.empty() == true)
-		{
-			return nullptr;
-		}
-
-		QObject* c = list.at(0);
-		QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
-		return c;
-	}
-
 	QString DeviceObject::replaceEngeneeringToEngineering(const QString& data)
 	{
 		QString result = data;
 
-		result.replace(QLatin1Literal("engeneering"), QLatin1Literal("engineering"), Qt::CaseSensitive);
-		result.replace(QLatin1Literal("Engeneering"), QLatin1Literal("Engineering"), Qt::CaseSensitive);
+		result.replace(QLatin1String("engeneering"), QLatin1String("engineering"), Qt::CaseSensitive);
+		result.replace(QLatin1String("Engeneering"), QLatin1String("Engineering"), Qt::CaseSensitive);
 
 		return result;
 	}
@@ -1464,10 +1375,7 @@ namespace Hardware
 
 	void DeviceObject::setUuid(QUuid value)
 	{
-		if (m_uuid != value)
-		{
-			m_uuid = value;
-		}
+		m_uuid = value;
 	}
 
 	QString DeviceObject::equipmentIdTemplate() const
@@ -1475,36 +1383,48 @@ namespace Hardware
 		return m_equipmentId;
 	}
 
-	void DeviceObject::setEquipmentIdTemplate(QString value)
+	void DeviceObject::setEquipmentIdTemplate(const QString& value)
 	{
 		if (m_equipmentId != value)
 		{
 			m_equipmentId = value;
-			m_equipmentId.replace(QRegExp("[^a-zA-Z0-9#$_()]"), "#");
+			m_equipmentId.replace(QRegExp(QStringLiteral("[^a-zA-Z0-9#$_()]")), QStringLiteral("#"));
 		}
 	}
 
 	QString DeviceObject::equipmentId() const
 	{
-		std::list<std::pair<const DeviceObject*, QString>> devices;		// 1st: device, 2nd: it's equipmentId
+		if (equipmentIdTemplate().contains(QChar('$')) == false)
+		{
+			// m_equipmentId does not have any marcos variables, just return it
+			//
+			return equipmentIdTemplate();
+		}
+
+		std::array<std::pair<const DeviceObject*, QString>, static_cast<size_t>(DeviceType::DeviceTypeCount)> devices;
+		size_t deviceCount = 0;
 
 		const DeviceObject* d = this;
 		while (d != nullptr)
 		{
-			devices.push_front(std::make_pair(d, d->equipmentIdTemplate()));
-
-			d = d->parent();
+			devices[deviceCount++] = std::make_pair(d, d->equipmentIdTemplate());
+			d = d->parent().get();
 		}
 
+		// !WARNING!
 		// The same procedure is done in expandEquipmentId, keep it in mind if add any new macroses
 		//
-		QString parentId = "";
-		for (std::pair<const DeviceObject*, QString>& dp : devices)
-		{
-			const DeviceObject* device = dp.first;
-			QString equipId = dp.second;
+		QString parentId;
+		size_t deviceIndex = deviceCount;
 
-			if (device->parent() != nullptr)
+		while (deviceIndex > 0)
+		{
+			deviceIndex--;
+
+			const DeviceObject* device = devices[deviceIndex].first;
+			QString equipId = devices[deviceIndex].second;
+
+			if (device->hasParent() == true)
 			{
 				equipId.replace(QLatin1String("$(PARENT)"), parentId, Qt::CaseInsensitive);
 			}
@@ -1528,7 +1448,6 @@ namespace Hardware
 		if (m_caption != value)
 		{
 			m_caption = value;
-
 			m_caption.replace(QChar::LineFeed, " ");
 		}
 	}
@@ -1580,18 +1499,9 @@ namespace Hardware
 		return m_place;
 	}
 
-	int DeviceObject::jsPlace() const
-	{
-		return place();
-
-	}
-
 	void DeviceObject::setPlace(int value)
 	{
-		if (m_place != value)
-		{
-			m_place = value;
-		}
+		m_place = value;
 	}
 
 	// JSON short description, uuid, equipmentId, caption, place, etc
@@ -1659,32 +1569,20 @@ R"DELIM({
 	// DeviceRoot
 	//
 	//
-	DeviceRoot::DeviceRoot(bool preset /*= false*/) :
-		DeviceObject(preset)
+	DeviceRoot::DeviceRoot(bool preset /*= false*/, QObject* parent /*= nullptr*/) :
+		DeviceObject(DeviceType::Root, preset, parent)
 	{
-		qDebug() << "DeviceRoot::DeviceRoot ThreadId: " << QThread::currentThreadId();
 	}
-
-	DeviceRoot::~DeviceRoot()
-	{
-		qDebug() << "DeviceRoot::~DeviceRoot ThreadId: " << QThread::currentThreadId();
-	}
-
-	DeviceType DeviceRoot::deviceType() const
-	{
-		return m_deviceType;
-	}
-
 
 	//
 	//
 	// DeviceSystem
 	//
 	//
-	DeviceSystem::DeviceSystem(bool preset /*= false*/) :
-		DeviceObject(preset)
+	DeviceSystem::DeviceSystem(bool preset /*= false*/, QObject* parent /*= nullptr*/) :
+		DeviceObject(DeviceType::System, preset, parent)
 	{
-		qDebug() << "DeviceRoot::DeviceSystem";
+		//qDebug() << "DeviceRoot::DeviceSystem";
 
 		auto p = propertyByCaption(PropertyNames::equipmentIdTemplate);
 		if (p == nullptr)
@@ -1697,25 +1595,19 @@ R"DELIM({
 		}
 	}
 
-	DeviceSystem::~DeviceSystem()
-	{
-		qDebug() << "DeviceRoot::~DeviceSystem";
-	}
-
 	bool DeviceSystem::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
-			assert(result);
-			assert(message->has_deviceobject());
+			Q_ASSERT(result);
+			Q_ASSERT(message->has_deviceobject());
 			return false;
 		}
 
 		// --
 		//
-		Proto::DeviceSystem* systemMessage =
-				message->mutable_deviceobject()->mutable_system();
+		Proto::DeviceSystem* systemMessage = message->mutable_deviceobject()->mutable_system();
 
 		Q_UNUSED(systemMessage);
 		//systemMessage->set_startxdocpt(m_startXDocPt);
@@ -1728,7 +1620,7 @@ R"DELIM({
 	{
 		if (message.has_deviceobject() == false)
 		{
-			assert(message.has_deviceobject());
+			Q_ASSERT(message.has_deviceobject());
 			return false;
 		}
 
@@ -1742,7 +1634,7 @@ R"DELIM({
 		//
 		if (message.deviceobject().has_system() == false)
 		{
-			assert(message.deviceobject().has_system());
+			Q_ASSERT(message.deviceobject().has_system());
 			return false;
 		}
 
@@ -1755,19 +1647,14 @@ R"DELIM({
 		return true;
 	}
 
-	DeviceType DeviceSystem::deviceType() const
-	{
-		return m_deviceType;
-	}
-
 
 	//
 	//
 	// DeviceRack
 	//
 	//
-	DeviceRack::DeviceRack(bool preset /*= false*/) :
-		DeviceObject(preset)
+	DeviceRack::DeviceRack(bool preset /*= false*/, QObject* parent/* = nullptr*/) :
+		DeviceObject(DeviceType::Rack, preset, parent)
 	{
 		auto p = propertyByCaption(PropertyNames::equipmentIdTemplate);
 		if (p == nullptr)
@@ -1780,24 +1667,19 @@ R"DELIM({
 		}
 	}
 
-	DeviceRack::~DeviceRack()
-	{
-	}
-
 	bool DeviceRack::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
-			assert(result);
-			assert(message->has_deviceobject());
+			Q_ASSERT(result);
+			Q_ASSERT(message->has_deviceobject());
 			return false;
 		}
 
 		// --
 		//
-		Proto::DeviceRack* rackMessage =
-				message->mutable_deviceobject()->mutable_rack();
+		Proto::DeviceRack* rackMessage = message->mutable_deviceobject()->mutable_rack();
 
 		Q_UNUSED(rackMessage);
 		//rackMessage->set_startxdocpt(m_startXDocPt);
@@ -1810,7 +1692,7 @@ R"DELIM({
 	{
 		if (message.has_deviceobject() == false)
 		{
-			assert(message.has_deviceobject());
+			Q_ASSERT(message.has_deviceobject());
 			return false;
 		}
 
@@ -1824,7 +1706,7 @@ R"DELIM({
 		//
 		if (message.deviceobject().has_rack() == false)
 		{
-			assert(message.deviceobject().has_rack());
+			Q_ASSERT(message.deviceobject().has_rack());
 			return false;
 		}
 
@@ -1837,18 +1719,13 @@ R"DELIM({
 		return true;
 	}
 
-	DeviceType DeviceRack::deviceType() const
-	{
-		return m_deviceType;
-	}
-
 	//
 	//
 	// DeviceChassis
 	//
 	//
-	DeviceChassis::DeviceChassis(bool preset /*= false*/) :
-		DeviceObject(preset)
+	DeviceChassis::DeviceChassis(bool preset /*= false*/, QObject* parent/* = nullptr*/) :
+		DeviceObject(DeviceType::Chassis, preset, parent)
 	{
 		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, "Type", true, DeviceChassis::type, DeviceChassis::setType);
 		typeProp->setUpdateFromPreset(true);
@@ -1866,17 +1743,13 @@ R"DELIM({
 
 	}
 
-	DeviceChassis::~DeviceChassis()
-	{
-	}
-
 	bool DeviceChassis::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
-			assert(result);
-			assert(message->has_deviceobject());
+			Q_ASSERT(result);
+			Q_ASSERT(message->has_deviceobject());
 			return false;
 		}
 
@@ -1893,7 +1766,7 @@ R"DELIM({
 	{
 		if (message.has_deviceobject() == false)
 		{
-			assert(message.has_deviceobject());
+			Q_ASSERT(message.has_deviceobject());
 			return false;
 		}
 
@@ -1907,7 +1780,7 @@ R"DELIM({
 		//
 		if (message.deviceobject().has_chassis() == false)
 		{
-			assert(message.deviceobject().has_chassis());
+			Q_ASSERT(message.deviceobject().has_chassis());
 			return false;
 		}
 
@@ -1918,32 +1791,23 @@ R"DELIM({
 		return true;
 	}
 
-	DeviceType DeviceChassis::deviceType() const
+	std::shared_ptr<DeviceModule> DeviceChassis::findLogicModule()
 	{
-		return m_deviceType;
-	}
-
-	std::shared_ptr<DeviceModule> DeviceChassis::getLogicModuleSharedPointer()
-	{
-		int count = childrenCount();
-
-		for(int i = 0; i < count; i++)
+		for(const auto& child : m_children)
 		{
-			std::shared_ptr<DeviceObject> device = childSharedPtr(i);
-
-			if (device == nullptr)
+			if (child == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(child);
 				continue;
 			}
 
-			if (device->isModule())
+			if (child->isModule())
 			{
-				std::shared_ptr<DeviceModule> module = std::dynamic_pointer_cast<DeviceModule>(device);
+				std::shared_ptr<DeviceModule> module = child->toModule();
 
 				if (module == nullptr)
 				{
-					assert(false);
+					Q_ASSERT(module);
 					continue;
 				}
 
@@ -1954,7 +1818,7 @@ R"DELIM({
 			}
 		}
 
-		return nullptr;
+		return {};
 	}
 
 	int DeviceChassis::type() const
@@ -1972,23 +1836,23 @@ R"DELIM({
 	// DeviceModule
 	//
 	//
-	DeviceModule::DeviceModule(bool preset /*= false*/) :
-		DeviceObject(preset)
+	DeviceModule::DeviceModule(bool preset /*= false*/, QObject* parent /*= nullptr*/) :
+		DeviceObject(DeviceType::Module, preset, parent)
 	{
-		auto familyTypeProp = ADD_PROPERTY_GETTER_SETTER(DeviceModule::FamilyType, "ModuleFamily", true, DeviceModule::moduleFamily, DeviceModule::setModuleFamily);
+		auto familyTypeProp = ADD_PROPERTY_GETTER_SETTER(DeviceModule::FamilyType, QLatin1String("ModuleFamily"), true, DeviceModule::moduleFamily, DeviceModule::setModuleFamily);
 		familyTypeProp->setExpert(true);
 
-		auto moduleVersionProp = ADD_PROPERTY_GETTER_SETTER(int, "ModuleVersion", true, DeviceModule::moduleVersion, DeviceModule::setModuleVersion);
+		auto moduleVersionProp = ADD_PROPERTY_GETTER_SETTER(int, QLatin1String("ModuleVersion"), true, DeviceModule::moduleVersion, DeviceModule::setModuleVersion);
 		moduleVersionProp->setExpert(true);
 
-		auto configScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, "ConfigurationScript", true, DeviceModule::configurationScript, DeviceModule::setConfigurationScript);
+		auto configScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, QLatin1String("ConfigurationScript"), true, DeviceModule::configurationScript, DeviceModule::setConfigurationScript);
 		configScriptProp->setExpert(true);
 		configScriptProp->setIsScript(true);
 
-		auto rawDataDescrProp = ADD_PROPERTY_GETTER_SETTER(QString, "RawDataDescription", true, DeviceModule::rawDataDescription, DeviceModule::setRawDataDescription);
+		auto rawDataDescrProp = ADD_PROPERTY_GETTER_SETTER(QString, QLatin1String("RawDataDescription"), true, DeviceModule::rawDataDescription, DeviceModule::setRawDataDescription);
 		rawDataDescrProp->setExpert(true);
 
-		auto customFamilyTypeProp = ADD_PROPERTY_GETTER_SETTER(int, "CustomModuleFamily", true, DeviceModule::customModuleFamily, DeviceModule::setCustomModuleFamily);
+		auto customFamilyTypeProp = ADD_PROPERTY_GETTER_SETTER(int, QLatin1String("CustomModuleFamily"), true, DeviceModule::customModuleFamily, DeviceModule::setCustomModuleFamily);
 		customFamilyTypeProp->setExpert(true);
 
 		familyTypeProp->setUpdateFromPreset(true);
@@ -2009,17 +1873,13 @@ R"DELIM({
 		}
 	}
 
-	DeviceModule::~DeviceModule()
-	{
-	}
-
 	bool DeviceModule::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
-			assert(result);
-			assert(message->has_deviceobject());
+			Q_ASSERT(result);
+			Q_ASSERT(message->has_deviceobject());
 			return false;
 		}
 
@@ -2039,7 +1899,7 @@ R"DELIM({
 	{
 		if (message.has_deviceobject() == false)
 		{
-			assert(message.has_deviceobject());
+			Q_ASSERT(message.has_deviceobject());
 			return false;
 		}
 
@@ -2053,7 +1913,7 @@ R"DELIM({
 		//
 		if (message.deviceobject().has_module() == false)
 		{
-			assert(message.deviceobject().has_module());
+			Q_ASSERT(message.deviceobject().has_module());
 			return false;
 		}
 
@@ -2084,32 +1944,11 @@ R"DELIM({
 
 		m_configurationScript = QString::fromStdString(modulemessage.configurationscript());
 		m_configurationScript = replaceEngeneeringToEngineering(m_configurationScript);		// Shit happens. We had a situaltion when misprinting was detected (EngEneering vs EngIneering).
-																				// To avoid manual replacement of this typo for non platform modules, the replace just made.
+																							// To avoid manual replacement of this typo for non platform modules, the replace just made.
 
 		m_rawDataDescription = QString::fromStdString(modulemessage.rawdatadescription());
 
 		return true;
-	}
-
-	DeviceType DeviceModule::deviceType() const
-	{
-		return m_deviceType;
-	}
-
-
-	int DeviceModule::jsModuleFamily() const
-	{
-		if (customModuleFamily() != 0)
-		{
-			return customModuleFamily();
-		}
-
-		//if (moduleFamily() == FamilyType::OTHER)
-		//{
-			//return customModuleFamily();
-		//}
-
-		return static_cast<int>(m_type & 0xFF00);
 	}
 
 	DeviceModule::FamilyType DeviceModule::moduleFamily() const
@@ -2119,9 +1958,9 @@ R"DELIM({
 
 	void DeviceModule::setModuleFamily(DeviceModule::FamilyType value)
 	{
-		decltype(m_type) tmp = static_cast<decltype(m_type)>(value);
+		auto tmp = static_cast<decltype(m_type)>(value);
 
-		assert((tmp & 0x00FF) == 0);
+		Q_ASSERT((tmp & 0x00FF) == 0);
 
 		tmp &= 0xFF00;
 
@@ -2145,9 +1984,9 @@ R"DELIM({
 
 	void DeviceModule::setModuleVersion(int value)
 	{
-		decltype(m_type) tmp = static_cast<decltype(m_type)>(value);
+		auto tmp = static_cast<decltype(m_type)>(value);
 
-		assert((tmp & 0xFF00) == 0);
+		Q_ASSERT((tmp & 0xFF00) == 0);
 
 		m_type = (m_type & 0xFF00) | tmp;
 	}
@@ -2234,12 +2073,8 @@ R"DELIM({
 	// DeviceController
 	//
 	//
-	DeviceController::DeviceController(bool preset /*= false*/) :
-		DeviceObject(preset)
-	{
-	}
-
-	DeviceController::~DeviceController()
+	DeviceController::DeviceController(bool preset /*= false*/, QObject* parent /*= nullptr*/) :
+		DeviceObject(DeviceType::Controller, preset, parent)
 	{
 	}
 
@@ -2248,15 +2083,14 @@ R"DELIM({
 		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
-			assert(result);
-			assert(message->has_deviceobject());
+			Q_ASSERT(result);
+			Q_ASSERT(message->has_deviceobject());
 			return false;
 		}
 
 		// --
 		//
-		Proto::DeviceController* controllerMessage =
-				message->mutable_deviceobject()->mutable_controller();
+		Proto::DeviceController* controllerMessage = message->mutable_deviceobject()->mutable_controller();
 
 		Q_UNUSED(controllerMessage);
 		//controllerMessage->set_startxdocpt(m_startXDocPt);
@@ -2269,7 +2103,7 @@ R"DELIM({
 	{
 		if (message.has_deviceobject() == false)
 		{
-			assert(message.has_deviceobject());
+			Q_ASSERT(message.has_deviceobject());
 			return false;
 		}
 
@@ -2283,7 +2117,7 @@ R"DELIM({
 		//
 		if (message.deviceobject().has_controller() == false)
 		{
-			assert(message.deviceobject().has_controller());
+			Q_ASSERT(message.deviceobject().has_controller());
 			return false;
 		}
 
@@ -2296,84 +2130,50 @@ R"DELIM({
 		return true;
 	}
 
-	DeviceType DeviceController::deviceType() const
+	//
+	//
+	// DeviceAppSignal
+	//
+	//
+	DeviceAppSignal::DeviceAppSignal(bool preset /*= false*/, QObject* parent /*= nullptr*/) noexcept :
+		DeviceObject(DeviceType::AppSignal, preset, parent)
 	{
-		return m_deviceType;
-	}
-
-	//
-	//
-	// DeviceDiagSignal
-	//
-	//
-	DeviceSignal::DeviceSignal(bool preset /*= false*/) noexcept :
-		DeviceObject(preset)
-	{
-
 		// These properties are used in setType()
 		// So they don take part in PropertyOnDemand
 		//
-		addProperty<E::AnalogAppSignalFormat, DeviceSignal, &DeviceSignal::appSignalDataFormat, &DeviceSignal::setAppSignalDataFormat>(PropertyNames::appSignalDataFormat, PropertyNames::categoryAppSignal, true)
+		addProperty<E::AnalogAppSignalFormat, DeviceAppSignal, &DeviceAppSignal::appSignalDataFormat, &DeviceAppSignal::setAppSignalDataFormat>(PropertyNames::appSignalDataFormat, PropertyNames::categoryAppSignal, true)
 				->setUpdateFromPreset(true)
 				.setExpert(preset);
 
-		addProperty<QString, DeviceSignal, &DeviceSignal::appSignalBusTypeId, &DeviceSignal::setAppSignalBusTypeId>(PropertyNames::appSignalBusTypeId, PropertyNames::categoryAppSignal, true)
+		addProperty<QString, DeviceAppSignal, &DeviceAppSignal::appSignalBusTypeId, &DeviceAppSignal::setAppSignalBusTypeId>(PropertyNames::appSignalBusTypeId, PropertyNames::categoryAppSignal, true)
 				->setUpdateFromPreset(true)
 				.setExpert(preset);
-
-//		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SignalType, PropertyNames::type, true, DeviceSignal::type, DeviceSignal::setType)
-//		auto functionProp = ADD_PROPERTY_GETTER_SETTER(E::SignalFunction, PropertyNames::function, true, DeviceSignal::function, DeviceSignal::setFunction)
-//		auto byteOrderProp = ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, PropertyNames::byteOrder, true, DeviceSignal::byteOrder, DeviceSignal::setByteOrder)
-//		auto formatProp = ADD_PROPERTY_GETTER_SETTER(E::DataFormat, PropertyNames::format, true, DeviceSignal::format, DeviceSignal::setFormat)
-//		auto memoryAreaProp = ADD_PROPERTY_GETTER_SETTER(E::MemoryArea, PropertyNames::memoryArea, true, DeviceSignal::memoryArea, DeviceSignal::setMemoryArea)
-
-//		auto sizeProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::size, true, DeviceSignal::size, DeviceSignal::setSize)
-
-//		auto valueOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::valueOffset, true, DeviceSignal::valueOffset, DeviceSignal::setValueOffset)
-//		auto valueBitProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::valueBit, true, DeviceSignal::valueBit, DeviceSignal::setValueBit)
-
-//		auto validitySignalId = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::validitySignalId, true, DeviceSignal::validitySignalId, DeviceSignal::setValiditySignalId)
-
-//		auto appSignalLowAdcProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::appSignalLowAdc, true, DeviceSignal::appSignalLowAdc, DeviceSignal::setAppSignalLowAdc)
-//		auto appSignalHighAdcProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::appSignalHighAdc, true, DeviceSignal::appSignalHighAdc, DeviceSignal::setAppSignalHighAdc)
-
-//		auto appSignalLowEngUnitsProp = ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::appSignalLowEngUnits, true, DeviceSignal::appSignalLowEngUnits, DeviceSignal::setAppSignalLowEngUnits)
-//		auto appSignalHighEngUnitsProp = ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::appSignalHighEngUnits, true, DeviceSignal::appSignalHighEngUnits, DeviceSignal::setAppSignalHighEngUnits)
-
-//		auto appSignalDataFormatProp = ADD_PROPERTY_GETTER_SETTER(E::AnalogAppSignalFormat, PropertyNames::appSignalDataFormat, true, DeviceSignal::appSignalDataFormat, DeviceSignal::setAppSignalDataFormat)
-
-//		auto signalSpecPropsStrucProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::signalSpecificProperties, true, DeviceSignal::signalSpecPropsStruc, DeviceSignal::setSignalSpecPropsStruc)
 
 		// Show/Hide analog signal properties
 		//
-		setType(type());
+		setSignalType(signalType());
 
 		return;
 	}
 
-	DeviceSignal::~DeviceSignal()
-	{
-
-	}
-
-	void DeviceSignal::propertyDemand(const QString& prop)
+	void DeviceAppSignal::propertyDemand(const QString& prop)
 	{
 		DeviceObject::propertyDemand(prop);
 
-		auto typeProp = addProperty<E::SignalType, DeviceSignal, &DeviceSignal::type, &DeviceSignal::setType>(PropertyNames::type, QLatin1String(), true);
-		auto functionProp = addProperty<E::SignalFunction, DeviceSignal, &DeviceSignal::function, &DeviceSignal::setFunction>(PropertyNames::function, QLatin1String(), true);
-		auto byteOrderProp = addProperty<E::ByteOrder, DeviceSignal, &DeviceSignal::byteOrder, &DeviceSignal::setByteOrder>(PropertyNames::byteOrder, QLatin1String(), true);
-		auto formatProp = addProperty<E::DataFormat, DeviceSignal, &DeviceSignal::format, &DeviceSignal::setFormat>(PropertyNames::format, QLatin1String(), true);
-		auto memoryAreaProp = addProperty<E::MemoryArea, DeviceSignal, &DeviceSignal::memoryArea, &DeviceSignal::setMemoryArea>(PropertyNames::memoryArea, QLatin1String(), true);
+		auto typeProp = addProperty<E::SignalType, DeviceAppSignal, &DeviceAppSignal::signalType, &DeviceAppSignal::setSignalType>(PropertyNames::type, QLatin1String(), true);
+		auto functionProp = addProperty<E::SignalFunction, DeviceAppSignal, &DeviceAppSignal::function, &DeviceAppSignal::setFunction>(PropertyNames::function, QLatin1String(), true);
+		auto byteOrderProp = addProperty<E::ByteOrder, DeviceAppSignal, &DeviceAppSignal::byteOrder, &DeviceAppSignal::setByteOrder>(PropertyNames::byteOrder, QLatin1String(), true);
+		auto formatProp = addProperty<E::DataFormat, DeviceAppSignal, &DeviceAppSignal::format, &DeviceAppSignal::setFormat>(PropertyNames::format, QLatin1String(), true);
+		auto memoryAreaProp = addProperty<E::MemoryArea, DeviceAppSignal, &DeviceAppSignal::memoryArea, &DeviceAppSignal::setMemoryArea>(PropertyNames::memoryArea, QLatin1String(), true);
 
-		auto sizeProp = addProperty<int, DeviceSignal, &DeviceSignal::size, &DeviceSignal::setSize>(PropertyNames::size, QLatin1String(), true);
+		auto sizeProp = addProperty<int, DeviceAppSignal, &DeviceAppSignal::size, &DeviceAppSignal::setSize>(PropertyNames::size, QLatin1String(), true);
 
-		auto valueOffsetProp = addProperty<int, DeviceSignal, &DeviceSignal::valueOffset, &DeviceSignal::setValueOffset>(PropertyNames::valueOffset, QLatin1String(), true);
-		auto valueBitProp = addProperty<int, DeviceSignal, &DeviceSignal::valueBit, &DeviceSignal::setValueBit>(PropertyNames::valueBit, QLatin1String(), true);
+		auto valueOffsetProp = addProperty<int, DeviceAppSignal, &DeviceAppSignal::valueOffset, &DeviceAppSignal::setValueOffset>(PropertyNames::valueOffset, QLatin1String(), true);
+		auto valueBitProp = addProperty<int, DeviceAppSignal, &DeviceAppSignal::valueBit, &DeviceAppSignal::setValueBit>(PropertyNames::valueBit, QLatin1String(), true);
 
-		auto validitySignalId = addProperty<QString, DeviceSignal, &DeviceSignal::validitySignalId, &DeviceSignal::setValiditySignalId>(PropertyNames::validitySignalId, QLatin1String(), true);
+		auto validitySignalId = addProperty<QString, DeviceAppSignal, &DeviceAppSignal::validitySignalId, &DeviceAppSignal::setValiditySignalId>(PropertyNames::validitySignalId, QLatin1String(), true);
 
-		auto signalSpecPropsStructProp = addProperty<QString, DeviceSignal, &DeviceSignal::signalSpecPropsStruct, &DeviceSignal::setSignalSpecPropsStruct>(PropertyNames::signalSpecificProperties, PropertyNames::categoryAppSignal, true);
+		auto signalSpecPropsStructProp = addProperty<QString, DeviceAppSignal, &DeviceAppSignal::signalSpecPropsStruct, &DeviceAppSignal::setSignalSpecPropsStruct>(PropertyNames::signalSpecificProperties, PropertyNames::categoryAppSignal, true);
 
 		typeProp->setUpdateFromPreset(true);
 		typeProp->setExpert(m_preset);
@@ -2409,21 +2209,21 @@ R"DELIM({
 		return;
 	}
 
-	bool DeviceSignal::SaveData(Proto::Envelope* message, bool saveTree) const
+	bool DeviceAppSignal::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
-			assert(result);
-			assert(message->has_deviceobject());
+			Q_ASSERT(result);
+			Q_ASSERT(message->has_deviceobject());
 			return false;
 		}
 
 		// --
 		//
-		Proto::DeviceSignal* signalMessage = message->mutable_deviceobject()->mutable_signal();
+		Proto::DeviceAppSignal* signalMessage = message->mutable_deviceobject()->mutable_appsignal();
 
-		signalMessage->set_type(static_cast<int>(m_type));
+		signalMessage->set_type(static_cast<int>(m_signalType));
 		signalMessage->set_function(static_cast<int>(m_function));
 
 		signalMessage->set_byteorder(static_cast<int>(m_byteOrder));
@@ -2453,11 +2253,11 @@ R"DELIM({
 		return true;
 	}
 
-	bool DeviceSignal::LoadData(const Proto::Envelope& message)
+	bool DeviceAppSignal::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_deviceobject() == false)
 		{
-			assert(message.has_deviceobject());
+			Q_ASSERT(message.has_deviceobject());
 			return false;
 		}
 
@@ -2469,54 +2269,54 @@ R"DELIM({
 
 		// --
 		//
-		if (message.deviceobject().has_signal() == false)
+		if (message.deviceobject().has_appsignal() == false)
 		{
-			assert(message.deviceobject().has_signal());
+			Q_ASSERT(message.deviceobject().has_appsignal());
 			return false;
 		}
 
-		const Proto::DeviceSignal& signalMessage = message.deviceobject().signal();
+		const Proto::DeviceAppSignal& signalMessage = message.deviceobject().appsignal();
 
 		if (signalMessage.has_obsoletetype() == true)
 		{
-			assert(signalMessage.has_type() == false);
-			assert(signalMessage.has_function() == false);
+			Q_ASSERT(signalMessage.has_type() == false);
+			Q_ASSERT(signalMessage.has_function() == false);
 
 			Obsolete::SignalType obsoleteType = static_cast<Obsolete::SignalType>(signalMessage.obsoletetype());
 
 			switch (obsoleteType)
 			{
 				case Obsolete::SignalType::DiagDiscrete:
-					setType(E::SignalType::Discrete);
+					setSignalType(E::SignalType::Discrete);
 					m_function = E::SignalFunction::Diagnostics;
 					break;
 				case Obsolete::SignalType::DiagAnalog:
-					setType(E::SignalType::Analog);
+					setSignalType(E::SignalType::Analog);
 					m_function = E::SignalFunction::Diagnostics;
 					break;
 				case Obsolete::SignalType::InputDiscrete:
-					setType(E::SignalType::Discrete);
+					setSignalType(E::SignalType::Discrete);
 					m_function = E::SignalFunction::Input;
 					break;
 				case Obsolete::SignalType::InputAnalog:
-					setType(E::SignalType::Analog);
+					setSignalType(E::SignalType::Analog);
 					m_function = E::SignalFunction::Input;
 					break;
 				case Obsolete::SignalType::OutputDiscrete:
-					setType(E::SignalType::Discrete);
+					setSignalType(E::SignalType::Discrete);
 					m_function = E::SignalFunction::Output;
 					break;
 				case Obsolete::SignalType::OutputAnalog:
-					setType(E::SignalType::Analog);
+					setSignalType(E::SignalType::Analog);
 					m_function = E::SignalFunction::Output;
 					break;
 				default:
-					assert(false);
+					Q_ASSERT(false);
 			}
 		}
 		else
 		{
-			setType(static_cast<E::SignalType>(signalMessage.type()));				// Show hide some props
+			setSignalType(static_cast<E::SignalType>(signalMessage.type()));				// Show hide some props
 			m_function = static_cast<E::SignalFunction>(signalMessage.function());
 		}
 
@@ -2570,90 +2370,80 @@ R"DELIM({
 		return true;
 	}
 
-	void DeviceSignal::expandEquipmentId()
+	void DeviceAppSignal::expandEquipmentId()
 	{
 		if (m_validitySignalId.isEmpty() == false)
 		{
-			if (parent() != nullptr)
+			if (hasParent() == true)
 			{
 				m_validitySignalId.replace(QLatin1String("$(PARENT)"), parent()->equipmentIdTemplate(), Qt::CaseInsensitive);
 			}
 
 			m_validitySignalId.replace(QLatin1String("$(PLACE)"), QString::number(place()).rightJustified(2, '0'), Qt::CaseInsensitive);
-
-			// qDebug() << m_validitySignalId;
 		}
 
 		DeviceObject::expandEquipmentId();
+
+		return;
 	}
 
-	DeviceType DeviceSignal::deviceType() const
+//	quint32 DeviceAppSignal::valueToMantExp1616(double value)
+//	{
+//		if (value == 0)
+//			return 0;
+
+//		//value = 2;
+
+//		double m = 0;
+//		int p = 1;
+
+//		m = frexp (value, &p);
+
+//		p+= 30;
+
+//		if (abs((int)m) < 0x3fffffff)
+//		{
+//			while (abs((int)m) < 0x3fffffff)
+//			{
+//				m *= 2;
+//				p--;
+//			}
+
+//			if ((int)m == -0x40000000)
+//			{
+//				m *= 2;
+//				p--;
+//			}
+//		}
+//		else
+//		{
+//			while (abs((int)m) > 0x20000000)
+//			{
+//				m /= 2;
+//				p++;
+//			}
+//		}
+
+//		if (p < -256 || p > 255)
+//		{
+//			return 0;
+//		}
+
+//		quint16 _m16 = (int)m >> 16;
+//		quint16 _p16 = static_cast<quint16>(p);
+
+//		quint32 result = (_m16 << 16) | _p16;
+//		return result;
+//	}
+
+	E::SignalType DeviceAppSignal::signalType() const
 	{
-		return DeviceSignal::m_deviceType;
+		return m_signalType;
 	}
 
-	quint32 DeviceSignal::valueToMantExp1616(double value)
+	void DeviceAppSignal::setSignalType(E::SignalType value)
 	{
-		if (value == 0)
-			return 0;
-
-		//value = 2;
-
-		double m = 0;
-		int p = 1;
-
-		m = frexp (value, &p);
-
-		p+= 30;
-
-		if (abs((int)m) < 0x3fffffff)
-		{
-			while (abs((int)m) < 0x3fffffff)
-			{
-				m *= 2;
-				p--;
-			}
-
-			if ((int)m == -0x40000000)
-			{
-				m *= 2;
-				p--;
-			}
-		}
-		else
-		{
-			while (abs((int)m) > 0x20000000)
-			{
-				m /= 2;
-				p++;
-			}
-		}
-
-		if (p < -256 || p > 255)
-		{
-			return 0;
-		}
-
-		quint16 _m16 = (int)m >> 16;
-		quint16 _p16 = static_cast<quint16>(p);
-
-		quint32 result = (_m16 << 16) | _p16;
-		return result;
-	}
-
-	E::SignalType DeviceSignal::type() const
-	{
-		return m_type;
-	}
-
-	int DeviceSignal::jsType() const
-	{
-		return static_cast<int>(type());
-	}
-
-	void DeviceSignal::setType(E::SignalType value)
-	{
-		m_type = value;
+		m_signalType = value;
 
 		if (function() == E::SignalFunction::Input ||
 			function() == E::SignalFunction::Output)
@@ -2661,7 +2451,7 @@ R"DELIM({
 			bool analogSignalProps = false;
 			bool busSignalProps = false;
 
-			switch (m_type)
+			switch (m_signalType)
 			{
 			case E::SignalType::Analog:
 				analogSignalProps = true;
@@ -2672,7 +2462,7 @@ R"DELIM({
 				busSignalProps = true;
 				break;
 			default:
-				assert(false);
+				Q_ASSERT(false);
 			}
 
 			bool propertiesWereChanged = false;
@@ -2686,7 +2476,7 @@ R"DELIM({
 			}
 			else
 			{
-				assert(p);
+				Q_ASSERT(p);
 			}
 
 			if (auto p = propertyByCaption(PropertyNames::appSignalBusTypeId);
@@ -2698,7 +2488,7 @@ R"DELIM({
 			}
 			else
 			{
-				assert(p);
+				Q_ASSERT(p);
 			}
 
 			if (propertiesWereChanged == true)
@@ -2708,187 +2498,182 @@ R"DELIM({
 		}
 	}
 
-	E::SignalFunction DeviceSignal::function() const
+	E::SignalFunction DeviceAppSignal::function() const
 	{
 		return m_function;
 	}
 
-	int DeviceSignal::jsFunction() const
-	{
-		return static_cast<int>(function());
-	}
-
-	void DeviceSignal::setFunction(E::SignalFunction value)
+	void DeviceAppSignal::setFunction(E::SignalFunction value)
 	{
 		m_function = value;
 	}
 
-	E::ByteOrder DeviceSignal::byteOrder() const
+	E::ByteOrder DeviceAppSignal::byteOrder() const
 	{
 		return m_byteOrder;
 	}
 
-	void DeviceSignal::setByteOrder(E::ByteOrder value)
+	void DeviceAppSignal::setByteOrder(E::ByteOrder value)
 	{
 		m_byteOrder = value;
 	}
 
-	E::DataFormat DeviceSignal::format() const
+	E::DataFormat DeviceAppSignal::format() const
 	{
 		return m_format;
 	}
 
-	void DeviceSignal::setFormat(E::DataFormat value)
+	void DeviceAppSignal::setFormat(E::DataFormat value)
 	{
 		m_format = value;
 	}
 
-	E::MemoryArea DeviceSignal::memoryArea() const
+	E::MemoryArea DeviceAppSignal::memoryArea() const
 	{
 		return m_memoryArea;
 	}
 
-	void DeviceSignal::setMemoryArea(E::MemoryArea value)
+	void DeviceAppSignal::setMemoryArea(E::MemoryArea value)
 	{
 		m_memoryArea = value;
 	}
 
-	int DeviceSignal::size() const
+	int DeviceAppSignal::size() const
 	{
 		return m_size;
 	}
 
-	void DeviceSignal::setSize(int value)
+	void DeviceAppSignal::setSize(int value)
 	{
 		m_size = value;
 	}
 
-	int DeviceSignal::valueOffset() const
+	int DeviceAppSignal::valueOffset() const
 	{
 		return m_valueOffset;
 	}
 
-	void DeviceSignal::setValueOffset(int value)
+	void DeviceAppSignal::setValueOffset(int value)
 	{
 		m_valueOffset = value;
 	}
 
-	int DeviceSignal::valueBit() const
+	int DeviceAppSignal::valueBit() const
 	{
 		return m_valueBit;
 	}
 
-	void DeviceSignal::setValueBit(int value)
+	void DeviceAppSignal::setValueBit(int value)
 	{
 		m_valueBit = value;
 	}
 
-	QString DeviceSignal::validitySignalId() const
+	QString DeviceAppSignal::validitySignalId() const
 	{
 		return m_validitySignalId;
 	}
 
-	void DeviceSignal::setValiditySignalId(QString value)
+	void DeviceAppSignal::setValiditySignalId(QString value)
 	{
 		m_validitySignalId = value.trimmed();
 	}
 
-	bool DeviceSignal::isInputSignal() const
+	bool DeviceAppSignal::isInputSignal() const
 	{
 		return m_function == E::SignalFunction::Input;
 	}
 
-	bool DeviceSignal::isOutputSignal() const
+	bool DeviceAppSignal::isOutputSignal() const
 	{
 		return m_function == E::SignalFunction::Output;
 	}
 
-	bool DeviceSignal::isDiagSignal() const
+	bool DeviceAppSignal::isDiagSignal() const
 	{
 		return m_function == E::SignalFunction::Diagnostics;
 	}
 
-	bool DeviceSignal::isValiditySignal() const
+	bool DeviceAppSignal::isValiditySignal() const
 	{
 		return m_function == E::SignalFunction::Validity;
 	}
 
-	bool DeviceSignal::isAnalogSignal() const
+	bool DeviceAppSignal::isAnalogSignal() const
 	{
-		return m_type == E::SignalType::Analog;
+		return m_signalType == E::SignalType::Analog;
 	}
 
-	bool DeviceSignal::isDiscreteSignal() const
+	bool DeviceAppSignal::isDiscreteSignal() const
 	{
-		return m_type == E::SignalType::Discrete;
+		return m_signalType == E::SignalType::Discrete;
 	}
 
-	int DeviceSignal::appSignalLowAdc() const
+	int DeviceAppSignal::appSignalLowAdc() const
 	{
 		return m_appSignalLowAdc;
 	}
 
-	void DeviceSignal::setAppSignalLowAdc(int value)
+	void DeviceAppSignal::setAppSignalLowAdc(int value)
 	{
 		m_appSignalLowAdc = value;
 	}
 
-	int DeviceSignal::appSignalHighAdc() const
+	int DeviceAppSignal::appSignalHighAdc() const
 	{
 		return m_appSignalHighAdc;
 	}
 
-	void DeviceSignal::setAppSignalHighAdc(int value)
+	void DeviceAppSignal::setAppSignalHighAdc(int value)
 	{
 		m_appSignalHighAdc = value;
 	}
 
-	double DeviceSignal::appSignalLowEngUnits() const
+	double DeviceAppSignal::appSignalLowEngUnits() const
 	{
 		return m_appSignalLowEngUnits;
 	}
 
-	void DeviceSignal::setAppSignalLowEngUnits(double value)
+	void DeviceAppSignal::setAppSignalLowEngUnits(double value)
 	{
 		m_appSignalLowEngUnits = value;
 	}
 
-	double DeviceSignal::appSignalHighEngUnits() const
+	double DeviceAppSignal::appSignalHighEngUnits() const
 	{
 		return m_appSignalHighEngUnits;
 	}
 
-	void DeviceSignal::setAppSignalHighEngUnits(double value)
+	void DeviceAppSignal::setAppSignalHighEngUnits(double value)
 	{
 		m_appSignalHighEngUnits = value;
 	}
 
-	E::AnalogAppSignalFormat DeviceSignal::appSignalDataFormat() const
+	E::AnalogAppSignalFormat DeviceAppSignal::appSignalDataFormat() const
 	{
 		return m_appSignalDataFormat;
 	}
 
-	void DeviceSignal::setAppSignalDataFormat(E::AnalogAppSignalFormat value)
+	void DeviceAppSignal::setAppSignalDataFormat(E::AnalogAppSignalFormat value)
 	{
 		m_appSignalDataFormat = value;
 	}
 
-	QString DeviceSignal::appSignalBusTypeId() const
+	QString DeviceAppSignal::appSignalBusTypeId() const
 	{
 		return m_appSignalBusTypeId;
 	}
 
-	void DeviceSignal::setAppSignalBusTypeId(QString value)
+	void DeviceAppSignal::setAppSignalBusTypeId(QString value)
 	{
 		m_appSignalBusTypeId = value;
 	}
 
-	QString DeviceSignal::signalSpecPropsStruct() const
+	QString DeviceAppSignal::signalSpecPropsStruct() const
 	{
 		return m_signalSpecPropsStruct;
 	}
 
-	void DeviceSignal::setSignalSpecPropsStruct(QString value)
+	void DeviceAppSignal::setSignalSpecPropsStruct(QString value)
 	{
 		m_signalSpecPropsStruct = value;
 	}
@@ -2898,8 +2683,8 @@ R"DELIM({
 	// Workstation
 	//
 	//
-	Workstation::Workstation(bool preset /*= false*/) :
-		DeviceObject(preset)
+	Workstation::Workstation(bool preset /*= false*/, QObject* parent /*= nullptr*/) :
+		DeviceObject(DeviceType::Workstation, preset, parent)
 	{
 		//auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, "Type", true, Workstation::type, Workstation::setType)
 		//typeProp->setUpdateFromPreset(true);
@@ -2915,17 +2700,13 @@ R"DELIM({
 		}
 	}
 
-	Workstation::~Workstation()
-	{
-	}
-
 	bool Workstation::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
-			assert(result);
-			assert(message->has_deviceobject());
+			Q_ASSERT(result);
+			Q_ASSERT(message->has_deviceobject());
 			return false;
 		}
 
@@ -2942,7 +2723,7 @@ R"DELIM({
 	{
 		if (message.has_deviceobject() == false)
 		{
-			assert(message.has_deviceobject());
+			Q_ASSERT(message.has_deviceobject());
 			return false;
 		}
 
@@ -2956,7 +2737,7 @@ R"DELIM({
 		//
 		if (message.deviceobject().has_workstation() == false)
 		{
-			assert(message.deviceobject().has_workstation());
+			Q_ASSERT(message.deviceobject().has_workstation());
 			return false;
 		}
 
@@ -2966,12 +2747,6 @@ R"DELIM({
 
 		return true;
 	}
-
-	DeviceType Workstation::deviceType() const
-	{
-		return m_deviceType;
-	}
-
 
 	int Workstation::type() const
 	{
@@ -2984,22 +2759,17 @@ R"DELIM({
 	}
 
 
-
 	//
 	//
 	// Software
 	//
 	//
-	Software::Software(bool preset /*= false*/) :
-		DeviceObject(preset)
+	Software::Software(bool preset /*= false*/, QObject* parent /*= nullptr*/) :
+		DeviceObject(DeviceType::Software, preset, parent)
 	{
-		ADD_PROPERTY_GETTER_SETTER(E::SoftwareType, "Type", true, Software::type, Software::setType)
+		ADD_PROPERTY_GETTER_SETTER(E::SoftwareType, PropertyNames::type, true, Software::softwareType, Software::setSoftwareType)
 				->setExpert(true)
 				.setUpdateFromPreset(true);
-	}
-
-	Software::~Software()
-	{
 	}
 
 	bool Software::SaveData(Proto::Envelope* message, bool saveTree) const
@@ -3007,8 +2777,8 @@ R"DELIM({
 		bool result = DeviceObject::SaveData(message, saveTree);
 		if (result == false || message->has_deviceobject() == false)
 		{
-			assert(result);
-			assert(message->has_deviceobject());
+			Q_ASSERT(result);
+			Q_ASSERT(message->has_deviceobject());
 			return false;
 		}
 
@@ -3016,7 +2786,7 @@ R"DELIM({
 		//
 		Proto::Software* softwareMessage = message->mutable_deviceobject()->mutable_software();
 
-		softwareMessage->set_type(static_cast<int>(m_type));
+		softwareMessage->set_type(static_cast<int>(m_softwareType));
 
 		return true;
 	}
@@ -3025,7 +2795,7 @@ R"DELIM({
 	{
 		if (message.has_deviceobject() == false)
 		{
-			assert(message.has_deviceobject());
+			Q_ASSERT(message.has_deviceobject());
 			return false;
 		}
 
@@ -3039,31 +2809,25 @@ R"DELIM({
 		//
 		if (message.deviceobject().has_software() == false)
 		{
-			assert(message.deviceobject().has_software());
+			Q_ASSERT(message.deviceobject().has_software());
 			return false;
 		}
 
 		const Proto::Software& softwareMessage = message.deviceobject().software();
 
-		m_type =  static_cast<E::SoftwareType>(softwareMessage.type());
+		m_softwareType =  static_cast<E::SoftwareType>(softwareMessage.type());
 
 		return true;
 	}
 
-	DeviceType Software::deviceType() const
+	E::SoftwareType Software::softwareType() const
 	{
-		return m_deviceType;
+		return m_softwareType;
 	}
 
-
-	E::SoftwareType Software::type() const
+	void Software::setSoftwareType(E::SoftwareType value)
 	{
-		return m_type;
-	}
-
-	void Software::setType(E::SoftwareType value)
-	{
-		m_type = value;
+		m_softwareType = value;
 	}
 
 
@@ -3072,14 +2836,14 @@ R"DELIM({
 	// EquipmentSet
 	//
 	//
-	EquipmentSet::EquipmentSet(std::shared_ptr<DeviceObject> root)
+	EquipmentSet::EquipmentSet(std::shared_ptr<DeviceRoot> root)
 	{
 		set(root);
 	}
 
 	EquipmentSet::~EquipmentSet()
 	{
-		// Release m_root in separate thrtead, if it is posiible
+		// Release m_root in separate thrtead, if it is possible
 		//
 		m_deviceTable.clear();	// Clear it first because it also holds m_root
 
@@ -3096,13 +2860,16 @@ R"DELIM({
 				equipmentSharedPointer);
 		}
 
+		return;
 	}
 
-	void EquipmentSet::set(std::shared_ptr<DeviceObject> root)
+	void EquipmentSet::set(std::shared_ptr<DeviceRoot> root)
 	{
+		m_deviceTable.clear();
+
 		if (root == nullptr)
 		{
-			assert(root);
+			Q_ASSERT(root);
 			return;
 		}
 
@@ -3110,49 +2877,13 @@ R"DELIM({
 
 		// fill map for fast access
 		//
-		m_deviceTable.clear();
-
 		m_deviceTable.insert(m_root->equipmentIdTemplate(), m_root);
 		addDeviceChildrenToHashTable(m_root);
-
-//		for (auto it : m_deviceTable)
-//		{
-//			qDebug() << it->equipmentIdTemplate();
-//		}
 
 		return;
 	}
 
-	DeviceObject* EquipmentSet::deviceObject(const QString& equipmentId)
-	{
-		auto it = m_deviceTable.find(equipmentId);
-
-		if (it != m_deviceTable.end())
-		{
-			return it.value().get();
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
-
-	const DeviceObject* EquipmentSet::deviceObject(const QString& equipmentId) const
-	{
-		auto it = m_deviceTable.find(equipmentId);
-
-		if (it != m_deviceTable.end())
-		{
-			return it.value().get();
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
-
-
-	std::shared_ptr<DeviceObject> EquipmentSet::deviceObjectSharedPointer(const QString& equipmentId)
+	std::shared_ptr<DeviceObject> EquipmentSet::deviceObject(const QString& equipmentId)
 	{
 		auto it = m_deviceTable.find(equipmentId);
 
@@ -3162,25 +2893,66 @@ R"DELIM({
 		}
 		else
 		{
-			return std::shared_ptr<DeviceObject>();
+			return nullptr;
 		}
 	}
 
-	DeviceRoot* EquipmentSet::root()
+	const std::shared_ptr<DeviceObject> EquipmentSet::deviceObject(const QString& equipmentId) const
 	{
-		return dynamic_cast<DeviceRoot*>(m_root.get());
+		auto it = m_deviceTable.find(equipmentId);
+
+		if (it != m_deviceTable.end())
+		{
+			return it.value();
+		}
+		else
+		{
+			return nullptr;
+		}
 	}
 
-	const DeviceRoot* EquipmentSet::root() const
+	std::shared_ptr<DeviceRoot> EquipmentSet::root()
 	{
-		return dynamic_cast<const DeviceRoot*>(m_root.get());
+		return m_root;
+	}
+
+	const std::shared_ptr<DeviceRoot> EquipmentSet::root() const
+	{
+		return m_root;
+	}
+
+	[[nodiscard]] std::vector<std::shared_ptr<DeviceObject>> EquipmentSet::devices()
+	{
+		std::vector<std::shared_ptr<DeviceObject>> result;
+		result.reserve(m_deviceTable.size());
+
+		for (auto d : m_deviceTable)
+		{
+			result.push_back(d);
+		}
+
+		return result;
+	}
+
+	void EquipmentSet::dump(bool dumpProps, QDebug d) const
+	{
+		if (m_root)
+		{
+			m_root->dump(dumpProps, true);
+		}
+		else
+		{
+			d << "EquipmentSet::root is empty";
+		}
+
+		return;
 	}
 
 	void EquipmentSet::addDeviceChildrenToHashTable(std::shared_ptr<DeviceObject> parent)
 	{
 		for (int i = 0; i < parent->childrenCount(); i++)
 		{
-			std::shared_ptr<DeviceObject> child = parent->childSharedPtr(i);
+			const std::shared_ptr<DeviceObject>& child = parent->child(i);
 			m_deviceTable.insert(child->equipmentIdTemplate(), child);
 
 			addDeviceChildrenToHashTable(child);
@@ -3193,7 +2965,7 @@ R"DELIM({
 	{
 		if (currentDevice == nullptr)
 		{
-			assert(currentDevice != nullptr);
+			Q_ASSERT(currentDevice != nullptr);
 
 			QString msg = QString(QObject::tr("%1: DeviceObject null pointer!")).arg(__FUNCTION__);
 
@@ -3210,7 +2982,7 @@ R"DELIM({
 
 		for(int i = 0; i < childrenCount; i++)
 		{
-			Hardware::DeviceObject* device = currentDevice->child(i);
+			Hardware::DeviceObject* device = currentDevice->child(i).get();
 
 			equipmentWalker(device, processBeforeChildren, processAfterChildren);
 		}
@@ -3231,7 +3003,7 @@ R"DELIM({
 		QXmlStreamReader equipmentReader;
 		QFile file(filePath);
 
-		Hardware::DeviceObject* pCurrentDevice = nullptr;
+		std::shared_ptr<DeviceObject> currentDevice;
 
 		if (file.open(QIODevice::ReadOnly))
 		{
@@ -3259,39 +3031,42 @@ R"DELIM({
 						qDebug() << QString("Could not interpret hash %s").arg(classNameHash);
 						continue;
 					}
-					std::shared_ptr<Hardware::DeviceObject> pDeviceObject(Hardware::DeviceObjectFactory.Create(hash));
-					if (pDeviceObject == nullptr)
+					std::shared_ptr<Hardware::DeviceObject> deviceObject = Hardware::DeviceObjectFactory.Create(hash);
+					if (deviceObject == nullptr)
 					{
 						qDebug() << QString("Unknown element %s found").arg(equipmentReader.name().toString());
 						continue;
 					}
 
-					if (typeid(*pDeviceObject) == typeid(Hardware::DeviceRoot))
+					if (deviceObject->isRoot() == true)
 					{
-						pCurrentDevice = pDeviceObject.get();
-						deviceRoot = std::dynamic_pointer_cast<Hardware::DeviceRoot>(pDeviceObject);
+						currentDevice = deviceObject;
+						deviceRoot = deviceObject->toRoot();
 						continue;
 					}
 
-					if (pCurrentDevice == nullptr)
+					if (currentDevice == nullptr)
 					{
 						qDebug() << "DeviceRoot should be the root xml element";
 						return;
 					}
 
-					pDeviceObject->setSpecificProperties(attr.value("SpecificProperties").toString());
+					deviceObject->setSpecificProperties(attr.value("SpecificProperties").toString());
 
-					for (auto p : pDeviceObject->properties())
+					for (auto p : deviceObject->properties())
 					{
+						Q_ASSERT(p);
+
 						if (p->readOnly() || p->caption() == QLatin1String("SpecificProperties"))
 						{
 							continue;
 						}
+
 						QVariant tmp = QVariant::fromValue(attr.value(p->caption()).toString());
 						bool result = tmp.convert(p->value().userType());
 						if (result == false)
 						{
-							assert(tmp.canConvert(p->value().userType()));
+							Q_ASSERT(tmp.canConvert(p->value().userType()));
 						}
 						else
 						{
@@ -3299,19 +3074,20 @@ R"DELIM({
 						}
 					}
 
-					pCurrentDevice->addChild(pDeviceObject);
-					pCurrentDevice = pDeviceObject.get();
+					currentDevice->addChild(deviceObject);
+					currentDevice = deviceObject;
 					break;
 				}
 				case QXmlStreamReader::EndElement:
-					if (pCurrentDevice != nullptr && typeid(*pCurrentDevice) != typeid(Hardware::DeviceRoot))
+					if (currentDevice != nullptr && currentDevice->isRoot() == false)
 					{
-						if (pCurrentDevice->parent() == nullptr)
+						if (currentDevice->hasParent() == false)
 						{
-							assert(false);
+							Q_ASSERT(currentDevice->hasParent());
 							break;
 						}
-						pCurrentDevice = pCurrentDevice->parent();
+
+						currentDevice = currentDevice->parent();
 					}
 					else
 					{

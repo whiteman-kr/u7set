@@ -1,7 +1,5 @@
 #include "SchemaPoint.h"
 
-#include "../lib/ProtoSerialization.h"
-
 namespace VFrame30
 {
 

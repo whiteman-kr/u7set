@@ -17,7 +17,7 @@ class AppSignalManager : public QObject, public IAppSignalManager
 
 public:
 	explicit AppSignalManager(QObject* parent = nullptr);
-	virtual ~AppSignalManager();
+	virtual ~AppSignalManager() = default;
 
 public:
 	void reset();
@@ -68,21 +68,26 @@ public:
 	//
 	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override;
 
+	// Extension
+	//
+public:
+	AppSignalParam signalParamByEquipemntId(const QString& equipmentId, bool* found) const;
+
 signals:
 	void addSignalToPriorityList(Hash signalHash) const;
 	void addSignalsToPriorityList(QVector<Hash> signalHash) const;
 
 private:
-	mutable QMutex m_unitsMutex;
-	std::map<int, QString> m_units;
+	mutable QReadWriteLock m_paramsLocker;
+	std::unordered_map<Hash, AppSignalParam> m_signalParams;		// Key is hash from AppSignalID (hash from hash here, not nice)
+	std::unordered_map<QString, Hash> m_signalParamByEquipmentId;	// Key is EquipmentId - value is hash from AppSignalID
 
-	mutable QMutex m_paramsMutex;
-	std::unordered_map<Hash, AppSignalParam> m_signalParams;
-
-	mutable QMutex m_statesMutex;
+	mutable QReadWriteLock m_statesLocker;
 	std::unordered_map<Hash, AppSignalState> m_signalStates;
 
-	ComparatorSet m_setpoints;			// ComparatorSet is threadsafe itself
+	// ComparatorSet is threadsafe itself
+	//
+	ComparatorSet m_setpoints;
 };
 
 

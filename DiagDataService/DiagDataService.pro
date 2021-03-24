@@ -11,10 +11,10 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../warnings.pri)
 
@@ -31,8 +31,7 @@ unix {
 
 SOURCES += \
     ../lib/Address16.cpp \
-    ../lib/LanControllerInfoHelper.cpp \
-	../lib/MemLeaksDetection.cpp \
+    ../lib/ScriptDeviceObject.cpp \
 	../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
 	../lib/SocketIO.cpp \
@@ -40,7 +39,6 @@ SOURCES += \
     ../lib/DataSource.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/Signal.cpp \
     ../lib/Types.cpp \
     ../lib/CfgServerLoader.cpp \
@@ -48,20 +46,14 @@ SOURCES += \
     ../lib/TcpFileTransfer.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SimpleThread.cpp \
-    ../lib/ServiceSettings.cpp \
-    ../lib/DeviceHelper.cpp \
-    ../lib/OutputLog.cpp \
+	../lib/SoftwareSettings.cpp \
     ../lib/XmlHelper.cpp \
     DiagDataService.cpp \
     ../lib/Queue.cpp \
     ../lib/DataProtocols.cpp \
     ../lib/WUtils.cpp \
-    ../Builder/IssueLogger.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
-    ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc \
-    ../Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
     DiagDataServiceMain.cpp \
     ../lib/SoftwareInfo.cpp \
@@ -72,9 +64,8 @@ SOURCES += \
 
 HEADERS += \
     ../lib/Address16.h \
-    ../lib/LanControllerInfo.h \
-    ../lib/LanControllerInfoHelper.h \
-	../lib/MemLeaksDetection.h \
+	../lib/LanControllerInfo.h \
+    ../lib/ScriptDeviceObject.h \
 	Stable.h \
 	../lib/SocketIO.h \
 	../lib/UdpSocket.h \
@@ -83,7 +74,6 @@ HEADERS += \
     ../lib/DataSource.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
-    ../lib/ProtoSerialization.h \
     ../lib/Signal.h \
     ../lib/CUtils.h \
     ../lib/PropertyObject.h \
@@ -93,20 +83,14 @@ HEADERS += \
     ../lib/TcpFileTransfer.h \
     ../lib/BuildInfo.h \
     ../lib/SimpleThread.h \
-    ../lib/ServiceSettings.h \
-    ../lib/DeviceHelper.h \
-    ../lib/OutputLog.h \
+	../lib/SoftwareSettings.h \
     ../lib/XmlHelper.h \
     ../lib/DataProtocols.h \
     DiagDataService.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
-    ../Builder/IssueLogger.h \
     ../lib/Crc.h \
     ../lib/HostAddressPort.h \
-    ../Proto/network.pb.h \
-    ../Proto/serialization.pb.h \
-    ../Builder/ModulesRawData.h \
     ../lib/CommandLineParser.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
@@ -119,17 +103,14 @@ include(../qtservice/src/qtservice.pri)
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-#protobuf
+# Protobuf
 #
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
+# Visual Leak Detector
+#
 win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
-
-	INCLUDEPATH += ./../Protobuf
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
-unix {
-	LIBS += -lprotobuf
-}
-
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG

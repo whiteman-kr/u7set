@@ -21,7 +21,30 @@ namespace VFrame30
 
 	SchemaItemValue::SchemaItemValue(SchemaUnit unit)
 	{
-		Property* p = nullptr;
+		m_font.setName(QStringLiteral("Arial"));
+
+		switch (unit)
+		{
+		case SchemaUnit::Display:
+			m_font.setSize(12.0, unit);
+			break;
+		case SchemaUnit::Inch:
+			m_font.setSize(1.0 / 8.0, unit);		// 1/8"
+			break;
+		case SchemaUnit::Millimeter:
+			m_font.setSize(mm2in(3), unit);
+			break;
+		default:
+			assert(false);
+		}
+
+		m_static = false;
+		setItemUnit(unit);
+	}
+
+	void SchemaItemValue::propertyDemand(const QString& prop)
+	{
+		PosRectImpl::propertyDemand(prop);
 
 		// Functional
 		//
@@ -48,37 +71,13 @@ namespace VFrame30
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::textCategory, true, SchemaItemValue::getFontBold, SchemaItemValue::setFontBold);
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::textCategory, true,  SchemaItemValue::getFontItalic, SchemaItemValue::setFontItalic);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::functionalCategory, true, SchemaItemValue::text, SchemaItemValue::setText);
-		p->setDescription(PropertyNames::textValuePropDescription);
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::functionalCategory, true, SchemaItemValue::text, SchemaItemValue::setText)
+			->setDescription(PropertyNames::textValuePropDescription);
 
-		p = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::precision, PropertyNames::functionalCategory, true, SchemaItemValue::precision, SchemaItemValue::setPrecision);
-		p->setDescription(PropertyNames::precisionPropText);
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::precision, PropertyNames::functionalCategory, true, SchemaItemValue::precision, SchemaItemValue::setPrecision)
+			->setDescription(PropertyNames::precisionPropText);
 
-		// --
-		//
-		m_font.setName(QStringLiteral("Arial"));
-
-		switch (unit)
-		{
-		case SchemaUnit::Display:
-			m_font.setSize(12.0, unit);
-			break;
-		case SchemaUnit::Inch:
-			m_font.setSize(1.0 / 8.0, unit);		// 1/8"
-			break;
-		case SchemaUnit::Millimeter:
-			m_font.setSize(mm2in(3), unit);
-			break;
-		default:
-			assert(false);
-		}
-
-		m_static = false;
-		setItemUnit(unit);
-	}
-
-	SchemaItemValue::~SchemaItemValue(void)
-	{
+		return;
 	}
 
 	// Serialization
@@ -195,6 +194,10 @@ namespace VFrame30
 		//
 		drawText(drawParam, r);
 
+		// Remove brush to draw non-filled rects
+		//
+		p->setBrush(Qt::NoBrush);
+
 		// Drawing frame rect
 		//
 		if (drawRect() == true)
@@ -253,7 +256,7 @@ namespace VFrame30
 		}
 		else
 		{
-			if (m_text.contains(QLatin1Literal("$(")) == true)
+			if (m_text.contains(QLatin1String("$(")) == true)
 			{
 				// m_text contains some variables, which need to be parsed
 				//
@@ -428,12 +431,6 @@ namespace VFrame30
 			Q_ASSERT(signalParam);
 			Q_ASSERT(appSignalState);
 			Q_ASSERT(tuningSignalState);
-			return false;
-		}
-
-		if (drawParam->isMonitorMode() == false)
-		{
-			Q_ASSERT(drawParam->isMonitorMode());
 			return false;
 		}
 

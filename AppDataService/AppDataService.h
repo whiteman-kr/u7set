@@ -4,7 +4,7 @@
 #include "../lib/DataSource.h"
 #include "../lib/Signal.h"
 #include "../lib/CfgServerLoader.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/Queue.h"
 
 #include "AppDataReceiver.h"
@@ -62,9 +62,11 @@ private:
 	void runCfgLoaderThread();
 	void stopCfgLoaderThread();
 
-	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void onConfigurationReady(const QByteArray configurationXmlData,
+							  const BuildFileInfoArray buildFileInfoArray,
+							  SessionParams sessionParams,
+							  std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
 
-	bool readConfigurationSettings(const QByteArray& fileData);
 	bool readDataSources(const QByteArray& fileData);
 	bool readAppSignals(const QByteArray& fileData);
 
@@ -105,7 +107,8 @@ private:
 private:
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-	AppDataServiceSettings m_cfgSettings;
+	AppDataServiceSettings m_curSettingsProfile;
+
 	int m_appDataProcessingThreadCount = 0;
 	QString m_strCmdLineAppDataReceivingIP;
 	HostAddressPort m_cmdLineAppDataReceivingIP;
@@ -132,11 +135,6 @@ private:
 	TcpArchiveClientThread* m_tcpArchiveClientThread = nullptr;
 
 	RtTrends::ServerThread* m_rtTrendsServerThread = nullptr;
-
-	static const int APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE = 1024 * 1024;
-
-	static const char* const SETTING_PROCESSING_THREADS_COUNT;
-	static const char* const SETTING_OVERRIDE_APP_DATA_RECEIVING_IP;
 
 	QTimer m_timer;
 };

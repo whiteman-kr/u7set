@@ -1,6 +1,6 @@
 #include "ConfigController.h"
 #include "MainWindow.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 #include "../lib/ClientBehavior.h"
 
 //
@@ -201,8 +201,13 @@ void ConfigController::start()
 	return;
 }
 
-void ConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void ConfigController::slot_configurationReady(const QByteArray configurationXmlData,
+											   const BuildFileInfoArray buildFileInfoArray,
+											   SessionParams sessionParams,
+											   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 {
+	Q_UNUSED(sessionParams);
+
 	// Copy old settings to new settings, EXCEPT schemas information!
 	//
 	ConfigSettings readSettings = theConfigSettings;
@@ -255,15 +260,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 		// Settings node
 		//
-		QDomNodeList settingsNodes = configElement.elementsByTagName("Settings");
-		if (settingsNodes.size() != 1)
-		{
-			readSettings.errorMessage += tr("Parsing Settings node error.\n");
-		}
-		else
-		{
-			result &= xmlReadSettingsNode(settingsNodes.item(0), &readSettings);
-		}
+		result &= applyCurSettingsProfile(curSettingsProfile, &readSettings);
 	}
 
 	// Error handling
@@ -281,7 +278,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	// Trace received params
 	//
 	theLogFile->writeMessage(tr("New configuration arrived"));
-	theLogFile->writeMessage(tr("TUNS1 (id, ip, port): %1, %2, %3").arg(readSettings.tuningServiceAddress.equipmentId()).arg(readSettings.tuningServiceAddress.ip()).arg(readSettings.tuningServiceAddress.port()));
+	theLogFile->writeMessage(tr("TUNS1 (id, ip, port): %1, %2, %3").arg(readSettings.serviceAddress.equipmentId()).arg(readSettings.serviceAddress.ip()).arg(readSettings.serviceAddress.port()));
 
 	bool someFilesUpdated = false;
 
@@ -352,7 +349,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			// Filters
 
-			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_FILTERS)
+			if (buildFileInfo.ID == CfgFileId::TUNING_FILTERS)
 			{
 				if (getFileBlockedById(buildFileInfo.ID, &data, &errorStr) == false)
 				{
@@ -369,7 +366,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			// Signals
 
-			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_SIGNALS)
+			if (buildFileInfo.ID == CfgFileId::TUNING_SIGNALS)
 			{
 				if (getFileBlockedById(buildFileInfo.ID, &data, &errorStr) == false)
 				{
@@ -383,7 +380,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 				}
 			}
 
-			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_GLOBALSCRIPT)
+			if (buildFileInfo.ID == CfgFileId::TUNING_GLOBALSCRIPT)
 			{
 				QByteArray globalScriptData;
 
@@ -395,11 +392,11 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 				}
 				else
 				{
-					readSettings.globalScript = globalScriptData;
+					readSettings.scriptGlobal = globalScriptData;
 				}
 			}
 
-			if (buildFileInfo.ID == CFG_FILE_ID_TUNING_CONFIGARRIVEDSCRIPT)
+			if (buildFileInfo.ID == CfgFileId::TUNING_CONFIGARRIVEDSCRIPT)
 			{
 				QByteArray configurationArrivedScriptData;
 
@@ -411,7 +408,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 				}
 				else
 				{
-					readSettings.configurationArrivedScript = configurationArrivedScriptData;
+					readSettings.scriptConfigArrived = configurationArrivedScriptData;
 				}
 			}
 
@@ -446,7 +443,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		{
 			if (buildFileInfo.ID == si.m_schemaId)
 			{
-				SchemaSettings s(si.m_schemaId, si.m_caption);
+				SchemaInfo s(si.m_schemaId, si.m_caption, si.tags());
 				readSettings.schemas.push_back(s);
 			}
 		}
@@ -454,21 +451,11 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	bool apperanceUpdated = false;
 
-	if (theConfigSettings.autoApply != readSettings.autoApply ||
-			theConfigSettings.filterByEquipment != readSettings.filterByEquipment ||
-			theConfigSettings.filterBySchema != readSettings.filterBySchema ||
-			theConfigSettings.showSchemasList != readSettings.showSchemasList ||
-			theConfigSettings.showSchemasTabs != readSettings.showSchemasTabs ||
-			theConfigSettings.showSchemas != readSettings.showSchemas ||
-			theConfigSettings.showSignals != readSettings.showSignals ||
-	        theConfigSettings.lmStatusFlagMode != readSettings.lmStatusFlagMode ||
-			theConfigSettings.logonMode != readSettings.logonMode ||
-			theConfigSettings.loginSessionLength != readSettings.loginSessionLength ||
-			theConfigSettings.usersAccounts != readSettings.usersAccounts ||
-			theConfigSettings.globalScript != readSettings.globalScript ||
-			theConfigSettings.configurationArrivedScript != readSettings.configurationArrivedScript ||
-			theConfigSettings.schemas.size() != readSettings.schemas.size()
-			)
+	if (theConfigSettings.clientSettings.appearanceChanged(readSettings.clientSettings)  == true ||
+		theConfigSettings.scriptGlobal != readSettings.scriptGlobal ||
+		theConfigSettings.scriptConfigArrived != readSettings.scriptConfigArrived ||
+		theConfigSettings.schemas.size() != readSettings.schemas.size()
+		)
 	{
 
 		updateInformation.push_back(tr("New configuration: appearance updated"));
@@ -477,11 +464,9 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	bool serversUpdated = false;
 
-	if (theConfigSettings.tuningServiceAddress.address().address() != readSettings.tuningServiceAddress.address().address() ||
-	        theConfigSettings.autoApply != readSettings.autoApply ||
-	        theConfigSettings.lmStatusFlagMode != readSettings.lmStatusFlagMode)
+	if (theConfigSettings.clientSettings.connectionChanged(readSettings.clientSettings) == true)
 	{
-		updateInformation.push_back(tr("New configuration: servers updated"));
+		updateInformation.push_back(tr("New configuration: connection parameters updated"));
 		serversUpdated = true;
 	}
 
@@ -497,7 +482,10 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	if (serversUpdated == true)
 	{
-		emit tcpClientConfigurationArrived(theConfigSettings.tuningServiceAddress.address(), theConfigSettings.autoApply, theConfigSettings.lmStatusFlagMode);
+
+		emit tcpClientConfigurationArrived(theConfigSettings.serviceAddress.address(),
+										   theConfigSettings.clientSettings.autoApply,
+										   theConfigSettings.lmStatusFlagMode());
 	}
 
 	if (someFilesUpdated == true || apperanceUpdated == true)
@@ -505,7 +493,9 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 		// Modify logon mode
 
-		theMainWindow->userManager()->setConfiguration(theConfigSettings.usersAccounts, theConfigSettings.logonMode, theConfigSettings.loginSessionLength);
+		theMainWindow->userManager()->setConfiguration(theConfigSettings.clientSettings.getUsersAccounts(),
+													   theConfigSettings.clientSettings.loginPerOperation == true ? LogonMode::PerOperation : LogonMode::Permanent,
+													   theConfigSettings.clientSettings.loginSessionLength);
 
 		emit configurationArrived();
 	}
@@ -620,104 +610,28 @@ bool ConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigS
 	return outSetting->errorMessage.isEmpty();
 }
 
-bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting)
+bool ConfigController::applyCurSettingsProfile(std::shared_ptr<const SoftwareSettings> curSettingsProfile,
+											   ConfigSettings* outSetting)
 {
-	if (outSetting == nullptr ||
-			settingsNode.nodeName() != "Settings")
+	if (outSetting == nullptr)
 	{
-		assert(outSetting);
-		assert(settingsNode.nodeName() == "Settings");
+		Q_ASSERT(false);
 		return false;
 	}
 
-	QDomElement settingsElement = settingsNode.toElement();
+	const TuningClientSettings* typedSettingsPtr = dynamic_cast<const TuningClientSettings*>(curSettingsProfile.get());
 
-	// Check if XML contains Error tag
-	//
-	QDomNodeList errorNodes = settingsElement.elementsByTagName("Error");
-
-	if (errorNodes.isEmpty() == false)
+	if (typedSettingsPtr == nullptr)
 	{
-		for (int i = 0; i < errorNodes.count();  i++)
-		{
-			outSetting->errorMessage += QString("%1\n").arg(errorNodes.at(i).toElement().text());
-		}
+		outSetting->errorMessage += tr("Settings applying error!\n");
 		return false;
 	}
 
-	// Get TuningService data
-	//
-	{
-		QDomNodeList dasNodes = settingsElement.elementsByTagName("TuningService");
+	outSetting->clientSettings = *typedSettingsPtr;
 
-		if (dasNodes.isEmpty() == true)
-		{
-			outSetting->errorMessage += tr("Cannot find TuningService tag\n");
-			return false;
-		}
-		else
-		{
-			QDomElement dasXmlElement = dasNodes.at(0).toElement();
+	outSetting->serviceAddress = ConfigConnection(outSetting->clientSettings.tuningServiceID,
+														outSetting->clientSettings.tuningServiceIP,
+														outSetting->clientSettings.tuningServicePort);
 
-			QString tunsId = dasXmlElement.attribute("TuningServiceID1");
-			QString tunsIp = dasXmlElement.attribute("ip1");
-			int tunsPort = dasXmlElement.attribute("port1").toInt();
-
-			outSetting->tuningServiceAddress = ConfigConnection(tunsId, tunsIp, tunsPort);
-
-		}
-	}
-
-	// Get TuningService data
-	//
-	{
-		QDomNodeList dasNodes = settingsElement.elementsByTagName("Appearance");
-
-		if (dasNodes.isEmpty() == true)
-		{
-			outSetting->errorMessage += tr("Cannot find Appearance tag\n");
-			return false;
-		}
-		else
-		{
-			QDomElement dasXmlElement = dasNodes.at(0).toElement();
-
-			outSetting->autoApply = dasXmlElement.attribute("autoApply") == "true" ? true : false;
-			outSetting->showSignals = dasXmlElement.attribute("showSignals") == "true" ? true : false;
-			outSetting->showSchemas = dasXmlElement.attribute("showSchemas") == "true" ? true : false;
-			outSetting->showSchemasList = dasXmlElement.attribute("showSchemasList") == "true" ? true : false;
-			outSetting->showSchemasTabs = dasXmlElement.attribute("showSchemasTabs") == "true" ? true : false;
-			outSetting->startSchemaID = dasXmlElement.attribute("startSchemaID");
-			outSetting->filterByEquipment = dasXmlElement.attribute("filterByEquipment") == "true" ? true : false;
-			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
-
-			bool showSOR = dasXmlElement.attribute("showSOR") == "true" ? true : false;
-			bool useAccessFlag = dasXmlElement.attribute("useAccessFlag") == "true" ? true : false;
-
-			outSetting->lmStatusFlagMode = LmStatusFlagMode::None;
-			if (showSOR == true)
-			{
-				outSetting->lmStatusFlagMode = LmStatusFlagMode::SOR;
-			}
-			else
-			{
-				if (useAccessFlag == true)
-				{
-					outSetting->lmStatusFlagMode = LmStatusFlagMode::AccessKey;
-				}
-			}
-
-			outSetting->logonMode = dasXmlElement.attribute("loginPerOperation") == "true" ? LogonMode::PerOperation : LogonMode::Permanent;
-			outSetting->loginSessionLength = dasXmlElement.attribute("loginSessionLength").toInt();
-
-			QString usersAccounts = dasXmlElement.attribute("usersAccounts");
-			usersAccounts.replace(' ', ';');
-			usersAccounts.replace('\n', ';');
-			usersAccounts.remove('\r');
-			outSetting->usersAccounts = usersAccounts.split(';', QString::SkipEmptyParts);
-		}
-	}
-
-	return outSetting->errorMessage.isEmpty();
+	return true;
 }
-

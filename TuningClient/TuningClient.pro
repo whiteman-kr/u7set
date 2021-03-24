@@ -12,21 +12,17 @@ TEMPLATE = app
 
 INCLUDEPATH += $$PWD
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
-win32:QMAKE_CXXFLAGS += /analyze		# Static code analyze
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
-# Warning level
+include(../warnings.pri)
+
+# generate PDBs for release
 #
-gcc:CONFIG += warn_on
-
-win32:CONFIG -= warn_on				# warn_on is level 3 warnings
-win32:QMAKE_CXXFLAGS += /W4			# CONFIG += warn_on is just W3 level, so set level 4
-win32:QMAKE_CXXFLAGS += /wd4201		# Disable warning: C4201: nonstandard extension used: nameless struct/union
-win32:QMAKE_CXXFLAGS += /wd4458		# Disable warning: C4458: declaration of 'selectionPen' hides class member
-win32:QMAKE_CXXFLAGS += /wd4275		# Disable warning: C4275: non - DLL-interface class 'class_1' used as base for DLL-interface class 'class_2'
+win32:QMAKE_CXXFLAGS_RELEASE += /Zi
+win32:QMAKE_LFLAGS_RELEASE += /DEBUG
 
 #Application icon
 win32:RC_ICONS += Images/TuningClient.ico
@@ -44,8 +40,6 @@ unix {
 }
 # /DESTDIR
 #
-
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
 unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 
@@ -71,7 +65,8 @@ win32 {
         INCLUDEPATH += ./../Protobuf
 }
 unix {
-        LIBS += -lprotobuf -lpam -lpam_misc
+        LIBS += -L$$DESTDIR -lprotobuf -lpam -lpam_misc
+		INCLUDEPATH += ./../Protobuf
 }
 
 
@@ -93,6 +88,8 @@ CONFIG(release, debug|release) {
 SOURCES +=\
     ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
+    ../lib/ScriptDeviceObject.cpp \
+    ../lib/SoftwareSettings.cpp \
         MainWindow.cpp \
     TuningPage.cpp \
     Settings.cpp \
@@ -108,14 +105,10 @@ SOURCES +=\
     ../lib/Crc.cpp \
     ../lib/SocketIO.cpp \
     DialogSettings.cpp \
-    ../Proto/network.pb.cc \
     ../lib/AppSignal.cpp \
-    ../Proto/serialization.pb.cc \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     ../lib/LogFile.cpp \
-    ../Builder/IssueLogger.cpp \
-    ../lib/OutputLog.cpp \
     UserManager.cpp \
     DialogProperties.cpp \
     ../lib/Ui/DialogSourceInfo.cpp \
@@ -134,7 +127,6 @@ SOURCES +=\
     ../lib/XmlHelper.cpp \
     ../lib/Types.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     DialogFilterEditor.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
@@ -159,6 +151,10 @@ SOURCES +=\
 HEADERS  += MainWindow.h \
     ../lib/Address16.h \
     ../lib/ClientBehavior.h \
+    ../lib/ConstStrings.h \
+    ../lib/ILogFile.h \
+    ../lib/ScriptDeviceObject.h \
+    ../lib/SoftwareSettings.h \
     Stable.h \
     TuningPage.h \
     Settings.h \
@@ -174,15 +170,11 @@ HEADERS  += MainWindow.h \
     ../lib/Crc.h \
     ../lib/SocketIO.h \
     DialogSettings.h \
-    ../Proto/network.pb.h \
     ../lib/AppSignal.h \
-    ../Proto/serialization.pb.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/PropertyObject.h \
     ../lib/LogFile.h \
-    ../Builder/IssueLogger.h \
-    ../lib/OutputLog.h \
     UserManager.h \
     DialogProperties.h \
     DialogPassword.h \
@@ -200,7 +192,6 @@ HEADERS  += MainWindow.h \
     ../lib/XmlHelper.h \
     ../lib/Types.h \
     ../lib/DbStruct.h \
-    ../lib/ProtoSerialization.h \
     ../lib/Tuning/TuningSignalState.h \
     DialogFilterEditor.h \
     ../lib/Tuning/TuningTcpClient.h \
@@ -240,3 +231,10 @@ DISTFILES += \
 
 RESOURCES += \
     Resources.qrc
+
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

@@ -11,10 +11,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = PacketViewer
 TEMPLATE = app
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 # DESTDIR
 #
@@ -30,6 +30,7 @@ unix {
 SOURCES += main.cpp\
     ../lib/Address16.cpp \
     ../lib/LanControllerInfoHelper.cpp \
+    ../lib/ScriptDeviceObject.cpp \
         SourceListWidget.cpp \
     PacketSourceModel.cpp \
     SourceStatusWidget.cpp \
@@ -38,7 +39,6 @@ SOURCES += main.cpp\
     ../lib/Signal.cpp \
     ../lib/SocketIO.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtoSerialization.cpp \
     PacketBufferTableModel.cpp \
     SignalTableModel.cpp \
     ../lib/Types.cpp \
@@ -62,6 +62,7 @@ HEADERS  += SourceListWidget.h \
     ../lib/Address16.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
+    ../lib/ScriptDeviceObject.h \
     PacketSourceModel.h \
     SourceStatusWidget.h \
     ../lib/DataSource.h \
@@ -70,7 +71,6 @@ HEADERS  += SourceListWidget.h \
     Stable.h \
     ../lib/SocketIO.h \
     ../lib/DbStruct.h \
-    ../lib/ProtoSerialization.h \
     PacketBufferTableModel.h \
     ../lib/PropertyObject.h \
     SignalTableModel.h \
@@ -94,17 +94,14 @@ HEADERS  += SourceListWidget.h \
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
+# Protobuf
 #
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
-#protobuf
+# Visual Leak Detector
 #
 win32 {
-        LIBS += -L$$DESTDIR -lprotobuf
-
-        INCLUDEPATH += ./../Protobuf
-}
-unix {
-        LIBS += -lprotobuf
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }

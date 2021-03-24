@@ -133,14 +133,6 @@ ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(TuningSignalManager* signal
 
 	QHBoxLayout* rightGridLayout = new QHBoxLayout();
 
-	/*m_moveUp = new QPushButton(tr("Move Up"));
-	connect(m_moveUp, &QPushButton::clicked, this, &DialogChooseTuningSignals::on_m_moveUp_clicked);
-	rightGridLayout->addWidget(m_moveUp);
-
-	m_moveDown = new QPushButton(tr("Move Down"));
-	connect(m_moveDown, &QPushButton::clicked, this, &DialogChooseTuningSignals::on_m_moveDown_clicked);
-	rightGridLayout->addWidget(m_moveDown);*/
-
 	rightGridLayout->addStretch();
 
 	m_setValue = new QPushButton(tr("Set Value"));
@@ -153,18 +145,6 @@ ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(TuningSignalManager* signal
 		connect(m_setCurrent, &QPushButton::clicked, this, &ChooseTuningSignalsWidget::on_m_setCurrent_clicked);
 		rightGridLayout->addWidget(m_setCurrent);
 	}
-
-	m_moveUpAction = new QAction(tr("Move Up"), this);
-	connect(m_moveUpAction, &QAction::triggered, this, &ChooseTuningSignalsWidget::on_m_moveUp_clicked);
-
-	m_moveDownAction = new QAction(tr("Move Down"), this);
-	connect(m_moveDownAction, &QAction::triggered, this, &ChooseTuningSignalsWidget::on_m_moveDown_clicked);
-
-	m_setValueAction = new QAction(tr("Set Value"), this);
-	connect(m_setValueAction, &QAction::triggered, this, &ChooseTuningSignalsWidget::on_m_setValue_clicked);
-
-	m_setCurrentAction = new QAction(tr("Set Current"), this);
-	connect(m_setCurrentAction, &QAction::triggered, this, &ChooseTuningSignalsWidget::on_m_setCurrent_clicked);
 
 	rightLayout->addLayout(rightGridLayout);
 
@@ -193,6 +173,36 @@ ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(TuningSignalManager* signal
 
 	m_baseSignalsTable->resizeColumnsToContents();
 
+}
+
+bool ChooseTuningSignalsWidget::readOnly() const
+{
+	return m_readOnly;
+
+}
+
+void ChooseTuningSignalsWidget::setReadOnly(bool value)
+{
+	m_readOnly = value;
+
+	if (m_addValue != nullptr)
+	{
+		m_addValue->setEnabled(m_readOnly == false);
+	}
+	if (m_removeValue != nullptr)
+	{
+		m_removeValue->setEnabled(m_readOnly == false);
+	}
+	if (m_setValue != nullptr)
+	{
+		m_setValue->setEnabled(m_readOnly == false);
+	}
+	if (m_setCurrent != nullptr)
+	{
+		m_setCurrent->setEnabled(m_readOnly == false);
+	}
+
+	return;
 }
 
 void ChooseTuningSignalsWidget::setFilter(std::shared_ptr<TuningFilter> selectedFilter)
@@ -379,6 +389,11 @@ void ChooseTuningSignalsWidget::fillBaseSignalsList()
 
 void ChooseTuningSignalsWidget::on_m_add_clicked()
 {
+	if (readOnly() == true)
+	{
+		return;
+	}
+
 	if (m_filter == nullptr)
 	{
 		return;
@@ -442,6 +457,11 @@ void ChooseTuningSignalsWidget::on_m_add_clicked()
 
 void ChooseTuningSignalsWidget::on_m_remove_clicked()
 {
+	if (readOnly() == true)
+	{
+		return;
+	}
+
 	if (m_filter == nullptr)
 	{
 		return;
@@ -477,6 +497,11 @@ void ChooseTuningSignalsWidget::on_m_remove_clicked()
 
 void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 {
+	if (readOnly() == true)
+	{
+		return;
+	}
+
 	if (m_filter == nullptr)
 	{
 		return;
@@ -539,7 +564,7 @@ void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 			{
 				value = fv.value();
 			}
-			value.setType(asp.toTuningType());
+			value.setType(asp.tuningType());
 
 			defaultValue = asp.tuningDefaultValue();
 
@@ -547,7 +572,7 @@ void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 		}
 		else
 		{
-			if (asp.toTuningType() != value.type())
+			if (asp.tuningType() != value.type())
 			{
 				QMessageBox::warning(this, tr("Filter Editor"), tr("Please select signals of same type (analog or discrete)."));
 				return;
@@ -611,6 +636,11 @@ void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 
 void ChooseTuningSignalsWidget::on_m_setCurrent_clicked()
 {
+	if (readOnly() == true)
+	{
+		return;
+	}
+
 	if (m_filter == nullptr)
 	{
 		return;
@@ -672,12 +702,24 @@ void ChooseTuningSignalsWidget::on_m_baseApplyFilter_clicked()
 void ChooseTuningSignalsWidget::on_m_baseSignalsTable_doubleClicked(const QModelIndex& index)
 {
 	Q_UNUSED(index);
+
+	if (readOnly() == true)
+	{
+		return;
+	}
+
 	on_m_add_clicked();
 }
 
 void ChooseTuningSignalsWidget::on_m_filterValuesTree_doubleClicked(const QModelIndex& index)
 {
 	Q_UNUSED(index);
+
+	if (readOnly() == true)
+	{
+		return;
+	}
+
 	on_m_setValue_clicked();
 }
 
@@ -704,16 +746,6 @@ void ChooseTuningSignalsWidget::on_m_baseFilterValueCombo_currentIndexChanged(in
 void ChooseTuningSignalsWidget::on_m_baseFilterText_returnPressed()
 {
 	fillBaseSignalsList();
-}
-
-void ChooseTuningSignalsWidget::on_m_moveUp_clicked()
-{
-
-}
-
-void ChooseTuningSignalsWidget::on_m_moveDown_clicked()
-{
-
 }
 
 void ChooseTuningSignalsWidget::on_m_baseSignalTypeCombo_currentIndexChanged(int index)
@@ -790,6 +822,7 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, Tunin
 									   bool typeButtonEnabled,
 									   bool typeTabEnabled,
 									   bool typeCounterEnabled,
+									   bool typeSchemasTabsEnabled,
 									   TuningFilter::Source source,
 									   QByteArray mainSplitterState,
 									   int propertyEditorSplitterPos):
@@ -801,6 +834,7 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, Tunin
 	m_typeButtonEnabled(typeButtonEnabled),
 	m_typeTabEnabled(typeTabEnabled),
 	m_typeCounterEnabled(typeCounterEnabled),
+	m_typeSchemasTabsEnabled(typeSchemasTabsEnabled),
 	m_source(source)
 {
 
@@ -855,6 +889,20 @@ TuningFilterEditor::~TuningFilterEditor()
 {
 }
 
+
+bool TuningFilterEditor::readOnly() const
+{
+	return m_readOnly;
+}
+
+void TuningFilterEditor::setReadOnly(bool value)
+{
+	m_readOnly = value;
+
+	m_chooseTuningSignalsWidget->setReadOnly(m_readOnly);
+
+	on_m_presetsTree_itemSelectionChanged();
+}
 
 void TuningFilterEditor::saveUserInterfaceSettings(QByteArray* mainSplitterState, int* propertyEditorSplitterPos)
 {
@@ -913,10 +961,11 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 
 	// Allow items
 
-	bool allowTree = (selectedFilter == nullptr || selectedFilter->interfaceType() == TuningFilter::InterfaceType::Tree);
-	bool allowTabs = (selectedFilter == nullptr || selectedFilter->interfaceType() == TuningFilter::InterfaceType::Button);
-	bool allowButtons = (selectedFilter == nullptr || selectedFilter->interfaceType() == TuningFilter::InterfaceType::Tab);
+	bool allowTree = (selectedFilter == nullptr || selectedFilter->isTree());
+	bool allowTabs = (selectedFilter == nullptr || selectedFilter->isButton());
+	bool allowButtons = (selectedFilter == nullptr || selectedFilter->isTab());
 	bool allowCounters = (selectedFilter == nullptr);
+	bool allowSchemasTabs = (selectedFilter == nullptr);
 
 	if (selectedFilter == nullptr)
 	{
@@ -934,12 +983,12 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 				 return;
 			 }
 
-			 if (f->interfaceType() == TuningFilter::InterfaceType::Button)
+			 if (f->isButton())
 			 {
 				 allowTabs = false;
 			 }
 
-			 if (f->interfaceType() == TuningFilter::InterfaceType::Tab)
+			 if (f->isTab())
 			 {
 				 allowButtons = false;
 			 }
@@ -952,8 +1001,13 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 	allowTabs &= m_typeTabEnabled;
 	allowButtons &= m_typeButtonEnabled;
 	allowCounters &= m_typeCounterEnabled;
+	allowSchemasTabs &= m_typeSchemasTabsEnabled;
 
-	if (m_typeTabEnabled == false && m_typeButtonEnabled == false && m_typeCounterEnabled == false && allowTree == true)
+	if (m_typeTabEnabled == false &&
+		m_typeButtonEnabled == false &&
+		m_typeCounterEnabled == false &&
+		m_typeSchemasTabsEnabled == false &&
+		allowTree == true)
 	{
 		// This is made for TuningClient
 
@@ -1021,6 +1075,21 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 		connect(action, &QAction::triggered, this, f);
 
 		action->setEnabled(allowCounters);
+
+		menu.addAction(action);
+	}
+
+	{
+		// Counter
+		QAction* action = new QAction(tr("Schemas Tab"), &menu);
+
+		auto f = [this]() -> void
+		{
+				addPreset(TuningFilter::InterfaceType::SchemasTab);
+		};
+		connect(action, &QAction::triggered, this, f);
+
+		action->setEnabled(allowSchemasTabs);
 
 		menu.addAction(action);
 	}
@@ -1214,11 +1283,17 @@ void TuningFilterEditor::on_m_presetsTree_itemSelectionChanged()
 
 	int presetsCount = selectedItems.size();
 
+	m_addPreset->setEnabled(m_readOnly == false);
+	m_addPresetAction->setEnabled(m_addPreset->isEnabled());
+
 	m_removePreset->setEnabled(m_readOnly == false && presetsCount > 0);
 	m_removePresetAction->setEnabled(m_removePreset->isEnabled());
 
 	m_copyPreset->setEnabled(m_readOnly == false && presetsCount > 0);
 	m_copyPresetAction->setEnabled(m_copyPreset->isEnabled());
+
+	m_pastePreset->setEnabled(m_readOnly == false);
+	m_pastePresetAction->setEnabled(m_readOnly == false);
 
 	m_moveUpPreset->setEnabled(m_readOnly == false && presetsCount > 0);
 	m_moveUpPresetAction->setEnabled(m_moveUpPreset->isEnabled());
@@ -1260,8 +1335,8 @@ void TuningFilterEditor::on_m_presetsTree_itemSelectionChanged()
 	}
 
 	m_propertyEditor->setObjects(selectedFilters);
-	m_propertyEditor->setReadOnly(m_readOnly);
 
+	m_propertyEditor->setReadOnly(m_readOnly);
 }
 
 void TuningFilterEditor::on_m_presetsTree_contextMenu(const QPoint& pos)

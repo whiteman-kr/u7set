@@ -4749,6 +4749,7 @@ const int NI_100_W_1617_COUNT = sizeof(NI_100_W_1617) / (sizeof(double)*2);
 
 const double PT_21[][2] =
 {
+	{-210,  5.94}, // a calulating value
 	{-200,  7.95},
 	{-190,  9.96},
 	{-180, 11.95},
@@ -4844,6 +4845,7 @@ const int PT_21_COUNT = sizeof(PT_21) / (sizeof(double)*2);
 
 const double CU_23[][2] =
 {
+	{-55, 40.58}, // a calulating value
 	{-50, 41.71},
 	{-45, 42.84},
 	{-40, 43.97},

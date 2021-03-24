@@ -338,6 +338,18 @@
         <file>Upgrade0336.sql</file>
         <file>Upgrade0337.sql</file>
         <file>Upgrade0338.sql</file>
+        <file>Upgrade0339.sql</file>
+        <file>Upgrade0340.sql</file>
+        <file>Upgrade0341.sql</file>
+        <file>Upgrade0342.sql</file>
+        <file>Upgrade0343.sql</file>
+        <file>Upgrade0344.sql</file>
+        <file>Upgrade0345.sql</file>
+        <file>Upgrade0346.sql</file>
+        <file>Upgrade0347.sql</file>
+        <file>Upgrade0348.sql</file>
+        <file>Upgrade0349.sql</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
+    

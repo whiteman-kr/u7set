@@ -136,7 +136,7 @@ const QString SignalProperties::defaultBusChildAnalogSpecPropStruct(
 const QString SignalProperties::lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
 
 
-SignalProperties::SignalProperties(Signal& signal, bool savePropertyDescription) :
+SignalProperties::SignalProperties(const Signal& signal, bool savePropertyDescription) :
 	m_signal(signal)
 {
 	initProperties(savePropertyDescription);
@@ -308,6 +308,7 @@ void SignalProperties::initProperties(bool savePropertyDescription)
 
 	auto tagsProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, tagsCaption, true, Signal::tagsStr, Signal::setTagsStr, m_signal);
 	tagsProperty->setCategory(categoryOnlineMonitoringSystem);
+	tagsProperty->setSpecificEditor(E::PropertySpecificEditor::Tags);
 
 	// append signal specific properties
 	//
@@ -498,13 +499,11 @@ bool SignalSpecPropValue::load(const Proto::SignalSpecPropValue& protoValue)
 
 	m_isEnum = protoValue.isenum();
 
-#ifdef Q_DEBUG
-
+#ifdef QT_DEBUG
 	if (m_isEnum == true && type != QVariant::Int)
 	{
 		assert(false);
 	}
-
 #endif
 
 	switch(type)

@@ -30,11 +30,11 @@ static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList {
 	{ QStringLiteral("Caption"), [](const DataSource& source) { return source.lmCaption(); } },
 	{ QStringLiteral("Port"), [](const DataSource& source) { return source.lmPort(); } },
 	{ QStringLiteral("RUP frames quantity"), [](const DataSource& source) { return source.lmRupFramesQuantity(); } },
-	{ QStringLiteral("Data type"), [](const DataSource& source) { return source.lmDataTypeStr(); } },
+	{ QStringLiteral("Data type"), [](const DataSource& source) { return QString("%1 (%2)").arg(source.lmDataTypeStr()).arg(source.lmDataTypeInt()); } },
 	{ QStringLiteral("Module number"), [](const DataSource& source) { return source.lmNumber(); } },
 	{ QStringLiteral("Module type"), [](const DataSource& source) { return source.lmNumber(); } },
 	{ QStringLiteral("Subsystem ID"), [](const DataSource& source) { return source.lmSubsystemKey(); } },
-	{ QStringLiteral("Subsystem caption"), [](const DataSource& source) { return source.lmSubsystem(); } },
+	{ QStringLiteral("Subsystem caption"), [](const DataSource& source) { return source.lmSubsystemID(); } },
 	{ QStringLiteral("Adapter ID"), [](const DataSource& source) { return source.lmAdapterID(); } },
 };
 

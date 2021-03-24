@@ -6,7 +6,7 @@
 namespace Sim
 {
 
-	bool FlagsReadStruct::create(const Signal& s, const std::unordered_map<Hash, Signal>& signalParams)
+	bool FlagsReadStruct::create(const Signal& s, const std::unordered_map<Hash, Signal>& signalParams, ScopedLog& log)
 	{
 		auto flagIt = s.stateFlagsSignals().constBegin();
 
@@ -21,9 +21,9 @@ namespace Sim
 			{
 				// Error, flag signal is not found
 				//
-				writeError(QObject::tr("AppSignalManager::signalFlags(%1) cannot find flag signal %2")
-						   .arg(s.appSignalID())
-						   .arg(flagAppSignalId));
+				log.writeError(QObject::tr("AppSignalManager::signalFlags(%1) cannot find flag signal %2")
+							   .arg(s.appSignalID())
+							   .arg(flagAppSignalId));
 
 				Q_ASSERT(flagSignalIt != signalParams.end());
 				return {};
@@ -35,9 +35,9 @@ namespace Sim
 
 				if (flagSignal.isDiscrete() == false)
 				{
-					writeError(QObject::tr("AppSignalManager::signalFlags(%1) flag is not discrete signal, flag signal %2")
-							   .arg(s.appSignalID())
-							   .arg(flagAppSignalId));
+					log.writeError(QObject::tr("AppSignalManager::signalFlags(%1) flag is not discrete signal, flag signal %2")
+								   .arg(s.appSignalID())
+								   .arg(flagAppSignalId));
 					Q_ASSERT(flagSignal.isDiscrete());
 					return {};
 				}
@@ -53,9 +53,9 @@ namespace Sim
 
 					if (flagAddress.isValid() == false)
 					{
-						writeError(QObject::tr("AppSignalManager::signalFlags(%1) invalid flag signal address, flag signal %2")
-								   .arg(s.appSignalID())
-								   .arg(flagAppSignalId));
+						log.writeError(QObject::tr("AppSignalManager::signalFlags(%1) invalid flag signal address, flag signal %2")
+									   .arg(s.appSignalID())
+									   .arg(flagAppSignalId));
 						Q_ASSERT(flagAddress.isValid());
 						return {};
 					}
@@ -75,7 +75,7 @@ namespace Sim
 		return true;
 	}
 
-	AppSignalStateFlags FlagsReadStruct::signalFlags(const Ram& ram) const
+	AppSignalStateFlags FlagsReadStruct::signalFlags(const Ram& ram, ScopedLog& log) const
 	{
 		AppSignalStateFlags result{};
 		bool hasValidity = false;
@@ -93,8 +93,8 @@ namespace Sim
 			if (bool readOk = ram.readBit(flagAddress.offset(), flagAddress.bit(), &flagValue, E::ByteOrder::BigEndian);
 				readOk == false)
 			{
-				writeError(QObject::tr("AppSignalManager::signalFlags error read flag signal by address %1")
-						   .arg(flagAddress.toString()));
+				log.writeError(QObject::tr("AppSignalManager::signalFlags error read flag signal by address %1")
+							   .arg(flagAddress.toString()));
 
 				Q_ASSERT(readOk);
 				return result;
@@ -135,8 +135,8 @@ namespace Sim
 	//
 	//
 	AppSignalManager::AppSignalManager(Simulator* simulator, QObject* /*parent*/) :
-		Sim::Output("AppSignalManager"),
-		m_simulator(simulator)
+		m_simulator(simulator),
+		m_log(simulator->log(), "AppSignalManager")
 	{
 		assert(m_simulator);
 
@@ -209,7 +209,7 @@ namespace Sim
 
 		if (ok == false)
 		{
-			writeError(QString("Cannot open file %1, error %2 ").arg(fileName).arg(file.errorString()));
+			m_log.writeError(QString("Cannot open file %1, error %2 ").arg(fileName).arg(file.errorString()));
 			return false;
 		}
 
@@ -221,7 +221,7 @@ namespace Sim
 
 		if (ok == false)
 		{
-			writeError(QString("Cannot parse file %1").arg(fileName));
+			m_log.writeError(QString("Cannot parse file %1").arg(fileName));
 			return false;
 		}
 
@@ -250,12 +250,12 @@ namespace Sim
 
 		for (const auto&[h, s] : signalParamsExt)
 		{
-			flagsStruct[h].create(s, signalParamsExt);
+			flagsStruct[h].create(s, signalParamsExt, m_log);
 		}
 
 		if (ok == false)
 		{
-			writeError(QString("Cannot load Proto::AppSignal"));
+			m_log.writeError(QString("Cannot load Proto::AppSignal"));
 			return false;
 		}
 
@@ -532,7 +532,8 @@ namespace Sim
 	{
 		QString appSignalId;
 		QString logicModuleId;
-		Address16 ualAddress{};
+		Address16 actualAddress{};
+		E::LogicModuleRamAccess ramAccess;
 		E::SignalType type{};
 		E::ByteOrder byteOrder{};
 		E::DataFormat analogDataFormat{};
@@ -574,7 +575,8 @@ namespace Sim
 			appSignalId = s.appSignalID();
 			logicModuleId = s.lmEquipmentID();
 			logicModuleHash = ::calcHash(logicModuleId);
-			ualAddress = s.ualAddr();
+			actualAddress = s.actualAddr();
+			ramAccess = s.lmRamAccess();
 			type = s.signalType();
 			byteOrder = s.byteOrder();
 			analogDataFormat = s.dataFormat();
@@ -627,7 +629,7 @@ namespace Sim
 			if (auto flagIt = m_flagsStruct.find(signalHash);
 				flagIt != m_flagsStruct.end())
 			{
-				state.m_flags = flagIt->second.signalFlags(ram);
+				state.m_flags = flagIt->second.signalFlags(ram, m_log);
 			}
 
 			if (m_simulator->isStopped() == true)
@@ -647,7 +649,7 @@ namespace Sim
 				return state;
 			}
 
-			if (ualAddress.isValid() == false)
+			if (actualAddress.isValid() == false)
 			{
 				state.m_flags.all = 0;
 				// This is can be unused signal, in this case it has non valid addresses
@@ -674,12 +676,12 @@ namespace Sim
 							case 32:
 								{
 									float data = 0;
-									if (bool ok = ram.readFloat(ualAddress.offset(), &data, byteOrder, E::LogicModuleRamAccess::Read, applyOverride);
+									if (bool ok = ram.readFloat(actualAddress.offset(), &data, byteOrder, ramAccess, applyOverride);
 										ok == false)
 									{
-										writeError(QString("Get signal state error, AppSignlaId: %1, LogicModule %2")
-												   .arg(appSignalId)
-												   .arg(logicModuleId));
+										m_log.writeError(QString("Get signal state error, AppSignlaId: %1, LogicModule %2")
+														 .arg(appSignalId)
+														 .arg(logicModuleId));
 									}
 									else
 									{
@@ -699,12 +701,12 @@ namespace Sim
 							case 32:
 								{
 									qint32 data = 0;
-									if (bool ok = ram.readSignedInt(ualAddress.offset(), &data, byteOrder, E::LogicModuleRamAccess::Read, applyOverride);
+									if (bool ok = ram.readSignedInt(actualAddress.offset(), &data, byteOrder, ramAccess, applyOverride);
 										ok == false)
 									{
-										writeError(QString("Get signal state error, AppSignlaId: %1, LogicModule %2")
-												   .arg(appSignalId)
-												   .arg(logicModuleId));
+										m_log.writeError(QString("Get signal state error, AppSignlaId: %1, LogicModule %2")
+														 .arg(appSignalId)
+														 .arg(logicModuleId));
 									}
 									else
 									{
@@ -728,13 +730,13 @@ namespace Sim
 			case E::SignalType::Discrete:
 				{
 					quint16 data = 0;
-					bool ok = ram.readBit(ualAddress.offset(), ualAddress.bit(), &data, byteOrder, applyOverride);
+					bool ok = ram.readBit(actualAddress.offset(), actualAddress.bit(), &data, byteOrder, ramAccess, applyOverride);
 
 					if (ok == false)
 					{
-						writeError(QString("Get signal state error, AppSignlaId: %1, LogicModule %2")
-										.arg(appSignalId)
-										.arg(logicModuleId));
+						m_log.writeError(QString("Get signal state error, AppSignlaId: %1, LogicModule %2")
+										 .arg(appSignalId)
+										 .arg(logicModuleId));
 					}
 					else
 					{

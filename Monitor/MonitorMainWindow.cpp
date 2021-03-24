@@ -3,14 +3,15 @@
 #include "Settings.h"
 #include "DialogSettings.h"
 #include "MonitorSchemaWidget.h"
-#include "../lib/Ui/DialogSignalSearch.h"
 #include "MonitorSignalSnapshot.h"
 #include "MonitorArchive.h"
+#include "DialogDataSources.h"
 #include "./Trend/MonitorTrends.h"
 #include "../VFrame30/Schema.h"
-#include "DialogDataSources.h"
+#include "../lib/Ui/DialogSignalSearch.h"
 #include "../lib/Ui/UiTools.h"
 #include "../lib/Ui/DialogAbout.h"
+#include "../lib/Ui/SchemaListWidget.h"
 
 const QString MonitorMainWindow::m_monitorSingleInstanceKey = "MonitorInstanceCheckerKey";
 
@@ -64,12 +65,14 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 	//
 	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(&theSignals);
 	m_tuningController = std::make_unique<VFrame30::TuningController>(&theTuningSignals, nullptr);
+	m_logController = std::make_unique<VFrame30::LogController>(&m_LogFile);
 
 	// --
 	//
 	MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager,
 																		  m_appSignalController.get(),
 																		  m_tuningController.get(),
+	                                                                      m_logController.get(),
 																		  this);
 	setCentralWidget(monitorCentralWidget);
 
@@ -117,6 +120,30 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 
 	m_appInstanceSharedMemory.setKey(MonitorMainWindow::getInstanceKey());
 	m_appInstanceSharedMemory.attach();
+
+	// Create SchemaList dock widget
+	//
+	m_schemaListDock = new QDockWidget{"Schemas List", this};
+	m_schemaListDock->setObjectName("SchemaList");
+	m_schemaListDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar);
+	m_schemaListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
+
+	SchemaListWidget* schemaListWidget = new SchemaListWidget{{SchemaListTreeColumns::SchemaID, SchemaListTreeColumns::Caption}, m_schemaListDock};
+	m_schemaListDock->setWidget(schemaListWidget);
+
+	addDockWidget(Qt::LeftDockWidgetArea, m_schemaListDock);
+
+	m_schemaListDock->setVisible(QSettings().value("m_schemaListAction.checked").toBool());
+
+	// SchemaListWidget
+	//
+	connect(schemaListWidget, &SchemaListWidget::openSchemaRequest, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
+
+	connect(m_schemaManager.monitorConfigController(), &MonitorConfigController::configurationUpdate,
+				[this, schemaListWidget]()
+				{
+					schemaListWidget->setDetails(m_schemaManager.monitorConfigController()->schemasDetailsSet());
+				});
 
 	return;
 }
@@ -321,7 +348,12 @@ void MonitorMainWindow::createActions()
 	m_pLogAction->setStatusTip(tr("Show application log"));
 	connect(m_pLogAction, &QAction::triggered, this, &MonitorMainWindow::showLog);
 
-	m_pAboutAction = new QAction(tr("About..."), this);
+	m_pAboutQtAction = new QAction(tr("About Qt..."), this);
+	m_pAboutQtAction->setStatusTip(tr("Show Qt information"));
+	//m_pAboutAction->setEnabled(true);
+	connect(m_pAboutQtAction, &QAction::triggered, this, &MonitorMainWindow::showAboutQt);
+
+	m_pAboutAction = new QAction(tr("About Monitor..."), this);
 	m_pAboutAction->setStatusTip(tr("Show application information"));
 	m_pAboutAction->setIcon(QIcon(":/Images/Images/About.svg"));
 	//m_pAboutAction->setEnabled(true);
@@ -331,10 +363,12 @@ void MonitorMainWindow::createActions()
 	m_schemaListAction->setStatusTip(tr("Open schema list page..."));
 	m_schemaListAction->setIcon(QIcon(":/Images/Images/SchemaList.svg"));
 	m_schemaListAction->setEnabled(true);
+	m_schemaListAction->setCheckable(true);
+	m_schemaListAction->setChecked(QSettings().value("m_schemaListAction.checked").toBool());
 	m_schemaListAction->setShortcuts(QList<QKeySequence>{}
 									 <<  QKeySequence{Qt::CTRL + Qt::Key_QuoteLeft}
 									 <<  QKeySequence{Qt::CTRL + Qt::Key_AsciiTilde});
-	connect(m_schemaListAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_schemaList);
+	connect(m_schemaListAction, &QAction::toggled, this, &MonitorMainWindow::schemaTreeListToggled);
 
 	m_newTabAction = new QAction(tr("New Tab"), this);
 	m_newTabAction->setStatusTip(tr("Open current schema in new tab page"));
@@ -472,20 +506,24 @@ void MonitorMainWindow::createMenus()
 	menuBar()->addSeparator();
 	QMenu* helpMenu = menuBar()->addMenu(tr("&?"));
 
-#ifdef Q_DEBUG
+#ifdef QT_DEBUG
 	//helpMenu->addAction(m_pDebugAction);
-#endif	// Q_DEBUG
-
-
-	helpMenu->addAction(m_manualMatsAction);
-	helpMenu->addAction(m_pAboutAction);
-	helpMenu->addSeparator();
+#endif	// QT_DEBUG
 
 	helpMenu->addAction(m_pDataSourcesAction);
 	helpMenu->addAction(m_pStatisticsAction);
 
 	helpMenu->addSeparator();
 	helpMenu->addAction(m_pLogAction);
+
+	helpMenu->addSeparator();
+
+	helpMenu->addAction(m_manualMatsAction);
+
+	helpMenu->addSeparator();
+
+	helpMenu->addAction(m_pAboutQtAction);
+	helpMenu->addAction(m_pAboutAction);
 
 	return;
 }
@@ -701,6 +739,21 @@ void MonitorMainWindow::exit()
 	close();
 }
 
+void MonitorMainWindow::schemaTreeListToggled(bool checked)
+{
+	if (m_schemaListDock == nullptr)
+	{
+		Q_ASSERT(m_schemaListDock);
+		return;
+	}
+
+	m_schemaListDock->setVisible(checked);
+
+	QSettings().setValue("m_schemaListAction.checked", checked);
+
+	return;
+}
+
 void MonitorMainWindow::showLog()
 {
 	m_LogFile.view(this);
@@ -799,6 +852,13 @@ void MonitorMainWindow::showStatistics()
 	UiTools::adjustDialogPlacement(m_dialogStatistics);
 }
 
+void MonitorMainWindow::showAboutQt()
+{
+	QMessageBox::aboutQt(this, qAppName());
+
+	return;
+}
+
 void MonitorMainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to view schemas and trends.<br>");
@@ -814,8 +874,7 @@ void MonitorMainWindow::showMatsUserManual()
 
 void MonitorMainWindow::debug()
 {
-#ifdef Q_DEBUG
-
+#ifdef QT_DEBUG
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
 													"./",
 													tr("Monitor schemas (*.mvs);; All files (*.*)"));
@@ -844,7 +903,7 @@ void MonitorMainWindow::debug()
 //	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(schema);
 //	tabWidget->addTab(schemaWidget, "Debug tab: " + fileInfo.fileName());
 
-#endif	// Q_DEBUG
+#endif	// QT_DEBUG
 }
 
 void MonitorMainWindow::checkMonitorSingleInstance()

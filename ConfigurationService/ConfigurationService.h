@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../lib/Service.h"
-#include "../lib/ServiceSettings.h"
-#include "../Builder/CfgFiles.h"
+#include "../lib/SoftwareSettings.h"
 #include "CfgControlServer.h"
 
 // ------------------------------------------------------------------------------------
@@ -49,11 +48,9 @@ private:
 	void startUdpThreads();
 	void stopUdpThreads();
 
-private:
-	static const char* const SETTING_AUTOLOAD_BUILD_PATH;
-	static const char* const SETTING_CLIENT_REQUEST_IP;
-	static const char* const SETTING_WORK_DIRECTORY;
+	E::SoftwareRunMode getSoftwareRunMode(QString runModeStr);
 
+private:
 	std::shared_ptr<CircularLogger> m_logger;
 	UdpSocketThread* m_infoSocketThread = nullptr;
 	Tcp::ServerThread* m_cfgServerThread = nullptr;

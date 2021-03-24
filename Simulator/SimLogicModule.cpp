@@ -1,11 +1,13 @@
 #include "SimLogicModule.h"
 #include "../lib/ModuleFirmware.h"
+#include "Simulator.h"
 
 namespace Sim
 {
 
-	LogicModule::LogicModule() :
-		Output("LogicModule")
+	LogicModule::LogicModule(Simulator* simulator) :
+		m_simulator(simulator),
+		m_log(simulator->log(), "LogicModule")
 	{
 	}
 
@@ -17,9 +19,10 @@ namespace Sim
 	bool LogicModule::load(const Hardware::LogicModuleInfo& lmInfo,
 						   const LmDescription& lmDescription,
 						   const Hardware::ModuleFirmware& firmware,
-						   const Connections& connections)
+						   const Connections& connections,
+						   const LogicModulesInfo& logicModulesExtraInfo)
 	{
-		setOutputScope(QString("LM %1").arg(lmInfo.equipmentId));
+		m_log.setOutputScope(QString("LM %1").arg(lmInfo.equipmentId));
 
 		clear();
 
@@ -50,7 +53,8 @@ namespace Sim
 									   m_tuningEeprom,
 									   m_confEeprom,
 									   m_appLogicEeprom,
-									   connections);
+									   connections,
+									   logicModulesExtraInfo);
 
 		if (de == DeviceError::Ok || de == DeviceError::NoCommandProcessor)
 		{
@@ -69,7 +73,7 @@ namespace Sim
 
 	void LogicModule::clear()
 	{
-		writeDebug(QObject::tr("Clear"));
+		m_log.writeDebug("Clear");
 
 		m_lmDescription.clear();
 
@@ -110,14 +114,14 @@ namespace Sim
 		const Hardware::ModuleFirmwareData& data = firmware.firmwareData(uartId, &ok);
 		if (ok == false)
 		{
-			writeError(QObject::tr("Loading eeprom data error, UartID = %1").arg(uartId));
+			m_log.writeError(tr("Loading eeprom data error, UartID = %1").arg(uartId));
 			return false;
 		}
 
 		ok = eeprom->init(data);
 		if (ok == false)
 		{
-			writeError(QObject::tr("LogicModule: Loading EEPROM error"));
+			m_log.writeError(tr("LogicModule: Loading EEPROM error"));
 			return false;
 		}
 
@@ -220,29 +224,19 @@ namespace Sim
 		return m_device.mutableRam();
 	}
 
-	DeviceMode LogicModule::deviceMode() const
+	RuntimeMode LogicModule::runtimeMode() const
 	{
-		return m_device.currentMode();
+		return m_device.runtimeMode();
 	}
 
-	void LogicModule::setOverrideSignals(OverrideSignals* overrideSignals)
+	DeviceState LogicModule::deviceState() const
 	{
-		m_device.setOverrideSignals(overrideSignals);
-	}
-
-	void LogicModule::setAppSignalManager(AppSignalManager* appSignalManager)
-	{
-		m_device.setAppSignalManager(appSignalManager);
-	}
-
-	void LogicModule::setAppDataTransmitter(AppDataTransmitter* appDataTransmitter)
-	{
-		m_device.setAppDataTransmitter(appDataTransmitter);
+		return m_device.deviceState();
 	}
 
 	bool LogicModule::isPowerOff() const
 	{
-		return deviceMode() == DeviceMode::Off;
+		return deviceState() == DeviceState::Off;
 	}
 
 	void LogicModule::setPowerOff(bool value)
@@ -263,4 +257,65 @@ namespace Sim
 //			}
 		}
 	}
+
+	bool LogicModule::armingKey() const
+	{
+		return m_device.armingKey();
+	}
+
+	void LogicModule::setArmingKey(bool value)
+	{
+		return m_device.setArmingKey(value);
+	}
+
+	bool LogicModule::tuningKey() const
+	{
+		return m_device.tuningKey();
+	}
+
+	void LogicModule::setTuningKey(bool value)
+	{
+		return m_device.setTuningKey(value);
+	}
+
+	bool LogicModule::sorIsSet() const
+	{
+		return m_device.sorIsSet();
+	}
+
+	bool LogicModule::sorSetSwitch1() const
+	{
+		return m_device.sorSetSwitch1();
+	}
+
+	void LogicModule::setSorSetSwitch1(bool value)
+	{
+		m_device.setSorSetSwitch1(value);
+	}
+
+	bool LogicModule::sorSetSwitch2() const
+	{
+		return m_device.sorSetSwitch2();
+	}
+
+	void LogicModule::setSorSetSwitch2(bool value)
+	{
+		m_device.setSorSetSwitch2(value);
+	}
+
+	bool LogicModule::sorSetSwitch3() const
+	{
+		return m_device.sorSetSwitch3();
+	}
+
+	void LogicModule::setSorSetSwitch3(bool value)
+	{
+		m_device.setSorSetSwitch3(value);
+	}
+
+	bool LogicModule::testSorResetSwitch(bool newValue)
+	{
+		return m_device.testSorResetSwitch(newValue);
+	}
+
 }

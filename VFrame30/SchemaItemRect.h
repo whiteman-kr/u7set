@@ -59,7 +59,7 @@ namespace VFrame30
 		{
 			// Get the state of the signal "#APPSIGNALID01"
 			//
-			var state = signals.signalState("#APPSIGNALID01");
+			let state = signals.signalState("#APPSIGNALID01");
 
 			if (state == undefined || state.Valid == false)
 			{
@@ -98,6 +98,9 @@ namespace VFrame30
 
 		/// \brief Switches rectangle border drawing
 		Q_PROPERTY(double DrawRect READ drawRect WRITE setDrawRect)
+
+		/// \brief Sets rect pen line style (0 - NoPen, 1 - SolidLine, 2 - DashLine, 3 - DotLine, 4 - DashDotLine, 5 - DashDotDotLine)
+		Q_PROPERTY(E::LineStyle LineStyle READ lineStyle WRITE setLineStyle)
 
 		// Text Category Properties
 
@@ -168,6 +171,9 @@ namespace VFrame30
 		QColor textColor() const;
 		void setTextColor(QColor color);
 
+		E::LineStyle lineStyle() const;
+		void setLineStyle(E::LineStyle value);
+
 		const QString& text() const;
 		void setText(QString value);
 
@@ -193,6 +199,8 @@ namespace VFrame30
 		QColor m_lineColor;
 		QColor m_fillColor;
 		QColor m_textColor;
+
+		E::LineStyle m_lineStyle = E::SolidLine;
 
 		QString m_text;
 		bool m_wordWrap = false;

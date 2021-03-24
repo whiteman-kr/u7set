@@ -1,9 +1,11 @@
 #pragma once
 
+#include <QWaitCondition>
+
 #include "../lib/TcpFileTransfer.h"
 #include "../lib/OrderedHash.h"
 #include "../lib/BuildInfo.h"
-
+#include "../lib/SoftwareSettings.h"
 
 typedef QVector<Builder::BuildFileInfo> BuildFileInfoArray;
 
@@ -28,7 +30,7 @@ protected:
 	};
 
 private:
-	static bool m_BuildFileInfoArrayRegistered;
+	static bool m_typesRegistered;
 };
 
 // -------------------------------------------------------------------------------------
@@ -42,9 +44,14 @@ class CfgServer : public Tcp::FileServer, public CfgServerLoaderBase
 	Q_OBJECT
 
 public:
-	CfgServer(const SoftwareInfo& softwareInfo, const QString& buildFolder, std::shared_ptr<CircularLogger> logger);
+	CfgServer(const SoftwareInfo& softwareInfo,
+			  const QString& buildFolder,
+			  const SessionParams& sessionParams,
+			  std::shared_ptr<CircularLogger> logger);
 
 	virtual CfgServer* getNewInstance() override;
+
+	virtual void processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
 
 	virtual void onServerThreadStarted() override;
 	virtual void onServerThreadFinished() override;
@@ -59,8 +66,12 @@ private:
 
 	bool checkFile(QString& pathFileName, QByteArray& fileData) override;
 
+	void processGetSessionParamsRequest();
+
 private:
 	std::shared_ptr<CircularLogger> m_logger;
+
+	SessionParams m_sessionParams;
 
 	QString m_buildXmlPathFileName;
 
@@ -77,7 +88,7 @@ private:
 //
 // -------------------------------------------------------------------------------------
 
-class CfgLoader: public Tcp::FileClient, public CfgServerLoaderBase
+class CfgLoader : public Tcp::FileClient, public CfgServerLoaderBase
 {
 	Q_OBJECT
 
@@ -93,10 +104,10 @@ public:
 
 	void changeApp(const QString& appEquipmentID, int appInstance);
 
-	bool getFileBlocked(QString pathFileName, QByteArray* fileData, QString *errorStr);
+	bool getFileBlocked(QString pathFileName, QByteArray* fileData, QString* errorStr);
 	bool getFile(QString pathFileName, QByteArray* fileData);
 
-	bool getFileBlockedByID(QString fileID, QByteArray* fileData, QString *errorStr);
+	bool getFileBlockedByID(QString fileID, QByteArray* fileData, QString* errorStr);
 	bool getFileByID(QString fileID, QByteArray* fileData);
 
 	bool hasFileID(QString fileID) const;
@@ -110,6 +121,18 @@ public:
 	bool enableDownloadCfg() const { return m_enableDownloadConfiguration; }
 	std::shared_ptr<CircularLogger> logger() { return m_logger; }
 
+	SessionParams sessionParams() const;
+	QString curSoftwareSettingsProfileName() const;
+	E::SoftwareRunMode softwareRunMode() const;
+
+	QStringList getSettingsProfiles() const;
+
+	template<typename T>
+	std::shared_ptr<const T> getSettingsProfile(const QString& profile) const;
+
+	template<typename T>
+	std::shared_ptr<const T> getCurrentSettingsProfile() const;
+
 	virtual void onTryConnectToServer(const HostAddressPort& serverAddr) override;
 	virtual void onConnection() override;
 	virtual void onDisconnection() override;
@@ -120,7 +143,10 @@ public:
 
 signals:
 	void signal_enableDownloadConfiguration();
-	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void signal_configurationReady(const QByteArray configurationXmlData,
+								   const BuildFileInfoArray buildFileInfoArray,
+								   SessionParams sessionParams,
+								   std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
 	void signal_getFile(const QString& fileName, QByteArray* fileData);
 	void signal_fileReady();					// emit only for manual requests
 	void signal_configurationChanged();
@@ -133,6 +159,11 @@ private slots:
 	void slot_enableDownloadConfiguration();
 	void slot_getFile(QString fileName, QByteArray *fileData);
 	void slot_onTimer();
+
+protected:
+	virtual void processSuccessorReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
+	void processGetSessionParamsReply(const char* replyData, quint32 replyDataSize);
+	void sendGetSessionParamsRequest();
 
 private:
 	void shutdown();
@@ -189,6 +220,9 @@ private:
 	int m_appInstance = 0;
 	volatile bool m_enableDownloadConfiguration = false;
 
+	SessionParams m_sessionParams;
+	SoftwareSettingsSet m_settingsSet;
+
 	//
 
 	static const int CONFIGURATION_XML_FILE_INDEX = 0;
@@ -228,9 +262,27 @@ private:
 	QMap<QString, QString> m_fileIDPathMap;
 
 	bool m_enableSignalUnknownClient = true;
-
-	static bool m_registerTypes;
 };
+
+template<typename T>
+std::shared_ptr<const T> CfgLoader::getSettingsProfile(const QString& profile) const
+{
+	AUTO_LOCK(m_mutex);
+
+	std::shared_ptr<const T> settings = m_settingsSet.getSettingsProfile<T>(profile);
+
+	return settings;
+}
+
+template<typename T>
+std::shared_ptr<const T> CfgLoader::getCurrentSettingsProfile() const
+{
+	AUTO_LOCK(m_mutex);
+
+	std::shared_ptr<const T> settings = m_settingsSet.getSettingsProfile<T>(curSoftwareSettingsProfileName());
+
+	return settings;
+}
 
 
 // -------------------------------------------------------------------------------------
@@ -259,10 +311,10 @@ public:
 
 	void enableDownloadConfiguration();
 
-	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString *errorStr);
+	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
 	bool getFile(const QString& pathFileName, QByteArray* fileData);
 
-	bool getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString *errorStr);
+	bool getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString* errorStr);
 	bool getFileByID(const QString& fileID, QByteArray* fileData);
 
 	bool hasFileID(QString fileID) const;
@@ -278,9 +330,18 @@ public:
 							 const HostAddressPort& serverAddressPort1,
 							 const HostAddressPort& serverAddressPort2,
 							 bool enableDownloadConfiguration);
+
+	SessionParams sessionParams() const;
+
+	template<typename T>
+	std::shared_ptr<const T> getCurrentSettingsProfile() const;
+
 signals:
 	void signal_configurationChanged();
-	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void signal_configurationReady(const QByteArray configurationXmlData,
+								   const BuildFileInfoArray buildFileInfoArray,
+								   SessionParams sessionParams,
+								   std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
 
 	void signal_unknownClient();
 	void signal_onEndFileDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
@@ -305,3 +366,10 @@ private:
 	CfgLoader* m_cfgLoader = nullptr;
 	SimpleThread* m_thread = nullptr;
 };
+
+template<typename T>
+std::shared_ptr<const T> CfgLoaderThread::getCurrentSettingsProfile() const
+{
+	return m_cfgLoader->getCurrentSettingsProfile<T>();
+}
+

@@ -310,9 +310,8 @@ namespace VFrame30
 
 		QPainter* p = drawParam->painter();
 
-		double cbs = drawParam->controlBarSize();
-
-		double lineWeight = cbs / 2.0f;
+		const double cbs = drawParam->controlBarSize();
+		const double lineWeight = cbs / 2.0f;
 
 		// Draw the main part
 		//
@@ -325,10 +324,9 @@ namespace VFrame30
 		}
 
 		QPen pen(isLocked() == true ?  SchemaItem::lockedSelectionColor : SchemaItem::selectionColor);
-
 		pen.setWidthF(lineWeight);
-		p->setPen(pen);
 
+		p->setPen(pen);
 		p->drawPolyline(polyline);
 			
 		// Draw control bars
@@ -337,8 +335,9 @@ namespace VFrame30
 		{
 			QBrush solidBrush(pen.color());
 
+			// Draw bars for moving points
+			//
 			QRectF controlRectangles;
-
 			for (auto pt = points.cbegin(); pt != points.cend(); ++pt)
 			{
 				controlRectangles.setLeft(pt->X - cbs / 2);
@@ -347,6 +346,62 @@ namespace VFrame30
 				controlRectangles.setHeight(cbs);
 
 				p->fillRect(controlRectangles, solidBrush);
+			}
+
+			// Draw bar for moving item
+			//
+			{
+				QRectF br = boundingRectInDocPt(drawParam);
+				QRectF moveBarRect = br;
+
+				moveBarRect.setWidth(cbs * 2);
+				moveBarRect.setHeight(cbs * 2);
+				moveBarRect.moveCenter(br.center());
+
+				p->fillRect(moveBarRect, solidBrush);
+
+				const double w3 = moveBarRect.width() / 3.0;
+				const double x = moveBarRect.left();
+				const double y = moveBarRect.top();
+
+				// Draw small triangles, Up
+				//
+				p->setPen(Qt::NoPen);
+				p->setBrush(QColor{0xFF, 0xFF, 0xFF, 0x80});
+
+				const QPointF triPointsUp[] = {
+					{x + w3, y + w3},
+					{x + w3 + w3 / 2, y},
+					{x + w3 + w3, y + w3}
+				};
+				p->drawPolygon(triPointsUp, static_cast<int>(std::size(triPointsUp)));
+
+				// Draw small triangles, Right
+				//
+				const QPointF triPointsRight[] = {
+					{x + w3 + w3, y + w3},
+					{x + w3 + w3 + w3, y + w3 + w3 / 2},
+					{x + w3 + w3, y + w3 + w3}
+				};
+				p->drawPolygon(triPointsRight, static_cast<int>(std::size(triPointsRight)));
+
+				// Draw small triangles, Down
+				//
+				const QPointF triPointsDown[] = {
+					{x + w3, y + w3 + w3},
+					{x + w3 + w3, y + w3 + w3},
+					{x + w3 + w3 / 2, y + w3 + w3 + w3}
+				};
+				p->drawPolygon(triPointsDown, static_cast<int>(std::size(triPointsDown)));
+
+				// Draw small triangles, Left
+				//
+				const QPointF triPointsLeft[] = {
+					{x + w3, y + w3},
+					{x + w3, y + w3 + w3},
+					{x, y + w3 + w3 / 2}
+				};
+				p->drawPolygon(triPointsLeft, static_cast<int>(std::size(triPointsLeft)));
 			}
 		}
 
@@ -456,7 +511,7 @@ namespace VFrame30
 		return false;
 	}
 
-	QRectF PosConnectionImpl::boundingRectInDocPt(CDrawParam* /*drawParam*/) const
+	QRectF PosConnectionImpl::boundingRectInDocPt(const CDrawParam* /*drawParam*/) const
 	{
 		if (points.size() == 0)
 		{

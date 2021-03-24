@@ -10,79 +10,135 @@
 #	include "../gitlabci_version.h"
 #endif
 
-#if defined (Q_OS_WIN) && defined(Q_DEBUG)
+//// ---------------- Minidump generating functions -------------------
+////
+#if defined (Q_OS_WIN)
 
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
+#pragma comment ( lib, "dbghelp.lib" )
+#pragma comment ( lib, "user32.lib" )
 
-_CRT_REPORT_HOOK prevHook = nullptr;
+#include <windows.h>
+#include <processthreadsapi.h>
+#include <fileapi.h>
+#include <dbghelp.h>
 
-#define FALSE   0
-#define TRUE    1
+void CreateMiniDump(EXCEPTION_POINTERS* pep);
 
-int reportingHook(int, char* userMessage, int*)
+BOOL CALLBACK MyMiniDumpCallback(
+	PVOID                            pParam,
+	const PMINIDUMP_CALLBACK_INPUT   pInput,
+	PMINIDUMP_CALLBACK_OUTPUT        pOutput
+);
+
+void CreateMiniDump(EXCEPTION_POINTERS* pep)
 {
-	// This function is called several times for each memory leak.
-	// Each time a part of the error message is supplied.
-	// This holds number of subsequent detail messages after
-	// a leak was reported
-	const int numFollowupDebugMsgParts = 2;
-	static bool ignoreMessage = false;
-	static int debugMsgPartsCount = 0;
-	static int leakCounter = 0;
+	QString dumpFileName = qAppName() + "_" + QDateTime::currentDateTime().toString("dd_MM_yyyy_hh_mm_ss") + ".dmp";
 
-	// check if the memory leak reporting starts
-	if ((strcmp(userMessage,"Detected memory leaks!\n") == 0)
-			|| ignoreMessage)
+	QString dumpPath = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+
+	QString fullDumpPath = dumpPath + QDir::separator() + dumpFileName;
+
+	HANDLE hFile = CreateFile(reinterpret_cast<LPCWSTR>(fullDumpPath.utf16()), GENERIC_READ | GENERIC_WRITE,
+		0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+	HWND hWnd = NULL;
+	if (theMainWindow != nullptr)
 	{
-		// check if the memory leak reporting ends
-		if (strcmp(userMessage,"Object dump complete.\n") == 0)
+		hWnd = reinterpret_cast<HWND>(theMainWindow->winId());
+	}
+
+	if ((hFile != NULL) && (hFile != INVALID_HANDLE_VALUE))
+	{
+		// Create the minidump
+
+		MINIDUMP_EXCEPTION_INFORMATION exceptionInfo;
+
+		exceptionInfo.ThreadId = GetCurrentThreadId();
+		exceptionInfo.ExceptionPointers = pep;
+		exceptionInfo.ClientPointers = FALSE;
+
+		MINIDUMP_TYPE dumpType = (MINIDUMP_TYPE)(MiniDumpWithFullMemory);
+
+		BOOL result = MiniDumpWriteDump(GetCurrentProcess(),
+			GetCurrentProcessId(),
+			hFile,
+			dumpType,
+			(pep != NULL) ? &exceptionInfo : NULL,
+			NULL,
+			NULL
+		);
+
+		if (result == false)
 		{
-			_CrtSetReportHook(prevHook);
-			ignoreMessage = false;
-			if (leakCounter > 0)
-			{
-				return FALSE;
-			}
+			MessageBoxW(hWnd, L"Application has been crashed!\n\nCrash dump creating failed.", reinterpret_cast<LPCWSTR>(qAppName().utf16()), MB_OK|MB_ICONERROR);
 		}
 		else
 		{
-			ignoreMessage = true;
+			QString message = QObject::tr("Application has been crashed!\n\nA crash dump has been created:\n\n%1\n\nPlease send this file and program execulable file to support.").arg(fullDumpPath);
+
+			MessageBoxW(hWnd, reinterpret_cast<LPCWSTR>(message.utf16()), reinterpret_cast<LPCWSTR>(qAppName().utf16()), MB_OK | MB_ICONERROR);
 		}
 
-		// something from our own code?
-		if(strstr(userMessage, ".cpp") == NULL)
-		{
-			if(debugMsgPartsCount++ < numFollowupDebugMsgParts
-					&& strcmp(userMessage,"Detected memory leaks!\n") != 0
-					&& strcmp(userMessage,"Dumping objects ->\n") != 0)
-			{
-				// give it back to _CrtDbgReport() to be printed to the console
-				return FALSE;
-			}
-			else
-			{
-				return TRUE;  // ignore it
-			}
-		}
-		else
-		{
-			debugMsgPartsCount = 0;
-			leakCounter++;
+		// Close the file
 
-			// give it back to _CrtDbgReport() to be printed to the console
-			return FALSE;
-		}
+		CloseHandle(hFile);
 	}
 	else
 	{
-		// give it back to _CrtDbgReport() to be printed to the console
-		return FALSE;
+		QString message = QObject::tr("Application has been crashed!\n\nColld not save crash dump file:\n\n%1.").arg(fullDumpPath);
+
+		MessageBoxW(hWnd, reinterpret_cast<LPCWSTR>(message.utf16()), reinterpret_cast<LPCWSTR>(qAppName().utf16()), MB_OK | MB_ICONERROR);
 	}
+
+	return;
+}
+
+
+LONG TopLevelExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo)
+{
+	CreateMiniDump(pExceptionInfo);
+
+	return EXCEPTION_CONTINUE_SEARCH;
+}
+
+bool EnableDumping(DWORD dumpCount)
+{
+	HKEY k;
+
+	TCHAR ModuleName[4096];
+	GetModuleFileName(NULL, ModuleName, 4096);
+
+	QString ApplicationPath =  QString::fromWCharArray(ModuleName);
+
+	QString dumpFolder = QObject::tr("%LOCALAPPDATA%\\CrashDumps");
+
+	DWORD dwDumpType = 2;
+
+	QString keyName = QObject::tr("SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\\%1").arg(ApplicationPath.mid(ApplicationPath.lastIndexOf('\\') + 1));
+
+	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, reinterpret_cast<LPCWSTR>(keyName.utf16()), 0, KEY_READ, &k) != ERROR_SUCCESS)
+	{
+		if (RegCreateKeyEx(HKEY_LOCAL_MACHINE, reinterpret_cast<LPCWSTR>(keyName.utf16()), 0, NULL, 0, KEY_WRITE | KEY_WOW64_64KEY, NULL, &k, NULL) != ERROR_SUCCESS
+			|| RegSetValueEx(k, L"DumpCount", NULL, REG_DWORD, (BYTE*)&dumpCount, sizeof(dumpCount)) != ERROR_SUCCESS
+			|| RegSetValueEx(k, L"DumpFolder", NULL, REG_EXPAND_SZ, (BYTE*)dumpFolder.utf16(), sizeof(TCHAR) * (keyName.length() + 1)) != ERROR_SUCCESS
+			|| RegSetValueEx(k, L"DumpType", NULL, REG_DWORD, (BYTE*)&dwDumpType, sizeof(dwDumpType)) != ERROR_SUCCESS)
+		{
+			return false;
+		}
+	}
+
+	RegCloseKey(k);
+
+	return true;
 }
 
 #endif
+
+////
+//// ---------------- Minidump generating functions -------------------
+
+// ---------------- Translator functions -------------------
+//
 
 QTranslator m_translator; // contains the translations for this application
 
@@ -105,23 +161,22 @@ void loadLanguage(const QString& rLanguage)
 	QLocale locale = QLocale(rLanguage);
 	QLocale::setDefault(locale);
 
-
-	/*QString langPath = QApplication::applicationDirPath();
-	langPath.append("/languages");
-
-	switchTranslator(m_translator, QString("%1/TuningClient_%2.qm").arg(langPath).arg(rLanguage));*/
-
 	switchTranslator(m_translator, QString(":/languages/TuningClient_%1.qm").arg(rLanguage));
 }
+
+//
+// ---------------- Translator functions -------------------
 
 
 int main(int argc, char* argv[])
 {
 
-#if defined (Q_OS_WIN) && defined(Q_DEBUG)
-	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-	// To see all memory leaks, not only in the own code, comment the next line
-	prevHook = _CrtSetReportHook(reportingHook);
+#if defined (Q_OS_WIN)
+	// Set writing minidumps handler
+	//
+	SetUnhandledExceptionFilter(TopLevelExceptionHandler);
+
+	EnableDumping(10);
 #endif
 
 	int result = 0;
@@ -229,6 +284,7 @@ int main(int argc, char* argv[])
 			result = a.exec();
 
 			delete theMainWindow;
+			theMainWindow = nullptr;
 
 			theSettings.StoreUser();
 		}
@@ -266,10 +322,6 @@ int main(int argc, char* argv[])
 
 	VFrame30::VFrame30Library::shutdown();
 	google::protobuf::ShutdownProtobufLibrary();
-
-#if defined (Q_OS_WIN)
-	_CrtDumpMemoryLeaks();
-#endif
 
 	return result;
 }

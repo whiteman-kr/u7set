@@ -339,19 +339,19 @@ namespace VFrame30
 
 			QRectF controlRectangles[] = 
 			{
-				QRectF(fx - cbs, fy - cbs, cbs, cbs),
-				QRectF(fx + width / 2 - cbs / 2, fy - cbs, cbs, cbs),
-				QRectF(fx + width, fy - cbs, cbs, cbs),
-				QRectF(fx + width, fy + height / 2 - cbs / 2, cbs, cbs),
-				QRectF(fx + width, fy + height, cbs, cbs),
-				QRectF(fx + width / 2 - cbs / 2, fy + height, cbs, cbs),
-				QRectF(fx - cbs, fy + height, cbs, cbs),
-				QRectF(fx - cbs, fy + height / 2 - cbs / 2, cbs, cbs)
+				QRectF{fx - cbs, fy - cbs, cbs, cbs},
+				QRectF{fx + width / 2 - cbs / 2, fy - cbs, cbs, cbs},
+				QRectF{fx + width, fy - cbs, cbs, cbs},
+				QRectF{fx + width, fy + height / 2 - cbs / 2, cbs, cbs},
+				QRectF{fx + width, fy + height, cbs, cbs},
+				QRectF{fx + width / 2 - cbs / 2, fy + height, cbs, cbs},
+				QRectF{fx - cbs, fy + height, cbs, cbs},
+				QRectF{fx - cbs, fy + height / 2 - cbs / 2, cbs, cbs}
 			};
 
-			for (quint32 i = 0; i < sizeof(controlRectangles) / sizeof(controlRectangles[0]); i++)
+			for (const QRectF& cr : controlRectangles)
 			{
-				p->fillRect(controlRectangles[i], selectionPen->color());
+				p->fillRect(cr, selectionPen->color());
 			}
 		}
 		
@@ -473,8 +473,10 @@ namespace VFrame30
 		return itemRect.intersects(detRect) | detRect.contains(itemRect.topLeft());	// contains for the empty rect (width or height is 0)
 	}
 
-	QRectF PosRectImpl::boundingRectInDocPt(CDrawParam* drawParam) const
+	QRectF PosRectImpl::boundingRectInDocPt(const CDrawParam* drawParam) const
 	{
+		Q_ASSERT(drawParam);
+
 		QRectF result(m_leftDocPt, m_topDocPt, m_widthDocPt, m_heightDocPt);
 
 		result.setTopRight(drawParam->gridToDpi(result.topRight()));

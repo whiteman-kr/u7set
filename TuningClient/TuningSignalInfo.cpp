@@ -29,6 +29,7 @@ TuningSignalInfo::TuningSignalInfo(Hash appSignalHash, E::AnalogFormat analogFor
 	ui->m_lineAppSignalId->setText(asp.appSignalId());
 	ui->m_lineCustomAppSignalId->setText(asp.customSignalId());
 	ui->m_lineCaption->setText(asp.caption());
+	ui->m_lineTags->setText(asp.tagStringList().join(' '));
 	ui->m_lineEquipmentId->setText(asp.equipmentId());
 	ui->m_lineLmEquipmentId->setText(asp.lmEquipmentId());
 
@@ -126,7 +127,7 @@ void TuningSignalInfo::updateInfo()
 	text += tr("WriteInProgress:\t%1\n").arg(state.writeInProgress() == true ? tr("Yes") : tr("No"));
 	text += tr("ControlIsEnabled:\t%1\n").arg(state.controlIsEnabled() == true ? tr("Yes") : tr("No"));
 
-	if (theConfigSettings.lmStatusFlagMode == LmStatusFlagMode::AccessKey)
+	if (theConfigSettings.lmStatusFlagMode() == LmStatusFlagMode::AccessKey)
 	{
 		text += tr("WritingIsEnabled:\t%1\n").arg(state.writingIsEnabled() == true ? tr("Yes") : tr("No"));
 	}

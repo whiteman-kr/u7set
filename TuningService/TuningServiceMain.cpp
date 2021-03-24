@@ -1,10 +1,7 @@
 #include "TuningService.h"
-#include "../lib/MemLeaksDetection.h"
 
 int main(int argc, char *argv[])
 {
-	initMemoryLeaksDetection();
-
 	QCoreApplication app(argc, argv);
 
 	CircularLoggerShared logger = std::make_shared<CircularLogger>();
@@ -24,7 +21,7 @@ int main(int argc, char *argv[])
 	si.init(E::SoftwareType::TuningService, "", 1, 0);
 
 	Tuning::TuningServiceWorker tuningServiceWorker(si,
-													Service::getServiceInstanceName("RPCT Tuning Service", argc, argv),
+													Service::getServiceInstanceName("Tuning Service", argc, argv),
 													argc, argv, logger, tuningLog);
 
 	ServiceStarter serviceStarter(app, tuningServiceWorker, logger);
@@ -36,8 +33,6 @@ int main(int argc, char *argv[])
 	LOGGER_SHUTDOWN(tuningLog);
 
 	LOGGER_SHUTDOWN(logger);
-
-	dumpMemoryLeaks();
 
 	return result;
 }

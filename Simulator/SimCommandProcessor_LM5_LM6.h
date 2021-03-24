@@ -13,7 +13,7 @@ namespace Sim
 
 	public:
 		explicit CommandProcessor_LM5_LM6(DeviceEmulator* device);
-		virtual ~CommandProcessor_LM5_LM6();
+		virtual ~CommandProcessor_LM5_LM6() = default;
 
 	public:
 		virtual void beforeAppLogicParse() override;
@@ -25,6 +25,17 @@ namespace Sim
 		//
 		virtual bool updatePlatformInterfaceState(const QDateTime& currentTime) override;
 
+		// Get state of signal 'Set SOR Chassis', this state is fetched from RAM withount any mutex, so
+		// device must not run or performe any work cycle while calling this function
+		//
+		virtual quint16 signalSetSorChassis() const override;
+
+	private:
+		bool setRuntimeModeSignals();
+
+	public:
+		// Run device command
+		//
 		virtual bool runCommand(const DeviceCommand& command) override;
 
 	private:
@@ -432,7 +443,7 @@ namespace Sim
 			{QStringLiteral("afb_pulse_gen_v0"),	&CommandProcessor_LM5_LM6::afb_pulse_gen_v0},			// 30
 		};
 
-		static const int m_cycleDurationMs = 5;
+		static constexpr int m_cycleDurationMs = 5;
 		qint64 m_blinkCounter = 0;
 
 		friend SimCommandTest_LM5_LM6;

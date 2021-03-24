@@ -1,5 +1,5 @@
 #include "DiagDataServiceCfgGenerator.h"
-#include "../lib/ServiceSettings.h"
+#include "../lib/SoftwareSettings.h"
 
 
 namespace Builder
@@ -9,38 +9,24 @@ namespace Builder
 	{
 	}
 
-
 	DiagDataServiceCfgGenerator::~DiagDataServiceCfgGenerator()
 	{
 	}
 
-
-	bool DiagDataServiceCfgGenerator::generateConfiguration()
+	bool DiagDataServiceCfgGenerator::createSettingsProfile(const QString& profile)
 	{
-		bool result = true;
+		DiagDataServiceSettingsGetter settingsGetter;
 
-		do
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
 		{
-			if (writeSettings() == false) break;
-
-			result = true;
+			return false;
 		}
-		while(false);
 
-		return result;
+		return m_settingsSet.addProfile<DiagDataServiceSettings>(profile, settingsGetter);
 	}
 
-	bool DiagDataServiceCfgGenerator::writeSettings()
+	bool DiagDataServiceCfgGenerator::generateConfigurationStep1()
 	{
-		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
-
-		RETURN_IF_FALSE(result);
-
-		XmlWriteHelper xml(m_cfgXml->xmlWriter());
-
-		result = m_settings.writeToXml(xml);
-
-		return result;
+		return true;
 	}
-
 }

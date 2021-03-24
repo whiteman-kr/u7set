@@ -7,7 +7,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-FolderEdit::FolderEdit(QWidget *parent)
+FolderEdit::FolderEdit(QWidget* parent)
 	: QWidget(parent)
 {
 	m_edit = new QLineEdit(this);
@@ -17,7 +17,7 @@ FolderEdit::FolderEdit(QWidget *parent)
 	m_button->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred));
 	m_button->setText(QLatin1String("..."));
 
-	QHBoxLayout *layout = new QHBoxLayout(this);
+	QHBoxLayout* layout = new QHBoxLayout(this);
 	layout->setMargin(0);
 	layout->setSpacing(0);
 	layout->addWidget(m_edit);
@@ -48,7 +48,7 @@ FolderEdit::~FolderEdit()
 {
 }
 
-void FolderEdit::focusInEvent(QFocusEvent *e)
+void FolderEdit::focusInEvent(QFocusEvent* e)
 {
 	m_edit->event(e);
 
@@ -60,19 +60,19 @@ void FolderEdit::focusInEvent(QFocusEvent *e)
 	QWidget::focusInEvent(e);
 }
 
-void FolderEdit::focusOutEvent(QFocusEvent *e)
+void FolderEdit::focusOutEvent(QFocusEvent* e)
 {
 	m_edit->event(e);
 
 	QWidget::focusOutEvent(e);
 }
 
-void FolderEdit::keyPressEvent(QKeyEvent *e)
+void FolderEdit::keyPressEvent(QKeyEvent* e)
 {
 	m_edit->event(e);
 }
 
-void FolderEdit::keyReleaseEvent(QKeyEvent *e)
+void FolderEdit::keyReleaseEvent(QKeyEvent* e)
 {
 	m_edit->event(e);
 }
@@ -81,8 +81,8 @@ void FolderEdit::keyReleaseEvent(QKeyEvent *e)
 
 VariantFactory::~VariantFactory()
 {
-	QList<FolderEdit *> editors = m_editorToPropertyMap.keys();
-	QListIterator<FolderEdit *> it(editors);
+	QList<FolderEdit* > editors = m_editorToPropertyMap.keys();
+	QListIterator<FolderEdit* > it(editors);
 
 	while (it.hasNext() == true)
 	{
@@ -90,25 +90,25 @@ VariantFactory::~VariantFactory()
 	}
 }
 
-void VariantFactory::connectPropertyManager(QtVariantPropertyManager *manager)
+void VariantFactory::connectPropertyManager(QtVariantPropertyManager* manager)
 {
 	connect(manager, &QtVariantPropertyManager::valueChanged, this, &VariantFactory::slotPropertyChanged);
 
 	QtVariantEditorFactory::connectPropertyManager(manager);
 }
 
-void VariantFactory::disconnectPropertyManager(QtVariantPropertyManager *manager)
+void VariantFactory::disconnectPropertyManager(QtVariantPropertyManager* manager)
 {
 	disconnect(manager, &QtVariantPropertyManager::valueChanged, this, &VariantFactory::slotPropertyChanged);
 
 	QtVariantEditorFactory::disconnectPropertyManager(manager);
 }
 
-QWidget *VariantFactory::createEditor(QtVariantPropertyManager *manager, QtProperty *property, QWidget *parent)
+QWidget* VariantFactory::createEditor(QtVariantPropertyManager* manager, QtProperty* property, QWidget* parent)
 {
 	if (manager->propertyType(property) == VariantManager::folerPathTypeId())
 	{
-		FolderEdit *editor = new FolderEdit(parent);
+		FolderEdit* editor = new FolderEdit(parent);
 
 		editor->setFolderPath(manager->value(property).toString());
 
@@ -125,15 +125,15 @@ QWidget *VariantFactory::createEditor(QtVariantPropertyManager *manager, QtPrope
 }
 
 
-void VariantFactory::slotPropertyChanged(QtProperty *property, const QVariant &value)
+void VariantFactory::slotPropertyChanged(QtProperty* property, const QVariant &value)
 {
 	if (m_createdEditorsMap.contains(property) == false)
 	{
 		return;
 	}
 
-	QList<FolderEdit *> editors = m_createdEditorsMap[property];
-	QListIterator<FolderEdit *> itEditor(editors);
+	QList<FolderEdit* > editors = m_createdEditorsMap[property];
+	QListIterator<FolderEdit* > itEditor(editors);
 
 	while (itEditor.hasNext() == true)
 	{
@@ -143,15 +143,15 @@ void VariantFactory::slotPropertyChanged(QtProperty *property, const QVariant &v
 
 void VariantFactory::slotSetValue(const QString &value)
 {
-	QObject *object = sender();
-	QMap<FolderEdit *, QtProperty *>::ConstIterator itEditor = m_editorToPropertyMap.constBegin();
+	QObject* object = sender();
+	QMap<FolderEdit* , QtProperty* >::ConstIterator itEditor = m_editorToPropertyMap.constBegin();
 
 	while (itEditor != m_editorToPropertyMap.constEnd())
 	{
 		if (itEditor.key() == object)
 		{
-			QtProperty *property = itEditor.value();
-			QtVariantPropertyManager *manager = propertyManager(property);
+			QtProperty* property = itEditor.value();
+			QtVariantPropertyManager* manager = propertyManager(property);
 			if (manager == nullptr)
 			{
 				return;
@@ -166,16 +166,16 @@ void VariantFactory::slotSetValue(const QString &value)
 	}
 }
 
-void VariantFactory::slotEditorDestroyed(QObject *object)
+void VariantFactory::slotEditorDestroyed(QObject* object)
 {
-	QMap<FolderEdit *, QtProperty *>::ConstIterator itEditor = m_editorToPropertyMap.constBegin();
+	QMap<FolderEdit* , QtProperty* >::ConstIterator itEditor = m_editorToPropertyMap.constBegin();
 
 	while (itEditor != m_editorToPropertyMap.constEnd())
 	{
 		if (itEditor.key() == object)
 		{
-			FolderEdit *editor = itEditor.key();
-			QtProperty *property = itEditor.value();
+			FolderEdit* editor = itEditor.key();
+			QtProperty* property = itEditor.value();
 
 			m_editorToPropertyMap.remove(editor);
 			m_createdEditorsMap[property].removeAll(editor);
@@ -226,7 +226,7 @@ int VariantManager::valueType(int propertyType) const
 	return QtVariantPropertyManager::valueType(propertyType);
 }
 
-QVariant VariantManager::value(const QtProperty *property) const
+QVariant VariantManager::value(const QtProperty* property) const
 {
 	if (m_valuesMap.contains(property) == true)
 	{
@@ -236,7 +236,7 @@ QVariant VariantManager::value(const QtProperty *property) const
 	return QtVariantPropertyManager::value(property);
 }
 
-QString VariantManager::valueText(const QtProperty *property) const
+QString VariantManager::valueText(const QtProperty* property) const
 {
 	if (m_valuesMap.contains(property) == true)
 	{
@@ -246,7 +246,7 @@ QString VariantManager::valueText(const QtProperty *property) const
 	return QtVariantPropertyManager::valueText(property);
 }
 
-void VariantManager::setValue(QtProperty *property, const QVariant &val)
+void VariantManager::setValue(QtProperty* property, const QVariant &val)
 {
 	if (m_valuesMap.contains(property) == true)
 	{
@@ -275,7 +275,7 @@ void VariantManager::setValue(QtProperty *property, const QVariant &val)
 	QtVariantPropertyManager::setValue(property, val);
 }
 
-void VariantManager::initializeProperty(QtProperty *property)
+void VariantManager::initializeProperty(QtProperty* property)
 {
 	if (propertyType(property) == folerPathTypeId())
 	{
@@ -285,7 +285,7 @@ void VariantManager::initializeProperty(QtProperty *property)
 	QtVariantPropertyManager::initializeProperty(property);
 }
 
-void VariantManager::uninitializeProperty(QtProperty *property)
+void VariantManager::uninitializeProperty(QtProperty* property)
 {
 	m_valuesMap.remove(property);
 

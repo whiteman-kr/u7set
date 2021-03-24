@@ -12,10 +12,10 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest		# CONFIG += c++20 has no effect yet
 
 include(../warnings.pri)
 
@@ -33,8 +33,7 @@ unix {
 
 SOURCES += \
     ../lib/Address16.cpp \
-    ../lib/LanControllerInfoHelper.cpp \
-	../lib/MemLeaksDetection.cpp \
+    ../lib/ScriptDeviceObject.cpp \
 	../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
 	../lib/SocketIO.cpp \
@@ -49,9 +48,7 @@ SOURCES += \
     ../lib/TcpFileTransfer.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SimpleThread.cpp \
-    ../lib/ServiceSettings.cpp \
-    ../lib/DeviceHelper.cpp \
-    ../lib/OutputLog.cpp \
+	../lib/SoftwareSettings.cpp \
     ../lib/XmlHelper.cpp \
     AppDataService.cpp \
     ../lib/Queue.cpp \
@@ -59,16 +56,13 @@ SOURCES += \
     AppDataProcessingThread.cpp \
     ../lib/WUtils.cpp \
     TcpAppDataServer.cpp \
-    ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc \
     ../lib/AppSignalStateFlags.cpp \
     ../lib/AppSignal.cpp \
-    ../Builder/IssueLogger.cpp \
     TcpAppDataClient.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
     AppDataSource.cpp \
-    ../Builder/ModulesRawData.cpp \
+#    ../Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
     AppDataServiceMain.cpp \
     TcpArchiveClient.cpp \
@@ -78,7 +72,6 @@ SOURCES += \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
     RtTrendsServer.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/TuningValue.cpp \
     ../lib/SimpleMutex.cpp \
     ../lib/SimpleAppSignalState.cpp \
@@ -86,9 +79,9 @@ SOURCES += \
 
 HEADERS += \
     ../lib/Address16.h \
+	../lib/ConstStrings.h \
     ../lib/LanControllerInfo.h \
-    ../lib/LanControllerInfoHelper.h \
-	../lib/MemLeaksDetection.h \
+    ../lib/ScriptDeviceObject.h \
 	Stable.h \
     ../lib/SocketIO.h \
     ../lib/UdpSocket.h \
@@ -97,7 +90,6 @@ HEADERS += \
     ../lib/DataSource.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
-    ../lib/ProtoSerialization.h \
     ../lib/Signal.h \
     ../lib/CUtils.h \
     ../lib/PropertyObject.h \
@@ -107,9 +99,7 @@ HEADERS += \
     ../lib/TcpFileTransfer.h \
     ../lib/BuildInfo.h \
     ../lib/SimpleThread.h \
-    ../lib/ServiceSettings.h \
-    ../lib/DeviceHelper.h \
-    ../lib/OutputLog.h \
+	../lib/SoftwareSettings.h \
     ../lib/XmlHelper.h \
     ../lib/DataProtocols.h \
     AppDataService.h \
@@ -118,12 +108,9 @@ HEADERS += \
     ../lib/OrderedHash.h \
     AppDataProcessingThread.h \
     TcpAppDataServer.h \
-    ../Proto/network.pb.h \
     ../lib/Hash.h \
-    ../Proto/serialization.pb.h \
     ../lib/AppSignalStateFlags.h \
     ../lib/AppSignal.h \
-    ../Builder/IssueLogger.h \
     TcpAppDataClient.h \
     ../lib/Crc.h \
     ../lib/HostAddressPort.h \
@@ -139,7 +126,6 @@ HEADERS += \
     ../lib/Times.h \
     ../lib/SignalProperties.h \
     RtTrendsServer.h \
-    ../lib/ProtoSerialization.h \
     ../lib/TuningValue.h \
     ../lib/SimpleMutex.h \
     ../lib/SimpleAppSignalState.h \
@@ -147,8 +133,6 @@ HEADERS += \
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
-
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 
 # VFrame30 library
 # $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
@@ -167,21 +151,21 @@ DEPENDPATH += ../VFrame30
 
 #protobuf
 #
-win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
-	INCLUDEPATH += ./../Protobuf
-}
-unix {
-	LIBS += -lprotobuf
-}
 
 DISTFILES += \
     ../Proto/network.proto \
     ../Proto/serialization.proto
 
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 CONFIG(release, debug|release): unix:QMAKE_CXXFLAGS += -DNDEBUG
 
 include(../qtservice/src/qtservice.pri)
 
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

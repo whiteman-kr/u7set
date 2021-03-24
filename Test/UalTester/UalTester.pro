@@ -11,10 +11,10 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../../warnings.pri)
 
@@ -34,6 +34,7 @@ unix {
 
 SOURCES += \
     ../../lib/Address16.cpp \
+    ../../lib/ScriptDeviceObject.cpp \
         main.cpp \
     UalTester.cpp \
     ../../lib/CommandLineParser.cpp \
@@ -43,16 +44,13 @@ SOURCES += \
     ../../lib/HostAddressPort.cpp \
     ../../lib/SocketIO.cpp \
     ../../lib/CfgServerLoader.cpp \
-    ../../Proto/network.pb.cc \
-    ../../Proto/serialization.pb.cc \
     ../../lib/BuildInfo.cpp \
     ../../lib/Tcp.cpp \
     ../../lib/TcpFileTransfer.cpp \
     ../../lib/Types.cpp \
-    ../../lib/ProtoSerialization.cpp \
     ../../lib/SoftwareInfo.cpp \
 	../../lib/XmlHelper.cpp \
-    ../../lib/ServiceSettings.cpp \
+	../../lib/SoftwareSettings.cpp \
     ../../lib/DeviceHelper.cpp \
     ../../Builder/IssueLogger.cpp \
     ../../lib/DeviceObject.cpp \
@@ -69,12 +67,13 @@ SOURCES += \
 	TestFile.cpp \
 	TuningSocket.cpp \
 	CmdLineParam.cpp \
-	../../lib/MemLeaksDetection.cpp \
     TuningSourceBase.cpp
 
 
 HEADERS += \
     ../../lib/Address16.h \
+	../../lib/ConstStrings.h \
+    ../../lib/ScriptDeviceObject.h \
 	UalTester.h \
     ../../lib/CommandLineParser.h \
     ../../lib/OrderedHash.h \
@@ -84,16 +83,13 @@ HEADERS += \
     ../../lib/HostAddressPort.h \
     ../../lib/SocketIO.h \
     ../../lib/CfgServerLoader.h \
-    ../../Proto/network.pb.h \
-    ../../Proto/serialization.pb.h \
     ../../lib/BuildInfo.h \
     ../../lib/Tcp.h \
     ../../lib/TcpFileTransfer.h \
     ../../lib/Types.h \
-    ../../lib/ProtoSerialization.h \
     ../../lib/SoftwareInfo.h \
 	../../lib/XmlHelper.h \
-    ../../lib/ServiceSettings.h \
+	../../lib/SoftwareSettings.h \
     ../../lib/DeviceHelper.h \
     ../../Builder/IssueLogger.h \
     ../../lib/DeviceObject.h \
@@ -113,7 +109,6 @@ HEADERS += \
     TuningSocket.h \
 	CmdLineParam.h \
 	Stable.h \
-	../../lib/MemLeaksDetection.h \
     TuningSourceBase.h
 
 
@@ -123,22 +118,19 @@ PRECOMPILED_HEADER = Stable.h
 RESOURCES += \
     Resources.qrc
 
-
-# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
+# Protobuf
 #
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../../Protobuf
 
-#protobuf
-#
-win32 {
-		LIBS += -L$$DESTDIR -lprotobuf
-
-		INCLUDEPATH += ./../../Protobuf
-}
-unix {
-		LIBS += -lprotobuf
-}
 
 DISTFILES += \
 	../../Proto/network.proto \
 	../../Proto/serialization.proto
+
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

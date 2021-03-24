@@ -516,7 +516,7 @@ namespace VFrame30
 			signal.setAppSignalId(appSignalId);
 			signalState.m_flags.valid = false;
 
-			if (drawParam->isMonitorMode() == true)
+			if (drawParam->appSignalController() != nullptr)
 			{
 				signal = drawParam->appSignalController()->signalParam(appSignalId, nullptr);
 				signalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);

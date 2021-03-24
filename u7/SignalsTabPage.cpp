@@ -28,7 +28,6 @@
 
 const int DEFAULT_COLUMN_WIDTH = 50;
 
-
 SignalsDelegate::SignalsDelegate(SignalSetProvider* signalSetProvider, SignalsModel* model, SignalsProxyModel* proxyModel, QObject *parent) :
 	QStyledItemDelegate(parent),
 	m_signalSetProvider(signalSetProvider),
@@ -365,11 +364,17 @@ bool SignalsDelegate::editorEvent(QEvent *event, QAbstractItemModel *, const QSt
 SignalsModel::SignalsModel(SignalSetProvider* signalSetProvider, SignalsTabPage* parent) :
 	QAbstractTableModel(parent),
 	m_signalSetProvider(signalSetProvider),
+	m_rowCount(signalSetProvider->signalCount()),
+	m_columnCount(signalSetProvider->signalPropertyManager().count()),
 	m_parentWindow(parent)
+
 {
 	connect(m_signalSetProvider, &SignalSetProvider::signalCountChanged, this, &SignalsModel::changeRowCount);
 	connect(m_signalSetProvider, &SignalSetProvider::signalUpdated, this, &SignalsModel::updateSignal);
-	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountIncreased, this, &SignalsModel::changeColumnCount);
+	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountWillIncrease, this, &SignalsModel::beginIncreaseColumnCount, Qt::DirectConnection);
+	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountWillDecrease, this, &SignalsModel::beginDecreaseColumnCount, Qt::DirectConnection);
+	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountIncreased, this, &SignalsModel::endIncreaseColumnCount, Qt::DirectConnection);
+	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountDecreased, this, &SignalsModel::endDecreaseColumnCount, Qt::DirectConnection);
 }
 
 SignalsModel::~SignalsModel()
@@ -558,6 +563,13 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 	}
 }
 
+void SignalsModel::finishReset()
+{
+	m_rowCount = m_signalSetProvider->signalCount();
+	m_columnCount = m_signalSetProvider->signalPropertyManager().count();
+	endResetModel();
+}
+
 void SignalsModel::updateSignal(int signalIndex)
 {
 	assert(signalIndex < m_rowCount);
@@ -575,19 +587,30 @@ void SignalsModel::changeRowCount()
 	}
 }
 
-void SignalsModel::changeColumnCount()
+void SignalsModel::beginIncreaseColumnCount(int newColumnCount)
 {
-	int signalPropertyCount = m_signalSetProvider->signalPropertyManager().count();
-	if (m_columnCount < signalPropertyCount)
-	{
-		beginInsertColumns(QModelIndex(), m_columnCount, signalPropertyCount - 1);
-		m_columnCount = signalPropertyCount;
-		endInsertColumns();
-	}
-	else
-	{
-		assert(false);
-	}
+	assert(newColumnCount > m_columnCount);
+
+	beginInsertColumns(QModelIndex(), m_columnCount, newColumnCount - 1);
+	m_columnCount = newColumnCount;
+}
+
+void SignalsModel::beginDecreaseColumnCount(int newColumnCount)
+{
+	assert(newColumnCount < m_columnCount);
+
+	beginRemoveColumns(QModelIndex(), newColumnCount, m_columnCount - 1);
+	m_columnCount = newColumnCount;
+}
+
+void SignalsModel::endIncreaseColumnCount()
+{
+	endInsertColumns();
+}
+
+void SignalsModel::endDecreaseColumnCount()
+{
+	endRemoveColumns();
 }
 
 
@@ -723,6 +746,7 @@ SignalsTabPage::SignalsTabPage(SignalSetProvider* signalSetProvider, DbControlle
 	connect(m_signalTypeFilterCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SignalsTabPage::changeSignalTypeFilter);
 
 	connect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &SignalsTabPage::changeLazySignalLoadingSequence);
+	connect(m_signalsView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SignalsTabPage::onSignalSelectionChanged);
 
 	connect(signalSetProvider, &SignalSetProvider::error, this, &SignalsTabPage::showError);
 
@@ -764,9 +788,11 @@ SignalsTabPage::~SignalsTabPage()
 		m_findSignalDialog->close();
 		delete m_findSignalDialog;
 	}
+
+	deleteMetrologyDialog();
 }
 
-bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties)
+bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceAppSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties)
 {
 	Q_UNUSED(forceUpdateProperties)
 
@@ -774,7 +800,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 
 	QStringList equipmentIDs;
 
-	for(const Hardware::DeviceSignal* deviceSignal: deviceSignalsToUpdate)
+	for(const Hardware::DeviceAppSignal* deviceSignal: deviceSignalsToUpdate)
 	{
 		TEST_PTR_CONTINUE(deviceSignal)
 		equipmentIDs.append(deviceSignal->equipmentId());
@@ -792,7 +818,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 	QVector<int> checkoutSignalIDs;
 	QVector<Signal> newSignalWorkcopies;
 
-	for(const Hardware::DeviceSignal* deviceSignal: deviceSignalsToUpdate)
+	for(const Hardware::DeviceAppSignal* deviceSignal: deviceSignalsToUpdate)
 	{
 		TEST_PTR_CONTINUE(deviceSignal)
 
@@ -1019,6 +1045,17 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	connect(action, &QAction::triggered, this, &SignalsTabPage::findAndReplaceSignal);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
+
+	m_signalsView->addAction(toolBar->addSeparator());
+
+	action = new QAction(QIcon(":/Images/Images/MetrologyConnection.svg"), tr("Metrology connections ..."), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::openMetrologyConnections);
+	toolBar->addAction(action);
+
+	m_addMetrologyConnectionAction = new QAction(QIcon(":/Images/Images/MetrologyConnection.svg"), tr("New metrology connection ..."), this);
+	connect(m_addMetrologyConnectionAction, &QAction::triggered, this, &SignalsTabPage::addMetrologyConnection);
+	m_signalsView->addAction(m_addMetrologyConnectionAction);
+
 }
 
 void SignalsTabPage::closeEvent(QCloseEvent* e)
@@ -1075,6 +1112,8 @@ void SignalsTabPage::projectClosed()
 		delete m_findSignalDialog;
 		m_findSignalDialog = nullptr;
 	}
+
+	deleteMetrologyDialog();
 }
 
 void SignalsTabPage::onTabPageChanged()
@@ -1151,9 +1190,7 @@ void SignalsTabPage::addSignal()
 	fl->addRow(buttonBox);
 
 	signalTypeDialog.setLayout(fl);
-
 	signalTypeDialog.setWindowTitle("Create signals");
-	signalTypeDialog.setFixedSize(600, 200);
 
 	if (signalTypeDialog.exec() != QDialog::Accepted)
 	{
@@ -1234,11 +1271,14 @@ void SignalsTabPage::addSignal()
 
 		if (!resultSignalVector.isEmpty())
 		{
+			int addedSignalId = -1;
 			for (int i = 0; i < resultSignalVector.count(); i++)
 			{
 				m_signalSetProvider->addSignal(resultSignalVector[i]);
+				addedSignalId = resultSignalVector[i].ID();
 			}
 			m_signalsModel->changeRowCount();
+			restoreSelection(addedSignalId);
 		}
 	}
 }
@@ -1457,6 +1497,113 @@ void SignalsTabPage::viewSignalHistory()
 	dlg.exec();
 }
 
+DialogMetrologyConnection* SignalsTabPage::createMetrologyDialog()
+{
+	if (m_signalSetProvider == nullptr)
+	{
+		Q_ASSERT(m_signalSetProvider);
+		return nullptr;
+	}
+
+	DialogMetrologyConnection* pMetrologyDialog = new DialogMetrologyConnection(m_signalSetProvider, this);
+	if (pMetrologyDialog == nullptr)
+	{
+		return nullptr;
+	}
+
+	connect(pMetrologyDialog, &QDialog::accepted, this, &SignalsTabPage::metrologyDialogClosed, Qt::QueuedConnection);
+	connect(pMetrologyDialog, &QDialog::rejected, this, &SignalsTabPage::metrologyDialogClosed, Qt::QueuedConnection);
+
+	pMetrologyDialog->setModal(false);
+
+	return pMetrologyDialog;
+}
+
+void SignalsTabPage::deleteMetrologyDialog()
+{
+	if (m_metrologyDialog == nullptr)
+	{
+		return;
+	}
+
+	delete m_metrologyDialog;
+	m_metrologyDialog = nullptr;
+}
+
+void SignalsTabPage::openMetrologyConnections()
+{
+	if (m_metrologyDialog == nullptr)
+	{
+		m_metrologyDialog = createMetrologyDialog();
+	}
+
+	if (m_metrologyDialog == nullptr)
+	{
+		return;
+	}
+
+	m_metrologyDialog->show();
+	m_metrologyDialog->loadConnectionBase();
+}
+
+void SignalsTabPage::addMetrologyConnection()
+{
+	if (m_signalSetProvider == nullptr)
+	{
+		Q_ASSERT(m_signalSetProvider);
+		return;
+	}
+
+	if (m_signalsView == nullptr)
+	{
+		Q_ASSERT(m_signalsView);
+		return;
+	}
+
+	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
+	if (selection.count() == 0)
+	{
+		QMessageBox::warning(this, tr("Metrology connections"), tr("No one signal was selected!"));
+		return;
+	}
+
+	int row = m_signalsProxyModel->mapToSource(selection[0]).row();
+	if (row < 0 || row >= m_signalSetProvider->signalCount())
+	{
+		return;
+	}
+
+	Signal signal = m_signalSetProvider->getSignalByID(m_signalSetProvider->key(row));
+	if (signal.isAnalog() == false)
+	{
+		QMessageBox::warning(this, tr("Metrology connections"), tr("Please, select analog signal!"));
+		return;
+	}
+
+	if (m_metrologyDialog == nullptr)
+	{
+		m_metrologyDialog = createMetrologyDialog();
+	}
+
+	if (m_metrologyDialog == nullptr)
+	{
+		return;
+	}
+
+	m_metrologyDialog->show();
+	m_metrologyDialog->createConnectionBySignal(&signal);
+}
+
+void SignalsTabPage::metrologyDialogClosed()
+{
+	if (m_metrologyDialog == nullptr)
+	{
+		return;
+	}
+
+	deleteMetrologyDialog();
+}
+
 void SignalsTabPage::changeLazySignalLoadingSequence()
 {
 	m_signalSetProvider->setMiddleVisibleSignalIndex(getMiddleVisibleRow());
@@ -1524,6 +1671,27 @@ void SignalsTabPage::restoreSelection(int focusedSignalId)
 	m_signalsView->verticalScrollBar()->setValue(m_lastVerticalScrollPosition);
 
 	m_signalsView->scrollTo(currentProxyIndex);
+}
+
+// Checks only first selected signal, because Metrology editor reads only first signal
+//
+void SignalsTabPage::onSignalSelectionChanged()
+{
+	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
+	if (selection.count() == 0)
+	{
+		m_addMetrologyConnectionAction->setEnabled(false);
+		return;
+	}
+	int row = m_signalsProxyModel->mapToSource(selection[0]).row();
+	if (m_signalSetProvider->getLoadedSignal(row).isAnalog())
+	{
+		m_addMetrologyConnectionAction->setEnabled(true);
+	}
+	else
+	{
+		m_addMetrologyConnectionAction->setEnabled(false);
+	}
 }
 
 void SignalsTabPage::changeSignalTypeFilter(int selectedType)
@@ -1630,6 +1798,11 @@ void SignalsTabPage::showError(QString message)
 
 void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compareData)
 {
+	if (isVisible() == false)
+	{
+		return;
+	}
+
 	// Can compare only files which are EquipmentObjects
 	//
 	if (object.isSignal() == false)

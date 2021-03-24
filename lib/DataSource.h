@@ -11,12 +11,8 @@
 #include "DeviceObject.h"
 #include "AppSignal.h"
 #include "SimpleThread.h"
-#include "CommonTypes.h"
-
-#include "../Builder/IssueLogger.h"
-
 #include "WUtils.h"
-
+#include "ConstStrings.h"
 
 class DataSource
 {
@@ -28,41 +24,9 @@ public:
 		Tuning,
 	};
 
-	static const char* const ELEMENT_DATA_SOURCES;
-	static const char* const ELEMENT_DATA_SOURCE;
-	static const char* const ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS;
-
-	// LM device properties
-
-	static const char* PROP_DEVICE_LM_NUMBER;
-	static const char* PROP_DEVICE_SUBSYSTEM_CHANNEL;
-	static const char* PROP_DEVICE_SUBSYSTEM_ID;
-
-	// XML-serializable members
-	//
-	static const char* DATA_TYPE_APP;
-	static const char* DATA_TYPE_DIAG;
-	static const char* DATA_TYPE_TUNING;
-
-	static const char* PROP_LM_DATA_TYPE;
-	static const char* PROP_LM_ID;
-	static const char* PROP_LM_PRESET_NAME;
-	static const char* PROP_LM_NUMBER;
-	static const char* PROP_LM_CHANNEL;
-	static const char* PROP_LM_SUBSYSTEM_KEY;
-	static const char* PROP_LM_SUBSYSTEM_ID;
-	static const char* PROP_LM_MODULE_TYPE;
-	static const char* PROP_LM_CAPTION;
-	static const char* PROP_LM_ADAPTER_ID;
-	static const char* PROP_LM_DATA_ENABLE;
-	static const char* PROP_LM_DATA_IP;
-	static const char* PROP_LM_DATA_PORT;
-	static const char* PROP_LM_DATA_SIZE;
-	static const char* PROP_LM_RUP_FRAMES_QUANTITY;
-	static const char* PROP_LM_DATA_ID;
-	static const char* PROP_LM_UNIQUE_ID;
-	static const char* PROP_SERVICE_ID;
-	static const char* PROP_COUNT;
+	static const QString DATA_TYPE_APP;
+	static const QString DATA_TYPE_DIAG;
+	static const QString DATA_TYPE_TUNING;
 
 private:
 
@@ -70,18 +34,10 @@ public:
 	DataSource();
 	virtual ~DataSource();
 
-	bool getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
-								   DataType dataType,
-								   int adapterNo,
-								   E::LanControllerType adapterType,
-								   const Hardware::EquipmentSet& equipmentSet,
-								   const SubsystemKeyMap& subsystemKeyMap,
-								   const QHash<QString, quint64>& lmUniqueIdMap,
-								   Builder::IssueLogger* log);
-
 	// LM's properties
 	//
 	DataType lmDataType() const { return m_lmDataType; }
+	int lmDataTypeInt() const { return static_cast<int>(m_lmDataType); }
 	QString lmDataTypeStr() const { return dataTypeToString(m_lmDataType); }
 	void setLmDataType(DataType dataType) { m_lmDataType = dataType; }
 
@@ -103,8 +59,8 @@ public:
 	int lmModuleType() const { return m_lmModuleType; }
 	void setLmModuleType(int lmModueType) { m_lmModuleType = lmModueType; }
 
-	QString lmSubsystem() const { return m_lmSubsystemID; }
-	void setLmSubsystem(const QString& lmSubsystem) { m_lmSubsystemID = lmSubsystem; }
+	QString lmSubsystemID() const { return m_lmSubsystemID; }
+	void setLmSubsystemID(const QString& lmSubsystemID) { m_lmSubsystemID = lmSubsystemID; }
 
 	QString lmCaption() const { return m_lmCaption; }
 	void setLmCaption(const QString& lmCaption) { m_lmCaption = lmCaption; }
@@ -122,6 +78,7 @@ public:
 
 	QHostAddress lmAddress() const { return m_lmAddressPort.address(); }
 	HostAddressPort lmAddressPort() const { return m_lmAddressPort; }
+	void setLmAddressPort(const HostAddressPort& addrPort) { m_lmAddressPort = addrPort; }
 
 	int lmPort() const { return m_lmAddressPort.port(); }
 	void setLmPort(int port) { Q_ASSERT(port >= 0 && port <= 65535); m_lmAddressPort.setPort(static_cast<quint16>(port)); }
@@ -134,6 +91,9 @@ public:
 
 	quint32 lmDataID() const { return m_lmDataID; }
 	void setLmDataID(quint32 lmDataID) { m_lmDataID = lmDataID; }
+
+	int lmDataSize() const { return m_lmDataSize; }
+	void setLmDataSize(int lmDataSize) { m_lmDataSize = lmDataSize; }
 
 	QString serviceID()	 const { return m_serviceID; }
 	void setServiceID(const QString& serviceID) { m_serviceID = serviceID; }
@@ -204,24 +164,22 @@ class DataSourceOnline : public DataSource
 private:
 	struct RupFrameTime
 	{
-		qint64 serverTime;
+		qint64 serverTime = 0;
+		bool isSimFrame = false;
 
 		Rup::Frame rupFrame;
-
-		void dump();
 	};
 
 	static const int APP_DATA_SOURCE_TIMEOUT = 1000;
 	static const int DATA_RECEIVING_RATE_CALC_PERIOD = 2000;
 
+	static const QString DATE_TIME_FORMAT_STR;
+
 public:
 	DataSourceOnline();
 	~DataSourceOnline();
 
-	bool init();
-
-//	void stop();
-//	void resume();
+	bool initQueue();
 
 	//
 
@@ -245,6 +203,7 @@ public:
 	void setRupFramesQueueCurMaxSize(int size) { m_rupFramesQueueCurMaxSize = size; }
 
 	qint64 rupFramePlantTime() const { return m_rupFramePlantTime; }
+	QString rupFramePlantTimeStr() const;
 	void setRupFramePlantTime(qint64 time) { m_rupFramePlantTime = time; }
 
 	quint16 rupFrameNumerator() const { return m_rupFrameNumerator; }
@@ -296,11 +255,16 @@ public:
 	void setDataProcessingEnabled(bool enabled) { m_dataProcessingEnabled = enabled; }
 
 	qint64 lastPacketSystemTime() const { return m_lastPacketSystemTime; }
+	QString lastPacketSystemTimeStr() const;
 	void setLastPacketSystemTime(qint64 sysTime) { m_lastPacketSystemTime = sysTime; }
 
 	// Functions used by receiver thread
 	//
-	void pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame, const QThread* thread);
+	void pushRupFrame(qint64 serverTime,
+					  bool isSimFrame,
+					  const Rup::Frame& rupFrame,
+					  const QThread* thread);
+
 	void incFrameSizeError() { m_errorFrameSize++; }
 
 	// Functions used by data processing thread
@@ -309,7 +273,12 @@ public:
 	bool releaseProcessingOwnership(const QThread* processingThread);
 
 	bool processRupFrameTimeQueue(const QThread* thread);
-	bool getDataToParsing(Times* times, quint16* packetNo, const char** rupData, int* rupDataSize, bool* dataReceivingTimeout);
+	bool getDataToParsing(Times* times,
+						  bool* isSimPacket,
+						  quint16* packetNo,
+						  const char** rupData,
+						  int* rupDataSize,
+						  bool* dataReceivingTimeout);
 
 	bool rupFramesQueueIsEmpty() const { return m_rupFrameTimeQueue.isEmpty(QThread::currentThread()); }
 
@@ -323,6 +292,8 @@ private:
 	bool reallocate(quint32 framesQuantity);
 
 	void calcDataReceivingRate();
+
+	QString getTimeStr(qint64 timeMs) const;
 
 private:
 	// static information
@@ -342,6 +313,7 @@ private:
 	qint64 m_rupFramePlantTime = 0;
 	quint16 m_rupFrameNumerator = 0;
 	bool m_dataReceives = false;
+
 	double m_dataReceivingRate = 0;
 	qint64 m_receivedDataSize = 0;
 	qint64 m_receivedFramesCount = 0;
@@ -383,6 +355,7 @@ private:
 	Rup::Header* m_rupFramesHeaders = nullptr;
 	Rup::Data* m_rupFramesData = nullptr;
 	qint64 m_frame0ServerTime = 0;
+	bool m_isSimPacket = false;
 
 	// result variables
 
@@ -434,8 +407,8 @@ bool DataSourcesXML<TYPE>::writeToXml(const QVector<TYPE>& dataSources, QByteArr
 	xml.setAutoFormatting(true);
 	xml.writeStartDocument();
 
-	xml.writeStartElement(DataSource::ELEMENT_DATA_SOURCES);
-	xml.writeIntAttribute(DataSource::PROP_COUNT, dataSources.count());
+	xml.writeStartElement(XmlElement::DATA_SOURCES);
+	xml.writeIntAttribute(XmlAttribute::COUNT, dataSources.count());
 
 	for(const TYPE& ds : dataSources)
 	{
@@ -459,14 +432,14 @@ bool DataSourcesXML<TYPE>::readFromXml(const QByteArray& fileData, QVector<TYPE>
 
 	bool result = true;
 
-	if (xml.findElement(DataSource::ELEMENT_DATA_SOURCES) == false)
+	if (xml.findElement(XmlElement::DATA_SOURCES) == false)
 	{
 		return false;
 	}
 
 	int count = 0;
 
-	if (xml.readIntAttribute(DataSource::PROP_COUNT, &count) == false)
+	if (xml.readIntAttribute(XmlAttribute::COUNT, &count) == false)
 	{
 		return false;
 	}

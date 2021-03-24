@@ -5,13 +5,16 @@
 
 #include <QObject>
 #include <QMutex>
-#include <QVector>
 #include <QFont>
 #include <QColor>
 
-#include "MeasureViewHeader.h"
-#include "ObjectVector.h"
 #include "../lib/SocketIO.h"
+#include "../lib/SoftwareSettings.h"
+#include "../lib/MetrologySignal.h"
+
+#include "MeasureViewHeader.h"
+#include "MeasureBase.h"
+#include "MeasurePointBase.h"
 
 // ==============================================================================================
 
@@ -19,53 +22,70 @@
 
 // ==============================================================================================
 
-#define					PROJECT_INFO_KEY				"Options/ProjectInfo/"
+#define					CALIBRATOR_OPTIONS_KEY			"Options/Calibrators/"
 
 // ----------------------------------------------------------------------------------------------
 
-class ProjectInfo: public QObject
+class CalibratorOption
+{
+
+public:
+
+	CalibratorOption();
+	CalibratorOption(const QString& port, int type);
+	virtual ~CalibratorOption() {}
+
+public:
+
+	bool				isValid() const;
+
+	QString				port() const { return m_port; }
+	void				setPort(const QString& port) { m_port = port; }
+
+	int					type() const { return m_type; }
+	void				setType(int type) { m_type = type; }
+
+private:
+
+	QString				m_port;
+	int					m_type = CalibratorType::Calys75;
+};
+
+// ----------------------------------------------------------------------------------------------
+
+class CalibratorsOption : public QObject
 {
 	Q_OBJECT
 
 public:
 
-	explicit ProjectInfo(QObject *parent = nullptr);
-	explicit ProjectInfo(const ProjectInfo& from, QObject *parent = nullptr);
-	virtual ~ProjectInfo();
-
-private:
-
-	QString				m_projectName;
-	int					m_id = -1;
-	QString				m_date;
-	int					m_changeset = 0;
-	QString				m_user;
-	QString				m_workstation;
-	int					m_dbVersion = 0;
-	int					m_cfgFileVersion = 0;
+	explicit CalibratorsOption(QObject* parent = nullptr);
+	explicit CalibratorsOption(const CalibratorsOption& from, QObject* parent = nullptr);
+	virtual ~CalibratorsOption() override;
 
 public:
 
-	QString				projectName() { return m_projectName; }
-	int					id() { return m_id; }
-	QString				date() { return m_date; }
-	int					changeset() { return m_changeset; }
-	QString				user() { return m_user; }
-	QString				workstation() { return m_workstation; }
-	int					dbVersion() { return m_dbVersion; }
-	int					cfgFileVersion() { return m_cfgFileVersion; }
-	void				setCfgFileVersion(int version) { m_cfgFileVersion = version; }
+	CalibratorOption	calibrator(int channel) const;
+	void				setCalibrator(int channel, const CalibratorOption& calibrator);
 
+	//
+	//
+	void				load();
 	void				save();
 
-	bool				readFromXml(const QByteArray& fileData);
+	//
+	//
+	CalibratorsOption&	operator=(const CalibratorsOption& from);
 
-	ProjectInfo&		operator=(const ProjectInfo& from);
+private:
+
+	CalibratorOption	m_calibrator[Metrology::ChannelCount];
 };
+
 
 // ==============================================================================================
 
-#define					SOCKET_OPTIONS_KEY				"Options/Socket/"
+#define					SOCKET_OPTIONS_KEY				"Options/SocketConnection/"
 
 // ----------------------------------------------------------------------------------------------
 
@@ -105,7 +125,7 @@ const int				SOCKET_CLIENT_PARAM_EQUIPMENT_ID1	= 0,
 
 struct CONNECTION_OPTION
 {
-	bool				readFromCfgSrv = false;
+	bool				isValid = false;
 
 	QString				equipmentID;
 	QString				serverIP;
@@ -120,12 +140,6 @@ public:
 
 	SocketClientOption();
 	virtual ~SocketClientOption() {}
-
-private:
-
-	int					m_type = -1;
-
-	CONNECTION_OPTION	m_connectOption[SOCKET_SERVER_TYPE_COUNT];
 
 public:
 
@@ -143,10 +157,18 @@ public:
 
 	HostAddressPort		address(int serverType) const;
 
+	//
+	//
 	void				load();
 	void				save();
 
-	bool				readOptionsFromXml(const QByteArray& fileData);
+	bool				init(const MetrologySettings& settings);
+
+private:
+
+	int					m_type = -1;
+
+	CONNECTION_OPTION	m_connectOption[SOCKET_SERVER_TYPE_COUNT];
 };
 
 // ==============================================================================================
@@ -214,25 +236,358 @@ class SocketOption : public QObject
 
 public:
 
-	explicit SocketOption(QObject *parent = nullptr);
-	explicit SocketOption(const SocketOption& from, QObject *parent = nullptr);
-	virtual ~SocketOption();
-
-private:
-
-	SocketClientOption	m_client[SOCKET_TYPE_COUNT];
+	explicit SocketOption(QObject* parent = nullptr);
+	explicit SocketOption(const SocketOption& from, QObject* parent = nullptr);
+	virtual ~SocketOption() override;
 
 public:
 
 	SocketClientOption	client(int socketType) const;
 	void				setClient(int socketType, const SocketClientOption& client);
 
+	//
+	//
 	void				load();
 	void				save();
 
+	//
+	//
 	SocketOption&		operator=(const SocketOption& from);
+
+private:
+
+	SocketClientOption	m_client[SOCKET_TYPE_COUNT];
 };
 
+// ==============================================================================================
+
+#define					PROJECT_INFO_KEY				"Options/ProjectInfo/"
+
+// ----------------------------------------------------------------------------------------------
+
+class ProjectInfo: public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit ProjectInfo(QObject* parent = nullptr);
+	explicit ProjectInfo(const ProjectInfo& from, QObject* parent = nullptr);
+	virtual ~ProjectInfo() override;
+
+public:
+
+	QString				projectName() { return m_projectName; }
+	int					id() { return m_id; }
+	QString				date() { return m_date; }
+	int					changeset() { return m_changeset; }
+	QString				user() { return m_user; }
+	QString				workstation() { return m_workstation; }
+	int					dbVersion() { return m_dbVersion; }
+	int					cfgFileVersion() { return m_cfgFileVersion; }
+	void				setCfgFileVersion(int version) { m_cfgFileVersion = version; }
+
+	//
+	//
+	void				save();
+	bool				readFromXml(const QByteArray& fileData);
+
+	//
+	//
+	ProjectInfo&		operator=(const ProjectInfo& from);
+
+private:
+
+	QString				m_projectName;
+	int					m_id = -1;
+	QString				m_date;
+	int					m_changeset = 0;
+	QString				m_user;
+	QString				m_workstation;
+	int					m_dbVersion = 0;
+	int					m_cfgFileVersion = 0;
+};
+
+// ==============================================================================================
+
+#define					MODULE_OPTIONS_KEY			"Options/Module/"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const		ModuleParamName[] =
+{
+						QT_TRANSLATE_NOOP("Options.h", "Suffix to identify signal of module serial number"),
+						QT_TRANSLATE_NOOP("Options.h", "Measure Internal signal instead Input signal"),
+						QT_TRANSLATE_NOOP("Options.h", "Measure linearity and comparators together"),
+						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
+						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
+						QT_TRANSLATE_NOOP("Options.h", "Maximum number of inputs for input module"),
+};
+
+const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName[0]);
+
+const int				MO_PARAM_SUFFIX_SN				= 0,
+						MO_PARAM_MEASURE_INT_INSTEAD_IN	= 1,
+						MO_PARAM_MEASURE_LIN_AND_CMP	= 2,
+						MO_PARAM_MEASURE_ENTIRE_MODULE	= 3,
+						MO_PARAM_WARN_IF_MEASURED		= 4,
+						MO_PARAM_MAX_IMPUT_COUNT		= 5;
+
+// ----------------------------------------------------------------------------------------------
+
+class ModuleOption : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit ModuleOption(QObject* parent = nullptr);
+	explicit ModuleOption(const ModuleOption& from, QObject* parent = nullptr);
+	virtual ~ModuleOption() override;
+
+public:
+
+	QString				suffixSN() const { return m_suffixSN; }
+	void				setSuffixSN(const QString& suffixSN) { m_suffixSN = suffixSN; }
+
+	bool				measureInterInsteadIn() const { return m_measureInterInsteadIn; }
+	void				setMeasureInterInsteadIn(bool measure) { m_measureInterInsteadIn = measure; }
+
+	bool				measureLinAndCmp() const { return m_measureLinAndCmp; }
+	void				setMeasureLinAndCmp(bool measure) { m_measureLinAndCmp = measure; }
+
+	bool				measureEntireModule() const { return m_measureEntireModule; }
+	void				setMeasureEntireModule(bool measure) { m_measureEntireModule = measure; }
+
+	bool				warningIfMeasured() const { return m_warningIfMeasured; }
+	void				setWarningIfMeasured(bool enable) { m_warningIfMeasured = enable; }
+
+	int					maxInputCount() const { return m_maxInputCount; }
+	void				setMaxInputCount(int count);
+
+	//
+	//
+	void				load();
+	void				save();
+
+	//
+	//
+	ModuleOption&		operator=(const ModuleOption& from);
+
+private:
+
+	QString				m_suffixSN;													// suffix to identify the signal of module serial number
+
+
+	bool				m_measureInterInsteadIn = false;							// measure internal signal instead input signal
+	bool				m_measureLinAndCmp = false;									// measure linearity and comparators together
+	bool				m_measureEntireModule = false;								// measure all inputs of module in series
+	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
+
+	int					m_maxInputCount = Metrology::InputCount;					// maximum number of inputs for input mofule
+};
+
+// ==============================================================================================
+
+#define					LINEARITY_OPTIONS_KEY			"Options/Linearity/"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const		LinearityParamName[] =
+{
+						QT_TRANSLATE_NOOP("Options.h", "Limit of error (%)"),
+						QT_TRANSLATE_NOOP("Options.h", "Type of error"),
+						QT_TRANSLATE_NOOP("Options.h", "Show error from limit"),
+						QT_TRANSLATE_NOOP("Options.h", "Measure time in a point (sec)"),
+						QT_TRANSLATE_NOOP("Options.h", "Count of measurements in a point"),
+						QT_TRANSLATE_NOOP("Options.h", "Division of the measure range"),
+						QT_TRANSLATE_NOOP("Options.h", "Count of points"),
+						QT_TRANSLATE_NOOP("Options.h", "Lower limit of the measure range (%)"),
+						QT_TRANSLATE_NOOP("Options.h", "High limit of the measure range (%)"),
+						QT_TRANSLATE_NOOP("Options.h", "Points of range"),
+						QT_TRANSLATE_NOOP("Options.h", "Type of measurements list"),
+};
+
+const int				LO_PARAM_COUNT					= sizeof(LinearityParamName)/sizeof(LinearityParamName[0]);
+
+const int				LO_PARAM_ERROR_LIMIT			= 0,
+						LO_PARAM_ERROR_TYPE				= 1,
+						LO_PARAM_SHOW_ERROR_FROM_LIMIT	= 2,
+						LO_PARAM_MEASURE_TIME			= 3,
+						LO_PARAM_MEASURE_IN_POINT		= 4,
+						LO_PARAM_RANGE_TYPE				= 5,
+						LO_PARAM_POINT_COUNT			= 6,
+						LO_PARAM_LOW_RANGE				= 7,
+						LO_PARAM_HIGH_RANGE				= 8,
+						LO_PARAM_VALUE_POINTS			= 9,
+						LO_PARAM_LIST_TYPE				= 10;
+
+// ----------------------------------------------------------------------------------------------
+
+enum LinearityViewType
+{
+	NoLinearityViewType	= -1,
+	Simple				= 0,
+	Extended			= 1,
+	DetailElectric		= 2,
+	DetailEngineering	= 3,
+};
+
+const int LinearityViewTypeCount = 4;
+
+#define ERR_LINEARITY_VIEW_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= LinearityViewTypeCount)
+
+QString LinearityViewTypeCaption(int type);
+
+// ----------------------------------------------------------------------------------------------
+
+class LinearityOption : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit LinearityOption(QObject* parent = nullptr);
+	explicit LinearityOption(const LinearityOption& from, QObject* parent = nullptr);
+	virtual ~LinearityOption() override;
+
+public:
+
+	Measure::PointBase&	points() { return m_pointBase; }
+
+	double				errorLimit() const { return m_errorLimit; }
+	void				setErrorLimit(double errorLimit) { m_errorLimit = errorLimit; }
+
+	int					errorType() const { return m_errorType; }
+	void				setErrorType(int type) { m_errorType = type; }
+
+	int					limitType() const { return m_limitType; }
+	void				setLimitType(int type) { m_limitType = type; }
+
+	int					measureTimeInPoint() const { return m_measureTimeInPoint; }
+	void				setMeasureTimeInPoint(int sec) { m_measureTimeInPoint = sec; }
+
+	int					measureCountInPoint();
+	void				setMeasureCountInPoint(int measureCount);
+
+	int					divisionType() const { return m_divisionType; }
+	void				setDivisionType(int type) { m_divisionType = type; }
+
+	double				lowLimitRange() const { return m_lowLimitRange; }
+	void				setLowLimitRange(double lowLimit) { m_lowLimitRange = lowLimit; }
+
+	double				highLimitRange() const { return m_highLimitRange; }
+	void				setHighLimitRange(double highLimit) { m_highLimitRange = highLimit; }
+
+	int					viewType() const { return m_viewType; }
+	void				setViewType(int type) { m_viewType = type; }
+
+	//
+	//
+	void				recalcPoints(int count = -1);
+
+	void				load();
+	void				save();
+
+	//
+	//
+	LinearityOption&	operator=(const LinearityOption& from);
+
+private:
+
+	Measure::PointBase	m_pointBase;												// list of measurement points
+
+	double				m_errorLimit = 0.2;											// permissible error is given by specified documents
+	int					m_errorType = Measure::ErrorType::Reduce;					// type of error absolute or reduced
+	int					m_limitType = Measure::LimitType::Electric;					// type of displaing error denend on limit
+
+	int					m_measureTimeInPoint = 1;									// time, in seconds, during which will be made ​​N measurements at each point
+	int					m_measureCountInPoint = Measure::MaxMeasurementInPoint;		// count of measurements in a point, according to GOST MI-2002 application 7
+
+	int					m_divisionType = Measure::LinearityDivision::Manual;		// type of division measure range: manual - 0 or automatic - 1
+	double				m_lowLimitRange = Measure::LinearityRangeLow;				// lower limit of the range for automatic division
+	double				m_highLimitRange = Measure::LinearityRangeHigh;				// high limit of the range for automatic division
+
+	int					m_viewType = LinearityViewType::Simple;						// type of measurements list extended or simple
+};
+
+// ==============================================================================================
+
+#define					COMPARATOR_OPTIONS_KEY			"Options/Comparator/"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const		ComparatorParamName[] =
+{
+						QT_TRANSLATE_NOOP("Options.h", "Limit of error (%)"),
+						QT_TRANSLATE_NOOP("Options.h", "Start value (%)"),
+						QT_TRANSLATE_NOOP("Options.h", "Error type"),
+						QT_TRANSLATE_NOOP("Options.h", "Show error from limit"),
+						QT_TRANSLATE_NOOP("Options.h", "Start measurement from the сomparator"),
+						QT_TRANSLATE_NOOP("Options.h", "Enable to measure hysteresis of comparators"),
+};
+
+const int				CO_PARAM_COUNT					= sizeof(ComparatorParamName)/sizeof(ComparatorParamName[0]);
+
+const int				CO_PARAM_ERROR_LIMIT			= 0,
+						CO_PARAM_START_VALUE			= 1,
+						CO_PARAM_ERROR_TYPE				= 2,
+						CO_PARAM_SHOW_ERROR_FROM_LIMIT	= 3,
+						CO_PARAM_COMPARATOR_INDEX		= 4,
+						CO_PARAM_ENABLE_HYSTERESIS		= 5;
+
+// ----------------------------------------------------------------------------------------------
+
+class ComparatorOption : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit ComparatorOption(QObject* parent = nullptr);
+	explicit ComparatorOption(const ComparatorOption& from, QObject* parent = nullptr);
+	virtual ~ComparatorOption() override;
+
+
+public:
+
+	double				errorLimit() const { return m_errorLimit; }
+	void				setErrorLimit(double errorLimit) { m_errorLimit = errorLimit; }
+
+	double				startValueForCompare() const { return m_startValueForCompare; }
+	void				setStartValueForCompare(double value) { m_startValueForCompare = value; }
+
+	int					errorType() const { return m_errorType; }
+	void				setErrorType(int type) { m_errorType = type; }
+
+	int					limitType() const { return m_limitType; }
+	void				setLimitType(int type) { m_limitType = type; }
+
+	int					startComparatorIndex() const { return m_startComparatorIndex; }
+	void				setStartComparatorIndex(int index) { m_startComparatorIndex = index; }
+
+	bool				enableMeasureHysteresis() const { return m_enableMeasureHysteresis; }
+	void				setEnableMeasureHysteresis(bool enable) { m_enableMeasureHysteresis = enable; }
+
+	//
+	//
+	void				load();
+	void				save();
+
+	//
+	//
+	ComparatorOption&	operator=(const ComparatorOption& from);
+
+private:
+
+	double				m_errorLimit = 0.2;										// permissible error is given by specified documents
+	double				m_startValueForCompare = 0.1;							// start value is given by metrologists
+	int					m_errorType = Measure::ErrorType::Reduce;					// type of error absolute or reduced
+	int					m_limitType = Measure::LimitType::Electric;				// type of displaing error denend on limit
+
+	int					m_startComparatorIndex = 0;								// start the measurement with the сomparators under the number ...
+	bool				m_enableMeasureHysteresis = false;						// enable flag to measure hysteresis of сomparator
+};
 
 // ==============================================================================================
 
@@ -246,15 +601,9 @@ class ToolBarOption : public QObject
 
 public:
 
-	explicit ToolBarOption(QObject *parent = nullptr);
-	explicit ToolBarOption(const ToolBarOption& from, QObject *parent = nullptr);
-	virtual ~ToolBarOption();
-
-private:
-
-	int					m_measureTimeout = 0;									// in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
-	int					m_measureKind = MEASURE_KIND_ONE_RACK;					// measure kind: each channel separately - 0 or for all channels together - 1
-	int					m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;	// selected type of connection
+	explicit ToolBarOption(QObject* parent = nullptr);
+	explicit ToolBarOption(const ToolBarOption& from, QObject* parent = nullptr);
+	virtual ~ToolBarOption() override;
 
 public:
 
@@ -264,19 +613,51 @@ public:
 	int					measureKind() const { return m_measureKind; }
 	void				setMeasureKind(int kind) { m_measureKind = kind; }
 
-	int					signalConnectionType() const { return m_signalConnectionType; }
-	void				setSignalConnectionType(int type) { m_signalConnectionType = type; }
+	int					connectionType() const { return m_connectionType; }
+	void				setConnectionType(int type) { m_connectionType = type; }
 
+	QString				defaultRack() const { return m_defaultRack; }
+	void				setDefaultRack(const QString& rack) { m_defaultRack = rack; }
 
+	QString				defaultSignalId() const { return m_defaultSignalId; }
+	void				setDefaultSignalId(const QString& signalId) { m_defaultSignalId = signalId; }
+
+	//
+	//
 	void				load();
 	void				save();
 
+	//
+	//
 	ToolBarOption&		operator=(const ToolBarOption& from);
+
+private:
+
+	int					m_measureTimeout = 0;											// in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
+	int					m_measureKind = Measure::Kind::OneRack;							// measure kind: each channel separately - 0 or for all channels together - 1
+	int					m_connectionType = Metrology::ConnectionType::Unused;			// selected type of connection
+
+	QString				m_defaultRack;
+	QString				m_defaultSignalId;
 };
 
 // ==============================================================================================
 
 #define					MEASURE_VIEW_OPTIONS_KEY		"Options/MeasureView/"
+
+// ----------------------------------------------------------------------------------------------
+
+enum LanguageType
+{
+	English	= 0,
+	Russian	= 1,
+};
+
+const int LanguageTypeCount = 2;
+
+#define ERR_LANGUAGE_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= LanguageTypeCount)
+
+QString LanguageTypeCaption(int type);
 
 // ----------------------------------------------------------------------------------------------
 
@@ -286,14 +667,18 @@ const char* const		MeasureViewParam[] =
 						QT_TRANSLATE_NOOP("Options.h", "Color measurement that has not error"),
 						QT_TRANSLATE_NOOP("Options.h", "Color measurement over limit error"),
 						QT_TRANSLATE_NOOP("Options.h", "Color measurement over control error"),
+						QT_TRANSLATE_NOOP("Options.h", "Show measuring value if signal is not valid"),
+						QT_TRANSLATE_NOOP("Options.h", "Show accuracy for measure value and nominal value from calibrator"),
 };
 
-const int				MWO_PARAM_COUNT					= sizeof(MeasureViewParam)/sizeof(MeasureViewParam[0]);
+const int				MWO_PARAM_COUNT						= sizeof(MeasureViewParam)/sizeof(MeasureViewParam[0]);
 
-const int				MWO_PARAM_FONT					= 0,
-						MWO_PARAM_COLOR_NOT_ERROR		= 1,
-						MWO_PARAM_COLOR_LIMIT_ERROR		= 2,
-						MWO_PARAM_COLOR_CONTROL_ERROR	= 3;
+const int				MWO_PARAM_FONT						= 0,
+						MWO_PARAM_COLOR_NOT_ERROR			= 1,
+						MWO_PARAM_COLOR_LIMIT_ERROR			= 2,
+						MWO_PARAM_COLOR_CONTROL_ERROR		= 3,
+						MWO_PARAM_SHOW_NO_VALID				= 4,
+						MWO_PARAM_PRECESION_BY_CALIBRATOR	= 5;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -323,36 +708,28 @@ class MeasureViewOption : public QObject
 	Q_OBJECT
 
 public:
-	explicit MeasureViewOption(QObject *parent = nullptr);
-	explicit MeasureViewOption(const MeasureViewOption& from, QObject *parent = nullptr);
-	virtual ~MeasureViewOption();
+	explicit MeasureViewOption(QObject* parent = nullptr);
+	explicit MeasureViewOption(const MeasureViewOption& from, QObject* parent = nullptr);
+	virtual ~MeasureViewOption() override;
 
 //private:
 public:
 
-	MeasureViewColumn	m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
-
-private:
-
-	int					m_measureType = MEASURE_TYPE_UNKNOWN;						// current, active ViewID
-
-	QFont				m_font;
-	QFont				m_fontBold;
-
-	QColor				m_colorNotError = COLOR_NOT_ERROR;
-	QColor				m_colorErrorLimit = COLOR_OVER_LIMIT_ERROR;
-	QColor				m_colorErrorControl = COLOR_OVER_CONTROL_ERROR;
+	Measure::HeaderColumn	m_column[Measure::TypeCount][LanguageTypeCount][Measure::MaxColumnCount];
 
 public:
 
 	int					measureType() const { return m_measureType; }
 	void				setMeasureType(int measureType) { m_measureType = measureType; }
 
-	QFont&				font() { return m_font; }
-	void				setFont(QFont font) { m_font = font; }
+	bool				updateColumnView(Measure::Type measureType) const;
+	void				setUpdateColumnView(Measure::Type measureType, bool state);
+
+	QFont				font() const { return m_font; }
+	void				setFont(const QString& fontStr)	{ m_font.fromString(fontStr); }
 
 	QFont				fontBold() const { return m_fontBold; }
-	void				setFontBold(QFont font) { m_fontBold = font; }
+	void				setFontBold(const QString& fontStr) { m_fontBold.fromString(fontStr); }
 
 	QColor				colorNotError() const { return m_colorNotError; }
 	void				setColorNotError(QColor color) { m_colorNotError = color; }
@@ -363,12 +740,36 @@ public:
 	QColor				colorErrorControl() const { return m_colorErrorControl; }
 	void				setColorErrorControl(QColor color) { m_colorErrorControl = color; }
 
-	void				init();
+	bool				showNoValid() const { return m_showNoValid; }
+	void				setShowNoValid(bool enable) { m_showNoValid = enable; }
 
+	bool				precesionByCalibrator() const { return m_precesionByCalibrator; }
+	void				setPrecesionByCalibrator(bool enable) { m_precesionByCalibrator = enable; }
+
+	//
+	//
 	void				load();
 	void				save();
 
+	//
+	//
 	MeasureViewOption&	operator=(const MeasureViewOption& from);
+
+private:
+
+	int					m_measureType = Measure::Type::NoMeasureType;				// current, active ViewID
+
+	bool				m_updateColumnView[Measure::TypeCount];						// determined the need to update the view after changing settings
+
+	QFont				m_font;
+	QFont				m_fontBold;
+
+	QColor				m_colorNotError = COLOR_NOT_ERROR;
+	QColor				m_colorErrorLimit = COLOR_OVER_LIMIT_ERROR;
+	QColor				m_colorErrorControl = COLOR_OVER_CONTROL_ERROR;
+
+	bool				m_showNoValid = false;										// show measuring value if signal is not valid
+	bool				m_precesionByCalibrator = false;							// show accuracy for measure value and nominal value from calibrator
 };
 
 // ==============================================================================================
@@ -380,6 +781,7 @@ public:
 const char* const		SignalInfoParam[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "Font of signal information list"),
+						QT_TRANSLATE_NOOP("Options.h", "Show measuring value if signal is not valid"),
 						QT_TRANSLATE_NOOP("Options.h", "Show electric state"),
 						QT_TRANSLATE_NOOP("Options.h", "Color flag no validity"),
 						QT_TRANSLATE_NOOP("Options.h", "Color flag overflow"),
@@ -390,11 +792,12 @@ const char* const		SignalInfoParam[] =
 const int				SIO_PARAM_COUNT					= sizeof(SignalInfoParam)/sizeof(SignalInfoParam[0]);
 
 const int				SIO_PARAM_FONT					= 0,
-						SIO_PARAM_ELECTRIC_STATE		= 1,
-						SIO_PARAM_COLOR_FLAG_VALID		= 2,
-						SIO_PARAM_COLOR_FLAG_OVERFLOW	= 3,
-						SIO_PARAM_COLOR_FLAG_UNDERFLOW	= 4,
-						SIO_PARAM_TIME_FOR_UPDATE		= 5;
+						SIO_PARAM_SHOW_NO_VALID			= 1,
+						SIO_PARAM_ELECTRIC_STATE		= 2,
+						SIO_PARAM_COLOR_FLAG_VALID		= 3,
+						SIO_PARAM_COLOR_FLAG_OVERFLOW	= 4,
+						SIO_PARAM_COLOR_FLAG_UNDERFLOW	= 5,
+						SIO_PARAM_TIME_FOR_UPDATE		= 6;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -410,26 +813,17 @@ class SignalInfoOption : public QObject
 
 public:
 
-	explicit SignalInfoOption(QObject *parent = nullptr);
-	explicit SignalInfoOption(const SignalInfoOption& from, QObject *parent = nullptr);
-	virtual ~SignalInfoOption();
-
-private:
-
-	QFont				m_font;
-
-	bool				m_showElectricState = false;
-
-	QColor				m_colorFlagValid = COLOR_FLAG_VALID;
-	QColor				m_colorFlagOverflow = COLOR_FLAG_OVERFLOW;
-	QColor				m_colorFlagUnderflow = COLOR_FLAG_OVERBREAK;
-
-	int					m_timeForUpdate = 250; // 250 ms
+	explicit SignalInfoOption(QObject* parent = nullptr);
+	explicit SignalInfoOption(const SignalInfoOption& from, QObject* parent = nullptr);
+	virtual ~SignalInfoOption() override;
 
 public:
 
-	QFont&				font() { return m_font; }
-	void				setFont(QFont font) { m_font = font; }
+	QFont				font() const { return m_font; }
+	void				setFont(const QString& fontStr)	{ m_font.fromString(fontStr); }
+
+	bool				showNoValid() const { return m_showNoValid; }
+	void				setShowNoValid(bool enable) { m_showNoValid = enable; }
 
 	bool				showElectricState() const { return m_showElectricState; }
 	void				setShowElectricState(bool show) { m_showElectricState = show; }
@@ -446,10 +840,27 @@ public:
 	int					timeForUpdate() const { return m_timeForUpdate; }
 	void				setTimeForUpdate(int ms) { m_timeForUpdate = ms; }
 
+	//
+	//
 	void				load();
 	void				save();
 
+	//
+	//
 	SignalInfoOption&	operator=(const SignalInfoOption& from);
+
+private:
+
+	QFont				m_font;
+
+	bool				m_showNoValid = false;										// show measuring value if signal is not valid
+	bool				m_showElectricState = false;
+
+	QColor				m_colorFlagValid = COLOR_FLAG_VALID;
+	QColor				m_colorFlagOverflow = COLOR_FLAG_OVERFLOW;
+	QColor				m_colorFlagUnderflow = COLOR_FLAG_OVERBREAK;
+
+	int					m_timeForUpdate = 250; // 250 ms
 };
 
 // ==============================================================================================
@@ -461,11 +872,11 @@ public:
 const char* const		ComparatorInfoParam[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "Font of signal information list"),
-						QT_TRANSLATE_NOOP("Options.h", "Displaying, if comparator has state \"logical 0\""),
-						QT_TRANSLATE_NOOP("Options.h", "Displaying, if comparator has state \"logical 1\""),
+						QT_TRANSLATE_NOOP("Options.h", "Displaying text, if comparator has state \"logical 0\""),
+						QT_TRANSLATE_NOOP("Options.h", "Displaying text, if comparator has state \"logical 1\""),
 						QT_TRANSLATE_NOOP("Options.h", "Color, if comparator has state \"logical 0\""),
 						QT_TRANSLATE_NOOP("Options.h", "Color, if comparator has state \"logical 1\""),
-						QT_TRANSLATE_NOOP("Options.h", "Time for updating state of signal, ms"),
+						QT_TRANSLATE_NOOP("Options.h", "Time for updating state of comparator (ms)"),
 };
 
 const int				CIO_PARAM_COUNT						= sizeof(ComparatorInfoParam)/sizeof(ComparatorInfoParam[0]);
@@ -490,26 +901,14 @@ class ComparatorInfoOption : public QObject
 
 public:
 
-	explicit ComparatorInfoOption(QObject *parent = nullptr);
-	explicit ComparatorInfoOption(const ComparatorInfoOption& from, QObject *parent = nullptr);
-	virtual ~ComparatorInfoOption();
-
-private:
-
-	QFont				m_font;
-
-	QString				m_displayingStateFalse;
-	QString				m_displayingStateTrue;
-
-	QColor				m_colorStateFalse = COLOR_COMPARATOR_STATE_FALSE;
-	QColor				m_colorStateTrue = COLOR_COMPARATOR_STATE_TRUE;
-
-	int					m_timeForUpdate = 250; // 250 ms
+	explicit ComparatorInfoOption(QObject* parent = nullptr);
+	explicit ComparatorInfoOption(const ComparatorInfoOption& from, QObject* parent = nullptr);
+	virtual ~ComparatorInfoOption() override;
 
 public:
 
-	QFont&				font() { return m_font; }
-	void				setFont(QFont font) { m_font = font; }
+	QFont				font() const { return m_font; }
+	void				setFont(const QString& fontStr)	{ m_font.fromString(fontStr); }
 
 	QString				displayingStateFalse() const { return m_displayingStateFalse; }
 	void				setDisplayingStateFalse(const QString& state) { m_displayingStateFalse = state; }
@@ -526,13 +925,27 @@ public:
 	int					timeForUpdate() const { return m_timeForUpdate; }
 	void				setTimeForUpdate(int ms) { m_timeForUpdate = ms; }
 
+	//
+	//
 	void				load();
 	void				save();
 
+	//
+	//
 	ComparatorInfoOption&	operator=(const ComparatorInfoOption& from);
+
+private:
+
+	QFont				m_font;
+
+	QString				m_displayingStateFalse;
+	QString				m_displayingStateTrue;
+
+	QColor				m_colorStateFalse = COLOR_COMPARATOR_STATE_FALSE;
+	QColor				m_colorStateTrue = COLOR_COMPARATOR_STATE_TRUE;
+
+	int					m_timeForUpdate = 250; // 250 ms
 };
-
-
 
 // ==============================================================================================
 
@@ -542,14 +955,20 @@ public:
 
 const char* const		DatabaseParam[] =
 {
-						QT_TRANSLATE_NOOP("Options.h", "Path"),
+						QT_TRANSLATE_NOOP("Options.h", "Location path"),
 						QT_TRANSLATE_NOOP("Options.h", "Type"),
+						QT_TRANSLATE_NOOP("Options.h", "On start application"),
+						QT_TRANSLATE_NOOP("Options.h", "On exit application"),
+						QT_TRANSLATE_NOOP("Options.h", "Path for backup"),
 };
 
-const int				DBO_PARAM_COUNT	= sizeof(DatabaseParam)/sizeof(DatabaseParam[0]);
+const int				DBO_PARAM_COUNT			= sizeof(DatabaseParam)/sizeof(DatabaseParam[0]);
 
-const int				DBO_PARAM_PATH	= 0,
-						DBO_PARAM_TYPE	= 1;
+const int				DBO_PARAM_LOCATION_PATH	= 0,
+						DBO_PARAM_TYPE			= 1,
+						DBO_PARAM_ON_START		= 2,
+						DBO_PARAM_ON_EXIT		= 3,
+						DBO_PARAM_COPY_PATH		= 4;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -571,439 +990,17 @@ class DatabaseOption : public QObject
 
 public:
 
-	explicit DatabaseOption(QObject *parent = nullptr);
-	explicit DatabaseOption(const DatabaseOption& from, QObject *parent = nullptr);
-	virtual ~DatabaseOption();
-
-private:
-
-	QString				m_path;
-	int					m_type;
+	explicit DatabaseOption(QObject* parent = nullptr);
+	explicit DatabaseOption(const DatabaseOption& from, QObject* parent = nullptr);
+	virtual ~DatabaseOption() override;
 
 public:
 
-	QString				path() const { return m_path; }
-	void				setPath(const QString& path) { m_path = path; }
+	QString				locationPath() const { return m_locationPath; }
+	void				setLocationPath(const QString& path) { m_locationPath = path; }
 
 	int					type() const { return m_type; }
 	void				setType(int type) { m_type = type; }
-
-
-	bool				create();
-	void				remove();
-
-	void				load();
-	void				save();
-
-	DatabaseOption&		operator=(const DatabaseOption& from);
-};
-
-// ==============================================================================================
-
-const char* const		LinearityPointSensor[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "%"),
-						QT_TRANSLATE_NOOP("Options.h", "0 .. 5 V"),
-						QT_TRANSLATE_NOOP("Options.h", "-10 .. 10 V"),
-						QT_TRANSLATE_NOOP("Options.h", "0 - 5 mA"),
-						QT_TRANSLATE_NOOP("Options.h", "4 - 20 mA"),
-						QT_TRANSLATE_NOOP("Options.h", "0 - 100 °C"),
-						QT_TRANSLATE_NOOP("Options.h", "0 - 150 °C"),
-						QT_TRANSLATE_NOOP("Options.h", "0 - 200 °C"),
-						QT_TRANSLATE_NOOP("Options.h", "0 - 400 °C"),
-};
-
-const int				POINT_SENSOR_COUNT			= sizeof(LinearityPointSensor)/sizeof(LinearityPointSensor[0]);
-
-const int				POINT_SENSOR_UNKNOWN		= -1,
-						POINT_SENSOR_PERCENT		= 0,
-						POINT_SENSOR_U_0_5_V		= 1,
-						POINT_SENSOR_U_m10_10_V		= 2,
-						POINT_SENSOR_I_0_5_MA		= 3,
-						POINT_SENSOR_I_4_20_MA		= 4,
-						POINT_SENSOR_T_0_100_C		= 5,
-						POINT_SENSOR_T_0_150_C		= 6,
-						POINT_SENSOR_T_0_200_C		= 7,
-						POINT_SENSOR_T_0_400_C		= 8;
-
-// ----------------------------------------------------------------------------------------------
-
-class LinearityPoint
-{
-public:
-
-	LinearityPoint() { setPercent(0); }
-	explicit LinearityPoint(double percent) { setPercent(percent); }
-	virtual ~LinearityPoint() {}
-
-private:
-
-	int					m_index = -1;
-
-	double				m_percentValue = 0;
-	double				m_sensorValue[POINT_SENSOR_COUNT];
-
-public:
-
-	int					Index() const { return m_index; }
-	void				setIndex(int index) { m_index = index; }
-
-	double				percent() const {return m_percentValue; }
-	void				setPercent(double value);
-
-	double				sensorValue(int sensor);
-};
-
-// ==============================================================================================
-
-class LinearityPointBase : public ObjectVector<LinearityPoint>
-{
-
-public:
-
-	LinearityPointBase();
-	virtual ~LinearityPointBase() { clear(); }
-
-	QString				text();
-
-	virtual void		initEmptyData(QVector<LinearityPoint> &data);
-};
-
-// ==============================================================================================
-
-#define					LINEARITY_OPTIONS_KEY			"Options/Linearity/"
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const		LinearityParamName[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "Limit of error (%)"),
-						QT_TRANSLATE_NOOP("Options.h", "Type of error"),
-						QT_TRANSLATE_NOOP("Options.h", "Show error from limit"),
-						QT_TRANSLATE_NOOP("Options.h", "Measure time in a point (sec)"),
-						QT_TRANSLATE_NOOP("Options.h", "Count of measurements in a point"),
-						QT_TRANSLATE_NOOP("Options.h", "Division of the measure range"),
-						QT_TRANSLATE_NOOP("Options.h", "Count of points"),
-						QT_TRANSLATE_NOOP("Options.h", "Lower limit of the measure range (%)"),
-						QT_TRANSLATE_NOOP("Options.h", "High limit of the measure range (%)"),
-						QT_TRANSLATE_NOOP("Options.h", "Points of range"),
-						QT_TRANSLATE_NOOP("Options.h", "Type of measurements list"),
-						QT_TRANSLATE_NOOP("Options.h", "Show columns of engineering values"),
-};
-
-const int				LO_PARAM_COUNT					= sizeof(LinearityParamName)/sizeof(LinearityParamName[0]);
-
-const int				LO_PARAM_ERROR_LIMIT			= 0,
-						LO_PARAM_ERROR_TYPE				= 1,
-						LO_PARAM_SHOW_ERROR_FROM_LIMIT	= 2,
-						LO_PARAM_MEASURE_TIME			= 3,
-						LO_PARAM_MEASURE_IN_POINT		= 4,
-						LO_PARAM_RANGE_TYPE				= 5,
-						LO_PARAM_POINT_COUNT			= 6,
-						LO_PARAM_LOW_RANGE				= 7,
-						LO_PARAM_HIGH_RANGE				= 8,
-						LO_PARAM_VALUE_POINTS			= 9,
-						LO_PARAM_LIST_TYPE				= 10,
-						LO_PARAM_SHOW_ENGINEERING_VALUE	= 11;
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const		LinearityRangeTypeStr[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "Manual division of the measure range"),
-						QT_TRANSLATE_NOOP("Options.h", "Automatic division of the measure range"),
-};
-
-const int				LO_RANGE_TYPE_COUNT			= sizeof(LinearityRangeTypeStr)/sizeof(LinearityRangeTypeStr[0]);
-
-const int				LO_RANGE_TYPE_MANUAL		= 0,
-						LO_RANGE_TYPE_AUTOMATIC		= 1;
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const		LinearityViewTypeStr[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "Simple"),
-						QT_TRANSLATE_NOOP("Options.h", "Extended (show columns for metrological certification)"),
-						QT_TRANSLATE_NOOP("Options.h", "Detail electric (show all measurements at one point)"),
-						QT_TRANSLATE_NOOP("Options.h", "Detail engineering (show all measurements at one point)"),
-};
-
-const int				LO_VIEW_TYPE_COUNT				= sizeof(LinearityViewTypeStr)/sizeof(LinearityViewTypeStr[0]);
-
-const int				LO_VIEW_TYPE_UNKNOWN			= -1,
-						LO_VIEW_TYPE_SIMPLE				= 0,
-						LO_VIEW_TYPE_EXTENDED			= 1,
-						LO_VIEW_TYPE_DETAIL_ELRCTRIC	= 2,
-						LO_VIEW_TYPE_DETAIL_ENGINEERING	= 3;
-
-// ----------------------------------------------------------------------------------------------
-
-class LinearityOption : public QObject
-{
-	Q_OBJECT
-
-public:
-
-	explicit LinearityOption(QObject *parent = nullptr);
-	explicit LinearityOption(const LinearityOption& from, QObject *parent = nullptr);
-	virtual ~LinearityOption();
-
-private:
-
-	LinearityPointBase	m_pointBase;												// list of measurement points
-
-	double				m_errorLimit = 0.2;											// permissible error is given by specified documents
-	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;					// type of error absolute or reduced
-	int					m_showErrorFromLimit = MEASURE_LIMIT_TYPE_ELECTRIC;			// type of displaing error denend on limit
-
-	int					m_measureTimeInPoint = 1;									// time, in seconds, during which will be made ​​N measurements at each point
-	int					m_measureCountInPoint = 20;									// count of measurements in a point, according to GOST MI-2002 application 7
-
-	int					m_rangeType = LO_RANGE_TYPE_MANUAL;							// type of division measure range: manual - 0 or automatic - 1
-	double				m_lowLimitRange = 0;										// lower limit of the range for automatic division
-	double				m_highLimitRange = 100;										// high limit of the range for automatic division
-
-	int					m_viewType = LO_VIEW_TYPE_SIMPLE;							// type of measurements list extended or simple
-	bool				m_showEngineeringValueColumn = true;						// show columns of engineering values
-
-public:
-
-	LinearityPointBase& points() { return m_pointBase; }
-
-	double				errorLimit() const { return m_errorLimit; }
-	void				setErrorLimit(double errorLimit) { m_errorLimit = errorLimit; }
-
-	int					errorType() const { return m_errorType; }
-	void				setErrorType(int type) { m_errorType = type; }
-
-	int					showErrorFromLimit() const { return m_showErrorFromLimit; }
-	void				setShowErrorFromLimit(int type) { m_showErrorFromLimit = type; }
-
-	int					measureTimeInPoint() const { return m_measureTimeInPoint; }
-	void				setMeasureTimeInPoint(int sec) { m_measureTimeInPoint = sec; }
-
-	int					measureCountInPoint();
-	void				setMeasureCountInPoint(int measureCount);
-
-	int					rangeType() const { return m_rangeType; }
-	void				setRangeType(int type) { m_rangeType = type; }
-
-	double				lowLimitRange() const { return m_lowLimitRange; }
-	void				setLowLimitRange(double lowLimit) { m_lowLimitRange = lowLimit; }
-
-	double				highLimitRange() const { return m_highLimitRange; }
-	void				setHighLimitRange(double highLimit) { m_highLimitRange = highLimit; }
-
-	int					viewType() const { return m_viewType; }
-	void				setViewType(int type) { m_viewType = type; }
-
-	bool				showEngineeringValueColumn() const { return m_showEngineeringValueColumn; }
-	void				setShowPhyscalValueColumn(bool show) { m_showEngineeringValueColumn = show; }
-
-public:
-
-	void				recalcPoints(int count = -1);
-
-	void				load();
-	void				save();
-
-	LinearityOption&	operator=(const LinearityOption& from);
-};
-
-// ==============================================================================================
-
-#define					COMPARATOR_OPTIONS_KEY			"Options/Comparator/"
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const		ComparatorParamName[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "Limit of error (%)"),
-						QT_TRANSLATE_NOOP("Options.h", "Start value (%)"),
-						QT_TRANSLATE_NOOP("Options.h", "Error type"),
-						QT_TRANSLATE_NOOP("Options.h", "Show error from limit"),
-						QT_TRANSLATE_NOOP("Options.h", "Enable to measure hysteresis"),
-						QT_TRANSLATE_NOOP("Options.h", "Start measurement from the сomparator"),
-						QT_TRANSLATE_NOOP("Options.h", "Show columns of engineering values"),
-};
-
-const int				CO_PARAM_COUNT					= sizeof(ComparatorParamName)/sizeof(ComparatorParamName[0]);
-
-const int				CO_PARAM_ERROR_LIMIT			= 0,
-						CO_PARAM_START_VALUE			= 1,
-						CO_PARAM_ERROR_TYPE				= 2,
-						CO_PARAM_SHOW_ERROR_FROM_LIMIT	= 3,
-						CO_PARAM_ENABLE_HYSTERESIS		= 4,
-						CO_PARAM_COMPARATOR_INDEX		= 5,
-						CO_PARAM_SHOW_ENGINEERING_VALUE	= 6;
-
-// ----------------------------------------------------------------------------------------------
-
-class ComparatorOption : public QObject
-{
-	Q_OBJECT
-
-public:
-
-	explicit ComparatorOption(QObject *parent = nullptr);
-	explicit ComparatorOption(const ComparatorOption& from, QObject *parent = nullptr);
-	virtual ~ComparatorOption();
-
-//private:
-public:
-
-	double				m_errorLimit = 0.2;										// permissible error is given by specified documents
-	double				m_startValueForCompare = 0.1;							// start value is given by metrologists
-	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;				// type of error absolute or reduced
-	int					m_showErrorFromLimit = MEASURE_LIMIT_TYPE_ELECTRIC;		// type of displaing error denend on limit
-
-	bool				m_enableMeasureHysteresis = false;						// enable flag to measure hysteresis of сomparator
-	int					m_startComparatorIndex = 0;								// start the measurement with the сomparators under the number ...
-
-	bool				m_showEngineeringValueColumn = true;					// show columns of engineering values
-
-public:
-
-	double				errorLimit() const { return m_errorLimit; }
-	void				setErrorLimit(double errorLimit) { m_errorLimit = errorLimit; }
-
-	double				startValueForCompare() const { return m_startValueForCompare; }
-	void				setStartValueForCompare(double value) { m_startValueForCompare = value; }
-
-	int					errorType() const { return m_errorType; }
-	void				setErrorType(int type) { m_errorType = type; }
-
-	int					showErrorFromLimit() const { return m_showErrorFromLimit; }
-	void				setShowErrorFromLimit(int type) { m_showErrorFromLimit = type; }
-
-	bool				enableMeasureHysteresis() const { return m_enableMeasureHysteresis; }
-	void				setEnableMeasureHysteresis(bool enable) { m_enableMeasureHysteresis = enable; }
-
-	int					startComparatorIndex() const { return m_startComparatorIndex; }
-	void				setStartComparatorIndex(int index) { m_startComparatorIndex = index; }
-
-	bool				showEngineeringValueColumn() const { return m_showEngineeringValueColumn; }
-	void				setShowPhyscalValueColumn(bool show) { m_showEngineeringValueColumn = show; }
-
-	void				load();
-	void				save();
-
-	ComparatorOption&	operator=(const ComparatorOption& from);
-};
-
-// ==============================================================================================
-
-#define					MODULE_OPTIONS_KEY			"Options/Module/"
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const		ModuleParamName[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
-						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
-						QT_TRANSLATE_NOOP("Options.h", "Show measuring value if signal is not valid"),
-						QT_TRANSLATE_NOOP("Options.h", "Suffix to identify signal of module serial number"),
-						QT_TRANSLATE_NOOP("Options.h", "Maximum number of inputs for mofule"),
-						QT_TRANSLATE_NOOP("Options.h", "Maximum number of comparators for signal"),
-};
-
-const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName[0]);
-
-const int				MO_PARAM_MEASURE_ENTIRE_MODULE	= 0,
-						MO_PARAM_WARN_IF_MEASURED		= 1,
-						MO_PARAM_SHOW_NO_VALID			= 2,
-						MO_PARAM_SUFFIX_SN				= 3,
-						MO_PARAM_MAX_IMPUT_COUNT		= 4,
-						MO_PARAM_MAX_CMP_COUNT			= 5;
-
-// ----------------------------------------------------------------------------------------------
-
-class ModuleOption : public QObject
-{
-	Q_OBJECT
-
-public:
-
-	explicit ModuleOption(QObject *parent = nullptr);
-	explicit ModuleOption(const ModuleOption& from, QObject *parent = nullptr);
-	virtual ~ModuleOption();
-
-private:
-
-	bool				m_measureEntireModule = false;								// measure all inputs of module in series
-	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
-	bool				m_showNoValid = false;										// show measuring value if signal is not valid
-	QString				m_suffixSN;													// suffix to identify the signal of module serial number
-	int					m_maxInputCount = Metrology::InputCount;					// Maximum number of inputs for mofule
-	int					m_maxComparatorCount = Metrology::ComparatorCount;			// Maximum number of comparators for signal
-
-public:
-
-	bool				measureEntireModule() const { return m_measureEntireModule; }
-	void				setMeasureEntireModule(bool measure) { m_measureEntireModule = measure; }
-
-	bool				warningIfMeasured() const { return m_warningIfMeasured; }
-	void				setWarningIfMeasured(bool enable) { m_warningIfMeasured = enable; }
-
-	bool				showNoValid() const { return m_showNoValid; }
-	void				setShowNoValid(bool enable) { m_showNoValid = enable; }
-
-	QString				suffixSN() const { return m_suffixSN; }
-	void				setSuffixSN(const QString& suffixSN) { m_suffixSN = suffixSN; }
-
-	int					maxInputCount() const { return m_maxInputCount; }
-	void				setMaxInputCount(int count) { m_maxInputCount = count; }
-
-	int					maxComparatorCount() const { return m_maxComparatorCount; }
-	void				setMaxComparatorCount(int count) { m_maxComparatorCount = count; }
-
-public:
-
-	void				load();
-	void				save();
-
-	ModuleOption&		operator=(const ModuleOption& from);
-};
-
-// ==============================================================================================
-
-#define					BACKUP_OPTIONS_REG_KEY			"Options/BackupMeasure/"
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const		BackupParam[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "On start application"),
-						QT_TRANSLATE_NOOP("Options.h", "On exit application"),
-						QT_TRANSLATE_NOOP("Options.h", "Path"),
-};
-
-const int				BUO_PARAM_COUNT		= sizeof(BackupParam)/sizeof(BackupParam[0]);
-
-const int				BUO_PARAM_ON_START	= 0,
-						BUO_PARAM_ON_EXIT	= 1,
-						BUO_PARAM_PATH		= 2;
-
-// ----------------------------------------------------------------------------------------------
-
-class BackupOption : public QObject
-{
-	Q_OBJECT
-
-public:
-
-	explicit BackupOption(QObject *parent = nullptr);
-	explicit BackupOption(const BackupOption& from, QObject *parent = nullptr);
-	virtual ~BackupOption();
-
-private:
-
-	bool				m_onStart = false;
-	bool				m_onExit = true;
-	QString				m_path;
-
-public:
 
 	bool				onStart () const { return m_onStart; }
 	void				setOnStart(bool onStart) { m_onStart = onStart; }
@@ -1011,18 +1008,77 @@ public:
 	bool				onExit() const { return m_onExit; }
 	void				setOnExit(bool onExit) { m_onExit = onExit; }
 
-	QString				path() const { return m_path; }
-	void				setPath(const QString& path) { m_path = path; }
+	QString				backupPath() const { return m_backupPath; }
+	void				setBackupPath(const QString& path) { m_backupPath = path; }
 
-
-	bool				createBackup();
-	void				createBackupOnStart();
-	void				createBackupOnExit();
-
+	//
+	//
 	void				load();
 	void				save();
 
-	BackupOption&		operator=(const BackupOption& from);
+	//
+	//
+	DatabaseOption&		operator=(const DatabaseOption& from);
+
+private:
+
+	QString				m_locationPath;
+	int					m_type;
+
+	bool				m_onStart = false;
+	bool				m_onExit = true;
+	QString				m_backupPath;
+};
+
+// ==============================================================================================
+
+#define					LANGUAGE_OPTIONS_REG_KEY			"Options/Language/"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const		LanguageParam[] =
+{
+						QT_TRANSLATE_NOOP("Options.h", "Language"),
+};
+
+const int				LNO_PARAM_COUNT		= sizeof(LanguageParam)/sizeof(LanguageParam[0]);
+
+const int				LNO_PARAM_LANGUAGE_TYPE	= 0;
+
+// ----------------------------------------------------------------------------------------------
+
+#define					LANGUAGE_OPTIONS_DIR		"/languages"
+#define					LANGUAGE_OPTIONS_FILE_RU	"Metrology_ru.qm"
+
+// ----------------------------------------------------------------------------------------------
+
+class LanguageOption : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit LanguageOption(QObject* parent = nullptr);
+	explicit LanguageOption(const LanguageOption& from, QObject* parent = nullptr);
+	virtual ~LanguageOption() override;
+
+public:
+
+	int					languageType() const { return m_languageType; }
+	void				setLanguageType(int type) { m_languageType = type; }
+
+	//
+	//
+	void				load();
+	void				save();
+
+	//
+	//
+	LanguageOption&		operator=(const LanguageOption& from);
+
+private:
+
+	int					m_languageType = LanguageType::English;
 };
 
 // ==============================================================================================
@@ -1037,40 +1093,32 @@ class Options : public QObject
 
 public:
 
-	explicit Options(QObject *parent = nullptr);
-	explicit Options(const Options& from, QObject *parent = nullptr);
-	virtual ~Options();
+	explicit Options(QObject* parent = nullptr);
+	explicit Options(const Options& from, QObject* parent = nullptr);
+	virtual ~Options() override;
 
 public:
 
-	bool					m_updateColumnView[MEASURE_TYPE_COUNT];			 // determined the need to update the view after changing settings
+	CalibratorsOption&		calibrators() { return m_calibrators; }
+	void					setCalibrators(const CalibratorsOption& calibrators) { m_calibrators = calibrators; }
 
-private:
-
-	QMutex					m_mutex;
-
-	ProjectInfo				m_projectInfo;
-	ToolBarOption			m_toolBar;
-	SocketOption			m_socket;
-	MeasureViewOption		m_measureView;
-	SignalInfoOption		m_signalInfo;
-	ComparatorInfoOption	m_comparatorInfo;
-	DatabaseOption			m_database;
-	LinearityOption			m_linearity;
-	ComparatorOption		m_comparator;
-	ModuleOption			m_module;
-	BackupOption			m_backup;
-
-public:
+	SocketOption&			socket() { return m_socket; }
+	void					setSocket(const SocketOption& socket) { m_socket = socket; }
 
 	ProjectInfo&			projectInfo() { return m_projectInfo; }
 	void					setProjectInfo(const ProjectInfo& projectInfo) { m_projectInfo = projectInfo; }
 
+	ModuleOption&			module() { return m_module; }
+	void					setModule(const ModuleOption& module) { m_module = module; }
+
+	LinearityOption&		linearity() { return m_linearity; }
+	void					setLinearity(const LinearityOption& linearity) { m_linearity = linearity; }
+
+	ComparatorOption&		comparator() { return m_comparator; }
+	void					setComparator(const ComparatorOption& comparator) { m_comparator = comparator; }
+
 	ToolBarOption&			toolBar() { return m_toolBar; }
 	void					setToolBar(const ToolBarOption& toolBar) { m_toolBar = toolBar; }
-
-	SocketOption&			socket() { return m_socket; }
-	void					setSocket(const SocketOption& socket) { m_socket = socket; }
 
 	MeasureViewOption&		measureView() { return m_measureView; }
 	void					setMeasureView(const MeasureViewOption& measureView) { m_measureView = measureView; }
@@ -1084,25 +1132,45 @@ public:
 	DatabaseOption&			database() { return m_database; }
 	void					setDatabase(const DatabaseOption& database) { m_database = database; }
 
-	LinearityOption&		linearity() { return m_linearity; }
-	void					setLinearity(const LinearityOption& linearity) { m_linearity = linearity; }
+	LanguageOption&			language() { return m_language; }
+	void					setLanguage(const LanguageOption& language) { m_language = language; }
 
-	ComparatorOption&		comparator() { return m_comparator; }
-	void					setComparator(const ComparatorOption& comparator) { m_comparator = comparator; }
-
-	ModuleOption&			module() { return m_module; }
-	void					setModule(const ModuleOption& module) { m_module = module; }
-
-	BackupOption&			backup() { return m_backup; }
-	void					etBackup(const BackupOption& backup) { m_backup = backup; }
-
+	//
+	//
 	void					load();
 	void					save();
-	void					unload();
 
+	bool					setMetrologySettings(std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 	bool					readFromXml(const QByteArray& fileData);
 
+	//
+	//
 	Options&				operator=(const Options& from);
+
+private:
+
+	QMutex					m_mutex;
+
+	CalibratorsOption		m_calibrators;
+
+	SocketOption			m_socket;
+	ProjectInfo				m_projectInfo;
+
+	MetrologySettings		m_settings;
+
+	ModuleOption			m_module;
+	LinearityOption			m_linearity;
+	ComparatorOption		m_comparator;
+
+	ToolBarOption			m_toolBar;
+	MeasureViewOption		m_measureView;
+
+	SignalInfoOption		m_signalInfo;
+	ComparatorInfoOption	m_comparatorInfo;
+
+	DatabaseOption			m_database;
+
+	LanguageOption			m_language;
 };
 
 // ==============================================================================================

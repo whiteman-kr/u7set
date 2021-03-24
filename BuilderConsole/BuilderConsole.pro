@@ -4,10 +4,12 @@ QT       += qml sql xml widgets
 CONFIG += console
 CONFIG -= app_bundle
 
-# c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
+
+include(../warnings.pri)
 
 # DESTDIR
 #
@@ -70,13 +72,8 @@ DEPENDPATH += ../VFrame30
 
 # Protobuf
 #
-win32 {
-    LIBS += -L$$DESTDIR -lprotobuf
-    INCLUDEPATH += ./../Protobuf
-}
-unix {
-    LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
 # Builder Lib
 #
@@ -93,4 +90,28 @@ unix {
     LIBS += -lBuilder
 }
 
+# Simulator Lib
+#
+INCLUDEPATH += $$PWD/../Simulator
+DEPENDPATH += $$PWD/../Simulator
+
+win32 {
+    LIBS += -L$$DESTDIR -lSimulator
+
+    CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/debug/Simulator.lib
+	CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/release/Simulator.lib
+}
+unix {
+    LIBS += -lSimulator
+}
+
 DISTFILES +=
+
+
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}
+

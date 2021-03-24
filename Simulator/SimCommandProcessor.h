@@ -2,7 +2,6 @@
 #include <map>
 #include <functional>
 #include "QtCore"
-#include "SimOutput.h"
 #include "SimDeviceEmulator.h"
 #include "SimException.h"
 
@@ -20,7 +19,7 @@ namespace Sim
 	};
 
 
-	class CommandProcessor : public QObject, protected Output
+	class CommandProcessor : public QObject
 	{
 		Q_OBJECT
 
@@ -46,6 +45,11 @@ namespace Sim
 		// Update mustb be done directly in RAM
 		//
 		virtual bool updatePlatformInterfaceState(const QDateTime& currentTime);
+
+		// Get state of signal 'Set SOR Chassis', this state is fetched from RAM withount any mutex, so
+		// device must not run or performe any work cycle while calling this function
+		//
+		virtual quint16 signalSetSorChassis() const;
 
 		// Run simulation LM command, can throw SimException
 		//

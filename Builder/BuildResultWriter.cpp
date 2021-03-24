@@ -180,11 +180,11 @@ namespace Builder
 
 		if (subDir.isEmpty())
 		{
-			pathFileName = "/" + fName;
+			pathFileName = Separator::DIR + fName;
 		}
 		else
 		{
-			pathFileName = "/" + removeHeadTailSeparator(subDir) + "/" + fName;
+			pathFileName = Separator::DIR + removeHeadTailSeparator(subDir) + Separator::DIR + fName;
 		}
 
 		return pathFileName;
@@ -824,7 +824,7 @@ namespace Builder
 
 			cfgFile->finalize();
 
-			BuildFile* buildFile = addFile(cfgFile->subDir(), Builder::FILE_CONFIGURATION_XML, cfgFile->getFileData());
+			BuildFile* buildFile = addFile(cfgFile->subDir(), File::CONFIGURATION_XML, cfgFile->getFileData());
 
 			if (buildFile == nullptr)
 			{
@@ -893,6 +893,18 @@ namespace Builder
 	QString BuildResultWriter::outputPath() const
 	{
 		return m_outputPath;
+	}
+
+	QStringList BuildResultWriter::fullOutputPathes() const
+	{
+		QStringList result;
+
+		for (const BuildResult& br : m_buildResults)
+		{
+			result.push_back(br.fullPath());
+		}
+
+		return result;
 	}
 
 	QString BuildResultWriter::checkOutputPath(QString outputPath)
