@@ -12,6 +12,7 @@
 #include "../Builder/Builder.h"
 #include "../lib/Signal.h"
 #include <QList>
+#include <optional>
 
 #include "../lib/SoftwareXmlReader.h"
 
@@ -55,6 +56,7 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<QVector<int>>();
 	qRegisterMetaType<ID_AppSignalID>();
 	qRegisterMetaType<QVector<ID_AppSignalID>>();
+	qRegisterMetaType<std::optional<std::vector<int>>>("std::optional<std::vector<int>>");
 
 	// Init TrendLib resources
 	//

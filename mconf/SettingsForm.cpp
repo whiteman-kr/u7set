@@ -180,13 +180,13 @@ SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
 	pLeftGridLayout->addWidget(m_pVerify, 2, 0, 1, 3);
 	pLeftGridLayout->addWidget(m_pExpertMode, 3, 0, 1, 3);
 
-	pLeftGridLayout->addWidget(m_pServerLabel, 4, 0);
+	pLeftGridLayout->addWidget(m_pServerLabel, 5, 0);
 	pLeftGridLayout->addWidget(m_pServer, 4, 1, 1, 3);
 
-	pLeftGridLayout->addWidget(m_pServerUsernameLabel, 5, 0);
+	pLeftGridLayout->addWidget(m_pServerUsernameLabel, 6, 0);
 	pLeftGridLayout->addWidget(m_pServerUsername, 5, 1, 1, 3);
 
-	pLeftGridLayout->addWidget(m_pServerPasswordLabel, 6, 0);
+	pLeftGridLayout->addWidget(m_pServerPasswordLabel, 7, 0);
 	pLeftGridLayout->addWidget(m_pServerPassword, 6, 1, 1, 3);
 
 	pLeftLayout->addStretch();
