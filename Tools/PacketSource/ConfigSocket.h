@@ -51,6 +51,8 @@ public:
 	QString cfgSrvInfo();
 	QString appDataSrvInfo();
 
+	E::SoftwareRunMode softwareRunMode() { return m_softwareRunMode; }
+
 private:
 
 	void clearConfiguration();
@@ -77,6 +79,8 @@ private:
 	HostAddressPort m_appDataSrvIP;
 
 	QStringList m_loadedFiles;
+
+	E::SoftwareRunMode m_softwareRunMode = E::SoftwareRunMode::Normal;
 
 signals:
 

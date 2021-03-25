@@ -669,6 +669,15 @@ void MainWindow::configSocketConfigurationLoaded()
 	//
 	m_statusSendToAppDaraServer->setText(tr(" AppDataService: on "));
 	m_statusSendToAppDaraServer->setToolTip(m_pConfigSocket->appDataSrvInfo());
+
+	//
+	//
+	if (m_pConfigSocket->softwareRunMode() != E::SoftwareRunMode::Simulation)
+	{
+		QMessageBox::information(this, windowTitle(), tr(	"Please run \"Configuration service\" in the Simulation mode, "
+															"otherwise the functionality of the program \"PacketSource\" "
+															"will be limited!"));
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

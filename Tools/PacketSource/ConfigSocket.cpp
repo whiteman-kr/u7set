@@ -260,6 +260,8 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 		m_loadedFiles.append(bfi.pathFileName);
 	}
 
+	m_softwareRunMode = sessionParams.softwareRunMode;
+
 	qDebug() << "Read configuration - Time for read:" << responseTime.elapsed() << "ms" << result;
 
 	emit configurationLoaded();
