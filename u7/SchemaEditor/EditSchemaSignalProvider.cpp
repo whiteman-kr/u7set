@@ -177,6 +177,12 @@ bool EditSchemaAppSignalProvider::signalHasTag(const QString& appSignalId, const
 	return signalTags(appSignalId).contains(tag, Qt::CaseInsensitive);
 }
 
+QString EditSchemaAppSignalProvider::equipmentToAppSiganlId(const QString& /*equipmentId*/) const
+{
+	Q_ASSERT(false);	// todo
+	return {};
+}
+
 std::vector<std::shared_ptr<Comparator>> EditSchemaAppSignalProvider::setpointsByInputSignalId(const QString& appSignalId) const
 {
 	// No simulation of this function in edit schema mode

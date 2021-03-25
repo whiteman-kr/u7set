@@ -1,8 +1,8 @@
-#ifndef SELECTSCHEMAWIDGET_H
-#define SELECTSCHEMAWIDGET_H
+#pragma once
 
 #include "MonitorCentralWidget.h"
 #include "MonitorConfigController.h"
+
 
 struct SelectSchemaItem
 {
@@ -12,6 +12,8 @@ struct SelectSchemaItem
 
 class SelectSchemaTable;
 
+
+//
 // SelectSchemaWidget -- widget to add to ToolBar
 //
 class SelectSchemaWidget : public QWidget
@@ -23,10 +25,10 @@ public:
 
 protected:
 	void clear();
-	void addSchema(QString schemaId, QString caption);
+	void addSchema(const QString& schemaId, const QString& caption);
 
-	bool setCurrentSchema(QString schemaId);
-	QString currentSchemaId() const;
+	bool setCurrentSchema(const QString& schemaId);
+	[[nodiscard]] const QString& currentSchemaId() const;
 
 signals:
 	void selectionChanged(QString schemaId);
@@ -53,6 +55,7 @@ private:
 };
 
 
+//
 // SelectSchemaPopup -- popup dialog with schema list and filter edit box
 //
 class SelectSchemaPopup : public QDialog
@@ -60,9 +63,9 @@ class SelectSchemaPopup : public QDialog
 	Q_OBJECT
 
 public:
-	SelectSchemaPopup(QString defaultSchemaId, const std::vector<SelectSchemaItem>& schemas, QWidget* parent);
+	explicit SelectSchemaPopup(QString defaultSchemaId, const std::vector<SelectSchemaItem>& schemas, QWidget* parent);
 
-	QString selectedSchemaId() const;
+	[[nodiscard]] const QString& selectedSchemaId() const;
 
 protected:
 	virtual void showEvent(QShowEvent* event) override;
@@ -84,9 +87,11 @@ private:
 	static int m_lastTimeHeigh;
 };
 
+
+//
 // SelectSchemaModel -- Simple model for SelectSchemaTable
 //
-class SelectSchemaModel : public QAbstractTableModel
+class SelectSchemaModel final : public QAbstractTableModel
 {
 	Q_OBJECT
 
@@ -94,9 +99,9 @@ public:
 	explicit SelectSchemaModel(const std::vector<SelectSchemaItem>& schemas, QObject* parent = nullptr);
 
 public:
-	virtual int rowCount(const QModelIndex &parent) const override;
-	virtual int columnCount(const QModelIndex &parent) const override;
-	virtual QVariant data(const QModelIndex &modelIndex, int role) const override;
+	virtual int rowCount(const QModelIndex &parent) const final;
+	virtual int columnCount(const QModelIndex &parent) const final;
+	virtual QVariant data(const QModelIndex &modelIndex, int role) const final;
 
 public:
 	int applyFilter(QString filterText, QString defaultSchemaId);
@@ -107,6 +112,7 @@ private:
 };
 
 
+//
 // SelectSchemaTable -- Tbale widget for selection schema
 //
 class SelectSchemaTable : public QTableView
@@ -114,7 +120,7 @@ class SelectSchemaTable : public QTableView
 	Q_OBJECT
 
 public:
-	SelectSchemaTable(const std::vector<SelectSchemaItem>& schemas, QString defaultSchemaId, QWidget* parent);
+	explicit SelectSchemaTable(const std::vector<SelectSchemaItem>& schemas, QString defaultSchemaId, QWidget* parent);
 
 	void applyFilter(QString filter, QString defaultSchemaId);
 
@@ -128,4 +134,3 @@ private:
 };
 
 
-#endif // SELECTSCHEMAWIDGET_H

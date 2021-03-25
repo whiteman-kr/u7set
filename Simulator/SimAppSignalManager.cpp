@@ -913,6 +913,12 @@ static const AppSignalParam dummy;
 		return signalHasTag(::calcHash(appSignalId), tag);
 	}
 
+	QString AppSignalManager::equipmentToAppSiganlId(const QString& /*equipmentId*/) const
+	{
+		Q_ASSERT(false);	// to do
+		return {};
+	}
+
 	std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSignalId(const QString& /*appSignalId*/) const
 	{
 		//int todo_setpointsByInputSignalId = 0;

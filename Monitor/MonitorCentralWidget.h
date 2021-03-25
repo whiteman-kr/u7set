@@ -1,5 +1,4 @@
-#ifndef MONITORCENTRALWIDGET_H
-#define MONITORCENTRALWIDGET_H
+#pragma once
 
 #include "MonitorSchemaWidget.h"
 #include "MonitorSchemaManager.h"
@@ -79,4 +78,3 @@ private:
 	int m_eventLoopTimerCounter = 0;		// We need to cathc event loop. Start timer, as we enter event loop timerEvent comes
 };
 
-#endif // MONITORCENTRALWIDGET_H

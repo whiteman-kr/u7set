@@ -1,5 +1,4 @@
-#ifndef MONITORCONFIGTHREAD_H
-#define MONITORCONFIGTHREAD_H
+#pragma once
 
 #include "../lib/CfgServerLoader.h"
 #include "../lib/SocketIO.h"
@@ -145,4 +144,4 @@ private:
 	ConfigSettings m_configuration;
 };
 
-#endif // MONITORCONFIGTHREAD_H
+

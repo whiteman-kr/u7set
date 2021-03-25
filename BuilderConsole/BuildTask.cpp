@@ -11,8 +11,6 @@ BuildTask::BuildTask(QObject* parent) :
 
 void BuildTask::start()
 {
-	qDebug() << Q_FUNC_INFO;
-
 	m_builder.start(m_databaseAddress,
 				  m_databasePort,
 				  m_databaseUserName,

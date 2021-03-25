@@ -43,12 +43,12 @@ void SelectSchemaWidget::clear()
 	return;
 }
 
-void SelectSchemaWidget::addSchema(QString schemaId, QString caption)
+void SelectSchemaWidget::addSchema(const QString& schemaId, const QString& caption)
 {
-	m_schemas.push_back(SelectSchemaItem{schemaId, caption});
+	m_schemas.emplace_back(schemaId, caption);
 }
 
-bool SelectSchemaWidget::setCurrentSchema(QString schemaId)
+bool SelectSchemaWidget::setCurrentSchema(const QString& schemaId)
 {
 	m_currentSchemaId.clear();
 
@@ -69,7 +69,7 @@ bool SelectSchemaWidget::setCurrentSchema(QString schemaId)
 	return false;
 }
 
-QString SelectSchemaWidget::currentSchemaId() const
+const QString& SelectSchemaWidget::currentSchemaId() const
 {
 	return m_currentSchemaId;
 }
@@ -202,7 +202,7 @@ SelectSchemaPopup::SelectSchemaPopup(QString defaultSchemaId, const std::vector<
 	return;
 }
 
-QString SelectSchemaPopup::selectedSchemaId() const
+const QString& SelectSchemaPopup::selectedSchemaId() const
 {
 	return m_selectedSchemaId;
 }

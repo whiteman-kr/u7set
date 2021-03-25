@@ -51,55 +51,68 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 	//
 	std::vector<SchemaItemPtr> items = itemsUnderCursor(pos);
 
-	if (items.empty() == false)
+	QStringList signalList;
+	QStringList impactSignalList;
+
+	for (const SchemaItemPtr& item : items)
 	{
-		for (const SchemaItemPtr& item : items)
+		if (VFrame30::SchemaItemSignal* schemaItemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
+			schemaItemSignal != nullptr)
 		{
-			if (VFrame30::SchemaItemSignal* schemaItemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
-				schemaItemSignal != nullptr)
-			{
-				signalContextMenu(schemaItemSignal->appSignalIdList(), schemaItemSignal->impactAppSignalIdList(), {});
-				break;
-			}
-
-			if (VFrame30::SchemaItemValue* schemaItem = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
-				schemaItem != nullptr)
-			{
-				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);
-				signalContextMenu(signalList, {}, {});
-				break;
-			}
-
-			if (VFrame30::SchemaItemImageValue* schemaItem = dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get());
-				schemaItem != nullptr)
-			{
-				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);
-				signalContextMenu(signalList, {}, {});
-				break;
-			}
-
-			if (VFrame30::SchemaItemIndicator* schemaItem = dynamic_cast<VFrame30::SchemaItemIndicator*>(item.get());
-				schemaItem != nullptr)
-			{
-				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);
-				signalContextMenu(signalList, {}, {});
-				break;
-			}
-
-			if (VFrame30::SchemaItemReceiver* schemaItemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
-				schemaItemReceiver != nullptr)
-			{
-				signalContextMenu(schemaItemReceiver->appSignalIdsAsList(), {}, {});
-				break;
-			}
-
+			signalList.append(schemaItemSignal->appSignalIdList());
+			impactSignalList.append(schemaItemSignal->impactAppSignalIdList());
+			continue;
 		}
+
+		if (VFrame30::SchemaItemValue* schemaItem = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
+			schemaItem != nullptr)
+		{
+			signalList.append(VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem));
+			continue;
+		}
+
+		if (VFrame30::SchemaItemImageValue* schemaItem = dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get());
+			schemaItem != nullptr)
+		{
+			signalList.append(VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem));
+			continue;
+		}
+
+		if (VFrame30::SchemaItemIndicator* schemaItem = dynamic_cast<VFrame30::SchemaItemIndicator*>(item.get());
+			schemaItem != nullptr)
+		{
+			signalList.append(VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem));
+			continue;
+		}
+
+		if (VFrame30::SchemaItemReceiver* schemaItemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+			schemaItemReceiver != nullptr)
+		{
+			signalList.append(schemaItemReceiver->appSignalIdsAsList());
+			continue;
+		}
+	}
+
+	if (signalList.isEmpty() == false || impactSignalList.isEmpty() == false)
+	{
+		auto f = [](QString& s)
+			{
+				if (s.startsWith('@') == true)
+				{
+					s = theSignals.equipmentToAppSiganlId(s);
+				}
+			};
+
+		std::ranges::for_each(signalList, f);
+		std::ranges::for_each(impactSignalList, f);
+
+		signalContextMenu(signalList, impactSignalList, {});
 	}
 
 	return;
 }
 
-void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const QStringList& impactSignals, const QList<QMenu*> customMenu)
+void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const QStringList& impactSignals, const QList<QMenu*>& customMenu)
 {
 	// To set, it will sort list and exclude same ids
 	//
@@ -187,7 +200,7 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 	}
 
 	// Custom menus
-
+	//
 	if (customMenu.isEmpty() == false)
 	{
 		for (auto cm : customMenu)
@@ -210,9 +223,9 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 
 		QAction* a = menu.addAction(signalId);
 
-		auto f = [this, s]() -> void
+		auto f = [this, &signal]() -> void
 				 {
-					signalInfo(s);
+					signalInfo(signal.appSignalId());
 				 };
 
 		connect(a, &QAction::triggered, this, f);
@@ -229,15 +242,16 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 		for (const QString& s : impactSignalListSet)
 		{
 			bool ok = false;
+
 			AppSignalParam signal =	theSignals.signalParam(s, &ok);
 
 			QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
 
 			QAction* a = menu.addAction(signalId);
 
-			auto f = [this, s]() -> void
+			auto f = [this, &signal]() -> void
 					 {
-						signalInfo(s);
+						signalInfo(signal.appSignalId());
 					 };
 
 			connect(a, &QAction::triggered, this, f);

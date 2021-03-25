@@ -87,6 +87,8 @@ namespace Sim
 		virtual bool signalHasTag(Hash signalHash, const QString& tag) const override;
 		virtual bool signalHasTag(const QString& appSignalId, const QString& tag) const override;
 
+		virtual QString equipmentToAppSiganlId(const QString& equipmentId) const final;
+
 		// Implementing IAppSignalManager - Setpoints/Comparators
 		//
 		virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override;

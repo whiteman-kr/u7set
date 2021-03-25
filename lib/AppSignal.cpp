@@ -483,7 +483,7 @@ const QString& AppSignalParam::unit() const
 
 void AppSignalParam::setUnit(QString value)
 {
-	m_unit = value;
+	m_unit = std::move(value);
 }
 
 double AppSignalParam::lowValidRange() const

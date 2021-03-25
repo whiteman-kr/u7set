@@ -5,7 +5,10 @@ SimSelectSchemaPage::SimSelectSchemaPage(SimIdeSimulator* simulator, QWidget* pa
 {
 	assert(m_simulator);
 
-	m_schemaListWidget = new SchemaListWidget{{SchemaListTreeColumns::SchemaID, SchemaListTreeColumns::Caption, SchemaListTreeColumns::Tags, SchemaListTreeColumns::Modules}, parent};
+	m_schemaListWidget = new SchemaListWidget{
+						 {SchemaListTreeColumns::SchemaID, SchemaListTreeColumns::Caption, SchemaListTreeColumns::Tags, SchemaListTreeColumns::Modules},
+						 true,
+						 parent};
 
 	QGridLayout* layout = new QGridLayout;
 	layout->addWidget(m_schemaListWidget);

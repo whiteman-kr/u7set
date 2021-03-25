@@ -9,7 +9,7 @@ class SignalSetProvider;
 // EditSchemaAppSignalProvider - this calss is used to provide app signals for drawing schemas, showing and getting signal ids, description, preciosion, etc...
 //
 //
-class EditSchemaAppSignalProvider : public IAppSignalManager
+class EditSchemaAppSignalProvider final : public IAppSignalManager
 {
 public:
 	EditSchemaAppSignalProvider() = delete;
@@ -37,6 +37,8 @@ public:
 
 	virtual bool signalHasTag(Hash signalHash, const QString& tag) const override;
 	virtual bool signalHasTag(const QString& appSignalId, const QString& tag) const override;
+
+	virtual QString equipmentToAppSiganlId(const QString& equipmentId) const final;
 
 	// Setpoints
 	//

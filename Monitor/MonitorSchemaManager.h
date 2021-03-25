@@ -1,5 +1,4 @@
-#ifndef MONITORSCHEMAMANAGER_H
-#define MONITORSCHEMAMANAGER_H
+#pragma once
 
 #include "../VFrame30/Schema.h"
 #include "../VFrame30/SchemaManager.h"
@@ -13,18 +12,18 @@ public:
 	explicit MonitorSchemaManager(MonitorConfigController* configController, QObject* parent = nullptr);
 
 public:
-	bool hasSchema(QString schemaId) const;
+	[[nodiscard]] bool hasSchema(QString schemaId) const;
 
 protected:
-	virtual std::shared_ptr<VFrame30::Schema> loadSchema(QString schemaId) override;
+	[[nodiscard]] virtual std::shared_ptr<VFrame30::Schema> loadSchema(QString schemaId) override;
 
 public:
-	virtual int schemaCount() const override;
-	virtual std::shared_ptr<VFrame30::Schema> schemaByIndex(int schemaIndex) override;
+	[[nodiscard]] virtual int schemaCount() const override;
+	[[nodiscard]] virtual std::shared_ptr<VFrame30::Schema> schemaByIndex(int schemaIndex) override;
 
-	virtual QString schemaCaptionById(const QString& schemaId) const override;
-	virtual QString schemaCaptionByIndex(int schemaIndex) const override;
-	virtual QString schemaIdByIndex(int schemaIndex) const override;
+	[[nodiscard]] virtual QString schemaCaptionById(const QString& schemaId) const override;
+	[[nodiscard]] virtual QString schemaCaptionByIndex(int schemaIndex) const override;
+	[[nodiscard]] virtual QString schemaIdByIndex(int schemaIndex) const override;
 
 	// Slots
 	//
@@ -32,10 +31,10 @@ protected slots:
 	void slot_configurationArrived(ConfigSettings configuration);
 
 public:
-	MonitorConfigController* monitorConfigController();
-	const MonitorConfigController* monitorConfigController() const;
+	[[nodiscard]] MonitorConfigController* monitorConfigController();
+	[[nodiscard]] const MonitorConfigController* monitorConfigController() const;
 
-	QString onConfigurationArrivedScript() const;
+	[[nodiscard]] QString onConfigurationArrivedScript() const;
 	void setOnConfigurationArrivedScript(QString value);
 
 	// Data
@@ -46,4 +45,3 @@ private:
 	QString m_onConfigurationArrivedScript;
 };
 
-#endif // MONITORSCHEMAMANAGER_H
