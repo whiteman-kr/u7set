@@ -231,7 +231,7 @@ public:
 	void					setSignalState(const Hash& hash, const Metrology::SignalState& state);
 	void					setSignalState(int index, const Metrology::SignalState& state);
 
-	bool					enableForMeasure(Metrology::ConnectionType connectionType, Metrology::Signal* pSignal);
+	bool					enableForMeasure(Metrology::ConnectionType connectionType, Metrology::Signal& signal);
 
 	// hashs for update signal state
 	//

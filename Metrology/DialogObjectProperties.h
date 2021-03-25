@@ -49,7 +49,7 @@ class DialogProjectProperty : public QDialog
 public:
 
 	explicit DialogProjectProperty(const ProjectInfo& info, QWidget* parent = nullptr);
-	virtual ~DialogProjectProperty();
+	virtual ~DialogProjectProperty() override;
 
 private:
 
