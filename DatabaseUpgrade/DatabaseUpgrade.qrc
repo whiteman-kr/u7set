@@ -349,7 +349,7 @@
         <file>Upgrade0347.sql</file>
         <file>Upgrade0348.sql</file>
         <file>Upgrade0349.sql</file>
+        <file>Upgrade0350.sql</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
-    
