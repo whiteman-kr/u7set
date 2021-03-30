@@ -10,7 +10,6 @@ before_script:
 #  - echo before_script
   - cd
   - dir
-  - set
   
 #after_script:
 #  - echo after_script
@@ -25,6 +24,7 @@ linux build job:
   tags:
     - gcc
   script:
+    - "printenv"
     - "pwd"
     - "whoami"
     - "gcc --version"
@@ -59,10 +59,11 @@ windows build job:
   tags:
     - vs2017
   script:
+    - "dir env:"
     - "echo %CI_COMMIT_SHA%"
     - "git status"
     - "git log -1"
-    - "set QT_BIN_DIR=C:\\Qt\\5.15.2\\msvc2019_64"
+    - $Env:QT_BIN_DIR="C:\\Qt\\5.15.2\\msvc2019_64"
 #generation version file
     - "echo #pragma once > gitlabci_version.h"
     - "echo. >> gitlabci_version.h"
@@ -149,7 +150,7 @@ windows build job:
     - "rem ----------------------------------------------"
     - "rem               Sign Files"
     - "rem ----------------------------------------------"
-    - "set /p K8S_SECRET_DIGITAL_SIGN_CERT=<c:\\radiy-code-signing\\password.txt"
+    - "$K8S_SECRET_DIGITAL_SIGN_CERT = Get-Content c:\\radiy-code-signing\\password.txt | Out-String"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\VFrame30.dll"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\AppDataSrv.exe"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\ArchSrv.exe"
@@ -221,6 +222,7 @@ test job:
     - develop
     - /experimental/
   script:
+    - "dir env:"    
     - "echo %CI_COMMIT_SHA%"
     - "git status"
     - "git log -1"
