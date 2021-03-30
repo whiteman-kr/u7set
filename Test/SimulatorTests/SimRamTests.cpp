@@ -19,7 +19,7 @@ void SimRamTests::cleanupTestCase()
 
 void SimRamTests::init()
 {
-	m_ramArea = std::make_unique<Sim::RamArea>(E::LogicModuleRamAccess::Read, s_ra_offset, s_ra_size, true, "RA0");
+    m_ramArea = std::make_unique<Sim::RamArea>(E::LogicModuleRamAccess::Read, SimRamTests::s_ra_offset, SimRamTests::s_ra_size, true, "RA0");
 	return;
 }
 

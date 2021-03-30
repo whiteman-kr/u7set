@@ -37,8 +37,8 @@ private slots:
 	void ramReadWriteDword();
 
 private:
-	static const quint32 s_ra_offset = 12000;
-	static const quint32 s_ra_size = 400;
+    inline static const quint32 s_ra_offset = 12000;
+    inline static const quint32 s_ra_size = 400;
 	std::unique_ptr<Sim::RamArea> m_ramArea;
 };
 
