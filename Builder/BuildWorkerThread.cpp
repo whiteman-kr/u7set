@@ -294,6 +294,16 @@ namespace Builder
 			m_context->m_progress += 10;		// Total progress 65
 
 			//
+			// Load Sim Profiles
+			//
+			loadSimProfiles();
+
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+
+			//
 			// Generate MATS software configurations
 			//
 			ok = generateSoftwareConfiguration();
@@ -437,9 +447,9 @@ namespace Builder
 		LOG_EMPTY_LINE(m_context->m_log);
 		LOG_MESSAGE(m_context->m_log, tr("Getting equipment"));
 
-		std::shared_ptr<Hardware::DeviceObject> deviceRoot = std::make_shared<Hardware::DeviceRoot>();
+		std::shared_ptr<Hardware::DeviceRoot> deviceRoot = std::make_shared<Hardware::DeviceRoot>();
 
-		int rootFileId = m_context->m_db.hcFileId();
+		int rootFileId = m_context->m_db.systemFileId(DbDir::HardwareConfigurationDir);
 		deviceRoot->fileInfo().setFileId(rootFileId);
 
 		if (bool ok = getEquipment(deviceRoot.get());
@@ -481,7 +491,7 @@ namespace Builder
 		LOG_EMPTY_LINE(m_context->m_log);
 		LOG_MESSAGE(m_context->m_log, tr("Checking for same Uuids and StrIds"));
 
-		if (bool ok = checkUuidAndStrId(m_context->m_equipmentSet->root());
+		if (bool ok = checkUuidAndStrId(m_context->m_equipmentSet->root().get());
 			ok == false)
 		{
 			return false;
@@ -570,7 +580,7 @@ namespace Builder
 
 		for (int i = 0; i < object->childrenCount(); i++)
 		{
-			Hardware::DeviceObject* child = object->child(i);
+			Hardware::DeviceObject* child = object->child(i).get();
 
 			if (child->deviceType() == Hardware::DeviceType::Module)
 			{
@@ -603,7 +613,7 @@ namespace Builder
 
 		for (int i = 0; i < object->childrenCount(); i++)
 		{
-			Hardware::DeviceObject* child = object->child(i);
+			Hardware::DeviceObject* child = object->child(i).get();
 
 			if (child->deviceType() == Hardware::DeviceType::Module)
 			{
@@ -877,14 +887,14 @@ namespace Builder
 
 		for (int i = 0; i < childCount; i++)
 		{
-			ok &= checkUuidAndStrIdWorker(device->child(i), uuidMap, strIdMap);
+			ok &= checkUuidAndStrIdWorker(device->child(i).get(), uuidMap, strIdMap);
 		}
 
 		return ok;
 	}
 
 
-	bool BuildWorkerThread::checkChildRestrictions(Hardware::DeviceObject* root)
+	bool BuildWorkerThread::checkChildRestrictions(std::shared_ptr<Hardware::DeviceObject> root)
 	{
 		if (root == nullptr)
 		{
@@ -894,13 +904,12 @@ namespace Builder
 
 		// Recursive function
 		//
-
 		bool ok = checkChildRestrictionsWorker(root);
 
 		return ok;
 	}
 
-	bool BuildWorkerThread::checkChildRestrictionsWorker(Hardware::DeviceObject* device)
+	bool BuildWorkerThread::checkChildRestrictionsWorker(std::shared_ptr<Hardware::DeviceObject> device)
 	{
 		assert(device != nullptr);
 
@@ -910,7 +919,7 @@ namespace Builder
 
 		for (int i = 0; i < childrenCount; i++)
 		{
-			Hardware::DeviceObject* child = device->child(i);
+			auto child = device->child(i);
 
 			if (child == nullptr)
 			{
@@ -922,6 +931,11 @@ namespace Builder
 
 			if (allowed == false)
 			{
+				if (errorMessage.isEmpty() == false)
+				{
+					m_context->m_log->errINT1001(errorMessage);
+				}
+
 				m_context->m_log->errEQP6008(device->equipmentId(), child->equipmentId(), child->place());
 				return false;
 			}
@@ -995,7 +1009,7 @@ namespace Builder
 		//
 		std::vector<DbFileInfo> fileList;
 
-		bool ok = m_context->m_db.getFileList(&fileList, m_context->m_db.busTypesFileId(), Db::File::BusFileExtension, true, nullptr);
+		bool ok = m_context->m_db.getFileList(&fileList, DbDir::BusTypesDir, Db::File::BusFileExtension, true, nullptr);
 		if (ok == false)
 		{
 			return false;
@@ -1053,10 +1067,10 @@ namespace Builder
 		m_context->m_lmDescriptions = std::make_shared<LmDescriptionSet>();
 		m_context->m_fscDescriptions = std::make_shared<LmDescriptionSet>();
 
-		findModulesByFamily(m_context->m_equipmentSet->root(), &m_context->m_lmModules, Hardware::DeviceModule::FamilyType::LM);
+		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_lmModules, Hardware::DeviceModule::FamilyType::LM);
 
-		findModulesByFamily(m_context->m_equipmentSet->root(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::LM);
-		findModulesByFamily(m_context->m_equipmentSet->root(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::BVB);
+		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::LM);
+		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::BVB);
 
 		bool ok = true;
 		for (Hardware::DeviceModule* lm : m_context->m_lmAndBvbModules)
@@ -1069,7 +1083,7 @@ namespace Builder
 			return false;
 		}
 
-		findFSCConfigurationModules(m_context->m_equipmentSet->root(), &m_context->m_fscModules);
+		findFSCConfigurationModules(m_context->m_equipmentSet->root().get(), &m_context->m_fscModules);
 
 		ok = true;
 		for (Hardware::DeviceModule* lm : m_context->m_fscModules)
@@ -1169,10 +1183,10 @@ namespace Builder
 
 		DbFileTree fileTree;
 
-		if (bool ok = db->getFileListTree(&fileTree, db->schemaFileId(), true, nullptr);
+		if (bool ok = db->getFileListTree(&fileTree, DbDir::SchemasDir, true, nullptr);
 			ok == false)
 		{
-			m_context->m_log->errPDB2001(db->schemaFileId(), "", db->lastError());
+			m_context->m_log->errPDB2001(db->systemFileId(DbDir::SchemasDir), "", db->lastError());
 			return false;
 		}
 
@@ -1308,9 +1322,134 @@ namespace Builder
 		return result;
 	}
 
+	bool BuildWorkerThread::loadSimProfiles()
+	{
+		Context* context = m_context.get();
+		DbController& db = context->m_db;
+		IssueLogger* log = context->m_log;
+
+		LOG_EMPTY_LINE(log);
+		LOG_MESSAGE(log, QString(tr("Loading Sim Profiles...")));
+
+		m_context->m_simProfiles.clear();
+		QByteArray fileContent;
+
+		std::vector<DbFileInfo> fileList;
+
+		bool ok = db.getFileList(&fileList, DbDir::EtcDir, Db::File::SimProfilesFileName, true, nullptr);
+		if (ok == false)
+		{
+			log->errPDB2001(db.systemFileId(DbDir::EtcDir), Db::File::SimProfilesFileName, db.lastError());
+			return false;
+		}
+
+		if (ok == true && fileList.size() == 1)
+		{
+			std::shared_ptr<DbFile> file;
+
+			ok = db.getLatestVersion(fileList[0], &file, nullptr);
+
+			if (ok == true)
+			{
+				QString errorMessage;
+				fileContent = file->data();
+
+				ok = m_context->m_simProfiles.load(fileContent, &errorMessage);
+
+				if (ok == false)
+				{
+					log->errCMN0010(fileList[0].fileName());
+					return false;
+				}
+			}
+			else
+			{
+				log->errPDB2002(fileList[0].fileId(), fileList[0].fileName(), db.lastError());
+				return false;
+			}
+		}
+
+		// Save file to build
+		//
+		BuildFile* outFile = context->m_buildResultWriter->addFile(Directory::COMMON, Db::File::SimProfilesFileName, fileContent, false);
+		if (outFile == nullptr)
+		{
+			return false;
+		}
+
+		/*
+		// -- EXAMPLE OF USING Sim::SimProfiles: --
+		//
+
+		// Enumerate all profiles
+		//
+		const QStringList profiles = m_context->m_simProfiles.profiles();
+		for (QString profileName : profiles)
+		{
+			Sim::Profile& profile = m_context->m_simProfiles.profile(profileName);
+			Q_ASSERT(profileName == profile.profileName);
+
+			// Enumerate objects in the profile
+			//
+			const QStringList objectList = profile.equipment();
+			bool allAppliedSuccesfully = true;
+
+			for (QString equipmentId : objectList)
+			{
+				// Get device object from the EquipmentSet
+				//
+				std::shared_ptr<Hardware::DeviceObject> object = m_context->m_equipmentSet->deviceObject(equipmentId);
+				if (object == nullptr)
+				{
+					m_log->errEQP6011(equipmentId, QString("appling %1 SimProfile").arg(profileName));
+					allAppliedSuccesfully = false;
+					continue;
+				}
+
+				Q_ASSERT(object->equipmentId() == equipmentId);
+
+				// Apply profile properties to DeviceObject.
+				// DeviceObject's state is saved here, later it can be restored with Sim::Profile::restoreObjects();
+				//
+				QString errorMessage;
+
+				bool applyOk = profile.applyToObject(equipmentId, object, &errorMessage);
+				if (applyOk == false)
+				{
+					m_log->errEQP6030(profileName, errorMessage);
+					allAppliedSuccesfully = false;
+					continue;
+				}
+			}
+
+			if (allAppliedSuccesfully == false)
+			{
+				continue;
+			}
+
+			// At this point we have m_context->m_equipmentSet with applied profile
+			// Do settings generation here
+			// ....
+			//
+
+			// Restore EquipmentSet state
+			//
+			profile.restoreObjects();
+		}
+
+		// -- END OF EXAMPLE--
+		//
+		*/
+
+		// --
+		//
+		return true;
+	}
 
 	bool BuildWorkerThread::generateSoftwareConfiguration()
 	{
+		SoftwareCfgGenerator::clearStaticData();
+
 		Context* context = m_context.get();
 
 		bool result = true;
@@ -1319,103 +1458,210 @@ namespace Builder
 		LOG_MESSAGE(context->m_log, QString(tr("MATS configuration generation...")))
 		LOG_EMPTY_LINE(context->m_log);
 
+		result = checkProfiles();
+
+		RETURN_IF_FALSE(result);
+
 		result &= SoftwareCfgGenerator::generalSoftwareCfgGeneration(context);
 
+		RETURN_IF_FALSE(result);
+
+		std::map<QString, std::shared_ptr<SoftwareCfgGenerator>> swCfgGens;
+
+		// create SoftwareCfgGenerators and generate "Default" profile settings
+		//
+
+		LOG_EMPTY_LINE(m_log);
+		LOG_MESSAGE(m_log, QString("Software settings generation for profile: %1").
+							arg(SettingsProfile::DEFAULT));
+
+		for(auto p : m_context->m_software)
+		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;;
+			}
+
+			Hardware::Software* software = p.second;
+
+			if (software == nullptr	|| software->isSoftware() == false)
+			{
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			std::shared_ptr<SoftwareCfgGenerator> swCfgGen;
+
+			switch(software->softwareType())
+			{
+			case E::SoftwareType::AppDataService:
+				swCfgGen = std::make_shared<AppDataServiceCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::DiagDataService:
+				swCfgGen = std::make_shared<DiagDataServiceCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::Monitor:
+				swCfgGen = std::make_shared<MonitorCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::TuningService:
+				swCfgGen = std::make_shared<TuningServiceCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::TuningClient:
+				swCfgGen = std::make_shared<TuningClientCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::ConfigurationService:
+				swCfgGen = std::make_shared<ConfigurationServiceCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::ArchiveService:
+				swCfgGen = std::make_shared<ArchivingServiceCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::Metrology:
+				swCfgGen = std::make_shared<MetrologyCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::TestClient:
+				swCfgGen = std::make_shared<TestClientCfgGenerator>(context, software);
+				break;
+
+			default:
+				m_context->m_log->errEQP6100(software->equipmentIdTemplate(), software->uuid());
+				result = false;
+			}
+
+			if (swCfgGen != nullptr)
+			{
+				swCfgGens.insert({software->equipmentIdTemplate(), swCfgGen});
+				result &= swCfgGen->createSettingsProfile(SettingsProfile::DEFAULT);
+			}
+		}
+
+		LOG_EMPTY_LINE(m_log);
+
+		QStringList profileIDs = context->m_simProfiles.profiles();
+
+		for(const QString& profileID : profileIDs)
+		{
+			if (profileID.isEmpty() == true || profileID == SettingsProfile::DEFAULT)
+			{
+				continue;
+			}
+
+			LOG_MESSAGE(m_log, QString("Software settings generation for profile: %1").
+								arg(profileID));
+
+			Sim::Profile& profile = context->m_simProfiles.profile(profileID);
+
+			QStringList profileEquipmentIDs = profile.equipment();
+
+			for(const QString& profileEquipmentID : profileEquipmentIDs)
+			{
+				std::shared_ptr<Hardware::DeviceObject> deviceObject = context->m_equipmentSet->deviceObject(profileEquipmentID);
+
+				if (deviceObject == nullptr)
+				{
+					Q_ASSERT(false);	// this error should be detected early in checkProfiles()
+					result = false;
+					break;
+				}
+
+				QString errMsg;
+
+				bool res = profile.applyToObject(profileEquipmentID, deviceObject, &errMsg);
+
+				if (res == false)
+				{
+					LOG_INTERNAL_ERROR_MSG(m_log, errMsg);
+					result = false;
+					break;
+				}
+			}
+
+			BREAK_IF_FALSE(result);
+
+			for(auto p : swCfgGens)
+			{
+				result &= p.second->createSettingsProfile(profileID);
+			}
+
+			BREAK_IF_FALSE(result);
+
+			profile.restoreObjects();
+
+			LOG_EMPTY_LINE(m_log);
+		}
+
+		RETURN_IF_FALSE(result);
+
+		// Software.xml file generation
+		//
 		QByteArray softwareXmlData;
 		QXmlStreamWriter softwareXml(&softwareXmlData);
 
 		softwareXml.setAutoFormatting(true);
 		softwareXml.writeStartDocument();
-		softwareXml.writeStartElement(XmlElement::SOFTWARE_ITEMS);
+		softwareXml.writeStartElement(XmlElement::SOFTWARE_ITEMS);	// <SoftwareItems>
 
 		context->m_buildResultWriter->buildInfo().writeToXml(softwareXml);
 
-		equipmentWalker(context->m_equipmentSet->root(),
-			[this, context, &softwareXml, &result](Hardware::DeviceObject* currentDevice)
-			{
-				if (QThread::currentThread()->isInterruptionRequested() == true)
-				{
-					return;
-				}
+		for(auto p : swCfgGens)
+		{
+			std::shared_ptr<SoftwareCfgGenerator> swCfgGen = p.second;
 
-				if (currentDevice->isSoftware() == false)
-				{
-					return;
-				}
+			// Writing settings of current software to Software.xml
+			//
+			swCfgGen->writeSoftwareSection(softwareXml, false);		// <Software>
 
-				Hardware::Software* software = dynamic_cast<Hardware::Software*>(currentDevice);
+			result &= swCfgGen->getSettingsXml(softwareXml);
 
-				if (software == nullptr)
-				{
-					assert(false);
-					return;
-				}
+			softwareXml.writeEndElement();							// </Software>
+		}
 
-				SoftwareCfgGenerator* softwareCfgGenerator = nullptr;
-
-				switch(software->type())
-				{
-				case E::SoftwareType::AppDataService:
-					softwareCfgGenerator = new AppDataServiceCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::DiagDataService:
-					softwareCfgGenerator = new DiagDataServiceCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::Monitor:
-					softwareCfgGenerator = new MonitorCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::TuningService:
-					softwareCfgGenerator = new TuningServiceCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::TuningClient:
-					softwareCfgGenerator = new TuningClientCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::ConfigurationService:
-					softwareCfgGenerator = new ConfigurationServiceCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::ArchiveService:
-					softwareCfgGenerator = new ArchivingServiceCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::Metrology:
-					softwareCfgGenerator = new MetrologyCfgGenerator(context, software);
-					break;
-
-				case E::SoftwareType::TestClient:
-					softwareCfgGenerator = new TestClientCfgGenerator(context, software);
-					break;
-
-				default:
-					m_context->m_log->errEQP6100(software->equipmentIdTemplate(), software->uuid());
-					result = false;
-				}
-
-				if (softwareCfgGenerator != nullptr)
-				{
-					result &= softwareCfgGenerator->run();
-
-					softwareCfgGenerator->writeSoftwareSection(softwareXml, false);	// <Software>
-
-					result &= softwareCfgGenerator->getSettingsXml(softwareXml);
-
-					softwareXml.writeEndElement();	// </Software>
-
-					delete softwareCfgGenerator;
-				}
-			}
-		);
-
-		softwareXml.writeEndElement();		// </SoftwareItems>
+		softwareXml.writeEndElement();								// </SoftwareItems>
 
 		context->m_buildResultWriter->addFile(Directory::COMMON, File::SOFTWARE_XML, softwareXmlData);
 
-		context->m_buildResultWriter->writeConfigurationXmlFiles();
+		//
+		// Software items configuration generation
+		//
+
+		for(auto p : swCfgGens)
+		{
+			std::shared_ptr<SoftwareCfgGenerator> swCfgGen = p.second;
+
+			// Creating Configuration.xml for current software
+			//
+			result &= swCfgGen->createConfigurationXml();
+
+			// First step of software configuration generation
+			//
+			LOG_MESSAGE(m_log, QString(tr("Configuration generation for software item (step 1): %1")).
+						arg(swCfgGen->equipmentID()));
+
+			result &= swCfgGen->generateConfigurationStep1();
+		}
+
+		for(auto p : swCfgGens)
+		{
+			std::shared_ptr<SoftwareCfgGenerator> swCfgGen = p.second;
+
+			// Second step of software configuration generation
+			//
+			LOG_MESSAGE(m_log, QString(tr("Configuration generation for software item (step 2): %1")).
+						arg(swCfgGen->equipmentID()));
+
+			result &= swCfgGen->generateConfigurationStep2();
+		}
+
+		result &= context->m_buildResultWriter->writeConfigurationXmlFiles();
 
 		LOG_EMPTY_LINE(context->m_log);
 
@@ -1433,6 +1679,67 @@ namespace Builder
 		return result;
 	}
 
+	bool BuildWorkerThread::checkProfiles()
+	{
+		Context* context = m_context.get();
+
+		if (context->m_simProfiles.isEmpty() == true)
+		{
+			return true;
+		}
+
+		LOG_MESSAGE(m_log, QString("Software settings profiles checking..."));
+
+		bool result = true;
+
+		QStringList profileIDs = context->m_simProfiles.profiles();
+
+		for(const QString& profileID : profileIDs)
+		{
+			Sim::Profile& profile = context->m_simProfiles.profile(profileID);
+
+			QStringList profileEquipmentIDs = profile.equipment();
+
+			for(const QString& profileEquipmentID : profileEquipmentIDs)
+			{
+				std::shared_ptr<Hardware::DeviceObject> deviceObject = context->m_equipmentSet->deviceObject(profileEquipmentID);
+
+				if (deviceObject == nullptr)
+				{
+					// Equipment object %1 is not found (Settings profile - %2).
+					//
+					m_log->errCFG3044(profileEquipmentID,profileID);
+					result = false;
+					continue;
+				}
+
+				const Sim::ProfileProperties& pp = profile.properties(profileEquipmentID);
+
+				for(auto p : pp.properties)
+				{
+					QString propertyName = p.first;
+
+					if (deviceObject->propertyExists(propertyName) == false)
+					{
+						// Property %1.%2 is not found (Settings profile - %3).
+						//
+						m_log->errCFG3045(profileEquipmentID, propertyName, profileID);
+						result = false;
+						continue;
+					}
+				}
+			}
+		}
+
+		if (result == true)
+		{
+			LOG_SUCCESS(m_log, QString("Ok"));
+		}
+
+		LOG_EMPTY_LINE(m_log);
+
+		return result;
+	}
 
 	bool BuildWorkerThread::writeFirmwareStatistics(BuildResultWriter& buildResultWriter)
 	{
@@ -1642,7 +1949,7 @@ namespace Builder
 
 		bool result = true;
 
-		equipmentWalker(equipment->root(), [context, &result](Hardware::DeviceObject* currentDevice)
+		equipmentWalker(equipment->root().get(), [context, &result](Hardware::DeviceObject* currentDevice)
 			{
 				if (currentDevice == nullptr)
 				{
@@ -1656,7 +1963,7 @@ namespace Builder
 					return;
 				}
 
-				Hardware::Software* software = currentDevice->toSoftware();
+				Hardware::Software* software = currentDevice->toSoftware().get();
 
 				if (software == nullptr)
 				{
@@ -1693,14 +2000,17 @@ namespace Builder
 		LOG_MESSAGE(m_context->m_log, tr(""));
 		LOG_MESSAGE(m_context->m_log, tr("Run simulator-based tests..."));
 
+		DbController& db = m_context->m_db;
+
 		// Get test scripts
 		//
 		DbFileTree scriptFilesTree;
+		int simTestsFileId = db.systemFileId(DbDir::SimTestsDir);
 
-		bool ok = m_context->m_db.getFileListTree(&scriptFilesTree, m_context->m_db.testsFileId(), true, nullptr);
+		bool ok = db.getFileListTree(&scriptFilesTree, simTestsFileId, true, nullptr);
 		if (ok == false)
 		{
-			m_context->m_log->errPDB2001(m_context->m_db.testsFileId(), "", m_context->m_db.lastError());
+			m_context->m_log->errPDB2001(simTestsFileId, "", db.lastError());
 			return false;
 		}
 
@@ -1728,10 +2038,10 @@ namespace Builder
 
 		std::vector<std::shared_ptr<DbFile>> files;
 
-		ok = m_context->m_db.getLatestVersion(fileInfos, &files, nullptr);
+		ok = db.getLatestVersion(fileInfos, &files, nullptr);
 		if (ok == false)
 		{
-			m_context->m_log->errPDB2001(m_context->m_db.testsFileId(), "", m_context->m_db.lastError());
+			m_context->m_log->errPDB2001(simTestsFileId, "", db.lastError());
 			return false;
 		}
 
@@ -1745,7 +2055,7 @@ namespace Builder
 		std::vector<Sim::SimScriptItem> testScripts;
 		testScripts.reserve(files.size());
 
-		for (std::shared_ptr<DbFile> f : files)
+		for (const std::shared_ptr<DbFile>& f : files)
 		{
 			testScripts.emplace_back(Sim::SimScriptItem{f->data(), scriptFilesTree.filePath(f->fileId()) + "/" + f->fileName()});
 		}

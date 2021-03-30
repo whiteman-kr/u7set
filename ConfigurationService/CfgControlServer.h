@@ -19,6 +19,7 @@ public:
 					 const QString& autoloadBuildPath,
 					 const QString& workDirectory,
 					 const QString& buildPath,
+					 const SessionParams& sessionParams,
 					 const QStringList& knownClients,
 					 const CfgCheckerWorker& checkerWorker,
 					 std::shared_ptr<CircularLogger> logger);
@@ -41,4 +42,6 @@ private:
 	QString m_autoloadBuildPath;
 	QString m_workDirectory;
 	QStringList m_knownClients;
+
+	SessionParams m_sessionParams;
 };

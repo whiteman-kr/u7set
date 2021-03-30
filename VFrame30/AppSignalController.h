@@ -1,5 +1,4 @@
-#ifndef APPSIGNALCONTROLLER_H
-#define APPSIGNALCONTROLLER_H
+#pragma once
 
 #include "VFrame30Lib_global.h"
 #include "../lib/IAppSignalManager.h"
@@ -21,30 +20,30 @@ namespace VFrame30
 	public:
 		// App Signals
 		//
-		bool signalExists(Hash hash) const;
-		bool signalExists(const QString& appSignalId) const;
+		[[nodiscard]] bool signalExists(Hash hash) const;
+		[[nodiscard]] bool signalExists(const QString& appSignalId) const;
 
-		AppSignalParam signalParam(Hash signalHash, bool* found) const;
-		AppSignalParam signalParam(const QString& appSignalId, bool* found) const;
+		[[nodiscard]] AppSignalParam signalParam(Hash signalHash, bool* found) const;
+		[[nodiscard]] AppSignalParam signalParam(const QString& appSignalId, bool* found) const;
 
-		AppSignalState signalState(Hash signalHash, bool* found) const;
-		AppSignalState signalState(const QString& appSignalId, bool* found) const;
+		[[nodiscard]] AppSignalState signalState(Hash signalHash, bool* found) const;
+		[[nodiscard]] AppSignalState signalState(const QString& appSignalId, bool* found) const;
 
 		void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const;
 		void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const;
 
-		QStringList signalTags(Hash signalHash) const;
-		QStringList signalTags(const QString& appSignalId) const;
-		bool signalHasTag(Hash signalHash, const QString& tag) const;
-		bool signalHasTag(const QString& appSignalId, const QString& tag) const;
+		[[nodiscard]] QStringList signalTags(Hash signalHash) const;
+		[[nodiscard]] QStringList signalTags(const QString& appSignalId) const;
+		[[nodiscard]] bool signalHasTag(Hash signalHash, const QString& tag) const;
+		[[nodiscard]] bool signalHasTag(const QString& appSignalId, const QString& tag) const;
 
 		// Setpoints AKA Comparators
 		//
-		std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const;
+		[[nodiscard]] std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const;
 
 	public:
-		IAppSignalManager* appSignalManager();
-		const IAppSignalManager* appSignalManager() const;
+		[[nodiscard]] IAppSignalManager* appSignalManager();
+		[[nodiscard]] const IAppSignalManager* appSignalManager() const;
 
 	private:
 		IAppSignalManager* m_appSignalManager = nullptr;
@@ -72,11 +71,11 @@ namespace VFrame30
 		\code
 		// Get static parameters of the signal "#SIGNALID_001"
 		//
-		var param = signals.signalParam("#SIGNALID_001");
+		let param = signals.signalParam("#SIGNALID_001");
 
 		// Get state of the signal "#SIGNALID_001"
 		//
-		var state = signals.signalState("#SIGNALID_001");
+		let state = signals.signalState("#SIGNALID_001");
 
 		// Check for functions result
 		//
@@ -100,7 +99,7 @@ namespace VFrame30
 
 		if (state.Valid === true)
 		{
-			var text = param.Caption;
+			let text = param.Caption;
 			...
 		}
 		\endcode
@@ -135,4 +134,3 @@ namespace VFrame30
 
 }
 
-#endif // APPSIGNALCONTROLLER_H

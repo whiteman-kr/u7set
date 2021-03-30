@@ -13,7 +13,7 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	GetFileReply::GetFileReply()
+/*	GetFileReply::GetFileReply()
 	{
 		clear();
 	}
@@ -40,7 +40,7 @@ namespace Tcp
 
 		memcpy(this->md5, md5.constData(), MD5_LEN);
 	}
-
+*/
 
 	// -------------------------------------------------------------------------------------
 	//
@@ -59,7 +59,6 @@ namespace Tcp
 			m_FileTransferErrorIsRegistered = true;
 		}
 	}
-
 
 	// -------------------------------------------------------------------------------------
 	//
@@ -91,12 +90,26 @@ namespace Tcp
 		init();
 	}
 
+	void FileClient::processSuccessorReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
+	{
+		Q_UNUSED(requestID);
+		Q_UNUSED(replyData);
+		Q_UNUSED(replyDataSize);
+	}
+
+	void FileClient::onEndFileDownload(const QString fileName,
+									   FileTransferResult errorCode,
+									   const QString md5)
+	{
+		Q_UNUSED(fileName);
+		Q_UNUSED(errorCode);
+		Q_UNUSED(md5);
+	}
 
 	void FileClient::onClientThreadStarted()
 	{
 		connect(this, &FileClient::signal_downloadFile, this, &FileClient::slot_downloadFile);
 	}
-
 
 	void FileClient::onClientThreadFinished()
 	{
@@ -105,213 +118,8 @@ namespace Tcp
 
 	void FileClient::onReplyTimeout()
 	{
-		endFileDownload(FileTransferResult::ServerReplyTimeout);
+		faultyFileDownload(FileTransferResult::ServerReplyTimeout);
 	}
-
-	void FileClient::init()
-	{
-		m_fileName = "";
-		m_file.close();
-		m_transferInProgress = false;
-		m_reply.clear();
-		m_md5Generator.reset();
-	}
-
-	FileTransferResult FileClient::checkLocalFolder()
-	{
-		QDir dir(m_rootFolder);
-
-		if (dir.exists() == false)
-		{
-			dir.mkpath(m_rootFolder);
-		}
-
-		QFileInfo pathInfo(m_rootFolder);
-
-		if (pathInfo.permission(QFileDevice::WriteUser | QFileDevice::ReadUser) == false)
-		{
-			return FileTransferResult::LocalFolderIsNotWriteable;
-		}
-
-		return FileTransferResult::Ok;
-	}
-
-
-	FileTransferResult FileClient::createFile()
-	{
-		QFileInfo fileInfo(m_rootFolder + m_fileName);
-
-		QString path = fileInfo.path();
-
-		QDir dir;
-
-		if (dir.mkpath(path) == false)
-		{
-			return FileTransferResult::CantCreateLocalFolder;
-		}
-
-		return FileTransferResult::Ok;
-	}
-
-
-	void FileClient::endFileDownload(FileTransferResult errorCode)
-	{
-		emit signal_endFileDownload(m_fileName, errorCode, QString(""));
-
-		onEndFileDownload(m_fileName, errorCode, QString(""));
-
-		init();
-	}
-
-
-	void FileClient::slot_downloadFile(const QString fileName)
-	{
-		if (isConnected() == false)
-		{
-			emit signal_endFileDownload(fileName, FileTransferResult::NotConnectedToServer, QString(""));
-			onEndFileDownload(fileName, FileTransferResult::NotConnectedToServer, QString(""));
-			return;
-		}
-
-		if (m_transferInProgress == true)
-		{
-			assert(false);
-			emit signal_endFileDownload(fileName, FileTransferResult::AlreadyDownloadFile, QString(""));
-			onEndFileDownload(fileName, FileTransferResult::AlreadyDownloadFile, QString(""));
-			return;
-		}
-
-		m_transferInProgress = true;
-		m_fileName = fileName;
-
-		FileTransferResult err = checkLocalFolder();
-
-		if (err != FileTransferResult::Ok)
-		{
-			endFileDownload(err);
-			return;
-		}
-
-		if (isClearToSendRequest() == false)
-		{
-			endFileDownload(FileTransferResult::CantSendRequest);
-			return;
-		}
-
-		sendRequest(RQID_GET_FILE_START, m_fileName.toUtf8());
-	}
-
-
-	void FileClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
-	{
-		switch(requestID)
-		{
-		case RQID_GET_FILE_START:
-			processGetFileStartNextReply(true, replyData, replyDataSize);
-			break;
-
-		case RQID_GET_FILE_NEXT:
-			processGetFileStartNextReply(false, replyData, replyDataSize);
-			break;
-
-		default:
-			processSuccessorReply(requestID, replyData, replyDataSize);
-		}
-	}
-
-
-	void FileClient::processGetFileStartNextReply(bool startReply, const char* replyData, quint32 replyDataSize)
-	{
-		assert(replyDataSize >= sizeof(GetFileReply));
-
-		Q_UNUSED(replyDataSize);
-
-		const GetFileReply* reply = reinterpret_cast<const GetFileReply*>(replyData);
-
-		if (reply->errorCode != FileTransferResult::Ok)
-		{
-			endFileDownload(reply->errorCode);
-			return;
-		}
-
-		assert(replyDataSize == (sizeof(GetFileReply) + reply->currentPartSize));
-
-		if (startReply)
-		{
-			QString fileName = m_rootFolder + m_fileName;
-
-			QFileInfo fi(fileName);
-
-			QDir dir(fi.path());
-
-			if (dir.mkpath(fi.path()) == false)
-			{
-				endFileDownload(FileTransferResult::CantCreateLocalFolder);
-				return;
-			}
-
-			m_file.setFileName(fileName);
-
-			if (m_file.open(QIODevice::ReadWrite | QIODevice::Truncate) == false)
-			{
-				endFileDownload(FileTransferResult::CantCreateLocalFile);
-				return;
-			}
-
-			if (m_file.resize(reply->fileSize) == false)
-			{
-				endFileDownload(FileTransferResult::CantCreateLocalFile);
-				return;
-			}
-
-			m_file.seek(0);
-		}
-
-		const char* filePartData = replyData + sizeof(GetFileReply);
-
-		m_md5Generator.addData(filePartData, reply->currentPartSize);
-
-		if (memcmp(m_md5Generator.result().constData(), reply->md5, MD5_LEN) != 0)
-		{
-			endFileDownload(FileTransferResult::FileDataCorrupted);
-			return;
-		}
-
-		qint64 written = m_file.write(filePartData, reply->currentPartSize);
-
-		if (written < reply->currentPartSize)
-		{
-			endFileDownload(FileTransferResult::CantWriteLocalFile);
-			return;
-		}
-
-		if (reply->currentPart != reply->totalParts)
-		{
-			sendRequest(RQID_GET_FILE_NEXT);
-			return;
-		}
-
-		QString downloadedFileName = m_fileName;
-
-		QString md5 = QString(m_md5Generator.result().toHex());
-
-		init();
-
-		emit signal_endFileDownload(downloadedFileName, FileTransferResult::Ok, md5);
-
-		onEndFileDownload(downloadedFileName, FileTransferResult::Ok, md5);
-	}
-
-
-	void FileClient::processSuccessorReply(quint32 /*requestID*/, const char* /*replyData*/, quint32 /*replyDataSize*/)
-	{
-	}
-
-
-	void FileClient::onEndFileDownload(const QString /*fileName*/, FileTransferResult /*errorCode*/, const QString /*md5*/)
-	{
-	}
-
 
 	QString FileClient::getErrorStr(FileTransferResult errorCode) const
 	{
@@ -327,8 +135,12 @@ namespace Tcp
 			str = QString(tr("Not connected to server"));
 			break;
 
-		case FileTransferResult::NotFoundRemoteFile:
-			str = QString(tr("Not found remote file"));
+		case FileTransferResult::FileIsNotAccessible:
+			str = QString(tr("File isn't enumerated in <files> section of Configuration.xml"));
+			break;
+
+		case FileTransferResult::RemoteFileIsNotExists:
+			str = QString(tr("Remote file is not exists"));
 			break;
 
 		case FileTransferResult::CantOpenRemoteFile:
@@ -398,6 +210,205 @@ namespace Tcp
 		return str;
 	}
 
+	void FileClient::slot_downloadFile(const QString fileName)
+	{
+		if (isConnected() == false)
+		{
+			emit signal_endFileDownload(fileName, FileTransferResult::NotConnectedToServer, QString());
+			onEndFileDownload(fileName, FileTransferResult::NotConnectedToServer, QString());
+			return;
+		}
+
+		if (m_transferInProgress == true)
+		{
+			assert(false);
+			emit signal_endFileDownload(fileName, FileTransferResult::AlreadyDownloadFile, QString());
+			onEndFileDownload(fileName, FileTransferResult::AlreadyDownloadFile, QString());
+			return;
+		}
+
+		m_transferInProgress = true;
+		m_fileName = fileName;
+
+		FileTransferResult err = checkLocalFolder();
+
+		if (err != FileTransferResult::Ok)
+		{
+			faultyFileDownload(err);
+			return;
+		}
+
+		if (isClearToSendRequest() == false)
+		{
+			faultyFileDownload(FileTransferResult::CantSendRequest);
+			return;
+		}
+
+		sendRequest(RQID_GET_FILE_START, m_fileName.toUtf8());
+	}
+
+	FileTransferResult FileClient::checkLocalFolder()
+	{
+		QDir dir(m_rootFolder);
+
+		if (dir.exists() == false)
+		{
+			dir.mkpath(m_rootFolder);
+		}
+
+		QFileInfo pathInfo(m_rootFolder);
+
+		if (pathInfo.permission(QFileDevice::WriteUser | QFileDevice::ReadUser) == false)
+		{
+			return FileTransferResult::LocalFolderIsNotWriteable;
+		}
+
+		return FileTransferResult::Ok;
+	}
+
+	FileTransferResult FileClient::createFile()
+	{
+		QFileInfo fileInfo(m_rootFolder + m_fileName);
+
+		QString path = fileInfo.path();
+
+		QDir dir;
+
+		if (dir.mkpath(path) == false)
+		{
+			return FileTransferResult::CantCreateLocalFolder;
+		}
+
+		return FileTransferResult::Ok;
+	}
+
+	void FileClient::init()
+	{
+		m_fileName = "";
+		m_file.close();
+		m_transferInProgress = false;
+		m_reply.Clear();
+		m_md5Generator.reset();
+	}
+
+	void FileClient::faultyFileDownload(FileTransferResult errorCode)
+	{
+		emit signal_endFileDownload(m_fileName, errorCode, QString());
+
+		onEndFileDownload(m_fileName, errorCode, QString());
+
+		init();
+	}
+
+	void FileClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
+	{
+		switch(requestID)
+		{
+		case RQID_GET_FILE_START:
+			processGetFileStartNextReply(true, replyData, replyDataSize);
+			break;
+
+		case RQID_GET_FILE_NEXT:
+			processGetFileStartNextReply(false, replyData, replyDataSize);
+			break;
+
+		default:
+			processSuccessorReply(requestID, replyData, replyDataSize);
+		}
+	}
+
+	void FileClient::processGetFileStartNextReply(bool startReply, const char* replyData, quint32 replyDataSize)
+	{
+		bool res = m_reply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+
+		if (res == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		FileTransferResult replyErrorCode = static_cast<FileTransferResult>(m_reply.errorcode());
+
+		if (replyErrorCode != FileTransferResult::Ok)
+		{
+			faultyFileDownload(replyErrorCode);
+			return;
+		}
+
+		if (startReply == true)
+		{
+			Q_ASSERT(m_reply.currentpart() == 1);
+			Q_ASSERT(m_reply.totalparts() >= 1);
+
+			QString fileName = m_rootFolder + m_fileName;
+
+			QFileInfo fi(fileName);
+
+			QDir dir(fi.path());
+
+			if (dir.mkpath(fi.path()) == false)
+			{
+				faultyFileDownload(FileTransferResult::CantCreateLocalFolder);
+				return;
+			}
+
+			m_file.setFileName(fileName);
+
+			if (m_file.open(QIODevice::ReadWrite | QIODevice::Truncate) == false)
+			{
+				faultyFileDownload(FileTransferResult::CantCreateLocalFile);
+				return;
+			}
+
+			if (m_file.resize(m_reply.filesize()) == false)
+			{
+				faultyFileDownload(FileTransferResult::CantCreateLocalFile);
+				return;
+			}
+
+			m_file.seek(0);
+		}
+
+		if (m_reply.currentpart() > m_reply.totalparts() ||
+			m_reply.filepartdata().size() != m_reply.currentpartsize() ||
+			m_reply.md5().size() != MD5_LEN)
+		{
+			faultyFileDownload(FileTransferResult::FileDataCorrupted);
+			return;
+		}
+
+		m_md5Generator.addData(m_reply.filepartdata().data(), static_cast<int>(m_reply.filepartdata().size()));
+
+		if (memcmp(m_md5Generator.result().constData(), m_reply.md5().data(), MD5_LEN) != 0)
+		{
+			faultyFileDownload(FileTransferResult::FileDataCorrupted);
+			return;
+		}
+
+		qint64 written = m_file.write(m_reply.filepartdata().data(), m_reply.filepartdata().size());
+
+		if (written < static_cast<qint64>(m_reply.filepartdata().size()))
+		{
+			faultyFileDownload(FileTransferResult::CantWriteLocalFile);
+			return;
+		}
+
+		if (m_reply.currentpart() < m_reply.totalparts())
+		{
+			sendRequest(RQID_GET_FILE_NEXT);
+			return;
+		}
+
+		QString downloadedFileName = m_fileName;
+
+		QString md5 = QString(m_md5Generator.result().toHex());
+
+		init();
+
+		emit signal_endFileDownload(downloadedFileName, FileTransferResult::Ok, md5);
+
+		onEndFileDownload(downloadedFileName, FileTransferResult::Ok, md5);
+	}
 
 	// -------------------------------------------------------------------------------------
 	//
@@ -408,24 +419,18 @@ namespace Tcp
 	FileServer::FileServer(const QString& rootFolder, const SoftwareInfo& softwareInfo, std::shared_ptr<CircularLogger> logger) :
 		Server(softwareInfo),
 		m_logger(logger),
-		m_reply(*reinterpret_cast<GetFileReply*>(m_replyData)),
-		m_replyFileData(m_replyData + sizeof(GetFileReply)),
 		m_transmitionFilesTimer(this)
 	{
 		m_rootFolder = QDir::fromNativeSeparators(rootFolder);
 		m_file.setParent(this);
 
-		m_reply.clear();
-
 		connect(&m_transmitionFilesTimer, &QTimer::timeout, [this]{ m_state.isActual = true; });
 	}
-
 
 	Server* FileServer::getNewInstance()
 	{
 		return new FileServer(m_rootFolder, localSoftwareInfo(), m_logger);
 	}
-
 
 	void FileServer::processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
 	{
@@ -434,18 +439,15 @@ namespace Tcp
 		Q_UNUSED(requestDataSize);
 	}
 
-
 	QString FileServer::rootFolder() const
 	{
 		return m_rootFolder;
 	}
 
-
 	void FileServer::onFileSent(const QString& fileName, const QString &ip)
 	{
 		DEBUG_LOG_MSG(m_logger,  QString(tr("File '%1' has been sent to %2")).arg(fileName).arg(ip));
 	}
-
 
 	void FileServer::init()
 	{
@@ -459,10 +461,9 @@ namespace Tcp
 		m_fileData.clear();
 
 		m_transferInProgress = false;
-		m_reply.clear();
+		m_reply.Clear();
 		m_md5Generator.reset();
 	}
-
 
 	void FileServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
 	{
@@ -504,8 +505,8 @@ namespace Tcp
 
 		if (res == false)
 		{
-			m_reply.errorCode = FileTransferResult::UnknownClient;
-			sendReply(m_reply, sizeof(m_reply));
+			m_reply.set_errorcode(static_cast<int>(FileTransferResult::UnknownClient));
+			sendReply(m_reply);
 			init();
 			return;
 		}
@@ -522,31 +523,31 @@ namespace Tcp
 
 		if (m_file.exists() == false)
 		{
-			m_reply.errorCode = FileTransferResult::NotFoundRemoteFile;
-			sendReply(m_reply, sizeof(m_reply));
+			m_reply.set_errorcode(static_cast<int>(FileTransferResult::RemoteFileIsNotExists));
+			sendReply(m_reply);
 			init();
 			return;
 		}
 
 		if (m_file.open(QIODevice::ReadOnly) == false)
 		{
-			m_reply.errorCode = FileTransferResult::CantOpenRemoteFile;
-			sendReply(m_reply, sizeof(m_reply));
+			m_reply.set_errorcode(static_cast<int>(FileTransferResult::CantOpenRemoteFile));
+			sendReply(m_reply);
 			init();
 			return;
 		}
 
 		QFileInfo fi(m_file);
 
-		m_reply.fileSize = fi.size();
+		m_reply.set_filesize(fi.size());
 
-		if (m_reply.fileSize == 0)
+		if (m_reply.filesize() == 0)
 		{
-			m_reply.totalParts = 1;
+			m_reply.set_totalparts(1);
 		}
 		else
 		{
-			m_reply.totalParts = static_cast<qint32>(m_reply.fileSize / FILE_PART_SIZE + ((m_reply.fileSize % FILE_PART_SIZE) ? 1 : 0));
+			m_reply.set_totalparts(static_cast<qint32>(m_reply.filesize() / FILE_PART_SIZE + ((m_reply.filesize() % FILE_PART_SIZE) ? 1 : 0)));
 		}
 
 		// read file into memory and check file consistensy
@@ -555,11 +556,11 @@ namespace Tcp
 
 		m_file.close();
 
-		if (m_reply.fileSize != 0 && m_fileData.size() == 0)
+		if (m_reply.filesize() != 0 && m_fileData.size() == 0)
 		{
 			// file reading error!
-			m_reply.errorCode = FileTransferResult::CantReadRemoteFile;
-			sendReply(m_reply, sizeof(m_reply));
+			m_reply.set_errorcode(static_cast<int>(FileTransferResult::CantReadRemoteFile));
+			sendReply(m_reply);
 			init();
 			return;
 		}
@@ -567,8 +568,8 @@ namespace Tcp
 		if (checkFile(m_fileName, m_fileData) == false)
 		{
 			// file reading error!
-			m_reply.errorCode = FileTransferResult::FileDataCorrupted;
-			sendReply(m_reply, sizeof(m_reply));
+			m_reply.set_errorcode(static_cast<int>(FileTransferResult::FileDataCorrupted));
+			sendReply(m_reply);
 			init();
 			return;
 		}
@@ -580,13 +581,13 @@ namespace Tcp
 	{
 		if (m_transferInProgress == false)
 		{
-			m_reply.errorCode = FileTransferResult::TransferIsNotStarted;
-			sendReply(m_reply, sizeof(m_reply));
+			m_reply.set_errorcode(static_cast<int>(FileTransferResult::TransferIsNotStarted));
+			sendReply(m_reply);
 			init();
 			return;
 		}
 
-		int offset = m_reply.currentPart * FILE_PART_SIZE;
+		int offset = m_reply.currentpart() * FILE_PART_SIZE;
 
 		int size = m_fileData.size() - offset;
 
@@ -597,17 +598,20 @@ namespace Tcp
 
 		const char* partDataPtr = m_fileData.constData() + offset;
 
-		memcpy(m_replyFileData, partDataPtr, size);
+		m_reply.set_filepartdata(partDataPtr, size);
+
 		m_md5Generator.addData(partDataPtr, size);
 
-		m_reply.setMD5(m_md5Generator.result());
+		m_reply.set_md5(m_md5Generator.result().toStdString());
 
-		m_reply.currentPart++;
-		m_reply.currentPartSize = size;
+		m_reply.set_currentpart(m_reply.currentpart() + 1);
+		m_reply.set_currentpartsize(size);
 
-		sendReply(m_replyData, sizeof(GetFileReply) + size);
+		m_reply.set_errorcode(static_cast<int>(FileTransferResult::Ok));
 
-		if (m_reply.currentPart == m_reply.totalParts)
+		sendReply(m_reply);
+
+		if (m_reply.currentpart() == m_reply.totalparts())
 		{
 			// all parts of file are sent
 			//

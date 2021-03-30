@@ -8,17 +8,21 @@ class SoftwareXmlInfo
 public:
 	QString caption;
 	QString equipmentID;
-	E::SoftwareType softwareType;
 
-	const CfgServiceSettings* cfgServiceSettings() const;
-	const AppDataServiceSettings* appDataServiceSettings() const;
-	const DiagDataServiceSettings* diagDataServiceSettings() const;
-	const ArchivingServiceSettings* archivingServiceSettings() const;
-	const TuningServiceSettings* tuningServiceSettings() const;
-	const TestClientSettings* testClientSettings() const;
-	const MetrologySettings* metrologySettings() const;
-	const MonitorSettings* monitorSettings() const;
-	const TuningClientSettings* tuningClientSettings() const;
+	std::shared_ptr<const CfgServiceSettings> cfgServiceSettings(const QString& profile) const;
+	std::shared_ptr<const AppDataServiceSettings> appDataServiceSettings(const QString& profile) const;
+	std::shared_ptr<const DiagDataServiceSettings> diagDataServiceSettings(const QString& profile) const;
+	std::shared_ptr<const ArchivingServiceSettings> archivingServiceSettings(const QString& profile) const;
+	std::shared_ptr<const TuningServiceSettings> tuningServiceSettings(const QString& profile) const;
+	std::shared_ptr<const TestClientSettings> testClientSettings(const QString& profile) const;
+	std::shared_ptr<const MetrologySettings> metrologySettings(const QString& profile) const;
+	std::shared_ptr<const MonitorSettings> monitorSettings(const QString& profile) const;
+	std::shared_ptr<const TuningClientSettings> tuningClientSettings(const QString& profile) const;
+
+	template<typename T>
+	std::shared_ptr<const T> getSettingsProfile(const QString& profile) const;
+
+	E::SoftwareType softwareType() const;
 
 private:
 	bool readFromXml(XmlReadHelper& xmlReader);
@@ -26,8 +30,14 @@ private:
 	friend class SoftwareXmlReader;
 
 private:
-	std::shared_ptr<SoftwareSettings> m_settings = nullptr;
+	SoftwareSettingsSet m_settingsSet;
 };
+
+template<typename T>
+std::shared_ptr<const T> SoftwareXmlInfo::getSettingsProfile(const QString& profile) const
+{
+	return 	m_settingsSet.getSettingsProfile<T>(profile);
+}
 
 class SoftwareXmlReader
 {

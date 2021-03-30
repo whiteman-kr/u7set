@@ -1,10 +1,7 @@
 #include "AppDataService.h"
-#include "../lib/MemLeaksDetection.h"
 
 int main(int argc, char *argv[])
 {
-	initMemoryLeaksDetection();
-
 	QCoreApplication app(argc, argv);
 
 	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
@@ -18,7 +15,7 @@ int main(int argc, char *argv[])
 	si.init(E::SoftwareType::AppDataService, "", 1, 0);
 
 	AppDataServiceWorker appDataServiceWorker(si,
-											  Service::getServiceInstanceName("RPCT Application Data Service", argc, argv),
+											  Service::getServiceInstanceName("Application Data Service", argc, argv),
 											  argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, appDataServiceWorker, logger);
@@ -28,8 +25,6 @@ int main(int argc, char *argv[])
 	google::protobuf::ShutdownProtobufLibrary();
 
 	LOGGER_SHUTDOWN(logger);
-
-	dumpMemoryLeaks();
 
 	return result;
 }

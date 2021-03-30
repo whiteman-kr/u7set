@@ -73,7 +73,7 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 
 		if (lanControllerInfo->tuningEnable == true)
 		{
-			const Hardware::DeviceObject* tunService = equipmentSet.deviceObject(lanControllerInfo->tuningServiceID);
+			const Hardware::DeviceObject* tunService = equipmentSet.deviceObject(lanControllerInfo->tuningServiceID).get();
 
 			if (tunService != nullptr)
 			{
@@ -135,7 +135,7 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 
 		if (lanControllerInfo->appDataEnable == true)
 		{
-			const Hardware::DeviceObject* appDataService = equipmentSet.deviceObject(lanControllerInfo->appDataServiceID);
+			const Hardware::DeviceObject* appDataService = equipmentSet.deviceObject(lanControllerInfo->appDataServiceID).get();
 
 			if (appDataService != nullptr)
 			{
@@ -199,7 +199,7 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 
 		if (lanControllerInfo->diagDataEnable == true)
 		{
-			const Hardware::DeviceObject* diagDataService = equipmentSet.deviceObject(lanControllerInfo->diagDataServiceID);
+			const Hardware::DeviceObject* diagDataService = equipmentSet.deviceObject(lanControllerInfo->diagDataServiceID).get();
 
 			if (diagDataService != nullptr)
 			{

@@ -19,11 +19,11 @@ namespace Sim
 		Q_OBJECT
 
 	public:
-		TuningServiceCommunicator(Simulator* simulator, const TuningServiceSettings& settings);
+		TuningServiceCommunicator(Simulator* simulator, const QString& tuningServiceEquipmentID);
 		virtual ~TuningServiceCommunicator();
 
 	public:
-		bool startSimulation();
+		bool startSimulation(QString profileName);
 		bool stopSimulation();
 
 		Simulator* simulator() const;
@@ -35,6 +35,7 @@ namespace Sim
 		bool updateTuningRam(const QString& lmEquipmentId,
 							 const QString& portEquipmentId,
 							 const RamArea& ramArea,
+							 bool setSorChassisState,
 							 TimeStamp timeStamp);
 
 		// This function is called by Simulator to provide confiramtion about writing data to RAM
@@ -43,12 +44,20 @@ namespace Sim
 							   const QString& lmEquipmentId,
 							   const QString& portEquipmentId,
 							   const RamArea& ramArea,
+							   bool setSorChassisState,
 							   TimeStamp timeStamp);	// timeStamp can be the same with following updateTuningRam call (writeConfiramtion is called before workcycle, updateTuningRam after workcyle, both already have the same timestamp)
 
 		// These functions are called by Simulator when module enters or leaves tuning mode
 		//
-		void tuningModeEntered(const QString& lmEquipmentId, const QString& portEquipmentId, const RamArea& ramArea, TimeStamp timeStamp);
+		void tuningModeEntered(const QString& lmEquipmentId,
+							   const QString& portEquipmentId,
+							   const RamArea& ramArea,
+							   bool setSorChassisState,
+							   TimeStamp timeStamp);
+
 		void tuningModeLeft(const QString& lmEquipmentId, const QString& portEquipmentId);
+
+		QString tuningServiceEquipmentID() const;
 
 	public:
 		// Write command to LM's RAM
@@ -60,10 +69,11 @@ namespace Sim
 		qint64 writeTuningFloat(const QString& lmEquipmentId, const QString& portEquipmentId, quint32 offsetW, float data);
 
 		std::queue<TuningRecord> fetchWriteTuningQueue(const QString& lmEquipmentId);
+
 	private:
 		qint64 writeTuningRecord(TuningRecord&& r);
 
-		void startProcessingThread();
+		void startProcessingThread(const QString& curProfileName);
 		void stopProcessingThread();
 
 	protected slots:
@@ -76,9 +86,8 @@ namespace Sim
 		//
 	private:
 		Simulator* m_simulator = nullptr;
+		const QString m_tuningServiceEquipmentID;
 		mutable ScopedLog m_log;
-
-		::TuningServiceSettings m_settings;
 
 		std::atomic<bool> m_enabled{true};		// Allow communication to TuningService
 
@@ -96,46 +105,101 @@ namespace Sim
 	class TuningRequestsProcessingThread : public RunOverrideThread
 	{
 	public:
-		TuningRequestsProcessingThread(TuningServiceCommunicator* tsCommunicator, const TuningServiceSettings& settings);
+		TuningRequestsProcessingThread(TuningServiceCommunicator& tsCommunicator,
+									   const QString& curProfileName,
+									   ScopedLog& log);
+
 		virtual ~TuningRequestsProcessingThread() override;
 
 		void updateTuningData(const QString& lmEquipmentID,
 							  const QString& portEquipmentID,
 							  const RamArea& data,
+							  bool setSorChassisState,
 							  TimeStamp timeStamp);
 
-		void tuningModeChanged(const QString& lmEquipmentId, bool tuningEnabled);
+		void writeConfirmation(const QString& lmEquipmentID,
+							   const QString& portEquipmentID,
+							   const std::vector<qint64>& confirmedRecords,
+							   const RamArea& ramArea,
+							   bool setSorChassisState,
+							   TimeStamp timeStamp);
+
+		void tuningModeEntered(const QString& lmEquipmentId,
+							   const QString& portEquipmentId,
+							   const RamArea& ramArea,
+							   bool setSorChassisState,
+							   TimeStamp timeStamp);
+
+		void tuningModeLeft(const QString& lmEquipmentId, const QString& portEquipmentId);
 
 	private:
 		virtual void run() override;
 
 		void initTuningSourcesHandlers(const TuningServiceSettings& settings);
 
+		std::shared_ptr<TuningSourceHandler> getTuningSourceHandler(const QString& lmEquipmentID,
+																	const QString& portEquipmentID);
+
+		std::shared_ptr<TuningSourceHandler> getTuningSourceHandler(quint32 tuningSourceIP);
+
 		bool tryCreateAndBindSocket();
 		void closeSocket();
 
 		void receiveRequests();
 
+		bool processWriteConfirmations();
+		bool processRequests();
+
+		void finalizeAndSendReply(quint32 tuningSourceIP, SimRupFotipV2 &reply);
+
+		void cancelTuningSourceHandlersOperations();
+
 	private:
-		TuningServiceCommunicator* m_tsCommunicator = nullptr;
-		Simulator* m_sim = nullptr;
+		struct WriteConfirmation
+		{
+			QString lmEquipmentID;
+			QString portEquipmentID;
+			std::vector<qint64> confirmedRecordsIDs;
+
+			WriteConfirmation()
+			{
+			}
+
+			WriteConfirmation(const QString& lmID, const QString& portID, const std::vector<qint64>& ids) :
+				lmEquipmentID(lmID),
+				portEquipmentID(portID),
+				confirmedRecordsIDs(ids)
+			{
+			}
+		};
+
+	private:
+		TuningServiceCommunicator& m_tsCommunicator;
+		QString m_curProfileName;
+		Simulator& m_sim;
 		ScopedLog& m_log;
 
-		QString m_tuningServiceEquipmentID;
 		HostAddressPort m_tuningRequestsReceivingIP;
 		HostAddressPort m_tuningRepliesSendingIP;
 
 		const QThread* m_thisThread = nullptr;
 		QUdpSocket* m_socket = nullptr;
 
+		qint64 m_lastRequestTime = 0;
+		SimRupFotipV2 m_request;
+		SimRupFotipV2 m_reply;
+
 		std::map<quint32, std::shared_ptr<TuningSourceHandler>> m_tuningSourcesByIP;
 		std::map<std::pair<QString, QString>, std::shared_ptr<TuningSourceHandler>> m_tuningSourcesByEquipmentID;
+
+		QMutex m_queueMutex;
+		std::queue<WriteConfirmation> m_writeConfirmationQueue;
 	};
 
 	class TuningSourceHandler
 	{
 	public:
-		TuningSourceHandler(TuningServiceCommunicator* tsCommunicator,
+		TuningSourceHandler(TuningServiceCommunicator& tsCommunicator,
 							  const QString& lmEquipmentID,
 							  const QString& portEquipmentID,
 							  const HostAddressPort& ip,
@@ -143,26 +207,37 @@ namespace Sim
 
 		virtual ~TuningSourceHandler();
 
-		void updateTuningData(const RamArea& data, TimeStamp timeStamp);
+		void updateTuningData(const RamArea& data, bool setSorChassisState, TimeStamp timeStamp);
+		bool writeConfirmation(const std::vector<qint64>& confirmationIDs, RupFotipV2* reply);
 
-		void tuningModeChanged(bool tuningEnabled);
+		void tuningModeEntered(const RamArea& ramArea, bool setSorChassisState, TimeStamp timeStamp);
+		void tuningModeLeft();
 
-		bool processRequest(const RupFotipV2& request, RupFotipV2* reply);
+		bool processRequest(const RupFotipV2& request, RupFotipV2* nowReply);
+
+		void cancelOperations();
 
 		QString lmEquipmentID() const { return m_lmEquipmentID; }
+		quint32 tuningSourceIP() const { return m_tuningSourceIP.address32(); }
 
 	private:
 		bool checkRequestRupHeader(const Rup::Header& rupHeader);
-		bool checkRequestFotipHeader(const FotipV2::Header& fotipHeader, FotipV2::HeaderFlags* replyFlags);
+		bool checkRequestFotipHeader(const FotipV2::Header& requestFotipHeader, FotipV2::HeaderFlags* replyFlags);
 
-		void processReadRequest(const FotipV2::Frame& request, FotipV2::Frame* reply, FotipV2::HeaderFlags* replyFlags);
-		void processWriteRequest(const FotipV2::Frame& request, FotipV2::Frame* reply, FotipV2::HeaderFlags* replyFlags);
-		void processApplyRequest(const FotipV2::Frame& request, FotipV2::Frame* reply, FotipV2::HeaderFlags* replyFlags);
+		void processReadRequest(const FotipV2::Frame& request,
+								FotipV2::Frame* reply, bool*
+								sendReplyImmediately);
+
+		void processWriteRequest(const FotipV2::Frame& request,
+								 FotipV2::Frame* reply,
+								 bool* sendReplyImmediately);
+
+		void processApplyRequest(bool* sendReplyImmediately);
 
 		void readFrameData(quint32 startFrameAddrW, FotipV2::Frame* reply);
 
 	private:
-		TuningServiceCommunicator* m_tsCommunicator = nullptr;
+		TuningServiceCommunicator& m_tsCommunicator;
 		QString m_lmEquipmentID;
 		QString m_portEquipmentID;
 		HostAddressPort m_tuningSourceIP;
@@ -187,8 +262,16 @@ namespace Sim
 
 		QMutex m_tuningDataMutex;
 		std::shared_ptr<RamArea> m_tuningData;
+		std::atomic<bool> m_setSorChassisState = { false };
 
 		std::vector<quint8> m_tuningDataReadBuffer;
+
+		// delayed reply processing
+		//
+		std::optional<qint64> m_waitingConfirmationID;
+		int m_receivedConfirmationsCount = 0;
+
+		RupFotipV2 m_delayedReply;
 	};
 }
 

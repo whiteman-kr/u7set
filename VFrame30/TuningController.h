@@ -38,7 +38,7 @@ namespace VFrame30
 		\code
 		// Request signal state by identifier "#APPSIGNALID"
 		//
-		var state = tuning.signalState("#APPSIGNALID");
+		let state = tuning.signalState("#APPSIGNALID");
 
 		if (state == undefined)
 		{
@@ -58,7 +58,7 @@ namespace VFrame30
 
 		//Increase signal value to 10
 		//
-		var newValue = state.Value;
+		let newValue = state.Value;
 
 		newValue =+ 10;
 

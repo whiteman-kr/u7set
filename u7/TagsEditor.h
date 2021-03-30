@@ -17,6 +17,8 @@ public:
 	bool readOnly() const override;
 	void setReadOnly(bool value) override;
 
+	bool externalOkCancelButtons() const override;
+
 private slots:
 	void tagsTextChanged(const QString& text);
 	void tagsListItemChanged(QTreeWidgetItem* item, int column);
@@ -33,6 +35,9 @@ private:
 	QLineEdit* m_textEdit = nullptr;
 	QLineEdit* m_filterEdit = nullptr;
 	QTreeWidget* m_tagsList = nullptr;
+
+	QPushButton* m_okButton = nullptr;
+	QPushButton* m_cancelButton = nullptr;
 
 	static QString m_filterText;
 

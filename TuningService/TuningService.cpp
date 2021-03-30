@@ -10,8 +10,6 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------------
 
-	const QString TuningServiceWorker::SETTING_TUNING_SIM_IP("TuningSimIP");
-
 	TuningServiceWorker::TuningServiceWorker(const SoftwareInfo& softwareInfo,
 											 const QString& serviceName,
 											 int& argc,
@@ -42,36 +40,31 @@ namespace Tuning
 
 	void TuningServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 	{
-		serviceInfo.set_clientrequestip(m_cfgSettings.clientRequestIP.address32());
-		serviceInfo.set_clientrequestport(m_cfgSettings.clientRequestIP.port());
+		QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::TuningService, m_cfgSettings);
+
+		serviceInfo.set_settingsxml(xmlString.toStdString());
 	}
 
 	void TuningServiceWorker::initCmdLineParser()
 	{
 		CommandLineParser& cp = cmdLineParser();
 
-		cp.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+		cp.addSingleValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
 
-		cp.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1,
+		cp.addSingleValueOption("cfgip1", SoftwareSetting::CFG_SERVICE_IP1,
 								QString("IP-address of first Configuration Service (default port - %1).").
 											arg(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST), "ip[:port]");
-		cp.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2,
+		cp.addSingleValueOption("cfgip2", SoftwareSetting::CFG_SERVICE_IP2,
 								QString("IP-address of second Configuration Service (default port - %1).").
 											arg(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST), "ip[:port]");
-		cp.addSingleValueOption("sim", SETTING_TUNING_SIM_IP,
-								QString("IP-address of Simulator (default port - %1)").arg(PORT_LM_TUNING), "ip[:port]");
 	}
 
 	void TuningServiceWorker::loadSettings()
 	{
-		m_tuningSimIPStr = getStrSetting(SETTING_TUNING_SIM_IP);
-		m_tuningSimIP.setAddressPortStr(m_tuningSimIPStr, PORT_LM_TUNING);
-
-		DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_TUNING_SIM_IP).arg(m_tuningSimIP.addressPortStrIfSet()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("Settings from command line or registry:")));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
 	}
 
 	void TuningServiceWorker::clear()
@@ -365,7 +358,22 @@ namespace Tuning
 
 		bool result = true;
 
-		result &= m_cfgSettings.readFromXml(xml);
+		result = softwareSettingsSet().readFromXml(cfgXmlData);
+
+		if (result == true)
+		{
+			std::shared_ptr<const TuningServiceSettings> typedSettingsPtr =
+					softwareSettingsSet().getSettingsProfile<TuningServiceSettings>(SettingsProfile::DEFAULT);
+
+			if (typedSettingsPtr != nullptr)
+			{
+				m_cfgSettings = *typedSettingsPtr;
+			}
+			else
+			{
+				result = false;
+			}
+		}
 
 		if  (result == true)
 		{
@@ -468,7 +476,11 @@ namespace Tuning
 
 			// create TuningSourceWorkerThreads and fill m_sourceWorkerThreadMap
 			//
-			TuningSourceThread* sourceThread = new TuningSourceThread(m_cfgSettings, tuningSource, m_logger, m_tuningLog);
+			TuningSourceThread* sourceThread = new TuningSourceThread(m_cfgSettings,
+																	  tuningSource,
+																	  sessionParams().softwareRunMode,
+																	  m_logger,
+																	  m_tuningLog);
 
 			m_sourceThreadMap.insert(tuningSource.lmAddress32(), sourceThread);
 
@@ -569,38 +581,36 @@ namespace Tuning
 
 	bool TuningServiceWorker::isSimulationMode() const
 	{
-		return m_tuningSimIP.isSet();
+		return sessionParams().softwareRunMode == E::SoftwareRunMode::Simulation;
 	}
 
-	void TuningServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+	void TuningServiceWorker::onConfigurationReady(const QByteArray configurationXmlData,
+												   const BuildFileInfoArray buildFileInfoArray,
+												   SessionParams sessionParams,
+												   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 	{
+		setSessionParams(sessionParams);
+
+		Q_UNUSED(configurationXmlData);
+
 		if (m_cfgLoaderThread == nullptr)
 		{
 			return;
 		}
 
-		DEBUG_LOG_MSG(m_logger, QString("Configuration is ready"));
+		const TuningServiceSettings* typedSettingsPtr = dynamic_cast<const TuningServiceSettings*>(curSettingsProfile.get());
 
-		bool result = true;
-
-		result = readConfiguration(configurationXmlData);
-
-		if (result == false)
+		if (typedSettingsPtr == nullptr)
 		{
-			DEBUG_LOG_ERR(m_logger, QString("Configuration reading error"));
+			DEBUG_LOG_MSG(logger(), "Settings casting error!");
 			return;
 		}
 
-		//
-
-		if (m_tuningSimIP.isSet() == true)
-		{
-			m_cfgSettings.tuningSimIP = m_tuningSimIP;
-		}
-
-		//
+		m_cfgSettings = *typedSettingsPtr;
 
 		DEBUG_LOG_MSG(m_logger, QString("Configuration reading success"));
+
+		bool result = true;
 
 		for(Builder::BuildFileInfo bfi : buildFileInfoArray)
 		{

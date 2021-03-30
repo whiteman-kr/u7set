@@ -432,8 +432,8 @@ void DataSourcesStateModel::reloadList()
 }
 
 
-AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget *parent) :
-	BaseServiceStateWidget(softwareInfo, udpIp, udpPort, parent),
+AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent) :
+	BaseServiceStateWidget(softwareInfo, service, udpIp, udpPort, parent),
 	m_tcpClientSocket(nullptr),
 	m_tcpClientThread(nullptr)
 {
@@ -466,18 +466,46 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, qui
 	// Clients
 	addClientsTab(false);
 
+	// Parameters
+	QTableView* parametersTableView = addTabWithTableView(250, "Parameters");
+
+	m_parametersTabModel = new QStandardItemModel(3, 2, this);
+	parametersTableView->setModel(m_parametersTabModel);
+
+	m_parametersTabModel->setHeaderData(0, Qt::Horizontal, "Property");
+	m_parametersTabModel->setHeaderData(1, Qt::Horizontal, "Value");
+
+	m_parametersTabModel->setData(m_parametersTabModel->index(0, 0), "Equipment ID");
+	m_parametersTabModel->setData(m_parametersTabModel->index(1, 0), "Configuration IP 1");
+	m_parametersTabModel->setData(m_parametersTabModel->index(2, 0), "Configuration IP 2");
+
 	// Settings
 	QTableView* settingsTableView = addTabWithTableView(250, "Settings");
 
-	m_settingsTabModel = new QStandardItemModel(3, 2, this);
+	m_settingsTabModel = new QStandardItemModel(12, 2, this);
 	settingsTableView->setModel(m_settingsTabModel);
 
 	m_settingsTabModel->setHeaderData(0, Qt::Horizontal, "Property");
 	m_settingsTabModel->setHeaderData(1, Qt::Horizontal, "Value");
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(0, 0), "Equipment ID");
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 0), "Configuration IP 1");
-	m_settingsTabModel->setData(m_settingsTabModel->index(2, 0), "Configuration IP 2");
+	m_settingsTabModel->setData(m_settingsTabModel->index(0, 0), "ConfigService1 ID");
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 0), "ConfigService1 IP");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 0), "ConfigService2 ID");
+	m_settingsTabModel->setData(m_settingsTabModel->index(3, 0), "ConfigService2 IP");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(4, 0), "AppData Receiving IP");
+	m_settingsTabModel->setData(m_settingsTabModel->index(5, 0), "AppData Receiving NetMask");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(6, 0), "AutoArchive Interval");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(7, 0), "ArchService ID");
+	m_settingsTabModel->setData(m_settingsTabModel->index(8, 0), "ArchService IP");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(9, 0), "Client Request IP");
+	m_settingsTabModel->setData(m_settingsTabModel->index(10, 0), "Client Request NetMask");
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(11, 0), "Realtime Trends Request IP");
 
 	// Log
 	addTab(new QTableView(this), tr("Log"));
@@ -516,11 +544,39 @@ void AppDataServiceWidget::updateServiceState()
 	stateTabModel()->setData(stateTabModel()->index(14, 1), static_cast<qint64>(state.errsimversion()));
 	stateTabModel()->setData(stateTabModel()->index(15, 1), static_cast<qint64>(state.errunknownappdatasourceip()));
 	stateTabModel()->setData(stateTabModel()->index(16, 1), static_cast<qint64>(state.errrupframecrc()));
+
+	stateTabModel()->setData(stateTabModel()->index(17, 1), static_cast<qint64>(state.errnotexpectedsimpacket()));
+
+	auto appDataSettings = std::dynamic_pointer_cast<AppDataServiceSettings>(m_service.settings);
+
+	if (appDataSettings == nullptr)
+	{
+		return;
+	}
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), appDataSettings->cfgServiceID1);
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), appDataSettings->cfgServiceIP1.addressStr());
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), appDataSettings->cfgServiceID2);
+	m_settingsTabModel->setData(m_settingsTabModel->index(3, 1), appDataSettings->cfgServiceIP2.addressStr());
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(4, 1), appDataSettings->appDataReceivingIP.addressStr());
+	m_settingsTabModel->setData(m_settingsTabModel->index(5, 1), appDataSettings->appDataReceivingNetmask.toString());
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(6, 1), QString::number(appDataSettings->autoArchiveInterval));
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(7, 1), appDataSettings->archServiceID);
+	m_settingsTabModel->setData(m_settingsTabModel->index(8, 1), appDataSettings->archServiceIP.addressStr());
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(9, 1), appDataSettings->clientRequestIP.addressStr());
+	m_settingsTabModel->setData(m_settingsTabModel->index(10, 1), appDataSettings->clientRequestNetmask.toString());
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(11, 1), appDataSettings->rtTrendsRequestIP.addressStr());
 }
 
 void AppDataServiceWidget::updateStateInfo()
 {
-	if (m_serviceInfo.servicestate() == ServiceState::Work)
+	if (m_service.information.servicestate() == ServiceState::Work)
 	{
 		stateTabModel()->setData(stateTabModel()->index(5, 0), "Connected client quantity");
 		stateTabModel()->setData(stateTabModel()->index(6, 0), "Connected to CfgService");
@@ -538,6 +594,8 @@ void AppDataServiceWidget::updateStateInfo()
 		stateTabModel()->setData(stateTabModel()->index(15, 0), "Unknown AppDataSource IP errors");
 		stateTabModel()->setData(stateTabModel()->index(16, 0), "RUP frames CRC errors");
 
+		stateTabModel()->setData(stateTabModel()->index(17, 0), "Not expected Simulated packets");
+
 		if (m_tcpClientSocket == nullptr || m_tcpClientSocket->stateIsReady() == false)
 		{
 			stateTabModel()->setData(stateTabModel()->index(6, 1), "???");
@@ -549,8 +607,8 @@ void AppDataServiceWidget::updateStateInfo()
 		}
 	}
 
-	quint32 ip = m_serviceInfo.clientrequestip();
-	qint32 port = m_serviceInfo.clientrequestport();
+	quint32 ip = m_service.clientRequestIp;
+	qint32 port = m_service.clientRequestPort;
 
 	quint32 workingIp = getWorkingClientRequestIp();
 
@@ -637,16 +695,16 @@ void AppDataServiceWidget::updateClientsInfo()
 	updateClientsModel(m_tcpClientSocket->clients());
 }
 
-void AppDataServiceWidget::updateSettings()
+void AppDataServiceWidget::updateServiceParameters()
 {
 	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->settingsIsReady() == false)
 	{
 		assert(false);
 		return;
 	}
-	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), m_tcpClientSocket->equipmentID());
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), m_tcpClientSocket->configIP1());
-	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), m_tcpClientSocket->configIP2());
+	m_parametersTabModel->setData(m_parametersTabModel->index(0, 1), m_tcpClientSocket->equipmentID());
+	m_parametersTabModel->setData(m_parametersTabModel->index(1, 1), m_tcpClientSocket->configIP1());
+	m_parametersTabModel->setData(m_parametersTabModel->index(2, 1), m_tcpClientSocket->configIP2());
 }
 
 void AppDataServiceWidget::clearServiceData()
@@ -654,9 +712,9 @@ void AppDataServiceWidget::clearServiceData()
 	stateTabModel()->setData(stateTabModel()->index(6, 1), "???");
 	stateTabModel()->setData(stateTabModel()->index(7, 1), "???");
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), "???");
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), "???");
-	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), "???");
+	m_parametersTabModel->setData(m_parametersTabModel->index(0, 1), "???");
+	m_parametersTabModel->setData(m_parametersTabModel->index(1, 1), "???");
+	m_parametersTabModel->setData(m_parametersTabModel->index(2, 1), "???");
 }
 
 void AppDataServiceWidget::onAppDataSourceDoubleClicked(const QModelIndex &index)
@@ -724,7 +782,7 @@ void AppDataServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 
 	connect(m_tcpClientSocket, &TcpAppDataClient::stateLoaded, this, &AppDataServiceWidget::updateServiceState);
 
-	connect(m_tcpClientSocket, &TcpAppDataClient::settingsLoaded, this, &AppDataServiceWidget::updateSettings);
+	connect(m_tcpClientSocket, &TcpAppDataClient::settingsLoaded, this, &AppDataServiceWidget::updateServiceParameters);
 
 	connect(m_tcpClientSocket, &TcpAppDataClient::disconnected, this, &AppDataServiceWidget::clearServiceData);
 

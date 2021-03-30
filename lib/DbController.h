@@ -2,11 +2,11 @@
 
 #include <QVector>
 #include <QThread>
-
 #include "../lib/DbStruct.h"
 #include "../lib/DbWorker.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/DbProgress.h"
+
 
 class DbController : public QObject
 {
@@ -71,10 +71,15 @@ public:
 	bool isFileExists(QString fileName, int parentId, int* fileId, QWidget* parentWidget);
 
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, bool removeDeleted, QWidget* parentWidget);
+	bool getFileList(std::vector<DbFileInfo>* files, DbDir systemDir, bool removeDeleted, QWidget* parentWidget);
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget);
+	bool getFileList(std::vector<DbFileInfo>* files, DbDir systemDir, QString filter, bool removeDeleted, QWidget* parentWidget);
 
 	bool getFileListTree(DbFileTree* filesTree, int parentId, bool removeDeleted, QWidget* parentWidget);
+	bool getFileListTree(DbFileTree* filesTree, DbDir parentSystemDir, bool removeDeleted, QWidget* parentWidget);
+
 	bool getFileListTree(DbFileTree* filesTree, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget);
+	bool getFileListTree(DbFileTree* filesTree, DbDir parentSystemDir, QString filter, bool removeDeleted, QWidget* parentWidget);
 
 	bool getFileInfo(int parentId, QString fileName, DbFileInfo* out, QWidget* parentWidget);
 	bool getFileInfo(int fileId, DbFileInfo* out, QWidget* parentWidget);
@@ -86,6 +91,8 @@ public:
 	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId, QWidget* parentWidget);
 	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, QWidget* parentWidget);
 	bool addFile(const std::shared_ptr<DbFile>& file, int parentId, QWidget* parentWidget);
+	bool addFile(const std::shared_ptr<DbFile>& file, DbDir systemDir, QWidget* parentWidget);
+
 	bool addUniqueFile(const std::shared_ptr<DbFile>& file, int parentId, int uniqueFromFileId, QWidget* parentWidget);
 
 	bool deleteFiles(std::vector<std::shared_ptr<DbFileInfo> >* files, QWidget* parentWidget);
@@ -149,6 +156,7 @@ public:
 	bool getCheckedOutSignalsIDs(QVector<int>* signalIDs, QWidget* parentWidget);
 	bool addSignal(E::SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget);
 	bool getLatestSignalsWithoutProgress(QVector<int> signalIDs, QVector<Signal>* signalsArray, QWidget* parentWidget);
+	bool getLatestSignalsWithUserID(std::vector<Signal>* out, QWidget* parentWidget);
 
 	bool checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
 	bool setSignalWorkcopy(Signal* signal, ObjectState* objectState, QWidget* parentWidget);
@@ -160,8 +168,8 @@ public:
 
 	bool checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState, QWidget* parentWidget);
 
-	bool autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, std::vector<Signal>* addedSignals, QWidget* parentWidget);
-	bool autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, QWidget* parentWidget);
+	bool autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<Signal>* addedSignals, QWidget* parentWidget);
+	bool autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, QWidget* parentWidget);
 
 	bool getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs, QWidget* parentWidget);
 	bool getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs, QWidget* parentWidget);
@@ -170,6 +178,9 @@ public:
 
 	bool getSignalHistory(int signalID, std::vector<DbChangeset>* out, QWidget* parentWidget);
 	bool getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out, QWidget* parentWidget);
+
+	bool getSpecificSignals(int changesetId, std::vector<Signal>* out, QWidget* parentWidget);
+	bool getSpecificSignals(QDateTime date, std::vector<Signal>* out, QWidget* parentWidget);
 
 	bool hasCheckedOutSignals(bool* hasCheckedOut, QWidget* parentWidget);
 
@@ -264,6 +275,7 @@ signals:
 	void signal_getLatestSignal(int signalID, Signal* signal);
 	void signal_getLatestSignals(QVector<int> signalIDs, QVector<Signal>* signalsArray);
 	void signal_getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray);
+	void signal_getLatestSignalsWithUserID(std::vector<Signal>* out);
 	void signal_getCheckedOutSignalsIDs(QVector<int>* signalIDs);
 	void signal_addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
 
@@ -275,8 +287,8 @@ signals:
 	bool signal_undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectState>* objectStates);
 	void signal_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
 
-	void signal_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, std::vector<Signal>* addedSignals);
-	void signal_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals);
+	void signal_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<Signal>* addedSignals);
+	void signal_autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals);
 
 	void signal_getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs);
 	void signal_getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs);
@@ -285,6 +297,8 @@ signals:
 
 	void signal_getSignalHistory(int signalID, std::vector<DbChangeset>* out);
 	void signal_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out);
+	void signal_getSpecificSignals(int changesetId, std::vector<Signal>* out);
+	void signal_getSpecificSignals(QDateTime date, std::vector<Signal>* out);
 	void signal_hasCheckedOutSignals(bool* hasCheckedOutSignals);
 
 	// Build management
@@ -339,21 +353,9 @@ public:
 	void setCurrentProject(const DbProject& project);
 
 	int rootFileId() const;			// Root file
-	int schemaFileId() const;		// $root$/Schemas file id
-	int afblFileId() const;			// Application Functional Block Library
-	int ufblFileId() const;			// User Functional Block Library
-	int alFileId() const;			// Application Logic
-	int hcFileId() const;			// Hardware Configuration
-	int hpFileId() const;			// Hadware Presets
-	int mcFileId() const;			// Module Configuration
-	int mvsFileId() const;			// Monitor Video Schemas
-	int tvsFileId() const;			// Tuning Video Schemas
-	int dvsFileId() const;			// Diaginostics Video Schemas
-	int connectionsFileId() const;	// Connections
-	int busTypesFileId() const;		// BusTypes
-	int etcFileId() const;			//
-	int testsFileId() const;		// Folder for tests ($root$/Tests)
-	int simTestsFileId() const;		// Folder for sim tests ($root$/Tests/SimTests)
+
+	int systemFileId(DbDir dir) const;				// Get project fileId for dir
+	DbFileInfo systemFileInfo(DbDir dir) const;		// Get project fileId for dir
 
 	std::vector<DbFileInfo> systemFiles() const;
 

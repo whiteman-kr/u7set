@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QSqlQuery>
-#include <QMutex>
+#include <QReadWriteLock>
 
 #include "DbStruct.h"
 #include "../lib/Signal.h"
@@ -51,22 +51,9 @@ public:
     static int databaseVersion();
     bool isProjectOpened() const;
 
-    int rootFileId() const;
-    int afblFileId() const;
-	int schemasFileId() const;
-	int ufblFileId() const;
-    int alFileId() const;
-    int hcFileId() const;
-    int hpFileId() const;
-    int mvsFileId() const;
-	int tvsFileId() const;
-    int dvsFileId() const;
-    int mcFileId() const;
-	int connectionsFileId() const;
-	int busTypesFileId() const;
-	int etcFileId() const;
-	int testsFileId() const;
-	int simTestsFileId() const;
+	int rootFileId() const;							// Get project fileId for dir $root$
+	int systemFileId(DbDir dir) const;				// Get project fileId for dir
+	DbFileInfo systemFileInfo(DbDir dir) const;		// Get project fileId for dir
 
     std::vector<DbFileInfo> systemFiles() const;
 
@@ -117,6 +104,7 @@ public slots:
 
 	void slot_getFullPathFilesInfo(const std::vector<QString>* fullPathFilenames, std::vector<DbFileInfo>* out);
 	bool worker_getFilesInfo(const std::vector<QString>& fullPathFileNames, std::vector<DbFileInfo>* out);
+	bool worker_getFileInfo(const QString& fullPathFileName, DbFileInfo* out);
 
 	void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId);
     void slot_deleteFiles(std::vector<DbFileInfo>* files);
@@ -161,6 +149,7 @@ public slots:
     void slot_getLatestSignal(int signalID, Signal* signal);
 	void slot_getLatestSignals(QVector<int> signalIDs, QVector<Signal>* signalsArray);
 	void slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<Signal>* signalArray);
+	void slot_getLatestSignalsWithUserID(std::vector<Signal>* out);
 	void slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs);
 	void slot_addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
 
@@ -177,8 +166,8 @@ public slots:
 
     void slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
 
-	void slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, std::vector<Signal>* addedSignals);
-    void slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals);
+	void slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<Signal>* addedSignals);
+    void slot_autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals);
 
 	bool isSignalWithEquipmentIDExists(const QString& equipmentID);
 
@@ -188,7 +177,13 @@ public slots:
 	void slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QMultiHash<QString, int>* signalIDs);
 
 	void slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out);
+
 	void slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out);
+
+	void slot_getSpecificSignals(int changesetId, std::vector<Signal>* out);
+	void slot_getSpecificSignals(QDateTime date, std::vector<Signal>* out);
+
+	void readSignalsToVector(QSqlQuery& q, std::vector<Signal>* out);
 
 	void slot_hasCheckedOutSignals(bool* hasCheckedOut);
 
@@ -265,7 +260,7 @@ private:
 
 
 private:
-    mutable QMutex m_mutex;
+	mutable QReadWriteLock m_lock;
 
     QString m_host;
     int m_port;
@@ -277,23 +272,7 @@ private:
     DbUser m_currentUser;
     DbProject m_currentProject;
 
-	int m_afblFileId = -1;			// Application Functional Block Library
-	int m_schemasFileId = -1;		// User Functional Block Libabry
-	int m_ufblFileId = -1;			// User Functional Block Libabry
-	int m_alFileId = -1;			// Application Logic
-	int m_hcFileId = -1;			// Hardware Configuration
-	int m_hpFileId = -1;			// Hardware Presets
-	int m_mvsFileId = -1;			// Monitor Visualization Schemas
-	int m_tvsFileId = -1;			// TuningClient Visualization Schemas
-	int m_dvsFileId = -1;			// Diagnostics Visualization Schemas
-	int m_mcFileId = -1;			// Module Configuration Template
-	int m_connectionsFileId = -1;	// Connections
-	int m_busTypesFileId = -1;		// BusTypes
-	int m_etcFileId = -1;			//
-	int m_testsFileId = -1;			// Folder for tests ($root$/Tests)
-	int m_simTestsFileId = -1;		// Folder for sim tests ($root$/Tests/SimTests)
-
-    std::vector<DbFileInfo> m_systemFiles;		// All system files
+	std::map<DbDir, DbFileInfo>	m_systemFiles;		// All system files
 
     static const UpgradeItem upgradeItems[];
 

@@ -41,26 +41,26 @@ void StatisticsItem::setSignal(Metrology::Signal* pSignal)
 {
 	m_pSignal = pSignal;
 
-	setSignalConnectionType(pSignal);
+	setConnectionType(pSignal);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString StatisticsItem::signalConnectionTypeStr() const
+QString StatisticsItem::connectionTypeStr() const
 {
-	if (m_signalConnectionType < 0 || m_signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (ERR_METROLOGY_CONNECTION_TYPE(m_connectionType) == true)
 	{
-		return QT_TRANSLATE_NOOP("StatisticBase.cpp", "Input is not set");
+		return QT_TRANSLATE_NOOP("StatisticsBase", "Input is not set");
 	}
 
-	return qApp->translate("SignalConnectionBase.h", SignalConnectionType[m_signalConnectionType]);
+	return qApp->translate("MetrologyConnection", Metrology::ConnectionTypeCaption(m_connectionType).toUtf8());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsItem::setSignalConnectionType(Metrology::Signal* pSignal)
+void StatisticsItem::setConnectionType(Metrology::Signal* pSignal)
 {
-	m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+	m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 	if (pSignal == nullptr || pSignal->param().isValid() == false)
 	{
@@ -69,23 +69,23 @@ void StatisticsItem::setSignalConnectionType(Metrology::Signal* pSignal)
 
 	if (pSignal->param().isInput() == true)
 	{
-		m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;
+		m_connectionType = Metrology::ConnectionType::Unused;
 		return;
 	}
 
-	int connectionIndex = theSignalBase.signalConnections().findIndex(MEASURE_IO_SIGNAL_TYPE_OUTPUT, pSignal);
+	int connectionIndex = theSignalBase.connections().findConnectionIndex(Metrology::ConnectionIoType::Destination, pSignal);
 	if (connectionIndex == -1)
 	{
 		return;
 	}
 
-	const SignalConnection& connection = theSignalBase.signalConnections().connection(connectionIndex);
+	const Metrology::Connection& connection = theSignalBase.connections().connection(connectionIndex);
 	if (connection.isValid() == false)
 	{
 		return;
 	}
 
-	m_signalConnectionType = connection.type();
+	m_connectionType = connection.type();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -105,7 +105,7 @@ QString StatisticsItem::measureCountStr() const
 void StatisticsItem::clear()
 {
 	m_pSignal = nullptr;
-	m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+	m_connectionType = Metrology::ConnectionType::NoConnectionType;
 	m_pComparator = nullptr;
 
 	m_measureCount = 0;
@@ -118,16 +118,18 @@ QString StatisticsItem::stateStr() const
 {
 	if (m_measureCount == 0)
 	{
-		return QT_TRANSLATE_NOOP("StatisticBase.cpp", "Not measured");
+		return QT_TRANSLATE_NOOP("StatisticsBase", "Not measured");
 	}
 
 	QString state;
 
 	switch (m_state)
 	{
-		case State::Failed:		state = QT_TRANSLATE_NOOP("StatisticBase.cpp", "Failed");	break;
-		case State::Success:	state = QT_TRANSLATE_NOOP("StatisticBase.cpp", "Ok");		break;
-		default:				assert(0);													break;
+		case State::Failed:		state = QT_TRANSLATE_NOOP("StatisticsBase", "Failed");	break;
+		case State::Success:	state = QT_TRANSLATE_NOOP("StatisticsBase", "Ok");		break;
+		default:
+			assert(0);
+			state = QT_TRANSLATE_NOOP("StatisticsBase", "Unknown");
 	}
 
 	return state;
@@ -137,12 +139,12 @@ QString StatisticsItem::stateStr() const
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticsBase::StatisticsBase(QObject *parent) :
+StatisticsBase::StatisticsBase(QObject* parent) :
 	QObject(parent)
 {
 	QMutexLocker l(&m_signalMutex);
 
-	m_statisticList.resize(MEASURE_TYPE_COUNT);
+	m_statisticList.resize(Measure::TypeCount);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -157,8 +159,8 @@ void StatisticsBase::clear()
 {
 	QMutexLocker l(&m_signalMutex);
 
-	int listCount = m_statisticList.count();
-	for(int i = 0; i < listCount; i++)
+	quint64 listCount = m_statisticList.size();
+	for(quint64 i = 0; i < listCount; i++)
 	{
 		m_statisticList[i].clear();
 	}
@@ -171,28 +173,28 @@ void StatisticsBase::clear()
 
 int StatisticsBase::count() const
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return 0;
 	}
 
 	QMutexLocker l(&m_signalMutex);
 
-	return m_statisticList[m_measureType].count();
+	return TO_INT(m_statisticList[static_cast<quint64>(m_measureType)].size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 int StatisticsBase::count(int measureType) const
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return 0;
 	}
 
 	QMutexLocker l(&m_signalMutex);
 
-	return m_statisticList[measureType].count();
+	return TO_INT(m_statisticList[static_cast<quint64>(measureType)].size());
 }
 
 
@@ -202,12 +204,12 @@ void StatisticsBase::createSignalList()
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (m_statisticList.count() <= MEASURE_TYPE_LINEARITY)
+	if (m_statisticList.size() <= Measure::Type::Linearity)
 	{
 		return;
 	}
 
-	m_statisticList[MEASURE_TYPE_LINEARITY].clear();
+	m_statisticList[Measure::Type::Linearity].clear();
 
 	QElapsedTimer responseTime;
 	responseTime.start();
@@ -254,13 +256,13 @@ void StatisticsBase::createSignalList()
 
 		if (param.isInternal() == true /*|| param.isOutput() == true */)
 		{
-			if (si.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNDEFINED)
+			if (ERR_METROLOGY_CONNECTION_TYPE(si.connectionType()) == true)
 			{
 				continue;
 			}
 		}
 
-		m_statisticList[MEASURE_TYPE_LINEARITY].append(si);
+		m_statisticList[Measure::Type::Linearity].push_back(si);
 	}
 
 	qDebug() << __FUNCTION__ << " Time for create: " << responseTime.elapsed() << " ms";
@@ -272,12 +274,12 @@ void StatisticsBase::createComparatorList()
 {
 	QMutexLocker l(&m_signalMutex);
 
-	if (m_statisticList.count() <= MEASURE_TYPE_COMPARATOR)
+	if (m_statisticList.size() <= Measure::Type::Comparators)
 	{
 		return;
 	}
 
-	m_statisticList[MEASURE_TYPE_COMPARATOR].clear();
+	m_statisticList[Measure::Type::Comparators].clear();
 
 	QElapsedTimer responseTime;
 	responseTime.start();
@@ -338,14 +340,14 @@ void StatisticsBase::createComparatorList()
 			/*
 			if (param.isInternal() == true)
 			{
-				if (si.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNDEFINED)
+				if (ERR_METROLOGY_CONNECTION_TYPE(si.connectionType()) == true)
 				{
 					continue;
 				}
 			}
 			*/
 
-			m_statisticList[MEASURE_TYPE_COMPARATOR].append(si);
+			m_statisticList[Measure::Type::Comparators].push_back(si);
 		}
 	}
 
@@ -354,95 +356,78 @@ void StatisticsBase::createComparatorList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsBase::updateConnections()
-{
-	QMutexLocker l(&m_signalMutex);
-
-	int listCount = m_statisticList.count();
-	for(int n = 0; n < listCount; n++)
-	{
-		int itemCount = m_statisticList[n].count();
-		for(int i = 0; i < itemCount; i++)
-		{
-			m_statisticList[n][i].setSignalConnectionType(m_statisticList[n][i].signal());
-		}
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 StatisticsItem StatisticsBase::item(int index) const
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return StatisticsItem();
 	}
 
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_statisticList[m_measureType].count())
+	if (index < 0 || index >= TO_INT(m_statisticList[static_cast<quint64>(m_measureType)].size()))
 	{
 		return StatisticsItem();
 	}
 
-	return m_statisticList[m_measureType][index];
+	return m_statisticList[static_cast<quint64>(m_measureType)][static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 StatisticsItem StatisticsBase::item(int measureType, int index) const
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return StatisticsItem();
 	}
 
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_statisticList[measureType].count())
+	if (index < 0 || index >= TO_INT(m_statisticList[static_cast<quint64>(measureType)].size()))
 	{
 		return StatisticsItem();
 	}
 
-	return m_statisticList[measureType][index];
+	return m_statisticList[static_cast<quint64>(measureType)][static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 StatisticsItem* StatisticsBase::itemPtr(int measureType, int index)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return nullptr;
 	}
 
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_statisticList[measureType].count())
+	if (index < 0 || index >= TO_INT(m_statisticList[static_cast<quint64>(measureType)].size()))
 	{
 		return nullptr;
 	}
 
-	return &m_statisticList[measureType][index];
+	return &m_statisticList[static_cast<quint64>(measureType)][static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void StatisticsBase::setItem(int measureType, int index, const StatisticsItem& item)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return;
 	}
 
 	QMutexLocker l(&m_signalMutex);
 
-	if (index < 0 || index >= m_statisticList[measureType].count())
+	if (index < 0 || index >= TO_INT(m_statisticList[static_cast<quint64>(measureType)].size()))
 	{
 		return;
 	}
 
-	m_statisticList[measureType][index] = item;
+	m_statisticList[static_cast<quint64>(measureType)][static_cast<quint64>(index)] = item;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

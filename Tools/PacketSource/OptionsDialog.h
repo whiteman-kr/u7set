@@ -1,6 +1,7 @@
 #ifndef SOURCEOPTIONS_H
 #define SOURCEOPTIONS_H
 
+#include <QDesktopWidget>
 #include <QDialog>
 #include <QGroupBox>
 #include <QVBoxLayout>
@@ -22,56 +23,35 @@ class OptionsDialog : public QDialog
 
 public:
 
-	explicit OptionsDialog(const BuildInfo& buildInfo, QWidget *parent = nullptr);
-	virtual ~OptionsDialog();
-
-private:
-
-	BuildInfo				m_buildInfo;
-
-	QLineEdit*				m_buildDirPathEdit = nullptr;
-	QPushButton*			m_selectBuildPathBtn = nullptr;
-	QLineEdit*				m_signalsFileEdit = nullptr;
-	QLineEdit*				m_sourceCfgFileEdit = nullptr;
-	QLineEdit*				m_sourcesFileEdit = nullptr;
-
-	QCheckBox*				m_enableReloadCheck = nullptr;
-	QLineEdit*				m_timeoutReloadEdit = nullptr;
-
-	QLineEdit*				m_appDataSrvIPEdit = nullptr;
-	QLineEdit*				m_ualTesterIPEdit = nullptr;
-
-	QDialogButtonBox*		m_buttonBox = nullptr;
-
-	bool					createInterface();
-
-	bool					loadBuildDirPath(const QString& buildDirPath);
-
-	void					saveWindowState();
-	void					restoreWindowState();
+	explicit OptionsDialog(const BuildOption& buildOption, QWidget *parent = nullptr);
+	virtual ~OptionsDialog() override;
 
 public:
 
-	BuildInfo&				buildInfo() { return m_buildInfo; }
+	BuildOption& buildOption() { return m_buildOption; }
 
-protected:
+private:
 
-	void					closeEvent(QCloseEvent* e);
+	BuildOption m_buildOption;
 
-signals:
+	QLineEdit* m_cfgSrvIDEdit = nullptr;
+	QLineEdit* m_cfgSrvIPEdit = nullptr;
+	QLineEdit* m_cfgSrvPortEdit = nullptr;
+	QLineEdit* m_appDataSrvIDEdit = nullptr;
+
+	QLineEdit* m_ualTesterIPEdit = nullptr;
+
+	QDialogButtonBox* m_buttonBox = nullptr;
+
+	bool createInterface();
 
 private slots:
 
 	// slots of buttons
 	//
-	void					onSelectBuildDirPath();
-	void					onEnableReload();
-	void					onTimeoutReload(const QString &sec);
-	void					onAppDataSrvIP(const QString &ip);
-	void					onUalTesterIP(const QString &ip);
+	void onUalTesterIP(const QString &ip);
 
-	void					onOk();
-	void					onCancel();
+	void onOk();
 };
 
 // ==============================================================================================

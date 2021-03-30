@@ -21,8 +21,6 @@ MonitorView::MonitorView(MonitorSchemaManager* schemaManager,
 	setTuningController(tuningController);
 	setLogController(logController);
 
-	qDebug() << Q_FUNC_INFO;
-
 	Q_ASSERT(schemaManager);
 	Q_ASSERT(schemaManager->monitorConfigController());
 
@@ -34,7 +32,6 @@ MonitorView::MonitorView(MonitorSchemaManager* schemaManager,
 
 MonitorView::~MonitorView()
 {
-	qDebug() << Q_FUNC_INFO;
 	return;
 }
 

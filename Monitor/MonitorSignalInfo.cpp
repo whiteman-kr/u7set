@@ -6,6 +6,17 @@
 
 bool MonitorSignalInfo::showDialog(QString appSignalId, MonitorConfigController* configController, TcpSignalClient* tcpSignalClient, MonitorCentralWidget* centralWidget)
 {
+	if (appSignalId.startsWith('@') == true)
+	{
+		bool ok = true;
+		AppSignalParam s = theSignals.signalParamByEquipemntId(appSignalId, &ok);
+
+		if (ok == true)
+		{
+			appSignalId = s.appSignalId();
+		}
+	}
+
 	DialogSignalInfo* dsi = DialogSignalInfo::dialogRegistered(appSignalId);
 
 	if (dsi != nullptr)

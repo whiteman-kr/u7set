@@ -1,5 +1,4 @@
-#ifndef TIMESTAMP_H
-#define TIMESTAMP_H
+#pragma once
 
 #include <QtGlobal>
 #include <QMetaType>
@@ -58,52 +57,52 @@ struct TimeStamp
 
 	TimeStamp& operator=(const TimeStamp& src) = default;
 
-	QDateTime toDateTime() const
+	[[nodiscard]] QDateTime toDateTime() const
 	{
 		return QDateTime::fromMSecsSinceEpoch(timeStamp, Qt::UTC);
 	}
 
-	QDate toDate() const
+	[[nodiscard]] QDate toDate() const
 	{
 		return QDateTime::fromMSecsSinceEpoch(timeStamp, Qt::UTC).date();
 	}
 
-	QTime toTime() const
+	[[nodiscard]] QTime toTime() const
 	{
 		return QDateTime::fromMSecsSinceEpoch(timeStamp, Qt::UTC).time();
 	}
 
-	TimeStamp roundedToHour() const
+	[[nodiscard]] TimeStamp roundedToHour() const
 	{
 		return TimeStamp{(timeStamp / 1_hour) * 1_hour};
 	}
 
-	bool operator> (const TimeStamp& value) const
+	bool operator> (const TimeStamp value) const
 	{
 		return this->timeStamp > value.timeStamp;
 	}
 
-	bool operator>= (const TimeStamp& value) const
+	bool operator>= (const TimeStamp value) const
 	{
 		return this->timeStamp >= value.timeStamp;
 	}
 
-	bool operator< (const TimeStamp& value) const
+	bool operator< (const TimeStamp value) const
 	{
 		return this->timeStamp < value.timeStamp;
 	}
 
-	bool operator<= (const TimeStamp& value) const
+	bool operator<= (const TimeStamp value) const
 	{
 		return this->timeStamp <= value.timeStamp;
 	}
 
-	bool operator== (const TimeStamp& value) const
+	bool operator== (const TimeStamp value) const
 	{
 		return this->timeStamp == value.timeStamp;
 	}
 
-	bool operator!= (const TimeStamp& value) const
+	bool operator!= (const TimeStamp value) const
 	{
 		return this->timeStamp != value.timeStamp;
 	}
@@ -128,4 +127,3 @@ struct TimeSpan
 Q_DECLARE_METATYPE(TimeSpan)
 
 
-#endif //TIMESTAMP_H

@@ -10,11 +10,6 @@ TARGET = protobuf
 TEMPLATE = lib
 CONFIG += staticlib
 
-# c++17 support
-#
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17
-
 win32 {
 	CONFIG += warn_off
 }
@@ -24,6 +19,12 @@ msvc {
 	QMAKE_CXXFLAGS += /wd4127
 	QMAKE_CXXFLAGS += /wd4512
 }
+
+# c++20 support -- for better compillation time, some cpps are included to this library,
+# and class PropertyObject is ussing std::clamp what is part cpp17
+#
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 # DESTDIR
 #
@@ -38,7 +39,16 @@ unix {
 
 INCLUDEPATH += ../protobuf
 
+gcc {
+    INCLUDEPATH += /usr/include		# pthread.h is here
+	LIBS += -lpthread
+	DEFINES += HAVE_PTHREAD
+}
+
 SOURCES += \
+    ../Proto/network.pb.cc \
+	../Proto/serialization.pb.cc \
+	../Proto/ProtoSerialization.cpp \
 	google/protobuf/api.pb.cc \
 	google/protobuf/duration.pb.cc \
 	google/protobuf/implicit_weak_message.cc \
@@ -96,6 +106,9 @@ SOURCES += \
 	google/protobuf/stubs/stringprintf.cc
 
 HEADERS += \
+    ../Proto/network.pb.h \
+	../Proto/serialization.pb.h \
+	../Proto/ProtoSerialization.h \
 	google/protobuf/api.pb.h \
 	google/protobuf/duration.pb.h \
 	google/protobuf/implicit_weak_message.h \
@@ -170,4 +183,9 @@ gcc {
 #	SOURCES += google/protobuf/stubs/atomicops_internals_x86_gcc.cc
 #	HEADERS += google/protobuf/stubs/atomicops_internals_x86_gcc.h
 }
+
+DISTFILES += \
+    ../Proto/network.proto \
+    ../Proto/serialization.proto \
+    ../Proto/trends.proto
 

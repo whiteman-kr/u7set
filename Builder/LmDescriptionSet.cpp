@@ -14,11 +14,12 @@ namespace Builder
 		Q_ASSERT(fileName.isEmpty() == false);
 
 		std::vector<DbFileInfo> fileList;
+		int afblFileId = db->systemFileId(DbDir::AfblDir);
 
-		bool result = db->getFileList(&fileList, db->afblFileId(), fileName, true, nullptr);
+		bool result = db->getFileList(&fileList, afblFileId, fileName, true, nullptr);
 		if (result == false)
 		{
-			log->errPDB2001(db->afblFileId(), fileName, db->lastError());
+			log->errPDB2001(afblFileId, fileName, db->lastError());
 			return false;
 		}
 

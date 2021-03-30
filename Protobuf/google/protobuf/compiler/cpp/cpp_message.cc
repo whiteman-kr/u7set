@@ -241,9 +241,9 @@ bool HasHasMethod(const FieldDescriptor* field) {
     return true;
   }
   // For message types without true field presence, only fields with a message
-  // type have a has_$name$() method.
+  // type or inside an one-of have a has_$name$() method.
   return field->cpp_type() == FieldDescriptor::CPPTYPE_MESSAGE ||
-         field->has_optional_keyword();
+         field->has_optional_keyword() || field->real_containing_oneof();
 }
 
 // Collects map entry message type information.
@@ -288,26 +288,6 @@ bool ShouldMarkClassAsFinal(const Descriptor* descriptor,
 
 bool ShouldMarkClearAsFinal(const Descriptor* descriptor,
                             const Options& options) {
-  static std::set<std::string> exclusions{
-  };
-
-  const std::string name = ClassName(descriptor, true);
-  return exclusions.find(name) == exclusions.end() ||
-         options.opensource_runtime;
-}
-
-bool ShouldMarkIsInitializedAsFinal(const Descriptor* descriptor,
-                                    const Options& options) {
-  static std::set<std::string> exclusions{
-  };
-
-  const std::string name = ClassName(descriptor, true);
-  return exclusions.find(name) == exclusions.end() ||
-         options.opensource_runtime;
-}
-
-bool ShouldMarkNewAsFinal(const Descriptor* descriptor,
-                          const Options& options) {
   static std::set<std::string> exclusions{
   };
 
@@ -587,8 +567,6 @@ MessageGenerator::MessageGenerator(
   // Variables that apply to this class
   variables_["classname"] = classname_;
   variables_["classtype"] = QualifiedClassName(descriptor_, options);
-  variables_["scc_info"] =
-      SccInfoSymbol(scc_analyzer_->GetSCC(descriptor_), options_);
   variables_["full_name"] = descriptor_->full_name();
   variables_["superclass"] = SuperClassName(descriptor_, options_);
 
@@ -1029,6 +1007,8 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
         "    ::$proto_ns$::internal::WireFormatLite::$val_wire_type$> "
         "SuperType;\n"
         "  $classname$();\n"
+        "  explicit constexpr $classname$(\n"
+        "      ::$proto_ns$::internal::ConstantInitialized);\n"
         "  explicit $classname$(::$proto_ns$::Arena* arena);\n"
         "  void MergeFrom(const $classname$& other);\n"
         "  static const $classname$* internal_default_instance() { return "
@@ -1046,7 +1026,7 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
             " }\n",
             descriptor_->field(0)->full_name());
       } else {
-        GOOGLE_CHECK(utf8_check == VERIFY);
+        GOOGLE_CHECK_EQ(utf8_check, VERIFY);
         format(
             "  static bool ValidateKey(std::string* s) {\n"
             "#ifndef NDEBUG\n"
@@ -1075,7 +1055,7 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
             " }\n",
             descriptor_->field(1)->full_name());
       } else {
-        GOOGLE_CHECK(utf8_check = VERIFY);
+        GOOGLE_CHECK_EQ(utf8_check, VERIFY);
         format(
             "  static bool ValidateValue(std::string* s) {\n"
             "#ifndef NDEBUG\n"
@@ -1123,6 +1103,8 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
   format(
       "inline $classname$() : $classname$(nullptr) {}\n"
       "virtual ~$classname$();\n"
+      "explicit constexpr "
+      "$classname$(::$proto_ns$::internal::ConstantInitialized);\n"
       "\n"
       "$classname$(const $classname$& from);\n"
       "$classname$($classname$&& from) noexcept\n"
@@ -1194,8 +1176,9 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
   }
 
   format(
-      "static const $classname$& default_instance();\n"
-      "\n");
+      "static const $classname$& default_instance() {\n"
+      "  return *internal_default_instance();\n"
+      "}\n");
 
   // Generate enum values for every field in oneofs. One list is generated for
   // each oneof with an additional *_NOT_SET value.
@@ -1232,13 +1215,13 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
         "\n");
     if (HasDescriptorMethods(descriptor_->file(), options_)) {
       format(
-          "void PackFrom(const ::$proto_ns$::Message& message) {\n"
-          "  _any_metadata_.PackFrom(message);\n"
+          "bool PackFrom(const ::$proto_ns$::Message& message) {\n"
+          "  return _any_metadata_.PackFrom(message);\n"
           "}\n"
-          "void PackFrom(const ::$proto_ns$::Message& message,\n"
+          "bool PackFrom(const ::$proto_ns$::Message& message,\n"
           "              ::PROTOBUF_NAMESPACE_ID::ConstStringParam "
           "type_url_prefix) {\n"
-          "  _any_metadata_.PackFrom(message, type_url_prefix);\n"
+          "  return _any_metadata_.PackFrom(message, type_url_prefix);\n"
           "}\n"
           "bool UnpackTo(::$proto_ns$::Message* message) const {\n"
           "  return _any_metadata_.UnpackTo(message);\n"
@@ -1250,16 +1233,16 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
           "template <typename T, class = typename std::enable_if<"
           "!std::is_convertible<T, const ::$proto_ns$::Message&>"
           "::value>::type>\n"
-          "void PackFrom(const T& message) {\n"
-          "  _any_metadata_.PackFrom<T>(message);\n"
+          "bool PackFrom(const T& message) {\n"
+          "  return _any_metadata_.PackFrom<T>(message);\n"
           "}\n"
           "template <typename T, class = typename std::enable_if<"
           "!std::is_convertible<T, const ::$proto_ns$::Message&>"
           "::value>::type>\n"
-          "void PackFrom(const T& message,\n"
+          "bool PackFrom(const T& message,\n"
           "              ::PROTOBUF_NAMESPACE_ID::ConstStringParam "
           "type_url_prefix) {\n"
-          "  _any_metadata_.PackFrom<T>(message, type_url_prefix);"
+          "  return _any_metadata_.PackFrom<T>(message, type_url_prefix);"
           "}\n"
           "template <typename T, class = typename std::enable_if<"
           "!std::is_convertible<T, const ::$proto_ns$::Message&>"
@@ -1270,14 +1253,14 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
     } else {
       format(
           "template <typename T>\n"
-          "void PackFrom(const T& message) {\n"
-          "  _any_metadata_.PackFrom(message);\n"
+          "bool PackFrom(const T& message) {\n"
+          "  return _any_metadata_.PackFrom(message);\n"
           "}\n"
           "template <typename T>\n"
-          "void PackFrom(const T& message,\n"
+          "bool PackFrom(const T& message,\n"
           "              ::PROTOBUF_NAMESPACE_ID::ConstStringParam "
           "type_url_prefix) {\n"
-          "  _any_metadata_.PackFrom(message, type_url_prefix);\n"
+          "  return _any_metadata_.PackFrom(message, type_url_prefix);\n"
           "}\n"
           "template <typename T>\n"
           "bool UnpackTo(T* message) const {\n"
@@ -1292,9 +1275,6 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
         "type_url,\n"
         "                            std::string* full_type_name);\n");
   }
-
-  format.Set("new_final",
-             ShouldMarkNewAsFinal(descriptor_, options_) ? "final" : "");
 
   format(
       "friend void swap($classname$& a, $classname$& b) {\n"
@@ -1318,11 +1298,11 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
       "\n"
       "// implements Message ----------------------------------------------\n"
       "\n"
-      "inline $classname$* New() const$ new_final$ {\n"
+      "inline $classname$* New() const final {\n"
       "  return CreateMaybeMessage<$classname$>(nullptr);\n"
       "}\n"
       "\n"
-      "$classname$* New(::$proto_ns$::Arena* arena) const$ new_final$ {\n"
+      "$classname$* New(::$proto_ns$::Arena* arena) const final {\n"
       "  return CreateMaybeMessage<$classname$>(arena);\n"
       "}\n");
 
@@ -1345,15 +1325,12 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
 
     format.Set("clear_final",
                ShouldMarkClearAsFinal(descriptor_, options_) ? "final" : "");
-    format.Set(
-        "is_initialized_final",
-        ShouldMarkIsInitializedAsFinal(descriptor_, options_) ? "final" : "");
 
     format(
         "void CopyFrom(const $classname$& from);\n"
         "void MergeFrom(const $classname$& from);\n"
         "PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear()$ clear_final$;\n"
-        "bool IsInitialized() const$ is_initialized_final$;\n"
+        "bool IsInitialized() const final;\n"
         "\n"
         "size_t ByteSizeLong() const final;\n"
         "const char* _InternalParse(const char* ptr, "
@@ -1405,8 +1382,7 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
         "::$proto_ns$::Metadata GetMetadata() const final;\n"
         "private:\n"
         "static ::$proto_ns$::Metadata GetMetadataStatic() {\n"
-        "  ::$proto_ns$::internal::AssignDescriptors(&::$desc_table$);\n"
-        "  return ::$desc_table$.file_level_metadata[kIndexInFileMessages];\n"
+        "  return ::$desc_table$_metadata_getter(kIndexInFileMessages);\n"
         "}\n"
         "\n"
         "public:\n"
@@ -1545,13 +1521,14 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* printer) {
   // For each oneof generate a union
   for (auto oneof : OneOfRange(descriptor_)) {
     std::string camel_oneof_name = UnderscoresToCamelCase(oneof->name(), true);
+    format("union $1$Union {\n", camel_oneof_name);
+    format.Indent();
     format(
-        "union $1$Union {\n"
         // explicit empty constructor is needed when union contains
         // ArenaStringPtr members for string fields.
-        "  $1$Union() {}\n",
+        "constexpr $1$Union() : _constinit_{} {}\n"
+        "  ::$proto_ns$::internal::ConstantInitialized _constinit_;\n",
         camel_oneof_name);
-    format.Indent();
     for (auto field : FieldRange(oneof)) {
       if (!IsFieldStripped(field, options_)) {
         field_generators_.get(field).GeneratePrivateMembers(printer);
@@ -2333,12 +2310,6 @@ void MessageGenerator::GenerateSharedConstructorCode(io::Printer* printer) {
   Formatter format(printer, variables_);
 
   format("void $classname$::SharedCtor() {\n");
-  if (scc_analyzer_->GetSCCAnalysis(scc_analyzer_->GetSCC(descriptor_))
-          .constructor_requires_initialization) {
-    format("  ::$proto_ns$::internal::InitSCC(&$scc_info$.base);\n");
-  }
-
-  format.Indent();
 
   std::vector<bool> processed(optimized_order_.size(), false);
   GenerateConstructorBody(printer, processed, false);
@@ -2347,7 +2318,6 @@ void MessageGenerator::GenerateSharedConstructorCode(io::Printer* printer) {
     format("clear_has_$1$();\n", oneof->name());
   }
 
-  format.Outdent();
   format("}\n\n");
 }
 
@@ -2418,12 +2388,6 @@ void MessageGenerator::GenerateArenaDestructorCode(io::Printer* printer) {
       }
     }
   }
-  if (num_weak_fields_) {
-    // _this is the object being destructed (we are inside a static method
-    // here).
-    format("_this->_weak_field_map_.ClearAll();\n");
-    need_registration = true;
-  }
 
   format.Outdent();
   format("}\n");
@@ -2441,6 +2405,42 @@ void MessageGenerator::GenerateArenaDestructorCode(io::Printer* printer) {
         "void $classname$::RegisterArenaDtor(::$proto_ns$::Arena*) {\n"
         "}\n");
   }
+}
+
+void MessageGenerator::GenerateConstexprConstructor(io::Printer* printer) {
+  Formatter format(printer, variables_);
+
+  format(
+      "constexpr $classname$::$classname$(\n"
+      "  ::$proto_ns$::internal::ConstantInitialized)");
+  format.Indent();
+  const char* field_sep = ":";
+  const auto put_sep = [&] {
+    format("\n$1$ ", field_sep);
+    field_sep = ",";
+  };
+
+  if (!IsMapEntryMessage(descriptor_)) {
+    // Process non-oneof fields first.
+    for (auto field : optimized_order_) {
+      auto& gen = field_generators_.get(field);
+      put_sep();
+      gen.GenerateConstinitInitializer(printer);
+    }
+
+    if (IsAnyMessage(descriptor_, options_)) {
+      put_sep();
+      format("_any_metadata_(&type_url_, &value_)");
+    }
+
+    if (descriptor_->real_oneof_decl_count() != 0) {
+      put_sep();
+      format("_oneof_case_{}");
+    }
+  }
+
+  format.Outdent();
+  format("{}\n");
 }
 
 void MessageGenerator::GenerateConstructorBody(io::Printer* printer,
@@ -2464,7 +2464,8 @@ void MessageGenerator::GenerateConstructorBody(io::Printer* printer,
   } else {
     pod_template =
         "::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(\n"
-        "    reinterpret_cast<char*>(&$first$_) - reinterpret_cast<char*>(this)),\n"
+        "    reinterpret_cast<char*>(&$first$_) - "
+        "reinterpret_cast<char*>(this)),\n"
         "    0, static_cast<size_t>(reinterpret_cast<char*>(&$last$_) -\n"
         "    reinterpret_cast<char*>(&$first$_)) + sizeof($last$_));\n";
   }
@@ -2668,14 +2669,6 @@ void MessageGenerator::GenerateStructors(io::Printer* printer) {
       "void $classname$::SetCachedSize(int size) const {\n"
       "  _cached_size_.Set(size);\n"
       "}\n");
-
-  format(
-      "const $classname$& $classname$::default_instance() {\n"
-      "  "
-      "::$proto_ns$::internal::InitSCC(&::$scc_info$.base)"
-      ";\n"
-      "  return *internal_default_instance();\n"
-      "}\n\n");
 }
 
 void MessageGenerator::GenerateSourceInProto2Namespace(io::Printer* printer) {
@@ -3603,28 +3596,16 @@ void MessageGenerator::GenerateSerializeWithCachedSizesBodyShuffled(
         "_weak_field_map_);\n");
   }
 
-  format(
-      "static const int kStart = GetInvariantPerBuild($1$UL) % $2$;\n"
-      "bool first_pass = true;\n"
-      "for (int i = kStart; i != kStart || first_pass; i = ((i + $3$) % $2$)) "
-      "{\n",
-      0,
-      num_fields, kLargePrime);
+  format("for (int i = $1$; i >= 0; i-- ) {\n", num_fields - 1);
 
   format.Indent();
   format("switch(i) {\n");
   format.Indent();
 
-  bool first_pass_set = false;
   int index = 0;
   for (const auto* f : ordered_fields) {
     format("case $1$: {\n", index++);
     format.Indent();
-
-    if (!first_pass_set) {
-      first_pass_set = true;
-      format("first_pass = false;\n");
-    }
 
     GenerateSerializeOneField(printer, f, -1);
 
@@ -3636,11 +3617,6 @@ void MessageGenerator::GenerateSerializeWithCachedSizesBodyShuffled(
   for (const auto* r : sorted_extensions) {
     format("case $1$: {\n", index++);
     format.Indent();
-
-    if (!first_pass_set) {
-      first_pass_set = true;
-      format("first_pass = false;\n");
-    }
 
     GenerateSerializeOneExtensionRange(printer, r);
 

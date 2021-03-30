@@ -4,9 +4,9 @@
 #include "SchemaPoint.h"
 #include "../lib/TypesAndEnums.h"
 #include "../lib/PropertyObject.h"
-#include "../lib/ProtoSerialization.h"
 #include "../lib/DebugInstCounter.h"
 #include "../lib/OutputLog.h"
+#include "../Proto/ProtoSerialization.h"
 #include <QJSValue>
 
 
@@ -39,16 +39,16 @@ namespace VFrame30
 	class ISchemaItemPropertiesPos
 	{
 	public:
-		virtual double left() const = 0;
+		[[nodiscard]] virtual double left() const = 0;
 		virtual void setLeft(double value) = 0;
 
-		virtual double top() const = 0;
+		[[nodiscard]] virtual double top() const = 0;
 		virtual void setTop(double value) = 0;
 
-		virtual double width() const = 0;
+		[[nodiscard]] virtual double width() const = 0;
 		virtual void setWidth(double value) = 0;
 
-		virtual double height() const = 0;
+		[[nodiscard]] virtual double height() const = 0;
 		virtual void setHeight(double value) = 0;
 	};
 
@@ -57,7 +57,7 @@ namespace VFrame30
 	class IPointList
 	{
 	public:
-		virtual std::vector<SchemaPoint> getPointList() const = 0;
+		[[nodiscard]] virtual std::vector<SchemaPoint> getPointList() const = 0;
 		virtual void setPointList(const std::vector<SchemaPoint>& points) = 0;
 	};
 

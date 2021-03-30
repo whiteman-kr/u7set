@@ -4,11 +4,13 @@
 #include "Settings.h"
 #include "DialogSettings.h"
 #include "../lib/DbController.h"
+#include "../lib/Ui/DialogAbout.h"
+#include "../lib/LogicModuleSet.h"
+#include "../lib/Ui/UiTools.h"
+#include "../lib/SignalSetProvider.h"
 #include "UserManagementDialog.h"
 #include "ProjectsTabPage.h"
 #include "FilesTabPage.h"
-#include "SchemaTabPageEx.h"
-#include "EquipmentTabPage.h"
 #include "SignalsTabPage.h"
 #include "DialogSubsystemListEditor.h"
 #include "DialogConnections.h"
@@ -20,15 +22,17 @@
 #include "SimulatorTabPage.h"
 #include "TestsTabPage.h"
 #include "GlobalMessanger.h"
-#include "Forms/FileHistoryDialog.h"
-#include "Forms/ProjectPropertiesForm.h"
-#include "Forms/PendingChangesDialog.h"
-#include "../lib/Ui/DialogAbout.h"
-#include "../VFrame30/VFrame30.h"
-#include "../lib/LogicModuleSet.h"
+#include "Forms/DialogProjectDiff.h"
+#include "Reports/ProjectDiffGenerator.h"
+#include "Reports/SchemasReportGenerator.h"
 #include "DialogShortcuts.h"
-#include "../lib/Ui/UiTools.h"
-#include "../lib/SignalSetProvider.h"
+#include "../VFrame30/VFrame30.h"
+#include "./Forms/FileHistoryDialog.h"
+#include "./Forms/ProjectPropertiesForm.h"
+#include "./Forms/PendingChangesDialog.h"
+#include "./SchemaEditor/SchemaTabPageEx.h"
+#include "./EquipmentEditor/EquipmentTabPage.h"
+#include "./Simulator/SimProfileEditor.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -79,7 +83,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
 	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
 
-	m_editSchemaTabPage = new SchemasTabPageEx{db(), this};
+	m_editSchemaTabPage = new SchemasTabPageEx{db(), m_signalSetProvider, this};
 	getCentralWidget()->addTabPage(m_editSchemaTabPage, tr("Schemas"));
 
 	m_buildTabPage = new BuildTabPage(dbController(), nullptr);
@@ -309,6 +313,11 @@ void MainWindow::createActions()
 	m_tagsEditorAction->setEnabled(false);
 	connect(m_tagsEditorAction, &QAction::triggered, this, &MainWindow::runTagsEditor);
 
+	m_simProfilesEditorAction = new QAction(tr("Simulator Profiles Editor..."), this);
+	m_simProfilesEditorAction->setStatusTip(tr("Run Simulator Profiles Editor"));
+	m_simProfilesEditorAction->setEnabled(false);
+	connect(m_simProfilesEditorAction, &QAction::triggered, this, &MainWindow::runSimulationProfilesEditor);
+
 	m_updateUfbsAfbs = new QAction(tr("Update AFBs/UFBs/Busses..."), this);
 	m_updateUfbsAfbs->setStatusTip(tr("Update AFBs/UFBs/Busses on all schemas"));
 	m_updateUfbsAfbs->setEnabled(false);
@@ -365,6 +374,19 @@ void MainWindow::createActions()
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectPropertiesAction->setEnabled(true);});
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectPropertiesAction->setEnabled(false);});
 
+	m_projectDifferenceAction = new QAction(tr("Project Diff..."), this);
+	m_projectDifferenceAction->setEnabled(false);
+	connect(m_projectDifferenceAction, &QAction::triggered, this, &MainWindow::projectDifference);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectDifferenceAction->setEnabled(true);});
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectDifferenceAction->setEnabled(false);});
+
+	m_schemasAlbumAction = new QAction(tr("Create Schemas Albums..."), this);
+	m_schemasAlbumAction->setStatusTip(tr("Create PDF albums with all project schemas"));
+	m_schemasAlbumAction->setEnabled(false);
+	connect(m_schemasAlbumAction, &QAction::triggered, this, &MainWindow::createSchemasAlbums);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_schemasAlbumAction->setEnabled(true);});
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_schemasAlbumAction->setEnabled(false);});
+
 	m_pendingChangesAction = new QAction(tr("Pending Changes..."), this);
 	m_pendingChangesAction->setEnabled(false);
 	connect(m_pendingChangesAction, &QAction::triggered, this, &MainWindow::pendingChanges);
@@ -394,7 +416,9 @@ void MainWindow::createMenus()
 	QMenu* pProjectMenu = menuBar()->addMenu(tr("Project"));		// Alt+P now switching to the Projects tab page, don't use &
 	pProjectMenu->addAction(m_projectHistoryAction);
 	pProjectMenu->addAction(m_pendingChangesAction);
+	pProjectMenu->addAction(m_projectDifferenceAction);
 	pProjectMenu->addSeparator();
+	pProjectMenu->addAction(m_schemasAlbumAction);
 	pProjectMenu->addAction(m_startBuildAction);
 	pProjectMenu->addSeparator();
 	pProjectMenu->addAction(m_projectPropertiesAction);
@@ -407,6 +431,7 @@ void MainWindow::createMenus()
 	pToolsMenu->addAction(m_connectionsEditorAction);
 	pToolsMenu->addAction(m_busEditorAction);
 	pToolsMenu->addAction(m_tagsEditorAction);
+	pToolsMenu->addAction(m_simProfilesEditorAction);
 
 	pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_updateUfbsAfbs);
@@ -643,6 +668,15 @@ void MainWindow::runTagsEditor()
 	d.exec();
 }
 
+void MainWindow::runSimulationProfilesEditor()
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	SimProfileEditor::run(dbController(), this);
+}
 
 void MainWindow::updateUfbsAfbsBusses()
 {
@@ -682,7 +716,7 @@ void MainWindow::updateUfbsAfbsBusses()
 	QStringList checkedOutFiles;
 
 	DbFileTree filesTree;
-	db()->getFileListTree(&filesTree, db()->ufblFileId(), "%", true, this);
+	db()->getFileListTree(&filesTree, DbDir::UfblDir, "%", true, this);
 
 	std::vector<DbFileInfo>	ufbSchemaFileInfos = filesTree.toVectorIf(
 		[](const DbFileInfo& file)
@@ -702,7 +736,7 @@ void MainWindow::updateUfbsAfbsBusses()
 	// Get ApplicationLogic schema list
 	//
 	filesTree.clear();
-	db()->getFileListTree(&filesTree, db()->alFileId(), "%", true, this);
+	db()->getFileListTree(&filesTree, DbDir::AppLogicDir, "%", true, this);
 
 	std::vector<DbFileInfo>	alSchemaFileInfos = filesTree.toVectorIf(
 		[](const DbFileInfo& file)
@@ -1066,6 +1100,64 @@ void MainWindow::projectProperties()
 	return;
 }
 
+void MainWindow::projectDifference()
+{
+	if (m_dbController == nullptr)
+	{
+		assert(m_dbController);
+		return;
+	}
+
+	if (m_dbController->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	DialogProjectDiff dialog(db(), this);
+
+	if (dialog.exec() == QDialog::Accepted)
+	{
+		ProjectDiffGeneratorThread::run(dialog.fileName(),
+										dialog.reportParams(),
+										db()->currentProject().projectName(),
+										db()->currentUser().username(),
+										db()->currentUser().password(),
+										this);
+	}
+
+	return;
+}
+
+void MainWindow::createSchemasAlbums()
+{
+	QString albumPath = QSettings{}.value("MainWindow/Export/AlbumPath").toString();
+
+	static std::vector<ReportFileTypeParams> albumFileTypeParams = {};
+	if (albumFileTypeParams.empty() == true)
+	{
+		albumFileTypeParams = SchemasReportGenerator::defaultFileTypeParams(db());
+	}
+
+	if (SchemasReportDialog::getReportFilesPath(&albumPath, &albumFileTypeParams, SchemasReportGenerator::defaultFileTypeParams(db()), this) == false)
+	{
+		return;
+	}
+
+	QSettings{}.setValue("MainWindow/Export/AlbumPath", albumPath);
+
+	SchemasReportGeneratorThread r(theSettings.serverIpAddress(),
+							 theSettings.serverPort(),
+							 theSettings.serverUsername(),
+							 theSettings.serverPassword(),
+							 db()->currentProject().projectName(),
+							 db()->currentUser().username(),
+							 db()->currentUser().password(),
+							 this);
+
+	r.exportAllSchemasToAlbum(albumPath, albumFileTypeParams);
+	return;
+}
+
 void MainWindow::pendingChanges()
 {
 	PendingChangesDialog::show(db(), this);
@@ -1091,6 +1183,7 @@ void MainWindow::projectOpened(DbProject project)
     m_connectionsEditorAction->setEnabled(true);
 	m_busEditorAction->setEnabled(true);
 	m_tagsEditorAction->setEnabled(true);
+	m_simProfilesEditorAction->setEnabled(true);
 	m_updateUfbsAfbs->setEnabled(true);
 	m_AfbLibraryCheck->setEnabled(true);
 
@@ -1134,6 +1227,7 @@ void MainWindow::projectClosed()
     m_connectionsEditorAction->setEnabled(false);
 	m_busEditorAction->setEnabled(false);
 	m_tagsEditorAction->setEnabled(false);
+	m_simProfilesEditorAction->setEnabled(false);
 	m_updateUfbsAfbs->setEnabled(false);
 	m_AfbLibraryCheck->setEnabled(false);
 

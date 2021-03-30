@@ -59,7 +59,8 @@ public:
 		Tree,
 		Tab,
 		Button,
-		Counter
+		Counter,
+		SchemasTab
 	};
 	Q_ENUM(InterfaceType)
 
@@ -118,8 +119,8 @@ public:
 	void setSignalsHashes(std::vector<Hash> value);
 
 public:
-	// Properties
-	//
+	// Main Properties
+
 	QString ID() const;
 	void setID(const QString& value);
 
@@ -129,6 +130,10 @@ public:
 	QString caption() const;
 	void setCaption(const QString& value);
 
+	bool isEmpty() const;
+
+	// Source
+
 	bool isSourceProject() const;
 	bool isSourceEquipment() const;
 	bool isSourceSchema() const;
@@ -137,11 +142,22 @@ public:
 	Source source() const;
 	void setSource(Source value);
 
+	// Interface Type
+
+	bool isRoot() const;
+	bool isTree() const;
+	bool isTab() const;
+	bool isButton() const;
+	bool isCounter() const;
+	bool isSchemasTab() const;
+
 	InterfaceType interfaceType() const;
 	void setInterfaceType(InterfaceType value);
 
 	SignalType signalType() const;
 	void setSignalType(SignalType value);
+
+	// Colors
 
 	bool useColors() const;
 	void setUseColors(bool value);
@@ -167,8 +183,8 @@ public:
 	bool hasDiscreteCounter() const;
 	void setHasDiscreteCounter(bool value);
 
-	// Filters
-	//
+	// Signal Masks
+
 	QString customAppSignalIDMask() const;
 	void setCustomAppSignalIDMask(const QString& value);
 
@@ -178,8 +194,11 @@ public:
 	QString appSignalIDMask() const;
 	void setAppSignalIDMask(const QString& value);
 
-	// FilterSignals
-	//
+	QString appSignalTags() const;
+	void setAppSignalTags(const QString& value);
+
+	// Filter Signals
+
 	std::vector <TuningFilterSignal> getFilterSignals() const;
 
 	int filterSignalsCount() const;
@@ -191,28 +210,33 @@ public:
 	bool filterSignal(Hash hash, TuningFilterSignal& fs);
 
 	// Counters
-	//
+
 	TuningCounters counters() const;
 	void setCounters(TuningCounters value);
-
-	// Tab appearance
-	//
-	int valuesColumnCount() const;
-	void setValuesColumnCount(int value);
-
-	std::vector<QString> valueColumnsAppSignalIdSuffixes() const;
-
-	TabType tabType() const;
-	void setTabType(TabType type);
 
 	CounterType counterType() const;
 	void setCounterType(CounterType type);
 
+	// Tags
+
 	QString tags() const;
 	void setTags(const QString& value);
 
-	QStringList tagsList() const;
+	const QStringList& tagsList() const;
 	bool hasAnyTag(const QStringList& tags) const;
+
+	QString startSchemaId() const;
+	void setStartSchemaId(const QString& id);
+
+	// Tab appearance
+
+	TabType tabType() const;
+	void setTabType(TabType type);
+
+	int valuesColumnCount() const;
+	void setValuesColumnCount(int value);
+
+	std::vector<QString> valueColumnsAppSignalIdSuffixes() const;
 
 	bool columnCustomAppId() const;
 	void setColumnCustomAppId(bool value);
@@ -246,16 +270,8 @@ public:
 
 public:
 	// Operations
-	//
+
 	TuningFilter* parentFilter() const;
-
-	bool isEmpty() const;
-
-	bool isRoot() const;
-	bool isTree() const;
-	bool isTab() const;
-	bool isButton() const;
-	bool isCounter() const;
 
 	void addChild(const std::shared_ptr<TuningFilter>& child);
 	void insertChild(int index, const std::shared_ptr<TuningFilter>& child);
@@ -311,11 +327,16 @@ private:
 
 	bool m_hasDiscreteCounter = false;
 
+	QStringList m_tags;
+
+	QString m_startSchemaId;
+
 	// Filters
 	//
 	QStringList m_customAppSignalIDMasks;
 	QStringList m_equipmentIDMasks;
 	QStringList m_appSignalIDMasks;
+	QStringList m_appSignalTags;
 
 	// Tab appearance
 	//
@@ -324,8 +345,6 @@ private:
 
 	TabType m_tabType = TabType::Generic;
 	CounterType m_counterType = CounterType::StatusBar;
-
-	QStringList m_tags;
 
 	bool m_columnCustomAppId = true;
 	bool m_columnAppId = false;

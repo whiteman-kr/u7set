@@ -178,7 +178,7 @@ namespace {
 #define STR_HASH_FXN hash<::google::protobuf::StringPiece>
 
 
-class GeneratedMessageFactory : public MessageFactory {
+class GeneratedMessageFactory final : public MessageFactory {
  public:
   static GeneratedMessageFactory* singleton();
 
@@ -363,3 +363,5 @@ PROTOBUF_NOINLINE
 
 }  // namespace protobuf
 }  // namespace google
+
+#include <google/protobuf/port_undef.inc>

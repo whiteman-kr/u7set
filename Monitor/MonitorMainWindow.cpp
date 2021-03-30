@@ -128,7 +128,10 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 	m_schemaListDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar);
 	m_schemaListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
 
-	SchemaListWidget* schemaListWidget = new SchemaListWidget{{SchemaListTreeColumns::SchemaID, SchemaListTreeColumns::Caption}, m_schemaListDock};
+	SchemaListWidget* schemaListWidget = new SchemaListWidget(
+												 std::vector{SchemaListTreeColumns::SchemaID, SchemaListTreeColumns::Caption},
+												 false,
+												 m_schemaListDock);
 	m_schemaListDock->setWidget(schemaListWidget);
 
 	addDockWidget(Qt::LeftDockWidgetArea, m_schemaListDock);
@@ -506,9 +509,9 @@ void MonitorMainWindow::createMenus()
 	menuBar()->addSeparator();
 	QMenu* helpMenu = menuBar()->addMenu(tr("&?"));
 
-#ifdef Q_DEBUG
+#ifdef QT_DEBUG
 	//helpMenu->addAction(m_pDebugAction);
-#endif	// Q_DEBUG
+#endif	// QT_DEBUG
 
 	helpMenu->addAction(m_pDataSourcesAction);
 	helpMenu->addAction(m_pStatisticsAction);
@@ -874,8 +877,7 @@ void MonitorMainWindow::showMatsUserManual()
 
 void MonitorMainWindow::debug()
 {
-#ifdef Q_DEBUG
-
+#ifdef QT_DEBUG
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
 													"./",
 													tr("Monitor schemas (*.mvs);; All files (*.*)"));
@@ -904,7 +906,7 @@ void MonitorMainWindow::debug()
 //	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(schema);
 //	tabWidget->addTab(schemaWidget, "Debug tab: " + fileInfo.fileName());
 
-#endif	// Q_DEBUG
+#endif	// QT_DEBUG
 }
 
 void MonitorMainWindow::checkMonitorSingleInstance()

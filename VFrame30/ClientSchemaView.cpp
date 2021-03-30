@@ -226,8 +226,34 @@ namespace VFrame30
 	{
 	}
 
-	void ClientSchemaView::paintEvent(QPaintEvent*)
+	void ClientSchemaView::paintEvent(QPaintEvent* paintEvent)
 	{
+		// Draw schema
+		//
+		QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
+
+		if (schema() != nullptr && m_infoMode  == false)
+		{
+			int dpiX = logicalDpiX();
+			int dpiY = logicalDpiY();
+
+			QRect updateRect = paintEvent->rect();
+			updateRect.adjust(-dpiX, -dpiY / 4, dpiX, dpiY / 4);	// -one inch, to draw pin names
+
+			QPointF cls;
+			QPointF clf;
+
+			bool mok = true;
+			mok &= MousePosToDocPoint(updateRect.topLeft(), &cls, dpiX, dpiY);
+			mok &= MousePosToDocPoint(updateRect.bottomRight(), &clf, dpiX, dpiY);
+
+			if (mok == true)
+			{
+				clipRect.setTopLeft(cls);
+				clipRect.setSize({clf.x() - cls.x(), clf.y() - cls.y()});
+			}
+		}
+
 		// Draw Schema
 		//
 		QPainter p;
@@ -249,7 +275,7 @@ namespace VFrame30
 
 		// Draw schema
 		//
-		SchemaView::draw(drawParam);
+		SchemaView::draw(drawParam, clipRect);
 
 		// Calc size
 		//

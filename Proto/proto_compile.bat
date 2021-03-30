@@ -34,8 +34,8 @@ del body.pb.h
 goto :endoffile
 
 :reporterror
-echo@ 
-echo@ Error compilation Proto file
+echo 
+echo Error compilation Proto file
 goto :endoffile
 
 :endoffile

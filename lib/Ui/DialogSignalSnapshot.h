@@ -1,5 +1,4 @@
-#ifndef DIALOGSIGNALSNAPSHOT_H
-#define DIALOGSIGNALSNAPSHOT_H
+#pragma once
 
 #include "../lib/AppSignalManager.h"
 #include "../lib/ExportPrint.h"
@@ -329,4 +328,3 @@ private:
 	QMenu m_formatMenu;
 };
 
-#endif // DIALOGSIGNALSNAPSHOT_H

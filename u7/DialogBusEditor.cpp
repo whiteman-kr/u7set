@@ -654,7 +654,7 @@ void DialogBusEditor::onCheckIn()
 
 	if (comment.isEmpty())
 	{
-		QMessageBox::warning(this, qAppName(), tr("No comment supplied!"));
+		QMessageBox::warning(this, qAppName(), tr("No comment supplied! Please provide a comment."));
 		return;
 	}
 

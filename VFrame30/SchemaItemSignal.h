@@ -6,7 +6,7 @@
 namespace VFrame30
 {
 	/*! \class SchemaItemSignal
-		\ingroup Application Logic Items
+		\ingroup appLogicSchemaItems
 		\brief This is functional item used for connection signal to AFB inputs/outputs, other signals etc
 	*/
 	class VFRAME30LIBSHARED_EXPORT SchemaItemSignal : public FblItemRect

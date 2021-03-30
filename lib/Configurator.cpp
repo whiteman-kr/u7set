@@ -196,11 +196,11 @@ void CONF_SERVICE_DATA_V1::setConfigureDay(uint16_t value)
 
 uint32_t CONF_SERVICE_DATA_V1::firmwareCrc() const
 {
-    return qFromBigEndian(m_firmwareCrc);
+	return qFromBigEndian(m_firmwareCrc);
 }
 void CONF_SERVICE_DATA_V1::setFirmwareCrc(uint32_t value)
 {
-    m_firmwareCrc = qToBigEndian(value);
+	m_firmwareCrc = qToBigEndian(value);
 }
 
 //
@@ -212,7 +212,7 @@ void CONF_IDENTIFICATION_DATA_V1::dump(QStringList& out) const
 
 	out << "Module Id: " + moduleUuid.toQUuid().toString();
 	out << "Configuration counter: " + QString().setNum(count);
-			
+
 	out << "First time configured: ";
 	out << "__Date: " + QDateTime().fromTime_t(static_cast<uint>(firstConfiguration.date)).toString();
 	out << "__Host: " + QString(firstConfiguration.host);
@@ -229,8 +229,8 @@ void CONF_IDENTIFICATION_DATA_V1::dump(QStringList& out) const
 }
 
 #ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4996) // warning for std::strncpy
+#pragma warning(push)
+#pragma warning(disable: 4996) // warning for std::strncpy
 #endif
 
 void CONF_IDENTIFICATION_DATA_V1::createFirstConfiguration()
@@ -244,7 +244,7 @@ void CONF_IDENTIFICATION_DATA_V1::createFirstConfiguration()
 	firstConfiguration.configurationId = QUuid::createUuid();	// Add this record to database
 	firstConfiguration.date = QDateTime::currentDateTime().toTime_t();
 
-//#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
+	//#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
 	firstConfiguration.configuratorFactoryNo = 0;
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(firstConfiguration.host) - 1);
@@ -263,7 +263,7 @@ void CONF_IDENTIFICATION_DATA_V1::createNextConfiguration()
 	lastConfiguration.configurationId = QUuid::createUuid();				// Add this record to database
 	lastConfiguration.date = QDateTime().currentDateTime().toTime_t();
 
-//#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
+	//#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
 	lastConfiguration.configuratorFactoryNo = 0;
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
@@ -349,7 +349,7 @@ void CONF_IDENTIFICATION_DATA_V2::createNextConfiguration(Hardware::ModuleFirmwa
 }
 
 #ifdef _MSC_VER
-	#pragma warning(pop)		//#pragma warning(disable: 3996) // warning for std::strncpy
+#pragma warning(pop)		//#pragma warning(disable: 3996) // warning for std::strncpy
 #endif
 
 //
@@ -357,9 +357,9 @@ void CONF_IDENTIFICATION_DATA_V2::createNextConfiguration(Hardware::ModuleFirmwa
 //
 Configurator::Configurator(QString serialDevice, OutputLog *log, QObject* parent)
 	: QObject(parent),
-	m_device(serialDevice),
-	m_serialPort(nullptr),
-	m_Log(log)
+	  m_device(serialDevice),
+	  m_serialPort(nullptr),
+	  m_Log(log)
 {
 }
 
@@ -413,25 +413,25 @@ bool Configurator::openConnection()
 
 	// Read programmers factory no
 	//
-/*#ifdef Q_OS_WIN32
-    DWORD DeviceCount = 0;
+	/*#ifdef Q_OS_WIN32
+	DWORD DeviceCount = 0;
 	FT_STATUS Result = FT_CreateDeviceInfoList(&DeviceCount);
 	if (Result != FT_OK)
 	{
 		m_Log->writeError(__FUNCTION__ + tr(" FT_CreateDeviceInfoList error."));
-        return false;
+		return false;
 	}
 
 	if (DeviceCount == 0)
 	{
 		m_Log->writeError(__FUNCTION__ + tr(" Can't find any configurator."));
-        return false;
+		return false;
 	}
 
 	if (DeviceCount != 1)
 	{
 		m_Log->writeError(__FUNCTION__ + tr(" There are more than one configurator, please leave only one."));
-        return false;
+		return false;
 	}
 
 	FT_HANDLE ftHandle;
@@ -439,7 +439,7 @@ bool Configurator::openConnection()
 	if (FT_Open(0, &ftHandle) != FT_OK)
 	{
 		m_Log->writeError(__FUNCTION__ + tr(" FT_Open error."));
-        return false;
+		return false;
 	}
 
 
@@ -467,8 +467,8 @@ bool Configurator::openConnection()
 		if (converted == false || sn == 0)
 		{
 			m_Log->writeError(__FUNCTION__ + tr(" Wrong configuration factory no(") + SerialNumberBuf + ")");
-            FT_Close(ftHandle);
-            return false;
+			FT_Close(ftHandle);
+			return false;
 		}
 
 		m_configuratorfactoryNo = sn;
@@ -477,32 +477,32 @@ bool Configurator::openConnection()
 	else
 	{
 		m_Log->writeError(__FUNCTION__ + tr(" FT_Read error."));
-        return false;
+		return false;
 	}
 
-    FT_Close(ftHandle);
+	FT_Close(ftHandle);
 #endif*/
 
-    if (m_serialPort != nullptr)
-    {
-        Q_ASSERT(false);
-        delete m_serialPort;
-        m_serialPort = nullptr;
-    }
+	if (m_serialPort != nullptr)
+	{
+		Q_ASSERT(false);
+		delete m_serialPort;
+		m_serialPort = nullptr;
+	}
 
 	// Open port
 	//
-    m_serialPort = new QSerialPort();
-    m_serialPort->setPortName(device());
+	m_serialPort = new QSerialPort();
+	m_serialPort->setPortName(device());
 
-    m_serialPort->setBaudRate(QSerialPort::Baud115200);
-    m_serialPort->setDataBits(QSerialPort::Data8);
-    m_serialPort->setParity(QSerialPort::NoParity);
-    m_serialPort->setStopBits(QSerialPort::OneStop);
+	m_serialPort->setBaudRate(QSerialPort::Baud115200);
+	m_serialPort->setDataBits(QSerialPort::Data8);
+	m_serialPort->setParity(QSerialPort::NoParity);
+	m_serialPort->setStopBits(QSerialPort::OneStop);
 
 	// !! Cannot create children for a parent that is in a different thread. !!
 
-    bool ok = m_serialPort->open(QIODevice::ReadWrite);
+	bool ok = m_serialPort->open(QIODevice::ReadWrite);
 
 
 	if (ok == false)
@@ -518,55 +518,55 @@ bool Configurator::openConnection()
 		}
 #endif
 
-        delete m_serialPort;
-        m_serialPort = nullptr;
+		delete m_serialPort;
+		m_serialPort = nullptr;
 
 		return false;
 	}
 
-    return true;
+	return true;
 }
 
 bool Configurator::closeConnection()
 {
 	m_configuratorfactoryNo = 0;
 
-    if (m_serialPort == nullptr)
-    {
-        Q_ASSERT(m_serialPort);
-        return false;
-    }
+	if (m_serialPort == nullptr)
+	{
+		Q_ASSERT(m_serialPort);
+		return false;
+	}
 
-    if (m_serialPort->isOpen() == false)
+	if (m_serialPort->isOpen() == false)
 	{
 		m_Log->writeError("CloseConnection error: The port was already closed.");
 		return false;
 	}
 
-    m_serialPort->close();
+	m_serialPort->close();
 
-    delete m_serialPort;
-    m_serialPort = nullptr;
+	delete m_serialPort;
+	m_serialPort = nullptr;
 
 	return true;
 }
 
 bool Configurator::send(int moduleUartId,
-	ConfigureCommand opcode,
-	uint16_t frameIndex,
-	uint16_t blockSize,
-    const std::vector<quint8>& requestData,
-	CONF_HEADER* pReceivedHeader,
-    std::vector<quint8>* replyData)
+						ConfigureCommand opcode,
+						uint16_t frameIndex,
+						uint16_t blockSize,
+						const std::vector<quint8>& requestData,
+						CONF_HEADER* pReceivedHeader,
+						std::vector<quint8>* replyData)
 {
-    if (m_serialPort == nullptr)
-    {
-        Q_ASSERT(false);
+	if (m_serialPort == nullptr)
+	{
+		Q_ASSERT(false);
 		m_Log->writeError(tr("Port object is not created: %1").arg(device()));
-        return false;
-    }
+		return false;
+	}
 
-    if (m_serialPort->isOpen() == false)
+	if (m_serialPort->isOpen() == false)
 	{
 		m_Log->writeError(tr("Port is not opened: %1").arg(device()));
 		return false;
@@ -581,69 +581,68 @@ bool Configurator::send(int moduleUartId,
 
 	// Generate packet
 	//
-    std::vector<quint8> buffer;				//
+	std::vector<quint8> buffer;				//
 	int expecetedDataBytes = 0;				// Expecting reply in expecetedDataBytes to read from device + sizeof(CONF_HEADER)
 	int headerSize = 0;
 
 	switch (opcode)
 	{
-    case Read:
-        {
-            CONF_HEADER readHeader = CONF_HEADER();
+	case Read:
+		{
+			CONF_HEADER readHeader = CONF_HEADER();
 
-            readHeader.version = static_cast<uint16_t>(ProtocolMaxVersion);
-            readHeader.moduleUartId = static_cast<uint16_t>(moduleUartId);
-            readHeader.opcode = static_cast<uint16_t>(opcode);
-            readHeader.frameIndex = static_cast<uint16_t>(frameIndex);
-            readHeader.setCrc();			// Calculate and set CRC for formed header
+			readHeader.version = static_cast<uint16_t>(ProtocolMaxVersion);
+			readHeader.moduleUartId = static_cast<uint16_t>(moduleUartId);
+			readHeader.opcode = static_cast<uint16_t>(opcode);
+			readHeader.frameIndex = static_cast<uint16_t>(frameIndex);
+			readHeader.setCrc();			// Calculate and set CRC for formed header
 
-            buffer.resize(sizeof(readHeader), 0);
-            memcpy(buffer.data(), &readHeader, sizeof(readHeader));
+			buffer.resize(sizeof(readHeader), 0);
+			memcpy(buffer.data(), &readHeader, sizeof(readHeader));
 
-            expecetedDataBytes = blockSize;
-            headerSize = sizeof(readHeader);
+			expecetedDataBytes = blockSize;
+			headerSize = sizeof(readHeader);
 
-            if (showDebugInfo() == true)
-            {
-				m_Log->writeMessage("");
+			if (showDebugInfo() == true)
+			{
+				m_Log->writeEmptyLine();
 				m_Log->writeMessage(tr("Sending header, opcode Read:"));
 				readHeader.dump(m_Log);
-            }
-        }
-        break;
+			}
+		}
+		break;
 
-    case Write:
-        {
-            assert(requestData.size() == blockSize);
+	case Write:
+		{
+			assert(requestData.size() == blockSize);
 
-            CONF_HEADER writeHeader = CONF_HEADER();
+			CONF_HEADER writeHeader = CONF_HEADER();
 
-            writeHeader.version = static_cast<uint16_t>(ProtocolMaxVersion);
-            writeHeader.moduleUartId = static_cast<uint16_t>(moduleUartId);
-            writeHeader.opcode = static_cast<uint16_t>(opcode);
-            writeHeader.frameIndex = static_cast<uint16_t>(frameIndex);
-            writeHeader.frameSize = blockSize - sizeof(writeHeader.crc64);
-            writeHeader.blockSize = blockSize;
-            writeHeader.setCrc();
+			writeHeader.version = static_cast<uint16_t>(ProtocolMaxVersion);
+			writeHeader.moduleUartId = static_cast<uint16_t>(moduleUartId);
+			writeHeader.opcode = static_cast<uint16_t>(opcode);
+			writeHeader.frameIndex = static_cast<uint16_t>(frameIndex);
+			writeHeader.frameSize = blockSize - sizeof(writeHeader.crc64);
+			writeHeader.blockSize = blockSize;
+			writeHeader.setCrc();
 
-            buffer.resize(sizeof(writeHeader) + requestData.size(), 0);
+			buffer.resize(sizeof(writeHeader) + requestData.size(), 0);
 
-            memcpy(buffer.data(), &writeHeader, sizeof(writeHeader));
-            memcpy(static_cast<quint8*>(buffer.data()) + sizeof(writeHeader), requestData.data(), requestData.size());
+			memcpy(buffer.data(), &writeHeader, sizeof(writeHeader));
+			memcpy(static_cast<quint8*>(buffer.data()) + sizeof(writeHeader), requestData.data(), requestData.size());
 
-            expecetedDataBytes = 0;
-            headerSize = sizeof(writeHeader);
+			expecetedDataBytes = 0;
+			headerSize = sizeof(writeHeader);
 
-            if (showDebugInfo() == true)
-            {
-				m_Log->writeMessage("");
+			if (showDebugInfo() == true)
+			{
+				m_Log->writeEmptyLine();
 				m_Log->writeMessage(tr("Sending header, opcode Write:"));
-
 				writeHeader.dump(m_Log);
 				m_Log->writeDump(requestData);
-            }
-        }
-        break;
+			}
+		}
+		break;
 
 	case Nop:
 		{
@@ -661,9 +660,34 @@ bool Configurator::send(int moduleUartId,
 
 			if (showDebugInfo() == true)
 			{
-				m_Log->writeMessage("");
+				m_Log->writeEmptyLine();
 				m_Log->writeMessage(tr("Sending header, opcode Nop"));
 				nopHeader.dump(m_Log);
+			}
+		}
+		break;
+
+	case Nop2:
+		{
+			CONF_HEADER nop2Header = CONF_HEADER();
+
+			nop2Header.version = static_cast<uint16_t>(ProtocolMaxVersion);
+			//readHeader.moduleUartId = static_cast<uint16_t>(moduleUartId);
+			nop2Header.opcode = static_cast<uint16_t>(opcode);
+			//readHeader.frameIndex = static_cast<uint16_t>(frameIndex);
+			nop2Header.setCrc();			// Calculate and set CRC for formed header
+
+			buffer.resize(sizeof(nop2Header), 0);
+			memcpy(buffer.data(), &nop2Header, sizeof(nop2Header));
+
+			expecetedDataBytes = blockSize;
+			headerSize = sizeof(nop2Header);
+
+			if (showDebugInfo() == true)
+			{
+				m_Log->writeEmptyLine();
+				m_Log->writeMessage(tr("Sending header, opcode Nop2:"));
+				nop2Header.dump(m_Log);
 			}
 		}
 		break;
@@ -679,13 +703,13 @@ bool Configurator::send(int moduleUartId,
 
 	// Clear all buffers
 	//
-    m_serialPort->clear();
+	m_serialPort->clear();
 
 	// Send Data
 	//
 
-    qint64 writtenBytes = m_serialPort->write((char*)buffer.data(), buffer.size());
-    m_serialPort->flush();
+	qint64 writtenBytes = m_serialPort->write((char*)buffer.data(), buffer.size());
+	m_serialPort->flush();
 
 	if (writtenBytes != static_cast<qint64>(buffer.size()))
 	{
@@ -696,8 +720,8 @@ bool Configurator::send(int moduleUartId,
 
 	// Read reply
 	//
-    std::vector<quint8> recBuffer;
-    int recSize = headerSize + expecetedDataBytes;
+	std::vector<quint8> recBuffer;
+	int recSize = headerSize + expecetedDataBytes;
 
 	for (int tc = 0; tc < 100; tc++)
 	{
@@ -723,19 +747,26 @@ bool Configurator::send(int moduleUartId,
 		}
 	}
 
-    if (recBuffer.size() != recSize)
+	if (opcode == Nop2 && recBuffer.size() == headerSize)
 	{
-		m_Log->writeError(tr("Received ") + QString().setNum(recBuffer.size()) + " bytes, expected " + QString().setNum(recSize) + ".");
-		return false;
+		expecetedDataBytes = 0; // We have received correct header and 0 data bytes on Nop2 request, possibly this command is not supported
+	}
+	else
+	{
+		if (recBuffer.size() != recSize)
+		{
+			m_Log->writeError(tr("Received ") + QString().setNum(recBuffer.size()) + " bytes, expected " + QString().setNum(recSize) + ".");
+			return false;
+		}
 	}
 
-    std::vector<quint8> recHeaderBuffer;
-    for (int i = 0; i < headerSize; i++)
-    {
-        recHeaderBuffer.push_back(recBuffer[i]);
-    }
+	std::vector<quint8> recHeaderBuffer;
+	for (int i = 0; i < headerSize; i++)
+	{
+		recHeaderBuffer.push_back(recBuffer[i]);
+	}
 
-    // fill output header
+	// fill output header
 	//
 	*pReceivedHeader = *reinterpret_cast<decltype(pReceivedHeader)>(recHeaderBuffer.data());
 
@@ -752,7 +783,7 @@ bool Configurator::send(int moduleUartId,
 	if (pReceivedHeader->checkCrc() == false)
 	{
 		m_Log->writeError(tr("Wrong CRC, received value is: ") +
-            QString().setNum(pReceivedHeader->crc64, 16).rightJustified(16, '0') + ".");
+						  QString().setNum(pReceivedHeader->crc64, 16).rightJustified(16, '0') + ".");
 
 		return false;
 	}
@@ -766,11 +797,11 @@ bool Configurator::send(int moduleUartId,
 
 	// Read Data
 	//
-    std::vector<quint8> recDataBuffer;
-    for (int i = 0; i < expecetedDataBytes; i++)
-    {
-        recDataBuffer.push_back(recBuffer[headerSize + i]);
-    }
+	std::vector<quint8> recDataBuffer;
+	for (int i = 0; i < expecetedDataBytes; i++)
+	{
+		recDataBuffer.push_back(recBuffer[headerSize + i]);
+	}
 
 	*replyData = recDataBuffer;
 
@@ -779,6 +810,115 @@ bool Configurator::send(int moduleUartId,
 		// Show received data
 		//
 		m_Log->writeDump(*replyData);
+	}
+
+	return true;
+}
+
+bool Configurator::requestUartInfo(CONF_HEADER* pingReceivedHeader, std::vector<int>* moduleUarts)
+{
+	if (pingReceivedHeader == nullptr || moduleUarts == nullptr)
+	{
+		Q_ASSERT(pingReceivedHeader);
+		Q_ASSERT(moduleUarts);
+		return false;
+	}
+
+	//
+	// PING command
+	//
+	std::vector<quint8> nopReply;
+
+	int protocolVersion = 0;
+
+	if (send(0, Nop2, 0, Nop2BlockSize, std::vector<quint8>(), pingReceivedHeader, &nopReply) == false)
+	{
+		return false;
+	}
+
+	protocolVersion = pingReceivedHeader->version;
+
+	switch (protocolVersion)
+	{
+	case 1:
+		{
+			CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(pingReceivedHeader);
+
+			if ((pingReplyVersioned.flags & OpDeniedInvalidOpcode) == 0)
+			{
+				// Nop2 command is supported, fill lmUarts
+
+				if (nopReply.size() != pingReplyVersioned.blockSize)
+				{
+					m_Log->writeError(tr("NOP2 command returned wrong number bytes of data: %1, expected: %2.").arg(nopReply.size()).arg(pingReplyVersioned.blockSize));
+					return false;
+				}
+
+				quint16* wData = reinterpret_cast<quint16*>(nopReply.data());
+				int wDataIndex = 0;
+
+				int uartsCount = qFromBigEndian<quint16>(wData[wDataIndex++]);
+				m_Log->writeMessage(tr("UART count: %1").arg(uartsCount));
+
+				if ((uartsCount < 1) || (uartsCount > 16))
+				{
+					m_Log->writeError(tr("Invalid Uarts count, expected 1..16."));
+					throw tr("Communication error.");
+				}
+
+				for (int i = 0; i < uartsCount; i++)
+				{
+					moduleUarts->push_back(qFromBigEndian<quint16>(wData[wDataIndex++]));
+				}
+
+				QStringList uartsList;
+				for (int uart : *moduleUarts)
+				{
+					uartsList.push_back(tr("0x%1").arg(QString::number(uart, 16)));
+				}
+				m_Log->writeMessage(tr("Supported UARTs: ") + uartsList.join(' '));
+
+				return true;
+			}
+		}
+		break;
+	default:
+		m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) + tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
+		throw tr("Communication error.");
+	}
+
+	if (moduleUarts->empty() == true)
+	{
+		// Nop2 command is not supported, send nop
+
+		if (send(0, Nop, 0, 0, std::vector<quint8>(), pingReceivedHeader, &nopReply) == false)
+		{
+			return false;
+		}
+
+		protocolVersion = pingReceivedHeader->version;
+
+		switch (protocolVersion)
+		{
+		case 1:
+			{
+				CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(pingReceivedHeader);
+
+				if ((pingReplyVersioned.flags & OpDeniedInvalidOpcode) == 0)
+				{
+					moduleUarts->push_back(pingReplyVersioned.moduleUartId);
+				}
+				else
+				{
+					m_Log->writeError("NOP command returned an error: Invalid opcode.");
+					return false;
+				}
+			}
+			break;
+		default:
+			m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) + tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
+			return false;
+		}
 	}
 
 	return true;
@@ -859,14 +999,12 @@ bool Configurator::loadBinaryFileWorker(const QString& fileName, ModuleFirmwareS
 	return result;
 }
 
-void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QString& subsystemId)
+void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QString& subsystemId, std::optional<std::vector<int>> selectedUarts)
 {
 	m_Log->writeMessage(tr("Uploading binary data for subsystem %1").arg(subsystemId));
 
 	//emit uploadFirmwareComplete(0x101);
 	//return;
-
-	m_cancelFlag = false;
 
 	// Open port
 	//
@@ -890,18 +1028,26 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 		//
 		// PING command
 		//
-		std::vector<quint8> nopReply;
 		CONF_HEADER pingReceivedHeader = CONF_HEADER();
+		std::vector<int> moduleUarts;
 
-		if (send(0, Nop, 0, 0, std::vector<quint8>(), &pingReceivedHeader, &nopReply) == false)
+		if (requestUartInfo(&pingReceivedHeader, &moduleUarts) == false)
 		{
 			throw tr("Communication error.");
 		}
 
+		if (moduleUarts.size() == 1 && moduleUarts[0] == ConfigurationUartId)
+		{
+			throw tr("Wrong UART, use Bitstream Configuration port.");
+		}
+
+		//
+		// Parse PING Header Info
+		//
 		int protocolVersion = pingReceivedHeader.version;
-		int moduleUartId = 0;
+		uint16_t payloadSize = 0;
 		uint16_t blockSize = 0;
-		int frameSize = 0;
+		int romSize = 0;
 		int blockCount = 0;
 
 		switch (protocolVersion)
@@ -911,33 +1057,12 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 				CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
 
 				protocolVersion = pingReplyVersioned.version;
-				moduleUartId = pingReplyVersioned.moduleUartId;
+				payloadSize = pingReplyVersioned.frameSize;
 				blockSize = pingReplyVersioned.blockSize;
-				frameSize = pingReplyVersioned.frameSize;
-				blockCount = pingReplyVersioned.romSize / pingReplyVersioned.blockSize;
-
-				m_currentUartId = moduleUartId;
-
-				emit uartOperationStart(m_currentUartId, "Uploading");
-
-				m_Log->writeMessage(tr("UART ID is %1h").arg(QString::number(m_currentUartId, 16)));
-
-				// Check if firmware exists for current uart
-
-				if (conf.uartExists(m_currentUartId) == false)
+				romSize = pingReplyVersioned.romSize;
+				if (payloadSize != 0)
 				{
-					throw tr("No firmware data exists for current UART ID.");
-				}
-
-				m_Log->writeMessage(tr("FrameSize: %1").arg(QString::number(conf.eepromFramePayloadSize(m_currentUartId))));
-				m_Log->writeMessage(tr("FrameSize with CRC: %1").arg(QString::number(conf.eepromFrameSize(m_currentUartId))));
-				m_Log->writeMessage(tr("FrameCount: %1").arg(QString::number(conf.eepromFrameCount(m_currentUartId))));
-
-				int confFrameDataSize = conf.eepromFramePayloadSize(m_currentUartId);
-
-				if (pingReplyVersioned.frameSize < confFrameDataSize)
-				{
-					throw tr("EEPROM Frame size is to small, requeried at least %1, but current frame size is %2.").arg(confFrameDataSize).arg(frameSize);
+					blockCount = romSize / blockSize;
 				}
 
 				// Ignore Wrong moduleUartId flag
@@ -959,226 +1084,276 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 		}
 
 		assert(protocolVersion != 0);
-		assert(moduleUartId != 0);
 		assert(blockSize != 0);
 
-		//
-		// READ IDENTIFICATION BLOCK
-		//
-		m_Log->writeMessage(tr("Read identification block."));
+		m_Log->writeMessage("PING Reply:");
+		m_Log->writeMessage(tr("Protocol Version: %1").arg(protocolVersion));
+		m_Log->writeMessage(tr("Frame Payload Size: %1").arg(QString::number(payloadSize)));
+		m_Log->writeMessage(tr("Frame Size: %1").arg(blockSize));
+		m_Log->writeMessage(tr("Frame Count: %1").arg(QString::number(blockCount)));
 
-		std::vector<uint8_t> identificationData;
-		switch (protocolVersion)
+		//
+		// Loop for all uarts
+		//
+		for (int moduleUartId : moduleUarts)
 		{
-		case 1:
+			// Skip configuration UART
+			//
+			if (moduleUartId == ConfigurationUartId)
 			{
-				CONF_HEADER_V1 readReceivedHeader = CONF_HEADER_V1();
+				continue;
+			}
 
-				if (bool sendOk = send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<uint8_t>(), &readReceivedHeader, &identificationData);
-					sendOk == false)
+			// Skip UART if it is not checked
+			//
+			if (selectedUarts.has_value() == true)
+			{
+				const std::vector<int>& selectedUartsValue = selectedUarts.value();
+				if (std::find(selectedUartsValue.begin(), selectedUartsValue.end(), moduleUartId) == selectedUartsValue.end())
 				{
-					throw tr("Communication error.");
+					m_Log->writeWarning0(tr("Uart ID = 0x%1 is skipped.").arg(QString::number(moduleUartId, 16)));
+					continue;
+				}
+			}
+
+			if (conf.uartExists(moduleUartId) == false)
+			{
+				throw tr("No firmware data exists for current UART ID = %1h.").arg(QString::number(moduleUartId, 16));
+			}
+
+			emit uartOperationStart(moduleUartId, "Uploading");
+
+			m_Log->writeEmptyLine();
+			m_Log->writeMessage(QString("UartId: %1 (%2h)").arg(moduleUartId).arg(moduleUartId, 4, 16, QLatin1Char('0')));
+
+			int confFrameDataSize = conf.eepromFramePayloadSize(moduleUartId);
+			if (payloadSize < confFrameDataSize)
+			{
+				throw tr("EEPROM Frame size is to small, requeried at least %1, but current frame size is %2.").arg(confFrameDataSize).arg(payloadSize);
+			}
+
+			//
+			// READ IDENTIFICATION BLOCK
+			//
+			m_Log->writeMessage(tr("Read identification block."));
+
+			std::vector<uint8_t> identificationData;
+			switch (protocolVersion)
+			{
+			case 1:
+				{
+					CONF_HEADER_V1 readReceivedHeader = CONF_HEADER_V1();
+
+					if (bool sendOk = send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<uint8_t>(), &readReceivedHeader, &identificationData);
+						sendOk == false)
+					{
+						throw tr("Communication error.");
+					}
+
+					assert(protocolVersion == readReceivedHeader.version);
+
+					// Ignoring all flags, CRC, etc
+					//
+				}
+				break;
+			default:
+				assert(false);
+			}
+
+			//
+			// WRITE IDENTIFICATION BLOCK
+			//
+			if (identificationData.size() != blockSize)
+			{
+				identificationData.resize(blockSize);
+			}
+
+			CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
+			if (pReadIdentificationStruct->marker != IdentificationStructMarker ||
+				pReadIdentificationStruct->version != CONF_IDENTIFICATION_DATA::structVersion())
+			{
+
+				if (pReadIdentificationStruct->marker == IdentificationStructMarker)
+				{
+					m_Log->writeMessage(tr("Upgrading CONF_IDENTIFICATION_DATA struct version: %1 -> %2").
+										arg(pReadIdentificationStruct->version).arg(CONF_IDENTIFICATION_DATA::structVersion()));
 				}
 
-				assert(protocolVersion == readReceivedHeader.version);
+				if (sizeof(CONF_IDENTIFICATION_DATA) > blockSize)
+				{
+					throw tr("CONF_IDENTIFICATION_DATA struct size (%1) is bigger than blockSize (%2).").arg(sizeof(CONF_IDENTIFICATION_DATA)).arg(blockSize);
+				}
 
-				// Ignoring all flags, CRC, etc
+				memset(identificationData.data(), 0, identificationData.size());
+
+				// This is the first configuration
 				//
+				pReadIdentificationStruct->createFirstConfiguration(storage);
+
 			}
-			break;
-		default:
-			assert(false);
-		}
-
-		//
-		// WRITE IDENTIFICATION BLOCK
-		//
-		if (identificationData.size() != blockSize)
-		{
-			identificationData.resize(blockSize);
-		}
-
-		CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
-		if (pReadIdentificationStruct->marker != IdentificationStructMarker ||
-				pReadIdentificationStruct->version != CONF_IDENTIFICATION_DATA::structVersion())
-		{
-
-			if (pReadIdentificationStruct->marker == IdentificationStructMarker)
+			else
 			{
-				m_Log->writeMessage(tr("Upgrading CONF_IDENTIFICATION_DATA struct version: %1 -> %2").
-									arg(pReadIdentificationStruct->version).arg(CONF_IDENTIFICATION_DATA::structVersion()));
+				pReadIdentificationStruct->createNextConfiguration(storage);
+				//pReadIdentificationStruct->dump(m_Log);
+
 			}
 
-			if (sizeof(CONF_IDENTIFICATION_DATA) > blockSize)
-			{
-				throw tr("CONF_IDENTIFICATION_DATA struct size (%1) is bigger than blockSize (%2).").arg(sizeof(CONF_IDENTIFICATION_DATA)).arg(blockSize);
-			}
-
-			memset(identificationData.data(), 0, identificationData.size());
-
-			// This is the first configuration
+			// Set Crc to identificationData
 			//
-			pReadIdentificationStruct->createFirstConfiguration(storage);
+			Crc::setDataBlockCrc(IdentificationFrameIndex, identificationData.data(), (int)identificationData.size());
 
-		}
-		else
-		{
-			pReadIdentificationStruct->createNextConfiguration(storage);
-			//pReadIdentificationStruct->dump(m_Log);
-
-		}
-
-		// Set Crc to identificationData
-		//
-		Crc::setDataBlockCrc(IdentificationFrameIndex, identificationData.data(), (int)identificationData.size());
-
-		CONF_HEADER_V1 replyIdentificationHeader = CONF_HEADER_V1();
-		std::vector<uint8_t> replyData;
-		if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &replyData) == false)
-		{
-			throw tr("Communication error.");
-		}
-
-		if (replyIdentificationHeader.version != 1)
-		{
-			throw tr("Command Write reply error. Different header version, expected 1, received ") + QString().setNum(replyIdentificationHeader.version) + ".";
-		}
-
-		if (replyIdentificationHeader.flagStateSuccess() != true)
-		{
-			replyIdentificationHeader.dumpFlagsState(m_Log);
-			throw tr("Communication error.");
-		}
-
-		if (verify() == true)
-		{
-			// Verify the written identificationData
-			//
-
-			m_Log->writeMessage(tr("Verifying block %1").arg(IdentificationFrameIndex));
-
-			std::vector<quint8> readData;
-			CONF_HEADER readReceivedHeader = CONF_HEADER();
-
-			if (send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
+			CONF_HEADER_V1 replyIdentificationHeader = CONF_HEADER_V1();
+			std::vector<uint8_t> replyData;
+			if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &replyData) == false)
 			{
 				throw tr("Communication error.");
 			}
 
-			if (identificationData.size() != readData.size())
+			if (replyIdentificationHeader.version != 1)
 			{
-				throw(tr("Send identificationData size does not match received data size in frame %1.").arg(IdentificationFrameIndex));
+				throw tr("Command Write reply error. Different header version, expected 1, received ") + QString().setNum(replyIdentificationHeader.version) + ".";
 			}
-			for (int v = 0; v < identificationData.size(); v++)
+
+			if (replyIdentificationHeader.flagStateSuccess() != true)
 			{
-				if (readData[v] != identificationData[v])
+				replyIdentificationHeader.dumpFlagsState(m_Log);
+				throw tr("Communication error.");
+			}
+
+			if (verify() == true)
+			{
+				// Verify the written identificationData
+				//
+
+				m_Log->writeMessage(tr("Verifying block %1").arg(IdentificationFrameIndex));
+
+				std::vector<quint8> readData;
+				CONF_HEADER readReceivedHeader = CONF_HEADER();
+
+				if (send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
 				{
-					throw(tr("Sent identificationData does not match received data size in frame %1, offset %2.").arg(IdentificationFrameIndex).arg(v));
+					throw tr("Communication error.");
+				}
+
+				if (identificationData.size() != readData.size())
+				{
+					throw(tr("Send identificationData size does not match received data size in frame %1.").arg(IdentificationFrameIndex));
+				}
+				for (int v = 0; v < identificationData.size(); v++)
+				{
+					if (readData[v] != identificationData[v])
+					{
+						throw(tr("Sent identificationData does not match received data size in frame %1, offset %2.").arg(IdentificationFrameIndex).arg(v));
+					}
 				}
 			}
-		}
 
-		//
-		// WRITE CONFIGURATION command
-		//
-		switch (protocolVersion)
-		{
-		case 1:
+			//
+			// WRITE CONFIGURATION command
+			//
+			switch (protocolVersion)
 			{
-				m_Log->writeMessage("Write configuration...");
-
-				for (uint16_t i = 0; i < conf.eepromFrameCount(m_currentUartId); i++)
+			case 1:
 				{
-					if (m_cancelFlag == true)
+					for (uint16_t i = 0; i < conf.eepromFrameCount(moduleUartId); i++)
 					{
-						m_Log->writeMessage("Write configuration cancelled.");
-						break;
-					}
+						if (m_cancelFlag == true)
+						{
+							m_Log->writeMessage("Write configuration cancelled.");
 
-					uint16_t frameIndex = i;
+							if (closeConnection() == false)
+							{
+								m_Log->writeError(tr("CloseConnection failed."));
+							}
 
-					if (frameIndex == IdentificationFrameIndex)
-					{
-						// Skip identifiaction frame
+							return;
+						}
+
+						uint16_t frameIndex = i;
+
+						if (frameIndex == IdentificationFrameIndex)
+						{
+							// Skip identifiaction frame
+							//
+							continue;
+						}
+
+						m_Log->writeMessage(tr("Writing block %1").arg(frameIndex));
+
+						if (frameIndex >= blockCount)
+						{
+							throw tr("Wrong FrameIndex %1").arg(frameIndex);
+						}
+
+						const std::vector<quint8> frameData = conf.frame(moduleUartId, i);
+
+						if (frameData.size() != blockSize)
+						{
+							throw tr("Frame %1 size (%2) does not match module's BlockSize (%3).").arg(i).arg(frameData.size()).arg(blockSize);
+						}
+
+						// Write data
 						//
-						continue;
-					}
+						CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
+						std::vector<uint8_t> replyBuffer;
+						bool sendResult = send(moduleUartId, Write, frameIndex, blockSize, frameData, &replyHeader, &replyBuffer);
 
-					m_Log->writeMessage(tr("Writing block %1").arg(frameIndex));
-
-					if (frameIndex >= blockCount)
-					{
-						throw tr("Wrong FrameIndex %1").arg(frameIndex);
-					}
-
-					const std::vector<quint8> frameData = conf.frame(m_currentUartId, i);
-
-					if (frameData.size() != blockSize)
-					{
-						throw tr("Frame %1 size (%2) does not match module's BlockSize (%3).").arg(i).arg(frameData.size()).arg(blockSize);
-					}
-
-					// Write data
-					//
-					CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
-					std::vector<uint8_t> replyBuffer;
-					bool sendResult = send(moduleUartId, Write, frameIndex, blockSize, frameData, &replyHeader, &replyBuffer);
-
-					if (sendResult == false)
-					{
-						throw tr("Communication error.");
-					}
-
-					if (replyHeader.version != 1)
-					{
-						throw tr("Command Write reply error. Different header version, expected 1, received ") + QString().setNum(replyHeader.version) + ".";
-					}
-
-					if (replyHeader.flagStateSuccess() != true)
-					{
-						replyHeader.dumpFlagsState(m_Log);
-						throw tr("Communication error.");
-					}
-
-					if (verify() == true)
-					{
-						// Verify the written data
-						//
-
-						m_Log->writeMessage(tr("Verifying block %1").arg(frameIndex));
-
-						std::vector<quint8> readData;
-						CONF_HEADER readReceivedHeader = CONF_HEADER();
-
-						if (send(moduleUartId, Read, frameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
+						if (sendResult == false)
 						{
 							throw tr("Communication error.");
 						}
 
-						if (frameData.size() != readData.size())
+						if (replyHeader.version != 1)
 						{
-							throw(tr("Send data size does not match received data size in frame %1.").arg(frameIndex));
+							throw tr("Command Write reply error. Different header version, expected 1, received ") + QString().setNum(replyHeader.version) + ".";
 						}
-						for (int v = 0; v < frameData.size(); v++)
+
+						if (replyHeader.flagStateSuccess() != true)
 						{
-							if (readData[v] != frameData[v])
+							replyHeader.dumpFlagsState(m_Log);
+							throw tr("Communication error.");
+						}
+
+						if (verify() == true)
+						{
+							// Verify the written data
+							//
+
+							m_Log->writeMessage(tr("Verifying block %1").arg(frameIndex));
+
+							std::vector<quint8> readData;
+							CONF_HEADER readReceivedHeader = CONF_HEADER();
+
+							if (send(moduleUartId, Read, frameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
 							{
-								throw(tr("Send data does not match received data size in frame %1, offset %2.").arg(frameIndex).arg(v));
+								throw tr("Communication error.");
+							}
+
+							if (frameData.size() != readData.size())
+							{
+								throw(tr("Send data size does not match received data size in frame %1.").arg(frameIndex));
+							}
+							for (int v = 0; v < frameData.size(); v++)
+							{
+								if (readData[v] != frameData[v])
+								{
+									throw(tr("Send data does not match received data size in frame %1, offset %2.").arg(frameIndex).arg(v));
+								}
 							}
 						}
 					}
 				}
+				break;
+			default:
+				assert(false);
 			}
-			break;
-		default:
-			assert(false);
+
+			// --
+			//
+			m_Log->writeSuccess(tr("Successful."));
+
+			emit uploadFirmwareComplete(moduleUartId);
 		}
-
-		// --
-		//
-		m_Log->writeSuccess(tr("Successful."));
-
-		emit uploadFirmwareComplete(m_currentUartId);
 	}
 	catch (QString str)
 	{
@@ -1228,16 +1403,16 @@ void Configurator::readServiceInformationWorker(int /*param*/)
 			{
 				CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
 
-				// Check if the connector in the configuartion UART
-				//
-				if ((pingReplyVersioned.moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
-				{
-					throw tr("Wrong UART, use configuration port.");
-				}
-
 				protocolVersion = pingReplyVersioned.version;
 				moduleUartId = pingReplyVersioned.moduleUartId;
 				blockSize = pingReplyVersioned.blockSize;
+
+				// Check if the connector in the configuartion UART
+				//
+				if (moduleUartId  != ConfigurationUartId)
+				{
+					throw tr("Wrong UART, use Service Configuration port.");
+				}
 
 				// Ignore Wrong moduleUartId flag
 				//
@@ -1266,7 +1441,9 @@ void Configurator::readServiceInformationWorker(int /*param*/)
 		//
 		m_Log->writeMessage(tr("Read identification block."));
 
+		bool identificationError = false;
 		std::vector<quint8> identificationData;
+
 		switch (protocolVersion)
 		{
 		case 1:
@@ -1285,10 +1462,9 @@ void Configurator::readServiceInformationWorker(int /*param*/)
 				//
 
 				QStringList dumpLog;
+				dumpIdentificationData(identificationData, blockSize, dumpLog, &identificationError);
 
-				dumpIdentificationData(identificationData, blockSize, dumpLog);
-
-				for (auto s : dumpLog)
+				for (const auto& s : dumpLog)
 				{
 					m_Log->writeMessage(s);
 				}
@@ -1298,6 +1474,10 @@ void Configurator::readServiceInformationWorker(int /*param*/)
 			assert(false);
 		}
 
+		if (identificationError == true)
+		{
+			throw tr("Identification error.");
+		}
 
 		//
 		// READ command
@@ -1355,11 +1535,11 @@ void Configurator::readServiceInformationWorker(int /*param*/)
 	return;
 }
 
-bool Configurator::readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxFrameCount)
+bool Configurator::readFirmwareWorker(std::vector<ModuleFirmwareData>* firmwareDataArray, bool logIdentificationData, int maxFrameCount, std::optional<std::vector<int>> selectedUarts)
 {
-	if (firmwareData == nullptr)
+	if (firmwareDataArray == nullptr)
 	{
-		assert(firmwareData);
+		assert(firmwareDataArray);
 		return false;
 	}
 
@@ -1379,18 +1559,21 @@ bool Configurator::readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxF
 		//
 		// PING command
 		//
-		std::vector<uint8_t> nopReply;
 		CONF_HEADER pingReceivedHeader = CONF_HEADER();
+		std::vector<int> moduleUarts;
 
-		if (send(0, Nop, 0, 0, std::vector<uint8_t>(), &pingReceivedHeader, &nopReply) == false)
+		if (requestUartInfo(&pingReceivedHeader, &moduleUarts) == false)
 		{
 			throw tr("Communication error.");
 		}
 
+		//
+		// Parse PING Header Info
+		//
 		int protocolVersion = pingReceivedHeader.version;
-		int moduleUartId = 0;
-		uint16_t eepromFrameSize = 0;
-		int eepromSize = 0;
+		uint16_t payloadSize = 0;
+		uint16_t blockSize = 0;
+		int romSize = 0;
 
 		switch (protocolVersion)
 		{
@@ -1398,35 +1581,14 @@ bool Configurator::readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxF
 			{
 				CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
 
-				// Check if the connector in the configuartion UART
-				//
-				if ((pingReplyVersioned.moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
-				{
-					// Read any memomy type!!!
-					//
-					//throw tr("Wrong UART, use configuration port.");
-				}
-
 				protocolVersion = pingReplyVersioned.version;
-				moduleUartId = pingReplyVersioned.moduleUartId;
-				eepromFrameSize = pingReplyVersioned.blockSize;
-				eepromSize = pingReplyVersioned.romSize;
-
-				emit uartOperationStart(moduleUartId, "Reading");
-
-				// Write log and output file
-				//
-
-				m_Log->writeEmptyLine();
-				m_Log->writeMessage("PING Reply:");
-				m_Log->writeMessage(QString("ProtocolVersion: %1").arg(protocolVersion));
-				m_Log->writeMessage(QString("UartId: %1 (%2h)").arg(moduleUartId).arg(moduleUartId, 4, 16, QLatin1Char('0')));
-				m_Log->writeMessage(QString("EEPROM frame size: %1 (%2h)").arg(eepromFrameSize).arg(eepromFrameSize, 4, 16, QLatin1Char('0')));
-				m_Log->writeMessage(QString("EEPROM size: %1 (%2h)").arg(eepromSize).arg(eepromSize, 4, 16, QLatin1Char('0')));
+				payloadSize = pingReplyVersioned.frameSize;
+				blockSize = pingReplyVersioned.blockSize;
+				romSize = pingReplyVersioned.romSize;
 
 				// --
 				//
-				if (eepromSize % eepromFrameSize != 0)
+				if (romSize % blockSize != 0)
 				{
 					throw tr("Flash memory block count is not an intergral multiple.");
 				}
@@ -1450,103 +1612,152 @@ bool Configurator::readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxF
 		}
 
 		assert(protocolVersion != 0);
-		assert(moduleUartId != 0);
-		assert(eepromFrameSize != 0);
+		assert(payloadSize != 0);
+		assert(romSize != 0);
 
-		int eepromFramesCount = eepromSize / eepromFrameSize;
+		int blockCount = romSize / blockSize;
+
+		m_Log->writeMessage("PING Reply:");
+		m_Log->writeMessage(tr("Protocol Version: %1").arg(protocolVersion));
+		m_Log->writeMessage(tr("Frame Payload Size: %1").arg(QString::number(payloadSize)));
+		m_Log->writeMessage(tr("Frame Size: %1").arg(blockSize));
+		m_Log->writeMessage(tr("Frame Count: %1").arg(QString::number(blockCount)));
 
 		//
-		// READ command
+		// Loop for all uarts
 		//
+		for (int moduleUartId : moduleUarts)
+		{
+			if (moduleUartId == ConfigurationUartId)
+			{
+				// Skip service UART
+				continue;
+			}
 
-		// Disabel showing DebugInfo (too much information)
-		bool oldStateShowDebugInfo = showDebugInfo();
+			// Skip UART if it is not checked
+			//
+			if (selectedUarts.has_value() == true)
+			{
+				const std::vector<int>& selectedUartsValue = selectedUarts.value();
+				if (std::find(selectedUartsValue.begin(), selectedUartsValue.end(), moduleUartId) == selectedUartsValue.end())
+				{
+					m_Log->writeWarning0(tr("Uart ID = 0x%1 is skipped.").arg(QString::number(moduleUartId, 16)));
+					continue;
+				}
+			}
 
-		// restore ShwoDebugInfo state throw shared_ptr and deleter
-		//
-		auto deleter = [this, oldStateShowDebugInfo](bool*)
+			ModuleFirmwareData firmwareData;
+
+			emit uartOperationStart(moduleUartId, "Reading");
+
+			// Write log and output file
+			//
+
+			m_Log->writeEmptyLine();
+			m_Log->writeMessage(QString("UartId: %1 (%2h)").arg(moduleUartId).arg(moduleUartId, 4, 16, QLatin1Char('0')));
+
+			//
+			// READ command
+			//
+
+			// Disabel showing DebugInfo (too much information)
+			bool oldStateShowDebugInfo = showDebugInfo();
+
+			// restore ShwoDebugInfo state throw shared_ptr and deleter
+			//
+			auto deleter = [this, oldStateShowDebugInfo](bool*)
 			{
 				this->setShowDebugInfo(oldStateShowDebugInfo);
 			};
-		std::shared_ptr<bool> scopedRestoreShowDebugInfo(nullptr, deleter);
+			std::shared_ptr<bool> scopedRestoreShowDebugInfo(nullptr, deleter);
 
-		setShowDebugInfo(false);
+			setShowDebugInfo(false);
 
-		firmwareData->uartId = moduleUartId;
-		firmwareData->eepromFrameSize = eepromFrameSize;
-		firmwareData->frames.resize(eepromFramesCount);
+			firmwareData.uartId = moduleUartId;
+			firmwareData.eepromFrameSize = blockSize;
+			firmwareData.frames.resize(blockCount);
 
-		switch (protocolVersion)
-		{
-		case 1:
+			switch (protocolVersion)
 			{
-				for (decltype(CONF_HEADER_V1().frameIndex) i = 0; i < eepromFramesCount; i++)
+			case 1:
 				{
-					if (m_cancelFlag == true)
+					for (decltype(CONF_HEADER_V1().frameIndex) i = 0; i < blockCount; i++)
 					{
-						m_Log->writeMessage(tr("Firmware reading cancelled."));
-						break;
-					}
-
-					if (maxFrameCount != -1 && i >= maxFrameCount)
-					{
-						break;
-					}
-
-					m_Log->writeMessage(tr("Reading block ") + QString().setNum(i));
-
-					std::vector<quint8>& readData = firmwareData->frames[i];
-					CONF_HEADER readReceivedHeader = CONF_HEADER();
-
-					if (bool sendOk = send(moduleUartId, Read, i, eepromFrameSize, std::vector<quint8>(), &readReceivedHeader, &readData);
-						sendOk == false)
-					{
-						throw tr("Communication error.");
-					}
-
-					assert(protocolVersion == readReceivedHeader.version);
-
-					if (i == 0)
-					{
-						QStringList dumpLog;
-
-						dumpIdentificationData(readData, eepromFrameSize, dumpLog);
-
-						for (auto s : dumpLog)
+						if (m_cancelFlag == true)
 						{
-							m_Log->writeMessage(s);
-						}
-					}
+							m_Log->writeMessage(tr("Firmware reading cancelled."));
 
-					switch (protocolVersion)
-					{
-					case 1:
-						{
-							CONF_HEADER_V1 readReply = *reinterpret_cast<CONF_HEADER_V1*>(&readReceivedHeader);
-
-							// Check flags
-							//
-							if (readReply.flagStateSuccess() != true)
+							if (closeConnection() == false)
 							{
-								readReceivedHeader.dumpFlagsState(m_Log);
-								throw tr("Communication error.");
+								m_Log->writeError(tr("CloseConnection failed."));
+							}
+							return false;
+						}
+
+
+						if (maxFrameCount != -1 && i >= maxFrameCount)
+						{
+							break;
+						}
+
+						m_Log->writeMessage(tr("Reading block ") + QString().setNum(i));
+
+						std::vector<quint8>& readData = firmwareData.frames[i];
+						CONF_HEADER readReceivedHeader = CONF_HEADER();
+
+						if (bool sendOk = send(moduleUartId, Read, i, blockSize, std::vector<quint8>(), &readReceivedHeader, &readData);
+							sendOk == false)
+						{
+							throw tr("Communication error.");
+						}
+
+						assert(protocolVersion == readReceivedHeader.version);
+
+						if (i == 0 && logIdentificationData == true)
+						{
+							QStringList dumpLog;
+							bool identificationError = false;
+
+							dumpIdentificationData(readData, blockSize, dumpLog, &identificationError);
+
+							for (const auto& s : dumpLog)
+							{
+								m_Log->writeMessage(s);
 							}
 						}
-						break;
-					default:
-						m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) + tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
-						throw tr("Communication error.");
+
+						switch (protocolVersion)
+						{
+						case 1:
+							{
+								CONF_HEADER_V1 readReply = *reinterpret_cast<CONF_HEADER_V1*>(&readReceivedHeader);
+
+								// Check flags
+								//
+								if (readReply.flagStateSuccess() != true)
+								{
+									readReceivedHeader.dumpFlagsState(m_Log);
+									throw tr("Communication error.");
+								}
+							}
+							break;
+						default:
+							m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) + tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
+							throw tr("Communication error.");
+						}
 					}
 				}
+				break;
+			default:
+				assert(false);
 			}
-			break;
-		default:
-			assert(false);
-		}
 
-		// --
-		//
-	}
+			// --
+			//
+			firmwareDataArray->push_back(firmwareData);
+
+		} // moduleUarts
+	}// try
 
 	catch (QString str)
 	{
@@ -1565,8 +1776,16 @@ bool Configurator::readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxF
 	return result;
 }
 
-void Configurator::dumpIdentificationData(const std::vector<quint8>& identificationData, int blockSize, QStringList& out)
+void Configurator::dumpIdentificationData(const std::vector<quint8>& identificationData, int blockSize, QStringList& out, bool* error)
 {
+	if (error == nullptr)
+	{
+		Q_ASSERT(error);
+		return;
+	}
+
+	*error = false;
+
 	if (identificationData.size() != blockSize)
 	{
 		out << tr("Identification block is empty.");
@@ -1592,12 +1811,16 @@ void Configurator::dumpIdentificationData(const std::vector<quint8>& identificat
 			break;
 		default:
 			out << tr("Unknown identification block version: ") + QString().setNum(pReadIdentificationStruct->version);
+			*error = true;
 		}
 	}
 	else
 	{
 		out << tr("Wrong identification block, marker: ") + QString().setNum(pReadIdentificationStruct->marker, 16);
+		*error = true;
 	}
+
+	return;
 }
 
 
@@ -1605,108 +1828,108 @@ void Configurator::uploadServiceInformation(quint32 factoryNo, QDate manufacture
 {
 	emit operationStarted();
 
-    // Open port
-    //
-    if (openConnection() == false)
-    {
+	// Open port
+	//
+	if (openConnection() == false)
+	{
 		m_Log->writeError(tr("Cannot open ") + device() + ".");
 		emit operationFinished();
-        return;
-    }
+		return;
+	}
 
-    try
-    {
-        //
-        // PING command
-        //
-        std::vector<quint8> nopReply;
-        CONF_HEADER pingReceivedHeader = CONF_HEADER();
+	try
+	{
+		//
+		// PING command
+		//
+		std::vector<quint8> nopReply;
+		CONF_HEADER pingReceivedHeader = CONF_HEADER();
 
-        if (send(0, Nop, 0, 0, std::vector<quint8>(), &pingReceivedHeader, &nopReply) == false)
-        {
-            throw tr("Communication error.");
-        }
+		if (send(0, Nop, 0, 0, std::vector<quint8>(), &pingReceivedHeader, &nopReply) == false)
+		{
+			throw tr("Communication error.");
+		}
 
-        int protocolVersion = pingReceivedHeader.version;
-        int moduleUartId = 0;
+		int protocolVersion = pingReceivedHeader.version;
+		int moduleUartId = 0;
 		uint16_t blockSize = 0;
-        int frameSize = 0;
+		int frameSize = 0;
 		
-        switch (protocolVersion)
-        {
-        case 1:
-            {
-                CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
+		switch (protocolVersion)
+		{
+		case 1:
+			{
+				CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
 
-                // Check if the connector in the configuartion UART
-                //
-                if ((pingReplyVersioned.moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
-                {
-                    throw tr("Wrong UART, use configuration port.");
-                }
+				protocolVersion = pingReplyVersioned.version;
+				moduleUartId = pingReplyVersioned.moduleUartId;
+				blockSize = pingReplyVersioned.blockSize;
+				frameSize = pingReplyVersioned.frameSize;
 
-                protocolVersion = pingReplyVersioned.version;
-                moduleUartId = pingReplyVersioned.moduleUartId;
-                blockSize = pingReplyVersioned.blockSize;
-                frameSize = pingReplyVersioned.frameSize;
+				// Check if the connector in the configuartion UART
+				//
+				if (moduleUartId  != ConfigurationUartId)
+				{
+					throw tr("Wrong UART, use Service Configuration port.");
+				}
 
-                // Ignore Wrong moduleUartId flag
-                //
-                pingReplyVersioned.flags &= ~OpDeniedInvalidModuleUartId;						// Ping was required to deremine moduleUartId
+				// Ignore Wrong moduleUartId flag
+				//
+				pingReplyVersioned.flags &= ~OpDeniedInvalidModuleUartId;						// Ping was required to deremine moduleUartId
 
-                // Check flags
-                //
-                if (pingReplyVersioned.flagStateSuccess() != true)
-                {
+				// Check flags
+				//
+				if (pingReplyVersioned.flagStateSuccess() != true)
+				{
 					pingReplyVersioned.dumpFlagsState(m_Log);
-                    throw tr("Communication error.");
-                }
-            }
-            break;
-        default:
+					throw tr("Communication error.");
+				}
+			}
+			break;
+		default:
 			m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) + tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
-            throw tr("Communication error.");
-        }
+			throw tr("Communication error.");
+		}
 
-        assert(protocolVersion != 0);
-        assert(moduleUartId != 0);
-        assert(blockSize != 0);
+		assert(protocolVersion != 0);
+		assert(moduleUartId != 0);
+		assert(blockSize != 0);
 
-        //
-        // READ IDENTIFICATION BLOCK
-        //
+		//
+		// READ IDENTIFICATION BLOCK
+		//
 		m_Log->writeMessage(tr("Read identification block."));
 		
-        std::vector<quint8> identificationData;
-        switch (protocolVersion)
-        {
-        case 1:
-            {
-                CONF_HEADER_V1 readReceivedHeader = CONF_HEADER_V1();
+		std::vector<quint8> identificationData;
+		switch (protocolVersion)
+		{
+		case 1:
+			{
+				CONF_HEADER_V1 readReceivedHeader = CONF_HEADER_V1();
 
 				if (bool sendOk = send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &identificationData);
 					sendOk == false)
-                {
-                    throw tr("Communication error.");
-                }
+				{
+					throw tr("Communication error.");
+				}
 
-                assert(protocolVersion == readReceivedHeader.version);
+				assert(protocolVersion == readReceivedHeader.version);
 
-                // Ignoring all flags, CRC, etc
-                //
-            }
-            break;
-        default:
-            assert(false);
-        }
+				// Ignoring all flags, CRC, etc
+				//
+			}
+			break;
+		default:
+			assert(false);
+		}
 		
-        //
-        // WRITE IDENTIFICATION BLOCK
-        //
-        if (identificationData.size() != blockSize)
-        {
-            identificationData.resize(blockSize);
-        }
+		//
+		// WRITE IDENTIFICATION BLOCK
+		//
+		if (identificationData.size() != blockSize)
+		{
+			identificationData.resize(blockSize);
+		}
 		
 		// An empty firmware
 		//
@@ -1718,7 +1941,7 @@ void Configurator::uploadServiceInformation(quint32 factoryNo, QDate manufacture
 
 		CONF_IDENTIFICATION_DATA* pReadIdentificationStruct = reinterpret_cast<CONF_IDENTIFICATION_DATA*>(identificationData.data());
 		if (pReadIdentificationStruct->marker != IdentificationStructMarker ||
-				pReadIdentificationStruct->version != CONF_IDENTIFICATION_DATA::structVersion())
+			pReadIdentificationStruct->version != CONF_IDENTIFICATION_DATA::structVersion())
 		{
 
 			if (pReadIdentificationStruct->marker == IdentificationStructMarker)
@@ -1745,96 +1968,96 @@ void Configurator::uploadServiceInformation(quint32 factoryNo, QDate manufacture
 			//pReadIdentificationStruct->dump(m_Log);
 
 		}
-        // Set Crc to identificationData
-        //
-        Crc::setDataBlockCrc(IdentificationFrameIndex, identificationData.data(), (int)identificationData.size());
-				
-        CONF_HEADER_V1 replyIdentificationHeader = CONF_HEADER_V1();
+		// Set Crc to identificationData
+		//
+		Crc::setDataBlockCrc(IdentificationFrameIndex, identificationData.data(), (int)identificationData.size());
+
+		CONF_HEADER_V1 replyIdentificationHeader = CONF_HEADER_V1();
 		std::vector<uint8_t> replyDatBuffera;
 		if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &replyDatBuffera) == false)
-        {
-            throw tr("Communication error.");
-        }
+		{
+			throw tr("Communication error.");
+		}
 
-        if (replyIdentificationHeader.version != 1)
-        {
-            throw tr("Command Write reply error. Different header version, expected 1, received ") + QString().setNum(replyIdentificationHeader.version) + ".";
-        }
+		if (replyIdentificationHeader.version != 1)
+		{
+			throw tr("Command Write reply error. Different header version, expected 1, received ") + QString().setNum(replyIdentificationHeader.version) + ".";
+		}
 
-        if (replyIdentificationHeader.flagStateSuccess() != true)
-        {
+		if (replyIdentificationHeader.flagStateSuccess() != true)
+		{
 			replyIdentificationHeader.dumpFlagsState(m_Log);
-            throw tr("Communication error.");
-        }
+			throw tr("Communication error.");
+		}
 		
-        //
-        // WRITE CONFIGURATION command
-        //
-        switch (protocolVersion)
-        {
-        case 1:
-            {
-                CONF_SERVICE_DATA_V1 writeServiceStruct = CONF_SERVICE_DATA_V1();
-                QDate now = QDate::currentDate();
+		//
+		// WRITE CONFIGURATION command
+		//
+		switch (protocolVersion)
+		{
+		case 1:
+			{
+				CONF_SERVICE_DATA_V1 writeServiceStruct = CONF_SERVICE_DATA_V1();
+				QDate now = QDate::currentDate();
 
-                writeServiceStruct.setFactoryNo(factoryNo);
+				writeServiceStruct.setFactoryNo(factoryNo);
 				writeServiceStruct.setManufactureYear(static_cast<uint16_t>(manufactureDate.year()));
 				writeServiceStruct.setManufactureMonth(static_cast<uint16_t>(manufactureDate.month()));
 				writeServiceStruct.setManufactureDay(static_cast<uint16_t>(manufactureDate.day()));
 				writeServiceStruct.setConfigureYear(static_cast<uint16_t>(now.year()));
 				writeServiceStruct.setConfigureMonth(static_cast<uint16_t>(now.month()));
 				writeServiceStruct.setConfigureDay(static_cast<uint16_t>(now.day()));
-                writeServiceStruct.setFirmwareCrc(firmwareCrc);
+				writeServiceStruct.setFirmwareCrc(firmwareCrc);
 
-                std::vector<quint8> writeData;
-                writeData.resize(blockSize, 0);
-                memcpy(writeData.data(), &writeServiceStruct, sizeof(writeServiceStruct));
+				std::vector<quint8> writeData;
+				writeData.resize(blockSize, 0);
+				memcpy(writeData.data(), &writeServiceStruct, sizeof(writeServiceStruct));
 
-                // Set Crc to databuffer
-                //
-                Crc::setDataBlockCrc(ConfiguartionFrameIndex, writeData.data(), (int)writeData.size());
+				// Set Crc to databuffer
+				//
+				Crc::setDataBlockCrc(ConfiguartionFrameIndex, writeData.data(), (int)writeData.size());
 				
-                // --
-                //
-                CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
+				// --
+				//
+				CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
 				std::vector<uint8_t> replyDataV1;
 				if (send(moduleUartId, Write, ConfiguartionFrameIndex, blockSize, writeData, &replyHeader, &replyDataV1) == false)
-                {
-                    throw tr("Communication error.");
-                }
+				{
+					throw tr("Communication error.");
+				}
 
-                if (replyHeader.version != 1)
-                {
-                    throw tr("Command Write reply error. Different header version, expected 1, received ") + QString().setNum(replyHeader.version) + ".";
-                }
+				if (replyHeader.version != 1)
+				{
+					throw tr("Command Write reply error. Different header version, expected 1, received ") + QString().setNum(replyHeader.version) + ".";
+				}
 
-                //
-                if (replyHeader.flagStateSuccess() != true)
-                {
+				//
+				if (replyHeader.flagStateSuccess() != true)
+				{
 					replyHeader.dumpFlagsState(m_Log);
-                    throw tr("Communication error.");
-                }
-            }
-            break;
-        default:
-            assert(false);
-        }
-				
-        // --
-        //
-		m_Log->writeSuccess(tr("Successful."));
-    }
-    catch (QString str)
-    {
-		m_Log->writeError(str);
-    }
+					throw tr("Communication error.");
+				}
+			}
+			break;
+		default:
+			assert(false);
+		}
 
-    // Close connection
-    //
-    if (closeConnection() == false)
-    {
+		// --
+		//
+		m_Log->writeSuccess(tr("Successful."));
+	}
+	catch (QString str)
+	{
+		m_Log->writeError(str);
+	}
+
+	// Close connection
+	//
+	if (closeConnection() == false)
+	{
 		m_Log->writeError(tr("CloseConnection failed."));
-    }
+	}
 
 	emit operationFinished();
 	return;
@@ -1851,8 +2074,10 @@ void Configurator::loadBinaryFile(const QString& fileName, ModuleFirmwareStorage
 	emit operationFinished();
 }
 
-void Configurator::uploadFirmware(ModuleFirmwareStorage *storage, const QString& subsystemId)
+void Configurator::uploadFirmware(ModuleFirmwareStorage *storage, const QString& subsystemId, std::optional<std::vector<int>> selectedUarts)
 {
+	m_cancelFlag = false;
+
 	emit operationStarted();
 
 	// If no binary data was loaded, load it
@@ -1866,12 +2091,12 @@ void Configurator::uploadFirmware(ModuleFirmwareStorage *storage, const QString&
 		}
 	}
 
-	uploadFirmwareWorker(storage, subsystemId);
+	uploadFirmwareWorker(storage, subsystemId, selectedUarts);
 
 	emit operationFinished();
 }
 
-void Configurator::readFirmware(const QString& fileName)
+void Configurator::readFirmware(const QString& fileName, std::optional<std::vector<int>> selectedUarts)
 {
 	m_cancelFlag = false;
 
@@ -1890,114 +2115,77 @@ void Configurator::readFirmware(const QString& fileName)
 
 	QTextStream out(&file);
 
-	ModuleFirmwareData fd;
+	const bool logIdentificationData = true;
+	const int readFramesCount = -1;	// Read all frames
 
-	if (readFirmwareWorker(&fd, -1) == false)
+	std::vector<ModuleFirmwareData> fdArray;
+
+	if (readFirmwareWorker(&fdArray, logIdentificationData, readFramesCount, selectedUarts) == false)
 	{
 		emit operationFinished();
 		return;
 	}
 
-	out << QString("UartId: %1 (%2h)\n").arg(fd.uartId).arg(fd.uartId, 4, 16, QLatin1Char('0'));
-	out << QString("EEPROM frame size: %1 (%2h)\n").arg(fd.eepromFrameSize).arg(fd.eepromFrameSize, 4, 16, QLatin1Char('0'));
-	out << QString("EEPROM frames count: %1\n").arg(fd.frames.size());
-
-	for (int f = 0; f < fd.frames.size(); f++)
+	for (const ModuleFirmwareData& fd : fdArray)
 	{
-		out << "FrameIndex " << f << "\n";
+		out << QString("UartId: %1 (%2h)\n").arg(fd.uartId).arg(fd.uartId, 4, 16, QLatin1Char('0'));
+		out << QString("EEPROM frame size: %1 (%2h)\n").arg(fd.eepromFrameSize).arg(fd.eepromFrameSize, 4, 16, QLatin1Char('0'));
+		out << QString("EEPROM frames count: %1\n").arg(fd.frames.size());
 
-		const std::vector<quint8>& frame = fd.frames[f];
-
-		if (f == 0)
+		for (int f = 0; f < fd.frames.size(); f++)
 		{
-			QStringList dumpLog;
-			dumpIdentificationData(frame, static_cast<int>(frame.size()), dumpLog);
-			for (auto s : dumpLog)
+			out << "FrameIndex " << f << "\n";
+
+			const std::vector<quint8>& frame = fd.frames[f];
+
+			if (f == 0)
 			{
-				out << s << "\n";
+				QStringList dumpLog;
+				bool identificationError = false;
+
+				dumpIdentificationData(frame, static_cast<int>(frame.size()), dumpLog, &identificationError);
+
+				for (const auto& s : dumpLog)
+				{
+					out << s << "\n";
+				}
+			}
+
+			// Write frame dump to outut file
+			//
+			QString dataString;
+
+			for (size_t i = 0; i < frame.size(); i++)
+			{
+				if ((i % 32) == 0 && i != 0)
+				{
+					QString s = QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString;
+					out << s << "\n";
+					dataString.clear();
+				}
+
+				dataString += ((i % 16) ? " " : " ' ")  + QString().setNum(frame[i], 16).rightJustified(2, '0');
+
+				if (i == frame.size() - 1 && i % 32 > 0)	// last iteration
+				{
+					QString s = QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString;
+					out << s << "\n";
+					dataString.clear();
+				}
 			}
 		}
 
-		// Write frame dump to outut file
-		//
-		QString dataString;
-
-		for (size_t i = 0; i < frame.size(); i++)
-		{
-			if ((i % 32) == 0 && i != 0)
-			{
-				QString s = QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString;
-				out << s << "\n";
-				dataString.clear();
-			}
-
-			dataString += ((i % 16) ? " " : " ' ")  + QString().setNum(frame[i], 16).rightJustified(2, '0');
-
-			if (i == frame.size() - 1 && i % 32 > 0)	// last iteration
-			{
-				QString s = QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString;
-				out << s << "\n";
-				dataString.clear();
-			}
-		}
+		out << "\n";
 	}
 
 	m_Log->writeSuccess(tr("Successful."));
 
 	emit operationFinished();
-	return;
-}
-
-void Configurator::detectSubsystem_v1()
-{
-	m_cancelFlag = false;
-
-	emit operationStarted();
-
-	ModuleFirmwareData fd;
-
-	const int readFramesCount = 2;
-
-	if (readFirmwareWorker(&fd, readFramesCount) == false)
-	{
-		emit operationFinished();
-		return;
-	}
-
-	if (fd.frames.size() < readFramesCount)
-	{
-		m_Log->writeError(QString("EEPROM frames is less than expected: %1").arg(readFramesCount));
-		emit operationFinished();
-		return;
-	}
-
-	const int formatFrameIndex = 1;
-
-	const std::vector<quint8>& formatFrame = fd.frames[formatFrameIndex];
-
-	const quint16* dataPtr = (quint16*)formatFrame.data();
-
-	quint16 marker = qFromBigEndian(*dataPtr++);
-	quint16 version = qFromBigEndian(*dataPtr++);
-	quint16 ssKey = qFromBigEndian(*dataPtr++) >> 6;
-
-	if (marker != 0xCA70 && version != 1)
-	{
-		m_Log->writeError(QString("Wrong storage format marker (0x%1) or version (%2), expected 0xca70, version 1.")
-						  .arg(QString::number(marker, 16))
-						  .arg(version));
-		emit operationFinished();
-		return;
-	}
-
-	emit detectSubsystemComplete(ssKey);
-
-	emit operationFinished();
 
 	return;
 }
 
-void Configurator::eraseFlashMemory(int)
+void Configurator::eraseFlashMemory(int, std::optional<std::vector<int>> selectedUarts)
 {
 	m_cancelFlag = false;
 
@@ -2017,36 +2205,28 @@ void Configurator::eraseFlashMemory(int)
 		//
 		// PING command
 		//
-		std::vector<uint8_t> nopReply;
 		CONF_HEADER pingReceivedHeader = CONF_HEADER();
+		std::vector<int> moduleUarts;
 
-		if (send(0, Nop, 0, 0, std::vector<uint8_t>(), &pingReceivedHeader, &nopReply) == false)
+		if (requestUartInfo(&pingReceivedHeader, &moduleUarts) == false)
 		{
 			throw tr("Communication error.");
 		}
 
+		//
+		// Parse PING Header Info
+		//
 		int protocolVersion = pingReceivedHeader.version;
-		int moduleUartId = 0;
 		uint16_t blockSize = 0;
 		int romSize = 0;
-		
+
 		switch (protocolVersion)
 		{
 		case 1:
 			{
 				CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(&pingReceivedHeader);
 
-				// Check if the connector in the configuartion UART
-				//
-				if ((pingReplyVersioned.moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
-				{
-					// Erase any memomy type
-					//
-					//throw tr("Wrong UART, use configuration port.");
-				}
-
 				protocolVersion = pingReplyVersioned.version;
-				moduleUartId = pingReplyVersioned.moduleUartId;
 				blockSize = pingReplyVersioned.blockSize;
 				romSize = pingReplyVersioned.romSize;
 
@@ -2074,91 +2254,121 @@ void Configurator::eraseFlashMemory(int)
 		}
 
 		assert(protocolVersion != 0);
-		assert(moduleUartId != 0);
 		assert(blockSize != 0);
-		
-		//
-		// ERASE command (Write zeros)
-		//
 
-		// Disabel showing DebugInfo (too much information)
-		bool oldStateShowDebugInfo = showDebugInfo();
+		int blockCount = romSize / blockSize;
 
-		// restore ShwoDebugInfo state throw shared_ptr and deleter
+		m_Log->writeMessage("PING Reply:");
+		m_Log->writeMessage(tr("Protocol Version: %1").arg(protocolVersion));
+		m_Log->writeMessage(tr("Frame Size: %1").arg(blockSize));
+		m_Log->writeMessage(tr("Frame Count: %1").arg(QString::number(blockCount)));
 		//
-		auto deleter = [this, oldStateShowDebugInfo](bool*)
+		// Loop for all uarts
+		//
+		for (int moduleUartId : moduleUarts)
+		{
+			// Skip UART if it is not checked
+			//
+			if (selectedUarts.has_value() == true)
+			{
+				const std::vector<int>& selectedUartsValue = selectedUarts.value();
+				if (std::find(selectedUartsValue.begin(), selectedUartsValue.end(), moduleUartId) == selectedUartsValue.end())
+				{
+					m_Log->writeWarning0(tr("Uart ID = 0x%1 is skipped.").arg(QString::number(moduleUartId, 16)));
+					continue;
+				}
+			}
+
+			m_Log->writeMessage(tr("Processing Uart ID = 0x%1").arg(QString::number(moduleUartId, 16)));
+
+			//
+			// ERASE command (Write zeros)
+			//
+
+			// Disabel showing DebugInfo (too much information)
+			bool oldStateShowDebugInfo = showDebugInfo();
+
+			// restore ShwoDebugInfo state throw shared_ptr and deleter
+			//
+			auto deleter = [this, oldStateShowDebugInfo](bool*)
 			{
 				this->setShowDebugInfo(oldStateShowDebugInfo);
 			};
-		std::shared_ptr<bool> scopedRestoreShowDebugInfo(nullptr, deleter);
+			std::shared_ptr<bool> scopedRestoreShowDebugInfo(nullptr, deleter);
 
-		setShowDebugInfo(false);
+			setShowDebugInfo(false);
 
-		switch (protocolVersion)
-		{
-		case 1:
+			switch (protocolVersion)
 			{
-				m_Log->writeMessage("");
-
-				int blockCount = romSize / blockSize;
-
-				for (decltype(CONF_HEADER_V1().frameIndex) i = 0; i < blockCount; i++)
+			case 1:
 				{
 
-					if (m_cancelFlag == true)
+					for (decltype(CONF_HEADER_V1().frameIndex) i = 0; i < blockCount; i++)
 					{
-						m_Log->writeMessage("Memory erasing cancelled.");
-						break;
-					}
 
-					if (i == IdentificationFrameIndex)
-					{
-						m_Log->writeMessage(tr("Erasing block ") + QString().setNum(i) + " - skip identification block.");
-						continue;
-					}
+						if (m_cancelFlag == true)
+						{
+							m_Log->writeMessage("Memory erasing cancelled.");
 
-					m_Log->writeMessage(tr("Erasing block ") + QString().setNum(i));
+							if (closeConnection() == false)
+							{
+								m_Log->writeError(tr("CloseConnection failed."));
+							}
 
-					std::vector<uint8_t> writeData;
-					writeData.resize(blockSize, 0);
+							emit operationFinished();
+							return;
+						}
 
-					// Set Crc to databuffer
-					//
-					Crc::setDataBlockCrc(i, writeData.data(), static_cast<int>(writeData.size()));
+						if (i == IdentificationFrameIndex)
+						{
+							m_Log->writeMessage(tr("Erasing block ") + QString().setNum(i) + " - skip identification block.");
+							continue;
+						}
 
-					// --
-					//
-					CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
-					auto replyData = std::vector<uint8_t>();
+						m_Log->writeMessage(tr("Erasing block ") + QString().setNum(i));
 
-					if (bool sendOk = send(moduleUartId, Write, i, blockSize, writeData, &replyHeader, &replyData);
-						sendOk == false)
-					{
-						throw tr("Communication error.");
-					}
+						std::vector<uint8_t> writeData;
+						writeData.resize(blockSize, 0);
 
-					if (replyHeader.version != 1)
-					{
-						throw tr("Command Write reply error. Different header version, expected 1, received ") + QString().setNum(replyHeader.version) + ".";
-					}
+						// Set Crc to databuffer
+						//
+						Crc::setDataBlockCrc(i, writeData.data(), static_cast<int>(writeData.size()));
 
-					//
-					if (replyHeader.flagStateSuccess() != true)
-					{
-						replyHeader.dumpFlagsState(m_Log);
-						throw tr("Communication error.");
+						// --
+						//
+						CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
+						auto replyData = std::vector<uint8_t>();
+
+						if (bool sendOk = send(moduleUartId, Write, i, blockSize, writeData, &replyHeader, &replyData);
+							sendOk == false)
+						{
+							throw tr("Communication error.");
+						}
+
+						if (replyHeader.version != 1)
+						{
+							throw tr("Command Write reply error. Different header version, expected 1, received ") + QString().setNum(replyHeader.version) + ".";
+						}
+
+						//
+						if (replyHeader.flagStateSuccess() != true)
+						{
+							replyHeader.dumpFlagsState(m_Log);
+							throw tr("Communication error.");
+						}
 					}
 				}
+				break;
+			default:
+				assert(false);
 			}
-			break;
-		default:
-			assert(false);
-		}
-				
-		// --
-		//
-		m_Log->writeSuccess(tr("Successful."));
-	}
+
+			// --
+			//
+			m_Log->writeSuccess(tr("Successful."));
+
+		} // moduleUarts
+	}// try
 	catch (QString str)
 	{
 		m_Log->writeError(str);
@@ -2172,6 +2382,130 @@ void Configurator::eraseFlashMemory(int)
 	}
 
 	emit operationFinished();
+	return;
+}
+
+void Configurator::detectSubsystem()
+{
+	m_cancelFlag = false;
+
+	emit operationStarted();
+
+	std::vector<ModuleFirmwareData> fdArray;
+
+	const bool logIdentificationData = false;
+	const int readFramesCount = 2;
+
+	if (readFirmwareWorker(&fdArray, logIdentificationData, readFramesCount, {}) == false)
+	{
+		emit operationFinished();
+		return;
+	}
+
+	if (fdArray.empty() == true)
+	{
+		return;
+	}
+
+	bool ssKeyFirst = true;
+	quint16 ssKeyGlobal = 0;
+
+	for (const ModuleFirmwareData& fd : fdArray)
+	{
+		if (fd.frames.size() < readFramesCount)
+		{
+			m_Log->writeError(QString("EEPROM frames is less than expected: %1").arg(readFramesCount));
+			emit operationFinished();
+			return;
+		}
+
+		const int formatFrameIndex = 1;
+
+		const std::vector<quint8>& formatFrame = fd.frames[formatFrameIndex];
+
+		const quint16* dataPtr = (quint16*)formatFrame.data();
+
+		quint16 marker = qFromBigEndian(*dataPtr++);
+		quint16 version = qFromBigEndian(*dataPtr++);
+
+		if (marker != 0xCA70 && version != 1)
+		{
+			m_Log->writeError(QString("Wrong storage format marker (0x%1) or version (%2), expected 0xca70, version 1.")
+							  .arg(QString::number(marker, 16))
+							  .arg(version));
+			emit operationFinished();
+			return;
+		}
+
+		quint16 ssKey = qFromBigEndian(*dataPtr++) >> 6;
+
+		if (ssKeyFirst == true)
+		{
+			ssKeyGlobal = ssKey;
+			ssKeyFirst = false;
+		}
+		else
+		{
+			if (ssKey != ssKeyGlobal)
+			{
+				m_Log->writeError(QString("Subsystem key is not the same."));
+				emit operationFinished();
+				return;
+			}
+		}
+	}
+
+	emit detectSubsystemComplete(ssKeyGlobal);
+	emit operationFinished();
+
+	return;
+}
+
+void Configurator::detectUarts()
+{
+	m_cancelFlag = false;
+
+	emit operationStarted();
+
+	// Open port
+	//
+	if (openConnection() == false)
+	{
+		m_Log->writeError(tr("Cannot open ") + device() + ".");
+		emit operationFinished();
+		return;
+	}
+
+	try
+	{
+		CONF_HEADER pingReceivedHeader = CONF_HEADER();
+
+		std::vector<int> uartIds;
+
+		if (requestUartInfo(&pingReceivedHeader, &uartIds) == false)
+		{
+			throw tr("Communication error.");
+		}
+
+		emit detectUartsComplete(uartIds);
+
+		m_Log->writeSuccess(tr("Successful."));
+	}
+
+	catch (QString str)
+	{
+		m_Log->writeError(str);
+	}
+
+	emit operationFinished();
+
+	// Close connection
+	//
+	if (closeConnection() == false)
+	{
+		m_Log->writeError(tr("CloseConnection failed."));
+	}
+
 	return;
 }
 

@@ -13,6 +13,8 @@ QT       += network
 QT       += sql
 QT       += qml
 QT       += xml
+QT       += charts
+
 #axcontainer
 
 TARGET = Metrology
@@ -20,14 +22,15 @@ TEMPLATE = app
 
 include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../warnings.pri)
 
 #Application icon
+#
 win32:RC_ICONS += icons/Metrology.ico
 
 # DESTDIR
@@ -43,34 +46,50 @@ unix {
 
 SOURCES += \
     ../lib/Address16.cpp \
-    ../lib/MemLeaksDetection.cpp \
+    ../lib/DbController.cpp \
+    ../lib/DbProgress.cpp \
+    ../lib/DbProgressDialog.cpp \
+    ../lib/DbWorker.cpp \
+    ../lib/MetrologyConnection.cpp \
+    ../lib/SignalSetProvider.cpp \
+    ../lib/ScriptDeviceObject.cpp \
+    DialogCalculator.cpp \
+    DialogComparatorList.cpp \
+    DialogList.cpp \
+    DialogMeasurePoint.cpp \
+    DialogMetrologyConnection.cpp \
+    DialogObjectProperties.cpp \
+    DialogOptions.cpp \
+    DialogOptionsMvh.cpp \
+    DialogRackList.cpp \
+    DialogSignalList.cpp \
+    DialogTuningSignalList.cpp \
+    DialogTuningSourceList.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
     MeasurePointBase.cpp \
-    MeasurePointDialog.cpp \
-    OptionsDialog.cpp \
     Options.cpp \
+    PanelComparatorInfo.cpp \
+    PanelFindMeasure.cpp \
+    PanelSignalInfo.cpp \
+    PanelStatistics.cpp \
     ProcessData.cpp \
     SelectSignalWidget.cpp \
     StatisticsBase.cpp \
-    StatisticsPanel.cpp \
     main.cpp \
     MeasureThread.cpp \
     CalibratorManager.cpp \
     MeasureViewHeader.cpp \
     MeasureView.cpp \
-    OptionsMvhDialog.cpp \
     Delegate.cpp \
     FolderPropertyManager.cpp \
     Database.cpp \
     Conversion.cpp \
-    Calculator.cpp \
     ../lib/Crc.cpp \
     ../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/ModuleFirmware.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/SocketIO.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/HostAddressPort.cpp \
@@ -78,15 +97,9 @@ SOURCES += \
     SignalSocket.cpp \
     ../lib/Tcp.cpp \
     SignalBase.cpp \
-    ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc \
     ../lib/AppSignal.cpp \
-    SignalList.cpp \
-    FindMeasurePanel.cpp \
-    SignalInfoPanel.cpp \
     TuningSocket.cpp \
     TuningSignalBase.cpp \
-    TuningSignalList.cpp \
     ConfigSocket.cpp \
     ../lib/CfgServerLoader.cpp \
     ../lib/BuildInfo.cpp \
@@ -97,8 +110,6 @@ SOURCES += \
     ../Builder/IssueLogger.cpp \
     ../lib/OutputLog.cpp \
     ../lib/MetrologySignal.cpp \
-    RackList.cpp \
-    ObjectProperties.cpp \
     RackBase.cpp \
     MeasureBase.cpp \
     ../lib/CircularLogger.cpp \
@@ -110,34 +121,46 @@ SOURCES += \
     ../lib/Ui/DialogAbout.cpp \
 	../lib/UnitsConvertor.cpp \
     ../lib/UnitsConvertorTable.cpp \
-    ../lib/ComparatorSet.cpp \
-    ComparatorList.cpp \
-    ComparatorInfoPanel.cpp \
-    SignalConnectionList.cpp \
-    SignalConnectionBase.cpp
-
-#../lib/ExcelHelper.cpp
+    ../lib/ComparatorSet.cpp
 
 HEADERS  += \
     ../lib/Address16.h \
-	../lib/MemLeaksDetection.h \
+    ../lib/DbController.h \
+    ../lib/DbProgress.h \
+    ../lib/DbProgressDialog.h \
+    ../lib/DbWorker.h \
+    ../lib/MetrologyConnection.h \
+    ../lib/SignalSetProvider.h \
+    ../lib/ScriptDeviceObject.h \
+    DialogCalculator.h \
+    DialogComparatorList.h \
+    DialogList.h \
+    DialogMeasurePoint.h \
+    DialogMetrologyConnection.h \
+    DialogObjectProperties.h \
+    DialogOptions.h \
+    DialogOptionsMvh.h \
+    DialogRackList.h \
+    DialogSignalList.h \
+    DialogTuningSignalList.h \
+    DialogTuningSourceList.h \
     MainWindow.h \
     Calibrator.h \
     CalibratorBase.h \
     MeasurePointBase.h \
-    MeasurePointDialog.h \
-    OptionsDialog.h \
     Options.h \
     MeasureThread.h \
     CalibratorManager.h \
     MeasureViewHeader.h \
     MeasureView.h \
-    OptionsMvhDialog.h \
     Delegate.h \
     FolderPropertyManager.h \
     Database.h \
     Conversion.h \
-    Calculator.h \
+    PanelComparatorInfo.h \
+    PanelFindMeasure.h \
+    PanelSignalInfo.h \
+    PanelStatistics.h \
     ProcessData.h \
     SelectSignalWidget.h \
     Stable.h \
@@ -148,7 +171,6 @@ HEADERS  += \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
     ../lib/ModuleFirmware.h \
-    ../lib/ProtoSerialization.h \
     ../lib/Types.h \
     ../lib/OrderedHash.h \
     ../lib/SocketIO.h \
@@ -159,17 +181,10 @@ HEADERS  += \
     SignalSocket.h \
     ../lib/Tcp.h \
     SignalBase.h \
-    ../Proto/network.pb.h \
-    ../Proto/serialization.pb.h \
     ../lib/AppSignal.h \
-    SignalList.h \
-    FindMeasurePanel.h \
-    SignalInfoPanel.h \
     StatisticsBase.h \
-    StatisticsPanel.h \
     TuningSocket.h \
     TuningSignalBase.h \
-    TuningSignalList.h \
     ConfigSocket.h \
     ../lib/CfgServerLoader.h \
     ../lib/BuildInfo.h \
@@ -180,8 +195,6 @@ HEADERS  += \
     ../Builder/IssueLogger.h \
     ../lib/OutputLog.h \
     ../lib/MetrologySignal.h \
-    RackList.h \
-    ObjectProperties.h \
     RackBase.h \
     MeasureBase.h \
     ../lib/CircularLogger.h \
@@ -192,12 +205,7 @@ HEADERS  += \
     ../lib/Ui/DialogAbout.h \
 	../lib/UnitsConvertor.h \
     ../lib/UnitsConvertorTable.h \
-#../lib/ExcelHelper.h
-    ../lib/ComparatorSet.h \
-    ComparatorList.h \
-    ComparatorInfoPanel.h \
-    SignalConnectionList.h \
-    SignalConnectionBase.h
+    ../lib/ComparatorSet.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
@@ -210,30 +218,20 @@ RESOURCES += \
 TRANSLATIONS = languages/Metrology_ru.ts \
     languages/Metrology_ru.qm
 
-# Q_DEBUG define
-#
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
-
-# _DEBUG define, Windows memmory detection leak depends on it
-#
-CONFIG(debug, debug|release): DEFINES += _DEBUG
-
-
-# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
-#
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
-
 #protobuf
 #
-win32 {
-		LIBS += -L$$DESTDIR -lprotobuf
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
-		INCLUDEPATH += ./../Protobuf
-}
-unix {
-		LIBS += -lprotobuf
-}
 
 DISTFILES += \
     ../Proto/network.proto \
 	../Proto/serialization.proto
+
+
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

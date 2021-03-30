@@ -87,13 +87,11 @@ namespace VFrame30
 
 	bool shutdown()
 	{
-		int* leaktest = new int[2000];
-
 		qDebug() << Q_FUNC_INFO;
 
-		SchemaItem::PrintRefCounter("SchemaItem");
+		SchemaItem::PrintRefCounter();
 
-		//google::protobuf::ShutdownProtobufLibrary();
+		google::protobuf::ShutdownProtobufLibrary();
 		return true;
 	}
 }

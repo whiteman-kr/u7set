@@ -370,6 +370,42 @@ function test_AFB_DEC_NUM_32(sim)
     assert(sim.signalValue("#OUT_32DEC_NUM030") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM031") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM032") === 0);
+
+    sim.overrideSignalValue("#TUN_IN_SI1", 128);
+	sim.startForMs(5);
+    assert(sim.signalValue("#OUT_32DEC_NUM001") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM002") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM003") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM004") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM005") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM006") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM007") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM008") === 1);
+    assert(sim.signalValue("#OUT_32DEC_NUM009") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM010") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM011") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM012") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM013") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM014") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM015") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM016") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM017") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM018") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM019") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM020") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM021") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM022") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM023") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM024") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM025") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM026") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM027") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM028") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM029") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM030") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM031") === 0);
+    assert(sim.signalValue("#OUT_32DEC_NUM032") === 0);
+    
     
     
     return;

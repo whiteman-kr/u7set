@@ -580,7 +580,7 @@ namespace Hardware
 		//
 
 		m_buildSoftware = qApp->applicationName() +" v" + qApp->applicationVersion();
-#ifndef Q_DEBUG
+#ifndef QT_DEBUG
 		m_buildSoftware += ", release";
 #else
 		m_buildSoftware += ", debug";

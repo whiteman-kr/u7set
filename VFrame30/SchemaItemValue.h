@@ -57,12 +57,12 @@ namespace VFrame30
 
 			// Take first signal identifier
 			//
-			var appSignalId = schemaItemValue.SignalIDs[0];
+			let appSignalId = schemaItemValue.SignalIDs[0];
 
 			// Get data from TuningService
 			//
-			var signalParam = tuning.signalParam(appSignalId);
-			var signalState = tuning.signalState(appSignalId);
+			let signalParam = tuning.signalParam(appSignalId);
+			let signalState = tuning.signalState(appSignalId);
 
 			if (signalState == undefined)
 			{
@@ -154,7 +154,10 @@ namespace VFrame30
 	public:
 		SchemaItemValue(void);
 		explicit SchemaItemValue(SchemaUnit unit);
-		virtual ~SchemaItemValue(void);
+		virtual ~SchemaItemValue(void) = default;
+
+	protected:
+		virtual void propertyDemand(const QString& prop) override;
 
 		// Serialization
 		//
@@ -171,7 +174,7 @@ namespace VFrame30
 		void initDrawingResources() const;
 		void drawText(CDrawParam* drawParam, const QRectF& rect) const;
 
-		bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
+		bool getSignalState(QString appSignalId, CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
 
 		QString parseText(QString text, CDrawParam* drawParam, const AppSignalParam& signal, const AppSignalState& signalState) const;
 		QString formatNumber(double value, const AppSignalParam& signal) const;

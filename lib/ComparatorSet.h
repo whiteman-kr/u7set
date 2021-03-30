@@ -5,7 +5,6 @@
 
 #include <QUuid>
 #include <QMutex>
-#include <QVector>
 
 // ------------------------------------------------------------------------------------------------
 //
@@ -129,12 +128,12 @@ public:
 	QString	lmID() const;
 	void setLmID(const QString& lmID);
 
-	const QVector<std::shared_ptr<Comparator>>& comparators() const;
+	const std::vector<std::shared_ptr<Comparator>>& comparators() const;
 
 private:
 
 	QString m_lmID;
-	QVector<std::shared_ptr<Comparator>> m_comparatorList;
+	std::vector<std::shared_ptr<Comparator>> m_comparatorList;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -163,12 +162,12 @@ public:
 	// get comparators of signal
 	//
 	QStringList inputSignalIDs() const;															// return list all AppSignalID of signals that contains compartors
-	QVector<std::shared_ptr<Comparator>> getByInputSignalID(const QString& appSignalID) const;	// return vector all comparators by AppSignalID of signal
+	std::vector<std::shared_ptr<Comparator>> getByInputSignalID(const QString& appSignalID) const;	// return vector all comparators by AppSignalID of signal
 
 	// get comparators of LM
 	//
 	QStringList lmIDs() const;																	// return list all EquipmentID of LMs that contains compartors
-	QVector<std::shared_ptr<Comparator>> getByLmID(const QString& equipmentID) const;			// return vector all comparators by EquipmentID of LM
+	std::vector<std::shared_ptr<Comparator>> getByLmID(const QString& equipmentID) const;		// return vector all comparators by EquipmentID of LM
 
 	// serialize
 	//
@@ -179,6 +178,6 @@ public:
 private:
 	mutable QMutex m_mutex;
 
-	QHash<QString, QVector<std::shared_ptr<Comparator>>> m_bySignal;
+	QHash<QString, std::vector<std::shared_ptr<Comparator>>> m_bySignal;
 	QHash<QString, std::shared_ptr<LmComparatorSet>> m_byLm;
 };

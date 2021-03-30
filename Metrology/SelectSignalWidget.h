@@ -25,29 +25,21 @@ public:
 
 	explicit SelectSignalItem();
 	explicit SelectSignalItem(const SelectSignalItem& signal);
-	explicit SelectSignalItem(int index, int connectionType, const MeasureSignal& measureSignal);
+	explicit SelectSignalItem(int index, Metrology::ConnectionType connectionType, const MeasureSignal& measureSignal);
 	virtual ~SelectSignalItem() {}
-
-private:
-
-	int m_index = -1;			// index MeasureSignal in the  SignalBase in the array SignalListForMeasure
-	int m_connectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
-
-	QString m_signalId[MEASURE_IO_SIGNAL_TYPE_COUNT];
-	QString m_caption[MEASURE_IO_SIGNAL_TYPE_COUNT];
 
 public:
 
 	void clear();
 	bool isValid() const;
 
-	bool set(int index, int connectionType, const MeasureSignal& measureSignal);
+	bool set(int index, Metrology::ConnectionType connectionType, const MeasureSignal& measureSignal);
 
 	int index() const { return m_index; }
 	void setIndex(int index) { m_index = index; }
 
-	int connectionType() const { return m_connectionType; }
-	void setConnectionType(int type) { m_connectionType = type; }
+	Metrology::ConnectionType connectionType() const { return m_connectionType; }
+	void setConnectionType(Metrology::ConnectionType type) { m_connectionType = type; }
 
 	QString signalId(int ioType) const;
 	void setSignalId(int ioType, const QString& signalId);
@@ -55,6 +47,13 @@ public:
 	QString caption(int ioType) const;
 	void setCaption(int ioType, const QString& caption);
 
+private:
+
+	int m_index = -1;													// index MeasureSignal in the  SignalBase in the array SignalListForMeasure
+	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
+
+	QString m_signalId[Metrology::ConnectionIoTypeCount];
+	QString m_caption[Metrology::ConnectionIoTypeCount];
 };
 
 // ==============================================================================================
@@ -70,17 +69,7 @@ class SelectSignalWidget : public QWidget
 public:
 
 	SelectSignalWidget(QWidget* parent = nullptr);
-	virtual ~SelectSignalWidget() {}
-
-private:
-
-	int m_currentSignalIndex = -1;
-	std::vector<SelectSignalItem> m_signalList;
-
-	QPushButton* m_button = nullptr;
-
-	int m_lastPopupHeight = 0;
-	int m_lastPopupWidth = 0;
+	virtual ~SelectSignalWidget() override {}
 
 public:
 
@@ -95,6 +84,16 @@ public:
 	int setSignalList(const std::vector<SelectSignalItem>& signalList, const QString& defaultSignalId);
 
 	void updateActiveOutputSignal(const MeasureSignal& activeSignal);
+
+private:
+
+	int m_currentSignalIndex = -1;
+	std::vector<SelectSignalItem> m_signalList;
+
+	QPushButton* m_button = nullptr;
+
+	int m_lastPopupHeight = 0;
+	int m_lastPopupWidth = 0;
 
 signals:
 
@@ -120,6 +119,10 @@ public:
 
 	SelectSignalPopup(int defaultSignalIndex, const std::vector<SelectSignalItem>& signalList, QWidget* parent);
 
+public:
+
+	int selectedSignalIndex() const;
+
 private:
 
 	std::vector<SelectSignalItem> m_signalList;
@@ -136,10 +139,6 @@ protected:
 	virtual void showEvent(QShowEvent* event) override;
 	virtual	void keyPressEvent(QKeyEvent* event) override;
 	void fillList(int selectSignalIndex);
-
-public:
-
-	int selectedSignalIndex() const;
 
 private slots:
 
@@ -158,20 +157,18 @@ public:
 
 	explicit SelectSignalModel(const std::vector<SelectSignalItem>& signalList, QObject* parent = nullptr);
 
-private:
-
-	const std::vector<SelectSignalItem>& m_signalList;
-	std::vector<int> m_filteredItems;
-
 public:
 
 	virtual int rowCount(const QModelIndex &parent) const override;
 	virtual int columnCount(const QModelIndex &parent) const override;
 	virtual QVariant data(const QModelIndex &modelIndex, int role) const override;
 
-public:
-
 	int applyFilter(QString filterText, int defaultSignalIndex);
+
+private:
+
+	const std::vector<SelectSignalItem>& m_signalList;
+	std::vector<int> m_filteredItems;
 };
 
 // ==============================================================================================
@@ -185,14 +182,14 @@ public:
 
 	SelectSignalTable(const std::vector<SelectSignalItem>& signalList, int defaultSignalIndex, QWidget* parent);
 
+public:
+
+	void applyFilter(QString filter, int defaultSignalIndex);
+
 private:
 
 	const std::vector<SelectSignalItem>& m_signalList;
 	SelectSignalModel* m_model = nullptr;
-
-public:
-
-	void applyFilter(QString filter, int defaultSignalIndex);
 
 protected slots:
 

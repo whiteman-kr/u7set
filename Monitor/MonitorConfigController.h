@@ -1,5 +1,4 @@
-#ifndef MONITORCONFIGTHREAD_H
-#define MONITORCONFIGTHREAD_H
+#pragma once
 
 #include "../lib/CfgServerLoader.h"
 #include "../lib/SocketIO.h"
@@ -101,12 +100,16 @@ public slots:
 	void start();
 
 private slots:
-	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void slot_configurationReady(const QByteArray configurationXmlData,
+								 const BuildFileInfoArray buildFileInfoArray,
+								 SessionParams sessionParams,
+								 std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 
 private:
 	bool xmlReadBuildInfoNode(const QDomNode& buildInfoNode, ConfigSettings* outSetting);
 	bool xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting);
-	bool xmlReadSettingsSection(const QByteArray& xmlFileData, ConfigSettings* outSetting);
+
+	bool applyCurSettingsProfile(std::shared_ptr<const SoftwareSettings> curSettingsProfile, ConfigSettings* outSetting);
 
 	// Public properties
 	//
@@ -141,4 +144,4 @@ private:
 	ConfigSettings m_configuration;
 };
 
-#endif // MONITORCONFIGTHREAD_H
+

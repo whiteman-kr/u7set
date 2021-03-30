@@ -1,1 +1,1 @@
-C:\u7_actual\SimulatorConsole.exe C:\Builds\ualtests_sf40-debug\build AFB_SUB_SI.js
+C:\u7_actual\SimulatorConsole.exe C:\u7_builds\ualtests_sf40\build AFB_SUB_SI.js

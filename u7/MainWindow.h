@@ -15,6 +15,7 @@ class SimulatorTabPage;
 class TestsTabPage;
 class DialogShortcuts;
 class SignalSetProvider;
+class ProjectDiffGenerator;
 
 namespace Ui {
 class MainWindow;
@@ -77,6 +78,7 @@ protected slots:
     void runConnectionsEditor();
 	void runBusEditor();
 	void runTagsEditor();
+	void runSimulationProfilesEditor();
 	void updateUfbsAfbsBusses();
 	void afbLibraryCheck();
     void showAbout();
@@ -85,6 +87,8 @@ protected slots:
 	void startBuild();
 	void projectHistory();
 	void projectProperties();
+	void projectDifference();
+	void createSchemasAlbums();
 	void pendingChanges();
 
 private slots:
@@ -123,6 +127,7 @@ private:
     QAction* m_connectionsEditorAction = nullptr;
 	QAction* m_busEditorAction = nullptr;
 	QAction* m_tagsEditorAction = nullptr;
+	QAction* m_simProfilesEditorAction = nullptr;
 	QAction* m_updateUfbsAfbs = nullptr;
 	QAction* m_AfbLibraryCheck = nullptr;
 	QAction* m_aboutAction = nullptr;
@@ -131,6 +136,8 @@ private:
 	QAction* m_startBuildAction = nullptr;
 	QAction* m_projectHistoryAction = nullptr;
 	QAction* m_projectPropertiesAction = nullptr;
+	QAction* m_projectDifferenceAction = nullptr;
+	QAction* m_schemasAlbumAction = nullptr;
 	QAction* m_pendingChangesAction = nullptr;
 	QLabel* m_statusBarInfo = nullptr;
 	QLabel* m_statusBarConnectionStatistics = nullptr;

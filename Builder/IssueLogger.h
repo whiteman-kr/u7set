@@ -177,6 +177,10 @@ namespace Builder
 						QString receivingEquipmentID);		// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
 
 
+		void errCFG3044(QString equipmentID, QString profileID);	// Equipment object %1 is not found (Settings profile - %2).
+		void errCFG3045(QString equipmentID, QString propertyName, QString profileID);	// Property %1.%2 is not found (Settings profile - %3).
+
+
 		// ALP			Application Logic Parsing				4000-4999
 		//
 		void errALP4000(QString schema, const std::vector<QUuid>& itemsUuids);
@@ -468,9 +472,14 @@ namespace Builder
 		void errEQP6007(QString subsystemId);	//	All modules in subsystem must have same type, version and LmDescriptionFile (properties ModuleFamily, ModuleVersion, LmDescriptionFile)
 
         void errEQP6008(QString equipmentId, QString childEquipmentId, int childPlace); // Child childEquipmentId is not allowed in parent equipmentId
-		void errEQP6009(QString equipmemtId, QUuid equpmentUuid);
+		void errEQP6009(QString equipmemtId, QUuid equpmentUuid);	// Property Place must be 0 (Equipment object %1).
 
-		void errEQP6020(QString lm, QUuid lmUuid);		//	Property lmDescriptionFile is empty
+		void errEQP6010(QString equipmemtId);						// Device Object %1 not found.
+		void errEQP6011(QString equipmemtId, QString buildStep);	// Device Object %1 not found on %2.
+
+		void errEQP6020(QString lm, QUuid lmUuid);					//	Property lmDescriptionFile is empty
+
+		void errEQP6030(QString profileName, QString errorMessage);	// Applying SimProfile %1 error: %2
 
 
 		// Subset of EQP -- Generation Software Configuration
@@ -497,6 +506,11 @@ namespace Builder
 		void errEQP6117(QString appSignalID, double wrongValue, double lowLimit, double highLinmit, QString unit, int precesion);	//  Signal %1 has wrong high electric limit: %2 %5. Electric limit: %3 .. %4 %5.
 		void errEQP6118(QString appSignalID, double wrongValue, double lowLimit, double highLinmit, QString unit, int precesion);	//  Signal %1 has wrong low engineering limit: %2 %5. Engineering limit: %3 .. %4 %5.
 		void errEQP6119(QString appSignalID, double wrongValue, double lowLimit, double highLinmit, QString unit, int precesion);	//  Signal %1 has wrong high engineering limit: %2 %5. Engineering limit: %3 .. %4 %5.
+
+		void errEQP6120(QString sourceAppSignalID, QString destinationAppSignalID);													//  Metrology connection with signals: %1 and %2, has wrong type of connection.
+		void errEQP6121(QString appSignalID);																						//  Metrology connections contain a non-existent source signal: %1.
+		void errEQP6122(QString appSignalID);																						//  Metrology connections contain a non-existent destination signal: %1.
+
 
 
 		void errEQP6200(QString monotorId);							// Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behavior in menu Project->Project Properties...->Safety Project.

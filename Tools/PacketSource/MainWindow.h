@@ -15,8 +15,10 @@
 #include <QFileDialog>
 #include <QSortFilterProxyModel>
 #include <QClipboard>
+#include <QProgressBar>
 
 #include "Options.h"
+#include "ConfigSocket.h"
 #include "SourceList.h"
 #include "SignalList.h"
 #include "FrameDataPanel.h"
@@ -33,13 +35,14 @@ class MainWindow : public QMainWindow
 public:
 
 	explicit MainWindow(const Options& options, QMainWindow* parent = nullptr);
-	virtual ~MainWindow();
+	virtual ~MainWindow() override;
+
+public:
+
+	QTableView* sourceView() { return m_pSourceView; }
+	QTableView* signalView() { return m_pSignalView; }
 
 private:
-
-	//
-	//
-	Options					m_options;
 
 	// Elements of interface - Menu
 	//
@@ -56,7 +59,6 @@ private:
 							//
 	QAction*				m_sourceStartAction = nullptr;
 	QAction*				m_sourceStopAction = nullptr;
-	QAction*				m_sourceReloadAction = nullptr;
 	QAction*				m_sourceSelectAllAction = nullptr;
 	QAction*				m_signalSetStateAction = nullptr;
 	QAction*				m_signalInitAction = nullptr;
@@ -84,7 +86,20 @@ private:
 	// Elements of interface - StatusBar
 	//
 	QLabel*					m_statusEmpty = nullptr;
+	QProgressBar*			m_statusLoadSignals = nullptr;
+	QLabel*					m_statusConnectToConfigServer = nullptr;
+	QLabel*					m_statusSendToAppDaraServer = nullptr;
 	QLabel*					m_statusUalTesterClient = nullptr;
+
+private:
+
+	//
+	//
+	Options					m_options;
+
+	ConfigSocket*			m_pConfigSocket = nullptr;
+	void					runConfigSocket();
+	void					stopConfigSocket();
 
 private:
 
@@ -131,14 +146,9 @@ private:
 	void					saveWindowState();
 	void					restoreWindowState();
 
-public:
-
-	QTableView*				sourceView() { return m_pSourceView; }
-	QTableView*				signalView() { return m_pSignalView; }
-
 protected:
 
-	void					closeEvent(QCloseEvent* e);
+	void					closeEvent(QCloseEvent* e) override;
 
 signals:
 
@@ -177,10 +187,20 @@ private slots:
 							//
 	void					aboutApp();
 
+	// Slots of configSocket
+	//
+	void					configSocketConnected();
+	void					configSocketDisconnected();
+	void					configSocketUnknownClient();
+	void					configSocketUnknownAdsEquipmentID(const QStringList& adsIDList);
+	void					configSocketConfigurationLoaded();
+	void					configSocketSignalBaseLoading(int persentage);
+	void					configSocketSignalBaseLoaded();
+
 	// slot of data
 	//
 	void					sourcesLoaded();
-	void					signalsLoaded();
+	void					signalsLoadedInSources();
 
 	// slot of lists
 	//

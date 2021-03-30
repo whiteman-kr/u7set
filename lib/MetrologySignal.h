@@ -8,8 +8,7 @@
 #include "../lib/DeviceObject.h"
 #include "../lib/XmlHelper.h"
 
-#include "../lib/ProtoSerialization.h"
-#include "../Proto/serialization.pb.h"
+#include "../Proto/ProtoSerialization.h"
 
 // Attention !!!
 // If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_ITEMS
@@ -178,28 +177,13 @@ namespace Metrology
 
 	// ==============================================================================================
 
-	const char* const SignalTypeStr[] =
-	{
-		QT_TRANSLATE_NOOP("MeasureSignal.h", "Input"),
-		QT_TRANSLATE_NOOP("MeasureSignal.h", "Output"),
-		QT_TRANSLATE_NOOP("MeasureSignal.h", "Internal"),
-	};
-
-	const int	SIGANL_TYPE_COUNT	= sizeof(SignalTypeStr)/sizeof(SignalTypeStr[0]);
-
-	const int	SIGANL_TYPE_INPUT		= 0,
-				SIGANL_TYPE_OUTPUT		= 1,
-				SIGANL_TYPE_INTERNAL	= 2;
-
-	// ==============================================================================================
-
 	class SignalParam : public ::Signal
 	{
 	public:
 
 		SignalParam() {}
 		SignalParam(const ::Signal& signal, const SignalLocation& location);
-		virtual ~SignalParam() {}
+		virtual ~SignalParam() override {}
 
 	private:
 
@@ -218,7 +202,7 @@ namespace Metrology
 		double					m_physicalLowLimit = 0;
 		double					m_physicalHighLimit = 0;
 
-		QVector<std::shared_ptr<ComparatorEx>> m_comparatorList;
+		std::vector<std::shared_ptr<ComparatorEx>> m_comparatorList;
 		int						m_comparatorCount = 0;
 
 	public:
@@ -294,7 +278,7 @@ namespace Metrology
 		// comparators
 		//
 		std::shared_ptr<ComparatorEx> comparator(int index) const;
-		void					setComparatorList(const QVector<std::shared_ptr<ComparatorEx>>& comparators);
+		void					setComparatorList(const std::vector<std::shared_ptr<ComparatorEx> >& comparators);
 		int						comparatorCount() const { return m_comparatorCount; }
 		bool					hasComparators() const { return m_comparatorCount != 0; }
 
@@ -306,7 +290,7 @@ namespace Metrology
 
 	// ==============================================================================================
 
-	const char* const SignalNoValid		= QT_TRANSLATE_NOOP("MeasureSignal.h", "No valid");
+	const char* const SignalNoValid		= QT_TRANSLATE_NOOP("MetrologySignal", "No valid");
 
 	// ==============================================================================================
 
@@ -368,16 +352,18 @@ namespace Metrology
 
 	// ==============================================================================================
 
-	const char* const CmpValueType[] =
+	enum CmpValueType
 	{
-				QT_TRANSLATE_NOOP("MetrologySignal.h", "Set point"),
-				QT_TRANSLATE_NOOP("MetrologySignal.h", "Hysteresis"),
+		NoCmpValueType	= -1,
+		SetPoint		= 0,
+		Hysteresis		= 1,
 	};
 
-	const int	CmpValueTypeCount		= sizeof(CmpValueType)/sizeof(CmpValueType[0]);
+	const int CmpValueTypeCount	= 2;
 
-	const int	CmpValueTypeSetPoint	= 0,
-				CmpValueTypeHysteresis	= 1;
+	#define ERR_METROLOGY_CMP_VALUE_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Metrology::CmpValueTypeCount)
+
+	QString CmpValueTypeCpation(CmpValueType type);
 
 	// ==============================================================================================
 
@@ -437,14 +423,16 @@ namespace Metrology
 
 		int valuePrecision() const;
 
-		double compareOnlineValue(int cmpValueType);			// current online (run time) value: return value of set point or hysteresis, depended from cmpValueType
-		QString compareOnlineValueStr(int cmpValueType);		// str current oline (run time) value
-		double compareConstValue() const;						// default offine value
-		QString compareDefaultValueStr() const;					// str default offine value
+		double compareOnlineValue(int cmpValueType);
+		double compareOnlineValue(CmpValueType cmpValueType);			// current online (run time) value: return value of set point or hysteresis, depended from cmpValueType
+		QString compareOnlineValueStr(int cmpValueType);
+		QString compareOnlineValueStr(CmpValueType cmpValueType);		// str current oline (run time) value
+		double compareConstValue() const;								// default offine value
+		QString compareDefaultValueStr() const;							// str default offine value
 
-		double hysteresisOnlineValue();							// current oline (run time) value
-		QString hysteresisOnlineValueStr();						// str current oline (run time) value
-		QString hysteresisDefaultValueStr() const;				// str default offine value
+		double hysteresisOnlineValue();									// current oline (run time) value
+		QString hysteresisOnlineValueStr();								// str current oline (run time) value
+		QString hysteresisDefaultValueStr() const;						// str default offine value
 
 		bool outputState() const;
 		QString outputStateStr() const;

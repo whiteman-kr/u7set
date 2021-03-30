@@ -1,22 +1,22 @@
 #include "Delegate.h"
 
-#include "FindMeasurePanel.h"
+#include "PanelFindMeasure.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-IntDelegate::IntDelegate(QObject *parent) :
+IntDelegate::IntDelegate(QObject* parent) :
 	QItemDelegate(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QWidget * IntDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const
+QWidget* IntDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /* option */, const QModelIndex& /* index */) const
 {
-	QLineEdit *editor = new QLineEdit(parent);
+	QLineEdit* editor = new QLineEdit(parent);
 
 	editor->setValidator(new QIntValidator(editor));
 
@@ -27,16 +27,16 @@ QWidget * IntDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-DoubleDelegate::DoubleDelegate(QObject *parent) :
+DoubleDelegate::DoubleDelegate(QObject* parent) :
 	QItemDelegate(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QWidget * DoubleDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const
+QWidget* DoubleDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /* option */, const QModelIndex& /* index */) const
 {
-	QLineEdit *editor = new QLineEdit(parent);
+	QLineEdit* editor = new QLineEdit(parent);
 
 	editor->setValidator(new QRegExpValidator(QRegExp("^[-]{0,1}[0-9]*[.]{0,1}[0-9]*$"),editor));
 
@@ -47,14 +47,14 @@ QWidget * DoubleDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ColorDelegate::ColorDelegate(QObject *parent) :
+ColorDelegate::ColorDelegate(QObject* parent) :
 	QStyledItemDelegate(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void ColorDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
 	QRect colorRect = option.rect;
 	colorRect.adjust(2,2,-2,-2);
@@ -98,14 +98,14 @@ void ColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-FindTextDelegate::FindTextDelegate(QObject *parent) :
+FindTextDelegate::FindTextDelegate(QObject* parent) :
 	QStyledItemDelegate(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindTextDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void FindTextDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
 	QRect textRect = option.rect;
 	QRect selectTextRect;

@@ -25,21 +25,12 @@ win32:LIBS += -lGdi32
 
 INCLUDEPATH += $$PWD
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
-win32:QMAKE_CXXFLAGS += /analyze		# Static code analyze
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
-# Warning level
-#
-gcc:CONFIG += warn_on
-
-win32:CONFIG -= warn_on				# warn_on is level 3 warnings
-win32:QMAKE_CXXFLAGS += /W4			# CONFIG += warn_on is just W3 level, so set level 4
-win32:QMAKE_CXXFLAGS += /wd4201		# Disable warning: C4201: nonstandard extension used: nameless struct/union
-win32:QMAKE_CXXFLAGS += /wd4458		# Disable warning: C4458: declaration of 'selectionPen' hides class member
-win32:QMAKE_CXXFLAGS += /wd4275		# Disable warning: C4275: non - DLL-interface class 'class_1' used as base for DLL-interface class 'class_2'
+include(../warnings.pri)
 
 #Application icon
 win32:RC_ICONS += Images/u7.ico
@@ -75,6 +66,7 @@ CONFIG(release, debug|release) {
 
 SOURCES +=\
     ../lib/ExportPrint.cpp \
+	../lib/MetrologyConnection.cpp \
     ../lib/SoftwareXmlReader.cpp \
     ../lib/Ui/DbControllerTools.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
@@ -89,20 +81,32 @@ SOURCES +=\
     CreateProjectDialog.cpp \
     CreateUserDialogDialog.cpp \
     DialogClientBehavior.cpp \
+    DialogMetrologyConnection.cpp \
     DialogSettings.cpp \
     DialogTagsEditor.cpp \
     EditEngine/EditEngineNop.cpp \
+    EquipmentEditor/EquipmentModel.cpp \
+    EquipmentEditor/EquipmentView.cpp \
     FilesTabPage.cpp \
+    ../lib/Ui/DialogProgress.cpp \
+    Forms/DialogProjectDiff.cpp \
     LoginDialog.cpp \
     Main.cpp \
     MainTabPage.cpp \
     MainWindow.cpp \
     PasswordService.cpp \
+    Reports/ProjectDiffGenerator.cpp \
+    Reports/ReportTools.cpp \
+    Reports/SchemasReportGenerator.cpp \
+    SchemaEditor/EditSchemaSignalProvider.cpp \
+    SchemaEditor/EditSchemaTypes.cpp \
+    SchemaEditor/EditSchemaView.cpp \
     Settings.cpp \
     Simulator/SimConnectionPage.cpp \
     Simulator/SimLogicModulePage.cpp \
     Simulator/SimOverridePane.cpp \
     Simulator/SimOverrideValueWidget.cpp \
+    Simulator/SimProfileEditor.cpp \
     Simulator/SimSignalInfo.cpp \
     Simulator/SimSelectSchemaPage.cpp \
     Simulator/SimSignalSnapshot.cpp \
@@ -111,7 +115,7 @@ SOURCES +=\
     TestsTabPage.cpp \
     UserManagementDialog.cpp \
     ../lib/DbProgressDialog.cpp \
-    EquipmentTabPage.cpp \
+	EquipmentEditor/EquipmentTabPage.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
     SignalsTabPage.cpp \
@@ -125,19 +129,19 @@ SOURCES +=\
     BuildTabPage.cpp \
     DialogFileEditor.cpp \
     DialogSubsystemListEditor.cpp \
-    EquipmentVcsDialog.cpp \
+	EquipmentEditor/EquipmentVcsDialog.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     GlobalMessanger.cpp \
-    EditSchemaWidget.cpp \
-    SchemaPropertiesDialog.cpp \
-    SchemaItemPropertiesDialog.cpp \
-    SchemaLayersDialog.cpp \
-    CreateSchemaDialog.cpp \
+	SchemaEditor/EditSchemaWidget.cpp \
+	SchemaEditor/SchemaPropertiesDialog.cpp \
+	SchemaEditor/SchemaItemPropertiesDialog.cpp \
+	SchemaEditor/SchemaLayersDialog.cpp \
+	SchemaEditor/CreateSchemaDialog.cpp \
     EditEngine/EditEngineSetSchemaProperty.cpp \
     EditEngine/EditEngineSetOrder.cpp \
     UploadTabPage.cpp \
-    DialogChoosePreset.cpp \
+	EquipmentEditor/DialogChoosePreset.cpp \
     ../lib/Configurator.cpp \
     DialogSettingsConfigurator.cpp \
     Forms/ChooseUfbDialog.cpp \
@@ -156,9 +160,9 @@ SOURCES +=\
     Forms/ChooseAfbDialog.cpp \
     IdePropertyEditor.cpp \
     EditEngine/EditEngineSetObject.cpp \
-    EditConnectionLine.cpp \
+	SchemaEditor/EditConnectionLine.cpp \
     EditEngine/EditEngineBatch.cpp \
-    CreateSignalDialog.cpp \
+	SchemaEditor/CreateSignalDialog.cpp \
     SimulatorTabPage.cpp \
     Simulator/SimIdeSimulator.cpp \
     Simulator/SimSchemaWidget.cpp \
@@ -176,8 +180,7 @@ SOURCES +=\
     Simulator/SimBasePage.cpp \
     SpecificPropertiesEditor.cpp \
     ../lib/Ui/DialogAbout.cpp \
-    SchemaTabPageEx.cpp \
-    DialogInputEx.cpp \
+	SchemaEditor/SchemaTabPageEx.cpp \
     DialogAfbLibraryCheck.cpp \
     ../lib/WidgetUtils.cpp \
     Forms/ProjectPropertiesForm.cpp \
@@ -195,6 +198,8 @@ SOURCES +=\
 
 HEADERS  += \
     ../lib/ExportPrint.h \
+	../lib/MetrologyConnection.h \
+    ../lib/QDoublevalidatorEx.h \
     ../lib/SoftwareXmlReader.h \
     ../lib/StandardColors.h \
     ../lib/Ui/DbControllerTools.h \
@@ -210,19 +215,31 @@ HEADERS  += \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \
     DialogClientBehavior.h \
+    DialogMetrologyConnection.h \
     DialogSettings.h \
     DialogTagsEditor.h \
     EditEngine/EditEngineNop.h \
+	EquipmentEditor/EquipmentModel.h \
+    EquipmentEditor/EquipmentView.h \
     FilesTabPage.h \
+    ../lib/Ui/DialogProgress.h \
+    Forms/DialogProjectDiff.h \
     LoginDialog.h \
     MainTabPage.h \
     MainWindow.h \
     PasswordService.h \
+    Reports/ProjectDiffGenerator.h \
+    Reports/ReportTools.h \
+    Reports/SchemasReportGenerator.h \
+    SchemaEditor/EditSchemaSignalProvider.h \
+    SchemaEditor/EditSchemaTypes.h \
+    SchemaEditor/EditSchemaView.h \
     Settings.h \
     Simulator/SimConnectionPage.h \
     Simulator/SimLogicModulePage.h \
     Simulator/SimOverridePane.h \
     Simulator/SimOverrideValueWidget.h \
+    Simulator/SimProfileEditor.h \
     Simulator/SimSignalInfo.h \
     Simulator/SimSelectSchemaPage.h \
     Simulator/SimSignalSnapshot.h \
@@ -235,7 +252,7 @@ HEADERS  += \
     ../lib/Factory.h \
     ../lib/CUtils.h \
     ../lib/OrderedHash.h \
-    EquipmentTabPage.h \
+	EquipmentEditor/EquipmentTabPage.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
     SignalsTabPage.h \
@@ -250,21 +267,21 @@ HEADERS  += \
     DialogFileEditor.h \
     DialogSubsystemListEditor.h \
     Forms/ChooseAfbDialog.h \
-    EquipmentVcsDialog.h \
+	EquipmentEditor/EquipmentVcsDialog.h \
     ../lib/PropertyObject.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/DebugInstCounter.h \
     GlobalMessanger.h \
-    EditSchemaWidget.h \
-    SchemaPropertiesDialog.h \
-    SchemaItemPropertiesDialog.h \
-    SchemaLayersDialog.h \
-    CreateSchemaDialog.h \
+	SchemaEditor/EditSchemaWidget.h \
+	SchemaEditor/SchemaPropertiesDialog.h \
+	SchemaEditor/SchemaItemPropertiesDialog.h \
+	SchemaEditor/SchemaLayersDialog.h \
+	SchemaEditor/CreateSchemaDialog.h \
     EditEngine/EditEngineSetSchemaProperty.h \
     EditEngine/EditEngineSetOrder.h \
     UploadTabPage.h \
-    DialogChoosePreset.h \
+	EquipmentEditor/DialogChoosePreset.h \
     ../lib/Configurator.h \
     DialogSettingsConfigurator.h \
     Forms/ChooseUfbDialog.h \
@@ -284,9 +301,9 @@ HEADERS  += \
     Forms/DialogUpdateFromPreset.h \
     IdePropertyEditor.h \
     EditEngine/EditEngineSetObject.h \
-    EditConnectionLine.h \
+	SchemaEditor/EditConnectionLine.h \
     EditEngine/EditEngineBatch.h \
-    CreateSignalDialog.h \
+	SchemaEditor/CreateSignalDialog.h \
     SimulatorTabPage.h \
     Simulator/SimIdeSimulator.h \
     Simulator/SimSchemaWidget.h \
@@ -305,15 +322,14 @@ HEADERS  += \
     SpecificPropertiesEditor.h \
     ../lib/Ui/DialogAbout.h \
     ../lib/DbObjectStorage.h \
-    SchemaTabPageEx.h \
-    DialogInputEx.h \
+	SchemaEditor/SchemaTabPageEx.h \
     DialogAfbLibraryCheck.h \
     Forms/ProjectPropertiesForm.h \
     Forms/PendingChangesDialog.h \
     ../lib/SimpleMutex.h \
     ../lib/Ui/TextEditCompleter.h \
     ../lib/QScintillaLexers/LexerJavaScript.h \
-    ../lib/QScintillaLexers/LexerXML.h \
+	../lib/QScintillaLexers/LexerXML.h \
     DialogShortcuts.h \
     ../lib/Ui/UiTools.h \
     SvgEditor.h \
@@ -326,6 +342,7 @@ FORMS    += \
     CreateProjectDialog.ui \
     CreateUserDialogDialog.ui \
     DialogSettings.ui \
+    Forms/DialogProjectDiff.ui \
     DialogTagsEditor.ui \
     LoginDialog.ui \
     Simulator/SimSelectBuildDialog.ui \
@@ -333,12 +350,12 @@ FORMS    += \
     CheckInDialog.ui \
     DialogSubsystemListEditor.ui \
     Forms/ChooseAfbDialog.ui \
-    EquipmentVcsDialog.ui \
-    CreateSchemaDialog.ui \
-    SchemaLayersDialog.ui \
-    SchemaPropertiesDialog.ui \
-    SchemaItemPropertiesDialog.ui \
-    DialogChoosePreset.ui \
+	EquipmentEditor/EquipmentVcsDialog.ui \
+	SchemaEditor/CreateSchemaDialog.ui \
+	SchemaEditor/SchemaLayersDialog.ui \
+	SchemaEditor/SchemaPropertiesDialog.ui \
+	SchemaEditor/SchemaItemPropertiesDialog.ui \
+	EquipmentEditor/DialogChoosePreset.ui \
     DialogSettingsConfigurator.ui \
     Forms/ChooseUfbDialog.ui \
     Forms/SelectChangesetDialog.ui \
@@ -360,6 +377,24 @@ OTHER_FILES += \
 
 DISTFILES += \
     ../Etc/ClientBehavior/ClientBehavior.xml \
+    ../Scripts/AIFM/AIFM.js \
+    ../Scripts/AIM/AIM.js \
+    ../Scripts/AIM_4PH/AIM_4PH.js \
+    ../Scripts/AOM/AOM.js \
+    ../Scripts/AOM_4PH/AOM_4PH.js \
+    ../Scripts/BVB15/BVB15Conf0000.ts \
+    ../Scripts/ChildRestriction/ChildRestriction.js \
+    ../Scripts/DIM/DIM.js \
+    ../Scripts/DOM/DOM.js \
+    ../Scripts/FSCChassis/FSCChassis.js \
+    ../Scripts/LM1-SF00/LM1_SF00_Conf.ts \
+    ../Scripts/MSO3/MSO3Conf0000.ts \
+    ../Scripts/MSO4/MSO4_SR21_Conf.ts \
+    ../Scripts/OCM/OCM.js \
+    ../Scripts/OCMN/OCMN.js \
+    ../Scripts/RIM/RIM.js \
+    ../Scripts/TIM/TIM.js \
+    ../Scripts/WAIM/WAIM.js \
     LogicModuleConfiguration.js \
     Afbl/_convert_all.bat \
     Afbl/bcomp_great_v1.afb \
@@ -398,20 +433,10 @@ DISTFILES += \
     LogicModuleDescription/LM1_SR03.xml \
     LogicModuleDescription/LM1_SF40.xml
 
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
-
-win32 {
-    #CONFIG(debug, debug|release): DEFINES += _CRTDBG_MAP_ALLOC
-    #CONFIG(debug, debug|release): DEFINES += "DBG_NEW=new(_NORMAL_BLOCK,__FILE__,__LINE__)"
-    #CONFIG(debug, debug|release): DEFINES += "new=DBG_NEW"
-}
-
-
-
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-#Optimization flags
+# Optimization flags
 #
 win32 {
     CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -Od
@@ -422,18 +447,10 @@ unix {
     CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
 }
 
-#protobuf
+# Protobuf
 #
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
-
-win32 {
-    LIBS += -L$$DESTDIR -lprotobuf
-
-    INCLUDEPATH += ./../Protobuf
-}
-unix {
-    LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
 # QScintilla
 #
@@ -484,17 +501,16 @@ include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
 # QtKeychain
 #
+INCLUDEPATH += ../Tools/qtkeychain-0.10
+include(../Tools/qtkeychain-0.10/qt5keychain.pri)
+
+DEFINES += QTKEYCHAIN_NO_EXPORT
+DEFINES += USE_CREDENTIAL_STORE
+
 win32 {
     LIBS += Advapi32.lib
-
-    DEFINES += QTKEYCHAIN_NO_EXPORT
-    DEFINES += USE_CREDENTIAL_STORE
-
-    INCLUDEPATH += ./qtkeychain-0.10
-	include(../Tools/qtkeychain-0.10/qt5keychain.pri)
 }
 unix {
-    LIBS += -lqtkeychain
 }
 
 # Simulator Lib
@@ -526,3 +542,10 @@ else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../Tren
 else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/release/TrendView.lib
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/debug/TrendView.lib
 else:unix:!macx: PRE_TARGETDEPS += $$OUT_PWD/../TrendView/libTrendView.a
+
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

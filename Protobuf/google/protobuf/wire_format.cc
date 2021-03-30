@@ -64,8 +64,6 @@ namespace protobuf {
 namespace internal {
 
 // Forward declare static functions
-static size_t MapKeyDataOnlyByteSize(const FieldDescriptor* field,
-                                     const MapKey& value);
 static size_t MapValueRefDataOnlyByteSize(const FieldDescriptor* field,
                                           const MapValueConstRef& value);
 
@@ -1061,9 +1059,9 @@ uint8* WireFormat::_InternalSerialize(const Message& message, uint8* target,
   }
 }
 
-static uint8* SerializeMapKeyWithCachedSizes(const FieldDescriptor* field,
-                                             const MapKey& value, uint8* target,
-                                             io::EpsCopyOutputStream* stream) {
+uint8* SerializeMapKeyWithCachedSizes(const FieldDescriptor* field,
+                                      const MapKey& value, uint8* target,
+                                      io::EpsCopyOutputStream* stream) {
   target = stream->EnsureSpace(target);
   switch (field->type()) {
     case FieldDescriptor::TYPE_DOUBLE:
@@ -1524,8 +1522,8 @@ size_t WireFormat::FieldByteSize(const FieldDescriptor* field,
   return our_size;
 }
 
-static size_t MapKeyDataOnlyByteSize(const FieldDescriptor* field,
-                                     const MapKey& value) {
+size_t MapKeyDataOnlyByteSize(const FieldDescriptor* field,
+                              const MapKey& value) {
   GOOGLE_DCHECK_EQ(FieldDescriptor::TypeToCppType(field->type()), value.type());
   switch (field->type()) {
     case FieldDescriptor::TYPE_DOUBLE:
@@ -1645,7 +1643,7 @@ size_t WireFormat::FieldDataOnlyByteSize(const FieldDescriptor* field,
 #define HANDLE_TYPE(TYPE, TYPE_METHOD, CPPTYPE_METHOD)                      \
   case FieldDescriptor::TYPE_##TYPE:                                        \
     if (field->is_repeated()) {                                             \
-      for (int j = 0; j < count; j++) {                                     \
+      for (size_t j = 0; j < count; j++) {                                  \
         data_size += WireFormatLite::TYPE_METHOD##Size(                     \
             message_reflection->GetRepeated##CPPTYPE_METHOD(message, field, \
                                                             j));            \
@@ -1685,7 +1683,7 @@ size_t WireFormat::FieldDataOnlyByteSize(const FieldDescriptor* field,
 
     case FieldDescriptor::TYPE_ENUM: {
       if (field->is_repeated()) {
-        for (int j = 0; j < count; j++) {
+        for (size_t j = 0; j < count; j++) {
           data_size += WireFormatLite::EnumSize(
               message_reflection->GetRepeatedEnum(message, field, j)->number());
         }
@@ -1700,7 +1698,7 @@ size_t WireFormat::FieldDataOnlyByteSize(const FieldDescriptor* field,
     // instead of copying.
     case FieldDescriptor::TYPE_STRING:
     case FieldDescriptor::TYPE_BYTES: {
-      for (int j = 0; j < count; j++) {
+      for (size_t j = 0; j < count; j++) {
         std::string scratch;
         const std::string& value =
             field->is_repeated()
@@ -1748,3 +1746,5 @@ size_t ComputeUnknownFieldsSize(const InternalMetadata& metadata,
 }  // namespace internal
 }  // namespace protobuf
 }  // namespace google
+
+#include <google/protobuf/port_undef.inc>

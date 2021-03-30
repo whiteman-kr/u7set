@@ -1,5 +1,4 @@
-#ifndef DEVICEEMULATOR_H
-#define DEVICEEMULATOR_H
+#pragma once
 
 #include <memory>
 #include <functional>
@@ -26,9 +25,9 @@
 
 #ifndef __FUNCTION_NAME__
 	#ifdef WIN32   //WINDOWS
-		#define __FUNCTION_NAME__   __FUNCTION__
+		#define __FUNCTION_NAME__ __FUNCTION__
 	#else          //*NIX
-		#define __FUNCTION_NAME__   __func__
+		#define __FUNCTION_NAME__ __FUNCTION__
 	#endif
 #endif
 
@@ -37,7 +36,7 @@ class SimCommandTest_LM5_LM6;
 // class DeviceEmulator has function DeviceEmulator::fault
 // this is convenient call of this func
 //
-#define SIM_FAULT(message) fault(message, __FUNCTION_NAME__);
+#define SIM_FAULT(message) fault(message, QLatin1String(__FUNCTION_NAME__));
 
 namespace Sim
 {
@@ -331,7 +330,19 @@ namespace Sim
 		[[nodiscard]] bool tuningKey() const;
 		void setTuningKey(bool value);
 
-		[[nodiscard]] bool testTuningApplyCommand(bool newValue);	// Test m_tuningApplyCommand and set new value
+		[[nodiscard]] bool sorIsSet() const;
+		void setSorIsSet(bool value);
+
+		[[nodiscard]] bool sorSetSwitch1() const;
+		void setSorSetSwitch1(bool value);
+
+		[[nodiscard]] bool sorSetSwitch2() const;
+		void setSorSetSwitch2(bool value);
+
+		[[nodiscard]] bool sorSetSwitch3() const;
+		void setSorSetSwitch3(bool value);
+
+		[[nodiscard]] bool testSorResetSwitch(bool newValue);
 
 		// Data
 		//
@@ -376,11 +387,20 @@ namespace Sim
 		//
 		std::atomic<bool> m_armingKey{false};			// External Key
 		std::atomic<bool> m_tuningKey{false};			// Extrenal Key
-		std::atomic<bool> m_tuningApplyCommand{false};	// Flag from tunning comunnication to apply tuning changes
 
 		RamArea	m_tuningRamArea{false};		// The copy of tuning ram area at the momemt device entered the TuningMode,
 											// On command 'Apply' RAM memory is copied into this area
 											// On leaving tuning mode this area is copied back to RAM
+
+		// External SOR Set Keys
+		//
+		std::atomic<bool> m_sorIsSet{false};			// Cached value of signal SOR is Set from module RAM
+
+		std::atomic<bool> m_sorSetSwitch1{false};		// External Key
+		std::atomic<bool> m_sorSetSwitch2{false};		// External Key
+		std::atomic<bool> m_sorSetSwitch3{false};		// External Key
+
+		std::atomic<bool> m_sorResetSwitch{false};		// External Key
 
 		// Cached state
 		//
@@ -392,5 +412,3 @@ namespace Sim
 		std::unordered_map<int, size_t> m_cachedOffsetToCommand;	// key: command offset, value: index in m_commands
 	};
 }
-
-#endif // DEVICEEMULATOR_H

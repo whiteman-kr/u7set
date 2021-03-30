@@ -1,4 +1,5 @@
 #include "XmlHelper.h"
+#include "ConstStrings.h"
 #include "WUtils.h"
 
 // -------------------------------------------------------------------------------------
@@ -14,7 +15,17 @@ XmlWriteHelper::XmlWriteHelper(QXmlStreamWriter& xmlWriter) :
 
 XmlWriteHelper::XmlWriteHelper(QByteArray* data)
 {
+	TEST_PTR_RETURN(data);
+
 	m_xmlLocalWriter = new QXmlStreamWriter(data);
+	m_xmlWriter = m_xmlLocalWriter;
+}
+
+XmlWriteHelper::XmlWriteHelper(QString* xmlString)
+{
+	TEST_PTR_RETURN(xmlString);
+
+	m_xmlLocalWriter = new QXmlStreamWriter(xmlString);
 	m_xmlWriter = m_xmlLocalWriter;
 }
 
@@ -130,6 +141,11 @@ void XmlWriteHelper::writeAddress16Attribute(const QString& name, const Address1
 	writeStringAttribute(name, addr16.toString());
 }
 
+void XmlWriteHelper::writeSoftwareTypeAttribute(E::SoftwareType swType)
+{
+	writeStringAttribute(EquipmentPropNames::SOFTWARE_TYPE, E::valueToString<E::SoftwareType>(swType));
+}
+
 void XmlWriteHelper::writeString(const QString& str)
 {
 	m_xmlWriter->writeCharacters(str);
@@ -175,6 +191,12 @@ XmlReadHelper::XmlReadHelper(QXmlStreamReader& xmlReader) :
 XmlReadHelper::XmlReadHelper(const QByteArray& data)
 {
 	m_xmlLocalReader = new QXmlStreamReader(data);
+	m_xmlReader = m_xmlLocalReader;
+}
+
+XmlReadHelper::XmlReadHelper(const QString& xmlString)
+{
+	m_xmlLocalReader = new QXmlStreamReader(xmlString);
 	m_xmlReader = m_xmlLocalReader;
 }
 
@@ -385,6 +407,32 @@ bool XmlReadHelper::readAddress16Attribute(const QString& name, Address16* value
 	value->fromString(addr16Str, &result);
 
 	return result;
+}
+
+bool XmlReadHelper::readSoftwareTypeAttribute(E::SoftwareType* swType)
+{
+	TEST_PTR_RETURN_FALSE(swType);
+
+	QString swTypeStr;
+
+	bool result = readStringAttribute(EquipmentPropNames::SOFTWARE_TYPE, &swTypeStr);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	bool ok = true;
+
+	*swType = E::stringToValue<E::SoftwareType>(swTypeStr, &ok);
+
+	if (ok == false)
+	{
+		*swType = E::SoftwareType::Unknown;
+		return false;
+	}
+
+	return true;
 }
 
 bool XmlReadHelper::readStringElement(const QString& elementName, QString* value, bool find)

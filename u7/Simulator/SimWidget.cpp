@@ -51,8 +51,8 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	QVBoxLayout* layout = new QVBoxLayout;
 	centralWidget()->setLayout(layout);
 
-	createToolBar();
 	createDocks();
+	createToolBar();
 
 	updateActions();
 
@@ -232,6 +232,10 @@ void SimWidget::createToolBar()
 	m_allowLanComm->setChecked(m_simulator->software().enabled());
 	connect(m_allowLanComm, &QAction::toggled, this, &SimWidget::allowLanCommToggled);
 
+	m_profilesComboBox = new QComboBox{};
+	m_profilesComboBox->setMinimumContentsLength(15);
+	connect(m_profilesComboBox, &QComboBox::currentTextChanged, this, &SimWidget::profileComboTextChanged);
+
 	m_trendsAction = new QAction{QIcon(":/Images/Images/SimTrends.svg"), tr("Trends"), this};
 	m_trendsAction->setEnabled(true);
 	m_trendsAction->setData(QVariant("IAmIndependentTrend"));			// This is required to find this action in MonitorToolBar for drag and drop
@@ -274,6 +278,7 @@ void SimWidget::createToolBar()
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_allowLanComm);
+	m_toolBar->addWidget(m_profilesComboBox);
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_snapshotAction);
@@ -294,8 +299,6 @@ void SimWidget::createToolBar()
 
 void SimWidget::createDocks()
 {
-	qDebug() << "SimWidget::createDocks()";
-
 	setCorner(Qt::Corner::BottomLeftCorner, Qt::DockWidgetArea::LeftDockWidgetArea);
 	setCorner(Qt::Corner::BottomRightCorner, Qt::DockWidgetArea::BottomDockWidgetArea);
 	setCorner(Qt::Corner::TopRightCorner, Qt::DockWidgetArea::RightDockWidgetArea);
@@ -322,27 +325,26 @@ void SimWidget::createDocks()
 
 	// Overriden Signals dock
 	//
-	QDockWidget* overrideDock = new QDockWidget{"Override", this};
-	overrideDock->setObjectName("SimOverridenSignals");
-	overrideDock->setWidget(new SimOverridePane{m_simulator.get(), dbc(), overrideDock});
-	overrideDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+	m_overridePaneDock = new QDockWidget{"Overrides", this};
+	m_overridePaneDock->setObjectName("SimOverridenSignals");
+	m_overridePaneDock->setWidget(new SimOverridePane{m_simulator.get(), dbc(), m_overridePaneDock});
+	m_overridePaneDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
-	addDockWidget(Qt::BottomDockWidgetArea, overrideDock);
+	addDockWidget(Qt::BottomDockWidgetArea, m_overridePaneDock);
 
 	// OutputLog dock
 	//
-	QDockWidget* outputDock = nullptr;
 	if (m_slaveWindow == false)
 	{
-		outputDock = new QDockWidget{"Output", this};
-		outputDock->setObjectName("SimOutputWidget");
+		m_outputPaneDock = new QDockWidget{"Output", this};
+		m_outputPaneDock->setObjectName("SimOutputWidget");
 
-		m_outputWidget = new SimOutputWidget{outputDock};
+		m_outputWidget = new SimOutputWidget{m_outputPaneDock};
 
-		outputDock->setWidget(m_outputWidget);
-		outputDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+		m_outputPaneDock->setWidget(m_outputWidget);
+		m_outputPaneDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
-		addDockWidget(Qt::BottomDockWidgetArea, outputDock);
+		addDockWidget(Qt::BottomDockWidgetArea, m_outputPaneDock);
 	}
 
 	// Memory Widget - at least one defaullt memory widget
@@ -397,11 +399,7 @@ void SimWidget::showEvent(QShowEvent* e)
 	QMainWindow::showEvent(e);
 	e->ignore();
 
-	m_showEventFired = true;
-
-static bool firstEvent = true;
-
-	if (firstEvent == true)
+	if (m_showEventFired == false)
 	{
 		// Restore docks states only after show event, otherwise the _floated_ docks will be behind main window
 		//
@@ -422,9 +420,10 @@ static bool firstEvent = true;
 
 			m_toolBar->setVisible(true);
 		}
-
-		firstEvent = false;
 	}
+
+	m_showEventFired = true;
+
 	return;
 }
 
@@ -522,23 +521,69 @@ void SimWidget::updateActions()
 {
 	bool projectIsLoaded = m_simulator->isLoaded();
 
-	m_openProjectAction->setEnabled(true);
-	m_closeProjectAction->setEnabled(projectIsLoaded);
+	{
+		m_openProjectAction->setEnabled(true);
+		m_closeProjectAction->setEnabled(projectIsLoaded);
 
-	QString project = db()->currentProject().projectName().toLower();
-	QString lastPath = QSettings().value("SimulatorWidget/ProjectLastPath/" + project).toString();
-	bool lastPathExists = QDir(lastPath).exists() == true && lastPath.isEmpty() == false;
+		QString project = db()->currentProject().projectName().toLower();
+		QString lastPath = QSettings().value("SimulatorWidget/ProjectLastPath/" + project).toString();
+		bool lastPathExists = QDir(lastPath).exists() == true && lastPath.isEmpty() == false;
 
-	m_refreshProjectAction->setEnabled(projectIsLoaded || lastPathExists);
-	m_addWindowAction->setEnabled(projectIsLoaded);
+		m_refreshProjectAction->setEnabled(projectIsLoaded || lastPathExists);
+		m_addWindowAction->setEnabled(projectIsLoaded);
+	}
 
 	// Run, Pause, Stop
 	//
-	m_runAction->setEnabled((m_simulator->isStopped() == true || m_simulator->isPaused()) && projectIsLoaded == true);
-	m_pauseAction->setEnabled(m_simulator->isRunning() == true && projectIsLoaded == true);
-	m_stopAction->setEnabled(m_simulator->isStopped() == false  && projectIsLoaded == true);
+	{
+		m_runAction->setEnabled((m_simulator->isStopped() == true || m_simulator->isPaused()) && projectIsLoaded == true);
+		m_pauseAction->setEnabled(m_simulator->isRunning() == true && projectIsLoaded == true);
+		m_stopAction->setEnabled(m_simulator->isStopped() == false  && projectIsLoaded == true);
 
-	m_timeIndicator->setEnabled(m_simulator->isStopped() == false  && projectIsLoaded == true);
+		m_timeIndicator->setEnabled(m_simulator->isStopped() == false  && projectIsLoaded == true);
+	}
+
+	// Update profile combo box
+	//
+	{
+		m_profilesComboBox->setEnabled(m_simulator->isStopped() == true && projectIsLoaded == true);
+
+		bool hasLastSelected = false;
+		QString lastSelectedProfile;
+
+		if (projectIsLoaded == true)
+		{
+			lastSelectedProfile = QSettings().value(QString("SimWidget/lastSelectedProfile_%1").
+													arg(m_simulator->projectName())).toString();
+		}
+
+		m_profilesComboBox->blockSignals(true);
+		m_profilesComboBox->clear();
+
+		if (projectIsLoaded == true)
+		{
+			QStringList profiles;
+
+			profiles += m_simulator->profiles().profiles();
+
+			for (QString p : profiles)
+			{
+				m_profilesComboBox->addItem(p, p);
+
+				if (p.compare(lastSelectedProfile, Qt::CaseInsensitive) == 0)
+				{
+					hasLastSelected = true;
+				}
+			}
+		}
+
+		m_profilesComboBox->blockSignals(false);
+
+		if (projectIsLoaded == true && hasLastSelected == true)
+		{
+			m_profilesComboBox->setCurrentText(lastSelectedProfile);
+		}
+	}
 
 	return;
 }
@@ -632,6 +677,21 @@ void SimWidget::runSimulation()
 		return;
 	}
 
+	// Set profile tosimulator
+	//
+	Q_ASSERT(m_profilesComboBox);
+
+	QString selectedProfile = m_profilesComboBox->currentText();
+
+	if (bool ok = m_simulator->setCurrentProfile(selectedProfile);
+		ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Profile %1 not found").arg(selectedProfile));
+		return;
+	}
+
+	// --
+	//
 	Sim::Control& mutableControl = m_simulator->control();
 
 	if (m_simulator->isPaused() == true)
@@ -724,6 +784,16 @@ void SimWidget::stopSimulation(bool stopSimulationThread)
 void SimWidget::allowLanCommToggled(bool state)
 {
 	m_simulator->software().setEnabled(state);
+	return;
+}
+
+void SimWidget::profileComboTextChanged(QString text)
+{
+	if (m_simulator->isLoaded() == true && text.isEmpty() == false)
+	{
+		QSettings{}.setValue(QString("SimWidget/lastSelectedProfile_%1").arg(m_simulator->projectName()), text);
+	}
+
 	return;
 }
 

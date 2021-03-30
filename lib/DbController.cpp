@@ -94,6 +94,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getLatestSignal, m_worker, &DbWorker::slot_getLatestSignal);
 	connect(this, &DbController::signal_getLatestSignals, m_worker, &DbWorker::slot_getLatestSignals);
 	connect(this, &DbController::signal_getLatestSignalsByAppSignalIDs, m_worker, &DbWorker::slot_getLatestSignalsByAppSignalIDs);
+	connect(this, &DbController::signal_getLatestSignalsWithUserID, m_worker, &DbWorker::slot_getLatestSignalsWithUserID);
 	connect(this, &DbController::signal_getCheckedOutSignalsIDs, m_worker, &DbWorker::slot_getCheckedOutSignalsIDs);
 	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
 	connect(this, &DbController::signal_checkoutSignals, m_worker, &DbWorker::slot_checkoutSignals);
@@ -110,7 +111,16 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getSignalsIDsWithEquipmentID, m_worker, &DbWorker::slot_getSignalsIDsWithEquipmentID);
 	connect(this, &DbController::signal_getMultipleSignalsIDsWithEquipmentID, m_worker, &DbWorker::slot_getMultipleSignalsIDsWithEquipmentID);
 	connect(this, &DbController::signal_getSignalHistory, m_worker, &DbWorker::slot_getSignalHistory);
-	connect(this, &DbController::signal_getSpecificSignals, m_worker, &DbWorker::slot_getSpecificSignals);
+
+	connect(this, static_cast<void(DbController::*)(const std::vector<int>*, int, std::vector<Signal>*)>(&DbController::signal_getSpecificSignals),
+			m_worker, static_cast<void(DbWorker::*)(const std::vector<int>*, int, std::vector<Signal>*)>(&DbWorker::slot_getSpecificSignals));
+
+	connect(this, static_cast<void(DbController::*)(int, std::vector<Signal>*)>(&DbController::signal_getSpecificSignals),
+			m_worker, static_cast<void(DbWorker::*)(int, std::vector<Signal>*)>(&DbWorker::slot_getSpecificSignals));
+
+	connect(this, static_cast<void(DbController::*)(QDateTime, std::vector<Signal>*)>(&DbController::signal_getSpecificSignals),
+			m_worker, static_cast<void(DbWorker::*)(QDateTime, std::vector<Signal>*)>(&DbWorker::slot_getSpecificSignals));
+
 	connect(this, &DbController::signal_hasCheckedOutSignals, m_worker, &DbWorker::slot_hasCheckedOutSignals);
 
 	connect(this, &DbController::signal_buildStart, m_worker, &DbWorker::slot_buildStart);
@@ -758,6 +768,11 @@ bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, boo
 	return getFileList(files, parentId, QString(), removeDeleted, parentWidget);
 }
 
+bool DbController::getFileList(std::vector<DbFileInfo>* files, DbDir systemDir, bool removeDeleted, QWidget* parentWidget)
+{
+	return getFileList(files, systemFileId(systemDir), removeDeleted, parentWidget);
+}
+
 bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget)
 {
 	// Check parameters
@@ -784,9 +799,20 @@ bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, QSt
 	return result;
 }
 
+bool DbController::getFileList(std::vector<DbFileInfo>* files, DbDir systemDir, QString filter, bool removeDeleted, QWidget* parentWidget)
+{
+	int parentFileId = systemFileId(systemDir);
+	return getFileList(files, parentFileId, filter, removeDeleted, parentWidget);
+}
+
 bool DbController::getFileListTree(DbFileTree* filesTree, int parentId, bool removeDeleted, QWidget* parentWidget)
 {
 	return getFileListTree(filesTree, parentId, QString{}, removeDeleted, parentWidget);
+}
+
+bool DbController::getFileListTree(DbFileTree* filesTree, DbDir parentSystemDir, bool removeDeleted, QWidget* parentWidget)
+{
+	return getFileListTree(filesTree, systemFileId(parentSystemDir), removeDeleted, parentWidget);
 }
 
 bool DbController::getFileListTree(DbFileTree* filesTree, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget)
@@ -813,6 +839,11 @@ bool DbController::getFileListTree(DbFileTree* filesTree, int parentId, QString 
 
 	bool result = waitForComplete(parentWidget, tr("Geting file list tree"));
 	return result;
+}
+
+bool DbController::getFileListTree(DbFileTree* filesTree, DbDir parentSystemDir, QString filter, bool removeDeleted, QWidget* parentWidget)
+{
+	return getFileListTree(filesTree, systemFileId(parentSystemDir), filter, removeDeleted, parentWidget);
 }
 
 bool DbController::getFileInfo(int parentId, QString fileName, DbFileInfo* out, QWidget* parentWidget)
@@ -996,6 +1027,11 @@ bool DbController::addFile(const std::shared_ptr<DbFile>& file, int parentId, QW
 	v.push_back(file);
 
 	return addFiles(&v, parentId, false, -1, parentWidget);
+}
+
+bool DbController::addFile(const std::shared_ptr<DbFile>& file, DbDir systemDir, QWidget* parentWidget)
+{
+	return addFile(file, systemFileId(systemDir), parentWidget);
 }
 
 bool DbController::addUniqueFile(const std::shared_ptr<DbFile>& file, int parentId, int uniqueFromFileId, QWidget* parentWidget)
@@ -1831,6 +1867,8 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 		return false;
 	}
 
+	out->reset();
+
 	// 1. Get files
 	//
 
@@ -1865,9 +1903,12 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 	std::vector<std::shared_ptr<DbFile>> threadFiles;
 	threadFiles.reserve(fileCountPerThread);
 
+	int hcFileId = systemFileId(DbDir::HardwareConfigurationDir);
+	int hpFileId = systemFileId(DbDir::HardwarePresetsDir);
+
 	for (const std::shared_ptr<DbFile>& f : files)
 	{
-		if (f->fileId() == hcFileId() || f->fileId() == hpFileId())
+		if (f->fileId() == hcFileId || f->fileId() == hpFileId)
 		{
 			std::shared_ptr<Hardware::DeviceObject> object = std::make_shared<Hardware::DeviceRoot>();
 			object->setFileInfo(*(f.get()));
@@ -1912,34 +1953,31 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 
 	// 2.2 Set child to items
 	//
-	bool rootWasFound = false;
-	for (const auto& pair : objectsMap)
+	for (auto [fileId, deviceObject] : objectsMap)
 	{
 		// Get parentId
 		//
-		int fileId = pair.second->fileInfo().fileId();
-		int parentId = pair.second->fileInfo().parentId();
+		assert(fileId == deviceObject->fileInfo().fileId());
+		int parentId = deviceObject->fileInfo().parentId();
 
 		auto parentIterator = objectsMap.find(parentId);
 		if (parentIterator == objectsMap.end())
 		{
 			// Apparently it is the root item, so, we have to check it and set flag that we already found it
 			//
-			assert(rootWasFound == false);
+			assert(out->get() == nullptr);
 			assert(file.fileId() == fileId);
 
-			*out = objectsMap[fileId];	// !!! HOW TO USE parentIterator->second; ?????
-			rootWasFound = true;
-
+			*out = deviceObject;
 			continue;
 		}
 
-		(*parentIterator).second->addChild(pair.second);
+		(*parentIterator).second->addChild(deviceObject);
 	}
 
-	if (rootWasFound == false)
+	if (out->get() == nullptr)
 	{
-		assert(rootWasFound == true);
+		assert(out->get());
 		return false;
 	}
 
@@ -2195,6 +2233,28 @@ bool DbController::getLatestSignalsWithoutProgress(QVector<int> signalIDs, QVect
 	return ok;
 }
 
+bool DbController::getLatestSignalsWithUserID(std::vector<Signal>* out, QWidget* parentWidget)
+{
+	TEST_PTR_RETURN_FALSE(out);
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getLatestSignalsWithUserID(out);
+
+	ok = waitForComplete(parentWidget, tr("Reading latest signals with UserID"));
+
+	return ok;
+
+}
+
+
 
 bool DbController::checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget)
 {
@@ -2374,7 +2434,7 @@ bool DbController::checkinSignals(QVector<int>* signalIDs, QString comment, QVec
 
 
 
-bool DbController::autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, std::vector<Signal>* addedSignals, QWidget* parentWidget)
+bool DbController::autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<Signal>* addedSignals, QWidget* parentWidget)
 {
 	if (deviceSignals == nullptr)
 	{
@@ -2399,7 +2459,7 @@ bool DbController::autoAddSignals(const std::vector<Hardware::DeviceSignal*>* de
 }
 
 
-bool DbController::autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, QWidget* parentWidget)
+bool DbController::autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, QWidget* parentWidget)
 {
 	if (deviceSignals == nullptr)
 	{
@@ -2584,6 +2644,49 @@ bool DbController::getSpecificSignals(const std::vector<int>* signalIDs, int cha
 	return true;
 }
 
+bool DbController::getSpecificSignals(int changesetId, std::vector<Signal>* out, QWidget* parentWidget)
+{
+	TEST_PTR_RETURN_FALSE(out);
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getSpecificSignals(changesetId, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting specific signals"));
+
+	return true;
+}
+
+bool DbController::getSpecificSignals(QDateTime date, std::vector<Signal>* out, QWidget* parentWidget)
+{
+	TEST_PTR_RETURN_FALSE(out);
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getSpecificSignals(date, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting specific signals"));
+
+	return true;
+}
 
 bool DbController::hasCheckedOutSignals(bool* hasCheckedOut, QWidget* parentWidget)
 {
@@ -2761,11 +2864,14 @@ bool DbController::getTags(std::vector<DbTag>* tags)
 												   {"ufb", "UFB Schema"},
 												   {"wiring", "Wiring Schema"},
 												   {"in", "Input Signal"},
-												   {"out", "Output Signal"}};
+												   {"out", "Output Signal"},
+												   {"view_linear", "Signal with Linear Grid"},
+												   {"view_log10", "Signal with Logarithmic Grid"},
+												   {"view_period", "Signal with Reactor Period Grid"}};
 
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = getFileList(&fileList, etcFileId(), Db::File::TagsFileName, true, nullptr);
+	bool ok = getFileList(&fileList, DbDir::EtcDir, Db::File::TagsFileName, true, nullptr);
 	if (ok == false || fileList.size() != 1)
 	{
 		*tags = defaultTags;
@@ -2808,10 +2914,10 @@ bool DbController::writeTags(const std::vector<DbTag> tags, const QString& comme
 	// save to db
 	//
 	std::shared_ptr<DbFile> file = nullptr;
-
 	std::vector<DbFileInfo> fileList;
+	int etcFileId = systemFileId(DbDir::EtcDir);
 
-	bool ok = getFileList(&fileList, etcFileId(), Db::File::TagsFileName, true, nullptr);
+	bool ok = getFileList(&fileList, etcFileId, Db::File::TagsFileName, true, nullptr);
 	if (ok == false || fileList.size() != 1)
 	{
 		// create a file, if it does not exists
@@ -2819,12 +2925,12 @@ bool DbController::writeTags(const std::vector<DbTag> tags, const QString& comme
 		std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
 		pf->setFileName(Db::File::TagsFileName);
 
-		if (addFile(pf, etcFileId(), nullptr) == false)
+		if (addFile(pf, etcFileId, nullptr) == false)
 		{
 			return false;
 		}
 
-		ok = getFileList(&fileList, etcFileId(), Db::File::TagsFileName, true, nullptr);
+		ok = getFileList(&fileList, etcFileId, Db::File::TagsFileName, true, nullptr);
 		if (ok == false || fileList.size() != 1)
 		{
 			return false;
@@ -3028,79 +3134,14 @@ int DbController::rootFileId() const
 	return m_worker->rootFileId();
 }
 
-int DbController::schemaFileId() const
+int DbController::systemFileId(DbDir dir) const
 {
-	return m_worker->schemasFileId();
+	return m_worker->systemFileId(dir);
 }
 
-int DbController::afblFileId() const
+DbFileInfo DbController::systemFileInfo(DbDir dir) const
 {
-	return m_worker->afblFileId();
-}
-
-int DbController::ufblFileId() const
-{
-	return m_worker->ufblFileId();
-}
-
-int DbController::alFileId() const
-{
-	return m_worker->alFileId();
-}
-
-int DbController::hcFileId() const
-{
-	return m_worker->hcFileId();
-}
-
-int DbController::hpFileId() const
-{
-	return m_worker->hpFileId();
-}
-
-int DbController::mcFileId() const
-{
-	return m_worker->mcFileId();
-}
-
-int DbController::mvsFileId() const
-{
-	return m_worker->mvsFileId();
-}
-
-int DbController::tvsFileId() const
-{
-	return m_worker->tvsFileId();
-}
-
-int DbController::dvsFileId() const
-{
-	return m_worker->dvsFileId();
-}
-
-int DbController::connectionsFileId() const
-{
-	return m_worker->connectionsFileId();
-}
-
-int DbController::busTypesFileId() const
-{
-	return m_worker->busTypesFileId();
-}
-
-int DbController::etcFileId() const
-{
-	return m_worker->etcFileId();
-}
-
-int DbController::testsFileId() const
-{
-	return m_worker->testsFileId();
-}
-
-int DbController::simTestsFileId() const
-{
-	return m_worker->simTestsFileId();
+	return m_worker->systemFileInfo(dir);
 }
 
 std::vector<DbFileInfo> DbController::systemFiles() const

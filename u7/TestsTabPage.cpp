@@ -4,7 +4,7 @@
 #include "Simulator/SimSelectBuildDialog.h"
 
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 	#include <QAbstractItemModelTester>
 #endif
 //
@@ -1696,7 +1696,7 @@ void TestsWidget::moveSelectedFiles()
 		}
 	}
 
-	m_testsTreeView->moveFile(db()->testsFileId());
+	m_testsTreeView->moveFile(db()->systemFileId(DbDir::TestsDir));
 }
 
 void TestsWidget::refreshFileTree()
@@ -1715,7 +1715,7 @@ void TestsWidget::runAllTestFiles()
 	// Find all files with scripts extention
 	DbFileTree testsTree;
 
-	bool ok = db()->getFileListTree(&testsTree, db()->testsFileId(), true, parentWidget());
+	bool ok = db()->getFileListTree(&testsTree, DbDir::TestsDir, true, parentWidget());
 	if (ok == false)
 	{
 		return;
@@ -2638,6 +2638,11 @@ void TestsWidget::closeDocumentsForDeletedFiles()
 
 void TestsWidget::compareObject(DbChangesetObject object, CompareData compareData)
 {
+	if (isVisible() == false)
+	{
+		return;
+	}
+
 	// Can compare only files which are EquipmentObjects
 	//
 	if (object.isFile() == false)
@@ -2890,9 +2895,9 @@ void TestsWidget::createTestsDock()
 	QVBoxLayout* testsLayout = new QVBoxLayout(testsWidget);
 	testsLayout->setContentsMargins(6, 0, 6, 6);
 
-	m_testsTreeModel = new TestsFileTreeModel(db(), DbFileInfo::fullPathToFileName(Db::File::TestsFileName), this, this);
+	m_testsTreeModel = new TestsFileTreeModel(db(), Db::File::systemDirToName(DbDir::TestsDir), this, this);
 
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 	[[maybe_unused]]QAbstractItemModelTester* modelTester = new QAbstractItemModelTester(m_testsTreeModel,
 																	 QAbstractItemModelTester::FailureReportingMode::Fatal,
 																		 this);
@@ -2956,7 +2961,7 @@ void TestsWidget::createTestsDock()
 
 	QVBoxLayout* filesLayout = new QVBoxLayout(filesWidget);
 
-	filesLayout->addWidget(new QLabel(tr("Open Files")));
+	filesLayout->addWidget(new QLabel(tr("Opened Files")));
 
 	m_openFilesTreeWidget = new QTreeWidget();
 	QStringList header;

@@ -13,6 +13,11 @@ namespace Sim
 		e.raise();
 	}
 
+	void SimException::raise(QString message, const char* where, QString scope /*= QString()*/)
+	{
+		return SimException::raise(message, QString(where), scope);
+	}
+
 	void SimException::raise() const
 	{
 		throw *this;

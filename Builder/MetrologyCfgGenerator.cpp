@@ -1,6 +1,7 @@
 #include "MetrologyCfgGenerator.h"
 
 #include "../lib/MetrologySignal.h"
+#include "../lib/MetrologyConnection.h"
 #include "../lib/SoftwareSettings.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/SignalProperties.h"
@@ -18,23 +19,27 @@ namespace Builder
 	{
 	}
 
-	bool MetrologyCfgGenerator::generateConfiguration()
+	bool MetrologyCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		MetrologySettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<MetrologySettings>(profile, settingsGetter);
+	}
+
+	bool MetrologyCfgGenerator::generateConfigurationStep1()
 	{
 		bool result = true;
 
 		result &= writeDatabaseInfo();
-		result &= writeSettings();
 		result &= writeMetrologyItemsXml();
 		result &= writeMetrologySignalSet();
 
 		return result;
-	}
-
-	bool MetrologyCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
-	{
-		XmlWriteHelper xml(xmlWriter);
-
-		return m_settings.writeToXml(xml);
 	}
 
 	bool MetrologyCfgGenerator::writeDatabaseInfo()
@@ -48,15 +53,6 @@ namespace Builder
 		xmlWriter.writeEndElement();
 
 		return true;
-	}
-
-	bool MetrologyCfgGenerator::writeSettings()
-	{
-		bool result = m_settings.readFromDevice(m_context, m_software);
-
-		RETURN_IF_FALSE(result)
-
-		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool MetrologyCfgGenerator::writeMetrologyItemsXml()
@@ -80,7 +76,7 @@ namespace Builder
 				int systemsCount = m_equipment->root()->childrenCount();
 				for (int s = 0; s < systemsCount; s++)
 				{
-					Hardware::DeviceObject* pSystem = m_equipment->root()->child(s);
+					Hardware::DeviceObject* pSystem = m_equipment->root()->child(s).get();
 					if (pSystem == nullptr || pSystem->isSystem() == false)
 					{
 						continue;
@@ -91,7 +87,7 @@ namespace Builder
 					int racksCount = pSystem->childrenCount();
 					for (int r = 0; r < racksCount; r++)
 					{
-						Hardware::DeviceObject* pRack = pSystem->child(r);
+						Hardware::DeviceObject* pRack = pSystem->child(r).get();
 						if (pRack == nullptr || pRack->isRack() == false)
 						{
 							continue;
@@ -105,7 +101,7 @@ namespace Builder
 				//
 				xml.writeStartElement("Racks");
 				{
-					xml.writeIntAttribute("Count", racks.count());
+					xml.writeIntAttribute(XmlAttribute::COUNT, racks.count());
 
 					for(Metrology::RackParam rack : racks)
 					{
@@ -117,14 +113,14 @@ namespace Builder
 						rack.writeToXml(xml);
 					}
 				}
-				xml.writeEndElement();
+				xml.writeEndElement(); // Metrology::RackParam
 
 
 				// Creating tuning sources list from software property
 				//
 				QStringList tuningSourceEquipmentID;
 
-				Hardware::DeviceObject* pObjectSoftware = m_equipment->deviceObject(m_software->equipmentId());
+				Hardware::DeviceObject* pObjectSoftware = m_equipment->deviceObject(m_software->equipmentId()).get();
 				if (pObjectSoftware != nullptr && pObjectSoftware->isSoftware() == true)
 				{
 					QString propertyValue;
@@ -142,7 +138,7 @@ namespace Builder
 				//
 				xml.writeStartElement("TuningSources");
 				{
-					xml.writeIntAttribute("Count", tuningSourceEquipmentID.count());
+					xml.writeIntAttribute(XmlAttribute::COUNT, tuningSourceEquipmentID.count());
 
 					for(QString equipmentID : tuningSourceEquipmentID)
 					{
@@ -158,17 +154,76 @@ namespace Builder
 						xml.writeEndElement();
 					}
 				}
-				xml.writeEndElement();
+				xml.writeEndElement(); // TuningSourceEquipmentID
+
+
+				// Creating metrology connections list from DbController
+				//
+				Metrology::ConnectionBase connectionBase;
+				connectionBase.load(m_dbController);
+
+				// Writing metrology connections
+				//
+				xml.writeStartElement("Connections");
+				{
+					int connectionCount = connectionBase.count();
+					xml.writeIntAttribute(XmlAttribute::COUNT, connectionCount);
+
+					for(int i = 0; i < connectionCount; i++)
+					{
+						Metrology::Connection connection = connectionBase.connection(i);
+
+						bool wrongConnection = false;
+
+						if (ERR_METROLOGY_CONNECTION_TYPE(connection.type()) == true)
+						{
+							// Metrology connection with signals: %1 and %2, has wrong type of connection
+							//
+							m_log->errEQP6120(connection.appSignalID(Metrology::ConnectionIoType::Source),
+											  connection.appSignalID(Metrology::ConnectionIoType::Destination));
+
+							wrongConnection = true;
+						}
+
+						Signal* pInSignal = m_signalSet->getSignal(connection.appSignalID(Metrology::ConnectionIoType::Source));
+						if (pInSignal == nullptr)
+						{
+							// Metrology connections contain a non-existent source signal: %1
+							//
+							m_log->errEQP6121(connection.appSignalID(Metrology::ConnectionIoType::Source));
+
+							wrongConnection = true;
+						}
+
+						Signal* pOutSignal = m_signalSet->getSignal(connection.appSignalID(Metrology::ConnectionIoType::Destination));
+						if (pOutSignal == nullptr)
+						{
+							// Metrology connections contain a non-existent destination signal: %1
+							//
+							m_log->errEQP6122(connection.appSignalID(Metrology::ConnectionIoType::Destination));
+
+							wrongConnection = true;
+						}
+
+						if (wrongConnection == true)
+						{
+							continue;
+						}
+
+						connection.writeToXml(xml);
+					}
+				}
+				xml.writeEndElement();  // Metrology::Connection
+
 			}
 			xml.writeEndElement();	// </MetrologyItems>
-
 		}
 		xml.writeEndDocument();
 
 
 		// Create and write build file MetrologySignals.xml
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::METROLOGY_ITEMS_XML, CfgFileId::METROLOGY_ITEMS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::METROLOGY_ITEMS_XML, CfgFileId::METROLOGY_ITEMS, "",  data);
 
 		if (buildFile == nullptr)
 		{
@@ -252,6 +307,14 @@ namespace Builder
 								hasWrongField = true;
 							}
 							break;
+
+						case E::ElectricUnit::Hz:
+
+							if (testElectricLimit_Input_Hz(signal) == false)
+							{
+								hasWrongField = true;
+							}
+							break;
 					}
 				}
 			}
@@ -272,7 +335,7 @@ namespace Builder
 
 			// find location of signal in the equipment Tree by signal equipmentID
 			//
-			Metrology::SignalLocation location(m_equipment->deviceObject(signal.equipmentID()), showOnSchemas);
+			Metrology::SignalLocation location(m_equipment->deviceObject(signal.equipmentID()).get(), showOnSchemas);
 
 			// append signal into list
 			//
@@ -297,7 +360,7 @@ namespace Builder
 
 		protoMetrologySignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, File::METROLOGY_SIGNAL_SET, CfgFileId::METROLOGY_SIGNAL_SET, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::METROLOGY_SIGNAL_SET, CfgFileId::METROLOGY_SIGNAL_SET, "",  data);
 		if (buildFile == nullptr)
 		{
 			return false;
@@ -700,7 +763,60 @@ namespace Builder
 		}
 		else
 		{
-			if (signal.sensorType() != E::SensorType::uA_m10_p10)
+			if (signal.sensorType() != E::SensorType::uA_m20_p20)
+			{
+				return false;
+			}
+		}
+
+		UnitsConvertor uc;
+
+		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		if(electricLimit.isValid() == false)
+		{
+			return false;
+		}
+
+		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+
+	bool MetrologyCfgGenerator::testElectricLimit_Input_Hz(const Signal& signal)
+	{
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.electricUnit() != E::ElectricUnit::Hz)
+			{
+				return false;
+			}
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+		else
+		{
+			if (signal.sensorType() != E::SensorType::Hz_005_50000)
 			{
 				return false;
 			}

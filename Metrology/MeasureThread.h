@@ -42,18 +42,9 @@ public:
 			Manual = 1,
 		};
 
-private:
-
-		msgType m_type = msgType::String;
-		QString m_message;
-		int m_timeout = 0;
-
-		bool m_cmdStopMeasure = true;
-		ExitCode m_exitCode = ExitCode::Manual;
-
 public:
 
-		void init();
+		void clear();
 
 		msgType type() const { return m_type; }
 
@@ -68,6 +59,15 @@ public:
 
 		ExitCode exitCode() const { return m_exitCode; }
 		void setExitCode(ExitCode exitCode) { m_exitCode = exitCode; }
+
+private:
+
+		msgType m_type = msgType::String;
+		QString m_message;
+		int m_timeout = 0;
+
+		bool m_cmdStopMeasure = true;
+		ExitCode m_exitCode = ExitCode::Manual;
 };
 
 Q_DECLARE_METATYPE(MeasureThreadInfo)
@@ -80,79 +80,79 @@ class MeasureThread : public QThread
 
 public:
 
-	explicit MeasureThread(QObject *parent = nullptr);
-	virtual ~MeasureThread();
-
-private:
-
-	int						m_measureType = MEASURE_TYPE_UNDEFINED;
-	int						m_measureKind = MEASURE_KIND_UNDEFINED;
-	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
-
-	MeasureThreadInfo		m_info;
-
-	QVector<IoSignalParam>	m_activeIoParamList;
-
-	int						m_measureTimeout = 0;
-	void					waitMeasureTimeout();
-
-	// calibrators
-	//
-	bool					calibratorIsValid(CalibratorManager* pCalibratorManager);
-	int						getConnectedCalibrators();
-	bool					setCalibratorUnit();
-	bool					prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
-	void					polarityTest(double electricVal, IoSignalParam& ioParam);
-
-	// Options
-	//
-	LinearityOption			m_linearityOption;
-	ComparatorOption		m_comparatorOption;
-
-	// function of measure
-	//
-	void					measureLinearity();
-	void					measureCompratorsInSeries();
-	void					measureCompratorsInParallel();
-
-	// function for tunning signal
-	//
-	void					saveStateTunSignals();
-	void					restoreStateTunSignals();
+	explicit MeasureThread(QObject* parent = nullptr);
+	virtual ~MeasureThread() override;
 
 public:
 
-	MeasureThreadInfo		info() const { return m_info; }
+	MeasureThreadInfo info() const { return m_info; }
 
-	bool					setActiveSignalParam(const MeasureSignal& activeSignal, const CalibratorBase& calibratorBase);
+	bool setActiveSignalParam(const MeasureSignal& activeSignal, const CalibratorBase& calibratorBase);
 
-	void					setLinearityOption(const LinearityOption& option) { m_linearityOption = option; }
-	void					setComparatorOption(const ComparatorOption& option) { m_comparatorOption = option; }
+	void setLinearityOption(const LinearityOption& option) { m_linearityOption = option; }
+	void setComparatorOption(const ComparatorOption& option) { m_comparatorOption = option; }
+
+private:
+
+	Measure::Type m_measureType = Measure::Type::NoMeasureType;
+	Measure::Kind m_measureKind = Measure::Kind::NoMeasureKind;
+	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
+
+	MeasureThreadInfo m_info;
+
+	std::vector<IoSignalParam> m_activeIoParamList;
+
+	int m_measureTimeout = 0;
+	void waitMeasureTimeout();
+
+	// calibrators
+	//
+	bool calibratorIsValid(std::shared_ptr<CalibratorManager> pCalibratorManager);
+	int	getConnectedCalibrators();
+	bool setCalibratorUnit();
+	bool prepareCalibrator(std::shared_ptr<CalibratorManager> pCalibratorManager, CalibratorMode calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
+	void polarityTest(double electricVal, IoSignalParam& ioParam);
+
+	// Options
+	//
+	LinearityOption m_linearityOption;
+	ComparatorOption m_comparatorOption;
+
+	// function of measure
+	//
+	void measureLinearity();
+	void measureCompratorsInSeries();
+	void measureCompratorsInParallel();
+
+	// function for tunning signal
+	//
+	void saveStateTunSignals();
+	void restoreStateTunSignals();
 
 protected:
 
-	void					run();
+	void run() override;
 
 signals:
 
-	void					sendMeasureInfo(const MeasureThreadInfo& info);
-	void					msgBox(int type, QString text, int* result = nullptr);
+	void sendMeasureInfo(const MeasureThreadInfo& info);
+	void msgBox(int type, QString text, int* result = nullptr);
 
-	void					measureComplite(Measurement*);
+	void measureComplite(Measure::Item*);
 
 public slots:
 
-	void					signalSocketDisconnected();
-	void					tuningSocketDisconnected();
+	void signalSocketDisconnected();
+	void tuningSocketDisconnected();
 
-	void					measureTimeoutChanged(int timeout);
-	void					measureTypeChanged(int type);
-	void					measureKindChanged(int kind);
-	void					signalConnectionTypeChanged(int type);
+	void measureTimeoutChanged(int timeout);
+	void measureTypeChanged(Measure::Type measureType);
+	void measureKindChanged(Measure::Kind measureKind);
+	void connectionTypeChanged(Metrology::ConnectionType connectionType);
 
-	void					signalParamChanged(const QString& appSignalID);
+	void signalParamChanged(const QString& appSignalID);
 
-	void					stopMeasure(MeasureThreadInfo::ExitCode exitCode);
+	void stopMeasure(MeasureThreadInfo::ExitCode exitCode);
 };
 
 // ==============================================================================================

@@ -6,7 +6,8 @@
 class HostAddressPort
 {
 public:
-	HostAddressPort() {}
+	HostAddressPort();
+	HostAddressPort(const HostAddressPort &copy);
 
 	HostAddressPort(const QHostAddress& addr, quint16 port);
 	HostAddressPort(const QHostAddress& addr, int port);
@@ -16,8 +17,6 @@ public:
 	HostAddressPort(const sockaddr* sockaddr, quint16 port);
 	HostAddressPort(const QString& address, quint16 port);
 	HostAddressPort(const QString& address, int port);
-
-	HostAddressPort(const HostAddressPort &copy);
 
 	HostAddressPort& operator=(const HostAddressPort &other);
 	bool operator==(const HostAddressPort &other);

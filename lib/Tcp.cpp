@@ -678,8 +678,6 @@ namespace Tcp
 		{
 			written = socketWrite(replyData, replyDataSize);
 
-
-
 			if (written == -1)
 			{
 				qDebug() << qPrintable(QString("Socket write error: %1").arg(m_tcpSocket->errorString()));

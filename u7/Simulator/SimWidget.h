@@ -65,6 +65,7 @@ protected slots:
 	void stopSimulation(bool stopSimulationThread = false);
 
 	void allowLanCommToggled(bool state);
+	void profileComboTextChanged(QString text);
 
 	void showSnapshot();
 	void showFindSignal();
@@ -97,6 +98,9 @@ private:
 
 	std::shared_ptr<SimIdeSimulator> m_simulator;
 
+	QDockWidget* m_overridePaneDock = nullptr;
+	QDockWidget* m_outputPaneDock = nullptr;
+
 	// --
 	//
 	SimSchemaManager m_schemaManager;
@@ -119,9 +123,11 @@ private:
 	QAction* m_stopAction = nullptr;
 
 	QAction* m_allowLanComm = nullptr;
+	QComboBox* m_profilesComboBox = nullptr;
 
 	QAction* m_snapshotAction = nullptr;
 	QAction* m_findSignalAction = nullptr;
+
 	QAction* m_trendsAction = nullptr;
 
 	QAction* m_showControlTabAccelerator = nullptr;

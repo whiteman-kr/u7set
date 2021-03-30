@@ -115,9 +115,22 @@ namespace TuningIPEN
 
 		cfgXmlData = file.readAll();
 
+		SoftwareSettingsSet settingsSet;
+
+		result &= settingsSet.readFromXml(cfgXmlData);
+
+		std::shared_ptr<const TuningServiceSettings> ptr = settingsSet.getSettingsDefaultProfile<TuningServiceSettings>();
+
+		if (ptr == nullptr)
+		{
+			qDebug() << C_STR(QString("Loading configuration error from file: %1").arg(fileName));
+			return false;
+		}
+
+		m_tuningSettings = *ptr.get();
+
 		XmlReadHelper xml(cfgXmlData);
 
-		result &= m_tuningSettings.readFromXml(xml);
 		result &= readTuningDataSources(xml);
 
 		m_dataSources.buildIP2DataSourceMap();

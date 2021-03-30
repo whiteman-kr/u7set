@@ -12,11 +12,9 @@ SignalHistoryTable::SignalHistoryTable(QObject*)
 
 SignalHistoryTable::~SignalHistoryTable()
 {
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		m_signalList.clear();
-
-	m_signalMutex.unlock();
+	m_signalList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -160,12 +158,12 @@ QString SignalHistoryTable::text(int row, int column, SignalForLog* pSignalLog) 
 	switch (column)
 	{
 		case SIGNAL_HISTORY_LIST_COLUMN_TIME:			result = pSignalLog->time();							break;
-		case SIGNAL_HISTORY_LIST_COLUMN_CUSTOM_ID:	result = pSignal->customAppSignalID();					break;
+		case SIGNAL_HISTORY_LIST_COLUMN_CUSTOM_ID:		result = pSignal->customAppSignalID();					break;
 		case SIGNAL_HISTORY_LIST_COLUMN_EQUIPMENT_ID:	result = pSignal->equipmentID();						break;
-		case SIGNAL_HISTORY_LIST_COLUMN_APP_ID:		result = pSignal->appSignalID();						break;
+		case SIGNAL_HISTORY_LIST_COLUMN_APP_ID:			result = pSignal->appSignalID();						break;
 		case SIGNAL_HISTORY_LIST_COLUMN_CAPTION:		result = pSignal->caption();							break;
-		case SIGNAL_HISTORY_LIST_COLUMN_PREV_STATE:	result = pSignalLog->stateStr(pSignalLog->prevState());	break;
-		case SIGNAL_HISTORY_LIST_COLUMN_STATE:		result = pSignalLog->stateStr(pSignalLog->state());		break;
+		case SIGNAL_HISTORY_LIST_COLUMN_PREV_STATE:		result = pSignalLog->stateStr(pSignalLog->prevState());	break;
+		case SIGNAL_HISTORY_LIST_COLUMN_STATE:			result = pSignalLog->stateStr(pSignalLog->state());		break;
 		case SIGNAL_HISTORY_LIST_COLUMN_EN_RANGE:		result = pSignal->engineeringRangeStr();				break;
 		default:										assert(0);
 	}
@@ -196,40 +194,30 @@ void SignalHistoryTable::updateColumn(int column)
 
 int SignalHistoryTable::signalCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
-
-		count = m_signalList.count();
-
-	m_signalMutex.unlock();
-
-	return count;
+	return TO_INT(m_signalList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalForLog* SignalHistoryTable::signalPtr(int index) const
 {
-	SignalForLog* pSignal = nullptr;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_signalList.count())
-		{
-			 pSignal = m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return pSignal;
+	return m_signalList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalHistoryTable::set(const QVector<SignalForLog*> list_add)
+void SignalHistoryTable::set(const std::vector<SignalForLog*> list_add)
 {
-	int count = list_add.count();
+	int count = TO_INT(list_add.size());
 	if (count == 0)
 	{
 		return;
@@ -250,7 +238,7 @@ void SignalHistoryTable::set(const QVector<SignalForLog*> list_add)
 
 void SignalHistoryTable::clear()
 {
-	int count = m_signalList.count();
+	int count = TO_INT(m_signalList.size());
 	if (count == 0)
 	{
 		return;
@@ -297,7 +285,7 @@ SignalHistoryDialog::~SignalHistoryDialog()
 void SignalHistoryDialog::createInterface()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/History.png"));
+	setWindowIcon(QIcon(":/Images/History.svg"));
 	setWindowTitle(tr("History"));
 
 	QScreen* screenAt = QGuiApplication::primaryScreen();
@@ -311,13 +299,13 @@ void SignalHistoryDialog::createInterface()
 	m_pEditMenu = new QMenu(tr("&Edit"), this);
 
 	m_pCopyAction = m_pEditMenu->addAction(tr("&Copy"));
-	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+	m_pCopyAction->setIcon(QIcon(":/Images/Copy.svg"));
 	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
 
 	m_pEditMenu->addSeparator();
 
 	m_pSelectAllAction = m_pEditMenu->addAction(tr("Select &All"));
-	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
+	m_pSelectAllAction->setIcon(QIcon(":/Images/SelectAll.svg"));
 	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
 
 	m_pMenuBar->addMenu(m_pEditMenu);
@@ -405,7 +393,7 @@ void SignalHistoryDialog::updateList()
 
 	m_signalTable.clear();
 
-	QVector<SignalForLog*> signalList;
+	std::vector<SignalForLog*> signalList;
 
 	int count = m_pLog->count();
 	for(int i = 0; i < count; i++)
@@ -421,7 +409,7 @@ void SignalHistoryDialog::updateList()
 			continue;
 		}
 
-		signalList.append(pSignalLog);
+		signalList.push_back(pSignalLog);
 	}
 
 	m_signalTable.set(signalList);
@@ -486,6 +474,18 @@ void SignalHistoryDialog::copy()
 
 	QClipboard *clipboard = QApplication::clipboard();
 	clipboard->setText(textClipboard);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalHistoryDialog::selectAll()
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	m_pView->selectAll();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

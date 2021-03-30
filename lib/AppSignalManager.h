@@ -5,19 +5,19 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
-#include <QMutex>
+#include <QReadWriteLock>
 #include "../lib/IAppSignalManager.h"
 #include "../lib/ComparatorSet.h"
 
 
 
-class AppSignalManager : public QObject, public IAppSignalManager
+class AppSignalManager final : public QObject, public IAppSignalManager
 {
 	Q_OBJECT
 
 public:
 	explicit AppSignalManager(QObject* parent = nullptr);
-	virtual ~AppSignalManager();
+	virtual ~AppSignalManager() = default;
 
 public:
 	void reset();
@@ -44,45 +44,52 @@ public:
 
 	// IAppSignalManager implememntation - AppSignals
 	//
-	virtual std::vector<AppSignalParam> signalList() const override;
+	virtual std::vector<AppSignalParam> signalList() const final;
 
 	virtual bool signalExists(Hash hash) const override;
-	virtual bool signalExists(const QString& appSignalId) const override;
+	virtual bool signalExists(const QString& appSignalId) const final;
 
-	virtual AppSignalParam signalParam(Hash signalHash, bool* found) const override;
-	virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override;
+	virtual AppSignalParam signalParam(Hash signalHash, bool* found) const final;
+	virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const final;
 
-	virtual AppSignalState signalState(Hash signalHash, bool* found) const override;
-	virtual AppSignalState signalState(const QString& appSignalId, bool* found) const override;
+	virtual AppSignalState signalState(Hash signalHash, bool* found) const final;
+	virtual AppSignalState signalState(const QString& appSignalId, bool* found) const final;
 
-	virtual void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const override;
-	virtual void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const override;
+	virtual void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const final;
+	virtual void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const final;
 
-	virtual QStringList signalTags(Hash signalHash) const override;
-	virtual QStringList signalTags(const QString& appSignalId) const override;
+	virtual QStringList signalTags(Hash signalHash) const final;
+	virtual QStringList signalTags(const QString& appSignalId) const final;
 
-	virtual bool signalHasTag(Hash signalHash, const QString& tag) const override;
-	virtual bool signalHasTag(const QString& appSignalId, const QString& tag) const override;
+	virtual bool signalHasTag(Hash signalHash, const QString& tag) const final;
+	virtual bool signalHasTag(const QString& appSignalId, const QString& tag) const final;
+
+	virtual QString equipmentToAppSiganlId(const QString& equipmentId) const final;
 
 	// IAppSignalManager implememntation - Setpoints
 	//
-	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override;
+	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const final;
+
+	// Extension
+	//
+public:
+	AppSignalParam signalParamByEquipemntId(const QString& equipmentId, bool* found) const;
 
 signals:
 	void addSignalToPriorityList(Hash signalHash) const;
 	void addSignalsToPriorityList(QVector<Hash> signalHash) const;
 
 private:
-	mutable QMutex m_unitsMutex;
-	std::map<int, QString> m_units;
+	mutable QReadWriteLock m_paramsLocker;
+	std::unordered_map<Hash, AppSignalParam> m_signalParams;			// Key is hash from AppSignalID (hash from hash here, not nice)
+	std::unordered_map<QString, QString> m_signalParamByEquipmentId;	// Key is EquipmentId - value is AppSignalID
 
-	mutable QMutex m_paramsMutex;
-	std::unordered_map<Hash, AppSignalParam> m_signalParams;
-
-	mutable QMutex m_statesMutex;
+	mutable QReadWriteLock m_statesLocker;
 	std::unordered_map<Hash, AppSignalState> m_signalStates;
 
-	ComparatorSet m_setpoints;			// ComparatorSet is threadsafe itself
+	// ComparatorSet is threadsafe itself
+	//
+	ComparatorSet m_setpoints;
 };
 
 

@@ -196,7 +196,7 @@ namespace Hardware
 			return false;
 		}
 
-		const DeviceSignal* validitySignal = validityObject->toSignal();
+		const DeviceAppSignal* validitySignal = validityObject->toAppSignal().get();
 
 		if (validitySignal == nullptr)
 		{
@@ -2061,7 +2061,7 @@ namespace Hardware
 
 			for(int c = 0; c < childrenCount; c++)
 			{
-				DeviceObject* child = module->child(c);
+				DeviceObject* child = module->child(c).get();
 
 				if (child == nullptr)
 				{
@@ -2071,7 +2071,7 @@ namespace Hardware
 
 				if (child->isController() && child->equipmentIdTemplate() == portStrID)
 				{
-					DeviceController* optoPortController = child->toController();
+					DeviceController* optoPortController = child->toController().get();
 
 					if (optoPortController == nullptr)
 					{
@@ -2721,7 +2721,7 @@ namespace Hardware
 
 		bool result = true;
 
-		equipmentWalker(m_equipmentSet->root(), [this, &result](DeviceObject* currentDevice)
+		equipmentWalker(m_equipmentSet->root().get(), [this, &result](DeviceObject* currentDevice)
 			{
 				if (currentDevice == nullptr)
 				{
@@ -2735,7 +2735,7 @@ namespace Hardware
 					return;
 				}
 
-				Hardware::DeviceModule* module = currentDevice->toModule();
+				Hardware::DeviceModule* module = currentDevice->toModule().get();
 
 				result &= addModule(module);
 			}
@@ -3428,7 +3428,7 @@ namespace Hardware
 
 		for(int i = 0; i < count; i++)
 		{
-			Hardware::DeviceObject* device = chassis->child(i);
+			Hardware::DeviceObject* device = chassis->child(i).get();
 
 			if (device == nullptr)
 			{
@@ -3441,7 +3441,7 @@ namespace Hardware
 				continue;
 			}
 
-			Hardware::DeviceModule* module =  device->toModule();
+			Hardware::DeviceModule* module =  device->toModule().get();
 
 			if (module == nullptr)
 			{

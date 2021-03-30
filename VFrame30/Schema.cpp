@@ -15,7 +15,6 @@
 #include "HorzVertLinks.h"
 #include "DrawParam.h"
 #include "PropertyNames.h"
-#include "../lib/ProtoSerialization.h"
 
 
 namespace VFrame30
@@ -319,6 +318,9 @@ namespace VFrame30
 		double clipWidth = clipRect.width();
 		double clipHeight = clipRect.height();
 
+		QElapsedTimer timer;
+		timer.start();
+
 		for (auto layer : Layers)
 		{
 			Q_ASSERT(layer);
@@ -338,10 +340,10 @@ namespace VFrame30
 			{
 				Q_ASSERT(item);
 
-				item->setDrawParam(drawParam);
-
 				if (item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
+					item->setDrawParam(drawParam);
+
 					if (drawParam->isMonitorMode() == true)
 					{
 						ClientSchemaView* view = drawParam->clientSchemaView();
@@ -373,6 +375,8 @@ namespace VFrame30
 				item->setDrawParam(nullptr);
 			}
 		}
+
+		//qDebug() << "Schema::Draw " << timer.elapsed();
 
 		return;
 	}
@@ -1436,36 +1440,30 @@ namespace VFrame30
 
 		if (schema->isLogicSchema() == true)
 		{
-			for (std::shared_ptr<SchemaLayer> layer : schema->Layers)
+			for (const std::shared_ptr<SchemaLayer>& layer : schema->Layers)
 			{
 				if (layer->compile() == true)
 				{
-					for (std::shared_ptr<SchemaItem> item : layer->Items)
+					for (const std::shared_ptr<SchemaItem>& item : layer->Items)
 					{
-						if (item->isType<SchemaItemConnection>() == true)
+						if (const SchemaItemConnection* connItem = item->toType<SchemaItemConnection>();
+							connItem != nullptr)
 						{
-							const SchemaItemConnection* connItem = item->toType<SchemaItemConnection>();
-							assert(connItem);
-
 							connections.insert(connItem->connectionIds());
 						}
 
-						if (item->isType<SchemaItemReceiver>() == true)
+						if (const SchemaItemReceiver* receiver = item->toType<SchemaItemReceiver>();
+							receiver != nullptr)
 						{
-							const SchemaItemReceiver* receiver = item->toType<SchemaItemReceiver>();
-							Q_ASSERT(receiver);
-
 							for (const QString& appSignalId : receiver->appSignalIdsAsList())
 							{
 								signalIds << appSignalId;
 							}
 						}
 
-						if (item->isType<SchemaItemLoopback>() == true)
+						if (const SchemaItemLoopback* lb = item->toType<SchemaItemLoopback>();
+							lb != nullptr)
 						{
-							const SchemaItemLoopback* lb = item->toType<SchemaItemLoopback>();
-							Q_ASSERT(lb);
-
 							loopbacks << lb->loopbackId();
 						}
 					}

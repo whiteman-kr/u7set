@@ -611,9 +611,6 @@ void UdpServerSocket::onSocketReadyRead()
 
 void UdpServerSocket::onThreadStarted()
 {
-	DEBUG_LOG_MSG(m_logger, QString(tr("UdpServerSocket thread started (listen %1)").
-						  arg(HostAddressPort(m_bindToAddress, m_port).addressPortStr())));
-
 	m_timer.start(1000);
 
 	connect(&m_timer, &QTimer::timeout, this, &UdpServerSocket::onTimer);
@@ -643,7 +640,7 @@ void UdpServerSocket::bind()
 
 	if (result == true)
 	{
-		DEBUG_LOG_MSG(m_logger, QString(tr("UdpServerSocket bound on  %1").
+		DEBUG_LOG_MSG(m_logger, QString(tr("UdpServerSocket listen on  %1").
 							  arg(HostAddressPort(m_bindToAddress, m_port).addressPortStr())));
 	}
 }

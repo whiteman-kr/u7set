@@ -137,9 +137,18 @@ message EnvelopeSetShortDescription
 {
     optional uint32 projectdbversion = 1;
 	repeated uint32 classnamehash = 2;				// Hash from classname, the way of getting the hash is always the same
+	repeated int32 devicetype = 10;					// DeviceObject::type()
 	optional bool equipmentEditor = 3;				// Copy from Equipmnet editor
 	optional bool presetEditor = 4;					// Copy from Equipment preset editor
 	optional bool presetRoot = 5;					// All objects are preset root
+}
+
+// Export Device Preset Message
+//
+message ExportedDevicePreset
+{
+    optional EnvelopeSetShortDescription description = 1;
+	optional EnvelopeSet items = 2;
 }
 
 //------------------------------------------------------------------------------------------
@@ -480,6 +489,7 @@ message SchemaItemRect
 	optional int32 horzAlign = 9  [default = 4];	// Qt::AlignHCenter 0x0004 Centers horizontally in the available space.
 	optional int32 vertAlign = 10  [default = 128];	// Qt::AlignVCenter 0x0080 Centers vertically in the available space.
 	optional bool wordWrap = 11 [default = false];
+	optional int32 lineStyle = 12 [default = 1];	// 1 is SolidLine
 }
 
 //
@@ -489,6 +499,12 @@ message SchemaItemLine
 {
 	required double weight = 1;
 	required uint32 lineColor = 2;
+	optional int32 lineStyle = 3 [default = 1];			// 1 is SolidLine
+
+    optional int32 lineStyleCap = 7 [default = 16];		// 16 is default Qt::SquareCap
+	optional int32 lineCapStart = 4 [default = 0];		// 16 is default NoCap
+	optional int32 lineCapEnd = 5 [default = 0];		// 16 is default NoCap
+	optional double lineCapFactor = 6 [default = 2.0];
 }
 
 //
@@ -498,6 +514,12 @@ message SchemaItemPath
 {
 	required double weight = 1;
 	required uint32 lineColor = 2;
+	optional int32 lineStyle = 3 [default = 1];		// 1 is SolidLine
+
+    optional int32 lineStyleCap = 7 [default = 16];		// 16 is default Qt::SquareCap
+	optional int32 lineCapStart = 4 [default = 0];		// 16 is default NoCap
+	optional int32 lineCapEnd = 5 [default = 0];		// 16 is default NoCap
+	optional double lineCapFactor = 6 [default = 2.0];
 }
 
 //
@@ -634,7 +656,7 @@ message FblItemRect
 	optional string obsoleteLabel = 6;		// Obsolote, moved to SchemaItem buf for compatibility left here also
 	optional string userText = 7;
 	optional int32 userTextPos = 8 [default = 1];			// enum E::UserTextPos, 1 - Top
-	optional int32  obsoleteLabelPos = 9 [default = -1];	// enum E::UserTextPos, 2 - RightTop	// Obsolote, moved to SchemaItem buf for compatibility left here also
+	optional int32 obsoleteLabelPos = 9 [default = -1];	// enum E::UserTextPos, 2 - RightTop	// Obsolote, moved to SchemaItem buf for compatibility left here also
 }
 
 
@@ -645,6 +667,7 @@ message FblItemLine
 {
 	required double weight = 1;
 	required uint32 lineColor = 2;
+	optional int32 lineStyle = 3 [default = 1];		// 1 is SolidLine
 }
 
 
@@ -937,7 +960,7 @@ message DeviceObject
 	optional DeviceChassis Chassis = 103;
 	optional DeviceModule Module = 104;
 	optional DeviceController Controller = 105;
-	optional DeviceSignal Signal = 106;
+	optional DeviceAppSignal AppSignal = 106;
 	optional Workstation Workstation = 107;
 	optional Software Software = 108;
 
@@ -977,7 +1000,7 @@ message DeviceController
 {
 }
 
-message DeviceSignal
+message DeviceAppSignal
 {
 	optional int32 obsoletetype = 1 [default = 0];			// old type format, not used anymore, RPCT-345
 

@@ -5,21 +5,24 @@
 #include <QXmlStreamReader>
 #include <QStandardPaths>
 
-
 // -------------------------------------------------------------------------------------
 //
 // CfgServerLoaderBase class implementation
 //
 // -------------------------------------------------------------------------------------
 
-bool CfgServerLoaderBase::m_BuildFileInfoArrayRegistered = false;
+bool CfgServerLoaderBase::m_typesRegistered = false;
 
 CfgServerLoaderBase::CfgServerLoaderBase()
 {
-	if (m_BuildFileInfoArrayRegistered == false)
+	if (m_typesRegistered == false)
 	{
 		qRegisterMetaType<BuildFileInfoArray>("BuildFileInfoArray");
-		m_BuildFileInfoArrayRegistered = true;
+		qRegisterMetaType<Tcp::FileTransferResult>("Tcp::FileTransferResult");
+		qRegisterMetaType<std::shared_ptr<const SoftwareSettings>>("std::shared_ptr<const SoftwareSettings>");
+		qRegisterMetaType<SessionParams>("SessionParams");
+
+		m_typesRegistered = true;
 	}
 }
 
@@ -29,15 +32,38 @@ CfgServerLoaderBase::CfgServerLoaderBase()
 //
 // -------------------------------------------------------------------------------------
 
-CfgServer::CfgServer(const SoftwareInfo& softwareInfo, const QString& buildFolder, std::shared_ptr<CircularLogger> logger) :
+CfgServer::CfgServer(const SoftwareInfo& softwareInfo,
+					 const QString& buildFolder,
+					 const SessionParams& sessionParams,
+					 std::shared_ptr<CircularLogger> logger) :
 	Tcp::FileServer(buildFolder, softwareInfo, logger),
-	m_logger(logger)
+	m_logger(logger),
+	m_sessionParams(sessionParams)
 {
 }
 
 CfgServer* CfgServer::getNewInstance()
 {
-	return new CfgServer(localSoftwareInfo(), m_rootFolder, m_logger);
+	return new CfgServer(localSoftwareInfo(),
+						 m_rootFolder,
+						 m_sessionParams,
+						 m_logger);
+}
+
+void CfgServer::processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
+{
+	Q_UNUSED(requestData);
+	Q_UNUSED(requestDataSize);
+
+	switch(requestID)
+	{
+	case RQID_GET_SESSION_PARAMS:
+		processGetSessionParamsRequest();
+		break;
+
+	default:
+		Q_ASSERT(false);
+	}
 }
 
 void CfgServer::onServerThreadStarted()
@@ -142,6 +168,15 @@ bool CfgServer::checkFile(QString& pathFileName, QByteArray& fileData)
 	return true;
 }
 
+void CfgServer::processGetSessionParamsRequest()
+{
+	Network::SessionParams sp;
+
+	m_sessionParams.saveTo(&sp);
+
+	sendReply(sp);
+}
+
 // -------------------------------------------------------------------------------------
 //
 // CfgLoader::FileDownloadRequest struct implementation
@@ -172,8 +207,6 @@ void CfgLoader::FileDownloadRequest::setErrorCode(Tcp::FileTransferResult result
 //
 // -------------------------------------------------------------------------------------
 
-bool CfgLoader::m_registerTypes = true;
-
 CfgLoader::CfgLoader(const SoftwareInfo& softwareInfo,
 						int appInstance,
 						const HostAddressPort& serverAddressPort1,
@@ -182,16 +215,11 @@ CfgLoader::CfgLoader(const SoftwareInfo& softwareInfo,
 						std::shared_ptr<CircularLogger> logger) :
 	Tcp::FileClient(softwareInfo, "", serverAddressPort1, serverAddressPort2),
 	m_enableDownloadConfiguration(enableDownloadCfg),
+	m_mutex(QMutex::Recursive),
 	m_logger(logger),
 	m_timer(this),
 	m_getFileBlockedMutex(QMutex::RecursionMode::NonRecursive)
 {
-	if (m_registerTypes == true)
-	{
-		qRegisterMetaType<Tcp::FileTransferResult>("Tcp::FileTransferResult");
-		m_registerTypes = false;
-	}
-
 	changeApp(softwareInfo.equipmentID(), appInstance);
 }
 
@@ -292,7 +320,7 @@ bool CfgLoader::getFile(QString pathFileName, QByteArray* fileData)
 	return true;
 }
 
-bool CfgLoader::getFileBlockedByID(QString fileID, QByteArray* fileData, QString *errorStr)
+bool CfgLoader::getFileBlockedByID(QString fileID, QByteArray* fileData, QString* errorStr)
 {
 	TEST_PTR_RETURN_FALSE(fileData);
 	TEST_PTR_RETURN_FALSE(errorStr);
@@ -317,22 +345,46 @@ bool CfgLoader::getFileByID(QString fileID, QByteArray* fileData)
 
 bool CfgLoader::hasFileID(QString fileID) const
 {
-	QMutexLocker l(&m_mutex);
+	AUTO_LOCK(m_mutex);
 
 	return m_fileIDPathMap.contains(fileID);
 }
 
 Builder::BuildInfo CfgLoader::buildInfo()
 {
-	Builder::BuildInfo buildInfo;
+	AUTO_LOCK(m_mutex);
 
-	m_mutex.lock();
+	return m_buildInfo;
+}
 
-	buildInfo = m_buildInfo;
+SessionParams CfgLoader::sessionParams() const
+{
+	AUTO_LOCK(m_mutex);
 
-	m_mutex.unlock();
+	return m_sessionParams;
+}
 
-	return buildInfo;
+QString CfgLoader::curSoftwareSettingsProfileName() const
+{
+	AUTO_LOCK(m_mutex);
+
+	return m_sessionParams.currentSettingsProfile;
+}
+
+E::SoftwareRunMode CfgLoader::softwareRunMode() const
+{
+	AUTO_LOCK(m_mutex);
+
+	return m_sessionParams.softwareRunMode;
+}
+
+QStringList CfgLoader::getSettingsProfiles() const
+{
+	AUTO_LOCK(m_mutex);
+
+	QStringList profiles = m_settingsSet.getSettingsProfiles();
+
+	return profiles;
 }
 
 void CfgLoader::onTryConnectToServer(const HostAddressPort& serverAddr)
@@ -353,7 +405,7 @@ void CfgLoader::onConnection()
 
 	resetStatuses();
 
-	startConfigurationXmlLoading();
+	sendGetSessionParamsRequest();
 }
 
 void CfgLoader::onDisconnection()
@@ -403,7 +455,7 @@ void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 
 	if (m_cfgFilesInfo.contains(fileName) == false)
 	{
-		m_lastError = Tcp::FileTransferResult::NotFoundRemoteFile;
+		m_lastError = Tcp::FileTransferResult::FileIsNotAccessible;
 		emitFileReady();
 		return;
 	}
@@ -461,10 +513,10 @@ void CfgLoader::slot_onTimer()
 
 		if (isCfgFileIsExists(cfi.pathFileName, cfi.md5) == true)
 		{
-			// file exists from previous downloads
-			// nothing to do
+			// file exists from previous downloads, nothing to do
 			//
-			qDebug() << "File " << cfi.pathFileName << " already exists, md5 = " << cfi.md5;
+			DEBUG_LOG_MSG(m_logger, QString("File %1 already exists, md5 = %2").
+										arg(cfi.pathFileName).arg(cfi.md5));
 		}
 		else
 		{
@@ -485,6 +537,50 @@ void CfgLoader::slot_onTimer()
 
 		m_autoDownloadIndex++;
 	}
+}
+
+void CfgLoader::processSuccessorReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
+{
+	switch(requestID)
+	{
+	case RQID_GET_SESSION_PARAMS:
+		processGetSessionParamsReply(replyData, replyDataSize);
+		break;
+
+	default:
+		Q_ASSERT(false);
+	}
+}
+
+void CfgLoader::processGetSessionParamsReply(const char* replyData, quint32 replyDataSize)
+{
+	Network::SessionParams sp;
+
+	bool res = sp.ParseFromArray(replyData, replyDataSize);
+
+	if (res == false)
+	{
+		Q_ASSERT(false);
+		sendGetSessionParamsRequest();
+		return;
+	}
+
+	m_mutex.lock();
+
+	m_sessionParams.loadFrom(sp);
+
+	m_mutex.unlock();
+
+	DEBUG_LOG_MSG(m_logger, QString("Current software settings profile - %1, run mode - %2").
+				  arg(m_sessionParams.currentSettingsProfile).
+				  arg(E::valueToString<E::SoftwareRunMode>(m_sessionParams.softwareRunMode)));
+
+	startConfigurationXmlLoading();
+}
+
+void CfgLoader::sendGetSessionParamsRequest()
+{
+	sendRequest(RQID_GET_SESSION_PARAMS);
 }
 
 void CfgLoader::shutdown()
@@ -579,7 +675,9 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 		}
 		else
 		{
-			qDebug() << "Downloaded Configuration.xml";
+			DEBUG_LOG_MSG(m_logger, "Downloaded Configuration.xml - Ok");
+
+			bool result = true;
 
 			if (readConfigurationXml() == true)
 			{
@@ -594,15 +692,43 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 					bfiArray.append(bfi);
 				}
 
-				qDebug() << "Read Configuration.xml";
+				std::shared_ptr<const SoftwareSettings> curSettingsProfile = getCurrentSettingsProfile<SoftwareSettings>();
 
-				emit signal_configurationReady(m_cfgFilesInfo[CONFIGURATION_XML_FILE_INDEX].fileData, bfiArray);
+				if (curSettingsProfile != nullptr)
+				{
+					DEBUG_LOG_MSG(m_logger, QString("Current software settings profile '%1' read - Ok").
+												arg(m_sessionParams.currentSettingsProfile));
+
+					DEBUG_LOG_MSG(m_logger, "Read Configuration.xml - Ok");
+
+					emit signal_configurationReady(m_cfgFilesInfo[CONFIGURATION_XML_FILE_INDEX].fileData,
+												   bfiArray,
+												   m_sessionParams,
+												   curSettingsProfile);
+				}
+				else
+				{
+					DEBUG_LOG_ERR(m_logger, QString("ERROR reading software settings profile - %1").
+												arg(m_sessionParams.currentSettingsProfile));
+					result = false;
+				}
+			}
+			else
+			{
+				result = false;
+			}
+
+			if (result == false)
+			{
+				DEBUG_LOG_ERR(m_logger, "ERROR reading Configuration.xml");
 			}
 		}
 	}
 	else
 	{
-		qDebug() << "Downloaded " << (m_currentDownloadRequest.isAutoRequest ? "(auto) :" : "(manual) :")  << fileName;
+		DEBUG_LOG_MSG(m_logger, QString("Downloaded %1 %2").
+									arg(m_currentDownloadRequest.isAutoRequest ? "(auto) :" : "(manual) :").
+									arg(fileName));
 
 		if (m_currentDownloadRequest.isAutoRequest == false)
 		{
@@ -679,7 +805,7 @@ bool CfgLoader::readConfigurationXml()
 		return false;
 	}
 
-	m_mutex.lock();
+	AUTO_LOCK(m_mutex);
 
 	m_cfgFilesInfo.clear();
 	m_fileIDPathMap.clear();
@@ -690,6 +816,14 @@ bool CfgLoader::readConfigurationXml()
 	cfi.size = fileData.size();
 	cfi.md5 = Md5Hash::hashStr(fileData);
 	cfi.fileData.swap(fileData);
+
+	bool result = m_settingsSet.readFromXml(cfi.fileData);
+
+	if (result == false)
+	{
+		DEBUG_LOG_ERR(m_logger, "ERROR reading software settings set!");
+		return false;
+	}
 
 	// Configuration.xml info always first item in m_cfgFileInfo
 	//
@@ -728,8 +862,6 @@ bool CfgLoader::readConfigurationXml()
 			m_fileIDPathMap.insert(xcfi.ID, xcfi.pathFileName);
 		}
 	}
-
-	m_mutex.unlock();
 
 	return true;
 }
@@ -865,14 +997,12 @@ QString CfgLoader::getFilePathNameByID(QString fileID) const
 {
 	QString pathFileName;
 
-	m_mutex.lock();
+	AUTO_LOCK(m_mutex);
 
 	if (m_fileIDPathMap.contains(fileID))
 	{
 		pathFileName = m_fileIDPathMap[fileID];
 	}
-
-	m_mutex.unlock();
 
 	return pathFileName;
 }
@@ -926,7 +1056,7 @@ void CfgLoaderThread::start()
 
 	if (m_thread == nullptr || m_cfgLoader == nullptr)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -988,7 +1118,7 @@ bool CfgLoaderThread::getFileBlockedByID(const QString& fileID, QByteArray* file
 	TEST_PTR_RETURN_FALSE(fileData);
 	TEST_PTR_RETURN_FALSE(errorStr);
 
-	return m_cfgLoader->getFileBlockedByID(fileID, fileData, errorStr);;
+	return m_cfgLoader->getFileBlockedByID(fileID, fileData, errorStr);
 }
 
 bool CfgLoaderThread::getFileByID(const QString& fileID, QByteArray* fileData)
@@ -997,7 +1127,7 @@ bool CfgLoaderThread::getFileByID(const QString& fileID, QByteArray* fileData)
 
 	AUTO_LOCK(m_mutex);
 
-	return m_cfgLoader->getFileByID(fileID, fileData);;
+	return m_cfgLoader->getFileByID(fileID, fileData);
 }
 
 bool CfgLoaderThread::hasFileID(QString fileID) const
@@ -1058,6 +1188,18 @@ void CfgLoaderThread::setConnectionParams(const SoftwareInfo& softwareInfo,
 	{
 		start();
 	}
+}
+
+SessionParams CfgLoaderThread::sessionParams() const
+{
+	if (m_cfgLoader != nullptr)
+	{
+		return m_cfgLoader->sessionParams();
+	}
+
+	Q_ASSERT(false);
+
+	return SessionParams();
 }
 
 void CfgLoaderThread::initThread()

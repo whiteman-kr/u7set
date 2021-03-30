@@ -43,7 +43,6 @@ void ConfigSocket::clearConfiguration()
 
 void ConfigSocket::start()
 {
-
 	m_cfgLoaderThread = new CfgLoaderThread(m_softwareInfo,
 											1,
 											m_serverAddressPort1,
@@ -108,9 +107,14 @@ void ConfigSocket::reconncect(const QString& equipmentID, const HostAddressPort&
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData,
+										   const BuildFileInfoArray buildFileInfoArray,
+										   SessionParams sessionParams,
+										   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 {
 	qDebug() << __FUNCTION__ << "File count: " << buildFileInfoArray.count();
+
+	Q_UNUSED(sessionParams)
 
 	if (m_cfgLoaderThread == nullptr)
 	{
@@ -125,7 +129,7 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 	bool result = false;
 
-	result = readConfiguration(configurationXmlData);
+	result = readConfiguration(configurationXmlData, curSettingsProfile);
 	if (result == false)
 	{
 		return;
@@ -175,9 +179,13 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool ConfigSocket::readConfiguration(const QByteArray& fileData)
+bool ConfigSocket::readConfiguration(const QByteArray& fileData,
+									 std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 {
-	bool result = theOptions.readFromXml(fileData);
+	bool result = true;
+
+	result &= theOptions.setMetrologySettings(curSettingsProfile);
+	result &= theOptions.readFromXml(fileData);
 
 	qDebug() << __FUNCTION__ << (result == true ? "Ok" : "Error!");
 
@@ -218,6 +226,7 @@ bool ConfigSocket::readMetrologyItems(const QByteArray& fileData)
 	responseTime.start();
 
 	result &= readRacks(fileData, fileVersion);
+	result &= readMetrologyConnections(fileData, fileVersion);
 	result &= readTuningSources(fileData, fileVersion);
 
 	qDebug() << __FUNCTION__ << " Time for read: " << responseTime.elapsed() << " ms";
@@ -274,10 +283,8 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 		return false;
 	}
 
-	Metrology::RackParam rack;
-
 	int rackCount = 0;
-	result &= xml.readIntAttribute("Count", &rackCount);
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &rackCount);
 
 	for(int r = 0; r < rackCount; r++)
 	{
@@ -286,6 +293,8 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 			result = false;
 			break;
 		}
+
+		Metrology::RackParam rack;
 
 		result &= rack.readFromXml(xml);
 		if (result == false)
@@ -312,6 +321,68 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+bool ConfigSocket::readMetrologyConnections(const QByteArray& fileData, int fileVersion)
+{
+	Q_UNUSED(fileVersion)
+
+	bool result = true;
+
+	XmlReadHelper xml(fileData);
+
+	if (xml.findElement("Connections") == false)
+	{
+		qDebug() << __FUNCTION__ << "Connections section not found";
+		return false;
+	}
+
+	int connectionCount = 0;
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &connectionCount);
+
+	for(int c = 0; c < connectionCount; c++)
+	{
+		if (xml.findElement("Connection") == false)
+		{
+			result = false;
+			break;
+		}
+
+		Metrology::Connection connection;
+
+		// read
+		//
+		result &= connection.readFromXml(xml);
+		if (result == false)
+		{
+			continue;
+		}
+
+		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
+		{
+			if (connection.appSignalID(ioType).isEmpty() == true)
+			{
+				continue;
+			}
+		}
+
+		// append
+		//
+		theSignalBase.connections().append(connection);
+	}
+
+	if (theSignalBase.connections().count() != connectionCount)
+	{
+		qDebug() << __FUNCTION__ << "Connections loading error, loaded: " << theSignalBase.connections().count() << " from " << connectionCount;
+		assert(false);
+		return false;
+	}
+
+	qDebug() << __FUNCTION__ << "Connections were loaded: " << theSignalBase.connections().count();
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 bool ConfigSocket::readTuningSources(const QByteArray& fileData, int fileVersion)
 {
 	Q_UNUSED(fileVersion)
@@ -327,7 +398,7 @@ bool ConfigSocket::readTuningSources(const QByteArray& fileData, int fileVersion
 	}
 
 	int tuningSourceCount = 0;
-	result &= xml.readIntAttribute("Count", &tuningSourceCount);
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &tuningSourceCount);
 
 	for(int t = 0; t < tuningSourceCount; t++)
 	{

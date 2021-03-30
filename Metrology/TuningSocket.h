@@ -47,6 +47,16 @@ public:
 				 const HostAddressPort& serverAddressPort2);
 	virtual ~TuningSocket() override;
 
+public:
+
+	virtual void	onClientThreadStarted() override;
+	virtual void	onClientThreadFinished() override;
+
+	virtual void	onConnection() override;
+	virtual void	onDisconnection() override;
+
+	virtual void	processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;	 // for processing functions: Request - Reply
+
 private:
 
 	// protobuf messages
@@ -80,16 +90,6 @@ private:
 	void			replyWriteTuningSignals(const char* replyData, quint32 replyDataSize);
 
 	int				m_readTuningSignalsIndex = 0;
-
-public:
-
-	virtual void	onClientThreadStarted() override;
-	virtual void	onClientThreadFinished() override;
-
-	virtual void	onConnection() override;
-	virtual void	onDisconnection() override;
-
-	virtual void	processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;	 // for processing functions: Request - Reply
 
 public slots:
 

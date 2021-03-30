@@ -16,6 +16,7 @@
 #include "../lib/SimpleThread.h"
 #include "../lib/CommandLineParser.h"
 #include "../lib/SoftwareInfo.h"
+#include "../lib/SoftwareSettings.h"
 #include "../Proto/network.pb.h"
 
 enum ServiceState
@@ -60,11 +61,6 @@ class Service;
 class ServiceWorker : public SimpleThreadWorker
 {
 	Q_OBJECT
-
-public:
-	static const char* const SETTING_EQUIPMENT_ID;
-	static const char* const SETTING_CFG_SERVICE_IP1;
-	static const char* const SETTING_CFG_SERVICE_IP2;
 
 public:
 	ServiceWorker(const SoftwareInfo& softwareInfo,
@@ -116,6 +112,14 @@ public:
 	QString getStrSetting(const QString& settingName);
 	QString getCmdLineSetting(const QString& settingName);
 
+	QString getSoftwareInfoStr() const;
+
+	SoftwareSettingsSet& softwareSettingsSet() { return m_softwareSettingsSet; }
+	const SoftwareSettingsSet& softwareSettingsSet() const { return m_softwareSettingsSet; }
+
+	void setSessionParams(const SessionParams& sp);
+	SessionParams sessionParams() const;
+
 signals:
 	void work();
 	void stopped();
@@ -145,6 +149,8 @@ private:
 
 	SoftwareInfo m_softwareInfo;
 
+	SoftwareSettingsSet m_softwareSettingsSet;
+
 	QString m_serviceName;
 
 	int& m_argc;
@@ -156,6 +162,9 @@ private:
 	CommandLineParser m_cmdLineParser;
 
 	Service* m_service = nullptr;
+
+	mutable QMutex m_spMutex;
+	SessionParams m_sessionParams;
 
 	static int m_instanceNo;
 };

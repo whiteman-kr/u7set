@@ -1,5 +1,4 @@
-#ifndef MONITORDIALOGSIGNALSNAPSHOT_H
-#define MONITORDIALOGSIGNALSNAPSHOT_H
+#pragma once
 
 #include "../lib/Ui/DialogSignalSnapshot.h"
 
@@ -8,6 +7,8 @@
 
 class MonitorDialogSignalSnapshot : public DialogSignalSnapshot
 {
+	Q_OBJECT
+
 public:
 	static bool showDialog(MonitorConfigController *configController,
 						   TcpSignalClient* tcpSignalClient,
@@ -31,4 +32,3 @@ private:
 	MonitorConfigController* m_configController = nullptr;
 };
 
-#endif // MONITORDIALOGSIGNALSNAPSHOT_H

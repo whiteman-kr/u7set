@@ -28,6 +28,7 @@ namespace VFrame30
 
 		addProperty<double, FblItemLine, &FblItemLine::weight, &FblItemLine::setWeight>(PropertyNames::lineWeight, PropertyNames::appearanceCategory, true);
 		addProperty<QColor, FblItemLine, &FblItemLine::lineColor, &FblItemLine::setLineColor>(PropertyNames::lineColor, PropertyNames::appearanceCategory, true);
+		addProperty<E::LineStyle, FblItemLine, &FblItemLine::lineStyle, &FblItemLine::setLineStyle>(PropertyNames::lineStyle, PropertyNames::appearanceCategory, true);
 
 		return;
 	}
@@ -56,6 +57,7 @@ namespace VFrame30
 
 		itemMessage->set_weight(m_weight);
 		itemMessage->set_linecolor(m_lineColor.rgba());
+		itemMessage->set_linestyle(static_cast<int>(m_lineStyle));
 		
 		return true;
 	}
@@ -94,6 +96,7 @@ namespace VFrame30
 
 		m_weight = itemMessage.weight();
 		m_lineColor = itemMessage.linecolor();
+		m_lineStyle = static_cast<E::LineStyle>(itemMessage.linestyle());
 
 		return true;
 	}
@@ -140,5 +143,16 @@ namespace VFrame30
 	{
 		m_lineColor = color;
 	}
+
+	E::LineStyle FblItemLine::lineStyle() const
+	{
+		return m_lineStyle;
+	}
+
+	void FblItemLine::setLineStyle(E::LineStyle value)
+	{
+		m_lineStyle = value;
+	}
+
 }
 

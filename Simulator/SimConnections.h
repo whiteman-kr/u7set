@@ -33,7 +33,7 @@ namespace Sim
 	class ConnectionPort
 	{
 	public:
-		ConnectionPort(::ConnectionPortInfo portInfo) :
+		ConnectionPort(const ::ConnectionPortInfo& portInfo) :
 			m_portInfo(portInfo)
 		{
 		}
@@ -119,7 +119,7 @@ namespace Sim
 		Q_OBJECT
 
 	public:
-		Connections() = default;
+		Connections(QObject* parent = nullptr);
 		virtual ~Connections() = default;
 
 	public:

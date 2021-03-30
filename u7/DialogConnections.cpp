@@ -856,7 +856,7 @@ void DialogConnections::onCheckIn()
 
 	if (comment.isEmpty())
 	{
-		QMessageBox::warning(this, tr("Connections Editor"), tr("No comment supplied!"));
+		QMessageBox::warning(this, tr("Connections Editor"), tr("No comment supplied! Please provide a comment."));
 		return;
 	}
 

@@ -2,12 +2,7 @@
 #include "../lib/PropertyEditor.h"
 #include "Simulator/SimSignalSnapshot.h"
 #include "../lib/Ui/DialogSignalSearch.h"
-
-#ifdef _WIN32
 #include "keychain.h"
-#else
-#include <qtkeychain/keychain.h>
-#endif
 
 Settings theSettings;
 
@@ -168,12 +163,6 @@ void Settings::writeUserScope() const
 
 	s.setValue("ConfigurationTabPage/Splitter/state", m_configurationTabPageSplitterState);
 
-	s.setValue("EquipmentTabPage/Splitter/state", m_equipmentTabPageSplitterState);
-    s.setValue("EquipmentTabPage/PropertiesSplitter/state", m_equipmentTabPagePropertiesSplitterState);
-	s.setValue("EquipmentTabPage/PropertiesTable/PropertiesMask", m_equipmentTabPagePropertiesMask);
-	s.setValue("EquipmentTabPage/PropertiesTable/ColumnsWidth", QVariant::fromValue(m_equipmentTabPagePropertiesColumnsWidth));
-	s.setValue("EquipmentTabPage/PropertiesTable/GroupByCategory", m_equipmentTabPagePropertiesGroupByCategory);
-
 	s.setValue("BuildTabPage/Splitter/state", m_buildTabPageSplitterState);
 
     s.setValue("TextEditorProperties/pos", m_DialogTextEditorWindowPos);
@@ -236,6 +225,9 @@ void Settings::writeUserScope() const
 	s.setValue("BuildTabPage/m_buildWarningLevel", m_buildWarningLevel);
 	s.setValue("BuildTabPage/m_buildSerachCompleter", m_buildSerachCompleter);
 
+	s.setValue("DialogMetrologyConnection/ColumnsWidth", QVariant::fromValue(m_dialogMetrologyConnectionColumnsWidth));
+	s.setValue("DialogMetrologyConnection/Geometry", m_dialogMetrologyConnectionGeometry);
+
 	return;
 }
 void Settings::loadUserScope()
@@ -252,17 +244,6 @@ void Settings::loadUserScope()
 	m_projectsSortOrder = static_cast<Qt::SortOrder>(s.value("ProjectsTabPage/sortOrder").toInt());
 
 	m_configurationTabPageSplitterState = s.value("ConfigurationTabPage/Splitter/state").toByteArray();
-
-	m_equipmentTabPageSplitterState = s.value("EquipmentTabPage/Splitter/state").toByteArray();
-
-    m_equipmentTabPagePropertiesSplitterState = s.value("EquipmentTabPage/PropertiesSplitter/state").toInt();
-    if (m_equipmentTabPagePropertiesSplitterState < 150)
-	{
-        m_equipmentTabPagePropertiesSplitterState = 150;
-	}
-	m_equipmentTabPagePropertiesMask = s.value("EquipmentTabPage/PropertiesTable/PropertiesMask").toString();
-	m_equipmentTabPagePropertiesColumnsWidth = s.value("EquipmentTabPage/PropertiesTable/ColumnsWidth").value<QMap<QString,int>>();
-	m_equipmentTabPagePropertiesGroupByCategory = s.value("EquipmentTabPage/PropertiesTable/GroupByCategory", m_equipmentTabPagePropertiesGroupByCategory).toBool();
 
     m_buildTabPageSplitterState = s.value("BuildTabPage/Splitter/state").toByteArray();
 
@@ -359,6 +340,9 @@ void Settings::loadUserScope()
 
 	m_buildWarningLevel = s.value("BuildTabPage/m_buildWarningLevel").toBool();
 	m_buildSerachCompleter = s.value("BuildTabPage/m_buildSerachCompleter").toStringList();
+
+	m_dialogMetrologyConnectionColumnsWidth = s.value("DialogMetrologyConnection/ColumnsWidth").value<QMap<QString,int>>();
+	m_dialogMetrologyConnectionGeometry = s.value("DialogMetrologyConnection/Geometry").toByteArray();
 
 	return;
 }

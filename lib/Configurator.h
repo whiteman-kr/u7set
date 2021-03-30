@@ -6,22 +6,26 @@
 #include "../lib/ModuleFirmware.h"
 #include "../lib/OutputLog.h"
 
+#include <optional>
+
 class OutputLog;
 
 const int ProtocolMaxVersion = 1;					// The maximum protocol version, changing it, change CONF_HEADER typedef
 
-const uint16_t ConfigurationUartMask = 0x000F;		// The least 4bit of CONF_HEADER::moduleUartId
-const uint16_t ConfigurationUartValue = 0x0003;		// The least 4bit of CONF_HEADER::moduleUartId
+const uint16_t ConfigurationUartId = 0x0103;
 
 const uint16_t IdentificationFrameIndex = 0x0000;	// Frame index for security data
 const uint16_t ConfiguartionFrameIndex = 0x0001;	// Frame index for configuration data (CONF_SERVICE_DATA)
+
+const uint16_t Nop2BlockSize = 1024;				// Nop2 command reply size
 
 
 enum ConfigureCommand
 {
 	Read = 0x0001,
 	Write = 0x0002,
-	Nop = 0x004
+	Nop = 0x0004,
+	Nop2 = 0x0008
 };
 
 enum HeaderFlag
@@ -246,12 +250,15 @@ protected:
 //	bool send(HANDLE hDevice, int moduleUartId, ConfigureCommand opcode, uint16_t frameIndex, uint16_t blockSize, const std::vector<uint8_t>& requestData, CONF_HEADER* pReceivedHeader, std::vector<uint8_t>* replyData);
 
 	bool loadBinaryFileWorker(const QString& fileName, ModuleFirmwareStorage* storage, bool loadBinaryData);
-	void uploadFirmwareWorker(ModuleFirmwareStorage* storage, const QString& subsystemId);
+	void uploadFirmwareWorker(ModuleFirmwareStorage* storage, const QString& subsystemId, std::optional<std::vector<int>> selectedUarts);
 
 	void readServiceInformationWorker(int param);
-	bool readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxFrameCount);
+	bool readFirmwareWorker(std::vector<ModuleFirmwareData>* firmwareDataArray, bool logIdentificationData, int maxFrameCount, std::optional<std::vector<int>> selectedUarts);
 
-	void dumpIdentificationData(const std::vector<quint8> &identificationData, int blockSize, QStringList &out);
+	void dumpIdentificationData(const std::vector<quint8> &identificationData, int blockSize, QStringList& out, bool* error);
+
+	bool requestUartInfo(CONF_HEADER* pingReceivedHeader, std::vector<int>* moduleUarts);
+
 	// Slots
 	//
 public slots:
@@ -261,11 +268,16 @@ public slots:
 	void uploadServiceInformation(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
 
 	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
-	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& subsystemId);
 
-	void readFirmware(const QString &fileName);
-	void detectSubsystem_v1();
-	void eraseFlashMemory(int param);
+	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& subsystemId, std::optional<std::vector<int>> selectedUarts);
+
+	void readFirmware(const QString &fileName, std::optional<std::vector<int>> selectedUarts);
+
+	void eraseFlashMemory(int param, std::optional<std::vector<int>> selectedUarts);
+
+	void detectSubsystem();
+
+	void detectUarts();
 
 	// Signals
 	//
@@ -278,6 +290,7 @@ signals:
 	void loadBinaryFileHeaderComplete();
 	void uartOperationStart(int uartID, QString operation);
 	void uploadFirmwareComplete(int uartID);
+	void detectUartsComplete(std::vector<int> uartIds);
 	void detectSubsystemComplete(int subsystemId);
 
 public:
@@ -308,8 +321,6 @@ private:
 	volatile bool m_cancelFlag = false;
 
 	bool m_verify = true;
-
-	int m_currentUartId = -1;
 
 	QString m_fileName;
 };

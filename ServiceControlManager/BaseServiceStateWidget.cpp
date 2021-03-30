@@ -13,10 +13,11 @@
 #include "../lib/WidgetUtils.h"
 
 
-BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget* parent) :
+BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget* parent) :
 	QMainWindow(parent),
 	m_udpIp(udpIp),
 	m_udpPort(udpPort),
+	m_service(service),
 	m_softwareInfo(softwareInfo)
 {
 	setWindowFlag(Qt::Dialog, true);
@@ -24,8 +25,8 @@ BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo,
 	m_tabWidget = new QTabWidget(this);
 	setCentralWidget(m_tabWidget);
 
-	m_serviceInfo.mutable_softwareinfo()->set_softwaretype(softwareInfo.softwareType());
-	m_serviceInfo.set_servicestate(TO_INT(ServiceState::Undefined));
+	m_service.information.mutable_softwareinfo()->set_softwaretype(softwareInfo.softwareType());
+	m_service.information.set_servicestate(TO_INT(ServiceState::Undefined));
 
 	QToolBar* toolBar = addToolBar("Service actions");
 	m_startServiceButton = toolBar->addAction("Start", this, SLOT(startService()));
@@ -76,7 +77,7 @@ BaseServiceStateWidget::~BaseServiceStateWidget()
 
 void BaseServiceStateWidget::updateServiceState()
 {
-	ServiceState serviceState = static_cast<ServiceState>(m_serviceInfo.servicestate());
+	ServiceState serviceState = static_cast<ServiceState>(m_service.information.servicestate());
 
 	if (serviceState != TO_INT(ServiceState::Unavailable) && serviceState != TO_INT(ServiceState::Undefined))
 	{
@@ -99,7 +100,7 @@ void BaseServiceStateWidget::updateServiceState()
 
 	for (int i = 0; i < servicesInfo.count(); i++)
 	{
-		if (static_cast<E::SoftwareType>(m_serviceInfo.softwareinfo().softwaretype()) == servicesInfo[i].softwareType)
+		if (static_cast<E::SoftwareType>(m_service.information.softwareinfo().softwaretype()) == servicesInfo[i].softwareType)
 		{
 			serviceName = servicesInfo[i].name;
 			serviceShortName = servicesInfo[i].shortName;
@@ -116,7 +117,7 @@ void BaseServiceStateWidget::updateServiceState()
 		case Work:
 		case Stops:
 			{
-				const Network::SoftwareInfo& softwareInfo = m_serviceInfo.softwareinfo();
+				const Network::SoftwareInfo& softwareInfo = m_service.information.softwareinfo();
 				setWindowTitle(serviceName +
 							   QString(" v%1.%2.%3 - %4:%5 (%6)")
 							   .arg(softwareInfo.majorversion())
@@ -128,7 +129,7 @@ void BaseServiceStateWidget::updateServiceState()
 
 				m_connectionStateStatus->setText("Connected to service" + QString(" - %1").arg(m_udpAckQuantity));
 
-				qint64 time = m_serviceInfo.uptime();
+				qint64 time = m_service.information.uptime();
 
 				qint64 s = time % 60; time /= 60;
 				qint64 m = time % 60; time /= 60;
@@ -167,11 +168,12 @@ void BaseServiceStateWidget::updateServiceState()
 	{
 		case ServiceState::Work:
 			{
-				runningStateStr = tr("Running");
+				SessionParams& session = m_service.sessionParams;
+				runningStateStr = tr("Running in ") + E::valueToString(session.softwareRunMode) + tr(" mode with ") + session.currentSettingsProfile + tr(" profile");
 
 				m_stateTabModel->setData(m_stateTabModel->index(3, 0), "Runing time");
 
-				qint64 time = m_serviceInfo.serviceuptime();
+				qint64 time = m_service.information.serviceuptime();
 
 				qint64 s = time % 60; time /= 60;
 				qint64 m = time % 60; time /= 60;
@@ -181,8 +183,8 @@ void BaseServiceStateWidget::updateServiceState()
 
 				m_stateTabModel->setData(m_stateTabModel->index(3, 1), srvUptimeStr);
 
-				quint32 ip = m_serviceInfo.clientrequestip();
-				qint32 port = m_serviceInfo.clientrequestport();
+				quint32 ip = m_service.clientRequestIp;
+				qint32 port = m_service.clientRequestPort;
 
 				QString address = QHostAddress(ip).toString() + QString(":%1").arg(port);
 
@@ -355,7 +357,7 @@ void BaseServiceStateWidget::serviceAckReceived(const UdpRequest udpRequest)
 
 			if (result == true)
 			{
-				ServiceState oldState = static_cast<ServiceState>(m_serviceInfo.servicestate());
+				ServiceState oldState = static_cast<ServiceState>(m_service.information.servicestate());
 				ServiceState newState = static_cast<ServiceState>(newServiceState.servicestate());
 
 				if (newState != ServiceState::Work && oldState == ServiceState::Work)
@@ -364,12 +366,13 @@ void BaseServiceStateWidget::serviceAckReceived(const UdpRequest udpRequest)
 				}
 
 				if (newState == ServiceState::Work &&
-						(oldState != ServiceState::Work || newServiceState.serviceuptime() < m_serviceInfo.serviceuptime()))
+						(oldState != ServiceState::Work || newServiceState.serviceuptime() < m_service.information.serviceuptime()))
 				{
 					emit needToReloadData();
 				}
 
-				m_serviceInfo = newServiceState;
+				m_service.information = newServiceState;
+				m_service.parseServiceInfo();
 
 				updateServiceState();
 			}
@@ -392,9 +395,9 @@ void BaseServiceStateWidget::serviceNotFound()
 {
 	m_udpAckQuantity = 0;
 
-	if (m_serviceInfo.servicestate() != TO_INT(ServiceState::Unavailable))
+	if (m_service.information.servicestate() != TO_INT(ServiceState::Unavailable))
 	{
-		m_serviceInfo.set_servicestate(TO_INT(ServiceState::Unavailable));
+		m_service.information.set_servicestate(TO_INT(ServiceState::Unavailable));
 		updateServiceState();
 	}
 }
@@ -476,7 +479,7 @@ void BaseServiceStateWidget::addClientsTab(bool showStateColumn)
 
 quint32 BaseServiceStateWidget::getWorkingClientRequestIp()
 {
-	QHostAddress address(m_serviceInfo.clientrequestip());
+	QHostAddress address(m_service.clientRequestIp);
 
 	if (address == QHostAddress::AnyIPv4)
 	{
@@ -488,7 +491,7 @@ quint32 BaseServiceStateWidget::getWorkingClientRequestIp()
 
 void BaseServiceStateWidget::sendCommand(int command)
 {
-	ServiceState state = static_cast<ServiceState>(m_serviceInfo.servicestate());
+	ServiceState state = static_cast<ServiceState>(m_service.information.servicestate());
 
 	if (!(state == ServiceState::Work && (command == RQID_SERVICE_STOP || command == RQID_SERVICE_RESTART)) &&
 		!(state == ServiceState::Stopped && (command == RQID_SERVICE_START || command == RQID_SERVICE_RESTART)))

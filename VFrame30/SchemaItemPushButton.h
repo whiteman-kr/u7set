@@ -62,8 +62,8 @@ namespace VFrame30
 		{
 			// Get current signal parameters and state
 			//
-			var param = tuning.signalParam(signalId);
-			var state = tuning.signalState(signalId);
+			let param = tuning.signalParam(signalId);
+			let state = tuning.signalState(signalId);
 
 			// Check if signal exists
 			//
@@ -83,13 +83,13 @@ namespace VFrame30
 
 			// Increment the value
 			//
-			var value = state.Value;
+			let value = state.Value;
 			value += step;
 
 			// Check signal limits
 			//
-			var lowLimit = param.TuningLowBound;
-			var highLimit = param.TuningHighBound;
+			let lowLimit = param.TuningLowBound;
+			let highLimit = param.TuningHighBound;
 
 			if (value < lowLimit || value > highLimit)
 			{
@@ -112,17 +112,17 @@ namespace VFrame30
 		{
 			// Find widget by its ObjectName
 			//
-			var widget = view.findWidget(objectName);
+			let widget = view.findWidget(objectName);
 			if (widget == null)
 			{
 				return;
 			}
 
-			var enabled = true;
+			let enabled = true;
 
 			// Get signal state and set enabled to false if signal does not exist or is not valid
 			//
-			var state = tuning.signalState(signalId);
+			let state = tuning.signalState(signalId);
 			if (state == undefined || state.Valid == false)
 			{
 				enabled = false;

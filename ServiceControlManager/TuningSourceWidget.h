@@ -1,5 +1,4 @@
-#ifndef TUNINGSOURCEWIDGET_H
-#define TUNINGSOURCEWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -45,4 +44,3 @@ private:
 	QString m_equipmentId;
 };
 
-#endif // TUNINGSOURCEWIDGET_H

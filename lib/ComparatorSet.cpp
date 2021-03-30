@@ -1,6 +1,6 @@
 #include "ComparatorSet.h"
 
-#include "../lib/ProtoSerialization.h"
+#include "../Proto/ProtoSerialization.h"
 #include "../lib/WUtils.h"
 
 // ------------------------------------------------------------------------------------------------
@@ -264,7 +264,7 @@ LmComparatorSet::LmComparatorSet(const QString& lmID, std::shared_ptr<Comparator
 	}
 
 	m_lmID = lmID;
-	m_comparatorList.append(comparator);
+	m_comparatorList.push_back(comparator);
 }
 
 LmComparatorSet::~LmComparatorSet()
@@ -285,7 +285,7 @@ void LmComparatorSet::append(std::shared_ptr<Comparator> comparator)
 		return;
 	}
 
-	m_comparatorList.append(comparator);
+	m_comparatorList.push_back(comparator);
 }
 
 QString	LmComparatorSet::lmID() const
@@ -298,7 +298,7 @@ void LmComparatorSet::setLmID(const QString& lmEquipmentID)
 	m_lmID = lmEquipmentID;
 }
 
-const QVector<std::shared_ptr<Comparator>>& LmComparatorSet::comparators() const
+const std::vector<std::shared_ptr<Comparator> >& LmComparatorSet::comparators() const
 {
 	return m_comparatorList;
 }
@@ -376,7 +376,7 @@ void ComparatorSet::dump() const
 	qDebug() << "------------------ComparatorSet Dump---------------------";
 	qDebug() << "Comparators: " << m_bySignal.size();
 
-	for (const auto bs : m_bySignal)
+	for (auto bs : m_bySignal)
 	{
 		qDebug() << "Comparators for signal: " << bs.size();
 		for (const std::shared_ptr<Comparator>& c : bs)
@@ -419,7 +419,7 @@ void ComparatorSet::insert(const QString& lmID, std::shared_ptr<Comparator> comp
 	//
 	if(m_bySignal.contains(comparator->input().appSignalID()) == false)
 	{
-		QVector<std::shared_ptr<Comparator>> comparatorVector;
+		std::vector<std::shared_ptr<Comparator>> comparatorVector;
 		comparatorVector.reserve(4);
 		comparatorVector.push_back(comparator);
 
@@ -427,7 +427,7 @@ void ComparatorSet::insert(const QString& lmID, std::shared_ptr<Comparator> comp
 	}
 	else
 	{
-		m_bySignal[comparator->input().appSignalID()].append(comparator);
+		m_bySignal[comparator->input().appSignalID()].push_back(comparator);
 	}
 
 	// insert by EquipmentID of LM
@@ -451,7 +451,7 @@ QStringList ComparatorSet::inputSignalIDs() const
 	return static_cast<QStringList>(m_bySignal.keys());
 }
 
-QVector<std::shared_ptr<Comparator>> ComparatorSet::getByInputSignalID(const QString& appSignalID) const
+std::vector<std::shared_ptr<Comparator>> ComparatorSet::getByInputSignalID(const QString& appSignalID) const
 {
 	QMutexLocker l(&m_mutex);
 
@@ -465,14 +465,14 @@ QStringList ComparatorSet::lmIDs() const
 	return static_cast<QStringList>(m_byLm.keys());
 }
 
-QVector<std::shared_ptr<Comparator>> ComparatorSet::getByLmID(const QString& equipmentID) const
+std::vector<std::shared_ptr<Comparator>> ComparatorSet::getByLmID(const QString& equipmentID) const
 {
 	QMutexLocker l(&m_mutex);
 
 	std::shared_ptr<LmComparatorSet> set = m_byLm[equipmentID];
 	if (set == nullptr)
 	{
-		return QVector<std::shared_ptr<Comparator>>();
+		return std::vector<std::shared_ptr<Comparator>>();
 	}
 
 	return set->comparators();

@@ -5,7 +5,7 @@
 #include <QUuid>
 #include <QtGlobal>
 
-typedef quint64 Hash;
+using Hash = quint64;
 
 #define UNDEFINED_HASH 0x0000000000000000ULL
 

@@ -11,11 +11,14 @@
 
 AppDataReceiverThread::AppDataReceiverThread(const HostAddressPort& dataReceivingIP,
 								 const AppDataSourcesIP& appDataSourcesIP,
+								 E::SoftwareRunMode swRunMode,
 								 CircularLoggerShared log) :
 	m_dataReceivingIP(dataReceivingIP),
 	m_appDataSourcesIP(appDataSourcesIP),
 	m_log(log)
 {
+	m_isSimulationMode = (swRunMode == E::SoftwareRunMode::Simulation);
+
 	setPriority(QThread::Priority::HighPriority);
 }
 
@@ -36,6 +39,8 @@ void AppDataReceiverThread::fillAppDataReceiveState(Network::AppDataReceiveState
 	adrs->set_errsimversion(m_errSimVersion);
 	adrs->set_errunknownappdatasourceip(m_errUnknownAppDataSourceIP);
 	adrs->set_errrupframecrc(m_errRupFrameCRC);
+
+	adrs->set_errnotexpectedsimpacket(m_errNotExpectedSimPacket);
 }
 
 void AppDataReceiverThread::run()
@@ -160,6 +165,8 @@ void AppDataReceiverThread::receivePackets()
 	qint64 prevServerTime = QDateTime::currentMSecsSinceEpoch();
 	qint64 lastPacketTime = prevServerTime;
 
+	bool isSimFrame = false;
+
 	while(isQuitRequested() == false)
 	{
 		qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
@@ -168,13 +175,13 @@ void AppDataReceiverThread::receivePackets()
 		{
 			prevServerTime = serverTime;
 
-			m_receivingRate = m_receivedPerSecond;
+			m_receivingRate.store(m_receivedPerSecond);
 			m_receivedPerSecond = 0;
 
-			m_udpReceivingRate = m_udpReceivedPerSecond;
+			m_udpReceivingRate.store(m_udpReceivedPerSecond);
 			m_udpReceivedPerSecond = 0;
 
-			m_rupFramesReceivingRate = m_rupFramesReceivedPerSecond;
+			m_rupFramesReceivingRate.store(m_rupFramesReceivedPerSecond);
 			m_rupFramesReceivedPerSecond = 0;
 
 			qDebug() << C_STR(QString("Receive RUP frames %1").arg(m_rupFramesReceivingRate));
@@ -202,12 +209,27 @@ void AppDataReceiverThread::receivePackets()
 
 		quint32 ip = 0;
 
+		isSimFrame = false;
+
 		if (size == sizeof(Rup::Frame))
 		{
 			ip = from.toIPv4Address();
 		}
 		else
 		{
+			if (m_isSimulationMode == false)
+			{
+				m_errNotExpectedSimPacket++;
+
+				if ((m_errNotExpectedSimPacket % 1000) == 0)
+				{
+					qDebug() << C_STR(QString("Software is not in SIMULATION mode, %1 sim packets has been ignored.").
+									  arg(m_errNotExpectedSimPacket));
+				}
+
+				continue;
+			}
+
 			if (size == sizeof(Rup::SimFrame))
 			{
 				quint16 simVersion = reverseUint16(simFrame.simVersion);
@@ -221,6 +243,8 @@ void AppDataReceiverThread::receivePackets()
 				ip = reverseUint32(simFrame.sourceIP);
 
 				m_simFramesCount++;
+
+				isSimFrame = true;
 			}
 			else
 			{
@@ -254,6 +278,6 @@ void AppDataReceiverThread::receivePackets()
 			continue;
 		}
 
-		dataSource->pushRupFrame(serverTime, simFrame.rupFrame, m_thisThread);
+		dataSource->pushRupFrame(serverTime, isSimFrame, simFrame.rupFrame, m_thisThread);
 	}
 }

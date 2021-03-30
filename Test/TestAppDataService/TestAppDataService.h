@@ -1,7 +1,7 @@
-#ifndef TST_TESTAPPDATASERVICE_H
-#define TST_TESTAPPDATASERVICE_H
+#pragma once
+
 #include <QObject>
-#include "../../lib/ServiceSettings.h"
+#include "../../lib/SoftwareSettings.h"
 #include "../../lib/DataSource.h"
 
 class AppDataServiceClient;
@@ -52,5 +52,3 @@ private:
 	Network::GetAppDataSourcesStatesReply m_previousDataSourceStateMessage;
 	Network::GetAppDataSourcesStatesReply m_nextDataSourceStateMessage;
 };
-
-#endif // TST_TESTAPPDATASERVICE_H

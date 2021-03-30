@@ -136,7 +136,7 @@ const QString SignalProperties::defaultBusChildAnalogSpecPropStruct(
 const QString SignalProperties::lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
 
 
-SignalProperties::SignalProperties(Signal& signal, bool savePropertyDescription) :
+SignalProperties::SignalProperties(const Signal& signal, bool savePropertyDescription) :
 	m_signal(signal)
 {
 	initProperties(savePropertyDescription);
@@ -499,13 +499,11 @@ bool SignalSpecPropValue::load(const Proto::SignalSpecPropValue& protoValue)
 
 	m_isEnum = protoValue.isenum();
 
-#ifdef Q_DEBUG
-
+#ifdef QT_DEBUG
 	if (m_isEnum == true && type != QVariant::Int)
 	{
 		assert(false);
 	}
-
 #endif
 
 	switch(type)

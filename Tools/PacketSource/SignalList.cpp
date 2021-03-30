@@ -14,11 +14,9 @@ SignalTable::SignalTable(QObject *)
 
 SignalTable::~SignalTable()
 {
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		m_signalList.clear();
-
-	m_signalMutex.unlock();
+	m_signalList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -203,40 +201,30 @@ void SignalTable::updateColumn(int column)
 
 int SignalTable::signalCount() const
 {
-	int count = 0;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
-
-		count = m_signalList.count();
-
-	m_signalMutex.unlock();
-
-	return count;
+	return TO_INT(m_signalList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 PS::Signal* SignalTable::signalPtr(int index) const
 {
-	PS::Signal* pSignal = nullptr;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_signalList.count())
-		{
-			 pSignal = m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return pSignal;
+	return m_signalList[static_cast<quint64>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalTable::set(const QVector<PS::Signal*> list_add)
+void SignalTable::set(const std::vector<PS::Signal*> list_add)
 {
-	int count = list_add.count();
+	int count = TO_INT(list_add.size());
 	if (count == 0)
 	{
 		return;
@@ -257,7 +245,7 @@ void SignalTable::set(const QVector<PS::Signal*> list_add)
 
 void SignalTable::clear()
 {
-	int count = m_signalList.count();
+	int count = TO_INT(m_signalList.size());
 	if (count == 0)
 	{
 		return;
@@ -296,7 +284,7 @@ SignalStateDialog::~SignalStateDialog()
 void SignalStateDialog::createInterface()
 {
 	setWindowFlags(Qt::Window  | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/InOut.png"));
+	setWindowIcon(QIcon(":/Images/Options.svg"));
 	setWindowTitle(tr("Signal state"));
 
 	if (m_pSignal == nullptr || m_pSignal->valueData() == nullptr)
@@ -324,7 +312,8 @@ void SignalStateDialog::createInterface()
 				{
 					case E::AnalogAppSignalFormat::SignedInt32:		formatStr = QString::asprintf("%%.%df", 0);								break;
 					case E::AnalogAppSignalFormat::Float32:			formatStr = QString::asprintf("%%.%df", m_pSignal->decimalPlaces());	break;
-					default:										assert(0);													break;
+					default:
+						assert(0);
 				}
 				strState = QString::asprintf(formatStr.toLocal8Bit(), m_pSignal->state());
 

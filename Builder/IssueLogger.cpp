@@ -1491,6 +1491,49 @@ namespace Builder
 								arg(dataSourceIP).arg(dataSourceEquipmentID).arg(dataReceivingIP).arg(receivingEquipmentID));
 	}
 
+	/// IssueCode: CFG3044
+	///
+	/// IssueType: Error
+	///
+	/// Title: Equipment object %1 is not found (Settings profile - %2).
+	///
+	/// Parameters:
+	///         %1 equipmentID
+	///			%2 settings profile ID
+	///
+	/// Description:
+	///			Object with EquipmentID specified in settings profile is not found.
+	///
+	void IssueLogger::errCFG3044(QString equipmentID, QString profileID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3044,
+				  QString(tr("Equipment object %1 is not found (Settings profile - %2).").
+								arg(equipmentID).arg(profileID)));
+	}
+
+	/// IssueCode: CFG3045
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1.%2 is not found (Settings profile - %3).
+	///
+	/// Parameters:
+	///         %1 equipmentID
+	///         %2 propertyName
+	///			%3 settings profile ID
+	///
+	/// Description:
+	///			Property specified in settings profile is not found.
+	///
+	void IssueLogger::errCFG3045(QString equipmentID, QString propertyName, QString profileID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3045,
+				  QString(tr("Property %1.%2 is not found (Settings profile - %3).").
+								arg(equipmentID).arg(propertyName).arg(profileID)));
+	}
+
 	//
 	// ALP			Application Logic Parsing				4000-4999
 	//
@@ -7352,6 +7395,49 @@ namespace Builder
 				  );
 	}
 
+
+	/// IssueCode: EQP6010
+	///
+	/// IssueType: Error
+	///
+	/// Title: Device Object %1 not found.
+	///
+	/// Parameters:
+	///		%1 DeviceObject EquipmentID
+	///
+	/// Description:
+	///		Some device object is not found in the equipment set.
+	///
+	void IssueLogger::errEQP6010(QString equipmemtId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6010,
+				  tr("Device Object %1 not found.")
+				  .arg(equipmemtId));
+	}
+
+	/// IssueCode: EQP6011
+	///
+	/// IssueType: Error
+	///
+	/// Title: Device Object %1 not found on %2.
+	///
+	/// Parameters:
+	///		%1 DeviceObject EquipmentID
+	///		%2 Build Step
+	///
+	/// Description:
+	///		Some device object is not found in the equipment set.
+	///
+	void IssueLogger::errEQP6011(QString equipmemtId, QString buildStep)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6011,
+				  tr("Device Object %1 not found on %2.")
+				  .arg(equipmemtId)
+				  .arg(buildStep));
+	}
+
 	/// IssueCode: EQP6020
 	///
 	/// IssueType: Error
@@ -7372,6 +7458,28 @@ namespace Builder
 				  6020,
 				  tr("Property LmDescriptionFile is empty, LogicModule %1.")
 				  .arg(lm));
+	}
+
+	/// IssueCode: EQP6030
+	///
+	/// IssueType: Error
+	///
+	/// Title: Applying SimProfile %1 error: %2
+	///
+	/// Parameters:
+	///		%1 SimProfile Name
+	///		%2 Error Message
+	///
+	/// Description:
+	///		Error occured during applying simulator profile to the equipmnet set.
+	///
+	void IssueLogger::errEQP6030(QString profileName, QString errorMessage)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6030,
+				  tr("Applying SimProfile %1 error: %2.")
+				  .arg(profileName)
+				  .arg(errorMessage));
 	}
 
 
@@ -7862,6 +7970,71 @@ namespace Builder
 				  .arg(QString::number(lowLimit, 'f', precesion))
 				  .arg(QString::number(highLinmit, 'f', precesion))
 				  .arg(unit)
+				  );
+	}
+
+	/// IssueCode: EQP6120
+	///
+	/// IssueType: Error
+	///
+	/// Title: Metrology connection with signals: %1 and %2, has wrong type of connection.
+	///
+	/// Parameters:
+	///		%1 AppSignalID of source signal
+	///		%2 AppSignalID of destination signal
+	///
+	/// Description:
+	///		Metrology connection with signals: %1 and %2, has wrong type of connection.
+	///
+	void IssueLogger::errEQP6120(QString sourceAppSignalID, QString destinationAppSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6120,
+				  tr("Metrology connection with signals: %1 and %2, has wrong type of connection")
+				  .arg(sourceAppSignalID)
+				  .arg(destinationAppSignalID)
+				  );
+	}
+
+	/// IssueCode: EQP6121
+	///
+	/// IssueType: Error
+	///
+	/// Title: Metrology connections contain a non-existent source signal: %1.
+	///
+	/// Parameters:
+	///		%1 AppSignalID of source signal
+	///
+	/// Description:
+	///		Metrology connections contain a non-existent source signal: %1.
+	///
+	void IssueLogger::errEQP6121(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6121,
+				  tr("Metrology connections contain a non-existent source signal: %1")
+				  .arg(appSignalID)
+				  );
+	}
+
+	/// IssueCode: EQP6122
+	///
+	/// IssueType: Error
+	///
+	/// Title: Metrology connections contain a non-existent destination signal: %1.
+	///
+	/// Parameters:
+	///		%1 AppSignalID of destination signal
+	///
+	/// Description:
+	///		Metrology connections contain a non-existent destination signal: %1.
+	///
+	void IssueLogger::errEQP6122(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6122,
+				  tr("Metrology connections contain a non-existent destination signal: %1")
+				  .arg(appSignalID)
 				  );
 	}
 

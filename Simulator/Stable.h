@@ -8,6 +8,7 @@
 #include <array>
 #include <vector>
 #include <algorithm>
+#include <cstring>
 
 // Qt includes
 //
@@ -43,19 +44,14 @@
 	#endif
 #endif
 
-// For detecting memory leaks
+// Visual Leak Detector
 //
-#if defined (Q_OS_WIN) && defined (Q_DEBUG)
-#define _CRTDBG_MAP_ALLOC
-#include <cstdlib>
-#include <crtdbg.h>
-#ifdef _DEBUG
-	#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
-	// Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
-	// allocations to be of _CLIENT_BLOCK type
-#else
-	#define DBG_NEW new
-#endif
-#endif
-
-
+#if defined(Q_OS_WIN) && defined(QT_DEBUG)
+	#if __has_include("C:/Program Files (x86)/Visual Leak Detector/include/vld.h")
+		#include "C:/Program Files (x86)/Visual Leak Detector/include/vld.h"
+	#else
+		#if __has_include("D:/Program Files (x86)/Visual Leak Detector/include/vld.h")
+			#include "D:/Program Files (x86)/Visual Leak Detector/include/vld.h"
+		#endif
+	#endif
+#endif	// Visual Leak Detector

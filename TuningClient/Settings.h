@@ -4,6 +4,7 @@
 #include "../lib/HostAddressPort.h"
 #include "UserManager.h"
 #include "../lib/Tuning/TuningTcpClient.h"
+#include "../lib/SoftwareSettings.h"
 
 // Enable the next line to access the admin functions
 //#define USE_ADMIN_REGISTRY_AREA
@@ -55,21 +56,31 @@ struct BuildInfo
 // SchemaSettings
 //
 
-struct SchemaSettings
+struct SchemaInfo
 {
-	SchemaSettings()
-	{
-
-	}
-
-	SchemaSettings(const QString& id, const QString& caption)
+	SchemaInfo(const QString& id, const QString& caption, const std::set<QString>& tags)
 	{
 		m_id = id;
 		m_caption = caption;
+		m_tags = tags;
+	}
+
+	bool hasAnyTag(const QStringList& tags) const
+	{
+		for (const QString& tag : tags)
+		{
+			if (m_tags.find(tag.trimmed().toLower()) != m_tags.end())
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	QString m_id;
 	QString m_caption;
+	std::set<QString> m_tags;
 };
 
 //
@@ -78,58 +89,38 @@ struct SchemaSettings
 
 struct ConfigSettings
 {
-	ConfigConnection tuningServiceAddress;				// Tuning Service connection params
+	TuningClientSettings clientSettings;
 
-	bool autoApply = true;
+	ConfigConnection serviceAddress;				// Tuning Service connection params
 
-	LogonMode logonMode = LogonMode::Permanent;
-
-	bool showSignals = true;
-	bool showSchemas = true;
-	bool showSchemasList = true;
-	bool showSchemasTabs = true;
-
-	bool filterByEquipment = true;
-	bool filterBySchema = true;
-
-	QString startSchemaID;
-
-	LmStatusFlagMode lmStatusFlagMode = LmStatusFlagMode::SOR;
-	int loginSessionLength = 120;
-	QStringList usersAccounts;
-
-	std::vector<SchemaSettings> schemas;
+	std::vector<SchemaInfo> schemas;
 
 	BuildInfo buildInfo;
 
-	QString globalScript;
-	QString configurationArrivedScript;
+	QString scriptGlobal;
+
+	QString scriptConfigArrived;
 
 	QString errorMessage;				// Parsing error message, empty if no errors
 
 	// Warning! Add new values to copy operator!!!
 
+	LmStatusFlagMode lmStatusFlagMode() const
+	{
+		return static_cast<LmStatusFlagMode>(clientSettings.statusFlagFunction);
+	}
+
 	ConfigSettings& operator = (const ConfigSettings& That)
 	{
-		tuningServiceAddress = That.tuningServiceAddress;
-		autoApply = That.autoApply;
-		logonMode = That.logonMode;
-		showSignals = That.showSignals;
-		showSchemas = That.showSchemas;
-		showSchemasList = That.showSchemasList;
-		showSchemasTabs = That.showSchemasTabs;
-		filterByEquipment = That.filterByEquipment;
-		filterBySchema = That.filterBySchema;
-		startSchemaID = That.startSchemaID;
-		lmStatusFlagMode = That.lmStatusFlagMode;
-		loginSessionLength = That.loginSessionLength;
-		usersAccounts = That.usersAccounts;
+		serviceAddress = That.serviceAddress;
+		clientSettings = That.clientSettings;
+
 		schemas = That.schemas;
 		buildInfo = That.buildInfo;
-		globalScript = That.globalScript;
-		configurationArrivedScript = That.configurationArrivedScript;
 
-		//errorMessage = That.errorMessage;
+		scriptGlobal = That.scriptGlobal;
+		scriptConfigArrived = That.scriptConfigArrived;
+
 		return *this;
 	}
 

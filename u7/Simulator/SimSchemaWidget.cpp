@@ -133,7 +133,6 @@ void SimSchemaWidget::contextMenuRequested(const QPoint& pos)
 				signalContextMenu(schemaItemReceiver->appSignalIdsAsList(), {}, {});
 				break;
 			}
-
 		}
 	}
 

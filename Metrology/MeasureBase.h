@@ -6,428 +6,441 @@
 
 #include "SignalBase.h"
 
-// ==============================================================================================
-
-const char* const MeasureType[] =
+namespace Measure
 {
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Measurements of linearity"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Measurements of comparators"),
-};
+	// ==============================================================================================
 
-const int	MEASURE_TYPE_COUNT = sizeof(MeasureType)/sizeof(MeasureType[0]);
+	enum Type
+	{
+		NoMeasureType	= -1,
+		Linearity		= 0,
+		Comparators		= 1,
+	};
 
-const int	MEASURE_TYPE_UNDEFINED	= -1,
-			MEASURE_TYPE_LINEARITY	= 0,
-			MEASURE_TYPE_COMPARATOR	= 1;
+	const int TypeCount	= 2;
 
-// ----------------------------------------------------------------------------------------------
+	#define ERR_MEASURE_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Measure::TypeCount)
 
-const char* const MeasureFileName[MEASURE_TYPE_COUNT] =
-{
-			"Linearity",
-			"Comparators",
-};
+	QString TypeCaption(int measureType);
 
-// ==============================================================================================
+	// ==============================================================================================
 
-const int	MeasureTimeout[] =
-{
-			0, 1, 2, 3, 5, 10, 15, 20, 30, 45, 60,
-};
+	enum Kind
+	{
+		NoMeasureKind	= -1,
+		OneRack			= 0,
+		OneModule		= 1,
+		MultiRack		= 2,
+	};
 
-const int	MeasureTimeoutCount = sizeof(MeasureTimeout)/sizeof(MeasureTimeout[0]);
+	const int KindCount	= 3;
 
-// ==============================================================================================
+	#define ERR_MEASURE_KIND(kind) (TO_INT(kind) < 0 || TO_INT(kind) >= Measure::KindCount)
 
-const char* const	MeasureKind[] =
-{
-			QT_TRANSLATE_NOOP("MeasureBase.h", " Single channel"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", " Single module"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", " Multi channel"),
-};
+	QString KindCaption(int measureKind);
 
-const int	MEASURE_KIND_COUNT		= sizeof(MeasureKind)/sizeof(MeasureKind[0]);
+	// ==============================================================================================
 
-const int	MEASURE_KIND_UNDEFINED	= -1,
-			MEASURE_KIND_ONE_RACK	= 0,
-			MEASURE_KIND_ONE_MODULE	= 1,
-			MEASURE_KIND_MULTI_RACK	= 2;
+	enum LimitType
+	{
+		NoLimitType	= -1,
+		Electric	= 0,
+		Engineering	= 1,
+	};
 
-// ==============================================================================================
+	const int LimitTypeCount = 2;
 
-const char* const MeasureLimitType[] =
-{
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Electric"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Engineering"),
-};
+	#define ERR_MEASURE_LIMIT_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Measure::LimitTypeCount)
 
-const int	MEASURE_LIMIT_TYPE_COUNT		= sizeof(MeasureLimitType)/sizeof(MeasureLimitType[0]);
+	QString LimitTypeCaption(int measureType);
 
-const int	MEASURE_LIMIT_TYPE_UNDEFINED	= -1,
-			MEASURE_LIMIT_TYPE_ELECTRIC		= 0,
-			MEASURE_LIMIT_TYPE_ENGINEER		= 1;
+	// ==============================================================================================
 
-// ==============================================================================================
+	enum ErrorType
+	{
+		NoErrorType	= -1,
+		Absolute	= 0,
+		Reduce		= 1,
+		Relative	= 2,
+	};
 
-const char* const MeasureErrorType[] =
-{
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Absolute"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Reduced"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Relative"),
-};
+	const int ErrorTypeCount	= 3;
 
-const int	MEASURE_ERROR_TYPE_COUNT	= sizeof(MeasureErrorType)/sizeof(MeasureErrorType[0]);
+	#define ERR_MEASURE_ERROR_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Measure::ErrorTypeCount)
 
-const int	MEASURE_ERROR_TYPE_UNDEFINED	= -1,
-			MEASURE_ERROR_TYPE_ABSOLUTE		= 0,
-			MEASURE_ERROR_TYPE_REDUCE		= 1,
-			MEASURE_ERROR_TYPE_RELATIVE		= 2;
+	QString ErrorTypeCaption(int errorType);
 
-// ==============================================================================================
+	// ==============================================================================================
 
-const char* const ErrorResult[] =
-{
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Ok"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Failed"),
-};
+	enum ErrorResult
+	{
+		NoErrorResult	= -1,
+		Ok				= 0,
+		Failed			= 1,
+	};
 
-const int	MEASURE_ERROR_RESULT_COUNT	= sizeof(ErrorResult)/sizeof(ErrorResult[0]);
+	const int ErrorResultCount = 2;
 
-const int	MEASURE_ERROR_RESULT_UNDEFINED		= -1,
-			MEASURE_ERROR_RESULT_OK				= 0,
-			MEASURE_ERROR_RESULT_FAILED			= 1;
+	#define ERR_MEASURE_ERROR_RESULT(result) (TO_INT(result) < 0 || TO_INT(result) >= Measure::ErrorResultCount)
 
-// ==============================================================================================
+	QString ErrorResultCaption(int errorResult);
 
-const char* const MeasureAdditionalParam[] =
-{
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Measure value max"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "System deviation"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Standard deviation"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Low High border"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Uncertainty"),
-};
+	// ==============================================================================================
 
-const int	MEASURE_ADDITIONAL_PARAM_COUNT				= sizeof(MeasureAdditionalParam)/sizeof(MeasureAdditionalParam[0]);
+	enum AdditionalParam
+	{
+		NoAdditionalParam	= -1,
+		MaxValue			= 0,
+		SystemDeviation		= 1,
+		StandardDeviation	= 2,
+		LowHighBorder		= 3,
+		Uncertainty			= 4,
+	};
 
-const int	MEASURE_ADDITIONAL_PARAM_UNDEFINED			= -1,
-			MEASURE_ADDITIONAL_PARAM_MAX_VALUE			= 0,
-			MEASURE_ADDITIONAL_PARAM_SYSTEM_DEVIATION	= 1,
-			MEASURE_ADDITIONAL_PARAM_SD					= 2,
-			MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER	= 3,
-			MEASURE_ADDITIONAL_PARAM_UNCERTAINTY		= 4;
+	const int AdditionalParamCount = 5;
 
-			// maximum 16 items (0 .. 15)
-			// now used 5 (1 .. 5)
+				// now used 5 (1 .. 5)
+				// maximum 16 items (0 .. 15)
 
-// ==============================================================================================
+	#define ERR_MEASURE_ADDITIONAL_PARAM(param) (TO_INT(param) < 0 || TO_INT(param) >= Measure::AdditionalParamCount)
 
-const int	MAX_MEASUREMENT_IN_POINT	= 20;
+	QString AdditionalParamCaption(int param);
 
-// ==============================================================================================
+	// ==============================================================================================
 
-#define	 MEASURE_TIME_FORMAT			"dd-MM-yyyy hh:mm:ss"
+	const int Timeout[] =
+	{
+		0, 1, 2, 3, 5, 10, 15, 20, 30, 45, 60,  // default value of seconds
+	};
 
-// ==============================================================================================
+	const int TimeoutCount = sizeof(Timeout)/sizeof(Timeout[0]);
 
-class Measurement
-{
+	// ==============================================================================================
 
-public:
+	const int MaxMeasurementInPoint = 20;
 
-	explicit Measurement(int measureType = MEASURE_TYPE_UNDEFINED);
-	virtual ~Measurement();
+	// ==============================================================================================
 
-private:
+	#define MEASURE_TIME_FORMAT "dd-MM-yyyy hh:mm:ss"
 
-	int				m_measureType = MEASURE_TYPE_UNDEFINED;					// measure type
-	Hash			m_signalHash = UNDEFINED_HASH;							// hash calced from AppSignalID by function calcHash()
+	// ==============================================================================================
 
-	int				m_measureID = -1;										// primary key of record in SQL table
-	bool			m_filter = false;										// filter for record, if "true" - hide record
+	class Item
+	{
 
-	bool			m_signalValid = true;									// signal is valid during the measurement
+	public:
 
-	QString			m_connectionAppSignalID;
-	int				m_connectionType = SIGNAL_CONNECTION_TYPE_UNDEFINED;
+		explicit Item(Type measureType = Measure::Type::NoMeasureType);
+		virtual ~Item();
 
-	QString			m_appSignalID;
-	QString			m_customAppSignalID;
-	QString			m_equipmentID;
-	QString			m_caption;
+	public:
 
-	Metrology::SignalLocation m_location;
+		void virtual clear();
 
-	int				m_calibratorPrecision = DEFAULT_ECLECTRIC_UNIT_PRECESION;	// precision of electric range of calibrator
+		Measure::Type measureType() const { return m_measureType; }
+		int measureTypeInt() const { return TO_INT(m_measureType); }
+		void setMeasureType(Measure::Type type) { m_measureType = type; }
+		void setMeasureType(int type) { m_measureType = static_cast<Measure::Type>(type); }
 
-	double			m_nominal[MEASURE_LIMIT_TYPE_COUNT];
-	double			m_measure[MEASURE_LIMIT_TYPE_COUNT];
+		Hash signalHash() const { return m_signalHash; }
+		void setSignalHash(const Hash& hash) { m_signalHash = hash; }
+		void setSignalHash(const QString& id) { m_signalHash = calcHash(id); }
 
-	double			m_lowLimit[MEASURE_LIMIT_TYPE_COUNT];
-	double			m_highLimit[MEASURE_LIMIT_TYPE_COUNT];
-	QString			m_unit[MEASURE_LIMIT_TYPE_COUNT];
-	int				m_limitPrecision[MEASURE_LIMIT_TYPE_COUNT];
+		int measureID() const { return m_measureID; }
+		void setMeasureID(int id) { m_measureID = id; }
 
-	double			m_adjustment = 0;
+		bool filter() const { return m_filter; }
+		void setFilter(bool filter) { m_filter = filter; }
 
-	double			m_error[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
-	double			m_errorLimit[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
+		bool isSignalValid() const { return m_signalValid; }
+		void setSignalValid(bool valid) { m_signalValid = valid; }
 
-	QDateTime		m_measureTime;											// measure time
-	QString			m_calibrator;											// calibrator name and calibrator SN
-	int				m_reportType = -1;										// report type
+		QString connectionAppSignalID() const;
+		void setConnectionAppSignalID(const QString& appSignalID) { m_connectionAppSignalID = appSignalID; }
 
-	bool			m_foundInStatistics = true;								// after loading find signal in the statistics list
+		Metrology::ConnectionType connectionType() const { return m_connectionType; }
+		int connectionTypeInt() const { return TO_INT(m_connectionType); }
+		QString connectionTypeStr() const;
+		void setConnectionType(Metrology::ConnectionType type) { m_connectionType = type; }
+		void setConnectionType(int type) { m_connectionType =  static_cast<Metrology::ConnectionType>(type); }
 
-public:
+		QString appSignalID() const { return m_appSignalID; }
+		void setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; setSignalHash(m_appSignalID); }
 
-	void			virtual clear();
+		QString customAppSignalID() const { return m_customAppSignalID; }
+		void setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
 
-	int				measureType() const { return m_measureType; }
-	void			setMeasureType(int type) { m_measureType = type; }
+		QString equipmentID() const { return m_equipmentID; }
+		void setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
 
-	Hash			signalHash() const { return m_signalHash; }
-	void			setSignalHash(const Hash& hash) { m_signalHash = hash; }
-	void			setSignalHash(const QString& id) { m_signalHash = calcHash(id); }
+		QString caption() const { return m_caption; }
+		void setCaption(const QString& caption) { m_caption = caption; }
 
-	int				measureID() const { return m_measureID; }
-	void			setMeasureID(int id) { m_measureID = id; }
+		Metrology::SignalLocation& location() { return m_location; }
+		void setLocation(const Metrology::SignalLocation& location) { m_location = location; }
 
-	bool			filter() const { return m_filter; }
-	void			setFilter(bool filter) { m_filter = filter; }
+		int calibratorPrecision() const { return m_calibratorPrecision; }
+		void setCalibratorPrecision(int precision) { m_calibratorPrecision = precision; }
 
-	bool			isSignalValid() const { return m_signalValid; }
-	void			setSignalValid(bool valid) { m_signalValid = valid; }
+		double nominal(LimitType limitType) const;
+		QString nominalStr(LimitType limitType) const;
+		void setNominal(LimitType limitType, double value);
 
-	QString			connectionAppSignalID() const;
-	void			setConnectionAppSignalID(const QString& appSignalID) { m_connectionAppSignalID = appSignalID; }
+		double measure(LimitType limitType) const;
+		QString measureStr(LimitType limitType) const;
+		void setMeasure(LimitType limitType, double value);
 
-	int				connectionType() const { return m_connectionType; }
-	QString			connectionTypeStr() const;
-	void			setConnectionType(int type) { m_connectionType = type; }
+		void setLimits(const IoSignalParam &ioParam);
 
-	QString			appSignalID() const { return m_appSignalID; }
-	void			setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; setSignalHash(m_appSignalID); }
+		double lowLimit(LimitType limitType) const;
+		void setLowLimit(LimitType limitType, double lowLimit);
 
-	QString			customAppSignalID() const { return m_customAppSignalID; }
-	void			setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
+		double highLimit(LimitType limitType) const;
+		void setHighLimit(LimitType limitType, double highLimit);
 
-	QString			equipmentID() const { return m_equipmentID; }
-	void			setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
+		QString unit(LimitType limitType) const;
+		void setUnit(LimitType limitType, QString unit);
 
-	QString			caption() const { return m_caption; }
-	void			setCaption(const QString& caption) { m_caption = caption; }
+		int limitPrecision(LimitType limitType) const;
+		void setLimitPrecision(LimitType limitType, int precision);
 
-	Metrology::SignalLocation& location() { return m_location; }
-	void			setLocation(const Metrology::SignalLocation& location) { m_location = location; }
+		QString limitStr(LimitType limitType) const;
 
-	int				calibratorPrecision() const { return m_calibratorPrecision; }
-	void			setCalibratorPrecision(int precision) { m_calibratorPrecision = precision; }
+		void calcError();
 
-	double			nominal(int limitType) const;
-	QString			nominalStr(int limitType) const;
-	void			setNominal(int limitType, double value);
+		double error(LimitType limitType, ErrorType errorType) const;
+		QString errorStr() const;
+		void setError(LimitType limitType, ErrorType errorType, double value);
 
-	double			measure(int limitType) const;
-	QString			measureStr(int limitType) const;
-	void			setMeasure(int limitType, double value);
+		double errorLimit(LimitType limitType, ErrorType errorType) const;
+		QString errorLimitStr() const;
+		void setErrorLimit(LimitType limitType, ErrorType errorType, double value);
 
-	void			setLimits(const IoSignalParam &ioParam);
+		int errorResult() const;
+		QString errorResultStr() const;
 
-	double			lowLimit(int limitType) const;
-	void			setLowLimit(int limitType, double lowLimit);
+		QDateTime measureTime() const { return m_measureTime; }
+		QString measureTimeStr() const;
+		void setMeasureTime(const QDateTime& time) { m_measureTime = time; }
 
-	double			highLimit(int limitType) const;
-	void			setHighLimit(int limitType, double highLimit);
+		QString calibrator() const { return m_calibrator; }
+		void setCalibrator(const QString& calibrator) { m_calibrator = calibrator; }
 
-	QString			unit(int limitType) const;
-	void			setUnit(int limitType, QString unit);
+		void setCalibratorData(const IoSignalParam &ioParam);
 
-	int				limitPrecision(int limitType) const;
-	void			setLimitPrecision(int limitType, int precision);
+		int reportType() const { return m_reportType; }
+		void setReportType(int type) { m_reportType = type; }
 
-	QString			limitStr(int limitType) const;
+		bool foundInStatistics() const { return m_foundInStatistics; }
+		void setFoundInStatistics(bool signalIsfound) { m_foundInStatistics = signalIsfound; }
 
-	void			calcError();
+		Item* at(int index);
 
-	double			error(int limitType, int errotType) const;
-	QString			errorStr() const;
-	void			setError(int limitType, int errotType, double value);
+		virtual bool findInStatisticsItem(const StatisticsItem& si);
+		virtual void updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si);
 
-	double			errorLimit(int limitType, int errotType) const;
-	QString			errorLimitStr() const;
-	void			setErrorLimit(int limitType, int errotType, double value);
+		Item& operator=(Item& from);
 
-	int				errorResult() const;
-	QString			errorResultStr() const;
+	private:
 
-	QDateTime		measureTime() const { return m_measureTime; }
-	QString			measureTimeStr() const;
-	void			setMeasureTime(const QDateTime& time) { m_measureTime = time; }
+		Measure::Type m_measureType = Measure::Type::NoMeasureType;			// measure type
+		Hash m_signalHash = UNDEFINED_HASH;									// hash calced from AppSignalID by function calcHash()
 
-	QString			calibrator() const { return m_calibrator; }
-	void			setCalibrator(const QString& calibrator) { m_calibrator = calibrator; }
+		int m_measureID = -1;												// primary key of record in SQL table
+		bool m_filter = false;												// filter for record, if "true" - hide record
 
-	void			setCalibratorData(const IoSignalParam &ioParam);
+		bool m_signalValid = true;											// signal is valid during the measurement
 
-	int				reportType() const { return m_reportType; }
-	void			setReportType(int type) { m_reportType = type; }
+		QString m_connectionAppSignalID;
+		Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
-	bool			foundInStatistics() const { return m_foundInStatistics; }
-	void			setFoundInStatistics(int signalIsfound) { m_foundInStatistics = signalIsfound; }
+		QString m_appSignalID;
+		QString m_customAppSignalID;
+		QString m_equipmentID;
+		QString m_caption;
 
-	Measurement*	at(int index);
+		Metrology::SignalLocation m_location;
 
-	Measurement&	operator=(Measurement& from);
-};
+		int m_calibratorPrecision = DefaultElectricUnitPrecesion;			// precision of electric range of calibrator
 
-// ==============================================================================================
+		double m_nominal[LimitTypeCount];
+		double m_measure[LimitTypeCount];
 
-class LinearityMeasurement : public Measurement
-{
+		double m_lowLimit[LimitTypeCount];
+		double m_highLimit[LimitTypeCount];
+		QString m_unit[LimitTypeCount];
+		int m_limitPrecision[LimitTypeCount];
 
-public:
+		double m_adjustment = 0;
 
-	LinearityMeasurement();
-	LinearityMeasurement(const IoSignalParam& ioParam);
-	virtual ~LinearityMeasurement();
+		double m_error[LimitTypeCount][ErrorTypeCount];
+		double m_errorLimit[LimitTypeCount][ErrorTypeCount];
 
-private:
+		QDateTime m_measureTime;											// measure time
+		QString m_calibrator;												// calibrator name and calibrator SN
+		int m_reportType = -1;												// report type
 
-	double			m_percent = 0;
+		bool m_foundInStatistics = true;									// after loading find signal in the statistics list
+	};
 
-	int				m_measureCount = 0;
-	double			m_measureArray[MEASURE_LIMIT_TYPE_COUNT][MAX_MEASUREMENT_IN_POINT];
+	// ==============================================================================================
 
-	int				m_additionalParamCount = 0;
-	double			m_additionalParam[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ADDITIONAL_PARAM_COUNT];
+	class LinearityItem : public Item
+	{
 
-public:
+	public:
 
-	void			virtual clear();
+		LinearityItem();
+		LinearityItem(const IoSignalParam& ioParam);
+		~LinearityItem() override;
 
-	void			fill_measure_input(const IoSignalParam& ioParam);
-	void			fill_measure_internal(const IoSignalParam& ioParam);
-	void			fill_measure_output(const IoSignalParam& ioParam);
+	public:
 
-	void			calcAdditionalParam(const IoSignalParam &ioParam);
-	double			calcUcertainty(const IoSignalParam &ioParam, int limitType) const;
+		void clear() override;
 
-	double			percent() const { return m_percent; }
-	void			setPercent(double percent) { m_percent = percent; }
+		void fill_measure_input(const IoSignalParam& ioParam);
+		void fill_measure_internal(const IoSignalParam& ioParam);
+		void fill_measure_output(const IoSignalParam& ioParam);
 
-	int				measureCount() const { return m_measureCount; }
-	void			setMeasureCount(int count) { m_measureCount = count; }
+		void calcAdditionalParam(const IoSignalParam &ioParam);
+		double calcUcertainty(const IoSignalParam &ioParam, LimitType limitType) const;
 
-	double			measureItemArray(int limitType, int index) const;
-	QString			measureItemStr(int limitType, int index) const;
-	void			setMeasureItemArray(int limitType, int index, double value);
+		double percent() const { return m_percent; }
+		void setPercent(double percent) { m_percent = percent; }
 
-	int				additionalParamCount() const { return m_additionalParamCount; }
-	void			setAdditionalParamCount(int count) { m_additionalParamCount = count; }
+		int measureCount() const { return m_measureCount; }
+		void setMeasureCount(int count) { m_measureCount = count; }
 
-	double			additionalParam(int limitType, int paramType) const;
-	QString			additionalParamStr(int limitType, int paramType) const;
-	void			setAdditionalParam(int limitType, int paramType, double value);
+		double measureItemArray(LimitType limitType, int index) const;
+		QString measureItemStr(LimitType limitType, int index) const;
+		void setMeasureItemArray(LimitType limitType, int index, double value);
 
-	void			updateMeasureArray(int limitType, Measurement* pMeasurement);
-	void			updateAdditionalParam(int limitType, Measurement* pMeasurement);
+		int additionalParamCount() const { return m_additionalParamCount; }
+		void setAdditionalParamCount(int count) { m_additionalParamCount = count; }
 
-	LinearityMeasurement& operator=(const LinearityMeasurement& from);
-};
+		double additionalParam(LimitType limitType, int paramType) const;
+		QString additionalParamStr(LimitType limitType, int paramType) const;
+		void setAdditionalParam(LimitType limitType, int paramType, double value);
 
-// ==============================================================================================
+		void updateMeasureArray(LimitType limitType, Item* pMeasurement);
+		void updateAdditionalParam(LimitType limitType, Item* pMeasurement);
 
-class ComparatorMeasurement : public Measurement
-{
+		bool findInStatisticsItem(const StatisticsItem& si) override;
+		void updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si) override;
 
-public:
+		LinearityItem& operator=(const LinearityItem& from);
 
-	ComparatorMeasurement();
-	explicit ComparatorMeasurement(const IoSignalParam& ioParam);
-	virtual ~ComparatorMeasurement();
+	private:
 
-private:
+		double m_percent = 0;
 
-	QString			m_compareAppSignalID;
-	QString			m_outputAppSignalID;
+		int m_measureCount = 0;
+		double m_measureArray[LimitTypeCount][MaxMeasurementInPoint];
 
-	int				m_cmpValueType = Metrology::CmpValueTypeSetPoint;
-	E::CmpType		m_cmpType = E::CmpType::Greate;
+		int	m_additionalParamCount = 0;
+		double m_additionalParam[LimitTypeCount][AdditionalParamCount];
+	};
 
-public:
+	// ==============================================================================================
 
-	void			virtual clear();
+	class ComparatorItem : public Item
+	{
 
-	void			fill_measure_input(const IoSignalParam& ioParam);
-	void			fill_measure_internal(const IoSignalParam &ioParam);
+	public:
 
-	QString			compareAppSignalID() const { return m_compareAppSignalID; }
-	void			setCompareAppSignalID(const QString& appSignalID) { m_compareAppSignalID = appSignalID; }
+		ComparatorItem();
+		explicit ComparatorItem(const IoSignalParam& ioParam);
+		~ComparatorItem() override;
 
-	QString			outputAppSignalID() const { return m_outputAppSignalID; }
-	void			setOutputAppSignalID(const QString& appSignalID) { m_outputAppSignalID = appSignalID; }
+	public:
 
-	int				cmpValueType() const { return m_cmpValueType; }
-	QString			cmpValueTypeStr() const;
-	void			setCmpValueType(int type) { m_cmpValueType = type; }
+		void clear() override;
 
-	E::CmpType		cmpType() const { return m_cmpType; }
-	int				cmpTypeInt() const { return TO_INT(m_cmpType); }
-	QString			cmpTypeStr() const;
-	void			setCmpType(int cmpValueType, E::CmpType cmpType);
-	void			setCmpTypeInt(int cmpType) { m_cmpType = static_cast<E::CmpType>(cmpType); }
+		void fill_measure_input(const IoSignalParam& ioParam);
+		void fill_measure_internal(const IoSignalParam &ioParam);
 
-	ComparatorMeasurement& operator=(const ComparatorMeasurement& from);
-};
+		QString compareAppSignalID() const { return m_compareAppSignalID; }
+		void setCompareAppSignalID(const QString& appSignalID) { m_compareAppSignalID = appSignalID; }
 
-// ==============================================================================================
+		QString outputAppSignalID() const { return m_outputAppSignalID; }
+		void setOutputAppSignalID(const QString& appSignalID) { m_outputAppSignalID = appSignalID; }
 
-class MeasureBase : public QObject
-{
-	Q_OBJECT
+		Metrology::CmpValueType cmpValueType() const { return m_cmpValueType; }
+		int	cmpValueTypeInt() const { return TO_INT(m_cmpValueType); }
+		QString cmpValueTypeStr() const;
+		void setCmpValueType(Metrology::CmpValueType type) { m_cmpValueType = type; }
+		void setCmpValueType(int type) { m_cmpValueType = static_cast<Metrology::CmpValueType>(type); }
 
-public:
+		E::CmpType cmpType() const { return m_cmpType; }
+		int cmpTypeInt() const { return TO_INT(m_cmpType); }
+		QString cmpTypeStr() const;
+		void setCmpType(Metrology::CmpValueType cmpValueType, E::CmpType cmpType);
+		void setCmpType(int cmpType) { m_cmpType = static_cast<E::CmpType>(cmpType); }
 
-	explicit MeasureBase(QObject *parent = nullptr);
-	virtual ~MeasureBase();
+		bool findInStatisticsItem(const StatisticsItem& si) override;
+		void updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si) override;
 
-private:
+		ComparatorItem& operator=(const ComparatorItem& from);
 
-	int						m_measureType = MEASURE_TYPE_UNDEFINED;
+	private:
 
-	mutable QMutex			m_measureMutex;
-	QVector<Measurement*>	m_measureList;
+		QString m_compareAppSignalID;
+		QString m_outputAppSignalID;
 
-public:
+		Metrology::CmpValueType m_cmpValueType = Metrology::CmpValueType::NoCmpValueType;
+		E::CmpType m_cmpType = E::CmpType::Greate;
+	};
 
-	int						count() const;
-	void					clear(bool removeData = true);
+	// ==============================================================================================
 
-	int						load(int measureType);
+	class Base : public QObject
+	{
+		Q_OBJECT
 
-	int						append(Measurement* pMeasurement);
-	Measurement*			measurement(int index) const;
-	bool					remove(int index, bool removeData = true);
-	bool					remove(int measureType, const QVector<int>& keyList);
+	public:
 
-	void					updateStatisticsItem(int measureType, StatisticsItem& si);
-	void					updateStatisticsBase(int measureType);
-	void					updateStatisticsBase(int measureType, Hash signalHash);
-	static void				markNotExistMeasuremetsFromStatistics(MeasureBase* pThis);
+		explicit Base(QObject* parent = nullptr);
+		virtual ~Base() override;
 
-signals:
+	public:
 
-	void					updatedMeasureBase(Hash signalHash);
-	void					updateMeasureView();
+		int count() const;
+		void clear();
 
-public slots:
+		int load(Measure::Type measureType);
 
-	void					signalBaseLoaded();
+		int append(Measure::Item* pMeasurement);
+		Measure::Item* measurement(int index) const;
+		bool remove(int index);
+		bool remove(Measure::Type measureType, const std::vector<int>& keyList);	// keyList this is list of measureID
 
-	void					appendToBase(Measurement* pMeasurement);
-	void					removeFromBase(int measureType, const QVector<int>& keyList);
-};
+		// Statistics
+		//
+		void updateStatisticsItem(Measure::Type measureType, StatisticsItem& si);
+		void updateStatisticsBase(Measure::Type measureType);
+		void updateStatisticsBase(Measure::Type measureType, Hash signalHash);
+		static void markNotExistMeasuremetsFromStatistics(Measure::Base* pThis);
+
+	private:
+
+		Measure::Type m_measureType = Measure::Type::NoMeasureType;
+
+		mutable QMutex m_measureMutex;
+		std::vector<Item*> m_measureList;
+
+	signals:
+
+		void updatedMeasureBase(Hash signalHash);
+		void updateMeasureView();
+
+	public slots:
+
+		void signalBaseLoaded();
+
+		void appendToBase(Measure::Item* pMeasurement);
+		void removeFromBase(Measure::Type measureType, const std::vector<int>& keyList);
+	};
+}
 
 // ==============================================================================================
 

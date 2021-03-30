@@ -229,67 +229,9 @@ namespace VFrame30
 		return;
 	}
 
-//	bool SchemaItemImageValue::getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
-//	{
-//		if (drawParam == nullptr ||
-//			signalParam == nullptr ||
-//			appSignalState == nullptr ||
-//			tuningSignalState == nullptr)
-//		{
-//			assert(drawParam);
-//			assert(signalParam);
-//			assert(appSignalState);
-//			assert(tuningSignalState);
-//			return false;
-//		}
-
-//		if (drawParam->isMonitorMode() == false)
-//		{
-//			assert(drawParam->isMonitorMode());
-//			return false;
-//		}
-
-//		bool ok = false;
-
-//		switch (signalSource())
-//		{
-//		case E::SignalSource::AppDataService:
-//			if (drawParam->appSignalController() == nullptr)
-//			{
-//			}
-//			else
-//			{
-//				*signalParam = drawParam->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
-//				*appSignalState = drawParam->appSignalController()->signalState(signalParam->appSignalId(), nullptr);
-//			}
-//			break;
-
-//		case E::SignalSource::TuningService:
-//			if (drawParam->tuningController() == nullptr)
-//			{
-//			}
-//			else
-//			{
-//				*signalParam = drawParam->tuningController()->signalParam(signalParam->appSignalId(), &ok);
-//				*tuningSignalState = drawParam->tuningController()->signalState(signalParam->appSignalId(), nullptr);
-
-//				appSignalState->m_hash = signalParam->hash();
-//				appSignalState->m_flags.valid = tuningSignalState->valid();
-//				appSignalState->m_value = tuningSignalState->value().toDouble();
-//			}
-//			break;
-
-//		default:
-//			assert(false);
-//			ok = false;
-//		}
-
-//		return ok;
-//	}
-
 	void SchemaItemImageValue::drawImage(CDrawParam* drawParam, const QString& imageId, const QRectF& rect)
 	{
-		for (std::shared_ptr<ImageItem> image : m_images)
+		for (const std::shared_ptr<ImageItem>& image : m_images)
 		{
 			if (image->imageId() == imageId)
 			{
@@ -322,18 +264,26 @@ namespace VFrame30
 
 	QString SchemaItemImageValue::signalIdsString() const
 	{
-		QString result = m_signalIds.join(QChar::LineFeed);
+		QStringList resultList = m_signalIds;
 
-		// Expand variables in AppSignalIDs in MonitorMode, if applicable (m_drawParam is set and is monitor mode)
+		// Expand variables in AppSignalIDs in MonitorMode, if applicable
 		//
 		if (m_drawParam != nullptr &&
 			m_drawParam->isMonitorMode() == true &&
 			m_drawParam->clientSchemaView() != nullptr)
 		{
-			result = MacrosExpander::parse(result, m_drawParam, this);
+			resultList = MacrosExpander::parse(resultList, m_drawParam, this);
+
+			for (QString& s : resultList)
+			{
+				if (s.startsWith('@') == true)
+				{
+					s = m_drawParam->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+				}
+			}
 		}
 
-		return result;
+		return resultList.join(QChar::LineFeed);
 	}
 
 	void SchemaItemImageValue::setSignalIdsString(const QString& value)
@@ -352,6 +302,14 @@ namespace VFrame30
 			m_drawParam->clientSchemaView() != nullptr)
 		{
 			resultList = MacrosExpander::parse(resultList, m_drawParam, this);
+
+			for (QString& s : resultList)
+			{
+				if (s.startsWith('@') == true)
+				{
+					s = m_drawParam->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+				}
+			}
 		}
 
 		return resultList;

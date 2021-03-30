@@ -70,7 +70,6 @@ namespace Builder
 		Builder::BuildResultWriter* m_buildResultWriter = nullptr;
 
 		BuildWorkerThread* m_buildWorkerThread = nullptr;
-		QJSEngine* m_jsEngine = nullptr;
 		DbController* m_db = nullptr;
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;
 		std::vector<Hardware::DeviceModule*> m_fscModules;

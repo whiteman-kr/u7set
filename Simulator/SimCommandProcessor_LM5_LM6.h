@@ -13,7 +13,7 @@ namespace Sim
 
 	public:
 		explicit CommandProcessor_LM5_LM6(DeviceEmulator* device);
-		virtual ~CommandProcessor_LM5_LM6();
+		virtual ~CommandProcessor_LM5_LM6() = default;
 
 	public:
 		virtual void beforeAppLogicParse() override;
@@ -24,6 +24,11 @@ namespace Sim
 		// Update mustb be done directly in RAM
 		//
 		virtual bool updatePlatformInterfaceState(const QDateTime& currentTime) override;
+
+		// Get state of signal 'Set SOR Chassis', this state is fetched from RAM withount any mutex, so
+		// device must not run or performe any work cycle while calling this function
+		//
+		virtual quint16 signalSetSorChassis() const override;
 
 	private:
 		bool setRuntimeModeSignals();

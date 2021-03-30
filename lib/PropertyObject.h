@@ -3,6 +3,7 @@
 #include <functional>
 #include <algorithm>
 #include <list>
+#include <utility>
 #include <vector>
 #include <map>
 #include <unordered_map>
@@ -36,8 +37,6 @@ class PropertyObject;
 		addProperty<TYPE>(NAME, QString(), VISIBLE, \
 		[OWNER_PTR](){return OWNER_PTR->GETTER();});\
 	}
-	//(std::function<TYPE(void)>)std::bind(&GETTER, &OWNER));
-
 
 // Add property which has getter and setter
 //
@@ -94,8 +93,8 @@ class PropertyObject;
 //
 class Property
 {
-public:
-	Property() noexcept {};
+protected:
+	Property() noexcept = default;
 	Property(const Property&) noexcept = default;
 	Property(Property&&) noexcept = default;
 	Property& operator=(const Property&) noexcept = default;
@@ -103,14 +102,14 @@ public:
 	virtual ~Property() = default;
 
 public:
-	virtual bool isEnum() const = 0;
-	virtual std::vector<std::pair<int, QString>> enumValues() const = 0;
+	[[nodiscard]] virtual bool isEnum() const = 0;
+	[[nodiscard]] virtual std::vector<std::pair<int, QString>> enumValues() const = 0;
 
-	virtual QVariant enumValue() const = 0;		// if is enum, returns QVariant with TYPE or QVariant::string if type
-												// cannot be get (dynamic enum properties)
+	[[nodiscard]] virtual QVariant enumValue() const = 0;	// if is enum, returns QVariant with TYPE or QVariant::string if type
+															// cannot be get (dynamic enum properties)
 
 public:
-	const QString& caption() const noexcept
+	[[nodiscard]] const QString& caption() const noexcept
 	{
 		return m_caption;
 	}
@@ -120,7 +119,7 @@ public:
 		return *this;
 	}
 
-	const QString& description() const noexcept
+	[[nodiscard]] const QString& description() const noexcept
 	{
 		return m_description;
 	}
@@ -130,7 +129,7 @@ public:
 		return *this;
 	}
 
-	const QString& category() const noexcept
+	[[nodiscard]] const QString& category() const noexcept
 	{
 		return m_category;
 	}
@@ -140,7 +139,7 @@ public:
 		return *this;
 	}
 
-	const QString& validator() const noexcept
+	[[nodiscard]] const QString& validator() const noexcept
 	{
 		return m_validator;
 	}
@@ -149,8 +148,13 @@ public:
 		m_validator = value;
 		return *this;
 	}
+	Property& setValidator(const QLatin1String value) noexcept
+	{
+		m_validator = value;
+		return *this;
+	}
 
-	bool readOnly() const noexcept
+	[[nodiscard]] bool readOnly() const noexcept
 	{
 		return m_readOnly;
 	}
@@ -160,7 +164,7 @@ public:
 		return *this;
 	}
 
-	bool updateFromPreset() const noexcept
+	[[nodiscard]] bool updateFromPreset() const noexcept
 	{
 		return m_updateFromPreset;
 	}
@@ -170,7 +174,7 @@ public:
 		return *this;
 	}
 
-	bool specific() const noexcept
+	[[nodiscard]] bool specific() const noexcept
 	{
 		return m_specific;
 	}
@@ -180,7 +184,11 @@ public:
 		return *this;
 	}
 
-	bool visible() const noexcept
+	[[nodiscard]] bool isVisible() const noexcept
+	{
+		return m_visible;
+	}
+	[[nodiscard]] bool visible() const noexcept
 	{
 		return m_visible;
 	}
@@ -190,7 +198,7 @@ public:
 		return *this;
 	}
 
-	bool expert() const noexcept
+	[[nodiscard]] bool expert() const noexcept
 	{
 		return m_expert;
 	}
@@ -200,7 +208,7 @@ public:
 		return *this;
 	}
 
-	bool essential() const noexcept
+	[[nodiscard]] bool essential() const noexcept
 	{
 		return m_essential;
 	}
@@ -210,7 +218,7 @@ public:
 		return *this;
 	}
 
-	bool disableTableEditor() const noexcept
+	[[nodiscard]] bool disableTableEditor() const noexcept
 	{
 		return m_disableTableEditor;
 	}
@@ -220,7 +228,7 @@ public:
 		return *this;
 	}
 
-	E::PropertySpecificEditor specificEditor() noexcept
+	[[nodiscard]] E::PropertySpecificEditor specificEditor() noexcept
 	{
 		return m_specificEditor;
 	}
@@ -230,7 +238,7 @@ public:
 		return *this;
 	}
 
-	bool password() const noexcept
+	[[nodiscard]] bool password() const noexcept
 	{
 		return m_specificEditor == E::PropertySpecificEditor::Password;
 	}
@@ -240,10 +248,10 @@ public:
 		return *this;
 	}
 
-	bool isScript() const noexcept
+	[[nodiscard]] bool isScript() const noexcept
 	{
 		return m_specificEditor == E::PropertySpecificEditor::Script ||
-				caption().contains("Script") == true;
+				caption().contains(QLatin1String("Script")) == true;
 	}
 	Property& setIsScript(bool value) noexcept
 	{
@@ -251,7 +259,7 @@ public:
 		return *this;
 	}
 
-	int precision() const noexcept
+	[[nodiscard]] int precision() const noexcept
 	{
 		return m_precision;
 	}
@@ -261,7 +269,7 @@ public:
 		return *this;
 	}
 
-	int viewOrder() const noexcept
+	[[nodiscard]] int viewOrder() const noexcept
 	{
 		return m_viewOrder;
 	}
@@ -271,19 +279,19 @@ public:
 		return *this;
 	}
 
-	virtual QVariant value() const noexcept = 0;
+	[[nodiscard]] virtual QVariant value() const noexcept = 0;
 	virtual void setValue(const QVariant& value) noexcept = 0;
 
 	virtual void setEnumValue(int value) noexcept = 0;
 	virtual void setEnumValue(const char* value) noexcept = 0;
 
-	virtual const QVariant& lowLimit() const noexcept = 0;
+	[[nodiscard]] virtual const QVariant& lowLimit() const noexcept = 0;
 	virtual void setLowLimit(const QVariant& value) noexcept = 0;
 
-	virtual const QVariant& highLimit() const noexcept = 0;
+	[[nodiscard]] virtual const QVariant& highLimit() const noexcept = 0;
 	virtual void setHighLimit(const QVariant& value) noexcept = 0;
 
-	virtual bool isTheSameType(Property* property) noexcept = 0;
+	[[nodiscard]] virtual bool isTheSameType(Property* property) noexcept = 0;
 	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept = 0;
 
 protected:
@@ -363,60 +371,38 @@ public:
 	PropertyTypedValue& operator=(PropertyTypedValue&&) noexcept = default;
 
 public:
-	virtual bool isEnum() const noexcept override final
+	[[nodiscard]] virtual bool isEnum() const noexcept final
 	{
 		return std::is_enum<TYPE>::value;
 	}
 
-	// Tag Dispatch method for enum/not enum type, it does not allow to instantiate metaEnum for not enums
-	// Example is in question:
-	// http://stackoverflow.com/questions/6917079/tag-dispatch-versus-static-methods-on-partially-specialised-classes
-	//
-private:
-	template <bool> struct enumness {};
-	typedef enumness<true> enum_tag;
-	typedef enumness<false> non_enum_tag;
-
-	template <typename ENUM>
-	const QMetaEnum metaEnum(enum_tag) const
+	[[nodiscard]] virtual std::vector<std::pair<int, QString>> enumValues() const noexcept final
 	{
-		QMetaEnum me = QMetaEnum::fromType<ENUM>();		// static_assert is here, that is why tag dispatch is used
-		return me;
-	}
-
-	template <typename NOT_ENUM>
-	const QMetaEnum metaEnum(non_enum_tag) const
-	{
-		Q_ASSERT(std::is_enum<NOT_ENUM>::value);			// Try to get QMetaEnum for not enum type
-		return QMetaEnum();
-	}
-
-public:
-	virtual std::vector<std::pair<int, QString>> enumValues() const noexcept override final
-	{
-		Q_ASSERT(std::is_enum<TYPE>::value);
-
-		std::vector<std::pair<int, QString>> result;
-
-		QMetaEnum me = metaEnum<TYPE>(enumness<std::is_enum<TYPE>::value>());
-		if (me.isValid() == false)
+		if constexpr (std::is_enum<TYPE>::value)
 		{
+			QMetaEnum me = QMetaEnum::fromType<TYPE>();
 			Q_ASSERT(me.isValid() == true);
+
+			int keyCount = me.keyCount();
+
+			std::vector<std::pair<int, QString>> result;
+			result.reserve(keyCount);
+
+			for (int i = 0; i < keyCount; i++)
+			{
+				result.emplace_back(me.value(i), QString::fromLocal8Bit(me.key(i)));
+			}
+
 			return result;
 		}
-
-		int keyCount = me.keyCount();
-		result.reserve(keyCount);
-
-		for (int i = 0; i < keyCount; i++)
+		else
 		{
-			result.push_back(std::make_pair(me.value(i), QString::fromLocal8Bit(me.key(i))));
+			Q_ASSERT(std::is_enum<TYPE>::value);
+			return {};
 		}
-
-		return result;
 	}
 
-	virtual QVariant enumValue() const noexcept override final
+	[[nodiscard]] virtual QVariant enumValue() const noexcept final
 	{
 		if constexpr (std::is_enum<TYPE>::value == false)
 		{
@@ -430,7 +416,7 @@ public:
 	}
 
 public:
-	virtual QVariant value() const noexcept override final
+	[[nodiscard]] virtual QVariant value() const noexcept final
 	{
 		QVariant result(QVariant::fromValue((m_object->*get)()));
 		return result;
@@ -450,7 +436,7 @@ public:
 		}
 	}
 
-	void setValue(const QVariant& value) noexcept override final	// Overriden from class Propery
+	void setValue(const QVariant& value) noexcept final	// Overriden from class Propery
 	{
 		if (set == nullptr)
 		{
@@ -463,50 +449,37 @@ public:
 		}
 	}
 
-	virtual void setEnumValue(int value) noexcept override final			// Overriden from class Property
+	virtual void setEnumValue(int value) noexcept final			// Overriden from class Property
 	{
-		setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
-	}
-	virtual void setEnumValue(const char* value) noexcept override final	// Overriden from class Property
-	{
-		return setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
-	}
+		if constexpr (std::is_enum<TYPE>::value)
+		{
+			static_assert(set);
+			static_assert(std::is_enum<TYPE>::value);
 
-private:
-	template <typename ENUM>
-	void setEnumValueInternal(int value, enum_tag) noexcept 			// Overriden from class Property
-	{
-		static_assert(set);
-		static_assert(std::is_enum<TYPE>::value);
-
-		(m_object->*set)(static_cast<TYPE>(value));
-	}
-	template <typename NON_ENUM>
-	void setEnumValueInternal(int value, non_enum_tag) noexcept
-	{
-		Q_UNUSED(value)
-		Q_ASSERT(false);
-	}
-
-	template <typename ENUM>
-	void setEnumValueInternal(const char* value, enum_tag) noexcept 			// Overriden from class Property
-	{
-		static_assert(std::is_enum<TYPE>::value);
-
-		QVariant v(value);
-		setValue(v);
+			(m_object->*set)(static_cast<TYPE>(value));
+		}
+		else
+		{
+			Q_ASSERT(std::is_enum<TYPE>::value);
+		}
 
 		return;
 	}
-	template <typename NON_ENUM>
-	void setEnumValueInternal(const char* value, non_enum_tag) noexcept
+	virtual void setEnumValue(const char* value) noexcept final	// Overriden from class Property
 	{
-		Q_UNUSED(value)
-		Q_ASSERT(false);
+		if constexpr (std::is_enum<TYPE>::value)
+		{
+			static_assert(std::is_enum<TYPE>::value);
+			setValue(QVariant{value});
+		}
+		else
+		{
+			Q_ASSERT(std::is_enum<TYPE>::value);
+		}
 	}
 
 public:
-	virtual const QVariant& lowLimit() const noexcept override final
+	[[nodiscard]] virtual const QVariant& lowLimit() const noexcept final
 	{
 		// Limits must be checked in getter/setter
 		//
@@ -514,13 +487,13 @@ public:
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
-	virtual void setLowLimit(const QVariant&) noexcept override final
+	virtual void setLowLimit(const QVariant&) noexcept final
 	{
 		// Limits must be checked in getter/setter
 		Q_ASSERT(false);
 	}
 
-	virtual const QVariant& highLimit() const noexcept override final
+	[[nodiscard]] virtual const QVariant& highLimit() const noexcept final
 	{
 		// Limits must be checked in getter/setter
 		//
@@ -528,13 +501,13 @@ public:
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
-	virtual void setHighLimit(const QVariant&) noexcept override final
+	virtual void setHighLimit(const QVariant&) noexcept final
 	{
 		// Limits must be checked in getter/setter
 		Q_ASSERT(false);
 	}
 
-	virtual bool isTheSameType(Property* property) noexcept override final
+	[[nodiscard]] virtual bool isTheSameType(Property* property) noexcept final
 	{
 		if (dynamic_cast<decltype(this)>(property) == nullptr)
 		{
@@ -544,7 +517,7 @@ public:
 		return true;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept override final
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept final
 	{
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
@@ -592,60 +565,38 @@ public:
 	PropertyValue& operator=(PropertyValue&&) noexcept = default;
 
 public:
-	virtual bool isEnum() const noexcept override final
+	[[nodiscard]] virtual bool isEnum() const noexcept final
 	{
 		return std::is_enum<TYPE>::value;
 	}
 
-	// Tag Dispatch method for enum/not enum type, it does not allow to instantiate metaEnum for not enums
-	// Example is in question:
-	// http://stackoverflow.com/questions/6917079/tag-dispatch-versus-static-methods-on-partially-specialised-classes
-	//
-private:
-	template <bool> struct enumness {};
-	typedef enumness<true> enum_tag;
-	typedef enumness<false> non_enum_tag;
-
-	template <typename ENUM>
-	const QMetaEnum metaEnum(enum_tag) const
+	[[nodiscard]] virtual std::vector<std::pair<int, QString>> enumValues() const noexcept final
 	{
-		QMetaEnum me = QMetaEnum::fromType<ENUM>();		// static_assert is here, that is why tag dispatch is used
-		return me;
-	}
-
-	template <typename NOT_ENUM>
-	const QMetaEnum metaEnum(non_enum_tag) const
-	{
-		Q_ASSERT(std::is_enum<NOT_ENUM>::value);			// Try to get QMetaEnum for not enum type
-		return QMetaEnum();
-	}
-
-public:
-	virtual std::vector<std::pair<int, QString>> enumValues() const noexcept override final
-	{
-		Q_ASSERT(std::is_enum<TYPE>::value);
-
-		std::vector<std::pair<int, QString>> result;
-
-		QMetaEnum me = metaEnum<TYPE>(enumness<std::is_enum<TYPE>::value>());
-		if (me.isValid() == false)
+		if constexpr (std::is_enum<TYPE>::value)
 		{
-			Q_ASSERT(me.isValid() == true);
+			QMetaEnum me = QMetaEnum::fromType<TYPE>();
+			Q_ASSERT(me.isValid());
+
+			int keyCount = me.keyCount();
+
+			std::vector<std::pair<int, QString>> result;
+			result.reserve(keyCount);
+
+			for (int i = 0; i < keyCount; i++)
+			{
+				result.emplace_back(me.value(i), QString::fromLocal8Bit(me.key(i)));
+			}
+
 			return result;
 		}
-
-		int keyCount = me.keyCount();
-		result.reserve(keyCount);
-
-		for (int i = 0; i < keyCount; i++)
+		else
 		{
-			result.push_back(std::make_pair(me.value(i), QString::fromLocal8Bit(me.key(i))));
+			Q_ASSERT(std::is_enum<TYPE>::value);
+			return {};
 		}
-
-		return result;
 	}
 
-	virtual QVariant enumValue() const noexcept override final
+	[[nodiscard]] virtual QVariant enumValue() const noexcept final
 	{
 		if constexpr (std::is_enum<TYPE>::value == false)
 		{
@@ -659,7 +610,7 @@ public:
 	}
 
 public:
-	virtual QVariant value() const noexcept override final
+	[[nodiscard]] virtual QVariant value() const noexcept final
 	{
 		if (m_getter)
 		{
@@ -678,11 +629,11 @@ public:
 		}
 		else
 		{
-			Q_ASSERT(false);
+			Q_ASSERT(m_setter);
 		}
 	}
 
-	void setValue(const QVariant& value) noexcept override final	// Overriden from class Propery
+	void setValue(const QVariant& value) noexcept final	// Overriden from class Propery
 	{
 		if (!m_setter)
 		{
@@ -696,56 +647,41 @@ public:
 		}
 	}
 
-	virtual void setEnumValue(int value) noexcept override final			// Overriden from class Propery
+	virtual void setEnumValue(int value) noexcept final			// Overriden from class Propery
 	{
-		setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
-	}
-	virtual void setEnumValue(const char* value) noexcept override final	// Overriden from class Propery
-	{
-		return setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
-	}
-
-private:
-	template <typename ENUM>
-	void setEnumValueInternal(int value, enum_tag) noexcept 			// Overriden from class Propery
-	{
-		static_assert(std::is_enum<TYPE>::value);
-
-		if (m_setter)
+		if constexpr (std::is_enum<TYPE>::value)
 		{
-			m_setter(static_cast<TYPE>(value));
+			Q_ASSERT(false);
+
+			if (m_setter)
+			{
+				m_setter(static_cast<TYPE>(value));
+			}
 		}
 		else
 		{
-			Q_ASSERT(false);
+			Q_ASSERT(std::is_enum<TYPE>::value);
 		}
-	}
-	template <typename NON_ENUM>
-	void setEnumValueInternal(int value, non_enum_tag) noexcept
-	{
-		Q_UNUSED(value)
-		Q_ASSERT(false);
-	}
-
-	template <typename ENUM>
-	void setEnumValueInternal(const char* value, enum_tag) noexcept 			// Overriden from class Propery
-	{
-		static_assert(std::is_enum<TYPE>::value);
-
-		QVariant v(value);
-		setValue(v);
 
 		return;
 	}
-	template <typename NON_ENUM>
-	void setEnumValueInternal(const char* value, non_enum_tag) noexcept
+
+	virtual void setEnumValue(const char* value) noexcept final	// Overriden from class Propery
 	{
-		Q_UNUSED(value)
-		Q_ASSERT(false);
+		if constexpr (std::is_enum<TYPE>::value)
+		{
+			setValue(QVariant{value});
+		}
+		else
+		{
+			Q_ASSERT(std::is_enum<TYPE>::value);
+		}
+
+		return;
 	}
 
 public:
-	virtual const QVariant& lowLimit() const noexcept override final
+	[[nodiscard]] virtual const QVariant& lowLimit() const noexcept final
 	{
 		// Limits must be checked in getter/setter
 		//
@@ -753,13 +689,13 @@ public:
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
-	virtual void setLowLimit(const QVariant&) noexcept override final
+	virtual void setLowLimit(const QVariant&) noexcept final
 	{
 		// Limits must be checked in getter/setter
 		Q_ASSERT(false);
 	}
 
-	virtual const QVariant& highLimit() const noexcept override final
+	[[nodiscard]] virtual const QVariant& highLimit() const noexcept final
 	{
 		// Limits must be checked in getter/setter
 		//
@@ -767,7 +703,7 @@ public:
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
-	virtual void setHighLimit(const QVariant&) noexcept override final
+	virtual void setHighLimit(const QVariant&) noexcept final
 	{
 		// Limits must be checked in getter/setter
 		Q_ASSERT(false);
@@ -782,7 +718,7 @@ public:
 		m_setter = setter;
 	}
 
-	virtual bool isTheSameType(Property* property) noexcept override final
+	[[nodiscard]] virtual bool isTheSameType(Property* property) noexcept final
 	{
 		if (dynamic_cast<PropertyValue<TYPE>*>(property) == nullptr)
 		{
@@ -792,7 +728,7 @@ public:
 		return true;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept override final
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept final
 	{
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
@@ -847,7 +783,7 @@ public:
 
 
 public:
-	virtual bool isEnum() const noexcept override final
+	[[nodiscard]] virtual bool isEnum() const noexcept final
 	{
 		if (m_value.isValid() == false)
 		{
@@ -862,11 +798,10 @@ public:
 			return false;
 		}
 
-		const char* typeName = m_value.typeName();
-		QString typeStr(typeName);
+		QString typeStr(QString::fromLatin1(m_value.typeName()));
 		QStringRef typeNameRef(&typeStr);
 
-		int doubleColumnIndex = typeNameRef.lastIndexOf("::");
+		int doubleColumnIndex = typeNameRef.lastIndexOf(QLatin1String("::"));
 		if (doubleColumnIndex != -1)
 		{
 			typeNameRef = typeNameRef.mid(doubleColumnIndex + 2);
@@ -884,7 +819,7 @@ public:
 		}
 	}
 
-	virtual QVariant enumValue() const noexcept override final
+	[[nodiscard]] virtual QVariant enumValue() const noexcept final
 	{
 #ifdef _DEBUG
 		if (isEnum() == false)		// Commented for perfomance reasone
@@ -898,7 +833,7 @@ public:
 	}
 
 public:
-	virtual std::vector<std::pair<int, QString>> enumValues() const noexcept override final
+	[[nodiscard]] virtual std::vector<std::pair<int, QString>> enumValues() const noexcept final
 	{
 		std::vector<std::pair<int, QString>> result;
 
@@ -919,11 +854,10 @@ public:
 				return result;
 			}
 
-			const char* typeName = m_value.typeName();
-			QString typeStr(typeName);
+			QString typeStr(QString::fromLatin1(m_value.typeName()));
 			QStringRef typeNameRef(&typeStr);
 
-			int doubleColumnIndex = typeNameRef.lastIndexOf("::");
+			int doubleColumnIndex = typeNameRef.lastIndexOf(QLatin1String("::"));
 			if (doubleColumnIndex != -1)
 			{
 				typeNameRef = typeNameRef.mid(doubleColumnIndex + 2);
@@ -945,7 +879,7 @@ public:
 
 				for (int i = 0; i < keyCount; i++)
 				{
-					result.push_back(std::make_pair(me.value(i), QString::fromLocal8Bit(me.key(i))));
+					result.emplace_back(me.value(i), QString::fromLocal8Bit(me.key(i)));
 				}
 			}
 		}
@@ -954,12 +888,12 @@ public:
 	}
 
 public:
-	virtual QVariant value() const noexcept override final
+	[[nodiscard]] virtual QVariant value() const noexcept final
 	{
 		return m_value;
 	}
 
-	void setValue(const QVariant& value) noexcept override final	// Overriden from class Propery
+	void setValue(const QVariant& value) noexcept final		// Overriden from class Propery
 	{
 		if (m_value.isValid() == false)
 		{
@@ -1012,7 +946,7 @@ public:
 		}
 	};
 
-	virtual void setEnumValue(int value) noexcept override final	// Overriden from class Propery
+	virtual void setEnumValue(int value) noexcept final	// Overriden from class Propery
 	{
 		// cannot implement it now, but it's possible
 		// The problem is, I dont see the way QVariant with enum inside can be set from integer and keep that enum type
@@ -1024,7 +958,7 @@ public:
 		return;
 	}
 
-	virtual void setEnumValue(const char* value) noexcept override final	// Overriden from class Propery
+	virtual void setEnumValue(const char* value) noexcept final	// Overriden from class Propery
 	{
 		if (QVariant v(value);
 			v.canConvert(m_value.userType()) == true)
@@ -1062,45 +996,45 @@ private:
 
 			switch (static_cast<QMetaType::Type>(m_value.type()))
 			{
-			case QMetaType::Int:		//NOLINT
+			case QMetaType::Int:
 				assert(m_value.canConvert<int>());
-				less = operatorLs(m_value.value<int>(), m_lowLimit.value<int>());
+				less = operatorLs(m_value.toInt(), m_lowLimit.toInt());
 				break;
-			case QMetaType::UInt:		//NOLINT
+			case QMetaType::UInt:
 				assert(m_value.canConvert<unsigned int>());
-				less = operatorLs(m_value.value<unsigned int>(), m_lowLimit.value<unsigned int>());
+				less = operatorLs(m_value.toUInt(), m_lowLimit.toUInt());
 				break;
-			case QMetaType::LongLong:	//NOLINT
+			case QMetaType::LongLong:
 				assert(m_value.canConvert<qlonglong>());
-				less = operatorLs(m_value.value<qlonglong>(), m_lowLimit.value<qlonglong>());
+				less = operatorLs(m_value.toLongLong(), m_lowLimit.toLongLong());
 				break;
-			case QMetaType::ULongLong:	//NOLINT
+			case QMetaType::ULongLong:
 				assert(m_value.canConvert<qulonglong>());
-				less = operatorLs(m_value.value<qulonglong>(), m_lowLimit.value<qulonglong>());
+				less = operatorLs(m_value.toULongLong(), m_lowLimit.toULongLong());
 				break;
-			case QMetaType::Double:		//NOLINT
+			case QMetaType::Double:
 				assert(m_value.canConvert<double>());
-				less = operatorLs(m_value.value<double>(), m_lowLimit.value<double>());
+				less = operatorLs(m_value.toDouble(), m_lowLimit.toDouble());
 				break;
-			case QMetaType::Long:		//NOLINT
+			case QMetaType::Long:
 				assert(m_value.canConvert<long>());
-				less = operatorLs(m_value.value<long>(), m_lowLimit.value<long>());
+				less = operatorLs(m_value.toInt(), m_lowLimit.toInt());
 				break;
-			case QMetaType::Short:		//NOLINT
+			case QMetaType::Short:
 				assert(m_value.canConvert<short>());
 				less = operatorLs(m_value.value<short>(), m_lowLimit.value<short>());
 				break;
-			case QMetaType::ULong:		//NOLINT
+			case QMetaType::ULong:
 				assert(m_value.canConvert<unsigned long>());
 				less = operatorLs(m_value.value<unsigned long>(), m_lowLimit.value<unsigned long>());
 				break;
-			case QMetaType::UShort:		//NOLINT
+			case QMetaType::UShort:
 				assert(m_value.canConvert<unsigned short>());
 				less = operatorLs(m_value.value<unsigned short>(), m_lowLimit.value<unsigned short>());
 				break;
-			case QMetaType::Float:		//NOLINT
+			case QMetaType::Float:
 				assert(m_value.canConvert<float>());
-				less = operatorLs(m_value.value<float>(), m_lowLimit.value<float>());
+				less = operatorLs(m_value.toFloat(), m_lowLimit.toFloat());
 				break;
 			default:
 				less = false;
@@ -1129,43 +1063,43 @@ private:
 			{
 			case QMetaType::Int:
 				assert(m_value.canConvert<int>());
-                gt = operatorGt(m_value.value<int>(), m_highLimit.value<int>());
+				gt = operatorGt(m_value.toInt(), m_highLimit.toInt());
 				break;
 			case QMetaType::UInt:
 				assert(m_value.canConvert<unsigned int>());
-                gt = operatorGt(m_value.value<unsigned int>(), m_highLimit.value<unsigned int>());
+				gt = operatorGt(m_value.toUInt(), m_highLimit.toUInt());
 				break;
 			case QMetaType::LongLong:
 				assert(m_value.canConvert<qlonglong>());
-                gt = operatorGt(m_value.value<qlonglong>(), m_highLimit.value<qlonglong>());
+				gt = operatorGt(m_value.toLongLong(), m_highLimit.toLongLong());
 				break;
 			case QMetaType::ULongLong:
 				assert(m_value.canConvert<qulonglong>());
-                gt = operatorGt(m_value.value<qulonglong>(), m_highLimit.value<qulonglong>());
+				gt = operatorGt(m_value.toULongLong(), m_highLimit.toULongLong());
 				break;
 			case QMetaType::Double:
 				assert(m_value.canConvert<double>());
-                gt = operatorGt(m_value.value<double>(), m_highLimit.value<double>());
+				gt = operatorGt(m_value.toDouble(), m_highLimit.toDouble());
                 break;
-            case QMetaType::Long:		//NOLINT
+			case QMetaType::Long:
                 assert(m_value.canConvert<long>());
-                gt = operatorGt(m_value.value<long>(), m_highLimit.value<long>());
+				gt = operatorGt(m_value.toInt(), m_highLimit.toInt());
                 break;
-            case QMetaType::Short:		//NOLINT
+			case QMetaType::Short:
                 assert(m_value.canConvert<short>());
                 gt = operatorGt(m_value.value<short>(), m_highLimit.value<short>());
                 break;
-            case QMetaType::ULong:		//NOLINT
+			case QMetaType::ULong:
                 assert(m_value.canConvert<unsigned long>());
                 gt = operatorGt(m_value.value<unsigned long>(), m_highLimit.value<unsigned long>());
                 break;
-            case QMetaType::UShort:		//NOLINT
+			case QMetaType::UShort:
                 assert(m_value.canConvert<unsigned short>());
                 gt = operatorGt(m_value.value<unsigned short>(), m_highLimit.value<unsigned short>());
                 break;
-            case QMetaType::Float:		//NOLINT
+			case QMetaType::Float:
                 assert(m_value.canConvert<float>());
-                gt = operatorGt(m_value.value<float>(), m_highLimit.value<float>());
+				gt = operatorGt(m_value.toFloat(), m_highLimit.toFloat());
                 break;
 			default:
 				gt = false;
@@ -1186,25 +1120,25 @@ public:
 		m_highLimit = high;
 	}
 
-	virtual const QVariant& lowLimit() const noexcept override final
+	[[nodiscard]] virtual const QVariant& lowLimit() const noexcept final
 	{
 		return m_lowLimit;
 	}
-	virtual void setLowLimit(const QVariant& value) noexcept override final
+	virtual void setLowLimit(const QVariant& value) noexcept final
 	{
 		m_lowLimit = value;
 	}
 
-	virtual const QVariant& highLimit() const noexcept override final
+	[[nodiscard]] virtual const QVariant& highLimit() const noexcept final
 	{
 		return m_highLimit;
 	}
-	virtual void setHighLimit(const QVariant& value) noexcept override final
+	virtual void setHighLimit(const QVariant& value) noexcept final
 	{
 		m_highLimit = value;
 	}
 
-	virtual bool isTheSameType(Property* property) noexcept override final
+	virtual bool isTheSameType(Property* property) noexcept final
 	{
 		if (dynamic_cast<PropertyValueNoGetterSetter*>(property) == nullptr)
 		{
@@ -1214,7 +1148,7 @@ public:
 		return true;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept override final
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept final
 	{
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
@@ -1262,33 +1196,31 @@ class PropertyValue<OrderedHash<int, QString>> final : public Property
 {
 public:
 	PropertyValue(std::shared_ptr<OrderedHash<int, QString>> enumValues) :
-		m_enumValues(enumValues)
+		m_enumValues(std::move(enumValues))
 	{
 		Q_ASSERT(m_enumValues);
 	}
 
-	virtual ~PropertyValue()
-	{
-	}
+	virtual ~PropertyValue() = default;
 
 public:
-	virtual bool isEnum() const noexcept override final
+	[[nodiscard]] virtual bool isEnum() const noexcept final
 	{
 		return true;	// This is dynamic enumeration
 	}
 
-	virtual std::vector<std::pair<int, QString>> enumValues() const noexcept override final
+	[[nodiscard]] virtual std::vector<std::pair<int, QString>> enumValues() const noexcept final
 	{
 		return m_enumValues->getKeyValueVector();
 	}
 
-	virtual QVariant enumValue() const noexcept override final
+	[[nodiscard]] virtual QVariant enumValue() const noexcept final
 	{
 		return value();
 	}
 
 public:
-	virtual QVariant value() const noexcept override final
+	[[nodiscard]] virtual QVariant value() const noexcept final
 	{
 		if (m_getter)
 		{
@@ -1301,7 +1233,7 @@ public:
 		}
 	}
 
-	void setValueDirect(const int& value) noexcept 			// Not virtual, is called from class ProprtyObject for direct access
+	void setValueDirect(int value) noexcept 			// Not virtual, is called from class ProprtyObject for direct access
 	{
 		// setValueDirect is used for non enum types only
 		//
@@ -1309,11 +1241,11 @@ public:
 		return;
 	}
 
-	void setValue(const QVariant& value) noexcept override final	// Overriden from class Propery
+	void setValue(const QVariant& value) noexcept final	// Overriden from class Propery
 	{
 		if (value.type() == QVariant::Int)
 		{
-			setEnumValue(value.value<int>());
+			setEnumValue(value.toInt());
 			return;
 		}
 
@@ -1327,7 +1259,7 @@ public:
 		Q_ASSERT(false);
 	}
 
-	virtual void setEnumValue(int value) noexcept override final	// Overriden from class Propery
+	virtual void setEnumValue(int value) noexcept final	// Overriden from class Propery
 	{
 		if (m_setter)
 		{
@@ -1339,9 +1271,9 @@ public:
 		}
 	}
 
-	virtual void setEnumValue(const char* value) noexcept override final	// Overriden from class Propery
+	virtual void setEnumValue(const char* value) noexcept final	// Overriden from class Propery
 	{
-		int key = m_enumValues->key(QString(value));
+		int key = m_enumValues->key(QString::fromLatin1(value));
 		setEnumValue(key);
 	}
 
@@ -1357,36 +1289,36 @@ public:
 		Q_UNUSED(high);
 	}
 
-	virtual const QVariant& lowLimit() const noexcept override final
+	[[nodiscard]] virtual const QVariant& lowLimit() const noexcept final
 	{
 		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
-	virtual void setLowLimit(const QVariant& value) noexcept override final
+	virtual void setLowLimit(const QVariant& value) noexcept final
 	{
 		Q_UNUSED(value);
 	}
 
-	virtual const QVariant& highLimit() const noexcept override final
+	[[nodiscard]] virtual const QVariant& highLimit() const noexcept final
 	{
 		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
-	virtual void setHighLimit(const QVariant& value) noexcept override final
+	virtual void setHighLimit(const QVariant& value) noexcept final
 	{
 		Q_UNUSED(value);
 	}
 
 	void setGetter(std::function<int(void)> getter) noexcept
 	{
-		m_getter = getter;
+		m_getter = std::move(getter);
 	}
 	void setSetter(std::function<void(int)> setter) noexcept
 	{
-		m_setter = setter;
+		m_setter = std::move(setter);
 	}
 
-	virtual bool isTheSameType(Property* property) noexcept override final
+	[[nodiscard]] virtual bool isTheSameType(Property* property) noexcept final
 	{
 		if (dynamic_cast<PropertyValue<OrderedHash<int, QString>>*>(property) == nullptr)
 		{
@@ -1396,7 +1328,7 @@ public:
 		return true;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept override final
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept final
 	{
 		// Implementation is not requiered yet
 		// To do if requeired
@@ -1425,8 +1357,8 @@ template <>
 class PropertyValue<std::vector<std::pair<QString, int>>> final : public Property
 {
 public:
-	PropertyValue(const std::vector<std::pair<QString, int>>& enumValues) noexcept :
-		m_enumValues(enumValues)
+	PropertyValue(std::vector<std::pair<QString, int>> enumValues) noexcept :
+		m_enumValues(std::move(enumValues))
 	{
 		if (m_enumValues.empty() == false)
 		{
@@ -1442,27 +1374,27 @@ public:
 	}
 
 public:
-	virtual bool isEnum() const noexcept override final
+	[[nodiscard]] virtual bool isEnum() const noexcept final
 	{
 		return true;	// This is dynamic enumeration
 	}
 
-	virtual std::vector<std::pair<int, QString>> enumValues() const noexcept override final
+	[[nodiscard]] virtual std::vector<std::pair<int, QString>> enumValues() const noexcept final
 	{
 		std::vector<std::pair<int, QString>> result;
 		result.reserve(m_enumValues.size());
 
 		for (const auto&[str, key] : m_enumValues)
 		{
-			result.push_back({key, str});
+			result.emplace_back(key, str);
 		}
 
 		return result;
 	}
 
-	virtual QVariant enumValue() const noexcept override final
+	[[nodiscard]] virtual QVariant enumValue() const noexcept final
 	{
-		for (auto[str, key] : m_enumValues)
+		for (const auto&[str, key] : m_enumValues)
 		{
 			if (key == m_value)
 			{
@@ -1475,7 +1407,7 @@ public:
 	}
 
 public:
-	virtual QVariant value() const noexcept override final
+	[[nodiscard]] virtual QVariant value() const noexcept final
 	{
 		if (m_getter)
 		{
@@ -1488,11 +1420,11 @@ public:
 		}
 	}
 
-	virtual void setValue(const QVariant& value) noexcept override final		// Overriden from class Propery
+	virtual void setValue(const QVariant& value) noexcept final		// Overriden from class Propery
 	{
 		if (value.type() == QVariant::Int)
 		{
-			setEnumValue(value.value<int>());
+			setEnumValue(value.toInt());
 			return;
 		}
 
@@ -1506,7 +1438,7 @@ public:
 		return;
 	}
 
-	virtual void setEnumValue(int value) noexcept override final				// Overriden from class Propery
+	virtual void setEnumValue(int value) noexcept final				// Overriden from class Propery
 	{
 		if (m_setter)
 		{
@@ -1518,11 +1450,11 @@ public:
 		}
 	}
 
-	virtual void setEnumValue(const char* value) noexcept override final		// Overriden from class Propery
+	virtual void setEnumValue(const char* value) noexcept final		// Overriden from class Propery
 	{
-		QString strvalue(value);
+		QString strvalue = QString::fromLatin1(value);
 
-		for (auto[str, key] : m_enumValues)
+		for (const auto&[str, key] : m_enumValues)
 		{
 			if (strvalue == str)
 			{
@@ -1549,41 +1481,41 @@ public:
 		Q_UNUSED(high);
 	}
 
-	virtual const QVariant& lowLimit() const noexcept override final
+	[[nodiscard]] virtual const QVariant& lowLimit() const noexcept final
 	{
 		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
-	virtual void setLowLimit(const QVariant& value) noexcept override final
+	virtual void setLowLimit(const QVariant& value) noexcept final
 	{
 		Q_UNUSED(value);
 	}
 
-	virtual const QVariant& highLimit() const noexcept override final
+	[[nodiscard]] virtual const QVariant& highLimit() const noexcept final
 	{
 		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
-	virtual void setHighLimit(const QVariant& value) noexcept override final
+	virtual void setHighLimit(const QVariant& value) noexcept final
 	{
 		Q_UNUSED(value);
 	}
 
 	void setGetter(std::function<int(void)> getter) noexcept
 	{
-		m_getter = getter;
+		m_getter = std::move(getter);
 	}
 	void setSetter(std::function<void(int)> setter) noexcept
 	{
-		m_setter = setter;
+		m_setter = std::move(setter);
 	}
 
-	virtual bool isTheSameType(Property* property) noexcept override final
+	virtual bool isTheSameType(Property* property) noexcept final
 	{
 		return dynamic_cast<PropertyValue<std::vector<std::pair<QString, int>>>*>(property) != nullptr;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept override final
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept final
 	{
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
@@ -1784,10 +1716,10 @@ public:
 
 	PropertyValue<OrderedHash<int, QString>>* addDynamicEnumProperty(
 			const QString& caption,
-			std::shared_ptr<OrderedHash<int, QString>> enumValues,
+			const std::shared_ptr<OrderedHash<int, QString>>& enumValues,
 			bool visible = false,
-			std::function<int(void)> getter = std::function<int(void)>(),
-			std::function<void(int)> setter = std::function<void(int)>())
+			const std::function<int(void)>& getter = std::function<int(void)>(),
+			const std::function<void(int)>& setter = std::function<void(int)>())
 	{
 		if (enumValues.get() == nullptr)
 		{
@@ -1823,8 +1755,8 @@ public:
 			const QString& caption,
 			const std::vector<std::pair<QString, int>>& enumValues,
 			bool visible = false,
-			std::function<int(void)> getter = std::function<int(void)>(),
-			std::function<void(int)> setter = std::function<void(int)>())
+			const std::function<int(void)>& getter = std::function<int(void)>(),
+			const std::function<void(int)>& setter = std::function<void(int)>())
 	{
 		auto property = std::make_shared<PropertyValue<std::vector<std::pair<QString, int>>>>(enumValues);
 
@@ -2015,7 +1947,7 @@ public:
 			if (auto itt = m_properties.find(caption);
 				itt == m_properties.end())
 			{
-				return std::shared_ptr<Property>();
+				return {};
 			}
 			else
 			{
@@ -2038,7 +1970,7 @@ public:
 			if (auto itt = m_properties.find(caption);
 				itt == m_properties.end())
 			{
-				return std::shared_ptr<Property>();
+				return {};
 			}
 			else
 			{
@@ -2120,12 +2052,12 @@ public:
 			if (PropertyValue<QString>* propertyValue = dynamic_cast<PropertyValue<QString>*>(property.get());
 				propertyValue != nullptr)
 			{
-				propertyValue->setValueDirect(QString(value));
+				propertyValue->setValueDirect(QString::fromLatin1(value));
 				return true;
 			}
 			else
 			{
-				property->setValue(QVariant::fromValue(QString(value)));	// Try to get luck
+				property->setValue(QVariant::fromValue(QString::fromLatin1(value)));	// Try to get luck
 				return true;
 			}
 		}
@@ -2177,7 +2109,12 @@ public:
 	{
 		static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 7);	// Function must be reviewed if version is raised
 
-		QString result = QString("%1;").arg(m_lastSpecificPropertiesVersion);
+		QString result = QStringLiteral("%1;").arg(m_lastSpecificPropertiesVersion);
+
+		QLatin1String trueStringSc{"true;"};
+		QLatin1String falseStringSc{"false;"};
+		QLatin1String trueString{"true"};
+		QLatin1String falseString{"false"};
 
 		result += name + ";";
 		result += category + ";";
@@ -2185,18 +2122,18 @@ public:
 		result += strMin + ";";
 		result += strMax + ";";
 		result += strDefaultValue + ";";
-		result += QString("%1;").arg(precision),
-		result += updateFromPreset ? "true;" : "false;";
-		result += expert ? "true;" : "false;";
+		result += tr("%1;").arg(precision),
+		result += updateFromPreset ? trueStringSc : falseStringSc;
+		result += expert ? trueStringSc : falseStringSc;
 		result += description + ";";
-		result += visible ? "true;" : "false;";
+		result += visible ? trueStringSc : falseStringSc;
 		result += E::valueToString<E::PropertySpecificEditor>(editor) + ";";
-		result += QString("%1;").arg(viewOrder);
-		result += essential ? "true;" : "false;";
-		result += readOnly ? "true" : "false";
+		result += tr("%1;").arg(viewOrder);
+		result += essential ? trueStringSc : falseStringSc;
+		result += readOnly ? trueString : falseString;	// No semicolon!
 
-		result = result.replace(QChar::CarriageReturn, "\\r");
-		result = result.replace(QChar::LineFeed, "\\n");
+		result = result.replace(QChar::CarriageReturn, QLatin1String("\\r"));
+		result = result.replace(QChar::LineFeed, QLatin1String("\\n"));
 
 		return result;
 
@@ -2275,7 +2212,7 @@ public:
 		Essential			[Added in version 6] Property is highlighted by color in PropertyEditor
 		ReadOnly			[Added in version 7] Property is read-only
 		*/
-		QString m_specificPropertiesStructTrimmed = specificProperties;
+		const QString& m_specificPropertiesStructTrimmed = specificProperties;
 
 		QStringList rows = m_specificPropertiesStructTrimmed.split(QChar::LineFeed, Qt::SkipEmptyParts);
 
@@ -2293,8 +2230,8 @@ public:
 			{
 				col = col.trimmed();
 
-				col = col.replace(QString("\\r"), QString(QChar::CarriageReturn));
-				col = col.replace(QString("\\n"), QString(QChar::LineFeed));
+				col = col.replace(QStringLiteral("\\r"), QString(QChar::CarriageReturn));
+				col = col.replace(QStringLiteral("\\n"), QString(QChar::LineFeed));
 			}
 
 			QString strVersion(columns[0]);
@@ -2420,7 +2357,7 @@ public:
 		if (columns.count() != 9)
 		{
 			result.first = false;
-			result.second += " Wrong proprty struct version 1! Expected: version;name;category;type;min;max;default;precision;updateFromPreset\n";
+			result.second += QLatin1String(" Wrong property struct version 1! Expected: version;name;category;type;min;max;default;precision;updateFromPreset\n");
 
 			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 1!";
 			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset";
@@ -2463,8 +2400,9 @@ public:
 		if (columns.count() != 11)
 		{
 			result.first = false;
-			result.second = "Wrong proprty struct version 2!\n"
-							"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description\n";
+			result.second = QStringLiteral(
+								"Wrong proprty struct version 2!\n"
+								"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description\n");
 
 			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 2!";
 			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description";
@@ -2509,8 +2447,9 @@ public:
 		if (columns.count() != 12)
 		{
 			result.first = false;
-			result.second = "Wrong proprty struct version 3!\n"
-							"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible\n";
+			result.second = QStringLiteral(
+								"Wrong proprty struct version 3!\n"
+								"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible\n");
 
 			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 3!";
 			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible";
@@ -2556,8 +2495,9 @@ public:
 		if (columns.count() != 13)
 		{
 			result.first = false;
-			result.second = "Wrong proprty struct version 4!\n"
-							"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor\n";
+			result.second = QStringLiteral(
+								"Wrong proprty struct version 4!\n"
+								"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor\n");
 
 			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 3!";
 			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor";
@@ -2604,8 +2544,9 @@ public:
 		if (columns.count() != 14)
 		{
 			result.first = false;
-			result.second = "Wrong proprty struct version 5!\n"
-							"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder\n";
+			result.second = QStringLiteral(
+								"Wrong proprty struct version 5!\n"
+								"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder\n");
 
 			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 3!";
 			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder";
@@ -2653,8 +2594,9 @@ public:
 		if (columns.count() != 15)
 		{
 			result.first = false;
-			result.second = "Wrong proprty struct version 6!\n"
-							"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder;essential\n";
+			result.second = QStringLiteral(
+									"Wrong proprty struct version 6!\n"
+									"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder;essential\n");
 
 			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 6!";
 			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder;essential";
@@ -2703,10 +2645,11 @@ public:
 		if (columns.count() != 16)
 		{
 			result.first = false;
-			result.second = "Wrong proprty struct version 6!\n"
-							"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder;essential;readOnly\n";
+			result.second = QStringLiteral(
+								"Wrong proprty struct version 7!\n"
+								"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder;essential;readOnly\n");
 
-			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 6!";
+			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 7!";
 			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder;essential;readOnly";
 			return result;
 		}
@@ -2727,7 +2670,7 @@ public:
 		const QString& strEssential = columns.at(14);
 		const QString& strReadOnly = columns.at(15);
 
-		result = parseSpecificPropertiesCreate(6,
+		result = parseSpecificPropertiesCreate(7,
 											   name,
 											   category,
 											   description,
@@ -2977,16 +2920,12 @@ public:
 				break;
 			case E::SpecificPropertyType::pt_e_channel:
 				{
-					// Default Value
-					//
-					QString defaultString = strDefaultValue;
-
 					// Add property with default value
 					//
 					auto p = addProperty(name, category, true, QVariant::fromValue(E::Channel::A));
 					addedProperty = p;
 
-					p->setValue(defaultString.toStdString().c_str());
+					p->setValue(strDefaultValue.toStdString().c_str());
 				}
 				break;
 			case E::SpecificPropertyType::pt_string:
@@ -3113,7 +3052,7 @@ public:
 
 		enumValues.reserve(valueStringList.size());
 
-		for (QString str : valueStringList)
+		for (const QString& str : valueStringList)
 		{
 			// str is like:
 			// EnumValue = 1
@@ -3137,7 +3076,7 @@ public:
 
 			// Pair is good
 			//
-			enumValues.push_back({enumStr, enumVal});
+			enumValues.emplace_back(enumStr, enumVal);
 		}
 
 		*ok = true;
@@ -3178,7 +3117,7 @@ public:
 	{
 		operator=(src);
 	}
-	PropertyVector(PropertyVector&& src) = default;
+	PropertyVector(PropertyVector&& src) noexcept = default;
 
 	~PropertyVector() = default;
 
@@ -3204,7 +3143,7 @@ public:
 
 		return *this;
 	}
-	PropertyVector& operator= (PropertyVector&& src) = default;
+	PropertyVector& operator= (PropertyVector&& src) noexcept = default;
 
 	virtual std::shared_ptr<OBJECT_TYPE> createItem() const override
 	{
@@ -3235,7 +3174,7 @@ public:
 	{
 		operator=(src);
 	}
-	PropertyList(PropertyList&& src) = default;
+	PropertyList(PropertyList&& src) noexcept = default;
 
 	~PropertyList() = default;
 
@@ -3256,7 +3195,7 @@ public:
 
 		return *this;
 	}
-	PropertyList& operator= (PropertyList&& src) = default;
+	PropertyList& operator= (PropertyList&& src) noexcept = default;
 
 	virtual std::shared_ptr<OBJECT_TYPE> createItem() const override
 	{
@@ -3270,7 +3209,7 @@ public:
 //
 inline bool variantIsPropertyVector(const QVariant& v)
 {
-	QString type{v.typeName()};
+	QString type{QString::fromLatin1(v.typeName())};
 	return type.startsWith(QStringLiteral("PropertyVector<"), Qt::CaseSensitive);
 }
 
@@ -3301,7 +3240,7 @@ inline PropertyVectorBase<PropertyObject>* qvariant_cast<PropertyVectorBase<Prop
 //
 inline bool variantIsPropertyList(const QVariant& v)
 {
-	QString type{v.typeName()};
+	QString type{QString::fromLatin1(v.typeName())};
 	return type.startsWith(QStringLiteral("PropertyList<"), Qt::CaseSensitive);
 }
 

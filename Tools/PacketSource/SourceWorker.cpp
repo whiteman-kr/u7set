@@ -35,7 +35,7 @@ void SourceWorker::process()
 		return;
 	}
 
-	if (pSource->info().serverAddress.isEmpty() == true)
+	if (pSource->info().appDataSrvIP.isEmpty() == true)
 	{
 		emit finished();
 		return;
@@ -94,7 +94,7 @@ void SourceWorker::process()
 			// version and IP of simFrame
 			//
 			m_simFrame.simVersion = reverseUint16(PS::SIM_FRAME_VERSION);
-			m_simFrame.sourceIP = reverseUint32(pSource->info().lmAddress.address32());
+			m_simFrame.sourceIP = reverseUint32(pSource->info().lmIP.address32());
 
 			// revers header
 			//
@@ -104,10 +104,11 @@ void SourceWorker::process()
 			//
 			m_simFrame.rupFrame.calcCRC64();
 
-			// send udp to AppDataReceivingIP of AppDataSrv - get from app options
+			// send udp to AppDataReceivingIP of AppDataSrv - get from CfgSrv
 			//
-			QHostAddress appDataReceivingIP = QHostAddress(pSource->info().serverAddress.address().toString());
-			qint64 sentBytes = pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), appDataReceivingIP, pSource->info().serverAddress.port());
+			qint64 sentBytes = pSocket->writeDatagram(	reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame),
+														QHostAddress(pSource->info().appDataSrvIP.addressStr()),
+														pSource->info().appDataSrvIP.port());
 
 			if (sentBytes != sizeof(m_simFrame))
 			{

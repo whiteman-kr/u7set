@@ -2,6 +2,7 @@
 #define FRAMEDATAPANEL_H
 
 #include <QDockWidget>
+#include <QDialog>
 #include <QMenu>
 #include <QAction>
 #include <QKeyEvent>
@@ -45,32 +46,32 @@ class FrameDataTable : public QAbstractTableModel
 public:
 
 	explicit FrameDataTable(QObject* parent = nullptr);
-	virtual ~FrameDataTable();
-
-private:
-
-	mutable QMutex			m_frameMutex;
-	QVector<PS::FrameData*>	m_frameList;
-
-	int						columnCount(const QModelIndex &parent) const;
-	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
-
-	QVariant				headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant				data(const QModelIndex &index, int role) const;
+	virtual ~FrameDataTable() override;
 
 public:
 
-	int						dataSize() const;
-	PS::FrameData*			frame(int index) const;
-	void					set(const QVector<PS::FrameData*>& list_add);
-	void					clear();
+	int	dataSize() const;
+	PS::FrameData* frame(int index) const;
+	void set(const std::vector<PS::FrameData*>& list_add);
+	void clear();
 
-	quint8					byte(int index) const;
-	void					setByte(int index, quint8 byte);
+	quint8 byte(int index) const;
+	void setByte(int index, quint8 byte);
 
-	QString					text(int row, int column, PS::FrameData *pFrameData) const;
+	QString text(int row, int column, PS::FrameData *pFrameData) const;
 
-	void					updateColumn(int column);
+	void updateColumn(int column);
+
+private:
+
+	mutable QMutex m_frameMutex;
+	std::vector<PS::FrameData*>	m_frameList;
+
+	int columnCount(const QModelIndex &parent) const override;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const override;
+
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
 };
 
 // ==============================================================================================
@@ -82,28 +83,24 @@ class FrameDataStateDialog : public QDialog
 public:
 
 	explicit FrameDataStateDialog(quint8 byte, QWidget *parent = nullptr);
-	virtual ~FrameDataStateDialog();
-
-private:
-
-	QLineEdit*				m_stateEdit = nullptr;
-
-	quint8					m_byte = 0;
-
-	void					createInterface();
+	virtual ~FrameDataStateDialog() override;
 
 public:
 
-	quint8					byte() const { return m_byte; }
-	void					setByte(quint8 byte) { m_byte = byte; }
+	quint8 byte() const { return m_byte; }
+	void setByte(quint8 byte) { m_byte = byte; }
 
-protected:
+private:
 
-signals:
+	QLineEdit* m_stateEdit = nullptr;
+
+	quint8 m_byte = 0;
+
+	void createInterface();
 
 private slots:
 
-	void					onOk();
+	void onOk();
 };
 
 // ==============================================================================================
@@ -115,38 +112,39 @@ class FrameDataPanel : public QDockWidget
 public:
 
 	explicit FrameDataPanel(QWidget* parent = nullptr);
-	virtual ~FrameDataPanel();
-
-private:
-
-	QMainWindow*		m_pMainWindow;
-
-	QMainWindow*		m_pFrameWindow = nullptr;
-	QTableView*			m_pView = nullptr;
-	FrameDataTable		m_frameDataTable;
-
-	QMenu*				m_pContextMenu = nullptr;
-	QAction*			m_pSetStateAction = nullptr;
-
-	void				createInterface();
-	void				createContextMenu();
+	virtual ~FrameDataPanel()  override;
 
 public:
 
-	void				clear();
-	void				set(const QVector<PS::FrameData*>& list_add);
+	void clear();
+	void set(const std::vector<PS::FrameData*>& list_add);
 
-	void				setState();
+	void setState();
+
+private:
+
+	QMainWindow* m_pMainWindow;
+
+	QMainWindow* m_pFrameWindow = nullptr;
+	QTableView* m_pView = nullptr;
+	FrameDataTable m_frameDataTable;
+
+	QMenu* m_pContextMenu = nullptr;
+	QAction* m_pSetStateAction = nullptr;
+
+	void createInterface();
+	void createContextMenu();
+
 protected:
 
-	bool				event(QEvent* e);
+	bool event(QEvent* e) override;
 
 private slots:
 
-	void				onContextMenu(QPoint);
+	void onContextMenu(QPoint);
 
-	void				onSetStateAction();
-	void				onListDoubleClicked(const QModelIndex& index);
+	void onSetStateAction();
+	void onListDoubleClicked(const QModelIndex& index);
 };
 // ==============================================================================================
 

@@ -16,13 +16,12 @@ namespace Builder
 								   Hardware::Software* software);
 		~AppDataServiceCfgGenerator();
 
-		virtual bool generateConfiguration() override;
-		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
+		virtual bool createSettingsProfile(const QString& profile) override;
+		virtual bool generateConfigurationStep1() override;
 
 	private:
 		bool getAssociatedLMs();
 
-		bool writeSettings();
 		bool writeAppDataSourcesXml();
 		bool writeAppSignalsXml();
 		bool addLinkToAppSignalsFile();
@@ -33,10 +32,6 @@ namespace Builder
 		bool findAppDataSourceAssociatedSignals(DataSource& appDataSource);
 
 	private:
-		AppDataServiceSettingsGetter m_settings;
-
-		//
-
 		QStringList m_associatedLMs;
 		QHash<QString, bool> m_associatedAppSignals;
 	};

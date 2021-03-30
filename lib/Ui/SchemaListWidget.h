@@ -70,7 +70,7 @@ class SchemaListWidget : public QWidget
 	Q_OBJECT
 
 public:
-	SchemaListWidget(std::vector<SchemaListTreeColumns> columns, QWidget* parent);
+	explicit SchemaListWidget(std::vector<SchemaListTreeColumns> columns, bool showTags, QWidget* parent);
 	virtual ~SchemaListWidget() = default;
 
 public:

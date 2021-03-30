@@ -11,6 +11,7 @@ class XmlWriteHelper
 public:
 	XmlWriteHelper(QXmlStreamWriter& xmlWriter);
 	XmlWriteHelper(QByteArray* data);
+	XmlWriteHelper(QString* xmlString);
 	~XmlWriteHelper();
 
 	QXmlStreamWriter* xmlStreamWriter() const;
@@ -31,6 +32,7 @@ public:
 	void writeDoubleAttribute(const QString& name, double value, int decimalPlaces);
 	void writeFloatAttribute(const QString& name, float value);
 	void writeAddress16Attribute(const QString& name, const Address16& addr16);
+	void writeSoftwareTypeAttribute(E::SoftwareType swType);
 
 	void writeString(const QString& str);
 
@@ -51,6 +53,7 @@ class XmlReadHelper
 public:
 	XmlReadHelper(QXmlStreamReader& xmlReader);
 	XmlReadHelper(const QByteArray& data);
+	XmlReadHelper(const QString& xmlString);
 	~XmlReadHelper();
 
 	bool readNextStartElement();
@@ -68,6 +71,7 @@ public:
 	bool readDoubleAttribute(const QString& name, double* value);
 	bool readFloatAttribute(const QString& name, float* value);
 	bool readAddress16Attribute(const QString& name, Address16* value);
+	bool readSoftwareTypeAttribute(E::SoftwareType* swType);
 
 	bool readStringElement(const QString& elementName, QString* value, bool find = false);
 	bool readIntElement(const QString& elementName, int* value, bool find = false);

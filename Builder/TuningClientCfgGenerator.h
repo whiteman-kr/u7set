@@ -15,8 +15,8 @@ namespace Builder
 	public:
 		TuningClientCfgGenerator(Context* context, Hardware::Software* software);
 
-		virtual bool generateConfiguration() override;
-		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
+		virtual bool createSettingsProfile(const QString& profile) override;
+		virtual bool generateConfigurationStep1() override;
 
 		static bool createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, ::Proto::AppSignalSet* tuningSet);
 
@@ -26,7 +26,6 @@ namespace Builder
 		bool createEquipmentList(QStringList* equipmentList);
 		bool createObjectFilters(const QStringList& equipmentList);
 
-		bool writeSettings();
 		bool writeTuningSignals();
 		bool writeObjectFilters();
 		bool writeTuningSchemas();
@@ -42,8 +41,6 @@ namespace Builder
 		TYPE getObjectProperty(QString strId, QString property, bool* ok);
 
 	private:
-		TuningClientSettingsGetter m_settings;
-
 		::Proto::AppSignalSet m_tuningSet;
 
 		TuningFilterStorage m_tuningFilterStorage;
@@ -60,7 +57,7 @@ namespace Builder
 
 		*ok = true;
 
-		Hardware::DeviceObject* object = m_equipment->deviceObject(strId);
+		Hardware::DeviceObject* object = m_equipment->deviceObject(strId).get();
 		if (object == nullptr)
 		{
 			QString errorStr = tr("Object %1 is not found")

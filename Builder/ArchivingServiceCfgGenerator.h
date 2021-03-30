@@ -13,18 +13,14 @@ namespace Builder
 
 		~ArchivingServiceCfgGenerator();
 
-		virtual bool generateConfiguration() override;
-		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
+		virtual bool createSettingsProfile(const QString& profile) override;
+		virtual bool generateConfigurationStep1() override;
 
 	private:
-		bool writeSettings();
 		bool writeArchSignalsFile();
 
 		bool writeBatFile();
 		bool writeShFile();
-
-	private:
-		ArchivingServiceSettingsGetter m_settings;
 	};
 
 }

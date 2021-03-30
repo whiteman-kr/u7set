@@ -39,6 +39,7 @@ class Signal
 	friend class DbWorker;
 	friend class SignalSet;
 	friend class SignalTests;
+	friend class DbControllerSignalTests;
 
 public:
 	static const QString MACRO_START_TOKEN;
@@ -48,8 +49,10 @@ public:
 	Signal();
 	Signal(const Signal& s);
 	Signal(const ID_AppSignalID& ids);
-	Signal(const Hardware::DeviceSignal& deviceSignal, QString* errMsg);
+	Signal(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg);
 	virtual ~Signal();
+
+	void clear();
 
 	void initSpecificProperties();
 
@@ -189,6 +192,7 @@ public:
 	// Tuning signal properties
 
 	bool enableTuning() const { return m_enableTuning; }
+	bool isTunable() const { return m_enableTuning; }
 	void setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
 
 	TuningValue tuningDefaultValue() const { return m_tuningDefaultValue; }
@@ -325,6 +329,8 @@ public:
 	Address16 regValidityAddr() const { return m_regValidityAddr; }
 	void setRegValidityAddr(const Address16& addr) { m_regValidityAddr = addr; }
 
+	Address16 actualAddr(E::LogicModuleRamAccess* lmRamAccess = nullptr) const;
+
 	void resetAddresses();
 
 	E::LogicModuleRamAccess lmRamAccess() const { return m_lmRamAccess; }
@@ -399,15 +405,16 @@ private:
 	void setInstanceCreated(const QDateTime& instanceCreated) { m_instanceCreated = instanceCreated; }
 	void setInstanceCreated(const QString& instanceCreatedStr) { m_instanceCreated = QDateTime::fromString(instanceCreatedStr, DATE_TIME_FORMAT_STR); }
 	void setInstanceAction(VcsItemAction action) { m_instanceAction = action; }
+	void initCreatedDates();
 
 	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
 
 	void updateTuningValuesType();
 
-	void initIDsAndCaption(const Hardware::DeviceSignal& deviceSignal,
+	void initIDsAndCaption(const Hardware::DeviceAppSignal& deviceSignal,
 							QString* errMsg);
 
-	void checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSignal, QString* errMsg);
+	void checkAndInitTuningSettings(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg);
 
 	QString specPropNotExistErr(const QString &propName) const;
 
@@ -481,7 +488,7 @@ private:
 	QDateTime m_created;
 	bool m_deleted = false;
 	QDateTime m_instanceCreated;
-	VcsItemAction m_instanceAction = VcsItemAction::Added;
+	VcsItemAction m_instanceAction{VcsItemAction::Added};
 
 	// Signal properties calculated in compile-time
 	//
@@ -534,6 +541,7 @@ public:
 	void reserve(int n);
 
 	void buildID2IndexMap();
+	void updateID2IndexInMap(const QString& appSignalId, int index);
 	void clearID2IndexMap() { m_strID2IndexMap.clear(); }
 	bool ID2IndexMapIsEmpty();
 

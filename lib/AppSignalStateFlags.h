@@ -27,9 +27,10 @@ union AppSignalStateFlags
 		quint32 aboveHighLimit: 1;			//	5	sets to 1 if value of signal is greate than HighEngineeringUnits limit
 		quint32 belowLowLimit: 1;			//	6	sets to 1 if value of signal is less than LowEngineeringUnits limit
 
+		quint32 swSimulated : 1;			//  7	state of signal is acquire from software simulated packet
+
 		// bits reserved for state flags
 		//
-		quint32 _bit7: 1;					//	7
 		quint32 _bit8: 1;					//	8
 		quint32 _bit9: 1;					//	9
 		quint32 _bit10: 1;					//	10

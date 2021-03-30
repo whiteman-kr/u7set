@@ -2,6 +2,7 @@
 #include "ModuleConfigurator.h"
 //#include "../include/ConfigData.h"
 #include <QtWidgets/QApplication>
+#include <google/protobuf/stubs/common.h>
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -30,6 +31,8 @@ int main(int argc, char *argv[])
 	ModuleConfigurator w;
 	w.show();
 	int result = a.exec();
+
+	google::protobuf::ShutdownProtobufLibrary();
 	
 	return result;
 }

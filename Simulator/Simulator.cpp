@@ -14,6 +14,9 @@
 
 namespace Sim
 {
+	const QString Simulator::DefaultProfileName = "Default";
+
+
 	//
 	// Simulator
 	//
@@ -144,6 +147,8 @@ namespace Sim
 		m_appSignalManager.resetAll();
 		m_connections.clear();
 		m_software.clear();
+		m_profiles.clear();
+		m_currentProfileName = DefaultProfileName;
 
 		return;
 	}
@@ -185,6 +190,42 @@ namespace Sim
 			}
 		}
 
+		// Load simulator profiles
+		//
+		{
+			QString profilesFileName = buildPath + Directory::COMMON + "/" + Db::File::SimProfilesFileName;
+			QFile file(profilesFileName);
+
+			if (file.exists() == true)
+			{
+				bool ok = file.open(QIODevice::ReadOnly | QIODevice::Text);
+
+				if (ok == false)
+				{
+					m_log.writeError(QObject::tr("Open simulator profiles file error. File %1").arg(profilesFileName));
+					clearImpl();
+					return false;
+				}
+
+				QString errorMessage;
+				ok = m_profiles.load(file.readAll(), &errorMessage);
+
+				if (ok == false)
+				{
+					m_log.writeError(QObject::tr("Load simulator profiles file error. File %1. Error %2")
+									 .arg(profilesFileName)
+									 .arg(errorMessage));
+					clearImpl();
+					return false;
+				}
+			}
+			else
+			{
+				// It's ok if the file not exists
+				//
+			}
+		}
+
 		// Load bts file
 		//
 		bool ok = loadFirmwares(buildPath);
@@ -197,9 +238,10 @@ namespace Sim
 		QStringList subsystems = m_firmwares.subsystems();
 		if (subsystems.isEmpty() == true)
 		{
-			m_log.writeError(QObject::tr("Bitstream file does not contain any subsystem."));
+			m_log.writeWarning(QObject::tr("Bitstream file does not contain any subsystem."));
+			m_log.writeWarning(QObject::tr("Nothing to load or simulate."));
 			clearImpl();
-			return false;
+			return true;	// Project is empty, is not an error
 		}
 
 		// Load LogicModules Descriptions
@@ -590,6 +632,40 @@ namespace Sim
 	const Sim::Software& Simulator::software() const
 	{
 		return m_software;
+	}
+
+	Sim::Profiles& Simulator::profiles()
+	{
+		return m_profiles;
+	}
+
+	const Sim::Profiles& Simulator::profiles() const
+	{
+		return m_profiles;
+	}
+
+	bool Simulator::setCurrentProfile(QString profileName)
+	{
+		if (profiles().hasProfile(profileName) == false)
+		{
+			m_log.writeError(tr("Cannot set profile %1, this profile not found").arg(profileName));
+
+			m_currentProfileName = DefaultProfileName;
+			return false;
+		}
+
+		m_currentProfileName = profileName;
+		return true;
+	}
+
+	QString Simulator::currentProfileName() const
+	{
+		return m_currentProfileName;
+	}
+
+	const Sim::Profile& Simulator::currentProfile() const
+	{
+		return m_profiles.profile(m_currentProfileName);
 	}
 
 	Sim::Control& Simulator::control()

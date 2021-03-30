@@ -7,6 +7,7 @@
 #include <QSortFilterProxyModel>
 #include <QDialog>
 #include <QHash>
+#include "DialogMetrologyConnection.h"
 
 class DbController;
 class QTableView;
@@ -104,18 +105,16 @@ public:
 	SignalsTabPage* parentWindow() { return m_parentWindow; }
 
 	void prepareForReset() { beginResetModel(); }
-	void finishReset()
-	{
-		m_rowCount = 0;
-		m_columnCount = 0;
-		endResetModel();
-	}
+	void finishReset();
 
 
 public slots:
 	void updateSignal(int signalIndex);
 	void changeRowCount();
-	void changeColumnCount();
+	void beginIncreaseColumnCount(int newColumnCount);
+	void beginDecreaseColumnCount(int newColumnCount);
+	void endIncreaseColumnCount();
+	void endDecreaseColumnCount();
 
 private:
 	// Data
@@ -372,7 +371,7 @@ public:
 	SignalsTabPage(SignalSetProvider* signalSetProvider, DbController* dbController, QWidget* parent);
 	virtual ~SignalsTabPage() override;
 
-	static bool updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties);
+	static bool updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceAppSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties);
 	int getMiddleVisibleRow();
 	bool editSignals(QVector<int> ids);
 
@@ -403,11 +402,18 @@ public slots:
 	void checkIn();
 	void viewSignalHistory();
 
+	DialogMetrologyConnection* createMetrologyDialog();
+	void deleteMetrologyDialog();
+	void openMetrologyConnections();
+	void addMetrologyConnection();
+	void metrologyDialogClosed();
+
 	void changeLazySignalLoadingSequence();
 
 	void setSelection(const QVector<int> &selectedRowsSignalID, int focusedCellSignalID = -1);
 	void saveSelection();
 	void restoreSelection(int focusedSignalId = -1);
+	void onSignalSelectionChanged();
 
 	void changeSignalTypeFilter(int selectedType);
 	void changeSignalIdFilter(QStringList strIds, bool refreshSignalList);
@@ -435,6 +441,8 @@ private:
 	int m_lastVerticalScrollPosition = -1;
 	int m_lastHorizontalScrollPosition = -1;
 	FindSignalDialog* m_findSignalDialog = nullptr;
+	DialogMetrologyConnection* m_metrologyDialog = nullptr;
+	QAction* m_addMetrologyConnectionAction = nullptr;
 
 	QVector<int> m_selectedRowsSignalID;
 	int m_focusedCellSignalID = -1;

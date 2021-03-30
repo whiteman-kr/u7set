@@ -12,22 +12,12 @@ win32:LIBS += -lGdi32
 
 INCLUDEPATH += $$PWD
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		# CONFIG += c++17 has no effect yet
-win32:QMAKE_CXXFLAGS += /analyze		# Static code analyze
+unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
-# Warning level
-#
-gcc:CONFIG += warn_on
-
-win32:CONFIG -= warn_on				# warn_on is level 3 warnings
-win32:QMAKE_CXXFLAGS += /W4			# CONFIG += warn_on is just W3 level, so set level 4
-win32:QMAKE_CXXFLAGS += /wd4201		# Disable warning: C4201: nonstandard extension used: nameless struct/union
-win32:QMAKE_CXXFLAGS += /wd4458		# Disable warning: C4458: declaration of 'selectionPen' hides class member
-win32:QMAKE_CXXFLAGS += /wd4275		# Disable warning: C4275: non - DLL-interface class 'class_1' used as base for DLL-interface class 'class_2'
-
+include(../warnings.pri)
 
 # DESTDIR
 #
@@ -66,6 +56,7 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
     ../lib/ILogFile.h \
+    ../lib/ScriptDeviceObject.h \
     Indicator.h \
     IndicatorArrowIndicator.h \
     IndicatorHistogramVert.h \
@@ -117,7 +108,6 @@ HEADERS += VFrame30Lib_global.h \
     MacrosExpander.h \
     Session.h \
     ../lib/TypesAndEnums.h \
-    ../lib/ProtoSerialization.h \
     ../lib/CUtils.h \
     ../lib/DebugInstCounter.h \
     ../lib/PropertyObject.h \
@@ -136,7 +126,6 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/ITuningSignalManager.h \
     ../lib/Tuning/ITuningTcpClient.h \
-    ../Proto/network.pb.h \
     ../lib/TuningValue.h \
     TuningController.h \
     AppSignalController.h \
@@ -156,6 +145,7 @@ SOURCES += \
     ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
+    ../lib/ScriptDeviceObject.cpp \
     Indicator.cpp \
     IndicatorArrowIndicator.cpp \
     IndicatorHistogramVert.cpp \
@@ -204,7 +194,6 @@ SOURCES += \
     SchemaItemTerminator.cpp \
     MacrosExpander.cpp \
     Session.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/AppSignalManager.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/AppSignal.cpp \
@@ -216,7 +205,6 @@ SOURCES += \
     SchemaManager.cpp \
     ClientSchemaView.cpp \
     SchemaItemLoopback.cpp \
-    ../Proto/network.pb.cc \
     ../lib/TuningValue.cpp \
     TuningController.cpp \
     AppSignalController.cpp \
@@ -233,11 +221,9 @@ SOURCES += \
     ../lib/OutputLog.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
-
 
 # Optimization flags
 #
@@ -248,20 +234,16 @@ unix {
 	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
 }
 
-#protobuf
-#
-win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
-
-	INCLUDEPATH += ./../Protobuf
-}
-unix {
-	LIBS += -lprotobuf
-}
-
 # Protobuf
 #
-#!include(protobuf.pri) {
-#	error("Couldn't find the protobuf.pri file!")
-#}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
+
+
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}
 

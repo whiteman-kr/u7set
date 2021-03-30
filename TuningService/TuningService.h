@@ -17,8 +17,6 @@ namespace Tuning
 	{
 		Q_OBJECT
 
-		static const QString SETTING_TUNING_SIM_IP;
-
 	public:
 		TuningServiceWorker(const SoftwareInfo& softwareInfo,
 							const QString &serviceInstanceName,
@@ -96,12 +94,12 @@ namespace Tuning
 		bool isSimulationMode() const;
 
 	private slots:
-		void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+		void onConfigurationReady(const QByteArray configurationXmlData,
+								  const BuildFileInfoArray buildFileInfoArray,
+								  SessionParams sessionParams,
+								  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 
 	private:
-		QString m_tuningSimIPStr;
-		HostAddressPort m_tuningSimIP;
-
 		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
 

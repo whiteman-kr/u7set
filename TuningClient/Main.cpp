@@ -10,8 +10,8 @@
 #	include "../gitlabci_version.h"
 #endif
 
-// ---------------- Minidump generating functions -------------------
-//
+//// ---------------- Minidump generating functions -------------------
+////
 #if defined (Q_OS_WIN)
 
 #pragma comment ( lib, "dbghelp.lib" )
@@ -110,7 +110,7 @@ bool EnableDumping(DWORD dumpCount)
 
 	QString ApplicationPath =  QString::fromWCharArray(ModuleName);
 
-	QString dumpFolder = ApplicationPath.mid(0, ApplicationPath.lastIndexOf('\\'));
+	QString dumpFolder = QObject::tr("%LOCALAPPDATA%\\CrashDumps");
 
 	DWORD dwDumpType = 2;
 
@@ -134,88 +134,8 @@ bool EnableDumping(DWORD dumpCount)
 
 #endif
 
-//
-// ---------------- Minidump generating functions -------------------
-
-// ---------------- Memory leaks handling functions -------------------
-//
-
-#if defined (Q_OS_WIN) && defined(Q_DEBUG)
-
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-
-_CRT_REPORT_HOOK prevHook = nullptr;
-
-#define FALSE   0
-#define TRUE    1
-
-int reportingHook(int, char* userMessage, int*)
-{
-	// This function is called several times for each memory leak.
-	// Each time a part of the error message is supplied.
-	// This holds number of subsequent detail messages after
-	// a leak was reported
-	const int numFollowupDebugMsgParts = 2;
-	static bool ignoreMessage = false;
-	static int debugMsgPartsCount = 0;
-	static int leakCounter = 0;
-
-	// check if the memory leak reporting starts
-	if ((strcmp(userMessage,"Detected memory leaks!\n") == 0)
-			|| ignoreMessage)
-	{
-		// check if the memory leak reporting ends
-		if (strcmp(userMessage,"Object dump complete.\n") == 0)
-		{
-			_CrtSetReportHook(prevHook);
-			ignoreMessage = false;
-			if (leakCounter > 0)
-			{
-				return FALSE;
-			}
-		}
-		else
-		{
-			ignoreMessage = true;
-		}
-
-		// something from our own code?
-		if(strstr(userMessage, ".cpp") == NULL)
-		{
-			if(debugMsgPartsCount++ < numFollowupDebugMsgParts
-					&& strcmp(userMessage,"Detected memory leaks!\n") != 0
-					&& strcmp(userMessage,"Dumping objects ->\n") != 0)
-			{
-				// give it back to _CrtDbgReport() to be printed to the console
-				return FALSE;
-			}
-			else
-			{
-				return TRUE;  // ignore it
-			}
-		}
-		else
-		{
-			debugMsgPartsCount = 0;
-			leakCounter++;
-
-			// give it back to _CrtDbgReport() to be printed to the console
-			return FALSE;
-		}
-	}
-	else
-	{
-		// give it back to _CrtDbgReport() to be printed to the console
-		return FALSE;
-	}
-}
-
-#endif
-
-//
-// ---------------- Memory leaks handling functions -------------------
+////
+//// ---------------- Minidump generating functions -------------------
 
 // ---------------- Translator functions -------------------
 //
@@ -241,12 +161,6 @@ void loadLanguage(const QString& rLanguage)
 	QLocale locale = QLocale(rLanguage);
 	QLocale::setDefault(locale);
 
-
-	/*QString langPath = QApplication::applicationDirPath();
-	langPath.append("/languages");
-
-	switchTranslator(m_translator, QString("%1/TuningClient_%2.qm").arg(langPath).arg(rLanguage));*/
-
 	switchTranslator(m_translator, QString(":/languages/TuningClient_%1.qm").arg(rLanguage));
 }
 
@@ -257,18 +171,12 @@ void loadLanguage(const QString& rLanguage)
 int main(int argc, char* argv[])
 {
 
-#if defined (Q_OS_WIN) && defined(Q_DEBUG)
-	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-	// To see all memory leaks, not only in the own code, comment the next line
-	prevHook = _CrtSetReportHook(reportingHook);
-#endif
-
 #if defined (Q_OS_WIN)
 	// Set writing minidumps handler
 	//
 	SetUnhandledExceptionFilter(TopLevelExceptionHandler);
 
-	//EnableDumping(10);
+	EnableDumping(10);
 #endif
 
 	int result = 0;
@@ -414,10 +322,6 @@ int main(int argc, char* argv[])
 
 	VFrame30::shutdown();
 	google::protobuf::ShutdownProtobufLibrary();
-
-#if defined (Q_OS_WIN)
-	_CrtDumpMemoryLeaks();
-#endif
 
 	return result;
 }

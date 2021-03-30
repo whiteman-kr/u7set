@@ -19,92 +19,95 @@
 
 // ==============================================================================================
 
-class MeasureViewColumn
+namespace Measure
 {
-public:
+	class HeaderColumn
+	{
+	public:
 
-	MeasureViewColumn();
-	MeasureViewColumn(const MeasureViewColumn& from);
-	MeasureViewColumn(const QString& uniqueTitle, const QString& title, int width, bool visible, int alignment, bool duplicate);
-	virtual ~MeasureViewColumn();
+		HeaderColumn();
+		HeaderColumn(const HeaderColumn& from);
+		HeaderColumn(const QString& uniqueTitle, const QString& title, int width, bool visible, int alignment, bool duplicate);
+		virtual ~HeaderColumn();
 
-private:
+	public:
 
-	int					m_index = -1;
+		int					index() const { return m_index; }
+		void				setIndex(int index) { m_index = index; }
 
-	QString				m_uniqueTitle;
-	QString				m_title;
-	int					m_width = 100;
-	bool				m_enableVisible = MVC_CMN_SHOW;
+		QString				uniqueTitle() const { return m_uniqueTitle; }
+		void				setUniqueTitle(const QString& title) { m_uniqueTitle = title; }
 
-	int					m_alignment = Qt::AlignLeft;
+		QString				title() const;
+		void				setTitle(const QString& title) { m_title = title; }
 
-	bool				m_enableDuplicate = MVC_CMN_ENABLE_DUPLICATE;
+		int					width() const { return m_width; }
+		void				setWidth(int width) { m_width = width; }
 
-public:
+		bool				enableVisible() const { return m_enableVisible; }
+		void				setVisible(bool enable) { m_enableVisible = enable; }
 
-	int					index() const { return m_index; }
-	void				setIndex(int index) { m_index = index; }
+		int					alignment() const { return m_alignment; }
 
-	QString				uniqueTitle() const { return m_uniqueTitle; }
-	void				setUniqueTitle(const QString& title) { m_uniqueTitle = title; }
+		bool				enableDuplicate() const { return m_enableDuplicate; }
 
-	QString				title() const;
-	void				setTitle(const QString& title) { m_title = title; }
+		HeaderColumn&		operator=(const HeaderColumn& from);
 
-	int					width() const { return m_width; }
-	void				setWidth(int width) { m_width = width; }
+	private:
 
-	bool				enableVisible() const { return m_enableVisible; }
-	void				setVisible(bool enable) { m_enableVisible = enable; }
+		int					m_index = -1;
 
-	int					alignment() const { return m_alignment; }
+		QString				m_uniqueTitle;
+		QString				m_title;
+		int					m_width = 100;
+		bool				m_enableVisible = MVC_CMN_SHOW;
 
-	bool				enableDuplicate() const { return m_enableDuplicate; }
+		int					m_alignment = Qt::AlignLeft;
 
-	MeasureViewColumn&	operator=(const MeasureViewColumn& from);
-};
+		bool				m_enableDuplicate = MVC_CMN_ENABLE_DUPLICATE;
+	};
+
+	// ==============================================================================================
+
+	const int				MaxColumnCount	= 64;
+
+	// ==============================================================================================
+
+	class ViewHeader : public QObject
+	{
+		Q_OBJECT
+
+	public:
+
+		explicit ViewHeader(QObject* parent = nullptr);
+		virtual ~ViewHeader();
+
+	public:
+
+		void				setMeasureType(Measure::Type measureType);
+
+		void				init(Measure::Type measureType);
+
+		int					count() const;
+		HeaderColumn*		column(int index) const;
+
+		void				updateColumnState();
+
+		void				setColumnTitle(int column, const QString& title);
+		void				setColumnVisible(int column, bool visible);
+
+	private:
+
+		static				HeaderColumn m_column[Measure::TypeCount][MaxColumnCount];
+
+		Measure::Type		m_measureType = Measure::Type::NoMeasureType;
+
+		int					m_columnCount[Measure::TypeCount];
+	};
+}
 
 // ==============================================================================================
-
-const int				MEASURE_VIEW_COLUMN_COUNT	= 64;
-
-// ==============================================================================================
-
-class MeasureViewHeader : public QObject
-{
-	Q_OBJECT
-
-public:
-
-	explicit MeasureViewHeader(QObject *parent = nullptr);
-	virtual ~MeasureViewHeader();
-
-private:
-
-	static				MeasureViewColumn m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
-
-	int					m_measureType = MEASURE_TYPE_UNDEFINED;
-
-	int					m_columnCount[MEASURE_TYPE_COUNT];
-
-public:
-
-	void				setMeasureType(int measureType);
-
-	void				init(int type);
-
-	int					count() const;
-	MeasureViewColumn*	column(int index) const;
-
-	void				updateColumnState();
-
-	void				setColumnTitle(int column, const QString& title);
-	void				setColumnVisible(int column, bool visible);
-};
-
-// ==============================================================================================
-// MEASURE_TYPE_LINEARITY
+// Measure::Type::Linearity
 //
 const int				MVC_CMN_L_INDEX				= 0,
 						MVC_CMN_L_MODULE_SN			= 1,
@@ -157,7 +160,7 @@ const int				MVC_CMN_L_INDEX				= 0,
 						MVC_CMN_L_CALIBRATOR		= 48;
 
 // ==============================================================================================
-// MEASURE_TYPE_COMPARATOR
+// Measure::Type::Comparators
 //
 const int				MVC_CMN_C_INDEX				= 0,
 						MVC_CMN_C_MODULE_SN			= 1,
@@ -186,6 +189,16 @@ const int				MVC_CMN_C_INDEX				= 0,
 						MVC_CMN_C_ERROR_RESULT		= 24,
 						MVC_CMN_C_MEASUREMENT_TIME	= 25,
 						MVC_CMN_C_CALIBRATOR		= 26;
+
+// ==============================================================================================
+
+const int				MVG_TYPE_UNDEFINED			= -1,
+						MVG_TYPE_LIN_EL				= 0,
+						MVG_TYPE_LIN_EN				= 1,
+						MVG_TYPE_20VAL_EL			= 2,
+						MVG_TYPE_20VAL_EN			= 3;
+
+const int				MVG_TYPE_COUNT				= 4;
 
 // ==============================================================================================
 

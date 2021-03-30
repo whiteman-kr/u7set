@@ -56,6 +56,14 @@ namespace Sim
 		return false;
 	}
 
+	quint16 CommandProcessor::signalSetSorChassis() const
+	{
+		// Must be implemented in derived class
+		//
+		Q_ASSERT(false);
+		return 0;
+	}
+
 	bool CommandProcessor::parseFunc(QString parseFunc, DeviceCommand* command)
 	{
 		if (command == nullptr)

@@ -38,13 +38,13 @@ signals:
 	void setCommunicationSettings(QString device, bool showDebugInfo, bool verify);
 
 	void readConfiguration(int);
-	void readFirmware(QString fileName);
+	void readFirmware(QString fileName, std::optional<std::vector<int>> selectedUarts);
 
 	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
-	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& selectedSubsystem);
+	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& selectedSubsystem, std::optional<std::vector<int>> selectedUarts);
 	void detectSubsystem();
 
-	void eraseFlashMemory(int);
+	void eraseFlashMemory(int, std::optional<std::vector<int>> selectedUarts);
 	void cancelOperation();
 
 	// Events
@@ -63,6 +63,7 @@ public slots:
 	void cancel();
 	void clearLog();
 	void settings();
+	void mconf();
 
 	void disableControls();
 	void enableControls();
@@ -116,6 +117,7 @@ private:
 	QPushButton* m_pReadToFileButton = nullptr;
 	QPushButton* m_pConfigureButton = nullptr;
 	QPushButton* m_pEraseButton = nullptr;
+	QPushButton* m_pMconfButton = nullptr;
 
 	QPushButton* m_pSettingsButton = nullptr;
 	QPushButton* m_pClearLogButton = nullptr;

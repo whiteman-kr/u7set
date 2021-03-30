@@ -31,6 +31,10 @@ struct SignalElectricLimit
 	//
 	{   0,		5.1,	E::ElectricUnit::mA,	E::SensorType::V_0_5,			},						// module AIM and Rload
 
+	// micro A
+	//
+	{   -20,	20,		E::ElectricUnit::uA,	E::SensorType::uA_m20_p20,		},						// module MAIM
+
 	// Ohm - types of thermistors
 	//
 	{ 17.24,	395.16,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1391,	},	// -200 .. 850		// module non ptaform
@@ -72,9 +76,9 @@ struct SignalElectricLimit
 	{ -35.000,	100.00,	E::ElectricUnit::mV,	E::SensorType::mV_Raw_Mul_8,	},						// module TIM
 	{ -8.500,	19.000,	E::ElectricUnit::mV,	E::SensorType::mV_Raw_Mul_32,	},						// module TIM
 
-	// micro A
+	// Hz
 	//
-	{   -10,	10,		E::ElectricUnit::uA,	E::SensorType::uA_m10_p10,		},						// module MAIM
+	{  0.05,	50000,	E::ElectricUnit::Hz,	E::SensorType::Hz_005_50000,	},						// module FIM
 };
 
 const int SignalElectricLimitCount = sizeof(SignalElectricLimits) / sizeof(SignalElectricLimits[0]);
@@ -86,13 +90,13 @@ const int SignalElectricLimitCount = sizeof(SignalElectricLimits) / sizeof(Signa
 const double RLOAD_OHM_LOW_LIMIT = 50;																	// module AIM and Rload
 const double RLOAD_OHM_HIGH_LIMIT = 1000;																// module AIM and Rload
 
-// limits for otput signals of module AOM
+// limits for output signals of module AOM
 //
 const double OUT_PH_LOW_LIMIT = 0;																		// module AOM
 const double OUT_PH_HIGH_LIMIT = 65535;																	// module AOM
 
 
-// limits for otput signals of module ROM
+// limits for output signals of module ROM
 //
 //const double OUT_OHM_LOW_LIMIT = 0;																	// module ROM
 //const double OUT_OHM_HIGH_LIMIT = 2110; // Ohm														// module ROM
@@ -169,8 +173,10 @@ enum class UnitsConvertModule
 	NonPlatform = 0,
 	AIM = 1,
 	WAIM = 2,
-	TIM = 3,
-	RIM = 4,
+	MAIM = 3,
+	TIM = 4,
+	RIM = 5,
+	FIM = 6,
 };
 
 Q_DECLARE_METATYPE(UnitsConvertModule)
@@ -188,6 +194,16 @@ enum class UnitsConvertType
 Q_DECLARE_METATYPE(UnitsConvertType)
 
 // ==============================================================================================
+
+enum class ConversionDirection
+{
+	Normal = 0,
+	Inversion = 1,
+};
+
+Q_DECLARE_METATYPE(ConversionDirection)
+
+// ==============================================================================================
 // class UnitsConvertor
 //
 
@@ -198,13 +214,15 @@ class UnitsConvertor : public QObject
 public:
 
 	explicit UnitsConvertor(QObject *parent = nullptr);
-	virtual ~UnitsConvertor();
+	virtual ~UnitsConvertor() override;
 
 public:
 
 	double conversion(double val, const UnitsConvertType& conversionType, const Signal& signal);																				// universal conversion from electrical to physical and vice versa
 	double conversionDegree(double val, const UnitsConvertType& conversionType, const E::ElectricUnit& unitID, const E::SensorType& sensorType, double r0 = 0);					// conversion only ThermoCouple and ThermoResistor
 	double conversionDegree(double val, const UnitsConvertType& conversionType);																								// conversion only Celsius to Fahrenheit and vice versa
+
+	Q_INVOKABLE double conversionByConnection(double val, int connectionType, const Signal& sourSignal, const Signal& destSignal, ConversionDirection directType);				// conversion for Metrology connections, return converted value
 
 	double r0_from_signal(const Signal& signal);																																// for signals of module RIM
 	bool r0_is_use(int sensorType);																																				// for signals of module RIM
@@ -214,10 +232,10 @@ public:
 
 	UnitsConvertModule getModuleType(int unitID, int sensorType);																												// take module type by unit and sensorType
 
-	Q_INVOKABLE UnitsConvertResult electricToPhysical_Input(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double rload);			// get physical value for blocks of input signals			- module AIM, WAIM (V - AIM and WAIM, mA - only AIM with Rload)
-	Q_INVOKABLE UnitsConvertResult electricToPhysical_Output(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int outputMode);						// get physical value for blocks of output signals			- module AOM
+	Q_INVOKABLE UnitsConvertResult electricToPhysical_Input(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double rload);			// get physical value for blocks of input signals			- module AIM, WAIM, MAIM, FIM
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoCouple(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType);				// get physical value for blocks of thermocouple signals	- module TIM
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoResistor(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double r0);	// get physical value for blocks of thermoresistor signals	- module RIM
+	Q_INVOKABLE UnitsConvertResult electricToPhysical_Output(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int outputMode);						// get physical value for blocks of output signals			- module AOM
 };
 
 // ==============================================================================================

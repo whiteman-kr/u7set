@@ -31,7 +31,17 @@ public:
 				 const HostAddressPort& serverAddressPort1,
 				 const HostAddressPort& serverAddressPort2);
 
-	virtual ~SignalSocket();
+	virtual ~SignalSocket() override;
+
+public:
+
+	virtual void	onClientThreadStarted() override;
+	virtual void	onClientThreadFinished() override;
+
+	virtual void	onConnection() override;
+	virtual void	onDisconnection() override;
+
+	virtual void	processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;		// for processing functions: Request - Reply
 
 private:
 
@@ -47,16 +57,6 @@ private:
 	//
 	void			requestSignalState();													// ADS_GET_APP_SIGNAL_STATE
 	void			replySignalState(const char* replyData, quint32 replyDataSize);
-
-public:
-
-	virtual void	onClientThreadStarted() override;
-	virtual void	onClientThreadFinished() override;
-
-	virtual void	onConnection() override;
-	virtual void	onDisconnection() override;
-
-	virtual void	processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;		// for processing functions: Request - Reply
 
 public slots:
 

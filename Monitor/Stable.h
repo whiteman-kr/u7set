@@ -53,26 +53,23 @@
 	#pragma warning(disable : 4251)		// Static analyzer warning: 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'
 	#pragma warning(disable : 4275)		// Static analyzer warning: non - DLL-interface class 'class_1' used as base for DLL-interface class 'class_2'
 
-		// Disable 4996 warning
+	// Disable 4996 warning
 	#ifndef _SCL_SECURE_NO_WARNINGS
 		#define _SCL_SECURE_NO_WARNINGS
 	#endif
 #endif
 
-// For detecting memory leaks
+// Visual Leak Detector
 //
-#if defined (Q_OS_WIN) && defined (Q_DEBUG)
-#define _CRTDBG_MAP_ALLOC
-#include <cstdlib>
-#include <crtdbg.h>
-#ifdef _DEBUG
-	#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
-	// Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
-	// allocations to be of _CLIENT_BLOCK type
-#else
-	#define DBG_NEW new
-#endif
-#endif
+#if defined(Q_OS_WIN) && defined(QT_DEBUG)
+	#if __has_include("C:/Program Files (x86)/Visual Leak Detector/include/vld.h")
+		#include "C:/Program Files (x86)/Visual Leak Detector/include/vld.h"
+	#else
+		#if __has_include("D:/Program Files (x86)/Visual Leak Detector/include/vld.h")
+			#include "D:/Program Files (x86)/Visual Leak Detector/include/vld.h"
+		#endif
+	#endif
+#endif	// Visual Leak Detector
 
 
 #include "../lib/AppSignalManager.h"

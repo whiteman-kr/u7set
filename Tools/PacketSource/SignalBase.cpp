@@ -96,7 +96,8 @@ QString PS::Signal::engineeringRangeStr() const
 	{
 		case E::AnalogAppSignalFormat::SignedInt32:	formatStr = QString::asprintf("%%.%df", 0);					break;
 		case E::AnalogAppSignalFormat::Float32:		formatStr = QString::asprintf("%%.%df", decimalPlaces());	break;
-		default:									assert(0);										break;
+		default:
+			assert(0);
 	}
 
 	range = QString::asprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngineeringUnits(), highEngineeringUnits());
@@ -161,7 +162,8 @@ QString PS::Signal::stateStr() const
 			{
 				case E::AnalogAppSignalFormat::SignedInt32:		formatStr = QString::asprintf("%%.%df", 0);					break;
 				case E::AnalogAppSignalFormat::Float32:			formatStr = QString::asprintf("%%.%df", decimalPlaces());	break;
-				default:										assert(0);										break;
+				default:
+					assert(0);
 			}
 
 			str = QString::asprintf(formatStr.toLocal8Bit(), state());
@@ -233,7 +235,8 @@ double PS::Signal::state() const
 
 					break;
 
-				default: assert(0);
+				default:
+					assert(0);
 			}
 
 			break;
@@ -321,7 +324,8 @@ bool PS::Signal::setState(double state)
 
 					break;
 
-				default: assert(0); break;
+				default:
+					assert(0);
 			}
 
 			break;
@@ -399,147 +403,19 @@ SignalBase::~SignalBase()
 
 void SignalBase::clear()
 {
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		m_signalList.clear();
-		m_signalHashMap.clear();
-
-	m_signalMutex.unlock();
+	m_signalList.clear();
+	m_signalHashMap.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 int SignalBase::count() const
 {
-	int count = 0;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
-
-		count = m_signalList.count();
-
-	m_signalMutex.unlock();
-
-	return count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int SignalBase::readFromFile(const BuildInfo& buildInfo)
-{
-	clear();
-
-	QString msgTitle = tr("Loading signals");
-
-	if (buildInfo.buildDirPath().isEmpty() == true)
-	{
-		QString strError = tr("Please, input path to build directory!");
-
-		#ifdef Q_CONSOLE_APP
-			qDebug() << strError;
-		#else
-			QMessageBox::information(nullptr, msgTitle, strError);
-		#endif
-
-		return 0;
-	}
-
-	// read Signals
-	//
-	QString signalsfile = buildInfo.buildFile(BUILD_FILE_TYPE_SIGNALS).path();
-	if (signalsfile.isEmpty() == true)
-	{
-		QString strError = tr("Signals file %1 - path is empty!").arg(File::APP_SIGNALS_ASGS);
-
-		#ifdef Q_CONSOLE_APP
-			qDebug() << strError;
-		#else
-			QMessageBox::information(nullptr, msgTitle, strError);
-		#endif
-
-		return 0;
-	}
-
-	QFile fileSignalsAsgs(signalsfile);
-	if (fileSignalsAsgs.exists() == false)
-	{
-		QString strError = tr("File %1 is not found!").arg(signalsfile);
-
-		#ifdef Q_CONSOLE_APP
-			qDebug() << strError;
-		#else
-			QMessageBox::information(nullptr, msgTitle, strError);
-		#endif
-
-		return 0;
-	}
-
-	if (fileSignalsAsgs.open(QIODevice::ReadOnly) == false)
-	{
-		QString strError = tr("File %1 is not opened!").arg(signalsfile);
-
-		#ifdef Q_CONSOLE_APP
-			qDebug() << strError;
-		#else
-			QMessageBox::information(nullptr, msgTitle, strError);
-		#endif
-
-		return 0;
-	}
-
-	QByteArray&& signalsData = fileSignalsAsgs.readAll();
-	QByteArray uncompressedData = qUncompress(signalsData);
-
-	::Proto::AppSignalSet protoAppSignalSet;
-
-	bool result = protoAppSignalSet.ParseFromArray(uncompressedData.constData(), uncompressedData.size());
-	if (result == false)
-	{
-		return 0;
-	}
-
-	QString strProgressLabel;
-	int signalCount = protoAppSignalSet.appsignal_size();
-
-	#ifndef Q_CONSOLE_APP
-		QProgressDialog* pprd = new QProgressDialog(tr("Loading signals..."), tr("&Cancel"), 0, signalCount);
-		pprd->setMinimumDuration(0);
-		pprd->setWindowTitle("Please Wait");
-
-		for(int i = 0; i < signalCount; i++)
-		{
-			pprd->setValue(i) ;
-			qApp->processEvents();
-			if (pprd->wasCanceled())
-			{
-				 break;
-			}
-
-			const ::Proto::AppSignal& protoAppSignal = protoAppSignalSet.appsignal(i);
-
-			PS::Signal signal;
-			signal.serializeFrom(protoAppSignal);
-
-			append(signal);
-		}
-
-		delete pprd;
-	#else
-		qDebug() << "Wait, please, signals are loading ...";
-
-		for(int i = 0; i < signalCount; i++)
-		{
-			const ::Proto::AppSignal& protoAppSignal = protoAppSignalSet.appsignal(i);
-
-			PS::Signal signal;
-			signal.serializeFrom(protoAppSignal);
-
-			append(signal);
-		}
-	#endif
-
-	emit signalsLoaded();
-
-	return count();
+	return TO_INT(m_signalList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -552,19 +428,17 @@ int SignalBase::append(const PS::Signal& signal)
 		return -1;
 	}
 
-	int index = -1;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (m_signalHashMap.contains(signal.hash()) == true)
+	{
+		return -1;
+	}
 
-		if (m_signalHashMap.contains(signal.hash()) == false)
-		{
-			m_signalList.append(signal);
-			index = m_signalList.count() - 1;
+	m_signalList.push_back(signal);
+	int index = TO_INT(m_signalList.size() - 1);
 
-			m_signalHashMap.insert(signal.hash(), index);
-		}
-
-	m_signalMutex.unlock();
+	m_signalHashMap.insert(signal.hash(), index);
 
 	return index;
 }
@@ -592,21 +466,20 @@ PS::Signal* SignalBase::signalPtr(const Hash& hash) const
 		return nullptr;
 	}
 
-	PS::Signal* pSignal = nullptr;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (m_signalHashMap.contains(hash) == false)
+	{
+		return nullptr;
+	}
 
-		if (m_signalHashMap.contains(hash) == true)
-		{
-			int index = m_signalHashMap[hash];
-			if (index >= 0 && index < m_signalList.count())
-			{
-				pSignal = (PS::Signal*) &m_signalList[index];
-			}
-		}
+	int index = m_signalHashMap[hash];
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
+	{
+		return nullptr;
+	}
 
-	m_signalMutex.unlock();
-
+	PS::Signal* pSignal = (PS::Signal*) &m_signalList[static_cast<quint64>(index)];
 	return pSignal;
 }
 
@@ -614,38 +487,30 @@ PS::Signal* SignalBase::signalPtr(const Hash& hash) const
 
 PS::Signal* SignalBase::signalPtr(int index) const
 {
-	PS::Signal* pSignal = nullptr;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
+	{
+		return nullptr;
+	}
 
-		if (index >= 0 && index < m_signalList.count())
-		{
-			pSignal = (PS::Signal*) &m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
+	PS::Signal* pSignal = (PS::Signal*) &m_signalList[static_cast<quint64>(index)];
 	return pSignal;
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
 PS::Signal SignalBase::signal(const Hash& hash) const
 {
-	PS::Signal signal;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	int index = m_signalHashMap[hash];
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
+	{
+		return PS::Signal();
+	}
 
-		int index = m_signalHashMap[hash];
-		if (index >= 0 && index < m_signalList.count())
-		{
-			signal = m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return signal;
+	return m_signalList[static_cast<quint64>(index)];
 }
 
 
@@ -653,34 +518,29 @@ PS::Signal SignalBase::signal(const Hash& hash) const
 
 PS::Signal SignalBase::signal(int index) const
 {
-	PS::Signal signal;
+	QMutexLocker l(&m_signalMutex);
 
-	m_signalMutex.lock();
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
+	{
+		return PS::Signal();
+	}
 
-		if (index >= 0 && index < m_signalList.count())
-		{
-			signal = m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return signal;
+	return m_signalList[static_cast<quint64>(index)];
 }
-
 
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalBase::setSignal(int index, const PS::Signal &signal)
 {
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		if (index >= 0 && index < m_signalList.count())
-		{
-			m_signalList[index] = signal;
-		}
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
+	{
+		return;
+	}
 
-	m_signalMutex.unlock();
+	m_signalList[static_cast<quint64>(index)] = signal;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -697,23 +557,22 @@ void SignalBase::saveSignalState(PS::Signal* pSignal)
 	ss.appSignalID = pSignal->appSignalID();
 	ss.state = pSignal->state();
 
-	m_signalStateList.append(ss);
+	m_signalStateList.push_back(ss);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalBase::restoreSignalsState()
 {
-	int count = m_signalStateList.count();
-	for(int i = 0; i < count; i++)
+	for(SignalState& ss : m_signalStateList)
 	{
-		PS::Signal* pSignal = signalPtr(m_signalStateList[i].appSignalID);
+		PS::Signal* pSignal = signalPtr(ss.appSignalID);
 		if (pSignal == nullptr)
 		{
 			continue;
 		}
 
-		pSignal->setState(m_signalStateList[i].state);
+		pSignal->setState(ss.state);
 	}
 
 	m_signalStateList.clear();
@@ -723,11 +582,12 @@ void SignalBase::restoreSignalsState()
 
 SignalBase& SignalBase::operator=(const SignalBase& from)
 {
-	m_signalMutex.lock();
+	QMutexLocker l(&m_signalMutex);
 
-		m_signalList = from.m_signalList;
+	m_signalList = from.m_signalList;
+	m_signalHashMap = from.m_signalHashMap;
 
-	m_signalMutex.unlock();
+	m_signalStateList = from.m_signalStateList;
 
 	return *this;
 }

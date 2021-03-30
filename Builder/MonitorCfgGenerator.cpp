@@ -16,16 +16,28 @@ namespace Builder
 	{
 	}
 
-	bool MonitorCfgGenerator::generateConfiguration()
+	bool MonitorCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		MonitorSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<MonitorSettings>(profile, settingsGetter);
+	}
+
+	bool MonitorCfgGenerator::generateConfigurationStep1()
 	{
 		if (m_software == nullptr ||
-			m_software->type() != E::SoftwareType::Monitor ||
+			m_software->softwareType() != E::SoftwareType::Monitor ||
 			m_equipment == nullptr ||
 			m_cfgXml == nullptr ||
 			m_buildResultWriter == nullptr)
 		{
 			Q_ASSERT(m_software);
-			Q_ASSERT(m_software->type() == E::SoftwareType::Monitor);
+			Q_ASSERT(m_software->softwareType() == E::SoftwareType::Monitor);
 			Q_ASSERT(m_equipment);
 			Q_ASSERT(m_cfgXml);
 			Q_ASSERT(m_buildResultWriter);
@@ -42,17 +54,19 @@ namespace Builder
 		//
 		result &= saveScriptProperties("OnConfigurationArrived", "OnConfigurationArrived.js");
 
-		// write XML via m_cfgXml->xmlWriter()
-		//
-		result &= writeMonitorSettings();
+		result &= initSchemaTagsAndTuningSources();
 
 		// Add links to schema files (previously written) via m_cfgXml->addLinkToFile(...)
 		//
 		result &= writeSchemasByTags();
 
+		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getSettingsDefaultProfile<MonitorSettings>();
+
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
 		// Generate tuning signals file
 		//
-		if (m_settings.tuningEnabled == true)
+		if (settings->tuningEnabled == true)
 		{
 			result &= writeTuningSignals();
 		}
@@ -80,109 +94,15 @@ namespace Builder
 		return result;
 	}
 
-	bool MonitorCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
+	bool MonitorCfgGenerator::initSchemaTagsAndTuningSources()
 	{
-		XmlWriteHelper xml(xmlWriter);
+		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getSettingsDefaultProfile<MonitorSettings>();
 
-		return m_settings.writeToXml(xml);
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 
-		/*
-		xmlWriter.writeStartElement("Settings");
+		m_schemaTagList = settings->getSchemaTags();
 
-		{
-			std::shared_ptr<int*> writeEndSettings(nullptr, [&xmlWriter](void*)
-				{
-					xmlWriter.writeEndElement();
-				});
-
-			// --
-			//
-
-			// StartSchemaID
-			//
-			{
-				bool ok = true;
-				QString startSchemaId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "StartSchemaID", &ok).trimmed();
-				if (ok == false)
-				{
-					return false;
-				}
-
-				if (startSchemaId.isEmpty() == true)
-				{
-					QString errorStr = tr("Monitor configuration error %1, property startSchemaId is invalid")
-									   .arg(m_software->equipmentIdTemplate());
-
-					m_log->writeError(errorStr);
-					writeErrorSection(xmlWriter, errorStr);
-					return false;
-				}
-
-				xmlWriter.writeTextElement("StartSchemaID", startSchemaId);
-			}
-
-			// SchemaTags
-			//
-			{
-				bool ok = true;
-				QString schemaTags = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "SchemaTags", &ok);
-				if (ok == false)
-				{
-					return false;
-				}
-
-				m_schemaTagList = schemaTags.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
-
-				for (QString& tag : m_schemaTagList)
-				{
-					tag = tag.toLower();
-				}
-
-				schemaTags = m_schemaTagList.join("; ");
-
-				xmlWriter.writeTextElement("SchemaTags", schemaTags);
-			}
-
-			// AppDataService
-			//
-			if (bool ok = writeAppDataServiceSection(xmlWriter);
-				ok == false)
-			{
-				return false;
-			}
-
-			// ArchiveService
-			//
-			if (bool ok = writeArchiveServiceSection(xmlWriter);
-				ok == false)
-			{
-				return false;
-			}
-
-			// TuningService
-			//
-			if (bool ok = writeTuningServiceSection(xmlWriter);
-				ok == false)
-			{
-				return false;
-			}
-		}
-
-		return true;*/
-	}
-
-	bool MonitorCfgGenerator::writeMonitorSettings()
-	{
-		bool result = m_settings.readFromDevice(m_context, m_software);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		m_schemaTagList = m_settings.getSchemaTags();
-
-		if (m_settings.tuningEnabled == true &&
+		if (settings->tuningEnabled == true &&
 			m_context->m_projectProperties.safetyProject() == true)
 		{
 			// Tuning for Monitor is forbiden for Safety Projects
@@ -192,9 +112,9 @@ namespace Builder
 			return false;
 		}
 
-		m_tuningSources = m_settings.getTuningSources();
+		m_tuningSources = settings->getTuningSources();
 
-		return getSettingsXml(m_cfgXml->xmlWriter());
+		return true;
 	}
 
 	bool MonitorCfgGenerator::saveScriptProperties(QString scriptProperty, QString fileName)
@@ -379,8 +299,9 @@ namespace Builder
 		ClientBehaviorStorage allBehaviorStorage;
 		QString errorCode;
 		QByteArray dbData;
+		int etcFileId = m_dbController->systemFileId(DbDir::EtcDir);
 
-		bool result = loadFileFromDatabase(m_dbController, m_dbController->etcFileId(), allBehaviorStorage.dbFileName(), &errorCode, &dbData);
+		bool result = loadFileFromDatabase(m_dbController, etcFileId, allBehaviorStorage.dbFileName(), &errorCode, &dbData);
 		if (result == false)
 		{
 			m_log->errPDB2002(-1, allBehaviorStorage.dbFileName(), errorCode);

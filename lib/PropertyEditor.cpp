@@ -17,67 +17,10 @@ namespace ExtWidgets
 	QString PropertyEditorBase::m_commonCategoryName = "Common";
 
 	//
-	// ------------ PropertyEditorBase ------------
+	// PropertyTools
 	//
 
-	PropertyEditorBase::PropertyEditorBase()
-	{
-		QSettings s;
-		thePropertyEditorSettings.restore(s);
-	}
-
-	PropertyEditorBase::~PropertyEditorBase()
-	{
-		QSettings s;
-		thePropertyEditorSettings.store(s);
-	}
-
-	PropertyEditor* PropertyEditorBase::createChildPropertyEditor(QWidget* parent)
-	{
-		return new PropertyEditor(parent);
-	}
-
-	PropertyTextEditor* PropertyEditorBase::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
-	{
-		Q_UNUSED(propertyPtr);
-		return new PropertyPlainTextEditor(parent);
-	}
-
-	bool PropertyEditorBase::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
-	{
-		Q_UNUSED(propertyPtr);
-		Q_UNUSED(dialog);
-		return false;
-	}
-
-	bool PropertyEditorBase::storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
-	{
-		Q_UNUSED(propertyPtr);
-		Q_UNUSED(dialog);
-		return false;
-	}
-
-	bool PropertyEditorBase::expertMode() const
-	{
-		return m_expertMode;
-	}
-
-	void PropertyEditorBase::setExpertMode(bool expertMode)
-	{
-		m_expertMode = expertMode;
-	}
-
-	bool PropertyEditorBase::isReadOnly() const
-	{
-		return m_readOnly;
-	}
-
-	void PropertyEditorBase::setReadOnly(bool readOnly)
-	{
-		m_readOnly = readOnly;
-	}
-
-	QString PropertyEditorBase::propertyVectorText(QVariant& value)
+	QString PropertyTools::propertyVectorText(QVariant& value)
 	{
 		// PropertyVector
 		//
@@ -112,7 +55,7 @@ namespace ExtWidgets
 		return QString();
 	}
 
-	QString PropertyEditorBase::stringListText(const QVariant& value)
+	QString PropertyTools::stringListText(const QVariant& value)
 	{
 		if (value.userType() == QVariant::StringList)
 		{
@@ -137,13 +80,13 @@ namespace ExtWidgets
 		return QString();
 	}
 
-	QString PropertyEditorBase::colorVectorText(QVariant& value)
+	QString PropertyTools::colorVectorText(QVariant& value)
 	{
 		QVector<QColor> v = value.value<QVector<QColor>>();
 		return QString("QVector<QColor> [%1 items]").arg(static_cast<int>(v.size()));
 	}
 
-	QString PropertyEditorBase::propertyValueText(Property* p, int row)
+	QString PropertyTools::propertyValueText(Property* p, int row)
 	{
 		QVariant value = p->value();
 
@@ -188,6 +131,11 @@ namespace ExtWidgets
 		if (type == qMetaTypeId<QVector<QColor>>())
 		{
 			return colorVectorText(value);
+		}
+
+		if (type == qMetaTypeId<QDateTime>())
+		{
+			return value.toString();
 		}
 
 		char numberFormat = p->precision() > 5 ? 'g' : 'f';
@@ -295,6 +243,69 @@ namespace ExtWidgets
 
 		return QString();
 	}
+
+	//
+	// ------------ PropertyEditorBase ------------
+	//
+
+	PropertyEditorBase::PropertyEditorBase()
+	{
+		QSettings s;
+		thePropertyEditorSettings.restore(s);
+	}
+
+	PropertyEditorBase::~PropertyEditorBase()
+	{
+		QSettings s;
+		thePropertyEditorSettings.store(s);
+	}
+
+	PropertyEditor* PropertyEditorBase::createChildPropertyEditor(QWidget* parent)
+	{
+		return new PropertyEditor(parent);
+	}
+
+	PropertyTextEditor* PropertyEditorBase::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
+	{
+		Q_UNUSED(propertyPtr);
+		return new PropertyPlainTextEditor(parent);
+	}
+
+	bool PropertyEditorBase::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+	{
+		Q_UNUSED(propertyPtr);
+		Q_UNUSED(dialog);
+		return false;
+	}
+
+	bool PropertyEditorBase::storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
+	{
+		Q_UNUSED(propertyPtr);
+		Q_UNUSED(dialog);
+		return false;
+	}
+
+	bool PropertyEditorBase::expertMode() const
+	{
+		return m_expertMode;
+	}
+
+	void PropertyEditorBase::setExpertMode(bool expertMode)
+	{
+		m_expertMode = expertMode;
+	}
+
+	bool PropertyEditorBase::isReadOnly() const
+	{
+		return m_readOnly;
+	}
+
+	void PropertyEditorBase::setReadOnly(bool readOnly)
+	{
+		m_readOnly = readOnly;
+	}
+
+
 
 	QString PropertyEditorBase::colorToText(QColor color)
 	{
@@ -1676,16 +1687,6 @@ namespace ExtWidgets
 		return m_modified;
 	}
 
-	bool PropertyTextEditor::hasOkCancelButtons()
-	{
-		return m_hasOkCancelButtons;
-	}
-
-	void PropertyTextEditor::setHasOkCancelButtons(bool value)
-	{
-		m_hasOkCancelButtons = value;
-	}
-
 	void PropertyTextEditor::textChanged()
 	{
 		m_modified = true;
@@ -1755,6 +1756,11 @@ namespace ExtWidgets
 	void PropertyPlainTextEditor::setReadOnly(bool value)
 	{
 		m_plainTextEdit->setReadOnly(value);
+	}
+
+	bool PropertyPlainTextEditor::externalOkCancelButtons() const
+	{
+		return true;
 	}
 
 	bool PropertyPlainTextEditor::eventFilter(QObject* obj, QEvent* event)
@@ -2158,12 +2164,20 @@ namespace ExtWidgets
 	//
 	// ---------MultiTextEditorDialog----------
 	//
-	MultiTextEditorDialog::MultiTextEditorDialog(PropertyEditorBase* propertyEditorBase, QWidget* parent, const QString &text, std::shared_ptr<Property> p):
+	MultiTextEditorDialog::MultiTextEditorDialog(PropertyEditorBase* propertyEditorBase, QWidget* parent, const QString &text, std::shared_ptr<Property> p, bool readOnly):
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint),
 		m_propertyEditorBase(propertyEditorBase),
 		m_property(p)
 	{
-		setWindowTitle(p->caption());
+		if (readOnly == true)
+		{
+			setWindowTitle(p->caption() + tr(" (Read-Only)"));
+		}
+		else
+		{
+			setWindowTitle(p->caption());
+		}
+
 
 		if (m_propertyEditorBase->restorePropertyTextEditorSize(m_property, this) == false)
 		{
@@ -2178,13 +2192,15 @@ namespace ExtWidgets
 			}
 		}
 
-		QVBoxLayout* vl = new QVBoxLayout();
+		QVBoxLayout* mainLayout = new QVBoxLayout();
 
 		// Create Editor
 
 		m_editor = m_propertyEditorBase->createPropertyTextEditor(m_property, this);
 
 		m_editor->setText(text);
+
+		m_editor->setReadOnly(readOnly);
 
 		if (m_property->validator().isEmpty() == false)
 		{
@@ -2193,40 +2209,21 @@ namespace ExtWidgets
 
 		connect(m_editor, &PropertyTextEditor::escapePressed, this, &MultiTextEditorDialog::reject);
 
+		mainLayout->addWidget(m_editor);
+
 		// Buttons
 
+		QPushButton* scriptHelpButton = nullptr;
 		QPushButton* okButton = nullptr;
 		QPushButton* cancelButton = nullptr;
 
-		if (m_editor->hasOkCancelButtons() == true)
-		{
-			okButton = new QPushButton(tr("OK"), this);
-			cancelButton = new QPushButton(tr("Cancel"), this);
-
-			okButton->setDefault(true);
-
-			connect(okButton, &QPushButton::clicked, this, &MultiTextEditorDialog::accept);
-			connect(cancelButton, &QPushButton::clicked, this, &MultiTextEditorDialog::reject);
-		}
-		else
-		{
-			connect(m_editor, &PropertyTextEditor::okPressed, this, &MultiTextEditorDialog::accept);
-			connect(m_editor, &PropertyTextEditor::cancelPressed, this, &MultiTextEditorDialog::reject);
-		}
-
-		connect(this, &QDialog::finished, this, &MultiTextEditorDialog::finished);
-
-		QHBoxLayout* hl = new QHBoxLayout();
-
 		// Property Editor help
-
+		//
 		if (p->isScript() && m_propertyEditorBase->scriptHelpFile().isEmpty() == false)
 		{
-			QPushButton* helpButton = new QPushButton("?", this);
+			scriptHelpButton = new QPushButton("?", this);
 
-			hl->addWidget(helpButton);
-
-			connect(helpButton, &QPushButton::clicked, [this] ()
+			connect(scriptHelpButton, &QPushButton::clicked, [this] ()
 			{
 				UiTools::openHelp(m_propertyEditorBase->scriptHelpFile(), this);
 			});
@@ -2240,21 +2237,57 @@ namespace ExtWidgets
 			});
 		}
 
-		hl->addStretch();
-		if (okButton != nullptr)
+		// OK and Cancel buttons
+		//
+		if (m_editor->externalOkCancelButtons() == true)
 		{
-			hl->addWidget(okButton);
+			okButton = new QPushButton(tr("OK"), this);
+			okButton->setDefault(true);
+			okButton->setEnabled(readOnly == false);
+
+			cancelButton = new QPushButton(tr("Cancel"), this);
+
+			if (readOnly == false)
+			{
+				connect(okButton, &QPushButton::clicked, this, &MultiTextEditorDialog::accept);
+			}
+			connect(cancelButton, &QPushButton::clicked, this, &MultiTextEditorDialog::reject);
 		}
-		if (cancelButton != nullptr)
+		else
 		{
-			hl->addWidget(cancelButton);
+			if (readOnly == false)
+			{
+				connect(m_editor, &PropertyTextEditor::okPressed, this, &MultiTextEditorDialog::accept);
+			}
+			connect(m_editor, &PropertyTextEditor::cancelPressed, this, &MultiTextEditorDialog::reject);
 		}
 
+		connect(this, &QDialog::finished, this, &MultiTextEditorDialog::finished);
 
-		vl->addWidget(m_editor);
-		vl->addLayout(hl);
+		if (scriptHelpButton != nullptr || okButton != nullptr || cancelButton != nullptr)
+		{
+			QHBoxLayout* buttonsLayout = new QHBoxLayout();
 
-		setLayout(vl);
+			if (scriptHelpButton != nullptr)
+			{
+				buttonsLayout->addWidget(scriptHelpButton);
+			}
+
+			buttonsLayout->addStretch();
+
+			if (okButton != nullptr)
+			{
+				buttonsLayout->addWidget(okButton);
+			}
+			if (cancelButton != nullptr)
+			{
+				buttonsLayout->addWidget(cancelButton);
+			}
+
+			mainLayout->addLayout(buttonsLayout);
+		}
+
+		setLayout(mainLayout);
 	}
 
 	QString MultiTextEditorDialog::text()
@@ -2320,11 +2353,13 @@ namespace ExtWidgets
 
 	MultiTextEdit::MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, int row, bool readOnly, QWidget* parent):
 		PropertyEditCellWidget(parent),
+		m_propertyEditorBase(propertyEditorBase),
 		m_property(p),
 		m_row(row),
-		m_userType(p->value().userType()),
-		m_propertyEditorBase(propertyEditorBase)
+		m_readOnly(readOnly),
+		m_userType(p->value().userType())
 	{
+
 		if (p == nullptr || m_propertyEditorBase == nullptr)
 		{
 			assert(p);
@@ -2342,10 +2377,47 @@ namespace ExtWidgets
 			m_oldValue = p->value();	// Save type of Tuning Value for future setting
 		}
 
+		// Create Line Edit
+		//
 		m_lineEdit = new QLineEdit(parent);
+
+		if (p->password() == true)
+		{
+			if (m_userType == QVariant::String)
+			{
+				m_lineEdit->setEchoMode(QLineEdit::Password);
+			}
+		}
+
+		if (m_userType == QVariant::ByteArray || m_userType == QVariant::Image)
+		{
+			m_lineEdit->setReadOnly(true);
+		}
+		else
+		{
+			m_lineEdit->setReadOnly(m_readOnly == true);
+		}
+
 		connect(m_lineEdit, &QLineEdit::editingFinished, this, &MultiTextEdit::onEditingFinished);
 		connect(m_lineEdit, &QLineEdit::textEdited, this, &MultiTextEdit::onTextEdited);
 
+		m_lineEdit->installEventFilter(this);
+
+		// Add Validator
+		//
+		if (p->validator().isEmpty() == false)
+		{
+			if (m_property->specificEditor() != E::PropertySpecificEditor::LoadFileDialog)// for LoadFileDialog, Validator is used as mask
+			{
+				QRegExp regexp(p->validator());
+				QRegExpValidator* v = new QRegExpValidator(regexp, this);
+				m_lineEdit->setValidator(v);
+			}
+		}
+
+
+		// Create Button for File, ByteArray, Strings and String List
+		//
 		if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog ||
 				m_userType == QVariant::ByteArray ||
 				(m_userType == QVariant::String && p->password() == false) ||
@@ -2354,9 +2426,17 @@ namespace ExtWidgets
 			m_button = new QToolButton(parent);
 			m_button->setText("...");
 
+			if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog)
+			{
+				// If property is read-only, button is enabled except for LoadFileDialog
+				m_button->setEnabled(m_readOnly == false);
+			}
+
 			connect(m_button, &QToolButton::clicked, this, &MultiTextEdit::onButtonPressed);
 		}
 
+		// Add items to layout
+		//
 		QHBoxLayout* lt = new QHBoxLayout;
 		lt->setContentsMargins(0, 0, 0, 0);
 		lt->setSpacing(0);
@@ -2367,33 +2447,6 @@ namespace ExtWidgets
 		}
 
 		setLayout(lt);
-
-		m_lineEdit->installEventFilter(this);
-
-		if (m_property->specificEditor() != E::PropertySpecificEditor::LoadFileDialog &&	// for LoadFileDialog, Validator is used as mask
-				p->validator().isEmpty() == false)
-		{
-			QRegExp regexp(p->validator());
-			QRegExpValidator* v = new QRegExpValidator(regexp, this);
-			m_lineEdit->setValidator(v);
-		}
-
-		if (m_userType == QVariant::String && p->password() == true)
-		{
-			m_lineEdit->setEchoMode(QLineEdit::Password);
-		}
-
-		m_lineEdit->setReadOnly(readOnly == true);
-
-		if (m_userType == QVariant::ByteArray || m_userType == QVariant::Image)
-		{
-			m_lineEdit->setReadOnly(true);
-		}
-
-		if (m_button != nullptr)
-		{
-			m_button->setEnabled(readOnly == false);
-		}
 
 		QTimer::singleShot(0, m_lineEdit, SLOT(setFocus()));
 	}
@@ -2449,8 +2502,13 @@ namespace ExtWidgets
 				return;
 			}
 
-			MultiTextEditorDialog multlLineEdit(m_propertyEditorBase, this, m_oldValue.toString(), m_property);
+			MultiTextEditorDialog multlLineEdit(m_propertyEditorBase, this, m_oldValue.toString(), m_property, m_readOnly);
 			if (multlLineEdit.exec() != QDialog::Accepted)
+			{
+				return;
+			}
+
+			if (m_readOnly == true)
 			{
 				return;
 			}
@@ -2644,11 +2702,6 @@ namespace ExtWidgets
 				assert(false);
 				return;
 			}
-		}
-
-		if (m_button != nullptr)
-		{
-			m_button->setEnabled(readOnly == false);
 		}
 	}
 
@@ -2847,19 +2900,19 @@ namespace ExtWidgets
 
 		if (m_currentValue.userType() == QVariant::StringList)
 		{
-			m_lineEdit->setText(PropertyEditorBase::stringListText(m_currentValue));
+			m_lineEdit->setText(PropertyTools::stringListText(m_currentValue));
 			return;
 		}
 
 		if (m_currentValue.userType() == qMetaTypeId<QVector<QColor>>())
 		{
-			m_lineEdit->setText(PropertyEditorBase::colorVectorText(m_currentValue));
+			m_lineEdit->setText(PropertyTools::colorVectorText(m_currentValue));
 			return;
 		}
 
 		if (variantIsPropertyVector(m_currentValue) == true || variantIsPropertyList(m_currentValue) == true)
 		{
-			m_lineEdit->setText(PropertyEditorBase::propertyVectorText(m_currentValue));
+			m_lineEdit->setText(PropertyTools::propertyVectorText(m_currentValue));
 			return;
 		}
 
@@ -2909,19 +2962,19 @@ namespace ExtWidgets
 
 		if (variantIsPropertyVector(m_currentValue) == true || variantIsPropertyList(m_currentValue) == true)
 		{
-			m_lineEdit->setText(PropertyEditorBase::propertyVectorText(m_currentValue));
+			m_lineEdit->setText(PropertyTools::propertyVectorText(m_currentValue));
 		}
 		else
 		{
 			if (m_currentValue.userType() == QVariant::StringList)
 			{
-				m_lineEdit->setText(PropertyEditorBase::stringListText(m_currentValue));
+				m_lineEdit->setText(PropertyTools::stringListText(m_currentValue));
 			}
 			else
 			{
 				if ( m_currentValue.userType() == qMetaTypeId<QVector<QColor>>())
 				{
-					m_lineEdit->setText(PropertyEditorBase::colorVectorText(m_currentValue));
+					m_lineEdit->setText(PropertyTools::colorVectorText(m_currentValue));
 				}
 			}
 		}
@@ -3139,7 +3192,13 @@ namespace ExtWidgets
 			return new QWidget(parent);
 		}
 
-		m_cellEditor = m_propertyEditor->createCellRowEditor(p, row, true, p->readOnly() == true || m_propertyEditor->isReadOnly() == true, parent);
+		bool sameValue = m_propertyEditor->propertySameValueFromIndex(index);
+
+		m_cellEditor = m_propertyEditor->createCellRowEditor(p,
+															 row,
+															 sameValue,
+															 p->readOnly() == true || m_propertyEditor->isReadOnly() == true,
+															 parent);
 
 		connect(m_cellEditor, &PropertyEditCellWidget::valueChanged, this, &PropertyEditorDelegate::onValueChanged);
 
@@ -3183,7 +3242,13 @@ namespace ExtWidgets
 			Q_ASSERT(cellEditor);
 			return;
 		}
-		cellEditor->setValue(p, p->readOnly() == true || m_propertyEditor->isReadOnly() == true);
+
+		bool sameValue = m_propertyEditor->propertySameValueFromIndex(index);
+
+		if (sameValue == true)
+		{
+			cellEditor->setValue(p, p->readOnly() == true || m_propertyEditor->isReadOnly() == true);
+		}
 
 		return;
 	}
@@ -3502,7 +3567,7 @@ namespace ExtWidgets
 
 		if (po.sameValue == true)
 		{
-			text = PropertyEditorBase::propertyValueText(po.property.get(), -1);
+			text = PropertyTools::propertyValueText(po.property.get(), -1);
 		}
 		else
 		{
@@ -3976,6 +4041,20 @@ namespace ExtWidgets
 
 		const PropertyEditorObject& po = it->second;
 		return po.property;
+	}
+
+	bool PropertyEditor::propertySameValueFromIndex(QModelIndex index) const
+	{
+		QString propertyName = m_treeWidget->propertyCaption(index);
+
+		auto it = m_treeObjects.find(propertyName);
+		if (it == m_treeObjects.end())
+		{
+			return false;
+		}
+
+		const PropertyEditorObject& po = it->second;
+		return po.sameValue;
 	}
 
 	// returns -1 if no type is selected or they are different

@@ -18,19 +18,16 @@ namespace Builder
 
 		~TuningServiceCfgGenerator();
 
-		virtual bool generateConfiguration() override;
-		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
+		virtual bool createSettingsProfile(const QString& profile) override;
+		virtual bool generateConfigurationStep1() override;
 
 	private:
-		bool writeSettings();
 		bool writeTuningSources();
 
 		bool writeBatFile();
 		bool writeShFile();
 
 	private:
-		TuningServiceSettingsGetter m_settings;
-
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 
 		QVector<Signal*> m_tuningSignals;

@@ -231,7 +231,7 @@ namespace Builder
 				continue;
 			}
 
-			std::shared_ptr<Hardware::DeviceObject> device = equipment->deviceObjectSharedPointer(s.equipmentID());
+			std::shared_ptr<Hardware::DeviceObject> device = equipment->deviceObject(s.equipmentID());
 
 			if (device == nullptr)
 			{
@@ -262,7 +262,7 @@ namespace Builder
 				}
 				break;
 
-			case Hardware::DeviceType::Signal:
+			case Hardware::DeviceType::AppSignal:
 				{
 					Hardware::DeviceChassis* chassis = const_cast<Hardware::DeviceChassis*>(device->getParentChassis());
 
@@ -272,7 +272,7 @@ namespace Builder
 						continue;
 					}
 
-					std::shared_ptr<Hardware::DeviceModule> module = chassis->getLogicModuleSharedPointer();
+					std::shared_ptr<Hardware::DeviceModule> module = chassis->findLogicModule();
 
 					if (module != nullptr && module->isLogicModule() == true)
 					{
@@ -359,7 +359,7 @@ namespace Builder
 				continue;
 			}
 
-			const Hardware::DeviceObject* deviceObject = equipment->deviceObject(s.equipmentID());
+			const Hardware::DeviceObject* deviceObject = equipment->deviceObject(s.equipmentID()).get();
 
 			if (deviceObject == nullptr)
 			{

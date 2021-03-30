@@ -1,14 +1,13 @@
 #include "UalTester.h"
 
+#include <QtCore/QCoreApplication>
+#include <csignal>
 #include <QDebug>
 
 #include "../../lib/SocketIO.h"
 #include "../../lib/XmlHelper.h"
 #include "../../lib/Signal.h"
-
-
-#include <QtCore/QCoreApplication>
-#include <csignal>
+#include "../../lib/ConstStrings.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 //
@@ -16,7 +15,8 @@
 //
 // -------------------------------------------------------------------------------------------------------------------
 
-UalTester::UalTester(int& argc, char** argv) :
+UalTester::UalTester(int& argc, char** argv, std::shared_ptr<CircularLogger> logger) :
+	m_log(logger),
 	m_waitSocketsConnectionTimer(this)
 {
 	setlocale(LC_ALL,"Russian");
@@ -37,7 +37,7 @@ bool UalTester::start()
 		return false;
 	}
 
-	std::cout << "------ Parsing of command line is successfully!" << std::endl;
+	DEBUG_LOG_MSG(m_log, "------ Parsing of command line is successfully!");
 
 	// run loader to receive signals from CfgSrv
 	//
@@ -54,6 +54,117 @@ void UalTester::stop()
 	stopTuningThread();
 }
 
+void UalTester::slot_loadConfiguration(const QByteArray configurationXmlData,
+									   const BuildFileInfoArray buildFileInfoArray,
+									   SessionParams sessionParams,
+									   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
+{
+	Q_UNUSED(sessionParams);
+
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return;
+	}
+
+	bool result = false;
+
+	const TestClientSettings* typedSettingsPtr = dynamic_cast<const TestClientSettings*>(curSettingsProfile.get());
+
+	if (typedSettingsPtr == nullptr)
+	{
+		DEBUG_LOG_ERR(m_log, "Settings casting ERROR!");
+		return;
+	}
+
+	m_cfgSettings = *typedSettingsPtr;
+
+	// load signals
+	//
+	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+	{
+		QByteArray fileData;
+		QString errStr;
+
+		m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
+
+		if (errStr.isEmpty() == false)
+		{
+			DEBUG_LOG_ERR(m_log, errStr);
+			continue;
+		}
+
+		result = true;
+
+		if (bfi.ID == CfgFileId::APP_SIGNAL_SET)
+		{
+			result &= readAppSignals(fileData);				// read signals
+		}
+	}
+
+	stopCfgLoaderThread();
+
+	// configuration and signals laoded successfully
+	//
+	if (result == false)
+	{
+		QCoreApplication::exit(-1);
+		return;
+	}
+
+	emit configurationLoaded();	// this is signal call slot to parse test file
+
+	return;
+}
+
+void UalTester::slot_parseTestFile()
+{
+	// parse Test file(s)
+	//
+	for(const QString& testFileName : m_cmdLineParam.testFileNameList())
+	{
+		if (parseTestFile(testFileName) == false)
+		{
+			m_cmdLineParam.printToReportFile(QStringList(QString("Test File: %1").arg(testFileName).toUtf8()));	// print file name to report file
+			m_cmdLineParam.printToReportFile(m_testfile.errorList());												// print errors to report file
+			QCoreApplication::exit(-1);
+			return;
+		}
+	}
+
+	DEBUG_LOG_MSG(m_log, "------ Test file(s) was parsed successfully!");
+
+	// run sockets to get AppSignalState and to set state signals and data sources
+	//
+	if (runSockets() == false)
+	{
+		QCoreApplication::exit(-1);
+		return;
+	}
+}
+
+void UalTester::slot_waitSocketsReady()
+{
+	if (signalStateSocketIsConnected() == false || tuningSocketIsConnected() == false)
+	{
+		return;
+	}
+
+	m_waitSocketsConnectionTimer.stop();
+
+	DEBUG_LOG_MSG(m_log, "------ Connect to AppDataSrv and TuningSrv is established successfully!");
+
+	emit signal_socketsReady();  // this is signal call slot to parse test file
+}
+
+void UalTester::slot_runTestFile()
+{
+	 int errorCount = runTestFile();
+	 QCoreApplication::exit(errorCount);
+
+	 stopSignalStateThread();
+	 stopTuningThread();
+}
+
 void UalTester::runCfgLoaderThread()
 {
 	m_softwareInfo.init(E::SoftwareType::TestClient, m_cmdLineParam.equipmentID(), 1, 0);
@@ -63,7 +174,7 @@ void UalTester::runCfgLoaderThread()
 											m_cmdLineParam.cfgSocketAddress1(),
 											m_cmdLineParam.cfgSocketAddress2(),
 											false,
-											nullptr);
+											m_log);
 
 	if (m_cfgLoaderThread == nullptr)
 	{
@@ -91,78 +202,6 @@ void UalTester::stopCfgLoaderThread()
 	m_cfgLoaderThread = nullptr;
 }
 
-
-void UalTester::slot_loadConfiguration(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
-{
-	if (m_cfgLoaderThread == nullptr)
-	{
-		return;
-	}
-
-	bool result = false;
-
-	// load configuration
-	//
-	result = readConfiguration(configurationXmlData);		// read configuration
-	if (result == false)
-	{
-		QCoreApplication::exit(-1);
-		return;
-	}
-
-	// load signals
-	//
-	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
-	{
-		QByteArray fileData;
-		QString errStr;
-
-		m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
-
-		if (errStr.isEmpty() == false)
-		{
-			std::cout << errStr.toLocal8Bit().constData() << std::endl;
-			continue;
-		}
-
-		result = true;
-
-		if (bfi.ID == CFG_FILE_ID_APP_SIGNAL_SET)
-		{
-			result &= readAppSignals(fileData);				// read signals
-		}
-	}
-
-	stopCfgLoaderThread();
-
-	// configuration and signals laoded successfully
-	//
-	if (result == false)
-	{
-		QCoreApplication::exit(-1);
-		return;
-	}
-
-	emit configurationLoaded();	// this is signal call slot to parse test file
-
-	return;
-}
-
-bool UalTester::readConfiguration(const QByteArray& cfgFileData)
-{
-	XmlReadHelper xml(cfgFileData);
-
-	if (m_cfgSettings.readFromXml(xml) == false)
-	{
-		std::cout << "Error: Configuration settings are not valid" << std::endl;
-		return false;
-	}
-
-	std::cout << "------ Configuration was read successfully!" << std::endl;
-
-	return true;
-}
-
 bool UalTester::readAppSignals(const QByteArray& cfgFileData)
 {
 	::Proto::AppSignalSet signalSet;
@@ -171,7 +210,7 @@ bool UalTester::readAppSignals(const QByteArray& cfgFileData)
 
 	if (result == false)
 	{
-		std::cout << "Error: Configuration can not read signal list";
+		DEBUG_LOG_ERR(m_log, "Error: Configuration can not read signal list");
 		return false;
 	}
 
@@ -195,50 +234,24 @@ bool UalTester::readAppSignals(const QByteArray& cfgFileData)
 
 	if (m_signalBase.signalCount() == 0)
 	{
-		std::cout << "Error: Configuration does not contain any signals for AppDataSrv" << std::endl;
+		DEBUG_LOG_ERR(m_log, "Error: Configuration does not contain any signals for AppDataSrv");;
 		return false;
 	}
 
-	std::cout << "------ Loaded signals: " << m_signalBase.signalCount() << " successfully!" << std::endl;
+	DEBUG_LOG_MSG(m_log, QString("------ Loaded signals: %1 successfully!").arg(m_signalBase.signalCount()));
 
 	return true;
-}
-
-void UalTester::slot_parseTestFile()
-{
-	// parse Test file(s)
-	//
-	for(const QString& testFileName : m_cmdLineParam.testFileNameList())
-	{
-		if (parseTestFile(testFileName) == false)
-		{
-			m_cmdLineParam.printToReportFile(QStringList(QString("Test File: %1").arg(testFileName).toUtf8()));	// print file name to report file
-			m_cmdLineParam.printToReportFile(m_testfile.errorList());												// print errors to report file
-			QCoreApplication::exit(-1);
-			return;
-		}
-	}
-
-	std::cout << "------ Test file(s) was parsed successfully!" << std::endl;
-
-	// run sockets to get AppSignalState and to set state signals and data sources
-	//
-	if (runSockets() == false)
-	{
-		QCoreApplication::exit(-1);
-		return;
-	}
 }
 
 bool UalTester::parseTestFile(const QString& testFileName)
 {
 	if (testFileName.isEmpty() == true)
 	{
-		std::cout << "Error: Test file name is empty" << std::endl;
+		DEBUG_LOG_ERR(m_log, "Error: Test file name is empty");
 		return false;
 	}
 
-	std::cout << "Parse test file:" << testFileName.toLocal8Bit().constData() << std::endl;
+	DEBUG_LOG_MSG(m_log, QString("Parse test file: %1").arg(testFileName));
 
 	if (m_testfile.parse(testFileName, &m_signalBase) == false)
 	{
@@ -248,30 +261,32 @@ bool UalTester::parseTestFile(const QString& testFileName)
 
 	m_testfile.close();
 
-	std::cout << "Test file: " << testFileName.toLocal8Bit().constData() <<  " - was parsed successfully" << std::endl;
+	DEBUG_LOG_MSG(m_log, QString("Test file: %1 - was parsed successfully").arg(testFileName));
 
 	return true;
 }
 
 bool UalTester::runSockets()
 {
-	std::cout << "Waiting connect to AppDataSrv and TuningSrv" << std::endl;
+	DEBUG_LOG_MSG(m_log, "Waiting connect to AppDataSrv and TuningSrv");
 
 	// run signal state socket thread - connect to AppDataSrv
 	//
-	std::cout << "Run connect to AppDataSrv" << std::endl;
+	DEBUG_LOG_MSG(m_log, "Run connect to AppDataSrv");
+
 	if (runSignalStateThread() == false)
 	{
-		std::cout << "Error: Signal state socket did not run" << std::endl;
+		DEBUG_LOG_ERR(m_log, "Error: Signal state socket did not run");
 		return false;
 	}
 
 	// run connect to TuningSrv
 	//
-	std::cout << "Run connect to TuningSrv" << std::endl;
+	DEBUG_LOG_MSG(m_log, "Run connect to TuningSrv");
+
 	if (runTuningThread() == false)
 	{
-		std::cout << "Error: Tuning socket did not run" << std::endl;
+		DEBUG_LOG_ERR(m_log, "Error: Tuning socket did not run");
 		return false;
 	}
 
@@ -403,29 +418,6 @@ bool UalTester::tuningSocketIsConnected()
 	return true;
 }
 
-void UalTester::slot_waitSocketsReady()
-{
-	if (signalStateSocketIsConnected() == false || tuningSocketIsConnected() == false)
-	{
-		return;
-	}
-
-	m_waitSocketsConnectionTimer.stop();
-
-	std::cout << "------ Connect to AppDataSrv and TuningSrv is established successfully!" << std::endl;
-
-	emit signal_socketsReady();  // this is signal call slot to parse test file
-}
-
-void UalTester::slot_runTestFile()
-{
-	 int errorCount = runTestFile();
-	 QCoreApplication::exit(errorCount);
-
-	 stopSignalStateThread();
-	 stopTuningThread();
-}
-
 int UalTester::runTestFile()
 {
 	if (m_pTuningSocket == nullptr)
@@ -437,11 +429,13 @@ int UalTester::runTestFile()
 	int startTestIndex = m_cmdLineParam.getStartTestIndex(m_testfile.testList());	// for cmd line param -from
 	if (startTestIndex == -1)
 	{
-		std::cout << "Error: TestID " << m_cmdLineParam.fromTestID().toLocal8Bit().constData() << " not found in the test file" << std::endl;
+		DEBUG_LOG_ERR(m_log, QString("Error: TestID %1 not found in the test file").
+								arg(m_cmdLineParam.fromTestID()));
 		return -1;
 	}
 
-	std::cout << std::endl << "Test file is running, wait for the end ..." << std::endl;
+	DEBUG_LOG_MSG(m_log, QString());
+	DEBUG_LOG_MSG(m_log, "Test file is running, wait for the end ...");
 
 	int totalErrorCount = 0;
 
@@ -820,14 +814,14 @@ int UalTester::runTestFile()
 
 							if (m_cmdLineParam.enableTrace() == true)
 							{
-								std::cout << str.toLocal8Bit().constData() << std::endl;
+								DEBUG_LOG_MSG(m_log, str);
 							}
 							else
 							{
 								int resCount = test.resultList().count();
 								for (int i = 0; i < resCount; i++)
 								{
-									std::cout << test.resultList().at(i).toLocal8Bit().constData() << std::endl;
+									DEBUG_LOG_MSG(m_log, test.resultList().at(i));
 								}
 							}
 						}
@@ -847,9 +841,8 @@ int UalTester::runTestFile()
 		totalErrorCount += test.errorCount();
 	}
 
-	std::cout << std::endl << "End of test file" << std::endl;
+	DEBUG_LOG_MSG(m_log, QString());
+	DEBUG_LOG_MSG(m_log, "End of test file");
 
 	return totalErrorCount;
 }
-
-

@@ -41,9 +41,9 @@ namespace  Sim
 		{
 			Q_ASSERT(equipmentId == si.equipmentID);
 
-			if (si.softwareType == E::SoftwareType::TuningService)
+			if (si.softwareType() == E::SoftwareType::TuningService)
 			{
-				std::shared_ptr<Sim::TuningServiceCommunicator> tsc = std::make_shared<Sim::TuningServiceCommunicator>(m_simulator, *si.tuningServiceSettings());
+				std::shared_ptr<Sim::TuningServiceCommunicator> tsc = std::make_shared<Sim::TuningServiceCommunicator>(m_simulator, equipmentId);
 
 				m_tuningServiceCommunicators.emplace(equipmentId, std::move(tsc));
 			}
@@ -54,17 +54,17 @@ namespace  Sim
 		return ok;
 	}
 
-	bool Software::startSimulation()
+	bool Software::startSimulation(QString profileName)
 	{
 		bool ok = true;
 
-		ok &= m_appDataTransmitter.startSimulation();
+		ok &= m_appDataTransmitter.startSimulation(profileName);
 
 		for (auto&[id, tcs] : m_tuningServiceCommunicators)
 		{
 			Q_UNUSED(id);
 
-			ok &= tcs->startSimulation();
+			ok &= tcs->startSimulation(profileName);
 		}
 
 		return ok;
@@ -111,7 +111,7 @@ namespace  Sim
 
 	bool Software::enabled() const
 	{
-		return m_enabled.load(std::memory_order::memory_order_relaxed);
+		return m_enabled.load(std::memory_order::relaxed);
 	}
 
 	void Software::setEnabled(bool value)

@@ -18,18 +18,19 @@
 #include "Database.h"
 #include "SignalBase.h"
 #include "ProcessData.h"
-#include "RackList.h"
-#include "SignalList.h"
-#include "ComparatorList.h"
-#include "TuningSignalList.h"
-#include "SignalConnectionList.h"
-#include "ObjectProperties.h"
+#include "DialogRackList.h"
+#include "DialogSignalList.h"
+#include "DialogComparatorList.h"
+#include "DialogTuningSourceList.h"
+#include "DialogTuningSignalList.h"
+#include "DialogMetrologyConnection.h"
+#include "DialogObjectProperties.h"
 #include "Options.h"
-#include "OptionsDialog.h"
+#include "DialogOptions.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
+MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent)
 	: QMainWindow(parent)
 	, m_softwareInfo(softwareInfo)
 {
@@ -49,7 +50,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	// load signal base
 	//
 	theSignalBase.racks().groups().load();		// load rack groups for multichannel measuring
-	theSignalBase.signalConnections().load();	// load signal connections base
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 	connect(&theSignalBase.tuning().signalBase(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
 
@@ -57,12 +57,12 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	//
 	theOptions.linearity().points().load();
 
-	for (int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType++)
+	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
 	{
-		m_measureBase.load(measureType);
+		m_measureBase.load(static_cast<Measure::Type>(measureType));
 	}
-	connect(this, &MainWindow::appendMeasure, &m_measureBase, &MeasureBase::appendToBase, Qt::QueuedConnection);
-	connect(&m_measureBase, &MeasureBase::updateMeasureView, this, &MainWindow::updateMeasureView, Qt::QueuedConnection);
+	connect(this, &MainWindow::appendMeasure, &m_measureBase, &Measure::Base::appendToBase, Qt::QueuedConnection);
+	connect(&m_measureBase, &Measure::Base::updateMeasureView, this, &MainWindow::updateMeasureView, Qt::QueuedConnection);
 
 	//
 	//
@@ -95,9 +95,9 @@ bool MainWindow::createInterface()
 
 	loadSettings();
 
-	setMeasureType(MEASURE_TYPE_LINEARITY);
+	setMeasureType(Measure::Type::Linearity);
 
-	m_pCalculator = new Calculator(this);	// calculator
+	m_pCalculator = new DialogCalculator(this);	// calculator
 
 	return true;
 }
@@ -175,15 +175,40 @@ void MainWindow::createActions()
 	m_pShowComparatorsListAction->setToolTip(QString());
 	connect(m_pShowComparatorsListAction, &QAction::triggered, this, &MainWindow::showComparatorsList);
 
-	m_pShowTuningSignalListAction = new QAction(tr("Tuning signals ..."), this);
+	m_pShowConnectionListAction = new QAction(tr("Metrology connections ..."), this);
+	m_pShowConnectionListAction->setIcon(QIcon(":/icons/Connection.png"));
+	m_pShowConnectionListAction->setToolTip(QString());
+	connect(m_pShowConnectionListAction, &QAction::triggered, this, &MainWindow::showConnectionList);
+
+	m_pShowTuningSourceListAction = new QAction(tr("Sources ..."), this);
+	m_pShowTuningSourceListAction->setIcon(QIcon(":/icons/Tuning.png"));
+	m_pShowTuningSourceListAction->setToolTip(QString());
+	connect(m_pShowTuningSourceListAction, &QAction::triggered, this, &MainWindow::showTuningSourceList);
+
+	m_pShowTuningSignalListAction = new QAction(tr("Signals ..."), this);
 	m_pShowTuningSignalListAction->setIcon(QIcon(":/icons/Tuning.png"));
 	m_pShowTuningSignalListAction->setToolTip(QString());
 	connect(m_pShowTuningSignalListAction, &QAction::triggered, this, &MainWindow::showTuningSignalList);
 
-	m_pShowSignalConnectionListAction = new QAction(tr("Signal connections ..."), this);
-	m_pShowSignalConnectionListAction->setIcon(QIcon(":/icons/Connection.png"));
-	m_pShowSignalConnectionListAction->setToolTip(QString());
-	connect(m_pShowSignalConnectionListAction, &QAction::triggered, this, &MainWindow::showSignalConnectionList);
+	m_pShowGraphLinElAction = new QAction(tr("Linearity: electric range ..."), this);
+	m_pShowGraphLinElAction->setIcon(QIcon(":/icons/Graph.png"));
+	m_pShowGraphLinElAction->setToolTip(tr("Show linearity graph"));
+	connect(m_pShowGraphLinElAction, &QAction::triggered, this, &MainWindow::showGraphLinEl);
+
+	m_pShowGraphLinEnAction = new QAction(tr("Linearity: engineering range ..."), this);
+	m_pShowGraphLinEnAction->setIcon(QIcon(":/icons/Graph.png"));
+	m_pShowGraphLinEnAction->setToolTip(tr("Show linearity graph"));
+	connect(m_pShowGraphLinEnAction, &QAction::triggered, this, &MainWindow::showGraphLinEn);
+
+	m_pShowGraph20ElAction = new QAction(tr("Detail in the point: electric range ..."), this);
+	m_pShowGraph20ElAction->setIcon(QIcon(":/icons/Graph.png"));
+	m_pShowGraph20ElAction->setToolTip(tr("Show linearity graph"));
+	connect(m_pShowGraph20ElAction, &QAction::triggered, this, &MainWindow::showGraph20El);
+
+	m_pShowGraph20EnAction = new QAction(tr("Detail in the point: engineering range ..."), this);
+	m_pShowGraph20EnAction->setIcon(QIcon(":/icons/Graph.png"));
+	m_pShowGraph20EnAction->setToolTip(tr("Show linearity graph"));
+	connect(m_pShowGraph20EnAction, &QAction::triggered, this, &MainWindow::showGraph20En);
 
 	m_pShowStatisticsAction = new QAction(tr("Sta&tistics (Checklist) ..."), this);
 	m_pShowStatisticsAction->setIcon(QIcon(":/icons/Statistics.png"));
@@ -255,16 +280,25 @@ void MainWindow::createMenu()
 	//
 	m_pViewMenu = pMenuBar->addMenu(tr("&View"));
 	m_pViewPanelMenu = new QMenu(tr("&Panels"), m_pViewMenu);
+	m_pViewTuningMenu = new QMenu(tr("&Tuning"), m_pViewMenu);
+	m_pViewGraphMenu = new QMenu(tr("&Graphs of linearity"), m_pViewMenu);
 
 	m_pViewMenu->addMenu(m_pViewPanelMenu);
 	m_pViewMenu->addSeparator();
 	m_pViewMenu->addAction(m_pShowRackListAction);
 	m_pViewMenu->addAction(m_pShowSignalListAction);
 	m_pViewMenu->addAction(m_pShowComparatorsListAction);
-	m_pViewMenu->addAction(m_pShowTuningSignalListAction);
+	m_pViewMenu->addAction(m_pShowConnectionListAction);
+	m_pViewTuningMenu->addAction(m_pShowTuningSourceListAction);
+	m_pViewTuningMenu->addAction(m_pShowTuningSignalListAction);
+	m_pViewMenu->addMenu(m_pViewTuningMenu);
 	m_pViewMenu->addSeparator();
-	m_pViewMenu->addAction(m_pShowSignalConnectionListAction);
-	m_pViewMenu->addSeparator();
+	m_pViewGraphMenu->addAction(m_pShowGraphLinElAction);
+	m_pViewGraphMenu->addAction(m_pShowGraphLinEnAction);
+	m_pViewGraphMenu->addSeparator();
+	m_pViewGraphMenu->addAction(m_pShowGraph20ElAction);
+	m_pViewGraphMenu->addAction(m_pShowGraph20EnAction);
+	m_pViewMenu->addMenu(m_pViewGraphMenu);
 	m_pViewMenu->addAction(m_pShowStatisticsAction);
 
 	// Tools
@@ -323,7 +357,7 @@ bool MainWindow::createToolBars()
 		QComboBox* pMeasureTimeoutList = new QComboBox(m_pMeasureTimeoutToolBar);
 		QLabel* pMeasureTimeoutUnitLabel = new QLabel(m_pMeasureTimeoutToolBar);
 		QRegExp rx("^[0-9]*[.]{1}[0-9]*$");
-		QValidator *validator = new QRegExpValidator(rx, m_pMeasureTimeoutToolBar);
+		QValidator* validator = new QRegExpValidator(rx, m_pMeasureTimeoutToolBar);
 
 		m_pMeasureTimeoutToolBar->addWidget(pMeasureTimeoutLabel);
 		m_pMeasureTimeoutToolBar->addWidget(pMeasureTimeoutList);
@@ -335,9 +369,9 @@ bool MainWindow::createToolBars()
 		pMeasureTimeoutList->setEditable(true);
 		pMeasureTimeoutList->setValidator(validator);
 
-		for(int t = 0; t < MeasureTimeoutCount; t++)
+		for(int t = 0; t < Measure::TimeoutCount; t++)
 		{
-			pMeasureTimeoutList->addItem(QString::number(MeasureTimeout[t], 'f', 1));
+			pMeasureTimeoutList->addItem(QString::number(Measure::Timeout[t], 'f', 1));
 		}
 
 		m_measureTimeout = theOptions.toolBar().measureTimeout();
@@ -372,53 +406,42 @@ bool MainWindow::createToolBars()
 			pMeasureKindLabel->setText(tr(" Measure kind "));
 			pMeasureKindLabel->setEnabled(false);
 
-			for(int k = 0; k < MEASURE_KIND_COUNT; k++)
-			{
-				m_pMeasureKindList->addItem(qApp->translate("MeasureBase.h", MeasureKind[k]));
-			}
+			loadOnToolBar_MeasureKind();
 
-			m_measureKind = theOptions.toolBar().measureKind();
-			m_pMeasureKindList->setCurrentIndex(m_measureKind);
-
-			connect(m_pMeasureKindList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setMeasureKind);
+			connect(m_pMeasureKindList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+					this, &MainWindow::setMeasureKind);
 
 			m_calibratorBase.measureKindChanged(m_measureKind);
-			connect(this, &MainWindow::measureKindChanged, &m_calibratorBase, &CalibratorBase::measureKindChanged, Qt::QueuedConnection);
+			connect(this, &MainWindow::measureKindChanged, &m_calibratorBase, &CalibratorBase::measureKindChanged);
 		}
 	}
 
 
-	// Control panel signal connections
+	// Control panel metrology connections
 	//
-	m_pSignalConnectionToolBar = new QToolBar(this);
-	if (m_pSignalConnectionToolBar != nullptr)
+	m_pConnectionToolBar = new QToolBar(this);
+	if (m_pConnectionToolBar != nullptr)
 	{
-		m_pSignalConnectionToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-		m_pSignalConnectionToolBar->setWindowTitle(tr("Control panel signal connections"));
-		m_pSignalConnectionToolBar->setObjectName(m_pSignalConnectionToolBar->windowTitle());
+		m_pConnectionToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+		m_pConnectionToolBar->setWindowTitle(tr("Control panel metrology connections"));
+		m_pConnectionToolBar->setObjectName(m_pConnectionToolBar->windowTitle());
 		addToolBarBreak(Qt::RightToolBarArea);
-		addToolBar(m_pSignalConnectionToolBar);
+		addToolBar(m_pConnectionToolBar);
 
-		QLabel* pSignalConnectionLabel = new QLabel(m_pSignalConnectionToolBar);
-		m_pSignalConnectionTypeList = new QComboBox(m_pSignalConnectionToolBar);
-		if (m_pSignalConnectionTypeList != nullptr)
+		QLabel* pConnectionLabel = new QLabel(m_pConnectionToolBar);
+		m_pConnectionTypeList = new QComboBox(m_pConnectionToolBar);
+		if (m_pConnectionTypeList != nullptr)
 		{
-			m_pSignalConnectionToolBar->addWidget(pSignalConnectionLabel);
-			pSignalConnectionLabel->setText(tr(" Signal connections "));
-			pSignalConnectionLabel->setEnabled(false);
+			m_pConnectionToolBar->addWidget(pConnectionLabel);
+			pConnectionLabel->setText(tr(" Metrology connections "));
+			pConnectionLabel->setEnabled(false);
 
-			m_pSignalConnectionToolBar->addWidget(m_pSignalConnectionTypeList);
+			m_pConnectionToolBar->addWidget(m_pConnectionTypeList);
 
-			for(int s = 0; s < SIGNAL_CONNECTION_TYPE_COUNT; s++)
-			{
-				m_pSignalConnectionTypeList->addItem(qApp->translate("SignalConnectionBase.h", SignalConnectionType[s]));
-			}
+			loadOnToolBar_Connection();
 
-			m_signalConnectionType = theOptions.toolBar().signalConnectionType();
-			m_pSignalConnectionTypeList->setCurrentIndex(m_signalConnectionType);
-
-			connect(m_pSignalConnectionTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-					this, &MainWindow::setSignalConnectionType);
+			connect(m_pConnectionTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+					this, &MainWindow::setConnectionType);
 		}
 	}
 
@@ -481,7 +504,7 @@ void MainWindow::createPanels()
 {
 	// Search measurements panel
 	//
-	m_pFindMeasurePanel = new FindMeasurePanel(this);
+	m_pFindMeasurePanel = new PanelFindMeasure(this);
 	if (m_pFindMeasurePanel != nullptr)
 	{
 		m_pFindMeasurePanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
@@ -510,12 +533,12 @@ void MainWindow::createPanels()
 			}
 		}
 
-		connect(this, &MainWindow::measureViewChanged, m_pFindMeasurePanel, &FindMeasurePanel::measureViewChanged, Qt::QueuedConnection);
+		connect(this, &MainWindow::measureViewChanged, m_pFindMeasurePanel, &PanelFindMeasure::measureViewChanged, Qt::QueuedConnection);
 	}
 
 	// Panel statistics
 	//
-	m_pStatisticsPanel = new StatisticsPanel(this);
+	m_pStatisticsPanel = new PanelStatistics(this);
 	if (m_pStatisticsPanel != nullptr)
 	{
 		m_pStatisticsPanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
@@ -532,19 +555,19 @@ void MainWindow::createPanels()
 
 		m_pStatisticsPanel->setMeasureBase(&m_measureBase);
 		m_pStatisticsPanel->measureKindChanged(m_measureKind);
-		m_pStatisticsPanel->signalConnectionTypeChanged(m_signalConnectionType);
+		m_pStatisticsPanel->connectionTypeChanged(m_connectionType);
 
-		connect(&theSignalBase, &SignalBase::activeSignalChanged, m_pStatisticsPanel, &StatisticsPanel::activeSignalChanged, Qt::QueuedConnection);
-		connect(&m_measureBase, &MeasureBase::updatedMeasureBase, m_pStatisticsPanel, &StatisticsPanel::updateSignalInList, Qt::QueuedConnection);
+		connect(&theSignalBase, &SignalBase::activeSignalChanged, m_pStatisticsPanel, &PanelStatistics::activeSignalChanged, Qt::QueuedConnection);
+		connect(&m_measureBase, &Measure::Base::updatedMeasureBase, m_pStatisticsPanel, &PanelStatistics::updateSignalInList, Qt::QueuedConnection);
 
-		connect(this, &MainWindow::measureTypeChanged, m_pStatisticsPanel, &StatisticsPanel::measureTypeChanged, Qt::QueuedConnection);
-		connect(this, &MainWindow::measureKindChanged, m_pStatisticsPanel, &StatisticsPanel::measureKindChanged, Qt::QueuedConnection);
-		connect(this, &MainWindow::signalConnectionTypeChanged, m_pStatisticsPanel, &StatisticsPanel::signalConnectionTypeChanged, Qt::QueuedConnection);
+		connect(this, &MainWindow::measureTypeChanged, m_pStatisticsPanel, &PanelStatistics::measureTypeChanged);
+		connect(this, &MainWindow::measureKindChanged, m_pStatisticsPanel, &PanelStatistics::measureKindChanged);
+		connect(this, &MainWindow::connectionTypeChanged, m_pStatisticsPanel, &PanelStatistics::connectionTypeChanged);
 
-		connect(m_pStatisticsPanel, &StatisticsPanel::setSignalConnectionType, m_pSignalConnectionTypeList, &QComboBox::setCurrentIndex);
-		connect(m_pStatisticsPanel, &StatisticsPanel::setRack, m_pRackCombo, &QComboBox::setCurrentIndex);
-		connect(m_pStatisticsPanel, &StatisticsPanel::setMeasureSignal, this, &MainWindow::setAcitiveMeasureSignal);
-		connect(m_pStatisticsPanel, &StatisticsPanel::showFindMeasurePanel, this, &MainWindow::showFindMeasurePanel, Qt::QueuedConnection);
+		connect(m_pStatisticsPanel, &PanelStatistics::setConnectionType, this, &MainWindow::setConnectionTypeFromStatistic);
+		connect(m_pStatisticsPanel, &PanelStatistics::setRack, m_pRackCombo, &QComboBox::setCurrentIndex);
+		connect(m_pStatisticsPanel, &PanelStatistics::setMeasureSignal, this, &MainWindow::setAcitiveMeasureSignal);
+		connect(m_pStatisticsPanel, &PanelStatistics::showFindMeasurePanel, this, &MainWindow::showFindMeasurePanel, Qt::QueuedConnection);
 	}
 
 
@@ -557,7 +580,7 @@ void MainWindow::createPanels()
 
 	// Panel signal information
 	//
-	m_pSignalInfoPanel = new SignalInfoPanel(theOptions.signalInfo(), this);
+	m_pSignalInfoPanel = new PanelSignalInfo(theOptions.signalInfo(), this);
 	if (m_pSignalInfoPanel != nullptr)
 	{
 		m_pSignalInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
@@ -574,18 +597,18 @@ void MainWindow::createPanels()
 
 		m_pSignalInfoPanel->setCalibratorBase(&m_calibratorBase);
 		m_pSignalInfoPanel->measureKindChanged(m_measureKind);
-		m_pSignalInfoPanel->signalConnectionTypeChanged(m_signalConnectionType);
+		m_pSignalInfoPanel->connectionTypeChanged(m_connectionType);
 
-		connect(this, &MainWindow::measureKindChanged, m_pSignalInfoPanel, &SignalInfoPanel::measureKindChanged, Qt::QueuedConnection);
-		connect(this, &MainWindow::signalConnectionTypeChanged, m_pSignalInfoPanel, &SignalInfoPanel::signalConnectionTypeChanged, Qt::QueuedConnection);
+		connect(this, &MainWindow::measureKindChanged, m_pSignalInfoPanel, &PanelSignalInfo::measureKindChanged);
+		connect(this, &MainWindow::connectionTypeChanged, m_pSignalInfoPanel, &PanelSignalInfo::connectionTypeChanged);
 
-		connect(m_pSignalInfoPanel, &SignalInfoPanel::changeActiveSignalOutput, this, &MainWindow::changeActiveSignalOutput, Qt::QueuedConnection);
-		connect(m_pSignalInfoPanel, &SignalInfoPanel::changeActiveSignalOutputs, this, &MainWindow::changeActiveSignalOutputs, Qt::QueuedConnection);
+		connect(m_pSignalInfoPanel, &PanelSignalInfo::changeActiveDestSignal, this, &MainWindow::changeActiveDestSignal, Qt::QueuedConnection);
+		connect(m_pSignalInfoPanel, &PanelSignalInfo::changeActiveDestSignals, this, &MainWindow::changeActiveDestSignals, Qt::QueuedConnection);
 	}
 
 	// Panel comparator information
 	//
-	m_pComparatorInfoPanel = new ComparatorInfoPanel(theOptions.comparatorInfo(), this);
+	m_pComparatorInfoPanel = new PanelComparatorInfo(theOptions.comparatorInfo(), this);
 	m_pComparatorInfoPanel->setObjectName("Panel comparator information");
 	if (m_pComparatorInfoPanel != nullptr)
 	{
@@ -602,13 +625,10 @@ void MainWindow::createPanels()
 
 		m_pComparatorInfoPanel->setCalibratorBase(&m_calibratorBase);
 		m_pComparatorInfoPanel->measureKindChanged(m_measureKind);
-		m_pComparatorInfoPanel->signalConnectionTypeChanged(m_signalConnectionType);
+		m_pComparatorInfoPanel->connectionTypeChanged(m_connectionType);
 
-		connect(this, &MainWindow::measureKindChanged,
-				m_pComparatorInfoPanel, &ComparatorInfoPanel::measureKindChanged, Qt::QueuedConnection);
-
-		connect(this, &MainWindow::signalConnectionTypeChanged,
-				m_pComparatorInfoPanel, &ComparatorInfoPanel::signalConnectionTypeChanged, Qt::QueuedConnection);
+		connect(this, &MainWindow::measureKindChanged, m_pComparatorInfoPanel, &PanelComparatorInfo::measureKindChanged);
+		connect(this, &MainWindow::connectionTypeChanged, m_pComparatorInfoPanel, &PanelComparatorInfo::connectionTypeChanged);
 	}
 }
 
@@ -619,9 +639,9 @@ void MainWindow::createMeasureViews()
 	m_pMainTab = new QTabWidget();
 	m_pMainTab->setTabPosition(QTabWidget::South);
 
-	for(int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType++)
+	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
 	{
-		MeasureView* pView = new MeasureView(measureType, this);
+		Measure::View* pView = new Measure::View(static_cast<Measure::Type>(measureType), this);
 		if (pView == nullptr)
 		{
 			continue;
@@ -629,7 +649,7 @@ void MainWindow::createMeasureViews()
 
 		pView->loadMeasurements(m_measureBase);
 
-		m_pMainTab->addTab(pView, qApp->translate("MeasureBase.h", MeasureType[measureType]));
+		m_pMainTab->addTab(pView, qApp->translate("MeasureBase", Measure::TypeCaption(measureType).toUtf8()));
 
 		pView->setFrameStyle(QFrame::NoFrame);
 
@@ -638,10 +658,10 @@ void MainWindow::createMeasureViews()
 		//
 		//
 
-		connect(pView, &MeasureView::removeFromBase, &theDatabase, &Database::removeFromBase, Qt::QueuedConnection);
-		connect(pView, &MeasureView::removeFromBase, &m_measureBase, &MeasureBase::removeFromBase, Qt::QueuedConnection);
+		connect(pView, &Measure::View::removeFromBase, &theDatabase, &Database::removeFromBase);
+		connect(pView, &Measure::View::removeFromBase, &m_measureBase, &Measure::Base::removeFromBase);
 
-		connect(this, &MainWindow::appendMeasure, pView, &MeasureView::appendMeasure, Qt::QueuedConnection);
+		connect(this, &MainWindow::appendMeasure, pView, &Measure::View::appendMeasure, Qt::QueuedConnection);
 	}
 
 	setCentralWidget(m_pMainTab);
@@ -651,9 +671,9 @@ void MainWindow::createMeasureViews()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureView* MainWindow::measureView(int measureType)
+Measure::View* MainWindow::measureView(Measure::Type measureType)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		assert(false);
 		return nullptr;
@@ -670,9 +690,9 @@ MeasureView* MainWindow::measureView(int measureType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::appendMeasureView(int measureType, MeasureView* pView)
+void MainWindow::appendMeasureView(int measureType, Measure::View* pView)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		assert(0);
 		return;
@@ -766,9 +786,9 @@ void MainWindow::createContextMenu()
 
 	// init context menu
 	//
-	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
 	{
-		MeasureView* pView = measureView(type);
+		Measure::View* pView = measureView(static_cast<Measure::Type>(measureType));
 		if (pView == nullptr)
 		{
 			continue;
@@ -781,7 +801,140 @@ void MainWindow::createContextMenu()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::loadRacksOnToolBar()
+void MainWindow::loadOnToolBar_MeasureKind()
+{
+	if (m_pMeasureKindList == nullptr)
+	{
+		return;
+	}
+
+	int selectedItem = -1;
+	int curerentMeasureKind = theOptions.toolBar().measureKind();
+
+	m_measureKind = static_cast<Measure::Kind>(curerentMeasureKind);
+
+	m_pMeasureKindList->blockSignals(true);
+
+		m_pMeasureKindList->clear();
+
+		for(int measureKind = 0; measureKind < Measure::KindCount; measureKind++)
+		{
+			if (measureKind == Measure::Kind::MultiRack)
+			{
+				if (theSignalBase.racks().groups().count() == 0)
+				{
+					continue;
+				}
+			}
+
+			if (measureKind == curerentMeasureKind)
+			{
+				selectedItem = measureKind;
+			}
+
+			m_pMeasureKindList->addItem(qApp->translate("MeasureBase", Measure::KindCaption(measureKind).toUtf8()), measureKind);
+		}
+
+	m_pMeasureKindList->blockSignals(false);
+
+	if (selectedItem == -1)
+	{
+		selectedItem = 0;
+		m_measureKind = Measure::Kind::OneRack;
+	}
+
+	m_pMeasureKindList->setCurrentIndex(selectedItem);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::loadOnToolBar_Connection()
+{
+	if (m_pConnectionTypeList == nullptr)
+	{
+		return;
+	}
+
+	// get current connection type from otions
+	//
+	int currentConnectionType = theOptions.toolBar().connectionType();
+	if (ERR_METROLOGY_CONNECTION_TYPE(currentConnectionType) == true)
+	{
+		currentConnectionType = Metrology::ConnectionType::Unused;
+	}
+	m_connectionType = static_cast<Metrology::ConnectionType>(currentConnectionType);
+
+
+	// found all exist connections
+	//
+	QSet<int> metrologyConnectionSet;
+
+	int connectionCount = theSignalBase.connections().count();
+	for(int i = 0; i < connectionCount; i++)
+	{
+		int type = theSignalBase.connections().connection(i).type();
+		if (ERR_METROLOGY_CONNECTION_TYPE(type) == true)
+		{
+			continue;
+		}
+
+		metrologyConnectionSet.insert(type);
+	}
+
+
+	// fill list of metrology connections
+	//
+	m_pConnectionTypeList->blockSignals(true);
+
+		m_pConnectionTypeList->clear();
+
+		// append Metrology::ConnectionType::Unused
+		//
+		m_pConnectionTypeList->addItem(qApp->translate(	"MetrologyConnection",
+														Metrology::ConnectionTypeCaption(Metrology::ConnectionType::Unused).toUtf8()),
+														Metrology::ConnectionType::Unused);
+		// get selectedItem
+		//
+		int selectedItem = -1;
+
+		QList<int> metrologyConnectionList = metrologyConnectionSet.values();
+		std::sort(metrologyConnectionList.begin(), metrologyConnectionList.end());
+
+		connectionCount = metrologyConnectionList.count();
+		for(int index = 0; index < connectionCount; index++)
+		{
+			int connectionType = metrologyConnectionList.at(index);
+			if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
+			{
+				continue;
+			}
+
+			if (connectionType == currentConnectionType)
+			{
+				selectedItem = index + 1;	// Metrology::ConnectionType::Unused item has already been added early, hence +1
+			}
+
+			m_pConnectionTypeList->addItem(qApp->translate("MetrologyConnection", Metrology::ConnectionTypeCaption(static_cast<Metrology::ConnectionType>(connectionType)).toUtf8()), connectionType);
+		}
+
+	m_pConnectionTypeList->blockSignals(false);
+
+	//
+	//
+	if (selectedItem == -1)
+	{
+		selectedItem = 0;	// first element - this is Metrology::ConnectionType::Unused
+		m_connectionType = Metrology::ConnectionType::Unused;
+	}
+
+	//
+	//
+	m_pConnectionTypeList->setCurrentIndex(selectedItem);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::loadOnToolBar_Racks()
 {
 	if (m_pRackCombo == nullptr || m_pSelectSignalWidget == nullptr)
 	{
@@ -794,17 +947,17 @@ void MainWindow::loadRacksOnToolBar()
 	m_pSelectSignalWidget->clear();
 	updatePrevNextSignalActions(0);
 
-	if (m_measureKind < 0 || m_measureKind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(m_measureKind) == true)
 	{
 		return;
 	}
 
-	if (m_signalConnectionType < 0 || m_signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (ERR_METROLOGY_CONNECTION_TYPE(m_connectionType) == true)
 	{
 		return;
 	}
 
-	int rackCount = theSignalBase.createRackListForMeasure(m_measureKind, m_signalConnectionType);
+	int rackCount = theSignalBase.createRackListForMeasure(m_measureKind, m_connectionType);
 	if (rackCount == 0)
 	{
 		updateStartStopActions();
@@ -851,7 +1004,7 @@ void MainWindow::loadRacksOnToolBar()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::loadSignalsOnToolBar()
+void MainWindow::loadOnToolBar_Signals()
 {
 	if (m_pRackCombo == nullptr || m_pSelectSignalWidget == nullptr)
 	{
@@ -861,12 +1014,12 @@ void MainWindow::loadSignalsOnToolBar()
 	m_pSelectSignalWidget->clear();
 	updatePrevNextSignalActions(0);
 
-	if (m_measureKind < 0 || m_measureKind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(m_measureKind) == true)
 	{
 		return;
 	}
 
-	if (m_signalConnectionType < 0 || m_signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (ERR_METROLOGY_CONNECTION_TYPE(m_connectionType) == true)
 	{
 		return;
 	}
@@ -883,7 +1036,7 @@ void MainWindow::loadSignalsOnToolBar()
 	//
 	std::vector<SelectSignalItem> signalList;
 
-	int signalCount = theSignalBase.createSignalListForMeasure(m_measureKind, m_signalConnectionType, rackIndex);
+	int signalCount = theSignalBase.createSignalListForMeasure(m_measureKind, m_connectionType, rackIndex);
 	if (signalCount == 0)
 	{
 		updateStartStopActions();
@@ -898,7 +1051,7 @@ void MainWindow::loadSignalsOnToolBar()
 			continue;
 		}
 
-		SelectSignalItem signal(index, m_signalConnectionType, measureSignal);
+		SelectSignalItem signal(index, m_connectionType, measureSignal);
 		if (signal.isValid() == false)
 		{
 			continue;
@@ -915,17 +1068,21 @@ void MainWindow::loadSignalsOnToolBar()
 
 void MainWindow::setMeasureType(int measureType)
 {
+	if (ERR_MEASURE_TYPE(measureType) == true)
+	{
+		return;
+	}
+
 	if (m_measureThread.isRunning() == true)
 	{
 		return;
 	}
 
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
-	{
-		return;
-	}
+	m_measureType = static_cast<Measure::Type>(measureType);
 
-	MeasureView* pView = measureView(measureType);
+	//
+	//
+	Measure::View* pView = measureView(m_measureType);
 	if (pView == nullptr)
 	{
 		return;
@@ -933,11 +1090,11 @@ void MainWindow::setMeasureType(int measureType)
 
 	switch(measureType)
 	{
-		case MEASURE_TYPE_LINEARITY:
-		case MEASURE_TYPE_COMPARATOR:
+		case Measure::Type::Linearity:
+		case Measure::Type::Comparators:
 
 			m_pMeasureKindToolBar->show();
-			m_pSignalConnectionToolBar->show();
+			m_pConnectionToolBar->show();
 			m_pAnalogSignalToolBar->show();
 
 			m_pSignalInfoPanel->show();
@@ -950,9 +1107,8 @@ void MainWindow::setMeasureType(int measureType)
 			break;
 	}
 
-	m_measureType = measureType;
-
-
+	//
+	//
 	emit measureViewChanged(pView);
 	emit measureTypeChanged(m_measureType);
 }
@@ -1008,7 +1164,7 @@ bool MainWindow::signalSourceIsValid(bool showMsg)
 		return false;
 	}
 
-	if (m_signalConnectionType == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
+	if (m_connectionType == Metrology::ConnectionType::Tuning_Output)
 	{
 		if (tuningSocketIsConnected() == false)
 		{
@@ -1028,12 +1184,12 @@ bool MainWindow::signalSourceIsValid(bool showMsg)
 
 bool MainWindow::changeInputSignalOnInternal(const MeasureSignal& activeSignal)
 {
-	if (m_pSignalConnectionTypeList == nullptr)
+	if (m_pConnectionTypeList == nullptr)
 	{
 		return false;
 	}
 
-	if (m_measureKind != MEASURE_KIND_ONE_RACK)
+	if (m_measureKind != Measure::Kind::OneRack)
 	{
 		return false;
 	}
@@ -1043,7 +1199,7 @@ bool MainWindow::changeInputSignalOnInternal(const MeasureSignal& activeSignal)
 		return false;
 	}
 
-	Metrology::Signal* pInSignal = activeSignal.metrologySignal(MEASURE_IO_SIGNAL_TYPE_INPUT, Metrology::Channel_0);
+	Metrology::Signal* pInSignal = activeSignal.metrologySignal(Metrology::ConnectionIoType::Source, Metrology::Channel_0);
 	if (pInSignal == nullptr || pInSignal->param().isValid() == false)
 	{
 		return false;
@@ -1054,24 +1210,24 @@ bool MainWindow::changeInputSignalOnInternal(const MeasureSignal& activeSignal)
 		return false;
 	}
 
-	if (activeSignal.signalConnectionType() != SIGNAL_CONNECTION_TYPE_UNUSED)
+	if (activeSignal.connectionType() != Metrology::ConnectionType::Unused)
 	{
 		return false;
 	}
 
-	int connectionIndex = theSignalBase.signalConnections().findIndex(MEASURE_IO_SIGNAL_TYPE_INPUT, pInSignal);
+	int connectionIndex = theSignalBase.connections().findConnectionIndex(Metrology::ConnectionIoType::Source, pInSignal);
 	if (connectionIndex == -1)
 	{
 		return false;
 	}
 
-	const SignalConnection& connection = theSignalBase.signalConnections().connection(connectionIndex);
+	const Metrology::Connection& connection = theSignalBase.connections().connection(connectionIndex);
 	if (connection.isValid() == false)
 	{
 		return false;
 	}
 
-	Metrology::Signal* pOutSignal = connection.signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	Metrology::Signal* pOutSignal = connection.metrologySignal(Metrology::ConnectionIoType::Destination);
 	if (pOutSignal == nullptr || pOutSignal->param().isValid() == false)
 	{
 		return false;
@@ -1082,7 +1238,7 @@ bool MainWindow::changeInputSignalOnInternal(const MeasureSignal& activeSignal)
 		return false;
 	}
 
-	m_pSignalConnectionTypeList->setCurrentIndex(connection.type());
+	m_pConnectionTypeList->setCurrentIndex(connection.type());
 
 	return true;
 }
@@ -1093,10 +1249,10 @@ bool MainWindow::signalIsMeasured(const MeasureSignal& activeSignal, QString& si
 {
 	MultiChannelSignal ioSignal;
 
-	switch (m_signalConnectionType)
+	switch (m_connectionType)
 	{
-		case SIGNAL_CONNECTION_TYPE_UNUSED:			ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
-		default:									ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
+		case Metrology::ConnectionType::Unused:	ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);	break;
+		default:								ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);	break;
 	}
 
 	if (ioSignal.isEmpty() == true)
@@ -1119,13 +1275,13 @@ bool MainWindow::signalIsMeasured(const MeasureSignal& activeSignal, QString& si
 
 		switch (m_measureType)
 		{
-			case MEASURE_TYPE_LINEARITY:
+			case Measure::Type::Linearity:
 				{
 					si.setSignal(pMetrologySignal);
 				}
 				break;
 
-			case MEASURE_TYPE_COMPARATOR:
+			case Measure::Type::Comparators:
 				{
 					si.setSignal(pMetrologySignal);
 
@@ -1163,20 +1319,20 @@ bool MainWindow::inputsOfmoduleIsSame(const MeasureSignal& activeSignal)
 {
 	MultiChannelSignal ioSignal;
 
-	switch (m_signalConnectionType)
+	switch (m_connectionType)
 	{
-		case SIGNAL_CONNECTION_TYPE_UNUSED:
-		case SIGNAL_CONNECTION_TYPE_INPUT_INTERNAL:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_INTERNAL_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_INTERNAL_F:
-			ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		case Metrology::ConnectionType::Unused:
+		case Metrology::ConnectionType::Input_Internal:
+		case Metrology::ConnectionType::Input_DP_Internal_F:
+		case Metrology::ConnectionType::Input_C_Internal_F:
+			ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);
 			break;
 
-		case SIGNAL_CONNECTION_TYPE_INPUT_OUTPUT:
-		case SIGNAL_CONNECTION_TYPE_INPUT_DP_TO_OUTPUT_F:
-		case SIGNAL_CONNECTION_TYPE_INPUT_C_TO_OUTPUT_F:
-		case SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT:
-			ioSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+		case Metrology::ConnectionType::Input_Output:
+		case Metrology::ConnectionType::Input_DP_Output_F:
+		case Metrology::ConnectionType::Input_C_Output_F:
+		case Metrology::ConnectionType::Tuning_Output:
+			ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);
 			break;
 
 		default:
@@ -1251,13 +1407,13 @@ int MainWindow::getMaxComparatorCount(const MeasureSignal& activeSignal)
 	{
 		Metrology::Signal* pSignal = nullptr;
 
-		switch (activeSignal.signalConnectionType())
+		switch (activeSignal.connectionType())
 		{
-			case SIGNAL_CONNECTION_TYPE_UNUSED:
-				pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).metrologySignal(ch);
+			case Metrology::ConnectionType::Unused:
+				pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).metrologySignal(ch);
 				break;
 			default:
-				pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).metrologySignal(ch);
+				pSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination).metrologySignal(ch);
 				break;
 		}
 
@@ -1279,7 +1435,7 @@ int MainWindow::getMaxComparatorCount(const MeasureSignal& activeSignal)
 
 void MainWindow::startMeasure()
 {
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return;
 	}
@@ -1311,7 +1467,7 @@ void MainWindow::startMeasure()
 
 	if (theOptions.module().measureInterInsteadIn() == true)
 	{
-		if (m_measureKind == MEASURE_KIND_ONE_RACK)
+		if (m_measureKind == Measure::Kind::OneRack)
 		{
 			if (changeInputSignalOnInternal(activeSignal) == true)
 			{
@@ -1321,7 +1477,7 @@ void MainWindow::startMeasure()
 		}
 	}
 
-	if (m_measureType == MEASURE_TYPE_COMPARATOR)
+	if (m_measureType == Measure::Type::Comparators)
 	{
 		int comparatorCount = getMaxComparatorCount(activeSignal);
 		if (comparatorCount == 0)
@@ -1335,7 +1491,7 @@ void MainWindow::startMeasure()
 	// if we check in single module mode
 	// all module inputs must be the same
 	//
-	if (m_measureKind == MEASURE_KIND_ONE_MODULE)
+	if (m_measureKind == Measure::Kind::OneModule)
 	{
 		if (inputsOfmoduleIsSame(activeSignal) == false)
 		{
@@ -1394,18 +1550,32 @@ void MainWindow::stopMeasure()
 
 void MainWindow::exportMeasure()
 {
-	MeasureView* pMeasureView = activeMeasureView();
+	Measure::View* pMeasureView = activeMeasureView();
 	if (pMeasureView == nullptr)
 	{
 		return;
 	}
 
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return;
 	}
 
-	ExportData* dialog = new ExportData(pMeasureView, false, MeasureFileName[m_measureType]);
+	QString fileName;
+
+	switch (m_measureType)
+	{
+		case Measure::Type::Linearity:		fileName = "Linearity";		break;
+		case Measure::Type::Comparators:	fileName = "Comparators";	break;
+		default:							assert(0);
+	}
+
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	ExportData* dialog = new ExportData(pMeasureView, false, fileName);
 	dialog->exec();
 }
 
@@ -1413,7 +1583,7 @@ void MainWindow::exportMeasure()
 
 void MainWindow::copyMeasure()
 {
-	MeasureView* pView = activeMeasureView();
+	Measure::View* pView = activeMeasureView();
 	if (pView == nullptr)
 	{
 		return;
@@ -1426,7 +1596,7 @@ void MainWindow::copyMeasure()
 
 void MainWindow::removeMeasure()
 {
-	MeasureView* pView = activeMeasureView();
+	Measure::View* pView = activeMeasureView();
 	if (pView == nullptr)
 	{
 		return;
@@ -1439,7 +1609,7 @@ void MainWindow::removeMeasure()
 
 void MainWindow::selectAllMeasure()
 {
-	MeasureView* pView = activeMeasureView();
+	Measure::View* pView = activeMeasureView();
 	if (pView == nullptr)
 	{
 		return;
@@ -1457,9 +1627,9 @@ void MainWindow::showRackList()
 		return;
 	}
 
-	RackListDialog dialog(this);
+	DialogRackList dialog(this);
 
-	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &RackListDialog::updateList, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &DialogRackList::updateList, Qt::QueuedConnection);
 
 	if (dialog.exec() != QDialog::Accepted)
 	{
@@ -1473,11 +1643,13 @@ void MainWindow::showRackList()
 		return;
 	}
 
-	theSignalBase.updateRackParam();
+	loadOnToolBar_MeasureKind();
 
-	if (m_measureKind == MEASURE_KIND_MULTI_RACK)
+	theSignalBase.initRackParam();
+
+	if (m_measureKind == Measure::Kind::MultiRack)
 	{
-		loadRacksOnToolBar();
+		loadOnToolBar_Racks();
 	}
 }
 
@@ -1490,9 +1662,9 @@ void MainWindow::showSignalList()
 		return;
 	}
 
-	SignalListDialog dialog(false, this);
+	DialogSignalList dialog(false, this);
 
-	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &SignalListDialog::updateList, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &DialogSignalList::updateList, Qt::QueuedConnection);
 
 	dialog.exec();
 }
@@ -1506,9 +1678,63 @@ void MainWindow::showComparatorsList()
 		return;
 	}
 
-	ComparatorListDialog dialog(this);
+	DialogComparatorList dialog(this);
 
-	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &ComparatorListDialog::updateList, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &DialogComparatorList::updateList, Qt::QueuedConnection);
+
+	dialog.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showConnectionList()
+{
+	if (m_pConfigSocket == nullptr)
+	{
+		return;
+	}
+
+	DialogMetrologyConnection dialog(this);
+
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &DialogMetrologyConnection::signalBaseLoaded, Qt::QueuedConnection);
+
+	if (dialog.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	theSignalBase.connections() = dialog.metrologyConnections();
+
+	// loadOnToolBar_Connection call loadOnToolBar_Racks() after setCurrentIndex
+	//
+	loadOnToolBar_Connection();
+
+	theSignalBase.statistics().createSignalList();
+	theSignalBase.statistics().createComparatorList();
+
+	if (m_pStatisticsPanel == nullptr)
+	{
+		assert(m_pStatisticsPanel);
+		return;
+	}
+
+	m_pStatisticsPanel->updateList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showTuningSourceList()
+{
+	if (m_pConfigSocket == nullptr || m_pTuningSocket == nullptr)
+	{
+		return;
+	}
+
+	DialogTuningSourceList dialog(this);
+
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &DialogTuningSourceList::updateList, Qt::QueuedConnection);
+	connect(m_pTuningSocket, &TuningSocket::sourcesLoaded, &dialog, &DialogTuningSourceList::updateList, Qt::QueuedConnection);
+	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, &dialog, &DialogTuningSourceList::updateList, Qt::QueuedConnection);
 
 	dialog.exec();
 }
@@ -1522,44 +1748,65 @@ void MainWindow::showTuningSignalList()
 		return;
 	}
 
-	TuningSignalListDialog dialog(this);
+	DialogTuningSignalList dialog(this);
 
-	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &TuningSignalListDialog::updateSignalList, Qt::QueuedConnection);
-	connect(m_pTuningSocket, &TuningSocket::sourcesLoaded, &dialog, &TuningSignalListDialog::updateSourceList, Qt::QueuedConnection);
-	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, &dialog, &TuningSignalListDialog::updateSourceList, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &DialogTuningSignalList::updateList, Qt::QueuedConnection);
+	connect(m_pTuningSocket, &TuningSocket::sourcesLoaded, &dialog, &DialogTuningSignalList::updateList, Qt::QueuedConnection);
+	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, &dialog, &DialogTuningSignalList::updateList, Qt::QueuedConnection);
 
 	dialog.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::showSignalConnectionList()
+void MainWindow::showGraphLinEl()
 {
-	if (m_pConfigSocket == nullptr)
+	Measure::View* pView = activeMeasureView();
+	if (pView == nullptr)
 	{
 		return;
 	}
 
-	SignalConnectionDialog dialog(this);
+	emit pView->showGraph(MVG_TYPE_LIN_EL);
+}
 
-	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &dialog, &SignalConnectionDialog::signalBaseLoaded, Qt::QueuedConnection);
+// -------------------------------------------------------------------------------------------------------------------
 
-	if (dialog.exec() != QDialog::Accepted)
+void MainWindow::showGraphLinEn()
+{
+	Measure::View* pView = activeMeasureView();
+	if (pView == nullptr)
 	{
 		return;
 	}
 
-	theSignalBase.signalConnections() = dialog.signalConnections();
-	if (theSignalBase.signalConnections().save() == false)
+	emit pView->showGraph(MVG_TYPE_LIN_EN);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showGraph20El()
+{
+	Measure::View* pView = activeMeasureView();
+	if (pView == nullptr)
 	{
-		QMessageBox::information(this, windowTitle(), tr("Attempt to save signal connections was unsuccessfully!"));
 		return;
 	}
 
-	loadRacksOnToolBar();
+	emit pView->showGraph(MVG_TYPE_20VAL_EL);
+}
 
-	theSignalBase.statistics().createSignalList();
-	theSignalBase.statistics().createComparatorList();
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showGraph20En()
+{
+	Measure::View* pView = activeMeasureView();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	emit pView->showGraph(MVG_TYPE_20VAL_EN);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1599,7 +1846,7 @@ void MainWindow::showOptions()
 {
 	Options options(theOptions);
 
-	OptionsDialog* pDialog = new OptionsDialog(theOptions, this);
+	DialogOptions* pDialog = new DialogOptions(theOptions, this);
 	if (pDialog->exec() != QDialog::Accepted)
 	{
 		return;
@@ -1630,14 +1877,14 @@ void MainWindow::showOptions()
 
 	// update columns in the measure views
 	//
-	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
 	{
-		if (theOptions.measureView().updateColumnView(type) == false)
+		if (theOptions.measureView().updateColumnView(static_cast<Measure::Type>(measureType)) == false)
 		{
 			continue;
 		}
 
-		MeasureView* pView = measureView(type);
+		Measure::View* pView = measureView(static_cast<Measure::Type>(measureType));
 		if (pView == nullptr)
 		{
 			continue;
@@ -1677,7 +1924,7 @@ void MainWindow::showOptions()
 
 void MainWindow::aboutConnection()
 {
-	ProjectPropertyDialog dialog(theOptions.projectInfo());
+	DialogProjectProperty dialog(theOptions.projectInfo(), this);
 	dialog.exec();
 }
 
@@ -1733,18 +1980,22 @@ void MainWindow::setMeasureKind(int index)
 		return;
 	}
 
-	int kind = index;
-	if (kind < 0 || kind >= MEASURE_KIND_COUNT)
+	int measureKind = m_pMeasureKindList->itemData(index).toInt();
+	if (ERR_MEASURE_KIND(measureKind) == true)
 	{
 		return;
 	}
 
-	if (kind == MEASURE_KIND_MULTI_RACK)
+	m_measureKind = static_cast<Measure::Kind>(measureKind);
+
+	//
+	//
+	if (m_measureKind == Measure::Kind::MultiRack)
 	{
 		if (theSignalBase.racks().groups().count() == 0)
 		{
 			m_pMeasureKindList->blockSignals(true);
-			m_pMeasureKindList->setCurrentIndex(m_measureKind);
+			m_pMeasureKindList->setCurrentIndex(0);
 			m_pMeasureKindList->blockSignals(false);
 
 			QMessageBox::information(this,
@@ -1753,57 +2004,93 @@ void MainWindow::setMeasureKind(int index)
 										 "you need to combine several racks into groups."
 										 "Currently, no groups have been found.\n"
 										 "To create a group of racks, click menu \"View\" - \"Racks ...\" ."));
-
-
 			return;
 		}
 	}
 
 	//
 	//
-	m_measureKind = kind;
-
-	//
-	//
-	theOptions.toolBar().setMeasureKind(m_measureKind);
+	theOptions.toolBar().setMeasureKind(measureKind);
 	theOptions.toolBar().save();
 
+	//
+	//
 	emit measureKindChanged(m_measureKind);
 
 	//
 	//
-	loadRacksOnToolBar();
+	loadOnToolBar_Racks();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::setSignalConnectionType(int index)
+void MainWindow::setConnectionType(int index)
 {
+	if (m_pConnectionTypeList == nullptr)
+	{
+		assert(m_pConnectionTypeList);
+		return;
+	}
+
 	if (index == -1)
 	{
 		return;
 	}
 
-	int type = index;
-	if (type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT)
+	int connectionType = m_pConnectionTypeList->itemData(index).toInt();
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
 		return;
 	}
 
-	//
-	//
-	m_signalConnectionType = type;
+	m_connectionType = static_cast<Metrology::ConnectionType>(connectionType);
 
 	//
 	//
-	theOptions.toolBar().setSignalConnectionType(m_signalConnectionType);
+	theOptions.toolBar().setConnectionType(connectionType);
 	theOptions.toolBar().save();
 
-	emit signalConnectionTypeChanged(m_signalConnectionType);
+	//
+	//
+	emit connectionTypeChanged(m_connectionType);
 
 	//
 	//
-	loadRacksOnToolBar();
+	loadOnToolBar_Racks();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::setConnectionTypeFromStatistic(int connectionType)
+{
+	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
+	{
+		return;
+	}
+	if (m_pConnectionTypeList == nullptr)
+	{
+		assert(m_pConnectionTypeList);
+		return;
+	}
+
+	int connectionIndex = -1;
+
+	int count = m_pConnectionTypeList->count();
+	for(int i = 0; i < count; i++)
+	{
+		if (m_pConnectionTypeList->itemData(i).toInt() == connectionType)
+		{
+			connectionIndex = i;
+			break;
+		}
+	}
+
+	if (connectionIndex == -1)
+	{
+		connectionIndex = 0;
+	}
+
+	m_pConnectionTypeList->setCurrentIndex(connectionIndex);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1817,7 +2104,7 @@ void MainWindow::setRack(int index)
 
 	// set
 	//
-	loadSignalsOnToolBar();
+	loadOnToolBar_Signals();
 
 	// save
 	//
@@ -1862,7 +2149,7 @@ void MainWindow::setAcitiveMeasureSignal(int index)
 
 	// save
 	//
-	const MultiChannelSignal& signal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	const MultiChannelSignal& signal = measureSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);
 	if (signal.isEmpty() == true)
 	{
 		return;
@@ -1984,8 +2271,8 @@ bool MainWindow::setNextMeasureSignalFromModule()
 
 	// if module numbers not equal then disabling selection of next input
 	//
-	if (	currentActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() != nextActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() ||
-			currentActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module() != nextActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module())
+	if (	currentActiveSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).location().chassis() != nextActiveSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).location().chassis() ||
+			currentActiveSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).location().module() != nextActiveSignal.multiChannelSignal(Metrology::ConnectionIoType::Source).location().module())
 	{
 		return false;
 	}
@@ -1997,7 +2284,7 @@ bool MainWindow::setNextMeasureSignalFromModule()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::changeActiveSignalOutput(int channel, Metrology::Signal* pOutputSignal)
+void MainWindow::changeActiveDestSignal(int channel, Metrology::Signal* pDestSignal)
 {
 	if (m_pSelectSignalWidget == nullptr)
 	{
@@ -2016,13 +2303,13 @@ void MainWindow::changeActiveSignalOutput(int channel, Metrology::Signal* pOutpu
 		return;
 	}
 
-	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);
 	if (multiChannelSignal.isEmpty() == true)
 	{
 		return;
 	}
 
-	if (m_measureKind < 0 || m_measureKind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(m_measureKind) == true)
 	{
 		return;
 	}
@@ -2032,16 +2319,16 @@ void MainWindow::changeActiveSignalOutput(int channel, Metrology::Signal* pOutpu
 		return;
 	}
 
-	if (pOutputSignal == nullptr || pOutputSignal->param().isValid() == false)
+	if (pDestSignal == nullptr || pDestSignal->param().isValid() == false)
 	{
 		return;
 	}
 
 	// change
 	//
-	multiChannelSignal.setMetrologySignal(m_measureKind, channel, pOutputSignal);
+	multiChannelSignal.setMetrologySignal(m_measureKind, channel, pDestSignal);
 
-	measureSignal.setMultiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, multiChannelSignal);
+	measureSignal.setMultiSignal(Metrology::ConnectionIoType::Destination, multiChannelSignal);
 
 	// set
 	//
@@ -2058,7 +2345,7 @@ void MainWindow::changeActiveSignalOutput(int channel, Metrology::Signal* pOutpu
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::changeActiveSignalOutputs(int channelPrev, int channelNext)
+void MainWindow::changeActiveDestSignals(int channelPrev, int channelNext)
 {
 	if (m_pSelectSignalWidget == nullptr)
 	{
@@ -2077,13 +2364,13 @@ void MainWindow::changeActiveSignalOutputs(int channelPrev, int channelNext)
 		return;
 	}
 
-	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	MultiChannelSignal multiChannelSignal = measureSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);
 	if (multiChannelSignal.isEmpty() == true)
 	{
 		return;
 	}
 
-	if (m_measureKind < 0 || m_measureKind >= MEASURE_KIND_COUNT)
+	if (ERR_MEASURE_KIND(m_measureKind) == true)
 	{
 		return;
 	}
@@ -2117,7 +2404,7 @@ void MainWindow::changeActiveSignalOutputs(int channelPrev, int channelNext)
 	multiChannelSignal.setMetrologySignal(m_measureKind, channelPrev, pOutputSignalNext);
 	multiChannelSignal.setMetrologySignal(m_measureKind, channelNext, pOutputSignalPrev);
 
-	measureSignal.setMultiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, multiChannelSignal);
+	measureSignal.setMultiSignal(Metrology::ConnectionIoType::Destination, multiChannelSignal);
 
 	// set
 	//
@@ -2148,6 +2435,11 @@ void MainWindow::onContextMenu(QPoint)
 
 void MainWindow::calibratorConnectedChanged(int count)
 {
+	if (m_statusCalibratorCount == nullptr)
+	{
+		return;
+	}
+
 	m_statusCalibratorCount->setText(tr(" Connected calibrators: %1 ").arg(count));
 
 	if (count == 0)
@@ -2169,7 +2461,7 @@ void MainWindow::calibratorConnectedChanged(int count)
 				continue;
 			}
 
-			Calibrator* pCalibrator = m_calibratorBase.calibratorManager(i)->calibrator();
+			std::shared_ptr<Calibrator> pCalibrator = m_calibratorBase.calibratorManager(i)->calibrator();
 			if (pCalibrator == nullptr || pCalibrator->isConnected() == false)
 			{
 				continue;
@@ -2288,6 +2580,17 @@ void MainWindow::configSocketConfigurationLoaded()
 
 	m_statusLoadSignals->show();
 	m_statusLoadSignals->setValue(0);
+
+	if (m_pConfigSocket == nullptr)
+	{
+		assert(m_pConfigSocket);
+		return;
+	}
+
+	if (m_pConfigSocket->loadedFiles().count() == 0)
+	{
+		QMessageBox::critical(this, windowTitle(), tr("No loaded files from Configuration Service!"));
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2306,7 +2609,15 @@ void MainWindow::configSocketSignalBaseLoading(int persentage)
 
 void MainWindow::configSocketSignalBaseLoaded()
 {
-	loadRacksOnToolBar();
+	// loadOnToolBar_Connection call loadOnToolBar_Racks() after setCurrentIndex
+	// if m_connectionType != Metrology::ConnectionType::Unused
+	//
+	loadOnToolBar_Connection();
+
+	if (m_connectionType == Metrology::ConnectionType::Unused)
+	{
+		loadOnToolBar_Racks();
+	}
 
 	//
 	//
@@ -2426,7 +2737,7 @@ void MainWindow::tuningSocketDisconnected()
 
 	if (m_measureThread.isRunning() == true)
 	{
-		if (m_signalConnectionType == SIGNAL_CONNECTION_TYPE_TUNING_OUTPUT)
+		if (m_connectionType == Metrology::ConnectionType::Tuning_Output)
 		{
 			m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Program);
 		}
@@ -2478,7 +2789,7 @@ void MainWindow::tuningSignalsCreated()
 void MainWindow::measureThreadStarted()
 {
 	m_pMeasureKindToolBar->setDisabled(true);
-	m_pSignalConnectionToolBar->setDisabled(true);
+	m_pConnectionToolBar->setDisabled(true);
 	m_pAnalogSignalToolBar->setDisabled(true);
 
 	m_statusMeasureThreadInfo->setText(QString());
@@ -2504,7 +2815,7 @@ void MainWindow::measureThreadStarted()
 void MainWindow::measureThreadStoped()
 {
 	m_pMeasureKindToolBar->setEnabled(true);
-	m_pSignalConnectionToolBar->setEnabled(true);
+	m_pConnectionToolBar->setEnabled(true);
 	m_pAnalogSignalToolBar->setEnabled(true);
 
 	m_statusMeasureThreadInfo->setText(QString());
@@ -2536,7 +2847,7 @@ void MainWindow::measureThreadStoped()
 	{
 		switch (m_measureType)
 		{
-			case MEASURE_TYPE_LINEARITY:
+			case Measure::Type::Linearity:
 				{
 					int comparatorCount = getMaxComparatorCount(activeSignal);
 					if (comparatorCount == 0)
@@ -2544,14 +2855,14 @@ void MainWindow::measureThreadStoped()
 						break;
 					}
 
-					m_pMainTab->setCurrentIndex(MEASURE_TYPE_COMPARATOR);
+					m_pMainTab->setCurrentIndex(Measure::Type::Comparators);
 
 					emit startMeasure();
 					return;
 				}
-			case MEASURE_TYPE_COMPARATOR:
+			case Measure::Type::Comparators:
 				{
-					m_pMainTab->setCurrentIndex(MEASURE_TYPE_LINEARITY);
+					m_pMainTab->setCurrentIndex(Measure::Type::Linearity);
 				}
 				break;
 			default:
@@ -2651,15 +2962,14 @@ void MainWindow::measureThreadMsgBox(int type, QString text, int* result)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::measureComplite(Measurement* pMeasurement)
+void MainWindow::measureComplite(Measure::Item* pMeasurement)
 {
 	if (pMeasurement == nullptr)
 	{
 		return;
 	}
 
-	int type = pMeasurement->measureType();
-	if (type < 0 || type >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(pMeasurement->measureType()) == true)
 	{
 		return;
 	}
@@ -2671,7 +2981,7 @@ void MainWindow::measureComplite(Measurement* pMeasurement)
 
 void MainWindow::updateMeasureView()
 {
-	MeasureView* pView = activeMeasureView();
+	Measure::View* pView = activeMeasureView();
 	if (pView == nullptr)
 	{
 		return;
@@ -2692,7 +3002,7 @@ void MainWindow::updateStartStopActions()
 	m_pStartMeasureAction->setEnabled(false);
 	m_pStopMeasureAction->setEnabled(false);
 
-	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
 		return;
 	}
@@ -2781,8 +3091,8 @@ void MainWindow::runConfigSocket()
 	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoading, this, &MainWindow::configSocketSignalBaseLoading, Qt::QueuedConnection);
 	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, this, &MainWindow::configSocketSignalBaseLoaded, Qt::QueuedConnection);
 	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &theSignalBase.statistics(), &StatisticsBase::signalBaseLoaded, Qt::QueuedConnection);
-	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, m_pStatisticsPanel, &StatisticsPanel::updateList, Qt::QueuedConnection);
-	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &m_measureBase, &MeasureBase::signalBaseLoaded, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, m_pStatisticsPanel, &PanelStatistics::updateList, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::signalBaseLoaded, &m_measureBase, &Measure::Base::signalBaseLoaded, Qt::QueuedConnection);
 
 	m_pConfigSocket->start();
 }
@@ -2873,12 +3183,12 @@ void MainWindow::runMeasureThread()
 	m_measureThread.measureTypeChanged(m_measureType);
 	m_measureThread.measureTimeoutChanged(m_measureTimeout);
 	m_measureThread.measureKindChanged(m_measureKind);
-	m_measureThread.signalConnectionTypeChanged(m_signalConnectionType);
+	m_measureThread.connectionTypeChanged(m_connectionType);
 
-	connect(this, &MainWindow::measureTypeChanged, &m_measureThread, &MeasureThread::measureTypeChanged, Qt::QueuedConnection);
-	connect(this, &MainWindow::measureTimeoutChanged, &m_measureThread, &MeasureThread::measureTimeoutChanged, Qt::QueuedConnection);
-	connect(this, &MainWindow::measureKindChanged, &m_measureThread, &MeasureThread::measureKindChanged, Qt::QueuedConnection);
-	connect(this, &MainWindow::signalConnectionTypeChanged, &m_measureThread, &MeasureThread::signalConnectionTypeChanged, Qt::QueuedConnection);
+	connect(this, &MainWindow::measureTimeoutChanged, &m_measureThread, &MeasureThread::measureTimeoutChanged);
+	connect(this, &MainWindow::measureTypeChanged, &m_measureThread, &MeasureThread::measureTypeChanged);
+	connect(this, &MainWindow::measureKindChanged, &m_measureThread, &MeasureThread::measureKindChanged);
+	connect(this, &MainWindow::connectionTypeChanged, &m_measureThread, &MeasureThread::connectionTypeChanged);
 
 	connect(&theSignalBase, &SignalBase::signalParamChanged, &m_measureThread, &MeasureThread::signalParamChanged, Qt::QueuedConnection);
 

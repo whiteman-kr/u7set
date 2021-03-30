@@ -1,5 +1,4 @@
-#ifndef MONITORMAINWINDOW_H
-#define MONITORMAINWINDOW_H
+#pragma once
 
 #include "MonitorConfigController.h"
 #include "MonitorSchemaManager.h"
@@ -152,7 +151,6 @@ private:
 
 	// Tools menu
 	//
-
 	QAction* m_pDataSourcesAction = nullptr;
 	QAction* m_pStatisticsAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
@@ -235,4 +233,3 @@ protected:
 
 extern MonitorMainWindow* theMonitorMainWindow;
 
-#endif // MONITORMAINWINDOW_H

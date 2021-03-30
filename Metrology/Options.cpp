@@ -33,7 +33,7 @@ bool CalibratorOption::isValid() const
 		return false;
 	}
 
-	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	if (ERR_CALIBRATOR_TYPE(m_type) == true)
 	{
 		return false;
 	}
@@ -45,14 +45,14 @@ bool CalibratorOption::isValid() const
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorsOption::CalibratorsOption(QObject *parent) :
+CalibratorsOption::CalibratorsOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorsOption::CalibratorsOption(const CalibratorsOption& from, QObject *parent) :
+CalibratorsOption::CalibratorsOption(const CalibratorsOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -102,7 +102,7 @@ void CalibratorsOption::load()
 		QString defaultPort = QString("COM%1").arg(QString::number(c+1));
 
 		QString port = s.value(QString("%1Calibrator%2/Port").arg(CALIBRATOR_OPTIONS_KEY).arg(c), defaultPort).toString();
-		int type = s.value(QString("%1Calibrator%2/Type").arg(CALIBRATOR_OPTIONS_KEY).arg(c), CALIBRATOR_TYPE_CALYS75).toInt();
+		int type = s.value(QString("%1Calibrator%2/Type").arg(CALIBRATOR_OPTIONS_KEY).arg(c), CalibratorType::Calys75).toInt();
 
 		m_calibrator[c].setPort(port);
 		m_calibrator[c].setType(type);
@@ -337,14 +337,14 @@ bool SocketClientOption::init(const MetrologySettings& settings)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SocketOption::SocketOption(QObject *parent) :
+SocketOption::SocketOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SocketOption::SocketOption(const SocketOption& from, QObject *parent) :
+SocketOption::SocketOption(const SocketOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -421,14 +421,14 @@ SocketOption& SocketOption::operator=(const SocketOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ProjectInfo::ProjectInfo(QObject *parent) :
+ProjectInfo::ProjectInfo(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ProjectInfo::ProjectInfo(const ProjectInfo& from, QObject *parent) :
+ProjectInfo::ProjectInfo(const ProjectInfo& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -520,14 +520,14 @@ ProjectInfo& ProjectInfo::operator=(const ProjectInfo& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ModuleOption::ModuleOption(QObject *parent) :
+ModuleOption::ModuleOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ModuleOption::ModuleOption(const ModuleOption& from, QObject *parent) :
+ModuleOption::ModuleOption(const ModuleOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -603,14 +603,14 @@ ModuleOption& ModuleOption::operator=(const ModuleOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearityOption::LinearityOption(QObject *parent) :
+LinearityOption::LinearityOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearityOption::LinearityOption(const LinearityOption& from, QObject *parent) :
+LinearityOption::LinearityOption(const LinearityOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -632,9 +632,9 @@ int LinearityOption::measureCountInPoint()
 		m_measureCountInPoint = 1;
 	}
 
-	if (m_measureCountInPoint > MAX_MEASUREMENT_IN_POINT)
+	if (m_measureCountInPoint > Measure::MaxMeasurementInPoint)
 	{
-		m_measureCountInPoint = MAX_MEASUREMENT_IN_POINT;
+		m_measureCountInPoint = Measure::MaxMeasurementInPoint;
 	}
 
 	return m_measureCountInPoint;
@@ -649,9 +649,9 @@ void LinearityOption::setMeasureCountInPoint(int measureCount)
 		measureCount = 1;
 	}
 
-	if (measureCount > MAX_MEASUREMENT_IN_POINT)
+	if (measureCount > Measure::MaxMeasurementInPoint)
 	{
-		measureCount = MAX_MEASUREMENT_IN_POINT;
+		measureCount = Measure::MaxMeasurementInPoint;
 	}
 
 	m_measureCountInPoint = measureCount;
@@ -661,7 +661,7 @@ void LinearityOption::setMeasureCountInPoint(int measureCount)
 
 void LinearityOption::recalcPoints(int count)
 {
-	if (m_rangeType != LO_RANGE_TYPE_AUTOMATIC)
+	if (m_divisionType != Measure::LinearityDivision::Automatic)
 	{
 		return;
 	}
@@ -680,7 +680,7 @@ void LinearityOption::recalcPoints(int count)
 
 	if (count == 1)
 	{
-		m_pointBase.append(MeasurePoint((m_lowLimitRange + m_highLimitRange) / 2));
+		m_pointBase.append(Measure::Point((m_lowLimitRange + m_highLimitRange) / 2));
 	}
 	else
 	{
@@ -688,7 +688,7 @@ void LinearityOption::recalcPoints(int count)
 
 		for (int p = 0; p < count ; p++)
 		{
-			m_pointBase.append(MeasurePoint(m_lowLimitRange + (p * value)));
+			m_pointBase.append(Measure::Point(m_lowLimitRange + (p * value)));
 		}
 	}
 }
@@ -700,17 +700,17 @@ void LinearityOption::load()
 	QSettings s;
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), 0.2).toDouble();
-	m_errorType = s.value(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
-	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(LINEARITY_OPTIONS_KEY), MEASURE_LIMIT_TYPE_ELECTRIC).toInt();
+	m_errorType = s.value(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), Measure::ErrorType::Reduce).toInt();
+	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(LINEARITY_OPTIONS_KEY), Measure::LimitType::Electric).toInt();
 
 	m_measureTimeInPoint = s.value(QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
-	m_measureCountInPoint = s.value(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), 20).toInt();
+	m_measureCountInPoint = s.value(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), Measure::MaxMeasurementInPoint).toInt();
 
-	m_rangeType = s.value(QString("%1RangeType").arg(LINEARITY_OPTIONS_KEY), LO_RANGE_TYPE_MANUAL).toInt();
-	m_lowLimitRange = s.value(QString("%1LowLimitRange").arg(LINEARITY_OPTIONS_KEY), 5).toDouble();
-	m_highLimitRange = s.value(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), 95).toDouble();
+	m_divisionType = s.value(QString("%1RangeType").arg(LINEARITY_OPTIONS_KEY), Measure::LinearityDivision::Manual).toInt();
+	m_lowLimitRange = s.value(QString("%1LowLimitRange").arg(LINEARITY_OPTIONS_KEY), Measure::LinearityRangeLow).toDouble();
+	m_highLimitRange = s.value(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), Measure::LinearityRangeHigh).toDouble();
 
-	m_viewType = s.value(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), LO_VIEW_TYPE_SIMPLE).toInt();
+	m_viewType = s.value(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), LinearityViewType::Simple).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -726,7 +726,7 @@ void LinearityOption::save()
 	s.setValue(QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureTimeInPoint);
 	s.setValue(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureCountInPoint);
 
-	s.setValue(QString("%1RangeType").arg(LINEARITY_OPTIONS_KEY), m_rangeType);
+	s.setValue(QString("%1RangeType").arg(LINEARITY_OPTIONS_KEY), m_divisionType);
 	s.setValue(QString("%1LowLimitRange").arg(LINEARITY_OPTIONS_KEY), m_lowLimitRange);
 	s.setValue(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), m_highLimitRange);
 
@@ -746,7 +746,7 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 	m_measureTimeInPoint = from.m_measureTimeInPoint;
 	m_measureCountInPoint = from.m_measureCountInPoint;
 
-	m_rangeType = from.m_rangeType;
+	m_divisionType = from.m_divisionType;
 	m_lowLimitRange = from.m_lowLimitRange;
 	m_highLimitRange = from.m_highLimitRange;
 
@@ -756,17 +756,37 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 }
 
 // -------------------------------------------------------------------------------------------------------------------
+
+QString LinearityViewTypeCaption(int type)
+{
+	QString caption;
+
+	switch (type)
+	{
+		case LinearityViewType::Simple:				caption = QT_TRANSLATE_NOOP("Options", "Simple");													break;
+		case LinearityViewType::Extended:			caption = QT_TRANSLATE_NOOP("Options", "Extended (show columns for metrological certification)");	break;
+		case LinearityViewType::DetailElectric:		caption = QT_TRANSLATE_NOOP("Options", "Detail electric (show all measurements at one point)");		break;
+		case LinearityViewType::DetailEngineering:	caption = QT_TRANSLATE_NOOP("Options", "Detail engineering (show all measurements at one point)");	break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return caption;
+};
+
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorOption::ComparatorOption(QObject *parent) :
+ComparatorOption::ComparatorOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorOption::ComparatorOption(const ComparatorOption& from, QObject *parent) :
+ComparatorOption::ComparatorOption(const ComparatorOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -787,8 +807,8 @@ void ComparatorOption::load()
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(COMPARATOR_OPTIONS_KEY), 0.2).toDouble();
 	m_startValueForCompare = s.value(QString("%1StartValueForCompare").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
-	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
-	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(COMPARATOR_OPTIONS_KEY), MEASURE_LIMIT_TYPE_ELECTRIC).toInt();
+	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), Measure::ErrorType::Reduce).toInt();
+	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(COMPARATOR_OPTIONS_KEY), Measure::LimitType::Electric).toInt();
 
 	m_startComparatorIndex = s.value(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
 	m_enableMeasureHysteresis = s.value(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
@@ -828,14 +848,14 @@ ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ToolBarOption::ToolBarOption(QObject *parent) :
+ToolBarOption::ToolBarOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ToolBarOption::ToolBarOption(const ToolBarOption& from, QObject *parent) :
+ToolBarOption::ToolBarOption(const ToolBarOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -855,8 +875,8 @@ void ToolBarOption::load()
 	QSettings s;
 
 	m_measureTimeout = s.value(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), 0).toInt();
-	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE_RACK).toInt();
-	m_signalConnectionType = s.value(QString("%1SignalConnectionType").arg(TOOLBAR_OPTIONS_KEY), SIGNAL_CONNECTION_TYPE_UNUSED).toInt();
+	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), Measure::Kind::OneRack).toInt();
+	m_connectionType = s.value(QString("%1ConnectionType").arg(TOOLBAR_OPTIONS_KEY), Metrology::ConnectionType::Unused).toInt();
 
 	m_defaultRack = s.value(QString("%1DefaultRack").arg(TOOLBAR_OPTIONS_KEY), "RACK").toString();
 	m_defaultSignalId = s.value(QString("%1DefaultSignalId").arg(TOOLBAR_OPTIONS_KEY), "SIGNAL_ID").toString();
@@ -870,7 +890,7 @@ void ToolBarOption::save()
 
 	s.setValue(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), m_measureTimeout);
 	s.setValue(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), m_measureKind);
-	s.setValue(QString("%1SignalConnectionType").arg(TOOLBAR_OPTIONS_KEY), m_signalConnectionType);
+	s.setValue(QString("%1ConnectionType").arg(TOOLBAR_OPTIONS_KEY), m_connectionType);
 
 	s.setValue(QString("%1DefaultRack").arg(TOOLBAR_OPTIONS_KEY), m_defaultRack);
 	s.setValue(QString("%1DefaultSignalId").arg(TOOLBAR_OPTIONS_KEY), m_defaultSignalId);
@@ -882,7 +902,7 @@ ToolBarOption& ToolBarOption::operator=(const ToolBarOption& from)
 {
 	m_measureTimeout = from.m_measureTimeout;
 	m_measureKind = from.m_measureKind;
-	m_signalConnectionType = from.m_signalConnectionType;
+	m_connectionType = from.m_connectionType;
 
 	m_defaultRack = from.m_defaultRack;
 	m_defaultSignalId = from.m_defaultSignalId;
@@ -894,14 +914,14 @@ ToolBarOption& ToolBarOption::operator=(const ToolBarOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureViewOption::MeasureViewOption(QObject *parent) :
+MeasureViewOption::MeasureViewOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureViewOption::MeasureViewOption(const MeasureViewOption& from, QObject *parent) :
+MeasureViewOption::MeasureViewOption(const MeasureViewOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -916,9 +936,9 @@ MeasureViewOption::~MeasureViewOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureViewOption::updateColumnView(int measureType) const
+bool MeasureViewOption::updateColumnView(Measure::Type measureType) const
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return false;
 	}
@@ -928,9 +948,9 @@ bool MeasureViewOption::updateColumnView(int measureType) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewOption::setUpdateColumnView(int measureType, bool state)
+void MeasureViewOption::setUpdateColumnView(Measure::Type measureType, bool state)
 {
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+	if (ERR_MEASURE_TYPE(measureType) == true)
 	{
 		return;
 	}
@@ -947,19 +967,19 @@ void MeasureViewOption::load()
 	// properties of columns
 	//
 	int languageType = theOptions.language().languageType();
-	if (languageType >= 0 && languageType < LANGUAGE_TYPE_COUNT)
+	if (ERR_LANGUAGE_TYPE(languageType) == false)
 	{
 		// init
 		//
-		MeasureViewHeader header;
+		Measure::ViewHeader header;
 
-		for(int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType ++)
+		for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
 		{
-			header.setMeasureType(measureType);
+			header.setMeasureType(static_cast<Measure::Type>(measureType));
 
-			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+			for(int column = 0; column < Measure::MaxColumnCount; column++)
 			{
-				MeasureViewColumn* pColumn = header.column(column);
+				Measure::HeaderColumn* pColumn = header.column(column);
 				if (pColumn == nullptr)
 				{
 					continue;
@@ -971,19 +991,22 @@ void MeasureViewOption::load()
 
 		// load
 		//
-		for(int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType ++)
+		for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
 		{
-			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+			for(int column = 0; column < Measure::MaxColumnCount; column++)
 			{
-				const MeasureViewColumn& c = m_column[measureType][languageType][column];
+				const Measure::HeaderColumn& c = m_column[measureType][languageType][column];
 				if (c.title().isEmpty() == true)
 				{
 					continue;
 				}
 
-				m_column[measureType][languageType][column].setTitle(s.value(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.title()).toString());
-				m_column[measureType][languageType][column].setWidth(s.value(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.width()).toInt());
-				m_column[measureType][languageType][column].setVisible(s.value(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.enableVisible()).toBool());
+				QString caption = Measure::TypeCaption(measureType);
+				QString language = qApp->translate("Options", LanguageTypeCaption(languageType).toUtf8());
+
+				m_column[measureType][languageType][column].setTitle(s.value(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.title()).toString());
+				m_column[measureType][languageType][column].setWidth(s.value(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.width()).toInt());
+				m_column[measureType][languageType][column].setVisible(s.value(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.enableVisible()).toBool());
 			}
 		}
 	}
@@ -1011,22 +1034,25 @@ void MeasureViewOption::save()
 	// properties of columns
 	//
 	int languageType = theOptions.language().languageType();
-	if (languageType >= 0 && languageType < LANGUAGE_TYPE_COUNT)
+	if (ERR_LANGUAGE_TYPE(languageType) == false)
 	{
-		for(int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType ++)
+		for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
 		{
-			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+			for(int column = 0; column < Measure::MaxColumnCount; column++)
 			{
-				const MeasureViewColumn& c = m_column[measureType][languageType][column];
+				const Measure::HeaderColumn& c = m_column[measureType][languageType][column];
 
 				if (c.title().isEmpty() == true)
 				{
 					continue;
 				}
 
-				s.setValue(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.title());
-				s.setValue(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.width());
-				s.setValue(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[measureType]).arg(c.uniqueTitle()).arg(LanguageTypeStr[languageType]), c.enableVisible());
+				QString caption = Measure::TypeCaption(measureType);
+				QString language = qApp->translate("Options", LanguageTypeCaption(languageType).toUtf8());
+
+				s.setValue(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.title());
+				s.setValue(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.width());
+				s.setValue(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.enableVisible());
 			}
 		}
 	}
@@ -1047,13 +1073,13 @@ void MeasureViewOption::save()
 
 MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 {
-	for(int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType ++)
+	for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
 	{
 		m_updateColumnView[measureType] = from.m_updateColumnView[measureType];
 
-		for(int languageType = 0; languageType < LANGUAGE_TYPE_COUNT; languageType ++)
+		for(int languageType = 0; languageType < LanguageTypeCount; languageType ++)
 		{
-			for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+			for(int column = 0; column < Measure::MaxColumnCount; column++)
 			{
 				m_column[measureType][languageType][column] = from.m_column[measureType][languageType][column];
 			}
@@ -1078,14 +1104,14 @@ MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalInfoOption::SignalInfoOption(QObject *parent) :
+SignalInfoOption::SignalInfoOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalInfoOption::SignalInfoOption(const SignalInfoOption& from, QObject *parent) :
+SignalInfoOption::SignalInfoOption(const SignalInfoOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -1156,14 +1182,14 @@ SignalInfoOption& SignalInfoOption::operator=(const SignalInfoOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorInfoOption::ComparatorInfoOption(QObject *parent) :
+ComparatorInfoOption::ComparatorInfoOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorInfoOption::ComparatorInfoOption(const ComparatorInfoOption& from, QObject *parent) :
+ComparatorInfoOption::ComparatorInfoOption(const ComparatorInfoOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -1231,14 +1257,14 @@ ComparatorInfoOption& ComparatorInfoOption::operator=(const ComparatorInfoOption
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-DatabaseOption::DatabaseOption(QObject *parent) :
+DatabaseOption::DatabaseOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-DatabaseOption::DatabaseOption(const DatabaseOption& from, QObject *parent) :
+DatabaseOption::DatabaseOption(const DatabaseOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -1296,14 +1322,14 @@ DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-LanguageOption::LanguageOption(QObject *parent) :
+LanguageOption::LanguageOption(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-LanguageOption::LanguageOption(const LanguageOption& from, QObject *parent) :
+LanguageOption::LanguageOption(const LanguageOption& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -1321,7 +1347,7 @@ void LanguageOption::load()
 {
 	QSettings s;
 
-	m_languageType = s.value(QString("%1Language").arg(LANGUAGE_OPTIONS_REG_KEY), LANGUAGE_TYPE_EN).toInt();
+	m_languageType = s.value(QString("%1Language").arg(LANGUAGE_OPTIONS_REG_KEY), LanguageType::English).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1343,6 +1369,24 @@ LanguageOption& LanguageOption::operator=(const LanguageOption& from)
 }
 
 // -------------------------------------------------------------------------------------------------------------------
+
+QString LanguageTypeCaption(int type)
+{
+	QString caption;
+
+	switch (type)
+	{
+		case LanguageType::English:	caption = QT_TRANSLATE_NOOP("Options", "English");	break;
+		case LanguageType::Russian:	caption = QT_TRANSLATE_NOOP("Options", "Russian");	break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return caption;
+};
+
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -1355,14 +1399,14 @@ bool compareDouble(double lDouble, double rDouble)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-Options::Options(QObject *parent) :
+Options::Options(QObject* parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Options::Options(const Options& from, QObject *parent) :
+Options::Options(const Options& from, QObject* parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -1421,19 +1465,29 @@ void Options::save()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+bool Options::setMetrologySettings(std::shared_ptr<const SoftwareSettings> curSettingsProfile)
+{
+	const MetrologySettings* typedSettingsPtr = dynamic_cast<const MetrologySettings*>(curSettingsProfile.get());
+
+	if (typedSettingsPtr == nullptr)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	// making modificable (if required) local copy of settings
+	//
+	m_settings = *typedSettingsPtr;
+
+	return true;
+}
+
 bool Options::readFromXml(const QByteArray& fileData)
 {
 	bool result = false;
 
 	result = m_projectInfo.readFromXml(fileData);
-	if (result == false)
-	{
-		return false;
-	}
 
-	XmlReadHelper xmlReader(fileData);
-
-	result = m_settings.readFromXml(xmlReader);
 	if (result == false)
 	{
 		return false;

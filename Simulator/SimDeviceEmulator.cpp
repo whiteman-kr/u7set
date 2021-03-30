@@ -320,7 +320,7 @@ namespace Sim
 		//
 		if (runtimeMode() == RuntimeMode::TuningMode && m_lans.isTuningEnabled() == true)
 		{
-			m_lans.updateTuningRam(tuningRamArea(), plantTime);
+			m_lans.updateTuningRam(tuningRamArea(), m_commandProcessor->signalSetSorChassis(), plantTime);
 		}
 
 		return ok;
@@ -1345,7 +1345,7 @@ namespace Sim
 				auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime);
 				TimeStamp plantTime{ms.count() + QDateTime::currentDateTime().offsetFromUtc() * 1000};
 
-				m_lans.sendTuningWriteConfirmation(confirmedRecords, tuningRamArea(), plantTime);
+				m_lans.sendTuningWriteConfirmation(confirmedRecords, tuningRamArea(), m_commandProcessor->signalSetSorChassis(), plantTime);
 			}
 		}
 
@@ -1775,7 +1775,7 @@ namespace Sim
 
 		setRuntimeMode(RuntimeMode::TuningMode);
 
-		m_lans.tuningModeEntered(m_tuningRamArea, timeStamp);
+		m_lans.tuningModeEntered(m_tuningRamArea, m_commandProcessor->signalSetSorChassis(), timeStamp);
 
 		return true;
 	}
@@ -1987,7 +1987,7 @@ namespace Sim
 
 	bool DeviceEmulator::armingKey() const
 	{
-		return m_armingKey;
+		return m_armingKey.load(std::memory_order::relaxed);
 	}
 
 	void DeviceEmulator::setArmingKey(bool value)
@@ -1997,7 +1997,7 @@ namespace Sim
 
 	bool DeviceEmulator::tuningKey() const
 	{
-		return m_tuningKey;
+		return m_tuningKey.load(std::memory_order::relaxed);
 	}
 
 	void DeviceEmulator::setTuningKey(bool value)
@@ -2005,8 +2005,49 @@ namespace Sim
 		m_tuningKey = value;
 	}
 
-	bool DeviceEmulator::testTuningApplyCommand(bool value)
+	bool DeviceEmulator::sorIsSet() const
 	{
-		return m_tuningApplyCommand.exchange(value);
+		return m_sorIsSet.load(std::memory_order::relaxed);
 	}
+
+	void DeviceEmulator::setSorIsSet(bool value)
+	{
+		m_sorIsSet = value;
+	}
+
+	bool DeviceEmulator::sorSetSwitch1() const
+	{
+		return m_sorSetSwitch1.load(std::memory_order::relaxed);
+	}
+
+	void DeviceEmulator::setSorSetSwitch1(bool value)
+	{
+		m_sorSetSwitch1 = value;
+	}
+
+	bool DeviceEmulator::sorSetSwitch2() const
+	{
+		return m_sorSetSwitch2.load(std::memory_order::relaxed);
+	}
+
+	void DeviceEmulator::setSorSetSwitch2(bool value)
+	{
+		m_sorSetSwitch2 = value;
+	}
+
+	bool DeviceEmulator::sorSetSwitch3() const
+	{
+		return m_sorSetSwitch3.load(std::memory_order::relaxed);
+	}
+
+	void DeviceEmulator::setSorSetSwitch3(bool value)
+	{
+		m_sorSetSwitch3 = value;
+	}
+
+	bool DeviceEmulator::testSorResetSwitch(bool newValue)
+	{
+		return m_sorResetSwitch.exchange(newValue, std::memory_order::relaxed);
+	}
+
 }

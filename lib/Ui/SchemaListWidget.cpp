@@ -485,7 +485,7 @@ void SchemaListTreeWidget::searchAndSelect(QString searchText)
 //		SchemaListWidget
 //
 //
-SchemaListWidget::SchemaListWidget(std::vector<SchemaListTreeColumns> columns, QWidget* parent) :
+SchemaListWidget::SchemaListWidget(std::vector<SchemaListTreeColumns> columns, bool showTags, QWidget* parent) :
 	QWidget(parent)
 {
 	setAutoFillBackground(true);
@@ -493,6 +493,7 @@ SchemaListWidget::SchemaListWidget(std::vector<SchemaListTreeColumns> columns, Q
 
 	m_treeWidget = new SchemaListTreeWidget{columns, this};
 	m_treeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+	m_treeWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	m_searchAction = new QAction(tr("Edit Search"), this);
 	m_searchAction->setShortcut(QKeySequence::Find);
@@ -519,29 +520,51 @@ SchemaListWidget::SchemaListWidget(std::vector<SchemaListTreeColumns> columns, Q
 	m_resetFilterButton = new QPushButton(tr("Reset Filter"));
 	m_resetFilterButton->setDisabled(true);
 
-	m_tagSelector = new TagSelectorWidget{this};
-	m_tagSelector->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-	connect(m_tagSelector, &TagSelectorWidget::changed, this, &SchemaListWidget::tagSelectorHasChanges);
+	if (showTags == true)
+	{
+		m_tagSelector = new TagSelectorWidget{this};
+		m_tagSelector->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+		connect(m_tagSelector, &TagSelectorWidget::changed, this, &SchemaListWidget::tagSelectorHasChanges);
+	}
 
 	// --
 	//
 	QGridLayout* layout = new QGridLayout(this);
-	layout->addWidget(m_treeWidget, 0, 0, 1, 6);
+	layout->addWidget(m_treeWidget, 0, 0, 1, 5);
 
-	layout->addWidget(m_searchEdit, 1, 0, 1, 2);
-	layout->addWidget(m_searchButton, 1, 2, 1, 1);
+	if (showTags == false)
+	{
+		layout->addWidget(m_searchEdit, 1, 0, 1, 2);
+		layout->addWidget(m_searchButton, 1, 2, 1, 1);
 
-	layout->addWidget(m_filterEdit, 2, 0, 1, 2);
-	layout->addWidget(m_filterButton, 2, 2, 1, 1);
-	layout->addWidget(m_resetFilterButton, 2, 3, 1, 1);
-	layout->addWidget(m_tagSelector, 1, 4, 2, 2);
+		layout->addWidget(m_filterEdit, 2, 0, 1, 2);
+		layout->addWidget(m_filterButton, 2, 2, 1, 1);
+		layout->addWidget(m_resetFilterButton, 2, 3, 1, 1);
+		layout->setColumnStretch(0, 1);
+	}
+	else
+	{
+		QGridLayout* buttonsLayout = new QGridLayout{this};
 
-	layout->setColumnStretch(0, 2);
-	layout->setColumnStretch(4, 2);
-	layout->setColumnStretch(5, 2);
+		buttonsLayout->addWidget(m_searchEdit, 0, 0, 1, 2);
+		buttonsLayout->addWidget(m_searchButton, 0, 2, 1, 1);
+		buttonsLayout->addWidget(m_filterEdit, 1, 0, 1, 2);
+		buttonsLayout->addWidget(m_filterButton, 1, 2, 1, 1);
+		buttonsLayout->addWidget(m_resetFilterButton, 1, 3, 1, 1);
+		buttonsLayout->setRowStretch(2, 10);
+		buttonsLayout->setColumnStretch(0, 2);
+		buttonsLayout->setColumnStretch(1, 0);
+		buttonsLayout->setColumnStretch(2, 0);
 
-	layout->setRowStretch(0, 2);
-	layout->setRowStretch(1, 0);
+		layout->addLayout(buttonsLayout, 1, 0, 1, 3);
+
+		layout->addWidget(m_tagSelector, 1, 4, 1, 1);
+
+		layout->setColumnStretch(0, 3);
+		layout->setColumnStretch(4, 4);
+
+		layout->setRowStretch(0, 10);
+	}
 
 	setLayout(layout);
 
@@ -584,8 +607,11 @@ void SchemaListWidget::setDetails(VFrame30::SchemaDetailsSet details)
 
 	QStringList selectedTags = m_treeWidget->tagFilter();
 
-	m_tagSelector->setTags(tags);
-	m_tagSelector->setSelectedTags(selectedTags, false);				// Restore selected tags
+	if (m_tagSelector != nullptr)
+	{
+		m_tagSelector->setTags(tags);
+		m_tagSelector->setSelectedTags(selectedTags, false);				// Restore selected tags
+	}
 
 	m_treeWidget->setDetails(std::move(details));
 
@@ -721,6 +747,11 @@ void SchemaListWidget::resetFilter()
 
 void SchemaListWidget::tagSelectorHasChanges()
 {
+	if (m_tagSelector == nullptr)
+	{
+		return;
+	}
+
 	// Filter schemas by tags
 	//
 	QStringList selectedTags = m_tagSelector->selectedTags();

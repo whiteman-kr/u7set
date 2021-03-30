@@ -255,7 +255,7 @@ bool DialogSubsystemListEditor::saveChanges()
     }
     if (comment.isEmpty())
     {
-        QMessageBox::warning(this, "Subsystem List Editor", "No comment supplied!");
+		QMessageBox::warning(this, "Subsystem List Editor", "No comment supplied! Please provide a comment.");
         return false;
     }
 

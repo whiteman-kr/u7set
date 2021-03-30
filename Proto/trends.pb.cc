@@ -28,215 +28,175 @@
 #include <google/protobuf/wire_format.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
-extern PROTOBUF_INTERNAL_EXPORT_trends_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_Trend_trends_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_trends_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_TrendArchive_trends_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_trends_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_TrendArchiveHour_trends_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_trends_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TrendParam_trends_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_trends_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TrendRuler_trends_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_trends_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_TrendRulerSet_trends_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_trends_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_TrendSignalParam_trends_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_trends_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_TrendSignalSet_trends_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_trends_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TrendStateRecord_trends_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_trends_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TrendViewLimit_trends_2eproto;
+
+PROTOBUF_PRAGMA_INIT_SEG
 namespace Proto {
-class TrendStateRecordDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TrendStateRecord> _instance;
-} _TrendStateRecord_default_instance_;
-class TrendArchiveHourDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TrendArchiveHour> _instance;
-} _TrendArchiveHour_default_instance_;
-class TrendArchiveDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TrendArchive> _instance;
-} _TrendArchive_default_instance_;
-class TrendViewLimitDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TrendViewLimit> _instance;
-} _TrendViewLimit_default_instance_;
-class TrendSignalParamDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TrendSignalParam> _instance;
-} _TrendSignalParam_default_instance_;
-class TrendSignalSetDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TrendSignalSet> _instance;
-} _TrendSignalSet_default_instance_;
-class TrendRulerDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TrendRuler> _instance;
-} _TrendRuler_default_instance_;
-class TrendRulerSetDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TrendRulerSet> _instance;
-} _TrendRulerSet_default_instance_;
-class TrendDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Trend> _instance;
-} _Trend_default_instance_;
-class TrendParamDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TrendParam> _instance;
-} _TrendParam_default_instance_;
-class TrendWidgetDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TrendWidget> _instance;
-} _TrendWidget_default_instance_;
+constexpr TrendStateRecord::TrendStateRecord(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : states_raw_buffer_v1_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+struct TrendStateRecordDefaultTypeInternal {
+  constexpr TrendStateRecordDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~TrendStateRecordDefaultTypeInternal() {}
+  union {
+    TrendStateRecord _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TrendStateRecordDefaultTypeInternal _TrendStateRecord_default_instance_;
+constexpr TrendArchiveHour::TrendArchiveHour(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : records_()
+  , time_stamp_(PROTOBUF_ULONGLONG(0))
+  , state_(0){}
+struct TrendArchiveHourDefaultTypeInternal {
+  constexpr TrendArchiveHourDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~TrendArchiveHourDefaultTypeInternal() {}
+  union {
+    TrendArchiveHour _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TrendArchiveHourDefaultTypeInternal _TrendArchiveHour_default_instance_;
+constexpr TrendArchive::TrendArchive(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : hours_()
+  , app_signal_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+struct TrendArchiveDefaultTypeInternal {
+  constexpr TrendArchiveDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~TrendArchiveDefaultTypeInternal() {}
+  union {
+    TrendArchive _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TrendArchiveDefaultTypeInternal _TrendArchive_default_instance_;
+constexpr TrendViewLimit::TrendViewLimit(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : high_limit_(0)
+  , low_limit_(0)
+  , type_(0){}
+struct TrendViewLimitDefaultTypeInternal {
+  constexpr TrendViewLimitDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~TrendViewLimitDefaultTypeInternal() {}
+  union {
+    TrendViewLimit _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TrendViewLimitDefaultTypeInternal _TrendViewLimit_default_instance_;
+constexpr TrendSignalParam::TrendSignalParam(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : view_limits_()
+  , signal_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , app_signal_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , caption_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , equipment_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , unit_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , analog_format_(nullptr)
+  , type_(0)
+  , precision_(0)
+  , color_(0u)
+  , line_weight_(0)
+  , high_limit_(0)
+  , low_limit_(0)
+  , view_high_limit_(0)
+  , view_low_limit_(0){}
+struct TrendSignalParamDefaultTypeInternal {
+  constexpr TrendSignalParamDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~TrendSignalParamDefaultTypeInternal() {}
+  union {
+    TrendSignalParam _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TrendSignalParamDefaultTypeInternal _TrendSignalParam_default_instance_;
+constexpr TrendSignalSet::TrendSignalSet(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : signal_params_()
+  , archive_local_time_()
+  , archive_system_time_()
+  , archive_plant_time_(){}
+struct TrendSignalSetDefaultTypeInternal {
+  constexpr TrendSignalSetDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~TrendSignalSetDefaultTypeInternal() {}
+  union {
+    TrendSignalSet _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TrendSignalSetDefaultTypeInternal _TrendSignalSet_default_instance_;
+constexpr TrendRuler::TrendRuler(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : time_stamp_(PROTOBUF_ULONGLONG(0))
+  , show_(true)
+  , show_signal_values_(true){}
+struct TrendRulerDefaultTypeInternal {
+  constexpr TrendRulerDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~TrendRulerDefaultTypeInternal() {}
+  union {
+    TrendRuler _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TrendRulerDefaultTypeInternal _TrendRuler_default_instance_;
+constexpr TrendRulerSet::TrendRulerSet(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : rulers_(){}
+struct TrendRulerSetDefaultTypeInternal {
+  constexpr TrendRulerSetDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~TrendRulerSetDefaultTypeInternal() {}
+  union {
+    TrendRulerSet _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TrendRulerSetDefaultTypeInternal _TrendRulerSet_default_instance_;
+constexpr Trend::Trend(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : signal_set_(nullptr)
+  , ruler_set_(nullptr){}
+struct TrendDefaultTypeInternal {
+  constexpr TrendDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~TrendDefaultTypeInternal() {}
+  union {
+    Trend _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TrendDefaultTypeInternal _Trend_default_instance_;
+constexpr TrendParam::TrendParam(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : view_mode_(0)
+  , scale_type_(0)
+  , start_time_(PROTOBUF_ULONGLONG(0))
+  , duration_(PROTOBUF_LONGLONG(0))
+  , back_color_1st_(0u)
+  , back_color_2nd_(0u)
+  , time_type_(2)
+  , lane_count_(1){}
+struct TrendParamDefaultTypeInternal {
+  constexpr TrendParamDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~TrendParamDefaultTypeInternal() {}
+  union {
+    TrendParam _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TrendParamDefaultTypeInternal _TrendParam_default_instance_;
+constexpr TrendWidget::TrendWidget(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : trend_(nullptr)
+  , trend_param_(nullptr){}
+struct TrendWidgetDefaultTypeInternal {
+  constexpr TrendWidgetDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~TrendWidgetDefaultTypeInternal() {}
+  union {
+    TrendWidget _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TrendWidgetDefaultTypeInternal _TrendWidget_default_instance_;
 }  // namespace Proto
-static void InitDefaultsscc_info_Trend_trends_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::Proto::_Trend_default_instance_;
-    new (ptr) ::Proto::Trend();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_Trend_trends_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_Trend_trends_2eproto}, {
-      &scc_info_TrendSignalSet_trends_2eproto.base,
-      &scc_info_TrendRulerSet_trends_2eproto.base,}};
-
-static void InitDefaultsscc_info_TrendArchive_trends_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::Proto::_TrendArchive_default_instance_;
-    new (ptr) ::Proto::TrendArchive();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_TrendArchive_trends_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_TrendArchive_trends_2eproto}, {
-      &scc_info_TrendArchiveHour_trends_2eproto.base,}};
-
-static void InitDefaultsscc_info_TrendArchiveHour_trends_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::Proto::_TrendArchiveHour_default_instance_;
-    new (ptr) ::Proto::TrendArchiveHour();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_TrendArchiveHour_trends_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_TrendArchiveHour_trends_2eproto}, {
-      &scc_info_TrendStateRecord_trends_2eproto.base,}};
-
-static void InitDefaultsscc_info_TrendParam_trends_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::Proto::_TrendParam_default_instance_;
-    new (ptr) ::Proto::TrendParam();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TrendParam_trends_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_TrendParam_trends_2eproto}, {}};
-
-static void InitDefaultsscc_info_TrendRuler_trends_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::Proto::_TrendRuler_default_instance_;
-    new (ptr) ::Proto::TrendRuler();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TrendRuler_trends_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_TrendRuler_trends_2eproto}, {}};
-
-static void InitDefaultsscc_info_TrendRulerSet_trends_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::Proto::_TrendRulerSet_default_instance_;
-    new (ptr) ::Proto::TrendRulerSet();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_TrendRulerSet_trends_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_TrendRulerSet_trends_2eproto}, {
-      &scc_info_TrendRuler_trends_2eproto.base,}};
-
-static void InitDefaultsscc_info_TrendSignalParam_trends_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::Proto::_TrendSignalParam_default_instance_;
-    new (ptr) ::Proto::TrendSignalParam();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_TrendSignalParam_trends_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_TrendSignalParam_trends_2eproto}, {
-      &scc_info_TrendViewLimit_trends_2eproto.base,}};
-
-static void InitDefaultsscc_info_TrendSignalSet_trends_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::Proto::_TrendSignalSet_default_instance_;
-    new (ptr) ::Proto::TrendSignalSet();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_TrendSignalSet_trends_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_TrendSignalSet_trends_2eproto}, {
-      &scc_info_TrendSignalParam_trends_2eproto.base,
-      &scc_info_TrendArchive_trends_2eproto.base,}};
-
-static void InitDefaultsscc_info_TrendStateRecord_trends_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::Proto::_TrendStateRecord_default_instance_;
-    new (ptr) ::Proto::TrendStateRecord();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TrendStateRecord_trends_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_TrendStateRecord_trends_2eproto}, {}};
-
-static void InitDefaultsscc_info_TrendViewLimit_trends_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::Proto::_TrendViewLimit_default_instance_;
-    new (ptr) ::Proto::TrendViewLimit();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TrendViewLimit_trends_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_TrendViewLimit_trends_2eproto}, {}};
-
-static void InitDefaultsscc_info_TrendWidget_trends_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::Proto::_TrendWidget_default_instance_;
-    new (ptr) ::Proto::TrendWidget();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_TrendWidget_trends_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_TrendWidget_trends_2eproto}, {
-      &scc_info_Trend_trends_2eproto.base,
-      &scc_info_TrendParam_trends_2eproto.base,}};
-
 static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_trends_2eproto[11];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_trends_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_trends_2eproto = nullptr;
@@ -446,31 +406,21 @@ const char descriptor_table_protodef_trends_2eproto[] PROTOBUF_SECTION_VARIABLE(
   "Widget\022\033\n\005trend\030\002 \001(\0132\014.Proto.Trend\022&\n\013t"
   "rend_param\030\003 \001(\0132\021.Proto.TrendParam"
   ;
-static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_trends_2eproto_deps[1] = {
-};
-static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_trends_2eproto_sccs[11] = {
-  &scc_info_Trend_trends_2eproto.base,
-  &scc_info_TrendArchive_trends_2eproto.base,
-  &scc_info_TrendArchiveHour_trends_2eproto.base,
-  &scc_info_TrendParam_trends_2eproto.base,
-  &scc_info_TrendRuler_trends_2eproto.base,
-  &scc_info_TrendRulerSet_trends_2eproto.base,
-  &scc_info_TrendSignalParam_trends_2eproto.base,
-  &scc_info_TrendSignalSet_trends_2eproto.base,
-  &scc_info_TrendStateRecord_trends_2eproto.base,
-  &scc_info_TrendViewLimit_trends_2eproto.base,
-  &scc_info_TrendWidget_trends_2eproto.base,
-};
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_trends_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_trends_2eproto = {
-  false, false, descriptor_table_protodef_trends_2eproto, "trends.proto", 1395,
-  &descriptor_table_trends_2eproto_once, descriptor_table_trends_2eproto_sccs, descriptor_table_trends_2eproto_deps, 11, 0,
+  false, false, 1395, descriptor_table_protodef_trends_2eproto, "trends.proto", 
+  &descriptor_table_trends_2eproto_once, nullptr, 0, 11,
   schemas, file_default_instances, TableStruct_trends_2eproto::offsets,
-  file_level_metadata_trends_2eproto, 11, file_level_enum_descriptors_trends_2eproto, file_level_service_descriptors_trends_2eproto,
+  file_level_metadata_trends_2eproto, file_level_enum_descriptors_trends_2eproto, file_level_service_descriptors_trends_2eproto,
 };
+PROTOBUF_ATTRIBUTE_WEAK ::PROTOBUF_NAMESPACE_ID::Metadata
+descriptor_table_trends_2eproto_metadata_getter(int index) {
+  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_trends_2eproto);
+  return descriptor_table_trends_2eproto.file_level_metadata[index];
+}
 
 // Force running AddDescriptors() at dynamic initialization time.
-static bool dynamic_init_dummy_trends_2eproto = (static_cast<void>(::PROTOBUF_NAMESPACE_ID::internal::AddDescriptors(&descriptor_table_trends_2eproto)), true);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptorsRunner dynamic_init_dummy_trends_2eproto(&descriptor_table_trends_2eproto);
 namespace Proto {
 
 // ===================================================================
@@ -502,8 +452,7 @@ TrendStateRecord::TrendStateRecord(const TrendStateRecord& from)
 }
 
 void TrendStateRecord::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_TrendStateRecord_trends_2eproto.base);
-  states_raw_buffer_v1_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+states_raw_buffer_v1_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 TrendStateRecord::~TrendStateRecord() {
@@ -526,11 +475,6 @@ void TrendStateRecord::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void TrendStateRecord::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
-const TrendStateRecord& TrendStateRecord::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_TrendStateRecord_trends_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void TrendStateRecord::Clear() {
 // @@protoc_insertion_point(message_clear_start:Proto.TrendStateRecord)
@@ -720,11 +664,10 @@ TrendArchiveHour::TrendArchiveHour(const TrendArchiveHour& from)
 }
 
 void TrendArchiveHour::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_TrendArchiveHour_trends_2eproto.base);
-  ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-      reinterpret_cast<char*>(&time_stamp_) - reinterpret_cast<char*>(this)),
-      0, static_cast<size_t>(reinterpret_cast<char*>(&state_) -
-      reinterpret_cast<char*>(&time_stamp_)) + sizeof(state_));
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&time_stamp_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&state_) -
+    reinterpret_cast<char*>(&time_stamp_)) + sizeof(state_));
 }
 
 TrendArchiveHour::~TrendArchiveHour() {
@@ -746,11 +689,6 @@ void TrendArchiveHour::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void TrendArchiveHour::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
-const TrendArchiveHour& TrendArchiveHour::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_TrendArchiveHour_trends_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void TrendArchiveHour::Clear() {
 // @@protoc_insertion_point(message_clear_start:Proto.TrendArchiveHour)
@@ -1004,8 +942,7 @@ TrendArchive::TrendArchive(const TrendArchive& from)
 }
 
 void TrendArchive::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_TrendArchive_trends_2eproto.base);
-  app_signal_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+app_signal_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 TrendArchive::~TrendArchive() {
@@ -1028,11 +965,6 @@ void TrendArchive::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void TrendArchive::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
-const TrendArchive& TrendArchive::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_TrendArchive_trends_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void TrendArchive::Clear() {
 // @@protoc_insertion_point(message_clear_start:Proto.TrendArchive)
@@ -1260,10 +1192,10 @@ TrendViewLimit::TrendViewLimit(const TrendViewLimit& from)
 }
 
 void TrendViewLimit::SharedCtor() {
-  ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-      reinterpret_cast<char*>(&high_limit_) - reinterpret_cast<char*>(this)),
-      0, static_cast<size_t>(reinterpret_cast<char*>(&type_) -
-      reinterpret_cast<char*>(&high_limit_)) + sizeof(type_));
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&high_limit_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&type_) -
+    reinterpret_cast<char*>(&high_limit_)) + sizeof(type_));
 }
 
 TrendViewLimit::~TrendViewLimit() {
@@ -1285,11 +1217,6 @@ void TrendViewLimit::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void TrendViewLimit::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
-const TrendViewLimit& TrendViewLimit::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_TrendViewLimit_trends_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void TrendViewLimit::Clear() {
 // @@protoc_insertion_point(message_clear_start:Proto.TrendViewLimit)
@@ -1603,17 +1530,16 @@ TrendSignalParam::TrendSignalParam(const TrendSignalParam& from)
 }
 
 void TrendSignalParam::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_TrendSignalParam_trends_2eproto.base);
-  signal_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  app_signal_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  caption_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  equipment_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  unit_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  analog_format_.UnsafeSetDefault(nullptr);
-  ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-      reinterpret_cast<char*>(&type_) - reinterpret_cast<char*>(this)),
-      0, static_cast<size_t>(reinterpret_cast<char*>(&view_low_limit_) -
-      reinterpret_cast<char*>(&type_)) + sizeof(view_low_limit_));
+signal_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+app_signal_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+caption_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+equipment_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+unit_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+analog_format_.UnsafeSetDefault(nullptr);
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&type_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&view_low_limit_) -
+    reinterpret_cast<char*>(&type_)) + sizeof(view_low_limit_));
 }
 
 TrendSignalParam::~TrendSignalParam() {
@@ -1641,11 +1567,6 @@ void TrendSignalParam::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void TrendSignalParam::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
-const TrendSignalParam& TrendSignalParam::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_TrendSignalParam_trends_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void TrendSignalParam::Clear() {
 // @@protoc_insertion_point(message_clear_start:Proto.TrendSignalParam)
@@ -2253,7 +2174,6 @@ TrendSignalSet::TrendSignalSet(const TrendSignalSet& from)
 }
 
 void TrendSignalSet::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_TrendSignalSet_trends_2eproto.base);
 }
 
 TrendSignalSet::~TrendSignalSet() {
@@ -2275,11 +2195,6 @@ void TrendSignalSet::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void TrendSignalSet::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
-const TrendSignalSet& TrendSignalSet::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_TrendSignalSet_trends_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void TrendSignalSet::Clear() {
 // @@protoc_insertion_point(message_clear_start:Proto.TrendSignalSet)
@@ -2555,9 +2470,9 @@ TrendRuler::TrendRuler(const TrendRuler& from)
 }
 
 void TrendRuler::SharedCtor() {
-  time_stamp_ = PROTOBUF_ULONGLONG(0);
-  show_ = true;
-  show_signal_values_ = true;
+time_stamp_ = PROTOBUF_ULONGLONG(0);
+show_ = true;
+show_signal_values_ = true;
 }
 
 TrendRuler::~TrendRuler() {
@@ -2579,11 +2494,6 @@ void TrendRuler::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void TrendRuler::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
-const TrendRuler& TrendRuler::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_TrendRuler_trends_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void TrendRuler::Clear() {
 // @@protoc_insertion_point(message_clear_start:Proto.TrendRuler)
@@ -2814,7 +2724,6 @@ TrendRulerSet::TrendRulerSet(const TrendRulerSet& from)
 }
 
 void TrendRulerSet::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_TrendRulerSet_trends_2eproto.base);
 }
 
 TrendRulerSet::~TrendRulerSet() {
@@ -2836,11 +2745,6 @@ void TrendRulerSet::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void TrendRulerSet::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
-const TrendRulerSet& TrendRulerSet::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_TrendRulerSet_trends_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void TrendRulerSet::Clear() {
 // @@protoc_insertion_point(message_clear_start:Proto.TrendRulerSet)
@@ -3040,11 +2944,10 @@ Trend::Trend(const Trend& from)
 }
 
 void Trend::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_Trend_trends_2eproto.base);
-  ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-      reinterpret_cast<char*>(&signal_set_) - reinterpret_cast<char*>(this)),
-      0, static_cast<size_t>(reinterpret_cast<char*>(&ruler_set_) -
-      reinterpret_cast<char*>(&signal_set_)) + sizeof(ruler_set_));
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&signal_set_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&ruler_set_) -
+    reinterpret_cast<char*>(&signal_set_)) + sizeof(ruler_set_));
 }
 
 Trend::~Trend() {
@@ -3068,11 +2971,6 @@ void Trend::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void Trend::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
-const Trend& Trend::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_Trend_trends_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void Trend::Clear() {
 // @@protoc_insertion_point(message_clear_start:Proto.Trend)
@@ -3321,12 +3219,12 @@ TrendParam::TrendParam(const TrendParam& from)
 }
 
 void TrendParam::SharedCtor() {
-  ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-      reinterpret_cast<char*>(&view_mode_) - reinterpret_cast<char*>(this)),
-      0, static_cast<size_t>(reinterpret_cast<char*>(&back_color_2nd_) -
-      reinterpret_cast<char*>(&view_mode_)) + sizeof(back_color_2nd_));
-  time_type_ = 2;
-  lane_count_ = 1;
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&view_mode_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&back_color_2nd_) -
+    reinterpret_cast<char*>(&view_mode_)) + sizeof(back_color_2nd_));
+time_type_ = 2;
+lane_count_ = 1;
 }
 
 TrendParam::~TrendParam() {
@@ -3348,11 +3246,6 @@ void TrendParam::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void TrendParam::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
-const TrendParam& TrendParam::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_TrendParam_trends_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void TrendParam::Clear() {
 // @@protoc_insertion_point(message_clear_start:Proto.TrendParam)
@@ -3740,11 +3633,10 @@ TrendWidget::TrendWidget(const TrendWidget& from)
 }
 
 void TrendWidget::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_TrendWidget_trends_2eproto.base);
-  ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-      reinterpret_cast<char*>(&trend_) - reinterpret_cast<char*>(this)),
-      0, static_cast<size_t>(reinterpret_cast<char*>(&trend_param_) -
-      reinterpret_cast<char*>(&trend_)) + sizeof(trend_param_));
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&trend_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&trend_param_) -
+    reinterpret_cast<char*>(&trend_)) + sizeof(trend_param_));
 }
 
 TrendWidget::~TrendWidget() {
@@ -3768,11 +3660,6 @@ void TrendWidget::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void TrendWidget::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
-const TrendWidget& TrendWidget::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_TrendWidget_trends_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void TrendWidget::Clear() {
 // @@protoc_insertion_point(message_clear_start:Proto.TrendWidget)

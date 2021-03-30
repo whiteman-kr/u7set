@@ -12,10 +12,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = TuningIPEN
 TEMPLATE = app
 
-#c++17 support
+# c++20 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+gcc:CONFIG += c++20
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../warnings.pri)
 
@@ -23,6 +23,7 @@ SOURCES +=\
     ../lib/Address16.cpp \
     ../lib/LanControllerInfoHelper.cpp \
 	../lib/MemLeaksDetection.cpp \
+    ../lib/ScriptDeviceObject.cpp \
 	TuningMainWindow.cpp \
 	../lib/SoftwareSettings.cpp \
 	../lib/DeviceHelper.cpp \
@@ -30,9 +31,7 @@ SOURCES +=\
 	../lib/DeviceObject.cpp \
 	../lib/OutputLog.cpp \
 	../lib/DbStruct.cpp \
-	../Proto/serialization.pb.cc \
 	../lib/Types.cpp \
-	../lib/ProtoSerialization.cpp \
 	../lib/Service.cpp \
 	../lib/DataProtocols.cpp \
 	../lib/DataSource.cpp \
@@ -50,7 +49,6 @@ SOURCES +=\
     TuningIPENService.cpp \
     ../Builder/IssueLogger.cpp \
     ../lib/HostAddressPort.cpp \
-    ../Proto/network.pb.cc \
     DiscreteSignalSetter.cpp \
     TripleChannelSignalsModel.cpp \
     TuningIPENSocket.cpp \
@@ -74,6 +72,7 @@ HEADERS  += TuningMainWindow.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
 	../lib/MemLeaksDetection.h \
+    ../lib/ScriptDeviceObject.h \
 	../lib/SoftwareSettings.h \
 	../lib/DeviceHelper.h \
 	../lib/XmlHelper.h \
@@ -81,9 +80,7 @@ HEADERS  += TuningMainWindow.h \
 	../lib/PropertyObject.h \
 	../lib/OutputLog.h \
 	../lib/DbStruct.h \
-	../Proto/serialization.pb.h \
 	../lib/Types.h \
-	../lib/ProtoSerialization.h \
 	../lib/Service.h \
 	../lib/DataProtocols.h \
 	../lib/DataSource.h \
@@ -101,7 +98,6 @@ HEADERS  += TuningMainWindow.h \
     TuningIPENService.h \
     ../Builder/IssueLogger.h \
     ../lib/HostAddressPort.h \
-    ../Proto/network.pb.h \
     DiscreteSignalSetter.h \
     TripleChannelSignalsModel.h \
     TuningIPENSocket.h \
@@ -151,25 +147,19 @@ CONFIG(release, debug|release) {
 }
 
 
-#c++11 support for GCC
+# c++20 support
 #
-unix:QMAKE_CXXFLAGS += -std=c++11
-win32:QMAKE_CXXFLAGS += /std:c++17
+gcc:CONFIG += c++20
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+include(../warnings.pri)
 
 #protobuf
 #
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 
-win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
-
-	INCLUDEPATH += ./../Protobuf
-}
-unix {
-	LIBS += -lprotobuf
-}
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
 RESOURCES += \
     TuningIPEN.qrc

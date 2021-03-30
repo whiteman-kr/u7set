@@ -6,6 +6,16 @@
 #include <QDebug>
 #include "Signal.h"
 
+namespace Db
+{
+	QString File::systemDirToName(DbDir systemDir)
+	{
+		auto it = s_dirToName.find(systemDir);
+		return it != s_dirToName.end() ? it->second : QString{};
+	}
+}
+
+
 //
 //
 //	VcsState
@@ -95,6 +105,14 @@ VcsItemAction::VcsItemActionType VcsItemAction::value() const noexcept
 	return m_action;
 }
 
+void VcsItemAction::setValue(int intVal)
+{
+	Q_ASSERT(intVal >= static_cast<int>(VcsItemActionType::Unknown));
+	Q_ASSERT(intVal <= static_cast<int>(VcsItemActionType::Deleted));
+
+	m_action = static_cast<VcsItemActionType>(intVal);
+}
+
 bool operator== (const VcsItemAction& s1, const VcsItemAction& s2) noexcept
 {
 	return s1.m_action == s2.m_action;
@@ -112,10 +130,6 @@ bool operator!= (const VcsItemAction& s1, const VcsItemAction& s2) noexcept
 //
 DbProject::DbProject() :
 	m_version(0)
-{
-}
-
-DbProject::~DbProject()
 {
 }
 
@@ -522,12 +536,12 @@ DbFileTree::DbFileTree(const std::map<int, std::shared_ptr<DbFileInfo>>& files, 
 	return;
 }
 
-DbFileTree::DbFileTree(DbFileTree&& src)
+DbFileTree::DbFileTree(DbFileTree&& src) noexcept
 {
 	operator=(std::move(src));
 }
 
-DbFileTree& DbFileTree::operator=(DbFileTree&& src)
+DbFileTree& DbFileTree::operator=(DbFileTree&& src) noexcept
 {
 	m_fileIdToChildren = std::move(src.m_fileIdToChildren);
 	m_files = std::move(src.m_files);
@@ -1108,10 +1122,6 @@ DbFileInfo::DbFileInfo(int fileId) noexcept :
 }
 
 
-DbFileInfo::~DbFileInfo()
-{
-}
-
 void DbFileInfo::trace() const
 {
 	qDebug() << "File:";
@@ -1536,10 +1546,6 @@ DbChangeset::DbChangeset()
 {
 }
 
-DbChangeset::~DbChangeset()
-{
-}
-
 int DbChangeset::changeset() const
 {
 	return m_changesetId;
@@ -1616,10 +1622,6 @@ DbChangesetDetails::DbChangesetDetails() :
 	m_objects.reserve(64);
 }
 
-DbChangesetDetails::~DbChangesetDetails()
-{
-}
-
 const std::vector<DbChangesetObject>& DbChangesetDetails::objects() const
 {
 	return m_objects;
@@ -1654,10 +1656,6 @@ DbChangesetObject::DbChangesetObject(const Signal& signal) :
 {
 }
 
-
-DbChangesetObject::~DbChangesetObject()
-{
-}
 
 DbChangesetObject::Type DbChangesetObject::type() const
 {

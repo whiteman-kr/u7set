@@ -15,12 +15,11 @@ namespace Builder
 		MetrologyCfgGenerator(Context* context, Hardware::Software* software);
 		virtual ~MetrologyCfgGenerator() override;
 
-		virtual bool generateConfiguration() override;
-		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
+		virtual bool createSettingsProfile(const QString& profile) override;
+		virtual bool generateConfigurationStep1() override;
 
 	private:
 		bool writeDatabaseInfo();
-		bool writeSettings();
 		bool writeMetrologyItemsXml();
 		bool writeMetrologySignalSet();
 
@@ -32,9 +31,9 @@ namespace Builder
 		bool testElectricLimit_Input_Ohm(const Signal& signal);
 		bool testElectricLimit_Input_V(const Signal& signal);
 		bool testElectricLimit_Input_uA(const Signal& signal);
+		bool testElectricLimit_Input_Hz(const Signal& signal);
 
 	private:
-		MetrologySettingsGetter m_settings;
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
 		std::unordered_set<QString> m_analogSignalsOnSchemas;
 	};

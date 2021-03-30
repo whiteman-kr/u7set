@@ -475,7 +475,7 @@ namespace VFrame30
 
 			QBrush barBrush = QBrush(signalColors[barIndex]);
 
-			if (drawParam->isMonitorMode() == true)
+			if (drawParam->appSignalController() != nullptr)
 			{
 				schemaItem->getSignalState(drawParam, &signalParam, &appSignalState, &tuningSignalState);
 

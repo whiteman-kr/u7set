@@ -15,10 +15,6 @@ namespace Sim
 	{
 	}
 
-	CommandProcessor_LM5_LM6::~CommandProcessor_LM5_LM6()
-	{
-	}
-
 	void CommandProcessor_LM5_LM6::beforeAppLogicParse()
 	{
 		m_parseMemorySanitizer.clear();
@@ -167,16 +163,89 @@ namespace Sim
 					return false;
 				}
 			}
-
-			if (m_device->testTuningApplyCommand(false) == true)
-			{
-				m_device->tuningApplyCommand();
-			}
 		}
 
+		// Set SOR external switches
+		//
+		{
+			// Signal 'Set SOR Chassis' $(PARENT)_SETSORCHASSIS
+			// Writtien by ApplicationLogic
+			//
+			const quint32 setSorChassisOffset =  57782 + 1;
+			const quint16 setSorChassisBit = 0;
+			bool setSorChassisState = m_device->readRamBit(setSorChassisOffset, setSorChassisBit, E::LogicModuleRamAccess::Write);
+
+			// Platform signals:
+			//		'SOR is set' - bit 6
+			//		'Sor Switch 1, 2, 3' - bits 3, 4, 5
+			//		'SOR Reset' - bit 7
+			//
+			const quint32 setSorSwitchOffset = 57526 + 143;		// <TxDiagDataOffset>57526</TxDiagDataOffset>
+			const quint16 setSorSwitchBit = 3;					// 3, 4, 5
+			const quint16 sorIsSetBit = 6;						// Platform signal 'SOR is set'
+			const quint16 resetSorSwitchBit = 7;				// Platform signal 'Reset SOR'
+
+			bool sorSwitch1 = m_device->sorSetSwitch1();
+			bool sorSwitch2 = m_device->sorSetSwitch2();
+			bool sorSwitch3 = m_device->sorSetSwitch3();
+			bool resetSorSwitch = m_device->testSorResetSwitch(false);
+
+			int sorSwitchCount = static_cast<int>(sorSwitch1) +
+								 static_cast<int>(sorSwitch2) +
+								 static_cast<int>(sorSwitch3);
+
+			m_device->writeRamBit(setSorSwitchOffset, setSorSwitchBit + 0, sorSwitch1, E::LogicModuleRamAccess::Read);
+			m_device->writeRamBit(setSorSwitchOffset, setSorSwitchBit + 1, sorSwitch2, E::LogicModuleRamAccess::Read);
+			m_device->writeRamBit(setSorSwitchOffset, setSorSwitchBit + 2, sorSwitch3, E::LogicModuleRamAccess::Read);
+
+			m_device->writeRamBit(setSorSwitchOffset, resetSorSwitchBit, resetSorSwitch, E::LogicModuleRamAccess::Read);
+
+			if (resetSorSwitch == true)
+			{
+				// Reset 'Sor is set'
+				//
+				m_device->writeRamBit(setSorSwitchOffset, sorIsSetBit, 0, E::LogicModuleRamAccess::Read);
+
+				if (m_device->runtimeMode() != RuntimeMode::TuningMode)
+				{
+					m_device->setRuntimeMode(RuntimeMode::RunMode);
+				}
+			}
+
+			if (sorSwitchCount >= 2 ||
+				(setSorChassisState && m_device->runtimeMode() != RuntimeMode::TuningMode))		// Durinmg TuningMode Set SOR Chassis does not have influence on SOR is Set
+			{
+				// Set 'SOR is set'
+				//
+				m_device->writeRamBit(setSorSwitchOffset, sorIsSetBit, 1, E::LogicModuleRamAccess::Read);
+			}
+
+			// --
+			//
+			if (quint16 sorIsSetState = m_device->readRamBit(setSorSwitchOffset, sorIsSetBit, E::LogicModuleRamAccess::Read);
+				sorIsSetState == 1 && m_device->runtimeMode() != RuntimeMode::TuningMode)
+			{
+				m_device->setRuntimeMode(RuntimeMode::RunSafeMode);
+			}
+
+			quint16 sorIsSet = m_device->readRamBit(setSorSwitchOffset, sorIsSetBit,  E::LogicModuleRamAccess::Read);
+			m_device->setSorIsSet(sorIsSet);
+		}
+
+		// --
+		//
 		bool ok = setRuntimeModeSignals();
 
 		return ok;
+	}
+
+	quint16 CommandProcessor_LM5_LM6::signalSetSorChassis() const
+	{
+		const quint32 inputControllerOffset = 57782;
+		const quint32 setSorChassisOffset = inputControllerOffset + 1;
+		const quint16 setSorChassisBit = 0;
+
+		return m_device->readRamBit(setSorChassisOffset, setSorChassisBit, E::LogicModuleRamAccess::Write);		// Application Logic writes TO this signal
 	}
 
 	bool CommandProcessor_LM5_LM6::setRuntimeModeSignals()
@@ -236,7 +305,7 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_not_implemented(const DeviceCommand& command)
 	{
-		SimException::raise(QString("Command %1 is not implemented yet").arg(command.caption()), __FUNCTION__);
+		SimException::raise(QStringLiteral("Command %1 is not implemented yet").arg(command.caption()), Q_FUNC_INFO);
 		return;
 	}
 
@@ -272,7 +341,9 @@ namespace Sim
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance);
 		if (afb.simulationFunc().isEmpty() == true)
 		{
-			SimException::raise(QString("Simultaion function for AFB %1 is not found").arg(afb.caption()));
+			SimException::raise(QStringLiteral("Simultaion function for AFB %1 is not found")
+									.arg(afb.caption()),
+								Q_FUNC_INFO);
 		}
 
 		command->m_afbComponentInstance = m_device->afbComponentInstance(command->m_afbOpCode, command->m_afbInstance);
@@ -288,7 +359,7 @@ namespace Sim
 		auto it = m_nameToFuncAfb.find(afb.simulationFunc());
 		if (it == m_nameToFuncAfb.end())
 		{
-			SimException::raise(QString("Cannot find AFB func %1").arg(afb.simulationFunc()), "CommandProcessor_LM5_LM6::command_startafb");
+			SimException::raise(QStringLiteral("Cannot find AFB func %1").arg(afb.simulationFunc()), Q_FUNC_INFO);
 		}
 
 		SimAfbFuncCast pcast;
@@ -305,10 +376,10 @@ namespace Sim
 
 		if (afbInstance == nullptr)
 		{
-			SimException::raise(QString("Cannot find afbInstance with OpCode %1, InstanceNo %2")
+			SimException::raise(QStringLiteral("Cannot find afbInstance with OpCode %1, InstanceNo %2")
 									.arg(command.m_afbOpCode)
 									.arg(command.m_afbInstance),
-								"CommandProcessor_LM5_LM6::command_startafb");
+								Q_FUNC_INFO);
 		}
 
 		// AFB
@@ -351,8 +422,9 @@ namespace Sim
 			return;
 		}
 
-		SimException::raise(QString("Command stop is cannot be run in current phase: %1")
-								.arg(static_cast<int>(m_device->phase())));
+		SimException::raise(QStringLiteral("Command stop is cannot be run in current phase: %1")
+								.arg(static_cast<int>(m_device->phase())),
+							Q_FUNC_INFO);
 		return;
 	}
 
@@ -550,10 +622,10 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(AfbComponentParam{command.m_afbPinOpCode, data});
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
-								.arg(command.m_afbPinOpCode)
-								.arg(command.m_afbOpCode)
-								.arg(command.m_afbInstance));
+			m_device->SIM_FAULT(QStringLiteral("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+									.arg(command.m_afbPinOpCode)
+									.arg(command.m_afbOpCode)
+									.arg(command.m_afbInstance));
 		}
 
 		return;
@@ -641,10 +713,10 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(command.m_afbParam);
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
-								.arg(command.m_afbPinOpCode)
-								.arg(command.m_afbOpCode)
-								.arg(command.m_afbInstance));
+			m_device->SIM_FAULT(QStringLiteral("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+									.arg(command.m_afbPinOpCode)
+									.arg(command.m_afbOpCode)
+									.arg(command.m_afbInstance));
 		}
 
 		return;
@@ -692,10 +764,10 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(AfbComponentParam{command.m_afbPinOpCode, data});
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
-								.arg(command.m_afbPinOpCode)
-								.arg(command.m_afbOpCode)
-								.arg(command.m_afbInstance));
+			m_device->SIM_FAULT(QStringLiteral("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+									.arg(command.m_afbPinOpCode)
+									.arg(command.m_afbOpCode)
+									.arg(command.m_afbInstance));
 		}
 
 		return;
@@ -987,13 +1059,13 @@ namespace Sim
 		AfbComponentParam param{command.m_afbPinOpCode};
 		param.setDwordValue(data);
 
-		bool ok = command.m_afbComponentInstance->addParam(std::move(param));
+		bool ok = command.m_afbComponentInstance->addParam(param);
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
-								.arg(command.m_afbPinOpCode)
-								.arg(command.m_afbOpCode)
-								.arg(command.m_afbInstance));
+			m_device->SIM_FAULT(QStringLiteral("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+									.arg(command.m_afbPinOpCode)
+									.arg(command.m_afbOpCode)
+									.arg(command.m_afbInstance));
 		}
 
 		return;
@@ -1083,10 +1155,10 @@ namespace Sim
 		bool ok = command.m_afbComponentInstance->addParam(command.m_afbParam);
 		if (ok == false)
 		{
-			m_device->SIM_FAULT(QString("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
-								.arg(command.m_afbPinOpCode)
-								.arg(command.m_afbOpCode)
-								.arg(command.m_afbInstance))
+			m_device->SIM_FAULT(QStringLiteral("Write param error. Param OpIndex %1, Element OpIndex %2, Element Instance %3")
+									.arg(command.m_afbPinOpCode)
+									.arg(command.m_afbOpCode)
+									.arg(command.m_afbInstance))
 		}
 
 		return;
@@ -1324,7 +1396,7 @@ namespace Sim
 				}
 				break;
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_logic");
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		// Save result
@@ -1432,22 +1504,18 @@ namespace Sim
 				if (currentInputValue == 1)
 				{
 					result = 1;
-					counter = 0;
+					counter = time;
 				}
 				else
 				{
-					// InputValue == 0
-					//
-					counter += m_cycleDurationMs;
-
-					if (counter > static_cast<quint32>(time))
+					if (counter == 0)
 					{
 						result = 0;
-						counter = time;		// It keeps counter from overflow and getting to 0
 					}
 					else
 					{
 						result = 1;
+						counter -= m_cycleDurationMs;
 					}
 				}
 			}
@@ -1535,8 +1603,8 @@ namespace Sim
 			break;
 
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
-									.arg(conf), "afb_tct");
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+									.arg(conf), Q_FUNC_INFO);
 		}
 
 		// Save result
@@ -1630,22 +1698,18 @@ namespace Sim
 				if (currentInputValue == 1)
 				{
 					result = 1;
-					counter = 0;
+					counter = time;
 				}
 				else
 				{
-					// InputValue == 0
-					//
-					counter += m_cycleDurationMs;
-
-					if (counter > static_cast<quint32>(time))
+					if (counter == 0)
 					{
 						result = 0;
-						counter = time;		// It keeps counter from overflow and getting to 0
 					}
 					else
 					{
 						result = 1;
+						counter -= m_cycleDurationMs;
 					}
 				}
 			}
@@ -1760,8 +1824,8 @@ namespace Sim
 			break;
 
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
-									.arg(conf), "afb_tct");
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+									.arg(conf), Q_FUNC_INFO);
 		}
 
 		// Save result
@@ -1855,22 +1919,18 @@ namespace Sim
 				if (currentInputValue == 1)
 				{
 					result = 1;
-					counter = 0;
+					counter = time;
 				}
 				else
 				{
-					// InputValue == 0
-					//
-					counter += m_cycleDurationMs;
-
-					if (counter > static_cast<quint32>(time))
+					if (counter == 0)
 					{
 						result = 0;
-						counter = time;		// It keeps counter from overflow and getting to 0
 					}
 					else
 					{
 						result = 1;
+						counter -= m_cycleDurationMs;
 					}
 				}
 			}
@@ -1985,8 +2045,9 @@ namespace Sim
 			break;
 
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
-									.arg(conf), "afb_tct");
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+									.arg(conf),
+								Q_FUNC_INFO);
 		}
 
 		// Save result
@@ -2169,7 +2230,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		// Save result
@@ -2236,7 +2297,7 @@ namespace Sim
 				}
 				break;
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_ctud");
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 			}
 		}
 
@@ -2434,7 +2495,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcod_v103/104");
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		// Save result
@@ -2483,7 +2544,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcod");
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		return;
@@ -2627,7 +2688,7 @@ namespace Sim
 				break;
 
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 			}
 
 			return;
@@ -2777,13 +2838,13 @@ namespace Sim
 				}
 				break;
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 			}
 
 			return;
 		}
 
-		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+		SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		return;
 	}
 
@@ -3057,7 +3118,7 @@ namespace Sim
 
 			default:
 				std::sort(std::begin(operands), std::begin(operands) + operandCount,
-							[](const Operand& a, const Operand& b)
+							[](const Operand a, const Operand b)
 							{
 								return a.value < b.value;
 							});
@@ -3256,9 +3317,9 @@ namespace Sim
 				operand1.divFloatingPoint(operand2);
 				break;
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
 										.arg(conf->wordValue()),
-									"CommandProcessor_LM5_LM6::afb_math");
+									Q_FUNC_INFO);
 		}
 
 		// Save result
@@ -3429,16 +3490,53 @@ namespace Sim
 				result.mulFloatingPoint(*k1);
 				result.addFloatingPoint(*k2);
 
-				if (result.floatValue() > std::numeric_limits<quint16>().max())
+				const float floatValue = result.floatValue();
+
+				// Rounding to the nearest even number
+				//
+				int oldRound = std::fegetround();
+				std::fesetround(FE_TONEAREST);
+
+				qint64 intValue64 = std::llrint(floatValue);
+				quint16 uintValue16 = static_cast<quint16>(intValue64);
+
+				std::fesetround(oldRound);
+
+				// Check limits, nan, +/-inf,
+				//
+				if (intValue64 > std::numeric_limits<quint16>().max())
 				{
-					// Overflow
-					//
 					result.setMathOverflow(1);
+					uintValue16 = std::numeric_limits<quint16>().max();
+				}
+
+				if (intValue64 < std::numeric_limits<quint16>().lowest())
+				{
+					result.setMathOverflow(1);
+					uintValue16 = std::numeric_limits<quint16>().lowest();
+				}
+
+				if (std::isinf(floatValue) == true)
+				{
+					result.setMathOverflow(1);
+					uintValue16 = std::signbit(floatValue) ?
+									 std::numeric_limits<quint16>().lowest() :
+									 std::numeric_limits<quint16>().max();
+				}
+
+				if (result.mathNan())
+				{
+					uintValue16 = 0;
+				}
+
+				if (uintValue16 == 0)
+				{
+					result.setMathZero(1);
 				}
 
 				// Save result
 				//
-				instance->addParamWord(o_ui_result, static_cast<quint16>(result.floatValue()));
+				instance->addParamWord(o_ui_result, uintValue16);
 			}
 			break;
 		case 8: // 32(FP)/32(SI)
@@ -3449,16 +3547,53 @@ namespace Sim
 				result.mulFloatingPoint(*k1);
 				result.addFloatingPoint(*k2);
 
-				if (result.floatValue() > static_cast<float>(std::numeric_limits<qint32>().max()))
+				const float floatValue = result.floatValue();
+
+				// Rounding to the nearest even number
+				//
+				int oldRound = std::fegetround();
+				std::fesetround(FE_TONEAREST);
+
+				qint64 intValue64 = std::llrint(floatValue);
+				qint32 intValue32 = static_cast<qint32>(intValue64);
+
+				std::fesetround(oldRound);
+
+				// Check limits, nan, +/-inf,
+				//
+				if (intValue64 > std::numeric_limits<qint32>().max())
 				{
-					// Overflow
-					//
 					result.setMathOverflow(1);
+					intValue32 = std::numeric_limits<qint32>().max();
+				}
+
+				if (intValue64 < std::numeric_limits<qint32>().lowest())
+				{
+					result.setMathOverflow(1);
+					intValue32 = std::numeric_limits<qint32>().lowest();
+				}
+
+				if (std::isinf(floatValue) == true)
+				{
+					result.setMathOverflow(1);
+					intValue32 = std::signbit(floatValue) ?
+									 std::numeric_limits<qint32>().lowest() :
+									 std::numeric_limits<qint32>().max();
+				}
+
+				if (result.mathNan())
+				{
+					intValue32 = 0;
+				}
+
+				if (intValue32 == 0)
+				{
+					result.setMathZero(1);
 				}
 
 				// Save result
 				//
-				instance->addParamSignedInt(o_si_fp_result, static_cast<qint32>(result.floatValue()));
+				instance->addParamSignedInt(o_si_fp_result, intValue32);
 			}
 			break;
 		case 9: // 16(UI)/32(FP)
@@ -3478,7 +3613,8 @@ namespace Sim
 			break;
 		default:
 			instance->addParamWord(o_scal_edi, 0x0001);
-			SimException::raise("Unknown AFB configuration: " + QString::number(conf->wordValue()) + " , or this configuration is not implemented yet.");
+			SimException::raise("Unknown AFB configuration: " + QString::number(conf->wordValue()) + " , or this configuration is not implemented yet.",
+								Q_FUNC_INFO);
 			break;
 		}
 
@@ -3596,9 +3732,9 @@ namespace Sim
 				}
 
 				// what type og float is it ?
-				SimException::raise(QString("Specific type of float: %1, %2.")
+				SimException::raise(QStringLiteral("Specific type of float: %1, %2.")
 									.arg(floatData),
-									"CommandProcessor_LM5_LM6::afb_func_v3");
+									Q_FUNC_INFO);
 			}
 			break;
 		case 2:		// FP ABS
@@ -3629,9 +3765,9 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
 								.arg(conf),
-								"CommandProcessor_LM5_LM6::afb_func_v3");
+								Q_FUNC_INFO);
 		}
 
 		// Save result
@@ -3850,11 +3986,11 @@ namespace Sim
 
 		// AFB Logic
 		//
-		if (conf >=1 && conf <= 4)
+		if (conf >= 1 && conf <= 4)
 		{
-			qint32 hystValue = instance->param(i_hyst)->signedIntValue();
-			qint32 settingValue = instance->param(i_setting)->signedIntValue();
-			qint32 inputValue = instance->param(i_data)->signedIntValue();
+			qint64 hystValue = instance->param(i_hyst)->signedIntValue();
+			qint64 settingValue = instance->param(i_setting)->signedIntValue();
+			qint64 inputValue = instance->param(i_data)->signedIntValue();
 			quint16 prevResult = 0;
 
 			if (hystValue < 0)
@@ -3870,75 +4006,125 @@ namespace Sim
 			switch (conf)
 			{
 			case 1:		// SignedInt32, ==
-				if (inputValue >= (settingValue - hystValue) &&
-					inputValue <= (settingValue + hystValue))
 				{
-					instance->addParamWord(o_result, 1);
-				}
-				else
-				{
-					instance->addParamWord(o_result, 0);
+					qint64 upLimit = settingValue + hystValue;
+					qint64 lowLimit = settingValue - hystValue;
+
+					if (upLimit > std::numeric_limits<qint32>::max() ||
+						upLimit < std::numeric_limits<qint32>::lowest() ||
+						lowLimit > std::numeric_limits<qint32>::max() ||
+						lowLimit < std::numeric_limits<qint32>::lowest())
+					{
+						upLimit = std::clamp<qint64>(upLimit, std::numeric_limits<qint32>::lowest(), std::numeric_limits<qint32>::max());
+						lowLimit = std::clamp<qint64>(lowLimit, std::numeric_limits<qint32>::lowest(), std::numeric_limits<qint32>::max());
+
+						instance->addParamWord(o_overflow, 1);
+					}
+
+					quint16 r = (inputValue >= lowLimit && inputValue <= upLimit);
+
+					instance->addParamWord(o_result, r);
 				}
 				break;
 
 			case 2:		// SignedInt32, >
-				if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
 				{
-					prevResult = instance->param(i_prev_result)->wordValue();
-				}
+					qint64 limit = settingValue - hystValue;
 
-				if (inputValue > settingValue ||
-					(prevResult == 1 && inputValue > settingValue - hystValue))
-				{
-					instance->addParamWord(o_result, 1);
-					instance->addParamWord(i_prev_result, 1);
-				}
-				else
-				{
-					instance->addParamWord(o_result, 0);
-					instance->addParamWord(i_prev_result, 0);
+					if (limit > std::numeric_limits<qint32>::max() ||
+						limit < std::numeric_limits<qint32>::lowest())
+					{
+						limit = std::clamp<qint64>(limit, std::numeric_limits<qint32>::lowest(), std::numeric_limits<qint32>::max());
+
+						instance->addParamWord(o_overflow, 1);
+					}
+
+					if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+					{
+						prevResult = instance->param(i_prev_result)->wordValue();
+					}
+
+					if (inputValue > settingValue ||
+						(prevResult == 1 && inputValue > limit))
+					{
+						instance->addParamWord(o_result, 1);
+						instance->addParamWord(i_prev_result, 1);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);
+					}
 				}
 				break;
 
 			case 3:		// SignedInt32, <
-				if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
 				{
-					prevResult = instance->param(i_prev_result)->wordValue();
-				}
+					qint64 limit = settingValue + hystValue;
 
-				if ((inputValue < settingValue) ||
-					(prevResult == 1 && inputValue < settingValue + hystValue))
-				{
-					instance->addParamWord(o_result, 1);
-					instance->addParamWord(i_prev_result, 1);
-				}
-				else
-				{
-					instance->addParamWord(o_result, 0);
-					instance->addParamWord(i_prev_result, 0);
+					if (limit > std::numeric_limits<qint32>::max() ||
+						limit < std::numeric_limits<qint32>::lowest())
+					{
+						limit = std::clamp<qint64>(limit, std::numeric_limits<qint32>::lowest(), std::numeric_limits<qint32>::max());
+
+						instance->addParamWord(o_overflow, 1);
+					}
+
+
+					if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+					{
+						prevResult = instance->param(i_prev_result)->wordValue();
+					}
+
+					if ((inputValue < settingValue) ||
+						(prevResult == 1 && inputValue < limit))
+					{
+						instance->addParamWord(o_result, 1);
+						instance->addParamWord(i_prev_result, 1);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);
+					}
 				}
 				break;
 
-			case 4:		// SignedInt32, <>
-				if (inputValue >= (settingValue - hystValue) &&
-					inputValue <= (settingValue + hystValue))
+			case 4:		// SignedInt32, !=
 				{
-					instance->addParamWord(o_result, 0);
-				}
-				else
-				{
-					instance->addParamWord(o_result, 1);
+					qint64 upLimit = settingValue + hystValue;
+					qint64 lowLimit = settingValue - hystValue;
+
+					if (upLimit > std::numeric_limits<qint32>::max() ||
+						upLimit < std::numeric_limits<qint32>::lowest() ||
+						lowLimit > std::numeric_limits<qint32>::max() ||
+						lowLimit < std::numeric_limits<qint32>::lowest())
+					{
+						upLimit = std::clamp<qint64>(upLimit, std::numeric_limits<qint32>::lowest(), std::numeric_limits<qint32>::max());
+						lowLimit = std::clamp<qint64>(lowLimit, std::numeric_limits<qint32>::lowest(), std::numeric_limits<qint32>::max());
+
+						instance->addParamWord(o_overflow, 1);
+					}
+
+					if (inputValue >= lowLimit && inputValue <= upLimit)
+					{
+						instance->addParamWord(o_result, 0);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 1);
+					}
 				}
 				break;
 
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 			}
 
 			return;
 		}
 
-		if (conf >=5 && conf <= 8)
+		if (conf >= 5 && conf <= 8)
 		{
 			float hystValue = instance->param(i_hyst)->floatValue();
 			float settingValue = instance->param(i_setting)->floatValue();
@@ -4082,15 +4268,13 @@ namespace Sim
 				break;
 
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 			}
 
 			return;
 		}
 
-
-
-		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+		SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		return;
 	}
 
@@ -4114,6 +4298,7 @@ namespace Sim
 		const int o_overflow = 10;		// Result
 		const int o_underflow = 11;		// Result
 		const int o_nan = 13;			// Any input FP param NaN
+		const int o_param_err = 14;		// Param error - if (config = 0) or (config > 8) or (i_hys < 0)
 
 		// Get params, throws exception in case of error
 		//
@@ -4121,85 +4306,149 @@ namespace Sim
 
 		// AFB Logic
 		//
-		if (conf >=1 && conf <= 4)
+		if (conf >= 1 && conf <= 4)
 		{
-			qint32 hystValue = instance->param(i_hyst)->signedIntValue();
-			qint32 settingValue = instance->param(i_setting)->signedIntValue();
-			qint32 inputValue = instance->param(i_data)->signedIntValue();
+			qint64 hystValue = instance->param(i_hyst)->signedIntValue();
+			qint64 settingValue = instance->param(i_setting)->signedIntValue();
+			qint64 inputValue = instance->param(i_data)->signedIntValue();
 			quint16 prevResult = 0;
+
+			if (hystValue < 0)
+			{
+				hystValue = 0;
+				instance->addParamWord(o_param_err, 1);
+			}
+			else
+			{
+				instance->addParamWord(o_param_err, 0);
+			}
 
 			switch (conf)
 			{
 			case 1:		// SignedInt32, ==
-				if (inputValue >= (settingValue - hystValue / 2) &&
-					inputValue <= (settingValue + hystValue / 2))
 				{
-					instance->addParamWord(o_result, 1);
-				}
-				else
-				{
-					instance->addParamWord(o_result, 0);
+					qint64 upLimit = settingValue + hystValue / 2;
+					qint64 lowLimit = settingValue - hystValue / 2;
+
+					if (upLimit > std::numeric_limits<qint32>::max() ||
+						upLimit < std::numeric_limits<qint32>::lowest() ||
+						lowLimit > std::numeric_limits<qint32>::max() ||
+						lowLimit < std::numeric_limits<qint32>::lowest())
+					{
+						upLimit = std::clamp<qint64>(upLimit, std::numeric_limits<qint32>::lowest(), std::numeric_limits<qint32>::max());
+						lowLimit = std::clamp<qint64>(lowLimit, std::numeric_limits<qint32>::lowest(), std::numeric_limits<qint32>::max());
+
+						instance->addParamWord(o_overflow, 1);
+					}
+
+					if (inputValue >= lowLimit && inputValue <= upLimit)
+					{
+						instance->addParamWord(o_result, 1);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 0);
+					}
 				}
 				break;
 
 			case 2:		// SignedInt32, >
-				if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
 				{
-					prevResult = instance->param(i_prev_result)->wordValue();
-				}
+					qint64 limit = settingValue - hystValue;
 
-				if (inputValue > settingValue ||
-					(prevResult == 1 && inputValue > settingValue - hystValue))
-				{
-					instance->addParamWord(o_result, 1);
-					instance->addParamWord(i_prev_result, 1);
-				}
-				else
-				{
-					instance->addParamWord(o_result, 0);
-					instance->addParamWord(i_prev_result, 0);
+					if (limit > std::numeric_limits<qint32>::max() ||
+						limit < std::numeric_limits<qint32>::lowest())
+					{
+						limit = std::clamp<qint64>(limit, std::numeric_limits<qint32>::lowest(), std::numeric_limits<qint32>::max());
+
+						instance->addParamWord(o_overflow, 1);
+					}
+
+					if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+					{
+						prevResult = instance->param(i_prev_result)->wordValue();
+					}
+
+					if (inputValue > settingValue ||
+						(prevResult == 1 && inputValue > limit))
+					{
+						instance->addParamWord(o_result, 1);
+						instance->addParamWord(i_prev_result, 1);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);
+					}
 				}
 				break;
 
 			case 3:		// SignedInt32, <
-				if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
 				{
-					prevResult = instance->param(i_prev_result)->wordValue();
-				}
+					qint64 limit = settingValue + hystValue;
 
-				if ((inputValue < settingValue) ||
-					(prevResult == 1 && inputValue < settingValue + hystValue))
-				{
-					instance->addParamWord(o_result, 1);
-					instance->addParamWord(i_prev_result, 1);
-				}
-				else
-				{
-					instance->addParamWord(o_result, 0);
-					instance->addParamWord(i_prev_result, 0);
+					if (limit > std::numeric_limits<qint32>::max() ||
+						limit < std::numeric_limits<qint32>::lowest())
+					{
+						limit = std::clamp<qint64>(limit, std::numeric_limits<qint32>::lowest(), std::numeric_limits<qint32>::max());
+
+						instance->addParamWord(o_overflow, 1);
+					}
+
+					if (instance->paramExists(i_prev_result) == true)	// There is not prev result for first cycle;
+					{
+						prevResult = instance->param(i_prev_result)->wordValue();
+					}
+
+					if ((inputValue < settingValue) ||
+						(prevResult == 1 && inputValue < limit))
+					{
+						instance->addParamWord(o_result, 1);
+						instance->addParamWord(i_prev_result, 1);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 0);
+						instance->addParamWord(i_prev_result, 0);
+					}
 				}
 				break;
 
-			case 4:		// SignedInt32, <>
-				if (inputValue >= (settingValue - hystValue / 2) &&
-					inputValue <= (settingValue + hystValue / 2))
+			case 4:		// SignedInt32, !=
 				{
-					instance->addParamWord(o_result, 0);
-				}
-				else
-				{
-					instance->addParamWord(o_result, 1);
+					qint64 upLimit = settingValue + hystValue / 2;
+					qint64 lowLimit = settingValue - hystValue / 2;
+
+					if (upLimit > std::numeric_limits<qint32>::max() ||
+						upLimit < std::numeric_limits<qint32>::lowest() ||
+						lowLimit > std::numeric_limits<qint32>::max() ||
+						lowLimit < std::numeric_limits<qint32>::lowest())
+					{
+						upLimit = std::clamp<qint64>(upLimit, std::numeric_limits<qint32>::lowest(), std::numeric_limits<qint32>::max());
+						lowLimit = std::clamp<qint64>(lowLimit, std::numeric_limits<qint32>::lowest(), std::numeric_limits<qint32>::max());
+
+						instance->addParamWord(o_overflow, 1);
+					}
+
+					if (inputValue >= lowLimit && inputValue <= upLimit)
+					{
+						instance->addParamWord(o_result, 0);
+					}
+					else
+					{
+						instance->addParamWord(o_result, 1);
+					}
 				}
 				break;
 
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 			}
 
 			return;
 		}
 
-		if (conf >=5 && conf <= 8)
+		if (conf >= 5 && conf <= 8)
 		{
 			float hystValue = instance->param(i_hyst)->floatValue();
 			float settingValue = instance->param(i_setting)->floatValue();
@@ -4220,7 +4469,18 @@ namespace Sim
 				instance->addParamWord(i_prev_result, 0);
 				instance->addParamWord(o_overflow, 0);
 				instance->addParamWord(o_underflow, 0);
+				instance->addParamWord(o_param_err, 0);
 				return;
+			}
+
+			if (hystValue < 0)
+			{
+				hystValue = 0;
+				instance->addParamWord(o_param_err, 1);
+			}
+			else
+			{
+				instance->addParamWord(o_param_err, 0);
 			}
 
 			// --
@@ -4332,13 +4592,13 @@ namespace Sim
 				break;
 
 			default:
-				SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+				SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 			}
 
 			return;
 		}
 
-		SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_bcomp");
+		SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		return;
 	}
 
@@ -4590,7 +4850,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_latch_v4");
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		return;
@@ -4801,7 +5061,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_latch_v5");
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		return;
@@ -4908,9 +5168,9 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
 								.arg(conf),
-								"CommandProcessor_LM5_LM6::afb_lim");
+								Q_FUNC_INFO);
 		}
 
 		// Save result
@@ -4930,12 +5190,14 @@ namespace Sim
 	//
 	void CommandProcessor_LM5_LM6::fb_deadzone_v5(AfbComponentInstance* /*instance*/)
 	{
-		SimException::raise(QString("fb_deadzone_v5: Is not implemented as hardware vesrion of this AFB has a number of error. Wait for version 7."), "CommandProcessor_LM5_LM6::fb_deadzone_v5");
+		SimException::raise(QStringLiteral("fb_deadzone_v5: Is not implemented as hardware vesrion of this AFB has a number of error. Wait for version 7."),
+							Q_FUNC_INFO);
 	}
 
 	void CommandProcessor_LM5_LM6::fb_deadzone_v6(AfbComponentInstance* /*instance*/)
 	{
-		SimException::raise(QString("fb_deadzone_v6: Is not implemented as hardware vesrion of this AFB has a number of error. Wait for version 7."), "CommandProcessor_LM5_LM6::fb_deadzone_v6");
+		SimException::raise(QStringLiteral("fb_deadzone_v6: Is not implemented as hardware vesrion of this AFB has a number of error. Wait for version 7."),
+							Q_FUNC_INFO);
 	}
 
 	//	POL, OpCode 25
@@ -5261,9 +5523,9 @@ namespace Sim
 			afb_mismatch_impl_fp(instance, version);
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1, or this configuration is not implemented yet.")
 								.arg(conf),
-								"CommandProcessor_LM5_LM6::afb_mismatch");
+								Q_FUNC_INFO);
 		}
 
 		return;
@@ -5643,53 +5905,57 @@ namespace Sim
 
 		case 4: // FP32 -> SI32
 			{
-				float input = instance->param(i_data_32)->floatValue();
+				const float input = instance->param(i_data_32)->floatValue();
 
-				qint32 result = static_cast<qint32>(input);
+				// Rounding to the nearest even number
+				//
+				int oldRound = std::fegetround();
+				std::fesetround(FE_TONEAREST);
+
+				qint64 result64 = std::llrint(input);
+				qint32 result32 = static_cast<qint32>(result64);
+
+				std::fesetround(oldRound);
 
 				// Flags
 				//
 				quint16 overflow = 0x0000;
-				if (static_cast<qint64>(input) > std::numeric_limits<qint32>::max())
+				if (result64 > std::numeric_limits<qint32>::max())
 				{
 					overflow = 0x0001;
-					result = std::numeric_limits<qint32>::max();
+					result32 = std::numeric_limits<qint32>::max();
 				}
 
-				if (static_cast<qint64>(input) < std::numeric_limits<qint32>::lowest())
+				if (result64 < std::numeric_limits<qint32>::lowest())
 				{
 					overflow = 0x0001;
-					result = std::numeric_limits<qint32>::lowest();
+					result32 = std::numeric_limits<qint32>::lowest();
 				}
 
 				if (std::isinf(input) == true)
 				{
-					if (std::signbit(input) == true)
-					{
-						result = std::numeric_limits<qint32>::lowest();
-					}
-					else
-					{
-						result = std::numeric_limits<qint32>::max();
-					}
+					overflow = 0x0001;
+					result32 = std::signbit(input) ?
+								   std::numeric_limits<qint32>::lowest() :
+								   std::numeric_limits<qint32>::max();
 				}
 
 				quint16 underflow = (std::fpclassify(input) == FP_SUBNORMAL) ? 0x0001 : 0x0000;
 				if (underflow == 0x0001)
 				{
-					result = 0;
+					result32 = 0;
 				}
 
 				quint16 nan = std::isnan(input);
 				if (nan == 0x0001)
 				{
-					result = 0;
+					result32 = 0;
 					overflow = 0;
 				}
 
 				// Set result
 				//
-				instance->addParamSignedInt(o_data_32, result);
+				instance->addParamSignedInt(o_data_32, result32);
 				instance->addParamWord(o_overflow, overflow);
 				instance->addParamWord(o_underflow, underflow);
 				instance->addParamWord(o_nan, nan);
@@ -5697,7 +5963,7 @@ namespace Sim
 			break;
 
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_tconv_v0");
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		return;
@@ -5939,7 +6205,7 @@ namespace Sim
 			}
 			break;
 		default:
-			SimException::raise(QString("Unknown AFB configuration: %1").arg(conf), "CommandProcessor_LM5_LM6::afb_indication_v1");
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
 		}
 
 		return;

@@ -1,6 +1,8 @@
 #include "SignalSetProvider.h"
 #include "DbController.h"
 
+#include <QMessageBox>
+
 
 SignalPropertyManager* SignalPropertyManager::m_instance = nullptr;
 
@@ -312,16 +314,10 @@ void SignalPropertyManager::reloadPropertyBehaviour()
 		return;
 	}
 
-	DbFileInfo mcInfo = m_dbController->systemFileInfo(m_dbController->etcFileId());
-
-	if (mcInfo.isNull() == true)
-	{
-		QMessageBox::critical(m_parentWidget, "Error", QString("File \"%1\" is not found!").arg(Db::File::EtcFileName));
-		return;
-	}
+	int etcFileId = m_dbController->systemFileId(DbDir::EtcDir);
 
 	DbFileInfo propertyBehaviorFile;
-	m_dbController->getFileInfo(mcInfo.fileId(), QString(Db::File::SignalPropertyBehaviorFileName), &propertyBehaviorFile, m_parentWidget);
+	m_dbController->getFileInfo(etcFileId, QString(Db::File::SignalPropertyBehaviorFileName), &propertyBehaviorFile, m_parentWidget);
 
 	if (propertyBehaviorFile.isNull() == true)
 	{
@@ -433,7 +429,18 @@ void SignalPropertyManager::reloadPropertyBehaviour()
 
 void SignalPropertyManager::clear()
 {
-	m_propertyDescription = m_basicPropertyDescription;
+	if (m_propertyDescription.size() > m_basicPropertyDescription.size())
+	{
+		emit propertyCountWillDecrease(static_cast<int>(m_basicPropertyDescription.size()));
+		m_propertyDescription = m_basicPropertyDescription;
+		emit propertyCountDecreased();
+	}
+	if (m_propertyDescription.size() < m_basicPropertyDescription.size())
+	{
+		emit propertyCountWillIncrease(static_cast<int>(m_basicPropertyDescription.size()));
+		m_propertyDescription = m_basicPropertyDescription;
+		emit propertyCountIncreased();
+	}
 	m_propertyName2IndexMap.clear();
 }
 
@@ -504,6 +511,8 @@ void SignalPropertyManager::addNewProperty(const SignalPropertyDescription& newP
 	{
 		return;
 	}
+
+	emit propertyCountWillIncrease(static_cast<int>(m_propertyDescription.size() + 1));
 	int propertyIndex = static_cast<int>(m_propertyDescription.size());
 	m_propertyDescription.push_back(newProperty);
 	m_propertyName2IndexMap.insert(newProperty.name, propertyIndex);
@@ -596,6 +605,27 @@ AppSignalParam SignalSetProvider::getAppSignalParam(int index)
 	param.load(signal);
 
 	return param;
+}
+
+AppSignalParam SignalSetProvider::getAppSignalParam(QString appSignalId)
+{
+	AppSignalParam param;
+
+	Signal* signal = getSignalByStrID(appSignalId);
+	if (signal == nullptr)
+	{
+		assert(false);
+		return param;
+	}
+
+	if (signal->isLoaded())
+	{
+		signal->cacheSpecPropValues();
+		param.load(*signal);
+		return param;
+	}
+
+	return getAppSignalParam(m_signalSet.keyIndex(signal->ID()));
 }
 
 QVector<int> SignalSetProvider::getSameChannelSignals(int index)
@@ -1031,9 +1061,10 @@ void SignalSetProvider::loadSignal(int signalId)
 		return;
 	}
 	dbController()->getLatestSignal(signalId, &m_signalSet[index], m_parentWidget);
+	m_signalSet.updateID2IndexInMap(m_signalSet[index].appSignalID(), index);
 
-	signalUpdated(index);
-	signalPropertiesChanged(getLoadedSignal(index));
+	emit signalUpdated(index);
+	emit signalPropertiesChanged(getLoadedSignal(index));
 }
 
 void SignalSetProvider::loadSignals()
@@ -1043,7 +1074,6 @@ void SignalSetProvider::loadSignals()
 		m_lazyLoadSignalsTimer->stop();
 		m_partialLoading = false;
 	}
-	clearSignals();
 
 	m_propertyManager.init();
 	m_propertyManager.reloadPropertyBehaviour();
@@ -1062,7 +1092,8 @@ void SignalSetProvider::loadSignals()
 		m_propertyManager.detectNewProperties(signalSetForReplacement[i]);
 	}
 
-	std::swap(m_signalSet, signalSetForReplacement);
+	m_signalSet = std::move(signalSetForReplacement);
+	signalSetForReplacement.forget();	// Destructor will delete all Signal pointers which should be kept for m_signalSet
 
 	emit signalCountChanged();
 }
@@ -1189,8 +1220,8 @@ void SignalSetProvider::clearSignals()
 {
 	if (m_signalSet.count() != 0)
 	{
-		m_signalSet.clear();
 		m_propertyManager.clear();
+		m_signalSet.clear();
 		emit signalCountChanged();
 	}
 }

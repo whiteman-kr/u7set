@@ -37,7 +37,7 @@ Signal::Signal(const ID_AppSignalID& ids)
 	m_isLoaded = false;
 }
 
-Signal::Signal(	const Hardware::DeviceSignal& deviceSignal,
+Signal::Signal(	const Hardware::DeviceAppSignal& deviceSignal,
 				QString* errMsg)
 {
 	TEST_PTR_RETURN(errMsg);
@@ -59,7 +59,7 @@ Signal::Signal(	const Hardware::DeviceSignal& deviceSignal,
 
 	//
 
-	m_signalType = deviceSignal.type();
+	m_signalType = deviceSignal.signalType();
 
 	switch(m_signalType)
 	{
@@ -154,6 +154,11 @@ Signal::Signal(	const Hardware::DeviceSignal& deviceSignal,
 
 Signal::~Signal()
 {
+}
+
+void Signal::clear()
+{
+	*this = Signal();
 }
 
 void Signal::initSpecificProperties()
@@ -678,6 +683,31 @@ Address16 Signal::ioBufAddr() const
 void Signal::setIoBufAddr(const Address16& addr)
 {
 	m_ioBufAddr = addr;
+}
+
+Address16 Signal::actualAddr(E::LogicModuleRamAccess* lmRamAccess) const
+{
+	if (lmRamAccess != nullptr)
+	{
+		*lmRamAccess = m_lmRamAccess;
+	}
+
+	if (m_ualAddr.isValid() == true)
+	{
+		return m_ualAddr;
+	}
+
+	if ((isInput() == true || isOutput() == true) && m_ioBufAddr.isValid() == true)
+	{
+		return m_ioBufAddr;
+	}
+
+	if (isTunable() == true && m_tuningAbsAddr.isValid() == true)
+	{
+		return m_tuningAbsAddr;
+	}
+
+	return Address16();
 }
 
 void Signal::resetAddresses()
@@ -1494,7 +1524,7 @@ const Hardware::DeviceObject* Signal::getParentDeviceObjectOfType(const Hardware
 			std::make_pair(QString("workstation"), Hardware::DeviceType::Workstation),
 			std::make_pair(QString("software"), Hardware::DeviceType::Software),
 			std::make_pair(QString("controller"), Hardware::DeviceType::Controller),
-			std::make_pair(QString("signal"), Hardware::DeviceType::Signal),
+			std::make_pair(QString("signal"), Hardware::DeviceType::AppSignal),
 	};
 
 	std::map<QString, Hardware::DeviceType>::const_iterator it = objectTypes.find(parentObjectType.toLower());
@@ -1522,11 +1552,17 @@ const Hardware::DeviceObject* Signal::getParentDeviceObjectOfType(const Hardware
 			return parent;
 		}
 
-		parent = parent->parent();
+		parent = parent->parent().get();
 	}
 	while(true);
 
 	return nullptr;
+}
+
+void Signal::initCreatedDates()
+{
+	m_created = QDateTime::currentDateTime();
+	m_instanceCreated = QDateTime::currentDateTime();
 }
 
 bool Signal::isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const
@@ -1579,7 +1615,7 @@ void Signal::updateTuningValuesType()
 	m_tuningHighBound.setType(tvType);
 }
 
-void Signal::initIDsAndCaption(	const Hardware::DeviceSignal& deviceSignal,
+void Signal::initIDsAndCaption(	const Hardware::DeviceAppSignal& deviceSignal,
 								QString* errMsg)
 {
 	TEST_PTR_RETURN(errMsg);
@@ -1631,7 +1667,7 @@ void Signal::initIDsAndCaption(	const Hardware::DeviceSignal& deviceSignal,
 	}
 }
 
-void Signal::checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSignal, QString* errMsg)
+void Signal::checkAndInitTuningSettings(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg)
 {
 	if (deviceSignal.propertyExists(SignalProperties::enableTuningCaption) == false)
 	{
@@ -1647,7 +1683,7 @@ void Signal::checkAndInitTuningSettings(const Hardware::DeviceSignal& deviceSign
 		return;
 	}
 
-	switch(deviceSignal.type())
+	switch(deviceSignal.signalType())
 	{
 	case E::SignalType::Analog:
 	case E::SignalType::Discrete:
@@ -2011,9 +2047,14 @@ void SignalSet::buildID2IndexMap()
 		}
 		else
 		{
-			m_strID2IndexMap.insert(s.appSignalID(), i);
+			updateID2IndexInMap(s.appSignalID(), i);
 		}
 	}
+}
+
+void SignalSet::updateID2IndexInMap(const QString& appSignalId, int index)
+{
+	m_strID2IndexMap.insert(appSignalId, index);
 }
 
 bool SignalSet::ID2IndexMapIsEmpty()
@@ -2230,4 +2271,6 @@ void SignalSet::replaceOrAppendIfNotExists(int signalID, const Signal& s)
 	{
 		append(signalID, new Signal(s));
 	}
+
+	m_strID2IndexMap.insert(s.appSignalID(), keyIndex(signalID));
 }

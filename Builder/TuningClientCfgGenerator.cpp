@@ -14,17 +14,29 @@ namespace Builder
 		assert(context);
 	}
 
-	bool TuningClientCfgGenerator::generateConfiguration()
+	bool TuningClientCfgGenerator::createSettingsProfile(const QString& profile)
+	{
+		TuningClientSettingsGetter settingsGetter;
+
+		if (settingsGetter.readFromDevice(m_context, m_software) == false)
+		{
+			return false;
+		}
+
+		return m_settingsSet.addProfile<TuningClientSettings>(profile, settingsGetter);
+	}
+
+	bool TuningClientCfgGenerator::generateConfigurationStep1()
 	{
 		if (m_software == nullptr ||
-				m_software->type() != E::SoftwareType::TuningClient ||
+				m_software->softwareType() != E::SoftwareType::TuningClient ||
 				m_equipment == nullptr ||
 				m_cfgXml == nullptr ||
 				m_buildResultWriter == nullptr ||
 				m_subsystems == nullptr)
 		{
 			assert(m_software);
-			assert(m_software->type() == E::SoftwareType::Monitor);
+			assert(m_software->softwareType() == E::SoftwareType::Monitor);
 			assert(m_equipment);
 			assert(m_cfgXml);
 			assert(m_buildResultWriter);
@@ -63,12 +75,6 @@ namespace Builder
 			return result;
 		}
 
-		result &= writeSettings();
-		if (result == false)
-		{
-			return result;
-		}
-
 		result &= writeTuningSchemas();
 		if (result == false)
 		{
@@ -100,13 +106,6 @@ namespace Builder
 		result &= writeTuningClientBehavior();
 
 		return result;
-	}
-
-	bool TuningClientCfgGenerator::getSettingsXml(QXmlStreamWriter& xmlWriter)
-	{
-		XmlWriteHelper xml(xmlWriter);
-
-		return m_settings.writeToXml(xml);
 	}
 
 	bool TuningClientCfgGenerator::createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, Proto::AppSignalSet* tuningSet)
@@ -213,18 +212,6 @@ namespace Builder
 		}
 
 		return true;
-	}
-
-	bool TuningClientCfgGenerator::writeSettings()
-	{
-		bool result = m_settings.readFromDevice(m_context, m_software);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		return getSettingsXml(m_cfgXml->xmlWriter());
 	}
 
 	bool TuningClientCfgGenerator::createObjectFilters(const QStringList& equipmentList)
@@ -340,12 +327,15 @@ namespace Builder
 
 	}
 
-
 	bool TuningClientCfgGenerator::writeTuningSchemas()
 	{
 		bool result = true;
 
-		QStringList schemaTagList = m_settings.getSchemaTags();
+		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningClientSettings>();
+
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
+		QStringList schemaTagList = settings->getSchemaTags();
 
 		std::set<std::shared_ptr<SchemaFile>> tuningSchemas;
 
@@ -487,12 +477,11 @@ namespace Builder
 		// Load all clients behavior
 		//
 		ClientBehaviorStorage allBehaviorStorage;
-
 		QString errorCode;
-
 		QByteArray dbData;
+		int etcFileId = m_dbController->systemFileId(DbDir::EtcDir);
 
-		bool result = loadFileFromDatabase(m_dbController, m_dbController->etcFileId(), allBehaviorStorage.dbFileName(), &errorCode, &dbData);
+		bool result = loadFileFromDatabase(m_dbController, etcFileId, allBehaviorStorage.dbFileName(), &errorCode, &dbData);
 		if (result == false)
 		{
 			m_log->errCMN0010(allBehaviorStorage.dbFileName());
@@ -554,7 +543,11 @@ namespace Builder
 	bool TuningClientCfgGenerator::createAutomaticFilters(const QStringList& equipmentList,
 														  const TuningSignalManager& tuningSignalManager)
 	{
-		if (m_settings.filterBySchema == true)
+		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningClientSettings>();
+
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
+		if (settings->filterBySchema == true)
 		{
 			// Filter for Schema
 			//
@@ -603,7 +596,7 @@ namespace Builder
 			m_tuningFilterStorage.add(ofSchema, true);
 		}	 // filterBySchema
 
-		if (m_settings.filterByEquipment == true)
+		if (settings->filterByEquipment == true)
 		{
 			// Filter for EquipmentId
 			//

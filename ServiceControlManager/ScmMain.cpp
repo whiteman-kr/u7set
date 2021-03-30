@@ -5,12 +5,10 @@
 #include <QMessageBox>
 #include <QTranslator>
 #include <QSettings>
-#include <stdlib.h>
 #include <google/protobuf/stubs/common.h>
 
 #include "../lib/SocketIO.h"
 #include "../lib/Tcp.h"
-#include "../lib/MemLeaksDetection.h"
 
 
 const char* const semaphoreString = "ServiceControlManagerSemaphore";
@@ -19,8 +17,6 @@ const char* const sharedMemoryString = "ServiceControlManagerSharedMemory";
 
 int main(int argc, char *argv[])
 {
-	initMemoryLeaksDetection();
-
 	QApplication a(argc, argv);
 
 	QSystemSemaphore semaphore(semaphoreString, 1);
@@ -112,8 +108,6 @@ int main(int argc, char *argv[])
 	DELETE_IF_NOT_NULL(qtTranslator);
 	DELETE_IF_NOT_NULL(qtbaseTranslator);
 	DELETE_IF_NOT_NULL(appTranslator);
-
-	dumpMemoryLeaks();
 
 	return result;
 }

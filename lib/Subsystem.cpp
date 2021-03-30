@@ -161,9 +161,10 @@ namespace Hardware
 
 		// Load the file from the database
 		//
-
 		std::vector<DbFileInfo> fileList;
-		bool ok = db->getFileList(&fileList, db->mcFileId(), fileName, true, nullptr);
+		int mcFileId = db->systemFileId(DbDir::ModuleConfigurationDir);
+
+		bool ok = db->getFileList(&fileList, mcFileId, fileName, true, nullptr);
 		if (ok == false || fileList.size() != 1)
 		{
 			return false;
@@ -251,10 +252,10 @@ namespace Hardware
 		// save to db
 		//
 		std::shared_ptr<DbFile> file = nullptr;
-
 		std::vector<DbFileInfo> fileList;
+		int mcFileId = db->systemFileId(DbDir::ModuleConfigurationDir);
 
-		bool ok = db->getFileList(&fileList, db->mcFileId(), fileName, true, nullptr);
+		bool ok = db->getFileList(&fileList, mcFileId, fileName, true, nullptr);
 
 		if (ok == false || fileList.size() != 1)
 		{
@@ -263,12 +264,12 @@ namespace Hardware
 			std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
 			pf->setFileName(fileName);
 
-			if (db->addFile(pf, db->mcFileId(), nullptr) == false)
+			if (db->addFile(pf, mcFileId, nullptr) == false)
 			{
 				return false;
 			}
 
-			ok = db->getFileList(&fileList, db->mcFileId(), fileName, true, nullptr);
+			ok = db->getFileList(&fileList, mcFileId, fileName, true, nullptr);
 			if (ok == false || fileList.size() != 1)
 			{
 				return false;

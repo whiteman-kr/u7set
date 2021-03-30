@@ -42,7 +42,7 @@ union TuningSignalStateFlags
 	\code
 	// Request signal state by identifier "#APPSIGNALID"
 	//
-	var state = tuning.signalState("#APPSIGNALID");
+	let state = tuning.signalState("#APPSIGNALID");
 
 	if (state == undefined)
 	{
@@ -62,7 +62,7 @@ union TuningSignalStateFlags
 
 	//Increase signal value to 10
 	//
-	var newValue = state.Value;
+	let newValue = state.Value;
 
 	newValue =+ 10;
 
@@ -91,10 +91,10 @@ class TuningSignalState
 		It is recommended to make comparsions as follows, especially analog values:
 
 		\code
-		var a = state.Value;
-		var b = 1.5;
+		let a = state.Value;
+		let b = 1.5;
 
-		var threshold = 0.0000001;
+		let threshold = 0.0000001;
 
 		if (Math.abs(a - b) <= threshold)
 		{

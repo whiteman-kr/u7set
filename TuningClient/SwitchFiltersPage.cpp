@@ -165,7 +165,7 @@ void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
 
 	// Apply Button
 	//
-	if (theConfigSettings.autoApply == false &&
+	if (theConfigSettings.clientSettings.autoApply == false &&
 			(m_buttonFilters.empty() == false || m_listFilters.empty() == false))
 	{
 		m_applyButton = new QPushButton(tr("Apply"), this);

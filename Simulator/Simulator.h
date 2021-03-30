@@ -15,6 +15,7 @@
 #include "SimScriptSimulator.h"
 #include "SimLans.h"
 #include "SimSoftware.h"
+#include "SimProfiles.h"
 #include "SimScopedLog.h"
 
 
@@ -93,6 +94,13 @@ namespace Sim
 		[[nodiscard]] Sim::Software& software();
 		[[nodiscard]] const Sim::Software& software() const;
 
+		[[nodiscard]] Sim::Profiles& profiles();
+		[[nodiscard]] const Sim::Profiles& profiles() const;
+
+		bool setCurrentProfile(QString profileName);
+		[[nodiscard]] QString currentProfileName() const;
+		[[nodiscard]] const Sim::Profile& currentProfile() const;
+
 		[[nodiscard]] Sim::Control& control();
 		[[nodiscard]] const Sim::Control& control() const;
 
@@ -117,6 +125,13 @@ namespace Sim
 		// Software Info
 		//
 		Sim::Software m_software;
+
+		// Software profiles - different software settings can be applied via these profiles
+		//
+		static const QString DefaultProfileName;
+
+		Sim::Profiles m_profiles;
+		QString m_currentProfileName = DefaultProfileName;
 
 		// Control thread
 		//

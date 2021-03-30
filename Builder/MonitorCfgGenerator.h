@@ -13,11 +13,11 @@ namespace Builder
 		MonitorCfgGenerator(Context* context, Hardware::Software* software);
 		~MonitorCfgGenerator();
 
-		virtual bool generateConfiguration() override;
-		virtual bool getSettingsXml(QXmlStreamWriter& xmlWriter) override;
+		virtual bool createSettingsProfile(const QString& profile) override;
+		virtual bool generateConfigurationStep1() override;
 
 	protected:
-		bool writeMonitorSettings();
+		bool initSchemaTagsAndTuningSources();
 
 		bool saveScriptProperties(QString scriptProperty, QString fileName);
 
@@ -38,8 +38,6 @@ namespace Builder
 		bool writeMonitorLogo();
 
 	private:
-		MonitorSettingsGetter m_settings;
-
 //		bool m_tuningEnabled = false;
 		QStringList m_tuningSources;
 
@@ -58,7 +56,7 @@ namespace Builder
 
 		*ok = true;
 
-		Hardware::DeviceObject* object = m_equipment->deviceObject(strId);
+		Hardware::DeviceObject* object = m_equipment->deviceObject(strId).get();
 		if (object == nullptr)
 		{
 			m_log->errCFG3021(m_software->equipmentId(), property, strId);

@@ -1,5 +1,5 @@
-#ifndef COMPONENT_H
-#define COMPONENT_H
+#pragma once
+
 #include <map>
 #include <unordered_map>
 #include <memory>
@@ -27,15 +27,15 @@ namespace Sim
 		~AfbComponent() = default;
 
 	public:
-		bool isNull() const;
+		[[nodiscard]] bool isNull() const;
 
-		int opCode() const;
-		QString caption() const;
-		int maxInstCount() const;
-		QString simulationFunc() const;
+		[[nodiscard]]int opCode() const;
+		[[nodiscard]]QString caption() const;
+		[[nodiscard]]int maxInstCount() const;
+		[[nodiscard]]QString simulationFunc() const;
 
-		bool pinExists(int pinOpIndex) const;
-		QString pinCaption(int pinOpIndex) const;
+		[[nodiscard]]bool pinExists(int pinOpIndex) const;
+		[[nodiscard]]QString pinCaption(int pinOpIndex) const;
 
 	private:
 		std::shared_ptr<Afb::AfbComponent> m_afbComponent;
@@ -47,7 +47,6 @@ namespace Sim
 	public:
 		AfbComponentParam() = default;
 		AfbComponentParam(const AfbComponentParam& that) = default;
-		AfbComponentParam(AfbComponentParam&&) = default;
 		explicit AfbComponentParam(quint16 paramOpIndex) :
 			m_paramOpIndex(paramOpIndex)
 		{
@@ -59,11 +58,8 @@ namespace Sim
 			setWordValue(word);
 		}
 
-		AfbComponentParam& operator=(const AfbComponentParam& that) = default;
-		AfbComponentParam& operator=(AfbComponentParam&&) = default;
-
 	public:
-		int opIndex() const noexcept
+		[[nodiscard]] int opIndex() const noexcept
 		{
 			return m_paramOpIndex;
 		}
@@ -72,7 +68,7 @@ namespace Sim
 			m_paramOpIndex = static_cast<quint16>(index);
 		}
 
-		quint16 wordValue() const noexcept
+		[[nodiscard]] quint16 wordValue() const noexcept
 		{
 			return m_data.asWord;
 		}
@@ -82,7 +78,7 @@ namespace Sim
 			m_data.asWord = value;
 		}
 
-		quint32 dwordValue() const  noexcept
+		[[nodiscard]] quint32 dwordValue() const  noexcept
 		{
 			return m_data.asDword;
 		}
@@ -92,7 +88,7 @@ namespace Sim
 			m_data.asDword = value;
 		}
 
-		float floatValue() const  noexcept
+		[[nodiscard]] float floatValue() const  noexcept
 		{
 			return m_data.asFloat;
 		}
@@ -102,7 +98,7 @@ namespace Sim
 			m_data.asFloat = value;
 		}
 
-		double doubleValue() const  noexcept
+		[[nodiscard]] double doubleValue() const  noexcept
 		{
 			return m_data.asDouble;
 		}
@@ -112,7 +108,7 @@ namespace Sim
 			m_data.asDouble = value;
 		}
 
-		qint32 signedIntValue() const noexcept
+		[[nodiscard]] qint32 signedIntValue() const noexcept
 		{
 			return m_data.asSignedInt;
 		}
@@ -122,7 +118,7 @@ namespace Sim
 			m_data.asSignedInt = value;
 		}
 
-		qint64 signedInt64Value() const noexcept
+		[[nodiscard]] qint64 signedInt64Value() const noexcept
 		{
 			return m_data.asSignedInt64;
 		}
@@ -168,49 +164,49 @@ namespace Sim
 			m_mathFlags.data = 0;
 		}
 
-		quint16 mathOverflow() const noexcept
+		[[nodiscard]] quint16 mathOverflow() const noexcept
 		{
 			return m_mathFlags.overflow ? 0x0001 : 0x0000;
 		}
 		void setMathOverflow(quint16 value) noexcept
 		{
-			m_mathFlags.overflow = value ? 0x0001 : 0x0000;
+			m_mathFlags.overflow = (value != 0);
 		}
 
-		quint16 mathUnderflow() const noexcept
+		[[nodiscard]] quint16 mathUnderflow() const noexcept
 		{
 			return m_mathFlags.underflow ? 0x0001 : 0x0000;
 		}
 		void setMathUnderflow(quint16 value) noexcept
 		{
-			m_mathFlags.underflow = value ? 0x0001 : 0x0000;
+			m_mathFlags.underflow = (value != 0);
 		}
 
-		quint16 mathZero() const noexcept
+		[[nodiscard]] quint16 mathZero() const noexcept
 		{
 			return m_mathFlags.zero ? 0x0001 : 0x0000;
 		}
 		void setMathZero(quint16 value) noexcept
 		{
-			m_mathFlags.zero = value ? 0x0001 : 0x0000;
+			m_mathFlags.zero = (value != 0);
 		}
 
-		quint16 mathNan() const noexcept
+		[[nodiscard]] quint16 mathNan() const noexcept
 		{
 			return m_mathFlags.nan ? 0x0001 : 0x0000;
 		}
 		void setMathNan(quint16 value) noexcept
 		{
-			m_mathFlags.nan = value ? 0x0001 : 0x0000;
+			m_mathFlags.nan = (value != 0);
 		}
 
-		quint16 mathDivByZero() const noexcept
+		[[nodiscard]] quint16 mathDivByZero() const noexcept
 		{
 			return m_mathFlags.divByZero ? 0x0001 : 0x0000;
 		}
 		void setMathDivByZero(quint16 value) noexcept
 		{
-			m_mathFlags.divByZero = value ? 0x0001 : 0x0000;
+			m_mathFlags.divByZero = (value != 0);
 		}
 
 	private:
@@ -249,18 +245,16 @@ namespace Sim
 	class AfbComponentInstance
 	{
 	public:
-		AfbComponentInstance(const std::shared_ptr<const Afb::AfbComponent>& afbComp,
-							 quint16 instanceNo);
+		AfbComponentInstance(const std::shared_ptr<const Afb::AfbComponent>& afbComp, quint16 instanceNo);
 
 	public:
 		void resetState();
 
 		bool addParam(const AfbComponentParam& param);
-		bool addParam(AfbComponentParam&& param);
 
-		const AfbComponentParam* param(quint16 opIndex);
+		[[nodiscard]] const AfbComponentParam* param(quint16 opIndex);
 
-		bool paramExists(quint16 opIndex) const;
+		[[nodiscard]] bool paramExists(quint16 opIndex) const;
 
 		bool addParamWord(quint16 opIndex, quint16 value);
 		bool addParamDword(quint16 opIndex, quint32 value);
@@ -289,12 +283,12 @@ namespace Sim
 		bool init();	// Create a number of instances
 		void resetState();
 
-		bool isNull() const;
+		[[nodiscard]] bool isNull() const;
 
 		bool addParam(int instanceNo, const AfbComponentParam& instParam, QString* errorMessage);
 		bool addParam(int instanceNo, AfbComponentParam&& instParam, QString* errorMessage);
 
-		AfbComponentInstance* instance(quint16 instance) noexcept
+		[[nodiscard]] AfbComponentInstance* instance(quint16 instance) noexcept
 		{
 			return instance > m_instances.size() ? nullptr : &m_instances[instance];
 		}
@@ -318,12 +312,9 @@ namespace Sim
 		bool addInstantiatorParam(int afbOpCode, int instanceNo, const AfbComponentParam& instParam, QString* errorMessage);
 		bool addInstantiatorParam(int afbOpCode, int instanceNo, AfbComponentParam&& instParam, QString* errorMessage);
 
-		AfbComponentInstance* componentInstance(int componentOpCode, int instance) noexcept;
+		[[nodiscard]] AfbComponentInstance* componentInstance(int componentOpCode, int instance) noexcept;
 
 	private:
 		std::vector<ModelComponent> m_components;		// Index is opcode of AFB
 	};
 }
-
-
-#endif // COMPONENT_H

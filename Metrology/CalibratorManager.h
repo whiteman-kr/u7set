@@ -27,14 +27,39 @@ class CalibratorManager : public QDialog
 
 public:
 
-	explicit CalibratorManager(Calibrator* pCalibrator, QWidget* parent = nullptr);
-	virtual ~CalibratorManager();
+	explicit CalibratorManager(std::shared_ptr<Calibrator> pCalibrator, QWidget* parent = nullptr);
+	virtual ~CalibratorManager() override;
+
+public:
+
+	// calibrator
+	//
+	std::shared_ptr<Calibrator> calibrator() const { return m_pCalibrator; }
+	void			setCalibrator(std::shared_ptr<Calibrator> pCalibrator) { m_pCalibrator = pCalibrator; }
+
+	bool			calibratorIsConnected() const;
+	int				calibratorChannel() const;
+	QString			calibratorPort() const;
+
+	bool			isReadyForManage() const;
+	void			setReadyForManage(bool ready);
+	void			waitReadyForManage();
+
+	// function for manage
+	//
+	bool			setUnit(int mode, int unit);
+
+	void			getValue();
+	void			setValue(double getValue);
+
+	void			stepDown();
+	void			stepUp();
 
 private:
 
 	mutable QMutex	m_mutex;
 
-	Calibrator*		m_pCalibrator = nullptr;
+	std::shared_ptr<Calibrator> m_pCalibrator;
 	bool			m_readyForManage = false;
 
 	// elements of interface - Menu
@@ -65,31 +90,6 @@ private:
 	void			updateModeList();
 	void			updateUnitList();
 	void			updateValue();
-
-public:
-
-	// calibrator
-	//
-	Calibrator*		calibrator() const { return m_pCalibrator; }
-	void			setCalibrator(Calibrator* pCalibrator) { m_pCalibrator = pCalibrator; }
-
-	bool			calibratorIsConnected() const;
-	int				calibratorChannel() const;
-	QString			calibratorPort() const;
-
-	bool			isReadyForManage() const;
-	void			setReadyForManage(bool ready);
-	void			waitReadyForManage();
-
-	// function for manage
-	//
-	bool			setUnit(int mode, int unit);
-
-	void			getValue();
-	void			setValue(double getValue);
-
-	void			stepDown();
-	void			stepUp();
 
 signals:
 

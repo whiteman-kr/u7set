@@ -97,7 +97,7 @@ DbProgress::~DbProgress()
 
 bool DbProgress::completed() const
 {
-	return m_completed.load(std::memory_order::memory_order_relaxed);
+	return m_completed.load(std::memory_order::relaxed);
 }
 
 void DbProgress::setCompleted(bool value)
@@ -107,7 +107,7 @@ void DbProgress::setCompleted(bool value)
 
 bool DbProgress::wasCanceled() const
 {
-	return m_cancel.load(std::memory_order::memory_order_relaxed);
+	return m_cancel.load(std::memory_order::relaxed);
 }
 
 void DbProgress::setCancel(bool value)
@@ -129,7 +129,7 @@ void DbProgress::setCurrentOperation(const QString& value)
 
 int DbProgress::value() const
 {
-	return m_value.load(std::memory_order::memory_order_relaxed);
+	return m_value.load(std::memory_order::relaxed);
 }
 
 void DbProgress::setValue(int value)
@@ -185,6 +185,6 @@ void DbProgress::disableProgress()
 
 bool DbProgress::isProgressEnabled() const
 {
-	return m_progressEnabled.load(std::memory_order::memory_order_relaxed);
+	return m_progressEnabled.load(std::memory_order::relaxed);
 }
 

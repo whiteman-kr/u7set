@@ -271,9 +271,10 @@ namespace Log
 		int m_errorAckCounter = 0;
 		int m_warningAckCounter = 0;
 	};
-
-	Q_DECLARE_METATYPE(LogFileRecord)
 }
+
+Q_DECLARE_METATYPE(Log::LogFileRecord)
+
 
 #endif // LOGFILE_H
 

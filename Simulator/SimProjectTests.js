@@ -2213,6 +2213,8 @@ function testAfbScaleSiSi(sim)
     assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T2R2") === 0);
     assert(sim.signalValue("#TEST_SCALE_32SI_32SI_T2R3") === 1);
 
+    // FP -> SI32
+    //
     assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R1") === 1500);
     assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R2") === 0);
     assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T11R3") === 0);
@@ -2224,6 +2226,42 @@ function testAfbScaleSiSi(sim)
     assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R3") === 0);
     assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R4") === 1);
     assert(sim.signalValue("#TEST_SCALE_32FP_32FP_T12R5") === 0);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T10R1") === 2);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T10R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T10R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T10R4") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T10R5") === 0);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T11R1") === 4);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T11R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T11R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T11R4") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T11R5") === 0);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T12R1") === 36);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T12R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T12R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T12R4") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T12R5") === 0);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T13R1") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T13R2") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T13R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T13R4") === 1);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T13R5") === 1);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T14R1") === 2147483647);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T14R2") === 1);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T14R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T14R4") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T14R5") === 0);
+
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T15R1") === -2147483648);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T15R2") === 1);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T15R3") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T15R4") === 0);
+    assert(sim.signalValue("#TEST_SCALE_32FP_32SI_T15R5") === 0);
 
     return;
 }

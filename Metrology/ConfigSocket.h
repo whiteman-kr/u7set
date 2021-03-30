@@ -26,7 +26,19 @@ public:
 				 const HostAddressPort& serverAddressPort1,
 				 const HostAddressPort& serverAddressPort2);
 
-	virtual ~ConfigSocket();
+	virtual ~ConfigSocket() override;
+
+public:
+
+	bool				isConnceted() { return m_connected; }
+	HostAddressPort		address() { return m_address; }
+
+	void				start();
+	void				quit();
+
+	void				reconncect(const QString& equipmentID, const HostAddressPort& serverAddressPort);
+
+	QStringList&		loadedFiles() { return m_loadedFiles; }
 
 private:
 
@@ -53,28 +65,22 @@ private:
 
 	QStringList			m_loadedFiles;
 
-public:
-
-	bool				isConnceted() { return m_connected; }
-	HostAddressPort		address() { return m_address; }
-
-	void				start();
-	void				quit();
-
-	void				reconncect(const QString& equipmentID, const HostAddressPort& serverAddressPort);
-
-	QStringList&		loadedFiles() { return m_loadedFiles; }
-
 private slots:
 
-	void				slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void				slot_configurationReady(const QByteArray configurationXmlData,
+												const BuildFileInfoArray buildFileInfoArray,
+												SessionParams sessionParams,
+												std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 
-	bool				readConfiguration(const QByteArray& fileData);
+	bool				readConfiguration(const QByteArray& fileData,
+										  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
+
 	bool				readMetrologyItems(const QByteArray& fileData);
 	bool				readMetrologySignalSet(const QByteArray& fileData);
 	bool				readComparatorSet(const QByteArray& fileData);
 
 	bool				readRacks(const QByteArray& fileData, int fileVersion);
+	bool				readMetrologyConnections(const QByteArray& fileData, int fileVersion);
 	bool				readTuningSources(const QByteArray& fileData, int fileVersion);
 
 	static void			loadSignalBase(ConfigSocket* pThis);

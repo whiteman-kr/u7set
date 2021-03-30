@@ -21,7 +21,30 @@ namespace VFrame30
 
 	SchemaItemValue::SchemaItemValue(SchemaUnit unit)
 	{
-		Property* p = nullptr;
+		m_font.setName(QStringLiteral("Arial"));
+
+		switch (unit)
+		{
+		case SchemaUnit::Display:
+			m_font.setSize(12.0, unit);
+			break;
+		case SchemaUnit::Inch:
+			m_font.setSize(1.0 / 8.0, unit);		// 1/8"
+			break;
+		case SchemaUnit::Millimeter:
+			m_font.setSize(mm2in(3), unit);
+			break;
+		default:
+			assert(false);
+		}
+
+		m_static = false;
+		setItemUnit(unit);
+	}
+
+	void SchemaItemValue::propertyDemand(const QString& prop)
+	{
+		PosRectImpl::propertyDemand(prop);
 
 		// Functional
 		//
@@ -48,37 +71,13 @@ namespace VFrame30
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::textCategory, true, SchemaItemValue::getFontBold, SchemaItemValue::setFontBold);
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::textCategory, true,  SchemaItemValue::getFontItalic, SchemaItemValue::setFontItalic);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::functionalCategory, true, SchemaItemValue::text, SchemaItemValue::setText);
-		p->setDescription(PropertyNames::textValuePropDescription);
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::functionalCategory, true, SchemaItemValue::text, SchemaItemValue::setText)
+			->setDescription(PropertyNames::textValuePropDescription);
 
-		p = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::precision, PropertyNames::functionalCategory, true, SchemaItemValue::precision, SchemaItemValue::setPrecision);
-		p->setDescription(PropertyNames::precisionPropText);
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::precision, PropertyNames::functionalCategory, true, SchemaItemValue::precision, SchemaItemValue::setPrecision)
+			->setDescription(PropertyNames::precisionPropText);
 
-		// --
-		//
-		m_font.setName(QStringLiteral("Arial"));
-
-		switch (unit)
-		{
-		case SchemaUnit::Display:
-			m_font.setSize(12.0, unit);
-			break;
-		case SchemaUnit::Inch:
-			m_font.setSize(1.0 / 8.0, unit);		// 1/8"
-			break;
-		case SchemaUnit::Millimeter:
-			m_font.setSize(mm2in(3), unit);
-			break;
-		default:
-			assert(false);
-		}
-
-		m_static = false;
-		setItemUnit(unit);
-	}
-
-	SchemaItemValue::~SchemaItemValue(void)
-	{
+		return;
 	}
 
 	// Serialization
@@ -195,6 +194,10 @@ namespace VFrame30
 		//
 		drawText(drawParam, r);
 
+		// Remove brush to draw non-filled rects
+		//
+		p->setBrush(Qt::NoBrush);
+
 		// Drawing frame rect
 		//
 		if (drawRect() == true)
@@ -253,7 +256,7 @@ namespace VFrame30
 		}
 		else
 		{
-			if (m_text.contains(QLatin1Literal("$(")) == true)
+			if (m_text.contains(QLatin1String("$(")) == true)
 			{
 				// m_text contains some variables, which need to be parsed
 				//
@@ -264,13 +267,17 @@ namespace VFrame30
 				AppSignalState signalState;
 				TuningSignalState tuningSignalState;
 
+				QString signalId;
+
 				if (signalIds().empty() == false)
 				{
-					signalParam.setAppSignalId(signalIds().front());
-					signalParam.setCustomSignalId(signalIds().front());
+					signalId = signalIds().front();
+
+					signalParam.setAppSignalId(signalId);
+					signalParam.setCustomSignalId(signalId);
 				}
 
-				getSignalState(drawParam, &signalParam, &signalState, &tuningSignalState);
+				getSignalState(signalId, drawParam, &signalParam, &signalState, &tuningSignalState);
 
 				text = parseText(m_text, drawParam, signalParam, signalState);
 			}
@@ -417,7 +424,7 @@ namespace VFrame30
 		return QString::number(value, static_cast<char>(analogFormat()), p);
 	}
 
-	bool SchemaItemValue::getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
+	bool SchemaItemValue::getSignalState(QString appSignalId, CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
 	{
 		if (drawParam == nullptr ||
 			signalParam == nullptr ||
@@ -431,24 +438,24 @@ namespace VFrame30
 			return false;
 		}
 
-		if (drawParam->isMonitorMode() == false)
-		{
-			Q_ASSERT(drawParam->isMonitorMode());
-			return false;
-		}
-
 		bool ok = false;
 
 		switch (signalSource())
 		{
 		case E::SignalSource::AppDataService:
-			if (drawParam->appSignalController() == nullptr)
+			if (auto appSignalController = drawParam->appSignalController();
+				appSignalController == nullptr)
 			{
 			}
 			else
 			{
-				*signalParam = drawParam->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
-				*appSignalState = drawParam->appSignalController()->signalState(signalParam->appSignalId(), nullptr);
+				if (appSignalId.startsWith('@') == true)
+				{
+					appSignalId = appSignalController->appSignalManager()->equipmentToAppSiganlId(appSignalId);
+				}
+
+				*signalParam = drawParam->appSignalController()->signalParam(appSignalId, &ok);
+				*appSignalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);
 			}
 			break;
 
@@ -458,8 +465,8 @@ namespace VFrame30
 			}
 			else
 			{
-				*signalParam = drawParam->tuningController()->signalParam(signalParam->appSignalId(), &ok);
-				*tuningSignalState = drawParam->tuningController()->signalState(signalParam->appSignalId(), nullptr);
+				*signalParam = drawParam->tuningController()->signalParam(appSignalId, &ok);
+				*tuningSignalState = drawParam->tuningController()->signalState(appSignalId, nullptr);
 
 				appSignalState->m_hash = signalParam->hash();
 				appSignalState->m_flags.valid = tuningSignalState->valid();
@@ -491,7 +498,7 @@ namespace VFrame30
 
 	QString SchemaItemValue::signalIdsString() const
 	{
-		QString result = m_signalIds.join(QChar::LineFeed);
+		QStringList resultList = m_signalIds;
 
 		// Expand variables in AppSignalIDs in MonitorMode, if applicable (m_drawParam is set and is monitor mode)
 		//
@@ -499,10 +506,15 @@ namespace VFrame30
 			m_drawParam->isMonitorMode() == true &&
 			m_drawParam->clientSchemaView() != nullptr)
 		{
-			result = MacrosExpander::parse(result, m_drawParam, this);
+			resultList = MacrosExpander::parse(resultList, m_drawParam, this);
+
+			for (QString& s : resultList)
+			{
+				s = m_drawParam->clientSchemaView()->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+			}
 		}
 
-		return result;
+		return resultList.join(QChar::LineFeed);
 	}
 
 	void SchemaItemValue::setSignalIdsString(const QString& value)
@@ -521,6 +533,11 @@ namespace VFrame30
 			m_drawParam->clientSchemaView() != nullptr)
 		{
 			resultList = MacrosExpander::parse(resultList, m_drawParam, this);
+
+			for (QString& s : resultList)
+			{
+				s = m_drawParam->clientSchemaView()->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+			}
 		}
 
 		return resultList;
