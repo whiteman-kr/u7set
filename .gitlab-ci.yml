@@ -80,7 +80,7 @@ windows build job:
     - "# ----------------------------------------------"
     - "#               Build Project"
     - "# ----------------------------------------------"    
-    - "&'gitlab_ci_build.bat'"
+    - "& './gitlab_ci_build.bat'"
 #Copy Qt DLLs to bin/release
     - "# ----------------------------------------------"
     - "#               Copy Qt DLL's"
