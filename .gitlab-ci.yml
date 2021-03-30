@@ -61,7 +61,7 @@ windows build job:
     - vs2017
   script:
     - "dir env:"
-    - "echo %CI_COMMIT_SHA%"
+    - "echo $Env:CI_COMMIT_SHA"
     - "git status"
     - "git log -1"
     - $Env:QT_BIN_DIR="C:\\Qt\\5.15.2\\msvc2019_64"
@@ -80,6 +80,7 @@ windows build job:
     - "# ----------------------------------------------"
     - "#               Build Project"
     - "# ----------------------------------------------"    
+    - "call \"C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"    
     - "cl.exe"
     - "%QT_BIN_DIR%/bin/qmake --version"
     - "%QT_BIN_DIR%/bin/qmake.exe %CI_PROJECT_DIR%/u7set.pro -spec win32-msvc"
