@@ -191,7 +191,7 @@ windows build job:
     - "$K8S_SECRET_DIGITAL_SIGN_CERT="
 
   artifacts:
-    name: "u7set_0.8.%CI_PIPELINE_ID%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%"
+    name: "'u7set_0.8.' + $Env:CI_PIPELINE_ID + '_' + $Env:CI_BUILD_REF_SLUG + '_' + $Env:CI_COMMIT_SHA"
     paths:
       - bin/*.exe
       - bin/release/*.exe
