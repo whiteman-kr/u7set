@@ -167,8 +167,8 @@ windows build job:
     - "# ----------------------------------------------"
     - "pushd ."	
     - "cd $Env:CI_PROJECT_DIR\\u7\\ScriptHelp"
-    - "call ScriptHelp.bat"
-    - "popd ."
+    - "&ScriptHelp.bat"
+    - "popd"
 
 #Request documents from SVN
     - "# ----------------------------------------------"
@@ -176,8 +176,8 @@ windows build job:
     - "# ----------------------------------------------"
     - "pushd ."	
     - "cd $Env:CI_PROJECT_DIR/doc"
-    - "call SvnGetDocs.bat"
-    - "popd ."
+    - "&SvnGetDocs.bat"
+    - "popd"
 
 #Build Installer
     - "# ----------------------------------------------"
@@ -185,8 +185,8 @@ windows build job:
     - "# ----------------------------------------------"
     - "pushd ."	
     - "cd $Env:CI_PROJECT_DIR\\u7setinstall"
-    - "call createinstall.bat"
-    - "popd ."	
+    - "&createinstall.bat"
+    - "popd"	
     - "&$SIGNTOOL sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $K8S_SECRET_DIGITAL_SIGN_CERT bin\\*.exe"
     - "$K8S_SECRET_DIGITAL_SIGN_CERT="
 
