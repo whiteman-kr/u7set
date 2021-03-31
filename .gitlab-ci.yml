@@ -260,5 +260,3 @@ test job:
     - "#               Run ROVT tests"
     - "# ----------------------------------------------"
     - "C:\\ROVT\\ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v349\\build"
-	
-	
