@@ -72,7 +72,7 @@ windows build job:
     - "'#define CI_BUILD_REF_SLUG \"' + $env:CI_BUILD_REF_SLUG + '\"' >> gitlabci_version.h"
     - "'#define CI_COMMIT_SHA \"' + $env:CI_COMMIT_SHA + '\"' >> gitlabci_version.h"
     - "'#define GITLAB_USER_NAME \"' + $env:GITLAB_USER_NAME + '\"' >> gitlabci_version.h"
-    - "'#define CI_PIPELINE_ID \"' + $env:CI_PIPELINE_ID + '\"' >> gitlabci_version.h"
+    - "'#define CI_PIPELINE_ID ' + $env:CI_PIPELINE_ID + '' >> gitlabci_version.h"
     - "'#define COMPUTERNAME \"' + $env:HOSTNAME + '\"' >> gitlabci_version.h"
     - "$Env:timestamp = Get-Date -Format 'dd MMMM yyyy HH:mm (K)'"
     - "'#define BUILD_DATE \"' + $Env:timestamp + '\"' >> gitlabci_version.h"
