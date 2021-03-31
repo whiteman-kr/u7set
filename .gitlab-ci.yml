@@ -138,12 +138,12 @@ windows build job:
     - "#               Remove some files not requiered for releases"
     - "# ----------------------------------------------"
 #    - "del /F /Q bin\\release\\BuilderConsole.exe"
-    - "del /F /Q bin\\release\\BaseSrv.exe"
-    - "del /F /Q bin\\release\\CommView.exe"
-    - "del /F /Q bin\\release\\DiagDataSrv.exe"
-#    - "del /F /Q bin\\release\\SimulatorConsole.exe"
-    - "del /F /Q bin\\release\\TuningIPEN.exe"
-#    - "del /F /Q bin\\release\\u7databasetests.exe"
+    - "del /F /Q $Env:CI_PROJECT_DIR/bin/release/BaseSrv.exe"
+    - "del /F /Q $Env:CI_PROJECT_DIR/bin/release/CommView.exe"
+    - "del /F /Q $Env:CI_PROJECT_DIR/bin/release/DiagDataSrv.exe"
+#    - "del /F /Q $Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe"
+    - "del /F /Q $Env:CI_PROJECT_DIR/bin/release/TuningIPEN.exe"
+#    - "del /F /Q $Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe"
     
 #Signing Files
     - "# ----------------------------------------------"
@@ -178,7 +178,7 @@ windows build job:
     - "#               Request documents from SVN"
     - "# ----------------------------------------------"
     - "pushd ."	
-    - "cd %CI_PROJECT_DIR%\\doc"
+    - "cd $Env:CI_PROJECT_DIR/doc"
     - "call SvnGetDocs.bat"
     - "popd ."
 
@@ -223,7 +223,7 @@ test job:
     - /experimental/
   script:
     - "dir env:"    
-    - "echo %CI_COMMIT_SHA%"
+    - "echo $Env:CI_COMMIT_SHA"
     - "git status"
     - "git log -1"
 #Run XML validation
