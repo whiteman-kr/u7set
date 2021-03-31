@@ -14,6 +14,7 @@ before_script:
 #after_script:
 #  - echo after_script
 
+
 linux build job:
   stage: build
   only:
@@ -50,6 +51,7 @@ linux build job:
     - "~/Qt/5.15.2/gcc_64/bin/qmake u7set.pro -spec linux-g++"
     - "make -j6"
 
+
 windows build job:
   stage: build
   only:
@@ -85,51 +87,51 @@ windows build job:
     - "# ----------------------------------------------"
     - "#               Copy Qt DLL's"
     - "# ----------------------------------------------"
-    - "copy \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Redist\\MSVC\\v142\\vcredist_x64.exe\" \"%CI_PROJECT_DIR%/bin/release/\""    
-    - "copy C:\\libpq_my_build\\libpq.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\libEGL.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\libGLESv2.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\Qt5Core.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\Qt5Gui.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\Qt5Network.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\Qt5PrintSupport.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\Qt5Qml.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\Qt5Quick.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\Qt5SerialPort.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\Qt5Sql.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\Qt5Svg.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\Qt5Test.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\Qt5Widgets.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\Qt5WinExtras.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\Qt5Xml.dll \"%CI_PROJECT_DIR%/bin/release/\""
-    - "copy %QT_BIN_DIR%\\bin\\Qt5Charts.dll \"%CI_PROJECT_DIR%/bin/release/\""
+    - "copy \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Redist\\MSVC\\v142\\vcredist_x64.exe\" \"$Env:CI_PROJECT_DIR/bin/release/\""    
+    - "copy C:\\libpq_my_build\\libpq.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\libEGL.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\libGLESv2.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt5Core.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt5Gui.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt5Network.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt5PrintSupport.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt5Qml.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt5Quick.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt5SerialPort.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt5Sql.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt5Svg.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt5Test.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt5Widgets.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt5WinExtras.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt5Xml.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:QT_BIN_DIR\\bin\\Qt5Charts.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
 # Copy Qt plugins
-    - "mkdir \"%CI_PROJECT_DIR%/bin/release/bearer\""
-    - "copy %QT_BIN_DIR%\\plugins\\bearer\\qgenericbearer.dll \"%CI_PROJECT_DIR%/bin/release/bearer/\""
-    - "mkdir \"%CI_PROJECT_DIR%\\bin\\release\\iconengines\""
-    - "copy %QT_BIN_DIR%\\plugins\\iconengines\\qsvgicon.dll \"%CI_PROJECT_DIR%/bin/release/iconengines/\""
-    - "mkdir \"%CI_PROJECT_DIR%\\bin\\release\\imageformats\""
-    - "copy %QT_BIN_DIR%\\plugins\\imageformats\\qgif.dll \"%CI_PROJECT_DIR%/bin/release/imageformats/\""
-    - "copy %QT_BIN_DIR%\\plugins\\imageformats\\qicns.dll \"%CI_PROJECT_DIR%/bin/release/imageformats/\""
-    - "copy %QT_BIN_DIR%\\plugins\\imageformats\\qico.dll \"%CI_PROJECT_DIR%/bin/release/imageformats/\""
-    - "copy %QT_BIN_DIR%\\plugins\\imageformats\\qjpeg.dll \"%CI_PROJECT_DIR%/bin/release/imageformats/\""
-    - "copy %QT_BIN_DIR%\\plugins\\imageformats\\qsvg.dll \"%CI_PROJECT_DIR%/bin/release/imageformats/\""
-    - "copy %QT_BIN_DIR%\\plugins\\imageformats\\qtga.dll \"%CI_PROJECT_DIR%/bin/release/imageformats/\""
-    - "copy %QT_BIN_DIR%\\plugins\\imageformats\\qtiff.dll \"%CI_PROJECT_DIR%/bin/release/imageformats/\""
-    - "copy %QT_BIN_DIR%\\plugins\\imageformats\\qwbmp.dll \"%CI_PROJECT_DIR%/bin/release/imageformats/\""
-    - "copy %QT_BIN_DIR%\\plugins\\imageformats\\qwebp.dll \"%CI_PROJECT_DIR%/bin/release/imageformats/\""
-    - "mkdir \"%CI_PROJECT_DIR%\\bin\\release\\platforms\""
-    - "copy %QT_BIN_DIR%\\plugins\\platforms\\qdirect2d.dll \"%CI_PROJECT_DIR%/bin/release/platforms/\""
-    - "copy %QT_BIN_DIR%\\plugins\\platforms\\qminimal.dll \"%CI_PROJECT_DIR%/bin/release/platforms/\""
-    - "copy %QT_BIN_DIR%\\plugins\\platforms\\qoffscreen.dll \"%CI_PROJECT_DIR%/bin/release/platforms/\""
-    - "copy %QT_BIN_DIR%\\plugins\\platforms\\qwindows.dll \"%CI_PROJECT_DIR%/bin/release/platforms/\""
-    - "mkdir \"%CI_PROJECT_DIR%\\bin\\release\\sqldrivers\""
-    - "copy %QT_BIN_DIR%\\plugins\\sqldrivers\\qsqlite.dll \"%CI_PROJECT_DIR%/bin/release/sqldrivers/\""
-    - "copy %QT_BIN_DIR%\\plugins\\sqldrivers\\qsqlpsql.dll \"%CI_PROJECT_DIR%/bin/release/sqldrivers/\""
-    - "mkdir \"%CI_PROJECT_DIR%\\bin\\release\\printsupport\""
-    - "copy %QT_BIN_DIR%\\plugins\\printsupport\\windowsprintersupport.dll \"%CI_PROJECT_DIR%/bin/release/printsupport/\""
-    - "mkdir \"%CI_PROJECT_DIR%\\bin\\release\\styles\""
-    - "copy %QT_BIN_DIR%\\plugins\\styles\\qwindowsvistastyle.dll \"%CI_PROJECT_DIR%/bin/release/styles/\""
+    - "mkdir \"$Env:CI_PROJECT_DIR/bin/release/bearer\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\bearer\\qgenericbearer.dll \"$Env:CI_PROJECT_DIR/bin/release/bearer/\""
+    - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\iconengines\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\iconengines\\qsvgicon.dll \"$Env:CI_PROJECT_DIR/bin/release/iconengines/\""
+    - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\imageformats\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\imageformats\\qgif.dll \"$Env:CI_PROJECT_DIR/bin/release/imageformats/\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\imageformats\\qicns.dll \"$Env:CI_PROJECT_DIR/bin/release/imageformats/\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\imageformats\\qico.dll \"$Env:CI_PROJECT_DIR/bin/release/imageformats/\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\imageformats\\qjpeg.dll \"$Env:CI_PROJECT_DIR/bin/release/imageformats/\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\imageformats\\qsvg.dll \"$Env:CI_PROJECT_DIR/bin/release/imageformats/\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\imageformats\\qtga.dll \"$Env:CI_PROJECT_DIR/bin/release/imageformats/\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\imageformats\\qtiff.dll \"$Env:CI_PROJECT_DIR/bin/release/imageformats/\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\imageformats\\qwbmp.dll \"$Env:CI_PROJECT_DIR/bin/release/imageformats/\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\imageformats\\qwebp.dll \"$Env:CI_PROJECT_DIR/bin/release/imageformats/\""
+    - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\platforms\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\platforms\\qdirect2d.dll \"$Env:CI_PROJECT_DIR/bin/release/platforms/\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\platforms\\qminimal.dll \"$Env:CI_PROJECT_DIR/bin/release/platforms/\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\platforms\\qoffscreen.dll \"$Env:CI_PROJECT_DIR/bin/release/platforms/\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\platforms\\qwindows.dll \"$Env:CI_PROJECT_DIR/bin/release/platforms/\""
+    - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\sqldrivers\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\sqldrivers\\qsqlite.dll \"$Env:CI_PROJECT_DIR/bin/release/sqldrivers/\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\sqldrivers\\qsqlpsql.dll \"$Env:CI_PROJECT_DIR/bin/release/sqldrivers/\""
+    - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\printsupport\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\printsupport\\windowsprintersupport.dll \"$Env:CI_PROJECT_DIR/bin/release/printsupport/\""
+    - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\styles\""
+    - "copy $Env:QT_BIN_DIR\\plugins\\styles\\qwindowsvistastyle.dll \"$Env:CI_PROJECT_DIR/bin/release/styles/\""
 
 #Remove some files not requiered for releases
     - "# ----------------------------------------------"
@@ -148,26 +150,26 @@ windows build job:
     - "#               Sign Files"
     - "# ----------------------------------------------"
     - "$K8S_SECRET_DIGITAL_SIGN_CERT = Get-Content c:\\radiy-code-signing\\password.txt | Out-String"
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\VFrame30.dll"
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\AppDataSrv.exe"
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\ArchSrv.exe"
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\CfgSrv.exe"
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\mconf.exe"
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\PacketSource.exe"
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\PacketViewer.exe"
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\Metrology.exe"
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\Monitor.exe"
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\scm.exe"
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\TuningClient.exe"
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\TuningSrv.exe"
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\u7.exe"    
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $Env:K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\VFrame30.dll"
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $Env:K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\AppDataSrv.exe"
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $Env:K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\ArchSrv.exe"
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $Env:K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\CfgSrv.exe"
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $Env:K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\mconf.exe"
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $Env:K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\PacketSource.exe"
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $Env:K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\PacketViewer.exe"
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $Env:K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\Metrology.exe"
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $Env:K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\Monitor.exe"
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $Env:K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\scm.exe"
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $Env:K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\TuningClient.exe"
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $Env:K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\TuningSrv.exe"
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $Env:K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\u7.exe"    
 
 #Generate ScriptHelp
     - "# ----------------------------------------------"
     - "#               Generate ScriptHelp"
     - "# ----------------------------------------------"
     - "pushd ."	
-    - "cd %CI_PROJECT_DIR%\\u7\\ScriptHelp"
+    - "cd $Env:CI_PROJECT_DIR\\u7\\ScriptHelp"
     - "call ScriptHelp.bat"
     - "popd ."
 
@@ -185,10 +187,10 @@ windows build job:
     - "#               Build Installer"
     - "# ----------------------------------------------"
     - "pushd ."	
-    - "cd %CI_PROJECT_DIR%\\u7setinstall"
+    - "cd $Env:CI_PROJECT_DIR\\u7setinstall"
     - "call createinstall.bat"
     - "popd ."	
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\*.exe"
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $Env:K8S_SECRET_DIGITAL_SIGN_CERT bin\\*.exe"
     - "set K8S_SECRET_DIGITAL_SIGN_CERT="
 
   artifacts:
@@ -209,6 +211,7 @@ windows build job:
       - bin/release/docs/*.pdf
       - bin/release/docs/Appendixes/*.pdf
 
+
 test job:
   stage: test
   tags:
@@ -228,7 +231,7 @@ test job:
     - "#               Run XML validation"
     - "# ----------------------------------------------"
     - "pushd ."	
-    - "cd %CI_PROJECT_DIR%\\u7\\LogicModuleDescription"
+    - "cd $Env:CI_PROJECT_DIR\\u7\\LogicModuleDescription"
     - "call validate_xmls.bat"
     - "popd ."
 
@@ -236,24 +239,26 @@ test job:
     - "# ----------------------------------------------"
     - "#               Run unit tests"
     - "# ----------------------------------------------"
-    - "%CI_PROJECT_DIR%\\bin\\release\\u7databasetests.exe"
-    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorTests.exe"
+    - "$Env:CI_PROJECT_DIR\\bin\\release\\u7databasetests.exe"
+    - "$Env:CI_PROJECT_DIR\\bin\\release\\SimulatorTests.exe"
 
 #Run Builder test
     - "# ----------------------------------------------"
     - "#               Run BuilderConsole tests"
     - "# ----------------------------------------------"
     - "rmdir /Q /S c:\\temp\\build\\test_simulator"
-    - "%CI_PROJECT_DIR%\\bin\\release\\BuilderConsole.exe %CI_PROJECT_DIR%\\Test\\BuilderConsoleArgs.xml"
+    - "$Env:CI_PROJECT_DIR\\bin\\release\\BuilderConsole.exe $Env:CI_PROJECT_DIR\\Test\\BuilderConsoleArgs.xml"
 
 #Run Sim AFB Tests
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "%CI_PROJECT_DIR%\\bin\\release\\SimulatorConsole.exe -build=c:\\temp\\build\\test_simulator_v349\\build -script=%CI_PROJECT_DIR%\\Simulator\\SimProjectTests.js"
+    - "$Env:CI_PROJECT_DIR\\bin\\release\\SimulatorConsole.exe -build=c:\\temp\\build\\test_simulator_v349\\build -script=$Env:CI_PROJECT_DIR\\Simulator\\SimProjectTests.js"
 
 #Run ROVT to check configuration generation
     - "# ----------------------------------------------"
     - "#               Run ROVT tests"
     - "# ----------------------------------------------"
     - "C:\\ROVT\\ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v349\\build"
+	
+	
