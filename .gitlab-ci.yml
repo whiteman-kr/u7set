@@ -140,7 +140,6 @@ windows build job:
     - "del -Force $Env:CI_PROJECT_DIR/bin/release/BaseSrv.exe"
     - "del -Force $Env:CI_PROJECT_DIR/bin/release/CommView.exe"
     - "del -Force $Env:CI_PROJECT_DIR/bin/release/DiagDataSrv.exe"
-    - "del -Force $Env:CI_PROJECT_DIR/bin/release/TuningIPEN.exe"
     
 #Signing Files
     - "# ----------------------------------------------"
