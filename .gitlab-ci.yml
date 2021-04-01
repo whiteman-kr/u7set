@@ -229,7 +229,7 @@ test job:
     - "# ----------------------------------------------"
     - "pushd ."	
     - "cd $Env:CI_PROJECT_DIR/u7/LogicModuleDescription"
-    - "&validate_xmls.bat"
+    - "&./validate_xmls.bat"
     - "popd"
 
 #Run unit tests
