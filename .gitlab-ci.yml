@@ -228,32 +228,32 @@ test job:
     - "#               Run XML validation"
     - "# ----------------------------------------------"
     - "pushd ."	
-    - "cd $Env:CI_PROJECT_DIR\\u7\\LogicModuleDescription"
-    - "call validate_xmls.bat"
-    - "popd ."
+    - "cd $Env:CI_PROJECT_DIR/u7/LogicModuleDescription"
+    - "&validate_xmls.bat"
+    - "popd"
 
 #Run unit tests
     - "# ----------------------------------------------"
     - "#               Run unit tests"
     - "# ----------------------------------------------"
-    - "$Env:CI_PROJECT_DIR\\bin\\release\\u7databasetests.exe"
-    - "$Env:CI_PROJECT_DIR\\bin\\release\\SimulatorTests.exe"
+    - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe"
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe"
 
 #Run Builder test
     - "# ----------------------------------------------"
     - "#               Run BuilderConsole tests"
     - "# ----------------------------------------------"
-    - "rmdir /Q /S c:\\temp\\build\\test_simulator"
-    - "$Env:CI_PROJECT_DIR\\bin\\release\\BuilderConsole.exe $Env:CI_PROJECT_DIR\\Test\\BuilderConsoleArgs.xml"
+    - "Remove-Item c:/temp/build/test_simulator -Recurse -Force"
+    - "&$Env:CI_PROJECT_DIR/bin/release/BuilderConsole.exe $Env:CI_PROJECT_DIR/Test/BuilderConsoleArgs.xml"
 
 #Run Sim AFB Tests
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "$Env:CI_PROJECT_DIR\\bin\\release\\SimulatorConsole.exe -build=c:\\temp\\build\\test_simulator_v349\\build -script=$Env:CI_PROJECT_DIR\\Simulator\\SimProjectTests.js"
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/test_simulator_v349/build -script=$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js"
 
 #Run ROVT to check configuration generation
     - "# ----------------------------------------------"
     - "#               Run ROVT tests"
     - "# ----------------------------------------------"
-    - "C:\\ROVT\\ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v349\\build"
+    - "&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v349\\build"
