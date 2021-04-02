@@ -646,6 +646,11 @@ namespace Sim
 
 	bool Simulator::setCurrentProfile(QString profileName)
 	{
+		if (profileName.isEmpty() == true)
+		{
+			profileName = DefaultProfileName;
+		}
+
 		if (profiles().hasProfile(profileName) == false)
 		{
 			m_log.writeError(tr("Cannot set profile %1, this profile not found").arg(profileName));
