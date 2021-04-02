@@ -250,7 +250,7 @@ test job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/test_simulator_v349/build -script=$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js"
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/test_simulator_v349/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
 
 #Run ROVT to check configuration generation
     - "# ----------------------------------------------"
