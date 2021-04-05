@@ -10,21 +10,13 @@ TARGET = protobuf
 TEMPLATE = lib
 CONFIG += staticlib
 
-win32 {
-	CONFIG += warn_off
-}
-msvc {
-	QMAKE_CXXFLAGS += /wd4996
-	QMAKE_CXXFLAGS += /wd4244
-	QMAKE_CXXFLAGS += /wd4127
-	QMAKE_CXXFLAGS += /wd4512
-}
+CONFIG += warn_off
 
-# c++20 support -- for better compillation time, some cpps are included to this library,
+# c++17 support -- for better compillation time, some cpps are included to this library,
 # and class PropertyObject is ussing std::clamp what is part cpp17
 #
-unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
-win32:QMAKE_CXXFLAGS += /std:c++latest
+unix:QMAKE_CXXFLAGS += --std=c++17
+win32:QMAKE_CXXFLAGS += /std:c++17
 
 # DESTDIR
 #

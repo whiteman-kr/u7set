@@ -1,6 +1,6 @@
 #win32:QMAKE_CXXFLAGS += /analyze
 
-gcc:CONFIG += warn_on
+gcc:CONFIG += warn_off
 
 win32:CONFIG -= warn_on				# warn_on is level 3 warnings
 #win32:CONFIG += warn_on				# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
