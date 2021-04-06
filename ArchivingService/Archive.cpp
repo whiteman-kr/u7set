@@ -4,6 +4,7 @@
 #include "ArchFile.h"
 #include "ArchRequest.h"
 #include "ArchWriterThread.h"
+#include "..\lib\ConstStrings.h"
 
 // ----------------------------------------------------------------------------------------------------------------------
 //
@@ -555,7 +556,9 @@ bool Archive::createGroupDirs()
 
 	for(int i = 0; i < 256; i++)
 	{
-		QString dir = QString("%1/%2").arg(m_archFullPath).arg(QString().sprintf("%02X", i));
+		QString x16 = (QString("%1").arg(i, 2, 16, Latin1Char::ZERO)).toUpper();
+
+		QString dir = QString("%1/%2").arg(m_archFullPath).arg(x16);
 
 		QDir d;
 

@@ -3,6 +3,7 @@
 #include "ArchWriterThread.h"
 #include "BinSearch.h"
 #include "ArchRequest.h"
+#include "..\lib\ConstStrings.h"
 
 // -----------------------------------------------------------------------------------------------------------------------
 //
@@ -324,10 +325,10 @@ QString ArchFilePartition::getFileName(qint64 partitionStartTime, bool shortTerm
 	QString fileName = QString("%1/%2_%3_%4_%5_%6.%7").
 							arg(m_archFilePath).
 							arg(date.date().year()).
-							arg(QString().sprintf("%02d", date.date().month())).
-							arg(QString().sprintf("%02d", date.date().day())).
-							arg(QString().sprintf("%02d", date.time().hour())).
-							arg(QString().sprintf("%02d", date.time().minute())).
+							arg(date.date().month(), 2, 10, Latin1Char::ZERO).
+							arg(date.date().day(), 2, 10, Latin1Char::ZERO).
+							arg(date.time().hour(), 2, 10, Latin1Char::ZERO).
+							arg(date.time().minute(), 2, 10, Latin1Char::ZERO).
 							arg(extension);
 
 	return fileName;
@@ -472,9 +473,11 @@ ArchFile::~ArchFile()
 
 void ArchFile::setArchFullPath(const QString& archFullPath)
 {
+	QString lastByteOfHash = (QString("%1").arg(static_cast<int>(m_hash & 0xFF), 2, 16, Latin1Char::ZERO)).toUpper();
+
 	m_path = QString("%1/%2/%3").
 					arg(archFullPath).
-					arg(QString().sprintf("%02X", static_cast<int>(m_hash & 0xFF))).
+					arg(lastByteOfHash).
 					arg(m_appSignalID.remove(QRegExp("[^0-9A-Za-z_]")));
 
 	m_writablePartition.init(m_path, true);
@@ -629,7 +632,7 @@ QVector<ArchFilePartition::Info> ArchFile::getArchPartitionsInfo(const QString& 
 
 	// Sort m_archPartitionsInfo by systemTime ascending
 	//
-	qSort(partitionsInfo);
+	std::sort(partitionsInfo.begin(), partitionsInfo.end());
 
 	//
 	for(int i = 0; i < partitionsInfo.count() - 1; /* it is Ok*/)

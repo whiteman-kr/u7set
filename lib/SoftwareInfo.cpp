@@ -43,7 +43,29 @@ void SoftwareInfo::init(E::SoftwareType softwareType,
 #endif
 
 #ifdef Q_OS_WIN
-	m_userName = getenv("USERNAME");
+
+	QString qUsername("USERNAME");
+	wchar_t username[16];
+	int ln = qUsername.toWCharArray(username);
+	username[ln] = '\0';
+
+	wchar_t* buf = nullptr;
+	size_t len = 0;
+
+	errno_t err = _wdupenv_s(&buf, &len, username);
+
+	Q_ASSERT(err == 0);
+
+	if (err == 0)
+	{
+		m_userName = QString::fromWCharArray(buf, -1);
+	}
+
+	if (buf != nullptr)
+	{
+		free(buf);
+	}
+
 #endif
 }
 

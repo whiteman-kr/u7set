@@ -74,10 +74,6 @@ void TcpArchRequestsServer::onServerThreadFinished()
 
 void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* requestData, quint32 requestDataSize)
 {
-	QTime startTime;
-
-	startTime.start();
-
 	Network::GetAppSignalStatesFromArchiveStartRequest request;
 	Network::GetAppSignalStatesFromArchiveStartReply reply;
 

@@ -62,7 +62,7 @@ namespace RtTrends
 		E::RtTrendsSamplePeriod m_samplePeriod = E::RtTrendsSamplePeriod::sp_1s;
 		int m_samplePeriodCounter = 0;
 
-		QHash<Hash, SignalStatesQueue*> m_trackedSignals;
+		QMultiHash<Hash, SignalStatesQueue*> m_trackedSignals;
 	};
 
 	typedef std::shared_ptr<Session> SessionShared;
