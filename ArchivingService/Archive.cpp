@@ -4,7 +4,7 @@
 #include "ArchFile.h"
 #include "ArchRequest.h"
 #include "ArchWriterThread.h"
-#include "..\lib\ConstStrings.h"
+#include "../lib/ConstStrings.h"
 
 // ----------------------------------------------------------------------------------------------------------------------
 //

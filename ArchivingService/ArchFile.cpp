@@ -3,7 +3,7 @@
 #include "ArchWriterThread.h"
 #include "BinSearch.h"
 #include "ArchRequest.h"
-#include "..\lib\ConstStrings.h"
+#include "../lib/ConstStrings.h"
 
 // -----------------------------------------------------------------------------------------------------------------------
 //
