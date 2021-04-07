@@ -1,11 +1,10 @@
 #pragma once
 
 #include "Schema.h"
-#include "VFrame30Lib_global.h"
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT SchemaManager : public QObject
+	class SchemaManager : public QObject
 	{
 		Q_OBJECT
 

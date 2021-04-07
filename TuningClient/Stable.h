@@ -69,7 +69,6 @@
 	#pragma warning(pop)
 #endif
 
-#include "../VFrame30/VFrame30Lib_global.h"
 #include "../lib/TypesAndEnums.h"
 
 

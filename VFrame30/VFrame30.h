@@ -2,7 +2,6 @@
 
 // Project stable includes
 //
-#include "VFrame30Lib_global.h"
 #include "../lib/Factory.h"
 #include "../lib/TypesAndEnums.h"
 #include "../lib/CUtils.h"

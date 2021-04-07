@@ -16,7 +16,7 @@ namespace VFrame30
 	class AppSignalController;
 	class TuningController;
 
-	class VFRAME30LIBSHARED_EXPORT CDrawParam
+	class CDrawParam
 	{
 	public:
 		CDrawParam(void) = delete;
@@ -118,7 +118,7 @@ namespace VFrame30
 	};
 
 
-	class VFRAME30LIBSHARED_EXPORT DrawHelper
+	class DrawHelper
 	{
 	public:
 		static void drawText(QPainter* p,

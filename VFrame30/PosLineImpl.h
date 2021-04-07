@@ -29,7 +29,7 @@ namespace VFrame30
 	/*! \class PosLineImpl
 		\brief PosLineImpl
 	*/
-	class VFRAME30LIBSHARED_EXPORT PosLineImpl : public SchemaItem, public IPosLine
+	class PosLineImpl : public SchemaItem, public IPosLine
 	{
 		Q_OBJECT
 

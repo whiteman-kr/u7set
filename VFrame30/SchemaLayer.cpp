@@ -5,8 +5,7 @@
 
 namespace VFrame30
 {
-
-	Factory<VFrame30::SchemaLayer> VideoLayerFactory;
+	::Factory<VFrame30::SchemaLayer> VideoLayerFactory;
 
 
 	SchemaLayer::SchemaLayer(void) :

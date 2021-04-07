@@ -6,13 +6,11 @@ namespace VFrame30
 	//
 	//		SchemaItemLoopback
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemaItemLoopback : public FblItemRect
+	class SchemaItemLoopback : public FblItemRect
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
 		friend ::Factory<SchemaItem>::DerivedType<SchemaItemLoopback>;
-#endif
 
 	public:
 		SchemaItemLoopback();
@@ -51,13 +49,11 @@ namespace VFrame30
 	//		SchemaItemLoopbackSource
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemaItemLoopbackSource : public SchemaItemLoopback
+	class SchemaItemLoopbackSource : public SchemaItemLoopback
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
 		friend ::Factory<SchemaItem>::DerivedType<SchemaItemLoopbackSource>;
-#endif
 
 	public:
 		SchemaItemLoopbackSource();
@@ -96,13 +92,11 @@ namespace VFrame30
 	//		SchemaItemLoopbackTarget
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemaItemLoopbackTarget : public SchemaItemLoopback
+	class SchemaItemLoopbackTarget : public SchemaItemLoopback
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
 		friend ::Factory<SchemaItem>::DerivedType<SchemaItemLoopbackTarget>;
-#endif
 
 	public:
 		SchemaItemLoopbackTarget();

@@ -466,7 +466,6 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libQScintilla.a
 unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 
 # VFrame30 library
-# $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
 #
 win32 {
     CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30

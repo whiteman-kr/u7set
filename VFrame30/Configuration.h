@@ -5,7 +5,7 @@ namespace VFrame30
 {
 	class Schema;
 
-	class VFRAME30LIBSHARED_EXPORT Configuration : 
+	class Configuration :
 		public QObject,
 		public Proto::ObjectSerialization<Configuration>,
 		public DebugInstCounter<Configuration>
@@ -65,7 +65,7 @@ namespace VFrame30
 	};
 
 
-	class VFRAME30LIBSHARED_EXPORT ConfigurationSharedPtr
+	class ConfigurationSharedPtr
 	{
 	public:
 		ConfigurationSharedPtr(const std::shared_ptr<Configuration>& sp) : m_sp(sp)

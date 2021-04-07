@@ -6,7 +6,7 @@ namespace VFrame30
 
 	// Используется для сохранения декомпозированных Link'ов, в BuildFblConnectionMap
 	//
-	class VFRAME30LIBSHARED_EXPORT CHorzVertLinks
+	class CHorzVertLinks
 	{
 	public:
 		void AddLinks(const std::list<SchemaPoint>& pointList, const QUuid& schemaItemGuid);

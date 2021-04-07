@@ -1,4 +1,4 @@
-QT       += qml sql xml widgets
+QT       += qml sql xml widgets svg
 
 
 CONFIG += console
@@ -49,12 +49,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-    BuildTask.cpp \
-    ../lib/SimpleMutex.cpp
+		BuildTask.cpp
 
 HEADERS += \
-    BuildTask.h \
-    ../lib/SimpleMutex.h
+    BuildTask.h
 
 # VFrame30 library
 #

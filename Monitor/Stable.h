@@ -43,7 +43,6 @@
 
 // Other stable includes
 //
-#include "../VFrame30/VFrame30Lib_global.h"
 #include "../lib/Types.h"
 
 // Disable some warnings

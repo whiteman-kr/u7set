@@ -91,7 +91,6 @@ namespace VFrame30
 
 		SchemaItem::PrintRefCounter();
 
-		google::protobuf::ShutdownProtobufLibrary();
 		return true;
 	}
 }

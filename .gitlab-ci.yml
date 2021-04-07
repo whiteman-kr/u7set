@@ -147,7 +147,6 @@ windows build job:
     - "# ----------------------------------------------"
     - "$SIGNTOOL='C:/Program Files (x86)/Windows Kits/10/App Certification Kit/signtool.exe'"
     - "$K8S_SECRET_DIGITAL_SIGN_CERT = Get-Content c:\\radiy-code-signing\\password.txt"
-    - "&$SIGNTOOL sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\VFrame30.dll"
     - "&$SIGNTOOL sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\AppDataSrv.exe"
     - "&$SIGNTOOL sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\ArchSrv.exe"
     - "&$SIGNTOOL sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $K8S_SECRET_DIGITAL_SIGN_CERT bin\\release\\CfgSrv.exe"

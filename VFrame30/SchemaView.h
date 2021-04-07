@@ -1,8 +1,5 @@
 #pragma once
-
 #include "Session.h"
-#include "VFrame30Lib_global.h"
-
 
 namespace VFrame30
 {
@@ -12,7 +9,7 @@ namespace VFrame30
 
 	static constexpr double ZoomStep = 10;
 
-	class VFRAME30LIBSHARED_EXPORT SchemaView : public QWidget
+	class SchemaView : public QWidget
 	{
 		Q_OBJECT
 

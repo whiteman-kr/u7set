@@ -9,7 +9,7 @@ namespace VFrame30
 		\ingroup appLogicSchemaItems
 		\brief This is functional item used for connection signal to AFB inputs/outputs, other signals etc
 	*/
-	class VFRAME30LIBSHARED_EXPORT SchemaItemSignal : public FblItemRect
+	class SchemaItemSignal : public FblItemRect
 	{
 		Q_OBJECT
 
@@ -194,7 +194,7 @@ namespace VFrame30
 	//
 	// SchemaItemInput
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemaItemInput : public SchemaItemSignal
+	class SchemaItemInput : public SchemaItemSignal
 	{
 		Q_OBJECT
 
@@ -223,7 +223,7 @@ namespace VFrame30
 	//
 	// SchemaItemOutput
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemaItemOutput : public SchemaItemSignal
+	class SchemaItemOutput : public SchemaItemSignal
 	{
 		Q_OBJECT
 
@@ -251,7 +251,7 @@ namespace VFrame30
 	//
 	// SchemaItemInOut
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemaItemInOut : public SchemaItemSignal
+	class SchemaItemInOut : public SchemaItemSignal
 	{
 		Q_OBJECT
 

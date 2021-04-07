@@ -5,7 +5,7 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT FblItemLine : public PosConnectionImpl, public FblItem
+	class FblItemLine : public PosConnectionImpl, public FblItem
 	{
 		Q_OBJECT
 

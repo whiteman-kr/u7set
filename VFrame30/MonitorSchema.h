@@ -6,7 +6,7 @@ namespace VFrame30
 {
 	// Schema for Monitor Application
 	//
-	class VFRAME30LIBSHARED_EXPORT MonitorSchema : public Schema
+	class MonitorSchema : public Schema
 	{
 		Q_OBJECT
 

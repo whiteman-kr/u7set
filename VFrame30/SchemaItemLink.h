@@ -5,7 +5,7 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT SchemaItemLink : public FblItemLine
+	class SchemaItemLink : public FblItemLine
 	{
 		Q_OBJECT
 

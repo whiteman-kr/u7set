@@ -5,13 +5,11 @@
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT SchemaItemTerminator : public FblItemRect
+	class SchemaItemTerminator : public FblItemRect
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
 		friend ::Factory<SchemaItem>::DerivedType<SchemaItemTerminator>;
-#endif
 
 	public:
 		SchemaItemTerminator();

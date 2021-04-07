@@ -1,11 +1,11 @@
 #pragma once
 
-#include "VFrame30Lib_global.h"
 #include "SchemaPoint.h"
 #include "../lib/TypesAndEnums.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/DebugInstCounter.h"
 #include "../lib/OutputLog.h"
+#include "../lib/Factory.h"
 #include "../Proto/ProtoSerialization.h"
 #include <QJSValue>
 
@@ -32,6 +32,8 @@ using SchemaItemPtr = std::shared_ptr<VFrame30::SchemaItem>;
 
 namespace VFrame30
 {
+	extern ::Factory<VFrame30::SchemaItem> SchemaItemFactory;
+
 	// Интерфейс для SchemaItem который перводит любой тип хранения координат (ISchemaPosRect, ISchemaPosLine, ...) в
 	// прямоугольник, для отображения в СВОЙСТВАХ ОБЪЕКТА. ВНИМАНИЕ! возврат элементов происходит в единицах мм, дюймы, точки.
 	// ВНИМАНИЕ! Эти свойства нельзя использовать для рисования и вычисления новых координат!
@@ -67,7 +69,7 @@ namespace VFrame30
 
 		Base class for all items displayed on schemas.
 	*/
-	class VFRAME30LIBSHARED_EXPORT SchemaItem :
+	class SchemaItem :
 		public PropertyObject,
 		public ISchemaItemPropertiesPos,
 		public IPointList,
@@ -346,9 +348,4 @@ namespace VFrame30
 		static const QColor highlightColor1;
 		static const QColor highlightColor2;
 	};
-
-#ifdef VFRAME30LIB_LIBRARY
-	extern Factory<VFrame30::SchemaItem> SchemaItemFactory;
-#endif
-
 }

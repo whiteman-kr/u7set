@@ -37,7 +37,7 @@ namespace VFrame30
 	/*! \class PosRectImpl
 		\brief PosRectImpl
 	*/
-	class VFRAME30LIBSHARED_EXPORT PosRectImpl : public SchemaItem, public IPosRect
+	class PosRectImpl : public SchemaItem, public IPosRect
 	{
 		Q_OBJECT
 

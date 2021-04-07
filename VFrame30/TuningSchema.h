@@ -6,7 +6,7 @@ namespace VFrame30
 {
 	// Schema for TuningClient
 	//
-	class VFRAME30LIBSHARED_EXPORT TuningSchema : public Schema
+	class TuningSchema : public Schema
 	{
 		Q_OBJECT
 

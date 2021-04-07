@@ -47,7 +47,7 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class VFRAME30LIBSHARED_EXPORT SchemaItemLine : public PosLineImpl
+	class SchemaItemLine : public PosLineImpl
 	{
 		Q_OBJECT
 

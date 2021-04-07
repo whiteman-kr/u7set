@@ -159,7 +159,7 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class VFRAME30LIBSHARED_EXPORT SchemaItemPushButton : public SchemaItemControl
+	class SchemaItemPushButton : public SchemaItemControl
 	{
 		Q_OBJECT
 

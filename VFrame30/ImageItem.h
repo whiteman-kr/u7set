@@ -7,7 +7,7 @@
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT ImageItem : public PropertyObject
+	class ImageItem : public PropertyObject
 	{
 		Q_OBJECT
 

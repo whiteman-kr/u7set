@@ -28,7 +28,6 @@ unix {
 }
 
 SOURCES += main.cpp\
-    ../Proto/serialization.pb.cc \
     ../lib/Address16.cpp \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/ScriptDeviceObject.cpp \

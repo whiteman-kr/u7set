@@ -1,6 +1,5 @@
 #pragma once
 
-#include "VFrame30Lib_global.h"
 #include "../lib/IAppSignalManager.h"
 
 class AppSignalParam;
@@ -9,7 +8,7 @@ class Comparator;
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT AppSignalController : public QObject
+	class AppSignalController : public QObject
 	{
 		Q_OBJECT
 

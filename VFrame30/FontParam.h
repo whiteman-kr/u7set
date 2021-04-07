@@ -44,7 +44,7 @@ namespace Proto
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT FontParam
+	class FontParam
 	{
 	public:
 		FontParam();

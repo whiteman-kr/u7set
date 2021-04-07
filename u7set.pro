@@ -3,19 +3,19 @@ TEMPLATE = subdirs
 CONFIG += ordered
 
 SUBDIRS += Protobuf \
-    qtservice \
 	qtpropertybrowser \
 	QScintilla \
 	TrendView \
 	VFrame30 \
-	BaseService \
-	ServiceControlManager \
-	Metrology \
 	Simulator \
 	SimulatorConsole \
 	Builder \
 	BuilderConsole \
 	u7 \
+	Metrology \
+	qtservice \
+	BaseService \
+	ServiceControlManager \
 	ConfigurationService \
 	ArchivingService \
 	Monitor \
@@ -30,3 +30,4 @@ SUBDIRS += Protobuf \
 	./Test/UalTester \
 	./Test/SimulatorTests \
 	./Test/u7databaseTests
+

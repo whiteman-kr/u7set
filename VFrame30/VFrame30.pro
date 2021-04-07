@@ -1,16 +1,14 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2012-10-02T18:35:47
-#
-#-------------------------------------------------
+QT += widgets qml xml svg
+
 TARGET = VFrame30
 
 TEMPLATE = lib
-QT += widgets qml xml svg
+CONFIG += staticlib
 
 win32:LIBS += -lGdi32
 
 INCLUDEPATH += $$PWD
+INCLUDEPATH += ./../Protobuf
 
 # c++20 support
 #
@@ -18,6 +16,23 @@ unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
 win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../warnings.pri)
+
+# Optimization flags
+#
+win32 {
+}
+unix {
+    CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
+	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
+}
+
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
+
+unix {
+    target.path = /usr/lib
+	INSTALLS += target
+}
 
 # DESTDIR
 #
@@ -50,7 +65,7 @@ OTHER_FILES += \
     ../Proto/serialization.proto \
     ../Proto/proto_compile.sh
 
-HEADERS += VFrame30Lib_global.h \
+HEADERS += \
     ../Proto/serialization.pb.h \
     ../lib/Address16.h \
     ../lib/ClientBehavior.h \
@@ -141,11 +156,7 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/OutputLog.h
 
 SOURCES += \
-    ../Proto/serialization.pb.cc \
-    ../lib/Address16.cpp \
-    ../lib/ClientBehavior.cpp \
-    ../lib/ComparatorSet.cpp \
-    ../lib/ScriptDeviceObject.cpp \
+    #../Builder/IssueLogger.cpp \
     Indicator.cpp \
     IndicatorArrowIndicator.cpp \
     IndicatorHistogramVert.cpp \
@@ -194,56 +205,17 @@ SOURCES += \
     SchemaItemTerminator.cpp \
     MacrosExpander.cpp \
     Session.cpp \
-    ../lib/AppSignalManager.cpp \
-    ../lib/HostAddressPort.cpp \
-    ../lib/AppSignal.cpp \
-    ../lib/DbStruct.cpp \
-    ../lib/Tuning/TuningSignalState.cpp \
     SchemaItemBus.cpp \
     Bus.cpp \
     ClientSchemaWidget.cpp \
     SchemaManager.cpp \
     ClientSchemaView.cpp \
     SchemaItemLoopback.cpp \
-    ../lib/TuningValue.cpp \
     TuningController.cpp \
     AppSignalController.cpp \
-    ../lib/Types.cpp \
-    ../lib/Signal.cpp \
-    ../lib/DeviceObject.cpp \
-    ../lib/SignalProperties.cpp \
-    ../lib/XmlHelper.cpp \
     TuningSchema.cpp \
     SchemaItemImage.cpp \
     SchemaItemImageValue.cpp \
-    ImageItem.cpp \
-    ../Builder/IssueLogger.cpp \
-    ../lib/OutputLog.cpp
+	ImageItem.cpp
 
-DEFINES += VFRAME30LIB_LIBRARY
-
-CONFIG += precompile_header
-PRECOMPILED_HEADER = Stable.h
-
-# Optimization flags
-#
-win32 {
-}
-unix {
-	CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
-	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
-}
-
-# Protobuf
-#
-LIBS += -L$$DESTDIR -lprotobuf
-INCLUDEPATH += ./../Protobuf
-
-
-# Visual Leak Detector
-#
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-}
 

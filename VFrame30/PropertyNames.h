@@ -4,7 +4,7 @@
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT PropertyNames
+	class PropertyNames
 	{
 	public:
 		PropertyNames() = delete;

@@ -177,7 +177,7 @@ namespace VFrame30
 		\endcode
 	*/
 
-	class VFRAME30LIBSHARED_EXPORT SchemaItemLineEdit : public SchemaItemControl
+	class SchemaItemLineEdit : public SchemaItemControl
 	{
 		Q_OBJECT
 
@@ -273,7 +273,7 @@ namespace VFrame30
 
 		LineEditWidget class is used to control appearance and behaviour of a line edit widget
 	*/
-	class VFRAME30LIBSHARED_EXPORT LineEditWidget : public QLineEdit
+	class LineEditWidget : public QLineEdit
 	{
 		Q_OBJECT
 

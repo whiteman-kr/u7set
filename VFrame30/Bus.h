@@ -1,7 +1,6 @@
 #ifndef BUS_H
 #define BUS_H
 
-#include "VFrame30Lib_global.h"
 #include "../lib/Types.h"
 #include "../lib/Hash.h"
 #include "../lib/PropertyObject.h"
@@ -16,7 +15,7 @@ namespace VFrame30
 	//
 	// BusSignal
 	//
-	class VFRAME30LIBSHARED_EXPORT BusSignal : public PropertyObject
+	class BusSignal : public PropertyObject
 	{
 	public:
 		BusSignal();
@@ -124,7 +123,7 @@ namespace VFrame30
 	//
 	// Bus
 	//
-	class VFRAME30LIBSHARED_EXPORT Bus :
+	class Bus :
 			public PropertyObject,
 			public Proto::ObjectSerialization<Bus>
 	{
@@ -203,7 +202,7 @@ namespace VFrame30
 	//
 	// BusSet
 	//
-	class VFRAME30LIBSHARED_EXPORT BusSet
+	class BusSet
 	{
 	public:
 		BusSet() = default;

@@ -6,7 +6,7 @@ namespace VFrame30
 {
 	/*! \class SchemaItemControl
 	*/
-	class VFRAME30LIBSHARED_EXPORT SchemaItemControl : public PosRectImpl
+	class SchemaItemControl : public PosRectImpl
 	{
 		Q_OBJECT
 

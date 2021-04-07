@@ -17,7 +17,7 @@ namespace VFrame30
 	//
 	// SchemaItemIndicator
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemaItemIndicator : public PosRectImpl
+	class SchemaItemIndicator : public PosRectImpl
 	{
 		Q_OBJECT
 

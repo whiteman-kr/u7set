@@ -1,12 +1,11 @@
 #pragma once
-#include "VFrame30Lib_global.h"
 
 namespace VFrame30
 {
 	class Schema;
 	class SchemaView;
 
-	class VFRAME30LIBSHARED_EXPORT BaseSchemaWidget : public QScrollArea
+	class BaseSchemaWidget : public QScrollArea
 	{
 		Q_OBJECT
 

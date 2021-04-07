@@ -1,6 +1,5 @@
 #pragma once
 #include <QBitArray>
-#include "VFrame30Lib_global.h"
 #include "../lib/Types.h"
 #include <optional>
 
@@ -22,7 +21,7 @@ namespace Afb
 		Output
 	};
 
-	class VFRAME30LIBSHARED_EXPORT AfbComponentPin
+	class AfbComponentPin
 	{
 	public:
 		AfbComponentPin() = default;
@@ -81,7 +80,7 @@ namespace Afb
 		AfbComponentPinType m_type = AfbComponentPinType::Param;
 	};
 
-	class VFRAME30LIBSHARED_EXPORT AfbComponent : public QObject
+	class AfbComponent : public QObject
 	{
 		Q_OBJECT
 
@@ -242,7 +241,7 @@ namespace Afb
 	//
 	// AfbSignal
 	//
-	class VFRAME30LIBSHARED_EXPORT AfbSignal : public QObject
+	class AfbSignal : public QObject
 	{
 		Q_OBJECT
 
@@ -325,7 +324,7 @@ private:
 	//
 	// AfbParam
 	//
-	class VFRAME30LIBSHARED_EXPORT AfbParam
+	class AfbParam
 	{
 	public:
 		AfbParam(void);
@@ -425,7 +424,7 @@ private:
 	//
 	// FblElement
 	//
-	class VFRAME30LIBSHARED_EXPORT AfbElement :
+	class AfbElement :
 		public QObject
 	{
 		Q_OBJECT
@@ -541,7 +540,7 @@ private:
 	//
 	//	AfbElementCollection
 	//
-	class VFRAME30LIBSHARED_EXPORT AfbElementCollection
+	class AfbElementCollection
 	{
 	public:
 		AfbElementCollection(void);

@@ -5,7 +5,7 @@
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT DiagSchema : public Schema
+	class DiagSchema : public Schema
 	{
 		Q_OBJECT
 

@@ -4,7 +4,10 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT SchemaLayer :
+	extern ::Factory<VFrame30::SchemaLayer> VideoLayerFactory;
+
+
+	class SchemaLayer :
 		public QObject,
 		public Proto::ObjectSerialization<SchemaLayer>,
 		public DebugInstCounter<SchemaLayer>
@@ -83,9 +86,5 @@ namespace VFrame30
 		bool m_show = true;
 		bool m_print = true;
 	};
-
-#ifdef VFRAME30LIB_LIBRARY
-	extern Factory<VFrame30::SchemaLayer> VideoLayerFactory;
-#endif
 
 }

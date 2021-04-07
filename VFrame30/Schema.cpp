@@ -19,7 +19,7 @@
 
 namespace VFrame30
 {
-	Factory<VFrame30::Schema> SchemaFactory;
+	::Factory<VFrame30::Schema> SchemaFactory;
 
 	//
 	// ScriptSchema

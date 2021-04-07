@@ -10,13 +10,11 @@ namespace VFrame30
 	//		SchemaItemBus
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemaItemBus : public FblItemRect
+	class SchemaItemBus : public FblItemRect
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
 		friend ::Factory<SchemaItem>::DerivedType<SchemaItemBus>;
-#endif
 
 	public:
 		SchemaItemBus();
@@ -68,13 +66,11 @@ namespace VFrame30
 	//		SchemaItemBusComposer
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemaItemBusComposer : public SchemaItemBus
+	class SchemaItemBusComposer : public SchemaItemBus
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
 		friend ::Factory<SchemaItem>::DerivedType<SchemaItemBusComposer>;
-#endif
 
 	public:
 		SchemaItemBusComposer();
@@ -118,13 +114,11 @@ namespace VFrame30
 	//		SchemaItemBusExtractor
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemaItemBusExtractor : public SchemaItemBus
+	class SchemaItemBusExtractor : public SchemaItemBus
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
 		friend ::Factory<SchemaItem>::DerivedType<SchemaItemBusExtractor>;
-#endif
 
 	public:
 		SchemaItemBusExtractor();

@@ -96,7 +96,7 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class VFRAME30LIBSHARED_EXPORT SchemaItemValue : public PosRectImpl
+	class SchemaItemValue : public PosRectImpl
 	{
 		Q_OBJECT
 

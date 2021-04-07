@@ -10,7 +10,7 @@ namespace VFrame30
 	class Schema;
 	class ClientSchemaView;
 
-	class VFRAME30LIBSHARED_EXPORT MacrosExpander
+	class MacrosExpander
 	{
 	public:
 		MacrosExpander() = delete;

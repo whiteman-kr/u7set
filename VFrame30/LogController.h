@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../lib/ILogFile.h"
-#include "VFrame30Lib_global.h"
 
 namespace VFrame30
 {
@@ -69,7 +68,7 @@ namespace VFrame30
 		\endcode
 
 	*/
-	class VFRAME30LIBSHARED_EXPORT LogController : public QObject
+	class LogController : public QObject
 	{
 		Q_OBJECT
 

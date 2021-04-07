@@ -48,12 +48,10 @@ namespace Hardware
 
 	void init()
 	{
-#ifdef VFRAME30LIB_LIBRARY
-		qDebug() << "Hardware::Init" << " VFrame30 instance";
-#else
-		qDebug() << "Hardware::Init" << " not VFrame30 instance";
-#endif
+		qDebug() << "Hardware::init";
 
+		// --
+		//
 		static bool firstRun = false;
 		if (firstRun)
 		{
@@ -63,6 +61,8 @@ namespace Hardware
 
 		firstRun = true;
 
+		//--
+		//
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRoot>();
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceSystem>();
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRack>();
@@ -74,16 +74,13 @@ namespace Hardware
 		Hardware::DeviceObjectFactory.Register<Hardware::Workstation>();
 		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
 
+		return;
 	}
 
 
 	void shutdown()
 	{
-#ifdef VFRAME30LIB_LIBRARY
-		qDebug() << "Hardware::Shutdown" << " VFrame30 instance";
-#else
-		qDebug() << "Hardware::Shutdown" << " not VFrame30 instance";
-#endif
+		qDebug() << "Hardware::Shutdown";
 
 		DeviceObject::PrintRefCounter();
 

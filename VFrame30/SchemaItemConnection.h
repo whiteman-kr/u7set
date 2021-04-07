@@ -10,13 +10,11 @@ namespace VFrame30
 	//		SchemaItemConnection
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemaItemConnection : public FblItemRect
+	class SchemaItemConnection : public FblItemRect
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
 		friend ::Factory<SchemaItem>::DerivedType<SchemaItemConnection>;
-#endif
 
 	public:
 		SchemaItemConnection();
@@ -60,13 +58,11 @@ namespace VFrame30
 	//		SchemaItemTransmitter
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemaItemTransmitter : public SchemaItemConnection
+	class SchemaItemTransmitter : public SchemaItemConnection
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
 		friend ::Factory<SchemaItem>::DerivedType<SchemaItemTransmitter>;
-#endif
 
 	public:
 		SchemaItemTransmitter();
@@ -109,13 +105,11 @@ namespace VFrame30
 	//		SchemaItemReceiver
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemaItemReceiver : public SchemaItemConnection
+	class SchemaItemReceiver : public SchemaItemConnection
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
 		friend ::Factory<SchemaItem>::DerivedType<SchemaItemReceiver>;
-#endif
 
 	public:
 		SchemaItemReceiver();

@@ -47,7 +47,7 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class VFRAME30LIBSHARED_EXPORT SchemaItemPath : public PosConnectionImpl
+	class SchemaItemPath : public PosConnectionImpl
 	{
 		Q_OBJECT
 

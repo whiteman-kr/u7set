@@ -219,7 +219,7 @@ namespace VFrame30
 	};
 
 
-	class VFRAME30LIBSHARED_EXPORT ClientSchemaView : public VFrame30::SchemaView
+	class ClientSchemaView : public VFrame30::SchemaView
 	{
 		Q_OBJECT
 

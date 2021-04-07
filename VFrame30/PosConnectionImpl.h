@@ -20,7 +20,7 @@ namespace VFrame30
 		virtual void DeleteLastPoint() = 0;
 	};
 
-	class VFRAME30LIBSHARED_EXPORT PosConnectionImpl : public SchemaItem, public IPosConnection
+	class PosConnectionImpl : public SchemaItem, public IPosConnection
 	{
 		Q_OBJECT
 

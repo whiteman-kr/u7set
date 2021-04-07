@@ -5,7 +5,7 @@
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT WiringSchema : public Schema
+	class WiringSchema : public Schema
 	{
 		Q_OBJECT
 

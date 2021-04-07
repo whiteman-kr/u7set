@@ -9,7 +9,7 @@ namespace VFrame30
 	//
 	// SchemaItemAfb
 	//
-	class VFRAME30LIBSHARED_EXPORT SchemaItemAfb : public FblItemRect
+	class SchemaItemAfb : public FblItemRect
 	{
 		Q_OBJECT
 

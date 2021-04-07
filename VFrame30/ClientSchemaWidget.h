@@ -1,7 +1,6 @@
 #ifndef CLIENTSCHEMAWIDGET_H
 #define CLIENTSCHEMAWIDGET_H
 
-#include "VFrame30Lib_global.h"
 #include "BaseSchemaWidget.h"
 #include "ClientSchemaView.h"
 #include "Schema.h"
@@ -30,7 +29,7 @@ namespace VFrame30
 	};
 
 
-	class VFRAME30LIBSHARED_EXPORT ClientSchemaWidget : public BaseSchemaWidget
+	class ClientSchemaWidget : public BaseSchemaWidget
 	{
 		Q_OBJECT
 

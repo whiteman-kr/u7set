@@ -12,11 +12,10 @@ CONFIG += staticlib
 
 CONFIG += warn_off
 
-# c++17 support -- for better compillation time, some cpps are included to this library,
-# and class PropertyObject is ussing std::clamp what is part cpp17
+# std::clamp what is part cpp17
 #
-unix:QMAKE_CXXFLAGS += --std=c++17
-win32:QMAKE_CXXFLAGS += /std:c++17
+unix:QMAKE_CXXFLAGS += --std=c++20
+win32:QMAKE_CXXFLAGS += /std:c++latest
 
 # DESTDIR
 #
@@ -29,8 +28,6 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
-INCLUDEPATH += ../protobuf
-
 gcc {
     INCLUDEPATH += /usr/include		# pthread.h is here
 	LIBS += -lpthread
@@ -39,6 +36,7 @@ gcc {
 
 SOURCES += \
     ../Proto/network.pb.cc \
+	../Proto/trends.pb.cc \
 	../Proto/serialization.pb.cc \
 	../Proto/ProtoSerialization.cpp \
 	google/protobuf/api.pb.cc \
@@ -99,6 +97,7 @@ SOURCES += \
 
 HEADERS += \
     ../Proto/network.pb.h \
+	../Proto/trends.pb.cc \
 	../Proto/serialization.pb.h \
 	../Proto/ProtoSerialization.h \
 	google/protobuf/api.pb.h \

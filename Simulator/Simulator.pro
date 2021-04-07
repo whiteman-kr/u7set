@@ -1,9 +1,3 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2017-11-10T10:13:51
-#
-#-------------------------------------------------
-
 QT       -= gui
 QT		 += xml qml core concurrent network
 
@@ -74,7 +68,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ../Proto/serialization.pb.cc \
     ../lib/Address16.cpp \
     ../lib/AppSignalStateFlags.cpp \
     ../lib/ConnectionsInfo.cpp \
@@ -83,7 +76,7 @@ SOURCES += \
 	../lib/LanControllerInfoHelper.cpp \
     ../lib/LmDescription.cpp \
     ../lib/DeviceObject.cpp \
-    ../lib/DbStruct.cpp \
+	../lib/DbStruct.cpp \
 	../lib/LogicModulesInfo.cpp \
     ../lib/ScriptDeviceObject.cpp \
 	../lib/SimpleMutex.cpp \
@@ -93,6 +86,16 @@ SOURCES += \
     ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
 	../lib/WUtils.cpp \
+	../lib/Crc.cpp \
+	../lib/AppSignalManager.cpp \
+	../lib/Signal.cpp \
+	../lib/AppSignal.cpp \
+	../lib/Tuning/TuningSignalManager.cpp \
+	../lib/Tuning/TuningSignalState.cpp \
+	../lib/TuningValue.cpp \
+	../lib/XmlHelper.cpp \
+	../lib/HostAddressPort.cpp \
+	../lib/SignalProperties.cpp	\
     SimAppDataLanInterface.cpp \
     SimAppDataTransmitter.cpp \
     SimCommandProcessor_LM5_LM6.cpp \
@@ -114,7 +117,6 @@ SOURCES += \
     SimTuningRecord.cpp \
     SimTuningServiceCommunicator.cpp \
     Simulator.cpp \
-    ../lib/Crc.cpp \
     SimRam.cpp \
     SimEeprom.cpp \
     SimSubsystem.cpp \
@@ -123,20 +125,11 @@ SOURCES += \
     SimTimeController.cpp \
     SimAppSignalManager.cpp \
     SimTuningSignalManager.cpp \
-    ../lib/AppSignalManager.cpp \
-    ../lib/Signal.cpp \
-    ../lib/AppSignal.cpp \
-    ../lib/Tuning/TuningSignalManager.cpp \
-    ../lib/Tuning/TuningSignalState.cpp \
-    ../lib/TuningValue.cpp \
-    ../lib/XmlHelper.cpp \
-    ../lib/HostAddressPort.cpp \
     SimAfb.cpp \
     SimLogicModule.cpp \
     SimCommandProcessor.cpp \
     SimException.cpp \
-    SimOverrideSignals.cpp \
-	../lib/SignalProperties.cpp
+	SimOverrideSignals.cpp
 
 HEADERS += \
     ../Proto/serialization.pb.h \
@@ -212,16 +205,8 @@ HEADERS += \
 
 # Protobuf
 #
-LIBS += -L$$DESTDIR -lprotobuf
 INCLUDEPATH += ./../Protobuf
 
 DISTFILES += \
     SimProjectTests.js
 
-
-# Visual Leak Detector
-#
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-}

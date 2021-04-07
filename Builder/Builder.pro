@@ -78,6 +78,7 @@ SOURCES += \
     ../lib/ScriptDeviceObject.cpp \
     ../lib/Signal.cpp \
     ../lib/SignalSetProvider.cpp \
+    ../lib/SimpleMutex.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/Subsystem.cpp \
     ../lib/Types.cpp \
@@ -169,6 +170,7 @@ HEADERS += \
     ../lib/ScriptDeviceObject.h \
     ../lib/Signal.h \
     ../lib/SignalSetProvider.h \
+    ../lib/SimpleMutex.h \
     ../lib/SoftwareSettings.h \
     ../lib/Subsystem.h \
     ../lib/Types.h \
@@ -188,7 +190,6 @@ HEADERS += \
     ../lib/LmDescription.h \
     ../lib/SocketIO.h \
     ../lib/Tuning/TuningSignalManager.h \
-    ../VFrame30/VFrame30Lib_global.h \
     ../lib/ConnectionsInfo.h \
 	Builder.h \
     Loopbacks.h \
@@ -245,7 +246,6 @@ unix {
 
 # protobuf
 #
-LIBS += -L$$DESTDIR -lprotobuf
 INCLUDEPATH += ./../Protobuf
 
 
@@ -255,9 +255,3 @@ DISTFILES += \
     ../Test/CompilerTests/CompilerTests.js
 
 
-# Visual Leak Detector
-#
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-}

@@ -5,13 +5,11 @@
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT SchemaItemConst : public FblItemRect
+	class SchemaItemConst : public FblItemRect
 	{
 		Q_OBJECT
 
-#ifdef VFRAME30LIB_LIBRARY
 		friend ::Factory<SchemaItem>::DerivedType<SchemaItemConst>;
-#endif
 
 		// Declarations
 		//

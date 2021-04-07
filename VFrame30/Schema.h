@@ -1,6 +1,5 @@
 #pragma once
 
-#include "VFrame30Lib_global.h"
 #include "SchemaLayer.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/TypesAndEnums.h"
@@ -15,6 +14,8 @@ namespace Afb
 
 namespace VFrame30
 {
+	extern ::Factory<VFrame30::Schema> SchemaFactory;
+
 	class SchemaLayer;
 	class CDrawParam;
 	class VideoFrameWidgetAgent;
@@ -71,7 +72,7 @@ namespace VFrame30
 	};
 
 
-	class VFRAME30LIBSHARED_EXPORT Schema :
+	class Schema :
 		public PropertyObject,
 		public Proto::ObjectSerialization<Schema>,
 		public DebugInstCounter<Schema>
@@ -251,7 +252,7 @@ namespace VFrame30
 	//		ItemGuids: ["guid1", "guid2", "guid3", ...]
 	//
 
-	class VFRAME30LIBSHARED_EXPORT SchemaDetails
+	class SchemaDetails
 	{
 	public:
 		SchemaDetails() noexcept;
@@ -296,7 +297,7 @@ namespace VFrame30
 		std::set<QUuid> m_guids;
 	};
 
-	class VFRAME30LIBSHARED_EXPORT SchemaDetailsSet : public Proto::ObjectSerialization<SchemaDetailsSet>
+	class SchemaDetailsSet : public Proto::ObjectSerialization<SchemaDetailsSet>
 	{
 	public:
 		SchemaDetailsSet();
@@ -342,11 +343,6 @@ namespace VFrame30
 	private:
 		std::map<QString, std::shared_ptr<SchemaDetails>> m_details;	// Key is schemaId
 	};
-
-
-#ifdef VFRAME30LIB_LIBRARY
-	extern Factory<VFrame30::Schema> SchemaFactory;
-#endif
 }
 
 

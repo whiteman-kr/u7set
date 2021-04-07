@@ -1,5 +1,4 @@
 #pragma once
-#include "VFrame30Lib_global.h"
 #include <QPointF>
 #include "../Proto/ProtoSerialization.h"
 
@@ -10,7 +9,7 @@ namespace Proto
 
 namespace VFrame30
 {
-	struct VFRAME30LIBSHARED_EXPORT SchemaPoint
+	struct SchemaPoint
 	{
 		double X;
 		double Y;

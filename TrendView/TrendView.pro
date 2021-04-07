@@ -33,7 +33,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ../Proto/trends.pb.cc \
     TrendScale.cpp \
     Forms/DialogChooseTrendSignals.cpp \
     TrendWidget.cpp \
@@ -85,15 +84,8 @@ FORMS += \
 
 # Protobuf
 #
-LIBS += -L$$DESTDIR -lprotobuf
 INCLUDEPATH += ./../Protobuf
 
 DISTFILES += \
     ../Proto/trends.proto
 
-# Visual Leak Detector
-#
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-}

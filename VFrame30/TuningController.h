@@ -2,7 +2,6 @@
 
 #include "../lib/Tuning/ITuningSignalManager.h"
 #include "../lib/Tuning/ITuningTcpClient.h"
-#include "VFrame30Lib_global.h"
 
 class AppSignalParam;
 class TuningSignalState;
@@ -71,7 +70,7 @@ namespace VFrame30
 		}
 		\endcode
 	*/
-	class VFRAME30LIBSHARED_EXPORT TuningController : public QObject
+	class TuningController : public QObject
 	{
 		Q_OBJECT
 

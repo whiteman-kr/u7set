@@ -5,7 +5,7 @@
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT Session : public PropertyObject
+	class Session : public PropertyObject
 	{
 		Q_OBJECT
 

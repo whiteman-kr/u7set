@@ -1,12 +1,11 @@
 #pragma once
 
-#include "VFrame30Lib_global.h"
 #include "Schema.h"
 
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT UfbSchema : public Schema
+	class UfbSchema : public Schema
 	{
 		Q_OBJECT
 

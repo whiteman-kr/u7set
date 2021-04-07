@@ -1,7 +1,6 @@
 #pragma once
 #include "SchemaItem.h"
 #include "../lib/Types.h"
-#include "VFrame30Lib_global.h"
 
 class QPainter;
 
@@ -29,7 +28,7 @@ namespace VFrame30
 
 	// CFblConnectionPoint
 	//
-	class VFRAME30LIBSHARED_EXPORT AfbPin
+	class AfbPin
 	{
 	public:
 		AfbPin();
@@ -111,7 +110,7 @@ namespace VFrame30
 
 	// CFblItem
 	//
-	class VFRAME30LIBSHARED_EXPORT FblItem
+	class FblItem
 	{
 	protected:
 		FblItem(void);

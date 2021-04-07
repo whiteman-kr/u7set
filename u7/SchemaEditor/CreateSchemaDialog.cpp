@@ -264,9 +264,6 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		for (size_t i = 0; i < m_templates.size(); i++)
 		{
 			std::shared_ptr<DbFile> f = m_templates[i];
-
-			qDebug() << f->fileName();
-
 			std::shared_ptr<VFrame30::Schema> schemaTemplate =  VFrame30::Schema::Create(f->data());
 
 			// Check if type the sane

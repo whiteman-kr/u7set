@@ -4,7 +4,7 @@ namespace VFrame30
 {
 	class Schema;
 
-	class VFRAME30LIBSHARED_EXPORT CPrint
+	class CPrint
 	{
 		std::list<std::pair<std::shared_ptr<Schema>, bool>> FrameList;
 
