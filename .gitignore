@@ -10,6 +10,7 @@ GetGitProjectVersion
 .~lock.*#
 .svn
 .vscode
+.vs
 Scripts/out
 Test/build-*/**
 Test/bin/**
