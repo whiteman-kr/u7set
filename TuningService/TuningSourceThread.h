@@ -4,7 +4,7 @@
 
 #include "../lib/SimpleThread.h"
 #include "../lib/SoftwareSettings.h"
-#include "../lib/CircularLogger.h"
+#include "../OnlineLib/CircularLogger.h"
 
 #include "TuningSource.h"
 #include "TuningMemory.h"

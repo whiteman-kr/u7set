@@ -2,7 +2,7 @@
 
 #include <QDateTime>
 
-#include "../lib/CircularLogger.h"
+#include "../OnlineLib/CircularLogger.h"
 #include "../lib/Types.h"
 
 // ------------------------------------------------------------------------------------

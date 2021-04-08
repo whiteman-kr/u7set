@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/CfgServerLoader.h"
+#include "../OnlineLib/CfgServerLoader.h"
 
 // ------------------------------------------------------------------------------------
 //

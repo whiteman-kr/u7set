@@ -1,8 +1,8 @@
 #include "ServiceTableModel.h"
 #include <QBrush>
 #include <QDebug>
-#include "../lib/UdpSocket.h"
-#include "../lib/SocketIO.h"
+#include "../OnlineLib/UdpSocket.h"
+#include "../OnlineLib/SocketIO.h"
 #include <QSettings>
 #include <QWidget>
 #include <QApplication>

@@ -27,70 +27,67 @@ unix {
         CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
-SOURCES += main.cpp\
+SOURCES += \
     ../lib/Address16.cpp \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/ScriptDeviceObject.cpp \
-        SourceListWidget.cpp \
-    PacketSourceModel.cpp \
-    SourceStatusWidget.cpp \
     ../lib/DataSource.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/Signal.cpp \
-    ../lib/SocketIO.cpp \
     ../lib/DbStruct.cpp \
-    PacketBufferTableModel.cpp \
-    SignalTableModel.cpp \
     ../lib/Types.cpp \
     ../lib/XmlHelper.cpp \
-    SendTuningFrameWidget.cpp \
     ../lib/Queue.cpp \
-    ../lib/DataProtocols.cpp \
     ../lib/WUtils.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/TuningValue.cpp \
-    ../Builder/IssueLogger.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/OutputLog.cpp \
-    ../Builder/ModulesRawData.cpp \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
-    ../lib/SimpleMutex.cpp
+	../lib/SimpleMutex.cpp \
+	../Builder/IssueLogger.cpp \
+	main.cpp \
+	SourceListWidget.cpp \
+	PacketSourceModel.cpp \
+	SourceStatusWidget.cpp \
+	PacketBufferTableModel.cpp \
+	SignalTableModel.cpp \
+	SendTuningFrameWidget.cpp \
 
-HEADERS  += SourceListWidget.h \
-    ../Proto/serialization.pb.h \
+
+HEADERS  += \
+	Stable.h \
+	../Proto/serialization.pb.h \
     ../lib/Address16.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
     ../lib/ScriptDeviceObject.h \
-    PacketSourceModel.h \
-    SourceStatusWidget.h \
     ../lib/DataSource.h \
     ../lib/DeviceObject.h \
     ../lib/Signal.h \
-    Stable.h \
-    ../lib/SocketIO.h \
     ../lib/DbStruct.h \
-    PacketBufferTableModel.h \
     ../lib/PropertyObject.h \
-    SignalTableModel.h \
     ../lib/Types.h \
-    ../lib/DataProtocols.h \
     ../lib/XmlHelper.h \
-    SendTuningFrameWidget.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
     ../lib/Crc.h \
     ../lib/HostAddressPort.h \
     ../lib/TuningValue.h \
-    ../Builder/IssueLogger.h \
     ../lib/DeviceHelper.h \
     ../lib/OutputLog.h \
-    ../Builder/ModulesRawData.h \
     ../lib/Times.h \
     ../lib/SignalProperties.h \
-    ../lib/SimpleMutex.h
+	../lib/SimpleMutex.h \
+	../Builder/IssueLogger.h \
+	SourceListWidget.h \
+	PacketSourceModel.h \
+	SourceStatusWidget.h \
+	PacketBufferTableModel.h \
+	SignalTableModel.h \
+	SendTuningFrameWidget.h \
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
@@ -106,3 +103,15 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
+
+# OnlineLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
+}
+

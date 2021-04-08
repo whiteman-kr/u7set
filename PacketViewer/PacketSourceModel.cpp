@@ -2,7 +2,7 @@
 #include <cassert>
 #include <QWidget>
 #include <QUdpSocket>
-#include "../lib/SocketIO.h"
+#include "../OnlineLib/SocketIO.h"
 #include "PacketBufferTableModel.h"
 #include <QHBoxLayout>
 #include <QTableView>
@@ -11,7 +11,7 @@
 #include "SourceStatusWidget.h"
 #include <QDirIterator>
 #include <QMessageBox>
-#include "../lib/DataProtocols.h"
+#include "../OnlineLib/DataProtocols.h"
 #include "../lib/DataSource.h"
 #include <QTimer>
 

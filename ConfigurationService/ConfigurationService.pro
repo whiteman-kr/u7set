@@ -37,58 +37,42 @@ include(../warnings.pri)
 
 SOURCES += \
     ../lib/Address16.cpp \
-    ../lib/CfgServerLoader.cpp \
     ../lib/ScriptDeviceObject.cpp \
-    ../lib/Tcp.cpp \
-    ../lib/TcpFileTransfer.cpp \
     ../lib/SimpleThread.cpp \
     ../lib/BuildInfo.cpp \
-    ../lib/SocketIO.cpp \
-    ConfigurationService.cpp \
-	../lib/Service.cpp \
-    ../lib/UdpSocket.cpp \
-    ../lib/CircularLogger.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/CommandLineParser.cpp \
-    CfgServiceMain.cpp \
     ../lib/XmlHelper.cpp \
-    CfgChecker.cpp \
-    CfgControlServer.cpp \
     ../lib/SoftwareInfo.cpp \
 	../lib/SoftwareSettings.cpp \
 	../lib/DeviceObject.cpp \
-	../lib/DbStruct.cpp
+	../lib/Crc.cpp \
+	../lib/DbStruct.cpp \
+	ConfigurationService.cpp \
+	CfgServiceMain.cpp \
+	CfgChecker.cpp \
+	CfgControlServer.cpp \
 
 HEADERS += \
-    ../lib/Address16.h \
-    ../lib/CfgServerLoader.h \
+	Stable.h \
+	../lib/Address16.h \
     ../lib/ScriptDeviceObject.h \
-    ../lib/Tcp.h \
-    ../lib/TcpFileTransfer.h \
     ../lib/SimpleThread.h \
     ../lib/BuildInfo.h \
-    ../lib/SocketIO.h \
-    ConfigurationService.h \
-	../lib/Service.h \
-    ../lib/UdpSocket.h \
-    ../lib/CircularLogger.h \
     ../lib/HostAddressPort.h \
-    ../lib/CommandLineParser.h \
     ../lib/XmlHelper.h \
-    CfgChecker.h \
-    CfgControlServer.h \
     ../lib/Types.h \
     ../lib/SoftwareInfo.h \
 	../lib/SoftwareSettings.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
+	../lib/Crc.h \
     ../lib/PropertyObject.h \
-	Stable.h
+	ConfigurationService.h \
+	CfgChecker.h \
+	CfgControlServer.h \
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
-
-include(../qtservice/src/qtservice.pri)
 
 # Protobuf
 #
@@ -104,5 +88,27 @@ DISTFILES += \
 win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}
+
+# OnlineLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
+}
+
+# ServiceLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
 }
 

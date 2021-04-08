@@ -7,13 +7,14 @@ SUBDIRS += Protobuf \
 	QScintilla \
 	TrendView \
 	VFrame30 \
+	OnlineLib \
+	ServiceLib \
 	Simulator \
 	SimulatorConsole \
 	Builder \
 	BuilderConsole \
 	u7 \
 	Metrology \
-	qtservice \
 	BaseService \
 	ServiceControlManager \
 	ConfigurationService \
@@ -25,9 +26,14 @@ SUBDIRS += Protobuf \
 	DiagDataService \
 	TuningClient \
 	mconf \
-	./Tools/CommView \
 	./Tools/PacketSource \
 	./Test/UalTester \
 	./Test/SimulatorTests \
 	./Test/u7databaseTests
 
+AppDataService.depends = OnlineLib ServiceLib
+DiagDataService.depends = OnlineLib ServiceLib
+ArchivingService.depends = OnlineLib ServiceLib
+ConfigurationService.depends = OnlineLib ServiceLib
+BaseService.depends = OnlineLib ServiceLib
+TuningService.depends = OnlineLib ServiceLib

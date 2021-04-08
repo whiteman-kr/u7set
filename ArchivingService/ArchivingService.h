@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../lib/Service.h"
-#include "../lib/CfgServerLoader.h"
+#include "../ServiceLib/Service.h"
+#include "../OnlineLib/CfgServerLoader.h"
 #include "../lib/SoftwareSettings.h"
 #include "../lib/Queue.h"
 

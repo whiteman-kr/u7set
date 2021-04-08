@@ -1,10 +1,14 @@
+#ifndef __ONLINE_LIB__
+#error Don't include this file in the project! Link OnlineLib instead.
+#endif
+
 #include <QDir>
 #include <QStandardPaths>
 #include <QDateTime>
 #include <QCoreApplication>
 
 #include "../lib/WUtils.h"
-#include "../lib/CircularLogger.h"
+#include "CircularLogger.h"
 
 // ----------------------------------------------------------------------------------
 //

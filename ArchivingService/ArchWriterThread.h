@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../lib/AppSignal.h"
-#include "../lib/CircularLogger.h"
+#include "../OnlineLib/CircularLogger.h"
 #include "../lib/WUtils.h"
 #include "Archive.h"
 

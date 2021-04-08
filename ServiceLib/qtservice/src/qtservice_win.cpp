@@ -53,7 +53,7 @@
 #include <QWaitCondition>
 #include <QAbstractEventDispatcher>
 
-#include "../../lib/Service.h"
+#include "../../Service.h"
 
 #ifdef _MSC_VER
 	#pragma warning(push)

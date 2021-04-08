@@ -5,7 +5,6 @@
 
 #include "../lib/Types.h"
 #include "../lib/Signal.h"
-#include "../lib/DataProtocols.h"
 
 #include "../Builder/IssueLogger.h"
 

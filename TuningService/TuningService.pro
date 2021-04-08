@@ -32,16 +32,9 @@ unix {
 SOURCES += \
     ../lib/Address16.cpp \
     ../lib/BuildInfo.cpp \
-    ../lib/CfgServerLoader.cpp \
-    ../lib/CircularLogger.cpp \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/ScriptDeviceObject.cpp \
-    ../lib/Service.cpp \
-    ../lib/SocketIO.cpp \
-    ../lib/UdpSocket.cpp \
     ../lib/SimpleThread.cpp \
-    ../lib/TcpFileTransfer.cpp \
-    ../lib/Tcp.cpp \
     TuningService.cpp \
     ../lib/DataSource.cpp \
     ../lib/XmlHelper.cpp \
@@ -55,7 +48,6 @@ SOURCES += \
     ../lib/Signal.cpp \
     ../lib/Crc.cpp \
     ../lib/WUtils.cpp \
-    ../lib/DataProtocols.cpp \
     ../Builder/IssueLogger.cpp \
     ../lib/HostAddressPort.cpp \
     TcpTuningServer.cpp \
@@ -64,7 +56,6 @@ SOURCES += \
     ../Builder/ModulesRawData.cpp \
     TuningMemory.cpp \
     TuningClientContext.cpp \
-    ../lib/CommandLineParser.cpp \
     TuningServiceMain.cpp \
     ../lib/AppSignal.cpp \
     ../lib/SoftwareInfo.cpp \
@@ -78,19 +69,12 @@ SOURCES += \
 HEADERS += \
     ../lib/Address16.h \
     ../lib/BuildInfo.h \
-    ../lib/CfgServerLoader.h \
-    ../lib/CircularLogger.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
     ../lib/OrderedHash.h \
     ../lib/ScriptDeviceObject.h \
-    ../lib/Service.h \
-    ../lib/SocketIO.h \
-    ../lib/UdpSocket.h \
     ../lib/SimpleThread.h \
     ../lib/WUtils.h \
-    ../lib/TcpFileTransfer.h \
-    ../lib/Tcp.h \
     Stable.h \
     TuningService.h \
     ../lib/DataSource.h \
@@ -112,10 +96,8 @@ HEADERS += \
     TcpTuningClient.h \
     TuningSource.h \
     ../Builder/ModulesRawData.h \
-    ../lib/DataProtocols.h \
     TuningMemory.h \
     TuningClientContext.h \
-    ../lib/CommandLineParser.h \
     ../lib/AppSignal.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
@@ -124,8 +106,6 @@ HEADERS += \
     TuningSourceThread.h \
     TuningDataStorage.h \
     ../lib/SimpleMutex.h
-
-include(../qtservice/src/qtservice.pri)
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
@@ -143,3 +123,26 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
+
+# OnlineLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
+}
+
+# ServiceLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
+}
+

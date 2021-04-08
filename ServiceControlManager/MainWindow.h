@@ -1,10 +1,9 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <QSystemTrayIcon>
 
-#include "../lib/Tcp.h"
+#include "../OnlineLib/Tcp.h"
 
 class ServiceTableModel;
 class QTableView;
@@ -37,4 +36,3 @@ public slots:
     void removeHost();
 };
 
-#endif // MAINWINDOW_H

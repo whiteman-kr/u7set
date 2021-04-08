@@ -1,3 +1,7 @@
+#ifndef __ONLINE_LIB__
+#error Don't include this file in the project! Link OnlineLib instead.
+#endif
+
 #include "SimpleAppSignalState.h"
 #include "../Proto/serialization.pb.h"
 

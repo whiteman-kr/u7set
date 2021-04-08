@@ -3,7 +3,7 @@
 #include <QtCore>
 #include <QList>
 #include "../lib/Signal.h"
-#include "../lib/DataProtocols.h"
+#include "../OlineLib/DataProtocols.h"
 #include "../Builder/IssueLogger.h"
 #include "../TuningService/TuningDataStorage.h"
 #include "TuningIPENSocket.h"

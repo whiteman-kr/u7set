@@ -1,4 +1,8 @@
-#include "CircularLogger.h"
+#ifndef __SERVICE_LIB__
+#error Don't include this file in the project! Link ServiceLib instead.
+#endif
+
+#include "../OnlineLib/CircularLogger.h"
 #include "CommandLineParser.h"
 
 
@@ -10,7 +14,6 @@ CommandLineParser::CommandLineParser(int argc, char** argv)
 {
 	setCmdLineArgs(argc, argv);
 }
-
 
 void CommandLineParser::setCmdLineArgs(int argc, char** argv)
 {

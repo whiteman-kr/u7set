@@ -59,7 +59,7 @@
 
 // WhiteMan 04.01.2017
 //
-#include "../../lib/CircularLogger.h"
+#include "../../../OnlineLib/CircularLogger.h"
 //
 
 #if defined(QTSERVICE_DEBUG)

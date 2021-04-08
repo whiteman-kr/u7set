@@ -8,7 +8,7 @@
 #include <QFont>
 #include <QColor>
 
-#include "../lib/SocketIO.h"
+#include "../OnlineLib/SocketIO.h"
 #include "../lib/SoftwareSettings.h"
 #include "../lib/MetrologySignal.h"
 

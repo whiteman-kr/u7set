@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../lib/CfgServerLoader.h"
-#include "../lib/SocketIO.h"
+#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/SocketIO.h"
 #include "../lib/ComparatorSet.h"
 #include "../lib/ClientBehavior.h"
 #include "../VFrame30/Schema.h"

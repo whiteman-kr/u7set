@@ -40,82 +40,63 @@ SOURCES += \
     ../lib/Address16.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/ScriptDeviceObject.cpp \
-    ArchivingService.cpp \
     ../lib/Queue.cpp \
-    ../lib/Service.cpp \
 	../lib/SoftwareSettings.cpp \
     ../lib/SimpleThread.cpp \
-    ../lib/SocketIO.cpp \
-    ../lib/Tcp.cpp \
     ../lib/XmlHelper.cpp \
-    ../lib/CfgServerLoader.cpp \
-    ../lib/UdpSocket.cpp \
     ../lib/BuildInfo.cpp \
-    ../lib/CircularLogger.cpp \
-    ../lib/TcpFileTransfer.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
     ../lib/Types.cpp \
-    ../lib/CommandLineParser.cpp \
-    ArchServiceMain.cpp \
-    TcpAppDataServer.cpp \
     ../lib/AppSignal.cpp \
-    TcpArchRequestsServer.cpp \
-    Archive.cpp \
-    TimeFilter.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Signal.cpp \
     ../lib/SignalProperties.cpp \
-    ../lib/Crc16.cpp \
-    FileArchReader.cpp \
-    ArchFile.cpp \
-    ArchWriterThread.cpp \
-    ArchRequest.cpp \
-    ArchMaintenance.cpp \
-    ArchFileRecord.cpp \
+	../lib/Crc.cpp \
     ../lib/AppSignalStateFlags.cpp \
-    ArchFileBuffer.cpp \
     ../lib/SimpleMutex.cpp \
-    ../lib/SimpleAppSignalState.cpp
+	ArchivingService.cpp \
+	ArchServiceMain.cpp \
+	TcpAppDataServer.cpp \
+	TcpArchRequestsServer.cpp \
+	Archive.cpp \
+	TimeFilter.cpp \
+	FileArchReader.cpp \
+	ArchFile.cpp \
+	ArchWriterThread.cpp \
+	ArchRequest.cpp \
+	ArchMaintenance.cpp \
+	ArchFileRecord.cpp \
+	ArchFileBuffer.cpp \
 
 HEADERS += \
-    ../lib/Address16.h \
+	Stable.h \
+	../lib/Address16.h \
     ../lib/HostAddressPort.h \
     ../lib/ScriptDeviceObject.h \
-    ArchivingService.h \
-    Stable.h \
     ../lib/Queue.h \
-    ../lib/Service.h \
 	../lib/SoftwareSettings.h \
     ../lib/Address16.h \
     ../lib/OrderedHash.h \
     ../lib/SimpleThread.h \
-    ../lib/SocketIO.h \
-    ../lib/Tcp.h \
     ../lib/XmlHelper.h \
-    ../lib/CfgServerLoader.h \
-    ../lib/UdpSocket.h \
     ../lib/BuildInfo.h \
-    ../lib/CircularLogger.h \
-    ../lib/TcpFileTransfer.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
-    ../lib/CommandLineParser.h \
-    TcpAppDataServer.h \
     ../lib/AppSignal.h \
-    TcpArchRequestsServer.h \
-    Archive.h \
     ../lib/TimeStamp.h \
-    TimeFilter.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     ../lib/Signal.h \
     ../lib/Signal.h \
     ../lib/SignalProperties.h \
-    ../lib/Crc16.h \
+	../lib/Crc.h \
+	../lib/AppSignalStateFlags.h \
+	../lib/SimpleMutex.h \
+	../lib/WUtils.h \
     FileArchReader.h \
     ArchFile.h \
     BinSearch.h \
@@ -123,13 +104,12 @@ HEADERS += \
     ArchRequest.h \
     ArchMaintenance.h \
     ArchFileRecord.h \
-    ../lib/AppSignalStateFlags.h \
     ArchFileBuffer.h \
-    ../lib/SimpleMutex.h \
-    ../lib/WUtils.h \
-    ../lib/SimpleAppSignalState.h
-
-include(../qtservice/src/qtservice.pri)
+	ArchivingService.h \
+	TcpAppDataServer.h \
+	TcpArchRequestsServer.h \
+	Archive.h \
+	TimeFilter.h \
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
@@ -156,3 +136,27 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
+
+# OnlineLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
+}
+
+# ServiceLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
+}
+
+

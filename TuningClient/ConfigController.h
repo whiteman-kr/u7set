@@ -1,12 +1,11 @@
-#ifndef CONFIGCONTROLLER_H
-#define CONFIGCONTROLLER_H
+#pragma once
 
 #include <vector>
 #include <set>
 #include <QThread>
 #include <QSharedMemory>
-#include "../lib/CfgServerLoader.h"
-#include "../lib/SocketIO.h"
+#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/SocketIO.h"
 #include "../VFrame30/Schema.h"
 
 #include "Settings.h"
@@ -87,5 +86,3 @@ private:
 	VFrame30::SchemaDetailsSet m_schemaDetailsSet;
 };
 
-
-#endif // CONFIGCONTROLLER_H

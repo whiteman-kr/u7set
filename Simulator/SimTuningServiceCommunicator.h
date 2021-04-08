@@ -3,7 +3,7 @@
 #include "../lib/SoftwareSettings.h"
 #include "../lib/TimeStamp.h"
 #include "../lib/SimpleThread.h"
-#include "../lib/DataProtocols.h"
+#include "../OnlineLib/DataProtocols.h"
 #include "../lib/LogicModulesInfo.h"
 #include "SimRam.h"
 #include "SimTuningRecord.h"

@@ -12,7 +12,7 @@
 #include "Times.h"
 #include "Types.h"
 #include "AppSignalStateFlags.h"
-#include "SimpleAppSignalState.h"
+#include "../OnlineLib/SimpleAppSignalState.h"
 #include "Signal.h"
 
 struct AppSignalParamMimeType

@@ -1,5 +1,9 @@
-#include "../lib/CfgServerLoader.h"
-#include "../lib/CircularLogger.h"
+#ifndef __ONLINE_LIB__
+#error Don't include this file in the project! Link OnlineLib instead.
+#endif
+
+#include "CfgServerLoader.h"
+#include "CircularLogger.h"
 #include "../lib/ConstStrings.h"
 
 #include <QXmlStreamReader>

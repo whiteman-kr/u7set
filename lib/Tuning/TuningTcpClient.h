@@ -5,7 +5,7 @@
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/ITuningTcpClient.h"
 #include "../lib/Tuning/TuningSourceState.h"
-#include "../lib/Tcp.h"
+#include "../OnlineLib/Tcp.h"
 #include "../lib/Hash.h"
 #include "../Proto/network.pb.h"
 

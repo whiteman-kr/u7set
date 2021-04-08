@@ -1,6 +1,6 @@
 #include "../lib/WUtils.h"
 #include "../lib/Crc.h"
-#include "../lib/CircularLogger.h"
+#include "../OnlineLib/CircularLogger.h"
 
 #include "TuningSourceThread.h"
 

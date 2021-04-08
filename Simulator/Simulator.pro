@@ -71,7 +71,6 @@ SOURCES += \
     ../lib/Address16.cpp \
     ../lib/AppSignalStateFlags.cpp \
     ../lib/ConnectionsInfo.cpp \
-	../lib/DataProtocols.cpp \
     ../lib/DomXmlHelper.cpp \
 	../lib/LanControllerInfoHelper.cpp \
     ../lib/LmDescription.cpp \
@@ -136,7 +135,6 @@ HEADERS += \
     ../lib/Address16.h \
     ../lib/AppSignalStateFlags.h \
     ../lib/ConnectionsInfo.h \
-	../lib/DataProtocols.h \
     ../lib/DomXmlHelper.h \
     ../lib/Hash.h \
     ../lib/ILogFile.h \
@@ -209,4 +207,3 @@ INCLUDEPATH += ./../Protobuf
 
 DISTFILES += \
     SimProjectTests.js
-

@@ -3,7 +3,7 @@
 
 #include <QMutex>
 
-#include "../../lib/DataProtocols.h"
+#include "../../OnlineLib/DataProtocols.h"
 
 // ==============================================================================================
 

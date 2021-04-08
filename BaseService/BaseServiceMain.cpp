@@ -1,6 +1,6 @@
-#include "../lib/Service.h"
 #include "../lib/WUtils.h"
-#include "../lib/CircularLogger.h"
+#include "../ServiceLib/Service.h"
+#include "../OnlineLib/CircularLogger.h"
 
 class BaseServiceWorker : public ServiceWorker
 {

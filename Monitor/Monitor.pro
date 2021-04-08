@@ -65,11 +65,7 @@ SOURCES += main.cpp \
     MonitorSignalInfo.cpp \
     MonitorSignalSnapshot.cpp \
 	Settings.cpp \
-    ../lib/SocketIO.cpp \
     DialogSettings.cpp \
-    ../lib/CfgServerLoader.cpp \
-    ../lib/TcpFileTransfer.cpp \
-    ../lib/Tcp.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SimpleThread.cpp \
     MonitorSchemaWidget.cpp \
@@ -87,7 +83,6 @@ SOURCES += main.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     DialogColumns.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/CircularLogger.cpp \
     MonitorView.cpp \
     Trend/MonitorTrends.cpp \
     MonitorArchive.cpp \
@@ -98,6 +93,7 @@ SOURCES += main.cpp \
     TcpSignalRecents.cpp \
     MonitorSchemaManager.cpp \
     SelectSchemaWidget.cpp \    
+	../lib/Crc.cpp \
     ../lib/Tuning/TuningSignalManager.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
@@ -140,11 +136,7 @@ HEADERS  += \
     MonitorSignalSnapshot.h \
 	Stable.h \
 	Settings.h \
-    ../lib/SocketIO.h \
     DialogSettings.h \
-    ../lib/Tcp.h \
-    ../lib/TcpFileTransfer.h \
-    ../lib/CfgServerLoader.h \
     ../lib/BuildInfo.h \
     ../lib/SimpleThread.h \
     MonitorSchemaWidget.h \
@@ -164,7 +156,6 @@ HEADERS  += \
     ../lib/Ui/DialogSignalSearch.h \
     DialogColumns.h \
     ../lib/HostAddressPort.h \
-    ../lib/CircularLogger.h \
     MonitorView.h \
     Trend/MonitorTrends.h \
     MonitorArchive.h \
@@ -175,6 +166,7 @@ HEADERS  += \
     TcpSignalRecents.h \
     SelectSchemaWidget.h \
     MonitorSchemaManager.h \
+	../lib/Crc.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/Tuning/TuningTcpClient.h \
     ../lib/SoftwareInfo.h \
@@ -285,3 +277,15 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
+
+# OnlineLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
+}
+

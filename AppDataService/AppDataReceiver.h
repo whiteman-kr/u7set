@@ -4,7 +4,7 @@
 
 #include "../lib/SimpleThread.h"
 #include "AppDataSource.h"
-#include "../lib/CircularLogger.h"
+#include "../OnlineLib/CircularLogger.h"
 
 //
 // AppDataReceiver is receives RUP datagrams and push it in AppDataSource's queues

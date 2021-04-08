@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../lib/Signal.h"
-#include "../lib/SimpleAppSignalState.h"
+#include "../OnlineLib/SimpleAppSignalState.h"
 
 namespace RtTrends
 {

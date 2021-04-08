@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "../../lib/CommandLineParser.h"
+#include "../../ServiceLib/CommandLineParser.h"
 #include "../../lib/HostAddressPort.h"
 
 #include "TestFile.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/Tcp.h"
+#include "../OnlineLib/Tcp.h"
 #include "../Proto/network.pb.h"
 #include "TuningSource.h"
 #include "TuningService.h"

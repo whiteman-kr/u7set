@@ -38,22 +38,13 @@ unix {
 }
 
 SOURCES += \
-    ../../lib/CfgServerLoader.cpp \
     ../../lib/LanControllerInfoHelper.cpp \
     ../../lib/SoftwareSettings.cpp \
-    ../../lib/TcpFileTransfer.cpp \
-    BuildOption.cpp \
-    ConfigSocket.cpp \
     ../../lib/ScriptDeviceObject.cpp \
-    main.cpp \
-    ../../Builder/IssueLogger.cpp \
-    ../../lib/CommandLineParser.cpp \
     ../../lib/XmlHelper.cpp \
-    ../../lib/SocketIO.cpp \
     ../../lib/HostAddressPort.cpp \
     ../../lib/SimpleThread.cpp \
     ../../lib/Crc.cpp \
-    ../../lib/DataProtocols.cpp \
     ../../lib/WUtils.cpp \
     ../../lib/Ui/DialogAbout.cpp \
     ../../lib/Signal.cpp \
@@ -71,9 +62,11 @@ SOURCES += \
     ../../lib/SimpleMutex.cpp \
     ../../lib/Times.cpp \
     ../../lib/SoftwareInfo.cpp \
-    ../../lib/CircularLogger.cpp \
-    ../../lib/Tcp.cpp \
     ../../lib/BuildInfo.cpp \
+	../../Builder/IssueLogger.cpp \
+	main.cpp \
+	BuildOption.cpp \
+	ConfigSocket.cpp \
     CmdLineParam.cpp \
     PacketSourceCore.cpp \
     MainWindow.cpp \
@@ -92,23 +85,15 @@ SOURCES += \
     UalTesterServer.cpp
 
 HEADERS += \
-    ../../lib/CfgServerLoader.h \
-    ../../lib/LanControllerInfo.h \
+	Stable.h \
+	../../lib/LanControllerInfo.h \
     ../../lib/LanControllerInfoHelper.h \
     ../../lib/SoftwareSettings.h \
-    ../../lib/TcpFileTransfer.h \
-    BuildOption.h \
-    ConfigSocket.h \
     ../../lib/ScriptDeviceObject.h \
-    Stable.h \
-    ../../Builder/IssueLogger.h \
-    ../../lib/CommandLineParser.h \
     ../../lib/XmlHelper.h \
-    ../../lib/SocketIO.h \
     ../../lib/HostAddressPort.h \
     ../../lib/SimpleThread.h \
     ../../lib/Crc.h \
-    ../../lib/DataProtocols.h \
     ../../lib/WUtils.h \
     ../../lib/Ui/DialogAbout.h \
     ../../lib/Signal.h \
@@ -131,9 +116,10 @@ HEADERS += \
     ../../lib/SimpleMutex.h \
     ../../lib/Times.h \
     ../../lib/SoftwareInfo.h \
-    ../../lib/CircularLogger.h \
-    ../../lib/Tcp.h \
     ../../lib/BuildInfo.h \
+	../../Builder/IssueLogger.h \
+	BuildOption.h \
+	ConfigSocket.h \
     CmdLineParam.h \
     PacketSourceCore.h \
     MainWindow.h \
@@ -150,7 +136,6 @@ HEADERS += \
     FrameBase.h \
     FrameDataPanel.h \
     UalTesterServer.h
-
 
 RESOURCES += \
     resources.qrc
@@ -173,3 +158,27 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
+
+# OnlineLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
+}
+
+# ServiceLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
+}
+
+

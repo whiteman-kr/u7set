@@ -7,8 +7,8 @@
 #include <QSettings>
 #include <google/protobuf/stubs/common.h>
 
-#include "../lib/SocketIO.h"
-#include "../lib/Tcp.h"
+#include "../OnlineLib/SocketIO.h"
+#include "../OnlineLib/Tcp.h"
 
 
 const char* const semaphoreString = "ServiceControlManagerSemaphore";

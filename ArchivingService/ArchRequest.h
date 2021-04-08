@@ -3,11 +3,11 @@
 #include <QSqlQuery>
 
 #include "../lib/SimpleThread.h"
-#include "../lib/CircularLogger.h"
+#include "../OnlineLib/CircularLogger.h"
 #include "../lib/TimeStamp.h"
 #include "../lib/Hash.h"
 #include "../lib/Queue.h"
-#include "../lib/SocketIO.h"
+#include "../OnlineLib/SocketIO.h"
 #include "../Proto/network.pb.h"
 #include "ArchFile.h"
 

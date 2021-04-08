@@ -1,4 +1,8 @@
-#include "../lib/Service.h"
+#ifndef __SERVICE_LIB__
+#error Don't include this file in the project! Link ServiceLib instead.
+#endif
+
+#include "Service.h"
 #include "../lib/WUtils.h"
 #include "../lib/ConstStrings.h"
 

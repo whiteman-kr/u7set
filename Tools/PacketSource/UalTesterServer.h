@@ -3,7 +3,7 @@
 #include "SourceBase.h"
 #include "SignalBase.h"
 
-#include "../../lib/Tcp.h"
+#include "../../OnlineLib//Tcp.h"
 
 // -------------------------------------------------------------------------------
 //

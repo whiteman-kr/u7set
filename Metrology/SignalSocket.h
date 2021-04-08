@@ -1,8 +1,8 @@
 #ifndef SIGNALSOCKET_H
 #define SIGNALSOCKET_H
 
-#include "../lib/Tcp.h"
-#include "../lib/SocketIO.h"
+#include "../OnlineLib/Tcp.h"
+#include "../OnlineLib/SocketIO.h"
 #include "../lib/Hash.h"
 #include "../lib/AppSignal.h"
 

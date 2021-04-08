@@ -95,7 +95,6 @@ SOURCES += \
     ../lib/AppSignal.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/LmDescription.cpp \
-    ../lib/SocketIO.cpp \
     ../lib/Tuning/TuningSignalManager.cpp \
     ../lib/ConnectionsInfo.cpp \
     Builder.cpp \
@@ -134,7 +133,6 @@ SOURCES += \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/Address16.cpp \
     ../lib/Times.cpp \
-    ../lib/DataProtocols.cpp \
 	../lib/DbProgressDialog.cpp \
     ../lib/MetrologySignal.cpp \
     RunOrder.cpp \
@@ -188,7 +186,6 @@ HEADERS += \
     ../lib/AppSignal.h \
     ../lib/BuildInfo.h \
     ../lib/LmDescription.h \
-    ../lib/SocketIO.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/ConnectionsInfo.h \
 	Builder.h \
@@ -227,7 +224,6 @@ HEADERS += \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Address16.h \
     ../lib/Times.h \
-    ../lib/DataProtocols.h \
     ../lib/DbProgressDialog.h \
     ../lib/MetrologySignal.h \
     RunOrder.h \

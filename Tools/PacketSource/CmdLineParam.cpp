@@ -4,7 +4,7 @@
 #include <QDir>
 #include <iostream>
 
-#include "../../lib/SocketIO.h"
+#include "../../OnlineLib/SocketIO.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 //

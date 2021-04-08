@@ -98,13 +98,9 @@ SOURCES +=\
     TuningWorkspace.cpp \
     ConfigController.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/CfgServerLoader.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SimpleThread.cpp \
-    ../lib/Tcp.cpp \
-    ../lib/TcpFileTransfer.cpp \
     ../lib/Crc.cpp \
-    ../lib/SocketIO.cpp \
     DialogSettings.cpp \
     ../lib/AppSignal.cpp \
     ../lib/PropertyEditor.cpp \
@@ -122,8 +118,7 @@ SOURCES +=\
     SchemasWorkspace.cpp \
     TuningSchemaView.cpp \
     TuningSchemaWidget.cpp \
-    ../lib/CircularLogger.cpp \
-    ../lib/Tuning/TuningSignalManager.cpp \
+	../lib/Tuning/TuningSignalManager.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/Types.cpp \
@@ -164,13 +159,9 @@ HEADERS  += MainWindow.h \
     TuningWorkspace.h \
     ConfigController.h \
     ../lib/HostAddressPort.h \
-    ../lib/CfgServerLoader.h \
     ../lib/BuildInfo.h \
     ../lib/SimpleThread.h \
-    ../lib/Tcp.h \
-    ../lib/TcpFileTransfer.h \
     ../lib/Crc.h \
-    ../lib/SocketIO.h \
     DialogSettings.h \
     ../lib/AppSignal.h \
     ../lib/PropertyEditor.h \
@@ -188,7 +179,6 @@ HEADERS  += MainWindow.h \
     TuningSchemaView.h \
     TuningSchemaWidget.h \
     SchemasWorkspace.h \
-    ../lib/CircularLogger.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/DeviceObject.h \
     ../lib/XmlHelper.h \
@@ -240,3 +230,15 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
+
+# OnlineLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
+}
+

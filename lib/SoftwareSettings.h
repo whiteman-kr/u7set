@@ -2,7 +2,7 @@
 
 #include "ConstStrings.h"
 #include "XmlHelper.h"
-#include "SocketIO.h"
+#include "../OnlineLib/SocketIO.h"
 #include "WUtils.h"
 #include "../Proto/network.pb.h"
 

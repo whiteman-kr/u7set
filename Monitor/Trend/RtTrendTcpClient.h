@@ -1,7 +1,7 @@
 #ifndef RTTRENDTCPCLIENT_H
 #define RTTRENDTCPCLIENT_H
 
-#include "../lib/Tcp.h"
+#include "../OnlineLib/Tcp.h"
 #include "../lib/Hash.h"
 #include "../lib/TimeStamp.h"
 #include "../Proto/network.pb.h"

@@ -1,5 +1,5 @@
 #include "Settings.h"
-#include "../lib/SocketIO.h"
+#include "../OnlineLib/SocketIO.h"
 
 Settings theSettings;
 

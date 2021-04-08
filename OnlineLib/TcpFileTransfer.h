@@ -4,8 +4,8 @@
 #include <QDir>
 
 #include "../lib/Md5Hash.h"
-#include "../lib/Tcp.h"
-#include "../lib/CircularLogger.h"
+#include "Tcp.h"
+#include "CircularLogger.h"
 #include "../Proto/network.pb.h"
 
 namespace Tcp

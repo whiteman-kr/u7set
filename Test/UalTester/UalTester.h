@@ -20,7 +20,7 @@
 
 #include <QObject>
 
-#include "../../lib/CfgServerLoader.h"
+#include "../../OnlineLib/CfgServerLoader.h"
 #include "../../lib/SoftwareSettings.h"
 
 #include "CmdLineParam.h"

@@ -3,7 +3,7 @@
 #include "../Proto/network.pb.h"
 #include "../Proto/serialization.pb.h"
 
-#include "../lib/Tcp.h"
+#include "../OnlineLib/Tcp.h"
 
 #include "AppDataSource.h"
 #include "SignalStatesProcessingThread.h"

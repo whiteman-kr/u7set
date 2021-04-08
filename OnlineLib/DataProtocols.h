@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SocketIO.h"
-#include "Crc.h"
+#include "../lib/Crc.h"
 
 #pragma pack(push, 1)
 

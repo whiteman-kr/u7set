@@ -2,7 +2,7 @@
 #include "Simulator.h"
 
 #include "../lib/LogicModulesInfo.h"
-#include "../lib/DataProtocols.h"
+#include "../OnlineLib/DataProtocols.h"
 
 namespace Sim
 {

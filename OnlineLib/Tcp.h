@@ -12,10 +12,11 @@
 #include "../Proto/serialization.pb.h"
 #include "../Proto/network.pb.h"
 
-#include "../lib/SocketIO.h"
+#include "SocketIO.h"
 #include "../lib/SimpleThread.h"
 #include "../lib/WUtils.h"
-#include "../lib/CircularLogger.h"
+#include "../lib/Crc.h"
+#include "CircularLogger.h"
 #include "../lib/SoftwareInfo.h"
 #include "../lib/HostAddressPort.h"
 

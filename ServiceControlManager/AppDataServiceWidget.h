@@ -4,7 +4,7 @@
 #include <QAbstractTableModel>
 #include "../lib/OrderedHash.h"
 #include "../AppDataService/AppDataSource.h"
-#include "../lib/Tcp.h"
+#include "../OnlineLib/Tcp.h"
 #include "BaseServiceStateWidget.h"
 
 

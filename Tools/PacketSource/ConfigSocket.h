@@ -3,7 +3,7 @@
 
 // This class is designed to receive signals from CfgSrv
 
-#include "../../lib/CfgServerLoader.h"
+#include "../../OnlineLib/CfgServerLoader.h"
 
 #include "PacketSourceCore.h"
 #include "Options.h"

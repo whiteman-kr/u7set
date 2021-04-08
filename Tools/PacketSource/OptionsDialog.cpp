@@ -5,7 +5,7 @@
 #include "../../lib/XmlHelper.h"
 #include "../../lib/Types.h"
 #include "../../lib/ConstStrings.h"
-#include "../../lib/SocketIO.h"
+#include "../../OnlineLib/SocketIO.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 

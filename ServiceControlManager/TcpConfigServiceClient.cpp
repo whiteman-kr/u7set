@@ -1,5 +1,5 @@
 #include "TcpConfigServiceClient.h"
-#include "../lib/SocketIO.h"
+#include "../OnlineLib/SocketIO.h"
 
 
 TcpConfigServiceClient::TcpConfigServiceClient(const SoftwareInfo& softwareInfo,

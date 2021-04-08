@@ -3,11 +3,11 @@
 #include "../lib/LmDescription.h"
 #include "../lib/DeviceHelper.h"
 #include "../lib/ConstStrings.h"
+#include "../lib/Crc.h"
 #include "../Builder/Context.h"
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "UalItems.h"
 #include "LmDescriptionSet.h"
-
 
 namespace Hardware
 {

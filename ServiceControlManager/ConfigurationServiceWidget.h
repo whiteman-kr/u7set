@@ -4,7 +4,7 @@
 class QStandardItemModel;
 class TcpConfigServiceClient;
 
-#include "../lib/Tcp.h"
+#include "../OnlineLib/Tcp.h"
 #include "BaseServiceStateWidget.h"
 
 

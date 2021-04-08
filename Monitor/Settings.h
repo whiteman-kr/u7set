@@ -1,6 +1,6 @@
 #pragma once
 
-#include <../lib/SocketIO.h>
+#include "../OnlineLib/SocketIO.h"
 #include "MonitorSignalSnapshot.h"
 #include "../lib/Ui/DialogSignalSearch.h"
 

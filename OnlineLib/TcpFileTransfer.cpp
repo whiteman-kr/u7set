@@ -1,4 +1,8 @@
-#include "../lib/TcpFileTransfer.h"
+#ifndef __ONLINE_LIB__
+#error Don't include this file in the project! Link OnlineLib instead.
+#endif
+
+#include "TcpFileTransfer.h"
 #include <QFileInfo>
 #include <QDir>
 #include <QCryptographicHash>

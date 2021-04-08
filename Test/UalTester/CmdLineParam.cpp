@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QFileInfo>
 
-#include "../../lib/SocketIO.h"
+#include "../../OnlineLib/SocketIO.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 //

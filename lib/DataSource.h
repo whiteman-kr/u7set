@@ -4,10 +4,10 @@
 
 #include "../Proto/network.pb.h"
 
-#include "SocketIO.h"
+#include "../OnlineLib/SocketIO.h"
 #include "Queue.h"
 #include "XmlHelper.h"
-#include "DataProtocols.h"
+#include "../OnlineLib/DataProtocols.h"
 #include "DeviceObject.h"
 #include "AppSignal.h"
 #include "SimpleThread.h"

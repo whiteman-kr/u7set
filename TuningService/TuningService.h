@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../lib/Service.h"
+#include "../ServiceLib/Service.h"
 #include "../lib/SoftwareSettings.h"
-#include "../lib/CfgServerLoader.h"
+#include "../OnlineLib/CfgServerLoader.h"
 #include "TuningSource.h"
 #include "TcpTuningServer.h"
 #include "TuningSourceThread.h"

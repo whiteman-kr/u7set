@@ -10,7 +10,7 @@
 #include "DeviceObject.h"
 #include "WUtils.h"
 #include "DeviceHelper.h"
-#include "DataProtocols.h"
+#include "../OnlineLib/DataProtocols.h"
 #include "Socket.h"
 
 const QString LanControllerInfoHelper::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR("_ETHERNET0%1");

@@ -5,9 +5,9 @@
 #include <QHostAddress>
 #include <QAbstractSocket>
 
-#include "BuildInfo.h"
-#include "Socket.h"
-#include "HostAddressPort.h"
+#include "../lib/BuildInfo.h"
+#include "../lib/Socket.h"
+#include "../lib/HostAddressPort.h"
 
 const int MAX_DATAGRAM_SIZE = 4096;
 
@@ -152,16 +152,6 @@ const quint16 NO_ACK_BLOCK_TYPE = 0;		// block type value if block didn't ack
 
 #pragma pack(pop)
 
-
-const quint32 CRC32_INITIAL_VALUE = 0xFFFFFFFF;
-
-quint32 CRC32(quint32 initialValue, const char* buffer, int len, bool finishCalc);
-
-quint32 CRC32(const char* buffer, int len);
-
-quint32 CRC32(quint32 initialValue, const QString& str, bool finishCalc);
-
-quint32 CRC32(quint32 initialValue, int value, bool finishCalc);
 
 const quint32 TCP_CLIENT_ALIVE = 0xFEDC;
 

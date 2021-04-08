@@ -5,11 +5,10 @@
 #include "../lib/Crc.h"
 #include "../lib/Connection.h"
 #include "../lib/LanControllerInfoHelper.h"
-#include "../TuningIPEN/TuningIPENDataStorage.h"
 
 #include "SoftwareCfgGenerator.h"
 #include "Parser.h"
-#include "LmDescriptionSet.h"
+#include "LmDescriptionSet.h" 
 
 #define LOG_UNDEFINED_UAL_ADDRESS(log, ualSignal) log->writeError(QString("Undefined signal's ualAddress: %1 (File: %2 Line: %3 Function: %4)").arg(ualSignal->refSignalIDs().join(", ")).arg(__FILE__).arg(__LINE__).arg(SHORT_FUNC_INFO));
 
@@ -9863,7 +9862,7 @@ namespace Builder
 		//
 		for(Afb::AfbParam pv : appFb->logicFb().params())
 		{
-			if (pv.opName() == "i_conf") // set comparator type: =(1(SI)), > (2(SI)), < (3(SI)), â‰  (4(SI)),= (5(FP)), > (6(FP)), < (7(FP)), â‰  (8(FP))
+			if (pv.opName() == "i_conf") // set comparator type: =(1(SI)), > (2(SI)), < (3(SI)), ? (4(SI)),= (5(FP)), > (6(FP)), < (7(FP)), ? (8(FP))
 			{
 				switch (pv.value().toInt())
 				{

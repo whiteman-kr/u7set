@@ -2,7 +2,7 @@
 
 #include <QWaitCondition>
 
-#include "../lib/TcpFileTransfer.h"
+#include "TcpFileTransfer.h"
 #include "../lib/OrderedHash.h"
 #include "../lib/BuildInfo.h"
 #include "../lib/SoftwareSettings.h"

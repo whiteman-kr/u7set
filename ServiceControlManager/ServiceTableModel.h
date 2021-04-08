@@ -3,10 +3,10 @@
 
 #include <QAbstractTableModel>
 #include <QHostAddress>
-#include "../lib/UdpSocket.h"
-#include "../lib/Service.h"
+#include "../OnlineLib/UdpSocket.h"
+#include "../ServiceLib/Service.h"
 #include "../lib/Types.h"
-#include "../lib/Tcp.h"
+#include "../OnlineLib/Tcp.h"
 
 
 // For QueuedConnection (scan network)

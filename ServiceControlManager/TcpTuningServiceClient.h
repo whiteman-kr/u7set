@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../lib/Tcp.h"
-#include "../lib/SocketIO.h"
+#include "../OnlineLib/Tcp.h"
+#include "../OnlineLib/SocketIO.h"
 #include "../Proto/network.pb.h"
 #include "../lib/Tuning/TuningSourceState.h"
 #include "../lib/Signal.h"

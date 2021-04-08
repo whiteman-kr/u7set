@@ -5,9 +5,9 @@
 #include <QQueue>
 #include <QUuid>
 
-#include "../lib/SocketIO.h"
+#include "SocketIO.h"
 #include "../lib/SimpleThread.h"
-#include "../lib/CircularLogger.h"
+#include "CircularLogger.h"
 #include "../lib/WUtils.h"
 
 #include "../Proto/network.pb.h"

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../lib/Tcp.h"
-#include "../lib/SocketIO.h"
+#include "../OnlineLib/Tcp.h"
+#include "../OnlineLib/SocketIO.h"
 #include "../lib/Hash.h"
 #include "../lib/OrderedHash.h"
 #include "../lib/Signal.h"

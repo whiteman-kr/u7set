@@ -16,8 +16,8 @@
 //				TDS_TUNING_SIGNALS_WRITE (Hashes and Values get from theTuningSignalBase)		|
 //				|_______________________________________________________________________________|
 
-#include "../lib/Tcp.h"
-#include "../lib/SocketIO.h"
+#include "../OnlineLib/Tcp.h"
+#include "../OnlineLib/SocketIO.h"
 #include "../lib/Hash.h"
 
 #include "../Proto/network.pb.h"

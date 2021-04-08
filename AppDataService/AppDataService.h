@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../lib/Service.h"
+#include "../ServiceLib/Service.h"
 #include "../lib/DataSource.h"
 #include "../lib/Signal.h"
-#include "../lib/CfgServerLoader.h"
+#include "../OnlineLib/CfgServerLoader.h"
 #include "../lib/SoftwareSettings.h"
 #include "../lib/Queue.h"
 

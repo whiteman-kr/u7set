@@ -1,9 +1,8 @@
-#ifndef CONFIGSOCKET_H
-#define CONFIGSOCKET_H
+#pragma once
 
 // This class is designed to receive signals from CfgSrv
 
-#include "../lib/CfgServerLoader.h"
+#include "../OnlineLib/CfgServerLoader.h"
 
 #include "Options.h"
 
@@ -97,5 +96,3 @@ signals:
 };
 
 // ==============================================================================================
-
-#endif // CONFIGSOCKET_H

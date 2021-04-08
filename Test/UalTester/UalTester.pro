@@ -35,82 +35,68 @@ unix {
 SOURCES += \
     ../../lib/Address16.cpp \
     ../../lib/ScriptDeviceObject.cpp \
-        main.cpp \
-    UalTester.cpp \
-    ../../lib/CommandLineParser.cpp \
-    ../../lib/CircularLogger.cpp \
     ../../lib/SimpleThread.cpp \
 	../../lib/WUtils.cpp \
     ../../lib/HostAddressPort.cpp \
-    ../../lib/SocketIO.cpp \
-    ../../lib/CfgServerLoader.cpp \
-    ../../lib/BuildInfo.cpp \
-    ../../lib/Tcp.cpp \
-    ../../lib/TcpFileTransfer.cpp \
+	../../lib/BuildInfo.cpp \
     ../../lib/Types.cpp \
+	../../lib/Crc.cpp \
     ../../lib/SoftwareInfo.cpp \
 	../../lib/XmlHelper.cpp \
 	../../lib/SoftwareSettings.cpp \
     ../../lib/DeviceHelper.cpp \
-    ../../Builder/IssueLogger.cpp \
     ../../lib/DeviceObject.cpp \
-    ../../Builder/ModulesRawData.cpp \
     ../../lib/OutputLog.cpp \
     ../../lib/DbStruct.cpp \
 	../../lib/AppSignal.cpp \
-	SignalStateSocket.cpp \
 	../../lib/Signal.cpp \
 	../../lib/Tuning/TuningSignalState.cpp \
 	../../lib/TuningValue.cpp \
 	../../lib/SignalProperties.cpp \
+	../../Builder/IssueLogger.cpp \
+	main.cpp \
+	UalTester.cpp \
 	SignalBase.cpp \
 	TestFile.cpp \
 	TuningSocket.cpp \
 	CmdLineParam.cpp \
-    TuningSourceBase.cpp
-
+	TuningSourceBase.cpp \
+	SignalStateSocket.cpp \
 
 HEADERS += \
+	Stable.h \
     ../../lib/Address16.h \
 	../../lib/ConstStrings.h \
     ../../lib/ScriptDeviceObject.h \
-	UalTester.h \
-    ../../lib/CommandLineParser.h \
     ../../lib/OrderedHash.h \
-    ../../lib/CircularLogger.h \
     ../../lib/SimpleThread.h \
 	../../lib/WUtils.h \
     ../../lib/HostAddressPort.h \
-    ../../lib/SocketIO.h \
-    ../../lib/CfgServerLoader.h \
     ../../lib/BuildInfo.h \
-    ../../lib/Tcp.h \
-    ../../lib/TcpFileTransfer.h \
     ../../lib/Types.h \
+	../../lib/Crc.h \
     ../../lib/SoftwareInfo.h \
 	../../lib/XmlHelper.h \
 	../../lib/SoftwareSettings.h \
     ../../lib/DeviceHelper.h \
-    ../../Builder/IssueLogger.h \
     ../../lib/DeviceObject.h \
-    ../../Builder/ModulesRawData.h \
     ../../lib/OutputLog.h \
     ../../lib/DbStruct.h \
     ../../lib/PropertyObject.h \
     ../../lib/AppSignal.h \
     ../../lib/Hash.h \
-    SignalStateSocket.h \
     ../../lib/Signal.h \
     ../../lib/Tuning/TuningSignalState.h \
     ../../lib/TuningValue.h \
     ../../lib/SignalProperties.h \
+	../../Builder/IssueLogger.h \
     SignalBase.h \
     TestFile.h \
     TuningSocket.h \
 	CmdLineParam.h \
-	Stable.h \
-    TuningSourceBase.h
-
+	TuningSourceBase.h \
+	UalTester.h \
+	SignalStateSocket.h \
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
@@ -134,3 +120,26 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
+
+# OnlineLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
+}
+
+# ServiceLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
+}
+

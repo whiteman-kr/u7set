@@ -150,7 +150,6 @@ SOURCES +=\
     Forms/ChangesetDetailsDialog.cpp \
     Forms/CompareDialog.cpp \
     Forms/ComparePropertyObjectDialog.cpp \
-    ../TuningIPEN/TuningIPENDataStorage.cpp \
     DialogConnections.cpp \
     ../lib/Tuning/TuningFilterEditor.cpp \
     ../lib/Tuning/TuningModel.cpp \
@@ -291,7 +290,6 @@ HEADERS  += \
     Forms/CompareDialog.h \
     Forms/ComparePropertyObjectDialog.h \
     ../lib/diff_match_patch.h \
-    ../TuningIPEN/TuningIPENDataStorage.h \
     DialogConnections.h \
     ../lib/Tuning/TuningFilterEditor.h \
     ../lib/Tuning/TuningModel.h \
@@ -548,3 +546,15 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
+
+# OnlineLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
+}
+

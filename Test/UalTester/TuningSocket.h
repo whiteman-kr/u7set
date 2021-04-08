@@ -20,8 +20,8 @@
 //				TDS_PACKETSOURCE_EXIT															|
 //				|_______________________________________________________________________________|
 
-#include "../lib/Tcp.h"
-#include "../lib/SocketIO.h"
+#include "../OnlineLib/Tcp.h"
+#include "../OnlineLib/SocketIO.h"
 #include "../lib/Hash.h"
 
 #include "../Proto/network.pb.h"

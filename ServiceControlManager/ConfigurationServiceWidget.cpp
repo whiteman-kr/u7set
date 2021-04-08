@@ -1,6 +1,6 @@
 #include "ConfigurationServiceWidget.h"
 #include "TcpConfigServiceClient.h"
-#include <../lib/SocketIO.h>
+#include "../OnlineLib/SocketIO.h"
 #include <QTableView>
 #include <QStandardItemModel>
 #include <QHeaderView>

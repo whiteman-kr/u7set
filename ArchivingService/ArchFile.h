@@ -2,9 +2,8 @@
 
 #include "../lib/AppSignal.h"
 #include "../lib/WUtils.h"
-#include "../lib/Crc16.h"
 #include "../lib/SimpleThread.h"
-#include "../lib/CircularLogger.h"
+#include "../OnlineLib/CircularLogger.h"
 
 #include "ArchFileBuffer.h"
 

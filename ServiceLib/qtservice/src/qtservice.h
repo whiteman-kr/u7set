@@ -43,7 +43,7 @@
 
 #include <QCoreApplication>
 
-#include "../lib/CircularLogger.h"
+#include "../OnlineLib/CircularLogger.h"
 
 #if defined(Q_OS_WIN)
 #  if !defined(QT_QTSERVICE_EXPORT) && !defined(QT_QTSERVICE_IMPORT)

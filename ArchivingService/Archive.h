@@ -7,7 +7,7 @@
 #include "../lib/Hash.h"
 #include "../lib/HostAddressPort.h"
 #include "../lib/TimeStamp.h"
-#include "../lib/CircularLogger.h"
+#include "../OnlineLib/CircularLogger.h"
 #include "../lib/Types.h"
 #include "../lib/Queue.h"
 #include "../lib/AppSignal.h"

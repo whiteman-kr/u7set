@@ -2,9 +2,9 @@
 #define BASESERVICESTATEWIDGET_H
 
 #include <QMainWindow>
-#include "../lib/UdpSocket.h"
-#include "../lib/Service.h"
-#include "../lib/Tcp.h"
+#include "../OnlineLib/UdpSocket.h"
+#include "../ServiceLib/Service.h"
+#include "../OnlineLib/Tcp.h"
 #include "ServiceTableModel.h"
 
 class QAction;

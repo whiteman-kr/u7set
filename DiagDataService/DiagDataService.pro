@@ -30,47 +30,34 @@ unix {
 }
 
 SOURCES += \
-    ../lib/Address16.cpp \
+	../lib/Address16.cpp \
     ../lib/ScriptDeviceObject.cpp \
-	../lib/UdpSocket.cpp \
-	../lib/Service.cpp \
-	../lib/SocketIO.cpp \
-	../lib/CircularLogger.cpp \
     ../lib/DataSource.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
     ../lib/Signal.cpp \
     ../lib/Types.cpp \
-    ../lib/CfgServerLoader.cpp \
-    ../lib/Tcp.cpp \
-    ../lib/TcpFileTransfer.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SimpleThread.cpp \
 	../lib/SoftwareSettings.cpp \
     ../lib/XmlHelper.cpp \
-    DiagDataService.cpp \
     ../lib/Queue.cpp \
-    ../lib/DataProtocols.cpp \
     ../lib/WUtils.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/CommandLineParser.cpp \
-    DiagDataServiceMain.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
-    ../lib/SimpleMutex.cpp
+	../lib/SimpleMutex.cpp \
+	DiagDataService.cpp \
+	DiagDataServiceMain.cpp \
 
 HEADERS += \
-    ../lib/Address16.h \
+	Stable.h \
+	../lib/Address16.h \
 	../lib/LanControllerInfo.h \
     ../lib/ScriptDeviceObject.h \
-	Stable.h \
-	../lib/SocketIO.h \
-	../lib/UdpSocket.h \
-	../lib/Service.h \
-	../lib/CircularLogger.h \
     ../lib/DataSource.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
@@ -78,27 +65,21 @@ HEADERS += \
     ../lib/CUtils.h \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
-    ../lib/CfgServerLoader.h \
-    ../lib/Tcp.h \
-    ../lib/TcpFileTransfer.h \
     ../lib/BuildInfo.h \
     ../lib/SimpleThread.h \
 	../lib/SoftwareSettings.h \
     ../lib/XmlHelper.h \
-    ../lib/DataProtocols.h \
-    DiagDataService.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
     ../lib/Crc.h \
     ../lib/HostAddressPort.h \
-    ../lib/CommandLineParser.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     ../lib/Times.h \
     ../lib/SignalProperties.h \
-    ../lib/SimpleMutex.h
+	../lib/SimpleMutex.h \
+	DiagDataService.h \
 
-include(../qtservice/src/qtservice.pri)
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
@@ -113,4 +94,26 @@ INCLUDEPATH += ./../Protobuf
 win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}
+
+# OnlineLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
+}
+
+# ServiceLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
 }

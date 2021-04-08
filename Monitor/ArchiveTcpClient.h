@@ -1,7 +1,7 @@
 #ifndef ARCHIVETCPCLIENT_H
 #define ARCHIVETCPCLIENT_H
 
-#include "../lib/Tcp.h"
+#include "../OnlineLib/Tcp.h"
 #include "../lib/Hash.h"
 #include "../lib/TimeStamp.h"
 #include "../lib/AppSignal.h"

@@ -4,7 +4,7 @@
 #include <QFile>
 
 #include "../../lib/XmlHelper.h"
-#include "../../lib/DataProtocols.h"
+#include "../../OnlineLib/DataProtocols.h"
 #include "../../lib/WUtils.h"
 #include "../../lib/ConstStrings.h"
 

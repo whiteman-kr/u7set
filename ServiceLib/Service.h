@@ -10,11 +10,11 @@
 #include <QSettings>
 #include <iostream>
 
-#include "../qtservice/src/qtservice.h"
-#include "../lib/UdpSocket.h"
-#include "../lib/CircularLogger.h"
+#include "./qtservice/src/qtservice.h"
+#include "../OnlineLib/UdpSocket.h"
+#include "../OnlineLib/CircularLogger.h"
 #include "../lib/SimpleThread.h"
-#include "../lib/CommandLineParser.h"
+#include "CommandLineParser.h"
 #include "../lib/SoftwareInfo.h"
 #include "../lib/SoftwareSettings.h"
 #include "../Proto/network.pb.h"

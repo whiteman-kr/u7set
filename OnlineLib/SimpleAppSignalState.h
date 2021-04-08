@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Hash.h"
-#include "Queue.h"
-#include "Times.h"
-#include "AppSignalStateFlags.h"
+#include "../lib/Hash.h"
+#include "../lib/Queue.h"
+#include "../lib/Times.h"
+#include "../lib/AppSignalStateFlags.h"
 
 namespace Proto
 {

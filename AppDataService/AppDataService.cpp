@@ -1,8 +1,8 @@
 #include <QXmlStreamReader>
 #include <QMetaProperty>
 
-#include "../lib/DeviceObject.h"
-#include "../lib/CfgServerLoader.h"
+//#include "../lib/DeviceObject.h"
+#include "../OnlineLib/CfgServerLoader.h"
 
 #include "AppDataService.h"
 #include "TcpAppDataServer.h"
