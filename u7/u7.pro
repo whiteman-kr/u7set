@@ -21,8 +21,6 @@ QT.testlib.CONFIG -= console
 TARGET = u7
 TEMPLATE = app
 
-win32:LIBS += -lGdi32
-
 INCLUDEPATH += $$PWD
 
 # c++20 support
@@ -445,18 +443,19 @@ unix {
     CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
 }
 
-# Protobuf
+# --
 #
-LIBS += -L$$DESTDIR -lprotobuf
-INCLUDEPATH += ./../Protobuf
+win32:LIBS += -lGdi32
+LIBS += -L$$DESTDIR
+LIBS += -L.
 
 # QScintilla
 #
+LIBS += -lQScintilla
 INCLUDEPATH += ./../QScintilla/Qt4Qt5
 DEPENDPATH += ./../QScintilla/Qt4Qt5
-LIBS += -L$$DESTDIR -lQScintilla
-win32:PRE_TARGETDEPS += $$DESTDIR/QScintilla.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libQScintilla.a
+#win32:PRE_TARGETDEPS += $$DESTDIR/QScintilla.lib
+#unix:PRE_TARGETDEPS += $$DESTDIR/libQScintilla.a
 
 # Add curent dir to a list of library directory paths
 #
@@ -465,32 +464,18 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 
 # VFrame30 library
 #
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
-    CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
-}
-unix {
-    CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
-    CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
-}
-
+LIBS += -lVFrame30
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
 
 # Builder Lib
 #
+LIBS += -lBuilder
 INCLUDEPATH += $$PWD/../Builder
 DEPENDPATH += $$PWD/../Builder
 
-win32 {
-    LIBS += -L$$DESTDIR -lBuilder
-
-    CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/debug/Builder.lib
-    CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/release/Builder.lib
-}
-unix {
-    LIBS += -lBuilder
-}
+#CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/debug/Builder.lib
+#CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/release/Builder.lib
 
 # QtPropertyBrowser
 #
@@ -512,33 +497,24 @@ unix {
 
 # Simulator Lib
 #
+LIBS += -lSimulator
 INCLUDEPATH += $$PWD/../Simulator
 DEPENDPATH += $$PWD/../Simulator
 
-win32 {
-    LIBS += -L$$DESTDIR -lSimulator
+#CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/debug/Simulator.lib
+#CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/release/Simulator.lib
 
-    CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/debug/Simulator.lib
-    CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/release/Simulator.lib
-}
-unix {
-    LIBS += -lSimulator
-}
 
 # TrendView library
 #
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../TrendView/release/ -lTrendView
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../TrendView/debug/ -lTrendView
-else:unix:!macx: LIBS += -L$$OUT_PWD/../TrendView/ -lTrendView
-
+LIBS += -lTrendView
 INCLUDEPATH += $$PWD/../TrendView
 DEPENDPATH += $$PWD/../TrendView
 
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/release/libTrendView.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/debug/libTrendView.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/release/TrendView.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/debug/TrendView.lib
-else:unix:!macx: PRE_TARGETDEPS += $$OUT_PWD/../TrendView/libTrendView.a
+# Protobuf
+#
+LIBS += -lprotobuf
+INCLUDEPATH += ./../Protobuf
 
 # Visual Leak Detector
 #

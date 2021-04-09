@@ -32,41 +32,31 @@ SOURCES +=  \
     main.cpp
 
 
+# --
+#
+LIBS += -L$$DESTDIR
+
 # Add curent dir to a list of library directory paths
 #
 unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 
-
-#protobuf
-#
-LIBS += -L$$DESTDIR -lprotobuf
-INCLUDEPATH += ./../../Protobuf
-
-# VFrame30 library
-#
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
-}
-unix {
-    CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
-}
-
 # Simulator Lib
 #
+LIBS += -lSimulator
 INCLUDEPATH += $$PWD/../../Simulator
 DEPENDPATH += $$PWD/../../Simulator
 
-win32 {
-    LIBS += -L$$DESTDIR -lSimulator
+# VFrame30 library
+#
+LIBS += -lVFrame30
+INCLUDEPATH += ../VFrame30
+DEPENDPATH += ../VFrame30
 
-    CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../bin/debug/Simulator.lib
-	CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../bin/release/Simulator.lib
-}
-unix {
-    LIBS += -lSimulator
-}
+#protobuf
+#
+LIBS += -lprotobuf
+INCLUDEPATH += ./../../Protobuf
+
 
 HEADERS += \
     ../../lib/PropertyObject.h \

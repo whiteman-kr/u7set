@@ -10,26 +10,27 @@ SUBDIRS += Protobuf \
 	OnlineLib \
 	ServiceLib \
 	Simulator \
-	SimulatorConsole \
+        SimulatorConsole \
 	Builder \
-	BuilderConsole \
+        BuilderConsole \
 	u7 \
-	Metrology \
-	BaseService \
-	ServiceControlManager \
-	ConfigurationService \
-	ArchivingService \
-	Monitor \
-	PacketViewer \
-	TuningService \
-	AppDataService \
-	DiagDataService \
-	TuningClient \
-	mconf \
-	./Tools/PacketSource \
-	./Test/UalTester \
-	./Test/SimulatorTests \
-	./Test/u7databaseTests
+        Metrology \
+        qtservice \
+        BaseService \
+        ServiceControlManager \
+        ConfigurationService \
+        ArchivingService \
+        Monitor \
+        PacketViewer \
+        TuningService \
+        AppDataService \
+        DiagDataService \
+        TuningClient \
+        mconf \
+        ./Tools/PacketSource \
+        ./Test/UalTester \
+        ./Test/SimulatorTests \
+        ./Test/u7databaseTests
 
 AppDataService.depends = OnlineLib ServiceLib
 DiagDataService.depends = OnlineLib ServiceLib

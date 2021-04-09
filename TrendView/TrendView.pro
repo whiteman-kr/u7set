@@ -14,6 +14,17 @@ CONFIG += staticlib
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
+# DESTDIR
+#
+win32 {
+    CONFIG(debug, debug|release): DESTDIR = ../bin/debug
+    CONFIG(release, debug|release): DESTDIR = ../bin/release
+}
+unix {
+    CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
+    CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
+}
+
 # c++20 support
 #
 unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
@@ -48,7 +59,6 @@ SOURCES += \
     DialogTrendSignalPoint.cpp
 
 HEADERS += \
-    ../Proto/trends.pb.h \
     Forms/DialogChooseTrendSignals.h \
     Stable.h \
     TrendScale.h \

@@ -18,6 +18,17 @@ win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../warnings.pri)
 
+# Optimization flags
+#
+win32 {
+        CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -Od
+        CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O2
+}
+unix {
+        CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
+        CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
+}
+
 #Application icon
 win32:RC_ICONS += Images/Monitor.ico
 
@@ -197,44 +208,6 @@ FORMS    += \
     DialogColumns.ui \
     DialogChooseArchiveSignals.ui
 
-
-# Optimization flags
-#
-win32 {
-	CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -Od
-	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O2
-}
-unix {
-	CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
-	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
-}
-
-# Add curent dir to a list of library directory paths
-#
-unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
-
-
-# VFrame30 library
-# $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
-#
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
-}
-
-INCLUDEPATH += ../VFrame30
-DEPENDPATH += ../VFrame30
-
-# Protobuf
-#
-LIBS += -L$$DESTDIR -lprotobuf
-INCLUDEPATH += ./../Protobuf
-
-
 RESOURCES += \
     Monitor.qrc
 
@@ -256,26 +229,41 @@ DISTFILES += \
     Images/TuningSources.svg \
     Images/Monitor.ico
 
+
+# Add curent dir to a list of library directory paths
+#
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+# --
+#
+LIBS += -L$$DESTDIR
+LIBS += -L.
+
+# VFrame30 library
+#
+LIBS += -lVFrame30
+INCLUDEPATH += ../VFrame30
+DEPENDPATH += ../VFrame30
+
 # TrendView library
 #
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../TrendView/release/ -lTrendView
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../TrendView/debug/ -lTrendView
-else:unix:!macx: LIBS += -L$$OUT_PWD/../TrendView/ -lTrendView
-
+LIBS += -lTrendView
 INCLUDEPATH += $$PWD/../TrendView
 DEPENDPATH += $$PWD/../TrendView
 
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/release/libTrendView.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/debug/libTrendView.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/release/TrendView.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/debug/TrendView.lib
-else:unix:!macx: PRE_TARGETDEPS += $$OUT_PWD/../TrendView/libTrendView.a
+# Protobuf
+#
+LIBS += -lprotobuf
+INCLUDEPATH += ./../Protobuf
+
+# --
+#
 
 # Visual Leak Detector
 #
 win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+    CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
 
 # OnlineLib
