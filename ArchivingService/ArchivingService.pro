@@ -117,11 +117,6 @@ PRECOMPILED_HEADER = Stable.h
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
 
-# Protobuf
-#
-LIBS += -L$$DESTDIR -lprotobuf
-INCLUDEPATH += ./../Protobuf
-
 DISTFILES += \
     ../Proto/network.proto \
     ../Proto/serialization.proto
@@ -137,17 +132,6 @@ win32 {
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
 
-# OnlineLib
-#
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
-
 # ServiceLib
 #
 win32 {
@@ -159,4 +143,18 @@ unix {
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
 }
 
+# OnlineLib
+#
+win32 {
+        CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+        CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+        CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
+}
 
+# Protobuf
+#
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf

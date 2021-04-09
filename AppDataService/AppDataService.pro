@@ -145,17 +145,6 @@ win32 {
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
 
-# OnlineLib
-#
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
-
 # ServiceLib
 #
 win32 {
@@ -165,4 +154,15 @@ win32 {
 unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
+}
+
+# OnlineLib
+#
+win32 {
+        CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+        CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+        CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
 }
