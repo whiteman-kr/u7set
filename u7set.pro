@@ -3,19 +3,18 @@ TEMPLATE = subdirs
 CONFIG += ordered
 
 SUBDIRS += Protobuf \
-	qtpropertybrowser \
-	QScintilla \
-	TrendView \
-	VFrame30 \
-	OnlineLib \
-	ServiceLib \
-	Simulator \
+        qtpropertybrowser \
+        QScintilla \
+        TrendView \
+        VFrame30 \
+        OnlineLib \
+        ServiceLib \
+        Simulator \
         SimulatorConsole \
-	Builder \
+        Builder \
         BuilderConsole \
-	u7 \
+        u7 \
         Metrology \
-        qtservice \
         BaseService \
         ServiceControlManager \
         ConfigurationService \
