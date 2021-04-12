@@ -7,6 +7,7 @@ SUBDIRS += Protobuf \
         QScintilla \
         TrendView \
         VFrame30 \
+		UtilsLib \
         OnlineLib \
         ServiceLib \
         Simulator \
@@ -20,13 +21,13 @@ SUBDIRS += Protobuf \
         ConfigurationService \
         ArchivingService \
         Monitor \
-        PacketViewer \
         TuningService \
         AppDataService \
         DiagDataService \
         TuningClient \
         mconf \
         ./Tools/PacketSource \
+		./Tools/PacketViewer \
         ./Test/UalTester \
         ./Test/SimulatorTests \
         ./Test/u7databaseTests
