@@ -4,15 +4,15 @@
 
 #include "Connection.h"
 #include "../Builder/OptoModule.h"
-#include "XmlHelper.h"
-#include "WUtils.h"
+#include "../UtilsLib/XmlHelper.h"
+#include "../UtilsLib/WUtils.h"
 
 #endif
 
 #include "ConstStrings.h"
-#include "Address16.h"
+#include "../UtilsLib/Address16.h"
 #include "Types.h"
-#include "DomXmlHelper.h"
+#include "../UtilsLib/DomXmlHelper.h"
 
 class ConnectionTxRxSignal
 {

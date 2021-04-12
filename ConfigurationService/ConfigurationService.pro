@@ -36,16 +36,11 @@ win32:QMAKE_CXXFLAGS += /std:c++latest
 include(../warnings.pri)
 
 SOURCES += \
-    ../lib/Address16.cpp \
     ../lib/ScriptDeviceObject.cpp \
-    ../lib/SimpleThread.cpp \
     ../lib/BuildInfo.cpp \
-    ../lib/HostAddressPort.cpp \
-    ../lib/XmlHelper.cpp \
     ../lib/SoftwareInfo.cpp \
 	../lib/SoftwareSettings.cpp \
 	../lib/DeviceObject.cpp \
-	../lib/Crc.cpp \
 	../lib/DbStruct.cpp \
 	ConfigurationService.cpp \
 	CfgServiceMain.cpp \
@@ -54,18 +49,13 @@ SOURCES += \
 
 HEADERS += \
 	Stable.h \
-	../lib/Address16.h \
     ../lib/ScriptDeviceObject.h \
-    ../lib/SimpleThread.h \
     ../lib/BuildInfo.h \
-    ../lib/HostAddressPort.h \
-    ../lib/XmlHelper.h \
     ../lib/Types.h \
     ../lib/SoftwareInfo.h \
 	../lib/SoftwareSettings.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
-	../lib/Crc.h \
     ../lib/PropertyObject.h \
 	ConfigurationService.h \
 	CfgChecker.h \
@@ -110,5 +100,16 @@ win32 {
 unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
+}
+
+# UtilsLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
 }
 

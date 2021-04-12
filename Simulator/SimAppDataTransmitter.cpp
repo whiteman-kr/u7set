@@ -230,18 +230,18 @@ namespace Sim
 		rupHeader.dataId = adspi.appDataUID;
 		rupHeader.moduleType = static_cast<quint16>(adspi.moduleType);
 		rupHeader.numerator = adspi.rupFramesNumerator;
-		rupHeader.framesQuantity = adspi.rupFramesCount;
+		rupHeader.framesQuantity = static_cast<quint16>(adspi.rupFramesCount);
 
 		QDateTime dt = extAppData.timeStamp.toDateTime();
 
-		rupHeader.timeStamp.millisecond = dt.time().msec();
-		rupHeader.timeStamp.second = dt.time().second();
-		rupHeader.timeStamp.minute = dt.time().minute();
-		rupHeader.timeStamp.hour = dt.time().hour();
+		rupHeader.timeStamp.millisecond = static_cast<quint16>(dt.time().msec());
+		rupHeader.timeStamp.second = static_cast<quint16>(dt.time().second());
+		rupHeader.timeStamp.minute = static_cast<quint16>(dt.time().minute());
+		rupHeader.timeStamp.hour = static_cast<quint16>(dt.time().hour());
 
-		rupHeader.timeStamp.day = dt.date().day();
-		rupHeader.timeStamp.month = dt.date().month();
-		rupHeader.timeStamp.year = dt.date().year();
+		rupHeader.timeStamp.day = static_cast<quint16>(dt.date().day());
+		rupHeader.timeStamp.month = static_cast<quint16>(dt.date().month());
+		rupHeader.timeStamp.year = static_cast<quint16>(dt.date().year());
 
 		rupHeader.reverseBytes();
 

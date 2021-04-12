@@ -29,31 +29,20 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
-
-SOURCES += \
-	../lib/Address16.cpp \
-    ../lib/SoftwareSettings.cpp \
-    ../lib/Types.cpp \
-    ../lib/SimpleThread.cpp \
-    ../lib/HostAddressPort.cpp \
-    ../lib/WUtils.cpp \
-	../lib/XmlHelper.cpp \
-	../lib/SoftwareInfo.cpp \
-	BaseServiceMain.cpp \
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 HEADERS += \
 	Stable.h \
-	../lib/Address16.h \
 	../lib/SoftwareSettings.h \
 	../lib/Types.h \
-    ../lib/SimpleThread.h \
-    ../lib/HostAddressPort.h \
-    ../lib/WUtils.h \
-    ../lib/SoftwareInfo.h \
-	../lib/XmlHelper.h \
+	../lib/SoftwareInfo.h \
 
-CONFIG += precompile_header
-PRECOMPILED_HEADER = Stable.h
+SOURCES += \
+	../lib/SoftwareSettings.cpp \
+    ../lib/Types.cpp \
+	../lib/SoftwareInfo.cpp \
+	BaseServiceMain.cpp \
 
 # Protobuf
 #
@@ -88,3 +77,15 @@ unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
 }
+
+# UtilsLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
+}
+

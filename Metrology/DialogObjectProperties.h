@@ -15,7 +15,7 @@
 #include <QDialogButtonBox>
 #include <QMessageBox>
 
-#include "../lib/Hash.h"
+#include "../UtilsLib/Hash.h"
 
 #include "../qtpropertybrowser/src/qtpropertymanager.h"
 #include "../qtpropertybrowser/src/qtvariantproperty.h"

@@ -33,16 +33,10 @@ unix {
 }
 
 SOURCES += \
-    ../../lib/Address16.cpp \
     ../../lib/ScriptDeviceObject.cpp \
-    ../../lib/SimpleThread.cpp \
-	../../lib/WUtils.cpp \
-    ../../lib/HostAddressPort.cpp \
 	../../lib/BuildInfo.cpp \
     ../../lib/Types.cpp \
-	../../lib/Crc.cpp \
     ../../lib/SoftwareInfo.cpp \
-	../../lib/XmlHelper.cpp \
 	../../lib/SoftwareSettings.cpp \
     ../../lib/DeviceHelper.cpp \
     ../../lib/DeviceObject.cpp \
@@ -65,18 +59,12 @@ SOURCES += \
 
 HEADERS += \
 	Stable.h \
-    ../../lib/Address16.h \
 	../../lib/ConstStrings.h \
     ../../lib/ScriptDeviceObject.h \
     ../../lib/OrderedHash.h \
-    ../../lib/SimpleThread.h \
-	../../lib/WUtils.h \
-    ../../lib/HostAddressPort.h \
     ../../lib/BuildInfo.h \
     ../../lib/Types.h \
-	../../lib/Crc.h \
     ../../lib/SoftwareInfo.h \
-	../../lib/XmlHelper.h \
 	../../lib/SoftwareSettings.h \
     ../../lib/DeviceHelper.h \
     ../../lib/DeviceObject.h \
@@ -84,7 +72,6 @@ HEADERS += \
     ../../lib/DbStruct.h \
     ../../lib/PropertyObject.h \
     ../../lib/AppSignal.h \
-    ../../lib/Hash.h \
     ../../lib/Signal.h \
     ../../lib/Tuning/TuningSignalState.h \
     ../../lib/TuningValue.h \
@@ -141,5 +128,16 @@ win32 {
 unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
+}
+
+# UtilsLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
 }
 

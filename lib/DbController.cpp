@@ -1,5 +1,5 @@
 #include "../lib/DbController.h"
-#include "../lib/WUtils.h"
+#include "../UtilsLib/WUtils.h"
 
 #include <QDebug>
 #include <QtConcurrent/QtConcurrent>

@@ -4,7 +4,7 @@
 
 #include "Signal.h"
 #include "DataSource.h"
-#include "WUtils.h"
+#include "../UtilsLib/WUtils.h"
 #include "SignalProperties.h"
 
 #include "../Builder/IssueLogger.h"

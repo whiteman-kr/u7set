@@ -32,7 +32,6 @@ unix {
 
 
 SOURCES += \
-    ../lib/Address16.cpp \
     ../lib/ScriptDeviceObject.cpp \
     ../lib/DataSource.cpp \
     ../lib/DeviceObject.cpp \
@@ -40,20 +39,13 @@ SOURCES += \
     ../lib/Signal.cpp \
     ../lib/Types.cpp \
     ../lib/BuildInfo.cpp \
-    ../lib/SimpleThread.cpp \
 	../lib/SoftwareSettings.cpp \
-    ../lib/XmlHelper.cpp \
-    ../lib/Queue.cpp \
-    ../lib/WUtils.cpp \
     ../lib/AppSignalStateFlags.cpp \
     ../lib/AppSignal.cpp \
-    ../lib/Crc.cpp \
-    ../lib/HostAddressPort.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
     ../lib/TuningValue.cpp \
-    ../lib/SimpleMutex.cpp \
 	AppDataService.cpp \
 	AppDataProcessingThread.cpp \
 	AppDataSource.cpp \
@@ -68,7 +60,6 @@ SOURCES += \
 
 HEADERS += \
 	Stable.h \
-	../lib/Address16.h \
 	../lib/ConstStrings.h \
     ../lib/LanControllerInfo.h \
     ../lib/ScriptDeviceObject.h \
@@ -80,23 +71,15 @@ HEADERS += \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
     ../lib/BuildInfo.h \
-    ../lib/SimpleThread.h \
 	../lib/SoftwareSettings.h \
-    ../lib/XmlHelper.h \
-    ../lib/Queue.h \
-    ../lib/WUtils.h \
-    ../lib/Hash.h \
     ../lib/AppSignalStateFlags.h \
     ../lib/AppSignal.h \
-    ../lib/Crc.h \
-    ../lib/HostAddressPort.h \
-    ../Builder/ModulesRawData.h \
     ../lib/TimeStamp.h \
     ../lib/SoftwareInfo.h \
     ../lib/Times.h \
     ../lib/SignalProperties.h \
     ../lib/TuningValue.h \
-    ../lib/SimpleMutex.h \
+	../Builder/ModulesRawData.h \
 	AppDataService.h \
 	AppDataProcessingThread.h \
 	AppDataSource.h \
@@ -166,3 +149,15 @@ unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
 }
+
+# UtilsLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
+}
+

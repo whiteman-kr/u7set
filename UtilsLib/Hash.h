@@ -81,21 +81,17 @@ namespace std
 	};
 }
 
-//inline HASH CalcHash(void* ptr, int nSize)
-//{
-//	if (ptr == NULL)
-//	{
-//		ASSERT(ptr);
-//		return UNDEFINED_HASH;
-//	}
+#include <QCryptographicHash>
 
-//	HASH nHash = 0;
 
-//	register BYTE* p = (BYTE*)ptr;
+class Md5Hash : public QCryptographicHash
+{
+public:
+	Md5Hash() : QCryptographicHash(QCryptographicHash::Md5) {}
 
-//	while (nSize--)
-//		nHash += (nHash<<5) + *p++;
+	QString resultStr() const { return QString(result().toHex()); }
 
-//	return nHash;
-//}
+	static QByteArray hash(const QByteArray& data) { return QCryptographicHash::hash(data, QCryptographicHash::Md5); }
+	static QString hashStr(const QByteArray& data) { return QString(QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex()); }
+};
 

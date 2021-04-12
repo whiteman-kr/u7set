@@ -1,5 +1,5 @@
-#include "../lib/WUtils.h"
-#include "../lib/Crc.h"
+#include "../UtilsLib/WUtils.h"
+#include "../UtilsLib/Crc.h"
 #include "../OnlineLib/CircularLogger.h"
 
 #include "TuningSourceThread.h"

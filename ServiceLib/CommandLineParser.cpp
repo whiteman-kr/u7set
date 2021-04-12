@@ -1,4 +1,4 @@
-#ifndef __SERVICE_LIB__
+#ifndef SERVICE_LIB_DOMAIN
 #error Don't include this file in the project! Link ServiceLib instead.
 #endif
 

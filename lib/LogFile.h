@@ -1,7 +1,7 @@
 #ifndef LOGFILE_H
 #define LOGFILE_H
 
-#include "SimpleThread.h"
+#include "../UtilsLib/SimpleThread.h"
 #include "../lib/ILogFile.h"
 
 #include <QTimer>

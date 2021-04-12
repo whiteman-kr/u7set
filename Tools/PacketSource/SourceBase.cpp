@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <QFile>
 
-#include "../../lib/XmlHelper.h"
+#include "../../UtilsLib/XmlHelper.h"
 #include "../../lib/DataSource.h"
 #include "../../lib/ConstStrings.h"
 

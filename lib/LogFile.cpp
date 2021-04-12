@@ -11,9 +11,8 @@
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QDesktopWidget>
-#include "Hash.h"
 #include "Ui/UiTools.h"
-
+#include "../UtilsLib/Hash.h"
 
 //#define LOGFILE_USE_HEADER	// Uncomment this to use header
 

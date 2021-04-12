@@ -5,8 +5,8 @@
 #include <memory>
 #include <set>
 
-#include "Hash.h"
-#include "Queue.h"
+#include "../UtilsLib/Hash.h"
+#include "../UtilsLib/Queue.h"
 #include "TimeStamp.h"
 #include "Tuning/TuningSignalState.h"
 #include "Times.h"

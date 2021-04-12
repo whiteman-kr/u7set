@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../lib/AppSignal.h"
-#include "../lib/WUtils.h"
-#include "../lib/SimpleThread.h"
+#include "../UtilsLib/WUtils.h"
+#include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"
 
 #include "ArchFileBuffer.h"

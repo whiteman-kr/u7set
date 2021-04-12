@@ -6,7 +6,7 @@
 #include <QMap>
 #include <QVector>
 
-#include "../../lib/Hash.h"
+#include "../../UtilsLib/Hash.h"
 #include "../../lib/Signal.h"
 #include "../../lib/AppSignal.h"
 

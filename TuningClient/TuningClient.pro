@@ -86,7 +86,6 @@ CONFIG(release, debug|release) {
 
 
 SOURCES +=\
-    ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
     ../lib/ScriptDeviceObject.cpp \
@@ -97,10 +96,7 @@ SOURCES +=\
     TuningSignalInfo.cpp \
     TuningWorkspace.cpp \
     ConfigController.cpp \
-    ../lib/HostAddressPort.cpp \
     ../lib/BuildInfo.cpp \
-    ../lib/SimpleThread.cpp \
-    ../lib/Crc.cpp \
     DialogSettings.cpp \
     ../lib/AppSignal.cpp \
     ../lib/PropertyEditor.cpp \
@@ -120,7 +116,6 @@ SOURCES +=\
     TuningSchemaWidget.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
     ../lib/DeviceObject.cpp \
-    ../lib/XmlHelper.cpp \
     ../lib/Types.cpp \
     ../lib/DbStruct.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
@@ -145,7 +140,6 @@ SOURCES +=\
     SwitchFiltersPageOptions.cpp
 
 HEADERS  += MainWindow.h \
-    ../lib/Address16.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
     ../lib/ConstStrings.h \
@@ -158,10 +152,7 @@ HEADERS  += MainWindow.h \
     TuningSignalInfo.h \
     TuningWorkspace.h \
     ConfigController.h \
-    ../lib/HostAddressPort.h \
     ../lib/BuildInfo.h \
-    ../lib/SimpleThread.h \
-    ../lib/Crc.h \
     DialogSettings.h \
     ../lib/AppSignal.h \
     ../lib/PropertyEditor.h \
@@ -181,7 +172,6 @@ HEADERS  += MainWindow.h \
     SchemasWorkspace.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/DeviceObject.h \
-    ../lib/XmlHelper.h \
     ../lib/Types.h \
     ../lib/DbStruct.h \
     ../lib/Tuning/TuningSignalState.h \
@@ -241,4 +231,16 @@ unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
 }
+
+# UtilsLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
+}
+
 

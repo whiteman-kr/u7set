@@ -2,7 +2,7 @@
 #define TUNINGSIGNALINFO_H
 
 #include <QDialog>
-#include "../lib/Hash.h"
+#include "../UtilsLib/Hash.h"
 #include "../lib/Types.h"
 
 namespace Ui {

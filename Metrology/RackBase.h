@@ -1,7 +1,7 @@
 #ifndef RACKBASE_H
 #define RACKBASE_H
 
-#include "../lib/Hash.h"
+#include "../UtilsLib/Hash.h"
 #include "../lib/MetrologySignal.h"
 
 // ==============================================================================================

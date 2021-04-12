@@ -4,9 +4,9 @@
 #include <QAbstractItemModel>
 #include <memory>
 #include <unordered_map>
-#include "../lib/Signal.h"
-#include "../OnlineLib/DataProtocols.h"
-#include "../lib/DataSource.h"
+#include "../../lib/Signal.h"
+#include "../../OnlineLib/DataProtocols.h"
+#include "../../lib/DataSource.h"
 
 class QUdpSocket;
 class DataSource;

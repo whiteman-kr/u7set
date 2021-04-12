@@ -13,12 +13,12 @@
 #include "../Proto/network.pb.h"
 
 #include "SocketIO.h"
-#include "../lib/SimpleThread.h"
-#include "../lib/WUtils.h"
-#include "../lib/Crc.h"
+#include "../UtilsLib/SimpleThread.h"
+#include "../UtilsLib/WUtils.h"
+#include "../UtilsLib/Crc.h"
 #include "CircularLogger.h"
 #include "../lib/SoftwareInfo.h"
-#include "../lib/HostAddressPort.h"
+#include "../OnlineLib/HostAddressPort.h"
 
 
 namespace Tcp

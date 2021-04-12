@@ -9,6 +9,7 @@ SUBDIRS += Protobuf \
 	VFrame30 \
 	OnlineLib \
 	ServiceLib \
+	UtilsLib \
 	Simulator \
 	SimulatorConsole \
 	Builder \
@@ -20,20 +21,20 @@ SUBDIRS += Protobuf \
 	ConfigurationService \
 	ArchivingService \
 	Monitor \
-	PacketViewer \
 	TuningService \
 	AppDataService \
 	DiagDataService \
 	TuningClient \
 	mconf \
 	./Tools/PacketSource \
+	./Tools/PacketViewer \
 	./Test/UalTester \
 	./Test/SimulatorTests \
 	./Test/u7databaseTests
 
-AppDataService.depends = OnlineLib ServiceLib
-DiagDataService.depends = OnlineLib ServiceLib
-ArchivingService.depends = OnlineLib ServiceLib
-ConfigurationService.depends = OnlineLib ServiceLib
-BaseService.depends = OnlineLib ServiceLib
-TuningService.depends = OnlineLib ServiceLib
+AppDataService.depends = OnlineLib ServiceLib UtilsLib
+DiagDataService.depends = OnlineLib ServiceLib UtilsLib
+ArchivingService.depends = OnlineLib ServiceLib UtilsLib
+ConfigurationService.depends = OnlineLib ServiceLib UtilsLib
+BaseService.depends = OnlineLib ServiceLib UtilsLib
+TuningService.depends = OnlineLib ServiceLib UtilsLib

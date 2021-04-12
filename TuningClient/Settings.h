@@ -1,7 +1,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include "../lib/HostAddressPort.h"
+#include "../OnlineLib/HostAddressPort.h"
 #include "UserManager.h"
 #include "../lib/Tuning/TuningTcpClient.h"
 #include "../lib/SoftwareSettings.h"

@@ -36,51 +36,14 @@ unix {
         CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
-SOURCES += \
-    ../lib/Address16.cpp \
-    ../lib/HostAddressPort.cpp \
-    ../lib/ScriptDeviceObject.cpp \
-    ../lib/Queue.cpp \
-	../lib/SoftwareSettings.cpp \
-    ../lib/SimpleThread.cpp \
-    ../lib/XmlHelper.cpp \
-    ../lib/BuildInfo.cpp \
-    ../lib/DeviceObject.cpp \
-    ../lib/DbStruct.cpp \
-    ../lib/Types.cpp \
-    ../lib/AppSignal.cpp \
-    ../lib/SoftwareInfo.cpp \
-    ../lib/TuningValue.cpp \
-    ../lib/Signal.cpp \
-    ../lib/SignalProperties.cpp \
-	../lib/Crc.cpp \
-    ../lib/AppSignalStateFlags.cpp \
-    ../lib/SimpleMutex.cpp \
-	ArchivingService.cpp \
-	ArchServiceMain.cpp \
-	TcpAppDataServer.cpp \
-	TcpArchRequestsServer.cpp \
-	Archive.cpp \
-	TimeFilter.cpp \
-	FileArchReader.cpp \
-	ArchFile.cpp \
-	ArchWriterThread.cpp \
-	ArchRequest.cpp \
-	ArchMaintenance.cpp \
-	ArchFileRecord.cpp \
-	ArchFileBuffer.cpp \
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 HEADERS += \
 	Stable.h \
-	../lib/Address16.h \
-    ../lib/HostAddressPort.h \
     ../lib/ScriptDeviceObject.h \
-    ../lib/Queue.h \
 	../lib/SoftwareSettings.h \
-    ../lib/Address16.h \
     ../lib/OrderedHash.h \
-    ../lib/SimpleThread.h \
-    ../lib/XmlHelper.h \
     ../lib/BuildInfo.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
@@ -91,12 +54,8 @@ HEADERS += \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     ../lib/Signal.h \
-    ../lib/Signal.h \
     ../lib/SignalProperties.h \
-	../lib/Crc.h \
 	../lib/AppSignalStateFlags.h \
-	../lib/SimpleMutex.h \
-	../lib/WUtils.h \
     FileArchReader.h \
     ArchFile.h \
     BinSearch.h \
@@ -111,8 +70,32 @@ HEADERS += \
 	Archive.h \
 	TimeFilter.h \
 
-CONFIG += precompile_header
-PRECOMPILED_HEADER = Stable.h
+SOURCES += \
+	../lib/ScriptDeviceObject.cpp \
+	../lib/SoftwareSettings.cpp \
+	../lib/BuildInfo.cpp \
+	../lib/DeviceObject.cpp \
+	../lib/DbStruct.cpp \
+	../lib/Types.cpp \
+	../lib/AppSignal.cpp \
+	../lib/SoftwareInfo.cpp \
+	../lib/TuningValue.cpp \
+	../lib/Signal.cpp \
+	../lib/SignalProperties.cpp \
+	../lib/AppSignalStateFlags.cpp \
+	ArchivingService.cpp \
+	ArchServiceMain.cpp \
+	TcpAppDataServer.cpp \
+	TcpArchRequestsServer.cpp \
+	Archive.cpp \
+	TimeFilter.cpp \
+	FileArchReader.cpp \
+	ArchFile.cpp \
+	ArchWriterThread.cpp \
+	ArchRequest.cpp \
+	ArchMaintenance.cpp \
+	ArchFileRecord.cpp \
+	ArchFileBuffer.cpp \
 
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
@@ -157,6 +140,17 @@ win32 {
 unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
+}
+
+# UtilsLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
 }
 
 

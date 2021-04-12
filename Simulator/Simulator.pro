@@ -68,32 +68,24 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ../lib/Address16.cpp \
     ../lib/AppSignalStateFlags.cpp \
     ../lib/ConnectionsInfo.cpp \
-    ../lib/DomXmlHelper.cpp \
 	../lib/LanControllerInfoHelper.cpp \
     ../lib/LmDescription.cpp \
     ../lib/DeviceObject.cpp \
 	../lib/DbStruct.cpp \
 	../lib/LogicModulesInfo.cpp \
     ../lib/ScriptDeviceObject.cpp \
-	../lib/SimpleMutex.cpp \
-	../lib/SimpleThread.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/SoftwareXmlReader.cpp \
     ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
-	../lib/WUtils.cpp \
-	../lib/Crc.cpp \
 	../lib/AppSignalManager.cpp \
 	../lib/Signal.cpp \
 	../lib/AppSignal.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
 	../lib/TuningValue.cpp \
-	../lib/XmlHelper.cpp \
-	../lib/HostAddressPort.cpp \
 	../lib/SignalProperties.cpp	\
     SimAppDataLanInterface.cpp \
     SimAppDataTransmitter.cpp \
@@ -131,22 +123,32 @@ SOURCES += \
 	SimOverrideSignals.cpp
 
 HEADERS += \
-    ../Proto/serialization.pb.h \
-    ../lib/Address16.h \
+	Stable.h \
     ../lib/AppSignalStateFlags.h \
     ../lib/ConnectionsInfo.h \
-    ../lib/DomXmlHelper.h \
-    ../lib/Hash.h \
     ../lib/ILogFile.h \
 	../lib/LanControllerInfo.h \
 	../lib/LanControllerInfoHelper.h \
 	../lib/LogicModulesInfo.h \
     ../lib/ScriptDeviceObject.h \
-	../lib/SimpleMutex.h \
-	../lib/SimpleThread.h \
     ../lib/SoftwareSettings.h \
     ../lib/SoftwareXmlReader.h \
-	../lib/WUtils.h \
+	../Proto/serialization.pb.h \
+	../lib/LmDescription.h \
+	../lib/DeviceObject.h \
+	../lib/DbStruct.h \
+	../lib/PropertyObject.h \
+	../lib/Types.h \
+	../lib/ModuleFirmware.h \
+	../lib/AppSignalManager.h \
+	../lib/Signal.h \
+	../lib/AppSignal.h \
+	../lib/IAppSignalManager.h \
+	../lib/Tuning/ITuningSignalManager.h \
+	../lib/Tuning/TuningSignalManager.h \
+	../lib/Tuning/TuningSignalState.h \
+	../lib/TuningValue.h \
+	../lib/SignalProperties.h \
     SimAppDataLanInterface.h \
     SimAppDataTransmitter.h \
     SimCommandProcessor_LM5_LM6.h \
@@ -167,15 +169,7 @@ HEADERS += \
     SimTuningLanInterface.h \
     SimTuningRecord.h \
     SimTuningServiceCommunicator.h \
-    Stable.h \
-    ../lib/LmDescription.h \
-    ../lib/DeviceObject.h \
-    ../lib/DbStruct.h \
-    ../lib/PropertyObject.h \
-    ../lib/Types.h \
-    ../lib/ModuleFirmware.h \
     Simulator.h \
-    ../lib/Crc.h \
     SimRam.h \
     SimEeprom.h \
     SimSubsystem.h \
@@ -184,22 +178,11 @@ HEADERS += \
     SimTimeController.h \
     SimAppSignalManager.h \
     SimTuningSignalManager.h \
-    ../lib/AppSignalManager.h \
-    ../lib/Signal.h \
-    ../lib/AppSignal.h \
-    ../lib/IAppSignalManager.h \
-    ../lib/Tuning/ITuningSignalManager.h \
-    ../lib/Tuning/TuningSignalManager.h \
-    ../lib/Tuning/TuningSignalState.h \
-    ../lib/TuningValue.h \
-    ../lib/XmlHelper.h \
-    ../lib/HostAddressPort.h \
     SimAfb.h \
     SimLogicModule.h \
     SimCommandProcessor.h \
     SimException.h \
     SimOverrideSignals.h \
-	../lib/SignalProperties.h
 
 # Protobuf
 #

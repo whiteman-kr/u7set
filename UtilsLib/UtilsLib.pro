@@ -1,6 +1,6 @@
-QT += network
+QT += network xml
 
-TARGET = OnlineLib
+TARGET = UtilsLib
 
 TEMPLATE = lib
 CONFIG += staticlib
@@ -61,26 +61,24 @@ CONFIG(release, debug|release) {
 
 HEADERS += \
 	Stable.h \
-	Tcp.h \
-	TcpFileTransfer.h \
-	SocketIO.h \
-	UdpSocket.h \
-	CfgServerLoader.h \
-	CircularLogger.h \
-	SimpleAppSignalState.h \
-	DataProtocols.h \
-	HostAddressPort.h \
+	Address16.h \
+	Crc.h \
+	DomXmlHelper.h \
+	Hash.h \
+	Queue.h \
+	SimpleMutex.h \
+	SimpleThread.h \
+	WUtils.h \
+	XmlHelper.h \
 
 SOURCES += \
-	Tcp.cpp \
-	TcpFileTransfer.cpp \
-	SocketIO.cpp \
-	UdpSocket.cpp \
-	CfgServerLoader.cpp \
-	CircularLogger.cpp \
-	SimpleAppSignalState.cpp \
-	DataProtocols.cpp \
-	HostAddressPort.cpp \
-
+	Address16.cpp \
+	Crc.cpp \
+	DomXmlHelper.cpp \
+	Queue.cpp \
+	SimpleMutex.cpp \
+	SimpleThread.cpp \
+	WUtils.cpp \
+	XmlHelper.cpp
 
 

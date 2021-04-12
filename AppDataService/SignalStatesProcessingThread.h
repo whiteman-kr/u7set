@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../lib/SimpleThread.h"
+#include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"
-#include "../lib/SimpleMutex.h"
+#include "../UtilsLib/SimpleMutex.h"
 
 #include "AppDataSource.h"
 

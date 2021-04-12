@@ -5,7 +5,7 @@
 #include "LanControllerInfo.h"
 #include "LanControllerInfoHelper.h"
 #include "SoftwareSettings.h"
-#include "WUtils.h"
+#include "../UtilsLib/WUtils.h"
 
 // -------------------------------------------------------------------------------------
 //

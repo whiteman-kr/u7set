@@ -4,7 +4,7 @@
 #include <QXmlStreamWriter>
 
 #include "../lib/CUtils.h"
-#include "../lib/WUtils.h"
+#include "../UtilsLib/WUtils.h"
 #include "../Proto/ProtoSerialization.h"
 
 #include "Connection.h"

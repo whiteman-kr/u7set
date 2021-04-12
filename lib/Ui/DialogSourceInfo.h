@@ -2,7 +2,7 @@
 #define DIALOGSOURCEINFO_H
 
 #include <QDialog>
-#include "../Hash.h"
+#include "../UtilsLib/Hash.h"
 
 class DialogSourceInfo : public QDialog
 {

@@ -3,7 +3,7 @@
 #include <QFile>
 #include <QDir>
 
-#include "../lib/Md5Hash.h"
+#include "../UtilsLib/Hash.h"
 #include "Tcp.h"
 #include "CircularLogger.h"
 #include "../Proto/network.pb.h"

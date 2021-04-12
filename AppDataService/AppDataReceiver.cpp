@@ -1,7 +1,6 @@
 #include "AppDataReceiver.h"
 #include "../lib/AppSignal.h"
-#include "../lib/WUtils.h"
-#include "../lib/Socket.h"
+#include "../UtilsLib/WUtils.h"
 
 // -------------------------------------------------------------------------------
 //

@@ -1,6 +1,6 @@
 #include "DataSource.h"
-#include "WUtils.h"
-#include "Crc.h"
+#include "../UtilsLib/WUtils.h"
+#include "../UtilsLib//Crc.h"
 #include "DeviceHelper.h"
 #include "LanControllerInfoHelper.h"
 

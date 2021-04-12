@@ -3,7 +3,7 @@
 #include "SoftwareCfgGenerator.h"
 #include "../lib/SoftwareSettings.h"
 #include "../lib/DeviceHelper.h"
-#include "../lib/XmlHelper.h"
+#include "../UtilsLib/XmlHelper.h"
 
 namespace Builder
 {

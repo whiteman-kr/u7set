@@ -4,14 +4,14 @@
 
 #include "../Proto/network.pb.h"
 
-#include "../OnlineLib/SocketIO.h"
-#include "Queue.h"
-#include "XmlHelper.h"
+#include "../UtilsLib/WUtils.h"
+#include "../UtilsLib/Queue.h"
+#include "../UtilsLib/XmlHelper.h"
+#include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/DataProtocols.h"
+#include "../OnlineLib/SocketIO.h"
 #include "DeviceObject.h"
 #include "AppSignal.h"
-#include "SimpleThread.h"
-#include "WUtils.h"
 #include "ConstStrings.h"
 
 class DataSource

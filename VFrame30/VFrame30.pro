@@ -67,7 +67,6 @@ OTHER_FILES += \
 
 HEADERS += \
     ../Proto/serialization.pb.h \
-    ../lib/Address16.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
     ../lib/ILogFile.h \
@@ -128,7 +127,6 @@ HEADERS += \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
     ../lib/AppSignalManager.h \
-    ../lib/HostAddressPort.h \
     ../lib/Factory.h \
     ../lib/AppSignal.h \
     ../lib/DbStruct.h \
@@ -147,7 +145,6 @@ HEADERS += \
     ../lib/Signal.h \
     ../lib/DeviceObject.h \
     ../lib/SignalProperties.h \
-    ../lib/XmlHelper.h \
     TuningSchema.h \
     SchemaItemImage.h \
     SchemaItemImageValue.h \

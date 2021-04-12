@@ -1,7 +1,7 @@
 #include "../Builder/ModuleFirmwareWriter.h"
 #include "../lib/CsvFile.h"
-#include "../lib/Crc.h"
-#include "../lib/WUtils.h"
+#include "../UtilsLib/Crc.h"
+#include "../UtilsLib/WUtils.h"
 #include "../lib/CUtils.h"
 
 #include <qqml.h>

@@ -6,7 +6,7 @@
 #include "../lib/ComparatorSet.h"
 
 #include "../lib/DeviceObject.h"
-#include "../lib/XmlHelper.h"
+#include "../UtilsLib/XmlHelper.h"
 
 #include "../Proto/ProtoSerialization.h"
 

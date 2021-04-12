@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/SimpleThread.h"
+#include "../UtilsLib/SimpleThread.h"
 #include "AppDataReceiver.h"
 
 class AppDataProcessingThread : public RunOverrideThread

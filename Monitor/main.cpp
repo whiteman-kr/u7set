@@ -1,4 +1,4 @@
-#include "../lib/SimpleThread.h"
+#include "../UtilsLib/SimpleThread.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../VFrame30/VFrame30Library.h"
 #include "Settings.h"

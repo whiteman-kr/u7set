@@ -8,8 +8,8 @@
 #include "DbStruct.h"
 #include "OrderedHash.h"
 #include "DeviceObject.h"
-#include "Address16.h"
-#include "Hash.h"
+#include "../UtilsLib/Address16.h"
+#include "../UtilsLib/Hash.h"
 #include "TuningValue.h"
 #include "AppSignalStateFlags.h"
 

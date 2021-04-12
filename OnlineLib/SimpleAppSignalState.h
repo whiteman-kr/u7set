@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../lib/Hash.h"
-#include "../lib/Queue.h"
+#include "../UtilsLib/Hash.h"
+#include "../UtilsLib/Queue.h"
 #include "../lib/Times.h"
 #include "../lib/AppSignalStateFlags.h"
 

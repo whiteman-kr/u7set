@@ -15,7 +15,6 @@ DialogSourceInfo::~DialogSourceInfo()
 {
 }
 
-
 void DialogSourceInfo::createDataItem(QTreeWidgetItem* parentItem, const QString& caption)
 {
 	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << caption);

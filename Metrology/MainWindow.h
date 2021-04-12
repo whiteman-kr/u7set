@@ -10,7 +10,7 @@
 #include <QProgressBar>
 #include <QComboBox>
 
-#include "../lib/SimpleThread.h"
+#include "../UtilsLib/SimpleThread.h"
 
 #include "CalibratorBase.h"
 #include "ConfigSocket.h"

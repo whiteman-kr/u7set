@@ -5,7 +5,7 @@
 #include <QDebug>
 
 #include "../../OnlineLib/SocketIO.h"
-#include "../../lib/XmlHelper.h"
+#include "../../UtilsLib/XmlHelper.h"
 #include "../../lib/Signal.h"
 #include "../../lib/ConstStrings.h"
 

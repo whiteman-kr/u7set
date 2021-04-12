@@ -3,7 +3,7 @@
 #include <QFile>
 #include <QTextStream>
 
-#include "../lib/SimpleThread.h"
+#include "../UtilsLib/SimpleThread.h"
 
 // ----------------------------------------------------------------------------------
 //

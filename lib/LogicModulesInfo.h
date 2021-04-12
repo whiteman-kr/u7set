@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Address16.h"
+#include "../UtilsLib/Address16.h"
 #include "Types.h"
-#include "DomXmlHelper.h"
+#include "../UtilsLib/DomXmlHelper.h"
 #include "LanControllerInfo.h"
 
 #ifdef IS_BUILDER
 
-#include "XmlHelper.h"
-#include "WUtils.h"
+#include "../UtilsLib/XmlHelper.h"
+#include "../UtilsLib/WUtils.h"
 #include "ModuleLogicCompiler.h"
 #include "DeviceHelper.h"
 #include "LmDescription.h"

@@ -5,7 +5,7 @@
 #include "../lib/Signal.h"
 #include "../OnlineLib/CfgServerLoader.h"
 #include "../lib/SoftwareSettings.h"
-#include "../lib/Queue.h"
+#include "../UtilsLib/Queue.h"
 
 #include "AppDataReceiver.h"
 #include "TcpAppDataServer.h"

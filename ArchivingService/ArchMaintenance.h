@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../lib/SimpleThread.h"
+#include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"
-#include "../lib/Hash.h"
+#include "../UtilsLib/Hash.h"
 #include <QVector>
 #include <QElapsedTimer>
 

@@ -60,7 +60,6 @@ DEFINES += IS_BUILDER
 SOURCES += \
     ../lib/ClientBehavior.cpp \
     ../lib/DeviceHelper.cpp \
-    ../lib/DomXmlHelper.cpp \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/LogicModulesInfo.cpp \
 	../lib/MetrologyConnection.cpp \
@@ -78,18 +77,12 @@ SOURCES += \
     ../lib/ScriptDeviceObject.cpp \
     ../lib/Signal.cpp \
     ../lib/SignalSetProvider.cpp \
-    ../lib/SimpleMutex.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/Subsystem.cpp \
     ../lib/Types.cpp \
     ../lib/TuningValue.cpp \
-    ../lib/XmlHelper.cpp \
     ../lib/SignalProperties.cpp \
-    ../lib/Crc.cpp \
-    ../lib/HostAddressPort.cpp \
     ../lib/DataSource.cpp \
-    ../lib/Queue.cpp \
-    ../lib/WUtils.cpp \
     ../lib/CsvFile.cpp \
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/AppSignal.cpp \
@@ -97,6 +90,14 @@ SOURCES += \
     ../lib/LmDescription.cpp \
     ../lib/Tuning/TuningSignalManager.cpp \
     ../lib/ConnectionsInfo.cpp \
+	../lib/Tuning/TuningSignalState.cpp \
+	../lib/Times.cpp \
+	../lib/DbProgressDialog.cpp \
+	../lib/MetrologySignal.cpp \
+	../lib/UnitsConvertor.cpp \
+	../lib/UnitsConvertorTable.cpp \
+	../lib/AppSignalStateFlags.cpp \
+	../lib/ComparatorSet.cpp \
     Builder.cpp \
     IssueLogger.cpp \
     BuildWorkerThread.cpp \
@@ -130,24 +131,14 @@ SOURCES += \
     BdfFile.cpp \
     FbParamCalculation.cpp \
     TuningBuilder.cpp \
-    ../lib/Tuning/TuningSignalState.cpp \
-    ../lib/Address16.cpp \
-    ../lib/Times.cpp \
-	../lib/DbProgressDialog.cpp \
-    ../lib/MetrologySignal.cpp \
     RunOrder.cpp \
     TestClientCfgGenerator.cpp \
-    ../lib/UnitsConvertor.cpp \
-    ../lib/UnitsConvertorTable.cpp \
     Context.cpp \
-    ../lib/AppSignalStateFlags.cpp \
-    ../lib/ComparatorSet.cpp
 
 HEADERS += \
     ../lib/ClientBehavior.h \
     ../lib/ConstStrings.h \
     ../lib/DeviceHelper.h \
-    ../lib/DomXmlHelper.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
     ../lib/LogicModulesInfo.h \
@@ -168,19 +159,12 @@ HEADERS += \
     ../lib/ScriptDeviceObject.h \
     ../lib/Signal.h \
     ../lib/SignalSetProvider.h \
-    ../lib/SimpleMutex.h \
     ../lib/SoftwareSettings.h \
     ../lib/Subsystem.h \
     ../lib/Types.h \
     ../lib/TuningValue.h \
-    ../lib/XmlHelper.h \
     ../lib/SignalProperties.h \
-    ../lib/Crc.h \
-    ../lib/Hash.h \
-    ../lib/HostAddressPort.h \
     ../lib/DataSource.h \
-    ../lib/Queue.h \
-    ../lib/WUtils.h \
     ../lib/CsvFile.h \
     ../lib/Tuning/TuningFilter.h \
     ../lib/AppSignal.h \
@@ -188,6 +172,14 @@ HEADERS += \
     ../lib/LmDescription.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/ConnectionsInfo.h \
+	../lib/Tuning/TuningSignalState.h \
+	../lib/Times.h \
+	../lib/DbProgressDialog.h \
+	../lib/MetrologySignal.h \
+	../lib/UnitsConvertor.h \
+	../lib/UnitsConvertorTable.h \
+	../lib/AppSignalStateFlags.h \
+	../lib/ComparatorSet.h \
 	Builder.h \
     Loopbacks.h \
     SignalsHeap.h \
@@ -221,18 +213,9 @@ HEADERS += \
     MetrologyCfgGenerator.h \
     LmDescriptionSet.h \
     BdfFile.h \
-    ../lib/Tuning/TuningSignalState.h \
-    ../lib/Address16.h \
-    ../lib/Times.h \
-    ../lib/DbProgressDialog.h \
-    ../lib/MetrologySignal.h \
     RunOrder.h \
     TestClientCfgGenerator.h \
-    ../lib/UnitsConvertor.h \
-    ../lib/UnitsConvertorTable.h \
     Context.h \
-    ../lib/AppSignalStateFlags.h \
-    ../lib/ComparatorSet.h
 
 unix {
     target.path = /usr/lib

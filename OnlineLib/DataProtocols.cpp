@@ -1,11 +1,11 @@
-#ifndef __ONLINE_LIB__
+#ifndef ONLINE_LIB_DOMAIN
 #error Don't include this file in the project! Link OnlineLib instead.
 #endif
 
 #include <QtEndian>
 
 #include "DataProtocols.h"
-#include "../lib/WUtils.h"
+#include "../UtilsLib/WUtils.h"
 #include "../lib/ConstStrings.h"
 
 namespace Rup

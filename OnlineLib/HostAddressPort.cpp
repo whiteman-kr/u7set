@@ -1,8 +1,10 @@
+#ifndef ONLINE_LIB_DOMAIN
+#error Don't include this file in the project! Link OnlineLib instead.
+#endif
+
 #include <cassert>
 
 #include "HostAddressPort.h"
-#include "Socket.h"
-
 
 // -------------------------------------------------------------------------------
 //

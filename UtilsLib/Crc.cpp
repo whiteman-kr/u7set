@@ -1,13 +1,16 @@
+#ifndef UTILS_LIB_DOMAIN
+#error Don't include this file in the project! Link UtilsLib instead.
+#endif
+
 #include <QtEndian>
 #include <QString>
-#include "../lib/Crc.h"
 #include <vector>
 #include <cassert>
 
+#include "Crc.h"
 
 // Using normal poly 0x000000000000001B
 //
-
 quint64 Crc::crc64(const void* src, qint64 size)
 {
 	return Crc::crc64Normal(src, size);

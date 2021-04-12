@@ -2,7 +2,7 @@
 
 #include <QFileDialog>
 
-#include "../../lib/XmlHelper.h"
+#include "../../UtilsLib/XmlHelper.h"
 #include "../../lib/Types.h"
 #include "../../lib/ConstStrings.h"
 #include "../../OnlineLib/SocketIO.h"

@@ -37,10 +37,8 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 
 
 SOURCES += main.cpp \
-    ../lib/DomXmlHelper.cpp
 
 HEADERS += \
-    ../lib/DomXmlHelper.h
 
 RESOURCES += \
     SimulatorConsole.qrc
@@ -80,7 +78,6 @@ DEPENDPATH += ../VFrame30
 LIBS += -L$$DESTDIR -lprotobuf
 INCLUDEPATH += ./../Protobuf
 
-
 # Visual Leak Detector
 #
 win32 {
@@ -98,5 +95,17 @@ unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
 }
+
+# UtilsLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
+}
+
 
 

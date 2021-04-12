@@ -37,7 +37,6 @@ CONFIG += warn_off
 #	SignalTests.cpp \
 
 SOURCES += main.cpp \
-    ../../lib/Address16.cpp \
 	../../lib/DbController.cpp \
 	../../lib/DbWorker.cpp \
 	../../lib/DbStruct.cpp \
@@ -47,8 +46,6 @@ SOURCES += main.cpp \
 	../../lib/Signal.cpp \
 	../../lib/DbProgressDialog.cpp \
 	../../lib/Types.cpp \
-	../../lib/XmlHelper.cpp \
-	../../lib/HostAddressPort.cpp \
 	../../lib/TuningValue.cpp \
 	../../lib/SignalProperties.cpp \
     DeviceObjectTests.cpp \
@@ -69,7 +66,6 @@ SOURCES += main.cpp \
 #    SignalTests.h \
 
 HEADERS += \
-    ../../lib/Address16.h \
     ../../lib/DbController.h \
 	../../lib/DbWorker.h \
 	../../lib/DbStruct.h \
@@ -81,8 +77,6 @@ HEADERS += \
 	../../lib/DbProgressDialog.h \
 	../../lib/PropertyObject.h \
 	../../lib/Types.h \
-	../../lib/XmlHelper.h \
-	../../lib/HostAddressPort.h \
 	../../lib/TuningValue.h \
 	../../lib/SignalProperties.h \
     DeviceObjectTests.h \
@@ -111,3 +105,33 @@ DISTFILES += \
 RESOURCES += \
     ../../DatabaseUpgrade/DatabaseUpgrade.qrc \
     FutureDatabaseUpgrade.qrc
+
+# Visual Leak Detector
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}
+
+# OnlineLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
+}
+
+# UtilsLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
+}
+

@@ -5,7 +5,7 @@
 #include "../lib/DbController.h"
 #include "../lib/SignalProperties.h"
 #include "../lib/WidgetUtils.h"
-#include "../lib/WUtils.h"
+#include "../UtilsLib/WUtils.h"
 #include "../lib/ConstStrings.h"
 #include "../lib/StandardColors.h"
 #include "../lib/SignalSetProvider.h"

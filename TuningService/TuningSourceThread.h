@@ -2,7 +2,7 @@
 
 #include <QUdpSocket>
 
-#include "../lib/SimpleThread.h"
+#include "../UtilsLib/SimpleThread.h"
 #include "../lib/SoftwareSettings.h"
 #include "../OnlineLib/CircularLogger.h"
 

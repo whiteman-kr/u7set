@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../lib/Signal.h"
-#include "../lib/WUtils.h"
+#include "../UtilsLib/WUtils.h"
 
 #include "../VFrame30/FblItemRect.h"
 #include "../VFrame30/SchemaItemSignal.h"

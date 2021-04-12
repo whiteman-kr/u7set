@@ -4,9 +4,9 @@
 #include <QUdpSocket>
 #include "../lib/TimeStamp.h"
 #include "../OnlineLib/SocketIO.h"
-#include "../lib/SimpleThread.h"
-#include "../lib/WUtils.h"
-#include "../lib/SimpleMutex.h"
+#include "../UtilsLib/SimpleThread.h"
+#include "../UtilsLib/WUtils.h"
+#include "../UtilsLib/SimpleMutex.h"
 #include "../lib/ILogFile.h"
 #include "SimScopedLog.h"
 

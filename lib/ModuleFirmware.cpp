@@ -1,5 +1,5 @@
 #include "../lib/ModuleFirmware.h"
-#include "../lib/Crc.h"
+#include "../UtilsLib/Crc.h"
 #include <QFile>
 #include <QMap>
 #include <QHash>

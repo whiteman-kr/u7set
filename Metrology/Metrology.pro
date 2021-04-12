@@ -45,7 +45,6 @@ unix {
 }
 
 SOURCES += \
-    ../lib/Address16.cpp \
     ../lib/DbController.cpp \
     ../lib/DbProgress.cpp \
     ../lib/DbProgressDialog.cpp \
@@ -53,13 +52,9 @@ SOURCES += \
     ../lib/MetrologyConnection.cpp \
     ../lib/SignalSetProvider.cpp \
     ../lib/ScriptDeviceObject.cpp \
-    ../lib/Crc.cpp \
-    ../lib/DbStruct.cpp \
+	../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/ModuleFirmware.cpp \
-    ../lib/XmlHelper.cpp \
-    ../lib/HostAddressPort.cpp \
-    ../lib/SimpleThread.cpp \
     ../lib/AppSignal.cpp \
     ../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
@@ -119,7 +114,6 @@ SOURCES += \
 
 HEADERS  += \
 	Stable.h \
-	../lib/Address16.h \
 	../lib/DbController.h \
     ../lib/DbProgress.h \
     ../lib/DbProgressDialog.h \
@@ -129,7 +123,6 @@ HEADERS  += \
     ../lib/ScriptDeviceObject.h \
     ../lib/Signal.h \
     ../lib/CUtils.h \
-    ../lib/Crc.h \
     ../lib/Factory.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
@@ -137,9 +130,6 @@ HEADERS  += \
     ../lib/Types.h \
     ../lib/OrderedHash.h \
     ../lib/PropertyObject.h \
-    ../lib/XmlHelper.h \
-    ../lib/HostAddressPort.h \
-    ../lib/SimpleThread.h \
     ../lib/AppSignal.h \
     ../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
@@ -236,4 +226,16 @@ unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
 }
+
+# UtilsLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
+}
+
 

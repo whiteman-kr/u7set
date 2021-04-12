@@ -1,6 +1,11 @@
+#ifndef UTILS_LIB_DOMAIN
+#error Don't include this file in the project! Link UtilsLib instead.
+#endif
+
 #include <cassert>
-#include "../lib/Queue.h"
-#include "../lib/WUtils.h"
+
+#include "Queue.h"
+#include "../UtilsLib/WUtils.h"
 
 // -------------------------------------------------------------------------
 //

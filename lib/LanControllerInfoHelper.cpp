@@ -1,3 +1,8 @@
+#include "../Builder/IssueLogger.h"
+#include "../UtilsLib/WUtils.h"
+#include "../OnlineLib/DataProtocols.h"
+#include "DeviceObject.h"
+#include "DeviceHelper.h"
 #include "LanControllerInfoHelper.h"
 
 // ---------------------------------------------------------------------------------
@@ -5,13 +10,6 @@
 //	LanControllerInfoHelper class implementation
 //
 // ---------------------------------------------------------------------------------
-
-#include "../Builder/IssueLogger.h"
-#include "DeviceObject.h"
-#include "WUtils.h"
-#include "DeviceHelper.h"
-#include "../OnlineLib/DataProtocols.h"
-#include "Socket.h"
 
 const QString LanControllerInfoHelper::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR("_ETHERNET0%1");
 

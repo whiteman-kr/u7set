@@ -1,5 +1,5 @@
 #include "SoftwareXmlReader.h"
-#include "../lib/WUtils.h"
+#include "../UtilsLib/WUtils.h"
 
 // -----------------------------------------------------------------------------------------------
 //

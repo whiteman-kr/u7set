@@ -30,22 +30,15 @@ unix {
 }
 
 SOURCES += \
-    ../lib/Address16.cpp \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/ScriptDeviceObject.cpp \
 	../lib/SoftwareSettings.cpp \
     ../lib/DataSource.cpp \
-    ../lib/SimpleThread.cpp \
-    ../lib/XmlHelper.cpp \
-    ../lib/Queue.cpp \
-    ../lib/WUtils.cpp \
-    ../lib/Crc.cpp \
     ../lib/Signal.cpp \
     ../lib/AppSignal.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/Types.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/HostAddressPort.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
@@ -56,7 +49,6 @@ SOURCES += \
     ../lib/SignalProperties.cpp \
 	../lib/AppSignalStateFlags.cpp \
     ../lib/WidgetUtils.cpp \
-    ../lib/SimpleMutex.cpp \
 	../Builder/IssueLogger.cpp \
 	../Builder/ModulesRawData.cpp \
 	../AppDataService/DynamicAppSignalState.cpp \
@@ -78,25 +70,18 @@ SOURCES += \
 
 HEADERS  += \
 	Stable.h \
-    ../lib/Address16.h \
     ../lib/CUtils.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
     ../lib/ScriptDeviceObject.h \
     ../lib/SoftwareSettings.h \
     ../lib/DataSource.h \
-    ../lib/SimpleThread.h \
-    ../lib/XmlHelper.h \
-    ../lib/Queue.h \
-    ../lib/WUtils.h \
-    ../lib/Crc.h \
     ../lib/Signal.h \
     ../lib/PropertyObject.h \
 	../lib/AppSignal.h \
     ../lib/DeviceObject.h \
     ../lib/Types.h \
     ../lib/DbStruct.h \
-    ../lib/HostAddressPort.h \
     ../lib/WidgetUtils.h \
     ../lib/SoftwareInfo.h \
     ../lib/OrderedHash.h \
@@ -108,7 +93,6 @@ HEADERS  += \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/SignalProperties.h \
     ../lib/AppSignalStateFlags.h \
-    ../lib/SimpleMutex.h \
 	../Builder/IssueLogger.h \
 	../Builder/ModulesRawData.h \
 	../AppDataService/DynamicAppSignalState.h \
@@ -175,6 +159,17 @@ win32 {
 unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
+}
+
+# UtilsLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
 }
 
 

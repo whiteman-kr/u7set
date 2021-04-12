@@ -2,11 +2,11 @@
 
 #include <QSqlQuery>
 
-#include "../lib/SimpleThread.h"
+#include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "../lib/TimeStamp.h"
-#include "../lib/Hash.h"
-#include "../lib/Queue.h"
+#include "../UtilsLib/Hash.h"
+#include "../UtilsLib/Queue.h"
 #include "../OnlineLib/SocketIO.h"
 #include "../Proto/network.pb.h"
 #include "ArchFile.h"

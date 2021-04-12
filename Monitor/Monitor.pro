@@ -50,7 +50,6 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 SOURCES += main.cpp \
-    ../lib/Address16.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
     ../lib/ScriptDeviceObject.cpp \
@@ -67,13 +66,11 @@ SOURCES += main.cpp \
 	Settings.cpp \
     DialogSettings.cpp \
     ../lib/BuildInfo.cpp \
-    ../lib/SimpleThread.cpp \
     MonitorSchemaWidget.cpp \
     ../lib/Types.cpp \
     MonitorConfigController.cpp \
     TcpSignalClient.cpp \
     ../lib/Signal.cpp \
-    ../lib/XmlHelper.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
     ../lib/AppSignal.cpp \
@@ -82,7 +79,6 @@ SOURCES += main.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     DialogColumns.cpp \
-    ../lib/HostAddressPort.cpp \
     MonitorView.cpp \
     Trend/MonitorTrends.cpp \
     MonitorArchive.cpp \
@@ -93,8 +89,7 @@ SOURCES += main.cpp \
     TcpSignalRecents.cpp \
     MonitorSchemaManager.cpp \
     SelectSchemaWidget.cpp \    
-	../lib/Crc.cpp \
-    ../lib/Tuning/TuningSignalManager.cpp \
+	../lib/Tuning/TuningSignalManager.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/SoftwareInfo.cpp \
@@ -118,7 +113,6 @@ SOURCES += main.cpp \
 	../lib/ExportPrint.cpp
 
 HEADERS  += \
-    ../lib/Address16.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
     ../lib/ConstStrings.h \
@@ -138,15 +132,12 @@ HEADERS  += \
 	Settings.h \
     DialogSettings.h \
     ../lib/BuildInfo.h \
-    ../lib/SimpleThread.h \
     MonitorSchemaWidget.h \
     ../lib/Types.h \
     MonitorConfigController.h \
     TcpSignalClient.h \
-    ../lib/Hash.h \
     ../lib/Signal.h \
     ../lib/PropertyObject.h \
-    ../lib/XmlHelper.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
     ../lib/AppSignal.h \
@@ -155,7 +146,6 @@ HEADERS  += \
     ../lib/Ui/DialogSignalInfo.h \
     ../lib/Ui/DialogSignalSearch.h \
     DialogColumns.h \
-    ../lib/HostAddressPort.h \
     MonitorView.h \
     Trend/MonitorTrends.h \
     MonitorArchive.h \
@@ -166,7 +156,6 @@ HEADERS  += \
     TcpSignalRecents.h \
     SelectSchemaWidget.h \
     MonitorSchemaManager.h \
-	../lib/Crc.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/Tuning/TuningTcpClient.h \
     ../lib/SoftwareInfo.h \
@@ -288,4 +277,16 @@ unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
 }
+
+# UtilsLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
+}
+
 

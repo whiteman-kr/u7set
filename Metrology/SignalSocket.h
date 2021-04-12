@@ -3,7 +3,7 @@
 
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/SocketIO.h"
-#include "../lib/Hash.h"
+#include "../UtilsLib/Hash.h"
 #include "../lib/AppSignal.h"
 
 #include "../Proto/network.pb.h"

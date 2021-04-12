@@ -3,7 +3,7 @@
 #include "../ServiceLib/Service.h"
 #include "../OnlineLib/CfgServerLoader.h"
 #include "../lib/SoftwareSettings.h"
-#include "../lib/Queue.h"
+#include "../UtilsLib/Queue.h"
 
 #include "TcpAppDataServer.h"
 #include "Archive.h"

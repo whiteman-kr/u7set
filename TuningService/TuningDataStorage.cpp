@@ -1,6 +1,6 @@
 #include <QtEndian>
-#include "../lib/Crc.h"
-#include "../lib/WUtils.h"
+#include "../UtilsLib/Crc.h"
+#include "../UtilsLib/WUtils.h"
 #include "TuningDataStorage.h"
 #include "../TuningService/TuningSource.h"
 

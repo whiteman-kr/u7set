@@ -41,14 +41,8 @@ SOURCES += \
     ../../lib/LanControllerInfoHelper.cpp \
     ../../lib/SoftwareSettings.cpp \
     ../../lib/ScriptDeviceObject.cpp \
-    ../../lib/XmlHelper.cpp \
-    ../../lib/HostAddressPort.cpp \
-    ../../lib/SimpleThread.cpp \
-    ../../lib/Crc.cpp \
-    ../../lib/WUtils.cpp \
     ../../lib/Ui/DialogAbout.cpp \
     ../../lib/Signal.cpp \
-    ../../lib/Address16.cpp \
     ../../lib/AppSignalStateFlags.cpp \
     ../../lib/DbStruct.cpp \
     ../../lib/DeviceObject.cpp \
@@ -59,7 +53,6 @@ SOURCES += \
     ../../lib/DataSource.cpp \
     ../../lib/OutputLog.cpp \
     ../../lib/DeviceHelper.cpp \
-    ../../lib/SimpleMutex.cpp \
     ../../lib/Times.cpp \
     ../../lib/SoftwareInfo.cpp \
     ../../lib/BuildInfo.cpp \
@@ -90,18 +83,11 @@ HEADERS += \
     ../../lib/LanControllerInfoHelper.h \
     ../../lib/SoftwareSettings.h \
     ../../lib/ScriptDeviceObject.h \
-    ../../lib/XmlHelper.h \
-    ../../lib/HostAddressPort.h \
-    ../../lib/SimpleThread.h \
-    ../../lib/Crc.h \
-    ../../lib/WUtils.h \
     ../../lib/Ui/DialogAbout.h \
     ../../lib/Signal.h \
-    ../../lib/Address16.h \
     ../../lib/AppSignalStateFlags.h \
     ../../lib/DbStruct.h \
     ../../lib/DeviceObject.h \
-    ../../lib/Hash.h \
     ../../lib/TuningValue.h \
     ../../lib/Types.h \
     ../../lib/PropertyObject.h \
@@ -113,7 +99,6 @@ HEADERS += \
     ../../lib/DataSource.h \
     ../../lib/OutputLog.h \
     ../../lib/DeviceHelper.h \
-    ../../lib/SimpleMutex.h \
     ../../lib/Times.h \
     ../../lib/SoftwareInfo.h \
     ../../lib/BuildInfo.h \
@@ -180,5 +165,17 @@ unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
 }
+
+# UtilsLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
+}
+
 
 

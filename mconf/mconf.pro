@@ -52,39 +52,37 @@ DEFINES += QT_DLL QT_WIDGETS_LIB QT_NETWORK_LIB QT_SQL_LIB QT_XML_LIB
 HEADERS += \
     ../lib/ScriptDeviceObject.h \
     ../lib/Ui/DialogAbout.h \
+	../lib/DbStruct.h \
+	../lib/DeviceObject.h \
+	../lib/OutputLog.h \
+	../lib/CUtils.h \
+	../lib/PropertyObject.h \
+	../lib/Types.h \
+	../lib/Configurator.h \
+	../lib/ModuleFirmware.h \
 	Stable.h \
 	ftdi/ftd2xx.h \
-        ../lib/DbStruct.h \
-    ../lib/DeviceObject.h \
-    ../lib/OutputLog.h \
     Settings.h \
     ApplicationTabPage.h \
     DiagTabPage.h \
     ModuleConfigurator.h \
     SettingsForm.h \
-        ../lib/Crc.h \
-        ../lib/CUtils.h \
-    ../lib/PropertyObject.h \
-    ../lib/Types.h \
-    ../lib/Configurator.h \
-    ../lib/ModuleFirmware.h
 
 SOURCES += \
     ../lib/ScriptDeviceObject.cpp \
     ../lib/Ui/DialogAbout.cpp \
-	main.cpp \
 	../lib/DbStruct.cpp \
-    ../lib/DeviceObject.cpp \
-    ../lib/OutputLog.cpp \
+	../lib/DeviceObject.cpp \
+	../lib/OutputLog.cpp \
+	../lib/Types.cpp \
+	../lib/Configurator.cpp \
+	../lib/ModuleFirmware.cpp \
+	main.cpp \
     Settings.cpp \
     ApplicationTabPage.cpp \
     DiagTabPage.cpp \
     ModuleConfigurator.cpp \
     SettingsForm.cpp \
-    ../lib/Crc.cpp \
-    ../lib/Types.cpp \
-    ../lib/Configurator.cpp \
-    ../lib/ModuleFirmware.cpp
 
 FORMS += moduleconfigurator.ui \
 	diagtabpage.ui
@@ -128,3 +126,15 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
+
+# UtilsLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
+}
+

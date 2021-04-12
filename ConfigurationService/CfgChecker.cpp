@@ -4,7 +4,7 @@
 #include <QDir>
 
 #include "CfgChecker.h"
-#include "../lib/XmlHelper.h"
+#include "../UtilsLib/XmlHelper.h"
 
 // ------------------------------------------------------------------------------------
 //

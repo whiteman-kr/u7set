@@ -3,7 +3,7 @@
 #include "../lib/DbController.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/ScriptDeviceObject.h"
-#include "../lib/Crc.h"
+#include "../UtilsLib/Crc.h"
 #include "../lib/SignalProperties.h"
 #include "../lib/Connection.h"
 #include "IssueLogger.h"

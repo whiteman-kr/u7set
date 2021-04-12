@@ -1,7 +1,11 @@
-#include "../lib/WUtils.h"
+#ifndef UTILS_LIB_DOMAIN
+#error Don't include this file in the project! Link UtilsLib instead.
+#endif
+
 #include <QString>
 #include <cassert>
 
+#include "WUtils.h"
 
 void swapBytes(const char* src, char* dest, int size)
 {

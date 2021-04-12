@@ -2,7 +2,7 @@
 #define ARCHIVETRENDTCPCLIENT_H
 
 #include "../OnlineLib/Tcp.h"
-#include "../lib/Hash.h"
+#include "../UtilsLib/Hash.h"
 #include "../lib/TimeStamp.h"
 #include "../Proto/network.pb.h"
 #include "../TrendView/TrendSignal.h"

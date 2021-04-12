@@ -22,7 +22,7 @@
 
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/SocketIO.h"
-#include "../lib/Hash.h"
+#include "../UtilsLib/Hash.h"
 
 #include "../Proto/network.pb.h"
 

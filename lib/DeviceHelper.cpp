@@ -1,5 +1,6 @@
 #include "../lib/DeviceHelper.h"
-#include "../lib/WUtils.h"
+#include "../UtilsLib/WUtils.h"
+#include "../OnlineLib/SocketIO.h"
 #include <QHostAddress>
 
 

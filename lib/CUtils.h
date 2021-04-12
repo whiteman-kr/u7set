@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TypesAndEnums.h"
-#include "Hash.h"
+#include "../UtilsLib/Hash.h"
 
 #include <QtWidgets/QApplication>
 #include <assert.h>

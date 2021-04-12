@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Hash.h"
+#include "../UtilsLib/Hash.h"
 #include "../TuningValue.h"
 #include "../../Proto/network.pb.h"
 

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "ConstStrings.h"
-#include "XmlHelper.h"
+#include "../UtilsLib/XmlHelper.h"
 #include "../OnlineLib/SocketIO.h"
-#include "WUtils.h"
+#include "../UtilsLib/WUtils.h"
 #include "../Proto/network.pb.h"
 
 #ifdef IS_BUILDER

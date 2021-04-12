@@ -2,7 +2,7 @@
 #include "IssueLogger.h"
 #include "../u7/Settings.h"
 #include "../lib/DbController.h"
-#include "../lib/WUtils.h"
+#include "../UtilsLib/WUtils.h"
 #include "../lib/ConstStrings.h"
 #include <QFileInfo>
 #include <QDir>

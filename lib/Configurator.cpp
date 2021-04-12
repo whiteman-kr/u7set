@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "../lib/Configurator.h"
-#include "../lib/Crc.h"
+#include "../UtilsLib/Crc.h"
 #include <QtEndian>
 #include <QHostInfo>
 #include <cstring>

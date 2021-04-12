@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 
 #include "../../lib/Ui/DialogAbout.h"
-#include "../../lib/XmlHelper.h"
+#include "../../UtilsLib/XmlHelper.h"
 
 #include "OptionsDialog.h"
 

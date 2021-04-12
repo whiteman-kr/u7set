@@ -1,5 +1,9 @@
+#ifndef UTILS_LIB_DOMAIN
+#error Don't include this file in the project! Link UtilsLib instead.
+#endif
+
 #include "Address16.h"
-#include "ConstStrings.h"
+#include "../lib/ConstStrings.h"
 
 Address16::Address16()
 {

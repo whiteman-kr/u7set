@@ -64,138 +64,8 @@ CONFIG(release, debug|release) {
 }
 
 
-SOURCES +=\
-    ../lib/ExportPrint.cpp \
-	../lib/MetrologyConnection.cpp \
-    ../lib/SoftwareXmlReader.cpp \
-    ../lib/Ui/DbControllerTools.cpp \
-    ../lib/Ui/DialogSignalInfo.cpp \
-    ../lib/Ui/DialogSignalSearch.cpp \
-    ../lib/Ui/DialogSignalSnapshot.cpp \
-    ../lib/Ui/DragDropHelper.cpp \
-    ../lib/Ui/FilesTreeView.cpp \
-    ../lib/Ui/SchemaListWidget.cpp \
-    ../lib/Ui/TabWidgetEx.cpp \
-    ../lib/Ui/TagSelectorWidget.cpp \
-    CentralWidget.cpp \
-    CreateProjectDialog.cpp \
-    CreateUserDialogDialog.cpp \
-    DialogClientBehavior.cpp \
-    DialogMetrologyConnection.cpp \
-    DialogSettings.cpp \
-    DialogTagsEditor.cpp \
-    EditEngine/EditEngineNop.cpp \
-    EquipmentEditor/EquipmentModel.cpp \
-    EquipmentEditor/EquipmentView.cpp \
-    FilesTabPage.cpp \
-    ../lib/Ui/DialogProgress.cpp \
-    Forms/DialogProjectDiff.cpp \
-    LoginDialog.cpp \
-    Main.cpp \
-    MainTabPage.cpp \
-    MainWindow.cpp \
-    PasswordService.cpp \
-    Reports/ProjectDiffGenerator.cpp \
-    Reports/ReportTools.cpp \
-    Reports/SchemasReportGenerator.cpp \
-    SchemaEditor/EditSchemaSignalProvider.cpp \
-    SchemaEditor/EditSchemaTypes.cpp \
-    SchemaEditor/EditSchemaView.cpp \
-    Settings.cpp \
-    Simulator/SimConnectionPage.cpp \
-    Simulator/SimLogicModulePage.cpp \
-    Simulator/SimOverridePane.cpp \
-    Simulator/SimOverrideValueWidget.cpp \
-    Simulator/SimProfileEditor.cpp \
-    Simulator/SimSignalInfo.cpp \
-    Simulator/SimSelectSchemaPage.cpp \
-    Simulator/SimSignalSnapshot.cpp \
-    Simulator/SimTrend/SimTrends.cpp \
-    TagsEditor.cpp \
-    TestsTabPage.cpp \
-    UserManagementDialog.cpp \
-    ../lib/DbProgressDialog.cpp \
-	EquipmentEditor/EquipmentTabPage.cpp \
-    CheckInDialog.cpp \
-    ProjectsTabPage.cpp \
-    SignalsTabPage.cpp \
-    SignalPropertiesDialog.cpp \
-    EditEngine/EditEngine.cpp \
-    EditEngine/EditEngineAddItem.cpp \
-    EditEngine/EditEngineDeleteItem.cpp \
-    EditEngine/EditEngineMoveItem.cpp \
-    EditEngine/EditEngineSetPoints.cpp \
-    EditEngine/EditEngineSetProperty.cpp \
-    BuildTabPage.cpp \
-    DialogFileEditor.cpp \
-    DialogSubsystemListEditor.cpp \
-	EquipmentEditor/EquipmentVcsDialog.cpp \
-    ../lib/PropertyEditor.cpp \
-    ../lib/PropertyEditorDialog.cpp \
-    GlobalMessanger.cpp \
-	SchemaEditor/EditSchemaWidget.cpp \
-	SchemaEditor/SchemaPropertiesDialog.cpp \
-	SchemaEditor/SchemaItemPropertiesDialog.cpp \
-	SchemaEditor/SchemaLayersDialog.cpp \
-	SchemaEditor/CreateSchemaDialog.cpp \
-    EditEngine/EditEngineSetSchemaProperty.cpp \
-    EditEngine/EditEngineSetOrder.cpp \
-    UploadTabPage.cpp \
-	EquipmentEditor/DialogChoosePreset.cpp \
-    ../lib/Configurator.cpp \
-    DialogSettingsConfigurator.cpp \
-    Forms/ChooseUfbDialog.cpp \
-    Forms/SelectChangesetDialog.cpp \
-    Forms/FileHistoryDialog.cpp \
-    Forms/ChangesetDetailsDialog.cpp \
-    Forms/CompareDialog.cpp \
-    Forms/ComparePropertyObjectDialog.cpp \
-    DialogConnections.cpp \
-    ../lib/Tuning/TuningFilterEditor.cpp \
-    ../lib/Tuning/TuningModel.cpp \
-    DialogBusEditor.cpp \
-    BusStorage.cpp \
-    Forms/DialogUpdateFromPreset.cpp \
-    Forms/ChooseAfbDialog.cpp \
-    IdePropertyEditor.cpp \
-    EditEngine/EditEngineSetObject.cpp \
-	SchemaEditor/EditConnectionLine.cpp \
-    EditEngine/EditEngineBatch.cpp \
-	SchemaEditor/CreateSignalDialog.cpp \
-    SimulatorTabPage.cpp \
-    Simulator/SimIdeSimulator.cpp \
-    Simulator/SimSchemaWidget.cpp \
-    Simulator/SimSchemaManager.cpp \
-    Simulator/SimSchemaView.cpp \
-    Simulator/SimTuningTcpClient.cpp \
-    ../lib/AppSignalManager.cpp \
-    Simulator/SimCodePage.cpp \
-    Simulator/SimWidget.cpp \
-    Simulator/SimSelectBuildDialog.cpp \
-    Simulator/SimSchemaPage.cpp \
-    Simulator/SimProjectWidget.cpp \
-    Simulator/SimOutputWidget.cpp \
-    Simulator/SimMemoryWidget.cpp \
-    Simulator/SimBasePage.cpp \
-    SpecificPropertiesEditor.cpp \
-    ../lib/Ui/DialogAbout.cpp \
-	SchemaEditor/SchemaTabPageEx.cpp \
-    DialogAfbLibraryCheck.cpp \
-    ../lib/WidgetUtils.cpp \
-    Forms/ProjectPropertiesForm.cpp \
-	Forms/PendingChangesDialog.cpp \
-    ../lib/SimpleMutex.cpp \
-    ../lib/Ui/TextEditCompleter.cpp \
-    ../lib/QScintillaLexers/LexerJavaScript.cpp \
-    ../lib/QScintillaLexers/LexerXML.cpp \
-    DialogShortcuts.cpp \
-    ../lib/Ui/UiTools.cpp \
-    SvgEditor.cpp \
-	../lib/PropertyTable.cpp \
-    ../lib/SignalSetProvider.cpp
-
-
 HEADERS  += \
+	Stable.h \
     ../lib/ExportPrint.h \
 	../lib/MetrologyConnection.h \
     ../lib/QDoublevalidatorEx.h \
@@ -210,7 +80,30 @@ HEADERS  += \
     ../lib/Ui/SchemaListWidget.h \
     ../lib/Ui/TabWidgetEx.h \
     ../lib/Ui/TagSelectorWidget.h \
-    CentralWidget.h \
+	../lib/Ui/DialogProgress.h \
+	../lib/DbProgressDialog.h \
+	../lib/Factory.h \
+	../lib/CUtils.h \
+	../lib/OrderedHash.h \
+	../lib/PropertyObject.h \
+	../lib/PropertyEditor.h \
+	../lib/PropertyEditorDialog.h \
+	../lib/DebugInstCounter.h \
+	../lib/diff_match_patch.h \
+	../lib/Configurator.h \
+	../lib/Tuning/TuningFilterEditor.h \
+	../lib/Tuning/TuningModel.h \
+	../lib/WidgetUtils.h \
+	../lib/Ui/DialogAbout.h \
+	../lib/DbObjectStorage.h \
+	../lib/AppSignalManager.h \
+	../lib/Ui/TextEditCompleter.h \
+	../lib/QScintillaLexers/LexerJavaScript.h \
+	../lib/QScintillaLexers/LexerXML.h \
+	../lib/Ui/UiTools.h \
+	../lib/PropertyTable.h \
+	../lib/SignalSetProvider.h \
+	CentralWidget.h \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \
     DialogClientBehavior.h \
@@ -221,7 +114,6 @@ HEADERS  += \
 	EquipmentEditor/EquipmentModel.h \
     EquipmentEditor/EquipmentView.h \
     FilesTabPage.h \
-    ../lib/Ui/DialogProgress.h \
     Forms/DialogProjectDiff.h \
     LoginDialog.h \
     MainTabPage.h \
@@ -243,14 +135,9 @@ HEADERS  += \
     Simulator/SimSelectSchemaPage.h \
     Simulator/SimSignalSnapshot.h \
     Simulator/SimTrend/SimTrends.h \
-    Stable.h \
     TagsEditor.h \
     TestsTabPage.h \
     UserManagementDialog.h \
-    ../lib/DbProgressDialog.h \
-    ../lib/Factory.h \
-    ../lib/CUtils.h \
-    ../lib/OrderedHash.h \
 	EquipmentEditor/EquipmentTabPage.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
@@ -267,10 +154,6 @@ HEADERS  += \
     DialogSubsystemListEditor.h \
     Forms/ChooseAfbDialog.h \
 	EquipmentEditor/EquipmentVcsDialog.h \
-    ../lib/PropertyObject.h \
-    ../lib/PropertyEditor.h \
-    ../lib/PropertyEditorDialog.h \
-    ../lib/DebugInstCounter.h \
     GlobalMessanger.h \
 	SchemaEditor/EditSchemaWidget.h \
 	SchemaEditor/SchemaPropertiesDialog.h \
@@ -281,7 +164,6 @@ HEADERS  += \
     EditEngine/EditEngineSetOrder.h \
     UploadTabPage.h \
 	EquipmentEditor/DialogChoosePreset.h \
-    ../lib/Configurator.h \
     DialogSettingsConfigurator.h \
     Forms/ChooseUfbDialog.h \
     Forms/SelectChangesetDialog.h \
@@ -289,11 +171,7 @@ HEADERS  += \
     Forms/ChangesetDetailsDialog.h \
     Forms/CompareDialog.h \
     Forms/ComparePropertyObjectDialog.h \
-    ../lib/diff_match_patch.h \
     DialogConnections.h \
-    ../lib/Tuning/TuningFilterEditor.h \
-    ../lib/Tuning/TuningModel.h \
-    ../lib/WidgetUtils.h \
     DialogBusEditor.h \
     BusStorage.h \
     Forms/DialogUpdateFromPreset.h \
@@ -308,7 +186,6 @@ HEADERS  += \
     Simulator/SimSchemaManager.h \
     Simulator/SimSchemaView.h \
     Simulator/SimTuningTcpClient.h \
-    ../lib/AppSignalManager.h \
     Simulator/SimCodePage.h \
     Simulator/SimWidget.h \
     Simulator/SimSelectBuildDialog.h \
@@ -318,22 +195,141 @@ HEADERS  += \
     Simulator/SimOutputWidget.h \
     Simulator/SimProjectWidget.h \
     SpecificPropertiesEditor.h \
-    ../lib/Ui/DialogAbout.h \
-    ../lib/DbObjectStorage.h \
 	SchemaEditor/SchemaTabPageEx.h \
     DialogAfbLibraryCheck.h \
     Forms/ProjectPropertiesForm.h \
     Forms/PendingChangesDialog.h \
-    ../lib/SimpleMutex.h \
-    ../lib/Ui/TextEditCompleter.h \
-    ../lib/QScintillaLexers/LexerJavaScript.h \
-	../lib/QScintillaLexers/LexerXML.h \
     DialogShortcuts.h \
-    ../lib/Ui/UiTools.h \
-    SvgEditor.h \
-	../lib/PropertyTable.h \
-    ../lib/SignalSetProvider.h
+	SvgEditor.h \
 
+SOURCES +=\
+	../lib/ExportPrint.cpp \
+	../lib/MetrologyConnection.cpp \
+	../lib/SoftwareXmlReader.cpp \
+	../lib/Ui/DbControllerTools.cpp \
+	../lib/Ui/DialogSignalInfo.cpp \
+	../lib/Ui/DialogSignalSearch.cpp \
+	../lib/Ui/DialogSignalSnapshot.cpp \
+	../lib/Ui/DragDropHelper.cpp \
+	../lib/Ui/FilesTreeView.cpp \
+	../lib/Ui/SchemaListWidget.cpp \
+	../lib/Ui/TabWidgetEx.cpp \
+	../lib/Ui/TagSelectorWidget.cpp \
+	../lib/Ui/DialogProgress.cpp \
+	../lib/DbProgressDialog.cpp \
+	../lib/PropertyEditor.cpp \
+	../lib/PropertyEditorDialog.cpp \
+	../lib/Configurator.cpp \
+	../lib/Tuning/TuningFilterEditor.cpp \
+	../lib/Tuning/TuningModel.cpp \
+	../lib/AppSignalManager.cpp \
+	../lib/Ui/DialogAbout.cpp \
+	../lib/WidgetUtils.cpp \
+	../lib/Ui/TextEditCompleter.cpp \
+	../lib/QScintillaLexers/LexerJavaScript.cpp \
+	../lib/QScintillaLexers/LexerXML.cpp \
+	../lib/Ui/UiTools.cpp \
+	../lib/PropertyTable.cpp \
+	../lib/SignalSetProvider.cpp \
+	CentralWidget.cpp \
+	CreateProjectDialog.cpp \
+	CreateUserDialogDialog.cpp \
+	DialogClientBehavior.cpp \
+	DialogMetrologyConnection.cpp \
+	DialogSettings.cpp \
+	DialogTagsEditor.cpp \
+	EditEngine/EditEngineNop.cpp \
+	EquipmentEditor/EquipmentModel.cpp \
+	EquipmentEditor/EquipmentView.cpp \
+	FilesTabPage.cpp \
+	Forms/DialogProjectDiff.cpp \
+	LoginDialog.cpp \
+	Main.cpp \
+	MainTabPage.cpp \
+	MainWindow.cpp \
+	PasswordService.cpp \
+	Reports/ProjectDiffGenerator.cpp \
+	Reports/ReportTools.cpp \
+	Reports/SchemasReportGenerator.cpp \
+	SchemaEditor/EditSchemaSignalProvider.cpp \
+	SchemaEditor/EditSchemaTypes.cpp \
+	SchemaEditor/EditSchemaView.cpp \
+	Settings.cpp \
+	Simulator/SimConnectionPage.cpp \
+	Simulator/SimLogicModulePage.cpp \
+	Simulator/SimOverridePane.cpp \
+	Simulator/SimOverrideValueWidget.cpp \
+	Simulator/SimProfileEditor.cpp \
+	Simulator/SimSignalInfo.cpp \
+	Simulator/SimSelectSchemaPage.cpp \
+	Simulator/SimSignalSnapshot.cpp \
+	Simulator/SimTrend/SimTrends.cpp \
+	TagsEditor.cpp \
+	TestsTabPage.cpp \
+	UserManagementDialog.cpp \
+	EquipmentEditor/EquipmentTabPage.cpp \
+	CheckInDialog.cpp \
+	ProjectsTabPage.cpp \
+	SignalsTabPage.cpp \
+	SignalPropertiesDialog.cpp \
+	EditEngine/EditEngine.cpp \
+	EditEngine/EditEngineAddItem.cpp \
+	EditEngine/EditEngineDeleteItem.cpp \
+	EditEngine/EditEngineMoveItem.cpp \
+	EditEngine/EditEngineSetPoints.cpp \
+	EditEngine/EditEngineSetProperty.cpp \
+	BuildTabPage.cpp \
+	DialogFileEditor.cpp \
+	DialogSubsystemListEditor.cpp \
+	EquipmentEditor/EquipmentVcsDialog.cpp \
+	GlobalMessanger.cpp \
+	SchemaEditor/EditSchemaWidget.cpp \
+	SchemaEditor/SchemaPropertiesDialog.cpp \
+	SchemaEditor/SchemaItemPropertiesDialog.cpp \
+	SchemaEditor/SchemaLayersDialog.cpp \
+	SchemaEditor/CreateSchemaDialog.cpp \
+	EditEngine/EditEngineSetSchemaProperty.cpp \
+	EditEngine/EditEngineSetOrder.cpp \
+	UploadTabPage.cpp \
+	EquipmentEditor/DialogChoosePreset.cpp \
+	DialogSettingsConfigurator.cpp \
+	Forms/ChooseUfbDialog.cpp \
+	Forms/SelectChangesetDialog.cpp \
+	Forms/FileHistoryDialog.cpp \
+	Forms/ChangesetDetailsDialog.cpp \
+	Forms/CompareDialog.cpp \
+	Forms/ComparePropertyObjectDialog.cpp \
+	DialogConnections.cpp \
+	DialogBusEditor.cpp \
+	BusStorage.cpp \
+	Forms/DialogUpdateFromPreset.cpp \
+	Forms/ChooseAfbDialog.cpp \
+	IdePropertyEditor.cpp \
+	EditEngine/EditEngineSetObject.cpp \
+	SchemaEditor/EditConnectionLine.cpp \
+	EditEngine/EditEngineBatch.cpp \
+	SchemaEditor/CreateSignalDialog.cpp \
+	SimulatorTabPage.cpp \
+	Simulator/SimIdeSimulator.cpp \
+	Simulator/SimSchemaWidget.cpp \
+	Simulator/SimSchemaManager.cpp \
+	Simulator/SimSchemaView.cpp \
+	Simulator/SimTuningTcpClient.cpp \
+	Simulator/SimCodePage.cpp \
+	Simulator/SimWidget.cpp \
+	Simulator/SimSelectBuildDialog.cpp \
+	Simulator/SimSchemaPage.cpp \
+	Simulator/SimProjectWidget.cpp \
+	Simulator/SimOutputWidget.cpp \
+	Simulator/SimMemoryWidget.cpp \
+	Simulator/SimBasePage.cpp \
+	SpecificPropertiesEditor.cpp \
+	SchemaEditor/SchemaTabPageEx.cpp \
+	DialogAfbLibraryCheck.cpp \
+	Forms/ProjectPropertiesForm.cpp \
+	Forms/PendingChangesDialog.cpp \
+	DialogShortcuts.cpp \
+	SvgEditor.cpp \
 
 FORMS    += \
     ../lib/Ui/DialogSignalInfo.ui \
@@ -556,5 +552,16 @@ win32 {
 unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
+}
+
+# UtilsLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
 }
 

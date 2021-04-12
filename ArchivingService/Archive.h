@@ -4,12 +4,12 @@
 #include <QMutex>
 #include <QSqlDatabase>
 
-#include "../lib/Hash.h"
-#include "../lib/HostAddressPort.h"
+#include "../UtilsLib/Hash.h"
+#include "../OnlineLib/HostAddressPort.h"
 #include "../lib/TimeStamp.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "../lib/Types.h"
-#include "../lib/Queue.h"
+#include "../UtilsLib/Queue.h"
 #include "../lib/AppSignal.h"
 #include "ArchRequest.h"
 #include "ArchMaintenance.h"

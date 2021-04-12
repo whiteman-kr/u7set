@@ -2,7 +2,7 @@
 #include "SimScopedLog.h"
 #include "../lib/SoftwareSettings.h"
 #include "../lib/TimeStamp.h"
-#include "../lib/SimpleThread.h"
+#include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/DataProtocols.h"
 #include "../lib/LogicModulesInfo.h"
 #include "SimRam.h"

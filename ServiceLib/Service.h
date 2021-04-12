@@ -13,7 +13,7 @@
 #include "./qtservice/src/qtservice.h"
 #include "../OnlineLib/UdpSocket.h"
 #include "../OnlineLib/CircularLogger.h"
-#include "../lib/SimpleThread.h"
+#include "../UtilsLib/SimpleThread.h"
 #include "CommandLineParser.h"
 #include "../lib/SoftwareInfo.h"
 #include "../lib/SoftwareSettings.h"

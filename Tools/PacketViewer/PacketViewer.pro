@@ -19,35 +19,28 @@ win32:QMAKE_CXXFLAGS += /std:c++latest
 # DESTDIR
 #
 win32 {
-        CONFIG(debug, debug|release): DESTDIR = ../bin/debug
-        CONFIG(release, debug|release): DESTDIR = ../bin/release
+		CONFIG(debug, debug|release): DESTDIR = ../../bin/debug
+		CONFIG(release, debug|release): DESTDIR = ../../bin/release
 }
 unix {
-        CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
-        CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
+		CONFIG(debug, debug|release): DESTDIR = ../../bin_unix/debug
+		CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
 }
 
 SOURCES += \
-    ../lib/Address16.cpp \
-    ../lib/LanControllerInfoHelper.cpp \
-    ../lib/ScriptDeviceObject.cpp \
-    ../lib/DataSource.cpp \
-    ../lib/DeviceObject.cpp \
-    ../lib/Signal.cpp \
-    ../lib/DbStruct.cpp \
-    ../lib/Types.cpp \
-    ../lib/XmlHelper.cpp \
-    ../lib/Queue.cpp \
-    ../lib/WUtils.cpp \
-    ../lib/Crc.cpp \
-    ../lib/HostAddressPort.cpp \
-    ../lib/TuningValue.cpp \
-    ../lib/DeviceHelper.cpp \
-    ../lib/OutputLog.cpp \
-    ../lib/Times.cpp \
-    ../lib/SignalProperties.cpp \
-	../lib/SimpleMutex.cpp \
-	../Builder/IssueLogger.cpp \
+	../../lib/LanControllerInfoHelper.cpp \
+	../../lib/ScriptDeviceObject.cpp \
+	../../lib/DataSource.cpp \
+	../../lib/DeviceObject.cpp \
+	../../lib/Signal.cpp \
+	../../lib/DbStruct.cpp \
+	../../lib/Types.cpp \
+	../../lib/TuningValue.cpp \
+	../../lib/DeviceHelper.cpp \
+	../../lib/OutputLog.cpp \
+	../../lib/Times.cpp \
+	../../lib/SignalProperties.cpp \
+	../../Builder/IssueLogger.cpp \
 	main.cpp \
 	SourceListWidget.cpp \
 	PacketSourceModel.cpp \
@@ -59,29 +52,22 @@ SOURCES += \
 
 HEADERS  += \
 	Stable.h \
-	../Proto/serialization.pb.h \
-    ../lib/Address16.h \
-    ../lib/LanControllerInfo.h \
-    ../lib/LanControllerInfoHelper.h \
-    ../lib/ScriptDeviceObject.h \
-    ../lib/DataSource.h \
-    ../lib/DeviceObject.h \
-    ../lib/Signal.h \
-    ../lib/DbStruct.h \
-    ../lib/PropertyObject.h \
-    ../lib/Types.h \
-    ../lib/XmlHelper.h \
-    ../lib/Queue.h \
-    ../lib/WUtils.h \
-    ../lib/Crc.h \
-    ../lib/HostAddressPort.h \
-    ../lib/TuningValue.h \
-    ../lib/DeviceHelper.h \
-    ../lib/OutputLog.h \
-    ../lib/Times.h \
-    ../lib/SignalProperties.h \
-	../lib/SimpleMutex.h \
-	../Builder/IssueLogger.h \
+	../../Proto/serialization.pb.h \
+	../../lib/LanControllerInfo.h \
+	../../lib/LanControllerInfoHelper.h \
+	../../lib/ScriptDeviceObject.h \
+	../../lib/DataSource.h \
+	../../lib/DeviceObject.h \
+	../../lib/Signal.h \
+	../../lib/DbStruct.h \
+	../../lib/PropertyObject.h \
+	../../lib/Types.h \
+	../../lib/TuningValue.h \
+	../../lib/DeviceHelper.h \
+	../../lib/OutputLog.h \
+	../../lib/Times.h \
+	../../lib/SignalProperties.h \
+	../../Builder/IssueLogger.h \
 	SourceListWidget.h \
 	PacketSourceModel.h \
 	SourceStatusWidget.h \
@@ -95,7 +81,7 @@ PRECOMPILED_HEADER = Stable.h
 # Protobuf
 #
 LIBS += -L$$DESTDIR -lprotobuf
-INCLUDEPATH += ./../Protobuf
+INCLUDEPATH += ./../../Protobuf
 
 # Visual Leak Detector
 #
@@ -114,4 +100,16 @@ unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
 }
+
+# UtilsLib
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
+}
+
 

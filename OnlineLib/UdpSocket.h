@@ -6,9 +6,9 @@
 #include <QUuid>
 
 #include "SocketIO.h"
-#include "../lib/SimpleThread.h"
+#include "../UtilsLib/SimpleThread.h"
 #include "CircularLogger.h"
-#include "../lib/WUtils.h"
+#include "../UtilsLib/WUtils.h"
 
 #include "../Proto/network.pb.h"
 

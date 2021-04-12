@@ -4,6 +4,7 @@
 #include <memory>
 #include <QtCore/QUuid>
 #include <QVariant>
+
 #include "../lib/PropertyObject.h"
 #include "../Proto/serialization.pb.h"
 

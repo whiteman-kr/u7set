@@ -1,6 +1,10 @@
+#ifndef UTILS_LIB_DOMAIN
+#error Don't include this file in the project! Link UtilsLib instead.
+#endif
+
 #include "XmlHelper.h"
-#include "ConstStrings.h"
-#include "WUtils.h"
+#include "../lib/ConstStrings.h"
+#include "../UtilsLib/WUtils.h"
 
 // -------------------------------------------------------------------------------------
 //

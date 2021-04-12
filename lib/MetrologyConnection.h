@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../lib/Hash.h"
+#include "../UtilsLib/Hash.h"
 #include "../lib/MetrologySignal.h"
 #include "../lib/DbController.h"
 #include "../lib/SignalSetProvider.h"
-#include "../lib/Crc.h"
+#include "../UtilsLib/Crc.h"
 
 #include <QMutex>
 #include <QVector>

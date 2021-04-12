@@ -3,9 +3,9 @@
 #include <assert.h>
 #include <QFile>
 
-#include "../../lib/XmlHelper.h"
 #include "../../OnlineLib/DataProtocols.h"
-#include "../../lib/WUtils.h"
+#include "../../UtilsLib/WUtils.h"
+#include "../../UtilsLib/XmlHelper.h"
 #include "../../lib/ConstStrings.h"
 
 #ifndef Q_CONSOLE_APP

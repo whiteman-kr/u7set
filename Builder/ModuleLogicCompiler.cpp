@@ -2,7 +2,7 @@
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "../lib/DeviceHelper.h"
 #include "../lib/DataSource.h"
-#include "../lib/Crc.h"
+#include "../UtilsLib/Crc.h"
 #include "../lib/Connection.h"
 #include "../lib/LanControllerInfoHelper.h"
 
