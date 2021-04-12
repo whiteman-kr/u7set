@@ -3,34 +3,33 @@ TEMPLATE = subdirs
 CONFIG += ordered
 
 SUBDIRS += Protobuf \
-	qtpropertybrowser \
-	QScintilla \
-	TrendView \
-	VFrame30 \
-	OnlineLib \
-	ServiceLib \
-	UtilsLib \
-	Simulator \
-	SimulatorConsole \
-	Builder \
-	BuilderConsole \
-	u7 \
-	Metrology \
-	BaseService \
-	ServiceControlManager \
-	ConfigurationService \
-	ArchivingService \
-	Monitor \
-	TuningService \
-	AppDataService \
-	DiagDataService \
-	TuningClient \
-	mconf \
-	./Tools/PacketSource \
-	./Tools/PacketViewer \
-	./Test/UalTester \
-	./Test/SimulatorTests \
-	./Test/u7databaseTests
+        qtpropertybrowser \
+        QScintilla \
+        TrendView \
+        VFrame30 \
+        OnlineLib \
+        ServiceLib \
+        Simulator \
+        SimulatorConsole \
+        Builder \
+        BuilderConsole \
+        u7 \
+        Metrology \
+        BaseService \
+        ServiceControlManager \
+        ConfigurationService \
+        ArchivingService \
+        Monitor \
+        PacketViewer \
+        TuningService \
+        AppDataService \
+        DiagDataService \
+        TuningClient \
+        mconf \
+        ./Tools/PacketSource \
+        ./Test/UalTester \
+        ./Test/SimulatorTests \
+        ./Test/u7databaseTests
 
 AppDataService.depends = OnlineLib ServiceLib UtilsLib
 DiagDataService.depends = OnlineLib ServiceLib UtilsLib

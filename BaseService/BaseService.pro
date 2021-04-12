@@ -44,27 +44,11 @@ SOURCES += \
 	../lib/SoftwareInfo.cpp \
 	BaseServiceMain.cpp \
 
-# Protobuf
-#
-LIBS += -L$$DESTDIR -lprotobuf
-INCLUDEPATH += ./../Protobuf
-
 # Visual Leak Detector
 #
 win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-}
-
-# OnlineLib
-#
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
 }
 
 # ServiceLib
@@ -78,6 +62,17 @@ unix {
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
 }
 
+# OnlineLib
+#
+win32 {
+        CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+        CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+        CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
+}
+
 # UtilsLib
 #
 win32 {
@@ -89,3 +84,7 @@ unix {
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
 }
 
+# Protobuf
+#
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf

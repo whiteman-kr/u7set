@@ -12,7 +12,7 @@ CONFIG += staticlib
 
 CONFIG += warn_off
 
-# std::clamp what is part cpp17
+# std::clamp is part op cpp17
 #
 unix:QMAKE_CXXFLAGS += --std=c++20
 win32:QMAKE_CXXFLAGS += /std:c++latest
@@ -28,16 +28,16 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
-gcc {
+unix {
     INCLUDEPATH += /usr/include		# pthread.h is here
 	LIBS += -lpthread
 	DEFINES += HAVE_PTHREAD
 }
 
 SOURCES += \
-    ../Proto/network.pb.cc \
-	../Proto/trends.pb.cc \
+        ../Proto/network.pb.cc \
 	../Proto/serialization.pb.cc \
+        ../Proto/trends.pb.cc \
 	../Proto/ProtoSerialization.cpp \
 	google/protobuf/api.pb.cc \
 	google/protobuf/duration.pb.cc \
@@ -96,9 +96,9 @@ SOURCES += \
 	google/protobuf/stubs/stringprintf.cc
 
 HEADERS += \
-    ../Proto/network.pb.h \
-	../Proto/trends.pb.cc \
-	../Proto/serialization.pb.h \
+        ../Proto/network.pb.h \
+        ../Proto/serialization.pb.h \
+        ../Proto/trends.pb.h \
 	../Proto/ProtoSerialization.h \
 	google/protobuf/api.pb.h \
 	google/protobuf/duration.pb.h \

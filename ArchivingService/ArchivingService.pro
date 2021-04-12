@@ -100,11 +100,6 @@ SOURCES += \
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
 
-# Protobuf
-#
-LIBS += -L$$DESTDIR -lprotobuf
-INCLUDEPATH += ./../Protobuf
-
 DISTFILES += \
     ../Proto/network.proto \
     ../Proto/serialization.proto
@@ -118,17 +113,6 @@ RESOURCES += \
 win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-}
-
-# OnlineLib
-#
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
 }
 
 # ServiceLib
@@ -153,4 +137,18 @@ unix {
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
 }
 
+# OnlineLib
+#
+win32 {
+        CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+        CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+        CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
+}
 
+# Protobuf
+#
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../Protobuf
