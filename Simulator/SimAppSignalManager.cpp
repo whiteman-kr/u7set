@@ -90,7 +90,7 @@ namespace Sim
 
 			quint16 flagValue = 0;
 
-			if (bool readOk = ram.readBit(flagAddress.offset(), flagAddress.bit(), &flagValue, E::ByteOrder::BigEndian);
+			if (bool readOk = ram.readBit(flagAddress.offset(), static_cast<quint16>(flagAddress.bit()), &flagValue, E::ByteOrder::BigEndian);
 				readOk == false)
 			{
 				log.writeError(QObject::tr("AppSignalManager::signalFlags error read flag signal by address %1")
@@ -730,7 +730,8 @@ namespace Sim
 			case E::SignalType::Discrete:
 				{
 					quint16 data = 0;
-					bool ok = ram.readBit(actualAddress.offset(), actualAddress.bit(), &data, byteOrder, ramAccess, applyOverride);
+					bool ok = ram.readBit(actualAddress.offset(), static_cast<quint16>(actualAddress.bit()),
+										  &data, byteOrder, ramAccess, applyOverride);
 
 					if (ok == false)
 					{

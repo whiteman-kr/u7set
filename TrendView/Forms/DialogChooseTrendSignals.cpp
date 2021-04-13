@@ -584,7 +584,7 @@ void FilteredTrendSignalsModel::filterSignals(QString filter, QString tags)
 	beginResetModel();
 
 	QString filterText = filter.trimmed().toLower();
-	QStringList tagList = tags.trimmed().toLower().split(' ', QString::SkipEmptyParts);
+	QStringList tagList = tags.trimmed().toLower().split(' ', Qt::SkipEmptyParts);
 
 	if (filterText.isEmpty() == true)
 	{

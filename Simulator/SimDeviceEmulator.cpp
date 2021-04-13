@@ -1654,7 +1654,7 @@ namespace Sim
 			// Set port receive validity flag to 0 or 1
 			//
 			ok = m_ram.writeBit(portInfo.rxValiditySignalAbsAddr.offset(),
-								portInfo.rxValiditySignalAbsAddr.bit(),
+								static_cast<quint16>(portInfo.rxValiditySignalAbsAddr.bit()),
 								timeout ? 0x0000 : 0x0001,
 								E::ByteOrder::BigEndian,
 								E::LogicModuleRamAccess::Read);

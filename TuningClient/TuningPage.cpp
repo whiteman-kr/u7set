@@ -608,7 +608,7 @@ bool TuningPageColumnsWidth::load(const QString& pageId)
 	QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
 	QString value = settings.value(QString("PageColumnsWidth/%1").arg(m_pageId)).toString();
 
-	QStringList l = value.split(';', QString::SkipEmptyParts);
+	QStringList l = value.split(';', Qt::SkipEmptyParts);
 
 	for (const QString& s : l)
 	{
@@ -944,7 +944,7 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 	{
 		QPalette Pal(palette());
 
-		Pal.setColor(QPalette::Background, m_pageFilter->backColor());
+		Pal.setColor(QPalette::Window, m_pageFilter->backColor());
 		setAutoFillBackground(true);
 		setPalette(Pal);
 	}

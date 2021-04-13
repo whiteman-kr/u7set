@@ -24,6 +24,8 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
 }
 
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 SOURCES +=  \
     SimCommandTest_LM5_LM6.cpp \
@@ -31,6 +33,8 @@ SOURCES +=  \
     SimRamTests.cpp \
     main.cpp
 
+HEADERS += \
+	Stable.h
 
 # --
 #

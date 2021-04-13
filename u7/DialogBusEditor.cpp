@@ -972,7 +972,7 @@ void DialogBusEditor::onSignalEdit()
 		{
 			size_t editIndex = editIndexes[i];
 
-			VFrame30::BusSignal* editSignal = (dynamic_cast<VFrame30::BusSignal*>(editSignalsPointers[i].get()));
+			VFrame30::BusSignal* editSignal = (dynamic_cast<VFrame30::BusSignal*>(editSignalsPointers[static_cast<int>(i)].get()));
 			if (editSignal == nullptr)
 			{
 				assert(editSignal);
@@ -1004,7 +1004,7 @@ void DialogBusEditor::onSignalEdit()
 
 			busSignals[editIndex] = *editSignal;
 
-			updateSignalsTreeItemText(selectedItems[i], busSignals[editIndex]);
+			updateSignalsTreeItemText(selectedItems[static_cast<int>(i)], busSignals[editIndex]);
 		}
 
 		bus->setBusSignals(busSignals);

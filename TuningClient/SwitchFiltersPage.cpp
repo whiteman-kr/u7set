@@ -107,7 +107,7 @@ SwitchFiltersPage::SwitchFiltersPage(std::shared_ptr<TuningFilter> workspaceFilt
 	{
 		QPalette Pal(palette());
 
-		Pal.setColor(QPalette::Background, workspaceFilter->backColor());
+		Pal.setColor(QPalette::Window, workspaceFilter->backColor());
 		setAutoFillBackground(true);
 		setPalette(Pal);
 	}
@@ -476,7 +476,7 @@ void SwitchFiltersPage::createListItems()
 				break;
 			case static_cast<int>(Columns::Counter):
 				item->setText("0/0");
-				item->setFlags(0/*Qt::ItemIsEnabled/* | Qt::ItemIsSelectable*/);
+				item->setFlags(Qt::NoItemFlags /*Qt::ItemIsEnabled/* | Qt::ItemIsSelectable*/);
 				break;
 			}
 		}
@@ -915,24 +915,24 @@ void SwitchFiltersPage::slot_timerTick500()
 			itemCounter->setText(counterText);
 		}
 
-		if (itemCaption->backgroundColor() != backColor)
+		if (itemCaption->background() != backColor)
 		{
-			itemCaption->setBackgroundColor(backColor);
+			itemCaption->setBackground(backColor);
 		}
 
-		if (itemCaption->textColor() != textColor)
+		if (itemCaption->foreground() != textColor)
 		{
-			itemCaption->setTextColor(textColor);
+			itemCaption->setForeground(textColor);
 		}
 
-		if (itemCounter->backgroundColor() != backColor)
+		if (itemCounter->background() != backColor)
 		{
-			itemCounter->setBackgroundColor(backColor);
+			itemCounter->setBackground(backColor);
 		}
 
-		if (itemCounter->textColor() != textColor)
+		if (itemCounter->foreground() != textColor)
 		{
-			itemCounter->setTextColor(textColor);
+			itemCounter->setForeground(textColor);
 		}
 
 		FilterCheckBox* checkBox = dynamic_cast<FilterCheckBox*>(m_filterTable->cellWidget(i, static_cast<int>(Columns::State)));

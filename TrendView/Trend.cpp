@@ -52,8 +52,8 @@ namespace TrendLib
 			return;
 		}
 
-		QTime timeMeasures;
-		timeMeasures.start();
+		// QTime timeMeasures;
+		// timeMeasures.start();
 
 		image->fill(Qt::white);
 
@@ -63,7 +63,7 @@ namespace TrendLib
 
 		draw(&painter, drawParam, true);
 
-		//qDebug() << "Trend draw time: " << timeMeasures.elapsed() << " ms";
+		// qDebug() << "Trend draw time: " << timeMeasures.elapsed() << " ms";
 		return;
 	}
 

@@ -805,7 +805,7 @@ namespace Sim
 
 		replyRupHeader.flags.all = 0;
 		replyRupHeader.flags.tuningData = 1;
-		replyRupHeader.moduleType = m_moduleType;
+		replyRupHeader.moduleType = static_cast<quint16>(m_moduleType);
 		replyRupHeader.framesQuantity = 1;
 		replyRupHeader.frameNumber = 0;
 
@@ -821,7 +821,7 @@ namespace Sim
 		replyFotipHeader.dataType = requestFotipHeader.dataType;
 		replyFotipHeader.fotipFrameSizeB = sizeof(FotipV2::Frame);
 		replyFotipHeader.romSizeB = m_tuningFlashSizeB;
-		replyFotipHeader.romFrameSizeB = m_tuningFlashFramePayloadB;
+		replyFotipHeader.romFrameSizeB = static_cast<quint16>(m_tuningFlashFramePayloadB);
 
 		replyFotipHeader.startAddressW = requestFotipHeader.startAddressW;
 		replyFotipHeader.offsetInFrameW = requestFotipHeader.offsetInFrameW;

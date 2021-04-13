@@ -35,10 +35,13 @@ unix {
 #
 unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 SOURCES += main.cpp \
 
 HEADERS += \
+		Stable.h \
 
 RESOURCES += \
     SimulatorConsole.qrc

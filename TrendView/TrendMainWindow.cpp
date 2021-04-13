@@ -704,7 +704,7 @@ namespace TrendLib
 			QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 			QApplication::processEvents();
 
-			QTime timer;
+			QElapsedTimer timer;
 			timer.start();
 
 			QString errorMessage;

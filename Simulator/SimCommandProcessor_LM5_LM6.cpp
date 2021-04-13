@@ -1224,7 +1224,9 @@ namespace Sim
 	void CommandProcessor_LM5_LM6::command_movcmpf(const DeviceCommand& command)
 	{
 		quint32 cmp = m_device->flagCmp();
-		m_device->writeRamBit(command.m_memoryAreaTo, command.m_word0, command.m_bitNo0, cmp);
+		m_device->writeRamBit(command.m_memoryAreaTo, command.m_word0,
+							  static_cast<quint16>(command.m_bitNo0),
+							  static_cast<quint16>(cmp));
 		return;
 	}
 
@@ -2533,14 +2535,16 @@ namespace Sim
 			for (quint16 i = 0; i < oprdQuant; i++)
 			{
 				int value = i == inputValue ? 0x0001 : 0x0000;
-				instance->addParamWord(o_1_result + i, value);
+				instance->addParamWord(static_cast<quint16>(o_1_result + i), 
+										static_cast<quint16>(value));
 			}
 			break;
 		case 2:
 			for (qint16 i = 0; i < oprdQuant; i++)
 			{
 				int value = inputValue & (0x01 << i) ?  1 : 0;
-				instance->addParamWord(o_1_result + i, value);
+				instance->addParamWord(static_cast<quint16>(o_1_result + i), 
+										static_cast<quint16>(value));
 			}
 			break;
 		default:
@@ -2630,7 +2634,7 @@ namespace Sim
 					break;
 				}
 
-				Q_ASSERT(false);
+				// Q_ASSERT(false);
 				break;
 
 			case 3:		// SignedInt32, <
@@ -2673,7 +2677,7 @@ namespace Sim
 					break;
 				}
 
-				Q_ASSERT(false);
+				// Q_ASSERT(false);
 				break;
 
 			case 4:		// SignedInt32, <>
@@ -2770,7 +2774,7 @@ namespace Sim
 						break;
 					}
 
-					Q_ASSERT(false);
+					// Q_ASSERT(false);
 				}
 				break;
 			case 7:		// FloatingPoint32, <
@@ -2819,7 +2823,7 @@ namespace Sim
 					break;
 				}
 
-				Q_ASSERT(false);
+				// Q_ASSERT(false);
 				break;
 			case 8:		// FloatingPoint32, <>
 				instance->addParamWord(o_nan, nan);
@@ -2944,8 +2948,8 @@ namespace Sim
 				std::feclearexcept(FE_ALL_EXCEPT);
 				float result = prevValue + inputValue / n - prevValue / n;
 
-				isOverflow = std::fetestexcept(FE_OVERFLOW);
-				isUnderflow = std::fetestexcept(FE_UNDERFLOW);
+				isOverflow = static_cast<quint16>(std::fetestexcept(FE_OVERFLOW));
+				isUnderflow = static_cast<quint16>(std::fetestexcept(FE_UNDERFLOW));
 				isZero = (result == .0f) || isUnderflow;
 				isNan = std::isnan(result);
 
@@ -3451,7 +3455,7 @@ namespace Sim
 
 				// Save result
 				//
-				instance->addParamWord(o_si_fp_result, result.signedIntValue());
+				instance->addParam(result);
 			}
 			break;
 		case 5: // 32(SI)/32(FP)
@@ -3840,9 +3844,9 @@ namespace Sim
 		quint16 track = instance->param(i_track)->wordValue();
 
 		// Logic
-		// Y = F(Õ,Ki,Ti)
+		// Y = F(Ð¥,Ki,Ti)
 		// Yi = (X * Ki) / TI + (Yi - 1);
-		// *TI = Òi(ms) / 5(ms)
+		// *TI = Ð¢i(ms) / 5(ms)
 		// i_ti = Ti(ms)
 		//
 		AfbComponentParam result{static_cast<quint16>(o_result)};
@@ -4644,7 +4648,7 @@ namespace Sim
 
 
 		//const int o_set_prev = 9;				// Previous set -> i_set_prev
-		//const int o_y_prev = 10;				// output Y/input Õ
+		//const int o_y_prev = 10;				// output Y/input Ð¥
 		const int o_result = 12;				// output Y
 		//const int o_edi = 14;
 		//const int o_version = 15;
@@ -4869,7 +4873,7 @@ namespace Sim
 
 
 		//const int o_set_prev = 9;				// Previous set -> i_set_prev
-		//const int o_y_prev = 10;				// output Y/input Õ
+		//const int o_y_prev = 10;				// output Y/input Ð¥
 		const int o_result = 12;				// output Y
 		//const int o_edi = 14;
 		//const int o_version = 15;
@@ -5246,7 +5250,7 @@ namespace Sim
 
 		for (int i = 0; i < settings; i++)
 		{
-			operands[i] = *(instance->param(i_1_oprd + i * 2));
+			operands[i] = *(instance->param(static_cast<quint16>(i_1_oprd + i * 2)));
 
 			float c = std::pow(x, static_cast<float>(i));
 			operands[i].mulFloatingPoint(c);
@@ -5341,9 +5345,9 @@ namespace Sim
 		}
 
 		// Logic
-		// Y= F(Õ,Kd,Td)
+		// Y= F(Ð¥,Kd,Td)
 		// Yd = (X - (Xi-1)) * Kd - (Yi-1) / TD + (Yi-1);
-		// TD=Òd(ms) / 5(ms)
+		// TD=Ð¢d(ms) / 5(ms)
 		// i_td = Ti(ms)
 		//
 		AfbComponentParam result{static_cast<quint16>(o_result)};

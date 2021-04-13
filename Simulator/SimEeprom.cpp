@@ -44,7 +44,7 @@ namespace Sim
 
 	bool Eeprom::reset()
 	{
-		m_data.fill((char)(0xFF));
+		m_data.fill(static_cast<char>(0xFF));
 		return true;
 	}
 

@@ -195,7 +195,11 @@ namespace TrendLib
 
 		if (ok == false)
 		{
-			*errorMessage = tr("Parse trend file error. ") + strerror(errno);
+			char errMsgBuf[512];
+			strerror_s(errMsgBuf, 512, errno);
+
+			*errorMessage = tr("Parse trend file error. ") + QString(errMsgBuf);
+
 			return false;
 		}
 

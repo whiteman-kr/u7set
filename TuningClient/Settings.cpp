@@ -112,7 +112,7 @@ void Settings::RestoreSystem()
 #endif
 
 	QString instanceHistoryString = s.value("m_instanceHistory", QString()).toString();
-	m_instanceHistory = instanceHistoryString.split(';', QString::SkipEmptyParts);
+	m_instanceHistory = instanceHistoryString.split(';', Qt::SkipEmptyParts);
 
 	m_instanceStrId = s.value("m_instanceStrId", "SYSTEM_RACKID_WS00_TUN").toString();
 

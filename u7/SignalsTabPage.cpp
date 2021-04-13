@@ -441,7 +441,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				assert(false);
 			}
 
-			return {b};
+			return QVariant(b);
 		}
 	}
 

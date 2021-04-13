@@ -36,6 +36,9 @@ CONFIG(release, debug|release) {
     UI_DIR = release/ui
 }
 
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
+
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -49,10 +52,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-		BuildTask.cpp
+		BuildTask.cpp \
 
 HEADERS += \
-    BuildTask.h
+	Stable.h \
+	BuildTask.h \
 
 # VFrame30 library
 #

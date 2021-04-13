@@ -272,7 +272,7 @@ namespace Sim
 			m_socket->writeDatagram(reinterpret_cast<const char*>(&simFrame),
 									sizeof(simFrame),
 									adspi.lanDestinationIP,
-									adspi.lanDestinationPort);
+									static_cast<quint16>(adspi.lanDestinationPort));
 		}
 
 		adspi.rupFramesNumerator++;

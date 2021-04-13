@@ -1,18 +1,6 @@
 #include <QCoreApplication>
 #include <QDebug>
 
-// Visual Leak Detector
-//
-#if defined(Q_OS_WIN) && defined(QT_DEBUG)
-	#if __has_include("C:/Program Files (x86)/Visual Leak Detector/include/vld.h")
-		#include "C:/Program Files (x86)/Visual Leak Detector/include/vld.h"
-	#else
-		#if __has_include("D:/Program Files (x86)/Visual Leak Detector/include/vld.h")
-			#include "D:/Program Files (x86)/Visual Leak Detector/include/vld.h"
-		#endif
-	#endif
-#endif	// Visual Leak Detector
-
 #include "../Simulator/Simulator.h"
 
 static QtMessageHandler originalMessageHandler = 0;
@@ -108,7 +96,7 @@ bool runScript(QString scriptFileName, qint64 timeout, Sim::Simulator* simulator
 		return false;
 	}
 
-	ok = simulator->waitScript(timeout < 0 ? ULONG_MAX : timeout);
+	ok = simulator->waitScript(static_cast<unsigned long>(timeout < 0 ? ULONG_MAX : timeout));
 	if (ok == false)
 	{
 		return false;

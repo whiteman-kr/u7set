@@ -25,6 +25,7 @@
 #include <QtNetwork>
 #include <QtConcurrent>
 #include <QtXml>
+#include <QVector>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

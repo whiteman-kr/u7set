@@ -209,7 +209,7 @@ TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::
 	{
 		QPalette Pal(palette());
 
-		Pal.setColor(QPalette::Background, workspaceFilter->backColor());
+		Pal.setColor(QPalette::Window, workspaceFilter->backColor());
 		setAutoFillBackground(true);
 		setPalette(Pal);
 		show();
@@ -1213,14 +1213,14 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 				treeItem->setText(m_columnStatusIndex, text);
 			}
 
-			if (treeItem->backgroundColor(m_columnStatusIndex) != backColor)
+			if (treeItem->background(m_columnStatusIndex) != backColor)
 			{
-				treeItem->setBackgroundColor(m_columnStatusIndex, backColor);
+				treeItem->setBackground(m_columnStatusIndex, backColor);
 			}
 
-			if (treeItem->textColor(m_columnStatusIndex) != textColor)
+			if (treeItem->foreground(m_columnStatusIndex) != textColor)
 			{
-				treeItem->setTextColor(m_columnStatusIndex, textColor);
+				treeItem->setForeground(m_columnStatusIndex, textColor);
 			}
 		}
 
@@ -1275,14 +1275,14 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 				treeItem->setText(m_columnSorIndex, text);
 			}
 
-			if (treeItem->backgroundColor(m_columnSorIndex) != backColor)
+			if (treeItem->background(m_columnSorIndex) != backColor)
 			{
-				treeItem->setBackgroundColor(m_columnSorIndex, backColor);
+				treeItem->setBackground(m_columnSorIndex, backColor);
 			}
 
-			if (treeItem->textColor(m_columnSorIndex) != textColor)
+			if (treeItem->foreground(m_columnSorIndex) != textColor)
 			{
-				treeItem->setTextColor(m_columnSorIndex, textColor);
+				treeItem->setForeground(m_columnSorIndex, textColor);
 			}
 		}
 	}
@@ -1401,14 +1401,14 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 			treeItem->setText(m_columnAccessIndex, accessText);
         }
 
-		if (treeItem->backgroundColor(m_columnAccessIndex) != accessBackColor)
+		if (treeItem->background(m_columnAccessIndex) != accessBackColor)
         {
-			treeItem->setBackgroundColor(m_columnAccessIndex, accessBackColor);
+			treeItem->setBackground(m_columnAccessIndex, accessBackColor);
         }
 
-		if (treeItem->textColor(m_columnAccessIndex) != accessTextColor)
+		if (treeItem->foreground(m_columnAccessIndex) != accessTextColor)
         {
-			treeItem->setTextColor(m_columnAccessIndex, accessTextColor);
+			treeItem->setForeground(m_columnAccessIndex, accessTextColor);
 		}
 
     }
@@ -1459,14 +1459,14 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tuni
 		}
 	}
 
-	if (treeItem->backgroundColor(m_columnStatusIndex) != stateBackColor)
+	if (treeItem->background(m_columnStatusIndex) != stateBackColor)
     {
-		 treeItem->setBackgroundColor(m_columnStatusIndex, stateBackColor);
+		 treeItem->setBackground(m_columnStatusIndex, stateBackColor);
     }
 
-	if (treeItem->textColor(m_columnStatusIndex) != stateTextColor)
+	if (treeItem->foreground(m_columnStatusIndex) != stateTextColor)
     {
-		treeItem->setTextColor(m_columnStatusIndex, stateTextColor);
+		treeItem->setForeground(m_columnStatusIndex, stateTextColor);
     }
 }
 
@@ -1519,14 +1519,14 @@ void TuningWorkspace::updateTreeItemCounters(QTreeWidgetItem* treeItem, TuningFi
 			treeItem->setText(columnIndex, text);
 		}
 
-		if (treeItem->backgroundColor(columnIndex) != backColor)
+		if (treeItem->background(columnIndex) != backColor)
 		{
-			treeItem->setBackgroundColor(columnIndex, backColor);
+			treeItem->setBackground(columnIndex, backColor);
 		}
 
-		if (treeItem->textColor(columnIndex) != textColor)
+		if (treeItem->foreground(columnIndex) != textColor)
 		{
-			treeItem->setTextColor(columnIndex, textColor);
+			treeItem->setForeground(columnIndex, textColor);
 		}
 
 		//

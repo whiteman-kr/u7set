@@ -213,6 +213,7 @@ void SimCommandTest_LM5_LM6::testCommandStop()
 	{
 		// This exception is expected
 		//
+		Q_UNUSED(e)
 	} catch (...)
 	{
 		QFAIL("Unexpected execptiom STOP command");
@@ -227,6 +228,7 @@ void SimCommandTest_LM5_LM6::testCommandStop()
 	{
 		// This exception is expected
 		//
+		Q_UNUSED(e)
 	} catch (...)
 	{
 		QFAIL("Unexpected execptiom STOP command");
@@ -337,7 +339,7 @@ void SimCommandTest_LM5_LM6::testCommandMovMem()
 
 		for (size_t i = 0; i < size; i++)
 		{
-			bool ok = m_device->mutableRam().writeWord(i + src, data[i], E::BigEndian);
+			bool ok = m_device->mutableRam().writeWord(static_cast<quint32>(i + src), data[i], E::BigEndian);
 			QVERIFY(ok);
 		}
 
@@ -345,7 +347,7 @@ void SimCommandTest_LM5_LM6::testCommandMovMem()
 
 		for (size_t i = 0; i < size; i++)
 		{
-			QCOMPARE(m_device->readRamWord(dst + i), data[i]);
+			QCOMPARE(m_device->readRamWord(static_cast<quint32>(dst + i)), data[i]);
 		}
 	}
 	catch (...)
@@ -452,6 +454,8 @@ void SimCommandTest_LM5_LM6::testCommandMovbc()
 	try
 	{
 		bool ok = m_device->mutableRam().writeWord(dst, 0x0000, E::BigEndian);
+
+		Q_UNUSED(ok)
 
 		m_cp->runCommand(command);
 
@@ -839,14 +843,14 @@ void SimCommandTest_LM5_LM6::testCommandRdfbCmp()
 		// Try equal
 		//
 		m_device->setFlagCmp(0);
-		QCOMPARE(m_device->flagCmp(), 0);
+		QCOMPARE(m_device->flagCmp(), static_cast<quint32>(0));
 
 		bool ok = m_device->afbComponentInstance(afbOpCode, afbInstance)->addParamWord(afbPinOpCode, data);
 		QVERIFY(ok);
 
 		m_cp->runCommand(command);
 
-		QCOMPARE(m_device->flagCmp(), 1);
+		QCOMPARE(m_device->flagCmp(), static_cast<quint32>(1));
 
 		// try not equal
 		//
@@ -855,7 +859,7 @@ void SimCommandTest_LM5_LM6::testCommandRdfbCmp()
 
 		m_cp->runCommand(command);
 
-		QCOMPARE(m_device->flagCmp(), 0);
+		QCOMPARE(m_device->flagCmp(), static_cast<quint32>(0));
 	}
 	catch (...)
 	{
@@ -913,7 +917,7 @@ void SimCommandTest_LM5_LM6::testCommandSetMem()
 
 		for (size_t i = 0; i < size; i++)
 		{
-			QCOMPARE(m_device->readRamWord(dst + i), data);
+			QCOMPARE(m_device->readRamWord(static_cast<quint32>(dst + i)), data);
 		}
 	}
 	catch (...)
@@ -1202,7 +1206,7 @@ void SimCommandTest_LM5_LM6::testCommandWrfb32()
 		m_cp->runCommand(command);
 
 		quint32 afbData = m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance)->param(command.m_afbPinOpCode)->dwordValue();
-		QCOMPARE(afbData, 0x123ABCAD);
+		QCOMPARE(afbData, static_cast<quint32>(0x123ABCAD));
 	}
 	catch (...)
 	{
@@ -1262,7 +1266,7 @@ void SimCommandTest_LM5_LM6::testCommandRdfb32()
 
 		m_cp->runCommand(command);
 
-		QCOMPARE(m_device->readRamDword(dst), 0x76241122);
+		QCOMPARE(m_device->readRamDword(dst), static_cast<quint32>(0x76241122));
 	}
 	catch (...)
 	{
@@ -1379,14 +1383,14 @@ void SimCommandTest_LM5_LM6::testCommandRdfbCmp32()
 		// Try equal
 		//
 		m_device->setFlagCmp(0);
-		QCOMPARE(m_device->flagCmp(), 0);
+		QCOMPARE(m_device->flagCmp(), static_cast<quint32>(0));
 
 		bool ok = m_device->afbComponentInstance(afbOpCode, afbInstance)->addParamDword(afbPinOpCode, data);
 		QVERIFY(ok);
 
 		m_cp->runCommand(command);
 
-		QCOMPARE(m_device->flagCmp(), 1);
+		QCOMPARE(m_device->flagCmp(), static_cast<quint32>(1));
 
 		// try not equal
 		//
@@ -1395,7 +1399,7 @@ void SimCommandTest_LM5_LM6::testCommandRdfbCmp32()
 
 		m_cp->runCommand(command);
 
-		QCOMPARE(m_device->flagCmp(), 0);
+		QCOMPARE(m_device->flagCmp(), static_cast<quint32>(0));
 	}
 	catch (...)
 	{

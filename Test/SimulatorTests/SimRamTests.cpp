@@ -184,11 +184,11 @@ void SimRamTests::ramAreaWriteDwordTest()
 
 	ok = m_ramArea->readDword(overrideDataOffset, &data, E::ByteOrder::BigEndian, false);		// Not apply override
 	QVERIFY(ok == true);
-	QCOMPARE(data, 0x12345678);
+	QCOMPARE(data, static_cast<quint32>(0x12345678));
 
 	ok = m_ramArea->readDword(overrideDataOffset, &data, E::ByteOrder::BigEndian, true);		// Apply override
 	QVERIFY(ok == true);
-	QCOMPARE(data, 0x11223344);
+	QCOMPARE(data, static_cast<quint32>(0x11223344));
 
 	// Test errors
 	//
@@ -512,7 +512,6 @@ void SimRamTests::ramSetMem()
 void SimRamTests::ramReadWriteBit()
 {
 	Sim::Ram ram;
-	bool ok = true;
 	quint16 data;
 
 	ram.addMemoryArea(E::LogicModuleRamAccess::Read, 0, 100, false, "RM0");
@@ -558,7 +557,6 @@ void SimRamTests::ramReadWriteBit()
 void SimRamTests::ramReadWriteWord()
 {
 	Sim::Ram ram;
-	bool ok = true;
 	quint16 data;
 
 	ram.addMemoryArea(E::LogicModuleRamAccess::Read, 0, 100, false, "RM0");
@@ -590,7 +588,6 @@ void SimRamTests::ramReadWriteWord()
 void SimRamTests::ramReadWriteDword()
 {
 	Sim::Ram ram;
-	bool ok = true;
 	quint32 data;
 
 	ram.addMemoryArea(E::LogicModuleRamAccess::Read, 0, 100, false, "RM0");
@@ -601,20 +598,20 @@ void SimRamTests::ramReadWriteDword()
 	ram.writeDword(10, 0x11223344, E::BigEndian);
 
 	ram.readDword(10, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Write);
-	QCOMPARE(data, 0x11223344);
+	QCOMPARE(data, static_cast<quint32>(0x11223344));
 
 	ram.readDword(10, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Read);
-	QCOMPARE(data, 0);
+	QCOMPARE(data, static_cast<quint32>(0));
 
 	// --
 	//
 	ram.writeDword(10, 0x55667788, E::BigEndian, E::LogicModuleRamAccess::Read);
 
 	ram.readDword(10, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Write);
-	QCOMPARE(data, 0x11223344);
+	QCOMPARE(data, static_cast<quint32>(0x11223344));
 
 	ram.readDword(10, &data, E::ByteOrder::BigEndian, E::LogicModuleRamAccess::Read);
-	QCOMPARE(data, 0x55667788);
+	QCOMPARE(data, static_cast<quint32>(0x55667788));
 
 	return;
 }

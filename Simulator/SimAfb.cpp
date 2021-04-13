@@ -518,7 +518,8 @@ namespace Sim
 			//
 			if (paramExists(opIndex) == false)
 			{
-				addParamWord(m_afbComp->versionOpIndex(), m_afbComp->impVersion());
+				addParamWord(static_cast<quint16>(m_afbComp->versionOpIndex()), 
+						static_cast<quint16>(m_afbComp->impVersion()));
 			}
 		}
 
@@ -615,7 +616,7 @@ namespace Sim
 
 		for (int i = 0; i < m_afbComp->maxInstCount(); i++)
 		{
-			m_instances.emplace_back(m_afbComp, i);		// AfbComponentInstance::AfbComponentInstance(quint16 instanceNo);
+			m_instances.emplace_back(m_afbComp, static_cast<quint16>(i));		// AfbComponentInstance::AfbComponentInstance(quint16 instanceNo);
 		}
 
 		return true;
@@ -822,7 +823,7 @@ namespace Sim
 			return nullptr;
 		}
 
-		return component.instance(instance);
+		return component.instance(static_cast<quint16>(instance));
 	}
 
 }

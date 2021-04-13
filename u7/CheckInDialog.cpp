@@ -19,7 +19,7 @@ CheckInDialog::CheckInDialog(const std::vector<DbFileInfo>& files, bool treeChec
 	ui->fileListEditBox->setReadOnly(true);
 
 	QStringList fileList;
-	fileList.reserve(files.size());
+	fileList.reserve(static_cast<int>(files.size()));
 
 	for (const DbFileInfo& file : m_files)
 	{

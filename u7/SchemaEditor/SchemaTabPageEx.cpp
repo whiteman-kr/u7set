@@ -326,7 +326,7 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 				Q_ASSERT(false);
 			}
 
-			return {b};
+			return QVariant(b);
 		}
 	}
 

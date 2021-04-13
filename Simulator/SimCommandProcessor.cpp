@@ -150,7 +150,7 @@ namespace Sim
 			return;
 		}
 
-		if (afbInstance->paramExists(paramOpIndex) == false)
+		if (afbInstance->paramExists(static_cast<quint16>(paramOpIndex)) == false)
 		{
 			if (paramName.isEmpty() == true)
 			{

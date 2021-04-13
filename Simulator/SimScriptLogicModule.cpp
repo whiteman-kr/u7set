@@ -89,7 +89,8 @@ namespace Sim
 			return std::numeric_limits<decltype(result)>::max();
 		}
 
-		bool ok = m_logicModule->ram().readBit(address.offset(), address.bit(), &result, E::ByteOrder::BigEndian, access, true);
+		bool ok = m_logicModule->ram().readBit(address.offset(), static_cast<quint16>(address.bit()),
+													&result, E::ByteOrder::BigEndian, access, true);
 		if (ok == false)
 		{
 			ScriptSimulator::throwScriptException(this, tr("readRamBit error, address %1").arg(address.toString()));
@@ -188,7 +189,8 @@ namespace Sim
 			return;
 		}
 
-		bool ok = m_logicModule->mutableRam().writeBit(address.offset(), address.bit(), value, E::ByteOrder::BigEndian, access);
+		bool ok = m_logicModule->mutableRam().writeBit(address.offset(), static_cast<quint16>(address.bit()),
+													   value, E::ByteOrder::BigEndian, access);
 		if (ok == false)
 		{
 			ScriptSimulator::throwScriptException(this, tr("writeRamBit error, address %1").arg(address.toString()));
