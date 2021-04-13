@@ -2,6 +2,8 @@
 
 // Add C includes here
 //
+#include <errno.h>
+#include <string.h>
 
 // Add C++ includes here
 //
