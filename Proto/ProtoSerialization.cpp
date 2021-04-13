@@ -3,23 +3,41 @@
 #include "ProtoSerialization.h"
 #include "../lib/PropertyObject.h"
 
+#if defined(Q_OS_WIN) && defined(QT_DEBUG)
+	#if __has_include("C:/Program Files (x86)/Visual Leak Detector/include/vld.h")
+		#include "C:/Program Files (x86)/Visual Leak Detector/include/vld.h"
+	#else
+		#if __has_include("D:/Program Files (x86)/Visual Leak Detector/include/vld.h")
+			#include "D:/Program Files (x86)/Visual Leak Detector/include/vld.h"
+		#endif
+	#endif
+#endif	// Visual Leak Detector
+
+
 namespace Proto
 {
 	bool ParseFromIstream(::google::protobuf::Message& message, std::fstream& stream)
 	{
+		VLDDisable();
 		bool result = message.ParseFromIstream(&stream);
+		VLDRestore();
+
 		return result;
 	}
 
 	bool ParseFromString(::google::protobuf::Message& message, const char* str)
 	{
+		VLDDisable();
 		bool result = message.ParseFromString(str);
+		VLDRestore();
 		return result;
 	}
 
 	bool ParseFromArray(::google::protobuf::Message& message, const QByteArray& data)
 	{
+		VLDDisable();
 		bool result = message.ParseFromArray(data.constData(), data.size());
+		VLDRestore();
 		return result;
 	}
 
