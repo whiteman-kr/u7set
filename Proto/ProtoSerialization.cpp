@@ -18,26 +18,43 @@ namespace Proto
 {
 	bool ParseFromIstream(::google::protobuf::Message& message, std::fstream& stream)
 	{
+#if defined QT_DEBUG && defined Q_OS_WIN
 		VLDDisable();
+#endif
 		bool result = message.ParseFromIstream(&stream);
+
+#if defined QT_DEBUG && defined Q_OS_WIN
 		VLDRestore();
+#endif
 
 		return result;
 	}
 
 	bool ParseFromString(::google::protobuf::Message& message, const char* str)
 	{
+#if defined QT_DEBUG && defined Q_OS_WIN
 		VLDDisable();
+#endif
+
 		bool result = message.ParseFromString(str);
+
+#if defined QT_DEBUG && defined Q_OS_WIN
 		VLDRestore();
+#endif
 		return result;
 	}
 
 	bool ParseFromArray(::google::protobuf::Message& message, const QByteArray& data)
 	{
+#if defined QT_DEBUG && defined Q_OS_WIN
 		VLDDisable();
+#endif
+
 		bool result = message.ParseFromArray(data.constData(), data.size());
+
+#if defined QT_DEBUG && defined Q_OS_WIN
 		VLDRestore();
+#endif
 		return result;
 	}
 
