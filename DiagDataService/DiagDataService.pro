@@ -78,34 +78,23 @@ win32 {
 # ServiceLib
 #
 win32 {
-        CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
-        CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
-}
-unix {
-        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
-        CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
-}
-
-# OnlineLib
-#
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
-
-# ServiceLib
-#
-win32 {
 	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
 	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
 }
 unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
+}
+
+# OnlineLib
+#
+win32 {
+        CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
+        CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
+}
+unix {
+        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
+        CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
 }
 
 # UtilsLib
@@ -123,4 +112,3 @@ unix {
 #
 LIBS += -L$$DESTDIR -lprotobuf
 INCLUDEPATH += ./../Protobuf
-
