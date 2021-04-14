@@ -128,7 +128,7 @@ HEADERS += \
     ../lib/Types.h \
     ../lib/AppSignalManager.h \
     ../lib/Factory.h \
-    ../lib/AppSignal.h \
+    ../lib/AppSignalParam.h \
     ../lib/DbStruct.h \
     SchemaItemBus.h \
     Bus.h \
@@ -142,7 +142,7 @@ HEADERS += \
     ../lib/TuningValue.h \
     TuningController.h \
     AppSignalController.h \
-    ../lib/Signal.h \
+    ../lib/AppSignal.h \
     ../lib/DeviceObject.h \
     ../lib/SignalProperties.h \
     TuningSchema.h \
@@ -188,7 +188,7 @@ SOURCES += \
     SchemaItemLink.cpp \
     SchemaItemPath.cpp \
     SchemaItemRect.cpp \
-    SchemaItemSignal.cpp \
+	SchemaItemSignal.cpp \
     SchemaItemControl.cpp \
     SchemaItemPushButton.cpp \
     SchemaItemLineEdit.cpp \

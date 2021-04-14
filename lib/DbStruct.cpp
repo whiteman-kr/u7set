@@ -4,7 +4,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDebug>
-#include "Signal.h"
+#include "AppSignal.h"
 
 namespace Db
 {

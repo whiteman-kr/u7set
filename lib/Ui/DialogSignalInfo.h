@@ -4,7 +4,7 @@
 #include <optional>
 #include "../VFrame30/TuningController.h"
 #include "../lib/AppSignalManager.h"
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include "../lib/Ui/DragDropHelper.h"
 
 namespace Ui {

@@ -40,8 +40,8 @@ SOURCES += \
     ../lib/DbStruct.cpp \
     ../lib/OutputLog.cpp \
     ../lib/Types.cpp \
-    ../lib/Signal.cpp \
     ../lib/AppSignal.cpp \
+    ../lib/AppSignalParam.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Times.cpp \
@@ -74,10 +74,10 @@ HEADERS += \
     ../lib/DbStruct.h \
     ../lib/OutputLog.h \
     ../lib/Types.h \
-    ../lib/Signal.h \
+    ../lib/AppSignal.h \
     ../Builder/IssueLogger.h \
     ../Builder/ModulesRawData.h \
-    ../lib/AppSignal.h \
+    ../lib/AppSignalParam.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     ../lib/Times.h \

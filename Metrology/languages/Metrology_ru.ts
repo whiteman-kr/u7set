@@ -6222,59 +6222,59 @@ Do you want to repeat the preparation process in order to switch the comparator 
 <context>
     <name>MetrologySignal</name>
     <message>
-        <location filename="../../lib/MetrologySignal.cpp" line="210"/>
-        <location filename="../../lib/MetrologySignal.cpp" line="838"/>
+        <location filename="../../lib/MetrologyAppSignal.cpp" line="210"/>
+        <location filename="../../lib/MetrologyAppSignal.cpp" line="838"/>
         <source>Yes</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.cpp" line="508"/>
+        <location filename="../../lib/MetrologyAppSignal.cpp" line="508"/>
         <source>Input</source>
         <translation>Входной</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.cpp" line="509"/>
+        <location filename="../../lib/MetrologyAppSignal.cpp" line="509"/>
         <source>Internal</source>
         <translation>Внутренний</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.cpp" line="510"/>
+        <location filename="../../lib/MetrologyAppSignal.cpp" line="510"/>
         <source>Output</source>
         <translation>Выходной</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.cpp" line="513"/>
-        <location filename="../../lib/MetrologySignal.cpp" line="954"/>
+        <location filename="../../lib/MetrologyAppSignal.cpp" line="513"/>
+        <location filename="../../lib/MetrologyAppSignal.cpp" line="954"/>
         <source>Unknown</source>
         <translation>Не определен</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.cpp" line="838"/>
+        <location filename="../../lib/MetrologyAppSignal.cpp" line="838"/>
         <source>No</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.cpp" line="950"/>
+        <location filename="../../lib/MetrologyAppSignal.cpp" line="950"/>
         <source>Set point</source>
         <translation>Уставка</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.cpp" line="951"/>
+        <location filename="../../lib/MetrologyAppSignal.cpp" line="951"/>
         <source>Hysteresis</source>
         <translation>Зона возврата</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.cpp" line="1231"/>
+        <location filename="../../lib/MetrologyAppSignal.cpp" line="1231"/>
         <source>Unused</source>
         <translation>Не используется</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.cpp" line="1259"/>
+        <location filename="../../lib/MetrologyAppSignal.cpp" line="1259"/>
         <source>True</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../../lib/MetrologySignal.cpp" line="1260"/>
+        <location filename="../../lib/MetrologyAppSignal.cpp" line="1260"/>
         <source>False</source>
         <translation>Нет</translation>
     </message>

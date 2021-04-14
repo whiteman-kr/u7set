@@ -2,7 +2,7 @@
 #include "SchemaItemIndicator.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
-#include "../lib/AppSignal.h"
+#include "../lib/AppSignalParam.h"
 #include "../lib/ComparatorSet.h"
 #include "AppSignalController.h"
 

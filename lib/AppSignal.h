@@ -1,496 +1,577 @@
 #pragma once
 
-#include <QtGlobal>
-#include <QDateTime>
-#include <memory>
+#include <QString>
+#include <QMultiHash>
 #include <set>
 
-#include "../UtilsLib/Hash.h"
-#include "../UtilsLib/Queue.h"
-#include "TimeStamp.h"
-#include "Tuning/TuningSignalState.h"
-#include "Times.h"
 #include "Types.h"
+#include "DbStruct.h"
+#include "OrderedHash.h"
+#include "DeviceObject.h"
+#include "../UtilsLib/Address16.h"
+#include "../UtilsLib/Hash.h"
+#include "TuningValue.h"
 #include "AppSignalStateFlags.h"
-#include "../OnlineLib/SimpleAppSignalState.h"
-#include "Signal.h"
 
-struct AppSignalParamMimeType
-{
-	static const char* value;	// = "application/x-appsignalparam";	Data in format ::Proto::AppSiagnalParamSet
-};
+class QXmlStreamAttributes;
+class XmlWriteHelper;
+class XmlReadHelper;
 
-namespace Proto
+namespace Builder
 {
-	class AppSignalState;
-	class AppSignal;
+	class IssueLogger;
 }
 
+const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
 
-/*! \class AppSignalState
-	\ingroup groupParamsStates
-	\brief Describes signal state in Monitor application
+class SignalSpecPropValues;
 
-	AppSignalState class describes signal state in Monitor application.	This state is received from ApplicationDataService.
-	\ref VFrame30::ScriptAppSignalController "ScriptAppSignalController" class accesed by global <b>signals</b> object is used for requesting signal states.
-
-	\warning
-	After requesting signal state it is highly recommended to check function return values, because errors can occur. For example,
-	connection to ApplicationDataService can be down, or signal with specified identifier could not exist.
-
-	<b>Example:</b>
-
-	\code
-	// Request signal state by identifier "#APPSIGNALID"
-	//
-	var state = signals.signalState("#APPSIGNALID");
-
-	if (state == undefined)
-	{
-		// No state was received for this signal
-		//
-		return;
-	}
-
-	// Check signal validity
-	//
-	if (state.valid == true)
-	{
-		// Put signal value to a schema item
-		//
-		schemaItemValue.Text = signalState.value;
-	}
-	\endcode
-*/
-class AppSignalState
+struct ID_AppSignalID
 {
-	Q_GADGET
-
-	/// \brief Contains a unique 64-bit hash of a signal identifier
-	Q_PROPERTY(Hash hash READ hash)
-	Q_PROPERTY(Hash Hash READ hash)
-
-	/*! \brief Contains current signal value
-
-		Contains current signal value. For discrete signals <b>"False"</b> is equal to <b>0</b>, <b>"True"</b> is equal to <b>1</b>.
-
-		\warning Be careful when comparing values. Remember that <b>double</b> can't be compared directly,
-		because doubles and floats cannot express every numerical value. They are using approximations to represent the value.
-		It is recommended to make comparsions as follows, especially analog values:
-
-		\code
-		var a = state.value;
-		var b = 1.5;
-
-		var threshold = 0.0000001;
-
-		if (Math.abs(a - b) <= threshold)
-		{
-		...
-		}
-		\endcode
-	*/
-	Q_PROPERTY(double value READ value)
-	Q_PROPERTY(double Value READ value)
-
-	/// \brief Contains signal validity flag
-	Q_PROPERTY(bool valid READ isValid)
-	Q_PROPERTY(bool Valid READ isValid)
-
-	/// \brief Signal value is received from Application Data Service
-	Q_PROPERTY(bool stateAvailable READ isStateAvailable)
-	Q_PROPERTY(bool StateAvailable READ isStateAvailable)
-
-	/// \brief Signal value simulated flag (see AFB simlock)
-	Q_PROPERTY(bool simulated READ isSimulated)
-	Q_PROPERTY(bool Simulated READ isSimulated)
-
-	/// \brief Signal value blocked flag (see AFB simlock)
-	Q_PROPERTY(bool blocked READ isBlocked)
-	Q_PROPERTY(bool Blocked READ isBlocked)
-
-	/// \brief Signal value mismatch flag (see AFB mismatch)
-	Q_PROPERTY(bool mismatch READ isMismatch)
-	Q_PROPERTY(bool Mismatch READ isMismatch)
-
-	/// \brief Signal value is above high limit
-	Q_PROPERTY(bool aboveHighLimit READ isAboveHighLimit)
-	Q_PROPERTY(bool AboveHighLimit READ isAboveHighLimit)
-
-	/// \brief Signal value is below low limit
-	Q_PROPERTY(bool belowLowLimit READ isBelowLowLimit)
-	Q_PROPERTY(bool BelowLowLimit READ isBelowLowLimit)
-
-	/// \brief Signal value is out of limits
-	Q_PROPERTY(bool outOfLimits READ isOutOfLimits)
-	Q_PROPERTY(bool OutOfLimits READ isOutOfLimits)
-
-public:
-	AppSignalState() = default;
-	AppSignalState(const AppSignalState&) = default;
-	AppSignalState(AppSignalState&&) = default;
-	AppSignalState(const Proto::AppSignalState& protoState);
-	~AppSignalState() = default;
-
-	AppSignalState& operator= (const AppSignalState& state) = default;
-	AppSignalState& operator= (const SimpleAppSignalState& smState);
-
-	[[nodiscard]] Hash hash() const;
-	[[nodiscard]] const Times& time() const;
-	[[nodiscard]] const TimeStamp& time(E::TimeType timeType) const;
-	[[nodiscard]] double value() const noexcept;
-
-	[[nodiscard]] bool isValid() const noexcept;
-	[[nodiscard]] bool isStateAvailable() const;
-	[[nodiscard]] bool isSimulated() const;
-	[[nodiscard]] bool isBlocked() const;
-	[[nodiscard]] bool isMismatch() const;
-	[[nodiscard]] bool isAboveHighLimit() const;
-	[[nodiscard]] bool isBelowLowLimit() const;
-	[[nodiscard]] bool isOutOfLimits() const;		//  isAboveHighLimit() || isBelowLowLimit()
-
-	void save(Proto::AppSignalState* protoState);
-	Hash load(const Proto::AppSignalState& protoState);
-
-	[[nodiscard]] bool hasSameValue(const AppSignalState& b) const;
-
-	[[nodiscard]] static QString toString(double value, E::ValueViewType viewType, E::AnalogFormat analogFormat, int precision);
-
-public:
-	Hash m_hash = 0;					// == ::calcHash(AppSignalID)
-	Times m_time;
-	AppSignalStateFlags m_flags;
-	double m_value = 0;
-
-	static const quint32 VALID = 1;
-	static const quint32 INVALID = 0;
+	int ID;
+	QString appSignalID;
 };
 
+Q_DECLARE_METATYPE(ID_AppSignalID);
 
-Q_DECLARE_METATYPE(AppSignalState)
-
-
-/*! \class AppSignalParam
-	\ingroup groupParamsStates
-	\brief Describes signal parameters in Monitor and TuningClient applications.
-
-	AppSignalParam class describes signal parmeters in Monitor and TuningClient applications. This state is received from ApplicationDataService by Monitor or
-	from TuningService by Monitor or TuningClient.
-
-	\ref VFrame30::ScriptAppSignalController "ScriptAppSignalController" class accesed by global <b>signals</b> object is used for
-	requesting signal parameters from Application Data Service.
-
-	\ref VFrame30::TuningController "TuningController" class accesed by global <b>tuning</b> object is used for
-	requesting signal parameters from Tuning Service.
-
-	\warning
-	TuningController is always available in TuningClient. In Monitor it is available only in non-safety projects when Tuning function is enabled.
-
-	\n
-	\warning
-	After requesting signal state it is highly recommended to check function return values, because errors can occur. For example,
-	connection to a service can be down, or signal with specified identifier could not exist.
-
-	<b>Example:</b>
-
-	\code
-	var appSignalIdA = "#APPSIGNAL01";	// Signal A
-	var appSignalIdB = "#APPSIGNAL02";	// Signal B
-
-	// Get parameters from Application Data Service
-	//
-	var param1 = signals.signalParam(appSignalIdA);
-
-	// Get parameters from Tuning Service
-	//
-	var param2 = tuning.signalParam(appSignalIdB);
-
-	if (param1 == undefined || param2 == undefined)
-	{
-		// Some signals do not exist or getting their parameters failed
-		//
-		return;
-	}
-
-	// Output parameters of signal A
-	//
-	schemaItemValue.Text = param1.caption;
-
-	// Check if signal B is analog and input
-	//
-	if (param2.isAnalog)
-	{
-		if (param2.isInput)
-		{
-			// Create a string with template "caption, units"
-			//
-			var units = param2.unit;
-
-			var text = param2.caption + ", " + units;
-			...
-		}
-	}
-	\endcode
-*/
-class AppSignalParam
+class Signal
 {
-	Q_GADGET
-
-	/// \brief Contains a 64-bit hash of a signal
-	Q_PROPERTY(Hash hash READ hash)
-	Q_PROPERTY(Hash Hash READ hash)
-
-	/// \brief Application Signal Identifier
-	Q_PROPERTY(QString appSignalID READ appSignalId)
-	Q_PROPERTY(QString AppSignalID READ appSignalId)
-
-	/// \brief Custom Application Signal Identifier
-	Q_PROPERTY(QString customAppSignalID READ customSignalId)
-	Q_PROPERTY(QString CustomAppSignalID READ customSignalId)
-
-	Q_PROPERTY(QString customSignalID READ customSignalId)	// same as CustomAppSignalID, for compatibility
-	Q_PROPERTY(QString CustomSignalID READ customSignalId)	// same as CustomAppSignalID, for compatibility
-
-	/// \brief Signal Caption
-	Q_PROPERTY(QString caption READ caption)
-	Q_PROPERTY(QString Caption READ caption)
-
-	/// \brief Signal EquipmentID, can be port EquipmentID for inputs/ouputs or LmEquipmentID for internal signals.
-	Q_PROPERTY(QString equipmentID READ equipmentId)
-	Q_PROPERTY(QString EquipmentID READ equipmentId)
-
-	/// \brief Signal Equipment ID
-	Q_PROPERTY(QString lmEquipmentID READ lmEquipmentId)
-	Q_PROPERTY(QString LmEquipmentID READ lmEquipmentId)
-
-	/// \brief Signal Measure Units
-	Q_PROPERTY(QString unit READ unit)
-	Q_PROPERTY(QString Unit READ unit)
-
-	/// \brief Signal precision (digits after point)
-	Q_PROPERTY(int precision READ precision)
-	Q_PROPERTY(int Precision READ precision)
-
-	/// \brief Signal channel
-	Q_PROPERTY(E::Channel channel READ channel)
-	Q_PROPERTY(E::Channel Channel READ channel)
-
-	/// \brief Low Valid Range
-	Q_PROPERTY(double lowValidRange READ lowValidRange)
-	Q_PROPERTY(double LowValidRange READ lowValidRange)
-
-	/// \brief High Valid Range
-	Q_PROPERTY(double highValidRange READ highValidRange)
-	Q_PROPERTY(double HighValidRange READ highValidRange)
-
-	/// \brief Low Engineering Units
-	Q_PROPERTY(double lowEngineeringUnits READ lowEngineeringUnits)
-	Q_PROPERTY(double LowEngineeringUnits READ lowEngineeringUnits)
-
-	/// \brief High Engineering Units
-	Q_PROPERTY(double highEngineeringUnits READ highEngineeringUnits)
-	Q_PROPERTY(double HighEngineeringUnits READ highEngineeringUnits)
-
-	/// \brief Signal is tunable
-	Q_PROPERTY(bool enableTuning READ enableTuning)
-	Q_PROPERTY(bool EnableTuning READ enableTuning)
-
-	/// \brief Default value of tunable signal
-	Q_PROPERTY(QVariant tuningDefaultValue READ tuningDefaultValueToVariant)
-	Q_PROPERTY(QVariant TuningDefaultValue READ tuningDefaultValueToVariant)
-
-	/// \brief Low tuning limit of the signal
-	Q_PROPERTY(QVariant tuningLowBound READ tuningLowBoundToVariant)
-	Q_PROPERTY(QVariant TuningLowBound READ tuningLowBoundToVariant)
-
-	/// \brief High tuning limit of the signal
-	Q_PROPERTY(QVariant tuningHighBound READ tuningHighBoundToVariant)
-	Q_PROPERTY(QVariant TuningHighBound READ tuningHighBoundToVariant)
-
-	/// \brief Signal is input
-	Q_PROPERTY(bool isInput READ isInput)
-	Q_PROPERTY(bool IsInput READ isInput)
-
-	/// \brief Signal is output
-	Q_PROPERTY(bool isOutput READ isOutput)
-	Q_PROPERTY(bool IsOutput READ isOutput)
-
-	/// \brief Signal is internal
-	Q_PROPERTY(bool isInternal READ isInternal)
-	Q_PROPERTY(bool IsInternal READ isInternal)
-
-	/// \brief Signal is analog
-	Q_PROPERTY(bool isAnalog READ isAnalog)
-	Q_PROPERTY(bool IsAnalog READ isAnalog)
-
-	/// \brief Signal is discrete
-	Q_PROPERTY(bool isDiscrete READ isDiscrete)
-	Q_PROPERTY(bool IsDiscrete READ isDiscrete)
+	friend class DbWorker;
+	friend class SignalSet;
+	friend class SignalTests;
+	friend class DbControllerSignalTests;
 
 public:
-	AppSignalParam() = default;
-	AppSignalParam(const AppSignalParam&) = default;
-	AppSignalParam(const Signal& signal);
+	static const QString MACRO_START_TOKEN;
+	static const QString MACRO_END_TOKEN;
 
-	bool load(const Proto::AppSignal& message);
-	void load(const Signal& signal);
-	void save(::Proto::AppSignal* message) const;
+public:
+	Signal();
+	Signal(const Signal& s);
+	Signal(const ID_AppSignalID& ids);
+	Signal(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg);
+	virtual ~Signal();
 
-	// Properties
+	void clear();
+
+	void initSpecificProperties();
+
+	bool isLoaded() const { return m_isLoaded; }
+	void setIsLoaded(bool isLoaded) { m_isLoaded = isLoaded; }
+
+	// Signal identificators
+
+	const QString& appSignalID() const { return m_appSignalID; }
+	void setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; }
+
+	QString customAppSignalID() const { return m_customAppSignalID; }
+	void setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
+	bool customAppSignalIDContainsMacro() const { return m_customAppSignalID.contains(MACRO_START_TOKEN); }
+
+	QString caption() const { return m_caption; }
+	void setCaption(const QString& caption) { m_caption = caption; }
+	bool captionContainsMacro() const { return m_caption.contains(MACRO_START_TOKEN); }
+
+	QString equipmentID() const { return m_equipmentID; }
+	void setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
+
+	QString lmEquipmentID() const { return m_lmEquipmentID; }
+	void setLmEquipmentID(const QString& lmEquipmentID) { m_lmEquipmentID = lmEquipmentID; }
+
+	QString busTypeID() const { return m_busTypeID; }
+	void setBusTypeID(const QString& busTypeID) { m_busTypeID = busTypeID; }
+
+	E::Channel channel() const { return m_channel; }
+	int channelInt() const { return TO_INT(m_channel); }
+
+	bool excludeFromBuild() const { return m_excludeFromBuild; }
+	void setExcludeFromBuild(bool excludeFromBuild) { m_excludeFromBuild = excludeFromBuild; }
+
+	bool isAutoSignal() const { return m_isAutoSignal; }
+	void setAutoSignal(bool autoSignal) { m_isAutoSignal = autoSignal; }
+
+	// Signal type
+
+	E::SignalType signalType() const { return m_signalType; }
+	int signalTypeInt() const { return TO_INT(m_signalType); }
+	void setSignalType(E::SignalType type);
+
+	bool isAnalog() const { return m_signalType == E::SignalType::Analog; }
+	bool isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
+	bool isBus() const { return m_signalType == E::SignalType::Bus; }
+
+	E::SignalInOutType inOutType() const { return m_inOutType; }
+	int inOutTypeInt() const { return TO_INT(m_inOutType); }
+	void setInOutType(E::SignalInOutType inOutType) { m_inOutType = inOutType; }
+
+	bool isInput() const { return m_inOutType == E::SignalInOutType::Input; }
+	bool isOutput() const { return m_inOutType == E::SignalInOutType::Output; }
+	bool isInternal() const { return m_inOutType == E::SignalInOutType::Internal; }
+
+	// Signal format
+
+	int dataSize() const { return m_dataSize; }
+	void setDataSize(int dataSize) { m_dataSize = dataSize; }
+	void setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat dataFormat);
+	void setDataSizeW(int sizeW);
+
+	int sizeW() const { return (m_dataSize / SIZE_16BIT + ((m_dataSize % SIZE_16BIT) ? 1 : 0)); }
+	int sizeBit() const { return m_dataSize; }
+
+	E::ByteOrder byteOrder() const { return m_byteOrder; }
+	int byteOrderInt() const { return TO_INT(m_byteOrder); }
+	void setByteOrder(E::ByteOrder byteOrder) { m_byteOrder = byteOrder; }
+
+	E::AnalogAppSignalFormat analogSignalFormat() const { return m_analogSignalFormat; }
+	int analogSignalFormatInt() const { return TO_INT(m_analogSignalFormat); }
+	void setAnalogSignalFormat(E::AnalogAppSignalFormat dataFormat);
+
+	E::DataFormat dataFormat() const;
+
+	bool isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder) const;
+	bool isCompatibleFormat(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, E::ByteOrder byteOrder) const;
+	bool isCompatibleFormat(const SignalAddress16& sa16) const;
+	bool isCompatibleFormat(const Signal& s) const;
+	bool isCompatibleFormat(E::SignalType signalType, const QString& busTypeID) const;
+
+	// Analog signal properties
+
+	int lowADC(QString* err = nullptr) const;
+	void setLowADC(int lowADC);
+
+	int highADC(QString* err = nullptr) const;
+	void setHighADC(int highADC);
+
+	int lowDAC(QString* err = nullptr) const;
+	void setLowDAC(int lowDAC);
+
+	int highDAC(QString* err = nullptr) const;
+	void setHighDAC(int highDAC);
+
+	double lowEngineeringUnits(QString* err = nullptr) const;
+	void setLowEngineeringUnits(double lowEngineeringUnits);
+
+	double highEngineeringUnits(QString* err = nullptr) const;
+	void setHighEngineeringUnits(double highEngineeringUnits);
+
+	double lowValidRange(QString* err = nullptr) const;
+	void setLowValidRange(double lowValidRange);
+
+	double highValidRange(QString* err = nullptr) const;
+	void setHighValidRange(double highValidRange);
+
+	double filteringTime(QString* err = nullptr) const;
+	void setFilteringTime(double filteringTime);
+
+	double spreadTolerance(QString* err = nullptr) const;
+	void setSpreadTolerance(double spreadTolerance);
+
+	// Analog input/output signal properties
+
+	double electricLowLimit(QString* err = nullptr) const;
+	void setElectricLowLimit(double electricLowLimit);
+
+	double electricHighLimit(QString* err = nullptr) const;
+	void setElectricHighLimit(double electricHighLimit);
+
+	E::ElectricUnit electricUnit(QString* err = nullptr) const;
+	void setElectricUnit(E::ElectricUnit electricUnit);
+
+	double rload_Ohm(QString* err = nullptr) const;
+	void setRload_Ohm(double rload_Ohm);
+
+	E::SensorType sensorType(QString* err = nullptr) const;
+	void setSensorType(E::SensorType sensorType);
+
+	E::OutputMode outputMode(QString* err = nullptr) const;
+	void setOutputMode(E::OutputMode outputMode);
+
+	double r0_Ohm(QString* err = nullptr) const;
+	void setR0_Ohm(double r0_Ohm);
+
+	// Tuning signal properties
+
+	bool enableTuning() const { return m_enableTuning; }
+	bool isTunable() const { return m_enableTuning; }
+	void setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
+
+	TuningValue tuningDefaultValue() const { return m_tuningDefaultValue; }
+	void setTuningDefaultValue(const TuningValue& value) { m_tuningDefaultValue = value; }
+
+	TuningValue tuningLowBound() const { return m_tuningLowBound; }
+	void setTuningLowBound(const TuningValue& value) { m_tuningLowBound = value; }
+
+	TuningValue tuningHighBound() const { return m_tuningHighBound; }
+	void setTuningHighBound(const TuningValue& value) { m_tuningHighBound = value; }
+
+	// Signal properties for MATS
+
+	bool acquire() const { return m_acquire; }
+	void setAcquire(bool acquire) { m_acquire = acquire; }
+
+	bool isAcquired() const { return m_acquire; }
+
+	bool archive() const { return m_archive; }
+	void setArchive(bool archive) { m_archive = archive; }
+
+	bool isArchived() const { return m_archive; }
+
+	int decimalPlaces() const { return m_decimalPlaces; }
+	void setDecimalPlaces(int decimalPlaces) { m_decimalPlaces = decimalPlaces; }
+
+	double coarseAperture() const { return m_coarseAperture; }
+	void setCoarseAperture(double aperture) { m_coarseAperture = aperture; }
+
+	double fineAperture() const { return m_fineAperture; }
+	void setFineAperture(double aperture) { m_fineAperture = aperture; }
+
+	bool adaptiveAperture() const { return m_adaptiveAperture; }
+	void setAdaptiveAperture(bool adaptive) { m_adaptiveAperture = adaptive; }
+
+	// Specific properties
+
+	QString specPropStruct() const { return m_specPropStruct; }
+	void setSpecPropStruct(const QString& specPropsStruct) { m_specPropStruct = specPropsStruct; }
+
+	bool createSpecPropValues();
+
+	void setProtoSpecPropValues(const QByteArray& protoSpecPropValues) { m_protoSpecPropValues = protoSpecPropValues; }
+	const QByteArray& protoSpecPropValues() const { return m_protoSpecPropValues; }
+
+	void cacheSpecPropValues();
+
+	double getSpecPropDouble(const QString& name, QString* err) const;
+	int getSpecPropInt(const QString& name, QString* err) const;
+	unsigned int getSpecPropUInt(const QString& name, QString* err) const;
+	int getSpecPropEnum(const QString& name, QString* err) const;
+	bool getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum, QString* err) const;
+	bool isSpecPropExists(const QString& name) const;
+
+	bool setSpecPropDouble(const QString& name, double value);
+	bool setSpecPropInt(const QString& name, int value);
+	bool setSpecPropUInt(const QString& name, unsigned int value);
+	bool setSpecPropEnum(const QString& name, int enumValue);
+	bool setSpecPropValue(const QString& name, const QVariant& qv, bool isEnum);
+
 	//
-public:
-	[[nodiscard]] Hash hash() const;
-	void setHash(Hash value);
 
-	[[nodiscard]] const QString& appSignalId() const;
-	void setAppSignalId(const QString& value);
+	QStringList tags() const;
+	const std::set<QString>& tagsSet() const { return m_tags; }
+	std::set<QString>& tagsSet() { return m_tags; }
+	QString tagsStr() const { return tags().join(QChar::LineFeed); }
 
-	[[nodiscard]] const QString& customSignalId() const;
-	void setCustomSignalId(const QString& value);
+	void setTags(const QStringList& tags);
+	void setTags(const std::set<QString>& tags) { m_tags = tags; }
+	void setTagsStr(const QString& tagsStr) { setTags(tagsStr.split(QRegExp("\\W+"), Qt::SkipEmptyParts)); }
 
-	[[nodiscard]] const QString& caption() const;
-	void setCaption(const QString& value);
+	bool hasTags() const { return m_tags.size() > 0; }
+	bool hasTag(const QString& tag) const { return m_tags.find(tag.toLower().trimmed()) != m_tags.end(); }
+	int tagsCount() const { return static_cast<int>(m_tags.size()); }
 
-	[[nodiscard]] const QString& equipmentId() const;
-	void setEquipmentId(const QString& value);
+	void appendTag(const QString& tag);
+	void appendTags(const QStringList& tags);
+	void appendTags(const std::set<QString>& tags);
 
-	[[nodiscard]] const QString& lmEquipmentId() const;
-	void setLmEquipmentId(const QString& value);
+	void removeTag(const QString& tag);
+	void removeTags(const QStringList& tags);
+	void removeTags(const std::set<QString>& tags);
 
-	[[nodiscard]] E::Channel channel() const;
-	void setChannel(E::Channel value);
+	void clearTags();
 
-	[[nodiscard]] bool isInput() const;
-	[[nodiscard]] bool isOutput() const;
-	[[nodiscard]] bool isInternal() const;
-	[[nodiscard]] E::SignalInOutType inOutType() const;
-	void setInOutType(E::SignalInOutType value);
+	//
 
-	[[nodiscard]] bool isAnalog() const;
-	[[nodiscard]] bool isDiscrete() const;
-	[[nodiscard]] E::SignalType type() const;
-	void setType(E::SignalType value);
+	void saveProtoData(QByteArray* protoDataArray) const;
+	void saveProtoData(Proto::ProtoAppSignalData* protoData) const;
 
-	[[nodiscard]] TuningValueType tuningType() const;
+	void loadProtoData(const QByteArray& protoDataArray);
+	void loadProtoData(const Proto::ProtoAppSignalData& protoData);
 
-	[[nodiscard]] E::AnalogAppSignalFormat analogSignalFormat() const;
-	void setAnalogSignalFormat(E::AnalogAppSignalFormat value);
+	// Signal fields from database
 
-	[[nodiscard]] E::ByteOrder byteOrder() const;
-	void setByteOrder(E::ByteOrder value);
+	int ID() const { return m_ID; }
+	int signalGroupID() const { return m_signalGroupID; }
+	int signalInstanceID() const { return m_signalInstanceID; }
+	int changesetID() const { return m_changesetID; }
+	bool checkedOut() const { return m_checkedOut; }
+	int userID() const { return m_userID; }
+	QDateTime created() const { return m_created; }
+	bool deleted() const { return m_deleted; }
+	QDateTime instanceCreated() const { return m_instanceCreated; }
+	VcsItemAction instanceAction() const { return m_instanceAction; }
 
-	[[nodiscard]] int unitId() const;
-	void setUnitId(int value);
+	// Signal properties calculated in compile-time
 
-	[[nodiscard]] const QString& unit() const;
-	void setUnit(QString value);
+	Hash hash() const { assert(m_hash !=0); return m_hash; }
+	void setHash(Hash hash) { m_hash = hash; }
 
-	[[nodiscard]] double lowValidRange() const;
-	[[nodiscard]] double highValidRange() const;
+	QString unit() const { return m_unit; }
+	void setUnit(const QString& unit) { m_unit = unit; }
 
-	[[nodiscard]] double lowEngineeringUnits() const;
-	void setLowEngineeringUnits(double value);
+	Address16 ioBufAddr() const;
+	void setIoBufAddr(const Address16& addr);
 
-	[[nodiscard]] double highEngineeringUnits() const;
-	void setHighEngineeringUnits(double value);
+	Address16 tuningAddr() const { return m_tuningAddr; }
+	void setTuningAddr(const Address16& addr) { m_tuningAddr = addr; }
 
-	[[nodiscard]] double inputLowLimit() const;
-	[[nodiscard]] double inputHighLimit() const;
-	[[nodiscard]] E::ElectricUnit inputUnitId() const;
-	[[nodiscard]] E::SensorType inputSensorType() const;
+	Address16 tuningAbsAddr() const { return m_tuningAbsAddr; }
+	void setTuningAbsAddr(const Address16& addr) { m_tuningAbsAddr = addr; }
 
-	[[nodiscard]] double outputLowLimit() const;
-	[[nodiscard]] double outputHighLimit() const;
-	[[nodiscard]] int outputUnitId() const;
-	[[nodiscard]] E::OutputMode outputMode() const;
-	[[nodiscard]] E::SensorType outputSensorType() const;
+	Address16 ualAddr() const { return m_ualAddr; }
+	void setUalAddr(const Address16& addr) { m_ualAddr = addr; }
+	bool ualAddrIsValid() const { return m_ualAddr.isValid(); }
 
-	[[nodiscard]] int precision() const;
-	void setPrecision(int value);
+	Address16 regBufAddr() const { return m_regBufAddr; }
+	void setRegBufAddr(const Address16& addr) { m_regBufAddr = addr; }
 
-	[[nodiscard]] double aperture();
-	void setAperture(double value);
+	Address16 regValueAddr() const { return m_regValueAddr; }
+	void setRegValueAddr(const Address16& addr) { m_regValueAddr = addr; }
 
-	[[nodiscard]] double filteringTime();
-	void setFilteringTime(double value);
+	Address16 regValidityAddr() const { return m_regValidityAddr; }
+	void setRegValidityAddr(const Address16& addr) { m_regValidityAddr = addr; }
 
-	[[nodiscard]] double spreadTolerance();
-	void setSpreadTolerance(double value);
+	Address16 actualAddr(E::LogicModuleRamAccess* lmRamAccess = nullptr) const;
 
-	[[nodiscard]] bool enableTuning() const;
-	void setEnableTuning(bool value);
+	void resetAddresses();
 
-	[[nodiscard]] TuningValue tuningDefaultValue() const;
-	[[nodiscard]] QVariant tuningDefaultValueToVariant() const;
-	void setTuningDefaultValue(const TuningValue& value);
+	E::LogicModuleRamAccess lmRamAccess() const { return m_lmRamAccess; }
+	void setLmRamAccess(E::LogicModuleRamAccess access) { m_lmRamAccess = access; }
 
-	[[nodiscard]] TuningValue tuningLowBound() const;
-	[[nodiscard]] QVariant tuningLowBoundToVariant() const;
-	void setTuningLowBound(const TuningValue& value);
+	QString regValueAddrStr() const;
 
-	[[nodiscard]] TuningValue tuningHighBound() const;
-	[[nodiscard]] QVariant tuningHighBoundToVariant() const;
-	void setTuningHighBound(const TuningValue& value);
+	bool needConversion() const { return m_needConversion; }
+	void setNeedConversion(bool need) { m_needConversion = need; }
 
-	[[nodiscard]] const std::set<QString>& tags() const;
-	[[nodiscard]] std::set<QString>& mutableTags();
-	[[nodiscard]] QStringList tagStringList() const;
+	bool isConst() const { return m_isConst; }
+	void setIsConst(bool isConst) { m_isConst = isConst; }
 
-	void setTags(std::set<QString> tags);
+	double constValue() const { return m_constValue; }
+	void setConstValue(double constValue) { m_constValue = constValue; }
 
-public slots:
-	/// \brief Check if signal has specified tag
-	[[nodiscard]] bool hasTag(const QString& tag) const;
+	//
 
-public:
-	static const int NO_UNIT_ID = 1;
+	void writeToXml(XmlWriteHelper& xml);
+	void writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString());
+	void writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString());
+	void writeTuningValuesToXml(XmlWriteHelper& xml);
+
+	bool readFromXml(XmlReadHelper& xml);
+	bool readTuningValuesFromXml(XmlReadHelper& xml);
+
+	void serializeTo(Proto::AppSignal* s) const;
+	void serializeFrom(const Proto::AppSignal &s);
+
+	void initCalculatedProperties();
+
+	bool addFlagSignalID(E::AppSignalStateFlagType flagType, const QString& appSignalID);
+	QString getFlagSignalID(E::AppSignalStateFlagType flagType) const { return  m_stateFlagsSignals.value(flagType, QString()); }
+	QStringList getFlagSignalsIDs() const { return m_stateFlagsSignals.values(); }
+	bool hasFlagsSignals() const { return m_stateFlagsSignals.count(); }
+
+	const AppSignalStateFlagsMap& stateFlagsSignals() const { return m_stateFlagsSignals;};
+
+
+	void initTuningValues();
+
+	static QString expandDeviceSignalTemplate(	const Hardware::DeviceObject& startDeviceObject,
+												const QString& templateStr,
+												QString* errMsg);
+
+	std::shared_ptr<Hardware::DeviceModule> lm() const { return m_lm; }
+	void setLm(std::shared_ptr<Hardware::DeviceModule> lm);
 
 private:
-	Hash m_hash = 0;					// Hash from m_appSignalId
-	QString m_appSignalId;
-	QString m_customSignalId;
-	QString m_caption;
-	QString m_equipmentId;
-	QString m_lmEquipmentId;
 
+	static QString expandDeviceObjectMacro(const Hardware::DeviceObject& startDeviceObject,
+									const QString& macroStr,
+									QString* errMsg);
+
+	static const Hardware::DeviceObject* getParentDeviceObjectOfType(const Hardware::DeviceObject& startObject,
+															  const QString& parentObjectType,
+															  QString* errMsg);
+
+	// Private setters for fields, wich can't be changed outside DB engine
+	// Should be used only by friends
+	//
+	void setID(int signalID) { m_ID = signalID; }
+	void setSignalGroupID(int signalGroupID) { m_signalGroupID = signalGroupID; }
+	void setSignalInstanceID(int signalInstanceID) { m_signalInstanceID = signalInstanceID; }
+	void setChangesetID(int changesetID) { m_changesetID = changesetID; }
+	void setCheckedOut(bool checkedOut) { m_checkedOut = checkedOut; }
+	void setUserID(int userID) { m_userID = userID; }
+	void setChannel(E::Channel channel) { m_channel = channel; }
+	void setCreated(const QDateTime& created) { m_created = created; }
+	void setCreated(const QString& createdStr) { m_created = QDateTime::fromString(createdStr, DATE_TIME_FORMAT_STR); }
+	void setDeleted(bool deleted) { m_deleted = deleted; }
+	void setInstanceCreated(const QDateTime& instanceCreated) { m_instanceCreated = instanceCreated; }
+	void setInstanceCreated(const QString& instanceCreatedStr) { m_instanceCreated = QDateTime::fromString(instanceCreatedStr, DATE_TIME_FORMAT_STR); }
+	void setInstanceAction(VcsItemAction action) { m_instanceAction = action; }
+	void initCreatedDates();
+
+	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
+
+	void updateTuningValuesType();
+
+	void initIDsAndCaption(const Hardware::DeviceAppSignal& deviceSignal,
+							QString* errMsg);
+
+	void checkAndInitTuningSettings(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg);
+
+	QString specPropNotExistErr(const QString &propName) const;
+
+private:
+	bool m_isLoaded = false;										// == false - only m_ID and m_appSignalID fields is initialized from database
+																	// == true - all Signal fields is initialized from database
+
+	// Signal identificators
+	//
+	QString m_appSignalID;
+	QString m_customAppSignalID;
+	QString m_caption;
+	QString m_equipmentID;											// should be transformed to portEquipmentID
+	QString m_lmEquipmentID;										// now fills in compile time only
+	QString m_busTypeID;											// only for: m_signalType == E::SignalType::Bus
 	E::Channel m_channel = E::Channel::A;
-	E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
+	bool m_excludeFromBuild = false;
+
+	bool m_isAutoSignal = false;
+
+	// Signal type
+	//
 	E::SignalType m_signalType = E::SignalType::Analog;
-	E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
+	E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
+
+	// Signal format
+	//
+	int m_dataSize = 32;											// signal data size in bits
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 
+	// Analog signal properties
+	//
+	E::AnalogAppSignalFormat m_analogSignalFormat =					// only for m_signalType == E::SignalType::Analog
+							E::AnalogAppSignalFormat::Float32;		// discrete signals is always treat as UnsignedInt and dataSize == 1
 	QString m_unit;
 
-	double m_lowValidRange = 0;
-	double m_highValidRange = 100;
-	double m_lowEngineeringUnits = 0;
-	double m_highEngineeringUnits = 100;
-
-	double m_electricLowLimit = 0;									// low electric value for input range
-	double m_electricHighLimit = 0;									// high electric value for input range
-	E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;		// electric unit for input range (mA, mV, Ohm, V ....)
-	E::SensorType m_sensorType = E::SensorType::NoSensor;			// electric sensor type for input range (was created for m_inputUnitID)
-
-	double m_outputLowLimit = 0;									// low physical value for output range
-	double m_outputHighLimit = 0;									// high physical value for output range
-	int m_outputUnitId = NO_UNIT_ID;								// physical unit for output range (kg, mm, Pa ...)
-	E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;		// output electric range (or mode ref. OutputModeStr[])
-	E::SensorType m_outputSensorType = E::SensorType::NoSensor;		// electric sensor type for output range (was created for m_outputMode)
-
-	int m_precision = 2;
-	double m_coarseAperture = 1;
-	double m_fineAperture = 0.5;
-	double m_filteringTime = 0.005;
-	double m_spreadTolerance = 2;
+	// Tuning signal properties
+	//
 	bool m_enableTuning = false;
 	TuningValue m_tuningDefaultValue;
 	TuningValue m_tuningLowBound;
 	TuningValue m_tuningHighBound;
 
+	// Signal properties for MATS
+	//
+	bool m_acquire = true;
+	bool m_archive = true;
+	int m_decimalPlaces = 2;
+	double m_coarseAperture = 1;
+	double m_fineAperture = 0.5;
+	bool m_adaptiveAperture = false;
+
+	// Signal specific properties
+	//
+
 	QString m_specPropStruct;
-	QByteArray m_specPropValues;
+	QByteArray m_protoSpecPropValues;					// serialized protobuf message Proto::PropertyValues
+
+	std::shared_ptr<SignalSpecPropValues> m_cachedSpecPropValues;
 
 	std::set<QString> m_tags;
+
+	// Signal fields from database
+	//
+	int m_ID = 0;
+	int m_signalGroupID = 0;
+	int m_signalInstanceID = 0;
+	int m_changesetID = 0;
+	bool m_checkedOut = false;
+	int m_userID = 0;
+	QDateTime m_created;
+	bool m_deleted = false;
+	QDateTime m_instanceCreated;
+	VcsItemAction m_instanceAction{VcsItemAction::Added};
+
+	// Signal properties calculated in compile-time
+	//
+	Hash m_hash = 0;						// == calcHash(m_appSignalID)
+
+	Address16 m_ioBufAddr;					// signal address in i/o modules buffers for signals of input/output modules (input and output signals)
+											// or
+
+	Address16 m_tuningAddr;					// address of tunable signal  from beginning of tuning buffer
+
+	Address16 m_tuningAbsAddr;				// absolute address of tunable signal
+											// For analogs m_tuningAddr and m_tuningAbsAddr are EQUAL!
+											// For discretes m_tuningAddr and m_tuningAbsAddr are different, due to 32-bits packing of discretes!
+
+	Address16 m_ualAddr;					// signal address is used in UAL
+											// may be equal to m_ioBufAddr, m_tuningAddr, m_regValueAddr or not
+											// this address should be used in all signals value read/write operations in UAL
+
+	Address16 m_regBufAddr;					// absolute signal address in registration buffer (LM's memory address)
+
+	Address16 m_regValueAddr;				// signal Value address in FSC data packet
+	Address16 m_regValidityAddr;			// signal Validity address in FSC data packet
+
+	E::LogicModuleRamAccess m_lmRamAccess = E::LogicModuleRamAccess::Undefined;
+
+	bool m_isConst = false;
+	double m_constValue = 0;
+
+	AppSignalStateFlagsMap m_stateFlagsSignals;
+
+	//
+
+	bool m_needConversion = false;
+
+	// specific build-time fields
+	//
+	std::shared_ptr<Hardware::DeviceModule> m_lm;
 };
 
-Q_DECLARE_METATYPE(AppSignalParam)
+typedef PtrOrderedHash<int, Signal> SignalPtrOrderedHash;
+
+class SignalSet : public SignalPtrOrderedHash
+{
+public:
+	SignalSet();
+	virtual ~SignalSet();
+
+	virtual void clear() override;
+
+	void reserve(int n);
+
+	void buildID2IndexMap();
+	void updateID2IndexInMap(const QString& appSignalId, int index);
+	void clearID2IndexMap() { m_strID2IndexMap.clear(); }
+	bool ID2IndexMapIsEmpty();
+
+	bool contains(const QString& appSignalID) const;
+	Signal* getSignal(const QString& appSignalID);
+
+	virtual void append(const int& signalID, Signal* signal) override;
+	virtual void remove(const int& signalID) override;
+	virtual void removeAt(const int index) override;
+
+	void append(Signal* signal);
+
+	QVector<int> getChannelSignalsID(const Signal& signal) const;
+	QVector<int> getChannelSignalsID(int signalGroupID) const;
+
+	void resetAddresses();
+
+	bool serializeFromProtoFile(const QString& filePath);
+
+	int getMaxID();
+	QStringList appSignalIdsList(bool removeNumberSign, bool sort) const;
+
+	void replaceOrAppendIfNotExists(int signalID, const Signal& s);
+
+private:
+	QMultiHash<int, int> m_groupSignals;
+	QHash<QString, int> m_strID2IndexMap;
+
+	int m_maxID = -1;
+
+	Builder::IssueLogger* m_log = nullptr;
+};
+

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "AppSignal.h"
+#include "AppSignalParam.h"
 
 
 class Comparator;

@@ -3,7 +3,7 @@
 #include <memory>
 #include <type_traits>
 
-#include "Signal.h"
+#include "AppSignal.h"
 #include "PropertyObject.h"
 
 

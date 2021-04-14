@@ -47,7 +47,7 @@ SOURCES += \
     TrendScale.cpp \
     Forms/DialogChooseTrendSignals.cpp \
     TrendWidget.cpp \
-    TrendSignal.cpp \
+	TrendSignal.cpp \
     TrendSlider.cpp \
     TrendSettings.cpp \
     TrendMainWindow.cpp \

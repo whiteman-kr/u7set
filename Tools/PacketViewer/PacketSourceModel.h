@@ -4,7 +4,7 @@
 #include <QAbstractItemModel>
 #include <memory>
 #include <unordered_map>
-#include "../../lib/Signal.h"
+#include "../../lib/AppSignal.h"
 #include "../../OnlineLib/DataProtocols.h"
 #include "../../lib/DataSource.h"
 

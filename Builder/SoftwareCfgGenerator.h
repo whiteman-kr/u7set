@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../lib/DbController.h"
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/DataSource.h"
 #include "../lib/Subsystem.h"

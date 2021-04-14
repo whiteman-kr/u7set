@@ -1,7 +1,7 @@
 #pragma once
 #include "../Builder/SignalSet.h"
 #include "SignalProperties.h"
-#include "AppSignal.h"
+#include "AppSignalParam.h"
 
 #define SIGNAL_TYPE_COUNT (QMetaEnum::fromType<E::SignalType>().keyCount())
 #define IN_OUT_TYPE_COUNT (QMetaEnum::fromType<E::SignalInOutType>().keyCount())

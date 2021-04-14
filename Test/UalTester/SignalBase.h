@@ -7,8 +7,8 @@
 #include <QVector>
 
 #include "../../UtilsLib/Hash.h"
-#include "../../lib/Signal.h"
 #include "../../lib/AppSignal.h"
+#include "../../lib/AppSignalParam.h"
 
 // ==============================================================================================
 

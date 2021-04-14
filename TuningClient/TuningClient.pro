@@ -98,7 +98,7 @@ SOURCES +=\
     ConfigController.cpp \
     ../lib/BuildInfo.cpp \
     DialogSettings.cpp \
-    ../lib/AppSignal.cpp \
+    ../lib/AppSignalParam.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     ../lib/LogFile.cpp \
@@ -127,7 +127,7 @@ SOURCES +=\
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     TuningSchemaManager.cpp \
-    ../lib/Signal.cpp \
+    ../lib/AppSignal.cpp \
     ../lib/SignalProperties.cpp \
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/UiTools.cpp \
@@ -154,7 +154,7 @@ HEADERS  += MainWindow.h \
     ConfigController.h \
     ../lib/BuildInfo.h \
     DialogSettings.h \
-    ../lib/AppSignal.h \
+    ../lib/AppSignalParam.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/PropertyObject.h \
@@ -183,7 +183,7 @@ HEADERS  += MainWindow.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
     TuningSchemaManager.h \
-    ../lib/Signal.h \
+    ../lib/AppSignal.h \
     ../lib/SignalProperties.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/UiTools.h \

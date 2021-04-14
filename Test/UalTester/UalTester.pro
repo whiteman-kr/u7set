@@ -42,8 +42,8 @@ SOURCES += \
     ../../lib/DeviceObject.cpp \
     ../../lib/OutputLog.cpp \
     ../../lib/DbStruct.cpp \
+	../../lib/AppSignalParam.cpp \
 	../../lib/AppSignal.cpp \
-	../../lib/Signal.cpp \
 	../../lib/Tuning/TuningSignalState.cpp \
 	../../lib/TuningValue.cpp \
 	../../lib/SignalProperties.cpp \
@@ -71,8 +71,8 @@ HEADERS += \
     ../../lib/OutputLog.h \
     ../../lib/DbStruct.h \
     ../../lib/PropertyObject.h \
+    ../../lib/AppSignalParam.h \
     ../../lib/AppSignal.h \
-    ../../lib/Signal.h \
     ../../lib/Tuning/TuningSignalState.h \
     ../../lib/TuningValue.h \
     ../../lib/SignalProperties.h \

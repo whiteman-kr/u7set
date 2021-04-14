@@ -49,11 +49,11 @@ HEADERS += \
     ../lib/DbStruct.h \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
-    ../lib/AppSignal.h \
+    ../lib/AppSignalParam.h \
     ../lib/TimeStamp.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
-    ../lib/Signal.h \
+    ../lib/AppSignal.h \
     ../lib/SignalProperties.h \
 	../lib/AppSignalStateFlags.h \
     FileArchReader.h \
@@ -77,10 +77,10 @@ SOURCES += \
 	../lib/DeviceObject.cpp \
 	../lib/DbStruct.cpp \
 	../lib/Types.cpp \
-	../lib/AppSignal.cpp \
+	../lib/AppSignalParam.cpp \
 	../lib/SoftwareInfo.cpp \
 	../lib/TuningValue.cpp \
-	../lib/Signal.cpp \
+	../lib/AppSignal.cpp \
 	../lib/SignalProperties.cpp \
 	../lib/AppSignalStateFlags.cpp \
 	ArchivingService.cpp \

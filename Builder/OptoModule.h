@@ -3,7 +3,7 @@
 #include "../lib/OrderedHash.h"
 #include "../lib/DeviceObject.h"
 #include "../UtilsLib/Address16.h"
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 
 #include "RawDataDescription.h"
 #include "ModulesRawData.h"

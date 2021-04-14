@@ -1,7 +1,7 @@
 #ifndef SIGNALBASE_H
 #define SIGNALBASE_H
 
-#include "../../lib/Signal.h"
+#include "../../lib/AppSignal.h"
 
 #include "BuildOption.h"
 

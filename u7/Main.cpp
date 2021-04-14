@@ -11,7 +11,7 @@
 #include "../lib/Configurator.h"
 #include "../lib/LogicModulesInfo.h"
 #include "../Builder/Builder.h"
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include <QList>
 #include <optional>
 

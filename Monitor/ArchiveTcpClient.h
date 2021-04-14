@@ -4,7 +4,7 @@
 #include "../OnlineLib/Tcp.h"
 #include "../UtilsLib/Hash.h"
 #include "../lib/TimeStamp.h"
-#include "../lib/AppSignal.h"
+#include "../lib/AppSignalParam.h"
 #include "../Proto/network.pb.h"
 #include "MonitorConfigController.h"
 #include "ArchiveData.h"

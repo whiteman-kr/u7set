@@ -81,8 +81,8 @@ SOURCES += \
     ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
 	../lib/AppSignalManager.cpp \
-	../lib/Signal.cpp \
 	../lib/AppSignal.cpp \
+	../lib/AppSignalParam.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
 	../lib/TuningValue.cpp \
@@ -141,8 +141,8 @@ HEADERS += \
 	../lib/Types.h \
 	../lib/ModuleFirmware.h \
 	../lib/AppSignalManager.h \
-	../lib/Signal.h \
 	../lib/AppSignal.h \
+	../lib/AppSignalParam.h \
 	../lib/IAppSignalManager.h \
 	../lib/Tuning/ITuningSignalManager.h \
 	../lib/Tuning/TuningSignalManager.h \

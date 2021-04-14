@@ -42,7 +42,7 @@ SOURCES += \
     ../../lib/SoftwareSettings.cpp \
     ../../lib/ScriptDeviceObject.cpp \
     ../../lib/Ui/DialogAbout.cpp \
-    ../../lib/Signal.cpp \
+    ../../lib/AppSignal.cpp \
     ../../lib/AppSignalStateFlags.cpp \
     ../../lib/DbStruct.cpp \
     ../../lib/DeviceObject.cpp \
@@ -84,7 +84,7 @@ HEADERS += \
     ../../lib/SoftwareSettings.h \
     ../../lib/ScriptDeviceObject.h \
     ../../lib/Ui/DialogAbout.h \
-    ../../lib/Signal.h \
+    ../../lib/AppSignal.h \
     ../../lib/AppSignalStateFlags.h \
     ../../lib/DbStruct.h \
     ../../lib/DeviceObject.h \

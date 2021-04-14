@@ -1,6 +1,6 @@
 #pragma once
 #include "Indicator.h"
-#include "../lib/AppSignal.h"
+#include "../lib/AppSignalParam.h"
 
 class Comparator;
 

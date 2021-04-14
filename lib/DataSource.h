@@ -11,7 +11,7 @@
 #include "../OnlineLib/DataProtocols.h"
 #include "../OnlineLib/SocketIO.h"
 #include "DeviceObject.h"
-#include "AppSignal.h"
+#include "AppSignalParam.h"
 #include "ConstStrings.h"
 
 class DataSource

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/AppSignal.h"
+#include "../lib/AppSignalParam.h"
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"

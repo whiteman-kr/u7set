@@ -1,5 +1,5 @@
 #include "TuningController.h"
-#include "../lib/AppSignal.h"
+#include "../lib/AppSignalParam.h"
 #include "../lib/Tuning/ITuningSignalManager.h"
 #include "../lib/Tuning/ITuningTcpClient.h"
 

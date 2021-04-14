@@ -4,7 +4,7 @@
 #include <QReadWriteLock>
 
 #include "DbStruct.h"
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include "../UtilsLib/WUtils.h"
 
 #define AUTO_COMPLETE std::shared_ptr<int*> progressCompleted(nullptr, [this](void*) { this->m_progress->setCompleted(true); } );

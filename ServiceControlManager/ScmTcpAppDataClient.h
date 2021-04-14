@@ -4,7 +4,7 @@
 #include "../OnlineLib/SocketIO.h"
 #include "../UtilsLib/Hash.h"
 #include "../lib/OrderedHash.h"
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include "../AppDataService/AppDataSource.h"
 #include "../Proto/network.pb.h"
 

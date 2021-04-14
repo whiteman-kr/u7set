@@ -1,7 +1,7 @@
 #include "TuningClientCfgGenerator.h"
 #include "../lib/SoftwareSettings.h"
 #include "../VFrame30/Schema.h"
-#include "../lib/AppSignal.h"
+#include "../lib/AppSignalParam.h"
 #include "../lib/ClientBehavior.h"
 
 namespace Builder

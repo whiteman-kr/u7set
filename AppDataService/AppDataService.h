@@ -2,7 +2,7 @@
 
 #include "../ServiceLib/Service.h"
 #include "../lib/DataSource.h"
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include "../OnlineLib/CfgServerLoader.h"
 #include "../lib/SoftwareSettings.h"
 #include "../UtilsLib/Queue.h"

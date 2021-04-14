@@ -1,6 +1,6 @@
 #include "TuningSignalState.h"
 #include <cmath>
-#include "../AppSignal.h"
+#include "../AppSignalParam.h"
 
 //
 // TuningSignalState

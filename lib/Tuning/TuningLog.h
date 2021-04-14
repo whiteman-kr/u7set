@@ -3,7 +3,7 @@
 
 #include "../LogFile.h"
 
-#include "../AppSignal.h"
+#include "../AppSignalParam.h"
 
 namespace TuningLog
 {

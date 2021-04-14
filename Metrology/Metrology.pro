@@ -55,16 +55,16 @@ SOURCES += \
 	../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/ModuleFirmware.cpp \
-    ../lib/AppSignal.cpp \
+    ../lib/AppSignalParam.cpp \
     ../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/OutputLog.cpp \
-    ../lib/MetrologySignal.cpp \
+	../lib/MetrologySignal.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
-    ../lib/Signal.cpp \
+    ../lib/AppSignal.cpp \
     ../lib/SignalProperties.cpp \
     ../lib/Ui/DialogAbout.cpp \
 	../lib/UnitsConvertor.cpp \
@@ -121,7 +121,7 @@ HEADERS  += \
     ../lib/MetrologyConnection.h \
     ../lib/SignalSetProvider.h \
     ../lib/ScriptDeviceObject.h \
-    ../lib/Signal.h \
+	../lib/AppSignal.h \
     ../lib/CUtils.h \
     ../lib/Factory.h \
     ../lib/DeviceObject.h \
@@ -130,7 +130,7 @@ HEADERS  += \
     ../lib/Types.h \
     ../lib/OrderedHash.h \
     ../lib/PropertyObject.h \
-    ../lib/AppSignal.h \
+    ../lib/AppSignalParam.h \
     ../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
     ../lib/DeviceHelper.h \

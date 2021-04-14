@@ -1,7 +1,7 @@
 #ifndef DIALOGSIGNALSEARCH_H
 #define DIALOGSIGNALSEARCH_H
 
-#include "../lib/AppSignal.h"
+#include "../lib/AppSignalParam.h"
 #include "../lib/IAppSignalManager.h"
 #include "DragDropHelper.h"
 

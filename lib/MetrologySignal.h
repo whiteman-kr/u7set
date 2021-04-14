@@ -1,7 +1,7 @@
 #pragma once
 
+#include "../lib/AppSignalParam.h"
 #include "../lib/AppSignal.h"
-#include "../lib/Signal.h"
 #include "../lib/SignalProperties.h"
 #include "../lib/ComparatorSet.h"
 

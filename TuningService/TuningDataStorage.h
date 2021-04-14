@@ -4,7 +4,7 @@
 #include <QList>
 
 #include "../lib/Types.h"
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 
 #include "../Builder/IssueLogger.h"
 

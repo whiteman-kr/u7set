@@ -81,10 +81,10 @@ SOURCES += main.cpp \
     ../lib/Types.cpp \
     MonitorConfigController.cpp \
     TcpSignalClient.cpp \
-    ../lib/Signal.cpp \
+    ../lib/AppSignal.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/AppSignal.cpp \
+    ../lib/AppSignalParam.cpp \
     ../lib/AppSignalManager.cpp \
     Statistics.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
@@ -147,11 +147,11 @@ HEADERS  += \
     ../lib/Types.h \
     MonitorConfigController.h \
     TcpSignalClient.h \
-    ../lib/Signal.h \
+    ../lib/AppSignal.h \
     ../lib/PropertyObject.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
-    ../lib/AppSignal.h \
+    ../lib/AppSignalParam.h \
     ../lib/AppSignalManager.h \
     Statistics.h \
     ../lib/Ui/DialogSignalInfo.h \

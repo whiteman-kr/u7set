@@ -36,12 +36,12 @@ SOURCES += \
     ../lib/DataSource.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/Signal.cpp \
+	../lib/AppSignal.cpp \
     ../lib/Types.cpp \
     ../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
     ../lib/AppSignalStateFlags.cpp \
-    ../lib/AppSignal.cpp \
+	../lib/AppSignalParam.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
@@ -66,14 +66,14 @@ HEADERS += \
     ../lib/DataSource.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
-    ../lib/Signal.h \
+	../lib/AppSignal.h \
     ../lib/CUtils.h \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
     ../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
     ../lib/AppSignalStateFlags.h \
-    ../lib/AppSignal.h \
+	../lib/AppSignalParam.h \
     ../lib/TimeStamp.h \
     ../lib/SoftwareInfo.h \
     ../lib/Times.h \

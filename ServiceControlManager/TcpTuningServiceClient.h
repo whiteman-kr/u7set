@@ -4,7 +4,7 @@
 #include "../OnlineLib/SocketIO.h"
 #include "../Proto/network.pb.h"
 #include "../lib/Tuning/TuningSourceState.h"
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include "../lib/Tuning/TuningSignalState.h"
 
 

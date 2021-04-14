@@ -34,8 +34,8 @@ SOURCES += \
     ../lib/ScriptDeviceObject.cpp \
 	../lib/SoftwareSettings.cpp \
     ../lib/DataSource.cpp \
-    ../lib/Signal.cpp \
     ../lib/AppSignal.cpp \
+    ../lib/AppSignalParam.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/Types.cpp \
     ../lib/DbStruct.cpp \
@@ -76,9 +76,9 @@ HEADERS  += \
     ../lib/ScriptDeviceObject.h \
     ../lib/SoftwareSettings.h \
     ../lib/DataSource.h \
-    ../lib/Signal.h \
+    ../lib/AppSignal.h \
     ../lib/PropertyObject.h \
-	../lib/AppSignal.h \
+	../lib/AppSignalParam.h \
     ../lib/DeviceObject.h \
     ../lib/Types.h \
     ../lib/DbStruct.h \

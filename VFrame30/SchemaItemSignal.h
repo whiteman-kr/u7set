@@ -1,7 +1,7 @@
 #pragma once
 
 #include "FblItemRect.h"
-#include "../lib/AppSignal.h"
+#include "../lib/AppSignalParam.h"
 
 namespace VFrame30
 {

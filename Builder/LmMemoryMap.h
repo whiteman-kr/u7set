@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../UtilsLib/Address16.h"
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include "../lib/OutputLog.h"
 #include "IssueLogger.h"
 

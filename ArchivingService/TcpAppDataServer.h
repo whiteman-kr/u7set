@@ -5,7 +5,7 @@
 #include "../Proto/network.pb.h"
 #include "../Proto/serialization.pb.h"
 
-#include "../lib/AppSignal.h"
+#include "../lib/AppSignalParam.h"
 
 #include "Archive.h"
 

@@ -5,7 +5,7 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <../../lib/DbController.h>
-#include <../../lib/Signal.h>
+#include <../../lib/AppSignal.h>
 
 #ifdef _DEBUG
 	#include <QAbstractItemModelTester>

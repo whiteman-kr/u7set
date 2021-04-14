@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include "../VFrame30/Bus.h"
 
 #include "BuildResultWriter.h"

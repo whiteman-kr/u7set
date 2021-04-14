@@ -3,7 +3,7 @@
 
 #include <assert.h>
 
-#include "Signal.h"
+#include "AppSignal.h"
 #include "Types.h"
 #include "UnitsConvertorTable.h"
 

@@ -32,7 +32,7 @@ SOURCES += \
 	../../lib/ScriptDeviceObject.cpp \
 	../../lib/DataSource.cpp \
 	../../lib/DeviceObject.cpp \
-	../../lib/Signal.cpp \
+	../../lib/AppSignal.cpp \
 	../../lib/DbStruct.cpp \
 	../../lib/Types.cpp \
 	../../lib/TuningValue.cpp \
@@ -58,7 +58,7 @@ HEADERS  += \
 	../../lib/ScriptDeviceObject.h \
 	../../lib/DataSource.h \
 	../../lib/DeviceObject.h \
-	../../lib/Signal.h \
+	../../lib/AppSignal.h \
 	../../lib/DbStruct.h \
 	../../lib/PropertyObject.h \
 	../../lib/Types.h \

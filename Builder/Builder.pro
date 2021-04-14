@@ -75,7 +75,7 @@ SOURCES += \
     ../lib/LogicModuleSet.cpp \
     ../lib/ModuleFirmware.cpp \
     ../lib/ScriptDeviceObject.cpp \
-    ../lib/Signal.cpp \
+    ../lib/AppSignal.cpp \
     ../lib/SignalSetProvider.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/Subsystem.cpp \
@@ -85,7 +85,7 @@ SOURCES += \
     ../lib/DataSource.cpp \
     ../lib/CsvFile.cpp \
     ../lib/Tuning/TuningFilter.cpp \
-    ../lib/AppSignal.cpp \
+    ../lib/AppSignalParam.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/LmDescription.cpp \
     ../lib/Tuning/TuningSignalManager.cpp \
@@ -157,7 +157,7 @@ HEADERS += \
     ../lib/PropertyObject.h \
     ../lib/ModuleFirmware.h \
     ../lib/ScriptDeviceObject.h \
-    ../lib/Signal.h \
+    ../lib/AppSignal.h \
     ../lib/SignalSetProvider.h \
     ../lib/SoftwareSettings.h \
     ../lib/Subsystem.h \
@@ -167,7 +167,7 @@ HEADERS += \
     ../lib/DataSource.h \
     ../lib/CsvFile.h \
     ../lib/Tuning/TuningFilter.h \
-    ../lib/AppSignal.h \
+    ../lib/AppSignalParam.h \
     ../lib/BuildInfo.h \
     ../lib/LmDescription.h \
     ../lib/Tuning/TuningSignalManager.h \

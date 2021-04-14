@@ -5,7 +5,7 @@
 #include "DrawParam.h"
 #include "TuningController.h"
 #include "AppSignalController.h"
-#include "../lib/AppSignal.h"
+#include "../lib/AppSignalParam.h"
 #include "../lib/Tuning/TuningSignalState.h"
 
 

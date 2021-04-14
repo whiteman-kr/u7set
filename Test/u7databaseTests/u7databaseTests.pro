@@ -43,7 +43,7 @@ SOURCES += main.cpp \
 	../../lib/DeviceObject.cpp \
 	../../lib/DbProgress.cpp \
     ../../lib/ScriptDeviceObject.cpp \
-	../../lib/Signal.cpp \
+	../../lib/AppSignal.cpp \
 	../../lib/DbProgressDialog.cpp \
 	../../lib/Types.cpp \
 	../../lib/TuningValue.cpp \
@@ -73,7 +73,7 @@ HEADERS += \
 	../../lib/Factory.h \
 	../../lib/DbProgress.h \
     ../../lib/ScriptDeviceObject.h \
-	../../lib/Signal.h \
+	../../lib/AppSignal.h \
 	../../lib/DbProgressDialog.h \
 	../../lib/PropertyObject.h \
 	../../lib/Types.h \

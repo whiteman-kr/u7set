@@ -4,8 +4,8 @@
 #include "../OnlineLib/SocketIO.h"
 #include "../UtilsLib/Hash.h"
 #include "../lib/OrderedHash.h"
-#include "../lib/Signal.h"
 #include "../lib/AppSignal.h"
+#include "../lib/AppSignalParam.h"
 #include "../Proto/network.pb.h"
 
 class DataSource;

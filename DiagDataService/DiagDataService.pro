@@ -34,7 +34,7 @@ SOURCES += \
     ../lib/DataSource.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/Signal.cpp \
+    ../lib/AppSignal.cpp \
     ../lib/Types.cpp \
     ../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
@@ -52,7 +52,7 @@ HEADERS += \
     ../lib/DataSource.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
-    ../lib/Signal.h \
+    ../lib/AppSignal.h \
     ../lib/CUtils.h \
     ../lib/PropertyObject.h \
     ../lib/Types.h \

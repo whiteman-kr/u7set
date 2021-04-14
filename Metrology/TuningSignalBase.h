@@ -4,7 +4,7 @@
 #include <QObject>
 
 #include "../UtilsLib/Hash.h"
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include "../lib/MetrologySignal.h"
 
 namespace Network

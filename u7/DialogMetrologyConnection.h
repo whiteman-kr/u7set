@@ -20,7 +20,7 @@
 #include <QPushButton>
 #include <QDialogButtonBox>
 
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include "../lib/SignalSetProvider.h"
 #include "../lib/MetrologyConnection.h"
 #include "../lib/StandardColors.h"

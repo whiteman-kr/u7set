@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../OnlineLib/Tcp.h"
-#include "../lib/AppSignal.h"
+#include "../lib/AppSignalParam.h"
 #include "../Proto/network.pb.h"
 
 #include "SignalStatesProcessingThread.h"

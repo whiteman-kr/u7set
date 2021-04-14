@@ -6,7 +6,7 @@
 
 #include "../../OnlineLib/SocketIO.h"
 #include "../../UtilsLib/XmlHelper.h"
-#include "../../lib/Signal.h"
+#include "../../lib/AppSignal.h"
 #include "../../lib/ConstStrings.h"
 
 // -------------------------------------------------------------------------------------------------------------------

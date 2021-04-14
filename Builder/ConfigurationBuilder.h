@@ -1,7 +1,7 @@
 #ifndef CONFIGURATIONBUILDER_H
 #define CONFIGURATIONBUILDER_H
 
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include "BuildWorkerThread.h"
 
 // Forware delcarations

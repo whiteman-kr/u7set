@@ -2,7 +2,7 @@
 #define SIGNALBASE_H
 
 #include "../UtilsLib/Hash.h"
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include "../lib/MetrologySignal.h"
 #include "../lib/MetrologyConnection.h"
 
