@@ -43,10 +43,22 @@ DialogShortcuts::DialogShortcuts(QWidget* parent)
 
 	section = addSection("Equipment Tab Page");
 
-	addShortcut("Ctrl + C", "Copy equipment ebject", section);
+	addShortcut("Ctrl + C", "Copy equipment object", section);
 	addShortcut("Ctrl + V", "Paste equipment object", section);
 	addShortcut("Delete", "Delete equipment object", section);
 	addShortcut("F5", "Refresh equipment tree", section);
+
+	section->setExpanded(true);
+
+	//
+
+	section = addSection("AppSignals Tab Page");
+
+	addShortcut("Ctrl + N", "Create new application signal", section);
+	addShortcut("Ctrl + C", "Copy AppSignalID in clipboard", section);
+	addShortcut("Ctrl + F", "Find and replace application signals", section);
+	addShortcut("Delete", "Delete application signal", section);
+	addShortcut("F5", "Refresh application signals list", section);
 
 	section->setExpanded(true);
 
