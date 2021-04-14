@@ -38,7 +38,7 @@ namespace Tuning
 		virtual ~TuningData();
 
 	public:
-		bool buildTuningSignalsLists(HashedVector<QString, Signal*> lmAssociatedSignals, Builder::IssueLogger* log);
+		bool buildTuningSignalsLists(HashedVector<QString, AppSignal*> lmAssociatedSignals, Builder::IssueLogger* log);
 
 		virtual void buildTuningData();
 		virtual void getTuningData(QByteArray* tuningData) const;
@@ -60,16 +60,16 @@ namespace Tuning
 
 		int usedFramesCount() const { return m_tuningDataUsedFramesCount; }
 
-		void getSignals(QVector<Signal *>& signalList) const;
+		void getSignals(QVector<AppSignal *>& signalList) const;
 
-		const QVector<Signal*>& getAnalogFloatSignals() const { return m_tuningSignals[TYPE_ANALOG_FLOAT]; }
-		const QVector<Signal*>& getAnalogIntSignals() const { return m_tuningSignals[TYPE_ANALOG_INT32]; }
-		const QVector<Signal*>& getDiscreteSignals() const { return m_tuningSignals[TYPE_DISCRETE]; }
+		const QVector<AppSignal*>& getAnalogFloatSignals() const { return m_tuningSignals[TYPE_ANALOG_FLOAT]; }
+		const QVector<AppSignal*>& getAnalogIntSignals() const { return m_tuningSignals[TYPE_ANALOG_INT32]; }
+		const QVector<AppSignal*>& getDiscreteSignals() const { return m_tuningSignals[TYPE_DISCRETE]; }
 
-		const QVector<Signal*>& getSignals(int type) const;
+		const QVector<AppSignal*>& getSignals(int type) const;
 
-		void getAcquiredAnalogSignals(QVector<Signal*>& analogSignals);
-		void getAcquiredDiscreteSignals(QVector<Signal*>& discreteSignals);
+		void getAcquiredAnalogSignals(QVector<AppSignal*>& analogSignals);
+		void getAcquiredDiscreteSignals(QVector<AppSignal*>& discreteSignals);
 
 		int getSignalsCount() const;
 
@@ -87,8 +87,8 @@ namespace Tuning
 
 	private:
 		void writeBigEndianUint32Bit(quint8* dataPtr, int bitNo, quint32 bitValue);
-		void sortSignalsByAcquiredProperty(QVector<Signal *>& tuningSignals);
-		void sortByAppSignalID(QVector<Signal *>& signalList);
+		void sortSignalsByAcquiredProperty(QVector<AppSignal *>& tuningSignals);
+		void sortByAppSignalID(QVector<AppSignal *>& signalList);
 
 	protected:
 		QString m_lmEquipmentID;
@@ -112,14 +112,14 @@ namespace Tuning
 
 		static const int TRIPLE_FRAMES = 3;
 
-		QVector<Signal*> m_tuningSignals[TYPES_COUNT];
+		QVector<AppSignal*> m_tuningSignals[TYPES_COUNT];
 
 		int m_tuningSignalSizes[TYPES_COUNT];
 
 		quint8* m_tuningData = nullptr;
 		int m_tuningDataSizeB = 0;
 
-		QHash<QString, Signal*> m_id2SignalMap;
+		QHash<QString, AppSignal*> m_id2SignalMap;
 
 		static QStringList m_metadataFields;
 		std::vector<QVariantList> m_metadata;
@@ -152,7 +152,7 @@ namespace Tuning
 		static const char* TUNING_SIGNALS_COUNT;
 
 		int signalValueSizeBits(int type);
-		int getSignalType(const Signal* signal);
+		int getSignalType(const AppSignal* signal);
 	};
 
 

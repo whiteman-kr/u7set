@@ -30,7 +30,7 @@ namespace Builder
 	private:
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 
-		QVector<Signal*> m_tuningSignals;
+		QVector<AppSignal*> m_tuningSignals;
 	};
 
 }

@@ -820,7 +820,7 @@ IdeTuningFiltersEditor::IdeTuningFiltersEditor(DbController* dbController, QWidg
   PropertyTextEditor(parent),
   m_dbController(dbController)
 {
-	SignalSet tuningSignalSet;
+	AppSignalSet tuningSignalSet;
 	::Proto::AppSignalSet appSignalSet;
 
 	// Load tuning signals

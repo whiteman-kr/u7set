@@ -128,7 +128,7 @@ namespace Builder
 
 		for (int i = 0; i < signalsCount; i++)
 		{
-			const Signal& s = (*signalSet)[i];
+			const AppSignal& s = (*signalSet)[i];
 
 			if (s.enableTuning() == false)
 			{

@@ -60,7 +60,7 @@ namespace Builder
 		cleanup();
 	}
 
-	Signal* ModuleLogicCompiler::getSignal(const QString& appSignalID)
+	AppSignal* ModuleLogicCompiler::getSignal(const QString& appSignalID)
 	{
 		return m_chassisSignals.value(appSignalID, nullptr);
 	}
@@ -416,7 +416,7 @@ namespace Builder
 
 		for(int i = 0; i < signalCount; i++)
 		{
-			Signal& s = (*m_signals)[i];
+			AppSignal& s = (*m_signals)[i];
 
 			if (s.equipmentID().isEmpty() == true)
 			{
@@ -1154,7 +1154,7 @@ namespace Builder
 
 		// fill m_ualSignals by Input and Tuning Acquired signals
 		//
-		for(Signal* appSignal : m_chassisSignals)
+		for(AppSignal* appSignal : m_chassisSignals)
 		{
 			if (appSignal == nullptr)
 			{
@@ -1239,7 +1239,7 @@ namespace Builder
 
 		QString busTypeID = busComposer->busTypeId();
 
-		Signal* connectedBusSignal = getCompatibleConnectedBusSignal(outPin, busTypeID);
+		AppSignal* connectedBusSignal = getCompatibleConnectedBusSignal(outPin, busTypeID);
 
 		// connectedBusSignal can be nullptr here, it is Ok! AUTO bus signal will be created
 
@@ -1255,7 +1255,7 @@ namespace Builder
 		return result;
 	}
 
-	UalSignal* ModuleLogicCompiler::createBusParentSignal(UalItem* ualItem, const LogicPin& outPin, Signal* appBusSignal, const QString& busTypeID)
+	UalSignal* ModuleLogicCompiler::createBusParentSignal(UalItem* ualItem, const LogicPin& outPin, AppSignal* appBusSignal, const QString& busTypeID)
 	{
 		BusShared bus = m_signals->getBus(busTypeID);
 
@@ -1450,7 +1450,7 @@ namespace Builder
 
 		bool result = true;
 
-		Signal* receivedSignal = m_signals->getSignal(receivedAppSignalID);
+		AppSignal* receivedSignal = m_signals->getSignal(receivedAppSignalID);
 
 		if (receivedSignal == nullptr)
 		{
@@ -1460,7 +1460,7 @@ namespace Builder
 			return false;
 		}
 
-		Signal* compatibleConnectedSignal = nullptr;
+		AppSignal* compatibleConnectedSignal = nullptr;
 
 		if (isSinglePortConnection == true)
 		{
@@ -1570,7 +1570,7 @@ namespace Builder
 
 		QString validitySignalEquipmentID = port->validitySignalEquipmentID();
 
-		Signal* validityAppSignal = m_equipmentSignals.value(validitySignalEquipmentID);
+		AppSignal* validityAppSignal = m_equipmentSignals.value(validitySignalEquipmentID);
 
 		if (validityAppSignal == nullptr)
 		{
@@ -1648,7 +1648,7 @@ namespace Builder
 
 		QString signalID = ualItem->strID();
 
-		Signal* appSignal = m_signals->getSignal(signalID);
+		AppSignal* appSignal = m_signals->getSignal(signalID);
 
 		if (appSignal == nullptr)
 		{
@@ -1937,7 +1937,7 @@ namespace Builder
 
 			UalSignal* ualSignal = nullptr;
 
-			Signal* connectedSignal = getCompatibleConnectedSignal(outPin, outAfbSignal, outBusTypeID);
+			AppSignal* connectedSignal = getCompatibleConnectedSignal(outPin, outAfbSignal, outBusTypeID);
 
 			switch(outAfbSignal.type())
 			{
@@ -2151,7 +2151,7 @@ namespace Builder
 
 		QString signalID = signalItem->strID();
 
-		Signal* s = m_signals->getSignal(signalID);
+		AppSignal* s = m_signals->getSignal(signalID);
 
 		if (s == nullptr)
 		{
@@ -2643,9 +2643,9 @@ namespace Builder
 	{
 		bool result = true;
 
-		QVector<QPair<Signal*, QString>> acquiredInputSignalToLinkedValiditySignalID;	// Acquired input signal => linked validity signal EquipmentID
+		QVector<QPair<AppSignal*, QString>> acquiredInputSignalToLinkedValiditySignalID;	// Acquired input signal => linked validity signal EquipmentID
 
-		for(const Signal* s : m_ioSignals)
+		for(const AppSignal* s : m_ioSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -2686,7 +2686,7 @@ namespace Builder
 				continue;
 			}
 
-			Signal* linkedValiditySignal = m_equipmentSignals.value(validitySignalEquipmentID, nullptr);
+			AppSignal* linkedValiditySignal = m_equipmentSignals.value(validitySignalEquipmentID, nullptr);
 
 			if (linkedValiditySignal == nullptr)
 			{
@@ -3012,7 +3012,7 @@ namespace Builder
 	{
 		// setFlagsItem can be nullptr!
 		//
-		Signal* signalWithFlag = m_signals->getSignal(signalWithFlagID);
+		AppSignal* signalWithFlag = m_signals->getSignal(signalWithFlagID);
 
 		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(signalWithFlag != nullptr, m_log);
 
@@ -3046,7 +3046,7 @@ namespace Builder
 
 		for(const QString& signalWithFlagsID : m_signalsWithFlagsIDs)
 		{
-			Signal* signalWithFlags = m_signals->getSignal(signalWithFlagsID);
+			AppSignal* signalWithFlags = m_signals->getSignal(signalWithFlagsID);
 
 			TEST_PTR_CONTINUE(signalWithFlags);
 
@@ -3100,7 +3100,7 @@ namespace Builder
 
 		for(const QString& signalWithFlagsID : m_signalsWithFlagsIDs)
 		{
-			Signal* signalWithFlags = m_signals->getSignal(signalWithFlagsID);
+			AppSignal* signalWithFlags = m_signals->getSignal(signalWithFlagsID);
 
 			if (signalWithFlags == nullptr)
 			{
@@ -3132,7 +3132,7 @@ namespace Builder
 
 			for(const QString& flagSignalID : flagSignalsIDs)
 			{
-				Signal* flagSignal = m_signals->getSignal(flagSignalID);
+				AppSignal* flagSignal = m_signals->getSignal(flagSignalID);
 
 				if (flagSignal == nullptr)
 				{
@@ -3174,7 +3174,7 @@ namespace Builder
 
 		for(const QString& signalWithFlagsID : m_signalsWithFlagsIDs)
 		{
-			Signal* signalWithFlags = m_signals->getSignal(signalWithFlagsID);
+			AppSignal* signalWithFlags = m_signals->getSignal(signalWithFlagsID);
 
 			TEST_PTR_CONTINUE(signalWithFlags);
 
@@ -3212,7 +3212,7 @@ namespace Builder
 		return true;
 	}
 
-	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID)
+	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID)
 	{
 		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
 
@@ -3271,7 +3271,7 @@ namespace Builder
 					continue;
 				}
 
-				Signal* s = getCompatibleConnectedSignal(*connectedItemOutPin, outAfbSignal, busTypeID);
+				AppSignal* s = getCompatibleConnectedSignal(*connectedItemOutPin, outAfbSignal, busTypeID);
 
 				if (s == nullptr)
 				{
@@ -3288,7 +3288,7 @@ namespace Builder
 
 			QString signalID = connectedItem->strID();
 
-			Signal* s = m_signals->getSignal(signalID);
+			AppSignal* s = m_signals->getSignal(signalID);
 
 			if (s == nullptr)
 			{
@@ -3309,7 +3309,7 @@ namespace Builder
 
 			for(const QString& signalID : signalIDs)
 			{
-				Signal* s = m_signals->getSignal(signalID);
+				AppSignal* s = m_signals->getSignal(signalID);
 
 				if (s == nullptr)
 				{
@@ -3326,12 +3326,12 @@ namespace Builder
 		return nullptr;
 	}
 
-	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal)
+	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal)
 	{
 		return getCompatibleConnectedSignal(outPin, outAfbSignal, QString());
 	}
 
-	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const Signal& s)
+	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const AppSignal& s)
 	{
 		LogicAfbSignal dummySignal;
 
@@ -3350,7 +3350,7 @@ namespace Builder
 		return getCompatibleConnectedSignal(outPin, dummySignal, busTypeID);
 	}
 
-	Signal* ModuleLogicCompiler::getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString busTypeID)
+	AppSignal* ModuleLogicCompiler::getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString busTypeID)
 	{
 		LogicAfbSignal dummyBusSignal;
 
@@ -3359,7 +3359,7 @@ namespace Builder
 		return getCompatibleConnectedSignal(outPin, dummyBusSignal, busTypeID);
 	}
 
-	bool ModuleLogicCompiler::isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const Signal* s)
+	bool ModuleLogicCompiler::isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const AppSignal* s)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(s, m_log);
 
@@ -3518,7 +3518,7 @@ namespace Builder
 			}
 
 			// yes, input is connected to Loopback
-			Signal* s = m_signals->getSignal(anyLoopbackSignalID);
+			AppSignal* s = m_signals->getSignal(anyLoopbackSignalID);
 
 			if (s == nullptr)
 			{
@@ -3602,7 +3602,7 @@ namespace Builder
 
 			for(const QString& linkedSignalID : linkedSignals)
 			{
-				Signal* s = m_signals->getSignal(linkedSignalID);
+				AppSignal* s = m_signals->getSignal(linkedSignalID);
 
 				if (s == nullptr)
 				{
@@ -4367,13 +4367,13 @@ namespace Builder
 		//	+ tunable
 		//	+ no matter used in UAL or not
 
-		QVector<Signal*> tuningSignals;
+		QVector<AppSignal*> tuningSignals;
 
 		m_tuningData->getAcquiredDiscreteSignals(tuningSignals);
 
 		// check signals!
 
-		for(Signal* s : tuningSignals)
+		for(AppSignal* s : tuningSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -4660,13 +4660,13 @@ namespace Builder
 		//	+ tunable
 		//	+ no matter used in UAL or not
 
-		QVector<Signal*> tuningSignals;
+		QVector<AppSignal*> tuningSignals;
 
 		m_tuningData->getAcquiredAnalogSignals(tuningSignals);
 
 		// check signals!
 
-		for(Signal* s : tuningSignals)
+		for(AppSignal* s : tuningSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -4753,8 +4753,8 @@ namespace Builder
 		{
 			for(int k = i + 1; k < count; k++)
 			{
-				Signal* si = m_analogOutputSignalsToConversion[i];
-				Signal* sk = m_analogOutputSignalsToConversion[k];
+				AppSignal* si = m_analogOutputSignalsToConversion[i];
+				AppSignal* sk = m_analogOutputSignalsToConversion[k];
 
 				if (si == nullptr || sk == nullptr)
 				{
@@ -5014,7 +5014,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		for(Signal* s : m_chassisSignals)
+		for(AppSignal* s : m_chassisSignals)
 		{
 			if(s == nullptr)
 			{
@@ -5067,12 +5067,12 @@ namespace Builder
 				continue;
 			}
 
-			QVector<Signal*> refSignals = ualSignal->refSignals();
+			QVector<AppSignal*> refSignals = ualSignal->refSignals();
 
 			if (ualSignal->isConst() == true)
 			{
 				std::for_each(refSignals.begin(), refSignals.end(),
-							[ualSignal](Signal* s) {
+							[ualSignal](AppSignal* s) {
 					if (s != nullptr)
 					{
 						s->setIsConst(true);
@@ -5087,7 +5087,7 @@ namespace Builder
 			if (ualSignal->isOutput() == true)
 			{
 				std::for_each(refSignals.begin(), refSignals.end(),
-							[](Signal* s) {
+							[](AppSignal* s) {
 					if (s != nullptr)
 					{
 						s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
@@ -5302,7 +5302,7 @@ namespace Builder
 		//
 		bool result = true;
 
-		for(Signal* s : m_ioSignals)
+		for(AppSignal* s : m_ioSignals)
 		{
 			if (s == nullptr)
 			{
@@ -5426,11 +5426,11 @@ namespace Builder
 
 		bool result = true;
 
-		QVector<Signal*> tunigableSignals;
+		QVector<AppSignal*> tunigableSignals;
 
 		m_tuningData->getSignals(tunigableSignals);
 
-		for(Signal* s : tunigableSignals)
+		for(AppSignal* s : tunigableSignals)
 		{
 			if (s == nullptr)
 			{
@@ -5465,7 +5465,7 @@ namespace Builder
 
 		// set ualAddress of Discrete and Bus input UalSignals reffered by m_ioSignals equal to ioBufAddr of input signal
 		//
-		for(Signal* ioSignal : m_ioSignals)
+		for(AppSignal* ioSignal : m_ioSignals)
 		{
 			if (ioSignal == nullptr)
 			{
@@ -5652,7 +5652,7 @@ namespace Builder
 			assert(ualSignal->isAnalog() == true);
 			assert(ualSignal->isInput() == true);
 
-			Signal* s = ualSignal->getInputSignal();
+			AppSignal* s = ualSignal->getInputSignal();
 
 			if (s == nullptr)
 			{
@@ -5685,7 +5685,7 @@ namespace Builder
 
 		// append FBs  for analog output signals conversion
 		//
-		for(Signal* s : m_analogOutputSignalsToConversion)
+		for(AppSignal* s : m_analogOutputSignalsToConversion)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -5887,7 +5887,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createAfbForAnalogInputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion)
+	bool ModuleLogicCompiler::createAfbForAnalogInputSignalConversion(const AppSignal& signal, UalItem* appItem, bool* needConversion)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(appItem, log());
 		TEST_PTR_LOG_RETURN_FALSE(needConversion, log());
@@ -6074,7 +6074,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createFbForAnalogOutputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion)
+	bool ModuleLogicCompiler::createFbForAnalogOutputSignalConversion(const AppSignal& signal, UalItem* appItem, bool* needConversion)
 	{
 		assert(signal.isAnalog());
 		assert(signal.isOutput());
@@ -6256,7 +6256,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceAppSignal& deviceAppSignal, const Signal& appSignal)
+	bool ModuleLogicCompiler::isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceAppSignal& deviceAppSignal, const AppSignal& appSignal)
 	{
 		switch(deviceAppSignal.format())
 		{
@@ -6567,7 +6567,7 @@ namespace Builder
 
 			for(const QString& id : ids)
 			{
-				Signal* s = m_signals->getSignal(id);
+				AppSignal* s = m_signals->getSignal(id);
 
 				if (s != nullptr && m_chassisSignals.contains(s->appSignalID()) == true)
 				{
@@ -7690,7 +7690,7 @@ namespace Builder
 				continue;
 			}
 
-			Signal* s = ualSignal->getInputSignal();
+			AppSignal* s = ualSignal->getInputSignal();
 
 			if (s == nullptr)
 			{
@@ -10180,7 +10180,7 @@ namespace Builder
 				return false;
 			}
 
-			Signal* s = ualSignal->getTunableSignal();
+			AppSignal* s = ualSignal->getTunableSignal();
 
 			if (s == nullptr)
 			{
@@ -10298,7 +10298,7 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(ualAddr);
 
-			Signal* s = ualAddr->getTunableSignal();
+			AppSignal* s = ualAddr->getTunableSignal();
 
 			TEST_PTR_CONTINUE(s);
 
@@ -10936,7 +10936,7 @@ namespace Builder
 
 		CodeItem cmd;
 
-		for(Signal* s : m_analogOutputSignalsToConversion)
+		for(AppSignal* s : m_analogOutputSignalsToConversion)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -11100,7 +11100,7 @@ namespace Builder
 
 		CodeItem cmd;
 
-		for(Signal* s : m_ioSignals)
+		for(AppSignal* s : m_ioSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -11149,9 +11149,9 @@ namespace Builder
 
 		bool result = true;
 
-		QMultiHash<int, Signal*> writeAddressesMap;
+		QMultiHash<int, AppSignal*> writeAddressesMap;
 
-		for(Signal* s : m_ioSignals)
+		for(AppSignal* s : m_ioSignals)
 		{
 			if (s == nullptr)
 			{
@@ -11188,13 +11188,13 @@ namespace Builder
 
 		for(int writeAddr : sortedWriteAddress)
 		{
-			QList<Signal*> writeSignals = writeAddressesMap.values(writeAddr);
+			QList<AppSignal*> writeSignals = writeAddressesMap.values(writeAddr);
 
 			// signals sorting by ioBufAddr  via std::map
 			//
-			std::map<int, Signal*> sortedWriteSignals;
+			std::map<int, AppSignal*> sortedWriteSignals;
 
-			for(Signal* s : writeSignals)
+			for(AppSignal* s : writeSignals)
 			{
 				sortedWriteSignals.insert(std::make_pair(s->ioBufAddr().bitAddress(), s));
 			}
@@ -11204,9 +11204,9 @@ namespace Builder
 			cmd.movConst(bitAccAddr, 0);
 			code->append(cmd);
 
-			for(const std::pair<int, Signal*> pair: sortedWriteSignals)
+			for(const std::pair<int, AppSignal*> pair: sortedWriteSignals)
 			{
-				Signal* s = pair.second;
+				AppSignal* s = pair.second;
 
 				TEST_PTR_CONTINUE(s);
 
@@ -12494,7 +12494,7 @@ namespace Builder
 	{
 		QStringList unusedSignals;
 
-		for(const Signal* s : m_chassisSignals)
+		for(const AppSignal* s : m_chassisSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -12529,7 +12529,7 @@ namespace Builder
 
 			QString appSignalID = ualItem->strID();
 
-			Signal* s = m_signals->getSignal(appSignalID);
+			AppSignal* s = m_signals->getSignal(appSignalID);
 
 			TEST_PTR_CONTINUE(s);					// this error should be detected early
 
@@ -12792,7 +12792,7 @@ namespace Builder
 
 		file.append(QString("Unique data ID: %1 (0x%2)").arg(uniqueID).arg(uniqueID, 16, 16, Latin1Char::ZERO));
 
-		const QVector<Signal*>& analogFloatSignals = m_tuningData->getAnalogFloatSignals();
+		const QVector<AppSignal*>& analogFloatSignals = m_tuningData->getAnalogFloatSignals();
 
 		if (analogFloatSignals.count() > 0)
 		{
@@ -12801,7 +12801,7 @@ namespace Builder
 			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\t\t\t\tDefault\t\tLow Limit\tHigh Limit"));
 			file.append(line);
 
-			for(Signal* signal : analogFloatSignals)
+			for(AppSignal* signal : analogFloatSignals)
 			{
 				if (signal == nullptr)
 				{
@@ -12821,7 +12821,7 @@ namespace Builder
 			}
 		}
 
-		const QVector<Signal*>& analogIntSignals = m_tuningData->getAnalogIntSignals();
+		const QVector<AppSignal*>& analogIntSignals = m_tuningData->getAnalogIntSignals();
 
 		if (analogIntSignals.count() > 0)
 		{
@@ -12830,7 +12830,7 @@ namespace Builder
 			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\t\t\t\tDefault\t\tLow Limit\tHigh Limit"));
 			file.append(line);
 
-			for(Signal* signal : analogIntSignals)
+			for(AppSignal* signal : analogIntSignals)
 			{
 				if (signal == nullptr)
 				{
@@ -12850,7 +12850,7 @@ namespace Builder
 			}
 		}
 
-		QVector<Signal*> discreteSignals = m_tuningData->getDiscreteSignals();
+		QVector<AppSignal*> discreteSignals = m_tuningData->getDiscreteSignals();
 
 		if (discreteSignals.count() > 0)
 		{
@@ -12860,8 +12860,8 @@ namespace Builder
 			{
 				for(int k = i + 1; k < discreteSignals.count(); k++)
 				{
-					Signal* s1 = discreteSignals[i];
-					Signal* s2 = discreteSignals[k];
+					AppSignal* s1 = discreteSignals[i];
+					AppSignal* s2 = discreteSignals[k];
 
 					TEST_PTR_CONTINUE(s1);
 					TEST_PTR_CONTINUE(s2);
@@ -12879,7 +12879,7 @@ namespace Builder
 			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\t\t\t\tDefault\t\tLow Limit\tHigh Limit"));
 			file.append(line);
 
-			for(Signal* signal : discreteSignals)
+			for(AppSignal* signal : discreteSignals)
 			{
 				if (signal == nullptr)
 				{
@@ -13428,7 +13428,7 @@ namespace Builder
 		m_scalAppItems.clear();
 	}
 
-	bool ModuleLogicCompiler::checkLoopbackTargetSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid)
+	bool ModuleLogicCompiler::checkLoopbackTargetSignalsCompatibility(const AppSignal& srcSignal, QUuid srcSignalUuid, const AppSignal& destSignal, QUuid destSignalUuid)
 	{
 		if (srcSignal.isDiscrete())
 		{
@@ -13481,7 +13481,7 @@ namespace Builder
 		return false;
 	}
 
-	bool ModuleLogicCompiler::checkLoopbackTargetSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const LogicAfbSignal& afbSignal)
+	bool ModuleLogicCompiler::checkLoopbackTargetSignalsCompatibility(const AppSignal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const LogicAfbSignal& afbSignal)
 	{
 		if (srcSignal.isDiscrete())
 		{
@@ -13523,7 +13523,7 @@ namespace Builder
 		return false;
 	}
 
-	bool ModuleLogicCompiler::isUsedInUal(const Signal* s) const
+	bool ModuleLogicCompiler::isUsedInUal(const AppSignal* s) const
 	{
 		TEST_PTR_RETURN_FALSE(s);
 
@@ -13823,7 +13823,7 @@ namespace Builder
 		return getFormatStr(ds.signalType(), ds.format(), ds.size(), ds.byteOrder());
 	}
 
-	QString ModuleLogicCompiler::getFormatStr(const Signal& s)
+	QString ModuleLogicCompiler::getFormatStr(const AppSignal& s)
 	{
 		switch(s.signalType())
 		{

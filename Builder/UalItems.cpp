@@ -1088,7 +1088,7 @@ namespace Builder
 		m_refSignals.clear();
 	}
 
-	bool UalSignal::createRegularSignal(const UalItem* ualItem, Signal* s)
+	bool UalSignal::createRegularSignal(const UalItem* ualItem, AppSignal* s)
 	{
 		// ualItem can be == nullptr!!!
 		//
@@ -1116,7 +1116,7 @@ namespace Builder
 										const QString& constSignalID,
 										E::SignalType constSignalType,
 										E::AnalogAppSignalFormat constAnalogFormat,
-										Signal** autoSignalPtr)
+										AppSignal** autoSignalPtr)
 	{
 		TEST_PTR_RETURN_FALSE(ualItem);
 		TEST_PTR_RETURN_FALSE(autoSignalPtr);
@@ -1129,7 +1129,7 @@ namespace Builder
 
 		// const UalSignal creation
 
-		Signal* autoSignal = *autoSignalPtr = new Signal;
+		AppSignal* autoSignal = *autoSignalPtr = new AppSignal;
 
 		autoSignal->setAppSignalID(constSignalID);
 		autoSignal->setCustomAppSignalID(QString(constSignalID).remove("#"));
@@ -1174,7 +1174,7 @@ namespace Builder
 									const QString& signalID,
 									E::SignalType signalType,
 									E::AnalogAppSignalFormat analogFormat,
-									Signal** autoSignalPtr)
+									AppSignal** autoSignalPtr)
 	{
 		TEST_PTR_RETURN_FALSE(ualItem);
 		TEST_PTR_RETURN_FALSE(autoSignalPtr);
@@ -1185,7 +1185,7 @@ namespace Builder
 
 		// analog or discrete auto UalSignal creation
 
-		Signal* autoSignal = *autoSignalPtr = new Signal;
+		AppSignal* autoSignal = *autoSignalPtr = new AppSignal;
 
 		autoSignal->setAppSignalID(signalID);
 		autoSignal->setCustomAppSignalID(QString(signalID).remove("#"));
@@ -1219,11 +1219,11 @@ namespace Builder
 	}
 
 	bool UalSignal::createBusParentSignal(const UalItem* ualItem,
-											Signal* appBusSignal,
+											AppSignal* appBusSignal,
 											Builder::BusShared bus,
 											const QString& outPinCaption,
 											std::shared_ptr<Hardware::DeviceModule> lm,
-											Signal** autoSignalPtr)
+											AppSignal** autoSignalPtr)
 	{
 		TEST_PTR_RETURN_FALSE(bus);
 		TEST_PTR_RETURN_FALSE(lm);
@@ -1258,7 +1258,7 @@ namespace Builder
 										arg(ualItem->label()).
 										arg(outPinCaption.toUpper());
 
-			*autoSignalPtr = appBusSignal = new Signal;
+			*autoSignalPtr = appBusSignal = new AppSignal;
 
 			appBusSignal->setAppSignalID(appSignalID);
 			appBusSignal->setCustomAppSignalID(appSignalID.remove("#"));
@@ -1284,7 +1284,7 @@ namespace Builder
 		return true;
 	}
 
-	bool UalSignal::appendRefSignal(Signal* s, bool isOptoSignal)
+	bool UalSignal::appendRefSignal(AppSignal* s, bool isOptoSignal)
 	{
 		if (s == nullptr)
 		{
@@ -1294,7 +1294,7 @@ namespace Builder
 
 		s->setAutoSignal(m_isAutoSignal);
 
-		for(Signal* pesentSignal : m_refSignals)
+		for(AppSignal* pesentSignal : m_refSignals)
 		{
 			if (pesentSignal == nullptr)
 			{
@@ -1313,7 +1313,7 @@ namespace Builder
 		{
 			// check signals compatibility
 			//
-			Signal* first = m_refSignals[0];
+			AppSignal* first = m_refSignals[0];
 
 			if (first->signalType() != s->signalType())
 			{
@@ -1383,7 +1383,7 @@ namespace Builder
 		return true;
 	}
 
-	bool UalSignal::appendBusChildRefSignals(const QString& busSignalID, Signal* s)
+	bool UalSignal::appendBusChildRefSignals(const QString& busSignalID, AppSignal* s)
 	{
 		UalSignal* childSignal = m_busChildSignals.value(busSignalID, nullptr);
 
@@ -1400,7 +1400,7 @@ namespace Builder
 	{
 		if (m_isInput == true)
 		{
-			Signal* inSignal = getInputSignal();
+			AppSignal* inSignal = getInputSignal();
 
 			if (inSignal == nullptr)
 			{
@@ -1413,7 +1413,7 @@ namespace Builder
 
 		if (m_isOutput == true)
 		{
-			Signal* outSignal = getOutputSignal();
+			AppSignal* outSignal = getOutputSignal();
 
 			if (outSignal == nullptr)
 			{
@@ -1426,7 +1426,7 @@ namespace Builder
 
 		if (m_isOptoSignal == true)
 		{
-			Signal* s = signal();
+			AppSignal* s = signal();
 
 			if (s == nullptr)
 			{
@@ -1445,7 +1445,7 @@ namespace Builder
 		return ioBufAddr().isValid();
 	}
 
-	Signal* UalSignal::signal() const
+	AppSignal* UalSignal::signal() const
 	{
 		if (m_refSignals.count() < 1)
 		{
@@ -1456,7 +1456,7 @@ namespace Builder
 		return m_refSignals[0];
 	}
 
-	bool UalSignal::isCompatible(const Signal* s, IssueLogger* log) const
+	bool UalSignal::isCompatible(const AppSignal* s, IssueLogger* log) const
 	{
 		TEST_PTR_RETURN_FALSE(log);
 		TEST_PTR_LOG_RETURN_FALSE(s, log);
@@ -1779,7 +1779,7 @@ namespace Builder
 
 		// set same ual address for all associated signals
 
-		for(Signal* s : m_refSignals)
+		for(AppSignal* s : m_refSignals)
 		{
 			Q_ASSERT(s->ualAddrIsValid() == false);
 
@@ -1861,7 +1861,7 @@ namespace Builder
 
 		// set same regBufAddr for all associated acquired signals
 
-		for(Signal* s : m_refSignals)
+		for(AppSignal* s : m_refSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -1931,7 +1931,7 @@ namespace Builder
 
 		// set same regBufAddr for all associated acquired signals
 
-		for(Signal* s : m_refSignals)
+		for(AppSignal* s : m_refSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -1994,7 +1994,7 @@ namespace Builder
 			{
 				if (m_refSignals[i]->appSignalID() > m_refSignals[k]->appSignalID())
 				{
-					Signal* tmp = m_refSignals[i];
+					AppSignal* tmp = m_refSignals[i];
 					m_refSignals[i] = m_refSignals[k];
 					m_refSignals[k] = tmp;
 				}
@@ -2002,11 +2002,11 @@ namespace Builder
 		}
 	}
 
-	Signal* UalSignal::getInputSignal() const
+	AppSignal* UalSignal::getInputSignal() const
 	{
-		Signal* inputSignal = nullptr;
+		AppSignal* inputSignal = nullptr;
 
-		for(Signal* s : m_refSignals)
+		for(AppSignal* s : m_refSignals)
 		{
 			if (s->isInput() == true)
 			{
@@ -2018,11 +2018,11 @@ namespace Builder
 		return inputSignal;
 	}
 
-	Signal* UalSignal::getOutputSignal() const
+	AppSignal* UalSignal::getOutputSignal() const
 	{
-		Signal* outputSignal = nullptr;
+		AppSignal* outputSignal = nullptr;
 
-		for(Signal* s : m_refSignals)
+		for(AppSignal* s : m_refSignals)
 		{
 			if (s->isOutput() == true)
 			{
@@ -2034,11 +2034,11 @@ namespace Builder
 		return outputSignal;
 	}
 
-	Signal* UalSignal::getTunableSignal() const
+	AppSignal* UalSignal::getTunableSignal() const
 	{
-		Signal* tunableSignal = nullptr;
+		AppSignal* tunableSignal = nullptr;
 
-		for(Signal* s : m_refSignals)
+		for(AppSignal* s : m_refSignals)
 		{
 			if (s->enableTuning() == true)
 			{
@@ -2050,9 +2050,9 @@ namespace Builder
 		return tunableSignal;
 	}
 
-	QVector<Signal*> UalSignal::getAnalogOutputSignals() const
+	QVector<AppSignal*> UalSignal::getAnalogOutputSignals() const
 	{
-		QVector<Signal*> analogOutputs;
+		QVector<AppSignal*> analogOutputs;
 
 		if (isAnalog() == false)
 		{
@@ -2060,7 +2060,7 @@ namespace Builder
 			return analogOutputs;
 		}
 
-		for(Signal* s : m_refSignals)
+		for(AppSignal* s : m_refSignals)
 		{
 			assert(s->isAnalog() == true);
 
@@ -2077,7 +2077,7 @@ namespace Builder
 	{
 		QStringList list;
 
-		for(Signal* s : m_refSignals)
+		for(AppSignal* s : m_refSignals)
 		{
 			list.append(s->appSignalID());
 		}
@@ -2095,7 +2095,7 @@ namespace Builder
 
 		appSignalIDs->clear();
 
-		for(Signal* s : m_refSignals)
+		for(AppSignal* s : m_refSignals)
 		{
 			if (s == nullptr)
 			{
@@ -2129,7 +2129,7 @@ namespace Builder
 	{
 		QStringList list;
 
-		for(Signal* s : m_refSignals)
+		for(AppSignal* s : m_refSignals)
 		{
 			if (s->isAcquired() == false)
 			{
@@ -2242,7 +2242,7 @@ namespace Builder
 	{
 		m_isAcquired = acquired;
 
-		for(Signal* refSignal : m_refSignals)
+		for(AppSignal* refSignal : m_refSignals)
 		{
 			TEST_PTR_CONTINUE(refSignal);
 
@@ -2256,7 +2256,7 @@ namespace Builder
 
 		bool signalWithFlagID_isFound = false;
 
-		for(Signal* s : m_refSignals)
+		for(AppSignal* s : m_refSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -2337,7 +2337,7 @@ namespace Builder
 			busChildSignal->setAutoSignal(autoSignal);
 		}
 
-		for(Signal* refAppSignal : m_refSignals)
+		for(AppSignal* refAppSignal : m_refSignals)
 		{
 			TEST_PTR_CONTINUE(refAppSignal);
 
@@ -2364,7 +2364,7 @@ namespace Builder
 		clear();
 	}
 
-	UalSignal* UalSignalsMap::createSignal(Signal* appSignal)
+	UalSignal* UalSignalsMap::createSignal(AppSignal* appSignal)
 	{
 		TEST_PTR_RETURN_NULLPTR(appSignal);
 
@@ -2384,7 +2384,7 @@ namespace Builder
 		return nullptr;
 	}
 
-	UalSignal* UalSignalsMap::createSignal(Signal* appSignal, const UalItem* ualItem, QUuid outPinUuid)
+	UalSignal* UalSignalsMap::createSignal(AppSignal* appSignal, const UalItem* ualItem, QUuid outPinUuid)
 	{
 		// ualItem can be nullptr!!!
 
@@ -2476,7 +2476,7 @@ namespace Builder
 		//
 		ualSignal = new UalSignal;
 
-		Signal* autoSignalPtr = nullptr;
+		AppSignal* autoSignalPtr = nullptr;
 
 		bool result = ualSignal->createConstSignal(ualItem,
 									  constSignalID,
@@ -2538,12 +2538,12 @@ namespace Builder
 		return privateCreateAutoSignal(ualItem, outPinUuid, templateOutAfbSignal.type(), analogFormat, expectedReadCount);
 	}
 
-	UalSignal* UalSignalsMap::createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const Signal& templateSignal)
+	UalSignal* UalSignalsMap::createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const AppSignal& templateSignal)
 	{
 		return privateCreateAutoSignal(ualItem, outPinUuid, templateSignal.signalType(), templateSignal.analogSignalFormat(), -1);
 	}
 
-	UalSignal* UalSignalsMap::createBusParentSignal(Signal* appBusSignal)
+	UalSignal* UalSignalsMap::createBusParentSignal(AppSignal* appBusSignal)
 	{
 		TEST_PTR_LOG_RETURN_NULLPTR(appBusSignal, m_log);
 
@@ -2566,7 +2566,7 @@ namespace Builder
 		return createBusParentSignal(appBusSignal, bus, nullptr, QUuid(), QString());
 	}
 
-	UalSignal* UalSignalsMap::createBusParentSignal(Signal* appBusSignal,
+	UalSignal* UalSignalsMap::createBusParentSignal(AppSignal* appBusSignal,
 													BusShared bus,
 													const UalItem* ualItem,
 													QUuid outPinUuid,
@@ -2608,7 +2608,7 @@ namespace Builder
 
 		UalSignal* busParentSignal = new UalSignal;
 
-		Signal* autoSignalPtr = nullptr;
+		AppSignal* autoSignalPtr = nullptr;
 
 		bool result = busParentSignal->createBusParentSignal(ualItem, appBusSignal, bus, outPinCaption,
 															 m_compiler.getLmSharedPtr(), &autoSignalPtr);
@@ -2635,7 +2635,7 @@ namespace Builder
 
 		for(const BusSignal& busSignal : busSignals)
 		{
-			Signal* sChild = m_compiler.signalSet()->appendBusChildSignal(*busParentSignal->signal(), bus, busSignal);
+			AppSignal* sChild = m_compiler.signalSet()->appendBusChildSignal(*busParentSignal->signal(), bus, busSignal);
 
 			UalSignal* busChildSignal = nullptr;
 
@@ -2722,7 +2722,7 @@ namespace Builder
 		return true;
 	}
 
-	bool UalSignalsMap::appendRefSignal(Signal* s, UalSignal* ualSignal)
+	bool UalSignalsMap::appendRefSignal(AppSignal* s, UalSignal* ualSignal)
 	{
 		if (ualSignal == nullptr || s == nullptr)
 		{
@@ -2797,7 +2797,7 @@ namespace Builder
 
 		for(const BusSignal& busSignal : bus->busSignals())
 		{
-			Signal* newSignal = m_compiler.signalSet()->appendBusChildSignal(*s, bus, busSignal);
+			AppSignal* newSignal = m_compiler.signalSet()->appendBusChildSignal(*s, bus, busSignal);
 
 			result &= ualSignal->appendBusChildRefSignals(busSignal.signalID, newSignal);
 		}
@@ -3102,7 +3102,7 @@ namespace Builder
 		//
 		ualSignal = new UalSignal;
 
-		Signal* autoSignalPtr = nullptr;
+		AppSignal* autoSignalPtr = nullptr;
 
 		bool result = ualSignal->createAutoSignal(ualItem, signalID, signalType, analogFormat, &autoSignalPtr);
 
@@ -3157,7 +3157,7 @@ namespace Builder
 			return false;
 		}
 
-		Signal* s = newUalSignal->signal();
+		AppSignal* s = newUalSignal->signal();
 
 		QString signalID = s->appSignalID();
 

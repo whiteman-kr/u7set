@@ -133,7 +133,7 @@ private:
 	QString getSignalGroupID(int signalID, int* signalGroupID);
 	QString getSignalInstanceID(int signalID, int* signalInstanceID);
 
-	QString setSignalWorkcopy(int userID, const Signal& s, ObjectState* obState);
+	QString setSignalWorkcopy(int userID, const AppSignal& s, ObjectState* obState);
 
 	QString checkinSignals(int userID,
 						   const std::vector<int>& ids,
@@ -166,7 +166,7 @@ private:
 	QString getAllSignalsInstancesIDs(std::vector<int>* allSignalsInstancesIDsSorted);
 
 	QString getActualSignalsSignalInstanceID(int userID, bool with_deleted, std::vector<int>* ids);
-	QString getLatestSignal(int userID, int signalID, Signal* s);
+	QString getLatestSignal(int userID, int signalID, AppSignal* s);
 
 	QString removePairsWithID(std::vector<std::pair<int, QString>>* pairs,
 								const std::vector<int>& idsToRemove);

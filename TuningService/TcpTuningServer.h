@@ -56,7 +56,7 @@ namespace Tuning
 
 		TuningSources& m_tuningSources;
 
-		QHash<Hash, const Signal*> m_signalHash2SignalPtr;
+		QHash<Hash, const AppSignal*> m_signalHash2SignalPtr;
 		QHash<Hash, quint32> m_signalHash2SourceIP;
 		QMultiHash<quint64, Hash> m_sourceId2SignalHash;
 

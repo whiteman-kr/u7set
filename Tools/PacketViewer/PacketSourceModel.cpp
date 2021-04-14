@@ -510,7 +510,7 @@ void Listener::checkListeningState()
 }
 
 
-Source::Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32,
+Source::Source(QString address, int port, const AppSignalSet& signalSet, const QHash<quint32,
 			   std::shared_ptr<DataSourceOnline>>& dataSources, Statistic* parent) :
 	Statistic(address, port, parent),
 	m_packetBufferModel(new PacketBufferTableModel(m_buffer, m_lastHeader, this)),
@@ -725,7 +725,7 @@ void swapHeader(Rup::Header& header)
 	swapBytes(header.timeStamp.year);
 }
 
-void PacketSourceModel::initDataSources(QHash<quint32, std::shared_ptr<DataSourceOnline> > &dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet)
+void PacketSourceModel::initDataSources(QHash<quint32, std::shared_ptr<DataSourceOnline> > &dataSources, Hardware::DeviceObject* deviceRoot, const AppSignalSet& signalSet)
 {
 	dataSources.clear();
 

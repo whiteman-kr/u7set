@@ -376,7 +376,7 @@ PS::Signal& PS::Signal::operator=(const PS::Signal& from)
 		m_frameOffset = from.m_frameOffset;
 		m_pValueData = from.m_pValueData;
 
-		::Signal::operator=(from);
+		::AppSignal::operator=(from);
 
 	m_signalMutex.unlock();
 

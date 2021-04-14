@@ -3817,7 +3817,7 @@ namespace Builder
 
 				for (const QString& appSignalId : itemSignals)
 				{
-					Signal* appSignal = m_signalSet->getSignal(appSignalId);
+					AppSignal* appSignal = m_signalSet->getSignal(appSignalId);
 
 					if (appSignal == nullptr)
 					{
@@ -4033,7 +4033,7 @@ namespace Builder
 
 					// Check that all signals belongs to appropriate LM
 					//
-					Signal* appSignal = m_signalSet->getSignal(signalId);
+					AppSignal* appSignal = m_signalSet->getSignal(signalId);
 
 					if (appSignal == nullptr)
 					{
@@ -4270,7 +4270,7 @@ namespace Builder
 
 						// Check if appSignalid from this channel
 						//
-						Signal* signal = m_signalSet->getSignal(appSignalId);
+						AppSignal* signal = m_signalSet->getSignal(appSignalId);
 
 						if (signal == nullptr)
 						{

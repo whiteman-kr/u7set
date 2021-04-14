@@ -178,13 +178,13 @@ namespace Builder
 		xml.writeIntAttribute("Count", 0);
 		xml.writeEndElement();				// Units
 
-		QVector<Signal*> signalsToWrite;
+		QVector<AppSignal*> signalsToWrite;
 
 		int signalCount = m_signalSet->count();
 
 		for(int i = 0; i < signalCount; i++)
 		{
-			Signal& signal = (*m_signalSet)[i];
+			AppSignal& signal = (*m_signalSet)[i];
 
 			if (m_associatedAppSignals.contains(signal.appSignalID()) == false)
 			{
@@ -222,7 +222,7 @@ namespace Builder
 		xml.writeStartElement("Signals");
 		xml.writeIntAttribute("Count", signalsToWrite.count());
 
-		for(Signal* signal : signalsToWrite)
+		for(AppSignal* signal : signalsToWrite)
 		{
 			signal->writeToXml(xml);
 		}
@@ -325,7 +325,7 @@ namespace Builder
 
 		for(int i = 0; i < signalCount; i++)
 		{
-			const Signal& appSignal =  (*m_signalSet)[i];
+			const AppSignal& appSignal =  (*m_signalSet)[i];
 
 			QString appSignalEquipmentID = appSignal.equipmentID();
 

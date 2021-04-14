@@ -134,7 +134,7 @@ UnitsConvertor::~UnitsConvertor()
 {
 }
 
-double UnitsConvertor::conversion(double val, const UnitsConvertType& conversionType, const Signal& signal)
+double UnitsConvertor::conversion(double val, const UnitsConvertType& conversionType, const AppSignal& signal)
 {
 	double retVal = 0;
 
@@ -564,7 +564,7 @@ double UnitsConvertor::conversionDegree(double val, const UnitsConvertType& conv
 	return retVal;
 }
 
-double UnitsConvertor::conversionByConnection(double val, int connectionType, const Signal& sourSignal, const Signal& destSignal, ConversionDirection directType)
+double UnitsConvertor::conversionByConnection(double val, int connectionType, const AppSignal& sourSignal, const AppSignal& destSignal, ConversionDirection directType)
 {
 	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
@@ -717,7 +717,7 @@ double UnitsConvertor::conversionByConnection(double val, int connectionType, co
 	return retVal;
 }
 
-double UnitsConvertor::r0_from_signal(const Signal& signal)
+double UnitsConvertor::r0_from_signal(const AppSignal& signal)
 {
 	double r0 = 0;
 

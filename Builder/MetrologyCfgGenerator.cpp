@@ -185,7 +185,7 @@ namespace Builder
 							wrongConnection = true;
 						}
 
-						Signal* pInSignal = m_signalSet->getSignal(connection.appSignalID(Metrology::ConnectionIoType::Source));
+						AppSignal* pInSignal = m_signalSet->getSignal(connection.appSignalID(Metrology::ConnectionIoType::Source));
 						if (pInSignal == nullptr)
 						{
 							// Metrology connections contain a non-existent source signal: %1
@@ -195,7 +195,7 @@ namespace Builder
 							wrongConnection = true;
 						}
 
-						Signal* pOutSignal = m_signalSet->getSignal(connection.appSignalID(Metrology::ConnectionIoType::Destination));
+						AppSignal* pOutSignal = m_signalSet->getSignal(connection.appSignalID(Metrology::ConnectionIoType::Destination));
 						if (pOutSignal == nullptr)
 						{
 							// Metrology connections contain a non-existent destination signal: %1
@@ -253,7 +253,7 @@ namespace Builder
 		int signalCount = m_signalSet->count();
 		for(int i = 0; i < signalCount; i++)
 		{
-			Signal& signal = (*m_signalSet)[i];
+			AppSignal& signal = (*m_signalSet)[i];
 
 			if (signal.isAcquired() == false)
 			{
@@ -387,7 +387,7 @@ namespace Builder
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testElectricLimit(const Signal& signal, double lowLimit, double highLimit)
+	bool MetrologyCfgGenerator::testElectricLimit(const AppSignal& signal, double lowLimit, double highLimit)
 	{
 		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
 		{
@@ -422,7 +422,7 @@ namespace Builder
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testEngineeringLimit(const Signal& signal, double lowLimit, double highLimit)
+	bool MetrologyCfgGenerator::testEngineeringLimit(const AppSignal& signal, double lowLimit, double highLimit)
 	{
 		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
 		{
@@ -488,7 +488,7 @@ namespace Builder
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testElectricLimit_Input_mA(const Signal& signal)
+	bool MetrologyCfgGenerator::testElectricLimit_Input_mA(const AppSignal& signal)
 	{
 		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 		{
@@ -558,7 +558,7 @@ namespace Builder
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testElectricLimit_Input_mV(const Signal& signal)
+	bool MetrologyCfgGenerator::testElectricLimit_Input_mV(const AppSignal& signal)
 	{
 		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 		{
@@ -609,7 +609,7 @@ namespace Builder
 	}
 
 
-	bool MetrologyCfgGenerator::testElectricLimit_Input_Ohm(const Signal& signal)
+	bool MetrologyCfgGenerator::testElectricLimit_Input_Ohm(const AppSignal& signal)
 	{
 		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 		{
@@ -681,7 +681,7 @@ namespace Builder
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testElectricLimit_Input_V(const Signal& signal)
+	bool MetrologyCfgGenerator::testElectricLimit_Input_V(const AppSignal& signal)
 	{
 		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 		{
@@ -733,7 +733,7 @@ namespace Builder
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testElectricLimit_Input_uA(const Signal& signal)
+	bool MetrologyCfgGenerator::testElectricLimit_Input_uA(const AppSignal& signal)
 	{
 		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 		{
@@ -786,7 +786,7 @@ namespace Builder
 	}
 
 
-	bool MetrologyCfgGenerator::testElectricLimit_Input_Hz(const Signal& signal)
+	bool MetrologyCfgGenerator::testElectricLimit_Input_Hz(const AppSignal& signal)
 	{
 		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
 		{

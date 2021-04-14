@@ -4,10 +4,10 @@
 #include "../lib/DataSource.h"
 #include "DynamicAppSignalState.h"
 
-class AppSignals : public HashedVector<QString, Signal*>
+class AppSignals : public HashedVector<QString, AppSignal*>
 {
 private:
-	QHash<Hash, Signal*> m_hash2Signal;
+	QHash<Hash, AppSignal*> m_hash2Signal;
 
 public:
 	~AppSignals();
@@ -15,7 +15,7 @@ public:
 	void clear();
 	void buildHash2Signal();
 
-	const Signal* getSignal(Hash hash) const;
+	const AppSignal* getSignal(Hash hash) const;
 };
 
 class AppDataSource : public DataSourceOnline

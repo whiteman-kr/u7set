@@ -218,13 +218,13 @@ public:
 
 public:
 
-	double conversion(double val, const UnitsConvertType& conversionType, const Signal& signal);																				// universal conversion from electrical to physical and vice versa
+	double conversion(double val, const UnitsConvertType& conversionType, const AppSignal& signal);																				// universal conversion from electrical to physical and vice versa
 	double conversionDegree(double val, const UnitsConvertType& conversionType, const E::ElectricUnit& unitID, const E::SensorType& sensorType, double r0 = 0);					// conversion only ThermoCouple and ThermoResistor
 	double conversionDegree(double val, const UnitsConvertType& conversionType);																								// conversion only Celsius to Fahrenheit and vice versa
 
-	Q_INVOKABLE double conversionByConnection(double val, int connectionType, const Signal& sourSignal, const Signal& destSignal, ConversionDirection directType);				// conversion for Metrology connections, return converted value
+	Q_INVOKABLE double conversionByConnection(double val, int connectionType, const AppSignal& sourSignal, const AppSignal& destSignal, ConversionDirection directType);				// conversion for Metrology connections, return converted value
 
-	double r0_from_signal(const Signal& signal);																																// for signals of module RIM
+	double r0_from_signal(const AppSignal& signal);																																// for signals of module RIM
 	bool r0_is_use(int sensorType);																																				// for signals of module RIM
 
 	SignalElectricLimit getElectricLimit(int unitID, int sensorType);																											// take limit by unit and sensorType

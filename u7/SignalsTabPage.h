@@ -286,14 +286,14 @@ protected:
 	void closeEvent(QCloseEvent* event);
 
 private:
-	void addSignalIfNeeded(const Signal& signal);
+	void addSignalIfNeeded(const AppSignal& signal);
 	bool match(QString signalProperty, int& start, int& end);
-	bool checkForEditableSignal(const Signal& signal);
+	bool checkForEditableSignal(const AppSignal& signal);
 	bool checkForUniqueSignalId(const QString& original, const QString& replaced);
 	bool checkForCorrectSignalId(const QString& replaced);
 	SearchOptions getCurrentSearchOptions();
-	QString getProperty(const Signal& signal);
-	void setProperty(Signal& signal, const QString& value);
+	QString getProperty(const AppSignal& signal);
+	void setProperty(AppSignal& signal, const QString& value);
 	int getSignalId(int row);
 	int getSelectedRow();
 	void selectRow(int row);
@@ -311,7 +311,7 @@ private slots:
 	void generateListIfNeededWithWarning();
 	void updateAllReplacement();
 	void updateReplacement(int row);
-	void updateReplacement(const Signal& signal, int row);
+	void updateReplacement(const AppSignal& signal, int row);
 	void replaceAll();
 	void replaceAndFindNext();
 	void findPrevious();

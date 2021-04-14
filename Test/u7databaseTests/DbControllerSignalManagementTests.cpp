@@ -540,7 +540,7 @@ void DbControllerSignalTests::test_setSignalWorkcopy()
 
 	const QByteArray specPropValues1("SpecPropValues_dummy_array", 26 + 1);
 
-	Signal s;
+	AppSignal s;
 
 	s.setID(id1);
 
@@ -1052,7 +1052,7 @@ void DbControllerSignalTests::test_getSignalsIDAppSignalID()
 
 	// try change AppSignalID under User3
 	//
-	Signal s;
+	AppSignal s;
 
 	const QString NEW_APP_SIGNAL_ID("#USER3_TEST_SIGNAL_APP_SIGNAL_ID_4567");
 
@@ -1116,7 +1116,7 @@ void DbControllerSignalTests::test_getLatestSignal()
 	int id1 = adminSignals[0];
 	int id2 = adminSignals[1];
 
-	Signal s1, s2;
+	AppSignal s1, s2;
 	QString res;
 
 	// Admin should see both his signals
@@ -1131,7 +1131,7 @@ void DbControllerSignalTests::test_getLatestSignal()
 	s2.setCaption("NEW12319283 Caption");
 	TS_VERIFY(setSignalWorkcopy(ADMIN_ID, s2, nullptr));
 
-	Signal s;
+	AppSignal s;
 
 	TS_VERIFY(getLatestSignal(ADMIN_ID, id2, &s));
 	QVERIFY(s.appSignalID() == s2.appSignalID());
@@ -1215,9 +1215,9 @@ void DbControllerSignalTests::dbcTest_addSignal()
 	//
 	OPEN_DATABASE();
 
-	QVector<Signal> newSignals;
+	QVector<AppSignal> newSignals;
 
-	Signal s;
+	AppSignal s;
 
 	s.setID(-1);
 	s.setAppSignalID("#DBC_ADD_SIGNAL_TEST_1");
@@ -1243,7 +1243,7 @@ void DbControllerSignalTests::dbcTest_addSignal()
 
 	for(int i = 0; i < 4; i++)
 	{
-		Signal s;
+		AppSignal s;
 
 		s.setID(-1);
 		s.setAppSignalID(QString("#DBC_ADD_SIGNAL_TEST_S%1").arg(i));
@@ -1270,7 +1270,7 @@ void DbControllerSignalTests::dbcTest_addSignal()
 
 	for(int i = 0; i < 5; i++)
 	{
-		Signal s;
+		AppSignal s;
 
 		s.setID(-1);
 		s.setAppSignalID(QString("#DBC_ADD_SIGNAL_TEST_SS%1").arg(i));
@@ -1289,7 +1289,7 @@ void DbControllerSignalTests::dbcTest_addSignal()
 
 	for(int i = 0; i < 3; i++)
 	{
-		Signal s;
+		AppSignal s;
 
 		s.setID(-1);
 		s.setAppSignalID(QString("#DBC_ADD_SIGNAL_TEST_ANOTHER_S%1").arg(i));
@@ -1643,7 +1643,7 @@ void DbControllerSignalTests::dbcTest_setSignalWorkcopy()
 
 	const QByteArray specPropValues1("SpecPropValues_dummy_array", 26 + 1);
 
-	Signal s;
+	AppSignal s;
 
 	s.setID(id1);
 
@@ -1962,7 +1962,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 
 	// try change AppSignalID under User3
 	//
-	Signal s;
+	AppSignal s;
 
 	const QString NEW_APP_SIGNAL_ID("#DBC_USER3_TEST_SIGNAL_APP_SIGNAL_ID_4567");
 
@@ -2119,11 +2119,11 @@ QString DbControllerSignalTests::dbc_addSignal(DbController* dbc,
 		addedIDs->clear();
 	}
 
-	QVector<Signal> newSignals;
+	QVector<AppSignal> newSignals;
 
 	for(QString appSignalID : appSignalIDs)
 	{
-		Signal s;
+		AppSignal s;
 
 		s.setID(-1);
 		s.initCreatedDates();
@@ -2138,7 +2138,7 @@ QString DbControllerSignalTests::dbc_addSignal(DbController* dbc,
 
 	if (addedIDs != nullptr)
 	{
-		for(const Signal& s : newSignals)
+		for(const AppSignal& s : newSignals)
 		{
 			addedIDs->push_back(s.ID());
 		}
@@ -2272,7 +2272,7 @@ QString DbControllerSignalTests::getSignalInstanceID(int signalID, int* signalIn
 	TS_RETURN_SUCCESS();
 }
 
-QString DbControllerSignalTests::setSignalWorkcopy(int userID, const Signal& s, ObjectState* obState)
+QString DbControllerSignalTests::setSignalWorkcopy(int userID, const AppSignal& s, ObjectState* obState)
 {
 	QSqlQuery q;
 
@@ -2620,7 +2620,7 @@ QString DbControllerSignalTests::getActualSignalsSignalInstanceID(int userID, bo
 	TS_RETURN_SUCCESS();
 }
 
-QString DbControllerSignalTests::getLatestSignal(int userID, int signalID, Signal* s)
+QString DbControllerSignalTests::getLatestSignal(int userID, int signalID, AppSignal* s)
 {
 	TS_TEST_PTR_RETURN(s);
 

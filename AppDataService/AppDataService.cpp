@@ -464,7 +464,7 @@ bool AppDataServiceWorker::readAppSignals(const QByteArray& fileData)
 			continue;
 		}
 
-		Signal* s = new Signal;
+		AppSignal* s = new AppSignal;
 
 		s->serializeFrom(appSignal);
 
@@ -488,7 +488,7 @@ void AppDataServiceWorker::createAndInitSignalStates()
 
 	int signalCount = 0;
 
-	for(Signal* signal : m_appSignals)
+	for(AppSignal* signal : m_appSignals)
 	{
 		TEST_PTR_CONTINUE(signal);
 
@@ -504,7 +504,7 @@ void AppDataServiceWorker::createAndInitSignalStates()
 
 	int index = 0;
 
-	for(Signal* signal : m_appSignals)
+	for(AppSignal* signal : m_appSignals)
 	{
 		TEST_PTR_CONTINUE(signal);
 

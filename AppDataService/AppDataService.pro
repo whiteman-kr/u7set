@@ -55,7 +55,6 @@ SOURCES += \
 	SignalStatesProcessingThread.cpp \
 	RtTrendsServer.cpp \
 	TcpAppDataServer.cpp \
-	TcpAppDataClient.cpp \
 	TcpArchiveClient.cpp \
 
 HEADERS += \
@@ -88,7 +87,6 @@ HEADERS += \
 	SignalStatesProcessingThread.h \
 	RtTrendsServer.h \
 	TcpAppDataServer.h \
-	TcpAppDataClient.h \
 	TcpArchiveClient.h \
 
 CONFIG += precompile_header

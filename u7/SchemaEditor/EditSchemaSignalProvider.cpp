@@ -32,7 +32,7 @@ bool EditSchemaAppSignalProvider::signalExists(Hash hash) const
 
 bool EditSchemaAppSignalProvider::signalExists(const QString& appSignalId) const
 {
-	Signal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
 	return s != nullptr;
 }
 
@@ -50,7 +50,7 @@ AppSignalParam EditSchemaAppSignalProvider::signalParam(const QString& appSignal
 {
 	AppSignalParam result;
 
-	Signal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
 
 	if (found != nullptr)
 	{
@@ -80,7 +80,7 @@ AppSignalState EditSchemaAppSignalProvider::signalState(const QString& appSignal
 	AppSignalState result;
 	result.m_hash = ::calcHash(appSignalId);
 
-	Signal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
 	if (found != nullptr)
 	{
 		*found = s != nullptr;
@@ -152,7 +152,7 @@ QStringList EditSchemaAppSignalProvider::signalTags(Hash signalHash) const
 
 QStringList EditSchemaAppSignalProvider::signalTags(const QString& appSignalId) const
 {
-	Signal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
 
 	if (s != nullptr)
 	{
@@ -209,7 +209,7 @@ bool EditSchemaTuningSignalProvider::signalExists(Hash hash) const
 
 bool EditSchemaTuningSignalProvider::signalExists(const QString& appSignalId) const
 {
-	Signal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
 	return s != nullptr;
 }
 
@@ -227,7 +227,7 @@ AppSignalParam EditSchemaTuningSignalProvider::signalParam(const QString& appSig
 {
 	AppSignalParam result;
 
-	Signal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
 
 	if (found != nullptr)
 	{
@@ -260,7 +260,7 @@ bool EditSchemaTuningSignalProvider::signalParam(const QString& appSignalId, App
 		return false;
 	}
 
-	Signal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
 
 	if (s != nullptr)
 	{
@@ -286,7 +286,7 @@ TuningSignalState EditSchemaTuningSignalProvider::state(const QString& appSignal
 	TuningSignalState result;
 	result.m_hash = ::calcHash(appSignalId);
 
-	Signal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
 	if (found != nullptr)
 	{
 		*found = s != nullptr;

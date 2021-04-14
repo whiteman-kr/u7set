@@ -161,9 +161,9 @@ namespace Builder
 			return;
 		}
 
-		const QVector<Signal*>& refSignals = ualSignal->refSignals();
+		const QVector<AppSignal*>& refSignals = ualSignal->refSignals();
 
-		for(const Signal* s : refSignals)
+		for(const AppSignal* s : refSignals)
 		{
 			if (s == nullptr)
 			{

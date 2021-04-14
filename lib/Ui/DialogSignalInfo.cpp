@@ -1173,14 +1173,14 @@ void DialogSignalInfo::fillExtProperties()
 {
 	ui->treePropertiesExt->clear();
 
-	std::optional<Signal> signalExtOpt = getSignalExt(m_signal);
+	std::optional<AppSignal> signalExtOpt = getSignalExt(m_signal);
 
 	if (signalExtOpt.has_value() == false)
 	{
 		return;
 	}
 
-	Signal& signalExt = signalExtOpt.value();
+	AppSignal& signalExt = signalExtOpt.value();
 
 	// Fill properties list
 	//

@@ -181,7 +181,7 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 	{
 		if (column == METROLOGY_CONNECTION_COLUMN_IN_ID)
 		{
-			::Signal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(Metrology::ConnectionIoType::Source));
+			::AppSignal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(Metrology::ConnectionIoType::Source));
 			if (pSignal == nullptr)	// if input signal is not exist
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
@@ -198,7 +198,7 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 
 		if (column == METROLOGY_CONNECTION_COLUMN_OUT_ID)
 		{
-			::Signal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(Metrology::ConnectionIoType::Destination));
+			::AppSignal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(Metrology::ConnectionIoType::Destination));
 			if (pSignal == nullptr)	// if output signal is not exist
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
@@ -390,7 +390,7 @@ void DialogMetrologyConnectionItem::setConnection(bool newConnection, const Metr
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool DialogMetrologyConnectionItem::electricLimitIsValid(Signal* pSignal)
+bool DialogMetrologyConnectionItem::electricLimitIsValid(AppSignal* pSignal)
 {
 	if (pSignal == nullptr)
 	{
@@ -479,7 +479,7 @@ void DialogMetrologyConnectionItem::onOk()
 	//
 	//
 
-	Signal* pInSignal = m_signalSetProvider->getSignalByStrID(inputAppSignalID);
+	AppSignal* pInSignal = m_signalSetProvider->getSignalByStrID(inputAppSignalID);
 	if (pInSignal == nullptr)
 	{
 		QMessageBox::information(this,
@@ -500,7 +500,7 @@ void DialogMetrologyConnectionItem::onOk()
 		return;
 	}
 
-	Signal* pOutSignal = m_signalSetProvider->getSignalByStrID(outputAppSignalID);
+	AppSignal* pOutSignal = m_signalSetProvider->getSignalByStrID(outputAppSignalID);
 	if (pOutSignal == nullptr)
 	{
 		QMessageBox::information(this,
@@ -1113,7 +1113,7 @@ void DialogMetrologyConnection::fillConnection(bool newConnection, const Metrolo
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool DialogMetrologyConnection::createConnectionBySignal(Signal* pSignal)
+bool DialogMetrologyConnection::createConnectionBySignal(AppSignal* pSignal)
 {
 	if (pSignal == nullptr)
 	{
@@ -1676,7 +1676,7 @@ void DialogMetrologyConnection::importConnections()
 
 		for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
 		{
-			Signal* pSignal = m_signalSetProvider->getSignalByStrID(pConnection->appSignalID(ioType));
+			AppSignal* pSignal = m_signalSetProvider->getSignalByStrID(pConnection->appSignalID(ioType));
 			if (pSignal == nullptr)
 			{
 				continue;

@@ -156,11 +156,11 @@ namespace Tuning
 				continue;
 			}
 
-			QVector<Signal*> sourceSignals;
+			QVector<AppSignal*> sourceSignals;
 
 			tuningData->getSignals(sourceSignals);
 
-			for(const Signal* signal : sourceSignals)
+			for(const AppSignal* signal : sourceSignals)
 			{
 				if (signal == nullptr)
 				{

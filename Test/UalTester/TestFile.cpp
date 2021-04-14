@@ -1283,7 +1283,7 @@ bool TestCmd::isUniqueConstOrVarName(const QString& name, const QVector<TestCmdP
 	return true;
 }
 
-TestCmdParam TestCmd::paramFromConstOrVar(const QString& name, const QString& value, const Signal& signal)
+TestCmdParam TestCmd::paramFromConstOrVar(const QString& name, const QString& value, const AppSignal& signal)
 {
 	if (m_pTestFile == nullptr)
 	{
@@ -1399,7 +1399,7 @@ TestCmdParam TestCmd::paramFromConstOrVar(const QString& name, const QString& va
 	return param;
 }
 
-TestCmdParam TestCmd::paramFromSignal(const QString& name, const QString& value, const Signal& signal)
+TestCmdParam TestCmd::paramFromSignal(const QString& name, const QString& value, const AppSignal& signal)
 {
 	if (name.isEmpty() == true)
 	{

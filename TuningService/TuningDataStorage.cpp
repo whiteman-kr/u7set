@@ -101,7 +101,7 @@ namespace  Tuning
 
 		for(int type = TYPE_ANALOG_FLOAT; type < TYPES_COUNT; type++)
 		{
-			for(Signal* signal : m_tuningSignals[type])
+			for(AppSignal* signal : m_tuningSignals[type])
 			{
 				delete signal;
 			}
@@ -110,16 +110,16 @@ namespace  Tuning
 		}
 	}
 
-	bool TuningData::buildTuningSignalsLists(HashedVector<QString, Signal *> lmAssociatedSignals, Builder::IssueLogger* log)
+	bool TuningData::buildTuningSignalsLists(HashedVector<QString, AppSignal *> lmAssociatedSignals, Builder::IssueLogger* log)
 	{
 		bool result = true;
 
-		for(QVector<Signal*>& signalList : m_tuningSignals)
+		for(QVector<AppSignal*>& signalList : m_tuningSignals)
 		{
 			signalList.clear();
 		}
 
-		for(Signal* signal : lmAssociatedSignals)
+		for(AppSignal* signal : lmAssociatedSignals)
 		{
 			if (signal->enableTuning() == false)
 			{
@@ -180,7 +180,7 @@ namespace  Tuning
 
 		int totalSize = 0;
 
-		for(QVector<Signal*>& signalList : m_tuningSignals)
+		for(QVector<AppSignal*>& signalList : m_tuningSignals)
 		{
 			sortSignalsByAcquiredProperty(signalList);
 
@@ -249,7 +249,7 @@ namespace  Tuning
 		{
 			int discreteCount = 0;
 
-			for(Signal* signal : m_tuningSignals[t])
+			for(AppSignal* signal : m_tuningSignals[t])
 			{
 				if (signal == nullptr)
 				{
@@ -440,9 +440,9 @@ namespace  Tuning
 
 		crc.add(lmEquipmentID);
 
-		for(QVector<Signal*>& signalList : m_tuningSignals)
+		for(QVector<AppSignal*>& signalList : m_tuningSignals)
 		{
-			for(Signal* signal : signalList)
+			for(AppSignal* signal : signalList)
 			{
 				crc.add(signal->appSignalID());
 				crc.add(signal->equipmentID());
@@ -458,18 +458,18 @@ namespace  Tuning
 	}
 
 
-	void TuningData::getSignals(QVector<Signal*>& signalList) const
+	void TuningData::getSignals(QVector<AppSignal*>& signalList) const
 	{
 		signalList.clear();
 
-		for(const QVector<Signal*>& list : m_tuningSignals)
+		for(const QVector<AppSignal*>& list : m_tuningSignals)
 		{
 			signalList.append(list);
 		}
 	}
 
 
-	const QVector<Signal *>& TuningData::getSignals(int type) const
+	const QVector<AppSignal *>& TuningData::getSignals(int type) const
 	{
 		if (type < TYPE_ANALOG_FLOAT || type > TYPE_DISCRETE)
 		{
@@ -480,9 +480,9 @@ namespace  Tuning
 		return m_tuningSignals[type];
 	}
 
-	void TuningData::getAcquiredAnalogSignals(QVector<Signal *>& analogSignals)
+	void TuningData::getAcquiredAnalogSignals(QVector<AppSignal *>& analogSignals)
 	{
-		for(Signal* s : m_tuningSignals[TYPE_ANALOG_FLOAT])
+		for(AppSignal* s : m_tuningSignals[TYPE_ANALOG_FLOAT])
 		{
 			if (s->isAcquired() == true)
 			{
@@ -490,7 +490,7 @@ namespace  Tuning
 			}
 		}
 
-		for(Signal* s : m_tuningSignals[TYPE_ANALOG_INT32])
+		for(AppSignal* s : m_tuningSignals[TYPE_ANALOG_INT32])
 		{
 			if (s->isAcquired() == true)
 			{
@@ -499,9 +499,9 @@ namespace  Tuning
 		}
 	}
 
-	void TuningData::getAcquiredDiscreteSignals(QVector<Signal*>& discreteSignals)
+	void TuningData::getAcquiredDiscreteSignals(QVector<AppSignal*>& discreteSignals)
 	{
-		for(Signal* s : m_tuningSignals[TYPE_DISCRETE])
+		for(AppSignal* s : m_tuningSignals[TYPE_DISCRETE])
 		{
 			if (s->isAcquired() == true)
 			{
@@ -581,7 +581,7 @@ namespace  Tuning
 
 		int signalCount = 0;
 
-		for(QVector<Signal*>& signalList : m_tuningSignals)
+		for(QVector<AppSignal*>& signalList : m_tuningSignals)
 		{
 			signalCount += signalList.count();
 		}
@@ -597,13 +597,13 @@ namespace  Tuning
 
 		for(int type = TYPE_ANALOG_FLOAT; type < TYPES_COUNT; type++)
 		{
-			QVector<Signal*>& tuningSignals = m_tuningSignals[type];
+			QVector<AppSignal*>& tuningSignals = m_tuningSignals[type];
 
 			xml.writeStartElement(typeSection[type]);	//	<typeSection[type]>
 
 			xml.writeIntAttribute(TUNING_SIGNALS_COUNT, tuningSignals.count());
 
-			for(Signal* signal : tuningSignals)
+			for(AppSignal* signal : tuningSignals)
 			{
 				signal->writeToXml(xml);
 			}
@@ -690,7 +690,7 @@ namespace  Tuning
 					break;
 				}
 
-				Signal* signal = new Signal();
+				AppSignal* signal = new AppSignal();
 
 				result &= signal->readFromXml(xml);
 
@@ -734,17 +734,17 @@ namespace  Tuning
 		*data32Ptr = reverseUint32(value);
 	}
 
-	void TuningData::sortSignalsByAcquiredProperty(QVector<Signal *>& tuningSignals)
+	void TuningData::sortSignalsByAcquiredProperty(QVector<AppSignal *>& tuningSignals)
 	{
 		int count = tuningSignals.count();
 
-		QVector<Signal*> acquired;
-		QVector<Signal*> nonAcquired;
+		QVector<AppSignal*> acquired;
+		QVector<AppSignal*> nonAcquired;
 
 		acquired.reserve(count);
 		nonAcquired.reserve(count);
 
-		for(Signal* s : tuningSignals)
+		for(AppSignal* s : tuningSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -767,7 +767,7 @@ namespace  Tuning
 		tuningSignals.append(nonAcquired);
 	}
 
-	void TuningData::sortByAppSignalID(QVector<Signal*>& signalList)
+	void TuningData::sortByAppSignalID(QVector<AppSignal*>& signalList)
 	{
 		int count = signalList.size();
 
@@ -775,8 +775,8 @@ namespace  Tuning
 		{
 			for(int k = i + 1; k < count; k++)
 			{
-				Signal* s1 = signalList[i];
-				Signal* s2 = signalList[k];
+				AppSignal* s1 = signalList[i];
+				AppSignal* s2 = signalList[k];
 
 				TEST_PTR_CONTINUE(s1);
 				TEST_PTR_CONTINUE(s2);
@@ -811,7 +811,7 @@ namespace  Tuning
 	}
 
 
-	int TuningData::getSignalType(const Signal* signal)
+	int TuningData::getSignalType(const AppSignal* signal)
 	{
 		if (signal->isAnalog() && signal->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
 		{

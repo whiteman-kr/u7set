@@ -10,7 +10,7 @@
 namespace Builder
 {
 
-	class SignalSet : public QObject, public ::SignalSet
+	class SignalSet : public QObject, public AppSignalSet
 	{
 		Q_OBJECT
 
@@ -27,17 +27,17 @@ namespace Builder
 
 		BusShared getBus(const QString & busTypeID) const { return m_busses.getBus(busTypeID); }
 
-		Signal* appendBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal);
-		Signal* createBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal);
+		AppSignal* appendBusChildSignal(const AppSignal& s, BusShared bus, const BusSignal& busSignal);
+		AppSignal* createBusChildSignal(const AppSignal& s, BusShared bus, const BusSignal& busSignal);
 
 		void findAndRemoveExcludedFromBuildSignals();
 
 	private:
-		QString expandBusSignalCaptionTemplate(const Signal& busParentSignal, BusShared bus, const BusSignal& busSignal) const;
+		QString expandBusSignalCaptionTemplate(const AppSignal& busParentSignal, BusShared bus, const BusSignal& busSignal) const;
 
-		bool checkSignalPropertiesRanges(const Signal& s);
-		bool checkSignalPropertyRanges(const Signal& s, const QString& propertyName);
-		bool checkSignalTuningValuesRanges(const Signal& s, const TuningValue& tuningValue, const QString& propertyName);
+		bool checkSignalPropertiesRanges(const AppSignal& s);
+		bool checkSignalPropertyRanges(const AppSignal& s, const QString& propertyName);
+		bool checkSignalTuningValuesRanges(const AppSignal& s, const TuningValue& tuningValue, const QString& propertyName);
 
 	private:
 		VFrame30::BusSet* m_busSet = nullptr;

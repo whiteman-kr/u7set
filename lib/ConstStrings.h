@@ -324,3 +324,8 @@ namespace Separator
 	inline const QString DIR("/");
 	inline const QString BACK_DIR("\\");
 }
+
+namespace FormatStr
+{
+	inline const QString POSTGRES_DATE_TIME("yyyy-MM-ddTHH:mm:ss");
+}

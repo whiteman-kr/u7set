@@ -203,7 +203,7 @@ private:
 	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 
 	void compareSignals(const CompareData& compareData, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
-	void compareSignalContents(const Signal& sourceSignal, const Signal& targetSignal, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
+	void compareSignalContents(const AppSignal& sourceSignal, const AppSignal& targetSignal, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 
 	void comparePropertyObjects(const PropertyObject& sourceObject, const PropertyObject& targetObject, std::vector<PropertyDiff>* const result) const;
 
@@ -222,10 +222,10 @@ private:
 	void fillDiffTable(ReportTable* diffTable, const std::vector<PropertyDiff>& diffs);
 
 	void addHeaderTableItem(ReportTable* const headerTable, const QString& caption, const QString& action, std::shared_ptr<DbFile> file);
-	void addHeaderTableItem(ReportTable* const headerTable, const QString& caption, const QString& action, const Signal& signal);
+	void addHeaderTableItem(ReportTable* const headerTable, const QString& caption, const QString& action, const AppSignal& signal);
 
 	QString changesetString(const std::shared_ptr<DbFile>& file);
-	QString changesetString(const Signal& signal);
+	QString changesetString(const AppSignal& signal);
 
 	void renderReport(std::map<int, std::vector<std::shared_ptr<ReportSection> > > reportContents);
 

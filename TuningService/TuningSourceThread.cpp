@@ -88,7 +88,7 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------
 
-	void TuningSourceHandler::TuningSignal::init(const Signal* s, int index, int tuningDataFrameSizeW)
+	void TuningSourceHandler::TuningSignal::init(const AppSignal* s, int index, int tuningDataFrameSizeW)
 	{
 		TEST_PTR_RETURN(s);
 
@@ -569,7 +569,7 @@ namespace Tuning
 			return;
 		}
 
-		QVector<Signal*> tuningSignals;
+		QVector<AppSignal*> tuningSignals;
 
 		td->getSignals(tuningSignals);
 
@@ -580,7 +580,7 @@ namespace Tuning
 
 		for(int i = 0; i < signalCount; i++)
 		{
-			Signal* signal = tuningSignals[i];
+			AppSignal* signal = tuningSignals[i];
 
 			if (signal == nullptr)
 			{

@@ -17,7 +17,7 @@
 //
 std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& signalId, DbController* dbController, QWidget* parent)
 {
-	QVector<Signal> signalVector;
+	QVector<AppSignal> signalVector;
 
 	for (QString& id : signalId)
 	{
@@ -36,11 +36,11 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 		}
 	}
 
-	QVector<Signal*> signalPtrVector;
+	QVector<AppSignal*> signalPtrVector;
 
 	QStringList foundSignalID;
 
-	for (Signal& signal : signalVector)
+	for (AppSignal& signal : signalVector)
 	{
 		if (!signalId.contains(signal.appSignalID()))
 		{
@@ -53,7 +53,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 	int readOnly = false;
 	std::vector<std::pair<QString, QString>> result;
 
-	for (Signal* signal : signalPtrVector)
+	for (AppSignal* signal : signalPtrVector)
 	{
 		if (signal->checkedOut() && signal->userID() != dbController->currentUser().userId() && !dbController->currentUser().isAdminstrator())
 		{
@@ -145,7 +145,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 }
 
 
-void initNewSignal(Signal& signal)
+void initNewSignal(AppSignal& signal)
 {
 	QSettings settings;
 
@@ -221,7 +221,7 @@ void initNewSignal(Signal& signal)
 }
 
 
-SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVector<Signal*> signalVector, bool readOnly, bool tryCheckout, QWidget *parent) :
+SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVector<AppSignal*> signalVector, bool readOnly, bool tryCheckout, QWidget *parent) :
 	QDialog(parent),
 	m_dbController(dbController),
 	m_signalVector(signalVector),
@@ -290,7 +290,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 	for (int i = 0; i < signalVector.count(); i++)
 	{
-		Signal& appSignal = *signalVector[i];
+		AppSignal& appSignal = *signalVector[i];
 
 		bool uppercaseAppSignalID = true;
 		if (m_dbController->getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalID, this) == false)
@@ -415,7 +415,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 			assert(false);
 			continue;
 		}
-		Signal& signal = signalProperties->signal();
+		AppSignal& signal = signalProperties->signal();
 		if (signal.appSignalID().trimmed().isEmpty())
 		{
 			QMessageBox::critical(this, "Error: Application signal ID is empty", "Fill Application signal ID");
@@ -429,7 +429,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	//
 	for (int i = m_signalVector.count() - 1; i >= 0; i--)
 	{
-		Signal& signal = *m_signalVector[i];
+		AppSignal& signal = *m_signalVector[i];
 
 		SignalProperties* signalProperties = dynamic_cast<SignalProperties*>(m_objList[i].get());
 		if (signalProperties == nullptr)
@@ -440,7 +440,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 
 		signalProperties->updateSpecPropValues();
 
-		Signal& editedSignalCopy = signalProperties->signal();
+		AppSignal& editedSignalCopy = signalProperties->signal();
 
 		signal.setTags(editedSignalCopy.tagsSet());	// Crashes here
 		signal = editedSignalCopy;
@@ -498,7 +498,7 @@ void SignalPropertiesDialog::rejectCheckoutProperty()
 	for (std::shared_ptr<PropertyObject> object : m_objList)
 	{
 		SignalProperties* signalProperites = dynamic_cast<SignalProperties*>(object.get());
-		Signal& signal = signalProperites->signal();
+		AppSignal& signal = signalProperites->signal();
 		int id = signal.ID();
 		if (!signal.checkedOut() && m_editedSignalsId.contains(id))
 		{
@@ -554,7 +554,7 @@ void SignalPropertiesDialog::checkoutSignals(QList<std::shared_ptr<PropertyObjec
 	for (std::shared_ptr<PropertyObject> object : objects)
 	{
 		SignalProperties* signalProperites = dynamic_cast<SignalProperties*>(object.get());
-		Signal& signal = signalProperites->signal();
+		AppSignal& signal = signalProperites->signal();
 		int id = signal.ID();
 		if (signal.checkedOut() || m_editedSignalsId.contains(id))
 		{
@@ -597,7 +597,7 @@ void SignalPropertiesDialog::closeEvent(QCloseEvent* event)
 	QDialog::closeEvent(event);
 }
 
-bool SignalPropertiesDialog::checkoutSignal(Signal& s, QString& message)
+bool SignalPropertiesDialog::checkoutSignal(AppSignal& s, QString& message)
 {
 	if (s.checkedOut())
 	{
@@ -701,7 +701,7 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 
 	SignalPropertyManager& manager = *SignalPropertyManager::getInstance();
 
-	const Signal& signal = *m_signalVector[0];
+	const AppSignal& signal = *m_signalVector[0];
 
 	QSettings settings(QSettings::UserScope, qApp->organizationName());
 

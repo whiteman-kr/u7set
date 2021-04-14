@@ -16,7 +16,7 @@ DynamicAppSignalState::DynamicAppSignalState()
 	m_current[1].flags.all = 0;
 }
 
-void DynamicAppSignalState::setSignalParams(const Signal* signal, const AppSignals& appSignals)
+void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSignals& appSignals)
 {
 	TEST_PTR_RETURN(signal);
 
@@ -43,7 +43,7 @@ void DynamicAppSignalState::setSignalParams(const Signal* signal, const AppSigna
 				continue;
 			}
 
-			const Signal* flagSignal = appSignals.value(flagSignalID, nullptr);
+			const AppSignal* flagSignal = appSignals.value(flagSignalID, nullptr);
 
 			if (flagSignal == nullptr)
 			{

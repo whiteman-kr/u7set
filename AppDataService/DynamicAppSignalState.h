@@ -21,7 +21,7 @@ public:
 public:
 	DynamicAppSignalState();
 
-	void setSignalParams(const Signal* signal, const AppSignals& appSignals);
+	void setSignalParams(const AppSignal* signal, const AppSignals& appSignals);
 
 	bool setState(const Times& time,
 				  bool isSimPacket,
@@ -69,7 +69,7 @@ public:
 
 	void rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway, const QThread* thread);
 
-	const Signal* signal() const { return m_signal; }
+	const AppSignal* signal() const { return m_signal; }
 
 private:
 	bool getValue(const char* rupData, int rupDataSize, double& value);
@@ -103,7 +103,7 @@ private:
 	};
 
 private:
-	const Signal* m_signal = nullptr;
+	const AppSignal* m_signal = nullptr;
 	Hash m_signalHash;
 
 	// parsing parameters
@@ -123,7 +123,7 @@ private:
 	QVector<FlagSignalParceInfo> m_flagsSignalsParceInfo;		// except  Validity flag signal
 
 
-	void init(const Signal& s, const AppSignals& appSignals);
+	void init(const AppSignal& s, const AppSignals& appSignals);
 
 	// paramters needed to update state
 	//

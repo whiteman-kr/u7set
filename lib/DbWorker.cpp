@@ -4680,19 +4680,19 @@ void DbWorker::slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAp
 
 
 
-void DbWorker::slot_getSignals(SignalSet* signalSet, bool excludeDeleted)
+void DbWorker::slot_getSignals(AppSignalSet* signalSet, bool excludeDeleted)
 {
 	getSignals(signalSet, excludeDeleted, false);
 }
 
 
-void DbWorker::slot_getTunableSignals(SignalSet* signalSet)
+void DbWorker::slot_getTunableSignals(AppSignalSet* signalSet)
 {
 	getSignals(signalSet, true, true);
 }
 
 
-void DbWorker::getSignals(SignalSet* signalSet, bool excludeDeleted, bool tunableOnly)
+void DbWorker::getSignals(AppSignalSet* signalSet, bool excludeDeleted, bool tunableOnly)
 {
 	AUTO_COMPLETE
 
@@ -4757,7 +4757,7 @@ void DbWorker::getSignals(SignalSet* signalSet, bool excludeDeleted, bool tunabl
 			m_progress->setValue((n / dProgress) * 5);
 		}
 
-		Signal* s = new Signal;
+		AppSignal* s = new AppSignal;
 
 		getSignalData(q, *s);
 
@@ -4783,7 +4783,7 @@ void DbWorker::getSignals(SignalSet* signalSet, bool excludeDeleted, bool tunabl
 	return;
 }
 
-void DbWorker::slot_getLatestSignal(int signalID, Signal* signal)
+void DbWorker::slot_getLatestSignal(int signalID, AppSignal* signal)
 {
 	AUTO_COMPLETE
 
@@ -4829,7 +4829,7 @@ void DbWorker::slot_getLatestSignal(int signalID, Signal* signal)
 	return;
 }
 
-void DbWorker::slot_getLatestSignals(QVector<int> signalIDs, QVector<Signal>* signalsArray)
+void DbWorker::slot_getLatestSignals(QVector<int> signalIDs, QVector<AppSignal>* signalsArray)
 {
 	AUTO_COMPLETE
 
@@ -4889,7 +4889,7 @@ void DbWorker::slot_getLatestSignals(QVector<int> signalIDs, QVector<Signal>* si
 
 	while(q.next() != false)
 	{
-		Signal s;
+		AppSignal s;
 		getSignalData(q, s);
 
 		signalsArray->append(s);
@@ -4898,7 +4898,7 @@ void DbWorker::slot_getLatestSignals(QVector<int> signalIDs, QVector<Signal>* si
 	return;
 }
 
-void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<Signal>* signalArray)
+void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<AppSignal>* signalArray)
 {
 	AUTO_COMPLETE
 
@@ -4957,7 +4957,7 @@ void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVe
 
 	while(q.next() != false)
 	{
-		Signal signal;
+		AppSignal signal;
 
 		getSignalData(q, signal);
 
@@ -4967,7 +4967,7 @@ void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVe
 	return;
 }
 
-void DbWorker::slot_getLatestSignalsWithUserID(std::vector<Signal>* out)
+void DbWorker::slot_getLatestSignalsWithUserID(std::vector<AppSignal>* out)
 {
 	AUTO_COMPLETE
 
@@ -5059,7 +5059,7 @@ void DbWorker::slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs)
 
 
 
-void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
+void DbWorker::getSignalData(QSqlQuery& q, AppSignal& s)
 {
 	// indexes of SignalData's fields
 	//
@@ -5115,7 +5115,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 }
 
 
-QString DbWorker::getSignalDataStr(const Signal& s)
+QString DbWorker::getSignalDataStr(const AppSignal& s)
 {
 	QByteArray protoDataArray;
 
@@ -5139,21 +5139,21 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 								arg(s.changesetID()).												/* 12 */
 								arg(toSqlBoolean(s.checkedOut())).									/* 13 */
 								arg(s.userID()).													/* 14 */
-								arg(s.created().toString(DATE_TIME_FORMAT_STR)).					/* 15 */
+								arg(s.created().toString(FormatStr::POSTGRES_DATE_TIME)).			/* 15 */
 								arg(toSqlBoolean(s.deleted())).										/* 16 */
-								arg(s.instanceCreated().toString(DATE_TIME_FORMAT_STR)).			/* 17 */
+								arg(s.instanceCreated().toString(FormatStr::POSTGRES_DATE_TIME)).	/* 17 */
 								arg(s.instanceAction().toInt());									/* 18 */
 	return str;
 }
 
-void DbWorker::slot_addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
+void DbWorker::slot_addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal)
 {
 	AUTO_COMPLETE
 
 	addSignal(signalType, newSignal);
 }
 
-bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
+bool DbWorker::addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal)
 {
 	if (newSignal == nullptr)
 	{
@@ -5176,7 +5176,7 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 	QString logMessage = QString("addSignal: SignalCount %1, SignalIDs ")
 						 .arg(newSignal->size());
 
-	for (const Signal& s : *newSignal)
+	for (const AppSignal& s : *newSignal)
 	{
 		logMessage += s.appSignalID() + QLatin1String(" ");
 	}
@@ -5213,7 +5213,7 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 
 		int signalID =  os.id;
 
-		Signal& signal = (*newSignal)[i];
+		AppSignal& signal = (*newSignal)[i];
 
 		signal.setID(signalID);
 		signal.setCreated(QDateTime::currentDateTime());
@@ -5285,7 +5285,7 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 	return true;
 }
 
-bool DbWorker::setSignalWorkcopy(QSqlDatabase& db, const Signal& s, ObjectState& objectState, QString& errMsg)
+bool DbWorker::setSignalWorkcopy(QSqlDatabase& db, const AppSignal& s, ObjectState& objectState, QString& errMsg)
 {
 	errMsg.clear();
 
@@ -5417,7 +5417,7 @@ void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState
 }
 
 
-void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
+void DbWorker::slot_setSignalWorkcopy(AppSignal* signal, ObjectState *objectState)
 {
 	AUTO_COMPLETE
 
@@ -5481,7 +5481,7 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 	}
 }
 
-void DbWorker::slot_setSignalsWorkcopies(const QVector<Signal>* signalsList)
+void DbWorker::slot_setSignalsWorkcopies(const QVector<AppSignal>* signalsList)
 {
 	AUTO_COMPLETE
 
@@ -5501,7 +5501,7 @@ void DbWorker::slot_setSignalsWorkcopies(const QVector<Signal>* signalsList)
 	double prevSum = 0;
 	double interval = signalsList->count() / 50.0;
 
-	for(Signal signal : *signalsList)
+	for(AppSignal signal : *signalsList)
 	{
 		//
 
@@ -5784,7 +5784,7 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 
 
 void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals,
-								   std::vector<Signal>* addedSignals)
+								   std::vector<AppSignal>* addedSignals)
 {
 	AUTO_COMPLETE
 
@@ -5818,7 +5818,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>
 			{
 				QString errMsg;
 
-				Signal signal(*deviceSignal, &errMsg);
+				AppSignal signal(*deviceSignal, &errMsg);
 
 				if (errMsg.isEmpty() == false)
 				{
@@ -5826,7 +5826,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>
 					return;
 				}
 
-				QVector<Signal> newSignals;
+				QVector<AppSignal> newSignals;
 
 				newSignals.append(signal);
 
@@ -6158,7 +6158,7 @@ void DbWorker::slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out
 	return;
 }
 
-void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out)
+void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<AppSignal>* out)
 {
 	AUTO_COMPLETE
 
@@ -6220,7 +6220,7 @@ void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int ch
 			return;
 		}
 
-		Signal s;
+		AppSignal s;
 
 		getSignalData(q, s);
 
@@ -6230,7 +6230,7 @@ void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int ch
 	return;
 }
 
-void DbWorker::slot_getSpecificSignals(int changesetId, std::vector<Signal>* out)
+void DbWorker::slot_getSpecificSignals(int changesetId, std::vector<AppSignal>* out)
 {
 	AUTO_COMPLETE
 
@@ -6262,7 +6262,7 @@ void DbWorker::slot_getSpecificSignals(int changesetId, std::vector<Signal>* out
 	readSignalsToVector(q, out);
 }
 
-void DbWorker::slot_getSpecificSignals(QDateTime date, std::vector<Signal>* out)
+void DbWorker::slot_getSpecificSignals(QDateTime date, std::vector<AppSignal>* out)
 {
 	AUTO_COMPLETE
 
@@ -6295,7 +6295,7 @@ void DbWorker::slot_getSpecificSignals(QDateTime date, std::vector<Signal>* out)
 	readSignalsToVector(q, out);
 }
 
-void DbWorker::readSignalsToVector(QSqlQuery& q, std::vector<Signal>* out)
+void DbWorker::readSignalsToVector(QSqlQuery& q, std::vector<AppSignal>* out)
 {
 	TEST_PTR_RETURN(out);
 

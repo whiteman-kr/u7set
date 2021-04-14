@@ -40,7 +40,7 @@ void SignalBase::clearSignalList()
 	m_signalMutex.unlock();
 }
 
-int SignalBase::appendSignal(const Signal& param)
+int SignalBase::appendSignal(const AppSignal& param)
 {
 	if (param.appSignalID().isEmpty() == true || param.hash() == UNDEFINED_HASH)
 	{
@@ -173,26 +173,26 @@ TestSignal SignalBase::signal(int index)
 	return signal;
 }
 
-Signal SignalBase::signalParam(const QString& appSignalID)
+AppSignal SignalBase::signalParam(const QString& appSignalID)
 {
 	if (appSignalID.isEmpty() == true)
 	{
 		assert(false);
-		return Signal();
+		return AppSignal();
 	}
 
 	return signalParam(calcHash(appSignalID));
 }
 
-Signal SignalBase::signalParam(const Hash& hash)
+AppSignal SignalBase::signalParam(const Hash& hash)
 {
 	if (hash == UNDEFINED_HASH)
 	{
 		assert(hash != UNDEFINED_HASH);
-		return Signal();
+		return AppSignal();
 	}
 
-	Signal param;
+	AppSignal param;
 
 	m_signalMutex.lock();
 
@@ -211,9 +211,9 @@ Signal SignalBase::signalParam(const Hash& hash)
 	return param;
 }
 
-Signal SignalBase::signalParam(int index)
+AppSignal SignalBase::signalParam(int index)
 {
-	Signal param;
+	AppSignal param;
 
 	m_signalMutex.lock();
 
@@ -227,7 +227,7 @@ Signal SignalBase::signalParam(int index)
 	return param;
 }
 
-void SignalBase::setSignalParam(const Hash& hash, const Signal& param)
+void SignalBase::setSignalParam(const Hash& hash, const AppSignal& param)
 {
 	if (hash == UNDEFINED_HASH)
 	{
@@ -252,7 +252,7 @@ void SignalBase::setSignalParam(const Hash& hash, const Signal& param)
 	m_signalMutex.unlock();
 }
 
-void SignalBase::setSignalParam(int index, const Signal& param)
+void SignalBase::setSignalParam(int index, const AppSignal& param)
 {
 	m_signalMutex.lock();
 

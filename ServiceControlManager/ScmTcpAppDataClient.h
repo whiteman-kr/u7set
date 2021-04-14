@@ -35,7 +35,7 @@ public:
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
 	QList<AppDataSource*> dataSources() { return m_appDataSources.values(); }
-	const QVector<Signal>& signalParams() { return m_signalParams; }
+	const QVector<AppSignal>& signalParams() { return m_signalParams; }
 	const QVector<AppSignalState>& signalStates() { return m_states; }
 
 	const Network::ServiceClients& clients() { return m_serviceClientsMessage; }
@@ -100,7 +100,7 @@ private:
 	QHash<quint64, AppDataSource*> m_appDataSources;		// id => AppDataSource
 
 	QVector<Hash> m_signalHashes;
-	QVector<Signal> m_signalParams;
+	QVector<AppSignal> m_signalParams;
 	QVector<AppSignalState> m_states;
 	QHash<Hash, int> m_hash2Index;
 

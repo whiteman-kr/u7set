@@ -169,8 +169,8 @@ public:
 	bool isUniqueTestID(const QString& testID);
 	bool isUniqueConstOrVarName(const QString& name, const QVector<TestCmdParam>& paramList);
 
-	TestCmdParam paramFromConstOrVar(const QString& name, const QString& value, const Signal& signal);
-	TestCmdParam paramFromSignal(const QString& name, const QString& value, const Signal& signal);
+	TestCmdParam paramFromConstOrVar(const QString& name, const QString& value, const AppSignal& signal);
+	TestCmdParam paramFromSignal(const QString& name, const QString& value, const AppSignal& signal);
 
 	const QVector<TestCmdParam>& paramList() const { return m_paramList; }
 	const QStringList& errorList() const { return m_errorList; }

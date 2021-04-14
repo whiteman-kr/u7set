@@ -11,7 +11,7 @@
 #include <QtSql/QSqlRecord>
 #include "PropertyObject.h"
 
-class Signal;
+class AppSignal;
 
 enum class DbDir
 {
@@ -681,7 +681,7 @@ class DbChangesetObject
 public:
 	DbChangesetObject();
 	explicit DbChangesetObject(const DbFileInfo& file);
-	explicit DbChangesetObject(const Signal& signal);
+	explicit DbChangesetObject(const AppSignal& signal);
 	virtual ~DbChangesetObject() = default;
 
 public:

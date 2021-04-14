@@ -301,7 +301,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 
 	// Generatuing Signal and show it's properties
 	//
-	QVector<Signal> newSignals;
+	QVector<AppSignal> newSignals;
 
 	auto resultData = d.resultData();
 
@@ -323,7 +323,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		QString customSignalId = resultData.customSignalIds[index];
 		QString caption = QString("App signal %1 in schema %2").arg(appSignalId).arg(options->m_schemaId);
 
-		Signal signal;
+		AppSignal signal;
 
 		switch (resultData.signalType)
 		{
@@ -382,9 +382,9 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 
 	// Show properties dialog
 	//
-	QVector<Signal*> signalPtrVector;
+	QVector<AppSignal*> signalPtrVector;
 
-	for (Signal& signal : newSignals)
+	for (AppSignal& signal : newSignals)
 	{
 		signalPtrVector.push_back(&signal);
 	}
@@ -397,7 +397,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		return {};
 	}
 
-	for (Signal& signal : newSignals)
+	for (AppSignal& signal : newSignals)
 	{
 		SignalSetProvider::trimSignalTextFields(signal);
 	}
@@ -415,7 +415,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 	int currentIdIndex = 0;
 	QStringList resultAppSignalIds;
 
-	for (Signal& signal : newSignals)
+	for (AppSignal& signal : newSignals)
 	{
 		resultAppSignalIds << signal.appSignalID();
 		selectIdList[currentIdIndex++] = signal.ID();

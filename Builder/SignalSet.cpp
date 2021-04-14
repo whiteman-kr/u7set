@@ -60,7 +60,7 @@ namespace Builder
 
 		for(int i = 0; i < signalCount; i++)
 		{
-			Signal& s = (*this)[i];
+			AppSignal& s = (*this)[i];
 
 			// check AppSignalID
 			//
@@ -219,7 +219,7 @@ namespace Builder
 
 		for(int i = 0; i < signalCount; i++)
 		{
-			Signal& s = (*this)[i];
+			AppSignal& s = (*this)[i];
 
 			// check EquipmentID
 			//
@@ -316,7 +316,7 @@ namespace Builder
 
 		for(int i = 0; i < signalsCount; i++)
 		{
-			Signal& s = (*this)[i];
+			AppSignal& s = (*this)[i];
 
 			s.initCalculatedProperties();
 		}
@@ -328,7 +328,7 @@ namespace Builder
 
 		for(int i = 0; i < signalsCount; i++)
 		{
-			Signal& s = (*this)[i];
+			AppSignal& s = (*this)[i];
 
 			s.cacheSpecPropValues();
 		}
@@ -343,7 +343,7 @@ namespace Builder
 			return true;
 		}
 
-		QHash<QString, Signal*> expandedCustomAppSignalIDs;
+		QHash<QString, AppSignal*> expandedCustomAppSignalIDs;
 
 		expandedCustomAppSignalIDs.reserve(signalCount);
 
@@ -351,7 +351,7 @@ namespace Builder
 
 		for(int i = 0; i < signalCount; i++)
 		{
-			Signal& s = (*this)[i];
+			AppSignal& s = (*this)[i];
 
 			if (s.customAppSignalIDContainsMacro() == false &&
 					s.captionContainsMacro() == false)
@@ -374,7 +374,7 @@ namespace Builder
 			{
 				QString errMsg;
 
-				QString expandedCustomID = Signal::expandDeviceSignalTemplate(*deviceObject, s.customAppSignalID(), &errMsg);
+				QString expandedCustomID = AppSignal::expandDeviceSignalTemplate(*deviceObject, s.customAppSignalID(), &errMsg);
 
 				if (errMsg.isEmpty() == false)
 				{
@@ -385,7 +385,7 @@ namespace Builder
 					continue;
 				}
 
-				Signal* existsSignal = expandedCustomAppSignalIDs.value(expandedCustomID, nullptr);
+				AppSignal* existsSignal = expandedCustomAppSignalIDs.value(expandedCustomID, nullptr);
 
 				if (existsSignal != nullptr)
 				{
@@ -405,7 +405,7 @@ namespace Builder
 			{
 				QString errMsg;
 
-				QString expandedCaption = Signal::expandDeviceSignalTemplate(*deviceObject, s.caption(), &errMsg);
+				QString expandedCaption = AppSignal::expandDeviceSignalTemplate(*deviceObject, s.caption(), &errMsg);
 
 				if (errMsg.isEmpty() == false)
 				{
@@ -429,18 +429,18 @@ namespace Builder
 		return result;
 	}
 
-	Signal* SignalSet::appendBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal)
+	AppSignal* SignalSet::appendBusChildSignal(const AppSignal& s, BusShared bus, const BusSignal& busSignal)
 	{
-		Signal* newSignal = createBusChildSignal(s, bus, busSignal);
+		AppSignal* newSignal = createBusChildSignal(s, bus, busSignal);
 
 		append(newSignal);
 
 		return newSignal;
 	}
 
-	Signal* SignalSet::createBusChildSignal(const Signal& busParentSignal, BusShared bus, const BusSignal& busSignal)
+	AppSignal* SignalSet::createBusChildSignal(const AppSignal& busParentSignal, BusShared bus, const BusSignal& busSignal)
 	{
-		Signal* newSignal = new Signal();
+		AppSignal* newSignal = new AppSignal();
 
 		newSignal->setAppSignalID(QString(busParentSignal.appSignalID() + BusSignal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
 		newSignal->setCustomAppSignalID(QString(busParentSignal.customAppSignalID() + BusSignal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
@@ -510,7 +510,7 @@ namespace Builder
 
 		for(int i = 0; i < signalCount; i++)
 		{
-			const Signal& s = (*this)[i];
+			const AppSignal& s = (*this)[i];
 
 			if (s.excludeFromBuild() == true)
 			{
@@ -528,7 +528,7 @@ namespace Builder
 		}
 	}
 
-	QString SignalSet::expandBusSignalCaptionTemplate(const Signal& busParentSignal, BusShared bus, const BusSignal& busSignal) const
+	QString SignalSet::expandBusSignalCaptionTemplate(const AppSignal& busParentSignal, BusShared bus, const BusSignal& busSignal) const
 	{
 		QString caption = busSignal.caption;
 
@@ -540,7 +540,7 @@ namespace Builder
 		return caption;
 	}
 
-	bool SignalSet::checkSignalPropertiesRanges(const Signal& s)
+	bool SignalSet::checkSignalPropertiesRanges(const AppSignal& s)
 	{
 		if (s.isAnalog() == false)
 		{
@@ -561,7 +561,7 @@ namespace Builder
 		return result;
 	}
 
-	bool SignalSet::checkSignalPropertyRanges(const Signal& s, const QString& propertyName)
+	bool SignalSet::checkSignalPropertyRanges(const AppSignal& s, const QString& propertyName)
 	{
 		if (s.isAnalog() == false)
 		{
@@ -608,7 +608,7 @@ namespace Builder
 		return result;
 	}
 
-	bool SignalSet::checkSignalTuningValuesRanges(const Signal& s, const TuningValue& tuningValue, const QString& propertyName)
+	bool SignalSet::checkSignalTuningValuesRanges(const AppSignal& s, const TuningValue& tuningValue, const QString& propertyName)
 	{
 		if (s.isAnalog() == false)
 		{

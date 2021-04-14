@@ -6,7 +6,7 @@
 namespace Sim
 {
 
-	bool FlagsReadStruct::create(const Signal& s, const std::unordered_map<Hash, Signal>& signalParams, ScopedLog& log)
+	bool FlagsReadStruct::create(const AppSignal& s, const std::unordered_map<Hash, AppSignal>& signalParams, ScopedLog& log)
 	{
 		auto flagIt = s.stateFlagsSignals().constBegin();
 
@@ -30,7 +30,7 @@ namespace Sim
 			}
 			else
 			{
-				const Signal& flagSignal = flagSignalIt->second;
+				const AppSignal& flagSignal = flagSignalIt->second;
 				Q_ASSERT(flagSignal.hash() == flagSignalHash);
 
 				if (flagSignal.isDiscrete() == false)
@@ -226,7 +226,7 @@ namespace Sim
 		}
 
 		std::unordered_map<Hash, AppSignalParam> signalParams;
-		std::unordered_map<Hash, Signal> signalParamsExt;
+		std::unordered_map<Hash, AppSignal> signalParamsExt;
 		std::unordered_map<Hash, Hash> customToAppSignalId;
 		std::unordered_map<Hash, FlagsReadStruct> flagsStruct;
 
@@ -377,7 +377,7 @@ namespace Sim
 
 		auto createTrendSignal = [this](Hash signalHash) -> TrendSignal
 		{
-			std::optional<Signal> sp = this->signalParamExt(signalHash);
+			std::optional<AppSignal> sp = this->signalParamExt(signalHash);
 
 			TrendSignal ts;
 
@@ -488,12 +488,12 @@ namespace Sim
 		return result;
 	}
 
-	std::optional<Signal> AppSignalManager::signalParamExt(const QString& appSignalId) const
+	std::optional<AppSignal> AppSignalManager::signalParamExt(const QString& appSignalId) const
 	{
 		return signalParamExt(::calcHash(appSignalId));
 	}
 
-	std::optional<Signal> AppSignalManager::signalParamExt(Hash hash) const
+	std::optional<AppSignal> AppSignalManager::signalParamExt(Hash hash) const
 	{
 		QReadLocker locker(&m_signalParamLock);
 
@@ -561,7 +561,7 @@ namespace Sim
 				return state;
 			}
 
-			const Signal& s = it->second;
+			const AppSignal& s = it->second;
 			Q_ASSERT(signalHash == s.hash());
 
 			if (s.signalType() == E::SignalType::Bus)

@@ -3,7 +3,7 @@
 namespace Sim
 {
 
-	ScriptSignal::ScriptSignal(const Signal& s) :
+	ScriptSignal::ScriptSignal(const AppSignal& s) :
 		m_signal(s)
 	{
 	}
@@ -13,7 +13,7 @@ namespace Sim
 		return m_signal.appSignalID().isEmpty();
 	}
 
-	void ScriptSignal::setSignal(const Signal& s)
+	void ScriptSignal::setSignal(const AppSignal& s)
 	{
 		m_signal = s;
 	}

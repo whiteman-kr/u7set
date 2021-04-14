@@ -423,32 +423,32 @@ namespace Builder
 	private:
 		// private intializers can be used by UalSignalsMap only
 		//
-		bool createRegularSignal(const UalItem* ualItem, Signal* s);
+		bool createRegularSignal(const UalItem* ualItem, AppSignal* s);
 
 		bool createConstSignal(const UalItem* ualItem,
 								const QString& constSignalID,
 								E::SignalType constSignalType,
 								E::AnalogAppSignalFormat constAnalogFormat,
-								Signal** autoSignalPtr);
+								AppSignal** autoSignalPtr);
 
 		bool createAutoSignal(const UalItem* ualItem,
 								const QString& signalID,
 								E::SignalType signalType,
 								E::AnalogAppSignalFormat analogFormat,
-								Signal** autoSignalPtr);
+								AppSignal** autoSignalPtr);
 
 		bool createBusParentSignal(const UalItem* ualItem,
-									Signal* busSignal,
+									AppSignal* busSignal,
 									BusShared bus,
 									const QString& outPinCaption,
 									std::shared_ptr<Hardware::DeviceModule> lm,
-									Signal** autoSignalPtr);
+									AppSignal** autoSignalPtr);
 
 		friend class UalSignalsMap;
 
 	public:
-		bool appendRefSignal(Signal* s, bool isOptoSignal);
-		bool appendBusChildRefSignals(const QString &busSignalID, Signal* s);
+		bool appendRefSignal(AppSignal* s, bool isOptoSignal);
+		bool appendBusChildRefSignals(const QString &busSignalID, AppSignal* s);
 
 		void setComputed() { m_computed = true; }
 		bool isComputed() const { return m_computed; }
@@ -478,7 +478,7 @@ namespace Builder
 
 		bool checkIoBufAddr() const;
 
-		Signal* signal() const;
+		AppSignal* signal() const;
 
 		E::SignalType signalType() const { return m_refSignals[0]->signalType(); }
 		E::SignalInOutType inOutType() const { return m_refSignals[0]->inOutType(); }
@@ -499,12 +499,12 @@ namespace Builder
 		QString caption() const { return m_refSignals[0]->caption(); }
 		QString customAppSignalID() const { return m_refSignals[0]->customAppSignalID(); }
 
-		const Signal& constSignal() { return *m_refSignals[0]; }
+		const AppSignal& constSignal() { return *m_refSignals[0]; }
 
-		const QVector<Signal*>& refSignals() const { return m_refSignals; }
+		const QVector<AppSignal*>& refSignals() const { return m_refSignals; }
 		int refSignalsCount() const { return m_refSignals.count(); }
 
-		bool isCompatible(const Signal* s, IssueLogger* log) const;
+		bool isCompatible(const AppSignal* s, IssueLogger* log) const;
 		bool isCanBeConnectedTo(const UalItem &ualItem, const LogicAfbSignal& afbSignal, IssueLogger* log) const;
 		bool isCompatible(BusShared bus, const BusSignal& busSignal, IssueLogger* log) const;
 		bool isCompatible(const UalSignal* ualSignal, IssueLogger* log) const;
@@ -551,10 +551,10 @@ namespace Builder
 
 		void sortRefSignals();
 
-		Signal* getInputSignal() const;
-		Signal* getOutputSignal() const;
-		Signal* getTunableSignal() const;
-		QVector<Signal*> getAnalogOutputSignals() const;
+		AppSignal* getInputSignal() const;
+		AppSignal* getOutputSignal() const;
+		AppSignal* getTunableSignal() const;
+		QVector<AppSignal*> getAnalogOutputSignals() const;
 
 		QStringList refSignalIDs() const;
 		void refSignalIDs(QStringList* appSignalIDs) const;
@@ -597,7 +597,7 @@ namespace Builder
 
 		const UalItem* m_ualItem = nullptr;
 
-		QVector<Signal*> m_refSignals;							// vector of pointers to signal in m_signalSet
+		QVector<AppSignal*> m_refSignals;							// vector of pointers to signal in m_signalSet
 
 		QHash<QString, UalSignal*> m_busChildSignals;
 
@@ -653,9 +653,9 @@ namespace Builder
 		QHash<UalSignal*, UalSignal*>::iterator end() { return QHash<UalSignal*, UalSignal*>::end(); }
 		QHash<UalSignal*, UalSignal*>::const_iterator end() const { return QHash<UalSignal*, UalSignal*>::end(); }
 
-		UalSignal* createSignal(Signal* appSignal);
+		UalSignal* createSignal(AppSignal* appSignal);
 
-		UalSignal* createSignal(Signal* appSignal, const UalItem* ualItem, QUuid outPinUuid);
+		UalSignal* createSignal(AppSignal* appSignal, const UalItem* ualItem, QUuid outPinUuid);
 
 		UalSignal* createConstSignal(const UalItem* ualItem,
 									 E::SignalType constSignalType,
@@ -666,13 +666,13 @@ namespace Builder
 									const LogicAfbSignal& templateOutAfbSignal,
 									std::optional<int> expectedReadCount);
 
-		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const Signal& templateSignal);
+		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const AppSignal& templateSignal);
 
-		UalSignal* createBusParentSignal(Signal* appBusSignal);
-		UalSignal* createBusParentSignal(Signal* appBusSignal, BusShared bus, const UalItem* ualItem, QUuid outPinUuid, const QString& outPinCaption);
+		UalSignal* createBusParentSignal(AppSignal* appBusSignal);
+		UalSignal* createBusParentSignal(AppSignal* appBusSignal, BusShared bus, const UalItem* ualItem, QUuid outPinUuid, const QString& outPinCaption);
 
 		bool appendRefPin(const UalItem* ualItem, QUuid pinUuid, UalSignal* ualSignal);
-		bool appendRefSignal(Signal* s, UalSignal* ualSignal);
+		bool appendRefSignal(AppSignal* s, UalSignal* ualSignal);
 
 		UalSignal* get(const QString& appSignalID) const { return m_idToSignalMap.value(appSignalID, nullptr); }
 		bool contains(const QString& appSignalID) const { return m_idToSignalMap.contains(appSignalID); }
@@ -726,7 +726,7 @@ namespace Builder
 		QHash<QString, UalSignal*> m_idToSignalMap;
 		QHash<QUuid, UalSignal*> m_pinToSignalMap;
 		QMultiHash<UalSignal*, QUuid> m_signalToPinsMap;
-		QHash<Signal*, UalSignal*> m_ptrToSignalMap;
+		QHash<AppSignal*, UalSignal*> m_ptrToSignalMap;
 
 		SignalsHeap m_discreteSignalsHeap;
 		SignalsHeap m_analogAndBusSignalsHeap;				// for now: Analog and Bus signals

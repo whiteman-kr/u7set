@@ -395,7 +395,7 @@ void TcpTuningServiceClient::onGetTuningSignalParam(const char *replyData, quint
 
 	int receivedSignalQuantity = m_getAppSignalParamReply.appsignals_size();
 
-	Signal signal;
+	AppSignal signal;
 
 	for (int i = 0; i < receivedSignalQuantity; i++)
 	{

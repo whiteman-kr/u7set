@@ -23,7 +23,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void ConnectionSignal::set(::Signal* pSignal)
+	void ConnectionSignal::set(::AppSignal* pSignal)
 	{
 		if (pSignal == nullptr)
 		{
@@ -119,7 +119,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	bool Connection::signalIsOk(const ::Signal& signal)
+	bool Connection::signalIsOk(const ::AppSignal& signal)
 	{
 		if (signal.isAnalog() == false)
 		{
@@ -256,7 +256,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Connection::setSignal(int ioType, ::Signal* pSignal)
+	void Connection::setSignal(int ioType, ::AppSignal* pSignal)
 	{
 		if (ioType < 0 || ioType >= ConnectionIoTypeCount)
 		{
@@ -691,7 +691,7 @@ namespace Metrology
 					continue;
 				}
 
-				::Signal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(ioType));
+				::AppSignal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(ioType));
 				if (pSignal == nullptr)
 				{
 					continue;

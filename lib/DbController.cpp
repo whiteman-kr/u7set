@@ -112,14 +112,14 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getMultipleSignalsIDsWithEquipmentID, m_worker, &DbWorker::slot_getMultipleSignalsIDsWithEquipmentID);
 	connect(this, &DbController::signal_getSignalHistory, m_worker, &DbWorker::slot_getSignalHistory);
 
-	connect(this, static_cast<void(DbController::*)(const std::vector<int>*, int, std::vector<Signal>*)>(&DbController::signal_getSpecificSignals),
-			m_worker, static_cast<void(DbWorker::*)(const std::vector<int>*, int, std::vector<Signal>*)>(&DbWorker::slot_getSpecificSignals));
+	connect(this, static_cast<void(DbController::*)(const std::vector<int>*, int, std::vector<AppSignal>*)>(&DbController::signal_getSpecificSignals),
+			m_worker, static_cast<void(DbWorker::*)(const std::vector<int>*, int, std::vector<AppSignal>*)>(&DbWorker::slot_getSpecificSignals));
 
-	connect(this, static_cast<void(DbController::*)(int, std::vector<Signal>*)>(&DbController::signal_getSpecificSignals),
-			m_worker, static_cast<void(DbWorker::*)(int, std::vector<Signal>*)>(&DbWorker::slot_getSpecificSignals));
+	connect(this, static_cast<void(DbController::*)(int, std::vector<AppSignal>*)>(&DbController::signal_getSpecificSignals),
+			m_worker, static_cast<void(DbWorker::*)(int, std::vector<AppSignal>*)>(&DbWorker::slot_getSpecificSignals));
 
-	connect(this, static_cast<void(DbController::*)(QDateTime, std::vector<Signal>*)>(&DbController::signal_getSpecificSignals),
-			m_worker, static_cast<void(DbWorker::*)(QDateTime, std::vector<Signal>*)>(&DbWorker::slot_getSpecificSignals));
+	connect(this, static_cast<void(DbController::*)(QDateTime, std::vector<AppSignal>*)>(&DbController::signal_getSpecificSignals),
+			m_worker, static_cast<void(DbWorker::*)(QDateTime, std::vector<AppSignal>*)>(&DbWorker::slot_getSpecificSignals));
 
 	connect(this, &DbController::signal_hasCheckedOutSignals, m_worker, &DbWorker::slot_hasCheckedOutSignals);
 
@@ -2024,7 +2024,7 @@ bool DbController::getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDApp
 	return ok;
 }
 
-bool DbController::getSignals(SignalSet* signalSet, bool excludeDeleted, QWidget* parentWidget)
+bool DbController::getSignals(AppSignalSet* signalSet, bool excludeDeleted, QWidget* parentWidget)
 {
 	if (signalSet == nullptr)
 	{
@@ -2048,7 +2048,7 @@ bool DbController::getSignals(SignalSet* signalSet, bool excludeDeleted, QWidget
 	return ok;
 }
 
-bool DbController::getTunableSignals(SignalSet* signalSet, QWidget* parentWidget)
+bool DbController::getTunableSignals(AppSignalSet* signalSet, QWidget* parentWidget)
 {
 	if (signalSet == nullptr)
 	{
@@ -2072,7 +2072,7 @@ bool DbController::getTunableSignals(SignalSet* signalSet, QWidget* parentWidget
 	return ok;
 }
 
-bool DbController::getLatestSignal(int signalID, Signal* signal, QWidget* parentWidget)
+bool DbController::getLatestSignal(int signalID, AppSignal* signal, QWidget* parentWidget)
 {
 	if (signal == nullptr)
 	{
@@ -2096,7 +2096,7 @@ bool DbController::getLatestSignal(int signalID, Signal* signal, QWidget* parent
 	return ok;
 }
 
-bool DbController::getLatestSignals(QVector<int> signalIDs, QVector<Signal>* signalsArray, QWidget* parentWidget)
+bool DbController::getLatestSignals(QVector<int> signalIDs, QVector<AppSignal>* signalsArray, QWidget* parentWidget)
 {
 	if (signalsArray == nullptr)
 	{
@@ -2121,7 +2121,7 @@ bool DbController::getLatestSignals(QVector<int> signalIDs, QVector<Signal>* sig
 }
 
 
-bool DbController::getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray, QWidget* parentWidget)
+bool DbController::getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<AppSignal>* signalArray, QWidget* parentWidget)
 {
 	if (signalArray == nullptr)
 	{
@@ -2170,7 +2170,7 @@ bool DbController::getCheckedOutSignalsIDs(QVector<int> *signalIDs, QWidget* par
 	return ok;
 }
 
-bool DbController::addSignal(E::SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget)
+bool DbController::addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal, QWidget* parentWidget)
 {
 	if (newSignal == nullptr)
 	{
@@ -2194,7 +2194,7 @@ bool DbController::addSignal(E::SignalType signalType, QVector<Signal>* newSigna
 	return ok;
 }
 
-bool DbController::getLatestSignalsWithoutProgress(QVector<int> signalIDs, QVector<Signal>* signalsArray, QWidget* parentWidget)
+bool DbController::getLatestSignalsWithoutProgress(QVector<int> signalIDs, QVector<AppSignal>* signalsArray, QWidget* parentWidget)
 {
 	if (signalsArray == nullptr)
 	{
@@ -2233,7 +2233,7 @@ bool DbController::getLatestSignalsWithoutProgress(QVector<int> signalIDs, QVect
 	return ok;
 }
 
-bool DbController::getLatestSignalsWithUserID(std::vector<Signal>* out, QWidget* parentWidget)
+bool DbController::getLatestSignalsWithUserID(std::vector<AppSignal>* out, QWidget* parentWidget)
 {
 	TEST_PTR_RETURN_FALSE(out);
 
@@ -2287,7 +2287,7 @@ bool DbController::checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>
 }
 
 
-bool DbController::setSignalWorkcopy(Signal *signal, ObjectState *objectState, QWidget* parentWidget)
+bool DbController::setSignalWorkcopy(AppSignal *signal, ObjectState *objectState, QWidget* parentWidget)
 {
 	TEST_PTR_RETURN_FALSE(signal);
 	TEST_PTR_RETURN_FALSE(objectState);
@@ -2308,7 +2308,7 @@ bool DbController::setSignalWorkcopy(Signal *signal, ObjectState *objectState, Q
 	return ok;
 }
 
-bool DbController::setSignalsWorkcopies(const QVector<Signal>* signalsList, QWidget* parentWidget)
+bool DbController::setSignalsWorkcopies(const QVector<AppSignal>* signalsList, QWidget* parentWidget)
 {
 	// Init progress and check availability
 	//
@@ -2434,7 +2434,7 @@ bool DbController::checkinSignals(QVector<int>* signalIDs, QString comment, QVec
 
 
 
-bool DbController::autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<Signal>* addedSignals, QWidget* parentWidget)
+bool DbController::autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<AppSignal>* addedSignals, QWidget* parentWidget)
 {
 	if (deviceSignals == nullptr)
 	{
@@ -2610,7 +2610,7 @@ bool DbController::getSignalHistory(int signalID, std::vector<DbChangeset>* out,
 }
 
 
-bool DbController::getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out, QWidget* parentWidget)
+bool DbController::getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<AppSignal>* out, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -2644,7 +2644,7 @@ bool DbController::getSpecificSignals(const std::vector<int>* signalIDs, int cha
 	return true;
 }
 
-bool DbController::getSpecificSignals(int changesetId, std::vector<Signal>* out, QWidget* parentWidget)
+bool DbController::getSpecificSignals(int changesetId, std::vector<AppSignal>* out, QWidget* parentWidget)
 {
 	TEST_PTR_RETURN_FALSE(out);
 
@@ -2666,7 +2666,7 @@ bool DbController::getSpecificSignals(int changesetId, std::vector<Signal>* out,
 	return true;
 }
 
-bool DbController::getSpecificSignals(QDateTime date, std::vector<Signal>* out, QWidget* parentWidget)
+bool DbController::getSpecificSignals(QDateTime date, std::vector<AppSignal>* out, QWidget* parentWidget)
 {
 	TEST_PTR_RETURN_FALSE(out);
 

@@ -1093,7 +1093,7 @@ void EquipmentView::addInOutsToSignals()
 			return a->equipmentIdTemplate() < b->equipmentIdTemplate();
 		});
 
-	std::vector<Signal> addedSignals;
+	std::vector<AppSignal> addedSignals;
 
 	bool result = db()->autoAddSignals(&inOuts, &addedSignals, this);
 

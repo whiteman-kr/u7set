@@ -112,7 +112,7 @@ void SimSignalInfo::setSchema(QString schemaId, QStringList highlightIds)
 	return;
 }
 
-std::optional<Signal> SimSignalInfo::getSignalExt(const AppSignalParam& appSignalParam)
+std::optional<AppSignal> SimSignalInfo::getSignalExt(const AppSignalParam& appSignalParam)
 {
 	return m_simuator->appSignalManager().signalParamExt(appSignalParam.hash());
 }

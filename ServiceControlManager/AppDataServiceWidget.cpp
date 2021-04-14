@@ -846,7 +846,7 @@ QVariant SignalStateModel::data(const QModelIndex& index, int role) const
 	}
 	if (role == Qt::DisplayRole)
 	{
-		const Signal& s = m_clientSocket->signalParams()[row];
+		const AppSignal& s = m_clientSocket->signalParams()[row];
 		const AppSignalState& ass = m_clientSocket->signalStates()[row];
 
 		switch (index.column())

@@ -76,7 +76,7 @@ QVariant PendingChangesModel::data(const QModelIndex& index, int role /*= Qt::Di
 	const PendingChangesObject& object = m_objects[objectIndex];
 
 	if (std::holds_alternative<DbFileInfo>(object) == false &&
-		std::holds_alternative<Signal>(object) == false)
+		std::holds_alternative<AppSignal>(object) == false)
 	{
 		assert(false);
 		return {};
@@ -156,9 +156,9 @@ QVariant PendingChangesModel::data(const QModelIndex& index, int role /*= Qt::Di
 		}
 	}	// Is file
 
-	if (std::holds_alternative<Signal>(object) == true)
+	if (std::holds_alternative<AppSignal>(object) == true)
 	{
-		const Signal& signal = std::get<Signal>(object);
+		const AppSignal& signal = std::get<AppSignal>(object);
 
 		if (role == Qt::DisplayRole)
 		{
@@ -436,9 +436,9 @@ void PendingChangesDialog::checkIn()
 			continue;
 		}
 
-		if (std::holds_alternative<Signal>(o) == true)
+		if (std::holds_alternative<AppSignal>(o) == true)
 		{
-			const Signal& signal = std::get<Signal>(o);
+			const AppSignal& signal = std::get<AppSignal>(o);
 			checkInSignals.push_back(signal.ID());
 			continue;
 		}
@@ -446,7 +446,7 @@ void PendingChangesDialog::checkIn()
 		// What kind of object is it?
 		//
 		assert(std::holds_alternative<DbFileInfo>(o) == true ||
-			   std::holds_alternative<Signal>(o) == true);
+			   std::holds_alternative<AppSignal>(o) == true);
 	}
 
 	// CheckIn files
@@ -499,9 +499,9 @@ void PendingChangesDialog::undoChanges()
 			continue;
 		}
 
-		if (std::holds_alternative<Signal>(o) == true)
+		if (std::holds_alternative<AppSignal>(o) == true)
 		{
-			const Signal& signal = std::get<Signal>(o);
+			const AppSignal& signal = std::get<AppSignal>(o);
 			undoSignals.push_back(signal.ID());
 			continue;
 		}
@@ -509,7 +509,7 @@ void PendingChangesDialog::undoChanges()
 		// What kind of object is it?
 		//
 		assert(std::holds_alternative<DbFileInfo>(o) == true ||
-			   std::holds_alternative<Signal>(o) == true);
+			   std::holds_alternative<AppSignal>(o) == true);
 	}
 
 	// CheckIn files
@@ -570,13 +570,13 @@ void PendingChangesDialog::updateData()
 
 	if (checkedOutSignalsIds.empty() == false)
 	{
-		QVector<Signal> checkedOutSignals;
+		QVector<AppSignal> checkedOutSignals;
 		checkedOutSignals.reserve(checkedOutSignalsIds.size());
 
 		if (bool ok = db()->getLatestSignals(checkedOutSignalsIds, &checkedOutSignals, this);
 			ok == true)
 		{
-			for (const Signal& s : checkedOutSignals)
+			for (const AppSignal& s : checkedOutSignals)
 			{
 				objects.push_back(s);
 			}

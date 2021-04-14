@@ -4,15 +4,15 @@
 #include <QAbstractTableModel>
 #include "../lib/DataSource.h"
 
-class SignalSet;
+class AppSignalSet;
 class DataSource;
-class Signal;
+class AppSignal;
 
 class SignalTableModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	SignalTableModel(quint8* buffer, const SignalSet& signalSet, QObject* parent = 0);
+	SignalTableModel(quint8* buffer, const AppSignalSet& signalSet, QObject* parent = 0);
 	virtual ~SignalTableModel();
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const ;
@@ -33,13 +33,13 @@ public slots:
 
 private:
 	quint16* m_buffer;
-	const SignalSet& m_signalSet;
+	const AppSignalSet& m_signalSet;
 	QVector<int> m_relatedSignalIndexes;
 	std::vector<std::pair<int, int>> m_frameSignalIndexLimits;
 	bool needToSwapBytes;
 
 	template <typename TYPE>
-	TYPE getAdc(const Signal& signal) const;
+	TYPE getAdc(const AppSignal& signal) const;
 };
 
 #endif // SIGNALTABLEMODEL_H

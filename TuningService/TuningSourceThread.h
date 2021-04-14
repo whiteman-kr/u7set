@@ -116,7 +116,7 @@ namespace Tuning
 		class TuningSignal
 		{
 		public:
-			void init(const Signal* s, int index, int tuningDataFrameSizeW);
+			void init(const AppSignal* s, int index, int tuningDataFrameSizeW);
 
 			QString appSignalID() const { return m_appSignalID; }
 

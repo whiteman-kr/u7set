@@ -27,8 +27,8 @@ private:
 public:
     DbWorker(DbProgress* progress);
 
-	static void getSignalData(QSqlQuery& q, Signal &s);
-	static QString getSignalDataStr(const Signal& s);
+	static void getSignalData(QSqlQuery& q, AppSignal &s);
+	static QString getSignalDataStr(const AppSignal& s);
 
 protected:
 	QString postgresConnectionName() const;
@@ -143,22 +143,22 @@ public slots:
     //
     void slot_getSignalsIDs(QVector<int>* signalsIDs);
 	void slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAppSignalID);
-	void slot_getSignals(SignalSet* signalSet, bool excludeDeleted);
-	void slot_getTunableSignals(SignalSet* signalSet);
-	void getSignals(SignalSet* signalSet, bool excludeDeleted, bool tunableOnly);
-    void slot_getLatestSignal(int signalID, Signal* signal);
-	void slot_getLatestSignals(QVector<int> signalIDs, QVector<Signal>* signalsArray);
-	void slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<Signal>* signalArray);
-	void slot_getLatestSignalsWithUserID(std::vector<Signal>* out);
+	void slot_getSignals(AppSignalSet* signalSet, bool excludeDeleted);
+	void slot_getTunableSignals(AppSignalSet* signalSet);
+	void getSignals(AppSignalSet* signalSet, bool excludeDeleted, bool tunableOnly);
+    void slot_getLatestSignal(int signalID, AppSignal* signal);
+	void slot_getLatestSignals(QVector<int> signalIDs, QVector<AppSignal>* signalsArray);
+	void slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<AppSignal>* signalArray);
+	void slot_getLatestSignalsWithUserID(std::vector<AppSignal>* out);
 	void slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs);
-	void slot_addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
+	void slot_addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal);
 
-	bool addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
-	bool setSignalWorkcopy(QSqlDatabase& db, const Signal& s, ObjectState& objectState, QString& errMsg);
+	bool addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal);
+	bool setSignalWorkcopy(QSqlDatabase& db, const AppSignal& s, ObjectState& objectState, QString& errMsg);
 
     void slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
-	void slot_setSignalWorkcopy(Signal *signal, ObjectState *objectState);
-	void slot_setSignalsWorkcopies(const QVector<Signal>* signalsList);
+	void slot_setSignalWorkcopy(AppSignal *signal, ObjectState *objectState);
+	void slot_setSignalsWorkcopies(const QVector<AppSignal>* signalsList);
 
     void slot_deleteSignal(int signalID, ObjectState* objectState);
     void slot_undoSignalChanges(int signalID, ObjectState* objectState);
@@ -166,7 +166,7 @@ public slots:
 
     void slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
 
-	void slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<Signal>* addedSignals);
+	void slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<AppSignal>* addedSignals);
     void slot_autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals);
 
 	bool isSignalWithEquipmentIDExists(const QString& equipmentID);
@@ -178,12 +178,12 @@ public slots:
 
 	void slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out);
 
-	void slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out);
+	void slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<AppSignal>* out);
 
-	void slot_getSpecificSignals(int changesetId, std::vector<Signal>* out);
-	void slot_getSpecificSignals(QDateTime date, std::vector<Signal>* out);
+	void slot_getSpecificSignals(int changesetId, std::vector<AppSignal>* out);
+	void slot_getSpecificSignals(QDateTime date, std::vector<AppSignal>* out);
 
-	void readSignalsToVector(QSqlQuery& q, std::vector<Signal>* out);
+	void readSignalsToVector(QSqlQuery& q, std::vector<AppSignal>* out);
 
 	void slot_hasCheckedOutSignals(bool* hasCheckedOut);
 

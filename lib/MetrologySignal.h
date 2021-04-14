@@ -177,12 +177,12 @@ namespace Metrology
 
 	// ==============================================================================================
 
-	class SignalParam : public ::Signal
+	class SignalParam : public ::AppSignal
 	{
 	public:
 
 		SignalParam() {}
-		SignalParam(const ::Signal& signal, const SignalLocation& location);
+		SignalParam(const ::AppSignal& signal, const SignalLocation& location);
 		virtual ~SignalParam() override {}
 
 	private:
@@ -209,7 +209,7 @@ namespace Metrology
 
 		bool					isValid() const;
 
-		void					setParam(const ::Signal& signal, const SignalLocation& location);
+		void					setParam(const ::AppSignal& signal, const SignalLocation& location);
 
 		void					setAppSignalID(const QString& appSignalID);
 

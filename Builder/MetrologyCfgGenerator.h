@@ -23,15 +23,15 @@ namespace Builder
 		bool writeMetrologyItemsXml();
 		bool writeMetrologySignalSet();
 
-		bool testElectricLimit(const Signal& signal, double lowLimit, double highLimit);
-		bool testEngineeringLimit(const Signal& signal, double lowLimit, double highLimit);
+		bool testElectricLimit(const AppSignal& signal, double lowLimit, double highLimit);
+		bool testEngineeringLimit(const AppSignal& signal, double lowLimit, double highLimit);
 
-		bool testElectricLimit_Input_mA(const Signal& signal);
-		bool testElectricLimit_Input_mV(const Signal& signal);
-		bool testElectricLimit_Input_Ohm(const Signal& signal);
-		bool testElectricLimit_Input_V(const Signal& signal);
-		bool testElectricLimit_Input_uA(const Signal& signal);
-		bool testElectricLimit_Input_Hz(const Signal& signal);
+		bool testElectricLimit_Input_mA(const AppSignal& signal);
+		bool testElectricLimit_Input_mV(const AppSignal& signal);
+		bool testElectricLimit_Input_Ohm(const AppSignal& signal);
+		bool testElectricLimit_Input_V(const AppSignal& signal);
+		bool testElectricLimit_Input_uA(const AppSignal& signal);
+		bool testElectricLimit_Input_Hz(const AppSignal& signal);
 
 	private:
 		Hardware::SubsystemStorage* m_subsystems = nullptr;

@@ -135,7 +135,7 @@ void MonitorSignalInfo::setSchema(QString schemaId, QStringList highlightIds)
 	return;
 }
 
-std::optional<Signal> MonitorSignalInfo::getSignalExt(const AppSignalParam& /*appSignalParam*/)
+std::optional<AppSignal> MonitorSignalInfo::getSignalExt(const AppSignalParam& /*appSignalParam*/)
 {
 	return {};
 }

@@ -12,7 +12,7 @@
 #endif
 
 
-using PendingChangesObject = std::variant<DbFileInfo, Signal>;
+using PendingChangesObject = std::variant<DbFileInfo, AppSignal>;
 
 
 class PendingChangesModel : public QAbstractItemModel

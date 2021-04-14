@@ -47,7 +47,7 @@ public:
 	QString configIP2() { return m_configIP2; }
 
 	const QList<TuningSource>& tuningSources() { return m_tuningSources; }
-	const QVector<Signal>& tuningSignalParams() { return m_signals; }
+	const QVector<AppSignal>& tuningSignalParams() { return m_signals; }
 	const QVector<TuningSignalState>& tuningSignalStates() { return m_tuningSignalState; }
 
 signals:
@@ -96,7 +96,7 @@ private:
 	QVector<quint64> m_signalsSourceID;
 	QHash<Hash, int> m_signalHash2SignalIndex;
 	QVector<Hash> m_signalHashes;
-	QVector<Signal> m_signals;
+	QVector<AppSignal> m_signals;
 	QVector<TuningSignalState> m_tuningSignalState;
 
 	int m_loadedSignalParamQuantity = 0;

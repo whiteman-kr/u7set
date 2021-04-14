@@ -44,7 +44,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 
 	m_signalSetProvider->loadSignal(m_signalSetProvider->key(row));	// get current checkedOut state
 
-	const Signal& s = m_signalSetProvider->getLoadedSignal(row);
+	const AppSignal& s = m_signalSetProvider->getLoadedSignal(row);
 
 	SignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
 	manager.reloadPropertyBehaviour();
@@ -166,7 +166,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 
 	QComboBox* cb = dynamic_cast<QComboBox*>(editor);
 
-	const Signal& s = m_signalSetProvider->getLoadedSignal(row);
+	const AppSignal& s = m_signalSetProvider->getLoadedSignal(row);
 
 	SignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
 	bool isExpert = theSettings.isExpertMode();
@@ -238,7 +238,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 
 	QComboBox* cb = dynamic_cast<QComboBox*>(editor);
 
-	Signal s = m_signalSetProvider->getLoadedSignal(row);
+	AppSignal s = m_signalSetProvider->getLoadedSignal(row);
 
 	SignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
 	bool isExpert = theSettings.isExpertMode();
@@ -413,7 +413,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 	int row = index.row();
 	int col = index.column();
 
-	const Signal& signal = m_signalSetProvider->getLoadedSignal(row);
+	const AppSignal& signal = m_signalSetProvider->getLoadedSignal(row);
 
 	if (row == m_signalSetProvider->signalCount() || signal.isLoaded() == false)
 	{
@@ -517,7 +517,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 		assert(row < m_signalSetProvider->signalCount());
 
-		Signal s = m_signalSetProvider->getLoadedSignal(row);
+		AppSignal s = m_signalSetProvider->getLoadedSignal(row);
 
 		propertyManager.setValue(&s, index.column(), value, theSettings.isExpertMode());
 
@@ -551,7 +551,7 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 
 	assert(row < m_signalSetProvider->signalCount());
 
-	const Signal& s = m_signalSetProvider->getLoadedSignal(row);
+	const AppSignal& s = m_signalSetProvider->getLoadedSignal(row);
 
 	if (propertyManager.getBehaviour(s, index.column()) == E::PropertyBehaviourType::Write)
 	{
@@ -816,7 +816,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 	}
 
 	QVector<int> checkoutSignalIDs;
-	QVector<Signal> newSignalWorkcopies;
+	QVector<AppSignal> newSignalWorkcopies;
 
 	for(const Hardware::DeviceAppSignal* deviceSignal: deviceSignalsToUpdate)
 	{
@@ -846,7 +846,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 		{
 			bool signalChanged = false;
 
-			Signal s;
+			AppSignal s;
 
 			result = dbc->getLatestSignal(signalID, &s, nullptr);
 
@@ -1200,7 +1200,7 @@ void SignalsTabPage::addSignal()
 	int channelCount = signalChannelCountEdit->text().toInt();
 	int signalCount = signalCountEdit->text().toInt();
 
-	Signal signal;
+	AppSignal signal;
 
 	signal.setSignalType(static_cast<E::SignalType>(signalTypeCombo->currentIndex()));
 
@@ -1227,19 +1227,19 @@ void SignalsTabPage::addSignal()
 		signal.setCaption(newId);
 	}
 
-	SignalPropertiesDialog dlg(dbController(), QVector<Signal*>() << &signal, false, false, this);
+	SignalPropertiesDialog dlg(dbController(), QVector<AppSignal*>() << &signal, false, false, this);
 
 	SignalSetProvider::trimSignalTextFields(signal);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
-		QVector<Signal> resultSignalVector;
+		QVector<AppSignal> resultSignalVector;
 
 		resultSignalVector.reserve(signalCount * channelCount);
 
 		for (int s = 0; s < signalCount; s++)
 		{
-			QVector<Signal> signalVector;
+			QVector<AppSignal> signalVector;
 
 			for (int i = 0; i < channelCount; i++)
 			{
@@ -1314,12 +1314,12 @@ bool SignalsTabPage::editSignals(QVector<int> ids)
 	m_signalSetProvider->loadSignalSet(ids);
 
 	bool readOnly = false;
-	QVector<Signal*> signalVector;
+	QVector<AppSignal*> signalVector;
 
 	for (int i = 0; i < ids.count(); i++)
 	{
 		int index = m_signalSetProvider->keyIndex(ids[i]);
-		Signal* signal = new Signal(m_signalSetProvider->getLoadedSignal(index));
+		AppSignal* signal = new AppSignal(m_signalSetProvider->getLoadedSignal(index));
 
 		if (!m_signalSetProvider->isEditableSignal(index))
 		{
@@ -1491,7 +1491,7 @@ void SignalsTabPage::viewSignalHistory()
 		return;
 	}
 
-	const Signal& signal = m_signalSetProvider->getLoadedSignal(row);
+	const AppSignal& signal = m_signalSetProvider->getLoadedSignal(row);
 	SignalHistoryDialog dlg(dbController(), signal.appSignalID(), signal.ID(), this);
 
 	dlg.exec();
@@ -1573,7 +1573,7 @@ void SignalsTabPage::addMetrologyConnection()
 		return;
 	}
 
-	Signal signal = m_signalSetProvider->getSignalByID(m_signalSetProvider->key(row));
+	AppSignal signal = m_signalSetProvider->getSignalByID(m_signalSetProvider->key(row));
 	if (signal.isAnalog() == false)
 	{
 		QMessageBox::warning(this, tr("Metrology connections"), tr("Please, select analog signal!"));
@@ -1821,7 +1821,7 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 			std::vector<int> signalIds;
 			signalIds.push_back(object.id());
 
-			std::vector<Signal> outSignals;
+			std::vector<AppSignal> outSignals;
 
 			bool ok = db()->getSpecificSignals(&signalIds, compareData.sourceChangeset, &outSignals, this);
 			if (ok == true && outSignals.size() == 1)
@@ -1837,7 +1837,7 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 		break;
 	case CompareVersionType::LatestVersion:
 		{
-			Signal outSignal;
+			AppSignal outSignal;
 
 			bool ok = db()->getLatestSignal(object.id(), &outSignal, this);
 			if (ok == true)
@@ -1866,7 +1866,7 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 			std::vector<int> signalIds;
 			signalIds.push_back(object.id());
 
-			std::vector<Signal> outSignals;
+			std::vector<AppSignal> outSignals;
 
 			bool ok = db()->getSpecificSignals(&signalIds, compareData.targetChangeset, &outSignals, this);
 			if (ok == true && outSignals.size() == 1)
@@ -1882,7 +1882,7 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 		break;
 	case CompareVersionType::LatestVersion:
 		{
-			Signal outSignal;
+			AppSignal outSignal;
 
 			bool ok = db()->getLatestSignal(object.id(), &outSignal, this);
 			if (ok == true)
@@ -2276,7 +2276,7 @@ SignalsProxyModel::SignalsProxyModel(SignalsModel *sourceModel, QObject *parent)
 
 bool SignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) const
 {
-	const Signal& currentSignal = m_signalSetProvider->getLoadedSignal(source_row);
+	const AppSignal& currentSignal = m_signalSetProvider->getLoadedSignal(source_row);
 	if (!(m_signalType == ST_ANY || m_signalType == currentSignal.signalTypeInt()))
 	{
 		return false;
@@ -2331,8 +2331,8 @@ bool SignalsProxyModel::lessThan(const QModelIndex &source_left, const QModelInd
 
 	if (l == r)
 	{
-		const Signal& sl = m_signalSetProvider->getLoadedSignal(source_left.row());
-		const Signal& sr = m_signalSetProvider->getLoadedSignal(source_right.row());
+		const AppSignal& sl = m_signalSetProvider->getLoadedSignal(source_left.row());
+		const AppSignal& sr = m_signalSetProvider->getLoadedSignal(source_right.row());
 
 		return sl.appSignalID() < sr.appSignalID();
 	}
@@ -2469,10 +2469,10 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 		defaultColumns.push_back(i);
 	}
 
-	QVector<Signal> signalInstances;
+	QVector<AppSignal> signalInstances;
 	signalInstances.reserve(static_cast<int>(signalChanges.size()));
 	std::vector<int> signalIds = { signalId };
-	std::vector<Signal> signalInstance;
+	std::vector<AppSignal> signalInstance;
 
 	SignalPropertyManager* pSignalPropertyManager = SignalPropertyManager::getInstance();
 	pSignalPropertyManager->reloadPropertyBehaviour();
@@ -2784,12 +2784,12 @@ void FindSignalDialog::updateReplacement(int row)
 {
 	int signalId = getSignalId(row);
 	int signalIndex = m_signalSetProvider->keyIndex(signalId);
-	const Signal& signal = m_signalSetProvider->getLoadedSignal(signalIndex);
+	const AppSignal& signal = m_signalSetProvider->getLoadedSignal(signalIndex);
 
 	updateReplacement(signal, row);
 }
 
-void FindSignalDialog::updateReplacement(const Signal& signal, int row)
+void FindSignalDialog::updateReplacement(const AppSignal& signal, int row)
 {
 	QString propertyValue = getProperty(signal);
 
@@ -2833,7 +2833,7 @@ void FindSignalDialog::updateReplacement(const Signal& signal, int row)
 	}
 }
 
-void FindSignalDialog::addSignalIfNeeded(const Signal& signal)
+void FindSignalDialog::addSignalIfNeeded(const AppSignal& signal)
 {
 	QString propertyValue = getProperty(signal);
 
@@ -2911,7 +2911,7 @@ bool FindSignalDialog::match(QString signalProperty, int& start, int& end)
 	return false;
 }
 
-bool FindSignalDialog::checkForEditableSignal(const Signal& signal)
+bool FindSignalDialog::checkForEditableSignal(const AppSignal& signal)
 {
 	return (signal.checkedOut() == false || signal.userID() == m_currentUserId || m_currentUserIsAdmin == true);
 }
@@ -2979,7 +2979,7 @@ FindSignalDialog::SearchOptions FindSignalDialog::getCurrentSearchOptions()
 	return options;
 }
 
-QString FindSignalDialog::getProperty(const Signal& signal)
+QString FindSignalDialog::getProperty(const AppSignal& signal)
 {
 	if (m_searchOptionsUsedLastTime.searchedPropertyIndex == -1)
 	{
@@ -2989,7 +2989,7 @@ QString FindSignalDialog::getProperty(const Signal& signal)
 	return SignalPropertyManager::getInstance()->value(&signal, m_searchOptionsUsedLastTime.searchedPropertyIndex, theSettings.isExpertMode()).toString();
 }
 
-void FindSignalDialog::setProperty(Signal& signal, const QString& value)
+void FindSignalDialog::setProperty(AppSignal& signal, const QString& value)
 {
 	if (m_searchOptionsUsedLastTime.searchedPropertyIndex == -1)
 	{
@@ -3055,7 +3055,7 @@ void FindSignalDialog::replace(int row)
 		return;
 	}
 
-	Signal signal = m_signalSetProvider->getSignalByID(signalId);
+	AppSignal signal = m_signalSetProvider->getSignalByID(signalId);
 	QString newValue = m_foundListModel->data(m_foundListModel->index(row, 1), Qt::DisplayRole).toString();
 
 	setProperty(signal, newValue);

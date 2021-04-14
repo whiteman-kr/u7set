@@ -1882,7 +1882,7 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 	// Get source signals
 	//
 
-	std::vector<Signal> sourceSignalsVec;
+	std::vector<AppSignal> sourceSignalsVec;
 
 	switch (compareData.sourceVersionType)
 	{
@@ -1921,7 +1921,7 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 	// Get target signals
 	//
 
-	std::vector<Signal>  targetSignalsVec;
+	std::vector<AppSignal>  targetSignalsVec;
 
 	switch (compareData.targetVersionType)
 	{
@@ -1959,12 +1959,12 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 
 	// Build signal maps
 
-	std::map<Hash, Signal*> sourceSignals;
-	std::map<Hash, Signal*> targetSignals;
+	std::map<Hash, AppSignal*> sourceSignals;
+	std::map<Hash, AppSignal*> targetSignals;
 
 	std::map<Hash, int> allHashesMap;
 
-	for (Signal& s : sourceSignalsVec)
+	for (AppSignal& s : sourceSignalsVec)
 	{
 		if (s.deleted() == true)
 		{
@@ -1978,7 +1978,7 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 		sourceSignals[::calcHash(s.appSignalID())] = &s;
 	}
 
-	for (Signal& s : targetSignalsVec)
+	for (AppSignal& s : targetSignalsVec)
 	{
 		if (s.deleted() == true)
 		{
@@ -2007,14 +2007,14 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 
 		Hash hash = it->first;
 
-		const Signal* targetSignal = it->second;
+		const AppSignal* targetSignal = it->second;
 		if (targetSignal == nullptr)
 		{
 			Q_ASSERT(targetSignal);
 			return;
 		}
 
-		const Signal* sourceSignal = nullptr;
+		const AppSignal* sourceSignal = nullptr;
 
 		auto itSource = sourceSignals.find(hash);
 		if (itSource != sourceSignals.end())
@@ -2101,7 +2101,7 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 
 		Hash hash = it->first;
 
-		const Signal* sourceSignal = it->second;
+		const AppSignal* sourceSignal = it->second;
 		if (sourceSignal == nullptr)
 		{
 			Q_ASSERT(sourceSignal);
@@ -2126,8 +2126,8 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 	return;
 }
 
-void ProjectDiffGenerator::compareSignalContents(const Signal& sourceSignal,
-											  const Signal& targetSignal,
+void ProjectDiffGenerator::compareSignalContents(const AppSignal& sourceSignal,
+											  const AppSignal& targetSignal,
 											  ReportTable* const headerTable,
 											  std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
 {
@@ -2879,7 +2879,7 @@ void ProjectDiffGenerator::addHeaderTableItem(ReportTable* const headerTable, co
 	return;
 }
 
-void ProjectDiffGenerator::addHeaderTableItem(ReportTable* const headerTable, const QString& caption, const QString& action, const Signal& signal)
+void ProjectDiffGenerator::addHeaderTableItem(ReportTable* const headerTable, const QString& caption, const QString& action, const AppSignal& signal)
 {
 	QString changesetStr = signal.changesetID() == 0 ? tr("Checked Out") : tr("%1").arg(signal.changesetID());
 
@@ -2908,7 +2908,7 @@ QString ProjectDiffGenerator::changesetString(const std::shared_ptr<DbFile>& fil
 	}
 }
 
-QString ProjectDiffGenerator::changesetString(const Signal& signal)
+QString ProjectDiffGenerator::changesetString(const AppSignal& signal)
 {
 	if (signal.changesetID() == 0)
 	{

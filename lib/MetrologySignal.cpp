@@ -265,7 +265,7 @@ namespace Metrology
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
-	SignalParam::SignalParam(const ::Signal& signal, const SignalLocation& location)
+	SignalParam::SignalParam(const ::AppSignal& signal, const SignalLocation& location)
 	{
 		setParam(signal, location);
 	}
@@ -286,7 +286,7 @@ namespace Metrology
 
 	void SignalParam::setAppSignalID(const QString& appSignalID)
 	{
-		Signal::setAppSignalID(appSignalID);
+		AppSignal::setAppSignalID(appSignalID);
 
 		if (appSignalID.isEmpty() == true)
 		{
@@ -299,11 +299,11 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void SignalParam::setParam(const ::Signal& signal, const SignalLocation& location)
+	void SignalParam::setParam(const ::AppSignal& signal, const SignalLocation& location)
 	{
 		// init AppSignal
 		//
-		::Signal* pSignal = dynamic_cast<::Signal*>(this);
+		::AppSignal* pSignal = dynamic_cast<::AppSignal*>(this);
 		if (pSignal == nullptr)
 		{
 			assert(false);
@@ -438,7 +438,7 @@ namespace Metrology
 			return;
 		}
 
-		const Signal* pSignal = dynamic_cast<const Signal*>(this);
+		const AppSignal* pSignal = dynamic_cast<const AppSignal*>(this);
 		if (pSignal == nullptr)
 		{
 			assert(false);
@@ -469,7 +469,7 @@ namespace Metrology
 
 	bool SignalParam::serializeFrom(const Proto::MetrologySignal& ms)
 	{
-		Signal* pSignal = dynamic_cast<Signal*>(this);
+		AppSignal* pSignal = dynamic_cast<AppSignal*>(this);
 		if (pSignal == nullptr)
 		{
 			assert(false);
@@ -545,7 +545,7 @@ namespace Metrology
 			return;
 		}
 
-		Signal::setElectricLowLimit(lowLimit);
+		AppSignal::setElectricLowLimit(lowLimit);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -559,7 +559,7 @@ namespace Metrology
 			return;
 		}
 
-		Signal::setElectricHighLimit(highLimit);
+		AppSignal::setElectricHighLimit(highLimit);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -573,7 +573,7 @@ namespace Metrology
 			return;
 		}
 
-		Signal::setElectricUnit(unitID);
+		AppSignal::setElectricUnit(unitID);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -594,7 +594,7 @@ namespace Metrology
 			return;
 		}
 
-		Signal::setSensorType(sensorType);
+		AppSignal::setSensorType(sensorType);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -645,7 +645,7 @@ namespace Metrology
 			return;
 		}
 
-		Signal::setRload_Ohm(rload);
+		AppSignal::setRload_Ohm(rload);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -668,7 +668,7 @@ namespace Metrology
 			return;
 		}
 
-		Signal::setR0_Ohm(r0);
+		AppSignal::setR0_Ohm(r0);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

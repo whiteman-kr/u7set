@@ -1237,7 +1237,7 @@ namespace Builder
 
 		for(int i = 0; i < signalCount; i++)
 		{
-			const Signal& s = (*signalSet())[i];
+			const AppSignal& s = (*signalSet())[i];
 
 			::Proto::AppSignal* protoAppSignal = protoAppSignalSet.add_appsignal();
 

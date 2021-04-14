@@ -17,18 +17,18 @@ class TestSignal
 public:
 
 	TestSignal() {}
-	explicit TestSignal(const Signal& signal)	{ setParam(signal); }
+	explicit TestSignal(const AppSignal& signal)	{ setParam(signal); }
 	virtual ~TestSignal() {}
 
 private:
 
-	Signal m_param;
+	AppSignal m_param;
 	AppSignalState m_state;
 
 public:
 
-	Signal& param() { return m_param; }
-	void setParam(const Signal& param) { m_param = param; }
+	AppSignal& param() { return m_param; }
+	void setParam(const AppSignal& param) { m_param = param; }
 
 	AppSignalState& state() { return m_state; }
 	void setState(const AppSignalState& state) { m_state = state; }
@@ -67,7 +67,7 @@ public:
 	int						signalCount() const;
 	void					clearSignalList();
 
-	int						appendSignal(const Signal& param);
+	int						appendSignal(const AppSignal& param);
 
 	TestSignal*				signalPtr(const QString& appSignalID);
 	TestSignal*				signalPtr(const Hash& hash);
@@ -77,13 +77,13 @@ public:
 	TestSignal				signal(const Hash& hash);
 	TestSignal				signal(int index);
 
-	Signal					signalParam(const QString& appSignalID);
-	Signal					signalParam(const Hash& hash);
-	Signal					signalParam(int index);
+	AppSignal					signalParam(const QString& appSignalID);
+	AppSignal					signalParam(const Hash& hash);
+	AppSignal					signalParam(int index);
 
-	void					setSignalParam(const QString& appSignalID, const Signal& param);
-	void					setSignalParam(const Hash& hash, const Signal& param);
-	void					setSignalParam(int index, const Signal& param);
+	void					setSignalParam(const QString& appSignalID, const AppSignal& param);
+	void					setSignalParam(const Hash& hash, const AppSignal& param);
+	void					setSignalParam(int index, const AppSignal& param);
 
 	AppSignalState			signalState(const QString& appSignalID);
 	AppSignalState			signalState(const Hash& hash);

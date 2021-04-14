@@ -665,7 +665,7 @@ namespace Tuning
 				return;
 			}
 
-			const Signal* signal = m_signalHash2SignalPtr.value(signalHash);
+			const AppSignal* signal = m_signalHash2SignalPtr.value(signalHash);
 
 			if (signal == nullptr)
 			{
@@ -688,7 +688,7 @@ namespace Tuning
 		{
 			TEST_PTR_CONTINUE(tuningSource.tuningData());
 
-			QVector<Signal*> signalList;
+			QVector<AppSignal*> signalList;
 			tuningSource.tuningData()->getSignals(signalList);
 
 			quint32 ip = tuningSource.lmAddress32();
@@ -698,7 +698,7 @@ namespace Tuning
 				continue;
 			}
 
-			for(const Signal* signal : signalList)
+			for(const AppSignal* signal : signalList)
 			{
 				TEST_PTR_CONTINUE(signal);
 

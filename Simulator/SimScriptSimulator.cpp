@@ -556,7 +556,7 @@ namespace Sim
 	{
 		ScriptSignal scriptSignal;
 
-		std::optional<Signal> s = m_simulator->appSignalManager().signalParamExt(appSignalId);
+		std::optional<AppSignal> s = m_simulator->appSignalManager().signalParamExt(appSignalId);
 		if (s.has_value() == false)
 		{
 			throwScriptException(this, tr("signalParamExt(%1), signal not found.").arg(appSignalId));

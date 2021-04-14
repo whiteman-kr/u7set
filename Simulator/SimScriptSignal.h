@@ -34,15 +34,15 @@ namespace Sim
 
 	public:
 		ScriptSignal() = default;
-		ScriptSignal(const Signal& s);
+		ScriptSignal(const AppSignal& s);
 		~ScriptSignal() = default;
 
 		bool isNull() const;
 
-		void setSignal(const Signal& s);
+		void setSignal(const AppSignal& s);
 
 	private:
-		Signal m_signal;
+		AppSignal m_signal;
 	};
 
 }

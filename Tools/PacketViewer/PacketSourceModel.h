@@ -89,7 +89,7 @@ class Source : public Statistic
 	Q_OBJECT
 public:
 	Source() : Statistic(nullptr) {}
-	Source(QString address, int port, const SignalSet& signalSet,
+	Source(QString address, int port, const AppSignalSet& signalSet,
 		   const QHash<quint32, std::shared_ptr<DataSourceOnline>>& dataSources, Statistic* parent);
 
 	~Source();
@@ -182,7 +182,7 @@ public:
 	void saveListenerList();
 	std::shared_ptr<QUdpSocket> getSocket(const QString& address, int port);
 
-	const SignalSet& signalSet() { return m_signalSet; }
+	const AppSignalSet& signalSet() { return m_signalSet; }
 	const QHash<quint32, std::shared_ptr<DataSourceOnline>>& dataSources() { return m_dataSources; }
 
 signals:
@@ -201,12 +201,12 @@ public slots:
 	void updateSourceStatisticByTimer();
 
 private:
-	void initDataSources(QHash<quint32, std::shared_ptr<DataSourceOnline>>& dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet);
+	void initDataSources(QHash<quint32, std::shared_ptr<DataSourceOnline>>& dataSources, Hardware::DeviceObject* deviceRoot, const AppSignalSet& signalSet);
 
 	std::vector<std::shared_ptr<Listener>> m_listeners;
 
 	std::shared_ptr<Hardware::DeviceRoot> m_deviceRoot;
-	SignalSet m_signalSet;
+	AppSignalSet m_signalSet;
 
 	QHash<quint32, std::shared_ptr<DataSourceOnline>> m_dataSources;
 };

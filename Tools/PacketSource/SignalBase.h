@@ -9,7 +9,7 @@
 
 namespace PS
 {
-	class Signal : public ::Signal
+	class Signal : public ::AppSignal
 	{
 
 	public:

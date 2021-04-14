@@ -20,7 +20,7 @@ namespace Sim
 		size_t flagConstsCount = 0;
 		std::array<std::pair<E::AppSignalStateFlagType, quint32>, sizeof AppSignalStateFlags::all * 8> flagsConsts;
 
-		bool create(const Signal& s, const std::unordered_map<Hash, Signal>& signalParams, ScopedLog& log);
+		bool create(const AppSignal& s, const std::unordered_map<Hash, AppSignal>& signalParams, ScopedLog& log);
 
 		AppSignalStateFlags signalFlags(const Ram& ram, ScopedLog& log) const;
 	};
@@ -54,8 +54,8 @@ namespace Sim
 														  TrendLib::TrendStateItem* minState,
 														  TrendLib::TrendStateItem* maxState);
 
-		std::optional<Signal> signalParamExt(const QString& appSignalId) const;
-		std::optional<Signal> signalParamExt(Hash hash) const;
+		std::optional<AppSignal> signalParamExt(const QString& appSignalId) const;
+		std::optional<AppSignal> signalParamExt(Hash hash) const;
 
 		Hash customToAppSignal(Hash customSignalHash) const;
 
@@ -107,7 +107,7 @@ namespace Sim
 
 		mutable QReadWriteLock m_signalParamLock{QReadWriteLock::Recursive};
 		std::unordered_map<Hash, AppSignalParam> m_signalParams;
-		std::unordered_map<Hash, Signal> m_signalParamsExt;			// Except AppSignalParam, we need Signal as it has more information (like offset in memory)
+		std::unordered_map<Hash, AppSignal> m_signalParamsExt;			// Except AppSignalParam, we need Signal as it has more information (like offset in memory)
 		std::unordered_map<Hash, Hash> m_customToAppSignalId;
 
 		// SimRuntime data

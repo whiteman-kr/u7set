@@ -53,7 +53,7 @@ namespace Builder
 
 		for(int i = 0; i < count; i++)
 		{
-			Signal& s = (*m_signalSet)[i];
+			AppSignal& s = (*m_signalSet)[i];
 
 			if (s.isAnalog() == true || s.isDiscrete() == true)
 			{

@@ -12,19 +12,17 @@
 #include "../UtilsLib/Hash.h"
 #include "TuningValue.h"
 #include "AppSignalStateFlags.h"
+#include "ConstStrings.h"
 
 class QXmlStreamAttributes;
 class XmlWriteHelper;
 class XmlReadHelper;
+class SignalSpecPropValues;
 
 namespace Builder
 {
 	class IssueLogger;
 }
-
-const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
-
-class SignalSpecPropValues;
 
 struct ID_AppSignalID
 {
@@ -32,12 +30,12 @@ struct ID_AppSignalID
 	QString appSignalID;
 };
 
-Q_DECLARE_METATYPE(ID_AppSignalID);
+Q_DECLARE_METATYPE(ID_AppSignalID)
 
-class Signal
+class AppSignal
 {
 	friend class DbWorker;
-	friend class SignalSet;
+	friend class AppSignalSet;
 	friend class SignalTests;
 	friend class DbControllerSignalTests;
 
@@ -46,11 +44,11 @@ public:
 	static const QString MACRO_END_TOKEN;
 
 public:
-	Signal();
-	Signal(const Signal& s);
-	Signal(const ID_AppSignalID& ids);
-	Signal(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg);
-	virtual ~Signal();
+	AppSignal();
+	AppSignal(const AppSignal& s);
+	AppSignal(const ID_AppSignalID& ids);
+	AppSignal(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg);
+	virtual ~AppSignal();
 
 	void clear();
 
@@ -131,7 +129,7 @@ public:
 	bool isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder) const;
 	bool isCompatibleFormat(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, E::ByteOrder byteOrder) const;
 	bool isCompatibleFormat(const SignalAddress16& sa16) const;
-	bool isCompatibleFormat(const Signal& s) const;
+	bool isCompatibleFormat(const AppSignal& s) const;
 	bool isCompatibleFormat(E::SignalType signalType, const QString& busTypeID) const;
 
 	// Analog signal properties
@@ -400,10 +398,10 @@ private:
 	void setUserID(int userID) { m_userID = userID; }
 	void setChannel(E::Channel channel) { m_channel = channel; }
 	void setCreated(const QDateTime& created) { m_created = created; }
-	void setCreated(const QString& createdStr) { m_created = QDateTime::fromString(createdStr, DATE_TIME_FORMAT_STR); }
+	void setCreated(const QString& createdStr) { m_created = QDateTime::fromString(createdStr, FormatStr::POSTGRES_DATE_TIME); }
 	void setDeleted(bool deleted) { m_deleted = deleted; }
 	void setInstanceCreated(const QDateTime& instanceCreated) { m_instanceCreated = instanceCreated; }
-	void setInstanceCreated(const QString& instanceCreatedStr) { m_instanceCreated = QDateTime::fromString(instanceCreatedStr, DATE_TIME_FORMAT_STR); }
+	void setInstanceCreated(const QString& instanceCreatedStr) { m_instanceCreated = QDateTime::fromString(instanceCreatedStr, FormatStr::POSTGRES_DATE_TIME); }
 	void setInstanceAction(VcsItemAction action) { m_instanceAction = action; }
 	void initCreatedDates();
 
@@ -528,13 +526,15 @@ private:
 	std::shared_ptr<Hardware::DeviceModule> m_lm;
 };
 
-typedef PtrOrderedHash<int, Signal> SignalPtrOrderedHash;
+typedef std::shared_ptr<AppSignal> AppSignalShared;
 
-class SignalSet : public SignalPtrOrderedHash
+typedef PtrOrderedHash<int, AppSignal> SignalPtrOrderedHash;
+
+class AppSignalSet : public SignalPtrOrderedHash
 {
 public:
-	SignalSet();
-	virtual ~SignalSet();
+	AppSignalSet();
+	virtual ~AppSignalSet();
 
 	virtual void clear() override;
 
@@ -546,15 +546,15 @@ public:
 	bool ID2IndexMapIsEmpty();
 
 	bool contains(const QString& appSignalID) const;
-	Signal* getSignal(const QString& appSignalID);
+	AppSignal* getSignal(const QString& appSignalID);
 
-	virtual void append(const int& signalID, Signal* signal) override;
+	virtual void append(const int& signalID, AppSignal* signal) override;
 	virtual void remove(const int& signalID) override;
 	virtual void removeAt(const int index) override;
 
-	void append(Signal* signal);
+	void append(AppSignal* signal);
 
-	QVector<int> getChannelSignalsID(const Signal& signal) const;
+	QVector<int> getChannelSignalsID(const AppSignal& signal) const;
 	QVector<int> getChannelSignalsID(int signalGroupID) const;
 
 	void resetAddresses();
@@ -564,7 +564,7 @@ public:
 	int getMaxID();
 	QStringList appSignalIdsList(bool removeNumberSign, bool sort) const;
 
-	void replaceOrAppendIfNotExists(int signalID, const Signal& s);
+	void replaceOrAppendIfNotExists(int signalID, const AppSignal& s);
 
 private:
 	QMultiHash<int, int> m_groupSignals;

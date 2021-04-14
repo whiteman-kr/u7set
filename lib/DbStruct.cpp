@@ -1647,7 +1647,7 @@ DbChangesetObject::DbChangesetObject(const DbFileInfo& file) :
 {
 }
 
-DbChangesetObject::DbChangesetObject(const Signal& signal) :
+DbChangesetObject::DbChangesetObject(const AppSignal& signal) :
 	m_type(Type::Signal),
 	m_id(signal.ID()),
 	m_name(signal.appSignalID()),

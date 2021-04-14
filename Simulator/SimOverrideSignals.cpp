@@ -12,7 +12,7 @@ namespace Sim
 		*this = src;
 	}
 
-	OverrideSignalParam::OverrideSignalParam(const Signal& signalParam)
+	OverrideSignalParam::OverrideSignalParam(const AppSignal& signalParam)
 	{
 		updateSignalProperties(signalParam);
 		return;
@@ -45,7 +45,7 @@ namespace Sim
 		return *this;
 	}
 
-	void OverrideSignalParam::updateSignalProperties(const Signal& signalParam, QVariant value /*= QVariant()*/)
+	void OverrideSignalParam::updateSignalProperties(const AppSignal& signalParam, QVariant value /*= QVariant()*/)
 	{
 		m_appSignalId = signalParam.appSignalID();
 		m_customSignalId = signalParam.customAppSignalID();
@@ -599,7 +599,7 @@ namespace Sim
 
 		for (const QString& id : appSignalIds)
 		{
-			std::optional<Signal> sp = appSignalManager().signalParamExt(id);
+			std::optional<AppSignal> sp = appSignalManager().signalParamExt(id);
 
 			if (sp.has_value() == false)
 			{
@@ -646,7 +646,7 @@ namespace Sim
 
 	bool OverrideSignals::addSignal(QString appSignalId, bool enabled, int index, OverrideSignalMethod method, QVariant value, QString script)
 	{
-		std::optional<Signal> sp = appSignalManager().signalParamExt(appSignalId);
+		std::optional<AppSignal> sp = appSignalManager().signalParamExt(appSignalId);
 
 		if (sp.has_value() == false)
 		{
@@ -763,7 +763,7 @@ namespace Sim
 
 		for (const OverrideSignalParam& osp : existingSignals)
 		{
-			std::optional<Signal> sp = appSignalManager().signalParamExt(osp.appSignalId());
+			std::optional<AppSignal> sp = appSignalManager().signalParamExt(osp.appSignalId());
 
 			if (sp.has_value() == false)
 			{

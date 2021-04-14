@@ -266,7 +266,7 @@ namespace Builder
 			}
 
 			QString firstSignalID;
-			Signal* firstSignal = nullptr;
+			AppSignal* firstSignal = nullptr;
 			const UalItem* firstSignalItem = nullptr;
 
 			for(const UalItem* linkedItem : linkedItems)
@@ -277,7 +277,7 @@ namespace Builder
 				}
 
 				QString signalID = linkedItem->strID();
-				Signal* s = m_compiler.getSignal(signalID);
+				AppSignal* s = m_compiler.getSignal(signalID);
 
 				if (s == nullptr)
 				{

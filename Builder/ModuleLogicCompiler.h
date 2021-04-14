@@ -153,7 +153,7 @@ namespace Builder
 		~ModuleLogicCompiler();
 
 		SignalSet* signalSet() { return m_signals; }
-		Signal* getSignal(const QString& appSignalID);
+		AppSignal* getSignal(const QString& appSignalID);
 
 		IssueLogger* log() { return m_log; }
 
@@ -223,7 +223,7 @@ namespace Builder
 
 		bool createUalSignalsFromBusComposers();
 		bool createUalSignalsFromBusComposer(UalItem* ualItem);
-		UalSignal* createBusParentSignal(UalItem* ualItem, const LogicPin& outPin, Signal* s, const QString& busTypeID);
+		UalSignal* createBusParentSignal(UalItem* ualItem, const LogicPin& outPin, AppSignal* s, const QString& busTypeID);
 		UalSignal* createBusParentSignalFromBusExtractorConnectedToDiscreteSignal(UalItem* ualItem);
 
 		bool createUalSignalsFromReceivers();
@@ -277,11 +277,11 @@ namespace Builder
 
 		//
 
-		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID);
-		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
-		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const Signal& s);
-		Signal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString busTypeID);
-		bool isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const Signal* s);
+		AppSignal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID);
+		AppSignal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
+		AppSignal* getCompatibleConnectedSignal(const LogicPin& outPin, const AppSignal& s);
+		AppSignal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString busTypeID);
+		bool isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const AppSignal* s);
 
 		bool isConnectedToTerminatorOnly(const LogicPin& outPin);
 		bool isConnectedToLoopback(const LogicPin& inPin, std::shared_ptr<Loopback>* loopback);
@@ -379,9 +379,9 @@ namespace Builder
 
 		bool appendAfbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();
-		bool createAfbForAnalogInputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion);
-		bool createFbForAnalogOutputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion);
-		bool isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceAppSignal& deviceAppSignal, const Signal& appSignal);
+		bool createAfbForAnalogInputSignalConversion(const AppSignal& signal, UalItem* appItem, bool* needConversion);
+		bool createFbForAnalogOutputSignalConversion(const AppSignal& signal, UalItem* appItem, bool* needConversion);
+		bool isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceAppSignal& deviceAppSignal, const AppSignal& appSignal);
 
 		UalAfb* createUalAfb(const UalItem& appItem);
 		bool setOutputSignalsAsComputed();
@@ -566,10 +566,10 @@ namespace Builder
 		bool getAfblUsageInfo();
 		void cleanup();
 
-		bool checkLoopbackTargetSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid);
-		bool checkLoopbackTargetSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const LogicAfbSignal& afbSignal);
+		bool checkLoopbackTargetSignalsCompatibility(const AppSignal& srcSignal, QUuid srcSignalUuid, const AppSignal& destSignal, QUuid destSignalUuid);
+		bool checkLoopbackTargetSignalsCompatibility(const AppSignal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const LogicAfbSignal& afbSignal);
 
-		bool isUsedInUal(const Signal* s) const;
+		bool isUsedInUal(const AppSignal* s) const;
 		bool isUsedInUal(const QString& appSignalID) const;
 
 		QString getSchemaID(QUuid itemUuid);
@@ -584,7 +584,7 @@ namespace Builder
 
 		void dumpApplicationLogicItems();
 
-		const HashedVector<QString, Signal*>& chassisSignals() const { return m_chassisSignals; }
+		const HashedVector<QString, AppSignal*>& chassisSignals() const { return m_chassisSignals; }
 
 		bool writeSignalLists();
 		bool writeSignalList(const QVector<UalSignal *> &signalList, QString listName) const;
@@ -603,7 +603,7 @@ namespace Builder
 		UalSignalsMap& ualSignals() { return m_ualSignals; }
 
 		QString getFormatStr(const Hardware::DeviceAppSignal& ds);
-		QString getFormatStr(const Signal& s);
+		QString getFormatStr(const AppSignal& s);
 		QString getFormatStr(E::SignalType signalType, E::DataFormat dataFormat, int dataSizeBits, E::ByteOrder byteOrder);
 
 	private:
@@ -677,9 +677,9 @@ namespace Builder
 		HashedVector<QUuid, UalItem*> m_ualItems;				// item GUID => item ptr
 		QHash<QUuid, UalItem*> m_pinParent;						// pin GUID => parent item ptr
 
-		HashedVector<QString, Signal*> m_chassisSignals;		// all signals available in current chassis, AppSignalID => Signal*
-		QHash<QString, Signal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => Signal*
-		QHash<QString, Signal*> m_equipmentSignals;				// equipment signals to app signals map, signal EquipmentID => Signal*
+		HashedVector<QString, AppSignal*> m_chassisSignals;		// all signals available in current chassis, AppSignalID => Signal*
+		QHash<QString, AppSignal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => Signal*
+		QHash<QString, AppSignal*> m_equipmentSignals;				// equipment signals to app signals map, signal EquipmentID => Signal*
 
 		::std::set<QString> m_signalsWithFlagsIDs;
 		::std::unordered_set<UalSignal*> m_signalsWithFlagsAndFlagSignals;
@@ -718,7 +718,7 @@ namespace Builder
 		QVector<UalSignal*> m_nonAcquiredAnalogStrictOutputSignals;		// non acquired analog strict output signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredAnalogInternalSignals;			// non acquired analog internal non tunigable signals, used in UAL
 
-		QVector<Signal*> m_analogOutputSignalsToConversion;				// all analog output signals requires conversion
+		QVector<AppSignal*> m_analogOutputSignalsToConversion;				// all analog output signals requires conversion
 
 		QVector<UalSignal*> m_acquiredInputBuses;						// acquired entirely Input Buses (in end of ALP phase should be copied from IO modules memory to regBuf)
 		QVector<UalSignal*> m_acquiredOutputBuses;						// acquired entirely Output Buses (in end of ALP phase should be copied from regBuf to IO modules memory)

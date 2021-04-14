@@ -294,12 +294,12 @@ void TuningServiceWidget::reloadTuningSignalsList()
 		return;
 	}
 
-	const QVector<Signal>& tspVector = m_tcpClientSocket->tuningSignalParams();
+	const QVector<AppSignal>& tspVector = m_tcpClientSocket->tuningSignalParams();
 
 	m_tuningSignalsTabModel->setRowCount(tspVector.count());
 	int row = 0;
 
-	for (const Signal& tsp : tspVector)
+	for (const AppSignal& tsp : tspVector)
 	{
 		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 0), tsp.customAppSignalID());
 		m_tuningSignalsTabModel->setData(m_tuningSignalsTabModel->index(row, 1), tsp.equipmentID());

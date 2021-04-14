@@ -22,14 +22,14 @@ namespace ExtWidgets
 
 
 std::vector<std::pair<QString, QString> > editApplicationSignals(QStringList& signalId, DbController* dbController, QWidget *parent = 0);
-void initNewSignal(Signal& signal);
+void initNewSignal(AppSignal& signal);
 
 
 class SignalPropertiesDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	explicit SignalPropertiesDialog(DbController* dbController, QVector<Signal*> signalVector, bool readOnly, bool tryCheckout, QWidget *parent = 0);
+	explicit SignalPropertiesDialog(DbController* dbController, QVector<AppSignal*> signalVector, bool readOnly, bool tryCheckout, QWidget *parent = 0);
 
 	bool isEditedSignal(int id) const { return m_editedSignalsId.contains(id); }
 	bool hasEditedSignals() const { return m_editedSignalsId.isEmpty() == false; }
@@ -52,7 +52,7 @@ protected:
 	void closeEvent(QCloseEvent* event);
 
 private:
-	bool checkoutSignal(Signal& s, QString& message);
+	bool checkoutSignal(AppSignal& s, QString& message);
 	QString errorMessage(const ObjectState& state) const;
 
 	bool isPropertyDependentOnPrecision(const QString& propName) { return m_propertiesDependentOnPrecision.value(propName, false); }
@@ -60,7 +60,7 @@ private:
 
 private:
 	DbController* m_dbController;
-	QVector<Signal*> m_signalVector;
+	QVector<AppSignal*> m_signalVector;
 	QVector<int> m_editedSignalsId;
 	QDialogButtonBox* m_buttonBox;
 	QList<std::shared_ptr<PropertyObject>> m_objList;

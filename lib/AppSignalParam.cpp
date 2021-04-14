@@ -202,14 +202,14 @@ QString AppSignalState::toString(double value, E::ValueViewType viewType, E::Ana
 //
 // -------------------------------------------------------------------------------------------------
 
-AppSignalParam::AppSignalParam(const Signal& signal)
+AppSignalParam::AppSignalParam(const AppSignal& signal)
 {
 	load(signal);
 }
 
 bool AppSignalParam::load(const ::Proto::AppSignal& message)
 {
-	Signal s;
+	AppSignal s;
 
 	s.serializeFrom(message);
 	s.cacheSpecPropValues();
@@ -221,7 +221,7 @@ bool AppSignalParam::load(const ::Proto::AppSignal& message)
 	return true;
 }
 
-void AppSignalParam::load(const Signal& s)
+void AppSignalParam::load(const AppSignal& s)
 {
 	m_appSignalId = s.appSignalID();
 	m_customSignalId = s.customAppSignalID();

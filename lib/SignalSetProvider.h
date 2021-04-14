@@ -45,13 +45,13 @@ public:
 	QString caption(int propertyIndex) const;
 	QString name(int propertyIndex);
 
-	QVariant value(const Signal* signal, int propertyIndex, bool isExpert) const;
+	QVariant value(const AppSignal* signal, int propertyIndex, bool isExpert) const;
 	const std::vector<std::pair<int, QString>> values(int propertyIndex) const;
 
-	void setValue(Signal* signal, int propertyIndex, const QVariant& value, bool isExpert);
+	void setValue(AppSignal* signal, int propertyIndex, const QVariant& value, bool isExpert);
 
 	QVariant::Type type(const int propertyIndex) const;
-	E::PropertyBehaviourType getBehaviour(const Signal& signal, const int propertyIndex) const;
+	E::PropertyBehaviourType getBehaviour(const AppSignal& signal, const int propertyIndex) const;
 	E::PropertyBehaviourType getBehaviour(E::SignalType type, E::SignalInOutType directionType, const int propertyIndex) const;
 	bool dependsOnPrecision(const int propertyIndex) const;
 	bool isHiddenFor(E::SignalType type, const int propertyIndex, bool isExpert) const;
@@ -64,7 +64,7 @@ public:
 	void init();
 
 public slots:
-	void detectNewProperties(const Signal& signal);
+	void detectNewProperties(const AppSignal& signal);
 
 private:
 	bool isNotCorrect(int propertyIndex) const;
@@ -91,38 +91,38 @@ private:
 		{ SignalProperties::appSignalIDCaption,
 		  SignalProperties::appSignalIDCaption,
 		  QVariant::String, {},
-		  [](const Signal* s){ return s->appSignalID(); },
-		  [](Signal* s, QVariant v){ s->setAppSignalID(v.toString()); }, },
+		  [](const AppSignal* s){ return s->appSignalID(); },
+		  [](AppSignal* s, QVariant v){ s->setAppSignalID(v.toString()); }, },
 
 		{ SignalProperties::customSignalIDCaption,
 		  SignalProperties::customSignalIDCaption,
 		  QVariant::String, {},
-		  [](const Signal* s){ return s->customAppSignalID(); },
-		  [](Signal* s, QVariant v){ s->setCustomAppSignalID(v.toString()); }, },
+		  [](const AppSignal* s){ return s->customAppSignalID(); },
+		  [](AppSignal* s, QVariant v){ s->setCustomAppSignalID(v.toString()); }, },
 
 		{ SignalProperties::equipmentIDCaption,
 		  SignalProperties::equipmentIDCaption,
 		  QVariant::String, {},
-		  [](const Signal* s){ return s->equipmentID(); },
-		  [](Signal* s, QVariant v){ s->setEquipmentID(v.toString()); }, },
+		  [](const AppSignal* s){ return s->equipmentID(); },
+		  [](AppSignal* s, QVariant v){ s->setEquipmentID(v.toString()); }, },
 
 		{ SignalProperties::busTypeIDCaption,
 		  SignalProperties::busTypeIDCaption,
 		  QVariant::String, {},
-		  [](const Signal* s){ return s->busTypeID(); },
-		  [](Signal* s, QVariant v){ s->setBusTypeID(v.toString()); }, },
+		  [](const AppSignal* s){ return s->busTypeID(); },
+		  [](AppSignal* s, QVariant v){ s->setBusTypeID(v.toString()); }, },
 
 		{ SignalProperties::typeCaption,
 		  "A/D/B",
 		  QVariant::String, {},
-		  [](const Signal* s){ return E::valueToString<E::SignalType>(s->signalType()).left(1); },
+		  [](const AppSignal* s){ return E::valueToString<E::SignalType>(s->signalType()).left(1); },
 		  nullptr },
 
 		{ SignalProperties::inOutTypeCaption,
 		  "Input-output type",
 		  QVariant::Int, E::enumValues<E::SignalInOutType>(),
-		  [](const Signal* s){ return TO_INT(s->inOutType()); },
-		  [](Signal* s, QVariant v){ s->setInOutType(IntToEnum<E::SignalInOutType>(v.toInt())); }, },
+		  [](const AppSignal* s){ return TO_INT(s->inOutType()); },
+		  [](AppSignal* s, QVariant v){ s->setInOutType(IntToEnum<E::SignalInOutType>(v.toInt())); }, },
 	};
 	std::vector<SignalPropertyDescription> m_propertyDescription;
 };
@@ -142,26 +142,26 @@ public:
 
 	void clearSignals();
 
-	const SignalSet& signalSet() const	{ return m_signalSet; }
-	static void trimSignalTextFields(Signal& signal);
+	const AppSignalSet& signalSet() const	{ return m_signalSet; }
+	static void trimSignalTextFields(AppSignal& signal);
 
 	int signalCount() { return m_signalSet.count(); }
-	Signal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
-	Signal* getSignalByStrID(const QString signalStrID);
+	AppSignal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
+	AppSignal* getSignalByStrID(const QString signalStrID);
 	QVector<int> getChannelSignalsID(int signalGroupID) { return m_signalSet.getChannelSignalsID(signalGroupID); }
 	int key(int index) const { return m_signalSet.key(index); }
 	int keyIndex(int key) { return m_signalSet.keyIndex(key); }
 	QVector<int> getSameChannelSignals(int index);
 
-	const Signal& getLoadedSignal(int index);
+	const AppSignal& getLoadedSignal(int index);
 
 	AppSignalParam getAppSignalParam(int index);
 	AppSignalParam getAppSignalParam(QString appSignalId);
 
 	bool isEditableSignal(int index) const { return isEditableSignal(m_signalSet[index]); }
-	bool isEditableSignal(const Signal& signal) const;
+	bool isEditableSignal(const AppSignal& signal) const;
 	bool isCheckinableSignalForMe(int index) const{ return isCheckinableSignalForMe(m_signalSet[index]); }
-	bool isCheckinableSignalForMe(const Signal& signal) const;
+	bool isCheckinableSignalForMe(const AppSignal& signal) const;
 
 	QString getUserStr(int userId) const;
 
@@ -176,9 +176,9 @@ public:
 	void deleteSignals(const QSet<int>& signalIDs);
 	void deleteSignal(int signalID);
 
-	void addSignal(Signal& signal);
-	void saveSignal(Signal& signal);
-	void saveSignals(QVector<Signal*> signalVector);
+	void addSignal(AppSignal& signal);
+	void saveSignal(AppSignal& signal);
+	void saveSignals(QVector<AppSignal*> signalVector);
 	QVector<int> cloneSignals(const QSet<int>& signalIDs);
 
 	void showError(const ObjectState& state);
@@ -188,7 +188,7 @@ signals:
 	void error(const QString& message) const;	// for throwing message boxes
 	void signalCountChanged() const;	// for reloading entire signal model content
 	void signalUpdated(int signalIndex) const;	// for updating row in signal view (throwing models DataChanged signal)
-	void signalPropertiesChanged(const Signal& signal) const; // for updating property list if new properties exist in signal
+	void signalPropertiesChanged(const AppSignal& signal) const; // for updating property list if new properties exist in signal
 
 public slots:
 	void initLazyLoadSignals();
@@ -210,7 +210,7 @@ private:
 	QTimer* m_lazyLoadSignalsTimer = nullptr;
 	int m_middleVisibleSignalIndex = 0;
 	QWidget* m_parentWidget = nullptr;	//used by DbController
-	SignalSet m_signalSet;
+	AppSignalSet m_signalSet;
 	QMap<int, QString> m_usernameMap;
 	bool m_partialLoading = false;
 };

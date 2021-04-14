@@ -220,7 +220,7 @@ bool UalTester::readAppSignals(const QByteArray& cfgFileData)
 	{
 		const ::Proto::AppSignal& appSignal = signalSet.appsignal(i);
 
-		Signal signal;
+		AppSignal signal;
 		signal.serializeFrom(appSignal);
 
 		if (signal.appSignalID().isEmpty() == true || signal.hash() == UNDEFINED_HASH)

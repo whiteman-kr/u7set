@@ -150,7 +150,7 @@ void SimOverridePane::dropEvent(QDropEvent* event)
 		//
 		for (const QString& id : signalIds)
 		{
-			std::optional<Signal> sp = m_simulator->appSignalManager().signalParamExt(id);
+			std::optional<AppSignal> sp = m_simulator->appSignalManager().signalParamExt(id);
 
 			if (sp.has_value() == false)
 			{

@@ -22,7 +22,7 @@ const char* const Columns[C_COUNT] =
 	"Data size"
 };
 
-SignalTableModel::SignalTableModel(quint8* buffer, const SignalSet& signalSet, QObject* parent) :
+SignalTableModel::SignalTableModel(quint8* buffer, const AppSignalSet& signalSet, QObject* parent) :
 	QAbstractTableModel(parent),
 	m_buffer(reinterpret_cast<quint16*>(buffer)),
 	m_signalSet(signalSet)
@@ -48,7 +48,7 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 {
 	if (role == Qt::DisplayRole)
 	{
-		const Signal& signal = m_signalSet[m_relatedSignalIndexes.at(index.row())];
+		const AppSignal& signal = m_signalSet[m_relatedSignalIndexes.at(index.row())];
 		switch (index.column())
 		{
 			case C_STR_ID: return signal.appSignalID();
@@ -235,7 +235,7 @@ void SignalTableModel::updateData()
 }
 
 template<typename TYPE>
-TYPE SignalTableModel::getAdc(const Signal& signal) const
+TYPE SignalTableModel::getAdc(const AppSignal& signal) const
 {
 	int size = signal.dataSize();
 	int sizeBytes = size / 8 + ((size % 8 > 0) ? 1 : 0);

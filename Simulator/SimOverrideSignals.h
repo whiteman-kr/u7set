@@ -55,12 +55,12 @@ namespace Sim
 	{
 	public:
 		OverrideSignalParam(const OverrideSignalParam& src);
-		OverrideSignalParam(const Signal& signalParam);
+		OverrideSignalParam(const AppSignal& signalParam);
 
 		OverrideSignalParam& operator=(const OverrideSignalParam& src);
 
 	public:
-		void updateSignalProperties(const Signal& signalParam, QVariant value = QVariant());
+		void updateSignalProperties(const AppSignal& signalParam, QVariant value = QVariant());
 
 		QString valueString(int base = 10,
 							E::AnalogFormat analogFormat = E::AnalogFormat::g_9_or_9e,

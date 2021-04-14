@@ -100,7 +100,7 @@ protected:
 	void updateSignal(const AppSignalParam& signal);
 
 protected:
-	virtual std::optional<Signal> getSignalExt(const AppSignalParam& appSignalParam) = 0;
+	virtual std::optional<AppSignal> getSignalExt(const AppSignalParam& appSignalParam) = 0;
 
 private:
 	enum class SchemasColumns

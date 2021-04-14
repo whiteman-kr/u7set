@@ -120,7 +120,7 @@ private:
 	void createInterface();
 	void updateSignals();
 
-	bool electricLimitIsValid(Signal* pSignal);
+	bool electricLimitIsValid(AppSignal* pSignal);
 
 private slots:
 
@@ -156,7 +156,7 @@ public:
 
 	//
 	//
-	bool createConnectionBySignal(Signal* pSignal);
+	bool createConnectionBySignal(AppSignal* pSignal);
 
 private:
 
