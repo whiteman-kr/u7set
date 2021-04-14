@@ -1092,6 +1092,8 @@ void SignalSetProvider::loadSignals()
 		m_propertyManager.detectNewProperties(signalSetForReplacement[i]);
 	}
 
+	m_signalSet.clear();
+
 	m_signalSet = std::move(signalSetForReplacement);
 	signalSetForReplacement.forget();	// Destructor will delete all Signal pointers which should be kept for m_signalSet
 
