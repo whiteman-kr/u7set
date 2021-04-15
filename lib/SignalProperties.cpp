@@ -78,9 +78,6 @@ const QString SignalProperties::tuningHighBoundCaption("TuningHighBound");
 const QString SignalProperties::specificPropertiesStructCaption("SpecificPropertiesStruct");
 const QString SignalProperties::tagsCaption("Tags");
 
-const QString SignalProperties::appSignalIDTemplateCaption("AppSignalIDTemplate");
-const QString SignalProperties::customAppSignalIDTemplateCaption("CustomAppSignalIDTemplate");
-const QString SignalProperties::appSignalCaptionTemplateCaption("AppSignalCaptionTemplate");
 
 const QString SignalProperties::MISPRINT_lowEngineeringUnitsCaption("LowEngeneeringUnits");
 const QString SignalProperties::MISPRINT_highEngineeringUnitsCaption("HighEngeneeringUnits");

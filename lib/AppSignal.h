@@ -40,15 +40,24 @@ class AppSignal
 	friend class DbControllerSignalTests;
 
 public:
-	static const QString MACRO_START_TOKEN;
-	static const QString MACRO_END_TOKEN;
-
-public:
 	AppSignal();
 	AppSignal(const AppSignal& s);
 	AppSignal(const ID_AppSignalID& ids);
-	AppSignal(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg);
 	virtual ~AppSignal();
+
+	QString initFromDeviceSignal(const QString& deviceSignalEquipmentID,
+								E::SignalType deviceSignalType,
+								E::SignalFunction deviceSignalFunction,
+								const QString& appSignalID,
+								const QString& customAppSignalID,
+								const QString& appSignalCaption,
+								const QString& appSignalBusTypeID,
+								E::AnalogAppSignalFormat analogAppSignalFormat,
+								const QString& appSignalSpecPropsStruct,
+								bool enableTuning,
+								const QVariant& tuningLowBound,
+								const QVariant& tuningHighBound,
+								const QVariant& tuningDefaultValue);
 
 	void clear();
 
@@ -64,11 +73,11 @@ public:
 
 	QString customAppSignalID() const { return m_customAppSignalID; }
 	void setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
-	bool customAppSignalIDContainsMacro() const { return m_customAppSignalID.contains(MACRO_START_TOKEN); }
+	bool customAppSignalIDContainsMacro() const { return m_customAppSignalID.contains(TemplateMacro::START_TOKEN); }
 
 	QString caption() const { return m_caption; }
 	void setCaption(const QString& caption) { m_caption = caption; }
-	bool captionContainsMacro() const { return m_caption.contains(MACRO_START_TOKEN); }
+	bool captionContainsMacro() const { return m_caption.contains(TemplateMacro::START_TOKEN); }
 
 	QString equipmentID() const { return m_equipmentID; }
 	void setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
@@ -365,28 +374,14 @@ public:
 	QStringList getFlagSignalsIDs() const { return m_stateFlagsSignals.values(); }
 	bool hasFlagsSignals() const { return m_stateFlagsSignals.count(); }
 
-	const AppSignalStateFlagsMap& stateFlagsSignals() const { return m_stateFlagsSignals;};
-
+	const AppSignalStateFlagsMap& stateFlagsSignals() const { return m_stateFlagsSignals; }
 
 	void initTuningValues();
-
-	static QString expandDeviceSignalTemplate(	const Hardware::DeviceObject& startDeviceObject,
-												const QString& templateStr,
-												QString* errMsg);
 
 	std::shared_ptr<Hardware::DeviceModule> lm() const { return m_lm; }
 	void setLm(std::shared_ptr<Hardware::DeviceModule> lm);
 
 private:
-
-	static QString expandDeviceObjectMacro(const Hardware::DeviceObject& startDeviceObject,
-									const QString& macroStr,
-									QString* errMsg);
-
-	static const Hardware::DeviceObject* getParentDeviceObjectOfType(const Hardware::DeviceObject& startObject,
-															  const QString& parentObjectType,
-															  QString* errMsg);
-
 	// Private setters for fields, wich can't be changed outside DB engine
 	// Should be used only by friends
 	//
@@ -408,11 +403,6 @@ private:
 	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
 
 	void updateTuningValuesType();
-
-	void initIDsAndCaption(const Hardware::DeviceAppSignal& deviceSignal,
-							QString* errMsg);
-
-	void checkAndInitTuningSettings(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg);
 
 	QString specPropNotExistErr(const QString &propName) const;
 

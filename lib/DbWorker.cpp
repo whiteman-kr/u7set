@@ -13,7 +13,6 @@
 #include "../lib/SignalProperties.h"
 #include "../lib/DbProgress.h"
 
-
 // Upgrade database
 //
 const UpgradeItem DbWorker::upgradeItems[] =
@@ -5782,7 +5781,6 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 	}
 }
 
-
 void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals,
 								   std::vector<AppSignal>* addedSignals)
 {
@@ -5818,7 +5816,9 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>
 			{
 				QString errMsg;
 
-				AppSignal signal(*deviceSignal, &errMsg);
+				AppSignal appSignal;
+
+				errMsg = initAppSignalFromDeviceAppSignal(*deviceSignal, &appSignal);
 
 				if (errMsg.isEmpty() == false)
 				{
@@ -5828,9 +5828,9 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>
 
 				QVector<AppSignal> newSignals;
 
-				newSignals.append(signal);
+				newSignals.append(appSignal);
 
-				bool result = addSignal(signal.signalType(), &newSignals);
+				bool result = addSignal(appSignal.signalType(), &newSignals);
 
 				if (result == true && addedSignals != nullptr)
 				{
@@ -5843,6 +5843,134 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>
 	m_progress->setValue(100);
 }
 
+QString DbWorker::initAppSignalFromDeviceAppSignal(const Hardware::DeviceAppSignal& deviceSignal, AppSignal* appSignal)
+{
+	if (appSignal == nullptr)
+	{
+		Q_ASSERT(false);
+		return QString("Null pointer");
+	}
+
+	QString errMsg;
+
+	//
+	// Identificators intialization
+	//
+
+	QString deviceSignalEquipmentID = deviceSignal.equipmentIdTemplate();
+
+	QString appSignalID;
+	QString customAppSignalID;
+	QString appSignalCaption;
+
+	if (deviceSignal.propertyExists(EquipmentPropNames::APP_SIGNAL_ID_TEMPLATE) == true)
+	{
+		appSignalID = Hardware::expandDeviceSignalTemplate(deviceSignal,
+									deviceSignal.propertyValue((EquipmentPropNames::APP_SIGNAL_ID_TEMPLATE)).toString(),
+									&errMsg);
+
+		if (errMsg.isEmpty() == false)
+		{
+			return errMsg;
+		}
+	}
+	else
+	{
+		appSignalID = QString("#%1").arg(deviceSignalEquipmentID);
+	}
+
+	if (deviceSignal.propertyExists(EquipmentPropNames::CUSTOM_APP_SIGNAL_ID_TEMPLATE) == true)
+	{
+		// customSignalIDTemplate will be expand in compile time
+		//
+		customAppSignalID = deviceSignal.propertyValue(EquipmentPropNames::CUSTOM_APP_SIGNAL_ID_TEMPLATE).toString();
+	}
+	else
+	{
+		customAppSignalID = deviceSignalEquipmentID;
+	}
+
+	if (deviceSignal.propertyExists(EquipmentPropNames::APP_SIGNAL_CAPTION_TEMPLATE) == true)
+	{
+		appSignalCaption = deviceSignal.propertyValue(EquipmentPropNames::APP_SIGNAL_CAPTION_TEMPLATE).toString();
+	}
+	else
+	{
+		int pos = deviceSignalEquipmentID.lastIndexOf(QChar('_'));
+
+		if (pos != -1)
+		{
+			appSignalCaption = QString("Signal %1").arg(deviceSignalEquipmentID.mid(pos + 1));
+		}
+		else
+		{
+			appSignalCaption = QString("Signal %1").arg(deviceSignalEquipmentID);
+		}
+	}
+
+	//
+	// Tuning settings checking
+	//
+
+	bool enableTuning = false;
+
+	QVariant tuningLowBound;
+	QVariant tuningHighBound;
+	QVariant tuningDefaultValue;
+
+	if (deviceSignal.propertyExists(EquipmentPropNames::ENABLE_TUNING) == true)
+	{
+		if (deviceSignal.propertyExists(EquipmentPropNames::TUNING_DEFAULT_VALUE) == false ||
+			deviceSignal.propertyExists(EquipmentPropNames::TUNING_LOW_BOUND) == false ||
+			deviceSignal.propertyExists(EquipmentPropNames::TUNING_HIGH_BOUND) == false)
+		{
+			return QString("Not all required properties for tuning settings initialization is exists in device signal %1").
+							arg(deviceSignalEquipmentID);
+		}
+
+		switch(deviceSignal.signalType())
+		{
+		case E::SignalType::Analog:
+		case E::SignalType::Discrete:
+			break;
+
+		default:
+			return QString("Device signal %1 is not Analog or Discrete. Tuning is no allowed.").
+							arg(deviceSignalEquipmentID);
+		}
+
+		switch(deviceSignal.function())
+		{
+		case E::SignalFunction::Output:
+			break;
+
+		default:
+			return QString("Device signal %1 is not Output. Tuning is no allowed.").
+							arg(deviceSignalEquipmentID);
+		}
+
+		enableTuning = deviceSignal.propertyValue(EquipmentPropNames::ENABLE_TUNING).toBool();
+
+		tuningLowBound = deviceSignal.propertyValue(EquipmentPropNames::TUNING_LOW_BOUND);
+		tuningHighBound = deviceSignal.propertyValue(EquipmentPropNames::TUNING_HIGH_BOUND);
+		tuningDefaultValue = deviceSignal.propertyValue(EquipmentPropNames::TUNING_DEFAULT_VALUE);
+	}
+
+	errMsg = appSignal->initFromDeviceSignal(deviceSignalEquipmentID,
+											deviceSignal.signalType(),
+											deviceSignal.function(),
+											appSignalID,
+											customAppSignalID,
+											appSignalCaption,
+											deviceSignal.appSignalBusTypeId(),
+											deviceSignal.appSignalDataFormat(),
+											deviceSignal.signalSpecPropsStruct(),
+											enableTuning,
+											tuningLowBound,
+											tuningHighBound,
+											tuningDefaultValue);
+	return errMsg;
+}
 
 void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals)
 {

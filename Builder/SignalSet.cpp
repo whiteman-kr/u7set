@@ -374,7 +374,7 @@ namespace Builder
 			{
 				QString errMsg;
 
-				QString expandedCustomID = AppSignal::expandDeviceSignalTemplate(*deviceObject, s.customAppSignalID(), &errMsg);
+				QString expandedCustomID = Hardware::expandDeviceSignalTemplate(*deviceObject, s.customAppSignalID(), &errMsg);
 
 				if (errMsg.isEmpty() == false)
 				{
@@ -405,7 +405,7 @@ namespace Builder
 			{
 				QString errMsg;
 
-				QString expandedCaption = AppSignal::expandDeviceSignalTemplate(*deviceObject, s.caption(), &errMsg);
+				QString expandedCaption = Hardware::expandDeviceSignalTemplate(*deviceObject, s.caption(), &errMsg);
 
 				if (errMsg.isEmpty() == false)
 				{

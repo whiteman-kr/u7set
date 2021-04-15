@@ -141,6 +141,17 @@ namespace EquipmentPropNames
 
 	inline const QString START_SCHEMA_ID("StartSchemaID");
 	inline const QString SCHEMA_TAGS("SchemaTags");
+
+	// DeviceAppSigal properties
+	//
+	inline const QString APP_SIGNAL_ID_TEMPLATE("AppSignalIDTemplate");
+	inline const QString CUSTOM_APP_SIGNAL_ID_TEMPLATE("CustomAppSignalIDTemplate");
+	inline const QString APP_SIGNAL_CAPTION_TEMPLATE("AppSignalCaptionTemplate");
+
+	inline const QString ENABLE_TUNING("EnableTuning");
+	inline const QString TUNING_DEFAULT_VALUE("TuningDefaultValue");
+	inline const QString TUNING_LOW_BOUND("TuningLowBound");
+	inline const QString TUNING_HIGH_BOUND("TuningHighBound");
 }
 
 namespace XmlElement
@@ -328,4 +339,10 @@ namespace Separator
 namespace FormatStr
 {
 	inline const QString POSTGRES_DATE_TIME("yyyy-MM-ddTHH:mm:ss");
+}
+
+namespace TemplateMacro
+{
+	inline const QString START_TOKEN("$(");
+	inline const QString END_TOKEN(")");
 }

@@ -16,9 +16,6 @@
 //
 // --------------------------------------------------------------------------------------------------------
 
-const QString AppSignal::MACRO_START_TOKEN("$(");
-const QString AppSignal::MACRO_END_TOKEN(")");
-
 AppSignal::AppSignal()
 {
 	updateTuningValuesType();
@@ -37,42 +34,51 @@ AppSignal::AppSignal(const ID_AppSignalID& ids)
 	m_isLoaded = false;
 }
 
-AppSignal::AppSignal(	const Hardware::DeviceAppSignal& deviceSignal,
-				QString* errMsg)
+AppSignal::~AppSignal()
 {
-	TEST_PTR_RETURN(errMsg);
+}
 
-	if (deviceSignal.isDiagSignal() == true)
-	{
-		Q_ASSERT(false);
-		return;
-	}
+QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
+										E::SignalType deviceSignalType,
+										E::SignalFunction deviceSignalFunction,
+										const QString& appSignalID,
+										const QString& customAppSignalID,
+										const QString& appSignalCaption,
+										const QString& appSignalBusTypeID,
+										E::AnalogAppSignalFormat analogAppSignalFormat,
+										const QString& appSignalSpecPropsStruct,
+										bool enableTuning,
+										const QVariant& tuningLowBound,
+										const QVariant& tuningHighBound,
+										const QVariant& tuningDefaultValue)
+{
+	QString errMsg;
 
 	//
 
-	initIDsAndCaption(deviceSignal, errMsg);	// init AppSignalID, CustomAppSignalID, EquipmentID, Caption
-
-	if (errMsg->isEmpty() == false)
-	{
-		return;
-	}
+	m_equipmentID = deviceSignalEquipmentID;
+	m_appSignalID = appSignalID;
+	m_customAppSignalID = customAppSignalID;
+	m_caption = appSignalCaption;
 
 	//
 
-	m_signalType = deviceSignal.signalType();
+	m_signalType = deviceSignalType;
+	m_analogSignalFormat = analogAppSignalFormat;
 
 	switch(m_signalType)
 	{
 	case E::SignalType::Analog:
 
-		m_analogSignalFormat = deviceSignal.appSignalDataFormat();
-		assert(m_analogSignalFormat == E::AnalogAppSignalFormat::Float32 || m_analogSignalFormat == E::AnalogAppSignalFormat::SignedInt32);
+		if (m_analogSignalFormat == E::AnalogAppSignalFormat::Float32 ||
+			m_analogSignalFormat == E::AnalogAppSignalFormat::SignedInt32)
+		{
+			Q_ASSERT(false);
 
-		setDataSize(m_signalType, m_analogSignalFormat);
-		updateTuningValuesType();
-		initTuningValues();
+			return QString("Unknown E::AnalogAppSignalFormat");
+		}
 
-		break;
+		// no break, it is Ok!
 
 	case E::SignalType::Discrete:
 
@@ -84,19 +90,17 @@ AppSignal::AppSignal(	const Hardware::DeviceAppSignal& deviceSignal,
 
 	case E::SignalType::Bus:
 
-		m_busTypeID = deviceSignal.appSignalBusTypeId();
+		m_busTypeID = appSignalBusTypeID;
 
 		break;
 
 	default:
 
-		assert(false);
-		*errMsg = "Unknown device signal E::SignalType";
-
-		return;
+		Q_ASSERT(false);
+		return QString("Unknown device signal E::SignalType");
 	}
 
-	switch(deviceSignal.function())
+	switch(deviceSignalFunction)
 	{
 	case E::SignalFunction::Input:
 	case E::SignalFunction::Validity:
@@ -113,36 +117,27 @@ AppSignal::AppSignal(	const Hardware::DeviceAppSignal& deviceSignal,
 
 	case E::SignalFunction::Diagnostics:
 
-		assert(false);	// never will be here
+		Q_ASSERT(false);
+		return QString("Can't create AppSignal from diagnostics device signal");
 
 		break;
 
 	default:
 
-		assert(false);
-		*errMsg = "Unknown device signal E::SignalFunction";
-
-		return;
-	}
-
-	checkAndInitTuningSettings(deviceSignal, errMsg);
-
-	if (errMsg->isEmpty() == false)
-	{
-		return;
+		Q_ASSERT(false);
+		return QString("Unknown device signal E::SignalFunction");
 	}
 
 	// specific properties processing
 	//
-	m_specPropStruct = deviceSignal.signalSpecPropsStruct();
+	m_specPropStruct = appSignalSpecPropsStruct;
 
 	if (m_specPropStruct.contains(SignalProperties::MISPRINT_lowEngineeringUnitsCaption) ||
 		m_specPropStruct.contains(SignalProperties::MISPRINT_highEngineeringUnitsCaption))
 	{
-		*errMsg = QString("Misprinted signal specific properties HighEngEneeringUnits/LowEngEneeringUnits has detected in device signal %1. \n\n"
+		return QString("Misprinted signal specific properties HighEngEneeringUnits/LowEngEneeringUnits has detected in device signal %1. \n\n"
 					 "Update module preset first. \n\nApplication signal creation is aborted!").
-										arg(deviceSignal.equipmentIdTemplate());
-		return;
+										arg(deviceSignalEquipmentID);
 	}
 
 	SignalSpecPropValues spv;
@@ -150,10 +145,23 @@ AppSignal::AppSignal(	const Hardware::DeviceAppSignal& deviceSignal,
 	spv.createFromSpecPropStruct(m_specPropStruct);
 
 	spv.serializeValuesToArray(&m_protoSpecPropValues);
-}
 
-AppSignal::~AppSignal()
-{
+	//
+
+	m_enableTuning = enableTuning;
+
+	m_tuningDefaultValue.setValue(	m_signalType,
+									m_analogSignalFormat,
+									tuningDefaultValue);
+
+	m_tuningLowBound.setValue(	m_signalType,
+								m_analogSignalFormat,
+								tuningLowBound);
+
+	m_tuningHighBound.setValue(	m_signalType,
+								m_analogSignalFormat,
+								tuningHighBound);
+	return QString();
 }
 
 void AppSignal::clear()
@@ -1389,55 +1397,7 @@ void AppSignal::initTuningValues()
 	}
 }
 
-QString AppSignal::expandDeviceSignalTemplate(	const Hardware::DeviceObject& startDeviceObject,
-											 const QString& templateStr,
-											 QString* errMsg)
-{
-	QString resultStr;
-
-	int searchStartPos = 0;
-
-	do
-	{
-		int macroStartPos = templateStr.indexOf(MACRO_START_TOKEN, searchStartPos);
-
-		if (macroStartPos == -1)
-		{
-			// no more macroses
-			//
-			resultStr += templateStr.mid(searchStartPos);
-			break;
-		}
-
-		resultStr += templateStr.mid(searchStartPos, macroStartPos - searchStartPos);
-
-		int macroEndPos = templateStr.indexOf(MACRO_END_TOKEN, macroStartPos + 2);
-
-		if (macroEndPos == -1)
-		{
-			*errMsg = QString("End of macro is not found in template %1 of device object %2. ").
-						arg(templateStr).arg(startDeviceObject.equipmentIdTemplate());
-			return QString();
-		}
-
-		QString macroStr = templateStr.mid(macroStartPos + 2, macroEndPos - (macroStartPos + 2));
-
-		QString expandedMacroStr = expandDeviceObjectMacro(startDeviceObject, macroStr, errMsg);
-
-		if (errMsg->isEmpty() == false)
-		{
-			return QString();
-		}
-
-		resultStr += expandedMacroStr;
-
-		searchStartPos = macroEndPos + 1;
-	}
-	while(true);
-
-	return resultStr;
-}
-
+/*
 void AppSignal::setLm(std::shared_ptr<Hardware::DeviceModule> lm)
 {
 	TEST_PTR_RETURN(lm);
@@ -1446,118 +1406,7 @@ void AppSignal::setLm(std::shared_ptr<Hardware::DeviceModule> lm)
 
 	setLmEquipmentID(lm->equipmentIdTemplate());
 }
-
-QString AppSignal::expandDeviceObjectMacro(const Hardware::DeviceObject& startDeviceObject,
-										const QString& macroStr,
-										QString* errMsg)
-{
-	QStringList macroFields = macroStr.split(".");
-
-	const Hardware::DeviceObject* deviceObject = nullptr;
-	QString propertyCaption;
-
-	switch(macroFields.count())
-	{
-	case 1:
-		{
-			// property only
-			//
-			deviceObject = &startDeviceObject;
-			propertyCaption = macroFields.at(0);
-		}
-		break;
-
-	case 2:
-		{
-			// parentObject.property
-			//
-			QString parentObjectType = macroFields.at(0);
-			propertyCaption = macroFields.at(1);
-
-			deviceObject = getParentDeviceObjectOfType(startDeviceObject, parentObjectType, errMsg);
-
-			if (errMsg->isEmpty() == false)
-			{
-				return QString();
-			}
-
-			if (deviceObject == nullptr)
-			{
-				*errMsg = QString("Macro expand error! Parent device object of type '%1' is not found for device object %2").
-								arg(parentObjectType).arg(startDeviceObject.equipmentIdTemplate());
-				return QString();
-			}
-
-		}
-		break;
-
-	default:
-		*errMsg = QString("Unknown format of macro %1 in template of device signal %2").
-				arg(macroStr).arg(startDeviceObject.equipmentIdTemplate());
-		return QString();
-	}
-
-	if (deviceObject->propertyExists(propertyCaption) == false)
-	{
-		*errMsg = QString("Device signal %1 macro expand error! Property '%2' is not found in device object %3.").
-							arg(startDeviceObject.equipmentIdTemplate()).
-							arg(propertyCaption).
-							arg(deviceObject->equipmentIdTemplate());
-		return QString();
-	}
-
-	QString propertyValue = deviceObject->propertyValue(propertyCaption).toString();
-
-	return propertyValue;
-}
-
-const Hardware::DeviceObject* AppSignal::getParentDeviceObjectOfType(const Hardware::DeviceObject& startObject,
-																  const QString& parentObjectType,
-																  QString* errMsg)
-{
-	static const std::map<QString, Hardware::DeviceType> objectTypes {
-			std::make_pair(QString("root"), Hardware::DeviceType::Root),
-			std::make_pair(QString("system"), Hardware::DeviceType::System),
-			std::make_pair(QString("rack"), Hardware::DeviceType::Rack),
-			std::make_pair(QString("chassis"), Hardware::DeviceType::Chassis),
-			std::make_pair(QString("module"), Hardware::DeviceType::Module),
-			std::make_pair(QString("workstation"), Hardware::DeviceType::Workstation),
-			std::make_pair(QString("software"), Hardware::DeviceType::Software),
-			std::make_pair(QString("controller"), Hardware::DeviceType::Controller),
-			std::make_pair(QString("signal"), Hardware::DeviceType::AppSignal),
-	};
-
-	std::map<QString, Hardware::DeviceType>::const_iterator it = objectTypes.find(parentObjectType.toLower());
-
-	if (it == objectTypes.end())
-	{
-		*errMsg = QString("Unknown object type '%1' in call of getParentObjectOfType(...) for device object %2").
-						arg(parentObjectType).arg(startObject.equipmentIdTemplate());
-		return nullptr;
-	}
-
-	Hardware::DeviceType requestedDeviceType = it->second;
-
-	const Hardware::DeviceObject* parent = &startObject;
-
-	do
-	{
-		if (parent == nullptr)
-		{
-			break;
-		}
-
-		if (parent->deviceType() == requestedDeviceType)
-		{
-			return parent;
-		}
-
-		parent = parent->parent().get();
-	}
-	while(true);
-
-	return nullptr;
-}
+*/
 
 void AppSignal::initCreatedDates()
 {
@@ -1605,7 +1454,6 @@ bool AppSignal::isCompatibleFormatPrivate(E::SignalType signalType, E::DataForma
 	return false;
 }
 
-
 void AppSignal::updateTuningValuesType()
 {
 	TuningValueType tvType = TuningValue::getTuningValueType(m_signalType, m_analogSignalFormat);
@@ -1613,112 +1461,6 @@ void AppSignal::updateTuningValuesType()
 	m_tuningDefaultValue.setType(tvType);
 	m_tuningLowBound.setType(tvType);
 	m_tuningHighBound.setType(tvType);
-}
-
-void AppSignal::initIDsAndCaption(	const Hardware::DeviceAppSignal& deviceSignal,
-								QString* errMsg)
-{
-	TEST_PTR_RETURN(errMsg);
-
-	QString deviceSignalEquipmentID = deviceSignal.equipmentIdTemplate();
-
-	m_equipmentID = deviceSignal.equipmentIdTemplate();
-
-	if (deviceSignal.propertyExists(SignalProperties::appSignalIDTemplateCaption) == true)
-	{
-		m_appSignalID = expandDeviceSignalTemplate( deviceSignal,
-													deviceSignal.propertyValue((SignalProperties::appSignalIDTemplateCaption)).toString(),
-													errMsg);
-		if (errMsg->isEmpty() == false)
-		{
-			return;
-		}
-	}
-	else
-	{
-		m_appSignalID = QString("#%1").arg(deviceSignalEquipmentID);
-	}
-
-	if (deviceSignal.propertyExists(SignalProperties::customAppSignalIDTemplateCaption) == true)
-	{
-		// customSignalIDTemplate will be expand in compile time
-		//
-		m_customAppSignalID = deviceSignal.propertyValue(SignalProperties::customAppSignalIDTemplateCaption).toString();
-	}
-	else
-	{
-		m_customAppSignalID = deviceSignalEquipmentID;
-	}
-
-	if (deviceSignal.propertyExists(SignalProperties::appSignalCaptionTemplateCaption) == true)
-	{
-		m_caption = deviceSignal.propertyValue(SignalProperties::appSignalCaptionTemplateCaption).toString();
-	}
-	else
-	{
-		int pos = deviceSignalEquipmentID.lastIndexOf(QChar('_'));
-
-		if (pos != -1)
-		{
-			deviceSignalEquipmentID = deviceSignalEquipmentID.mid(pos + 1);
-		}
-
-		m_caption = QString("Signal #%1").arg(deviceSignalEquipmentID);
-	}
-}
-
-void AppSignal::checkAndInitTuningSettings(const Hardware::DeviceAppSignal& deviceSignal, QString* errMsg)
-{
-	if (deviceSignal.propertyExists(SignalProperties::enableTuningCaption) == false)
-	{
-		return;
-	}
-
-	if (deviceSignal.propertyExists(SignalProperties::tuningDefaultValueCaption) == false ||
-		deviceSignal.propertyExists(SignalProperties::tuningLowBoundCaption) == false ||
-		deviceSignal.propertyExists(SignalProperties::tuningHighBoundCaption) == false)
-	{
-		*errMsg = QString("Not all required properties for tuning settings initialization is exists in device signal %1").
-						arg(deviceSignal.equipmentIdTemplate());
-		return;
-	}
-
-	switch(deviceSignal.signalType())
-	{
-	case E::SignalType::Analog:
-	case E::SignalType::Discrete:
-		break;
-
-	default:
-		*errMsg = QString("Device signal %1 is not Analog or Discrete. Tuning is no allowed.").
-						arg(deviceSignal.equipmentIdTemplate());
-		return;
-	}
-
-	switch(deviceSignal.function())
-	{
-	case E::SignalFunction::Output:
-		break;
-
-	default:
-		*errMsg = QString("Device signal %1 is not Output. Tuning is no allowed.").
-						arg(deviceSignal.equipmentIdTemplate());
-		return;
-	}
-
-	m_enableTuning = deviceSignal.propertyValue(SignalProperties::enableTuningCaption).toBool();
-
-	m_tuningDefaultValue.setValue(	m_signalType,
-									m_analogSignalFormat,
-									deviceSignal.propertyValue(SignalProperties::tuningDefaultValueCaption));
-
-	m_tuningLowBound.setValue(	m_signalType,
-								m_analogSignalFormat,
-								deviceSignal.propertyValue(SignalProperties::tuningLowBoundCaption));
-
-	m_tuningHighBound.setValue(	m_signalType,
-								m_analogSignalFormat,
-								deviceSignal.propertyValue(SignalProperties::tuningHighBoundCaption));
 }
 
 QString AppSignal::specPropNotExistErr(const QString& propName) const
