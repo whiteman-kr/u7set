@@ -52,10 +52,6 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 										const QVariant& tuningHighBound,
 										const QVariant& tuningDefaultValue)
 {
-	QString errMsg;
-
-	//
-
 	m_equipmentID = deviceSignalEquipmentID;
 	m_appSignalID = appSignalID;
 	m_customAppSignalID = customAppSignalID;
@@ -215,7 +211,6 @@ void AppSignal::initSpecificProperties()
 		createSpecPropValues();
 	}
 }
-
 
 void AppSignal::setSignalType(E::SignalType type)
 {
@@ -1397,7 +1392,6 @@ void AppSignal::initTuningValues()
 	}
 }
 
-/*
 void AppSignal::setLm(std::shared_ptr<Hardware::DeviceModule> lm)
 {
 	TEST_PTR_RETURN(lm);
@@ -1406,7 +1400,6 @@ void AppSignal::setLm(std::shared_ptr<Hardware::DeviceModule> lm)
 
 	setLmEquipmentID(lm->equipmentIdTemplate());
 }
-*/
 
 void AppSignal::initCreatedDates()
 {
