@@ -7,7 +7,6 @@
 #include "Types.h"
 #include "DbStruct.h"
 #include "OrderedHash.h"
-#include "DeviceObject.h"
 #include "../UtilsLib/Address16.h"
 #include "../UtilsLib/Hash.h"
 #include "TuningValue.h"
@@ -378,9 +377,6 @@ public:
 
 	void initTuningValues();
 
-	std::shared_ptr<Hardware::DeviceModule> lm() const { return m_lm; }
-	void setLm(std::shared_ptr<Hardware::DeviceModule> lm);
-
 private:
 	// Private setters for fields, wich can't be changed outside DB engine
 	// Should be used only by friends
@@ -513,7 +509,7 @@ private:
 
 	// specific build-time fields
 	//
-	std::shared_ptr<Hardware::DeviceModule> m_lm;
+	//std::shared_ptr<Hardware::DeviceModule> m_lm;
 };
 
 typedef std::shared_ptr<AppSignal> AppSignalShared;
@@ -536,7 +532,9 @@ public:
 	bool ID2IndexMapIsEmpty();
 
 	bool contains(const QString& appSignalID) const;
+
 	AppSignal* getSignal(const QString& appSignalID);
+	const AppSignal* getSignal(const QString& appSignalID) const;
 
 	virtual void append(const int& signalID, AppSignal* signal) override;
 	virtual void remove(const int& signalID) override;

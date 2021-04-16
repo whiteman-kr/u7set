@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QSize>
+
 struct DatabaseConnectionParam
 {
 	QChar m_address[256];

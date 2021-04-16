@@ -1392,15 +1392,6 @@ void AppSignal::initTuningValues()
 	}
 }
 
-void AppSignal::setLm(std::shared_ptr<Hardware::DeviceModule> lm)
-{
-	TEST_PTR_RETURN(lm);
-
-	m_lm = lm;
-
-	setLmEquipmentID(lm->equipmentIdTemplate());
-}
-
 void AppSignal::initCreatedDates()
 {
 	m_created = QDateTime::currentDateTime();
@@ -1809,6 +1800,24 @@ bool AppSignalSet::contains(const QString& appSignalID) const
 }
 
 AppSignal* AppSignalSet::getSignal(const QString& appSignalID)
+{
+	if (count() > 0 && m_strID2IndexMap.isEmpty() == true)
+	{
+		assert(false);		//	call buildStrID2IndexMap() before
+		return nullptr;
+	}
+
+	int index = m_strID2IndexMap.value(appSignalID.trimmed(), -1);
+
+	if (index == -1)
+	{
+		return nullptr;
+	}
+
+	return &(*this)[index];
+}
+
+const AppSignal* AppSignalSet::getSignal(const QString& appSignalID) const
 {
 	if (count() > 0 && m_strID2IndexMap.isEmpty() == true)
 	{

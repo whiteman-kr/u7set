@@ -4,6 +4,7 @@
 #include <optional>
 #include <QObject>
 #include <QReadWriteLock>
+#include <array>
 #include "../lib/Types.h"
 #include "../lib/AppSignal.h"
 #include "SimScopedLog.h"
@@ -127,7 +128,7 @@ namespace Sim
 		Address16 m_address;
 		E::LogicModuleRamAccess m_ramAccess;				// RAM type to verride signal data
 
-		std::array<OverrideRamRecord, 4> m_ramOverrides;	// Set of RAM offsets, masks and data to override, up to 4 words
+		std::array<Sim::OverrideRamRecord, 4> m_ramOverrides;	// Set of RAM offsets, masks and data to override, up to 4 words
 
 		OverrideSignalMethod m_method = OverrideSignalMethod::Value;
 		QVariant m_value;

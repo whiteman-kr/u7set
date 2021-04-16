@@ -9,6 +9,7 @@
 
 namespace Builder
 {
+	typedef std::shared_ptr<Hardware::DeviceModule> DeviceModuleShared;
 
 	class SignalSet : public QObject, public AppSignalSet
 	{
@@ -27,10 +28,21 @@ namespace Builder
 
 		BusShared getBus(const QString & busTypeID) const { return m_busses.getBus(busTypeID); }
 
-		AppSignal* appendBusChildSignal(const AppSignal& s, BusShared bus, const BusSignal& busSignal);
+		AppSignal* appendBusChildSignal(const AppSignal& s, BusShared bus, const BusSignal& busSignal, DeviceModuleShared lm);
 		AppSignal* createBusChildSignal(const AppSignal& s, BusShared bus, const BusSignal& busSignal);
 
 		void findAndRemoveExcludedFromBuildSignals();
+
+		void linkSignalToLm(AppSignal* appSignal, DeviceModuleShared lm);
+
+		void append(AppSignal* signal) = delete;			// Hiding AppSignalSet::append(AppSignal*) of base class
+															// All signals that will be added to this signal set
+															// should be use append(AppSignal*, DeviceModuleShared)
+
+		void append(AppSignal* appSignal, DeviceModuleShared lm);
+
+		DeviceModuleShared getAppSignalLm(const AppSignal* appSignal) const;
+		DeviceModuleShared getAppSignalLm(const QString& appSignalID) const;
 
 	private:
 		QString expandBusSignalCaptionTemplate(const AppSignal& busParentSignal, BusShared bus, const BusSignal& busSignal) const;
@@ -49,6 +61,8 @@ namespace Builder
 		QHash<int, QString> m_busSignals;
 
 		Busses m_busses;
+
+		std::map<const AppSignal*, DeviceModuleShared> m_signalToLm;
 	};
 
 }

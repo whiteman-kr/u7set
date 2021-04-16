@@ -3826,14 +3826,16 @@ namespace Builder
 						continue;
 					}
 
-					if (appSignal->lm() == nullptr)
+					std::shared_ptr<Hardware::DeviceModule> lm = m_signalSet->getAppSignalLm(appSignal);
+
+					if (lm == nullptr)
 					{
 						alienLmIds = true;
 						m_log->errALP4135(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
 						continue;
 					}
 
-					if (equipmentIds.contains(appSignal->lm()->equipmentId()) == false)
+					if (equipmentIds.contains(lm->equipmentIdTemplate()) == false)
 					{
 						alienLmIds = true;
 						m_log->errALP4136(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
@@ -4042,14 +4044,16 @@ namespace Builder
 						continue;
 					}
 
-					if (appSignal->lm() == nullptr)
+					std::shared_ptr<Hardware::DeviceModule> lm = m_signalSet->getAppSignalLm(appSignal);
+
+					if (lm == nullptr)
 					{
 						result = false;
 						m_log->errALP4135(schema->schemaId(), signalItem->buildName(), signalId, signalItem->guid());
 						continue;
 					}
 
-					if (appSignal->lm()->equipmentId() != equipmentId)
+					if (lm->equipmentIdTemplate() != equipmentId)
 					{
 						result = false;
 						m_log->errALP4137(schema->schemaId(), signalItem->buildName(), signalId, equipmentId, signalItem->guid());
@@ -4279,14 +4283,16 @@ namespace Builder
 							continue;
 						}
 
-						if (signal->lm() == nullptr)
+						std::shared_ptr<Hardware::DeviceModule> lm = m_signalSet->getAppSignalLm(signal);
+
+						if (lm == nullptr)
 						{
 							allSignalsFromThisChannel = false;
 							m_log->errALP4135(schema->schemaId(), fbl.second->buildName(), appSignalId, fbl.second->guid());
 							continue;
 						}
 
-						if (signal->lm()->equipmentId() != equipmentId)
+						if (lm->equipmentIdTemplate() != equipmentId)
 						{
 							allSignalsFromThisChannel = false;
 
@@ -4294,11 +4300,11 @@ namespace Builder
 							{
 								// The first occurance LM, init lmEquipmnetId
 								//
-								lmEquipmnetId = signal->lm()->equipmentId();
+								lmEquipmnetId = lm->equipmentIdTemplate();
 							}
 							else
 							{
-								if (lmEquipmnetId != signal->lm()->equipmentId())
+								if (lmEquipmnetId != lm->equipmentIdTemplate())
 								{
 									// Branch contains signals (%1) from different channels (LogicSchema '%2').
 									//
@@ -4308,7 +4314,7 @@ namespace Builder
 						}
 						else
 						{
-							lmEquipmnetId = signal->lm()->equipmentId();	// Init lmEquipmnetId with first LM
+							lmEquipmnetId = lm->equipmentIdTemplate();	// Init lmEquipmnetId with first LM
 						}
 					}
 				}

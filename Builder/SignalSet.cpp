@@ -217,6 +217,8 @@ namespace Builder
 
 		bool result = true;
 
+		m_signalToLm.clear();
+
 		for(int i = 0; i < signalCount; i++)
 		{
 			AppSignal& s = (*this)[i];
@@ -250,7 +252,7 @@ namespace Builder
 
 					if (module != nullptr && (module->isLogicModule() == true || module->isBvb() == true))
 					{
-						s.setLm(module);
+						linkSignalToLm(&s, module);
 					}
 					else
 					{
@@ -276,7 +278,7 @@ namespace Builder
 
 					if (module != nullptr && module->isLogicModule() == true)
 					{
-						s.setLm(module);
+						linkSignalToLm(&s, module);
 					}
 					else
 					{
@@ -429,11 +431,16 @@ namespace Builder
 		return result;
 	}
 
-	AppSignal* SignalSet::appendBusChildSignal(const AppSignal& s, BusShared bus, const BusSignal& busSignal)
+	AppSignal* SignalSet::appendBusChildSignal(const AppSignal& s, BusShared bus, const BusSignal& busSignal, DeviceModuleShared lm)
 	{
 		AppSignal* newSignal = createBusChildSignal(s, bus, busSignal);
 
-		append(newSignal);
+		if (newSignal != nullptr)
+		{
+			AppSignalSet::append(newSignal);
+
+			linkSignalToLm(newSignal, lm);
+		}
 
 		return newSignal;
 	}
@@ -449,7 +456,6 @@ namespace Builder
 
 		newSignal->setCaption(caption);
 		newSignal->setEquipmentID(busParentSignal.equipmentID());
-		newSignal->setLm(busParentSignal.lm());
 
 		newSignal->setSignalType(busSignal.signalType);
 		newSignal->setInOutType(busParentSignal.inOutType());
@@ -526,6 +532,53 @@ namespace Builder
 		{
 			remove(id);
 		}
+	}
+
+	void SignalSet::linkSignalToLm(AppSignal* appSignal, DeviceModuleShared lm)
+	{
+		TEST_PTR_RETURN(appSignal);
+		TEST_PTR_RETURN(lm);
+
+		if (m_signalToLm.contains(appSignal) == true)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		m_signalToLm.insert({appSignal, lm});
+	}
+
+	void SignalSet::append(AppSignal* appSignal, DeviceModuleShared lm)
+	{
+		TEST_PTR_RETURN(appSignal);
+		TEST_PTR_RETURN(lm);
+
+		AppSignalSet::append(appSignal);
+		linkSignalToLm(appSignal, lm);
+	}
+
+	DeviceModuleShared SignalSet::getAppSignalLm(const AppSignal* appSignal) const
+	{
+		if (appSignal == nullptr)
+		{
+			return nullptr;
+		}
+
+		std::map<const AppSignal*, DeviceModuleShared>::const_iterator pos = m_signalToLm.find(appSignal);
+
+		if (pos == m_signalToLm.end())
+		{
+			return nullptr;
+		}
+
+		return pos->second;
+	}
+
+	DeviceModuleShared SignalSet::getAppSignalLm(const QString& appSignalID) const
+	{
+		const AppSignal* appSignal = getSignal(appSignalID);
+
+		return getAppSignalLm(appSignal);
 	}
 
 	QString SignalSet::expandBusSignalCaptionTemplate(const AppSignal& busParentSignal, BusShared bus, const BusSignal& busSignal) const

@@ -1270,8 +1270,6 @@ namespace Builder
 			appBusSignal->setDataSizeW(bus->sizeW());
 
 			appBusSignal->setAcquire(false);
-
-			appBusSignal->setLm(lm);
 		}
 		else
 		{
@@ -2501,7 +2499,7 @@ namespace Builder
 
 		if (autoSignalPtr != nullptr)
 		{
-			m_compiler.signalSet()->append(autoSignalPtr);
+			m_compiler.signalSet()->append(autoSignalPtr, lm());
 		}
 		else
 		{
@@ -2635,7 +2633,7 @@ namespace Builder
 
 		for(const BusSignal& busSignal : busSignals)
 		{
-			AppSignal* sChild = m_compiler.signalSet()->appendBusChildSignal(*busParentSignal->signal(), bus, busSignal);
+			AppSignal* sChild = m_compiler.signalSet()->appendBusChildSignal(*busParentSignal->signal(), bus, busSignal, lm());
 
 			UalSignal* busChildSignal = nullptr;
 
@@ -2680,7 +2678,7 @@ namespace Builder
 
 		if (autoSignalPtr != nullptr)
 		{
-			m_compiler.signalSet()->append(autoSignalPtr);
+			m_compiler.signalSet()->append(autoSignalPtr, lm());
 		}
 
 		return busParentSignal;
@@ -2797,7 +2795,7 @@ namespace Builder
 
 		for(const BusSignal& busSignal : bus->busSignals())
 		{
-			AppSignal* newSignal = m_compiler.signalSet()->appendBusChildSignal(*s, bus, busSignal);
+			AppSignal* newSignal = m_compiler.signalSet()->appendBusChildSignal(*s, bus, busSignal, lm());
 
 			result &= ualSignal->appendBusChildRefSignals(busSignal.signalID, newSignal);
 		}
@@ -3064,6 +3062,11 @@ namespace Builder
 		log->append(m_analogAndBusSignalsHeap.getHeapLog());
 	}
 
+	std::shared_ptr<Hardware::DeviceModule> UalSignalsMap::lm() const
+	{
+		return m_compiler.getLmSharedPtr();
+	}
+
 	UalSignal* UalSignalsMap::privateCreateAutoSignal(const UalItem* ualItem,
 											   QUuid outPinUuid,
 											   E::SignalType signalType,
@@ -3124,7 +3127,7 @@ namespace Builder
 
 		if (autoSignalPtr != nullptr)
 		{
-			m_compiler.signalSet()->append(autoSignalPtr);
+			m_compiler.signalSet()->append(autoSignalPtr, lm());
 		}
 		else
 		{

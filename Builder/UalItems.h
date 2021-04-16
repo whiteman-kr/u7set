@@ -701,6 +701,8 @@ namespace Builder
 
 		void getHeapsLog(QStringList* log) const;
 
+		std::shared_ptr<Hardware::DeviceModule> lm() const;
+
 	private:
 		UalSignal* privateCreateAutoSignal(const UalItem* ualItem,
 									QUuid outPinUuid,

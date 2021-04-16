@@ -12,6 +12,7 @@
 namespace Hardware
 {
     class DeviceObject;
+	class DeviceAppSignal;
 }
 
 class DbProgress;
