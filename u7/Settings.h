@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QSize>
+#include <QPoint>
 
 struct DatabaseConnectionParam
 {
