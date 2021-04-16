@@ -32,9 +32,7 @@ unix {
 
 
 SOURCES += \
-    ../lib/ScriptDeviceObject.cpp \
-    ../lib/DataSource.cpp \
-    ../lib/DeviceObject.cpp \
+	../lib/DataSource.cpp \
     ../lib/DbStruct.cpp \
 	../lib/AppSignal.cpp \
     ../lib/Types.cpp \
@@ -61,9 +59,7 @@ HEADERS += \
 	Stable.h \
 	../lib/ConstStrings.h \
     ../lib/LanControllerInfo.h \
-    ../lib/ScriptDeviceObject.h \
     ../lib/DataSource.h \
-    ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
 	../lib/AppSignal.h \
     ../lib/CUtils.h \

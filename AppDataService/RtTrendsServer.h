@@ -94,6 +94,8 @@ namespace RtTrends
 
 		void onRtTrendsGetStateChangesRequest(const char* requestData, quint32 requestDataSize);
 
+		int getSamplePeriodCounter(E::RtTrendsSamplePeriod period, int lmWorkcycle_ms);
+
 	private:
 		AppDataServiceWorker& m_appDataService;
 		const SignalsToSources& m_signalsToSources;

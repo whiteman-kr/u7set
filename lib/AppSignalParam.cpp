@@ -224,6 +224,7 @@ bool AppSignalParam::load(const ::Proto::AppSignal& message)
 void AppSignalParam::load(const AppSignal& s)
 {
 	m_appSignalId = s.appSignalID();
+
 	m_customSignalId = s.customAppSignalID();
 	m_caption = s.caption();
 	m_equipmentId = s.equipmentID();

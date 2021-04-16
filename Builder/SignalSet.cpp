@@ -546,6 +546,8 @@ namespace Builder
 		}
 
 		m_signalToLm.insert({appSignal, lm});
+
+		appSignal->setLmEquipmentID(lm->equipmentIdTemplate());
 	}
 
 	void SignalSet::append(AppSignal* appSignal, DeviceModuleShared lm)
