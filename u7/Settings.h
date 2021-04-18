@@ -29,7 +29,6 @@ public:
 	// Public methods
 	//
 public:
-	void write() const;
 	void load();
 
 	void writeUserScope() const;

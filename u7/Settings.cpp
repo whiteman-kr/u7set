@@ -136,12 +136,6 @@ Settings::~Settings()
 {
 }
 
-void Settings::write() const
-{
-	writeUserScope();
-	writeSystemScope();
-}
-
 void Settings::load()
 {
 	loadUserScope();
@@ -352,10 +346,28 @@ void Settings::writeSystemScope() const
 	// Database connection setting are sored in secure storage
 	//
 	{
+		{
+			// Somehow credentials returns to first written state after log out/log in
+			//
+			QKeychain::DeletePasswordJob deleteJob(QLatin1String("u7keychain18"));
+			deleteJob.setKey("f1646f45-238a-45ec-ad0c-0d0960067b96");
+
+			// Blocking job
+			//
+			QEventLoop loop;
+			deleteJob.connect(&deleteJob, &QKeychain::DeletePasswordJob::finished, &loop, &QEventLoop::quit);
+
+			deleteJob.start();
+			loop.exec();
+
+			if (deleteJob.error() != QKeychain::Error::NoError)
+			{
+				qDebug() << "Deleting keychain failed: " << deleteJob.errorString();
+			}
+		}
+
 		QKeychain::WritePasswordJob writeJob(QLatin1String("u7keychain18"));
-		//writeJob.setAutoDelete(false);
 		writeJob.setKey("f1646f45-238a-45ec-ad0c-0d0960067b96");
-		//writeJob.setInsecureFallback(true);
 
 		QByteArray ba = QByteArray::fromRawData(reinterpret_cast<const char*>(&m_databaseConnection), sizeof(m_databaseConnection));
 		writeJob.setBinaryData(ba);

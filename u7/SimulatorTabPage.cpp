@@ -1,7 +1,6 @@
 #include "SimulatorTabPage.h"
 #include "Settings.h"
 #include "GlobalMessanger.h"
-#include "DialogSettingsConfigurator.h"
 #include "../lib/DbController.h"
 
 //
