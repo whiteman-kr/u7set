@@ -1072,11 +1072,11 @@ void EditSchemaWidget::updateFileActions()
 	// Version Control enable/disable items
 	//
 	m_fileSaveAction->setEnabled(readOnly() == false && modified() == true);
-	m_fileCheckInAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
-	m_fileCheckOutAction->setEnabled(readOnly() == true && fileInfo().state() == VcsState::CheckedIn);
-	m_fileUndoChangesAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
+	m_fileCheckInAction->setEnabled(readOnly() == false && fileInfo().state() == E::VcsState::CheckedOut);
+	m_fileCheckOutAction->setEnabled(readOnly() == true && fileInfo().state() == E::VcsState::CheckedIn);
+	m_fileUndoChangesAction->setEnabled(readOnly() == false && fileInfo().state() == E::VcsState::CheckedOut);
 	m_fileExportAction->setEnabled(true);
-	m_fileImportAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
+	m_fileImportAction->setEnabled(readOnly() == false && fileInfo().state() == E::VcsState::CheckedOut);
 
 	return;
 }

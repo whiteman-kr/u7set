@@ -172,7 +172,7 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				break;
 
 			case ObjectStateColumn:
-				if (devieFileInfo.state() == VcsState::CheckedOut)
+				if (devieFileInfo.state() == E::VcsState::CheckedOut)
 				{
 					QString state = devieFileInfo.action().text();
 					v.setValue<QString>(state);
@@ -180,7 +180,7 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				break;
 
 			case ObjectUserColumn:
-				if (devieFileInfo.state() == VcsState::CheckedOut)
+				if (devieFileInfo.state() == E::VcsState::CheckedOut)
 				{
 					v.setValue<QString>(usernameById(devieFileInfo.userId()));
 				}
@@ -204,7 +204,7 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 
 	case Qt::BackgroundRole:
 		{
-			if (devieFileInfo.state() == VcsState::CheckedOut)
+			if (devieFileInfo.state() == E::VcsState::CheckedOut)
 			{
 				QBrush b(StandardColors::VcsCheckedIn);
 
@@ -609,7 +609,7 @@ void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::m
 		device->setFileInfo(foundFileInfo->second);
 
 		if (device->fileInfo().deleted() == true ||
-			(device->fileInfo().action() == VcsItemAction::Deleted && device->fileInfo().state() == VcsState::CheckedIn))
+			(device->fileInfo().action() == VcsItemAction::Deleted && device->fileInfo().state() == E::VcsState::CheckedIn))
 		{
 			QModelIndex pi = modelIndex.parent();
 			std::shared_ptr<Hardware::DeviceObject> po = this->deviceObject(pi);
@@ -699,7 +699,7 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 		std::shared_ptr<Hardware::DeviceObject> d = deviceObject(index);
 		assert(d);
 
-		if (d->fileInfo().state() == VcsState::CheckedIn)
+		if (d->fileInfo().state() == E::VcsState::CheckedIn)
 		{
 			files.push_back(d->fileInfo());
 			checkedInList.push_back(index);
@@ -763,7 +763,7 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 			{
 				d->setFileInfo(fi);						// Update file info record in the DeviceOubject
 
-				if (d->fileInfo().state() == VcsState::CheckedOut)
+				if (d->fileInfo().state() == E::VcsState::CheckedOut)
 				{
 					QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount, index.parent());
 					emit dataChanged(index, bottomRightIndex);		// Notify view about data update
@@ -807,7 +807,7 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 		std::shared_ptr<Hardware::DeviceObject> d = deviceObject(index);
 		assert(d);
 
-		if (d->fileInfo().state() == VcsState::CheckedOut &&
+		if (d->fileInfo().state() == E::VcsState::CheckedOut &&
 			(d->fileInfo().userId() == currentUser.userId() || currentUser.isAdminstrator() == true))
 		{
 			files.push_back(d->fileInfo());

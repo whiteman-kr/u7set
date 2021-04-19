@@ -485,7 +485,7 @@ namespace Metrology
 
 		//
 		//
-		if (file->state() == VcsState::CheckedOut)
+		if (file->state() == E::VcsState::CheckedOut)
 		{
 			int userId = file->userId();
 
@@ -555,7 +555,7 @@ namespace Metrology
 
 		// file must be check out, after save
 		//
-		if (file->state() != VcsState::CheckedOut)
+		if (file->state() != E::VcsState::CheckedOut)
 		{
 			return true;
 		}
@@ -625,7 +625,7 @@ namespace Metrology
 
 		// check out file
 		//
-		if (file->state() == VcsState::CheckedOut)
+		if (file->state() == E::VcsState::CheckedOut)
 		{
 			return true;
 		}
@@ -661,7 +661,7 @@ namespace Metrology
 
 		// test checked in
 		//
-		bool result = file->state() == VcsState::CheckedIn;
+		bool result = file->state() == E::VcsState::CheckedIn;
 		return result;
 	}
 

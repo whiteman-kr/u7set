@@ -108,40 +108,6 @@ namespace Db
 	};
 }
 
-
-//
-//
-// VcsState
-//
-//
-class VcsState
-{
-public:
-	enum VcsStateType
-	{
-		CheckedIn,					// File has no any action, it's normal state
-		CheckedOut
-	};
-
-	VcsState() noexcept;
-	VcsState(VcsStateType s) noexcept;
-
-	[[nodiscard]] QString text() const noexcept;
-	[[nodiscard]] VcsStateType value() const noexcept;
-
-private:
-	VcsStateType m_state;
-
-	friend bool operator== (const VcsState& s1, const VcsState& s2) noexcept;
-	friend bool operator!= (const VcsState& s1, const VcsState& s2) noexcept;
-	friend bool operator< (const VcsState& s1, const VcsState& s2) noexcept;
-};
-
-bool operator== (const VcsState& s1, const VcsState& s2) noexcept;
-bool operator!= (const VcsState& s1, const VcsState& s2) noexcept;
-bool operator<  (const VcsState& s1, const VcsState& s2) noexcept;
-
-
 //
 //
 // VcsItemAction
@@ -510,8 +476,8 @@ public:
 	void setLastCheckIn(const QDateTime& value);
 	void setLastCheckIn(const QString& value);
 
-	[[nodiscard]] const VcsState& state() const noexcept;
-	void setState(const VcsState& state);
+	[[nodiscard]] const E::VcsState& state() const noexcept;
+	void setState(const E::VcsState& state);
 
 	[[nodiscard]] const VcsItemAction& action() const noexcept;
 	void setAction(const VcsItemAction& action);
@@ -544,7 +510,7 @@ protected:
 	QDateTime m_created;
 	QDateTime m_lastCheckIn;
 
-	VcsState m_state;
+	E::VcsState m_state;
 	VcsItemAction m_action;
 	int m_userId = -1;
 

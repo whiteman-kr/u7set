@@ -99,7 +99,6 @@ public:
 	};
 	Q_ENUM(LineStyleCap)
 
-
 	// UserTextPos
 	//
 	enum class TextPos
@@ -114,6 +113,15 @@ public:
 		Left
 	};
 	Q_ENUM(TextPos)
+
+	// Version Control State
+	//
+	enum class VcsState
+	{
+		CheckedIn,					// File has no any action, it's normal state
+		CheckedOut
+	};
+	Q_ENUM(VcsState)
 
 	// Format analog
 	//
@@ -772,7 +780,6 @@ public:
 		return valuesArray;
 	}
 };
-
 
 inline uint qHash(E::AppSignalStateFlagType t, uint seed)
 {

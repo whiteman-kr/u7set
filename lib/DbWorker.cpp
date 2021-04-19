@@ -7089,7 +7089,7 @@ bool DbWorker::db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo, bool
 
 	int fileId = q.value(0).toInt();
 	bool deleted  = q.value(1).toBool();
-	VcsState::VcsStateType state = q.value(2).toBool() ? VcsState::CheckedOut : VcsState::CheckedIn;
+	E::VcsState state = q.value(2).toBool() ? E::VcsState::CheckedOut : E::VcsState::CheckedIn;
 	VcsItemAction::VcsItemActionType action = static_cast<VcsItemAction::VcsItemActionType>(q.value(3).toInt());
 	int userId = q.value(4).toInt();
 	//int errcode = q.value(5).toInt();
@@ -7174,7 +7174,7 @@ static thread_local int attributesNo = -1;
 	file->setLastCheckIn(record.value(checkOutTimeNo).toDateTime());		// setLastCheckIn BUT TIME IS CheckOutTime
 
 	bool checkedOut = record.value(checkedOutNo).toBool();
-	file->setState(checkedOut ? VcsState::CheckedOut : VcsState::CheckedIn);
+	file->setState(checkedOut ? E::VcsState::CheckedOut : E::VcsState::CheckedIn);
 
 	int action = record.value(actionNo).toInt();
 	file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
@@ -7219,7 +7219,7 @@ bool DbWorker::db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo)
 	fileInfo->setChangeset(q.value(4).toInt());
 	fileInfo->setCreated(q.value(5).toDateTime());
 	fileInfo->setSize(q.value(6).toInt());
-	fileInfo->setState(q.value(7).toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
+	fileInfo->setState(q.value(7).toBool() ? E::VcsState::CheckedOut : E::VcsState::CheckedIn);
 	//fileInfo->setCheckoutTime(q.value(8).toString());
 	fileInfo->setUserId(q.value(9).toInt());
 	fileInfo->setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(10).toInt()));

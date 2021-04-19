@@ -15,55 +15,6 @@ namespace Db
 	}
 }
 
-
-//
-//
-//	VcsState
-//
-//
-VcsState::VcsState()  noexcept:
-	m_state(CheckedIn)
-{
-}
-
-VcsState::VcsState(VcsStateType s) noexcept :
-	m_state(s)
-{
-}
-
-QString VcsState::text() const noexcept
-{
-	switch (m_state)
-	{
-	case CheckedIn:		return QStringLiteral("Checked In");
-	case CheckedOut:	return QStringLiteral("Checked Out");
-	default:
-		assert(false);
-	}
-
-	return {};
-}
-
-VcsState::VcsStateType VcsState::value() const noexcept
-{
-	return m_state;
-}
-
-bool operator== (const VcsState& s1, const VcsState& s2) noexcept
-{
-	return s1.m_state == s2.m_state;
-}
-
-bool operator!= (const VcsState& s1, const VcsState& s2) noexcept
-{
-	return s1.m_state != s2.m_state;
-}
-
-bool operator< (const VcsState& s1, const VcsState& s2) noexcept
-{
-	return s1.m_state < s2.m_state;
-}
-
 //
 //
 // VcsItemAction
@@ -1103,7 +1054,7 @@ bool DbFileTree::removeIf(std::function<bool(const DbFileInfo&)> pred)
 //
 //
 DbFileInfo::DbFileInfo() noexcept :
-	m_state(VcsState::CheckedIn),
+	m_state(E::VcsState::CheckedIn),
 	m_action(VcsItemAction::Added),
 	m_details("{}")
 {
@@ -1129,7 +1080,7 @@ void DbFileInfo::trace() const
 	qDebug() << "	ID: " << m_fileId;
 	qDebug() << "	ParentID: " << m_parentId;
 	qDebug() << "	Changeset: " << m_changeset;
-	qDebug() << "	State: " << m_state.text();
+	qDebug() << "	State: " << E::valueToString<E::VcsState>(m_state);
 	qDebug() << "	Attributes: " << m_attributes;
 
 	return;
@@ -1255,12 +1206,12 @@ void DbFileInfo::setLastCheckIn(const QString& value)
 	setLastCheckIn(dt);
 }
 
-const VcsState& DbFileInfo::state() const noexcept
+const E::VcsState &DbFileInfo::state() const noexcept
 {
 	return m_state;
 }
 
-void DbFileInfo::setState(const VcsState& state)
+void DbFileInfo::setState(const E::VcsState& state)
 {
 	m_state = state;
 }

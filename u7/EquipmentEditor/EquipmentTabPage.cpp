@@ -882,13 +882,13 @@ void EquipmentTabPage::setActionState()
 		auto device = m_equipmentModel->deviceObject(mi);
 		assert(device);
 
-		if (device->fileInfo().state() == VcsState::CheckedOut &&
+		if (device->fileInfo().state() == E::VcsState::CheckedOut &&
 			(device->fileInfo().userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
 		{
 			canAnyBeCheckedIn = true;
 		}
 
-		if (device->fileInfo().state() == VcsState::CheckedIn)
+		if (device->fileInfo().state() == E::VcsState::CheckedIn)
 		{
 			canAnyBeCheckedOut = true;
 		}
@@ -1235,7 +1235,7 @@ void EquipmentTabPage::setProperties()
 		std::shared_ptr<Hardware::DeviceObject> device = m_equipmentModel->deviceObject(mi);
 		assert(device);
 
-		if (device->fileInfo().state() == VcsState::CheckedOut)
+		if (device->fileInfo().state() == E::VcsState::CheckedOut)
 		{
 			checkedOutList << device;
 		}

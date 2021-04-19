@@ -2943,7 +2943,7 @@ bool DbController::writeTags(const std::vector<DbTag> tags, const QString& comme
 		return false;
 	}
 
-	if (file->state() != VcsState::CheckedOut)
+	if (file->state() != E::VcsState::CheckedOut)
 	{
 		if (checkOut(fileList[0], nullptr) == false)
 		{

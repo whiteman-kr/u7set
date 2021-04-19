@@ -133,7 +133,7 @@ QVariant PendingChangesModel::data(const QModelIndex& index, int role /*= Qt::Di
 				}
 
 			case Columns::State:
-				return {file.state().text()};
+				return {E::valueToString<E::VcsState>(file.state())};
 
 			case Columns::Action:
 				return {file.action().text()};

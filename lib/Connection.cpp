@@ -962,7 +962,7 @@ namespace Hardware
 				return false;
 			}
 
-			if (file->state() != VcsState::CheckedOut)
+			if (file->state() != E::VcsState::CheckedOut)
 			{
 				*errorMessage = QString("File %1 state is not CheckedOut").arg(file->fileName());
 				return false;
@@ -1134,7 +1134,7 @@ namespace Hardware
             return false;
         }
 
-        if (file->state() != VcsState::CheckedOut)
+        if (file->state() != E::VcsState::CheckedOut)
         {
 			if (m_db->checkOut(fileList[0], nullptr) == false)
             {

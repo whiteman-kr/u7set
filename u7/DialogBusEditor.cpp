@@ -951,7 +951,7 @@ void DialogBusEditor::onSignalEdit()
 		editSignalsPointers.push_back(bs);
 	}
 
-	bool readOnly = m_busses.fileInfo(uuid).state() != VcsState::CheckedOut;
+	bool readOnly = m_busses.fileInfo(uuid).state() != E::VcsState::CheckedOut;
 
 	m_propEditorDialog->setReadOnly(readOnly);
 	m_propEditorDialog->setObjects(editSignalsPointers);
@@ -1398,7 +1398,7 @@ void DialogBusEditor::fillBusProperties()
 
 		busObjects.push_back(bus);
 
-		if (m_busses.fileInfo(bus->uuid()).state() == VcsState::CheckedOut)
+		if (m_busses.fileInfo(bus->uuid()).state() == E::VcsState::CheckedOut)
 		{
 			checkedOutCount++;
 		}
@@ -1524,7 +1524,7 @@ void DialogBusEditor::updateButtonsEnableState()
 
 		const std::shared_ptr<VFrame30::Bus> bus = m_busses.get(uuid);
 
-		if (m_busses.fileInfo(bus->uuid()).state() == VcsState::CheckedOut)
+		if (m_busses.fileInfo(bus->uuid()).state() == E::VcsState::CheckedOut)
 		{
 			checkedOutCount++;
 		}
@@ -1589,7 +1589,7 @@ void DialogBusEditor::updateBusTreeItemText(QTreeWidgetItem* item)
 
 	DbFileInfo fi = m_busses.fileInfo(uuid);
 
-	if (fi.state() == VcsState::CheckedOut)
+	if (fi.state() == E::VcsState::CheckedOut)
 	{
 		item->setText(1, fi.action().text());
 

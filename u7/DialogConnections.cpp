@@ -504,7 +504,7 @@ void DialogConnections::setPropertyEditorObjects()
 			return;
 		}
 
-		if (m_connections.fileInfo(connection->uuid()).state() != VcsState::CheckedOut)
+		if (m_connections.fileInfo(connection->uuid()).state() != E::VcsState::CheckedOut)
 		{
 			readOnly = true;
 		}
@@ -1182,7 +1182,7 @@ void DialogConnections::updateTreeItemText(QTreeWidgetItem* item)
 
 	DbFileInfo fi = m_connections.fileInfo(connection->uuid());
 
-	if (fi.state() == VcsState::CheckedOut)
+	if (fi.state() == E::VcsState::CheckedOut)
 	{
 		item->setText(c++, fi.action().text());
 
@@ -1219,7 +1219,7 @@ void DialogConnections::updateButtonsEnableState()
 			return;
 		}
 
-		if (m_connections.fileInfo(connection->uuid()).state() == VcsState::CheckedOut)
+		if (m_connections.fileInfo(connection->uuid()).state() == E::VcsState::CheckedOut)
 		{
 			checkedOutCount++;
 		}
