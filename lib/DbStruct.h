@@ -464,8 +464,9 @@ class DbFile;
 class DbFileInfo
 {
 public:
-	DbFileInfo() noexcept;
-	DbFileInfo(const DbFileInfo& fileInfo) noexcept = default;
+	DbFileInfo() = default;
+	DbFileInfo(const DbFileInfo& fileInfo) = default;
+	DbFileInfo(const DbFileInfo& fileInfo, const QString& details);
 	explicit DbFileInfo(const DbFile& file) noexcept;
 	explicit DbFileInfo(int fileId) noexcept;
 	virtual ~DbFileInfo() = default;
@@ -544,11 +545,11 @@ protected:
 	QDateTime m_created;
 	QDateTime m_lastCheckIn;
 
-	VcsState m_state;
-	VcsItemAction m_action;
+	VcsState m_state = VcsState::CheckedIn;
+	VcsItemAction m_action = VcsItemAction::Added;
 	int m_userId = -1;
 
-	QString m_details;
+	QString m_details = QLatin1String("{}");
 
 	union
 	{

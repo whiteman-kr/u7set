@@ -22,6 +22,7 @@ TARGET = u7
 TEMPLATE = app
 
 INCLUDEPATH += $$PWD
+INCLUDEPATH += $$PWD/../lib
 
 # c++20 support
 #

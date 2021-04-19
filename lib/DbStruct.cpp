@@ -1102,11 +1102,10 @@ bool DbFileTree::removeIf(std::function<bool(const DbFileInfo&)> pred)
 //	DbFileInfo
 //
 //
-DbFileInfo::DbFileInfo() noexcept :
-	m_state(VcsState::CheckedIn),
-	m_action(VcsItemAction::Added),
-	m_details("{}")
+DbFileInfo::DbFileInfo(const DbFileInfo& fileInfo, const QString& details) :
+	DbFileInfo(fileInfo)
 {
+	m_details = details;
 }
 
 DbFileInfo::DbFileInfo(const DbFile& file) noexcept

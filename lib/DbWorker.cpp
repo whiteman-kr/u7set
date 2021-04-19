@@ -558,6 +558,34 @@ QString DbWorker::toSqlByteaStr(const QByteArray& binData)
 	return QString("E'\\\\x%1'").arg(QString(binData.toHex().constData()));
 }
 
+std::shared_ptr<Hardware::DeviceObject> DbWorker::deviceObjectFromDbFile(const DbFile& file)
+{
+	std::shared_ptr<Hardware::DeviceObject> object = Hardware::DeviceObject::Create(file.data());
+	Q_ASSERT(object != nullptr);
+
+	if (object != nullptr)
+	{
+		auto fileInfo = std::make_shared<DbFileInfo>(file, object->details());
+		object->setData(fileInfo);
+	}
+
+	return object;
+}
+
+std::vector<std::shared_ptr<Hardware::DeviceObject>> DbWorker::deviceObjectFromDbFiles(const std::vector<std::shared_ptr<DbFile>>& files)
+{
+	std::vector<std::shared_ptr<Hardware::DeviceObject>> result;
+	result.reserve(files.size());
+
+	for (const std::shared_ptr<DbFile>& f : files)
+	{
+		std::shared_ptr<Hardware::DeviceObject> object = deviceObjectFromDbFile(*f.get());
+		result.push_back(object);
+	}
+
+	return result;
+}
+
 void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 {
 	// Init automitic varaiables
@@ -4465,7 +4493,7 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 	//
 	if (device == nullptr)
 	{
-		assert(device != nullptr);
+		Q_ASSERT(device != nullptr);
 		return;
 	}
 
@@ -4480,9 +4508,8 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 
 	// Log action
 	//
-	QString logMessage = QString("slot_addDeviceObject: Device %1, FileID %2, ParentID %3")
+	QString logMessage = QString("slot_addDeviceObject: Device %1, ParentID %3")
 						 .arg(device->equipmentId())
-						 .arg(device->fileId())
 						 .arg(parentId);
 
 	addLogRecord(db, logMessage);
@@ -4546,17 +4573,18 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 			return false;
 		}
 
-		DbFileInfo fi;
-		fi.setParentId(parentId);
+		auto fi = std::make_shared<DbFileInfo>();
+		fi->setParentId(parentId);
 
-		db_updateFileState(q, &fi, false);
-		current->setFileInfo(fi);
+		db_updateFileState(q, fi.get(), false);
+
+		current->setData(fi);
 
 		// Call it for all children
 		//
 		for (int i = 0; i < current->childrenCount(); i++)
 		{
-			result = addDevice(current->child(i).get(), current->fileInfo().fileId());
+			result = addDevice(current->child(i).get(), fi->fileId());
 			if (result == false)
 			{
 				nesting --;

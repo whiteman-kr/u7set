@@ -139,9 +139,6 @@ namespace Hardware
 		m_deviceType(deviceType),
 		m_preset(preset)
 	{
-		auto fileIdProp = ADD_PROPERTY_GETTER(int, PropertyNames::fileId, true, DeviceObject::fileId);
-		fileIdProp->setExpert(true);
-
 		auto uuidProp = ADD_PROPERTY_GETTER(QUuid, PropertyNames::uuid, true, DeviceObject::uuid);
 		uuidProp->setExpert(true);
 
@@ -253,33 +250,6 @@ namespace Hardware
 	std::shared_ptr<DeviceObject> DeviceObject::sharedPtr()
 	{
 		return shared_from_this();
-	}
-
-	std::shared_ptr<DeviceObject> DeviceObject::fromDbFile(const DbFile& file)
-	{
-		std::shared_ptr<DeviceObject> object = DeviceObject::Create(file.data());
-		Q_ASSERT(object != nullptr);
-
-		if (object != nullptr)
-		{
-			object->setFileInfo(file);
-		}
-
-		return object;
-	}
-
-	std::vector<std::shared_ptr<DeviceObject>> DeviceObject::fromDbFiles(const std::vector<std::shared_ptr<DbFile>>& files)
-	{
-		std::vector<std::shared_ptr<DeviceObject>> result;
-		result.reserve(files.size());
-
-		for (const std::shared_ptr<DbFile>& f : files)
-		{
-			std::shared_ptr<DeviceObject> object = fromDbFile(*f.get());
-			result.push_back(object);
-		}
-
-		return result;
 	}
 
 	bool DeviceObject::SaveData(Proto::Envelope* message) const
@@ -985,6 +955,11 @@ namespace Hardware
 		return result;
 	}
 
+	[[nodiscard]] const std::vector<std::shared_ptr<DeviceObject>>& DeviceObject::children() const
+	{
+		return m_children;
+	}
+
 	const std::shared_ptr<DeviceObject>& DeviceObject::child(int index) const
 	{
 		return m_children.at(index);
@@ -1177,180 +1152,6 @@ namespace Hardware
 		return boolResult;
 	}
 
-	void DeviceObject::sortByPlace(Qt::SortOrder order)
-	{
-		std::sort(std::begin(m_children), std::end(m_children),
-			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
-			{
-				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
-				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
-
-				if (ref1->m_place < ref2->m_place)
-				{
-					return true;
-				}
-				else
-				{
-					if (ref1->m_place == ref2->m_place)
-					{
-						return ref1->m_equipmentId < ref2->m_equipmentId;
-					}
-					else
-					{
-						return false;
-					}
-				}
-			});
-
-		return;
-	}
-
-	void DeviceObject::sortByEquipmentId(Qt::SortOrder order)
-	{
-		std::sort(std::begin(m_children), std::end(m_children),
-			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
-			{
-				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
-				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
-
-				if (ref1->m_equipmentId < ref2->m_equipmentId)
-				{
-					return true;
-				}
-				else
-				{
-					if (ref1->m_equipmentId == ref2->m_equipmentId)
-					{
-						return ref1->m_place < ref2->m_place;
-					}
-					else
-					{
-						return false;
-					}
-				}
-			});
-
-		return;
-	}
-
-	void DeviceObject::sortByCaption(Qt::SortOrder order)
-	{
-		std::sort(std::begin(m_children), std::end(m_children),
-			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
-			{
-				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
-				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
-
-				if (ref1->m_caption < ref2->m_caption)
-				{
-					return true;
-				}
-				else
-				{
-					if (ref1->m_caption == ref2->m_caption)
-					{
-						return ref1->m_place < ref2->m_place;
-					}
-					else
-					{
-						return false;
-					}
-				}
-			});
-
-		return;
-	}
-
-	void DeviceObject::sortByType(Qt::SortOrder order)
-	{
-		std::sort(std::begin(m_children), std::end(m_children),
-			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
-			{
-				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
-				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
-
-				if (ref1->deviceType() < ref2->deviceType())
-				{
-					return true;
-				}
-				else
-				{
-					if (ref1->deviceType() == ref2->deviceType())
-					{
-						return ref1->m_equipmentId < ref2->m_equipmentId;
-					}
-					else
-					{
-						return false;
-					}
-				}
-			});
-
-		return;
-	}
-
-	void DeviceObject::sortByState(Qt::SortOrder order)
-	{
-		std::sort(std::begin(m_children), std::end(m_children),
-			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
-			{
-				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
-				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
-
-				if (ref1->m_fileInfo.state() < ref2->m_fileInfo.state())
-				{
-					return true;
-				}
-				else
-				{
-					if (ref1->m_fileInfo.state() == ref2->m_fileInfo.state())
-					{
-						return ref1->m_equipmentId < ref2->m_equipmentId;
-					}
-					else
-					{
-						return false;
-					}
-				}
-			});
-
-		return;
-	}
-
-	void DeviceObject::sortByUser(Qt::SortOrder order, const std::map<int, QString>& users)
-	{
-		std::sort(std::begin(m_children), std::end(m_children),
-			[order, &users](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
-			{
-				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
-				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
-
-				auto uit1 = users.find(ref1->m_fileInfo.userId());
-				QString u1 =  uit1 == users.end() ? "Unknows" : uit1->second;
-
-				auto uit2 = users.find(ref2->m_fileInfo.userId());
-				QString u2 =  uit2 == users.end() ? "Unknows" : uit2->second;
-
-				if (u1 < u2)
-				{
-					return true;
-				}
-				else
-				{
-					if (u1 == u2)
-					{
-						return ref1->m_equipmentId < ref2->m_equipmentId;
-					}
-					else
-					{
-						return false;
-					}
-				}
-			});
-
-		return;
-	}
-
 	QString DeviceObject::replaceEngeneeringToEngineering(const QString& data)
 	{
 		QString result = data;
@@ -1359,11 +1160,6 @@ namespace Hardware
 		result.replace(QLatin1String("Engeneering"), QLatin1String("Engineering"), Qt::CaseSensitive);
 
 		return result;
-	}
-
-	int DeviceObject::fileId() const
-	{
-		return fileInfo().fileId();
 	}
 
 	QUuid DeviceObject::uuid() const
@@ -1448,24 +1244,6 @@ namespace Hardware
 			m_caption = value;
 			m_caption.replace(QChar::LineFeed, " ");
 		}
-	}
-
-	DbFileInfo& DeviceObject::fileInfo()
-	{
-		//m_fileInfo.setDetails(details());		// fileInfo() is called to often
-		return m_fileInfo;
-	}
-
-	const DbFileInfo& DeviceObject::fileInfo() const
-	{
-		//const_cast<DeviceObject*>(this)->m_fileInfo.setDetails(details());	// fileInfo() is called to often
-		return m_fileInfo;
-	}
-
-	void DeviceObject::setFileInfo(const DbFileInfo& value)
-	{
-		m_fileInfo = value;
-		m_fileInfo.setDetails(details());
 	}
 
 	QString DeviceObject::childRestriction() const
@@ -1560,6 +1338,23 @@ R"DELIM({
 	void DeviceObject::setPresetObjectUuid(QUuid value)
 	{
 		m_presetObjectUuid = value;
+	}
+
+
+	DbFileInfo* DeviceObject::data()
+	{
+		return m_data.get();
+	}
+
+	const DbFileInfo* DeviceObject::data() const
+	{
+		return m_data.get();
+	}
+
+	void DeviceObject::setData(std::shared_ptr<DbFileInfo> data)
+	{
+		m_data = std::move(data);
+		return;
 	}
 
 	//

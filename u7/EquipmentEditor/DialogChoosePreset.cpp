@@ -57,7 +57,7 @@ DialogChoosePreset::DialogChoosePreset(QWidget* parent, DbController* db, Hardwa
 
 	for (std::shared_ptr<DbFile>& f : files)
 	{
-		std::shared_ptr<Hardware::DeviceObject> object(Hardware::DeviceObject::fromDbFile(*f));
+		std::shared_ptr<Hardware::DeviceObject> object = DbWorker::deviceObjectFromDbFile(*f);
 		Q_ASSERT(object != nullptr);
 
 		m_presets.push_back(object);

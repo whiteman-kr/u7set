@@ -138,8 +138,6 @@ public:
 
 	bool getChangesetDetails(int changeset, DbChangesetDetails* out, QWidget* parentWidget);
 
-	// Hardware Configuration
-	//
 	bool addDeviceObject(Hardware::DeviceObject* device, int parentId, QWidget* parentWidget);
 	bool deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& devices, QWidget* parentWidget);
 	bool getDeviceTreeLatestVersion(const DbFileInfo& file, std::shared_ptr<Hardware::DeviceObject>* out, QWidget* parentWidget);

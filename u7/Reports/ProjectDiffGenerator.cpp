@@ -1068,20 +1068,18 @@ std::shared_ptr<Hardware::DeviceObject> ProjectDiffGenerator::loadDeviceObject(c
 		return nullptr;
 	}
 
-	std::shared_ptr<Hardware::DeviceObject> object = Hardware::DeviceObject::fromDbFile(*file);
+	std::shared_ptr<Hardware::DeviceObject> object = DbWorker::deviceObjectFromDbFile(*file);
 	if (object == nullptr)
 	{
 		return nullptr;
 	}
 
 	// Save object to the map
-
-	(*deviceObjectMap)[object->fileId()] = object;
-
-	//qDebug() << object->fileId() << object->equipmentIdTemplate() << object->equipmentId();
+	//
+	(*deviceObjectMap)[file->fileId()] = object;
 
 	// Get pointers to parent and expand Equipment ID
-
+	//
 	auto it = deviceObjectMap->find(file->parentId());
 	if (it != deviceObjectMap->end())
 	{

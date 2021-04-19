@@ -77,15 +77,17 @@ void DbControllerHardwareConfigurationTests::addAndRemoveDeviceObjectTest()
 	Hardware::DeviceObject* deviceForTest =  new Hardware::DeviceRoot();
 	assert(deviceForTest);
 
-	//deviceForTest
+	// deviceForTest
+	//
+	auto devFileInfo = std::make_shared<DbFileInfo>(fileInfo, deviceForTest->details());
+	deviceForTest->setData(devFileInfo);
 
-	deviceForTest->setFileInfo(fileInfo);
 	deviceForTest->setCaption("addDeviceObjectTestDevice");
 	deviceForTest->setObjectName("addDeviceObjectTestDevice");
 	deviceForTest->setPlace(1);
 	deviceForTest->setChildRestriction("ChildRestriction");
 
-	ok = m_db->addDeviceObject(deviceForTest, 1, 0);
+	ok = m_db->addDeviceObject(deviceForTest, 1, nullptr);
 	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec("SELECT MAX(fileid) FROM fileInstance");

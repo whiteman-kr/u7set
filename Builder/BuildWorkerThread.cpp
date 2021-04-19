@@ -450,7 +450,9 @@ namespace Builder
 		std::shared_ptr<Hardware::DeviceRoot> deviceRoot = std::make_shared<Hardware::DeviceRoot>();
 
 		int rootFileId = m_context->m_db.systemFileId(DbDir::HardwareConfigurationDir);
-		deviceRoot->fileInfo().setFileId(rootFileId);
+		auto fio = std::make_shared<DbFileInfo>(rootFileId);
+
+		deviceRoot->setData(fio);
 
 		if (bool ok = getEquipment(deviceRoot.get());
 			ok == false)
@@ -526,9 +528,24 @@ namespace Builder
 		std::vector<DbFileInfo> files;
 		bool ok = false;
 
+		// --
+		//
+		int parentFileId = -1;
+
+		if (const DbFileInfo* parentFileInfo = parent->data();
+			parentFileInfo == nullptr)
+		{
+			Q_ASSERT(parentFileInfo);
+			return false;
+		}
+		else
+		{
+			parentFileId = parentFileInfo->fileId();
+		}
+
 		// Get file list with checked out files,
 		//
-		ok = m_context->m_db.getFileList(&files, parent->fileInfo().fileId(), true, nullptr);
+		ok = m_context->m_db.getFileList(&files, parentFileId, true, nullptr);
 
 		if (ok == false)
 		{

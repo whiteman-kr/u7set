@@ -23,7 +23,7 @@ const char* EquipmentView::mimeTypeShortDescription = "application/x-deviceobjec
 EquipmentView::EquipmentView(DbController* dbcontroller) :
 	m_dbController(dbcontroller)
 {
-	assert(m_dbController);
+	Q_ASSERT(m_dbController);
 
 	setSortingEnabled(true);
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -333,7 +333,10 @@ void EquipmentView::addPreset()
 		DialogChoosePreset d(this, db(), selectedObject->deviceType(), false);
 		if (d.exec() == QDialog::Accepted && d.selectedPreset != nullptr)
 		{
-			addPresetToConfiguration(d.selectedPreset->fileInfo(), true);
+			const DbFileInfo* fio = d.selectedPreset->data();
+			Q_ASSERT(fio);
+
+			addPresetToConfiguration(*fio, true);
 			emit updateState();
 		}
 	}
@@ -345,7 +348,7 @@ void EquipmentView::replaceObject()
 {
 	if (isConfigurationMode() == false)
 	{
-		assert(isConfigurationMode() == true);
+		Q_ASSERT(isConfigurationMode() == true);
 		return;
 	}
 
@@ -353,7 +356,7 @@ void EquipmentView::replaceObject()
 
 	if (selectedIndexList.size() != 1)
 	{
-		assert(selectedIndexList.size() == 1);
+		Q_ASSERT(selectedIndexList.size() == 1);
 		return;
 	}
 
@@ -362,13 +365,13 @@ void EquipmentView::replaceObject()
 	auto selectedObject = equipmentModel()->deviceObject(singleSelectedIndex);
 	if (selectedObject == nullptr)
 	{
-		assert(selectedObject != nullptr);
+		Q_ASSERT(selectedObject != nullptr);
 		return;
 	}
 
 	if (selectedObject->presetRoot() == false)
 	{
-		assert(selectedObject->presetRoot());
+		Q_ASSERT(selectedObject->presetRoot());
 	}
 
 	DialogChoosePreset d(this, db(), selectedObject->deviceType(), true);
@@ -389,13 +392,16 @@ void EquipmentView::replaceObject()
 		//
 		std::shared_ptr<Hardware::DeviceObject> selectedObjectFullTree;
 
-		bool ok = db()->getDeviceTreeLatestVersion(selectedObject->fileInfo(), &selectedObjectFullTree, this);
+		const DbFileInfo* fio = selectedObject->data();
+		Q_ASSERT(fio);
+
+		bool ok = db()->getDeviceTreeLatestVersion(*fio, &selectedObjectFullTree, this);
 		if (ok == false)
 		{
 			return;
 		}
 
-		assert(selectedObjectFullTree);
+		Q_ASSERT(selectedObjectFullTree);
 
 		// Delete selected device
 		//
@@ -403,12 +409,15 @@ void EquipmentView::replaceObject()
 
 		// Object will not be added to DB in the next line, it must be changed before adding
 		//
-		std::shared_ptr<Hardware::DeviceObject> device = addPresetToConfiguration(selectedPreset->fileInfo(), false);
+		const DbFileInfo* presetFio = selectedPreset->data();
+		Q_ASSERT(presetFio);
+
+		std::shared_ptr<Hardware::DeviceObject> device = addPresetToConfiguration(*presetFio, false);
 
 		if (device == nullptr || device->presetRoot() == false)
 		{
-			assert(device);
-			assert(device->presetRoot());
+			Q_ASSERT(device);
+			Q_ASSERT(device->presetRoot());
 			return;
 		}
 
@@ -449,7 +458,7 @@ void EquipmentView::replaceObject()
 				for (int childIndex = 0; childIndex < dst->childrenCount(); childIndex++)
 				{
 					auto dstChild = dst->child(childIndex);
-					assert(dstChild);
+					Q_ASSERT(dstChild);
 
 					QString dstChildTemplateId = dstChild->equipmentIdTemplate();
 
@@ -458,7 +467,7 @@ void EquipmentView::replaceObject()
 					for (int srcChildIndex = 0; srcChildIndex < src->childrenCount(); srcChildIndex++)
 					{
 						auto srcChild = src->child(srcChildIndex);
-						assert(srcChild);
+						Q_ASSERT(srcChild);
 
 						if (srcChild->equipmentIdTemplate() == dstChildTemplateId)
 						{
@@ -650,7 +659,7 @@ void EquipmentView::choosePreset(Hardware::DeviceType type)
 {
 	if (isConfigurationMode() == false)
 	{
-		assert(isConfigurationMode() == true);
+		Q_ASSERT(isConfigurationMode() == true);
 		return;
 	}
 
@@ -689,8 +698,8 @@ void EquipmentView::choosePreset(Hardware::DeviceType type)
 
 	for (std::shared_ptr<DbFile>& f : files)
 	{
-		std::shared_ptr<Hardware::DeviceObject> object(Hardware::DeviceObject::fromDbFile(*f));
-		assert(object != nullptr);
+		auto object = DbWorker::deviceObjectFromDbFile(*f);
+		Q_ASSERT(object != nullptr);
 
 		presets.push_back(object);
 	}
@@ -706,7 +715,10 @@ void EquipmentView::choosePreset(Hardware::DeviceType type)
 		connect(a, &QAction::triggered,
 			[this, p]()
 			{
-				addPresetToConfiguration(p->fileInfo(), true);
+				const DbFileInfo* fio = p->data();
+				Q_ASSERT(fio);
+
+				addPresetToConfiguration(*fio, true);
 			});
 
 		menu->addAction(a);
@@ -719,9 +731,9 @@ void EquipmentView::choosePreset(Hardware::DeviceType type)
 
 std::shared_ptr<Hardware::DeviceObject> EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo, bool addToEquipment)
 {
-	assert(fileInfo.fileId() != -1);
-	assert(fileInfo.parentId() != -1);
-	assert(fileInfo.parentId() == db()->systemFileId(DbDir::HardwarePresetsDir));
+	Q_ASSERT(fileInfo.fileId() != -1);
+	Q_ASSERT(fileInfo.parentId() != -1);
+	Q_ASSERT(fileInfo.parentId() == db()->systemFileId(DbDir::HardwarePresetsDir));
 
 	// Read all preset tree and add it to the hardware configuration
 	//
@@ -733,11 +745,16 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentView::addPresetToConfiguration(
 		return std::shared_ptr<Hardware::DeviceObject>();
 	}
 
-	if (device->fileInfo().fileId() != fileInfo.fileId() ||
+	const DbFileInfo* deviceFileInfo = device->data();
+	Q_ASSERT(deviceFileInfo);
+
+	if (deviceFileInfo == nullptr ||
+		deviceFileInfo->fileId() != fileInfo.fileId() ||
 		device->presetRoot() == false)
 	{
-		assert(device->fileInfo().fileId() == fileInfo.fileId());
-		assert(device->presetRoot() == true);
+		Q_ASSERT(deviceFileInfo);
+		Q_ASSERT(deviceFileInfo->fileId() == fileInfo.fileId());
+		Q_ASSERT(device->presetRoot() == true);
 		return std::shared_ptr<Hardware::DeviceObject>();
 	}
 
@@ -760,7 +777,7 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentView::addPresetToConfiguration(
 
 				if (module->propertyExists("SubsystemID") == false)
 				{
-					assert(false);
+					Q_ASSERT(false);
 				}
 				else
 				{
@@ -809,13 +826,13 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 {
 	if (object == nullptr)
 	{
-		assert(object != nullptr);
+		Q_ASSERT(object != nullptr);
 		return QModelIndex();
 	}
 
 	if (isPresetMode() == true && object->preset() == false)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return QModelIndex();
 	}
 
@@ -825,7 +842,7 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 
 	std::function<void(Hardware::DeviceObject*)> setUuid = [&setUuid, presetMode](Hardware::DeviceObject* object)
 		{
-			assert(object);
+			Q_ASSERT(object);
 
 			object->setUuid(QUuid::createUuid());
 
@@ -872,12 +889,12 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 		// --
 		//
 		parentObject = equipmentModel()->deviceObject(parentModelIndex);
-		assert(parentObject);
+		Q_ASSERT(parentObject);
 
 		if (object->deviceType() == Hardware::DeviceType::Software &&
 			(parentObject->deviceType() != Hardware::DeviceType::Workstation && parentObject->deviceType() != Hardware::DeviceType::Software))
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return QModelIndex();
 		}
 
@@ -888,13 +905,13 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 			parentModelIndex = parentModelIndex.parent();
 			parentObject = equipmentModel()->deviceObject(parentModelIndex);
 
-			assert(parentObject->deviceType() < object->deviceType());
+			Q_ASSERT(parentObject->deviceType() < object->deviceType());
 		}
 
 		if (parentObject->deviceType() > object->deviceType() ||
 			(object->deviceType() == Hardware::DeviceType::Workstation && parentObject->deviceType() > Hardware::DeviceType::Chassis))
 		{
-			assert(parentObject->deviceType() <= object->deviceType());
+			Q_ASSERT(parentObject->deviceType() <= object->deviceType());
 			return QModelIndex();
 		}
 	}
@@ -919,7 +936,10 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 
 	// Add device to DB
 	//
-	bool result = db()->addDeviceObject(object.get(), parentObject->fileInfo().fileId(), this);
+	const DbFileInfo* parentObjectFileInfo = parentObject->data();
+	Q_ASSERT(parentObjectFileInfo);
+
+	bool result = db()->addDeviceObject(object.get(), parentObjectFileInfo->fileId(), this);
 
 	if (result == false)
 	{
@@ -955,21 +975,28 @@ void EquipmentView::addInOutsToSignals()
 
 	if (selectedIndexList.size() != 1)
 	{
-		assert(false);	// how did we get here?
+		Q_ASSERT(false);	// how did we get here?
 		return;
 	}
 
 	auto device = equipmentModel()->deviceObject(selectedIndexList.front());
 	if (device == nullptr)
 	{
-		assert(device);
+		Q_ASSERT(device);
 		return;
 	}
 
 	auto module = device->toModule();
 	if (module == nullptr)
 	{
-		assert(module);
+		Q_ASSERT(module);
+		return;
+	}
+
+	const DbFileInfo* moduleFileInfo = module->data();
+	if (moduleFileInfo == nullptr)
+	{
+		Q_ASSERT(moduleFileInfo);
 		return;
 	}
 
@@ -996,7 +1023,7 @@ void EquipmentView::addInOutsToSignals()
 	// Get module from the DB as here it can be not fully loaded
 	//
 	std::shared_ptr<Hardware::DeviceObject> dbModule;
-	bool ok = db()->getDeviceTreeLatestVersion(module->fileInfo(), &dbModule, this);
+	bool ok = db()->getDeviceTreeLatestVersion(*moduleFileInfo, &dbModule, this);
 
 	if (ok == false)
 	{
@@ -1013,7 +1040,7 @@ void EquipmentView::addInOutsToSignals()
 			if (device->deviceType() == Hardware::DeviceType::AppSignal)
 			{
 				Hardware::DeviceAppSignal* signal = dynamic_cast<Hardware::DeviceAppSignal*>(device);
-				assert(signal);
+				Q_ASSERT(signal);
 
 				if (signal->function() == E::SignalFunction::Input ||
 					signal->function() == E::SignalFunction::Output ||
@@ -1137,7 +1164,7 @@ void EquipmentView::showAppSignals(bool refreshSignalList /*= false*/)
 
 	if (selectedIndexList.isEmpty() == true)
 	{
-		assert(false);	// how did we get here?
+		Q_ASSERT(false);	// how did we get here?
 		return;
 	}
 
@@ -1146,7 +1173,7 @@ void EquipmentView::showAppSignals(bool refreshSignalList /*= false*/)
 	for (const QModelIndex& mi : selectedIndexList)
 	{
 		auto device = equipmentModel()->deviceObject(mi);
-		assert(device);
+		Q_ASSERT(device);
 
 		if (device != nullptr)
 		{
@@ -1167,21 +1194,21 @@ void EquipmentView::addAppSignal()
 
 	if (selectedIndexList.size() != 1)
 	{
-		assert(false);	// how did we get here?
+		Q_ASSERT(false);	// how did we get here?
 		return;
 	}
 
 	auto device = equipmentModel()->deviceObject(selectedIndexList.front());
 	if (device == nullptr)
 	{
-		assert(device);
+		Q_ASSERT(device);
 		return;
 	}
 
 	auto module = device->toModule();
 	if (module == nullptr || module->isLogicModule() == false)
 	{
-		assert(module);
+		Q_ASSERT(module);
 		return;
 	}
 
@@ -1203,7 +1230,7 @@ void EquipmentView::addLogicSchemaToLm()
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
 	if (selectedIndexList.empty() == true)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -1214,7 +1241,7 @@ void EquipmentView::addLogicSchemaToLm()
 	for (const QModelIndex& mi : selectedIndexList)
 	{
 		auto device = equipmentModel()->deviceObject(mi);
-		assert(device);
+		Q_ASSERT(device);
 
 		deviceStrIds.push_back(device->equipmentId());
 
@@ -1257,17 +1284,17 @@ void EquipmentView::showLogicSchemaForLm()
 
 	if (selectedIndexList.size() != 1)
 	{
-		assert(false);	// how did we get here?
+		Q_ASSERT(false);	// how did we get here?
 		return;
 	}
 
 	auto device = equipmentModel()->deviceObject(selectedIndexList.front());
-	assert(device);
+	Q_ASSERT(device);
 
 	auto module = device->toModule();
 	if (module == nullptr || module->isLogicModule() == false)
 	{
-		assert(module);
+		Q_ASSERT(module);
 		return;
 	}
 
@@ -1289,7 +1316,7 @@ void EquipmentView::addOptoConnection()
 
 	if (selectedIndexList.size() != 1 && selectedIndexList.size() != 2)
 	{
-		assert(false);	// how did we get here?
+		Q_ASSERT(false);	// how did we get here?
 		return;
 	}
 
@@ -1298,8 +1325,8 @@ void EquipmentView::addOptoConnection()
 
 	if (controller1 == nullptr || controller2 == nullptr)
 	{
-		assert(controller1);
-		assert(controller2);
+		Q_ASSERT(controller1);
+		Q_ASSERT(controller2);
 		return;
 	}
 
@@ -1343,7 +1370,7 @@ void EquipmentView::showObjectConnections()
 
 	if (selectedIndexList.size() == 0)
 	{
-		assert(false);	// how did we get here?
+		Q_ASSERT(false);	// how did we get here?
 		return;
 	}
 
@@ -1353,7 +1380,7 @@ void EquipmentView::showObjectConnections()
 		auto device = equipmentModel()->deviceObject(mi);
 		if (device == nullptr)
 		{
-			assert(device);
+			Q_ASSERT(device);
 			return;
 		}
 
@@ -1389,14 +1416,14 @@ void EquipmentView::copySelectedDevices()
 
 	if (selected.empty())
 	{
-		assert(false);		// How did we get here, action should be disabled
+		Q_ASSERT(false);		// How did we get here, action should be disabled
 		return;
 	}
 
 	// Check if all selected equipmnet has the same type
 	//
 	auto firstDevice = equipmentModel()->deviceObject(selected.first());
-	assert(firstDevice);
+	Q_ASSERT(firstDevice);
 
 	Hardware::DeviceType type = firstDevice->deviceType();
 	bool allObjectsArePresetRoots = true;
@@ -1407,11 +1434,11 @@ void EquipmentView::copySelectedDevices()
 	for (const QModelIndex& mi : selected)
 	{
 		const auto device = equipmentModel()->deviceObject(mi);
-		assert(device);
+		Q_ASSERT(device);
 
 		if (type != device->deviceType())
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -1427,16 +1454,19 @@ void EquipmentView::copySelectedDevices()
 
 	for (const Hardware::DeviceObject* device : devices)
 	{
+		const DbFileInfo* deviceFileInfo = device->data();
+		Q_ASSERT(deviceFileInfo);
+
 		std::shared_ptr<Hardware::DeviceObject> out;
 
-		bool result = db()->getDeviceTreeLatestVersion(device->fileInfo(), &out, this);
+		bool result = db()->getDeviceTreeLatestVersion(*deviceFileInfo, &out, this);
 
 		if (result == false)
 		{
 			return;
 		}
 
-		assert(out);
+		Q_ASSERT(out);
 
 		latestDevices.push_back(out);
 	}
@@ -1470,7 +1500,7 @@ void EquipmentView::copySelectedDevices()
 
 	if (ok == false)
 	{
-		assert(ok);
+		Q_ASSERT(ok);
 		return;
 	}
 
@@ -1481,7 +1511,7 @@ void EquipmentView::copySelectedDevices()
 
 	if (ok == false)
 	{
-		assert(ok);
+		Q_ASSERT(ok);
 		return;
 	}
 
@@ -1515,7 +1545,7 @@ void EquipmentView::pasteDevices()
 	{
 		// How did we get here?
 		//
-		assert(pasetIsAllowed == true);
+		Q_ASSERT(pasetIsAllowed == true);
 		return;
 	}
 
@@ -1621,7 +1651,7 @@ void EquipmentView::pasteDevices(const ::Proto::EnvelopeSet& messageItems, const
 	//
 	std::function<void(Hardware::DeviceObject*)> setUuid = [&setUuid](Hardware::DeviceObject* object)
 		{
-			assert(object);
+			Q_ASSERT(object);
 			object->setUuid(QUuid::createUuid());
 
 			for (int i = 0; i < object->childrenCount(); i++)
@@ -1745,12 +1775,12 @@ bool EquipmentView::canPaste(const ::Proto::EnvelopeSetShortDescription& message
 	//
 	if (message.classnamehash().size() == 0 || message.devicetype().size() == 0)
 	{
-		assert(message.classnamehash().size() > 0);
-		assert(message.devicetype().size() > 0);
+		Q_ASSERT(message.classnamehash().size() > 0);
+		Q_ASSERT(message.devicetype().size() > 0);
 		return false;
 	}
 
-	assert(message.classnamehash().size() == message.devicetype().size());
+	Q_ASSERT(message.classnamehash().size() == message.devicetype().size());
 
 	std::shared_ptr<Hardware::DeviceObject> deviceObject;
 
@@ -1761,7 +1791,7 @@ bool EquipmentView::canPaste(const ::Proto::EnvelopeSetShortDescription& message
 		bool canCreateInstance = Hardware::DeviceObjectFactory.isRegistered(classNameHash);
 		if (canCreateInstance == false)
 		{
-			assert(canCreateInstance);
+			Q_ASSERT(canCreateInstance);
 			return false;
 		}
 	}
@@ -1769,11 +1799,11 @@ bool EquipmentView::canPaste(const ::Proto::EnvelopeSetShortDescription& message
 	// Check if chese devices can be added
 	//
 	auto selectedDevice = equipmentModel()->deviceObject(selectedIndexList.at(0));
-	assert(selectedDevice);
+	Q_ASSERT(selectedDevice);
 
 	if (selectedDevice == nullptr)
 	{
-		assert(selectedDevice);
+		Q_ASSERT(selectedDevice);
 		return false;
 	}
 
@@ -1892,15 +1922,18 @@ void EquipmentView::showHistory()
 	auto device = equipmentModel()->deviceObject(selected.front());
 	if (device == nullptr)
 	{
-		assert(device);
+		Q_ASSERT(device);
 		return;
 	}
+
+	const DbFileInfo* deviceFileInfo = device->data();
+	Q_ASSERT(deviceFileInfo);
 
 	// Get file history
 	//
 	std::vector<DbChangeset> fileHistory;
 
-	bool ok = db()->getFileHistoryRecursive(device->fileInfo(), &fileHistory, this);
+	bool ok = db()->getFileHistoryRecursive(*deviceFileInfo, &fileHistory, this);
 	if (ok == false)
 	{
 		return;
@@ -1927,13 +1960,16 @@ void EquipmentView::compare()
 	auto device = equipmentModel()->deviceObject(selected.front());
 	if (device == nullptr)
 	{
-		assert(device);
+		Q_ASSERT(device);
 		return;
 	}
 
+	const DbFileInfo* deviceFileInfo = device->data();
+	Q_ASSERT(deviceFileInfo);
+
 	// --
 	//
-	CompareDialog::showCompare(db(), DbChangesetObject(device->fileInfo()), -1, this);
+	CompareDialog::showCompare(db(), DbChangesetObject(*deviceFileInfo), -1, this);
 
 	return;
 }
@@ -1968,7 +2004,7 @@ void EquipmentView::updateFromPreset()
 	// Check if some files are checked out
 	//
 	DbFileInfo hcFileInfo = db()->systemFileInfo(db()->systemFileId(DbDir::HardwareConfigurationDir));
-	assert(hcFileInfo.isNull() == false);
+	Q_ASSERT(hcFileInfo.isNull() == false);
 
 //	std::vector<DbFileInfo> checkedOutHcFiles;
 
@@ -1988,7 +2024,7 @@ void EquipmentView::updateFromPreset()
 	// Get all presets
 	//
 	DbFileInfo hpFileInfo = db()->systemFileInfo(DbDir::HardwarePresetsDir); 	//	hp -- stands for Hardware Presets
-	assert(hpFileInfo.isNull() == false);
+	Q_ASSERT(hpFileInfo.isNull() == false);
 
 	std::shared_ptr<Hardware::DeviceObject> presetRoot;
 
@@ -1999,7 +2035,7 @@ void EquipmentView::updateFromPreset()
 		return;
 	}
 
-	assert(presetRoot);
+	Q_ASSERT(presetRoot);
 
 	// Get All preset Roots
 	//
@@ -2013,8 +2049,8 @@ void EquipmentView::updateFromPreset()
 
 		if (preset.get() == nullptr || preset->presetRoot() == false)
 		{
-			assert(preset);
-			assert(preset->presetRoot() == true);
+			Q_ASSERT(preset);
+			Q_ASSERT(preset->presetRoot() == true);
 			continue;
 		}
 
@@ -2065,7 +2101,7 @@ void EquipmentView::updateFromPreset()
 		return;
 	}
 
-	assert(root);
+	Q_ASSERT(root);
 
 	// Check out all preset files
 	//
@@ -2078,11 +2114,14 @@ void EquipmentView::updateFromPreset()
 	std::function<void(std::shared_ptr<Hardware::DeviceObject>)> getPresetFiles =
 		[&presetRoots, &getPresetFiles, &presetFiles](std::shared_ptr<Hardware::DeviceObject> object)
 		{
-			assert(object);
+			Q_ASSERT(object);
 
 			if (object->preset() == true)
 			{
-				presetFiles.push_back(object->fileInfo());
+				const DbFileInfo* objectFileInfo = object->data();
+				Q_ASSERT(objectFileInfo);
+
+				presetFiles.push_back(*objectFileInfo);
 			}
 
 			if (object->preset() == true &&
@@ -2169,7 +2208,7 @@ void EquipmentView::updateFromPreset()
 				return;
 			}
 
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -2177,8 +2216,8 @@ void EquipmentView::updateFromPreset()
 		//
 		std::shared_ptr<Hardware::DeviceObject> preset = foundPreset->second;
 
-		assert(preset->presetRoot() == true);
-		assert(preset->presetName() == presetName);
+		Q_ASSERT(preset->presetRoot() == true);
+		Q_ASSERT(preset->presetName() == presetName);
 
 		ok = updateDeviceFromPreset(device,
 									preset,
@@ -2201,7 +2240,7 @@ void EquipmentView::updateFromPreset()
 
 		if (device == nullptr)
 		{
-			assert(device != nullptr);
+			Q_ASSERT(device != nullptr);
 			continue;
 		}
 
@@ -2214,11 +2253,11 @@ void EquipmentView::updateFromPreset()
 			continue;
 		}
 
-		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+		const DbFileInfo* deviceFileInfo = device->data();
+		Q_ASSERT(deviceFileInfo);
 
-		*file = device->fileInfo();
-		file->swapData(data);
-
+		std::shared_ptr<DbFile> file = std::make_shared<DbFile>(*deviceFileInfo);
+		file->setData(data);
 		file->setDetails(device->details());
 
 		updatedFiles.push_back(file);
@@ -2242,8 +2281,8 @@ void EquipmentView::updateFromPreset()
 
 		if (parentFileId == -1 || presetFileId == -1)
 		{
-			assert(parentFileId != -1);
-			assert(presetFileId != -1);
+			Q_ASSERT(parentFileId != -1);
+			Q_ASSERT(presetFileId != -1);
 			continue;
 		}
 
@@ -2259,13 +2298,18 @@ void EquipmentView::updateFromPreset()
 			return;
 		}
 
+		const DbFileInfo* deviceFileInfo = device->data();
+		Q_ASSERT(deviceFileInfo);
+
 		if (device == nullptr ||
 			device->preset() == false ||
-			device->fileInfo().fileId() != presetFileInfo.fileId())		// can be not presetRoot
+			deviceFileInfo == nullptr ||
+			deviceFileInfo->fileId() != presetFileInfo.fileId())	// can be not presetRoot
 		{
-			assert(device);
-			assert(device->preset() == true);
-			assert(device->fileInfo().fileId() == presetFileInfo.fileId());
+			Q_ASSERT(device);
+			Q_ASSERT(device->preset() == true);
+			Q_ASSERT(deviceFileInfo);
+			Q_ASSERT(deviceFileInfo->fileId() == presetFileInfo.fileId());
 			return;
 		}
 
@@ -2273,7 +2317,7 @@ void EquipmentView::updateFromPreset()
 		//
 		std::function<void(Hardware::DeviceObject*)> setUuid = [&setUuid](Hardware::DeviceObject* object)
 			{
-				assert(object);
+				Q_ASSERT(object);
 
 				object->setUuid(QUuid::createUuid());
 
@@ -2418,7 +2462,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 						// The type is different, PropertyValue<int> <-> PropettyValue<QString>
 						// Obviosly thi2s is static properties
 						//
-						assert(false);
+						Q_ASSERT(false);
 					}
 
 					++dit;
@@ -2539,9 +2583,15 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 			if (deviceChild == nullptr)
 			{
+				const DbFileInfo* deviceFileInfo = device->data();
+				Q_ASSERT(deviceFileInfo);
+
+				const DbFileInfo* presetChildFileInfo = presetChild->data();
+				Q_ASSERT(presetChildFileInfo);
+
 				// Child is not added yet, add it
 				//
-				addDeviceList->push_back(std::make_pair(device->fileId(), presetChild->fileId()));
+				addDeviceList->push_back(std::make_pair(deviceFileInfo->fileId(), presetChildFileInfo->fileId()));
 			}
 		}
 	}
@@ -2574,7 +2624,7 @@ void EquipmentView::focusInEvent(QFocusEvent* /*event*/)
 
 	for (QAction* a : acts)
 	{
-		assert(a);
+		Q_ASSERT(a);
 
 		if (a->objectName() == QLatin1String("I_am_a_Copy_Action"))
 		{
@@ -2600,7 +2650,7 @@ void EquipmentView::focusOutEvent(QFocusEvent* event)
 
 		for (QAction* a : acts)
 		{
-			assert(a);
+			Q_ASSERT(a);
 
 			if (a->objectName() == QLatin1String("I_am_a_Copy_Action"))
 			{
@@ -2622,13 +2672,13 @@ void EquipmentView::focusOutEvent(QFocusEvent* event)
 EquipmentModel* EquipmentView::equipmentModel()
 {
 	EquipmentModel* result = dynamic_cast<EquipmentModel*>(model());
-	assert(result);
+	Q_ASSERT(result);
 	return result;
 }
 
 EquipmentModel* EquipmentView::equipmentModel() const
 {
 	EquipmentModel* result = dynamic_cast<EquipmentModel*>(model());
-	assert(result);
+	Q_ASSERT(result);
 	return result;
 }

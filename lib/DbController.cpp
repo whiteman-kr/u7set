@@ -1820,7 +1820,10 @@ bool DbController::deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& dev
 
 	for (auto& d : devices)
 	{
-		files.push_back(d->fileInfo());
+		const DbFileInfo* fi = d->data();
+		Q_ASSERT(fi);
+
+		files.push_back(*fi);
 	}
 
 	bool ok = deleteFiles(&files, parentWidget);
@@ -1837,7 +1840,13 @@ bool DbController::deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& dev
 	std::sort(devices.begin(), devices.end(),
 		[](const Hardware::DeviceObject* d1, const Hardware::DeviceObject* d2)
 		{
-			return d1->fileInfo().fileId() >= d2->fileInfo().fileId();
+			const DbFileInfo* f1 = d1->data();
+			const DbFileInfo* f2 = d2->data();
+
+			Q_ASSERT(f1);
+			Q_ASSERT(f2);
+
+			return f1->fileId() >= f2->fileId();
 		});
 
 	std::sort(files.begin(), files.end(),
@@ -1848,9 +1857,15 @@ bool DbController::deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& dev
 
 	for (size_t i = 0; i < devices.size(); i++)
 	{
-		assert(devices[i]->fileInfo().fileId() == files[i].fileId());
+		Hardware::DeviceObject* deviceObject = devices[i];
 
-		devices[i]->setFileInfo(files[i]);
+		const DbFileInfo* fi = deviceObject->data();
+		Q_ASSERT(fi);
+
+		Q_ASSERT(fi->fileId() == files[i].fileId());
+
+		auto fileInfo = std::make_shared<DbFileInfo>(files[i], deviceObject->details());
+		deviceObject->setData(fileInfo);
 	}
 
 	return true;
@@ -1911,9 +1926,11 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 		if (f->fileId() == hcFileId || f->fileId() == hpFileId)
 		{
 			std::shared_ptr<Hardware::DeviceObject> object = std::make_shared<Hardware::DeviceRoot>();
-			object->setFileInfo(*(f.get()));
 
-			objectsMap[object->fileInfo().fileId()] = object;
+			auto fio = std::make_shared<DbFileInfo>(*f.get(), object->details());
+			object->setData(fio);
+
+			objectsMap[fio->fileId()] = object;
 		}
 		else
 		{
@@ -1922,7 +1939,7 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 			if (threadFiles.size() >= fileCountPerThread)
 			{
 				QFuture<std::vector<std::shared_ptr<Hardware::DeviceObject>>> thread =
-						QtConcurrent::run(Hardware::DeviceObject::fromDbFiles, threadFiles);
+						QtConcurrent::run(DbWorker::deviceObjectFromDbFiles, threadFiles);
 
 				threads.push_back(thread);
 
@@ -1933,7 +1950,7 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 
 	if (threadFiles.empty() == false)
 	{
-		QFuture<std::vector<std::shared_ptr<Hardware::DeviceObject>>> thread = QtConcurrent::run(Hardware::DeviceObject::fromDbFiles, threadFiles);
+		QFuture<std::vector<std::shared_ptr<Hardware::DeviceObject>>> thread = QtConcurrent::run(DbWorker::deviceObjectFromDbFiles, threadFiles);
 		threads.push_back(thread);
 
 		threadFiles.clear();
@@ -1945,7 +1962,10 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 
 		for (std::shared_ptr<Hardware::DeviceObject>& object : v)
 		{
-			objectsMap[object->fileInfo().fileId()] = object;
+			const DbFileInfo* fio = object->data();
+			Q_ASSERT(fio);
+
+			objectsMap[fio->fileId()] = object;
 		}
 	}
 
@@ -1957,8 +1977,12 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 	{
 		// Get parentId
 		//
-		assert(fileId == deviceObject->fileInfo().fileId());
-		int parentId = deviceObject->fileInfo().parentId();
+		const DbFileInfo* fio = deviceObject->data();
+
+		Q_ASSERT(fio);
+		Q_ASSERT(fileId == fio->fileId());
+
+		int parentId = fio->parentId();
 
 		auto parentIterator = objectsMap.find(parentId);
 		if (parentIterator == objectsMap.end())

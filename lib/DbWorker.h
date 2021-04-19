@@ -41,11 +41,6 @@ protected:
 	void emitError(QSqlDatabase db, const QString& err, bool addLogRecord = true);
 
     //
-    // Public signals
-    //
-signals:
-
-    //
     // Public methods
     //
 public:
@@ -61,6 +56,11 @@ public:
 	static QString toSqlStr(const QString& str);
 	static QString toSqlBoolean(bool value);
 	static QString toSqlByteaStr(const QByteArray& binData);
+
+	// Hardware Configuration
+	//
+	[[nodiscard]] static std::shared_ptr<Hardware::DeviceObject> deviceObjectFromDbFile(const DbFile& file);
+	[[nodiscard]] static std::vector<std::shared_ptr<Hardware::DeviceObject>> deviceObjectFromDbFiles(const std::vector<std::shared_ptr<DbFile>>& files);
 
     //
     // Operations
