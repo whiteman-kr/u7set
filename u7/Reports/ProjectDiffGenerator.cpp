@@ -1170,7 +1170,7 @@ void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& s
 
 	if (diffs.empty() == false)
 	{
-		addHeaderTableItem(headerTable, tr("%1").arg(targetObject->equipmentId()), targetFile->action().text(), targetFile);
+		addHeaderTableItem(headerTable, tr("%1").arg(targetObject->equipmentId()), E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
 
 		QString equmipmentType = presets == true ? tr("Preset: ") : tr("Equipment: ");
 
@@ -1342,7 +1342,7 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 
 	if (busDiffTable->rowCount() > 0 || busSignalsDiffTable->rowCount() > 0 || busSignalsPropertiesTables.empty() == false)
 	{
-		addHeaderTableItem(headerTable, targetBus.busTypeId(), targetFile->action().text(), targetFile);
+		addHeaderTableItem(headerTable, targetBus.busTypeId(), E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
 
 		// Add tables to section
 
@@ -1591,7 +1591,7 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 	if (schemaDiffTable->rowCount() > 0 || schemaItemsDiffTable->rowCount() > 0 || itemsTables.empty() == false)
 	{
-		addHeaderTableItem(headerTable, fileName, targetFile->action().text(), targetFile);
+		addHeaderTableItem(headerTable, fileName, E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
 
 		// Add schema differences drawing
 
@@ -1710,7 +1710,7 @@ void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sou
 
 		connectionDiffSection->addText(tr("Connection: %1, %2\n\n").arg(targetConnection.connectionID()).arg(changesetString(targetFile)), currentCharFormat(), currentBlockFormat());
 
-		addHeaderTableItem(headerTable, targetConnection.connectionID(), targetFile->action().text(), targetFile);
+		addHeaderTableItem(headerTable, targetConnection.connectionID(), E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
 
 		saveFormat();
 		setFont(m_tableFont);
@@ -1757,7 +1757,7 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 		return;
 	}
 
-	addHeaderTableItem(headerTable, targetFile->fileName(), targetFile->action().text(), targetFile);
+	addHeaderTableItem(headerTable, targetFile->fileName(), E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
 
 	std::shared_ptr<ReportSection> fileDiffSection = std::make_shared<ReportSection>(tr("File: ") + targetFile->fileName());
 	sectionsArray->push_back(fileDiffSection);
@@ -2194,7 +2194,7 @@ void ProjectDiffGenerator::compareSignalContents(const AppSignal& sourceSignal,
 
 		signalDiffSection->addText(tr("Signal: %1, %2\n\n").arg(targetSignal.appSignalID()).arg(changesetString(targetSignal)), currentCharFormat(), currentBlockFormat());
 
-		addHeaderTableItem(headerTable, targetSignal.appSignalID(), targetSignal.instanceAction().text(), targetSignal);
+		addHeaderTableItem(headerTable, targetSignal.appSignalID(), E::valueToString<E::VcsItemAction>(targetSignal.instanceAction()), targetSignal);
 
 		saveFormat();
 		setFont(m_tableFont);

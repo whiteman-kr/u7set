@@ -100,7 +100,7 @@ namespace Metrology
 			m_connectionSignal[ioType].clear();
 		}
 
-		m_action = VcsItemAction::VcsItemActionType::Unknown;
+		m_action = E::VcsItemAction::Unknown;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -560,7 +560,7 @@ namespace Metrology
 			return true;
 		}
 
-		// delete all connections that marked as VcsItemAction::VcsItemActionType::Deleted
+		// delete all connections that marked as E::VcsItemAction::VcsItemActionType::Deleted
 		// update all restoreID
 		//
 		if (checkIn == true)
@@ -780,19 +780,19 @@ namespace Metrology
 		int connectionCount = m_connectionList.count();
 		for(int i = connectionCount - 1; i >= 0; i--)
 		{
-			if (m_connectionList[i].action() == VcsItemAction::VcsItemActionType::Deleted)
+			if (m_connectionList[i].action() == E::VcsItemAction::Deleted)
 			{
 				m_connectionList.remove(i);
 				continue;
 			}
 
-			m_connectionList[i].setAction(VcsItemAction::VcsItemActionType::Unknown);
+			m_connectionList[i].setAction(E::VcsItemAction::Unknown);
 		}
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void ConnectionBase::setAction(int index, const VcsItemAction::VcsItemActionType& type)
+	void ConnectionBase::setAction(int index, const E::VcsItemAction& action)
 	{
 		QMutexLocker l(&m_connectionMutex);
 
@@ -801,7 +801,7 @@ namespace Metrology
 			return;
 		}
 
-		m_connectionList[index].setAction(type);
+		m_connectionList[index].setAction(action);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -1120,7 +1120,7 @@ namespace Metrology
 
 			if (full == true)
 			{
-				dataStr.append(QString::number(connection.action().toInt()));
+				dataStr.append(QString::number(static_cast<int>(connection.action())));
 				dataStr.append(";");
 				dataStr.append(QString::number(connection.restoreID()));
 				dataStr.append(";");
@@ -1150,11 +1150,11 @@ namespace Metrology
 			{
 				switch (column)
 				{
-					case 0:	connection.setType(line[column].toInt());													break;
-					case 1:	connection.setAppSignalID(ConnectionIoType::Source, line[column]);							break;
-					case 2:	connection.setAppSignalID(ConnectionIoType::Destination, line[column]);						break;
-					case 3:	connection.setAction(static_cast<VcsItemAction::VcsItemActionType>(line[column].toInt()));	break;
-					case 4:	connection.setRestoreID(line[column].toInt());												break;
+					case 0:	connection.setType(line[column].toInt());										break;
+					case 1:	connection.setAppSignalID(ConnectionIoType::Source, line[column]);				break;
+					case 2:	connection.setAppSignalID(ConnectionIoType::Destination, line[column]);			break;
+					case 3:	connection.setAction(static_cast<E::VcsItemAction>(line[column].toInt()));		break;
+					case 4:	connection.setRestoreID(line[column].toInt());									break;
 				}
 			}
 

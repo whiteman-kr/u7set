@@ -55,7 +55,7 @@ bool BusStorage::load(QString* errorMessage)
 	for (const std::shared_ptr<DbFile>& f : files)
 	{
 		if (f->deleted() == true ||
-			f->action() == VcsItemAction::Deleted)
+			f->action() == E::VcsItemAction::Deleted)
 		{
 			continue;
 		}

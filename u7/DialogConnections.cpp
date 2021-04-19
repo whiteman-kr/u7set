@@ -1184,7 +1184,7 @@ void DialogConnections::updateTreeItemText(QTreeWidgetItem* item)
 
 	if (fi.state() == E::VcsState::CheckedOut)
 	{
-		item->setText(c++, fi.action().text());
+		item->setText(c++, E::valueToString<E::VcsItemAction>(fi.action()));
 
 		int userId = fi.userId();
 		item->setText(c++, m_db->username(userId));

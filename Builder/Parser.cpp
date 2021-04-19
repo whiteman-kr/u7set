@@ -2792,7 +2792,7 @@ namespace Builder
 
 		filesTree.removeIf([](const DbFileInfo& f)
 			{
-				return f.action() == VcsItemAction::Deleted;
+				return f.action() == E::VcsItemAction::Deleted;
 			});
 
 		std::vector<DbFileInfo> fileList = filesTree.toVectorIf(
@@ -2809,7 +2809,7 @@ namespace Builder
 
 		for (DbFileInfo& fi : fileList)
 		{
-			if (fi.action() == VcsItemAction::Deleted)		// File is deleted
+			if (fi.action() == E::VcsItemAction::Deleted)		// File is deleted
 			{
 				qDebug() << "Skip file " << fi.fileId() << ", " << fi.fileName() << ", it was marked as deleted";
 				continue;

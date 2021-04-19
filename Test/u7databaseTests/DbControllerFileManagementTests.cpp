@@ -605,7 +605,7 @@ void DbControllerFileTests::getFileInfo()
 	QVERIFY2(fileInfo.changeset() == query.value("changesetId").toInt(), qPrintable("Wrong changeset returned by dbController function()"));
 	QVERIFY2(fileInfo.size() == query.value("size").toInt(), qPrintable("Wrong size returned by dbController function()"));
 	QVERIFY2(fileInfo.userId() == query.value("userId").toInt(), qPrintable("Wrong userId returned by dbController function()"));
-	QVERIFY2(fileInfo.action().toInt() == query.value("action").toInt(), qPrintable("Wrong action returned by dbController function()"));
+	QVERIFY2(static_cast<int>(fileInfo.action()) == query.value("action").toInt(), qPrintable("Wrong action returned by dbController function()"));
 	QVERIFY2(fileInfo.details() == query.value("details").toString(), qPrintable("Wrong details returned by dbController function()"));
 
 	// LogOut
@@ -654,7 +654,7 @@ void DbControllerFileTests::getFullPathFileInfo()
 	QVERIFY(fileInfo.deleted() == false);
 	QVERIFY(fileInfo.parentId() == 1);
 	QVERIFY(fileInfo.userId() == 1);
-	QVERIFY(fileInfo.action() == VcsItemAction::Added);
+	QVERIFY(fileInfo.action() == E::VcsItemAction::Added);
 
 	// LogOut
 	//
@@ -1690,11 +1690,11 @@ void DbControllerFileTests::getWorkcopyTest()
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	QVERIFY2 (result.get()->fileId() == query.value("fileId").toInt(), qPrintable("Error: wrong file Id"));
-	QVERIFY2 (result.get()->details() == query.value("details").toString(), qPrintable("Error: wrong file Id"));
-	QVERIFY2 (result.get()->action().toInt() == query.value("action").toInt(), qPrintable("Error: wrong file Id"));
-	QVERIFY2 (result.get()->userId() == query.value("userId").toInt(), qPrintable("Error: wrong file Id"));
-	QVERIFY2 (result.get()->fileName() == query.value("name").toString(), qPrintable("Error: wrong file Id"));
-	QVERIFY2 (result.get()->parentId() == query.value("parentId").toInt(), qPrintable("Error: wrong file Id"));
+	QVERIFY2 (result.get()->details() == query.value("details").toString(), qPrintable("Error: wrong file details"));
+	QVERIFY2 (static_cast<int>(result.get()->action()) == query.value("action").toInt(), qPrintable("Error: wrong file action"));
+	QVERIFY2 (result.get()->userId() == query.value("userId").toInt(), qPrintable("Error: wrong file userId"));
+	QVERIFY2 (result.get()->fileName() == query.value("name").toString(), qPrintable("Error: wrong file name"));
+	QVERIFY2 (result.get()->parentId() == query.value("parentId").toInt(), qPrintable("Error: wrong file parentId"));
 
 	DbFileInfo secondFile;
 
@@ -1750,11 +1750,11 @@ void DbControllerFileTests::getWorkcopyTest()
 		QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 
 		QVERIFY2 (buff.get()->fileId() == query.value("fileId").toInt(), qPrintable("Error: wrong file Id"));
-		QVERIFY2 (buff.get()->details() == query.value("details").toString(), qPrintable("Error: wrong file Id"));
-		QVERIFY2 (buff.get()->action().toInt() == query.value("action").toInt(), qPrintable("Error: wrong file Id"));
-		QVERIFY2 (buff.get()->userId() == query.value("userId").toInt(), qPrintable("Error: wrong file Id"));
-		QVERIFY2 (buff.get()->fileName() == query.value("name").toString(), qPrintable("Error: wrong file Id"));
-		QVERIFY2 (buff.get()->parentId() == query.value("parentId").toInt(), qPrintable("Error: wrong file Id"));
+		QVERIFY2 (buff.get()->details() == query.value("details").toString(), qPrintable("Error: wrong file details"));
+		QVERIFY2 (static_cast<int>(buff.get()->action()) == query.value("action").toInt(), qPrintable("Error: wrong file action"));
+		QVERIFY2 (buff.get()->userId() == query.value("userId").toInt(), qPrintable("Error: wrong file userId"));
+		QVERIFY2 (buff.get()->fileName() == query.value("name").toString(), qPrintable("Error: wrong file name"));
+		QVERIFY2 (buff.get()->parentId() == query.value("parentId").toInt(), qPrintable("Error: wrong file parentId"));
 	}
 
 	// LogOut

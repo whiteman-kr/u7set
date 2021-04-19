@@ -426,15 +426,15 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 		{
 			QBrush b(StandardColors::VcsCheckedIn);
 
-			switch (signal.instanceAction().value())
+			switch (signal.instanceAction())
 			{
-			case VcsItemAction::Added:
+			case E::VcsItemAction::Added:
 				b.setColor(StandardColors::VcsAdded);
 				break;
-			case VcsItemAction::Modified:
+			case E::VcsItemAction::Modified:
 				b.setColor(StandardColors::VcsModified);
 				break;
-			case VcsItemAction::Deleted:
+			case E::VcsItemAction::Deleted:
 				b.setColor(StandardColors::VcsDeleted);
 				break;
 			default:

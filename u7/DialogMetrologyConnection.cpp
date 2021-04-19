@@ -205,11 +205,11 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 			}
 		}
 
-		switch (connection.action().toInt())
+		switch (connection.action())
 		{
-			case VcsItemAction::VcsItemActionType::Added :		return QColor(StandardColors::VcsAdded);
-			case VcsItemAction::VcsItemActionType::Modified :	return QColor(StandardColors::VcsModified);
-			case VcsItemAction::VcsItemActionType::Deleted :	return QColor(StandardColors::VcsDeleted);
+			case E::VcsItemAction::Added :		return QColor(StandardColors::VcsAdded);
+			case E::VcsItemAction::Modified :	return QColor(StandardColors::VcsModified);
+			case E::VcsItemAction::Deleted :	return QColor(StandardColors::VcsDeleted);
 		}
 
 		return QVariant();
@@ -1210,7 +1210,7 @@ void DialogMetrologyConnection::editConnection()
 
 	const Metrology::Connection& connection = m_connectionTable.at(conncetionIndex);
 
-	if (connection.action() == VcsItemAction::VcsItemActionType::Deleted)
+	if (connection.action() == E::VcsItemAction::Deleted)
 	{
 		QMessageBox::information(this, m_windowTitle, tr("This connection is deleted!"));
 		return;
@@ -1265,7 +1265,7 @@ void DialogMetrologyConnection::connectionChanged()
 				}
 				else
 				{
-					connection.setAction(VcsItemAction::VcsItemActionType::Added);
+					connection.setAction(E::VcsItemAction::Added);
 					m_connectionBase.append(connection);
 				}
 			}
@@ -1276,7 +1276,7 @@ void DialogMetrologyConnection::connectionChanged()
 					int connectionIndex = m_connectionBase.findConnectionIndex(m_dialogConnectionItem->parentConnection());
 					if (connectionIndex >= 0 && connectionIndex < m_connectionBase.count())
 					{
-						connection.setAction(VcsItemAction::VcsItemActionType::Modified);
+						connection.setAction(E::VcsItemAction::Modified);
 						m_connectionBase.setConnection(connectionIndex, connection);
 					}
 				}
@@ -1343,7 +1343,7 @@ void DialogMetrologyConnection::removeConnection()
 
 		const Metrology::Connection& connection = m_connectionTable.at(tableIndex);
 
-		if (connection.action() == VcsItemAction::VcsItemActionType::Deleted)
+		if (connection.action() == E::VcsItemAction::Deleted)
 		{
 			continue;
 		}
@@ -1370,7 +1370,7 @@ void DialogMetrologyConnection::removeConnection()
 			continue;
 		}
 
-		m_connectionBase.setAction(connectionIndex, VcsItemAction::VcsItemActionType::Deleted);
+		m_connectionBase.setAction(connectionIndex, E::VcsItemAction::Deleted);
 
 		m_isModified = true;
 	}
@@ -1417,20 +1417,20 @@ void DialogMetrologyConnection::unremoveConnection()
 
 		const Metrology::Connection& connection = m_connectionTable.at(tableIndex);
 
-		if (connection.action() != VcsItemAction::VcsItemActionType::Deleted)
+		if (connection.action() != E::VcsItemAction::Deleted)
 		{
 			continue;
 		}
 
-		VcsItemAction::VcsItemActionType actionType;
+		E::VcsItemAction action;
 
 		if (connection == m_connectionBase.connectionFromChekedIn(connection.restoreID()))
 		{
-			actionType = VcsItemAction::VcsItemActionType::Unknown;
+			action = E::VcsItemAction::Unknown;
 		}
 		else
 		{
-			actionType = VcsItemAction::VcsItemActionType::Modified;
+			action = E::VcsItemAction::Modified;
 		}
 
 		int connectionIndex = m_connectionBase.findConnectionIndex(connection);
@@ -1439,7 +1439,7 @@ void DialogMetrologyConnection::unremoveConnection()
 			continue;
 		}
 
-		m_connectionBase.setAction(connectionIndex, actionType);
+		m_connectionBase.setAction(connectionIndex, action);
 
 		m_isModified = true;
 	}
@@ -1490,7 +1490,7 @@ void DialogMetrologyConnection::restoreConnection()
 		{
 			const Metrology::Connection& connection = m_connectionTable.at(tableIndex);
 
-			if (connection.action() == VcsItemAction::VcsItemActionType::Added)
+			if (connection.action() == E::VcsItemAction::Added)
 			{
 				continue;
 			}
@@ -1651,7 +1651,7 @@ void DialogMetrologyConnection::importConnections()
 
 		// append
 		//
-		connection.setAction(VcsItemAction::Added);
+		connection.setAction(E::VcsItemAction::Added);
 
 		if (m_connectionBase.findConnectionIndex(connection) != -1)
 		{
@@ -1779,12 +1779,12 @@ void DialogMetrologyConnection::onContextMenu(QPoint)
 
 		if (conncetionIndex >= 0 && conncetionIndex < m_connectionTable.connectionCount())
 		{
-			if (m_connectionBase.connection(conncetionIndex).action() == VcsItemAction::VcsItemActionType::Modified)
+			if (m_connectionBase.connection(conncetionIndex).action() == E::VcsItemAction::Modified)
 			{
 				enableRestore = true;
 			}
 
-			if (m_connectionBase.connection(conncetionIndex).action() == VcsItemAction::VcsItemActionType::Deleted)
+			if (m_connectionBase.connection(conncetionIndex).action() == E::VcsItemAction::Deleted)
 			{
 				enableRestore = true;
 

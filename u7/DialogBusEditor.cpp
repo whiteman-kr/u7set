@@ -1591,7 +1591,7 @@ void DialogBusEditor::updateBusTreeItemText(QTreeWidgetItem* item)
 
 	if (fi.state() == E::VcsState::CheckedOut)
 	{
-		item->setText(1, fi.action().text());
+		item->setText(1, E::valueToString<E::VcsItemAction>(fi.action()));
 
 		int userId = fi.userId();
 		item->setText(2, m_db->username(userId));

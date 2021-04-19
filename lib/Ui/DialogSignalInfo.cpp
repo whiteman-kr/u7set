@@ -1334,7 +1334,7 @@ void DialogSignalInfo::fillExtProperties()
 		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("created") << signalExt.created().toString("yyyy-MM-dd HH:mm:ss")));
 		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("deleted") << (signalExt.deleted() ? tr("Yes") : tr("No")) ));
 		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("instanceCreated") << signalExt.instanceCreated().toString("yyyy-MM-dd HH:mm:ss")));
-		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("instanceAction") << signalExt.instanceAction().text()));
+		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("instanceAction") << E::valueToString<E::VcsItemAction>(signalExt.instanceAction())));
 
 		ui->treePropertiesExt->addTopLevelItem(itemGroup);
 		itemGroup->setExpanded(true);

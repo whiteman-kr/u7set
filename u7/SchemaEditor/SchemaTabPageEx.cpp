@@ -187,7 +187,7 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 			}
 
 		case Columns::FileActionColumn:
-			return file->action().text();
+			return E::valueToString<E::VcsItemAction>(file->action());
 
 		case Columns::ChangesetColumn:
 			return (file->state() == E::VcsState::CheckedIn) ? QVariant{file->changeset()} : QVariant{};
@@ -311,15 +311,15 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 		{
 			QBrush b{StandardColors::VcsCheckedIn};
 
-			switch (file->action().value())
+			switch (file->action())
 			{
-			case VcsItemAction::Added:
+			case E::VcsItemAction::Added:
 				b.setColor(StandardColors::VcsAdded);
 				break;
-			case VcsItemAction::Modified:
+			case E::VcsItemAction::Modified:
 				b.setColor(StandardColors::VcsModified);
 				break;
-			case VcsItemAction::Deleted:
+			case E::VcsItemAction::Deleted:
 				b.setColor(StandardColors::VcsDeleted);
 				break;
 			default:

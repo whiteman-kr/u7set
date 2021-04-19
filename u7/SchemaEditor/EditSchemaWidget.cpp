@@ -3987,7 +3987,7 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 	for (const std::shared_ptr<DbFile>& f : files)
 	{
 		if (f->deleted() == true ||
-			f->action() == VcsItemAction::Deleted)
+			f->action() == E::VcsItemAction::Deleted)
 		{
 			continue;
 		}
@@ -4083,7 +4083,7 @@ bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* 
 	for (const std::shared_ptr<DbFile>& f : files)
 	{
 		if (f->deleted() == true ||
-			f->action() == VcsItemAction::Deleted)
+			f->action() == E::VcsItemAction::Deleted)
 		{
 			continue;
 		}

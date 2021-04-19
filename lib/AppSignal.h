@@ -303,7 +303,7 @@ public:
 	QDateTime created() const { return m_created; }
 	bool deleted() const { return m_deleted; }
 	QDateTime instanceCreated() const { return m_instanceCreated; }
-	VcsItemAction instanceAction() const { return m_instanceAction; }
+	E::VcsItemAction instanceAction() const { return m_instanceAction; }
 
 	// Signal properties calculated in compile-time
 
@@ -393,7 +393,7 @@ private:
 	void setDeleted(bool deleted) { m_deleted = deleted; }
 	void setInstanceCreated(const QDateTime& instanceCreated) { m_instanceCreated = instanceCreated; }
 	void setInstanceCreated(const QString& instanceCreatedStr) { m_instanceCreated = QDateTime::fromString(instanceCreatedStr, FormatStr::POSTGRES_DATE_TIME); }
-	void setInstanceAction(VcsItemAction action) { m_instanceAction = action; }
+	void setInstanceAction(E::VcsItemAction action) { m_instanceAction = action; }
 	void initCreatedDates();
 
 	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
@@ -472,7 +472,7 @@ private:
 	QDateTime m_created;
 	bool m_deleted = false;
 	QDateTime m_instanceCreated;
-	VcsItemAction m_instanceAction{VcsItemAction::Added};
+	E::VcsItemAction m_instanceAction = E::VcsItemAction::Added;
 
 	// Signal properties calculated in compile-time
 	//

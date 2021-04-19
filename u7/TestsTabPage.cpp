@@ -3458,7 +3458,7 @@ void TestsWidget::setTestsTreeActionsState()
 		assert(file);
 
 		if (file->state() == E::VcsState::CheckedIn/* &&
-			file->action() != VcsItemAction::Deleted*/)
+			file->action() != E::VcsItemAction::Deleted*/)
 		{
 			m_deleteFileAction->setEnabled(true);
 			break;
@@ -3466,7 +3466,7 @@ void TestsWidget::setTestsTreeActionsState()
 
 		if (file->state() == E::VcsState::CheckedOut &&
 			(file->userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator())
-			/*&& file->action() != VcsItemAction::Deleted*/)
+			/*&& file->action() != E::VcsItemAction::Deleted*/)
 		{
 			m_deleteFileAction->setEnabled(true);
 			break;

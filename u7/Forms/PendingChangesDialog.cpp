@@ -136,7 +136,7 @@ QVariant PendingChangesModel::data(const QModelIndex& index, int role /*= Qt::Di
 				return {E::valueToString<E::VcsState>(file.state())};
 
 			case Columns::Action:
-				return {file.action().text()};
+				return {E::valueToString<E::VcsItemAction>(file.action())};
 
 			case Columns::User:
 				if (auto it = m_users.find(file.userId());
@@ -184,7 +184,7 @@ QVariant PendingChangesModel::data(const QModelIndex& index, int role /*= Qt::Di
 				return {"Checked Out"};
 
 			case Columns::Action:
-				return {signal.instanceAction().text()};
+				return {E::valueToString<E::VcsItemAction>(signal.instanceAction())};
 
 			case Columns::User:
 				if (auto it = m_users.find(signal.userID());

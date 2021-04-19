@@ -132,7 +132,7 @@ void DbControllerSignalTests::test_addSignal()
 	TS_VERIFY(addSignal(USER2_ID, E::SignalType::Bus, 1, &obStates));
 
 	QVERIFY(obStates.size() == 1);
-	QVERIFY(obStates[0].action == VcsItemAction::Added);
+	QVERIFY(obStates[0].action == static_cast<int>(E::VcsItemAction::Added));
 	QVERIFY(obStates[0].checkedOut == true);
 
 	TS_VERIFY(check_signalIsExist(USER2_ID, obStates[0].id, E::SignalType::Bus, 0, 0, true));
@@ -145,7 +145,7 @@ void DbControllerSignalTests::test_addSignal()
 
 	for(int i = 0; i < 2; i++)
 	{
-		QVERIFY(obStates[i].action == VcsItemAction::Added);
+		QVERIFY(obStates[i].action == static_cast<int>(E::VcsItemAction::Added));
 		QVERIFY(obStates[i].checkedOut == true);
 	}
 
@@ -163,7 +163,7 @@ void DbControllerSignalTests::test_addSignal()
 
 	for(int i = 0; i < 4; i++)
 	{
-		QVERIFY(obStates[i].action == VcsItemAction::Added);
+		QVERIFY(obStates[i].action == static_cast<int>(E::VcsItemAction::Added));
 		QVERIFY(obStates[i].checkedOut == true);
 	}
 
@@ -206,7 +206,7 @@ void DbControllerSignalTests::test_checkinSignals()
 	//
 	TS_VERIFY(addSignal(USER2_ID, E::SignalType::Analog, 1, &obStates));
 	QVERIFY(obStates.size() == 1);
-	QVERIFY(obStates[0].action == VcsItemAction::Added);
+	QVERIFY(obStates[0].action == static_cast<int>(E::VcsItemAction::Added));
 	QVERIFY(obStates[0].checkedOut == true);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 
@@ -216,7 +216,7 @@ void DbControllerSignalTests::test_checkinSignals()
 	//
 	TS_VERIFY(checkinSignals(USER2_ID, std::vector<int>({id1}), "First checking", &obStates));
 	QVERIFY(obStates.size() == 1);
-	QVERIFY(obStates[0].action == VcsItemAction::Unknown);
+	QVERIFY(obStates[0].action == static_cast<int>(E::VcsItemAction::Unknown));
 	QVERIFY(obStates[0].checkedOut == false);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 
@@ -226,7 +226,7 @@ void DbControllerSignalTests::test_checkinSignals()
 	//
 	TS_VERIFY(addSignal(USER2_ID, E::SignalType::Bus, 1, &obStates));
 	QVERIFY(obStates.size() == 1);
-	QVERIFY(obStates[0].action == VcsItemAction::Added);
+	QVERIFY(obStates[0].action == static_cast<int>(E::VcsItemAction::Added));
 	QVERIFY(obStates[0].checkedOut == true);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 
@@ -236,7 +236,7 @@ void DbControllerSignalTests::test_checkinSignals()
 	//
 	TS_VERIFY(checkinSignals(USER3_ID, std::vector<int>({id2}), "Second checking", &obStates));
 	QVERIFY(obStates.size() == 1);
-	QVERIFY(obStates[0].action == VcsItemAction::Unknown);
+	QVERIFY(obStates[0].action == static_cast<int>(E::VcsItemAction::Unknown));
 	QVERIFY(obStates[0].checkedOut == true);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER);
 
@@ -244,7 +244,7 @@ void DbControllerSignalTests::test_checkinSignals()
 	//
 	TS_VERIFY(checkinSignals(ADMIN_ID, std::vector<int>({id2}), "Second checking", &obStates));
 	QVERIFY(obStates.size() == 1);
-	QVERIFY(obStates[0].action == VcsItemAction::Unknown);
+	QVERIFY(obStates[0].action == static_cast<int>(E::VcsItemAction::Unknown));
 	QVERIFY(obStates[0].checkedOut == false);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 
@@ -254,7 +254,7 @@ void DbControllerSignalTests::test_checkinSignals()
 	//
 	TS_VERIFY(checkinSignals(USER2_ID, std::vector<int>({id2}), "Second checking", &obStates));
 	QVERIFY(obStates.size() == 1);
-	QVERIFY(obStates[0].action == VcsItemAction::Unknown);
+	QVERIFY(obStates[0].action == static_cast<int>(E::VcsItemAction::Unknown));
 	QVERIFY(obStates[0].checkedOut == false);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_IS_NOT_CHECKED_OUT);
 
@@ -278,7 +278,7 @@ void DbControllerSignalTests::test_checkinSignals()
 
 	for(int i = 0; i < 3; i++)
 	{
-		QVERIFY(obStates[i].action == VcsItemAction::Unknown);
+		QVERIFY(obStates[i].action == static_cast<int>(E::VcsItemAction::Unknown));
 		QVERIFY(obStates[i].checkedOut == false);
 		QVERIFY(obStates[i].errCode == ERR_SIGNAL_OK);
 
@@ -291,7 +291,7 @@ void DbControllerSignalTests::test_checkinSignals()
 
 	TS_VERIFY(deleteSignal(USER2_ID, idToDelete, &obState));
 	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
-	QVERIFY(obState.action == VcsItemAction::Deleted);
+	QVERIFY(obState.action == static_cast<int>(E::VcsItemAction::Deleted));
 
 	TS_VERIFY(checkinSignals(USER2_ID, std::vector<int>({idToDelete}), "checkin deleted signal", &obStates));
 	QVERIFY(obStates.size() == 1);
@@ -336,9 +336,9 @@ void DbControllerSignalTests::test_checkoutSignals()
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 
-	VcsItemAction action;
+	E::VcsItemAction action;
 	TS_VERIFY(check_signalIsCheckedOut(id1, &action));
-	QVERIFY(action == VcsItemAction::Modified);
+	QVERIFY(action == E::VcsItemAction::Modified);
 
 	// try checkout by another USER3_ID
 	//
@@ -499,7 +499,7 @@ void DbControllerSignalTests::test_deleteSignal()
 
 	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chOutInstanceID));
 	QVERIFY(q.first() == true);
-	QVERIFY(q.value("action").toInt() == static_cast<int>(VcsItemAction::Deleted));
+	QVERIFY(q.value("action").toInt() == static_cast<int>(E::VcsItemAction::Deleted));
 
 	// delete checked in 3 channel
 	//
@@ -508,9 +508,9 @@ void DbControllerSignalTests::test_deleteSignal()
 
 	// signal should be automatically checked out
 	//
-	VcsItemAction action;
+	E::VcsItemAction action;
 	TS_VERIFY(check_signalIsCheckedOut(sid3, &action));
-	QVERIFY(action == VcsItemAction::Deleted);
+	QVERIFY(action == E::VcsItemAction::Deleted);
 }
 
 void DbControllerSignalTests::test_setSignalWorkcopy()
@@ -1459,9 +1459,9 @@ void DbControllerSignalTests::dbcTest_checkoutSignals()
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 
-	VcsItemAction action;
+	E::VcsItemAction action;
 	TS_VERIFY(check_signalIsCheckedOut(id1, &action));
-	QVERIFY(action == VcsItemAction::Modified);
+	QVERIFY(action == E::VcsItemAction::Modified);
 
 	// try checkout by User2
 	//
@@ -1473,7 +1473,7 @@ void DbControllerSignalTests::dbcTest_checkoutSignals()
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 
 	TS_VERIFY(check_signalIsCheckedOut(id2, &action));
-	QVERIFY(action == VcsItemAction::Modified);
+	QVERIFY(action == E::VcsItemAction::Modified);
 
 	// try checkout by Admin
 	//
@@ -1607,7 +1607,7 @@ void DbControllerSignalTests::dbcTest_deleteSignal()
 
 	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chOutInstanceID));
 	QVERIFY(q.first() == true);
-	QVERIFY(q.value("action").toInt() == static_cast<int>(VcsItemAction::Deleted));
+	QVERIFY(q.value("action").toInt() == static_cast<int>(E::VcsItemAction::Deleted));
 
 	// delete checked in 3 channel
 	//
@@ -1616,9 +1616,9 @@ void DbControllerSignalTests::dbcTest_deleteSignal()
 
 	// signal should be automatically checked out
 	//
-	VcsItemAction action;
+	E::VcsItemAction action;
 	TS_VERIFY(check_signalIsCheckedOut(sid3, &action));
-	QVERIFY(action == VcsItemAction::Deleted);
+	QVERIFY(action == E::VcsItemAction::Deleted);
 }
 
 void DbControllerSignalTests::dbcTest_setSignalWorkcopy()
@@ -2412,7 +2412,7 @@ QString DbControllerSignalTests::check_signalIsCheckedIn(int signalID)
 	TS_RETURN_SUCCESS();
 }
 
-QString DbControllerSignalTests::check_signalIsCheckedOut(int signalID, VcsItemAction* action)
+QString DbControllerSignalTests::check_signalIsCheckedOut(int signalID, E::VcsItemAction* action)
 {
 	QSqlQuery q;
 
@@ -2438,7 +2438,7 @@ QString DbControllerSignalTests::check_signalIsCheckedOut(int signalID, VcsItemA
 
 	if (action != nullptr)
 	{
-		action->setValue(q.value("action").toInt());
+		*action = static_cast<E::VcsItemAction>(q.value("action").toInt());
 	}
 
 	// check Checkout table

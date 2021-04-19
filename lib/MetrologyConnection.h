@@ -119,8 +119,8 @@ namespace Metrology
 
 		//
 		//
-		const VcsItemAction& action() const { return m_action; }
-		void setAction(const VcsItemAction& action) { m_action = action; }
+		const E::VcsItemAction& action() const { return m_action; }
+		void setAction(const E::VcsItemAction& action) { m_action = action; }
 
 		//
 		//
@@ -141,7 +141,7 @@ namespace Metrology
 		ConnectionType m_type = ConnectionType::NoConnectionType;
 		ConnectionSignal m_connectionSignal[ConnectionIoTypeCount];
 
-		VcsItemAction m_action;
+		E::VcsItemAction m_action;
 		int m_restoreID = -1;
 	};
 
@@ -198,7 +198,7 @@ namespace Metrology
 
 		//
 		//
-		void setAction(int index, const VcsItemAction::VcsItemActionType& type);
+		void setAction(int index, const E::VcsItemAction& action);
 
 		//
 		//

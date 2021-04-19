@@ -1080,7 +1080,7 @@ void AppSignal::serializeTo(Proto::AppSignal* s) const
 		dbField->set_created(m_created.toMSecsSinceEpoch());
 		dbField->set_deleted(m_deleted);
 		dbField->set_instancecreated(m_instanceCreated.toMSecsSinceEpoch());
-		dbField->set_instanceaction(m_instanceAction.toInt());
+		dbField->set_instanceaction(static_cast<int>(m_instanceAction));
 	}
 	else
 	{
@@ -1296,7 +1296,7 @@ void AppSignal::serializeFrom(const Proto::AppSignal& s)
 	m_created.setMSecsSinceEpoch(dbFiled.created());
 	m_deleted = dbFiled.deleted();
 	m_instanceCreated.setMSecsSinceEpoch(dbFiled.instancecreated());
-	m_instanceAction = static_cast<VcsItemAction::VcsItemActionType>(dbFiled.instanceaction());
+	m_instanceAction = static_cast<E::VcsItemAction>(dbFiled.instanceaction());
 
 	// Signal properties calculated in compile-time
 

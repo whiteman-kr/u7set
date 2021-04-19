@@ -17,65 +17,6 @@ namespace Db
 
 //
 //
-// VcsItemAction
-//
-//
-VcsItemAction::VcsItemAction() noexcept :
-	m_action(Added)
-{
-}
-
-VcsItemAction::VcsItemAction(VcsItemActionType s) noexcept :
-	m_action(s)
-{
-}
-
-QString VcsItemAction::text() const noexcept
-{
-	switch (m_action)
-	{
-	case Unknown:		return QStringLiteral("Unknown");
-	case Added:			return QStringLiteral("Added");
-	case Modified:		return QStringLiteral("Modified");
-	case Deleted:		return QStringLiteral("Deleted");
-	default:
-		qDebug() << static_cast<int>(m_action);
-		assert(false);
-	}
-
-	return {};
-}
-
-int VcsItemAction::toInt() const noexcept
-{
-	return static_cast<int>(m_action);
-}
-
-VcsItemAction::VcsItemActionType VcsItemAction::value() const noexcept
-{
-	return m_action;
-}
-
-void VcsItemAction::setValue(int intVal)
-{
-	Q_ASSERT(intVal >= static_cast<int>(VcsItemActionType::Unknown));
-	Q_ASSERT(intVal <= static_cast<int>(VcsItemActionType::Deleted));
-
-	m_action = static_cast<VcsItemActionType>(intVal);
-}
-
-bool operator== (const VcsItemAction& s1, const VcsItemAction& s2) noexcept
-{
-	return s1.m_action == s2.m_action;
-}
-
-bool operator!= (const VcsItemAction& s1, const VcsItemAction& s2) noexcept
-{
-	return s1.m_action != s2.m_action;
-}
-
-//
-//
 //	DbProject
 //
 //
@@ -1055,7 +996,7 @@ bool DbFileTree::removeIf(std::function<bool(const DbFileInfo&)> pred)
 //
 DbFileInfo::DbFileInfo() noexcept :
 	m_state(E::VcsState::CheckedIn),
-	m_action(VcsItemAction::Added),
+	m_action(E::VcsItemAction::Added),
 	m_details("{}")
 {
 }
@@ -1216,12 +1157,12 @@ void DbFileInfo::setState(const E::VcsState& state)
 	m_state = state;
 }
 
-const VcsItemAction& DbFileInfo::action() const noexcept
+const E::VcsItemAction& DbFileInfo::action() const noexcept
 {
 	return m_action;
 }
 
-void DbFileInfo::setAction(const VcsItemAction& action)
+void DbFileInfo::setAction(const E::VcsItemAction& action)
 {
 	m_action = action;
 }
@@ -1522,12 +1463,12 @@ void DbChangeset::setDate(const QString& value)
 	m_date = QDateTime::fromString(value, "yyyy-MM-ddTHH:mm:ss");
 }
 
-const VcsItemAction& DbChangeset::action() const
+const E::VcsItemAction& DbChangeset::action() const
 {
 	return m_action;
 }
 
-void DbChangeset::setAction(const VcsItemAction& value)
+void DbChangeset::setAction(const E::VcsItemAction& value)
 {
 	m_action = value;
 }
@@ -1603,7 +1544,7 @@ DbChangesetObject::DbChangesetObject(const AppSignal& signal) :
 	m_id(signal.ID()),
 	m_name(signal.appSignalID()),
 	m_caption(signal.caption()),
-	m_action(VcsItemAction::Modified)
+	m_action(E::VcsItemAction::Modified)
 {
 }
 
@@ -1658,12 +1599,12 @@ void DbChangesetObject::setCaption(const QString& value)
 	m_caption = value;
 }
 
-VcsItemAction DbChangesetObject::action() const
+E::VcsItemAction DbChangesetObject::action() const
 {
 	return m_action;
 }
 
-void DbChangesetObject::setAction(VcsItemAction value)
+void DbChangesetObject::setAction(E::VcsItemAction value)
 {
 	m_action = value;
 }

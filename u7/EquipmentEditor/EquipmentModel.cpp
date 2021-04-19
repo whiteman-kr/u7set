@@ -135,7 +135,7 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 	Hardware::DeviceObject* device = static_cast<Hardware::DeviceObject*>(index.internalPointer());
 	assert(device != nullptr);
 
-	const DbFileInfo& devieFileInfo = device->fileInfo();
+	const DbFileInfo& deviceFileInfo = device->fileInfo();
 
 	switch (role)
 	{
@@ -172,17 +172,17 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				break;
 
 			case ObjectStateColumn:
-				if (devieFileInfo.state() == E::VcsState::CheckedOut)
+				if (deviceFileInfo.state() == E::VcsState::CheckedOut)
 				{
-					QString state = devieFileInfo.action().text();
+					QString state = E::valueToString<E::VcsItemAction>(deviceFileInfo.action());
 					v.setValue<QString>(state);
 				}
 				break;
 
 			case ObjectUserColumn:
-				if (devieFileInfo.state() == E::VcsState::CheckedOut)
+				if (deviceFileInfo.state() == E::VcsState::CheckedOut)
 				{
-					v.setValue<QString>(usernameById(devieFileInfo.userId()));
+					v.setValue<QString>(usernameById(deviceFileInfo.userId()));
 				}
 				break;
 
@@ -204,22 +204,22 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 
 	case Qt::BackgroundRole:
 		{
-			if (devieFileInfo.state() == E::VcsState::CheckedOut)
+			if (deviceFileInfo.state() == E::VcsState::CheckedOut)
 			{
 				QBrush b(StandardColors::VcsCheckedIn);
 
-				switch (static_cast<VcsItemAction::VcsItemActionType>(devieFileInfo.action().toInt()))
+				switch (deviceFileInfo.action())
 				{
-				case VcsItemAction::Unknown:
+				case E::VcsItemAction::Unknown:
 					b.setColor(StandardColors::VcsCheckedIn);
 					break;
-				case VcsItemAction::Added:
+				case E::VcsItemAction::Added:
 					b.setColor(StandardColors::VcsAdded);
 					break;
-				case VcsItemAction::Modified:
+				case E::VcsItemAction::Modified:
 					b.setColor(StandardColors::VcsModified);
 					break;
-				case VcsItemAction::Deleted:
+				case E::VcsItemAction::Deleted:
 					b.setColor(StandardColors::VcsDeleted);
 					break;
 				}
@@ -609,7 +609,7 @@ void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::m
 		device->setFileInfo(foundFileInfo->second);
 
 		if (device->fileInfo().deleted() == true ||
-			(device->fileInfo().action() == VcsItemAction::Deleted && device->fileInfo().state() == E::VcsState::CheckedIn))
+			(device->fileInfo().action() == E::VcsItemAction::Deleted && device->fileInfo().state() == E::VcsState::CheckedIn))
 		{
 			QModelIndex pi = modelIndex.parent();
 			std::shared_ptr<Hardware::DeviceObject> po = this->deviceObject(pi);

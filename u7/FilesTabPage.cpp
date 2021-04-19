@@ -244,7 +244,7 @@ void FilesTabPage::setActionState()
 		assert(file);
 
 		if (file->state() == E::VcsState::CheckedIn /*&&
-			file->action() != VcsItemAction::Deleted*/)
+			file->action() != E::VcsItemAction::Deleted*/)
 		{
 			m_deleteFileAction->setEnabled(true);
 			break;
@@ -252,7 +252,7 @@ void FilesTabPage::setActionState()
 
 		if (file->state() == E::VcsState::CheckedOut &&
 			(file->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
-			&& file->action() != VcsItemAction::Deleted)
+			&& file->action() != E::VcsItemAction::Deleted)
 		{
 			m_deleteFileAction->setEnabled(true);
 			break;
