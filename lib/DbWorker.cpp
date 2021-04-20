@@ -7526,7 +7526,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 
 	SignalSpecPropValues inputSpecPropValues;
 
-	result = inputSpecPropValues.createFromSpecPropStruct(SignalProperties::defaultInputAnalogSpecPropStruct);
+	result = inputSpecPropValues.createFromSpecPropStruct(AppSignalDefaultSpecPropStruct::INPUT_ANALOG);
 
 	if (result == false)
 	{
@@ -7534,10 +7534,9 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 		return false;
 	}
 
-
 	SignalSpecPropValues outputSpecPropValues;
 
-	result = outputSpecPropValues.createFromSpecPropStruct(SignalProperties::defaultOutputAnalogSpecPropStruct);
+	result = outputSpecPropValues.createFromSpecPropStruct(AppSignalDefaultSpecPropStruct::OUTPUT_ANALOG);
 
 	if (result == false)
 	{
@@ -7547,7 +7546,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 
 	SignalSpecPropValues internalSpecPropValues;
 
-	result = internalSpecPropValues.createFromSpecPropStruct(SignalProperties::defaultInternalAnalogSpecPropStruct);
+	result = internalSpecPropValues.createFromSpecPropStruct(AppSignalDefaultSpecPropStruct::INTERNAL_ANALOG);
 
 	if (result == false)
 	{
@@ -7666,55 +7665,55 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 		{
 		case E::SignalInOutType::Input:
 
-			result &= inputSpecPropValues.setValue(SignalProperties::lowADCCaption, lowADC);
-			result &= inputSpecPropValues.setValue(SignalProperties::highADCCaption, highADC);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::LOW_ADC, lowADC);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::HIGH_ADC, highADC);
 
-			result &= inputSpecPropValues.setValue(SignalProperties::lowEngineeringUnitsCaption, lowEngineeringUnits);
-			result &= inputSpecPropValues.setValue(SignalProperties::highEngineeringUnitsCaption, highEngineeringUnits);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::LOW_ENGINEERING_UNITS, lowEngineeringUnits);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::HIGH_ENGINEERING_UNITS, highEngineeringUnits);
 
-			result &= inputSpecPropValues.setValue(SignalProperties::lowValidRangeCaption, lowValidRange);
-			result &= inputSpecPropValues.setValue(SignalProperties::highValidRangeCaption, highValidRange);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::LOW_VALID_RANGE, lowValidRange);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::HIGH_VALID_RANGE, highValidRange);
 
-			result &= inputSpecPropValues.setValue(SignalProperties::filteringTimeCaption, filteringTime);
-			result &= inputSpecPropValues.setValue(SignalProperties::spreadToleranceCaption, spreadTolerance);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::FILTERING_TIME, filteringTime);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::SPREAD_TOLERANCE, spreadTolerance);
 
-			result &= inputSpecPropValues.setValue(SignalProperties::electricLowLimitCaption, electricLowLimit);
-			result &= inputSpecPropValues.setValue(SignalProperties::electricHighLimitCaption, electricHighLimit);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::ELECTRIC_LOW_LIMIT, electricLowLimit);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::ELECTRIC_HIGH_LIMIT, electricHighLimit);
 
-			result &= inputSpecPropValues.setEnumValue<E::ElectricUnit>(SignalProperties::electricUnitCaption, electricUnit);
-			result &= inputSpecPropValues.setEnumValue<E::SensorType>(SignalProperties::sensorTypeCaption, sensorType);
+			result &= inputSpecPropValues.setEnumValue<E::ElectricUnit>(AppSignalPropNames::ELECTRIC_UNIT, electricUnit);
+			result &= inputSpecPropValues.setEnumValue<E::SensorType>(AppSignalPropNames::SENSOR_TYPE, sensorType);
 
-			specPropStruct = SignalProperties::defaultInputAnalogSpecPropStruct;
+			specPropStruct = AppSignalDefaultSpecPropStruct::INPUT_ANALOG;
 			inputSpecPropValues.serializeValuesToArray(&protoDataArray);
 
 			break;
 
 		case E::SignalInOutType::Output:
 
-			result &= outputSpecPropValues.setValue(SignalProperties::lowDACCaption, lowADC);
-			result &= outputSpecPropValues.setValue(SignalProperties::highDACCaption, highADC);
+			result &= outputSpecPropValues.setValue(AppSignalPropNames::LOW_DAC, lowADC);
+			result &= outputSpecPropValues.setValue(AppSignalPropNames::HIGH_DAC, highADC);
 
-			result &= outputSpecPropValues.setValue(SignalProperties::lowEngineeringUnitsCaption, lowEngineeringUnits);
-			result &= outputSpecPropValues.setValue(SignalProperties::highEngineeringUnitsCaption, highEngineeringUnits);
+			result &= outputSpecPropValues.setValue(AppSignalPropNames::LOW_ENGINEERING_UNITS, lowEngineeringUnits);
+			result &= outputSpecPropValues.setValue(AppSignalPropNames::HIGH_ENGINEERING_UNITS, highEngineeringUnits);
 
-			result &= inputSpecPropValues.setValue(SignalProperties::electricLowLimitCaption, electricLowLimit);
-			result &= inputSpecPropValues.setValue(SignalProperties::electricHighLimitCaption, electricHighLimit);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::ELECTRIC_LOW_LIMIT, electricLowLimit);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::ELECTRIC_HIGH_LIMIT, electricHighLimit);
 
-			result &= inputSpecPropValues.setEnumValue<E::ElectricUnit>(SignalProperties::electricUnitCaption, electricUnit);
+			result &= inputSpecPropValues.setEnumValue<E::ElectricUnit>(AppSignalPropNames::ELECTRIC_UNIT, electricUnit);
 
-			result &= outputSpecPropValues.setEnumValue<E::OutputMode>(SignalProperties::outputModeCaption, outputMode);
+			result &= outputSpecPropValues.setEnumValue<E::OutputMode>(AppSignalPropNames::OUTPUT_MODE, outputMode);
 
-			specPropStruct = SignalProperties::defaultOutputAnalogSpecPropStruct;
+			specPropStruct = AppSignalDefaultSpecPropStruct::OUTPUT_ANALOG;
 			outputSpecPropValues.serializeValuesToArray(&protoDataArray);
 
 			break;
 
 		case E::SignalInOutType::Internal:
 
-			result &= internalSpecPropValues.setValue(SignalProperties::lowEngineeringUnitsCaption, lowEngineeringUnits);
-			result &= internalSpecPropValues.setValue(SignalProperties::highEngineeringUnitsCaption, highEngineeringUnits);
+			result &= internalSpecPropValues.setValue(AppSignalPropNames::LOW_ENGINEERING_UNITS, lowEngineeringUnits);
+			result &= internalSpecPropValues.setValue(AppSignalPropNames::HIGH_ENGINEERING_UNITS, highEngineeringUnits);
 
-			specPropStruct = SignalProperties::defaultInternalAnalogSpecPropStruct;
+			specPropStruct = AppSignalDefaultSpecPropStruct::INTERNAL_ANALOG;
 			internalSpecPropValues.serializeValuesToArray(&protoDataArray);
 
 			break;
@@ -7788,11 +7787,11 @@ bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* err
 			continue;
 		}
 
-		bool replacingIsOccured = spv.replaceName(SignalProperties::MISPRINT_highEngineeringUnitsCaption,
-												  SignalProperties::highEngineeringUnitsCaption);
+		bool replacingIsOccured = spv.replaceName(AppSignalPropNames::MISPRINT_highEngineeringUnitsCaption,
+												  AppSignalPropNames::HIGH_ENGINEERING_UNITS);
 
-		replacingIsOccured |= spv.replaceName(SignalProperties::MISPRINT_lowEngineeringUnitsCaption,
-											  SignalProperties::lowEngineeringUnitsCaption);
+		replacingIsOccured |= spv.replaceName(AppSignalPropNames::MISPRINT_lowEngineeringUnitsCaption,
+											  AppSignalPropNames::LOW_ENGINEERING_UNITS);
 
 		if (replacingIsOccured == true)
 		{

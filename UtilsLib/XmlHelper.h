@@ -2,9 +2,11 @@
 
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
+#include <QHostAddress>
 
-#include "../OnlineLib/HostAddressPort.h"
 #include "../UtilsLib/Address16.h"
+
+class HostAddressPort;
 
 class XmlWriteHelper
 {

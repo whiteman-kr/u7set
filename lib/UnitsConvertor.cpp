@@ -151,12 +151,12 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 						case E::SensorType::NoSensor:
 						case E::SensorType::Ohm_Raw:
 
-							if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 							{
 								break;
 							}
 
-							if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 							{
 								break;
 							}
@@ -167,12 +167,12 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 
 						default:
 
-							if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 							{
 								break;
 							}
 
-							if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
 							{
 								break;
 							}
@@ -192,12 +192,12 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 						case E::SensorType::mV_Raw_Mul_8:
 						case E::SensorType::mV_Raw_Mul_32:
 
-							if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 							{
 								break;
 							}
 
-							if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 							{
 								break;
 							}
@@ -208,12 +208,12 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 
 						default:
 
-							if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 							{
 								break;
 							}
 
-							if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
 							{
 								break;
 							}
@@ -231,12 +231,12 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 				case E::ElectricUnit::uA:
 				case E::ElectricUnit::Hz:
 
-					if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+					if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 					{
 						break;
 					}
 
-					if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+					if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 					{
 						break;
 					}
@@ -262,12 +262,12 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 						case E::SensorType::NoSensor:
 						case E::SensorType::Ohm_Raw:
 
-							if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 							{
 								break;
 							}
 
-							if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 							{
 								break;
 							}
@@ -278,12 +278,12 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 
 						default:
 
-							if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 							{
 								break;
 							}
 
-							if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
 							{
 								break;
 							}
@@ -303,12 +303,12 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 						case E::SensorType::mV_Raw_Mul_8:
 						case E::SensorType::mV_Raw_Mul_32:
 
-							if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 							{
 								break;
 							}
 
-							if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 							{
 								break;
 							}
@@ -319,12 +319,12 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 
 						default:
 
-							if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 							{
 								break;
 							}
 
-							if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+							if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
 							{
 								break;
 							}
@@ -342,12 +342,12 @@ double UnitsConvertor::conversion(double val, const UnitsConvertType& conversion
 				case E::ElectricUnit::uA:
 				case E::ElectricUnit::Hz:
 
-					if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+					if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 					{
 						break;
 					}
 
-					if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+					if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 					{
 						break;
 					}
@@ -576,8 +576,8 @@ double UnitsConvertor::conversionByConnection(double val, int connectionType, co
 		return val;
 	}
 
-	if (sourSignal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false ||
-		sourSignal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+	if (sourSignal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false ||
+		sourSignal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 	{
 		return val;
 	}
@@ -587,8 +587,8 @@ double UnitsConvertor::conversionByConnection(double val, int connectionType, co
 		return val;
 	}
 
-	if (destSignal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false ||
-		destSignal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+	if (destSignal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false ||
+		destSignal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 	{
 		return val;
 	}
@@ -721,13 +721,13 @@ double UnitsConvertor::r0_from_signal(const AppSignal& signal)
 {
 	double r0 = 0;
 
-	if (signal.isSpecPropExists(SignalProperties::R0_OhmCaption) == true)
+	if (signal.isSpecPropExists(AppSignalPropNames::R0_OHM) == true)
 	{
 		r0 = signal.r0_Ohm();
 	}
 	else
 	{
-		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == true)
+		if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == true)
 		{
 			switch(signal.sensorType())
 			{

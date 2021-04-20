@@ -470,7 +470,7 @@ namespace Builder
 			newSignal->setDataSize(SIZE_32BIT);
 			newSignal->setAnalogSignalFormat(busSignal.analogFormat);
 
-			newSignal->setSpecPropStruct(SignalProperties::defaultBusChildAnalogSpecPropStruct);
+			newSignal->setSpecPropStruct(AppSignalDefaultSpecPropStruct::BUS_CHILD_ANALOG);
 			newSignal->createSpecPropValues();
 
 			newSignal->setLowADC(static_cast<int>(busSignal.inbusAnalogLowLimit));
@@ -604,14 +604,14 @@ namespace Builder
 
 		bool result = true;
 
-		result &= checkSignalPropertyRanges(s, SignalProperties::lowEngineeringUnitsCaption);
-		result &= checkSignalPropertyRanges(s, SignalProperties::highEngineeringUnitsCaption);
-		result &= checkSignalPropertyRanges(s, SignalProperties::lowValidRangeCaption);
-		result &= checkSignalPropertyRanges(s, SignalProperties::highValidRangeCaption);
+		result &= checkSignalPropertyRanges(s, AppSignalPropNames::LOW_ENGINEERING_UNITS);
+		result &= checkSignalPropertyRanges(s, AppSignalPropNames::HIGH_ENGINEERING_UNITS);
+		result &= checkSignalPropertyRanges(s, AppSignalPropNames::LOW_VALID_RANGE);
+		result &= checkSignalPropertyRanges(s, AppSignalPropNames::HIGH_VALID_RANGE);
 
-		result &= checkSignalTuningValuesRanges(s, s.tuningDefaultValue(), SignalProperties::tuningDefaultValueCaption);
-		result &= checkSignalTuningValuesRanges(s, s.tuningLowBound(), SignalProperties::tuningLowBoundCaption);
-		result &= checkSignalTuningValuesRanges(s, s.tuningHighBound(), SignalProperties::tuningHighBoundCaption);
+		result &= checkSignalTuningValuesRanges(s, s.tuningDefaultValue(), AppSignalPropNames::TUNING_DEFAULT_VALUE);
+		result &= checkSignalTuningValuesRanges(s, s.tuningLowBound(), AppSignalPropNames::TUNING_LOW_BOUND);
+		result &= checkSignalTuningValuesRanges(s, s.tuningHighBound(), AppSignalPropNames::TUNING_HIGH_BOUND);
 
 		return result;
 	}

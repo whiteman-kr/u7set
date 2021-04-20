@@ -128,7 +128,7 @@ namespace Metrology
 
 		// Engineering range
 		//
-		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return false;
 		}
@@ -142,7 +142,7 @@ namespace Metrology
 		//
 		if (signal.isInput() == true || signal.isOutput() == true)
 		{
-			if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+			if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 			{
 				return false;
 			}
@@ -152,7 +152,7 @@ namespace Metrology
 				return false;
 			}
 
-			if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+			if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 			{
 				return false;
 			}
@@ -169,7 +169,7 @@ namespace Metrology
 		{
 			case E::SignalInOutType::Input:
 
-				if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+				if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
 				{
 					return true; // some modules do not have a sensor type
 				}
@@ -183,7 +183,7 @@ namespace Metrology
 
 			case E::SignalInOutType::Output:
 
-				if (signal.isSpecPropExists(SignalProperties::outputModeCaption) == false)
+				if (signal.isSpecPropExists(AppSignalPropNames::OUTPUT_MODE) == false)
 				{
 					return false;
 				}

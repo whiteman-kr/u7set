@@ -5,6 +5,7 @@
 #include "XmlHelper.h"
 #include "../lib/ConstStrings.h"
 #include "../UtilsLib/WUtils.h"
+#include "../OnlineLib/HostAddressPort.h"
 
 // -------------------------------------------------------------------------------------
 //

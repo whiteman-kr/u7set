@@ -402,13 +402,13 @@ bool DialogMetrologyConnectionItem::electricLimitIsValid(AppSignal* pSignal)
 	{
 		case E::SignalInOutType::Input:
 
-			if (pSignal->isSpecPropExists(SignalProperties::electricLowLimitCaption) == false ||
-				pSignal->isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+			if (pSignal->isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false ||
+				pSignal->isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 			{
 				return false;
 			}
 
-			if (pSignal->isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+			if (pSignal->isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 			{
 				return true;
 			}
@@ -427,7 +427,7 @@ bool DialogMetrologyConnectionItem::electricLimitIsValid(AppSignal* pSignal)
 
 		case E::SignalInOutType::Output:
 
-			if (pSignal->isSpecPropExists(SignalProperties::outputModeCaption) == false)
+			if (pSignal->isSpecPropExists(AppSignalPropNames::OUTPUT_MODE) == false)
 			{
 				return false;
 			}

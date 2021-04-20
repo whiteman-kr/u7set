@@ -7,81 +7,6 @@
 #include "PropertyObject.h"
 
 
-class SignalSpecPropValue
-{
-public:
-	SignalSpecPropValue();
-
-	bool create(std::shared_ptr<Property> prop);
-	bool create(const QString& name, const QVariant& value, bool isEnum);
-
-	bool setValue(const QString& name, const QVariant& value, bool isEnum);
-	bool setAnyValue(const QString& name, const QVariant& value);
-
-	QString name() const { return m_name; }
-	void setName(const QString& name) { m_name = name; }
-
-	QVariant::Type type() const { return m_value.type(); }
-	QVariant value() const { return m_value; }
-	bool isEnum() const {return m_isEnum; }
-
-	bool save(Proto::SignalSpecPropValue* protoValue) const;
-	bool load(const Proto::SignalSpecPropValue& protoValue);
-
-private:
-	QString m_name;
-	QVariant m_value;
-	bool m_isEnum = false;
-};
-
-class SignalSpecPropValues
-{
-public:
-	SignalSpecPropValues();
-
-	bool create(const AppSignal& s);
-
-	bool createFromSpecPropStruct(const QString& specPropStruct, bool buildNamesMap = true);
-	bool updateFromSpecPropStruct(const QString& specPropStruct);
-
-	bool isExists(const QString& name) const { return m_propNamesMap.contains(name); }
-
-	bool setValue(const QString& name, const QVariant& value);
-
-	bool setAnyValue(const QString& name, const QVariant& value);		// setter without isEnum checking
-
-	template<typename ENUM_TYPE>
-	bool setEnumValue(const QString& name, ENUM_TYPE enumItemValue);
-	bool setEnumValue(const QString& name, int enumItemValue);
-
-	bool setValue(const SignalSpecPropValue& propValue);
-
-	bool getValue(const QString& name, QVariant* qv) const;
-	bool getValue(const QString& name, QVariant* qv, bool* isEnum) const;
-
-	bool serializeValuesToArray(QByteArray* protoData) const;
-	bool parseValuesFromArray(const QByteArray& protoData);
-
-	//bool save(Proto::SignalSpecPropValues* protoValues) const;
-
-	const QVector<SignalSpecPropValue>& values() const { return m_specPropValues; }
-
-	void append(const SignalSpecPropValue& value);
-
-	bool replaceName(const QString& oldName, const QString& newName);			// returns true if replacing is occured
-
-private:
-	void buildPropNamesMap();
-
-	bool setValue(const QString& name, const QVariant& value, bool isEnum);
-
-	int getPropertyIndex(const QString& name) const;
-
-private:
-	QVector<SignalSpecPropValue> m_specPropValues;
-	QHash<QString, int> m_propNamesMap;									// prop name => index in m_propSpecValues
-
-};
 
 template<typename ENUM_TYPE>
 bool SignalSpecPropValues::setEnumValue(const QString& name, ENUM_TYPE enumItemValue)
@@ -103,7 +28,6 @@ struct SignalPropertyDescription
 	std::function<void (AppSignal*, const QVariant&)> valueSetter;
 };
 
-
 class SignalProperties : public PropertyObject
 {
 	Q_OBJECT
@@ -111,67 +35,9 @@ class SignalProperties : public PropertyObject
 public:
 	static QString generateCaption(const QString& name);
 
-	static const QString idCaption;
-	static const QString signalGroupIDCaption;
-	static const QString signalInstanceIDCaption;
-	static const QString changesetIDCaption;
-	static const QString checkedOutCaption;
-	static const QString userIdCaption;
-	static const QString channelCaption;
-	static const QString excludeFromBuildCaption;
-	static const QString createdCaption;
-	static const QString deletedCaption;
-	static const QString instanceCreatedCaption;
-	static const QString typeCaption;
-	static const QString inOutTypeCaption;
-	static const QString cacheValidator;
-	static const QString upperCacheValidator;
-	static const QString appSignalIDCaption;
-	static const QString customSignalIDCaption;
-	static const QString busTypeIDCaption;
-	static const QString captionCaption;
-	static const QString captionValidator;
-	static const QString analogSignalFormatCaption;
-	static const QString dataSizeCaption;
-	static const QString lowADCCaption;
-	static const QString highADCCaption;
-	static const QString lowDACCaption;
-	static const QString highDACCaption;
-	static const QString lowEngineeringUnitsCaption;
-	static const QString highEngineeringUnitsCaption;
-	static const QString unitCaption;
-	static const QString lowValidRangeCaption;
-	static const QString highValidRangeCaption;
-	static const QString electricLowLimitCaption;
-	static const QString electricHighLimitCaption;
-	static const QString electricUnitCaption;
-	static const QString rload_OhmCaption;
-	static const QString sensorTypeCaption;
-	static const QString R0_OhmCaption;
-	static const QString outputModeCaption;
-	static const QString acquireCaption;
-	static const QString archiveCaption;
-	static const QString decimalPlacesCaption;
-	static const QString coarseApertureCaption;
-	static const QString fineApertureCaption;
-	static const QString adaptiveApertureCaption;
-	static const QString filteringTimeCaption;
-	static const QString spreadToleranceCaption;
-	static const QString byteOrderCaption;
-	static const QString equipmentIDCaption;
-	static const QString enableTuningCaption;
-	static const QString tuningDefaultValueCaption;
-	static const QString tuningLowBoundCaption;
-	static const QString tuningHighBoundCaption;
-	static const QString specificPropertiesStructCaption;
-	static const QString tagsCaption;
-
 	static const QString appSignalIDTemplateCaption;
 	static const QString customAppSignalIDTemplateCaption;
 	static const QString appSignalCaptionTemplateCaption;
-
-	static const QString MISPRINT_lowEngineeringUnitsCaption;
-	static const QString MISPRINT_highEngineeringUnitsCaption;
 
 	static const QString categoryIdentification;
 	static const QString categorySignalType;
@@ -181,11 +47,6 @@ public:
 	static const QString categoryOnlineMonitoringSystem;
 	static const QString categoryTuning;
 	static const QString categoryExpertProperties;
-
-	static const QString defaultInputAnalogSpecPropStruct;
-	static const QString defaultOutputAnalogSpecPropStruct;
-	static const QString defaultInternalAnalogSpecPropStruct;
-	static const QString defaultBusChildAnalogSpecPropStruct;
 
 	static const QString lastEditedSignalFieldValuePlace;
 

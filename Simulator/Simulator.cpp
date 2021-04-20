@@ -193,7 +193,7 @@ namespace Sim
 		// Load simulator profiles
 		//
 		{
-			QString profilesFileName = buildPath + Directory::COMMON + "/" + Db::File::SimProfilesFileName;
+			QString profilesFileName = buildPath + Directory::COMMON + "/" + File::SIM_PROFILES;
 			QFile file(profilesFileName);
 
 			if (file.exists() == true)

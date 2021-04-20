@@ -37,12 +37,12 @@ CreateSignalDialog::CreateSignalDialog(DbController* dbc, CreatingSignalDialogOp
 
 		QLineEdit* appSiganalIdEdit = new QLineEdit;
 		appSiganalIdEdit->setPlaceholderText(tr("#APPSIGNALID"));
-		appSiganalIdEdit->setValidator(new QRegExpValidator(QRegExp(SignalProperties::cacheValidator), this));
+		appSiganalIdEdit->setValidator(new QRegExpValidator(QRegExp(AppSignal::IDENTIFICATORS_VALIDATOR), this));
 		m_appSiganalIds.push_back(appSiganalIdEdit);
 
 		QLineEdit* customSiganalIdEdit = new QLineEdit;
 		customSiganalIdEdit->setPlaceholderText(tr("SIGNALID"));
-		customSiganalIdEdit->setValidator(new QRegExpValidator(QRegExp(SignalProperties::cacheValidator), this));
+		customSiganalIdEdit->setValidator(new QRegExpValidator(QRegExp(AppSignal::IDENTIFICATORS_VALIDATOR), this));
 		m_customSiganalIds.push_back(customSiganalIdEdit);
 	}
 

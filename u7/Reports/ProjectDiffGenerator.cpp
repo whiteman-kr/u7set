@@ -2139,43 +2139,43 @@ void ProjectDiffGenerator::compareSignalContents(const AppSignal& sourceSignal,
 	SignalProperties sourceProperties(sourceSignal);
 	SignalProperties targetProperties(targetSignal);
 
-	auto p = sourceProperties.propertyByCaption(SignalProperties::changesetIDCaption);
+	auto p = sourceProperties.propertyByCaption(AppSignalPropNames::CHANGESET_ID);
 	if (p != nullptr)
 	{
 		p->setExpert(true);
 	}
-	p = sourceProperties.propertyByCaption(SignalProperties::instanceCreatedCaption);
+	p = sourceProperties.propertyByCaption(AppSignalPropNames::INSTANCE_CREATED);
 	if (p != nullptr)
 	{
 		p->setExpert(true);
 	}
-	p = sourceProperties.propertyByCaption(SignalProperties::signalInstanceIDCaption);
+	p = sourceProperties.propertyByCaption(AppSignalPropNames::SIGNAL_INSTANCE_ID);
 	if (p != nullptr)
 	{
 		p->setExpert(true);
 	}
-	p = sourceProperties.propertyByCaption(SignalProperties::signalGroupIDCaption);
+	p = sourceProperties.propertyByCaption(AppSignalPropNames::SIGNAL_GROUP_ID);
 	if (p != nullptr)
 	{
 		p->setExpert(true);
 	}
 
-	p = targetProperties.propertyByCaption(SignalProperties::changesetIDCaption);
+	p = targetProperties.propertyByCaption(AppSignalPropNames::CHANGESET_ID);
 	if (p != nullptr)
 	{
 		p->setExpert(true);
 	}
-	p = targetProperties.propertyByCaption(SignalProperties::instanceCreatedCaption);
+	p = targetProperties.propertyByCaption(AppSignalPropNames::INSTANCE_CREATED);
 	if (p != nullptr)
 	{
 		p->setExpert(true);
 	}
-	p = targetProperties.propertyByCaption(SignalProperties::signalInstanceIDCaption);
+	p = targetProperties.propertyByCaption(AppSignalPropNames::SIGNAL_INSTANCE_ID);
 	if (p != nullptr)
 	{
 		p->setExpert(true);
 	}
-	p = targetProperties.propertyByCaption(SignalProperties::signalGroupIDCaption);
+	p = targetProperties.propertyByCaption(AppSignalPropNames::SIGNAL_GROUP_ID);
 	if (p != nullptr)
 	{
 		p->setExpert(true);

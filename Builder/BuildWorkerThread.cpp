@@ -1388,7 +1388,7 @@ namespace Builder
 
 		// Save file to build
 		//
-		BuildFile* outFile = context->m_buildResultWriter->addFile(Directory::COMMON, Db::File::SimProfilesFileName, fileContent, false);
+		BuildFile* outFile = context->m_buildResultWriter->addFile(Directory::COMMON, File::SIM_PROFILES, fileContent, false);
 		if (outFile == nullptr)
 		{
 			return false;

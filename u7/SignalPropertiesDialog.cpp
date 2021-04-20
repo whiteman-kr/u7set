@@ -185,8 +185,8 @@ void initNewSignal(AppSignal& signal)
 		}
 	};
 
-	setter(SignalProperties::lowEngineeringUnitsCaption, 0.0);
-	setter(SignalProperties::highEngineeringUnitsCaption, 100.0);
+	setter(AppSignalPropNames::LOW_ENGINEERING_UNITS, 0.0);
+	setter(AppSignalPropNames::HIGH_ENGINEERING_UNITS, 100.0);
 
 	for (int i = 0; i < propertyManager.count(); i++)
 	{

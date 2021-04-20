@@ -41,8 +41,8 @@ SOURCES += \
     ../lib/AppSignalStateFlags.cpp \
 	../lib/AppSignalParam.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/Times.cpp \
-    ../lib/SignalProperties.cpp \
+	../lib/Times.cpp \
+	#../lib/SignalProperties.cpp \
     ../lib/TuningValue.cpp \
 	AppDataService.cpp \
 	AppDataProcessingThread.cpp \

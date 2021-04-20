@@ -264,7 +264,7 @@ namespace Builder
 
 			if (signal.isAnalog() == true && signal.isInput() == true)
 			{
-				if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == true)
+				if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == true)
 				{
 					switch (signal.electricUnit())
 					{
@@ -389,12 +389,12 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricLimit(const AppSignal& signal, double lowLimit, double highLimit)
 	{
-		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 		{
 			return false;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 		{
 			return false;
 		}
@@ -424,19 +424,19 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testEngineeringLimit(const AppSignal& signal, double lowLimit, double highLimit)
 	{
-		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 		{
 			return false;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 		{
 			return false;
 		}
 
 		QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 
-		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return false;
 		}
@@ -490,17 +490,17 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricLimit_Input_mA(const AppSignal& signal)
 	{
-		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 		{
 			return true;
 		}
@@ -512,7 +512,7 @@ namespace Builder
 			}
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
 		{
 			return true;
 		}
@@ -524,7 +524,7 @@ namespace Builder
 			}
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::rload_OhmCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::RLOAD_OHM) == false)
 		{
 			return true;
 		}
@@ -560,17 +560,17 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricLimit_Input_mV(const AppSignal& signal)
 	{
-		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 		{
 			return true;
 		}
@@ -582,7 +582,7 @@ namespace Builder
 			}
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
 		{
 			return true;
 		}
@@ -611,17 +611,17 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricLimit_Input_Ohm(const AppSignal& signal)
 	{
-		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 		{
 			return true;
 		}
@@ -633,7 +633,7 @@ namespace Builder
 			}
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
 		{
 			return true;
 		}
@@ -683,17 +683,17 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricLimit_Input_V(const AppSignal& signal)
 	{
-		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 		{
 			return true;
 		}
@@ -705,7 +705,7 @@ namespace Builder
 			}
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
 		{
 			return true;
 		}
@@ -735,17 +735,17 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricLimit_Input_uA(const AppSignal& signal)
 	{
-		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 		{
 			return true;
 		}
@@ -757,7 +757,7 @@ namespace Builder
 			}
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
 		{
 			return true;
 		}
@@ -788,17 +788,17 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricLimit_Input_Hz(const AppSignal& signal)
 	{
-		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 		{
 			return true;
 		}
@@ -810,7 +810,7 @@ namespace Builder
 			}
 		}
 
-		if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
 		{
 			return true;
 		}
