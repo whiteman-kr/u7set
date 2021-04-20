@@ -58,7 +58,6 @@ SOURCES += \
 HEADERS += \
 	Stable.h \
 	../lib/ConstStrings.h \
-    ../lib/LanControllerInfo.h \
     ../lib/DataSource.h \
     ../lib/DbStruct.h \
 	../lib/AppSignal.h \

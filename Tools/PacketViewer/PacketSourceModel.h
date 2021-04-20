@@ -7,6 +7,7 @@
 #include "../../lib/AppSignal.h"
 #include "../../OnlineLib/DataProtocols.h"
 #include "../../lib/DataSource.h"
+#include "../../lib/DeviceObject.h"
 
 class QUdpSocket;
 class DataSource;
