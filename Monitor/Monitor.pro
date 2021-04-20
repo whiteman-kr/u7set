@@ -83,8 +83,8 @@ SOURCES += main.cpp \
     TcpSignalClient.cpp \
     ../lib/AppSignal.cpp \
     ../lib/DeviceObject.cpp \
-    ../lib/DbStruct.cpp \
-    ../lib/AppSignalParam.cpp \
+	../lib/DbStruct.cpp \
+	../lib/AppSignalParam.cpp \
     ../lib/AppSignalManager.cpp \
     Statistics.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
@@ -98,7 +98,7 @@ SOURCES += main.cpp \
     ArchiveModelView.cpp \
     ArchiveData.cpp \
     TcpSignalRecents.cpp \
-    MonitorSchemaManager.cpp \
+	MonitorSchemaManager.cpp \
     SelectSchemaWidget.cpp \    
 	../lib/Tuning/TuningSignalManager.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
@@ -150,8 +150,8 @@ HEADERS  += \
     ../lib/AppSignal.h \
     ../lib/PropertyObject.h \
     ../lib/DeviceObject.h \
-    ../lib/DbStruct.h \
-    ../lib/AppSignalParam.h \
+	../lib/DbStruct.h \
+	../lib/AppSignalParam.h \
     ../lib/AppSignalManager.h \
     Statistics.h \
     ../lib/Ui/DialogSignalInfo.h \

@@ -121,6 +121,8 @@ int main(int argc, char *argv[])
 	//
 	Hardware::shutdown();
 
+	google::protobuf::ShutdownProtobufLibrary();
+
 	return returnCode;
 }
 

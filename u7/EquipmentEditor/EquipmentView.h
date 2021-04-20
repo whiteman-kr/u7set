@@ -1,5 +1,6 @@
 #pragma once
 #include "../../lib/DeviceObject.h"
+#include "../../lib/DbController.h"
 
 namespace Hardware
 {

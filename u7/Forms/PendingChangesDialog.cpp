@@ -548,7 +548,9 @@ void PendingChangesDialog::updateData()
 	//
 	std::vector<DbFileInfo> checkedOutFiles;
 
-	DbFileInfo rootFile{db()->rootFileId()};
+	DbFileInfo rootFile;
+	rootFile.setFileId(db()->rootFileId());
+
 	if (bool ok = db()->getCheckedOutFiles(rootFile, &checkedOutFiles, parentWidget());
 		ok == false)
 	{

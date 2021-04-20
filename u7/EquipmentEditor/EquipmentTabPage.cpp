@@ -882,13 +882,16 @@ void EquipmentTabPage::setActionState()
 		auto device = m_equipmentModel->deviceObject(mi);
 		assert(device);
 
-		if (device->fileInfo().state() == E::VcsState::CheckedOut &&
-			(device->fileInfo().userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
+		const DbFileInfo* fileInfo = device->data();
+		Q_ASSERT(fileInfo);
+
+		if (fileInfo->state() == E::VcsState::CheckedOut &&
+			(fileInfo->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
 		{
 			canAnyBeCheckedIn = true;
 		}
 
-		if (device->fileInfo().state() == E::VcsState::CheckedIn)
+		if (fileInfo->state() == E::VcsState::CheckedIn)
 		{
 			canAnyBeCheckedOut = true;
 		}
@@ -1235,7 +1238,10 @@ void EquipmentTabPage::setProperties()
 		std::shared_ptr<Hardware::DeviceObject> device = m_equipmentModel->deviceObject(mi);
 		assert(device);
 
-		if (device->fileInfo().state() == E::VcsState::CheckedOut)
+		const DbFileInfo* deviceFileInfo = device->data();
+		assert(deviceFileInfo);
+
+		if (deviceFileInfo->state() == E::VcsState::CheckedOut)
 		{
 			checkedOutList << device;
 		}
@@ -1283,12 +1289,19 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> 
 	for (auto& o : objects)
 	{
 		Hardware::DeviceObject* device = dynamic_cast<Hardware::DeviceObject*>(o.get());
-
 		if (device == nullptr)
 		{
 			assert(device != nullptr);
 			return;
 		}
+
+		const DbFileInfo* deviceFileInfo = device->data();
+		if (deviceFileInfo == nullptr)
+		{
+			assert(deviceFileInfo != nullptr);
+			return;
+		}
+
 
 		QByteArray data;
 		bool ok = device->saveToByteArray(&data);
@@ -1301,9 +1314,8 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> 
 
 		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
-		*file = device->fileInfo();
-		file->swapData(data);
-
+		file->operator=(*deviceFileInfo);
+		file->setData(std::move(data));
 		file->setDetails(device->details());
 
 		files.push_back(file);
@@ -1603,9 +1615,16 @@ void EquipmentTabPage::exportPreset()
 
 	for (const Hardware::DeviceObject* device : devices)
 	{
+		const DbFileInfo* deviceFileInfo = device->data();
+		if (deviceFileInfo == nullptr)
+		{
+			Q_ASSERT(deviceFileInfo);
+			return;
+		}
+
 		std::shared_ptr<Hardware::DeviceObject> out;
 
-		bool result = db()->getDeviceTreeLatestVersion(device->fileInfo(), &out, this);
+		bool result = db()->getDeviceTreeLatestVersion(*deviceFileInfo, &out, this);
 		if (result == false)
 		{
 			return;

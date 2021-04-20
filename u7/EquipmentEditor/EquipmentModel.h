@@ -1,12 +1,8 @@
 #pragma once
+#include "../../lib/DeviceObject.h"
+#include "../../lib/DbStruct.h"
 
 class DbController;
-class DbFileInfo;
-
-namespace Hardware
-{
-	class DeviceObject;
-}
 
 //
 //
@@ -64,6 +60,14 @@ public:
 
 	void reset();
 
+private:
+	void sortChildrenByCaption(std::shared_ptr<Hardware::DeviceObject> deviceObject, Qt::SortOrder order);
+	void sortChildrenByType(std::shared_ptr<Hardware::DeviceObject> deviceObject, Qt::SortOrder order);
+	void sortChildrenByEquipmentId(std::shared_ptr<Hardware::DeviceObject> deviceObject, Qt::SortOrder order);
+	void sortChildrenByPlace(std::shared_ptr<Hardware::DeviceObject> deviceObject, Qt::SortOrder order);
+	void sortChildrenByState(std::shared_ptr<Hardware::DeviceObject> deviceObject, Qt::SortOrder order);
+	void sortChildrenByUser(std::shared_ptr<Hardware::DeviceObject> deviceObject, Qt::SortOrder order);
+
 public slots:
 	void projectOpened();
 	void projectClosed();
@@ -78,6 +82,12 @@ signals:
 	// Properties
 	//
 public:
+	static const DbFileInfo* fileInfo(const Hardware::DeviceObject* deviceObject);
+	static const DbFileInfo* fileInfo(const std::shared_ptr<Hardware::DeviceObject>& deviceObject);
+
+	static void setFileInfo(Hardware::DeviceObject* deviceObject, const DbFileInfo& fileInfo);
+	static void setFileInfo(std::shared_ptr<Hardware::DeviceObject> deviceObject, const DbFileInfo& fileInfo);
+
 	DbController* dbController();
 	DbController* dbController() const;
 

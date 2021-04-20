@@ -2,9 +2,9 @@
 
 #include <unordered_map>
 #include <functional>
+#include <memory>
 #include <array>
-#include "DbStruct.h"
-#include "QUuid"
+#include <QtCore>
 #include "../lib/DebugInstCounter.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/Factory.h"
@@ -12,7 +12,7 @@
 #include "../lib/ModuleFirmware.h"
 #include "../Proto/ProtoSerialization.h"
 
-class DbController;
+class DbFileInfo;
 
 namespace Hardware
 {
@@ -22,7 +22,6 @@ namespace Hardware
 
 	void init();
 	void shutdown();
-
 
 	class DeviceObject;
 	class DeviceRoot;
@@ -137,12 +136,7 @@ namespace Hardware
 
 		// Serialization
 		//
-	public:
 		friend Proto::ObjectSerialization<DeviceObject>;	// for call CreateObject from Proto::ObjectSerialization
-
-		[[nodiscard]] static std::shared_ptr<DeviceObject> fromDbFile(const DbFile& file);
-		[[nodiscard]] static std::vector<std::shared_ptr<DeviceObject>> fromDbFiles(const std::vector<std::shared_ptr<DbFile>>& files);
-
 	protected:
 		// Implementing Proto::ObjectSerialization<DeviceObject>::SaveData, LoadData
 		//
@@ -262,6 +256,8 @@ namespace Hardware
 		[[nodiscard]] int childrenCount() const;
 		[[nodiscard]] int childIndex(const std::shared_ptr<const DeviceObject>& child) const;
 
+		[[nodiscard]] const std::vector<std::shared_ptr<DeviceObject>>& children() const;
+
 		[[nodiscard]] const std::shared_ptr<DeviceObject>& child(int index) const;
 		[[nodiscard]] std::shared_ptr<DeviceObject> child(const QUuid& uuid) const;
 		[[nodiscard]] std::shared_ptr<DeviceObject> childByPresetUuid(const QUuid& presetObjectUuid) const;
@@ -275,20 +271,11 @@ namespace Hardware
 
 		[[nodiscard]] bool checkChild(std::shared_ptr<DeviceObject> child, QString* errorMessage);
 
-		void sortByPlace(Qt::SortOrder order);
-		void sortByEquipmentId(Qt::SortOrder order);
-		void sortByCaption(Qt::SortOrder order);
-		void sortByType(Qt::SortOrder order);
-		void sortByState(Qt::SortOrder order);
-		void sortByUser(Qt::SortOrder order, const std::map<int, QString>& users);
-
 		static QString replaceEngeneeringToEngineering(const QString& data);
 
 		// Props
 		//
 	public:
-		[[nodiscard]] int fileId() const;
-
 		[[nodiscard]] QUuid uuid() const;
 		void setUuid(QUuid value);
 
@@ -299,10 +286,6 @@ namespace Hardware
 
 		[[nodiscard]] QString caption() const;
 		void setCaption(QString value);
-
-		[[nodiscard]] DbFileInfo& fileInfo();
-		[[nodiscard]] const DbFileInfo& fileInfo() const;
-		void setFileInfo(const DbFileInfo& value);
 
 		[[nodiscard]] QString childRestriction() const;
 		void setChildRestriction(QString value);
@@ -328,6 +311,10 @@ namespace Hardware
 		[[nodiscard]] QUuid presetObjectUuid() const;
 		void setPresetObjectUuid(QUuid value);
 
+		[[nodiscard]] DbFileInfo* data();
+		[[nodiscard]] const DbFileInfo* data() const;
+		void setData(std::shared_ptr<DbFileInfo> data);
+
 		// Data
 		//
 	protected:
@@ -339,8 +326,6 @@ namespace Hardware
 		QUuid m_uuid;
 		QString m_equipmentId;
 		QString m_caption;
-
-		DbFileInfo m_fileInfo;
 
 		QString m_childRestriction;			// Restriction script for child items
 		QString m_specificPropertiesStruct;	// Desctription of the Object's specific properties
@@ -355,6 +340,7 @@ namespace Hardware
 		QUuid m_presetObjectUuid;			// In configuration this field has uuid of the PRESET object from which it was constructed
 											// In preset edit mode this field has the same value with m_uuid
 	private:
+		std::shared_ptr<DbFileInfo> m_data;	// Application-specific value associated with the specified item (DbFileInfo)
 	};
 
 

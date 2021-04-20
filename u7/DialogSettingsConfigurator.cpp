@@ -70,5 +70,4 @@ void DialogSettingsConfigurator::on_DialogSettingsConfigurator_accepted()
 	theSettings.m_configuratorVerify = (ui->verifyData->checkState() == Qt::Checked);
 
 	theSettings.writeSystemScope();
-
 }

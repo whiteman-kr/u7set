@@ -64,7 +64,7 @@ SOURCES += \
 	../lib/Tuning/TuningSignalState.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
-    ../lib/AppSignal.cpp \
+	../lib/AppSignal.cpp \
     ../lib/SignalProperties.cpp \
     ../lib/Ui/DialogAbout.cpp \
 	../lib/UnitsConvertor.cpp \
