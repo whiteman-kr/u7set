@@ -12,8 +12,8 @@ int main(int argc, char* argv[])
     QApplication a(argc, argv);
 
     a.setApplicationName("Metrology");
-    a.setOrganizationName("Radiy");
-    a.setOrganizationDomain("radiy.com");
+    a.setOrganizationName(Manufacturer::RADIY);
+    a.setOrganizationDomain(Manufacturer::SITE);
 
 #ifdef GITLAB_CI_BUILD
 	a.setApplicationVersion(QString("2.0.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));

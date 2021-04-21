@@ -15,7 +15,7 @@
 SourceListWidget::SourceListWidget(QWidget *parent)
 	: QWidget(parent)
 {
-	QSettings s("Radiy", "u7");
+	QSettings s(Manufacturer::RADIY, "u7");
 	m_rootPath = s.value("m_buildOutputPath", QDir::currentPath()).toString();
 
 	m_packetSourceView = new QTreeView(this);

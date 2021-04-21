@@ -88,16 +88,22 @@
 										break; \
 									}
 
-
-
 #define AUTO_LOCK(mutex) QMutexLocker _locker_##mutex(&mutex);
-
 
 #define C_STR(qstring) qstring.toStdString().c_str()
 
 
-void swapBytes(const char* src, char* dest, int size);
+inline void swapBytes(const char* src, char* dest, int size)
+{
+	Q_ASSERT(src != dest);
 
+	dest += (size - 1);
+
+	for(int i = 0; i < size; i++)
+	{
+		*dest-- = *src++;
+	}
+}
 
 template <typename TYPE>
 TYPE reverseBytes(TYPE value)
@@ -109,7 +115,6 @@ TYPE reverseBytes(TYPE value)
 	return dest;
 }
 
-
 inline quint16 reverseUint16(quint16 val) { return reverseBytes<quint16>(val); }
 inline quint32 reverseUint32(quint32 val) { return reverseBytes<quint32>(val); }
 inline quint64 reverseUint64(quint64 val) { return reverseBytes<quint64>(val); }
@@ -117,8 +122,6 @@ inline quint64 reverseUint64(quint64 val) { return reverseBytes<quint64>(val); }
 inline qint32 reverseInt32(qint32 val)	  { return reverseBytes<qint32>(val);  }
 
 inline float reverseFloat(float val)	  { return reverseBytes<float>(val);   }
-
-const char* const RADIY_ORG = "Radiy";
 
 class PrintElapsedTime
 {

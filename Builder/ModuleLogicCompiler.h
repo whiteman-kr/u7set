@@ -606,6 +606,10 @@ namespace Builder
 		QString getFormatStr(const AppSignal& s);
 		QString getFormatStr(E::SignalType signalType, E::DataFormat dataFormat, int dataSizeBits, E::ByteOrder byteOrder);
 
+		bool partitionOfInteger(int number, const std::vector<int>& availableParts,
+								 std::vector<int>* resultPartition);
+		bool partitionOfInteger(int number, const QVector<int>& availableParts, QVector<int>* partition);
+
 	private:
 		// input parameters
 		//

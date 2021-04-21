@@ -183,8 +183,8 @@ int main(int argc, char* argv[])
 
 	QApplication a(argc, argv);
 	a.setApplicationName("TuningClient");
-	a.setOrganizationName("Radiy");
-	a.setOrganizationDomain("radiy.com");
+	a.setOrganizationName(Manufacturer::RADIY);
+	a.setOrganizationDomain(Manufacturer::SITE);
 
 
 #ifdef GITLAB_CI_BUILD

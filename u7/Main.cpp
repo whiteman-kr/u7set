@@ -43,8 +43,8 @@ int main(int argc, char *argv[])
 		// --
 		//
 		a.setApplicationName("u7");
-		a.setOrganizationName("Radiy");
-		a.setOrganizationDomain("radiy.com");
+		a.setOrganizationName(Manufacturer::RADIY);
+		a.setOrganizationDomain(Manufacturer::SITE);
 
 #ifdef GITLAB_CI_BUILD
 		a.setApplicationVersion(QString("0.8.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));

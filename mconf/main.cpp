@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "ModuleConfigurator.h"
-//#include "../include/ConfigData.h"
+#include "../lib/ConstStrings.h"
 #include <QtWidgets/QApplication>
 #include <google/protobuf/stubs/common.h>
 
@@ -16,8 +16,8 @@ int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 
-	QCoreApplication::setOrganizationName("Radiy");
-	QCoreApplication::setOrganizationDomain("radiy.com");
+	QCoreApplication::setOrganizationName(Manufacturer::RADIY);
+	QCoreApplication::setOrganizationDomain(Manufacturer::SITE);
 	QCoreApplication::setApplicationName("ModuleConfigurator");
 
 #ifdef GITLAB_CI_BUILD

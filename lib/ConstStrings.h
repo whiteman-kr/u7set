@@ -447,3 +447,9 @@ namespace AppSignalDefaultSpecPropStruct
 		"4;LowValidRange;4 Signal processing;double;;;0;10;false;false;Low valid range of signal;true;None\n");
 }
 
+namespace Manufacturer
+{
+	inline const QString RADIY("Radiy");
+	inline const QString SITE("radiy.com");
+}
+

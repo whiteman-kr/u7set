@@ -54,7 +54,7 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 	m_argc(argc),
 	m_argv(argv),
 	m_logger(logger),
-	m_settings(QSettings::SystemScope, RADIY_ORG, serviceName, this),
+	m_settings(QSettings::SystemScope, Manufacturer::RADIY, serviceName, this),
 	m_cmdLineParser(argc, argv),
 	m_softwareSettingsSet(softwareInfo.softwareType()),
 	m_spMutex(QMutex::RecursionMode::Recursive)
@@ -601,7 +601,7 @@ ServiceStarter::ServiceStarter(QCoreApplication& app, ServiceWorker& serviceWork
 	m_serviceWorker(serviceWorker),
 	m_logger(logger)
 {
-	app.setOrganizationName(RADIY_ORG);
+	app.setOrganizationName(Manufacturer::RADIY);
 	app.setApplicationName(serviceWorker.serviceName());
 }
 

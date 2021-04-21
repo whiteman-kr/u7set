@@ -14,7 +14,6 @@
 //
 // -------------------------------------------------------------------------------------
 
-
 void SimpleThreadWorker::slot_onThreadStarted()
 {
 	onThreadStarted();
@@ -27,24 +26,20 @@ void SimpleThreadWorker::slot_onThreadFinished()
 	deleteLater();
 }
 
-
 // -------------------------------------------------------------------------------------
 //
 // SimpleThread class implementation
 //
 // -------------------------------------------------------------------------------------
 
-
 SimpleThread::SimpleThread()
 {
 }
-
 
 SimpleThread::SimpleThread(SimpleThreadWorker* worker)
 {
 	addWorker(worker);
 }
-
 
 SimpleThread::~SimpleThread()
 {
@@ -60,7 +55,6 @@ SimpleThread::~SimpleThread()
 		}
 	}
 }
-
 
 void SimpleThread::addWorker(SimpleThreadWorker* worker)
 {
@@ -80,7 +74,6 @@ void SimpleThread::addWorker(SimpleThreadWorker* worker)
 
 	m_workerList.append(worker);
 }
-
 
 void SimpleThread::start()
 {
@@ -103,7 +96,6 @@ void SimpleThread::start()
 	m_thread.start();
 }
 
-
 void SimpleThread::quit()
 {
 	beforeQuit();
@@ -122,12 +114,10 @@ void SimpleThread::quit()
 	m_thread.quit();
 }
 
-
 bool SimpleThread::wait(unsigned long time)
 {
 	return m_thread.wait(time);
 }
-
 
 bool SimpleThread::quitAndWait(unsigned long time)
 {
@@ -148,7 +138,6 @@ bool SimpleThread::isFinished() const
 void SimpleThread::beforeStart()
 {
 }
-
 
 void SimpleThread::beforeQuit()
 {

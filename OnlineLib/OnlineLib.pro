@@ -80,7 +80,6 @@ SOURCES += \
 	CircularLogger.cpp \
 	SimpleAppSignalState.cpp \
 	DataProtocols.cpp \
-	HostAddressPort.cpp \
 
 
 

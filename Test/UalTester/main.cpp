@@ -6,8 +6,8 @@ int main(int argc, char *argv[])
 	QCoreApplication a(argc, argv);
 
 	a.setApplicationName("UalTester");
-	a.setOrganizationName("Radiy");
-	a.setOrganizationDomain("radiy.com");
+	a.setOrganizationName(Manufacturer::RADIY);
+	a.setOrganizationDomain(Manufacturer::SITE);
 
 	//
 

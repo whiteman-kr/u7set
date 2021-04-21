@@ -9,7 +9,7 @@
 
 #include "../OnlineLib/SocketIO.h"
 #include "../OnlineLib/Tcp.h"
-
+#include "../lib/ConstStrings.h"
 
 const char* const semaphoreString = "ServiceControlManagerSemaphore";
 const char* const sharedMemoryString = "ServiceControlManagerSharedMemory";
@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    QCoreApplication::setOrganizationName("Radiy");
-    QCoreApplication::setOrganizationDomain("inter.project@radiy.com");
+    QCoreApplication::setOrganizationName(Manufacturer::RADIY);
+	QCoreApplication::setOrganizationDomain(Manufacturer::SITE);
     QCoreApplication::setApplicationName("ServiceControlManager");
     if (closeToTray)
     {

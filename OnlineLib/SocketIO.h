@@ -74,7 +74,7 @@ const quint32	RQERROR_OK = 0,
 				RQERROR_UNKNOWN_REQUEST = 1;
 
 
-// --------------------------- Data structs used for parsing "Radiy" platform packets ------------------------
+// --------------------------- Data structs used for parsing Manufacturer::RADIY platform packets ------------------------
 //
 
 #pragma pack(push, 2)

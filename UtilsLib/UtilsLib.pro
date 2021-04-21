@@ -72,13 +72,8 @@ HEADERS += \
 	XmlHelper.h \
 
 SOURCES += \
-	Address16.cpp \
 	Crc.cpp \
 	DomXmlHelper.cpp \
 	Queue.cpp \
-	SimpleMutex.cpp \
 	SimpleThread.cpp \
-	WUtils.cpp \
-	XmlHelper.cpp
-
-
+	XmlHelper.cpp \
