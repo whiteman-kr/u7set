@@ -4,7 +4,7 @@
 #include <QJSEngine>
 #include <unordered_set>
 
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "../lib/Subsystem.h"
 #include "../lib/Connection.h"
 #include "../VFrame30/Bus.h"

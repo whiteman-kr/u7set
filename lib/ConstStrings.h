@@ -325,6 +325,8 @@ namespace File
 	inline const QString CONNECTIONS_TXT("Connections.txt");
 	inline const QString CONNECTIONS_XML("Connections.xml");
 	inline const QString LOGIC_MODULES_XML("LogicModules.xml");
+
+	inline const QString SIM_PROFILES = "SimProfiles.txt";
 }
 
 namespace Separator
@@ -346,3 +348,102 @@ namespace TemplateMacro
 	inline const QString START_TOKEN("$(");
 	inline const QString END_TOKEN(")");
 }
+
+namespace AppSignalPropNames
+{
+	inline const QString ID("ID");										// Optimization, to share one string among all Signal instances
+	inline const QString SIGNAL_GROUP_ID("SignalGroupID");
+	inline const QString SIGNAL_INSTANCE_ID("SignalInstanceID");
+	inline const QString CHANGESET_ID("ChangesetID");
+	inline const QString CHECKED_OUT("CheckedOut");
+	inline const QString USER_ID("UserID");
+	inline const QString CHANNEL("Channel");
+	inline const QString EXCLUDE_FROM_BUILD("ExcludeFromBuild");
+	inline const QString CREATED("Created");
+	inline const QString DELETED("Deleted");
+	inline const QString INSTANCE_CREATED("InstanceCreated");
+	inline const QString TYPE("Type");
+	inline const QString IN_OUT_TYPE("InOutType");
+	inline const QString APP_SIGNAL_ID("AppSignalID");
+	inline const QString CUSTOM_APP_SIGNAL_ID("CustomAppSignalID");
+	inline const QString BUS_TYPE_ID("BusTypeID");
+	inline const QString CAPTION("Caption");
+	inline const QString ANALOG_SIGNAL_FORMAT("AnalogSignalFormat");
+	inline const QString DATA_SIZE("DataSize");
+	inline const QString LOW_ADC("LowADC");
+	inline const QString HIGH_ADC("HighADC");
+	inline const QString LOW_DAC("LowDAC");
+	inline const QString HIGH_DAC("HighDAC");
+	inline const QString LOW_ENGINEERING_UNITS("LowEngineeringUnits");
+	inline const QString HIGH_ENGINEERING_UNITS("HighEngineeringUnits");
+	inline const QString UNIT("Unit");
+	inline const QString LOW_VALID_RANGE("LowValidRange");
+	inline const QString HIGH_VALID_RANGE("HighValidRange");
+	inline const QString ELECTRIC_LOW_LIMIT("ElectricLowLimit");
+	inline const QString ELECTRIC_HIGH_LIMIT("ElectricHighLimit");
+	inline const QString ELECTRIC_UNIT("ElectricUnit");
+	inline const QString RLOAD_OHM("Rload_Ohm");
+	inline const QString SENSOR_TYPE("SensorType");
+	inline const QString R0_OHM("R0_Ohm");
+	inline const QString OUTPUT_MODE("OutputMode");
+	inline const QString ACQUIRE("Acquire");
+	inline const QString ARCHIVE("Archive");
+	inline const QString DECIMAL_PLACES("DecimalPlaces");
+	inline const QString COARSE_APERTURE("CoarseAperture");
+	inline const QString FINE_APERTURE("FineAperture");
+	inline const QString ADAPTIVE_APERTURE("AdaptiveAperture");
+	inline const QString FILTERING_TIME("FilteringTime");
+	inline const QString SPREAD_TOLERANCE("SpreadTolerance");
+	inline const QString BYTE_ORDER_PROP("ByteOrder");
+	inline const QString EQUIPMENT_ID("EquipmentID");
+	inline const QString ENABLE_TUNING("EnableTuning");
+	inline const QString TUNING_DEFAULT_VALUE("TuningDefaultValue");
+	inline const QString TUNING_LOW_BOUND("TuningLowBound");
+	inline const QString TUNING_HIGH_BOUND("TuningHighBound");
+	inline const QString SPECIFIC_PROPERTIES_STRUCT("SpecificPropertiesStruct");
+	inline const QString TAGS("Tags");
+
+	inline const QString MISPRINT_lowEngineeringUnitsCaption("LowEngeneeringUnits");
+	inline const QString MISPRINT_highEngineeringUnitsCaption("HighEngeneeringUnits");
+}
+
+namespace AppSignalDefaultSpecPropStruct
+{
+	inline const QString INPUT_ANALOG(
+		"4;ElectricHighLimit;5 Electric parameters;double;;;0;10;false;false;Electric high limit of input signal;true;None\n"
+		"4;ElectricLowLimit;5 Electric parameters;double;;;0;10;false;false;Electric low limit of input signal;true;None\n"
+		"4;ElectricUnit;5 Electric parameters;DynamicEnum [NoUnit=0,mA=1,mV=2,Ohm=3,V=4];;;NoUnit;0;false;false;;true;None\n"
+		"4;FilteringTime;4 Signal processing;double;;;0.005;5;false;false;Signal filtering time in seconds;true;None\n"
+		"4;HighADC;4 Signal processing;uint32;0;65535;65535;0;false;false;High ADC value;true;None\n"
+		"4;HighEngineeringUnits;4 Signal processing;double;;;100;10;false;false;High engineering units;true;None\n"
+		"4;HighValidRange;4 Signal processing;double;;;100;10;false;false;High valid range of signal;true;None\n"
+		"4;LowADC;4 Signal processing;uint32;0;65535;0;0;false;false;Low ADC value;true;None\n"
+		"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n"
+		"4;LowValidRange;4 Signal processing;double;;;0;10;false;false;Low valid range of signal;true;None\n"
+		"4;SensorType;5 Electric parameters;DynamicEnum [NoSensor=0,Ohm_Pt50_W1391=1,Ohm_Pt100_W1391=2,Ohm_Pt50_W1385=3,Ohm_Pt100_W1385=4,Ohm_Cu_50_W1428=5,Ohm_Cu_100_W1428=6,Ohm_Cu_50_W1426=7,Ohm_Cu_100_W1426=8,Ohm_Pt21=9,Ohm_Cu23=10,mV_K_TXA=11,mV_L_TXK=12,mV_N_THH=13];;;NoSensor;0;false;false;;true;None\n"
+		"4;SpreadTolerance;4 Signal processing;double;;;2;5;false;false;Spread tolerance of signal measurement channels in percents;true;None");
+
+	inline const QString OUTPUT_ANALOG(
+		"4;ElectricHighLimit;5 Electric parameters;double;;;0;10;false;false;Electric high limit of input signal;true;None\n"
+		"4;ElectricLowLimit;5 Electric parameters;double;;;0;10;false;false;Electric low limit of input signal;true;None\n"
+		"4;ElectricUnit;5 Electric parameters;DynamicEnum [NoUnit=0,mA=1,mV=2,Ohm=3,V=4];;;NoUnit;0;false;false;;true;None\n"
+		"4;HighDAC;4 Signal processing;uint32;0;65535;65535;0;false;false;High DAC value;true;None\n"
+		"4;HighEngineeringUnits;4 Signal processing;double;;;100;10;false;false;High engineering units;true;None\n"
+		"4;LowDAC;4 Signal processing;uint32;0;65535;0;0;false;false;Low DAC value;true;None\n"
+		"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n"
+		"4;OutputMode;5 Electric parameters;DynamicEnum [Plus0_Plus5_V=0,Plus4_Plus20_mA=1,Minus10_Plus10_V=2,Plus0_Plus5_mA=3];;;Plus0_Plus5_V;0;false;false;;true;None\n");
+
+
+	inline const QString INTERNAL_ANALOG(
+		"4;HighEngineeringUnits;4 Signal processing;double;;;100;10;false;false;High engineering units;true;None\n"
+		"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n");
+
+	inline const QString BUS_CHILD_ANALOG(
+		"4;HighADC;4 Signal processing;uint32;0;65535;65535;0;false;false;High ADC value;true;None\n"
+		"4;HighEngineeringUnits;4 Signal processing;double;;;100;10;false;false;High engineering units;true;None\n"
+		"4;HighValidRange;4 Signal processing;double;;;100;10;false;false;High valid range of signal;true;None\n"
+		"4;LowADC;4 Signal processing;uint32;0;65535;0;0;false;false;Low ADC value;true;None\n"
+		"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n"
+		"4;LowValidRange;4 Signal processing;double;;;0;10;false;false;Low valid range of signal;true;None\n");
+}
+

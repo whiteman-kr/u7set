@@ -2,7 +2,7 @@
 
 #include "../lib/OutputLog.h"
 #include "../lib/OrderedHash.h"
-#include "../lib/DeviceObject.h"
+#include "../HardwareLib/DeviceObject.h"
 #include "../lib/BuildInfo.h"
 #include "../lib/ConstStrings.h"
 #include "ModuleFirmwareWriter.h"

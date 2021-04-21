@@ -2,7 +2,7 @@
 #define DIALOGFILEEDITOR_H
 
 #include "IdePropertyEditor.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 
 class DialogFileEditor : public QDialog
 {

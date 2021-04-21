@@ -2,26 +2,23 @@
 
 #include <QString>
 #include <QMultiHash>
+#include <QFile>
+#include <utility>
 #include <set>
 
-#include "Types.h"
-#include "DbStruct.h"
-#include "OrderedHash.h"
 #include "../UtilsLib/Address16.h"
 #include "../UtilsLib/Hash.h"
+#include "../UtilsLib/WUtils.h"
+
+#include "ConstStrings.h"
+#include "Types.h"
+#include "PropertyObject.h"
+#include "OrderedHash.h"
 #include "TuningValue.h"
 #include "AppSignalStateFlags.h"
-#include "ConstStrings.h"
 
-class QXmlStreamAttributes;
 class XmlWriteHelper;
 class XmlReadHelper;
-class SignalSpecPropValues;
-
-namespace Builder
-{
-	class IssueLogger;
-}
 
 struct ID_AppSignalID
 {
@@ -31,12 +28,94 @@ struct ID_AppSignalID
 
 Q_DECLARE_METATYPE(ID_AppSignalID)
 
+class SignalSpecPropValue
+{
+public:
+	SignalSpecPropValue();
+
+	bool create(std::shared_ptr<Property> prop);
+	bool create(const QString& name, const QVariant& value, bool isEnum);
+
+	bool setValue(const QString& name, const QVariant& value, bool isEnum);
+	bool setAnyValue(const QString& name, const QVariant& value);
+
+	QString name() const { return m_name; }
+	void setName(const QString& name) { m_name = name; }
+
+	QVariant::Type type() const { return m_value.type(); }
+	QVariant value() const { return m_value; }
+	bool isEnum() const {return m_isEnum; }
+
+	bool save(Proto::SignalSpecPropValue* protoValue) const;
+	bool load(const Proto::SignalSpecPropValue& protoValue);
+
+private:
+	QString m_name;
+	QVariant m_value;
+	bool m_isEnum = false;
+};
+
+class AppSignal;
+
+class SignalSpecPropValues
+{
+public:
+	SignalSpecPropValues();
+
+	bool create(const AppSignal& s);
+
+	bool createFromSpecPropStruct(const QString& specPropStruct, bool buildNamesMap = true);
+	bool updateFromSpecPropStruct(const QString& specPropStruct);
+
+	bool isExists(const QString& name) const { return m_propNamesMap.contains(name); }
+
+	bool setValue(const QString& name, const QVariant& value);
+
+	bool setAnyValue(const QString& name, const QVariant& value);		// setter without isEnum checking
+
+	template<typename ENUM_TYPE>
+	bool setEnumValue(const QString& name, ENUM_TYPE enumItemValue);
+	bool setEnumValue(const QString& name, int enumItemValue);
+
+	bool setValue(const SignalSpecPropValue& propValue);
+
+	bool getValue(const QString& name, QVariant* qv) const;
+	bool getValue(const QString& name, QVariant* qv, bool* isEnum) const;
+
+	bool serializeValuesToArray(QByteArray* protoData) const;
+	bool parseValuesFromArray(const QByteArray& protoData);
+
+	//bool save(Proto::SignalSpecPropValues* protoValues) const;
+
+	const QVector<SignalSpecPropValue>& values() const { return m_specPropValues; }
+
+	void append(const SignalSpecPropValue& value);
+
+	bool replaceName(const QString& oldName, const QString& newName);			// returns true if replacing is occured
+
+private:
+	void buildPropNamesMap();
+
+	bool setValue(const QString& name, const QVariant& value, bool isEnum);
+
+	int getPropertyIndex(const QString& name) const;
+
+private:
+	QVector<SignalSpecPropValue> m_specPropValues;
+	QHash<QString, int> m_propNamesMap;									// prop name => index in m_propSpecValues
+
+};
+
 class AppSignal
 {
 	friend class DbWorker;
 	friend class AppSignalSet;
 	friend class SignalTests;
 	friend class DbControllerSignalTests;
+
+public:
+	static const QString CAPTION_VALIDATOR;
+	static const QString IDENTIFICATORS_VALIDATOR;
 
 public:
 	AppSignal();
@@ -303,7 +382,7 @@ public:
 	QDateTime created() const { return m_created; }
 	bool deleted() const { return m_deleted; }
 	QDateTime instanceCreated() const { return m_instanceCreated; }
-	VcsItemAction instanceAction() const { return m_instanceAction; }
+	E::VcsItemAction instanceAction() const { return m_instanceAction; }
 
 	// Signal properties calculated in compile-time
 
@@ -393,7 +472,7 @@ private:
 	void setDeleted(bool deleted) { m_deleted = deleted; }
 	void setInstanceCreated(const QDateTime& instanceCreated) { m_instanceCreated = instanceCreated; }
 	void setInstanceCreated(const QString& instanceCreatedStr) { m_instanceCreated = QDateTime::fromString(instanceCreatedStr, FormatStr::POSTGRES_DATE_TIME); }
-	void setInstanceAction(VcsItemAction action) { m_instanceAction = action; }
+	void setInstanceAction(E::VcsItemAction action) { m_instanceAction = action; }
 	void initCreatedDates();
 
 	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
@@ -472,7 +551,7 @@ private:
 	QDateTime m_created;
 	bool m_deleted = false;
 	QDateTime m_instanceCreated;
-	VcsItemAction m_instanceAction{VcsItemAction::Added};
+	E::VcsItemAction m_instanceAction = E::VcsItemAction::Added;
 
 	// Signal properties calculated in compile-time
 	//
@@ -559,7 +638,5 @@ private:
 	QHash<QString, int> m_strID2IndexMap;
 
 	int m_maxID = -1;
-
-	Builder::IssueLogger* m_log = nullptr;
 };
 

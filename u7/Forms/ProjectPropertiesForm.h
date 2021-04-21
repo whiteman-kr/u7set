@@ -2,7 +2,7 @@
 
 #include <QDialog>
 #include "../../lib/PropertyObject.h"
-#include "../../lib/DbController.h"
+#include "../../DbLib/DbController.h"
 
 
 class ProjectPropertiesForm

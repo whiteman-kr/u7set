@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QTest>
 #include <QtSql>
-#include "../../lib/DbController.h"
+#include "../../DbLib/DbController.h"
 
 
 struct User

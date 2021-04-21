@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MainTabPage.h"
-#include "../lib/DbStruct.h"
+#include "../DbLib/DbStruct.h"
 #include "GlobalMessanger.h"
 #include "../lib/Ui/FilesTreeView.h"
 

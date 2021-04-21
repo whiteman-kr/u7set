@@ -192,7 +192,7 @@ void DbControllerVersionControlTests::get_changeset_details()
 		QVERIFY(cs.userId() == 1);
 		QVERIFY(cs.username() == "Administrator");
 		QVERIFY(cs.comment() == "Test function get_changeset_details");
-		QVERIFY(cs.action() == VcsItemAction::Added);
+		QVERIFY(cs.action() == E::VcsItemAction::Added);
 
 		changesetId = cs.changeset();
 
@@ -228,7 +228,7 @@ void DbControllerVersionControlTests::get_changeset_details()
 
 			QVERIFY(cso.id() == fileId);
 			QVERIFY(cso.name() == "TestFile.tmp");
-			QVERIFY(cso.action() == VcsItemAction::Added);
+			QVERIFY(cso.action() == E::VcsItemAction::Added);
 		}
 
 		// 7. LogOut
@@ -264,7 +264,7 @@ void DbControllerVersionControlTests::get_changeset_details()
 
 			QVERIFY(cso.id() == fileId);
 			QVERIFY(cso.name() == "TestFile.tmp");
-			QVERIFY(cso.action() == VcsItemAction::Added);
+			QVERIFY(cso.action() == E::VcsItemAction::Added);
 		}
 	}
 

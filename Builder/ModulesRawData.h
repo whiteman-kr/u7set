@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/DeviceObject.h"
+#include "../HardwareLib/DeviceObject.h"
 #include "IssueLogger.h"
 
 class ModuleRawDataDescription

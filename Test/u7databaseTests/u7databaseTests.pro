@@ -37,14 +37,7 @@ CONFIG += warn_off
 #	SignalTests.cpp \
 
 SOURCES += main.cpp \
-	../../lib/DbController.cpp \
-	../../lib/DbWorker.cpp \
-	../../lib/DbStruct.cpp \
-	../../lib/DeviceObject.cpp \
-	../../lib/DbProgress.cpp \
-    ../../lib/ScriptDeviceObject.cpp \
 	../../lib/AppSignal.cpp \
-	../../lib/DbProgressDialog.cpp \
 	../../lib/Types.cpp \
 	../../lib/TuningValue.cpp \
 	../../lib/SignalProperties.cpp \
@@ -66,15 +59,8 @@ SOURCES += main.cpp \
 #    SignalTests.h \
 
 HEADERS += \
-    ../../lib/DbController.h \
-	../../lib/DbWorker.h \
-	../../lib/DbStruct.h \
-	../../lib/DeviceObject.h \
 	../../lib/Factory.h \
-	../../lib/DbProgress.h \
-    ../../lib/ScriptDeviceObject.h \
 	../../lib/AppSignal.h \
-	../../lib/DbProgressDialog.h \
 	../../lib/PropertyObject.h \
 	../../lib/Types.h \
 	../../lib/TuningValue.h \
@@ -106,6 +92,13 @@ RESOURCES += \
     ../../DatabaseUpgrade/DatabaseUpgrade.qrc \
     FutureDatabaseUpgrade.qrc
 
+# --
+#
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+LIBS += -L$$DESTDIR
+LIBS += -L.
+
 # Visual Leak Detector
 #
 win32 {
@@ -113,24 +106,7 @@ win32 {
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
 
-# UtilsLib
-#
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
-
-# OnlineLib
-#
-win32 {
-        CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-        CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-        CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
+LIBS += -lUtilsLib
+LIBS += -lOnlineLib
+LIBS += -lHardwareLib
+LIBS += -lDbLib

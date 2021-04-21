@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../lib/OrderedHash.h"
-#include "../lib/DeviceObject.h"
+#include "../HardwareLib/DeviceObject.h"
 #include "../UtilsLib/Address16.h"
 #include "../lib/AppSignal.h"
 

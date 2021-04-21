@@ -29,11 +29,8 @@ unix {
 
 SOURCES += \
 	../../lib/LanControllerInfoHelper.cpp \
-	../../lib/ScriptDeviceObject.cpp \
 	../../lib/DataSource.cpp \
-	../../lib/DeviceObject.cpp \
 	../../lib/AppSignal.cpp \
-	../../lib/DbStruct.cpp \
 	../../lib/Types.cpp \
 	../../lib/TuningValue.cpp \
 	../../lib/DeviceHelper.cpp \
@@ -55,11 +52,8 @@ HEADERS  += \
 	../../Proto/serialization.pb.h \
 	../../lib/LanControllerInfo.h \
 	../../lib/LanControllerInfoHelper.h \
-	../../lib/ScriptDeviceObject.h \
 	../../lib/DataSource.h \
-	../../lib/DeviceObject.h \
 	../../lib/AppSignal.h \
-	../../lib/DbStruct.h \
 	../../lib/PropertyObject.h \
 	../../lib/Types.h \
 	../../lib/TuningValue.h \
@@ -78,9 +72,18 @@ HEADERS  += \
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
+# Add curent dir to a list of library directory paths
+#
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+# --
+#
+LIBS += -L$$DESTDIR
+LIBS += -L.
+
 # Protobuf
 #
-LIBS += -L$$DESTDIR -lprotobuf
+LIBS += -lprotobuf
 INCLUDEPATH += ./../../Protobuf
 
 # Visual Leak Detector
@@ -92,24 +95,16 @@ win32 {
 
 # OnlineLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
+LIBS += -lOnlineLib
 
 # UtilsLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
+LIBS += -lUtilsLib
+
+# HardwareLib
+#
+LIBS += -lHardwareLib
+
+
 
 

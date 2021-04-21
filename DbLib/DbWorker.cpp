@@ -1,3 +1,7 @@
+#ifndef DB_LIB_DOMAIN
+#error Don't include this file in the project! Link DbLib instead.
+#endif
+
 #include <functional>
 #include <QDateTime>
 #include <QFile>
@@ -8,10 +12,10 @@
 #include <QHostInfo>
 #include <QElapsedTimer>
 
-#include "../lib/DbWorker.h"
-#include "../lib/DeviceObject.h"
+#include "DbWorker.h"
+#include "DbProgress.h"
 #include "../lib/SignalProperties.h"
-#include "../lib/DbProgress.h"
+#include "../HardwareLib/DeviceObject.h"
 
 // Upgrade database
 //
@@ -4663,7 +4667,11 @@ void DbWorker::slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAp
 
 	// Check parameters
 	//
-	TEST_PTR_RETURN(signalsIDAppSignalID);
+	if (signalsIDAppSignalID == nullptr)
+	{
+		Q_ASSERT(signalsIDAppSignalID);
+		return;
+	}
 
 	signalsIDAppSignalID->clear();
 
@@ -4788,7 +4796,7 @@ void DbWorker::getSignals(AppSignalSet* signalSet, bool excludeDeleted, bool tun
 
 		getSignalData(q, *s);
 
-		if (excludeDeleted == true && s->instanceAction() == VcsItemAction::Deleted)
+		if (excludeDeleted == true && s->instanceAction() == E::VcsItemAction::Deleted)
 		{
 			delete s;
 			continue;
@@ -5136,7 +5144,7 @@ void DbWorker::getSignalData(QSqlQuery& q, AppSignal& s)
 	s.setCreated(q.value(SD_CREATED).toDateTime());
 	s.setDeleted(q.value(SD_DELETED).toBool());
 	s.setInstanceCreated(q.value(SD_INSTANCE_CREATED).toDateTime());
-	s.setInstanceAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(SD_INSTANCE_ACTION).toInt()));
+	s.setInstanceAction(static_cast<E::VcsItemAction>(q.value(SD_INSTANCE_ACTION).toInt()));
 
 	s.setIsLoaded(true);
 }
@@ -5169,7 +5177,7 @@ QString DbWorker::getSignalDataStr(const AppSignal& s)
 								arg(s.created().toString(FormatStr::POSTGRES_DATE_TIME)).			/* 15 */
 								arg(toSqlBoolean(s.deleted())).										/* 16 */
 								arg(s.instanceCreated().toString(FormatStr::POSTGRES_DATE_TIME)).	/* 17 */
-								arg(s.instanceAction().toInt());									/* 18 */
+								arg(static_cast<int>(s.instanceAction()));							/* 18 */
 	return str;
 }
 
@@ -5814,7 +5822,11 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>
 {
 	AUTO_COMPLETE
 
-	TEST_PTR_RETURN(deviceSignals);
+	if (deviceSignals == nullptr)
+	{
+		Q_ASSERT(deviceSignals);
+		return;
+	}
 
 	if (addedSignals != nullptr)
 	{
@@ -6390,7 +6402,11 @@ void DbWorker::slot_getSpecificSignals(int changesetId, std::vector<AppSignal>* 
 {
 	AUTO_COMPLETE
 
-	TEST_PTR_RETURN(out);
+	if (out == nullptr)
+	{
+		Q_ASSERT(out);
+		return;
+	}
 
 	// Operation
 	//
@@ -6422,7 +6438,11 @@ void DbWorker::slot_getSpecificSignals(QDateTime date, std::vector<AppSignal>* o
 {
 	AUTO_COMPLETE
 
-	TEST_PTR_RETURN(out);
+	if (out == nullptr)
+	{
+		Q_ASSERT(out);
+		return;
+	}
 
 	// Operation
 	//
@@ -6453,7 +6473,11 @@ void DbWorker::slot_getSpecificSignals(QDateTime date, std::vector<AppSignal>* o
 
 void DbWorker::readSignalsToVector(QSqlQuery& q, std::vector<AppSignal>* out)
 {
-	TEST_PTR_RETURN(out);
+	if (out == nullptr)
+	{
+		Q_ASSERT(out);
+		return;
+	}
 
 	out->clear();
 
@@ -7117,8 +7141,8 @@ bool DbWorker::db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo, bool
 
 	int fileId = q.value(0).toInt();
 	bool deleted  = q.value(1).toBool();
-	VcsState::VcsStateType state = q.value(2).toBool() ? VcsState::CheckedOut : VcsState::CheckedIn;
-	VcsItemAction::VcsItemActionType action = static_cast<VcsItemAction::VcsItemActionType>(q.value(3).toInt());
+	E::VcsState state = q.value(2).toBool() ? E::VcsState::CheckedOut : E::VcsState::CheckedIn;
+	E::VcsItemAction action = static_cast<E::VcsItemAction>(q.value(3).toInt());
 	int userId = q.value(4).toInt();
 	//int errcode = q.value(5).toInt();
 
@@ -7202,10 +7226,10 @@ static thread_local int attributesNo = -1;
 	file->setLastCheckIn(record.value(checkOutTimeNo).toDateTime());		// setLastCheckIn BUT TIME IS CheckOutTime
 
 	bool checkedOut = record.value(checkedOutNo).toBool();
-	file->setState(checkedOut ? VcsState::CheckedOut : VcsState::CheckedIn);
+	file->setState(checkedOut ? E::VcsState::CheckedOut : E::VcsState::CheckedIn);
 
 	int action = record.value(actionNo).toInt();
-	file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
+	file->setAction(static_cast<E::VcsItemAction>(action));
 
 	file->setUserId(record.value(userIdNo).toInt());
 	file->setDetails(record.value(detailsNo).toString());
@@ -7247,10 +7271,10 @@ bool DbWorker::db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo)
 	fileInfo->setChangeset(q.value(4).toInt());
 	fileInfo->setCreated(q.value(5).toDateTime());
 	fileInfo->setSize(q.value(6).toInt());
-	fileInfo->setState(q.value(7).toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
+	fileInfo->setState(q.value(7).toBool() ? E::VcsState::CheckedOut : E::VcsState::CheckedIn);
 	//fileInfo->setCheckoutTime(q.value(8).toString());
 	fileInfo->setUserId(q.value(9).toInt());
-	fileInfo->setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(10).toInt()));
+	fileInfo->setAction(static_cast<E::VcsItemAction>(q.value(10).toInt()));
 	fileInfo->setDetails(q.value(11).toString());
 	fileInfo->setAttributes(q.value(12).toInt());
 
@@ -7284,7 +7308,7 @@ bool DbWorker::db_dbChangeset(const QSqlQuery& q, DbChangeset* out)
 	out->setUsername(q.value(2).toString());
 	out->setDate(q.value(3).toDateTime());
 	out->setComment(q.value(4).toString());
-	out->setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(5).toInt()));
+	out->setAction(static_cast<E::VcsItemAction>(q.value(5).toInt()));
 
 	return true;
 }
@@ -7302,7 +7326,7 @@ bool DbWorker::db_dbChangesetObject(const QSqlQuery& q, DbChangesetDetails* dest
 	destination->setUsername(q.value(2).toString());
 	destination->setDate(q.value(3).toDateTime());
 	destination->setComment(q.value(4).toString());
-	destination->setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(5).toInt()));
+	destination->setAction(static_cast<E::VcsItemAction>(q.value(5).toInt()));
 
 	DbChangesetObject csObject;
 
@@ -7310,7 +7334,7 @@ bool DbWorker::db_dbChangesetObject(const QSqlQuery& q, DbChangesetDetails* dest
 	csObject.setId(q.value(6 + 1).toInt());
 	csObject.setName(q.value(6 + 2).toString());
 	csObject.setCaption(q.value(6 + 3).toString());
-	csObject.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(6 + 4).toInt()));
+	csObject.setAction(static_cast<E::VcsItemAction>(q.value(6 + 4).toInt()));
 	csObject.setParent(q.value(6 + 5).toString());
 	csObject.setFileMoveText(q.value(6 + 6).toString());
 	csObject.setFileRenameText(q.value(6 + 7).toString());
@@ -7526,7 +7550,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 
 	SignalSpecPropValues inputSpecPropValues;
 
-	result = inputSpecPropValues.createFromSpecPropStruct(SignalProperties::defaultInputAnalogSpecPropStruct);
+	result = inputSpecPropValues.createFromSpecPropStruct(AppSignalDefaultSpecPropStruct::INPUT_ANALOG);
 
 	if (result == false)
 	{
@@ -7534,10 +7558,9 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 		return false;
 	}
 
-
 	SignalSpecPropValues outputSpecPropValues;
 
-	result = outputSpecPropValues.createFromSpecPropStruct(SignalProperties::defaultOutputAnalogSpecPropStruct);
+	result = outputSpecPropValues.createFromSpecPropStruct(AppSignalDefaultSpecPropStruct::OUTPUT_ANALOG);
 
 	if (result == false)
 	{
@@ -7547,7 +7570,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 
 	SignalSpecPropValues internalSpecPropValues;
 
-	result = internalSpecPropValues.createFromSpecPropStruct(SignalProperties::defaultInternalAnalogSpecPropStruct);
+	result = internalSpecPropValues.createFromSpecPropStruct(AppSignalDefaultSpecPropStruct::INTERNAL_ANALOG);
 
 	if (result == false)
 	{
@@ -7666,55 +7689,55 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 		{
 		case E::SignalInOutType::Input:
 
-			result &= inputSpecPropValues.setValue(SignalProperties::lowADCCaption, lowADC);
-			result &= inputSpecPropValues.setValue(SignalProperties::highADCCaption, highADC);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::LOW_ADC, lowADC);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::HIGH_ADC, highADC);
 
-			result &= inputSpecPropValues.setValue(SignalProperties::lowEngineeringUnitsCaption, lowEngineeringUnits);
-			result &= inputSpecPropValues.setValue(SignalProperties::highEngineeringUnitsCaption, highEngineeringUnits);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::LOW_ENGINEERING_UNITS, lowEngineeringUnits);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::HIGH_ENGINEERING_UNITS, highEngineeringUnits);
 
-			result &= inputSpecPropValues.setValue(SignalProperties::lowValidRangeCaption, lowValidRange);
-			result &= inputSpecPropValues.setValue(SignalProperties::highValidRangeCaption, highValidRange);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::LOW_VALID_RANGE, lowValidRange);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::HIGH_VALID_RANGE, highValidRange);
 
-			result &= inputSpecPropValues.setValue(SignalProperties::filteringTimeCaption, filteringTime);
-			result &= inputSpecPropValues.setValue(SignalProperties::spreadToleranceCaption, spreadTolerance);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::FILTERING_TIME, filteringTime);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::SPREAD_TOLERANCE, spreadTolerance);
 
-			result &= inputSpecPropValues.setValue(SignalProperties::electricLowLimitCaption, electricLowLimit);
-			result &= inputSpecPropValues.setValue(SignalProperties::electricHighLimitCaption, electricHighLimit);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::ELECTRIC_LOW_LIMIT, electricLowLimit);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::ELECTRIC_HIGH_LIMIT, electricHighLimit);
 
-			result &= inputSpecPropValues.setEnumValue<E::ElectricUnit>(SignalProperties::electricUnitCaption, electricUnit);
-			result &= inputSpecPropValues.setEnumValue<E::SensorType>(SignalProperties::sensorTypeCaption, sensorType);
+			result &= inputSpecPropValues.setEnumValue<E::ElectricUnit>(AppSignalPropNames::ELECTRIC_UNIT, electricUnit);
+			result &= inputSpecPropValues.setEnumValue<E::SensorType>(AppSignalPropNames::SENSOR_TYPE, sensorType);
 
-			specPropStruct = SignalProperties::defaultInputAnalogSpecPropStruct;
+			specPropStruct = AppSignalDefaultSpecPropStruct::INPUT_ANALOG;
 			inputSpecPropValues.serializeValuesToArray(&protoDataArray);
 
 			break;
 
 		case E::SignalInOutType::Output:
 
-			result &= outputSpecPropValues.setValue(SignalProperties::lowDACCaption, lowADC);
-			result &= outputSpecPropValues.setValue(SignalProperties::highDACCaption, highADC);
+			result &= outputSpecPropValues.setValue(AppSignalPropNames::LOW_DAC, lowADC);
+			result &= outputSpecPropValues.setValue(AppSignalPropNames::HIGH_DAC, highADC);
 
-			result &= outputSpecPropValues.setValue(SignalProperties::lowEngineeringUnitsCaption, lowEngineeringUnits);
-			result &= outputSpecPropValues.setValue(SignalProperties::highEngineeringUnitsCaption, highEngineeringUnits);
+			result &= outputSpecPropValues.setValue(AppSignalPropNames::LOW_ENGINEERING_UNITS, lowEngineeringUnits);
+			result &= outputSpecPropValues.setValue(AppSignalPropNames::HIGH_ENGINEERING_UNITS, highEngineeringUnits);
 
-			result &= inputSpecPropValues.setValue(SignalProperties::electricLowLimitCaption, electricLowLimit);
-			result &= inputSpecPropValues.setValue(SignalProperties::electricHighLimitCaption, electricHighLimit);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::ELECTRIC_LOW_LIMIT, electricLowLimit);
+			result &= inputSpecPropValues.setValue(AppSignalPropNames::ELECTRIC_HIGH_LIMIT, electricHighLimit);
 
-			result &= inputSpecPropValues.setEnumValue<E::ElectricUnit>(SignalProperties::electricUnitCaption, electricUnit);
+			result &= inputSpecPropValues.setEnumValue<E::ElectricUnit>(AppSignalPropNames::ELECTRIC_UNIT, electricUnit);
 
-			result &= outputSpecPropValues.setEnumValue<E::OutputMode>(SignalProperties::outputModeCaption, outputMode);
+			result &= outputSpecPropValues.setEnumValue<E::OutputMode>(AppSignalPropNames::OUTPUT_MODE, outputMode);
 
-			specPropStruct = SignalProperties::defaultOutputAnalogSpecPropStruct;
+			specPropStruct = AppSignalDefaultSpecPropStruct::OUTPUT_ANALOG;
 			outputSpecPropValues.serializeValuesToArray(&protoDataArray);
 
 			break;
 
 		case E::SignalInOutType::Internal:
 
-			result &= internalSpecPropValues.setValue(SignalProperties::lowEngineeringUnitsCaption, lowEngineeringUnits);
-			result &= internalSpecPropValues.setValue(SignalProperties::highEngineeringUnitsCaption, highEngineeringUnits);
+			result &= internalSpecPropValues.setValue(AppSignalPropNames::LOW_ENGINEERING_UNITS, lowEngineeringUnits);
+			result &= internalSpecPropValues.setValue(AppSignalPropNames::HIGH_ENGINEERING_UNITS, highEngineeringUnits);
 
-			specPropStruct = SignalProperties::defaultInternalAnalogSpecPropStruct;
+			specPropStruct = AppSignalDefaultSpecPropStruct::INTERNAL_ANALOG;
 			internalSpecPropValues.serializeValuesToArray(&protoDataArray);
 
 			break;
@@ -7748,7 +7771,11 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 
 bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* errorMessage)
 {
-	TEST_PTR_RETURN_FALSE(errorMessage);
+	if (errorMessage == nullptr)
+	{
+		Q_ASSERT(errorMessage);
+		return false;
+	}
 
 	QSqlQuery q(db);
 
@@ -7788,11 +7815,11 @@ bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* err
 			continue;
 		}
 
-		bool replacingIsOccured = spv.replaceName(SignalProperties::MISPRINT_highEngineeringUnitsCaption,
-												  SignalProperties::highEngineeringUnitsCaption);
+		bool replacingIsOccured = spv.replaceName(AppSignalPropNames::MISPRINT_highEngineeringUnitsCaption,
+												  AppSignalPropNames::HIGH_ENGINEERING_UNITS);
 
-		replacingIsOccured |= spv.replaceName(SignalProperties::MISPRINT_lowEngineeringUnitsCaption,
-											  SignalProperties::lowEngineeringUnitsCaption);
+		replacingIsOccured |= spv.replaceName(AppSignalPropNames::MISPRINT_lowEngineeringUnitsCaption,
+											  AppSignalPropNames::LOW_ENGINEERING_UNITS);
 
 		if (replacingIsOccured == true)
 		{

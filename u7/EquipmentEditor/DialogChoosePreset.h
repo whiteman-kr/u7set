@@ -1,5 +1,5 @@
 #pragma once
-#include "../../lib/DeviceObject.h"
+#include "../../HardwareLib/DeviceObject.h"
 
 namespace Ui {
 class DialogChoosePreset;

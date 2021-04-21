@@ -55,7 +55,7 @@ SelectChangesetDialog::SelectChangesetDialog(QString title, DbController* db, co
 		QStringList itemTextList;
 		itemTextList << QString::number(ci.changeset());
 		itemTextList << ci.username();
-		itemTextList << ci.action().text();
+		itemTextList << E::valueToString<E::VcsItemAction>(ci.action());
 		itemTextList << locale.toString(ci.date(), QLocale::FormatType::ShortFormat);
 		itemTextList << ci.comment();
 

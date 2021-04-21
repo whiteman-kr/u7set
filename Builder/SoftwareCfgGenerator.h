@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "../lib/AppSignal.h"
-#include "../lib/DeviceObject.h"
+#include "../HardwareLib/DeviceObject.h"
 #include "../lib/DataSource.h"
 #include "../lib/Subsystem.h"
 #include "../VFrame30/Schema.h"

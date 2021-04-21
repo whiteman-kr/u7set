@@ -73,7 +73,7 @@ ChangesetDetailsDialog::ChangesetDetailsDialog(DbController* db, const DbChanges
 				itemTextList << co.name();
 				itemTextList << co.caption();
 
-				QString action = co.action().text();
+				QString action = E::valueToString<E::VcsItemAction>(co.action());
 				if (co.fileMoveText().isEmpty() == false)
 				{
 					action += ", " + co.fileMoveText();
@@ -94,7 +94,7 @@ ChangesetDetailsDialog::ChangesetDetailsDialog(DbController* db, const DbChanges
 			itemTextList << "S";
 			itemTextList << co.name();
 			itemTextList << co.caption();
-			itemTextList << co.action().text();
+			itemTextList << E::valueToString<E::VcsItemAction>(co.action());
 			itemTextList << co.parent();
 			break;
 

@@ -1,5 +1,5 @@
 #include "EquipmentModel.h"
-#include "../../lib/DbController.h"
+#include "../../DbLib/DbController.h"
 #include "../../lib/StandardColors.h"
 #include "../GlobalMessanger.h"
 #include "../CheckInDialog.h"
@@ -145,8 +145,7 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 	Hardware::DeviceObject* device = static_cast<Hardware::DeviceObject*>(index.internalPointer());
 	assert(device != nullptr);
 
-	const DbFileInfo* devieFileInfo = fileInfo(device);
-	Q_ASSERT(devieFileInfo);
+	const DbFileInfo* deviceFileInfo = fileInfo(device);
 
 	switch (role)
 	{
@@ -183,17 +182,19 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				break;
 
 			case ObjectStateColumn:
-				if (devieFileInfo->state() == VcsState::CheckedOut)
+
+				if (deviceFileInfo->state() == E::VcsState::CheckedOut)
 				{
-					QString state = devieFileInfo->action().text();
+					QString state = E::valueToString<E::VcsItemAction>(deviceFileInfo->action());
 					v.setValue<QString>(state);
 				}
 				break;
 
 			case ObjectUserColumn:
-				if (devieFileInfo->state() == VcsState::CheckedOut)
+
+				if (deviceFileInfo->state() == E::VcsState::CheckedOut)
 				{
-					v.setValue<QString>(usernameById(devieFileInfo->userId()));
+					v.setValue<QString>(usernameById(deviceFileInfo->userId()));
 				}
 				break;
 
@@ -215,22 +216,22 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 
 	case Qt::BackgroundRole:
 		{
-			if (devieFileInfo->state() == VcsState::CheckedOut)
+			if (deviceFileInfo->state() == E::VcsState::CheckedOut)
 			{
 				QBrush b(StandardColors::VcsCheckedIn);
 
-				switch (static_cast<VcsItemAction::VcsItemActionType>(devieFileInfo->action().toInt()))
+				switch (deviceFileInfo->action())
 				{
-				case VcsItemAction::Unknown:
+				case E::VcsItemAction::Unknown:
 					b.setColor(StandardColors::VcsCheckedIn);
 					break;
-				case VcsItemAction::Added:
+				case E::VcsItemAction::Added:
 					b.setColor(StandardColors::VcsAdded);
 					break;
-				case VcsItemAction::Modified:
+				case E::VcsItemAction::Modified:
 					b.setColor(StandardColors::VcsModified);
 					break;
-				case VcsItemAction::Deleted:
+				case E::VcsItemAction::Deleted:
 					b.setColor(StandardColors::VcsDeleted);
 					break;
 				}
@@ -638,7 +639,7 @@ void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::m
 		device->setData(newFileInfo);
 
 		if (newFileInfo->deleted() == true ||
-			(newFileInfo->action() == VcsItemAction::Deleted && newFileInfo->state() == VcsState::CheckedIn))
+			(newFileInfo->action() == E::VcsItemAction::Deleted && newFileInfo->state() == E::VcsState::CheckedIn))
 		{
 			QModelIndex pi = modelIndex.parent();
 			std::shared_ptr<Hardware::DeviceObject> po = this->deviceObject(pi);
@@ -734,7 +735,7 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 		const DbFileInfo* fi = d->data();
 		Q_ASSERT(fi);
 
-		if (fi->state() == VcsState::CheckedIn)
+		if (fi->state() == E::VcsState::CheckedIn)
 		{
 			files.push_back(*fi);
 			checkedInList.push_back(index);
@@ -801,7 +802,7 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 				auto newFileInfo = std::make_shared<DbFileInfo>(fi, d->details());
 				d->setData(newFileInfo);		// Update file info record in the DeviceOubject
 
-				if (newFileInfo->state() == VcsState::CheckedOut)
+				if (newFileInfo->state() == E::VcsState::CheckedOut)
 				{
 					QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount, index.parent());
 					emit dataChanged(index, bottomRightIndex);		// Notify view about data update
@@ -854,7 +855,7 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 		const DbFileInfo* fileInfo = d->data();
 		Q_ASSERT(fileInfo);
 
-		if (fileInfo->state() == VcsState::CheckedOut &&
+		if (fileInfo->state() == E::VcsState::CheckedOut &&
 			(fileInfo->userId() == currentUser.userId() || currentUser.isAdminstrator() == true))
 		{
 			files.push_back(*fileInfo);

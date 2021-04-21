@@ -8,8 +8,7 @@
 #include <QString>
 #include <QDateTime>
 #include <QMetaType>
-#include <QtSql/QSqlRecord>
-#include "PropertyObject.h"
+#include "../lib/PropertyObject.h"
 
 class AppSignal;
 
@@ -107,74 +106,6 @@ namespace Db
 		constexpr static const char* AppSignalSetFileExtension = "asgs";			// Application signals set file extention (::Proto::AppSignalSet message)
 	};
 }
-
-
-//
-//
-// VcsState
-//
-//
-class VcsState
-{
-public:
-	enum VcsStateType
-	{
-		CheckedIn,					// File has no any action, it's normal state
-		CheckedOut
-	};
-
-	VcsState() noexcept;
-	VcsState(VcsStateType s) noexcept;
-
-	[[nodiscard]] QString text() const noexcept;
-	[[nodiscard]] VcsStateType value() const noexcept;
-
-private:
-	VcsStateType m_state;
-
-	friend bool operator== (const VcsState& s1, const VcsState& s2) noexcept;
-	friend bool operator!= (const VcsState& s1, const VcsState& s2) noexcept;
-	friend bool operator< (const VcsState& s1, const VcsState& s2) noexcept;
-};
-
-bool operator== (const VcsState& s1, const VcsState& s2) noexcept;
-bool operator!= (const VcsState& s1, const VcsState& s2) noexcept;
-bool operator<  (const VcsState& s1, const VcsState& s2) noexcept;
-
-
-//
-//
-// VcsItemAction
-//
-//
-class VcsItemAction
-{
-public:
-	enum VcsItemActionType
-	{
-		Unknown = 0,		// Don't change values, they are stored in DB
-		Added = 1,			// Don't change values, they are stored in DB
-		Modified = 2,		// Don't change values, they are stored in DB
-		Deleted = 3			// Don't change values, they are stored in DB
-	};
-
-	VcsItemAction() noexcept;
-	VcsItemAction(VcsItemActionType s) noexcept;
-
-	[[nodiscard]] QString text() const noexcept;
-	[[nodiscard]] int toInt() const noexcept;
-
-	[[nodiscard]] VcsItemActionType value() const noexcept;
-
-	void setValue(int intVal);
-
-private:
-	VcsItemActionType m_action;
-
-	friend bool operator== (const VcsItemAction& s1, const VcsItemAction& s2) noexcept;
-	friend bool operator!= (const VcsItemAction& s1, const VcsItemAction& s2) noexcept;
-};
-
 
 // signal management error codes
 // returns in ObjectState.errCode field
@@ -511,11 +442,11 @@ public:
 	void setLastCheckIn(const QDateTime& value);
 	void setLastCheckIn(const QString& value);
 
-	[[nodiscard]] const VcsState& state() const noexcept;
-	void setState(const VcsState& state);
+	[[nodiscard]] const E::VcsState& state() const noexcept;
+	void setState(const E::VcsState& state);
 
-	[[nodiscard]] const VcsItemAction& action() const noexcept;
-	void setAction(const VcsItemAction& action);
+	[[nodiscard]] const E::VcsItemAction& action() const noexcept;
+	void setAction(const E::VcsItemAction& action);
 
 	[[nodiscard]] int userId() const noexcept;
 	void setUserId(int value);
@@ -545,8 +476,9 @@ protected:
 	QDateTime m_created;
 	QDateTime m_lastCheckIn;
 
-	VcsState m_state = VcsState::CheckedIn;
-	VcsItemAction m_action = VcsItemAction::Added;
+	E::VcsState m_state = E::VcsState::CheckedIn;
+	E::VcsItemAction m_action = E::VcsItemAction::Added;
+
 	int m_userId = -1;
 
 	QString m_details = QLatin1String("{}");
@@ -641,8 +573,8 @@ public:
 	[[nodiscard]] const QString& comment() const;
 	void setComment(const QString& value);
 
-	[[nodiscard]] const VcsItemAction& action() const;
-	void setAction(const VcsItemAction& value);
+	[[nodiscard]] const E::VcsItemAction& action() const;
+	void setAction(const E::VcsItemAction& value);
 
 	// Data
 	//
@@ -652,7 +584,7 @@ private:
 	int m_userId = -1;
 	QString m_username;
 	QString m_comment;
-	VcsItemAction m_action;
+	E::VcsItemAction m_action;
 };
 
 //
@@ -708,8 +640,8 @@ public:
 	[[nodiscard]] QString caption() const;
 	void setCaption(const QString& value);
 
-	[[nodiscard]] VcsItemAction action() const;
-	void setAction(VcsItemAction value);
+	[[nodiscard]] E::VcsItemAction action() const;
+	void setAction(E::VcsItemAction value);
 
 	[[nodiscard]] QString parent() const;
 	void setParent(const QString& value);
@@ -725,7 +657,7 @@ private:
 	int m_id = -1;				// File.FileID or Signal.SignalsID
 	QString m_name;				// FileName or AppSignalID
 	QString m_caption;
-	VcsItemAction m_action{VcsItemAction::Added};
+	E::VcsItemAction m_action{E::VcsItemAction::Added};
 	QString m_parent;
 	QString m_fileMoveText;
 	QString m_fileRenameText;

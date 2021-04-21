@@ -177,20 +177,20 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 			return fileCaption(fileId);
 
 		case Columns::FileStateColumn:
-			if (file->state() == VcsState::CheckedIn)
+			if (file->state() == E::VcsState::CheckedIn)
 			{
 				return {};
 			}
 			else
 			{
-				return file->state().text();
+				return E::valueToString<E::VcsState>(file->state());
 			}
 
 		case Columns::FileActionColumn:
-			return file->action().text();
+			return E::valueToString<E::VcsItemAction>(file->action());
 
 		case Columns::ChangesetColumn:
-			return (file->state() == VcsState::CheckedIn) ? QVariant{file->changeset()} : QVariant{};
+			return (file->state() == E::VcsState::CheckedIn) ? QVariant{file->changeset()} : QVariant{};
 
 		case Columns::FileUserColumn:
 			return usernameById(file->userId());
@@ -307,19 +307,19 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 
 	if (role == Qt::BackgroundRole)
 	{
-		if (file->state() == VcsState::CheckedOut)
+		if (file->state() == E::VcsState::CheckedOut)
 		{
 			QBrush b{StandardColors::VcsCheckedIn};
 
-			switch (file->action().value())
+			switch (file->action())
 			{
-			case VcsItemAction::Added:
+			case E::VcsItemAction::Added:
 				b.setColor(StandardColors::VcsAdded);
 				break;
-			case VcsItemAction::Modified:
+			case E::VcsItemAction::Modified:
 				b.setColor(StandardColors::VcsModified);
 				break;
-			case VcsItemAction::Deleted:
+			case E::VcsItemAction::Deleted:
 				b.setColor(StandardColors::VcsDeleted);
 				break;
 			default:
@@ -1863,7 +1863,7 @@ void SchemaFileViewEx::slot_doubleClicked(const QModelIndex& index)
 	}
 	else
 	{
-		if (file.state() == VcsState::CheckedOut)
+		if (file.state() == E::VcsState::CheckedOut)
 		{
 			emit openFileSignal(file);
 		}
@@ -1912,7 +1912,7 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 	// hasAbilityToOpen
 	//
 	if (selectedFiles.size() == 1 &&
-		selectedFiles.front()->state() == VcsState::CheckedOut &&
+		selectedFiles.front()->state() == E::VcsState::CheckedOut &&
 		selectedFiles.front()->directoryAttribute() == false &&
 		(selectedFiles.front()->userId() == currentUserId  || currentUserIsAdmin == true))
 	{
@@ -1938,29 +1938,29 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 
 		// hasDeletePossibility
 		//
-		if ((file->state() == VcsState::CheckedOut && file->userId() == currentUserId) ||
-			file->state() == VcsState::CheckedIn)
+		if ((file->state() == E::VcsState::CheckedOut && file->userId() == currentUserId) ||
+			file->state() == E::VcsState::CheckedIn)
 		{
 			hasDeletePossibility = true;
 		}
 
 		// hasMovePossibility
 		//
-		if (file->state() == VcsState::CheckedOut && file->userId() == currentUserId)
+		if (file->state() == E::VcsState::CheckedOut && file->userId() == currentUserId)
 		{
 			hasMovePossibility = true;
 		}
 
 		// hasCheckOutPossibility
 		//
-		if (file->state() == VcsState::CheckedIn)
+		if (file->state() == E::VcsState::CheckedIn)
 		{
 			hasCheckOutPossibility = true;
 		}
 
 		// hasCheckInPossibility
 		//
-		if (file->state() == VcsState::CheckedOut &&
+		if (file->state() == E::VcsState::CheckedOut &&
 			(file->userId() == currentUserId || currentUserIsAdmin == true))
 		{
 			hasCheckInPossibility = true;
@@ -1968,7 +1968,7 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 
 		// hasUndoPossibility
 		//
-		if (file->state() == VcsState::CheckedOut &&
+		if (file->state() == E::VcsState::CheckedOut &&
 			(file->userId() == currentUserId || currentUserIsAdmin == true))
 		{
 			hasUndoPossibility = true;
@@ -1976,7 +1976,7 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 
 		// canGetWorkcopy, canSetWorkcopy
 		//
-		if (file->state() == VcsState::CheckedOut &&
+		if (file->state() == E::VcsState::CheckedOut &&
 			file->directoryAttribute() == false &&
 			file->userId() == currentUserId)
 		{
@@ -2744,7 +2744,7 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 		return;
 	}
 
-	if (file.state() != VcsState::CheckedOut)
+	if (file.state() != E::VcsState::CheckedOut)
 	{
 		QMessageBox mb(this);
 		mb.setText(tr("Check Out file for edit first."));
@@ -2752,7 +2752,7 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 		return;
 	}
 
-	if (file.state() == VcsState::CheckedOut &&
+	if (file.state() == E::VcsState::CheckedOut &&
 		file.userId() != db()->currentUser().userId())
 	{
 		QMessageBox mb(this);
@@ -2762,7 +2762,7 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 		return;
 	}
 
-	Q_ASSERT(file.state() == VcsState::CheckedOut && file.userId() == db()->currentUser().userId());
+	Q_ASSERT(file.state() == E::VcsState::CheckedOut && file.userId() == db()->currentUser().userId());
 
 	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
 	if (tabWidget == nullptr)
@@ -3613,7 +3613,7 @@ void SchemaControlTabPageEx::moveFiles()
 	for(const std::shared_ptr<DbFileInfo>& f : files)
 	{
 		if (dbc()->isSystemFile(f->fileId()) == true ||
-			f->state() != VcsState::CheckedOut)
+			f->state() != E::VcsState::CheckedOut)
 		{
 			continue;
 		}
@@ -3725,7 +3725,7 @@ void SchemaControlTabPageEx::checkOutFiles()
 			continue;
 		}
 
-		if (f->state() == VcsState::CheckedIn)
+		if (f->state() == E::VcsState::CheckedIn)
 		{
 			checkOutFiles.emplace_back(*f);
 		}
@@ -3782,7 +3782,7 @@ void SchemaControlTabPageEx::checkInFiles()
 			continue;
 		}
 
-		if (file->state() == VcsState::CheckedIn)
+		if (file->state() == E::VcsState::CheckedIn)
 		{
 			continue;
 		}
@@ -3892,7 +3892,7 @@ void SchemaControlTabPageEx::undoChangesFiles()
 
 	for (const std::shared_ptr<DbFileInfo>& fi : selectedFiles)
 	{
-		if (fi->state() == VcsState::CheckedOut &&
+		if (fi->state() == E::VcsState::CheckedOut &&
 			(fi->userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator() == true))
 		{
 			undoFiles.push_back(*fi);
@@ -4285,7 +4285,7 @@ void SchemaControlTabPageEx::exportWorkcopy()
 
 	for (auto file : selectedFiles)
 	{
-		if (file->state() == VcsState::CheckedOut &&
+		if (file->state() == E::VcsState::CheckedOut &&
 			file->userId() == db()->currentUser().userId())
 		{
 			files.push_back(*file);
@@ -4339,7 +4339,7 @@ void SchemaControlTabPageEx::importWorkcopy()
 	{
 		auto file = selectedFiles[i];
 
-		if (file->state() == VcsState::CheckedOut &&
+		if (file->state() == E::VcsState::CheckedOut &&
 			file->userId() == db()->currentUser().userId())
 		{
 			files.push_back(*file);
@@ -4360,7 +4360,7 @@ void SchemaControlTabPageEx::importWorkcopy()
 
 	auto fileInfo = files[0];
 
-	if (fileInfo.state() != VcsState::CheckedOut || fileInfo.userId() != db()->currentUser().userId())
+	if (fileInfo.state() != E::VcsState::CheckedOut || fileInfo.userId() != db()->currentUser().userId())
 	{
 		return;
 	}
@@ -4499,7 +4499,7 @@ void SchemaControlTabPageEx::showFileProperties()
 
 	for (const auto& file : selectedFiles)
 	{
-		if (file->state() == VcsState::CheckedOut &&
+		if (file->state() == E::VcsState::CheckedOut &&
 			(file->userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator() == true))
 		{
 			readOnly = false;
@@ -4639,7 +4639,7 @@ void SchemaControlTabPageEx::showFileProperties()
 
 		for (auto [file, schema]: schemas)
 		{
-			if (file->state() != VcsState::CheckedOut ||
+			if (file->state() != E::VcsState::CheckedOut ||
 				(file->userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
 			{
 				continue;
@@ -5276,7 +5276,7 @@ void EditSchemaTabPageEx::modifiedChanged(bool /*modified*/)
 void EditSchemaTabPageEx::checkInFile()
 {
 	if (readOnly() == true ||
-		fileInfo().state() != VcsState::CheckedOut ||
+		fileInfo().state() != E::VcsState::CheckedOut ||
 		(fileInfo().userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
 	{
 		return;
@@ -5322,7 +5322,7 @@ void EditSchemaTabPageEx::checkInFile()
 void EditSchemaTabPageEx::checkOutFile()
 {
 	if (readOnly() == false ||
-		fileInfo().state() != VcsState::CheckedIn)
+		fileInfo().state() != E::VcsState::CheckedIn)
 	{
 		return;
 	}
@@ -5369,7 +5369,7 @@ void EditSchemaTabPageEx::undoChangesFile()
 	// 3 Set frame to readonly mode
 	//
 	if (readOnly() == true ||
-		fileInfo().state() != VcsState::CheckedOut ||
+		fileInfo().state() != E::VcsState::CheckedOut ||
 		fileInfo().userId() != db()->currentUser().userId())
 	{
 		Q_ASSERT(fileInfo().userId() == db()->currentUser().userId());
@@ -5483,7 +5483,7 @@ bool EditSchemaTabPageEx::saveWorkcopy()
 {
 	if (readOnly() == true ||
 		modified() == false ||
-		fileInfo().state() != VcsState::CheckedOut ||
+		fileInfo().state() != E::VcsState::CheckedOut ||
 		fileInfo().userId() != db()->currentUser().userId())
 	{
 		Q_ASSERT(fileInfo().userId() == db()->currentUser().userId());
@@ -5580,7 +5580,7 @@ void EditSchemaTabPageEx::getCurrentWorkcopy()
 void EditSchemaTabPageEx::setCurrentWorkcopy()
 {
 	if (readOnly() == true ||
-		fileInfo().state() != VcsState::CheckedOut ||
+		fileInfo().state() != E::VcsState::CheckedOut ||
 		(fileInfo().userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
 	{
 		Q_ASSERT(fileInfo().userId() == db()->currentUser().userId());

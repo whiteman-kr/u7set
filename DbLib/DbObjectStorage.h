@@ -1,5 +1,4 @@
-#ifndef DBOBJECTSTORAGE_H
-#define DBOBJECTSTORAGE_H
+#pragma once
 
 #include <map>
 #include "DbController.h"
@@ -118,7 +117,7 @@ public:
 			return false;
 		}
 
-		if (file->state() != VcsState::CheckedOut)
+		if (file->state() != E::VcsState::CheckedOut)
 		{
 			if (m_db->checkOut(fileList[0], nullptr) == false)
 			{
@@ -235,7 +234,7 @@ public:
 
 		DbFileInfo fi = fileInfo(uuid);
 
-		if (fi.state() == VcsState::CheckedOut)
+		if (fi.state() == E::VcsState::CheckedOut)
 		{
 			return true;
 		}
@@ -268,7 +267,7 @@ public:
 
 		DbFileInfo fi = fileInfo(uuid);
 
-		if (fi.state() == VcsState::CheckedIn)
+		if (fi.state() == E::VcsState::CheckedIn)
 		{
 			return true;
 		}
@@ -305,7 +304,7 @@ public:
 
 		DbFileInfo fi = fileInfo(uuid);
 
-		if (fi.state() != VcsState::CheckedOut)
+		if (fi.state() != E::VcsState::CheckedOut)
 		{
 			return true;
 		}
@@ -359,4 +358,4 @@ private:
 	std::map<QUuid, DbFileInfo> m_fileInfo;
 };
 
-#endif // DBOBJECTSTORAGE_H
+

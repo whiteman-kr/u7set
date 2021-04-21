@@ -181,14 +181,14 @@ namespace Builder
 		//
 		filesTree.removeIf([](const DbFileInfo& f)
 			{
-				return f.action() == VcsItemAction::Deleted;
+				return f.action() == E::VcsItemAction::Deleted;
 			});
 
 		// Remove all unsuported files and marked for deleting
 		//
 		std::vector<DbFileInfo> files = filesTree.toVectorIf([](const DbFileInfo& f)
 						{
-							return  (f.action() != VcsItemAction::Deleted) &&
+							return  (f.action() != E::VcsItemAction::Deleted) &&
 									(f.isFolder() == false) &&
 									(f.fileName().endsWith(QLatin1String(".") + Db::File::AlFileExtension, Qt::CaseInsensitive) ||
 									 f.fileName().endsWith(QLatin1String(".") + Db::File::MvsFileExtension, Qt::CaseInsensitive) ||

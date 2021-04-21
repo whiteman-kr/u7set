@@ -55,7 +55,7 @@ bool BusStorage::load(QString* errorMessage)
 	for (const std::shared_ptr<DbFile>& f : files)
 	{
 		if (f->deleted() == true ||
-			f->action() == VcsItemAction::Deleted)
+			f->action() == E::VcsItemAction::Deleted)
 		{
 			continue;
 		}
@@ -186,7 +186,7 @@ bool BusStorage::save(const QUuid& uuid, QString* errorMessage)
 			return false;
 		}
 
-		if (file->state() != VcsState::CheckedOut)
+		if (file->state() != E::VcsState::CheckedOut)
 		{
 			*errorMessage = QString("file %1 is not checked out.").arg(file->fileName());
 			return false;

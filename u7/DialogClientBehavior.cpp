@@ -803,7 +803,7 @@ bool DialogClientBehavior::saveFileToDatabase(const QByteArray& data, DbControll
 		return false;
 	}
 
-	if (file->state() != VcsState::CheckedOut)
+	if (file->state() != E::VcsState::CheckedOut)
 	{
 		if (db->checkOut(fileList[0], nullptr) == false)
 		{

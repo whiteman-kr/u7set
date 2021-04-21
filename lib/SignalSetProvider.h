@@ -2,11 +2,11 @@
 #include "../Builder/SignalSet.h"
 #include "SignalProperties.h"
 #include "AppSignalParam.h"
+#include "../DbLib/DbStruct.h"
 
 #define SIGNAL_TYPE_COUNT (QMetaEnum::fromType<E::SignalType>().keyCount())
 #define IN_OUT_TYPE_COUNT (QMetaEnum::fromType<E::SignalInOutType>().keyCount())
 #define TOTAL_SIGNAL_TYPE_COUNT (SIGNAL_TYPE_COUNT * IN_OUT_TYPE_COUNT)
-
 
 class DbController;
 
@@ -88,37 +88,37 @@ private:
 	// is initialized by non specific properties
 	//
 	std::vector<SignalPropertyDescription> m_basicPropertyDescription = {
-		{ SignalProperties::appSignalIDCaption,
-		  SignalProperties::appSignalIDCaption,
+		{ AppSignalPropNames::APP_SIGNAL_ID,
+		  AppSignalPropNames::APP_SIGNAL_ID,
 		  QVariant::String, {},
 		  [](const AppSignal* s){ return s->appSignalID(); },
 		  [](AppSignal* s, QVariant v){ s->setAppSignalID(v.toString()); }, },
 
-		{ SignalProperties::customSignalIDCaption,
-		  SignalProperties::customSignalIDCaption,
+		{ AppSignalPropNames::CUSTOM_APP_SIGNAL_ID,
+		  AppSignalPropNames::CUSTOM_APP_SIGNAL_ID,
 		  QVariant::String, {},
 		  [](const AppSignal* s){ return s->customAppSignalID(); },
 		  [](AppSignal* s, QVariant v){ s->setCustomAppSignalID(v.toString()); }, },
 
-		{ SignalProperties::equipmentIDCaption,
-		  SignalProperties::equipmentIDCaption,
+		{ AppSignalPropNames::EQUIPMENT_ID,
+		  AppSignalPropNames::EQUIPMENT_ID,
 		  QVariant::String, {},
 		  [](const AppSignal* s){ return s->equipmentID(); },
 		  [](AppSignal* s, QVariant v){ s->setEquipmentID(v.toString()); }, },
 
-		{ SignalProperties::busTypeIDCaption,
-		  SignalProperties::busTypeIDCaption,
+		{ AppSignalPropNames::BUS_TYPE_ID,
+		  AppSignalPropNames::BUS_TYPE_ID,
 		  QVariant::String, {},
 		  [](const AppSignal* s){ return s->busTypeID(); },
 		  [](AppSignal* s, QVariant v){ s->setBusTypeID(v.toString()); }, },
 
-		{ SignalProperties::typeCaption,
+		{ AppSignalPropNames::TYPE,
 		  "A/D/B",
 		  QVariant::String, {},
 		  [](const AppSignal* s){ return E::valueToString<E::SignalType>(s->signalType()).left(1); },
 		  nullptr },
 
-		{ SignalProperties::inOutTypeCaption,
+		{ AppSignalPropNames::IN_OUT_TYPE,
 		  "Input-output type",
 		  QVariant::Int, E::enumValues<E::SignalInOutType>(),
 		  [](const AppSignal* s){ return TO_INT(s->inOutType()); },

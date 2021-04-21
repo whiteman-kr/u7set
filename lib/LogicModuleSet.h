@@ -1,10 +1,10 @@
-#ifndef LOGICMODULESET_H
-#define LOGICMODULESET_H
+#pragma once
+
 #include <memory>
 #include <map>
 #include <QObject>
 #include "../lib/LmDescription.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 
 class LogicModuleSet : public QObject
 {
@@ -36,4 +36,3 @@ private:
 };
 
 
-#endif // LOGICMODULESET_H

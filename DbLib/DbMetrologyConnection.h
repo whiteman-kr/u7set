@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../lib/DbController.h"
 #include "../lib/SignalSetProvider.h"
 #include "../lib/MetrologyConnection.h"
 
@@ -46,7 +45,7 @@ namespace Metrology
 
 		// modify
 		//
-		void setAction(int index, const VcsItemAction::VcsItemActionType& type);
+		void setAction(int index, const E::VcsItemAction& type);
 
 		void removeAllMarked();
 

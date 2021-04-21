@@ -1,10 +1,14 @@
-#include "../lib/DbStruct.h"
+#ifndef DB_LIB_DOMAIN
+#error Don't include this file in the project! Link DbLib instead.
+#endif
+
+#include "DbStruct.h"
 
 #include <QObject>
 #include <QFile>
 #include <QFileInfo>
 #include <QDebug>
-#include "AppSignal.h"
+#include "../lib/AppSignal.h"
 
 namespace Db
 {
@@ -13,114 +17,6 @@ namespace Db
 		auto it = s_dirToName.find(systemDir);
 		return it != s_dirToName.end() ? it->second : QString{};
 	}
-}
-
-
-//
-//
-//	VcsState
-//
-//
-VcsState::VcsState()  noexcept:
-	m_state(CheckedIn)
-{
-}
-
-VcsState::VcsState(VcsStateType s) noexcept :
-	m_state(s)
-{
-}
-
-QString VcsState::text() const noexcept
-{
-	switch (m_state)
-	{
-	case CheckedIn:		return QStringLiteral("Checked In");
-	case CheckedOut:	return QStringLiteral("Checked Out");
-	default:
-		assert(false);
-	}
-
-	return {};
-}
-
-VcsState::VcsStateType VcsState::value() const noexcept
-{
-	return m_state;
-}
-
-bool operator== (const VcsState& s1, const VcsState& s2) noexcept
-{
-	return s1.m_state == s2.m_state;
-}
-
-bool operator!= (const VcsState& s1, const VcsState& s2) noexcept
-{
-	return s1.m_state != s2.m_state;
-}
-
-bool operator< (const VcsState& s1, const VcsState& s2) noexcept
-{
-	return s1.m_state < s2.m_state;
-}
-
-//
-//
-// VcsItemAction
-//
-//
-VcsItemAction::VcsItemAction() noexcept :
-	m_action(Added)
-{
-}
-
-VcsItemAction::VcsItemAction(VcsItemActionType s) noexcept :
-	m_action(s)
-{
-}
-
-QString VcsItemAction::text() const noexcept
-{
-	switch (m_action)
-	{
-	case Unknown:		return QStringLiteral("Unknown");
-	case Added:			return QStringLiteral("Added");
-	case Modified:		return QStringLiteral("Modified");
-	case Deleted:		return QStringLiteral("Deleted");
-	default:
-		qDebug() << static_cast<int>(m_action);
-		assert(false);
-	}
-
-	return {};
-}
-
-int VcsItemAction::toInt() const noexcept
-{
-	return static_cast<int>(m_action);
-}
-
-VcsItemAction::VcsItemActionType VcsItemAction::value() const noexcept
-{
-	return m_action;
-}
-
-void VcsItemAction::setValue(int intVal)
-{
-	Q_ASSERT(intVal >= static_cast<int>(VcsItemActionType::Unknown));
-	Q_ASSERT(intVal <= static_cast<int>(VcsItemActionType::Deleted));
-
-	m_action = static_cast<VcsItemActionType>(intVal);
-}
-
-bool operator== (const VcsItemAction& s1, const VcsItemAction& s2) noexcept
-{
-	return s1.m_action == s2.m_action;
-}
-
-bool operator!= (const VcsItemAction& s1, const VcsItemAction& s2) noexcept
-{
-	return s1.m_action != s2.m_action;
 }
 
 //
@@ -1128,7 +1024,7 @@ void DbFileInfo::trace() const
 	qDebug() << "	ID: " << m_fileId;
 	qDebug() << "	ParentID: " << m_parentId;
 	qDebug() << "	Changeset: " << m_changeset;
-	qDebug() << "	State: " << m_state.text();
+	qDebug() << "	State: " << E::valueToString<E::VcsState>(m_state);
 	qDebug() << "	Attributes: " << m_attributes;
 
 	return;
@@ -1254,22 +1150,22 @@ void DbFileInfo::setLastCheckIn(const QString& value)
 	setLastCheckIn(dt);
 }
 
-const VcsState& DbFileInfo::state() const noexcept
+const E::VcsState &DbFileInfo::state() const noexcept
 {
 	return m_state;
 }
 
-void DbFileInfo::setState(const VcsState& state)
+void DbFileInfo::setState(const E::VcsState& state)
 {
 	m_state = state;
 }
 
-const VcsItemAction& DbFileInfo::action() const noexcept
+const E::VcsItemAction& DbFileInfo::action() const noexcept
 {
 	return m_action;
 }
 
-void DbFileInfo::setAction(const VcsItemAction& action)
+void DbFileInfo::setAction(const E::VcsItemAction& action)
 {
 	m_action = action;
 }
@@ -1570,12 +1466,12 @@ void DbChangeset::setDate(const QString& value)
 	m_date = QDateTime::fromString(value, "yyyy-MM-ddTHH:mm:ss");
 }
 
-const VcsItemAction& DbChangeset::action() const
+const E::VcsItemAction& DbChangeset::action() const
 {
 	return m_action;
 }
 
-void DbChangeset::setAction(const VcsItemAction& value)
+void DbChangeset::setAction(const E::VcsItemAction& value)
 {
 	m_action = value;
 }
@@ -1651,7 +1547,7 @@ DbChangesetObject::DbChangesetObject(const AppSignal& signal) :
 	m_id(signal.ID()),
 	m_name(signal.appSignalID()),
 	m_caption(signal.caption()),
-	m_action(VcsItemAction::Modified)
+	m_action(E::VcsItemAction::Modified)
 {
 }
 
@@ -1706,12 +1602,12 @@ void DbChangesetObject::setCaption(const QString& value)
 	m_caption = value;
 }
 
-VcsItemAction DbChangesetObject::action() const
+E::VcsItemAction DbChangesetObject::action() const
 {
 	return m_action;
 }
 
-void DbChangesetObject::setAction(VcsItemAction value)
+void DbChangesetObject::setAction(E::VcsItemAction value)
 {
 	m_action = value;
 }

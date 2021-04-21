@@ -3,7 +3,7 @@
 #include "CentralWidget.h"
 #include "Settings.h"
 #include "DialogSettings.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "../lib/Ui/DialogAbout.h"
 #include "../lib/LogicModuleSet.h"
 #include "../lib/Ui/UiTools.h"
@@ -727,7 +727,7 @@ void MainWindow::updateUfbsAfbsBusses()
 
 	for (const DbFileInfo& f : ufbSchemaFileInfos)
 	{
-		if (f.state() == VcsState::CheckedOut)
+		if (f.state() == E::VcsState::CheckedOut)
 		{
 			checkedOutFiles.push_back(f.fileName());
 		}
@@ -747,7 +747,7 @@ void MainWindow::updateUfbsAfbsBusses()
 
 	for (const DbFileInfo& f : alSchemaFileInfos)
 	{
-		if (f.state() == VcsState::CheckedOut)
+		if (f.state() == E::VcsState::CheckedOut)
 		{
 			checkedOutFiles.push_back(f.fileName());
 		}
@@ -928,7 +928,7 @@ void MainWindow::updateUfbsAfbsBusses()
 			{
 				ok = db()->checkOut(fi, this);
 
-				if (ok == false || fi.state() != VcsState::CheckedOut)
+				if (ok == false || fi.state() != E::VcsState::CheckedOut)
 				{
 					break;
 				}

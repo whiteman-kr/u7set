@@ -33,7 +33,6 @@ unix {
 
 SOURCES += \
 	../lib/DataSource.cpp \
-    ../lib/DbStruct.cpp \
 	../lib/AppSignal.cpp \
     ../lib/Types.cpp \
     ../lib/BuildInfo.cpp \
@@ -41,8 +40,8 @@ SOURCES += \
     ../lib/AppSignalStateFlags.cpp \
 	../lib/AppSignalParam.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/Times.cpp \
-    ../lib/SignalProperties.cpp \
+	../lib/Times.cpp \
+	#../lib/SignalProperties.cpp \
     ../lib/TuningValue.cpp \
 	AppDataService.cpp \
 	AppDataProcessingThread.cpp \
@@ -58,9 +57,7 @@ SOURCES += \
 HEADERS += \
 	Stable.h \
 	../lib/ConstStrings.h \
-    ../lib/LanControllerInfo.h \
     ../lib/DataSource.h \
-    ../lib/DbStruct.h \
 	../lib/AppSignal.h \
     ../lib/CUtils.h \
     ../lib/PropertyObject.h \
@@ -87,21 +84,6 @@ HEADERS += \
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
-
-# VFrame30 library
-# $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
-#
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
-}
-unix {
-    CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
-}
-
-INCLUDEPATH += ../VFrame30
-DEPENDPATH += ../VFrame30
 
 #protobuf
 #

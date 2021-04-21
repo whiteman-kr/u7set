@@ -2,7 +2,7 @@
 #include "Settings.h"
 #include "SignalPropertiesDialog.h"
 #include "BusStorage.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "../lib/SignalProperties.h"
 #include "../lib/WidgetUtils.h"
 #include "../UtilsLib/WUtils.h"
@@ -93,7 +93,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 
 		if (manager.name(col).right(2) == "ID")
 		{
-			QRegExp rx4ID(SignalProperties::cacheValidator);
+			QRegExp rx4ID(AppSignal::IDENTIFICATORS_VALIDATOR);
 			le->setValidator(new QRegExpValidator(rx4ID, le));
 		}
 		else
@@ -297,19 +297,19 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 	{
 		QString name = manager.name(col);
 
-		if (name == SignalProperties::appSignalIDCaption &&
+		if (name == AppSignalPropNames::APP_SIGNAL_ID &&
 				(value.isEmpty() || value[0] != '#'))
 		{
 			value = ('#' + value).trimmed();
 		}
-		if ((name == SignalProperties::customSignalIDCaption ||
-			 name == SignalProperties::busTypeIDCaption ||
-			 name == SignalProperties::equipmentIDCaption) &&
+		if ((name == AppSignalPropNames::CUSTOM_APP_SIGNAL_ID ||
+			 name == AppSignalPropNames::BUS_TYPE_ID ||
+			 name == AppSignalPropNames::EQUIPMENT_ID) &&
 				(value.isEmpty() == false && value[0] == '#'))
 		{
 			value = value.mid(1).trimmed();
 		}
-		if (name == SignalProperties::captionCaption)
+		if (name == AppSignalPropNames::CAPTION)
 		{
 			value = value.trimmed();
 		}
@@ -426,15 +426,15 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 		{
 			QBrush b(StandardColors::VcsCheckedIn);
 
-			switch (signal.instanceAction().value())
+			switch (signal.instanceAction())
 			{
-			case VcsItemAction::Added:
+			case E::VcsItemAction::Added:
 				b.setColor(StandardColors::VcsAdded);
 				break;
-			case VcsItemAction::Modified:
+			case E::VcsItemAction::Modified:
 				b.setColor(StandardColors::VcsModified);
 				break;
-			case VcsItemAction::Deleted:
+			case E::VcsItemAction::Deleted:
 				b.setColor(StandardColors::VcsDeleted);
 				break;
 			default:
@@ -708,24 +708,24 @@ SignalsTabPage::SignalsTabPage(SignalSetProvider* signalSetProvider, DbControlle
 	auto& propertyManager = signalSetProvider->signalPropertyManager();
 	int wideColumnWidth = 400;
 
-	m_signalsView->setColumnWidth(propertyManager.index(SignalProperties::appSignalIDCaption), wideColumnWidth);
-	m_signalsView->setColumnWidth(propertyManager.index(SignalProperties::customSignalIDCaption), wideColumnWidth);
-	m_signalsView->setColumnWidth(propertyManager.index(SignalProperties::busTypeIDCaption), wideColumnWidth);
-	m_signalsView->setColumnWidth(propertyManager.index(SignalProperties::captionCaption), wideColumnWidth);
-	m_signalsView->setColumnWidth(propertyManager.index(SignalProperties::equipmentIDCaption), wideColumnWidth);
+	m_signalsView->setColumnWidth(propertyManager.index(AppSignalPropNames::APP_SIGNAL_ID), wideColumnWidth);
+	m_signalsView->setColumnWidth(propertyManager.index(AppSignalPropNames::CUSTOM_APP_SIGNAL_ID), wideColumnWidth);
+	m_signalsView->setColumnWidth(propertyManager.index(AppSignalPropNames::BUS_TYPE_ID), wideColumnWidth);
+	m_signalsView->setColumnWidth(propertyManager.index(AppSignalPropNames::CAPTION), wideColumnWidth);
+	m_signalsView->setColumnWidth(propertyManager.index(AppSignalPropNames::EQUIPMENT_ID), wideColumnWidth);
 
 	QVector<int> defaultColumnVisibility;
 
 	const QVector<QString> defaultSignalPropertyVisibility =
 	{
-		SignalProperties::appSignalIDCaption,
-		SignalProperties::customSignalIDCaption,
-		SignalProperties::captionCaption,
-		SignalProperties::typeCaption,
-		SignalProperties::inOutTypeCaption,
-		SignalProperties::equipmentIDCaption,
-		SignalProperties::lowEngineeringUnitsCaption,
-		SignalProperties::highEngineeringUnitsCaption,
+		AppSignalPropNames::APP_SIGNAL_ID,
+		AppSignalPropNames::CUSTOM_APP_SIGNAL_ID,
+		AppSignalPropNames::CAPTION,
+		AppSignalPropNames::TYPE,
+		AppSignalPropNames::IN_OUT_TYPE,
+		AppSignalPropNames::EQUIPMENT_ID,
+		AppSignalPropNames::LOW_ENGINEERING_UNITS,
+		AppSignalPropNames::HIGH_ENGINEERING_UNITS,
 	};
 
 	for (const QString& columnName : defaultSignalPropertyVisibility)
@@ -824,8 +824,8 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 
 		QString deviceSignalSpecPropStruct = deviceSignal->signalSpecPropsStruct();
 
-		if (	deviceSignalSpecPropStruct.contains(SignalProperties::MISPRINT_lowEngineeringUnitsCaption) ||
-				deviceSignalSpecPropStruct.contains(SignalProperties::MISPRINT_highEngineeringUnitsCaption))
+		if (	deviceSignalSpecPropStruct.contains(AppSignalPropNames::MISPRINT_lowEngineeringUnitsCaption) ||
+				deviceSignalSpecPropStruct.contains(AppSignalPropNames::MISPRINT_highEngineeringUnitsCaption))
 		{
 			QMessageBox::critical(m_instance,
 						  QApplication::applicationName(),
@@ -2575,7 +2575,7 @@ FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, Q
 	m_findPreviousButton(new QPushButton("Find Previous", this)),
 	m_findNextButton(new QPushButton("Find Next", this)),
 	m_replaceableSignalQuantityBlinkTimer(new QTimer(this)),
-	m_regExp4Id(SignalProperties::cacheValidator),
+	m_regExp4Id(AppSignal::IDENTIFICATORS_VALIDATOR),
 	m_currentUserId(currentUserId),
 	m_currentUserIsAdmin(currentUserIsAdmin)
 {
@@ -2595,10 +2595,10 @@ FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, Q
 	}
 
 	m_searchInPropertyList->addItems(QStringList() <<
-									 SignalProperties::appSignalIDCaption <<
-									 SignalProperties::customSignalIDCaption <<
-									 SignalProperties::captionCaption <<
-									 SignalProperties::equipmentIDCaption);
+									 AppSignalPropNames::APP_SIGNAL_ID <<
+									 AppSignalPropNames::CUSTOM_APP_SIGNAL_ID <<
+									 AppSignalPropNames::CAPTION <<
+									 AppSignalPropNames::EQUIPMENT_ID);
 
 	m_foundList->setModel(m_foundListModel);
 
@@ -2717,8 +2717,8 @@ void FindSignalDialog::generateListIfNeeded(bool throwWarning)
 	m_searchOptionsUsedLastTime = currentOptions;
 
 	QString fieldName = m_searchInPropertyList->currentText();
-	m_checkCorrectnessOfId = ((fieldName == SignalProperties::appSignalIDCaption) ||
-							  (fieldName == SignalProperties::customSignalIDCaption));
+	m_checkCorrectnessOfId = ((fieldName == AppSignalPropNames::APP_SIGNAL_ID) ||
+							  (fieldName == AppSignalPropNames::CUSTOM_APP_SIGNAL_ID));
 
 	reloadCurrentIdsMap();
 

@@ -4,7 +4,7 @@
 #include <QTreeView>
 #include <QPlainTextEdit>
 #include <QPushButton>
-#include <../../lib/DbController.h>
+#include <../../DbLib/DbController.h>
 #include <../../lib/AppSignal.h>
 
 #ifdef _DEBUG

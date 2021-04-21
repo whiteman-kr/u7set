@@ -99,7 +99,7 @@ namespace Metrology
 
 		//
 		//
-		if (file->state() == VcsState::CheckedOut)
+		if (file->state() == E::VcsState::CheckedOut)
 		{
 			int userId = file->userId();
 
@@ -169,7 +169,7 @@ namespace Metrology
 
 		// file must be check out, after save
 		//
-		if (file->state() != VcsState::CheckedOut)
+		if (file->state() != E::VcsState::CheckedOut)
 		{
 			return true;
 		}
@@ -239,7 +239,7 @@ namespace Metrology
 
 		// check out file
 		//
-		if (file->state() == VcsState::CheckedOut)
+		if (file->state() == E::VcsState::CheckedOut)
 		{
 			return true;
 		}
@@ -275,7 +275,7 @@ namespace Metrology
 
 		// test checked in
 		//
-		bool result = file->state() == VcsState::CheckedIn;
+		bool result = file->state() == E::VcsState::CheckedIn;
 		return result;
 	}
 
@@ -320,7 +320,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void DbConnectionBase::setAction(int index, const VcsItemAction::VcsItemActionType& type)
+	void DbConnectionBase::setAction(int index, const E::VcsItemAction& type)
 	{
 		QMutexLocker l(&m_connectionMutex);
 
@@ -341,13 +341,13 @@ namespace Metrology
 		int connectionCount = m_connectionList.count();
 		for(int i = connectionCount - 1; i >= 0; i--)
 		{
-			if (m_connectionList[i].action() == VcsItemAction::VcsItemActionType::Deleted)
+			if (m_connectionList[i].action() == E::VcsItemAction::Deleted)
 			{
 				m_connectionList.remove(i);
 				continue;
 			}
 
-			m_connectionList[i].setAction(VcsItemAction::VcsItemActionType::Unknown);
+			m_connectionList[i].setAction(E::VcsItemAction::Unknown);
 		}
 	}
 

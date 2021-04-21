@@ -80,23 +80,12 @@ win32 {
 
 # OnlineLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
+LIBS += -lOnlineLib
 
 # UtilsLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
+LIBS += -lUtilsLib
 
+# HardwareLib
+#
+LIBS += -lHardwareLib

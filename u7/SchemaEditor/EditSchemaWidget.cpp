@@ -1072,11 +1072,11 @@ void EditSchemaWidget::updateFileActions()
 	// Version Control enable/disable items
 	//
 	m_fileSaveAction->setEnabled(readOnly() == false && modified() == true);
-	m_fileCheckInAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
-	m_fileCheckOutAction->setEnabled(readOnly() == true && fileInfo().state() == VcsState::CheckedIn);
-	m_fileUndoChangesAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
+	m_fileCheckInAction->setEnabled(readOnly() == false && fileInfo().state() == E::VcsState::CheckedOut);
+	m_fileCheckOutAction->setEnabled(readOnly() == true && fileInfo().state() == E::VcsState::CheckedIn);
+	m_fileUndoChangesAction->setEnabled(readOnly() == false && fileInfo().state() == E::VcsState::CheckedOut);
 	m_fileExportAction->setEnabled(true);
-	m_fileImportAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
+	m_fileImportAction->setEnabled(readOnly() == false && fileInfo().state() == E::VcsState::CheckedOut);
 
 	return;
 }
@@ -3987,7 +3987,7 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 	for (const std::shared_ptr<DbFile>& f : files)
 	{
 		if (f->deleted() == true ||
-			f->action() == VcsItemAction::Deleted)
+			f->action() == E::VcsItemAction::Deleted)
 		{
 			continue;
 		}
@@ -4083,7 +4083,7 @@ bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* 
 	for (const std::shared_ptr<DbFile>& f : files)
 	{
 		if (f->deleted() == true ||
-			f->action() == VcsItemAction::Deleted)
+			f->action() == E::VcsItemAction::Deleted)
 		{
 			continue;
 		}

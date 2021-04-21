@@ -284,7 +284,7 @@ bool SimProfileEditor::saveChanges()
 		return false;
 	}
 
-	if (file->state() != VcsState::CheckedOut)
+	if (file->state() != E::VcsState::CheckedOut)
 	{
 		if (m_db->checkOut(fileList[0], this) == false)
 		{

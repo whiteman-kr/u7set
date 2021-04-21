@@ -2,7 +2,7 @@
 
 #include "../VFrame30/Schema.h"
 #include "../lib/PropertyEditor.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 
 
 namespace Ui {

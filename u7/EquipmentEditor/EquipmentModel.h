@@ -1,6 +1,6 @@
 #pragma once
-#include "DeviceObject.h"
-#include "DbStruct.h"
+#include "../../HardwareLib/DeviceObject.h"
+#include "../../DbLib/DbStruct.h"
 
 class DbController;
 

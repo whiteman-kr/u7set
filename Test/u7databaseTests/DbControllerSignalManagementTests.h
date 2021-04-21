@@ -5,7 +5,7 @@
 #include <QSqlError>
 #include <QDebug>
 
-#include "../../lib/DbController.h"
+#include "../../DbLib/DbController.h"
 
 
 #define OPEN_DATABASE()		QSqlDatabase db; \
@@ -145,7 +145,7 @@ private:
 						   std::vector<ObjectState>* obStates);
 
 	QString check_signalIsCheckedIn(int signalID);
-	QString check_signalIsCheckedOut(int signalID, VcsItemAction* action = nullptr);
+	QString check_signalIsCheckedOut(int signalID, E::VcsItemAction* action = nullptr);
 
 	QString deleteSignal(int userID, int signalID, ObjectState* obState);
 	QString deleteSignals(int userID, const std::vector<int>& ids, std::vector<ObjectState>* obStates);

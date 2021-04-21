@@ -59,23 +59,17 @@ DEFINES += IS_BUILDER
 
 SOURCES += \
     ../lib/ClientBehavior.cpp \
-    ../lib/DbMetrologyConnection.cpp \
+	../DbLib/DbMetrologyConnection.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/LogicModulesInfo.cpp \
 	../lib/MetrologyConnection.cpp \
     ../lib/OutputLog.cpp \
-    ../lib/DbController.cpp \
-    ../lib/DbProgress.cpp \
-    ../lib/DbStruct.cpp \
-    ../lib/DbWorker.cpp \
-    ../lib/DeviceObject.cpp \
     ../lib/Connection.cpp \
     ../TuningService/TuningDataStorage.cpp \
     ../TuningService/TuningSource.cpp \
     ../lib/LogicModuleSet.cpp \
     ../lib/ModuleFirmware.cpp \
-    ../lib/ScriptDeviceObject.cpp \
     ../lib/AppSignal.cpp \
     ../lib/SignalSetProvider.cpp \
     ../lib/SoftwareSettings.cpp \
@@ -93,7 +87,6 @@ SOURCES += \
     ../lib/ConnectionsInfo.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
 	../lib/Times.cpp \
-	../lib/DbProgressDialog.cpp \
 	../lib/MetrologySignal.cpp \
 	../lib/UnitsConvertor.cpp \
 	../lib/UnitsConvertorTable.cpp \
@@ -139,26 +132,19 @@ SOURCES += \
 HEADERS += \
     ../lib/ClientBehavior.h \
     ../lib/ConstStrings.h \
-    ../lib/DbMetrologyConnection.h \
+	../DbLib/DbMetrologyConnection.h \
     ../lib/DeviceHelper.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
     ../lib/LogicModulesInfo.h \
 	../lib/MetrologyConnection.h \
     ../lib/OutputLog.h \
-    ../lib/DbController.h \
-    ../lib/DbProgress.h \
-    ../lib/DbStruct.h \
-    ../lib/DbWorker.h \
-    ../lib/DeviceObject.h \
-    ../lib/DbObjectStorage.h \
     ../lib/Connection.h \
     ../TuningService/TuningSource.h \
     ../TuningService/TuningDataStorage.h \
     ../lib/LogicModuleSet.h \
     ../lib/PropertyObject.h \
     ../lib/ModuleFirmware.h \
-    ../lib/ScriptDeviceObject.h \
     ../lib/AppSignal.h \
     ../lib/SignalSetProvider.h \
     ../lib/SoftwareSettings.h \
@@ -176,7 +162,6 @@ HEADERS += \
     ../lib/ConnectionsInfo.h \
 	../lib/Tuning/TuningSignalState.h \
 	../lib/Times.h \
-	../lib/DbProgressDialog.h \
 	../lib/MetrologySignal.h \
 	../lib/UnitsConvertor.h \
 	../lib/UnitsConvertorTable.h \

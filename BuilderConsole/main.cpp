@@ -1,14 +1,15 @@
 #include <iostream>
 #include <QCoreApplication>
 #include <QTimer>
-#include <Builder.h>
-#include <BuildTask.h>
-#include "../lib/DeviceObject.h"
-#include "../lib/DbController.h"
+#include "../Builder/Builder.h"
+#include "BuildTask.h"
+#include "../HardwareLib/DeviceObject.h"
+#include "../DbLib/DbController.h"
 #include "../VFrame30/VFrame30Library.h"
 #include <QFile>
 #include <QXmlStreamWriter>
 #include <QDomDocument>
+#include "../Protobuf/google/protobuf/message.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -335,27 +336,34 @@ int main(int argc, char *argv[])
 
 	QStringList args = a.arguments();
 
+	int result = 0;
+
 	switch (args.size())
 	{
-		case 2:
-			return startBuild(args[1]);
+	case 2:
+		result = startBuild(args[1]);
+		break;
 
-		case 3:
-			// Create a template file?
-			//
-			if (args[1].trimmed().compare(QLatin1String("/create"), Qt::CaseInsensitive) == 0)
-			{
-				createTemplateFile(args[2]);
-				return 0;
-			}
-			else
-			{
-				showHelp();
-				return 1;
-			}
-
-		default:
+	case 3:
+		// Create a template file?
+		//
+		if (args[1].trimmed().compare(QLatin1String("/create"), Qt::CaseInsensitive) == 0)
+		{
+			createTemplateFile(args[2]);
+			result = 0;
+		}
+		else
+		{
 			showHelp();
-			return 2;
+			result = 1;
+		}
+		break;
+
+	default:
+		showHelp();
+		result = 2;
 	}
+
+	google::protobuf::ShutdownProtobufLibrary();
+	return result;
 }

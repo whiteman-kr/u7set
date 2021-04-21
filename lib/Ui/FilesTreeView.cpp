@@ -1,12 +1,12 @@
 #include "FilesTreeView.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "GlobalMessanger.h"
 #include "DialogFileEditor.h"
 #include "CheckInDialog.h"
 #include "Forms/FileHistoryDialog.h"
 #include "Forms/CompareDialog.h"
 #include "../lib/StandardColors.h"
-#include "../lib/Ui/DbControllerTools.h"
+#include "../DbLib/DbControllerTools.h"
 
 //
 //
@@ -264,9 +264,9 @@ bool FileTreeProxyModel::lessThan(const QModelIndex &left, const QModelIndex &ri
 				return f1->state() < f2->state();
 			}
 
-			if (f1->action().toInt() != f2->action().toInt())
+			if (f1->action() != f2->action())
 			{
-				return f1->action().toInt() < f2->action().toInt();
+				return static_cast<int>(f1->action()) < static_cast<int>(f2->action());
 			}
 		}
 		//break;
@@ -501,16 +501,16 @@ QVariant FileTreeModel::data(const QModelIndex& index, int role) const
 
 			case Columns::FileStateColumn:
 				{
-					if (file->state() == VcsState::CheckedOut)
+					if (file->state() == E::VcsState::CheckedOut)
 					{
-						QString state = file->action().text();
+						QString state = E::valueToString<E::VcsItemAction>(file->action());
 						v.setValue<QString>(state);
 					}
 				}
 				break;
 
 			case Columns::FileUserColumn:
-				if (file->state() == VcsState::CheckedOut)
+				if (file->state() == E::VcsState::CheckedOut)
 				{
 					v = db()->username(file->userId());
 				}
@@ -546,20 +546,20 @@ QVariant FileTreeModel::data(const QModelIndex& index, int role) const
 
 	case Qt::BackgroundRole:
 		{
-			if (file->state() == VcsState::CheckedOut)
+			if (file->state() == E::VcsState::CheckedOut)
 			{
 
 				QBrush b(StandardColors::VcsCheckedIn);
 
-				switch (static_cast<VcsItemAction::VcsItemActionType>(file->action().toInt()))
+				switch (file->action())
 				{
-				case VcsItemAction::Added:
+				case E::VcsItemAction::Added:
 					b.setColor(StandardColors::VcsAdded);
 					break;
-				case VcsItemAction::Modified:
+				case E::VcsItemAction::Modified:
 					b.setColor(StandardColors::VcsModified);
 					break;
-				case VcsItemAction::Deleted:
+				case E::VcsItemAction::Deleted:
 					b.setColor(StandardColors::VcsDeleted);
 					break;
 				}
@@ -971,7 +971,7 @@ void FileTreeModel::updateFile(QModelIndex index, const DbFileInfo& file)
 		return;
 	}
 
-	if (file.deleted() == true || (file.state() == VcsState::CheckedIn && file.action() == VcsItemAction::Deleted))
+	if (file.deleted() == true || (file.state() == E::VcsState::CheckedIn && file.action() == E::VcsItemAction::Deleted))
 	{
 		removeFile(index);
 		return;
@@ -1290,7 +1290,7 @@ void FileTreeView::moveFile(int parentFileId)
 		FileTreeModelItem* f = m_model->fileItem(mi);
 
 		if (db()->isSystemFile(f->fileId()) == true ||
-			f->state() != VcsState::CheckedOut)
+			f->state() != E::VcsState::CheckedOut)
 		{
 			continue;
 		}
@@ -2108,7 +2108,7 @@ void FileTreeView::checkOutFiles(QModelIndexList indexList)
 		FileTreeModelItem* f = m_model->fileItem(mi);
 		assert(f);
 
-		if (f->state() == VcsState::CheckedOut)
+		if (f->state() == E::VcsState::CheckedOut)
 		{
 			continue;
 		}
@@ -2172,7 +2172,7 @@ void FileTreeView::checkInFiles(QModelIndexList indexList)
 		FileTreeModelItem* f = m_model->fileItem(mi);
 		assert(f);
 
-		if (f->state() == VcsState::CheckedOut &&
+		if (f->state() == E::VcsState::CheckedOut &&
 			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
 		{
 			files.push_back(*f);
@@ -2247,7 +2247,7 @@ bool FileTreeView::undoChangesFiles(QModelIndexList indexList)
 		FileTreeModelItem* f = m_model->fileItem(mi);
 		assert(f);
 
-		if (f->state() == VcsState::CheckedOut &&
+		if (f->state() == E::VcsState::CheckedOut &&
 			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
 		{
 			files.push_back(*f);
@@ -2376,7 +2376,7 @@ void FileTreeView::runFileEditor(bool viewOnly)
 		assert(f);
 
 		if (viewOnly == true ||
-			(f->state() == VcsState::CheckedOut &&
+			(f->state() == E::VcsState::CheckedOut &&
 			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId())))
 		{
 			files.push_back(*f);
@@ -2396,7 +2396,7 @@ void FileTreeView::runFileEditor(bool viewOnly)
 
 	if (viewOnly == false)
 	{
-		if (fileInfo.state() == VcsState::CheckedOut)
+		if (fileInfo.state() == E::VcsState::CheckedOut)
 		{
 			readOnly = false;
 		}
@@ -2454,7 +2454,7 @@ void FileTreeView::setWorkcopy()
 		FileTreeModelItem* f = m_model->fileItem(mi);
 		assert(f);
 
-		if (f->state() == VcsState::CheckedOut &&
+		if (f->state() == E::VcsState::CheckedOut &&
 			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
 		{
 			files.push_back(*f);

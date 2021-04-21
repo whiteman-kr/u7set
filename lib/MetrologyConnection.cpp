@@ -100,7 +100,7 @@ namespace Metrology
 			m_connectionSignal[ioType].clear();
 		}
 
-		m_action = VcsItemAction::VcsItemActionType::Unknown;
+		m_action = E::VcsItemAction::Unknown;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -128,7 +128,7 @@ namespace Metrology
 
 		// Engineering range
 		//
-		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return false;
 		}
@@ -142,7 +142,7 @@ namespace Metrology
 		//
 		if (signal.isInput() == true || signal.isOutput() == true)
 		{
-			if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+			if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 			{
 				return false;
 			}
@@ -152,7 +152,7 @@ namespace Metrology
 				return false;
 			}
 
-			if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+			if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 			{
 				return false;
 			}
@@ -169,7 +169,7 @@ namespace Metrology
 		{
 			case E::SignalInOutType::Input:
 
-				if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+				if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
 				{
 					return true; // some modules do not have a sensor type
 				}
@@ -183,7 +183,7 @@ namespace Metrology
 
 			case E::SignalInOutType::Output:
 
-				if (signal.isSpecPropExists(SignalProperties::outputModeCaption) == false)
+				if (signal.isSpecPropExists(AppSignalPropNames::OUTPUT_MODE) == false)
 				{
 					return false;
 				}
@@ -666,7 +666,7 @@ namespace Metrology
 
 			if (full == true)
 			{
-				dataStr.append(QString::number(connection.action().toInt()));
+				dataStr.append(QString::number(static_cast<int>(connection.action())));
 				dataStr.append(";");
 				dataStr.append(QString::number(connection.restoreID()));
 				dataStr.append(";");
@@ -696,11 +696,11 @@ namespace Metrology
 			{
 				switch (column)
 				{
-					case 0:	connection.setType(line[column].toInt());													break;
-					case 1:	connection.setAppSignalID(ConnectionIoType::Source, line[column]);							break;
-					case 2:	connection.setAppSignalID(ConnectionIoType::Destination, line[column]);						break;
-					case 3:	connection.setAction(static_cast<VcsItemAction::VcsItemActionType>(line[column].toInt()));	break;
-					case 4:	connection.setRestoreID(line[column].toInt());												break;
+					case 0:	connection.setType(line[column].toInt());										break;
+					case 1:	connection.setAppSignalID(ConnectionIoType::Source, line[column]);				break;
+					case 2:	connection.setAppSignalID(ConnectionIoType::Destination, line[column]);			break;
+					case 3:	connection.setAction(static_cast<E::VcsItemAction>(line[column].toInt()));		break;
+					case 4:	connection.setRestoreID(line[column].toInt());									break;
 				}
 			}
 

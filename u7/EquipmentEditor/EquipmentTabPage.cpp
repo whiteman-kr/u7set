@@ -885,13 +885,13 @@ void EquipmentTabPage::setActionState()
 		const DbFileInfo* fileInfo = device->data();
 		Q_ASSERT(fileInfo);
 
-		if (fileInfo->state() == VcsState::CheckedOut &&
+		if (fileInfo->state() == E::VcsState::CheckedOut &&
 			(fileInfo->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
 		{
 			canAnyBeCheckedIn = true;
 		}
 
-		if (fileInfo->state() == VcsState::CheckedIn)
+		if (fileInfo->state() == E::VcsState::CheckedIn)
 		{
 			canAnyBeCheckedOut = true;
 		}
@@ -1241,7 +1241,7 @@ void EquipmentTabPage::setProperties()
 		const DbFileInfo* deviceFileInfo = device->data();
 		assert(deviceFileInfo);
 
-		if (deviceFileInfo->state() == VcsState::CheckedOut)
+		if (deviceFileInfo->state() == E::VcsState::CheckedOut)
 		{
 			checkedOutList << device;
 		}

@@ -2,8 +2,6 @@
 #include <QXmlStreamWriter>
 #include <QObject>
 
-#include "LanControllerInfo.h"
-#include "LanControllerInfoHelper.h"
 #include "SoftwareSettings.h"
 #include "../UtilsLib/WUtils.h"
 
@@ -294,6 +292,9 @@ bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_p
 }
 
 #ifdef IS_BUILDER
+
+#include "LanControllerInfo.h"
+#include "LanControllerInfoHelper.h"
 
 	// -------------------------------------------------------------------------------------
 	//

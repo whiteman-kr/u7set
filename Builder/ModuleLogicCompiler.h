@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/DeviceObject.h"
+#include "../HardwareLib/DeviceObject.h"
 
 #include "../lib/OrderedHash.h"
 #include "../lib/ModuleFirmware.h"

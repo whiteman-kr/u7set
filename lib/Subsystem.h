@@ -6,7 +6,7 @@
 #include <QObject>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 
 namespace Hardware
 {

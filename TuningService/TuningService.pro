@@ -31,13 +31,8 @@ unix {
 
 SOURCES += \
     ../lib/BuildInfo.cpp \
-    ../lib/LanControllerInfoHelper.cpp \
-    ../lib/ScriptDeviceObject.cpp \
     ../lib/DataSource.cpp \
 	../lib/SoftwareSettings.cpp \
-    ../lib/DeviceHelper.cpp \
-    ../lib/DeviceObject.cpp \
-    ../lib/DbStruct.cpp \
     ../lib/OutputLog.cpp \
     ../lib/Types.cpp \
     ../lib/AppSignal.cpp \
@@ -46,8 +41,6 @@ SOURCES += \
     ../lib/TuningValue.cpp \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
-	../Builder/IssueLogger.cpp \
-	../Builder/ModulesRawData.cpp \
 	TuningService.cpp \
 	TcpTuningServer.cpp \
 	TcpTuningClient.cpp \
@@ -56,27 +49,19 @@ SOURCES += \
 	TuningClientContext.cpp \
 	TuningServiceMain.cpp \
 	TuningSourceThread.cpp \
-	TuningDataStorage.cpp \
+	TuningDataStorage.cpp
 
 
 HEADERS += \
+    ../lib/PropertyObject.h \
 	Stable.h \
     ../lib/BuildInfo.h \
-    ../lib/LanControllerInfo.h \
-    ../lib/LanControllerInfoHelper.h \
     ../lib/OrderedHash.h \
-    ../lib/ScriptDeviceObject.h \
     ../lib/DataSource.h \
 	../lib/SoftwareSettings.h \
-    ../lib/DeviceHelper.h \
-    ../lib/DeviceObject.h \
-    ../lib/PropertyObject.h \
-    ../lib/DbStruct.h \
     ../lib/OutputLog.h \
     ../lib/Types.h \
     ../lib/AppSignal.h \
-    ../Builder/IssueLogger.h \
-    ../Builder/ModulesRawData.h \
     ../lib/AppSignalParam.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
@@ -89,7 +74,7 @@ HEADERS += \
 	TuningMemory.h \
 	TuningClientContext.h \
 	TuningSourceThread.h \
-	TuningDataStorage.h \
+	TuningDataStorage.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
@@ -101,6 +86,17 @@ DISTFILES += \
     ../Proto/network.proto \
     ../Proto/serialization.proto
 
+# LibPath
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L../bin/debug
+	CONFIG(release, debug|release): LIBS += -L../bin/release
+}
+unix {
+    CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release
+}
+
 # Visual Leak Detector
 #
 win32 {
@@ -110,33 +106,12 @@ win32 {
 
 # ServiceLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
-}
+LIBS += -lServiceLib
 
 # UtilsLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
+LIBS += -lUtilsLib
 
 # OnlineLib
 #
-win32 {
-        CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-        CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-        CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
+LIBS += -lOnlineLib

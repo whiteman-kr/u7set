@@ -340,20 +340,20 @@ namespace Metrology
 
 			if (signal.isInput() == true || signal.isOutput() == true)
 			{
-				if (	signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == true &&
-						signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == true)
+				if (	signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == true &&
+						signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == true)
 				{
 					m_electricLowLimit = signal.electricLowLimit();
 					m_electricHighLimit = signal.electricHighLimit();
 					m_electricPrecision = 4;
 				}
 
-				if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == true)
+				if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == true)
 				{
 					m_electricUnitID = signal.electricUnit();
 				}
 
-				if (signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == true)
+				if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == true)
 				{
 					m_electricSensorType = signal.sensorType();
 				}
@@ -371,7 +371,7 @@ namespace Metrology
 
 								if (m_electricUnitID == E::ElectricUnit::mA)
 								{
-									if (signal.isSpecPropExists(SignalProperties::rload_OhmCaption) == true)
+									if (signal.isSpecPropExists(AppSignalPropNames::RLOAD_OHM) == true)
 									{
 										m_electricRLoad = signal.rload_Ohm();
 									}
@@ -403,7 +403,7 @@ namespace Metrology
 
 					case E::SignalInOutType::Output:
 
-						if (signal.isSpecPropExists(SignalProperties::outputModeCaption) == false)
+						if (signal.isSpecPropExists(AppSignalPropNames::OUTPUT_MODE) == false)
 						{
 							break;
 						}
@@ -540,7 +540,7 @@ namespace Metrology
 	{
 		m_electricLowLimit = lowLimit;
 
-		if (isSpecPropExists(SignalProperties::electricLowLimitCaption) == false)
+		if (isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false)
 		{
 			return;
 		}
@@ -554,7 +554,7 @@ namespace Metrology
 	{
 		m_electricHighLimit = highLimit;
 
-		if (isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		if (isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 		{
 			return;
 		}
@@ -568,7 +568,7 @@ namespace Metrology
 	{
 		m_electricUnitID = unitID;
 
-		if (isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+		if (isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 		{
 			return;
 		}
@@ -589,7 +589,7 @@ namespace Metrology
 	{
 		m_electricSensorType = sensorType;
 
-		if (isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		if (isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
 		{
 			return;
 		}
@@ -640,7 +640,7 @@ namespace Metrology
 	{
 		m_electricRLoad = rload;
 
-		if (isSpecPropExists(SignalProperties::rload_OhmCaption) == false)
+		if (isSpecPropExists(AppSignalPropNames::RLOAD_OHM) == false)
 		{
 			return;
 		}
@@ -663,7 +663,7 @@ namespace Metrology
 	{
 		m_electricR0 = r0;
 
-		if (isSpecPropExists(SignalProperties::R0_OhmCaption) == false)
+		if (isSpecPropExists(AppSignalPropNames::R0_OHM) == false)
 		{
 			return;
 		}

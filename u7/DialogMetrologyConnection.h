@@ -23,7 +23,7 @@
 #include "../lib/AppSignal.h"
 #include "../lib/SignalSetProvider.h"
 #include "../lib/StandardColors.h"
-#include "../lib/DbMetrologyConnection.h"
+#include "../DbLib/DbMetrologyConnection.h"
 
 // ==============================================================================================
 

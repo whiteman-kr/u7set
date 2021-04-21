@@ -1,6 +1,9 @@
 #pragma once
 
 #include "../UtilsLib/Hash.h"
+#include "../lib/MetrologySignal.h"
+#include "../lib/SignalSetProvider.h"
+#include "../DbLib/DbController.h"
 #include "../UtilsLib/Crc.h"
 #include "../lib/MetrologySignal.h"
 
@@ -117,8 +120,8 @@ namespace Metrology
 
 		//
 		//
-		const VcsItemAction& action() const { return m_action; }
-		void setAction(const VcsItemAction& action) { m_action = action; }
+		const E::VcsItemAction& action() const { return m_action; }
+		void setAction(const E::VcsItemAction& action) { m_action = action; }
 
 		//
 		//
@@ -139,7 +142,7 @@ namespace Metrology
 		ConnectionType m_type = ConnectionType::NoConnectionType;
 		ConnectionSignal m_connectionSignal[ConnectionIoTypeCount];
 
-		VcsItemAction m_action;
+		E::VcsItemAction m_action;
 		int m_restoreID = -1;
 	};
 

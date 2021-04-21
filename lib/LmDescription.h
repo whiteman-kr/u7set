@@ -1,5 +1,4 @@
-#ifndef LOGICMODULE_H
-#define LOGICMODULE_H
+#pragma once
 
 #include <memory>
 #include <QObject>
@@ -247,4 +246,3 @@ private:
 };
 
 
-#endif // LOGICMODULE_H

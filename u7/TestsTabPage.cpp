@@ -1244,7 +1244,7 @@ void TestsWidget::openFile()
 
 	// Load file
 
-	bool readOnly = f->state() != VcsState::CheckedOut ||
+	bool readOnly = f->state() != E::VcsState::CheckedOut ||
 					  (db()->currentUser().isAdminstrator() == false
 					   && db()->currentUser().userId() != f->userId());
 
@@ -1433,7 +1433,7 @@ void TestsWidget::checkInSelectedFiles()
 
 		if (documentIsOpen(f->fileId()) == true)
 		{
-			setDocumentReadOnly(f->fileId(), f->state() == VcsState::CheckedIn);
+			setDocumentReadOnly(f->fileId(), f->state() == E::VcsState::CheckedIn);
 		}
 	}
 
@@ -1494,7 +1494,7 @@ void TestsWidget::checkOutSelectedFiles()
 			}
 			codeEditor->setText(dbFile->data());
 
-			setDocumentReadOnly(fileId, fi.state() == VcsState::CheckedIn);
+			setDocumentReadOnly(fileId, fi.state() == E::VcsState::CheckedIn);
 		}
 	}
 }
@@ -1511,7 +1511,7 @@ void TestsWidget::undoChangesSelectedFiles()
 		FileTreeModelItem* f = m_testsTreeModel->fileItem(mi);
 		assert(f);
 
-		if (f->state() == VcsState::CheckedOut)
+		if (f->state() == E::VcsState::CheckedOut)
 		{
 			if (documentIsOpen(f->fileId()) == true)
 			{
@@ -1563,7 +1563,7 @@ void TestsWidget::undoChangesSelectedFiles()
 			codeEditor->setText(dbFile->data());
 			document.setModified(false);
 
-			setDocumentReadOnly(f->fileId(), f->state() == VcsState::CheckedIn);
+			setDocumentReadOnly(f->fileId(), f->state() == E::VcsState::CheckedIn);
 
 			openUndoDocuments.removeOne(f->fileId());
 		}
@@ -1998,14 +1998,14 @@ void TestsWidget::openFilesMenuRequested(const QPoint& pos)
 			return;
 		}
 
-		if (fi.state() == VcsState::CheckedOut &&
+		if (fi.state() == E::VcsState::CheckedOut &&
 			(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
 		{
 			m_checkInOpenDocumentAction->setEnabled(true);
 			m_undoChangesOpenDocumentAction->setEnabled(true);
 		}
 
-		if (fi.state() == VcsState::CheckedIn)
+		if (fi.state() == E::VcsState::CheckedIn)
 		{
 			m_checkOutOpenDocumentAction->setEnabled(true);
 		}
@@ -2048,7 +2048,7 @@ void TestsWidget::checkInOpenFile()
 			return;
 		}
 
-		if (fi.state() == VcsState::CheckedOut &&
+		if (fi.state() == E::VcsState::CheckedOut &&
 			(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
 		{
 			fileIds.push_back(fileId);
@@ -2081,7 +2081,7 @@ void TestsWidget::checkOutOpenFile()
 			return;
 		}
 
-		if (fi.state() == VcsState::CheckedIn)
+		if (fi.state() == E::VcsState::CheckedIn)
 		{
 			fileIds.push_back(fileId);
 		}
@@ -2113,7 +2113,7 @@ void TestsWidget::undoChangesOpenFile()
 			return;
 		}
 
-		if (fi.state() == VcsState::CheckedOut &&
+		if (fi.state() == E::VcsState::CheckedOut &&
 			(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
 		{
 			fileIds.push_back(fileId);
@@ -2334,7 +2334,7 @@ void TestsWidget::checkInDocument(std::vector<int> fileIds)
 				return;
 			}
 
-			setDocumentReadOnly(fileId, fi.state() == VcsState::CheckedIn);
+			setDocumentReadOnly(fileId, fi.state() == E::VcsState::CheckedIn);
 		}
 	}
 
@@ -2386,7 +2386,7 @@ void TestsWidget::checkOutDocument(std::vector<int> fileIds)
 		}
 		codeEditor->setText(dbFile->data());
 
-		setDocumentReadOnly(fileId, fi.state() == VcsState::CheckedIn);
+		setDocumentReadOnly(fileId, fi.state() == E::VcsState::CheckedIn);
 
 	}
 
@@ -2450,7 +2450,7 @@ void TestsWidget::undoChangesDocument(std::vector<int> fileIds)
 			}
 			codeEditor->setText(dbFile->data());
 
-			setDocumentReadOnly(fileId, fi.state() == VcsState::CheckedIn);
+			setDocumentReadOnly(fileId, fi.state() == E::VcsState::CheckedIn);
 		}
 	}
 }
@@ -3419,13 +3419,13 @@ void TestsWidget::setTestsTreeActionsState()
 			editableExtension = true;
 		}
 
-		if (file->state() == VcsState::CheckedOut &&
+		if (file->state() == E::VcsState::CheckedOut &&
 			(file->userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
 		{
 			canAnyBeCheckedIn = true;
 		}
 
-		if (file->state() == VcsState::CheckedIn)
+		if (file->state() == E::VcsState::CheckedIn)
 		{
 			canAnyBeCheckedOut = true;
 		}
@@ -3457,16 +3457,16 @@ void TestsWidget::setTestsTreeActionsState()
 		const FileTreeModelItem* file = m_testsTreeModel->fileItem(mi);
 		assert(file);
 
-		if (file->state() == VcsState::CheckedIn/* &&
-			file->action() != VcsItemAction::Deleted*/)
+		if (file->state() == E::VcsState::CheckedIn/* &&
+			file->action() != E::VcsItemAction::Deleted*/)
 		{
 			m_deleteFileAction->setEnabled(true);
 			break;
 		}
 
-		if (file->state() == VcsState::CheckedOut &&
+		if (file->state() == E::VcsState::CheckedOut &&
 			(file->userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator())
-			/*&& file->action() != VcsItemAction::Deleted*/)
+			/*&& file->action() != E::VcsItemAction::Deleted*/)
 		{
 			m_deleteFileAction->setEnabled(true);
 			break;
@@ -3508,14 +3508,14 @@ void TestsWidget::setCodeEditorActionsState()
 		return;
 	}
 
-	if (fi.state() == VcsState::CheckedOut &&
+	if (fi.state() == E::VcsState::CheckedOut &&
 		(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
 	{
 		m_checkInCurrentDocumentAction->setEnabled(true);
 		m_undoChangesCurrentDocumentAction->setEnabled(true);
 	}
 
-	if (fi.state() == VcsState::CheckedIn)
+	if (fi.state() == E::VcsState::CheckedIn)
 	{
 		m_checkOutCurrentDocumentAction->setEnabled(true);
 	}

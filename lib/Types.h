@@ -99,7 +99,6 @@ public:
 	};
 	Q_ENUM(LineStyleCap)
 
-
 	// UserTextPos
 	//
 	enum class TextPos
@@ -114,6 +113,26 @@ public:
 		Left
 	};
 	Q_ENUM(TextPos)
+
+	// Version Control State
+	//
+	enum class VcsState
+	{
+		CheckedIn,					// File has no any action, it's normal state
+		CheckedOut
+	};
+	Q_ENUM(VcsState)
+
+	// Version Control Item Action
+	//
+	enum class VcsItemAction
+	{
+		Unknown = 0,		// Don't change values, they are stored in DB
+		Added = 1,			// Don't change values, they are stored in DB
+		Modified = 2,		// Don't change values, they are stored in DB
+		Deleted = 3			// Don't change values, they are stored in DB
+	};
+	Q_ENUM(VcsItemAction)
 
 	// Format analog
 	//
@@ -772,7 +791,6 @@ public:
 		return valuesArray;
 	}
 };
-
 
 inline uint qHash(E::AppSignalStateFlagType t, uint seed)
 {

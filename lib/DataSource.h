@@ -10,7 +10,6 @@
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/DataProtocols.h"
 #include "../OnlineLib/SocketIO.h"
-#include "DeviceObject.h"
 #include "AppSignalParam.h"
 #include "ConstStrings.h"
 

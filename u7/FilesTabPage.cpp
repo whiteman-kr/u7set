@@ -1,5 +1,5 @@
 #include "FilesTabPage.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "GlobalMessanger.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 
@@ -243,16 +243,16 @@ void FilesTabPage::setActionState()
 		const FileTreeModelItem* file = m_fileModel->fileItem(mi);
 		assert(file);
 
-		if (file->state() == VcsState::CheckedIn /*&&
-			file->action() != VcsItemAction::Deleted*/)
+		if (file->state() == E::VcsState::CheckedIn /*&&
+			file->action() != E::VcsItemAction::Deleted*/)
 		{
 			m_deleteFileAction->setEnabled(true);
 			break;
 		}
 
-		if (file->state() == VcsState::CheckedOut &&
+		if (file->state() == E::VcsState::CheckedOut &&
 			(file->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
-			&& file->action() != VcsItemAction::Deleted)
+			&& file->action() != E::VcsItemAction::Deleted)
 		{
 			m_deleteFileAction->setEnabled(true);
 			break;
@@ -269,13 +269,13 @@ void FilesTabPage::setActionState()
 		const FileTreeModelItem* file = m_fileModel->fileItem(mi);
 		assert(file);
 
-		if (file->state() == VcsState::CheckedOut &&
+		if (file->state() == E::VcsState::CheckedOut &&
 			(file->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
 		{
 			canAnyBeCheckedIn = true;
 		}
 
-		if (file->state() == VcsState::CheckedIn)
+		if (file->state() == E::VcsState::CheckedIn)
 		{
 			canAnyBeCheckedOut = true;
 		}

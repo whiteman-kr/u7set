@@ -1,7 +1,7 @@
 #include "SimProfilesTest.h"
 #include <QtTest>
 
-#include "../../lib/DeviceObject.h"
+#include "../../HardwareLib/DeviceObject.h"
 
 SimProfilesTest::SimProfilesTest()
 {

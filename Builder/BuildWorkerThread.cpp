@@ -562,7 +562,7 @@ namespace Builder
 				break;
 			}
 
-			if (fi.action() == VcsItemAction::Deleted)		// File is deleted
+			if (fi.action() == E::VcsItemAction::Deleted)		// File is deleted
 			{
 				continue;
 			}
@@ -1055,7 +1055,7 @@ namespace Builder
 		for (const std::shared_ptr<DbFile>& f : files)
 		{
 			if (f->deleted() == true ||
-				f->action() == VcsItemAction::Deleted)
+				f->action() == E::VcsItemAction::Deleted)
 			{
 				continue;
 			}
@@ -1388,7 +1388,7 @@ namespace Builder
 
 		// Save file to build
 		//
-		BuildFile* outFile = context->m_buildResultWriter->addFile(Directory::COMMON, Db::File::SimProfilesFileName, fileContent, false);
+		BuildFile* outFile = context->m_buildResultWriter->addFile(Directory::COMMON, File::SIM_PROFILES, fileContent, false);
 		if (outFile == nullptr)
 		{
 			return false;

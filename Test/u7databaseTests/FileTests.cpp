@@ -2,7 +2,7 @@
 #include <QString>
 #include <QTest>
 #include "FileTests.h"
-#include "../../lib/DbController.h"
+#include "../../DbLib/DbController.h"
 
 void FileTests::getObjectState(QSqlQuery& q, ObjectState& os)
 {
@@ -201,7 +201,7 @@ void FileTests::api_add_file()
 		int fileId = os.id;
 
 		QVERIFY2(os.errCode == 0, qPrintable("Expected no error while creating file"));
-		QVERIFY2(os.action == VcsItemAction::Added, qPrintable("Expected VcsItemAction::Added"));
+		QVERIFY2(os.action == static_cast<int>(E::VcsItemAction::Added), qPrintable("Expected E::VcsItemAction::Added"));
 		QVERIFY2(os.checkedOut == true, qPrintable("Expected CheckedOut"));
 		QVERIFY2(os.deleted == false, qPrintable("Expected not deleted"));
 

@@ -1,7 +1,5 @@
 TEMPLATE = subdirs
 
-CONFIG += ordered
-
 SUBDIRS += Protobuf \
         qtpropertybrowser \
         QScintilla \
@@ -10,6 +8,8 @@ SUBDIRS += Protobuf \
 		UtilsLib \
         OnlineLib \
         ServiceLib \
+		HardwareLib \
+		DbLib \
         Simulator \
         SimulatorConsole \
         Builder \
@@ -32,9 +32,20 @@ SUBDIRS += Protobuf \
         ./Test/SimulatorTests \
         ./Test/u7databaseTests
 
-AppDataService.depends = OnlineLib ServiceLib UtilsLib
-DiagDataService.depends = OnlineLib ServiceLib UtilsLib
-ArchivingService.depends = OnlineLib ServiceLib UtilsLib
-ConfigurationService.depends = OnlineLib ServiceLib UtilsLib
+AppDataService.depends = Protobuf OnlineLib ServiceLib UtilsLib
+DiagDataService.depends = Protobuf OnlineLib ServiceLib UtilsLib HardwareLib
+ArchivingService.depends = Protobuf OnlineLib ServiceLib UtilsLib
+ConfigurationService.depends = Protobuf OnlineLib ServiceLib UtilsLib
 BaseService.depends = OnlineLib ServiceLib UtilsLib
-TuningService.depends = OnlineLib ServiceLib UtilsLib
+TuningService.depends = Protobuf OnlineLib ServiceLib UtilsLib
+
+Monitor.depends = Protobuf OnlineLib UtilsLib TrendView VFrame30
+
+SimulatorConsole.depends = Protobuf HardwareLib Simulator UtilsLib OnlineLib VFrame30
+BuilderConsole.depends = Protobuf HardwareLib Simulator UtilsLib OnlineLib VFrame30 DbLib
+
+u7.depends = Protobuf HardwareLib Simulator UtilsLib OnlineLib VFrame30 HardwareLib TrendView QScintilla DbLib
+
+SimulatorTests.depends = Protobuf HardwareLib Simulator UtilsLib OnlineLib VFrame30
+u7databaseTests.depends = Protobuf UtilsLib HardwareLib DbLib OnlineLib
+

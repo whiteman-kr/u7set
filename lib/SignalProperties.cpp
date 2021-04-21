@@ -24,63 +24,6 @@
 //
 // -------------------------------------------------------------------------------------------------------------
 
-const QString SignalProperties::idCaption("ID");										// Optimization, to share one string among all Signal instances
-const QString SignalProperties::signalGroupIDCaption("SignalGroupID");
-const QString SignalProperties::signalInstanceIDCaption("SignalInstanceID");
-const QString SignalProperties::changesetIDCaption("ChangesetID");
-const QString SignalProperties::checkedOutCaption("CheckedOut");
-const QString SignalProperties::userIdCaption("UserID");
-const QString SignalProperties::channelCaption("Channel");
-const QString SignalProperties::excludeFromBuildCaption("ExcludeFromBuild");
-const QString SignalProperties::createdCaption("Created");
-const QString SignalProperties::deletedCaption("Deleted");
-const QString SignalProperties::instanceCreatedCaption("InstanceCreated");
-const QString SignalProperties::typeCaption("Type");
-const QString SignalProperties::inOutTypeCaption("InOutType");
-const QString SignalProperties::cacheValidator("^[#]?[A-Za-z\\d_]*$");
-const QString SignalProperties::appSignalIDCaption("AppSignalID");
-const QString SignalProperties::customSignalIDCaption("CustomAppSignalID");
-const QString SignalProperties::busTypeIDCaption("BusTypeID");
-const QString SignalProperties::captionCaption("Caption");
-const QString SignalProperties::captionValidator("^.+$");
-const QString SignalProperties::analogSignalFormatCaption("AnalogSignalFormat");
-const QString SignalProperties::dataSizeCaption("DataSize");
-const QString SignalProperties::lowADCCaption("LowADC");
-const QString SignalProperties::highADCCaption("HighADC");
-const QString SignalProperties::lowDACCaption("LowDAC");
-const QString SignalProperties::highDACCaption("HighDAC");
-const QString SignalProperties::lowEngineeringUnitsCaption("LowEngineeringUnits");
-const QString SignalProperties::highEngineeringUnitsCaption("HighEngineeringUnits");
-const QString SignalProperties::unitCaption("Unit");
-const QString SignalProperties::lowValidRangeCaption("LowValidRange");
-const QString SignalProperties::highValidRangeCaption("HighValidRange");
-const QString SignalProperties::electricLowLimitCaption("ElectricLowLimit");
-const QString SignalProperties::electricHighLimitCaption("ElectricHighLimit");
-const QString SignalProperties::electricUnitCaption("ElectricUnit");
-const QString SignalProperties::rload_OhmCaption("Rload_Ohm");
-const QString SignalProperties::sensorTypeCaption("SensorType");
-const QString SignalProperties::R0_OhmCaption("R0_Ohm");
-const QString SignalProperties::outputModeCaption("OutputMode");
-const QString SignalProperties::acquireCaption("Acquire");
-const QString SignalProperties::archiveCaption("Archive");
-const QString SignalProperties::decimalPlacesCaption("DecimalPlaces");
-const QString SignalProperties::coarseApertureCaption("CoarseAperture");
-const QString SignalProperties::fineApertureCaption("FineAperture");
-const QString SignalProperties::adaptiveApertureCaption("AdaptiveAperture");
-const QString SignalProperties::filteringTimeCaption("FilteringTime");
-const QString SignalProperties::spreadToleranceCaption("SpreadTolerance");
-const QString SignalProperties::byteOrderCaption("ByteOrder");
-const QString SignalProperties::equipmentIDCaption("EquipmentID");
-const QString SignalProperties::enableTuningCaption("EnableTuning");
-const QString SignalProperties::tuningDefaultValueCaption("TuningDefaultValue");
-const QString SignalProperties::tuningLowBoundCaption("TuningLowBound");
-const QString SignalProperties::tuningHighBoundCaption("TuningHighBound");
-const QString SignalProperties::specificPropertiesStructCaption("SpecificPropertiesStruct");
-const QString SignalProperties::tagsCaption("Tags");
-
-
-const QString SignalProperties::MISPRINT_lowEngineeringUnitsCaption("LowEngeneeringUnits");
-const QString SignalProperties::MISPRINT_highEngineeringUnitsCaption("HighEngeneeringUnits");
 
 const QString SignalProperties::categoryIdentification("1 Identification");
 const QString SignalProperties::categorySignalType("2 Signal type");
@@ -91,47 +34,44 @@ const QString SignalProperties::categoryOnlineMonitoringSystem("6 Online Monitor
 const QString SignalProperties::categoryTuning("7 Tuning");
 const QString SignalProperties::categoryExpertProperties("8 Expert properties");
 
-const QString SignalProperties::defaultInputAnalogSpecPropStruct(
-	"4;ElectricHighLimit;5 Electric parameters;double;;;0;10;false;false;Electric high limit of input signal;true;None\n"
-	"4;ElectricLowLimit;5 Electric parameters;double;;;0;10;false;false;Electric low limit of input signal;true;None\n"
-	"4;ElectricUnit;5 Electric parameters;DynamicEnum [NoUnit=0,mA=1,mV=2,Ohm=3,V=4];;;NoUnit;0;false;false;;true;None\n"
-	"4;FilteringTime;4 Signal processing;double;;;0.005;5;false;false;Signal filtering time in seconds;true;None\n"
-	"4;HighADC;4 Signal processing;uint32;0;65535;65535;0;false;false;High ADC value;true;None\n"
-	"4;HighEngineeringUnits;4 Signal processing;double;;;100;10;false;false;High engineering units;true;None\n"
-	"4;HighValidRange;4 Signal processing;double;;;100;10;false;false;High valid range of signal;true;None\n"
-	"4;LowADC;4 Signal processing;uint32;0;65535;0;0;false;false;Low ADC value;true;None\n"
-	"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n"
-	"4;LowValidRange;4 Signal processing;double;;;0;10;false;false;Low valid range of signal;true;None\n"
-	"4;SensorType;5 Electric parameters;DynamicEnum [NoSensor=0,Ohm_Pt50_W1391=1,Ohm_Pt100_W1391=2,Ohm_Pt50_W1385=3,Ohm_Pt100_W1385=4,Ohm_Cu_50_W1428=5,Ohm_Cu_100_W1428=6,Ohm_Cu_50_W1426=7,Ohm_Cu_100_W1426=8,Ohm_Pt21=9,Ohm_Cu23=10,mV_K_TXA=11,mV_L_TXK=12,mV_N_THH=13];;;NoSensor;0;false;false;;true;None\n"
-	"4;SpreadTolerance;4 Signal processing;double;;;2;5;false;false;Spread tolerance of signal measurement channels in percents;true;None");
-
-const QString SignalProperties::defaultOutputAnalogSpecPropStruct(
-	"4;ElectricHighLimit;5 Electric parameters;double;;;0;10;false;false;Electric high limit of input signal;true;None\n"
-	"4;ElectricLowLimit;5 Electric parameters;double;;;0;10;false;false;Electric low limit of input signal;true;None\n"
-	"4;ElectricUnit;5 Electric parameters;DynamicEnum [NoUnit=0,mA=1,mV=2,Ohm=3,V=4];;;NoUnit;0;false;false;;true;None\n"
-	"4;HighDAC;4 Signal processing;uint32;0;65535;65535;0;false;false;High DAC value;true;None\n"
-	"4;HighEngineeringUnits;4 Signal processing;double;;;100;10;false;false;High engineering units;true;None\n"
-	"4;LowDAC;4 Signal processing;uint32;0;65535;0;0;false;false;Low DAC value;true;None\n"
-	"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n"
-	"4;OutputMode;5 Electric parameters;DynamicEnum [Plus0_Plus5_V=0,Plus4_Plus20_mA=1,Minus10_Plus10_V=2,Plus0_Plus5_mA=3];;;Plus0_Plus5_V;0;false;false;;true;None\n");
-
-
-const QString SignalProperties::defaultInternalAnalogSpecPropStruct(
-	"4;HighEngineeringUnits;4 Signal processing;double;;;100;10;false;false;High engineering units;true;None\n"
-	"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n");
-
-
-const QString SignalProperties::defaultBusChildAnalogSpecPropStruct(
-								"4;HighADC;4 Signal processing;uint32;0;65535;65535;0;false;false;High ADC value;true;None\n"
-								"4;HighEngineeringUnits;4 Signal processing;double;;;100;10;false;false;High engineering units;true;None\n"
-								"4;HighValidRange;4 Signal processing;double;;;100;10;false;false;High valid range of signal;true;None\n"
-								"4;LowADC;4 Signal processing;uint32;0;65535;0;0;false;false;Low ADC value;true;None\n"
-								"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n"
-								"4;LowValidRange;4 Signal processing;double;;;0;10;false;false;Low valid range of signal;true;None\n");
-
 
 const QString SignalProperties::lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
 
+QString SignalProperties::generateCaption(const QString& name)
+{
+	QString result;
+	if (name.isEmpty())
+	{
+		assert(false);
+		return result;
+	}
+	result += name[0].toUpper();
+	for (int i = 1; i < name.count(); i++)
+	{
+		if (name[i].isUpper())
+		{
+			if (i + 1 < name.count() && name[i + 1].isUpper())	// abbreviation?
+			{
+				result += ' ';
+				while (i < name.count() && name[i].isUpper())
+				{
+					result += name[i];
+					i++;
+				}
+				result += ' ';
+			}
+			else
+			{
+				result += ' ' + name[i].toLower();
+			}
+		}
+		else
+		{
+			result += name[i];
+		}
+	}
+	return result.trimmed();
+}
 
 SignalProperties::SignalProperties(const AppSignal& signal, bool savePropertyDescription) :
 	m_signal(signal)
@@ -185,7 +125,7 @@ void SignalProperties::setSpecPropStruct(const QString & specPropStruct)
 
 int SignalProperties::getPrecision()
 {
-	std::shared_ptr<Property> precisionProperty = propertyByCaption(SignalProperties::decimalPlacesCaption);
+	std::shared_ptr<Property> precisionProperty = propertyByCaption(AppSignalPropNames::DECIMAL_PLACES);
 
 	if (precisionProperty == nullptr)
 	{
@@ -206,104 +146,104 @@ int SignalProperties::getPrecision()
 
 void SignalProperties::initProperties(bool savePropertyDescription)
 {
-	ADD_SIGNAL_PROPERTY_GETTER(int, idCaption, false, AppSignal::ID, m_signal);
-	ADD_SIGNAL_PROPERTY_GETTER(int, signalGroupIDCaption, false, AppSignal::signalGroupID, m_signal);
-	ADD_SIGNAL_PROPERTY_GETTER(int, signalInstanceIDCaption, false, AppSignal::signalInstanceID, m_signal);
-	ADD_SIGNAL_PROPERTY_GETTER(int, changesetIDCaption, false, AppSignal::changesetID, m_signal);
-	ADD_SIGNAL_PROPERTY_GETTER(bool, checkedOutCaption, false, AppSignal::checkedOut, m_signal);
-	ADD_SIGNAL_PROPERTY_GETTER(int, userIdCaption, false, AppSignal::userID, m_signal);
-	ADD_SIGNAL_PROPERTY_GETTER(E::Channel, channelCaption, false, AppSignal::channel, m_signal);
-	ADD_SIGNAL_PROPERTY_GETTER(QDateTime, createdCaption, false, AppSignal::created, m_signal);
-	ADD_SIGNAL_PROPERTY_GETTER(bool, deletedCaption, false, AppSignal::deleted, m_signal);
-	ADD_SIGNAL_PROPERTY_GETTER(QDateTime, instanceCreatedCaption, false, AppSignal::instanceCreated, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(int, AppSignalPropNames::ID, false, AppSignal::ID, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(int, AppSignalPropNames::SIGNAL_GROUP_ID, false, AppSignal::signalGroupID, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(int, AppSignalPropNames::SIGNAL_INSTANCE_ID, false, AppSignal::signalInstanceID, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(int, AppSignalPropNames::CHANGESET_ID, false, AppSignal::changesetID, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(bool, AppSignalPropNames::CHECKED_OUT, false, AppSignal::checkedOut, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(int, AppSignalPropNames::USER_ID, false, AppSignal::userID, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(E::Channel, AppSignalPropNames::CHANNEL, false, AppSignal::channel, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(QDateTime, AppSignalPropNames::CREATED, false, AppSignal::created, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(bool, AppSignalPropNames::DELETED, false, AppSignal::deleted, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(QDateTime, AppSignalPropNames::INSTANCE_CREATED, false, AppSignal::instanceCreated, m_signal);
 
-	auto excludeFromBuildProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, excludeFromBuildCaption, true,
-																		AppSignal::excludeFromBuild,
-																		AppSignal::setExcludeFromBuild, m_signal);
+	auto excludeFromBuildProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::EXCLUDE_FROM_BUILD, true,
+																		AppSignal::excludeFromBuild, AppSignal::setExcludeFromBuild, m_signal);
 	excludeFromBuildProperty->setCategory(categorySignalProcessing);
 
-	auto signalTypeProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::SignalType, typeCaption, true, AppSignal::signalType, AppSignal::setSignalType, m_signal);
+	auto signalTypeProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::SignalType, AppSignalPropNames::TYPE,
+																true, AppSignal::signalType, AppSignal::setSignalType, m_signal);
 	signalTypeProperty->setCategory(categorySignalType);
 
-	auto signalInOutTypeProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::SignalInOutType, inOutTypeCaption, true, AppSignal::inOutType, AppSignal::setInOutType, m_signal);
+	auto signalInOutTypeProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::SignalInOutType, AppSignalPropNames::IN_OUT_TYPE, true, AppSignal::inOutType, AppSignal::setInOutType, m_signal);
 	signalInOutTypeProperty->setCategory(categorySignalType);
 
-	auto strIdProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, appSignalIDCaption, true, AppSignal::appSignalID, AppSignal::setAppSignalID, m_signal);
-	strIdProperty->setValidator(cacheValidator);
+	auto strIdProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, AppSignalPropNames::APP_SIGNAL_ID, true, AppSignal::appSignalID, AppSignal::setAppSignalID, m_signal);
+	strIdProperty->setValidator(AppSignal::IDENTIFICATORS_VALIDATOR);
 	strIdProperty->setCategory(categoryIdentification);
 
-	auto extStrIdProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, customSignalIDCaption, true, AppSignal::customAppSignalID, AppSignal::setCustomAppSignalID, m_signal);
-	extStrIdProperty->setValidator(cacheValidator);
+	auto extStrIdProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, AppSignalPropNames::CUSTOM_APP_SIGNAL_ID, true, AppSignal::customAppSignalID, AppSignal::setCustomAppSignalID, m_signal);
+	extStrIdProperty->setValidator(AppSignal::IDENTIFICATORS_VALIDATOR);
 	extStrIdProperty->setCategory(categoryIdentification);
 
-	auto busTypeIDProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, busTypeIDCaption, true, AppSignal::busTypeID, AppSignal::setBusTypeID, m_signal);
+	auto busTypeIDProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, AppSignalPropNames::BUS_TYPE_ID, true, AppSignal::busTypeID, AppSignal::setBusTypeID, m_signal);
 	busTypeIDProperty->setCategory(categoryIdentification);
 
-	auto nameProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, captionCaption, true, AppSignal::caption, AppSignal::setCaption, m_signal);
-	nameProperty->setValidator(captionValidator);
+	auto nameProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, AppSignalPropNames::CAPTION, true, AppSignal::caption, AppSignal::setCaption, m_signal);
+	nameProperty->setValidator(AppSignal::CAPTION_VALIDATOR);
 	nameProperty->setCategory(categoryIdentification);
 
-	auto equipmentProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, equipmentIDCaption, true, AppSignal::equipmentID, AppSignal::setEquipmentID, m_signal);
+	auto equipmentProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, AppSignalPropNames::EQUIPMENT_ID, true, AppSignal::equipmentID, AppSignal::setEquipmentID, m_signal);
 	equipmentProperty->setCategory(categoryIdentification);
 
-	auto enableTuningProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, enableTuningCaption, true, AppSignal::enableTuning, AppSignal::setEnableTuning, m_signal);
+	auto enableTuningProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::ENABLE_TUNING, true, AppSignal::enableTuning, AppSignal::setEnableTuning, m_signal);
 	enableTuningProperty->setCategory(categoryTuning);
 
-	auto tuningDefaultValueProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(TuningValue, tuningDefaultValueCaption, true, AppSignal::tuningDefaultValue, AppSignal::setTuningDefaultValue, m_signal);
+	auto tuningDefaultValueProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(TuningValue, AppSignalPropNames::TUNING_DEFAULT_VALUE, true, AppSignal::tuningDefaultValue, AppSignal::setTuningDefaultValue, m_signal);
 	tuningDefaultValueProperty->setCategory(categoryTuning);
 
-	auto tuningLowBoundProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(TuningValue, tuningLowBoundCaption, true, AppSignal::tuningLowBound, AppSignal::setTuningLowBound, m_signal);
+	auto tuningLowBoundProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(TuningValue, AppSignalPropNames::TUNING_LOW_BOUND, true, AppSignal::tuningLowBound, AppSignal::setTuningLowBound, m_signal);
 	tuningLowBoundProperty->setCategory(categoryTuning);
 
-	auto tuningHighBoundProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(TuningValue, tuningHighBoundCaption, true, AppSignal::tuningHighBound, AppSignal::setTuningHighBound, m_signal);
+	auto tuningHighBoundProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(TuningValue, AppSignalPropNames::TUNING_HIGH_BOUND, true, AppSignal::tuningHighBound, AppSignal::setTuningHighBound, m_signal);
 	tuningHighBoundProperty->setCategory(categoryTuning);
 
 	if (savePropertyDescription)
 	{
-		addPropertyDescription<int>(dataSizeCaption,
+		addPropertyDescription<int>(AppSignalPropNames::DATA_SIZE,
 									&AppSignal::dataSize,
 									static_cast<void (AppSignal::*)(int)>(&AppSignal::setDataSize));
 
-		addPropertyDescription<E::AnalogAppSignalFormat>(analogSignalFormatCaption,
+		addPropertyDescription<E::AnalogAppSignalFormat>(AppSignalPropNames::ANALOG_SIGNAL_FORMAT,
 														 &AppSignal::analogSignalFormat,
 														 static_cast<void (AppSignal::*)(E::AnalogAppSignalFormat)>(&AppSignal::setAnalogSignalFormat));
 	}
-	auto dataSizeProperty = addProperty<int>(dataSizeCaption, QString(), true,
+	auto dataSizeProperty = addProperty<int>(AppSignalPropNames::DATA_SIZE, QString(), true,
 										(std::function<int(void)>)std::bind(&AppSignal::dataSize, &m_signal),
 										std::bind(static_cast<void (AppSignal::*)(int)>(&AppSignal::setDataSize), &m_signal, std::placeholders::_1));
 
 	dataSizeProperty->setCategory(categoryDataFormat);
 
-	auto analogSignalFormatProperty = addProperty<E::AnalogAppSignalFormat>(analogSignalFormatCaption, QString(), true,
+	auto analogSignalFormatProperty = addProperty<E::AnalogAppSignalFormat>(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, QString(), true,
 																		  (std::function<E::AnalogAppSignalFormat(void)>)std::bind(&AppSignal::analogSignalFormat, &m_signal),
 																		  std::bind(static_cast<void (AppSignal::*)(E::AnalogAppSignalFormat)>(&AppSignal::setAnalogSignalFormat), &m_signal, std::placeholders::_1));
 	analogSignalFormatProperty->setCategory(categoryDataFormat);
 
-	auto unitProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, unitCaption, true, AppSignal::unit, AppSignal::setUnit, m_signal);
+	auto unitProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, AppSignalPropNames::UNIT, true, AppSignal::unit, AppSignal::setUnit, m_signal);
 	unitProperty->setCategory(categorySignalProcessing);
 
-	auto decimalPlacesProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(int, decimalPlacesCaption, true, AppSignal::decimalPlaces, AppSignal::setDecimalPlaces, m_signal);
+	auto decimalPlacesProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(int, AppSignalPropNames::DECIMAL_PLACES, true, AppSignal::decimalPlaces, AppSignal::setDecimalPlaces, m_signal);
 	decimalPlacesProperty->setCategory(categoryOnlineMonitoringSystem);
 
-	auto coarseApertureProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(double, coarseApertureCaption, true, AppSignal::coarseAperture, AppSignal::setCoarseAperture, m_signal);
+	auto coarseApertureProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(double, AppSignalPropNames::COARSE_APERTURE, true, AppSignal::coarseAperture, AppSignal::setCoarseAperture, m_signal);
 	coarseApertureProperty->setCategory(categoryOnlineMonitoringSystem);
 
-	auto fineApertureProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(double, fineApertureCaption, true, AppSignal::fineAperture, AppSignal::setFineAperture, m_signal);
+	auto fineApertureProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(double, AppSignalPropNames::FINE_APERTURE, true, AppSignal::fineAperture, AppSignal::setFineAperture, m_signal);
 	fineApertureProperty->setCategory(categoryOnlineMonitoringSystem);
 
-	auto adaptiveApertureProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, adaptiveApertureCaption, true, AppSignal::adaptiveAperture, AppSignal::setAdaptiveAperture, m_signal);
+	auto adaptiveApertureProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::ADAPTIVE_APERTURE, true, AppSignal::adaptiveAperture, AppSignal::setAdaptiveAperture, m_signal);
 	adaptiveApertureProperty->setCategory(categoryOnlineMonitoringSystem);
 
-	auto acquireProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, acquireCaption, true, AppSignal::acquire, AppSignal::setAcquire, m_signal);
+	auto acquireProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::ACQUIRE, true, AppSignal::acquire, AppSignal::setAcquire, m_signal);
 	acquireProperty->setCategory(categoryOnlineMonitoringSystem);
 
-	auto archiveProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, archiveCaption, true, AppSignal::archive, AppSignal::setArchive, m_signal);
+	auto archiveProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::ARCHIVE, true, AppSignal::archive, AppSignal::setArchive, m_signal);
 	archiveProperty->setCategory(categoryOnlineMonitoringSystem);
 
-	auto byteOrderProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::ByteOrder, byteOrderCaption, true, AppSignal::byteOrder, AppSignal::setByteOrder, m_signal);
+	auto byteOrderProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::ByteOrder, AppSignalPropNames::BYTE_ORDER_PROP, true, AppSignal::byteOrder, AppSignal::setByteOrder, m_signal);
 	byteOrderProperty->setCategory(categoryDataFormat);
 
-	auto tagsProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, tagsCaption, true, AppSignal::tagsStr, AppSignal::setTagsStr, m_signal);
+	auto tagsProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, AppSignalPropNames::TAGS, true, AppSignal::tagsStr, AppSignal::setTagsStr, m_signal);
 	tagsProperty->setCategory(categoryOnlineMonitoringSystem);
 	tagsProperty->setSpecificEditor(E::PropertySpecificEditor::Tags);
 
@@ -314,10 +254,10 @@ void SignalProperties::initProperties(bool savePropertyDescription)
 
 	if (savePropertyDescription)
 	{
-		addPropertyDescription<QString>(specificPropertiesStructCaption,
+		addPropertyDescription<QString>(AppSignalPropNames::SPECIFIC_PROPERTIES_STRUCT,
 										&AppSignal::specPropStruct);
 	}
-	auto propSpecPropStruct = ADD_PROPERTY_GETTER_SETTER(QString, specificPropertiesStructCaption, true,
+	auto propSpecPropStruct = ADD_PROPERTY_GETTER_SETTER(QString, AppSignalPropNames::SPECIFIC_PROPERTIES_STRUCT, true,
 															 SignalProperties::specPropStruct, SignalProperties::setSpecPropStruct);
 	propSpecPropStruct->setCategory(categoryExpertProperties);
 	propSpecPropStruct->setExpert(true);
@@ -377,570 +317,3 @@ std::shared_ptr<OrderedHash<int, QString> > SignalProperties::generateOrderedHas
 	return result;
 }
 
-// -------------------------------------------------------------------------------------------------------------
-//
-// SignalSpecPropValue class implementation
-//
-// -------------------------------------------------------------------------------------------------------------
-
-SignalSpecPropValue::SignalSpecPropValue()
-{
-}
-
-bool SignalSpecPropValue::create(std::shared_ptr<Property> prop)
-{
-	if (prop == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-	return create(prop->caption(), prop->value(), prop->isEnum());
-}
-
-bool SignalSpecPropValue::create(const QString& name, const QVariant& value, bool isEnum)
-{
-	m_name = name;
-	m_value = value;
-	m_isEnum = isEnum;
-
-	return true;
-}
-
-bool SignalSpecPropValue::setValue(const QString& name, const QVariant& value, bool isEnum)
-{
-	if (name != m_name)
-	{
-		assert(false);
-		return false;
-	}
-
-	if (m_value.type() != value.type())
-	{
-		assert(false);
-		return false;
-	}
-
-	if (m_isEnum != isEnum)
-	{
-		assert(false);
-		return false;
-	}
-
-	m_value = value;
-
-	return true;
-}
-
-bool SignalSpecPropValue::setAnyValue(const QString& name, const QVariant& value)
-{
-	return setValue(name, value, m_isEnum);
-}
-
-bool SignalSpecPropValue::save(Proto::SignalSpecPropValue* protoValue) const
-{
-	TEST_PTR_RETURN_FALSE(protoValue);
-
-	protoValue->Clear();
-
-	protoValue->set_name(m_name.toStdString());
-	protoValue->set_type(static_cast<int>(m_value.type()));
-	protoValue->set_isenum(m_isEnum);
-
-	switch(m_value.type())
-	{
-	case QVariant::Invalid:
-		assert(false);
-		return true;
-
-	case QVariant::Int:
-		protoValue->set_int32val(m_value.toInt());
-		return true;
-
-	case QVariant::UInt:
-		protoValue->set_uint32val(m_value.toUInt());
-		return true;
-
-	case QVariant::LongLong:
-		protoValue->set_int64val(m_value.toLongLong());
-		return true;
-
-	case QVariant::ULongLong:
-		protoValue->set_uint64val(m_value.toULongLong());
-		return true;
-
-	case QVariant::Double:
-		protoValue->set_doubleval(m_value.toDouble());
-		return true;
-
-	case QVariant::Bool:
-		protoValue->set_boolval(m_value.toBool());
-		return true;
-
-	case QVariant::String:
-		protoValue->set_stringval(m_value.toString().toStdString());
-		return true;
-
-	default:
-		assert(false);
-	}
-
-	return false;
-}
-
-bool SignalSpecPropValue::load(const Proto::SignalSpecPropValue& protoValue)
-{
-	m_name = QString::fromStdString(protoValue.name());
-
-	QVariant::Type type = static_cast<QVariant::Type>(protoValue.type());
-
-	m_isEnum = protoValue.isenum();
-
-#ifdef QT_DEBUG
-	if (m_isEnum == true && type != QVariant::Int)
-	{
-		assert(false);
-	}
-#endif
-
-	switch(type)
-	{
-	case QVariant::Invalid:
-		m_value = QVariant();
-		return true;
-
-	case QVariant::Int:
-		assert(protoValue.has_int32val());
-		m_value.setValue(protoValue.int32val());
-		return true;
-
-	case QVariant::UInt:
-		assert(protoValue.has_uint32val());
-		m_value.setValue(protoValue.uint32val());
-		return true;
-
-	case QVariant::LongLong:
-		assert(protoValue.has_int64val());
-		m_value.setValue(protoValue.int64val());
-		return true;
-
-	case QVariant::ULongLong:
-		assert(protoValue.has_uint64val());
-		m_value.setValue(protoValue.uint64val());
-		return true;
-
-	case QVariant::Double:
-		assert(protoValue.has_doubleval());
-		m_value.setValue(protoValue.doubleval());
-		return true;
-
-	case QVariant::Bool:
-		assert(protoValue.has_boolval());
-		m_value.setValue(protoValue.boolval());
-		return true;
-
-	case QVariant::String:
-		assert(protoValue.has_stringval());
-		m_value.setValue(QString::fromStdString(protoValue.stringval()));
-		return true;
-
-	default:
-		assert(false);
-	}
-
-	return false;
-}
-
-
-// ----------------------------------------------------------------------------------------------------------
-//
-// SignalSpecPropValues class implementation
-//
-// ----------------------------------------------------------------------------------------------------------
-
-SignalSpecPropValues::SignalSpecPropValues()
-{
-}
-
-
-bool SignalSpecPropValues::create(const AppSignal& s)
-{
-	bool result = true;
-
-	result &= createFromSpecPropStruct(s.specPropStruct());
-	result &= parseValuesFromArray(s.protoSpecPropValues());
-
-	return result;
-}
-
-
-bool SignalSpecPropValues::createFromSpecPropStruct(const QString& specPropStruct, bool buildNamesMap)
-{
-	m_specPropValues.clear();
-	m_propNamesMap.clear();
-
-	if (specPropStruct.isEmpty() == true)
-	{
-		return true;
-	}
-
-	PropertyObject pob;
-
-	std::pair<bool, QString> result = pob.parseSpecificPropertiesStruct(specPropStruct);
-
-	if (result.first == false)
-	{
-		assert(false);
-		return false;
-	}
-
-	std::vector<std::shared_ptr<Property>> properties = pob.properties();
-
-	for(std::shared_ptr<Property> property : properties)
-	{
-		SignalSpecPropValue specPropValue;
-
-		bool createResult = specPropValue.create(property);
-		if (createResult == false)
-		{
-			Q_ASSERT(createResult);
-			return false;
-		}
-
-		m_specPropValues.append(specPropValue);
-	}
-
-	if (buildNamesMap == true)
-	{
-		buildPropNamesMap();
-	}
-
-	return true;
-}
-
-bool SignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropStruct)
-{
-	PropertyObject pob;
-
-	std::pair<bool, QString> pobResult = pob.parseSpecificPropertiesStruct(specPropStruct);
-
-	if (pobResult.first == false)
-	{
-		return false;
-	}
-
-	buildPropNamesMap();
-
-	QStringList namesToDelete;
-	QHash<QString, std::shared_ptr<Property>> namesToCreate;
-
-	std::vector<std::shared_ptr<Property>> properties = pob.properties();
-
-	for(std::shared_ptr<Property> property : properties)
-	{
-		QString propName = property->caption();
-
-		if (isExists(propName) == false)
-		{
-			namesToCreate.insert(propName, property);
-		}
-		else
-		{
-			// value of property is exists
-			//
-			QVariant value;
-			bool isEnum = false;
-
-			getValue(propName, &value, &isEnum);
-
-			// checking that property end value types are equal
-			//
-			if (property->value().type() == value.type() && property->isEnum() == isEnum)
-			{
-				// equal, update existing value if nessesery
-				//
-				if (property->updateFromPreset() == true)
-				{
-					setValue(propName, property->value(), property->isEnum());
-				}
-			}
-			else
-			{
-				// property type has been changed, recreate value
-				//
-				namesToDelete.append(propName);
-				namesToCreate.insert(propName, property);
-			}
-		}
-	}
-
-	buildPropNamesMap();
-
-	for(const SignalSpecPropValue& specPropValue : m_specPropValues)
-	{
-		if (pob.propertyByCaption(specPropValue.name()) == nullptr)
-		{
-			namesToDelete.append(specPropValue.name());
-		}
-	}
-
-	for(const QString& nameToDelete : namesToDelete)
-	{
-		int index = getPropertyIndex(nameToDelete);
-
-		if (index != -1)
-		{
-			m_specPropValues.removeAt(index);
-			buildPropNamesMap();
-		}
-		else
-		{
-			assert(false);
-		}
-	}
-
-	// create new property value, set to default
-	//
-	for(std::shared_ptr<Property> property : namesToCreate)
-	{
-		SignalSpecPropValue specPropValue;
-
-		specPropValue.create(property);
-
-		m_specPropValues.append(specPropValue);
-	}
-
-	return true;
-}
-
-bool SignalSpecPropValues::setValue(const QString& name, const QVariant& value)
-{
-	return setValue(name, value, false);
-}
-
-bool SignalSpecPropValues::setAnyValue(const QString& name, const QVariant& value)
-{
-	int index = getPropertyIndex(name);
-
-	if (index == -1)
-	{
-		return false;
-	}
-
-	return m_specPropValues[index].setAnyValue(name, value);
-}
-
-bool SignalSpecPropValues::setEnumValue(const QString& name, int enumItemValue)
-{
-	int index = getPropertyIndex(name);
-
-	if (index == -1)
-	{
-		return false;
-	}
-
-	return m_specPropValues[index].setValue(name, QVariant(enumItemValue), true);
-}
-
-bool SignalSpecPropValues::setValue(const SignalSpecPropValue& propValue)
-{
-	return setValue(propValue.name(), propValue.value(), propValue.isEnum());
-}
-
-bool SignalSpecPropValues::getValue(const QString& name, QVariant* qv) const
-{
-	TEST_PTR_RETURN_FALSE(qv);
-
-	int index = getPropertyIndex(name);
-
-	if (index == -1)
-	{
-		return false;
-	}
-
-	*qv = m_specPropValues[index].value();
-
-	return true;
-}
-
-bool SignalSpecPropValues::getValue(const QString& name, QVariant* qv, bool* isEnum) const
-{
-	TEST_PTR_RETURN_FALSE(qv);
-	TEST_PTR_RETURN_FALSE(isEnum);
-
-	int index = getPropertyIndex(name);
-
-	if (index == -1)
-	{
-		return false;
-	}
-
-	*qv = m_specPropValues[index].value();
-	*isEnum = m_specPropValues[index].isEnum();
-
-	return true;
-}
-
-
-bool SignalSpecPropValues::	serializeValuesToArray(QByteArray* protoData) const
-{
-	TEST_PTR_RETURN_FALSE(protoData);
-
-	Proto::SignalSpecPropValues protoValues;
-
-	for(const SignalSpecPropValue& specPropValue : m_specPropValues)
-	{
-		Proto::SignalSpecPropValue* protoValue = protoValues.add_value();
-		specPropValue.save(protoValue);
-	}
-
-	protoData->resize(static_cast<int>(protoValues.ByteSizeLong()));
-
-	protoValues.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(protoData->data()));
-
-	return true;
-}
-
-bool SignalSpecPropValues::parseValuesFromArray(const QByteArray& protoData)
-{
-	m_specPropValues.clear();
-
-	Proto::SignalSpecPropValues protoValues;
-
-	bool result = protoValues.ParseFromArray(protoData.constData(), protoData.size());
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	int count = protoValues.value_size();
-
-	for(int i = 0; i < count; i++)
-	{
-		SignalSpecPropValue specPropValue;
-
-		specPropValue.load(protoValues.value(i));
-
-		m_specPropValues.append(specPropValue);
-	}
-
-	buildPropNamesMap();
-
-	return true;
-}
-
-void SignalSpecPropValues::append(const SignalSpecPropValue& value)
-{
-	m_specPropValues.append(value);
-}
-
-bool SignalSpecPropValues::replaceName(const QString& oldName, const QString& newName)
-{
-	bool replacingIsOccured = false;
-
-	for(SignalSpecPropValue& specPropValue : m_specPropValues)
-	{
-		if (specPropValue.name() == oldName)
-		{
-			specPropValue.setName(newName);
-			replacingIsOccured = true;
-			break;
-		}
-	}
-
-	return replacingIsOccured;
-}
-
-void SignalSpecPropValues::buildPropNamesMap()
-{
-	m_propNamesMap.clear();
-
-	m_propNamesMap.reserve(static_cast<int>(m_specPropValues.size() * 1.2));
-
-	int index = 0;
-
-	for(const SignalSpecPropValue& specPropValue : m_specPropValues)
-	{
-		if (m_propNamesMap.contains(specPropValue.name()) == false)
-		{
-			m_propNamesMap.insert(specPropValue.name(), index);
-		}
-		else
-		{
-			assert(false);			// duplicate property name
-		}
-
-		index++;
-	}
-}
-
-bool SignalSpecPropValues::setValue(const QString& name, const QVariant& value, bool isEnum)
-{
-	int index = getPropertyIndex(name);
-
-	if (index == -1)
-	{
-		return false;
-	}
-
-	return m_specPropValues[index].setValue(name, value, isEnum);
-}
-
-int SignalSpecPropValues::getPropertyIndex(const QString& name) const
-{
-	if (m_propNamesMap.isEmpty() == false)
-	{
-		return m_propNamesMap.value(name, -1);
-	}
-
-	int index = 0;
-
-	for(const SignalSpecPropValue& propValue : m_specPropValues)
-	{
-		if (propValue.name() == name)
-		{
-			return index;
-		}
-
-		index++;
-	}
-
-	return -1;
-}
-
-QString SignalProperties::generateCaption(const QString& name)
-{
-	QString result;
-	if (name.isEmpty())
-	{
-		assert(false);
-		return result;
-	}
-	result += name[0].toUpper();
-	for (int i = 1; i < name.count(); i++)
-	{
-		if (name[i].isUpper())
-		{
-			if (i + 1 < name.count() && name[i + 1].isUpper())	// abbreviation?
-			{
-				result += ' ';
-				while (i < name.count() && name[i].isUpper())
-				{
-					result += name[i];
-					i++;
-				}
-				result += ' ';
-			}
-			else
-			{
-				result += ' ' + name[i].toLower();
-			}
-		}
-		else
-		{
-			result += name[i];
-		}
-	}
-	return result.trimmed();
-}

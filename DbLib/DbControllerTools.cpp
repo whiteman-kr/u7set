@@ -1,6 +1,13 @@
-#include <QObject>
-#include "../lib/DbController.h"
+#ifndef DB_LIB_DOMAIN
+#error Don't include this file in the project! Link DbLib instead.
+#endif
+
+#include <QDialog>
+#include <QLabel>
+#include <QTreeWidget>
+#include <QDialogButtonBox>
 #include "DbControllerTools.h"
+#include "DbController.h"
 
 std::pair<int, std::vector<int>> DbControllerTools::showSelectFolderDialog(DbController* db, int parentFileId, int currentSelectionFileId, bool showRootFile, QWidget* parentWidget)
 {

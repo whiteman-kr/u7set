@@ -1,8 +1,7 @@
-#ifndef CONNECTION_H
-#define CONNECTION_H
+#pragma once
 
-#include "../lib/DbController.h"
-#include "../lib/DbObjectStorage.h"
+#include "../DbLib/DbController.h"
+#include "../DbLib/DbObjectStorage.h"
 
 namespace Hardware
 {
@@ -240,4 +239,3 @@ namespace Hardware
 
 Q_DECLARE_METATYPE (std::shared_ptr<Hardware::Connection>)
 
-#endif // CONNECTION_H
