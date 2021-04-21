@@ -4,12 +4,10 @@
 #include <functional>
 #include <memory>
 #include <array>
-#include <QtCore>
 #include "../lib/DebugInstCounter.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/Factory.h"
 #include "../lib/Types.h"
-#include "../lib/ModuleFirmware.h"
 #include "../Proto/ProtoSerialization.h"
 
 class DbFileInfo;

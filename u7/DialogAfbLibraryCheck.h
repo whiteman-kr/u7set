@@ -2,7 +2,7 @@
 #define DIALOGAFBLIBRARYREPORT_H
 
 #include <QDialog>
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "../VFrame30/Afb.h"
 
 enum class AfbComponentColumns

@@ -33,15 +33,12 @@ unix {
 }
 
 SOURCES += \
-    ../../lib/ScriptDeviceObject.cpp \
 	../../lib/BuildInfo.cpp \
     ../../lib/Types.cpp \
     ../../lib/SoftwareInfo.cpp \
 	../../lib/SoftwareSettings.cpp \
     ../../lib/DeviceHelper.cpp \
-    ../../lib/DeviceObject.cpp \
     ../../lib/OutputLog.cpp \
-    ../../lib/DbStruct.cpp \
 	../../lib/AppSignalParam.cpp \
 	../../lib/AppSignal.cpp \
 	../../lib/Tuning/TuningSignalState.cpp \
@@ -60,16 +57,13 @@ SOURCES += \
 HEADERS += \
 	Stable.h \
 	../../lib/ConstStrings.h \
-    ../../lib/ScriptDeviceObject.h \
     ../../lib/OrderedHash.h \
     ../../lib/BuildInfo.h \
     ../../lib/Types.h \
     ../../lib/SoftwareInfo.h \
 	../../lib/SoftwareSettings.h \
     ../../lib/DeviceHelper.h \
-    ../../lib/DeviceObject.h \
     ../../lib/OutputLog.h \
-    ../../lib/DbStruct.h \
     ../../lib/PropertyObject.h \
     ../../lib/AppSignalParam.h \
     ../../lib/AppSignal.h \
@@ -91,6 +85,15 @@ PRECOMPILED_HEADER = Stable.h
 RESOURCES += \
     Resources.qrc
 
+# Add curent dir to a list of library directory paths
+#
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+# --
+#
+LIBS += -L$$DESTDIR
+LIBS += -L.
+
 # Protobuf
 #
 LIBS += -L$$DESTDIR -lprotobuf
@@ -108,36 +111,10 @@ win32 {
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
 
-# OnlineLib
-#
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
+LIBS += -lOnlineLib
+LIBS += -lServiceLib
+LIBS += -lUtilsLib
+LIBS += -lHardwareLib
 
-# ServiceLib
-#
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
-}
 
-# UtilsLib
-#
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
 

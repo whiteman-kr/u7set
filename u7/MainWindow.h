@@ -1,5 +1,5 @@
 #pragma once
-#include "../lib/DbStruct.h"
+#include "../DbLib/DbStruct.h"
 
 class CentralWidget;
 class DbController;

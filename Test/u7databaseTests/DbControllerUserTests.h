@@ -2,7 +2,7 @@
 #include <QTest>
 #include <memory>
 #include "TestDbBase.h"
-#include "../../lib/DbController.h"
+#include "../../DbLib/DbController.h"
 
 class DbControllerUserTests : public TestDbBase
 {

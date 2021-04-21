@@ -2,9 +2,10 @@
 
 #include "../UtilsLib/Hash.h"
 #include "../lib/MetrologySignal.h"
-#include "../lib/DbController.h"
 #include "../lib/SignalSetProvider.h"
+#include "../DbLib/DbController.h"
 #include "../UtilsLib/Crc.h"
+#include "../lib/MetrologySignal.h"
 
 #include <QMutex>
 #include <QVector>
@@ -160,30 +161,8 @@ namespace Metrology
 
 		//
 		//
-		void clear();
+		virtual void clear();
 		int count() const;
-
-		//
-		//
-		void setSignalSetProvider(SignalSetProvider* signalSetProvider);
-
-		//
-		//
-		std::shared_ptr<DbFile> getConnectionFile(DbController* db);
-
-		bool load(DbController* db);
-		bool save(bool checkIn, const QString &comment);
-
-		bool checkOut();
-		bool isCheckIn();
-
-		void findSignal_in_signalSet();
-
-		// resolution on edit
-		//
-		QString userName() { return m_userName; }
-		bool enableEditBase() { return m_enableEditBase; }
-		bool userIsAdmin() { return m_userIsAdmin; }
 
 		// modify
 		//
@@ -194,17 +173,6 @@ namespace Metrology
 		void setConnection(int index, const Connection& connection);
 
 		void remove(int index);
-		void removeAllMarked();
-
-		//
-		//
-		void setAction(int index, const E::VcsItemAction& action);
-
-		//
-		//
-		void updateRestoreIDs();									// will be update all resotoreID  on check in during save connection
-		Connection connectionFromChekedIn(int restoreID);			// get connection from last check in
-		int restoreConnection(int restoreID);						// restore connection from last check in, return index of restore connection
 
 		//
 		//
@@ -227,16 +195,10 @@ namespace Metrology
 		//
 		ConnectionBase&	operator=(const ConnectionBase& from);
 
-	private:
+	protected:
 
 		mutable QMutex m_connectionMutex;
 		QVector<Connection> m_connectionList;
-
-		SignalSetProvider* m_signalSetProvider = nullptr;
-
-		QString m_userName;
-		bool m_enableEditBase = true;
-		bool m_userIsAdmin = false;
 	};
 
 	// ==============================================================================================

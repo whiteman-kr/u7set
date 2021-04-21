@@ -1,6 +1,10 @@
+#ifndef HARDWARE_LIB_DOMAIN
+#error Don't include this file in the project! Link HardwareLib instead.
+#endif
+
 #include "DeviceObject.h"
 #include "ScriptDeviceObject.h"
-#include "ConstStrings.h"
+#include "../lib/ConstStrings.h"
 #include "../Proto/ProtoSerialization.h"
 #include <utility>
 #include <QJSEngine>

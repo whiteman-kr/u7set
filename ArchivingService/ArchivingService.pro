@@ -41,12 +41,9 @@ PRECOMPILED_HEADER = Stable.h
 
 HEADERS += \
 	Stable.h \
-    ../lib/ScriptDeviceObject.h \
 	../lib/SoftwareSettings.h \
     ../lib/OrderedHash.h \
     ../lib/BuildInfo.h \
-    ../lib/DeviceObject.h \
-    ../lib/DbStruct.h \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
     ../lib/AppSignalParam.h \
@@ -71,11 +68,8 @@ HEADERS += \
 	TimeFilter.h \
 
 SOURCES += \
-	../lib/ScriptDeviceObject.cpp \
 	../lib/SoftwareSettings.cpp \
 	../lib/BuildInfo.cpp \
-	../lib/DeviceObject.cpp \
-	../lib/DbStruct.cpp \
 	../lib/Types.cpp \
 	../lib/AppSignalParam.cpp \
 	../lib/SoftwareInfo.cpp \

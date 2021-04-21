@@ -1,7 +1,7 @@
 #ifndef DIALOGCLIENTBEHAVIOR_H
 #define DIALOGCLIENTBEHAVIOR_H
 
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/ClientBehavior.h"
 

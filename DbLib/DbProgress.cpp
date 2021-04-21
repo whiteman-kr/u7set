@@ -1,10 +1,13 @@
-#include "../lib/DbProgress.h"
-#include "../lib/DbProgressDialog.h"
+#ifndef DB_LIB_DOMAIN
+#error Don't include this file in the project! Link DbLib instead.
+#endif
+
+#include "DbProgress.h"
+#include "DbProgressDialog.h"
 
 #include <QThread>
 #include <QDebug>
 #include <QCoreApplication>
-#include <assert.h>
 #include <QMessageBox>
 #include <QProgressDialog>
 

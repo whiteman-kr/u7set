@@ -1,5 +1,5 @@
-#ifndef DRAWPARAM_H
-#define DRAWPARAM_H
+#pragma once
+
 #include "../lib/TimeStamp.h"
 #include "../lib/Types.h"
 #include <QColor>
@@ -107,4 +107,3 @@ namespace TrendLib
 
 Q_DECLARE_METATYPE(TrendLib::TrendParam)
 
-#endif // DRAWPARAM_H

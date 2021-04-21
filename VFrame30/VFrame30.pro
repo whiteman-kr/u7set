@@ -70,7 +70,6 @@ HEADERS += \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
     ../lib/ILogFile.h \
-    ../lib/ScriptDeviceObject.h \
     Indicator.h \
     IndicatorArrowIndicator.h \
     IndicatorHistogramVert.h \
@@ -129,7 +128,6 @@ HEADERS += \
     ../lib/AppSignalManager.h \
     ../lib/Factory.h \
     ../lib/AppSignalParam.h \
-    ../lib/DbStruct.h \
     SchemaItemBus.h \
     Bus.h \
     ClientSchemaWidget.h \
@@ -143,17 +141,14 @@ HEADERS += \
     TuningController.h \
     AppSignalController.h \
     ../lib/AppSignal.h \
-    ../lib/DeviceObject.h \
     ../lib/SignalProperties.h \
     TuningSchema.h \
     SchemaItemImage.h \
     SchemaItemImageValue.h \
     ImageItem.h \
-    ../Builder/IssueLogger.h \
     ../lib/OutputLog.h
 
 SOURCES += \
-    #../Builder/IssueLogger.cpp \
     Indicator.cpp \
     IndicatorArrowIndicator.cpp \
     IndicatorHistogramVert.cpp \

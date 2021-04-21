@@ -1,12 +1,12 @@
 #include "FilesTreeView.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "GlobalMessanger.h"
 #include "DialogFileEditor.h"
 #include "CheckInDialog.h"
 #include "Forms/FileHistoryDialog.h"
 #include "Forms/CompareDialog.h"
 #include "../lib/StandardColors.h"
-#include "../lib/Ui/DbControllerTools.h"
+#include "../DbLib/DbControllerTools.h"
 
 //
 //

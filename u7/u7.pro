@@ -67,10 +67,10 @@ HEADERS  += \
 	Stable.h \
     ../lib/ExportPrint.h \
 	../lib/MetrologyConnection.h \
+	../DbLib/DbMetrologyConnection.h \
     ../lib/QDoublevalidatorEx.h \
     ../lib/SoftwareXmlReader.h \
     ../lib/StandardColors.h \
-    ../lib/Ui/DbControllerTools.h \
     ../lib/Ui/DialogSignalInfo.h \
     ../lib/Ui/DialogSignalSearch.h \
     ../lib/Ui/DialogSignalSnapshot.h \
@@ -80,7 +80,6 @@ HEADERS  += \
     ../lib/Ui/TabWidgetEx.h \
     ../lib/Ui/TagSelectorWidget.h \
 	../lib/Ui/DialogProgress.h \
-	../lib/DbProgressDialog.h \
 	../lib/Factory.h \
 	../lib/CUtils.h \
 	../lib/OrderedHash.h \
@@ -94,7 +93,6 @@ HEADERS  += \
 	../lib/Tuning/TuningModel.h \
 	../lib/WidgetUtils.h \
 	../lib/Ui/DialogAbout.h \
-	../lib/DbObjectStorage.h \
 	../lib/AppSignalManager.h \
 	../lib/Ui/TextEditCompleter.h \
 	../lib/QScintillaLexers/LexerJavaScript.h \
@@ -204,8 +202,8 @@ HEADERS  += \
 SOURCES +=\
 	../lib/ExportPrint.cpp \
 	../lib/MetrologyConnection.cpp \
+	../DbLib/DbMetrologyConnection.cpp \
 	../lib/SoftwareXmlReader.cpp \
-	../lib/Ui/DbControllerTools.cpp \
 	../lib/Ui/DialogSignalInfo.cpp \
 	../lib/Ui/DialogSignalSearch.cpp \
 	../lib/Ui/DialogSignalSnapshot.cpp \
@@ -215,7 +213,6 @@ SOURCES +=\
 	../lib/Ui/TabWidgetEx.cpp \
 	../lib/Ui/TagSelectorWidget.cpp \
 	../lib/Ui/DialogProgress.cpp \
-	../lib/DbProgressDialog.cpp \
 	../lib/PropertyEditor.cpp \
 	../lib/PropertyEditorDialog.cpp \
 	../lib/Configurator.cpp \
@@ -456,7 +453,6 @@ DEPENDPATH += ./../QScintilla/Qt4Qt5
 
 # Add curent dir to a list of library directory paths
 #
-#QMAKE_RPATHDIR += ./
 unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 
 # VFrame30 library
@@ -498,9 +494,6 @@ LIBS += -lSimulator
 INCLUDEPATH += $$PWD/../Simulator
 DEPENDPATH += $$PWD/../Simulator
 
-#CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/debug/Simulator.lib
-#CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/release/Simulator.lib
-
 
 # TrendView library
 #
@@ -522,23 +515,17 @@ win32 {
 
 # OnlineLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
+LIBS += -lOnlineLib
 
 # UtilsLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
+LIBS += -lUtilsLib
+
+# DbLib
+#
+LIBS += -lDbLib
+
+# HardwareLib
+#
+LIBS += -lHardwareLib
 

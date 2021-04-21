@@ -2,6 +2,7 @@
 #include <QDebug>
 
 #include "../Simulator/Simulator.h"
+#include "../Protobuf/google/protobuf/message.h"
 
 static QtMessageHandler originalMessageHandler = 0;
 
@@ -219,6 +220,8 @@ int main(int argc, char *argv[])
 	{
 		std::cout << "FAILED\n";
 	}
+
+	google::protobuf::ShutdownProtobufLibrary();
 
 	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

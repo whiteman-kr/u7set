@@ -8,7 +8,7 @@
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemBus.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "./EditEngine/EditEngine.h"
 #include "SignalsTabPage.h"
 #include "CreateSignalDialog.h"

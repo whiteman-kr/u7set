@@ -2,7 +2,7 @@
 #define GLOBALMESSANGER_H
 
 #include "../lib/OutputLog.h"
-#include "../lib/DbStruct.h"
+#include "../DbLib/DbStruct.h"
 #include "../Builder/IssueLogger.h"
 #include "../Builder/RunOrder.h"
 

@@ -1,6 +1,6 @@
 #include "MainTabPage.h"
 #include "GlobalMessanger.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 
 MainTabPage::MainTabPage(DbController* dbcontroller, QWidget* parent) :
 	QWidget(parent),

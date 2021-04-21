@@ -1,5 +1,5 @@
 #include "ProjectsTabPage.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "CreateProjectDialog.h"
 #include "LoginDialog.h"
 #include "Settings.h"

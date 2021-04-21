@@ -1,8 +1,8 @@
 #include "ConfigurationBuilder.h"
 
-#include "../lib/DbController.h"
-#include "../lib/DeviceObject.h"
-#include "../lib/ScriptDeviceObject.h"
+#include "../DbLib/DbController.h"
+#include "../HardwareLib/DeviceObject.h"
+#include "../HardwareLib/ScriptDeviceObject.h"
 #include "../UtilsLib/Crc.h"
 #include "../lib/SignalProperties.h"
 #include "../lib/Connection.h"

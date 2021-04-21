@@ -1,9 +1,9 @@
 #include "MetrologyCfgGenerator.h"
 
 #include "../lib/MetrologySignal.h"
-#include "../lib/MetrologyConnection.h"
+#include "../DbLib/DbMetrologyConnection.h"
 #include "../lib/SoftwareSettings.h"
-#include "../lib/DeviceObject.h"
+#include "../HardwareLib/DeviceObject.h"
 #include "../lib/SignalProperties.h"
 
 namespace Builder
@@ -159,7 +159,7 @@ namespace Builder
 
 				// Creating metrology connections list from DbController
 				//
-				Metrology::ConnectionBase connectionBase;
+				Metrology::DbConnectionBase connectionBase;
 				connectionBase.load(m_dbController);
 
 				// Writing metrology connections

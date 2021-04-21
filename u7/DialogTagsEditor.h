@@ -2,7 +2,7 @@
 #define DIALOGTAGSEDITOR_H
 
 #include <QDialog>
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 
 namespace Ui {
 	class DialogTagsEditor;

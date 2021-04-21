@@ -1,5 +1,5 @@
 #include "SignalSetProvider.h"
-#include "DbController.h"
+#include "../DbLib/DbController.h"
 
 #include <QMessageBox>
 

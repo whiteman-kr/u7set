@@ -1,6 +1,6 @@
 #include "EquipmentView.h"
 #include "EquipmentModel.h"
-#include "../../lib/DbController.h"
+#include "../../DbLib/DbController.h"
 #include "../../lib/Subsystem.h"
 #include "DialogChoosePreset.h"
 #include "../GlobalMessanger.h"

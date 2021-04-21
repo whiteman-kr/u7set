@@ -2,7 +2,7 @@
 #include "Settings.h"
 #include "SignalPropertiesDialog.h"
 #include "BusStorage.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "../lib/SignalProperties.h"
 #include "../lib/WidgetUtils.h"
 #include "../UtilsLib/WUtils.h"

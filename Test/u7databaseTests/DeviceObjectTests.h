@@ -1,5 +1,5 @@
 #pragma once
-#include "../../lib/DeviceObject.h"
+#include "../../HardwareLib/DeviceObject.h"
 
 class DeviceObjectTests : public QObject
 {

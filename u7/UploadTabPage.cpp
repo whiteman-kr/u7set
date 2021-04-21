@@ -2,7 +2,7 @@
 #include "Settings.h"
 #include "GlobalMessanger.h"
 #include "DialogSettingsConfigurator.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 
 //
 //

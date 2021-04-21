@@ -5,7 +5,7 @@
 #include <QSqlError>
 #include <QDebug>
 
-#include "../../lib/DbController.h"
+#include "../../DbLib/DbController.h"
 
 
 #define OPEN_DATABASE()		QSqlDatabase db; \

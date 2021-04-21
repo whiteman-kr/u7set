@@ -1,7 +1,7 @@
 #include "../Builder/IssueLogger.h"
 #include "../UtilsLib/WUtils.h"
 #include "../OnlineLib/DataProtocols.h"
-#include "DeviceObject.h"
+#include "../HardwareLib/DeviceObject.h"
 #include "DeviceHelper.h"
 #include "LanControllerInfoHelper.h"
 

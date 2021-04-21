@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../lib/DbController.h"
-#include "../lib/DeviceObject.h"
+#include "../DbLib/DbController.h"
+#include "../HardwareLib/DeviceObject.h"
 #include "../lib/ModuleFirmware.h"
 #include "../lib/Subsystem.h"
 #include "../TuningService/TuningDataStorage.h"

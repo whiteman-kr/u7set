@@ -1,5 +1,4 @@
-#ifndef DBOBJECTSTORAGE_H
-#define DBOBJECTSTORAGE_H
+#pragma once
 
 #include <map>
 #include "DbController.h"
@@ -359,4 +358,4 @@ private:
 	std::map<QUuid, DbFileInfo> m_fileInfo;
 };
 
-#endif // DBOBJECTSTORAGE_H
+

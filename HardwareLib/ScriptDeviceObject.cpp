@@ -1,3 +1,7 @@
+#ifndef HARDWARE_LIB_DOMAIN
+#error Don't include this file in the project! Link HardwareLib instead.
+#endif
+
 #include "ScriptDeviceObject.h"
 #include <QHostAddress>
 #include "DeviceObject.h"

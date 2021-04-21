@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "SimIdeSimulator.h"
 #include "SimSchemaManager.h"
 #include "../Simulator/SimAppSignalManager.h"

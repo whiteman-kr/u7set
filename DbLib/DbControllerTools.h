@@ -1,5 +1,4 @@
-#ifndef DBCONTROLLERTOOLS_H
-#define DBCONTROLLERTOOLS_H
+#pragma once
 
 class DbController;
 
@@ -11,4 +10,3 @@ public:
 };
 
 
-#endif // DBCONTROLLERTOOLS_H

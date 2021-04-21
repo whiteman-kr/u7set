@@ -36,39 +36,31 @@ win32:RC_ICONS += icons/Metrology.ico
 # DESTDIR
 #
 win32 {
-	CONFIG(debug, debug|release): DESTDIR = ../bin/debug
+    CONFIG(debug, debug|release): DESTDIR = ../bin/debug
 	CONFIG(release, debug|release): DESTDIR = ../bin/release
 }
 unix {
-	CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
+    CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
 SOURCES += \
-    ../lib/DbController.cpp \
-    ../lib/DbProgress.cpp \
-    ../lib/DbProgressDialog.cpp \
-    ../lib/DbWorker.cpp \
     ../lib/MetrologyConnection.cpp \
-    ../lib/SignalSetProvider.cpp \
-    ../lib/ScriptDeviceObject.cpp \
-	../lib/DbStruct.cpp \
-    ../lib/DeviceObject.cpp \
-    ../lib/ModuleFirmware.cpp \
-    ../lib/AppSignalParam.cpp \
-    ../lib/BuildInfo.cpp \
+	../lib/ModuleFirmware.cpp \
+	../lib/AppSignalParam.cpp \
+	../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
-    ../lib/DeviceHelper.cpp \
-    ../lib/OutputLog.cpp \
+	../lib/DeviceHelper.cpp \
+	../lib/OutputLog.cpp \
 	../lib/MetrologySignal.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
-    ../lib/SoftwareInfo.cpp \
-    ../lib/TuningValue.cpp \
+	../lib/SoftwareInfo.cpp \
+	../lib/TuningValue.cpp \
 	../lib/AppSignal.cpp \
-    ../lib/SignalProperties.cpp \
-    ../lib/Ui/DialogAbout.cpp \
+	../lib/SignalProperties.cpp \
+	../lib/Ui/DialogAbout.cpp \
 	../lib/UnitsConvertor.cpp \
-    ../lib/UnitsConvertorTable.cpp \
+	../lib/UnitsConvertorTable.cpp \
 	../lib/ComparatorSet.cpp \
 	../Builder/IssueLogger.cpp \
 	DialogCalculator.cpp \
@@ -113,38 +105,29 @@ SOURCES += \
 	MeasureBase.cpp \
 
 HEADERS  += \
-	Stable.h \
-	../lib/DbController.h \
-    ../lib/DbProgress.h \
-    ../lib/DbProgressDialog.h \
-    ../lib/DbWorker.h \
-    ../lib/MetrologyConnection.h \
-    ../lib/SignalSetProvider.h \
-    ../lib/ScriptDeviceObject.h \
+    Stable.h \
+	../lib/MetrologyConnection.h \
 	../lib/AppSignal.h \
-    ../lib/CUtils.h \
-    ../lib/Factory.h \
-    ../lib/DeviceObject.h \
-    ../lib/DbStruct.h \
-    ../lib/ModuleFirmware.h \
-    ../lib/Types.h \
-    ../lib/OrderedHash.h \
-    ../lib/PropertyObject.h \
-    ../lib/AppSignalParam.h \
-    ../lib/BuildInfo.h \
+	../lib/CUtils.h \
+	../lib/Factory.h \
+	../lib/ModuleFirmware.h \
+	../lib/Types.h \
+	../lib/OrderedHash.h \
+	../lib/PropertyObject.h \
+	../lib/AppSignalParam.h \
+	../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
-    ../lib/DeviceHelper.h \
-    ../lib/OutputLog.h \
-    ../lib/MetrologySignal.h \
-    ../lib/Tuning/TuningSignalState.h \
-    ../lib/SoftwareInfo.h \
-    ../lib/TuningValue.h \
-    ../lib/SignalProperties.h \
-    ../lib/Ui/DialogAbout.h \
+	../lib/DeviceHelper.h \
+	../lib/OutputLog.h \
+	../lib/MetrologySignal.h \
+	../lib/Tuning/TuningSignalState.h \
+	../lib/SoftwareInfo.h \
+	../lib/TuningValue.h \
+	../lib/SignalProperties.h \
+	../lib/Ui/DialogAbout.h \
 	../lib/UnitsConvertor.h \
-    ../lib/UnitsConvertorTable.h \
+	../lib/UnitsConvertorTable.h \
 	../lib/ComparatorSet.h \
-	../Builder/ModulesRawData.h \
 	../Builder/IssueLogger.h \
 	DialogCalculator.h \
 	DialogComparatorList.h \
@@ -198,16 +181,24 @@ RESOURCES += \
 TRANSLATIONS = languages/Metrology_ru.ts \
     languages/Metrology_ru.qm
 
-#protobuf
+# Add curent dir to a list of library directory paths
 #
-LIBS += -L$$DESTDIR -lprotobuf
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+# --
+#
+LIBS += -L$$DESTDIR
+LIBS += -L.
+
+# protobuf
+#
+LIBS += -lprotobuf
 INCLUDEPATH += ./../Protobuf
 
 
 DISTFILES += \
     ../Proto/network.proto \
 	../Proto/serialization.proto
-
 
 # Visual Leak Detector
 #
@@ -218,24 +209,22 @@ win32 {
 
 # OnlineLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
+LIBS += -lOnlineLib
 
 # UtilsLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
+LIBS += -lUtilsLib
+
+# UtilsLib
+#
+LIBS += -lUtilsLib
+
+# HardwareLib
+#
+LIBS += -lHardwareLib
+
+# DbLib !!!!!!!!!!!!!! REMOVE IN FUTURE, MUST IT BE HERE!?
+#
+LIBS += -lDbLib
 
 

@@ -3,8 +3,8 @@
 #include "Settings.h"
 #include "GlobalMessanger.h"
 #include "../VFrame30/VFrame30Library.h"
-#include "../lib/DbController.h"
-#include "../lib/DeviceObject.h"
+#include "../DbLib/DbController.h"
+#include "../HardwareLib/DeviceObject.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/TimeStamp.h"
 #include "../lib/LmDescription.h"
@@ -14,6 +14,7 @@
 #include "../lib/AppSignal.h"
 #include <QList>
 #include <optional>
+#include "../Protobuf/google/protobuf/message.h"
 
 #include "../lib/SoftwareXmlReader.h"
 

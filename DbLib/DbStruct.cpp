@@ -1,10 +1,14 @@
-#include "../lib/DbStruct.h"
+#ifndef DB_LIB_DOMAIN
+#error Don't include this file in the project! Link DbLib instead.
+#endif
+
+#include "DbStruct.h"
 
 #include <QObject>
 #include <QFile>
 #include <QFileInfo>
 #include <QDebug>
-#include "AppSignal.h"
+#include "../lib/AppSignal.h"
 
 namespace Db
 {

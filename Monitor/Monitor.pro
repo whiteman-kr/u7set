@@ -63,7 +63,6 @@ PRECOMPILED_HEADER = Stable.h
 SOURCES += main.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
-    ../lib/ScriptDeviceObject.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DragDropHelper.cpp \
@@ -82,8 +81,6 @@ SOURCES += main.cpp \
     MonitorConfigController.cpp \
     TcpSignalClient.cpp \
     ../lib/AppSignal.cpp \
-    ../lib/DeviceObject.cpp \
-	../lib/DbStruct.cpp \
 	../lib/AppSignalParam.cpp \
     ../lib/AppSignalManager.cpp \
     Statistics.cpp \
@@ -128,7 +125,6 @@ HEADERS  += \
     ../lib/ComparatorSet.h \
     ../lib/ConstStrings.h \
     ../lib/ILogFile.h \
-    ../lib/ScriptDeviceObject.h \
     ../lib/SoftwareSettings.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DragDropHelper.h \
@@ -149,8 +145,6 @@ HEADERS  += \
     TcpSignalClient.h \
     ../lib/AppSignal.h \
     ../lib/PropertyObject.h \
-    ../lib/DeviceObject.h \
-	../lib/DbStruct.h \
 	../lib/AppSignalParam.h \
     ../lib/AppSignalManager.h \
     Statistics.h \
@@ -257,24 +251,10 @@ win32 {
 
 # OnlineLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
+LIBS += -lOnlineLib
 
 # UtilsLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
+LIBS += -lUtilsLib
 
 

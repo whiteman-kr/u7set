@@ -2,10 +2,10 @@
 
 #include <QVector>
 #include <QThread>
-#include "../lib/DbStruct.h"
-#include "../lib/DbWorker.h"
-#include "../lib/DeviceObject.h"
-#include "../lib/DbProgress.h"
+#include "DbStruct.h"
+#include "DbWorker.h"
+#include "DbProgress.h"
+#include "../HardwareLib/DeviceObject.h"
 
 
 class DbController : public QObject

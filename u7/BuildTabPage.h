@@ -2,7 +2,7 @@
 #include "MainTabPage.h"
 #include "../Builder/Builder.h"
 #include "../Builder/IssueLogger.h"
-#include "../lib/DeviceObject.h"
+#include "../HardwareLib/DeviceObject.h"
 #include "../lib/OutputLog.h"
 
 class DbController;
