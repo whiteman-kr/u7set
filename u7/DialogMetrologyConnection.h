@@ -22,8 +22,8 @@
 
 #include "../lib/AppSignal.h"
 #include "../lib/SignalSetProvider.h"
-#include "../lib/MetrologyConnection.h"
 #include "../lib/StandardColors.h"
+#include "../lib/DbMetrologyConnection.h"
 
 // ==============================================================================================
 
@@ -56,7 +56,7 @@ class MetrologyConnectionTable : public QAbstractTableModel
 public:
 
 	explicit MetrologyConnectionTable(QObject* parent = nullptr);
-	virtual ~MetrologyConnectionTable();
+	virtual ~MetrologyConnectionTable() override;
 
 public:
 
@@ -74,11 +74,11 @@ private:
 	mutable QMutex m_connectionMutex;
 	QVector<Metrology::Connection> m_connectionList;
 
-	int columnCount(const QModelIndex &parent) const;
-	int rowCount(const QModelIndex &parent=QModelIndex()) const;
+	int columnCount(const QModelIndex &parent) const override;
+	int rowCount(const QModelIndex &parent=QModelIndex()) const override;
 
-	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
-	QVariant data(const QModelIndex &index, int role) const;
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
 
 	QString text(int row, int column, const Metrology::Connection& connection) const;
 };
@@ -92,7 +92,7 @@ class DialogMetrologyConnectionItem : public QDialog
 public:
 
 	DialogMetrologyConnectionItem(SignalSetProvider* signalSetProvider, QWidget* parent = nullptr);
-	virtual ~DialogMetrologyConnectionItem();
+	virtual ~DialogMetrologyConnectionItem() override;
 
 public:
 
@@ -140,7 +140,7 @@ class DialogMetrologyConnection : public QDialog
 public:
 
 	DialogMetrologyConnection(SignalSetProvider* signalSetProvider, QWidget* parent = nullptr);
-	virtual ~DialogMetrologyConnection();
+	virtual ~DialogMetrologyConnection() override;
 
 public:
 
@@ -160,7 +160,7 @@ public:
 
 private:
 
-	Metrology::ConnectionBase m_connectionBase;
+	Metrology::DbConnectionBase m_connectionBase;
 	bool m_isModified = false;
 
 	//
@@ -204,8 +204,8 @@ private:
 
 private:
 
-	virtual void closeEvent(QCloseEvent * e);
-	virtual void done(int r);
+	virtual void closeEvent(QCloseEvent * e) override;
+	virtual void done(int r) override;
 
 	void saveChanges();
 	void saveColumnsWidth();
@@ -214,7 +214,7 @@ private:
 
 protected:
 
-	void keyPressEvent(QKeyEvent* e);
+	void keyPressEvent(QKeyEvent* e) override;
 
 private slots:
 

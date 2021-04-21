@@ -59,6 +59,7 @@ DEFINES += IS_BUILDER
 
 SOURCES += \
     ../lib/ClientBehavior.cpp \
+    ../lib/DbMetrologyConnection.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/LogicModulesInfo.cpp \
@@ -138,6 +139,7 @@ SOURCES += \
 HEADERS += \
     ../lib/ClientBehavior.h \
     ../lib/ConstStrings.h \
+    ../lib/DbMetrologyConnection.h \
     ../lib/DeviceHelper.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \

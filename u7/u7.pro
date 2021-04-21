@@ -67,6 +67,7 @@ HEADERS  += \
 	Stable.h \
     ../lib/ExportPrint.h \
 	../lib/MetrologyConnection.h \
+	../lib/DbMetrologyConnection.h \
     ../lib/QDoublevalidatorEx.h \
     ../lib/SoftwareXmlReader.h \
     ../lib/StandardColors.h \
@@ -204,6 +205,7 @@ HEADERS  += \
 SOURCES +=\
 	../lib/ExportPrint.cpp \
 	../lib/MetrologyConnection.cpp \
+	../lib/DbMetrologyConnection.cpp \
 	../lib/SoftwareXmlReader.cpp \
 	../lib/Ui/DbControllerTools.cpp \
 	../lib/Ui/DialogSignalInfo.cpp \

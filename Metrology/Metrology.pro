@@ -45,12 +45,7 @@ unix {
 }
 
 SOURCES += \
-    ../lib/DbController.cpp \
-    ../lib/DbProgress.cpp \
-    ../lib/DbProgressDialog.cpp \
-    ../lib/DbWorker.cpp \
     ../lib/MetrologyConnection.cpp \
-    ../lib/SignalSetProvider.cpp \
     ../lib/ScriptDeviceObject.cpp \
 	../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
@@ -114,12 +109,7 @@ SOURCES += \
 
 HEADERS  += \
 	Stable.h \
-	../lib/DbController.h \
-    ../lib/DbProgress.h \
-    ../lib/DbProgressDialog.h \
-    ../lib/DbWorker.h \
     ../lib/MetrologyConnection.h \
-    ../lib/SignalSetProvider.h \
     ../lib/ScriptDeviceObject.h \
 	../lib/AppSignal.h \
     ../lib/CUtils.h \
