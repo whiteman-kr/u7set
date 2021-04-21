@@ -5,7 +5,7 @@
 #include "../lib/SignalProperties.h"
 #include "../lib/ComparatorSet.h"
 
-#include "../lib/DeviceObject.h"
+#include "../HardwareLib/DeviceObject.h"
 #include "../UtilsLib/XmlHelper.h"
 
 #include "../Proto/ProtoSerialization.h"

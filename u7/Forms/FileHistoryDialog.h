@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../lib/DbController.h"
-#include "../lib/DbStruct.h"
+#include "../DbLib/DbController.h"
+#include "../DbLib/DbStruct.h"
 
 namespace Ui {
 	class FileHistoryDialog;

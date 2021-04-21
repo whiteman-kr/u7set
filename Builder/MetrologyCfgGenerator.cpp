@@ -3,7 +3,7 @@
 #include "../lib/MetrologySignal.h"
 #include "../lib/MetrologyConnection.h"
 #include "../lib/SoftwareSettings.h"
-#include "../lib/DeviceObject.h"
+#include "../HardwareLib/DeviceObject.h"
 #include "../lib/SignalProperties.h"
 
 namespace Builder

@@ -30,10 +30,7 @@ unix {
 }
 
 SOURCES += \
-    ../lib/ScriptDeviceObject.cpp \
     ../lib/DataSource.cpp \
-    ../lib/DeviceObject.cpp \
-    ../lib/DbStruct.cpp \
     ../lib/AppSignal.cpp \
     ../lib/Types.cpp \
     ../lib/BuildInfo.cpp \
@@ -48,10 +45,7 @@ SOURCES += \
 HEADERS += \
 	Stable.h \
 	../lib/LanControllerInfo.h \
-    ../lib/ScriptDeviceObject.h \
     ../lib/DataSource.h \
-    ../lib/DeviceObject.h \
-    ../lib/DbStruct.h \
     ../lib/AppSignal.h \
     ../lib/CUtils.h \
     ../lib/PropertyObject.h \
@@ -68,6 +62,15 @@ HEADERS += \
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
+win32 {
+        CONFIG(debug, debug|release): LIBS += -L../bin/debug/
+		CONFIG(release, debug|release): LIBS += -L../bin/release/
+}
+unix {
+        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/
+		CONFIG(release, debug|release): LIBS += -L../bin_unix/release/
+}
+
 # Visual Leak Detector
 #
 win32 {
@@ -77,36 +80,23 @@ win32 {
 
 # ServiceLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
-}
+LIBS += -lServiceLib
 
 # OnlineLib
 #
-win32 {
-        CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-        CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-        CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
+LIBS += -lOnlineLib
 
 # UtilsLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
+LIBS += -lUtilsLib
+
+# HardwareLib
+#
+LIBS += -lHardwareLib
+
+# -lSe
+#
+LIBS += -lUtilsLib
 
 # Protobuf
 #

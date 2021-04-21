@@ -1,7 +1,7 @@
 #include "BuildResultWriter.h"
 #include "IssueLogger.h"
 #include "../u7/Settings.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "../UtilsLib/WUtils.h"
 #include "../lib/ConstStrings.h"
 #include <QFileInfo>

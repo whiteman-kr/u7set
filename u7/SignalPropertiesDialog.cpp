@@ -6,7 +6,7 @@
 #include "Settings.h"
 #include "../lib/SignalProperties.h"
 #include "../lib/PropertyEditor.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "../lib/WidgetUtils.h"
 #include "../lib/SignalSetProvider.h"
 

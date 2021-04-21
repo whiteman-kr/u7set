@@ -2,7 +2,7 @@
 #include <QString>
 #include <QTest>
 #include "FileTests.h"
-#include "../../lib/DbController.h"
+#include "../../DbLib/DbController.h"
 
 void FileTests::getObjectState(QSqlQuery& q, ObjectState& os)
 {

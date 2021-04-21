@@ -2,11 +2,12 @@
 
 #include <QObject>
 #include <QDebug>
-#include "Builder.h"
+#include "../Builder/Builder.h"
 
 class BuildTask : public QObject
 {
 	Q_OBJECT
+
 public:
 	BuildTask(QObject* parent = nullptr);
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 
 namespace Ui {
 	class CheckInDialog;

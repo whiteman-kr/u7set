@@ -3,10 +3,10 @@
 #include "ReportTools.h"
 
 #include "GlobalMessanger.h"
-#include "../lib/DeviceObject.h"
+#include "../HardwareLib/DeviceObject.h"
 #include "../VFrame30/Schema.h"
 #include "../VFrame30/SchemaView.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 
 //
 // FileDiff

@@ -1,5 +1,4 @@
-#ifndef DBPROGRESS_H
-#define DBPROGRESS_H
+#pragma once
 
 #include <QObject>
 #include <QMutex>
@@ -57,4 +56,3 @@ private:
 };
 
 
-#endif // DBPROGRESS_H

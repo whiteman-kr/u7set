@@ -2,7 +2,7 @@
 #define COMPAREPROPERTYOBJECTDIALOG_H
 
 #include "GlobalMessanger.h"
-#include "../../lib/DbStruct.h"
+#include "../../DbLib/DbStruct.h"
 #include "../../lib/PropertyObject.h"
 
 namespace Ui {

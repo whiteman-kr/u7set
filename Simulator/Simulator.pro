@@ -70,12 +70,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     ../lib/AppSignalStateFlags.cpp \
     ../lib/ConnectionsInfo.cpp \
-	../lib/LanControllerInfoHelper.cpp \
     ../lib/LmDescription.cpp \
-    ../lib/DeviceObject.cpp \
-	../lib/DbStruct.cpp \
 	../lib/LogicModulesInfo.cpp \
-    ../lib/ScriptDeviceObject.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/SoftwareXmlReader.cpp \
     ../lib/Types.cpp \
@@ -128,15 +124,11 @@ HEADERS += \
     ../lib/ConnectionsInfo.h \
     ../lib/ILogFile.h \
 	../lib/LanControllerInfo.h \
-	../lib/LanControllerInfoHelper.h \
 	../lib/LogicModulesInfo.h \
-    ../lib/ScriptDeviceObject.h \
     ../lib/SoftwareSettings.h \
     ../lib/SoftwareXmlReader.h \
 	../Proto/serialization.pb.h \
 	../lib/LmDescription.h \
-	../lib/DeviceObject.h \
-	../lib/DbStruct.h \
 	../lib/PropertyObject.h \
 	../lib/Types.h \
 	../lib/ModuleFirmware.h \

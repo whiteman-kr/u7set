@@ -1,6 +1,6 @@
 #include <set>
 #include "LmDescription.h"
-#include "DeviceObject.h"
+#include "../HardwareLib/DeviceObject.h"
 
 bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
 {

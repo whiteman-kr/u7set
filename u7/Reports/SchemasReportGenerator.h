@@ -1,5 +1,5 @@
 #include "ReportTools.h"
-#include "../../lib/DbController.h"
+#include "../../DbLib/DbController.h"
 
 class SchemasReportDialog : public QDialog
 {

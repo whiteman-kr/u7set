@@ -1,6 +1,6 @@
 #include "DialogProjectDiff.h"
 #include "ui_DialogProjectDiff.h"
-#include "../../lib/DbController.h"
+#include "../../DbLib/DbController.h"
 #include "SelectChangesetDialog.h"
 
 #include <QPageSetupDialog>

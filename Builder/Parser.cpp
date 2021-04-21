@@ -1,7 +1,7 @@
 #include "Parser.h"
 #include <QtConcurrentRun>
 
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "../lib/LmDescription.h"
 
 #include "../VFrame30/UfbSchema.h"

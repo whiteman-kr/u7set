@@ -40,12 +40,9 @@ unix {
 SOURCES += \
     ../../lib/LanControllerInfoHelper.cpp \
     ../../lib/SoftwareSettings.cpp \
-    ../../lib/ScriptDeviceObject.cpp \
     ../../lib/Ui/DialogAbout.cpp \
     ../../lib/AppSignal.cpp \
     ../../lib/AppSignalStateFlags.cpp \
-    ../../lib/DbStruct.cpp \
-    ../../lib/DeviceObject.cpp \
     ../../lib/TuningValue.cpp \
     ../../lib/Types.cpp \
     ../../lib/ModuleFirmware.cpp \
@@ -82,12 +79,9 @@ HEADERS += \
 	../../lib/LanControllerInfo.h \
     ../../lib/LanControllerInfoHelper.h \
     ../../lib/SoftwareSettings.h \
-    ../../lib/ScriptDeviceObject.h \
     ../../lib/Ui/DialogAbout.h \
     ../../lib/AppSignal.h \
     ../../lib/AppSignalStateFlags.h \
-    ../../lib/DbStruct.h \
-    ../../lib/DeviceObject.h \
     ../../lib/TuningValue.h \
     ../../lib/Types.h \
     ../../lib/PropertyObject.h \
@@ -128,9 +122,19 @@ RESOURCES += \
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
+# Add curent dir to a list of library directory paths
+#
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+# --
+#
+LIBS += -L$$DESTDIR
+LIBS += -L.
+
+
 # Protobuf
 #
-LIBS += -L$$DESTDIR -lprotobuf
+LIBS += -lprotobuf
 INCLUDEPATH += ./../../Protobuf
 
 DISTFILES += \
@@ -146,36 +150,20 @@ win32 {
 
 # OnlineLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
+LIBS += -lOnlineLib
 
 # ServiceLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
-}
+LIBS += -lServiceLib
 
 # UtilsLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
+LIBS += -lUtilsLib
+
+# HardwareLib
+#
+LIBS += -lHardwareLib
+
 
 
 

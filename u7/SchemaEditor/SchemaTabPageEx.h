@@ -4,7 +4,7 @@
 	#include <QAbstractItemModelTester>
 #endif
 #include "MainTabPage.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "GlobalMessanger.h"
 #include "EditSchemaWidget.h"
 #include "../VFrame30/LogicSchema.h"

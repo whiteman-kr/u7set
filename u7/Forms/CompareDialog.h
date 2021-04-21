@@ -1,7 +1,7 @@
 #ifndef COMPAREDIALOG_H
 #define COMPAREDIALOG_H
 
-#include "../../lib/DbStruct.h"
+#include "../../DbLib/DbStruct.h"
 
 namespace Ui {
 	class CompareDialog;

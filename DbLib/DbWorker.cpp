@@ -1,3 +1,7 @@
+#ifndef DB_LIB_DOMAIN
+#error Don't include this file in the project! Link DbLib instead.
+#endif
+
 #include <functional>
 #include <QDateTime>
 #include <QFile>
@@ -8,10 +12,10 @@
 #include <QHostInfo>
 #include <QElapsedTimer>
 
-#include "../lib/DbWorker.h"
-#include "../lib/DeviceObject.h"
+#include "DbWorker.h"
+#include "DbProgress.h"
 #include "../lib/SignalProperties.h"
-#include "../lib/DbProgress.h"
+#include "../HardwareLib/DeviceObject.h"
 
 // Upgrade database
 //
@@ -4663,7 +4667,11 @@ void DbWorker::slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAp
 
 	// Check parameters
 	//
-	TEST_PTR_RETURN(signalsIDAppSignalID);
+	if (signalsIDAppSignalID == nullptr)
+	{
+		Q_ASSERT(signalsIDAppSignalID);
+		return;
+	}
 
 	signalsIDAppSignalID->clear();
 
@@ -5814,7 +5822,11 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>
 {
 	AUTO_COMPLETE
 
-	TEST_PTR_RETURN(deviceSignals);
+	if (deviceSignals == nullptr)
+	{
+		Q_ASSERT(deviceSignals);
+		return;
+	}
 
 	if (addedSignals != nullptr)
 	{
@@ -6390,7 +6402,11 @@ void DbWorker::slot_getSpecificSignals(int changesetId, std::vector<AppSignal>* 
 {
 	AUTO_COMPLETE
 
-	TEST_PTR_RETURN(out);
+	if (out == nullptr)
+	{
+		Q_ASSERT(out);
+		return;
+	}
 
 	// Operation
 	//
@@ -6422,7 +6438,11 @@ void DbWorker::slot_getSpecificSignals(QDateTime date, std::vector<AppSignal>* o
 {
 	AUTO_COMPLETE
 
-	TEST_PTR_RETURN(out);
+	if (out == nullptr)
+	{
+		Q_ASSERT(out);
+		return;
+	}
 
 	// Operation
 	//
@@ -6453,7 +6473,11 @@ void DbWorker::slot_getSpecificSignals(QDateTime date, std::vector<AppSignal>* o
 
 void DbWorker::readSignalsToVector(QSqlQuery& q, std::vector<AppSignal>* out)
 {
-	TEST_PTR_RETURN(out);
+	if (out == nullptr)
+	{
+		Q_ASSERT(out);
+		return;
+	}
 
 	out->clear();
 
@@ -7747,7 +7771,11 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 
 bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* errorMessage)
 {
-	TEST_PTR_RETURN_FALSE(errorMessage);
+	if (errorMessage == nullptr)
+	{
+		Q_ASSERT(errorMessage);
+		return false;
+	}
 
 	QSqlQuery q(db);
 

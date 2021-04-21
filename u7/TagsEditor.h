@@ -2,7 +2,7 @@
 #define TAGSEDITOR_H
 
 #include "../lib/PropertyEditor.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 
 class TagsEditor : public ExtWidgets::PropertyTextEditor
 {

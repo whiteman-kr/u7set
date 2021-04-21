@@ -45,15 +45,8 @@ unix {
 }
 
 SOURCES += \
-    ../lib/DbController.cpp \
-    ../lib/DbProgress.cpp \
-    ../lib/DbProgressDialog.cpp \
-    ../lib/DbWorker.cpp \
     ../lib/MetrologyConnection.cpp \
     ../lib/SignalSetProvider.cpp \
-    ../lib/ScriptDeviceObject.cpp \
-	../lib/DbStruct.cpp \
-    ../lib/DeviceObject.cpp \
     ../lib/ModuleFirmware.cpp \
     ../lib/AppSignalParam.cpp \
     ../lib/BuildInfo.cpp \
@@ -114,18 +107,11 @@ SOURCES += \
 
 HEADERS  += \
 	Stable.h \
-	../lib/DbController.h \
-    ../lib/DbProgress.h \
-    ../lib/DbProgressDialog.h \
-    ../lib/DbWorker.h \
     ../lib/MetrologyConnection.h \
     ../lib/SignalSetProvider.h \
-    ../lib/ScriptDeviceObject.h \
 	../lib/AppSignal.h \
     ../lib/CUtils.h \
     ../lib/Factory.h \
-    ../lib/DeviceObject.h \
-    ../lib/DbStruct.h \
     ../lib/ModuleFirmware.h \
     ../lib/Types.h \
     ../lib/OrderedHash.h \
@@ -144,7 +130,6 @@ HEADERS  += \
 	../lib/UnitsConvertor.h \
     ../lib/UnitsConvertorTable.h \
 	../lib/ComparatorSet.h \
-	../Builder/ModulesRawData.h \
 	../Builder/IssueLogger.h \
 	DialogCalculator.h \
 	DialogComparatorList.h \
@@ -198,16 +183,24 @@ RESOURCES += \
 TRANSLATIONS = languages/Metrology_ru.ts \
     languages/Metrology_ru.qm
 
-#protobuf
+# Add curent dir to a list of library directory paths
 #
-LIBS += -L$$DESTDIR -lprotobuf
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+# --
+#
+LIBS += -L$$DESTDIR
+LIBS += -L.
+
+# protobuf
+#
+LIBS += -lprotobuf
 INCLUDEPATH += ./../Protobuf
 
 
 DISTFILES += \
     ../Proto/network.proto \
 	../Proto/serialization.proto
-
 
 # Visual Leak Detector
 #
@@ -218,24 +211,22 @@ win32 {
 
 # OnlineLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
+LIBS += -lOnlineLib
 
 # UtilsLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
+LIBS += -lUtilsLib
+
+# UtilsLib
+#
+LIBS += -lUtilsLib
+
+# HardwareLib
+#
+LIBS += -lHardwareLib
+
+# DbLib !!!!!!!!!!!!!! REMOVE IN FUTURE, MUST IT BE HERE!?
+#
+LIBS += -lDbLib
 
 

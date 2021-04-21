@@ -1,5 +1,5 @@
 #include "CreateSignalDialog.h"
-#include "../lib/DbController.h"
+#include "../DbLib/DbController.h"
 #include "BusStorage.h"
 #include "SignalsTabPage.h"
 #include "SignalPropertiesDialog.h"

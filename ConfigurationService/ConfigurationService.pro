@@ -36,12 +36,9 @@ win32:QMAKE_CXXFLAGS += /std:c++latest
 include(../warnings.pri)
 
 SOURCES += \
-    ../lib/ScriptDeviceObject.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SoftwareInfo.cpp \
 	../lib/SoftwareSettings.cpp \
-	../lib/DeviceObject.cpp \
-	../lib/DbStruct.cpp \
 	ConfigurationService.cpp \
 	CfgServiceMain.cpp \
 	CfgChecker.cpp \
@@ -49,14 +46,10 @@ SOURCES += \
 
 HEADERS += \
 	Stable.h \
-    ../lib/ScriptDeviceObject.h \
     ../lib/BuildInfo.h \
     ../lib/Types.h \
     ../lib/SoftwareInfo.h \
 	../lib/SoftwareSettings.h \
-    ../lib/DeviceObject.h \
-    ../lib/DbStruct.h \
-    ../lib/PropertyObject.h \
 	ConfigurationService.h \
 	CfgChecker.h \
 	CfgControlServer.h \

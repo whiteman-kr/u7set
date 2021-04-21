@@ -1,8 +1,10 @@
-#include "../lib/DbController.h"
-#include "../UtilsLib/WUtils.h"
+#ifndef DB_LIB_DOMAIN
+#error Don't include this file in the project! Link DbLib instead.
+#endif
 
+#include "DbController.h"
 #include <QDebug>
-#include <QtConcurrent/QtConcurrent>
+#include <QtConcurrent>
 
 DbController::DbController() :
 	m_worker(nullptr),
@@ -2010,7 +2012,11 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 
 bool DbController::getSignalsIDs(QVector<int>* signalIDs, QWidget* parentWidget)
 {
-	TEST_PTR_RETURN_FALSE(signalIDs);
+	if (signalIDs == nullptr)
+	{
+		Q_ASSERT(signalIDs);
+		return false;
+	}
 
 	// Init progress and check availability
 	//
@@ -2030,7 +2036,11 @@ bool DbController::getSignalsIDs(QVector<int>* signalIDs, QWidget* parentWidget)
 
 bool DbController::getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAppSignalID, QWidget* parentWidget)
 {
-	TEST_PTR_RETURN_FALSE(signalsIDAppSignalID);
+	if (signalsIDAppSignalID == nullptr)
+	{
+		Q_ASSERT(signalsIDAppSignalID);
+		return false;
+	}
 
 	// Init progress and check availability
 	//
@@ -2259,7 +2269,11 @@ bool DbController::getLatestSignalsWithoutProgress(QVector<int> signalIDs, QVect
 
 bool DbController::getLatestSignalsWithUserID(std::vector<AppSignal>* out, QWidget* parentWidget)
 {
-	TEST_PTR_RETURN_FALSE(out);
+	if (out == nullptr)
+	{
+		Q_ASSERT(out);
+		return false;
+	}
 
 	// Init progress and check availability
 	//
@@ -2313,8 +2327,13 @@ bool DbController::checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>
 
 bool DbController::setSignalWorkcopy(AppSignal *signal, ObjectState *objectState, QWidget* parentWidget)
 {
-	TEST_PTR_RETURN_FALSE(signal);
-	TEST_PTR_RETURN_FALSE(objectState);
+	if (signal == nullptr ||
+		objectState == nullptr)
+	{
+		Q_ASSERT(signal);
+		Q_ASSERT(objectState);
+		return false;
+	}
 
 	// Init progress and check availability
 	//
@@ -2670,7 +2689,11 @@ bool DbController::getSpecificSignals(const std::vector<int>* signalIDs, int cha
 
 bool DbController::getSpecificSignals(int changesetId, std::vector<AppSignal>* out, QWidget* parentWidget)
 {
-	TEST_PTR_RETURN_FALSE(out);
+	if (out == nullptr)
+	{
+		Q_ASSERT(out);
+		return false;
+	}
 
 	// Init progress and check availability
 	//
@@ -2692,7 +2715,11 @@ bool DbController::getSpecificSignals(int changesetId, std::vector<AppSignal>* o
 
 bool DbController::getSpecificSignals(QDateTime date, std::vector<AppSignal>* out, QWidget* parentWidget)
 {
-	TEST_PTR_RETURN_FALSE(out);
+	if (out == nullptr)
+		{
+			Q_ASSERT(out);
+			return false;
+		}
 
 	// Init progress and check availability
 	//

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DeviceObject.h"
+#include "../HardwareLib/DeviceObject.h"
 #include "OutputLog.h"
 #include "../OnlineLib/HostAddressPort.h"
 #include "../Builder/IssueLogger.h"

@@ -8,8 +8,7 @@
 #include <QString>
 #include <QDateTime>
 #include <QMetaType>
-#include <QtSql/QSqlRecord>
-#include "PropertyObject.h"
+#include "../lib/PropertyObject.h"
 
 class AppSignal;
 
