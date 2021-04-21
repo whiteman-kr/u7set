@@ -190,6 +190,7 @@ LIBS += -L$$DESTDIR
 LIBS += -L.
 
 win32:LIBS += -lKernel32 -lAdvapi32
+unix:LIBS += -lpam -lpam_misc
 
 # VFrame30 library
 #
@@ -197,17 +198,16 @@ INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
 LIBS += -lVFrame30
 
-# Protobuf
-#
-INCLUDEPATH += ./../Protobuf
-LIBS += -lprotobuf
-
 # Visual Leak Detector
 #
 win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
+
+# HardwareLib
+#
+LIBS += -lHardwareLib
 
 # OnlineLib
 #
@@ -217,6 +217,8 @@ LIBS += -lOnlineLib
 #
 LIBS += -lUtilsLib
 
-
-
+# Protobuf
+#
+INCLUDEPATH += ./../Protobuf
+LIBS += -lprotobuf
 

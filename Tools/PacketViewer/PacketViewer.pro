@@ -16,6 +16,8 @@ TEMPLATE = app
 unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
 win32:QMAKE_CXXFLAGS += /std:c++latest
 
+include(../../warnings.pri)
+
 # DESTDIR
 #
 win32 {
@@ -81,10 +83,9 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
-# Protobuf
+# HardwareLib
 #
-LIBS += -lprotobuf
-INCLUDEPATH += ./../../Protobuf
+LIBS += -lHardwareLib
 
 # Visual Leak Detector
 #
@@ -101,10 +102,9 @@ LIBS += -lOnlineLib
 #
 LIBS += -lUtilsLib
 
-# HardwareLib
+# Protobuf
 #
-LIBS += -lHardwareLib
-
-
+LIBS += -lprotobuf
+INCLUDEPATH += ./../../Protobuf
 
 

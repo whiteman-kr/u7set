@@ -78,6 +78,10 @@ win32 {
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
 
+# HardwareLib
+#
+LIBS += -lHardwareLib
+
 # ServiceLib
 #
 LIBS += -lServiceLib
@@ -89,10 +93,6 @@ LIBS += -lOnlineLib
 # UtilsLib
 #
 LIBS += -lUtilsLib
-
-# HardwareLib
-#
-LIBS += -lHardwareLib
 
 # -lSe
 #

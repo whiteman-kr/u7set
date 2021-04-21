@@ -94,12 +94,6 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
-# Protobuf
-#
-LIBS += -L$$DESTDIR -lprotobuf
-INCLUDEPATH += ./../../Protobuf
-
-
 DISTFILES += \
 	../../Proto/network.proto \
 	../../Proto/serialization.proto
@@ -108,13 +102,20 @@ DISTFILES += \
 #
 win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+    CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
 
+
+LIBS += -lHardwareLib
 LIBS += -lOnlineLib
 LIBS += -lServiceLib
 LIBS += -lUtilsLib
-LIBS += -lHardwareLib
+
+# Protobuf
+#
+LIBS += -L$$DESTDIR -lprotobuf
+INCLUDEPATH += ./../../Protobuf
+
 
 
 
