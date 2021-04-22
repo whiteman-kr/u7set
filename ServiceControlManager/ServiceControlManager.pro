@@ -116,6 +116,10 @@ TRANSLATIONS = ./translations/ServiceControlManager_ru.ts \
 RESOURCES += \
     ServiceControlManager.qrc
 
+DISTFILES += \
+    ../Proto/network.proto \
+    ../Proto/serialization.proto
+
 # Add curent dir to a list of library directory paths
 #
 unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
@@ -125,14 +129,6 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
-# Protobuf
-#
-LIBS += -lprotobuf
-INCLUDEPATH += ./../Protobuf
-
-DISTFILES += \
-    ../Proto/network.proto \
-	../Proto/serialization.proto
 
 # Visual Leak Detector
 #
@@ -145,10 +141,6 @@ win32 {
 #
 LIBS += -lOnlineLib
 
-
-# ServiceLib
-#
-
 # ServiceLib
 #
 LIBS += -lServiceLib
@@ -157,11 +149,13 @@ LIBS += -lServiceLib
 #
 LIBS += -lUtilsLib
 
-
 # HardwareLib
 #
 LIBS += -lHardwareLib
 
 
-
+# Protobuf
+#
+LIBS += -lprotobuf
+INCLUDEPATH += ./../Protobuf
 

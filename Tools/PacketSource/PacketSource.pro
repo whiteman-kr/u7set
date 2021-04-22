@@ -26,6 +26,9 @@ include(../../warnings.pri)
 
 win32:RC_ICONS += icons/PacketSource.ico
 
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
+
 # DESTDIR
 #
 win32 {
@@ -119,8 +122,9 @@ HEADERS += \
 RESOURCES += \
     resources.qrc
 
-CONFIG += precompile_header
-PRECOMPILED_HEADER = Stable.h
+DISTFILES += \
+    ../../Proto/network.proto \
+    ../../Proto/serialization.proto
 
 # Add curent dir to a list of library directory paths
 #
@@ -130,16 +134,6 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 #
 LIBS += -L$$DESTDIR
 LIBS += -L.
-
-
-# Protobuf
-#
-LIBS += -lprotobuf
-INCLUDEPATH += ./../../Protobuf
-
-DISTFILES += \
-	../../Proto/network.proto \
-    ../../Proto/serialization.proto
 
 # Visual Leak Detector
 #
@@ -163,6 +157,11 @@ LIBS += -lUtilsLib
 # HardwareLib
 #
 LIBS += -lHardwareLib
+
+# Protobuf
+#
+LIBS += -lprotobuf
+INCLUDEPATH += ./../../Protobuf
 
 
 

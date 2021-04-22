@@ -5,15 +5,14 @@
 
 using namespace Hardware;
 
-DbControllerHardwareConfigurationTests::DbControllerHardwareConfigurationTests() :
-	m_db(new DbController())
+DbControllerHardwareConfigurationTests::DbControllerHardwareConfigurationTests()
 {
 }
 
 void DbControllerHardwareConfigurationTests::initTestCase()
 {
-	m_db->setServerUsername(m_databaseUser);
-	m_db->setServerPassword(m_databasePassword);
+	m_db.setServerUsername(m_databaseUser);
+	m_db.setServerPassword(m_databasePassword);
 
 	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
 
@@ -40,14 +39,14 @@ void DbControllerHardwareConfigurationTests::initTestCase()
 
 	db.close();
 
-	ok = m_db->createProject(m_databaseName, m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not create project: " + m_db->lastError()));
+	ok = m_db.createProject(m_databaseName, m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not create project: " + m_db.lastError()));
 
-	ok = m_db->upgradeProject(m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not upgrade project: " + m_db->lastError()));
+	ok = m_db.upgradeProject(m_databaseName, m_adminPassword, true, 0);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not upgrade project: " + m_db.lastError()));
 
-	ok = m_db->openProject(m_databaseName, "Administrator", m_adminPassword, nullptr);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_db->lastError()));
+	ok = m_db.openProject(m_databaseName, "Administrator", m_adminPassword, nullptr);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_db.lastError()));
 }
 
 void DbControllerHardwareConfigurationTests::addAndRemoveDeviceObjectTest()
@@ -71,11 +70,10 @@ void DbControllerHardwareConfigurationTests::addAndRemoveDeviceObjectTest()
 
 	DbFileInfo fileInfo;
 
-	ok = m_db->getFileInfo(query.value("id").toInt(), &fileInfo, 0);
-	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
+	ok = m_db.getFileInfo(query.value("id").toInt(), &fileInfo, 0);
+	QVERIFY2(ok == true, qPrintable(m_db.lastError()));
 
-	Hardware::DeviceObject* deviceForTest =  new Hardware::DeviceRoot();
-	assert(deviceForTest);
+	std::shared_ptr<Hardware::DeviceObject> deviceForTest = std::make_shared<Hardware::DeviceRoot>();
 
 	// deviceForTest
 	//
@@ -87,8 +85,8 @@ void DbControllerHardwareConfigurationTests::addAndRemoveDeviceObjectTest()
 	deviceForTest->setPlace(1);
 	deviceForTest->setChildRestriction("ChildRestriction");
 
-	ok = m_db->addDeviceObject(deviceForTest, 1, nullptr);
-	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
+	ok = m_db.addDeviceObject(deviceForTest.get(), 1, nullptr);
+	QVERIFY2(ok == true, qPrintable(m_db.lastError()));
 
 	ok = query.exec("SELECT MAX(fileid) FROM fileInstance");
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -103,10 +101,10 @@ void DbControllerHardwareConfigurationTests::addAndRemoveDeviceObjectTest()
 	QVERIFY2(query.value("details").toString().contains("addDeviceObjectTestDevice") == true, qPrintable("Error: wrong record in fileinstance"));
 
 	std::vector<Hardware::DeviceObject*> devices;
-	devices.push_back(deviceForTest);
+	devices.push_back(deviceForTest.get());
 
-	ok = m_db->deleteDeviceObjects(devices,0);
-	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
+	ok = m_db.deleteDeviceObjects(devices,0);
+	QVERIFY2(ok == true, qPrintable(m_db.lastError()));
 
 	ok = query.exec(QString("SELECT COUNT(*) FROM fileInstance WHERE fileId = %1").arg(deviceObjectFileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -134,9 +132,9 @@ void DbControllerHardwareConfigurationTests::getDeviceTreeLatestVersionTest()
 	db.setPassword(m_adminPassword);
 	db.setDatabaseName("u7_" + m_databaseName);
 
-	Hardware::DeviceObject* parentDeviceForTest =  new Hardware::DeviceRoot();
-	Hardware::DeviceObject* firstChildDeviceForTest = new Hardware::DeviceModule();
-	Hardware::DeviceObject* secondChildDeviceForTest = new Hardware::DeviceModule();
+	std::shared_ptr<Hardware::DeviceObject> parentDeviceForTest =  std::make_shared<Hardware::DeviceRoot>();
+	std::shared_ptr<Hardware::DeviceObject> firstChildDeviceForTest = std::make_shared<Hardware::DeviceModule>();
+	std::shared_ptr<Hardware::DeviceObject> secondChildDeviceForTest = std::make_shared<Hardware::DeviceModule>();
 
 	assert(parentDeviceForTest);
 	assert(firstChildDeviceForTest);
@@ -148,8 +146,8 @@ void DbControllerHardwareConfigurationTests::getDeviceTreeLatestVersionTest()
 	parentDeviceForTest->setPlace(1);
 	parentDeviceForTest->setUuid(QUuid("000fa400-00a0-0045-00b0-000c00000000"));
 
-	bool ok = m_db->addDeviceObject(parentDeviceForTest, 1, 0);
-	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
+	bool ok = m_db.addDeviceObject(parentDeviceForTest.get(), 1, 0);
+	QVERIFY2(ok == true, qPrintable(m_db.lastError()));
 
 	DbFileInfo parentFileInfo;
 
@@ -159,8 +157,8 @@ void DbControllerHardwareConfigurationTests::getDeviceTreeLatestVersionTest()
 
 	int parentDeviceObjectFileId = query.value(0).toInt();
 
-	ok = m_db->getFileInfo(parentDeviceObjectFileId, &parentFileInfo, 0);
-	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
+	ok = m_db.getFileInfo(parentDeviceObjectFileId, &parentFileInfo, 0);
+	QVERIFY2(ok == true, qPrintable(m_db.lastError()));
 
 	// First child device for test
 	//
@@ -172,8 +170,8 @@ void DbControllerHardwareConfigurationTests::getDeviceTreeLatestVersionTest()
 	firstChildDeviceForTest->setPlace(2);
 	firstChildDeviceForTest->setUuid(firstChildUuid);
 
-	ok = m_db->addDeviceObject(firstChildDeviceForTest, 1, 0);
-	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
+	ok = m_db.addDeviceObject(firstChildDeviceForTest.get(), 1, 0);
+	QVERIFY2(ok == true, qPrintable(m_db.lastError()));
 
 	ok = query.exec("SELECT MAX(fileid) FROM fileInstance");
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -192,8 +190,8 @@ void DbControllerHardwareConfigurationTests::getDeviceTreeLatestVersionTest()
 	secondChildDeviceForTest->setPlace(3);
 	secondChildDeviceForTest->setUuid(secondChildUuid);
 
-	ok = m_db->addDeviceObject(secondChildDeviceForTest, 1, 0);
-	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
+	ok = m_db.addDeviceObject(secondChildDeviceForTest.get(), 1, 0);
+	QVERIFY2(ok == true, qPrintable(m_db.lastError()));
 
 	ok = query.exec("SELECT MAX(fileid) FROM fileInstance");
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -206,8 +204,8 @@ void DbControllerHardwareConfigurationTests::getDeviceTreeLatestVersionTest()
 
 	qRegisterMetaType<DbFileInfo>("DbFileInfo");
 
-	ok = m_db->getDeviceTreeLatestVersion(parentFileInfo, &out, 0);
-	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
+	ok = m_db.getDeviceTreeLatestVersion(parentFileInfo, &out, 0);
+	QVERIFY2(ok == true, qPrintable(m_db.lastError()));
 
 	QVERIFY2(out.get()->childrenCount() == 2, qPrintable("Error: wrong amount of children!"));
 
@@ -224,5 +222,5 @@ void DbControllerHardwareConfigurationTests::cleanupTestCase()
 		QSqlDatabase::removeDatabase(connection);
 	}
 
-	m_db->deleteProject(m_databaseName, m_adminPassword, true, 0);
+	m_db.deleteProject(m_databaseName, m_adminPassword, true, 0);
 }

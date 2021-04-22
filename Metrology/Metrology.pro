@@ -188,15 +188,9 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
-# protobuf
-#
-LIBS += -lprotobuf
-INCLUDEPATH += ./../Protobuf
-
-
 DISTFILES += \
     ../Proto/network.proto \
-	../Proto/serialization.proto
+    ../Proto/serialization.proto
 
 # Visual Leak Detector
 #
@@ -213,10 +207,6 @@ LIBS += -lOnlineLib
 #
 LIBS += -lUtilsLib
 
-# UtilsLib
-#
-LIBS += -lUtilsLib
-
 # HardwareLib
 #
 LIBS += -lHardwareLib
@@ -225,4 +215,7 @@ LIBS += -lHardwareLib
 #
 LIBS += -lDbLib
 
-
+# protobuf
+#
+LIBS += -lprotobuf
+INCLUDEPATH += ./../Protobuf

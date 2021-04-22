@@ -1,22 +1,3 @@
-##-------------------------------------------------
-##
-## Project created by QtCreator 2013-05-15T14:47:21
-##
-##-------------------------------------------------
-
-#QT       += core gui
-
-#TARGET = mconf
-#TEMPLATE = app
-
-
-#SOURCES += main.cpp\
-#        mainwindow.cpp
-
-#HEADERS  += mainwindow.h
-
-#FORMS    += mainwindow.ui
-
 QT += core sql network xml widgets gui serialport qml
 
 TARGET = mconf
@@ -29,7 +10,18 @@ win32:QMAKE_CXXFLAGS += /std:c++latest
 
 include(../warnings.pri)
 
-#Application icon
+# Optimization flags
+#
+win32 {
+        CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -Od
+        CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O2
+}
+unix {
+        CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
+        CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
+}
+
+# Application icon
 win32:RC_ICONS += Images/MConf.ico
 
 # DESTDIR
@@ -44,10 +36,7 @@ unix {
 }
 
 CONFIG += precompile_header
-
-DEFINES += QT_DLL QT_WIDGETS_LIB QT_NETWORK_LIB QT_SQL_LIB QT_XML_LIB
-
-#win32:LIBS += advapi32.lib
+PRECOMPILED_HEADER = stable.h
 
 HEADERS += \
     ../lib/Ui/DialogAbout.h \
@@ -83,10 +72,21 @@ FORMS += moduleconfigurator.ui \
 
 RESOURCES +=	moduleconfigurator.qrc
 
-CONFIG += precompile_header
-PRECOMPILED_HEADER = stable.h
+DISTFILES += \
+    Images/Logo.png \
+    Images/MConf.ico
 
-OTHER_FILES +=
+
+# Add curent dir to a list of library directory paths
+#
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+# --
+#
+LIBS += -L$$DESTDIR
+LIBS += -L.
+
+#win32:LIBS += advapi32.lib
 
 #win32: LIBS += -L$$PWD/ftdi -lftd2xx
 win32: LIBS += -L$$PWD/ftdi64 -lftd2xx
@@ -94,41 +94,18 @@ win32: LIBS += -L$$PWD/ftdi64 -lftd2xx
 INCLUDEPATH += $$PWD/ftdi
 DEPENDPATH += $$PWD/ftdi
 
-#Optimization flags
+# Visual Leak Detector
 #
 win32 {
-	CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -Od
-	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O2
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+    CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
-unix {
-	CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
-	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
-}
+
+# UtilsLib
+#
+LIBS += -lUtilsLib
 
 # Protobuf
 #
 LIBS += -L$$DESTDIR -lprotobuf
 INCLUDEPATH += ./../Protobuf
-
-DISTFILES += \
-    Images/Logo.png \
-    Images/MConf.ico
-
-# Visual Leak Detector
-#
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-}
-
-# UtilsLib
-#
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
-
