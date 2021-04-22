@@ -71,6 +71,7 @@ SOURCES += \
 	DialogSignalList.cpp \
 	DialogTuningSignalList.cpp \
 	DialogTuningSourceList.cpp \
+	MetrologyMain.cpp \
 	MetrologyMainWindow.cpp \
 	MetrologyConnection.cpp \
 	MetrologySignal.cpp \
@@ -87,7 +88,6 @@ SOURCES += \
 	ProcessData.cpp \
 	SelectSignalWidget.cpp \
 	StatisticsBase.cpp \
-	main.cpp \
 	MeasureThread.cpp \
 	CalibratorManager.cpp \
 	MeasureViewHeader.cpp \
