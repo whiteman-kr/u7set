@@ -129,8 +129,6 @@ namespace Builder
 	}
 
 	const QString Bus::INVALUD_BUS_SIGNAL_ID("##InvalidBusSignalID##");
-	VFrame30::BusSignal Bus::m_invalidBusSignal;
-	BusSignal Bus::m_invalidSignal;
 
 	Bus::Bus(const Busses& busses, const VFrame30::Bus bus, IssueLogger* log) :
 		m_busses(busses),
