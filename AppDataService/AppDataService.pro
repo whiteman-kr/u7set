@@ -41,7 +41,6 @@ SOURCES += \
 	../lib/AppSignalParam.cpp \
     ../lib/SoftwareInfo.cpp \
 	../lib/Times.cpp \
-	#../lib/SignalProperties.cpp \
     ../lib/TuningValue.cpp \
 	AppDataService.cpp \
 	AppDataProcessingThread.cpp \
@@ -69,9 +68,7 @@ HEADERS += \
     ../lib/TimeStamp.h \
     ../lib/SoftwareInfo.h \
     ../lib/Times.h \
-    ../lib/SignalProperties.h \
     ../lib/TuningValue.h \
-	../Builder/ModulesRawData.h \
 	AppDataService.h \
 	AppDataProcessingThread.h \
 	AppDataSource.h \
@@ -84,6 +81,15 @@ HEADERS += \
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
+
+# Add curent dir to a list of library directory paths
+#
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+# --
+#
+LIBS += -L$$DESTDIR
+LIBS += -L.
 
 #protobuf
 #
@@ -106,34 +112,12 @@ win32 {
 
 # ServiceLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
-}
+LIBS += -lServiceLib
 
 # OnlineLib
 #
-win32 {
-        CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-        CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-        CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
+LIBS += -lOnlineLib
 
 # UtilsLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
-
+LIBS += -lUtilsLib

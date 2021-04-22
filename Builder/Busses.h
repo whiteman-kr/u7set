@@ -118,8 +118,8 @@ namespace Builder
 		std::vector<int> m_busSignalIndexes;
 		std::map<int, std::vector<int>> m_discreteSignalIndexes;		// discrete signals offset => discrete signal indexes
 
-		static VFrame30::BusSignal m_invalidBusSignal;
-		static BusSignal m_invalidSignal;
+		VFrame30::BusSignal m_invalidBusSignal;
+		BusSignal m_invalidSignal;
 
 		bool m_isInitialized = false;
 	};
