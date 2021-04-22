@@ -17,7 +17,7 @@ private slots:
 	void cleanupTestCase();
 
 private:
-	std::unique_ptr<DbController> m_db;
+	DbController m_db;
 	QString m_databaseHost = "127.0.0.1";
 	QString m_databaseName = "dbcontrollerbuildtesting";
 	QString m_databaseUser = "u7";
