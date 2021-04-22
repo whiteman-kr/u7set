@@ -1,7 +1,6 @@
-#ifndef DIALOGSIGNALLIST_H
-#define DIALOGSIGNALLIST_H
+#pragma once
 
-#include "../lib/MetrologySignal.h"
+#include "MetrologySignal.h"
 
 #include "DialogList.h"
 
@@ -156,5 +155,3 @@ private slots:
 };
 
 // ==============================================================================================
-
-#endif // DIALOGSIGNALLIST_H

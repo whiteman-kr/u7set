@@ -1,8 +1,7 @@
-#ifndef MEASUREBASE_H
-#define MEASUREBASE_H
+#pragma once
 
 #include "../UtilsLib/Hash.h"
-#include "../lib/MetrologySignal.h"
+#include "MetrologySignal.h"
 
 #include "SignalBase.h"
 
@@ -442,6 +441,6 @@ namespace Measure
 	};
 }
 
-// ==============================================================================================
+double conversionByConnection(double val, const IoSignalParam &ioParam, ConversionDirection directType);
 
-#endif // MEASUREBASE_H
+// ==============================================================================================

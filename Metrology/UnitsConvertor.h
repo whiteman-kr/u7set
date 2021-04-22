@@ -1,11 +1,7 @@
-﻿#ifndef UNITSCONVERTOR_H
-#define UNITSCONVERTOR_H
+﻿#pragma once
 
-#include <assert.h>
-
-#include "AppSignal.h"
-#include "Types.h"
-#include "UnitsConvertorTable.h"
+#include "../lib/AppSignal.h"
+#include "../lib/Types.h"
 
 // ==============================================================================================
 //
@@ -240,4 +236,3 @@ public:
 
 // ==============================================================================================
 
-#endif // UNITSCONVERTOR_H

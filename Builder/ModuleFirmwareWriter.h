@@ -1,10 +1,9 @@
-#ifndef MODULEFIRMWAREWRITER_H
-#define MODULEFIRMWAREWRITER_H
+#pragma once
 
 #include "../lib/ModuleFirmware.h"
 #include "IssueLogger.h"
 
-#include "../lib/UnitsConvertor.h"
+#include "../Metrology/UnitsConvertor.h"
 
 //
 // JsVariantList
@@ -135,4 +134,3 @@ namespace Hardware
 
 }
 
-#endif // MODULEFIRMWAREWRITER_H

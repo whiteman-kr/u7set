@@ -66,8 +66,6 @@ CONFIG(release, debug|release) {
 HEADERS  += \
 	Stable.h \
     ../lib/ExportPrint.h \
-	../lib/MetrologyConnection.h \
-	../DbLib/DbMetrologyConnection.h \
     ../lib/QDoublevalidatorEx.h \
     ../lib/SoftwareXmlReader.h \
     ../lib/StandardColors.h \
@@ -100,11 +98,12 @@ HEADERS  += \
 	../lib/Ui/UiTools.h \
 	../lib/PropertyTable.h \
 	../lib/SignalSetProvider.h \
+	../Metrology/MetrologyConnection.h \
+	DlgMetrologyConnection.h \
 	CentralWidget.h \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \
     DialogClientBehavior.h \
-    DialogMetrologyConnection.h \
     DialogSettings.h \
     DialogTagsEditor.h \
     EditEngine/EditEngineNop.h \
@@ -201,8 +200,6 @@ HEADERS  += \
 
 SOURCES +=\
 	../lib/ExportPrint.cpp \
-	../lib/MetrologyConnection.cpp \
-	../DbLib/DbMetrologyConnection.cpp \
 	../lib/SoftwareXmlReader.cpp \
 	../lib/Ui/DialogSignalInfo.cpp \
 	../lib/Ui/DialogSignalSearch.cpp \
@@ -227,11 +224,12 @@ SOURCES +=\
 	../lib/Ui/UiTools.cpp \
 	../lib/PropertyTable.cpp \
 	../lib/SignalSetProvider.cpp \
+	../Metrology/MetrologyConnection.cpp \
+	DlgMetrologyConnection.cpp \
 	CentralWidget.cpp \
 	CreateProjectDialog.cpp \
 	CreateUserDialogDialog.cpp \
 	DialogClientBehavior.cpp \
-	DialogMetrologyConnection.cpp \
 	DialogSettings.cpp \
 	DialogTagsEditor.cpp \
 	EditEngine/EditEngineNop.cpp \

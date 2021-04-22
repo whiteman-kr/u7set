@@ -3,8 +3,8 @@
 
 #include <QObject>
 
-#include "../lib/MetrologySignal.h"
-#include "../lib/MetrologyConnection.h"
+#include "MetrologySignal.h"
+#include "MetrologyConnection.h"
 
 // ==============================================================================================
 

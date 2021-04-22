@@ -45,22 +45,18 @@ unix {
 }
 
 SOURCES += \
-    ../lib/MetrologyConnection.cpp \
 	../lib/ModuleFirmware.cpp \
 	../lib/AppSignalParam.cpp \
 	../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
 	../lib/DeviceHelper.cpp \
 	../lib/OutputLog.cpp \
-	../lib/MetrologySignal.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
 	../lib/SoftwareInfo.cpp \
 	../lib/TuningValue.cpp \
 	../lib/AppSignal.cpp \
 	../lib/SignalProperties.cpp \
 	../lib/Ui/DialogAbout.cpp \
-	../lib/UnitsConvertor.cpp \
-	../lib/UnitsConvertorTable.cpp \
 	../lib/ComparatorSet.cpp \
 	../Builder/IssueLogger.cpp \
 	DialogCalculator.cpp \
@@ -75,7 +71,11 @@ SOURCES += \
 	DialogSignalList.cpp \
 	DialogTuningSignalList.cpp \
 	DialogTuningSourceList.cpp \
-	MainWindow.cpp \
+	MetrologyMainWindow.cpp \
+	MetrologyConnection.cpp \
+	MetrologySignal.cpp \
+	UnitsConvertor.cpp \
+	UnitsConvertorTable.cpp \
 	Calibrator.cpp \
 	CalibratorBase.cpp \
 	MeasurePointBase.cpp \
@@ -95,7 +95,6 @@ SOURCES += \
 	Delegate.cpp \
 	FolderPropertyManager.cpp \
 	Database.cpp \
-	Conversion.cpp \
 	SignalSocket.cpp \
 	SignalBase.cpp \
 	TuningSocket.cpp \
@@ -106,7 +105,6 @@ SOURCES += \
 
 HEADERS  += \
     Stable.h \
-	../lib/MetrologyConnection.h \
 	../lib/AppSignal.h \
 	../lib/CUtils.h \
 	../lib/Factory.h \
@@ -119,14 +117,11 @@ HEADERS  += \
 	../lib/SoftwareSettings.h \
 	../lib/DeviceHelper.h \
 	../lib/OutputLog.h \
-	../lib/MetrologySignal.h \
 	../lib/Tuning/TuningSignalState.h \
 	../lib/SoftwareInfo.h \
 	../lib/TuningValue.h \
 	../lib/SignalProperties.h \
 	../lib/Ui/DialogAbout.h \
-	../lib/UnitsConvertor.h \
-	../lib/UnitsConvertorTable.h \
 	../lib/ComparatorSet.h \
 	../Builder/IssueLogger.h \
 	DialogCalculator.h \
@@ -141,23 +136,26 @@ HEADERS  += \
 	DialogSignalList.h \
 	DialogTuningSignalList.h \
 	DialogTuningSourceList.h \
-	MainWindow.h \
+	MetrologyMainWindow.h \
 	Calibrator.h \
 	CalibratorBase.h \
 	MeasurePointBase.h \
 	Options.h \
 	MeasureThread.h \
+	MetrologySignal.h \
+	MetrologyConnection.h \
 	CalibratorManager.h \
 	MeasureViewHeader.h \
 	MeasureView.h \
 	Delegate.h \
 	FolderPropertyManager.h \
 	Database.h \
-	Conversion.h \
 	PanelComparatorInfo.h \
 	PanelFindMeasure.h \
 	PanelSignalInfo.h \
 	PanelStatistics.h \
+	UnitsConvertor.h \
+	UnitsConvertorTable.h \
 	ProcessData.h \
 	SelectSignalWidget.h \
 	SignalSocket.h \

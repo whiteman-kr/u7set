@@ -1,6 +1,6 @@
 #include "DialogComparatorList.h"
 
-#include "../lib/UnitsConvertor.h"
+#include "UnitsConvertor.h"
 
 #include "SignalBase.h"
 

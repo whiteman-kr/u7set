@@ -1,11 +1,9 @@
 #pragma once
 
 #include "../UtilsLib/Hash.h"
-#include "../lib/MetrologySignal.h"
 #include "../lib/SignalSetProvider.h"
-#include "../DbLib/DbController.h"
 #include "../UtilsLib/Crc.h"
-#include "../lib/MetrologySignal.h"
+#include "MetrologySignal.h"
 
 #include <QMutex>
 #include <QVector>

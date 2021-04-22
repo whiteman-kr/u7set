@@ -1,7 +1,8 @@
 #pragma once
 
 #include "../lib/SignalSetProvider.h"
-#include "../lib/MetrologyConnection.h"
+#include "../DbLib/DbController.h"
+#include "../Metrology/MetrologyConnection.h"
 
 namespace Metrology
 {

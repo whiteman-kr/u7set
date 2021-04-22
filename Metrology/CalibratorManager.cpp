@@ -10,8 +10,7 @@
 #include <QGroupBox>
 #include <QDesktopWidget>
 
-#include "../lib/MetrologySignal.h"
-
+#include "MetrologySignal.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------

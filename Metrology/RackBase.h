@@ -1,8 +1,7 @@
-#ifndef RACKBASE_H
-#define RACKBASE_H
+#pragma once
 
 #include "../UtilsLib/Hash.h"
-#include "../lib/MetrologySignal.h"
+#include "MetrologySignal.h"
 
 // ==============================================================================================
 
@@ -119,5 +118,3 @@ private:
 };
 
 // ==============================================================================================
-
-#endif // RACKBASE_H

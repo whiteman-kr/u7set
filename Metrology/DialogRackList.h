@@ -1,8 +1,6 @@
-#ifndef DIALOGRACKLIST_H
-#define DIALOGRACKLIST_H
+#pragma once
 
-#include "../lib/MetrologySignal.h"
-
+#include "MetrologySignal.h"
 #include "RackBase.h"
 #include "DialogList.h"
 
@@ -103,4 +101,3 @@ private slots:
 
 // ==============================================================================================
 
-#endif // DIALOGRACKLISTDIALOG_H

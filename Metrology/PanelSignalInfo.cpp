@@ -6,8 +6,7 @@
 #include <QVBoxLayout>
 #include <QKeyEvent>
 
-#include "../lib/UnitsConvertor.h"
-
+#include "UnitsConvertor.h"
 #include "ProcessData.h"
 #include "DialogObjectProperties.h"
 

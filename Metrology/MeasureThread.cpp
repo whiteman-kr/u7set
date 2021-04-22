@@ -3,9 +3,7 @@
 #include <assert.h>
 #include <QTime>
 
-#include "../lib/UnitsConvertor.h"
-
-#include "Conversion.h"
+#include "UnitsConvertor.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------

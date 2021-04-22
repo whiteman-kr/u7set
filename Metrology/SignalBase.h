@@ -3,9 +3,9 @@
 
 #include "../UtilsLib/Hash.h"
 #include "../lib/AppSignal.h"
-#include "../lib/MetrologySignal.h"
-#include "../lib/MetrologyConnection.h"
 
+#include "MetrologySignal.h"
+#include "MetrologyConnection.h"
 #include "CalibratorManager.h"
 #include "RackBase.h"
 #include "TuningSignalBase.h"

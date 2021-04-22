@@ -10,7 +10,7 @@
 
 #include "../OnlineLib/SocketIO.h"
 #include "../lib/SoftwareSettings.h"
-#include "../lib/MetrologySignal.h"
+#include "MetrologySignal.h"
 
 #include "MeasureViewHeader.h"
 #include "MeasureBase.h"

@@ -1,5 +1,5 @@
 ﻿#include "UnitsConvertor.h"
-#include "SignalProperties.h"
+#include "UnitsConvertorTable.h"
 #include "MetrologyConnection.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1099,3 +1099,4 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Output(double elVal, doubl
 
 	return UnitsConvertResult(phVal);
 }
+

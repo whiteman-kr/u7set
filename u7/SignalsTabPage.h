@@ -7,7 +7,7 @@
 #include <QSortFilterProxyModel>
 #include <QDialog>
 #include <QHash>
-#include "DialogMetrologyConnection.h"
+#include "DlgMetrologyConnection.h"
 
 class DbController;
 class QTableView;

@@ -1,4 +1,4 @@
-#include "../lib/MetrologyConnection.h"
+#include "MetrologyConnection.h"
 
 namespace Metrology
 {

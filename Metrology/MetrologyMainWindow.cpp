@@ -1,4 +1,4 @@
-#include "MainWindow.h"
+#include "MetrologyMainWindow.h"
 
 #include <QApplication>
 #include <QSettings>

@@ -1,11 +1,10 @@
-#ifndef TUNINGSIGNALBASE_H
-#define TUNINGSIGNALBASE_H
+#pragma once
 
 #include <QObject>
 
 #include "../UtilsLib/Hash.h"
 #include "../lib/AppSignal.h"
-#include "../lib/MetrologySignal.h"
+#include "MetrologySignal.h"
 
 namespace Network
 {
@@ -264,4 +263,3 @@ private:
 
 // ==============================================================================================
 
-#endif // SIGNALBASE_H

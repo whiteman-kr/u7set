@@ -1,4 +1,4 @@
-#include "DialogMetrologyConnection.h"
+#include "DlgMetrologyConnection.h"
 
 #include <QFileDialog>
 #include <QClipboard>

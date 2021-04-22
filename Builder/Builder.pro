@@ -59,15 +59,11 @@ DEFINES += IS_BUILDER
 
 SOURCES += \
     ../lib/ClientBehavior.cpp \
-	../DbLib/DbMetrologyConnection.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/LogicModulesInfo.cpp \
-	../lib/MetrologyConnection.cpp \
     ../lib/OutputLog.cpp \
     ../lib/Connection.cpp \
-    ../TuningService/TuningDataStorage.cpp \
-    ../TuningService/TuningSource.cpp \
     ../lib/LogicModuleSet.cpp \
     ../lib/ModuleFirmware.cpp \
     ../lib/AppSignal.cpp \
@@ -87,13 +83,17 @@ SOURCES += \
     ../lib/ConnectionsInfo.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
 	../lib/Times.cpp \
-	../lib/MetrologySignal.cpp \
-	../lib/UnitsConvertor.cpp \
-	../lib/UnitsConvertorTable.cpp \
 	../lib/AppSignalStateFlags.cpp \
 	../lib/ComparatorSet.cpp \
+	../TuningService/TuningDataStorage.cpp \
+	../TuningService/TuningSource.cpp \
+	../Metrology/MetrologySignal.cpp \
+	../Metrology/MetrologyConnection.cpp \
+	../Metrology/UnitsConvertor.cpp \
+	../Metrology/UnitsConvertorTable.cpp \
     Builder.cpp \
     IssueLogger.cpp \
+	DbMetrologyConnection.cpp \
     BuildWorkerThread.cpp \
     BuildResultWriter.cpp \
     Loopbacks.cpp \
@@ -102,7 +102,7 @@ SOURCES += \
     SignalSet.cpp \
     Busses.cpp \
     OptoModule.cpp \
-    RawDataDescription.cpp \
+	RawDataDescription.cpp \
     SignalsHeap.cpp \
     UalItems.cpp \
     ApplicationLogicCode.cpp \
@@ -132,16 +132,12 @@ SOURCES += \
 HEADERS += \
     ../lib/ClientBehavior.h \
     ../lib/ConstStrings.h \
-	../DbLib/DbMetrologyConnection.h \
     ../lib/DeviceHelper.h \
     ../lib/LanControllerInfo.h \
     ../lib/LanControllerInfoHelper.h \
     ../lib/LogicModulesInfo.h \
-	../lib/MetrologyConnection.h \
     ../lib/OutputLog.h \
     ../lib/Connection.h \
-    ../TuningService/TuningSource.h \
-    ../TuningService/TuningDataStorage.h \
     ../lib/LogicModuleSet.h \
     ../lib/PropertyObject.h \
     ../lib/ModuleFirmware.h \
@@ -162,17 +158,21 @@ HEADERS += \
     ../lib/ConnectionsInfo.h \
 	../lib/Tuning/TuningSignalState.h \
 	../lib/Times.h \
-	../lib/MetrologySignal.h \
-	../lib/UnitsConvertor.h \
-	../lib/UnitsConvertorTable.h \
 	../lib/AppSignalStateFlags.h \
 	../lib/ComparatorSet.h \
+	../TuningService/TuningSource.h \
+	../TuningService/TuningDataStorage.h \
+	../Metrology/MetrologySignal.h \
+	../Metrology/MetrologyConnection.h \
+	../Metrology/UnitsConvertor.h \
+	../Metrology/UnitsConvertorTable.h \
 	Builder.h \
     Loopbacks.h \
     SignalsHeap.h \
     Stable.h \
     IssueLogger.h \
-    BuildWorkerThread.h \
+	DbMetrologyConnection.h \
+	BuildWorkerThread.h \
     BuildResultWriter.h \
     ModuleFirmwareWriter.h \
     Parser.h \

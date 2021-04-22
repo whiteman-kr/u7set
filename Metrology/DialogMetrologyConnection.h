@@ -1,7 +1,6 @@
-#ifndef DIALOGMETROLOGYCONNECTION_H
-#define DIALOGMETROLOGYCONNECTION_H
+#pragma once
 
-#include "../lib/MetrologySignal.h"
+//#include "../lib/MetrologySignal.h"
 
 #include "DialogList.h"
 
@@ -161,4 +160,3 @@ private slots:
 
 // ==============================================================================================
 
-#endif // DIALOGMETROLOGYCONNECTION_H
