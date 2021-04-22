@@ -6,6 +6,7 @@
 #include "DbProgressDialog.h"
 
 #include <QThread>
+#include <QGuiApplication>
 #include <QDebug>
 #include <QCoreApplication>
 #include <QMessageBox>
@@ -50,6 +51,8 @@ bool DbProgress::run(QWidget* parentWidget, const QString& description)
 		isGuiThread = QThread::currentThread() == QCoreApplication::instance()->thread();
 	}
 
+	const bool isConsoleApp = (dynamic_cast<const QGuiApplication*>(QCoreApplication::instance()) == nullptr);
+
 	if (isProgressEnabled() == true)
 	{
 		assert(isGuiThread == true);
@@ -69,11 +72,12 @@ bool DbProgress::run(QWidget* parentWidget, const QString& description)
 		{
 			qDebug() << errorMessage();
 
-#ifndef Q_CONSOLE_APP
-			QMessageBox mb(parentWidget);
-			mb.setText(errorMessage());
-			mb.exec();
-#endif
+			if (isConsoleApp == false)
+			{
+				QMessageBox mb(parentWidget);
+				mb.setText(errorMessage());
+				mb.exec();
+			}
 		}
 
 		return false;
@@ -84,18 +88,15 @@ bool DbProgress::run(QWidget* parentWidget, const QString& description)
 	{
 		qDebug() << completeMessage();
 
-#ifndef Q_CONSOLE_APP
-		QMessageBox mb(parentWidget);
-		mb.setText(completeMessage());
-		mb.exec();
-#endif
+		if (isConsoleApp == false)
+		{
+			QMessageBox mb(parentWidget);
+			mb.setText(completeMessage());
+			mb.exec();
+		}
 	}
 
 	return true;
-}
-
-DbProgress::~DbProgress()
-{
 }
 
 bool DbProgress::completed() const

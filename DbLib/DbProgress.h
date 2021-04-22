@@ -10,9 +10,11 @@
 //
 class DbProgress : public QObject
 {
+	Q_OBJECT
+
 public:
 	DbProgress();
-	virtual ~DbProgress();
+	virtual ~DbProgress() = default;
 
 	bool init();
 	bool run(QWidget* parentWidget, const QString& description);

@@ -30,7 +30,7 @@ int runSpecificTest(const QStringList& stdArgs, QStringList& nativeArgs, bool* e
 
 int main(int argc, char *argv[])
 {
-	QApplication app(argc, argv);
+	QCoreApplication app(argc, argv);
 
 	int returnCode = 0;
 
