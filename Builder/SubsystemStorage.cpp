@@ -1,127 +1,16 @@
-#include "../lib/Subsystem.h"
+#include "SubsystemStorage.h"
+#include "../DbLib/DbController.h"
 
-namespace Hardware
+namespace Builder
 {
-	//
-	//
-	// Subsystem
-	//
-	//
-	Subsystem::Subsystem():
-		m_index(0),
-		m_key(5)
-	{
-
-	}
-
-	Subsystem::Subsystem(int index, int key, const QString& subsystemId, const QString& caption):
-		m_index(index),
-		m_key(key),
-		m_subsystemId(subsystemId),
-		m_caption(caption)
-	{
-
-	}
-
-	bool Subsystem::save(QXmlStreamWriter& writer)
-	{
-		writer.writeAttribute("Index", QString::number(index()));
-		writer.writeAttribute("Key", QString::number(key()));
-		writer.writeAttribute("SubsystemID", subsystemId());
-		writer.writeAttribute("Caption", caption());
-		return true;
-	}
-
-
-	bool Subsystem::load(QXmlStreamReader& reader)
-	{
-		if (reader.attributes().hasAttribute("Index"))
-		{
-			setIndex(reader.attributes().value("Index").toInt());
-		}
-
-		if (reader.attributes().hasAttribute("Key"))
-		{
-			setKey(reader.attributes().value("Key").toInt());
-		}
-
-		if (reader.attributes().hasAttribute("SubsystemID"))
-		{
-			setSubsystemId(reader.attributes().value("SubsystemID").toString());
-		}
-		else
-		{
-			// The old file format, before renaming StrID->SubsytemID (RPCT-744)
-			//
-			if (reader.attributes().hasAttribute("StrID"))
-			{
-				setSubsystemId(reader.attributes().value("StrID").toString());
-			}
-		}
-
-		if (reader.attributes().hasAttribute("Caption"))
-		{
-			setCaption(reader.attributes().value("Caption").toString());
-		}
-
-		QXmlStreamReader::TokenType endToken = reader.readNext();
-		Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
-
-		return true;
-	}
-
-
-	const QString& Subsystem::subsystemId() const
-	{
-		return m_subsystemId;
-	}
-
-	void Subsystem::setSubsystemId(const QString& value)
-	{
-		m_subsystemId = value;
-	}
-
-	const QString& Subsystem::caption() const
-	{
-		return m_caption;
-	}
-
-	void Subsystem::setCaption(const QString& value)
-	{
-		m_caption = value;
-	}
-
-	int Subsystem::index() const
-	{
-		return m_index;
-	}
-
-	void Subsystem::setIndex(int value)
-	{
-		m_index = value;
-	}
-
-	int Subsystem::key() const
-	{
-		return m_key;
-	}
-
-	void Subsystem::setKey(int value)
-	{
-		m_key = value;
-	}
-
-	//
 	//
 	// SubsystemStorage
 	//
-	//
 	SubsystemStorage::SubsystemStorage()
 	{
-
 	}
 
-	void SubsystemStorage::add(std::shared_ptr<Subsystem> subsystem)
+	void SubsystemStorage::add(std::shared_ptr<Hardware::Subsystem> subsystem)
 	{
 		m_subsystems.push_back(subsystem);
 	}
@@ -131,12 +20,12 @@ namespace Hardware
 		return static_cast<int>(m_subsystems.size());
 	}
 
-	std::shared_ptr<Subsystem> SubsystemStorage::get(int index) const
+	std::shared_ptr<Hardware::Subsystem> SubsystemStorage::get(int index) const
 	{
 		if (index < 0 || index >= count())
 		{
 			assert(false);
-			return std::make_shared<Subsystem>();
+			return std::make_shared<Hardware::Subsystem>();
 		}
 		return m_subsystems[index];
 	}
@@ -146,7 +35,7 @@ namespace Hardware
 		m_subsystems.clear();
 	}
 
-	const std::vector<std::shared_ptr<Subsystem>>& SubsystemStorage::subsystems()
+	const std::vector<std::shared_ptr<Hardware::Subsystem>>& SubsystemStorage::subsystems()
 	{
 		return m_subsystems;
 	}

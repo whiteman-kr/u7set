@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/Subsystem.h"
+#include "SubsystemStorage.h"
 #include "../VFrame30/Bus.h"
 #include "ModuleLogicCompiler.h"
 #include "../lib/ComparatorSet.h"
@@ -28,7 +28,7 @@ namespace Builder
 		//
 		Context* context();
 		IssueLogger* log();
-		Hardware::SubsystemStorage* subsystems();
+		SubsystemStorage* subsystems();
 		Hardware::EquipmentSet* equipmentSet();
 		SignalSet* signalSet();
 		LmDescriptionSet* lmDescriptions();

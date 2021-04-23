@@ -672,7 +672,7 @@ namespace Builder
 
 		QString errorCode;
 
-		m_context->m_subsystems = std::make_shared<Hardware::SubsystemStorage>();
+		m_context->m_subsystems = std::make_shared<SubsystemStorage>();
 
 		if (bool ok = m_context->m_subsystems->load(&m_context->m_db, errorCode);
 			ok == false)

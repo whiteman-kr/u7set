@@ -1,6 +1,7 @@
 #include "TrendWidget.h"
 #include "../Proto/trends.pb.h"
 #include "TrendScale.h"
+#include <string.h>
 
 namespace TrendLib
 {
@@ -195,7 +196,13 @@ namespace TrendLib
 
 		if (ok == false)
 		{
+#ifdef Q_OS_WINDOWS
+			std::array<char, 512> errMsgBuf;
+			strerror_s(errMsgBuf.data(), std::size(errMsgBuf), errno);
+			*errorMessage = tr("Parse trend file error. ") + QString(errMsgBuf.data());
+#else
 			*errorMessage = tr("Parse trend file error. ") + strerror(errno);
+#endif
 			return false;
 		}
 
@@ -758,7 +765,7 @@ namespace TrendLib
 			return;
 		}
 
-		int numDegrees = event->delta() / 8;
+		int numDegrees = event->angleDelta().y() / 8;
 		int numSteps = numDegrees / 15;
 
 		if (numSteps == 0)
@@ -826,7 +833,7 @@ namespace TrendLib
 				TimeStamp timeStamp;
 				TrendSignalParam trendSignal;
 
-				Trend::MouseOn mouseOn = mouseIsOver(event->pos(), &laneIndex, &timeStamp, &rulerIndex, &trendSignal);
+				Trend::MouseOn mouseOn = mouseIsOver(event->position().toPoint(), &laneIndex, &timeStamp, &rulerIndex, &trendSignal);
 
 				if (mouseOn != Trend::MouseOn::OutsideTrendArea &&
 					mouseOn != Trend::MouseOn::Outside &&

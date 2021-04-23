@@ -5,12 +5,12 @@
 #include <unordered_set>
 
 #include "../DbLib/DbController.h"
-#include "../lib/Subsystem.h"
 #include "../lib/Connection.h"
 #include "../VFrame30/Bus.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../TuningService/TuningDataStorage.h"
 #include "SignalSet.h"
+#include "SubsystemStorage.h"
 #include "IssueLogger.h"
 #include "BuildResultWriter.h"
 #include "LmDescriptionSet.h"
@@ -69,7 +69,7 @@ namespace Builder
 
 		std::map<QString, Hardware::Software*> m_software;
 
-		std::shared_ptr<Hardware::SubsystemStorage> m_subsystems;
+		std::shared_ptr<SubsystemStorage> m_subsystems;
 		std::map<QString, quint64> m_lmsUniqueIDs;
 
 		std::shared_ptr<AppLogicData> m_appLogicData;

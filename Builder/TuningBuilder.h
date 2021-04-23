@@ -3,7 +3,6 @@
 #include "../DbLib/DbController.h"
 #include "../HardwareLib/DeviceObject.h"
 #include "../lib/ModuleFirmware.h"
-#include "../lib/Subsystem.h"
 #include "../TuningService/TuningDataStorage.h"
 #include "IssueLogger.h"
 #include "LmDescriptionSet.h"
@@ -33,7 +32,7 @@ namespace Builder
 		DbController* m_db = nullptr;
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;
 		SignalSet* m_signalSet = nullptr;
-		Hardware::SubsystemStorage* m_subsystems = nullptr;
+		SubsystemStorage* m_subsystems = nullptr;
 		Tuning::TuningDataStorage *m_tuningDataStorage = nullptr;
 		mutable IssueLogger* m_log = nullptr;
 		std::vector<Hardware::DeviceModule*> m_lmModules;

@@ -4,7 +4,6 @@
 #include "../lib/AppSignal.h"
 #include "../HardwareLib/DeviceObject.h"
 #include "../lib/DataSource.h"
-#include "../lib/Subsystem.h"
 #include "../VFrame30/Schema.h"
 #include "../VFrame30/SchemaItemFrame.h"
 #include "../lib/SoftwareSettings.h"

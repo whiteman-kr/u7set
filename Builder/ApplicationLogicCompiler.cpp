@@ -110,7 +110,7 @@ namespace Builder
 		return m_context->m_log;
 	}
 
-	Hardware::SubsystemStorage* ApplicationLogicCompiler::subsystems()
+	SubsystemStorage* ApplicationLogicCompiler::subsystems()
 	{
 		return m_context->m_subsystems.get();
 	}

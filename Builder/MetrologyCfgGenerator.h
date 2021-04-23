@@ -34,7 +34,7 @@ namespace Builder
 		bool testElectricLimit_Input_Hz(const AppSignal& signal);
 
 	private:
-		Hardware::SubsystemStorage* m_subsystems = nullptr;
+		SubsystemStorage* m_subsystems = nullptr;
 		std::unordered_set<QString> m_analogSignalsOnSchemas;
 	};
 }

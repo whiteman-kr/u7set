@@ -2,7 +2,7 @@
 #define DIALOGSUBSYSTEMLISTEDITOR_H
 
 #include "../DbLib/DbController.h"
-#include "../lib/Subsystem.h"
+#include "../Builder/SubsystemStorage.h"
 
 namespace Ui {
 class DialogSubsystemListEditor;

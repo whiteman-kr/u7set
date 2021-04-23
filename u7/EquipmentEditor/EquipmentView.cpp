@@ -1,7 +1,7 @@
 #include "EquipmentView.h"
 #include "EquipmentModel.h"
 #include "../../DbLib/DbController.h"
-#include "../../lib/Subsystem.h"
+#include "../../Builder/SubsystemStorage.h"
 #include "DialogChoosePreset.h"
 #include "../GlobalMessanger.h"
 #include "../DialogConnections.h"
@@ -768,7 +768,7 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentView::addPresetToConfiguration(
 		{
 			// Get susbsystems
 			//
-			Hardware::SubsystemStorage subsystems;
+			Builder::SubsystemStorage subsystems;
 			QString errorCode;
 
 			if (subsystems.load(db(), errorCode) == true && subsystems.count() > 0)

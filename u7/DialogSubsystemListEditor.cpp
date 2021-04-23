@@ -102,7 +102,7 @@ DialogSubsystemListEditor::DialogSubsystemListEditor(DbController *pDbController
 
 	QString errorCode;
 
-	Hardware::SubsystemStorage subsystems;
+	Builder::SubsystemStorage subsystems;
 
 	if (subsystems.load(db(), errorCode) == false)
 	{
@@ -187,7 +187,7 @@ bool DialogSubsystemListEditor::askForSaveChanged()
 
 bool DialogSubsystemListEditor::saveChanges()
 {
-	Hardware::SubsystemStorage subsystems;
+	Builder::SubsystemStorage subsystems;
 
 	for (int i = 0; i < ui->m_list->topLevelItemCount(); i++)
 	{

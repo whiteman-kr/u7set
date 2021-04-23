@@ -18,6 +18,7 @@
 #include <vector>
 #include <set>
 #include <type_traits>
+#include <utility>
 
 // Qt includes
 //

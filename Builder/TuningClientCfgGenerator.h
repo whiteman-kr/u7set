@@ -21,7 +21,7 @@ namespace Builder
 		static bool createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, ::Proto::AppSignalSet* tuningSet);
 
 	private:
-		Hardware::SubsystemStorage* m_subsystems = nullptr;
+		SubsystemStorage* m_subsystems = nullptr;
 
 		bool createEquipmentList(QStringList* equipmentList);
 		bool createObjectFilters(const QStringList& equipmentList);

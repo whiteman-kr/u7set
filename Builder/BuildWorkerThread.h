@@ -2,7 +2,6 @@
 #define BUILDWORKERTHREAD_H
 
 #include <QJSEngine>
-#include "../lib/Subsystem.h"
 #include "../TuningService/TuningDataStorage.h"
 #include "Context.h"
 #include "TuningBuilder.h"

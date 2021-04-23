@@ -69,7 +69,6 @@ SOURCES += \
     ../lib/AppSignal.cpp \
     ../lib/SignalSetProvider.cpp \
     ../lib/SoftwareSettings.cpp \
-    ../lib/Subsystem.cpp \
     ../lib/Types.cpp \
     ../lib/TuningValue.cpp \
     ../lib/SignalProperties.cpp \
@@ -104,6 +103,7 @@ SOURCES += \
     OptoModule.cpp \
 	RawDataDescription.cpp \
     SignalsHeap.cpp \
+    SubsystemStorage.cpp \
     UalItems.cpp \
     ApplicationLogicCode.cpp \
     LmMemoryMap.cpp \
@@ -144,7 +144,6 @@ HEADERS += \
     ../lib/AppSignal.h \
     ../lib/SignalSetProvider.h \
     ../lib/SoftwareSettings.h \
-    ../lib/Subsystem.h \
     ../lib/Types.h \
     ../lib/TuningValue.h \
     ../lib/SignalProperties.h \
@@ -180,6 +179,7 @@ HEADERS += \
     Busses.h \
     OptoModule.h \
     RawDataDescription.h \
+    SubsystemStorage.h \
     UalItems.h \
     ApplicationLogicCode.h \
     LmMemoryMap.h \
