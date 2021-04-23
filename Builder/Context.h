@@ -5,11 +5,12 @@
 #include <unordered_set>
 
 #include "../DbLib/DbController.h"
-#include "../lib/Connection.h"
+#include "../HardwareLib/Connection.h"
 #include "../VFrame30/Bus.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../TuningService/TuningDataStorage.h"
 #include "SignalSet.h"
+#include "ConnectionStorage.h"
 #include "SubsystemStorage.h"
 #include "IssueLogger.h"
 #include "BuildResultWriter.h"
@@ -74,7 +75,7 @@ namespace Builder
 
 		std::shared_ptr<AppLogicData> m_appLogicData;
 
-		std::shared_ptr<Hardware::ConnectionStorage> m_connections;
+		std::shared_ptr<ConnectionStorage> m_connections;
 		std::shared_ptr<Hardware::OptoModuleStorage> m_opticModuleStorage;
 
 		std::shared_ptr<Tuning::TuningDataStorage> m_tuningDataStorage;

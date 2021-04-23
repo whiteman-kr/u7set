@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../DbLib/DbController.h"
-#include "../DbLib/DbObjectStorage.h"
+#include "../Proto/ProtoSerialization.h"
+#include "../lib/PropertyObject.h"
+
 
 namespace Hardware
 {
@@ -207,34 +208,6 @@ namespace Hardware
 		bool m_disableDataID = false;
 		bool m_generateVHDFile = false;
     };
-
-	class ConnectionStorage : public DbObjectStorage<std::shared_ptr<Connection>>
-	{
-	public:
-		explicit ConnectionStorage(DbController* db);
-        virtual ~ConnectionStorage();
-
-	public:
-		using DbObjectStorage::get;
-
-		std::vector<std::shared_ptr<Connection>> get(const QStringList& masks) const;
-
-		QStringList filterByMoudules(const QStringList& modules) const;
-
-		std::shared_ptr<Connection> getPortConnection(QString portEquipmentId) const;
-
-		std::vector<std::shared_ptr<Connection>> getConnections() const;
-
-		// --
-		//
-		bool load(QString* errorMessage) override;
-		bool save(const QUuid& uuid, QString* errorMessage) override;
-
-		bool loadFromConnectionsFolder(QString* errorMessage);
-		bool loadFromXmlDeprecated(QString* errorMessage);
-
-		bool deleteXmlDeprecated(QString* errorMessage);
-	};
 }
 
 Q_DECLARE_METATYPE (std::shared_ptr<Hardware::Connection>)

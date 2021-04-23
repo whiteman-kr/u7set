@@ -36,7 +36,7 @@ namespace Builder
 		Tuning::TuningDataStorage* tuningDataStorage();
 		ComparatorSet* comparatorSet();
 		BuildResultWriter* buildResultWriter();
-		Hardware::ConnectionStorage* connectionStorage();
+		Builder::ConnectionStorage* connectionStorage();
 		const VFrame30::BusSet* busSet();
 		Hardware::OptoModuleStorage* opticModuleStorage();
 		std::vector<Hardware::DeviceModule*>& lmModules();

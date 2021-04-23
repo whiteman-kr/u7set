@@ -8,6 +8,7 @@
 #include "../TuningService/TuningDataStorage.h"
 
 #include "BuildResultWriter.h"
+#include "ConnectionStorage.h"
 #include "OptoModule.h"
 #include "LmMemoryMap.h"
 #include "../lib/ComparatorSet.h"
@@ -15,7 +16,7 @@
 #include "MemWriteMap.h"
 #include "Loopbacks.h"
 
-#include "../lib/Connection.h"
+#include "../HardwareLib/Connection.h"
 #include "../lib/AppSignalStateFlags.h"
 
 class LmDescription;
@@ -619,7 +620,7 @@ namespace Builder
 
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
 		Hardware::DeviceObject* m_deviceRoot = nullptr;
-		Hardware::ConnectionStorage* m_connections = nullptr;
+		Builder::ConnectionStorage* m_connections = nullptr;
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;

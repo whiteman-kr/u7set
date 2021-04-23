@@ -60,12 +60,14 @@ CONFIG(release, debug|release) {
 }
 
 HEADERS += \
+	Connection.h \
 	DeviceObject.h \
 	ScriptDeviceObject.h \
 	Stable.h \
 	Subsystem.h
 
 SOURCES += \
+    Connection.cpp \
     DeviceObject.cpp \
     ScriptDeviceObject.cpp \
     Subsystem.cpp

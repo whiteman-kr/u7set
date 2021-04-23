@@ -1166,7 +1166,7 @@ namespace Builder
 	{
 		QString errorMessage;
 
-		m_context->m_connections = std::make_shared<Hardware::ConnectionStorage>(&m_context->m_db);
+		m_context->m_connections = std::make_shared<ConnectionStorage>(&m_context->m_db);
 
 		if (bool ok = m_context->m_connections->load(&errorMessage);
 			ok == false)

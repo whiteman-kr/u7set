@@ -7,7 +7,7 @@
 #include "./Forms/ChooseUfbDialog.h"
 #include "SignalPropertiesDialog.h"
 #include "GlobalMessanger.h"
-#include "../lib/Connection.h"
+#include "../Builder/ConnectionStorage.h"
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaItemLine.h"
 #include "../VFrame30/SchemaItemRect.h"
@@ -4931,7 +4931,7 @@ bool EditSchemaWidget::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngin
 
 	// Get all connections
 	//
-	Hardware::ConnectionStorage connections(db());
+	Builder::ConnectionStorage connections(db());
 
 	QString errorMessage;
 
@@ -5081,7 +5081,7 @@ bool EditSchemaWidget::f2KeyForTransmitter(SchemaItemPtr item, bool setViaEditEn
 
 	// Get all connections
 	//
-	Hardware::ConnectionStorage connections(db());
+	Builder::ConnectionStorage connections(db());
 
 	QString errorMessage;
 

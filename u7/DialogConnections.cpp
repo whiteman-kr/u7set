@@ -182,7 +182,7 @@ DialogConnections::DialogConnections(DbController* db, QWidget* parent)
 
 	// Load deprecated connections
 	//
-	Hardware::ConnectionStorage xmlConnections(m_db);
+	Builder::ConnectionStorage xmlConnections(m_db);
 
 	ok = xmlConnections.loadFromXmlDeprecated(&errorMessage);
 	if (ok == false)

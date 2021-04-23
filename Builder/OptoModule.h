@@ -7,7 +7,8 @@
 
 #include "RawDataDescription.h"
 #include "ModulesRawData.h"
-#include "../lib/Connection.h"
+#include "ConnectionStorage.h"
+#include "../HardwareLib/Connection.h"
 
 class LmDescription;
 class OutputLog;
@@ -553,7 +554,7 @@ namespace Hardware
 	private:
 		std::shared_ptr<EquipmentSet> m_equipmentSet;
 		std::shared_ptr<Builder::LmDescriptionSet> m_lmDescriptionSet;
-		std::shared_ptr<ConnectionStorage> m_connectionStorage;
+		std::shared_ptr<Builder::ConnectionStorage> m_connectionStorage;
 		Builder::IssueLogger* m_log = nullptr;
 
 		HashedVector<QString, OptoModuleShared> m_modules;

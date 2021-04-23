@@ -150,7 +150,7 @@ namespace Builder
 		return m_context->m_buildResultWriter.get();
 	}
 
-	Hardware::ConnectionStorage* ApplicationLogicCompiler::connectionStorage()
+	Builder::ConnectionStorage* ApplicationLogicCompiler::connectionStorage()
 	{
 		return m_context->m_connections.get();
 	}
@@ -717,7 +717,7 @@ namespace Builder
 	{
 		ConnectionsInfoWriter connectionsInfoWriter;
 
-		Hardware::ConnectionStorage* connStorage = connectionStorage();
+		Builder::ConnectionStorage* connStorage = connectionStorage();
 
 		TEST_PTR_LOG_RETURN_FALSE(connStorage, log());
 

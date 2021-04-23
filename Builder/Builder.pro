@@ -63,7 +63,6 @@ SOURCES += \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/LogicModulesInfo.cpp \
     ../lib/OutputLog.cpp \
-    ../lib/Connection.cpp \
     ../lib/LogicModuleSet.cpp \
     ../lib/ModuleFirmware.cpp \
     ../lib/AppSignal.cpp \
@@ -91,6 +90,7 @@ SOURCES += \
 	../Metrology/UnitsConvertor.cpp \
 	../Metrology/UnitsConvertorTable.cpp \
     Builder.cpp \
+    ConnectionStorage.cpp \
     IssueLogger.cpp \
 	DbMetrologyConnection.cpp \
     BuildWorkerThread.cpp \
@@ -137,7 +137,6 @@ HEADERS += \
     ../lib/LanControllerInfoHelper.h \
     ../lib/LogicModulesInfo.h \
     ../lib/OutputLog.h \
-    ../lib/Connection.h \
     ../lib/LogicModuleSet.h \
     ../lib/PropertyObject.h \
     ../lib/ModuleFirmware.h \
@@ -166,6 +165,7 @@ HEADERS += \
 	../Metrology/UnitsConvertor.h \
 	../Metrology/UnitsConvertorTable.h \
 	Builder.h \
+    ConnectionStorage.h \
     Loopbacks.h \
     SignalsHeap.h \
     Stable.h \

@@ -2,7 +2,7 @@
 
 #ifdef IS_BUILDER
 
-#include "Connection.h"
+#include "../HardwareLib/Connection.h"
 #include "../Builder/OptoModule.h"
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/WUtils.h"
@@ -128,7 +128,7 @@ protected:
 class ConnectionsInfoWriter : public ConnectionsInfo
 {
 public:
-	bool fill(const Hardware::ConnectionStorage& connectionsStorage, const Hardware::OptoModuleStorage& optoModuleStorage);
+	bool fill(const Builder::ConnectionStorage& connectionsStorage, const Hardware::OptoModuleStorage& optoModuleStorage);
 	void save(QByteArray* xmlFileData) const;
 
 private:

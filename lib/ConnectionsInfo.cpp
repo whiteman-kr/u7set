@@ -380,7 +380,7 @@ QString ConnectionsInfo::portTag(int portNo)
 	//
 	// -----------------------------------------------------------------------------------
 
-	bool ConnectionsInfoWriter::fill(const Hardware::ConnectionStorage& connectionsStorage, const Hardware::OptoModuleStorage& optoModuleStorage)
+	bool ConnectionsInfoWriter::fill(const Builder::ConnectionStorage& connectionsStorage, const Hardware::OptoModuleStorage& optoModuleStorage)
 	{
 		bool result = true;
 

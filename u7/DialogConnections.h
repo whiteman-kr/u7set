@@ -4,7 +4,7 @@
 #include "../DbLib/DbController.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyEditorDialog.h"
-#include "../lib/Connection.h"
+#include "../Builder/ConnectionStorage.h"
 
 class DialogConnections : public QDialog
 {
@@ -81,7 +81,7 @@ private:
 
 	DbController* m_db = nullptr;
 
-	Hardware::ConnectionStorage m_connections;
+	Builder::ConnectionStorage m_connections;
 
     QMenu* m_popupMenu = nullptr;
     QAction* m_addAction = nullptr;

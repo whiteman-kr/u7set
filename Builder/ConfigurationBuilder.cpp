@@ -5,7 +5,7 @@
 #include "../HardwareLib/ScriptDeviceObject.h"
 #include "../UtilsLib/Crc.h"
 #include "../lib/SignalProperties.h"
-#include "../lib/Connection.h"
+#include "../HardwareLib/Connection.h"
 #include "IssueLogger.h"
 #include "SignalSet.h"
 

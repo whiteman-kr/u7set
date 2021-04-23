@@ -3,7 +3,7 @@
 #include "../lib/DeviceHelper.h"
 #include "../lib/DataSource.h"
 #include "../UtilsLib/Crc.h"
-#include "../lib/Connection.h"
+#include "../HardwareLib/Connection.h"
 #include "../lib/LanControllerInfoHelper.h"
 
 #include "SoftwareCfgGenerator.h"
