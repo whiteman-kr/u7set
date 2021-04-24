@@ -2,7 +2,7 @@
 #include <map>
 #include <vector>
 #include <QObject>
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 
 // ----------------------------------------------------------------------------
 //

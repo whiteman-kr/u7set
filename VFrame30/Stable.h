@@ -92,8 +92,7 @@
 // Project stable includes
 //
 #include "../lib/Factory.h"
-#include "../lib/TypesAndEnums.h"
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include "../lib/CUtils.h"
 #include "../lib/DebugInstCounter.h"
 #include "../lib/PropertyObject.h"

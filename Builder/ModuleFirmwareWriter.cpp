@@ -880,7 +880,7 @@ namespace Hardware
 
 		QByteArray bytes = dataString.toUtf8();
 
-		quint64 result = CUtils::calcHash(bytes.data(), bytes.size());
+		quint64 result = ::calcHash(bytes.data(), bytes.size());
 
 		quint32 h = (result >> 32) & 0xffffffff;
 		quint32 l = result & 0xffffffff;
@@ -933,7 +933,7 @@ namespace Hardware
 
 		QByteArray bytes = dataString.toUtf8();
 
-		quint64 result = CUtils::calcHash(bytes.data(), bytes.size());
+		quint64 result = ::calcHash(bytes.data(), bytes.size());
 		setData64(frameIndex, offset, result);
 
 		return QString::number(result, 16);
@@ -1339,7 +1339,7 @@ static QByteArray err;
 					{
 						QByteArray bytes = firmware.subsysId().toUtf8();
 
-						*(quint64*)ptr = qToBigEndian(CUtils::calcHash(bytes.data(), bytes.size()));
+						*(quint64*)ptr = qToBigEndian(::calcHash(bytes.data(), bytes.size()));
 						ptr += sizeof(quint64);
 					}
 					else

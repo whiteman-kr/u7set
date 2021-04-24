@@ -1,7 +1,7 @@
 #ifndef CREATESIGNALDIALOG_H
 #define CREATESIGNALDIALOG_H
 
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 
 
 class DbController;

@@ -4,7 +4,7 @@
 #include <array>
 #include <bitset>
 #include <memory>
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include "../lib/AppSignalParam.h"
 
 namespace Proto

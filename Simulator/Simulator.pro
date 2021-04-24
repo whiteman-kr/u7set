@@ -74,7 +74,6 @@ SOURCES += \
 	../lib/LogicModulesInfo.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/SoftwareXmlReader.cpp \
-    ../lib/Types.cpp \
     ../lib/ModuleFirmware.cpp \
 	../lib/AppSignalManager.cpp \
 	../lib/AppSignal.cpp \
@@ -130,7 +129,6 @@ HEADERS += \
 	../Proto/serialization.pb.h \
 	../lib/LmDescription.h \
 	../lib/PropertyObject.h \
-	../lib/Types.h \
 	../lib/ModuleFirmware.h \
 	../lib/AppSignalManager.h \
 	../lib/AppSignal.h \

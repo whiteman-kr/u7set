@@ -58,13 +58,32 @@ inline Hash calcHash(const void* data, size_t byteSize)
 	Hash hash = 0;
 	const char* prt = (const char*)data;
 
-	for (size_t i = 0; i < byteSize; ++i)
+	while (byteSize--)
 	{
 		hash += (hash << 5) + *prt;
 		prt++;
 	}
 
 	return hash;
+}
+
+inline quint16 calcHash16(const void* src, int l)
+{
+	if (src == nullptr)
+	{
+		assert(src);
+		return 0;
+	}
+
+	quint16 nHash = 0;
+	quint8* p = (quint8*)src;
+
+	while (l--)
+	{
+		nHash += (nHash<<5) + *p++;
+	}
+
+	return nHash;
 }
 
 // Custom specialization of std::hash for QUuid
@@ -95,3 +114,32 @@ public:
 	static QString hashStr(const QByteArray& data) { return QString(QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex()); }
 };
 
+
+inline quint32 ClassNameHashCode(const std::string& className)
+{
+	assert(className.empty() == false);
+
+	std::string clearClassName = className;
+
+	auto findResult = className.rfind("::");
+	if (findResult != className.npos)
+	{
+		assert(findResult + 2 < className.size());
+		assert((findResult + 2) + (className.size() - findResult - 2) == className.size());
+
+		clearClassName = className.substr(findResult + 2, className.size() - findResult - 2);
+	}
+
+	// Do not change this hash function
+	// as its' results are stored in files
+	//
+	quint32 nHash = 0;
+	const char* ptr = clearClassName.c_str();
+
+	while (*ptr)
+	{
+		nHash += (nHash << 5) + *ptr++;
+	}
+
+	return nHash;
+}

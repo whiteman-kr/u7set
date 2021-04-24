@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../UtilsLib/Address16.h"
-#include "Types.h"
+#include "../CommonLib/Types.h"
 #include "../UtilsLib/DomXmlHelper.h"
 #include "LanControllerInfo.h"
 

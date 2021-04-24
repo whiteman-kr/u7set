@@ -8,7 +8,7 @@
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyTable.h"
 #include "../DbLib/DbController.h"
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include "../lib/Tuning/TuningFilterEditor.h"
 
 //

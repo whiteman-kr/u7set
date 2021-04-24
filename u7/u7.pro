@@ -527,3 +527,6 @@ LIBS += -lDbLib
 #
 LIBS += -lHardwareLib
 
+# CommonLib
+#
+LIBS += -lCommonLib

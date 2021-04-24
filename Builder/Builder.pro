@@ -68,7 +68,6 @@ SOURCES += \
     ../lib/AppSignal.cpp \
     ../lib/SignalSetProvider.cpp \
     ../lib/SoftwareSettings.cpp \
-    ../lib/Types.cpp \
     ../lib/TuningValue.cpp \
     ../lib/SignalProperties.cpp \
     ../lib/DataSource.cpp \
@@ -143,7 +142,6 @@ HEADERS += \
     ../lib/AppSignal.h \
     ../lib/SignalSetProvider.h \
     ../lib/SoftwareSettings.h \
-    ../lib/Types.h \
     ../lib/TuningValue.h \
     ../lib/SignalProperties.h \
     ../lib/DataSource.h \

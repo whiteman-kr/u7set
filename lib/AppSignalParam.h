@@ -10,7 +10,7 @@
 #include "TimeStamp.h"
 #include "Tuning/TuningSignalState.h"
 #include "Times.h"
-#include "Types.h"
+#include "../CommonLib/Types.h"
 #include "AppSignalStateFlags.h"
 #include "../OnlineLib/SimpleAppSignalState.h"
 #include "AppSignal.h"

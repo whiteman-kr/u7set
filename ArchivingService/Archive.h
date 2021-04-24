@@ -8,7 +8,7 @@
 #include "../OnlineLib/HostAddressPort.h"
 #include "../lib/TimeStamp.h"
 #include "../OnlineLib/CircularLogger.h"
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include "../UtilsLib/Queue.h"
 #include "../lib/AppSignalParam.h"
 #include "ArchRequest.h"

@@ -9,7 +9,7 @@
 #include <QTableView>
 #include <QHeaderView>
 #include <QStandardItemModel>
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include "../lib/WidgetUtils.h"
 
 

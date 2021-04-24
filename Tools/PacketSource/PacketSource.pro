@@ -47,7 +47,6 @@ SOURCES += \
     ../../lib/AppSignal.cpp \
     ../../lib/AppSignalStateFlags.cpp \
     ../../lib/TuningValue.cpp \
-    ../../lib/Types.cpp \
     ../../lib/ModuleFirmware.cpp \
     ../../lib/SignalProperties.cpp \
     ../../lib/DataSource.cpp \
@@ -86,7 +85,6 @@ HEADERS += \
     ../../lib/AppSignal.h \
     ../../lib/AppSignalStateFlags.h \
     ../../lib/TuningValue.h \
-    ../../lib/Types.h \
     ../../lib/PropertyObject.h \
     ../../lib/Factory.h \
     ../../lib/ModuleFirmware.h \
@@ -162,6 +160,10 @@ LIBS += -lHardwareLib
 #
 LIBS += -lprotobuf
 INCLUDEPATH += ./../../Protobuf
+
+# CommonLib
+#
+LIBS += -lCommonLib
 
 
 

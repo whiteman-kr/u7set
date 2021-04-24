@@ -1,7 +1,7 @@
 #ifndef BUS_H
 #define BUS_H
 
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include "../UtilsLib/Hash.h"
 #include "../lib/PropertyObject.h"
 #include "../Proto/ProtoSerialization.h"

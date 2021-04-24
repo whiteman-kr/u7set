@@ -43,7 +43,7 @@
 
 // Other stable includes
 //
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 
 // Disable some warnings
 //

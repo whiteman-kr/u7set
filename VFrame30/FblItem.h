@@ -1,6 +1,6 @@
 #pragma once
 #include "SchemaItem.h"
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 
 class QPainter;
 

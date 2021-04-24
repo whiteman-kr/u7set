@@ -265,7 +265,7 @@ namespace Hardware
 	bool DeviceObject::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		const std::string& className = this->metaObject()->className();
-		quint32 classnamehash = CUtils::GetClassHashCode(className);
+		quint32 classnamehash = ::ClassNameHashCode(className);
 
 		message->set_classnamehash(classnamehash);
 

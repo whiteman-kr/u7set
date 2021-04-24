@@ -32,7 +32,6 @@ unix {
 SOURCES += \
     ../lib/DataSource.cpp \
     ../lib/AppSignal.cpp \
-    ../lib/Types.cpp \
     ../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
     ../lib/SoftwareInfo.cpp \
@@ -49,7 +48,6 @@ HEADERS += \
     ../lib/AppSignal.h \
     ../lib/CUtils.h \
     ../lib/PropertyObject.h \
-    ../lib/Types.h \
     ../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
     ../lib/SoftwareInfo.h \
@@ -94,9 +92,9 @@ LIBS += -lOnlineLib
 #
 LIBS += -lUtilsLib
 
-# -lSe
+# CommonLib
 #
-LIBS += -lUtilsLib
+LIBS += -lCommonLib
 
 # Protobuf
 #

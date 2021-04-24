@@ -2,7 +2,6 @@
 
 #include "../lib/SignalProperties.h"
 #include "../lib/PropertyEditor.h"
-#include "../lib/TypesAndEnums.h"
 #include "../HardwareLib/Connection.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/Bus.h"

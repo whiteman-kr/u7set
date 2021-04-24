@@ -34,7 +34,6 @@ SOURCES += \
     ../lib/DataSource.cpp \
 	../lib/SoftwareSettings.cpp \
     ../lib/OutputLog.cpp \
-    ../lib/Types.cpp \
     ../lib/AppSignal.cpp \
     ../lib/AppSignalParam.cpp \
     ../lib/SoftwareInfo.cpp \
@@ -60,7 +59,6 @@ HEADERS += \
     ../lib/DataSource.h \
 	../lib/SoftwareSettings.h \
     ../lib/OutputLog.h \
-    ../lib/Types.h \
     ../lib/AppSignal.h \
     ../lib/AppSignalParam.h \
     ../lib/SoftwareInfo.h \
@@ -115,3 +113,7 @@ LIBS += -lUtilsLib
 # OnlineLib
 #
 LIBS += -lOnlineLib
+
+# CommonLib
+#
+LIBS += -lCommonLib

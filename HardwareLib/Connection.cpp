@@ -8,7 +8,7 @@
 #include "Connection.h"
 #include <set>
 
-#include "../lib/CUtils.h"
+#include "../UtilsLib/Hash.h"
 
 
 namespace Hardware
@@ -142,7 +142,7 @@ namespace Hardware
     bool Connection::SaveData(Proto::Envelope* message) const
 	{
 		const std::string& className = this->metaObject()->className();
-		quint32 classnamehash = CUtils::GetClassHashCode(className);
+		quint32 classnamehash = ::ClassNameHashCode(className);
 
 		message->set_classnamehash(classnamehash);
 
@@ -432,7 +432,7 @@ namespace Hardware
 
 		QString sourceStr = port1EquipmentID() + port2EquipmentID();
 
-		quint16 hash = CUtils::calcHash16(sourceStr.toStdString().c_str(), sourceStr.length());
+		quint16 hash = ::calcHash16(sourceStr.toStdString().c_str(), sourceStr.length());
 
         return (hash % 999) + 1;
     }

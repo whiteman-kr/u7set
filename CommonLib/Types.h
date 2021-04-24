@@ -12,8 +12,6 @@ class E : public QObject
 	Q_OBJECT
 
 public:
-	E() = delete;
-
 	// Horz/Vert text Align enums
 	// This enum type is used to describe alignment. It contains horizontal and vertical flags that can be
 	// combined to produce the required effect.
@@ -852,3 +850,16 @@ const int	SIZE_32BIT = 32;
 
 const int	SIZE_1WORD = 1;
 const int	SIZE_2WORD = 2;
+
+
+// SchemaUnit
+//
+enum class SchemaUnit
+{
+	Display,			// display pixels
+	Millimeter,			// mm
+	Inch				// inches
+};
+
+Q_DECLARE_METATYPE(SchemaUnit)
+

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Types.h"
+#include "../CommonLib/Types.h"
 #include "../HardwareLib/DeviceObject.h"
 #include "ConstStrings.h"
 #include "../Builder/IssueLogger.h"

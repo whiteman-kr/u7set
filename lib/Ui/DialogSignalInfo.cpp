@@ -1,6 +1,6 @@
 #include "DialogSignalInfo.h"
 #include "ui_DialogSignalInfo.h"
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include "../Proto/serialization.pb.h"
 #include "../lib/Ui/UiTools.h"
 

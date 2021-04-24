@@ -465,14 +465,14 @@ void SchemasReportGenerator::exportFilesToPdf()
 		double pageWidth = schema->docWidth();
 		double pageHeight = schema->docHeight();
 
-		if (schema->unit() == VFrame30::SchemaUnit::Inch)
+		if (schema->unit() == SchemaUnit::Inch)
 		{
 			pageSize = QPageSize(QSizeF(pageWidth, pageHeight), QPageSize::Inch);
 			pdfWriter->setResolution(resolution());
 		}
 		else
 		{
-			assert(schema->unit() == VFrame30::SchemaUnit::Display);
+			assert(schema->unit() == SchemaUnit::Display);
 			pageSize = QPageSize(QSize(static_cast<int>(pageWidth), static_cast<int>(pageHeight)));
 
 			pdfWriter->setResolution(72);	// 72 is from enum QPageLayout::Unit help,

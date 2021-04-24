@@ -35,12 +35,10 @@ PRECOMPILED_HEADER = Stable.h
 HEADERS += \
 	Stable.h \
 	../lib/SoftwareSettings.h \
-	../lib/Types.h \
 	../lib/SoftwareInfo.h \
 
 SOURCES += \
 	../lib/SoftwareSettings.cpp \
-    ../lib/Types.cpp \
 	../lib/SoftwareInfo.cpp \
 	BaseServiceMain.cpp \
 
@@ -83,6 +81,10 @@ unix {
 	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
 }
+
+# CommonLib
+#
+LIBS += -lCommonLib
 
 # Protobuf
 #

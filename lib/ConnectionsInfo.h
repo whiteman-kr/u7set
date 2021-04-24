@@ -11,7 +11,7 @@
 
 #include "ConstStrings.h"
 #include "../UtilsLib/Address16.h"
-#include "Types.h"
+#include "../CommonLib/Types.h"
 #include "../UtilsLib/DomXmlHelper.h"
 
 class ConnectionTxRxSignal

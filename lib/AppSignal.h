@@ -11,7 +11,7 @@
 #include "../UtilsLib/WUtils.h"
 
 #include "ConstStrings.h"
-#include "Types.h"
+#include "../CommonLib/Types.h"
 #include "PropertyObject.h"
 #include "OrderedHash.h"
 #include "TuningValue.h"

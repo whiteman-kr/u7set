@@ -45,7 +45,6 @@ HEADERS += \
     ../lib/OrderedHash.h \
     ../lib/BuildInfo.h \
     ../lib/PropertyObject.h \
-    ../lib/Types.h \
     ../lib/AppSignalParam.h \
     ../lib/TimeStamp.h \
     ../lib/SoftwareInfo.h \
@@ -70,7 +69,6 @@ HEADERS += \
 SOURCES += \
 	../lib/SoftwareSettings.cpp \
 	../lib/BuildInfo.cpp \
-	../lib/Types.cpp \
 	../lib/AppSignalParam.cpp \
 	../lib/SoftwareInfo.cpp \
 	../lib/TuningValue.cpp \
@@ -141,6 +139,10 @@ unix {
         CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
         CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
 }
+
+# CommonLib
+#
+LIBS += -lCommonLib
 
 # Protobuf
 #

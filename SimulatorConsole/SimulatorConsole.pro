@@ -77,6 +77,10 @@ LIBS += -lOnlineLib
 #
 LIBS += -lUtilsLib
 
+# CommonLib
+#
+LIBS += -lCommonLib
+
 # HardwareLib
 #
 LIBS += -lHardwareLib

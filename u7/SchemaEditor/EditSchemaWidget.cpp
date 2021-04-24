@@ -1058,7 +1058,7 @@ void EditSchemaWidget::createActions()
 		m_viewMenu->addAction(m_zoom100Action);
 		m_viewMenu->addAction(m_zoomFitToScreenAction);
 
-	if (schema()->unit() == VFrame30::SchemaUnit::Display)
+	if (schema()->unit() == SchemaUnit::Display)
 	{
 		m_viewMenu->addAction(m_viewSeparatorAction0);
 		m_viewMenu->addAction(m_snapToGridAction);
@@ -6296,16 +6296,16 @@ void EditSchemaWidget::editPaste()
 //				double xf = 1.0;
 //				double yf = 1.0;
 
-//				if (schemaItem->itemUnit() == VFrame30::SchemaUnit::Display)
+//				if (schemaItem->itemUnit() == SchemaUnit::Display)
 //				{
-//					Q_ASSERT(schema()->unit() == VFrame30::SchemaUnit::Inch);
+//					Q_ASSERT(schema()->unit() == SchemaUnit::Inch);
 
 //					xf = this->logicalDpiX();
 //					yf = this->logicalDpiY();
 //				}
 //				else
 //				{
-//					Q_ASSERT(schema()->unit() == VFrame30::SchemaUnit::Display);
+//					Q_ASSERT(schema()->unit() == SchemaUnit::Display);
 
 //					xf = 1.0 / this->logicalDpiX();
 //					yf = 1.0 / this->logicalDpiY();

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "../lib/AppSignal.h"
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 
 // ==============================================================================================
 //

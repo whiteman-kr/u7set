@@ -34,10 +34,10 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	int tempateParentFileId = -1;
 	QString templateFileExtension;
 
-	std::vector<std::pair<QString, VFrame30::SchemaUnit>> units;
-	auto pxUnits = std::make_pair<QString, VFrame30::SchemaUnit>("Pixels", VFrame30::SchemaUnit::Display);
-	auto mmUnits = std::make_pair<QString, VFrame30::SchemaUnit>("Millimeters", VFrame30::SchemaUnit::Inch);
-	auto inUnits = std::make_pair<QString, VFrame30::SchemaUnit>("Inches", VFrame30::SchemaUnit::Inch);
+	std::vector<std::pair<QString, SchemaUnit>> units;
+	auto pxUnits = std::make_pair<QString, SchemaUnit>("Pixels", SchemaUnit::Display);
+	auto mmUnits = std::make_pair<QString, SchemaUnit>("Millimeters", SchemaUnit::Inch);
+	auto inUnits = std::make_pair<QString, SchemaUnit>("Inches", SchemaUnit::Inch);
 
 	if (dynamic_cast<VFrame30::LogicSchema*>(m_schema.get()) != nullptr)
 	{
@@ -46,7 +46,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		tempateParentFileId = db->systemFileId(DbDir::AppLogicDir);
 		templateFileExtension = Db::File::AlTemplExtension;
 
-		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+		if (VFrame30::Settings::regionalUnit() == SchemaUnit::Inch)
 		{
 			units.push_back(inUnits);
 		}
@@ -63,7 +63,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		tempateParentFileId = db->systemFileId(DbDir::UfblDir);
 		templateFileExtension = Db::File::UfbTemplExtension;
 
-		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+		if (VFrame30::Settings::regionalUnit() == SchemaUnit::Inch)
 		{
 			units.push_back(inUnits);
 		}
@@ -80,7 +80,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		tempateParentFileId = db->systemFileId(DbDir::MonitorSchemasDir);
 		templateFileExtension = Db::File::MvsTemplExtension;
 
-		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+		if (VFrame30::Settings::regionalUnit() == SchemaUnit::Inch)
 		{
 			units.push_back(inUnits);
 			units.push_back(pxUnits);
@@ -99,7 +99,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		tempateParentFileId = db->systemFileId(DbDir::TuningSchemasDir);
 		templateFileExtension = Db::File::TvsTemplExtension;
 
-		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+		if (VFrame30::Settings::regionalUnit() == SchemaUnit::Inch)
 		{
 			units.push_back(inUnits);
 			units.push_back(pxUnits);
@@ -127,8 +127,8 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	//
 	int setUnitIndex = -1;
 	int unitIndex = 0;
-	VFrame30::SchemaUnit s_lastSelectedMonitorUnits =
-			static_cast<VFrame30::SchemaUnit>(QSettings().value("CreateSchemaDialog/s_lastSelectedMonitorUnits",
+	SchemaUnit s_lastSelectedMonitorUnits =
+			static_cast<SchemaUnit>(QSettings().value("CreateSchemaDialog/s_lastSelectedMonitorUnits",
 																QVariant(static_cast<int>(VFrame30::Settings::regionalUnit()))).toInt());
 
 	for (auto&[unitsCaption, schemaUnits] : units)
@@ -337,7 +337,7 @@ void CreateSchemaDialog::accept()
 
 	// Units
 	//
-	VFrame30::SchemaUnit units = static_cast<VFrame30::SchemaUnit>(ui->unitsComboBox->currentData().toInt());
+	SchemaUnit units = static_cast<SchemaUnit>(ui->unitsComboBox->currentData().toInt());
 	m_schema->setUnit(units);
 
 	// Width
@@ -397,23 +397,23 @@ void CreateSchemaDialog::accept()
 	{
 		// Template Blank is selected
 		//
-		if (m_schema->unit() == VFrame30::SchemaUnit::Display)
+		if (m_schema->unit() == SchemaUnit::Display)
 		{
 			m_schema->setDocWidth(width);
 			m_schema->setDocHeight(height);
 		}
 		else
 		{
-			assert(m_schema->unit() == VFrame30::SchemaUnit::Inch);
+			assert(m_schema->unit() == SchemaUnit::Inch);
 
-			if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+			if (VFrame30::Settings::regionalUnit() == SchemaUnit::Inch)
 			{
 				m_schema->setDocWidth(width);
 				m_schema->setDocHeight(height);
 			}
 			else
 			{
-				assert(VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Millimeter);
+				assert(VFrame30::Settings::regionalUnit() == SchemaUnit::Millimeter);
 
 				m_schema->setDocWidth(width / 25.4);
 				m_schema->setDocHeight(height / 25.4);
@@ -517,18 +517,18 @@ void CreateSchemaDialog::setWidthHeight(VFrame30::Schema* schema)
 	//
 	QString units;
 
-	if (schema->unit() == VFrame30::SchemaUnit::Display)
+	if (schema->unit() == SchemaUnit::Display)
 	{
 		units = tr(", px");
 	}
 	else
 	{
-		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+		if (VFrame30::Settings::regionalUnit() == SchemaUnit::Inch)
 		{
 			units = tr(", in");
 		}
 
-		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Millimeter)
+		if (VFrame30::Settings::regionalUnit() == SchemaUnit::Millimeter)
 		{
 			units = tr(", mm");
 		}
@@ -548,7 +548,7 @@ void CreateSchemaDialog::setWidthHeight(VFrame30::Schema* schema)
 	double h = 0;
 	int precision = 0;
 
-	if (schema->unit() == VFrame30::SchemaUnit::Display)
+	if (schema->unit() == SchemaUnit::Display)
 	{
 		w = schema->docWidth();
 		h = schema->docHeight();
@@ -556,9 +556,9 @@ void CreateSchemaDialog::setWidthHeight(VFrame30::Schema* schema)
 	}
 	else
 	{
-		assert(m_schema->unit() == VFrame30::SchemaUnit::Inch);
+		assert(m_schema->unit() == SchemaUnit::Inch);
 
-		if (VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Inch)
+		if (VFrame30::Settings::regionalUnit() == SchemaUnit::Inch)
 		{
 			w = schema->docWidth();
 			h = schema->docHeight();
@@ -566,7 +566,7 @@ void CreateSchemaDialog::setWidthHeight(VFrame30::Schema* schema)
 		}
 		else
 		{
-			assert(VFrame30::Settings::regionalUnit() == VFrame30::SchemaUnit::Millimeter);
+			assert(VFrame30::Settings::regionalUnit() == SchemaUnit::Millimeter);
 
 			w = schema->docWidth() * 25.4;
 			h = schema->docHeight() * 25.4;

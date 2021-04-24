@@ -5,7 +5,7 @@
 #include <QHostAddress>
 #include "../OnlineLib/UdpSocket.h"
 #include "../ServiceLib/Service.h"
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include "../OnlineLib/Tcp.h"
 
 

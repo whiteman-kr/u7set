@@ -5,7 +5,7 @@
 #include "TuningMemory.h"
 
 #include <cstring>
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 
 namespace Tuning
 {

@@ -47,7 +47,6 @@ SOURCES += \
 HEADERS += \
 	Stable.h \
     ../lib/BuildInfo.h \
-    ../lib/Types.h \
     ../lib/SoftwareInfo.h \
 	../lib/SoftwareSettings.h \
 	ConfigurationService.h \
@@ -106,3 +105,6 @@ unix {
 	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
 }
 
+# CommonLib
+#
+LIBS += -lCommonLib

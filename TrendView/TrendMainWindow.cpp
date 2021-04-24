@@ -6,7 +6,7 @@
 #include "TrendScale.h"
 #include "DialogTrendSignalProperties.h"
 #include "../Proto/serialization.pb.h"
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 
 namespace TrendLib
 {

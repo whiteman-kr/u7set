@@ -263,7 +263,7 @@ namespace VFrame30
 
 		VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 
-		drawParam.setControlBarSize(schema()->unit() == VFrame30::SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));		// Is required for drawing highlights on items
+		drawParam.setControlBarSize(schema()->unit() == SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));		// Is required for drawing highlights on items
 		drawParam.setBlinkPhase(static_cast<bool>((QTime::currentTime().msec() / 250) % 2));	// 0-249 : false, 250-499 : true, 500-749 : false, 750-999 : true
 		drawParam.setEditMode(false);
 

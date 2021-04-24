@@ -1,12 +1,10 @@
 #pragma once
 
-#include "TypesAndEnums.h"
-#include "../UtilsLib/Hash.h"
-
 #include <QtWidgets/QApplication>
-#include <assert.h>
+#include <cassert>
 #include <cmath>
 #include <QDateTime>
+#include "../CommonLib/Types.h"
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -19,6 +17,15 @@
 
 #define mm2in(mmVal) (mmVal / 25.4)
 #define in2mm(inVal) (inVal * 25.4)
+
+// Round type
+//
+enum class MidpointRounding
+{
+	ToFloor,			// Floor rounding
+	AwayFromZero		// When a number is halfway between two others, it is rounded toward the nearest number that is away from zero.
+};
+
 
 class CUtils
 {
@@ -33,9 +40,9 @@ public:
 	// Округление, числа до указанного количсетва знаков дробной части.
 	// mode указывает, округлять отбрасыыанием дробной части, или AwayFromZero, т.е. 1.5 -> 2.0
 	//
-	static double Round(double value, int digits, VFrame30::MidpointRounding mode)	// Округление, числа до указанного количсетва знаков дробной части.
+	static double Round(double value, int digits, MidpointRounding mode)	// Округление, числа до указанного количсетва знаков дробной части.
 	{
-		if (mode == VFrame30::MidpointRounding::ToFloor)
+		if (mode == MidpointRounding::ToFloor)
 		{
 			double intpart = 0.0;
 			double fractpart = modf(value, &intpart);
@@ -167,19 +174,19 @@ public:
 	}
 
 	// Округлить значение в зависимости от типа региональной метрики
-	static double RoundPoint(double p, VFrame30::SchemaUnit unit)
+	static double RoundPoint(double p, SchemaUnit unit)
 	{
 		switch (unit)
 		{
-		case VFrame30::SchemaUnit::Display:
+		case SchemaUnit::Display:
 			assert(false);
 			return 0;
 
-		case VFrame30::SchemaUnit::Inch:
-			return Round(p, InchesRoundDigits, VFrame30::MidpointRounding::AwayFromZero);
+		case SchemaUnit::Inch:
+			return Round(p, InchesRoundDigits, MidpointRounding::AwayFromZero);
 
-		case VFrame30::SchemaUnit::Millimeter:
-			return Round(p, MillimetresRoundDigits, VFrame30::MidpointRounding::AwayFromZero);
+		case SchemaUnit::Millimeter:
+			return Round(p, MillimetresRoundDigits, MidpointRounding::AwayFromZero);
 
 		default:
 			assert(false);
@@ -187,14 +194,14 @@ public:
 		}
 	}
 
-	static double ConvertPoint(double point, VFrame30::SchemaUnit convertFrom, VFrame30::SchemaUnit convertTo, int dpi)
+	static double ConvertPoint(double point, SchemaUnit convertFrom, SchemaUnit convertTo, int dpi)
 	{
 		if (convertFrom == convertTo)
 		{
 			return point;
 		}
 
-		if (convertFrom == VFrame30::SchemaUnit::Display)
+		if (convertFrom == SchemaUnit::Display)
 		{
 			if (dpi == 0)
 			{
@@ -202,13 +209,13 @@ public:
 				return 0.0;
 			}
 
-			if (convertTo == VFrame30::SchemaUnit::Inch)
+			if (convertTo == SchemaUnit::Inch)
 			{
 				point = point / dpi;
 				return point;
 			}
 
-			if (convertTo == VFrame30::SchemaUnit::Millimeter)
+			if (convertTo == SchemaUnit::Millimeter)
 			{
 				point = point * 25.4 / dpi;
 				return point;
@@ -218,9 +225,9 @@ public:
 			return 0.0;
 		}
 
-		if (convertFrom == VFrame30::SchemaUnit::Inch)
+		if (convertFrom == SchemaUnit::Inch)
 		{
-			if (convertTo == VFrame30::SchemaUnit::Display)
+			if (convertTo == SchemaUnit::Display)
 			{
 				if (dpi == 0)
 				{
@@ -232,7 +239,7 @@ public:
 				return point;
 			}
 
-			if (convertTo == VFrame30::SchemaUnit::Millimeter)
+			if (convertTo == SchemaUnit::Millimeter)
 			{
 				point = point * 25.4;
 				return point;
@@ -242,9 +249,9 @@ public:
 			return 0.0;
 		}
 
-		if (convertFrom == VFrame30::SchemaUnit::Millimeter)
+		if (convertFrom == SchemaUnit::Millimeter)
 		{
-			if (convertTo == VFrame30::SchemaUnit::Display)
+			if (convertTo == SchemaUnit::Display)
 			{
 				if (dpi == 0)
 				{
@@ -256,7 +263,7 @@ public:
 				return point;
 			}
 
-			if (convertTo == VFrame30::SchemaUnit::Inch)
+			if (convertTo == SchemaUnit::Inch)
 			{
 				point = point / 25.4;
 				return point;
@@ -270,16 +277,16 @@ public:
 		return 0.0;
 	}
 
-	static void ConvertPoint(double& x, double& y, const VFrame30::SchemaUnit convertFrom, const VFrame30::SchemaUnit convertTo, const int dpiX, const int dpiY)
+	static void ConvertPoint(double& x, double& y, const SchemaUnit convertFrom, const SchemaUnit convertTo, const int dpiX, const int dpiY)
 	{
 		if (convertFrom == convertTo)
 		{
 			return;
 		}
 
-		if (convertFrom == VFrame30::SchemaUnit::Display)
+		if (convertFrom == SchemaUnit::Display)
 		{
-			if (convertTo == VFrame30::SchemaUnit::Inch)
+			if (convertTo == SchemaUnit::Inch)
 			{
 				if (dpiX == 0 || dpiY == 0)
 				{
@@ -293,7 +300,7 @@ public:
 				return;
 			}
 
-			if (convertTo == VFrame30::SchemaUnit::Millimeter)
+			if (convertTo == SchemaUnit::Millimeter)
 			{
 				if (dpiX == 0 || dpiY == 0)
 				{
@@ -311,9 +318,9 @@ public:
 			return;
 		}
 
-		if (convertFrom == VFrame30::SchemaUnit::Inch)
+		if (convertFrom == SchemaUnit::Inch)
 		{
-			if (convertTo == VFrame30::SchemaUnit::Display)
+			if (convertTo == SchemaUnit::Display)
 			{
 				if (dpiX == 0 || dpiY == 0)
 				{
@@ -327,7 +334,7 @@ public:
 				return;
 			}
 
-			if (convertTo == VFrame30::SchemaUnit::Millimeter)
+			if (convertTo == SchemaUnit::Millimeter)
 			{
 				x = x * 25.4;
 				y = y * 25.4;
@@ -338,9 +345,9 @@ public:
 			return;
 		}
 
-		if (convertFrom == VFrame30::SchemaUnit::Millimeter)
+		if (convertFrom == SchemaUnit::Millimeter)
 		{
-			if (convertTo == VFrame30::SchemaUnit::Display)
+			if (convertTo == SchemaUnit::Display)
 			{
 				if (dpiX == 0 || dpiY == 0)
 				{
@@ -354,7 +361,7 @@ public:
 				return;
 			}
 
-			if (convertTo == VFrame30::SchemaUnit::Inch)
+			if (convertTo == SchemaUnit::Inch)
 			{
 				x = x / 25.4;
 				y = y / 25.4;
@@ -507,39 +514,6 @@ public:
 	}
 
 
-	/// <summary>
-	/// Вычисление хэш кода имени класса
-	/// </summary>
-	/// <remarks>
-	/// Сохраняется в сериализуемом файле, не изменять способ вычисления
-	/// </remarks>
-	static quint32 GetClassHashCode(const std::string& className)
-	{
-		assert(className.empty() == false);
-
-		std::string clearClassName = className;
-
-		auto findResult = className.rfind("::");
-		if (findResult != className.npos)
-		{
-			assert(findResult + 2 < className.size());
-			assert((findResult + 2) + (className.size() - findResult - 2) == className.size());
-
-			clearClassName = className.substr(findResult + 2, className.size() - findResult - 2);
-		}
-
-		quint32 nHash = 0;
-		const char* ptr = clearClassName.c_str();
-
-		while (*ptr)
-		{
-			nHash += (nHash << 5) + *ptr++;
-		}
-
-		return nHash;
-	}
-
-
 	static bool processDiagSignalMask(const QString& mask, const QString& str)
 	{
 		if (mask.isEmpty())
@@ -617,45 +591,6 @@ public:
 		}
 
 		return true;
-	}
-
-    static quint16 calcHash16(const void* src, int l)
-    {
-        if (src == nullptr)
-        {
-            assert(src);
-            return 0;
-        }
-
-        quint16 nHash = 0;
-		quint8* p = (quint8*)src;
-
-        while (l--)
-		{
-            nHash += (nHash<<5) + *p++;
-		}
-
-        return nHash;
-    }
-
-	static quint64 calcHash(const void* src, qint64 l)
-	{
-		if (src == nullptr)
-		{
-			assert(src);
-			return UNDEFINED_HASH;
-		}
-
-		quint64 nHash = 0;
-		quint8* p = (quint8*)src;
-
-		while (l--)
-		{
-			nHash += (nHash<<5) + *p++;
-		}
-
-		return nHash;
-
 	}
 
 	static QString dateTimeToStringTime(const QDateTime& dt, bool milliseconds)

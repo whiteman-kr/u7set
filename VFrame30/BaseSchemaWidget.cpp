@@ -199,7 +199,7 @@ namespace VFrame30
 
 		// Scaling to zoom factor
 		//
-		if (schema()->unit() == VFrame30::SchemaUnit::Display)
+		if (schema()->unit() == SchemaUnit::Display)
 		{
 			docX = x / (zoom() / 100.0);
 			docY = y / (zoom() / 100.0);
@@ -255,7 +255,7 @@ namespace VFrame30
 		const int x = mousePos.x() - startX;
 		const int y = mousePos.y() - startY;
 
-		if (schema()->unit() == VFrame30::SchemaUnit::Display)
+		if (schema()->unit() == SchemaUnit::Display)
 		{
 			destDocPos->setX(x / (zoom / 100.0));
 			destDocPos->setY(y / (zoom / 100.0));
@@ -365,11 +365,11 @@ namespace VFrame30
 
 		switch (schema()->unit())
 		{
-		case VFrame30::SchemaUnit::Display:
+		case SchemaUnit::Display:
 			newHorzValue = horizontalScrollBar()->value() - static_cast<int>(dPos.x() * zoom / 100.0);
 			newVertValue = verticalScrollBar()->value() - static_cast<int>(dPos.y() * zoom / 100.0);
 			break;
-		case VFrame30::SchemaUnit::Inch:
+		case SchemaUnit::Inch:
 			newHorzValue = horizontalScrollBar()->value() - static_cast<int>(dPos.x() * (zoom / 100.0) * logicalDpiX());
 			newVertValue = verticalScrollBar()->value() - static_cast<int>(dPos.y() * (zoom / 100.0) * logicalDpiY());
 			break;

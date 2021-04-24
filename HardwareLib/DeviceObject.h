@@ -7,7 +7,7 @@
 #include "../lib/DebugInstCounter.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/Factory.h"
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include "../Proto/ProtoSerialization.h"
 
 class DbFileInfo;

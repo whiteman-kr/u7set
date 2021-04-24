@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include "../Proto/serialization.pb.h"
 
 #include <QUuid>

@@ -10,7 +10,7 @@
 #include "AppDataServiceWidget.h"
 #include "ConfigurationServiceWidget.h"
 #include "TuningServiceWidget.h"
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 
 HostInfo::HostInfo() : ip(0)
 {

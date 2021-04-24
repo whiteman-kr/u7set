@@ -35,7 +35,6 @@ SOURCES += \
     ../lib/DataSource.cpp \
     ../lib/AppSignal.cpp \
     ../lib/AppSignalParam.cpp \
-    ../lib/Types.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
@@ -75,7 +74,6 @@ HEADERS  += \
     ../lib/AppSignal.h \
     ../lib/PropertyObject.h \
 	../lib/AppSignalParam.h \
-    ../lib/Types.h \
     ../lib/WidgetUtils.h \
     ../lib/SoftwareInfo.h \
     ../lib/OrderedHash.h \
@@ -153,6 +151,9 @@ LIBS += -lUtilsLib
 #
 LIBS += -lHardwareLib
 
+# CommonLib
+#
+LIBS += -lCommonLib
 
 # Protobuf
 #

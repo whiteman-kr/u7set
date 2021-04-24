@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include "../UtilsLib/Hash.h"
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 
 namespace Ui {
 	class TuningSignalInfo;

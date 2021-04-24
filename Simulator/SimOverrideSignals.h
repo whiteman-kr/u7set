@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QReadWriteLock>
 #include <array>
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include "../lib/AppSignal.h"
 #include "SimScopedLog.h"
 

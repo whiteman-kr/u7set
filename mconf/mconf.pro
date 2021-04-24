@@ -43,7 +43,6 @@ HEADERS += \
 	../lib/OutputLog.h \
 	../lib/CUtils.h \
 	../lib/PropertyObject.h \
-	../lib/Types.h \
 	../lib/Configurator.h \
 	../lib/ModuleFirmware.h \
 	Stable.h \
@@ -57,7 +56,6 @@ HEADERS += \
 SOURCES += \
     ../lib/Ui/DialogAbout.cpp \
 	../lib/OutputLog.cpp \
-	../lib/Types.cpp \
 	../lib/Configurator.cpp \
 	../lib/ModuleFirmware.cpp \
 	main.cpp \
@@ -104,6 +102,10 @@ win32 {
 # UtilsLib
 #
 LIBS += -lUtilsLib
+
+# CommonLib
+#
+LIBS += -lCommonLib
 
 # Protobuf
 #

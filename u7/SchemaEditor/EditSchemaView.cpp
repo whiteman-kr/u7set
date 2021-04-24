@@ -108,7 +108,7 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 
 		VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 		drawParam.setControlBarSize(
-			schema()->unit() == VFrame30::SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
+			schema()->unit() == SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
 
 		drawParam.setInfoMode(theSettings.infoMode());
 		drawParam.session() = session();
@@ -139,7 +139,7 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 	// Draw schema
 	//
 	drawParam.setControlBarSize(
-		schema()->unit() == VFrame30::SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
+		schema()->unit() == SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
 
 	// Draw Build Issues
 	//
@@ -1016,7 +1016,7 @@ void EditSchemaView::drawGrid(QPainter* p, const QRectF& clipRect)
 
 	// Thin out the grid
 	//
-	if (unit == VFrame30::SchemaUnit::Display)
+	if (unit == SchemaUnit::Display)
 	{
 		while (gridSize * scale < 11.0)
 		{
@@ -1046,8 +1046,8 @@ void EditSchemaView::drawGrid(QPainter* p, const QRectF& clipRect)
 	//
 	p->setPen(QColor{0x00, 0x00, 0x80, 0xB4});
 
-	const double dpiX = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->logicalDpiX();
-	const double dpiY = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->logicalDpiY();
+	const double dpiX = unit == SchemaUnit::Display ? 1.0 : p->device()->logicalDpiX();
+	const double dpiY = unit == SchemaUnit::Display ? 1.0 : p->device()->logicalDpiY();
 
 	const double dpiXScale = gridSize * dpiX * scale;
 	const double dpiYScale = gridSize * dpiY * scale;

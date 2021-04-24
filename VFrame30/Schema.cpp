@@ -147,7 +147,7 @@ namespace VFrame30
 //		}
 
 		std::string className = this->metaObject()->className();
-		quint32 classnamehash = CUtils::GetClassHashCode(className);
+		quint32 classnamehash = ::ClassNameHashCode(className);
 
 		message->set_classnamehash(classnamehash);	// Required field, class name hash code, by it instance is created
 
@@ -1909,7 +1909,7 @@ namespace VFrame30
 	bool SchemaDetailsSet::SaveData(Proto::Envelope* envelopeMessage) const
 	{
 		std::string className = {"SchemaDetailsSet"};
-		quint32 classnamehash = CUtils::GetClassHashCode(className);
+		quint32 classnamehash = ::ClassNameHashCode(className);
 		envelopeMessage->set_classnamehash(classnamehash);
 
 		::Proto::SchemaDetailsSet* setMessage = envelopeMessage->mutable_schemadetailsset();

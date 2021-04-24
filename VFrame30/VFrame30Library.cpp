@@ -28,7 +28,7 @@
 #include "SchemaItemImageValue.h"
 #include "SchemaItemBus.h"
 #include "SchemaItemLoopback.h"
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 
 namespace VFrame30
 {

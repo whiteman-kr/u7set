@@ -109,7 +109,6 @@ HEADERS  += \
 	../lib/CUtils.h \
 	../lib/Factory.h \
 	../lib/ModuleFirmware.h \
-	../lib/Types.h \
 	../lib/OrderedHash.h \
 	../lib/PropertyObject.h \
 	../lib/AppSignalParam.h \
@@ -214,6 +213,10 @@ LIBS += -lHardwareLib
 # DbLib !!!!!!!!!!!!!! REMOVE IN FUTURE, MUST IT BE HERE!?
 #
 LIBS += -lDbLib
+
+# CommonLib
+#
+LIBS += -lCommonLib
 
 # protobuf
 #

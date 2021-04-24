@@ -2,7 +2,7 @@
 #include "ui_DialogTrendSignalProperties.h"
 #include "DialogTrendSignalPoints.h"
 #include "TrendScale.h"
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 
 //
 // DialogTrendSignalProperties

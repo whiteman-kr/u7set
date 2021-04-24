@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-#include "Types.h"
+#include "../CommonLib/Types.h"
 #include "../Proto/network.pb.h"
 
 enum class TuningValueType

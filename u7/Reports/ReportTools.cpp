@@ -878,7 +878,7 @@ void ReportGenerator::printSchema(QPdfWriter* pdfWriter,
 		compareActions.value()->empty() == false)
 	{
 		drawParam.setControlBarSize(
-			schema->unit() == VFrame30::SchemaUnit::Display ?
+			schema->unit() == SchemaUnit::Display ?
 						(4 / zoom) : (mm2in(2.4) / zoom));
 
 		m_schemaView->drawCompareOutlines(&drawParam, clipRect, *(compareActions.value()));

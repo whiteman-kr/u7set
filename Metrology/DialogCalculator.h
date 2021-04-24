@@ -11,7 +11,7 @@
 #include <QLineEdit>
 #include <QComboBox>
 
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include "UnitsConvertor.h"
 
 // ==============================================================================================

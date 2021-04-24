@@ -69,9 +69,6 @@
 	#pragma warning(pop)
 #endif
 
-#include "../lib/TypesAndEnums.h"
-
-
 // Disable some warnings
 //
 #ifdef _MSC_VER

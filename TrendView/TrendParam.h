@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../lib/TimeStamp.h"
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include <QColor>
 #include <QRectF>
 

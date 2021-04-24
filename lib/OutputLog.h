@@ -3,7 +3,7 @@
 #include <QObject>
 #include <QDateTime>
 #include <QMutex>
-#include "Types.h"
+#include "../CommonLib/Types.h"
 
 #ifdef Q_CC_MSVC
 	#define SHORT_FUNC_INFO __FUNCTION__

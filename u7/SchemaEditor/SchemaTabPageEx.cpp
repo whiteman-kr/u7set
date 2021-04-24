@@ -3134,7 +3134,7 @@ void SchemaControlTabPageEx::addFile()
 
     // Set Width and Height
     //
-    if (schema->unit() == VFrame30::SchemaUnit::Display)
+    if (schema->unit() == SchemaUnit::Display)
     {
         schema->setDocWidth(1280);
         schema->setDocHeight(1024);

@@ -33,7 +33,6 @@ SOURCES += \
 	../../lib/LanControllerInfoHelper.cpp \
 	../../lib/DataSource.cpp \
 	../../lib/AppSignal.cpp \
-	../../lib/Types.cpp \
 	../../lib/TuningValue.cpp \
 	../../lib/DeviceHelper.cpp \
 	../../lib/OutputLog.cpp \
@@ -57,7 +56,6 @@ HEADERS  += \
 	../../lib/DataSource.h \
 	../../lib/AppSignal.h \
 	../../lib/PropertyObject.h \
-	../../lib/Types.h \
 	../../lib/TuningValue.h \
 	../../lib/DeviceHelper.h \
 	../../lib/OutputLog.h \
@@ -101,6 +99,10 @@ LIBS += -lOnlineLib
 # UtilsLib
 #
 LIBS += -lUtilsLib
+
+# CommonLib
+#
+LIBS += -lCommonLib
 
 # Protobuf
 #

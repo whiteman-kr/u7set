@@ -34,7 +34,6 @@ unix {
 
 SOURCES += \
 	../../lib/BuildInfo.cpp \
-    ../../lib/Types.cpp \
     ../../lib/SoftwareInfo.cpp \
 	../../lib/SoftwareSettings.cpp \
     ../../lib/DeviceHelper.cpp \
@@ -59,7 +58,6 @@ HEADERS += \
 	../../lib/ConstStrings.h \
     ../../lib/OrderedHash.h \
     ../../lib/BuildInfo.h \
-    ../../lib/Types.h \
     ../../lib/SoftwareInfo.h \
 	../../lib/SoftwareSettings.h \
     ../../lib/DeviceHelper.h \
@@ -110,6 +108,7 @@ LIBS += -lHardwareLib
 LIBS += -lOnlineLib
 LIBS += -lServiceLib
 LIBS += -lUtilsLib
+LIBS += -lCommonLib
 
 # Protobuf
 #

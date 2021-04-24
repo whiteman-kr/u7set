@@ -37,7 +37,7 @@ namespace VFrame30
 	bool SchemaLayer::SaveData(Proto::Envelope* message) const
 	{
 		std::string className = this->metaObject()->className();
-		quint32 classnamehash = CUtils::GetClassHashCode(className);
+		quint32 classnamehash = ::ClassNameHashCode(className);
 
 		message->set_classnamehash(classnamehash);	// Required field, hash of the class name, it restores the class.
 

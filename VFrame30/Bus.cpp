@@ -455,7 +455,7 @@ namespace VFrame30
 		}
 
 		std::string className = {"Bus"};
-		quint32 classnamehash = CUtils::GetClassHashCode(className);
+		quint32 classnamehash = ::ClassNameHashCode(className);
 		message->set_classnamehash(classnamehash);
 
 		bool ok = save(message->mutable_bus());
@@ -466,10 +466,10 @@ namespace VFrame30
 	bool Bus::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_bus() == false ||
-			message.classnamehash() != CUtils::GetClassHashCode("Bus"))
+			message.classnamehash() != ::ClassNameHashCode("Bus"))
 		{
 			assert(message.has_bus());
-			assert(message.classnamehash() == CUtils::GetClassHashCode("Bus"));
+			assert(message.classnamehash() == ::ClassNameHashCode("Bus"));
 			return false;
 		}
 

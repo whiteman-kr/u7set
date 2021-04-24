@@ -5,7 +5,7 @@
 #include <memory>
 #include <cstring>
 #include <QByteArray>
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include "SimOverrideSignals.h"
 
 class SimRamTests;

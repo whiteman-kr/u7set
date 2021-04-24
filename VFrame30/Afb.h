@@ -1,6 +1,6 @@
 #pragma once
 #include <QBitArray>
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include <optional>
 
 class QDomElement;

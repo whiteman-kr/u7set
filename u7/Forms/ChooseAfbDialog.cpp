@@ -326,7 +326,7 @@ void AfbHelpWidget::setAfb(std::shared_ptr<Afb::AfbElement> afb)
 	else
 	{
 		QString errorMessage;
-		m_afb = std::make_shared<VFrame30::SchemaItemAfb>(VFrame30::SchemaUnit::Display, *afb, &errorMessage);
+		m_afb = std::make_shared<VFrame30::SchemaItemAfb>(SchemaUnit::Display, *afb, &errorMessage);
 	}
 
 	update();

@@ -1,6 +1,6 @@
 #include "TuningFilter.h"
 #include <QApplication>
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include <QClipboard>
 
 namespace TuningTags

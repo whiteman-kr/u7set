@@ -3,7 +3,7 @@
 #include <QtGlobal>
 #include <QDateTime>
 
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include "ArchWriterThread.h"
 
 class FileArchReader

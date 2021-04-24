@@ -120,11 +120,9 @@ HEADERS += \
     SchemaItemTerminator.h \
     MacrosExpander.h \
     Session.h \
-    ../lib/TypesAndEnums.h \
     ../lib/CUtils.h \
     ../lib/DebugInstCounter.h \
     ../lib/PropertyObject.h \
-    ../lib/Types.h \
     ../lib/AppSignalManager.h \
     ../lib/Factory.h \
     ../lib/AppSignalParam.h \

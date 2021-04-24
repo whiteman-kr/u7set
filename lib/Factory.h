@@ -3,7 +3,7 @@
 #include <QtGlobal>
 #include <unordered_map>
 #include <memory>
-#include "../lib/CUtils.h"
+#include "../UtilsLib/Hash.h"
 
 template<typename BaseClass>
 class Factory
@@ -17,7 +17,7 @@ public:
 	template<typename DerivedClass>
 	void Register(const std::string& className)
 	{
-		quint32 classHash = CUtils::GetClassHashCode(className);
+		quint32 classHash = ::ClassNameHashCode(className);
 
 		Q_ASSERT(factories.find(classHash) == std::end(factories));
 		factories[classHash] = std::make_shared<DerivedType<DerivedClass>>();		// new DerivedType<DerivedClass>();
@@ -28,7 +28,7 @@ public:
 	template<typename DerivedClass>
 	void Register()
 	{
-		quint32 classHash = CUtils::GetClassHashCode(DerivedClass::staticMetaObject.className());
+		quint32 classHash = ::ClassNameHashCode(DerivedClass::staticMetaObject.className());
 
 		Q_ASSERT(factories.find(classHash) == std::end(factories));
 		factories[classHash] = std::make_shared<DerivedType<DerivedClass>>();		// new DerivedType<DerivedClass>();
@@ -39,7 +39,7 @@ public:
 	template<typename DerivedClass>
 	void isRegistered()
 	{
-		return isRegistered(CUtils::GetClassHashCode(DerivedClass::staticMetaObject.className()));
+		return isRegistered(::ClassNameHashCode(DerivedClass::staticMetaObject.className()));
 	}
 
 	[[nodiscard]] bool isRegistered(quint32 classHash) const

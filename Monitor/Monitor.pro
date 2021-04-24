@@ -77,7 +77,6 @@ SOURCES += main.cpp \
     DialogSettings.cpp \
     ../lib/BuildInfo.cpp \
     MonitorSchemaWidget.cpp \
-    ../lib/Types.cpp \
     MonitorConfigController.cpp \
     TcpSignalClient.cpp \
     ../lib/AppSignal.cpp \
@@ -140,7 +139,6 @@ HEADERS  += \
     DialogSettings.h \
     ../lib/BuildInfo.h \
     MonitorSchemaWidget.h \
-    ../lib/Types.h \
     MonitorConfigController.h \
     TcpSignalClient.h \
     ../lib/AppSignal.h \
@@ -257,4 +255,6 @@ LIBS += -lOnlineLib
 #
 LIBS += -lUtilsLib
 
-
+# CommonLib
+#
+LIBS += -lCommonLib

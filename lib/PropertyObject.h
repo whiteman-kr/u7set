@@ -22,7 +22,7 @@
 #include <QDebug>
 
 #include "../lib/OrderedHash.h"
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 
 class PropertyObject;
 

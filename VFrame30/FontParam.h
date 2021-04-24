@@ -1,6 +1,5 @@
 #pragma once
 #include "Settings.h"
-#include "../lib/TypesAndEnums.h"
 
 
 #define DECLARE_FONT_PROPERTIES(propname) \

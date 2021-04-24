@@ -3,7 +3,7 @@
 #include <QtCore>
 #include <QList>
 
-#include "../lib/Types.h"
+#include "../CommonLib/Types.h"
 #include "../lib/AppSignal.h"
 
 #include "../Builder/IssueLogger.h"

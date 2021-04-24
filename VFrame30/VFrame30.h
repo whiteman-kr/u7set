@@ -3,7 +3,6 @@
 // Project stable includes
 //
 #include "../lib/Factory.h"
-#include "../lib/TypesAndEnums.h"
 #include "../lib/CUtils.h"
 
 #include "Schema.h"
