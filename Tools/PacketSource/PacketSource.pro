@@ -84,7 +84,7 @@ HEADERS += \
     ../../lib/AppSignal.h \
     ../../lib/AppSignalStateFlags.h \
     ../../lib/TuningValue.h \
-    ../../lib/PropertyObject.h \
+    ../../CommonLib/PropertyObject.h \
     ../../lib/Factory.h \
     ../../lib/DebugInstCounter.h \
     ../../lib/OrderedHash.h \

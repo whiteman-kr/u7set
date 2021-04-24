@@ -55,7 +55,7 @@ HEADERS  += \
 	../../lib/LanControllerInfoHelper.h \
 	../../lib/DataSource.h \
 	../../lib/AppSignal.h \
-	../../lib/PropertyObject.h \
+	../../CommonLib/PropertyObject.h \
 	../../lib/TuningValue.h \
 	../../lib/DeviceHelper.h \
 	../../lib/OutputLog.h \

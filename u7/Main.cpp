@@ -5,7 +5,7 @@
 #include "../VFrame30/VFrame30Library.h"
 #include "../DbLib/DbController.h"
 #include "../HardwareLib/DeviceObject.h"
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 #include "../lib/TimeStamp.h"
 #include "../lib/LmDescription.h"
 #include "../lib/Configurator.h"

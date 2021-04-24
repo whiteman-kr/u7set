@@ -1,7 +1,7 @@
 #include <QUuid>
 
 #include "ProtoSerialization.h"
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 
 #if defined(Q_OS_WIN) && defined(QT_DEBUG)
 	#if __has_include("C:/Program Files (x86)/Visual Leak Detector/include/vld.h")

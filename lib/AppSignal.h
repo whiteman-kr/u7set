@@ -12,7 +12,7 @@
 
 #include "ConstStrings.h"
 #include "../CommonLib/Types.h"
-#include "PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 #include "OrderedHash.h"
 #include "TuningValue.h"
 #include "AppSignalStateFlags.h"

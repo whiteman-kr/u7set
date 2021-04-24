@@ -1,5 +1,5 @@
 #pragma once
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 
 namespace Sim
 {

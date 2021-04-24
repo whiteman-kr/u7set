@@ -58,7 +58,8 @@ CONFIG(release, debug|release) {
 
 HEADERS += \
 	Stable.h \
-	Types.h
+	Types.h \
+	PropertyObject.h
 
 SOURCES += \
 	Types.cpp

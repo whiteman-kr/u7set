@@ -127,7 +127,7 @@ HEADERS += \
     ../lib/SoftwareXmlReader.h \
 	../Proto/serialization.pb.h \
 	../lib/LmDescription.h \
-	../lib/PropertyObject.h \
+	../CommonLib/PropertyObject.h \
 	../lib/AppSignalManager.h \
 	../lib/AppSignal.h \
 	../lib/AppSignalParam.h \

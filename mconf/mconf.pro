@@ -42,7 +42,7 @@ HEADERS += \
     ../lib/Ui/DialogAbout.h \
 	../lib/OutputLog.h \
 	../lib/CUtils.h \
-	../lib/PropertyObject.h \
+	../CommonLib/PropertyObject.h \
 	../lib/Configurator.h \
 	Stable.h \
 	ftdi/ftd2xx.h \

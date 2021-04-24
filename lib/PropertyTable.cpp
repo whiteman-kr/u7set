@@ -1,4 +1,4 @@
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 #include "../lib/PropertyEditor.h"
 #include "PropertyTable.h"
 #include "TuningValue.h"

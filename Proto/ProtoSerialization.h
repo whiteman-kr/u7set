@@ -5,7 +5,7 @@
 #include <QtCore/QUuid>
 #include <QVariant>
 
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 #include "../Proto/serialization.pb.h"
 
 #ifdef Q_OS_WIN

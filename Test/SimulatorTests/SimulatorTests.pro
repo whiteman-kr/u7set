@@ -63,7 +63,7 @@ INCLUDEPATH += ./../../Protobuf
 
 
 HEADERS += \
-    ../../lib/PropertyObject.h \
+    ../../CommonLib/PropertyObject.h \
     SimCommandTest_LM5_LM6.h \
     SimProfilesTest.h \
     SimRamTests.h

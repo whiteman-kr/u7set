@@ -3,7 +3,7 @@
 
 #include <QSortFilterProxyModel>
 #include <QAbstractItemModel>
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 #include "../lib/PropertyEditor.h"
 
 namespace ExtWidgets

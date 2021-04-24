@@ -1,6 +1,6 @@
 #ifndef SESSION_H
 #define SESSION_H
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 
 namespace VFrame30
 {

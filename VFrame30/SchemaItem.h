@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SchemaPoint.h"
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 #include "../lib/DebugInstCounter.h"
 #include "../lib/OutputLog.h"
 #include "../lib/Factory.h"

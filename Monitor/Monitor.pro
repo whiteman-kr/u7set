@@ -142,7 +142,7 @@ HEADERS  += \
     MonitorConfigController.h \
     TcpSignalClient.h \
     ../lib/AppSignal.h \
-    ../lib/PropertyObject.h \
+    ../CommonLib/PropertyObject.h \
 	../lib/AppSignalParam.h \
     ../lib/AppSignalManager.h \
     Statistics.h \

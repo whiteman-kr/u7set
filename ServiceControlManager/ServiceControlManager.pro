@@ -72,7 +72,7 @@ HEADERS  += \
     ../lib/SoftwareSettings.h \
     ../lib/DataSource.h \
     ../lib/AppSignal.h \
-    ../lib/PropertyObject.h \
+    ../CommonLib/PropertyObject.h \
 	../lib/AppSignalParam.h \
     ../lib/WidgetUtils.h \
     ../lib/SoftwareInfo.h \

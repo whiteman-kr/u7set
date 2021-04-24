@@ -2,7 +2,7 @@
 #define PROPERTYEDITOR_H
 
 #include <QItemDelegate>
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 
 class QPlainTextEdit;
 

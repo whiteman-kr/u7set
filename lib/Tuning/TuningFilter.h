@@ -1,7 +1,7 @@
 #pragma once
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/TuningSignalState.h"
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 #include "../UtilsLib/Hash.h"
 #include "../VFrame30/Schema.h"
 #include <QColor>

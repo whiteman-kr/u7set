@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Proto/ProtoSerialization.h"
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 
 
 namespace Hardware

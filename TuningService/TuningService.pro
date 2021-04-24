@@ -52,7 +52,7 @@ SOURCES += \
 
 
 HEADERS += \
-    ../lib/PropertyObject.h \
+    ../CommonLib/PropertyObject.h \
 	Stable.h \
     ../lib/BuildInfo.h \
     ../lib/OrderedHash.h \

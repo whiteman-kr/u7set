@@ -47,7 +47,7 @@ HEADERS += \
     ../lib/DataSource.h \
     ../lib/AppSignal.h \
     ../lib/CUtils.h \
-    ../lib/PropertyObject.h \
+	../CommonLib/PropertyObject.h \
     ../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
     ../lib/SoftwareInfo.h \

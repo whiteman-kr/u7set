@@ -81,7 +81,7 @@ HEADERS  += \
 	../lib/Factory.h \
 	../lib/CUtils.h \
 	../lib/OrderedHash.h \
-	../lib/PropertyObject.h \
+	../CommonLib/PropertyObject.h \
 	../lib/PropertyEditor.h \
 	../lib/PropertyEditorDialog.h \
 	../lib/DebugInstCounter.h \

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SchemaLayer.h"
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 #include <QColor>
 
 

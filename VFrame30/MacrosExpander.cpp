@@ -1,5 +1,5 @@
 #include "MacrosExpander.h"
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 #include "Session.h"
 #include "Schema.h"
 #include "DrawParam.h"

@@ -108,7 +108,7 @@ HEADERS  += \
 	../lib/CUtils.h \
 	../lib/Factory.h \
 	../lib/OrderedHash.h \
-	../lib/PropertyObject.h \
+	../CommonLib/PropertyObject.h \
 	../lib/AppSignalParam.h \
 	../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \

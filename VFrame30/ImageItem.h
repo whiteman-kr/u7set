@@ -1,7 +1,7 @@
 #pragma once
 #include <QSvgRenderer>
 #include <optional>
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 #include "DrawParam.h"
 
 namespace VFrame30

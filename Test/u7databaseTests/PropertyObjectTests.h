@@ -1,6 +1,6 @@
 #pragma once
 #include <QTest>
-#include "../../lib/PropertyObject.h"
+#include "../../CommonLib/PropertyObject.h"
 
 class PropertyClass;
 

@@ -60,7 +60,7 @@ SOURCES += main.cpp \
 HEADERS += \
 	../../lib/Factory.h \
 	../../lib/AppSignal.h \
-	../../lib/PropertyObject.h \
+	../../CommonLib/PropertyObject.h \
 	../../lib/TuningValue.h \
 	../../lib/SignalProperties.h \
     DeviceObjectTests.h \

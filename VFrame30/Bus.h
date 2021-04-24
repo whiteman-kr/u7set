@@ -3,7 +3,7 @@
 
 #include "../CommonLib/Types.h"
 #include "../UtilsLib/Hash.h"
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 #include "../Proto/ProtoSerialization.h"
 
 

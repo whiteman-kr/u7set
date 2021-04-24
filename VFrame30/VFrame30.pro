@@ -122,7 +122,7 @@ HEADERS += \
     Session.h \
     ../lib/CUtils.h \
     ../lib/DebugInstCounter.h \
-    ../lib/PropertyObject.h \
+    ../CommonLib/PropertyObject.h \
     ../lib/AppSignalManager.h \
     ../lib/Factory.h \
     ../lib/AppSignalParam.h \

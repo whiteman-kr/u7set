@@ -123,7 +123,7 @@ HEADERS  += MainWindow.h \
     ../lib/AppSignalParam.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
-    ../lib/PropertyObject.h \
+    ../CommonLib/PropertyObject.h \
     ../lib/LogFile.h \
     UserManager.h \
     DialogProperties.h \

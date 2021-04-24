@@ -95,7 +95,7 @@
 #include "../CommonLib/Types.h"
 #include "../lib/CUtils.h"
 #include "../lib/DebugInstCounter.h"
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 #include "../Proto/ProtoSerialization.h"
 
 #ifdef _MSC_VER

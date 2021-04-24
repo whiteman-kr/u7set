@@ -62,7 +62,7 @@ HEADERS += \
 	../../lib/SoftwareSettings.h \
     ../../lib/DeviceHelper.h \
     ../../lib/OutputLog.h \
-    ../../lib/PropertyObject.h \
+    ../../CommonLib/PropertyObject.h \
     ../../lib/AppSignalParam.h \
     ../../lib/AppSignal.h \
     ../../lib/Tuning/TuningSignalState.h \

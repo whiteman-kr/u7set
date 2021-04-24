@@ -136,7 +136,7 @@ HEADERS += \
     ../lib/LogicModulesInfo.h \
     ../lib/OutputLog.h \
     ../lib/LogicModuleSet.h \
-    ../lib/PropertyObject.h \
+	../CommonLib/PropertyObject.h \
     ../lib/AppSignal.h \
     ../lib/SignalSetProvider.h \
     ../lib/SoftwareSettings.h \

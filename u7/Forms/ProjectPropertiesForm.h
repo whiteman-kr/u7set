@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QDialog>
-#include "../../lib/PropertyObject.h"
+#include "../../CommonLib/PropertyObject.h"
 #include "../../DbLib/DbController.h"
 
 

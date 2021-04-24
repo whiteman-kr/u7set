@@ -5,7 +5,7 @@
 #include <memory>
 #include <array>
 #include "../lib/DebugInstCounter.h"
-#include "../lib/PropertyObject.h"
+#include "../CommonLib/PropertyObject.h"
 #include "../lib/Factory.h"
 #include "../CommonLib/Types.h"
 #include "../Proto/ProtoSerialization.h"

@@ -44,7 +44,7 @@ HEADERS += \
 	../lib/SoftwareSettings.h \
     ../lib/OrderedHash.h \
     ../lib/BuildInfo.h \
-    ../lib/PropertyObject.h \
+	../CommonLib/PropertyObject.h \
     ../lib/AppSignalParam.h \
     ../lib/TimeStamp.h \
     ../lib/SoftwareInfo.h \
