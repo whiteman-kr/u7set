@@ -13,6 +13,7 @@
 #include "MetrologyCfgGenerator.h"
 #include "TestClientCfgGenerator.h"
 #include "../Simulator/Simulator.h"
+#include "../HardwareLib/Subsystem.h"
 
 namespace Builder
 {

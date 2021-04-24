@@ -67,15 +67,15 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
-# HardwareLib
-#
-LIBS += -lHardwareLib
-
 # Builder Lib
 #
 INCLUDEPATH += $$PWD/../Builder
 DEPENDPATH += $$PWD/../Builder
 LIBS += -lBuilder
+
+# HardwareLib
+#
+LIBS += -lHardwareLib
 
 # Simulator Lib
 #
