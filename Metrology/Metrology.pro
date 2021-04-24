@@ -45,7 +45,6 @@ unix {
 }
 
 SOURCES += \
-	../lib/ModuleFirmware.cpp \
 	../lib/AppSignalParam.cpp \
 	../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
@@ -108,7 +107,6 @@ HEADERS  += \
 	../lib/AppSignal.h \
 	../lib/CUtils.h \
 	../lib/Factory.h \
-	../lib/ModuleFirmware.h \
 	../lib/OrderedHash.h \
 	../lib/PropertyObject.h \
 	../lib/AppSignalParam.h \

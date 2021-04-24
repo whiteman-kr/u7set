@@ -44,7 +44,6 @@ HEADERS += \
 	../lib/CUtils.h \
 	../lib/PropertyObject.h \
 	../lib/Configurator.h \
-	../lib/ModuleFirmware.h \
 	Stable.h \
 	ftdi/ftd2xx.h \
     Settings.h \
@@ -57,7 +56,6 @@ SOURCES += \
     ../lib/Ui/DialogAbout.cpp \
 	../lib/OutputLog.cpp \
 	../lib/Configurator.cpp \
-	../lib/ModuleFirmware.cpp \
 	main.cpp \
     Settings.cpp \
     ApplicationTabPage.cpp \
@@ -98,6 +96,10 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
     CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
+
+# HardwareLib
+#
+LIBS += -lHardwareLib
 
 # UtilsLib
 #

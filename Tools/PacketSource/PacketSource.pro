@@ -47,7 +47,6 @@ SOURCES += \
     ../../lib/AppSignal.cpp \
     ../../lib/AppSignalStateFlags.cpp \
     ../../lib/TuningValue.cpp \
-    ../../lib/ModuleFirmware.cpp \
     ../../lib/SignalProperties.cpp \
     ../../lib/DataSource.cpp \
     ../../lib/OutputLog.cpp \
@@ -87,7 +86,6 @@ HEADERS += \
     ../../lib/TuningValue.h \
     ../../lib/PropertyObject.h \
     ../../lib/Factory.h \
-    ../../lib/ModuleFirmware.h \
     ../../lib/DebugInstCounter.h \
     ../../lib/OrderedHash.h \
     ../../lib/SignalProperties.h \

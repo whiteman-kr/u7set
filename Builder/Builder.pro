@@ -64,7 +64,6 @@ SOURCES += \
     ../lib/LogicModulesInfo.cpp \
     ../lib/OutputLog.cpp \
     ../lib/LogicModuleSet.cpp \
-    ../lib/ModuleFirmware.cpp \
     ../lib/AppSignal.cpp \
     ../lib/SignalSetProvider.cpp \
     ../lib/SoftwareSettings.cpp \
@@ -138,7 +137,6 @@ HEADERS += \
     ../lib/OutputLog.h \
     ../lib/LogicModuleSet.h \
     ../lib/PropertyObject.h \
-    ../lib/ModuleFirmware.h \
     ../lib/AppSignal.h \
     ../lib/SignalSetProvider.h \
     ../lib/SoftwareSettings.h \

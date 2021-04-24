@@ -1,10 +1,10 @@
 #pragma once
 #include "MainTabPage.h"
 #include "../lib/OutputLog.h"
-#include "../lib/ModuleFirmware.h"
 #include "../lib/Configurator.h"
 #include "../lib/OutputLog.h"
 #include "../lib/BuildInfo.h"
+#include "../HardwareLib/ModuleFirmware.h"
 
 class DbController;
 class QCheckBox;

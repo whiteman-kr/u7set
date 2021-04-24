@@ -10,7 +10,7 @@
 //
 // ----------------------------------------------------------------------------
 
-typedef std::pair<int, QString> UartPair;
+using UartPair = std::pair<int, QString>;
 
 namespace Hardware
 {
@@ -28,8 +28,9 @@ namespace Hardware
 		//
 		std::vector<std::vector<quint8>> frames;
 
-		QByteArray toByteArray() const;
+		[[nodiscard]] QByteArray toByteArray() const;
 	};
+
 
 	struct LogicModuleInfo
 	{
@@ -44,36 +45,39 @@ namespace Hardware
 		int moduleType = 0;
 	};
 
+
 	class ModuleFirmware
 	{
 	public:
-		void addFirmwareData(int uartId, const QString& uartType,
-				  int eepromFramePayloadSize,
-				  int eepromFrameCount);
+		void addFirmwareData(int uartId,
+							 const QString& uartType,
+							 int eepromFramePayloadSize,
+							 int eepromFrameCount);
 
 		void init(const QString& subsysId,
-				  int ssKey, const QString& lmDescriptionFile,
+				  int ssKey,
+				  const QString& lmDescriptionFile,
 				  int lmDescriptionNumber);
 
 		// Data access
 		//
 	public:
-		std::vector<UartPair> uartList() const;
-		bool uartExists(int uartId) const;
+		[[nodiscard]] std::vector<UartPair> uartList() const;
+		[[nodiscard]] bool uartExists(int uartId) const;
 
-		ModuleFirmwareData& firmwareData(int uartId, bool* ok);
-		const ModuleFirmwareData& firmwareData(int uartId, bool* ok) const;
+		[[nodiscard]] ModuleFirmwareData& firmwareData(int uartId, bool* ok);
+		[[nodiscard]] const ModuleFirmwareData& firmwareData(int uartId, bool* ok) const;
 
-		int eepromFramePayloadSize(int uartId) const;
-		int eepromFrameSize(int uartId) const;
-		int eepromFrameCount(int uartId) const;
+		[[nodiscard]] int eepromFramePayloadSize(int uartId) const;
+		[[nodiscard]] int eepromFrameSize(int uartId) const;
+		[[nodiscard]] int eepromFrameCount(int uartId) const;
 
-		const std::vector<quint8>& frame(int uartId, int frameIndex) const;
+		[[nodiscard]] const std::vector<quint8>& frame(int uartId, int frameIndex) const;
 
-		QString subsysId() const;
-		quint16 ssKey() const;
-		QString lmDescriptionFile() const;
-		int lmDescriptionNumber() const;
+		[[nodiscard]] QString subsysId() const;
+		[[nodiscard]] quint16 ssKey() const;
+		[[nodiscard]] QString lmDescriptionFile() const;
+		[[nodiscard]] int lmDescriptionNumber() const;
 
 		void addLogicModuleInfo(const QString& equipmentId,
 								const QString& subsystemId,
@@ -86,7 +90,7 @@ namespace Hardware
 								);
 		void addLogicModuleInfo(const LogicModuleInfo& lmi);
 
-		const std::vector<LogicModuleInfo>& logicModulesInfo() const;
+		[[nodiscard]] const std::vector<LogicModuleInfo>& logicModulesInfo() const;
 
 	private:
 		QString m_subsysId;
@@ -100,6 +104,7 @@ namespace Hardware
 
 		std::vector<LogicModuleInfo> m_lmInfo;
 	};
+
 
 	class ModuleFirmwareStorage : public QObject
 	{
@@ -120,18 +125,18 @@ namespace Hardware
 		bool load(const QByteArray& data, QString* errorCode);
 		bool loadHeader(QString fileName, QString* errorCode);
 
-		bool hasBinaryData() const;
+		[[nodiscard]] bool hasBinaryData() const;
 
 		void clear();
 
 		// Firmware operations
 		//
 		void createFirmware(const QString& subsysId, int ssKey, int uartId, const QString& uartType, int frameSize, int frameCount, const QString& lmDescriptionFile, int lmDescriptionNumber);
-		ModuleFirmware& firmware(const QString& subsysId, bool* ok);
+		[[nodiscard]] ModuleFirmware& firmware(const QString& subsysId, bool* ok);
 
-		bool isEmpty() const;
-		QStringList subsystems() const;
-		QString subsystemsString() const;
+		[[nodiscard]] bool isEmpty() const;
+		[[nodiscard]] QStringList subsystems() const;
+		[[nodiscard]] QString subsystemsString() const;
 
 	private:
 		bool parse(const QByteArray& data, bool readDataFrames, QString* errorCode);
@@ -140,13 +145,13 @@ namespace Hardware
 		// Properties, for access from JS it is "public slots"
 		//
 	public slots:
-		int fileVersion() const;
-		int maxFileVersion() const;
+		[[nodiscard]] int fileVersion() const;
+		[[nodiscard]] int maxFileVersion() const;
 
-		QString projectName() const;
-		QString userName() const;
-		int changesetId() const;
-		int buildNumber() const;
+		[[nodiscard]] QString projectName() const;
+		[[nodiscard]] QString userName() const;
+		[[nodiscard]] int changesetId() const;
+		[[nodiscard]] int buildNumber() const;
 
 		// Data
 		//

@@ -1,4 +1,8 @@
-#include "../lib/ModuleFirmware.h"
+#ifndef HARDWARE_LIB_DOMAIN
+#error Don't include this file in the project! Link HardwareLib instead.
+#endif
+
+#include "ModuleFirmware.h"
 #include "../UtilsLib/Crc.h"
 #include <QFile>
 #include <QMap>

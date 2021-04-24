@@ -10,8 +10,8 @@
 #include "SimTimeController.h"
 #include "SimCommandProcessor.h"
 #include "../lib/LmDescription.h"
-#include "../lib/ModuleFirmware.h"
 #include "../lib/LogicModulesInfo.h"
+#include "../HardwareLib/ModuleFirmware.h"
 
 
 namespace Sim

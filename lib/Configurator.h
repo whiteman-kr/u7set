@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QSerialPort>
-#include "../lib/ModuleFirmware.h"
+#include "../HardwareLib/ModuleFirmware.h"
 #include "../lib/OutputLog.h"
 
 #include <optional>

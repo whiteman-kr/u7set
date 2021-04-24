@@ -1,5 +1,5 @@
 #include "SimLogicModule.h"
-#include "../lib/ModuleFirmware.h"
+#include "../HardwareLib/ModuleFirmware.h"
 #include "Simulator.h"
 
 namespace Sim

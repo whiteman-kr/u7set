@@ -12,8 +12,8 @@
 #include <QMutex>
 #include <QTimerEvent>
 #include "../lib/LmDescription.h"
-#include "../lib/ModuleFirmware.h"
 #include "../lib/LogicModulesInfo.h"
+#include "../HardwareLib/ModuleFirmware.h"
 #include "SimEeprom.h"
 #include "SimRam.h"
 #include "SimConnections.h"

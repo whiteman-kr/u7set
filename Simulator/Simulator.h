@@ -3,7 +3,7 @@
 #include <memory>
 #include <map>
 #include <vector>
-#include "../lib/ModuleFirmware.h"
+#include "../HardwareLib/ModuleFirmware.h"
 #include "../lib/LmDescription.h"
 #include "../lib/ILogFile.h"
 #include "SimSubsystem.h"

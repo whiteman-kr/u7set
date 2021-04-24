@@ -2,7 +2,7 @@
 
 #include "../DbLib/DbController.h"
 #include "../HardwareLib/DeviceObject.h"
-#include "../lib/ModuleFirmware.h"
+#include "../HardwareLib/ModuleFirmware.h"
 #include "../TuningService/TuningDataStorage.h"
 #include "IssueLogger.h"
 #include "LmDescriptionSet.h"

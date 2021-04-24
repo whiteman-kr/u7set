@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QtConcurrent/QtConcurrent>
-#include "../lib/ModuleFirmware.h"
+#include "../HardwareLib/ModuleFirmware.h"
 #include "../lib/LogicModulesInfo.h"
 #include "SimScriptRamAddress.h"
 #include "SimScriptLogicModule.h"

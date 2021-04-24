@@ -2,7 +2,7 @@
 #include <cassert>
 #include <QJsonDocument>
 #include <QtEndian>
-#include "../lib/ModuleFirmware.h"
+#include "../HardwareLib/ModuleFirmware.h"
 
 namespace Sim
 {

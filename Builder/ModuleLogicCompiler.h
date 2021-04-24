@@ -1,22 +1,22 @@
 #pragma once
 
 #include "../HardwareLib/DeviceObject.h"
-
+#include "../HardwareLib/ModuleFirmware.h"
+#include "../HardwareLib/Connection.h"
 #include "../lib/OrderedHash.h"
-#include "../lib/ModuleFirmware.h"
-
+#include "../lib/ComparatorSet.h"
 #include "../TuningService/TuningDataStorage.h"
 
 #include "BuildResultWriter.h"
 #include "ConnectionStorage.h"
 #include "OptoModule.h"
 #include "LmMemoryMap.h"
-#include "../lib/ComparatorSet.h"
+
 #include "UalItems.h"
 #include "MemWriteMap.h"
 #include "Loopbacks.h"
 
-#include "../HardwareLib/Connection.h"
+
 #include "../lib/AppSignalStateFlags.h"
 
 class LmDescription;

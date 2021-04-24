@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/ModuleFirmware.h"
+#include "../HardwareLib/ModuleFirmware.h"
 #include "IssueLogger.h"
 
 #include "../Metrology/UnitsConvertor.h"

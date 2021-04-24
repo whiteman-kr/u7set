@@ -62,6 +62,7 @@ CONFIG(release, debug|release) {
 HEADERS += \
 	Connection.h \
 	DeviceObject.h \
+	ModuleFirmware.h \
 	ScriptDeviceObject.h \
 	Stable.h \
 	Subsystem.h
@@ -69,6 +70,7 @@ HEADERS += \
 SOURCES += \
     Connection.cpp \
     DeviceObject.cpp \
+    ModuleFirmware.cpp \
     ScriptDeviceObject.cpp \
     Subsystem.cpp
 
