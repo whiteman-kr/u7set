@@ -31,7 +31,7 @@
 	#pragma warning(disable : 28182)
 #endif
 
-//#include <QtCore>
+#include <QVector>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

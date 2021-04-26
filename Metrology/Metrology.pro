@@ -100,7 +100,6 @@ SOURCES += \
 HEADERS  += \
     Stable.h \
 	../lib/AppSignal.h \
-	../lib/Types.h \
 	../lib/OrderedHash.h \
 	../CommonLib/PropertyObject.h \
 	../lib/AppSignalParam.h \

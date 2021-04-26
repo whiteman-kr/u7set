@@ -33,7 +33,6 @@ SOURCES += \
     ../lib/BuildInfo.cpp \
     ../lib/DataSource.cpp \
 	../lib/SoftwareSettings.cpp \
-    ../lib/Types.cpp \
     ../lib/AppSignal.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Times.cpp \
@@ -54,7 +53,6 @@ HEADERS += \
     ../lib/OrderedHash.h \
     ../lib/DataSource.h \
 	../lib/SoftwareSettings.h \
-    ../lib/Types.h \
     ../lib/AppSignal.h \
 	../lib/PropertyObject.h \
     ../lib/TuningValue.h \

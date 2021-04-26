@@ -30,7 +30,6 @@ unix {
 }
 
 SOURCES += \
-    ../lib/Types.cpp \
     ../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
 	DiagDataService.cpp \
@@ -38,7 +37,6 @@ SOURCES += \
 
 HEADERS += \
 	Stable.h \
-    ../lib/Types.h \
     ../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
 	DiagDataService.h \
