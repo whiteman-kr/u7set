@@ -20,31 +20,33 @@ public slots:
 	bool checkSocket();
 
 private:
-	QComboBox* m_endiansCombo;
-	QComboBox* m_sourceAddressCombo;
-	QLineEdit* m_sourcePortEdit;
-	QLineEdit* m_destinationAddressEdit;
-	QLineEdit* m_destinationPortEdit;
+	QComboBox* m_endiansCombo = nullptr;
+	QComboBox* m_sourceAddressCombo = nullptr;
+	QLineEdit* m_sourcePortEdit = nullptr;
+	QLineEdit* m_destinationAddressEdit = nullptr;
+	QLineEdit* m_destinationPortEdit = nullptr;
 
-	QLineEdit* m_moduleIdEdit;
+	QLineEdit* m_moduleIdEdit = nullptr;
 
-	QLineEdit* m_uniqueId;
+	QLineEdit* m_uniqueId = nullptr;
 
-	QLineEdit* m_channelNumber;
-	QLineEdit* m_subsystemCode;
+	QLineEdit* m_channelNumber = nullptr;
+	QLineEdit* m_subsystemCode = nullptr;
 
-	QComboBox* m_operationCode;
-	QLineEdit* m_flags;
-	QLineEdit* m_startAddress;
-	QLineEdit* m_fotipFrameSize;
-	QLineEdit* m_romSize;
-	QLineEdit* m_romFrameSize;
-	QComboBox* m_dataType;
+	QComboBox* m_operationCode = nullptr;
+	QLineEdit* m_flags = nullptr;
+	QLineEdit* m_startAddress = nullptr;
+	QLineEdit* m_fotipFrameSize = nullptr;
+	QLineEdit* m_romSize = nullptr;
+	QLineEdit* m_romFrameSize = nullptr;
+	QComboBox* m_dataType = nullptr;
 
-	QComboBox* m_fillFotipDataMethod;
+	QComboBox* m_fillFotipDataMethod = nullptr;
 
 	std::shared_ptr<QUdpSocket> m_socket;
-	PacketSourceModel* m_packetSourceModel;
+	PacketSourceModel* m_packetSourceModel = nullptr;
 
-	int numerator;
+	quint16 m_numerator = 0;
+
+	QRandomGenerator m_randGen;
 };

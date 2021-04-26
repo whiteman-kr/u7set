@@ -4,7 +4,7 @@
 #include "DbMetrologyConnection.h"
 #include "../lib/SoftwareSettings.h"
 #include "../HardwareLib/DeviceObject.h"
-#include "../lib/SignalProperties.h"
+#include "../lib/AppSignalProperties.h"
 
 namespace Builder
 {

@@ -445,6 +445,14 @@ public:
 	};
 	Q_ENUM(TimeType)
 
+	enum class TuningSignalType
+	{
+		AnalogFloat = 0,				// Don't change this values without TuningDataStorage.h/cpp code review
+		AnalogInt32 = 1,				// This values used as indexes in arrays!
+		Discrete = 2
+	};
+	Q_ENUM(TuningSignalType)
+
 	// RtTrendsSamplePeriod
 	//
 	// ATTENTION: After changes in this enum function getSamplePeriodCounter() MUST BE CHECKED !!!

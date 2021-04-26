@@ -42,6 +42,17 @@ SOURCES += \
 	../lib/SoftwareInfo.cpp \
 	BaseServiceMain.cpp \
 
+INCLUDEPATH += ./../Protobuf
+
+# Add curent dir to a list of library directory paths
+#
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+# --
+#
+LIBS += -L$$DESTDIR
+LIBS += -L.
+
 # Visual Leak Detector
 #
 win32 {
@@ -49,38 +60,18 @@ win32 {
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
 
+
 # ServiceLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
-}
+LIBS += -lServiceLib
 
 # OnlineLib
 #
-win32 {
-        CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-        CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-        CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
+LIBS += -lOnlineLib
 
 # UtilsLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
+LIBS += -lUtilsLib
 
 # CommonLib
 #
@@ -88,5 +79,5 @@ LIBS += -lCommonLib
 
 # Protobuf
 #
-LIBS += -L$$DESTDIR -lprotobuf
-INCLUDEPATH += ./../Protobuf
+LIBS += -lprotobuf
+

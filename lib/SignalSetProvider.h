@@ -1,6 +1,6 @@
 #pragma once
 #include "../Builder/SignalSet.h"
-#include "SignalProperties.h"
+#include "AppSignalProperties.h"
 #include "AppSignalParam.h"
 #include "../DbLib/DbStruct.h"
 
@@ -73,7 +73,7 @@ private:
 
 	static TuningValue variant2TuningValue(const QVariant& variant, TuningValueType type);
 
-	void addNewProperty(const SignalPropertyDescription& newProperty);
+	void addNewProperty(const AppSignalPropertyDescription& newProperty);
 
 	static void trimm(QStringList& stringList);
 
@@ -87,7 +87,7 @@ private:
 
 	// is initialized by non specific properties
 	//
-	std::vector<SignalPropertyDescription> m_basicPropertyDescription = {
+	std::vector<AppSignalPropertyDescription> m_basicPropertyDescription = {
 		{ AppSignalPropNames::APP_SIGNAL_ID,
 		  AppSignalPropNames::APP_SIGNAL_ID,
 		  QVariant::String, {},
@@ -124,7 +124,7 @@ private:
 		  [](const AppSignal* s){ return TO_INT(s->inOutType()); },
 		  [](AppSignal* s, QVariant v){ s->setInOutType(IntToEnum<E::SignalInOutType>(v.toInt())); }, },
 	};
-	std::vector<SignalPropertyDescription> m_propertyDescription;
+	std::vector<AppSignalPropertyDescription> m_propertyDescription;
 };
 
 class SignalSetProvider : public QObject

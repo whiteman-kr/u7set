@@ -30,7 +30,6 @@ unix {
 }
 
 SOURCES += \
-    ../lib/LanControllerInfoHelper.cpp \
 	../lib/SoftwareSettings.cpp \
     ../lib/DataSource.cpp \
     ../lib/AppSignal.cpp \
@@ -38,15 +37,9 @@ SOURCES += \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
-    ../lib/OutputLog.cpp \
-    ../lib/DeviceHelper.cpp \
     ../lib/Times.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
-    ../lib/SignalProperties.cpp \
-	../lib/AppSignalStateFlags.cpp \
     ../lib/WidgetUtils.cpp \
-	../Builder/IssueLogger.cpp \
-	../Builder/ModulesRawData.cpp \
 	../AppDataService/DynamicAppSignalState.cpp \
 	../AppDataService/AppDataSource.cpp \
 	../AppDataService/RtTrendsServer.cpp \
@@ -66,9 +59,6 @@ SOURCES += \
 
 HEADERS  += \
 	Stable.h \
-    ../lib/CUtils.h \
-    ../lib/LanControllerInfo.h \
-    ../lib/LanControllerInfoHelper.h \
     ../lib/SoftwareSettings.h \
     ../lib/DataSource.h \
     ../lib/AppSignal.h \
@@ -79,14 +69,8 @@ HEADERS  += \
     ../lib/OrderedHash.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
-    ../lib/OutputLog.h \
-    ../lib/DeviceHelper.h \
     ../lib/Times.h \
     ../lib/Tuning/TuningSignalState.h \
-    ../lib/SignalProperties.h \
-    ../lib/AppSignalStateFlags.h \
-	../Builder/IssueLogger.h \
-	../Builder/ModulesRawData.h \
 	../AppDataService/DynamicAppSignalState.h \
 	../AppDataService/AppDataSource.h \
 	../AppDataService/RtTrendsServer.h \
@@ -127,7 +111,6 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
-
 # Visual Leak Detector
 #
 win32 {
@@ -146,10 +129,6 @@ LIBS += -lServiceLib
 # UtilsLib
 #
 LIBS += -lUtilsLib
-
-# HardwareLib
-#
-LIBS += -lHardwareLib
 
 # CommonLib
 #

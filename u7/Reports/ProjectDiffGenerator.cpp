@@ -1,6 +1,6 @@
 #include "ProjectDiffGenerator.h"
 
-#include "../lib/SignalProperties.h"
+#include "../lib/AppSignalProperties.h"
 #include "../lib/PropertyEditor.h"
 #include "../HardwareLib/Connection.h"
 #include "../VFrame30/DrawParam.h"
@@ -2135,8 +2135,8 @@ void ProjectDiffGenerator::compareSignalContents(const AppSignal& sourceSignal,
 		return;
 	}
 
-	SignalProperties sourceProperties(sourceSignal);
-	SignalProperties targetProperties(targetSignal);
+	AppSignalProperties sourceProperties(sourceSignal);
+	AppSignalProperties targetProperties(targetSignal);
 
 	auto p = sourceProperties.propertyByCaption(AppSignalPropNames::CHANGESET_ID);
 	if (p != nullptr)

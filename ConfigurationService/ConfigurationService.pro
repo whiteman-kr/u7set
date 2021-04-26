@@ -56,11 +56,16 @@ HEADERS += \
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-# Protobuf
-#
-LIBS += -L$$DESTDIR -lprotobuf
 INCLUDEPATH += ./../Protobuf
 
+# Add curent dir to a list of library directory paths
+#
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+# --
+#
+LIBS += -L$$DESTDIR
+LIBS += -L.
 
 DISTFILES += \
     ../Proto/network.proto
@@ -72,39 +77,22 @@ win32 {
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
 
-# OnlineLib
+# Protobuf
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
+LIBS += -lprotobuf
 
 # ServiceLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
-}
+LIBS += -lServiceLib
 
-# UtilsLib
+# OnlineLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
+LIBS += -lOnlineLib
 
 # CommonLib
 #
 LIBS += -lCommonLib
+
+# UtilsLib
+#
+LIBS += -lUtilsLib

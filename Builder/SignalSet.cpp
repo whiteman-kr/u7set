@@ -1,6 +1,6 @@
 #include "SignalSet.h"
 #include "../UtilsLib/WUtils.h"
-#include "../lib/SignalProperties.h"
+#include "../lib/AppSignalProperties.h"
 
 namespace Builder
 {

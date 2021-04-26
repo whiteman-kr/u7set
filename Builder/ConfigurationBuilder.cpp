@@ -4,8 +4,8 @@
 #include "../HardwareLib/DeviceObject.h"
 #include "../HardwareLib/ScriptDeviceObject.h"
 #include "../UtilsLib/Crc.h"
-#include "../lib/SignalProperties.h"
 #include "../HardwareLib/Connection.h"
+#include "../lib/AppSignalProperties.h"
 #include "IssueLogger.h"
 #include "SignalSet.h"
 
@@ -41,7 +41,7 @@ namespace Builder
 		{
 			if ((*m_signalSet)[i].equipmentID() == equpmentID)
 			{
-				SignalProperties* sp = new SignalProperties((*m_signalSet)[i]);
+				AppSignalProperties* sp = new AppSignalProperties((*m_signalSet)[i]);
 				return sp;
 
 				//QObject* c = &(*m_signalSet)[i];

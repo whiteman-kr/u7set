@@ -4,7 +4,7 @@
 #include "SignalPropertiesDialog.h"
 #include "SignalsTabPage.h"
 #include "Settings.h"
-#include "../lib/SignalProperties.h"
+#include "../lib/AppSignalProperties.h"
 #include "../lib/PropertyEditor.h"
 #include "../DbLib/DbController.h"
 #include "../lib/WidgetUtils.h"
@@ -196,7 +196,7 @@ void initNewSignal(AppSignal& signal)
 		}
 
 		QString name = propertyManager.name(i);
-		QVariant value = settings.value(SignalProperties::lastEditedSignalFieldValuePlace + name, QVariant());
+		QVariant value = settings.value(AppSignalProperties::lastEditedSignalFieldValuePlace + name, QVariant());
 		if (value.isValid() == false)
 		{
 			continue;
@@ -323,7 +323,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 				}
 			}
 		}
-		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(appSignal, true);
+		std::shared_ptr<AppSignalProperties> signalProperties = std::make_shared<AppSignalProperties>(appSignal, true);
 
 		if (readOnly == true)
 		{
@@ -409,7 +409,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	//
 	for (auto object : m_objList)
 	{
-		auto signalProperties = dynamic_cast<SignalProperties*>(object.get());
+		auto signalProperties = dynamic_cast<AppSignalProperties*>(object.get());
 		if (signalProperties == nullptr)
 		{
 			assert(false);
@@ -431,7 +431,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	{
 		AppSignal& signal = *m_signalVector[i];
 
-		SignalProperties* signalProperties = dynamic_cast<SignalProperties*>(m_objList[i].get());
+		AppSignalProperties* signalProperties = dynamic_cast<AppSignalProperties*>(m_objList[i].get());
 		if (signalProperties == nullptr)
 		{
 			assert(false);
@@ -497,7 +497,7 @@ void SignalPropertiesDialog::rejectCheckoutProperty()
 {
 	for (std::shared_ptr<PropertyObject> object : m_objList)
 	{
-		SignalProperties* signalProperites = dynamic_cast<SignalProperties*>(object.get());
+		AppSignalProperties* signalProperites = dynamic_cast<AppSignalProperties*>(object.get());
 		AppSignal& signal = signalProperites->signal();
 		int id = signal.ID();
 		if (!signal.checkedOut() && m_editedSignalsId.contains(id))
@@ -523,7 +523,7 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 
 	for (std::shared_ptr<PropertyObject> object : objects)
 	{
-		SignalProperties* signalProperties = dynamic_cast<SignalProperties*>(object.get());
+		AppSignalProperties* signalProperties = dynamic_cast<AppSignalProperties*>(object.get());
 
 		if (signalProperties == nullptr)
 		{
@@ -553,7 +553,7 @@ void SignalPropertiesDialog::checkoutSignals(QList<std::shared_ptr<PropertyObjec
 {
 	for (std::shared_ptr<PropertyObject> object : objects)
 	{
-		SignalProperties* signalProperites = dynamic_cast<SignalProperties*>(object.get());
+		AppSignalProperties* signalProperites = dynamic_cast<AppSignalProperties*>(object.get());
 		AppSignal& signal = signalProperites->signal();
 		int id = signal.ID();
 		if (signal.checkedOut() || m_editedSignalsId.contains(id))
@@ -713,6 +713,6 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 		}
 
 		QString name = manager.name(i);
-		settings.setValue(SignalProperties::lastEditedSignalFieldValuePlace + name, manager.value(&signal, i, theSettings.isExpertMode()));
+		settings.setValue(AppSignalProperties::lastEditedSignalFieldValuePlace + name, manager.value(&signal, i, theSettings.isExpertMode()));
 	}
 }

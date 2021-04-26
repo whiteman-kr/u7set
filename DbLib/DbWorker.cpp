@@ -14,7 +14,7 @@
 
 #include "DbWorker.h"
 #include "DbProgress.h"
-#include "../lib/SignalProperties.h"
+#include "../lib/AppSignalProperties.h"
 #include "../HardwareLib/DeviceObject.h"
 
 // Upgrade database
@@ -7548,7 +7548,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 //	const int SD_INSTANCE_CREATED = 46;
 //	const int SD_INSTANCE_ACTION = 47;
 
-	SignalSpecPropValues inputSpecPropValues;
+	AppSignalSpecPropValues inputSpecPropValues;
 
 	result = inputSpecPropValues.createFromSpecPropStruct(AppSignalDefaultSpecPropStruct::INPUT_ANALOG);
 
@@ -7558,7 +7558,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 		return false;
 	}
 
-	SignalSpecPropValues outputSpecPropValues;
+	AppSignalSpecPropValues outputSpecPropValues;
 
 	result = outputSpecPropValues.createFromSpecPropStruct(AppSignalDefaultSpecPropStruct::OUTPUT_ANALOG);
 
@@ -7568,7 +7568,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 		return false;
 	}
 
-	SignalSpecPropValues internalSpecPropValues;
+	AppSignalSpecPropValues internalSpecPropValues;
 
 	result = internalSpecPropValues.createFromSpecPropStruct(AppSignalDefaultSpecPropStruct::INTERNAL_ANALOG);
 
@@ -7800,7 +7800,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* err
 			continue;
 		}
 
-		SignalSpecPropValues spv;
+		AppSignalSpecPropValues spv;
 
 		bool res = spv.parseValuesFromArray(specPropValuesData);
 

@@ -5,15 +5,114 @@
 
 // -------------------------------------------------------------------------------------------------------------
 //
+// AppSignalStateFlags class implementation
+//
+// -------------------------------------------------------------------------------------------------------------
+
+void AppSignalStateFlags::setFlag(E::AppSignalStateFlagType flagType, quint32 value)
+{
+	// set flagValue to corresponding flag
+	//
+	switch (flagType)
+	{
+	case E::AppSignalStateFlagType::Validity:
+		valid = value;
+		return;
+
+	case E::AppSignalStateFlagType::StateAvailable:
+		stateAvailable = value;
+		return;
+
+	case E::AppSignalStateFlagType::Simulated:
+		simulated  = value;
+		return;
+
+	case E::AppSignalStateFlagType::Blocked:
+		blocked = value;
+		return;
+
+	case E::AppSignalStateFlagType::Mismatch:
+		mismatch = value;
+		return;
+
+	case E::AppSignalStateFlagType::AboveHighLimit:
+		aboveHighLimit = value;
+		return;
+
+	case E::AppSignalStateFlagType::BelowLowLimit:
+		belowLowLimit = value;
+		return;
+
+	case E::AppSignalStateFlagType::SwSimulated:
+		swSimulated = value;
+		return;
+	}
+
+	Q_ASSERT(false);
+	return;
+}
+
+void AppSignalStateFlags::clear()
+{
+	all = 0;
+}
+
+void AppSignalStateFlags::clearReasonsFlags()
+{
+	all &= ~MASK_ALL_ARCHIVING_REASONS;
+}
+
+bool AppSignalStateFlags::hasArchivingReason() const
+{
+	return (all & MASK_ALL_ARCHIVING_REASONS) != 0;
+}
+
+bool AppSignalStateFlags::hasShortTermArchivingReasonOnly() const
+{
+	quint32 archivingReasons = all & MASK_ALL_ARCHIVING_REASONS;
+
+	return	(archivingReasons & ~MASK_SHORT_TERM_ARCHIVING_REASONE) == 0 &&
+			(archivingReasons & MASK_SHORT_TERM_ARCHIVING_REASONE) != 0;
+}
+
+bool AppSignalStateFlags::hasAutoPointReasonOnly() const
+{
+	quint32 archivingReasons = all & MASK_ALL_ARCHIVING_REASONS;
+
+	return	(archivingReasons & ~MASK_AUTO_POINT_REASONE) == 0 &&
+			(archivingReasons & MASK_AUTO_POINT_REASONE) != 0;
+}
+
+void AppSignalStateFlags::updateArchivingReasonFlags(const AppSignalStateFlags& prevFlags)
+{
+	quint32 changedFlags = all ^ prevFlags.all;
+
+	validityChange = (changedFlags & MASK_VALIDITY_AND_AVAILABLE_FLAGS) == 0 ? 0 : 1;
+	simBlockMismatchChange = (changedFlags & MASK_SIM_BLOCK_UNBL_FLAGS) == 0 ? 0 : 1;
+	limitFlagsChange = (changedFlags & MASK_LIMITS_FLAGS) == 0 ? 0 : 1;
+}
+
+QString AppSignalStateFlags::print()
+{
+	return QString("Valid=%1 Avail=%2 Sim=%3 Blk=%4 Unbl=%5 HLim=%6 LLim=%7 SwSim=%8 "
+				   "[Reasons: ValCh=%9 SBUCh=%10 Lim=%11 Auto=%12 Fine=%13 Coarse=%14]").
+			arg(valid).arg(stateAvailable).arg(simulated).arg(blocked).
+			arg(mismatch).arg(aboveHighLimit).arg(belowLowLimit).arg(swSimulated).
+			arg(validityChange).arg(simBlockMismatchChange).arg(limitFlagsChange).
+			arg(autoPoint).arg(fineAperture).arg(coarseAperture);
+}
+
+// -------------------------------------------------------------------------------------------------------------
+//
 // SignalSpecPropValue class implementation
 //
 // -------------------------------------------------------------------------------------------------------------
 
-SignalSpecPropValue::SignalSpecPropValue()
+AppSignalSpecPropValue::AppSignalSpecPropValue()
 {
 }
 
-bool SignalSpecPropValue::create(std::shared_ptr<Property> prop)
+bool AppSignalSpecPropValue::create(std::shared_ptr<Property> prop)
 {
 	if (prop == nullptr)
 	{
@@ -24,7 +123,7 @@ bool SignalSpecPropValue::create(std::shared_ptr<Property> prop)
 	return create(prop->caption(), prop->value(), prop->isEnum());
 }
 
-bool SignalSpecPropValue::create(const QString& name, const QVariant& value, bool isEnum)
+bool AppSignalSpecPropValue::create(const QString& name, const QVariant& value, bool isEnum)
 {
 	m_name = name;
 	m_value = value;
@@ -33,7 +132,7 @@ bool SignalSpecPropValue::create(const QString& name, const QVariant& value, boo
 	return true;
 }
 
-bool SignalSpecPropValue::setValue(const QString& name, const QVariant& value, bool isEnum)
+bool AppSignalSpecPropValue::setValue(const QString& name, const QVariant& value, bool isEnum)
 {
 	if (name != m_name)
 	{
@@ -58,12 +157,12 @@ bool SignalSpecPropValue::setValue(const QString& name, const QVariant& value, b
 	return true;
 }
 
-bool SignalSpecPropValue::setAnyValue(const QString& name, const QVariant& value)
+bool AppSignalSpecPropValue::setAnyValue(const QString& name, const QVariant& value)
 {
 	return setValue(name, value, m_isEnum);
 }
 
-bool SignalSpecPropValue::save(Proto::SignalSpecPropValue* protoValue) const
+bool AppSignalSpecPropValue::save(Proto::SignalSpecPropValue* protoValue) const
 {
 	TEST_PTR_RETURN_FALSE(protoValue);
 
@@ -114,7 +213,7 @@ bool SignalSpecPropValue::save(Proto::SignalSpecPropValue* protoValue) const
 	return false;
 }
 
-bool SignalSpecPropValue::load(const Proto::SignalSpecPropValue& protoValue)
+bool AppSignalSpecPropValue::load(const Proto::SignalSpecPropValue& protoValue)
 {
 	m_name = QString::fromStdString(protoValue.name());
 
@@ -184,12 +283,12 @@ bool SignalSpecPropValue::load(const Proto::SignalSpecPropValue& protoValue)
 //
 // ----------------------------------------------------------------------------------------------------------
 
-SignalSpecPropValues::SignalSpecPropValues()
+AppSignalSpecPropValues::AppSignalSpecPropValues()
 {
 }
 
 
-bool SignalSpecPropValues::create(const AppSignal& s)
+bool AppSignalSpecPropValues::create(const AppSignal& s)
 {
 	bool result = true;
 
@@ -200,7 +299,7 @@ bool SignalSpecPropValues::create(const AppSignal& s)
 }
 
 
-bool SignalSpecPropValues::createFromSpecPropStruct(const QString& specPropStruct, bool buildNamesMap)
+bool AppSignalSpecPropValues::createFromSpecPropStruct(const QString& specPropStruct, bool buildNamesMap)
 {
 	m_specPropValues.clear();
 	m_propNamesMap.clear();
@@ -224,7 +323,7 @@ bool SignalSpecPropValues::createFromSpecPropStruct(const QString& specPropStruc
 
 	for(std::shared_ptr<Property> property : properties)
 	{
-		SignalSpecPropValue specPropValue;
+		AppSignalSpecPropValue specPropValue;
 
 		bool createResult = specPropValue.create(property);
 		if (createResult == false)
@@ -244,7 +343,7 @@ bool SignalSpecPropValues::createFromSpecPropStruct(const QString& specPropStruc
 	return true;
 }
 
-bool SignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropStruct)
+bool AppSignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropStruct)
 {
 	PropertyObject pob;
 
@@ -302,7 +401,7 @@ bool SignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropStruc
 
 	buildPropNamesMap();
 
-	for(const SignalSpecPropValue& specPropValue : m_specPropValues)
+	for(const AppSignalSpecPropValue& specPropValue : m_specPropValues)
 	{
 		if (pob.propertyByCaption(specPropValue.name()) == nullptr)
 		{
@@ -329,7 +428,7 @@ bool SignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropStruc
 	//
 	for(std::shared_ptr<Property> property : namesToCreate)
 	{
-		SignalSpecPropValue specPropValue;
+		AppSignalSpecPropValue specPropValue;
 
 		specPropValue.create(property);
 
@@ -339,12 +438,12 @@ bool SignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropStruc
 	return true;
 }
 
-bool SignalSpecPropValues::setValue(const QString& name, const QVariant& value)
+bool AppSignalSpecPropValues::setValue(const QString& name, const QVariant& value)
 {
 	return setValue(name, value, false);
 }
 
-bool SignalSpecPropValues::setAnyValue(const QString& name, const QVariant& value)
+bool AppSignalSpecPropValues::setAnyValue(const QString& name, const QVariant& value)
 {
 	int index = getPropertyIndex(name);
 
@@ -356,7 +455,7 @@ bool SignalSpecPropValues::setAnyValue(const QString& name, const QVariant& valu
 	return m_specPropValues[index].setAnyValue(name, value);
 }
 
-bool SignalSpecPropValues::setEnumValue(const QString& name, int enumItemValue)
+bool AppSignalSpecPropValues::setEnumValue(const QString& name, int enumItemValue)
 {
 	int index = getPropertyIndex(name);
 
@@ -368,12 +467,12 @@ bool SignalSpecPropValues::setEnumValue(const QString& name, int enumItemValue)
 	return m_specPropValues[index].setValue(name, QVariant(enumItemValue), true);
 }
 
-bool SignalSpecPropValues::setValue(const SignalSpecPropValue& propValue)
+bool AppSignalSpecPropValues::setValue(const AppSignalSpecPropValue& propValue)
 {
 	return setValue(propValue.name(), propValue.value(), propValue.isEnum());
 }
 
-bool SignalSpecPropValues::getValue(const QString& name, QVariant* qv) const
+bool AppSignalSpecPropValues::getValue(const QString& name, QVariant* qv) const
 {
 	TEST_PTR_RETURN_FALSE(qv);
 
@@ -389,7 +488,7 @@ bool SignalSpecPropValues::getValue(const QString& name, QVariant* qv) const
 	return true;
 }
 
-bool SignalSpecPropValues::getValue(const QString& name, QVariant* qv, bool* isEnum) const
+bool AppSignalSpecPropValues::getValue(const QString& name, QVariant* qv, bool* isEnum) const
 {
 	TEST_PTR_RETURN_FALSE(qv);
 	TEST_PTR_RETURN_FALSE(isEnum);
@@ -407,14 +506,13 @@ bool SignalSpecPropValues::getValue(const QString& name, QVariant* qv, bool* isE
 	return true;
 }
 
-
-bool SignalSpecPropValues::	serializeValuesToArray(QByteArray* protoData) const
+bool AppSignalSpecPropValues::	serializeValuesToArray(QByteArray* protoData) const
 {
 	TEST_PTR_RETURN_FALSE(protoData);
 
 	Proto::SignalSpecPropValues protoValues;
 
-	for(const SignalSpecPropValue& specPropValue : m_specPropValues)
+	for(const AppSignalSpecPropValue& specPropValue : m_specPropValues)
 	{
 		Proto::SignalSpecPropValue* protoValue = protoValues.add_value();
 		specPropValue.save(protoValue);
@@ -427,7 +525,7 @@ bool SignalSpecPropValues::	serializeValuesToArray(QByteArray* protoData) const
 	return true;
 }
 
-bool SignalSpecPropValues::parseValuesFromArray(const QByteArray& protoData)
+bool AppSignalSpecPropValues::parseValuesFromArray(const QByteArray& protoData)
 {
 	m_specPropValues.clear();
 
@@ -444,7 +542,7 @@ bool SignalSpecPropValues::parseValuesFromArray(const QByteArray& protoData)
 
 	for(int i = 0; i < count; i++)
 	{
-		SignalSpecPropValue specPropValue;
+		AppSignalSpecPropValue specPropValue;
 
 		specPropValue.load(protoValues.value(i));
 
@@ -456,16 +554,16 @@ bool SignalSpecPropValues::parseValuesFromArray(const QByteArray& protoData)
 	return true;
 }
 
-void SignalSpecPropValues::append(const SignalSpecPropValue& value)
+void AppSignalSpecPropValues::append(const AppSignalSpecPropValue& value)
 {
 	m_specPropValues.append(value);
 }
 
-bool SignalSpecPropValues::replaceName(const QString& oldName, const QString& newName)
+bool AppSignalSpecPropValues::replaceName(const QString& oldName, const QString& newName)
 {
 	bool replacingIsOccured = false;
 
-	for(SignalSpecPropValue& specPropValue : m_specPropValues)
+	for(AppSignalSpecPropValue& specPropValue : m_specPropValues)
 	{
 		if (specPropValue.name() == oldName)
 		{
@@ -478,7 +576,7 @@ bool SignalSpecPropValues::replaceName(const QString& oldName, const QString& ne
 	return replacingIsOccured;
 }
 
-void SignalSpecPropValues::buildPropNamesMap()
+void AppSignalSpecPropValues::buildPropNamesMap()
 {
 	m_propNamesMap.clear();
 
@@ -486,7 +584,7 @@ void SignalSpecPropValues::buildPropNamesMap()
 
 	int index = 0;
 
-	for(const SignalSpecPropValue& specPropValue : m_specPropValues)
+	for(const AppSignalSpecPropValue& specPropValue : m_specPropValues)
 	{
 		if (m_propNamesMap.contains(specPropValue.name()) == false)
 		{
@@ -501,7 +599,7 @@ void SignalSpecPropValues::buildPropNamesMap()
 	}
 }
 
-bool SignalSpecPropValues::setValue(const QString& name, const QVariant& value, bool isEnum)
+bool AppSignalSpecPropValues::setValue(const QString& name, const QVariant& value, bool isEnum)
 {
 	int index = getPropertyIndex(name);
 
@@ -513,7 +611,7 @@ bool SignalSpecPropValues::setValue(const QString& name, const QVariant& value, 
 	return m_specPropValues[index].setValue(name, value, isEnum);
 }
 
-int SignalSpecPropValues::getPropertyIndex(const QString& name) const
+int AppSignalSpecPropValues::getPropertyIndex(const QString& name) const
 {
 	if (m_propNamesMap.isEmpty() == false)
 	{
@@ -522,7 +620,7 @@ int SignalSpecPropValues::getPropertyIndex(const QString& name) const
 
 	int index = 0;
 
-	for(const SignalSpecPropValue& propValue : m_specPropValues)
+	for(const AppSignalSpecPropValue& propValue : m_specPropValues)
 	{
 		if (propValue.name() == name)
 		{
@@ -664,7 +762,7 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 										arg(deviceSignalEquipmentID);
 	}
 
-	SignalSpecPropValues spv;
+	AppSignalSpecPropValues spv;
 
 	spv.createFromSpecPropStruct(m_specPropStruct);
 
@@ -1080,11 +1178,11 @@ bool AppSignal::createSpecPropValues()
 
 	std::vector<std::shared_ptr<Property>> specificProperties = propObject.properties();
 
-	SignalSpecPropValues spValues;
+	AppSignalSpecPropValues spValues;
 
 	for(std::shared_ptr<Property> specificProperty : specificProperties)
 	{
-		SignalSpecPropValue spValue;
+		AppSignalSpecPropValue spValue;
 
 		spValue.create(specificProperty);
 
@@ -1100,7 +1198,7 @@ void AppSignal::cacheSpecPropValues()
 {
 	if (m_cachedSpecPropValues == nullptr)
 	{
-		m_cachedSpecPropValues = std::make_shared<SignalSpecPropValues>();
+		m_cachedSpecPropValues = std::make_shared<AppSignalSpecPropValues>();
 	}
 
 	m_cachedSpecPropValues->parseValuesFromArray(m_protoSpecPropValues);
@@ -2082,7 +2180,7 @@ bool AppSignal::getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum
 	}
 	else
 	{
-		SignalSpecPropValues spv;
+		AppSignalSpecPropValues spv;
 
 		bool res = spv.parseValuesFromArray(m_protoSpecPropValues);
 
@@ -2111,7 +2209,7 @@ bool AppSignal::isSpecPropExists(const QString& name) const
 		return m_cachedSpecPropValues->isExists(name);
 	}
 
-	SignalSpecPropValues spv;
+	AppSignalSpecPropValues spv;
 
 	bool result = spv.parseValuesFromArray(m_protoSpecPropValues);
 
@@ -2154,7 +2252,7 @@ bool AppSignal::setSpecPropEnum(const QString& name, int enumValue)
 
 bool AppSignal::setSpecPropValue(const QString& name, const QVariant& qv, bool isEnum)
 {
-	SignalSpecPropValues spv;
+	AppSignalSpecPropValues spv;
 
 	bool result = spv.parseValuesFromArray(m_protoSpecPropValues);
 

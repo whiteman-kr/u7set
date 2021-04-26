@@ -3,7 +3,7 @@
 #include "SignalPropertiesDialog.h"
 #include "BusStorage.h"
 #include "../DbLib/DbController.h"
-#include "../lib/SignalProperties.h"
+#include "../lib/AppSignalProperties.h"
 #include "../lib/WidgetUtils.h"
 #include "../UtilsLib/WUtils.h"
 #include "../lib/ConstStrings.h"
@@ -863,7 +863,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 				signalChanged = true;
 			}
 
-			SignalSpecPropValues specPropValues;
+			AppSignalSpecPropValues specPropValues;
 
 			result = specPropValues.parseValuesFromArray(s.protoSpecPropValues());
 
@@ -1812,7 +1812,7 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 
 	// Get versions from the project database
 	//
-	std::shared_ptr<SignalProperties> source = nullptr;
+	std::shared_ptr<AppSignalProperties> source = nullptr;
 
 	switch (compareData.sourceVersionType)
 	{
@@ -1826,7 +1826,7 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 			bool ok = db()->getSpecificSignals(&signalIds, compareData.sourceChangeset, &outSignals, this);
 			if (ok == true && outSignals.size() == 1)
 			{
-				source = std::make_shared<SignalProperties>(outSignals.front());
+				source = std::make_shared<AppSignalProperties>(outSignals.front());
 			}
 		}
 		break;
@@ -1842,7 +1842,7 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 			bool ok = db()->getLatestSignal(object.id(), &outSignal, this);
 			if (ok == true)
 			{
-				source = std::make_shared<SignalProperties>(outSignal);
+				source = std::make_shared<AppSignalProperties>(outSignal);
 			}
 		}
 		break;
@@ -1857,7 +1857,7 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 
 	// Get target file version
 	//
-	std::shared_ptr<SignalProperties> target = nullptr;
+	std::shared_ptr<AppSignalProperties> target = nullptr;
 
 	switch (compareData.targetVersionType)
 	{
@@ -1871,7 +1871,7 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 			bool ok = db()->getSpecificSignals(&signalIds, compareData.targetChangeset, &outSignals, this);
 			if (ok == true && outSignals.size() == 1)
 			{
-				target = std::make_shared<SignalProperties>(outSignals.front());
+				target = std::make_shared<AppSignalProperties>(outSignals.front());
 			}
 		}
 		break;
@@ -1887,7 +1887,7 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 			bool ok = db()->getLatestSignal(object.id(), &outSignal, this);
 			if (ok == true)
 			{
-				target = std::make_shared<SignalProperties>(outSignal);
+				target = std::make_shared<AppSignalProperties>(outSignal);
 			}
 		}
 		break;

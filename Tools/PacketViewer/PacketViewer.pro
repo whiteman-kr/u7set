@@ -30,15 +30,10 @@ unix {
 }
 
 SOURCES += \
-	../../lib/LanControllerInfoHelper.cpp \
 	../../lib/DataSource.cpp \
 	../../lib/AppSignal.cpp \
 	../../lib/TuningValue.cpp \
-	../../lib/DeviceHelper.cpp \
-	../../lib/OutputLog.cpp \
 	../../lib/Times.cpp \
-	../../lib/SignalProperties.cpp \
-	../../Builder/IssueLogger.cpp \
 	main.cpp \
 	SourceListWidget.cpp \
 	PacketSourceModel.cpp \
@@ -51,17 +46,11 @@ SOURCES += \
 HEADERS  += \
 	Stable.h \
 	../../Proto/serialization.pb.h \
-	../../lib/LanControllerInfo.h \
-	../../lib/LanControllerInfoHelper.h \
 	../../lib/DataSource.h \
 	../../lib/AppSignal.h \
 	../../CommonLib/PropertyObject.h \
 	../../lib/TuningValue.h \
-	../../lib/DeviceHelper.h \
-	../../lib/OutputLog.h \
 	../../lib/Times.h \
-	../../lib/SignalProperties.h \
-	../../Builder/IssueLogger.h \
 	SourceListWidget.h \
 	PacketSourceModel.h \
 	SourceStatusWidget.h \

@@ -7,12 +7,12 @@
 
 #include "../UtilsLib/Hash.h"
 #include "../UtilsLib/Queue.h"
+#include "../CommonLib/Types.h"
+#include "../OnlineLib/SimpleAppSignalState.h"
+
 #include "TimeStamp.h"
 #include "Tuning/TuningSignalState.h"
 #include "Times.h"
-#include "../CommonLib/Types.h"
-#include "AppSignalStateFlags.h"
-#include "../OnlineLib/SimpleAppSignalState.h"
 #include "AppSignal.h"
 
 struct AppSignalParamMimeType

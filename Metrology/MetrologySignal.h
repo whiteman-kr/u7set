@@ -2,7 +2,7 @@
 
 #include "../lib/AppSignalParam.h"
 #include "../lib/AppSignal.h"
-#include "../lib/SignalProperties.h"
+#include "../lib/AppSignalProperties.h"
 #include "../lib/ComparatorSet.h"
 
 #include "../HardwareLib/DeviceObject.h"

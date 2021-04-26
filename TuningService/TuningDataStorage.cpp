@@ -37,6 +37,8 @@ namespace  Tuning
 	const char* TuningData::TUNING_DISCRETE_SIGNALS = "DiscreteSignals";
 	const char* TuningData::TUNING_SIGNALS_COUNT = "Count";
 
+	const int TuningData::TYPES_COUNT = E::metaEnum<E::TuningSignalType>().keyCount();
+
 	QStringList TuningData::m_metadataFields;
 
 	TuningData::TuningData()
@@ -62,10 +64,8 @@ namespace  Tuning
 		m_tuningDataFramePayloadW(tuningDataFramePayloadW),
 		m_tuningDataFrameSizeW(tuningDataFrameSizeW)
 	{
-		for(int& v : m_tuningSignalSizes)
-		{
-			v = 0;
-		}
+		m_tuningSignals.resize(TYPES_COUNT);
+		m_tuningSignalSizes.fill(0, TYPES_COUNT);
 	}
 
 	// constructor for IPEN tuning only
@@ -110,78 +110,31 @@ namespace  Tuning
 		}
 	}
 
-	bool TuningData::buildTuningSignalsLists(HashedVector<QString, AppSignal *> lmAssociatedSignals, Builder::IssueLogger* log)
+	void TuningData::clearSignalLists()
 	{
-		bool result = true;
-
 		for(QVector<AppSignal*>& signalList : m_tuningSignals)
 		{
 			signalList.clear();
 		}
+	}
 
-		for(AppSignal* signal : lmAssociatedSignals)
-		{
-			if (signal->enableTuning() == false)
-			{
-				continue;
-			}
+	void TuningData::appendTuningSignal(E::TuningSignalType tunSignalType, AppSignal* appSignal)
+	{
+		TEST_PTR_RETURN(appSignal);
 
-			if (signal->isAnalog() == true)
-			{
-				if (signal->dataSize() != SIZE_32BIT)
-				{
-					LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
-						  QString(tr("Signal '%1' for tuning must have 32-bit dataSize")).
-						  arg(signal->appSignalID()));
-					result = false;
-				}
-				else
-				{
-					if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
-					{
-						m_tuningSignals[TYPE_ANALOG_FLOAT].append(signal);
-					}
-					else
-					{
-						if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
-						{
-							m_tuningSignals[TYPE_ANALOG_INT32].append(signal);
-						}
-						else
-						{
-							LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
-								  QString(tr("Signal '%1' for tuning must have Float or Signed Int data format")).
-								  arg(signal->appSignalID()));
-							result = false;
-						}
-					}
-				}
-			}
-			else
-			{
-				if (signal->dataSize() != 1)
-				{
-					LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
-						  QString(tr("Signal '%1' for tuning must have 1-bit dataSize")).
-						  arg(signal->appSignalID()));
-					result = false;
-					continue;
-				}
-				else
-				{
-					m_tuningSignals[TYPE_DISCRETE].append(signal);
-				}
-			}
-		}
+		m_tuningSignals[static_cast<int>(tunSignalType)].append(appSignal);
+	}
 
+	void TuningData::buildTuningData()
+	{
 		// calculate tuning signals sizes
 		//
-		int t = TYPE_ANALOG_FLOAT;
-
 		int totalSize = 0;
 
-		for(QVector<AppSignal*>& signalList : m_tuningSignals)
+		for(int t = TYPE_ANALOG_FLOAT; t < TYPES_COUNT; t++)
 		{
+			QVector<AppSignal*>& signalList = m_tuningSignals[t];
+
 			sortSignalsByAcquiredProperty(signalList);
 
 			int signalCount = signalList.size();
@@ -205,8 +158,6 @@ namespace  Tuning
 			}
 
 			totalSize += m_tuningSignalSizes[t];
-
-			t++;
 		}
 
 		// calculate used tuning frames count
@@ -222,17 +173,9 @@ namespace  Tuning
 			m_tuningDataUsedFramesCount = (totalSize / tuningFramePayloadBytes + ((totalSize % tuningFramePayloadBytes) == 0 ? 0 : 1)) * TRIPLE_FRAMES;
 		}
 
-		return result;
-	}
-
-
-	void TuningData::buildTuningData()
-	{
 		// allocate m_tuningData
 		//
 		m_metadata.clear();
-
-		int tuningFramePayloadBytes = m_tuningDataFramePayloadW * WORD_SIZE_IN_BYTES;
 
 		m_tuningDataSizeB = m_tuningDataUsedFramesCount * tuningFramePayloadBytes;
 
@@ -588,12 +531,13 @@ namespace  Tuning
 
 		xml.writeIntAttribute(TUNING_ALL_SIGNALS_COUNT, signalCount);
 
-		const char* typeSection[TYPES_COUNT] =
-		{
-			TUNING_ANALOG_FLOAT_SIGNALS,
-			TUNING_ANALOG_INT32_SIGNALS,
-			TUNING_DISCRETE_SIGNALS
-		};
+		QVector<const char*> typeSection;
+
+		typeSection.append(TUNING_ANALOG_FLOAT_SIGNALS);
+		typeSection.append(TUNING_ANALOG_INT32_SIGNALS);
+		typeSection.append(TUNING_DISCRETE_SIGNALS);
+
+		Q_ASSERT(typeSection.size() == TYPES_COUNT);
 
 		for(int type = TYPE_ANALOG_FLOAT; type < TYPES_COUNT; type++)
 		{
@@ -664,12 +608,13 @@ namespace  Tuning
 
 		m_deleteSignals = true;		// !
 
-		const char* typeSection[TYPES_COUNT] =
-		{
-			TUNING_ANALOG_FLOAT_SIGNALS,
-			TUNING_ANALOG_INT32_SIGNALS,
-			TUNING_DISCRETE_SIGNALS
-		};
+		QVector<const char*> typeSection;
+
+		typeSection.append(TUNING_ANALOG_FLOAT_SIGNALS);
+		typeSection.append(TUNING_ANALOG_INT32_SIGNALS);
+		typeSection.append(TUNING_DISCRETE_SIGNALS);
+
+		Q_ASSERT(typeSection.size() == TYPES_COUNT);
 
 		for(int type = TYPE_ANALOG_FLOAT; type < TYPES_COUNT; type++)
 		{

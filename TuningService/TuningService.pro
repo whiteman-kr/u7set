@@ -33,13 +33,11 @@ SOURCES += \
     ../lib/BuildInfo.cpp \
     ../lib/DataSource.cpp \
 	../lib/SoftwareSettings.cpp \
-    ../lib/OutputLog.cpp \
+    ../lib/Types.cpp \
     ../lib/AppSignal.cpp \
-    ../lib/AppSignalParam.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Times.cpp \
-    ../lib/SignalProperties.cpp \
 	TuningService.cpp \
 	TcpTuningServer.cpp \
 	TcpTuningClient.cpp \
@@ -52,19 +50,18 @@ SOURCES += \
 
 
 HEADERS += \
-    ../CommonLib/PropertyObject.h \
 	Stable.h \
+	../CommonLib/PropertyObject.h \
     ../lib/BuildInfo.h \
     ../lib/OrderedHash.h \
     ../lib/DataSource.h \
 	../lib/SoftwareSettings.h \
-    ../lib/OutputLog.h \
+    ../lib/Types.h \
     ../lib/AppSignal.h \
-    ../lib/AppSignalParam.h \
+	../lib/PropertyObject.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     ../lib/Times.h \
-    ../lib/SignalProperties.h \
 	TuningService.h \
 	TcpTuningServer.h \
 	TcpTuningClient.h \
@@ -84,7 +81,17 @@ DISTFILES += \
     ../Proto/network.proto \
     ../Proto/serialization.proto
 
-# LibPath
+# Add curent dir to a list of library directory paths
+#
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+# --
+#
+LIBS += -L$$DESTDIR
+LIBS += -L.
+
+
+# DESTDIR
 #
 win32 {
     CONFIG(debug, debug|release): LIBS += -L../bin/debug

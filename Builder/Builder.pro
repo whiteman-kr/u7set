@@ -68,7 +68,7 @@ SOURCES += \
     ../lib/SignalSetProvider.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/TuningValue.cpp \
-    ../lib/SignalProperties.cpp \
+	../lib/AppSignalProperties.cpp \
     ../lib/DataSource.cpp \
     ../lib/CsvFile.cpp \
     ../lib/Tuning/TuningFilter.cpp \
@@ -79,7 +79,6 @@ SOURCES += \
     ../lib/ConnectionsInfo.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
 	../lib/Times.cpp \
-	../lib/AppSignalStateFlags.cpp \
 	../lib/ComparatorSet.cpp \
 	../TuningService/TuningDataStorage.cpp \
 	../TuningService/TuningSource.cpp \
@@ -141,7 +140,7 @@ HEADERS += \
     ../lib/SignalSetProvider.h \
     ../lib/SoftwareSettings.h \
     ../lib/TuningValue.h \
-    ../lib/SignalProperties.h \
+	../lib/AppSignalProperties.h \
     ../lib/DataSource.h \
     ../lib/CsvFile.h \
     ../lib/Tuning/TuningFilter.h \
@@ -152,7 +151,6 @@ HEADERS += \
     ../lib/ConnectionsInfo.h \
 	../lib/Tuning/TuningSignalState.h \
 	../lib/Times.h \
-	../lib/AppSignalStateFlags.h \
 	../lib/ComparatorSet.h \
 	../TuningService/TuningSource.h \
 	../TuningService/TuningDataStorage.h \

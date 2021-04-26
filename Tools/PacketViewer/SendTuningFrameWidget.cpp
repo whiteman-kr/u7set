@@ -14,18 +14,11 @@
 #include "SendTuningFrameWidget.h"
 #include "PacketSourceModel.h"
 
-template <typename D, typename S>
-inline void writeBigEndian(D& destination, S source)
+template <typename TYPE>
+inline void writeBigEndian(TYPE& destination, TYPE source)
 {
-	destination = qToBigEndian<D>(source);
+	destination = qToBigEndian<TYPE>(source);
 }
-
-const int dataTypes[] =
-{
-	1300,
-	1500,
-	1700
-};
 
 SendTuningFrameWidget::SendTuningFrameWidget(PacketSourceModel* packetSourceModel, QWidget *parent)
 	: QDialog(parent),
@@ -47,17 +40,15 @@ SendTuningFrameWidget::SendTuningFrameWidget(PacketSourceModel* packetSourceMode
 	  m_dataType(new QComboBox(this)),
 	  m_fillFotipDataMethod(new QComboBox(this)),
 	  m_packetSourceModel(packetSourceModel),
-	  numerator(0)
+	  m_randGen(QTime::currentTime().msec())
 {
-	qsrand(static_cast<uint>(QTime::currentTime().msec()));
-
 	QSettings settings;
 
 	m_endiansCombo->addItem("Big Endian");
 	m_endiansCombo->addItem("Little Endian");
 	m_endiansCombo->setCurrentText(settings.value("PacketSourceModel/SendTuningFrameWidget/endians", "").toString());
 
-	numerator = settings.value("PacketSourceModel/SendTuningFrameWidget/numerator", numerator).toInt();
+	m_numerator = static_cast<quint16>(settings.value("PacketSourceModel/SendTuningFrameWidget/numerator", m_numerator).toUInt());
 
 	QList<QNetworkInterface> interfaceList = QNetworkInterface::allInterfaces();
 	for (int i = 0; i < interfaceList.count(); i++)
@@ -196,7 +187,7 @@ SendTuningFrameWidget::~SendTuningFrameWidget()
 	settings.setValue("PacketSourceModel/SendTuningFrameWidget/destinationAddress", m_destinationAddressEdit->text());
 	settings.setValue("PacketSourceModel/SendTuningFrameWidget/destinationPort", m_destinationPortEdit->text());
 	settings.setValue("PacketSourceModel/SendTuningFrameWidget/moduleId", m_moduleIdEdit->text());
-	settings.setValue("PacketSourceModel/SendTuningFrameWidget/numerator", numerator);
+	settings.setValue("PacketSourceModel/SendTuningFrameWidget/numerator", m_numerator);
 
 	settings.setValue("PacketSourceModel/SendTuningFrameWidget/uniqueId", m_uniqueId->text());
 	settings.setValue("PacketSourceModel/SendTuningFrameWidget/channelNumber", m_channelNumber->text());
@@ -214,10 +205,19 @@ SendTuningFrameWidget::~SendTuningFrameWidget()
 void SendTuningFrameWidget::sendPacket()
 {
 	static_assert(sizeof(FotipV2::Header) == 128, "fotip header size check failed");
+
 	if (!checkSocket())
 	{
 		return;
 	}
+
+	static quint16 dataTypes[] =
+	{
+		static_cast<quint16>(FotipV2::DataType::AnalogSignedInt),
+		static_cast<quint16>(FotipV2::DataType::AnalogFloat),
+		static_cast<quint16>(FotipV2::DataType::Discrete)
+	};
+
 	Rup::Frame frame;
 	memset(&frame, 0, sizeof(Rup::Frame));
 
@@ -226,29 +226,30 @@ void SendTuningFrameWidget::sendPacket()
 		// in big endian format
 		//
 		Rup::Header& header = frame.header;
-		writeBigEndian(header.frameSize, Socket::ENTIRE_UDP_SIZE);
-		writeBigEndian(header.protocolVersion, 4);
+		writeBigEndian<quint16>(header.frameSize, Socket::ENTIRE_UDP_SIZE);
+		writeBigEndian<quint16>(header.protocolVersion, 4);
 		header.flags.tuningData = 1;
-		writeBigEndian(header.flags.all, header.flags.all);
-		writeBigEndian(header.moduleType, m_moduleIdEdit->text().toUInt());
-		writeBigEndian(header.numerator, numerator++);
-		writeBigEndian(header.framesQuantity, 1);
-		writeBigEndian(header.frameNumber, 0);
+		writeBigEndian<quint16>(header.flags.all, header.flags.all);
+		writeBigEndian<quint16>(header.moduleType, static_cast<quint16>(m_moduleIdEdit->text().toUInt()));
+		writeBigEndian<quint16>(header.numerator, m_numerator++);
+		writeBigEndian<quint16>(header.framesQuantity, 1);
+		writeBigEndian<quint16>(header.frameNumber, 0);
 
 		QDateTime&& time = QDateTime::currentDateTime();
 		Rup::TimeStamp& timeStamp = header.timeStamp;
-		writeBigEndian(timeStamp.year, time.date().year());
-		writeBigEndian(timeStamp.month, time.date().month());
-		writeBigEndian(timeStamp.day, time.date().day());
 
-		writeBigEndian(timeStamp.hour, time.time().hour());
-		writeBigEndian(timeStamp.minute, time.time().minute());
-		writeBigEndian(timeStamp.second, time.time().second());
-		writeBigEndian(timeStamp.millisecond, time.time().msec());
+		writeBigEndian<quint16>(timeStamp.year,  static_cast<quint16>(time.date().year()));
+		writeBigEndian<quint16>(timeStamp.month,  static_cast<quint16>(time.date().month()));
+		writeBigEndian<quint16>(timeStamp.day,  static_cast<quint16>(time.date().day()));
+
+		writeBigEndian<quint16>(timeStamp.hour,  static_cast<quint16>(time.time().hour()));
+		writeBigEndian<quint16>(timeStamp.minute,  static_cast<quint16>(time.time().minute()));
+		writeBigEndian<quint16>(timeStamp.second,  static_cast<quint16>(time.time().second()));
+		writeBigEndian<quint16>(timeStamp.millisecond,  static_cast<quint16>(time.time().msec()));
 
 		FotipV2::Header& fotip = *reinterpret_cast<FotipV2::Header*>(frame.data);
-		writeBigEndian(fotip.protocolVersion, 1);
-		writeBigEndian(fotip.uniqueId, m_uniqueId->text().toUInt());
+		writeBigEndian<quint16>(fotip.protocolVersion, 1);
+		writeBigEndian<quint64>(fotip.uniqueId, m_uniqueId->text().toUInt());
 
 		fotip.subsystemKey.lmNumber = m_channelNumber->text().toUInt();
 		fotip.subsystemKey.subsystemCode = m_subsystemCode->text().toUInt();
@@ -258,13 +259,15 @@ void SendTuningFrameWidget::sendPacket()
 		fotip.subsystemKey.crc = (data << 4) % 0b10011;	// x^4+x+1
 		writeBigEndian(fotip.subsystemKey.wordVaue, fotip.subsystemKey.wordVaue);
 
-		writeBigEndian(fotip.operationCode, (m_operationCode->currentIndex() == 0) ? 1200 : 1400);
-		writeBigEndian(fotip.flags.all, m_flags->text().toUInt());
-		writeBigEndian(fotip.startAddressW, m_startAddress->text().toUInt());
-		writeBigEndian(fotip.fotipFrameSizeB, m_fotipFrameSize->text().toUInt());
-		writeBigEndian(fotip.romSizeB, m_romSize->text().toUInt());
-		writeBigEndian(fotip.romFrameSizeB, m_romFrameSize->text().toUInt());
-		writeBigEndian(fotip.dataType, dataTypes[m_dataType->currentIndex()]);
+		writeBigEndian<quint16>(fotip.operationCode,
+								static_cast<quint16>((m_operationCode->currentIndex() == 0) ?
+														FotipV2::OpCode::Read : FotipV2::OpCode::Write));
+		writeBigEndian<quint16>(fotip.flags.all,  static_cast<quint16>(m_flags->text().toUInt()));
+		writeBigEndian<quint32>(fotip.startAddressW, m_startAddress->text().toUInt());
+		writeBigEndian<quint16>(fotip.fotipFrameSizeB,  static_cast<quint16>(m_fotipFrameSize->text().toUInt()));
+		writeBigEndian<quint32>(fotip.romSizeB, m_romSize->text().toUInt());
+		writeBigEndian<quint16>(fotip.romFrameSizeB,  static_cast<quint16>(m_romFrameSize->text().toUInt()));
+		writeBigEndian<quint16>(fotip.dataType, dataTypes[m_dataType->currentIndex()]);
 
 		switch (m_fillFotipDataMethod->currentIndex())
 		{
@@ -275,7 +278,7 @@ void SendTuningFrameWidget::sendPacket()
 				quint16* fotipData = reinterpret_cast<quint16*>(frame.data + sizeof(FotipV2::Header));
 				for (int i = 0; i < FotipV2::TX_RX_DATA_SIZE / 2; i++)
 				{
-					writeBigEndian(fotipData[i], qrand() % 0x10000);
+					writeBigEndian(fotipData[i], static_cast<quint16>(m_randGen.generate() & 0xFFFF));
 				}
 				break;
 			}
@@ -290,7 +293,7 @@ void SendTuningFrameWidget::sendPacket()
 					}
 					else
 					{
-						writeBigEndian(fotipData[i], m_startAddress->text().toUInt() + i);
+						writeBigEndian<quint16>(fotipData[i], static_cast<quint16>(m_startAddress->text().toUInt() + i));
 					}
 				}
 				break;
@@ -307,21 +310,21 @@ void SendTuningFrameWidget::sendPacket()
 		header.frameSize = Socket::ENTIRE_UDP_SIZE;
 		header.protocolVersion = 4;
 		header.flags.tuningData = 1;
-		header.moduleType = m_moduleIdEdit->text().toUInt();
-		header.numerator = numerator++;
+		header.moduleType = static_cast<quint16>(m_moduleIdEdit->text().toUInt());
+		header.numerator = m_numerator++;
 		header.framesQuantity = 1;
 		header.frameNumber = 0;
 
 		QDateTime&& time = QDateTime::currentDateTime();
 		Rup::TimeStamp& timeStamp = header.timeStamp;
-		timeStamp.year = time.date().year();
-		timeStamp.month = time.date().month();
-		timeStamp.day = time.date().day();
+		timeStamp.year = static_cast<quint16>(time.date().year());
+		timeStamp.month = static_cast<quint16>(time.date().month());
+		timeStamp.day = static_cast<quint16>(time.date().day());
 
-		timeStamp.hour = time.time().hour();
-		timeStamp.minute = time.time().minute();
-		timeStamp.second = time.time().second();
-		timeStamp.millisecond = time.time().msec();
+		timeStamp.hour = static_cast<quint16>(time.time().hour());
+		timeStamp.minute = static_cast<quint16>(time.time().minute());
+		timeStamp.second = static_cast<quint16>(time.time().second());
+		timeStamp.millisecond = static_cast<quint16>(time.time().msec());
 
 		FotipV2::Header& fotip = *reinterpret_cast<FotipV2::Header*>(frame.data);
 		fotip.protocolVersion = 1;
@@ -334,12 +337,13 @@ void SendTuningFrameWidget::sendPacket()
 		data += fotip.subsystemKey.lmNumber;	// first
 		fotip.subsystemKey.crc = (data << 4) % 0b10011;	// x^4+x+1
 
-		fotip.operationCode = (m_operationCode->currentIndex() == 0) ? 1200 : 1400;
-		fotip.flags.all =  m_flags->text().toUInt();
+		fotip.operationCode = (static_cast<quint16>((m_operationCode->currentIndex() == 0) ?
+								FotipV2::OpCode::Read : FotipV2::OpCode::Write));
+		fotip.flags.all =  static_cast<quint16>(m_flags->text().toUInt());
 		fotip.startAddressW = m_startAddress->text().toUInt();
-		fotip.fotipFrameSizeB = m_fotipFrameSize->text().toUInt();
+		fotip.fotipFrameSizeB = static_cast<quint16>(m_fotipFrameSize->text().toUInt());
 		fotip.romSizeB = m_romSize->text().toUInt();
-		fotip.romFrameSizeB = m_romFrameSize->text().toUInt();
+		fotip.romFrameSizeB = static_cast<quint16>(m_romFrameSize->text().toUInt());
 		fotip.dataType = dataTypes[m_dataType->currentIndex()];
 
 		switch (m_fillFotipDataMethod->currentIndex())
@@ -351,7 +355,7 @@ void SendTuningFrameWidget::sendPacket()
 				quint16* fotipData = reinterpret_cast<quint16*>(frame.data + sizeof(FotipV2::Header));
 				for (int i = 0; i < FotipV2::TX_RX_DATA_SIZE / 2; i++)
 				{
-					fotipData[i] = qrand() % 0x10000;
+					fotipData[i] = static_cast<quint16>(m_randGen.generate() & 0xFFFF);
 				}
 				break;
 			}
@@ -366,7 +370,7 @@ void SendTuningFrameWidget::sendPacket()
 					}
 					else
 					{
-						fotipData[i] = m_startAddress->text().toUInt() + i;
+						fotipData[i] = static_cast<quint16>(m_startAddress->text().toUInt() + i);
 					}
 				}
 				break;
@@ -378,14 +382,18 @@ void SendTuningFrameWidget::sendPacket()
 	}
 
 
-	m_socket->writeDatagram(reinterpret_cast<char*>(&frame), sizeof(Rup::Frame), QHostAddress(m_destinationAddressEdit->text()), m_destinationPortEdit->text().toUInt());
+	m_socket->writeDatagram(reinterpret_cast<char*>(&frame), sizeof(Rup::Frame),
+							QHostAddress(m_destinationAddressEdit->text()),
+							static_cast<quint16>(m_destinationPortEdit->text().toUInt()));
 }
 
 bool SendTuningFrameWidget::checkSocket()
 {
-	bool ok;
-	int port = m_sourcePortEdit->text().toUInt(&ok);
-	if (!ok)
+	bool ok = false;
+
+	quint16 port = static_cast<quint16>(m_sourcePortEdit->text().toUInt(&ok));
+
+	if (ok == false)
 	{
 		return false;
 	}

@@ -33,7 +33,7 @@
 #include "../lib/SignalSetProvider.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "Settings.h"
-#include "../lib/SignalProperties.h"
+#include "../lib/AppSignalProperties.h"
 #include "../lib/SignalSetProvider.h"
 #include "../lib/QScintillaLexers/LexerJavaScript.h"
 #include "../lib/Ui/TextEditCompleter.h"

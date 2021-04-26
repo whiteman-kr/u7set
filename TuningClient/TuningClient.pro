@@ -94,7 +94,7 @@ SOURCES +=\
     ../lib/Tuning/TuningSourceState.cpp \
     TuningSchemaManager.cpp \
     ../lib/AppSignal.cpp \
-    ../lib/SignalProperties.cpp \
+	../lib/AppSignalProperties.cpp \
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/DialogAbout.cpp \
     DialogChooseFilter.cpp \
@@ -144,7 +144,7 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningSourceState.h \
     TuningSchemaManager.h \
     ../lib/AppSignal.h \
-    ../lib/SignalProperties.h \
+	../lib/AppSignalProperties.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/DialogAbout.h \
     DialogChooseFilter.h \

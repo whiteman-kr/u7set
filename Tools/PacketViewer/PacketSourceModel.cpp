@@ -188,7 +188,7 @@ void PacketSourceModel::sort(int, Qt::SortOrder)
 
 }
 
-void PacketSourceModel::addListener(QString ip, int port, bool saveList)
+void PacketSourceModel::addListener(QString ip, quint16 port, bool saveList)
 {
 	std::shared_ptr<Listener> listener(new Listener(this, ip, port));
 	for (size_t i = 0; i < m_listeners.size(); i++)
@@ -370,7 +370,7 @@ Statistic::Statistic(Statistic* parent) :
 {
 }
 
-Statistic::Statistic(QString address, int port, Statistic* parent) :
+Statistic::Statistic(QString address, quint16 port, Statistic* parent) :
 	m_fullAddress(address + ":" + QString::number(port)),
 	m_ipAddress(QHostAddress(address).toIPv4Address()),
 	m_port(port),
@@ -385,7 +385,7 @@ Listener::Listener() :
 {
 }
 
-Listener::Listener(PacketSourceModel* model, QString address, int port) :
+Listener::Listener(PacketSourceModel* model, QString address, quint16 port) :
 	Statistic(address, port, nullptr),
 	m_socket(new QUdpSocket(this)),
 	m_model(model),
@@ -510,14 +510,14 @@ void Listener::checkListeningState()
 }
 
 
-Source::Source(QString address, int port, const AppSignalSet& signalSet, const QHash<quint32,
+Source::Source(QString address, quint16 port, const AppSignalSet& signalSet, const QHash<quint32,
 			   std::shared_ptr<DataSourceOnline>>& dataSources, Statistic* parent) :
 	Statistic(address, port, parent),
 	m_packetBufferModel(new PacketBufferTableModel(m_buffer, m_lastHeader, this)),
 	m_signalTableModel(new SignalTableModel(m_buffer, signalSet, this)),
 	m_dataSources(&dataSources)
 {
-	m_lastHeader.packetNo = -1;
+	m_lastHeader.packetNo = static_cast<quint32>(-1);
 	memset(m_buffer, 0, Rup::MAX_FRAME_COUNT * Rup::FRAME_DATA_SIZE);
 	memset(&m_lastHeader, 0, sizeof(m_lastHeader));
 }
@@ -547,45 +547,56 @@ void V4toV3Header(RpPacketHeader& v3header, const Rup::Header& v4header) // copy
 void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 {
 	RpPacket& packet = *reinterpret_cast<RpPacket*>(buffer);
+
 	quint16 version = packet.Header.protocolVersion;
+
 	bool needSwap = false;
+
 	if (packet.Header.packetSize > Socket::ENTIRE_UDP_SIZE)
 	{
 		quint16 swapedPacketSize = packet.Header.packetSize;
+
 		swapBytes(swapedPacketSize);
+
 		if (swapedPacketSize == Socket::ENTIRE_UDP_SIZE)
 		{
 			needSwap = true;
 			swapBytes(version);
 		}
 	}
+
 	RpPacketHeader header;
+
 	switch (version)
 	{
-		case 3:
-			if (needSwap)
-			{
-				swapHeader(packet.Header);
-			}
-			header = packet.Header;
-			break;
-		case 4:
-		case 5:
+	case 3:
+		if (needSwap)
 		{
-			Rup::Header& v4Header = *reinterpret_cast<Rup::Header*>(buffer);
-			if (needSwap)
-			{
-				swapHeader(v4Header);
-			}
-			V4toV3Header(header, v4Header);
-			break;
+			swapHeader(packet.Header);
 		}
-		default:
-			assert(false);
+		header = packet.Header;
+		break;
+
+	case 4:
+	case 5:
+	{
+		Rup::Header& v4Header = *reinterpret_cast<Rup::Header*>(buffer);
+		if (needSwap)
+		{
+			swapHeader(v4Header);
+		}
+		V4toV3Header(header, v4Header);
+		break;
 	}
 
-	//swapHeader(header);
+	default:
+		assert(false);
+		qDebug() << "Unknown protocol version" << version;
+		return;
+	}
+
 	incrementPacketReceivedCount();
+
 	if (readBytes != header.packetSize)
 	{
 		incrementPartialFrameCount();

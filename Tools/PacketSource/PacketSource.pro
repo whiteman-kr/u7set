@@ -41,24 +41,17 @@ unix {
 }
 
 SOURCES += \
-    ../../lib/LanControllerInfoHelper.cpp \
     ../../lib/SoftwareSettings.cpp \
     ../../lib/Ui/DialogAbout.cpp \
     ../../lib/AppSignal.cpp \
-    ../../lib/AppSignalStateFlags.cpp \
     ../../lib/TuningValue.cpp \
-    ../../lib/SignalProperties.cpp \
-    ../../lib/DataSource.cpp \
-    ../../lib/OutputLog.cpp \
-    ../../lib/DeviceHelper.cpp \
+	../../lib/DataSource.cpp \
     ../../lib/Times.cpp \
     ../../lib/SoftwareInfo.cpp \
     ../../lib/BuildInfo.cpp \
-	../../Builder/IssueLogger.cpp \
 	main.cpp \
 	BuildOption.cpp \
 	ConfigSocket.cpp \
-    CmdLineParam.cpp \
     PacketSourceCore.cpp \
     MainWindow.cpp \
     Options.cpp \
@@ -77,25 +70,17 @@ SOURCES += \
 
 HEADERS += \
 	Stable.h \
-	../../lib/LanControllerInfo.h \
-    ../../lib/LanControllerInfoHelper.h \
     ../../lib/SoftwareSettings.h \
     ../../lib/Ui/DialogAbout.h \
     ../../lib/AppSignal.h \
-    ../../lib/AppSignalStateFlags.h \
     ../../lib/TuningValue.h \
-    ../../CommonLib/PropertyObject.h \
-    ../../lib/Factory.h \
-    ../../lib/DebugInstCounter.h \
     ../../lib/OrderedHash.h \
-    ../../lib/SignalProperties.h \
-    ../../lib/DataSource.h \
-    ../../lib/OutputLog.h \
-    ../../lib/DeviceHelper.h \
+	../../lib/DataSource.h \
     ../../lib/Times.h \
     ../../lib/SoftwareInfo.h \
     ../../lib/BuildInfo.h \
-	../../Builder/IssueLogger.h \
+	../../CommonLib/PropertyObject.h \
+	../../CommonLib/Types.h \
 	BuildOption.h \
 	ConfigSocket.h \
     CmdLineParam.h \
@@ -142,17 +127,9 @@ win32 {
 #
 LIBS += -lOnlineLib
 
-# ServiceLib
-#
-LIBS += -lServiceLib
-
 # UtilsLib
 #
 LIBS += -lUtilsLib
-
-# HardwareLib
-#
-LIBS += -lHardwareLib
 
 # Protobuf
 #

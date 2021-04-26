@@ -91,7 +91,6 @@ void SoftwareInfo::init(E::SoftwareType softwareType,
 	init(softwareType, equipmentID, majorVersion, minorVersion, UNDEFINED_BUILD_NO);
 }
 
-
 void SoftwareInfo::serializeTo(Network::SoftwareInfo* info) const
 {
 	if (info == nullptr)

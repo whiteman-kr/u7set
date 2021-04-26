@@ -1,4 +1,4 @@
-#include "SignalProperties.h"
+#include "AppSignalProperties.h"
 #include "../UtilsLib/WUtils.h"
 #include "../u7/Settings.h"
 
@@ -25,19 +25,18 @@
 // -------------------------------------------------------------------------------------------------------------
 
 
-const QString SignalProperties::categoryIdentification("1 Identification");
-const QString SignalProperties::categorySignalType("2 Signal type");
-const QString SignalProperties::categoryDataFormat("3 Data Format");
-const QString SignalProperties::categorySignalProcessing("4 Signal processing");
-const QString SignalProperties::categoryElectricParameters("5 Electric parameters");
-const QString SignalProperties::categoryOnlineMonitoringSystem("6 Online Monitoring System");
-const QString SignalProperties::categoryTuning("7 Tuning");
-const QString SignalProperties::categoryExpertProperties("8 Expert properties");
+const QString AppSignalProperties::categoryIdentification("1 Identification");
+const QString AppSignalProperties::categorySignalType("2 Signal type");
+const QString AppSignalProperties::categoryDataFormat("3 Data Format");
+const QString AppSignalProperties::categorySignalProcessing("4 Signal processing");
+const QString AppSignalProperties::categoryElectricParameters("5 Electric parameters");
+const QString AppSignalProperties::categoryOnlineMonitoringSystem("6 Online Monitoring System");
+const QString AppSignalProperties::categoryTuning("7 Tuning");
+const QString AppSignalProperties::categoryExpertProperties("8 Expert properties");
 
+const QString AppSignalProperties::lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
 
-const QString SignalProperties::lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
-
-QString SignalProperties::generateCaption(const QString& name)
+QString AppSignalProperties::generateCaption(const QString& name)
 {
 	QString result;
 	if (name.isEmpty())
@@ -73,15 +72,15 @@ QString SignalProperties::generateCaption(const QString& name)
 	return result.trimmed();
 }
 
-SignalProperties::SignalProperties(const AppSignal& signal, bool savePropertyDescription) :
+AppSignalProperties::AppSignalProperties(const AppSignal& signal, bool savePropertyDescription) :
 	m_signal(signal)
 {
 	initProperties(savePropertyDescription);
 }
 
-void SignalProperties::updateSpecPropValues()
+void AppSignalProperties::updateSpecPropValues()
 {
-	for (const SignalSpecPropValue& value : m_specPropValues.values())
+	for (const AppSignalSpecPropValue& value : m_specPropValues.values())
 	{
 		std::shared_ptr<Property> property = propertyByCaption(value.name());
 
@@ -100,7 +99,7 @@ void SignalProperties::updateSpecPropValues()
 	m_signal.setProtoSpecPropValues(valuesData);
 }
 
-void SignalProperties::setSpecPropStruct(const QString & specPropStruct)
+void AppSignalProperties::setSpecPropStruct(const QString & specPropStruct)
 {
 	deleteSpecificProperties();
 
@@ -123,7 +122,7 @@ void SignalProperties::setSpecPropStruct(const QString & specPropStruct)
 	createSpecificProperties();
 }
 
-int SignalProperties::getPrecision()
+int AppSignalProperties::getPrecision()
 {
 	std::shared_ptr<Property> precisionProperty = propertyByCaption(AppSignalPropNames::DECIMAL_PLACES);
 
@@ -144,7 +143,7 @@ int SignalProperties::getPrecision()
 	return precision;
 }
 
-void SignalProperties::initProperties(bool savePropertyDescription)
+void AppSignalProperties::initProperties(bool savePropertyDescription)
 {
 	ADD_SIGNAL_PROPERTY_GETTER(int, AppSignalPropNames::ID, false, AppSignal::ID, m_signal);
 	ADD_SIGNAL_PROPERTY_GETTER(int, AppSignalPropNames::SIGNAL_GROUP_ID, false, AppSignal::signalGroupID, m_signal);
@@ -258,14 +257,14 @@ void SignalProperties::initProperties(bool savePropertyDescription)
 										&AppSignal::specPropStruct);
 	}
 	auto propSpecPropStruct = ADD_PROPERTY_GETTER_SETTER(QString, AppSignalPropNames::SPECIFIC_PROPERTIES_STRUCT, true,
-															 SignalProperties::specPropStruct, SignalProperties::setSpecPropStruct);
+															 AppSignalProperties::specPropStruct, AppSignalProperties::setSpecPropStruct);
 	propSpecPropStruct->setCategory(categoryExpertProperties);
 	propSpecPropStruct->setExpert(true);
 
 	propSpecPropStruct->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
 }
 
-void SignalProperties::createSpecificProperties()
+void AppSignalProperties::createSpecificProperties()
 {
 	m_specPropValues.create(m_signal);
 
@@ -296,18 +295,18 @@ void SignalProperties::createSpecificProperties()
 	}
 }
 
-void SignalProperties::deleteSpecificProperties()
+void AppSignalProperties::deleteSpecificProperties()
 {
-	const QVector<SignalSpecPropValue>& values = m_specPropValues.values();
+	const QVector<AppSignalSpecPropValue>& values = m_specPropValues.values();
 
-	for(const SignalSpecPropValue& value : values)
+	for(const AppSignalSpecPropValue& value : values)
 	{
 		removeProperty(value.name());
 	}
 }
 
 
-std::shared_ptr<OrderedHash<int, QString> > SignalProperties::generateOrderedHashFromStringArray(const char* const* array, size_t size)
+std::shared_ptr<OrderedHash<int, QString> > AppSignalProperties::generateOrderedHashFromStringArray(const char* const* array, size_t size)
 {
 	auto result = std::make_shared<OrderedHash<int, QString>>();
 	for (size_t i = 0; i < size; i++)

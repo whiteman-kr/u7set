@@ -2,7 +2,7 @@
 
 #include "MainTabPage.h"
 #include "GlobalMessanger.h"
-#include "../lib/SignalProperties.h"
+#include "../lib/AppSignalProperties.h"
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
 #include <QDialog>

@@ -6,18 +6,15 @@
 #include "../lib/OrderedHash.h"
 #include "../lib/ComparatorSet.h"
 #include "../TuningService/TuningDataStorage.h"
+#include "../lib/ComparatorSet.h"
 
 #include "BuildResultWriter.h"
 #include "ConnectionStorage.h"
 #include "OptoModule.h"
 #include "LmMemoryMap.h"
-
 #include "UalItems.h"
 #include "MemWriteMap.h"
 #include "Loopbacks.h"
-
-
-#include "../lib/AppSignalStateFlags.h"
 
 class LmDescription;
 
@@ -303,6 +300,7 @@ namespace Builder
 		bool checkBusAndBusExtractorCompatibility(UalItem* srcAppItem, BusShared bus, UalItem* destAppItem);
 
 		bool buildTuningData();
+		bool buildTuningSignalsLists(Tuning::TuningData* tuningData);
 		bool getTuningSettings(bool* tuningPropertyExists, bool* tuningEnabled);
 
 		bool disposeSignalsInHeap();

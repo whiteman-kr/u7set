@@ -27,7 +27,7 @@ class Statistic : public QObject
 	Q_OBJECT
 public:
 	Statistic(Statistic* parent);
-	Statistic(QString address, int port, Statistic* parent);
+	Statistic(QString address, quint16 port, Statistic* parent);
 	virtual ~Statistic() {}
 
 	Statistic* parent() { return m_parent; }
@@ -90,7 +90,7 @@ class Source : public Statistic
 	Q_OBJECT
 public:
 	Source() : Statistic(nullptr) {}
-	Source(QString address, int port, const AppSignalSet& signalSet,
+	Source(QString address, quint16 port, const AppSignalSet& signalSet,
 		   const QHash<quint32, std::shared_ptr<DataSourceOnline>>& dataSources, Statistic* parent);
 
 	~Source();
@@ -120,7 +120,7 @@ class Listener : public Statistic
 	Q_OBJECT
 public:
 	Listener();
-	Listener(PacketSourceModel* model, QString address, int port);
+	Listener(PacketSourceModel* model, QString address, quint16 port);
 
 	Source& source(int index) const { return *m_sources[index].get(); }
 	int index(Source* source) const;
@@ -178,7 +178,7 @@ public:
 
 	virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
-	void addListener(QString ip, int port, bool saveList = true);
+	void addListener(QString ip, quint16 port, bool saveList = true);
 	int index(Listener* listener);
 	void saveListenerList();
 	std::shared_ptr<QUdpSocket> getSocket(const QString& address, int port);

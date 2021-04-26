@@ -36,7 +36,6 @@ SOURCES += \
 	../lib/AppSignal.cpp \
     ../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
-    ../lib/AppSignalStateFlags.cpp \
 	../lib/AppSignalParam.cpp \
     ../lib/SoftwareInfo.cpp \
 	../lib/Times.cpp \
@@ -61,7 +60,6 @@ HEADERS += \
 	../CommonLib/PropertyObject.h \
     ../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
-    ../lib/AppSignalStateFlags.h \
 	../lib/AppSignalParam.h \
     ../lib/TimeStamp.h \
     ../lib/SoftwareInfo.h \
@@ -80,6 +78,8 @@ HEADERS += \
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
+INCLUDEPATH += ./../Protobuf
+
 # Add curent dir to a list of library directory paths
 #
 unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
@@ -88,12 +88,6 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 #
 LIBS += -L$$DESTDIR
 LIBS += -L.
-
-#protobuf
-#
-LIBS += -L$$DESTDIR -lprotobuf
-INCLUDEPATH += ./../Protobuf
-
 
 DISTFILES += \
     ../Proto/network.proto \
@@ -107,6 +101,10 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
+
+# Protobuf
+#
+LIBS += -lprotobuf
 
 # ServiceLib
 #

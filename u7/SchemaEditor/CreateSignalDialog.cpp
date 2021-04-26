@@ -3,7 +3,7 @@
 #include "BusStorage.h"
 #include "SignalsTabPage.h"
 #include "SignalPropertiesDialog.h"
-#include "../lib/SignalProperties.h"
+#include "../lib/AppSignalProperties.h"
 #include "../lib/SignalSetProvider.h"
 
 void CreatingSignalDialogOptions::init(QString schemaId, QString schemaCaption, QStringList equipmentIds, QStringList proposedAppSignalIds)

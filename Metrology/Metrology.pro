@@ -48,16 +48,13 @@ SOURCES += \
 	../lib/AppSignalParam.cpp \
 	../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
-	../lib/DeviceHelper.cpp \
-	../lib/OutputLog.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
 	../lib/SoftwareInfo.cpp \
 	../lib/TuningValue.cpp \
 	../lib/AppSignal.cpp \
-	../lib/SignalProperties.cpp \
+#	../lib/AppSignalProperties.cpp \
 	../lib/Ui/DialogAbout.cpp \
 	../lib/ComparatorSet.cpp \
-	../Builder/IssueLogger.cpp \
 	DialogCalculator.cpp \
 	DialogComparatorList.cpp \
 	DialogList.cpp \
@@ -105,22 +102,17 @@ SOURCES += \
 HEADERS  += \
     Stable.h \
 	../lib/AppSignal.h \
-	../lib/CUtils.h \
-	../lib/Factory.h \
+	../lib/Types.h \
 	../lib/OrderedHash.h \
 	../CommonLib/PropertyObject.h \
 	../lib/AppSignalParam.h \
 	../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
-	../lib/DeviceHelper.h \
-	../lib/OutputLog.h \
 	../lib/Tuning/TuningSignalState.h \
 	../lib/SoftwareInfo.h \
 	../lib/TuningValue.h \
-	../lib/SignalProperties.h \
 	../lib/Ui/DialogAbout.h \
 	../lib/ComparatorSet.h \
-	../Builder/IssueLogger.h \
 	DialogCalculator.h \
 	DialogComparatorList.h \
 	DialogList.h \
@@ -207,10 +199,6 @@ LIBS += -lUtilsLib
 # HardwareLib
 #
 LIBS += -lHardwareLib
-
-# DbLib !!!!!!!!!!!!!! REMOVE IN FUTURE, MUST IT BE HERE!?
-#
-LIBS += -lDbLib
 
 # CommonLib
 #

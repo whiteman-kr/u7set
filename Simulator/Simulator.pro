@@ -68,7 +68,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ../lib/AppSignalStateFlags.cpp \
     ../lib/ConnectionsInfo.cpp \
     ../lib/LmDescription.cpp \
 	../lib/LogicModulesInfo.cpp \
@@ -80,7 +79,7 @@ SOURCES += \
 	../lib/Tuning/TuningSignalManager.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
 	../lib/TuningValue.cpp \
-	../lib/SignalProperties.cpp	\
+	../lib/AppSignalProperties.cpp	\
     SimAppDataLanInterface.cpp \
     SimAppDataTransmitter.cpp \
     SimCommandProcessor_LM5_LM6.cpp \
@@ -118,7 +117,6 @@ SOURCES += \
 
 HEADERS += \
 	Stable.h \
-    ../lib/AppSignalStateFlags.h \
     ../lib/ConnectionsInfo.h \
 	../UtilsLib/ILogFile.h \
 	../lib/LanControllerInfo.h \
@@ -136,7 +134,7 @@ HEADERS += \
 	../lib/Tuning/TuningSignalManager.h \
 	../lib/Tuning/TuningSignalState.h \
 	../lib/TuningValue.h \
-	../lib/SignalProperties.h \
+	../lib/AppSignalProperties.h \
     SimAppDataLanInterface.h \
     SimAppDataTransmitter.h \
     SimCommandProcessor_LM5_LM6.h \

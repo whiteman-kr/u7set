@@ -36,14 +36,10 @@ SOURCES += \
 	../../lib/BuildInfo.cpp \
     ../../lib/SoftwareInfo.cpp \
 	../../lib/SoftwareSettings.cpp \
-    ../../lib/DeviceHelper.cpp \
-    ../../lib/OutputLog.cpp \
 	../../lib/AppSignalParam.cpp \
 	../../lib/AppSignal.cpp \
 	../../lib/Tuning/TuningSignalState.cpp \
 	../../lib/TuningValue.cpp \
-	../../lib/SignalProperties.cpp \
-	../../Builder/IssueLogger.cpp \
 	main.cpp \
 	UalTester.cpp \
 	SignalBase.cpp \
@@ -60,15 +56,11 @@ HEADERS += \
     ../../lib/BuildInfo.h \
     ../../lib/SoftwareInfo.h \
 	../../lib/SoftwareSettings.h \
-    ../../lib/DeviceHelper.h \
-    ../../lib/OutputLog.h \
-    ../../CommonLib/PropertyObject.h \
+	../../CommonLib/PropertyObject.h \
     ../../lib/AppSignalParam.h \
     ../../lib/AppSignal.h \
     ../../lib/Tuning/TuningSignalState.h \
     ../../lib/TuningValue.h \
-    ../../lib/SignalProperties.h \
-	../../Builder/IssueLogger.h \
     SignalBase.h \
     TestFile.h \
     TuningSocket.h \
@@ -104,7 +96,6 @@ win32 {
 }
 
 
-LIBS += -lHardwareLib
 LIBS += -lOnlineLib
 LIBS += -lServiceLib
 LIBS += -lUtilsLib

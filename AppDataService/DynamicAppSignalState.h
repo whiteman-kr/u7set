@@ -36,8 +36,6 @@ public:
 				  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
 				  const QThread* thread);
 
-//	void invalidate() { m_current[0].flags.all = m_current[1].flags.all = 0; }
-
 	Hash hash() const;
 
 	bool archive() const { return m_archive; }

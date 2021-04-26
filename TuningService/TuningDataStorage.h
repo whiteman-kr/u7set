@@ -6,11 +6,8 @@
 #include "../CommonLib/Types.h"
 #include "../lib/AppSignal.h"
 
-#include "../Builder/IssueLogger.h"
-
 namespace Tuning
 {
-
 	// -------------------------------------------------------------------------------------
 	//
 	// TuningData class declaration
@@ -38,7 +35,8 @@ namespace Tuning
 		virtual ~TuningData();
 
 	public:
-		bool buildTuningSignalsLists(HashedVector<QString, AppSignal*> lmAssociatedSignals, Builder::IssueLogger* log);
+		void clearSignalLists();
+		void appendTuningSignal(E::TuningSignalType tunSignalType, AppSignal* appSignal);
 
 		virtual void buildTuningData();
 		virtual void getTuningData(QByteArray* tuningData) const;
@@ -79,11 +77,11 @@ namespace Tuning
 		void writeToXml(XmlWriteHelper& xml);
 		bool readFromXml(XmlReadHelper& xml);
 
-		static const int TYPE_ANALOG_FLOAT = 0;
-		static const int TYPE_ANALOG_INT32 = 1;
-		static const int TYPE_DISCRETE = 2;
+		static const int TYPE_ANALOG_FLOAT = static_cast<int>(E::TuningSignalType::AnalogFloat);
+		static const int TYPE_ANALOG_INT32 = static_cast<int>(E::TuningSignalType::AnalogInt32);
+		static const int TYPE_DISCRETE = static_cast<int>(E::TuningSignalType::Discrete);
 
-		static const int TYPES_COUNT = 3;
+		static const int TYPES_COUNT;
 
 	private:
 		void writeBigEndianUint32Bit(quint8* dataPtr, int bitNo, quint32 bitValue);
@@ -112,9 +110,9 @@ namespace Tuning
 
 		static const int TRIPLE_FRAMES = 3;
 
-		QVector<AppSignal*> m_tuningSignals[TYPES_COUNT];
+		QVector<QVector<AppSignal*>> m_tuningSignals;
 
-		int m_tuningSignalSizes[TYPES_COUNT];
+		QVector<int> m_tuningSignalSizes;
 
 		quint8* m_tuningData = nullptr;
 		int m_tuningDataSizeB = 0;

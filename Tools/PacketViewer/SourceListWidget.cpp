@@ -31,20 +31,27 @@ SourceListWidget::SourceListWidget(QWidget *parent)
 		for (int j = 0; j < addressList.count(); j++)
 		{
 			QHostAddress ip = addressList[j].ip();
+
 			if (ip.protocol() != QAbstractSocket::IPv4Protocol)
 			{
 				continue;
 			}
 			m_netListCombo->addItem(ip.toString());
+
 			QSettings settings;
+
 			int count = settings.beginReadArray("PacketSourceModel/listenAddresses");
-			for (int i = 0; i < count; i++)
+
+			for (int k = 0; k < count; k++)
 			{
-				settings.setArrayIndex(i);
+				settings.setArrayIndex(k);
+
 				quint32 listenIp = settings.value("ip").toUInt();
+
 				if (listenIp == ip.toIPv4Address())
 				{
-					m_listenerModel->addListener(ip.toString(), settings.value("port").toUInt(), false);
+					m_listenerModel->addListener(ip.toString(),
+												 static_cast<quint16>(settings.value("port").toUInt()), false);
 				}
 			}
 			settings.endArray();
@@ -106,7 +113,8 @@ SourceListWidget::~SourceListWidget()
 
 void SourceListWidget::addListener()
 {
-	m_listenerModel->addListener(m_netListCombo->currentText(), m_portEditor->text().toInt());
+	m_listenerModel->addListener(m_netListCombo->currentText(),
+								 static_cast<quint16>(m_portEditor->text().toUInt()));
 }
 
 void SourceListWidget::removeListener()

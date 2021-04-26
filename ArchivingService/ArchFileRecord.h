@@ -2,8 +2,8 @@
 
 #include <QtGlobal>
 
-#include "../lib/AppSignalStateFlags.h"
 #include "../CommonLib/Types.h"
+#include "../lib/AppSignal.h"
 #include "../UtilsLib/Crc.h"
 
 static const QString ARCH_FILE_NAME_TEMPLATE("2[0-9][0-9][0-9]_[0-1][0-9]_[0-3][0-9]_[0-2][0-9]_[0-5][0-9].[ls]ta");

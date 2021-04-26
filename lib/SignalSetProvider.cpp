@@ -72,7 +72,7 @@ QVariant SignalPropertyManager::value(const AppSignal* signal, int propertyIndex
 		return QVariant();
 	}
 
-	const SignalPropertyDescription& property = m_propertyDescription[static_cast<size_t>(propertyIndex)];
+	const AppSignalPropertyDescription& property = m_propertyDescription[static_cast<size_t>(propertyIndex)];
 	if (property.enumValues.size() == 0)
 	{
 		return property.valueGetter(signal);
@@ -213,7 +213,7 @@ void SignalPropertyManager::detectNewProperties(const AppSignal &signal)
 
 	std::vector<std::shared_ptr<Property>> specificProperties = propObject.properties();
 
-	SignalSpecPropValues spValues;
+	AppSignalSpecPropValues spValues;
 
 	for(std::shared_ptr<Property> specificProperty : specificProperties)
 	{
@@ -223,14 +223,14 @@ void SignalPropertyManager::detectNewProperties(const AppSignal &signal)
 			continue;
 		}
 
-		SignalPropertyDescription newProperty;
+		AppSignalPropertyDescription newProperty;
 
 		QString propertyName = specificProperty->caption();
 		bool propertyIsEnum = specificProperty->isEnum();
 		QVariant::Type type = specificProperty->value().type();
 
 		newProperty.name = propertyName;
-		newProperty.caption = SignalProperties::generateCaption(propertyName);
+		newProperty.caption = AppSignalProperties::generateCaption(propertyName);
 		newProperty.type = type;
 		if (propertyIsEnum)
 		{
@@ -291,10 +291,10 @@ void SignalPropertyManager::detectNewProperties(const AppSignal &signal)
 void SignalPropertyManager::loadNotSpecificProperties()
 {
 	AppSignal signal;
-	SignalProperties signalProperties(signal, true);
-	std::vector<SignalPropertyDescription> propetyDescription = signalProperties.getProperties();
+	AppSignalProperties signalProperties(signal, true);
+	std::vector<AppSignalPropertyDescription> propetyDescription = signalProperties.getProperties();
 
-	for (SignalPropertyDescription& property : propetyDescription)
+	for (AppSignalPropertyDescription& property : propetyDescription)
 	{
 		if (index(property.name) == -1)
 		{
@@ -500,7 +500,7 @@ bool SignalPropertyManager::isReadOnly(E::PropertyBehaviourType behaviour, bool 
 	return readOnly;
 }
 
-void SignalPropertyManager::addNewProperty(const SignalPropertyDescription& newProperty)
+void SignalPropertyManager::addNewProperty(const AppSignalPropertyDescription& newProperty)
 {
 	if (m_propertyName2IndexMap.contains(newProperty.name))
 	{

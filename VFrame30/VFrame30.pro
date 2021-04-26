@@ -139,7 +139,7 @@ HEADERS += \
     TuningController.h \
     AppSignalController.h \
     ../lib/AppSignal.h \
-    ../lib/SignalProperties.h \
+	../lib/AppSignalProperties.h \
     TuningSchema.h \
     SchemaItemImage.h \
     SchemaItemImageValue.h \

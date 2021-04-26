@@ -44,14 +44,13 @@ HEADERS += \
 	../lib/SoftwareSettings.h \
     ../lib/OrderedHash.h \
     ../lib/BuildInfo.h \
-	../CommonLib/PropertyObject.h \
-    ../lib/AppSignalParam.h \
+	../lib/AppSignalParam.h \
     ../lib/TimeStamp.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     ../lib/AppSignal.h \
-    ../lib/SignalProperties.h \
-	../lib/AppSignalStateFlags.h \
+	../CommonLib/Types.h \
+	../CommonLib/PropertyObject.h \
     FileArchReader.h \
     ArchFile.h \
     BinSearch.h \
@@ -73,8 +72,6 @@ SOURCES += \
 	../lib/SoftwareInfo.cpp \
 	../lib/TuningValue.cpp \
 	../lib/AppSignal.cpp \
-	../lib/SignalProperties.cpp \
-	../lib/AppSignalStateFlags.cpp \
 	ArchivingService.cpp \
 	ArchServiceMain.cpp \
 	TcpAppDataServer.cpp \
@@ -90,6 +87,7 @@ SOURCES += \
 	ArchFileBuffer.cpp \
 
 INCLUDEPATH += ../VFrame30
+INCLUDEPATH += ./../Protobuf
 DEPENDPATH += ../VFrame30
 
 DISTFILES += \
@@ -99,6 +97,14 @@ DISTFILES += \
 RESOURCES += \
     Database/Database.qrc
 
+# Add curent dir to a list of library directory paths
+#
+unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
+
+# --
+#
+LIBS += -L$$DESTDIR
+LIBS += -L.
 
 # Visual Leak Detector
 #
@@ -109,36 +115,15 @@ win32 {
 
 # ServiceLib
 #
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lServiceLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lServiceLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lServiceLib
-}
-
-# UtilsLib
-#
-win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lUtilsLib
-}
-unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lUtilsLib
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lUtilsLib
-}
+LIBS += -lServiceLib
 
 # OnlineLib
 #
-win32 {
-        CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lOnlineLib
-        CONFIG(release, debug|release): LIBS += -L../bin/release/ -lOnlineLib
-}
-unix {
-        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lOnlineLib
-        CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lOnlineLib
-}
+LIBS += -lOnlineLib
+
+# UtilsLib
+#
+LIBS += -lUtilsLib
 
 # CommonLib
 #
@@ -146,5 +131,5 @@ LIBS += -lCommonLib
 
 # Protobuf
 #
-LIBS += -L$$DESTDIR -lprotobuf
-INCLUDEPATH += ./../Protobuf
+LIBS += -lprotobuf
+

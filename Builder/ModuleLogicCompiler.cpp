@@ -4024,8 +4024,7 @@ namespace Builder
 																m_lmDescription->memory().m_tuningDataFrameCount,
 																m_lmDescription->memory().m_tuningDataFramePayload,
 																m_lmDescription->memory().m_tuningDataFrameSize);
-
-		result = tuningData->buildTuningSignalsLists(m_chassisSignals, m_log);
+		result = buildTuningSignalsLists(tuningData);
 
 		if (result == false)
 		{
@@ -4074,6 +4073,79 @@ namespace Builder
 		m_tuningDataStorage->insert(lmEquipmentID(), tuningData);
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::buildTuningSignalsLists(Tuning::TuningData* tuningData)
+	{
+		TEST_PTR_RETURN_FALSE(tuningData);
+
+		tuningData->clearSignalLists();
+
+		bool result = true;
+
+		for(AppSignal* signal : m_chassisSignals)
+		{
+			if (signal->enableTuning() == false)
+			{
+				continue;
+			}
+
+			switch(signal->signalType())
+			{
+			case E::SignalType::Analog:
+
+				if (signal->dataSize() != SIZE_32BIT)
+				{
+					LOG_INTERNAL_ERROR_MSG(m_log, QString(tr("Analog signal '%1' for tuning must have 32-bit dataSize")).
+						  arg(signal->appSignalID()));
+					result = false;
+				}
+				else
+				{
+					if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
+					{
+						tuningData->appendTuningSignal(E::TuningSignalType::AnalogFloat, signal);
+					}
+					else
+					{
+						if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
+						{
+							tuningData->appendTuningSignal(E::TuningSignalType::AnalogInt32, signal);
+						}
+						else
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, QString(tr("Analog signal '%1' for tuning must have Float or Signed Int data format")).
+													arg(signal->appSignalID()));
+							result = false;
+						}
+					}
+				}
+
+				break;
+
+			case E::SignalType::Discrete:
+
+				if (signal->dataSize() != 1)
+				{
+					LOG_INTERNAL_ERROR_MSG(m_log,  QString(tr("Discrete signal '%1' for tuning must have 1-bit dataSize")).
+													arg(signal->appSignalID()));
+					result = false;
+					continue;
+				}
+				else
+				{
+					tuningData->appendTuningSignal(E::TuningSignalType::Discrete, signal);
+				}
+
+				break;
+
+			case E::SignalType::Bus:
+			default:
+				Q_ASSERT(false);				// unknown tuning signal type
+			}
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::getTuningSettings(bool* tuningPropertyExists, bool* tuningEnabled)
