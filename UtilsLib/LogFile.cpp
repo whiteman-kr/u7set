@@ -1,4 +1,9 @@
+#ifndef UTILS_LIB_DOMAIN
+#error Don't include this file in the project! Link UtilsLib instead.
+#endif
+
 #include "LogFile.h"
+#include <QApplication>
 #include <QDir>
 #include <QFile>
 #include <QTimer>
@@ -11,7 +16,10 @@
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QDesktopWidget>
-#include "Ui/UiTools.h"
+#include <QVBoxLayout>
+#include <QMessageBox>
+#include <QLineEdit>
+#include "./Ui/UiTools.h"
 #include "../UtilsLib/Hash.h"
 
 //#define LOGFILE_USE_HEADER	// Uncomment this to use header

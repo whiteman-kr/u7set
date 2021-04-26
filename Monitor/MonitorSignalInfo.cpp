@@ -1,7 +1,7 @@
 #include "MonitorSignalInfo.h"
 #include "MonitorCentralWidget.h"
 #include "TcpSignalClient.h"
-#include "../lib/Ui/UiTools.h"
+#include "../UtilsLib/Ui/UiTools.h"
 #include "ui_DialogSignalInfo.h"
 
 bool MonitorSignalInfo::showDialog(QString appSignalId, MonitorConfigController* configController, TcpSignalClient* tcpSignalClient, MonitorCentralWidget* centralWidget)

@@ -1,7 +1,15 @@
-#include "../lib/Ui/UiTools.h"
+#ifndef UTILS_LIB_DOMAIN
+#error Don't include this file in the project! Link UtilsLib instead.
+#endif
 
-#include <QDialog>
+#include "UiTools.h"
+
+#include <QIcon>
+#include <QStyle>
+#include <QApplication>
 #include <QDesktopWidget>
+#include <QPainter>
+#include <QMessageBox>
 #include <QDateTime>
 #include <QDesktopServices>
 

@@ -71,7 +71,6 @@ SOURCES +=\
     ../lib/AppSignalParam.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
-    ../lib/LogFile.cpp \
     UserManager.cpp \
     DialogProperties.cpp \
     ../lib/Ui/DialogSourceInfo.cpp \
@@ -97,7 +96,6 @@ SOURCES +=\
     ../lib/AppSignal.cpp \
     ../lib/SignalProperties.cpp \
     ../lib/Ui/DialogAlert.cpp \
-    ../lib/Ui/UiTools.cpp \
     ../lib/Ui/DialogAbout.cpp \
     DialogChooseFilter.cpp \
     DialogTuningSources.cpp \
@@ -110,7 +108,7 @@ HEADERS  += MainWindow.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
     ../lib/ConstStrings.h \
-    ../lib/ILogFile.h \
+	../UtilsLib/ILogFile.h \
     ../lib/SoftwareSettings.h \
     Stable.h \
     TuningPage.h \
@@ -124,7 +122,6 @@ HEADERS  += MainWindow.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../CommonLib/PropertyObject.h \
-    ../lib/LogFile.h \
     UserManager.h \
     DialogProperties.h \
     DialogPassword.h \
@@ -149,7 +146,6 @@ HEADERS  += MainWindow.h \
     ../lib/AppSignal.h \
     ../lib/SignalProperties.h \
     ../lib/Ui/DialogAlert.h \
-    ../lib/Ui/UiTools.h \
     ../lib/Ui/DialogAbout.h \
     DialogChooseFilter.h \
     DialogTuningSources.h \

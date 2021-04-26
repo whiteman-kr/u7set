@@ -5,7 +5,7 @@
 #include <vector>
 #include "../HardwareLib/ModuleFirmware.h"
 #include "../lib/LmDescription.h"
-#include "../lib/ILogFile.h"
+#include "../UtilsLib/ILogFile.h"
 #include "SimSubsystem.h"
 #include "SimControl.h"
 #include "SimAppSignalManager.h"

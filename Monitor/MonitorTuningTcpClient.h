@@ -2,9 +2,9 @@
 #define MONITORTUNINGTCPCLIENT_H
 #include "../lib/Tuning/TuningTcpClient.h"
 #include "../lib/Tuning/TuningSignalManager.h"
-#include "../lib/LogFile.h"
-#include "MonitorConfigController.h"
 #include "../lib/TcpClientsStatistics.h"
+#include "../UtilsLib/LogFile.h"
+#include "MonitorConfigController.h"
 
 class MonitorTuningTcpClient : public TuningTcpClient, public TcpClientStatistics
 {

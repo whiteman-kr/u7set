@@ -1,6 +1,6 @@
 #include "AppDataSourcesWidget.h"
 #include "TcpAppSourcesState.h"
-#include "UiTools.h"
+#include "../UtilsLib/Ui/UiTools.h"
 
 #include <QTreeWidget>
 

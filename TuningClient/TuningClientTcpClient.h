@@ -2,8 +2,8 @@
 
 #include "../lib/Tuning/TuningTcpClient.h"
 #include "../lib/Tuning/TuningFilter.h"
-#include "../lib/LogFile.h"
 #include "../lib/Tuning/TuningLog.h"
+#include "../UtilsLib/LogFile.h"
 #include "UserManager.h"
 #include "../lib/TcpClientsStatistics.h"
 

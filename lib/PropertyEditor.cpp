@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "../lib/PropertyEditor.h"
-#include "../lib/Ui/UiTools.h"
+#include "../UtilsLib/Ui/UiTools.h"
 #include "TuningValue.h"
 
 #include <QToolButton>

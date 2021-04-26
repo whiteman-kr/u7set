@@ -2,7 +2,7 @@
 #include "ui_DialogSignalInfo.h"
 #include "../CommonLib/Types.h"
 #include "../Proto/serialization.pb.h"
-#include "../lib/Ui/UiTools.h"
+#include "../UtilsLib/Ui/UiTools.h"
 
 //
 //

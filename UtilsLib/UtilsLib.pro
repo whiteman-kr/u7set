@@ -1,4 +1,4 @@
-QT += network xml
+QT += network xml widgets
 
 TARGET = UtilsLib
 
@@ -60,6 +60,8 @@ CONFIG(release, debug|release) {
 }
 
 HEADERS += \
+    ILogFile.h \
+    LogFile.h \
 	Stable.h \
 	Address16.h \
 	Crc.h \
@@ -68,12 +70,15 @@ HEADERS += \
 	Queue.h \
 	SimpleMutex.h \
 	SimpleThread.h \
+    Ui/UiTools.h \
 	WUtils.h \
 	XmlHelper.h \
 
 SOURCES += \
 	Crc.cpp \
 	DomXmlHelper.cpp \
+    LogFile.cpp \
 	Queue.cpp \
 	SimpleThread.cpp \
+    Ui/UiTools.cpp \
 	XmlHelper.cpp \

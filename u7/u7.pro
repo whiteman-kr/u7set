@@ -95,7 +95,6 @@ HEADERS  += \
 	../lib/Ui/TextEditCompleter.h \
 	../lib/QScintillaLexers/LexerJavaScript.h \
 	../lib/QScintillaLexers/LexerXML.h \
-	../lib/Ui/UiTools.h \
 	../lib/PropertyTable.h \
 	../lib/SignalSetProvider.h \
 	../Metrology/MetrologyConnection.h \
@@ -221,7 +220,6 @@ SOURCES +=\
 	../lib/Ui/TextEditCompleter.cpp \
 	../lib/QScintillaLexers/LexerJavaScript.cpp \
 	../lib/QScintillaLexers/LexerXML.cpp \
-	../lib/Ui/UiTools.cpp \
 	../lib/PropertyTable.cpp \
 	../lib/SignalSetProvider.cpp \
 	../Metrology/MetrologyConnection.cpp \

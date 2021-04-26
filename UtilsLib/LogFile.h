@@ -1,12 +1,16 @@
-#ifndef LOGFILE_H
-#define LOGFILE_H
+#pragma once
 
 #include "../UtilsLib/SimpleThread.h"
-#include "../lib/ILogFile.h"
+#include "../UtilsLib/ILogFile.h"
 
 #include <QTimer>
 #include <QDateTime>
 #include <QMutex>
+#include <QDialog>
+#include <QComboBox>
+#include <QTableView>
+#include <QLabel>
+#include <QPushButton>
 
 namespace Log
 {
@@ -276,5 +280,4 @@ namespace Log
 Q_DECLARE_METATYPE(Log::LogFileRecord)
 
 
-#endif // LOGFILE_H
 

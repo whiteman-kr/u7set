@@ -7,10 +7,10 @@
 #include <QDesktopWidget>
 
 #include "../lib/Tuning/TuningFilter.h"
-#include "../lib/LogFile.h"
+#include "../UtilsLib/LogFile.h"
 #include "../lib/Tuning/TuningLog.h"
 #include "../lib/Ui/DialogAlert.h"
-#include "../lib/Ui/UiTools.h"
+#include "../UtilsLib/Ui/UiTools.h"
 #include "../lib/Ui/DialogAbout.h"
 
 #include "Settings.h"

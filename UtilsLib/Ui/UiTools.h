@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QDialog>
+
 class UiTools
 {
 public:

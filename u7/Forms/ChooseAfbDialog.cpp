@@ -1,5 +1,5 @@
 #include "ChooseAfbDialog.h"
-#include "../lib/Ui/UiTools.h"
+#include "../UtilsLib/Ui/UiTools.h"
 #include "ui_ChooseAfbDialog.h"
 #include "../VFrame30/SchemaItemAfb.h"
 

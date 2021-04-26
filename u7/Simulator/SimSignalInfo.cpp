@@ -1,7 +1,7 @@
 #include "SimSignalInfo.h"
 #include "SimWidget.h"
 #include "SimIdeSimulator.h"
-#include "../lib/Ui/UiTools.h"
+#include "../UtilsLib/Ui/UiTools.h"
 #include "ui_DialogSignalInfo.h"
 
 bool SimSignalInfo::showDialog(QString appSignalId,

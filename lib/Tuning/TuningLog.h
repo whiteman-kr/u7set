@@ -1,7 +1,7 @@
 #ifndef TUNINGLOG_H
 #define TUNINGLOG_H
 
-#include "../LogFile.h"
+#include "../../UtilsLib/LogFile.h"
 
 #include "../AppSignalParam.h"
 

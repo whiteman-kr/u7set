@@ -107,9 +107,7 @@ SOURCES += main.cpp \
     Trend/RtTrendTcpClient.cpp \
     Trend/ArchiveTrendTcpClient.cpp \
     MonitorTuningTcpClient.cpp \
-    ../lib/LogFile.cpp \
     ../lib/Ui/DialogAlert.cpp \
-    ../lib/Ui/UiTools.cpp \
     ../lib/Ui/DialogAbout.cpp \
     ../lib/Ui/DialogSourceInfo.cpp \
     TcpAppSourcesState.cpp \
@@ -123,7 +121,7 @@ HEADERS  += \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
     ../lib/ConstStrings.h \
-    ../lib/ILogFile.h \
+	../UtilsLib/ILogFile.h \
     ../lib/SoftwareSettings.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DragDropHelper.h \
@@ -171,9 +169,7 @@ HEADERS  += \
     MonitorTuningTcpClient.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/TuningSourceState.h \
-    ../lib/LogFile.h \
     ../lib/Ui/DialogAlert.h \
-    ../lib/Ui/UiTools.h \
     ../lib/Ui/DialogAbout.h \
     ../lib/Ui/DialogSourceInfo.h \
     TcpAppSourcesState.h \

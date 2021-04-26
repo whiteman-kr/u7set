@@ -5,7 +5,7 @@
 #include <QDesktopWidget>
 #include <QScreen>
 
-#include "../lib/Ui/UiTools.h"
+#include "../UtilsLib/Ui/UiTools.h"
 
 DialogAlert::DialogAlert(QWidget* parent, QString title):
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)

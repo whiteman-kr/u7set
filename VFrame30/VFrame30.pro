@@ -69,7 +69,7 @@ HEADERS += \
     ../Proto/serialization.pb.h \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
-    ../lib/ILogFile.h \
+	../UtilsLib/ILogFile.h \
     Indicator.h \
     IndicatorArrowIndicator.h \
     IndicatorHistogramVert.h \

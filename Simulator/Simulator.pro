@@ -120,7 +120,7 @@ HEADERS += \
 	Stable.h \
     ../lib/AppSignalStateFlags.h \
     ../lib/ConnectionsInfo.h \
-    ../lib/ILogFile.h \
+	../UtilsLib/ILogFile.h \
 	../lib/LanControllerInfo.h \
 	../lib/LogicModulesInfo.h \
     ../lib/SoftwareSettings.h \

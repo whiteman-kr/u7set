@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/ILogFile.h"
+#include "../UtilsLib/ILogFile.h"
 
 namespace VFrame30
 {

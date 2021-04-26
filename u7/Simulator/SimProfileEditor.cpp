@@ -1,5 +1,5 @@
 #include "SimProfileEditor.h"
-#include "../../lib/Ui/UiTools.h"
+#include "../../UtilsLib/Ui/UiTools.h"
 #include "GlobalMessanger.h"
 
 

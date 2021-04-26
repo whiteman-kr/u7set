@@ -9,7 +9,7 @@
 #include "MonitorTuningTcpClient.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
-#include "../lib/LogFile.h"
+#include "../UtilsLib/LogFile.h"
 #include "../lib/Ui/DialogAlert.h"
 #include "../lib/TcpClientsStatistics.h"
 

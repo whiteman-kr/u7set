@@ -9,7 +9,7 @@
 #include "./Trend/MonitorTrends.h"
 #include "../VFrame30/Schema.h"
 #include "../lib/Ui/DialogSignalSearch.h"
-#include "../lib/Ui/UiTools.h"
+#include "../UtilsLib/Ui/UiTools.h"
 #include "../lib/Ui/DialogAbout.h"
 #include "../lib/Ui/SchemaListWidget.h"
 

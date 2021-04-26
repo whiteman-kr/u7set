@@ -7,7 +7,7 @@
 #include "../UtilsLib/SimpleThread.h"
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/SimpleMutex.h"
-#include "../lib/ILogFile.h"
+#include "../UtilsLib/ILogFile.h"
 #include "SimScopedLog.h"
 
 

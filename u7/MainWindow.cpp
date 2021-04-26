@@ -6,7 +6,7 @@
 #include "../DbLib/DbController.h"
 #include "../lib/Ui/DialogAbout.h"
 #include "../lib/LogicModuleSet.h"
-#include "../lib/Ui/UiTools.h"
+#include "../UtilsLib/Ui/UiTools.h"
 #include "../lib/SignalSetProvider.h"
 #include "UserManagementDialog.h"
 #include "ProjectsTabPage.h"
