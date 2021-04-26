@@ -35,7 +35,6 @@ SOURCES += \
 	../lib/SoftwareSettings.cpp \
     ../lib/Types.cpp \
     ../lib/AppSignal.cpp \
-    ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Times.cpp \
 	TuningService.cpp \
@@ -51,7 +50,6 @@ SOURCES += \
 
 HEADERS += \
 	Stable.h \
-	../CommonLib/PropertyObject.h \
     ../lib/BuildInfo.h \
     ../lib/OrderedHash.h \
     ../lib/DataSource.h \
@@ -59,9 +57,9 @@ HEADERS += \
     ../lib/Types.h \
     ../lib/AppSignal.h \
 	../lib/PropertyObject.h \
-    ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     ../lib/Times.h \
+	../CommonLib/PropertyObject.h \
 	TuningService.h \
 	TcpTuningServer.h \
 	TcpTuningClient.h \

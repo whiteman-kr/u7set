@@ -46,7 +46,6 @@ HEADERS += \
     ../lib/BuildInfo.h \
 	../lib/AppSignalParam.h \
     ../lib/TimeStamp.h \
-    ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     ../lib/AppSignal.h \
 	../CommonLib/Types.h \
@@ -69,7 +68,6 @@ SOURCES += \
 	../lib/SoftwareSettings.cpp \
 	../lib/BuildInfo.cpp \
 	../lib/AppSignalParam.cpp \
-	../lib/SoftwareInfo.cpp \
 	../lib/TuningValue.cpp \
 	../lib/AppSignal.cpp \
 	ArchivingService.cpp \

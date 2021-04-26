@@ -34,7 +34,6 @@ SOURCES += \
     ../lib/DataSource.cpp \
     ../lib/AppSignal.cpp \
     ../lib/AppSignalParam.cpp \
-    ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     ../lib/Times.cpp \
@@ -65,7 +64,6 @@ HEADERS  += \
     ../CommonLib/PropertyObject.h \
 	../lib/AppSignalParam.h \
     ../lib/WidgetUtils.h \
-    ../lib/SoftwareInfo.h \
     ../lib/OrderedHash.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \

@@ -49,10 +49,8 @@ SOURCES += \
 	../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
-	../lib/SoftwareInfo.cpp \
 	../lib/TuningValue.cpp \
 	../lib/AppSignal.cpp \
-#	../lib/AppSignalProperties.cpp \
 	../lib/Ui/DialogAbout.cpp \
 	../lib/ComparatorSet.cpp \
 	DialogCalculator.cpp \
@@ -109,7 +107,6 @@ HEADERS  += \
 	../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
 	../lib/Tuning/TuningSignalState.h \
-	../lib/SoftwareInfo.h \
 	../lib/TuningValue.h \
 	../lib/Ui/DialogAbout.h \
 	../lib/ComparatorSet.h \

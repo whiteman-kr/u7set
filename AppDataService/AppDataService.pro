@@ -37,7 +37,6 @@ SOURCES += \
     ../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
 	../lib/AppSignalParam.cpp \
-    ../lib/SoftwareInfo.cpp \
 	../lib/Times.cpp \
     ../lib/TuningValue.cpp \
 	AppDataService.cpp \
@@ -62,7 +61,6 @@ HEADERS += \
 	../lib/SoftwareSettings.h \
 	../lib/AppSignalParam.h \
     ../lib/TimeStamp.h \
-    ../lib/SoftwareInfo.h \
     ../lib/Times.h \
     ../lib/TuningValue.h \
 	AppDataService.h \

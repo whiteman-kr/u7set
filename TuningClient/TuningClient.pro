@@ -60,7 +60,7 @@ SOURCES +=\
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
     ../lib/SoftwareSettings.cpp \
-        MainWindow.cpp \
+	MainWindow.cpp \
     TuningPage.cpp \
     Settings.cpp \
     TuningSignalInfo.cpp \
@@ -88,7 +88,6 @@ SOURCES +=\
     DialogFilterEditor.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
     TuningClientTcpClient.cpp \ 
-    ../lib/SoftwareInfo.cpp \
     ../lib/Tuning/TuningLog.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
@@ -138,7 +137,6 @@ HEADERS  += MainWindow.h \
     DialogFilterEditor.h \
     ../lib/Tuning/TuningTcpClient.h \
     TuningClientTcpClient.h \ 
-    ../lib/SoftwareInfo.h \
     ../lib/Tuning/TuningLog.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \

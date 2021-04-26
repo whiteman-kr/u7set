@@ -37,7 +37,6 @@ include(../warnings.pri)
 
 SOURCES += \
     ../lib/BuildInfo.cpp \
-    ../lib/SoftwareInfo.cpp \
 	../lib/SoftwareSettings.cpp \
 	ConfigurationService.cpp \
 	CfgServiceMain.cpp \
@@ -47,8 +46,8 @@ SOURCES += \
 HEADERS += \
 	Stable.h \
     ../lib/BuildInfo.h \
-    ../lib/SoftwareInfo.h \
 	../lib/SoftwareSettings.h \
+	../CommonLib/Types.h \
 	ConfigurationService.h \
 	CfgChecker.h \
 	CfgControlServer.h \

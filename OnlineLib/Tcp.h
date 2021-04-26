@@ -17,7 +17,7 @@
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/Crc.h"
 #include "CircularLogger.h"
-#include "../lib/SoftwareInfo.h"
+#include "SoftwareInfo.h"
 #include "../OnlineLib/HostAddressPort.h"
 
 

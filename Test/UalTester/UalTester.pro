@@ -34,7 +34,6 @@ unix {
 
 SOURCES += \
 	../../lib/BuildInfo.cpp \
-    ../../lib/SoftwareInfo.cpp \
 	../../lib/SoftwareSettings.cpp \
 	../../lib/AppSignalParam.cpp \
 	../../lib/AppSignal.cpp \
@@ -54,7 +53,6 @@ HEADERS += \
 	../../lib/ConstStrings.h \
     ../../lib/OrderedHash.h \
     ../../lib/BuildInfo.h \
-    ../../lib/SoftwareInfo.h \
 	../../lib/SoftwareSettings.h \
 	../../CommonLib/PropertyObject.h \
     ../../lib/AppSignalParam.h \

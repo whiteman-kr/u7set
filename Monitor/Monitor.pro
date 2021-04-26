@@ -99,7 +99,6 @@ SOURCES += main.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
-    ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     ../lib/Times.cpp \
@@ -159,7 +158,6 @@ HEADERS  += \
     MonitorSchemaManager.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/Tuning/TuningTcpClient.h \
-    ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
     ../lib/Times.h \

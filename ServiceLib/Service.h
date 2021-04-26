@@ -15,7 +15,7 @@
 #include "../OnlineLib/CircularLogger.h"
 #include "../UtilsLib/SimpleThread.h"
 #include "CommandLineParser.h"
-#include "../lib/SoftwareInfo.h"
+#include "../OnlineLib/SoftwareInfo.h"
 #include "../lib/SoftwareSettings.h"
 #include "../Proto/network.pb.h"
 

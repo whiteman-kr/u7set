@@ -33,7 +33,6 @@ SOURCES += \
     ../lib/Types.cpp \
     ../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
-    ../lib/SoftwareInfo.cpp \
 	DiagDataService.cpp \
 	DiagDataServiceMain.cpp \
 
@@ -42,7 +41,6 @@ HEADERS += \
     ../lib/Types.h \
     ../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
-    ../lib/SoftwareInfo.h \
 	DiagDataService.h \
 
 CONFIG += precompile_header

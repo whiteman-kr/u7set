@@ -35,11 +35,9 @@ PRECOMPILED_HEADER = Stable.h
 HEADERS += \
 	Stable.h \
 	../lib/SoftwareSettings.h \
-	../lib/SoftwareInfo.h \
 
 SOURCES += \
 	../lib/SoftwareSettings.cpp \
-	../lib/SoftwareInfo.cpp \
 	BaseServiceMain.cpp \
 
 INCLUDEPATH += ./../Protobuf

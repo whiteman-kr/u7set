@@ -61,6 +61,7 @@ CONFIG(release, debug|release) {
 
 HEADERS += \
 	Stable.h \
+	SoftwareInfo.h \
 	Tcp.h \
 	TcpFileTransfer.h \
 	SocketIO.h \
@@ -72,6 +73,7 @@ HEADERS += \
 	HostAddressPort.h \
 
 SOURCES += \
+	SoftwareInfo.cpp \
 	Tcp.cpp \
 	TcpFileTransfer.cpp \
 	SocketIO.cpp \
@@ -80,6 +82,3 @@ SOURCES += \
 	CircularLogger.cpp \
 	SimpleAppSignalState.cpp \
 	DataProtocols.cpp \
-
-
-
