@@ -45,7 +45,6 @@ HEADERS += \
     ../lib/OrderedHash.h \
     ../lib/BuildInfo.h \
 	../lib/AppSignalParam.h \
-    ../lib/TimeStamp.h \
     ../lib/TuningValue.h \
     ../lib/AppSignal.h \
 	../CommonLib/Types.h \

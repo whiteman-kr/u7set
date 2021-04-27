@@ -64,7 +64,6 @@ HEADERS += \
     TrendScale.h \
     TrendWidget.h \
     TrendSignal.h \
-    ../lib/TimeStamp.h \
     TrendSlider.h \
     TrendSettings.h \
     TrendMainWindow.h \

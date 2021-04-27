@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/TimeStamp.h"
+#include "../CommonLib/Times.h"
 #include "../lib/AppSignalParam.h"
 
 

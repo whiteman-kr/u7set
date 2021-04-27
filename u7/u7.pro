@@ -78,7 +78,6 @@ HEADERS  += \
     ../lib/Ui/TabWidgetEx.h \
     ../lib/Ui/TagSelectorWidget.h \
 	../lib/Ui/DialogProgress.h \
-	../lib/Factory.h \
 	../lib/CUtils.h \
 	../lib/OrderedHash.h \
 	../CommonLib/PropertyObject.h \

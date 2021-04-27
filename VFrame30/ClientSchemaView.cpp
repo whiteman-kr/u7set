@@ -1,7 +1,7 @@
 #include "ClientSchemaView.h"
 #include "DrawParam.h"
 #include "PropertyNames.h"
-#include "../lib/TimeStamp.h"
+#include "../CommonLib/Times.h"
 
 namespace VFrame30
 {

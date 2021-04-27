@@ -58,7 +58,6 @@ SOURCES += main.cpp \
 #    SignalTests.h \
 
 HEADERS += \
-	../../lib/Factory.h \
 	../../lib/AppSignal.h \
 	../../CommonLib/PropertyObject.h \
 	../../lib/TuningValue.h \

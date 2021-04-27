@@ -1,6 +1,6 @@
 #ifndef ARCHIVEDATA_H
 #define ARCHIVEDATA_H
-#include "../lib/TimeStamp.h"
+#include "../CommonLib/Times.h"
 #include "../lib/AppSignalParam.h"
 
 

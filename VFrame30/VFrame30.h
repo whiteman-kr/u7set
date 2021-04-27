@@ -2,7 +2,7 @@
 
 // Project stable includes
 //
-#include "../lib/Factory.h"
+#include "../CommonLib/Factory.h"
 #include "../lib/CUtils.h"
 
 #include "Schema.h"

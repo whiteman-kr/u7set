@@ -36,7 +36,6 @@ SOURCES += \
     ../lib/AppSignalParam.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
-    ../lib/Times.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/WidgetUtils.cpp \
 	../AppDataService/DynamicAppSignalState.cpp \
@@ -67,7 +66,6 @@ HEADERS  += \
     ../lib/OrderedHash.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
-    ../lib/Times.h \
     ../lib/Tuning/TuningSignalState.h \
 	../AppDataService/DynamicAppSignalState.h \
 	../AppDataService/AppDataSource.h \

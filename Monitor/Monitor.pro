@@ -101,7 +101,6 @@ SOURCES += main.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
-    ../lib/Times.cpp \
 	../lib/AppSignalProperties.cpp \
     Trend/RtTrendTcpClient.cpp \
     Trend/ArchiveTrendTcpClient.cpp \
@@ -160,7 +159,6 @@ HEADERS  += \
     ../lib/Tuning/TuningTcpClient.h \
     ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
-    ../lib/Times.h \
 	../lib/AppSignalProperties.h \
     Trend/RtTrendTcpClient.h \
     Trend/ArchiveTrendTcpClient.h \

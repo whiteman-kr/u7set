@@ -1,7 +1,7 @@
 #pragma once
 #include "SimScopedLog.h"
 #include "../lib/SoftwareSettings.h"
-#include "../lib/TimeStamp.h"
+#include "../CommonLib/Times.h"
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/DataProtocols.h"
 #include "../lib/LogicModulesInfo.h"

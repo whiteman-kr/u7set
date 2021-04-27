@@ -124,7 +124,6 @@ HEADERS += \
     ../lib/DebugInstCounter.h \
     ../CommonLib/PropertyObject.h \
     ../lib/AppSignalManager.h \
-    ../lib/Factory.h \
     ../lib/AppSignalParam.h \
     SchemaItemBus.h \
     Bus.h \

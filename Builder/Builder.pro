@@ -78,7 +78,6 @@ SOURCES += \
     ../lib/Tuning/TuningSignalManager.cpp \
     ../lib/ConnectionsInfo.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
-	../lib/Times.cpp \
 	../lib/ComparatorSet.cpp \
 	../TuningService/TuningDataStorage.cpp \
 	../TuningService/TuningSource.cpp \
@@ -150,7 +149,6 @@ HEADERS += \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/ConnectionsInfo.h \
 	../lib/Tuning/TuningSignalState.h \
-	../lib/Times.h \
 	../lib/ComparatorSet.h \
 	../TuningService/TuningSource.h \
 	../TuningService/TuningDataStorage.h \

@@ -35,7 +35,6 @@ SOURCES += \
 	../lib/SoftwareSettings.cpp \
     ../lib/AppSignal.cpp \
     ../lib/TuningValue.cpp \
-    ../lib/Times.cpp \
 	TuningService.cpp \
 	TcpTuningServer.cpp \
 	TcpTuningClient.cpp \
@@ -55,7 +54,6 @@ HEADERS += \
 	../lib/SoftwareSettings.h \
     ../lib/AppSignal.h \
     ../lib/TuningValue.h \
-    ../lib/Times.h \
 	../CommonLib/PropertyObject.h \
 	TuningService.h \
 	TcpTuningServer.h \

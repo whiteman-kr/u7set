@@ -2,7 +2,7 @@
 #define TRENDSLIDER_H
 #include <QWidget>
 #include "TrendRuler.h"
-#include "../lib/TimeStamp.h"
+#include "../CommonLib/Times.h"
 
 class QPushButton;
 class TrendSliderRailSubcontrol;

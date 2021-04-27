@@ -3,7 +3,7 @@
 
 #include "../OnlineLib/Tcp.h"
 #include "../CommonLib/Hash.h"
-#include "../lib/TimeStamp.h"
+#include "../CommonLib/Times.h"
 #include "../Proto/network.pb.h"
 #include "../TrendView/TrendSignal.h"
 #include "MonitorConfigController.h"

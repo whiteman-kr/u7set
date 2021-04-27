@@ -33,7 +33,6 @@ SOURCES += \
 	../../lib/DataSource.cpp \
 	../../lib/AppSignal.cpp \
 	../../lib/TuningValue.cpp \
-	../../lib/Times.cpp \
 	main.cpp \
 	SourceListWidget.cpp \
 	PacketSourceModel.cpp \
@@ -50,7 +49,6 @@ HEADERS  += \
 	../../lib/AppSignal.h \
 	../../CommonLib/PropertyObject.h \
 	../../lib/TuningValue.h \
-	../../lib/Times.h \
 	SourceListWidget.h \
 	PacketSourceModel.h \
 	SourceStatusWidget.h \

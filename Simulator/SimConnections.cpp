@@ -1,5 +1,5 @@
 #include "SimConnections.h"
-#include "../lib/TimeStamp.h"
+#include "../CommonLib/Times.h"
 
 namespace Sim
 {

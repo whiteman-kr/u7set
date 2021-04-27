@@ -70,7 +70,7 @@
 
 // Other stable includes
 //
-#include "../lib/Factory.h"
+#include "../CommonLib/Factory.h"
 #include "../CommonLib/Types.h"
 #include "../lib/DebugInstCounter.h"
 #include "../lib/CUtils.h"

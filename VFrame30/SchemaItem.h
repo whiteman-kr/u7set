@@ -2,9 +2,9 @@
 
 #include "SchemaPoint.h"
 #include "../CommonLib/PropertyObject.h"
+#include "../CommonLib/Factory.h"
 #include "../lib/DebugInstCounter.h"
 #include "../lib/OutputLog.h"
-#include "../lib/Factory.h"
 #include "../Proto/ProtoSerialization.h"
 #include <QJSValue>
 

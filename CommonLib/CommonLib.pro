@@ -57,11 +57,14 @@ CONFIG(release, debug|release) {
 }
 
 HEADERS += \
+	Factory.h \
 	Hash.h \
 	Stable.h \
+	Times.h \
 	Types.h \
 	PropertyObject.h
 
 SOURCES += \
+	Times.cpp \
 	Types.cpp
 

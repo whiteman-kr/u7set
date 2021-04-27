@@ -6,7 +6,7 @@
 #include <array>
 #include "../lib/DebugInstCounter.h"
 #include "../CommonLib/PropertyObject.h"
-#include "../lib/Factory.h"
+#include "../CommonLib/Factory.h"
 #include "../CommonLib/Types.h"
 #include "../Proto/ProtoSerialization.h"
 

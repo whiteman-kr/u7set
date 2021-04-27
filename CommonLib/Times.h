@@ -4,7 +4,6 @@
 #include <QMetaType>
 #include <QDateTime>
 
-
 // Time literals converts to ms
 //
 constexpr int64_t operator "" _ms(unsigned long long int value)
@@ -38,6 +37,7 @@ constexpr int64_t operator "" _day(unsigned long long int value)
 }
 
 
+//
 // TimeStamp
 //
 struct TimeStamp
@@ -117,6 +117,8 @@ struct TimeStamp
 
 Q_DECLARE_METATYPE(TimeStamp)
 
+
+//
 // TimeSpan
 //
 struct TimeSpan
@@ -127,3 +129,18 @@ struct TimeSpan
 Q_DECLARE_METATYPE(TimeSpan)
 
 
+//
+// Times
+//
+struct Times
+{
+	TimeStamp system;
+	TimeStamp local;
+	TimeStamp plant;
+
+	[[nodiscard]] QDateTime systemToDateTime() const;
+	[[nodiscard]] QDateTime localToDateTime() const;
+	[[nodiscard]] QDateTime plantToDateTime() const;
+
+	Times& operator += (qint64 timeSpan);
+};
