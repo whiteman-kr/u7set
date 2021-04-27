@@ -849,10 +849,10 @@ namespace VFrame30
 			}
 		}
 
-		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
 
-		double minPinHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
-		double minTextHeight = CUtils::snapToGrid(m_font.drawSize() * static_cast<double>(textLineCount), gridSize);
+		double minPinHeight = VFrame30::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
+		double minTextHeight = VFrame30::snapToGrid(m_font.drawSize() * static_cast<double>(textLineCount), gridSize);
 
 		if (minTextHeight < minPinHeight)
 		{

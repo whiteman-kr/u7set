@@ -527,12 +527,12 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			return CUtils::RoundDisplayPoint(m_lineWeight);
+			return VFrame30::RoundDisplayPoint(m_lineWeight);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(m_lineWeight, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
+			double pt = VFrame30::ConvertPoint(m_lineWeight, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			pt = VFrame30::RoundPoint(pt, Settings::regionalUnit());
 			return pt;
 		}
 	}
@@ -551,11 +551,11 @@ namespace VFrame30
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			m_lineWeight = CUtils::RoundDisplayPoint(weight);
+			m_lineWeight = VFrame30::RoundDisplayPoint(weight);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(weight, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			double pt = VFrame30::ConvertPoint(weight, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 			m_lineWeight = pt;
 		}
 	}

@@ -126,8 +126,8 @@ namespace VFrame30
 		QPointF lt(leftDocPt(), topDocPt());
 		QPointF br(leftDocPt() + widthDocPt(), topDocPt() + heightDocPt());
 
-		QPointF leftTop = CUtils::snapToGrid(lt, gridSize);
-		QPointF bottomRight = CUtils::snapToGrid(br, gridSize);
+		QPointF leftTop = VFrame30::snapToGrid(lt, gridSize);
+		QPointF bottomRight = VFrame30::snapToGrid(br, gridSize);
 
 		setLeftDocPt(leftTop.x());
 		setTopDocPt(leftTop.y());
@@ -454,8 +454,8 @@ namespace VFrame30
 		{
 			bool result = false;
 
-			result |= CUtils::IsLineIntersectRect(x, y, x, y + height, itemRect);
-			result |= CUtils::IsLineIntersectRect(x, y, x + width, y, itemRect);
+			result |= VFrame30::IsLineIntersectRect(x, y, x, y + height, itemRect);
+			result |= VFrame30::IsLineIntersectRect(x, y, x + width, y, itemRect);
 
 			return result;
 		}
@@ -464,8 +464,8 @@ namespace VFrame30
 		{
 			bool result = false;
 
-			result |= CUtils::IsLineIntersectRect(itemRect.x(), itemRect.y(), itemRect.x() + itemRect.width(), itemRect.y(), detRect);
-			result |= CUtils::IsLineIntersectRect(itemRect.x(), itemRect.y(), itemRect.x(), itemRect.y() + itemRect.height(), detRect);
+			result |= VFrame30::IsLineIntersectRect(itemRect.x(), itemRect.y(), itemRect.x() + itemRect.width(), itemRect.y(), detRect);
+			result |= VFrame30::IsLineIntersectRect(itemRect.x(), itemRect.y(), itemRect.x(), itemRect.y() + itemRect.height(), detRect);
 
 			return result;
 		}
@@ -503,7 +503,7 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			m_leftDocPt = CUtils::Round(value);
+			m_leftDocPt = VFrame30::Round(value);
 		}
 		else
 		{
@@ -519,7 +519,7 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			m_topDocPt = CUtils::Round(value);
+			m_topDocPt = VFrame30::Round(value);
 		}
 		else
 		{
@@ -535,7 +535,7 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			m_widthDocPt = CUtils::Round(value);
+			m_widthDocPt = VFrame30::Round(value);
 		}
 		else
 		{
@@ -556,7 +556,7 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			m_heightDocPt = CUtils::Round(value);
+			m_heightDocPt = VFrame30::Round(value);
 		}
 		else
 		{
@@ -575,24 +575,24 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			return CUtils::RoundDisplayPoint(leftDocPt());
+			return VFrame30::RoundDisplayPoint(leftDocPt());
 		}
 		else
 		{
 			double pt = leftDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			return CUtils::RoundPoint(pt, Settings::regionalUnit());
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
 	void PosRectImpl::setLeft(double value)
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			setLeftDocPt(CUtils::RoundDisplayPoint(value));
+			setLeftDocPt(VFrame30::RoundDisplayPoint(value));
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			double pt = VFrame30::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 			setLeftDocPt(pt);
 		}
 	}
@@ -601,25 +601,25 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			return CUtils::RoundDisplayPoint(topDocPt());
+			return VFrame30::RoundDisplayPoint(topDocPt());
 		}
 		else
 		{
 			double pt = topDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			return CUtils::RoundPoint(pt, Settings::regionalUnit());
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
 		}			
 	}
 	void PosRectImpl::setTop(double value)
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			double pt = CUtils::RoundDisplayPoint(value);
+			double pt = VFrame30::RoundDisplayPoint(value);
 			setTopDocPt(pt);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			double pt = VFrame30::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 			setTopDocPt(pt);
 		}
 	}
@@ -628,13 +628,13 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			return CUtils::RoundDisplayPoint(widthDocPt());
+			return VFrame30::RoundDisplayPoint(widthDocPt());
 		}
 		else
 		{
 			double pt = widthDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			return CUtils::RoundPoint(pt, Settings::regionalUnit());
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
 	void PosRectImpl::setWidth(double value)
@@ -643,11 +643,11 @@ namespace VFrame30
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			setWidthDocPt(CUtils::RoundDisplayPoint(normalizedValue));
+			setWidthDocPt(VFrame30::RoundDisplayPoint(normalizedValue));
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(normalizedValue, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			double pt = VFrame30::ConvertPoint(normalizedValue, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 			setWidthDocPt(pt);
 		}
 	}
@@ -656,13 +656,13 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			return CUtils::RoundDisplayPoint(heightDocPt());
+			return VFrame30::RoundDisplayPoint(heightDocPt());
 		}
 		else
 		{
 			double pt = heightDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			return CUtils::RoundPoint(pt, Settings::regionalUnit());
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
 		}			
 	}
 	void PosRectImpl::setHeight(double value)
@@ -671,11 +671,11 @@ namespace VFrame30
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			setHeightDocPt(CUtils::RoundDisplayPoint(normalizedValue));
+			setHeightDocPt(VFrame30::RoundDisplayPoint(normalizedValue));
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(normalizedValue, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			double pt = VFrame30::ConvertPoint(normalizedValue, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 			setHeightDocPt(pt);
 		}
 	}

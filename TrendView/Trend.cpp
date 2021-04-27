@@ -1,5 +1,5 @@
 #include "Trend.h"
-#include "../lib/CUtils.h"
+#include "../UtilsLib/CUtils.h"
 #include "../Proto/trends.pb.h"
 #include "TrendScale.h"
 

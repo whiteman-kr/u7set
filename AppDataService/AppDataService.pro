@@ -54,7 +54,6 @@ HEADERS += \
 	../lib/ConstStrings.h \
     ../lib/DataSource.h \
 	../lib/AppSignal.h \
-    ../lib/CUtils.h \
 	../CommonLib/PropertyObject.h \
     ../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \

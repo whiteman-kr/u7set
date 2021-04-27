@@ -1,4 +1,5 @@
 #include "EditConnectionLine.h"
+#include "../VFrame30/VFrameTools.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/PosConnectionImpl.h"
 #include "../VFrame30/SchemaPoint.h"
@@ -220,7 +221,7 @@ void EditConnectionLine::moveEndPointPos(std::shared_ptr<VFrame30::SchemaLayer> 
 		//         (1)     (2)
 		//
 		QPointF cornerPoint(toPoint.x(), ptBase.y());				// (2)
-		cornerPoint = CUtils::snapToGrid(cornerPoint, gridSize);
+		cornerPoint = VFrame30::snapToGrid(cornerPoint, gridSize);
 
 		clearExtensionPoints();
 		addExtensionPoint(cornerPoint);								// (2)
@@ -237,7 +238,7 @@ void EditConnectionLine::moveEndPointPos(std::shared_ptr<VFrame30::SchemaLayer> 
 		//   [ITEM]-+-------+(2
 		//
 		QPointF cornerPoint(ptBase.x(), toPoint.y());		// (1)
-		cornerPoint = CUtils::snapToGrid(cornerPoint, gridSize);
+		cornerPoint = VFrame30::snapToGrid(cornerPoint, gridSize);
 
 		clearExtensionPoints();
 		addExtensionPoint(cornerPoint);
@@ -270,7 +271,7 @@ void EditConnectionLine::moveEndPointPos(std::shared_ptr<VFrame30::SchemaLayer> 
 		}
 
 		QPointF onePoint(midPoint, ptBase.y());
-		onePoint = CUtils::snapToGrid(onePoint, gridSize);
+		onePoint = VFrame30::snapToGrid(onePoint, gridSize);
 
 		clearExtensionPoints();
 

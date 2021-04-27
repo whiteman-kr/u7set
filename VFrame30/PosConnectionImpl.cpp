@@ -127,7 +127,7 @@ namespace VFrame30
 	{
 		for(auto pt = points.begin(); pt != points.end(); ++pt)
 		{
-			QPointF snapped = CUtils::snapToGrid(QPointF(pt->X, pt->Y), gridSize);
+			QPointF snapped = VFrame30::snapToGrid(QPointF(pt->X, pt->Y), gridSize);
 
 			pt->X = snapped.x();
 			pt->Y = snapped.y();
@@ -500,7 +500,7 @@ namespace VFrame30
 				continue;
 			}
 
-			if (CUtils::IsLineIntersectRect(prevPoint.X, prevPoint.Y, curPoint->X, curPoint->Y, intersectRectangleIn) == true)
+			if (VFrame30::IsLineIntersectRect(prevPoint.X, prevPoint.Y, curPoint->X, curPoint->Y, intersectRectangleIn) == true)
 			{
 				return true;
 			}
@@ -606,12 +606,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			val = CUtils::RoundDisplayPoint(val);
+			val = VFrame30::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CUtils::ConvertPoint(val, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			val = CUtils::RoundPoint(val, Settings::regionalUnit());
+			val = VFrame30::ConvertPoint(val, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			val = VFrame30::RoundPoint(val, Settings::regionalUnit());
 		}
 
 		return val;
@@ -639,12 +639,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			val = CUtils::RoundDisplayPoint(val);
+			val = VFrame30::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CUtils::ConvertPoint(val, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			val = CUtils::RoundPoint(val, Settings::regionalUnit());
+			val = VFrame30::ConvertPoint(val, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			val = VFrame30::RoundPoint(val, Settings::regionalUnit());
 		}
 
 		return val;
@@ -676,12 +676,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			val = CUtils::RoundDisplayPoint(val);
+			val = VFrame30::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CUtils::ConvertPoint(val, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			val = CUtils::RoundPoint(val, Settings::regionalUnit());
+			val = VFrame30::ConvertPoint(val, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			val = VFrame30::RoundPoint(val, Settings::regionalUnit());
 		}
 
 		return val;
@@ -713,12 +713,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			val = CUtils::RoundDisplayPoint(val);
+			val = VFrame30::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CUtils::ConvertPoint(val, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			val = CUtils::RoundPoint(val, Settings::regionalUnit());
+			val = VFrame30::ConvertPoint(val, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			val = VFrame30::RoundPoint(val, Settings::regionalUnit());
 		}
 
 		return val;

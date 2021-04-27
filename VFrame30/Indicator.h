@@ -52,13 +52,13 @@ namespace VFrame30
 	{
 		if (m_itemUnit == SchemaUnit::Display)
 		{
-			return CUtils::RoundDisplayPoint(variable);
+			return VFrame30::RoundDisplayPoint(variable);
 		}
 		else
 		{
 			double pt = variable;
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			return CUtils::RoundPoint(pt, Settings::regionalUnit());
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
 
@@ -69,11 +69,11 @@ namespace VFrame30
 
 		if (m_itemUnit == SchemaUnit::Display)
 		{
-			*variable = CUtils::RoundDisplayPoint(value);
+			*variable = VFrame30::RoundDisplayPoint(value);
 		}
 		else
 		{
-			*variable = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			*variable = VFrame30::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 		}
 	}
 

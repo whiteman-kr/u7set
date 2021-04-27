@@ -3,7 +3,7 @@
 #include "PosRectImpl.h"
 #include "FblItem.h"
 #include "FontParam.h"
-#include "../lib/CUtils.h"
+#include "VFrameTools.h"
 
 namespace VFrame30
 {
@@ -25,8 +25,7 @@ namespace VFrame30
 
 namespace VFrame30
 {
-	static const double BusSideLineWidth = mm2in(0.4);
-
+	static const double BusSideLineWidth = VFrame30::mm2in(0.4);
 
 	class FblItemRect : public PosRectImpl, public FblItem
 	{

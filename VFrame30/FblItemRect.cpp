@@ -290,13 +290,13 @@ namespace VFrame30
 		//
 //		double x = connection.dirrection() == ConnectionDirrection::Input ? fblItemRect.left() : fblItemRect.right();
 
-//		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
-//		double halfpinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep) / 2.0, gridSize);
+//		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+//		double halfpinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep) / 2.0, gridSize);
 
-//		double top = CUtils::snapToGrid(fblItemRect.top(), gridSize);
+//		double top = VFrame30::snapToGrid(fblItemRect.top(), gridSize);
 
 //		double y = top + halfpinVertGap + pinVertGap * static_cast<double>(index);
-//		y = CUtils::snapToGrid(y, gridSize);
+//		y = VFrame30::snapToGrid(y, gridSize);
 
 //		return SchemaPoint(x, y);
 
@@ -305,12 +305,12 @@ namespace VFrame30
 		double pinVertGap =	gridSize * static_cast<double>(pinGridStep);
 		double halfpinVertGap =	gridSize * static_cast<double>(pinGridStep) / 2.0;
 
-		double top = CUtils::snapToGrid(fblItemRect.top(), gridSize);
+		double top = VFrame30::snapToGrid(fblItemRect.top(), gridSize);
 
 		double y = top + halfpinVertGap + pinVertGap * static_cast<double>(index);
 
-		y = CUtils::snapToGrid(y, gridSize);
-		x = CUtils::snapToGrid(x, gridSize);
+		y = VFrame30::snapToGrid(y, gridSize);
+		x = VFrame30::snapToGrid(x, gridSize);
 
 		return SchemaPoint(x, y);
 	}
@@ -819,8 +819,8 @@ namespace VFrame30
 			pinCount = 1;
 		}
 
-		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
-		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
+		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		double minHeight = VFrame30::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
 
 		return minHeight;
 	}
@@ -1123,12 +1123,12 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			return CUtils::RoundDisplayPoint(m_weight);
+			return VFrame30::RoundDisplayPoint(m_weight);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(m_weight, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			return CUtils::RoundPoint(pt, Settings::regionalUnit());
+			double pt = VFrame30::ConvertPoint(m_weight, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
 
@@ -1136,11 +1136,11 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			m_weight = CUtils::RoundDisplayPoint(weight);
+			m_weight = VFrame30::RoundDisplayPoint(weight);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(weight, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			double pt = VFrame30::ConvertPoint(weight, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 			m_weight = pt;
 		}
 	}

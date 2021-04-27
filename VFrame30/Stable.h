@@ -91,10 +91,10 @@
 
 // Project stable includes
 //
+#include "VFrameTools.h"
 #include "../CommonLib/Factory.h"
 #include "../CommonLib/Types.h"
 #include "../CommonLib/PropertyObject.h"
-#include "../lib/CUtils.h"
 #include "../lib/DebugInstCounter.h"
 #include "../Proto/ProtoSerialization.h"
 

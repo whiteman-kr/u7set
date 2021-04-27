@@ -258,8 +258,8 @@ namespace VFrame30
 		//
 		int pinCount = std::max(connectionIdsAsList().size(), inputsCount());
 
-		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
-		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
+		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		double minHeight = VFrame30::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
 
 		return minHeight;
 	}
@@ -503,7 +503,7 @@ namespace VFrame30
 		r.setRight(r.right() - pinWidth - m_font.drawSize() / 4.0);
 
 		double maxGridSize = qMax(drawParam->gridSize() * drawParam->pinGridStep(), m_font.drawSize());
-		double lineHeight = CUtils::snapToGrid(maxGridSize, drawParam->gridSize());
+		double lineHeight = VFrame30::snapToGrid(maxGridSize, drawParam->gridSize());
 
 		// Draw Data (AppSignalID, CustomerSignalID, Caption, etc
 		//
@@ -577,8 +577,8 @@ namespace VFrame30
 		//
 		int pinCount = qBound(2, connectionIdsAsList().size() + appSignalIdsAsList().size(), 256);
 
-		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
-		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
+		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		double minHeight = VFrame30::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
 
 		return minHeight;
 	}

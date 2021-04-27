@@ -55,12 +55,12 @@ namespace VFrame30
 	{
 		if (unit == SchemaUnit::Display)
 		{
-			return CUtils::RoundDisplayPoint(m_size);
+			return VFrame30::RoundDisplayPoint(m_size);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(m_size, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			return CUtils::RoundPoint(pt, Settings::regionalUnit());
+			double pt = VFrame30::ConvertPoint(m_size, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
 	void FontParam::setSize(double value, SchemaUnit unit)
@@ -68,11 +68,11 @@ namespace VFrame30
 		value = std::max(value, 0.0);
 		if (unit == SchemaUnit::Display)
 		{
-			m_size = CUtils::RoundDisplayPoint(value);
+			m_size = VFrame30::RoundDisplayPoint(value);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, unit, SchemaUnit::Inch, 0);
+			double pt = VFrame30::ConvertPoint(value, unit, SchemaUnit::Inch, 0);
 			m_size = pt;
 		}
 	}

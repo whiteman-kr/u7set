@@ -71,7 +71,6 @@ HEADERS += \
     DialogTrendSignalProperties.h \
     TrendRuler.h \
     TrendParam.h \
-    ../lib/CUtils.h \
     DialogTrendSignalPoints.h \
     DialogTrendSignalPoint.h
 

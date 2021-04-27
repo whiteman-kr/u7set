@@ -4,7 +4,7 @@
 #include <QHBoxLayout>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
-#include "../lib/CUtils.h"
+#include "../UtilsLib/CUtils.h"
 
 TrendSlider::TrendSlider(TrendLib::TrendRulerSet* rulerSet) :
 	m_rulerSet(rulerSet)

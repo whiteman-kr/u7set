@@ -3064,12 +3064,12 @@ QPointF EditSchemaWidget::widgetPointToDocument(const QPoint& widgetPoint, bool 
 
 QPointF EditSchemaWidget::snapToGrid(QPointF pt) const
 {
-	return CUtils::snapToGrid(pt, schema()->gridSize());
+	return VFrame30::snapToGrid(pt, schema()->gridSize());
 }
 
 VFrame30::SchemaPoint EditSchemaWidget::snapToGrid(VFrame30::SchemaPoint pt) const
 {
-	return VFrame30::SchemaPoint{CUtils::snapToGrid(pt.X, pt.Y, schema()->gridSize())};
+	return VFrame30::SchemaPoint{VFrame30::snapToGrid(pt.X, pt.Y, schema()->gridSize())};
 }
 
 bool EditSchemaWidget::updateAfbsForSchema()

@@ -70,7 +70,6 @@ SOURCES += \
     ../lib/TuningValue.cpp \
 	../lib/AppSignalProperties.cpp \
     ../lib/DataSource.cpp \
-    ../lib/CsvFile.cpp \
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/AppSignalParam.cpp \
     ../lib/BuildInfo.cpp \
@@ -141,7 +140,6 @@ HEADERS += \
     ../lib/TuningValue.h \
 	../lib/AppSignalProperties.h \
     ../lib/DataSource.h \
-    ../lib/CsvFile.h \
     ../lib/Tuning/TuningFilter.h \
     ../lib/AppSignalParam.h \
     ../lib/BuildInfo.h \

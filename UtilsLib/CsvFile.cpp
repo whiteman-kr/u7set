@@ -1,4 +1,8 @@
-#include "../lib/CsvFile.h"
+#ifndef UTILS_LIB_DOMAIN
+#error Don't include this file in the project! Link UtilsLib instead.
+#endif
+
+#include "CsvFile.h"
 #include <QVariant>
 
 QString CsvFile::getCsvString(const QStringList& strings, bool replaceSeparatorsAndQuotes)

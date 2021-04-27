@@ -95,6 +95,7 @@ HEADERS += \
     Afb.h \
     Schema.h \
     LogicSchema.h \
+    VFrameTools.h \
     WiringSchema.h \
     DiagSchema.h \
     SchemaLayer.h \
@@ -120,7 +121,6 @@ HEADERS += \
     SchemaItemTerminator.h \
     MacrosExpander.h \
     Session.h \
-    ../lib/CUtils.h \
     ../lib/DebugInstCounter.h \
     ../CommonLib/PropertyObject.h \
     ../lib/AppSignalManager.h \
@@ -169,6 +169,7 @@ SOURCES += \
     Afb.cpp \
     Schema.cpp \
     LogicSchema.cpp \
+    VFrameTools.cpp \
     WiringSchema.cpp \
     DiagSchema.cpp \
     SchemaLayer.cpp \

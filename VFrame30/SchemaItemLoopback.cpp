@@ -160,7 +160,7 @@ namespace VFrame30
 
 		// Draw loopback logo
 		//
-		double pinVertGap =	CUtils::snapToGrid(drawParam->gridSize() * static_cast<double>(drawParam->pinGridStep()), drawParam->gridSize());
+		double pinVertGap =	VFrame30::snapToGrid(drawParam->gridSize() * static_cast<double>(drawParam->pinGridStep()), drawParam->gridSize());
 
 		QRectF logoRect = {r.right() - pinVertGap * 2.0, r.top(), pinVertGap * 2.0, r.height()};
 		logoRect.setTopRight(drawParam->gridToDpi(logoRect.topRight()));
@@ -282,7 +282,7 @@ namespace VFrame30
 
 		// Draw loopback logo
 		//
-		double pinVertGap =	CUtils::snapToGrid(drawParam->gridSize() * static_cast<double>(drawParam->pinGridStep()), drawParam->gridSize());
+		double pinVertGap =	VFrame30::snapToGrid(drawParam->gridSize() * static_cast<double>(drawParam->pinGridStep()), drawParam->gridSize());
 
 		QRectF logoRect = {r.left(), r.top(), pinVertGap * 2.0, r.height()};
 		logoRect.setTopRight(drawParam->gridToDpi(logoRect.topRight()));

@@ -60,6 +60,8 @@ CONFIG(release, debug|release) {
 }
 
 HEADERS += \
+    CUtils.h \
+    CsvFile.h \
     ILogFile.h \
     LogFile.h \
 	Stable.h \
@@ -75,6 +77,7 @@ HEADERS += \
 
 SOURCES += \
 	Crc.cpp \
+    CsvFile.cpp \
 	DomXmlHelper.cpp \
     LogFile.cpp \
 	Queue.cpp \
