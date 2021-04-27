@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <QTranslator>
@@ -9,7 +8,7 @@
 #include "ConfigController.h"
 #include "UserManager.h"
 #include "DialogTuningSources.h"
-#include "../lib/TcpClientsStatistics.h"
+#include "../lib/Ui/DialogTcpStatistics.h"
 
 class TuningTcpClient;
 class DialogAlert;
@@ -139,8 +138,7 @@ private:
 	QString m_multipleLmControlModeText;
 
 	DialogTuningSources* m_dialogTuningSources = nullptr;
-	DialogStatistics* m_dialogStatistics = nullptr;
-
+	DialogTcpStatistics* m_dialogStatistics = nullptr;
 };
 
 // Global definitions
@@ -149,5 +147,4 @@ extern MainWindow* theMainWindow;
 
 extern Log::LogFile* theLogFile;
 
-#endif // MAINWINDOW_H
 

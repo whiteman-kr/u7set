@@ -82,7 +82,6 @@ HEADERS  += \
 	../CommonLib/PropertyObject.h \
 	../lib/PropertyEditor.h \
 	../lib/PropertyEditorDialog.h \
-	../lib/DebugInstCounter.h \
 	../lib/diff_match_patch.h \
 	../lib/Configurator.h \
 	../lib/Tuning/TuningFilterEditor.h \

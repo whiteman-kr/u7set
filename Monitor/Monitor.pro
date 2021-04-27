@@ -65,6 +65,7 @@ SOURCES += main.cpp \
     ../lib/ComparatorSet.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
+    ../lib/Ui/DialogTcpStatistics.cpp \
     ../lib/Ui/DragDropHelper.cpp \
     ../lib/Ui/SchemaListWidget.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
@@ -112,7 +113,6 @@ SOURCES += main.cpp \
     ../lib/Ui/TuningSourcesWidget.cpp \
     ../lib/Ui/AppDataSourcesWidget.cpp \
     DialogDataSources.cpp \
-    ../lib/TcpClientsStatistics.cpp \
 	../lib/ExportPrint.cpp
 
 HEADERS  += \
@@ -122,6 +122,7 @@ HEADERS  += \
 	../UtilsLib/ILogFile.h \
     ../lib/SoftwareSettings.h \
     ../lib/Ui/DialogSignalSnapshot.h \
+    ../lib/Ui/DialogTcpStatistics.h \
     ../lib/Ui/DragDropHelper.h \
     ../lib/Ui/SchemaListWidget.h \
     ../lib/Ui/TabWidgetEx.h \
@@ -172,7 +173,6 @@ HEADERS  += \
     ../lib/Ui/TuningSourcesWidget.h \
     ../lib/Ui/AppDataSourcesWidget.h \
     DialogDataSources.h \
-    ../lib/TcpClientsStatistics.h \
 	../lib/ExportPrint.h
 
 FORMS    += \

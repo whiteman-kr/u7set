@@ -8,7 +8,7 @@
 #include "../Proto/network.pb.h"
 #include "MonitorConfigController.h"
 #include "ArchiveData.h"
-#include "../lib/TcpClientsStatistics.h"
+#include "../OnlineLib/TcpClientStatistics.h"
 
 
 struct ArchiveRequest

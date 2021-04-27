@@ -121,7 +121,6 @@ HEADERS += \
     SchemaItemTerminator.h \
     MacrosExpander.h \
     Session.h \
-    ../lib/DebugInstCounter.h \
     ../CommonLib/PropertyObject.h \
     ../lib/AppSignalManager.h \
     ../lib/AppSignalParam.h \

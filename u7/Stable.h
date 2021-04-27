@@ -72,7 +72,7 @@
 //
 #include "../CommonLib/Factory.h"
 #include "../CommonLib/Types.h"
-#include "../lib/DebugInstCounter.h"
+#include "../CommonLib/DebugInstCounter.h"
 #include "../Proto/ProtoSerialization.h"
 
 // Disable some warnings

@@ -57,6 +57,7 @@ CONFIG(release, debug|release) {
 }
 
 HEADERS += \
+	DebugInstCounter.h \
 	Factory.h \
 	Hash.h \
 	Stable.h \

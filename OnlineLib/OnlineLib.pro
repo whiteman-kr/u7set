@@ -63,6 +63,7 @@ HEADERS += \
 	Stable.h \
 	SoftwareInfo.h \
 	Tcp.h \
+    TcpClientStatistics.h \
 	TcpFileTransfer.h \
 	SocketIO.h \
 	UdpSocket.h \
@@ -75,6 +76,7 @@ HEADERS += \
 SOURCES += \
 	SoftwareInfo.cpp \
 	Tcp.cpp \
+    TcpClientStatistics.cpp \
 	TcpFileTransfer.cpp \
 	SocketIO.cpp \
 	UdpSocket.cpp \

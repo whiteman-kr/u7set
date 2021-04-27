@@ -4,7 +4,7 @@
 #include <functional>
 #include <memory>
 #include <array>
-#include "../lib/DebugInstCounter.h"
+#include "../CommonLib/DebugInstCounter.h"
 #include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/Factory.h"
 #include "../CommonLib/Types.h"

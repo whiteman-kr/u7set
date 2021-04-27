@@ -2,12 +2,12 @@
 #define RTTRENDTCPCLIENT_H
 
 #include "../OnlineLib/Tcp.h"
+#include "../OnlineLib/TcpClientStatistics.h"
 #include "../CommonLib/Hash.h"
 #include "../CommonLib/Times.h"
 #include "../Proto/network.pb.h"
 #include "../TrendView/TrendSignal.h"
 #include "MonitorConfigController.h"
-#include "../lib/TcpClientsStatistics.h"
 
 class RtTrendTcpClient : public Tcp::Client, public TcpClientStatistics
 {

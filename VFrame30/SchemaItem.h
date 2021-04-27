@@ -3,7 +3,7 @@
 #include "SchemaPoint.h"
 #include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/Factory.h"
-#include "../lib/DebugInstCounter.h"
+#include "../CommonLib/DebugInstCounter.h"
 #include "../lib/OutputLog.h"
 #include "../Proto/ProtoSerialization.h"
 #include <QJSValue>

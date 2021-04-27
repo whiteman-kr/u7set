@@ -11,7 +11,7 @@
 #include "../VFrame30/TuningController.h"
 #include "../UtilsLib/LogFile.h"
 #include "../lib/Ui/DialogAlert.h"
-#include "../lib/TcpClientsStatistics.h"
+#include "../lib/Ui/DialogTcpStatistics.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;
@@ -211,7 +211,7 @@ private:
 	int m_logWarningsCounter = -1;
 
 	DialogDataSources* m_dialogDataSources = nullptr;
-	DialogStatistics* m_dialogStatistics = nullptr;
+	DialogTcpStatistics* m_dialogStatistics = nullptr;
 };
 
 

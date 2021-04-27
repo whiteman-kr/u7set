@@ -1,5 +1,4 @@
-#ifndef TUNINGTCPCLIENT_H
-#define TUNINGTCPCLIENT_H
+#pragma once
 
 #include <queue>
 #include "../lib/Tuning/TuningSignalManager.h"
@@ -258,4 +257,3 @@ private:
 };
 
 
-#endif // TUNINGTCPCLIENT_H
