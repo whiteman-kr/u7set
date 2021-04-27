@@ -144,7 +144,7 @@ namespace Hardware
 
 		// Properties, for access from JS it is "public slots"
 		//
-	public:
+	public slots:
 		[[nodiscard]] int fileVersion() const;
 		[[nodiscard]] int maxFileVersion() const;
 		[[nodiscard]] QString projectName() const;
