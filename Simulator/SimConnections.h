@@ -1,7 +1,7 @@
 #pragma once
 
 #include "map"
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include "../lib/ConnectionsInfo.h"
 
 

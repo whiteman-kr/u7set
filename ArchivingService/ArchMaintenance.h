@@ -2,7 +2,7 @@
 
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include <QVector>
 #include <QElapsedTimer>
 

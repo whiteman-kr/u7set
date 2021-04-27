@@ -2,7 +2,7 @@
 #define BUS_H
 
 #include "../CommonLib/Types.h"
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include "../CommonLib/PropertyObject.h"
 #include "../Proto/ProtoSerialization.h"
 

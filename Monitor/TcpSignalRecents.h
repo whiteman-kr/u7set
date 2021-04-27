@@ -2,7 +2,7 @@
 #define TCPSIGNALRECENTS_H
 
 #include "../OnlineLib/Tcp.h"
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include "../Proto/network.pb.h"
 #include "../lib/AppSignalManager.h"
 #include "MonitorConfigController.h"

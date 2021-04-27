@@ -57,6 +57,7 @@ CONFIG(release, debug|release) {
 }
 
 HEADERS += \
+	Hash.h \
 	Stable.h \
 	Types.h \
 	PropertyObject.h

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include "MetrologySignal.h"
 
 #include "SignalBase.h"

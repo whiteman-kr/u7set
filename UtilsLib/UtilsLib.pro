@@ -66,7 +66,6 @@ HEADERS += \
 	Address16.h \
 	Crc.h \
 	DomXmlHelper.h \
-	Hash.h \
 	Queue.h \
 	SimpleMutex.h \
 	SimpleThread.h \

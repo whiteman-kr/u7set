@@ -4,7 +4,7 @@
 #include <QMutex>
 #include <QSqlDatabase>
 
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include "../OnlineLib/HostAddressPort.h"
 #include "../lib/TimeStamp.h"
 #include "../OnlineLib/CircularLogger.h"

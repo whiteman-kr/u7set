@@ -3,7 +3,7 @@
 #include <memory>
 #include <QObject>
 #include <QDomDocument>
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include "../VFrame30/Afb.h"
 
 class SimCommandTest_LM5_LM6;

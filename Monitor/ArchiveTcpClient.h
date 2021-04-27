@@ -2,7 +2,7 @@
 #define ARCHIVETCPCLIENT_H
 
 #include "../OnlineLib/Tcp.h"
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include "../lib/TimeStamp.h"
 #include "../lib/AppSignalParam.h"
 #include "../Proto/network.pb.h"

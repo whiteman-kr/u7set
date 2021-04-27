@@ -7,7 +7,7 @@
 #include <set>
 
 #include "../UtilsLib/Address16.h"
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include "../UtilsLib/WUtils.h"
 
 #include "ConstStrings.h"

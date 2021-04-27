@@ -54,7 +54,6 @@ HEADERS += \
     ../lib/DataSource.h \
 	../lib/SoftwareSettings.h \
     ../lib/AppSignal.h \
-	../lib/PropertyObject.h \
     ../lib/TuningValue.h \
     ../lib/Times.h \
 	../CommonLib/PropertyObject.h \

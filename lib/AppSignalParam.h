@@ -5,7 +5,7 @@
 #include <memory>
 #include <set>
 
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include "../UtilsLib/Queue.h"
 #include "../CommonLib/Types.h"
 #include "../OnlineLib/SimpleAppSignalState.h"

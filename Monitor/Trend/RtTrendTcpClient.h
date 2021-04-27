@@ -2,7 +2,7 @@
 #define RTTRENDTCPCLIENT_H
 
 #include "../OnlineLib/Tcp.h"
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include "../lib/TimeStamp.h"
 #include "../Proto/network.pb.h"
 #include "../TrendView/TrendSignal.h"

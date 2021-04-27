@@ -2,7 +2,7 @@
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/TuningSignalState.h"
 #include "../CommonLib/PropertyObject.h"
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include "../VFrame30/Schema.h"
 #include <QColor>
 

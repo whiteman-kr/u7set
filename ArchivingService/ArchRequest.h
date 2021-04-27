@@ -5,7 +5,7 @@
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "../lib/TimeStamp.h"
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include "../UtilsLib/Queue.h"
 #include "../OnlineLib/SocketIO.h"
 #include "../Proto/network.pb.h"

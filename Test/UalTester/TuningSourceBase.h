@@ -5,7 +5,7 @@
 
 #include "SignalBase.h"
 
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include "../lib/AppSignal.h"
 #include "../lib/AppSignalParam.h"
 

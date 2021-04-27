@@ -20,7 +20,7 @@
 #include <QMessageBox>
 #include <QLineEdit>
 #include "./Ui/UiTools.h"
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 
 //#define LOGFILE_USE_HEADER	// Uncomment this to use header
 

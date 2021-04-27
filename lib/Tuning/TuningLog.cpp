@@ -7,7 +7,7 @@
 #include <QAbstractItemModel>
 #include <QComboBox>
 #include <QUuid>
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 
 namespace TuningLog
 {
