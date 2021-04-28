@@ -370,6 +370,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0348.sql", "Upgrade to version 348, All scripts use ScriptDeviceObject class"},
 	{":/DatabaseUpgrade/Upgrade0349.sql", "Upgrade to version 349, Added folder $root$/DiagSignalTypes"},
 	{":/DatabaseUpgrade/Upgrade0350.sql", "Upgrade to version 350, Added module LM1-SR10"},
+	{":/DatabaseUpgrade/Upgrade0351.sql", "Upgrade to version 351, LM1-SR10 has been changed to LM8-SR10"},
 };
 
 int DbWorker::counter = 0;
