@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SR10" DescriptionNumber="10" ConfigurationScriptFile="LM1_SR10_Conf.js" Version="1.001">
+<LogicModule Name="LM8_SR10" DescriptionNumber="10" ConfigurationScriptFile="LM8_SR10_Conf.js" Version="1.001">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -442,16 +442,18 @@
 			<Pin OpName="o_version"		OpIndex ="14"	PinType = "Output"/>
 			<Pin OpName="o_param_err"	OpIndex ="15"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="DEAD_ZONE"	OpCode="24"	HasRam="false"	ImpVersion="7"		VersionOpIndex="16"	MaxInstCount="256" SimulationFunc="afb_deadzone_v7">
+		<AFBComponent Caption="DEAD_ZONE"	OpCode="24"	HasRam="false"	ImpVersion="6"		VersionOpIndex="16"	MaxInstCount="256" SimulationFunc="afb_deadzone_v6">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_data_x1"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_data_x2"		OpIndex ="3"	PinType = "Param"/>
+			<Pin OpName="i_state"		OpIndex ="5"	PinType = "Input"/>
 			<Pin OpName="i_data"		OpIndex ="6"	PinType = "Input"/>
+			<Pin OpName="o_state"		OpIndex ="8"	PinType = "Output"/>
 			<Pin OpName="o_result"		OpIndex ="9"	PinType = "Output"/>			
 			<Pin OpName="o_overflow"	OpIndex ="11"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="12"	PinType = "Output"/>
 			<Pin OpName="o_zero"		OpIndex ="13"	PinType = "Output"/>
-			<Pin OpName="o_nan"		OpIndex ="14"	PinType = "Output"/>
+			<Pin OpName="o_nan"			OpIndex ="14"	PinType = "Output"/>
 			<Pin OpName="o_dz_edi"		OpIndex ="15"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="16"	PinType = "Output"/>
 			<Pin OpName="o_param_err"	OpIndex ="17"	PinType = "Output"/>
@@ -8474,7 +8476,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db1_fp_v1"       Caption="db1_fp"       Version="1.0010">
+		<AFB id="#db1_fp_v1"       Caption="db1_fp"       Version="1.0011">
 			<Properties>				
 				<Description>Dead zone Block with float data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -8485,9 +8487,11 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<MinHeight>8</MinHeight>
 			</Properties>
 			<Inputs>
+				<Pin OpName="i_st" Caption="in_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
 				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="6" Size="32"/>           
 			</Inputs>
 			<Outputs>
+				<Pin OpName="o_st" Caption="out_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="9" Size="32"/>
 				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
@@ -8630,7 +8634,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db1_si_v1"       Caption="db1_si"       Version="1.0009">
+		<AFB id="#db1_si_v1"       Caption="db1_si"       Version="1.0010">
 			<Properties>				
 				<Description>Dead zone Block with signed int data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -8642,9 +8646,11 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<MinHeight>8</MinHeight>				
 			</Properties>
 			<Inputs>
+				<Pin OpName="i_st" Caption="in_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
 				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="6" Size="32"/>           
 			</Inputs>
 			<Outputs>
+				<Pin OpName="o_st" Caption="out_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="9" Size="32"/>
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="17" Size="1"/>
@@ -8745,7 +8751,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db2_fp_v1"       Caption="db2_fp"       Version="1.0010">
+		<AFB id="#db2_fp_v1"       Caption="db2_fp"       Version="1.0011">
 			<Properties>
 				<Description>Dead zone Block with float data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -8756,9 +8762,11 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<MinHeight>8</MinHeight>				
 			</Properties>
 			<Inputs>
+				<Pin OpName="i_st" Caption="in_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
 				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="6" Size="32"/>           
 			</Inputs>
 			<Outputs>
+				<Pin OpName="o_st" Caption="out_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="9" Size="32"/>
 				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
@@ -8901,7 +8909,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db2_si_v1"       Caption="db2_si"       Version="1.0010">
+		<AFB id="#db2_si_v1"       Caption="db2_si"       Version="1.0011">
 			<Properties>
 				<Description>Dead zone Block with signed int data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -8913,9 +8921,11 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<MinHeight>8</MinHeight>				
 			</Properties>
 			<Inputs>
+				<Pin OpName="i_st" Caption="in_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
 				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="6" Size="32"/>           
 			</Inputs>
 			<Outputs>
+				<Pin OpName="o_st" Caption="out_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="9" Size="32"/>
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="17" Size="1"/>
