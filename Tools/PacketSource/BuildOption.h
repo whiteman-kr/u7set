@@ -1,7 +1,7 @@
 #ifndef BUILDOPTION_H
 #define BUILDOPTION_H
 
-#include "../../OnlineLib/HostAddressPort.h"
+#include "../../CommonLib/HostAddressPort.h"
 
 // ==============================================================================================
 

@@ -6,8 +6,9 @@
 class HostAddressPort
 {
 public:
-	HostAddressPort();
-	HostAddressPort(const HostAddressPort &copy);
+	HostAddressPort() = default;
+	HostAddressPort(const HostAddressPort &copy) = default;
+	~HostAddressPort() = default;
 
 	HostAddressPort(const QHostAddress& addr, quint16 port);
 	HostAddressPort(const QHostAddress& addr, int port);
@@ -18,7 +19,7 @@ public:
 	HostAddressPort(const QString& address, quint16 port);
 	HostAddressPort(const QString& address, int port);
 
-	HostAddressPort& operator=(const HostAddressPort &other);
+	HostAddressPort& operator=(const HostAddressPort &other) = default;
 	bool operator==(const HostAddressPort &other);
 	bool operator!=(const HostAddressPort &other);
 
@@ -36,20 +37,20 @@ public:
 
 	bool setAddressPortStr(const QString& addressPortStr, quint16 defaultPort);
 
-	quint32 address32() const;
-	QHostAddress address() const;
+	[[nodiscard]] quint32 address32() const;
+	[[nodiscard]] QHostAddress address() const;
 
-	quint16 port() const;
+	[[nodiscard]] quint16 port() const;
 
-	QString addressPortStr() const;
-	QString addressPortStrIfSet() const;
+	[[nodiscard]] QString addressPortStr() const;
+	[[nodiscard]] QString addressPortStrIfSet() const;
 
-	QString addressStr() const;
-	QString addressStrIfSet() const;
+	[[nodiscard]] QString addressStr() const;
+	[[nodiscard]] QString addressStrIfSet() const;
 
 	void clear();
-	bool isEmpty() const;
-	bool isSet() const;
+	[[nodiscard]] bool isEmpty() const;
+	[[nodiscard]] bool isSet() const;
 
 	static bool isValidIPv4(const QString& ipAddressStr);
 	static bool isValidPort(const QString& portStr);
@@ -71,28 +72,17 @@ private:
 
 inline const QString HostAddressPort::NOT_SET = "NotSet";
 
-inline HostAddressPort::HostAddressPort()
+inline HostAddressPort::HostAddressPort(const QHostAddress& addr, quint16 port) :
+	m_hostAddress(addr),
+	m_port(port)
 {
 }
 
-inline HostAddressPort::HostAddressPort(const HostAddressPort& copy)
-{
-	m_hostAddress = copy.m_hostAddress;
-	m_port = copy.m_port;
-}
-
-inline HostAddressPort::HostAddressPort(const QHostAddress& addr, quint16 port)
-{
-	m_hostAddress = addr;
-	m_port = port;
-}
-
-inline HostAddressPort::HostAddressPort(const QHostAddress& addr, int port)
+inline HostAddressPort::HostAddressPort(const QHostAddress& addr, int port) :
+	m_hostAddress(addr),
+	m_port(static_cast<quint16>(port))
 {
 	Q_ASSERT(port >= 0 && port <= 65535);
-
-	m_hostAddress = addr;
-	m_port = static_cast<quint16>(port);
 }
 
 inline HostAddressPort::HostAddressPort(quint32 ip4Addr, quint16 port)
@@ -131,14 +121,6 @@ inline HostAddressPort::HostAddressPort(const QString& address, int port)
 
 	m_hostAddress.setAddress(address);
 	m_port = static_cast<quint16>(port);
-}
-
-inline HostAddressPort& HostAddressPort::operator=(const HostAddressPort& other)
-{
-	m_hostAddress = other.m_hostAddress;
-	m_port = other.m_port;
-
-	return *this;
 }
 
 inline bool HostAddressPort::operator==(const HostAddressPort& other)

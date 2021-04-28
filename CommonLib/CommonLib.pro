@@ -60,6 +60,7 @@ HEADERS += \
 	DebugInstCounter.h \
 	Factory.h \
 	Hash.h \
+	HostAddressPort.h \
 	Stable.h \
 	Times.h \
 	Types.h \

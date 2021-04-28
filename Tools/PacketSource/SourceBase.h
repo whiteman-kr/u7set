@@ -7,7 +7,7 @@
 #include "SignalBase.h"
 #include "FrameBase.h"
 
-#include "../../OnlineLib/HostAddressPort.h"
+#include "../../CommonLib/HostAddressPort.h"
 
 // ==============================================================================================
 
