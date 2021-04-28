@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../lib/Times.h"
-#include "../lib/TimeStamp.h"
+#include "../CommonLib/Times.h"
 
 class TimeFilter
 {

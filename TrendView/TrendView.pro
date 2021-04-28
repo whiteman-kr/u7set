@@ -64,7 +64,6 @@ HEADERS += \
     TrendScale.h \
     TrendWidget.h \
     TrendSignal.h \
-    ../lib/TimeStamp.h \
     TrendSlider.h \
     TrendSettings.h \
     TrendMainWindow.h \
@@ -72,7 +71,6 @@ HEADERS += \
     DialogTrendSignalProperties.h \
     TrendRuler.h \
     TrendParam.h \
-    ../lib/CUtils.h \
     DialogTrendSignalPoints.h \
     DialogTrendSignalPoint.h
 

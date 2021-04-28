@@ -6,7 +6,7 @@
 #include "../DbLib/DbController.h"
 #include "../HardwareLib/DeviceObject.h"
 #include "../CommonLib/PropertyObject.h"
-#include "../lib/TimeStamp.h"
+#include "../CommonLib/Times.h"
 #include "../lib/LmDescription.h"
 #include "../lib/Configurator.h"
 #include "../lib/LogicModulesInfo.h"

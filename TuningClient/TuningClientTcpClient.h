@@ -4,8 +4,9 @@
 #include "../lib/Tuning/TuningFilter.h"
 #include "../lib/Tuning/TuningLog.h"
 #include "../UtilsLib/LogFile.h"
+#include "../OnlineLib/TcpClientStatistics.h"
 #include "UserManager.h"
-#include "../lib/TcpClientsStatistics.h"
+
 
 class TuningClientTcpClient : public TuningTcpClient, public TcpClientStatistics
 {

@@ -5,9 +5,9 @@
 #include <QMap>
 #include <QVector>
 
-#include "../../UtilsLib/Hash.h"
 #include "../../AppSignalLib/AppSignal.h"
 #include "../../AppSignalLib/AppSignalParam.h"
+#include "../../CommonLib/Hash.h"
 
 // ==============================================================================================
 

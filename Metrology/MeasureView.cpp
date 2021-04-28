@@ -7,7 +7,6 @@
 #include "Database.h"
 #include "ProcessData.h"
 #include "Options.h"
-#include "../lib/CUtils.h"
 
 namespace Measure
 {

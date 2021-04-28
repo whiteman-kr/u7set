@@ -123,8 +123,8 @@ namespace VFrame30
 
 	void PosLineImpl::snapToGrid(double gridSize)
 	{
-		QPointF sp = CUtils::snapToGrid(QPointF(startXDocPt(), startYDocPt()), gridSize);
-		QPointF ep = CUtils::snapToGrid(QPointF(endXDocPt(), endYDocPt()), gridSize);
+		QPointF sp = VFrame30::snapToGrid(QPointF(startXDocPt(), startYDocPt()), gridSize);
+		QPointF ep = VFrame30::snapToGrid(QPointF(endXDocPt(), endYDocPt()), gridSize);
 
 		setStartXDocPt(sp.x());
 		setStartYDocPt(sp.y());
@@ -308,28 +308,28 @@ namespace VFrame30
 			return true;
 		}
 
-		if (CUtils::IsLineIntersected(ax1, ay1, ax2, ay2,
+		if (VFrame30::IsLineIntersected(ax1, ay1, ax2, ay2,
 			detRect.x(), detRect.y(),
 			detRect.x() + detRect.width(), detRect.y()) == true)
 		{
 			return true;
 		}
 
-		if (CUtils::IsLineIntersected(ax1, ay1, ax2, ay2,
+		if (VFrame30::IsLineIntersected(ax1, ay1, ax2, ay2,
 			detRect.x() + detRect.width(), detRect.y(),
 			detRect.x() + detRect.width(), detRect.y() + detRect.height()) == true)
 		{
 			return true;
 		}
 
-		if (CUtils::IsLineIntersected(ax1, ay1, ax2, ay2,
+		if (VFrame30::IsLineIntersected(ax1, ay1, ax2, ay2,
 			detRect.x() + detRect.width(), detRect.y() + detRect.height(),
 			detRect.x(), detRect.y() + detRect.height()) == true)
 		{
 			return true;
 		}
 
-		if (CUtils::IsLineIntersected(ax1, ay1, ax2, ay2,
+		if (VFrame30::IsLineIntersected(ax1, ay1, ax2, ay2,
 			detRect.x(), detRect.y() + detRect.height(),
 			detRect.x(), detRect.y()) == true)
 		{
@@ -396,12 +396,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			pt = CUtils::RoundDisplayPoint(pt);
+			pt = VFrame30::RoundDisplayPoint(pt);
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			pt = VFrame30::RoundPoint(pt, Settings::regionalUnit());
 		}
 
 		return pt;
@@ -412,14 +412,14 @@ namespace VFrame30
 
 		if (itemUnit() != SchemaUnit::Display)
 		{
-			left = CUtils::ConvertPoint(left, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			left = VFrame30::ConvertPoint(left, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 		}
 
 		double delta = value - left;
 
 		if (itemUnit() != SchemaUnit::Display)
 		{
-			delta = CUtils::ConvertPoint(delta, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			delta = VFrame30::ConvertPoint(delta, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 		}
 
 		m_startXDocPt = m_startXDocPt + delta;
@@ -432,12 +432,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			pt = CUtils::RoundDisplayPoint(pt);
+			pt = VFrame30::RoundDisplayPoint(pt);
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			pt = VFrame30::RoundPoint(pt, Settings::regionalUnit());
 		}
 				
 		return pt;
@@ -448,14 +448,14 @@ namespace VFrame30
 
 		if (itemUnit() != SchemaUnit::Display)
 		{
-			top = CUtils::ConvertPoint(top, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			top = VFrame30::ConvertPoint(top, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 		}
 
 		double delta = value - top;
 
 		if (itemUnit() != SchemaUnit::Display)
 		{
-			delta = CUtils::ConvertPoint(delta, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			delta = VFrame30::ConvertPoint(delta, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 		}
 
 		m_startYDocPt = m_startYDocPt + delta;
@@ -468,12 +468,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			pt = CUtils::RoundDisplayPoint(pt);
+			pt = VFrame30::RoundDisplayPoint(pt);
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			pt = VFrame30::RoundPoint(pt, Settings::regionalUnit());
 		}
 
 		return pt;
@@ -487,7 +487,7 @@ namespace VFrame30
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			pt = VFrame30::ConvertPoint(pt, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 		}
 
 		if (m_endXDocPt >= m_startXDocPt)
@@ -506,12 +506,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			pt = CUtils::RoundDisplayPoint(pt);
+			pt = VFrame30::RoundDisplayPoint(pt);
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
-			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
+			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			pt = VFrame30::RoundPoint(pt, Settings::regionalUnit());
 		}
 
 		return pt;	
@@ -525,7 +525,7 @@ namespace VFrame30
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			pt = VFrame30::ConvertPoint(pt, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 		}
 
 		if (m_endYDocPt >= m_startYDocPt)

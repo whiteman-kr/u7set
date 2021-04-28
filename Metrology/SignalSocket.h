@@ -3,8 +3,8 @@
 
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/SocketIO.h"
-#include "../UtilsLib/Hash.h"
 #include "../AppSignalLib/AppSignalParam.h"
+#include "../CommonLib/Hash.h"
 
 #include "../Proto/network.pb.h"
 

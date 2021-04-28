@@ -95,6 +95,7 @@ HEADERS += \
     Afb.h \
     Schema.h \
     LogicSchema.h \
+    VFrameTools.h \
     WiringSchema.h \
     DiagSchema.h \
     SchemaLayer.h \
@@ -120,12 +121,8 @@ HEADERS += \
     SchemaItemTerminator.h \
     MacrosExpander.h \
     Session.h \
-    ../lib/CUtils.h \
-    ../lib/DebugInstCounter.h \
     ../CommonLib/PropertyObject.h \
     ../lib/AppSignalManager.h \
-    ../lib/Factory.h \
-    ../AppSignalLib/AppSignalParam.h \
     SchemaItemBus.h \
     Bus.h \
     ClientSchemaWidget.h \
@@ -135,10 +132,8 @@ HEADERS += \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/ITuningSignalManager.h \
     ../lib/Tuning/ITuningTcpClient.h \
-    ../lib/TuningValue.h \
-    TuningController.h \
+	TuningController.h \
     AppSignalController.h \
-    ../AppSignalLib/AppSignal.h \
     TuningSchema.h \
     SchemaItemImage.h \
     SchemaItemImageValue.h \
@@ -169,6 +164,7 @@ SOURCES += \
     Afb.cpp \
     Schema.cpp \
     LogicSchema.cpp \
+    VFrameTools.cpp \
     WiringSchema.cpp \
     DiagSchema.cpp \
     SchemaLayer.cpp \

@@ -57,10 +57,16 @@ CONFIG(release, debug|release) {
 }
 
 HEADERS += \
+	DebugInstCounter.h \
+	Factory.h \
+	Hash.h \
+	HostAddressPort.h \
 	Stable.h \
+	Times.h \
 	Types.h \
 	PropertyObject.h
 
 SOURCES += \
+	Times.cpp \
 	Types.cpp
 

@@ -2,7 +2,7 @@
 
 #include <queue>
 #include <QUdpSocket>
-#include "../lib/TimeStamp.h"
+#include "../CommonLib/Times.h"
 #include "../OnlineLib/SocketIO.h"
 #include "../UtilsLib/SimpleThread.h"
 #include "../UtilsLib/WUtils.h"

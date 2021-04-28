@@ -8,7 +8,7 @@
 #include "Connection.h"
 #include <set>
 
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 
 
 namespace Hardware

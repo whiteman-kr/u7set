@@ -66,14 +66,12 @@ SOURCES += \
     ../lib/LogicModuleSet.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/DataSource.cpp \
-    ../lib/CsvFile.cpp \
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/LmDescription.cpp \
     ../lib/Tuning/TuningSignalManager.cpp \
     ../lib/ConnectionsInfo.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
-	../lib/Times.cpp \
 	../lib/ComparatorSet.cpp \
 	../TuningService/TuningDataStorage.cpp \
 	../TuningService/TuningSource.cpp \
@@ -134,14 +132,12 @@ HEADERS += \
     ../lib/LogicModuleSet.h \
     ../lib/SoftwareSettings.h \
     ../lib/DataSource.h \
-    ../lib/CsvFile.h \
     ../lib/Tuning/TuningFilter.h \
     ../lib/BuildInfo.h \
     ../lib/LmDescription.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/ConnectionsInfo.h \
 	../lib/Tuning/TuningSignalState.h \
-	../lib/Times.h \
 	../lib/ComparatorSet.h \
 	../CommonLib/PropertyObject.h \
 	../TuningService/TuningSource.h \

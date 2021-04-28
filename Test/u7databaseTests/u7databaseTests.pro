@@ -52,10 +52,7 @@ SOURCES += main.cpp \
 	DbControllerUserTests.cpp \
 	DbControllerProjectTests.cpp
 
-#    SignalTests.h \
-
 HEADERS += \
-	../../lib/Factory.h \
     DeviceObjectTests.h \
 	UserPropertyTest.h \
 	UserTests.h \

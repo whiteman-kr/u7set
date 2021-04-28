@@ -44,7 +44,6 @@ HEADERS += \
 	../lib/SoftwareSettings.h \
     ../lib/OrderedHash.h \
     ../lib/BuildInfo.h \
-    ../lib/TimeStamp.h \
     FileArchReader.h \
     ArchFile.h \
     BinSearch.h \

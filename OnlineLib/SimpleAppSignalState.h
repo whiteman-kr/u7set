@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
+#include "../CommonLib/Times.h"
 #include "../UtilsLib/Queue.h"
-#include "../lib/Times.h"
 #include "../AppSignalLib/AppSignal.h"
 
 namespace Proto

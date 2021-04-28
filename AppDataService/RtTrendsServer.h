@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../OnlineLib/Tcp.h"
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 
 #include "../Proto/network.pb.h"
 

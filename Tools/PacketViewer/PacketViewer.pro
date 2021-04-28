@@ -31,7 +31,6 @@ unix {
 
 SOURCES += \
 	../../lib/DataSource.cpp \
-	../../lib/Times.cpp \
 	main.cpp \
 	SourceListWidget.cpp \
 	PacketSourceModel.cpp \
@@ -45,7 +44,6 @@ HEADERS  += \
 	Stable.h \
 	../../Proto/serialization.pb.h \
 	../../lib/DataSource.h \
-	../../lib/Times.h \
 	SourceListWidget.h \
 	PacketSourceModel.h \
 	SourceStatusWidget.h \

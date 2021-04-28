@@ -65,6 +65,7 @@ SOURCES += main.cpp \
     ../lib/ComparatorSet.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
+    ../lib/Ui/DialogTcpStatistics.cpp \
     ../lib/Ui/DragDropHelper.cpp \
     ../lib/Ui/SchemaListWidget.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
@@ -98,7 +99,7 @@ SOURCES += main.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
-    ../lib/Times.cpp \
+#	../lib/AppSignalProperties.cpp \
     Trend/RtTrendTcpClient.cpp \
     Trend/ArchiveTrendTcpClient.cpp \
     MonitorTuningTcpClient.cpp \
@@ -109,7 +110,6 @@ SOURCES += main.cpp \
     ../lib/Ui/TuningSourcesWidget.cpp \
     ../lib/Ui/AppDataSourcesWidget.cpp \
     DialogDataSources.cpp \
-    ../lib/TcpClientsStatistics.cpp \
 	../lib/ExportPrint.cpp
 
 HEADERS  += \
@@ -119,6 +119,7 @@ HEADERS  += \
 	../UtilsLib/ILogFile.h \
     ../lib/SoftwareSettings.h \
     ../lib/Ui/DialogSignalSnapshot.h \
+    ../lib/Ui/DialogTcpStatistics.h \
     ../lib/Ui/DragDropHelper.h \
     ../lib/Ui/SchemaListWidget.h \
     ../lib/Ui/TabWidgetEx.h \
@@ -153,7 +154,7 @@ HEADERS  += \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/Tuning/TuningTcpClient.h \
     ../lib/Tuning/TuningSourceState.h \
-    ../lib/Times.h \
+#	../lib/AppSignalProperties.h \
     Trend/RtTrendTcpClient.h \
     Trend/ArchiveTrendTcpClient.h \
     MonitorTuningTcpClient.h \
@@ -166,7 +167,6 @@ HEADERS  += \
     ../lib/Ui/TuningSourcesWidget.h \
     ../lib/Ui/AppDataSourcesWidget.h \
     DialogDataSources.h \
-    ../lib/TcpClientsStatistics.h \
 	../lib/ExportPrint.h
 
 FORMS    += \

@@ -1,6 +1,7 @@
 #include "EditSchemaView.h"
 #include "../GlobalMessanger.h"
 #include "../Settings.h"
+#include "../../VFrame30/VFrameTools.h"
 #include "../../VFrame30/DrawParam.h"
 #include "../../VFrame30/LogicSchema.h"
 #include "../../VFrame30/MonitorSchema.h"
@@ -108,7 +109,7 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 
 		VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 		drawParam.setControlBarSize(
-			schema()->unit() == SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
+			schema()->unit() == SchemaUnit::Display ?	10 * (100.0 / zoom()) : VFrame30::mm2in(2.4) * (100.0 / zoom()));
 
 		drawParam.setInfoMode(theSettings.infoMode());
 		drawParam.session() = session();
@@ -138,8 +139,9 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 
 	// Draw schema
 	//
-	drawParam.setControlBarSize(
-		schema()->unit() == SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
+	drawParam.setControlBarSize(schema()->unit() == SchemaUnit::Display ?
+									10 * (100.0 / zoom()) :
+									VFrame30::mm2in(2.4) * (100.0 / zoom()));
 
 	// Draw Build Issues
 	//

@@ -2,12 +2,12 @@
 #define ARCHIVETRENDTCPCLIENT_H
 
 #include "../OnlineLib/Tcp.h"
-#include "../UtilsLib/Hash.h"
-#include "../lib/TimeStamp.h"
+#include "../OnlineLib/TcpClientStatistics.h"
+#include "../CommonLib/Hash.h"
+#include "../CommonLib/Times.h"
 #include "../Proto/network.pb.h"
 #include "../TrendView/TrendSignal.h"
 #include "MonitorConfigController.h"
-#include "../lib/TcpClientsStatistics.h"
 
 class ArchiveTrendTcpClient : public Tcp::Client, public TcpClientStatistics
 {

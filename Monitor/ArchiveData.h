@@ -1,8 +1,8 @@
 #ifndef ARCHIVEDATA_H
 #define ARCHIVEDATA_H
-#include "../lib/TimeStamp.h"
-#include "../AppSignalLib/AppSignalParam.h"
 
+#include "../AppSignalLib/AppSignalParam.h"
+#include "../CommonLib/Times.h"
 
 struct ArchiveSource
 {

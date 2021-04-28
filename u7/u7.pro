@@ -78,12 +78,9 @@ HEADERS  += \
     ../lib/Ui/TabWidgetEx.h \
     ../lib/Ui/TagSelectorWidget.h \
 	../lib/Ui/DialogProgress.h \
-	../lib/Factory.h \
-	../lib/CUtils.h \
 	../lib/OrderedHash.h \
 	../lib/PropertyEditor.h \
 	../lib/PropertyEditorDialog.h \
-	../lib/DebugInstCounter.h \
 	../lib/diff_match_patch.h \
 	../lib/Configurator.h \
 	../lib/Tuning/TuningFilterEditor.h \

@@ -60,6 +60,7 @@ SOURCES +=\
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
     ../lib/SoftwareSettings.cpp \
+    ../lib/Ui/DialogTcpStatistics.cpp \
 	MainWindow.cpp \
     TuningPage.cpp \
     Settings.cpp \
@@ -95,7 +96,6 @@ SOURCES +=\
     DialogChooseFilter.cpp \
     DialogTuningSources.cpp \
     ../lib/Ui/TuningSourcesWidget.cpp \
-    ../lib/TcpClientsStatistics.cpp \
     SwitchFiltersPage.cpp \
     SwitchFiltersPageOptions.cpp
 
@@ -105,6 +105,7 @@ HEADERS  += MainWindow.h \
     ../lib/ConstStrings.h \
 	../UtilsLib/ILogFile.h \
     ../lib/SoftwareSettings.h \
+    ../lib/Ui/DialogTcpStatistics.h \
     Stable.h \
     TuningPage.h \
     Settings.h \
@@ -141,7 +142,6 @@ HEADERS  += MainWindow.h \
     DialogTuningSources.h \
     ../lib/Ui/TuningSourcesWidget.h \
     ../lib/Ui/DialogSourceInfo.h \
-    ../lib/TcpClientsStatistics.h \
     SwitchFiltersPage.h \
     SwitchFiltersPageOptions.h
 

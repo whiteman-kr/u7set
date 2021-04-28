@@ -328,8 +328,8 @@ namespace VFrame30
 		}
 		else
 		{
-			startX = CUtils::Round(startX) + 0.5;
-			startY = CUtils::Round(startY) + 0.5;
+			startX = VFrame30::Round(startX) + 0.5;
+			startY = VFrame30::Round(startY) + 0.5;
 
 			painter->translate(startX, startY);
 			painter->scale(zoom / 100.0, zoom / 100.0);

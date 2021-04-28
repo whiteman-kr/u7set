@@ -1,7 +1,7 @@
 #ifndef SIGNALBASE_H
 #define SIGNALBASE_H
 
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include "../AppSignalLib/AppSignal.h"
 
 #include "MetrologySignal.h"

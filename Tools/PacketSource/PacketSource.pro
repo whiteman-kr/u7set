@@ -44,7 +44,6 @@ SOURCES += \
     ../../lib/SoftwareSettings.cpp \
     ../../lib/Ui/DialogAbout.cpp \
 	../../lib/DataSource.cpp \
-    ../../lib/Times.cpp \
     ../../lib/BuildInfo.cpp \
 	main.cpp \
 	BuildOption.cpp \
@@ -71,7 +70,6 @@ HEADERS += \
     ../../lib/Ui/DialogAbout.h \
     ../../lib/OrderedHash.h \
 	../../lib/DataSource.h \
-    ../../lib/Times.h \
     ../../lib/BuildInfo.h \
 	../../CommonLib/PropertyObject.h \
 	../../CommonLib/Types.h \

@@ -2,11 +2,11 @@
 #define TCPSIGNALRECENTS_H
 
 #include "../OnlineLib/Tcp.h"
-#include "../UtilsLib/Hash.h"
+#include "../OnlineLib/TcpClientStatistics.h"
+#include "../CommonLib/Hash.h"
 #include "../Proto/network.pb.h"
 #include "../lib/AppSignalManager.h"
 #include "MonitorConfigController.h"
-#include "../lib/TcpClientsStatistics.h"
 
 
 //		ADS_GET_APP_SIGNAL_STATE <------+

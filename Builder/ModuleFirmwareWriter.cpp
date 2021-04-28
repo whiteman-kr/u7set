@@ -1,8 +1,7 @@
 #include "../Builder/ModuleFirmwareWriter.h"
-#include "../lib/CsvFile.h"
+#include "../UtilsLib/CsvFile.h"
 #include "../UtilsLib/Crc.h"
 #include "../UtilsLib/WUtils.h"
-#include "../lib/CUtils.h"
 
 #include <qqml.h>
 #include <QJsonObject>

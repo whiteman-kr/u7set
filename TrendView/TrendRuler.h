@@ -1,7 +1,7 @@
 #ifndef TRENDRULER_H
 #define TRENDRULER_H
 #include <vector>
-#include "../lib/TimeStamp.h"
+#include "../CommonLib/Times.h"
 
 namespace Proto
 {

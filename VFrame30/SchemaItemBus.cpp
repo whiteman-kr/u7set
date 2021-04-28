@@ -285,8 +285,8 @@ namespace VFrame30
 		//
 		int pinCount = qBound(2, inputsCount(), 128);
 
-		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
-		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
+		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		double minHeight = VFrame30::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
 
 		return minHeight;
 	}
@@ -567,8 +567,8 @@ R"(<p><b>BusComposer:</b> Create a bus signal</p>
 		//
 		int pinCount = qBound(2, outputsCount(), 128);
 
-		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
-		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
+		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		double minHeight = VFrame30::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
 
 		return minHeight;
 	}

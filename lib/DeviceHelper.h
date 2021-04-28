@@ -2,7 +2,7 @@
 
 #include "../HardwareLib/DeviceObject.h"
 #include "OutputLog.h"
-#include "../OnlineLib/HostAddressPort.h"
+#include "../CommonLib/HostAddressPort.h"
 #include "../Builder/IssueLogger.h"
 
 const int	LM1_PLACE = 0;

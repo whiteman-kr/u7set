@@ -2,7 +2,7 @@
 
 #include "queue"
 #include "SimLanInterface.h"
-#include "../lib/TimeStamp.h"
+#include "../CommonLib/Times.h"
 #include "SimTuningRecord.h"
 
 namespace Sim

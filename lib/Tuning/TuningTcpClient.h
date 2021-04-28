@@ -1,12 +1,11 @@
-#ifndef TUNINGTCPCLIENT_H
-#define TUNINGTCPCLIENT_H
+#pragma once
 
 #include <queue>
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/ITuningTcpClient.h"
 #include "../lib/Tuning/TuningSourceState.h"
 #include "../OnlineLib/Tcp.h"
-#include "../UtilsLib/Hash.h"
+#include "../CommonLib/Hash.h"
 #include "../Proto/network.pb.h"
 
 struct TuningWriteCommand
@@ -258,4 +257,3 @@ private:
 };
 
 
-#endif // TUNINGTCPCLIENT_H

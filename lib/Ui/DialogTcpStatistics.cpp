@@ -1,86 +1,10 @@
-#include "TcpClientsStatistics.h"
-
-//
-// TcpClientInstance
-//
-
-QMutex TcpClientStatistics::s_mutex;
-std::set<Tcp::Client*> TcpClientStatistics::s_clients;
-
-
-TcpClientStatistics::TcpClientStatistics(Tcp::Client* client) :
-	m_client(client)
-{
-	Q_ASSERT(m_client);
-
-	QMutexLocker l(&s_mutex);
-	s_clients.insert(m_client);
-
-	return;
-}
-
-TcpClientStatistics::~TcpClientStatistics()
-{
-	QMutexLocker l(&s_mutex);
-
-	Q_ASSERT(s_clients.count(m_client) == 1);
-	s_clients.erase(m_client);
-
-	return;
-}
-
-std::vector<TcpClientStatistics::Statisctics> TcpClientStatistics::statistics()
-{
-	std::vector<Statisctics> result;
-
-	QMutexLocker l(&s_mutex);
-	result.reserve(s_clients.size());
-
-	for (Tcp::Client* tcpClient : s_clients)
-	{
-		if (tcpClient == nullptr)
-		{
-			Q_ASSERT(tcpClient);
-			return {};
-		}
-
-		result.emplace_back(reinterpret_cast<size_t>(tcpClient),
-							tcpClient->objectName(),
-							tcpClient->getConnectionState());
-	}
-
-	return result;
-}
-
-void TcpClientStatistics::reconnect(size_t id)
-{
-	QMutexLocker l(&s_mutex);
-
-	Tcp::Client* ptr = reinterpret_cast<Tcp::Client*>(id);
-	if (s_clients.count(ptr) == 0)
-	{
-		return;
-	}
-
-	Tcp::Client* tcpClient = dynamic_cast<Tcp::Client*>(ptr);
-	if (tcpClient == nullptr)
-	{
-		Q_ASSERT(tcpClient);
-		return;
-	}
-
-	tcpClient->setServers(tcpClient->serverAddressPort1(), tcpClient->serverAddressPort2(), true);		// this will reconnect
-
-	return;
-}
-
-
+#include "DialogTcpStatistics.h"
+#include "../../OnlineLib/TcpClientStatistics.h"
 
 //
 // DialogStatistics
 //
-
-DialogStatistics::DialogStatistics(QWidget* parent) :
+DialogTcpStatistics::DialogTcpStatistics(QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
 	setWindowTitle(tr("Connections Statistics"));
@@ -96,13 +20,13 @@ DialogStatistics::DialogStatistics(QWidget* parent) :
 	mainLayout->addLayout(bottomLayout);
 
 	QPushButton* reconnectButton = new QPushButton(tr("Reconnect"));
-	connect(reconnectButton, &QPushButton::clicked, this, &DialogStatistics::reconnectAll);
+	connect(reconnectButton, &QPushButton::clicked, this, &DialogTcpStatistics::reconnectAll);
 	bottomLayout->addWidget(reconnectButton);
 
 	bottomLayout->addStretch();
 
 	QPushButton* closeButton = new QPushButton(tr("Close"));
-	connect(closeButton, &QPushButton::clicked, this, &DialogStatistics::reject);
+	connect(closeButton, &QPushButton::clicked, this, &DialogTcpStatistics::reject);
 	bottomLayout->addWidget(closeButton);
 
 	setLayout(mainLayout);
@@ -125,7 +49,7 @@ DialogStatistics::DialogStatistics(QWidget* parent) :
 	m_treeWidget->setHeaderLabels(headerLabels);
 
 	m_treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested,this, &DialogStatistics::prepareContextMenu);
+	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested,this, &DialogTcpStatistics::prepareContextMenu);
 
 	setMinimumSize(960, 250);
 
@@ -141,11 +65,11 @@ DialogStatistics::DialogStatistics(QWidget* parent) :
 	return;
 }
 
-DialogStatistics::~DialogStatistics()
+DialogTcpStatistics::~DialogTcpStatistics()
 {
 }
 
-void DialogStatistics::prepareContextMenu(const QPoint& pos)
+void DialogTcpStatistics::prepareContextMenu(const QPoint& pos)
 {
 	Q_UNUSED(pos);
 
@@ -190,13 +114,13 @@ void DialogStatistics::prepareContextMenu(const QPoint& pos)
 }
 
 
-void DialogStatistics::reject()
+void DialogTcpStatistics::reject()
 {
 	emit dialogClosed();
 	QDialog::reject();
 }
 
-void DialogStatistics::timerEvent(QTimerEvent* event)
+void DialogTcpStatistics::timerEvent(QTimerEvent* event)
 {
 	assert(event);
 
@@ -208,7 +132,7 @@ void DialogStatistics::timerEvent(QTimerEvent* event)
 	return;
 }
 
-void DialogStatistics::reconnectAll()
+void DialogTcpStatistics::reconnectAll()
 {
 	auto mbResult = QMessageBox::warning(this, qAppName(), tr("Are you sure you want to reconnect all connections?\n\nData will not be available at the time of reconnection."), QMessageBox::Yes, QMessageBox::No);
 	if (mbResult == QMessageBox::No)
@@ -226,7 +150,7 @@ void DialogStatistics::reconnectAll()
 	return;
 }
 
-void DialogStatistics::update()
+void DialogTcpStatistics::update()
 {
 	std::vector<TcpClientStatistics::Statisctics> stats = TcpClientStatistics::statistics();
 

@@ -35,7 +35,6 @@ SOURCES += \
 	../lib/DataSource.cpp \
     ../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
-	../lib/Times.cpp \
 	AppDataService.cpp \
 	AppDataProcessingThread.cpp \
 	AppDataSource.cpp \
@@ -51,11 +50,8 @@ HEADERS += \
 	Stable.h \
 	../lib/ConstStrings.h \
     ../lib/DataSource.h \
-    ../lib/CUtils.h \
     ../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
-    ../lib/TimeStamp.h \
-    ../lib/Times.h \
 	AppDataService.h \
 	AppDataProcessingThread.h \
 	AppDataSource.h \

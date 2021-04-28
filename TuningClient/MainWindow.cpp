@@ -1041,7 +1041,7 @@ void MainWindow::showStatistics()
 {
 	if (m_dialogStatistics == nullptr)
 	{
-		m_dialogStatistics = new DialogStatistics(this);
+		m_dialogStatistics = new DialogTcpStatistics(this);
 		m_dialogStatistics->show();
 
 		auto f = [this]() -> void
@@ -1049,7 +1049,7 @@ void MainWindow::showStatistics()
 				m_dialogStatistics = nullptr;
 			};
 
-		connect(m_dialogStatistics, &DialogStatistics::dialogClosed, this, f);
+		connect(m_dialogStatistics, &DialogTcpStatistics::dialogClosed, this, f);
 	}
 	else
 	{

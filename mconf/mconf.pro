@@ -41,7 +41,6 @@ PRECOMPILED_HEADER = stable.h
 HEADERS += \
     ../lib/Ui/DialogAbout.h \
 	../lib/OutputLog.h \
-	../lib/CUtils.h \
 	../CommonLib/PropertyObject.h \
 	../lib/Configurator.h \
 	Stable.h \

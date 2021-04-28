@@ -5,9 +5,9 @@
 
 #include "SignalBase.h"
 
-#include "../UtilsLib/Hash.h"
 #include "../../AppSignalLib/AppSignal.h"
 #include "../../AppSignalLib/AppSignalParam.h"
+#include "../CommonLib/Hash.h"
 
 #include "../Proto/network.pb.h"
 

@@ -33,7 +33,6 @@ SOURCES += \
     ../lib/BuildInfo.cpp \
     ../lib/DataSource.cpp \
 	../lib/SoftwareSettings.cpp \
-    ../lib/Times.cpp \
 	TuningService.cpp \
 	TcpTuningServer.cpp \
 	TcpTuningClient.cpp \
@@ -51,7 +50,6 @@ HEADERS += \
     ../lib/OrderedHash.h \
     ../lib/DataSource.h \
 	../lib/SoftwareSettings.h \
-    ../lib/Times.h \
 	TuningService.h \
 	TcpTuningServer.h \
 	TcpTuningClient.h \
@@ -79,7 +77,6 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 #
 LIBS += -L$$DESTDIR
 LIBS += -L.
-
 
 # DESTDIR
 #

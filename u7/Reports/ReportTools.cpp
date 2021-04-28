@@ -5,6 +5,7 @@
 
 #include "../VFrame30/Schema.h"
 #include "../VFrame30/DrawParam.h"
+#include "../VFrame30/VFrameTools.h"
 
 //
 // DialogProjectDiffSections
@@ -879,7 +880,7 @@ void ReportGenerator::printSchema(QPdfWriter* pdfWriter,
 	{
 		drawParam.setControlBarSize(
 			schema->unit() == SchemaUnit::Display ?
-						(4 / zoom) : (mm2in(2.4) / zoom));
+						(4 / zoom) : (VFrame30::mm2in(2.4) / zoom));
 
 		m_schemaView->drawCompareOutlines(&drawParam, clipRect, *(compareActions.value()));
 	}

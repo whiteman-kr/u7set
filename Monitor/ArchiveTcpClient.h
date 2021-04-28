@@ -2,13 +2,13 @@
 #define ARCHIVETCPCLIENT_H
 
 #include "../OnlineLib/Tcp.h"
-#include "../UtilsLib/Hash.h"
-#include "../lib/TimeStamp.h"
 #include "../AppSignalLib/AppSignalParam.h"
+#include "../CommonLib/Hash.h"
+#include "../CommonLib/Times.h"
 #include "../Proto/network.pb.h"
 #include "MonitorConfigController.h"
 #include "ArchiveData.h"
-#include "../lib/TcpClientsStatistics.h"
+#include "../OnlineLib/TcpClientStatistics.h"
 
 
 struct ArchiveRequest
