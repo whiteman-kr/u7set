@@ -42,8 +42,8 @@ namespace VFrame30
 	//
 	// Convert functions
 	//
-	extern constexpr double mm2in(double mmVal);
-	extern constexpr double in2mm(double inVal);
+	double mm2in(double mmVal);
+	double in2mm(double inVal);
 
 	double ConvertPoint(double point, SchemaUnit convertFrom, SchemaUnit convertTo, int dpi);
 	void ConvertPoint(double& x, double& y, const SchemaUnit convertFrom, const SchemaUnit convertTo, const int dpiX, const int dpiY);

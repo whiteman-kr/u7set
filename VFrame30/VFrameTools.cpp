@@ -165,12 +165,12 @@ namespace VFrame30
 	//
 	// Convert functions
 	//
-	constexpr double mm2in(const double mmVal)
+	double mm2in(const double mmVal)
 	{
 		return mmVal / 25.4;
 	}
 
-	constexpr double in2mm(const double inVal)
+	double in2mm(const double inVal)
 	{
 		return inVal * 25.4;
 	}
