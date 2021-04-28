@@ -108,10 +108,10 @@ LIBS += -lUtilsLib
 #
 LIBS += -lOnlineLib
 
-# CommonLib
-#
-LIBS += -lCommonLib
-
 # AppSignalLib
 #
 LIBS += -lAppSignalLib
+
+# CommonLib
+#
+LIBS += -lCommonLib

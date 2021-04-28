@@ -77,10 +77,6 @@ LIBS += -lOnlineLib
 #
 LIBS += -lUtilsLib
 
-# CommonLib
-#
-LIBS += -lCommonLib
-
 # HardwareLib
 #
 LIBS += -lHardwareLib
@@ -88,6 +84,10 @@ LIBS += -lHardwareLib
 # AppSignalLib
 #
 LIBS += -lAppSignalLib
+
+# CommonLib
+#
+LIBS += -lCommonLib
 
 # Visual Leak Detector
 #

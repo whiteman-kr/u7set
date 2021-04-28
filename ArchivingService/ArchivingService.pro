@@ -114,10 +114,6 @@ LIBS += -lOnlineLib
 #
 LIBS += -lUtilsLib
 
-# CommonLib
-#
-LIBS += -lCommonLib
-
 # Protobuf
 #
 LIBS += -lprotobuf
@@ -125,5 +121,9 @@ LIBS += -lprotobuf
 # AppSignalLib
 #
 LIBS += -lAppSignalLib
+
+# CommonLib
+#
+LIBS += -lCommonLib
 
 
