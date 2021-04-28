@@ -43,8 +43,6 @@ unix {
 SOURCES += \
     ../../lib/SoftwareSettings.cpp \
     ../../lib/Ui/DialogAbout.cpp \
-    ../../lib/AppSignal.cpp \
-    ../../lib/TuningValue.cpp \
 	../../lib/DataSource.cpp \
     ../../lib/Times.cpp \
     ../../lib/BuildInfo.cpp \
@@ -71,8 +69,6 @@ HEADERS += \
 	Stable.h \
     ../../lib/SoftwareSettings.h \
     ../../lib/Ui/DialogAbout.h \
-    ../../lib/AppSignal.h \
-    ../../lib/TuningValue.h \
     ../../lib/OrderedHash.h \
 	../../lib/DataSource.h \
     ../../lib/Times.h \
@@ -137,6 +133,10 @@ INCLUDEPATH += ./../../Protobuf
 # CommonLib
 #
 LIBS += -lCommonLib
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
 
 
 

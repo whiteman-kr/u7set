@@ -13,7 +13,7 @@
 // EditSchemaView
 //
 //
-EditSchemaView::EditSchemaView(SignalSetProvider* signalSetProvider, QWidget* parent) :
+EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, QWidget* parent) :
 	VFrame30::SchemaView(parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),
@@ -29,7 +29,7 @@ EditSchemaView::EditSchemaView(SignalSetProvider* signalSetProvider, QWidget* pa
 	m_updateDuringBuildTimer = startTimer(50);
 }
 
-EditSchemaView::EditSchemaView(SignalSetProvider* signalSetProvider, std::shared_ptr<VFrame30::Schema> schema, QWidget* parent)
+EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, std::shared_ptr<VFrame30::Schema> schema, QWidget* parent)
 	: VFrame30::SchemaView(schema, parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),

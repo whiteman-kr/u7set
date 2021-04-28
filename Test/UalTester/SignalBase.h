@@ -1,5 +1,4 @@
-#ifndef SIGNALBASE_H
-#define SIGNALBASE_H
+#pragma once
 
 #include <QObject>
 #include <QMutex>
@@ -7,8 +6,8 @@
 #include <QVector>
 
 #include "../../UtilsLib/Hash.h"
-#include "../../lib/AppSignal.h"
-#include "../../lib/AppSignalParam.h"
+#include "../../AppSignalLib/AppSignal.h"
+#include "../../AppSignalLib/AppSignalParam.h"
 
 // ==============================================================================================
 
@@ -109,5 +108,3 @@ public slots:
 };
 
 // ==============================================================================================
-
-#endif // SIGNALBASE_H

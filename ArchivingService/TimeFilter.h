@@ -1,8 +1,7 @@
 #pragma once
 
+#include "../lib/Times.h"
 #include "../lib/TimeStamp.h"
-#include "../lib/AppSignalParam.h"
-
 
 class TimeFilter
 {

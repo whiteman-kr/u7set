@@ -44,12 +44,7 @@ HEADERS += \
 	../lib/SoftwareSettings.h \
     ../lib/OrderedHash.h \
     ../lib/BuildInfo.h \
-	../lib/AppSignalParam.h \
     ../lib/TimeStamp.h \
-    ../lib/TuningValue.h \
-    ../lib/AppSignal.h \
-	../CommonLib/Types.h \
-	../CommonLib/PropertyObject.h \
     FileArchReader.h \
     ArchFile.h \
     BinSearch.h \
@@ -67,9 +62,6 @@ HEADERS += \
 SOURCES += \
 	../lib/SoftwareSettings.cpp \
 	../lib/BuildInfo.cpp \
-	../lib/AppSignalParam.cpp \
-	../lib/TuningValue.cpp \
-	../lib/AppSignal.cpp \
 	ArchivingService.cpp \
 	ArchServiceMain.cpp \
 	TcpAppDataServer.cpp \
@@ -130,4 +122,9 @@ LIBS += -lCommonLib
 # Protobuf
 #
 LIBS += -lprotobuf
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+
 

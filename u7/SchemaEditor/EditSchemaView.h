@@ -1,6 +1,5 @@
 #pragma once
-#include "../../lib/SignalSetProvider.h"
-#include "../../lib/SignalSetProvider.h"
+#include "../../Builder/AppSignalSetProvider.h"
 #include "../../VFrame30/Schema.h"
 #include "../../VFrame30/SchemaView.h"
 #include "../../VFrame30/PosRectImpl.h"
@@ -22,8 +21,8 @@ class EditSchemaView : public VFrame30::SchemaView
 	Q_OBJECT
 
 public:
-	explicit EditSchemaView(SignalSetProvider* signalSetProvider, QWidget* parent = 0);
-	explicit EditSchemaView(SignalSetProvider* signalSetProvider, std::shared_ptr<VFrame30::Schema> schema, QWidget* parent = nullptr);
+	explicit EditSchemaView(AppSignalSetProvider* signalSetProvider, QWidget* parent = 0);
+	explicit EditSchemaView(AppSignalSetProvider* signalSetProvider, std::shared_ptr<VFrame30::Schema> schema, QWidget* parent = nullptr);
 
 	virtual ~EditSchemaView();
 

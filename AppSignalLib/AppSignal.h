@@ -9,11 +9,11 @@
 #include "../UtilsLib/Address16.h"
 #include "../UtilsLib/Hash.h"
 #include "../UtilsLib/WUtils.h"
-
-#include "ConstStrings.h"
+#include "../lib/OrderedHash.h"
+#include "../lib/ConstStrings.h"
 #include "../CommonLib/Types.h"
 #include "../CommonLib/PropertyObject.h"
-#include "OrderedHash.h"
+
 #include "TuningValue.h"
 
 class XmlWriteHelper;

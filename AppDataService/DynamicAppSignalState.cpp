@@ -1,8 +1,5 @@
 #include "DynamicAppSignalState.h"
-#include "../lib/AppSignalParam.h"
-#include "../UtilsLib/WUtils.h"
 #include "RtTrendsServer.h"
-#include "AppDataSource.h"
 
 // -------------------------------------------------------------------------------
 //

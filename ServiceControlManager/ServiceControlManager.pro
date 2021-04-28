@@ -32,9 +32,6 @@ unix {
 SOURCES += \
 	../lib/SoftwareSettings.cpp \
     ../lib/DataSource.cpp \
-    ../lib/AppSignal.cpp \
-    ../lib/AppSignalParam.cpp \
-    ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     ../lib/Times.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
@@ -60,12 +57,8 @@ HEADERS  += \
 	Stable.h \
     ../lib/SoftwareSettings.h \
     ../lib/DataSource.h \
-    ../lib/AppSignal.h \
-    ../CommonLib/PropertyObject.h \
-	../lib/AppSignalParam.h \
     ../lib/WidgetUtils.h \
     ../lib/OrderedHash.h \
-    ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
     ../lib/Times.h \
     ../lib/Tuning/TuningSignalState.h \
@@ -131,6 +124,10 @@ LIBS += -lUtilsLib
 # CommonLib
 #
 LIBS += -lCommonLib
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
 
 # Protobuf
 #

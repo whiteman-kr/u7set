@@ -1,7 +1,7 @@
 #pragma once
 #include "../Builder/SignalSet.h"
 #include "AppSignalProperties.h"
-#include "AppSignalParam.h"
+#include "../AppSignalLib/AppSignalParam.h"
 #include "../DbLib/DbStruct.h"
 
 #define SIGNAL_TYPE_COUNT (QMetaEnum::fromType<E::SignalType>().keyCount())
@@ -10,7 +10,7 @@
 
 class DbController;
 
-class SignalPropertyManager : public QObject
+class AppSignalPropertyManager : public QObject
 {
 	Q_OBJECT
 public:
@@ -32,9 +32,9 @@ signals:
 	void propertyCountDecreased();
 
 public:
-	SignalPropertyManager(DbController* dbController, QWidget* parentWidget);
+	AppSignalPropertyManager(DbController* dbController, QWidget* parentWidget);
 
-	static SignalPropertyManager* getInstance();
+	static AppSignalPropertyManager* getInstance();
 
 	// Data for models
 	//
@@ -83,7 +83,7 @@ private:
 
 	DbController* m_dbController;
 	QWidget* m_parentWidget;
-	static SignalPropertyManager* m_instance;
+	static AppSignalPropertyManager* m_instance;
 
 	// is initialized by non specific properties
 	//
@@ -127,16 +127,16 @@ private:
 	std::vector<AppSignalPropertyDescription> m_propertyDescription;
 };
 
-class SignalSetProvider : public QObject
+class AppSignalSetProvider : public QObject
 {
 	Q_OBJECT
 
 public:
-	SignalSetProvider(DbController* dbController, QWidget* parentWidget);
-	virtual ~SignalSetProvider();
+	AppSignalSetProvider(DbController* dbController, QWidget* parentWidget);
+	virtual ~AppSignalSetProvider();
 
-	static SignalSetProvider* getInstance();
-	SignalPropertyManager& signalPropertyManager() { return m_propertyManager; }
+	static AppSignalSetProvider* getInstance();
+	AppSignalPropertyManager& signalPropertyManager() { return m_propertyManager; }
 
 	void setMiddleVisibleSignalIndex(int signalIndex);
 
@@ -185,10 +185,10 @@ public:
 	void showErrors(const QVector<ObjectState>& states);
 
 signals:
-	void error(const QString& message) const;	// for throwing message boxes
-	void signalCountChanged() const;	// for reloading entire signal model content
-	void signalUpdated(int signalIndex) const;	// for updating row in signal view (throwing models DataChanged signal)
-	void signalPropertiesChanged(const AppSignal& signal) const; // for updating property list if new properties exist in signal
+	void error(const QString& message);						// for throwing message boxes
+	void signalCountChanged();								// for reloading entire signal model content
+	void signalUpdated(int signalIndex);					// for updating row in signal view (throwing models DataChanged signal)
+	void signalPropertiesChanged(const AppSignal& signal);	// for updating property list if new properties exist in signal
 
 public slots:
 	void initLazyLoadSignals();
@@ -203,10 +203,10 @@ public slots:
 private:
 	QString errorMessage(const ObjectState& state);	// Converts ObjectState to human readable text
 
-	static SignalSetProvider* m_instance;
+	static AppSignalSetProvider* m_instance;
 
 	DbController* m_dbController = nullptr;
-	SignalPropertyManager m_propertyManager;
+	AppSignalPropertyManager m_propertyManager;
 	QTimer* m_lazyLoadSignalsTimer = nullptr;
 	int m_middleVisibleSignalIndex = 0;
 	QWidget* m_parentWidget = nullptr;	//used by DbController

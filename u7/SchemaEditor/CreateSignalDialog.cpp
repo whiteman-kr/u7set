@@ -3,8 +3,7 @@
 #include "BusStorage.h"
 #include "SignalsTabPage.h"
 #include "SignalPropertiesDialog.h"
-#include "../lib/AppSignalProperties.h"
-#include "../lib/SignalSetProvider.h"
+#include "../Builder/AppSignalSetProvider.h"
 
 void CreatingSignalDialogOptions::init(QString schemaId, QString schemaCaption, QStringList equipmentIds, QStringList proposedAppSignalIds)
 {
@@ -399,7 +398,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 
 	for (AppSignal& signal : newSignals)
 	{
-		SignalSetProvider::trimSignalTextFields(signal);
+		AppSignalSetProvider::trimSignalTextFields(signal);
 	}
 
 	bool ok = dbc->addSignal(newSignals.front().signalType(), &newSignals, parent);
@@ -408,7 +407,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		return {};
 	}
 
-	SignalSetProvider* model = SignalSetProvider::getInstance();
+	AppSignalSetProvider* model = AppSignalSetProvider::getInstance();
 	model->loadSignals();
 
 	QVector<int> selectIdList(newSignals.size());

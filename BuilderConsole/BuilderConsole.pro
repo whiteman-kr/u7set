@@ -110,6 +110,10 @@ LIBS += -lDbLib
 #
 LIBS += -lCommonLib
 
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+
 # Visual Leak Detector
 #
 win32 {

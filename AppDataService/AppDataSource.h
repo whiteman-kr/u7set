@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/AppSignal.h"
+#include "../AppSignalLib/AppSignal.h"
 #include "../lib/DataSource.h"
 #include "DynamicAppSignalState.h"
 

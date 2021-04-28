@@ -20,7 +20,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void DbConnectionBase::setSignalSetProvider(SignalSetProvider* signalSetProvider)
+	void DbConnectionBase::setSignalSetProvider(AppSignalSetProvider* signalSetProvider)
 	{
 		if (signalSetProvider == nullptr)
 		{

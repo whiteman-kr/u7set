@@ -3,12 +3,12 @@
 #include "SignalPropertiesDialog.h"
 #include "BusStorage.h"
 #include "../DbLib/DbController.h"
-#include "../lib/AppSignalProperties.h"
+#include "../Builder/AppSignalProperties.h"
+#include "../Builder/AppSignalSetProvider.h"
 #include "../lib/WidgetUtils.h"
-#include "../UtilsLib/WUtils.h"
 #include "../lib/ConstStrings.h"
 #include "../lib/StandardColors.h"
-#include "../lib/SignalSetProvider.h"
+#include "../UtilsLib/WUtils.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
 #include <QMessageBox>
 #include <QFormLayout>
@@ -28,7 +28,7 @@
 
 const int DEFAULT_COLUMN_WIDTH = 50;
 
-SignalsDelegate::SignalsDelegate(SignalSetProvider* signalSetProvider, SignalsModel* model, SignalsProxyModel* proxyModel, QObject *parent) :
+SignalsDelegate::SignalsDelegate(AppSignalSetProvider* signalSetProvider, SignalsModel* model, SignalsProxyModel* proxyModel, QObject *parent) :
 	QStyledItemDelegate(parent),
 	m_signalSetProvider(signalSetProvider),
 	m_model(model),
@@ -46,7 +46,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 
 	const AppSignal& s = m_signalSetProvider->getLoadedSignal(row);
 
-	SignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
+	AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
 	manager.reloadPropertyBehaviour();
 
 	bool isExpert = theSettings.isExpertMode();
@@ -168,7 +168,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 
 	const AppSignal& s = m_signalSetProvider->getLoadedSignal(row);
 
-	SignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
+	AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
 	bool isExpert = theSettings.isExpertMode();
 
 	const auto values = manager.values(col);
@@ -240,7 +240,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 
 	AppSignal s = m_signalSetProvider->getLoadedSignal(row);
 
-	SignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
+	AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
 	bool isExpert = theSettings.isExpertMode();
 
 	const auto values = manager.values(col);
@@ -361,7 +361,7 @@ bool SignalsDelegate::editorEvent(QEvent *event, QAbstractItemModel *, const QSt
 }
 
 
-SignalsModel::SignalsModel(SignalSetProvider* signalSetProvider, SignalsTabPage* parent) :
+SignalsModel::SignalsModel(AppSignalSetProvider* signalSetProvider, SignalsTabPage* parent) :
 	QAbstractTableModel(parent),
 	m_signalSetProvider(signalSetProvider),
 	m_rowCount(signalSetProvider->signalCount()),
@@ -369,12 +369,12 @@ SignalsModel::SignalsModel(SignalSetProvider* signalSetProvider, SignalsTabPage*
 	m_parentWindow(parent)
 
 {
-	connect(m_signalSetProvider, &SignalSetProvider::signalCountChanged, this, &SignalsModel::changeRowCount);
-	connect(m_signalSetProvider, &SignalSetProvider::signalUpdated, this, &SignalsModel::updateSignal);
-	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountWillIncrease, this, &SignalsModel::beginIncreaseColumnCount, Qt::DirectConnection);
-	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountWillDecrease, this, &SignalsModel::beginDecreaseColumnCount, Qt::DirectConnection);
-	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountIncreased, this, &SignalsModel::endIncreaseColumnCount, Qt::DirectConnection);
-	connect(&m_signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountDecreased, this, &SignalsModel::endDecreaseColumnCount, Qt::DirectConnection);
+	connect(m_signalSetProvider, &AppSignalSetProvider::signalCountChanged, this, &SignalsModel::changeRowCount);
+	connect(m_signalSetProvider, &AppSignalSetProvider::signalUpdated, this, &SignalsModel::updateSignal);
+	connect(&m_signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountWillIncrease, this, &SignalsModel::beginIncreaseColumnCount, Qt::DirectConnection);
+	connect(&m_signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountWillDecrease, this, &SignalsModel::beginDecreaseColumnCount, Qt::DirectConnection);
+	connect(&m_signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountIncreased, this, &SignalsModel::endIncreaseColumnCount, Qt::DirectConnection);
+	connect(&m_signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountDecreased, this, &SignalsModel::endDecreaseColumnCount, Qt::DirectConnection);
 }
 
 SignalsModel::~SignalsModel()
@@ -445,7 +445,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 		}
 	}
 
-	SignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
+	AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
@@ -486,7 +486,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-	SignalPropertyManager& propertyManager = m_signalSetProvider->signalPropertyManager();
+	AppSignalPropertyManager& propertyManager = m_signalSetProvider->signalPropertyManager();
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
 		if (orientation == Qt::Horizontal)
@@ -510,7 +510,7 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 
 bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-	SignalPropertyManager& propertyManager = m_signalSetProvider->signalPropertyManager();
+	AppSignalPropertyManager& propertyManager = m_signalSetProvider->signalPropertyManager();
 	if (role == Qt::EditRole)
 	{
 		int row = index.row();
@@ -536,7 +536,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 {
-	SignalPropertyManager& propertyManager = m_signalSetProvider->signalPropertyManager();
+	AppSignalPropertyManager& propertyManager = m_signalSetProvider->signalPropertyManager();
 	if (index.isValid() == false)
 	{
 		return QAbstractTableModel::flags(index);
@@ -624,7 +624,7 @@ void SignalsModel::endDecreaseColumnCount()
 SignalsTabPage* SignalsTabPage::m_instance = nullptr;
 
 
-SignalsTabPage::SignalsTabPage(SignalSetProvider* signalSetProvider, DbController* dbController, QWidget* parent) :
+SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbController* dbController, QWidget* parent) :
 	MainTabPage(dbController, parent),
 	m_signalSetProvider(signalSetProvider)
 {
@@ -734,7 +734,7 @@ SignalsTabPage::SignalsTabPage(SignalSetProvider* signalSetProvider, DbControlle
 	}
 
 	m_signalsColumnVisibilityController = new TableDataVisibilityController(m_signalsView, "SignalsTabPage", defaultColumnVisibility);
-	connect(&signalSetProvider->signalPropertyManager(), &SignalPropertyManager::propertyCountIncreased, m_signalsColumnVisibilityController, &TableDataVisibilityController::checkNewColumns);
+	connect(&signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountIncreased, m_signalsColumnVisibilityController, &TableDataVisibilityController::checkNewColumns);
 
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
 	m_signalsView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
@@ -748,7 +748,7 @@ SignalsTabPage::SignalsTabPage(SignalSetProvider* signalSetProvider, DbControlle
 	connect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &SignalsTabPage::changeLazySignalLoadingSequence);
 	connect(m_signalsView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SignalsTabPage::onSignalSelectionChanged);
 
-	connect(signalSetProvider, &SignalSetProvider::error, this, &SignalsTabPage::showError);
+	connect(signalSetProvider, &AppSignalSetProvider::error, this, &SignalsTabPage::showError);
 
 	// Create Actions
 	//
@@ -1229,7 +1229,7 @@ void SignalsTabPage::addSignal()
 
 	SignalPropertiesDialog dlg(dbController(), QVector<AppSignal*>() << &signal, false, false, this);
 
-	SignalSetProvider::trimSignalTextFields(signal);
+	AppSignalSetProvider::trimSignalTextFields(signal);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -1953,7 +1953,7 @@ Qt::ItemFlags CheckedoutSignalsModel::flags(const QModelIndex& index) const
 
 bool CheckedoutSignalsModel::filterAcceptsRow(int source_row, const QModelIndex&) const
 {
-	return SignalSetProvider::getInstance()->isCheckinableSignalForMe(source_row);
+	return AppSignalSetProvider::getInstance()->isCheckinableSignalForMe(source_row);
 }
 
 void CheckedoutSignalsModel::initCheckStates(const QModelIndexList& list, bool fromSourceModel)
@@ -1979,7 +1979,7 @@ void CheckedoutSignalsModel::setAllCheckStates(bool state)
 
 void CheckedoutSignalsModel::setCheckState(int row, Qt::CheckState state)
 {
-	QVector<int> sourceRows = SignalSetProvider::getInstance()->getSameChannelSignals(mapToSource(index(row, 0)).row());
+	QVector<int> sourceRows = AppSignalSetProvider::getInstance()->getSameChannelSignals(mapToSource(index(row, 0)).row());
 	foreach (const int sourceRow, sourceRows)
 	{
 		QModelIndex changedIndex = mapFromSource(m_sourceModel->index(sourceRow, 0));
@@ -2034,7 +2034,7 @@ CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel *sourceModel, TableDataV
 
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
 
-	int signalPropertyCount = SignalPropertyManager::getInstance()->count();
+	int signalPropertyCount = AppSignalPropertyManager::getInstance()->count();
 
 	QSettings settings;
 	m_signalsView->setColumnWidth(0, columnManager->getColumnWidth(0) + 30);	// basic column width + checkbox size
@@ -2100,7 +2100,7 @@ void CheckinSignalsDialog::checkinSelected()
 		return;
 	}
 	QVector<int> IDs;
-	SignalSetProvider* signalSetProvider = SignalSetProvider::getInstance();
+	AppSignalSetProvider* signalSetProvider = AppSignalSetProvider::getInstance();
 	for (int i = 0; i < m_proxyModel->rowCount(); i++)
 	{
 		QModelIndex proxyIndex = m_proxyModel->index(i, 0);
@@ -2173,7 +2173,7 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, TableDataVisibil
 
 	signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(signalsView->fontMetrics().height() * 1.4));
 
-	const auto& propertyManager = *SignalPropertyManager::getInstance();
+	const auto& propertyManager = *AppSignalPropertyManager::getInstance();
 
 	QSettings settings;
 	signalsView->setColumnWidth(0, columnManager->getColumnWidth(0) + 30);	// basic column width + checkbox size
@@ -2220,7 +2220,7 @@ void UndoSignalsDialog::undoSelected()
 {
 	saveDialogGeometry();
 
-	SignalSetProvider* signalSetProvider = SignalSetProvider::getInstance();
+	AppSignalSetProvider* signalSetProvider = AppSignalSetProvider::getInstance();
 
 	QVector<int> IDs;
 	for (int i = 0; i < m_proxyModel->rowCount(); i++)
@@ -2268,9 +2268,9 @@ SignalsProxyModel::SignalsProxyModel(SignalsModel *sourceModel, QObject *parent)
 	QSortFilterProxyModel(parent),
 	m_sourceModel(sourceModel)
 {
-	m_signalSetProvider = SignalSetProvider::getInstance();
-	connect(this, &SignalsProxyModel::aboutToSort, m_signalSetProvider, &SignalSetProvider::finishLoadingSignals, Qt::DirectConnection);
-	connect(this, &SignalsProxyModel::aboutToFilter, m_signalSetProvider, &SignalSetProvider::finishLoadingSignals, Qt::DirectConnection);
+	m_signalSetProvider = AppSignalSetProvider::getInstance();
+	connect(this, &SignalsProxyModel::aboutToSort, m_signalSetProvider, &AppSignalSetProvider::finishLoadingSignals, Qt::DirectConnection);
+	connect(this, &SignalsProxyModel::aboutToFilter, m_signalSetProvider, &AppSignalSetProvider::finishLoadingSignals, Qt::DirectConnection);
 	setSourceModel(sourceModel);
 }
 
@@ -2474,7 +2474,7 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 	std::vector<int> signalIds = { signalId };
 	std::vector<AppSignal> signalInstance;
 
-	SignalPropertyManager* pSignalPropertyManager = SignalPropertyManager::getInstance();
+	AppSignalPropertyManager* pSignalPropertyManager = AppSignalPropertyManager::getInstance();
 	pSignalPropertyManager->reloadPropertyBehaviour();
 
 	int row = 0;
@@ -2559,7 +2559,7 @@ const QString FindSignalDialog::replacedMessage("Yes - replaced");
 FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, QTableView* parent) :
 	QDialog(parent, Qt::Dialog),
 	m_signalTable(parent),
-	m_signalSetProvider(SignalSetProvider::getInstance()),
+	m_signalSetProvider(AppSignalSetProvider::getInstance()),
 	m_findString(new QLineEdit(this)),
 	m_replaceString(new QLineEdit(this)),
 	m_searchInPropertyList(new QComboBox(this)),
@@ -2956,7 +2956,7 @@ FindSignalDialog::SearchOptions FindSignalDialog::getCurrentSearchOptions()
 		return options;
 	}
 
-	int propertyIndex = SignalPropertyManager::getInstance()->index(m_searchInPropertyList->currentText());
+	int propertyIndex = AppSignalPropertyManager::getInstance()->index(m_searchInPropertyList->currentText());
 
 	if (propertyIndex == -1)
 	{
@@ -2986,7 +2986,7 @@ QString FindSignalDialog::getProperty(const AppSignal& signal)
 		return QString();
 	}
 
-	return SignalPropertyManager::getInstance()->value(&signal, m_searchOptionsUsedLastTime.searchedPropertyIndex, theSettings.isExpertMode()).toString();
+	return AppSignalPropertyManager::getInstance()->value(&signal, m_searchOptionsUsedLastTime.searchedPropertyIndex, theSettings.isExpertMode()).toString();
 }
 
 void FindSignalDialog::setProperty(AppSignal& signal, const QString& value)
@@ -2997,7 +2997,7 @@ void FindSignalDialog::setProperty(AppSignal& signal, const QString& value)
 		return;
 	}
 
-	SignalPropertyManager::getInstance()->setValue(&signal, m_searchOptionsUsedLastTime.searchedPropertyIndex, value, theSettings.isExpertMode());
+	AppSignalPropertyManager::getInstance()->setValue(&signal, m_searchOptionsUsedLastTime.searchedPropertyIndex, value, theSettings.isExpertMode());
 }
 
 int FindSignalDialog::getSignalId(int row)

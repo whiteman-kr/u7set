@@ -30,11 +30,9 @@
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/Bus.h"
 #include "../lib/LmDescription.h"
-#include "../lib/SignalSetProvider.h"
+#include "../Builder/AppSignalSetProvider.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "Settings.h"
-#include "../lib/AppSignalProperties.h"
-#include "../lib/SignalSetProvider.h"
 #include "../lib/QScintillaLexers/LexerJavaScript.h"
 #include "../lib/Ui/TextEditCompleter.h"
 #include "../lib/QDoublevalidatorEx.h"
@@ -94,7 +92,7 @@ const char* SchemaItemClipboardData::mimeType = "application/x-radiyschemaset";
 EditSchemaWidget::EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 								   const DbFileInfo& fileInfo,
 								   DbController* dbController,
-								   SignalSetProvider* signalSetProvider,
+								   AppSignalSetProvider* signalSetProvider,
 								   QWidget* parent) :
 	VFrame30::BaseSchemaWidget(schema, new EditSchemaView{signalSetProvider, schema}, parent),
 	m_fileInfo(fileInfo),
@@ -4975,7 +4973,7 @@ bool EditSchemaWidget::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngin
 
 	// QCompleter for signals
 	//
-	SignalSetProvider* signalSetProvider = SignalSetProvider::getInstance();
+	AppSignalSetProvider* signalSetProvider = AppSignalSetProvider::getInstance();
 	Q_ASSERT(signalSetProvider);
 
 	QStringList appSignalIdsCompleterList = signalSetProvider->signalSet().appSignalIdsList(true, true);
@@ -5410,7 +5408,7 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 
 	// QCompleter for signals
 	//
-	SignalSetProvider* signalSetProvider = SignalSetProvider::getInstance();
+	AppSignalSetProvider* signalSetProvider = AppSignalSetProvider::getInstance();
 	Q_ASSERT(signalSetProvider);
 
 	QStringList appSignalIdsCompleterList = signalSetProvider->signalSet().appSignalIdsList(true, true);

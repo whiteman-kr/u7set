@@ -25,7 +25,7 @@ class SchemaLayersDialog;
 class SchemaItemPropertiesDialog;
 class EditSchemaTabPage;
 class SchemaFindDialog;
-class SignalSetProvider;
+class AppSignalSetProvider;
 
 
 //
@@ -52,7 +52,7 @@ public:
 	EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 					 const DbFileInfo& fileInfo,
 					 DbController* dbController,
-					 SignalSetProvider* signalSetProvider,
+					 AppSignalSetProvider* signalSetProvider,
 					 QWidget* parent);
 	virtual ~EditSchemaWidget();
 	

@@ -4,11 +4,10 @@
 #include "SignalPropertiesDialog.h"
 #include "SignalsTabPage.h"
 #include "Settings.h"
-#include "../lib/AppSignalProperties.h"
 #include "../lib/PropertyEditor.h"
 #include "../DbLib/DbController.h"
 #include "../lib/WidgetUtils.h"
-#include "../lib/SignalSetProvider.h"
+#include "../Builder/AppSignalSetProvider.h"
 
 
 // Returns vector of pairs,
@@ -93,7 +92,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 				continue;
 			}
 			ObjectState state;
-			SignalSetProvider::trimSignalTextFields(*signalPtrVector[i]);
+			AppSignalSetProvider::trimSignalTextFields(*signalPtrVector[i]);
 			dbController->setSignalWorkcopy(signalPtrVector[i], &state, parent);
 			if (state.errCode != ERR_SIGNAL_OK)
 			{
@@ -170,7 +169,7 @@ void initNewSignal(AppSignal& signal)
 
 	signal.initSpecificProperties();
 
-	SignalPropertyManager& propertyManager = *SignalPropertyManager::getInstance();
+	AppSignalPropertyManager& propertyManager = *AppSignalPropertyManager::getInstance();
 
 	auto setter = [&signal, &propertyManager](const QString& name, QVariant value) {
 		int index = propertyManager.index(name);
@@ -335,7 +334,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 		int precision = appSignal.decimalPlaces();
 
-		SignalPropertyManager& manager = *SignalPropertyManager::getInstance();
+		AppSignalPropertyManager& manager = *AppSignalPropertyManager::getInstance();
 		manager.detectNewProperties(appSignal);
 		manager.loadNotSpecificProperties();
 		manager.reloadPropertyBehaviour();
@@ -423,7 +422,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		}
 	}
 
-	connect(this, &SignalPropertiesDialog::signalChanged, SignalSetProvider::getInstance(), &SignalSetProvider::loadSignal, Qt::QueuedConnection);
+	connect(this, &SignalPropertiesDialog::signalChanged, AppSignalSetProvider::getInstance(), &AppSignalSetProvider::loadSignal, Qt::QueuedConnection);
 
 	// Save
 	//
@@ -699,7 +698,7 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 		return;
 	}
 
-	SignalPropertyManager& manager = *SignalPropertyManager::getInstance();
+	AppSignalPropertyManager& manager = *AppSignalPropertyManager::getInstance();
 
 	const AppSignal& signal = *m_signalVector[0];
 

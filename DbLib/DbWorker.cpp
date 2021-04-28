@@ -14,7 +14,6 @@
 
 #include "DbWorker.h"
 #include "DbProgress.h"
-#include "../lib/AppSignalProperties.h"
 #include "../HardwareLib/DeviceObject.h"
 
 // Upgrade database

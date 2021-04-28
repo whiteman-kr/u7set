@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../DbLib/DbController.h"
-#include "../lib/AppSignal.h"
 #include "../HardwareLib/DeviceObject.h"
 #include "../lib/DataSource.h"
 #include "../VFrame30/Schema.h"

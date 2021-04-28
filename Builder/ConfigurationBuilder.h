@@ -1,7 +1,5 @@
-#ifndef CONFIGURATIONBUILDER_H
-#define CONFIGURATIONBUILDER_H
+#pragma once
 
-#include "../lib/AppSignal.h"
 #include "BuildWorkerThread.h"
 
 // Forware delcarations
@@ -16,7 +14,6 @@ namespace Hardware
 	class DeviceRoot;
 	class McFirmwareOld;
 }
-
 
 namespace Builder
 {
@@ -82,5 +79,3 @@ namespace Builder
 	};
 
 }
-
-#endif // CONFIGURATIONBUILDER_H

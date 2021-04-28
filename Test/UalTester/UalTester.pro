@@ -35,10 +35,7 @@ unix {
 SOURCES += \
 	../../lib/BuildInfo.cpp \
 	../../lib/SoftwareSettings.cpp \
-	../../lib/AppSignalParam.cpp \
-	../../lib/AppSignal.cpp \
 	../../lib/Tuning/TuningSignalState.cpp \
-	../../lib/TuningValue.cpp \
 	main.cpp \
 	UalTester.cpp \
 	SignalBase.cpp \
@@ -54,11 +51,7 @@ HEADERS += \
     ../../lib/OrderedHash.h \
     ../../lib/BuildInfo.h \
 	../../lib/SoftwareSettings.h \
-	../../CommonLib/PropertyObject.h \
-    ../../lib/AppSignalParam.h \
-    ../../lib/AppSignal.h \
     ../../lib/Tuning/TuningSignalState.h \
-    ../../lib/TuningValue.h \
     SignalBase.h \
     TestFile.h \
     TuningSocket.h \
@@ -98,6 +91,7 @@ LIBS += -lOnlineLib
 LIBS += -lServiceLib
 LIBS += -lUtilsLib
 LIBS += -lCommonLib
+LIBS += -lAppSignalLib
 
 # Protobuf
 #

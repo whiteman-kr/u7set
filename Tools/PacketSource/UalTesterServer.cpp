@@ -1,6 +1,6 @@
 #include "UalTesterServer.h"
 
-#include "../../lib/TuningValue.h"
+#include "../../AppSignalLib/TuningValue.h"
 
 // -------------------------------------------------------------------------------
 //

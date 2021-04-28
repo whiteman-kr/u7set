@@ -37,9 +37,6 @@ CONFIG += warn_off
 #	SignalTests.cpp \
 
 SOURCES += main.cpp \
-	../../lib/AppSignal.cpp \
-	../../lib/TuningValue.cpp \
-	../../lib/AppSignalProperties.cpp \
     DeviceObjectTests.cpp \
 	UserPropertyTest.cpp \
 	UserTests.cpp \
@@ -59,10 +56,6 @@ SOURCES += main.cpp \
 
 HEADERS += \
 	../../lib/Factory.h \
-	../../lib/AppSignal.h \
-	../../CommonLib/PropertyObject.h \
-	../../lib/TuningValue.h \
-	../../lib/AppSignalProperties.h \
     DeviceObjectTests.h \
 	UserPropertyTest.h \
 	UserTests.h \
@@ -109,4 +102,6 @@ LIBS += -lOnlineLib
 LIBS += -lHardwareLib
 LIBS += -lDbLib
 LIBS += -lCommonLib
+LIBS += -lAppSignalLib
+
 

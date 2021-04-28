@@ -5,7 +5,7 @@
 #include <bitset>
 #include <memory>
 #include "../CommonLib/Types.h"
-#include "../lib/AppSignalParam.h"
+#include "../AppSignalLib/AppSignalParam.h"
 
 namespace Proto
 {

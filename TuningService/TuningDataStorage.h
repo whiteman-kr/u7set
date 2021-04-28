@@ -4,7 +4,7 @@
 #include <QList>
 
 #include "../CommonLib/Types.h"
-#include "../lib/AppSignal.h"
+#include "../AppSignalLib/AppSignal.h"
 
 namespace Tuning
 {

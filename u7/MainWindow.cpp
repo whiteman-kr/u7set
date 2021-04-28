@@ -7,7 +7,7 @@
 #include "../lib/Ui/DialogAbout.h"
 #include "../lib/LogicModuleSet.h"
 #include "../UtilsLib/Ui/UiTools.h"
-#include "../lib/SignalSetProvider.h"
+#include "../Builder/AppSignalSetProvider.h"
 #include "UserManagementDialog.h"
 #include "ProjectsTabPage.h"
 #include "FilesTabPage.h"
@@ -61,7 +61,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &MainWindow::projectClosed);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::changeCurrentTab, getCentralWidget(), &CentralWidget::setCurrentWidget);
 
-	m_signalSetProvider = new SignalSetProvider(dbController(), this);
+	m_signalSetProvider = new AppSignalSetProvider(dbController(), this);
 
 	// Add main tab pages
 	//

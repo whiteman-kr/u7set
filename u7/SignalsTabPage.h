@@ -1,12 +1,13 @@
 #pragma once
 
-#include "MainTabPage.h"
-#include "GlobalMessanger.h"
-#include "../lib/AppSignalProperties.h"
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
 #include <QDialog>
 #include <QHash>
+
+#include "../Builder/AppSignalProperties.h"
+#include "MainTabPage.h"
+#include "GlobalMessanger.h"
 #include "DlgMetrologyConnection.h"
 
 class DbController;
@@ -26,7 +27,7 @@ class QCompleter;
 class QActionGroup;
 class QStandardItemModel;
 class TableDataVisibilityController;
-class SignalSetProvider;
+class AppSignalSetProvider;
 
 
 const int	ST_ANALOG = TO_INT(E::SignalType::Analog),
@@ -58,7 +59,7 @@ class SignalsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-	explicit SignalsDelegate(SignalSetProvider* signalSetProvider, SignalsModel* model, SignalsProxyModel* signalsProxyModel, QObject *parent = nullptr);
+	explicit SignalsDelegate(AppSignalSetProvider* signalSetProvider, SignalsModel* model, SignalsProxyModel* signalsProxyModel, QObject *parent = nullptr);
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
@@ -77,7 +78,7 @@ protected:
 	bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index);
 
 private:
-	SignalSetProvider* m_signalSetProvider;
+	AppSignalSetProvider* m_signalSetProvider;
 	SignalsModel* m_model;
 	SignalsProxyModel* m_proxyModel;
 	mutable int signalIdForUndoOnCancelEditing = -1;
@@ -88,7 +89,7 @@ class SignalsModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	SignalsModel(SignalSetProvider* signalSetProvider, SignalsTabPage* parent = nullptr);
+	SignalsModel(AppSignalSetProvider* signalSetProvider, SignalsTabPage* parent = nullptr);
 	virtual ~SignalsModel() override;
 
 	virtual int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
@@ -119,7 +120,7 @@ public slots:
 private:
 	// Data
 	//
-	SignalSetProvider* m_signalSetProvider;
+	AppSignalSetProvider* m_signalSetProvider;
 	int m_rowCount = 0;
 	int m_columnCount = 0;
 
@@ -152,7 +153,7 @@ private:
 	void applyNewFilter();
 
 	SignalsModel* m_sourceModel;
-	SignalSetProvider* m_signalSetProvider;
+	AppSignalSetProvider* m_signalSetProvider;
 	int m_signalType = ST_ANY;
 	int m_idFilterField = FI_EQUIPMENT_ID;
 	QStringList m_strIdMasks;
@@ -324,7 +325,7 @@ private:
 	SignalsProxyModel* m_signalProxyModel = nullptr;
 	SignalsModel* m_signalModel = nullptr;
 
-	SignalSetProvider* m_signalSetProvider = nullptr;
+	AppSignalSetProvider* m_signalSetProvider = nullptr;
 
 	QLineEdit* m_findString = nullptr;
 	QLineEdit* m_replaceString = nullptr;
@@ -368,7 +369,7 @@ class SignalsTabPage : public MainTabPage
 	Q_OBJECT
 
 public:
-	SignalsTabPage(SignalSetProvider* signalSetProvider, DbController* dbController, QWidget* parent);
+	SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbController* dbController, QWidget* parent);
 	virtual ~SignalsTabPage() override;
 
 	static bool updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceAppSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties);
@@ -429,7 +430,7 @@ public slots:
 private:
 	static SignalsTabPage* m_instance;
 	SignalsModel* m_signalsModel = nullptr;
-	SignalSetProvider* m_signalSetProvider = nullptr;
+	AppSignalSetProvider* m_signalSetProvider = nullptr;
 	SignalsProxyModel* m_signalsProxyModel = nullptr;
 	QTableView* m_signalsView = nullptr;
 	TableDataVisibilityController* m_signalsColumnVisibilityController = nullptr;

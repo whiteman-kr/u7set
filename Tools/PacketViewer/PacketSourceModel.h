@@ -1,10 +1,9 @@
-#ifndef PACKETSOURCEMODEL_H
-#define PACKETSOURCEMODEL_H
+#pragma once
 
 #include <QAbstractItemModel>
 #include <memory>
 #include <unordered_map>
-#include "../../lib/AppSignal.h"
+#include "../../AppSignalLib/AppSignal.h"
 #include "../../OnlineLib/DataProtocols.h"
 #include "../../lib/DataSource.h"
 #include "../../HardwareLib/DeviceObject.h"
@@ -211,5 +210,3 @@ private:
 
 	QHash<quint32, std::shared_ptr<DataSourceOnline>> m_dataSources;
 };
-
-#endif // PACKETSOURCEMODEL_H

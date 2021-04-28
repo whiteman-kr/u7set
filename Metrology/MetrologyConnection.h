@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../UtilsLib/Hash.h"
-#include "../lib/SignalSetProvider.h"
 #include "../UtilsLib/Crc.h"
 #include "MetrologySignal.h"
 

@@ -31,8 +31,6 @@ unix {
 
 SOURCES += \
 	../../lib/DataSource.cpp \
-	../../lib/AppSignal.cpp \
-	../../lib/TuningValue.cpp \
 	../../lib/Times.cpp \
 	main.cpp \
 	SourceListWidget.cpp \
@@ -47,9 +45,6 @@ HEADERS  += \
 	Stable.h \
 	../../Proto/serialization.pb.h \
 	../../lib/DataSource.h \
-	../../lib/AppSignal.h \
-	../../CommonLib/PropertyObject.h \
-	../../lib/TuningValue.h \
 	../../lib/Times.h \
 	SourceListWidget.h \
 	PacketSourceModel.h \
@@ -92,6 +87,10 @@ LIBS += -lUtilsLib
 # CommonLib
 #
 LIBS += -lCommonLib
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
 
 # Protobuf
 #

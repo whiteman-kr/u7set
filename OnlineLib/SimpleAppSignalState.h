@@ -3,7 +3,7 @@
 #include "../UtilsLib/Hash.h"
 #include "../UtilsLib/Queue.h"
 #include "../lib/Times.h"
-#include "../lib/AppSignal.h"
+#include "../AppSignalLib/AppSignal.h"
 
 namespace Proto
 {

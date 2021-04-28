@@ -6,6 +6,7 @@ SUBDIRS += Protobuf \
         qtpropertybrowser \
         QScintilla \
         TrendView \
+		AppSignalLib \
         VFrame30 \
         UtilsLib \
         OnlineLib \

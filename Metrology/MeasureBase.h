@@ -2,8 +2,8 @@
 
 #include "../UtilsLib/Hash.h"
 #include "MetrologySignal.h"
-
 #include "SignalBase.h"
+#include "UnitsConvertor.h"
 
 namespace Measure
 {

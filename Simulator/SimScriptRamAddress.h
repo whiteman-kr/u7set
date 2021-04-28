@@ -1,5 +1,5 @@
 #pragma once
-#include "../lib/AppSignal.h"
+#include "../AppSignalLib/AppSignal.h"
 
 namespace Sim
 {

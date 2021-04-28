@@ -3,8 +3,8 @@
 #include <QUdpSocket>
 
 #include "../UtilsLib/SimpleThread.h"
-#include "AppDataSource.h"
 #include "../OnlineLib/CircularLogger.h"
+#include "AppDataSource.h"
 
 //
 // AppDataReceiver is receives RUP datagrams and push it in AppDataSource's queues

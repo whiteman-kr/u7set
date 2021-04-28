@@ -68,7 +68,6 @@ SOURCES +=\
     ConfigController.cpp \
     ../lib/BuildInfo.cpp \
     DialogSettings.cpp \
-    ../lib/AppSignalParam.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     UserManager.cpp \
@@ -89,11 +88,8 @@ SOURCES +=\
     ../lib/Tuning/TuningTcpClient.cpp \
     TuningClientTcpClient.cpp \ 
     ../lib/Tuning/TuningLog.cpp \
-    ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     TuningSchemaManager.cpp \
-    ../lib/AppSignal.cpp \
-	../lib/AppSignalProperties.cpp \
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/DialogAbout.cpp \
     DialogChooseFilter.cpp \
@@ -117,7 +113,6 @@ HEADERS  += MainWindow.h \
     ConfigController.h \
     ../lib/BuildInfo.h \
     DialogSettings.h \
-    ../lib/AppSignalParam.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../CommonLib/PropertyObject.h \
@@ -138,11 +133,8 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningTcpClient.h \
     TuningClientTcpClient.h \ 
     ../lib/Tuning/TuningLog.h \
-    ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
     TuningSchemaManager.h \
-    ../lib/AppSignal.h \
-	../lib/AppSignalProperties.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/DialogAbout.h \
     DialogChooseFilter.h \
@@ -212,6 +204,10 @@ LIBS += -lUtilsLib
 # CommonLib
 #
 LIBS += -lCommonLib
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
 
 # Protobuf
 #

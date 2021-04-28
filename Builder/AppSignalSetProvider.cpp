@@ -1,12 +1,12 @@
-#include "SignalSetProvider.h"
+#include "AppSignalSetProvider.h"
 #include "../DbLib/DbController.h"
 
 #include <QMessageBox>
 
 
-SignalPropertyManager* SignalPropertyManager::m_instance = nullptr;
+AppSignalPropertyManager* AppSignalPropertyManager::m_instance = nullptr;
 
-SignalPropertyManager::SignalPropertyManager(DbController* dbController, QWidget* parentWidget) :
+AppSignalPropertyManager::AppSignalPropertyManager(DbController* dbController, QWidget* parentWidget) :
 	m_dbController(dbController),
 	m_parentWidget(parentWidget)
 {
@@ -15,18 +15,18 @@ SignalPropertyManager::SignalPropertyManager(DbController* dbController, QWidget
 	m_instance = this;
 }
 
-SignalPropertyManager* SignalPropertyManager::getInstance()
+AppSignalPropertyManager* AppSignalPropertyManager::getInstance()
 {
 	assert (m_instance != nullptr);
 	return m_instance;
 }
 
-int SignalPropertyManager::count() const
+int AppSignalPropertyManager::count() const
 {
 	return static_cast<int>(m_propertyDescription.size());
 }
 
-int SignalPropertyManager::index(const QString& name)
+int AppSignalPropertyManager::index(const QString& name)
 {
 	for (size_t i = 0; i < m_propertyDescription.size(); i++)
 	{
@@ -38,7 +38,7 @@ int SignalPropertyManager::index(const QString& name)
 	return -1;
 }
 
-QString SignalPropertyManager::caption(int propertyIndex) const
+QString AppSignalPropertyManager::caption(int propertyIndex) const
 {
 	if (isNotCorrect(propertyIndex))
 	{
@@ -48,7 +48,7 @@ QString SignalPropertyManager::caption(int propertyIndex) const
 	return m_propertyDescription[static_cast<size_t>(propertyIndex)].caption;
 }
 
-QString SignalPropertyManager::name(int propertyIndex)
+QString AppSignalPropertyManager::name(int propertyIndex)
 {
 	if (isNotCorrect(propertyIndex))
 	{
@@ -58,7 +58,7 @@ QString SignalPropertyManager::name(int propertyIndex)
 	return m_propertyDescription[static_cast<size_t>(propertyIndex)].name;
 }
 
-QVariant SignalPropertyManager::value(const AppSignal* signal, int propertyIndex, bool isExpert) const
+QVariant AppSignalPropertyManager::value(const AppSignal* signal, int propertyIndex, bool isExpert) const
 {
 	if (isNotCorrect(propertyIndex))
 	{
@@ -91,7 +91,7 @@ QVariant SignalPropertyManager::value(const AppSignal* signal, int propertyIndex
 	}
 }
 
-const std::vector<std::pair<int, QString> > SignalPropertyManager::values(int propertyIndex) const
+const std::vector<std::pair<int, QString> > AppSignalPropertyManager::values(int propertyIndex) const
 {
 	if (isNotCorrect(propertyIndex))
 	{
@@ -102,7 +102,7 @@ const std::vector<std::pair<int, QString> > SignalPropertyManager::values(int pr
 	return m_propertyDescription[static_cast<size_t>(propertyIndex)].enumValues;
 }
 
-void SignalPropertyManager::setValue(AppSignal* signal, int propertyIndex, const QVariant& value, bool isExpert)
+void AppSignalPropertyManager::setValue(AppSignal* signal, int propertyIndex, const QVariant& value, bool isExpert)
 {
 	if (isNotCorrect(propertyIndex))
 	{
@@ -118,7 +118,7 @@ void SignalPropertyManager::setValue(AppSignal* signal, int propertyIndex, const
 	m_propertyDescription[static_cast<size_t>(propertyIndex)].valueSetter(signal, value);
 }
 
-QVariant::Type SignalPropertyManager::type(const int propertyIndex) const
+QVariant::Type AppSignalPropertyManager::type(const int propertyIndex) const
 {
 	if (isNotCorrect(propertyIndex))
 	{
@@ -128,7 +128,7 @@ QVariant::Type SignalPropertyManager::type(const int propertyIndex) const
 	return m_propertyDescription[static_cast<size_t>(propertyIndex)].type;
 }
 
-E::PropertyBehaviourType SignalPropertyManager::getBehaviour(const AppSignal& signal, const int propertyIndex) const
+E::PropertyBehaviourType AppSignalPropertyManager::getBehaviour(const AppSignal& signal, const int propertyIndex) const
 {
 	if (isNotCorrect(propertyIndex))
 	{
@@ -139,7 +139,7 @@ E::PropertyBehaviourType SignalPropertyManager::getBehaviour(const AppSignal& si
 	return getBehaviour(signal.signalType(), signal.inOutType(), propertyIndex);
 }
 
-E::PropertyBehaviourType SignalPropertyManager::getBehaviour(E::SignalType type, E::SignalInOutType directionType, const int propertyIndex) const
+E::PropertyBehaviourType AppSignalPropertyManager::getBehaviour(E::SignalType type, E::SignalInOutType directionType, const int propertyIndex) const
 {
 	int behaviourIndex = m_propertyIndex2BehaviourIndexMap.value(propertyIndex, -1);
 	if (behaviourIndex == -1)
@@ -167,7 +167,7 @@ E::PropertyBehaviourType SignalPropertyManager::getBehaviour(E::SignalType type,
 	return defaultBehaviour;
 }
 
-bool SignalPropertyManager::dependsOnPrecision(const int propertyIndex) const
+bool AppSignalPropertyManager::dependsOnPrecision(const int propertyIndex) const
 {
 	if (isNotCorrect(propertyIndex))
 	{
@@ -184,7 +184,7 @@ bool SignalPropertyManager::dependsOnPrecision(const int propertyIndex) const
 	return m_propertyBehaviorDescription[static_cast<size_t>(behaviourIndex)].dependsOnPrecision;
 }
 
-bool SignalPropertyManager::isHiddenFor(E::SignalType type, const int propertyIndex, bool isExpert) const
+bool AppSignalPropertyManager::isHiddenFor(E::SignalType type, const int propertyIndex, bool isExpert) const
 {
 	auto inOutTypeEnum = QMetaEnum::fromType<E::SignalInOutType>();
 	for (int i = 0; i < IN_OUT_TYPE_COUNT; i++)
@@ -199,7 +199,7 @@ bool SignalPropertyManager::isHiddenFor(E::SignalType type, const int propertyIn
 	return true;
 }
 
-void SignalPropertyManager::detectNewProperties(const AppSignal &signal)
+void AppSignalPropertyManager::detectNewProperties(const AppSignal &signal)
 {
 	PropertyObject propObject;
 
@@ -288,7 +288,7 @@ void SignalPropertyManager::detectNewProperties(const AppSignal &signal)
 
 // Loads properties that uninitialized signal contains
 //
-void SignalPropertyManager::loadNotSpecificProperties()
+void AppSignalPropertyManager::loadNotSpecificProperties()
 {
 	AppSignal signal;
 	AppSignalProperties signalProperties(signal, true);
@@ -307,7 +307,7 @@ void SignalPropertyManager::loadNotSpecificProperties()
 	}
 }
 
-void SignalPropertyManager::reloadPropertyBehaviour()
+void AppSignalPropertyManager::reloadPropertyBehaviour()
 {
 	if (m_dbController == nullptr)
 	{
@@ -427,7 +427,7 @@ void SignalPropertyManager::reloadPropertyBehaviour()
 	}
 }
 
-void SignalPropertyManager::clear()
+void AppSignalPropertyManager::clear()
 {
 	if (m_propertyDescription.size() > m_basicPropertyDescription.size())
 	{
@@ -444,7 +444,7 @@ void SignalPropertyManager::clear()
 	m_propertyName2IndexMap.clear();
 }
 
-void SignalPropertyManager::init()
+void AppSignalPropertyManager::init()
 {
 	clear();
 	for (size_t i = 0; i < m_propertyDescription.size(); i++)
@@ -454,7 +454,7 @@ void SignalPropertyManager::init()
 	loadNotSpecificProperties();
 }
 
-bool SignalPropertyManager::isNotCorrect(int propertyIndex) const
+bool AppSignalPropertyManager::isNotCorrect(int propertyIndex) const
 {
 	if (propertyIndex < 0 || propertyIndex >= static_cast<int>(m_propertyDescription.size()))
 	{
@@ -463,18 +463,18 @@ bool SignalPropertyManager::isNotCorrect(int propertyIndex) const
 	return false;
 }
 
-QString SignalPropertyManager::typeName(E::SignalType type, E::SignalInOutType inOutType)
+QString AppSignalPropertyManager::typeName(E::SignalType type, E::SignalInOutType inOutType)
 {
 	return E::valueToString<E::SignalType>(type) + E::valueToString<E::SignalInOutType>(inOutType);
 }
 
-QString SignalPropertyManager::typeName(int typeIndex, int inOutTypeIndex)
+QString AppSignalPropertyManager::typeName(int typeIndex, int inOutTypeIndex)
 {
 	return typeName(IntToEnum<E::SignalType>(QMetaEnum::fromType<E::SignalType>().value(typeIndex)),
 					IntToEnum<E::SignalInOutType>(QMetaEnum::fromType<E::SignalInOutType>().value(inOutTypeIndex)));
 }
 
-TuningValue SignalPropertyManager::variant2TuningValue(const QVariant& variant, TuningValueType type)
+TuningValue AppSignalPropertyManager::variant2TuningValue(const QVariant& variant, TuningValueType type)
 {
 	TuningValue value;
 	value.setType(type);
@@ -486,21 +486,21 @@ TuningValue SignalPropertyManager::variant2TuningValue(const QVariant& variant, 
 	return value;
 }
 
-bool SignalPropertyManager::isHidden(E::PropertyBehaviourType behaviour, bool isExpert) const
+bool AppSignalPropertyManager::isHidden(E::PropertyBehaviourType behaviour, bool isExpert) const
 {
 	bool hidden = behaviour == E::PropertyBehaviourType::Hide;
 	hidden |= behaviour == E::PropertyBehaviourType::Expert && isExpert == false;
 	return hidden;
 }
 
-bool SignalPropertyManager::isReadOnly(E::PropertyBehaviourType behaviour, bool isExpert) const
+bool AppSignalPropertyManager::isReadOnly(E::PropertyBehaviourType behaviour, bool isExpert) const
 {
 	bool readOnly = behaviour != E::PropertyBehaviourType::Write;
 	readOnly |= behaviour == E::PropertyBehaviourType::Expert && isExpert == false;
 	return readOnly;
 }
 
-void SignalPropertyManager::addNewProperty(const AppSignalPropertyDescription& newProperty)
+void AppSignalPropertyManager::addNewProperty(const AppSignalPropertyDescription& newProperty)
 {
 	if (m_propertyName2IndexMap.contains(newProperty.name))
 	{
@@ -528,7 +528,7 @@ void SignalPropertyManager::addNewProperty(const AppSignalPropertyDescription& n
 	}
 }
 
-void SignalPropertyManager::trimm(QStringList& stringList)
+void AppSignalPropertyManager::trimm(QStringList& stringList)
 {
 	for (QString& string : stringList)
 	{
@@ -537,9 +537,9 @@ void SignalPropertyManager::trimm(QStringList& stringList)
 }
 
 
-SignalSetProvider* SignalSetProvider::m_instance = nullptr;
+AppSignalSetProvider* AppSignalSetProvider::m_instance = nullptr;
 
-SignalSetProvider::SignalSetProvider(DbController* dbController, QWidget* parentWidget) :
+AppSignalSetProvider::AppSignalSetProvider(DbController* dbController, QWidget* parentWidget) :
 	QObject(parentWidget),
 	m_dbController(dbController),
 	m_propertyManager(dbController, parentWidget),
@@ -548,10 +548,10 @@ SignalSetProvider::SignalSetProvider(DbController* dbController, QWidget* parent
 	assert(m_instance == nullptr);
 	m_instance = this;
 
-	connect(this, &SignalSetProvider::signalPropertiesChanged, &m_propertyManager, &SignalPropertyManager::detectNewProperties);
+	connect(this, &AppSignalSetProvider::signalPropertiesChanged, &m_propertyManager, &AppSignalPropertyManager::detectNewProperties);
 }
 
-SignalSetProvider::~SignalSetProvider()
+AppSignalSetProvider::~AppSignalSetProvider()
 {
 	if (m_lazyLoadSignalsTimer != nullptr)
 	{
@@ -560,19 +560,19 @@ SignalSetProvider::~SignalSetProvider()
 	}
 }
 
-SignalSetProvider* SignalSetProvider::getInstance()
+AppSignalSetProvider* AppSignalSetProvider::getInstance()
 {
 	assert(m_instance != nullptr);
 	return m_instance;
 }
 
-void SignalSetProvider::setMiddleVisibleSignalIndex(int signalIndex)
+void AppSignalSetProvider::setMiddleVisibleSignalIndex(int signalIndex)
 {
 	m_middleVisibleSignalIndex = signalIndex;
 }
 
 
-AppSignal* SignalSetProvider::getSignalByStrID(const QString signalStrID)
+AppSignal* AppSignalSetProvider::getSignalByStrID(const QString signalStrID)
 {
 	if (m_signalSet.ID2IndexMapIsEmpty())
 	{
@@ -581,7 +581,7 @@ AppSignal* SignalSetProvider::getSignalByStrID(const QString signalStrID)
 	return m_signalSet.getSignal(signalStrID);
 }
 
-const AppSignal& SignalSetProvider::getLoadedSignal(int index)
+const AppSignal& AppSignalSetProvider::getLoadedSignal(int index)
 {
 	if (m_signalSet[index].isLoaded() == false)
 	{
@@ -596,7 +596,7 @@ const AppSignal& SignalSetProvider::getLoadedSignal(int index)
 	return m_signalSet[index];
 }
 
-AppSignalParam SignalSetProvider::getAppSignalParam(int index)
+AppSignalParam AppSignalSetProvider::getAppSignalParam(int index)
 {
 	AppSignal signal = getLoadedSignal(index);
 	signal.cacheSpecPropValues();
@@ -607,7 +607,7 @@ AppSignalParam SignalSetProvider::getAppSignalParam(int index)
 	return param;
 }
 
-AppSignalParam SignalSetProvider::getAppSignalParam(QString appSignalId)
+AppSignalParam AppSignalSetProvider::getAppSignalParam(QString appSignalId)
 {
 	AppSignalParam param;
 
@@ -628,7 +628,7 @@ AppSignalParam SignalSetProvider::getAppSignalParam(QString appSignalId)
 	return getAppSignalParam(m_signalSet.keyIndex(signal->ID()));
 }
 
-QVector<int> SignalSetProvider::getSameChannelSignals(int index)
+QVector<int> AppSignalSetProvider::getSameChannelSignals(int index)
 {
 	QVector<int> sameChannelSignalRows;
 	if (m_signalSet[index].signalGroupID() != 0)
@@ -646,7 +646,7 @@ QVector<int> SignalSetProvider::getSameChannelSignals(int index)
 	return sameChannelSignalRows;
 }
 
-void SignalSetProvider::loadUsers()
+void AppSignalSetProvider::loadUsers()
 {
 	std::vector<DbUser> list;
 	m_dbController->getUserList(&list, m_parentWidget);
@@ -658,7 +658,7 @@ void SignalSetProvider::loadUsers()
 	}
 }
 
-bool SignalSetProvider::isEditableSignal(const AppSignal& signal) const
+bool AppSignalSetProvider::isEditableSignal(const AppSignal& signal) const
 {
 	if (!signal.checkedOut() || (signal.userID() == m_dbController->currentUser().userId() || m_dbController->currentUser().isAdminstrator()))
 	{
@@ -667,7 +667,7 @@ bool SignalSetProvider::isEditableSignal(const AppSignal& signal) const
 	return false;
 }
 
-bool SignalSetProvider::isCheckinableSignalForMe(const AppSignal& signal) const
+bool AppSignalSetProvider::isCheckinableSignalForMe(const AppSignal& signal) const
 {
 	if (signal.checkedOut() && (signal.userID() == m_dbController->currentUser().userId() || m_dbController->currentUser().isAdminstrator()))
 	{
@@ -676,7 +676,7 @@ bool SignalSetProvider::isCheckinableSignalForMe(const AppSignal& signal) const
 	return false;
 }
 
-QString SignalSetProvider::getUserStr(int userId) const
+QString AppSignalSetProvider::getUserStr(int userId) const
 {
 	if (m_usernameMap.contains(userId))
 	{
@@ -688,7 +688,7 @@ QString SignalSetProvider::getUserStr(int userId) const
 	}
 }
 
-bool SignalSetProvider::checkoutSignal(int index)
+bool AppSignalSetProvider::checkoutSignal(int index)
 {
 	AppSignal& s = m_signalSet[index];
 	if (s.checkedOut())
@@ -736,7 +736,7 @@ bool SignalSetProvider::checkoutSignal(int index)
 
 // Converts ObjectState to human readable message
 //
-QString SignalSetProvider::errorMessage(const ObjectState& state)
+QString AppSignalSetProvider::errorMessage(const ObjectState& state)
 {
 	switch(state.errCode)
 	{
@@ -752,7 +752,7 @@ QString SignalSetProvider::errorMessage(const ObjectState& state)
 
 // Throws error signal with human readable message for single ObjectState
 //
-void SignalSetProvider::showError(const ObjectState& state)
+void AppSignalSetProvider::showError(const ObjectState& state)
 {
 	if (state.errCode != ERR_SIGNAL_OK)
 	{
@@ -766,7 +766,7 @@ void SignalSetProvider::showError(const ObjectState& state)
 
 // Throws single error signal with human readable message for set of ObjectState
 //
-void SignalSetProvider::showErrors(const QVector<ObjectState>& states)
+void AppSignalSetProvider::showErrors(const QVector<ObjectState>& states)
 {
 	QString message;
 
@@ -790,7 +790,7 @@ void SignalSetProvider::showErrors(const QVector<ObjectState>& states)
 }
 
 
-void SignalSetProvider::initLazyLoadSignals()
+void AppSignalSetProvider::initLazyLoadSignals()
 {
 	loadUsers();
 
@@ -811,13 +811,13 @@ void SignalSetProvider::initLazyLoadSignals()
 	if (m_lazyLoadSignalsTimer == nullptr)
 	{
 		m_lazyLoadSignalsTimer = new QTimer(this);
-		connect(m_lazyLoadSignalsTimer, &QTimer::timeout, this, &SignalSetProvider::loadNextSignalsPortion);
+		connect(m_lazyLoadSignalsTimer, &QTimer::timeout, this, &AppSignalSetProvider::loadNextSignalsPortion);
 	}
 
 	m_lazyLoadSignalsTimer->start(100);
 }
 
-void SignalSetProvider::stopLoadingSignals()
+void AppSignalSetProvider::stopLoadingSignals()
 {
 	if (m_partialLoading == true)
 	{
@@ -826,7 +826,7 @@ void SignalSetProvider::stopLoadingSignals()
 	}
 }
 
-void SignalSetProvider::finishLoadingSignals()
+void AppSignalSetProvider::finishLoadingSignals()
 {
 	if (m_partialLoading == true)
 	{
@@ -861,7 +861,7 @@ void SignalSetProvider::finishLoadingSignals()
 	m_partialLoading = false;
 }
 
-void SignalSetProvider::loadNextSignalsPortion()
+void AppSignalSetProvider::loadNextSignalsPortion()
 {
 	if (m_partialLoading == false)
 	{
@@ -926,7 +926,7 @@ void SignalSetProvider::loadNextSignalsPortion()
 	}
 }
 
-bool SignalSetProvider::checkoutSignal(int index, QString& message)
+bool AppSignalSetProvider::checkoutSignal(int index, QString& message)
 {
 	AppSignal& s = m_signalSet[index];
 	if (s.checkedOut())
@@ -979,7 +979,7 @@ bool SignalSetProvider::checkoutSignal(int index, QString& message)
 }
 
 
-bool SignalSetProvider::undoSignal(int id)
+bool AppSignalSetProvider::undoSignal(int id)
 {
 	const AppSignal& s = m_signalSet[m_signalSet.keyIndex(id)];
 	if (!s.checkedOut())
@@ -1021,7 +1021,7 @@ bool SignalSetProvider::undoSignal(int id)
 	return true;
 }
 
-void SignalSetProvider::deleteSignal(int signalID)
+void AppSignalSetProvider::deleteSignal(int signalID)
 {
 	ObjectState state;
 	dbController()->deleteSignal(signalID, &state, m_parentWidget);
@@ -1031,12 +1031,12 @@ void SignalSetProvider::deleteSignal(int signalID)
 	}
 }
 
-void SignalSetProvider::addSignal(AppSignal& signal)
+void AppSignalSetProvider::addSignal(AppSignal& signal)
 {
 	m_signalSet.replaceOrAppendIfNotExists(signal.ID(), signal);
 }
 
-void SignalSetProvider::deleteSignals(const QSet<int>& signalIDs)
+void AppSignalSetProvider::deleteSignals(const QSet<int>& signalIDs)
 {
 	for (const int signalID : signalIDs)
 	{
@@ -1045,7 +1045,7 @@ void SignalSetProvider::deleteSignals(const QSet<int>& signalIDs)
 	loadSignals();
 }
 
-void SignalSetProvider::loadSignalSet(QVector<int> keys)
+void AppSignalSetProvider::loadSignalSet(QVector<int> keys)
 {
 	for (int i = 0; i < keys.count(); i++)
 	{
@@ -1053,7 +1053,7 @@ void SignalSetProvider::loadSignalSet(QVector<int> keys)
 	}
 }
 
-void SignalSetProvider::loadSignal(int signalId)
+void AppSignalSetProvider::loadSignal(int signalId)
 {
 	int index = keyIndex(signalId);
 	if (index == -1)
@@ -1067,7 +1067,7 @@ void SignalSetProvider::loadSignal(int signalId)
 	emit signalPropertiesChanged(getLoadedSignal(index));
 }
 
-void SignalSetProvider::loadSignals()
+void AppSignalSetProvider::loadSignals()
 {
 	if (m_partialLoading == true)
 	{
@@ -1100,7 +1100,7 @@ void SignalSetProvider::loadSignals()
 	emit signalCountChanged();
 }
 
-void SignalSetProvider::saveSignal(AppSignal& signal)
+void AppSignalSetProvider::saveSignal(AppSignal& signal)
 {
 	ObjectState state;
 	trimSignalTextFields(signal);
@@ -1115,7 +1115,7 @@ void SignalSetProvider::saveSignal(AppSignal& signal)
 	loadSignal(signal.ID());
 }
 
-void SignalSetProvider::saveSignals(QVector<AppSignal*> signalVector)
+void AppSignalSetProvider::saveSignals(QVector<AppSignal*> signalVector)
 {
 	QVector<ObjectState> states;
 	for (int i = 0; i < signalVector.count(); i++)
@@ -1131,7 +1131,7 @@ void SignalSetProvider::saveSignals(QVector<AppSignal*> signalVector)
 	showErrors(states);
 }
 
-QVector<int> SignalSetProvider::cloneSignals(const QSet<int>& signalIDs)
+QVector<int> AppSignalSetProvider::cloneSignals(const QSet<int>& signalIDs)
 {
 	QVector<int> resultSignalIDs;
 	m_signalSet.buildID2IndexMap();
@@ -1218,7 +1218,7 @@ QVector<int> SignalSetProvider::cloneSignals(const QSet<int>& signalIDs)
 	return resultSignalIDs;
 }
 
-void SignalSetProvider::clearSignals()
+void AppSignalSetProvider::clearSignals()
 {
 	if (m_signalSet.count() != 0)
 	{
@@ -1228,7 +1228,7 @@ void SignalSetProvider::clearSignals()
 	}
 }
 
-void SignalSetProvider::trimSignalTextFields(AppSignal& signal)
+void AppSignalSetProvider::trimSignalTextFields(AppSignal& signal)
 {
 	signal.setAppSignalID(signal.appSignalID().trimmed());
 	signal.setCustomAppSignalID(signal.customAppSignalID().trimmed());

@@ -64,15 +64,10 @@ SOURCES += \
     ../lib/LogicModulesInfo.cpp \
     ../lib/OutputLog.cpp \
     ../lib/LogicModuleSet.cpp \
-    ../lib/AppSignal.cpp \
-    ../lib/SignalSetProvider.cpp \
     ../lib/SoftwareSettings.cpp \
-    ../lib/TuningValue.cpp \
-	../lib/AppSignalProperties.cpp \
     ../lib/DataSource.cpp \
     ../lib/CsvFile.cpp \
     ../lib/Tuning/TuningFilter.cpp \
-    ../lib/AppSignalParam.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/LmDescription.cpp \
     ../lib/Tuning/TuningSignalManager.cpp \
@@ -87,6 +82,8 @@ SOURCES += \
 	../Metrology/UnitsConvertor.cpp \
 	../Metrology/UnitsConvertorTable.cpp \
     Builder.cpp \
+	AppSignalProperties.cpp \
+	AppSignalSetProvider.cpp \
     ConnectionStorage.cpp \
     IssueLogger.cpp \
 	DbMetrologyConnection.cpp \
@@ -135,16 +132,10 @@ HEADERS += \
     ../lib/LogicModulesInfo.h \
     ../lib/OutputLog.h \
     ../lib/LogicModuleSet.h \
-	../CommonLib/PropertyObject.h \
-    ../lib/AppSignal.h \
-    ../lib/SignalSetProvider.h \
     ../lib/SoftwareSettings.h \
-    ../lib/TuningValue.h \
-	../lib/AppSignalProperties.h \
     ../lib/DataSource.h \
     ../lib/CsvFile.h \
     ../lib/Tuning/TuningFilter.h \
-    ../lib/AppSignalParam.h \
     ../lib/BuildInfo.h \
     ../lib/LmDescription.h \
     ../lib/Tuning/TuningSignalManager.h \
@@ -152,6 +143,7 @@ HEADERS += \
 	../lib/Tuning/TuningSignalState.h \
 	../lib/Times.h \
 	../lib/ComparatorSet.h \
+	../CommonLib/PropertyObject.h \
 	../TuningService/TuningSource.h \
 	../TuningService/TuningDataStorage.h \
 	../Metrology/MetrologySignal.h \
@@ -159,6 +151,8 @@ HEADERS += \
 	../Metrology/UnitsConvertor.h \
 	../Metrology/UnitsConvertorTable.h \
 	Builder.h \
+	AppSignalProperties.h \
+	AppSignalSetProvider.h \
     ConnectionStorage.h \
     Loopbacks.h \
     SignalsHeap.h \
@@ -202,7 +196,6 @@ unix {
     target.path = /usr/lib
     INSTALLS += target
 }
-
 
 # protobuf
 #

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QtGlobal>
 #include <QDateTime>
 #include <memory>
 #include <set>
@@ -9,10 +8,8 @@
 #include "../UtilsLib/Queue.h"
 #include "../CommonLib/Types.h"
 #include "../OnlineLib/SimpleAppSignalState.h"
-
-#include "TimeStamp.h"
-#include "Tuning/TuningSignalState.h"
-#include "Times.h"
+#include "../lib/TimeStamp.h"
+#include "../lib/Times.h"
 #include "AppSignal.h"
 
 struct AppSignalParamMimeType

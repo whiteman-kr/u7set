@@ -1,12 +1,11 @@
-#ifndef SIMOVERRIDESIGNALS_H
-#define SIMOVERRIDESIGNALS_H
+#pragma once
 
 #include <optional>
 #include <QObject>
 #include <QReadWriteLock>
 #include <array>
 #include "../CommonLib/Types.h"
-#include "../lib/AppSignal.h"
+#include "../AppSignalLib/AppSignal.h"
 #include "SimScopedLog.h"
 
 
@@ -216,5 +215,3 @@ R"+++((function(lastOverrideValue, workcycle)
 	};
 
 }
-
-#endif // SIMOVERRIDESIGNALS_H

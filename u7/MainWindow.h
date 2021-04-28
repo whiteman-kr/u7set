@@ -14,7 +14,7 @@ class UploadTabPage;
 class SimulatorTabPage;
 class TestsTabPage;
 class DialogShortcuts;
-class SignalSetProvider;
+class AppSignalSetProvider;
 class ProjectDiffGenerator;
 
 namespace Ui {
@@ -154,7 +154,7 @@ private:
 	TestsTabPage* m_testsTabPage = nullptr;
 
 	DbController* m_dbController = nullptr;
-	SignalSetProvider* m_signalSetProvider = nullptr;
+	AppSignalSetProvider* m_signalSetProvider = nullptr;
 
 	DialogShortcuts* m_dialogShortcuts = nullptr;
 

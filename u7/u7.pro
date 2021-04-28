@@ -81,7 +81,6 @@ HEADERS  += \
 	../lib/Factory.h \
 	../lib/CUtils.h \
 	../lib/OrderedHash.h \
-	../CommonLib/PropertyObject.h \
 	../lib/PropertyEditor.h \
 	../lib/PropertyEditorDialog.h \
 	../lib/DebugInstCounter.h \
@@ -96,7 +95,6 @@ HEADERS  += \
 	../lib/QScintillaLexers/LexerJavaScript.h \
 	../lib/QScintillaLexers/LexerXML.h \
 	../lib/PropertyTable.h \
-	../lib/SignalSetProvider.h \
 	../Metrology/MetrologyConnection.h \
 	DlgMetrologyConnection.h \
 	CentralWidget.h \
@@ -221,7 +219,6 @@ SOURCES +=\
 	../lib/QScintillaLexers/LexerJavaScript.cpp \
 	../lib/QScintillaLexers/LexerXML.cpp \
 	../lib/PropertyTable.cpp \
-	../lib/SignalSetProvider.cpp \
 	../Metrology/MetrologyConnection.cpp \
 	DlgMetrologyConnection.cpp \
 	CentralWidget.cpp \
@@ -528,3 +525,7 @@ LIBS += -lHardwareLib
 # CommonLib
 #
 LIBS += -lCommonLib
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib

@@ -1,9 +1,9 @@
-#include "ArchFile.h"
+#include "../lib/ConstStrings.h"
 
+#include "ArchFile.h"
 #include "ArchWriterThread.h"
 #include "BinSearch.h"
 #include "ArchRequest.h"
-#include "../lib/ConstStrings.h"
 
 // -----------------------------------------------------------------------------------------------------------------------
 //

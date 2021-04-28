@@ -1,9 +1,7 @@
-#ifndef TUNINGLOG_H
-#define TUNINGLOG_H
+#pragma once
 
 #include "../../UtilsLib/LogFile.h"
-
-#include "../AppSignalParam.h"
+#include "../../AppSignalLib/AppSignalParam.h"
 
 namespace TuningLog
 {
@@ -21,5 +19,4 @@ namespace TuningLog
 	};
 }
 
-#endif // TUNINGLOG_H
 

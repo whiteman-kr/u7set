@@ -1,7 +1,6 @@
-#ifndef SIGNALBASE_H
-#define SIGNALBASE_H
+#pragma once
 
-#include "../../lib/AppSignal.h"
+#include "../../AppSignalLib/AppSignal.h"
 
 #include "BuildOption.h"
 
@@ -109,5 +108,3 @@ private:
 };
 
 // ==============================================================================================
-
-#endif // SIGNALBASE_H

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/AppSignal.h"
+#include "../AppSignalLib/AppSignal.h"
 #include "../VFrame30/Bus.h"
 
 #include "BuildResultWriter.h"
@@ -11,7 +11,7 @@ namespace Builder
 {
 	typedef std::shared_ptr<Hardware::DeviceModule> DeviceModuleShared;
 
-	class SignalSet : public QObject, public AppSignalSet
+	class SignalSet : public QObject, public ::AppSignalSet
 	{
 		Q_OBJECT
 

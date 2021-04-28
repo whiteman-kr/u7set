@@ -33,12 +33,9 @@ unix {
 
 SOURCES += \
 	../lib/DataSource.cpp \
-	../lib/AppSignal.cpp \
     ../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
-	../lib/AppSignalParam.cpp \
 	../lib/Times.cpp \
-    ../lib/TuningValue.cpp \
 	AppDataService.cpp \
 	AppDataProcessingThread.cpp \
 	AppDataSource.cpp \
@@ -54,15 +51,11 @@ HEADERS += \
 	Stable.h \
 	../lib/ConstStrings.h \
     ../lib/DataSource.h \
-	../lib/AppSignal.h \
     ../lib/CUtils.h \
-	../CommonLib/PropertyObject.h \
     ../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
-	../lib/AppSignalParam.h \
     ../lib/TimeStamp.h \
     ../lib/Times.h \
-    ../lib/TuningValue.h \
 	AppDataService.h \
 	AppDataProcessingThread.h \
 	AppDataSource.h \
@@ -119,3 +112,7 @@ LIBS += -lUtilsLib
 # CommonLib
 #
 LIBS += -lCommonLib
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib

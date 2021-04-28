@@ -1,7 +1,7 @@
 #include "../CommonLib/PropertyObject.h"
+#include "../AppSignalLib/TuningValue.h"
 #include "../lib/PropertyEditor.h"
 #include "PropertyTable.h"
-#include "TuningValue.h"
 
 #include "Stable.h"
 

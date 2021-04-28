@@ -10,7 +10,6 @@
 #include "../OnlineLib/CircularLogger.h"
 #include "../CommonLib/Types.h"
 #include "../UtilsLib/Queue.h"
-#include "../lib/AppSignalParam.h"
 #include "ArchRequest.h"
 #include "ArchMaintenance.h"
 

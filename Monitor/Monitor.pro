@@ -79,8 +79,6 @@ SOURCES += main.cpp \
     MonitorSchemaWidget.cpp \
     MonitorConfigController.cpp \
     TcpSignalClient.cpp \
-    ../lib/AppSignal.cpp \
-	../lib/AppSignalParam.cpp \
     ../lib/AppSignalManager.cpp \
     Statistics.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
@@ -99,10 +97,8 @@ SOURCES += main.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
     ../lib/Tuning/TuningTcpClient.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
-    ../lib/TuningValue.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     ../lib/Times.cpp \
-	../lib/AppSignalProperties.cpp \
     Trend/RtTrendTcpClient.cpp \
     Trend/ArchiveTrendTcpClient.cpp \
     MonitorTuningTcpClient.cpp \
@@ -138,9 +134,7 @@ HEADERS  += \
     MonitorSchemaWidget.h \
     MonitorConfigController.h \
     TcpSignalClient.h \
-    ../lib/AppSignal.h \
     ../CommonLib/PropertyObject.h \
-	../lib/AppSignalParam.h \
     ../lib/AppSignalManager.h \
     Statistics.h \
     ../lib/Ui/DialogSignalInfo.h \
@@ -158,10 +152,8 @@ HEADERS  += \
     MonitorSchemaManager.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/Tuning/TuningTcpClient.h \
-    ../lib/TuningValue.h \
     ../lib/Tuning/TuningSourceState.h \
     ../lib/Times.h \
-	../lib/AppSignalProperties.h \
     Trend/RtTrendTcpClient.h \
     Trend/ArchiveTrendTcpClient.h \
     MonitorTuningTcpClient.h \
@@ -252,3 +244,7 @@ LIBS += -lUtilsLib
 # CommonLib
 #
 LIBS += -lCommonLib
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib

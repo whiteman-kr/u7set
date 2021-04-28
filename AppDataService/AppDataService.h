@@ -1,11 +1,10 @@
 #pragma once
 
 #include "../ServiceLib/Service.h"
-#include "../lib/DataSource.h"
-#include "../lib/AppSignal.h"
 #include "../OnlineLib/CfgServerLoader.h"
-#include "../lib/SoftwareSettings.h"
 #include "../UtilsLib/Queue.h"
+#include "../lib/SoftwareSettings.h"
+#include "../lib/DataSource.h"
 
 #include "AppDataReceiver.h"
 #include "TcpAppDataServer.h"

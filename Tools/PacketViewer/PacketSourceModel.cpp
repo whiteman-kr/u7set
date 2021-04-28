@@ -765,7 +765,7 @@ void PacketSourceModel::initDataSources(QHash<quint32, std::shared_ptr<DataSourc
 			return;
 		}
 		QStringList propertyList = QStringList() << "RegIP1" << "RegIP2";
-		for (QString prop : propertyList)
+		for (QString& prop : propertyList)
 		{
 			if (currentModule->propertyValue(prop).isValid())
 			{

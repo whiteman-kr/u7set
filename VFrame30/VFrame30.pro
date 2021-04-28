@@ -125,7 +125,7 @@ HEADERS += \
     ../CommonLib/PropertyObject.h \
     ../lib/AppSignalManager.h \
     ../lib/Factory.h \
-    ../lib/AppSignalParam.h \
+    ../AppSignalLib/AppSignalParam.h \
     SchemaItemBus.h \
     Bus.h \
     ClientSchemaWidget.h \
@@ -138,8 +138,7 @@ HEADERS += \
     ../lib/TuningValue.h \
     TuningController.h \
     AppSignalController.h \
-    ../lib/AppSignal.h \
-	../lib/AppSignalProperties.h \
+    ../AppSignalLib/AppSignal.h \
     TuningSchema.h \
     SchemaItemImage.h \
     SchemaItemImageValue.h \

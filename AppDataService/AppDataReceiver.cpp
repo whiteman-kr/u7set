@@ -1,6 +1,4 @@
 #include "AppDataReceiver.h"
-#include "../lib/AppSignalParam.h"
-#include "../UtilsLib/WUtils.h"
 
 // -------------------------------------------------------------------------------
 //

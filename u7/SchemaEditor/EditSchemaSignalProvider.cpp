@@ -1,5 +1,5 @@
 #include "EditSchemaSignalProvider.h"
-#include "../../lib/SignalSetProvider.h"
+#include "../../Builder/AppSignalSetProvider.h"
 
 //
 //
@@ -7,7 +7,7 @@
 //
 //
 
-EditSchemaAppSignalProvider::EditSchemaAppSignalProvider(SignalSetProvider* signalSetProvider) :
+EditSchemaAppSignalProvider::EditSchemaAppSignalProvider(AppSignalSetProvider* signalSetProvider) :
 	m_signalSetProvider(signalSetProvider)
 {
 	Q_ASSERT(signalSetProvider);
@@ -191,7 +191,7 @@ std::vector<std::shared_ptr<Comparator>> EditSchemaAppSignalProvider::setpointsB
 	return {};
 }
 
-EditSchemaTuningSignalProvider::EditSchemaTuningSignalProvider(SignalSetProvider* signalSetProvider) :
+EditSchemaTuningSignalProvider::EditSchemaTuningSignalProvider(AppSignalSetProvider* signalSetProvider) :
 	m_signalSetProvider(signalSetProvider)
 {
 	Q_ASSERT(m_signalSetProvider);

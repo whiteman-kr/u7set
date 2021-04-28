@@ -1,11 +1,10 @@
-#ifndef DIALOGSIGNALINFO_H
-#define DIALOGSIGNALINFO_H
+#pragma once
 
 #include <optional>
 #include "../VFrame30/TuningController.h"
 #include "../lib/AppSignalManager.h"
-#include "../lib/AppSignal.h"
 #include "../lib/Ui/DragDropHelper.h"
+#include "../../AppSignalLib/AppSignal.h"
 
 namespace Ui {
 	class DialogSignalInfo;
@@ -200,7 +199,6 @@ private:
 
 };
 
-
 class QLabelAppSignalDragAndDrop : public QLabel
 {
 public:
@@ -217,5 +215,3 @@ private:
 	AppSignalParam m_appSignalParam;
 	DragDropHelper m_dragDrop;
 };
-
-#endif // DIALOGSIGNALINFO_H

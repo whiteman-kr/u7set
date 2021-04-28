@@ -10,7 +10,7 @@
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/DataProtocols.h"
 #include "../OnlineLib/SocketIO.h"
-#include "AppSignalParam.h"
+#include "Times.h"
 #include "ConstStrings.h"
 
 class DataSource

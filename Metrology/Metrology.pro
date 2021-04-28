@@ -45,12 +45,9 @@ unix {
 }
 
 SOURCES += \
-	../lib/AppSignalParam.cpp \
 	../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
-	../lib/TuningValue.cpp \
-	../lib/AppSignal.cpp \
 	../lib/Ui/DialogAbout.cpp \
 	../lib/ComparatorSet.cpp \
 	DialogCalculator.cpp \
@@ -99,14 +96,10 @@ SOURCES += \
 
 HEADERS  += \
     Stable.h \
-	../lib/AppSignal.h \
 	../lib/OrderedHash.h \
-	../CommonLib/PropertyObject.h \
-	../lib/AppSignalParam.h \
 	../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
 	../lib/Tuning/TuningSignalState.h \
-	../lib/TuningValue.h \
 	../lib/Ui/DialogAbout.h \
 	../lib/ComparatorSet.h \
 	DialogCalculator.h \
@@ -199,6 +192,10 @@ LIBS += -lHardwareLib
 # CommonLib
 #
 LIBS += -lCommonLib
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
 
 # protobuf
 #

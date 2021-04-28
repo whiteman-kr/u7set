@@ -2,13 +2,13 @@
 
 #include "../lib/OrderedHash.h"
 #include "../HardwareLib/DeviceObject.h"
+#include "../HardwareLib/Connection.h"
 #include "../UtilsLib/Address16.h"
-#include "../lib/AppSignal.h"
+#include "../AppSignalLib/AppSignal.h"
 
 #include "RawDataDescription.h"
 #include "ModulesRawData.h"
 #include "ConnectionStorage.h"
-#include "../HardwareLib/Connection.h"
 
 class LmDescription;
 class OutputLog;

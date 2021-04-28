@@ -27,7 +27,7 @@ MetrologyConnectionTable::~MetrologyConnectionTable()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MetrologyConnectionTable::setSignalSetProvider(SignalSetProvider* signalSetProvider)
+void MetrologyConnectionTable::setSignalSetProvider(AppSignalSetProvider* signalSetProvider)
 {
 	if (signalSetProvider == nullptr)
 	{
@@ -255,7 +255,7 @@ QString MetrologyConnectionTable::text(int row, int column, const Metrology::Con
 // -------------------------------------------------------------------------------------------------------------------
 // class DialogMetrologyConnectionItem
 
-DialogMetrologyConnectionItem::DialogMetrologyConnectionItem(SignalSetProvider* signalSetProvider, QWidget* parent) :
+DialogMetrologyConnectionItem::DialogMetrologyConnectionItem(AppSignalSetProvider* signalSetProvider, QWidget* parent) :
 	QDialog(parent),
 	m_signalSetProvider(signalSetProvider)
 {
@@ -643,7 +643,7 @@ void DialogMetrologyConnectionItem::onOk()
 // -------------------------------------------------------------------------------------------------------------------
 // class DialogMetrologyConnection
 
-DialogMetrologyConnection::DialogMetrologyConnection(SignalSetProvider* signalSetProvider, QWidget* parent) :
+DialogMetrologyConnection::DialogMetrologyConnection(AppSignalSetProvider* signalSetProvider, QWidget* parent) :
 	QDialog(parent),
 	m_signalSetProvider(signalSetProvider)
 {

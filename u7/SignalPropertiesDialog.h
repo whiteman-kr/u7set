@@ -1,7 +1,7 @@
 #ifndef SIGNALPROPERTIESDIALOG_H
 #define SIGNALPROPERTIESDIALOG_H
 
-#include "../lib/AppSignal.h"
+#include "../AppSignalLib/AppSignal.h"
 #include "IdePropertyEditor.h"
 
 class QtProperty;

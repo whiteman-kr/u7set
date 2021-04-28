@@ -1,6 +1,6 @@
 #include "ProjectDiffGenerator.h"
 
-#include "../lib/AppSignalProperties.h"
+#include "../Builder/AppSignalProperties.h"
 #include "../lib/PropertyEditor.h"
 #include "../HardwareLib/Connection.h"
 #include "../VFrame30/DrawParam.h"

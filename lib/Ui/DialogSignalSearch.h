@@ -1,7 +1,6 @@
-#ifndef DIALOGSIGNALSEARCH_H
-#define DIALOGSIGNALSEARCH_H
+#pragma once
 
-#include "../lib/AppSignalParam.h"
+#include "../../AppSignalLib/AppSignalParam.h"
 #include "../lib/IAppSignalManager.h"
 #include "DragDropHelper.h"
 
@@ -155,5 +154,3 @@ private:
 	std::vector<AppSignalParam> m_signals;
 
 };
-
-#endif // DIALOGSIGNALSEARCH_H

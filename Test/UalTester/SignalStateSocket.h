@@ -1,12 +1,11 @@
-#ifndef SIGNALSOCKET_H
-#define SIGNALSOCKET_H
+#pragma once
 
 #include <assert.h>
 
 #include "../../OnlineLib/Tcp.h"
 #include "../../OnlineLib/SocketIO.h"
 #include "../../UtilsLib/Hash.h"
-#include "../../lib/AppSignalParam.h"
+#include "../../AppSignalLib/AppSignalParam.h"
 
 #include "../../Proto/network.pb.h"
 
@@ -69,5 +68,3 @@ public slots:
 };
 
 // ==============================================================================================
-
-#endif // SIGNALSOCKET_H

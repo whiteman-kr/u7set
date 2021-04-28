@@ -1,6 +1,5 @@
 #include "AppDataServiceCfgGenerator.h"
 #include "Builder.h"
-#include "../lib/AppSignalProperties.h"
 
 class DataSource;
 

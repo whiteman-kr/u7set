@@ -1,6 +1,6 @@
 #include "SchemaTabPageEx.h"
 #include "../lib/StandardColors.h"
-#include "../lib/SignalSetProvider.h"
+#include "../Builder/AppSignalSetProvider.h"
 #include "CreateSchemaDialog.h"
 #include "CheckInDialog.h"
 #include "Settings.h"
@@ -2048,7 +2048,7 @@ int SchemaFileViewEx::parentFileId() const
 // SchemasTabPage
 //
 //
-SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, SignalSetProvider* signalSetProvider, QWidget* parent) :
+SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, AppSignalSetProvider* signalSetProvider, QWidget* parent) :
 	MainTabPage(dbc, parent)
 {
 	m_tabWidget = new TabWidgetEx{this};
@@ -2215,7 +2215,7 @@ void SchemasTabPageEx::currentTabChanged(int index)
 // SchemaControlTabPage
 //
 //
-SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db, SignalSetProvider* signalSetProvider) :
+SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db, AppSignalSetProvider* signalSetProvider) :
 	HasDbController(db),
 	m_signalSetProvider(signalSetProvider)
 {
@@ -4903,7 +4903,7 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 										 std::shared_ptr<VFrame30::Schema> schema,
 										 const DbFileInfo& fileInfo,
 										 DbController* dbcontroller,
-										 SignalSetProvider* signalSetProvider) :
+										 AppSignalSetProvider* signalSetProvider) :
 	QMainWindow(nullptr, Qt::WindowType::Widget),	// Always created as widget as from start it's attached to TabWidget, later can be switcher to Qt::Window
 	HasDbController(dbcontroller),
 	m_schemaWidget(nullptr),

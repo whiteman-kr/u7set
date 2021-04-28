@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/AppSignal.h"
+#include "../AppSignalLib/AppSignal.h"
 #include "../lib/AppSignalManager.h"
 #include "../TrendView/TrendSignal.h"
 #include "SimRam.h"

@@ -2,7 +2,7 @@
 #include "../../lib/IAppSignalManager.h"
 #include "../../lib/Tuning/ITuningSignalManager.h"
 
-class SignalSetProvider;
+class AppSignalSetProvider;
 
 //
 //
@@ -13,7 +13,7 @@ class EditSchemaAppSignalProvider final : public IAppSignalManager
 {
 public:
 	EditSchemaAppSignalProvider() = delete;
-	EditSchemaAppSignalProvider(SignalSetProvider* signalSetProvider);
+	EditSchemaAppSignalProvider(AppSignalSetProvider* signalSetProvider);
 
 	// IAppSignalManager implementation
 	//
@@ -45,7 +45,7 @@ public:
 	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override;
 
 private:
-	SignalSetProvider* m_signalSetProvider = nullptr;
+	AppSignalSetProvider* m_signalSetProvider = nullptr;
 };
 
 
@@ -58,7 +58,7 @@ class EditSchemaTuningSignalProvider : public ITuningSignalManager
 {
 public:
 	EditSchemaTuningSignalProvider() = delete;
-	EditSchemaTuningSignalProvider(SignalSetProvider* signalSetProvider);
+	EditSchemaTuningSignalProvider(AppSignalSetProvider* signalSetProvider);
 
 	// ITuningSignalManager implementation
 	//
@@ -77,5 +77,5 @@ public:
 
 
 private:
-	SignalSetProvider* m_signalSetProvider = nullptr;
+	AppSignalSetProvider* m_signalSetProvider = nullptr;
 };

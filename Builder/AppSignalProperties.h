@@ -3,7 +3,7 @@
 #include <memory>
 #include <type_traits>
 
-#include "AppSignal.h"
+#include "../AppSignalLib/AppSignal.h"
 #include "../CommonLib/PropertyObject.h"
 
 struct AppSignalPropertyDescription

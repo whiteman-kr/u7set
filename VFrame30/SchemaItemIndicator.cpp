@@ -1,5 +1,5 @@
 #include "SchemaItemIndicator.h"
-#include "../lib/AppSignalParam.h"
+#include "../AppSignalLib/AppSignalParam.h"
 #include "../lib/Tuning/TuningSignalState.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"

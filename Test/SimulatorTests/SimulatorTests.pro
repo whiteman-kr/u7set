@@ -93,3 +93,8 @@ LIBS += -lUtilsLib
 # HardwareLib
 #
 LIBS += -lHardwareLib
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+

@@ -20,10 +20,11 @@
 #include <QPushButton>
 #include <QDialogButtonBox>
 
-#include "../lib/AppSignal.h"
-#include "../lib/SignalSetProvider.h"
-#include "../lib/StandardColors.h"
+#include "../Builder/AppSignalSetProvider.h"
 #include "../Builder/DbMetrologyConnection.h"
+#include "../AppSignalLib/AppSignal.h"
+#include "../lib/StandardColors.h"
+
 
 // ==============================================================================================
 
@@ -60,7 +61,7 @@ public:
 
 public:
 
-	void setSignalSetProvider(SignalSetProvider* signalSetProvider);
+	void setSignalSetProvider(AppSignalSetProvider* signalSetProvider);
 
 	int	connectionCount() const;
 	Metrology::Connection at(int index) const;
@@ -69,7 +70,7 @@ public:
 
 private:
 
-	SignalSetProvider* m_signalSetProvider = nullptr;
+	AppSignalSetProvider* m_signalSetProvider = nullptr;
 
 	mutable QMutex m_connectionMutex;
 	QVector<Metrology::Connection> m_connectionList;
@@ -91,7 +92,7 @@ class DialogMetrologyConnectionItem : public QDialog
 
 public:
 
-	DialogMetrologyConnectionItem(SignalSetProvider* signalSetProvider, QWidget* parent = nullptr);
+	DialogMetrologyConnectionItem(AppSignalSetProvider* signalSetProvider, QWidget* parent = nullptr);
 	virtual ~DialogMetrologyConnectionItem() override;
 
 public:
@@ -105,7 +106,7 @@ public:
 
 private:
 
-	SignalSetProvider* m_signalSetProvider = nullptr;
+	AppSignalSetProvider* m_signalSetProvider = nullptr;
 
 	bool m_isNewConnection = false;
 
@@ -139,7 +140,7 @@ class DialogMetrologyConnection : public QDialog
 
 public:
 
-	DialogMetrologyConnection(SignalSetProvider* signalSetProvider, QWidget* parent = nullptr);
+	DialogMetrologyConnection(AppSignalSetProvider* signalSetProvider, QWidget* parent = nullptr);
 	virtual ~DialogMetrologyConnection() override;
 
 public:
@@ -167,7 +168,7 @@ private:
 	//
 	const QString m_windowTitle = tr("Metrology connections");
 
-	SignalSetProvider* m_signalSetProvider = nullptr;
+	AppSignalSetProvider* m_signalSetProvider = nullptr;
 
 	QMenu* m_pContextMenu = nullptr;
 

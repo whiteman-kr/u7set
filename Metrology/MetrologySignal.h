@@ -1,8 +1,6 @@
 #pragma once
 
-#include "../lib/AppSignalParam.h"
-#include "../lib/AppSignal.h"
-#include "../lib/AppSignalProperties.h"
+#include "../AppSignalLib/AppSignalParam.h"
 #include "../lib/ComparatorSet.h"
 
 #include "../HardwareLib/DeviceObject.h"

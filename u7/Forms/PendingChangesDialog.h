@@ -4,13 +4,13 @@
 #include <QTreeView>
 #include <QPlainTextEdit>
 #include <QPushButton>
-#include <../../DbLib/DbController.h>
-#include <../../lib/AppSignal.h>
+
+#include "../../DbLib/DbController.h"
+#include "../../AppSignalLib/AppSignal.h"
 
 #ifdef _DEBUG
 	#include <QAbstractItemModelTester>
 #endif
-
 
 using PendingChangesObject = std::variant<DbFileInfo, AppSignal>;
 

@@ -74,12 +74,8 @@ SOURCES += \
     ../lib/SoftwareSettings.cpp \
     ../lib/SoftwareXmlReader.cpp \
 	../lib/AppSignalManager.cpp \
-	../lib/AppSignal.cpp \
-	../lib/AppSignalParam.cpp \
 	../lib/Tuning/TuningSignalManager.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
-	../lib/TuningValue.cpp \
-	../lib/AppSignalProperties.cpp	\
     SimAppDataLanInterface.cpp \
     SimAppDataTransmitter.cpp \
     SimCommandProcessor_LM5_LM6.cpp \
@@ -125,16 +121,11 @@ HEADERS += \
     ../lib/SoftwareXmlReader.h \
 	../Proto/serialization.pb.h \
 	../lib/LmDescription.h \
-	../CommonLib/PropertyObject.h \
 	../lib/AppSignalManager.h \
-	../lib/AppSignal.h \
-	../lib/AppSignalParam.h \
 	../lib/IAppSignalManager.h \
 	../lib/Tuning/ITuningSignalManager.h \
 	../lib/Tuning/TuningSignalManager.h \
 	../lib/Tuning/TuningSignalState.h \
-	../lib/TuningValue.h \
-	../lib/AppSignalProperties.h \
     SimAppDataLanInterface.h \
     SimAppDataTransmitter.h \
     SimCommandProcessor_LM5_LM6.h \

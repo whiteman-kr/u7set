@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/SignalSetProvider.h"
+#include "AppSignalSetProvider.h"
 #include "../DbLib/DbController.h"
 #include "../Metrology/MetrologyConnection.h"
 
@@ -24,7 +24,7 @@ namespace Metrology
 
 		//
 		//
-		void setSignalSetProvider(SignalSetProvider* signalSetProvider);
+		void setSignalSetProvider(AppSignalSetProvider* signalSetProvider);
 
 		//
 		//
@@ -58,7 +58,7 @@ namespace Metrology
 
 	private:
 
-		SignalSetProvider* m_signalSetProvider = nullptr;
+		AppSignalSetProvider* m_signalSetProvider = nullptr;
 
 		QString m_userName;
 		bool m_enableEditBase = true;

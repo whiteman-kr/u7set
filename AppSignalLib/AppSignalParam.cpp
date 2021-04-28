@@ -1,4 +1,4 @@
-#include "../lib/AppSignalParam.h"
+#include "AppSignalParam.h"
 #include "../Proto/serialization.pb.h"
 
 const char* AppSignalParamMimeType::value ="application/x-appsignalparam";		// Data in format ::Proto::AppSiagnalParamSet
