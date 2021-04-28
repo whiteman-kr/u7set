@@ -81,8 +81,6 @@ namespace Tuning
 		static const int TYPE_ANALOG_INT32 = static_cast<int>(E::TuningSignalType::AnalogInt32);
 		static const int TYPE_DISCRETE = static_cast<int>(E::TuningSignalType::Discrete);
 
-		static const int TYPES_COUNT;
-
 	private:
 		void writeBigEndianUint32Bit(quint8* dataPtr, int bitNo, quint32 bitValue);
 		void sortSignalsByAcquiredProperty(QVector<AppSignal *>& tuningSignals);
@@ -90,6 +88,8 @@ namespace Tuning
 
 	protected:
 		QString m_lmEquipmentID;
+
+		const int TYPES_COUNT = 0;
 
 		// tuning flash memory parameters from LmDescription
 		//

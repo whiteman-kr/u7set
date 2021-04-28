@@ -37,11 +37,10 @@ namespace  Tuning
 	const char* TuningData::TUNING_DISCRETE_SIGNALS = "DiscreteSignals";
 	const char* TuningData::TUNING_SIGNALS_COUNT = "Count";
 
-	const int TuningData::TYPES_COUNT = E::metaEnum<E::TuningSignalType>().keyCount();
-
 	QStringList TuningData::m_metadataFields;
 
-	TuningData::TuningData()
+	TuningData::TuningData() :
+		TYPES_COUNT(E::metaEnum<E::TuningSignalType>().keyCount())
 	{
 	}
 
@@ -55,6 +54,7 @@ namespace  Tuning
 						   int tuningDataFramePayloadW,
 						   int tuningDataFrameSizeW) :
 		m_lmEquipmentID(lmID),
+		TYPES_COUNT(E::metaEnum<E::TuningSignalType>().keyCount()),
 		m_tuningFlashFrameCount(tuningFlashFrameCount),
 		m_tuningFlashFramePayloadB(tuningFlashFramePayloadB),
 		m_tuningFlashFrameSizeB(tuningFlashFrameSizeB),

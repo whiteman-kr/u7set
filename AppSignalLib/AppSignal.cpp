@@ -691,9 +691,8 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 	switch(m_signalType)
 	{
 	case E::SignalType::Analog:
-
-		if (m_analogSignalFormat == E::AnalogAppSignalFormat::Float32 ||
-			m_analogSignalFormat == E::AnalogAppSignalFormat::SignedInt32)
+		if (m_analogSignalFormat != E::AnalogAppSignalFormat::Float32 &&
+			m_analogSignalFormat != E::AnalogAppSignalFormat::SignedInt32)
 		{
 			Q_ASSERT(false);
 
