@@ -18,7 +18,7 @@
 #include "../UtilsLib/Crc.h"
 #include "CircularLogger.h"
 #include "SoftwareInfo.h"
-#include "../OnlineLib/HostAddressPort.h"
+#include "../CommonLib/HostAddressPort.h"
 
 
 namespace Tcp

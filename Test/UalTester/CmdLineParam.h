@@ -4,7 +4,7 @@
 #include <QObject>
 
 #include "../../ServiceLib/CommandLineParser.h"
-#include "../../OnlineLib/HostAddressPort.h"
+#include "../../CommonLib/HostAddressPort.h"
 
 #include "TestFile.h"
 

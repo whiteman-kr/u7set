@@ -71,7 +71,6 @@ HEADERS += \
 	CircularLogger.h \
 	SimpleAppSignalState.h \
 	DataProtocols.h \
-	HostAddressPort.h \
 
 SOURCES += \
 	SoftwareInfo.cpp \

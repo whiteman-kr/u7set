@@ -6,7 +6,7 @@
 #include <QAbstractSocket>
 
 #include "../lib/BuildInfo.h"
-#include "../OnlineLib/HostAddressPort.h"
+#include "../CommonLib/HostAddressPort.h"
 
 namespace Socket
 {

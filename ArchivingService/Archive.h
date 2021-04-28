@@ -7,7 +7,7 @@
 #include "../CommonLib/Hash.h"
 #include "../CommonLib/Times.h"
 #include "../CommonLib/Types.h"
-#include "../OnlineLib/HostAddressPort.h"
+#include "../CommonLib/HostAddressPort.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "../UtilsLib/Queue.h"
 #include "../lib/AppSignalParam.h"
