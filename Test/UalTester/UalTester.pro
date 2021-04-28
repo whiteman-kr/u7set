@@ -90,8 +90,8 @@ win32 {
 LIBS += -lOnlineLib
 LIBS += -lServiceLib
 LIBS += -lUtilsLib
-LIBS += -lCommonLib
 LIBS += -lAppSignalLib
+LIBS += -lCommonLib
 
 # Protobuf
 #
