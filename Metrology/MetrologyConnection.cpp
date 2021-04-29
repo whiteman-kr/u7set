@@ -508,9 +508,9 @@ namespace Metrology
 			return -1;
 		}
 
-		auto it = std::find_if(begin(m_connectionList), end(m_connectionList), [=](const Connection& c)
+		auto it = std::find_if(begin(m_connectionList), end(m_connectionList), [=](const Connection& connection)
 		{
-			if (c.metrologySignal(ioType) != pSignal)
+			if (connection.metrologySignal(ioType) != pSignal)
 			{
 				return false;
 			}
@@ -549,14 +549,14 @@ namespace Metrology
 			return -1;
 		}
 
-		auto it = std::find_if(begin(m_connectionList), end(m_connectionList), [=](const Connection& c)
+		auto it = std::find_if(begin(m_connectionList), end(m_connectionList), [=](const Connection& connection)
 		{
-			if (c.type() != connectionType)
+			if (connection.type() != connectionType)
 			{
 				return false;
 			}
 
-			if (c.metrologySignal(ioType) != pSignal)
+			if (connection.metrologySignal(ioType) != pSignal)
 			{
 				return false;
 			}
@@ -591,7 +591,7 @@ namespace Metrology
 
 		QMutexLocker l(&m_connectionMutex);
 
-		for(const Connection& connection: m_connectionList)
+		for(const Metrology::Connection& connection: m_connectionList)
 		{
 			if (connection.type() != connectionType)
 			{
@@ -621,7 +621,7 @@ namespace Metrology
 	{
 		QString dataStr;
 
-		for(Metrology::Connection connection : m_connectionList)
+		for(const Metrology::Connection& connection : m_connectionList)
 		{
 			for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
 			{
