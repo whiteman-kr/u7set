@@ -1,5 +1,7 @@
 #include "DlgMetrologyConnection.h"
 
+#include <QDesktopWidget>
+#include <QApplication>
 #include <QFileDialog>
 #include <QClipboard>
 #include <QMessageBox>
@@ -44,7 +46,7 @@ int MetrologyConnectionTable::connectionCount() const
 {
 	QMutexLocker l(&m_connectionMutex);
 
-	return m_connectionList.count();
+	return TO_INT(m_connectionList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -53,19 +55,19 @@ Metrology::Connection MetrologyConnectionTable::at(int index) const
 {
 	QMutexLocker l(&m_connectionMutex);
 
-	if (index < 0 || index >= m_connectionList.count())
+	if (index < 0 || index >= TO_INT(m_connectionList.size()))
 	{
 		return Metrology::Connection();
 	}
 
-	return m_connectionList[index];
+	return m_connectionList[static_cast<int>(index)];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MetrologyConnectionTable::set(const QVector<Metrology::Connection>& list_add)
+void MetrologyConnectionTable::set(const std::vector<Metrology::Connection>& list_add)
 {
-	int count = list_add.count();
+	int count = TO_INT(list_add.size());
 	if (count == 0)
 	{
 		return;
@@ -988,7 +990,7 @@ void DialogMetrologyConnection::createContextMenu()
 
 void DialogMetrologyConnection::updateList()
 {
-	QVector<Metrology::Connection> connectionList;
+	std::vector<Metrology::Connection> connectionList;
 
 	m_connectionTable.clear();
 
@@ -998,7 +1000,7 @@ void DialogMetrologyConnection::updateList()
 		int count = m_connectionBase.count();
 		for(int i = 0; i < count; i++)
 		{
-			connectionList.append(m_connectionBase.connection(i));
+			connectionList.push_back(m_connectionBase.connection(i));
 		}
 	}
 	else
@@ -1030,7 +1032,7 @@ void DialogMetrologyConnection::updateList()
 
 			if (found == true)
 			{
-				connectionList.append(m_connectionBase.connection(i));
+				connectionList.push_back(m_connectionBase.connection(i));
 			}
 		}
 	}

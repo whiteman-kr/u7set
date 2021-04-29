@@ -291,11 +291,8 @@ namespace Metrology
 
 		QMutexLocker l(&m_connectionMutex);
 
-		int connectionCount = m_connectionList.count();
-		for(int i = 0; i < connectionCount; i++)
+		for(Connection& connection : m_connectionList)
 		{
-			Connection& connection = m_connectionList[i];
-
 			// init signals
 			//
 			for(int ioType = 0; ioType < ConnectionIoTypeCount; ioType++)
@@ -324,12 +321,12 @@ namespace Metrology
 	{
 		QMutexLocker l(&m_connectionMutex);
 
-		if (index < 0 || index >= m_connectionList.count())
+		if (index < 0 || index >= TO_INT(m_connectionList.size()))
 		{
 			return;
 		}
 
-		m_connectionList[index].setAction(type);
+		m_connectionList[static_cast<quint64>(index)].setAction(type);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -338,16 +335,21 @@ namespace Metrology
 	{
 		QMutexLocker l(&m_connectionMutex);
 
-		int connectionCount = m_connectionList.count();
-		for(int i = connectionCount - 1; i >= 0; i--)
+		auto it = std::remove_if(m_connectionList.begin(), m_connectionList.end(), [](const Connection& connection)
 		{
-			if (m_connectionList[i].action() == E::VcsItemAction::Deleted)
+			if (connection.action() != E::VcsItemAction::Deleted)
 			{
-				m_connectionList.remove(i);
-				continue;
+				return false;
 			}
 
-			m_connectionList[i].setAction(E::VcsItemAction::Unknown);
+			return true;
+		});
+
+		m_connectionList.erase(it, m_connectionList.end());
+
+		for(Connection& connection: m_connectionList)
+		{
+			connection.setAction(E::VcsItemAction::Unknown);
 		}
 	}
 
@@ -357,10 +359,10 @@ namespace Metrology
 	{
 		QMutexLocker l(&m_connectionMutex);
 
-		int connectionCount = m_connectionList.count();
-		for(int index = 0; index < connectionCount; index++)
+		quint64 connectionCount = m_connectionList.size();
+		for(quint64 index = 0; index < connectionCount; index++)
 		{
-			m_connectionList[index].setRestoreID(index);
+			m_connectionList[index].setRestoreID(static_cast<int>(index));
 		}
 	}
 
@@ -414,7 +416,7 @@ namespace Metrology
 		QByteArray data;
 		fileOut->swapData(data);
 
-		QVector<Connection> connectionList = connectionsFromCsvData(data);
+		std::vector<Connection> connectionList = connectionsFromCsvData(data);
 
 		// find connection with restoreID
 		//
@@ -453,14 +455,14 @@ namespace Metrology
 
 		QMutexLocker l(&m_connectionMutex);
 
-		int connectionCount = m_connectionList.count();
-		for(int index = 0; index < connectionCount; index++)
+		quint64 connectionCount = m_connectionList.size();
+		for(quint64 index = 0; index < connectionCount; index++)
 		{
 			if (m_connectionList[index].restoreID() == restoreID)
 			{
 				m_connectionList[index] = connectionForRestore;
 
-				connectionIndex = index;
+				connectionIndex = static_cast<int>(index);
 
 				break;
 			}

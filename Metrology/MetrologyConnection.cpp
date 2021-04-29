@@ -398,7 +398,7 @@ namespace Metrology
 	{
 		QMutexLocker l(&m_connectionMutex);
 
-		return m_connectionList.count();
+		return TO_INT(m_connectionList.size());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -407,9 +407,9 @@ namespace Metrology
 	{
 		QMutexLocker l(&m_connectionMutex);
 
-		m_connectionList.append(connection);
+		m_connectionList.push_back(connection);
 
-		return m_connectionList.count() - 1;
+		return TO_INT(m_connectionList.size()) - 1;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -418,12 +418,12 @@ namespace Metrology
 	{
 		QMutexLocker l(&m_connectionMutex);
 
-		if (index < 0 || index >= m_connectionList.count())
+		if (index < 0 || index >= TO_INT(m_connectionList.size()))
 		{
 			return Connection();
 		}
 
-		return m_connectionList[index];
+		return m_connectionList[static_cast<quint64>(index)];
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -432,12 +432,12 @@ namespace Metrology
 	{
 		QMutexLocker l(&m_connectionMutex);
 
-		if (index < 0 || index >= m_connectionList.count())
+		if (index < 0 || index >= TO_INT(m_connectionList.size()))
 		{
 			return nullptr;
 		}
 
-		return &m_connectionList[index];
+		return &m_connectionList[static_cast<quint64>(index)];
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -446,12 +446,12 @@ namespace Metrology
 	{
 		QMutexLocker l(&m_connectionMutex);
 
-		if (index < 0 || index >= m_connectionList.count())
+		if (index < 0 || index >= TO_INT(m_connectionList.size()))
 		{
 			return;
 		}
 
-		m_connectionList[index] = connection;
+		m_connectionList[static_cast<quint64>(index)] = connection;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -460,12 +460,12 @@ namespace Metrology
 	{
 		QMutexLocker l(&m_connectionMutex);
 
-		if (index < 0 || index >= m_connectionList.count())
+		if (index < 0 || index >= TO_INT(m_connectionList.size()))
 		{
 			return;
 		}
 
-		m_connectionList.remove(index);
+		m_connectionList.erase(m_connectionList.cbegin() + index);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -474,19 +474,7 @@ namespace Metrology
 	{
 		QMutexLocker l(&m_connectionMutex);
 
-		int connectionCount = m_connectionList.count();
-		for( int i = 0; i < connectionCount - 1; i++ )
-		{
-			for( int k = i+1; k < connectionCount; k++ )
-			{
-				if (m_connectionList[i].strID() > m_connectionList[k].strID())
-				{
-					Connection connection = m_connectionList[i];
-					m_connectionList[i] = m_connectionList[k];
-					m_connectionList[k] = connection;
-				}
-			}
-		}
+		std::sort(begin(m_connectionList), end(m_connectionList), [](const Connection& c1, const Connection& c2) { return c1.strID() < c2.strID(); });
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -495,19 +483,13 @@ namespace Metrology
 	{
 		QMutexLocker l(&m_connectionMutex);
 
-		int foundIndex = -1;
-
-		int connectionCount = m_connectionList.count();
-		for( int index = 0; index < connectionCount; index++ )
+		auto it = std::find(begin(m_connectionList), end(m_connectionList), connection);
+		if (it == m_connectionList.end())
 		{
-			if (m_connectionList[index] == connection)
-			{
-				foundIndex = index;
-				break;
-			}
+			return -1;
 		}
 
-		return foundIndex;
+		return static_cast<int>(it - m_connectionList.cbegin());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -526,25 +508,23 @@ namespace Metrology
 			return -1;
 		}
 
-		int foundIndex = -1;
-
-		QMutexLocker l(&m_connectionMutex);
-
-		int count = m_connectionList.count();
-
-		for(int i = 0; i < count; i ++)
+		auto it = std::find_if(begin(m_connectionList), end(m_connectionList), [=](const Connection& c)
 		{
-			if (m_connectionList[i].metrologySignal(ioType) != pSignal)
+			if (c.metrologySignal(ioType) != pSignal)
 			{
-				continue;
+				return false;
 			}
 
-			foundIndex = i;
+			return true;
 
-			break;
+		});
+
+		if (it == m_connectionList.end())
+		{
+			return -1;
 		}
 
-		return foundIndex;
+		return static_cast<int>(it - m_connectionList.cbegin());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -569,31 +549,28 @@ namespace Metrology
 			return -1;
 		}
 
-		int foundIndex = -1;
-
-		QMutexLocker l(&m_connectionMutex);
-
-		int count = m_connectionList.count();
-		for(int i = 0; i < count; i ++)
+		auto it = std::find_if(begin(m_connectionList), end(m_connectionList), [=](const Connection& c)
 		{
-			const Connection& connection = m_connectionList[i];
-
-			if (connection.type() != connectionType)
+			if (c.type() != connectionType)
 			{
-				continue;
+				return false;
 			}
 
-			if (connection.metrologySignal(ioType) != pSignal)
+			if (c.metrologySignal(ioType) != pSignal)
 			{
-				continue;
+				return false;
 			}
 
-			foundIndex = i;
+			return true;
 
-			break;
+		});
+
+		if (it == m_connectionList.end())
+		{
+			return -1;
 		}
 
-		return foundIndex;
+		return static_cast<int>(it - m_connectionList.cbegin());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -614,11 +591,8 @@ namespace Metrology
 
 		QMutexLocker l(&m_connectionMutex);
 
-		int count = m_connectionList.count();
-		for(int i = 0; i < count; i ++)
+		for(const Connection& connection: m_connectionList)
 		{
-			const Connection& connection = m_connectionList[i];
-
 			if (connection.type() != connectionType)
 			{
 				continue;
@@ -629,7 +603,7 @@ namespace Metrology
 				continue;
 			}
 
-			Metrology::Signal* pDestSignal = m_connectionList[i].metrologySignal(ConnectionIoType::Destination);
+			Metrology::Signal* pDestSignal = connection.metrologySignal(ConnectionIoType::Destination);
 			if (pDestSignal == nullptr || pDestSignal->param().isValid() == false)
 			{
 				continue;
@@ -680,9 +654,9 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QVector<Connection> ConnectionBase::connectionsFromCsvData(const QByteArray& data) const
+	std::vector<Connection> ConnectionBase::connectionsFromCsvData(const QByteArray& data) const
 	{
-		QVector<Connection> connectionList;
+		std::vector<Connection> connectionList;
 
 		// load record from CSV-data
 		//
@@ -712,9 +686,9 @@ namespace Metrology
 				}
 			}
 
-			// append to m_connectionList
+			// append to connectionList
 			//
-			connectionList.append(connection);
+			connectionList.push_back(connection);
 		}
 
 		return connectionList;
