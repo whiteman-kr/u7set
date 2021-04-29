@@ -41,7 +41,7 @@ void ExportPrint::printTable(QTableView* tableView)
 
 		QTextDocument doc;
 
-		QSizeF pageSize = printer->pageRect().size();
+		QSize pageSize = printer->pageLayout().paintRectPixels(printer->resolution()).size();
 		doc.setPageSize(pageSize);
 
 		exportToTextDocument(tableView, &doc, printer->printRange() == QPrinter::PrintRange::Selection);
@@ -302,7 +302,7 @@ bool ExportPrint::saveArchiveWithDocWriter(QTableView* tableView, QString fileNa
 
 	if (pageSetupDialog != nullptr)
 	{
-		QSizeF pageSize = pageSetupDialog->printer()->pageRect().size();
+		QSizeF pageSize = pageSetupDialog->printer()->pageLayout().paintRectPixels(pageSetupDialog->printer()->resolution()).size();
 		doc.setPageSize(pageSize);
 	}
 
