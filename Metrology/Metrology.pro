@@ -189,10 +189,6 @@ LIBS += -lUtilsLib
 #
 LIBS += -lHardwareLib
 
-# CommonLib
-#
-LIBS += -lCommonLib
-
 # AppSignalLib
 #
 LIBS += -lAppSignalLib
@@ -201,3 +197,7 @@ LIBS += -lAppSignalLib
 #
 LIBS += -lprotobuf
 INCLUDEPATH += ./../Protobuf
+
+# CommonLib
+#
+LIBS += -lCommonLib
