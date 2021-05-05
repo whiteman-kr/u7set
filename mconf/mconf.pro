@@ -93,23 +93,26 @@ DEPENDPATH += $$PWD/ftdi
 #
 LIBS += -lHardwareLib
 win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
 
 # UtilsLib
 #
 LIBS += -lUtilsLib
 win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
 
 # CommonLib
 #
 LIBS += -lCommonLib
 win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
 # Protobuf
 #
 LIBS += -lprotobuf
 win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../Protobuf
-
 
 # Visual Leak Detector
 #

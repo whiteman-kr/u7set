@@ -55,6 +55,7 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 #
 LIBS += -lSimulator
 win32:PRE_TARGETDEPS += $$DESTDIR/Simulator.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libSimulator.a
 INCLUDEPATH += $$PWD/../../Simulator
 DEPENDPATH += $$PWD/../../Simulator
 
@@ -62,6 +63,7 @@ DEPENDPATH += $$PWD/../../Simulator
 #
 LIBS += -lVFrame30
 win32:PRE_TARGETDEPS += $$DESTDIR/VFrame30.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libVFrame30.a
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
 
@@ -69,32 +71,38 @@ DEPENDPATH += ../VFrame30
 #
 LIBS += -lprotobuf
 win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../../Protobuf
 
 # UtilsLib
 #
 LIBS += -lCommonLib
 win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
 # OnlineLib
 #
 LIBS += -lOnlineLib
 win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
 
 # UtilsLib
 #
 LIBS += -lUtilsLib
 win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
 
 # HardwareLib
 #
 LIBS += -lHardwareLib
 win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
 
 # AppSignalLib
 #
 LIBS += -lAppSignalLib
 win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
 
 # Visual Leak Detector
 #

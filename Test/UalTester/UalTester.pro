@@ -81,23 +81,29 @@ LIBS += -L.
 
 LIBS += -lOnlineLib
 win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
 
 LIBS += -lServiceLib
 win32:PRE_TARGETDEPS += $$DESTDIR/ServiceLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libServiceLib.a
 
 LIBS += -lUtilsLib
 win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
 
 LIBS += -lAppSignalLib
 win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
 
 LIBS += -lCommonLib
 win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
 # Protobuf
 #
 LIBS += -lprotobuf
 win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../../Protobuf
 
 # Visual Leak Detector

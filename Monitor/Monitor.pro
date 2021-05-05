@@ -210,6 +210,7 @@ LIBS += -L.
 #
 LIBS += -lVFrame30
 win32:PRE_TARGETDEPS += $$DESTDIR/VFrame30.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libVFrame30.a
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
 
@@ -217,6 +218,7 @@ DEPENDPATH += ../VFrame30
 #
 LIBS += -lTrendView
 win32:PRE_TARGETDEPS += $$DESTDIR/TrendView.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libTrendView.a
 INCLUDEPATH += $$PWD/../TrendView
 DEPENDPATH += $$PWD/../TrendView
 
@@ -224,27 +226,32 @@ DEPENDPATH += $$PWD/../TrendView
 #
 LIBS += -lprotobuf
 win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../Protobuf
 
 # OnlineLib
 #
 LIBS += -lOnlineLib
 win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
 
 # UtilsLib
 #
 LIBS += -lUtilsLib
 win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
 
 # CommonLib
 #
 LIBS += -lCommonLib
 win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
 # AppSignalLib
 #
 LIBS += -lAppSignalLib
 win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
 
 # Visual Leak Detector
 #
