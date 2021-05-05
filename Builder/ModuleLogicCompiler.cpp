@@ -5027,11 +5027,10 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(ualSignal);
 
-			if (ualSignal->isAcquired() == true &&
-				ualSignal->isBus() == true &&
-				ualSignal->isInternal() == true &&
-				ualSignal->isBusChild() == false &&
-				ualSignal->isOptoSignal() == true)
+			if ( ualSignal->isAcquired() == true &&
+				 ualSignal->isBus() == true &&
+				 ualSignal->isBusChild() == false &&
+				 ualSignal->isOptoSignal() == true)
 			{
 				m_acquiredOptoBuses.append(ualSignal);
 			}
@@ -7114,21 +7113,21 @@ namespace Builder
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::convertAnalogInputSignals),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAppLogicCode),
 
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogOptoSignalsToRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsToRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsToRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogConstSignalsToRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogOptoSignalsInRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsInRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsInRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogConstSignalsInRegBuf),
 
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredInputBusesToRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredBusChildBusesToRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredOptoBusesToRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredInputBusesInRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredBusChildBusesInRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredOptoBusesInRegBuf),
 
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsToRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOptoSignalsToRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteBusChildSignalsToRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningDiscreteSignalsToRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteConstSignalsToRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsInRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsInRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOptoSignalsInRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteBusChildSignalsInRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningDiscreteSignalsInRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteConstSignalsInRegBuf),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyOptoConnectionsTxData),
 		};
@@ -10107,7 +10106,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::copyAcquiredAnalogOptoSignalsToRegBuf(CodeSnippet* code)
+	bool ModuleLogicCompiler::copyAcquiredAnalogOptoSignalsInRegBuf(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -10118,7 +10117,7 @@ namespace Builder
 
 		// m_alpCode_init(&m_resourcesUsageInfo.copyAcquiredAnalogOptoSignalsToRegBuf);
 
-		code->comment_nl("Copy acquired opto signals to regBuf");
+		code->comment_nl("Copy acquired Analog opto signals in regBuf");
 
 		bool result = true;
 
@@ -10169,7 +10168,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsToRegBuf(CodeSnippet* code)
+	bool ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsInRegBuf(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -10220,7 +10219,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsToRegBuf(CodeSnippet* code)
+	bool ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsInRegBuf(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -10343,7 +10342,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::copyAcquiredTuningDiscreteSignalsToRegBuf(CodeSnippet* code)
+	bool ModuleLogicCompiler::copyAcquiredTuningDiscreteSignalsInRegBuf(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -10487,7 +10486,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::copyAcquiredAnalogConstSignalsToRegBuf(CodeSnippet* code)
+	bool ModuleLogicCompiler::copyAcquiredAnalogConstSignalsInRegBuf(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -10596,19 +10595,19 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::copyAcquiredInputBusesToRegBuf(CodeSnippet* code)
+	bool ModuleLogicCompiler::copyAcquiredInputBusesInRegBuf(CodeSnippet* code)
 	{
 		return copyBusesToRegBuf("Copy aquired Input Buses to RegBuf", m_acquiredInputBuses, code);
 	}
 
-	bool ModuleLogicCompiler::copyAcquiredBusChildBusesToRegBuf(CodeSnippet* code)
+	bool ModuleLogicCompiler::copyAcquiredBusChildBusesInRegBuf(CodeSnippet* code)
 	{
 		return copyBusesToRegBuf("Copy aquired bus child Buses to RegBuf", m_acquiredBusChildBuses, code);
 	}
 
-	bool ModuleLogicCompiler::copyAcquiredOptoBusesToRegBuf(CodeSnippet* code)
+	bool ModuleLogicCompiler::copyAcquiredOptoBusesInRegBuf(CodeSnippet* code)
 	{
-		return copyBusesToRegBuf("Copy aquired Opto Buses to regBuf", m_acquiredOptoBuses, code);
+		return copyBusesToRegBuf("Copy aquired opto Buses to regBuf", m_acquiredOptoBuses, code);
 	}
 
 	bool ModuleLogicCompiler::copyBusesToRegBuf(const QString& comment, const QVector<UalSignal*>& buses, CodeSnippet* code)
@@ -10700,7 +10699,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsToRegBuf(CodeSnippet* code)
+	bool ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsInRegBuf(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -10713,13 +10712,13 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::copyAcquiredDiscreteOptoSignalsToRegBuf(CodeSnippet* code)
+	bool ModuleLogicCompiler::copyAcquiredDiscreteOptoSignalsInRegBuf(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
 		//m_alpCode_init(&m_resourcesUsageInfo.copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf);
 
-		bool result = copyScatteredDiscreteSignalsInRegBuf(code, m_acquiredDiscreteOptoSignals, "acquired discrete opto signals");
+		bool result = copyScatteredDiscreteSignalsInRegBuf(code, m_acquiredDiscreteOptoSignals, "acquired Discrete opto signals");
 
 		//m_alpCode_calculate(&m_resourcesUsageInfo.copyAcquiredDiscreteOptoAndBusChildSignalsToRegBuf);
 
@@ -10727,7 +10726,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyAcquiredDiscreteBusChildSignalsToRegBuf(CodeSnippet* code)
+	bool ModuleLogicCompiler::copyAcquiredDiscreteBusChildSignalsInRegBuf(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -10740,7 +10739,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf(CodeSnippet* code)
+	bool ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsInRegBuf(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -10785,7 +10784,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::copyAcquiredDiscreteConstSignalsToRegBuf(CodeSnippet* code)
+	bool ModuleLogicCompiler::copyAcquiredDiscreteConstSignalsInRegBuf(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 

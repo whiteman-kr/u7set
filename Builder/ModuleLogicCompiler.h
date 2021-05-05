@@ -497,28 +497,28 @@ namespace Builder
 		bool addToComparatorSet(const UalAfb *appFb);
 		bool initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* appFb);
 
-		bool copyAcquiredAnalogOptoSignalsToRegBuf(CodeSnippet* code);
-		bool copyAcquiredAnalogBusChildSignalsToRegBuf(CodeSnippet* code);
+		bool copyAcquiredAnalogOptoSignalsInRegBuf(CodeSnippet* code);
+		bool copyAcquiredAnalogBusChildSignalsInRegBuf(CodeSnippet* code);
 
-		bool copyAcquiredTuningAnalogSignalsToRegBuf(CodeSnippet* code);
-		bool copyAcquiredTuningDiscreteSignalsToRegBuf(CodeSnippet* code);
+		bool copyAcquiredTuningAnalogSignalsInRegBuf(CodeSnippet* code);
+		bool copyAcquiredTuningDiscreteSignalsInRegBuf(CodeSnippet* code);
 
-		bool copyAcquiredAnalogConstSignalsToRegBuf(CodeSnippet* code);
+		bool copyAcquiredAnalogConstSignalsInRegBuf(CodeSnippet* code);
 
-		bool copyAcquiredInputBusesToRegBuf(CodeSnippet* code);
-		bool copyAcquiredBusChildBusesToRegBuf(CodeSnippet* code);
-		bool copyAcquiredOptoBusesToRegBuf(CodeSnippet* code);
+		bool copyAcquiredInputBusesInRegBuf(CodeSnippet* code);
+		bool copyAcquiredBusChildBusesInRegBuf(CodeSnippet* code);
+		bool copyAcquiredOptoBusesInRegBuf(CodeSnippet* code);
 
 		bool copyBusesToRegBuf(const QString& comment, const QVector<UalSignal*>& buses, CodeSnippet* code);
 
 		bool checkUalAndRegBufAddrs(const UalSignal* ualSignal) const;
 		bool checkUalAndIoBufAddrs(const UalSignal* ualSignal) const;
 
-		bool copyAcquiredDiscreteInputSignalsToRegBuf(CodeSnippet* code);
-		bool copyAcquiredDiscreteOptoSignalsToRegBuf(CodeSnippet* code);
-		bool copyAcquiredDiscreteBusChildSignalsToRegBuf(CodeSnippet* code);
-		bool copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf(CodeSnippet* code);
-		bool copyAcquiredDiscreteConstSignalsToRegBuf(CodeSnippet* code);
+		bool copyAcquiredDiscreteInputSignalsInRegBuf(CodeSnippet* code);
+		bool copyAcquiredDiscreteOptoSignalsInRegBuf(CodeSnippet* code);
+		bool copyAcquiredDiscreteBusChildSignalsInRegBuf(CodeSnippet* code);
+		bool copyAcquiredDiscreteOutputAndInternalSignalsInRegBuf(CodeSnippet* code);
+		bool copyAcquiredDiscreteConstSignalsInRegBuf(CodeSnippet* code);
 
 		bool copyScatteredDiscreteSignalsInRegBuf(CodeSnippet* code, const QVector<UalSignal *>& signalsList, const QString& description);
 
