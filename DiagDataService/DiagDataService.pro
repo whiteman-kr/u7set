@@ -55,14 +55,35 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
-win32 {
-        CONFIG(debug, debug|release): LIBS += -L../bin/debug/
-		CONFIG(release, debug|release): LIBS += -L../bin/release/
-}
-unix {
-        CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/
-		CONFIG(release, debug|release): LIBS += -L../bin_unix/release/
-}
+# ServiceLib
+#
+LIBS += -lServiceLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ServiceLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libServiceLib.a
+
+# OnlineLib
+#
+LIBS += -lOnlineLib
+win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
+
+# UtilsLib
+#
+LIBS += -lUtilsLib
+win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
+
+# CommonLib
+#
+LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
+
+# Protobuf
+#
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 
 # Visual Leak Detector
 #
@@ -70,24 +91,3 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
-
-# ServiceLib
-#
-LIBS += -lServiceLib
-
-# OnlineLib
-#
-LIBS += -lOnlineLib
-
-# UtilsLib
-#
-LIBS += -lUtilsLib
-
-# CommonLib
-#
-LIBS += -lCommonLib
-
-# Protobuf
-#
-LIBS += -lprotobuf
-

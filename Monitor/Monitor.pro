@@ -209,42 +209,53 @@ LIBS += -L.
 # VFrame30 library
 #
 LIBS += -lVFrame30
+win32:PRE_TARGETDEPS += $$DESTDIR/VFrame30.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libVFrame30.a
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
 
 # TrendView library
 #
 LIBS += -lTrendView
+win32:PRE_TARGETDEPS += $$DESTDIR/TrendView.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libTrendView.a
 INCLUDEPATH += $$PWD/../TrendView
 DEPENDPATH += $$PWD/../TrendView
 
 # Protobuf
 #
 LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../Protobuf
 
-# --
+# OnlineLib
 #
+LIBS += -lOnlineLib
+win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
+
+# UtilsLib
+#
+LIBS += -lUtilsLib
+win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
+
+# CommonLib
+#
+LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
 
 # Visual Leak Detector
 #
 win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-    CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
-
-# OnlineLib
-#
-LIBS += -lOnlineLib
-
-# UtilsLib
-#
-LIBS += -lUtilsLib
-
-# CommonLib
-#
-LIBS += -lCommonLib
-
-# AppSignalLib
-#
-LIBS += -lAppSignalLib

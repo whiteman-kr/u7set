@@ -101,16 +101,9 @@ namespace Metrology
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
-	SignalLocation::SignalLocation(Hardware::DeviceObject* pDeviceObject, bool shownOnSchemas)
+	SignalLocation::SignalLocation(bool shownOnSchemas)
 		: m_shownOnSchemas(shownOnSchemas)
 	{
-		if (pDeviceObject == nullptr)
-		{
-			assert(pDeviceObject);
-			return;
-		}
-
-		getParentObject(pDeviceObject);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -132,40 +125,6 @@ namespace Metrology
 
 		m_moduleSerialNoID.clear();
 		m_moduleSerialNo = 0;
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	void SignalLocation::getParentObject(Hardware::DeviceObject* pDeviceObject)
-	{
-		if (pDeviceObject == nullptr || pDeviceObject->isRoot() == true)
-		{
-			return;
-		}
-
-		switch(pDeviceObject->deviceType())
-		{
-			case Hardware::DeviceType::Rack:
-				rack().setEquipmentID(pDeviceObject->equipmentId());
-				break;
-
-			case Hardware::DeviceType::Chassis:
-				setChassisID(pDeviceObject->equipmentId());
-				setChassis(pDeviceObject->place());
-				break;
-
-			case Hardware::DeviceType::Module:
-				setModuleID(pDeviceObject->equipmentId());
-				setModule(pDeviceObject->place());
-				break;
-
-			case Hardware::DeviceType::AppSignal:
-				setPlace(pDeviceObject->place());
-				setContact(pDeviceObject->equipmentId().remove(pDeviceObject->parent()->equipmentId()));
-				break;
-		}
-
-		getParentObject(pDeviceObject->parent().get());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

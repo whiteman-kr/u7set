@@ -65,7 +65,7 @@ public:
 
 	int	connectionCount() const;
 	Metrology::Connection at(int index) const;
-	void set(const QVector<Metrology::Connection>& list_add);
+	void set(const std::vector<Metrology::Connection>& list_add);
 	void clear();
 
 private:
@@ -73,7 +73,7 @@ private:
 	AppSignalSetProvider* m_signalSetProvider = nullptr;
 
 	mutable QMutex m_connectionMutex;
-	QVector<Metrology::Connection> m_connectionList;
+	std::vector<Metrology::Connection> m_connectionList;
 
 	int columnCount(const QModelIndex &parent) const override;
 	int rowCount(const QModelIndex &parent=QModelIndex()) const override;

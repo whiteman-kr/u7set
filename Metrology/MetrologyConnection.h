@@ -184,7 +184,7 @@ namespace Metrology
 		// CSV-data
 		//
 		QByteArray csvDataFromConnections(bool full);
-		QVector<Connection> connectionsFromCsvData(const QByteArray& data) const;
+		std::vector<Connection> connectionsFromCsvData(const QByteArray& data) const;
 
 		bool exportConnectionsToFile(const QString& fileName);
 
@@ -195,7 +195,7 @@ namespace Metrology
 	protected:
 
 		mutable QMutex m_connectionMutex;
-		QVector<Connection> m_connectionList;
+		std::vector<Connection> m_connectionList;
 	};
 
 	// ==============================================================================================

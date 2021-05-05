@@ -32,6 +32,9 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
 }
 
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
+
 SOURCES += \
 	../../lib/BuildInfo.cpp \
 	../../lib/SoftwareSettings.cpp \
@@ -60,11 +63,12 @@ HEADERS += \
 	UalTester.h \
 	SignalStateSocket.h \
 
-CONFIG += precompile_header
-PRECOMPILED_HEADER = Stable.h
-
 RESOURCES += \
     Resources.qrc
+
+DISTFILES += \
+    ../../Proto/network.proto \
+	../../Proto/serialization.proto
 
 # Add curent dir to a list of library directory paths
 #
@@ -75,29 +79,36 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
-DISTFILES += \
-	../../Proto/network.proto \
-	../../Proto/serialization.proto
+LIBS += -lOnlineLib
+win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
+
+LIBS += -lServiceLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ServiceLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libServiceLib.a
+
+LIBS += -lUtilsLib
+win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
+
+LIBS += -lAppSignalLib
+win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
+
+LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
+
+# Protobuf
+#
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
+INCLUDEPATH += ./../../Protobuf
 
 # Visual Leak Detector
 #
 win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-    CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
-
-
-LIBS += -lOnlineLib
-LIBS += -lServiceLib
-LIBS += -lUtilsLib
-LIBS += -lAppSignalLib
-LIBS += -lCommonLib
-
-# Protobuf
-#
-LIBS += -L$$DESTDIR -lprotobuf
-INCLUDEPATH += ./../../Protobuf
-
-
-
-

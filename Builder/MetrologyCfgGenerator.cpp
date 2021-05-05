@@ -1,6 +1,5 @@
 #include "MetrologyCfgGenerator.h"
 
-#include "../Metrology/MetrologySignal.h"
 #include "DbMetrologyConnection.h"
 #include "../lib/SoftwareSettings.h"
 #include "../HardwareLib/DeviceObject.h"
@@ -139,7 +138,7 @@ namespace Builder
 				{
 					xml.writeIntAttribute(XmlAttribute::COUNT, tuningSourceEquipmentID.count());
 
-					for(QString equipmentID : tuningSourceEquipmentID)
+					for(const QString& equipmentID : tuningSourceEquipmentID)
 					{
 						if (equipmentID.isEmpty() == true)
 						{
@@ -334,7 +333,8 @@ namespace Builder
 
 			// find location of signal in the equipment Tree by signal equipmentID
 			//
-			Metrology::SignalLocation location(m_equipment->deviceObject(signal.equipmentID()).get(), showOnSchemas);
+			Metrology::SignalLocation location(showOnSchemas);
+			getSignalLocation(m_equipment->deviceObject(signal.equipmentID()).get(), location);
 
 			// append signal into list
 			//
@@ -345,7 +345,7 @@ namespace Builder
 		//
 		::Proto::MetrologySignalSet protoMetrologySignalSet;
 
-		for(Metrology::SignalParam signal : signalsToWrite)
+		for(const Metrology::SignalParam& signal : signalsToWrite)
 		{
 			::Proto::MetrologySignal* protoMetrologySignal = protoMetrologySignalSet.add_metrologysignal();
 			signal.serializeTo(protoMetrologySignal);
@@ -384,6 +384,38 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	void MetrologyCfgGenerator::getSignalLocation(Hardware::DeviceObject* pDeviceObject, Metrology::SignalLocation& l)
+	{
+		if (pDeviceObject == nullptr || pDeviceObject->isRoot() == true)
+		{
+			return;
+		}
+
+		switch(pDeviceObject->deviceType())
+		{
+			case Hardware::DeviceType::Rack:
+				l.rack().setEquipmentID(pDeviceObject->equipmentId());
+				break;
+
+			case Hardware::DeviceType::Chassis:
+				l.setChassisID(pDeviceObject->equipmentId());
+				l.setChassis(pDeviceObject->place());
+				break;
+
+			case Hardware::DeviceType::Module:
+				l.setModuleID(pDeviceObject->equipmentId());
+				l.setModule(pDeviceObject->place());
+				break;
+
+			case Hardware::DeviceType::AppSignal:
+				l.setPlace(pDeviceObject->place());
+				l.setContact(pDeviceObject->equipmentId().remove(pDeviceObject->parent()->equipmentId()));
+				break;
+		}
+
+		getSignalLocation(pDeviceObject->parent().get(), l);
 	}
 
 	bool MetrologyCfgGenerator::testElectricLimit(const AppSignal& signal, double lowLimit, double highLimit)

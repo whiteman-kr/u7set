@@ -104,7 +104,7 @@ namespace Metrology
 	{
 		public:
 			SignalLocation() {}
-			SignalLocation(Hardware::DeviceObject* pDeviceObject, bool shownOnSchemas);
+			SignalLocation(bool shownOnSchemas);
 			virtual ~SignalLocation() {}
 
 		private:
@@ -124,8 +124,6 @@ namespace Metrology
 
 			QString				m_moduleSerialNoID;			// AppSignalID serial number of module	- write online
 			int					m_moduleSerialNo = 0;		// serial number of module				- write online
-
-			void				getParentObject(Hardware::DeviceObject* pDeviceObject);
 
 		public:
 

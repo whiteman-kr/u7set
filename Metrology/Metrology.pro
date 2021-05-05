@@ -157,6 +157,10 @@ RESOURCES += \
 TRANSLATIONS = languages/Metrology_ru.ts \
     languages/Metrology_ru.qm
 
+DISTFILES += \
+    ../Proto/network.proto \
+	../Proto/serialization.proto
+
 # Add curent dir to a list of library directory paths
 #
 unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
@@ -166,9 +170,42 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
-DISTFILES += \
-    ../Proto/network.proto \
-    ../Proto/serialization.proto
+# OnlineLib
+#
+LIBS += -lOnlineLib
+win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
+
+# UtilsLib
+#
+LIBS += -lUtilsLib
+win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
+
+# HardwareLib
+#
+LIBS += -lHardwareLib
+win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
+
+# protobuf
+#
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
+INCLUDEPATH += ./../Protobuf
+
+# CommonLib
+#
+LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
 # Visual Leak Detector
 #
@@ -176,28 +213,3 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
-
-# OnlineLib
-#
-LIBS += -lOnlineLib
-
-# UtilsLib
-#
-LIBS += -lUtilsLib
-
-# HardwareLib
-#
-LIBS += -lHardwareLib
-
-# CommonLib
-#
-LIBS += -lCommonLib
-
-# AppSignalLib
-#
-LIBS += -lAppSignalLib
-
-# protobuf
-#
-LIBS += -lprotobuf
-INCLUDEPATH += ./../Protobuf

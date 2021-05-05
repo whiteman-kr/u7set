@@ -89,26 +89,34 @@ win32: LIBS += -L$$PWD/ftdi64 -lftd2xx
 INCLUDEPATH += $$PWD/ftdi
 DEPENDPATH += $$PWD/ftdi
 
-# Visual Leak Detector
-#
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-    CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-}
-
 # HardwareLib
 #
 LIBS += -lHardwareLib
+win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
 
 # UtilsLib
 #
 LIBS += -lUtilsLib
+win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
 
 # CommonLib
 #
 LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
 # Protobuf
 #
-LIBS += -L$$DESTDIR -lprotobuf
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../Protobuf
+
+# Visual Leak Detector
+#
+win32 {
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}

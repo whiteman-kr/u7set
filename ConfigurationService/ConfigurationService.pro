@@ -69,29 +69,39 @@ LIBS += -L.
 DISTFILES += \
     ../Proto/network.proto
 
+# Protobuf
+#
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
+
+# ServiceLib
+#
+LIBS += -lServiceLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ServiceLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libServiceLib.a
+
+# OnlineLib
+#
+LIBS += -lOnlineLib
+win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libOnlineLib.a
+
+# CommonLib
+#
+LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
+
+# UtilsLib
+#
+LIBS += -lUtilsLib
+win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libUtilsLib.a
+
 # Visual Leak Detector
 #
 win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
-
-# Protobuf
-#
-LIBS += -lprotobuf
-
-# ServiceLib
-#
-LIBS += -lServiceLib
-
-# OnlineLib
-#
-LIBS += -lOnlineLib
-
-# CommonLib
-#
-LIBS += -lCommonLib
-
-# UtilsLib
-#
-LIBS += -lUtilsLib

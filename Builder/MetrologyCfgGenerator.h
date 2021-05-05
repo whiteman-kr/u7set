@@ -2,9 +2,12 @@
 
 #include "SoftwareCfgGenerator.h"
 
-#include "../lib/DeviceHelper.h"
 #include "../UtilsLib/XmlHelper.h"
+
+#include "../lib/DeviceHelper.h"
 #include "../lib/SoftwareSettings.h"
+
+#include "../Metrology/MetrologySignal.h"
 
 namespace Builder
 {
@@ -22,6 +25,8 @@ namespace Builder
 		bool writeDatabaseInfo();
 		bool writeMetrologyItemsXml();
 		bool writeMetrologySignalSet();
+
+		void getSignalLocation(Hardware::DeviceObject* pDeviceObject, Metrology::SignalLocation& l);
 
 		bool testElectricLimit(const AppSignal& signal, double lowLimit, double highLimit);
 		bool testEngineeringLimit(const AppSignal& signal, double lowLimit, double highLimit);

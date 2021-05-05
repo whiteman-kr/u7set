@@ -3762,7 +3762,7 @@ namespace ExtWidgets
 	{
 		clear();
 
-		QMap<QString, std::shared_ptr<Property>> propertyItems;
+		QMultiMap<QString, std::shared_ptr<Property>> propertyItems;
 		QList<QString> propertyNames;
 
 		std::vector<PropertyEditorObject> propertyEditorObjects;
@@ -3786,7 +3786,7 @@ namespace ExtWidgets
 					continue;
 				}
 
-				propertyItems.insertMulti(p->caption(), p);
+				propertyItems.insert(p->caption(), p);
 
 				if (propertyNames.indexOf(p->caption()) == -1)
 				{
