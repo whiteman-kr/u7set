@@ -66,6 +66,33 @@ LIBS += -L.
 # HardwareLib
 #
 LIBS += -lHardwareLib
+win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
+
+# OnlineLib
+#
+LIBS += -lOnlineLib
+win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
+
+# UtilsLib
+#
+LIBS += -lUtilsLib
+win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+
+# CommonLib
+#
+LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+
+# Protobuf
+#
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+INCLUDEPATH += ./../../Protobuf
 
 # Visual Leak Detector
 #
@@ -73,26 +100,3 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
-
-# OnlineLib
-#
-LIBS += -lOnlineLib
-
-# UtilsLib
-#
-LIBS += -lUtilsLib
-
-# CommonLib
-#
-LIBS += -lCommonLib
-
-# AppSignalLib
-#
-LIBS += -lAppSignalLib
-
-# Protobuf
-#
-LIBS += -lprotobuf
-INCLUDEPATH += ./../../Protobuf
-
-

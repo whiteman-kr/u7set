@@ -87,18 +87,27 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
+LIBS += -lOnlineLib
+win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
+
+LIBS += -lHardwareLib
+win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
+
+LIBS += -lDbLib
+win32:PRE_TARGETDEPS += $$DESTDIR/DbLib.lib
+
+LIBS += -lAppSignalLib
+win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+
+LIBS += -lUtilsLib
+win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+
+LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+
 # Visual Leak Detector
 #
 win32 {
-	CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
-
-LIBS += -lOnlineLib
-LIBS += -lHardwareLib
-LIBS += -lDbLib
-LIBS += -lAppSignalLib
-LIBS += -lUtilsLib
-LIBS += -lCommonLib
-
-

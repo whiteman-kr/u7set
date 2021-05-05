@@ -100,35 +100,40 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
+# OnlineLib
+#
+LIBS += -lOnlineLib
+win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
+
+# ServiceLib
+#
+LIBS += -lServiceLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ServiceLib.lib
+
+# UtilsLib
+#
+LIBS += -lUtilsLib
+win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+
+# CommonLib
+#
+LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+
+# Protobuf
+#
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+INCLUDEPATH += ./../Protobuf
+
 # Visual Leak Detector
 #
 win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
-
-# OnlineLib
-#
-LIBS += -lOnlineLib
-
-# ServiceLib
-#
-LIBS += -lServiceLib
-
-# UtilsLib
-#
-LIBS += -lUtilsLib
-
-# AppSignalLib
-#
-LIBS += -lAppSignalLib
-
-# CommonLib
-#
-LIBS += -lCommonLib
-
-# Protobuf
-#
-LIBS += -lprotobuf
-INCLUDEPATH += ./../Protobuf
-

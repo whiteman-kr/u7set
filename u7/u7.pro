@@ -427,42 +427,42 @@ unix {
     CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
 }
 
-# --
+# QtPropertyBrowser
 #
-win32:LIBS += -lGdi32
-LIBS += -L$$DESTDIR
-LIBS += -L.
-
-# QScintilla
-#
-LIBS += -lQScintilla
-INCLUDEPATH += ./../QScintilla/Qt4Qt5
-DEPENDPATH += ./../QScintilla/Qt4Qt5
-#win32:PRE_TARGETDEPS += $$DESTDIR/QScintilla.lib
-#unix:PRE_TARGETDEPS += $$DESTDIR/libQScintilla.a
+include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
 # Add curent dir to a list of library directory paths
 #
 unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 
+# --
+#
+LIBS += -L$$DESTDIR
+LIBS += -L.
+
+win32:LIBS += -lGdi32
+
+# QScintilla
+#
+LIBS += -lQScintilla
+win32:PRE_TARGETDEPS += $$DESTDIR/QScintilla.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libQScintilla.a
+INCLUDEPATH += ./../QScintilla/Qt4Qt5
+DEPENDPATH += ./../QScintilla/Qt4Qt5
+
 # VFrame30 library
 #
 LIBS += -lVFrame30
+win32:PRE_TARGETDEPS += $$DESTDIR/VFrame30.lib
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
 
 # Builder Lib
 #
 LIBS += -lBuilder
+win32:PRE_TARGETDEPS += $$DESTDIR/Builder.lib
 INCLUDEPATH += $$PWD/../Builder
 DEPENDPATH += $$PWD/../Builder
-
-#CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/debug/Builder.lib
-#CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/release/Builder.lib
-
-# QtPropertyBrowser
-#
-include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
 # QtKeychain
 #
@@ -481,20 +481,52 @@ unix {
 # Simulator Lib
 #
 LIBS += -lSimulator
+win32:PRE_TARGETDEPS += $$DESTDIR/Simulator.lib
 INCLUDEPATH += $$PWD/../Simulator
 DEPENDPATH += $$PWD/../Simulator
-
 
 # TrendView library
 #
 LIBS += -lTrendView
+win32:PRE_TARGETDEPS += $$DESTDIR/TrendView.lib
 INCLUDEPATH += $$PWD/../TrendView
 DEPENDPATH += $$PWD/../TrendView
 
 # Protobuf
 #
 LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
 INCLUDEPATH += ./../Protobuf
+
+# OnlineLib
+#
+LIBS += -lOnlineLib
+win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
+
+# UtilsLib
+#
+LIBS += -lUtilsLib
+win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+
+# DbLib
+#
+LIBS += -lDbLib
+win32:PRE_TARGETDEPS += $$DESTDIR/DbLib.lib
+
+# HardwareLib
+#
+LIBS += -lHardwareLib
+win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
+
+# CommonLib
+#
+LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
 
 # Visual Leak Detector
 #
@@ -502,27 +534,3 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
-
-# OnlineLib
-#
-LIBS += -lOnlineLib
-
-# UtilsLib
-#
-LIBS += -lUtilsLib
-
-# DbLib
-#
-LIBS += -lDbLib
-
-# HardwareLib
-#
-LIBS += -lHardwareLib
-
-# CommonLib
-#
-LIBS += -lCommonLib
-
-# AppSignalLib
-#
-LIBS += -lAppSignalLib

@@ -62,9 +62,6 @@ HEADERS += \
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-LIBS += -L$$DESTDIR -lprotobuf
-INCLUDEPATH += ./../Protobuf
-
 DISTFILES += \
     ../Proto/network.proto \
     ../Proto/serialization.proto
@@ -78,16 +75,36 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 LIBS += -L$$DESTDIR
 LIBS += -L.
 
-# DESTDIR
+# Protobuf
 #
-win32 {
-    CONFIG(debug, debug|release): LIBS += -L../bin/debug
-	CONFIG(release, debug|release): LIBS += -L../bin/release
-}
-unix {
-    CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release
-}
+LIBS += -lprotobuf
+win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
+INCLUDEPATH += ./../Protobuf
+
+# ServiceLib
+#
+LIBS += -lServiceLib
+win32:PRE_TARGETDEPS += $$DESTDIR/ServiceLib.lib
+
+# UtilsLib
+#
+LIBS += -lUtilsLib
+win32:PRE_TARGETDEPS += $$DESTDIR/UtilsLib.lib
+
+# OnlineLib
+#
+LIBS += -lOnlineLib
+win32:PRE_TARGETDEPS += $$DESTDIR/OnlineLib.lib
+
+# AppSignalLib
+#
+LIBS += -lAppSignalLib
+win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
+
+# CommonLib
+#
+LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
 
 # Visual Leak Detector
 #
@@ -95,23 +112,3 @@ win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 }
-
-# ServiceLib
-#
-LIBS += -lServiceLib
-
-# UtilsLib
-#
-LIBS += -lUtilsLib
-
-# OnlineLib
-#
-LIBS += -lOnlineLib
-
-# AppSignalLib
-#
-LIBS += -lAppSignalLib
-
-# CommonLib
-#
-LIBS += -lCommonLib
