@@ -10,8 +10,8 @@ function generate_fim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 	let tsConstant = 200 * 0.000001;	// 200 us
     
     let defaultTf = valToADC(0 / tsConstant, 0, 65535, 0, 0xffff);
-    let defaultHighBound = 5000;
-    let defaultLowBound = 50;
+    let defaultHighBound = 50000;
+    let defaultLowBound = 0.1;
 	let defaultK1 = 1.0;
 	let defaultK2 = 0.0;
 	let defaultMaxFrequency = 5000;
@@ -397,7 +397,7 @@ function generate_fim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			let k1 = (y2 - y1) / (x2 - x1);	// K
 			let k2 = y1 - k1 * x1;			// B
 
-			let lowValidRangeMin = 50;
+			let lowValidRangeMin = 0.05;
 			let highValidRangeMax = 50000;
 
 			let lowValidRangeMinEngineering = lowValidRangeMin * k1 + k2;
