@@ -230,6 +230,8 @@ namespace Builder
 		bool createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, std::shared_ptr<Hardware::Connection> connection);
 		bool getReceiverConnectionID(const UalReceiver* receiver, QString* connectionID, const QString& schemaID);
 
+		bool createUalSignalsFromOptoValidity();
+
 		bool createUalSignalFromSignal(UalItem* ualItem, int passNo);
 		bool createUalSignalFromConst(UalItem* ualItem);
 		bool createUalSignalsFromAfbOuts(UalItem* ualItem);
@@ -609,6 +611,9 @@ namespace Builder
 								 std::vector<int>* resultPartition);
 		bool partitionOfInteger(int number, const QVector<int>& availableParts, QVector<int>* partition);
 
+		void getChassisSignalsWithEquipmentID(QString& equipmentID, std::vector<AppSignal*>& resultSignalList);
+		void buildChassisSignalsByEquipmentIdMap();
+
 	private:
 		// input parameters
 		//
@@ -680,8 +685,9 @@ namespace Builder
 		HashedVector<QUuid, UalItem*> m_ualItems;				// item GUID => item ptr
 		QHash<QUuid, UalItem*> m_pinParent;						// pin GUID => parent item ptr
 
-		HashedVector<QString, AppSignal*> m_chassisSignals;		// all signals available in current chassis, AppSignalID => Signal*
-		QHash<QString, AppSignal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => Signal*
+		HashedVector<QString, AppSignal*> m_chassisSignals;		// all signals available in current chassis, AppSignalID => AppSignal*
+		std::multimap<QString, AppSignal*> m_chassisSignalsByEquipmentID;		// EquipementID => AppSignal*
+		QHash<QString, AppSignal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => AppSignal*
 		QHash<QString, AppSignal*> m_equipmentSignals;				// equipment signals to app signals map, signal EquipmentID => Signal*
 
 		::std::set<QString> m_signalsWithFlagsIDs;

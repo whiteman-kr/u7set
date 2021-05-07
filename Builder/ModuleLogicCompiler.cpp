@@ -661,6 +661,7 @@ namespace Builder
 		result &= createUalSignalsFromInputAndTuningAcquiredSignals();
 		result &= createUalSignalsFromBusComposers();
 		result &= createUalSignalsFromReceivers();
+		result &= createUalSignalsFromOptoValidity();
 
 		RETURN_IF_FALSE(result);
 
@@ -1634,6 +1635,62 @@ namespace Builder
 		}
 
 		return false;
+	}
+
+	bool ModuleLogicCompiler::createUalSignalsFromOptoValidity()
+	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_optoModuleStorage, m_log);
+
+		//
+		// Append OptoValidity signals for ALL opto ports in current LM and associated OptoModules
+		//
+
+		bool result = true;
+
+		QList<Hardware::OptoPortShared> lmAssociatedPorts;
+
+		result = m_optoModuleStorage->getLmAssociatedOptoPorts(lmEquipmentID(), lmAssociatedPorts);
+
+		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(result, m_log);
+
+		for(Hardware::OptoPortShared optoPort : lmAssociatedPorts)
+		{
+			if (optoPort == nullptr)
+			{
+				result = false;
+				continue;
+			}
+
+			QString validitySignalEquipmentID = optoPort->validitySignalEquipmentID();
+			Address16 validitySignalAbsAddr = optoPort->validitySignalAbsAddr();
+
+			for(AppSignal* appSignal : m_chassisSignals)
+			{
+				if (appSignal == nullptr)
+				{
+					LOG_NULLPTR_ERROR(m_log);
+					result = false;
+					continue;
+				}
+
+				if (appSignal->isAcquired() == false)
+				{
+					continue;
+				}
+
+				if (appSignal->isInput() == true)
+				{
+					m_ualSignals.createSignal(appSignal);
+					continue;
+				}
+
+		}
+
+		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(result, m_log);
+
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::createUalSignalFromSignal(UalItem* ualItem, int passNo)
