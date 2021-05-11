@@ -527,17 +527,17 @@ LIBS += -lHardwareLib
 win32:PRE_TARGETDEPS += $$DESTDIR/HardwareLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libHardwareLib.a
 
-# CommonLib
-#
-LIBS += -lCommonLib
-win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
-
 # AppSignalLib
 #
 LIBS += -lAppSignalLib
 win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
+
+# CommonLib
+#
+LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
 # Visual Leak Detector
 #

@@ -220,6 +220,7 @@ namespace VFrame30
 
 		const std::vector<VFrame30::Bus>& busses() const;
 		void setBusses(const std::vector<VFrame30::Bus>& src);
+		void setBusses(std::vector<VFrame30::Bus>&& src);
 
 	private:
 		std::vector<VFrame30::Bus> m_busses;

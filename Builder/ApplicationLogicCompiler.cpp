@@ -188,8 +188,6 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::checkLmIpAddresses()
 	{
-		LOG_EMPTY_LINE(log());
-
 		LOG_MESSAGE(log(), QString(tr("Check LM's ethernet adapters IP addresses...")));
 
 		bool result = true;
@@ -315,7 +313,7 @@ namespace Builder
 
 		if (result == true)
 		{
-			LOG_OK(log());
+			LOG_MESSAGE(m_context->m_log, tr("Ok"));
 		}
 
 		return result;

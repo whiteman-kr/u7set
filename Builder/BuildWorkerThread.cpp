@@ -28,22 +28,77 @@ namespace Builder
 
 	void BuildWorkerThread::run()
 	{
-		m_context = std::make_unique<Context>(m_log, buildOutputPath(), expertMode());
-		std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
-			{
-				this->m_context.reset();		// this will release m_context on leaving run()
-			});
-
-		m_context->m_progress = 0;
-
-		assert(m_context->m_log);
-
 		QThread::currentThread()->setTerminationEnabled(true);
 
-        QElapsedTimer buildTime;
-		buildTime.start();
+		preBuild();
 
-		bool ok = false;
+		// Run build tasks
+		//
+		for (BuildTask& task : m_buildTasks)
+		{
+			// PreRunTask
+			//
+			preRunTask(task);
+
+			// Run Task
+			//
+			QElapsedTimer taskTimer;
+			taskTimer.start();
+
+			bool taskResult = (this->*task.func)();
+
+			// Seva task results
+			//
+			task.result.emplace();
+			task.result.value().result = taskResult;
+			task.result.value().durationMs = taskTimer.elapsed();
+
+			// PostRunTask
+			//
+			postRunTask(task);
+
+			// --
+			//
+			if (taskResult == false && task.breakOnFailed == true)
+			{
+				break;
+			}
+
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+		}
+
+		// PostBuild
+		//
+		postBuild();
+
+		// We've done, exit
+		//
+		qDebug("Leave BuildWorkerThread::run()");
+
+		// QThread::finished will be emitted, it should be counted as reasultReady
+		//
+		return;
+	}
+
+	bool BuildWorkerThread::preBuild()
+	{
+		Q_ASSERT(m_buildTasks.empty() == false);
+
+		m_context = std::make_unique<Context>(m_log, buildOutputPath(), expertMode());
+		Q_ASSERT(m_context->m_log);
+
+		m_totalProgress = 0;
+		m_buildTimer.restart();
+
+		// Reset build result for all tasks
+		//
+		for (BuildTask& task : m_buildTasks)
+		{
+			task.result.reset();
+		}
 
 		// Start logging to output string, this string will be written as file to build output
 		//
@@ -55,6 +110,152 @@ namespace Builder
 		LOG_MESSAGE(m_context->m_log, qApp->applicationName() + " v" + qApp->applicationVersion());
 		LOG_MESSAGE(m_context->m_log, tr("Started at: ") + QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss"));
 
+		return true;
+	}
+
+	bool BuildWorkerThread::postBuild()
+	{
+		QString message = QString("----------[ Finalizing ]----------");
+
+		const int width = 100;
+		while (message.size() < width)
+		{
+			if (message.size() % 2)
+			{
+				message.append('-');
+			}
+			else
+			{
+				message.prepend('-');
+			}
+		}
+
+		LOG_EMPTY_LINE(m_context->m_log);
+		LOG_MESSAGE(m_context->m_log, message);
+
+		// Report all tasks result
+		//
+		LOG_MESSAGE(m_context->m_log, tr("Task Run Report:"))
+
+		for (const auto& task : m_buildTasks)
+		{
+			QString strResult;
+
+
+
+			if (task.result.has_value() == false)
+			{
+				strResult = tr("NO RESULT");
+			}
+			else
+			{
+				bool taskOk = task.result.value().result;
+				strResult = taskOk ? tr("Ok") : tr("FAILED");
+			}
+
+			QString str = tr("TASK: %1: %2")
+							.arg(task.name)
+							.arg(strResult);
+
+			m_context->m_log->writeMessage(str);
+
+//			if (taskOk == true)
+//			{
+//				m_context->m_log->writeSuccess(str);
+//			}
+//			else
+//			{
+//				m_context->m_log->writeError(str);
+//			}
+		}
+
+		// --
+		//
+		m_context->m_buildResultWriter->finish();
+
+		if (m_context->m_db.isProjectOpened() == true)
+		{
+			m_context->m_db.closeProject(nullptr);
+		}
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			// The build was cancelled.
+			//
+			m_context->m_log->errCMN0016();
+			m_context->m_log->clear();		// Log can contain thouthands of messages, if it some kind of "same ids" error
+		}
+
+		// Log everything here
+		//
+
+		// Display build time
+		//
+		qint64 buildEllapsed = m_buildTimer.elapsed() / 1000;
+		qint64 durationSecs = buildEllapsed % 60;
+		qint64 durationMins = buildEllapsed / 60;
+		LOG_MESSAGE(m_context->m_log, QString("Build time: %1 minute(s) %2 second(s)").arg(durationMins).arg(durationSecs));
+
+		// Relese resources
+		//
+		this->m_context.reset();
+
+		return true;
+	}
+
+	bool BuildWorkerThread::preRunTask(const BuildTask& task)
+	{
+		QString message = QString("----------[ %1 ]----------").arg(task.name);
+
+		const int width = 100;
+		while (message.size() < width)
+		{
+			if (message.size() % 2)
+			{
+				message.append('-');
+			}
+			else
+			{
+				message.prepend('-');
+			}
+		}
+
+		LOG_EMPTY_LINE(m_context->m_log);
+		LOG_MESSAGE(m_context->m_log, message);
+
+		return true;
+	}
+
+	bool BuildWorkerThread::postRunTask(const BuildTask& task)
+	{
+		m_totalProgress += 100.0 / m_buildTasks.size();
+
+		if (task.result.has_value() == false)
+		{
+			Q_ASSERT(task.result.has_value());
+			return false;
+		}
+
+		const auto& taskResult = task.result.value();
+
+		if (taskResult.result == false)
+		{
+			QString message = QString("Result: %1 - FAILED").arg(task.name);
+			m_context->m_log->writeError(message);
+		}
+		else
+		{
+			QString message = QString("Result: %1 - OK").arg(task.name);
+			m_context->m_log->writeSuccess(message);
+		}
+
+		return true;
+	}
+
+	bool BuildWorkerThread::taskOpenProject()
+	{
+		LOG_MESSAGE(m_context->m_log, tr("Opening project %1").arg(projectName()));
+
 		// Create database controller and open project
 		//
 		m_context->m_db.disableProgress();
@@ -64,352 +265,37 @@ namespace Builder
 		m_context->m_db.setServerUsername(serverUsername());
 		m_context->m_db.setServerPassword(serverPassword());
 
-		ok = m_context->m_db.openProject(projectName(), projectUserName(), projectUserPassword(), nullptr);
+		bool ok = m_context->m_db.openProject(projectName(), projectUserName(), projectUserPassword(), nullptr);
 
 		if (ok == false)
 		{
 			// Opening project %1 error (%2).
 			//
 			m_context->m_log->errPDB2006(projectName(), m_context->m_db.lastError());
-			return;
+			return false;
 		}
-		else
-		{
-			LOG_MESSAGE(m_context->m_log, tr("Opening project %1: ok").arg(projectName()));
-		}
-
-		// Get project properties
-		//
-		ok = getProjectProperties();
 
 		// --
 		//
-		m_context->m_buildResultWriter = std::make_shared<BuildResultWriter>();
-		m_context->m_buildResultWriter->start(buildOutputPath(), &m_context->m_db, m_context->m_log, 0 /* Load correct ChangesetID */);
+		ok = m_context->m_db.lastChangesetId(&m_context->m_lastChangesetId);
 
-		do
+		if (ok == false)
 		{
-			// --
-			//
-			ok = m_context->m_db.lastChangesetId(&m_context->m_lastChangesetId);
-
-			if (ok == false)
-			{
-				LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, tr("lastChangesetId Error."));
-				break;
-			}
-
-			int to_do_thre_are_two_places_in_build_checking_checked_out_objects;
-			int checkedOutCount = 0;
-			ok = m_context->m_db.isAnyCheckedOut(&checkedOutCount);
-			if (ok == false)
-			{
-				LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, tr("isAnyCheckedOut Error."));
-				break;
-			}
-
-			const BuildInfo& bi = m_context->m_buildResultWriter->buildInfo();
-			m_context->m_buildResultWriter->firmwareWriter()->setProjectInfo(bi.project, bi.user, bi.id, bi.changeset);
-
-			//
-			// Get Equipment from the database
-			//
-			if (ok = getEquipment();
-				ok == false)
-			{
-				break;
-			}
-
-			m_context->m_progress += 5;			// Total progress 5
-
-			if (QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			//
-			// Loading BusTypes
-			//
-			if (ok = loadBusses();
-				ok == false )
-			{
-				LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, tr("Can't load BusTypes files"));
-			}
-
-			if (QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			//
-			// Builder::SignalSet
-			//
-			m_context->m_signalSet = std::make_shared<SignalSet>(m_context->m_busSet.get(), m_context->m_buildResultWriter, m_context->m_log);
-
-			if (m_context->m_signalSet->prepareBusses() == false)
-			{
-				break;
-			}
-
-			if (loadSignals(m_context->m_signalSet.get(), m_context->m_equipmentSet.get()) == false)
-			{
-				break;
-			}
-
-			m_context->m_progress += 10;		// Total progress 15
-
-			if (QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			//
-			// Find all LM Modules and load their descriptions
-			//
-			if (ok = loadLmDescriptions();
-				ok == false)
-			{
-				break;
-			}
-
-			m_context->m_progress += 5;			// Total progress 20
-
-			//
-			// Loading subsystems
-			//
-			if (ok = loadSubsystems();
-				ok == false)
-			{
-				break;
-			}
-			else
-			{
-				LOG_SUCCESS(m_context->m_log, tr("Ok"));
-			}
-
-			//
-			// Loading connections
-			//
-			if (bool loadConnectionsOk = loadConnections();
-				loadConnectionsOk == false)
-			{
-				break;
-			}
-
-			//
-			// Check that all files (and from that theirs SchemaIds) in $root$/Schema are unique
-			//
-			ok = checkRootSchemasUniquesIds(&m_context->m_db);
-
-			if (QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			//
-			// Parse application logic
-			//
-			if (bool parseOk = parseApplicationLogic();
-				parseOk == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			//m_context->m_progress is set inside parseApplicationLogic(); up to 25%
-			//m_context->m_progress += 25;		// Total progress 45
-
-			//
-			// Save LogicModule Descriptions
-			//
-			ok = saveLogicModuleDescriptions();
-
-			if (ok == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			//
-			// Compile application logic
-			//
-			m_context->m_tuningDataStorage = std::make_shared<Tuning::TuningDataStorage>();
-			m_context->m_comparatorSet = std::make_shared<ComparatorSet>();
-
-			ok = compileApplicationLogic();
-
-			if (ok == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			m_context->m_progress += 10;		// Total progress 55
-
-			//
-			// Tuning parameters
-			//
-			LOG_EMPTY_LINE(m_context->m_log);
-			LOG_MESSAGE(m_context->m_log, tr("Tuning parameters compilation"));
-
-			::Builder::TuningBuilder tuningBuilder(m_context.get());
-
-			ok = tuningBuilder.build();
-
-			if (ok == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			//
-			// Compile Module configuration
-			//
-			LOG_EMPTY_LINE(m_context->m_log);
-			LOG_MESSAGE(m_context->m_log, tr("Module configurations compilation"));
-
-			ConfigurationBuilder cfgBuilder(this, m_context.get());
-
-			ok = cfgBuilder.build();
-
-			if (ok == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			generateModulesInformation(*m_context->m_buildResultWriter, m_context->m_lmAndBvbModules);
-
-			ok &= generateLmsUniqueIDs(m_context.get());
-
-			ok &= writeLogicModulesInfoXml(m_context.get());
-
-			ok &= buildSoftwareList(m_context.get());
-
-			if (ok == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			m_context->m_progress += 10;		// Total progress 65
-
-			//
-			// Load Sim Profiles
-			//
-			loadSimProfiles();
-
-			if (QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			//
-			// Generate MATS software configurations
-			//
-			ok = generateSoftwareConfiguration();
-
-			if (ok == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			m_context->m_progress += 10;		// Total progress 75
-
-			//
-			// Write logic, configuration and tuning binary files
-			//
-			if (m_log->errorCount() == 0)
-			{
-				ok = writeBinaryFiles(*m_context->m_buildResultWriter);
-
-				if (ok == false ||
-						QThread::currentThread()->isInterruptionRequested() == true)
-				{
-					break;
-				}
-			}
-
-			//
-
-			ok = cfgBuilder.writeDataFiles();
-
-			if (ok == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			m_context->m_progress += 10;		// Total progress 85
-
-			//
-			// Write Firmware Statistics
-			//
-			ok = writeFirmwareStatistics(*m_context->m_buildResultWriter);
-
-			if (ok == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			m_context->m_progress += 5;		// Total progress 90
-
-			//
-			// Run simulator-based script tests
-			//
-			ok = runSimTests();
-
-			if (ok == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			m_context->m_progress += 5;		// Total progress 95
-
-			//
-			// Ok
-			//
-			LOG_SUCCESS(m_context->m_log, tr("Ok"));
-		}
-		while (false);
-
-		m_context->m_buildResultWriter->finish();
-
-		if (QThread::currentThread()->isInterruptionRequested() == true)
-		{
-			// The build was cancelled.
-			//
-			m_context->m_log->errCMN0016();
-			m_context->m_log->clear();		// Log can contain thouthands of messages, if it some kind iof "same ids" error
+			LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, tr("lastChangesetId Error."));
+			return false;
 		}
 
-		m_context->m_db.closeProject(nullptr);
+		//int to_do_thre_are_two_places_in_build_checking_checked_out_objects;
 
-		// Display build time
-		//
-		qint64 buildEllapsed = buildTime.elapsed() / 1000;
-		qint64 durationSecs = buildEllapsed % 60;
-		qint64 durationMins = buildEllapsed / 60;
-		LOG_MESSAGE(m_context->m_log, QString("Build time: %1 minute(s) %2 second(s)").arg(durationMins).arg(durationSecs));
+		//int checkedOutCount = 0;
+		//ok = m_context->m_db.isAnyCheckedOut(&checkedOutCount);
 
-		// We've done, exit
-		//
-		qDebug("Leave BuildWorkerThread::run()");
-
-		m_context->m_progress += 5;		// Total progress 100
-
-		// QThread::finished will be emitted, it should be counted as reasultReady
-		//
-
-		return;
+		return ok;
 	}
 
-	bool BuildWorkerThread::getProjectProperties()
+	bool BuildWorkerThread::taskGetProjectProperties()
 	{
-		assert(m_context->m_db.isProjectOpened() == true);
+		Q_ASSERT(m_context->m_db.isProjectOpened() == true);
 
 		bool ok = m_context->m_db.getProjectProperties(&m_context->m_projectProperties, nullptr);
 
@@ -443,11 +329,19 @@ namespace Builder
 		return ok;
 	}
 
-	bool BuildWorkerThread::getEquipment()
+	bool BuildWorkerThread::taskStartBuildResultWriter()
 	{
-		LOG_EMPTY_LINE(m_context->m_log);
-		LOG_MESSAGE(m_context->m_log, tr("Getting equipment"));
+		m_context->m_buildResultWriter = std::make_shared<BuildResultWriter>();
+		bool ok = m_context->m_buildResultWriter->start(buildOutputPath(), &m_context->m_db, m_context->m_log, 0 /* Load correct ChangesetID */);
 
+		const BuildInfo& bi = m_context->m_buildResultWriter->buildInfo();
+		m_context->m_buildResultWriter->firmwareWriter()->setProjectInfo(bi.project, bi.user, bi.id, bi.changeset);
+
+		return ok;
+	}
+
+	bool BuildWorkerThread::taskGetEquipment()
+	{
 		std::shared_ptr<Hardware::DeviceRoot> deviceRoot = std::make_shared<Hardware::DeviceRoot>();
 
 		int rootFileId = m_context->m_db.systemFileId(DbDir::HardwareConfigurationDir);
@@ -460,10 +354,6 @@ namespace Builder
 		{
 			return false;
 		}
-		else
-		{
-			LOG_SUCCESS(m_context->m_log, tr("Ok"));
-		}
 
 		if (QThread::currentThread()->isInterruptionRequested() == true)
 		{
@@ -473,7 +363,6 @@ namespace Builder
 		//
 		// Expand Devices StrId
 		//
-		LOG_EMPTY_LINE(m_context->m_log);
 		LOG_MESSAGE(m_context->m_log, tr("Expanding devices StrIds"));
 
 		if (bool ok = expandDeviceStrId(deviceRoot.get());
@@ -482,7 +371,7 @@ namespace Builder
 			return false;
 		}
 
-		LOG_SUCCESS(m_context->m_log, tr("Ok"));
+		LOG_MESSAGE(m_context->m_log, tr("Ok"));
 
 		m_context->m_equipmentSet = std::make_shared<Hardware::EquipmentSet>(deviceRoot);
 
@@ -491,7 +380,6 @@ namespace Builder
 		//
 		// Check same Uuids and same StrIds
 		//
-		LOG_EMPTY_LINE(m_context->m_log);
 		LOG_MESSAGE(m_context->m_log, tr("Checking for same Uuids and StrIds"));
 
 		if (bool ok = checkUuidAndStrId(m_context->m_equipmentSet->root().get());
@@ -509,9 +397,508 @@ namespace Builder
 			return false;
 		}
 
-		LOG_SUCCESS(m_context->m_log, tr("Ok"));
+		LOG_MESSAGE(m_context->m_log, tr("Ok"));
 
 		return true;
+	}
+
+	bool BuildWorkerThread::taskLoadBusTypes()
+	{
+		m_context->m_busSet = std::make_shared<VFrame30::BusSet>();
+
+		// Get Busses
+		//
+		std::vector<DbFileInfo> fileList;
+
+		bool ok = m_context->m_db.getFileList(&fileList, DbDir::BusTypesDir, Db::File::BusFileExtension, true, nullptr);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		if (fileList.empty() == true)
+		{
+			LOG_MESSAGE(m_context->m_log, tr("Project does not have bus types"));
+			return true;
+		}
+
+		// Get Busses latest version from the DB
+		//
+		std::vector<std::shared_ptr<DbFile>> files;
+
+		ok = m_context->m_db.getLatestVersion(fileList, &files, nullptr);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		// Parse files, create actual Busses
+		//
+		std::vector<VFrame30::Bus> busses;
+		busses.reserve(files.size());
+
+		for (const std::shared_ptr<DbFile>& f : files)
+		{
+			if (f->deleted() == true ||
+				f->action() == E::VcsItemAction::Deleted)
+			{
+				continue;
+			}
+
+			VFrame30::Bus bus;
+			ok = bus.Load(f->data());
+			if (ok == false)
+			{
+				return false;
+			}
+
+			busses.push_back(bus);
+		}
+
+		m_context->m_busSet->setBusses(std::move(busses));
+
+		LOG_MESSAGE(m_context->m_log, tr("Loaded %1 bus type(s)").arg(m_context->m_busSet->busses().size()));
+
+		return true;
+	}
+
+	bool BuildWorkerThread::taskLoadAppSignals()
+	{
+		//
+		// Builder::SignalSet
+		//
+		m_context->m_signalSet = std::make_shared<SignalSet>(m_context->m_busSet.get(), m_context->m_buildResultWriter, m_context->m_log);
+
+		if (m_context->m_signalSet->prepareBusses() == false)
+		{
+			return false;
+		}
+
+		if (loadSignals(m_context->m_signalSet.get(), m_context->m_equipmentSet.get()) == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool BuildWorkerThread::taskLoadLmDescriptions()
+	{
+		// Find all LM Modules and load their descriptions
+		//
+		m_context->m_lmDescriptions = std::make_shared<LmDescriptionSet>();
+		m_context->m_fscDescriptions = std::make_shared<LmDescriptionSet>();
+
+		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_lmModules, Hardware::DeviceModule::FamilyType::LM);
+
+		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::LM);
+		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::BVB);
+
+		LOG_MESSAGE(m_context->m_log, tr("Loading to m_lmAndBvbModules..."))
+		bool ok = true;
+		for (Hardware::DeviceModule* lm : m_context->m_lmAndBvbModules)
+		{
+			ok &= loadLogicModuleDescription(lm, m_context->m_lmDescriptions.get());
+		}
+
+		if (ok == false)
+		{
+			return false;
+		}
+
+		findFSCConfigurationModules(m_context->m_equipmentSet->root().get(), &m_context->m_fscModules);
+
+		LOG_MESSAGE(m_context->m_log, tr("Loading to m_fscModules..."))
+		ok = true;
+		for (Hardware::DeviceModule* lm : m_context->m_fscModules)
+		{
+			ok &= loadLogicModuleDescription(lm, m_context->m_fscDescriptions.get());
+		}
+
+		if (ok == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool BuildWorkerThread::taskLoadSubsystems()
+	{
+		m_context->m_subsystems = std::make_shared<SubsystemStorage>();
+
+		QString errorCode;
+
+		if (bool ok = m_context->m_subsystems->load(&m_context->m_db, errorCode);
+			ok == false)
+		{
+			LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, tr("Can't load subsystems file"));
+			if (errorCode.isEmpty() == false)
+			{
+				LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, errorCode);
+				return false;
+			}
+		}
+
+		// Check if subsystems have same id or sskey
+		//
+		std::set<QString> ids;
+		std::set<int> sskeys;
+
+		bool result = true;
+
+		for (std::shared_ptr<Hardware::Subsystem> subsystem : m_context->m_subsystems->subsystems())
+		{
+			Q_ASSERT(subsystem);
+
+			if (ids.contains(subsystem->subsystemId()) == true)
+			{
+				// Duplicate SubsystemID
+				//
+				result = false;
+				m_context->m_log->errEQP6005(subsystem->subsystemId());
+			}
+			else
+			{
+				ids.insert(subsystem->subsystemId());
+			}
+
+			if (sskeys.contains(subsystem->key()) == true)
+			{
+				// Duplicate ssKey
+				//
+				result = false;
+				m_context->m_log->errEQP6006(subsystem->key());
+			}
+			else
+			{
+				sskeys.insert(subsystem->key());
+			}
+		}
+
+		// Check if all LMs in subsystem have the same version and LmDescriptionFile
+		//
+		for (std::shared_ptr<Hardware::Subsystem> subsystem : m_context->m_subsystems->subsystems())
+		{
+			Q_ASSERT(subsystem);
+
+			Hardware::DeviceModule::FamilyType moduleFamily = Hardware::DeviceModule::FamilyType::OTHER;
+			int moduleVersion = -1;
+			QString LmDescriptionFile;
+
+			for (const Hardware::DeviceModule* lm : m_context->m_lmAndBvbModules)
+			{
+				Q_ASSERT(lm);
+				Q_ASSERT(lm->isFSCConfigurationModule() == true);
+
+				auto lmSubsystemIdProp = lm->propertyByCaption(Hardware::PropertyNames::lmSubsystemID);
+				if (lmSubsystemIdProp == nullptr)
+				{
+					m_context->m_log->errCFG3000(Hardware::PropertyNames::lmSubsystemID, lm->equipmentIdTemplate());
+					return false;
+				}
+
+				if (lmSubsystemIdProp->value() != subsystem->subsystemId())
+				{
+					continue;
+				}
+
+				// Check moduleFamily
+				//
+				if (moduleFamily == Hardware::DeviceModule::FamilyType::OTHER)
+				{
+					moduleFamily = lm->moduleFamily();			// Init start value
+				}
+				else
+				{
+					if (moduleFamily != lm->moduleFamily())
+					{
+						result = false;
+						m_context->m_log->errEQP6007(subsystem->subsystemId());
+						continue;
+					}
+				}
+
+				// Check moduleVersion
+				//
+				if (moduleVersion == -1)
+				{
+					moduleVersion = lm->moduleVersion();			// Init start value
+				}
+				else
+				{
+					if (moduleVersion != lm->moduleVersion())
+					{
+						result = false;
+						m_context->m_log->errEQP6007(subsystem->subsystemId());
+						continue;
+					}
+				}
+
+				// Check LmDescriptionFile
+				//
+				auto LmDescriptionFileProp = lm->propertyByCaption(Hardware::PropertyNames::lmDescriptionFile);
+				if (LmDescriptionFileProp == nullptr)
+				{
+					m_context->m_log->errCFG3000(Hardware::PropertyNames::lmDescriptionFile, lm->equipmentIdTemplate());
+					return false;
+				}
+
+				if (LmDescriptionFile.isEmpty() == true)
+				{
+					LmDescriptionFile = LmDescriptionFileProp->value().toString();	// Init start value
+				}
+				else
+				{
+					if (LmDescriptionFile != LmDescriptionFileProp->value().toString())
+					{
+						result = false;
+						m_context->m_log->errEQP6007(subsystem->subsystemId());
+						continue;
+					}
+				}
+			}
+		}
+
+		LOG_MESSAGE(m_context->m_log, tr("Loaded %1 subsystem(s)").arg(m_context->m_subsystems->count()))
+
+		return result;
+	}
+
+	bool BuildWorkerThread::taskLoadConnections()
+	{
+		m_context->m_connections = std::make_shared<ConnectionStorage>(&m_context->m_db);
+
+		QString errorMessage;
+
+		if (bool ok = m_context->m_connections->load(&errorMessage);
+			ok == false)
+		{
+			LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, tr("Can't load connections file: "));
+			if (errorMessage.isEmpty() == false)
+			{
+				LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, errorMessage);
+				return false;
+			}
+		}
+
+		m_context->m_opticModuleStorage = std::make_shared<Hardware::OptoModuleStorage>(m_context.get());
+		bool res = m_context->m_opticModuleStorage->init();
+
+		LOG_MESSAGE(m_context->m_log, tr("Loaded %1 connection(s)").arg(m_context->m_connections->count()))
+
+		return res;
+	}
+
+	// Check that all files (and from that theirs SchemaIds) in $root$/Schema are unique
+	//
+	bool BuildWorkerThread::taskCheckSchemaIds()
+	{
+		DbFileTree fileTree;
+
+		if (bool ok = m_context->m_db.getFileListTree(&fileTree, DbDir::SchemasDir, true, nullptr);
+			ok == false)
+		{
+			m_context->m_log->errPDB2001(m_context->m_db.systemFileId(DbDir::SchemasDir), "", m_context->m_db.lastError());
+			return false;
+		}
+
+		// --
+		//
+		const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
+
+		QString strAlFileExtension{Db::File::AlFileExtension};
+		QString strUfbFileExtension{Db::File::UfbFileExtension};
+		QString strMvsFileExtension{Db::File::MvsFileExtension};
+		QString strDvsFileExtension{Db::File::DvsFileExtension};
+
+		bool success = true;
+
+		std::set<QString> schemaIds;
+		for (auto& [fileId, file] : files)
+		{
+			if (file->isFolder() == true)
+			{
+				continue;
+			}
+
+			QString fileExt = file->extension();
+
+			if (fileExt.compare(strAlFileExtension, Qt::CaseInsensitive) != 0 &&
+				fileExt.compare(strUfbFileExtension, Qt::CaseInsensitive) != 0 &&
+				fileExt.compare(strMvsFileExtension, Qt::CaseInsensitive) != 0 &&
+				fileExt.compare(strDvsFileExtension, Qt::CaseInsensitive) != 0)
+			{
+				continue;
+			}
+
+			//--
+			//
+			VFrame30::SchemaDetails details;
+
+			if (bool ok = details.parseDetails(file->details());
+				ok == false)
+			{
+				m_context->m_log->errALP4024(file->fileName(), file->details());
+				continue;
+			}
+
+			if (schemaIds.count(details.m_schemaId) != 0)
+			{
+				m_context->m_log->errALP4025(details.m_schemaId);
+				success = false;
+			}
+			else
+			{
+				schemaIds.insert(details.m_schemaId);
+			}
+		}
+
+		return success;
+	}
+
+	bool BuildWorkerThread::taskParseApplicationLogic()
+	{
+		m_context->m_appLogicData = std::make_shared<AppLogicData>();
+		int errorCount = m_context->m_log->errorCount();
+
+		Parser parser(m_context.get());
+		parser.parse();
+
+		bool result = m_context->m_log->errorCount() == errorCount;
+
+		emit runOrderReady(parser.runOrder());
+
+		return result;
+	}
+
+	bool BuildWorkerThread::taskSaveLogicModuleDescriptions()
+	{
+		Q_ASSERT(m_context->m_buildResultWriter);
+
+		for (QStringList lmFiles = m_context->m_lmDescriptions->fileList();
+			 QString fileName : lmFiles)
+		{
+			auto file = m_context->m_lmDescriptions->rowFile(fileName);
+
+			if (file.second == false)
+			{
+				m_context->m_log->errINT1000(tr("File %1 present in LmDescriptionSet but cannot be found it's raw version. ") + Q_FUNC_INFO);
+				return false;
+			}
+
+			BuildFile* buildFile = m_context->m_buildResultWriter->addFile(QLatin1String("LmDescriptions"), fileName, file.first, false);
+
+			if (buildFile == nullptr)
+			{
+				Q_ASSERT(buildFile);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool BuildWorkerThread::taskCompileApplicationLogic()
+	{
+		m_context->m_tuningDataStorage = std::make_shared<Tuning::TuningDataStorage>();
+		m_context->m_comparatorSet = std::make_shared<ComparatorSet>();
+
+		// Compile Application Logic
+		//
+		ApplicationLogicCompiler appLogicCompiler(m_context.get());
+		bool result = appLogicCompiler.run();
+
+		return result;
+	}
+
+	bool BuildWorkerThread::taskProcessTuningParameters()
+	{
+		::Builder::TuningBuilder tuningBuilder(m_context.get());
+		bool ok = tuningBuilder.build();
+
+		return ok;
+	}
+
+	bool BuildWorkerThread::taskGenerationModulesConfiguration()
+	{
+		ConfigurationBuilder cfgBuilder(this, m_context.get());
+
+		bool ok = cfgBuilder.build();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		generateModulesInformation(*m_context->m_buildResultWriter, m_context->m_lmAndBvbModules);
+
+		ok &= generateLmsUniqueIDs(m_context.get());
+		ok &= writeLogicModulesInfoXml(m_context.get());
+
+		ok &= cfgBuilder.writeDataFiles();
+
+		return ok;
+	}
+
+	bool BuildWorkerThread::taskGenerationBitstreamFile()
+	{
+		if (m_log->errorCount() != 0)
+		{
+			return false;
+		}
+
+		// Write logic, configuration and tuning binary files
+		//
+		bool ok = m_context->m_buildResultWriter->writeBitstreamFile();
+
+		// Write Firmware Statistics
+		//
+		ok &= writeFirmwareStatistics(*m_context->m_buildResultWriter);
+
+		return ok;
+	}
+
+	bool BuildWorkerThread::taskGenerationSoftwareConfiguration()
+	{
+		bool ok = buildSoftwareList(m_context.get());
+		if (ok == false)
+		{
+			return false;
+		}
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			return true;
+		}
+
+		// Load Sim Profiles
+		//
+		ok = loadSimProfiles();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			return true;
+		}
+
+		// Generate MATS software configurations
+		//
+		ok = generateSoftwareConfiguration();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool BuildWorkerThread::taskRunSimTests()
+	{
+		bool ok = runSimTests();
+		return ok;
 	}
 
 	bool BuildWorkerThread::getEquipment(Hardware::DeviceObject* parent)
@@ -582,6 +969,8 @@ namespace Builder
 
 			parent->addChild(device);
 		}
+
+		LOG_MESSAGE(m_context->m_log, tr("Ok"));
 
 		return true;
 	}
@@ -666,149 +1055,6 @@ namespace Builder
 		return true;
 	}
 
-	bool BuildWorkerThread::loadSubsystems()
-	{
-		LOG_EMPTY_LINE(m_context->m_log);
-		LOG_MESSAGE(m_context->m_log, tr("Loading subsystems..."));
-
-		QString errorCode;
-
-		m_context->m_subsystems = std::make_shared<SubsystemStorage>();
-
-		if (bool ok = m_context->m_subsystems->load(&m_context->m_db, errorCode);
-			ok == false)
-		{
-			LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, tr("Can't load subsystems file"));
-			if (errorCode.isEmpty() == false)
-			{
-				LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, errorCode);
-				return false;
-			}
-		}
-
-		// Check if subsystems have same id or sskey
-		//
-		std::set<QString> ids;
-		std::set<int> sskeys;
-
-		bool result = true;
-
-		for (std::shared_ptr<Hardware::Subsystem> subsystem : m_context->m_subsystems->subsystems())
-		{
-			assert(subsystem);
-
-			if (ids.count(subsystem->subsystemId()) > 0)
-			{
-				// Duplicate SubsystemID
-				//
-				result = false;
-				m_context->m_log->errEQP6005(subsystem->subsystemId());
-			}
-			else
-			{
-				ids.insert(subsystem->subsystemId());
-			}
-
-			if (sskeys.count(subsystem->key()) > 0)
-			{
-				// Duplicate ssKey
-				//
-				result = false;
-				m_context->m_log->errEQP6006(subsystem->key());
-			}
-			else
-			{
-				sskeys.insert(subsystem->key());
-			}
-		}
-
-		// Check if all LMs in subsystem have the same version and LmDescriptionFile
-		//
-		for (std::shared_ptr<Hardware::Subsystem> subsystem : m_context->m_subsystems->subsystems())
-		{
-			assert(subsystem);
-
-			Hardware::DeviceModule::FamilyType moduleFamily = Hardware::DeviceModule::FamilyType::OTHER;
-			int moduleVersion = -1;
-			QString LmDescriptionFile;
-
-			for (const Hardware::DeviceModule* lm : m_context->m_lmAndBvbModules)
-			{
-				assert(lm);
-				assert(lm->isFSCConfigurationModule() == true);
-
-				auto lmSubsystemIdProp = lm->propertyByCaption(Hardware::PropertyNames::lmSubsystemID);
-				if (lmSubsystemIdProp == nullptr)
-				{
-					m_context->m_log->errCFG3000(Hardware::PropertyNames::lmSubsystemID, lm->equipmentIdTemplate());
-					return false;
-				}
-
-				if (lmSubsystemIdProp->value() != subsystem->subsystemId())
-				{
-					continue;
-				}
-
-				// Check moduleFamily
-				//
-				if (moduleFamily == Hardware::DeviceModule::FamilyType::OTHER)
-				{
-					moduleFamily = lm->moduleFamily();			// Init start value
-				}
-				else
-				{
-					if (moduleFamily != lm->moduleFamily())
-					{
-						result = false;
-						m_context->m_log->errEQP6007(subsystem->subsystemId());
-						continue;
-					}
-				}
-
-				// Check moduleVersion
-				//
-				if (moduleVersion == -1)
-				{
-					moduleVersion = lm->moduleVersion();			// Init start value
-				}
-				else
-				{
-					if (moduleVersion != lm->moduleVersion())
-					{
-						result = false;
-						m_context->m_log->errEQP6007(subsystem->subsystemId());
-						continue;
-					}
-				}
-
-				// Check LmDescriptionFile
-				//
-				auto LmDescriptionFileProp = lm->propertyByCaption(Hardware::PropertyNames::lmDescriptionFile);
-				if (LmDescriptionFileProp == nullptr)
-				{
-					m_context->m_log->errCFG3000(Hardware::PropertyNames::lmDescriptionFile, lm->equipmentIdTemplate());
-					return false;
-				}
-
-				if (LmDescriptionFile.isEmpty() == true)
-				{
-					LmDescriptionFile = LmDescriptionFileProp->value().toString();	// Init start value
-				}
-				else
-				{
-					if (LmDescriptionFile != LmDescriptionFileProp->value().toString())
-					{
-						result = false;
-						m_context->m_log->errEQP6007(subsystem->subsystemId());
-						continue;
-					}
-				}
-			}
-		}
-
-		return result;
-	}
-
 	bool BuildWorkerThread::checkUuidAndStrId(Hardware::DeviceObject* root)
 	{
 		if (root == nullptr)
@@ -822,7 +1068,6 @@ namespace Builder
 
 		// Recursive function
 		//
-
 		bool ok = checkUuidAndStrIdWorker(root, uuidMap, strIdMap);
 
 		return ok;
@@ -1014,110 +1259,6 @@ namespace Builder
 
 		signalSet->initCalculatedSignalsProperties();
 
-		LOG_SUCCESS(log, tr("Ok"));
-
-		return true;
-	}
-
-	bool BuildWorkerThread::loadBusses()
-	{
-		m_context->m_busSet = std::make_shared<VFrame30::BusSet>();
-
-		// Get Busses
-		//
-		std::vector<DbFileInfo> fileList;
-
-		bool ok = m_context->m_db.getFileList(&fileList, DbDir::BusTypesDir, Db::File::BusFileExtension, true, nullptr);
-		if (ok == false)
-		{
-			return false;
-		}
-
-		if (fileList.empty() == true)
-		{
-			return true;
-		}
-
-		// Get Busses latest version from the DB
-		//
-		std::vector<std::shared_ptr<DbFile>> files;
-
-		ok = m_context->m_db.getLatestVersion(fileList, &files, nullptr);
-		if (ok == false)
-		{
-			return false;
-		}
-
-		// Parse files, create actual Busses
-		//
-		std::vector<VFrame30::Bus> busses;
-		busses.reserve(files.size());
-
-		for (const std::shared_ptr<DbFile>& f : files)
-		{
-			if (f->deleted() == true ||
-				f->action() == E::VcsItemAction::Deleted)
-			{
-				continue;
-			}
-
-			VFrame30::Bus bus;
-			ok = bus.Load(f->data());
-			if (ok == false)
-			{
-				return false;
-			}
-
-			busses.push_back(bus);
-		}
-
-		m_context->m_busSet->setBusses(busses);
-
-		return true;
-	}
-
-
-	bool BuildWorkerThread::loadLmDescriptions()
-	{
-		LOG_EMPTY_LINE(m_context->m_log);
-		LOG_MESSAGE(m_context->m_log, tr("Loading LogicModule descriptions..."));
-
-		m_context->m_lmDescriptions = std::make_shared<LmDescriptionSet>();
-		m_context->m_fscDescriptions = std::make_shared<LmDescriptionSet>();
-
-		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_lmModules, Hardware::DeviceModule::FamilyType::LM);
-
-		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::LM);
-		findModulesByFamily(m_context->m_equipmentSet->root().get(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::BVB);
-
-		bool ok = true;
-		for (Hardware::DeviceModule* lm : m_context->m_lmAndBvbModules)
-		{
-			ok &= loadLogicModuleDescription(lm, m_context->m_lmDescriptions.get());
-		}
-
-		if (ok == false)
-		{
-			return false;
-		}
-
-		findFSCConfigurationModules(m_context->m_equipmentSet->root().get(), &m_context->m_fscModules);
-
-		ok = true;
-		for (Hardware::DeviceModule* lm : m_context->m_fscModules)
-		{
-			ok &= loadLogicModuleDescription(lm, m_context->m_fscDescriptions.get());
-		}
-
-		if (ok == false)
-		{
-			return false;
-		}
-		else
-		{
-			LOG_SUCCESS(m_context->m_log, tr("Ok"));
-		}
-
 		return true;
 	}
 
@@ -1160,184 +1301,12 @@ namespace Builder
 		//
 		bool ok = lmDescriptions->loadFile(m_context->m_log, &m_context->m_db, logicModule->equipmentIdTemplate(), lmDescriptionFile);
 
+		if (ok == true)
+		{
+			LOG_MESSAGE(m_context->m_log, tr("Loaded: %1").arg(lmDescriptionFile));
+		}
+
 		return ok;
-	}
-
-	bool BuildWorkerThread::loadConnections()
-	{
-		QString errorMessage;
-
-		m_context->m_connections = std::make_shared<ConnectionStorage>(&m_context->m_db);
-
-		if (bool ok = m_context->m_connections->load(&errorMessage);
-			ok == false)
-		{
-			LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, tr("Can't load connections file: "));
-			if (errorMessage.isEmpty() == false)
-			{
-				LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, errorMessage);
-				return false;
-			}
-		}
-
-		m_context->m_opticModuleStorage = std::make_shared<Hardware::OptoModuleStorage>(m_context.get());
-		bool res = m_context->m_opticModuleStorage->init();
-
-		return res;
-	}
-
-	// Check that all files (and from that theirs SchemaIds) in $root$/Schema are unique
-	//
-	bool BuildWorkerThread::checkRootSchemasUniquesIds(DbController* db)
-	{
-		if (db == nullptr)
-		{
-			assert(db);
-			return false;
-		}
-
-		LOG_EMPTY_LINE(m_context->m_log);
-		LOG_MESSAGE(m_context->m_log, tr("Checking uniqueness SchemaIDs..."));
-
-		DbFileTree fileTree;
-
-		if (bool ok = db->getFileListTree(&fileTree, DbDir::SchemasDir, true, nullptr);
-			ok == false)
-		{
-			m_context->m_log->errPDB2001(db->systemFileId(DbDir::SchemasDir), "", db->lastError());
-			return false;
-		}
-
-		// --
-		//
-		const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
-
-		QString strAlFileExtension{Db::File::AlFileExtension};
-		QString strUfbFileExtension{Db::File::UfbFileExtension};
-		QString strMvsFileExtension{Db::File::MvsFileExtension};
-		QString strDvsFileExtension{Db::File::DvsFileExtension};
-
-		bool success = true;
-
-		std::set<QString> schemaIds;
-		for (auto& [fileId, file] : files)
-		{
-			if (file->isFolder() == true)
-			{
-				continue;
-			}
-
-			QString fileExt = file->extension();
-
-			if (fileExt.compare(strAlFileExtension, Qt::CaseInsensitive) != 0 &&
-				fileExt.compare(strUfbFileExtension, Qt::CaseInsensitive) != 0 &&
-				fileExt.compare(strMvsFileExtension, Qt::CaseInsensitive) != 0 &&
-				fileExt.compare(strDvsFileExtension, Qt::CaseInsensitive) != 0)
-			{
-				continue;
-			}
-
-			//--
-			//
-			VFrame30::SchemaDetails details;
-
-			if (bool ok = details.parseDetails(file->details());
-				ok == false)
-			{
-				m_context->m_log->errALP4024(file->fileName(), file->details());
-				continue;
-			}
-
-			if (schemaIds.count(details.m_schemaId) != 0)
-			{
-				m_context->m_log->errALP4025(details.m_schemaId);
-				success = false;
-			}
-			else
-			{
-				schemaIds.insert(details.m_schemaId);
-			}
-		}
-
-		if (success == true)
-		{
-			LOG_SUCCESS(m_context->m_log, tr("Ok"));
-		}
-
-		return success;
-	}
-
-	bool BuildWorkerThread::parseApplicationLogic()
-	{
-		m_context->m_appLogicData = std::make_shared<AppLogicData>();
-
-		LOG_EMPTY_LINE(m_context->m_log);
-		LOG_MESSAGE(m_context->m_log, tr("Application Logic parsing..."));
-
-		Parser parser(m_context.get());
-		parser.parse();
-
-		bool result = m_context->m_log->errorCount() == 0;
-		if (result == false)
-		{
-		}
-		else
-		{
-			LOG_SUCCESS(m_context->m_log, tr("Ok"));
-		}
-
-		emit runOrderReady(parser.runOrder());
-
-		return result;
-	}
-
-	bool BuildWorkerThread::saveLogicModuleDescriptions()
-	{
-		assert(m_context->m_buildResultWriter);
-
-		LOG_MESSAGE(m_context->m_log, "Saving LogicModule's descriptions");
-
-		QStringList lmFiles = m_context->m_lmDescriptions->fileList();
-
-		for (QString fileName : lmFiles)
-		{
-			auto file = m_context->m_lmDescriptions->rowFile(fileName);
-
-			if (file.second == false)
-			{
-				m_context->m_log->errINT1000(tr("File %1 present in LmDescriptionSet but cannot be found it's raw version. ") + Q_FUNC_INFO);
-				return false;
-			}
-
-			BuildFile* buildFile = m_context->m_buildResultWriter->addFile(QLatin1String("LmDescriptions"), fileName, file.first, false);
-			assert(buildFile);
-			Q_UNUSED(buildFile);
-		}
-
-		return true;
-	}
-
-	bool BuildWorkerThread::compileApplicationLogic()
-	{
-		LOG_EMPTY_LINE(m_context->m_log);
-		LOG_MESSAGE(m_context->m_log, tr("Application Logic compilation"));
-
-		ApplicationLogicCompiler appLogicCompiler(m_context.get());
-
-		bool result = appLogicCompiler.run();
-
-		LOG_EMPTY_LINE(m_context->m_log);
-
-		if (result == false)
-		{
-			LOG_MESSAGE(m_context->m_log, tr("Application Logic compilation was finished with errors"));
-		}
-		else
-		{
-			LOG_SUCCESS(m_context->m_log, tr("Application Logic compilation was succesfully finished"));
-		}
-
-		return result;
 	}
 
 	bool BuildWorkerThread::loadSimProfiles()
@@ -1683,15 +1652,6 @@ namespace Builder
 
 		LOG_EMPTY_LINE(context->m_log);
 
-		if (result == false)
-		{
-			LOG_MESSAGE(context->m_log, tr("Sofware configuration generation was finished with errors"));
-		}
-		else
-		{
-			LOG_SUCCESS(context->m_log, tr("Sofware configuration generation was succesfully finished"));
-		}
-
 		SoftwareCfgGenerator::clearStaticData();
 
 		return result;
@@ -1751,7 +1711,7 @@ namespace Builder
 
 		if (result == true)
 		{
-			LOG_SUCCESS(m_log, QString("Ok"));
+			LOG_MESSAGE(m_log, QString("Ok"));
 		}
 
 		LOG_EMPTY_LINE(m_log);
@@ -1768,17 +1728,8 @@ namespace Builder
 		return result;
 	}
 
-	bool BuildWorkerThread::writeBinaryFiles(BuildResultWriter &buildResultWriter)
-	{
-		bool result = true;
-
-		result &= buildResultWriter.writeBinaryFiles();
-
-		return result;
-	}
-
-	void BuildWorkerThread::generateModulesInformation(BuildResultWriter& buildWriter,
-							   const std::vector<Hardware::DeviceModule *>& lmModules)
+	bool BuildWorkerThread::generateModulesInformation(BuildResultWriter& buildWriter,
+													   const std::vector<Hardware::DeviceModule*>& lmModules)
 	{
 		for (auto it = lmModules.begin(); it != lmModules.end(); it++)
 		{
@@ -1824,6 +1775,8 @@ namespace Builder
 
 			moduleFirmware.addLogicModuleInfo(lm->equipmentId(), subsysID, lmNumber, subsystemChannel, lm->moduleFamily(), lm->customModuleFamily(), lm->moduleVersion(), lm->moduleType());
 		}
+
+		return true;
 	}
 
 	bool BuildWorkerThread::generateLmsUniqueIDs(Context* context)
@@ -2252,7 +2205,7 @@ namespace Builder
 	{
 		if (m_context != nullptr)
 		{
-			return m_context->m_progress;
+			return static_cast<int>(m_totalProgress);
 		}
 		else
 		{

@@ -147,7 +147,7 @@ namespace Builder
 
 		bool writeFirmwareStatistics();
 
-		bool writeBinaryFiles();
+		bool writeBitstreamFile();
 
 		bool writeConfigurationXmlFiles();
 
