@@ -358,7 +358,7 @@ namespace Builder
 		//
 		for(Afb::AfbParam& param : afbElement->params())
 		{
-			m_appLogicItem.m_fblItem->toAfbElement()->setAfbParamByOpName(param.opName(), param.value());
+			m_appLogicItem.m_fblItem->toAfbElement()->setAfbParamByOpName(param.opName(), param.afbParamValue());
 		}
 
 		return true;
@@ -610,7 +610,9 @@ namespace Builder
 
 	AppFbParamValue::AppFbParamValue(const Afb::AfbParam& afbParam)
 	{
-		QVariant qv = afbParam.value();
+		Q_ASSERT(afbParam.afbParamValue().reference().isEmpty() == false);
+
+		QVariant qv = afbParam.afbParamValue().value();
 
 		m_opName = afbParam.opName();
 		m_caption = afbParam.caption();

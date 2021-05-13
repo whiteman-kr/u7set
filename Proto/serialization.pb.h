@@ -4958,6 +4958,7 @@ class UfbSchema PROTOBUF_FINAL :
   enum : int {
     kDescriptionFieldNumber = 1,
     kLmDescriptionFileFieldNumber = 3,
+    kSpecificPropertiesStructFieldNumber = 6,
     kVersionFieldNumber = 2,
   };
   // optional string description = 1;
@@ -5000,6 +5001,26 @@ class UfbSchema PROTOBUF_FINAL :
   std::string* _internal_mutable_lmdescriptionfile();
   public:
 
+  // optional string specific_properties_struct = 6;
+  bool has_specific_properties_struct() const;
+  private:
+  bool _internal_has_specific_properties_struct() const;
+  public:
+  void clear_specific_properties_struct();
+  const std::string& specific_properties_struct() const;
+  void set_specific_properties_struct(const std::string& value);
+  void set_specific_properties_struct(std::string&& value);
+  void set_specific_properties_struct(const char* value);
+  void set_specific_properties_struct(const char* value, size_t size);
+  std::string* mutable_specific_properties_struct();
+  std::string* release_specific_properties_struct();
+  void set_allocated_specific_properties_struct(std::string* specific_properties_struct);
+  private:
+  const std::string& _internal_specific_properties_struct() const;
+  void _internal_set_specific_properties_struct(const std::string& value);
+  std::string* _internal_mutable_specific_properties_struct();
+  public:
+
   // optional int32 version = 2 [default = 1];
   bool has_version() const;
   private:
@@ -5025,6 +5046,7 @@ class UfbSchema PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr description_;
   static const ::PROTOBUF_NAMESPACE_ID::internal::LazyString _i_give_permission_to_break_this_code_default_lmdescriptionfile_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr lmdescriptionfile_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr specific_properties_struct_;
   ::PROTOBUF_NAMESPACE_ID::int32 version_;
   friend struct ::TableStruct_serialization_2eproto;
 };
@@ -12210,10 +12232,30 @@ class SchemaItemUfb PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kPropertiesFieldNumber = 11,
     kUfbSchemaIdFieldNumber = 1,
     kUfbCaptionFieldNumber = 2,
+    kSpecificPropertiesStructFieldNumber = 10,
     kUfbVersionFieldNumber = 3,
   };
+  // repeated .Proto.Property properties = 11;
+  int properties_size() const;
+  private:
+  int _internal_properties_size() const;
+  public:
+  void clear_properties();
+  ::Proto::Property* mutable_properties(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Property >*
+      mutable_properties();
+  private:
+  const ::Proto::Property& _internal_properties(int index) const;
+  ::Proto::Property* _internal_add_properties();
+  public:
+  const ::Proto::Property& properties(int index) const;
+  ::Proto::Property* add_properties();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Property >&
+      properties() const;
+
   // optional string ufbSchemaId = 1;
   bool has_ufbschemaid() const;
   private:
@@ -12254,6 +12296,26 @@ class SchemaItemUfb PROTOBUF_FINAL :
   std::string* _internal_mutable_ufbcaption();
   public:
 
+  // optional string specific_properties_struct = 10;
+  bool has_specific_properties_struct() const;
+  private:
+  bool _internal_has_specific_properties_struct() const;
+  public:
+  void clear_specific_properties_struct();
+  const std::string& specific_properties_struct() const;
+  void set_specific_properties_struct(const std::string& value);
+  void set_specific_properties_struct(std::string&& value);
+  void set_specific_properties_struct(const char* value);
+  void set_specific_properties_struct(const char* value, size_t size);
+  std::string* mutable_specific_properties_struct();
+  std::string* release_specific_properties_struct();
+  void set_allocated_specific_properties_struct(std::string* specific_properties_struct);
+  private:
+  const std::string& _internal_specific_properties_struct() const;
+  void _internal_set_specific_properties_struct(const std::string& value);
+  std::string* _internal_mutable_specific_properties_struct();
+  public:
+
   // optional int32 ufbVersion = 3 [default = -1];
   bool has_ufbversion() const;
   private:
@@ -12276,8 +12338,10 @@ class SchemaItemUfb PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Property > properties_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr ufbschemaid_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr ufbcaption_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr specific_properties_struct_;
   ::PROTOBUF_NAMESPACE_ID::int32 ufbversion_;
   friend struct ::TableStruct_serialization_2eproto;
 };
@@ -30828,7 +30892,7 @@ inline void UfbSchema::set_allocated_description(std::string* description) {
 
 // optional int32 version = 2 [default = 1];
 inline bool UfbSchema::_internal_has_version() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool UfbSchema::has_version() const {
@@ -30836,7 +30900,7 @@ inline bool UfbSchema::has_version() const {
 }
 inline void UfbSchema::clear_version() {
   version_ = 1;
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 UfbSchema::_internal_version() const {
   return version_;
@@ -30846,7 +30910,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 UfbSchema::version() const {
   return _internal_version();
 }
 inline void UfbSchema::_internal_set_version(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
   version_ = value;
 }
 inline void UfbSchema::set_version(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -30926,6 +30990,79 @@ inline void UfbSchema::set_allocated_lmdescriptionfile(std::string* lmdescriptio
   lmdescriptionfile_.SetAllocated(nullptr, lmdescriptionfile,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Proto.UfbSchema.lmDescriptionFile)
+}
+
+// optional string specific_properties_struct = 6;
+inline bool UfbSchema::_internal_has_specific_properties_struct() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool UfbSchema::has_specific_properties_struct() const {
+  return _internal_has_specific_properties_struct();
+}
+inline void UfbSchema::clear_specific_properties_struct() {
+  specific_properties_struct_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline const std::string& UfbSchema::specific_properties_struct() const {
+  // @@protoc_insertion_point(field_get:Proto.UfbSchema.specific_properties_struct)
+  return _internal_specific_properties_struct();
+}
+inline void UfbSchema::set_specific_properties_struct(const std::string& value) {
+  _internal_set_specific_properties_struct(value);
+  // @@protoc_insertion_point(field_set:Proto.UfbSchema.specific_properties_struct)
+}
+inline std::string* UfbSchema::mutable_specific_properties_struct() {
+  // @@protoc_insertion_point(field_mutable:Proto.UfbSchema.specific_properties_struct)
+  return _internal_mutable_specific_properties_struct();
+}
+inline const std::string& UfbSchema::_internal_specific_properties_struct() const {
+  return specific_properties_struct_.Get();
+}
+inline void UfbSchema::_internal_set_specific_properties_struct(const std::string& value) {
+  _has_bits_[0] |= 0x00000004u;
+  specific_properties_struct_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void UfbSchema::set_specific_properties_struct(std::string&& value) {
+  _has_bits_[0] |= 0x00000004u;
+  specific_properties_struct_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.UfbSchema.specific_properties_struct)
+}
+inline void UfbSchema::set_specific_properties_struct(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000004u;
+  specific_properties_struct_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.UfbSchema.specific_properties_struct)
+}
+inline void UfbSchema::set_specific_properties_struct(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000004u;
+  specific_properties_struct_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.UfbSchema.specific_properties_struct)
+}
+inline std::string* UfbSchema::_internal_mutable_specific_properties_struct() {
+  _has_bits_[0] |= 0x00000004u;
+  return specific_properties_struct_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* UfbSchema::release_specific_properties_struct() {
+  // @@protoc_insertion_point(field_release:Proto.UfbSchema.specific_properties_struct)
+  if (!_internal_has_specific_properties_struct()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000004u;
+  return specific_properties_struct_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void UfbSchema::set_allocated_specific_properties_struct(std::string* specific_properties_struct) {
+  if (specific_properties_struct != nullptr) {
+    _has_bits_[0] |= 0x00000004u;
+  } else {
+    _has_bits_[0] &= ~0x00000004u;
+  }
+  specific_properties_struct_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), specific_properties_struct,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.UfbSchema.specific_properties_struct)
 }
 
 // -------------------------------------------------------------------
@@ -39901,7 +40038,7 @@ inline void SchemaItemUfb::set_allocated_ufbcaption(std::string* ufbcaption) {
 
 // optional int32 ufbVersion = 3 [default = -1];
 inline bool SchemaItemUfb::_internal_has_ufbversion() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool SchemaItemUfb::has_ufbversion() const {
@@ -39909,7 +40046,7 @@ inline bool SchemaItemUfb::has_ufbversion() const {
 }
 inline void SchemaItemUfb::clear_ufbversion() {
   ufbversion_ = -1;
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemUfb::_internal_ufbversion() const {
   return ufbversion_;
@@ -39919,12 +40056,124 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemUfb::ufbversion() const {
   return _internal_ufbversion();
 }
 inline void SchemaItemUfb::_internal_set_ufbversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
   ufbversion_ = value;
 }
 inline void SchemaItemUfb::set_ufbversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_ufbversion(value);
   // @@protoc_insertion_point(field_set:Proto.SchemaItemUfb.ufbVersion)
+}
+
+// optional string specific_properties_struct = 10;
+inline bool SchemaItemUfb::_internal_has_specific_properties_struct() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool SchemaItemUfb::has_specific_properties_struct() const {
+  return _internal_has_specific_properties_struct();
+}
+inline void SchemaItemUfb::clear_specific_properties_struct() {
+  specific_properties_struct_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline const std::string& SchemaItemUfb::specific_properties_struct() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemUfb.specific_properties_struct)
+  return _internal_specific_properties_struct();
+}
+inline void SchemaItemUfb::set_specific_properties_struct(const std::string& value) {
+  _internal_set_specific_properties_struct(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemUfb.specific_properties_struct)
+}
+inline std::string* SchemaItemUfb::mutable_specific_properties_struct() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemUfb.specific_properties_struct)
+  return _internal_mutable_specific_properties_struct();
+}
+inline const std::string& SchemaItemUfb::_internal_specific_properties_struct() const {
+  return specific_properties_struct_.Get();
+}
+inline void SchemaItemUfb::_internal_set_specific_properties_struct(const std::string& value) {
+  _has_bits_[0] |= 0x00000004u;
+  specific_properties_struct_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SchemaItemUfb::set_specific_properties_struct(std::string&& value) {
+  _has_bits_[0] |= 0x00000004u;
+  specific_properties_struct_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.SchemaItemUfb.specific_properties_struct)
+}
+inline void SchemaItemUfb::set_specific_properties_struct(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000004u;
+  specific_properties_struct_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.SchemaItemUfb.specific_properties_struct)
+}
+inline void SchemaItemUfb::set_specific_properties_struct(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000004u;
+  specific_properties_struct_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaItemUfb.specific_properties_struct)
+}
+inline std::string* SchemaItemUfb::_internal_mutable_specific_properties_struct() {
+  _has_bits_[0] |= 0x00000004u;
+  return specific_properties_struct_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SchemaItemUfb::release_specific_properties_struct() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaItemUfb.specific_properties_struct)
+  if (!_internal_has_specific_properties_struct()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000004u;
+  return specific_properties_struct_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SchemaItemUfb::set_allocated_specific_properties_struct(std::string* specific_properties_struct) {
+  if (specific_properties_struct != nullptr) {
+    _has_bits_[0] |= 0x00000004u;
+  } else {
+    _has_bits_[0] &= ~0x00000004u;
+  }
+  specific_properties_struct_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), specific_properties_struct,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemUfb.specific_properties_struct)
+}
+
+// repeated .Proto.Property properties = 11;
+inline int SchemaItemUfb::_internal_properties_size() const {
+  return properties_.size();
+}
+inline int SchemaItemUfb::properties_size() const {
+  return _internal_properties_size();
+}
+inline void SchemaItemUfb::clear_properties() {
+  properties_.Clear();
+}
+inline ::Proto::Property* SchemaItemUfb::mutable_properties(int index) {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemUfb.properties)
+  return properties_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Property >*
+SchemaItemUfb::mutable_properties() {
+  // @@protoc_insertion_point(field_mutable_list:Proto.SchemaItemUfb.properties)
+  return &properties_;
+}
+inline const ::Proto::Property& SchemaItemUfb::_internal_properties(int index) const {
+  return properties_.Get(index);
+}
+inline const ::Proto::Property& SchemaItemUfb::properties(int index) const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemUfb.properties)
+  return _internal_properties(index);
+}
+inline ::Proto::Property* SchemaItemUfb::_internal_add_properties() {
+  return properties_.Add();
+}
+inline ::Proto::Property* SchemaItemUfb::add_properties() {
+  // @@protoc_insertion_point(field_add:Proto.SchemaItemUfb.properties)
+  return _internal_add_properties();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Property >&
+SchemaItemUfb::properties() const {
+  // @@protoc_insertion_point(field_list:Proto.SchemaItemUfb.properties)
+  return properties_;
 }
 
 // -------------------------------------------------------------------

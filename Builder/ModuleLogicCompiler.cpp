@@ -6029,11 +6029,11 @@ namespace Builder
 
 					FbScal fb = m_fbScal[FB_SCALE_16UI_FP_INDEX];
 
-					fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1));
-					fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2));
+					fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1));
+					fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2));
 
-					fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1));
-					fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2));
+					fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1));
+					fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2));
 
 					result &= appItem->init(fb.pointer, errorMsg);
 					appItem->setLabel(signal.appSignalID());
@@ -6053,11 +6053,11 @@ namespace Builder
 
 					FbScal& fb = m_fbScal[FB_SCALE_16UI_SI_INDEX];
 
-					fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1));
-					fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2));
+					fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1));
+					fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2));
 
-					fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
-					fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
+					fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1).toInt());
+					fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2).toInt());
 
 					result &= appItem->init(fb.pointer, errorMsg);
 					appItem->setLabel(signal.appSignalID());
@@ -6211,11 +6211,11 @@ namespace Builder
 
 					FbScal& fb = m_fbScal[FB_SCALE_FP_16UI_INDEX];
 
-					fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1));
-					fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2));
+					fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1));
+					fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2));
 
-					fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
-					fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
+					fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1).toInt());
+					fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2).toInt());
 
 					result = appItem->init(fb.pointer, errorMsg);
 					appItem->setLabel(signal.appSignalID());
@@ -6235,11 +6235,11 @@ namespace Builder
 
 					FbScal& fb = m_fbScal[FB_SCALE_SI_16UI_INDEX];
 
-					fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1).toInt());
-					fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2).toInt());
+					fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1).toInt());
+					fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2).toInt());
 
-					fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
-					fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
+					fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1).toInt());
+					fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2).toInt());
 
 					result = appItem->init(fb.pointer, errorMsg);
 					appItem->setLabel(signal.appSignalID());
@@ -9935,7 +9935,7 @@ namespace Builder
 		{
 			if (pv.opName() == "i_conf") // set comparator type: =(1(SI)), > (2(SI)), < (3(SI)), ? (4(SI)),= (5(FP)), > (6(FP)), < (7(FP)), ? (8(FP))
 			{
-				switch (pv.value().toInt())
+				switch (pv.afbParamValue().value().toInt())
 				{
 					case 1:
 					case 5:			cmp->setCmpType(E::CmpType::Equal);		break;
@@ -9952,9 +9952,9 @@ namespace Builder
 			{
 				switch (pv.dataFormat())
 				{
-					case E::DataFormat::Float :			cmp->compare().setConstValue(pv.value().toDouble());	break;
-					case E::DataFormat::SignedInt :		cmp->compare().setConstValue(pv.value().toInt());		break;
-					case E::DataFormat::UnsignedInt :	cmp->compare().setConstValue(pv.value().toInt());		break;
+					case E::DataFormat::Float :			cmp->compare().setConstValue(pv.afbParamValue().value().toDouble());	break;
+					case E::DataFormat::SignedInt :		cmp->compare().setConstValue(pv.afbParamValue().value().toInt());		break;
+					case E::DataFormat::UnsignedInt :	cmp->compare().setConstValue(pv.afbParamValue().value().toInt());		break;
 					default:							assert(0);
 				}
 			}
@@ -9963,9 +9963,9 @@ namespace Builder
 			{
 				switch (pv.dataFormat())
 				{
-					case E::DataFormat::Float :			cmp->hysteresis().setConstValue(pv.value().toDouble());	break;
-					case E::DataFormat::SignedInt :		cmp->hysteresis().setConstValue(pv.value().toInt());	break;
-					case E::DataFormat::UnsignedInt :	cmp->hysteresis().setConstValue(pv.value().toInt());	break;
+					case E::DataFormat::Float :			cmp->hysteresis().setConstValue(pv.afbParamValue().value().toDouble());	break;
+					case E::DataFormat::SignedInt :		cmp->hysteresis().setConstValue(pv.afbParamValue().value().toInt());	break;
+					case E::DataFormat::UnsignedInt :	cmp->hysteresis().setConstValue(pv.afbParamValue().value().toInt());	break;
 					default:							assert(0);
 				}
 			}

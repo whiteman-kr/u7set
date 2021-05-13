@@ -345,6 +345,7 @@ message UfbSchema
     optional string description = 1;
 	optional int32 version = 2 [default = 1];
 	optional string lmDescriptionFile = 3 [default = "LogicModule0000.xml"];
+	optional string specific_properties_struct = 6;
 }
 
 
@@ -784,6 +785,9 @@ message SchemaItemUfb
     optional string ufbSchemaId = 1;
 	optional string ufbCaption = 2;
 	optional int32 ufbVersion = 3 [default = -1];
+
+    optional string specific_properties_struct = 10;
+	repeated Property properties = 11;
 }
 
 //

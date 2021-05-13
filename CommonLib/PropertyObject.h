@@ -24,11 +24,13 @@
 #include "../lib/OrderedHash.h"
 #include "../CommonLib/Types.h"
 
+// --
+//
 class PropertyObject;
 
 #define ADD_PROPERTY_GETTER(TYPE, NAME, VISIBLE, GETTER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
-	[this](){return GETTER();});
+	[this](){return GETTER();})
 
 
 #define ADD_PROPERTY_GETTER_INDIRECT(TYPE, NAME, VISIBLE, GETTER, OWNER) \

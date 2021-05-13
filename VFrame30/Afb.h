@@ -322,6 +322,67 @@ private:
 	};
 
 	//
+	// AfbParamValue
+	//
+	class AfbParamValue
+	{
+	public:
+		AfbParamValue() = default;
+		AfbParamValue(E::SignalType _type, E::DataFormat _dataFormat, quint16 _size);
+		AfbParamValue(const AfbParamValue&) = default;
+		~AfbParamValue() = default;
+		AfbParamValue& operator=(const AfbParamValue&) = default;
+
+		bool operator==(const AfbParamValue&) const = default;
+		bool operator!=(const AfbParamValue&) const = default;
+
+	public:
+		[[nodiscard]] QString toString() const;
+		bool fromString(const QString& str);
+
+		[[nodiscard]] int validate(const QString& str) const;
+
+		[[nodiscard]] QVariant toVariant() const;		// Returns AfbParamValue as QVariant
+		bool fromVariant(const QVariant& v);			// Set *this to QVariant (AfbParamValue)
+
+	public:
+		[[nodiscard]] E::SignalType type() const;
+		void setType(E::SignalType type);
+
+		[[nodiscard]] E::DataFormat dataFormat() const;
+		void setDataFormat(E::DataFormat dataFormat);
+
+		[[nodiscard]] bool isAnalog() const;
+		[[nodiscard]] bool isDiscrete() const;
+
+		[[nodiscard]] int size() const;
+		void setSize(int value);
+
+		[[nodiscard]] QVariant value() const;
+		bool setValue(const QVariant& v);
+
+		[[nodiscard]] const QString& reference() const;
+		void setReference(const QString& value);
+
+		[[nodiscard]] bool checkValue() const;
+
+		// Data
+		//
+	private:
+		E::SignalType m_type = E::SignalType::Analog;
+		E::DataFormat m_dataFormat = E::DataFormat::Float;
+		quint16 m_size = 0;				// BitWidth
+
+		QVariant m_value;
+		QString m_reference;			// Reference to variable e.g. '$(Schema.VarName)'
+	};
+}	// namespace Afb
+
+Q_DECLARE_METATYPE(Afb::AfbParamValue)
+
+namespace Afb
+{
+	//
 	// AfbParam
 	//
 	class AfbParam
@@ -344,55 +405,56 @@ private:
 		// Properties
 		//
 	public:
-		const QString& caption() const;
+		[[nodiscard]] const QString& caption() const;
 		void setCaption(const QString& caption);
 
-		const QString& opName() const;
+		[[nodiscard]] const QString& opName() const;
 		void setOpName(const QString& value);
 
-		bool visible() const;
+		[[nodiscard]] bool visible() const;
 		void setVisible(bool visible);
 
-		E::SignalType type() const;
+		[[nodiscard]] E::SignalType type() const;
 		void setType(E::SignalType type);
 
-		E::DataFormat dataFormat() const;
+		[[nodiscard]] E::DataFormat dataFormat() const;
 		void setDataFormat(E::DataFormat dataFormat);
 
-		bool isAnalog() const;
-		bool isDiscrete() const;
+		[[nodiscard]] bool isAnalog() const;
+		[[nodiscard]] bool isDiscrete() const;
 
-		const QVariant& value() const;
-		void setValue(const QVariant& value);
+		[[nodiscard]] const AfbParamValue& afbParamValue() const;
+		[[nodiscard]] AfbParamValue& afbParamValue();
+		void setAfbParamValue(const AfbParamValue& v);
 
-		const QVariant& defaultValue() const;
+		[[nodiscard]] const QVariant& defaultValue() const;
 		void setDefaultValue(const QVariant& defaultValue);
 
-		const QVariant& lowLimit() const;
+		[[nodiscard]] const QVariant& lowLimit() const;
 		void setLowLimit(const QVariant& lowLimit);
 
-		const QVariant& highLimit() const;
+		[[nodiscard]] const QVariant& highLimit() const;
 		void setHighLimit(const QVariant& highLimit);
 
-        int operandIndex() const;
+		[[nodiscard]] int operandIndex() const;
 		void setOperandIndex(int value);
 
-		int size() const;
+		[[nodiscard]] int size() const;
 		void setSize(int value);
 
-		E::ByteOrder byteOrder() const;
+		[[nodiscard]] E::ByteOrder byteOrder() const;
 		void setByteOrder(E::ByteOrder value);
 
-		bool instantiator() const;
+		[[nodiscard]] bool instantiator() const;
 		void setInstantiator(bool value);
 
-		bool user() const;
+		[[nodiscard]] bool user() const;
 		void setUser(bool value);
 
-		QString changedScript() const;
+		[[nodiscard]] QString changedScript() const;
 		void setChangedScript(const QString& value);
 
-		const QString& units() const;
+		[[nodiscard]] const QString& units() const;
 		void setUnits(const QString& value);
 
 		// Data
@@ -401,14 +463,12 @@ private:
 		QString m_opName;			// Param name
 		QString m_caption;			// Param caption
 		bool m_visible;
-		E::SignalType m_type;		// Param type
-		E::DataFormat m_dataFormat;
 		E::ByteOrder m_byteOrder;
 		bool m_instantiator;
 		bool m_user;
 		QString m_changedScript;
 
-		QVariant m_value;			// Param value
+		AfbParamValue m_afbParamValue;	// Param value
 		QVariant m_defaultValue;	// Param default value
 
 		QVariant m_lowLimit;		// Low limit for param
@@ -567,5 +627,4 @@ private:
 		std::vector<std::shared_ptr<AfbElement>> m_elements;
 	};
 }
-
 

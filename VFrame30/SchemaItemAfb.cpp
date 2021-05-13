@@ -163,11 +163,7 @@ namespace VFrame30
 
 			// Param string LOWERCASED
 			//
-			QString paramStr = QString("%1: %2 %3")
-							   .arg(param.caption())
-							   .arg(paramValue)
-							   .arg(param.units())
-									.toLower();
+			QString paramStr = QString("%1: %2 %3").arg(param.caption(), paramValue, param.units()).toLower();
 
 			if (text.isEmpty() == true)
 			{
@@ -422,6 +418,7 @@ namespace VFrame30
 			}
 
 			QRectF paramRect(intend, paramY, rect.width() - intend * 2, pinHeight);
+			QString paramValueStr = param.afbParamValue().toString();
 
 			QString str;
 			if (param.isAnalog() == true)
@@ -433,7 +430,7 @@ namespace VFrame30
 					str = QString("%1, %2: %3 (%4 - %5), %6")
 						  .arg(param.caption())
 						  .arg(param.units())
-						  .arg(param.value().toString())
+						  .arg(paramValueStr)
 						  .arg(param.lowLimit().toString())
 						  .arg(param.highLimit().toString())
 						  .arg(typeStr);
@@ -442,7 +439,7 @@ namespace VFrame30
 				{
 					str = QString("%1: %2 (%3 - %4), %5")
 						  .arg(param.caption())
-						  .arg(param.value().toString())
+						  .arg(paramValueStr)
 						  .arg(param.lowLimit().toString())
 						  .arg(param.highLimit().toString())
 						  .arg(typeStr);
@@ -454,7 +451,7 @@ namespace VFrame30
 
 				str = QString("%1: %2")
 					  .arg(param.caption())
-					  .arg(param.value().toString());
+					  .arg(paramValueStr);
 			}
 
 			drawTextFunc(p, paramRect, str, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip);
@@ -598,6 +595,14 @@ namespace VFrame30
 			return false;
 		}
 
+		if (value.canConvert<Afb::AfbParamValue>() == false)
+		{
+			Q_ASSERT(value.canConvert<Afb::AfbParamValue>());
+			return false;
+		}
+
+		Afb::AfbParamValue newValue = value.value<Afb::AfbParamValue>();
+
 		auto found = std::find_if(m_afbElement.params().begin(), m_afbElement.params().end(), [&name](const Afb::AfbParam& p)
 			{
 				return p.caption() == name;
@@ -609,16 +614,14 @@ namespace VFrame30
 			return false;
 		}
 
-
-
-		if (found->value() != value)
+		if (found->afbParamValue() != newValue)
 		{
 			qDebug() << tr("Param %1 was changed from %2 to %3").
 						arg(name).
-						arg(found->value().toString()).
+						arg(found->afbParamValue().toString()).
 						arg(value.toString());
 
-			found->setValue(value);
+			found->setAfbParamValue(newValue);
 
 			// Call script here
 			//
@@ -637,13 +640,21 @@ namespace VFrame30
 		return true;
 	}
 
-	bool SchemaItemAfb::setAfbParamByOpName(const QString& opName, QVariant value)
+	bool SchemaItemAfb::setAfbParamByOpName(const QString& opName, const Afb::AfbParamValue& value)
 	{
 		if (opName.isEmpty() == true)
 		{
 			assert(opName.isEmpty() != true);
 			return false;
 		}
+
+//		if (value.canConvert<Afb::AfbParamValue>() == false)
+//		{
+//			Q_ASSERT(value.canConvert<Afb::AfbParamValue>());
+//			return false;
+//		}
+
+//		Afb::AfbParamValue newValue = value.value<Afb::AfbParamValue>();
 
 		auto found = std::find_if(m_afbElement.params().begin(), m_afbElement.params().end(), [&opName](const Afb::AfbParam& p)
 			{
@@ -661,7 +672,7 @@ namespace VFrame30
 //					arg(found->value().toString()).
 //					arg(value.toString());
 
-		found->setValue(value);
+		found->setAfbParamValue(value);
 
 		return true;
 	}
@@ -672,7 +683,7 @@ namespace VFrame30
 		{
 			if (p.caption() == name)
 			{
-				return p.value();
+				return p.afbParamValue().toVariant();
 			}
 		}
 		return QVariant();
@@ -697,7 +708,7 @@ namespace VFrame30
 		{
 			if (p.isDiscrete() == true && p.caption() == QStringLiteral("AssignFlags"))
 			{
-				return p.value().toBool();
+				return p.afbParamValue().value().toBool();
 			}
 		}
 
@@ -729,7 +740,7 @@ namespace VFrame30
 				return false;
 			}
 
-			param.setValue(propValue);
+			param.afbParamValue().fromVariant(propValue);
 		}
 
 		return true;
@@ -773,11 +784,11 @@ namespace VFrame30
 				//
 				const Afb::AfbParam& currentParam = *foundExistingParam;
 
-				if (p.value().type() == currentParam.value().type())
+				if (p.afbParamValue().value().type() == currentParam.afbParamValue().value().type())
 				{
-					p.setValue(currentParam.value());
+					p.setAfbParamValue(currentParam.afbParamValue());
 
-					//qDebug() << "Param: " << currentParam.caption() << ", value: " << p.value();
+					qDebug() << "Param: " << currentParam.caption() << ", value: " << p.afbParamValue().toString();
 				}
 			}
 		}
@@ -892,7 +903,7 @@ namespace VFrame30
 				continue;
 			}
 
-			QVariant value = p.value();
+			QVariant value = p.afbParamValue().toVariant();
 
 			auto prop = this->addProperty(p.caption(), PropertyNames::parametersCategory, true, value);
 

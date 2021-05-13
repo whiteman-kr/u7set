@@ -1,5 +1,4 @@
-#ifndef CHOOSEUFBDIALOG_H
-#define CHOOSEUFBDIALOG_H
+#pragma once
 
 #include "../VFrame30/UfbSchema.h"
 
@@ -12,7 +11,7 @@ class ChooseUfbDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit ChooseUfbDialog(const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs, QWidget* parent = 0);
+	explicit ChooseUfbDialog(const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs, QWidget* parent = nullptr);
 	~ChooseUfbDialog();
 
 protected:
@@ -33,4 +32,3 @@ private:
 	std::shared_ptr<VFrame30::UfbSchema> m_selectedUfb;
 };
 
-#endif // CHOOSEUFBDIALOG_H

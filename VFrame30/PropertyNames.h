@@ -133,6 +133,8 @@ namespace VFrame30
 		static const QString ufbSchemaId;
 		static const QString ufbSchemaVersion;
 
+		static const QString specificProperties;
+
 		static const QString locked;
 
 		static const QString checkable;
