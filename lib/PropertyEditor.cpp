@@ -140,6 +140,12 @@ namespace ExtWidgets
 
 		char numberFormat = p->precision() > 5 ? 'g' : 'f';
 
+		if (type == qMetaTypeId<Afb::AfbParamValue>())
+		{
+			Afb::AfbParamValue v = value.value<Afb::AfbParamValue>();
+			return v.toString(numberFormat, p->precision());
+		}
+
 		switch (type)
 		{
 		case QVariant::Int:
@@ -539,7 +545,8 @@ namespace ExtWidgets
 				break;
 			}
 
-			if (propertyPtr->value().userType() == TuningValue::tuningValueTypeId())
+			if (propertyPtr->value().userType() == TuningValue::tuningValueTypeId() ||
+				propertyPtr->value().userType() == qMetaTypeId<Afb::AfbParamValue>())
 			{
 				MultiTextEdit* m_editor = new MultiTextEdit(this, propertyPtr, readOnly, parent);
 
@@ -2372,11 +2379,6 @@ namespace ExtWidgets
 			m_userType = QVariant::String;
 		}
 
-		if (m_userType == TuningValue::tuningValueTypeId())
-		{
-			m_oldValue = p->value();	// Save type of Tuning Value for future setting
-		}
-
 		// Create Line Edit
 		//
 		m_lineEdit = new QLineEdit(parent);
@@ -2699,8 +2701,17 @@ namespace ExtWidgets
 			}
 			else
 			{
-				assert(false);
-				return;
+				if (m_userType == qMetaTypeId<Afb::AfbParamValue>())
+				{
+					m_oldValue = property->value();// QVariant::fromValue(t);
+					Afb::AfbParamValue v = property->value().value<Afb::AfbParamValue>();
+					m_lineEdit->setText(v.toString(numberFormat, property->precision()));
+				}
+				else
+				{
+					assert(false);
+					return;
+				}
 			}
 		}
 	}
@@ -2812,20 +2823,39 @@ namespace ExtWidgets
 			if (m_userType == TuningValue::tuningValueTypeId())
 			{
 				bool ok = false;
+				TuningValue newValue(m_property->value().value<TuningValue>());	// Initialize newValue's type
+				newValue.fromString(m_lineEdit->text(), &ok);
+
 				TuningValue oldValue = m_oldValue.value<TuningValue>();
-				TuningValue value(oldValue);
-				value.fromString(m_lineEdit->text(), &ok);
+
 				if (ok == true &&
-						(value != oldValue || m_oldValue.isNull() == true))
+					(m_oldValue.isNull() == true || newValue != oldValue))
 				{
-					m_oldValue.setValue(value);
+					m_oldValue.setValue(newValue);
 					emit valueChanged(m_oldValue);
 				}
 			}
 			else
 			{
-				assert(false);
-				return;
+				if (m_userType == qMetaTypeId<Afb::AfbParamValue>())
+				{
+					Afb::AfbParamValue newValue(m_property->value().value<Afb::AfbParamValue>());	// Initialize newValue's type
+					bool ok = newValue.fromString(m_lineEdit->text());
+
+					Afb::AfbParamValue oldValue = m_oldValue.value<Afb::AfbParamValue>();
+
+					if (ok == true &&
+						(m_oldValue.isNull() == true || newValue != oldValue))
+					{
+						m_oldValue.setValue(newValue);
+						emit valueChanged(m_oldValue);
+					}
+				}
+				else
+				{
+					assert(false);
+					return;
+				}
 			}
 		}
 

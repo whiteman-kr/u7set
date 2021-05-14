@@ -3,6 +3,7 @@
 
 #include <QItemDelegate>
 #include "../CommonLib/PropertyObject.h"
+#include "../VFrame30/Afb.h"
 
 class QPlainTextEdit;
 
