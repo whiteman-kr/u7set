@@ -2713,8 +2713,6 @@ namespace Hardware
 
 	bool OptoModuleStorage::appendOptoModules()
 	{
-		LOG_EMPTY_LINE(m_log);
-
 		LOG_MESSAGE(m_log, QString(tr("Searching opto-modules")));
 
 		clear();
@@ -2744,7 +2742,7 @@ namespace Hardware
 		if (result == true)
 		{
 			LOG_MESSAGE(m_log, QString(tr("Opto-modules found: %1")).arg(m_modules.count()))
-			LOG_SUCCESS(m_log, QString(tr("Ok")));
+			LOG_MESSAGE(m_log, QString(tr("Ok")));
 		}
 
 		return result;

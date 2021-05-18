@@ -1,5 +1,4 @@
-#ifndef BUILDWORKERTHREAD_H
-#define BUILDWORKERTHREAD_H
+#pragma once
 
 #include <QJSEngine>
 #include "../TuningService/TuningDataStorage.h"
@@ -11,6 +10,8 @@
 
 namespace Builder
 {
+
+	struct BuildTask;
 
 	//
 	//		BuildWorkerThread
@@ -25,13 +26,151 @@ namespace Builder
 	private:
 		virtual void run() override;
 
-		// Get SuppressWarning list
+		// Build tasks:
+		//		void taskXxx(std::atomic<double> progress);
+		//		progress: ref to double value form 0 to 1.0 indicates progress of the current task
 		//
-		bool getProjectProperties();
+	private:
+		struct BuildTask;
 
+		bool preBuild();
+		bool postBuild();
+
+		bool preRunTask(const BuildTask& task);
+		bool postRunTask(const BuildTask& task);
+
+		bool taskOpenProject();
+		bool taskGetProjectProperties();
+		bool taskStartBuildResultWriter();
+		bool taskGetEquipment();
+		bool taskLoadBusTypes();					// Load BusTypes (VFrame30::BusSet)
+		bool taskLoadAppSignals();					// Load Builder::SignalSet
+		bool taskLoadLmDescriptions();				// Load LmDescription files
+		bool taskLoadSubsystems();					// Load subsystems
+		bool taskLoadConnections();					// Load connections
+		bool taskCheckSchemaIds();					// Check all schemas ids for uniqueness
+		bool taskParseApplicationLogic();			// Parse application logic schemas
+		bool taskSaveLogicModuleDescriptions();		// Save LogicModule Descriptions
+		bool taskCompileApplicationLogic();			// Compile application logic
+		bool taskProcessTuningParameters();			// Tuning Parameters
+		bool taskGenerationModulesConfiguration();	// Generate Modules Configuration
+		bool taskGenerationBitstreamFile();			// Generate Bitstream File
+		bool taskGenerationSoftwareConfiguration();// Generate Software Configuration
+		bool taskRunSimTests();					// Run Simulator-based tests
+
+		struct BuildTask
+		{
+			using BuildTaskFunc = bool (BuildWorkerThread::*)();
+
+			const BuildTaskFunc func;
+			const QString name;					// Task name
+			const bool breakOnFailed = false;	// if thrue and task build failed, then stop build
+
+			struct BuildTaskResult
+			{
+				bool result;			// keeps return value of bool func(...) or no value if task was not run
+				qint64 durationMs;		// time spent to perform task
+			};
+			std::optional<BuildTaskResult> result;
+		};
+
+		std::vector<BuildTask> m_buildTasks =
+			{
+				{
+					.func = &BuildWorkerThread::taskOpenProject,
+					.name = "Open Project",
+					.breakOnFailed = true
+				},
+				{
+					.func = &BuildWorkerThread::taskGetProjectProperties,
+					.name = "Getting Project Properties",
+					.breakOnFailed = true
+				},
+				{
+					.func = &BuildWorkerThread::taskStartBuildResultWriter,
+					.name = "Start BuildResultWriter",
+					.breakOnFailed = true
+				},
+				{
+					.func = &BuildWorkerThread::taskGetEquipment,
+					.name = "Getting Equipment",
+					.breakOnFailed = true
+				},
+				{
+					.func = &BuildWorkerThread::taskLoadBusTypes,
+					.name = "Loading BusType(s)",
+					.breakOnFailed = false
+				},
+				{
+					.func = &BuildWorkerThread::taskLoadAppSignals,
+					.name = "Loading AppSignals",
+					.breakOnFailed = false
+				},
+				{
+					.func = &BuildWorkerThread::taskLoadLmDescriptions,
+					.name = "Loading LogicModule Descriptions",
+					.breakOnFailed = true
+				},
+				{
+					.func = &BuildWorkerThread::taskLoadSubsystems,
+					.name = "Loading SubSystems",
+					.breakOnFailed = true
+				},
+				{
+					.func = &BuildWorkerThread::taskLoadConnections,
+					.name = "Loading Connections",
+					.breakOnFailed = false
+				},
+				{
+					.func = &BuildWorkerThread::taskCheckSchemaIds,
+					.name = "Checking SchemaIDs Uniqueness",
+					.breakOnFailed = false
+				},
+				{
+					.func = &BuildWorkerThread::taskParseApplicationLogic,
+					.name = "Application Logic Parsing",
+					.breakOnFailed = true
+				},
+				{
+					.func = &BuildWorkerThread::taskSaveLogicModuleDescriptions,
+					.name = "Saving LogicModule Descriptions",
+					.breakOnFailed = false
+				},
+				{
+					.func = &BuildWorkerThread::taskCompileApplicationLogic,
+					.name = "Application Logic Compilation",
+					.breakOnFailed = true
+				},
+				{
+					.func = &BuildWorkerThread::taskProcessTuningParameters,
+					.name = "Tuning Parameters Processing",
+					.breakOnFailed = true
+				},
+				{
+					.func = &BuildWorkerThread::taskGenerationModulesConfiguration,
+					.name = "Modules Configuration Generation",
+					.breakOnFailed = false
+				},
+				{
+					.func = &BuildWorkerThread::taskGenerationBitstreamFile,
+					.name = "Bitstream File Generation",
+					.breakOnFailed = false
+				},
+				{
+					.func = &BuildWorkerThread::taskGenerationSoftwareConfiguration,
+					.name = "Software Configuration Generation",
+					.breakOnFailed = false
+				},
+				{
+					.func = &BuildWorkerThread::taskRunSimTests,
+					.name = "Simulator-based Tests",
+					.breakOnFailed = false
+				},
+			};
+
+	private:
 		// Get Equipment from the project database
 		//
-		bool getEquipment();
 		bool getEquipment(Hardware::DeviceObject* parent);
 
 		void findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
@@ -40,10 +179,6 @@ namespace Builder
 		// Expand Devices StrId
 		//
 		bool expandDeviceStrId(Hardware::DeviceObject* device);
-
-		// Load subsystems
-		//
-		bool loadSubsystems();
 
 		// Check same Uuids and same StrIds
 		//
@@ -59,34 +194,9 @@ namespace Builder
 		//
 		bool loadSignals(SignalSet* signalSet, Hardware::EquipmentSet* equipment);
 
-		// Load BusTypes (VFrame30::BusSet)
-		//
-		bool loadBusses();
-
 		// Load Application Functional Block Library
 		//
-		bool loadLmDescriptions();
 		bool loadLogicModuleDescription(Hardware::DeviceModule* logicModule, LmDescriptionSet* lmDescriptions);
-
-		// Load Connections
-		//
-		bool loadConnections();
-
-		// Check that all files (and from that theirs SchemaIds) in $root$/Schema are unique
-		//
-		bool checkRootSchemasUniquesIds(DbController* db);
-
-		// Build Application Logic
-		//
-		bool parseApplicationLogic();
-
-		// Save Logic Modules Descriptions
-		//
-		bool saveLogicModuleDescriptions();
-
-		// Compile Application Logic
-		//
-		bool compileApplicationLogic();
 
 		// Load Sim Profiles
 		//
@@ -100,9 +210,7 @@ namespace Builder
 
 		bool writeFirmwareStatistics(BuildResultWriter& buildResultWriter);
 
-		bool writeBinaryFiles(BuildResultWriter& buildResultWriter);
-
-		void generateModulesInformation(BuildResultWriter& buildWriter,
+		bool generateModulesInformation(BuildResultWriter& buildWriter,
 								   const std::vector<Hardware::DeviceModule *>& lmModules);
 
 		bool generateLmsUniqueIDs(Context* context);
@@ -174,8 +282,10 @@ namespace Builder
 		IssueLogger* m_log = nullptr;		// Probably it's better to make it as shared_ptr
 
 		std::unique_ptr<Context> m_context;
+
+		QElapsedTimer m_buildTimer;
+		std::atomic<double> m_totalProgress;	// 0 - 100%
 	};
 
 }
 
-#endif // BUILDWORKERTHREAD_H

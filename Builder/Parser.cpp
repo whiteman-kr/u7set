@@ -1012,10 +1012,11 @@ namespace Builder
 
 			// Check associated IOs
 			//
-			for (const std::pair<QUuid, std::pair<AppLogicItem, VFrame30::AfbPin>>& pinPair : pins)
+			//for (const std::pair<QUuid, std::pair<AppLogicItem, VFrame30::AfbPin>>& pinPair : pins)
+			for (const auto&[quuid, pinPair] : pins)
 			{
-				const AppLogicItem& ali = pinPair.second.first;
-				const VFrame30::AfbPin& pin = pinPair.second.second;
+				const AppLogicItem& ali = pinPair.first;
+				const VFrame30::AfbPin& pin = pinPair.second;
 
 				if (pin.IsInput() == true)
 				{
@@ -2535,9 +2536,9 @@ namespace Builder
 
 		// Check if some LmDescripnFiles were not loaded
 		//
-		double loadSchemaProgress = 0;		// 0 - 1
-		double loadSchemaItem = 1.0 / schemas.size();				// All load is 5%
-		int startProgress = m_context->m_progress;
+		//double loadSchemaProgress = 0;		// 0 - 1
+		//double loadSchemaItem = 1.0 / schemas.size();				// All load is 5%
+		//int startProgress = static_cast<int>(m_context->m_progress);
 
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
@@ -2548,8 +2549,8 @@ namespace Builder
 				ok &= m_lmDescriptions->loadFile(log(), db(), schema->schemaId(), schema->lmDescriptionFile());
 			}
 
-			loadSchemaProgress += loadSchemaItem;
-			m_context->m_progress = startProgress + static_cast<int>(5.0 * loadSchemaProgress);
+			//loadSchemaProgress += loadSchemaItem;
+			//m_context->m_progress = startProgress + static_cast<int>(5.0 * loadSchemaProgress);
 		}
 
 		if (ok == false)
@@ -2668,7 +2669,6 @@ namespace Builder
 			result &= task.result();
 		}
 
-		m_context->m_progress += 5;
 
 		// Set all parsed data to modules
 		//
@@ -2735,8 +2735,6 @@ namespace Builder
 		//  Save/show item order for displaying on schemas
 		//
 		setRunOrder();
-
-		m_context->m_progress += 15;
 
 		return result;
 	}

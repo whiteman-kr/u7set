@@ -777,7 +777,7 @@ namespace Builder
 
 	}
 
-	bool BuildResultWriter::writeBinaryFiles()
+	bool BuildResultWriter::writeBitstreamFile()
 	{
 		bool result = true;
 

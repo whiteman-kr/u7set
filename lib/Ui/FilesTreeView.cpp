@@ -1618,7 +1618,9 @@ void FileTreeView::renameFile()
 
 	// Add default extension
 
-	if (m_defaultExtension.isEmpty() == false && newFileName.endsWith(m_defaultExtension) == false)
+	if (m_defaultExtension.isEmpty() == false &&
+		files[0].isFolder() == false
+		&& newFileName.endsWith(m_defaultExtension) == false)
 	{
 		newFileName += m_defaultExtension;
 	}

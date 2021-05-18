@@ -82,10 +82,6 @@ namespace Builder
 		std::shared_ptr<ComparatorSet> m_comparatorSet;
 
 		std::unordered_set<QString> m_analogSignalsOnSchemas;
-
-		//--
-		//
-		std::atomic_int m_progress;			// 0 - 100%
 	};
 
 }

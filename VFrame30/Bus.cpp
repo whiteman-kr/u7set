@@ -640,4 +640,9 @@ namespace VFrame30
 	{
 		m_busses = src;
 	}
+
+	void BusSet::setBusses(std::vector<VFrame30::Bus>&& src)
+	{
+		m_busses = std::move(src);
+	}
 }
