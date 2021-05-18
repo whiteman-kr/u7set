@@ -2017,6 +2017,44 @@ void AppSignal::initTuningValues()
 	}
 }
 
+AppSignal* AppSignal::createDiscreteSignal(	E::SignalInOutType inOutType,
+											const QString& appSignalID,
+											const QString& customAppSignalID,
+											const QString& caption,
+											const QString& equipmentID)
+{
+	//
+	// Allocate and init new discrete AppSignal
+	// Calling proc take on ownership of allocated AppSignal
+	//
+	AppSignal* newSignal = new AppSignal();
+
+	newSignal->setSignalType(E::SignalType::Discrete);
+	newSignal->setInOutType(inOutType);
+	newSignal->setDataSize(DISCRETE_SIZE);
+
+	newSignal->setAppSignalID(appSignalID);
+	newSignal->setCustomAppSignalID(customAppSignalID);
+	newSignal->setCaption(caption);
+	newSignal->setEquipmentID(equipmentID);
+
+	newSignal->updateTuningValuesType();
+	newSignal->initTuningValues();
+
+	return newSignal;
+}
+
+
+QString AppSignal::removeNumberSign(const QString& appSignalID)
+{
+	if (appSignalID[0] == '#')
+	{
+		return appSignalID.mid(1);
+	}
+
+	return appSignalID;
+}
+
 void AppSignal::initCreatedDates()
 {
 	m_created = QDateTime::currentDateTime();
@@ -2408,6 +2446,15 @@ void AppSignalSet::updateID2IndexInMap(const QString& appSignalId, int index)
 	m_strID2IndexMap.insert(appSignalId, index);
 }
 
+void AppSignalSet::updateID2IndexInMap(const AppSignal* appSignal)
+{
+	TEST_PTR_RETURN(appSignal);
+
+	int index = keyIndex(appSignal->ID());
+
+	updateID2IndexInMap(appSignal->appSignalID(), index);
+}
+
 bool AppSignalSet::ID2IndexMapIsEmpty()
 {
 	return m_strID2IndexMap.isEmpty();
@@ -2460,7 +2507,7 @@ const AppSignal* AppSignalSet::getSignal(const QString& appSignalID) const
 	return &(*this)[index];
 }
 
-void AppSignalSet::append(const int& signalID, AppSignal *signal)
+void AppSignalSet::append(const int& signalID, AppSignal* signal)
 {
 	if (signalID > m_maxID)
 	{
@@ -2470,6 +2517,13 @@ void AppSignalSet::append(const int& signalID, AppSignal *signal)
 	SignalPtrOrderedHash::append(signalID, signal);
 
 	m_groupSignals.insert(signal->signalGroupID(), signalID);
+}
+
+void AppSignalSet::append(AppSignal* signal)
+{
+	int newID = getMaxID() + 1;
+
+	append(newID, signal);
 }
 
 void AppSignalSet::remove(const int& signalID)
@@ -2491,13 +2545,6 @@ void AppSignalSet::removeAt(const int index)
 	SignalPtrOrderedHash::removeAt(index);
 
 	m_groupSignals.remove(signalGroupID, signalID);
-}
-
-void AppSignalSet::append(AppSignal* signal)
-{
-	int newID = getMaxID() + 1;
-
-	append(newID, signal);
 }
 
 QVector<int> AppSignalSet::getChannelSignalsID(const AppSignal& signal) const

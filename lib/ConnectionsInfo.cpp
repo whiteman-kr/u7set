@@ -17,6 +17,8 @@ const QString ConnectionsInfo::ELEM_RX_VALIDITY_SIGNAL("RxValiditySignal");
 
 const QString ConnectionsInfo::ATTR_LINK_ID("LinkID");
 const QString ConnectionsInfo::ATTR_TYPE("Type");
+const QString ConnectionsInfo::ATTR_ANALOG_FORMAT("AnalogFormat");
+const QString ConnectionsInfo::ATTR_BUS_TYPE_ID("BusTypeID");
 const QString ConnectionsInfo::ATTR_ENABLE_MANUAL_SETTINGS("EnableManualSettings");
 const QString ConnectionsInfo::ATTR_DISABLE_DATA_ID_CONTROL("DisableDataIDControl");
 const QString ConnectionsInfo::ATTR_PORTS_COUNT("PortsCount");
@@ -345,19 +347,41 @@ bool ConnectionsInfo::load(ConnectionTxRxSignal* cs, const QDomElement& txRxSign
 
 	result &= DomXmlHelper::getStringAttribute(txRxSignalElem, XmlAttribute::ID, &cs->ID, errMsg);
 
-	QString signalTypeStr;
+	//
 
-	result &= DomXmlHelper::getStringAttribute(txRxSignalElem, ConnectionsInfo::ATTR_TYPE, &signalTypeStr, errMsg);
-
+	QString str;
 	bool ok = false;
 
-	cs->type = E::stringToValue<E::SignalType>(signalTypeStr, &ok);
+	result &= DomXmlHelper::getStringAttribute(txRxSignalElem, ConnectionsInfo::ATTR_TYPE, &str, errMsg);
+
+	cs->type = E::stringToValue<E::SignalType>(str, &ok);
 
 	if (ok == false)
 	{
 		*errMsg = DomXmlHelper::errAttributeParsing(txRxSignalElem, ConnectionsInfo::ATTR_TYPE);
 		return false;
 	}
+
+	//
+
+	ok = false;
+	str.clear();
+
+	result &= DomXmlHelper::getStringAttribute(txRxSignalElem, ConnectionsInfo::ATTR_ANALOG_FORMAT, &str, errMsg);
+
+	cs->analogFormat = E::stringToValue<E::AnalogAppSignalFormat>(str, &ok);
+
+	if (ok == false)
+	{
+		*errMsg = DomXmlHelper::errAttributeParsing(txRxSignalElem, ConnectionsInfo::ATTR_ANALOG_FORMAT);
+		return false;
+	}
+
+	//
+
+	result &= DomXmlHelper::getStringAttribute(txRxSignalElem, ConnectionsInfo::ATTR_BUS_TYPE_ID, &cs->busTypeID, errMsg);
+
+	//
 
 	result &= DomXmlHelper::getAddress16Attribute(txRxSignalElem, ConnectionsInfo::ATTR_ADDR_IN_BUF, &cs->addrInBuf, errMsg);
 	result &= DomXmlHelper::getAddress16Attribute(txRxSignalElem, ConnectionsInfo::ATTR_ABS_ADDR, &cs->absAddr, errMsg);
@@ -680,6 +704,9 @@ QString ConnectionsInfo::portTag(int portNo)
 
 		xml.writeStringAttribute(XmlAttribute::ID, cs.ID);
 		xml.writeStringAttribute(ConnectionsInfo::ATTR_TYPE, E::valueToString<E::SignalType>(cs.type));
+		xml.writeStringAttribute(ConnectionsInfo::ATTR_ANALOG_FORMAT,
+								 E::valueToString<E::AnalogAppSignalFormat>(cs.analogFormat));
+		xml.writeStringAttribute(ConnectionsInfo::ATTR_BUS_TYPE_ID, cs.busTypeID);
 		xml.writeAddress16Attribute(ConnectionsInfo::ATTR_ADDR_IN_BUF, cs.addrInBuf);
 		xml.writeAddress16Attribute(ConnectionsInfo::ATTR_ABS_ADDR, cs.absAddr);
 

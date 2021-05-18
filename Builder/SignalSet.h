@@ -39,10 +39,12 @@ namespace Builder
 															// All signals that will be added to this signal set
 															// should be use append(AppSignal*, DeviceModuleShared)
 
-		void append(AppSignal* appSignal, DeviceModuleShared lm);
+		void append(AppSignal* appSignal, DeviceModuleShared lm);		// Here SignalSet take on ownership of appSignal object
 
 		DeviceModuleShared getAppSignalLm(const AppSignal* appSignal) const;
 		DeviceModuleShared getAppSignalLm(const QString& appSignalID) const;
+
+		bool isSignalExists(const QString& appSignalID) const;
 
 	private:
 		QString expandBusSignalCaptionTemplate(const AppSignal& busParentSignal, BusShared bus, const BusSignal& busSignal) const;

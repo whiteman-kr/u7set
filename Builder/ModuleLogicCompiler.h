@@ -15,6 +15,7 @@
 #include "UalItems.h"
 #include "MemWriteMap.h"
 #include "Loopbacks.h"
+#include "SignalSet.h"
 
 class LmDescription;
 
@@ -224,13 +225,13 @@ namespace Builder
 		UalSignal* createBusParentSignal(UalItem* ualItem, const LogicPin& outPin, AppSignal* s, const QString& busTypeID);
 		UalSignal* createBusParentSignalFromBusExtractorConnectedToDiscreteSignal(UalItem* ualItem);
 
+		bool createUalSignalsFromOptoValidity();
+
 		bool createUalSignalsFromReceivers();
 		bool createUalSignalsFromReceiver(UalItem* ualItem);
 		bool createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& appSignalID, bool isSinglePortConnection);
 		bool createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, std::shared_ptr<Hardware::Connection> connection);
 		bool getReceiverConnectionID(const UalReceiver* receiver, QString* connectionID, const QString& schemaID);
-
-		bool createUalSignalsFromOptoValidity();
 
 		bool createUalSignalFromSignal(UalItem* ualItem, int passNo);
 		bool createUalSignalFromConst(UalItem* ualItem);
@@ -585,8 +586,6 @@ namespace Builder
 
 		void dumpApplicationLogicItems();
 
-		const HashedVector<QString, AppSignal*>& chassisSignals() const { return m_chassisSignals; }
-
 		bool writeSignalLists();
 		bool writeSignalList(const QVector<UalSignal *> &signalList, QString listName) const;
 		bool writeUalSignalsList() const;
@@ -611,8 +610,7 @@ namespace Builder
 								 std::vector<int>* resultPartition);
 		bool partitionOfInteger(int number, const QVector<int>& availableParts, QVector<int>* partition);
 
-		void getChassisSignalsWithEquipmentID(QString& equipmentID, std::vector<AppSignal*>& resultSignalList);
-		void buildChassisSignalsByEquipmentIdMap();
+		void getChassisSignalsWithEquipmentID(QString& equipmentID, std::vector<const AppSignal *>* resultSignalList);
 
 	private:
 		// input parameters
@@ -620,6 +618,7 @@ namespace Builder
 		ApplicationLogicCompiler& m_appLogicCompiler;
 		Context* m_context = nullptr;
 		const Hardware::DeviceModule* m_lm = nullptr;
+		DeviceModuleShared m_lmShared;
 
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
 		Hardware::DeviceObject* m_deviceRoot = nullptr;
@@ -685,8 +684,8 @@ namespace Builder
 		HashedVector<QUuid, UalItem*> m_ualItems;				// item GUID => item ptr
 		QHash<QUuid, UalItem*> m_pinParent;						// pin GUID => parent item ptr
 
-		HashedVector<QString, AppSignal*> m_chassisSignals;		// all signals available in current chassis, AppSignalID => AppSignal*
-		std::multimap<QString, AppSignal*> m_chassisSignalsByEquipmentID;		// EquipementID => AppSignal*
+		std::map<QString, AppSignal*> m_chassisSignals;			// all signals available in current chassis, AppSignalID => AppSignal*
+		std::multimap<QString, const AppSignal*> m_chassisSignalsByEquipmentID;		// EquipementID => AppSignal*
 		QHash<QString, AppSignal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => AppSignal*
 		QHash<QString, AppSignal*> m_equipmentSignals;				// equipment signals to app signals map, signal EquipmentID => Signal*
 

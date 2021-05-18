@@ -43,6 +43,8 @@ namespace Builder
 
 		m_lmDescription = appLogicCompiler.lmDescriptions()->get(lm);
 
+		m_lmShared = getLmSharedPtr();
+
 		assert(m_lmDescription != nullptr);
 
 		m_appLogicData = appLogicCompiler.appLogicData();
@@ -62,7 +64,14 @@ namespace Builder
 
 	AppSignal* ModuleLogicCompiler::getSignal(const QString& appSignalID)
 	{
-		return m_chassisSignals.value(appSignalID, nullptr);
+		auto it = m_chassisSignals.find(appSignalID);
+
+		if (it == m_chassisSignals.end())
+		{
+			return nullptr;
+		}
+
+		return it->second;
 	}
 
 	bool ModuleLogicCompiler::pass1()
@@ -250,7 +259,12 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_NULLPTR(m_lm, m_log);
 
-		return 	std::dynamic_pointer_cast<Hardware::DeviceModule>(getDeviceSharedPtr(lmEquipmentID()));
+		if (m_lmShared == nullptr)
+		{
+			m_lmShared = std::dynamic_pointer_cast<Hardware::DeviceModule>(getDeviceSharedPtr(lmEquipmentID()));
+		}
+
+		return 	m_lmShared;
 	}
 
 	std::shared_ptr<LmDescription> ModuleLogicCompiler::getLmDescription()
@@ -504,7 +518,7 @@ namespace Builder
 				continue;
 			}
 
-			m_chassisSignals.insert(s.appSignalID(), &s);
+			m_chassisSignals.insert({s.appSignalID(), &s});
 
 			if (isIoSignal == true)
 			{
@@ -660,8 +674,8 @@ namespace Builder
 		//
 		result &= createUalSignalsFromInputAndTuningAcquiredSignals();
 		result &= createUalSignalsFromBusComposers();
-		result &= createUalSignalsFromReceivers();
 		result &= createUalSignalsFromOptoValidity();
+		result &= createUalSignalsFromReceivers();
 
 		RETURN_IF_FALSE(result);
 
@@ -1155,8 +1169,10 @@ namespace Builder
 
 		// fill m_ualSignals by Input and Tuning Acquired signals
 		//
-		for(AppSignal* appSignal : m_chassisSignals)
+		for(auto it = m_chassisSignals.begin(); it != m_chassisSignals.end(); it++)
 		{
+			AppSignal* appSignal = it->second;
+
 			if (appSignal == nullptr)
 			{
 				LOG_NULLPTR_ERROR(m_log);
@@ -1643,7 +1659,7 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(m_optoModuleStorage, m_log);
 
 		//
-		// Append OptoValidity signals for ALL opto ports in current LM and associated OptoModules
+		// Appending OptoValidity signals for ALL opto ports in current LM and associated OptoModules
 		//
 
 		bool result = true;
@@ -1658,37 +1674,105 @@ namespace Builder
 		{
 			if (optoPort == nullptr)
 			{
+				LOG_NULLPTR_ERROR(m_log);
 				result = false;
 				continue;
 			}
 
 			QString validitySignalEquipmentID = optoPort->validitySignalEquipmentID();
-			Address16 validitySignalAbsAddr = optoPort->validitySignalAbsAddr();
 
-			for(AppSignal* appSignal : m_chassisSignals)
+			if (m_equipmentSignals.contains(validitySignalEquipmentID))
 			{
-				if (appSignal == nullptr)
+				continue;			// it is Ok, opto validity signal is already in AppSignalSet
+			}
+
+			QString optoPortID = optoPort->equipmentID();
+
+			const std::shared_ptr<Hardware::DeviceObject> deviceShared = m_equipmentSet->deviceObject(validitySignalEquipmentID);
+
+			if (deviceShared == nullptr)
+			{
+				// Device Object %1 not found.
+				//
+				m_log->errEQP6010(validitySignalEquipmentID);
+				result = false;
+				continue;
+			}
+
+			const Hardware::DeviceAppSignal* deviceAppSignal = dynamic_cast<const Hardware::DeviceAppSignal*>(deviceShared.get());
+
+			if (deviceAppSignal == nullptr)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Device object %1 is not a DeviceAppSignal type").
+										arg(validitySignalEquipmentID));
+				result = false;
+				continue;
+			}
+
+			AppSignal* validitySignal = new AppSignal;
+
+			QString errStr = DbWorker::initAppSignalFromDeviceAppSignal(*deviceAppSignal, validitySignal);
+
+			if (errStr.isEmpty() == false)
+			{
+				delete validitySignal;		// !!!
+				LOG_INTERNAL_ERROR_MSG(m_log, errStr);
+				result = false;
+				continue;
+			}
+
+			// Opto validity signal IDs reserv templates to avoid coincidence with exists signals
+			//
+			static const QStringList reservAppSignalIDTemplates(
+						{QString("#%1_VALID"),
+						 QString("#%1_VALIDITY")});
+
+			int templateNo = 0;
+			bool canCreate = false;
+
+			do
+			{
+				const AppSignal* existSignal = m_signals->getSignal(validitySignal->appSignalID());
+
+				if (existSignal == nullptr)
 				{
-					LOG_NULLPTR_ERROR(m_log);
-					result = false;
-					continue;
+					canCreate = true;
+					break;
 				}
 
-				if (appSignal->isAcquired() == false)
-				{
-					continue;
-				}
+				validitySignal->setAppSignalID(reservAppSignalIDTemplates[templateNo].arg(optoPortID));
 
-				if (appSignal->isInput() == true)
-				{
-					m_ualSignals.createSignal(appSignal);
-					continue;
-				}
+				templateNo++;
+			}
+			while(templateNo < reservAppSignalIDTemplates.count());
 
+			if (canCreate == false)
+			{
+				delete validitySignal;		// !!!
+
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't auto create opto validity signal for port %1").
+												arg(optoPortID));
+				result = false;
+				continue;
+			}
+
+			validitySignal->setAcquire(true);
+
+			m_signals->append(validitySignal, m_lmShared);
+
+			m_signals->updateID2IndexInMap(validitySignal);
+
+			UalSignal* validtyUalSignal = m_ualSignals.createSignal(validitySignal);
+
+			if (validtyUalSignal == nullptr)
+			{
+				result = false;
+			}
+
+			m_chassisSignals.insert({validitySignal->appSignalID(), validitySignal});
+			m_ioSignals.insert(validitySignal->appSignalID(), validitySignal);
+			m_equipmentSignals.insert(validitySignalEquipmentID, validitySignal);
 		}
-
-		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(result, m_log);
-
 
 		return result;
 	}
@@ -4140,8 +4224,10 @@ namespace Builder
 
 		bool result = true;
 
-		for(AppSignal* signal : m_chassisSignals)
+		for(auto it = m_chassisSignals.begin(); it != m_chassisSignals.end(); it++)
 		{
+			AppSignal* signal = it->second;
+
 			if (signal->enableTuning() == false)
 			{
 				continue;
@@ -5142,8 +5228,10 @@ namespace Builder
 	{
 		bool result = true;
 
-		for(AppSignal* s : m_chassisSignals)
+		for(auto it = m_chassisSignals.begin(); it != m_chassisSignals.end(); it++)
 		{
+			AppSignal* s = it->second;
+
 			if(s == nullptr)
 			{
 				assert(false);
@@ -5313,7 +5401,7 @@ namespace Builder
 
 		QHash<UalSignal*, UalSignal*> signalsMap;
 
-		signalsMap.reserve(m_chassisSignals.count());
+		signalsMap.reserve(static_cast<int>(m_chassisSignals.size()));
 
 		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteInputSignals);
 		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteStrictOutputSignals);
@@ -12622,8 +12710,10 @@ namespace Builder
 	{
 		QStringList unusedSignals;
 
-		for(const AppSignal* s : m_chassisSignals)
+		for(auto pair : m_chassisSignals)
 		{
+			const AppSignal* s = pair.second;
+
 			TEST_PTR_CONTINUE(s);
 
 			if (s->isInternal() == true && m_ualSignals.contains(s->appSignalID()) == false)
@@ -14254,6 +14344,44 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	void ModuleLogicCompiler::getChassisSignalsWithEquipmentID(QString& equipmentID,
+															   std::vector<const AppSignal*>* resultSignalList)
+	{
+		if (resultSignalList == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return;
+		}
+
+		if (m_chassisSignals.size() != 0 &&
+			m_chassisSignalsByEquipmentID.size() == 0)
+		{
+			// initialization of m_chassisSignalsByEquipmentID
+			//
+			for(auto pair : m_chassisSignals)
+			{
+				const AppSignal* appSignal = pair.second;
+
+				TEST_PTR_CONTINUE(appSignal);
+
+				m_chassisSignalsByEquipmentID.insert({appSignal->equipmentID(), appSignal});
+			}
+		}
+
+		resultSignalList->clear();
+
+		for(auto it = m_chassisSignalsByEquipmentID.find(equipmentID);
+			it != m_chassisSignalsByEquipmentID.end(); it++)
+		{
+			if (it->first != equipmentID)
+			{
+				break;
+			}
+
+			resultSignalList->push_back(it->second);
+		}
 	}
 
 	// ---------------------------------------------------------------------------------------

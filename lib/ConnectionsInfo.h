@@ -19,6 +19,8 @@ class ConnectionTxRxSignal
 public:
 	QString ID;
 	E::SignalType type = E::SignalType::Discrete;
+	E::AnalogAppSignalFormat analogFormat = E::AnalogAppSignalFormat::SignedInt32;	// matter only for Analog signals
+	QString busTypeID;																// matter only for Bus signals
 	Address16 addrInBuf;
 	Address16 absAddr;
 };
@@ -102,6 +104,8 @@ protected:
 
 	static const QString ATTR_LINK_ID;
 	static const QString ATTR_TYPE;
+	static const QString ATTR_ANALOG_FORMAT;
+	static const QString ATTR_BUS_TYPE_ID;
 	static const QString ATTR_ENABLE_MANUAL_SETTINGS;
 	static const QString ATTR_DISABLE_DATA_ID_CONTROL;
 	static const QString ATTR_PORTS_COUNT;
