@@ -17,7 +17,7 @@
 class ConnectionTxRxSignal
 {
 public:
-	QString ID;
+	QStringList IDs;
 	E::SignalType type = E::SignalType::Discrete;
 	E::AnalogAppSignalFormat analogFormat = E::AnalogAppSignalFormat::SignedInt32;	// matter only for Analog signals
 	QString busTypeID;																// matter only for Bus signals

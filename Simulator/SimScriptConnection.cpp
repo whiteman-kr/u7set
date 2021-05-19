@@ -285,7 +285,7 @@ namespace Sim
 
 		for(int i = 0; i < signalsArray.size(); i++)
 		{
-			if (signalsArray[i].ID == appSignalID)
+			if (signalsArray[i].IDs.contains(appSignalID) == true)
 			{
 				index = i;
 				break;
@@ -312,7 +312,12 @@ namespace Sim
 
 	QString ScriptConnSignalInfo::appSignalID() const
 	{
-		return m_signalInfo.ID;
+		return m_signalInfo.IDs.first();
+	}
+
+	QStringList ScriptConnSignalInfo::appSignalIDs() const
+	{
+		return m_signalInfo.IDs;
 	}
 
 	QString ScriptConnSignalInfo::signalType() const

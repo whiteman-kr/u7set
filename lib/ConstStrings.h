@@ -197,6 +197,7 @@ namespace XmlAttribute
 	inline const QString CAPTION("Caption");
 	inline const QString COUNT("Count");
 	inline const QString ID("ID");
+	inline const QString IDs("IDs");
 	inline const QString TYPE("Type");
 
 	inline const QString DATA_ID("DataID");
@@ -333,6 +334,8 @@ namespace Separator
 {
 	inline const QString SEMICOLON_SPACE("; ");
 	inline const QString SEMICOLON(";");
+	inline const QString COMMA(",");
+	inline const QString COMMA_SPACE(", ");
 	inline const QString LINE("-------------------------------------------------------------------------------");
 	inline const QString DIR("/");
 	inline const QString BACK_DIR("\\");

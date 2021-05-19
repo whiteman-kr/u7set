@@ -321,14 +321,14 @@ void SimConnectionPage::showXxSignals(int portNo, QString portId, QString trx, c
 		{
 		case E::SignalType::Analog:
 			text += QString("%1 %2 Offset=0x%3 (%4)\n")
-					.arg(s.ID)
+					.arg(s.IDs.join(Separator::COMMA_SPACE))
 					.arg("A")
 					.arg(s.addrInBuf.offset(), 4, 16, QChar('0'))
 					.arg(s.addrInBuf.offset());
 			break;
 		case E::SignalType::Discrete:
 			text += QString("%1 %2 Offset=0x%3[%5] (%4[%5])\n")
-					.arg(s.ID)
+					.arg(s.IDs.join(Separator::COMMA_SPACE))
 					.arg("A")
 					.arg(s.addrInBuf.offset(), 4, 16, QChar('0'))
 					.arg(s.addrInBuf.offset())
@@ -336,7 +336,7 @@ void SimConnectionPage::showXxSignals(int portNo, QString portId, QString trx, c
 			break;
 		case E::SignalType::Bus:
 			text += QString("%1 %2 Offset=0x%3 (%4)\n")
-					.arg(s.ID)
+					.arg(s.IDs.join(Separator::COMMA_SPACE))
 					.arg("B")
 					.arg(s.addrInBuf.offset(), 4, 16, QChar('0'))
 					.arg(s.addrInBuf.offset());

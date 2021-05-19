@@ -71,21 +71,31 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 
 		if (lanControllerInfo->tuningEnable == true)
 		{
-			const Hardware::DeviceObject* tunService = equipmentSet.deviceObject(lanControllerInfo->tuningServiceID).get();
-
-			if (tunService != nullptr)
+			if (lanControllerInfo->tuningServiceID.isEmpty() == true)
 			{
-				result &= DeviceHelper::getStrProperty(tunService,
-													   EquipmentPropNames::TUNING_DATA_IP,
-													   &lanControllerInfo->tuningServiceIP, log);
+				// Property %1.%2 is empty.
+				//
+				log->errCFG3022(deviceController->equipmentIdTemplate(), EquipmentPropNames::TUNING_SERVICE_ID);
+				result = false;
+			}
+			else
+			{
+				const Hardware::DeviceObject* tunService = equipmentSet.deviceObject(lanControllerInfo->tuningServiceID).get();
 
-				result &= DeviceHelper::getIntProperty(tunService,
-													   EquipmentPropNames::TUNING_DATA_PORT,
-													   &lanControllerInfo->tuningServicePort, log);
+				if (tunService != nullptr)
+				{
+					result &= DeviceHelper::getStrProperty(tunService,
+														   EquipmentPropNames::TUNING_DATA_IP,
+														   &lanControllerInfo->tuningServiceIP, log);
 
-				result &= DeviceHelper::getStrProperty(tunService,
-													   EquipmentPropNames::TUNING_DATA_NETMASK,
-													   &lanControllerInfo->tuningServiceNetmask, log);
+					result &= DeviceHelper::getIntProperty(tunService,
+														   EquipmentPropNames::TUNING_DATA_PORT,
+														   &lanControllerInfo->tuningServicePort, log);
+
+					result &= DeviceHelper::getStrProperty(tunService,
+														   EquipmentPropNames::TUNING_DATA_NETMASK,
+														   &lanControllerInfo->tuningServiceNetmask, log);
+				}
 			}
 		}
 	}

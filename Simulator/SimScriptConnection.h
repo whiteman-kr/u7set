@@ -126,6 +126,7 @@ namespace Sim
 		Q_OBJECT
 
 		Q_PROPERTY(QString appSignalID READ appSignalID CONSTANT)
+		Q_PROPERTY(QStringList appSignalIDs READ appSignalIDs CONSTANT)
 		Q_PROPERTY(QString signalType READ signalType CONSTANT)
 		Q_PROPERTY(QString analogFormat READ analogFormat CONSTANT)
 		Q_PROPERTY(QString busTypeID READ busTypeID CONSTANT)
@@ -137,6 +138,7 @@ namespace Sim
 		ScriptConnSignalInfo(const ::ConnectionTxRxSignal& signalInfo);
 
 		QString appSignalID() const;
+		QStringList appSignalIDs() const;
 		QString signalType() const;
 		QString analogFormat() const;
 		QString busTypeID() const;

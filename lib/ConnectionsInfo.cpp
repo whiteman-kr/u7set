@@ -345,7 +345,11 @@ bool ConnectionsInfo::load(ConnectionTxRxSignal* cs, const QDomElement& txRxSign
 
 	bool result = true;
 
-	result &= DomXmlHelper::getStringAttribute(txRxSignalElem, XmlAttribute::ID, &cs->ID, errMsg);
+	QString ids;
+
+	result &= DomXmlHelper::getStringAttribute(txRxSignalElem, XmlAttribute::IDs, &ids, errMsg);
+
+	cs->IDs = ids.split(Separator::SEMICOLON);
 
 	//
 
@@ -588,7 +592,7 @@ QString ConnectionsInfo::portTag(int portNo)
 
 			ConnectionTxRxSignal txs;
 
-			txs.ID = txSignal->appSignalID();
+			txs.IDs = txSignal->appSignalIDs();
 			txs.type = txSignal->signalType();
 			txs.addrInBuf = txSignal->addrInBuf();
 			txs.absAddr = txSignal->addrInBuf();
@@ -614,7 +618,7 @@ QString ConnectionsInfo::portTag(int portNo)
 
 			ConnectionTxRxSignal rxs;
 
-			rxs.ID = rxSignal->appSignalID();
+			rxs.IDs = rxSignal->appSignalIDs();
 			rxs.type = rxSignal->signalType();
 			rxs.addrInBuf = rxSignal->addrInBuf();
 			rxs.absAddr = rxSignal->addrInBuf();
@@ -702,7 +706,9 @@ QString ConnectionsInfo::portTag(int portNo)
 	{
 		xml.writeStartElement(ConnectionsInfo::ELEM_TX_RX_SIGNAL);
 
-		xml.writeStringAttribute(XmlAttribute::ID, cs.ID);
+		QString ids = cs.IDs.join(Separator::SEMICOLON);
+
+		xml.writeStringAttribute(XmlAttribute::IDs, ids);
 		xml.writeStringAttribute(ConnectionsInfo::ATTR_TYPE, E::valueToString<E::SignalType>(cs.type));
 		xml.writeStringAttribute(ConnectionsInfo::ATTR_ANALOG_FORMAT,
 								 E::valueToString<E::AnalogAppSignalFormat>(cs.analogFormat));
