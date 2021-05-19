@@ -546,6 +546,14 @@ public:
 
 	void initTuningValues();
 
+	static AppSignal* createDiscreteSignal(E::SignalInOutType inOutType,
+										  const QString& appSignalID,
+										  const QString& customAppSignalID,
+										  const QString& caption,
+										  const QString& equipmentID);
+
+	static QString removeNumberSign(const QString& appSignalID);
+
 private:
 	// Private setters for fields, wich can't be changed outside DB engine
 	// Should be used only by friends
@@ -692,6 +700,7 @@ public:
 
 	void buildID2IndexMap();
 	void updateID2IndexInMap(const QString& appSignalId, int index);
+	void updateID2IndexInMap(const AppSignal* appSignal);
 	void clearID2IndexMap() { m_strID2IndexMap.clear(); }
 	bool ID2IndexMapIsEmpty();
 
@@ -701,10 +710,10 @@ public:
 	const AppSignal* getSignal(const QString& appSignalID) const;
 
 	virtual void append(const int& signalID, AppSignal* signal) override;
+	void append(AppSignal* signal);
+
 	virtual void remove(const int& signalID) override;
 	virtual void removeAt(const int index) override;
-
-	void append(AppSignal* signal);
 
 	QVector<int> getChannelSignalsID(const AppSignal& signal) const;
 	QVector<int> getChannelSignalsID(int signalGroupID) const;

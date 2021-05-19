@@ -554,6 +554,10 @@ namespace Builder
 		TEST_PTR_RETURN(appSignal);
 		TEST_PTR_RETURN(lm);
 
+		//
+		// Here SignalSet take on ownership of appSignal object
+		//
+
 		AppSignalSet::append(appSignal);
 		linkSignalToLm(appSignal, lm);
 	}
@@ -592,6 +596,11 @@ namespace Builder
 		caption.replace(BusSignal::BUS_CAPTION, busParentSignal.caption());
 
 		return caption;
+	}
+
+	bool SignalSet::isSignalExists(const QString& appSignalID) const
+	{
+		return (getSignal(appSignalID) != nullptr);
 	}
 
 	bool SignalSet::checkSignalPropertiesRanges(const AppSignal& s)

@@ -37,7 +37,7 @@
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="17" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>3</Default>
 					<LowLimit>1</LowLimit>
@@ -191,7 +191,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="17" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -308,7 +308,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="17" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>4</Value>
 					<Default>4</Default>
 					<LowLimit>1</LowLimit>
@@ -462,7 +462,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="17" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
