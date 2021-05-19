@@ -785,8 +785,146 @@ namespace Afb
 		}
 	}
 
+	QString AfbParamValue::toString(char numberFormat, int precision) const
+	{
+		if (m_reference.isEmpty() == false)
+		{
+			return m_reference;
+		}
+
+		switch (m_type)
+		{
+		case E::SignalType::Analog:
+			{
+				switch (m_dataFormat)
+				{
+				case E::DataFormat::Float:
+					{
+						float val = m_value.toFloat();
+						return QString::number(val, numberFormat, precision);
+					}
+
+				case E::DataFormat::UnsignedInt:
+					{
+						int val = m_value.toUInt();
+						return QString::number(val);
+					}
+
+				case E::DataFormat::SignedInt:
+					{
+						int val = m_value.toInt();
+						return QString::number(val);
+					}
+
+				default:
+					Q_ASSERT(false);
+					return {};
+				}
+				break;
+			}
+
+		case E::SignalType::Discrete:
+			{
+				if (m_dataFormat != E::DataFormat::UnsignedInt)
+				{
+					Q_ASSERT(m_dataFormat == E::DataFormat::UnsignedInt);
+					return {};
+				}
+
+				int val = m_value.toUInt();
+				return QString::number(val);
+			}
+
+		case E::SignalType::Bus:
+			Q_ASSERT(false);
+			return {};
+		}
+
+		Q_ASSERT(false);
+		return {};
+	}
+
 	bool AfbParamValue::fromString(const QString& str)
 	{
+		// Check if string is reference
+		//
+		QRegExp rx("^\\$\\(([A-Za-z]+\\.)*[A-Za-z]+\\)$");	// $(AA.BB.CC)
+		if (rx.exactMatch(str) == true)
+		{
+			m_reference = str;
+			return true;
+		}
+
+		m_reference.clear();
+
+		// Convert string to value
+		//
+		bool ok = false;
+
+		switch (m_type)
+		{
+		case E::SignalType::Analog:
+			{
+				switch (m_dataFormat)
+				{
+				case E::DataFormat::Float:
+					{
+						float value = str.toFloat(&ok);
+						if (ok == true)
+						{
+							return setValue(value);
+						}
+						return false;
+					}
+
+				case E::DataFormat::UnsignedInt:
+					{
+						uint value = str.toUInt(&ok);
+						if (ok == true)
+						{
+							return setValue(value);
+						}
+						return false;
+					}
+
+				case E::DataFormat::SignedInt:
+					{
+						uint value = str.toInt(&ok);
+						if (ok == true)
+						{
+							return setValue(value);
+						}
+						return false;
+					}
+
+				default:
+					Q_ASSERT(false);
+					return false;
+				}
+				break;
+			}
+
+		case E::SignalType::Discrete:
+			{
+				if (m_dataFormat != E::DataFormat::UnsignedInt)
+				{
+					Q_ASSERT(m_dataFormat == E::DataFormat::UnsignedInt);
+					return false;
+				}
+
+				uint value = str.toUInt(&ok);
+				if (ok == true)
+				{
+					return setValue(value);
+				}
+				return false;
+			}
+
+		case E::SignalType::Bus:
+			Q_ASSERT(false);
+			return false;
+		}
+
 		Q_ASSERT(false);
 		return false;
 	}
@@ -897,9 +1035,8 @@ namespace Afb
 		case E::SignalType::Analog:
 			if (m_dataFormat == E::DataFormat::Float)
 			{
-				auto r = checkValueType.operator()<float>(32);
-
-				if (r.has_value() == false || r.value() == false)
+				if (auto r = checkValueType.operator()<float>(32);
+					r.has_value() == true && r.value() == false)
 				{
 					Q_ASSERT(false);
 					return false;

@@ -338,6 +338,7 @@ private:
 
 	public:
 		[[nodiscard]] QString toString() const;
+		[[nodiscard]] QString toString(char numberFormat, int precision) const;
 		bool fromString(const QString& str);
 
 		[[nodiscard]] int validate(const QString& str) const;
