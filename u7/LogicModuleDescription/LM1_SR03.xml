@@ -541,7 +541,7 @@
 				<Pin OpName="o_maj_2err" Caption="err_st" Type="Bus" ByteOrder="BigEndian" OpIndex="23" Size="16" BusDataFormat="Discrete"/>				
 			</Outputs>
 			<Params>
-			    <Param OpName="i_conf_x" Caption="XCount" Visible="true" OpIndex="0" Size="4" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			    <Param OpName="i_conf_x" Caption="XCount" Visible="true" OpIndex="0" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 				    <Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>2</LowLimit>
@@ -572,7 +572,7 @@
 							</Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf_y" Caption="YCount" Visible="true" OpIndex="1" Size="4" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf_y" Caption="YCount" Visible="true" OpIndex="1" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 				    <Value>3</Value>
 					<Default>3</Default>
 					<LowLimit>3</LowLimit>
@@ -751,7 +751,7 @@
 			    <Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="20" Size="16"  BusDataFormat="Discrete"/>
 			</Outputs>
 			<Params>
-			    <Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			    <Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 				    <Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>2</LowLimit>
@@ -765,13 +765,13 @@
 							</Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 				    <Value>16</Value>
 					<Script>
 					    <Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 				    <Value>3</Value>
 					<Script>
 					    <Changed></Changed>
@@ -857,7 +857,7 @@
 			    <Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="20" Size="16" BusDataFormat="Discrete"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>2</LowLimit>
@@ -871,13 +871,13 @@
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 				    <Value>16</Value>
 					<Script>
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Script>
 						<Changed></Changed>
@@ -987,7 +987,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 			    <Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="20" Size="16" BusDataFormat="Discrete"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>2</LowLimit>
@@ -1001,13 +1001,13 @@ function createInputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 				    <Value>16</Value>
 					<Script>
 						<Changed/>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Script>
 						<Changed/>
@@ -1083,7 +1083,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="12" Size="1"/>            
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>5</Value>
 					<Default>5</Default>
 					<LowLimit>1</LowLimit>
@@ -1203,7 +1203,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -1310,7 +1310,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>2</LowLimit>
@@ -1324,13 +1324,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Script>
 						<Changed/>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Script>
 						<Changed/>
@@ -1409,7 +1409,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>5</Value>
 					<Default>5</Default>
 					<LowLimit>1</LowLimit>
@@ -1532,7 +1532,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>6</Value>
 					<Default>6</Default>
 					<LowLimit>1</LowLimit>
@@ -1654,7 +1654,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>7</Value>
 					<Default>7</Default>
 					<LowLimit>1</LowLimit>
@@ -1777,7 +1777,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>8</Value>
 					<Default>8</Default>
 					<LowLimit>1</LowLimit>
@@ -1907,7 +1907,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>5</Value>
 					<Default>5</Default>
 					<LowLimit>1</LowLimit>
@@ -2025,7 +2025,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>6</Value>
 					<Default>6</Default>
 					<LowLimit>1</LowLimit>
@@ -2141,7 +2141,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>7</Value>
 					<Default>7</Default>
 					<LowLimit>1</LowLimit>
@@ -2258,7 +2258,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>8</Value>
 					<Default>8</Default>
 					<LowLimit>1</LowLimit>
@@ -2372,7 +2372,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -2413,7 +2413,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -2454,7 +2454,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>3</Default>
 					<LowLimit>1</LowLimit>
@@ -2495,7 +2495,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>4</Value>
 					<Default>4</Default>
 					<LowLimit>1</LowLimit>
@@ -2554,7 +2554,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>5</Value>
 					<Default>5</Default>
 					<LowLimit>1</LowLimit>
@@ -2660,7 +2660,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>6</Value>
 					<Default>6</Default>
 					<LowLimit>1</LowLimit>
@@ -2766,7 +2766,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>7</Value>
 					<Default>7</Default>
 					<LowLimit>1</LowLimit>
@@ -2872,7 +2872,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>8</Value>
 					<Default>8</Default>
 					<LowLimit>1</LowLimit>
@@ -2977,7 +2977,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -3035,7 +3035,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -3093,7 +3093,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>3</Default>
 					<LowLimit>1</LowLimit>
@@ -3151,7 +3151,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>4</Value>
 					<Default>4</Default>
 					<LowLimit>1</LowLimit>
@@ -3183,7 +3183,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="7" Size="32"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -3215,7 +3215,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="7" Size="32"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -3278,7 +3278,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_in_activ" Caption="active" Type="Discrete" ByteOrder="BigEndian" OpIndex="36" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 						<Value>1</Value>
 						<Default>1</Default>
 						<LowLimit>1</LowLimit>
@@ -3287,7 +3287,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 							<Changed></Changed>
 						</Script>
 				</Param>
-				<Param OpName="i_conf_x" Caption="OperandCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf_x" Caption="OperandCount" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -3397,7 +3397,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="34" Size="32"/>				
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 						<Value>2</Value>
 						<Default>2</Default>
 						<LowLimit>1</LowLimit>
@@ -3406,7 +3406,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 							<Changed></Changed>
 						</Script>
 				</Param>
-				<Param OpName="i_conf_x" Caption="OperandCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf_x" Caption="OperandCount" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -3492,7 +3492,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="19" Size="1"/>
 			</Outputs>
 			<Params>				
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -3632,7 +3632,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="19" Size="1"/>
 			</Outputs>
 			<Params>				
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -3745,7 +3745,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					</Script>
 					<Units>ms</Units>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -3901,7 +3901,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					</Script>
 					<Units>ms</Units>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -4038,7 +4038,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_32_oprd" Caption="out_32" Type="Discrete" ByteOrder="BigEndian" OpIndex="35" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 						<Value>1</Value>
 						<Default>1</Default>
 						<LowLimit>1</LowLimit>
@@ -4047,7 +4047,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 							<Changed></Changed>
 						</Script>
 				</Param>
-				<Param OpName="i_conf_y" Caption="OutputCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf_y" Caption="OutputCount" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -4157,7 +4157,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_32_oprd" Caption="out_32" Type="Discrete" ByteOrder="BigEndian" OpIndex="35" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 						<Value>2</Value>
 						<Default>2</Default>
 						<LowLimit>1</LowLimit>
@@ -4166,7 +4166,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 							<Changed></Changed>
 						</Script>
 				</Param>
-				<Param OpName="i_conf_y" Caption="OutputCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf_y" Caption="OutputCount" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -4253,7 +4253,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_div_by_zero" Caption="div_by_zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>8</Value>
 					<Default>8</Default>
 					<LowLimit>1</LowLimit>
@@ -4386,7 +4386,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_div_by_zero" Caption="div_by_zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>4</Value>
 					<Default>4</Default>
 					<LowLimit>1</LowLimit>
@@ -4478,7 +4478,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="y" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>5</Value>                
 					<Script>
 						<Changed></Changed>
@@ -4507,7 +4507,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="y" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>                
 					<Script>
 						<Changed></Changed>
@@ -4536,7 +4536,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="y" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>                
 					<Script>
 						<Changed></Changed>
@@ -4565,7 +4565,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="y" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>                
 					<Script>
 						<Changed></Changed>
@@ -4593,7 +4593,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="y" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>6</Value>
 					<Script>
 						<Changed></Changed>
@@ -4621,7 +4621,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="y" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>4</Value>
 					<Script>
 						<Changed></Changed>
@@ -4652,7 +4652,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="12" Size="32"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -4685,7 +4685,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="12" Size="32"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -4718,7 +4718,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="12" Size="32"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -4751,7 +4751,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="12" Size="32"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -4785,7 +4785,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="12" Size="32"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>3</Default>
 					<LowLimit>1</LowLimit>
@@ -4818,7 +4818,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="12" Size="32"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>3</Default>
 					<LowLimit>1</LowLimit>
@@ -4850,7 +4850,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="12" Size="32"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>4</Value>
 					<Default>4</Default>
 					<LowLimit>1</LowLimit>
@@ -4882,7 +4882,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="12" Size="32"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>4</Value>
 					<Default>4</Default>
 					<LowLimit>1</LowLimit>
@@ -4914,7 +4914,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="5" Size="32"/>
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -4946,7 +4946,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="5" Size="32"/>
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>8</Value>
 					<Default>8</Default>
 					<LowLimit>1</LowLimit>
@@ -4981,7 +4981,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_div_by_zero" Caption="div_by_zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>7</Value>
 					<Default>7</Default>
 					<LowLimit>1</LowLimit>
@@ -5101,7 +5101,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>            
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -5230,7 +5230,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="40" Size="1"/>      
 			</Outputs>
 			<Params>
-				<Param OpName="i_count" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_count" Caption="OperandCount" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>3</Default>
 					<LowLimit>3</LowLimit>
@@ -5244,7 +5244,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Script>
 						<Changed></Changed>
@@ -5504,7 +5504,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_min_in" Caption="min_in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="36" Size="16"/>-->
 			</Outputs>
 			<Params>
-				<Param OpName="i_count" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_count" Caption="OperandCount" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>3</Default>
 					<LowLimit>3</LowLimit>
@@ -5518,7 +5518,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Script>
 						<Changed></Changed>
@@ -5715,13 +5715,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1"/>     
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Script>
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>2</Default>
 					<LowLimit>2</LowLimit>
@@ -5931,13 +5931,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1"/>     
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Script>
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>2</Default>
 					<LowLimit>2</LowLimit>
@@ -6140,13 +6140,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1"/>     
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Script>
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>2</Default>
 					<LowLimit>2</LowLimit>
@@ -6380,13 +6380,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="16" Size="1"/>                
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Script>
 						<Changed></Changed>
 					</Script>
 				</Param>            
-				<Param OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>2</Default>
 					<LowLimit>2</LowLimit>
@@ -6580,13 +6580,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="16" Size="1"/>                
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Script>
 						<Changed></Changed>
 					</Script>
 				</Param>            
-				<Param OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>2</Default>
 					<LowLimit>2</LowLimit>
@@ -6751,7 +6751,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>            
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>7</Value>
 					<Default>7</Default>
 					<LowLimit>1</LowLimit>
@@ -6876,13 +6876,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="16" Size="1"/>                
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Script>
 						<Changed></Changed>
 					</Script>
 				</Param>            
-				<Param OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf_n" Caption="InputCount" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>2</Default>
 					<LowLimit>2</LowLimit>
@@ -7039,7 +7039,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>3</Default>
 					<LowLimit>1</LowLimit>
@@ -7167,7 +7167,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>2</LowLimit>
@@ -7181,13 +7181,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Script>
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Script>
 						<Changed></Changed>
@@ -7352,7 +7352,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="CoefCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="CoefCount" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>2</LowLimit>
@@ -7550,7 +7550,7 @@ function showCoeffitients(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -7698,7 +7698,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>9</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -7870,7 +7870,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -8018,7 +8018,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>7</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -8193,7 +8193,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>6</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -8368,7 +8368,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>8</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -8540,7 +8540,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -8689,7 +8689,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>5</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -8862,7 +8862,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>4</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -8989,7 +8989,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>            
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>6</Value>
 					<Default>6</Default>
 					<LowLimit>1</LowLimit>
@@ -9109,7 +9109,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>				
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -9274,7 +9274,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>4</Value>
 					<Default>4</Default>
 					<LowLimit>1</LowLimit>
@@ -9354,7 +9354,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -9434,7 +9434,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -9513,7 +9513,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>5</Value>
 					<Default>5</Default>
 					<LowLimit>1</LowLimit>
@@ -9592,7 +9592,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>3</Default>
 					<LowLimit>1</LowLimit>
@@ -9681,7 +9681,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					</Script>
 					<Units>ms</Units>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>4</Value>
 					<Default>4</Default>
 					<LowLimit>1</LowLimit>
@@ -9723,7 +9723,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					</Script>
 					<Units>ms</Units>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -9765,7 +9765,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					</Script>
 					<Units>ms</Units>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -9807,7 +9807,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					</Script>
 					<Units>ms</Units>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>5</Value>
 					<Default>5</Default>
 					<LowLimit>1</LowLimit>
@@ -9849,7 +9849,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					</Script>
 					<Units>ms</Units>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>3</Default>
 					<LowLimit>1</LowLimit>
@@ -9897,7 +9897,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_maj_2err" Caption="err_st" Type="Discrete" ByteOrder="BigEndian" OpIndex="23" Size="1"/>				
 			</Outputs>
 			<Params>
-				<Param OpName="i_conf_x" Caption="XCount" Visible="true" OpIndex="0" Size="4" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf_x" Caption="XCount" Visible="true" OpIndex="0" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>2</LowLimit>
@@ -9928,7 +9928,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf_y" Caption="YCount" Visible="true" OpIndex="1" Size="4" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf_y" Caption="YCount" Visible="true" OpIndex="1" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>3</Default>
 					<LowLimit>3</LowLimit>
@@ -10086,7 +10086,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>2</LowLimit>
@@ -10100,13 +10100,13 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Script>
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Script>
 						<Changed></Changed>
@@ -10177,7 +10177,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 			    <Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="LittleEndian" DataFormat="UnsignedInt" OpIndex="4" Size="16"/>
 			</Outputs>
 			<Params>
-			    <Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			    <Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 				    <Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -10210,7 +10210,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 			    <Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="4" Size="16"/>
 			</Outputs>
 			<Params>
-			    <Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			    <Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 				    <Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -10243,7 +10243,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="LittleEndian" DataFormat="SignedInt" OpIndex="5" Size="32"/>
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -10276,7 +10276,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="5" Size="32"/>
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -10309,7 +10309,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="LittleEndian" DataFormat="Float" OpIndex="5" Size="32"/>
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -10342,7 +10342,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="5" Size="32"/>
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -10375,7 +10375,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="5" Size="32"/>
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>3</Value>
 					<Default>3</Default>
 					<LowLimit>1</LowLimit>
@@ -10411,7 +10411,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="9" Size="1"/>            
 			</Outputs>
 			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>4</Value>
 					<Default>4</Default>
 					<LowLimit>1</LowLimit>
@@ -10521,7 +10521,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			    <Pin OpName="o_univibrator" Caption="univibrator" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 			</Outputs>
 			<Params>
-			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 				    <Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -10557,7 +10557,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			    <Pin OpName="o_univibrator" Caption="univibrator" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 			</Outputs>
 			<Params>
-			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 				    <Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -10593,7 +10593,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			    <Pin OpName="o_univibrator" Caption="univibrator" Type="Bus" ByteOrder="BigEndian" OpIndex="14" Size="16" BusDataFormat="Discrete"/>
 			</Outputs>
 			<Params>
-			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 				    <Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
@@ -10629,7 +10629,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			    <Pin OpName="o_univibrator" Caption="univibrator" Type="Bus" ByteOrder="BigEndian" OpIndex="14" Size="16" BusDataFormat="Discrete"/>
 			</Outputs>
 			<Params>
-			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 				    <Value>2</Value>
 					<Default>2</Default>
 					<LowLimit>1</LowLimit>
@@ -10661,7 +10661,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			    <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
 			</Outputs>
 			<Params>
-			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			    <Param OpName="i_conf" Caption="config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 				    <Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
