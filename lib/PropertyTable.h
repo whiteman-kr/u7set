@@ -132,9 +132,11 @@ namespace ExtWidgets
 		void closeCurrentEditorIfOpen();
 
 	protected:
+		virtual void mousePressEvent(QMouseEvent *event) override;
 		virtual void keyPressEvent(QKeyEvent *event) override;
 
 	signals:
+		void mousePressed();
 		void editKeyPressed();
 		void symbolKeyPressed(QString key);
 		void spaceKeyPressed();
@@ -177,6 +179,7 @@ namespace ExtWidgets
 	private slots:
 		void onCellDoubleClicked(const QModelIndex &index);
 		void onCellEditKeyPressed();
+		void onCellClicked();
 		void onCellSymbolKeyPressed(QString key);
 		void onCellToggleKeyPressed();
 		void onShowErrorMessage (QString message);

@@ -3176,6 +3176,11 @@ namespace ExtWidgets
 	{
 		Q_UNUSED(option);
 
+		if (index.column() != static_cast<int>(PropertyEditorColumns::Value))
+		{
+			return nullptr;
+		}
+
 		if (m_treeWidget == nullptr || m_propertyEditor == nullptr)
 		{
 			Q_ASSERT(m_treeWidget);
@@ -3348,7 +3353,7 @@ namespace ExtWidgets
 
 	void PropertyTreeWidget::keyPressEvent(QKeyEvent *event)
 	{
-		if (event->key() == Qt::Key_F2 || event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
+		if (event->key() == Qt::Key_F2)
 		{
 			if (selectedIndexes().size() > 0)
 			{
@@ -3420,7 +3425,7 @@ namespace ExtWidgets
 		connect(m_treeWidget, &PropertyTreeWidget::editKeyPressed, this, &PropertyEditor::onCellEditKeyPressed);
 		connect(m_treeWidget, &PropertyTreeWidget::spaceKeyPressed, this, &PropertyEditor::onCellToggleKeyPressed);
 
-		m_treeWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+		m_treeWidget->setEditTriggers(QAbstractItemView::SelectedClicked);
 
 		// Edit Delegate
 
@@ -3687,7 +3692,10 @@ namespace ExtWidgets
 
 	void PropertyEditor::onCellClicked()
 	{
-		startEditing();
+		if (getSelectionType() == QVariant::Bool)
+		{
+			toggleSelected();
+		}
 	}
 
 	void PropertyEditor::onCellEditKeyPressed()
@@ -4089,7 +4097,7 @@ namespace ExtWidgets
 
 		if (index.column() != static_cast<int>(PropertyEditorColumns::Value))
 		{
-			index = index.siblingAtColumn(static_cast<int>(PropertyEditorColumns::Value));
+			return;
 		}
 
 		m_treeWidget->edit(index);
