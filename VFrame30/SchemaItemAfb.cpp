@@ -108,16 +108,16 @@ namespace VFrame30
 			}
 
 			QString paramValue;
+			bool afbParamValueIsString = param.afbParamValue().reference().isEmpty() == false;
+
+			QVariant a = afbParamValueIsString ?
+							param.afbParamValue().reference() :
+							param.afbParamValue().value();
+
 			switch (param.type())
 			{
 				case E::SignalType::Analog:
 					{
-						bool afbParamValueIsString = param.afbParamValue().reference().isEmpty() == false;
-
-						QVariant a = afbParamValueIsString ?
-										param.afbParamValue().reference() :
-										param.afbParamValue().value();
-
 						char paramFormat = precision() > 5 ? 'g' : 'f';
 
 						switch (param.dataFormat())
@@ -164,8 +164,7 @@ namespace VFrame30
 
 				case E::SignalType::Discrete:
 					{
-						QVariant d = propertyValue(param.caption());
-						paramValue = d.toString();
+						paramValue = a.toString();
 					}
 					break;
 				default:

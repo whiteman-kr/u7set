@@ -1024,15 +1024,6 @@ namespace Afb
 		}
 
 		int size = xmlElement.attribute(QLatin1String("Size")).toInt();
-
-		// Fix size, in old versions of LM descriptsions the size og AfbParam could be 4 or 5 (i_conf for example),
-		// but in reality size of param is 16bit, so fix this problem for stored AFB params here
-		//
-		if (size == 4 || size == 5)
-		{
-			size = 16;
-		}
-
 		afbParamValue().setSize(size);
 
 		// Instantiator
@@ -1068,6 +1059,16 @@ namespace Afb
 		if (typeAttribute.compare(QLatin1String(QLatin1String("Analog")), Qt::CaseInsensitive) == 0)
 		{
 			m_afbParamValue.setType(E::SignalType::Analog);
+
+			// Analog signal size cannot be less then 16 bits
+			// Fix size, in old versions of LM descriptsions the size og AfbParam could be 4 or 5 (i_conf for example),
+			// but in reality size of param is 16bit, so fix this problem for stored AFB params here
+			// Also puls_gen had an error, discrete signal was saved as 1-bit analog
+			//
+			if (m_afbParamValue.size() < 16)
+			{
+				m_afbParamValue.setSize(16);
+			}
 		}
 		else
 		{

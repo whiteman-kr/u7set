@@ -75,8 +75,9 @@ namespace Afb
 					return {};
 				}
 
-				int val = m_value.toUInt();
-				return QString::number(val);
+				//int val = m_value.toUInt();
+				//return QString::number(val);
+				return m_value.toString();
 			}
 
 		case E::SignalType::Bus:
@@ -156,11 +157,15 @@ namespace Afb
 					return false;
 				}
 
-				uint value = str.toUInt(&ok);
-				if (ok == true)
+				bool isTrue = str.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+				bool isFalse = str.compare(QLatin1String("false"), Qt::CaseInsensitive) == 0;
+
+				if (isTrue == true || isFalse == true)
 				{
-					return setValue(value);
+					Q_ASSERT(isTrue * isFalse == 0);
+					return setValue(isTrue);
 				}
+
 				return false;
 			}
 

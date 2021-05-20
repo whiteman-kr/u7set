@@ -2749,6 +2749,34 @@ namespace Builder
 						.arg(schemaItem)));
 	}
 
+	/// IssueCode: ALP4200
+	///
+	/// IssueType: Error
+	///
+	/// Title:	Invalid SchemaItem param (%1) reference format ('%2'), expected format '$(obj.var)' or '$(var)', LogicSchema %3, SchemaItem %4.
+	///
+	/// Parameters:
+	///		%1 Inavlid property or param
+	///		%2 Actual reference to variable
+	///		%3 LogicSchemaID
+	///		%4 SchemaItem
+	///
+	/// Description:
+	///		SchemaItem has property or parmeter with refernce to variable and it has invalid format. The valid format for variable is '$(obj.var)' or '$(var)'.
+	///
+	void IssueLogger::errALP4200(QString schema, QString schemaItem, QString varName, QString currentValue, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4200, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4200,
+				  QString(tr("Invalid SchemaItem.(%1) reference format ('%2'), expected format '$(obj.var)' or '$(var)', LogicSchema %3, SchemaItem %4.")
+						.arg(varName)
+						.arg(currentValue)
+						.arg(schema)
+						.arg(schemaItem)));
+	}
+
 
 	// ALC			Application logic compiler				5000-5999
 	//

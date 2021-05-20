@@ -2181,6 +2181,38 @@ namespace Builder
 										ali.m_fblItem->isOutputSignalElement();
 							});
 
+				// Expand UFBs params:
+				// Some FBs may have AfbParamValue with reference (reference is variable name)
+				// Here we substitute there refs with actual values from SchemaItemUfb
+				//
+//				for (AppLogicItem& item : ufbItemsCopy)
+//				{
+//					if (VFrame30::SchemaItemAfb* afbItem = item.m_fblItem->toAfbElement();
+//						afbItem != nullptr)
+//					{
+//						// Iterate all AfbParams
+//						//
+//						for (Afb::AfbParam& param : afbItem->params())
+//						{
+//							QString reference = param.afbParamValue().reference().trimmed().chop(1).  âóöäæâäæöóëâîöóäæë ;
+
+//							óöâöóâæöë
+
+//							if (reference.isEmpty() == false)
+//							{
+
+
+//								// This reference must be like $(obj.var)
+//								//
+//								if (reference.startsWith("$(") == false || reference.endsWith(")") == false)
+//								{
+//									log->errALP4200();
+//								}
+//							}
+//						}
+//					}
+//				}
+
 				// Inject ufb schema items
 				//
 				module->items().insert(itemIt, ufbItemsCopy.begin(), ufbItemsCopy.end());
@@ -2477,7 +2509,7 @@ namespace Builder
 			checkForUniqueLoopbackId(schema.get());
 		}
 
-		// Parse User Functional Blocks
+		// Parse User Functional Blocks (UFBs)
 		//
 		if (ufbs.empty() == false)
 		{
@@ -2662,7 +2694,7 @@ namespace Builder
 				QThread::yieldCurrentThread();
 			}
 		}
-		while (1);
+		while (true);
 
 		for (QFuture<bool>& task : parseTasks)
 		{
@@ -3117,6 +3149,57 @@ namespace Builder
 					else
 					{
 						pins.insert(itemSignalId);
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	bool Parser::checkParamsReferencesFormat(const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& schemas) const
+	{
+		// Some FBs may have AfbParamValue with reference (reference is variable name)
+		// Check these variables format
+		//
+		bool  result = true;
+
+		for (std::shared_ptr<VFrame30::UfbSchema> ufb : schemas)
+		{
+			if (ufb->excludeFromBuild() == true)
+			{
+				continue;
+			}
+
+			for (const std::shared_ptr<VFrame30::SchemaLayer>& layer : ufb->Layers)
+			{
+				if (layer->compile() == false)
+				{
+					continue;
+				}
+
+				for (const SchemaItemPtr& item : layer->Items)
+				{
+					if (VFrame30::SchemaItemAfb* afbItem = item->toSchemaItemAfb();
+						afbItem != nullptr)
+					{
+						// Iterate all AfbParams
+						//
+						for (Afb::AfbParam& param : afbItem->params())
+						{
+							QString reference = param.afbParamValue().reference().trimmed();
+
+							if (reference.isEmpty() == false)
+							{
+								// This reference must be like $(obj.var)
+								//
+								if (reference.startsWith("$(") == false || reference.endsWith(")") == false)
+								{
+									log()->errALP4200(ufb->schemaId(), item->label(), param.caption(), reference, item->guid());
+									result = false;
+								}
+							}
+						}
 					}
 				}
 			}
