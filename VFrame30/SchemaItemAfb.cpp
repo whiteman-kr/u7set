@@ -112,7 +112,11 @@ namespace VFrame30
 			{
 				case E::SignalType::Analog:
 					{
-						QVariant a = propertyValue(param.caption());
+						bool afbParamValueIsString = param.afbParamValue().reference().isEmpty() == false;
+
+						QVariant a = afbParamValueIsString ?
+										param.afbParamValue().reference() :
+										param.afbParamValue().value();
 
 						char paramFormat = precision() > 5 ? 'g' : 'f';
 
@@ -127,20 +131,27 @@ namespace VFrame30
 								break;
 
 							case E::DataFormat::Float:
-								paramValue.setNum(a.toDouble(), paramFormat, precision());
-
-								if (paramValue.contains(QChar('.')) == true &&
-									paramValue.contains(QChar('e')) == false &&
-									paramValue.size() > 2)
+								if (afbParamValueIsString == true)
 								{
-									while(paramValue.endsWith('0'))
-									{
-										paramValue.chop(1);
-									}
+									paramValue = a.toString();
+								}
+								else
+								{
+									paramValue.setNum(a.toDouble(), paramFormat, precision());
 
-									if (paramValue.endsWith('.'))
+									if (paramValue.contains(QChar('.')) == true &&
+										paramValue.contains(QChar('e')) == false &&
+										paramValue.size() > 2)
 									{
-										paramValue.chop(1);
+										while(paramValue.endsWith('0'))
+										{
+											paramValue.chop(1);
+										}
+
+										if (paramValue.endsWith('.'))
+										{
+											paramValue.chop(1);
+										}
 									}
 								}
 								break;
@@ -619,7 +630,7 @@ namespace VFrame30
 			qDebug() << tr("Param %1 was changed from %2 to %3").
 						arg(name).
 						arg(found->afbParamValue().toString()).
-						arg(value.toString());
+						arg(newValue.toString());
 
 			found->setAfbParamValue(newValue);
 

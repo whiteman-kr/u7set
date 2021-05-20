@@ -68,7 +68,6 @@ HEADERS += \
 	Stable.h \
     ../../lib/SoftwareSettings.h \
     ../../lib/Ui/DialogAbout.h \
-    ../../lib/OrderedHash.h \
 	../../lib/DataSource.h \
     ../../lib/BuildInfo.h \
 	../../CommonLib/PropertyObject.h \

@@ -1,9 +1,8 @@
-#ifndef PROPERTYEDITOR_H
-#define PROPERTYEDITOR_H
+#pragma once
 
 #include <QItemDelegate>
 #include "../CommonLib/PropertyObject.h"
-#include "../VFrame30/Afb.h"
+#include "../CommonLib/AfbParamValue.h"
 
 class QPlainTextEdit;
 
@@ -17,7 +16,6 @@ namespace ExtWidgets
 	//
 	// PropertyEditorSettings
 	//
-
 	struct PropertyEditorSettings
 	{
 		QByteArray m_arrayPropertyEditorSplitterState;
@@ -37,7 +35,6 @@ namespace ExtWidgets
 	//
 	// PropertyTools
 	//
-
 	class PropertyTools
 	{
 	public:
@@ -51,12 +48,12 @@ namespace ExtWidgets
 	//
 	// PropertyEditorBase
 	//
-
-	class PropertyEditorBase
+	class PropertyEditorBase : public QWidget
 	{
-	public:
+		Q_OBJECT
 
-		PropertyEditorBase();
+	public:
+		PropertyEditorBase(QWidget* parent);
 		virtual ~PropertyEditorBase();
 
 		virtual PropertyEditor* createChildPropertyEditor(QWidget* parent);
@@ -65,16 +62,18 @@ namespace ExtWidgets
 		virtual bool restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog);	// return true if custom size is set
 		virtual bool storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog);	// return true if custom size is set
 
-		bool expertMode() const;
+		[[nodiscard]] bool expertMode() const;
 		void setExpertMode(bool expertMode);
 
-		bool isReadOnly() const;
+		[[nodiscard]] bool isReadOnly() const;
 		void setReadOnly(bool readOnly);
+
+		[[nodiscard]] QString defaultSpecificPropertyCategory() const;
+		void setDefaultSpecificPropertyCategory(QString value);
 
 	public:
 		//  Base Editor functions used by list and table editors
 		//
-
 		static QString colorToText(QColor color);
 		static QColor colorFromText(const QString& t);
 
@@ -99,7 +98,11 @@ namespace ExtWidgets
 		QByteArray m_scriptHelpWindowGeometry;
 
 	public:
-		static QString m_commonCategoryName;	// = "Common"
+		static QString s_commonCategoryName;	// = "Common"
+
+		// Default category for newly created specific properties on SpecificPropertiesEditor
+		//
+		QString m_defaultSpecificPropertyCategory = ExtWidgets::PropertyEditorBase::s_commonCategoryName;
 	};
 
 	//
@@ -109,7 +112,6 @@ namespace ExtWidgets
 	//
 	// PropertyArrayEditorDialog
 	//
-
 	class PropertyArrayEditorDialog : public QDialog
 	{
 		Q_OBJECT
@@ -152,7 +154,6 @@ namespace ExtWidgets
 	//	- QStringList
 	//	- QVector<QColor>
 	//
-
 	class VectorEditorDialog : public QDialog
 	{
 		Q_OBJECT
@@ -193,7 +194,6 @@ namespace ExtWidgets
 	//
 	// PropertyEditorHelp
 	//
-
 	class PropertyEditorHelpDialog : public QDialog
 	{
 	public:
@@ -205,7 +205,6 @@ namespace ExtWidgets
 	//
 	// PropertyTextEditor
 	//
-
 	const int PropertyEditorTextMaxLength = 32767;
 
 	class PropertyTextEditor : public QWidget
@@ -250,7 +249,6 @@ namespace ExtWidgets
 	//
 	// PropertyPlainTextEditor
 	//
-
 	class PropertyPlainTextEditor : public PropertyTextEditor
 	{
 		Q_OBJECT
@@ -286,7 +284,6 @@ namespace ExtWidgets
 	//
 	// PropertyEditWidget - a base class for Multi*Edit classes
 	//
-
 	class PropertyEditCellWidget : public QWidget
 	{
 		Q_OBJECT
@@ -306,12 +303,11 @@ namespace ExtWidgets
 	//
 	// MultiFilePathEdit
 	//
-
 	struct FilePathPropertyType
 	{
-		FilePathPropertyType()
+		FilePathPropertyType() :
+			filter("*.*")
 		{
-			filter = "*.*";
 		}
 
 		QString filePath;
@@ -335,20 +331,18 @@ namespace ExtWidgets
 		void onButtonPressed();
 
 	private:
-		bool eventFilter(QObject* watched, QEvent* event);
+		bool eventFilter(QObject* watched, QEvent* event) override;
 
 	private:
 		QLineEdit* m_lineEdit = nullptr;
         QToolButton* m_button = nullptr;
 		bool m_escape = false;
 		QVariant m_oldPath;
-
 	};
 
 	//
 	// MultiEnumEdit
 	//
-
 	class MultiEnumEdit : public PropertyEditCellWidget
 	{
 		Q_OBJECT
@@ -362,13 +356,11 @@ namespace ExtWidgets
 
 	private:
 		QComboBox* m_combo = nullptr;
-
 	};
 
 	//
 	// MultiColorEdit
 	//
-
 	class MultiColorEdit : public PropertyEditCellWidget
 	{
 		Q_OBJECT
@@ -398,7 +390,6 @@ namespace ExtWidgets
 	//
 	// MultiTextEditorDialog
 	//
-
 	class MultiTextEditorDialog : public QDialog
 	{
 		Q_OBJECT
@@ -430,7 +421,6 @@ namespace ExtWidgets
 	//
 	// PropertyEditorCheckBox
 	//
-
 	class PropertyEditorCheckBox : public QCheckBox
 	{
 	public:
@@ -451,7 +441,6 @@ namespace ExtWidgets
 	//
 	// MultiCheckBox
 	//
-
 	class MultiCheckBox : public PropertyEditCellWidget
 	{
 		Q_OBJECT
@@ -469,14 +458,11 @@ namespace ExtWidgets
 
 	private:
 		PropertyEditorCheckBox* m_checkBox = nullptr;
-
 	};
 
 	//
 	// MultiTextEdit
 	//
-
-
 	class MultiTextEdit : public PropertyEditCellWidget
 	{
 		Q_OBJECT
@@ -522,7 +508,6 @@ namespace ExtWidgets
 	//
 	// MultiArrayEdit
 	//
-
 	class MultiArrayEdit : public PropertyEditCellWidget
 	{
 		Q_OBJECT
@@ -547,7 +532,6 @@ namespace ExtWidgets
 	//
 	// PropertyEditorObject
 	//
-
 	class PropertyTreeWidget;
 
 	enum class PropertyEditorColumns
@@ -582,10 +566,10 @@ namespace ExtWidgets
 	//
 	// PropertyEditorDelegate
 	//
-
 	class PropertyEditorDelegate : public QItemDelegate
 	{
 		Q_OBJECT
+
 	public:
 		explicit PropertyEditorDelegate(PropertyTreeWidget* treeWidget, PropertyEditor* propretyEditor);
 
@@ -615,7 +599,6 @@ namespace ExtWidgets
 	//
 	// PropertyTreeWidget
 	//
-
 	class PropertyTreeWidget : public QTreeWidget
 	{
 		Q_OBJECT
@@ -638,8 +621,7 @@ namespace ExtWidgets
 	//
 	// PropertyEditor
 	//
-
-	class PropertyEditor : public QWidget, public PropertyEditorBase
+	class PropertyEditor : public PropertyEditorBase
 	{
 		Q_OBJECT
 
@@ -715,4 +697,3 @@ Q_DECLARE_METATYPE(std::shared_ptr<Property>)
 Q_DECLARE_METATYPE(ExtWidgets::FilePathPropertyType)
 Q_DECLARE_METATYPE(QVector<QColor>)
 
-#endif // PROPERTYEDITOR_H

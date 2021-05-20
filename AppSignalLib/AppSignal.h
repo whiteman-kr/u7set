@@ -9,7 +9,7 @@
 #include "../UtilsLib/Address16.h"
 #include "../CommonLib/Hash.h"
 #include "../UtilsLib/WUtils.h"
-#include "../lib/OrderedHash.h"
+#include "../CommonLib/OrderedHash.h"
 #include "../lib/ConstStrings.h"
 #include "../CommonLib/Types.h"
 #include "../CommonLib/PropertyObject.h"

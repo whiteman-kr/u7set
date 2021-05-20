@@ -162,6 +162,7 @@ private:
 class SpecificPropertiesEditor : public ExtWidgets::PropertyTextEditor
 {
 	Q_OBJECT
+
 public:
 	explicit SpecificPropertiesEditor(QWidget* parent);
 	virtual ~SpecificPropertiesEditor();
@@ -174,6 +175,9 @@ public:
 
 	bool externalOkCancelButtons() const override;
 
+	QString defaultCategory() const;
+	void setDefaultCategory(QString value);
+
 private slots:
 	void tableSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 	void onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
@@ -185,7 +189,6 @@ private slots:
 
 	void onOkClicked();
 	void onCancelClicked();
-
 
 private:
 	SpecificPropertyModel m_propertiesModel;
@@ -204,6 +207,7 @@ private:
 
 	QWidget* m_parent = nullptr;
 
+	QString m_defaultCategory = ExtWidgets::PropertyEditorBase::s_commonCategoryName;
 };
 
 #endif // SPECIFICPROPERTIESEDITOR_H

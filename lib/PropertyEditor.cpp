@@ -14,12 +14,11 @@
 namespace ExtWidgets
 {
 
-	QString PropertyEditorBase::m_commonCategoryName = "Common";
+	QString PropertyEditorBase::s_commonCategoryName = "Common";
 
 	//
 	// PropertyTools
 	//
-
 	QString PropertyTools::propertyVectorText(QVariant& value)
 	{
 		// PropertyVector
@@ -38,7 +37,6 @@ namespace ExtWidgets
 
 		// PropertyList
 		//
-
 		if (variantIsPropertyList(value) == true)
 		{
 			auto pv = variantToPropertyList(value);
@@ -253,8 +251,8 @@ namespace ExtWidgets
 	//
 	// ------------ PropertyEditorBase ------------
 	//
-
-	PropertyEditorBase::PropertyEditorBase()
+	PropertyEditorBase::PropertyEditorBase(QWidget* parent) :
+		QWidget(parent)
 	{
 		QSettings s;
 		thePropertyEditorSettings.restore(s);
@@ -311,7 +309,15 @@ namespace ExtWidgets
 		m_readOnly = readOnly;
 	}
 
+	QString PropertyEditorBase::defaultSpecificPropertyCategory() const
+	{
+		return m_defaultSpecificPropertyCategory;
+	}
 
+	void PropertyEditorBase::setDefaultSpecificPropertyCategory(QString value)
+	{
+		m_defaultSpecificPropertyCategory = value;
+	}
 
 	QString PropertyEditorBase::colorToText(QColor color)
 	{
@@ -3425,8 +3431,7 @@ namespace ExtWidgets
 	//
 
 	PropertyEditor::PropertyEditor(QWidget* parent) :
-		QWidget(parent),
-		PropertyEditorBase()
+		PropertyEditorBase(parent)
 	{
 		QVBoxLayout* mainLayout = new QVBoxLayout(this);
 		mainLayout->setContentsMargins(1, 1, 1, 1);
@@ -4001,7 +4006,7 @@ namespace ExtWidgets
 		QString category = poe.property->category();
 		if (category.isEmpty() == true)
 		{
-			category = m_commonCategoryName;
+			category = m_defaultSpecificPropertyCategory;
 		}
 
 		for (int i = 0; i < m_treeWidget->topLevelItemCount(); i++)

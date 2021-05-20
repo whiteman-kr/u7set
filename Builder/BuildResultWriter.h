@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../lib/OutputLog.h"
-#include "../lib/OrderedHash.h"
+#include "../CommonLib/OrderedHash.h"
 #include "../HardwareLib/DeviceObject.h"
 #include "../lib/BuildInfo.h"
 #include "../lib/ConstStrings.h"

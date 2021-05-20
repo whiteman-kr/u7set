@@ -51,7 +51,6 @@ SOURCES += \
 HEADERS += \
 	Stable.h \
 	../../lib/ConstStrings.h \
-    ../../lib/OrderedHash.h \
     ../../lib/BuildInfo.h \
 	../../lib/SoftwareSettings.h \
     ../../lib/Tuning/TuningSignalState.h \

@@ -140,7 +140,7 @@ namespace ExtWidgets
 		void spaceKeyPressed();
 	};
 
-	class PropertyTable : public QWidget, public PropertyEditorBase
+	class PropertyTable : public PropertyEditorBase
 	{
 		Q_OBJECT
 	public:

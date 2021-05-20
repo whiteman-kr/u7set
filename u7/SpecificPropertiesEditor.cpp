@@ -763,8 +763,8 @@ bool SpecificPropertyModelSorter::sortFunction(int index1, int index2, int colum
 //
 SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 	PropertyTextEditor(parent),
-	m_parent(parent),
-	m_propertiesModel(this)
+	m_propertiesModel(this),
+	m_parent(parent)
 {
 
 	assert(m_parent);
@@ -1060,6 +1060,16 @@ bool SpecificPropertiesEditor::externalOkCancelButtons() const
 	return false;
 }
 
+QString SpecificPropertiesEditor::defaultCategory() const
+{
+	return m_defaultCategory;
+}
+
+void SpecificPropertiesEditor::setDefaultCategory(QString value)
+{
+	m_defaultCategory = value;
+}
+
 void SpecificPropertiesEditor::tableSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
 	Q_UNUSED(selected);
@@ -1131,15 +1141,16 @@ void SpecificPropertiesEditor::onAddProperty()
 {
 	std::shared_ptr<SpecificPropertyDescription> spd = std::make_shared<SpecificPropertyDescription>();
 
-	spd->setCaption(tr("New Property"));
-	spd->setCategory(ExtWidgets::PropertyEditorBase::m_commonCategoryName);
-	spd->setType(E::SpecificPropertyType::pt_uint32);
+	spd->setCaption(tr("NewProperty"));
+	spd->setCategory(defaultCategory());
+	spd->setType(E::SpecificPropertyType::pt_int32);
 	spd->setVisible(true);
 
 	// Add the tree item
 	//
-
 	m_propertiesModel.add(spd);
+
+	return;
 }
 
 void SpecificPropertiesEditor::onCloneProperty()
