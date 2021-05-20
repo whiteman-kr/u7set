@@ -12551,7 +12551,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#pulse_gen_v1" Caption="pulse_gen" Version="1.0003">
+        <AFB id="#pulse_gen_v1" Caption="pulse_gen" Version="1.0004">
 		    <Properties>
 			    <Description>Pulse generator</Description>
 				<Category>Other</Category>
@@ -12596,7 +12596,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					</Script>
 					<Units>ms</Units>
 				</Param>
-			    <Param OpName="i_start_from" Caption="StartFrom" Visible="true" OpIndex="8" Size="1" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			    <Param OpName="i_start_from" Caption="StartFrom" Visible="true" OpIndex="8" Size="1" Instantiator="false" User="true" Type="Discrete" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>1</Value>
 					<Default>1</Default>
 					<LowLimit>0</LowLimit>
