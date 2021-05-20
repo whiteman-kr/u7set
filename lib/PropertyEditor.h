@@ -90,6 +90,16 @@ namespace ExtWidgets
 		QString scriptHelpFile() const;
 
 	private:
+		enum class CellEditorType
+		{
+			Text,
+			Array,
+			Enum,
+			FilePath,
+			CheckBox,
+			Color
+		};
+
 		bool m_expertMode = false;
 		bool m_readOnly = false;
 

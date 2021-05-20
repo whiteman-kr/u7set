@@ -75,9 +75,8 @@ namespace Afb
 					return {};
 				}
 
-				//int val = m_value.toUInt();
-				//return QString::number(val);
-				return m_value.toString();
+				QString val = m_value.toUInt() ? QLatin1String("True") : QLatin1String("False");
+				return val;
 			}
 
 		case E::SignalType::Bus:
@@ -93,7 +92,7 @@ namespace Afb
 	{
 		// Check if string is reference
 		//
-		QRegExp rx("^\\$\\(([A-Za-z]+\\.)*[A-Za-z]+\\)$");	// $(AA.BB.CC)
+		QRegExp rx("^\\$\\(([A-Za-z0-9_]+\\.)*[A-Za-z0-9_]+\\)$");	// $(AA.BB.CC)
 		if (rx.exactMatch(str) == true)
 		{
 			m_reference = str;
