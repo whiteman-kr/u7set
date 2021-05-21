@@ -3,7 +3,7 @@
 
 #include "../lib/PropertyEditor.h"
 
-enum SpecificPropertyEditorColumns
+enum class SpecificPropertyEditorColumns
 {
 	Category = 0,
 	Caption,
@@ -135,7 +135,7 @@ private:
 	std::vector<std::shared_ptr<SpecificPropertyDescription>> m_propertyDescriptions;
 	std::vector<int> m_sortedIndexes;
 
-	int m_sortColumn = SpecificPropertyEditorColumns::ViewOrder;
+	int m_sortColumn = static_cast<int>(SpecificPropertyEditorColumns::ViewOrder);
 	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 };
 
@@ -182,6 +182,7 @@ private slots:
 	void tableSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 	void onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
 	void sortIndicatorChanged(int column, Qt::SortOrder order);
+	void onCustomContextMenuRequested(const QPoint& pos);
 
 	void onAddProperty();
 	void onCloneProperty();
@@ -204,6 +205,12 @@ private:
 
 	QPushButton* m_okButton = nullptr;
 	QPushButton* m_cancelButton = nullptr;
+
+	QAction* m_addAction = nullptr;
+	QAction* m_removeAction = nullptr;
+	QAction* m_cloneAction = nullptr;
+
+	QMenu* m_popupMenu = nullptr;
 
 	QWidget* m_parent = nullptr;
 
