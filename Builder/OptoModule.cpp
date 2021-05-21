@@ -36,6 +36,7 @@ namespace Hardware
 		assert(hasSignalID(m_nearestSignalID));
 
 		m_signalType = ualSignal->signalType();
+		m_analogFormat = ualSignal->analogSignalFormat();
 		m_byteOrder = ualSignal->byteOrder();
 
 		switch(m_signalType)

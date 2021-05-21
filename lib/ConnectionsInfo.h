@@ -23,6 +23,7 @@ public:
 	QString busTypeID;																// matter only for Bus signals
 	Address16 addrInBuf;
 	Address16 absAddr;
+	int dataSizeBits = 0;
 };
 
 class ConnectionPortInfo
@@ -122,6 +123,7 @@ protected:
 	static const QString ATTR_DATA_SIZE_W;
 	static const QString ATTR_ABS_ADDR;
 	static const QString ATTR_ADDR_IN_BUF;
+	static const QString ATTR_DATA_SIZE_BITS;
 
 	static const QString CONN_TYPE_PORT_TO_PORT;
 	static const QString CONN_TYPE_SINGLE_PORT;

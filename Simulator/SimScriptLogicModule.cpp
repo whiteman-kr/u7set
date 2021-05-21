@@ -85,7 +85,7 @@ namespace Sim
 
 		if (isNull() == true)
 		{
-			ScriptSimulator::throwScriptException(this, tr("readRamBit error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("readRamBit", address, access));
 			return std::numeric_limits<decltype(result)>::max();
 		}
 
@@ -93,7 +93,7 @@ namespace Sim
 													&result, E::ByteOrder::BigEndian, access, true);
 		if (ok == false)
 		{
-			ScriptSimulator::throwScriptException(this, tr("readRamBit error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("readRamBit", address, access));
 			return {};
 		}
 
@@ -106,14 +106,14 @@ namespace Sim
 
 		if (isNull() == true)
 		{
-			ScriptSimulator::throwScriptException(this, tr("readRamWord error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("readRamWord", address, access));
 			return std::numeric_limits<decltype(result)>::max();
 		}
 
 		bool ok = m_logicModule->ram().readWord(address.offset(), &result, E::ByteOrder::BigEndian, access, true);
 		if (ok == false)
 		{
-			ScriptSimulator::throwScriptException(this, tr("readRamWord error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("readRamWord", address, access));
 			return {};
 		}
 
@@ -126,14 +126,14 @@ namespace Sim
 
 		if (isNull() == true)
 		{
-			ScriptSimulator::throwScriptException(this, tr("readRamDword error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("readRamDword", address, access));
 			return std::numeric_limits<decltype(result)>::max();
 		}
 
 		bool ok = m_logicModule->ram().readDword(address.offset(), &result, E::ByteOrder::BigEndian, access, true);
 		if (ok == false)
 		{
-			ScriptSimulator::throwScriptException(this, tr("readRamDword error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("readRamDword", address, access));
 			return {};
 		}
 
@@ -146,14 +146,14 @@ namespace Sim
 
 		if (isNull() == true)
 		{
-			ScriptSimulator::throwScriptException(this, tr("readRamSignedInt error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("readRamSignedInt", address, access));
 			return std::numeric_limits<decltype(result)>::max();
 		}
 
 		bool ok = m_logicModule->ram().readSignedInt(address.offset(), &result, E::ByteOrder::BigEndian, access, true);
 		if (ok == false)
 		{
-			ScriptSimulator::throwScriptException(this, tr("readRamSignedInt error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("readRamSignedInt", address, access));
 			return {};
 		}
 
@@ -166,26 +166,25 @@ namespace Sim
 
 		if (isNull() == true)
 		{
-			ScriptSimulator::throwScriptException(this, tr("readRamFloat error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("readRamFloat", address, access));
 			return std::numeric_limits<decltype(result)>::quiet_NaN();
 		}
 
 		bool ok = m_logicModule->ram().readFloat(address.offset(), &result, E::ByteOrder::BigEndian, access, true);
 		if (ok == false)
 		{
-			ScriptSimulator::throwScriptException(this, tr("readRamFloat error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("readRamFloat", address, access));
 			return {};
 		}
 
 		return result;
 	}
 
-
 	void ScriptLogicModule::writeRamBit(RamAddress address, quint16 value, E::LogicModuleRamAccess access)
 	{
 		if (isNull() == true)
 		{
-			ScriptSimulator::throwScriptException(this, tr("writeRamBit error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("writeRamBit", address, access));
 			return;
 		}
 
@@ -193,7 +192,7 @@ namespace Sim
 													   value, E::ByteOrder::BigEndian, access);
 		if (ok == false)
 		{
-			ScriptSimulator::throwScriptException(this, tr("writeRamBit error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("writeRamBit", address, access));
 		}
 
 		return;
@@ -203,14 +202,14 @@ namespace Sim
 	{
 		if (isNull() == true)
 		{
-			ScriptSimulator::throwScriptException(this, tr("writeRamWord error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("writeRamWord", address, access));
 			return;
 		}
 
 		bool ok = m_logicModule->mutableRam().writeWord(address.offset(), value, E::ByteOrder::BigEndian, access);
 		if (ok == false)
 		{
-			ScriptSimulator::throwScriptException(this, tr("writeRamWord error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("writeRamWord", address, access));
 		}
 
 		return;
@@ -220,14 +219,14 @@ namespace Sim
 	{
 		if (isNull() == true)
 		{
-			ScriptSimulator::throwScriptException(this, tr("writeRamDword error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("writeRamDword", address, access));
 			return;
 		}
 
 		bool ok = m_logicModule->mutableRam().writeDword(address.offset(), value, E::ByteOrder::BigEndian, access);
 		if (ok == false)
 		{
-			ScriptSimulator::throwScriptException(this, tr("writeRamDword error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("writeRamDword", address, access));
 		}
 
 		return;
@@ -237,14 +236,14 @@ namespace Sim
 	{
 		if (isNull() == true)
 		{
-			ScriptSimulator::throwScriptException(this, tr("writeRamSignedInt error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("writeRamSignedInt", address, access));
 			return;
 		}
 
 		bool ok = m_logicModule->mutableRam().writeSignedInt(address.offset(), value, E::ByteOrder::BigEndian, access);
 		if (ok == false)
 		{
-			ScriptSimulator::throwScriptException(this, tr("writeRamSignedInt error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("writeRamSignedInt", address, access));
 		}
 
 		return;
@@ -254,17 +253,22 @@ namespace Sim
 	{
 		if (isNull() == true)
 		{
-			ScriptSimulator::throwScriptException(this, tr("writeRamFloat error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("writeRamFloat", address, access));
 			return;
 		}
 
 		bool ok = m_logicModule->mutableRam().writeFloat(address.offset(), value, E::ByteOrder::BigEndian, access);
 		if (ok == false)
 		{
-			ScriptSimulator::throwScriptException(this, tr("writeRamFloat error, address %1").arg(address.toString()));
+			ScriptSimulator::throwScriptException(this, rwError("writeRamFloat", address, access));
 		}
 
 		return;
 	}
 
+	QString ScriptLogicModule::rwError(const QString& function, const RamAddress& address, E::LogicModuleRamAccess access) const
+	{
+		return QString("%1 error, address %2, access %3").
+				arg(function).arg(address.toString()).arg(E::valueToString<E::LogicModuleRamAccess>(access));
+	}
 }

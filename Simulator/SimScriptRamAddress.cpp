@@ -42,7 +42,8 @@ namespace Sim
 
 	QString RamAddress::toString() const
 	{
-		return QString("Offset: %1 (%2), bit: %3, Access: %4");
+		return QString("Offset: %1 (0x%2), bit: %3").
+						arg(m_offset).arg(m_offset, 0, 16).arg(m_bit);
 	}
 
 	quint32 RamAddress::bitAddress() const

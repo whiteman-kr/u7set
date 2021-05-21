@@ -50,6 +50,9 @@ namespace Sim
 		void writeRamFloat(RamAddress address, float value, E::LogicModuleRamAccess access);
 
 	private:
+		QString rwError(const QString& function, const RamAddress& address, E::LogicModuleRamAccess access) const;
+
+	private:
 		std::shared_ptr<LogicModule> m_logicModule;
 	};
 

@@ -147,6 +147,12 @@ namespace Sim
 
 		ScriptDevUtils devUtils();
 
+		/// \brief Returns uninitialized RamAddress object
+		RamAddress createRamAddress();
+
+		/// \brief Returns initialized RamAddress object
+		RamAddress createRamAddress(int offset, int bit);
+
 	public:
 		[[nodiscard]] ScopedLog& log();
 

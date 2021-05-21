@@ -35,6 +35,7 @@ const QString ConnectionsInfo::ATTR_BUFFER_ABS_ADDR("BufferAbsAddr");
 const QString ConnectionsInfo::ATTR_DATA_SIZE_W("DataSizeW");
 const QString ConnectionsInfo::ATTR_ABS_ADDR("AbsAddr");
 const QString ConnectionsInfo::ATTR_ADDR_IN_BUF("AddrInBuf");
+const QString ConnectionsInfo::ATTR_DATA_SIZE_BITS("DataSizeBits");
 
 const QString ConnectionsInfo::CONN_TYPE_PORT_TO_PORT("PortToPort");
 const QString ConnectionsInfo::CONN_TYPE_SINGLE_PORT("SinglePort");
@@ -390,6 +391,8 @@ bool ConnectionsInfo::load(ConnectionTxRxSignal* cs, const QDomElement& txRxSign
 	result &= DomXmlHelper::getAddress16Attribute(txRxSignalElem, ConnectionsInfo::ATTR_ADDR_IN_BUF, &cs->addrInBuf, errMsg);
 	result &= DomXmlHelper::getAddress16Attribute(txRxSignalElem, ConnectionsInfo::ATTR_ABS_ADDR, &cs->absAddr, errMsg);
 
+	result &= DomXmlHelper::getIntAttribute(txRxSignalElem, ConnectionsInfo::ATTR_DATA_SIZE_BITS, &cs->dataSizeBits, errMsg);
+
 	return result;
 }
 
@@ -594,9 +597,12 @@ QString ConnectionsInfo::portTag(int portNo)
 
 			txs.IDs = txSignal->appSignalIDs();
 			txs.type = txSignal->signalType();
+			txs.analogFormat = txSignal->analogFormat();
+			txs.busTypeID = txSignal->busTypeID();
 			txs.addrInBuf = txSignal->addrInBuf();
 			txs.absAddr = txSignal->addrInBuf();
 			txs.absAddr.addWord(cpi->txBufferAbsAddr);
+			txs.dataSizeBits = txSignal->dataSize();
 
 			cpi->txSignals.push_back(txs);
 		}
@@ -620,9 +626,12 @@ QString ConnectionsInfo::portTag(int portNo)
 
 			rxs.IDs = rxSignal->appSignalIDs();
 			rxs.type = rxSignal->signalType();
+			rxs.analogFormat = rxSignal->analogFormat();
+			rxs.busTypeID = rxSignal->busTypeID();
 			rxs.addrInBuf = rxSignal->addrInBuf();
 			rxs.absAddr = rxSignal->addrInBuf();
 			rxs.absAddr.addWord(cpi->rxBufferAbsAddr);
+			rxs.dataSizeBits = rxSignal->dataSize();
 
 			cpi->rxSignals.push_back(rxs);
 		}
@@ -715,6 +724,7 @@ QString ConnectionsInfo::portTag(int portNo)
 		xml.writeStringAttribute(ConnectionsInfo::ATTR_BUS_TYPE_ID, cs.busTypeID);
 		xml.writeAddress16Attribute(ConnectionsInfo::ATTR_ADDR_IN_BUF, cs.addrInBuf);
 		xml.writeAddress16Attribute(ConnectionsInfo::ATTR_ABS_ADDR, cs.absAddr);
+		xml.writeIntAttribute(ConnectionsInfo::ATTR_DATA_SIZE_BITS, cs.dataSizeBits);
 
 		xml.writeEndElement();
 	}

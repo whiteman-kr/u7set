@@ -1595,9 +1595,8 @@ namespace Builder
 
 		softwareXml.setAutoFormatting(true);
 		softwareXml.writeStartDocument();
-		softwareXml.writeStartElement(XmlElement::SOFTWARE_ITEMS);	// <SoftwareItems>
 
-		context->m_buildResultWriter->buildInfo().writeToXml(softwareXml);
+		softwareXml.writeStartElement(XmlElement::SOFTWARE_ITEMS);	// <SoftwareItems>
 
 		for(auto p : swCfgGens)
 		{

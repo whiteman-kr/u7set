@@ -589,6 +589,16 @@ namespace Sim
 		return ScriptDevUtils{m_simulator};
 	}
 
+	RamAddress ScriptSimulator::createRamAddress()
+	{
+		return RamAddress();
+	}
+
+	RamAddress ScriptSimulator::createRamAddress(int offset, int bit)
+	{
+		return RamAddress(offset, bit);
+	}
+
 	ScopedLog& ScriptSimulator::log()
 	{
 		return m_log;

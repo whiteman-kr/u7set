@@ -69,6 +69,7 @@ namespace Hardware
 		void setAddrInBuf(const Address16 &addr);
 
 		E::SignalType signalType() const { return m_signalType; }
+		E::AnalogAppSignalFormat analogFormat() const { return m_analogFormat; }
 		E::DataFormat dataFormat() const { return m_dataFormat; }
 		int dataSize() const { return m_dataSize; }
 		E::ByteOrder byteOrder() const { return m_byteOrder; }
@@ -81,6 +82,7 @@ namespace Hardware
 		QString m_nearestSignalID;
 		QStringList m_appSignalIDs;
 		E::SignalType m_signalType = E::SignalType::Analog;
+		E::AnalogAppSignalFormat m_analogFormat = E::AnalogAppSignalFormat::SignedInt32;
 		E::DataFormat m_dataFormat = E::DataFormat::UnsignedInt;
 		E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 		int m_dataSize = 0;					// signal size in tx(rx)Buffer in bits

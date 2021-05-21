@@ -17,6 +17,9 @@ namespace Sim
 		Q_PROPERTY(bool enabled READ enabled WRITE setEnabled)
 		Q_PROPERTY(bool timeout READ timeout CONSTANT)
 
+		Q_PROPERTY(bool enableManualSettings READ enableManualSettings CONSTANT);
+		Q_PROPERTY(bool disableDataIDControl READ disableDataIDControl CONSTANT);
+
 		Q_PROPERTY(QJSValue port1Info READ port1Info CONSTANT)
 		Q_PROPERTY(QJSValue port2Info READ port2Info CONSTANT)
 
@@ -36,6 +39,9 @@ namespace Sim
 		void setEnabled(bool value);
 
 		bool timeout() const;
+
+		bool enableManualSettings() const;
+		bool disableDataIDControl() const;
 
 		QJSValue port1Info() const;
 		QJSValue port2Info() const;
@@ -66,11 +72,11 @@ namespace Sim
 		Q_PROPERTY(bool enableDuplex READ enableDuplex CONSTANT)
 		Q_PROPERTY(QString serialMode READ serialMode CONSTANT)
 
-		Q_PROPERTY(int txBufferAbsAddr READ txBufferAbsAddr CONSTANT)
+		Q_PROPERTY(RamAddress txBufferAbsAddr READ txBufferAbsAddr CONSTANT)
 		Q_PROPERTY(int txDataSizeW READ txDataSizeW CONSTANT)
 		Q_PROPERTY(quint32 txDataID READ txDataID CONSTANT)
 
-		Q_PROPERTY(int rxBufferAbsAddr READ rxBufferAbsAddr CONSTANT)
+		Q_PROPERTY(RamAddress rxBufferAbsAddr READ rxBufferAbsAddr CONSTANT)
 		Q_PROPERTY(int rxDataSizeW READ rxDataSizeW CONSTANT)
 		Q_PROPERTY(quint32 rxDataID READ rxDataID CONSTANT)
 
@@ -95,16 +101,19 @@ namespace Sim
 		bool enableDuplex() const;
 		QString serialMode() const;
 
-		int txBufferAbsAddr() const;
+		RamAddress txBufferAbsAddr() const;
 		int txDataSizeW() const;
 		quint32 txDataID() const;
 
-		int rxBufferAbsAddr() const;
+		RamAddress rxBufferAbsAddr() const;
 		int rxDataSizeW() const;
 		quint32 rxDataID() const;
 
 		QString rxValiditySignalEquipmentID() const;
 		RamAddress rxValiditySignalAbsAddr() const;
+
+		quint32 receivedDataID() const;
+		quint32 sentDataID() const;
 
 	public slots:
 		bool isTxSignalExist(const QString& txAppSignalID) const;
@@ -132,6 +141,7 @@ namespace Sim
 		Q_PROPERTY(QString busTypeID READ busTypeID CONSTANT)
 		Q_PROPERTY(RamAddress addrInBuf READ addrInBuf CONSTANT)
 		Q_PROPERTY(RamAddress absAddr READ absAddr CONSTANT)
+		Q_PROPERTY(int dataSizeBits READ dataSizeBits CONSTANT)
 
 	public:
 		ScriptConnSignalInfo();
@@ -144,6 +154,7 @@ namespace Sim
 		QString busTypeID() const;
 		RamAddress addrInBuf() const;
 		RamAddress absAddr() const;
+		int dataSizeBits() const;
 
 	private:
 		::ConnectionTxRxSignal m_signalInfo;

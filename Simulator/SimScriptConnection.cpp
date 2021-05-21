@@ -75,6 +75,16 @@ namespace Sim
 		return m_connection->timeout();
 	}
 
+	bool ScriptConnection::enableManualSettings() const
+	{
+		return m_connection->connectionInfo().enableManualSettings;
+	}
+
+	bool ScriptConnection::disableDataIDControl() const
+	{
+		return m_connection->connectionInfo().disableDataIDControl;
+	}
+
 	QJSValue ScriptConnection::port1Info() const
 	{
 		return portInfo(1);
@@ -184,9 +194,9 @@ namespace Sim
 		return m_connPortInfo.serialMode;
 	}
 
-	int ScriptConnPortInfo::txBufferAbsAddr() const
+	RamAddress ScriptConnPortInfo::txBufferAbsAddr() const
 	{
-		return m_connPortInfo.txBufferAbsAddr;
+		return RamAddress(m_connPortInfo.txBufferAbsAddr, 0);
 	}
 
 	int ScriptConnPortInfo::txDataSizeW() const
@@ -199,9 +209,9 @@ namespace Sim
 		return m_connPortInfo.txDataID;
 	}
 
-	int ScriptConnPortInfo::rxBufferAbsAddr() const
+	RamAddress ScriptConnPortInfo::rxBufferAbsAddr() const
 	{
-		return m_connPortInfo.rxBufferAbsAddr;
+		return RamAddress(m_connPortInfo.rxBufferAbsAddr, 0);
 	}
 
 	int ScriptConnPortInfo::rxDataSizeW() const
@@ -345,4 +355,8 @@ namespace Sim
 		return RamAddress(m_signalInfo.absAddr);
 	}
 
+	int ScriptConnSignalInfo::dataSizeBits() const
+	{
+		return m_signalInfo.dataSizeBits;
+	}
 }

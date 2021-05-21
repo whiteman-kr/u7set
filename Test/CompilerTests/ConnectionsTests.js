@@ -14,24 +14,42 @@ function assert(condition, message)
     }
 }
 
-const CONN_01 = "CONN_01";
+var lm1;
+var lm2;
 
 var conn01;
 var conn01_port1;
 var conn01_port2;
 
+var conn02;
+var conn02_port1;
+var conn02_port2;
+
 // initTestCase() - will be called before the first test function is executed.
 //
 function initTestCase(sim)
 {
-    console.log(sim.buildPath);
-
+    
+	log.writeText("Log Text");
+	
     sim.unlockTimer = true;             // Unlock simulation timer binding to PC's time. This param can significantly increase simulation speed but it depends on underlying hardware and project size.
     sim.appDataTrasmittion = false;     // Allow or disable LogicModules' Application Data transmittion to AppDataSrv
 
     sim.startForMs(5);                  // Run simulation for 5 ms, it warms up all modules
 	
-	conn01 = sim.connection(CONN_01);
+	//
+	
+	lm1 = sim.logicModule("SYSTEMID_RACK01_FSCC01_MD00");
+	
+	assert(lm1 != null);
+	
+	lm2 = sim.logicModule("SYSTEMID_RACK01_FSCC02_MD00");
+	
+	assert(lm2 != null);
+
+	//
+	
+	conn01 = sim.connection("CONN_01");
 	
 	assert(conn01 != null);
 	
@@ -44,6 +62,22 @@ function initTestCase(sim)
 
 	assert(conn01_port2 != null)
 	assert(conn01_port2.equipmentID == "SYSTEMID_RACK01_FSCC02_MD14_OPTOPORT04");
+	
+	//
+	
+	conn02 = sim.connection("CONN_02");
+	
+	assert(conn02 != null);
+	
+	conn02_port1 = conn02.port1Info;
+	
+	assert(conn02_port1 != null)
+	assert(conn02_port1.equipmentID == "SYSTEMID_RACK01_FSCC01_MD11_OPTOPORT02");
+	
+	conn02_port2 = conn02.port2Info;
+
+	assert(conn02_port2 != null)
+	assert(conn02_port2.equipmentID == "SYSTEMID_RACK01_FSCC02_MD14_OPTOPORT03");
 
     return;
 }
@@ -147,15 +181,47 @@ function test_UAL_CONN_4_1_03(sim)
 	// Signals of modules SYSTEMID_RACK01_FSCC02_MD00 (LM) and SYSTEMID_RACK01_FSCC02_MD14 (OCM) are not added to AppSignals
 	// Opto validity signals should be created automatically
 	//
-	assert(sim.signalExists("#SYSTEMID_RACK01_FSCC02_MD00_PI_OPTOPORT01VALID") === true);
-	assert(sim.signalExists("#SYSTEMID_RACK01_FSCC02_MD00_PI_OPTOPORT02VALID") === true);
-	assert(sim.signalExists("#SYSTEMID_RACK01_FSCC02_MD00_PI_OPTOPORT03VALID") === true);
+	let sg = sim.signalParamExt("#SYSTEMID_RACK01_FSCC02_MD00_PI_OPTOPORT01VALID");
+	assert(sg != null);									// check - signal is exists
+	assert(sg.regBufAddr.isValid == true);				// checks - signal is placed in reg buf
+	assert(sg.regValueAddr.isValid == true);			//
 	
-	assert(sim.signalExists("#SYSTEMID_RACK01_FSCC02_MD14_PI_OPTOPORT01VALID") === true);
-	assert(sim.signalExists("#SYSTEMID_RACK01_FSCC02_MD14_PI_OPTOPORT02VALID") === true);
-	assert(sim.signalExists("#SYSTEMID_RACK01_FSCC02_MD14_PI_OPTOPORT03VALID") === true);
-	assert(sim.signalExists("#SYSTEMID_RACK01_FSCC02_MD14_PI_OPTOPORT04VALID") === true);
-	assert(sim.signalExists("#SYSTEMID_RACK01_FSCC02_MD14_PI_OPTOPORT05VALID") === true);
+	sg = sim.signalParamExt("#SYSTEMID_RACK01_FSCC02_MD00_PI_OPTOPORT02VALID");
+	assert(sg != null);
+	assert(sg.regBufAddr.isValid == true);
+	assert(sg.regValueAddr.isValid == true);	
+
+	sg = sim.signalParamExt("#SYSTEMID_RACK01_FSCC02_MD00_PI_OPTOPORT03VALID");
+	assert(sg != null);
+	assert(sg.regBufAddr.isValid == true);
+	assert(sg.regValueAddr.isValid == true);	
+	
+	//
+	
+	sg = sim.signalParamExt("#SYSTEMID_RACK01_FSCC02_MD14_PI_OPTOPORT01VALID");
+	assert(sg != null);
+	assert(sg.regBufAddr.isValid == true);
+	assert(sg.regValueAddr.isValid == true);	
+
+	sg = sim.signalParamExt("#SYSTEMID_RACK01_FSCC02_MD14_PI_OPTOPORT02VALID");
+	assert(sg != null);
+	assert(sg.regBufAddr.isValid == true);
+	assert(sg.regValueAddr.isValid == true);	
+	
+	sg = sim.signalParamExt("#SYSTEMID_RACK01_FSCC02_MD14_PI_OPTOPORT03VALID");
+	assert(sg != null);
+	assert(sg.regBufAddr.isValid == true);
+	assert(sg.regValueAddr.isValid == true);	
+	
+	sg = sim.signalParamExt("#SYSTEMID_RACK01_FSCC02_MD14_PI_OPTOPORT04VALID");
+	assert(sg != null);
+	assert(sg.regBufAddr.isValid == true);
+	assert(sg.regValueAddr.isValid == true);	
+	
+	sg = sim.signalParamExt("#SYSTEMID_RACK01_FSCC02_MD14_PI_OPTOPORT05VALID");
+	assert(sg != null);
+	assert(sg.regBufAddr.isValid == true);
+	assert(sg.regValueAddr.isValid == true);	
 }
 
 function test_UAL_CONN_4_1_04(sim)
@@ -228,6 +294,129 @@ function test_UAL_CONN_4_1_04(sim)
 	sim.overridesReset();
 }
 
+function test_UAL_CONN_4_1_05(sim)
+{
+	sim.overridesReset();
+
+	sim.connectionsSetEnabled(true);
+	sim.startForMs(10);
+	
+	assert(sim.signalValue("#SYSTEMID_RACK01_FSCC01_MD00_PI_OPTOPORT01VALID") == 1);
+	assert(sim.signalValue("#SYSTEMID_RACK01_FSCC02_MD14_PI_OPTOPORT04VALID") == 1);
+	
+	conn01.enabled = false;
+	sim.startForMs(20);
+			
+	assert(sim.signalValue("#SYSTEMID_RACK01_FSCC01_MD00_PI_OPTOPORT01VALID") == 0);
+	assert(sim.signalValue("#SYSTEMID_RACK01_FSCC02_MD14_PI_OPTOPORT04VALID") == 0);
+	
+	sim.connectionsSetEnabled(true);
+	sim.startForMs(10);
+							
+	assert(sim.signalValue("#SYSTEMID_RACK01_FSCC01_MD00_PI_OPTOPORT01VALID") == 1);
+	assert(sim.signalValue("#SYSTEMID_RACK01_FSCC02_MD14_PI_OPTOPORT04VALID") == 1);
+}
+
+function test_UAL_CONN_4_1_06(sim)
+{
+	// conn01_port1 is not receive any signal from conn01_port2
+	// only dataID should be receive
+	//
+	assert(conn01_port1.rxDataSizeW == 2);
+	assert(conn01_port2.txDataSizeW == 2);
+	
+	sim.connectionsSetEnabled(true);
+	sim.startForMs(15);
+	
+	let receivedDataID = lm1.readRamDword(conn01_port1.rxBufferAbsAddr, RamReadAccess);
+	
+	assert(receivedDataID == conn01_port1.rxDataID);
+	assert(receivedDataID == conn01_port2.txDataID);
+	
+	let transmittedDataID = lm2.readRamDword(conn01_port2.txBufferAbsAddr, RamWriteAccess);
+	
+	assert(receivedDataID == transmittedDataID);
+	
+	assert(transmittedDataID == conn01_port1.rxDataID);
+	assert(transmittedDataID == conn01_port2.txDataID);
+}
+
+function test_UAL_CONN_4_1_07(sim)
+{
+	assert(conn01.disableDataIDControl == false);
+
+	sim.connectionsSetEnabled(true);
+	sim.startForMs(15);
+
+	// LM1
+	
+	let receivedDataID = lm1.readRamDword(conn01_port1.rxBufferAbsAddr, RamReadAccess);
+	
+	assert(receivedDataID != 0);
+	assert(receivedDataID == conn01_port1.rxDataID);
+	assert(receivedDataID == conn01_port2.txDataID);
+	
+	transmittedDataID = lm1.readRamDword(conn01_port1.txBufferAbsAddr, RamWriteAccess);
+	
+	assert(transmittedDataID != 0);
+	assert(transmittedDataID == conn01_port1.txDataID);
+	assert(transmittedDataID == conn01_port2.rxDataID);
+	
+	// LM2
+	
+	receivedDataID = lm2.readRamDword(conn01_port2.rxBufferAbsAddr, RamReadAccess);
+	
+	assert(receivedDataID != 0);
+	assert(receivedDataID == conn01_port2.rxDataID);
+	assert(receivedDataID == conn01_port1.txDataID);
+	
+	let transmittedDataID = lm2.readRamDword(conn01_port2.txBufferAbsAddr, RamWriteAccess);
+	
+	assert(transmittedDataID != 0);
+	assert(transmittedDataID == conn01_port1.rxDataID);
+	assert(transmittedDataID == conn01_port2.txDataID);
+}
+
+function test_UAL_CONN_4_1_08(sim)
+{
+	assert(conn02.disableDataIDControl == true);
+
+	sim.connectionsSetEnabled(true);
+	sim.startForMs(15);
+
+	// LM1
+	
+	let receivedDataID = lm1.readRamDword(conn02_port1.rxBufferAbsAddr, RamReadAccess);
+	
+	assert(receivedDataID == 0);
+	assert(receivedDataID == conn02_port1.rxDataID);
+	assert(receivedDataID == conn02_port2.txDataID);
+	
+	transmittedDataID = lm1.readRamDword(conn02_port1.txBufferAbsAddr, RamWriteAccess);
+	
+	assert(transmittedDataID == 0);
+	assert(transmittedDataID == conn02_port1.txDataID);
+	assert(transmittedDataID == conn02_port2.rxDataID);
+	
+	// LM2
+	
+	receivedDataID = lm2.readRamDword(conn02_port2.rxBufferAbsAddr, RamReadAccess);
+	
+	assert(receivedDataID == 0);
+	assert(receivedDataID == conn02_port2.rxDataID);
+	assert(receivedDataID == conn02_port1.txDataID);
+	
+	let transmittedDataID = lm2.readRamDword(conn02_port2.txBufferAbsAddr, RamWriteAccess);
+	
+	assert(transmittedDataID == 0);
+	assert(transmittedDataID == conn02_port1.rxDataID);
+	assert(transmittedDataID == conn02_port2.txDataID);
+}
+
+function test_UAL_CONN_4_1_09(sim)
+{
+}
+
 // ---------------------------------------------------------------------------------------------------------
 //
 // UAL_CONN_4_2* - Opto transmitters tests
@@ -258,6 +447,33 @@ function test_UAL_CONN_4_2_01(sim)
 	assert(sim.signalValue("#LM2_DS03") === 1);
 }
 
+function test_UAL_CONN_4_2_02(sim)
+{
+	let txBufAbsAddr = conn01_port1.txBufferAbsAddr.offset;
+	let txDataSizeW = conn01_port1.txDataSizeW;
+	
+	let sg = conn01_port1.txSignalInfo("#LM1_DS02");
+	assert(sg != null);
+	
+	assert(sg.absAddr.offset > txBufAbsAddr && sg.absAddr.offset < (txBufAbsAddr + txDataSizeW));
+	
+	sg = conn01_port1.txSignalInfo("#LM1_DS03");
+	assert(sg != null);
+	assert(sg.absAddr.offset > txBufAbsAddr && sg.absAddr.offset < (txBufAbsAddr + txDataSizeW));
+	
+	sg = conn01_port1.txSignalInfo("#SYSTEMID_RACK01_FSCC01_MD00_PI_TEMP");
+	assert(sg != null);
+	assert(sg.absAddr.offset > txBufAbsAddr && sg.absAddr.offset < (txBufAbsAddr + txDataSizeW));
+
+	sg = conn01_port1.txSignalInfo("#SYSTEMID_RACK01_FSCC01_MD00_PI_BLINK");
+	assert(sg != null);
+	assert(sg.absAddr.offset > txBufAbsAddr && sg.absAddr.offset < (txBufAbsAddr + txDataSizeW));
+
+	sg = conn01_port1.txSignalInfo("#BUS32_S01");
+	assert(sg != null);
+	assert(sg.absAddr.offset > txBufAbsAddr && sg.absAddr.offset < (txBufAbsAddr + txDataSizeW));
+}
+
 // ---------------------------------------------------------------------------------------------------------
 //
 // UAL_CONN_4_3* - Opto receivers tests
@@ -274,7 +490,7 @@ function test_UAL_CONN_4_3_01(sim)
 		let txSignal = conn01_port1.txSignalInfo(analogSignalID);
 		let rxSignal = conn01_port2.rxSignalInfo(analogSignalID);
 		
-		assert(rxSignal.absAddr.offset > rxPort.rxBufferAbsAddr && rxSignal.absAddr.offset < (rxPort.rxBufferAbsAddr + rxPort.rxDataSizeW));
+		assert(rxSignal.absAddr.offset > rxPort.rxBufferAbsAddr.offset && rxSignal.absAddr.offset < (rxPort.rxBufferAbsAddr.offset + rxPort.rxDataSizeW));
 		
 		let ualRxSignal = sim.signalParamExt("#LM2_LM1_TEMP");
 		
@@ -287,7 +503,7 @@ function test_UAL_CONN_4_3_01(sim)
 		let txSignal = conn01_port1.txSignalInfo(discreteSignalID);
 		let rxSignal = conn01_port2.rxSignalInfo(discreteSignalID);
 
-		assert(rxSignal.absAddr.offset > rxPort.rxBufferAbsAddr && rxSignal.absAddr.offset < (rxPort.rxBufferAbsAddr + rxPort.rxDataSizeW));
+		assert(rxSignal.absAddr.offset > rxPort.rxBufferAbsAddr.offset && rxSignal.absAddr.offset < (rxPort.rxBufferAbsAddr.offset + rxPort.rxDataSizeW));
 		
 		let ualRxSignal = sim.signalParamExt("#LM2_LM1_BLINK");
 		
@@ -300,7 +516,7 @@ function test_UAL_CONN_4_3_01(sim)
 		let txSignal = conn01_port1.txSignalInfo(busSignalID);
 		let rxSignal = conn01_port2.rxSignalInfo(busSignalID);
 
-		assert(rxSignal.absAddr.offset > rxPort.rxBufferAbsAddr && rxSignal.absAddr.offset < (rxPort.rxBufferAbsAddr + rxPort.rxDataSizeW));
+		assert(rxSignal.absAddr.offset > rxPort.rxBufferAbsAddr.offset && rxSignal.absAddr.offset < (rxPort.rxBufferAbsAddr.offset + rxPort.rxDataSizeW));
 		
 		let ualRxSignal = sim.signalParamExt("#LM2_BUS32_S01");
 		

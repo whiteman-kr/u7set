@@ -590,7 +590,7 @@ bool XmlReadHelper::findElement(const QString& elementName)
 		}
 	}
 
-	qDebug() << "XmlReadHelper: element is not found -" << elementName;
+//	qDebug() << "XmlReadHelper: element is not found -" << elementName;
 
 	return false;
 }
