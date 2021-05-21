@@ -604,7 +604,16 @@ namespace ExtWidgets
 			return QAbstractTableModel::flags(index);
 		}
 
-		if (prop->value().userType() == QVariant::Bool)
+		// Discrete values are not editable
+
+		int userType = prop->value().userType();
+		if (userType == qMetaTypeId<Afb::AfbParamValue>())
+		{
+			Afb::AfbParamValue v = prop->value().value<Afb::AfbParamValue>();
+			userType = v.value().userType();
+		}
+
+		if (userType == QVariant::Bool)
 		{
 			return QAbstractTableModel::flags(index);
 		}
@@ -634,12 +643,7 @@ namespace ExtWidgets
 
 		if (event->button() == Qt::MouseButton::LeftButton)
 		{
-			//QModelIndex mi = indexAt(event->pos());
-
-			//if (mi.column() == static_cast<int>(PropertyEditorColumns::Value))
-			{
-				emit mousePressed();
-			}
+			emit mousePressed();
 		}
 	}
 
@@ -655,14 +659,6 @@ namespace ExtWidgets
 
 			if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
 			{
-				QTableView::keyPressEvent(event);
-				return;
-			}
-
-
-			if (event->key() == Qt::Key_F2/* || event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter*/)
-			{
-				emit editKeyPressed();
 				return;
 			}
 
@@ -686,7 +682,6 @@ namespace ExtWidgets
 				emit symbolKeyPressed(event->text());
 				return;
 			}
-
 		}
 		else
 		{
@@ -759,7 +754,7 @@ namespace ExtWidgets
 
 		m_tableView->setModel(&m_proxyModel);
 		m_tableView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-		m_tableView->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked);
+		m_tableView->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked | QAbstractItemView::EditKeyPressed);
 		m_tableView->setTabKeyNavigation(false);
 
 		m_tableView->setSortingEnabled(true);
@@ -768,10 +763,7 @@ namespace ExtWidgets
 		m_tableView->setContextMenuPolicy(Qt::CustomContextMenu);
 		connect(m_tableView, &PropertyTableView::customContextMenuRequested, this, &PropertyTable::onTableContextMenuRequested);
 
-		//connect(m_tableView, &QTableView::doubleClicked, this, &PropertyTable::onCellDoubleClicked);
-
 		connect(m_tableView, &PropertyTableView::mousePressed, this, &PropertyTable::onCellClicked);
-		connect(m_tableView, &PropertyTableView::editKeyPressed, this, &PropertyTable::onCellEditKeyPressed);
 		connect(m_tableView, &PropertyTableView::symbolKeyPressed, this, &PropertyTable::onCellSymbolKeyPressed);
 		connect(m_tableView, &PropertyTableView::spaceKeyPressed, this, &PropertyTable::onCellToggleKeyPressed);
 
@@ -985,20 +977,6 @@ namespace ExtWidgets
 		m_tableView->viewport()->update();
 	}
 
-	void PropertyTable::onCellDoubleClicked(const QModelIndex &index)
-	{
-		Q_UNUSED(index);
-		startEditing();
-	}
-
-	void PropertyTable::onCellEditKeyPressed()
-	{
-		if (getSelectionType() != QVariant::Bool)
-		{
-			startEditing();
-		}
-	}
-
 	void PropertyTable::onCellClicked()
 	{
 		if (getSelectionType() == QVariant::Bool)
@@ -1012,7 +990,6 @@ namespace ExtWidgets
 		if (getSelectionType() != QVariant::Bool && isSelectionReadOnly() == false)
 		{
 			m_itemDelegate->setInitText(key);
-
 
 			startEditing();
 		}
@@ -1541,15 +1518,9 @@ namespace ExtWidgets
 					}
 				}
 
-				/*
-				 * Add these later
-				if (variantIsPropertyVector(value) == true || variantIsPropertyList(value) == true)
-						case QVariant::ByteArray:
-						case QVariant::Image:
-							*/
-
 				if (p->isEnum() == true ||
 						type == TuningValue::tuningValueTypeId() ||
+						type == qMetaTypeId<Afb::AfbParamValue>() ||
 						type == FilePathPropertyType::filePathTypeId() ||
 						type == QVariant::Int ||
 						type == QVariant::UInt ||
@@ -1601,8 +1572,16 @@ namespace ExtWidgets
 				return -1;
 			}
 
+			int userType = p->value().userType();
+
+			if (userType == qMetaTypeId<Afb::AfbParamValue>())
+			{
+				Afb::AfbParamValue v =  p->value().value<Afb::AfbParamValue>();
+				userType = v.value().userType();
+			}
+
 			if (expandValuesToAllRows() == false &&
-					p->value().userType() != QVariant::StringList &&
+					userType != QVariant::StringList &&
 					row > 0)
 			{
 				// empty cell with no-repeated value is selected
@@ -1611,12 +1590,12 @@ namespace ExtWidgets
 
 			if (firstCell == true)
 			{
-				type = p->value().userType();
+				type = userType;
 				firstCell = false;
 			}
 			else
 			{
-				if (type != p->value().userType())
+				if (type != userType)
 				{
 					QMessageBox::critical(this, qAppName(), tr("Please select properties of same type."));
 					return -1;
@@ -1693,11 +1672,27 @@ namespace ExtWidgets
 				return;
 			}
 
-			if (p->value().userType() == QVariant::Bool && p->readOnly() == false)
+			if (p->readOnly() == true)
+			{
+				continue;
+			}
+
+			if (p->value().userType() == QVariant::Bool)
 			{
 				bool b = p->value().toBool();
 
 				modifiedObjectsData.insertMulti(p->caption(), std::make_pair(po, !b));
+			}
+
+			if (p->value().userType() == qMetaTypeId<Afb::AfbParamValue>())
+			{
+				Afb::AfbParamValue v = p->value().value<Afb::AfbParamValue>();
+
+				bool b = v.value().toBool();
+
+				v.setValue(!b);
+
+				modifiedObjectsData.insertMulti(p->caption(), std::make_pair(po, v.toVariant()));
 			}
 		}
 

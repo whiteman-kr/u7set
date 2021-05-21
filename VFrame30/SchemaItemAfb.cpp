@@ -1001,6 +1001,12 @@ namespace VFrame30
 			return false;
 		}
 
+		if (result.type() >= QVariant::UserType && result.userType() == qMetaTypeId<Afb::AfbParamValue>())
+		{
+			Afb::AfbParamValue v = result.value<Afb::AfbParamValue>();
+			return v.value().toBool();
+		}
+
 		return result.toBool();
 	}
 

@@ -456,7 +456,8 @@ namespace ExtWidgets
 		Q_OBJECT
 
 	public:
-		explicit MultiCheckBox(QWidget* parent, bool readOnly);
+		explicit MultiCheckBox(QWidget* parent, std::shared_ptr<Property> p, bool readOnly);
+
 		void setValue(std::shared_ptr<Property> propertyPtr, bool readOnly);
 
 	public slots:
@@ -468,6 +469,10 @@ namespace ExtWidgets
 
 	private:
 		PropertyEditorCheckBox* m_checkBox = nullptr;
+
+		std::shared_ptr<Property> m_property;
+		int m_userType = 0;
+
 	};
 
 	//
@@ -617,6 +622,8 @@ namespace ExtWidgets
 		QString propertyCaption(const QModelIndex& mi);
 		void closeCurrentEditorIfOpen();
 
+		bool itemIsEditable(const QModelIndex& mi) const;
+
 	protected:
 		virtual void mousePressEvent(QMouseEvent *event) override;
 		virtual void keyPressEvent(QKeyEvent *event) override;
@@ -670,7 +677,6 @@ namespace ExtWidgets
 		void updatePropertiesList();
 
 	private slots:
-		void onCellClicked();
 		void onCellEditKeyPressed();
 		void onCellToggleKeyPressed();
 		void onCellEditorClosed(QWidget *editor, QAbstractItemDelegate::EndEditHint hint);

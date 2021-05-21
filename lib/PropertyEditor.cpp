@@ -625,7 +625,7 @@ namespace ExtWidgets
 
 		case CellEditorType::CheckBox:
 			{
-				editor = new MultiCheckBox(parent, readOnly);
+				editor = new MultiCheckBox(parent, propertyPtr, readOnly);
 			}
 			break;
 
@@ -3087,8 +3087,10 @@ namespace ExtWidgets
 		painter.drawText(textRect, Qt::AlignVCenter,  text());
 	}
 
-	MultiCheckBox::MultiCheckBox(QWidget* parent, bool readOnly):
-		PropertyEditCellWidget(parent)
+	MultiCheckBox::MultiCheckBox(QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
+		PropertyEditCellWidget(parent),
+		m_property(p),
+		m_userType(p->value().userType())
 	{
 		m_checkBox = new PropertyEditorCheckBox(parent);
 
@@ -3115,7 +3117,18 @@ namespace ExtWidgets
 
 		m_checkBox->setTristate(false);
 
-		Qt::CheckState state = propertyPtr->value().toBool() ? Qt::Checked : Qt::Unchecked;
+		Qt::CheckState state = Qt::Unchecked;
+
+		if (m_userType == qMetaTypeId<Afb::AfbParamValue>())
+		{
+			Afb::AfbParamValue v = propertyPtr->value().value<Afb::AfbParamValue>();
+			state = v.value().toBool() ? Qt::Checked : Qt::Unchecked;
+		}
+		else
+		{
+			Q_ASSERT(m_userType == QVariant::Bool);
+			state = propertyPtr->value().toBool() ? Qt::Checked : Qt::Unchecked;
+		}
 
 		m_checkBox->blockSignals(true);
 		m_checkBox->setCheckState(state);
@@ -3149,7 +3162,20 @@ namespace ExtWidgets
 
         updateText();
 		m_checkBox->setTristate(false);
-        emit valueChanged(state == Qt::Checked ? true : false);
+
+
+		if (m_userType == qMetaTypeId<Afb::AfbParamValue>())
+		{
+			Afb::AfbParamValue newValue(m_property->value().value<Afb::AfbParamValue>());	// Initialize newValue's type
+			newValue.setValue(state == Qt::Checked ? true : false);
+
+			emit valueChanged(newValue.toVariant());
+		}
+		else
+		{
+			Q_ASSERT(m_userType == QVariant::Bool);
+			emit valueChanged(state == Qt::Checked ? true : false);
+		}
 	}
 
 	void MultiCheckBox::updateText()
@@ -3467,11 +3493,10 @@ namespace ExtWidgets
 		m_treeWidget->setSelectionBehavior(QTreeWidget::SelectRows);
 		m_treeWidget->setSelectionMode(QTreeWidget::SingleSelection);
 
-		connect(m_treeWidget, &PropertyTreeWidget::mousePressed, this, &PropertyEditor::onCellClicked);
 		connect(m_treeWidget, &PropertyTreeWidget::editKeyPressed, this, &PropertyEditor::onCellEditKeyPressed);
 		connect(m_treeWidget, &PropertyTreeWidget::spaceKeyPressed, this, &PropertyEditor::onCellToggleKeyPressed);
 
-		m_treeWidget->setEditTriggers(QAbstractItemView::SelectedClicked);
+		m_treeWidget->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged);
 
 		// Edit Delegate
 
@@ -3644,6 +3669,16 @@ namespace ExtWidgets
 			{
 				text = "<Different values>";
 			}
+
+			if (value.userType() == qMetaTypeId<Afb::AfbParamValue>())
+			{
+				Afb::AfbParamValue v = value.value<Afb::AfbParamValue>();
+
+				if (v.value().userType() == QVariant::Bool)
+				{
+					text = "<Different values>";
+				}
+			}
 		}
 
 		po.item->setText(static_cast<int>(PropertyEditorColumns::Value), text);
@@ -3736,17 +3771,6 @@ namespace ExtWidgets
 		return;
 	}
 
-	void PropertyEditor::onCellClicked()
-	{
-		int selectionType = getSelectionType();
-
-		if (selectionType == QVariant::Bool ||
-			selectionType == qMetaTypeId<Afb::AfbParamValue>())
-		{
-			toggleSelected();
-		}
-	}
-
 	void PropertyEditor::onCellEditKeyPressed()
 	{
 		if (getSelectionType() != QVariant::Bool)
@@ -3757,7 +3781,9 @@ namespace ExtWidgets
 
 	void PropertyEditor::onCellToggleKeyPressed()
 	{
-		if (getSelectionType() == QVariant::Bool)
+		int selectionType = getSelectionType();
+
+		if (selectionType == QVariant::Bool)
 		{
 			toggleSelected();
 		}
@@ -3915,9 +3941,23 @@ namespace ExtWidgets
 					}
 					else
 					{
-						if (value != _p->value())
+						if (value.userType() == qMetaTypeId<Afb::AfbParamValue>() &&
+							_p->value().userType() == qMetaTypeId<Afb::AfbParamValue>())
 						{
-							sameValue = false;
+							Afb::AfbParamValue v1 = value.value<Afb::AfbParamValue>();
+							Afb::AfbParamValue v2 = _p->value().value<Afb::AfbParamValue>();
+
+							if (v1.value() != v2.value())
+							{
+								sameValue = false;
+							}
+						}
+						else
+						{
+							if (value != _p->value())
+							{
+								sameValue = false;
+							}
 						}
 					}
 				}
@@ -4132,7 +4172,17 @@ namespace ExtWidgets
 			return -1;
 		}
 
-		return p->value().userType();
+		int userType = p->value().userType();
+
+		if (userType == qMetaTypeId<Afb::AfbParamValue>())
+		{
+			Afb::AfbParamValue v =  p->value().value<Afb::AfbParamValue>();
+			return v.value().userType();
+		}
+		else
+		{
+			return p->value().userType();
+		}
 	}
 
 	void PropertyEditor::startEditing()
@@ -4146,7 +4196,7 @@ namespace ExtWidgets
 
 		if (index.column() != static_cast<int>(PropertyEditorColumns::Value))
 		{
-			return;
+			index = index.siblingAtColumn(static_cast<int>(PropertyEditorColumns::Value));
 		}
 
 		m_treeWidget->edit(index);
@@ -4170,6 +4220,11 @@ namespace ExtWidgets
 			return;
 		}
 
+		 if (p->readOnly() == true)
+		 {
+			 return;
+		 }
+
 		if (p->value().userType() == QVariant::Bool)
 		{
 			bool b = p->value().toBool();
@@ -4185,7 +4240,9 @@ namespace ExtWidgets
 
 			bool b = v.value().toBool();
 
-			valueChanged(p->caption(), !b);
+			v.setValue(!b);
+
+			valueChanged(p->caption(), v.toVariant());
 
 			updatePropertyValue(p->caption());
 		}
