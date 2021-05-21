@@ -2185,33 +2185,67 @@ namespace Builder
 				// Some FBs may have AfbParamValue with reference (reference is variable name)
 				// Here we substitute there refs with actual values from SchemaItemUfb
 				//
-//				for (AppLogicItem& item : ufbItemsCopy)
-//				{
-//					if (VFrame30::SchemaItemAfb* afbItem = item.m_fblItem->toAfbElement();
-//						afbItem != nullptr)
-//					{
-//						// Iterate all AfbParams
-//						//
-//						for (Afb::AfbParam& param : afbItem->params())
-//						{
-//							QString reference = param.afbParamValue().reference().trimmed().chop(1).  âóöäæâäæöóëâîöóäæë ;
+				for (AppLogicItem& item : ufbItemsCopy)
+				{
+					if (VFrame30::SchemaItemAfb* afbItem = item.m_fblItem->toAfbElement();
+						afbItem != nullptr)
+					{
+						// Iterate all AfbParams
+						//
+						for (Afb::AfbParam& param : afbItem->params())
+						{
+							QString reference = param.afbParamValue().reference().trimmed();
 
-//							óöâöóâæöë
+							if (reference.isEmpty() == false)
+							{
+								Q_ASSERT(reference.startsWith("$(") && reference.endsWith(")"));
 
-//							if (reference.isEmpty() == false)
-//							{
+								reference.chop(1);				// removes the last bracket
+								reference = reference.mid(2);	// removes $( at the beginning
 
+								// Find this property in SchemaItemUFB which we expand now
+								//
+								auto property = ufbItem->propertyByCaption(reference);
+								if (property == nullptr)
+								{
+									log->errINT1001(QString("While expanding UFB item an error occured, some item(s) has reference to variable %1, but UFB item %2 does not have this property. Updating UFBs may solve the problem.")
+														.arg(reference)
+														.arg(ufbItem->label()),
+													  item.m_schema->schemaId(),
+													  ufbItem->guid());
+									continue;
+								}
 
-//								// This reference must be like $(obj.var)
-//								//
-//								if (reference.startsWith("$(") == false || reference.endsWith(")") == false)
-//								{
-//									log->errALP4200();
-//								}
-//							}
-//						}
-//					}
-//				}
+								// Check type
+								//
+								QVariant propertyValue = property->value();
+								if (propertyValue.canConvert(qMetaTypeId<Afb::AfbParamValue>()) == true)
+								{
+									propertyValue = propertyValue.value<Afb::AfbParamValue>().value();
+								}
+
+								// Convert to the target type if required
+								//
+								if (propertyValue.type() != param.afbParamValue().value().type())
+								{
+									bool convertOk = propertyValue.convert(param.afbParamValue().value().type());
+									if (convertOk == false)
+									{
+										// Properties hav eincompatible types
+										//
+										log->errALP4201(item.m_schema->schemaId(), ufbItem->label(), reference, ufbItem->guid());
+										continue;
+									}
+								}
+
+								// set value and clear reference for copied item
+								//
+								param.afbParamValue().setValue(propertyValue);
+								param.afbParamValue().setReference({});
+							}
+						}
+					}
+				}
 
 				// Inject ufb schema items
 				//
