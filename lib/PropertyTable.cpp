@@ -596,6 +596,19 @@ namespace ExtWidgets
 
 	Qt::ItemFlags PropertyTableModel::flags(const QModelIndex &index) const
 	{
+
+		std::shared_ptr<Property> prop = propertyByIndex(index, nullptr);
+		if (prop == nullptr)
+		{
+			Q_ASSERT(prop);
+			return QAbstractTableModel::flags(index);
+		}
+
+		if (prop->value().userType() == QVariant::Bool)
+		{
+			return QAbstractTableModel::flags(index);
+		}
+
 		return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
 	}
 
@@ -615,6 +628,21 @@ namespace ExtWidgets
 		return;
 	}
 
+	void PropertyTableView::mousePressEvent(QMouseEvent *event)
+	{
+		QTableView::mousePressEvent(event);
+
+		if (event->button() == Qt::MouseButton::LeftButton)
+		{
+			//QModelIndex mi = indexAt(event->pos());
+
+			//if (mi.column() == static_cast<int>(PropertyEditorColumns::Value))
+			{
+				emit mousePressed();
+			}
+		}
+	}
+
 	void PropertyTableView::keyPressEvent(QKeyEvent *event)
 	{
 		if (selectedIndexes().size() > 0)
@@ -625,7 +653,14 @@ namespace ExtWidgets
 				return;
 			}
 
-			if (event->key() == Qt::Key_F2 || event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
+			if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
+			{
+				QTableView::keyPressEvent(event);
+				return;
+			}
+
+
+			if (event->key() == Qt::Key_F2/* || event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter*/)
 			{
 				emit editKeyPressed();
 				return;
@@ -725,7 +760,7 @@ namespace ExtWidgets
 
 		m_tableView->setModel(&m_proxyModel);
 		m_tableView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-		m_tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+		m_tableView->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked);
 		m_tableView->setTabKeyNavigation(false);
 
 		m_tableView->setSortingEnabled(true);
@@ -734,8 +769,9 @@ namespace ExtWidgets
 		m_tableView->setContextMenuPolicy(Qt::CustomContextMenu);
 		connect(m_tableView, &PropertyTableView::customContextMenuRequested, this, &PropertyTable::onTableContextMenuRequested);
 
-		connect(m_tableView, &QTableView::doubleClicked, this, &PropertyTable::onCellDoubleClicked);
+		//connect(m_tableView, &QTableView::doubleClicked, this, &PropertyTable::onCellDoubleClicked);
 
+		connect(m_tableView, &PropertyTableView::mousePressed, this, &PropertyTable::onCellClicked);
 		connect(m_tableView, &PropertyTableView::editKeyPressed, this, &PropertyTable::onCellEditKeyPressed);
 		connect(m_tableView, &PropertyTableView::symbolKeyPressed, this, &PropertyTable::onCellSymbolKeyPressed);
 		connect(m_tableView, &PropertyTableView::spaceKeyPressed, this, &PropertyTable::onCellToggleKeyPressed);
@@ -964,11 +1000,20 @@ namespace ExtWidgets
 		}
 	}
 
+	void PropertyTable::onCellClicked()
+	{
+		if (getSelectionType() == QVariant::Bool)
+		{
+			toggleSelected();
+		}
+	}
+
 	void PropertyTable::onCellSymbolKeyPressed(QString key)
 	{
 		if (getSelectionType() != QVariant::Bool && isSelectionReadOnly() == false)
 		{
 			m_itemDelegate->setInitText(key);
+
 
 			startEditing();
 		}
@@ -1650,7 +1695,7 @@ namespace ExtWidgets
 				return;
 			}
 
-			if (p->value().userType() == QVariant::Bool)
+			if (p->value().userType() == QVariant::Bool && p->readOnly() == false)
 			{
 				bool b = p->value().toBool();
 
