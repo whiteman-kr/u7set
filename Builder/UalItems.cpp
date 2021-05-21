@@ -610,7 +610,7 @@ namespace Builder
 
 	AppFbParamValue::AppFbParamValue(const Afb::AfbParam& afbParam)
 	{
-		Q_ASSERT(afbParam.afbParamValue().reference().isEmpty() == false);
+		Q_ASSERT(afbParam.afbParamValue().reference().isEmpty() == true);
 
 		QVariant qv = afbParam.afbParamValue().value();
 

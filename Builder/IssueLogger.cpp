@@ -2777,6 +2777,32 @@ namespace Builder
 						.arg(schemaItem)));
 	}
 
+	/// IssueCode: ALP4201
+	///
+	/// IssueType: Error
+	///
+	/// Title: Incompatible reference (%1) types in SchemaItemUfb (%2) and SchemaItem in UFB schema, LogicSchema %3.
+	///
+	/// Parameters:
+	///		%1 Property or param
+	///		%2 SchemaItemUfb with incompatible property type
+	///		%3 LogicSchemaID
+	///
+	/// Description:
+	///		SchemaItem in UFB schema has reference to SchmaItemUfb.property, so this reference and SchmaItemUfb.property have incompatibe types.
+	///
+	void IssueLogger::errALP4201(QString schema, QString schemaItemUfb, QString varName, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4201, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4201,
+				  QString(tr("Incompatible reference (%1) types in SchemaItemUfb (%2) and SchemaItem in UFB schema, LogicSchema %3.")
+						.arg(varName)
+						.arg(schemaItemUfb)
+						.arg(schema)));
+	}
+
 
 	// ALC			Application logic compiler				5000-5999
 	//

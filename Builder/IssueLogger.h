@@ -245,6 +245,7 @@ namespace Builder
 		void errALP4154(QString schema, QString schemaItem, QUuid itemUuid);			// Property ConnectionID is empty (LogicSchema %2, SchemaItem %3).
 
 		void errALP4200(QString schema, QString schemaItem, QString varName, QString currentValue, QUuid itemUuid);
+		void errALP4201(QString schema, QString schemaItemUfb, QString varName, QUuid itemUuid);
 
 		// ALC			Application logic compiler				5000-5999
 		//
