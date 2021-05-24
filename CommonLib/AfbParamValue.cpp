@@ -92,7 +92,7 @@ namespace Afb
 	{
 		// Check if string is reference
 		//
-		QRegExp rx("^\\$\\(([A-Za-z0-9_]+\\.)*[A-Za-z0-9_]+\\)$");	// $(AA.BB.CC)
+		QRegExp rx("^\\$\\(([A-Za-z_]+[A-Za-z\\d_]*\\.)*[A-Za-z_]+[A-Za-z\\d_]*\\)$");	// $(A_2A.BB_.CC3)
 		if (rx.exactMatch(str) == true)
 		{
 			m_reference = str;

@@ -1,5 +1,6 @@
 #include "SpecificPropertiesEditor.h"
 #include "Settings.h"
+#include <algorithm>
 
 //
 // SpecificPropertyDescription
@@ -410,7 +411,7 @@ void SpecificPropertyModel::sort(int column, Qt::SortOrder order)
 		return;
 	}
 
-	if (column < 0 || column >= SpecificPropertyEditorColumns::Count)
+	if (column < 0 || column >= static_cast<int>(SpecificPropertyEditorColumns::Count))
 	{
 		assert(false);
 		return;
@@ -604,19 +605,19 @@ QVariant SpecificPropertyModel::data(const QModelIndex &index, int role) const
 
 		switch (index.column())
 		{
-		case SpecificPropertyEditorColumns::ViewOrder:
+		case static_cast<int>(SpecificPropertyEditorColumns::ViewOrder):
 		{
 			return QString::number(spd->viewOrder());
 		}
-		case SpecificPropertyEditorColumns::Caption:
+		case static_cast<int>(SpecificPropertyEditorColumns::Caption):
 		{
 			return spd->caption();
 		}
-		case SpecificPropertyEditorColumns::Type:
+		case static_cast<int>(SpecificPropertyEditorColumns::Type):
 		{
 			return E::valueToString<E::SpecificPropertyType>(spd->type());
 		}
-		case SpecificPropertyEditorColumns::Category:
+		case static_cast<int>(SpecificPropertyEditorColumns::Category):
 		{
 			return spd->category();
 		}
@@ -635,19 +636,19 @@ QVariant SpecificPropertyModel::headerData(int section, Qt::Orientation orientat
 		{
 			switch (section)
 			{
-			case SpecificPropertyEditorColumns::ViewOrder:
+			case static_cast<int>(SpecificPropertyEditorColumns::ViewOrder):
 			{
 				return "#";
 			}
-			case SpecificPropertyEditorColumns::Caption:
+			case static_cast<int>(SpecificPropertyEditorColumns::Caption):
 			{
 				return QString("Caption");
 			}
-			case SpecificPropertyEditorColumns::Type:
+			case static_cast<int>(SpecificPropertyEditorColumns::Type):
 			{
 				return QString("Type");
 			}
-			case SpecificPropertyEditorColumns::Category:
+			case static_cast<int>(SpecificPropertyEditorColumns::Category):
 			{
 				return QString("Category");
 			}
@@ -735,19 +736,19 @@ bool SpecificPropertyModelSorter::sortFunction(int index1, int index2, int colum
 
 	switch (column)
 	{
-	case SpecificPropertyEditorColumns::ViewOrder:
+	case static_cast<int>(SpecificPropertyEditorColumns::ViewOrder):
 	{
 		return spd1->tuple_order() < spd2->tuple_order();
 	}
-	case SpecificPropertyEditorColumns::Caption:
+	case static_cast<int>(SpecificPropertyEditorColumns::Caption):
 	{
 		return spd1->tuple_caption() < spd2->tuple_caption();
 	}
-	case SpecificPropertyEditorColumns::Type:
+	case static_cast<int>(SpecificPropertyEditorColumns::Type):
 	{
 		return spd1->tuple_type() < spd2->tuple_type();
 	}
-	case SpecificPropertyEditorColumns::Category:
+	case static_cast<int>(SpecificPropertyEditorColumns::Category):
 	{
 		return spd1->tuple_category() < spd2->tuple_category();
 	}
@@ -783,8 +784,37 @@ SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 	m_propertiesTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	connect(m_propertiesTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SpecificPropertiesEditor::tableSelectionChanged);
 	connect(m_propertiesTable->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &SpecificPropertiesEditor::sortIndicatorChanged);
+	m_propertiesTable->setTabKeyNavigation(false);
 
+	m_propertiesTable->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_propertiesTable, &QWidget::customContextMenuRequested, this, &SpecificPropertiesEditor::onCustomContextMenuRequested);
 
+	// Create actions
+	//
+	m_addAction = new QAction(tr("Add"), this);
+	m_addAction->setShortcutContext(Qt::WidgetShortcut);
+	m_addAction->setShortcut(QKeySequence("Insert"));
+	connect(m_addAction, &QAction::triggered, this, &SpecificPropertiesEditor::onAddProperty);
+
+	m_cloneAction = new QAction(tr("Clone"), this);
+	m_cloneAction->setShortcutContext(Qt::WidgetShortcut);
+	connect(m_cloneAction, &QAction::triggered, this, &SpecificPropertiesEditor::onCloneProperty);
+
+	m_removeAction = new QAction(tr("Remove"), this);
+	m_removeAction->setShortcutContext(Qt::WidgetShortcut);
+	m_removeAction->setShortcut(QKeySequence::Delete);
+	connect(m_removeAction, &QAction::triggered, this, &SpecificPropertiesEditor::onRemoveProperties);
+
+	m_propertiesTable->addAction(m_addAction);
+	m_propertiesTable->addAction(m_cloneAction);
+	m_propertiesTable->addAction(m_removeAction);
+
+	// Create context menu
+	//
+	m_popupMenu = new QMenu(this);
+	m_popupMenu->addAction(m_addAction);
+	m_popupMenu->addAction(m_cloneAction);
+	m_popupMenu->addAction(m_removeAction);
 
 	// Create property editor
 	//
@@ -1028,15 +1058,15 @@ void SpecificPropertiesEditor::setText(const QString& text)
 
 	}
 
-	m_propertiesTable->setColumnWidth(SpecificPropertyEditorColumns::ViewOrder, 50);
-	m_propertiesTable->setColumnWidth(SpecificPropertyEditorColumns::Caption, 200);
-	m_propertiesTable->setColumnWidth(SpecificPropertyEditorColumns::Type, 100);
-	m_propertiesTable->setColumnWidth(SpecificPropertyEditorColumns::Category, 140);
+	m_propertiesTable->setColumnWidth(static_cast<int>(SpecificPropertyEditorColumns::ViewOrder), 50);
+	m_propertiesTable->setColumnWidth(static_cast<int>(SpecificPropertyEditorColumns::Caption), 200);
+	m_propertiesTable->setColumnWidth(static_cast<int>(SpecificPropertyEditorColumns::Type), 100);
+	m_propertiesTable->setColumnWidth(static_cast<int>(SpecificPropertyEditorColumns::Category), 140);
 
 	// Sort
 
 	m_propertiesTable->horizontalHeader()->blockSignals(true);
-	m_propertiesTable->sortByColumn(SpecificPropertyEditorColumns::Category, Qt::AscendingOrder);
+	m_propertiesTable->sortByColumn(static_cast<int>(SpecificPropertyEditorColumns::Category), Qt::AscendingOrder);
 	m_propertiesTable->horizontalHeader()->blockSignals(false);
 }
 
@@ -1137,6 +1167,13 @@ void SpecificPropertiesEditor::sortIndicatorChanged(int column, Qt::SortOrder or
 
 }
 
+void SpecificPropertiesEditor::onCustomContextMenuRequested(const QPoint& pos)
+{
+	Q_UNUSED(pos);
+
+	m_popupMenu->exec(this->cursor().pos());
+}
+
 void SpecificPropertiesEditor::onAddProperty()
 {
 	std::shared_ptr<SpecificPropertyDescription> spd = std::make_shared<SpecificPropertyDescription>();
@@ -1149,6 +1186,19 @@ void SpecificPropertiesEditor::onAddProperty()
 	// Add the tree item
 	//
 	m_propertiesModel.add(spd);
+
+	// Select it
+	//
+
+	QModelIndex lastIndex = m_propertiesModel.index(m_propertiesModel.count() - 1, 0);
+
+	if (lastIndex.isValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	m_propertiesTable->selectionModel()->select(lastIndex, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
 
 	return;
 }
@@ -1207,10 +1257,40 @@ void SpecificPropertiesEditor::onRemoveProperties()
 		return;
 	}
 
+	// Get the row of first selected item
+	//
+
+	QModelIndex firstSelectedIndex = *std::min_element(selection.begin(), selection.end(), [](const QModelIndex& left, const QModelIndex& right) -> bool{return left.row() < right.row(); });
+
+	//
+	// Remove selected rows
+
 	m_propertiesModel.remove(selection);
 
 	m_propertiesTable->clearSelection();
 
+	// Select the item that is on the first row now, or the last one
+
+	QModelIndex selectIndex;
+
+	if (firstSelectedIndex.row() < m_propertiesModel.count())
+	{
+		selectIndex = m_propertiesModel.index(firstSelectedIndex.row(), 0);
+	}
+	else
+	{
+		if (m_propertiesModel.count() != 0)
+		{
+			selectIndex = m_propertiesModel.index(m_propertiesModel.count() - 1, 0);
+		}
+	}
+
+	if (selectIndex.isValid() == true)
+	{
+		m_propertiesTable->selectionModel()->select(selectIndex, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+	}
+
+	return;
 }
 
 void SpecificPropertiesEditor::onOkClicked()
