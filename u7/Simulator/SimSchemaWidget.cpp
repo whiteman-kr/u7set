@@ -8,6 +8,7 @@
 #include "../VFrame30/SchemaItemImageValue.h"
 #include "../VFrame30/SchemaItemIndicator.h"
 #include "../VFrame30/SchemaItemConnection.h"
+#include "../VFrame30/SchemaItemUfb.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/MacrosExpander.h"
 
@@ -131,6 +132,26 @@ void SimSchemaWidget::contextMenuRequested(const QPoint& pos)
 				schemaItemReceiver != nullptr)
 			{
 				signalContextMenu(schemaItemReceiver->appSignalIdsAsList(), {}, {});
+				break;
+			}
+
+			if (VFrame30::SchemaItemUfb* schemaItemUfb = dynamic_cast<VFrame30::SchemaItemUfb*>(item.get());
+				schemaItemUfb != nullptr)
+			{
+				std::vector<std::shared_ptr<Property>> props = static_cast<const PropertyObject*>(schemaItemUfb)->specificProperties();
+
+				QStringList signalList;
+
+				for (auto p : props)
+				{
+					QString v = p->value().toString();
+					if (v.startsWith(QChar('#')) == true)
+					{
+						signalList += v.split(QChar::LineFeed, Qt::SkipEmptyParts);
+					}
+				}
+
+				signalContextMenu(signalList, {}, {});
 				break;
 			}
 		}
