@@ -47,7 +47,6 @@ SOURCES += \
 HEADERS += \
 	Stable.h \
     ../lib/BuildInfo.h \
-    ../lib/OrderedHash.h \
     ../lib/DataSource.h \
 	../lib/SoftwareSettings.h \
 	TuningService.h \

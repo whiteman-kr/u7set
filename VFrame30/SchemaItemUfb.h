@@ -44,13 +44,19 @@ namespace VFrame30
 		// Properties and Data
 		//
 	public:
-		QString ufbSchemaId() const;
-		QString ufbCaption() const;
-		int ufbSchemaVersion() const;
+		[[nodiscard]] QString ufbSchemaId() const;
+		[[nodiscard]] QString ufbCaption() const;
+		[[nodiscard]] int ufbSchemaVersion() const;
+
+		[[nodiscard]] QString specificProperties() const;
+	private:
+		void setSpecificProperties(QString value);
 
 	private:
 		QString m_ufbSchemaId;
 		QString m_ufbCaption;
 		int m_ufbVersion = -1;
+
+		QString m_specificPropertiesStruct;		// Description of the UFB's specific properties
 	};
 }

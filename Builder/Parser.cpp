@@ -468,7 +468,7 @@ namespace Builder
 
 	bool AppLogicItem::operator < (const AppLogicItem& li) const
 	{
-		return this->m_fblItem.get() < li.m_fblItem.get();
+		return this->m_fblItem->guid() < li.m_fblItem->guid();
 	}
 
 	bool AppLogicItem::operator == (const AppLogicItem& li) const
@@ -1555,10 +1555,11 @@ namespace Builder
 	//		ApplicationLogicData
 	//
 	// ------------------------------------------------------------------------
-	AppLogicData::AppLogicData()
+	AppLogicData::AppLogicData(SignalSet* signalSet) :
+		m_signalSet(signalSet)
 	{
+		Q_ASSERT(m_signalSet);
 	}
-
 
 	bool AppLogicData::addLogicModuleData(QString equipmentId,
 										  const BushContainer& bushContainer,
@@ -1823,6 +1824,15 @@ namespace Builder
 			{
 				const AppLogicItem& item = *itemIt;
 
+				auto logicSchema = std::dynamic_pointer_cast<VFrame30::LogicSchema>(item.m_schema);
+				if (logicSchema == nullptr)
+				{
+					// item.m_schema can be UfbSchema - then it is just expanded ufb because
+					// after injecting ufb items itemIt is set to these nes items (and they have item.m_schema as UfbSchema)
+					//
+					continue;
+				}
+
 				if (item.m_fblItem->isType<VFrame30::SchemaItemUfb>() == false)
 				{
 					continue;
@@ -1837,7 +1847,7 @@ namespace Builder
 				{
 					// UFB schema '%1' is not found for schema item '%2' (Logic Schema '%3').
 					//
-					log->errALP4009(item.m_schema->schemaId(), ufbItem->label(), ufbItem->ufbSchemaId(), ufbItem->guid());
+					log->errALP4009(logicSchema->schemaId(), ufbItem->label(), ufbItem->ufbSchemaId(), ufbItem->guid());
 					result = false;
 					continue;
 				}
@@ -1846,7 +1856,7 @@ namespace Builder
 				//
 				if (parsedUfb->lmDescriptionFile() != module->lmDescriptionFile())
 				{
-					log->errALP4019(item.m_schema->schemaId(), ufbItem->label(), ufbItem->ufbSchemaId(), ufbItem->guid(),
+					log->errALP4019(logicSchema->schemaId(), ufbItem->label(), ufbItem->ufbSchemaId(), ufbItem->guid(),
 									parsedUfb->lmDescriptionFile(), module->lmDescriptionFile());
 					result = false;
 					continue;
@@ -1907,7 +1917,7 @@ namespace Builder
 
 							fakeItems.push_back(inOutItem);
 
-							AppLogicItem fakeAli(inOutItem, item.m_schema);
+							AppLogicItem fakeAli(inOutItem, logicSchema);
 							module->items().push_back(fakeAli);	// Order is not important here, this item will be removed later
 						}
 					}
@@ -1970,7 +1980,7 @@ namespace Builder
 
 					if (foundInputIt == ufbItemsCopy.end())
 					{
-						log->errALP4012(item.m_schema->schemaId(), ufbItem->label(), ufbItemPin.caption(), ufbItem->guid());
+						log->errALP4012(logicSchema->schemaId(), ufbItem->label(), ufbItemPin.caption(), ufbItem->guid());
 						result = false;
 						continue;
 					}
@@ -2002,7 +2012,7 @@ namespace Builder
 								if (targetItem.m_fblItem->isOutputSignalElement() == true &&
 									std::find(fakeItems.begin(), fakeItems.end(), sourceItem.m_fblItem) != fakeItems.end())
 								{
-									log->errALP4013(item.m_schema->schemaId(),
+									log->errALP4013(logicSchema->schemaId(),
 													ufbItem->buildName(),
 													ufbItemPin.caption(),
 													targetItem.m_fblItem->toOutputSignalElement()->appSignalIds(),
@@ -2038,7 +2048,7 @@ namespace Builder
 
 									fakeItems.push_back(inOutItem);
 
-									AppLogicItem fakeAli(inOutItem, item.m_schema);
+									AppLogicItem fakeAli(inOutItem, logicSchema);
 									ufbItemsCopy.push_back(fakeAli);	// Order is not important here, this item will be removed later
 
 									// Bind source to fake item input
@@ -2088,7 +2098,7 @@ namespace Builder
 
 					if (foundUfbOutputIt == ufbItemsCopy.end())
 					{
-						log->errALP4012(item.m_schema->schemaId(), ufbItem->label(), ufbItemPin.caption(), ufbItem->guid());
+						log->errALP4012(logicSchema->schemaId(), ufbItem->label(), ufbItemPin.caption(), ufbItem->guid());
 						result = false;
 						continue;
 					}
@@ -2169,17 +2179,309 @@ namespace Builder
 					}
 				}
 
+				// Expand UFBs params:
+				// Some FBs may have AfbParamValue with reference (reference is variable name)
+				// Here we substitute there refs with actual values from SchemaItemUfb
+				//
+				std::set<QUuid> referencedInputOutputsItems;
+
+				for (AppLogicItem& ufbSchemaItem : ufbItemsCopy)
+				{
+					// Set values to AFB params with reference
+					//
+					if (VFrame30::SchemaItemAfb* afbItem = ufbSchemaItem.m_fblItem->toAfbElement();
+						afbItem != nullptr)
+					{
+						// Iterate all AfbParams
+						//
+						for (Afb::AfbParam& param : afbItem->params())
+						{
+							QString reference = param.afbParamValue().reference().trimmed();
+
+							if (reference.isEmpty() == false)
+							{
+								Q_ASSERT(reference.startsWith("$(") && reference.endsWith(")"));
+
+								reference.chop(1);				// removes the last bracket
+								reference = reference.mid(2);	// removes $( at the beginning
+
+								// Find this property in SchemaItemUFB which we expand now
+								//
+								auto property = ufbItem->propertyByCaption(reference);
+								if (property == nullptr)
+								{
+									log->errALP4202(logicSchema->schemaId(), ufbItem->label(), reference, ufbItem->guid());
+									continue;
+								}
+
+								// Check type
+								//
+								QVariant propertyValue = property->value();
+								if (propertyValue.canConvert(qMetaTypeId<Afb::AfbParamValue>()) == true)
+								{
+									propertyValue = propertyValue.value<Afb::AfbParamValue>().value();
+								}
+
+								// Convert to the target type if required
+								//
+								if (propertyValue.type() != param.afbParamValue().value().type())
+								{
+									bool convertOk = propertyValue.convert(param.afbParamValue().value().type());
+									if (convertOk == false)
+									{
+										// Properties haû eincompatible types
+										//
+										log->errALP4201(logicSchema->schemaId(), ufbItem->label(), reference, ufbItem->guid());
+										continue;
+									}
+								}
+
+								// set value and clear reference for copied item
+								//
+								param.afbParamValue().setValue(propertyValue);
+								param.afbParamValue().setReference({});
+							}
+						}
+
+						continue;
+					}
+
+					// Set values to AFB params with reference
+					//
+					if (VFrame30::SchemaItemConst* constItem = ufbSchemaItem.m_fblItem->toType<VFrame30::SchemaItemConst>();
+						constItem != nullptr)
+					{
+						// Iterate all AfbParams
+						//
+						Afb::AfbParamValue signedInt32Param = constItem->signedInt32Value();
+						Afb::AfbParamValue floatParam = constItem->floatValue();
+						Afb::AfbParamValue discreteParam = constItem->discreteValue();
+
+						auto func =
+								[&ufbItem, &logicSchema, log](Afb::AfbParamValue& param)
+								{
+									if (param.hasReference() == false)
+									{
+										return;
+									}
+
+									QString reference = param.reference();
+									Q_ASSERT(reference.startsWith("$(") && reference.endsWith(")"));
+
+									reference.chop(1);				// removes the last bracket
+									reference = reference.mid(2);	// removes $( at the beginning
+
+									// Find this property in SchemaItemUFB which we expand now
+									//
+									auto property = ufbItem->propertyByCaption(reference);
+									if (property == nullptr)
+									{
+										log->errALP4202(logicSchema->schemaId(), ufbItem->label(), reference, ufbItem->guid());
+										return;
+									}
+
+									// Check type
+									//
+									QVariant propertyValue = property->value();
+									if (propertyValue.canConvert(qMetaTypeId<Afb::AfbParamValue>()) == true)
+									{
+										propertyValue = propertyValue.value<Afb::AfbParamValue>().value();
+									}
+
+									// Convert to the target type if required
+									//
+									if (propertyValue.type() != param.value().type())
+									{
+										bool convertOk = propertyValue.convert(param.value().type());
+										if (convertOk == false)
+										{
+											// Properties have incompatible types
+											//
+											log->errALP4201(logicSchema->schemaId(), ufbItem->label(), reference, ufbItem->guid());
+											return;
+										}
+									}
+
+									// set value and clear reference for copied item
+									//
+									param.setValue(propertyValue);
+									param.setReference({});
+								};
+
+						switch (constItem->type())
+						{
+						case VFrame30::SchemaItemConst::ConstType::IntegerType:
+							func(signedInt32Param);
+							floatParam = {};
+							discreteParam = {};
+							break;
+						case VFrame30::SchemaItemConst::ConstType::FloatType:
+							signedInt32Param = {};
+							func(floatParam);
+							discreteParam = {};
+							break;
+						case VFrame30::SchemaItemConst::ConstType::Discrete:
+							signedInt32Param = {};
+							floatParam = {};
+							func(discreteParam);
+							break;
+						default:
+							Q_ASSERT(false);
+						}
+
+						constItem->setSignedInt32Value(signedInt32Param);
+						constItem->setFloatValue(floatParam);
+						constItem->setDiscreteValue(discreteParam);
+
+						continue;
+					}
+
+					// Set values to references Inputs/Outputs
+					// Some Inputs or outputs in UFB can be Refernces to SchemaItemUfb.Property
+					//
+					if (VFrame30::SchemaItemSignal* signalItem = ufbSchemaItem.m_fblItem->toSignalElement();
+						signalItem != nullptr)
+					{
+						QString reference = signalItem->appSignalIds().trimmed();
+
+						if (reference.startsWith("$(") == false || reference.endsWith(")") == false)
+						{
+							// This SignalItem is not reference
+							//
+							continue;
+						}
+
+						reference.chop(1);				// chop ')' at the end
+						reference = reference.mid(2);	// remove '$(' at the beginning
+
+						// Find this property in SchemaItemUFB which we expand now
+						//
+						auto property = ufbItem->propertyByCaption(reference);
+						if (property == nullptr)
+						{
+							log->errALP4202(logicSchema->schemaId(), ufbItem->label(), reference, ufbItem->guid());
+							continue;
+						}
+
+						if (property->value().canConvert(QMetaType::QString) == false)
+						{
+							// Properties hav incompatible types
+							//
+							log->errALP4201(logicSchema->schemaId(), ufbItem->label(), reference, ufbItem->guid());
+							continue;
+						}
+
+						QString propertyValue = property->value().toString().trimmed();
+						QStringList appSignalIds = propertyValue.split(QChar::LineFeed, Qt::SkipEmptyParts);
+
+						if (appSignalIds.isEmpty() == true)
+						{
+							// Property value cannot be empty
+							//
+							log->errALP4203(logicSchema->schemaId(), ufbItem->label(), reference, ufbItem->guid());
+							continue;
+						}
+
+						// Set property value
+						//
+						if (appSignalIds.size() == 1)
+						{
+							signalItem->setAppSignalIds(appSignalIds.front());
+
+							// Save this, so keep it while deleting inputs/outputs from UFB items
+							//
+							referencedInputOutputsItems.insert(signalItem->guid());
+						}
+						else
+						{
+							// Multichannel -- appSignalIds.size() > 1
+							//
+							int equipmentIdIndex = logicSchema->equipmentIdList().indexOf(module->equipmentId());
+
+							if (equipmentIdIndex == -1)
+							{
+								// "this" AppLogicModule has LM's equipmentID  but Schema's equipmentIdList does not have any.
+								// How did we end up here?
+								//
+								Q_ASSERT(equipmentIdIndex != -1);
+								log->errINT1001(QString("AppLogicData::expandUfbs: equipmentIdIndex == -1, LogicSchema %1, UfbSignalItem %2").arg(logicSchema->schemaId()).arg(signalItem->label()));
+								return false;
+							}
+
+							if (appSignalIds.size() == logicSchema->channelCount())
+							{
+								// Get correct SignalID
+								//
+								QString signalId = appSignalIds[equipmentIdIndex];
+
+								signalItem->setAppSignalIds(signalId);
+
+								// Save this, so keep it while deleting inputs/outputs from UFB items
+								//
+								referencedInputOutputsItems.insert(signalItem->guid());
+
+								// Check that all signals belongs to appropriate LM
+								//
+								AppSignal* appSignal = m_signalSet->getSignal(signalId);
+
+								if (appSignal == nullptr)
+								{
+									result = false;
+									log->errALP4134(logicSchema->schemaId(), signalItem->buildName(), signalId, ufbItem->guid());
+									continue;
+								}
+
+								std::shared_ptr<Hardware::DeviceModule> lm = m_signalSet->getAppSignalLm(appSignal);
+
+								if (lm == nullptr)
+								{
+									result = false;
+									log->errALP4135(logicSchema->schemaId(), signalItem->buildName(), signalId, ufbItem->guid());
+									continue;
+								}
+
+								if (lm->equipmentIdTemplate() != module->equipmentId())
+								{
+									result = false;
+									log->errALP4137(logicSchema->schemaId(), signalItem->buildName(), signalId, module->equipmentId(), ufbItem->guid());
+									continue;
+								}
+
+								continue;
+							}
+							else
+							{
+								// Multichannel signal block must have the same number of AppSignalIDs as schema's channel number (number of schema's EquipmentIDs), Logic Schema %1, item %2.
+								//
+								result = false;
+								log->errALP4131(logicSchema->schemaId(), signalItem->buildName(), ufbItem->guid());
+								continue;
+							}
+						}
+
+						continue;
+					}
+				}
+
 				// Remove all Signal elements
 				//
 				ufbItemsCopy.remove_if(
-							[](const AppLogicItem& ali)
+							[&referencedInputOutputsItems](const AppLogicItem& ali)
 							{
-								// Remove onlu Inputs and Outputs block,
-								// Keep InOut blocks, it can be FakeItems to solve direct connections
+								// 1. Remove only Inputs and Outputs block, BUT
+								// 2. Keep Inputs/Outputs which were references (and became AppSignalIds)
+								// 3. Keep InOut blocks, it can be FakeItems to solve direct connections
 								//
-								return	ali.m_fblItem->isInputSignalElement() ||
-										ali.m_fblItem->isOutputSignalElement();
+								return referencedInputOutputsItems.contains(ali.m_fblItem->guid()) == false &&
+									   (ali.m_fblItem->isInputSignalElement() || ali.m_fblItem->isOutputSignalElement());
 							});
+
+				// Set "mother" schema to ufb items
+				//
+				for (AppLogicItem& ufbali : ufbItemsCopy)
+				{
+					ufbali.m_schema = logicSchema;
+				}
 
 				// Inject ufb schema items
 				//
@@ -2477,7 +2779,7 @@ namespace Builder
 			checkForUniqueLoopbackId(schema.get());
 		}
 
-		// Parse User Functional Blocks
+		// Parse User Functional Blocks (UFBs)
 		//
 		if (ufbs.empty() == false)
 		{
@@ -2602,11 +2904,10 @@ namespace Builder
 			checkUfbItemsVersion(schema.get(), ufbs);
 		}
 
-		// Save schams to context
+		// Save schemas to context
 		// Important, these schemas are shared pointer, so they must not be spoiled in parsing
 		//
 		m_context->m_appLogicSchemas = schemas;
-
 
 		// Parse Application Logic
 		//
@@ -2662,7 +2963,7 @@ namespace Builder
 				QThread::yieldCurrentThread();
 			}
 		}
-		while (1);
+		while (true);
 
 		for (QFuture<bool>& task : parseTasks)
 		{
@@ -2723,10 +3024,16 @@ namespace Builder
 			checkForUniqueLoopbackId(module);
 		}
 
+		// Check that all references like $(varname) have been resolved
+		//
+		for (std::shared_ptr<AppLogicModule> module : m_applicationData->modules())
+		{
+			result &= checkForResolvedReferences(module);
+		}
+
 		// Set AfbComponent to AfbElements
 		//
 		ok = m_applicationData->setAfbComponents(m_lmDescriptions, m_log);
-
 		if (ok == false)
 		{
 			result = false;
@@ -3117,6 +3424,57 @@ namespace Builder
 					else
 					{
 						pins.insert(itemSignalId);
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	bool Parser::checkParamsReferencesFormat(const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& schemas) const
+	{
+		// Some FBs may have AfbParamValue with reference (reference is variable name)
+		// Check these variables format
+		//
+		bool  result = true;
+
+		for (std::shared_ptr<VFrame30::UfbSchema> ufb : schemas)
+		{
+			if (ufb->excludeFromBuild() == true)
+			{
+				continue;
+			}
+
+			for (const std::shared_ptr<VFrame30::SchemaLayer>& layer : ufb->Layers)
+			{
+				if (layer->compile() == false)
+				{
+					continue;
+				}
+
+				for (const SchemaItemPtr& item : layer->Items)
+				{
+					if (VFrame30::SchemaItemAfb* afbItem = item->toSchemaItemAfb();
+						afbItem != nullptr)
+					{
+						// Iterate all AfbParams
+						//
+						for (Afb::AfbParam& param : afbItem->params())
+						{
+							QString reference = param.afbParamValue().reference().trimmed();
+
+							if (reference.isEmpty() == false)
+							{
+								// This reference must be like $(obj.var)
+								//
+								if (reference.startsWith("$(") == false || reference.endsWith(")") == false)
+								{
+									log()->errALP4200(ufb->schemaId(), item->label(), param.caption(), reference, item->guid());
+									result = false;
+								}
+							}
+						}
 					}
 				}
 			}
@@ -3574,7 +3932,82 @@ namespace Builder
 	}
 
 
+	bool Parser::checkForResolvedReferences(std::shared_ptr<AppLogicModule> module)
+	{
+		if (module == nullptr)
+		{
+			Q_ASSERT(module);
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", module %1")
+							  .arg(reinterpret_cast<size_t>(module.get())));
+			return false;
+		}
 
+		bool ok = true;
+
+		auto logErrorFunc =
+			[this](const AppLogicItem& appLogicItem, QString param, QString paramValue)
+			{
+				// All reference must be resolved
+				//
+				QUuid itemGuid = appLogicItem.m_groupId.isNull() ?
+									 appLogicItem.m_fblItem->guid() :
+									 appLogicItem.m_groupId;
+
+				log()->errALP4204(appLogicItem.m_schema->schemaId(), appLogicItem.m_fblItem->label(), param, paramValue, itemGuid);
+			};
+
+		for (const AppLogicItem& appLogicItem : module->items())
+		{
+			auto props = appLogicItem.m_fblItem->properties();
+
+			// Check SchemaItemAfbs
+			//
+			if (auto afbItem = appLogicItem.m_fblItem->toSchemaItemAfb();
+				afbItem != nullptr)
+			{
+				for (const Afb::AfbParam& param : afbItem->params())
+				{
+					const Afb::AfbParamValue& paramValue = param.afbParamValue();
+
+					if (paramValue.hasReference() == true)
+					{
+						// All reference must be resolved
+						//
+						logErrorFunc(appLogicItem, param.caption(), paramValue.reference());
+						ok = false;
+					}
+				}
+			}
+
+			// Check SchemaItemConsts
+			//
+			if (auto constItem = appLogicItem.m_fblItem->toSchemaItemConst();
+				constItem != nullptr)
+			{
+				// All reference must be resolved
+				//
+				if (constItem->signedInt32Value().hasReference() == true)
+				{
+					logErrorFunc(appLogicItem, "signedInt32Value", constItem->signedInt32Value().reference());
+					ok = false;
+				}
+
+				if (constItem->floatValue().hasReference() == true)
+				{
+					logErrorFunc(appLogicItem, "floatValue", constItem->floatValue().reference());
+					ok = false;
+				}
+
+				if (constItem->discreteValue().hasReference() == true)
+				{
+					logErrorFunc(appLogicItem, "discreteValue", constItem->discreteValue().reference());
+					ok = false;
+				}
+			}
+		}
+
+		return ok;
+	}
 
 	bool Parser::parsUfbSchema(std::shared_ptr<VFrame30::UfbSchema> ufbSchema)
 	{

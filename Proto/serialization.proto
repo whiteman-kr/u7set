@@ -93,6 +93,20 @@ message ImageItem
 	optional string svgData = 9;
 }
 
+//
+// AfbParamValue
+//
+message AfbParamValue
+{
+    optional int32 version = 1;		// [default = 0];
+	optional int32 type = 2;		//  Mapped to E::SignalType
+	optional int32 dataFormat = 3;	//  Mapped to E::DataFormat
+	optional int32 size = 4;		//  Bit width
+
+    optional qvariant value = 6;
+	optional string reference = 7;
+}
+
 
 //------------------------------------------------------------------------------------------
 //
@@ -345,6 +359,7 @@ message UfbSchema
     optional string description = 1;
 	optional int32 version = 2 [default = 1];
 	optional string lmDescriptionFile = 3 [default = "LogicModule0000.xml"];
+	optional string specific_properties_struct = 6;
 }
 
 
@@ -738,13 +753,21 @@ message SchemaItemAfb
 message SchemaItemConst
 {
 	optional int32 type = 1 [default = 0];
-	optional int32 intValue = 2 [default = 0];
-	optional double floatValue = 3 [default = 0.0];
-	optional int32 discreteValue = 7 [default = 0];
+
 	optional int32 precision = 4 [default = 2];
-	optional int32 horzAlign = 5  [default = 4];		// Qt::AlignHCenter 0x0004 Centers horizontally in the available space.
-	optional int32 vertAlign = 6  [default = 128];		// Qt::AlignVCenter 0x0080 Centers vertically in the available space.
-	optional int32 analogFormat = 8 [default = 102];	// Default 102 (charcode for 'f') is AnalogFormat::f (format as [-]9.9)
+	optional int32 horzAlign = 5  [default = 4];				// Qt::AlignHCenter 0x0004 Centers horizontally in the available space.
+	optional int32 vertAlign = 6  [default = 128];				// Qt::AlignVCenter 0x0080 Centers vertically in the available space.
+	optional int32 analogFormat = 8 [default = 102];			// Default 102 (charcode for 'f') is AnalogFormat::f (format as [-]9.9)
+
+    optional int32 intValue = 2 [default = 0];
+	optional string intRef = 10;
+
+    optional double floatValue_obsolete = 3 [default = 0.0];
+	optional float floatValue = 9 [default = 0.0];
+	optional string floatRef = 11;
+
+    optional int32 discreteValue = 7 [default = 0];
+	optional string discreteRef = 12;
 }
 
 //
@@ -784,6 +807,9 @@ message SchemaItemUfb
     optional string ufbSchemaId = 1;
 	optional string ufbCaption = 2;
 	optional int32 ufbVersion = 3 [default = -1];
+
+    optional string specific_properties_struct = 10;
+	repeated Property properties = 11;
 }
 
 //

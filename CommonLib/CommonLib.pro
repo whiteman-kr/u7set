@@ -57,16 +57,19 @@ CONFIG(release, debug|release) {
 }
 
 HEADERS += \
+	AfbParamValue.h \
 	DebugInstCounter.h \
 	Factory.h \
 	Hash.h \
 	HostAddressPort.h \
+	OrderedHash.h \
 	Stable.h \
 	Times.h \
 	Types.h \
 	PropertyObject.h
 
 SOURCES += \
+	AfbParamValue.cpp \
 	Times.cpp \
 	Types.cpp
 

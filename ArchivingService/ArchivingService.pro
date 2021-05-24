@@ -42,7 +42,6 @@ PRECOMPILED_HEADER = Stable.h
 HEADERS += \
 	Stable.h \
 	../lib/SoftwareSettings.h \
-    ../lib/OrderedHash.h \
     ../lib/BuildInfo.h \
     FileArchReader.h \
     ArchFile.h \

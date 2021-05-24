@@ -131,6 +131,8 @@ namespace VFrame30
 	const QString PropertyNames::ufbSchemaId{"UFBSchemaID"};
 	const QString PropertyNames::ufbSchemaVersion{"UFBSchemaVersion"};
 
+	const QString PropertyNames::specificProperties{"SpecificProperties"};
+
 	const QString PropertyNames::locked{"Locked"};
 
 	const QString PropertyNames::checkable{"Checkable"};

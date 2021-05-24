@@ -201,7 +201,7 @@ namespace Builder
 		void errALP4014(QString schema, QString schemaItem, QString itemType, QUuid itemUuid);
 		void errALP4015(QString schema, QString schemaItem, QUuid itemUuid);
 
-		void errALP4016(QString schema, QString lmDecriptionFile);
+		void errALP4016(QString schema, QString lmDecriptionFile);				// File LmDescriptionFile %1 is not found (Schema %2).
 		void errALP4017(QString schema, QString lmDecriptionFile, int opCode);
 		void errALP4017(QString schema, QString lmDecriptionFile, int opCode, QUuid itemUuid);
 		void errALP4018(QString schema, QString equipmentId, QString schemaLmDecriptionFile1, QString moduleLmDecriptionFile2);
@@ -244,9 +244,14 @@ namespace Builder
 		void errALP4153(QString schema, QString schemaItem, QUuid itemUuid);			// Multichannel transmitter must have the same number of ConnectionIDs as schema's channel number (number of schema's EquipmentIDs), Logic Schema %1, SchemaItem %2.
 		void errALP4154(QString schema, QString schemaItem, QUuid itemUuid);			// Property ConnectionID is empty (LogicSchema %2, SchemaItem %3).
 
+		void errALP4200(QString schema, QString schemaItem, QString varName, QString currentValue, QUuid itemUuid);
+		void errALP4201(QString schema, QString schemaItemUfb, QString varName, QUuid itemUuid);
+		void errALP4202(QString schema, QString schemaItemUfb, QString varName, QUuid itemUuid);
+		void errALP4203(QString schema, QString schemaItem, QString property, QUuid itemUuid);
+		void errALP4204(QString schema, QString schemaItem, QString property, QString propertyValue, QUuid itemUuid);
+
 		// ALC			Application logic compiler				5000-5999
 		//
-
 		void errALC5000(QString appSignalID, QUuid itemUuid, QString schemaID);		// Signal identifier %1 is not found (Logic schema %2).
 		void wrnALC5001(QString logicModuleID);									// Application logic for module %1 is not found.
 		void errALC5002(QString schemaID, QString appSignalID, QUuid itemUuid);					// Value of signal %1 is undefined (Logic schema %2).

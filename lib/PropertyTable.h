@@ -142,7 +142,7 @@ namespace ExtWidgets
 		void spaceKeyPressed();
 	};
 
-	class PropertyTable : public QWidget, public PropertyEditorBase
+	class PropertyTable : public PropertyEditorBase
 	{
 		Q_OBJECT
 	public:
@@ -177,8 +177,6 @@ namespace ExtWidgets
 		void updatePropertiesValues();
 
 	private slots:
-		void onCellDoubleClicked(const QModelIndex &index);
-		void onCellEditKeyPressed();
 		void onCellClicked();
 		void onCellSymbolKeyPressed(QString key);
 		void onCellToggleKeyPressed();

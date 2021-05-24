@@ -5192,9 +5192,10 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 	}
 
 	VFrame30::SchemaItemConst::ConstType type = constItem->type();
-	int intValue = constItem->intValue();
-	double floatValue = constItem->floatValue();
-	int discreteValue = constItem->discreteValue();
+
+	Afb::AfbParamValue intValue = constItem->signedInt32Value();
+	Afb::AfbParamValue floatValue = constItem->floatValue();
+	Afb::AfbParamValue discreteValue = constItem->discreteValue();
 
 	// Show input dialog
 	//
@@ -5210,23 +5211,42 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 	//
 	QLabel* typeLabel = new QLabel("Const Type:");
 
-	QComboBox* typeCombo = new QComboBox();
-	typeCombo->addItem("IntegerType", QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(VFrame30::SchemaItemConst::ConstType::IntegerType));
-	typeCombo->addItem("FloatType", QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(VFrame30::SchemaItemConst::ConstType::FloatType));
-	typeCombo->addItem("Discrete", QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(VFrame30::SchemaItemConst::ConstType::Discrete));
+	auto buttonSignedInt32 = new QPushButton{"SignedInt32"};
+	auto buttonFloat32 = new QPushButton{"Float"};
+	auto buttonDiscrete = new QPushButton{"Discrete"};
 
-	int dataIndex = typeCombo->findData(QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(type));
-	assert(dataIndex != -1);
-	if (dataIndex != -1)
+	buttonSignedInt32->setCheckable(true);
+	buttonFloat32->setCheckable(true);
+	buttonDiscrete->setCheckable(true);
+
+	QButtonGroup* typeGroup = new QButtonGroup{};
+
+	typeGroup->addButton(buttonSignedInt32, static_cast<int>(VFrame30::SchemaItemConst::ConstType::IntegerType));
+	typeGroup->addButton(buttonFloat32, static_cast<int>(VFrame30::SchemaItemConst::ConstType::FloatType));
+	typeGroup->addButton(buttonDiscrete, static_cast<int>(VFrame30::SchemaItemConst::ConstType::Discrete));
+
+	switch (type)
 	{
-		typeCombo->setCurrentIndex(dataIndex);
+	case VFrame30::SchemaItemConst::ConstType::IntegerType:
+		buttonSignedInt32->setChecked(true);
+		break;
+	case VFrame30::SchemaItemConst::ConstType::FloatType:
+		buttonFloat32->setChecked(true);
+		break;
+	case VFrame30::SchemaItemConst::ConstType::Discrete:
+		buttonDiscrete->setChecked(true);
+		break;
+	default:
+		Q_ASSERT(false);
 	}
 
 	// IntItems
 	//
 	QLabel* intValueLabel = new QLabel("IntegerValue:");
-	QLineEdit* intValueEdit = new QLineEdit(QString::number(intValue));
-	intValueEdit->setValidator(new QIntValidator(std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), intValueEdit));
+	QString intInitString = intValue.hasReference() ? intValue.reference() :
+													  QString::number(constItem->signedInt32NativeValue());
+	QLineEdit* intValueEdit = new QLineEdit{intInitString};
+	intValueEdit->setValidator(new QIntValidatorEx(std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), schema()->isUfbSchema(), intValueEdit));
 
 	if (type != VFrame30::SchemaItemConst::ConstType::IntegerType)
 	{
@@ -5239,8 +5259,10 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 	QLocale locale;
 
 	QLabel* floatValueLabel = new QLabel("FloatValue:");
-	QLineEdit* floatValueEdit = new QLineEdit(locale.toString(floatValue));
-	floatValueEdit->setValidator(new QDoubleValidatorEx(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), 1000, floatValueEdit));
+	QString floatInitString = floatValue.hasReference() ? floatValue.reference() :
+														  locale.toString(constItem->floatNativeValue());
+	QLineEdit* floatValueEdit = new QLineEdit(floatInitString);
+	floatValueEdit->setValidator(new QDoubleValidatorEx(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), 1000, schema()->isUfbSchema(), floatValueEdit));
 
 	if (type != VFrame30::SchemaItemConst::ConstType::FloatType)
 	{
@@ -5251,8 +5273,10 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 	// DiscreteItems
 	//
 	QLabel* discreteValueLabel = new QLabel("DiscreteValue (0 or 1):");
-	QLineEdit* discreteValueEdit = new QLineEdit(QString::number(discreteValue));
-	discreteValueEdit->setValidator(new QIntValidator(0, 1, discreteValueEdit));
+	QString discreteInitString = discreteValue.hasReference() ? discreteValue.reference() :
+																QString::number(constItem->discreteNativeValue());
+	QLineEdit* discreteValueEdit = new QLineEdit(discreteInitString);
+	discreteValueEdit->setValidator(new QIntValidatorEx(0, 1, schema()->isUfbSchema(), discreteValueEdit));
 
 	if (type != VFrame30::SchemaItemConst::ConstType::Discrete)
 	{
@@ -5272,67 +5296,82 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 	QGridLayout* layout = new QGridLayout;
 
 	layout->addWidget(typeLabel, 0, 0);
-	layout->addWidget(typeCombo, 0, 1);
+
+	typeGroup->setParent(layout);
+	layout->addWidget(buttonSignedInt32, 0, 1);
+	layout->addWidget(buttonFloat32, 0, 2);
+	layout->addWidget(buttonDiscrete, 0, 3);
 
 	layout->addWidget(intValueLabel, 1, 0);
-	layout->addWidget(intValueEdit, 1, 1);
+	layout->addWidget(intValueEdit, 1, 1, 1, 3);
 
 	layout->addWidget(floatValueLabel, 2, 0);
-	layout->addWidget(floatValueEdit, 2, 1);
+	layout->addWidget(floatValueEdit, 2, 1, 1, 3);
 
 	layout->addWidget(discreteValueLabel, 3, 0);
-	layout->addWidget(discreteValueEdit, 3, 1);
+	layout->addWidget(discreteValueEdit, 3, 1, 1, 3);
 
 	layout->addWidget(spacer, 4, 0, 1, 2);
-
-	layout->addWidget(buttonBox, 5, 0, 1, 2);
+	layout->addWidget(buttonBox, 5, 0, 1, 4);
 
 	d.setLayout(layout);
 
 	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
 
-	connect(typeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-			[typeCombo, intValueLabel, intValueEdit, floatValueLabel, floatValueEdit, discreteValueLabel, discreteValueEdit](int)
+	connect(typeGroup, &QButtonGroup::idToggled,
+		[intValueLabel, intValueEdit, floatValueLabel, floatValueEdit, discreteValueLabel, discreteValueEdit](int id, bool checked)
+		{
+			VFrame30::SchemaItemConst::ConstType type = static_cast<VFrame30::SchemaItemConst::ConstType>(id);
+
+			if (type == VFrame30::SchemaItemConst::ConstType::IntegerType)
 			{
-				VFrame30::SchemaItemConst::ConstType type = typeCombo->currentData().value<VFrame30::SchemaItemConst::ConstType>();
+				intValueLabel->setEnabled(checked);
+				intValueEdit->setEnabled(checked);
 
-				if (type == VFrame30::SchemaItemConst::ConstType::IntegerType)
+				if (checked == true)
 				{
-					intValueLabel->setEnabled(true);
-					intValueEdit->setEnabled(true);
-
-					floatValueLabel->setEnabled(false);
-					floatValueEdit->setEnabled(false);
-
-					discreteValueLabel->setEnabled(false);
-					discreteValueEdit->setEnabled(false);
+					intValueEdit->setFocus(Qt::OtherFocusReason);
 				}
+			}
 
-				if (type == VFrame30::SchemaItemConst::ConstType::FloatType)
+			if (type == VFrame30::SchemaItemConst::ConstType::FloatType)
+			{
+				floatValueLabel->setEnabled(checked);
+				floatValueEdit->setEnabled(checked);
+
+				if (checked == true)
 				{
-					intValueLabel->setEnabled(false);
-					intValueEdit->setEnabled(false);
-
-					floatValueLabel->setEnabled(true);
-					floatValueEdit->setEnabled(true);
-
-					discreteValueLabel->setEnabled(false);
-					discreteValueEdit->setEnabled(false);
+					floatValueEdit->setFocus(Qt::OtherFocusReason);
 				}
+			}
 
-				if (type == VFrame30::SchemaItemConst::ConstType::Discrete)
+			if (type == VFrame30::SchemaItemConst::ConstType::Discrete)
+			{
+				discreteValueLabel->setEnabled(checked);
+				discreteValueEdit->setEnabled(checked);
+
+				if (checked == true)
 				{
-					intValueLabel->setEnabled(false);
-					intValueEdit->setEnabled(false);
-
-					floatValueLabel->setEnabled(false);
-					floatValueEdit->setEnabled(false);
-
-					discreteValueLabel->setEnabled(true);
-					discreteValueEdit->setEnabled(true);
+					discreteValueEdit->setFocus(Qt::OtherFocusReason);
 				}
-			});
+			}
+		});
+
+	switch (type)
+	{
+	case VFrame30::SchemaItemConst::ConstType::IntegerType:
+		intValueEdit->setFocus(Qt::OtherFocusReason);
+		break;
+	case VFrame30::SchemaItemConst::ConstType::FloatType:
+		floatValueEdit->setFocus(Qt::OtherFocusReason);
+		break;
+	case VFrame30::SchemaItemConst::ConstType::Discrete:
+		discreteValueEdit->setFocus(Qt::OtherFocusReason);
+		break;
+	default:
+		Q_ASSERT(false);
+	}
 
 	int width = QSettings().value("f2KeyForConst\\width").toInt();
 	int height = QSettings().value("f2KeyForConst\\height").toInt();
@@ -5344,32 +5383,112 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 
 	if (result == QDialog::Accepted)
 	{
-		VFrame30::SchemaItemConst::ConstType newType = typeCombo->currentData().value<VFrame30::SchemaItemConst::ConstType>();
+		VFrame30::SchemaItemConst::ConstType newType = static_cast<VFrame30::SchemaItemConst::ConstType>(typeGroup->checkedId());
 
-		int newIntValue = intValueEdit->text().toInt();
-
-		double newFloatValue = locale.toFloat(floatValueEdit->text());
-		int newDiscreteValue = discreteValueEdit->text().toInt();
+		bool batchOk = m_editEngine->startBatch();
+		if (batchOk == false)
+		{
+			return;
+		}
 
 		if (newType != type)
 		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::type, QVariant(newType), item);
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::type, QVariant::fromValue(newType), item);
 		}
 
-		if (newIntValue != intValue)
+		QRegExp rx("^\\$\\(([A-Za-z0-9_]+\\.)*[A-Za-z0-9_]+\\)$");	// $(AA.BB.CC)
+
+		switch (newType)
 		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::valueInteger, QVariant(newIntValue), item);
+		case VFrame30::SchemaItemConst::ConstType::IntegerType:
+			{
+				Afb::AfbParamValue param = intValue;
+
+				QString text = intValueEdit->text().trimmed();
+				if (rx.exactMatch(text) == true)
+				{
+					param.setReference(text);
+				}
+				else
+				{
+					param.setReference({});
+
+					bool convertOk = false;
+					qint32 nativeValue = text.toInt(&convertOk);
+
+					if (convertOk == true)
+					{
+						param.setValue(nativeValue);
+					}
+				}
+
+				if (param != intValue)
+				{
+					m_editEngine->runSetProperty(VFrame30::PropertyNames::valueInteger, QVariant::fromValue(param), item);
+				}
+			}
+			break;
+		case VFrame30::SchemaItemConst::ConstType::FloatType:
+			{
+				Afb::AfbParamValue param = floatValue;
+
+				QString text = floatValueEdit->text().trimmed();
+				if (rx.exactMatch(text) == true)
+				{
+					param.setReference(text);
+				}
+				else
+				{
+					param.setReference({});
+
+					bool convertOk = false;
+					float nativeValue = locale.toFloat(text, &convertOk);
+
+					if (convertOk == true)
+					{
+						param.setValue(nativeValue);
+					}
+				}
+
+				if (param != floatValue)
+				{
+					m_editEngine->runSetProperty(VFrame30::PropertyNames::valueFloat, QVariant::fromValue(param), item);
+				}
+			}
+			break;
+		case VFrame30::SchemaItemConst::ConstType::Discrete:
+			{
+				Afb::AfbParamValue param = discreteValue;
+
+				QString text = discreteValueEdit->text().trimmed();
+				if (rx.exactMatch(text) == true)
+				{
+					param.setReference(text);
+				}
+				else
+				{
+					param.setReference({});
+
+					bool convertOk = false;
+					quint16 nativeValue = static_cast<quint16>(text.toUInt(&convertOk));
+
+					if (convertOk == true)
+					{
+						param.setValue(nativeValue);
+					}
+				}
+
+				if (param != discreteValue)
+				{
+					m_editEngine->runSetProperty(VFrame30::PropertyNames::valueDiscrete, QVariant::fromValue(param), item);
+				}
+			}
+			break;
+		default:
+			Q_ASSERT(false);
 		}
 
-		if (newFloatValue != floatValue)
-		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::valueFloat, QVariant(newFloatValue), item);
-		}
-
-		if (newDiscreteValue != discreteValue)
-		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::valueDiscrete, QVariant(newDiscreteValue), item);
-		}
+		m_editEngine->endBatch();
 
 		editSchemaView()->update();
 	}

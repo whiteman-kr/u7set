@@ -1,6 +1,6 @@
 #pragma once
 #include <QBitArray>
-#include "../CommonLib/Types.h"
+#include "../CommonLib/AfbParamValue.h"
 #include <optional>
 
 class QDomElement;
@@ -344,55 +344,56 @@ private:
 		// Properties
 		//
 	public:
-		const QString& caption() const;
+		[[nodiscard]] const QString& caption() const;
 		void setCaption(const QString& caption);
 
-		const QString& opName() const;
+		[[nodiscard]] const QString& opName() const;
 		void setOpName(const QString& value);
 
-		bool visible() const;
+		[[nodiscard]] bool visible() const;
 		void setVisible(bool visible);
 
-		E::SignalType type() const;
+		[[nodiscard]] E::SignalType type() const;
 		void setType(E::SignalType type);
 
-		E::DataFormat dataFormat() const;
+		[[nodiscard]] E::DataFormat dataFormat() const;
 		void setDataFormat(E::DataFormat dataFormat);
 
-		bool isAnalog() const;
-		bool isDiscrete() const;
+		[[nodiscard]] bool isAnalog() const;
+		[[nodiscard]] bool isDiscrete() const;
 
-		const QVariant& value() const;
-		void setValue(const QVariant& value);
+		[[nodiscard]] const AfbParamValue& afbParamValue() const;
+		[[nodiscard]] AfbParamValue& afbParamValue();
+		void setAfbParamValue(const AfbParamValue& v);
 
-		const QVariant& defaultValue() const;
+		[[nodiscard]] const QVariant& defaultValue() const;
 		void setDefaultValue(const QVariant& defaultValue);
 
-		const QVariant& lowLimit() const;
+		[[nodiscard]] const QVariant& lowLimit() const;
 		void setLowLimit(const QVariant& lowLimit);
 
-		const QVariant& highLimit() const;
+		[[nodiscard]] const QVariant& highLimit() const;
 		void setHighLimit(const QVariant& highLimit);
 
-        int operandIndex() const;
+		[[nodiscard]] int operandIndex() const;
 		void setOperandIndex(int value);
 
-		int size() const;
+		[[nodiscard]] int size() const;
 		void setSize(int value);
 
-		E::ByteOrder byteOrder() const;
+		[[nodiscard]] E::ByteOrder byteOrder() const;
 		void setByteOrder(E::ByteOrder value);
 
-		bool instantiator() const;
+		[[nodiscard]] bool instantiator() const;
 		void setInstantiator(bool value);
 
-		bool user() const;
+		[[nodiscard]] bool user() const;
 		void setUser(bool value);
 
-		QString changedScript() const;
+		[[nodiscard]] QString changedScript() const;
 		void setChangedScript(const QString& value);
 
-		const QString& units() const;
+		[[nodiscard]] const QString& units() const;
 		void setUnits(const QString& value);
 
 		// Data
@@ -401,21 +402,18 @@ private:
 		QString m_opName;			// Param name
 		QString m_caption;			// Param caption
 		bool m_visible;
-		E::SignalType m_type;		// Param type
-		E::DataFormat m_dataFormat;
 		E::ByteOrder m_byteOrder;
 		bool m_instantiator;
 		bool m_user;
 		QString m_changedScript;
 
-		QVariant m_value;			// Param value
+		AfbParamValue m_afbParamValue;	// Param value
 		QVariant m_defaultValue;	// Param default value
 
 		QVariant m_lowLimit;		// Low limit for param
 		QVariant m_highLimit;		// High limit for param
 
 		int m_operandIndex;
-		int m_size;
 
 		QString m_units;
 	};
@@ -567,5 +565,4 @@ private:
 		std::vector<std::shared_ptr<AfbElement>> m_elements;
 	};
 }
-
 

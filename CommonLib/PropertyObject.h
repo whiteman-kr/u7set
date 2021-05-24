@@ -21,14 +21,17 @@
 #include <QTimer>
 #include <QDebug>
 
-#include "../lib/OrderedHash.h"
+#include "../CommonLib/OrderedHash.h"
 #include "../CommonLib/Types.h"
+#include "../CommonLib/AfbParamValue.h"
 
+// --
+//
 class PropertyObject;
 
 #define ADD_PROPERTY_GETTER(TYPE, NAME, VISIBLE, GETTER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
-	[this](){return GETTER();});
+	[this](){return GETTER();})
 
 
 #define ADD_PROPERTY_GETTER_INDIRECT(TYPE, NAME, VISIBLE, GETTER, OWNER) \
@@ -982,9 +985,30 @@ public:
 private:
 	void checkLimits() noexcept
 	{
+		QVariant value;
+
+		if (m_value.type() >= QMetaType::User && m_value.userType() == qMetaTypeId<Afb::AfbParamValue>())
+		{
+			auto afbParamValue = m_value.value<Afb::AfbParamValue>();
+
+			if (afbParamValue.reference().isEmpty())
+			{
+				value = afbParamValue.value();
+			}
+			else
+			{
+				return;		// AfbParamValue is cannot check limits for variable
+			}
+		}
+		else
+		{
+			value = m_value;
+		}
+
+
 		if (m_lowLimit.isValid() == true)
 		{
-			Q_ASSERT(m_lowLimit.type() == m_value.type());
+			Q_ASSERT(value.canConvert(m_lowLimit.type()) == true);
 
             auto operatorLs =
                 [](auto op1, auto op2) -> bool
@@ -994,47 +1018,47 @@ private:
 
 			bool less = false;
 
-			switch (static_cast<QMetaType::Type>(m_value.type()))
+			switch (static_cast<QMetaType::Type>(value.type()))
 			{
 			case QMetaType::Int:
-				assert(m_value.canConvert<int>());
-				less = operatorLs(m_value.toInt(), m_lowLimit.toInt());
+				assert(value.canConvert<int>());
+				less = operatorLs(value.toInt(), m_lowLimit.toInt());
 				break;
 			case QMetaType::UInt:
-				assert(m_value.canConvert<unsigned int>());
-				less = operatorLs(m_value.toUInt(), m_lowLimit.toUInt());
+				assert(value.canConvert<unsigned int>());
+				less = operatorLs(value.toUInt(), m_lowLimit.toUInt());
 				break;
 			case QMetaType::LongLong:
-				assert(m_value.canConvert<qlonglong>());
-				less = operatorLs(m_value.toLongLong(), m_lowLimit.toLongLong());
+				assert(value.canConvert<qlonglong>());
+				less = operatorLs(value.toLongLong(), m_lowLimit.toLongLong());
 				break;
 			case QMetaType::ULongLong:
-				assert(m_value.canConvert<qulonglong>());
-				less = operatorLs(m_value.toULongLong(), m_lowLimit.toULongLong());
+				assert(value.canConvert<qulonglong>());
+				less = operatorLs(value.toULongLong(), m_lowLimit.toULongLong());
 				break;
 			case QMetaType::Double:
-				assert(m_value.canConvert<double>());
-				less = operatorLs(m_value.toDouble(), m_lowLimit.toDouble());
+				assert(value.canConvert<double>());
+				less = operatorLs(value.toDouble(), m_lowLimit.toDouble());
 				break;
 			case QMetaType::Long:
-				assert(m_value.canConvert<long>());
-				less = operatorLs(m_value.toInt(), m_lowLimit.toInt());
+				assert(value.canConvert<long>());
+				less = operatorLs(value.toInt(), m_lowLimit.toInt());
 				break;
 			case QMetaType::Short:
-				assert(m_value.canConvert<short>());
-				less = operatorLs(m_value.value<short>(), m_lowLimit.value<short>());
+				assert(value.canConvert<short>());
+				less = operatorLs(value.value<short>(), m_lowLimit.value<short>());
 				break;
 			case QMetaType::ULong:
-				assert(m_value.canConvert<unsigned long>());
-				less = operatorLs(m_value.value<unsigned long>(), m_lowLimit.value<unsigned long>());
+				assert(value.canConvert<unsigned long>());
+				less = operatorLs(value.value<unsigned long>(), m_lowLimit.value<unsigned long>());
 				break;
 			case QMetaType::UShort:
-				assert(m_value.canConvert<unsigned short>());
-				less = operatorLs(m_value.value<unsigned short>(), m_lowLimit.value<unsigned short>());
+				assert(value.canConvert<unsigned short>());
+				less = operatorLs(value.value<unsigned short>(), m_lowLimit.value<unsigned short>());
 				break;
 			case QMetaType::Float:
-				assert(m_value.canConvert<float>());
-				less = operatorLs(m_value.toFloat(), m_lowLimit.toFloat());
+				assert(value.canConvert<float>());
+				less = operatorLs(value.toFloat(), m_lowLimit.toFloat());
 				break;
 			default:
 				less = false;
@@ -1049,7 +1073,7 @@ private:
 
 		if (m_highLimit.isValid() == true)
 		{
-			Q_ASSERT(m_highLimit.type() == m_value.type());
+			Q_ASSERT(value.canConvert(m_highLimit.type()) == true);
 
             auto operatorGt =
                 [](auto op1, auto op2) -> bool
@@ -1059,47 +1083,47 @@ private:
 
 			bool gt = false;
 
-			switch (static_cast<QMetaType::Type>(m_value.type()))
+			switch (static_cast<QMetaType::Type>(value.type()))
 			{
 			case QMetaType::Int:
-				assert(m_value.canConvert<int>());
-				gt = operatorGt(m_value.toInt(), m_highLimit.toInt());
+				assert(value.canConvert<int>());
+				gt = operatorGt(value.toInt(), m_highLimit.toInt());
 				break;
 			case QMetaType::UInt:
-				assert(m_value.canConvert<unsigned int>());
-				gt = operatorGt(m_value.toUInt(), m_highLimit.toUInt());
+				assert(value.canConvert<unsigned int>());
+				gt = operatorGt(value.toUInt(), m_highLimit.toUInt());
 				break;
 			case QMetaType::LongLong:
-				assert(m_value.canConvert<qlonglong>());
-				gt = operatorGt(m_value.toLongLong(), m_highLimit.toLongLong());
+				assert(value.canConvert<qlonglong>());
+				gt = operatorGt(value.toLongLong(), m_highLimit.toLongLong());
 				break;
 			case QMetaType::ULongLong:
-				assert(m_value.canConvert<qulonglong>());
-				gt = operatorGt(m_value.toULongLong(), m_highLimit.toULongLong());
+				assert(value.canConvert<qulonglong>());
+				gt = operatorGt(value.toULongLong(), m_highLimit.toULongLong());
 				break;
 			case QMetaType::Double:
-				assert(m_value.canConvert<double>());
-				gt = operatorGt(m_value.toDouble(), m_highLimit.toDouble());
+				assert(value.canConvert<double>());
+				gt = operatorGt(value.toDouble(), m_highLimit.toDouble());
                 break;
 			case QMetaType::Long:
-                assert(m_value.canConvert<long>());
-				gt = operatorGt(m_value.toInt(), m_highLimit.toInt());
+				assert(value.canConvert<long>());
+				gt = operatorGt(value.toInt(), m_highLimit.toInt());
                 break;
 			case QMetaType::Short:
-                assert(m_value.canConvert<short>());
-                gt = operatorGt(m_value.value<short>(), m_highLimit.value<short>());
+				assert(value.canConvert<short>());
+				gt = operatorGt(value.value<short>(), m_highLimit.value<short>());
                 break;
 			case QMetaType::ULong:
-                assert(m_value.canConvert<unsigned long>());
-                gt = operatorGt(m_value.value<unsigned long>(), m_highLimit.value<unsigned long>());
+				assert(value.canConvert<unsigned long>());
+				gt = operatorGt(value.value<unsigned long>(), m_highLimit.value<unsigned long>());
                 break;
 			case QMetaType::UShort:
-                assert(m_value.canConvert<unsigned short>());
-                gt = operatorGt(m_value.value<unsigned short>(), m_highLimit.value<unsigned short>());
+				assert(value.canConvert<unsigned short>());
+				gt = operatorGt(value.value<unsigned short>(), m_highLimit.value<unsigned short>());
                 break;
 			case QMetaType::Float:
-                assert(m_value.canConvert<float>());
-				gt = operatorGt(m_value.toFloat(), m_highLimit.toFloat());
+				assert(value.canConvert<float>());
+				gt = operatorGt(value.toFloat(), m_highLimit.toFloat());
                 break;
 			default:
 				gt = false;

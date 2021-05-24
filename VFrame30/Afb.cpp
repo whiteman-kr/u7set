@@ -1,6 +1,5 @@
 #include "Afb.h"
 
-
 namespace Afb
 {
 
@@ -763,24 +762,18 @@ namespace Afb
 		return ok;
 	}
 
-	//
+
 	//
 	//							AfbParam
 	//
-	//
-
-	AfbParam::AfbParam(void):
+	AfbParam::AfbParam(void) :
 		m_visible(true),
-		m_type(E::SignalType::Analog),
-		m_dataFormat(E::DataFormat::UnsignedInt),
 		m_byteOrder(E::ByteOrder::BigEndian),
 		m_instantiator(false),
+		m_afbParamValue(E::SignalType::Analog, E::DataFormat::UnsignedInt, 16),
 		m_user(false),
-		m_operandIndex(0),
-		m_size(0)
-
+		m_operandIndex(0)
 	{
-		m_value = 0;
 		m_defaultValue = 0;
 		m_lowLimit = 0;
 		m_highLimit = 0;
@@ -788,8 +781,8 @@ namespace Afb
 
 	void AfbParam::update(const E::SignalType& type, const E::DataFormat dataFormat, E::ByteOrder byteOrder, const QVariant &lowLimit, const QVariant &highLimit)
 	{
-		m_type = type;
-		m_dataFormat = dataFormat;
+		m_afbParamValue.setType(type);
+		m_afbParamValue.setDataFormat(dataFormat);
 		m_byteOrder = byteOrder,
 		m_lowLimit = lowLimit;
 		m_highLimit = highLimit;
@@ -949,7 +942,7 @@ namespace Afb
 				{
 					if (QString::compare(valueName, "Value", Qt::CaseInsensitive) == 0)
 					{
-						setValue(val);
+						afbParamValue().setValue(val);
 					}
 					if (QString::compare(valueName, "Default", Qt::CaseInsensitive) == 0)
 					{
@@ -1030,7 +1023,8 @@ namespace Afb
 			return false;
 		}
 
-		m_size = xmlElement.attribute(QLatin1String("Size")).toInt();
+		int size = xmlElement.attribute(QLatin1String("Size")).toInt();
+		afbParamValue().setSize(size);
 
 		// Instantiator
 		//
@@ -1064,13 +1058,23 @@ namespace Afb
 
 		if (typeAttribute.compare(QLatin1String(QLatin1String("Analog")), Qt::CaseInsensitive) == 0)
 		{
-			m_type = E::SignalType::Analog;
+			m_afbParamValue.setType(E::SignalType::Analog);
+
+			// Analog signal size cannot be less then 16 bits
+			// Fix size, in old versions of LM descriptsions the size og AfbParam could be 4 or 5 (i_conf for example),
+			// but in reality size of param is 16bit, so fix this problem for stored AFB params here
+			// Also puls_gen had an error, discrete signal was saved as 1-bit analog
+			//
+			if (m_afbParamValue.size() < 16)
+			{
+				m_afbParamValue.setSize(16);
+			}
 		}
 		else
 		{
 			if (typeAttribute.compare(QLatin1String(QLatin1String("Discrete")), Qt::CaseInsensitive) == 0)
 			{
-				m_type = E::SignalType::Discrete;
+				m_afbParamValue.setType(E::SignalType::Discrete);
 			}
 			else
 			{
@@ -1093,19 +1097,19 @@ namespace Afb
 
 			if (dataFormatAttribute.compare(QLatin1String("UnsignedInt"), Qt::CaseInsensitive) == 0)
 			{
-				m_dataFormat = E::DataFormat::UnsignedInt;
+				m_afbParamValue.setDataFormat(E::DataFormat::UnsignedInt);
 			}
 			else
 			{
 				if (dataFormatAttribute.compare(QLatin1String("SignedInt"), Qt::CaseInsensitive) == 0)
 				{
-					m_dataFormat = E::DataFormat::SignedInt;
+					m_afbParamValue.setDataFormat(E::DataFormat::SignedInt);
 				}
 				else
 				{
 					if (dataFormatAttribute.compare(QLatin1String("Float"), Qt::CaseInsensitive) == 0)
 					{
-						m_dataFormat = E::DataFormat::Float;
+						m_afbParamValue.setDataFormat(E::DataFormat::Float);
 					}
 					else
 					{
@@ -1145,30 +1149,30 @@ namespace Afb
 		//
 		std::function<QVariant(QString, E::SignalType, E::DataFormat)> valToDataFormat =
 				[](QString str, E::SignalType type, E::DataFormat dataFormat) -> QVariant
-		{
-			if (type == E::SignalType::Analog)
-			{
-				switch (dataFormat)
 				{
-				case E::DataFormat::UnsignedInt:
-				case E::DataFormat::SignedInt:
-					return QVariant(str.toInt());
-				case E::DataFormat::Float:
-					return QVariant(str.toDouble());
-				default:
+					if (type == E::SignalType::Analog)
+					{
+						switch (dataFormat)
+						{
+						case E::DataFormat::UnsignedInt:
+						case E::DataFormat::SignedInt:
+							return QVariant(str.toInt());
+						case E::DataFormat::Float:
+							return QVariant(str.toDouble());
+						default:
+							assert(false);
+							return QVariant();
+						}
+					}
+
+					if (type == E::SignalType::Discrete)
+					{
+						return QVariant(str == "1" ? true : false);
+					}
+
 					assert(false);
 					return QVariant();
-				}
-			}
-
-			if (type == E::SignalType::Discrete)
-			{
-				return QVariant(str == "1" ? true : false);
-			}
-
-			assert(false);
-			return QVariant();
-		};
+				};
 
 		{
 			QDomElement valueElement = xmlElement.firstChildElement(QLatin1String("Value"));
@@ -1180,7 +1184,7 @@ namespace Afb
 			}
 
 			QVariant v = valToDataFormat(valueElement.text(), type(), dataFormat());
-			setValue(v);
+			afbParamValue().setValue(v);
 		}
 
 		// Section <Default>
@@ -1210,7 +1214,7 @@ namespace Afb
 				QDomElement e = xmlElement.firstChildElement(QLatin1String("LowLimit"));
 
 				if (user() == true &&
-						e.isNull() == true)
+					e.isNull() == true)
 				{
 					*errorMessage = QString("Can't find section LowLimit. Param %1.").arg(m_caption);
 					return false;
@@ -1229,7 +1233,7 @@ namespace Afb
 				QDomElement e = xmlElement.firstChildElement(QLatin1String("HighLimit"));
 
 				if (user() == true &&
-						e.isNull() == true)
+					e.isNull() == true)
 				{
 					*errorMessage = QString("Can't find section HighLimit. Param %1.").arg(m_caption);
 					return false;
@@ -1258,7 +1262,6 @@ namespace Afb
 			}
 		}
 
-
 		// Section <Script>::<Changed>
 		//
 		m_changedScript.clear();
@@ -1275,6 +1278,15 @@ namespace Afb
 					m_changedScript = sc.text().trimmed();
 				}
 			}
+		}
+
+		// Section <ValueReference>
+		// Value reference string (AfbParamValue::reference())
+		// May not exist
+		//
+		{
+			QDomElement e = xmlElement.firstChildElement(QLatin1String("ValueReference"));
+			m_afbParamValue.setReference(e.isNull() ? QString{} : e.text());
 		}
 
 		return true;
@@ -1310,7 +1322,7 @@ namespace Afb
 
 		// Size
 		//
-		xmlElement->setAttribute(QLatin1String("Size"), m_size);
+		xmlElement->setAttribute(QLatin1String("Size"), afbParamValue().size());
 
 		// Instantiator
 		//
@@ -1322,11 +1334,11 @@ namespace Afb
 
 		// Type
 		//
-		xmlElement->setAttribute(QLatin1String("Type"), E::valueToString(m_type));
+		xmlElement->setAttribute(QLatin1String("Type"), E::valueToString(m_afbParamValue.type()));
 
 		// DataFormat
 		//
-		xmlElement->setAttribute(QLatin1String("DataFormat"), E::valueToString(m_dataFormat));
+		xmlElement->setAttribute(QLatin1String("DataFormat"), E::valueToString(m_afbParamValue.dataFormat()));
 
 		// ByteOrder
 		//
@@ -1342,25 +1354,25 @@ namespace Afb
 			// Value
 			{
 				QDomNode node = xmlElement->appendChild(doc.createElement(QLatin1String("Value")));
-				QDomText text = doc.createTextNode(value() == true ? "1" : "0");
+				QDomText text = doc.createTextNode(afbParamValue().value() == true ? QLatin1String("1") : QLatin1String("0"));
 				node.appendChild(text);
 			}
 			// Default
 			{
 				QDomNode node = xmlElement->appendChild(doc.createElement(QLatin1String("Default")));
-				QDomText text = doc.createTextNode(defaultValue() == true ? "1" : "0");
+				QDomText text = doc.createTextNode(defaultValue() == true ? QLatin1String("1") : QLatin1String("0"));
 				node.appendChild(text);
 			}
 			// LowLimit
 			{
 				QDomNode node = xmlElement->appendChild(doc.createElement(QLatin1String("LowLimit")));
-				QDomText text = doc.createTextNode(lowLimit() == true ? "1" : "0");
+				QDomText text = doc.createTextNode(lowLimit() == true ? QLatin1String("1") : QLatin1String("0"));
 				node.appendChild(text);
 			}
 			// HighLimit
 			{
 				QDomNode node = xmlElement->appendChild(doc.createElement(QLatin1String("HighLimit")));
-				QDomText text = doc.createTextNode(highLimit() == true ? "1" : "0");
+				QDomText text = doc.createTextNode(highLimit() == true ? QLatin1String("1") : QLatin1String("0"));
 				node.appendChild(text);
 			}
 		}
@@ -1369,7 +1381,7 @@ namespace Afb
 			// Value
 			{
 				QDomNode node = xmlElement->appendChild(doc.createElement(QLatin1String("Value")));
-				QDomText text = doc.createTextNode(value().toString());
+				QDomText text = doc.createTextNode(afbParamValue().value().toString());
 				node.appendChild(text);
 			}
 			// Default
@@ -1414,9 +1426,19 @@ namespace Afb
 			}
 		}
 
+		// Section <ValueReference>
+		// Value reference string (AfbParamValue::reference())
+		// May not exist
+		//
+		if (m_afbParamValue.reference().isEmpty() == false)
+		{
+			QDomNode node = xmlElement->appendChild(doc.createElement(QLatin1String("ValueReference")));
+			QDomText text = doc.createTextNode(m_afbParamValue.reference());
+			node.appendChild(text);
+		}
+
 		return true;
 	}
-
 
 	// Caption
 	//
@@ -1453,42 +1475,48 @@ namespace Afb
 	//
 	E::SignalType AfbParam::type() const
 	{
-		return m_type;
+		return m_afbParamValue.type();
 	}
 	void AfbParam::setType(E::SignalType type)
 	{
-		m_type = type;
+		m_afbParamValue.setType(type);
 	}
 
 	E::DataFormat AfbParam::dataFormat() const
 	{
-		return m_dataFormat;
+		return m_afbParamValue.dataFormat();
 	}
 
 	void AfbParam::setDataFormat(E::DataFormat dataFormat)
 	{
-		m_dataFormat = dataFormat;
+		m_afbParamValue.setDataFormat(dataFormat);
 	}
 
 	bool AfbParam::isAnalog() const
 	{
-		return m_type == E::SignalType::Analog;
+		return m_afbParamValue.type() == E::SignalType::Analog;
 	}
 
 	bool AfbParam::isDiscrete() const
 	{
-		return m_type == E::SignalType::Discrete;
+		return m_afbParamValue.type() == E::SignalType::Discrete;
 	}
 
 	// Value
 	//
-	const QVariant& AfbParam::value() const
+	const AfbParamValue& AfbParam::afbParamValue() const
 	{
-		return m_value;
+		return m_afbParamValue;
 	}
-	void AfbParam::setValue(const QVariant& value)
+
+	AfbParamValue& AfbParam::afbParamValue()
 	{
-		m_value = value;
+		return m_afbParamValue;
+	}
+
+	void AfbParam::setAfbParamValue(const AfbParamValue& v)
+	{
+		m_afbParamValue = v;
 	}
 
 	// Defaut Value
@@ -1536,12 +1564,12 @@ namespace Afb
 
 	int AfbParam::size() const
 	{
-		return m_size;
+		return afbParamValue().size();
 	}
 
 	void AfbParam::setSize(int value)
 	{
-		m_size = value;
+		afbParamValue().setSize(value);
 	}
 
 	E::ByteOrder AfbParam::byteOrder() const

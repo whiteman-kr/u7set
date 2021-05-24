@@ -608,7 +608,7 @@ namespace Builder
 		return true;
 	}
 
-	bool BuildResultWriter::finish()
+	bool BuildResultWriter::finish(int errorCount, int warningCount)
 	{
 		if (m_buildInfo.id == -1)
 		{
@@ -617,23 +617,20 @@ namespace Builder
 
 		LOG_EMPTY_LINE(m_log)
 
-		int errors = m_log->errorCount();
-		int warnings = m_log->warningCount();
-
 		msg = QString(tr("Build #%1 was finished. Errors - %2. Warnings - %3."))
 		        .arg(m_buildInfo.id)
-		        .arg(errors)
-		        .arg(warnings);
+				.arg(errorCount)
+				.arg(warningCount);
 
-		if (errors)
+		if (errorCount)
 		{
 			m_log->writeError(msg, __FILE__, __LINE__, SHORT_FUNC_INFO);
 		}
 		else
 		{
-			if (warnings)
+			if (warningCount)
 			{
-				m_log->writeWarning0(QString("Compilation finished with warnings - %1").arg(warnings),
+				m_log->writeWarning0(QString("Compilation finished with warnings - %1").arg(warningCount),
 									 __FILE__,
 									 __LINE__,
 									 SHORT_FUNC_INFO);
@@ -658,7 +655,7 @@ namespace Builder
 			result &= buildResult.finalize(m_buildFiles);
 		}
 
-		result &= m_dbController->buildFinish(m_buildInfo.id, errors, warnings, buildLogStr, nullptr);
+		result &= m_dbController->buildFinish(m_buildInfo.id, errorCount, warningCount, buildLogStr, nullptr);
 
 		return result;
 	}

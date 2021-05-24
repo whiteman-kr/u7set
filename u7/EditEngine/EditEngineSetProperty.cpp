@@ -2,6 +2,7 @@
 #include "SchemaEditor/EditSchemaView.h"
 #include "../../VFrame30/SchemaItemAfb.h"
 #include "../../VFrame30/SchemaItemBus.h"
+#include "../../VFrame30/SchemaItemUfb.h"
 
 namespace EditEngine
 {
@@ -86,6 +87,14 @@ namespace EditEngine
 					continue;
 				}
 
+				if (VFrame30::SchemaItemUfb* ufbItem = dynamic_cast<VFrame30::SchemaItemUfb*>(r.item.get());
+					ufbItem != nullptr)
+				{
+					// Actually no action here
+					//
+					continue;
+				}
+
 				if (r.item->isType<VFrame30::SchemaItemBusExtractor>() == true)
 				{
 					VFrame30::SchemaItemBusExtractor* busExtractor = dynamic_cast<VFrame30::SchemaItemBusExtractor*>(r.item.get());
@@ -98,7 +107,7 @@ namespace EditEngine
 					continue;
 				}
 
-				assert(false);		// Specific proprties have only SchemaItemAfb and SchemaItemBusExtractor
+				assert(false);		// Specific proprties have only SchemaItemAfb, SchemaItemUfb, SchemaItemBusExtractor
 			}
 		}
 

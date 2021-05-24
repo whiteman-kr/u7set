@@ -7,16 +7,17 @@ namespace VFrame30
 {
 	UfbSchema::UfbSchema(void)
 	{
-		//qDebug() << "UfbSchema::UfbSchema(void)";
+		setUnit(SchemaUnit::Inch);
+
+		setDocWidth(mm2in(297));
+		setDocHeight(mm2in(210));
 
 		ADD_PROPERTY_GETTER_SETTER(QString, "Description", true, UfbSchema::description, UfbSchema::setDescription);
 		ADD_PROPERTY_GETTER(int, "Version", true, UfbSchema::version);
 		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::lmDescriptionFile, true, UfbSchema::lmDescriptionFile, UfbSchema::setLmDescriptionFile);
 
-		setUnit(SchemaUnit::Inch);
-
-		setDocWidth(mm2in(297));
-		setDocHeight(mm2in(210));
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::specificProperties, true, UfbSchema::specificProperties, UfbSchema::setSpecificProperties)
+			->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
 
 		Layers.push_back(std::make_shared<SchemaLayer>("Logic", true));
 		Layers.push_back(std::make_shared<SchemaLayer>("Frame", false));
@@ -28,7 +29,6 @@ namespace VFrame30
 
 	UfbSchema::~UfbSchema(void)
 	{
-		//qDebug() << "UfbSchema::~UfbSchema(void)";
 	}
 
 	bool UfbSchema::SaveData(Proto::Envelope* message) const
@@ -51,6 +51,7 @@ namespace VFrame30
 		this->m_version++;		// Incerement version
 		us->set_version(m_version);
 		us->set_lmdescriptionfile(m_lmDescriptionFile.toStdString());
+		us->set_specific_properties_struct(m_specificPropertiesStruct.toStdString());
 
 		return true;
 	}
@@ -84,6 +85,7 @@ namespace VFrame30
 		m_description = QString::fromStdString(us.description());
 		m_version = us.version();
 		m_lmDescriptionFile = QString::fromStdString(us.lmdescriptionfile());
+		m_specificPropertiesStruct = QString::fromStdString(us.specific_properties_struct());
 
 		return true;
 	}
@@ -119,5 +121,15 @@ namespace VFrame30
 	void UfbSchema::setLmDescriptionFile(QString value)
 	{
 		m_lmDescriptionFile = value;
+	}
+
+	QString UfbSchema::specificProperties() const
+	{
+		return m_specificPropertiesStruct;
+	}
+
+	void UfbSchema::setSpecificProperties(QString value)
+	{
+		m_specificPropertiesStruct = value;
 	}
 }
