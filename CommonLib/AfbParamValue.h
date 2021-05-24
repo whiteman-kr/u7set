@@ -10,7 +10,7 @@ namespace Afb
 	{
 	public:
 		AfbParamValue() = default;
-		AfbParamValue(E::SignalType _type, E::DataFormat _dataFormat, quint16 _size);
+		explicit AfbParamValue(E::SignalType type, E::DataFormat dataFormat, quint16 size);
 		AfbParamValue(const AfbParamValue&) = default;
 		~AfbParamValue() = default;
 		AfbParamValue& operator=(const AfbParamValue&) = default;
@@ -47,6 +47,7 @@ namespace Afb
 		[[nodiscard]] const QString& reference() const;
 		void setReference(const QString& value);
 
+		[[nodiscard]] bool hasReference() const;
 		[[nodiscard]] bool checkValue() const;
 
 		// Data

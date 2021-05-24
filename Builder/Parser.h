@@ -189,7 +189,7 @@ namespace Builder
 	class AppLogicData
 	{
 	public:
-		AppLogicData();
+		explicit AppLogicData(SignalSet* signalSet);
 
 		// Public methods
 		//
@@ -225,6 +225,8 @@ namespace Builder
 	private:
 		std::list<std::shared_ptr<AppLogicModule>> m_modules;
 		std::map<QString, std::shared_ptr<AppLogicModule>> m_ufbs;
+
+		SignalSet* m_signalSet = nullptr;
 	};
 
 

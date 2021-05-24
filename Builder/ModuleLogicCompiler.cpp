@@ -1946,10 +1946,11 @@ namespace Builder
 		switch(ualConst->type())
 		{
 		case VFrame30::SchemaItemConst::ConstType::Discrete:
+			Q_ASSERT(ualConst->discreteValue().hasReference() == false);
 
 			constSignalType = E::SignalType::Discrete;
 
-			if (ualConst->discreteValue() != 0 && ualConst->discreteValue() != 1)
+			if (ualConst->discreteNativeValue() != 0 && ualConst->discreteNativeValue() != 1)
 			{
 				// Discrete constant must have value 0 or 1.
 				//
@@ -1959,11 +1960,12 @@ namespace Builder
 			break;
 
 		case VFrame30::SchemaItemConst::ConstType::IntegerType:
+			Q_ASSERT(ualConst->signedInt32Value().hasReference() == false);
 
 			constSignalType = E::SignalType::Analog;
 			constAnalogFormat = E::AnalogAppSignalFormat::SignedInt32;
 
-			if (ualConst->intValue() < std::numeric_limits<qint32>::min() || ualConst->intValue() > std::numeric_limits<qint32>::max())
+			if (ualConst->signedInt32NativeValue() < std::numeric_limits<qint32>::min() || ualConst->signedInt32NativeValue() > std::numeric_limits<qint32>::max())
 			{
 				// Integer constant value out of range (Logic schema %1, item %2)
 				//
@@ -1974,11 +1976,12 @@ namespace Builder
 			break;
 
 		case VFrame30::SchemaItemConst::ConstType::FloatType:
+			Q_ASSERT(ualConst->floatValue().hasReference() == false);
 
 			constSignalType = E::SignalType::Analog;
 			constAnalogFormat = E::AnalogAppSignalFormat::Float32;
 
-			if (ualConst->floatValue() < std::numeric_limits<float>::lowest() || ualConst->floatValue() > std::numeric_limits<float>::max())
+			if (ualConst->floatNativeValue() < std::numeric_limits<float>::lowest() || ualConst->floatNativeValue() > std::numeric_limits<float>::max())
 			{
 				// Float constant value out of range (Logic schema %1, item %2)
 				//

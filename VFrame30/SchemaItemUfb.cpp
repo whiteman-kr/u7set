@@ -352,21 +352,33 @@ namespace VFrame30
 			{
 				for (std::shared_ptr<SchemaItem>& item : layer->Items)
 				{
-					const FblItemRect* fblItemRect = item->toFblItemRect();
-					if (fblItemRect == nullptr)
+					const SchemaItemSignal* itemSignal = item->toType<SchemaItemSignal>();
+					if (itemSignal == nullptr)
 					{
 						continue;
 					}
 
-					if (fblItemRect->isInputSignalElement() == true)
+					// Check it this siganl item is just variable reference
+					//
+					QString appSignalIds = itemSignal->appSignalIds();
+					if (appSignalIds.startsWith("$(") == true && appSignalIds.endsWith(")") == true)
 					{
-						ufbInputs.push_back(fblItemRect->toInputSignalElement());
+						// Do not add references to input or output list
+						//
 						continue;
 					}
 
-					if (fblItemRect->isOutputSignalElement() == true)
+					// Add UFB input or output or nothing))
+					//
+					if (itemSignal->isInputSignalElement() == true)
 					{
-						ufbOutputs.push_back(fblItemRect->toOutputSignalElement());
+						ufbInputs.push_back(itemSignal->toInputSignalElement());
+						continue;
+					}
+
+					if (itemSignal->isOutputSignalElement() == true)
+					{
+						ufbOutputs.push_back(itemSignal->toOutputSignalElement());
 						continue;
 					}
 				}

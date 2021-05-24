@@ -2803,6 +2803,58 @@ namespace Builder
 						.arg(schema)));
 	}
 
+	/// IssueCode: ALP4202
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property (%1) is not found in SchemaItemUfb %2, LogicSchema %3.
+	///
+	/// Parameters:
+	///		%1 Property or param
+	///		%2 SchemaItemUfb with missing property
+	///		%3 LogicSchemaID
+	///
+	/// Description:
+	///		SchemaItem in UFB schema has no propert, but some UFB items are referenced to this property.
+	///
+	void IssueLogger::errALP4202(QString schema, QString schemaItemUfb, QString varName, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4202, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4202,
+				  QString(tr("Property (%1) is not found in SchemaItemUfb %2, LogicSchema %3.")
+						.arg(varName)
+						.arg(schemaItemUfb)
+						.arg(schema)));
+	}
+
+	/// IssueCode: ALP4203
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1.%2 is empty, LogicSchema %3.
+	///
+	/// Parameters:
+	///		%1 SchemaIte
+	///		%2 Property or param name
+	///		%3 LogicSchemaID
+	///
+	/// Description:
+	///		SchemaItem property is empty, this property must have some non empty value.
+	///
+	void IssueLogger::errALP4203(QString schema, QString schemaItem, QString property, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4203, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4203,
+				  QString(tr("Property %1.%2 is empty, LogicSchema %3.")
+						.arg(schemaItem)
+						.arg(property)
+						.arg(schema)));
+	}
+
 
 	// ALC			Application logic compiler				5000-5999
 	//

@@ -267,6 +267,11 @@ namespace Afb
 		m_reference = value.trimmed();
 	}
 
+	bool AfbParamValue::hasReference() const
+	{
+		return m_reference.isEmpty() == false;
+	}
+
 	bool AfbParamValue::checkValue() const
 	{
 		auto checkValueType = [this]<class T>(quint16 size) -> std::optional<bool>

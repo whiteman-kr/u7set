@@ -270,4 +270,38 @@ namespace Proto
 
 		return ok;
 	}
+
+	void Read(const Proto::AfbParamValue& message, Afb::AfbParamValue* dst)
+	{
+		Q_ASSERT(dst);
+
+		switch (message.version())
+		{
+		case 0:
+			dst->setType(static_cast<E::SignalType>(message.type()));
+			dst->setDataFormat(static_cast<E::DataFormat>(message.dataformat()));
+			dst->setSize(message.size());
+			dst->setValue(Read(message.value()));
+			dst->setReference(QString::fromStdString(message.reference()));
+			break;
+		default:
+			Q_ASSERT(false);
+		}
+
+		return;
+	}
+
+	void Write(Proto::AfbParamValue* message, const Afb::AfbParamValue& src)
+	{
+		Q_ASSERT(message);
+
+		message->set_version(0);
+		message->set_type(static_cast<int>(src.type()));
+		message->set_dataformat(static_cast<int>(src.dataFormat()));
+		message->set_size(src.size());
+		Write(message->mutable_value(), src.value());
+		message->set_reference(src.reference().toStdString());
+
+		return;
+	}
 }

@@ -47,7 +47,6 @@ namespace VFrame30
 		QString valueToString() const;
 
 		virtual QString buildName() const final;
-
 		virtual QString toolTipText(int dpiX, int dpiY) const final;
 
 		// Properties
@@ -60,14 +59,20 @@ namespace VFrame30
 		bool isFloat() const;
 		bool isDiscrete() const;
 
-		int intValue() const;
-		void setIntValue(int intValue);
+		const Afb::AfbParamValue& signedInt32Value() const;
+		void setSignedInt32Value(const Afb::AfbParamValue& intValue);
+		qint32 signedInt32NativeValue() const;
+		void setSignedInt32NativeValue(qint32 v);
 
-		double floatValue() const;
-		void setFloatValue(double floatValue);
+		const Afb::AfbParamValue& floatValue() const;
+		void setFloatValue(const Afb::AfbParamValue& value);
+		float floatNativeValue() const;
+		void setFloatNativeValue(float v);
 
-		int discreteValue() const;
-		void setDiscreteValue(int discreteValue);
+		const Afb::AfbParamValue& discreteValue() const;
+		void setDiscreteValue(const Afb::AfbParamValue& discreteValue);
+		quint16 discreteNativeValue() const;
+		void setDiscreteNativeValue(quint16);
 
 		int precision() const;
 		void setPrecision(int value);
@@ -88,9 +93,9 @@ namespace VFrame30
 
 		struct ConstValue
 		{
-			int intValue = 0;
-			double floatValue = 0.0;
-			int discreteValue = 0;
+			Afb::AfbParamValue signedInt32{E::SignalType::Analog, E::DataFormat::SignedInt, 32};
+			Afb::AfbParamValue float32{E::SignalType::Analog, E::DataFormat::Float, 32};
+			Afb::AfbParamValue discrete{E::SignalType::Analog, E::DataFormat::UnsignedInt, 16};		// It is made analog uint because if we make discrete then in PropertyEditor it will be edited as bool (true/false)
 		} m_value;
 
 		int m_precision = 2;
