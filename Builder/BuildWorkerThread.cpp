@@ -93,6 +93,9 @@ namespace Builder
 		m_totalProgress = 0;
 		m_buildTimer.restart();
 
+		m_finalizedErrorCount = 0;
+		m_finalizedWarningCount = 0;
+
 		// Reset build result for all tasks
 		//
 		for (BuildTask& task : m_buildTasks)
@@ -133,6 +136,11 @@ namespace Builder
 		LOG_EMPTY_LINE(m_context->m_log);
 		LOG_MESSAGE(m_context->m_log, message);
 
+		// Save error/warning count as printing task result can lead to change these values
+		//
+		m_finalizedErrorCount = m_log->errorCount();
+		m_finalizedWarningCount = m_log->warningCount();
+
 		// Report all tasks result
 		//
 		LOG_MESSAGE(m_context->m_log, tr("Task Run Report:"))
@@ -140,8 +148,7 @@ namespace Builder
 		for (const auto& task : m_buildTasks)
 		{
 			QString strResult;
-
-
+			bool taskOk = false;
 
 			if (task.result.has_value() == false)
 			{
@@ -149,7 +156,7 @@ namespace Builder
 			}
 			else
 			{
-				bool taskOk = task.result.value().result;
+				taskOk = task.result.value().result;
 				strResult = taskOk ? tr("Ok") : tr("FAILED");
 			}
 
@@ -157,22 +164,29 @@ namespace Builder
 							.arg(task.name)
 							.arg(strResult);
 
-			m_context->m_log->writeMessage(str);
-
-//			if (taskOk == true)
-//			{
-//				m_context->m_log->writeSuccess(str);
-//			}
-//			else
-//			{
-//				m_context->m_log->writeError(str);
-//			}
+			if (task.result.has_value() == false)
+			{
+				m_context->m_log->writeMessage(str);
+			}
+			else
+			{
+				if (taskOk == true)
+				{
+					m_context->m_log->writeSuccess(str);
+				}
+				else
+				{
+					m_context->m_log->writeError(str);
+				}
+			}
 		}
+
+		// Final message about build is here
+		//
+		m_context->m_buildResultWriter->finish(m_finalizedErrorCount, m_finalizedWarningCount);
 
 		// --
 		//
-		m_context->m_buildResultWriter->finish();
-
 		if (m_context->m_db.isProjectOpened() == true)
 		{
 			m_context->m_db.closeProject(nullptr);
@@ -185,9 +199,6 @@ namespace Builder
 			m_context->m_log->errCMN0016();
 			m_context->m_log->clear();		// Log can contain thouthands of messages, if it some kind of "same ids" error
 		}
-
-		// Log everything here
-		//
 
 		// Display build time
 		//
@@ -759,7 +770,7 @@ namespace Builder
 
 	bool BuildWorkerThread::taskParseApplicationLogic()
 	{
-		m_context->m_appLogicData = std::make_shared<AppLogicData>();
+		m_context->m_appLogicData = std::make_shared<AppLogicData>(m_context->m_signalSet.get());
 		int errorCount = m_context->m_log->errorCount();
 
 		Parser parser(m_context.get());

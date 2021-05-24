@@ -133,7 +133,7 @@ namespace Builder
 		~BuildResultWriter();
 
 		bool start(const QString& outputPath, DbController *db, IssueLogger* log, int changesetID);
-		bool finish();
+		bool finish(int errorCount, int warningCount);
 
 		BuildFile* addFile(const QString& subDir, const QString& fileName, const QByteArray& data, bool compress = false);
 		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& dataString, bool compress = false);
