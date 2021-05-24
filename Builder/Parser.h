@@ -296,6 +296,8 @@ namespace Builder
 		bool checkForUniqueLoopbackId(VFrame30::Schema* schema);
 		bool checkForUniqueLoopbackId(std::shared_ptr<AppLogicModule> module);
 
+		bool checkForResolvedReferences(std::shared_ptr<AppLogicModule> module);
+
 		bool parsUfbSchema(std::shared_ptr<VFrame30::UfbSchema> ufbSchema);
 		bool parseUfbLayer(std::shared_ptr<VFrame30::UfbSchema> ufbSchema,
 						   std::shared_ptr<VFrame30::SchemaLayer> layer);

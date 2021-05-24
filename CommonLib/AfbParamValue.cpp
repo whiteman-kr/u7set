@@ -177,7 +177,7 @@ namespace Afb
 		return false;
 	}
 
-	int AfbParamValue::validate(const QString& str) const
+	int AfbParamValue::validate(const QString& /*str*/) const
 	{
 		Q_ASSERT(false);
 		return -1;

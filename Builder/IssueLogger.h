@@ -248,6 +248,7 @@ namespace Builder
 		void errALP4201(QString schema, QString schemaItemUfb, QString varName, QUuid itemUuid);
 		void errALP4202(QString schema, QString schemaItemUfb, QString varName, QUuid itemUuid);
 		void errALP4203(QString schema, QString schemaItem, QString property, QUuid itemUuid);
+		void errALP4204(QString schema, QString schemaItem, QString property, QString propertyValue, QUuid itemUuid);
 
 		// ALC			Application logic compiler				5000-5999
 		//

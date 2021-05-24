@@ -1827,7 +1827,8 @@ namespace Builder
 				auto logicSchema = std::dynamic_pointer_cast<VFrame30::LogicSchema>(item.m_schema);
 				if (logicSchema == nullptr)
 				{
-					// Process items only from LogicSchemas, "UFB in UFB" is not supported
+					// item.m_schema can be UfbSchema - then it is just expanded ufb because
+					// after injecting ufb items itemIt is set to these nes items (and they have item.m_schema as UfbSchema)
 					//
 					continue;
 				}
@@ -2475,6 +2476,13 @@ namespace Builder
 									   (ali.m_fblItem->isInputSignalElement() || ali.m_fblItem->isOutputSignalElement());
 							});
 
+				// Set "mother" schema to ufb items
+				//
+				for (AppLogicItem& ufbali : ufbItemsCopy)
+				{
+					ufbali.m_schema = logicSchema;
+				}
+
 				// Inject ufb schema items
 				//
 				module->items().insert(itemIt, ufbItemsCopy.begin(), ufbItemsCopy.end());
@@ -2896,7 +2904,7 @@ namespace Builder
 			checkUfbItemsVersion(schema.get(), ufbs);
 		}
 
-		// Save schams to context
+		// Save schemas to context
 		// Important, these schemas are shared pointer, so they must not be spoiled in parsing
 		//
 		m_context->m_appLogicSchemas = schemas;
@@ -3016,10 +3024,16 @@ namespace Builder
 			checkForUniqueLoopbackId(module);
 		}
 
+		// Check that all references like $(varname) have been resolved
+		//
+		for (std::shared_ptr<AppLogicModule> module : m_applicationData->modules())
+		{
+			result &= checkForResolvedReferences(module);
+		}
+
 		// Set AfbComponent to AfbElements
 		//
 		ok = m_applicationData->setAfbComponents(m_lmDescriptions, m_log);
-
 		if (ok == false)
 		{
 			result = false;
@@ -3918,7 +3932,82 @@ namespace Builder
 	}
 
 
+	bool Parser::checkForResolvedReferences(std::shared_ptr<AppLogicModule> module)
+	{
+		if (module == nullptr)
+		{
+			Q_ASSERT(module);
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", module %1")
+							  .arg(reinterpret_cast<size_t>(module.get())));
+			return false;
+		}
 
+		bool ok = true;
+
+		auto logErrorFunc =
+			[this](const AppLogicItem& appLogicItem, QString param, QString paramValue)
+			{
+				// All reference must be resolved
+				//
+				QUuid itemGuid = appLogicItem.m_groupId.isNull() ?
+									 appLogicItem.m_fblItem->guid() :
+									 appLogicItem.m_groupId;
+
+				log()->errALP4204(appLogicItem.m_schema->schemaId(), appLogicItem.m_fblItem->label(), param, paramValue, itemGuid);
+			};
+
+		for (const AppLogicItem& appLogicItem : module->items())
+		{
+			auto props = appLogicItem.m_fblItem->properties();
+
+			// Check SchemaItemAfbs
+			//
+			if (auto afbItem = appLogicItem.m_fblItem->toSchemaItemAfb();
+				afbItem != nullptr)
+			{
+				for (const Afb::AfbParam& param : afbItem->params())
+				{
+					const Afb::AfbParamValue& paramValue = param.afbParamValue();
+
+					if (paramValue.hasReference() == true)
+					{
+						// All reference must be resolved
+						//
+						logErrorFunc(appLogicItem, param.caption(), paramValue.reference());
+						ok = false;
+					}
+				}
+			}
+
+			// Check SchemaItemConsts
+			//
+			if (auto constItem = appLogicItem.m_fblItem->toSchemaItemConst();
+				constItem != nullptr)
+			{
+				// All reference must be resolved
+				//
+				if (constItem->signedInt32Value().hasReference() == true)
+				{
+					logErrorFunc(appLogicItem, "signedInt32Value", constItem->signedInt32Value().reference());
+					ok = false;
+				}
+
+				if (constItem->floatValue().hasReference() == true)
+				{
+					logErrorFunc(appLogicItem, "floatValue", constItem->floatValue().reference());
+					ok = false;
+				}
+
+				if (constItem->discreteValue().hasReference() == true)
+				{
+					logErrorFunc(appLogicItem, "discreteValue", constItem->discreteValue().reference());
+					ok = false;
+				}
+			}
+		}
+
+		return ok;
+	}
 
 	bool Parser::parsUfbSchema(std::shared_ptr<VFrame30::UfbSchema> ufbSchema)
 	{
