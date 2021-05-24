@@ -126,17 +126,17 @@ win32:PRE_TARGETDEPS += $$DESTDIR/protobuf.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libprotobuf.a
 INCLUDEPATH += ./../../Protobuf
 
-# CommonLib
-#
-LIBS += -lCommonLib
-win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
-
 # AppSignalLib
 #
 LIBS += -lAppSignalLib
 win32:PRE_TARGETDEPS += $$DESTDIR/AppSignalLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
+
+# CommonLib
+#
+LIBS += -lCommonLib
+win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
 # Visual Leak Detector
 #
