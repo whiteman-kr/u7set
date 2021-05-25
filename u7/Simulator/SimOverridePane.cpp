@@ -208,13 +208,30 @@ bool SimOverridePane::eventFilter(QObject* obj, QEvent* event)
 			return true;
 		case Qt::Key::Key_Space:
 			{
+				// Switch discrete signal 1 - 0 - 1 - 0...
+				//
 				QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
 				if (item != nullptr)
 				{
-					// It makes toggle state (check box) from any selected column (not only for column 0 as by default)
-					//
-					item->setCheckState(0, item->checkState(0) == Qt::Checked ? Qt::Unchecked : Qt::Checked);
+					if (item->m_overrideSignal.signalType() == E::SignalType::Discrete)
+					{
+						quint16 currentValue = item->m_overrideSignal.value().value<quint16>();
+						currentValue = currentValue ? 0 : 1;
+
+						QString appSignalId = item->m_overrideSignal.appSignalId();
+						setValue(appSignalId, Sim::OverrideSignalMethod::Value, QVariant::fromValue<qint32>(currentValue));
+					}
 				}
+
+				// Turn off/on override for current signal
+				//
+//				QOverrideTreeWidgetItem* item = dynamic_cast<QOverrideTreeWidgetItem*>(m_treeWidget->currentItem());
+//				if (item != nullptr)
+//				{
+//					// It makes toggle state (check box) from any selected column (not only for column 0 as by default)
+//					//
+//					item->setCheckState(0, item->checkState(0) == Qt::Checked ? Qt::Unchecked : Qt::Checked);
+//				}
 			}
 			return true;
 		case Qt::Key_0:

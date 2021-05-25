@@ -66,6 +66,8 @@ SchemaPropertyEditor::SchemaPropertyEditor(EditEngine::EditEngine* editEngine, D
 {
 	assert(m_editEngine);
 	assert(m_dbController);
+
+	setDefaultSpecificPropertyCategory(tr("Params"));
 }
 
 SchemaPropertyEditor::~SchemaPropertyEditor()
@@ -101,7 +103,7 @@ void SchemaPropertyEditor::valueChanged(QString propertyName, QVariant value)
 
 ExtWidgets::PropertyTextEditor* SchemaPropertyEditor::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
 {
-	return IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, m_dbController, parent);
+	return IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, defaultSpecificPropertyCategory(), m_dbController, parent);
 }
 
 bool SchemaPropertyEditor::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)

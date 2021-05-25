@@ -1,5 +1,4 @@
-#ifndef IDEPROPERTYEDITOR_H
-#define IDEPROPERTYEDITOR_H
+#pragma once
 
 #include "../QScintilla/Qt4Qt5/Qsci/qsciscintilla.h"
 #include "../lib/QScintillaLexers/LexerXML.h"
@@ -7,18 +6,18 @@
 
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyTable.h"
+#include "../lib/Tuning/TuningFilterEditor.h"
 #include "../DbLib/DbController.h"
 #include "../CommonLib/Types.h"
-#include "../lib/Tuning/TuningFilterEditor.h"
+
 
 //
 // IdePropertyEditorHelper
 //
-
 class IdePropertyEditorHelper
 {
 public:
-	static ExtWidgets::PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, DbController* dbController, QWidget* parent);
+	static ExtWidgets::PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QString defaultSpecPropCategory, DbController* dbController, QWidget* parent);
 
 	static bool restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog);
 	static bool storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog);
@@ -28,9 +27,10 @@ public:
 //
 // IdePropertyEditor
 //
-
 class IdePropertyEditor : public ExtWidgets::PropertyEditor
 {
+	Q_OBJECT
+
 public:
 	IdePropertyEditor(QWidget* parent, DbController* dbController = nullptr);
     virtual ~IdePropertyEditor();
@@ -45,12 +45,14 @@ private:
 	DbController* m_dbController = nullptr;
 };
 
+
 //
 // IdePropertyTable
 //
-
 class IdePropertyTable : public ExtWidgets::PropertyTable
 {
+	Q_OBJECT
+
 public:
 	IdePropertyTable(QWidget* parent, DbController* dbController = nullptr);
 	virtual ~IdePropertyTable();
@@ -65,10 +67,10 @@ private:
 	DbController* m_dbController = nullptr;
 };
 
+
 //
 // DialogFindReplace
 //
-
 class DialogFindReplace : public QDialog
 {
     Q_OBJECT
@@ -111,6 +113,7 @@ private:
 	QAction* m_replaceAllAction = nullptr;
 };
 
+
 class IdeQsciScintilla : public QsciScintilla
 {
 	Q_OBJECT
@@ -131,19 +134,19 @@ private:
 	QMenu m_replaceMenu;
 	QAction* m_replaceSelectedAction = nullptr;
 	QAction* m_replaceAllAction = nullptr;
-
 };
+
 
 //
 // IdeCodeEditor
 //
-
 enum class CodeType
 {
 	JavaScript,
     Xml,
     Unknown
 };
+
 
 class IdeCodeEditor : public ExtWidgets::PropertyTextEditor
 {
@@ -184,7 +187,7 @@ signals:
 	void ctrlTabKeyPressed();
 
 private:
-    bool eventFilter(QObject* obj, QEvent* event);
+	bool eventFilter(QObject* obj, QEvent* event) override;
 
 private slots:
 	void onCustomContextMenuAboutToBeShown();
@@ -210,17 +213,15 @@ private:
 
 	static bool m_findCaseSensitive;
 	static QString m_findText;
-
 };
+
 
 //
 // IdeTuningFiltersEditor
 //
-
 class IdeTuningFiltersEditor : public ExtWidgets::PropertyTextEditor
 {
 public:
-
 	explicit IdeTuningFiltersEditor(DbController* dbController, QWidget* parent);
     virtual ~IdeTuningFiltersEditor();
 
@@ -239,9 +240,6 @@ private:
 	TuningFilterStorage m_filters;
 
 	DbController* m_dbController = nullptr;
-
 };
 
-
-#endif // IDEPROPERTYEDITOR_H
 

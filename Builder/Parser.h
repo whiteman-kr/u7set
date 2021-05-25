@@ -189,7 +189,7 @@ namespace Builder
 	class AppLogicData
 	{
 	public:
-		AppLogicData();
+		explicit AppLogicData(SignalSet* signalSet);
 
 		// Public methods
 		//
@@ -225,6 +225,8 @@ namespace Builder
 	private:
 		std::list<std::shared_ptr<AppLogicModule>> m_modules;
 		std::map<QString, std::shared_ptr<AppLogicModule>> m_ufbs;
+
+		SignalSet* m_signalSet = nullptr;
 	};
 
 
@@ -281,6 +283,7 @@ namespace Builder
 		bool checkSameLabelsAndGuids(const std::vector<std::shared_ptr<SchemaType> >& schemas) const;
 
 		bool checkSameInputsAndOutputs(const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& schemas) const;
+		bool checkParamsReferencesFormat(const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& schemas) const;
 
 		bool checkEquipmentIds(VFrame30::LogicSchema* logicSchema);
 
@@ -292,6 +295,8 @@ namespace Builder
 								  const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs);
 		bool checkForUniqueLoopbackId(VFrame30::Schema* schema);
 		bool checkForUniqueLoopbackId(std::shared_ptr<AppLogicModule> module);
+
+		bool checkForResolvedReferences(std::shared_ptr<AppLogicModule> module);
 
 		bool parsUfbSchema(std::shared_ptr<VFrame30::UfbSchema> ufbSchema);
 		bool parseUfbLayer(std::shared_ptr<VFrame30::UfbSchema> ufbSchema,

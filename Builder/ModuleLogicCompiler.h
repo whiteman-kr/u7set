@@ -3,7 +3,7 @@
 #include "../HardwareLib/DeviceObject.h"
 #include "../HardwareLib/ModuleFirmware.h"
 #include "../HardwareLib/Connection.h"
-#include "../lib/OrderedHash.h"
+#include "../CommonLib/OrderedHash.h"
 #include "../lib/ComparatorSet.h"
 #include "../TuningService/TuningDataStorage.h"
 #include "../lib/ComparatorSet.h"

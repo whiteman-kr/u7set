@@ -27,20 +27,25 @@ namespace VFrame30
 		// Properties
 		//
 	public:
-		QString description() const;
+		[[nodiscard]]QString description() const;
 		void setDescription(QString value);
 
-		int version() const;
+		[[nodiscard]]int version() const;
 
-		QString lmDescriptionFile() const;
+		[[nodiscard]]QString lmDescriptionFile() const;
 		void setLmDescriptionFile(QString value);
+
+		[[nodiscard]] QString specificProperties() const;
+		void setSpecificProperties(QString value);
 
 		// Data
 		//
 	private:
 		QString m_description;
-		mutable int m_version = 1;							// Version is inceremented every save
+		mutable int m_version = 1;								// Version is inceremented every save
 		QString m_lmDescriptionFile = "LogicModule0000.xml";	// LogicModule Description
+
+		QString m_specificPropertiesStruct;						// Description of the UFB's specific properties
 	};
 
 }

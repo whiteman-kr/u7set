@@ -2660,7 +2660,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4150(QString schema, QString schemaItem, QString connectionId, QString equipmentsIds, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 4150, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 4150, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4150,
@@ -2689,7 +2689,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4152(QString schema, QString schemaItem, QString connectionId, QString equipmentsId, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 4152, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 4152, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4152,
@@ -2716,7 +2716,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4153(QString schema, QString schemaItem, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 4153, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 4153, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4153,
@@ -2740,13 +2740,147 @@ namespace Builder
 	///
 	void IssueLogger::errALP4154(QString schema, QString schemaItem, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 4154, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 4154, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4154,
 				  QString(tr("Property ConnectionID for is empty, for Receiver/Transmitter it must not be empty (LogicSchema %1, SchemaItem %2).")
 						.arg(schema)
 						.arg(schemaItem)));
+	}
+
+	/// IssueCode: ALP4200
+	///
+	/// IssueType: Error
+	///
+	/// Title:	Invalid SchemaItem param (%1) reference format ('%2'), expected format '$(obj.var)' or '$(var)', LogicSchema %3, SchemaItem %4.
+	///
+	/// Parameters:
+	///		%1 Inavlid property or param
+	///		%2 Actual reference to variable
+	///		%3 LogicSchemaID
+	///		%4 SchemaItem
+	///
+	/// Description:
+	///		SchemaItem has property or parmeter with refernce to variable and it has invalid format. The valid format for variable is '$(obj.var)' or '$(var)'.
+	///
+	void IssueLogger::errALP4200(QString schema, QString schemaItem, QString varName, QString currentValue, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4200, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4200,
+				  QString(tr("Invalid SchemaItem.(%1) reference format ('%2'), expected format '$(obj.var)' or '$(var)', LogicSchema %3, SchemaItem %4.")
+						.arg(varName)
+						.arg(currentValue)
+						.arg(schema)
+						.arg(schemaItem)));
+	}
+
+	/// IssueCode: ALP4201
+	///
+	/// IssueType: Error
+	///
+	/// Title: Incompatible reference (%1) types in SchemaItemUfb (%2) and SchemaItem in UFB schema, LogicSchema %3.
+	///
+	/// Parameters:
+	///		%1 Property or param
+	///		%2 SchemaItemUfb with incompatible property type
+	///		%3 LogicSchemaID
+	///
+	/// Description:
+	///		SchemaItem in UFB schema has reference to SchmaItemUfb.property, so this reference and SchmaItemUfb.property have incompatibe types.
+	///
+	void IssueLogger::errALP4201(QString schema, QString schemaItemUfb, QString varName, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4201, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4201,
+				  QString(tr("Incompatible reference (%1) types in SchemaItemUfb (%2) and SchemaItem in UFB schema, LogicSchema %3.")
+						.arg(varName)
+						.arg(schemaItemUfb)
+						.arg(schema)));
+	}
+
+	/// IssueCode: ALP4202
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property (%1) is not found in SchemaItemUfb %2, LogicSchema %3.
+	///
+	/// Parameters:
+	///		%1 Property or param
+	///		%2 SchemaItemUfb with missing property
+	///		%3 LogicSchemaID
+	///
+	/// Description:
+	///		SchemaItem in UFB schema has no propert, but some UFB items are referenced to this property.
+	///
+	void IssueLogger::errALP4202(QString schema, QString schemaItemUfb, QString varName, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4202, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4202,
+				  QString(tr("Property (%1) is not found in SchemaItemUfb %2, LogicSchema %3.")
+						.arg(varName)
+						.arg(schemaItemUfb)
+						.arg(schema)));
+	}
+
+	/// IssueCode: ALP4203
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1.%2 is empty, LogicSchema %3.
+	///
+	/// Parameters:
+	///		%1 SchemaItemm
+	///		%2 Property or param name
+	///		%3 LogicSchemaID
+	///
+	/// Description:
+	///		SchemaItem property is empty, this property must have some non empty value.
+	///
+	void IssueLogger::errALP4203(QString schema, QString schemaItem, QString property, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4203, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4203,
+				  QString(tr("Property %1.%2 is empty, LogicSchema %3.")
+						.arg(schemaItem)
+						.arg(property)
+						.arg(schema)));
+	}
+
+	/// IssueCode: ALP4204
+	///
+	/// IssueType: Error
+	///
+	/// Title: Unresolved SchemaItem reference: SchemaItem %1, Property %2 (%3), LogicSchema %4.
+	///
+	/// Parameters:
+	///		%1 SchemaItem
+	///		%2 Property or param name
+	///		%3 Property valie
+	///		%3 LogicSchemaID
+	///
+	/// Description:
+	///		Schema has SchemaItem with unresolved reference.
+	///
+	void IssueLogger::errALP4204(QString schema, QString schemaItem, QString property, QString propertyValue, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4204, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4204,
+				  QString(tr("Unresolved SchemaItem reference: SchemaItem %1, Property %2 (%3), LogicSchema %4.")
+						.arg(schemaItem)
+						.arg(property)
+						.arg(propertyValue)
+						.arg(schema)));
 	}
 
 

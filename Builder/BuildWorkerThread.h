@@ -285,6 +285,9 @@ namespace Builder
 
 		QElapsedTimer m_buildTimer;
 		std::atomic<double> m_totalProgress;	// 0 - 100%
+
+		int m_finalizedErrorCount = 0;
+		int m_finalizedWarningCount = 0;
 	};
 
 }

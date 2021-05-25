@@ -40,6 +40,19 @@ namespace Builder
 		return result;
 	}
 
+	QStringList ConnectionStorage::connectionIds() const
+	{
+		QStringList result;
+
+		for (const std::shared_ptr<Hardware::Connection>& connection : m_objectsVector)
+		{
+			assert(connection);
+			result.push_back(connection->connectionID());
+		}
+
+		return result;
+	}
+
 	QStringList ConnectionStorage::filterByMoudules(const QStringList& modules) const
 	{
 		std::set<QString> chassisConnectios;

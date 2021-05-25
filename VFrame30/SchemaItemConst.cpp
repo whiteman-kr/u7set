@@ -17,9 +17,9 @@ namespace VFrame30
 	{
 		ADD_PROPERTY_GET_SET_CAT(ConstType, PropertyNames::type, PropertyNames::constCategory, true, SchemaItemConst::type, SchemaItemConst::setType);
 
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueInteger, PropertyNames::constCategory, true, SchemaItemConst::intValue, SchemaItemConst::setIntValue);
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::valueFloat, PropertyNames::constCategory, true, SchemaItemConst::floatValue, SchemaItemConst::setFloatValue);
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueDiscrete, PropertyNames::constCategory, true, SchemaItemConst::discreteValue, SchemaItemConst::setDiscreteValue);
+		ADD_PROPERTY_GET_SET_CAT(Afb::AfbParamValue, PropertyNames::valueInteger, PropertyNames::constCategory, true, SchemaItemConst::signedInt32Value, SchemaItemConst::setSignedInt32Value);
+		ADD_PROPERTY_GET_SET_CAT(Afb::AfbParamValue, PropertyNames::valueFloat, PropertyNames::constCategory, true, SchemaItemConst::floatValue, SchemaItemConst::setFloatValue);
+		ADD_PROPERTY_GET_SET_CAT(Afb::AfbParamValue, PropertyNames::valueDiscrete, PropertyNames::constCategory, true, SchemaItemConst::discreteValue, SchemaItemConst::setDiscreteValue);
 
 		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::precision, PropertyNames::constCategory, true, SchemaItemConst::precision, SchemaItemConst::setPrecision);
 		ADD_PROPERTY_GET_SET_CAT(E::AnalogFormat, PropertyNames::analogFormat, PropertyNames::constCategory, true, SchemaItemConst::analogFormat, SchemaItemConst::setAnalogFormat);
@@ -56,10 +56,20 @@ namespace VFrame30
 		Proto::SchemaItemConst* constitem = message->mutable_schemaitem()->mutable_constitem();
 
 		constitem->set_type(m_type);
-		constitem->set_intvalue(m_value.intValue);
-		constitem->set_floatvalue(m_value.floatValue);
-		constitem->set_discretevalue(m_value.discreteValue);
 
+		// --
+		//
+		constitem->set_intvalue(m_value.signedInt32.value().toInt());
+		constitem->set_intref(m_value.signedInt32.reference().toStdString());
+
+		constitem->set_floatvalue(m_value.float32.value().toFloat());
+		constitem->set_floatref(m_value.float32.reference().toStdString());
+
+		constitem->set_discretevalue(m_value.discrete.value().toUInt());
+		constitem->set_discreteref(m_value.discrete.reference().toStdString());
+
+		// --
+		//
 		constitem->set_precision(m_precision);
 		constitem->set_analogformat(static_cast<int32_t>(m_analogFormat));
 
@@ -89,11 +99,21 @@ namespace VFrame30
 
 		setType(static_cast<ConstType>(constitem.type()));		// Value properties created here
 
-		m_value.intValue = constitem.intvalue();
-		m_value.floatValue = constitem.floatvalue();
-		m_value.discreteValue = constitem.discretevalue();
-		m_precision = constitem.precision();
+		// --
+		//
+		m_value.signedInt32.setValue(constitem.intvalue());
+		m_value.signedInt32.setReference(QString::fromStdString(constitem.intref()));
 
+		m_value.float32.setValue(constitem.has_floatvalue_obsolete() ?
+									 static_cast<float>(constitem.floatvalue_obsolete()) :
+									 constitem.floatvalue());
+		m_value.float32.setReference(QString::fromStdString(constitem.floatref()));
+
+		m_value.discrete.setValue(static_cast<quint16>(constitem.discretevalue()));
+		m_value.discrete.setReference(QString::fromStdString(constitem.discreteref()));
+
+		// --
+		//
 		setPrecision(m_precision);			// This function will set Precision for valueFloat property
 		m_analogFormat = static_cast<E::AnalogFormat>(constitem.analogformat());
 
@@ -177,17 +197,34 @@ namespace VFrame30
 		switch (type())
 		{
 		case ConstType::IntegerType:
-			text = QString("SI: %1").arg(QString::number(intValue()));
+			{
+				const Afb::AfbParamValue v = m_value.signedInt32;
+				QString vstr = v.hasReference() ? v.reference() :
+												  QString::number(v.value().toInt());
+
+				text = QString("SI: %1").arg(vstr);
+			}
 			break;
 		case ConstType::FloatType:
-			text = QString("FP: %1")
-			        .arg(static_cast<double>(floatValue()), 0, static_cast<char>(analogFormat()), precision());
+			{
+				const Afb::AfbParamValue v = m_value.float32;
+				QString vstr = v.hasReference() ? v.reference() :
+												  QString::number(static_cast<double>(v.value().toFloat()), static_cast<char>(analogFormat()), precision());
+
+				text = QString("FP: %1").arg(vstr);
+			}
 			break;
 		case ConstType::Discrete:
-			text = QString("%1").arg(discreteValue());
+			{
+				const Afb::AfbParamValue v = m_value.discrete;
+				QString vstr = v.hasReference() ? v.reference() :
+												  QString::number(v.value().toInt());
+
+				text = QString("%1").arg(vstr);
+			}
 			break;
 		default:
-			assert(false);
+			Q_ASSERT(false);
 			break;
 		}
 
@@ -287,33 +324,68 @@ namespace VFrame30
 		return m_type == SchemaItemConst::ConstType::Discrete;
 	}
 
-	int SchemaItemConst::intValue() const
+	const Afb::AfbParamValue& SchemaItemConst::signedInt32Value() const
 	{
-		return m_value.intValue;
+		return m_value.signedInt32;
 	}
 
-	void SchemaItemConst::setIntValue(int intValue)
+	void SchemaItemConst::setSignedInt32Value(const Afb::AfbParamValue& intValue)
 	{
-		m_value.intValue = intValue;
-	}
-	double SchemaItemConst::floatValue() const
-	{
-		return m_value.floatValue;
+		m_value.signedInt32.setValue(intValue.value().toInt());
+		m_value.signedInt32.setReference(intValue.reference());
 	}
 
-	void SchemaItemConst::setFloatValue(double doubleValue)
+	qint32 SchemaItemConst::signedInt32NativeValue() const
 	{
-		m_value.floatValue = doubleValue;
+		return m_value.signedInt32.value().value<qint32>();
 	}
 
-	int SchemaItemConst::discreteValue() const
+	void SchemaItemConst::setSignedInt32NativeValue(qint32 v)
 	{
-		return m_value.discreteValue;
+		m_value.signedInt32.setValue(v);
 	}
 
-	void SchemaItemConst::setDiscreteValue(int discreteValue)
+	const Afb::AfbParamValue& SchemaItemConst::floatValue() const
 	{
-		m_value.discreteValue = qBound(0, discreteValue, 1);
+		return m_value.float32;
+	}
+
+	void SchemaItemConst::setFloatValue(const Afb::AfbParamValue& value)
+	{
+		m_value.float32.setValue(value.value().toFloat());
+		m_value.float32.setReference(value.reference());
+	}
+
+	float SchemaItemConst::floatNativeValue() const
+	{
+		return m_value.float32.value().toFloat();
+	}
+
+	void SchemaItemConst::setFloatNativeValue(float v)
+	{
+		m_value.float32.setValue(v);
+	}
+
+	const Afb::AfbParamValue& SchemaItemConst::discreteValue() const
+	{
+		return m_value.discrete;
+	}
+
+	void SchemaItemConst::setDiscreteValue(const Afb::AfbParamValue& discreteValue)
+	{
+		quint16 v = qBound<quint16>(0, discreteValue.value().value<quint16>(), 1);
+		m_value.discrete.setValue(v);
+		m_value.discrete.setReference(discreteValue.reference());
+	}
+
+	quint16 SchemaItemConst::discreteNativeValue() const
+	{
+		return m_value.discrete.value().value<quint16>();
+	}
+
+	void SchemaItemConst::setDiscreteNativeValue(quint16 v)
+	{
+		m_value.discrete.setValue(qBound<quint16>(0, v, 1));
 	}
 
 	int SchemaItemConst::precision() const

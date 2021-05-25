@@ -57,7 +57,6 @@ HEADERS  += \
     ../lib/SoftwareSettings.h \
     ../lib/DataSource.h \
     ../lib/WidgetUtils.h \
-    ../lib/OrderedHash.h \
     ../lib/Tuning/TuningSourceState.h \
     ../lib/Tuning/TuningSignalState.h \
 	../AppDataService/DynamicAppSignalState.h \

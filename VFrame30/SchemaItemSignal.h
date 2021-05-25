@@ -13,6 +13,22 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		/// \brief Application signal identifiers array. Use <b>AppSignalIDs.length</b> to get number of identifiers
+		Q_PROPERTY(QStringList SignalIDs READ appSignalIdList)
+
+		/// \brief Application signal identifiers array. Use <b>AppSignalIDs.length</b> to get number of identifiers
+		Q_PROPERTY(QStringList AppSignalIDs READ appSignalIdList)
+
+		/// \brief Impact application signal identifiers array. Impact signal is usually related to AppSignalID in some or other way. Use <b>ImpactSignalIDs.length</b> to get number of identifiers
+		Q_PROPERTY(QStringList ImpactSignalIDs READ impactAppSignalIdList)
+
+		/// \brief Impact application signal identifiers array. Impact signal is usually related to AppSignalID in some or other way. Use <b>ImpactAppSignalIDs.length</b> to get number of identifiers
+		Q_PROPERTY(QStringList ImpactAppSignalIDs READ impactAppSignalIdList)
+
+		/// \brief Item column count. To get column data type use function columnData(columnIndex), returns \ref E::ColumnData "ColumnData"
+		///
+		Q_PROPERTY(int ColumnCount READ columnCount)
+
 	protected:
 		SchemaItemSignal(void);
 		SchemaItemSignal(SchemaUnit unit);
@@ -137,7 +153,11 @@ namespace VFrame30
 		double columnWidth(int columnIndex) const;
 		void setColumnWidth(double value, int columnIndex);
 
+	public slots:
+		/// \brief Returns column data type for column specified by <b>columnIndex</b>, returns \ref E::ColumnData "ColumnData"
 		E::ColumnData columnData(int columnIndex) const;
+
+	public:
 		void setColumnData(E::ColumnData value, int columnIndex);
 
 		E::HorzAlign columnHorzAlign(int columnIndex) const;

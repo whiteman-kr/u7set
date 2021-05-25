@@ -2,10 +2,10 @@
 
 #include <fstream>
 #include <memory>
-#include <QtCore/QUuid>
+#include <QUuid>
 #include <QVariant>
-
 #include "../CommonLib/PropertyObject.h"
+#include "../CommonLib/AfbParamValue.h"
 #include "../Proto/serialization.pb.h"
 
 #ifdef Q_OS_WIN
@@ -468,6 +468,11 @@ namespace Proto
 
 	bool loadProperty(const ::Proto::Property& protoProperty, const std::shared_ptr<::Property>& property);
 	bool loadProperty(const ::Proto::Property& protoProperty, ::Property* property);
+
+	// Read/Write AfbParamValue
+	//
+	void Read(const Proto::AfbParamValue& message, Afb::AfbParamValue* dst);
+	void Write(Proto::AfbParamValue* message, const Afb::AfbParamValue& src);
 }
 
 

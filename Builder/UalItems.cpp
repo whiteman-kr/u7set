@@ -358,7 +358,7 @@ namespace Builder
 		//
 		for(Afb::AfbParam& param : afbElement->params())
 		{
-			m_appLogicItem.m_fblItem->toAfbElement()->setAfbParamByOpName(param.opName(), param.value());
+			m_appLogicItem.m_fblItem->toAfbElement()->setAfbParamByOpName(param.opName(), param.afbParamValue());
 		}
 
 		return true;
@@ -610,7 +610,9 @@ namespace Builder
 
 	AppFbParamValue::AppFbParamValue(const Afb::AfbParam& afbParam)
 	{
-		QVariant qv = afbParam.value();
+		Q_ASSERT(afbParam.afbParamValue().reference().isEmpty() == true);
+
+		QVariant qv = afbParam.afbParamValue().value();
 
 		m_opName = afbParam.opName();
 		m_caption = afbParam.caption();
@@ -1159,11 +1161,25 @@ namespace Builder
 		appendRefSignal(autoSignal, false);
 
 		// set Const signal fields
-
+		//
 		m_isConst = true;
-		m_constDiscreteValue = ualConst->discreteValue();
-		m_constIntValue = ualConst->intValue();
-		m_constFloatValue = ualConst->floatValue();
+
+		if (ualConst->discreteValue().hasReference() == true ||
+			ualConst->signedInt32Value().hasReference() == true ||
+			ualConst->floatValue().hasReference() == true)
+		{
+			// All references must be resolved before this step
+			//
+			Q_ASSERT(ualConst->discreteValue().hasReference() == false);
+			Q_ASSERT(ualConst->signedInt32Value().hasReference() == false);
+			Q_ASSERT(ualConst->floatValue().hasReference() == false);
+
+			return false;
+		}
+
+		m_constDiscreteValue = ualConst->discreteNativeValue();
+		m_constIntValue = ualConst->signedInt32NativeValue();
+		m_constFloatValue = ualConst->floatNativeValue();
 
 		setComputed();
 

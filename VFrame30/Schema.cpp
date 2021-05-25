@@ -655,11 +655,11 @@ namespace VFrame30
 
 		for (std::shared_ptr<SchemaLayer> l : Layers)
 		{
-			for (std::shared_ptr<SchemaItem> si : l->Items)
+			for (std::shared_ptr<SchemaItem>& si : l->Items)
 			{
 				std::shared_ptr<VFrame30::SchemaItemAfb> schemaAfbItem = std::dynamic_pointer_cast<VFrame30::SchemaItemAfb>(si);
 
-				if (schemaAfbItem != nullptr)
+				if (schemaAfbItem != nullptr && schemaAfbItem->isCommented() == false)
 				{
 					schemaAfbItems.push_back(schemaAfbItem);
 				}
@@ -720,7 +720,7 @@ namespace VFrame30
 			{
 				std::shared_ptr<VFrame30::SchemaItemUfb> schemaUfbItem = std::dynamic_pointer_cast<VFrame30::SchemaItemUfb>(si);
 
-				if (schemaUfbItem != nullptr)
+				if (schemaUfbItem != nullptr  && schemaUfbItem->isCommented() == false)
 				{
 					schemaUfbItems.push_back(schemaUfbItem);
 				}
@@ -777,11 +777,11 @@ namespace VFrame30
 
 		for (std::shared_ptr<SchemaLayer> l : Layers)
 		{
-			for (std::shared_ptr<SchemaItem> si : l->Items)
+			for (std::shared_ptr<SchemaItem>& si : l->Items)
 			{
 				std::shared_ptr<VFrame30::SchemaItemBus> schemaItemBus = std::dynamic_pointer_cast<VFrame30::SchemaItemBus>(si);
 
-				if (schemaItemBus != nullptr)
+				if (schemaItemBus != nullptr && schemaItemBus->isCommented() == false)
 				{
 					schemaItemBusses.push_back(schemaItemBus);
 				}

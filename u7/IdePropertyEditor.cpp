@@ -7,8 +7,7 @@
 //
 // IdePropertyEditorHelper
 //
-
-ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, DbController* dbController, QWidget* parent)
+ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QString defaultSpecPropCategory, DbController* dbController, QWidget* parent)
 {
 	if (propertyPtr == nullptr || parent == nullptr)
 	{
@@ -35,8 +34,8 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEdito
 	{
 		// This is Specific Properties
 		//
-
 		SpecificPropertiesEditor* editor = new SpecificPropertiesEditor(parent);
+		editor->setDefaultCategory(defaultSpecPropCategory);
 		return editor;
 	}
 
@@ -44,7 +43,6 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEdito
 	{
 		// This is SVG
 		//
-
 		SvgEditor* editor = new SvgEditor(parent);
 		return editor;
 	}
@@ -119,7 +117,6 @@ bool IdePropertyEditorHelper::storePropertyTextEditorSize(std::shared_ptr<Proper
 //
 // IdePropertyEditor
 //
-
 IdePropertyEditor::IdePropertyEditor(QWidget* parent, DbController* dbController /*= nullptr*/) :
 	PropertyEditor(parent),
 	m_dbController(dbController)
@@ -139,7 +136,8 @@ ExtWidgets::PropertyEditor* IdePropertyEditor::createChildPropertyEditor(QWidget
 
 ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
 {
-	return IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, m_dbController, parent);
+	auto editor = IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, m_defaultSpecificPropertyCategory, m_dbController, parent);
+	return editor;
 }
 
 bool IdePropertyEditor::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)
@@ -156,12 +154,11 @@ bool IdePropertyEditor::storePropertyTextEditorSize(std::shared_ptr<Property> pr
 //
 // IdePropertyTable
 //
-
 IdePropertyTable::IdePropertyTable(QWidget* parent, DbController* dbController):
 	PropertyTable(parent),
 	m_dbController(dbController)
 {
-	QString docPath = QApplication::applicationDirPath()+"/scripthelp/index.html";
+	QString docPath = QApplication::applicationDirPath() + "/scripthelp/index.html";
 	setScriptHelpFile(docPath);
 }
 
@@ -177,7 +174,8 @@ ExtWidgets::PropertyEditor* IdePropertyTable::createChildPropertyEditor(QWidget*
 
 ExtWidgets::PropertyTextEditor* IdePropertyTable::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
 {
-	return IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, m_dbController, parent);
+	auto editor = IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, m_defaultSpecificPropertyCategory, m_dbController, parent);
+	return editor;
 }
 
 bool IdePropertyTable::restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog)

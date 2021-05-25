@@ -152,7 +152,7 @@ namespace SimOverrideUI
 						m_floatEdit->setAlignment(Qt::AlignRight);
 						m_floatEdit->setText(signal.valueString(m_currentBase, m_analogFormat, m_precision));
 
-						m_floatEditValidator = new QDoubleValidatorEx{this};
+						m_floatEditValidator = new QDoubleValidatorEx{false, this};
 						m_floatEditValidator->setDecimals(m_precision);
 
 						m_floatEdit->setValidator(m_floatEditValidator);

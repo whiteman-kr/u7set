@@ -642,7 +642,11 @@ void SimWidget::closeBuild()
 void SimWidget::refreshBuild()
 {
 	m_simulator->control().stop();
-	m_outputWidget->clear();
+
+	if (m_outputWidget != nullptr)	// Detached window does not have OutputWidget
+	{
+		m_outputWidget->clear();
+	}
 
 	QString buildPath = m_simulator->buildPath();
 	if (buildPath.isEmpty() == true)

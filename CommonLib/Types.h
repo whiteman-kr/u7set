@@ -153,19 +153,22 @@ public:
 	};
 	Q_ENUM(SignalSource)
 
+
 	// Column Data
 	//
+	/** \brief This enum defines data type to display in columns of SchemaItemSignal (In/Out/InOut).
+	 */
 	enum class ColumnData
 	{
-		AppSignalID = 0,
-		CustomSignalID = 1,
-		Caption = 2,
-		State = 3,
-		ImpactAppSignalID = 32,
-		ImpactCustomSignalID = 33,
-		ImpactCaption = 34,
-		ImpactState = 35,
-		CustomText = 64				// Add new
+		AppSignalID = 0,			/**< AppSignalID = 0*/
+		CustomSignalID = 1,			/**< CustomSignalID = 1*/
+		Caption = 2,				/**< Caption = 2*/
+		State = 3,					/**< State = 3*/
+		ImpactAppSignalID = 32,		/**< ImpactAppSignalID = 32*/
+		ImpactCustomSignalID = 33,	/**< ImpactCustomSignalID = 33*/
+		ImpactCaption = 34,			/**< ImpactCaption = 34*/
+		ImpactState = 35,			/**< ImpactState = 35*/
+		CustomText = 64				/**< CustomText = 64*/
 	};
 	Q_ENUM(ColumnData)
 

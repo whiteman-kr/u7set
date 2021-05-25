@@ -3,13 +3,17 @@
 
 ChooseUfbDialog::ChooseUfbDialog(const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	ui(new Ui::ChooseUfbDialog)
+	ui(new Ui::ChooseUfbDialog),
+	m_ufbs(ufbs)
 {
 	ui->setupUi(this);
 
-	m_ufbs = ufbs;
+	QStringList headers;
+	headers.push_back(tr("Caption"));
+	headers.push_back(tr("ID"));
 
-	ui->ufbElements->setHeaderLabel(tr("Caption"));
+	ui->ufbElements->setHeaderLabels(headers);
+
 	ui->ufbElements->setSortingEnabled(true);
 	ui->ufbElements->sortItems(0, Qt::AscendingOrder);
 
@@ -18,12 +22,12 @@ ChooseUfbDialog::ChooseUfbDialog(const std::vector<std::shared_ptr<VFrame30::Ufb
 
 	ui->ok->setEnabled(false);
 
-	connect (ui->quickSearch, &QLineEdit::textChanged, this, &ChooseUfbDialog::fillTree);
-	connect (ui->ufbElements, &QTreeWidget::itemSelectionChanged, this, &ChooseUfbDialog::itemSelectionChanged);
+	connect(ui->quickSearch, &QLineEdit::textChanged, this, &ChooseUfbDialog::fillTree);
+	connect(ui->ufbElements, &QTreeWidget::itemSelectionChanged, this, &ChooseUfbDialog::itemSelectionChanged);
 
-	connect (ui->ok, &QPushButton::clicked, this, &ChooseUfbDialog::accept);
-	connect (ui->cancel, &QPushButton::clicked, this, &ChooseUfbDialog::reject);
-	connect (ui->ufbElements, &QTreeWidget::doubleClicked, this, &ChooseUfbDialog::itemDoubleClicked);
+	connect(ui->ok, &QPushButton::clicked, this, &ChooseUfbDialog::accept);
+	connect(ui->cancel, &QPushButton::clicked, this, &ChooseUfbDialog::reject);
+	connect(ui->ufbElements, &QTreeWidget::doubleClicked, this, &ChooseUfbDialog::itemDoubleClicked);
 
 	fillTree();
 
@@ -32,19 +36,40 @@ ChooseUfbDialog::ChooseUfbDialog(const std::vector<std::shared_ptr<VFrame30::Ufb
 
 ChooseUfbDialog::~ChooseUfbDialog()
 {
+	QSettings{}.setValue("ChooseUfbDialog/Geometry", this->saveGeometry());
+	QSettings{}.setValue("ChooseUfbDialog/TreeState", this->ui->ufbElements->header()->saveState());
+
 	delete ui;
 }
 
 void ChooseUfbDialog::showEvent(QShowEvent*)
 {
-	// Resize depends on monitor size, DPI, resolution
-	//
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	if (QByteArray geometry = QSettings{}.value("ChooseUfbDialog/Geometry").toByteArray();
+		geometry.isNull() == false)
+	{
+		this->restoreGeometry(geometry);
+	}
+	else
+	{
+		// Resize depends on monitor size, DPI, resolution
+		//
+		QRect screen = QDesktopWidget().availableGeometry(parentWidget());
 
-	resize(static_cast<int>(screen.width() * 0.35),
-		   static_cast<int>(screen.height() * 0.40));
+		resize(static_cast<int>(screen.width() * 0.35),
+			   static_cast<int>(screen.height() * 0.40));
 
-	move(screen.center() - rect().center());
+		move(screen.center() - rect().center());
+	}
+
+	if (QByteArray treeState = QSettings{}.value("ChooseUfbDialog/TreeState").toByteArray();
+		treeState.isNull() == false)
+	{
+		this->ui->ufbElements->header()->restoreState(treeState);
+	}
+	else
+	{
+		this->ui->ufbElements->header()->adjustSize();
+	}
 
 	return;
 }
@@ -54,37 +79,29 @@ void ChooseUfbDialog::fillTree()
 	ui->ok->setEnabled(false);
 	ui->caption->clear();
 	ui->description->clear();
+	ui->ufbElements->clear();
 
 	QString searchMask = ui->quickSearch->text();
 
 	QList<QTreeWidgetItem*> items;
-
-	ui->ufbElements->clear();
-	QTreeWidgetItem* allSection = new QTreeWidgetItem(QStringList(QString("All")));
-
-	ui->ufbElements->insertTopLevelItem(0, allSection);
-
-	if (searchMask.isEmpty() == true)
+	for (std::shared_ptr<VFrame30::UfbSchema>& ufb : m_ufbs)
 	{
-		for (std::shared_ptr<VFrame30::UfbSchema> ufb : m_ufbs)
+		bool add = (searchMask.isEmpty() == true) || (searchMask.isEmpty() == false && ufb->caption().contains(searchMask, Qt::CaseInsensitive) == true);
+		if (add == false)
 		{
-			items.append(new QTreeWidgetItem(allSection, QStringList(ufb->caption())));
+			continue;
 		}
-	}
-	else
-	{
-		for (std::shared_ptr<VFrame30::UfbSchema> ufb : m_ufbs)
-		{
-			bool found = ufb->caption().contains(searchMask, Qt::CaseInsensitive);
 
-			if (found == true)
-			{
-				items.append(new QTreeWidgetItem(allSection, QStringList(ufb->caption())));
-			}
-		}
+		QStringList sl;
+		sl.push_back(ufb->caption());
+		sl.push_back(ufb->schemaId());
+
+		items.append(new QTreeWidgetItem(sl));
 	}
 
-	ui->ufbElements->expandAll();
+	ui->ufbElements->insertTopLevelItems(0, items);
+
+	return;
 }
 
 void ChooseUfbDialog::itemSelectionChanged()
@@ -104,7 +121,7 @@ void ChooseUfbDialog::itemSelectionChanged()
 			if (ufb->caption() == item->text(0))
 			{
 				// UFB was found
-
+				//
 				m_selectedUfb = ufb;
 
 				ui->caption->setText(ufb->caption());
@@ -129,13 +146,11 @@ void ChooseUfbDialog::itemSelectionChanged()
 
 void ChooseUfbDialog::itemDoubleClicked(QModelIndex index)
 {
-	QString itemName = index.sibling(index.row(), 0).data(Qt::DisplayRole).toString();
+	QString itemId = index.sibling(index.row(), 1).data(Qt::DisplayRole).toString();
 
-	qDebug() << itemName;
-
-	for (std::shared_ptr<VFrame30::UfbSchema> ufb : m_ufbs)
+	for (std::shared_ptr<VFrame30::UfbSchema>& ufb : m_ufbs)
 	{
-		if (ufb->caption() == itemName)
+		if (ufb->schemaId() == itemId)
 		{
 			m_selectedUfb = ufb;
 
@@ -144,8 +159,12 @@ void ChooseUfbDialog::itemDoubleClicked(QModelIndex index)
 			ui->ok->setEnabled(true);
 
 			accept();
+
+			break;
 		}
 	}
+
+	return;
 }
 
 std::shared_ptr<VFrame30::UfbSchema> ChooseUfbDialog::result()

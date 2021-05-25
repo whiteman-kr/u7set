@@ -4571,6 +4571,7 @@ void SchemaControlTabPageEx::showFileProperties()
 
 	IdePropertyEditor* propertyEditor = new IdePropertyEditor(this, dbc());
 	propertyEditor->setReadOnly(readOnly);
+	propertyEditor->setDefaultSpecificPropertyCategory(tr("Params"));
 
 	std::vector<std::shared_ptr<PropertyObject>> propertyObjects;
 	propertyObjects.reserve(schemas.size());

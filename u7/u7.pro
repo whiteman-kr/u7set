@@ -78,7 +78,6 @@ HEADERS  += \
     ../lib/Ui/TabWidgetEx.h \
     ../lib/Ui/TagSelectorWidget.h \
 	../lib/Ui/DialogProgress.h \
-	../lib/OrderedHash.h \
 	../lib/PropertyEditor.h \
 	../lib/PropertyEditorDialog.h \
 	../lib/diff_match_patch.h \

@@ -2,7 +2,7 @@
 #define DATAAQUISITIONSERVICEWIDGET_H
 
 #include <QAbstractTableModel>
-#include "../lib/OrderedHash.h"
+#include "../CommonLib/OrderedHash.h"
 #include "../AppDataService/AppDataSource.h"
 #include "../OnlineLib/Tcp.h"
 #include "BaseServiceStateWidget.h"
