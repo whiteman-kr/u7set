@@ -263,13 +263,13 @@ function test_UAL_CONN_4_1_04(sim)
 		
 		sim.startForMs(10);
 		
-		assert(sim.signalValue("#LM1_DS01") === 1);
+		assert(sim.signalValue("#LM2_DS01") === 1);
 	
 		sim.overrideSignalValue("#LM1_DS01", 0);
 		
 		sim.startForMs(10);
 		
-		assert(sim.signalValue("#LM1_DS01") === 0);
+		assert(sim.signalValue("#LM2_DS01") === 0);
 		
 	}
 	
@@ -455,6 +455,27 @@ function test_UAL_CONN_4_1_10(sim)
 	assert(conn02_port2.txDataSizeW == conn02_port2.manualTxWordsQuantity);
 	assert(conn02_port2.txDataSizeW == conn02_port1.rxDataSizeW);
 	assert(conn02_port1.rxDataSizeW == conn02_port1.manualRxWordsQuantity);
+}
+
+function test_UAL_CONN_4_1_11(sim)
+{
+	let validitySignal = sim.signalParamExt("#SYSTEMID_RACK01_FSCC02_MD14_PI_OPTOPORT04VALID");
+	assert(validitySignal != null);
+	
+	let optoSignal = sim.signalParamExt("#LM2_LM1_TEMP");
+	assert(optoSignal != null);
+	assert(validitySignal.regValueAddr === optoSignal.regValidityAddr);
+	
+	// Signal #LM2_LM1_TEMP4 is NOT  acquired
+	
+	optoSignal = sim.signalParamExt("#LM2_LM1_TEMP4");
+	assert(optoSignal != null);
+	assert(optoSignal.regValueAddr.isValid === false);
+	assert(optoSignal.regValidityAddr.isValid === false);
+
+	optoSignal = sim.signalParamExt("#LM2_DS01");
+	assert(optoSignal != null);
+	assert(validitySignal.regValueAddr === optoSignal.regValidityAddr);
 }
 
 // ---------------------------------------------------------------------------------------------------------
