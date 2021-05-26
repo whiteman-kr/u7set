@@ -372,6 +372,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0350.sql", "Upgrade to version 350, Added module LM1-SR10"},
 	{":/DatabaseUpgrade/Upgrade0351.sql", "Upgrade to version 351, LM1-SR10 has been changed to LM8-SR10"},
 	{":/DatabaseUpgrade/Upgrade0352.sql", "Upgrade to version 352, In LM descriptions Size 4 and 5 had been changed to 16"},
+	{":/DatabaseUpgrade/Upgrade0353.sql", "Upgrade to version 353, FIM preset has been added"},
 };
 
 int DbWorker::counter = 0;
