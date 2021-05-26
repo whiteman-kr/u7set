@@ -1681,86 +1681,98 @@ namespace Builder
 
 			QString validitySignalEquipmentID = optoPort->validitySignalEquipmentID();
 
-			if (m_equipmentSignals.contains(validitySignalEquipmentID))
+			AppSignal* validitySignal = m_equipmentSignals.value(validitySignalEquipmentID, nullptr);
+
+			if (validitySignal == nullptr)
 			{
-				continue;			// it is Ok, opto validity signal is already in AppSignalSet
-			}
-
-			QString optoPortID = optoPort->equipmentID();
-
-			const std::shared_ptr<Hardware::DeviceObject> deviceShared = m_equipmentSet->deviceObject(validitySignalEquipmentID);
-
-			if (deviceShared == nullptr)
-			{
-				// Device Object %1 not found.
+				// validity signal is not exists, create corresponding AppSignal
 				//
-				m_log->errEQP6010(validitySignalEquipmentID);
-				result = false;
-				continue;
-			}
+				QString optoPortID = optoPort->equipmentID();
 
-			const Hardware::DeviceAppSignal* deviceAppSignal = dynamic_cast<const Hardware::DeviceAppSignal*>(deviceShared.get());
+				const std::shared_ptr<Hardware::DeviceObject> deviceShared = m_equipmentSet->deviceObject(validitySignalEquipmentID);
 
-			if (deviceAppSignal == nullptr)
-			{
-				LOG_INTERNAL_ERROR_MSG(m_log, QString("Device object %1 is not a DeviceAppSignal type").
-										arg(validitySignalEquipmentID));
-				result = false;
-				continue;
-			}
-
-			AppSignal* validitySignal = new AppSignal;
-
-			QString errStr = DbWorker::initAppSignalFromDeviceAppSignal(*deviceAppSignal, validitySignal);
-
-			if (errStr.isEmpty() == false)
-			{
-				delete validitySignal;		// !!!
-				LOG_INTERNAL_ERROR_MSG(m_log, errStr);
-				result = false;
-				continue;
-			}
-
-			// Opto validity signal IDs reserv templates to avoid coincidence with exists signals
-			//
-			static const QStringList reservAppSignalIDTemplates(
-						{QString("#%1_VALID"),
-						 QString("#%1_VALIDITY")});
-
-			int templateNo = 0;
-			bool canCreate = false;
-
-			do
-			{
-				const AppSignal* existSignal = m_signals->getSignal(validitySignal->appSignalID());
-
-				if (existSignal == nullptr)
+				if (deviceShared == nullptr)
 				{
-					canCreate = true;
-					break;
+					// Device Object %1 not found.
+					//
+					m_log->errEQP6010(validitySignalEquipmentID);
+					result = false;
+					continue;
 				}
 
-				validitySignal->setAppSignalID(reservAppSignalIDTemplates[templateNo].arg(optoPortID));
+				const Hardware::DeviceAppSignal* deviceAppSignal = dynamic_cast<const Hardware::DeviceAppSignal*>(deviceShared.get());
 
-				templateNo++;
+				if (deviceAppSignal == nullptr)
+				{
+					LOG_INTERNAL_ERROR_MSG(m_log, QString("Device object %1 is not a DeviceAppSignal type").
+											arg(validitySignalEquipmentID));
+					result = false;
+					continue;
+				}
+
+				validitySignal = new AppSignal;
+
+				QString errStr = DbWorker::initAppSignalFromDeviceAppSignal(*deviceAppSignal, validitySignal);
+
+				if (errStr.isEmpty() == false)
+				{
+					delete validitySignal;		// !!!
+					validitySignal = nullptr;
+					LOG_INTERNAL_ERROR_MSG(m_log, errStr);
+					result = false;
+					continue;
+				}
+
+				// Opto validity signal IDs reserv templates to avoid coincidence with exists signals
+				//
+				static const QStringList reservAppSignalIDTemplates(
+							{QString("#%1_VALID"),
+							 QString("#%1_VALIDITY")});
+
+				int templateNo = 0;
+				bool canCreate = false;
+
+				do
+				{
+					const AppSignal* existSignal = m_signals->getSignal(validitySignal->appSignalID());
+
+					if (existSignal == nullptr)
+					{
+						canCreate = true;
+						break;
+					}
+
+					validitySignal->setAppSignalID(reservAppSignalIDTemplates[templateNo].arg(optoPortID));
+
+					templateNo++;
+				}
+				while(templateNo < reservAppSignalIDTemplates.count());
+
+				if (canCreate == false)
+				{
+					delete validitySignal;		// !!!
+					validitySignal = nullptr;
+
+					LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't auto create opto validity signal for port %1").
+													arg(optoPortID));
+					result = false;
+				}
+				else
+				{
+					m_signals->append(validitySignal, m_lmShared);
+					m_signals->updateID2IndexInMap(validitySignal);
+					m_chassisSignals.insert({validitySignal->appSignalID(), validitySignal});
+					m_ioSignals.insert(validitySignal->appSignalID(), validitySignal);
+					m_equipmentSignals.insert(validitySignalEquipmentID, validitySignal);
+				}
 			}
-			while(templateNo < reservAppSignalIDTemplates.count());
 
-			if (canCreate == false)
+			if (validitySignal == nullptr)
 			{
-				delete validitySignal;		// !!!
-
-				LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't auto create opto validity signal for port %1").
-												arg(optoPortID));
-				result = false;
 				continue;
 			}
 
 			validitySignal->setAcquire(true);
-
-			m_signals->append(validitySignal, m_lmShared);
-
-			m_signals->updateID2IndexInMap(validitySignal);
 
 			UalSignal* validtyUalSignal = m_ualSignals.createSignal(validitySignal);
 
@@ -1769,9 +1781,6 @@ namespace Builder
 				result = false;
 			}
 
-			m_chassisSignals.insert({validitySignal->appSignalID(), validitySignal});
-			m_ioSignals.insert(validitySignal->appSignalID(), validitySignal);
-			m_equipmentSignals.insert(validitySignalEquipmentID, validitySignal);
 			m_optoPortValiditySignal.insert({optoPort->equipmentID(), validtyUalSignal});
 		}
 
@@ -2898,7 +2907,7 @@ namespace Builder
 
 			if (it == m_optoPortValiditySignal.end())
 			{
-				LOG_INTERNAL_ERROR(m_log);			// validity signal should be exists
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("OptoPort %1 validity signal should be exists").arg(optoPort->equipmentID()));
 				result = false;
 				continue;
 			}
