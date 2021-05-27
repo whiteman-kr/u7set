@@ -143,6 +143,7 @@ HEADERS  += \
 	ConfigSocket.h \
 	RackBase.h \
 	MeasureBase.h \
+    Visa/visa.h
 
 
 CONFIG += precompile_header
@@ -208,10 +209,7 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
 # Interface for calibrator Rigol DG1062Z
 #
-win32 {
-    INCLUDEPATH += ../lib/visa
-	LIBS += ../lib/visa/visa64.lib
-}
+win32:LIBS += ../../u7set/Metrology/Visa/visa64.lib
 
 # Visual Leak Detector
 #

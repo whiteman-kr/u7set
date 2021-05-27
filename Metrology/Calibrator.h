@@ -6,7 +6,7 @@
 #include <QtSerialPort/QSerialPort>
 #include <QStringList>
 
-#include "../lib/visa/visa.h" // Interface for calibrator Rigol DG1062Z
+#include "Visa/visa.h" // Interface for calibrator Rigol DG1062Z
 
 // ==============================================================================================
 
