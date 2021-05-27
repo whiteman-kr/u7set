@@ -206,6 +206,13 @@ LIBS += -lCommonLib
 win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
+# Interface for calibrator Rigol DG1062Z
+#
+win32 {
+    INCLUDEPATH += ../lib/visa
+	LIBS += ../lib/visa/visa64.lib
+}
+
 # Visual Leak Detector
 #
 win32 {
