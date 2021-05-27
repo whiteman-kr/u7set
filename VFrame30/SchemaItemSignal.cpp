@@ -154,6 +154,27 @@ namespace VFrame30
 
 	void SchemaItemSignal::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
+//		///!!!!!!!!!!!!!!!!!!!!!!!!!
+
+//		qDebug() << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
+//		int hhh = cellRowCount();
+//		int www = cellColumnCount();
+
+//		for (int y = 0; y < hhh; y++)
+//		{
+//			QString s, d;
+//			for (int x = 0; x < www; x++)
+//			{
+//				s += tr("| %1 ").arg(cellAppSignalID(y, x), 16);
+//				d += tr("| %1 ").arg(E::valueToString<E::ColumnData>(cellData(y, x)), 16);
+//			}
+//			qDebug() << s;
+//			qDebug() << d;
+//			qDebug() << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ";
+//		}
+
+//		///!!!!!!!!!!!!!!!!!!!!!!!!!
+
 		if (multiChannel() == true)
 		{
 			// Set pin captions
@@ -1540,6 +1561,230 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		}
 
 		return false;
+	}
+
+	int SchemaItemSignal::cellRowCount() const
+	{
+		if (multiChannel() == true)
+		{
+			if (multiLine() == true)
+			{
+				return m_appSignalIds.size();
+			}
+			else
+			{
+				return 1;
+			}
+		}
+		else
+		{
+			return 1;
+		}
+	}
+
+	int SchemaItemSignal::cellColumnCount() const
+	{
+		if (multiLine() == true)
+		{
+			return columnCount();
+		}
+		else
+		{
+			int result = 0;
+			for (const Column& c : m_columns)
+			{
+				switch (c.data)
+				{
+				case E::ColumnData::State:
+					result += m_appSignalIds.size();
+					break;
+				case E::ColumnData::ImpactState:
+					result += m_impactAppSignalIds.size();
+					break;
+				default:
+					result++;
+				}
+			}
+
+			return result;
+		}
+	}
+
+	E::ColumnData SchemaItemSignal::cellData(int row, int column) const
+	{
+		if (row < 0 || column < 0)
+		{
+			return E::ColumnData::CustomText/*empty*/;
+		}
+
+		if (multiLine() == true)
+		{
+			if (static_cast<size_t>(column) >= m_columns.size())
+			{
+				return E::ColumnData::CustomText/*empty*/;
+			}
+
+			return m_columns[column].data;
+		}
+		else
+		{
+			// single line
+			//
+			int x = -1;
+
+			for (const Column& c : m_columns)
+			{
+				switch (c.data)
+				{
+				case E::ColumnData::State:
+					for (int i = 0; i < m_appSignalIds.size(); i++)
+					{
+						x ++;
+						if (x == column)
+						{
+							return c.data;
+						}
+					}
+					break;
+				case E::ColumnData::ImpactState:
+					for (int i = 0; i < m_impactAppSignalIds.size(); i++)
+					{
+						x ++;
+						if (x == column)
+						{
+							return c.data;
+						}
+					}
+					break;
+				default:
+					x++;
+				}
+
+				if (x == column)
+				{
+					return c.data;
+				}
+			}
+
+			return {};
+		}
+	}
+
+	QString SchemaItemSignal::cellAppSignalID(int row, int column) const
+	{
+		if (row < 0 || column < 0)
+		{
+			return {};
+		}
+
+		if (multiLine() == true)
+		{
+			if (static_cast<size_t>(column) >= m_columns.size())
+			{
+				return {};
+			}
+
+			switch (m_columns[column].data)
+			{
+			case E::ColumnData::AppSignalID:
+			case E::ColumnData::CustomSignalID:
+			case E::ColumnData::Caption:
+			case E::ColumnData::State:
+				return (row < m_appSignalIds.size()) == true ?
+							m_appSignalIds[row] :
+							QString{};
+
+			case E::ColumnData::ImpactAppSignalID:
+			case E::ColumnData::ImpactCustomSignalID:
+			case E::ColumnData::ImpactCaption:
+			case E::ColumnData::ImpactState:
+				return (row < m_impactAppSignalIds.size()) == true ?
+							m_impactAppSignalIds[row] :
+							QString{};
+
+			case E::ColumnData::CustomText:
+				return QString{};
+			}
+
+			Q_ASSERT(false);
+
+			return {};
+		}
+		else
+		{
+			auto foundFunc = [this](const Column& c, int indexInColumn) -> QString
+				{
+					switch (c.data)
+					{
+					case E::ColumnData::AppSignalID:
+					case E::ColumnData::CustomSignalID:
+					case E::ColumnData::Caption:
+						return m_appSignalIds.empty() == true ?
+									QString{} :
+									m_appSignalIds.front();
+
+					case E::ColumnData::State:
+						return indexInColumn < m_appSignalIds.size() ?
+									m_appSignalIds[indexInColumn] :
+									QString{};
+
+					case E::ColumnData::ImpactAppSignalID:
+					case E::ColumnData::ImpactCustomSignalID:
+					case E::ColumnData::ImpactCaption:
+						return m_impactAppSignalIds.empty() == true ?
+									QString{} :
+									m_impactAppSignalIds.front();
+
+					case E::ColumnData::ImpactState:
+						return indexInColumn < m_impactAppSignalIds.size() ?
+									m_impactAppSignalIds[indexInColumn] :
+									QString{};
+
+					case E::ColumnData::CustomText:
+						return QString{};
+					}
+
+					Q_ASSERT(false);
+					return QString{};
+				};
+
+			int x = -1;
+			for (const Column& c : m_columns)
+			{
+				switch (c.data)
+				{
+				case E::ColumnData::State:
+					for (int i = 0; i < m_appSignalIds.size(); i++)
+					{
+						x ++;
+						if (x == column)
+						{
+							return foundFunc(c, i);
+						}
+					}
+					break;
+				case E::ColumnData::ImpactState:
+					for (int i = 0; i < m_impactAppSignalIds.size(); i++)
+					{
+						x ++;
+						if (x == column)
+						{
+							return foundFunc(c, i);
+						}
+					}
+					break;
+				default:
+					x++;
+				}
+
+				if (x == column)
+				{
+					return foundFunc(c, 0);
+				}
+			}
+
+			return {};
+		}
 	}
 
 	QString SchemaItemSignal::cellText(int row, int column) const

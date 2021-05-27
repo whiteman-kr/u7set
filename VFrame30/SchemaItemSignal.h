@@ -13,26 +13,50 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-		/// \brief Application signal identifiers array. Use <b>appSignalIDs.length</b> to get number of identifiers
+		/// \brief Application signal identifiers array. Use <b>appSignalIDs.length</b> to get number of identifiers.
 		Q_PROPERTY(QStringList signalIDs READ appSignalIdList)
 		Q_PROPERTY(QStringList SignalIDs READ appSignalIdList)
 
-		/// \brief Application signal identifiers array. Use <b>appSignalIDs.length</b> to get number of identifiers
+		/// \brief Application signal identifiers array. Use <b>appSignalIDs.length</b> to get number of identifiers.
 		Q_PROPERTY(QStringList appSignalIDs READ appSignalIdList)
 		Q_PROPERTY(QStringList AppSignalIDs READ appSignalIdList)
 
-		/// \brief Impact application signal identifiers array. Impact signal is usually related to AppSignalID in some or other way. Use <b>impactSignalIDs.length</b> to get number of identifiers
+		/// \brief Impact application signal identifiers array. Impact signal is usually related to AppSignalID in some or other way. Use <b>impactSignalIDs.length</b> to get number of identifiers.
 		Q_PROPERTY(QStringList impactSignalIDs READ impactAppSignalIdList)
 		Q_PROPERTY(QStringList ImpactSignalIDs READ impactAppSignalIdList)
 
-		/// \brief Impact application signal identifiers array. Impact signal is usually related to AppSignalID in some or other way. Use <b>impactAppSignalIDs.length</b> to get number of identifiers
+		/// \brief Impact application signal identifiers array. Impact signal is usually related to AppSignalID in some or other way. Use <b>impactAppSignalIDs.length</b> to get number of identifiers.
 		Q_PROPERTY(QStringList impactAppSignalIDs READ impactAppSignalIdList)
 		Q_PROPERTY(QStringList ImpactAppSignalIDs READ impactAppSignalIdList)
 
-		/// \brief Item column count. To get column data type use function columnData(columnIndex), returns \ref E::ColumnData "ColumnData"
+		/// \brief Text to print if column data type is set to \ref E::ColumnData::CustomText "CustomText"
+		Q_PROPERTY(QString customText READ customText WRITE setCustomText)
+
+		/// \brief If <b>true</b> each signal has own row, if <b>false</b> only one row is drawn and state is displayed as multiple cells.
+		Q_PROPERTY(QString multiline READ multiline)
+
+		/// \brief Precision for floating point numbers.
+		Q_PROPERTY(QString precision READ precision WRITE setPrecision)
+
+		/// \brief Way to display numbers.
+		Q_PROPERTY(E::AnalogFormat analogFormat READ analogFormat WRITE setAnalogFormat)
+
+		/// \brief Item column count. To get column data type use function \ref columnData.
 		///
 		Q_PROPERTY(int columnCount READ columnCount)
 		Q_PROPERTY(int ColumnCount READ columnCount)
+
+		/** \brief Cell column count. May differ from <b>columnCount</b> as column can have several cells.
+		To get cell data type use function \ref cellData, returns \ref E::ColumnData "ColumnData".
+		To get AppSignaID associated with cell use function \ref cellAppSignalId.
+		*/
+		Q_PROPERTY(int cellColumnCount READ cellColumnCount )
+
+		/** \brief Cell row count. Always the same as \ref columnCount.
+		To get cell data type use function \ref cellData, returns \ref E::ColumnData "ColumnData".
+		To get AppSignaID associated with cell use function \ref cellAppSignalID.
+		*/
+		Q_PROPERTY(int cellRowCount READ cellColumnCount )
 
 	protected:
 		SchemaItemSignal(void);
@@ -170,23 +194,32 @@ namespace VFrame30
 
 		bool hasImpactColumn() const;
 
+		int cellRowCount() const;
+		int cellColumnCount() const;
+
 	public slots:
-		/// \brief Returns overriden (set with setCellText) cell text
+		/// \brief Returns data type associated with the cell.
+		E::ColumnData cellData(int row, int column) const;
+
+		/// \brief Returns AppSignalID associated with the cell. <b>Note:</b> the result can be value one of \ref appSignalIDs or \ref impactSignalIDs
+		QString cellAppSignalID(int row, int column) const;
+
+		/// \brief Returns overriden (set with setCellText) cell text.
 		QString cellText(int row, int column) const;
 
-		/// \brief Overrides cell text, to reset value to default pass undefines as argumnet
+		/// \brief Overrides cell text, to reset value to default pass undefines as argumnet.
 		void setCellText(int row, int column, QString text);
 
-		/// \brief Returns background color for specified cell
+		/// \brief Returns background color for specified cell.
 		QColor cellFillColor(int row, int column) const;
 
-		/// \brief Sets background color for specified cell
+		/// \brief Sets background color for specified cell.
 		void setCellFillColor(int row, int column, QColor color);
 
-		/// \brief Returns text color for specified cell, to reset value to default pass "" as argumnet
+		/// \brief Returns text color for specified cell, to reset value to default pass "" as argumnet.
 		QColor cellTextColor(int row, int column) const;
 
-		/// \brief Sets text color for specified cell
+		/// \brief Sets text color for specified cell.
 		void setCellTextColor(int row, int column, QColor color);
 
 		// Data

@@ -134,13 +134,15 @@ public:
 
 	// Format analog
 	//
+	/** \brief This enum type defines format style of floating point numbers.
+	 */
 	enum class AnalogFormat
 	{
-		e_9e = 'e',			// format as [-]9.9e[+|-]999
-		E_9E = 'E',			// format as [-]9.9E[+|-]999
-		f_9 = 'f',			// format as [-]9.9
-		g_9_or_9e = 'g',	// use e or f format, whichever is the most concise
-		G_9_or_9E = 'G'		// use E or f format, whichever is the most concise
+		e_9e = 'e',			/**< e_9e = 'e' (0x65/101) Format as [-]9.9e[+|-]999*/
+		E_9E = 'E',			/**< E_9E = 'E' (0x45/69) Format as [-]9.9E[+|-]999*/
+		f_9 = 'f',			/**< f_9 = 'f' (0x66/102) Format as [-]9.9*/
+		g_9_or_9e = 'g',	/**< g_9_or_9e = 'g' (0x67/103) Use 'e' or 'f' format, whichever is the most concise*/
+		G_9_or_9E = 'G'		/**< G_9_or_9E = 'G' (0x47/71) Use E or f format, whichever is the most concise*/
 	};
 	Q_ENUM(AnalogFormat)
 
