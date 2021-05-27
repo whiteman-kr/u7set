@@ -160,15 +160,19 @@ bool Calibrator::portIsOpen() const
 
 		case CalibratorInterface::USB:
 
-			if (m_rscMng == 0)
-			{
-				return false;
-			}
+			#ifdef Q_OS_WIN
 
-			if (m_session == 0)
-			{
-				return false;
-			}
+				if (m_rscMng == 0)
+				{
+					return false;
+				}
+
+				if (m_session == 0)
+				{
+					return false;
+				}
+
+			#endif
 
 			break;
 	}
