@@ -22,7 +22,7 @@ namespace VFrame30
 		// Methods
 		//
 	public:
-		virtual void Draw(CDrawParam* drawParam, const QRectF& clipRect) const override;
+		virtual void Draw(CDrawParam* drawParam, const QRectF& clipRect) override;
 
 		// Properties
 		//

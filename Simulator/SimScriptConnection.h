@@ -72,11 +72,11 @@ namespace Sim
 		Q_PROPERTY(bool enableDuplex READ enableDuplex CONSTANT)
 		Q_PROPERTY(QString serialMode READ serialMode CONSTANT)
 
-		Q_PROPERTY(RamAddress txBufferAbsAddr READ txBufferAbsAddr CONSTANT)
+		Q_PROPERTY(RamAddress txBufAbsAddr READ txBufAbsAddr CONSTANT)
 		Q_PROPERTY(int txDataSizeW READ txDataSizeW CONSTANT)
 		Q_PROPERTY(quint32 txDataID READ txDataID CONSTANT)
 
-		Q_PROPERTY(RamAddress rxBufferAbsAddr READ rxBufferAbsAddr CONSTANT)
+		Q_PROPERTY(RamAddress rxBufAbsAddr READ rxBufAbsAddr CONSTANT)
 		Q_PROPERTY(int rxDataSizeW READ rxDataSizeW CONSTANT)
 		Q_PROPERTY(quint32 rxDataID READ rxDataID CONSTANT)
 
@@ -101,11 +101,11 @@ namespace Sim
 		bool enableDuplex() const;
 		QString serialMode() const;
 
-		RamAddress txBufferAbsAddr() const;
+		RamAddress txBufAbsAddr() const;
 		int txDataSizeW() const;
 		quint32 txDataID() const;
 
-		RamAddress rxBufferAbsAddr() const;
+		RamAddress rxBufAbsAddr() const;
 		int rxDataSizeW() const;
 		quint32 rxDataID() const;
 

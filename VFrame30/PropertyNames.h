@@ -1,5 +1,4 @@
-#ifndef PROPERTYNAMES_H
-#define PROPERTYNAMES_H
+#pragma once
 
 namespace VFrame30
 {
@@ -10,211 +9,219 @@ namespace VFrame30
 		PropertyNames() = delete;
 
 	public:
-		static const QString schemaId;
+		inline static const QString schemaId{"SchemaID"};
 
-		static const QString top;
-		static const QString left;
-		static const QString width;
-		static const QString height;
+		inline static const QString top{"Top"};
+		inline static const QString left{"Left"};
+		inline static const QString width{"Width"};
+		inline static const QString height{"Height"};
 
-		static const QString acceptClick;
-		static const QString clickScript;
-		static const QString preDrawScript;
-		static const QString commented;
-		static const QString objectName;
-		static const QString name;
-		static const QString guid;
+		inline static const QString acceptClick{"AcceptClick"};
+		inline static const QString clickScript{"ClickScript"};
+		inline static const QString preDrawScript{"PreDrawScript"};
+		inline static const QString onShowScript{"OnShowScript"};
+		inline static const QString commented{"Commented"};
+		inline static const QString objectName{"ObjectName"};
+		inline static const QString name{"Name"};
+		inline static const QString guid{"Uuid"};
 
-		static const QString fontName;
-		static const QString fontSize;
-		static const QString fontBold;
-		static const QString fontItalic;
+		inline static const QString fontName{"FontName"};
+		inline static const QString fontSize{"FontSize"};
+		inline static const QString fontBold{"FontBold"};
+		inline static const QString fontItalic{"FontItalic"};
 
-		static const QString color;
+		inline static const QString color{"Color"};
 
-		static const QString type;
-		static const QString value;
-		static const QString valueInteger;
-		static const QString valueFloat;
-		static const QString valueDiscrete;
-		static const QString precision;
-		static const QString precisionPropText;
-		static const QString analogFormat;
-		static const QString customText;
-		static const QString columnCount;
-		static const QString pinCount;
-		static const QString showValidityPin;
+		inline static const QString type{"Type"};
+		inline static const QString value{"Value"};
+		inline static const QString valueInteger{"ValueInteger"};
+		inline static const QString valueFloat{"ValueFloat"};
+		inline static const QString valueDiscrete{"ValueDiscrete"};
+		inline static const QString precision{"Precision"};
+		inline static const QString precisionPropText{"Number of decimals after period, -1: take value from the signal description"};
+		inline static const QString analogFormat{"AnalogFormat"};
+		inline static const QString customText{"CustomText"};
+		inline static const QString columnCount{"ColumnCount"};
+		inline static const QString pinCount{"PinCount"};
+		inline static const QString showValidityPin{"ValidityPin"};
 
-		static const QString lineCapFactor;
-		static const QString lineCapStart;
-		static const QString lineCapEnd;
-		static const QString lineStyle;
-		static const QString lineStyleCap;
-		static const QString lineColor;
-		static const QString lineWeight;
-		static const QString fillColor;
-		static const QString backgroundColor;
-		static const QString fill;
-		static const QString drawRect;
-		static const QString textColor;
-		static const QString text;
-		static const QString wordWrap;
-		static const QString placeholderText;
-		static const QString label;
-		static const QString labelPos;
-		static const QString caption;
-		static const QString maxLength;
-		static const QString multiLine;
+		inline static const QString lineCapFactor{"LineCapFactor"};
+		inline static const QString lineCapStart{"LineCapStart"};
+		inline static const QString lineCapEnd{"LineCapEnd"};
+		inline static const QString lineStyle{"LineStyle"};
+		inline static const QString lineStyleCap{"LineStyleCap"};
+		inline static const QString lineColor{"LineColor"};
+		inline static const QString lineWeight{"LineWeight"};
+		inline static const QString fillColor{"FillColor"};
+		inline static const QString backgroundColor{"BackgroundColor"};
+		inline static const QString fill{"Fill"};
+		inline static const QString drawRect{"DrawRect"};
+		inline static const QString textColor{"TextColor"};
+		inline static const QString text{"Text"};
+		inline static const QString wordWrap{"WordWrap"};
+		inline static const QString placeholderText{"PlaceholderText"};
+		inline static const QString tags{"Tags"};
+		inline static const QString label{"Label"};
+		inline static const QString labelPos{"LabelPos"};
+		inline static const QString caption{"Caption"};
+		inline static const QString maxLength{"MaxLength"};
+		inline static const QString multiLine{"MultiLine"};
 
-		static const QString allowScale;
-		static const QString keepAspectRatio;
-		static const QString imageId;
-		static const QString image;
-		static const QString images;
-		static const QString svg;
-		static const QString currentImageId;
+		inline static const QString allowScale{"AllowScale"};
+		inline static const QString keepAspectRatio{"KeepAspectRatio"};
+		inline static const QString imageId{"ImageID"};
+		inline static const QString image{"Image"};
+		inline static const QString images{"Images"};
+		inline static const QString svg{"Svg"};
+		inline static const QString currentImageId{"CurrentImageID"};
 
-		static const QString drawGrid;
-		static const QString drawGridForAllBars;
-		static const QString drawGridValues;
-		static const QString drawGridValueForAllBars;
-		static const QString drawGridValueUnits;
-		static const QString linearGridMainStep;
-		static const QString linearGridSmallStep;
-		static const QString logarithmicGridMainStep;
-		static const QString logarithmicGridSmallStep;
+		inline static const QString drawGrid{"DrawGrid"};
+		inline static const QString drawGridForAllBars{"DrawGridForAllBars"};
+		inline static const QString drawGridValues{"DrawGridValues"};
+		inline static const QString drawGridValueForAllBars{"DrawGridValueForAllBars"};
+		inline static const QString drawGridValueUnits{"DrawGridValueUnits"};
+		inline static const QString linearGridMainStep{"LinearGridMainStep"};
+		inline static const QString linearGridSmallStep{"LinearGridSmallStep"};
+		inline static const QString logarithmicGridMainStep{"LogarithmicGridMainStep"};
+		inline static const QString logarithmicGridSmallStep{"LogarithmicGridSmallStep"};
 
-		static const QString indicatorSignalColors;
-		static const QString indicatorType;
-		static const QString indicatorSettings;
-		static const QString indicator;
+		inline static const QString indicatorSignalColors{"SignalColors"};
+		inline static const QString indicatorType{"IndicatorType"};
+		inline static const QString indicatorSettings{"IndicatorSettings"};
+		inline static const QString indicator{"Indicator"};
 
-		static const QString indicatorSetpointType;
-		static const QString indicatorColorSource;
-		static const QString indicatorSchemaItemLabel;
-		static const QString indicatorOutputAppSignalId;
-		static const QString indicatorStaticValue;
-		static const QString indicatorStaticCompareType;
+		inline static const QString indicatorSetpointType{"SetpointType"};
+		inline static const QString indicatorColorSource{"ColorSource"};
+		inline static const QString indicatorSchemaItemLabel{"SchemaItemLabel"};
+		inline static const QString indicatorOutputAppSignalId{"OutputAppSignalId"};
+		inline static const QString indicatorStaticValue{"StaticValue"};
+		inline static const QString indicatorStaticCompareType{"StaticCompareType"};
 
-		static const QString indicatorSetpointTypeByLabelCategory;
-		static const QString indicatorSetpointTypeBySignalIdCategory;
-		static const QString indicatorSetpointTypeStaticCategory;
+		inline static const QString indicatorSetpointTypeByLabelCategory{"Type By Label"};
+		inline static const QString indicatorSetpointTypeBySignalIdCategory{"Type By Output SignalID"};
+		inline static const QString indicatorSetpointTypeStaticCategory{"Type Static"};
 
-		static const QString indicatorStartValue;
-		static const QString indicatorEndValue;
-		static const QString indicatorBarWidth;
-		static const QString indicatorDrawBarRect;
-		static const QString indicatorStartAngle;
-		static const QString indicatorSpanAngle;
+		inline static const QString indicatorStartValue{"StartValue"};
+		inline static const QString indicatorEndValue{"EndValue"};
+		inline static const QString indicatorBarWidth{"BarWidth"};
+		inline static const QString indicatorDrawBarRect{"DrawBarRect"};
+		inline static const QString indicatorStartAngle{"StartAngle"};
+		inline static const QString indicatorSpanAngle{"SpanAngle"};
 
-		static const QString indicatorMargingLeft;
-		static const QString indicatorMargingTop;
-		static const QString indicatorMargingRight;
-		static const QString indicatorMargingBottom;
-		static const QString indicatorScaleType;
+		inline static const QString indicatorMargingLeft{"MarginLeft"};
+		inline static const QString indicatorMargingTop{"MarginTop"};
+		inline static const QString indicatorMargingRight{"MarginRight"};
+		inline static const QString indicatorMargingBottom{"MarginBottom"};
+		inline static const QString indicatorScaleType{"ScaleType"};
 
-		static const QString drawSetpoints;
-		static const QString customSetpoints;
+		inline static const QString drawSetpoints{"DrawSetpoints"};
+		inline static const QString customSetpoints{"CustomSetpoints"};
 
 		// --
 		//
-		static const QString textAnalog;
-		static const QString textDiscrete0;
-		static const QString textDiscrete1;
-		static const QString textNonValid;
-		static const QString textValuePropDescription;
+		inline static const QString textAnalog{"TextAnalog"};
+		inline static const QString textDiscrete0{"TextDiscrete0"};
+		inline static const QString textDiscrete1{"TextDiscrete1"};
+		inline static const QString textNonValid{"TextNonValid"};
+		inline static const QString textValuePropDescription{"$(value) Signal value\n"
+															 "$(caption) Signal caption\n"
+															 "$(signalid) SignalID (CustomSignalID)\n"
+															 "$(appsignalid) AppSignalID (#APPSIGANLID)\n"
+															 "$(equipmentid) Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals)\n"};
+															 //"$(highlimit) High limit\n"
+															 //"$(lowlimit) Low limit"};
 
-		static const QString userText;
-		static const QString userTextPos;
+		inline static const QString userText{"UserText"};
+		inline static const QString userTextPos{"UserTextPos"};
 
-		static const QString equipmentIds;
-		static const QString lmDescriptionFile;
+		inline static const QString equipmentIds{"EquipmentIDs"};
+		inline static const QString lmDescriptionFile{"LmDescriptionFile"};
 
-		static const QString ufbSchemaId;
-		static const QString ufbSchemaVersion;
+		inline static const QString ufbSchemaId{"UFBSchemaID"};
+		inline static const QString ufbSchemaVersion{"UFBSchemaVersion"};
 
-		static const QString specificProperties;
+		inline static const QString specificProperties{"SpecificProperties"};
 
-		static const QString locked;
+		inline static const QString locked{"Locked"};
 
-		static const QString checkable;
-		static const QString checkedDefault;
-		static const QString autoRepeat;
-		static const QString autoRepeatDelay;
-		static const QString autoRepeatInterval;
-		static const QString styleSheet;
-		static const QString toolTip;
-		static const QString readOnly;
+		inline static const QString checkable{"Checkable"};
+		inline static const QString checkedDefault{"CheckedDefault"};
+		inline static const QString autoRepeat{"AutoRepeat"};
+		inline static const QString autoRepeatDelay{"AutoRepeatDelay"};
+		inline static const QString autoRepeatInterval{"AutoRepeatInterval"};
+		inline static const QString styleSheet{"StyleSheet"};
+		inline static const QString toolTip{"ToolTip"};
+		inline static const QString readOnly{"ReadOnly"};
 
-		static const QString afterCreate;
-		static const QString clicked;
-		static const QString pressed;
-		static const QString released;
-		static const QString toggled;
-		static const QString editingFinished;
-		static const QString returnPressed;
-		static const QString textChanged;
+		inline static const QString afterCreate{"AfterCreate"};
+		inline static const QString clicked{"Clicked"};
+		inline static const QString pressed{"Pressed"};
+		inline static const QString released{"Released"};
+		inline static const QString toggled{"Toggled"};
+		inline static const QString editingFinished{"EditingFinished"};
+		inline static const QString returnPressed{"ReturnPressed"};
+		inline static const QString textChanged{"TextChanged"};
 
-		static const QString alignHorz;
-		static const QString alignVert;
+		inline static const QString alignHorz{"AlignHorz"};
+		inline static const QString alignVert{"AlignVert"};
 
-		static const QString dataType;
-		static const QString units;
+		inline static const QString dataType{"DataType"};
+		inline static const QString units{"Units"};
 
-		static const QString signalIDs;
-		static const QString appSignalIDs;
-		static const QString appSignalIDsValidator;
-		static const QString appSignalId;
-		static const QString appSignalIdValidator;
-		static const QString impactAppSignalIDs;
-		static const QString connectionId;
-		static const QString signalSource;
+		inline static const QString signalIDs{"SignalIDs"};
+		inline static const QString appSignalIDs{"AppSignalIDs"};
+		inline static const QString appSignalIDsValidator{"^[#]?([A-Za-z\\d_]+((;[#]?)?\\r?(\\n[#]?)?))+$"};
+		inline static const QString appSignalId{"AppSignalID"};
+		inline static const QString appSignalIdValidator{"^[#]?[A-Za-z\\d_]+$"};
+		inline static const QString impactAppSignalIDs{"ImpactAppSignalIDs"};
+		inline static const QString connectionId{"ConnectionID"};
+		inline static const QString signalSource{"SignalSource"};
 
-		static const QString coarseAperture;
-		static const QString fineAperture;
-		static const QString adaptiveAperture;
+		inline static const QString coarseAperture{"CoarseAperture"};
+		inline static const QString fineAperture{"FineAperture"};
+		inline static const QString adaptiveAperture{"AdaptiveAperture"};
 
-		static const QString loopbackId;
+		inline static const QString loopbackId{"LoopbackID"};
 
-		static const QString compareType;
+		inline static const QString compareType{"CompareType"};
 
-		static const QString busTypeId;
-		static const QString busTypeFileName;
-		static const QString busAutoSignalPlacement;
-		static const QString busEnableManualBusSize;
-		static const QString busManualBusSize;
-		static const QString busSignalId;
-		static const QString busInbusOffset;
-		static const QString busInbusDiscreteBitNo;
-		static const QString busInbusAnalogSize;
-		static const QString busInbusAnalogFormat;
-		static const QString busInbusAnalogByteOrder;
-		static const QString busAnalogLowLimit;
-		static const QString busAnalogHightLimit;
-		static const QString busInbusAnalogLowLimit;
-		static const QString busInbusAnalogHightLimit;
+		inline static const QString busTypeId{"BusTypeID"};
+		inline static const QString busTypeFileName{"FileName"};
+		inline static const QString busAutoSignalPlacement{"AutoSignalPlacement"};
+		inline static const QString busEnableManualBusSize{"EnableManualBusSize"};
+		inline static const QString busManualBusSize{"ManualBusSize"};
+		inline static const QString busSignalId{"SignalID"};
+		inline static const QString busInbusOffset{"Offset"};
+		inline static const QString busInbusDiscreteBitNo{"BitNo"};
+		inline static const QString busInbusAnalogSize{"Size"};
+		inline static const QString busInbusAnalogFormat{"Format"};
+		inline static const QString busInbusAnalogByteOrder{"ByteOrder"};
+		inline static const QString busAnalogLowLimit{"BusSignalLowLimit"};
+		inline static const QString busAnalogHightLimit{"BusSignalHighLimit"};
+		inline static const QString busInbusAnalogLowLimit{"InbusSignalLowLimit"};
+		inline static const QString busInbusAnalogHightLimit{"InbusSignalHighLimit"};
 
-		static const QString busSettingCategory;
-		static const QString busInbusSettingCategory;
+		inline static const QString busSettingCategory{"Bus Settings"};
+		inline static const QString busInbusSettingCategory{"InBus Settings (Manual Signal Placement)"};
 
-		static const QString behaviourCategory;
-		static const QString appearanceCategory;
-		static const QString functionalCategory;
-		static const QString textCategory;
-		static const QString colorCategory;
-		static const QString monitorCategory;
-		static const QString parametersCategory;
-		static const QString controlCategory;
-		static const QString scriptsCategory;
-		static const QString apertureCategory;
-		static const QString constCategory;
-		static const QString imageCategory;
-		static const QString positionAndSizeCategory;
-		static const QString setpointsCategory;
+		inline static const QString behaviourCategory{"Behaviour"};
+		inline static const QString appearanceCategory{"Appearance"};
+		inline static const QString functionalCategory{"Functional"};
+		inline static const QString textCategory{"Text"};
+		inline static const QString colorCategory{"Color"};
+		inline static const QString monitorCategory{"Monitor"};
+		inline static const QString parametersCategory{"Parameters"};
+		inline static const QString controlCategory{"Control"};
+		inline static const QString scriptsCategory{"Scripts"};
+		inline static const QString apertureCategory{"Aperture"};
+		inline static const QString constCategory{"Const"};
+		inline static const QString imageCategory{"Image"};
+		inline static const QString positionAndSizeCategory{"Position and Size"};
+		inline static const QString setpointsCategory{"Setpoints"};
 
-		static const QString widgetPropStyleSheet;
-		static const QString widgetPropToolTip;
-		static const QString widgetPropAfterCreate;
+		inline static const QString widgetPropStyleSheet{"Property holds the widget's style sheet.\nThe style sheet contains a textual description of customizations to the widget's style."};
+		inline static const QString widgetPropToolTip{"Property holds the widget's tooltip."};
+		inline static const QString widgetPropAfterCreate{"Script code to run after the control is created."};
 
 		static const QString pushButtonPropText;
 		static const QString pushButtonDefaultStyleSheet;
@@ -239,11 +246,9 @@ namespace VFrame30
 		static const QString lineEditPropReturnPressed;
 		static const QString lineEditPropTextChanged;
 
-		static const QString scriptGlobalVariableView;
-		static const QString scriptGlobalVariableTuning;
-		static const QString scriptGlobalVariableSignals;
-		static const QString scriptGlobalVariableLog;
+		inline static const QString scriptGlobalVariableView{"view"};
+		inline static const QString scriptGlobalVariableTuning{"tuning"};
+		inline static const QString scriptGlobalVariableSignals{"signals"};
+		inline static const QString scriptGlobalVariableLog{"log"};
 	};
-
 }
-#endif // PROPERTYNAMES_H

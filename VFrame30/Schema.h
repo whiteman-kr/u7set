@@ -23,7 +23,6 @@ namespace VFrame30
 	class UfbSchema;
 	class Bus;
 	class SchemaDetails;
-
 	class Schema;
 
 	// Proxy class for using in scripts
@@ -37,14 +36,23 @@ namespace VFrame30
 		Q_OBJECT
 
 		/// \brief Schema unique identifier (SchemaID).
+		Q_PROPERTY(QString schemaID READ schemaId)
 		Q_PROPERTY(QString SchemaID READ schemaId)
 
 		/// \brief Schema caption.
+		Q_PROPERTY(QString caption READ caption)
 		Q_PROPERTY(QString Caption READ caption)
+
+		/// \brief Schema background color.
+		Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor)
+		Q_PROPERTY(QColor BackgroundColor READ backgroundColor WRITE setBackgroundColor)
+
+		/// \brief Layer count.
+		Q_PROPERTY(int layerCont READ layerCount)
 
 	public:
 		explicit ScriptSchema(std::shared_ptr<Schema> schema);
-		~ScriptSchema();
+		virtual ~ScriptSchema() = default;
 
 	public slots:
 		/// \brief Return true if is ApplicationLogic schema.
@@ -62,9 +70,23 @@ namespace VFrame30
 		/// \brief Return true if is Diag schema.
 		bool isDiagSchema() const;
 
+		/// \brief Get schema layer by index.
+		QJSValue layer(int index);
+
+		/// \brief Get schema layer by caption.
+		QJSValue layer(QString caption);
+
+		/// \brief Get schema items with specified tag.
+		QVariantList itemsByTag(QString tag);
+
 	private:
 		QString schemaId() const;
 		QString caption() const;
+
+		QColor backgroundColor() const ;
+		void setBackgroundColor(QColor value);
+
+		int layerCount() const;
 
 	private:
 		std::shared_ptr<Schema> m_schema;
@@ -74,7 +96,8 @@ namespace VFrame30
 	class Schema :
 		public PropertyObject,
 		public Proto::ObjectSerialization<Schema>,
-		public DebugInstCounter<Schema>
+		public DebugInstCounter<Schema>,
+		public std::enable_shared_from_this<Schema>
 	{
 		Q_OBJECT
 
@@ -100,8 +123,7 @@ namespace VFrame30
 		// Methods
 		//
 	public:
-		virtual void Draw(CDrawParam* drawParam, const QRectF& clipRect) const;
-		void Print();
+		virtual void Draw(CDrawParam* drawParam, const QRectF& clipRect);
 
 		virtual void MouseClick(const QPointF& docPoint, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const;
 		void RunClickScript(const std::shared_ptr<SchemaItem>& schemaItem) const;
@@ -129,20 +151,34 @@ namespace VFrame30
 		template<typename SchemaItemType>
 		bool hasSchemaItemType() const;
 
+		// Scripting
+		//
+	public:
+		bool preDrawEvent(QJSEngine* engine);
+		bool onShowEvent(QJSEngine* engine);
+
+	protected:
+		bool runScript(QJSValue& evaluatedJs, QJSEngine* engine);
+		QJSValue evaluateScript(QString script, QJSEngine* engine, QWidget* parentWidget) const;
+		QString formatSqriptError(const QJSValue& scriptValue) const;
+		void reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const;
+
+		void drawScriptError(CDrawParam* drawParam) const;
+
 		// Properties and Datas
 		//
 	public:
-		[[nodiscard]] QUuid guid() const noexcept;
+		[[nodiscard]] QUuid guid() const;
 		void setGuid(const QUuid& guid);
 
-		[[nodiscard]] QString schemaId() const noexcept;
+		[[nodiscard]] QString schemaId() const;
 		void setSchemaId(const QString& id);
 
-		[[nodiscard]] QString caption() const noexcept;
+		[[nodiscard]] QString caption() const;
 		void setCaption(const QString& caption);
 
-		[[nodiscard]] QString tagsAsString() const noexcept;
-		[[nodiscard]] QStringList tagsAsList() const noexcept;
+		[[nodiscard]] QString tagsAsString() const;
+		[[nodiscard]] QStringList tagsAsList() const;
 
 		void setTags(QString tags);
 		void setTagsList(const QStringList& tags);
@@ -174,40 +210,46 @@ namespace VFrame30
 		[[nodiscard]] double docHeightRegional() const;
 		void setDocHeightRegional(double height);
 
-		[[nodiscard]] SchemaUnit unit() const noexcept;
-		void setUnit(SchemaUnit value) noexcept;
+		[[nodiscard]] SchemaUnit unit() const;
+		void setUnit(SchemaUnit value);
 
 		[[nodiscard]] int activeLayerIndex() const;
 		[[nodiscard]] QUuid activeLayerGuid() const;
 		[[nodiscard]] std::shared_ptr<VFrame30::SchemaLayer> activeLayer() const;
 		void setActiveLayer(std::shared_ptr<VFrame30::SchemaLayer> layer);
 
-		[[nodiscard]] double gridSize() const noexcept;
+		[[nodiscard]] double gridSize() const;
 		void setGridSize(double value);
 
-		[[nodiscard]] int pinGridStep() const noexcept;
+		[[nodiscard]] int pinGridStep() const;
 		void setPinGridStep(int value);
 
-		[[nodiscard]] bool excludeFromBuild() const noexcept;
+		[[nodiscard]] bool excludeFromBuild() const;
 		void setExcludeFromBuild(bool value);
 
-		[[nodiscard]] QColor backgroundColor() const noexcept;
+		[[nodiscard]] QColor backgroundColor() const;
 		void setBackgroundColor(const QColor& value);
 
-		[[nodiscard]] bool isLogicSchema() const noexcept;
-		[[nodiscard]] bool isUfbSchema() const noexcept;
-		[[nodiscard]] bool isMonitorSchema() const noexcept;
-		[[nodiscard]] bool isTuningSchema() const noexcept;
-		[[nodiscard]] bool isDiagSchema() const noexcept;
+		[[nodiscard]] bool isLogicSchema() const;
+		[[nodiscard]] bool isUfbSchema() const;
+		[[nodiscard]] bool isMonitorSchema() const;
+		[[nodiscard]] bool isTuningSchema() const;
+		[[nodiscard]] bool isDiagSchema() const;
 
-		[[nodiscard]] LogicSchema* toLogicSchema() noexcept;
-		[[nodiscard]] const LogicSchema* toLogicSchema() const noexcept;
+		[[nodiscard]] LogicSchema* toLogicSchema();
+		[[nodiscard]] const LogicSchema* toLogicSchema() const;
 
-		[[nodiscard]] UfbSchema* toUfbSchema() noexcept;
-		[[nodiscard]] const UfbSchema* toUfbSchema() const noexcept;
+		[[nodiscard]] UfbSchema* toUfbSchema();
+		[[nodiscard]] const UfbSchema* toUfbSchema() const;
 
-		[[nodiscard]] int changeset() const noexcept;
+		[[nodiscard]] int changeset() const;
 		void setChangeset(int value);
+
+		[[nodiscard]] QString preDrawScript() const;
+		void setPreDrawScript(QString value);
+
+		[[nodiscard]] QString onShowScript() const;
+		void setOnShowScript(QString value);
 
 	public:
 		std::vector<std::shared_ptr<SchemaLayer>> Layers;
@@ -239,6 +281,22 @@ namespace VFrame30
 		QColor m_backgroundColor = {qRgb(0xFF, 0xFF, 0xFF)};
 
 		int m_changeset = -1;					// Changeset, this field is not stored in file
+
+		// --
+		//
+		QString m_preDrawScript;
+		QString m_onShowScript;
+
+		// Cached scripting staff
+		//
+	private:
+		mutable QJSValue m_jsPreDrawScript;				// Evaluated m_preDrawScript
+		mutable size_t m_evaluatedPreDrawScript = 0;	//
+
+		mutable QJSValue m_jsOnShowScript;				// Evaluated m_OnShowScript
+		mutable size_t m_evaluatedOnShowScript = 0;
+
+		mutable QString m_lastScriptError;
 	};
 
 
@@ -250,7 +308,6 @@ namespace VFrame30
 	//		Labels: ["Label1", "Label2", "Label3", ...]
 	//		ItemGuids: ["guid1", "guid2", "guid3", ...]
 	//
-
 	class SchemaDetails
 	{
 	public:
@@ -295,6 +352,7 @@ namespace VFrame30
 		std::set<QString> m_tags;		// All tags are kept in lowercase
 		std::set<QUuid> m_guids;
 	};
+
 
 	class SchemaDetailsSet : public Proto::ObjectSerialization<SchemaDetailsSet>
 	{

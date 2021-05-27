@@ -139,28 +139,36 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-		/// \brief Application signal identifiers array. <b>Use AppSignalIDs.length</b> to get number of identifiers
+		/// \brief Application signal identifiers array. <b>Use appSignalIDs.length</b> to get number of identifiers
+		Q_PROPERTY(QStringList signalIDs READ signalIds WRITE setSignalIds)
 		Q_PROPERTY(QStringList SignalIDs READ signalIds WRITE setSignalIds)
 
-		/// \brief Application signal identifiers array. Use <b>AppSignalIDs.length</b> to get number of identifiers
+		/// \brief Application signal identifiers array. Use <b>appSignalIDs.length</b> to get number of identifiers
+		Q_PROPERTY(QStringList appSignalIDs READ signalIds WRITE setSignalIds)
 		Q_PROPERTY(QStringList AppSignalIDs READ signalIds WRITE setSignalIds)
 
 		/// \brief An identifier of current image
+		Q_PROPERTY(QString currentImageID READ currentImageId WRITE setCurrentImageId)
 		Q_PROPERTY(QString CurrentImageID READ currentImageId WRITE setCurrentImageId)
 
 		/// \brief Border line weight, in pixels
+		Q_PROPERTY(double lineWeight READ lineWeight WRITE setLineWeight)
 		Q_PROPERTY(double LineWeight READ lineWeight WRITE setLineWeight)
 
 		/// \brief Bounding rectangle drawing
+		Q_PROPERTY(bool drawRect READ drawRect WRITE setDrawRect)
 		Q_PROPERTY(bool DrawRect READ drawRect WRITE setDrawRect)
 
 		/// \brief Rectangle filling
+		Q_PROPERTY(bool fill READ fillRect WRITE setFillRect)
 		Q_PROPERTY(bool Fill READ fillRect WRITE setFillRect)
 
 		/// \brief Border line color name
+		Q_PROPERTY(QColor lineColor READ lineColor WRITE setLineColor)
 		Q_PROPERTY(QColor LineColor READ lineColor WRITE setLineColor)
 
 		/// \brief Rectangle fill color name
+		Q_PROPERTY(QColor fillColor READ fillColor WRITE setFillColor)
 		Q_PROPERTY(QColor FillColor READ fillColor WRITE setFillColor)
 
 	public:

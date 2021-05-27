@@ -254,6 +254,7 @@ namespace Builder
 
 		bool processSignalsWithFlags();
 		bool processAcquiredIOSignalsValidity();
+		bool processAcquiredOptoSignalsValidity();
 		bool processSimlockItems();
 		bool processMismatchItems();
 		bool processSetFlagsItems();
@@ -378,6 +379,8 @@ namespace Builder
 		bool disposeNonAcquiredBuses();
 
 		bool disposeAnalogAndBusSignalsHeap();
+
+		bool setSignalsRegValidityAddr();
 
 		bool appendAfbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();
@@ -687,7 +690,8 @@ namespace Builder
 		std::map<QString, AppSignal*> m_chassisSignals;			// all signals available in current chassis, AppSignalID => AppSignal*
 		std::multimap<QString, const AppSignal*> m_chassisSignalsByEquipmentID;		// EquipementID => AppSignal*
 		QHash<QString, AppSignal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => AppSignal*
-		QHash<QString, AppSignal*> m_equipmentSignals;				// equipment signals to app signals map, signal EquipmentID => Signal*
+		QHash<QString, AppSignal*> m_equipmentSignals;			// equipment signals to app signals map, signal EquipmentID => Signal*
+		std::map<QString, UalSignal*> m_optoPortValiditySignal;	// OptoPort EquipmentID => OptoPort validity signal
 
 		::std::set<QString> m_signalsWithFlagsIDs;
 		::std::unordered_set<UalSignal*> m_signalsWithFlagsAndFlagSignals;

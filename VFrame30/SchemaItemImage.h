@@ -42,22 +42,25 @@ namespace VFrame30
 		Q_OBJECT
 
 		/// \brief Allow image scaling
+		Q_PROPERTY(bool allowScale READ allowScale WRITE setAllowScale)
 		Q_PROPERTY(bool AllowScale READ allowScale WRITE setAllowScale)
 
 		/// \brief Keep aspect ratio
+		Q_PROPERTY(bool keepAspectRatio READ keepAspectRatio WRITE setKeepAspectRatio)
 		Q_PROPERTY(bool KeepAspectRatio READ keepAspectRatio WRITE setKeepAspectRatio)
 
 		/*! \brief Image displayed by the item
 
 		This property specifies bitmap image displayed by the schema item. Image is loaded from external file and is stored in schema.
-		The image is displayed only if <b>Svg</b> property is empty.
+		The image is displayed only if <b>svg</b> property is empty.
 		*/
+		Q_PROPERTY(QImage image READ image WRITE setImage)
 		Q_PROPERTY(QImage Image READ image WRITE setImage)
 
 		/*! \brief SVG data for image
 
 		Image can be described by SVG (Scalable Vector Graphic) code. If this property is empty, SchemaItemImage displays
-		image specified by <b>Image</b> property, otherwise displays image specified by <b>Svg</b> property.
+		image specified by <b>image</b> property, otherwise displays image specified by <b>Svg</b> property.
 
 		// Example:
 		\code
@@ -66,6 +69,7 @@ namespace VFrame30
 		</svg>
 		\endcode
 		*/
+		Q_PROPERTY(QString svg READ svgData WRITE setSvgData)
 		Q_PROPERTY(QString Svg READ svgData WRITE setSvgData)
 
 	public:

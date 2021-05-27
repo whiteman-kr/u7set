@@ -194,7 +194,7 @@ namespace Sim
 		return m_connPortInfo.serialMode;
 	}
 
-	RamAddress ScriptConnPortInfo::txBufferAbsAddr() const
+	RamAddress ScriptConnPortInfo::txBufAbsAddr() const
 	{
 		return RamAddress(m_connPortInfo.txBufferAbsAddr, 0);
 	}
@@ -209,7 +209,7 @@ namespace Sim
 		return m_connPortInfo.txDataID;
 	}
 
-	RamAddress ScriptConnPortInfo::rxBufferAbsAddr() const
+	RamAddress ScriptConnPortInfo::rxBufAbsAddr() const
 	{
 		return RamAddress(m_connPortInfo.rxBufferAbsAddr, 0);
 	}
