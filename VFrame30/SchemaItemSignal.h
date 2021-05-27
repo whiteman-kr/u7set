@@ -13,20 +13,25 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-		/// \brief Application signal identifiers array. Use <b>AppSignalIDs.length</b> to get number of identifiers
+		/// \brief Application signal identifiers array. Use <b>appSignalIDs.length</b> to get number of identifiers
+		Q_PROPERTY(QStringList signalIDs READ appSignalIdList)
 		Q_PROPERTY(QStringList SignalIDs READ appSignalIdList)
 
-		/// \brief Application signal identifiers array. Use <b>AppSignalIDs.length</b> to get number of identifiers
+		/// \brief Application signal identifiers array. Use <b>appSignalIDs.length</b> to get number of identifiers
+		Q_PROPERTY(QStringList appSignalIDs READ appSignalIdList)
 		Q_PROPERTY(QStringList AppSignalIDs READ appSignalIdList)
 
-		/// \brief Impact application signal identifiers array. Impact signal is usually related to AppSignalID in some or other way. Use <b>ImpactSignalIDs.length</b> to get number of identifiers
+		/// \brief Impact application signal identifiers array. Impact signal is usually related to AppSignalID in some or other way. Use <b>impactSignalIDs.length</b> to get number of identifiers
+		Q_PROPERTY(QStringList impactSignalIDs READ impactAppSignalIdList)
 		Q_PROPERTY(QStringList ImpactSignalIDs READ impactAppSignalIdList)
 
-		/// \brief Impact application signal identifiers array. Impact signal is usually related to AppSignalID in some or other way. Use <b>ImpactAppSignalIDs.length</b> to get number of identifiers
+		/// \brief Impact application signal identifiers array. Impact signal is usually related to AppSignalID in some or other way. Use <b>impactAppSignalIDs.length</b> to get number of identifiers
+		Q_PROPERTY(QStringList impactAppSignalIDs READ impactAppSignalIdList)
 		Q_PROPERTY(QStringList ImpactAppSignalIDs READ impactAppSignalIdList)
 
 		/// \brief Item column count. To get column data type use function columnData(columnIndex), returns \ref E::ColumnData "ColumnData"
 		///
+		Q_PROPERTY(int columnCount READ columnCount)
 		Q_PROPERTY(int ColumnCount READ columnCount)
 
 	protected:

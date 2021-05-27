@@ -417,6 +417,10 @@ namespace VFrame30
 			schema->setCaption("Empty Schema");
 		}
 
+		// Run onShowScript
+		//
+		schema->onShowEvent(clientSchemaView()->jsEngine());
+
 		// --
 		//
 		BaseSchemaWidget::setSchema(schema, false);

@@ -3,6 +3,7 @@
 #include "SimSchemaManager.h"
 #include "SimIdeSimulator.h"
 #include "SimulatorTabPage.h"
+#include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemValue.h"
 #include "../VFrame30/SchemaItemImageValue.h"
@@ -312,7 +313,7 @@ void SimSchemaWidget::signalContextMenu(const QStringList& appSignals, const QSt
 
 			QAction* a = menu.addAction(signalId);
 
-			auto f = [this, s, simWidget]() -> void
+			auto f = [s, simWidget]() -> void
 					 {
 						simWidget->signalInfo(s);
 					 };
@@ -333,6 +334,15 @@ void SimSchemaWidget::updateSchema()
 	if (m_simulator->isLoaded() == true)
 	{
 		auto newSchema = schemaManager()->schema(schemaId());
+
+		if (newSchema == nullptr)
+		{
+			// Schema could be deleted or renamed
+			// create a dummy schema
+			//
+			newSchema = std::make_shared<VFrame30::LogicSchema>();
+		}
+
 		BaseSchemaWidget::setSchema(newSchema, true);
 	}
 

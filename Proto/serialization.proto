@@ -327,6 +327,9 @@ message Schema
 	optional string joinRightSchemaId = 34;
 	optional string joinBottomSchemaId = 35;
 
+    optional string preDrawScript = 50;
+	optional string onShowScript = 51;
+
 	repeated Envelope layers = 100;				// Layer list
 	required AfbElementCollection afbs = 101;	// Not used anymore, keep for compability
 
@@ -400,6 +403,7 @@ message SchemaItem
 	optional string clickScript = 7;
 	optional bool isCommented = 8 [default = false];
 	optional string objectName = 9;
+	optional string tags = 13;
 
     optional string label = 14;
 	optional int32  labelPos = 15 [default = 2];		// enum E::UserTextPos, 2 - RightTop

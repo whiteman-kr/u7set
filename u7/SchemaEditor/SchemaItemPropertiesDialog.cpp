@@ -5,14 +5,14 @@
 #include "Settings.h"
 
 
-SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget* parent) :
+SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* editEngine, DbController* db, QWidget* parent) :
 	QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::SchemaItemPropertiesDialog)
 {
 	ui->setupUi(this);
 
 
-	m_propertyEditor = new SchemaItemPropertyEditor(editEngine, this);
+	m_propertyEditor = new SchemaItemPropertyEditor(editEngine, db, this);
 	m_propertyEditor->setReadOnly(editEngine->readOnly());
 
 	m_propertyTable = new SchemaItemPropertyTable(editEngine, this, this);
@@ -126,8 +126,8 @@ void SchemaItemPropertiesDialog::saveSettings()
 //		SchemaItemPropertyBrowser
 //
 //
-SchemaItemPropertyEditor::SchemaItemPropertyEditor(EditEngine::EditEngine* editEngine, QWidget* parent) :
-	IdePropertyEditor(parent),
+SchemaItemPropertyEditor::SchemaItemPropertyEditor(EditEngine::EditEngine* editEngine, DbController* db, QWidget* parent) :
+	IdePropertyEditor(parent, db),
 	m_editEngine(editEngine)
 {
 	assert(m_editEngine);

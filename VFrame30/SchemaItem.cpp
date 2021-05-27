@@ -56,11 +56,14 @@ namespace VFrame30
 
 	void SchemaItem::propertyDemand(const QString& /*prop*/)
 	{
-		auto guidProp = addProperty<QUuid, SchemaItem, &SchemaItem::guid, nullptr>(PropertyNames::guid, PropertyNames::functionalCategory, true);
-		guidProp->setExpert(true);
+		addProperty<QUuid, SchemaItem, &SchemaItem::guid, nullptr>(PropertyNames::guid, PropertyNames::functionalCategory, true)
+			->setExpert(true);
 
 		addProperty<bool, SchemaItem, &SchemaItem::commented, &SchemaItem::setCommented>(PropertyNames::commented, PropertyNames::functionalCategory, true);
 		addProperty<bool, SchemaItem, &SchemaItem::isLocked, &SchemaItem::setLocked>(PropertyNames::locked, PropertyNames::appearanceCategory, true);
+
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::tags, true, SchemaItem::tagsAsString, SchemaItem::setTags)
+			->setSpecificEditor(E::PropertySpecificEditor::Tags);
 
 		addProperty<QString, SchemaItem, &SchemaItem::label, nullptr>(PropertyNames::label, PropertyNames::functionalCategory, true);
 		addProperty<E::TextPos, SchemaItem, &SchemaItem::labelPos, &FblItemRect::setLabelPos>(PropertyNames::labelPos, PropertyNames::functionalCategory, true);
@@ -97,6 +100,8 @@ namespace VFrame30
 		schemaItem->set_iscommented(m_commented);
 		schemaItem->set_itemunit(static_cast<Proto::SchemaUnit>(m_itemUnit));
 
+		schemaItem->set_tags(tagsAsString().toStdString());
+
 		schemaItem->set_label(m_label.toStdString());
 		schemaItem->set_labelpos(static_cast<::google::protobuf::int32>(m_labelPos));
 
@@ -124,6 +129,8 @@ namespace VFrame30
 		m_locked = schemaitem.islocked();
 		m_commented = schemaitem.iscommented();
 		m_itemUnit = static_cast<SchemaUnit>(schemaitem.itemunit());
+
+		setTags(QString::fromStdString(schemaitem.tags()));
 
 		m_label = QString::fromStdString(schemaitem.label());
 		m_labelPos = static_cast<E::TextPos>(schemaitem.labelpos());
@@ -755,12 +762,12 @@ namespace VFrame30
 		return dynamic_cast<const SchemaItemAfb*>(this);
 	}
 
-	bool SchemaItem::isControl() const noexcept
+	bool SchemaItem::isControl() const
 	{
 		return dynamic_cast<const SchemaItemControl*>(this) != nullptr;
 	}
 
-	bool SchemaItem::isLocked() const noexcept
+	bool SchemaItem::isLocked() const
 	{
 		return m_locked;
 	}
@@ -771,12 +778,12 @@ namespace VFrame30
 		return;
 	}
 
-	bool SchemaItem::isCommented() const noexcept
+	bool SchemaItem::isCommented() const
 	{
 		return m_commented;
 	}
 
-	bool SchemaItem::commented() const noexcept
+	bool SchemaItem::commented() const
 	{
 		return m_commented;
 	}
@@ -786,12 +793,22 @@ namespace VFrame30
 		m_commented = value;
 	}
 
-	QUuid SchemaItem::guid() const noexcept
+	bool SchemaItem::visible() const
+	{
+		return m_visible;
+	}
+
+	void SchemaItem::setVisible(bool value)
+	{
+		m_visible = value;
+	}
+
+	QUuid SchemaItem::guid() const
 	{
 		return m_guid;
 	}
 
-	void SchemaItem::setGuid(const QUuid& guid)
+	void SchemaItem::setGuid(QUuid guid)
 	{
 		m_guid = guid;
 		return;
@@ -824,7 +841,77 @@ namespace VFrame30
 		m_itemUnit = value;
 	}
 
-	QString SchemaItem::label() const noexcept
+	QString SchemaItem::tagsAsString() const
+	{
+		QString result;
+
+		for (QString t : m_tags)
+		{
+			t = t.trimmed();
+
+			if (result.isEmpty() == false)
+			{
+				result.append(QChar::LineFeed);
+			}
+
+			result.append(t);
+		}
+
+		return result;
+	}
+
+	QStringList SchemaItem::tagsAsList() const
+	{
+		QStringList result;
+		result.reserve(m_tags.size());
+
+		for (const QString& t : m_tags)
+		{
+			result.push_back(t.trimmed());
+		}
+
+		return result;
+	}
+
+	void SchemaItem::setTags(QString tags)
+	{
+		//tags.replace(';', QChar::LineFeed);
+		//tags.replace(',', QChar::LineFeed);	QChar::LineFeed
+
+		m_tags = tags.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
+
+		for (QString& t : m_tags)
+		{
+			t = t.trimmed();
+		}
+
+		return;
+	}
+
+	void SchemaItem::setTagsList(const QStringList& tags)
+	{
+		m_tags.clear();
+		m_tags.reserve(tags.size());
+
+		for (QString t : tags)
+		{
+			QString trimmed = t.trimmed();
+
+			if (trimmed.isEmpty() == false)
+			{
+				m_tags.append(trimmed);
+			}
+		}
+
+		return;
+	}
+
+	bool SchemaItem::hasTag(QString tag) const
+	{
+		return m_tags.contains(tag);
+	}
+
+	QString SchemaItem::label() const
 	{
 		return m_label;
 	}
@@ -834,7 +921,7 @@ namespace VFrame30
 		m_label = value;
 	}
 
-	E::TextPos SchemaItem::labelPos() const noexcept
+	E::TextPos SchemaItem::labelPos() const
 	{
 		return m_labelPos;
 	}
@@ -846,7 +933,7 @@ namespace VFrame30
 
 	// AcceptClick property
 	//
-	bool SchemaItem::acceptClick() const noexcept
+	bool SchemaItem::acceptClick() const
 	{
 		return m_acceptClick;
 	}
@@ -858,7 +945,7 @@ namespace VFrame30
 
 	// ClickScript property
 	//
-	QString SchemaItem::clickScript() const noexcept
+	QString SchemaItem::clickScript() const
 	{
 		return m_clickScript;
 	}
@@ -868,7 +955,7 @@ namespace VFrame30
 		m_clickScript = value;
 	}
 
-	QString SchemaItem::preDrawScript() const noexcept
+	QString SchemaItem::preDrawScript() const
 	{
 		return m_preDrawScript;
 	}
@@ -878,7 +965,7 @@ namespace VFrame30
 		m_preDrawScript = value;
 	}
 
-	bool SchemaItem::blinkPhase() const noexcept
+	bool SchemaItem::blinkPhase() const
 	{
 		if (m_drawParam != nullptr && m_drawParam->isMonitorMode() == true)
 		{

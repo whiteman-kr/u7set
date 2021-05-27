@@ -7,6 +7,35 @@ namespace VFrame30
 {
 	::Factory<VFrame30::SchemaLayer> VideoLayerFactory;
 
+	ScriptSchemaLayer::ScriptSchemaLayer(SchemaLayerPtr schemaLayer) :
+		m_schemaLayer(schemaLayer)
+	{
+		Q_ASSERT(m_schemaLayer);
+	}
+
+	QString ScriptSchemaLayer::caption() const
+	{
+		return m_schemaLayer ?
+					m_schemaLayer->name() :
+					QString{};
+	}
+
+	bool ScriptSchemaLayer::visible() const
+	{
+		return m_schemaLayer ?
+					m_schemaLayer->show() :
+					false;
+	}
+
+	void ScriptSchemaLayer::setVisible(bool value)
+	{
+		if (m_schemaLayer != nullptr)
+		{
+			m_schemaLayer->setShow(value);
+		}
+
+		return;
+	}
 
 	SchemaLayer::SchemaLayer(void) :
 		Proto::ObjectSerialization<SchemaLayer>(Proto::ProtoCompress::Never)

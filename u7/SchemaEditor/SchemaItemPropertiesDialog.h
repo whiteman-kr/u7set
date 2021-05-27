@@ -17,13 +17,12 @@ class SchemaItemPropertyEditor;
 class SchemaItemPropertyTable;
 
 
-
 class SchemaItemPropertiesDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit SchemaItemPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget* parent = 0);
+	explicit SchemaItemPropertiesDialog(EditEngine::EditEngine* editEngine, DbController* db, QWidget* parent = 0);
 	virtual ~SchemaItemPropertiesDialog();
 
 public:
@@ -60,7 +59,7 @@ class SchemaItemPropertyEditor : public IdePropertyEditor
 	Q_OBJECT
 
 public:
-	explicit SchemaItemPropertyEditor(EditEngine::EditEngine* editEngine, QWidget* parent);
+	explicit SchemaItemPropertyEditor(EditEngine::EditEngine* editEngine, DbController* db, QWidget* parent);
 	virtual ~SchemaItemPropertyEditor();
 
 protected slots:

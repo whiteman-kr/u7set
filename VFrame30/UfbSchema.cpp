@@ -90,7 +90,7 @@ namespace VFrame30
 		return true;
 	}
 
-	void UfbSchema::Draw(CDrawParam* drawParam, const QRectF& clipRect) const
+	void UfbSchema::Draw(CDrawParam* drawParam, const QRectF& clipRect)
 	{
 		BuildFblConnectionMap();
 

@@ -30,11 +30,6 @@ namespace VFrame30
 		Q_ASSERT(m_schema);
 	}
 
-	ScriptSchema::~ScriptSchema()
-	{
-		qDebug() << "ScriptSchema::~ScriptSchema " << schemaId();
-	}
-
 	bool ScriptSchema::isLogicSchema() const
 	{
 		return m_schema ? m_schema->isLogicSchema() : false;
@@ -61,6 +56,88 @@ namespace VFrame30
 		return m_schema ? m_schema->isDiagSchema() : false;
 	}
 
+	QJSValue ScriptSchema::layer(int index)
+	{
+		QJSValue result;
+
+		if (m_schema == nullptr || index < 0 || index >= layerCount())
+		{
+			return result;
+		}
+
+		QJSEngine* engine = qjsEngine(this);
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return result;
+		}
+
+		result = engine->newQObject(new ScriptSchemaLayer(m_schema->Layers[index]));
+
+		return result;
+	}
+
+	QJSValue ScriptSchema::layer(QString caption)
+	{
+		QJSValue result;
+
+		if (m_schema == nullptr)
+		{
+			return result;
+		}
+
+		QJSEngine* engine = qjsEngine(this);
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return result;
+		}
+
+		for (auto& l : m_schema->Layers)
+		{
+			if (l->name() == caption)
+			{
+				result = engine->newQObject(new ScriptSchemaLayer(l));
+				break;
+			}
+		}
+
+		return result;
+	}
+
+	QVariantList ScriptSchema::itemsByTag(QString tag)
+	{
+		QVariantList result;
+
+		if (m_schema == nullptr)
+		{
+			return result;
+		}
+
+		QJSEngine* engine = qjsEngine(this);
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return result;
+		}
+
+		// --
+		//
+		for (auto& l : m_schema->Layers)
+		{
+			for (auto& i : l->Items)
+			{
+				if (i->hasTag(tag) == true)
+				{
+					result.push_back(QVariant::fromValue<VFrame30::SchemaItem*>(i.get()));
+					QQmlEngine::setObjectOwnership(i.get(), QQmlEngine::CppOwnership);
+				}
+			}
+		}
+
+		return result;
+	}
+
 	QString ScriptSchema::schemaId() const
 	{
 		return m_schema ? m_schema->schemaId() : QString{};
@@ -69,6 +146,28 @@ namespace VFrame30
 	QString ScriptSchema::caption() const
 	{
 		return m_schema ? m_schema->caption() : QString{};
+	}
+
+	QColor ScriptSchema::backgroundColor() const
+	{
+		return m_schema ? m_schema->backgroundColor() : QColor{};
+	}
+
+	void ScriptSchema::setBackgroundColor(QColor value)
+	{
+		if (m_schema != nullptr)
+		{
+			m_schema->setBackgroundColor(value);
+		}
+
+		return;
+	}
+
+	int ScriptSchema::layerCount() const
+	{
+		return m_schema ?
+					static_cast<int>(m_schema->Layers.size()) :
+					0;
 	}
 
 	//
@@ -91,8 +190,8 @@ namespace VFrame30
 		ADD_PROPERTY_GETTER(int, "Changeset", true, Schema::changeset);
 		ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, Schema::caption, Schema::setCaption);
 
-		auto tagsProp = ADD_PROPERTY_GETTER_SETTER(QString, "Tags", true, Schema::tagsAsString, Schema::setTags);
-		tagsProp->setSpecificEditor(E::PropertySpecificEditor::Tags);
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::tags, true, Schema::tagsAsString, Schema::setTags)
+			->setSpecificEditor(E::PropertySpecificEditor::Tags);
 
 		ADD_PROPERTY_GETTER_SETTER(bool, "ExcludeFromBuild", true, Schema::excludeFromBuild, Schema::setExcludeFromBuild);
 		ADD_PROPERTY_GETTER_SETTER(double, "SchemaWidth", true, Schema::docWidthRegional, Schema::setDocWidthRegional);
@@ -111,6 +210,12 @@ namespace VFrame30
 			->setViewOrder(103);
 		ADD_PROPERTY_GET_SET_CAT(QString, "JoinBottomSchemaID", "Monitor", true, Schema::joinBottomSchemaId, Schema::setJoinBottomSchemaId)
 			->setViewOrder(104);
+
+		addProperty<QString, Schema, &Schema::preDrawScript, &Schema::setPreDrawScript>(PropertyNames::preDrawScript, PropertyNames::scriptsCategory, true)
+				->setIsScript(true);
+
+		addProperty<QString, Schema, &Schema::onShowScript, &Schema::setOnShowScript>(PropertyNames::onShowScript, PropertyNames::scriptsCategory, true)
+				->setIsScript(true);
 
 		m_guid = QUuid();  // GUID_NULL
 
@@ -171,6 +276,9 @@ namespace VFrame30
 		mutableSchema->set_excludefrombuild(m_excludeFromBuild);
 		mutableSchema->set_backgroundcolor(m_backgroundColor.rgba());
 
+		mutableSchema->set_predrawscript(m_preDrawScript.toStdString());
+		mutableSchema->set_onshowscript(m_onShowScript.toStdString());
+
 		// Save Layers
 		//
 		bool saveLayersResult = true;
@@ -229,6 +337,9 @@ namespace VFrame30
 		{
 			m_backgroundColor = schema.backgroundcolor();
 		}
+
+		m_preDrawScript = QString::fromStdString(schema.predrawscript());
+		m_onShowScript = QString::fromStdString(schema.onshowscript());
 
 		// Layers
 		//
@@ -293,12 +404,20 @@ namespace VFrame30
 		return schema;
 	}
 
-	void Schema::Draw(CDrawParam* drawParam, const QRectF& clipRect) const
+	void Schema::Draw(CDrawParam* drawParam, const QRectF& clipRect)
 	{
 		if (drawParam == nullptr)
 		{
-			assert(drawParam);
+			Q_ASSERT(drawParam);
 			return;
+		}
+
+		if (drawParam->isMonitorMode() == true)
+		{
+			ClientSchemaView* view = drawParam->clientSchemaView();
+			Q_ASSERT(view);
+
+			this->preDrawEvent(view->jsEngine());
 		}
 
 		// Cleare client area by "grey" color
@@ -321,7 +440,9 @@ namespace VFrame30
 		QElapsedTimer timer;
 		timer.start();
 
-		for (auto layer : Layers)
+		bool isClientMode = drawParam->isMonitorMode();
+
+		for (const SchemaLayerPtr& layer : Layers)
 		{
 			Q_ASSERT(layer);
 
@@ -340,11 +461,16 @@ namespace VFrame30
 			{
 				Q_ASSERT(item);
 
+				if (isClientMode == true && item->visible() == false)
+				{
+					continue;
+				}
+
 				if (item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
 					item->setDrawParam(drawParam);
 
-					if (drawParam->isMonitorMode() == true)
+					if (isClientMode == true)
 					{
 						ClientSchemaView* view = drawParam->clientSchemaView();
 						Q_ASSERT(view);
@@ -376,14 +502,14 @@ namespace VFrame30
 			}
 		}
 
+		if (isClientMode == true)
+		{
+			drawScriptError(drawParam);
+		}
+
 		//qDebug() << "Schema::Draw " << timer.elapsed();
 
 		return;
-	}
-
-	void Schema::Print()
-	{
-		assert(false);
 	}
 
 	void Schema::MouseClick(const QPointF& docPoint, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const
@@ -905,12 +1031,190 @@ namespace VFrame30
 		return false;
 	}
 
+	// Scripting
+	//
+	bool Schema::preDrawEvent(QJSEngine* engine)
+	{
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return false;
+		}
+
+		if (m_preDrawScript.trimmed().isEmpty() == true)
+		{
+			return true;
+		}
+
+		// Evaluate script
+		//
+		if (m_jsPreDrawScript.isUndefined() == true || qHash(m_preDrawScript) != m_evaluatedPreDrawScript)
+		{
+			m_jsPreDrawScript = evaluateScript(m_preDrawScript, engine, nullptr);
+			m_evaluatedPreDrawScript = qHash(m_preDrawScript);
+		}
+
+		if (m_jsPreDrawScript.isError() == true ||
+			m_jsPreDrawScript.isNull() == true)
+		{
+			return false;
+		}
+
+		bool result = runScript(m_jsPreDrawScript, engine);
+
+		return result;
+	}
+
+	bool Schema::onShowEvent(QJSEngine* engine)
+	{
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return false;
+		}
+
+		if (m_onShowScript.trimmed().isEmpty() == true)
+		{
+			return true;
+		}
+
+		// Evaluate script
+		//
+		if (m_jsOnShowScript.isUndefined() == true || qHash(m_onShowScript) != m_evaluatedOnShowScript)
+		{
+			m_jsOnShowScript = evaluateScript(m_onShowScript, engine, nullptr);
+			m_evaluatedOnShowScript = qHash(m_preDrawScript);
+		}
+
+		if (m_jsOnShowScript.isError() == true ||
+			m_jsOnShowScript.isNull() == true)
+		{
+			return false;
+		}
+
+		bool result = runScript(m_jsOnShowScript, engine);
+
+		return result;
+	}
+
+	bool Schema::runScript(QJSValue& evaluatedJs, QJSEngine* engine)
+	{
+		if (evaluatedJs.isUndefined() == true ||
+			evaluatedJs.isError() == true ||
+			engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return false;
+		}
+
+		// Set argument list
+		//
+		QJSValueList args;
+		args << engine->newQObject(new ScriptSchema(this->shared_from_this()));
+
+		// Run script
+		//
+		QJSValue jsResult = evaluatedJs.call(args);
+		if (jsResult.isError() == true)
+		{
+			m_lastScriptError = formatSqriptError(jsResult);
+			return false;
+		}
+		else
+		{
+			m_lastScriptError.clear();
+		}
+
+		return true;
+	}
+
+	QJSValue Schema::evaluateScript(QString script, QJSEngine* engine, QWidget* parentWidget) const
+	{
+		if (engine == nullptr)
+		{
+			assert(engine);
+			assert(parentWidget);
+			return QJSValue();
+		}
+
+		QJSValue result = engine->evaluate(script);
+
+		if (result.isError() == true)
+		{
+			m_lastScriptError = formatSqriptError(result);
+
+			if (parentWidget != nullptr)
+			{
+				QMessageBox::critical(parentWidget, qAppName(), m_lastScriptError);
+			}
+		}
+
+		return result;
+	}
+
+	QString Schema::formatSqriptError(const QJSValue& scriptValue) const
+	{
+		qDebug() << "Script running uncaught exception at line " << scriptValue.property("lineNumber").toInt();
+		qDebug() << "\tItem: " << guid().toString() << " " << metaObject()->className();
+		qDebug() << "\tStack: " << scriptValue.property("stack").toString();
+		qDebug() << "\tMessage: " << scriptValue.toString();
+
+		QString str = QString("Script running uncaught exception at line %1\n"
+							  "\tItem: %2 %3\n"
+							  "\tStack: %4\n"
+							  "\tMessage: %5")
+					  .arg(scriptValue.property("lineNumber").toInt())
+					  .arg(guid().toString()).arg(metaObject()->className())
+					  .arg(scriptValue.property("stack").toString())
+					  .arg(scriptValue.toString());
+
+		return str;
+	}
+
+	void Schema::reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const
+	{
+		qDebug() << "Script running uncaught exception at line " << scriptValue.property("lineNumber").toInt();
+		qDebug() << "\tItem: " << guid().toString() << " " << metaObject()->className();
+		qDebug() << "\tStack: " << scriptValue.property("stack").toString();
+		qDebug() << "\tMessage: " << scriptValue.toString();
+
+		QMessageBox::critical(parent, QApplication::applicationDisplayName(),
+							  tr("Script uncaught exception at line %1:\n%2")
+								  .arg(scriptValue.property("lineNumber").toInt())
+								  .arg(scriptValue.toString()));
+
+		return;
+	}
+
+	void Schema::drawScriptError(CDrawParam* drawParam) const
+	{
+		if (m_lastScriptError.isEmpty() == true)
+		{
+			return;
+		}
+
+		QRectF pageRect{0, 0, 1, 1};
+		static FontParam font(QStringLiteral("Arial"), drawParam->gridSize() * 1.75, false, false);
+
+		QPainter* p = drawParam->painter();
+		p->setPen(Qt::red);
+
+		DrawHelper::drawText(p,
+							 font,
+							 unit(),
+							 m_lastScriptError,
+							 pageRect,
+							 Qt::TextDontClip | Qt::AlignTop | Qt::AlignLeft);
+
+		return;
+	}
+
 	// Properties and Data
 	//
 
 	// Guid
 	//
-	QUuid Schema::guid() const noexcept
+	QUuid Schema::guid() const
 	{
 		return m_guid;
 	}
@@ -923,7 +1227,7 @@ namespace VFrame30
 
 	// SchemaID
 	//
-	QString Schema::schemaId() const noexcept
+	QString Schema::schemaId() const
 	{
 		return m_schemaID;
 	}
@@ -935,7 +1239,7 @@ namespace VFrame30
 
 	// Caption
 	//
-	QString Schema::caption() const noexcept
+	QString Schema::caption() const
 	{
 		return m_caption;
 	}
@@ -947,7 +1251,7 @@ namespace VFrame30
 
 	// Tags
 	//
-	QString Schema::tagsAsString() const noexcept
+	QString Schema::tagsAsString() const
 	{
 		QString result;
 
@@ -966,7 +1270,7 @@ namespace VFrame30
 		return result;
 	}
 
-	QStringList Schema::tagsAsList() const noexcept
+	QStringList Schema::tagsAsList() const
 	{
 		QStringList result;
 		result.reserve(m_tags.size());
@@ -1227,12 +1531,12 @@ namespace VFrame30
 
 	// Unit
 	//
-	SchemaUnit Schema::unit() const noexcept
+	SchemaUnit Schema::unit() const
 	{
 		return m_unit;
 	}
 
-	void Schema::setUnit(SchemaUnit value) noexcept
+	void Schema::setUnit(SchemaUnit value)
 	{
 		Q_ASSERT(value == SchemaUnit::Display || value == SchemaUnit::Inch);
 
@@ -1297,7 +1601,7 @@ namespace VFrame30
 		return;
 	}
 
-	double Schema::gridSize() const noexcept
+	double Schema::gridSize() const
 	{
 		return m_gridSize;
 	}
@@ -1307,7 +1611,7 @@ namespace VFrame30
 		m_gridSize = value;
 	}
 
-	int Schema::pinGridStep() const noexcept
+	int Schema::pinGridStep() const
 	{
 		return m_pinGridStep;
 	}
@@ -1317,7 +1621,7 @@ namespace VFrame30
 		m_pinGridStep = value;
 	}
 
-	bool Schema::excludeFromBuild() const noexcept
+	bool Schema::excludeFromBuild() const
 	{
 		return m_excludeFromBuild;
 	}
@@ -1327,7 +1631,7 @@ namespace VFrame30
 		m_excludeFromBuild = value;
 	}
 
-	QColor Schema::backgroundColor() const noexcept
+	QColor Schema::backgroundColor() const
 	{
 		return m_backgroundColor;
 	}
@@ -1337,52 +1641,52 @@ namespace VFrame30
 		m_backgroundColor = value;
 	}
 
-	bool Schema::isLogicSchema() const noexcept
+	bool Schema::isLogicSchema() const
 	{
 		return dynamic_cast<const VFrame30::LogicSchema*>(this) != nullptr;
 	}
 
-	bool Schema::isUfbSchema() const noexcept
+	bool Schema::isUfbSchema() const
 	{
 		return dynamic_cast<const VFrame30::UfbSchema*>(this) != nullptr;
 	}
 
-	bool Schema::isMonitorSchema() const noexcept
+	bool Schema::isMonitorSchema() const
 	{
 		return dynamic_cast<const VFrame30::MonitorSchema*>(this) != nullptr;
 	}
 
-	bool Schema::isTuningSchema() const noexcept
+	bool Schema::isTuningSchema() const
 	{
 		return dynamic_cast<const VFrame30::TuningSchema*>(this) != nullptr;
 	}
 
-	bool Schema::isDiagSchema() const noexcept
+	bool Schema::isDiagSchema() const
 	{
 		return dynamic_cast<const VFrame30::DiagSchema*>(this) != nullptr;
 	}
 
-	LogicSchema* Schema::toLogicSchema() noexcept
+	LogicSchema* Schema::toLogicSchema()
 	{
 		return dynamic_cast<VFrame30::LogicSchema*>(this);
 	}
 
-	const LogicSchema* Schema::toLogicSchema() const noexcept
+	const LogicSchema* Schema::toLogicSchema() const
 	{
 		return dynamic_cast<const VFrame30::LogicSchema*>(this);
 	}
 
-	UfbSchema* Schema::toUfbSchema() noexcept
+	UfbSchema* Schema::toUfbSchema()
 	{
 		return dynamic_cast<VFrame30::UfbSchema*>(this);
 	}
 
-	const UfbSchema* Schema::toUfbSchema() const noexcept
+	const UfbSchema* Schema::toUfbSchema() const
 	{
 		return dynamic_cast<const VFrame30::UfbSchema*>(this);
 	}
 
-	int Schema::changeset() const noexcept
+	int Schema::changeset() const
 	{
 		return m_changeset;
 	}
@@ -1392,12 +1696,31 @@ namespace VFrame30
 		m_changeset = value;
 	}
 
+	QString Schema::preDrawScript() const
+	{
+		return m_preDrawScript;
+	}
+
+	void Schema::setPreDrawScript(QString value)
+	{
+		m_preDrawScript = value;
+	}
+
+	QString Schema::onShowScript() const
+	{
+		return m_onShowScript;
+	}
+
+	void Schema::setOnShowScript(QString value)
+	{
+		m_onShowScript = value;
+	}
+
 	//
 	//
 	//				SchemaDetails
 	//
 	//
-
 	SchemaDetails::SchemaDetails() noexcept
 	{
 	}

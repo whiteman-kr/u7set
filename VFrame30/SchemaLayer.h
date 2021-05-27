@@ -4,7 +4,42 @@
 
 namespace VFrame30
 {
+	using SchemaLayerPtr = std::shared_ptr<VFrame30::SchemaLayer>;
+	class SchemaLayer;
+
 	extern ::Factory<VFrame30::SchemaLayer> VideoLayerFactory;
+
+	// Proxy class for using in scripts
+	//
+	/*! \class ScriptSchema
+		\ingroup view
+		\brief Represents a class that contains schema. Can be get from global <b>view.Schema</b>.
+	*/
+	class ScriptSchemaLayer : public QObject
+	{
+		Q_OBJECT
+
+		/// \brief SchemaLayer caption.
+		Q_PROPERTY(QString caption READ caption)
+
+		/// \brief Layer count.
+		Q_PROPERTY(bool visible READ visible WRITE setVisible)
+
+	public:
+		explicit ScriptSchemaLayer(SchemaLayerPtr schemaLayer);
+		virtual ~ScriptSchemaLayer() = default;
+
+	public slots:
+
+	private:
+		QString caption() const;
+
+		bool visible() const ;
+		void setVisible(bool value);
+
+	private:
+		SchemaLayerPtr m_schemaLayer;
+	};
 
 
 	class SchemaLayer :

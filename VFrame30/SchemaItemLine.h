@@ -52,9 +52,11 @@ namespace VFrame30
 		Q_OBJECT
 
 		/// \brief Line weight, in pixels
+		Q_PROPERTY(double lineWeight READ weight WRITE setWeight)
 		Q_PROPERTY(double LineWeight READ weight WRITE setWeight)
 
 		/// \brief Line color name
+		Q_PROPERTY(QColor lineColor READ lineColor WRITE setLineColor)
 		Q_PROPERTY(QColor LineColor READ lineColor WRITE setLineColor)
 
 	public:

@@ -42,15 +42,19 @@ namespace VFrame30
 		Q_OBJECT
 
 		/// \brief Top position
+		Q_PROPERTY(double top READ top WRITE setTop)
 		Q_PROPERTY(double Top READ top WRITE setTop)
 
 		/// \brief Left position
+		Q_PROPERTY(double left READ left WRITE setLeft)
 		Q_PROPERTY(double Left READ left WRITE setLeft)
 
 		/// \brief Width
+		Q_PROPERTY(double width READ width WRITE setWidth)
 		Q_PROPERTY(double Width READ width WRITE setWidth)
 
 		/// \brief Height
+		Q_PROPERTY(double height READ height WRITE setHeight)
 		Q_PROPERTY(double Height READ height WRITE setHeight)
 
 	protected:

@@ -6777,7 +6777,7 @@ void EditSchemaWidget::properties()
 {
 	if (m_itemsPropertiesDialog == nullptr)
 	{
-		m_itemsPropertiesDialog = new SchemaItemPropertiesDialog(m_editEngine, this);
+		m_itemsPropertiesDialog = new SchemaItemPropertiesDialog(m_editEngine, db(), this);
 	}
 
 	m_itemsPropertiesDialog->setObjects(editSchemaView()->selectedItems());
@@ -6865,7 +6865,7 @@ void EditSchemaWidget::selectionChanged()
 	//
 	if (m_itemsPropertiesDialog == nullptr)
 	{
-		m_itemsPropertiesDialog = new SchemaItemPropertiesDialog(m_editEngine, this);
+		m_itemsPropertiesDialog = new SchemaItemPropertiesDialog(m_editEngine, db(), this);
 	}
 
 	m_itemsPropertiesDialog->setObjects(editSchemaView()->selectedItems());

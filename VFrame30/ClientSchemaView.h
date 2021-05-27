@@ -114,15 +114,19 @@ namespace VFrame30
 		Q_OBJECT
 
 		/// \brief Current schema unique identifier (SchemaID).
+		Q_PROPERTY(QString schemaID READ schemaId)
 		Q_PROPERTY(QString SchemaID READ schemaId)
 
 		/// \brief Current schema caption.
+		Q_PROPERTY(QString schemaCaption READ schemaCaption)
 		Q_PROPERTY(QString SchemaCaption READ schemaCaption)
 
-		/// \brief Get current ScriptSchema object. To get SchemaID or SchemaCaption for perfomance reason use appropriate properties of view <b>view.SchemaID</b> and <b>view.SchemaCaption</b>.
+		/// \brief Get current ScriptSchema object. To get SchemaID or SchemaCaption for perfomance reason use appropriate properties of view <b>view.schemaID</b> and <b>view.schemaCaption</b>.
+		Q_PROPERTY(QObject* schema READ schema)
 		Q_PROPERTY(QObject* Schema READ schema)
 
 		/// \brief Get schema count.
+		Q_PROPERTY(int schemaCount READ schemaCount)
 		Q_PROPERTY(int SchemaCount READ schemaCount)
 
 	public:

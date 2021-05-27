@@ -7,12 +7,12 @@ SUBDIRS += Protobuf \
         QScintilla \
         TrendView \
 		AppSignalLib \
-        VFrame30 \
         UtilsLib \
         OnlineLib \
         ServiceLib \
         HardwareLib \
 		CommonLib \
+		VFrame30 \
         DbLib \
         Simulator \
         SimulatorConsole \

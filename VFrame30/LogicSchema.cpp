@@ -145,7 +145,7 @@ namespace VFrame30
 		return true;
 	}
 
-	void LogicSchema::Draw(CDrawParam* drawParam, const QRectF& clipRect) const
+	void LogicSchema::Draw(CDrawParam* drawParam, const QRectF& clipRect)
 	{
 		BuildFblConnectionMap();
 
