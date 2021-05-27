@@ -127,12 +127,6 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	
 		}
 	}
 
-	if (fileList.size() == 0)
-	{
-		m_startText = m_exampleText;
-	}
-
-
 	// Resize dialog
 	//
 	QSettings settings;
