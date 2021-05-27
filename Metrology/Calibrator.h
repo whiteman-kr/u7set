@@ -6,6 +6,8 @@
 #include <QtSerialPort/QSerialPort>
 #include <QStringList>
 
+#include "../lib/visa/visa.h" // Interface for calibrator Rigol DG1062Z
+
 // ==============================================================================================
 
 enum CalibratorType
@@ -14,14 +16,30 @@ enum CalibratorType
 	TrxII				= 0,
 	Calys75				= 1,
 	Ktl6221				= 2,
+	Rgl1062				= 3,
 };
 
-const int CalibratorTypeCount = 3;
+const int CalibratorTypeCount = 4;
 
 #define ERR_CALIBRATOR_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= CalibratorTypeCount)
 
 QString CalibratorTypeCaption(int сalibratorType);
 QString CalibratorIdnCaption(int сalibratorType);
+
+// ==============================================================================================
+
+enum CalibratorInterface
+{
+	NoCalibratorInterface	= -1,
+	Serial					= 0,
+	USB						= 1,
+};
+
+const int CalibratorInterfaceCount = 2;
+
+#define ERR_CALIBRATOR_INTERFACE(i) (static_cast<int>(i) < 0 || static_cast<int>(i) >= CalibratorInterfaceCount)
+
+CalibratorInterface getCalibratorInterface(int calibratorType);									// test is serial or usb port
 
 // ----------------------------------------------------------------------------------------------
 
@@ -105,6 +123,12 @@ const int		INVALID_CALIBRATOR_CHANNEL = -1;
 #define KTHL6221_LIMIT_FOR_SWITCH		21
 
 // ==============================================================================================
+// Commands - model KEITHLEY-6221
+
+#define RGL1062_OUTPUT_ON				":OUTP1 ON"
+#define RGL1062_OUTPUT_OFF				":OUTP1 OFF"
+
+// ==============================================================================================
 
 struct CalibratorParam
 {
@@ -125,6 +149,7 @@ const CalibratorParam CalibratorParams[CalibratorTypeCount] =
 	{ CalibratorType::TrxII,	QSerialPort::Baud9600,		":SAMPLE",	":PT ",		"\n\r"	},
 	{ CalibratorType::Calys75,	QSerialPort::Baud115200,	"DISP?",	"SOUR ",	"\r\n"	},
 	{ CalibratorType::Ktl6221,	QSerialPort::Baud9600,		"CURR?",	"CURR ",	"\n\r"	},
+	{ CalibratorType::Rgl1062,	-1,							"FREQ?",	"FREQ ",	"\n"	},
 };
 
 // ==============================================================================================
@@ -197,6 +222,12 @@ const CalibratorLimit CalibratorLimits[] =
 	{ CalibratorType::Ktl6221,	CalibratorMode::SourceMode,		0,	 20,	CalibratorUnit::mA,			3,	0.050,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-3"},					// 0.05% +- 10 microA - i.e.  10 microA * 100% / 20 mА = 0.05%
 	{ CalibratorType::Ktl6221,	CalibratorMode::SourceMode,		0,	 20,	CalibratorUnit::uA,			3,	0.050,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-6"},					// 0.05% +- 10 nanoA - i.e.  10 nanoA * 100% / 20 microА = 0.05%
 	{ CalibratorType::Ktl6221,	CalibratorMode::SourceMode,		0,	 20,	CalibratorUnit::nA,			3,	0.300,	0.0500	,"CURR:RANG:AUTO ON\n\rCURR 1e-9"},					// 0.05% +- 10 picoA - i.e.  10 picoA * 100% / 20 nanoА = 0.05%
+
+	// RIGOL DG1062Z
+	//
+		// Source
+		//
+	{ CalibratorType::Rgl1062,	CalibratorMode::SourceMode,		0,25000000,	CalibratorUnit::Hz,			6,	0.00,	0.00	,":SOUR1:FUNC SQU"},
 };
 
 const int CalibratorLimitCount = sizeof(CalibratorLimits) / sizeof(CalibratorLimits[0]);
@@ -222,7 +253,7 @@ public:
 
 	int channel() const{ return m_channel; }
 
-	bool portIsOpen() const { return m_port.isOpen(); }
+	bool portIsOpen() const;
 
 	QString portName() const { return m_portName; }
 	void setPortName(const QString& portName) { m_portName = portName; }
@@ -256,6 +287,10 @@ private:
 	int m_channel = INVALID_CALIBRATOR_CHANNEL;											// index calibrator in a common base calibrators CalibratorBase
 
 	QSerialPort m_port;																	// object serial port for management of the calibrator
+
+	ViSession m_rscMng = 0;																// resource manager for calibrator Rigol DG1062Z
+	ViSession m_session = 0;															// interface for calibrator Rigol DG1062Z
+
 	QString m_portName;																	// string containing the name of the serial port
 
 	bool m_connected = false;
@@ -287,10 +322,10 @@ private:
 	bool openPort();																	// open the serial port to manage the calibrator
 	bool getIDN();																		// identify the calibrator, get: SerialNo, Type and etc.
 
-	CalibratorParam getParam(int type);													// get claibtator param by type
+	CalibratorParam getParam(int type) const;											// get claibtator param by type
 
-	bool send(QString cmd);																// sending commands to the calibrator
-	bool recv();																		// receiving a response from the calibrator
+	bool read();																		// receiving a response from the calibrator
+	bool write(QString cmd);															// sending commands to the calibrator
 
 	void parseResponse();																// extracts from the string of the last response from the calibrator current electrical values
 
