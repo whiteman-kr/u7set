@@ -33,10 +33,10 @@ namespace VFrame30
 		Q_PROPERTY(QString customText READ customText WRITE setCustomText)
 
 		/// \brief If <b>true</b> each signal has own row, if <b>false</b> only one row is drawn and state is displayed as multiple cells.
-		Q_PROPERTY(QString multiline READ multiline)
+		Q_PROPERTY(bool multiLine READ multiLine)
 
 		/// \brief Precision for floating point numbers.
-		Q_PROPERTY(QString precision READ precision WRITE setPrecision)
+		Q_PROPERTY(int precision READ precision WRITE setPrecision)
 
 		/// \brief Way to display numbers.
 		Q_PROPERTY(E::AnalogFormat analogFormat READ analogFormat WRITE setAnalogFormat)
