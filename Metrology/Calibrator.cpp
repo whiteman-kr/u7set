@@ -41,17 +41,21 @@ void Calibrator::clear()
 
 		case CalibratorInterface::USB:
 
-			if (m_session != 0)
-			{
-				viClose(m_session);
-				m_session = 0;
-			}
+			#ifdef Q_OS_WIN
 
-			if (m_rscMng != 0)
-			{
-				viClose(m_rscMng);
-				m_rscMng = 0;
-			}
+				if (m_session != 0)
+				{
+					viClose(m_session);
+					m_session = 0;
+				}
+
+				if (m_rscMng != 0)
+				{
+					viClose(m_rscMng);
+					m_rscMng = 0;
+				}
+
+			#endif
 
 			break;
 	}
@@ -226,24 +230,28 @@ bool Calibrator::openPort()
 
 		case CalibratorInterface::USB:
 			{
-				ViStatus result = viOpenDefaultRM(&m_rscMng);		// open resource manager
-				if (result == VI_SUCCESS || result == VI_WARN_CONFIG_NLOADED)
-				{
-					ViChar usbPortCaption[VI_FIND_BUFLEN];
-					qstrcpy(usbPortCaption, m_portName.toLocal8Bit());
+				#ifdef Q_OS_WIN
 
-					result = viOpen(m_rscMng, usbPortCaption, VI_NULL, VI_NULL, &m_session);
-					if (result != VI_SUCCESS)
+					ViStatus result = viOpenDefaultRM(&m_rscMng);		// open resource manager
+					if (result == VI_SUCCESS || result == VI_WARN_CONFIG_NLOADED)
 					{
-						m_lastError = QString("Calibrator error! "
-											  "Function: %1, USB port: %2").
-												arg(__FUNCTION__).
-												arg(m_portName);
-						qDebug("%s", qPrintable(m_lastError));
-						emit error(m_lastError);
-						return false;
+						ViChar usbPortCaption[VI_FIND_BUFLEN];
+						qstrcpy(usbPortCaption, m_portName.toLocal8Bit());
+
+						result = viOpen(m_rscMng, usbPortCaption, VI_NULL, VI_NULL, &m_session);
+						if (result != VI_SUCCESS)
+						{
+							m_lastError = QString("Calibrator error! "
+												  "Function: %1, USB port: %2").
+													arg(__FUNCTION__).
+													arg(m_portName);
+							qDebug("%s", qPrintable(m_lastError));
+							emit error(m_lastError);
+							return false;
+						}
 					}
-				}
+
+				#endif
 			}
 
 			break;
@@ -599,23 +607,27 @@ bool Calibrator::write(QString cmd)
 
 		case CalibratorInterface::USB:
 			{
-				ViChar viCmd[256] = {0};
-				qstrcpy(viCmd, cmd.toLocal8Bit());
+				#ifdef Q_OS_WIN
 
-				ViStatus result = viPrintf(m_session, viCmd);
-				if (result != VI_SUCCESS)
-				{
-					m_lastError = QString("Calibrator error! "
-										  "Function: %1, Serial port: %2, "
-										  "Error description: Command is sent is not fully").
-											arg(__FUNCTION__).
-											arg(m_portName);
-					qDebug("%s", qPrintable(m_lastError));
-					emit error(m_lastError);
-					return false;
-				}
+					ViChar viCmd[256] = {0};
+					qstrcpy(viCmd, cmd.toLocal8Bit());
 
-				emit commandIsSent(cmd);
+					ViStatus result = viPrintf(m_session, viCmd);
+					if (result != VI_SUCCESS)
+					{
+						m_lastError = QString("Calibrator error! "
+											  "Function: %1, Serial port: %2, "
+											  "Error description: Command is sent is not fully").
+												arg(__FUNCTION__).
+												arg(m_portName);
+						qDebug("%s", qPrintable(m_lastError));
+						emit error(m_lastError);
+						return false;
+					}
+
+					emit commandIsSent(cmd);
+
+				#endif
 			}
 
 			break;
@@ -719,24 +731,28 @@ bool Calibrator::read()
 			{
 				setWaitResponse(true);
 
-				ViChar viResopse[256] = {0};
-				ViStatus result = viScanf(m_session, const_cast<ViString>("%t"), &viResopse);
-				if (result != VI_SUCCESS)
-				{
-					m_lastError = QString("Calibrator error! "
-										  "Function: %1, USB port: %2, "
-										  "Error description: Calibrator don't sent a response").
-											arg(__FUNCTION__).
-											arg(m_portName);
-					qDebug("%s", qPrintable(m_lastError));
-					emit error(m_lastError);
+				#ifdef Q_OS_WIN
 
-					close();
+					ViChar viResopse[256] = {0};
+					ViStatus result = viScanf(m_session, const_cast<ViString>("%t"), &viResopse);
+					if (result != VI_SUCCESS)
+					{
+						m_lastError = QString("Calibrator error! "
+											  "Function: %1, USB port: %2, "
+											  "Error description: Calibrator don't sent a response").
+												arg(__FUNCTION__).
+												arg(m_portName);
+						qDebug("%s", qPrintable(m_lastError));
+						emit error(m_lastError);
 
-					return false;
-				}
+						close();
 
-				requestData = viResopse;
+						return false;
+					}
+
+					requestData = viResopse;
+
+				#endif
 			}
 
 			break;

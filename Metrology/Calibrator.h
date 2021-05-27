@@ -6,7 +6,9 @@
 #include <QtSerialPort/QSerialPort>
 #include <QStringList>
 
-#include "Visa/visa.h" // Interface for calibrator Rigol DG1062Z
+#ifdef Q_OS_WIN
+	#include "Visa/visa.h" // Interface for calibrator Rigol DG1062Z
+#endif
 
 // ==============================================================================================
 
@@ -288,8 +290,12 @@ private:
 
 	QSerialPort m_port;																	// object serial port for management of the calibrator
 
+#ifdef Q_OS_WIN
+
 	ViSession m_rscMng = 0;																// resource manager for calibrator Rigol DG1062Z
 	ViSession m_session = 0;															// interface for calibrator Rigol DG1062Z
+
+#endif
 
 	QString m_portName;																	// string containing the name of the serial port
 

@@ -560,26 +560,31 @@ void CalibratorBase::onSettings(int row, int)
 			portCombo->addItem(info.portName());
 		}
 
-		// USB ports for Rigol
-		//
-		ViSession rscMng;
-		ViStatus result = viOpenDefaultRM(&rscMng);		// open resource manager
-		if (result == VI_SUCCESS || result == VI_WARN_CONFIG_NLOADED)
-		{
-			// search for the calibrator
-			//
-			ViChar usbPortCaption[VI_FIND_BUFLEN];
-			ViUInt32 usbPortCount;
-			ViFindList listOfFound;
+		#ifdef Q_OS_WIN
 
-			result = viFindRsrc(rscMng, const_cast<ViString>("USB?*"), &listOfFound, &usbPortCount, usbPortCaption);
-			if (result == VI_SUCCESS)
+			// USB ports for Rigol
+			//
+			ViSession rscMng;
+			ViStatus result = viOpenDefaultRM(&rscMng);		// open resource manager
+			if (result == VI_SUCCESS || result == VI_WARN_CONFIG_NLOADED)
 			{
-				portCombo->addItem(usbPortCaption);
+				// search for the calibrator
+				//
+				ViChar usbPortCaption[VI_FIND_BUFLEN];
+				ViUInt32 usbPortCount;
+				ViFindList listOfFound;
+
+				result = viFindRsrc(rscMng, const_cast<ViString>("USB?*"), &listOfFound, &usbPortCount, usbPortCaption);
+				if (result == VI_SUCCESS)
+				{
+					portCombo->addItem(usbPortCaption);
+				}
+
+				viClose(rscMng);
 			}
 
-			viClose(rscMng);
-		}
+		#endif
+
 		//
 		//
 		portCombo->setEditable(true);
