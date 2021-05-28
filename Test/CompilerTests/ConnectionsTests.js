@@ -156,28 +156,6 @@ function cleanup(sim)
     return;
 }
 
-//function test_1(sim)
-//{
-
-    // Start simulation for N msecs:
-    //      sim.startForMs(50);
-
-    // Check signal value:
-    //      assert(sim.signalValue("#TEST_NOT_1") === 1);
-
-    // Override signal value:
-    //      sim.overrideSignalValue("#TEST_NOT_1", 0);
-
-    // Clear override signal list:
-    //      sim.overridesReset();
-
-    // Write message to console:
-    //      log.writeText("Log Text");
-    //      log.writeWarning("Log Text");
-
-	//return;
-//}
-
 // ---------------------------------------------------------------------------------------------------------
 //
 // UAL_CONN_4_1* - Opto connections general tests
@@ -640,7 +618,7 @@ function test_UAL_CONN_4_1_14(sim)
 {
 	let optoModuleStartAddr = lm2Description.ioModuleBufStartAddr(14);
 	
-	assert(conn02_port2.rxBufAbsAddr.offset === optoModuleStartAddr.offset + 163);
+	assert(conn02_port2.rxBufAbsAddr.offset === optoModuleStartAddr.offset + 163);			// start of receive buffers should be moved from beginnig of opto module memory
 	assert(conn02_port2.rxDataSizeW === conn02_port2.manualRxWordsQuantity);
 	assert(conn02_port2.rxDataSizeW == conn02_port1.txDataSizeW);	
 	
@@ -649,6 +627,35 @@ function test_UAL_CONN_4_1_14(sim)
 	
 	assert(conn04_port2.rxBufAbsAddr.offset === conn01_port2.rxBufAbsAddr.offset + conn01_port2.rxDataSizeW);
 	assert(conn04_port2.rxDataSizeW == conn04_port1.txDataSizeW);
+}
+
+function test_UAL_CONN_4_1_15(sim)
+{
+	let optoInterfaceOffset = lm1Description.optoInterfaceDataOffset;
+	assert(optoInterfaceOffset != null);
+	
+	//
+	
+	assert(conn01.enableManualSettings === false);
+	
+	assert(conn01_port1.txBufAbsAddr.offset === optoInterfaceOffset);
+	assert(conn01_port1.rxBufAbsAddr.offset === optoInterfaceOffset);
+}
+
+function test_UAL_CONN_4_1_16(sim)
+{
+	let optoInterfaceOffset = lm1Description.optoInterfaceDataOffset;
+	assert(optoInterfaceOffset != null);
+	
+	let optoPortDataSize = lm1Description.optoPortDataSize;
+	assert(optoPortDataSize != null);
+	
+	//
+	
+	assert(conn03.enableManualSettings === true);
+	
+	assert(conn03_port1.txBufAbsAddr.offset === optoInterfaceOffset + 1 * optoPortDataSize + conn03_port1.manualTxStartAddr);
+	assert(conn03_port1.rxBufAbsAddr.offset === optoInterfaceOffset + 1 * optoPortDataSize);
 }
 
 // ---------------------------------------------------------------------------------------------------------

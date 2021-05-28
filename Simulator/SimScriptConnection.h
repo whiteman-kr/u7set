@@ -17,8 +17,8 @@ namespace Sim
 		Q_PROPERTY(bool enabled READ enabled WRITE setEnabled)
 		Q_PROPERTY(bool timeout READ timeout CONSTANT)
 
-		Q_PROPERTY(bool enableManualSettings READ enableManualSettings CONSTANT);
-		Q_PROPERTY(bool disableDataIDControl READ disableDataIDControl CONSTANT);
+		Q_PROPERTY(bool enableManualSettings READ enableManualSettings CONSTANT)
+		Q_PROPERTY(bool disableDataIDControl READ disableDataIDControl CONSTANT)
 
 		Q_PROPERTY(QJSValue port1Info READ port1Info CONSTANT)
 		Q_PROPERTY(QJSValue port2Info READ port2Info CONSTANT)

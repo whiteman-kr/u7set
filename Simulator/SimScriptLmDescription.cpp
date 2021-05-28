@@ -80,5 +80,15 @@ namespace Sim
 	{
 		return m_lmInfo.appDataSizeBytes;
 	}
+
+	int ScriptLmDescription::optoInterfaceDataOffset() const
+	{
+		return m_lmDesc.optoInterface().m_optoInterfaceDataOffset;
+	}
+
+	int ScriptLmDescription::optoPortDataSize() const
+	{
+		return m_lmDesc.optoInterface().m_optoPortDataSize;
+	}
 }
 
