@@ -196,7 +196,7 @@ private:
 
 	void compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile,
 							  const std::shared_ptr<Hardware::DeviceObject>& sourceObject, const std::shared_ptr<Hardware::DeviceObject>& targetObject,
-							  ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray, bool presets);
+							  ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray, bool fileTypeIsPreset);
 	void compareBusTypes(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 	void compareSchemas(const QString& fileName, const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);
 	void compareConnections(const std::shared_ptr<DbFile>& sourceFile, const std::shared_ptr<DbFile>& targetFile, ReportTable* const headerTable, std::vector<std::shared_ptr<ReportSection> >* sectionsArray);

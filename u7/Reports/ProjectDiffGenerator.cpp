@@ -997,13 +997,22 @@ void ProjectDiffGenerator::compareFileContents(int rootFileId,
 		return;
 	}
 
+	bool fileTypeIsPreset = rootFileId == db()->systemFileId(DbDir::HardwarePresetsDir);
+
 	// File was deleted
 	//
 	if (sourceFile != nullptr && sourceFile->deleted() == true)
 	{
 		if (hardwareObject == true)
 		{
-			addHeaderTableItem(headerTable, sourceObject->equipmentId(), tr("Deleted"), sourceFile);
+			if (fileTypeIsPreset == true)
+			{
+				addHeaderTableItem(headerTable, tr("%1, %2").arg(sourceObject->presetName()).arg(sourceObject->equipmentId()), tr("Deleted"), sourceFile);
+			}
+			else
+			{
+				addHeaderTableItem(headerTable, sourceObject->equipmentId(), tr("Deleted"), sourceFile);
+			}
 		}
 		else
 		{
@@ -1017,7 +1026,14 @@ void ProjectDiffGenerator::compareFileContents(int rootFileId,
 		{
 			if (hardwareObject == true)
 			{
-				addHeaderTableItem(headerTable, targetObject->equipmentId(), tr("Deleted"), targetFile);
+				if (fileTypeIsPreset == true)
+				{
+					addHeaderTableItem(headerTable, tr("%1, %2").arg(targetObject->presetName()).arg(targetObject->equipmentId()), tr("Deleted"), targetFile);
+				}
+				else
+				{
+					addHeaderTableItem(headerTable, targetObject->equipmentId(), tr("Deleted"), targetFile);
+				}
 			}
 			else
 			{
@@ -1031,9 +1047,7 @@ void ProjectDiffGenerator::compareFileContents(int rootFileId,
 	//
 	if (hardwareObject == true)
 	{
-		bool preset = rootFileId == db()->systemFileId(DbDir::HardwarePresetsDir);
-
-		compareDeviceObjects(sourceFile, targetFile, sourceObject, targetObject, headerTable, sectionsArray, preset);
+		compareDeviceObjects(sourceFile, targetFile, sourceObject, targetObject, headerTable, sectionsArray, fileTypeIsPreset);
 		return;
 	}
 
@@ -1114,7 +1128,7 @@ void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& s
 											 const std::shared_ptr<Hardware::DeviceObject>& targetObject,
 											 ReportTable* const headerTable,
 											 std::vector<std::shared_ptr<ReportSection>>* sectionsArray,
-											 bool presets)
+											 bool fileTypeIsPreset)
 {
 	if (headerTable == nullptr || sectionsArray == nullptr)
 	{
@@ -1147,14 +1161,28 @@ void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& s
 	//
 	if (sourceObject != nullptr && targetObject == nullptr)
 	{
-		addHeaderTableItem(headerTable, tr("%1").arg(sourceObject->equipmentId()), tr("Added"), sourceFile);
+		if (fileTypeIsPreset == false)
+		{
+			addHeaderTableItem(headerTable, tr("%1").arg(sourceObject->equipmentId()), tr("Added"), sourceFile);
+		}
+		else
+		{
+			addHeaderTableItem(headerTable, tr("%1, %2").arg(sourceObject->presetName()).arg(sourceObject->equipmentId()), tr("Added"), sourceFile);
+		}
 		return;
 	}
 	else
 	{
 		if (sourceObject == nullptr && targetObject != nullptr)
 		{
-			addHeaderTableItem(headerTable, tr("%1").arg(targetObject->equipmentId()), tr("Added"), targetFile);
+			if (fileTypeIsPreset == false)
+			{
+				addHeaderTableItem(headerTable, tr("%1").arg(targetObject->equipmentId()), tr("Added"), targetFile);
+			}
+			else
+			{
+				addHeaderTableItem(headerTable, tr("%1, %2").arg(targetObject->presetName()).arg(targetObject->equipmentId()), tr("Added"), targetFile);
+			}
 			return;
 		}
 	}
@@ -1167,14 +1195,33 @@ void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& s
 
 	if (diffs.empty() == false)
 	{
-		addHeaderTableItem(headerTable, tr("%1").arg(targetObject->equipmentId()), E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
+		if (fileTypeIsPreset == false)
+		{
+			addHeaderTableItem(headerTable, tr("%1").arg(targetObject->equipmentId()),
+							   E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
+		}
+		else
+		{
+			addHeaderTableItem(headerTable, tr("%1, %2").arg(targetObject->presetName()).arg(targetObject->equipmentId()),
+							   E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
+		}
 
-		QString equmipmentType = presets == true ? tr("Preset: ") : tr("Equipment: ");
+		QString equipmentType = fileTypeIsPreset == true ? tr("Preset") : tr("Equipment");
+		QString sectionName;
 
-		std::shared_ptr<ReportSection> deviceDiffSection = std::make_shared<ReportSection>(equmipmentType + targetObject->equipmentId());
+		if (fileTypeIsPreset == true)
+		{
+			sectionName = tr("%1: %2, %3").arg(equipmentType).arg(targetObject->presetName()).arg(targetObject->equipmentId());
+		}
+		else
+		{
+			sectionName = tr("%1: %2").arg(equipmentType).arg(targetObject->equipmentId());
+		}
+
+		std::shared_ptr<ReportSection> deviceDiffSection = std::make_shared<ReportSection>(sectionName);
 		sectionsArray->push_back(deviceDiffSection);
 
-		deviceDiffSection->addText(tr("%1: %2, %3\n\n").arg(equmipmentType).arg(targetObject->equipmentId()).arg(changesetString(targetFile)), currentCharFormat(), currentBlockFormat());
+		deviceDiffSection->addText(tr("%1, %2\n\n").arg(sectionName).arg(changesetString(targetFile)), currentCharFormat(), currentBlockFormat());
 
 		saveFormat();
 		setFont(m_tableFont);
