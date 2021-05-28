@@ -85,50 +85,65 @@ namespace VFrame30
 		Q_OBJECT
 
 		/// \brief Border line weight, in pixels
+		Q_PROPERTY(double lineWeight READ weight WRITE setWeight)
 		Q_PROPERTY(double LineWeight READ weight WRITE setWeight)
 
 		/// \brief Border line color name
+		Q_PROPERTY(QColor lineColor READ lineColor WRITE setLineColor)
 		Q_PROPERTY(QColor LineColor READ lineColor WRITE setLineColor)
 
 		/// \brief Rectangle fill color name
+		Q_PROPERTY(QColor fillColor READ fillColor WRITE setFillColor)
 		Q_PROPERTY(QColor FillColor READ fillColor WRITE setFillColor)
 
 		/// \brief Switches rectangle filling
+		Q_PROPERTY(double fill READ fill WRITE setFill)
 		Q_PROPERTY(double Fill READ fill WRITE setFill)
 
 		/// \brief Switches rectangle border drawing
+		Q_PROPERTY(double drawRect READ drawRect WRITE setDrawRect)
 		Q_PROPERTY(double DrawRect READ drawRect WRITE setDrawRect)
 
 		/// \brief Sets rect pen line style (0 - NoPen, 1 - SolidLine, 2 - DashLine, 3 - DotLine, 4 - DashDotLine, 5 - DashDotDotLine)
+		Q_PROPERTY(E::LineStyle lineStyle READ lineStyle WRITE setLineStyle)
 		Q_PROPERTY(E::LineStyle LineStyle READ lineStyle WRITE setLineStyle)
 
 		// Text Category Properties
 
 		/// \brief Text color name
+		Q_PROPERTY(QColor textColor READ textColor WRITE setTextColor)
 		Q_PROPERTY(QColor TextColor READ textColor WRITE setTextColor)
 
 		/// \brief Rectangle text
+		Q_PROPERTY(QString text READ text WRITE setText)
 		Q_PROPERTY(QString Text READ text WRITE setText)
 
 		/// \brief Wrap words for long text
+		Q_PROPERTY(bool wordWrap READ wordWrap WRITE setWordWrap)
 		Q_PROPERTY(bool WordWrap READ wordWrap WRITE setWordWrap)
 
 		/// \brief Horizontal text alignment
+		Q_PROPERTY(E::HorzAlign alignHorz READ horzAlign WRITE setHorzAlign)
 		Q_PROPERTY(E::HorzAlign AlignHorz READ horzAlign WRITE setHorzAlign)
 
 		/// \brief Vertical text alignment
+		Q_PROPERTY(E::VertAlign alignVert READ vertAlign WRITE setVertAlign)
 		Q_PROPERTY(E::VertAlign AlignVert READ vertAlign WRITE setVertAlign)
 
 		/// \brief Font name
+		Q_PROPERTY(QString fontName READ getFontName WRITE setFontName)
 		Q_PROPERTY(QString FontName READ getFontName WRITE setFontName)
 
 		/// \brief Font size
+		Q_PROPERTY(double fontSize READ getFontSize WRITE setFontSize)
 		Q_PROPERTY(double FontSize READ getFontSize WRITE setFontSize)
 
 		/// \brief Font bold
+		Q_PROPERTY(bool fontBold READ getFontBold WRITE setFontBold)
 		Q_PROPERTY(bool FontBold READ getFontBold WRITE setFontBold)
 
 		/// \brief Font italic
+		Q_PROPERTY(bool fontItalic READ getFontItalic WRITE setFontItalic)
 		Q_PROPERTY(bool FontItalic READ getFontItalic WRITE setFontItalic)
 
 

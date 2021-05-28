@@ -797,8 +797,7 @@ namespace VFrame30
 				if (p.afbParamValue().value().type() == currentParam.afbParamValue().value().type())
 				{
 					p.setAfbParamValue(currentParam.afbParamValue());
-
-					qDebug() << "Param: " << currentParam.caption() << ", value: " << p.afbParamValue().toString();
+					//qDebug() << "Param: " << currentParam.caption() << ", value: " << p.afbParamValue().toString();
 				}
 			}
 		}

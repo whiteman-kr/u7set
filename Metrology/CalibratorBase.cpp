@@ -544,7 +544,7 @@ void CalibratorBase::onSettings(int row, int)
 	dialog->setWindowTitle(tr("Settings calibrator %1").arg(manager->calibratorChannel() + 1));
 	dialog->move(m_pInitDialog->geometry().center() - dialog->rect().center());
 
-		// serial port
+		// Serial ports for calibrators
 		//
 		QHBoxLayout* portLayout = new QHBoxLayout ;
 
@@ -553,10 +553,40 @@ void CalibratorBase::onSettings(int row, int)
 
 		QComboBox* portCombo = new QComboBox;
 
+		// ports for all calibrators
+		//
 		foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
 		{
 			portCombo->addItem(info.portName());
 		}
+
+		#ifdef Q_OS_WIN
+
+			// USB ports for Rigol
+			//
+			ViSession rscMng;
+			ViStatus result = viOpenDefaultRM(&rscMng);		// open resource manager
+			if (result == VI_SUCCESS || result == VI_WARN_CONFIG_NLOADED)
+			{
+				// search for the calibrator
+				//
+				ViChar usbPortCaption[VI_FIND_BUFLEN];
+				ViUInt32 usbPortCount;
+				ViFindList listOfFound;
+
+				result = viFindRsrc(rscMng, const_cast<ViString>("USB?*"), &listOfFound, &usbPortCount, usbPortCaption);
+				if (result == VI_SUCCESS)
+				{
+					portCombo->addItem(usbPortCaption);
+				}
+
+				viClose(rscMng);
+			}
+
+		#endif
+
+		//
+		//
 		portCombo->setEditable(true);
 		portCombo->setCurrentText(calibrator->portName());
 

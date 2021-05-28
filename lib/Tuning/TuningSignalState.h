@@ -78,6 +78,7 @@ class TuningSignalState
 	Q_GADGET
 
 	/// \brief Contains a 64-bit hash of a signal
+	Q_PROPERTY(Hash hash READ hash)
 	Q_PROPERTY(Hash Hash READ hash)
 
 	/*! \brief Contains current signal value
@@ -100,27 +101,35 @@ class TuningSignalState
 		}
 		\endcode
 	*/
+	Q_PROPERTY(QVariant value READ toVariant)
 	Q_PROPERTY(QVariant Value READ toVariant)
 
 	/// \brief Contains low bound of signal value
+	Q_PROPERTY(QVariant lowBound READ lowBoundToVariant)
 	Q_PROPERTY(QVariant LowBound READ lowBoundToVariant)
 
 	/// \brief Contains high bound of signal value.
+	Q_PROPERTY(QVariant highBound READ highBoundToVariant)
 	Q_PROPERTY(QVariant HighBound READ highBoundToVariant)
 
 	/// \brief Contains signal validity flag.
+	Q_PROPERTY(bool valid READ valid)
 	Q_PROPERTY(bool Valid READ valid)
 
 	/// \brief This flag is set to true when signal value is out of range
+	Q_PROPERTY(bool outOfRange READ outOfRange)
 	Q_PROPERTY(bool OutOfRange READ outOfRange)
 
 	/// \brief This flag is set to true when a new value is being written to a logic module
+	Q_PROPERTY(bool writeInProgress READ writeInProgress)
 	Q_PROPERTY(bool WriteInProgress READ writeInProgress)
 
 	/// \brief This flag is set to true when logic module control is enabled
+	Q_PROPERTY(bool controlIsEnabled READ controlIsEnabled)
 	Q_PROPERTY(bool ControlIsEnabled READ controlIsEnabled)
 
 	/// \brief This flag is set to true when signal has access for tuning.\n
+	Q_PROPERTY(bool writingIsEnabled READ writingIsEnabled)
 	Q_PROPERTY(bool WritingIsEnabled READ writingIsEnabled)
 
 public:

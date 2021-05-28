@@ -96,9 +96,9 @@ namespace VFrame30
 		// Further processing
 		//
 
-		if (state.Valid === true)
+		if (state.valid === true)
 		{
-			let text = param.Caption;
+			let text = param.caption;
 			...
 		}
 		\endcode

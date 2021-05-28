@@ -100,55 +100,70 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-		/// \brief Application signal identifiers array. Use <b>AppSignalIDs.length</b> to get number of identifiers
+		/// \brief Application signal identifiers array. Use <b>appSignalIDs.length</b> to get number of identifiers
+		Q_PROPERTY(QStringList signalIDs READ signalIds WRITE setSignalIds)
 		Q_PROPERTY(QStringList SignalIDs READ signalIds WRITE setSignalIds)
 
-		/// \brief Application signal identifiers array. Use <b>AppSignalIDs.length</b> to get number of identifiers
+		/// \brief Application signal identifiers array. Use <b>appSignalIDs.length</b> to get number of identifiers
+		Q_PROPERTY(QStringList appSignalIDs READ signalIds WRITE setSignalIds)
 		Q_PROPERTY(QStringList AppSignalIDs READ signalIds WRITE setSignalIds)
 
 		// Appearance
 		//
 
 		/// \brief Border line weight, in pixels
+		Q_PROPERTY(double lineWeight READ lineWeight WRITE setLineWeight)
 		Q_PROPERTY(double LineWeight READ lineWeight WRITE setLineWeight)
 
 		/// \brief Border line color name
+		Q_PROPERTY(QColor lineColor READ lineColor WRITE setLineColor)
 		Q_PROPERTY(QColor LineColor READ lineColor WRITE setLineColor)
 
 		/// \brief Rectangle fill color name
+		Q_PROPERTY(QColor fillColor READ fillColor WRITE setFillColor)
 		Q_PROPERTY(QColor FillColor READ fillColor WRITE setFillColor)
 
 		/// \brief Text color name
+		Q_PROPERTY(QColor textColor READ textColor WRITE setTextColor)
 		Q_PROPERTY(QColor TextColor READ textColor WRITE setTextColor)
 
 		/// \brief Bounding rectangle drawing
+		Q_PROPERTY(bool drawRect READ drawRect WRITE setDrawRect)
 		Q_PROPERTY(bool DrawRect READ drawRect WRITE setDrawRect)
 
 		// Text Category Properties
 		//
 
 		/// \brief Horizontal text alignment
+		Q_PROPERTY(E::HorzAlign alignHorz READ horzAlign WRITE setHorzAlign)
 		Q_PROPERTY(E::HorzAlign AlignHorz READ horzAlign WRITE setHorzAlign)
 
 		/// \brief Vertical text alignment
+		Q_PROPERTY(E::VertAlign alignVert READ vertAlign WRITE setVertAlign)
 		Q_PROPERTY(E::VertAlign AlignVert READ vertAlign WRITE setVertAlign)
 
 		/// \brief Font name
+		Q_PROPERTY(QString fontName READ getFontName WRITE setFontName)
 		Q_PROPERTY(QString FontName READ getFontName WRITE setFontName)
 
 		/// \brief Font size
+		Q_PROPERTY(double fontSize READ getFontSize WRITE setFontSize)
 		Q_PROPERTY(double FontSize READ getFontSize WRITE setFontSize)
 
 		/// \brief Font bold
+		Q_PROPERTY(bool fontBold READ getFontBold WRITE setFontBold)
 		Q_PROPERTY(bool FontBold READ getFontBold WRITE setFontBold)
 
 		/// \brief Font italic
+		Q_PROPERTY(bool fontItalic READ getFontItalic WRITE setFontItalic)
 		Q_PROPERTY(bool FontItalic READ getFontItalic WRITE setFontItalic)
 
 		/// \brief Text
+		Q_PROPERTY(QString text READ text WRITE setText)
 		Q_PROPERTY(QString Text READ text WRITE setText)
 
 		/// \brief Precision
+		Q_PROPERTY(int precision READ precision WRITE setPrecision)
 		Q_PROPERTY(int Precision READ precision WRITE setPrecision)
 
 	public:

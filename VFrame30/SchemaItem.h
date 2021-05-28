@@ -78,6 +78,7 @@ namespace VFrame30
 		Q_OBJECT
 
 		/// \brief Object name
+		Q_PROPERTY(QString objectName READ objectName)
 		Q_PROPERTY(QString ObjectName READ objectName)
 
 		/*! \brief Turns <b>ClickScript</b> script call when user clicks mouse button on schema item
@@ -86,6 +87,7 @@ namespace VFrame30
 
 		  \warning This property has no effect on SchemaItemPushButton and SchemaItemLineEdit.
 		*/
+		Q_PROPERTY(bool acceptClick READ acceptClick WRITE setAcceptClick)
 		Q_PROPERTY(bool AcceptClick READ acceptClick WRITE setAcceptClick)
 
 		/*! \brief Blinking phase. Value of this property is inverted approximately each 250 milliseconds
@@ -97,10 +99,19 @@ namespace VFrame30
 		Value inverting is based on system clock. This is required to synchronize blinking when multiple Monitor or TuningClient
 		applications run on the same computer.
 
-		\warning <b>PreDrawScript</b> code calling is not synchronized with BlinkPhase inverting. According to this, it is possible that BlinkPhase value will not changed
-		in two consecutive <b>PreDrawScript</b> calls.
+		\warning <b>preDrawScript</b> code calling is not synchronized with <b>blinkPhase</b> inverting. According to this, it is possible that <b>blinkPhase</b> value will not changed
+		in two consecutive <b>preDrawScript</b> calls.
 		*/
+		Q_PROPERTY(bool blinkPhase READ blinkPhase)
 		Q_PROPERTY(bool BlinkPhase READ blinkPhase)
+
+		/// \brief Show or hide schema item in client Software (Monitor, TuningClient, etc)
+		Q_PROPERTY(bool visible READ visible WRITE setVisible)
+		Q_PROPERTY(bool Visible READ visible WRITE setVisible)
+
+		/// \brief SchemaItem's tags.
+		Q_PROPERTY(QStringList tags READ tagsAsList)
+		Q_PROPERTY(QStringList Tags READ tagsAsList)
 
 	protected:
 		SchemaItem();
@@ -268,17 +279,20 @@ namespace VFrame30
 			return dynamic_cast<const SCHEMAITEMTYPE*>(this);
 		}
 
-		bool isControl() const noexcept;
+		bool isControl() const ;
 
-		bool isLocked() const noexcept;
+		bool isLocked() const ;
 		void setLocked(bool locked);
 
-		bool isCommented() const noexcept;
-		bool commented() const noexcept;
+		bool isCommented() const;
+		bool commented() const;
 		void setCommented(bool value);
 
-		QUuid guid() const noexcept;
-		void setGuid(const QUuid& guid);
+		bool visible() const;
+		void setVisible(bool value);
+
+		QUuid guid() const;
+		void setGuid(QUuid guid);
 		virtual void setNewGuid();			// set new GUID for item, for it's pins etc, useful for copy (mousemove + ctrl)
 
 		// Item position unit, can be inches or pixels
@@ -286,22 +300,31 @@ namespace VFrame30
 		SchemaUnit itemUnit() const noexcept;
 		void setItemUnit(SchemaUnit value);
 
-		QString label() const noexcept;
+		[[nodiscard]] QString tagsAsString() const;
+		[[nodiscard]] QStringList tagsAsList() const;
+
+		void setTags(QString tags);
+		void setTagsList(const QStringList& tags);
+
+		/// \brief Check if SchemaItem has specified tag.
+		Q_INVOKABLE	bool hasTag(QString tag) const;
+
+		QString label() const ;
 		void setLabel(const QString& value);
 
-		E::TextPos labelPos() const noexcept;
+		E::TextPos labelPos() const ;
 		void setLabelPos(E::TextPos value);
 
-		bool acceptClick() const noexcept;
+		bool acceptClick() const ;
 		void setAcceptClick(bool value);
 
-		QString clickScript() const noexcept;
+		QString clickScript() const ;
 		void setClickScript(QString value);
 
-		QString preDrawScript() const noexcept;
+		QString preDrawScript() const ;
 		void setPreDrawScript(QString value);
 
-		bool blinkPhase() const noexcept;
+		bool blinkPhase() const;
 
 		const CDrawParam* drawParam() const;
 		void setDrawParam(CDrawParam* value);
@@ -320,8 +343,11 @@ namespace VFrame30
 		bool m_static = true;
 		bool m_locked = false;
 		bool m_commented = false;
+		bool m_visible = true;		// Visible for client
 		QUuid m_guid;
 		SchemaUnit m_itemUnit;		// Item position unit, can be inches or pixels
+
+		QStringList m_tags;
 
 		QString m_label;
 		E::TextPos m_labelPos = E::TextPos::RightTop;
@@ -330,6 +356,8 @@ namespace VFrame30
 		QString m_clickScript;		// Qt script on mouse left button click
 		QString m_preDrawScript;
 
+		// Runtime stuff
+		//
 		bool m_blinkPhase = false;			// Taken from m_drawParam
 		CDrawParam* m_drawParam = nullptr;	// Is filled before PreDrawScript (in Schema::draw) to have ability to call MacroExpander::expand in AppSiganlIDs getter from script
 
