@@ -1,6 +1,7 @@
 #include "SimAppSignalManager.h"
 #include "Simulator.h"
 #include "../Proto/serialization.pb.h"
+#include "../CommonLib/Hash.h"
 
 
 namespace Sim
@@ -912,6 +913,19 @@ static const AppSignalParam dummy;
 	bool AppSignalManager::signalHasTag(const QString& appSignalId, const QString& tag) const
 	{
 		return signalHasTag(::calcHash(appSignalId), tag);
+	}
+
+	E::SignalType AppSignalManager::signalType(Hash signalHash, bool* found) const
+	{
+		Q_UNUSED(signalHash);
+		Q_UNUSED(found);
+		Q_ASSERT(false);		// TO DO
+		return {};
+	}
+
+	E::SignalType AppSignalManager::signalType(const QString& appSignalId, bool* found) const
+	{
+		return signalType(::calcHash(appSignalId), found);
 	}
 
 	QString AppSignalManager::equipmentToAppSiganlId(const QString& /*equipmentId*/) const

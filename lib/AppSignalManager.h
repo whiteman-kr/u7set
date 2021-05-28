@@ -64,6 +64,9 @@ public:
 	virtual bool signalHasTag(Hash signalHash, const QString& tag) const final;
 	virtual bool signalHasTag(const QString& appSignalId, const QString& tag) const final;
 
+	virtual E::SignalType signalType(Hash signalHash, bool* found) const final;
+	virtual E::SignalType signalType(const QString& appSignalId, bool* found) const final;
+
 	virtual QString equipmentToAppSiganlId(const QString& equipmentId) const final;
 
 	// IAppSignalManager implememntation - Setpoints

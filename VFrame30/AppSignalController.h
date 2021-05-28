@@ -122,8 +122,14 @@ namespace VFrame30
 		QJSValue signalState(QString signalId) const;		// Returns AppSignalState
 		QJSValue signalState(Hash signalHash) const;		// Returns AppSignalState
 
-		/// \brief Returns true if signal specified by <b>signalId</b> is exist.
+		/// \brief Returns <b>true</b> if signal specified by <b>signalId</b> is exist.
 		bool signalExists(QString signalId) const;
+
+		/// \brief Returns <b>true</b> for discrete signals.
+		bool isDiscrete(QString signalId) const;
+
+		/// \brief Returns <b>true</b> for analog signals.
+		bool isAnalog(QString signalId) const;
 
 		// Data
 		//
