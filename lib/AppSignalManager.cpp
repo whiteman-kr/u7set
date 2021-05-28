@@ -385,6 +385,27 @@ bool AppSignalManager::signalHasTag(const QString& appSignalId, const QString& t
 	return signalHasTag(::calcHash(appSignalId), tag);
 }
 
+E::SignalType AppSignalManager::signalType(Hash signalHash, bool* found) const
+{
+	QReadLocker rl(&m_paramsLocker);
+
+	auto result = m_signalParams.find(signalHash);
+
+	if (found != nullptr)
+	{
+		*found = (result != m_signalParams.end());
+	}
+
+	return result == m_signalParams.end() ?
+				E::SignalType::Discrete :
+				result->second.type();
+}
+
+E::SignalType AppSignalManager::signalType(const QString& appSignalId, bool* found) const
+{
+	return signalType(::calcHash(appSignalId), found);
+}
+
 QString AppSignalManager::equipmentToAppSiganlId(const QString& equipmentId) const
 {
 	QString result;

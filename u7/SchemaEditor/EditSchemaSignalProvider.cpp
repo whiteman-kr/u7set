@@ -177,6 +177,19 @@ bool EditSchemaAppSignalProvider::signalHasTag(const QString& appSignalId, const
 	return signalTags(appSignalId).contains(tag, Qt::CaseInsensitive);
 }
 
+E::SignalType EditSchemaAppSignalProvider::signalType(Hash signalHash, bool* found) const
+{
+	Q_UNUSED(signalHash);
+	Q_UNUSED(found);
+	Q_ASSERT(false);	// to do
+	return E::SignalType::Analog;
+}
+
+E::SignalType EditSchemaAppSignalProvider::signalType(const QString& appSignalId, bool* found) const
+{
+	return signalType(::calcHash(appSignalId), found);
+}
+
 QString EditSchemaAppSignalProvider::equipmentToAppSiganlId(const QString& /*equipmentId*/) const
 {
 	Q_ASSERT(false);	// todo
