@@ -209,7 +209,7 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
 # Interface for calibrator Rigol DG1062Z
 #
-win32:LIBS += ../../u7set/Metrology/Visa/visa64.lib
+win32:LIBS += $$_PRO_FILE_PWD_/Visa/visa64.lib
 
 # Visual Leak Detector
 #
