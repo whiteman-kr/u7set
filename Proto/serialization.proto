@@ -1183,6 +1183,7 @@ message AppSignalCalculatedParam
     optional bool isConst = 9 [default = false];
     optional double constValue = 10 [default = 0];
 	repeated StateFlagSignal stateFlagsSignals = 11;
+	optional bool isEndpoint = 12 [default = false];
 }
 
 message AppSignal

@@ -120,6 +120,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoRawInSignalsAsComputed),
 			PROC_TO_CALL(ModuleLogicCompiler::fillComparatorSet),
+			PROC_TO_CALL(ModuleLogicCompiler::findEndpointSignals),
 		};
 
 		bool result = runProcs(procs);
@@ -2780,7 +2781,7 @@ namespace Builder
 		bool result = true;
 
 		result &= processAcquiredIOSignalsValidity();
-		result &= processAcquiredOptoSignalsValidity();
+//		result &= processAcquiredOptoSignalsValidity();
 		result &= processSimlockItems();
 		result &= processMismatchItems();
 		result &= processSetFlagsItems();
@@ -7268,6 +7269,48 @@ namespace Builder
 			TEST_PTR_CONTINUE(ualAfb);
 
 			result &= addToComparatorSet(ualAfb);
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::findEndpointSignals()
+	{
+		bool result = true;
+
+		for(const UalItem* ualItem : m_ualItems)
+		{
+			TEST_PTR_CONTINUE(ualItem);
+
+			if (ualItem->isSignal() == false)
+			{
+				continue;
+			}
+
+			bool isEndpoint = false;
+
+			if (ualItem->outputs().size() == 0)
+			{
+				isEndpoint = true;
+			}
+
+			QString appSignalID = ualItem->strID();
+
+			AppSignal* s = m_signals->getSignal(appSignalID);
+
+			if (s == nullptr)
+			{
+				Q_ASSERT(false);	// this error should be detected early!
+
+				// Signal identifier %1 is not found (Logic schema %2).
+				//
+				m_log->errALC5000(appSignalID, ualItem->guid(), ualItem->schemaID());
+
+				result = false;
+				continue;
+			}
+
+			s->setEndpoint(isEndpoint);
 		}
 
 		return result;

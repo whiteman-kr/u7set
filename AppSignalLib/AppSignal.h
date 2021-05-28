@@ -522,6 +522,9 @@ public:
 	double constValue() const { return m_constValue; }
 	void setConstValue(double constValue) { m_constValue = constValue; }
 
+	bool isEndpoint() const { return m_isEndpoint; }
+	void setEndpoint(bool ep) { m_isEndpoint = ep; }
+
 	//
 
 	void writeToXml(XmlWriteHelper& xml);
@@ -676,6 +679,8 @@ private:
 
 	bool m_isConst = false;
 	double m_constValue = 0;
+
+	bool m_isEndpoint = false;
 
 	AppSignalStateFlagsMap m_stateFlagsSignals;
 
