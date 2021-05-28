@@ -447,7 +447,7 @@ function test_UAL_CONN_4_1_06(sim)
 
 function test_UAL_CONN_4_1_07(sim)
 {
-	assert(conn01.disableDataIDControl === false);
+	assert(conn01.dataIDControlDisabled === false);
 
 	sim.connectionsSetEnabled(true);
 	sim.startForMs(15);
@@ -483,7 +483,7 @@ function test_UAL_CONN_4_1_07(sim)
 
 function test_UAL_CONN_4_1_08(sim)
 {
-	assert(conn02.disableDataIDControl === true);
+	assert(conn02.dataIDControlDisabled === true);
 
 	sim.connectionsSetEnabled(true);
 	sim.startForMs(15);
@@ -519,7 +519,7 @@ function test_UAL_CONN_4_1_08(sim)
 
 function test_UAL_CONN_4_1_09(sim)
 {
-	assert(conn02.enableManualSettings === true);
+	assert(conn02.manualSettingsEnabled === true);
 	
 	//
 	
@@ -534,7 +534,7 @@ function test_UAL_CONN_4_1_09(sim)
 
 function test_UAL_CONN_4_1_10(sim)
 {
-	assert(conn02.enableManualSettings === true);
+	assert(conn02.manualSettingsEnabled === true);
 	
 	//
 	
@@ -576,11 +576,11 @@ function test_UAL_CONN_4_1_12(sim)
 	//
 	// conn02_port2 is port 3 of OCM (place 14) with manual settings
 	//
-	assert(conn02.enableManualSettings === true);
+	assert(conn02.manualSettingsEnabled === true);
 
 	// conn01_port2 is port 4 of OCM (place 14) with auto settings
 	//
-	assert(conn01.enableManualSettings === false);
+	assert(conn01.manualSettingsEnabled === false);
 	
 	let optoModuleStartAddr = lm2Description.ioModuleBufStartAddr(14);
 	assert(conn01_port2.txBufAbsAddr.offset === optoModuleStartAddr.offset + conn02_port2.manualTxStartAddr + conn02_port2.manualTxWordsQuantity);
@@ -590,7 +590,7 @@ function test_UAL_CONN_4_1_12(sim)
 	//
 	// conn04_port1 port 1 of OCM (place 11) with auto settings
 	//
-	assert(conn04.enableManualSettings === false);
+	assert(conn04.manualSettingsEnabled === false);
 	
 	optoModuleStartAddr = lm1Description.ioModuleBufStartAddr(11);
 	assert(conn04_port1.txBufAbsAddr.offset === optoModuleStartAddr.offset);
@@ -599,7 +599,7 @@ function test_UAL_CONN_4_1_12(sim)
 	//
 	// conn04_port2 is port 5 of OCM (place 14) with auto settings
 	//
-	assert(conn04.enableManualSettings === false);
+	assert(conn04.manualSettingsEnabled === false);
 	
 	assert(conn04_port2.txBufAbsAddr.offset === conn01_port2.txBufAbsAddr.offset + conn01_port2.txDataSizeW);
 }
@@ -608,7 +608,7 @@ function test_UAL_CONN_4_1_13(sim)
 {
 	// conn02_port2 is port 3 of OCM (place 14) with manual settings
 	//
-	assert(conn02.enableManualSettings === true);
+	assert(conn02.manualSettingsEnabled === true);
 	
 	let optoModuleStartAddr = lm2Description.ioModuleBufStartAddr(14);
 	assert(conn02_port2.txBufAbsAddr.offset === optoModuleStartAddr.offset + conn02_port2.manualTxStartAddr);
@@ -636,7 +636,7 @@ function test_UAL_CONN_4_1_15(sim)
 	
 	//
 	
-	assert(conn01.enableManualSettings === false);
+	assert(conn01.manualSettingsEnabled === false);
 	
 	assert(conn01_port1.txBufAbsAddr.offset === optoInterfaceOffset);
 	assert(conn01_port1.rxBufAbsAddr.offset === optoInterfaceOffset);
@@ -652,7 +652,7 @@ function test_UAL_CONN_4_1_16(sim)
 	
 	//
 	
-	assert(conn03.enableManualSettings === true);
+	assert(conn03.manualSettingsEnabled === true);
 	
 	assert(conn03_port1.txBufAbsAddr.offset === optoInterfaceOffset + 1 * optoPortDataSize + conn03_port1.manualTxStartAddr);
 	assert(conn03_port1.rxBufAbsAddr.offset === optoInterfaceOffset + 1 * optoPortDataSize);
