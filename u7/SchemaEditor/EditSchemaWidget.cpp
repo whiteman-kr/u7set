@@ -5758,7 +5758,7 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 	//
 	QString preDrawScriptTemplateString = R"((function(schemaItemValue)
 {
-	// let appSignalId = schemaItemValue.SignalIDs[0];
+	// let appSignalId = schemaItemValue.signalIDs[0];
 
 	// Get data from AppDataService
 	// let signalParam = signals.signalParam(appSignalId);
@@ -5771,10 +5771,10 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 	// Get signal state
 	// if (signalState.Valid == true)
 	// {
-	//		schemaItemValue.Text = signalState.Value;
-	//		schemaItemValue.TextColor = "white";
-	//		schemaItemValue.FillColor = schemaItemValue.BlinkPhase ? "black" : "#A00000";
-	//		schemaItemValue.LineColor = "#000000";
+	//		schemaItemValue.text = signalState.value;
+	//		schemaItemValue.textColor = "white";
+	//		schemaItemValue.fillColor = schemaItemValue.blinkPhase ? "black" : "#A00000";
+	//		schemaItemValue.lineColor = "#000000";
 	// }
 }))";
 
@@ -5913,7 +5913,7 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 	QString preDrawScriptTemplateString = R"((function(schemaItemImageValue)
 {
 	// Get signal id by index from schema item
-	let appSignalId = schemaItemImageValue.SignalIDs[0];
+	let appSignalId = schemaItemImageValue.signalIDs[0];
 
 	// Get data from AppDataService or TuningService sources
 	// let signalState = tuning.signalState(appSignalId);
@@ -5921,14 +5921,14 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 
 	if (signalState.Valid == false)
 	{
-		schemaItemImageValue.CurrentImageID = "IMAGEID_NOT_VALID";
+		schemaItemImageValue.currentImageID = "IMAGEID_NOT_VALID";
 		return;
 	}
 
 	if (signalState.Value == 0)
-		schemaItemImageValue.CurrentImageID = "IMAGEID_OFF";
+		schemaItemImageValue.currentImageID = "IMAGEID_OFF";
 	else
-		schemaItemImageValue.CurrentImageID = "IMAGEID_ON";
+		schemaItemImageValue.currentImageID = "IMAGEID_ON";
 }))";
 
 	connect(preDrawScriptTemplate, &QPushButton::clicked, &d, [preDrawScriptEdit, preDrawScriptTemplateString](){preDrawScriptEdit->setText(preDrawScriptTemplateString);});
