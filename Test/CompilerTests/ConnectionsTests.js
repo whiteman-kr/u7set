@@ -31,6 +31,14 @@ var conn02;
 var conn02_port1;
 var conn02_port2;
 
+var conn03;
+var conn03_port1;
+var conn03_port2;
+
+var conn04;
+var conn04_port1;
+var conn04_port2;
+
 // initTestCase() - will be called before the first test function is executed.
 //
 function initTestCase(sim)
@@ -90,8 +98,38 @@ function initTestCase(sim)
 
 	assert(conn02_port2 != null)
 	assert(conn02_port2.equipmentID === "SYSTEMID_RACK01_FSCC02_MD14_OPTOPORT03");
+	
+	//
+	
+	conn03 = sim.connection("CONN_03");
+	
+	assert(conn03 != null);
+	
+	conn03_port1 = conn03.port1Info;
+	
+	assert(conn03_port1 != null)
+	assert(conn03_port1.equipmentID === "SYSTEMID_RACK01_FSCC01_MD00_OPTOPORT02");
+	
+	conn03_port2 = conn03.port2Info;
 
-    return;
+	assert(conn03_port2 != null)
+	assert(conn03_port2.equipmentID === "SYSTEMID_RACK01_FSCC02_MD00_OPTOPORT02");
+
+	//
+	
+	conn04 = sim.connection("CONN_04");
+	
+	assert(conn04 != null);
+	
+	conn04_port1 = conn04.port1Info;
+	
+	assert(conn04_port1 != null)
+	assert(conn04_port1.equipmentID === "SYSTEMID_RACK01_FSCC01_MD11_OPTOPORT01");
+	
+	conn04_port2 = conn04.port2Info;
+
+	assert(conn04_port2 != null)
+	assert(conn04_port2.equipmentID === "SYSTEMID_RACK01_FSCC02_MD14_OPTOPORT05");
 }
 
 // cleanupTestCase() - will be called after the last test function was executed.
@@ -556,6 +594,8 @@ function test_UAL_CONN_4_1_11(sim)
 
 function test_UAL_CONN_4_1_12(sim)
 {
+	// case: auto port after manual port
+	//
 	// conn02_port2 is port 3 of OCM (place 14) with manual settings
 	//
 	assert(conn02.enableManualSettings === true);
@@ -566,8 +606,50 @@ function test_UAL_CONN_4_1_12(sim)
 	
 	let optoModuleStartAddr = lm2Description.ioModuleBufStartAddr(14);
 	assert(conn01_port2.txBufAbsAddr.offset === optoModuleStartAddr.offset + conn02_port2.manualTxStartAddr + conn02_port2.manualTxWordsQuantity);
+	assert(conn01_port2.txBufAbsAddr.offset === conn02_port2.txBufAbsAddr.offset + conn02_port2.txDataSizeW);
+	
+	// case: first auto port
+	//
+	// conn04_port1 port 1 of OCM (place 11) with auto settings
+	//
+	assert(conn04.enableManualSettings === false);
+	
+	optoModuleStartAddr = lm1Description.ioModuleBufStartAddr(11);
+	assert(conn04_port1.txBufAbsAddr.offset === optoModuleStartAddr.offset);
+	
+	// case: auto port after auto port
+	//
+	// conn04_port2 is port 5 of OCM (place 14) with auto settings
+	//
+	assert(conn04.enableManualSettings === false);
+	
+	assert(conn04_port2.txBufAbsAddr.offset === conn01_port2.txBufAbsAddr.offset + conn01_port2.txDataSizeW);
 }
 
+function test_UAL_CONN_4_1_13(sim)
+{
+	// conn02_port2 is port 3 of OCM (place 14) with manual settings
+	//
+	assert(conn02.enableManualSettings === true);
+	
+	let optoModuleStartAddr = lm2Description.ioModuleBufStartAddr(14);
+	assert(conn02_port2.txBufAbsAddr.offset === optoModuleStartAddr.offset + conn02_port2.manualTxStartAddr);
+}
+
+function test_UAL_CONN_4_1_14(sim)
+{
+	let optoModuleStartAddr = lm2Description.ioModuleBufStartAddr(14);
+	
+	assert(conn02_port2.rxBufAbsAddr.offset === optoModuleStartAddr.offset + 163);
+	assert(conn02_port2.rxDataSizeW === conn02_port2.manualRxWordsQuantity);
+	assert(conn02_port2.rxDataSizeW == conn02_port1.txDataSizeW);	
+	
+	assert(conn01_port2.rxBufAbsAddr.offset === conn02_port2.rxBufAbsAddr.offset + conn02_port2.rxDataSizeW);
+	assert(conn01_port2.rxDataSizeW == conn01_port1.txDataSizeW);
+	
+	assert(conn04_port2.rxBufAbsAddr.offset === conn01_port2.rxBufAbsAddr.offset + conn01_port2.rxDataSizeW);
+	assert(conn04_port2.rxDataSizeW == conn04_port1.txDataSizeW);
+}
 
 // ---------------------------------------------------------------------------------------------------------
 //
