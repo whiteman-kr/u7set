@@ -4,60 +4,60 @@
 <context>
     <name>Calibrator</name>
     <message>
-        <location filename="../Calibrator.cpp" line="1672"/>
-        <location filename="../Calibrator.cpp" line="1690"/>
-        <location filename="../Calibrator.cpp" line="1706"/>
-        <location filename="../Calibrator.cpp" line="1728"/>
+        <location filename="../Calibrator.cpp" line="1514"/>
+        <location filename="../Calibrator.cpp" line="1531"/>
+        <location filename="../Calibrator.cpp" line="1547"/>
+        <location filename="../Calibrator.cpp" line="1569"/>
         <source>Unknown</source>
         <translation>Не определено</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1702"/>
+        <location filename="../Calibrator.cpp" line="1543"/>
         <source>Measure</source>
         <translation>Измерение</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1703"/>
+        <location filename="../Calibrator.cpp" line="1544"/>
         <source>Source</source>
         <translation>Источник</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1718"/>
+        <location filename="../Calibrator.cpp" line="1559"/>
         <source>mV</source>
         <translation>мВ</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1719"/>
+        <location filename="../Calibrator.cpp" line="1560"/>
         <source>mA</source>
         <translation>мА</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1720"/>
+        <location filename="../Calibrator.cpp" line="1561"/>
         <source>μA</source>
         <translation>μA</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1721"/>
+        <location filename="../Calibrator.cpp" line="1562"/>
         <source>nA</source>
         <translation>нА</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1722"/>
+        <location filename="../Calibrator.cpp" line="1563"/>
         <source>V</source>
         <translation>В</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1723"/>
+        <location filename="../Calibrator.cpp" line="1564"/>
         <source>Hz</source>
         <translation>Гц</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1724"/>
+        <location filename="../Calibrator.cpp" line="1565"/>
         <source>Ohm (Low)</source>
         <translation>Ом (low)</translation>
     </message>
     <message>
-        <location filename="../Calibrator.cpp" line="1725"/>
+        <location filename="../Calibrator.cpp" line="1566"/>
         <source>Ohm (High)</source>
         <translation>Ом (High)</translation>
     </message>
@@ -130,17 +130,17 @@
         <translation>Порт:</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="596"/>
+        <location filename="../CalibratorBase.cpp" line="571"/>
         <source>Calibrator type:</source>
         <translation>Тип калибратора:</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="613"/>
+        <location filename="../CalibratorBase.cpp" line="588"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="614"/>
+        <location filename="../CalibratorBase.cpp" line="589"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
@@ -2813,68 +2813,68 @@ Tuning signals: %1</source>
         <translation>Подготовка калибратора: %1 %2</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="433"/>
+        <location filename="../MeasureThread.cpp" line="434"/>
         <source>Please, switch polarity for calibrator %1
 You have used the negative (-) part of the electrical range.</source>
         <translation>Переключите полярность на калибраторе: %1
 Вы используете отрицательную (-) часть электрического диапазона.</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="442"/>
+        <location filename="../MeasureThread.cpp" line="443"/>
         <source>Please, switch polarity for calibrator %1
 You have used the positive (+) part of the electrical range.</source>
         <translation>Переключите полярность на калибраторе: %1
 Вы используете положительную (+) часть электрического диапазона.</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="519"/>
+        <location filename="../MeasureThread.cpp" line="520"/>
         <source>No points for measure</source>
         <translation>Нет точек измерения</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="531"/>
+        <location filename="../MeasureThread.cpp" line="532"/>
         <source>Point %1 / %2 </source>
         <translation>Точка %1 / %2 </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="613"/>
+        <location filename="../MeasureThread.cpp" line="614"/>
         <source>Wait timeout for point %1 / %2 </source>
         <translation>Ожидаем таймаут для точки %1 / %2 </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="620"/>
-        <location filename="../MeasureThread.cpp" line="1101"/>
-        <location filename="../MeasureThread.cpp" line="1731"/>
+        <location filename="../MeasureThread.cpp" line="621"/>
+        <location filename="../MeasureThread.cpp" line="1102"/>
+        <location filename="../MeasureThread.cpp" line="1732"/>
         <source>Save measurement </source>
         <translation>Сохранение измерения </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="751"/>
-        <location filename="../MeasureThread.cpp" line="1227"/>
+        <location filename="../MeasureThread.cpp" line="752"/>
+        <location filename="../MeasureThread.cpp" line="1228"/>
         <source>Comparator %1, Prepare %2</source>
         <translation>Уставка %1, Подготовка %2</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="754"/>
-        <location filename="../MeasureThread.cpp" line="1230"/>
+        <location filename="../MeasureThread.cpp" line="755"/>
+        <location filename="../MeasureThread.cpp" line="1231"/>
         <source>Hysteresis of comparator %1, Prepare %2</source>
         <translation>Зона возврата уставки %1, Подготовка %2</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="888"/>
-        <location filename="../MeasureThread.cpp" line="1398"/>
+        <location filename="../MeasureThread.cpp" line="889"/>
+        <location filename="../MeasureThread.cpp" line="1399"/>
         <source>Comparator %1, additional delay</source>
         <translation>Уставка %1, дополнительная задержка</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="891"/>
-        <location filename="../MeasureThread.cpp" line="1401"/>
+        <location filename="../MeasureThread.cpp" line="892"/>
+        <location filename="../MeasureThread.cpp" line="1402"/>
         <source>Hysteresis of comparator %1, additional delay</source>
         <translation>Зона возврата уставки %1, дополнительная задержка</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="942"/>
-        <location filename="../MeasureThread.cpp" line="1481"/>
+        <location filename="../MeasureThread.cpp" line="943"/>
+        <location filename="../MeasureThread.cpp" line="1482"/>
         <source>Comparator %1, for following signals, is already in state of logical &quot;%2&quot;:
 
 </source>
@@ -2883,30 +2883,30 @@ You have used the positive (+) part of the electrical range.</source>
 </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="946"/>
-        <location filename="../MeasureThread.cpp" line="1527"/>
+        <location filename="../MeasureThread.cpp" line="947"/>
+        <location filename="../MeasureThread.cpp" line="1528"/>
         <source>%1
 </source>
         <translation>%1
 </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="948"/>
-        <location filename="../MeasureThread.cpp" line="1539"/>
+        <location filename="../MeasureThread.cpp" line="949"/>
+        <location filename="../MeasureThread.cpp" line="1540"/>
         <source>
 Do you want to repeat the preparation process in order to switch the comparator to state of logical &quot;%1&quot;, click &quot;Yes&quot;. Go to next comparator, click &quot;No&quot;</source>
         <translation>
 Вы хотите повторить процесс подготовок, чтобы переключать уставку в состояние лог. &quot;%1&quot;, тогда выберите &quot;Да&quot;. Перейти к следующей уставке, выберите &quot;Нет&quot;</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="988"/>
-        <location filename="../MeasureThread.cpp" line="1575"/>
+        <location filename="../MeasureThread.cpp" line="989"/>
+        <location filename="../MeasureThread.cpp" line="1576"/>
         <source>Comparator %1, Step %2</source>
         <translation>Уставка %1, Шаг %2</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="991"/>
-        <location filename="../MeasureThread.cpp" line="1578"/>
+        <location filename="../MeasureThread.cpp" line="992"/>
+        <location filename="../MeasureThread.cpp" line="1579"/>
         <source>Hysteresis of comparator %1, Step %2</source>
         <translation>Зона возврата уставки %1, Шаг %2</translation>
     </message>
@@ -3327,38 +3327,38 @@ Do you want to repeat the preparation process in order to switch the comparator 
 <context>
     <name>Options</name>
     <message>
-        <location filename="../Options.cpp" line="766"/>
+        <location filename="../Options.cpp" line="771"/>
         <source>Simple</source>
         <translation>Простой</translation>
     </message>
     <message>
-        <location filename="../Options.cpp" line="767"/>
+        <location filename="../Options.cpp" line="772"/>
         <source>Extended (show columns for metrological certification)</source>
         <translation>Расширенный (отображаются значения для аттестации)</translation>
     </message>
     <message>
-        <location filename="../Options.cpp" line="768"/>
+        <location filename="../Options.cpp" line="773"/>
         <source>Detail electric (show all measurements at one point)</source>
         <translation>Детальный электрический (отображаются все измерения в точке)</translation>
     </message>
     <message>
-        <location filename="../Options.cpp" line="769"/>
+        <location filename="../Options.cpp" line="774"/>
         <source>Detail engineering (show all measurements at one point)</source>
         <translation>Детальный физический (отображаются все измерения в точке)</translation>
     </message>
     <message>
-        <location filename="../Options.cpp" line="1379"/>
+        <location filename="../Options.cpp" line="1384"/>
         <source>English</source>
         <translation>Английский</translation>
     </message>
     <message>
-        <location filename="../Options.cpp" line="1380"/>
+        <location filename="../Options.cpp" line="1385"/>
         <source>Russian</source>
         <translation>Русский</translation>
     </message>
     <message>
-        <location filename="../Options.cpp" line="772"/>
-        <location filename="../Options.cpp" line="1383"/>
+        <location filename="../Options.cpp" line="777"/>
+        <location filename="../Options.cpp" line="1388"/>
         <source>Unknown</source>
         <translation>Не определен</translation>
     </message>
