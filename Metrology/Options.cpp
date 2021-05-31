@@ -104,6 +104,11 @@ void CalibratorsOption::load()
 		QString port = s.value(QString("%1Calibrator%2/Port").arg(CALIBRATOR_OPTIONS_KEY).arg(c), defaultPort).toString();
 		int type = s.value(QString("%1Calibrator%2/Type").arg(CALIBRATOR_OPTIONS_KEY).arg(c), CalibratorType::Calys75).toInt();
 
+		if (ERR_CALIBRATOR_TYPE(type) == true)
+		{
+			type = CalibratorType::Calys75;
+		}
+
 		m_calibrator[c].setPort(port);
 		m_calibrator[c].setType(type);
 	}
