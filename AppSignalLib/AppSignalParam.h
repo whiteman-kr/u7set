@@ -323,6 +323,10 @@ class AppSignalParam
 	Q_PROPERTY(bool isDiscrete READ isDiscrete)
 	Q_PROPERTY(bool IsDiscrete READ isDiscrete)
 
+	/// \brief Signal is endpoint
+	Q_PROPERTY(bool isEndpoint READ isEndpoint)
+	Q_PROPERTY(bool IsEndpoint READ isEndpoint)
+
 public:
 	AppSignalParam() = default;
 	AppSignalParam(const AppSignalParam&) = default;
@@ -416,6 +420,9 @@ public:
 	[[nodiscard]] bool enableTuning() const;
 	void setEnableTuning(bool value);
 
+	[[nodiscard]] bool isEndpoint() const;
+	void setEndpoint(bool value);
+
 	[[nodiscard]] TuningValue tuningDefaultValue() const;
 	[[nodiscard]] QVariant tuningDefaultValueToVariant() const;
 	void setTuningDefaultValue(const TuningValue& value);
@@ -479,6 +486,7 @@ private:
 	double m_filteringTime = 0.005;
 	double m_spreadTolerance = 2;
 	bool m_enableTuning = false;
+	bool m_isEndpoint = false;
 	TuningValue m_tuningDefaultValue;
 	TuningValue m_tuningLowBound;
 	TuningValue m_tuningHighBound;

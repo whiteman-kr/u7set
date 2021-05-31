@@ -255,6 +255,7 @@ void AppSignalParam::load(const AppSignal& s)
 	m_filteringTime = s.filteringTime();
 	m_spreadTolerance = s.spreadTolerance();
 	m_enableTuning = s.enableTuning();
+	m_isEndpoint = s.isEndpoint();
 
 	m_tuningDefaultValue = s.tuningDefaultValue();
 	m_tuningLowBound = s.tuningLowBound();
@@ -300,6 +301,15 @@ void AppSignalParam::save(::Proto::AppSignal* message) const
 
 	message->set_specpropstruct(m_specPropStruct.toStdString());
 	message->set_specpropvalues(m_specPropValues.constData(), m_specPropValues.size());
+
+	// Signal properties calculated in compile-time
+
+	Proto::AppSignalCalculatedParam* calcParam = message->mutable_calcparam();
+
+	if (calcParam != nullptr)
+	{
+		calcParam->set_isendpoint(m_isEndpoint);
+	}
 
 	// Tags
 	//
@@ -610,6 +620,16 @@ bool AppSignalParam::enableTuning() const
 void AppSignalParam::setEnableTuning(bool value)
 {
 	m_enableTuning = value;
+}
+
+bool AppSignalParam::isEndpoint() const
+{
+	return m_isEndpoint;
+}
+
+void AppSignalParam::setEndpoint(bool value)
+{
+	m_isEndpoint = value;
 }
 
 TuningValue AppSignalParam::tuningDefaultValue() const
