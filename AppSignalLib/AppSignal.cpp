@@ -1817,6 +1817,8 @@ void AppSignal::serializeTo(Proto::AppSignal* s) const
 		calcParam->set_isconst(m_isConst);
 		calcParam->set_constvalue(m_constValue);
 
+		calcParam->set_isendpoint(m_isEndpoint);
+
 		// save state flags signals
 
 		assert(calcParam->stateflagssignals_size() == 0);
@@ -1951,6 +1953,8 @@ void AppSignal::serializeFrom(const Proto::AppSignal& s)
 
 	m_isConst = calcParam.isconst();
 	m_constValue = calcParam.constvalue();
+
+	m_isEndpoint = calcParam.isendpoint();
 
 	// load state flags signals
 

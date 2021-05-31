@@ -17,8 +17,8 @@ namespace Sim
 		Q_PROPERTY(bool enabled READ enabled WRITE setEnabled)
 		Q_PROPERTY(bool timeout READ timeout CONSTANT)
 
-		Q_PROPERTY(bool enableManualSettings READ enableManualSettings CONSTANT);
-		Q_PROPERTY(bool disableDataIDControl READ disableDataIDControl CONSTANT);
+		Q_PROPERTY(bool manualSettingsEnabled READ manualSettingsEnabled CONSTANT)
+		Q_PROPERTY(bool dataIDControlDisabled READ dataIDControlDisabled CONSTANT)
 
 		Q_PROPERTY(QJSValue port1Info READ port1Info CONSTANT)
 		Q_PROPERTY(QJSValue port2Info READ port2Info CONSTANT)
@@ -40,8 +40,8 @@ namespace Sim
 
 		bool timeout() const;
 
-		bool enableManualSettings() const;
-		bool disableDataIDControl() const;
+		bool manualSettingsEnabled() const;
+		bool dataIDControlDisabled() const;
 
 		QJSValue port1Info() const;
 		QJSValue port2Info() const;
@@ -68,8 +68,8 @@ namespace Sim
 		Q_PROPERTY(int manualTxStartAddr READ manualTxStartAddr CONSTANT)
 		Q_PROPERTY(int manualTxWordsQuantity READ manualTxWordsQuantity CONSTANT)
 
-		Q_PROPERTY(bool enableSerial READ enableSerial CONSTANT)
-		Q_PROPERTY(bool enableDuplex READ enableDuplex CONSTANT)
+		Q_PROPERTY(bool serialEnabled READ serialEnabled CONSTANT)
+		Q_PROPERTY(bool duplexEnabled READ duplexEnabled CONSTANT)
 		Q_PROPERTY(QString serialMode READ serialMode CONSTANT)
 
 		Q_PROPERTY(RamAddress txBufAbsAddr READ txBufAbsAddr CONSTANT)
@@ -97,8 +97,8 @@ namespace Sim
 		int manualTxStartAddr() const;
 		int manualTxWordsQuantity() const;
 
-		bool enableSerial() const;
-		bool enableDuplex() const;
+		bool serialEnabled() const;
+		bool duplexEnabled() const;
 		QString serialMode() const;
 
 		RamAddress txBufAbsAddr() const;

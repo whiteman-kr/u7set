@@ -1610,6 +1610,32 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		}
 	}
 
+	void SchemaItemSignal::resetCell(int row, int column)
+	{
+		resetCellText(row, column);
+		resetCellFillColor(row, column);
+		resetCellTextColor(row, column);
+		return;
+	}
+
+	void SchemaItemSignal::resetCellText(int row, int column)
+	{
+		Cell cell{row, column, Qt::ItemDataRole::DisplayRole};
+		m_runtimeCellMod.erase(cell);
+	}
+
+	void SchemaItemSignal::resetCellFillColor(int row, int column)
+	{
+		Cell cell{row, column, Qt::ItemDataRole::BackgroundRole};
+		m_runtimeCellMod.erase(cell);
+	}
+
+	void SchemaItemSignal::resetCellTextColor(int row, int column)
+	{
+		Cell cell{row, column, Qt::ItemDataRole::ForegroundRole};
+		m_runtimeCellMod.erase(cell);
+	}
+
 	E::ColumnData SchemaItemSignal::cellData(int row, int column) const
 	{
 		if (row < 0 || column < 0)

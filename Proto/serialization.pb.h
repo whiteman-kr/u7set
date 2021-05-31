@@ -19689,6 +19689,7 @@ class AppSignalCalculatedParam PROTOBUF_FINAL :
     kHashFieldNumber = 1,
     kLmRamAccessFieldNumber = 8,
     kIsConstFieldNumber = 9,
+    kIsEndpointFieldNumber = 12,
     kConstValueFieldNumber = 10,
   };
   // repeated .Proto.StateFlagSignal stateFlagsSignals = 11;
@@ -19856,6 +19857,19 @@ class AppSignalCalculatedParam PROTOBUF_FINAL :
   void _internal_set_isconst(bool value);
   public:
 
+  // optional bool isEndpoint = 12 [default = false];
+  bool has_isendpoint() const;
+  private:
+  bool _internal_has_isendpoint() const;
+  public:
+  void clear_isendpoint();
+  bool isendpoint() const;
+  void set_isendpoint(bool value);
+  private:
+  bool _internal_isendpoint() const;
+  void _internal_set_isendpoint(bool value);
+  public:
+
   // optional double constValue = 10 [default = 0];
   bool has_constvalue() const;
   private:
@@ -19888,6 +19902,7 @@ class AppSignalCalculatedParam PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 hash_;
   ::PROTOBUF_NAMESPACE_ID::int32 lmramaccess_;
   bool isconst_;
+  bool isendpoint_;
   double constvalue_;
   friend struct ::TableStruct_serialization_2eproto;
 };
@@ -48461,7 +48476,7 @@ inline void AppSignalCalculatedParam::set_isconst(bool value) {
 
 // optional double constValue = 10 [default = 0];
 inline bool AppSignalCalculatedParam::_internal_has_constvalue() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
 inline bool AppSignalCalculatedParam::has_constvalue() const {
@@ -48469,7 +48484,7 @@ inline bool AppSignalCalculatedParam::has_constvalue() const {
 }
 inline void AppSignalCalculatedParam::clear_constvalue() {
   constvalue_ = 0;
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline double AppSignalCalculatedParam::_internal_constvalue() const {
   return constvalue_;
@@ -48479,7 +48494,7 @@ inline double AppSignalCalculatedParam::constvalue() const {
   return _internal_constvalue();
 }
 inline void AppSignalCalculatedParam::_internal_set_constvalue(double value) {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000400u;
   constvalue_ = value;
 }
 inline void AppSignalCalculatedParam::set_constvalue(double value) {
@@ -48524,6 +48539,34 @@ inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::StateFlagSignal
 AppSignalCalculatedParam::stateflagssignals() const {
   // @@protoc_insertion_point(field_list:Proto.AppSignalCalculatedParam.stateFlagsSignals)
   return stateflagssignals_;
+}
+
+// optional bool isEndpoint = 12 [default = false];
+inline bool AppSignalCalculatedParam::_internal_has_isendpoint() const {
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  return value;
+}
+inline bool AppSignalCalculatedParam::has_isendpoint() const {
+  return _internal_has_isendpoint();
+}
+inline void AppSignalCalculatedParam::clear_isendpoint() {
+  isendpoint_ = false;
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline bool AppSignalCalculatedParam::_internal_isendpoint() const {
+  return isendpoint_;
+}
+inline bool AppSignalCalculatedParam::isendpoint() const {
+  // @@protoc_insertion_point(field_get:Proto.AppSignalCalculatedParam.isEndpoint)
+  return _internal_isendpoint();
+}
+inline void AppSignalCalculatedParam::_internal_set_isendpoint(bool value) {
+  _has_bits_[0] |= 0x00000200u;
+  isendpoint_ = value;
+}
+inline void AppSignalCalculatedParam::set_isendpoint(bool value) {
+  _internal_set_isendpoint(value);
+  // @@protoc_insertion_point(field_set:Proto.AppSignalCalculatedParam.isEndpoint)
 }
 
 // -------------------------------------------------------------------

@@ -246,4 +246,36 @@ namespace VFrame30
 		return m_appSignalManager->signalExists(::calcHash(signalId));
 	}
 
+	bool ScriptAppSignalController::isDiscrete(QString signalId) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(m_appSignalManager);
+			return {};
+		}
+
+		bool ok = false;
+		E::SignalType type = m_appSignalManager->signalType(::calcHash(signalId), &ok);
+
+		return ok ?
+					(type == E::SignalType::Discrete) :
+					false;
+	}
+
+	bool ScriptAppSignalController::isAnalog(QString signalId) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(m_appSignalManager);
+			return {};
+		}
+
+		bool ok = false;
+		E::SignalType type = m_appSignalManager->signalType(::calcHash(signalId), &ok);
+
+		return ok ?
+					(type == E::SignalType::Analog) :
+					false;
+	}
+
 }

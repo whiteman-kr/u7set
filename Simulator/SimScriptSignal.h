@@ -24,6 +24,8 @@ namespace Sim
 		Q_PROPERTY(bool isInternal READ (m_signal.isInternal))
 		Q_PROPERTY(bool isOutput READ (m_signal.isOutput))
 
+		Q_PROPERTY(bool isEndpoint READ (m_signal.isEndpoint))
+
 		Q_PROPERTY(RamAddress ualAddr READ (m_signal.ualAddr))
 		Q_PROPERTY(RamAddress ioBufAddr READ (m_signal.ioBufAddr))
 		Q_PROPERTY(RamAddress tuningAddr READ (m_signal.tuningAddr))

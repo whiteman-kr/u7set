@@ -14,6 +14,9 @@ namespace Sim
 		Q_PROPERTY(bool isNull READ isNull)
 		Q_PROPERTY(RamAddress appDataStartAddr READ appDataStartAddr)
 
+		Q_PROPERTY(int optoInterfaceDataOffset READ optoInterfaceDataOffset)
+		Q_PROPERTY(int optoPortDataSize READ optoPortDataSize)
+
 	public:
 		ScriptLmDescription() = default;
 		~ScriptLmDescription() = default;
@@ -34,6 +37,9 @@ namespace Sim
 		RamAddress appDataStartAddr() const;
 		int appDataSizeW() const;
 		int appDataSizeBytes() const;
+
+		int optoInterfaceDataOffset() const;
+		int optoPortDataSize() const;
 
 	private:
 		LmDescription m_lmDesc;

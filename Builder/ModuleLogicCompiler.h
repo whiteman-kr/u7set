@@ -413,6 +413,8 @@ namespace Builder
 
 		bool fillComparatorSet();
 
+		bool findEndpointSignals();
+
 		// pass #2 compilation functions
 		//
 		bool initComparatorSignals();

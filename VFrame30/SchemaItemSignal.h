@@ -198,6 +198,18 @@ namespace VFrame30
 		int cellColumnCount() const;
 
 	public slots:
+		/// \brief Resets all previously set atrributes to cell.
+		void resetCell(int row, int column);
+
+		/// \brief Resets previously set text to cell.
+		void resetCellText(int row, int column);
+
+		/// \brief Resets previously set fill color to cell.
+		void resetCellFillColor(int row, int column);
+
+		/// \brief Resets previously set text color to cell.
+		void resetCellTextColor(int row, int column);
+
 		/// \brief Returns data type associated with the cell.
 		E::ColumnData cellData(int row, int column) const;
 

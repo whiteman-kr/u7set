@@ -75,12 +75,12 @@ namespace Sim
 		return m_connection->timeout();
 	}
 
-	bool ScriptConnection::enableManualSettings() const
+	bool ScriptConnection::manualSettingsEnabled() const
 	{
 		return m_connection->connectionInfo().enableManualSettings;
 	}
 
-	bool ScriptConnection::disableDataIDControl() const
+	bool ScriptConnection::dataIDControlDisabled() const
 	{
 		return m_connection->connectionInfo().disableDataIDControl;
 	}
@@ -179,12 +179,12 @@ namespace Sim
 		return m_connPortInfo.manualTxWordsQuantity;
 	}
 
-	bool ScriptConnPortInfo::enableSerial() const
+	bool ScriptConnPortInfo::serialEnabled() const
 	{
 		return m_connPortInfo.enableSerial;
 	}
 
-	bool ScriptConnPortInfo::enableDuplex() const
+	bool ScriptConnPortInfo::duplexEnabled() const
 	{
 		return m_connPortInfo.enableDuplex;
 	}
