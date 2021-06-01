@@ -1067,7 +1067,20 @@ private:
 
 			if (less == true)
 			{
-				m_value = m_lowLimit;
+				if (m_value.type() >= QMetaType::User && m_value.userType() == qMetaTypeId<Afb::AfbParamValue>())
+				{
+					Afb::AfbParamValue afbParamValue = m_value.value<Afb::AfbParamValue>();
+
+					if (afbParamValue.reference().isEmpty() == true)
+					{
+						afbParamValue.setValue(m_lowLimit);
+						m_value = afbParamValue.toVariant();
+					}
+				}
+				else
+				{
+					m_value = m_lowLimit;
+				}
 			}
 		}
 
@@ -1132,7 +1145,20 @@ private:
 
 			if (gt == true)
 			{
-				m_value = m_highLimit;
+				if (m_value.type() >= QMetaType::User && m_value.userType() == qMetaTypeId<Afb::AfbParamValue>())
+				{
+					Afb::AfbParamValue afbParamValue = m_value.value<Afb::AfbParamValue>();
+
+					if (afbParamValue.reference().isEmpty() == true)
+					{
+						afbParamValue.setValue(m_highLimit);
+						m_value = afbParamValue.toVariant();
+					}
+				}
+				else
+				{
+					m_value = m_highLimit;
+				}
 			}
 		}
 	}
