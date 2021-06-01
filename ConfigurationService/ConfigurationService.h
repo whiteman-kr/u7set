@@ -19,7 +19,8 @@ public:
 							   const QString& serviceInstanceName,
 							   int& argc,
 							   char** argv,
-							   std::shared_ptr<CircularLogger> logger);
+							   std::shared_ptr<CircularLogger> logger,
+							   E::ServiceRunMode runMode);
 
 	virtual ServiceWorker* createInstance() const override;
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const;

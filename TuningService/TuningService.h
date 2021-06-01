@@ -23,6 +23,7 @@ namespace Tuning
 							int &argc,
 							char **argv,
 							CircularLoggerShared logger,
+							E::ServiceRunMode runMode,
 							CircularLoggerShared tuningLog);
 		~TuningServiceWorker();
 

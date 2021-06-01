@@ -16,7 +16,8 @@ public:
 						  const QString& serviceInstanceName,
 						  int& argc,
 						  char** argv,
-						  std::shared_ptr<CircularLogger> logger);
+						  CircularLoggerShared logger,
+						  E::ServiceRunMode runMode);
 	virtual ~DiagDataServiceWorker();
 
 	virtual ServiceWorker* createInstance() const override;

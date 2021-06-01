@@ -13,8 +13,9 @@ ArchivingService::ArchivingService(const SoftwareInfo& softwareInfo,
 											   const QString& serviceName,
 											   int& argc,
 											   char** argv,
-											   CircularLoggerShared logger) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger)
+											   CircularLoggerShared logger,
+											   E::ServiceRunMode runMode) :
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode)
 {
 }
 
@@ -28,7 +29,9 @@ ServiceWorker* ArchivingService::createInstance() const
 {
 	ArchivingService* archServiceWorker = new ArchivingService(softwareInfo(),
 															   serviceName(),
-															   argc(), argv(), logger());
+															   argc(), argv(),
+															   logger(),
+															   serviceRunMode());
 	archServiceWorker->init();
 
 	return archServiceWorker;

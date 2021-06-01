@@ -568,6 +568,13 @@ public:
 	};
 	Q_ENUM(SoftwareRunMode)
 
+	enum class ServiceRunMode
+	{
+		ConsoleApp,
+		Service
+	};
+	Q_ENUM(ServiceRunMode)
+
 	// For Monitor
 	//
 	enum class ValueViewType

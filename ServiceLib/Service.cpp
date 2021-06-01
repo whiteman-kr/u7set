@@ -48,12 +48,14 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 							 const QString& serviceName,
 							 int& argc,
 							 char** argv,
-							 CircularLoggerShared logger) :
+							 CircularLoggerShared logger,
+							 E::ServiceRunMode runMode) :
 	m_softwareInfo(softwareInfo),
 	m_serviceName(serviceName),
 	m_argc(argc),
 	m_argv(argv),
 	m_logger(logger),
+	m_serviceRunMode(runMode),
 	m_settings(QSettings::SystemScope, Manufacturer::RADIY, serviceName, this),
 	m_cmdLineParser(argc, argv),
 	m_softwareSettingsSet(softwareInfo.softwareType()),
@@ -216,6 +218,16 @@ SessionParams ServiceWorker::sessionParams() const
 	AUTO_LOCK(m_spMutex);
 
 	return m_sessionParams;
+}
+
+void ServiceWorker::setServiceRunMode(E::ServiceRunMode srm)
+{
+	m_serviceRunMode = srm;
+}
+
+E::ServiceRunMode ServiceWorker::serviceRunMode() const
+{
+	return m_serviceRunMode;
 }
 
 void ServiceWorker::init()
@@ -644,6 +656,8 @@ int ServiceStarter::privateRun()
 
 	if (startAsRegularApp == true)
 	{
+		m_serviceWorker.setServiceRunMode(E::ServiceRunMode::ConsoleApp);
+
 		if (m_serviceWorker.getStrSetting(SoftwareSetting::EQUIPMENT_ID).isEmpty() == true)
 		{
 			DEBUG_LOG_MSG(m_logger, "");
@@ -655,6 +669,8 @@ int ServiceStarter::privateRun()
 	}
 	else
 	{
+		m_serviceWorker.setServiceRunMode(E::ServiceRunMode::Service);
+
 		DaemonServiceStarter daemonStarter(m_app, m_serviceWorker, m_logger);
 
 		result = daemonStarter.exec();
@@ -730,11 +746,11 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 
 int ServiceStarter::runAsRegularApplication()
 {
-	KeyReaderThread* keyReaderThread = new KeyReaderThread();
+	KeyReaderThread keyReaderThread;
 
-	keyReaderThread->start();
+	keyReaderThread.start();
 
-		// run service
+	// run service
 	//
 	Service* service = new Service(m_serviceWorker, m_logger);
 
@@ -745,16 +761,27 @@ int ServiceStarter::runAsRegularApplication()
 	service->stop();
 	delete service;
 
-	keyReaderThread->quit();
-	keyReaderThread->wait();
-	delete keyReaderThread;
+	keyReaderThread.stop();
 
 	return result;
 }
 
+ServiceStarter::KeyReaderThread::KeyReaderThread()
+{
+	setTerminationEnabled(true);
+}
+
 void ServiceStarter::KeyReaderThread::run()
 {
-	char c = 0;
-	std::cin >> c;
+	char ch = 0;
+
+	std::cin >> ch;
 	QCoreApplication::exit(0);
 }
+
+void ServiceStarter::KeyReaderThread::stop()
+{
+	terminate();
+	wait();
+}
+

@@ -14,8 +14,9 @@ DiagDataServiceWorker::DiagDataServiceWorker(const SoftwareInfo& softwareInfo,
 											 const QString& serviceName,
 											 int& argc,
 											 char** argv,
-											 std::shared_ptr<CircularLogger> logger) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
+											 CircularLoggerShared logger,
+											 E::ServiceRunMode runMode) :
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode),
 	m_logger(logger)
 {
 }
@@ -28,7 +29,9 @@ ServiceWorker* DiagDataServiceWorker::createInstance() const
 {
 	DiagDataServiceWorker* diagDataServiceWorker = new DiagDataServiceWorker(softwareInfo(),
 																			 serviceName(),
-																			 argc(), argv(), m_logger);
+																			 argc(), argv(),
+																			 logger(),
+																			 serviceRunMode());
 	diagDataServiceWorker->init();
 
 	return diagDataServiceWorker;

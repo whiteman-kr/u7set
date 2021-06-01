@@ -19,8 +19,9 @@ AppDataServiceWorker::AppDataServiceWorker(const SoftwareInfo& softwareInfo,
 										   const QString& serviceName,
 										   int& argc,
 										   char** argv,
-										   CircularLoggerShared logger) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
+										   CircularLoggerShared logger,
+										   E::ServiceRunMode runMode) :
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode),
 	m_timer(this)
 {
 }
@@ -33,7 +34,9 @@ ServiceWorker* AppDataServiceWorker::createInstance() const
 {
 	AppDataServiceWorker* newInstance = new AppDataServiceWorker(softwareInfo(),
 																 serviceName(),
-																 argc(), argv(), logger());
+																 argc(), argv(),
+																 logger(),
+																 serviceRunMode());
 	newInstance->init();
 
 	return newInstance;

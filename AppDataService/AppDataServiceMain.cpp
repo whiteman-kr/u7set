@@ -16,7 +16,8 @@ int main(int argc, char *argv[])
 
 	AppDataServiceWorker appDataServiceWorker(si,
 											  Service::getServiceInstanceName("Application Data Service", argc, argv),
-											  argc, argv, logger);
+											  argc, argv, logger,
+											  E::ServiceRunMode::ConsoleApp);	// run mode will be refined after cmd line processing
 
 	ServiceStarter serviceStarter(app, appDataServiceWorker, logger);
 

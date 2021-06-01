@@ -9,8 +9,9 @@ public:
 					  const QString& serviceName,
 					  int& argc,
 					  char** argv,
-					  std::shared_ptr<CircularLogger> logger) :
-		ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
+					  std::shared_ptr<CircularLogger> logger,
+					  E::ServiceRunMode runMode) :
+		ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode),
 		m_logger(logger)
 	{
 	}
@@ -19,7 +20,9 @@ public:
 	{
 		BaseServiceWorker* newInstance = new BaseServiceWorker(softwareInfo(),
 															   serviceName(),
-															   argc(), argv(), m_logger);
+															   argc(), argv(),
+															   logger(),
+															   serviceRunMode());
 
 		newInstance->init();
 
@@ -72,7 +75,8 @@ int main(int argc, char *argv[])
 
 	BaseServiceWorker baseServiceWorker(si,
 										Service::getServiceInstanceName("Base Service", argc, argv),
-										argc, argv, logger);
+										argc, argv, logger,
+										E::ServiceRunMode::ConsoleApp);		// run mode will be refined after cmd line processing
 
 	ServiceStarter serviceStarter(app, baseServiceWorker, logger);
 

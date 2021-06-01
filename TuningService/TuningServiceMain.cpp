@@ -22,7 +22,9 @@ int main(int argc, char *argv[])
 
 	Tuning::TuningServiceWorker tuningServiceWorker(si,
 													Service::getServiceInstanceName("Tuning Service", argc, argv),
-													argc, argv, logger, tuningLog);
+													argc, argv, logger,
+													E::ServiceRunMode::ConsoleApp,	// run mode will be refined after cmd line processing
+													tuningLog);
 
 	ServiceStarter serviceStarter(app, tuningServiceWorker, logger);
 

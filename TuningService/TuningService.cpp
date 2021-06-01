@@ -15,8 +15,9 @@ namespace Tuning
 											 int& argc,
 											 char** argv,
 											 CircularLoggerShared logger,
+											 E::ServiceRunMode runMode,
 											 CircularLoggerShared tuningLog) :
-		ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
+		ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode),
 		m_logger(logger),
 		m_tuningLog(tuningLog)
 	{
@@ -31,7 +32,10 @@ namespace Tuning
 	{
 		TuningServiceWorker* newInstance = new TuningServiceWorker(softwareInfo(),
 																   serviceName(),
-																   argc(), argv(), m_logger, m_tuningLog);
+																   argc(), argv(),
+																   logger(),
+																   serviceRunMode(),
+																   m_tuningLog);
 
 		newInstance->init();
 
