@@ -1,5 +1,5 @@
 #include "ArchiveTcpClient.h"
-#include "Settings.h"
+#include "MonitorAppSettings.h"
 
 ArchiveTcpClient::ArchiveTcpClient(MonitorConfigController* configController) :
 	Tcp::Client(configController->softwareInfo(),
@@ -242,7 +242,7 @@ void ArchiveTcpClient::requestStart()
 	m_requestInProgress = true;
 
 	m_startRequest.Clear();
-	m_startRequest.set_clientequipmentid(theSettings.instanceStrId().toStdString());
+	m_startRequest.set_clientequipmentid(MonitorAppSettings::instance().equipmentId().toStdString());
 
 	m_startRequest.set_timetype(static_cast<int>(m_requestData.timeType));		// enum TymeType: 0 Plan, 1 SystemTime, 2 LocalTyme, 3 ArchiveId
 	m_startRequest.set_starttime(m_requestData.startTime.timeStamp);

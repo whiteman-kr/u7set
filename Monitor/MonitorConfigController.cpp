@@ -1,6 +1,6 @@
 #include "../lib/SoftwareSettings.h"
 #include "MonitorConfigController.h"
-#include "Settings.h"
+#include "MonitorAppSettings.h"
 
 ConfigConnection::ConfigConnection(QString EquipmentId, QString ipAddress, int port) :
 	m_equipmentId(EquipmentId),
@@ -322,9 +322,9 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 	ConfigSettings readSettings;
 
-	readSettings.globalScript = getScriptFunc("/" + theSettings.instanceStrId() + "/GlobalScript.js");
+	readSettings.globalScript = getScriptFunc("/" + MonitorAppSettings::instance().equipmentId() + "/GlobalScript.js");
 	readSettings.logoImage = getImageFunc(CfgFileId::LOGO);
-	readSettings.onConfigurationArrivedScript = getScriptFunc("/" + theSettings.instanceStrId() + "/OnConfigurationArrived.js");
+	readSettings.onConfigurationArrivedScript = getScriptFunc("/" + MonitorAppSettings::instance().equipmentId() + "/OnConfigurationArrived.js");
 
 	// Parse XML
 	//
@@ -415,7 +415,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		QString parsingError;
 
 		QByteArray ba;
-		QString fileName = "/" + theSettings.instanceStrId() + QStringLiteral("/SchemaDetails.pbuf");
+		QString fileName = "/" + MonitorAppSettings::instance().equipmentId() + QStringLiteral("/SchemaDetails.pbuf");
 		bool ok = m_cfgLoaderThread->getFileBlocked(fileName, &ba, &parsingError);
 
 		if (ok == false)
@@ -567,7 +567,7 @@ bool MonitorConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, 
 	//
 	QString appEquipmentId = softwareElement.attribute("ID");
 
-	if (theSettings.instanceStrId() != appEquipmentId)
+	if (MonitorAppSettings::instance().equipmentId() != appEquipmentId)
 	{
 		// The received file has different StrID then expected
 		//

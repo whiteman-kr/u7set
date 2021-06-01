@@ -1,6 +1,6 @@
 #include "DialogChooseArchiveSignals.h"
 #include "ui_DialogChooseArchiveSignals.h"
-#include "Settings.h"
+#include "MonitorAppSettings.h"
 
 
 DialogChooseArchiveSignals::ArchiveSignalType DialogChooseArchiveSignals::m_lastSignalType = DialogChooseArchiveSignals::ArchiveSignalType::AllSignals;
@@ -86,7 +86,9 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(
 
 	// Set filter completer
 	//
-	m_filterCompleter = new QCompleter(theSettings.m_archiveSignalsDialogFilterCompleter, this);
+	auto archiveSignalsDialogFilterCompleter = QSettings{}.value("DialogChooseArchiveSignals/filter").toStringList();
+
+	m_filterCompleter = new QCompleter(archiveSignalsDialogFilterCompleter, this);
 	m_filterCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 
 	ui->filterEdit->setCompleter(m_filterCompleter);
@@ -375,13 +377,14 @@ void DialogChooseArchiveSignals::on_filterEdit_editingFinished()
 {
 	QString arg = ui->filterEdit->text();
 
-	if (theSettings.m_archiveSignalsDialogFilterCompleter.contains(arg) == false)
+	if (auto archiveSignalsDialogFilterCompleter = QSettings{}.value("DialogChooseArchiveSignals/filter").toStringList();
+		archiveSignalsDialogFilterCompleter.contains(arg) == false)
 	{
-		theSettings.m_archiveSignalsDialogFilterCompleter << arg;
+		archiveSignalsDialogFilterCompleter << arg;
 
-		while (theSettings.m_archiveSignalsDialogFilterCompleter.size() > 1000)
+		while (archiveSignalsDialogFilterCompleter.size() > 1000)
 		{
-			theSettings.m_archiveSignalsDialogFilterCompleter.pop_front();
+			archiveSignalsDialogFilterCompleter.pop_front();
 		}
 
 		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_filterCompleter->model());
@@ -389,7 +392,7 @@ void DialogChooseArchiveSignals::on_filterEdit_editingFinished()
 
 		if (completerModel != nullptr)
 		{
-			completerModel->setStringList(theSettings.m_archiveSignalsDialogFilterCompleter);
+			QSettings{}.setValue("DialogChooseArchiveSignals/filter", archiveSignalsDialogFilterCompleter);
 		}
 	}
 
