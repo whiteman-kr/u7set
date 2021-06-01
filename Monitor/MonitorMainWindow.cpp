@@ -13,15 +13,16 @@
 #include "../lib/Ui/DialogAbout.h"
 #include "../lib/Ui/SchemaListWidget.h"
 
-const QString MonitorMainWindow::m_monitorSingleInstanceKey = "MonitorInstanceCheckerKey";
-
-MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
+MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
-	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
+	m_instanceResolver(instanceResolver),
+	m_configController(softwareInfo, MonitorAppSettings::instance().configuratorAddress1(), MonitorAppSettings::instance().configuratorAddress2()),
 	m_schemaManager(&m_configController),
 	m_LogFile(qAppName()),
 	m_dialogAlert(this)
 {
+	setWindowTitle(MonitorAppSettings::instance().windowCaption());
+
 	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorMainWindow::slot_configurationArrived);
 	connect(&m_configController, &MonitorConfigController::unknownClient, this, &MonitorMainWindow::slot_unknownClient);
 
@@ -52,7 +53,6 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 
 	// Log file
 	//
-
 	m_LogFile.writeText("---");
 	m_LogFile.writeMessage(tr("Application started."));
 
@@ -110,17 +110,6 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 
 	m_updateStatusBarTimerId = startTimer(100);
 
-	// Try attach memory segment, that keep information
-	// about instance status
-	//
-	m_instanceTimer = new QTimer(this);
-	m_instanceTimer->start(100);
-
-	connect(m_instanceTimer, &QTimer::timeout, this, &MonitorMainWindow::checkMonitorSingleInstance);
-
-	m_appInstanceSharedMemory.setKey(MonitorMainWindow::getInstanceKey());
-	m_appInstanceSharedMemory.attach();
-
 	// Create SchemaList dock widget
 	//
 	m_schemaListDock = new QDockWidget{"Schemas List", this};
@@ -137,6 +126,10 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 	addDockWidget(Qt::LeftDockWidgetArea, m_schemaListDock);
 
 	m_schemaListDock->setVisible(QSettings().value("m_schemaListAction.checked").toBool());
+
+	// --
+	//
+	connect(&instanceResolver, &InstanceResolver::activate, this, &MonitorMainWindow::activateRequested);
 
 	// SchemaListWidget
 	//
@@ -222,20 +215,27 @@ void MonitorMainWindow::showTrends(const std::vector<AppSignalParam>& appSignals
 
 void MonitorMainWindow::saveWindowState()
 {
-	theSettings.m_mainWindowPos = pos();
-	theSettings.m_mainWindowGeometry = saveGeometry();
-	theSettings.m_mainWindowState = saveState();
+	QSettings s{};
 
-	theSettings.writeUserScope();
+	s.setValue("MainWindow/pos", pos());
+	s.setValue("MainWindow/geometry", saveGeometry());
+	s.setValue("MainWindow/state", saveState());
 
 	return;
 }
 
 void MonitorMainWindow::restoreWindowState()
 {
-	move(theSettings.m_mainWindowPos);
-	restoreGeometry(theSettings.m_mainWindowGeometry);
-	restoreState(theSettings.m_mainWindowState);
+	QSettings s{};
+
+	auto mainWindowPos = s.value("MainWindow/pos", QPoint(200, 200)).toPoint();
+	auto mainWindowGeometry = s.value("MainWindow/geometry").toByteArray();
+	auto mainWindowState = s.value("MainWindow/state").toByteArray();
+
+
+	move(mainWindowPos);
+	restoreGeometry(mainWindowGeometry);
+	restoreState(mainWindowState);
 
 	// Ensure widget is visible
 	//
@@ -293,7 +293,7 @@ void MonitorMainWindow::showLogo()
 
 	// Show logo if it was enabled in settings
 	//
-	if (theSettings.showLogo() == true)
+	if (MonitorAppSettings::instance().showLogo() == true)
 	{
 		m_logoLabel->setPixmap(QPixmap::fromImage(logo));
 	}
@@ -303,11 +303,6 @@ void MonitorMainWindow::showLogo()
 	}
 
 	return;
-}
-
-QString MonitorMainWindow::getInstanceKey()
-{
-	return m_monitorSingleInstanceKey;
 }
 
 void MonitorMainWindow::createActions()
@@ -644,8 +639,8 @@ void MonitorMainWindow::updateStatusBar()
 
 		showSoftwareConnection(tr("Configuration Service"), tr("ConfigService"),
 							   confiConnState,
-							   theSettings.configuratorAddress1(),
-							   theSettings.configuratorAddress2(),
+							   MonitorAppSettings::instance().configuratorAddress1(),
+							   MonitorAppSettings::instance().configuratorAddress2(),
 							   m_statusBarConfigConnection);
 	}
 
@@ -792,7 +787,7 @@ void MonitorMainWindow::showDataSources()
 void MonitorMainWindow::showSettings()
 {
 	DialogSettings d(this);
-	d.setSettings(theSettings);
+	d.setSettings(MonitorAppSettings::instance().get());
 
 	int result = d.exec();
 
@@ -801,18 +796,28 @@ void MonitorMainWindow::showSettings()
 		// --
 		//
 		bool needReconnect = false;
+		bool reinitIntanceResolver = false;
 
-		if (theSettings.instanceStrId() != d.settings().instanceStrId() ||
-			theSettings.configuratorAddress1() != d.settings().configuratorAddress1() ||
-			theSettings.configuratorAddress2() != d.settings().configuratorAddress2())
+		auto currentSettings = MonitorAppSettings::instance().get();
+
+		if (currentSettings.equipmentId != d.settings().equipmentId ||
+			currentSettings.cfgSrvIpAddress1 != d.settings().cfgSrvIpAddress1 ||
+			currentSettings.cfgSrvPort1 != d.settings().cfgSrvPort1 ||
+			currentSettings.cfgSrvIpAddress2 != d.settings().cfgSrvIpAddress2 ||
+			currentSettings.cfgSrvPort2 != d.settings().cfgSrvPort2)
 		{
 			needReconnect = true;
 		}
 
+		if (currentSettings.equipmentId != d.settings().equipmentId)
+		{
+			reinitIntanceResolver = true;
+		}
+
 		// --
 		//
-		theSettings = d.settings();
-		theSettings.writeSystemScope();
+		MonitorAppSettings::instance().set(d.settings());
+		MonitorAppSettings::instance().save();
 
 		// Apply settings here
 		//
@@ -822,10 +827,19 @@ void MonitorMainWindow::showSettings()
 		//
 		if (needReconnect == true)
 		{
-			m_configController.setConnectionParams(theSettings.instanceStrId(),
-												   theSettings.configuratorAddress1(),
-												   theSettings.configuratorAddress2());
+			m_configController.setConnectionParams(MonitorAppSettings::instance().equipmentId(),
+												   MonitorAppSettings::instance().configuratorAddress1(),
+												   MonitorAppSettings::instance().configuratorAddress2());
 		}
+
+		// --
+		//
+		if (reinitIntanceResolver == true)
+		{
+			m_instanceResolver.reinit(MonitorAppSettings::instance().equipmentId(), MonitorAppSettings::instance().singleInstance());
+		}
+
+		setWindowTitle(MonitorAppSettings::instance().windowCaption());
 
 		return;
 	}
@@ -909,63 +923,31 @@ void MonitorMainWindow::debug()
 #endif	// QT_DEBUG
 }
 
-void MonitorMainWindow::checkMonitorSingleInstance()
+void MonitorMainWindow::activateRequested()
 {
-	if (m_appInstanceSharedMemory.isAttached() == true &&
-	        theSettings.singleInstance() == true)
-	{
-		// If memory segment is attached, and singleInstance option is set,
-		// get information from this memory segment
-		//
+	// To move window to top, add WindowStaysOnTopHint flag. In linux X11Bypass tag required
+	// to do this. When flags added - activateWindow and show it to apply changes. After that, window
+	// will be every time on top, so we need remove WindowStaysOnTop flag, apply changes, and only then remove
+	// X11Bypass flag.
+	//
+//	this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
+//	this->activateWindow();
+//	this->show();
+//	this->setWindowFlags(this->windowFlags() & (~Qt::WindowStaysOnTopHint));
+//	this->activateWindow();
+//	this->show();
+//	this->setWindowFlags(this->windowFlags() & (~Qt::X11BypassWindowManagerHint));
+//	this->activateWindow();
+//	this->show();
 
-		m_appInstanceSharedMemory.lock();
+	// WARNING: Windows prevents from stealing focus, to avoid it set registry key
+	// Computer\HKEY_CURRENT_USER\Control Panel\Desktop\ForegroundLockTimeout to 0
+	// Restart computer
+	//
+	this->activateWindow();
+	this->show();
 
-		char* sharedData = static_cast<char*>(m_appInstanceSharedMemory.data());
-
-		// If memory segment contains "1" value - other instance of program
-		// has been executed. Show message of execution on debug console, and move window
-		// to top
-		//
-
-		if (*sharedData != 0)
-		{
-			qDebug() << "Another instance of Monitor has been started";
-
-			*sharedData = 0;
-
-			// To move window to top, add WindowStaysOnTopHint flag. In linux X11Bypass tag required
-			// to do this. When flags added - activateWindow and show it to apply changes. After that, window
-			// will be every time on top, so we need remove WindowStaysOnTop flag, apply changes, and only then remove
-			// X11Bypass flag.
-			//
-
-			this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
-			this->activateWindow();
-			this->show();
-			this->setWindowFlags(this->windowFlags() & (~Qt::WindowStaysOnTopHint));
-			this->activateWindow();
-			this->show();
-			this->setWindowFlags(this->windowFlags() & (~Qt::X11BypassWindowManagerHint));
-			this->activateWindow();
-			this->show();
-		}
-
-		m_appInstanceSharedMemory.unlock();
-	}
-	else
-	{
-		if (m_appInstanceSharedMemory.isAttached() == false &&
-		        theSettings.singleInstance() == true)
-		{
-			qDebug() << "Single instance checker shared Memory segment is not attached";
-
-			bool result = m_appInstanceSharedMemory.attach();
-			if (result == false)
-			{
-				qDebug() << "Single instance attach error: " << m_appInstanceSharedMemory.errorString();
-			}
-		}
-	}
+	return;
 }
 
 void MonitorMainWindow::slot_archive()

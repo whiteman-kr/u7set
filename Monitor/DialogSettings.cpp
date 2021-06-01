@@ -1,5 +1,6 @@
 #include "DialogSettings.h"
 #include "ui_DialogSettings.h"
+#include <QFileDialog>
 
 DialogSettings::DialogSettings(QWidget *parent) :
 	QDialog(parent),
@@ -14,6 +15,7 @@ DialogSettings::DialogSettings(QWidget *parent) :
 
 	connect (ui->buttonBox, &QDialogButtonBox::accepted, this, &DialogSettings::ok_clicked);
 	connect (ui->buttonBox, &QDialogButtonBox::rejected, this, &DialogSettings::cancel_clicked);
+	connect (ui->saveAsButton, &QPushButton::clicked, this, &DialogSettings::saveAs_clicked);
 
 	return;
 }
@@ -23,26 +25,27 @@ DialogSettings::~DialogSettings()
 	delete ui;
 }
 
-const Settings& DialogSettings::settings() const
+const MonitorAppSettings::Data& DialogSettings::settings() const
 {
 	return m_settings;
 }
 
-void DialogSettings::setSettings(const Settings& value)
+void DialogSettings::setSettings(const MonitorAppSettings::Data& value)
 {
 	m_settings = value;
 
-	ui->instanceStrId->setText(m_settings.instanceStrId());
+	ui->instanceStrId->setText(m_settings.equipmentId);
 
-	ui->editConfiguratorIpAddress1->setText(m_settings.configuratorIpAddress1());
-	ui->editConfiguratorPort1->setText(QString().setNum(m_settings.configuratorPort1()));
+	ui->editConfiguratorIpAddress1->setText(m_settings.cfgSrvIpAddress1);
+	ui->editConfiguratorPort1->setText(QString().setNum(m_settings.cfgSrvPort1));
 
-	ui->editConfiguratorIpAddress2->setText(m_settings.configuratorIpAddress2());
-	ui->editConfiguratorPort2->setText(QString().setNum(m_settings.configuratorPort2()));
+	ui->editConfiguratorIpAddress2->setText(m_settings.cfgSrvIpAddress2);
+	ui->editConfiguratorPort2->setText(QString().setNum(m_settings.cfgSrvPort2));
 
-	ui->checkShowLogo->setChecked(m_settings.showLogo());
-	ui->checkShowItemsLabels->setChecked(m_settings.showItemsLabels());
-	ui->checkSingleInstance->setChecked(m_settings.singleInstance());
+	ui->checkShowLogo->setChecked(m_settings.showLogo);
+	ui->checkShowItemsLabels->setChecked(m_settings.showItemsLabels);
+	ui->checkSingleInstance->setChecked(m_settings.singleInstance);
+	ui->windowCaptionEdit->setText(m_settings.windowCaption);
 
 	return;
 }
@@ -59,7 +62,7 @@ void DialogSettings::showEvent(QShowEvent*)
 	return;
 }
 
-void DialogSettings::ok_clicked()
+std::optional<MonitorAppSettings::Data> DialogSettings::parseData()
 {
 	// Check Instance StrID
 	//
@@ -73,7 +76,7 @@ void DialogSettings::ok_clicked()
 
 		ui->instanceStrId->setFocus();
 		ui->instanceStrId->selectAll();
-		return;
+		return {};
 	}
 
 	// Check ip address 1
@@ -89,15 +92,15 @@ void DialogSettings::ok_clicked()
 
 		ui->editConfiguratorIpAddress1->setFocus();
 		ui->editConfiguratorIpAddress1->selectAll();
-		return;
+		return {};
 	}
 
 	// Check port num 1
 	//
-	bool result = false;
-	int serverPort1 = ui->editConfiguratorPort1->text().toInt(&result);
+	bool convResult = false;
+	int serverPort1 = ui->editConfiguratorPort1->text().toInt(&convResult);
 
-	if (result == false || serverPort1 < 0 || serverPort1 > 65535)
+	if (convResult == false || serverPort1 < 0 || serverPort1 > 65535)
 	{
 		QMessageBox mb(this);
 		mb.setText(tr("Incorrect server port."));
@@ -105,7 +108,7 @@ void DialogSettings::ok_clicked()
 
 		ui->editConfiguratorPort1->setFocus();
 		ui->editConfiguratorPort1->selectAll();
-		return;
+		return {};
 	}
 
 	// Check ip address 2
@@ -120,15 +123,15 @@ void DialogSettings::ok_clicked()
 
 		ui->editConfiguratorIpAddress2->setFocus();
 		ui->editConfiguratorIpAddress2->selectAll();
-		return;
+		return {};
 	}
 
 	// Check port num 2
 	//
-	result = false;
-	int serverPort2 = ui->editConfiguratorPort2->text().toInt(&result);
+	convResult = false;
+	int serverPort2 = ui->editConfiguratorPort2->text().toInt(&convResult);
 
-	if (result == false || serverPort2 < 0 || serverPort2 > 65535)
+	if (convResult == false || serverPort2 < 0 || serverPort2 > 65535)
 	{
 		QMessageBox mb(this);
 		mb.setText(tr("Incorrect server port."));
@@ -136,29 +139,72 @@ void DialogSettings::ok_clicked()
 
 		ui->editConfiguratorPort2->setFocus();
 		ui->editConfiguratorPort2->selectAll();
-		return;
+		return {};
 	}
 
 	// --
 	//
-	m_settings.setInstanceStrId(instanceStrId);
+	MonitorAppSettings::Data data;
 
-	m_settings.setConfiguratorIpAddress1(configuratorIpAddress1);
-	m_settings.setConfiguratorPort1(serverPort1);
+	data.equipmentId = instanceStrId;
 
-	m_settings.setConfiguratorIpAddress2(configuratorIpAddress2);
-	m_settings.setConfiguratorPort2(serverPort2);
+	data.cfgSrvIpAddress1 = configuratorIpAddress1;
+	data.cfgSrvPort1 = serverPort1;
 
-	m_settings.setShowLogo(ui->checkShowLogo->isChecked());
-	m_settings.setShowItemsLabels(ui->checkShowItemsLabels->isChecked());
-	m_settings.setSingleInstance(ui->checkSingleInstance->isChecked());
+	data.cfgSrvIpAddress2 = configuratorIpAddress2;
+	data.cfgSrvPort2 = serverPort2;
 
-	accept();
+	data.showLogo = ui->checkShowLogo->isChecked();
+	data.showItemsLabels = ui->checkShowItemsLabels->isChecked();
+	data.windowCaption = ui->windowCaptionEdit->text();
+
+	data.singleInstance = ui->checkSingleInstance->isChecked();
+
+	return {data};
+}
+
+
+void DialogSettings::ok_clicked()
+{
+	auto d = parseData();
+
+	if (d.has_value() == true)
+	{
+		m_settings = d.value();
+		accept();
+	}
+
 	return;
 }
 
 void DialogSettings::cancel_clicked()
 {
 	reject();
+	return;
+}
+
+void DialogSettings::saveAs_clicked()
+{
+	auto d = parseData();
+
+	if (d.has_value() == false)
+	{
+		return;
+	}
+
+	QString fileName = QFileDialog::getSaveFileName(this,
+													tr("Save File"),
+													QString{},
+													tr("ini File (*.ini);;All Files (*.*)"));
+
+	MonitorAppSettings ms;
+	ms.set(d.value());
+
+	if (bool ok = ms.saveToFile(fileName);
+		ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("File %1 saving error.").arg(fileName));
+	}
+
 	return;
 }

@@ -1,5 +1,5 @@
 #include "TcpSignalClient.h"
-#include "Settings.h"
+#include "MonitorAppSettings.h"
 
 TcpSignalClient::TcpSignalClient(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
 	Tcp::Client(configController->softwareInfo(), serverAddressPort1, serverAddressPort2, "TcpSignalClient"),
@@ -13,7 +13,7 @@ TcpSignalClient::TcpSignalClient(MonitorConfigController* configController, cons
 	qDebug() << "TcpSignalClient::TcpSignalClient(...)";
 
 
-	m_startStateTimerId = startTimer(theSettings.requestTimeInterval());
+	m_startStateTimerId = startTimer(MonitorAppSettings::instance().requestTimeInterval());
 }
 
 TcpSignalClient::~TcpSignalClient()
@@ -114,7 +114,7 @@ void TcpSignalClient::processReply(quint32 requestID, const char* replyData, qui
 
 void TcpSignalClient::resetToGetSignalList()
 {
-	QThread::msleep(theSettings.requestTimeInterval());
+	QThread::msleep(MonitorAppSettings::instance().requestTimeInterval());
 
 	theSignals.reset();
 	m_signalList.clear();
@@ -127,7 +127,7 @@ void TcpSignalClient::resetToGetSignalList()
 
 void TcpSignalClient::resetToGetState(bool resetStateIndex)
 {
-	QThread::msleep(theSettings.requestTimeInterval());
+	QThread::msleep(MonitorAppSettings::instance().requestTimeInterval());
 
 	if (resetStateIndex == true)
 	{

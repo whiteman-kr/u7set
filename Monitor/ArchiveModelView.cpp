@@ -1,5 +1,5 @@
 #include "ArchiveModelView.h"
-#include "Settings.h"
+#include "MonitorAppSettings.h"
 
 //
 //
@@ -504,7 +504,8 @@ ArchiveView::ArchiveView(QWidget* parent) :
 
 	connect(horizontalHeader(), &QWidget::customContextMenuRequested, this, &ArchiveView::headerColumnContextMenuRequested);
 
-	horizontalHeader()->restoreState(theSettings.m_archiveHorzHeader);
+	auto archiveHorzHeader = QSettings{}.value("ArchiveWindow/horzHeader").toByteArray();
+	horizontalHeader()->restoreState(archiveHorzHeader);
 
 	qRegisterMetaType<ArchiveColumns>("ArchiveColumns");
 
@@ -521,8 +522,12 @@ ArchiveView::ArchiveView(QWidget* parent) :
 
 ArchiveView::~ArchiveView()
 {
-	theSettings.m_archiveHorzHeader = horizontalHeader()->saveState();
-	theSettings.m_archiveHorzHeaderCount = static_cast<int>(ArchiveColumns::ColumnCount);
+	QSettings s{};
+
+	s.setValue("ArchiveWindow/horzHeader", horizontalHeader()->saveState());
+	s.setValue("ArchiveWindow/horzHeaderCount", static_cast<int>(ArchiveColumns::ColumnCount));
+
+	return;
 }
 
 void ArchiveView::contextMenuEvent(QContextMenuEvent* event)
