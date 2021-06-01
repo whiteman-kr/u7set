@@ -8,6 +8,121 @@ namespace VFrame30
 	/*! \class SchemaItemSignal
 		\ingroup appLogicSchemaItems
 		\brief This is functional item used for connection signal to AFB inputs/outputs, other signals etc
+
+		Project developer can implement own PreDrawScript implementation to customize text and colors for an item.
+
+		The next example shows how to customize an element. It assumes that item has three signal identifiers in SignalIDs property.
+		It determines the layout of an item, then calculates number of signals and columns. After that it loops throug all rows
+		and columns and sets text and different colors for every cell as shown on the picture after the code.
+
+		<b>Example</b>
+
+		\code
+		(function(schemaItem)
+		{
+			// Column Type Constants
+			//
+			let ColumnAppSignalID = 0;
+			let ColumnCustomSignalID = 1;
+			let ColumnCaption = 2;
+			let ColumnState = 3;
+			let ColumnImpactAppSignalID = 32;
+			let ColumnImpactCustomSignalID = 33;
+			let ColumnImpactCaption = 34;
+			let ColumnImpactState = 35;
+			let ColumnCustomText = 64;
+
+			// Color Constants
+			//
+			let backColors = ["#c00000", "#00c000", "#0000c0"];
+			let textColors = ["#ffffff", "#000000", "#ffffff"];
+
+			//	Signal identifiers
+			//
+			var appSignalIDs = schemaItem.appSignalIDs;
+			if (appSignalIDs.length < 1 || appSignalIDs.length > 3)
+			{
+				return;
+			}
+
+			if (schemaItem.multiLine == false)
+			{
+				// Single-line mode: all signal values are displayed in corresponding column
+				//
+				let cellColumnCount = schemaItem.cellColumnCount;
+
+				let stateIndex = 0;	// Index of the signal state (channel)
+
+				for (let c = 0; c < cellColumnCount; c++)
+				{
+					let cellType = schemaItem.cellData(0, c);
+
+					// Output the information depending on column data type
+					//
+					switch (cellType)
+					{
+						case ColumnCaption:
+						{
+							schemaItem.setCellText(0, c, "Caption is here");
+							break;
+						}
+						case ColumnState:
+						{
+							schemaItem.setCellText(0, c, appSignalIDs[stateIndex] + " #" + stateIndex);
+							schemaItem.setCellFillColor(0, c, backColors[stateIndex]);
+							schemaItem.setCellTextColor(0, c, textColors[stateIndex]);
+
+							stateIndex++;	// Increment state index to proceed to the next channel
+
+							break;
+						}
+						default:
+							// Other columns
+							break;
+					}
+				}
+			}
+			else
+			{
+				// Multi-line mode: all signal values are displayed in separate line
+				//
+				let rowCount = appSignalIDs.length;
+				let columnCount = schemaItem.columnCount;
+
+				for (let r = 0; r < rowCount; r++)
+				{
+					for (let c = 0; c < columnCount; c++)
+					{
+						let columnType = schemaItem.columnData(c);
+
+						// Output the information depending on column data type
+						//
+						switch (columnType)
+						{
+							case ColumnCaption:
+							{
+								schemaItem.setCellText(r, c, "Row #" + r + ", Caption is here");
+								break;
+							}
+							case ColumnState:
+							{
+								schemaItem.setCellText(r, c, appSignalIDs[r]);
+								schemaItem.setCellFillColor(r, c, "#c0c000");
+								schemaItem.setCellTextColor(r, c, "#ffffff");
+								break;
+							}
+							default:
+								// Other columns
+								break;
+						}
+					}
+				}
+			}
+		})
+		\endcode
+
+		<img src="SchemaItemSignal.bmp" align="left"/>
+
 	*/
 	class SchemaItemSignal : public FblItemRect
 	{
