@@ -7,6 +7,7 @@
 #include "TcpAppSourcesState.h"
 #include "SelectSchemaWidget.h"
 #include "MonitorTuningTcpClient.h"
+#include "InstanceResolver.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
 #include "../UtilsLib/LogFile.h"
@@ -24,7 +25,7 @@ class MonitorMainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
+	MonitorMainWindow(InstanceResolver& instanceResolver,  const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
 	~MonitorMainWindow();
 
 	// Events
@@ -96,7 +97,8 @@ protected:
 	void slot_configurationArrived(ConfigSettings configuration);
 	void slot_unknownClient();
 
-	void checkMonitorSingleInstance();
+	//void checkMonitorSingleInstance();
+	void activateRequested();
 
 	// Properties
 	//
@@ -112,15 +114,7 @@ protected:
 	// Data
 	//
 private:
-	// Monitor instance key value
-	//
-	static const QString m_monitorSingleInstanceKey;
-
-	QSharedMemory m_appInstanceSharedMemory;
-
-	// Instance checker timer
-	//
-	QTimer* m_instanceTimer = nullptr;
+	InstanceResolver& m_instanceResolver;
 
 	MonitorConfigController m_configController;
 	MonitorSchemaManager m_schemaManager;

@@ -3496,7 +3496,7 @@ namespace ExtWidgets
 		connect(m_treeWidget, &PropertyTreeWidget::editKeyPressed, this, &PropertyEditor::onCellEditKeyPressed);
 		connect(m_treeWidget, &PropertyTreeWidget::spaceKeyPressed, this, &PropertyEditor::onCellToggleKeyPressed);
 
-		m_treeWidget->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged);
+		m_treeWidget->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged | QAbstractItemView::DoubleClicked);
 
 		// Edit Delegate
 

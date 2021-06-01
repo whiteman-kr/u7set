@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Settings.h"
+#include "MonitorAppSettings.h"
 
 namespace Ui {
 	class DialogSettings;
@@ -14,19 +14,22 @@ public:
 	explicit DialogSettings(QWidget* parent);
 	virtual ~DialogSettings();
 
-	const Settings& settings() const;
-	void setSettings(const Settings& value);
+	const MonitorAppSettings::Data& settings() const;
+	void setSettings(const MonitorAppSettings::Data& value);
 
 protected:
 	virtual void showEvent(QShowEvent* event) override;
 	
 private slots:
+	std::optional<MonitorAppSettings::Data> parseData();
+
 	void ok_clicked();
 	void cancel_clicked();
+	void saveAs_clicked();
 
 private:
 	Ui::DialogSettings *ui;
-	Settings m_settings;
+	MonitorAppSettings::Data m_settings;
 };
 
 

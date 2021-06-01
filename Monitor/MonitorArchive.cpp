@@ -1,6 +1,6 @@
 #include "MonitorMainWindow.h"
 #include "MonitorArchive.h"
-#include "Settings.h"
+#include "MonitorAppSettings.h"
 #include "MonitorSignalInfo.h"
 
 //
@@ -152,7 +152,8 @@ static int no = 1;
 
 	// --
 	//
-	m_source.timeType = static_cast<E::TimeType>(theSettings.m_archiveTimeType);
+
+	m_source.timeType = static_cast<E::TimeType>(QSettings{}.value("ArchiveWindow/timeType").toInt());
 
 	QDateTime currentTime = QDateTime::currentDateTime();
 
@@ -260,7 +261,12 @@ static int no = 1;
 
 	m_view->setWordWrap(false);
 
-	if (theSettings.m_archiveHorzHeader.isEmpty() == true || theSettings.m_archiveHorzHeaderCount != static_cast<int>(ArchiveColumns::ColumnCount))
+	// --
+	//
+	auto archiveHorzHeader = QSettings{}.value("ArchiveWindow/horzHeader").toByteArray();
+	auto archiveHorzHeaderCount = QSettings{}.value("ArchiveWindow/horzHeaderCount").toInt();
+
+	if (archiveHorzHeader.isEmpty() == true || archiveHorzHeaderCount != static_cast<int>(ArchiveColumns::ColumnCount))
 	{
 		// First time? Set what is should be hidden by deafult
 		//
@@ -382,7 +388,8 @@ void MonitorArchiveWidget::requestData()
 	m_source.requestEndTime = TimeStamp(m_endDateTimeEdit->dateTime());
 
 	m_source.timeType = m_timeType->currentData().value<E::TimeType>();
-	theSettings.m_archiveTimeType = static_cast<int>(m_source.timeType);
+
+	QSettings{}.setValue("ArchiveWindow/timeType", static_cast<int>(m_source.timeType));
 
 	m_tcpClient->requestData(m_source.requestStartTime,
 							 m_source.requestEndTime,
@@ -498,18 +505,26 @@ void MonitorArchiveWidget::dropEvent(QDropEvent* event)
 
 void MonitorArchiveWidget::saveWindowState()
 {
-	theSettings.m_archiveWindowPos = pos();
-	theSettings.m_archiveWindowGeometry = saveGeometry();
-	theSettings.m_archiveWindowState = saveState();
+	QSettings s{};
 
-	theSettings.writeUserScope();
+	s.setValue("ArchiveWindow/pos", pos());
+	s.setValue("ArchiveWindow/geometry", saveGeometry());
+	s.setValue("ArchiveWindow/state", saveState());
+
+	return;
 }
 
 void MonitorArchiveWidget::restoreWindowState()
 {
-	move(theSettings.m_archiveWindowPos);
-	restoreGeometry(theSettings.m_archiveWindowGeometry);
-	restoreState(theSettings.m_archiveWindowState);
+	QSettings s{};
+
+	auto archiveWindowPos = s.value("ArchiveWindow/pos", QPoint(200, 200)).toPoint();
+	auto archiveWindowGeometry = s.value("ArchiveWindow/geometry").toByteArray();
+	auto archiveWindowState = s.value("ArchiveWindow/state").toByteArray();
+
+	move(archiveWindowPos);
+	restoreGeometry(archiveWindowGeometry);
+	restoreState(archiveWindowState);
 
 	ensureVisible();
 
@@ -521,7 +536,7 @@ void MonitorArchiveWidget::timeTypeCurrentIndexChanged(int /*index*/)
 	Q_ASSERT(m_timeType);
 
 	m_source.timeType = m_timeType->currentData().value<E::TimeType>();
-	theSettings.m_archiveTimeType = static_cast<int>(m_source.timeType);
+	QSettings{}.setValue("ArchiveWindow/timeType", static_cast<int>(m_source.timeType));
 
 	return;
 }

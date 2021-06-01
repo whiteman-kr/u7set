@@ -148,6 +148,13 @@ namespace EditEngine
 					continue;
 				}
 
+				if (r.item->isType<VFrame30::SchemaItemUfb>() == true)
+				{
+					// Actually no action here
+					//
+					continue;
+				}
+
 				if (r.item->isType<VFrame30::SchemaItemBusExtractor>() == true)
 				{
 					VFrame30::SchemaItemBusExtractor* busExtractor = dynamic_cast<VFrame30::SchemaItemBusExtractor*>(r.item.get());

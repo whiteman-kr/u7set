@@ -883,3 +883,4 @@ enum class SchemaUnit
 
 Q_DECLARE_METATYPE(SchemaUnit)
 
+Q_DECLARE_METATYPE(E::ColumnData)
