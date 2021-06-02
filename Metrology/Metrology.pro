@@ -93,6 +93,7 @@ SOURCES += \
 	ConfigSocket.cpp \
 	RackBase.cpp \
 	MeasureBase.cpp \
+	Visa/visa.h
 
 HEADERS  += \
     Stable.h \
@@ -205,9 +206,19 @@ LIBS += -lCommonLib
 win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
 
+# Interface for calibrator Rigol DG1062Z
+#
+win32:LIBS += $$_PRO_FILE_PWD_/Visa/visa64.lib
+
 # Visual Leak Detector
 #
 win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}
+
+# AddressSanitizer for Linux
+#
+unix {
+    CONFIG(debug, debug|release): CONFIG += sanitizer sanitize_address
 }
