@@ -217,7 +217,7 @@ namespace Builder
 		// add AfbElement in/out signals to m_fblsSignals map
 		//
 
-		const std::vector<LogicAfbSignal>& inputSignals = logicAfb->inputSignals();
+/*		const std::vector<LogicAfbSignal>& inputSignals = logicAfb->inputSignals();
 
 		for(LogicAfbSignal signal : inputSignals)
 		{
@@ -252,11 +252,11 @@ namespace Builder
 
 			m_afbSignals.insert(si, signal);
 		}
-
+*/
 		// add AfbElement params to m_fblsParams map
 		//
 
-		std::vector<LogicAfbParam>& params = logicAfb->params();
+/*		std::vector<LogicAfbParam>& params = logicAfb->params();
 
 		for(LogicAfbParam param : params)
 		{
@@ -277,7 +277,7 @@ namespace Builder
 			}
 
 			m_afbParams.insert(si, &param);
-		}
+		}*/
 	}
 
 	void AfblsMap::clear()
@@ -293,7 +293,7 @@ namespace Builder
 		HashedVector<QString, Afbl*>::clear();
 	}
 
-	const LogicAfbSignal AfblsMap::getAfbSignal(const QString& afbStrID, int signalIndex)
+/*	const LogicAfbSignal AfblsMap::getAfbSignal(const QString& afbStrID, int signalIndex)
 	{
 		StrIDIndex si;
 
@@ -308,7 +308,7 @@ namespace Builder
 		assert(false);
 
 		return LogicAfbSignal();
-	}
+	}*/
 
 	int AfblsMap::getUsedInstances(int opCode) const
 	{
