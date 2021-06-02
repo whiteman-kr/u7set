@@ -93,6 +93,7 @@ SOURCES += \
 	ConfigSocket.cpp \
 	RackBase.cpp \
 	MeasureBase.cpp \
+	Visa/visa.h
 
 HEADERS  += \
     Stable.h \
@@ -204,6 +205,10 @@ INCLUDEPATH += ./../Protobuf
 LIBS += -lCommonLib
 win32:PRE_TARGETDEPS += $$DESTDIR/CommonLib.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libCommonLib.a
+
+# Interface for calibrator Rigol DG1062Z
+#
+win32:LIBS += $$_PRO_FILE_PWD_/Visa/visa64.lib
 
 # Visual Leak Detector
 #
