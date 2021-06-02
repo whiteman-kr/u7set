@@ -1,13 +1,13 @@
 #include "../UtilsLib/SimpleThread.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../VFrame30/VFrame30Library.h"
-#include "Settings.h"
+#include "MonitorAppSettings.h"
 #include "MonitorMainWindow.h"
 #include "MonitorConfigController.h"
 #include "TcpSignalClient.h"
 
 #if __has_include("../gitlabci_version.h")
-#	include "../gitlabci_version.h"
+#include "../gitlabci_version.h"
 #endif
 
 AppSignalManager theSignals;
@@ -39,59 +39,41 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<TimeStamp>();
 	qRegisterMetaType<TimeSpan>();
 
+	// Parse command line
+	//
+	QStringList aruments = a.arguments();
+	QString settingsFileName;
+
+	if (aruments.size() > 1)
+	{
+		settingsFileName = aruments[1];
+	}
+
+	if (settingsFileName.isEmpty() == false && QFile::exists(settingsFileName) == false)
+	{
+		QMessageBox::critical(nullptr, qAppName(), QObject::tr("Application settings file %1 is not exist.").arg(settingsFileName));
+		return 1;
+	}
+
 	// Read settings
 	//
-	theSettings.load();
+	if (settingsFileName.isEmpty() == true)
+	{
+		MonitorAppSettings::instance().restore();
+	}
+	else
+	{
+		bool loadSettingsOk = MonitorAppSettings::instance().loadFromFile(settingsFileName);
+		if (loadSettingsOk == false)
+		{
+			QMessageBox::critical(nullptr, qAppName(), QObject::tr("Error loading application settings from file %1.").arg(settingsFileName));
+			return 1;
+		}
+	}
 
 	// Init TrendLib resources
 	//
 	Q_INIT_RESOURCE(TrendView);
-
-	// Create memory segment for check single Instance
-	//
-	QSharedMemory instanceChecker;
-	instanceChecker.setKey(MonitorMainWindow::getInstanceKey());
-
-	bool ok = instanceChecker.create(sizeof(char));
-
-	if (ok == true)
-	{
-		// If it was created, we should initialize it with 0
-		//
-
-		instanceChecker.lock();
-
-		char* sharedData = static_cast<char*>(instanceChecker.data());
-		*sharedData = 0;
-
-		instanceChecker.unlock();
-	}
-	else
-	{
-		if (instanceChecker.error() == QSharedMemory::SharedMemoryError::AlreadyExists &&
-		        theSettings.singleInstance() == true)
-		{
-			// In other way, if memory segment exists, write there
-			// value "1" and exit.
-
-			instanceChecker.attach();
-			instanceChecker.lock();
-
-			char* sharedData = static_cast<char*>(instanceChecker.data());
-			*sharedData = 1;
-
-			instanceChecker.unlock();
-			qDebug() << "Another instance is active";
-
-			return 0;
-		}
-		else
-		{
-			// If other error occured - show it on debug console
-			//
-			qDebug() << "Shared memory: " << instanceChecker.errorString();
-		}
-	}
 
 	// --
 	//
@@ -99,13 +81,26 @@ int main(int argc, char *argv[])
 	//Hardware::Init();
 
 	SoftwareInfo si;
-	si.init(E::SoftwareType::Monitor, theSettings.instanceStrId(), 0, 1);
+	si.init(E::SoftwareType::Monitor, MonitorAppSettings::instance().equipmentId(), 0, 1);
+
+	// --
+	//
+	auto settings = MonitorAppSettings::instance().get();
+
+	InstanceResolver instanceResover;
+
+	if (bool ok = instanceResover.init(settings.equipmentId, settings.singleInstance);
+		ok == false)
+	{
+		qDebug() << "Another instance is active";
+		return 0;
+	}
 
 	// --
 	//
 	int result = 0;
 	{
-		MonitorMainWindow w(si);
+		MonitorMainWindow w(instanceResover, si);
 		theMonitorMainWindow = &w;
 		w.show();
 

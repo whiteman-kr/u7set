@@ -13,8 +13,9 @@
 ConfigurationServiceWorker::ConfigurationServiceWorker(const SoftwareInfo& softwareInfo,
 													   const QString& serviceName,
 													   int& argc, char** argv,
-													   std::shared_ptr<CircularLogger> logger) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
+													   std::shared_ptr<CircularLogger> logger,
+													   E::ServiceRunMode runMode) :
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode),
 	m_logger(logger)
 {
 }
@@ -24,7 +25,9 @@ ServiceWorker* ConfigurationServiceWorker::createInstance() const
 {
 	ConfigurationServiceWorker* newInstance = new ConfigurationServiceWorker(softwareInfo(),
 																			 serviceName(),
-																			 argc(), argv(), m_logger);
+																			 argc(), argv(),
+																			 logger(),
+																			 serviceRunMode());
 
 	newInstance->init();
 
@@ -119,7 +122,20 @@ bool ConfigurationServiceWorker::loadCfgServiceSettings(const QString& buildPath
 
 	if (ptr == nullptr)
 	{
-		DEBUG_LOG_ERR(m_logger, QString("Error loading settings for profile: %1").arg(curProfile));
+		if (softwareSettingsSet().settingsProfileIsExists(curProfile) == false)
+		{
+			DEBUG_LOG_ERR(m_logger, QString("------------ Settings profile '%1' is not exists ------------").arg(curProfile));
+		}
+		else
+		{
+			DEBUG_LOG_ERR(m_logger, QString("------------ Error loading settings for profile: %1 ------------").arg(curProfile));
+		}
+
+		if (serviceRunMode() == E::ServiceRunMode::ConsoleApp)
+		{
+			QCoreApplication::exit(0);
+		}
+
 		return false;
 	}
 

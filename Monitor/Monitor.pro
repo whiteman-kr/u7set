@@ -4,7 +4,10 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets network xmlpatterns qml xml svg printsupport
+QT += core gui widgets network xmlpatterns qml xml svg printsupport
+
+#QT += testlib
+#QT.testlib.CONFIG -= console
 
 TARGET = Monitor
 TEMPLATE = app
@@ -70,11 +73,12 @@ SOURCES += main.cpp \
     ../lib/Ui/SchemaListWidget.cpp \
     ../lib/Ui/TabWidgetEx.cpp \
     ../lib/Ui/TagSelectorWidget.cpp \
+    InstanceResolver.cpp \
+    MonitorAppSettings.cpp \
     MonitorMainWindow.cpp \
 	MonitorCentralWidget.cpp \
     MonitorSignalInfo.cpp \
     MonitorSignalSnapshot.cpp \
-	Settings.cpp \
     DialogSettings.cpp \
     ../lib/BuildInfo.cpp \
     MonitorSchemaWidget.cpp \
@@ -124,12 +128,13 @@ HEADERS  += \
     ../lib/Ui/SchemaListWidget.h \
     ../lib/Ui/TabWidgetEx.h \
     ../lib/Ui/TagSelectorWidget.h \
+    InstanceResolver.h \
+    MonitorAppSettings.h \
     MonitorMainWindow.h \
     MonitorCentralWidget.h \
     MonitorSignalInfo.h \
     MonitorSignalSnapshot.h \
 	Stable.h \
-	Settings.h \
     DialogSettings.h \
     ../lib/BuildInfo.h \
     MonitorSchemaWidget.h \
@@ -258,4 +263,10 @@ unix:PRE_TARGETDEPS += $$DESTDIR/libAppSignalLib.a
 win32 {
     CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 	CONFIG(debug, debug|release): LIBS += -L"D:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+}
+
+# AddressSanitizer for Linux
+#
+unix {
+    CONFIG(debug, debug|release): CONFIG += sanitizer sanitize_address
 }

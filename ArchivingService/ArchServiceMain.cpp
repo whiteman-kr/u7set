@@ -22,7 +22,8 @@ int main(int argc, char *argv[])
 
 	ArchivingService archServiceWorker(si,
 									   Service::getServiceInstanceName("Archiving Service", argc, argv),
-									   argc, argv, logger);
+									   argc, argv, logger,
+									   E::ServiceRunMode::ConsoleApp);	// run mode will be refined after cmd line processing
 
 	ServiceStarter serviceStarter(app, archServiceWorker, logger);
 

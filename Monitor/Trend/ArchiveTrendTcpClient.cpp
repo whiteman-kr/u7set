@@ -1,5 +1,5 @@
 #include "ArchiveTrendTcpClient.h"
-#include "Settings.h"
+#include "MonitorAppSettings.h"
 
 ArchiveTrendTcpClient::ArchiveTrendTcpClient(MonitorConfigController* configController) :
 	Tcp::Client(configController->softwareInfo(),
@@ -58,7 +58,7 @@ void ArchiveTrendTcpClient::onClientThreadStarted()
 			this, &ArchiveTrendTcpClient::slot_configurationArrived,
 			Qt::QueuedConnection);
 
-	m_periodicTimerId = startTimer(theSettings.requestTimeInterval());	// Start it here, as this function is running in the right thread
+	m_periodicTimerId = startTimer(MonitorAppSettings::instance().requestTimeInterval());	// Start it here, as this function is running in the right thread
 
 	return;
 }
@@ -156,7 +156,7 @@ void ArchiveTrendTcpClient::requestStart()
 	m_currentSignalHash = ::calcHash(m_currentRequest.appSignalId);
 
 	m_startRequest.Clear();
-	m_startRequest.set_clientequipmentid(theSettings.instanceStrId().toStdString());
+	m_startRequest.set_clientequipmentid(MonitorAppSettings::instance().equipmentId().toStdString());
 
 	m_startRequest.set_timetype(static_cast<int>(m_currentRequest.timeType));		// enum TymeType: 0 Plan, 1 SystemTime, 2 LocalTyme, 3 ArchiveId
 	m_startRequest.set_starttime(m_currentRequest.hourToRequest.timeStamp);

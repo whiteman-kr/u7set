@@ -67,6 +67,8 @@ public:
 	template<typename T>
 	std::shared_ptr<const T> getSettingsDefaultProfile() const;
 
+	bool settingsProfileIsExists(const QString& profile);
+
 	bool writeToXml(XmlWriteHelper& xml);
 
 	bool readFromXml(const QByteArray& xmlData);

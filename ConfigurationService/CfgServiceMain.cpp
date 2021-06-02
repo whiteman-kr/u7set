@@ -18,7 +18,8 @@ int main(int argc, char *argv[])
 
 	ConfigurationServiceWorker cfgServiceWorker(si,
 												Service::getServiceInstanceName("Configuration Service", argc, argv),
-												argc, argv, logger);
+												argc, argv, logger,
+												E::ServiceRunMode::ConsoleApp);	// run mode will be refined after cmd line processing
 
 	ServiceStarter serviceStarter(app, cfgServiceWorker, logger);
 

@@ -8,6 +8,33 @@ namespace VFrame30
 	/*! \class SchemaItemSignal
 		\ingroup appLogicSchemaItems
 		\brief This is functional item used for connection signal to AFB inputs/outputs, other signals etc
+
+		Project developer can implement own PreDrawScript implementation to customize text and colors for an item.
+
+		<b>Example 1: set special text and color at column 0 and row 0</b>
+
+		\code
+		(function(schemaItem)
+		{
+			schemaItem.setCellFillColor(0, 0, "#c00000");
+			schemaItem.setCellTextColor(0, 0, "#ffffff");
+			schemaItem.setCellText(0, 0, "This is column 0");
+		})
+		\endcode
+
+		<b>Example 2: print special text in every column in row 0</b>
+
+		\code
+		(function(schemaItem)
+		{
+			let cellColumnCount = schemaItem.cellColumnCount;
+
+			for (let c = 0; c < cellColumnCount; c++)
+			{
+				schemaItem.setCellText(0, c, "This is column " + c);
+			}
+		})
+		\endcode
 	*/
 	class SchemaItemSignal : public FblItemRect
 	{

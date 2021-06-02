@@ -82,6 +82,8 @@ namespace VFrame30
 
 		QMetaType::registerConverter<int, VFrame30::SchemaItemConst::ConstType>(IntToEnum<VFrame30::SchemaItemConst::ConstType>);
 
+		qRegisterMetaType<E::ColumnData>();
+
 		return true;
 	}
 

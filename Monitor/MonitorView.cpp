@@ -1,6 +1,6 @@
 #include "MonitorView.h"
 #include "MonitorSchemaManager.h"
-#include "Settings.h"
+#include "MonitorAppSettings.h"
 #include "../lib/AppSignalManager.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/PropertyNames.h"
@@ -37,7 +37,7 @@ MonitorView::~MonitorView()
 
 void MonitorView::paintEvent(QPaintEvent* event)
 {
-	this->setInfoMode(theSettings.showItemsLabels());
+	this->setInfoMode(MonitorAppSettings::instance().showItemsLabels());
 	return ClientSchemaView::paintEvent(event);
 }
 

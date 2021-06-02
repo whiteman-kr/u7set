@@ -91,6 +91,13 @@ SoftwareSettingsSet::SoftwareSettingsSet() :
 {
 }
 
+bool SoftwareSettingsSet::settingsProfileIsExists(const QString& profile)
+{
+	auto it = m_settingsMap.find(profile.isEmpty() == true ? SettingsProfile::DEFAULT : profile);
+
+	return it != m_settingsMap.end();
+}
+
 bool SoftwareSettingsSet::writeToXml(XmlWriteHelper& xml)
 {
 	bool result = true;

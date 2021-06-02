@@ -89,7 +89,7 @@ namespace Builder
 		void insert(std::shared_ptr<Afb::AfbElement> logicAfb);
 		void clear();
 
-		const LogicAfbSignal getAfbSignal(const QString &afbStrID, int signalIndex);
+//		const LogicAfbSignal getAfbSignal(const QString &afbStrID, int signalIndex);
 
 		int getUsedInstances(int opCode) const;
 
@@ -106,8 +106,8 @@ namespace Builder
 		FblInstanceMap m_fblInstance;						// Fbl opCode -> current instance
 		NonRamFblInstanceMap m_nonRamFblInstance;			// Non RAM Fbl StrID -> instance
 
-		QHash<QString, LogicAfbSignal> m_afbSignals;
-		QHash<QString, LogicAfbParam*> m_afbParams;
+//		QHash<QString, LogicAfbSignal> m_afbSignals;
+//		QHash<QString, LogicAfbParam*> m_afbParams;
 	};
 
 	class UalItem : public QObject

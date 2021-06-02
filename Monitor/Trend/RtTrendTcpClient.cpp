@@ -1,5 +1,5 @@
 #include "RtTrendTcpClient.h"
-#include "Settings.h"
+#include "MonitorAppSettings.h"
 
 RtTrendTcpClient::RtTrendTcpClient(MonitorConfigController* configController) :
 	Tcp::Client(configController->softwareInfo(),
@@ -146,7 +146,7 @@ void RtTrendTcpClient::requestTrendManagement()
 	std::set<Hash> signalSet = m_signalSet;
 	m_dataMutex.unlock();
 
-	m_managementRequest.set_clientequipmentid(theSettings.instanceStrId().toStdString());
+	m_managementRequest.set_clientequipmentid(MonitorAppSettings::instance().equipmentId().toStdString());
 	m_managementRequest.set_sampleperiod(static_cast<int>(samplePeriod));
 
 	// Add signals for tracking

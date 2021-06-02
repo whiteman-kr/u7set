@@ -67,7 +67,8 @@ public:
 				  const QString& serviceInstanceName,
 				  int& argc,
 				  char** argv,
-				  CircularLoggerShared logger);
+				  CircularLoggerShared logger,
+				  E::ServiceRunMode runMode);
 
 	virtual ~ServiceWorker();
 
@@ -120,6 +121,9 @@ public:
 	void setSessionParams(const SessionParams& sp);
 	SessionParams sessionParams() const;
 
+	void setServiceRunMode(E::ServiceRunMode srm);
+	E::ServiceRunMode serviceRunMode() const;
+
 signals:
 	void work();
 	void stopped();
@@ -156,6 +160,7 @@ private:
 	int& m_argc;
 	char** m_argv = nullptr;
 	CircularLoggerShared m_logger;
+	E::ServiceRunMode m_serviceRunMode = E::ServiceRunMode::ConsoleApp;
 
 	QSettings m_settings;
 
@@ -286,13 +291,13 @@ private:
 
 	int runAsRegularApplication();
 
-	void exitThread();
-
 private:
-	class KeyReaderThread : public QThread
+	class KeyReaderThread : public RunOverrideThread
 	{
 	public:
+		KeyReaderThread();
 		virtual void run() override;
+		void stop();
 	};
 
 private:

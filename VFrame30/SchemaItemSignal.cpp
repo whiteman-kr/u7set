@@ -21,10 +21,10 @@ namespace VFrame30
 		FblItemRect(unit)
 	{
 		addProperty<QString, SchemaItemSignal, &SchemaItemSignal::appSignalIds, &SchemaItemSignal::setAppSignalIds>(PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true)
-			->setValidator(PropertyNames::appSignalIDsValidator);
+			->setValidator(PropertyNames::appSignalIDsOrReferenceValidator);
 
 		addProperty<QString, SchemaItemSignal, &SchemaItemSignal::impactAppSignalIds, &SchemaItemSignal::setImpactAppSignalIds>(PropertyNames::impactAppSignalIDs, PropertyNames::functionalCategory, true)
-			->setValidator(PropertyNames::appSignalIDsValidator);
+			->setValidator(PropertyNames::appSignalIDsOrReferenceValidator);
 
 		addProperty<bool, SchemaItemSignal, &SchemaItemSignal::multiLine, &SchemaItemSignal::setMultiLine>(PropertyNames::multiLine, PropertyNames::appearanceCategory, true);
 		addProperty<int, SchemaItemSignal, &SchemaItemSignal::precision, &SchemaItemSignal::setPrecision>(PropertyNames::precision, PropertyNames::monitorCategory, true);

@@ -34,7 +34,8 @@ public:
 						 const QString& serviceInstanceName,
 						 int& argc,
 						 char** argv,
-						 CircularLoggerShared logger);
+						 CircularLoggerShared logger,
+						 E::ServiceRunMode runMode);
 	~AppDataServiceWorker();
 
 	virtual ServiceWorker* createInstance() const override;

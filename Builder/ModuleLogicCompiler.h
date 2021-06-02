@@ -156,7 +156,7 @@ namespace Builder
 
 		IssueLogger* log() { return m_log; }
 
-		const LogicAfbSignal getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbls.getAfbSignal(afbStrID, signalIndex); }
+//		const LogicAfbSignal getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbls.getAfbSignal(afbStrID, signalIndex); }
 
 		bool pass1();
 		bool pass2();
