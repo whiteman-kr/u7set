@@ -355,7 +355,7 @@ namespace VFrame30
 								 true,
 								 SchemaItemReceiver::appSignalIds,
 								 SchemaItemReceiver::setAppSignalIds);
-		strIdProperty->setValidator(PropertyNames::appSignalIDsValidator);
+		strIdProperty->setValidator(PropertyNames::appSignalIDsOrReferenceValidator);
 
 		ADD_PROPERTY_GET_SET_CAT(E::ColumnData,
 								 PropertyNames::dataType,
