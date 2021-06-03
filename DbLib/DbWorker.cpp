@@ -374,6 +374,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0352.sql", "Upgrade to version 352, In LM descriptions Size 4 and 5 had been changed to 16"},
 	{":/DatabaseUpgrade/Upgrade0353.sql", "Upgrade to version 353, FIM preset has been added"},
 	{":/DatabaseUpgrade/Upgrade0354.sql", "Upgrade to version 354, OCM RxAppDataOffset set to 0, RxAppDataSize set to 2560, Monitor tags set to applogic monitor"},
+	{":/DatabaseUpgrade/Upgrade0355.sql", "Upgrade to version 355, Added to LM1-SR04 AFBs with sync in/outs : integrator, triggers, latches, time counters, comparators, damper"},
 };
 
 int DbWorker::counter = 0;

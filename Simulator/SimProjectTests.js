@@ -4242,3 +4242,205 @@ function testGetLogicModuleInfoTests(sim)
 
     return;
 }
+
+// Test for UFB
+// Schema: TEST_UFB_PARAM_1
+//
+function testUfbParam1(sim)
+{
+    let inSignal = "#UFB_T1_SI_IN";
+    let outSignal1 = "#UFB_T1_R1";
+    let outSignal2 = "#UFB_T1_R2";
+    let simSignal = "#UFB_T1_SIM";
+    let blockSignal = "#UFB_T1_BLOCK";
+
+    // Initial
+    //
+    assert(sim.signalValue(outSignal1) === 0);
+    assert(sim.signalValue(outSignal2) === 0);
+
+    // 1. Test test signal
+    //
+    sim.overrideSignalValue(inSignal, 101);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 1);
+    assert(sim.signalValue(outSignal2) === 1);
+
+    // 2.
+    //
+    sim.overrideSignalValue(blockSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 0);
+    assert(sim.signalValue(outSignal2) === 0);
+
+    // 3.
+    //
+    sim.overrideSignalValue(blockSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 1);
+    assert(sim.signalValue(outSignal2) === 1);
+
+    // 4.
+    //
+    sim.overrideSignalValue(inSignal, 96);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 1);
+    assert(sim.signalValue(outSignal2) === 1);
+
+    // 5.
+    //
+    sim.overrideSignalValue(inSignal, 95);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 0);
+    assert(sim.signalValue(outSignal2) === 0);
+
+    // 6.
+    //
+    sim.overrideSignalValue(simSignal, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 1);
+    assert(sim.signalValue(outSignal2) === 1);
+
+    // 7.
+    //
+    sim.overrideSignalValue(simSignal, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 0);
+    assert(sim.signalValue(outSignal2) === 0);
+
+    return;
+}
+
+// Test for UFB
+// Schema: TEST_UFB_PARAM_2
+//
+function testUfbParam2(sim)
+{
+    let inSignal1 = "#UFB_T2_SI_IN_1SF";
+    let inSignal2 = "#UFB_T2_SI_IN_2SF";
+    let inSignal3 = "#UFB_T2_SI_IN_3SF";
+
+    let outSignal1 = "#UFB_T2_R1_1SF";
+    let outSignal2 = "#UFB_T2_R1_2SF";
+    let outSignal3 = "#UFB_T2_R1_3SF";
+
+    let simSignal1 = "#UFB_T2_SIM_1SF";
+    let simSignal2 = "#UFB_T2_SIM_2SF";
+    let simSignal3 = "#UFB_T2_SIM_3SF";
+
+    let blockSignal1 = "#UFB_T2_BLOCK_1SF";
+    let blockSignal2 = "#UFB_T2_BLOCK_2SF";
+    let blockSignal3 = "#UFB_T2_BLOCK_3SF";
+
+    // Initial
+    //
+    assert(sim.signalValue(outSignal1) === 0);
+    assert(sim.signalValue(outSignal2) === 0);
+    assert(sim.signalValue(outSignal3) === 0);
+
+    // 1. Test test signal
+    //
+    sim.overrideSignalValue(inSignal1, 101);
+    sim.overrideSignalValue(inSignal2, 101);
+    sim.overrideSignalValue(inSignal3, 101);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 1);
+    assert(sim.signalValue(outSignal2) === 1);
+    assert(sim.signalValue(outSignal3) === 1);
+
+    // 2.
+    //
+    sim.overrideSignalValue(blockSignal1, 1);
+    sim.overrideSignalValue(blockSignal2, 1);
+    sim.overrideSignalValue(blockSignal3, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 0);
+    assert(sim.signalValue(outSignal2) === 0);
+    assert(sim.signalValue(outSignal3) === 0);
+
+    // 3.
+    //
+    sim.overrideSignalValue(blockSignal1, 0);
+    sim.overrideSignalValue(blockSignal2, 0);
+    sim.overrideSignalValue(blockSignal3, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 1);
+    assert(sim.signalValue(outSignal2) === 1);
+    assert(sim.signalValue(outSignal3) === 1);
+
+    // 4.
+    //
+    sim.overrideSignalValue(inSignal1, 96);
+    sim.overrideSignalValue(inSignal2, 96);
+    sim.overrideSignalValue(inSignal3, 96);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 1);
+    assert(sim.signalValue(outSignal2) === 1);
+    assert(sim.signalValue(outSignal3) === 1);
+
+    // 5.
+    //
+    sim.overrideSignalValue(inSignal1, 95);
+    sim.overrideSignalValue(inSignal2, 95);
+    sim.overrideSignalValue(inSignal3, 95);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 0);
+    assert(sim.signalValue(outSignal2) === 0);
+    assert(sim.signalValue(outSignal3) === 0);
+
+    // 6.
+    //
+    sim.overrideSignalValue(simSignal1, 1);
+    sim.overrideSignalValue(simSignal2, 1);
+    sim.overrideSignalValue(simSignal3, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 1);
+    assert(sim.signalValue(outSignal2) === 1);
+    assert(sim.signalValue(outSignal3) === 1);
+
+    // 7.
+    //
+    sim.overrideSignalValue(simSignal1, 0);
+    sim.overrideSignalValue(simSignal2, 0);
+    sim.overrideSignalValue(simSignal3, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 0);
+    assert(sim.signalValue(outSignal2) === 0);
+    assert(sim.signalValue(outSignal3) === 0);
+
+    // 7.
+    //
+    sim.overrideSignalValue(simSignal1, 0);
+    sim.overrideSignalValue(simSignal2, 0);
+    sim.overrideSignalValue(simSignal3, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 0);
+    assert(sim.signalValue(outSignal2) === 0);
+    assert(sim.signalValue(outSignal3) === 1);
+
+    sim.overrideSignalValue(simSignal1, 1);
+    sim.overrideSignalValue(simSignal2, 0);
+    sim.overrideSignalValue(simSignal3, 1);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 1);
+    assert(sim.signalValue(outSignal2) === 0);
+    assert(sim.signalValue(outSignal3) === 1);
+
+    sim.overrideSignalValue(simSignal1, 0);
+    sim.overrideSignalValue(simSignal2, 1);
+    sim.overrideSignalValue(simSignal3, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 0);
+    assert(sim.signalValue(outSignal2) === 1);
+    assert(sim.signalValue(outSignal3) === 0);
+
+    sim.overrideSignalValue(simSignal1, 0);
+    sim.overrideSignalValue(simSignal2, 0);
+    sim.overrideSignalValue(simSignal3, 0);
+    sim.startForMs(5);
+    assert(sim.signalValue(outSignal1) === 0);
+    assert(sim.signalValue(outSignal2) === 0);
+    assert(sim.signalValue(outSignal3) === 0);
+
+    return;
+}
