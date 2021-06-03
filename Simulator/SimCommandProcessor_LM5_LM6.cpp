@@ -5499,7 +5499,6 @@ namespace Sim
 		instance->addParamWord(o_param_err, param_err);
 
 		return;
-
 	}
 
 	// MISMATCH, OpCode 27

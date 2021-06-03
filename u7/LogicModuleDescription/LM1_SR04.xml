@@ -4759,7 +4759,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#deriv_v1"        Caption="deriv"        Version="1.0011">
+        <AFB id="#deriv_v1"        Caption="deriv"        Version="1.0012">
 			<Properties>				
 				<Description>Derive Block performs derivative calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
@@ -4775,6 +4775,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="i_td" Caption="td" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="2" Size="32"/>
 				<Pin OpName="i_min" Caption="min" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="6" Size="32"/>
 				<Pin OpName="i_max" Caption="max" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="4" Size="32"/>
+				<Pin OpName="i_sync_in" Caption="s_in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="10" Size="32"/>
 			</Inputs>
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="19" Size="32"/>
@@ -4785,6 +4786,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="25" Size="1"/>
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="26" Size="1"/>
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="27" Size="1"/>
+				<Pin OpName="o_sync_out" Caption="s_out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="19" Size="32"/>
 			</Outputs>
 			<Params>				
 				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
@@ -4792,10 +4794,11 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+						    (function(videoItemFblElement, afbElement)
+							{
+							    createSyncSignals(videoItemFblElement, afbElement);
+								createOutputSignals(videoItemFblElement, afbElement);
+							})
 						</Changed>
 					</Script>
 				</Param>            
@@ -4804,10 +4807,11 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+						    (function(videoItemFblElement, afbElement)
+							{
+							    createSyncSignals(videoItemFblElement, afbElement);
+								createOutputSignals(videoItemFblElement, afbElement);
+							})
 						</Changed>
 					</Script>
 				</Param>
@@ -4816,10 +4820,11 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+						    (function(videoItemFblElement, afbElement)
+							{
+							    createSyncSignals(videoItemFblElement, afbElement);
+								createOutputSignals(videoItemFblElement, afbElement);
+							})
 						</Changed>
 					</Script>
 				</Param>
@@ -4828,10 +4833,11 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+						    (function(videoItemFblElement, afbElement)
+							{
+							    createSyncSignals(videoItemFblElement, afbElement);
+								createOutputSignals(videoItemFblElement, afbElement);
+							})
 						</Changed>
 					</Script>
 				</Param>
@@ -4840,61 +4846,93 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+						    (function(videoItemFblElement, afbElement)
+							{
+							    createSyncSignals(videoItemFblElement, afbElement);
+								createOutputSignals(videoItemFblElement, afbElement);
+							})
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="SyncStatePins" Caption="SyncStatePins" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				    <Value>0</Value>
+					<Default>0</Default>
+					<Script>
+					    <Changed>
+						    (function(videoItemFblElement, afbElement)
+							{
+							    createSyncSignals(videoItemFblElement, afbElement);
+								createOutputSignals(videoItemFblElement, afbElement);
+							})
 						</Changed>
 					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
+				    function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+					{
+					    var show = videoItemFblElement.getParamBoolValue(paramName);
+						if (show == true)
+						{
+						    var s = afbElement.getAfbSignalByCaption(signalCaption);
+							if (s != null)
+							{
+							    videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}
+						}
+					}
 
-function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
-{
-	var show = videoItemFblElement.getParamBoolValue(paramName);
-	if (show == true)
-	{
-		var s = afbElement.getAfbSignalByCaption(signalCaption);
-		if (s != null)
-		{
-			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
-		}	
-	}
-}
+                    function createOutputSignals(videoItemFblElement, afbElement)
+					{
+					    videoItemFblElement.removeOutputSignals();
 
-function createOutputSignals(videoItemFblElement, afbElement)
-{
-	videoItemFblElement.removeOutputSignals();
-	
-	var out = afbElement.getAfbSignalByCaption("out");
-	if (out != null)
-	{
-		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
-	}
+                        var out = afbElement.getAfbSignalByCaption("out");
+						if (out != null)
+						{
+						    videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+						}
 
-	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
-	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
-	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
-	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");	
+                        createOutput(videoItemFblElement, afbElement, "SyncStatePins", "s_out");
+						createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
+						createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
+						createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
+						createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+						createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
 
-	videoItemFblElement.adjustHeight();
+                        videoItemFblElement.adjustHeight();
+						return true;
+					}
 
-	return true;
-}
+                    function createSyncSignals(videoItemFblElement, afbElement)
+					{
+					    videoItemFblElement.removeInputSignal("s_in");
+
+                        var show = videoItemFblElement.getParamBoolValue("SyncStatePins");
+						if (show == true)
+						{
+						    var s = afbElement.getAfbSignalByCaption("s_in");
+							if (s != null)
+							{
+							    videoItemFblElement.addInputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}
+						}
+
+                        videoItemFblElement.adjustHeight();
+						return true;
+					}
 				</Library>
 				<AfterCreation>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+				    (function(videoItemFblElement, afbElement)
+					{
+					    createSyncSignals(videoItemFblElement, afbElement);
+						createOutputSignals(videoItemFblElement, afbElement);
+					})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#derivc_v1"       Caption="derivc"       Version="1.0010">
+        <AFB id="#derivc_v1"       Caption="derivc"       Version="1.0013">
 			<Properties>				
 				<Description>Derive Block performs derivative calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
@@ -4906,6 +4944,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="i_x" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="12" Size="32"/>
 				<Pin OpName="i_reset" Caption="reset" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 				<Pin OpName="i_pause" Caption="pause" Type="Discrete" ByteOrder="BigEndian" OpIndex="15" Size="1"/>           
+				<Pin OpName="i_sync_in" Caption="s_in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="10" Size="32"/>
 			</Inputs>
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="19" Size="32"/>
@@ -4916,6 +4955,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="25" Size="1"/>
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="26" Size="1"/>
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="27" Size="1"/>
+				<Pin OpName="o_sync_out" Caption="s_out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="19" Size="32"/>
 			</Outputs>
 			<Params>
 				<Param OpName="i_kd" Caption="Kd" Visible="true" OpIndex="0" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
@@ -4960,10 +5000,11 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+						    (function(videoItemFblElement, afbElement)
+							{
+							    createSyncSignals(videoItemFblElement, afbElement);
+								createOutputSignals(videoItemFblElement, afbElement);
+							})
 						</Changed>
 					</Script>
 				</Param>            
@@ -4972,10 +5013,11 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+						    (function(videoItemFblElement, afbElement)
+							{
+							    createSyncSignals(videoItemFblElement, afbElement);
+								createOutputSignals(videoItemFblElement, afbElement);
+							})
 						</Changed>
 					</Script>
 				</Param>
@@ -4984,10 +5026,11 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+						    (function(videoItemFblElement, afbElement)
+							{
+							    createSyncSignals(videoItemFblElement, afbElement);
+								createOutputSignals(videoItemFblElement, afbElement);
+							})
 						</Changed>
 					</Script>
 				</Param>
@@ -4996,10 +5039,11 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+						    (function(videoItemFblElement, afbElement)
+							{
+							    createSyncSignals(videoItemFblElement, afbElement);
+								createOutputSignals(videoItemFblElement, afbElement);
+							})
 						</Changed>
 					</Script>
 				</Param>
@@ -5008,56 +5052,88 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+						    (function(videoItemFblElement, afbElement)
+							{
+							    createSyncSignals(videoItemFblElement, afbElement);
+								createOutputSignals(videoItemFblElement, afbElement);
+							})
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="SyncStatePins" Caption="SyncStatePins" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				    <Value>0</Value>
+					<Default>0</Default>
+					<Script>
+					    <Changed>
+						    (function(videoItemFblElement, afbElement)
+							{
+							    createSyncSignals(videoItemFblElement, afbElement);
+								createOutputSignals(videoItemFblElement, afbElement);
+							})
 						</Changed>
 					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
+				    function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+					{
+					    var show = videoItemFblElement.getParamBoolValue(paramName);
+						if (show == true)
+						{
+						    var s = afbElement.getAfbSignalByCaption(signalCaption);
+							if (s != null)
+							{
+							    videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}
+						}
+					}
 
-function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
-{
-	var show = videoItemFblElement.getParamBoolValue(paramName);
-	if (show == true)
-	{
-		var s = afbElement.getAfbSignalByCaption(signalCaption);
-		if (s != null)
-		{
-			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
-		}	
-	}
-}
+                    function createOutputSignals(videoItemFblElement, afbElement)
+					{
+					    videoItemFblElement.removeOutputSignals();
 
-function createOutputSignals(videoItemFblElement, afbElement)
-{
-	videoItemFblElement.removeOutputSignals();
-	
-	var out = afbElement.getAfbSignalByCaption("out");
-	if (out != null)
-	{
-		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
-	}
+                        var out = afbElement.getAfbSignalByCaption("out");
+						if (out != null)
+						{
+						    videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+						}
 
-	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
-	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
-	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
-	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");	
+                        createOutput(videoItemFblElement, afbElement, "SyncStatePins", "s_out");
+						createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
+						createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
+						createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
+						createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
+						createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
 
-	videoItemFblElement.adjustHeight();
+                        videoItemFblElement.adjustHeight();
+						return true;
+					}
 
-	return true;
-}
+                    function createSyncSignals(videoItemFblElement, afbElement)
+					{
+					    videoItemFblElement.removeInputSignal("s_in");
+
+                        var show = videoItemFblElement.getParamBoolValue("SyncStatePins");
+						if (show == true)
+						{
+						    var s = afbElement.getAfbSignalByCaption("s_in");
+							if (s != null)
+							{
+							    videoItemFblElement.addInputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+							}
+						}
+
+                        videoItemFblElement.adjustHeight();
+						return true;
+					}
 				</Library>
 				<AfterCreation>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
+				    (function(videoItemFblElement, afbElement)
+					{
+					    createSyncSignals(videoItemFblElement, afbElement);
+						createOutputSignals(videoItemFblElement, afbElement);
+					})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
