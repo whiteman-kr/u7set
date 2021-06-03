@@ -392,6 +392,7 @@ bool MeasureThread::prepareCalibrator(std::shared_ptr<CalibratorManager> pCalibr
 		case CalibratorType::TrxII:		QThread::msleep(1000);	break;
 		case CalibratorType::Calys75:	QThread::msleep(500);	break;
 		case CalibratorType::Ktl6221:	QThread::msleep(500);	break;
+		case CalibratorType::Rgl1062:	QThread::msleep(100);	break;
 		default:
 			assert(0);
 			break;

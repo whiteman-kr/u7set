@@ -90,7 +90,7 @@ namespace VFrame30
 			r.setRight(r.right() - pinWidth);
 		}
 
-		QRectF labelRect(r);	// save rect for future use
+		//QRectF labelRect(r);	// save rect for future use
 
 		r.setLeft(r.left() + m_font.drawSize() / 4.0);
 		r.setRight(r.right() - m_font.drawSize() / 4.0);
@@ -197,6 +197,33 @@ namespace VFrame30
 
 		p->setPen(textColor());
 		DrawHelper::drawText(p, smallFont, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignBottom);
+
+		// Draw highlights for m_appSignalIds
+		//
+		{
+			for (auto prop : props)
+			{
+				bool breakLoop = false;
+				QString v = prop->value().toString();
+				QStringList valueAsList = v.split(QChar::LineFeed, Qt::SkipEmptyParts);
+
+				for (const QString& s : valueAsList)
+				{
+					if (s.startsWith(QChar('#')) == true && drawParam->hightlightIds().contains(s))
+					{
+						QRectF highlightRect = boundingRectInDocPt(drawParam);
+						drawHighlightRect(drawParam, highlightRect);
+						breakLoop = true;
+						break;
+					}
+				}
+
+				if (breakLoop == true)
+				{
+					break;
+				}
+			}
+		}
 
 		return;
 	}
