@@ -115,7 +115,14 @@ namespace VFrame30
 			{
 				if (p1->category() == p2->category())
 				{
-					return p1->caption() < p2->caption();
+					if (p1->viewOrder() == p2->viewOrder())
+					{
+						return p1->caption() < p2->caption();
+					}
+					else
+					{
+						return p1->viewOrder() < p2->viewOrder();
+					}
 				}
 				else
 				{
