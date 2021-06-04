@@ -5572,19 +5572,25 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 	QPushButton* tagsEditorButton = new QPushButton(tr("Tags..."), &d);
 	tagsEditorButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
-	connect(tagsEditorButton, &QPushButton::click,
+	connect(tagsEditorButton, &QPushButton::clicked,
 	[this, &d, tagsEdit]()
 	{
-//		QDialog tagsSelectorDialog{&d};
+		QDialog tagsSelectorDialog{&d, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
 
-//		tagsSelectorDialog.setLayout()
+		TagsEditor te{this->db(), &d};
+		te.setText(tagsEdit->text());
 
-//		TagsEditor te{this->db(), &d};
-//		te.setText(tagsEdit->text());
+		connect(&te, &TagsEditor::okPressed, &tagsSelectorDialog, &QDialog::accept);
+		connect(&te, &TagsEditor::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
 
-////		//Show_dialog_here();
+		QHBoxLayout l;
+		l.addWidget(&te);
+		tagsSelectorDialog.setLayout(&l);
 
-//		tagsEdit->setText(te.text());
+		if (tagsSelectorDialog.exec() == QDialog::Accepted)
+		{
+			tagsEdit->setText(te.text());
+		}
 	});
 
 	// --
