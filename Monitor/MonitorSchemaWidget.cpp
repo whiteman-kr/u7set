@@ -241,7 +241,7 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 
 		QAction* a = menu.addAction(signalId);
 
-		auto f = [this, &signal]() -> void
+		auto f = [this, signal]() -> void
 				 {
 					signalInfo(signal.appSignalId());
 				 };
