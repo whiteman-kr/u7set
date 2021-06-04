@@ -5577,6 +5577,10 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 	{
 		QDialog tagsSelectorDialog{&d, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
 
+		int width = QSettings().value("f2KeyForSignal/tagsSelectorDialog/width").toInt();
+		int height = QSettings().value("f2KeyForSignal/tagsSelectorDialog/height").toInt();
+		tagsSelectorDialog.resize(width, height);
+
 		TagsEditor te{this->db(), &d};
 		te.setText(tagsEdit->text());
 
@@ -5591,6 +5595,9 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 		{
 			tagsEdit->setText(te.text());
 		}
+
+		QSettings().setValue("f2KeyForSignal/tagsSelectorDialog/width", tagsSelectorDialog.width());
+		QSettings().setValue("f2KeyForSignal/tagsSelectorDialog/height", tagsSelectorDialog.height());
 	});
 
 	// --
@@ -5619,8 +5626,8 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 
 	// --
 	//
-	int width = QSettings().value("f2KeyForSignal\\width").toInt();
-	int height = QSettings().value("f2KeyForSignal\\height").toInt();
+	int width = QSettings().value("f2KeyForSignal/width").toInt();
+	int height = QSettings().value("f2KeyForSignal/height").toInt();
 	d.resize(width, height);
 
 	int result = d.exec();
@@ -5647,8 +5654,8 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 		}
 	}
 
-	QSettings().setValue("f2KeyForSignal\\width", d.width());
-	QSettings().setValue("f2KeyForSignal\\height", d.height());
+	QSettings().setValue("f2KeyForSignal/width", d.width());
+	QSettings().setValue("f2KeyForSignal/height", d.height());
 
 	return;
 }
