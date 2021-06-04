@@ -2938,6 +2938,8 @@ bool DbController::getTags(std::vector<DbTag>* tags)
 
 	QTextStream in(file->data());
 
+	in.setCodec("UTF-8");
+
 	while (in.atEnd() == false)
 	{
 		QString str = in.readLine();

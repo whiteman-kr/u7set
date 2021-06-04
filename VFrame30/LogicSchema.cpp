@@ -1,5 +1,6 @@
 #include "LogicSchema.h"
 #include "SchemaItemAfb.h"
+#include "SchemaItemUfb.h"
 #include "SchemaItemSignal.h"
 #include "SchemaItemConnection.h"
 #include "PropertyNames.h"
@@ -191,6 +192,27 @@ namespace VFrame30
 							signalMap.insert(appSignalId);
 						}
 					}
+
+					if (const VFrame30::SchemaItemUfb* itemUfb = item->toType<VFrame30::SchemaItemUfb>();
+						itemUfb != nullptr)
+					{
+						std::vector<std::shared_ptr<Property>> props = static_cast<const PropertyObject*>(itemUfb)->specificProperties();
+
+						for (auto p : props)
+						{
+							QString v = p->value().toString();
+							QStringList valueAsList = v.split(QChar::LineFeed, Qt::SkipEmptyParts);
+
+							for (const QString& s : valueAsList)
+							{
+								if (s.startsWith(QChar('#')) == true)
+								{
+									signalMap.insert(s);
+								}
+							}
+						}
+					}
+
 				}
 
 				break;

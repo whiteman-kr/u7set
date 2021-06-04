@@ -2576,9 +2576,9 @@ namespace Sim
 		//
 		if (conf >=1 && conf <= 4)
 		{
-			qint32 settingValue = instance->param(i_sp_s)->signedIntValue();
-			qint32 resetValue = instance->param(i_sp_r)->signedIntValue();
-			qint32 inputValue = instance->param(i_data)->signedIntValue();
+			const qint32 settingValue = instance->param(i_sp_s)->signedIntValue();
+			const qint32 resetValue = instance->param(i_sp_r)->signedIntValue();
+			const qint32 inputValue = instance->param(i_data)->signedIntValue();
 			quint16 prevResult = 0;
 
 			switch (conf)
@@ -2859,17 +2859,19 @@ namespace Sim
 		// Define input opIndexes
 		//
 		const int i_conf = 0;
-		const int i_time = 1;		// 32 bit SI
-		const int i_prev = 3;		// 48-bit prev data after filer (inputs 3, 4, 5)
-		const int i_data = 6;		// Input data
-		const int i_track = 8;		//
+		const int i_time = 1;			// 32 bit SI
+		const int i_prev_si = 3;		// 48-bit prev data after filer (inputs SI:3, 4, 5)
+		const int i_prev_fp = 4;		// 48-bit prev data after filer (inputs FP:   4, 5)
+		const int i_data = 6;			// Input data
+		const int i_track = 8;			//
 
-		const int o_current = 10;	// 48-bit current data after filer (inputs 10, 11, 12)
-		const int o_result = 13;	// 32-bit current result value (SI/FP)
+		const int o_current_si = 10;	// 48-bit current data after filer (inputs SI: 10, 11, 12)
+		const int o_current_fp = 11;	// 48-bit current data after filer (inputs FP:     11, 12)
+		const int o_result = 13;		// 32-bit current result value (SI/FP)
 		const int o_overflow = 15;
 		const int o_underflow = 16;
 		const int o_zero = 17;
-		const int o_nan = 18;		// Any input FP param NaN
+		const int o_nan = 18;			// Any input FP param NaN
 		const int o_param_err = 19;
 		//const int o_version = 21;
 
@@ -2878,18 +2880,19 @@ namespace Sim
 		quint16 conf = instance->param(i_conf)->wordValue();
 		qint64 time = instance->param(i_time)->dwordValue();
 
-		const AfbComponentParam* prevValueParam = instance->paramExists(i_prev) ? instance->param(i_prev) : nullptr;
-		const AfbComponentParam* dataParam = instance->param(i_data);
-
 		quint16 track = instance->param(i_track)->wordValue();
+
+		const AfbComponentParam* dataParam = instance->param(i_data);
 
 		if (time < m_cycleDurationMs || (conf != 1 && conf != 2))
 		{
-			// ?????
+			// --
 			//
 			instance->addParamSignedInt(o_result, 0);
-			instance->addParamSignedInt64(o_current, 0);
-			instance->addParamSignedInt64(i_prev, 0);
+			instance->addParamSignedInt64(o_current_si, 0);
+			instance->addParamSignedInt64(o_current_fp, 0);
+			instance->addParamSignedInt64(i_prev_si, 0);
+			instance->addParamSignedInt64(i_prev_fp, 0);
 
 			instance->addParamWord(o_overflow, 0);
 			instance->addParamWord(o_underflow, 0);
@@ -2919,6 +2922,8 @@ namespace Sim
 			{
 				// SignedInt
 				//
+				const AfbComponentParam* prevValueParam = instance->paramExists(i_prev_si) ? instance->param(i_prev_si) : nullptr;
+
 				qint64 inputValue = dataParam->signedIntValue();
 				inputValue <<= 16;
 
@@ -2927,8 +2932,8 @@ namespace Sim
 				qint64 resultExt = prevValue + inputValue / n - prevValue / n;
 
 				instance->addParamSignedInt(o_result, static_cast<qint32>(resultExt >> 16));
-				instance->addParamSignedInt64(o_current, resultExt);						// Save exdended value
-				instance->addParamSignedInt64(i_prev, resultExt);							// Save exdended value
+				instance->addParamSignedInt64(o_current_si, resultExt);						// Save exdended value
+				instance->addParamSignedInt64(i_prev_si, resultExt);						// Save exdended value
 
 				isOverflow = (resultExt >> 16) > std::numeric_limits<qint32>::max() ||
 							 (resultExt >> 16) < std::numeric_limits<qint32>::min();
@@ -2940,6 +2945,8 @@ namespace Sim
 			{
 				// Float
 				//
+				const AfbComponentParam* prevValueParam = instance->paramExists(i_prev_fp) ? instance->param(i_prev_fp) : nullptr;
+
 				float inputValue = dataParam->floatValue();
 
 				float prevValue = prevValueParam ? prevValueParam->floatValue() : 0.0f;	// First cycle prevValue is 0
@@ -2954,8 +2961,8 @@ namespace Sim
 				isNan = std::isnan(result);
 
 				instance->addParamFloat(o_result, result);
-				instance->addParamFloat(o_current, result);
-				instance->addParamFloat(i_prev, result);
+				instance->addParamFloat(o_current_fp, result);
+				instance->addParamFloat(i_prev_fp, result);
 			}
 		}
 		else
@@ -2969,8 +2976,8 @@ namespace Sim
 				qint32 inputValue = dataParam->signedIntValue();
 
 				instance->addParamSignedInt(o_result, inputValue);
-				instance->addParamSignedInt64(o_current, static_cast<qint64>(inputValue) << 16);		// This input is extended for SI
-				instance->addParamSignedInt64(i_prev, static_cast<qint64>(inputValue) << 16);			// This output is extended for SI
+				instance->addParamSignedInt64(o_current_si, static_cast<qint64>(inputValue) << 16);		// This input is extended for SI
+				instance->addParamSignedInt64(i_prev_si, static_cast<qint64>(inputValue) << 16);			// This output is extended for SI
 
 				isOverflow = false;
 				isUnderflow = false;
@@ -2984,8 +2991,8 @@ namespace Sim
 				float inputValue = dataParam->floatValue();
 
 				instance->addParamFloat(o_result, inputValue);
-				instance->addParamFloat(o_current, inputValue);
-				instance->addParamFloat(i_prev, inputValue);
+				instance->addParamFloat(o_current_fp, inputValue);
+				instance->addParamFloat(i_prev_fp, inputValue);
 
 				isOverflow = false;
 				isUnderflow = false;
@@ -4648,7 +4655,7 @@ namespace Sim
 
 
 		//const int o_set_prev = 9;				// Previous set -> i_set_prev
-		//const int o_y_prev = 10;				// output Y/input Х
+		const int o_y_prev = 10;				// output Y/input Х
 		const int o_result = 12;				// output Y
 		//const int o_edi = 14;
 		//const int o_version = 15;
@@ -4710,8 +4717,8 @@ namespace Sim
 				//
 				instance->addParamDword(o_result, result);
 
+				instance->addParamDword(o_y_prev, result);
 				instance->addParamDword(i_y_prev, result);
-				//instance->addParamDword(o_y_prev, result);		// Commented for optimization
 
 				instance->addParamWord(i_set_prev, set);
 				//instance->addParamWord(o_set_prev, set);			// Commented for optimization
@@ -4764,8 +4771,8 @@ namespace Sim
 				//
 				instance->addParamDword(o_result, result);
 
+				instance->addParamDword(o_y_prev, result);
 				instance->addParamDword(i_y_prev, result);
-				//instance->addParamDword(o_y_prev, result);		// Commented for optimization
 
 				instance->addParamWord(i_set_prev, set);
 				//instance->addParamWord(o_set_prev, set);			// Commented for optimization
@@ -4807,7 +4814,8 @@ namespace Sim
 				// Result
 				//
 				instance->addParamDword(o_result, result);
-				//instance->addParamDword(o_y_prev, result);		// Commented for optimization
+
+				instance->addParamDword(o_y_prev, result);
 				instance->addParamDword(i_y_prev, result);
 			}
 			break;
@@ -4841,14 +4849,16 @@ namespace Sim
 
 				if (reset == 0)
 				{
+					instance->addParamDword(o_y_prev, input);
 					instance->addParamDword(i_y_prev, input);
 				}
 				else
 				{
 					// That is how implemented in VHDL code for v4 of AFB LATCH
 					// if reset has gone then output will be in 0 in any case for one cycle.
-					// It is an error, hopefully it will be fixed in the next version.
+					// It is an error, it fixed in the next version (5).
 					//
+					instance->addParamDword(o_y_prev, 0);
 					instance->addParamDword(i_y_prev, 0);
 				}
 			}
@@ -4873,7 +4883,7 @@ namespace Sim
 
 
 		//const int o_set_prev = 9;				// Previous set -> i_set_prev
-		//const int o_y_prev = 10;				// output Y/input Х
+		const int o_y_prev = 10;				// output Y/input Х
 		const int o_result = 12;				// output Y
 		//const int o_edi = 14;
 		//const int o_version = 15;
@@ -4935,8 +4945,8 @@ namespace Sim
 				//
 				instance->addParamDword(o_result, result);
 
+				instance->addParamDword(o_y_prev, result);
 				instance->addParamDword(i_y_prev, result);
-				//instance->addParamDword(o_y_prev, result);		// Commented for optimization
 
 				instance->addParamWord(i_set_prev, set);
 				//instance->addParamWord(o_set_prev, set);			// Commented for optimization
@@ -4989,8 +4999,8 @@ namespace Sim
 				//
 				instance->addParamDword(o_result, result);
 
+				instance->addParamDword(o_y_prev, result);
 				instance->addParamDword(i_y_prev, result);
-				//instance->addParamDword(o_y_prev, result);		// Commented for optimization
 
 				instance->addParamWord(i_set_prev, set);
 				//instance->addParamWord(o_set_prev, set);			// Commented for optimization
@@ -5032,7 +5042,8 @@ namespace Sim
 				// Result
 				//
 				instance->addParamDword(o_result, result);
-				//instance->addParamDword(o_y_prev, result);		// Commented for optimization
+
+				instance->addParamDword(o_y_prev, result);
 				instance->addParamDword(i_y_prev, result);
 			}
 			break;
@@ -5061,6 +5072,7 @@ namespace Sim
 				// Result
 				//
 				instance->addParamDword(o_result, result);
+				instance->addParamDword(o_y_prev, input);
 				instance->addParamDword(i_y_prev, input);
 			}
 			break;
@@ -5487,7 +5499,6 @@ namespace Sim
 		instance->addParamWord(o_param_err, param_err);
 
 		return;
-
 	}
 
 	// MISMATCH, OpCode 27
