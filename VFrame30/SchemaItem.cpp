@@ -885,6 +885,8 @@ namespace VFrame30
 			t = t.trimmed();
 		}
 
+		m_tags.removeDuplicates();
+
 		return;
 	}
 
@@ -902,6 +904,8 @@ namespace VFrame30
 				m_tags.append(trimmed);
 			}
 		}
+
+		m_tags.removeDuplicates();
 
 		return;
 	}

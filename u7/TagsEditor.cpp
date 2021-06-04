@@ -112,7 +112,6 @@ bool TagsEditor::externalOkCancelButtons() const
 	return false;
 }
 
-
 void TagsEditor::tagsTextChanged(const QString& text)
 {
 	updateChecks(text);

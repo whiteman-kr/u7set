@@ -3,6 +3,7 @@
 #include "SchemaPropertiesDialog.h"
 #include "SchemaLayersDialog.h"
 #include "SchemaItemPropertiesDialog.h"
+#include "TagsEditor.h"
 #include "./Forms/ChooseAfbDialog.h"
 #include "./Forms/ChooseUfbDialog.h"
 #include "SignalPropertiesDialog.h"
@@ -5547,7 +5548,7 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 	appSignalIdsEdit->setPlainText(appSignalIds);
 	appSignalIdsEdit->setCompleter(completer);
 
-	// Text
+	// ImpactAppSignalIDs
 	//
 	QLabel* impactAppSignalIdsLabel = new QLabel("ImpactAppSignalIDs:", &d);
 	impactAppSignalIdsLabel->setEnabled(signalItem->hasImpactColumn());
@@ -5558,6 +5559,34 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 	impactAppSignalIdsEdit->setPlainText(impactAppSignalIds);
 	impactAppSignalIdsEdit->setCompleter(completer);
 
+	// Tags
+	//
+	QString tags = signalItem->tagsAsList().join(QChar(' '));
+
+	QLabel* tagsLabel = new QLabel("SchemaItem Tags:", &d);
+
+	QLineEdit* tagsEdit = new QLineEdit(&d);
+	tagsEdit->setPlaceholderText("Enter tags separated by spaces.");
+	tagsEdit->setText(tags);
+
+	QPushButton* tagsEditorButton = new QPushButton(tr("Tags..."), &d);
+	tagsEditorButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+
+	connect(tagsEditorButton, &QPushButton::click,
+	[this, &d, tagsEdit]()
+	{
+//		QDialog tagsSelectorDialog{&d};
+
+//		tagsSelectorDialog.setLayout()
+
+//		TagsEditor te{this->db(), &d};
+//		te.setText(tagsEdit->text());
+
+////		//Show_dialog_here();
+
+//		tagsEdit->setText(te.text());
+	});
+
 	// --
 	//
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &d);
@@ -5565,13 +5594,17 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 
 	QGridLayout* layout = new QGridLayout(&d);
 
-	layout->addWidget(appSignalIdsLabel, 0, 0, 1, 3);
-	layout->addWidget(appSignalIdsEdit, 1, 0, 1, 3);
+	layout->addWidget(appSignalIdsLabel, 0, 0, 1, 4);
+	layout->addWidget(appSignalIdsEdit, 1, 0, 1, 4);
 
-	layout->addWidget(impactAppSignalIdsLabel, 2, 0, 1, 3);
-	layout->addWidget(impactAppSignalIdsEdit, 3, 0, 1, 3);
+	layout->addWidget(impactAppSignalIdsLabel, 2, 0, 1, 4);
+	layout->addWidget(impactAppSignalIdsEdit, 3, 0, 1, 4);
 
-	layout->addWidget(buttonBox, 4, 0, 1, 3);
+	layout->addWidget(tagsLabel, 4, 0, 1, 3);
+	layout->addWidget(tagsEdit, 5, 0, 1, 3);
+	layout->addWidget(tagsEditorButton, 5, 3, 1, 1);
+
+	layout->addWidget(buttonBox, 6, 0, 1, 4);
 
 	d.setLayout(layout);
 
@@ -5590,15 +5623,18 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 	{
 		QString newAppSignaIds = appSignalIdsEdit->toPlainText();
 		QString newImpactAppSignaIds = impactAppSignalIdsEdit->toPlainText();
+		QString newTags = tagsEdit->text();
 
 		if (newAppSignaIds != appSignalIds ||
-			newImpactAppSignaIds != impactAppSignalIds)
+			newImpactAppSignaIds != impactAppSignalIds ||
+			newTags.trimmed() != tags.trimmed())
 		{
 			if (bool ok = m_editEngine->startBatch();
 				ok == true)
 			{
 				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newAppSignaIds), item);
 				m_editEngine->runSetProperty(VFrame30::PropertyNames::impactAppSignalIDs, QVariant(newImpactAppSignaIds), item);
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::tags, QVariant(newTags), item);
 
 				m_editEngine->endBatch();
 			}
