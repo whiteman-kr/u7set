@@ -1255,22 +1255,13 @@ namespace Builder
 
 		result = signalSet->checkSignals();
 
-		RETURN_IF_FALSE(result);
-
-		//QStringList
-
 		signalSet->buildID2IndexMap();
 
-		result = signalSet->bindSignalsToLMs(equipment);
-
-		if (result == false)
-		{
-			return false;
-		}
+		result &= signalSet->bindSignalsToLMs(equipment);
 
 		signalSet->initCalculatedSignalsProperties();
 
-		return true;
+		return result;
 	}
 
 	bool BuildWorkerThread::loadLogicModuleDescription(Hardware::DeviceModule* logicModule, LmDescriptionSet* lmDescriptions)

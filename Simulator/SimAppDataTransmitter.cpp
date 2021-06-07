@@ -21,7 +21,7 @@ namespace Sim
 
 	bool AppDataTransmitter::startSimulation(QString profileName)
 	{
-		m_log.writeMessage(QString("Sending app data simulation is started for profile %1").arg(profileName));
+		// m_log.writeText(QString("Sending app data simulation is started for profile %1").arg(profileName));
 
 		TEST_PTR_RETURN_FALSE(m_simulator);
 

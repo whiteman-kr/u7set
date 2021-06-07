@@ -549,6 +549,8 @@ function test_UAL_CONN_4_1_10(sim)
 	assert(conn02_port1.rxDataSizeW === conn02_port1.manualRxWordsQuantity);
 }
 
+/* Uncomment after return auto opto validity assigning
+
 function test_UAL_CONN_4_1_11(sim)
 {
 	let validitySignal = sim.signalParamExt("#SYSTEMID_RACK01_FSCC02_MD14_PI_OPTOPORT04VALID");
@@ -568,7 +570,7 @@ function test_UAL_CONN_4_1_11(sim)
 	optoSignal = sim.signalParamExt("#LM2_DS01");
 	assert(optoSignal != null);
 	assert(validitySignal.regValueAddr === optoSignal.regValidityAddr);
-}
+}*/
 
 function test_UAL_CONN_4_1_12(sim)
 {
