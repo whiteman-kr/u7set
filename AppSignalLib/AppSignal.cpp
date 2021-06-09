@@ -1100,7 +1100,7 @@ double AppSignal::electricLowLimit(QString* err) const
 
 void AppSignal::setElectricLowLimit(double electricLowLimit)
 {
-	setSpecPropDouble(AppSignalPropNames::ELECTRIC_HIGH_LIMIT, electricLowLimit);
+	setSpecPropDouble(AppSignalPropNames::ELECTRIC_LOW_LIMIT, electricLowLimit);
 }
 
 double AppSignal::electricHighLimit(QString* err) const
