@@ -42,6 +42,8 @@ namespace  Tuning
 	TuningData::TuningData() :
 		TYPES_COUNT(E::metaEnum<E::TuningSignalType>().keyCount())
 	{
+		m_tuningSignals.resize(TYPES_COUNT);
+		m_tuningSignalSizes.fill(0, TYPES_COUNT);
 	}
 
 	TuningData::TuningData(const QString& lmID,

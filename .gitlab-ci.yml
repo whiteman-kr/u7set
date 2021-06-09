@@ -133,6 +133,10 @@ windows build job:
     - "mkdir \"$Env:CI_PROJECT_DIR\\bin\\release\\styles\""
     - "copy $Env:QT_BIN_DIR\\plugins\\styles\\qwindowsvistastyle.dll \"$Env:CI_PROJECT_DIR/bin/release/styles/\""
 
+    - "copy $Env:CI_PROJECT_DIR\\bin_Win64\\visa64.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:CI_PROJECT_DIR\\bin_Win64\\visaConfMgr.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy $Env:CI_PROJECT_DIR\\bin_Win64\\visaUtilities.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+
 #Remove some files not requiered for releases
     - "# ----------------------------------------------"
     - "#               Remove some files not requiered for releases"
@@ -248,10 +252,10 @@ test job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/test_simulator_v352/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/test_simulator_v355/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
 
 #Run ROVT to check configuration generation
     - "# ----------------------------------------------"
     - "#               Run ROVT tests"
     - "# ----------------------------------------------"
-    - "&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v352\\build"
+    - "&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v355\\build"

@@ -68,10 +68,10 @@ namespace VFrame30
 		/// \brief Way to display numbers.
 		Q_PROPERTY(E::AnalogFormat analogFormat READ analogFormat WRITE setAnalogFormat)
 
-		/// \brief Item column count. To get column data type use function \ref columnData.
+		/// \brief Returns or sets item column count. To get column data type use function \ref columnData.
 		///
-		Q_PROPERTY(int columnCount READ columnCount)
-		Q_PROPERTY(int ColumnCount READ columnCount)
+		Q_PROPERTY(int columnCount READ columnCount WRITE setColumnCount)
+		Q_PROPERTY(int ColumnCount READ columnCount WRITE setColumnCount)
 
 		/** \brief Cell column count. May differ from <b>columnCount</b> as column can have several cells.
 		To get cell data type use function \ref cellData, returns \ref E::ColumnData "ColumnData".
@@ -206,19 +206,26 @@ namespace VFrame30
 		int columnCount() const;
 		void setColumnCount(int value);
 
+	public slots:
+		/// \brief Returns column width in percents for column specified by <b>columnIndex</b>
 		double columnWidth(int columnIndex) const;
+
+		/// \brief Sets column width in percents for column specified by <b>columnIndex</b>
 		void setColumnWidth(double value, int columnIndex);
 
-	public slots:
-		/// \brief Returns column data type for column specified by <b>columnIndex</b>, returns \ref E::ColumnData "ColumnData"
+		/// \brief Returns data type for column specified by <b>columnIndex</b>, returns \ref E::ColumnData "ColumnData"
 		E::ColumnData columnData(int columnIndex) const;
 
-	public:
+		/// \brief Sets data type specified by \ref E::ColumnData "ColumnData" for column specified by <b>columnIndex</b>
 		void setColumnData(E::ColumnData value, int columnIndex);
 
+		/// \brief Returns text horizontal alignment for column specified by <b>columnIndex</b>, returns \ref E::HorzAlign "HorzAlign"
 		E::HorzAlign columnHorzAlign(int columnIndex) const;
+
+		/// \brief Sets text horizontal alignment specified by \ref E::HorzAlign "HorzAlign" for column specified by <b>columnIndex</b>
 		void setColumnHorzAlign(E::HorzAlign value, int columnIndex);
 
+	public:
 		bool hasImpactColumn() const;
 
 		int cellRowCount() const;
