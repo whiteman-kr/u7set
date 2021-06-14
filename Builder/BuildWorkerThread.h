@@ -99,12 +99,12 @@ namespace Builder
 				{
 					.func = &BuildWorkerThread::taskLoadBusTypes,
 					.name = "Loading BusType(s)",
-					.breakOnFailed = false
+					.breakOnFailed = true
 				},
 				{
 					.func = &BuildWorkerThread::taskLoadAppSignals,
 					.name = "Loading AppSignals",
-					.breakOnFailed = false
+					.breakOnFailed = true
 				},
 				{
 					.func = &BuildWorkerThread::taskLoadLmDescriptions,
@@ -119,7 +119,7 @@ namespace Builder
 				{
 					.func = &BuildWorkerThread::taskLoadConnections,
 					.name = "Loading Connections",
-					.breakOnFailed = false
+					.breakOnFailed = true
 				},
 				{
 					.func = &BuildWorkerThread::taskCheckSchemaIds,
@@ -159,7 +159,7 @@ namespace Builder
 				{
 					.func = &BuildWorkerThread::taskGenerationSoftwareConfiguration,
 					.name = "Software Configuration Generation",
-					.breakOnFailed = false
+					.breakOnFailed = true
 				},
 				{
 					.func = &BuildWorkerThread::taskRunSimTests,

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SR04" DescriptionNumber="4" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0026">
+<LogicModule Name="LM1_SR04" DescriptionNumber="4" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0027">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -286,16 +286,18 @@
 		</AFBComponent>
 		<AFBComponent Caption="DAMPER"		OpCode="11"	HasRam="true"	ImpVersion="112"	VersionOpIndex="21"	MaxInstCount="256" SimulationFunc="afb_damper_v112">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
-			<Pin OpName="i_del"		OpIndex ="1"	PinType = "Param"/>
-			<Pin OpName="i_data_dff"	OpIndex ="3"	PinType = "Input"/>
+			<Pin OpName="i_del"			OpIndex ="1"	PinType = "Param"/>
+			<Pin OpName="i_dff_si48"	OpIndex ="3"	PinType = "Input"/>
+			<Pin OpName="i_dff_fp32"	OpIndex ="4"	PinType = "Input"/>
 			<Pin OpName="i_data"		OpIndex ="6"	PinType = "Input"/>
 			<Pin OpName="i_track"		OpIndex ="8"	PinType = "Input"/>
-			<Pin OpName="o_y"		OpIndex ="10"	PinType = "Input"/>
+			<Pin OpName="o_y_si48"		OpIndex ="10"	PinType = "Output"/>
+			<Pin OpName="o_y_fp32"		OpIndex ="11"	PinType = "Output"/>
 			<Pin OpName="o_result"		OpIndex ="13"	PinType = "Output"/>
 			<Pin OpName="o_overflow"	OpIndex ="15"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="16"	PinType = "Output"/>
 			<Pin OpName="o_zero"		OpIndex ="17"	PinType = "Output"/>
-			<Pin OpName="o_nan"		OpIndex ="18"	PinType = "Output"/>
+			<Pin OpName="o_nan"			OpIndex ="18"	PinType = "Output"/>
 			<Pin OpName="o_param_err"	OpIndex ="19"	PinType = "Output"/>
 			<Pin OpName="o_damp_edi"	OpIndex ="20"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="21"	PinType = "Output"/>			
