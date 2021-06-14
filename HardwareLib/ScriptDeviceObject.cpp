@@ -572,6 +572,12 @@ namespace Hardware
 		return m ? static_cast<int>(m->moduleFamily()) : -1;
 	}
 
+	int ScriptDeviceModule::customModuleFamily() const
+	{
+		auto m = module();
+		return m ? static_cast<int>(m->customModuleFamily()) : -1;
+	}
+
 	int ScriptDeviceModule::moduleVersion() const
 	{
 		auto m = module();

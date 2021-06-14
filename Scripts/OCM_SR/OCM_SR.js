@@ -221,7 +221,7 @@ function generate_ocmsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 	}
 	confFirmware.writeLog("    txWordsCount = " + txWordsCount + "\r\n");
 	
-	let txId = module.moduleFamily + module.moduleVersion;
+	let txId = module.customModuleFamily + module.moduleVersion;
    
     if (generate_txRxIoConfig(confFirmware, module.equipmentId, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
 	{

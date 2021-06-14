@@ -223,7 +223,7 @@ function generate_aomsr(confFirmware, module, LMNumber, frame, log, signalSet, o
     var configFramesQuantity = 5;
     var dataFramesQuantity = 1;
  
-    let txId = module.moduleFamily + module.moduleVersion;
+    let txId = module.customModuleFamily + module.moduleVersion;
     
     if (generate_txRxIoConfig(confFirmware, module.equipmentId, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
 	{

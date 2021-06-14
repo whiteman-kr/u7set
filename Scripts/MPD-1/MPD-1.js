@@ -31,7 +31,7 @@ function generate_mpd1(confFirmware, module, LMNumber, frame, log, signalSet, op
     var configFramesQuantity = 1;
     var dataFramesQuantity = 0;
     
-    let txId = module.moduleFamily + module.moduleVersion;
+    let txId = module.customModuleFamily + module.moduleVersion;
     
     if (generate_txRxIoConfig(confFirmware, module.equipmentId, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false)
 	{

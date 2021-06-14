@@ -141,6 +141,7 @@ namespace Hardware
 		Q_OBJECT
 
 		Q_PROPERTY(int moduleFamily READ moduleFamily)
+		Q_PROPERTY(int customModuleFamily READ customModuleFamily)
 		Q_PROPERTY(int moduleVersion READ moduleVersion)
 
 	public:
@@ -151,6 +152,7 @@ namespace Hardware
 		Hardware::DeviceModule* module();
 
 		int moduleFamily() const;
+		int customModuleFamily() const;
 		int moduleVersion() const;
 	};
 

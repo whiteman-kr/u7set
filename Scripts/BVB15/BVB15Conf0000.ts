@@ -72,6 +72,7 @@ interface ScriptDeviceChassis extends ScriptDeviceObject {
 }
 
 interface ScriptDeviceModule extends ScriptDeviceObject {
+	customModuleFamily: number;
 	moduleFamily: number;
 	moduleVersion: number;
 }
@@ -214,7 +215,7 @@ function main(builder: Builder, root: ScriptDeviceObject, logicModules: ScriptDe
 
 	for (let i: number = 0; i < logicModules.length; i++) {
 
-		if (logicModules[i].moduleFamily != FamilyBVB15ID) {
+		if (logicModules[i].customModuleFamily != FamilyBVB15ID) {
 			continue;
 		}
 
@@ -333,7 +334,7 @@ function valToADC(val: number, lowLimit: number, highLimit: number, lowADC: numb
 function module_bvb15(builder: Builder, root: ScriptDeviceObject, module: ScriptDeviceModule, confFirmware: ModuleFirmware, log: IssueLogger,
 	signalSet: SignalSet, subsystemStorage: SubsystemStorage, opticModuleStorage: OptoModuleStorage, logicModuleDescription: LogicModule): boolean {
 
-	if (module.moduleFamily == FamilyBVB15ID) {
+	if (module.customModuleFamily == FamilyBVB15ID) {
 		let place: number = module.place;
 
 		if (place != 0) {
@@ -534,7 +535,7 @@ function generate_bvb15_rev1(builder: Builder, root: ScriptDeviceObject, module:
 
 		let ioModule: ScriptDeviceModule = chassis.child(i).toModule();
 
-		if (ioModule.moduleFamily == FamilyBVB15ID) {
+		if (ioModule.customModuleFamily == FamilyBVB15ID) {
 			continue;
 		}
 
@@ -1118,11 +1119,9 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 			return false;
 		}
 
-		if (ioModule.moduleFamily == FamilyBVB15ID) {
+		if (ioModule.customModuleFamily == FamilyBVB15ID) {
 			continue;
 		}
-
-		let customModuleFamily : number = ioModule.moduleFamily;
 
 		let ioEquipmentID: string = ioModule.equipmentId;
 
@@ -1161,7 +1160,7 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 		// Id
 
-		value = customModuleFamily | ioModule.moduleVersion;
+		value = ioModule.customModuleFamily | ioModule.moduleVersion;
 
 		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "ID", value) == false) {
 			return false;

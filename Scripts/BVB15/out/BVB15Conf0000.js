@@ -52,7 +52,7 @@ function main(builder, root, logicModules, confFirmware, log, signalSet, subsyst
     log.writeMessage("Subsystem " + subSysID + ", configuration script: " + logicModuleDescription.jsConfigurationStringFile() + ", version: " + configScriptVersion + ", logic modules count: " + logicModules.length);
     let LMNumberCount = 0;
     for (let i = 0; i < logicModules.length; i++) {
-        if (logicModules[i].moduleFamily != FamilyBVB15ID) {
+        if (logicModules[i].customModuleFamily != FamilyBVB15ID) {
             continue;
         }
         let result = module_bvb15(builder, root, logicModules[i], confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
@@ -144,7 +144,7 @@ function valToADC(val, lowLimit, highLimit, lowADC, highADC) {
     return Math.round(res);
 }
 function module_bvb15(builder, root, module, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
-    if (module.moduleFamily == FamilyBVB15ID) {
+    if (module.customModuleFamily == FamilyBVB15ID) {
         let place = module.place;
         if (place != 0) {
             log.errCFG3002("Place", place, 0, 0, module.equipmentId);
@@ -219,12 +219,14 @@ function generate_bvb15_rev1(builder, root, module, confFirmware, log, signalSet
     //
     let frameStorageConfig = 1;
     let ptr = 0;
-    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameStorageConfig, ptr, "Marker", 0xca70) == false) {
+    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameStorageConfig, ptr, "Marker", 0xca70) == false) //CFG_Marker
+     {
         return false;
     }
     confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] CFG_Marker = 0xca70" + "\r\n");
     ptr += 2;
-    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameStorageConfig, ptr, "Version", 0x0001) == false) {
+    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameStorageConfig, ptr, "Version", 0x0001) == false) //CFG_Version
+     {
         return false;
     }
     confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] CFG_Version = 0x0001" + "\r\n");
@@ -272,12 +274,14 @@ function generate_bvb15_rev1(builder, root, module, confFirmware, log, signalSet
     confFirmware.writeLog("Writing service information.\r\n");
     let frameServiceConfig = configFrame;
     ptr = 0;
-    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "ServiceVersion", 0x0001) == false) {
+    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "ServiceVersion", 0x0001) == false) //CFG_Ch_Vers
+     {
         return false;
     }
     confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] CFG_Ch_Vers = 0x0001\r\n");
     ptr += 2;
-    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "UartID", uartId) == false) {
+    if (setData16(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "UartID", uartId) == false) //CFG_Ch_Dtype == UARTID?
+     {
         return false;
     }
     confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] uartId = " + uartId + "\r\n");
@@ -299,7 +303,7 @@ function generate_bvb15_rev1(builder, root, module, confFirmware, log, signalSet
             continue;
         }
         let ioModule = chassis.child(i).toModule();
-        if (ioModule.moduleFamily == FamilyBVB15ID) {
+        if (ioModule.customModuleFamily == FamilyBVB15ID) {
             continue;
         }
         let ioPlace = ioModule.place;
@@ -366,11 +370,13 @@ function generate_bvb15_rev1(builder, root, module, confFirmware, log, signalSet
             let serviceObject = root.childByEquipmentId(serviceID);
             if (serviceObject == null || serviceObject.isSoftware() == false) {
                 log.wrnCFG3008(serviceID, module.equipmentId);
-                if (s == 0) {
+                if (s == 0) // this is App
+                 {
                     serviceIP[s] = 0xc0a80bfe; //	192.168.11.254
                     servicePort[s] = 13322;
                 }
-                if (s == 1) {
+                if (s == 1) // this is Diag
+                 {
                     serviceIP[s] = 0xc0a815fe; //	192.168.21.254
                     servicePort[s] = 13323;
                 }
@@ -454,19 +460,23 @@ function generate_txRxIoConfig(confFirmware, equipmentID, LMNumber, frame, offse
         "; [" + frame + ":" + (ptr + 2) + "] configFrames = " + configFrames +
         "; [" + frame + ":" + (ptr + 4) + "] dataFrames = " + dataFrames +
         "; [" + frame + ":" + (ptr + 6) + "] txId = " + txId + "\r\n");
-    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "TxRxFlags", flags) == false) {
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "TxRxFlags", flags) == false) // Flags word
+     {
         return false;
     }
     ptr += 2;
-    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Configuration words quantity", configFrames) == false) {
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Configuration words quantity", configFrames) == false) // Configuration words quantity
+     {
         return false;
     }
     ptr += 2;
-    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Data words quantity", dataFrames) == false) {
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Data words quantity", dataFrames) == false) // Data words quantity
+     {
         return false;
     }
     ptr += 2;
-    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Tx ID", txId) == false) {
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Tx ID", txId) == false) // Tx ID
+     {
         return false;
     }
     ptr += 2;
@@ -723,10 +733,9 @@ function generate_niosConfiguration(confFirmware, log, frame, module, LMNumber, 
             log.errCFG3000("EquipmentID", "I/O_module");
             return false;
         }
-        if (ioModule.moduleFamily == FamilyBVB15ID) {
+        if (ioModule.customModuleFamily == FamilyBVB15ID) {
             continue;
         }
-        let customModuleFamily = ioModule.moduleFamily;
         let ioEquipmentID = ioModule.equipmentId;
         let checkProperties = ["ModuleVersion", "Place", "PresetName", "ConfigurationScript", "TxDiagDataSize", "TxAppDataSize"];
         for (let cp = 0; cp < checkProperties.length; cp++) {
@@ -752,7 +761,7 @@ function generate_niosConfiguration(confFirmware, log, frame, module, LMNumber, 
         confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: Module Place = " + ioPlace + "\r\n");
         blockPtr += 2;
         // Id
-        value = customModuleFamily | ioModule.moduleVersion;
+        value = ioModule.customModuleFamily | ioModule.moduleVersion;
         if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "ID", value) == false) {
             return false;
         }
