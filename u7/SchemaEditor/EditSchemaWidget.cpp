@@ -5551,10 +5551,8 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 	// ImpactAppSignalIDs
 	//
 	QLabel* impactAppSignalIdsLabel = new QLabel("ImpactAppSignalIDs:", &d);
-	impactAppSignalIdsLabel->setEnabled(signalItem->hasImpactColumn());
 
 	QTextEditCompleter* impactAppSignalIdsEdit = new QTextEditCompleter(&d);
-	impactAppSignalIdsEdit->setEnabled(signalItem->hasImpactColumn());
 	impactAppSignalIdsEdit->setPlaceholderText("Enter Impact AppSchemaIDs separated by lines. Press Ctrl+E to show completer.");
 	impactAppSignalIdsEdit->setPlainText(impactAppSignalIds);
 	impactAppSignalIdsEdit->setCompleter(completer);

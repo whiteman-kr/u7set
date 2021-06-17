@@ -510,7 +510,10 @@ namespace VFrame30
 
 			for (QString& s : resultList)
 			{
-				s = m_drawParam->clientSchemaView()->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+				if (s.startsWith('@') == true)
+				{
+					s = m_drawParam->clientSchemaView()->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+				}
 			}
 		}
 
@@ -536,7 +539,10 @@ namespace VFrame30
 
 			for (QString& s : resultList)
 			{
-				s = m_drawParam->clientSchemaView()->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+				if (s.startsWith('@') == true)
+				{
+					s = m_drawParam->clientSchemaView()->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+				}
 			}
 		}
 
