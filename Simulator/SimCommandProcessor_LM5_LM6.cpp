@@ -1478,6 +1478,19 @@ namespace Sim
 		{
 		case 1:
 			{
+				/* VHDL Code
+						if wave = '0' then
+							o_result	<= '0';
+							counter		:=	(others => '0');
+						elseif
+							counter >= counter_t then
+								o_result	<= '1';
+							else
+								o_result	<= '0';
+								counter		:= counter + 1;
+							end if;
+				*/
+
 				// On
 				//
 				if (currentInputValue == 0)
@@ -1487,26 +1500,40 @@ namespace Sim
 				}
 				else
 				{
-					// InputValue == 1
-					//
-					counter += m_cycleDurationMs;
-
-					if (counter > static_cast<quint32>(time))
+					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
 					{
 						result = 1;
-						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+					else
+					{
+						result = 0;
+						counter ++;
 					}
 				}
 			}
 			break;
+
 		case 2:
 			{
 				// Off
 				//
+
+				/*
+						if wave = '1' then
+							o_result		<= '1';
+							counter			:= counter_t;
+						elsif counter = 0 then
+							o_result		<= '0';
+						else
+							o_result		<= '1';
+							counter		:= counter - 1;
+						end if;
+				*/
+
 				if (currentInputValue == 1)
 				{
 					result = 1;
-					counter = time;
+					counter = time / m_cycleDurationMs;
 				}
 				else
 				{
@@ -1517,34 +1544,78 @@ namespace Sim
 					else
 					{
 						result = 1;
-						counter -= m_cycleDurationMs;
+						counter --;
 					}
 				}
 			}
 			break;
+
 		case 3:
 			{
 				// Univibrator (TCTC_VIBR)
 				//
-				if (counter == 0 &&
-					prevInputValue == 0 &&
-					currentInputValue == 1)
+				/*
+					if (wave = '0' and wave_dff = '0') then
+						counter			:= (others => '0');
+						o_result 		<= '0';
+					elsif counter >= counter_t then
+						if wave = '0'  then
+							counter			:= (others => '0');
+						end if;
+						wave_dff		<= '0';
+						o_result		<= '0';
+					else
+						counter			:= counter + 1;
+						wave_dff		<= '1';
+						o_result 		<= '1';
+					end if;
+				*/
+
+				if (currentInputValue == 0 && prevResultValue == 0)
 				{
-					// Start timer
-					//
-					counter = time / m_cycleDurationMs;
+					counter	= 0;
+					result = 0;
 				}
 				else
 				{
-					if (counter != 0)
+					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
 					{
-						counter --;
+						if (currentInputValue == 0)
+						{
+							counter	= 0;
+						}
+
+						prevInputValue = 0;
+						result = 0;
+					}
+					else
+					{
+						counter	++;
+						prevInputValue = 1;
+						result = 1;
 					}
 				}
 
-				result = (counter == 0) ? 0 : 1;
+//				if (counter == 0 &&
+//					prevInputValue == 0 &&
+//					currentInputValue == 1)
+//				{
+//					// Start timer
+//					//
+//					counter = time / m_cycleDurationMs;
+//				}
+//				else
+//				{
+//					if (counter != 0)
+//					{
+//						counter --;
+//					}
+//				}
+
+//				result = (counter == 0) ? 0 : 1;
 			}
 			break;
+
 		case 4:
 			{
 				// In AFBL RM shown another diagram, what is wrong
@@ -1672,6 +1743,19 @@ namespace Sim
 		{
 		case 1:
 			{
+				/* VHDL Code
+						if wave = '0' then
+							o_result	<= '0';
+							counter		:=	(others => '0');
+						elseif
+							counter >= counter_t then
+								o_result	<= '1';
+							else
+								o_result	<= '0';
+								counter		:= counter + 1;
+							end if;
+				*/
+
 				// On
 				//
 				if (currentInputValue == 0)
@@ -1681,26 +1765,40 @@ namespace Sim
 				}
 				else
 				{
-					// InputValue == 1
-					//
-					counter += m_cycleDurationMs;
-
-					if (counter > static_cast<quint32>(time))
+					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
 					{
 						result = 1;
-						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+					else
+					{
+						result = 0;
+						counter ++;
 					}
 				}
 			}
 			break;
+
 		case 2:
 			{
 				// Off
 				//
+
+				/*
+						if wave = '1' then
+							o_result		<= '1';
+							counter			:= counter_t;
+						elsif counter = 0 then
+							o_result		<= '0';
+						else
+							o_result		<= '1';
+							counter		:= counter - 1;
+						end if;
+				*/
+
 				if (currentInputValue == 1)
 				{
 					result = 1;
-					counter = time;
+					counter = time / m_cycleDurationMs;
 				}
 				else
 				{
@@ -1711,62 +1809,152 @@ namespace Sim
 					else
 					{
 						result = 1;
-						counter -= m_cycleDurationMs;
+						counter --;
 					}
 				}
 			}
 			break;
+
 		case 3:
 			{
 				// Univibrator (TCTC_VIBR)
 				//
-				if (counter == 0 &&
-					prevInputValue == 0 &&
-					currentInputValue == 1)
+				/*
+					if (wave = '0' and wave_dff = '0') then
+						counter			:= (others => '0');
+						o_result 		<= '0';
+					elsif counter >= counter_t then
+						if wave = '0'  then
+							counter			:= (others => '0');
+						end if;
+						wave_dff		<= '0';
+						o_result		<= '0';
+					else
+						counter			:= counter + 1;
+						wave_dff		<= '1';
+						o_result 		<= '1';
+					end if;
+				*/
+
+				if (currentInputValue == 0 && prevResultValue == 0)
 				{
-					// Start timer
-					//
-					counter = time / m_cycleDurationMs;
+					counter	= 0;
+					result = 0;
 				}
 				else
 				{
-					if (counter != 0)
+					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
 					{
-						counter --;
+						if (currentInputValue == 0)
+						{
+							counter	= 0;
+						}
+
+						prevInputValue = 0;
+						result = 0;
+					}
+					else
+					{
+						counter	++;
+						prevInputValue = 1;
+						result = 1;
 					}
 				}
 
-				result = (counter == 0) ? 0 : 1;
+//				if (counter == 0 &&
+//					prevInputValue == 0 &&
+//					currentInputValue == 1)
+//				{
+//					// Start timer
+//					//
+//					counter = time / m_cycleDurationMs;
+//				}
+//				else
+//				{
+//					if (counter != 0)
+//					{
+//						counter --;
+//					}
+//				}
+
+//				result = (counter == 0) ? 0 : 1;
 			}
 			break;
+
 		case 4:
 			{
 				// Filter (TCTC_FILTER)
 				//
-				if (prevInputValue != currentInputValue)
-				{
-					// Start timer
-					//
-					counter = time / m_cycleDurationMs + 1;
-				}
 
-				if (counter != 0 )
+				// VHDL implementation
+				//
+				if (prevResultValue == 0)
 				{
-					counter --;
-
-					if (counter == 0)
+					if (currentInputValue == 0)
 					{
-						result = currentInputValue;
+						counter = 1;
+						result = prevResultValue;
 					}
 					else
 					{
-						result = prevResultValue;
+						if 	(counter >= static_cast<quint32>(time / m_cycleDurationMs))
+						{
+							prevResultValue	= 1;
+							result = 1;
+						}
+						else
+						{
+							result = prevResultValue;
+							counter	++;
+						}
 					}
 				}
 				else
 				{
-					result = prevResultValue;
+					if (currentInputValue == 1)
+					{
+						counter	= 1;
+						result = prevResultValue;
+					}
+					else
+					{
+						if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
+						{
+							result = 0;
+							prevResultValue	= 0;
+						}
+						else
+						{
+							result = prevResultValue;
+							counter ++;
+						}
+					}
 				}
+
+//				if (prevInputValue != currentInputValue)
+//				{
+//					// Start timer
+//					//
+//					counter = time / m_cycleDurationMs + 1;
+//				}
+
+//				if (counter != 0 )
+//				{
+//					counter --;
+
+//					if (counter == 0)
+//					{
+//						result = currentInputValue;
+//					}
+//					else
+//					{
+//						result = prevResultValue;
+//					}
+//				}
+//				else
+//				{
+//					result = prevResultValue;
+//				}
 			}
 			break;
 
@@ -1774,22 +1962,57 @@ namespace Sim
 			{
 				// Univibrator R (TCTC_RSV)
 				//
-				if (prevInputValue == 0 &&
-					currentInputValue == 1)
+				if (currentInputValue == 0 && prevResultValue == 0)
 				{
-					// Start timer
-					//
-					counter = time / m_cycleDurationMs;
+					counter	= 0;
+					result = 0;
 				}
 				else
 				{
-					if (counter != 0)
+					if (currentInputValue == 1 && prevInputValue == 0)
 					{
-						counter --;
+						counter	= 1;
+						prevResultValue = 1;
+						result = 1;
+					}
+					else
+					{
+						if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
+						{
+							prevResultValue = 0;
+							result = 0;
+						}
+						else
+						{
+							counter	++;
+							prevResultValue = 1;
+							result = 1;
+						}
 					}
 				}
 
-				result = (counter == 0) ? 0 : 1;
+				// THIS IS RIGHT AND SIMPLE CODE, BUT now 'counter' is exposed to output for sync internal state, so I had to
+				// rewrite code as it's done in VHDL (conter up)
+				//
+
+//				// Univibrator R (TCTC_RSV)
+//				//
+//				if (prevInputValue == 0 &&
+//					currentInputValue == 1)
+//				{
+//					// Start timer
+//					//
+//					counter = time / m_cycleDurationMs;
+//				}
+//				else
+//				{
+//					if (counter != 0)
+//					{
+//						counter --;
+//					}
+//				}
+
+//				result = (counter == 0) ? 0 : 1;
 			}
 			break;
 
@@ -1797,6 +2020,34 @@ namespace Sim
 			{
 				// RC FILTER (tctc_rcfilter)
 				//
+//				if (currentInputValue == 1 && counter >= static_cast<quint32>(time / m_cycleDurationMs))
+//				{
+//					result = 1;
+//					prevResultValue = 1;
+//				}
+//				else
+//				{
+//					if  (currentInputValue == 0 && counter == 0)
+//					{
+//						result = 0;
+//						prevResultValue = 0;
+//						counter	= 0;
+//					}
+//					else
+//					{
+//						if (currentInputValue == 1)
+//						{
+//							result = prevResultValue;
+//							counter ++;
+//						}
+//						else
+//						{
+//							result = prevResultValue;
+//							counter	--;
+//						}
+//					}
+//				}
+
 				if (currentInputValue == 0)
 				{
 					if (counter == 0)
@@ -1893,6 +2144,19 @@ namespace Sim
 		{
 		case 1:
 			{
+				/* VHDL Code
+						if wave = '0' then
+							o_result	<= '0';
+							counter		:=	(others => '0');
+						elseif
+							counter >= counter_t then
+								o_result	<= '1';
+							else
+								o_result	<= '0';
+								counter		:= counter + 1;
+							end if;
+				*/
+
 				// On
 				//
 				if (currentInputValue == 0)
@@ -1902,26 +2166,40 @@ namespace Sim
 				}
 				else
 				{
-					// InputValue == 1
-					//
-					counter += m_cycleDurationMs;
-
-					if (counter > static_cast<quint32>(time))
+					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
 					{
 						result = 1;
-						counter = time;		// It keeps counter from overflow and getting to 0
+					}
+					else
+					{
+						result = 0;
+						counter ++;
 					}
 				}
 			}
 			break;
+
 		case 2:
 			{
 				// Off
 				//
+
+				/*
+						if wave = '1' then
+							o_result		<= '1';
+							counter			:= counter_t;
+						elsif counter = 0 then
+							o_result		<= '0';
+						else
+							o_result		<= '1';
+							counter		:= counter - 1;
+						end if;
+				*/
+
 				if (currentInputValue == 1)
 				{
 					result = 1;
-					counter = time;
+					counter = time / m_cycleDurationMs;
 				}
 				else
 				{
@@ -1932,62 +2210,152 @@ namespace Sim
 					else
 					{
 						result = 1;
-						counter -= m_cycleDurationMs;
+						counter --;
 					}
 				}
 			}
 			break;
+
 		case 3:
 			{
 				// Univibrator (TCTC_VIBR)
 				//
-				if (counter == 0 &&
-					prevInputValue == 0 &&
-					currentInputValue == 1)
+				/*
+					if (wave = '0' and wave_dff = '0') then
+						counter			:= (others => '0');
+						o_result 		<= '0';
+					elsif counter >= counter_t then
+						if wave = '0'  then
+							counter			:= (others => '0');
+						end if;
+						wave_dff		<= '0';
+						o_result		<= '0';
+					else
+						counter			:= counter + 1;
+						wave_dff		<= '1';
+						o_result 		<= '1';
+					end if;
+				*/
+
+				if (currentInputValue == 0 && prevResultValue == 0)
 				{
-					// Start timer
-					//
-					counter = time / m_cycleDurationMs;
+					counter	= 0;
+					result = 0;
 				}
 				else
 				{
-					if (counter != 0)
+					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
 					{
-						counter --;
+						if (currentInputValue == 0)
+						{
+							counter	= 0;
+						}
+
+						prevInputValue = 0;
+						result = 0;
+					}
+					else
+					{
+						counter	++;
+						prevInputValue = 1;
+						result = 1;
 					}
 				}
 
-				result = (counter == 0) ? 0 : 1;
+//				if (counter == 0 &&
+//					prevInputValue == 0 &&
+//					currentInputValue == 1)
+//				{
+//					// Start timer
+//					//
+//					counter = time / m_cycleDurationMs;
+//				}
+//				else
+//				{
+//					if (counter != 0)
+//					{
+//						counter --;
+//					}
+//				}
+
+//				result = (counter == 0) ? 0 : 1;
 			}
 			break;
+
 		case 4:
 			{
 				// Filter (TCTC_FILTER)
 				//
-				if (prevInputValue != currentInputValue)
-				{
-					// Start timer
-					//
-					counter = time / m_cycleDurationMs + 1;
-				}
 
-				if (counter != 0 )
+				// VHDL implementation
+				//
+				if (prevResultValue == 0)
 				{
-					counter --;
-
-					if (counter == 0)
+					if (currentInputValue == 0)
 					{
-						result = currentInputValue;
+						counter = 0;					// This is diff from 209, 208
+						result = prevResultValue;
 					}
 					else
 					{
-						result = prevResultValue;
+						if 	(counter >= static_cast<quint32>(time / m_cycleDurationMs))
+						{
+							prevResultValue	= 1;
+							result = 1;
+						}
+						else
+						{
+							result = prevResultValue;
+							counter	++;
+						}
 					}
 				}
 				else
 				{
-					result = prevResultValue;
+					if (currentInputValue == 1)
+					{
+						counter	= 0;					// This is diff from 209, 208
+						result = prevResultValue;
+					}
+					else
+					{
+						if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
+						{
+							result = 0;
+							prevResultValue	= 0;
+						}
+						else
+						{
+							result = prevResultValue;
+							counter ++;
+						}
+					}
 				}
+
+//				if (prevInputValue != currentInputValue)
+//				{
+//					// Start timer
+//					//
+//					counter = time / m_cycleDurationMs + 1;
+//				}
+
+//				if (counter != 0 )
+//				{
+//					counter --;
+
+//					if (counter == 0)
+//					{
+//						result = currentInputValue;
+//					}
+//					else
+//					{
+//						result = prevResultValue;
+//					}
+//				}
+//				else
+//				{
+//					result = prevResultValue;
+//				}
 			}
 			break;
 
@@ -1995,22 +2363,57 @@ namespace Sim
 			{
 				// Univibrator R (TCTC_RSV)
 				//
-				if (prevInputValue == 0 &&
-					currentInputValue == 1)
+				if (currentInputValue == 0 && prevResultValue == 0)
 				{
-					// Start timer
-					//
-					counter = time / m_cycleDurationMs;
+					counter	= 0;
+					result = 0;
 				}
 				else
 				{
-					if (counter != 0)
+					if (currentInputValue == 1 && prevInputValue == 0)
 					{
-						counter --;
+						counter	= 1;
+						prevResultValue = 1;
+						result = 1;
+					}
+					else
+					{
+						if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
+						{
+							prevResultValue = 0;
+							result = 0;
+						}
+						else
+						{
+							counter	++;
+							prevResultValue = 1;
+							result = 1;
+						}
 					}
 				}
 
-				result = (counter == 0) ? 0 : 1;
+				// THIS IS RIGHT AND SIMPLE CODE, BUT now 'counter' is exposed to output for sync internal state, so I had to
+				// rewrite code as it's done in VHDL (conter up)
+				//
+
+//				// Univibrator R (TCTC_RSV)
+//				//
+//				if (prevInputValue == 0 &&
+//					currentInputValue == 1)
+//				{
+//					// Start timer
+//					//
+//					counter = time / m_cycleDurationMs;
+//				}
+//				else
+//				{
+//					if (counter != 0)
+//					{
+//						counter --;
+//					}
+//				}
+
+//				result = (counter == 0) ? 0 : 1;
 			}
 			break;
 
@@ -2018,6 +2421,34 @@ namespace Sim
 			{
 				// RC FILTER (tctc_rcfilter)
 				//
+//				if (currentInputValue == 1 && counter >= static_cast<quint32>(time / m_cycleDurationMs))
+//				{
+//					result = 1;
+//					prevResultValue = 1;
+//				}
+//				else
+//				{
+//					if  (currentInputValue == 0 && counter == 0)
+//					{
+//						result = 0;
+//						prevResultValue = 0;
+//						counter	= 0;
+//					}
+//					else
+//					{
+//						if (currentInputValue == 1)
+//						{
+//							result = prevResultValue;
+//							counter ++;
+//						}
+//						else
+//						{
+//							result = prevResultValue;
+//							counter	--;
+//						}
+//					}
+//				}
+
 				if (currentInputValue == 0)
 				{
 					if (counter == 0)
@@ -2035,7 +2466,7 @@ namespace Sim
 					if (counter >= static_cast<quint32>(time / m_cycleDurationMs))
 					{
 						result = 1;
-						counter = time / m_cycleDurationMs;		// counter cannot be more then (time / m_cycleDurationMs)
+						counter = time / m_cycleDurationMs;		// counter cannot be greater than (time / m_cycleDurationMs)
 					}
 					else
 					{
