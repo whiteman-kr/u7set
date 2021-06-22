@@ -4034,6 +4034,8 @@ void SchemaControlTabPageEx::compareObject(DbChangesetObject object, CompareData
 		object.name().endsWith("." + QString(Db::File::UfbTemplExtension)) == false &&
 		object.name().endsWith("." + QString(Db::File::MvsFileExtension)) == false &&
 		object.name().endsWith("." + QString(Db::File::MvsTemplExtension)) == false &&
+		object.name().endsWith("." + QString(Db::File::TvsFileExtension)) == false &&
+		object.name().endsWith("." + QString(Db::File::TvsTemplExtension)) == false &&
 		object.name().endsWith("." + QString(Db::File::DvsFileExtension)) == false &&
 		object.name().endsWith("." + QString(Db::File::DvsTemplExtension)) == false)
 	{

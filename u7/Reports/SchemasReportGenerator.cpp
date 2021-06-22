@@ -583,7 +583,7 @@ void SchemasReportGenerator::exportAllSchemasToAlbum()
 
 		schemaFilesInfo.push_back({db()->systemFileId(DbDir::AppLogicDir), tr("ApplicationLogic")});
 		schemaFilesInfo.push_back({db()->systemFileId(DbDir::MonitorSchemasDir), tr("MonitorSchemas")});
-		schemaFilesInfo.push_back({db()->systemFileId(DbDir::TuningSchemasDir), tr("TunungSchemas")});
+		schemaFilesInfo.push_back({db()->systemFileId(DbDir::TuningSchemasDir), tr("TuningSchemas")});
 		schemaFilesInfo.push_back({db()->systemFileId(DbDir::DiagnosticsSchemasDir), tr("DiagnosticsSchemas")});
 		schemaFilesInfo.push_back({db()->systemFileId(DbDir::UfblDir), tr("UFBSchemas")});
 
@@ -616,6 +616,7 @@ void SchemasReportGenerator::exportAllSchemasToAlbum()
 				if (fi->fileName().endsWith("." + QString(Db::File::AlFileExtension)) == false &&
 					fi->fileName().endsWith("." + QString(Db::File::UfbFileExtension)) == false &&
 					fi->fileName().endsWith("." + QString(Db::File::MvsFileExtension)) == false &&
+					fi->fileName().endsWith("." + QString(Db::File::TvsFileExtension)) == false &&
 					fi->fileName().endsWith("." + QString(Db::File::DvsFileExtension)) == false)
 				{
 					continue;
