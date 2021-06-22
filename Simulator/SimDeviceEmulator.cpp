@@ -282,7 +282,7 @@ namespace Sim
 
 		// Send reg data to AppDataSrv
 		//
-		if (m_lans.isAppDataEnabled() == true)
+		if (m_deviceState == DeviceState::Operate && m_lans.isAppDataEnabled() == true)
 		{
 			QByteArray regData;
 
@@ -318,7 +318,9 @@ namespace Sim
 
 		// Update tuning data
 		//
-		if (runtimeMode() == RuntimeMode::TuningMode && m_lans.isTuningEnabled() == true)
+		if (m_deviceState == DeviceState::Operate &&
+			runtimeMode() == RuntimeMode::TuningMode &&
+			m_lans.isTuningEnabled() == true)
 		{
 			m_lans.updateTuningRam(tuningRamArea(), m_commandProcessor->signalSetSorChassis(), plantTime);
 		}

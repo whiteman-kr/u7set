@@ -49,7 +49,7 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 
 	fileName += "Schemas.als/SchemaDetails.pbuf";
 
-	log().writeMessage(tr("Load logic schema detais file: %1").arg(fileName));
+	log().writeMessage(tr("Load logic schema details file: %1").arg(fileName));
 
 	bool ok = true;
 

@@ -95,7 +95,7 @@ private:
 	ConfigConnection m_archiveService1;
 	ConfigConnection m_archiveService2;
 
-	std::vector<VFrame30::SchemaDetails> m_schemasDetais;
+	std::vector<VFrame30::SchemaDetails> m_schemasDetails;
 
 	ConfigSettings m_configuration;
 
