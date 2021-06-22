@@ -281,10 +281,10 @@ namespace Sim
 
 	void TuningRequestsProcessingThread::run()
 	{
-		m_log.writeMessage(QString("Tuning simulation is started (EquipmentID %1, receiving IP %2, sending IP %3)").
-						arg(m_tsCommunicator.tuningServiceEquipmentID()).
-						arg(m_tuningRequestsReceivingIP.addressPortStr()).
-						arg(m_tuningRepliesSendingIP.addressPortStr()));
+		m_log.writeDebug(QString("Tuning simulation is started (EquipmentID %1, receiving IP %2, sending IP %3)").
+						 arg(m_tsCommunicator.tuningServiceEquipmentID()).
+						 arg(m_tuningRequestsReceivingIP.addressPortStr()).
+						 arg(m_tuningRepliesSendingIP.addressPortStr()));
 
 		m_thisThread = QThread::currentThread();
 

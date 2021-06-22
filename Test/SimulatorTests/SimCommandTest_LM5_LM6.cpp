@@ -11,7 +11,7 @@ SimCommandTest_LM5_LM6::SimCommandTest_LM5_LM6()
 
 void SimCommandTest_LM5_LM6::initTestCase()
 {
-	Sim::Simulator simulator{nullptr, nullptr};
+	Sim::Simulator simulator{nullptr, false, nullptr};
 
 	m_device = std::make_unique<Sim::DeviceEmulator>(&simulator);
 

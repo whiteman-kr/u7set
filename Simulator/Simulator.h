@@ -32,7 +32,7 @@ namespace Sim
 		Q_OBJECT
 
 	public:
-		explicit Simulator(ILogFile* log, QObject* parent);		// if log is nullptr then log to console
+		explicit Simulator(ILogFile* log, bool allowDebugMessages, QObject* parent);		// if log is nullptr then log to console
 		virtual ~Simulator();
 
 	public:
@@ -49,8 +49,8 @@ namespace Sim
 		//
 		bool runScript(const SimScriptItem& script, qint64 timeout);				// Starts one script in separate thread and returns immediately
 		bool runScripts(const std::vector<SimScriptItem>& scripts, qint64 timeout);// Starts a pack of scripts in separate thread and returns immediately
-		bool stopScript();														// Stops script if it is running
-		bool waitScript(unsigned long msecs = ULONG_MAX);						// Wait script to stop
+		bool stopScript();															// Stops script if it is running
+		bool waitScript(unsigned long msecs = ULONG_MAX);							// Wait script to stop
 		bool scriptResult();
 
 	private:

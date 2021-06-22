@@ -277,6 +277,8 @@ namespace Sim
 		m_log(simulator->log())
 	{
 		assert(m_simulator);
+
+		m_log.setDebugMessagesEnabled(false);
 	}
 
 	ScriptSimulator::~ScriptSimulator()

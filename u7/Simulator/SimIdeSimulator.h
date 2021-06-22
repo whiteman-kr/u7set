@@ -9,7 +9,7 @@ class SimIdeSimulator : public Sim::Simulator
 	Q_OBJECT
 
 public:
-	SimIdeSimulator(ILogFile* log, QObject* parent);
+	SimIdeSimulator(ILogFile* log, bool allowDebugMessages, QObject* parent);
 	virtual ~SimIdeSimulator();
 
 public:

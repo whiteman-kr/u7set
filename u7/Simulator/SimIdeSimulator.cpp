@@ -1,7 +1,7 @@
 #include "SimIdeSimulator.h"
 
-SimIdeSimulator::SimIdeSimulator(ILogFile* log, QObject* parent) :
-	Sim::Simulator(log, parent)
+SimIdeSimulator::SimIdeSimulator(ILogFile* log, bool allowDebugMessages, QObject* parent) :
+	Sim::Simulator(log, allowDebugMessages, parent)
 {
 }
 

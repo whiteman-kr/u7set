@@ -2064,7 +2064,7 @@ namespace Builder
 		SimLogger simLogger(m_log);
 		QString buildPath = m_context->m_buildResultWriter->fullOutputPathes()[0];
 
-		Sim::Simulator simulator{&simLogger, nullptr};
+		Sim::Simulator simulator{&simLogger, false, nullptr};
 
 		ok = simulator.load(buildPath);
 		if (ok == false)

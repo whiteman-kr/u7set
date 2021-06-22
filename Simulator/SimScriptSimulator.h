@@ -78,6 +78,9 @@ namespace Sim
 		/// \brief Allows or disables LogicModules' LAN communications like Application Data transmittion to AppDataSrv, TuningService communications (note: Tuning Key and Arming Key must be set to 1). This is global flag for all simulated communications.
 		Q_PROPERTY(bool enabledLanComm READ enabledLanComm WRITE setEnabledLanComm)
 
+		/// \brief Allows or disables debug log messages.
+		Q_PROPERTY(bool debugMessagesEnabled READ (m_log.debugMessagesEnabled) WRITE (m_log.setDebugMessagesEnabled))
+
 	public:
 		explicit ScriptSimulator(Simulator* simulator, QObject* parent = nullptr);
 		virtual ~ScriptSimulator();

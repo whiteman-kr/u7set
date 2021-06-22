@@ -7,13 +7,15 @@ namespace Sim
 {
 	ScopedLog::ScopedLog(const ScopedLog& src) :
 		m_log(src.m_log),
-		m_scope(src.m_scope)
+		m_scope(src.m_scope),
+		m_debugMessagesEnabled(src.m_debugMessagesEnabled.load())
 	{
 	}
 
-	ScopedLog::ScopedLog(ILogFile* log, QString scope) :
+	ScopedLog::ScopedLog(ILogFile* log, bool allowDebugMessages, QString scope) :
 		m_log(log),
-		m_scope(scope)
+		m_scope(scope),
+		m_debugMessagesEnabled(allowDebugMessages)
 	{
 		if (m_scope.isEmpty() == false)
 		{
@@ -25,7 +27,8 @@ namespace Sim
 
 	ScopedLog::ScopedLog(const ScopedLog& src, QString scope) :
 		m_log(src.m_log),
-		m_scope(scope)
+		m_scope(scope),
+		m_debugMessagesEnabled(src.m_debugMessagesEnabled.load())
 	{
 		if (m_scope.isEmpty() == false)
 		{
@@ -132,8 +135,11 @@ namespace Sim
 
 	bool ScopedLog::writeDebug(QString text)
 	{
-		// ScopedLog is used for tests, to prevent from rubishing script output writeDebug is disabled
-		//return writeText(text);
+		if (debugMessagesEnabled() == true)
+		{
+			return writeText(text);
+		}
+
 		return true;
 	}
 
@@ -145,6 +151,16 @@ namespace Sim
 	void ScopedLog::setOutputScope(QString value)
 	{
 		m_scope = value;
+	}
+
+	bool ScopedLog::debugMessagesEnabled() const
+	{
+		return m_debugMessagesEnabled;
+	}
+
+	void ScopedLog::setDebugMessagesEnabled(bool value)
+	{
+		m_debugMessagesEnabled = value;
 	}
 
 
