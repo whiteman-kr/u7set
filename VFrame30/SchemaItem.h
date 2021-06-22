@@ -90,6 +90,9 @@ namespace VFrame30
 		Q_PROPERTY(bool acceptClick READ acceptClick WRITE setAcceptClick)
 		Q_PROPERTY(bool AcceptClick READ acceptClick WRITE setAcceptClick)
 
+		/// \brief A script to run before each schema redraw event.
+		Q_PROPERTY(QString preDrawScript READ preDrawScript WRITE setPreDrawScript)
+
 		/*! \brief Blinking phase. Value of this property is inverted approximately each 250 milliseconds
 
 		Blinking phase.	Value of this property is inverted (switched from true to false or vice versa) approximately each 250 milliseconds.

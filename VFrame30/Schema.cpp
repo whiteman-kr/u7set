@@ -138,6 +138,37 @@ namespace VFrame30
 		return result;
 	}
 
+	QJSValue ScriptSchema::findSchemaItem(QString objectName)
+	{
+		if (m_schema == nullptr)
+		{
+			return QJSValue::NullValue;
+		}
+
+		QJSEngine* engine = qjsEngine(this);
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return QJSValue::NullValue;
+		}
+
+		for (auto layer : m_schema->Layers)
+		{
+			for (auto& item : layer->Items)
+			{
+				if (item->objectName() == objectName)
+				{
+					QJSValue v = engine->newQObject(item.get());
+					QQmlEngine::setObjectOwnership(item.get(), QQmlEngine::ObjectOwnership::CppOwnership);
+
+					return v;
+				}
+			}
+		}
+
+		return QJSValue::NullValue;;
+	}
+
 	QString ScriptSchema::schemaId() const
 	{
 		return m_schema ? m_schema->schemaId() : QString{};

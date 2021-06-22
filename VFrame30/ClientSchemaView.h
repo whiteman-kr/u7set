@@ -141,7 +141,7 @@ namespace VFrame30
 		/// \brief Sets the active schema specified in schemaId parameter.
 		void setSchema(QString schemaId);				// Set schema by SchemaID
 
-		/// \brief Finds a schema item by its name (ObjectName property). Return value has SchemaItem type or undefined if item is not found.
+		/// \brief Finds schema item by its name (ObjectName property). Returned value has SchemaItem type or undefined if item is not found.
 		QObject* findSchemaItem(QString objectName);	// Find SchemaItem by ObjectName
 
 		/// \brief Finds a schema control widget (edit control, button, etc...) by its name (ObjectName property).

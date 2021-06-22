@@ -42,6 +42,10 @@ SimSchemaWidget::SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 
 	createActions();
 
+	// Run onShowScript
+	//
+	schema->onShowEvent(clientSchemaView()->jsEngine());
+
 	// --
 	//
 	connect(m_simulator, &SimIdeSimulator::projectUpdated, this, &SimSchemaWidget::updateSchema);
@@ -234,7 +238,7 @@ void SimSchemaWidget::signalContextMenu(const QStringList& appSignals, const QSt
 	{
 		for (const QString& schemaId : signalsSchemasSet)
 		{
-			auto f = [this, schemaId, &appSignals, &impactSignals, simWidget]() -> void
+			auto f = [schemaId, &appSignals, &impactSignals, simWidget]() -> void
 					 {
 						simWidget->openSchemaTabPage(schemaId, appSignals + impactSignals);
 					 };
@@ -252,7 +256,7 @@ void SimSchemaWidget::signalContextMenu(const QStringList& appSignals, const QSt
 
 		for (const QString& schemaId : impactSignalsSchemasSet)
 		{
-			auto f = [this, schemaId, &appSignals, &impactSignals, simWidget]() -> void
+			auto f = [schemaId, &appSignals, &impactSignals, simWidget]() -> void
 					 {
 						simWidget->openSchemaTabPage(schemaId, appSignals + impactSignals);
 					 };
@@ -288,7 +292,7 @@ void SimSchemaWidget::signalContextMenu(const QStringList& appSignals, const QSt
 
 		QAction* a = menu.addAction(signalId);
 
-		auto f = [this, s, simWidget]() -> void
+		auto f = [s, simWidget]() -> void
 				 {
 					simWidget->signalInfo(s);
 				 };
@@ -345,6 +349,10 @@ void SimSchemaWidget::updateSchema()
 
 		BaseSchemaWidget::setSchema(newSchema, true);
 	}
+
+	// Run onShowScript
+	//
+	schema()->onShowEvent(clientSchemaView()->jsEngine());
 
 	return;
 }

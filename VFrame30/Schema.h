@@ -79,6 +79,9 @@ namespace VFrame30
 		/// \brief Get schema items with specified tag.
 		QVariantList itemsByTag(QString tag);
 
+		/// \brief Finds schema item by its name (ObjectName property). Returned value has SchemaItem type or undefined if item is not found.
+		QJSValue findSchemaItem(QString objectName);
+
 	private:
 		QString schemaId() const;
 		QString caption() const;
