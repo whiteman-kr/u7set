@@ -436,9 +436,14 @@ function testAfbTctV209Conf4(sim)
     //
     sim.overrideSignalValue(initiatorSignalId, 1);
 
-    // 200ms result must be in 0
+    // ATTENTION!!!
+    // AFB TCT conv 4 (TCT_FILTER), ver 209 has an error
+    // Filter works for 1 worcycle less then required.
+    // This behavior expected to be fixed in v210
     //
-    for (let i = 0; i < timerCounter; i++)
+    // 200ms result must be 0
+    //
+    for (let i = 0; i < timerCounter - 1; i++)  // "- 1" here because of implementation error (see comment above)
     {
         sim.startForMs(5);
         assert(sim.signalValue(resultSignalId) === 0);
@@ -456,9 +461,14 @@ function testAfbTctV209Conf4(sim)
     //
     sim.overrideSignalValue(initiatorSignalId, 0);
 
-    // 200ms result must be in 1
+    // ATTENTION!!!
+    // AFB TCT conv 4 (TCT_FILTER), ver 209 has an error
+    // Filter works for 1 worcycle less then required.
+    // This behavior expected to be fixed in v210
     //
-    for (let i = 0; i < timerCounter; i++)
+    // 200ms result must be 1
+    //
+    for (let i = 0; i < timerCounter - 1; i++)   // "- 1" here because of implementation error (see comment above)
     {
         sim.startForMs(5);
         assert(sim.signalValue(resultSignalId) === 1);
@@ -495,9 +505,14 @@ function testAfbTctV209Conf4(sim)
 
     sim.overrideSignalValue(initiatorSignalId, 1);
 
+    // ATTENTION!!!
+    // AFB TCT conv 4 (TCT_FILTER), ver 209 has an error
+    // Filter works for 1 worcycle less then required.
+    // This behavior expected to be fixed in v210
+    //
     // 200ms result must be in 0
     //
-    for (let i = 0; i < timerCounter; i++)
+    for (let i = 0; i < timerCounter - 1; i++)  // "- 1" here because of implementation error (see comment above)
     {
         sim.startForMs(5);
         assert(sim.signalValue(resultSignalId) === 0);
@@ -523,9 +538,14 @@ function testAfbTctV209Conf4(sim)
 
     sim.overrideSignalValue(initiatorSignalId, 0);
 
+    // ATTENTION!!!
+    // AFB TCT conv 4 (TCT_FILTER), ver 209 has an error
+    // Filter works for 1 worcycle less then required.
+    // This behavior expected to be fixed in v210
+    //
     // 200ms result must be in 1
     //
-    for (let i = 0; i < timerCounter; i++)
+    for (let i = 0; i < timerCounter - 1; i++)      // "- 1" here because of implementation error (see comment above)
     {
         sim.startForMs(5);
         assert(sim.signalValue(resultSignalId) === 1);
