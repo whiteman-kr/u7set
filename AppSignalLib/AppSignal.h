@@ -50,9 +50,11 @@ union AppSignalStateFlags
 
 		quint32 swSimulated : 1;			//  7	state of signal is acquire from software simulated packet
 
+		quint32 tuningDefault : 1;			//  8,	sets to 1 if current tunable signal value is equal to tuning default value,
+											//		else sets to 0. For not tunable signals always 0.
+
 		// bits reserved for state flags
 		//
-		quint32 _bit8: 1;					//	8
 		quint32 _bit9: 1;					//	9
 		quint32 _bit10: 1;					//	10
 		quint32 _bit11: 1;					//	11

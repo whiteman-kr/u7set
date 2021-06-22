@@ -130,6 +130,7 @@ namespace Tuning
 			TuningValue currentValue() const { return m_currentValue; }
 			TuningValue readLowBound() const { return m_readLowBound; }
 			TuningValue readHighBound() const { return m_readHighBound; }
+			bool isTuningDefault() const { return m_tuningDefaultFlag; }
 
 			TuningValue defaultValue() const { return m_defaultValue; }
 			TuningValue lowBound() const { return m_lowBound; }
@@ -197,6 +198,8 @@ namespace Tuning
 			TuningValue m_currentValue;
 			TuningValue m_readLowBound;
 			TuningValue m_readHighBound;
+
+			bool m_tuningDefaultFlag = false;
 
 			bool m_writeInProgress = false;
 

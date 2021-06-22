@@ -557,7 +557,8 @@ public:
 		Mismatch,
 		AboveHighLimit,
 		BelowLowLimit,
-		SwSimulated
+		SwSimulated,
+		TuningDefault,
 	};
 	Q_ENUM(AppSignalStateFlagType)
 

@@ -684,12 +684,13 @@ constexpr TuningSignalState::TuningSignalState(
   , writeclient_(PROTOBUF_ULONGLONG(0))
   , successfulreadtime_(PROTOBUF_LONGLONG(0))
   , writerequesttime_(PROTOBUF_LONGLONG(0))
-  , successfulwritetime_(PROTOBUF_LONGLONG(0))
-  , unsuccessfulwritetime_(PROTOBUF_LONGLONG(0))
   , valid_(false)
   , writeinprogress_(false)
   , setsor_(false)
-  , writingdisabled_(false){}
+  , writingdisabled_(false)
+  , tuningdefault_(false)
+  , successfulwritetime_(PROTOBUF_LONGLONG(0))
+  , unsuccessfulwritetime_(PROTOBUF_LONGLONG(0)){}
 struct TuningSignalStateDefaultTypeInternal {
   constexpr TuningSignalStateDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -1650,21 +1651,23 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalState, unsuccessfulwritetime_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalState, setsor_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalState, writingdisabled_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSignalState, tuningdefault_),
   3,
   4,
-  11,
+  9,
   0,
   1,
   2,
-  12,
+  10,
   5,
   6,
   7,
   8,
-  9,
-  10,
-  13,
   14,
+  15,
+  11,
+  12,
+  13,
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalsReadReply, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalsReadReply, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1951,31 +1954,31 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 571, 579, sizeof(::Network::ChangeConrolledTuningSourceRequest)},
   { 582, 590, sizeof(::Network::ChangeConrolledTuningSourceReply)},
   { 593, -1, sizeof(::Network::TuningSignalsRead)},
-  { 599, 619, sizeof(::Network::TuningSignalState)},
-  { 634, 641, sizeof(::Network::TuningSignalsReadReply)},
-  { 643, 650, sizeof(::Network::TuningWriteCommand)},
-  { 652, 659, sizeof(::Network::TuningSignalsWrite)},
-  { 661, 668, sizeof(::Network::TuningSignalWriteResult)},
-  { 670, 677, sizeof(::Network::TuningSignalsWriteReply)},
-  { 679, -1, sizeof(::Network::TuningSignalsApply)},
-  { 684, 690, sizeof(::Network::TuningSignalsApplyReply)},
-  { 691, 698, sizeof(::Network::DataSourceWrite)},
-  { 700, 706, sizeof(::Network::DataSourceWriteReply)},
-  { 707, -1, sizeof(::Network::PacketSourceExit)},
-  { 712, 718, sizeof(::Network::PacketSourceExitReply)},
-  { 719, 726, sizeof(::Network::SaveAppSignalsStatesToArchiveRequest)},
-  { 728, 735, sizeof(::Network::SaveAppSignalsStatesToArchiveReply)},
-  { 737, 748, sizeof(::Network::GetAppSignalStatesFromArchiveStartRequest)},
-  { 754, 763, sizeof(::Network::GetAppSignalStatesFromArchiveStartReply)},
-  { 767, 773, sizeof(::Network::GetAppSignalStatesFromArchiveNextRequest)},
-  { 774, 789, sizeof(::Network::GetAppSignalStatesFromArchiveNextReply)},
-  { 799, 805, sizeof(::Network::GetAppSignalStatesFromArchiveCancelRequest)},
-  { 806, 814, sizeof(::Network::GetAppSignalStatesFromArchiveCancelReply)},
-  { 817, 826, sizeof(::Network::RtTrendsManagementRequest)},
-  { 830, 839, sizeof(::Network::RtTrendsManagementReply)},
-  { 843, -1, sizeof(::Network::RtTrendsGetStateChangesRequest)},
-  { 848, 856, sizeof(::Network::RtTrendsGetStateChangesReply)},
-  { 859, 871, sizeof(::Network::GetFileReply)},
+  { 599, 620, sizeof(::Network::TuningSignalState)},
+  { 636, 643, sizeof(::Network::TuningSignalsReadReply)},
+  { 645, 652, sizeof(::Network::TuningWriteCommand)},
+  { 654, 661, sizeof(::Network::TuningSignalsWrite)},
+  { 663, 670, sizeof(::Network::TuningSignalWriteResult)},
+  { 672, 679, sizeof(::Network::TuningSignalsWriteReply)},
+  { 681, -1, sizeof(::Network::TuningSignalsApply)},
+  { 686, 692, sizeof(::Network::TuningSignalsApplyReply)},
+  { 693, 700, sizeof(::Network::DataSourceWrite)},
+  { 702, 708, sizeof(::Network::DataSourceWriteReply)},
+  { 709, -1, sizeof(::Network::PacketSourceExit)},
+  { 714, 720, sizeof(::Network::PacketSourceExitReply)},
+  { 721, 728, sizeof(::Network::SaveAppSignalsStatesToArchiveRequest)},
+  { 730, 737, sizeof(::Network::SaveAppSignalsStatesToArchiveReply)},
+  { 739, 750, sizeof(::Network::GetAppSignalStatesFromArchiveStartRequest)},
+  { 756, 765, sizeof(::Network::GetAppSignalStatesFromArchiveStartReply)},
+  { 769, 775, sizeof(::Network::GetAppSignalStatesFromArchiveNextRequest)},
+  { 776, 791, sizeof(::Network::GetAppSignalStatesFromArchiveNextReply)},
+  { 801, 807, sizeof(::Network::GetAppSignalStatesFromArchiveCancelRequest)},
+  { 808, 816, sizeof(::Network::GetAppSignalStatesFromArchiveCancelReply)},
+  { 819, 828, sizeof(::Network::RtTrendsManagementRequest)},
+  { 832, 841, sizeof(::Network::RtTrendsManagementReply)},
+  { 845, -1, sizeof(::Network::RtTrendsGetStateChangesRequest)},
+  { 850, 858, sizeof(::Network::RtTrendsGetStateChangesReply)},
+  { 861, 873, sizeof(::Network::GetFileReply)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -2216,7 +2219,7 @@ const char descriptor_table_protodef_network_2eproto[] PROTOBUF_SECTION_VARIABLE
   "\001(\005:\0010\022)\n!controlledTuningSourceEquipmen"
   "tID\030\002 \001(\t\022\036\n\017controlIsActive\030\003 \001(\010:\005fals"
   "e\"\'\n\021TuningSignalsRead\022\022\n\nsignalHash\030\002 \003"
-  "(\004\"\322\003\n\021TuningSignalState\022\025\n\nsignalHash\030\001"
+  "(\004\"\351\003\n\021TuningSignalState\022\025\n\nsignalHash\030\001"
   " \001(\006:\0010\022\020\n\005error\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010"
   ":\005false\022!\n\005value\030\004 \001(\0132\022.Proto.TuningVal"
   "ue\022(\n\014readLowBound\030\005 \001(\0132\022.Proto.TuningV"
@@ -2227,72 +2230,73 @@ const char descriptor_table_protodef_network_2eproto[] PROTOBUF_SECTION_VARIABLE
   "0\022\033\n\020writeRequestTime\030\013 \001(\020:\0010\022\036\n\023succes"
   "sfulWriteTime\030\014 \001(\020:\0010\022 \n\025unsuccessfulWr"
   "iteTime\030\r \001(\020:\0010\022\025\n\006setSOR\030\016 \001(\010:\005false\022"
-  "\036\n\017writingDisabled\030\017 \001(\010:\005false\"a\n\026Tunin"
-  "gSignalsReadReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021t"
-  "uningSignalState\030\002 \003(\0132\032.Network.TuningS"
-  "ignalState\"N\n\022TuningWriteCommand\022\025\n\nsign"
-  "alHash\030\001 \001(\004:\0010\022!\n\005value\030\002 \001(\0132\022.Proto.T"
-  "uningValue\"]\n\022TuningSignalsWrite\022\030\n\tauto"
-  "Apply\030\002 \001(\010:\005false\022-\n\010commands\030\003 \003(\0132\033.N"
-  "etwork.TuningWriteCommand\"B\n\027TuningSigna"
-  "lWriteResult\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005e"
-  "rror\030\002 \001(\005:\0010\"b\n\027TuningSignalsWriteReply"
-  "\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013writeResult\030\002 \003(\0132"
-  " .Network.TuningSignalWriteResult\"\024\n\022Tun"
-  "ingSignalsApply\"+\n\027TuningSignalsApplyRep"
-  "ly\022\020\n\005error\030\001 \001(\005:\0010\"B\n\017DataSourceWrite\022"
-  "\031\n\021sourceEquipmentID\030\001 \001(\t\022\024\n\005state\030\002 \001("
-  "\010:\005false\"(\n\024DataSourceWriteReply\022\020\n\005erro"
-  "r\030\001 \001(\005:\0010\"\022\n\020PacketSourceExit\")\n\025Packet"
-  "SourceExitReply\022\020\n\005error\030\001 \001(\005:\0010\"q\n$Sav"
-  "eAppSignalsStatesToArchiveRequest\022\031\n\021cli"
-  "entEquipmentID\030\001 \001(\t\022.\n\017appSignalStates\030"
-  "\002 \003(\0132\025.Proto.AppSignalState\"N\n\"SaveAppS"
-  "ignalsStatesToArchiveReply\022\020\n\005error\030\001 \001("
-  "\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\"\271\001\n)GetAppS"
-  "ignalStatesFromArchiveStartRequest\022\031\n\021cl"
-  "ientEquipmentID\030\001 \001(\t\022\023\n\010timeType\030\002 \001(\005:"
-  "\0011\022\024\n\tstartTime\030\003 \001(\020:\0010\022\022\n\007endTime\030\004 \001("
-  "\020:\0010\022\024\n\014signalHashes\030\005 \003(\004\022\034\n\016removePeri"
-  "odic\030\006 \001(\010:\004true\"~\n\'GetAppSignalStatesFr"
-  "omArchiveStartReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n"
-  "\tarchError\030\002 \001(\005:\003100\022\023\n\013errorString\030\004 \001"
-  "(\t\022\024\n\trequestID\030\003 \001(\r:\0010\"@\n(GetAppSignal"
-  "StatesFromArchiveNextRequest\022\024\n\trequestI"
-  "D\030\001 \001(\r:\0010\"\271\002\n&GetAppSignalStatesFromArc"
-  "hiveNextReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchE"
-  "rror\030\002 \001(\005:\003100\022\024\n\trequestID\030\003 \001(\r:\0010\022\023\n"
-  "\013errorString\030\n \001(\t\022\030\n\tdataReady\030\004 \001(\010:\005f"
-  "alse\022\033\n\020totalStatesCount\030\005 \001(\005:\0010\022\032\n\017sen"
-  "tStatesCount\030\006 \001(\005:\0010\022\034\n\021statesInPartCou"
-  "nt\030\007 \001(\005:\0010\022\031\n\nisLastPart\030\010 \001(\010:\005false\022."
-  "\n\017appSignalStates\030\t \003(\0132\025.Proto.AppSigna"
-  "lState\"B\n*GetAppSignalStatesFromArchiveC"
-  "ancelRequest\022\024\n\trequestID\030\001 \001(\r:\0010\"i\n(Ge"
-  "tAppSignalStatesFromArchiveCancelReply\022\020"
-  "\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100"
-  "\022\023\n\013errorString\030\003 \001(\t\"\204\001\n\031RtTrendsManage"
-  "mentRequest\022\031\n\021clientEquipmentID\030\001 \001(\t\022\024"
-  "\n\014samplePeriod\030\002 \001(\005\022\032\n\022appendSignalHash"
-  "es\030\003 \003(\004\022\032\n\022deleteSignalHashes\030\004 \003(\004\"s\n\027"
-  "RtTrendsManagementReply\022\020\n\005error\030\001 \001(\005:\001"
-  "0\022\023\n\013errorString\030\002 \001(\t\022\024\n\014samplePeriod\030\003"
-  " \001(\005\022\033\n\023trackedSignalHashes\030\004 \003(\004\" \n\036RtT"
-  "rendsGetStateChangesRequest\"r\n\034RtTrendsG"
-  "etStateChangesReply\022\020\n\005error\030\001 \001(\005:\0010\022\023\n"
-  "\013errorString\030\002 \001(\t\022+\n\014signalStates\030\003 \003(\013"
-  "2\025.Proto.AppSignalState\"\247\001\n\014GetFileReply"
-  "\022\024\n\terrorCode\030\001 \002(\005:\0010\022\023\n\010fileSize\030\002 \001(\003"
-  ":\0010\022\025\n\ntotalParts\030\003 \001(\005:\0010\022\026\n\013currentPar"
-  "t\030\004 \001(\005:\0010\022\032\n\017currentPartSize\030\005 \001(\005:\0010\022\013"
-  "\n\003md5\030\006 \001(\014\022\024\n\014filePartData\030\n \001(\014"
+  "\036\n\017writingDisabled\030\017 \001(\010:\005false\022\025\n\rtunin"
+  "gDefault\030\020 \001(\010\"a\n\026TuningSignalsReadReply"
+  "\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030"
+  "\002 \003(\0132\032.Network.TuningSignalState\"N\n\022Tun"
+  "ingWriteCommand\022\025\n\nsignalHash\030\001 \001(\004:\0010\022!"
+  "\n\005value\030\002 \001(\0132\022.Proto.TuningValue\"]\n\022Tun"
+  "ingSignalsWrite\022\030\n\tautoApply\030\002 \001(\010:\005fals"
+  "e\022-\n\010commands\030\003 \003(\0132\033.Network.TuningWrit"
+  "eCommand\"B\n\027TuningSignalWriteResult\022\025\n\ns"
+  "ignalHash\030\001 \001(\004:\0010\022\020\n\005error\030\002 \001(\005:\0010\"b\n\027"
+  "TuningSignalsWriteReply\022\020\n\005error\030\001 \001(\005:\001"
+  "0\0225\n\013writeResult\030\002 \003(\0132 .Network.TuningS"
+  "ignalWriteResult\"\024\n\022TuningSignalsApply\"+"
+  "\n\027TuningSignalsApplyReply\022\020\n\005error\030\001 \001(\005"
+  ":\0010\"B\n\017DataSourceWrite\022\031\n\021sourceEquipmen"
+  "tID\030\001 \001(\t\022\024\n\005state\030\002 \001(\010:\005false\"(\n\024DataS"
+  "ourceWriteReply\022\020\n\005error\030\001 \001(\005:\0010\"\022\n\020Pac"
+  "ketSourceExit\")\n\025PacketSourceExitReply\022\020"
+  "\n\005error\030\001 \001(\005:\0010\"q\n$SaveAppSignalsStates"
+  "ToArchiveRequest\022\031\n\021clientEquipmentID\030\001 "
+  "\001(\t\022.\n\017appSignalStates\030\002 \003(\0132\025.Proto.App"
+  "SignalState\"N\n\"SaveAppSignalsStatesToArc"
+  "hiveReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError"
+  "\030\002 \001(\005:\003100\"\271\001\n)GetAppSignalStatesFromAr"
+  "chiveStartRequest\022\031\n\021clientEquipmentID\030\001"
+  " \001(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003"
+  " \001(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014signalHas"
+  "hes\030\005 \003(\004\022\034\n\016removePeriodic\030\006 \001(\010:\004true\""
+  "~\n\'GetAppSignalStatesFromArchiveStartRep"
+  "ly\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:"
+  "\003100\022\023\n\013errorString\030\004 \001(\t\022\024\n\trequestID\030\003"
+  " \001(\r:\0010\"@\n(GetAppSignalStatesFromArchive"
+  "NextRequest\022\024\n\trequestID\030\001 \001(\r:\0010\"\271\002\n&Ge"
+  "tAppSignalStatesFromArchiveNextReply\022\020\n\005"
+  "error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\024"
+  "\n\trequestID\030\003 \001(\r:\0010\022\023\n\013errorString\030\n \001("
+  "\t\022\030\n\tdataReady\030\004 \001(\010:\005false\022\033\n\020totalStat"
+  "esCount\030\005 \001(\005:\0010\022\032\n\017sentStatesCount\030\006 \001("
+  "\005:\0010\022\034\n\021statesInPartCount\030\007 \001(\005:\0010\022\031\n\nis"
+  "LastPart\030\010 \001(\010:\005false\022.\n\017appSignalStates"
+  "\030\t \003(\0132\025.Proto.AppSignalState\"B\n*GetAppS"
+  "ignalStatesFromArchiveCancelRequest\022\024\n\tr"
+  "equestID\030\001 \001(\r:\0010\"i\n(GetAppSignalStatesF"
+  "romArchiveCancelReply\022\020\n\005error\030\001 \001(\005:\0010\022"
+  "\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013errorString\030\003"
+  " \001(\t\"\204\001\n\031RtTrendsManagementRequest\022\031\n\021cl"
+  "ientEquipmentID\030\001 \001(\t\022\024\n\014samplePeriod\030\002 "
+  "\001(\005\022\032\n\022appendSignalHashes\030\003 \003(\004\022\032\n\022delet"
+  "eSignalHashes\030\004 \003(\004\"s\n\027RtTrendsManagemen"
+  "tReply\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013errorString\030"
+  "\002 \001(\t\022\024\n\014samplePeriod\030\003 \001(\005\022\033\n\023trackedSi"
+  "gnalHashes\030\004 \003(\004\" \n\036RtTrendsGetStateChan"
+  "gesRequest\"r\n\034RtTrendsGetStateChangesRep"
+  "ly\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013errorString\030\002 \001("
+  "\t\022+\n\014signalStates\030\003 \003(\0132\025.Proto.AppSigna"
+  "lState\"\247\001\n\014GetFileReply\022\024\n\terrorCode\030\001 \002"
+  "(\005:\0010\022\023\n\010fileSize\030\002 \001(\003:\0010\022\025\n\ntotalParts"
+  "\030\003 \001(\005:\0010\022\026\n\013currentPart\030\004 \001(\005:\0010\022\032\n\017cur"
+  "rentPartSize\030\005 \001(\005:\0010\022\013\n\003md5\030\006 \001(\014\022\024\n\014fi"
+  "lePartData\030\n \001(\014"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_network_2eproto_deps[1] = {
   &::descriptor_table_serialization_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_network_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_network_2eproto = {
-  false, false, 9553, descriptor_table_protodef_network_2eproto, "network.proto", 
+  false, false, 9576, descriptor_table_protodef_network_2eproto, "network.proto", 
   &descriptor_table_network_2eproto_once, descriptor_table_network_2eproto_deps, 1, 65,
   schemas, file_default_instances, TableStruct_network_2eproto::offsets,
   file_level_metadata_network_2eproto, file_level_enum_descriptors_network_2eproto, file_level_service_descriptors_network_2eproto,
@@ -16087,7 +16091,7 @@ class TuningSignalState::_Internal {
     (*has_bits)[0] |= 16u;
   }
   static void set_has_valid(HasBits* has_bits) {
-    (*has_bits)[0] |= 2048u;
+    (*has_bits)[0] |= 512u;
   }
   static const ::Proto::TuningValue& value(const TuningSignalState* msg);
   static void set_has_value(HasBits* has_bits) {
@@ -16102,7 +16106,7 @@ class TuningSignalState::_Internal {
     (*has_bits)[0] |= 4u;
   }
   static void set_has_writeinprogress(HasBits* has_bits) {
-    (*has_bits)[0] |= 4096u;
+    (*has_bits)[0] |= 1024u;
   }
   static void set_has_writeerrorcode(HasBits* has_bits) {
     (*has_bits)[0] |= 32u;
@@ -16117,16 +16121,19 @@ class TuningSignalState::_Internal {
     (*has_bits)[0] |= 256u;
   }
   static void set_has_successfulwritetime(HasBits* has_bits) {
-    (*has_bits)[0] |= 512u;
+    (*has_bits)[0] |= 16384u;
   }
   static void set_has_unsuccessfulwritetime(HasBits* has_bits) {
-    (*has_bits)[0] |= 1024u;
+    (*has_bits)[0] |= 32768u;
   }
   static void set_has_setsor(HasBits* has_bits) {
-    (*has_bits)[0] |= 8192u;
+    (*has_bits)[0] |= 2048u;
   }
   static void set_has_writingdisabled(HasBits* has_bits) {
-    (*has_bits)[0] |= 16384u;
+    (*has_bits)[0] |= 4096u;
+  }
+  static void set_has_tuningdefault(HasBits* has_bits) {
+    (*has_bits)[0] |= 8192u;
   }
 };
 
@@ -16180,16 +16187,16 @@ TuningSignalState::TuningSignalState(const TuningSignalState& from)
     readhighbound_ = nullptr;
   }
   ::memcpy(&signalhash_, &from.signalhash_,
-    static_cast<size_t>(reinterpret_cast<char*>(&writingdisabled_) -
-    reinterpret_cast<char*>(&signalhash_)) + sizeof(writingdisabled_));
+    static_cast<size_t>(reinterpret_cast<char*>(&unsuccessfulwritetime_) -
+    reinterpret_cast<char*>(&signalhash_)) + sizeof(unsuccessfulwritetime_));
   // @@protoc_insertion_point(copy_constructor:Network.TuningSignalState)
 }
 
 void TuningSignalState::SharedCtor() {
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&value_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&writingdisabled_) -
-    reinterpret_cast<char*>(&value_)) + sizeof(writingdisabled_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&unsuccessfulwritetime_) -
+    reinterpret_cast<char*>(&value_)) + sizeof(unsuccessfulwritetime_));
 }
 
 TuningSignalState::~TuningSignalState() {
@@ -16241,10 +16248,10 @@ void TuningSignalState::Clear() {
         reinterpret_cast<char*>(&successfulreadtime_) -
         reinterpret_cast<char*>(&signalhash_)) + sizeof(successfulreadtime_));
   }
-  if (cached_has_bits & 0x00007f00u) {
+  if (cached_has_bits & 0x0000ff00u) {
     ::memset(&writerequesttime_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&writingdisabled_) -
-        reinterpret_cast<char*>(&writerequesttime_)) + sizeof(writingdisabled_));
+        reinterpret_cast<char*>(&unsuccessfulwritetime_) -
+        reinterpret_cast<char*>(&writerequesttime_)) + sizeof(unsuccessfulwritetime_));
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -16375,6 +16382,14 @@ const char* TuningSignalState::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
+      // optional bool tuningDefault = 16;
+      case 16:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 128)) {
+          _Internal::set_has_tuningdefault(&has_bits);
+          tuningdefault_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
       default: {
       handle_unusual:
         if ((tag & 7) == 4 || tag == 0) {
@@ -16418,7 +16433,7 @@ failure:
   }
 
   // optional bool valid = 3 [default = false];
-  if (cached_has_bits & 0x00000800u) {
+  if (cached_has_bits & 0x00000200u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(3, this->_internal_valid(), target);
   }
@@ -16448,7 +16463,7 @@ failure:
   }
 
   // optional bool writeInProgress = 7 [default = false];
-  if (cached_has_bits & 0x00001000u) {
+  if (cached_has_bits & 0x00000400u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(7, this->_internal_writeinprogress(), target);
   }
@@ -16478,27 +16493,33 @@ failure:
   }
 
   // optional sfixed64 successfulWriteTime = 12 [default = 0];
-  if (cached_has_bits & 0x00000200u) {
+  if (cached_has_bits & 0x00004000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteSFixed64ToArray(12, this->_internal_successfulwritetime(), target);
   }
 
   // optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];
-  if (cached_has_bits & 0x00000400u) {
+  if (cached_has_bits & 0x00008000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteSFixed64ToArray(13, this->_internal_unsuccessfulwritetime(), target);
   }
 
   // optional bool setSOR = 14 [default = false];
-  if (cached_has_bits & 0x00002000u) {
+  if (cached_has_bits & 0x00000800u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(14, this->_internal_setsor(), target);
   }
 
   // optional bool writingDisabled = 15 [default = false];
-  if (cached_has_bits & 0x00004000u) {
+  if (cached_has_bits & 0x00001000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(15, this->_internal_writingdisabled(), target);
+  }
+
+  // optional bool tuningDefault = 16;
+  if (cached_has_bits & 0x00002000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(16, this->_internal_tuningdefault(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -16570,40 +16591,45 @@ size_t TuningSignalState::ByteSizeLong() const {
     }
 
   }
-  if (cached_has_bits & 0x00007f00u) {
+  if (cached_has_bits & 0x0000ff00u) {
     // optional sfixed64 writeRequestTime = 11 [default = 0];
     if (cached_has_bits & 0x00000100u) {
       total_size += 1 + 8;
     }
 
-    // optional sfixed64 successfulWriteTime = 12 [default = 0];
-    if (cached_has_bits & 0x00000200u) {
-      total_size += 1 + 8;
-    }
-
-    // optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];
-    if (cached_has_bits & 0x00000400u) {
-      total_size += 1 + 8;
-    }
-
     // optional bool valid = 3 [default = false];
-    if (cached_has_bits & 0x00000800u) {
+    if (cached_has_bits & 0x00000200u) {
       total_size += 1 + 1;
     }
 
     // optional bool writeInProgress = 7 [default = false];
-    if (cached_has_bits & 0x00001000u) {
+    if (cached_has_bits & 0x00000400u) {
       total_size += 1 + 1;
     }
 
     // optional bool setSOR = 14 [default = false];
-    if (cached_has_bits & 0x00002000u) {
+    if (cached_has_bits & 0x00000800u) {
       total_size += 1 + 1;
     }
 
     // optional bool writingDisabled = 15 [default = false];
-    if (cached_has_bits & 0x00004000u) {
+    if (cached_has_bits & 0x00001000u) {
       total_size += 1 + 1;
+    }
+
+    // optional bool tuningDefault = 16;
+    if (cached_has_bits & 0x00002000u) {
+      total_size += 2 + 1;
+    }
+
+    // optional sfixed64 successfulWriteTime = 12 [default = 0];
+    if (cached_has_bits & 0x00004000u) {
+      total_size += 1 + 8;
+    }
+
+    // optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];
+    if (cached_has_bits & 0x00008000u) {
+      total_size += 1 + 8;
     }
 
   }
@@ -16666,27 +16692,30 @@ void TuningSignalState::MergeFrom(const TuningSignalState& from) {
     }
     _has_bits_[0] |= cached_has_bits;
   }
-  if (cached_has_bits & 0x00007f00u) {
+  if (cached_has_bits & 0x0000ff00u) {
     if (cached_has_bits & 0x00000100u) {
       writerequesttime_ = from.writerequesttime_;
     }
     if (cached_has_bits & 0x00000200u) {
-      successfulwritetime_ = from.successfulwritetime_;
-    }
-    if (cached_has_bits & 0x00000400u) {
-      unsuccessfulwritetime_ = from.unsuccessfulwritetime_;
-    }
-    if (cached_has_bits & 0x00000800u) {
       valid_ = from.valid_;
     }
-    if (cached_has_bits & 0x00001000u) {
+    if (cached_has_bits & 0x00000400u) {
       writeinprogress_ = from.writeinprogress_;
     }
-    if (cached_has_bits & 0x00002000u) {
+    if (cached_has_bits & 0x00000800u) {
       setsor_ = from.setsor_;
     }
-    if (cached_has_bits & 0x00004000u) {
+    if (cached_has_bits & 0x00001000u) {
       writingdisabled_ = from.writingdisabled_;
+    }
+    if (cached_has_bits & 0x00002000u) {
+      tuningdefault_ = from.tuningdefault_;
+    }
+    if (cached_has_bits & 0x00004000u) {
+      successfulwritetime_ = from.successfulwritetime_;
+    }
+    if (cached_has_bits & 0x00008000u) {
+      unsuccessfulwritetime_ = from.unsuccessfulwritetime_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
@@ -16715,8 +16744,8 @@ void TuningSignalState::InternalSwap(TuningSignalState* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(TuningSignalState, writingdisabled_)
-      + sizeof(TuningSignalState::writingdisabled_)
+      PROTOBUF_FIELD_OFFSET(TuningSignalState, unsuccessfulwritetime_)
+      + sizeof(TuningSignalState::unsuccessfulwritetime_)
       - PROTOBUF_FIELD_OFFSET(TuningSignalState, value_)>(
           reinterpret_cast<char*>(&value_),
           reinterpret_cast<char*>(&other->value_));

@@ -11,6 +11,10 @@
 
 void AppSignalStateFlags::setFlag(E::AppSignalStateFlagType flagType, quint32 value)
 {
+	Q_ASSERT(value == 0 || value == 1);
+
+	value = (value == 0 ? 0 : 1);
+
 	// set flagValue to corresponding flag
 	//
 	switch (flagType)
@@ -45,6 +49,10 @@ void AppSignalStateFlags::setFlag(E::AppSignalStateFlagType flagType, quint32 va
 
 	case E::AppSignalStateFlagType::SwSimulated:
 		swSimulated = value;
+		return;
+
+	case E::AppSignalStateFlagType::TuningDefault:
+		tuningDefault = value;
 		return;
 	}
 

@@ -405,8 +405,8 @@ namespace Sim
 
 			// bind Ok
 
-			m_log.writeDebug(QString("Tuning simulation listening socket is created and bound to %1").
-							   arg(m_tuningRequestsReceivingIP.addressPortStr()));
+			/* m_log.writeDebug(QString("Tuning simulation listening socket is created and bound to %1").
+							   arg(m_tuningRequestsReceivingIP.addressPortStr())); */
 
 			QVariant newRecvBufSize(static_cast<int>(2 * 1024 * 1024));
 

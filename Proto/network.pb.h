@@ -9205,12 +9205,13 @@ class TuningSignalState PROTOBUF_FINAL :
     kWriteClientFieldNumber = 9,
     kSuccessfulReadTimeFieldNumber = 10,
     kWriteRequestTimeFieldNumber = 11,
-    kSuccessfulWriteTimeFieldNumber = 12,
-    kUnsuccessfulWriteTimeFieldNumber = 13,
     kValidFieldNumber = 3,
     kWriteInProgressFieldNumber = 7,
     kSetSORFieldNumber = 14,
     kWritingDisabledFieldNumber = 15,
+    kTuningDefaultFieldNumber = 16,
+    kSuccessfulWriteTimeFieldNumber = 12,
+    kUnsuccessfulWriteTimeFieldNumber = 13,
   };
   // optional .Proto.TuningValue value = 4;
   bool has_value() const;
@@ -9344,32 +9345,6 @@ class TuningSignalState PROTOBUF_FINAL :
   void _internal_set_writerequesttime(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // optional sfixed64 successfulWriteTime = 12 [default = 0];
-  bool has_successfulwritetime() const;
-  private:
-  bool _internal_has_successfulwritetime() const;
-  public:
-  void clear_successfulwritetime();
-  ::PROTOBUF_NAMESPACE_ID::int64 successfulwritetime() const;
-  void set_successfulwritetime(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_successfulwritetime() const;
-  void _internal_set_successfulwritetime(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
-  // optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];
-  bool has_unsuccessfulwritetime() const;
-  private:
-  bool _internal_has_unsuccessfulwritetime() const;
-  public:
-  void clear_unsuccessfulwritetime();
-  ::PROTOBUF_NAMESPACE_ID::int64 unsuccessfulwritetime() const;
-  void set_unsuccessfulwritetime(::PROTOBUF_NAMESPACE_ID::int64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int64 _internal_unsuccessfulwritetime() const;
-  void _internal_set_unsuccessfulwritetime(::PROTOBUF_NAMESPACE_ID::int64 value);
-  public:
-
   // optional bool valid = 3 [default = false];
   bool has_valid() const;
   private:
@@ -9422,6 +9397,45 @@ class TuningSignalState PROTOBUF_FINAL :
   void _internal_set_writingdisabled(bool value);
   public:
 
+  // optional bool tuningDefault = 16;
+  bool has_tuningdefault() const;
+  private:
+  bool _internal_has_tuningdefault() const;
+  public:
+  void clear_tuningdefault();
+  bool tuningdefault() const;
+  void set_tuningdefault(bool value);
+  private:
+  bool _internal_tuningdefault() const;
+  void _internal_set_tuningdefault(bool value);
+  public:
+
+  // optional sfixed64 successfulWriteTime = 12 [default = 0];
+  bool has_successfulwritetime() const;
+  private:
+  bool _internal_has_successfulwritetime() const;
+  public:
+  void clear_successfulwritetime();
+  ::PROTOBUF_NAMESPACE_ID::int64 successfulwritetime() const;
+  void set_successfulwritetime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_successfulwritetime() const;
+  void _internal_set_successfulwritetime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];
+  bool has_unsuccessfulwritetime() const;
+  private:
+  bool _internal_has_unsuccessfulwritetime() const;
+  public:
+  void clear_unsuccessfulwritetime();
+  ::PROTOBUF_NAMESPACE_ID::int64 unsuccessfulwritetime() const;
+  void set_unsuccessfulwritetime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_unsuccessfulwritetime() const;
+  void _internal_set_unsuccessfulwritetime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Network.TuningSignalState)
  private:
   class _Internal;
@@ -9440,12 +9454,13 @@ class TuningSignalState PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 writeclient_;
   ::PROTOBUF_NAMESPACE_ID::int64 successfulreadtime_;
   ::PROTOBUF_NAMESPACE_ID::int64 writerequesttime_;
-  ::PROTOBUF_NAMESPACE_ID::int64 successfulwritetime_;
-  ::PROTOBUF_NAMESPACE_ID::int64 unsuccessfulwritetime_;
   bool valid_;
   bool writeinprogress_;
   bool setsor_;
   bool writingdisabled_;
+  bool tuningdefault_;
+  ::PROTOBUF_NAMESPACE_ID::int64 successfulwritetime_;
+  ::PROTOBUF_NAMESPACE_ID::int64 unsuccessfulwritetime_;
   friend struct ::TableStruct_network_2eproto;
 };
 // -------------------------------------------------------------------
@@ -21527,7 +21542,7 @@ inline void TuningSignalState::set_error(::PROTOBUF_NAMESPACE_ID::int32 value) {
 
 // optional bool valid = 3 [default = false];
 inline bool TuningSignalState::_internal_has_valid() const {
-  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
 inline bool TuningSignalState::has_valid() const {
@@ -21535,7 +21550,7 @@ inline bool TuningSignalState::has_valid() const {
 }
 inline void TuningSignalState::clear_valid() {
   valid_ = false;
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline bool TuningSignalState::_internal_valid() const {
   return valid_;
@@ -21545,7 +21560,7 @@ inline bool TuningSignalState::valid() const {
   return _internal_valid();
 }
 inline void TuningSignalState::_internal_set_valid(bool value) {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00000200u;
   valid_ = value;
 }
 inline void TuningSignalState::set_valid(bool value) {
@@ -21792,7 +21807,7 @@ inline void TuningSignalState::set_allocated_readhighbound(::Proto::TuningValue*
 
 // optional bool writeInProgress = 7 [default = false];
 inline bool TuningSignalState::_internal_has_writeinprogress() const {
-  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
 inline bool TuningSignalState::has_writeinprogress() const {
@@ -21800,7 +21815,7 @@ inline bool TuningSignalState::has_writeinprogress() const {
 }
 inline void TuningSignalState::clear_writeinprogress() {
   writeinprogress_ = false;
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline bool TuningSignalState::_internal_writeinprogress() const {
   return writeinprogress_;
@@ -21810,7 +21825,7 @@ inline bool TuningSignalState::writeinprogress() const {
   return _internal_writeinprogress();
 }
 inline void TuningSignalState::_internal_set_writeinprogress(bool value) {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00000400u;
   writeinprogress_ = value;
 }
 inline void TuningSignalState::set_writeinprogress(bool value) {
@@ -21932,7 +21947,7 @@ inline void TuningSignalState::set_writerequesttime(::PROTOBUF_NAMESPACE_ID::int
 
 // optional sfixed64 successfulWriteTime = 12 [default = 0];
 inline bool TuningSignalState::_internal_has_successfulwritetime() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
   return value;
 }
 inline bool TuningSignalState::has_successfulwritetime() const {
@@ -21940,7 +21955,7 @@ inline bool TuningSignalState::has_successfulwritetime() const {
 }
 inline void TuningSignalState::clear_successfulwritetime() {
   successfulwritetime_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSignalState::_internal_successfulwritetime() const {
   return successfulwritetime_;
@@ -21950,7 +21965,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSignalState::successfulwritetime() c
   return _internal_successfulwritetime();
 }
 inline void TuningSignalState::_internal_set_successfulwritetime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00004000u;
   successfulwritetime_ = value;
 }
 inline void TuningSignalState::set_successfulwritetime(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -21960,7 +21975,7 @@ inline void TuningSignalState::set_successfulwritetime(::PROTOBUF_NAMESPACE_ID::
 
 // optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];
 inline bool TuningSignalState::_internal_has_unsuccessfulwritetime() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
   return value;
 }
 inline bool TuningSignalState::has_unsuccessfulwritetime() const {
@@ -21968,7 +21983,7 @@ inline bool TuningSignalState::has_unsuccessfulwritetime() const {
 }
 inline void TuningSignalState::clear_unsuccessfulwritetime() {
   unsuccessfulwritetime_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSignalState::_internal_unsuccessfulwritetime() const {
   return unsuccessfulwritetime_;
@@ -21978,7 +21993,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TuningSignalState::unsuccessfulwritetime()
   return _internal_unsuccessfulwritetime();
 }
 inline void TuningSignalState::_internal_set_unsuccessfulwritetime(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00008000u;
   unsuccessfulwritetime_ = value;
 }
 inline void TuningSignalState::set_unsuccessfulwritetime(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -21988,7 +22003,7 @@ inline void TuningSignalState::set_unsuccessfulwritetime(::PROTOBUF_NAMESPACE_ID
 
 // optional bool setSOR = 14 [default = false];
 inline bool TuningSignalState::_internal_has_setsor() const {
-  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
 inline bool TuningSignalState::has_setsor() const {
@@ -21996,7 +22011,7 @@ inline bool TuningSignalState::has_setsor() const {
 }
 inline void TuningSignalState::clear_setsor() {
   setsor_ = false;
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline bool TuningSignalState::_internal_setsor() const {
   return setsor_;
@@ -22006,7 +22021,7 @@ inline bool TuningSignalState::setsor() const {
   return _internal_setsor();
 }
 inline void TuningSignalState::_internal_set_setsor(bool value) {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00000800u;
   setsor_ = value;
 }
 inline void TuningSignalState::set_setsor(bool value) {
@@ -22016,7 +22031,7 @@ inline void TuningSignalState::set_setsor(bool value) {
 
 // optional bool writingDisabled = 15 [default = false];
 inline bool TuningSignalState::_internal_has_writingdisabled() const {
-  bool value = (_has_bits_[0] & 0x00004000u) != 0;
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
   return value;
 }
 inline bool TuningSignalState::has_writingdisabled() const {
@@ -22024,7 +22039,7 @@ inline bool TuningSignalState::has_writingdisabled() const {
 }
 inline void TuningSignalState::clear_writingdisabled() {
   writingdisabled_ = false;
-  _has_bits_[0] &= ~0x00004000u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline bool TuningSignalState::_internal_writingdisabled() const {
   return writingdisabled_;
@@ -22034,12 +22049,40 @@ inline bool TuningSignalState::writingdisabled() const {
   return _internal_writingdisabled();
 }
 inline void TuningSignalState::_internal_set_writingdisabled(bool value) {
-  _has_bits_[0] |= 0x00004000u;
+  _has_bits_[0] |= 0x00001000u;
   writingdisabled_ = value;
 }
 inline void TuningSignalState::set_writingdisabled(bool value) {
   _internal_set_writingdisabled(value);
   // @@protoc_insertion_point(field_set:Network.TuningSignalState.writingDisabled)
+}
+
+// optional bool tuningDefault = 16;
+inline bool TuningSignalState::_internal_has_tuningdefault() const {
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  return value;
+}
+inline bool TuningSignalState::has_tuningdefault() const {
+  return _internal_has_tuningdefault();
+}
+inline void TuningSignalState::clear_tuningdefault() {
+  tuningdefault_ = false;
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline bool TuningSignalState::_internal_tuningdefault() const {
+  return tuningdefault_;
+}
+inline bool TuningSignalState::tuningdefault() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSignalState.tuningDefault)
+  return _internal_tuningdefault();
+}
+inline void TuningSignalState::_internal_set_tuningdefault(bool value) {
+  _has_bits_[0] |= 0x00002000u;
+  tuningdefault_ = value;
+}
+inline void TuningSignalState::set_tuningdefault(bool value) {
+  _internal_set_tuningdefault(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSignalState.tuningDefault)
 }
 
 // -------------------------------------------------------------------

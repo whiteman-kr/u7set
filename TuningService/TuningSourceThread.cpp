@@ -135,9 +135,11 @@ namespace Tuning
 	{
 		m_valid = valid;
 
-		assert(m_currentValue.type() == value.type());
+		Q_ASSERT(m_currentValue.type() == value.type());
+		Q_ASSERT(m_defaultValue.type() == value.type());
 
 		m_currentValue = value;
+		m_tuningDefaultFlag = (m_currentValue == m_defaultValue ? 1 : 0);
 	}
 
 	void TuningSourceHandler::TuningSignal::setReadLowBound(const TuningValue& value)
@@ -447,6 +449,8 @@ namespace Tuning
 		result &= ts.currentValue().save(tss->mutable_value());
 		result &= ts.readLowBound().save(tss->mutable_readlowbound());
 		result &= ts.readHighBound().save(tss->mutable_readhighbound());
+
+		tss->set_tuningdefault(ts.isTuningDefault());
 
 		if (result == false)
 		{
