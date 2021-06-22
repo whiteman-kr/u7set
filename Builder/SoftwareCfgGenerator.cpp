@@ -430,7 +430,7 @@ namespace Builder
 			if (bool parseOk = schemaFile->details.parseDetails(schema->details(filesTree.filePath(file->fileId())));
 				parseOk == false)
 			{
-				log->errINT1001(tr("Parse schema detais error."), schema->schemaId());
+				log->errINT1001(tr("Parse schema details error."), schema->schemaId());
 				returnResult = false;
 				continue;
 			}

@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
 
 	// --
 	//
-	Sim::Simulator simulator{nullptr, nullptr};		// Log to console
+	Sim::Simulator simulator{nullptr, scriptFile.isEmpty() == false, nullptr};		// Log to console
 
 	if (bool ok = simulator.load(buildPath);
 		ok == false)

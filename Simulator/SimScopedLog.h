@@ -15,7 +15,7 @@ namespace Sim
 
 	public:
 		ScopedLog(const ScopedLog& src);
-		explicit ScopedLog(ILogFile* log, QString outputScope);
+		explicit ScopedLog(ILogFile* log, bool allowDebugMessages, QString outputScope);
 		explicit ScopedLog(const ScopedLog& src, QString outputScope);
 
 		virtual ~ScopedLog();
@@ -34,9 +34,13 @@ namespace Sim
 		const QString& outputScope() const;
 		void setOutputScope(QString value);
 
+		bool debugMessagesEnabled() const;
+		void setDebugMessagesEnabled(bool value);
+
 	private:
 		mutable ILogFile* m_log = nullptr;
 		QString m_scope;
+		std::atomic<bool> m_debugMessagesEnabled = true;
 	};
 
 }

@@ -436,7 +436,7 @@ private:
 
 	bool m_scriptIsRunning = false;
 
-	Sim::Simulator m_simulator{&m_log, nullptr};	// log to OutputLog, no parent
+	Sim::Simulator m_simulator{&m_log, false, nullptr};	// log to OutputLog, no parent
 };
 
 

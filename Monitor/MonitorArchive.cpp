@@ -137,7 +137,7 @@ MonitorArchiveWidget::MonitorArchiveWidget(MonitorConfigController* configContro
 	QMainWindow(parent, Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_archiveService1(configController->configuration().archiveService1),
 	m_archiveService2(configController->configuration().archiveService2),
-	m_schemasDetais(configController->schemasDetails()),
+	m_schemasDetails(configController->schemasDetails()),
 	m_configuration(configController->configuration())
 {
 	setAttribute(Qt::WA_DeleteOnClose);
@@ -613,7 +613,7 @@ void MonitorArchiveWidget::updateOrCancelButton()
 
 void MonitorArchiveWidget::signalsButton()
 {
-	DialogChooseArchiveSignals dialog(m_schemasDetais, m_source, this);
+	DialogChooseArchiveSignals dialog(m_schemasDetails, m_source, this);
 
 	int result = dialog.exec();
 

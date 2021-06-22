@@ -26,7 +26,7 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	: QMainWindow(parent),
 	  HasDbController(db),
 	  m_slaveWindow(slaveWindow),
-	  m_simulator(simulator ? simulator : std::make_shared<SimIdeSimulator>(nullptr, nullptr)),
+	  m_simulator(simulator ? simulator : std::make_shared<SimIdeSimulator>(nullptr, true, nullptr)),
 	  m_schemaManager(m_simulator.get())
 {
 	// --

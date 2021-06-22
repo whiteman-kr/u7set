@@ -195,12 +195,12 @@ namespace Builder
 
 		// --
 		//
-		VFrame30::SchemaDetailsSet detaisSet;
+		VFrame30::SchemaDetailsSet detailsSet;
 
 		for (auto schemaFile : monitorSchemas)
 		{
 			result &= m_cfgXml->addLinkToFile(schemaFile->subDir, schemaFile->fileName);
-			detaisSet.add(schemaFile->details);
+			detailsSet.add(schemaFile->details);
 		}
 
 		// Save details
@@ -208,7 +208,7 @@ namespace Builder
 		{
 			QByteArray fileData;
 
-			if (bool ok = detaisSet.saveToByteArray(&fileData);
+			if (bool ok = detailsSet.saveToByteArray(&fileData);
 				ok == true)
 			{
 				BuildFile* schemaDetailsBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemaDetails.pbuf", fileData);

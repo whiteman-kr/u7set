@@ -1,7 +1,7 @@
 #include "SimIdeSimulator.h"
 
-SimIdeSimulator::SimIdeSimulator(ILogFile* log, QObject* parent) :
-	Sim::Simulator(log, parent)
+SimIdeSimulator::SimIdeSimulator(ILogFile* log, bool allowDebugMessages, QObject* parent) :
+	Sim::Simulator(log, allowDebugMessages, parent)
 {
 }
 
@@ -49,7 +49,7 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 
 	fileName += "Schemas.als/SchemaDetails.pbuf";
 
-	log().writeMessage(tr("Load logic schema detais file: %1").arg(fileName));
+	log().writeMessage(tr("Load logic schema details file: %1").arg(fileName));
 
 	bool ok = true;
 

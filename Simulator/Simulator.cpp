@@ -20,10 +20,10 @@ namespace Sim
 	//
 	// Simulator
 	//
-	Simulator::Simulator(ILogFile* log, QObject* parent) :
+	Simulator::Simulator(ILogFile* log, bool allowDebugMessages, QObject* parent) :
 		QObject{parent},
-		m_log{log, {}},
-		m_tuningSignalManager{ScopedLog{log, {}}},
+		m_log{log, allowDebugMessages, nullptr},
+		m_tuningSignalManager{ScopedLog{log, allowDebugMessages, nullptr}},
 		m_software{this},
 		m_scriptSimulator{this}
 	{
@@ -117,6 +117,7 @@ namespace Sim
 			m_scriptSimulator.stopScript();
 		}
 
+		m_scriptSimulator.log().setDebugMessagesEnabled(false);
 		m_scriptSimulator.setExecutionTimeout(timeout);
 
 		return m_scriptSimulator.runScripts(scripts);

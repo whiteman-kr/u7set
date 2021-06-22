@@ -2212,7 +2212,7 @@ namespace Builder
 	///
 	/// Parameters:
 	///		%1 Schema file name
-	///		%2 Detaisl string
+	///		%2 Details string
 	///
 	/// Description:
 	///		Schema details parsing error.

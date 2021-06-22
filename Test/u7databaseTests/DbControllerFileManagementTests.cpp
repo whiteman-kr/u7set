@@ -314,7 +314,7 @@ void DbControllerFileTests::addFileTest()
 	ok = query.first();
 	QVERIFY2 (ok, qPrintable(query.lastError().databaseText()));
 
-	QVERIFY2 (query.value("details").toString() == details, qPrintable("Error: wrong detais after addFile function of DbController"));
+	QVERIFY2 (query.value("details").toString() == details, qPrintable("Error: wrong details after addFile function of DbController"));
 	db.close();
 
 	return;
@@ -419,7 +419,7 @@ void DbControllerFileTests::addFilesTest()
 		ok = query.first();
 		QVERIFY2 (ok, qPrintable(query.lastError().databaseText()));
 
-		QVERIFY2 (query.value("details").toString() == details, qPrintable("Error: wrong detais after addFile function of DbController"));
+		QVERIFY2 (query.value("details").toString() == details, qPrintable("Error: wrong details after addFile function of DbController"));
 	}
 	db.close();
 }
