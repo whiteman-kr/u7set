@@ -97,6 +97,11 @@ bool AppSignalState::isOutOfLimits() const
 	return isAboveHighLimit() || isBelowLowLimit();
 }
 
+bool AppSignalState::isTuningDefault() const
+{
+	return m_flags.tuningDefault;
+}
+
 void AppSignalState::save(Proto::AppSignalState* protoState)
 {
 	if (protoState == nullptr)

@@ -159,6 +159,7 @@ namespace Tuning
 	void TuningSourceHandler::TuningSignal::invalidate()
 	{
 		m_valid = false;
+		m_tuningDefaultFlag = false;
 	}
 
 	FotipV2::DataType TuningSourceHandler::TuningSignal::fotipV2DataType()
@@ -307,41 +308,9 @@ namespace Tuning
 
 	void TuningSourceHandler::periodicProcessing()
 	{
-		// DEBUG
-		m_timerCount++;
-
-		/*
-		if ((m_timerCount % 6000) == 0)			// 1 per minute
-		{
-			LOG_MSG(m_logger, QString("Timer is working %1 (%2) m_waitReplay = %3 m_waitReplyCounter = %4").
-				arg(m_timerCount).arg(m_sourceIP.addressStr()).arg(m_waitReply).arg(m_waitReplyCounter));
-		}
-		*/
-
-		// DEBUG
-
 		if (processWaitReply() == true)
 		{
-			// DEBUG
-			m_waitReplyFalseCount = 0;
-			m_waitReplyTrueCount++;
-
-			if((m_waitReplyTrueCount % 100) == 0)
-			{
-				//LOG_MSG(m_logger, QString("processWaitReply TRUE %1 (%2) m_waitReplay = %3 m_waitReplyCounter = %4").
-				//		arg(m_waitReplyTrueCount).arg(m_sourceIP.addressStr()).arg(m_waitReply).arg(m_waitReplyCounter));
-			}
-			// DEBUG
 			return;
-		}
-
-		m_waitReplyTrueCount = 0;
-		m_waitReplyFalseCount++;
-
-		if((m_waitReplyFalseCount % 100) == 0)
-		{
-			//LOG_MSG(m_logger, QString("processWaitReply FALSE %1 (%2) m_waitReplay = %3 m_waitReplyCounter = %4").
-			//		arg(m_waitReplyFalseCount).arg(m_sourceIP.addressStr()).arg(m_waitReply).arg(m_waitReplyCounter));
 		}
 
 		if (processCommandQueue() == true)
@@ -351,18 +320,8 @@ namespace Tuning
 
 		if (processIdle() == true)
 		{
-			m_processIdleTrueCount++;
-
-			if((m_processIdleTrueCount % 100) == 0)
-			{
-				LOG_MSG(m_logger, QString("processIdle TRUE %1 (%2) m_waitReplay = %3 m_waitReplyCounter = %4").
-						arg(m_processIdleTrueCount).arg(m_sourceIP.addressStr()).arg(m_waitReply).arg(m_waitReplyCounter));
-			}
-
 			return;
 		}
-
-		m_processIdleTrueCount = 0;
 	}
 
 	bool TuningSourceHandler::processReplyQueue()

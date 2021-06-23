@@ -352,13 +352,6 @@ namespace Tuning
 		// statisticts
 		//
 		SourceStatistics m_stat;
-
-		// debug vars
-		//
-		qint64 m_timerCount = 0;
-		qint64 m_waitReplyFalseCount = 0;
-		qint64 m_waitReplyTrueCount = 0;
-		qint64 m_processIdleTrueCount = 0;
 	};
 
 	// ----------------------------------------------------------------------------------

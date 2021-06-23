@@ -121,6 +121,10 @@ class AppSignalState
 	Q_PROPERTY(bool outOfLimits READ isOutOfLimits)
 	Q_PROPERTY(bool OutOfLimits READ isOutOfLimits)
 
+	/// \brief Tunable signal value is equal to tuningDefaultValue
+	Q_PROPERTY(bool tuningDefault READ isTuningDefault)
+	Q_PROPERTY(bool TuningDefault READ isTuningDefault)
+
 public:
 	AppSignalState() = default;
 	AppSignalState(const AppSignalState&) = default;
@@ -144,6 +148,7 @@ public:
 	[[nodiscard]] bool isAboveHighLimit() const;
 	[[nodiscard]] bool isBelowLowLimit() const;
 	[[nodiscard]] bool isOutOfLimits() const;		//  isAboveHighLimit() || isBelowLowLimit()
+	[[nodiscard]] bool isTuningDefault() const;
 
 	void save(Proto::AppSignalState* protoState);
 	Hash load(const Proto::AppSignalState& protoState);

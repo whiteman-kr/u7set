@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../AppSignalLib/AppSignalParam.h"
+#include "../AppSignalLib/TuningValue.h"
 
 namespace RtTrends
 {
@@ -111,6 +112,9 @@ private:
 	E::SignalType m_signalType = E::SignalType::Discrete;
 	E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
+
+	bool m_enableTuning = false;
+	TuningValue m_tuningDefaultValue;
 
 	double m_absCoarseAperture = 0;
 	double m_absFineAperture = 0;

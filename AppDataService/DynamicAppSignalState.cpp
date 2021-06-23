@@ -27,6 +27,9 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 	m_byteOrder = signal->byteOrder();
 	m_dataSize = signal->dataSize();
 
+	m_enableTuning = signal->enableTuning();
+	m_tuningDefaultValue = signal->tuningDefaultValue();
+
 	if (signal->hasFlagsSignals() == true)
 	{
 		static const std::vector<E::AppSignalStateFlagType> flagsTypes = E::values<E::AppSignalStateFlagType>();
@@ -265,6 +268,22 @@ bool DynamicAppSignalState::setState(const Times& time,
 				assert(false);					// bus signals should not be parsed here
 				break;
 			}
+		}
+
+		// update tuningDefault flag
+		//
+		if (m_enableTuning == true)
+		{
+			TuningValue currTuningValue;
+			currTuningValue.setValue(m_tuningDefaultValue.type(),
+									 static_cast<quint64>(value),
+									 value);
+
+			curState.flags.tuningDefault = (currTuningValue == m_tuningDefaultValue ? 1 : 0);
+		}
+		else
+		{
+			// curState.flags.tuningDefault sets to 0 in constructor of curState
 		}
 
 		// update other signal flags
