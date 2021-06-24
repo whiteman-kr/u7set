@@ -13,7 +13,7 @@ union TuningSignalStateFlags
 		quint32	writeInProgress : 1;
 		quint32 controlIsEnabled: 1;
 		quint32 writingIsEnabled: 1;
-
+		quint32 tuningDefault: 1;
 	};
 
 	quint32 all = 0;
@@ -132,6 +132,10 @@ class TuningSignalState
 	Q_PROPERTY(bool writingIsEnabled READ writingIsEnabled)
 	Q_PROPERTY(bool WritingIsEnabled READ writingIsEnabled)
 
+	/// \brief Tunable signal value is equal to tuningDefaultValue
+	Q_PROPERTY(bool tuningDefault READ isTuningDefault)
+	Q_PROPERTY(bool TuningDefault READ isTuningDefault)
+
 public:
 	TuningSignalState() = default;
 	TuningSignalState(const ::Network::TuningSignalState& message);
@@ -154,6 +158,7 @@ public:
 	bool writeInProgress() const;
 	bool controlIsEnabled() const;
 	bool writingIsEnabled() const;
+	bool isTuningDefault() const;
 
 	int writeErrorCode() const;
 	Hash writeClient() const;
