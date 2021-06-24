@@ -5,43 +5,9 @@
 // EQUIPMENTID.PropertyCaption = "TextValue";	// Set property value to text
 // EQUIPMENTID.PropertyCaption = 10;			// Set property value to num
 //
-
+// Profile Example:
 //
-// Profile example to set communiaction of IDE Simulator and AppDataService and TuningService on localhost
-//
-[Local]
-
-// Overwrites real AppDataService.AppDataReceivingIP address to loacalhost IP address
-//
-USER_APP_DATA_SERVICE_ID.AppDataReceivingIP = "127.0.0.1";
-
-// Sets AppDataService.AppDataReceivingNetmask to prevent 'different Netmask error' of real LMs AppDataIP addresses and
-// overwritten AppDataService.AppDataReceivingIP address
-//
-USER_APP_DATA_SERVICE_ID.AppDataReceivingNetmask = "0.0.0.0";
-
-// Overwrites real TuningService.TuningDataIP address to loacalhost IP address
-//
-USER_TUNING_SERVICE_ID.TuningDataIP = "127.0.0.1";
-
-// Sets TuningService.TuningDataNetmask property to prevent 'different Netmask error' of real LMs TuningDataIP and
-// overwritten TuningService.TuningDataIP
-//
-USER_TUNING_SERVICE_ID.TuningDataNetmask = "0.0.0.0";
-
-// Sets Simulator tuning interface IP address to localhost.
-// Usually this is not required since 127.0.0.1 is a default value of this property
-//
-USER_TUNING_SERVICE_ID.TuningSimIP = "127.0.0.1";
-
-// To run communication of IDE Simulator and AppDataService and TuningService on localhost next steps should be done:
-//
-// 1) In cmd line of CfgService specify parameters: -mode=simulation -profile=Local.
-// 2) Run CfgService, AppDataService, TuningService, TuningClient, Monitor.
-// 3) Load last successful build in Simulator.
-// 4) Press 'Allow LogicModules' Application data transmittion to AppDataSrv' button on Simulator toolbar.
-// 5) Press 'Run simulation for complete project' button on Simulator toolbar.
-//	  After that states of AppData signals will be displayed in Monitor.
-// 6) Enable Tuning mode by pressing 'Arming key' and 'Tuning key' buttons on control tab of required LM
-// 7) Activate Control of required LM in TuningClient. After that TuningClient should indicate
-//	  successfull communication with selected LM and display valid values of tunable signals.
+[TestProfile]
+SYSTEMID_WS00_ARCHS.AppDataReceivingIP = "192.168.12.254";
+SYSTEMID_WS00_ARCHS.AppDataReceivingPort = 2500;
+SYSTEMID_WS00_ARCHS.ArchiveLocation = "d:\arch2";
