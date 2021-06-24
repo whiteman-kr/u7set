@@ -9397,7 +9397,7 @@ class TuningSignalState PROTOBUF_FINAL :
   void _internal_set_writingdisabled(bool value);
   public:
 
-  // optional bool tuningDefault = 16;
+  // optional bool tuningDefault = 16 [default = false];
   bool has_tuningdefault() const;
   private:
   bool _internal_has_tuningdefault() const;
@@ -22057,7 +22057,7 @@ inline void TuningSignalState::set_writingdisabled(bool value) {
   // @@protoc_insertion_point(field_set:Network.TuningSignalState.writingDisabled)
 }
 
-// optional bool tuningDefault = 16;
+// optional bool tuningDefault = 16 [default = false];
 inline bool TuningSignalState::_internal_has_tuningdefault() const {
   bool value = (_has_bits_[0] & 0x00002000u) != 0;
   return value;

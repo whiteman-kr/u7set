@@ -476,7 +476,7 @@ message TuningSignalState
 	optional bool setSOR = 14 [default = false];
 	optional bool writingDisabled = 15 [default = false];
 
-	optional bool tuningDefault = 16;							// flag, sets to 1 if current tunable signal value is equal to tuning default value,
+	optional bool tuningDefault = 16 [default = false];							// flag, sets to 1 if current tunable signal value is equal to tuning default value,
 																// else sets to 0
 }
 
