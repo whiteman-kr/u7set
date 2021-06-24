@@ -717,6 +717,20 @@ namespace VFrame30
 		return !m_static;
 	}
 
+	QString SchemaItem::type() const
+	{
+		QString clearClassName = metaObject()->className();
+
+		auto findResult = clearClassName.lastIndexOf("::");
+		if (findResult != -1)
+		{
+			Q_ASSERT(findResult + 2 < clearClassName.size());
+			clearClassName = clearClassName.mid(findResult + 2);
+		}
+
+		return clearClassName;
+	}
+
 	bool SchemaItem::isFblItemRect() const noexcept
 	{
 		return dynamic_cast<const FblItemRect*>(this) != nullptr;
@@ -873,6 +887,14 @@ namespace VFrame30
 		return result;
 	}
 
+	void SchemaItem::addTag(QString tag)
+	{
+		if (hasTag(tag) == false)
+		{
+			m_tags.append(tag);
+		}
+	}
+
 	void SchemaItem::setTags(QString tags)
 	{
 		//tags.replace(';', QChar::LineFeed);
@@ -912,7 +934,25 @@ namespace VFrame30
 
 	bool SchemaItem::hasTag(QString tag) const
 	{
-		return m_tags.contains(tag);
+		bool has = m_tags.contains(tag);
+		if (has == true)
+		{
+			return has;
+		}
+
+		// Implicit tag is item type (SchemaItemRect, SchemaItemInput, etc...)
+		//
+		const QString className = metaObject()->className();
+		QStringRef clearClassName;
+
+		auto findResult = className.lastIndexOf("::");
+		if (findResult != -1)
+		{
+			Q_ASSERT(findResult + 2 < className.size());
+			clearClassName = className.midRef(findResult + 2);
+		}
+
+		return clearClassName.compare(tag, Qt::CaseInsensitive) == 0;
 	}
 
 	QString SchemaItem::label() const

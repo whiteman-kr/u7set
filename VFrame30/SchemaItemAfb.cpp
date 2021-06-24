@@ -29,6 +29,11 @@ namespace VFrame30
 		auto precisionProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, SchemaItemAfb::precision, SchemaItemAfb::setPrecision);
 		precisionProp->setCategory(PropertyNames::functionalCategory);
 
+		// Add tags for scripting
+		//
+		addTag("ufb");
+		addTag(fblElement.caption());
+
 		// Create input output signals in VFrame30::FblEtem
 		//
 		updateAfbElement(fblElement, errorMsg);
