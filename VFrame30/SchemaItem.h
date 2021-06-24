@@ -116,6 +116,9 @@ namespace VFrame30
 		Q_PROPERTY(QStringList tags READ tagsAsList)
 		Q_PROPERTY(QStringList Tags READ tagsAsList)
 
+		/// \brief Item's type as a string, e.g. SchemaItemInput, SchemaItemUfb, SchemaItemAfb, SchemaItemLine, etc..
+		Q_PROPERTY(QString type  READ type)
+
 	protected:
 		SchemaItem();
 
@@ -252,6 +255,8 @@ namespace VFrame30
 		bool IsStatic() const noexcept;
 		bool IsDynamic() const noexcept;
 
+		QString type() const;
+
 		bool isFblItemRect() const noexcept;
 		FblItemRect* toFblItemRect();
 		const FblItemRect* toFblItemRect() const;
@@ -306,10 +311,11 @@ namespace VFrame30
 		[[nodiscard]] QString tagsAsString() const;
 		[[nodiscard]] QStringList tagsAsList() const;
 
+		void addTag(QString tag);
 		void setTags(QString tags);
 		void setTagsList(const QStringList& tags);
 
-		/// \brief Check if SchemaItem has specified tag.
+		/// \brief Check if SchemaItem has specified tag. There is an implicit tag that is the type of the item, e.g. SchemaItemInput, SchemaItemUfb, SchemaItemAfb, SchemaItemLine, etc..
 		Q_INVOKABLE	bool hasTag(QString tag) const;
 
 		QString label() const ;

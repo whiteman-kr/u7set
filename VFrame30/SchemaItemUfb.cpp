@@ -41,6 +41,11 @@ namespace VFrame30
 			return;
 		}
 
+		// Add UfbSchemaID as tag, it's useful for scripting
+		//
+		addTag("ufb");
+		addTag(ufbSchema->schemaId());
+
 		// Create input output signals in VFrame30::FblEtem
 		//
 		updateUfbElement(ufbSchema, errorMsg);
