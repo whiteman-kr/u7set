@@ -1,6 +1,6 @@
 #include "MonitorMainWindow.h"
 #include "MonitorSchemaWidget.h"
-#include "MonitorView.h"
+#include "MonitorSchemaView.h"
 #include "MonitorSchemaManager.h"
 #include "MonitorSignalInfo.h"
 #include "../VFrame30/SchemaItemSignal.h"
@@ -24,7 +24,7 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 										 VFrame30::TuningController* tuningController,
                                          VFrame30::LogController* logController,
 										 QWidget* parent) :
-    VFrame30::ClientSchemaWidget(new MonitorView{schemaManager, appSignalController, tuningController, logController},
+    VFrame30::ClientSchemaWidget(new MonitorSchemaView{schemaManager, appSignalController, tuningController, logController},
 								 schema,
 								 schemaManager,
 								 parent)
@@ -294,16 +294,16 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 	return;
 }
 
-MonitorView* MonitorSchemaWidget::monitorSchemaView()
+MonitorSchemaView* MonitorSchemaWidget::monitorSchemaView()
 {
-	MonitorView* result = dynamic_cast<MonitorView*>(schemaView());
+	MonitorSchemaView* result = dynamic_cast<MonitorSchemaView*>(schemaView());
 	Q_ASSERT(result);
 	return result;
 }
 
-const MonitorView* MonitorSchemaWidget::monitorSchemaView() const
+const MonitorSchemaView* MonitorSchemaWidget::monitorSchemaView() const
 {
-	const MonitorView* result = dynamic_cast<const MonitorView*>(schemaView());
+	const MonitorSchemaView* result = dynamic_cast<const MonitorSchemaView*>(schemaView());
 	Q_ASSERT(result);
 	return result;
 }

@@ -9,17 +9,17 @@ namespace VFrame30
 	class TuningController;
 }
 
-class MonitorView : public VFrame30::ClientSchemaView
+class MonitorSchemaView : public VFrame30::ClientSchemaView
 {
 	Q_OBJECT
 
 public:
-	explicit MonitorView(MonitorSchemaManager* schemaManager,
+	explicit MonitorSchemaView(MonitorSchemaManager* schemaManager,
 						 VFrame30::AppSignalController* appSignalController,
 						 VFrame30::TuningController* tuningController,
 						 VFrame30::LogController* logController,
 						 QWidget* parent = nullptr);
-	virtual ~MonitorView();
+	virtual ~MonitorSchemaView();
 
 protected:
 	virtual void paintEvent(QPaintEvent* event) override;

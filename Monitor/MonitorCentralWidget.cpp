@@ -391,6 +391,13 @@ void MonitorCentralWidget::slot_resetSchema()
 			}
 		}
 
+		// Reload schema in widget
+		//
+		std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(schemaToLoad);
+		static_cast<VFrame30::BaseSchemaWidget*>(tabPage)->setSchema(schema, false);		// cast to BaseSchemaWidget as this function is hidden in ClientSchemaWidget
+
+		// Set schema for client widget
+		//
 		tabPage->setSchema(schemaToLoad, QStringList{});
 
 		tabPage->clientSchemaView()->deleteControlWidgets();		// deleteControlWidgets after loading new schema, as it will delete old widgets and later they will be created

@@ -6,7 +6,7 @@
 #include "../VFrame30/TuningController.h"
 
 
-class MonitorView;
+class MonitorSchemaView;
 struct SchemaHistoryItem;
 
 
@@ -48,8 +48,8 @@ public slots:
 	// Properties
 	//
 public:
-	MonitorView* monitorSchemaView();
-	const MonitorView* monitorSchemaView() const;
+	MonitorSchemaView* monitorSchemaView();
+	const MonitorSchemaView* monitorSchemaView() const;
 
 	MonitorSchemaManager* schemaManager();
 	const MonitorSchemaManager* schemaManager() const;

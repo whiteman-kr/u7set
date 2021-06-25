@@ -77,6 +77,7 @@ SOURCES += main.cpp \
     MonitorAppSettings.cpp \
     MonitorMainWindow.cpp \
 	MonitorCentralWidget.cpp \
+    MonitorSchemaView.cpp \
     MonitorSignalInfo.cpp \
     MonitorSignalSnapshot.cpp \
     DialogSettings.cpp \
@@ -89,7 +90,6 @@ SOURCES += main.cpp \
     ../lib/Ui/DialogSignalInfo.cpp \
     ../lib/Ui/DialogSignalSearch.cpp \
     DialogColumns.cpp \
-    MonitorView.cpp \
     Trend/MonitorTrends.cpp \
     MonitorArchive.cpp \
     DialogChooseArchiveSignals.cpp \
@@ -132,6 +132,7 @@ HEADERS  += \
     MonitorAppSettings.h \
     MonitorMainWindow.h \
     MonitorCentralWidget.h \
+    MonitorSchemaView.h \
     MonitorSignalInfo.h \
     MonitorSignalSnapshot.h \
 	Stable.h \
@@ -146,7 +147,6 @@ HEADERS  += \
     ../lib/Ui/DialogSignalInfo.h \
     ../lib/Ui/DialogSignalSearch.h \
     DialogColumns.h \
-    MonitorView.h \
     Trend/MonitorTrends.h \
     MonitorArchive.h \
     DialogChooseArchiveSignals.h \

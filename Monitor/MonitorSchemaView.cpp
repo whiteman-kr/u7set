@@ -1,4 +1,4 @@
-#include "MonitorView.h"
+#include "MonitorSchemaView.h"
 #include "MonitorSchemaManager.h"
 #include "MonitorAppSettings.h"
 #include "../lib/AppSignalManager.h"
@@ -10,7 +10,7 @@
 
 // MonitorView
 //
-MonitorView::MonitorView(MonitorSchemaManager* schemaManager,
+MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 						 VFrame30::AppSignalController* appSignalController,
 						 VFrame30::TuningController* tuningController,
 						 VFrame30::LogController* logController,
@@ -24,24 +24,24 @@ MonitorView::MonitorView(MonitorSchemaManager* schemaManager,
 	Q_ASSERT(schemaManager);
 	Q_ASSERT(schemaManager->monitorConfigController());
 
-	connect(schemaManager->monitorConfigController(), &MonitorConfigController::configurationArrived, this, &MonitorView::configurationArrived);
+	connect(schemaManager->monitorConfigController(), &MonitorConfigController::configurationArrived, this, &MonitorSchemaView::configurationArrived);
 
 	return;
 }
 
 
-MonitorView::~MonitorView()
+MonitorSchemaView::~MonitorSchemaView()
 {
 	return;
 }
 
-void MonitorView::paintEvent(QPaintEvent* event)
+void MonitorSchemaView::paintEvent(QPaintEvent* event)
 {
 	this->setInfoMode(MonitorAppSettings::instance().showItemsLabels());
 	return ClientSchemaView::paintEvent(event);
 }
 
-void MonitorView::configurationArrived(ConfigSettings configuration)
+void MonitorSchemaView::configurationArrived(ConfigSettings configuration)
 {
 	// --
 	//
@@ -66,12 +66,14 @@ void MonitorView::configurationArrived(ConfigSettings configuration)
 		return;
 	}
 
+	// --
+	//
 	runScript(scriptValue, "run onConfigurationArrivedScript", true);
 
 	return;
 }
 
-MonitorSchemaManager* MonitorView::monitorSchemaManager()
+MonitorSchemaManager* MonitorSchemaView::monitorSchemaManager()
 {
 	MonitorSchemaManager* result = dynamic_cast<MonitorSchemaManager*>(schemaManager());
 	Q_ASSERT(result);
@@ -79,7 +81,7 @@ MonitorSchemaManager* MonitorView::monitorSchemaManager()
 	return result;
 }
 
-const MonitorSchemaManager* MonitorView::monitorSchemaManager() const
+const MonitorSchemaManager* MonitorSchemaView::monitorSchemaManager() const
 {
 	const MonitorSchemaManager* result = dynamic_cast<const MonitorSchemaManager*>(schemaManager());
 	Q_ASSERT(result);
