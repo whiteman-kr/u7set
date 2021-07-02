@@ -493,9 +493,15 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 		// Modify logon mode
 
-		theMainWindow->userManager()->setConfiguration(theConfigSettings.clientSettings.getUsersAccounts(),
-													   theConfigSettings.clientSettings.loginPerOperation == true ? LogonMode::PerOperation : LogonMode::Permanent,
-													   theConfigSettings.clientSettings.loginSessionLength);
+		if (theMainWindow->userManager()->isLoggedIn() == true)
+		{
+			theMainWindow->userManager()->logout();
+		}
+
+		theMainWindow->userManager()->setConfiguration(theConfigSettings.clientSettings.tuningLogin,
+													   theConfigSettings.clientSettings.getUsersAccounts(),
+													   theConfigSettings.clientSettings.loginPerOperation,
+													   theConfigSettings.clientSettings.tuningSessionTimeout);
 
 		emit configurationArrived();
 	}

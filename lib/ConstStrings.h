@@ -90,9 +90,6 @@ namespace EquipmentPropNames
 	inline const QString STATUS_FLAG_FUNCTION("StatusFlagFunction");
 	inline const QString SHOW_SOR("ShowSOR");
 	inline const QString USE_ACCESS_FLAG("UseAccessFlag");
-	inline const QString LOGIN_PER_OPERATION("LoginPerOperation");
-	inline const QString USER_ACCOUNTS("UsersAccounts");
-	inline const QString LOGIN_SESSION_LENGTH("LoginSessionLength");
 	inline const QString FILTER_BY_EQUIPMENT("FilterByEquipment");
 	inline const QString FILTER_BY_SCHEMA("FilterBySchema");
 
@@ -152,6 +149,14 @@ namespace EquipmentPropNames
 	inline const QString TUNING_DEFAULT_VALUE("TuningDefaultValue");
 	inline const QString TUNING_LOW_BOUND("TuningLowBound");
 	inline const QString TUNING_HIGH_BOUND("TuningHighBound");
+
+
+	// Tuning Authorization properties
+	//
+	inline const QString TUNING_LOGIN("TuningLogin");
+	inline const QString TUNING_USER_ACCOUNTS("TuningUserAccounts");
+	inline const QString TUNING_SESSION_TIMEOUT("TuningSessionTimeout");
+	inline const QString LOGIN_PER_OPERATION("LoginPerOperation");
 }
 
 namespace XmlElement
@@ -190,6 +195,8 @@ namespace XmlElement
 	inline const QString SETTINGS_SET("SettingsSet");
 
 	inline const QString APP_DATA_SERVICES("AppDataServices");
+
+	inline const QString SECURITY("TuningSecurity");
 }
 
 namespace XmlAttribute

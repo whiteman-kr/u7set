@@ -5,7 +5,7 @@
 #include "../lib/Tuning/TuningLog.h"
 #include "../UtilsLib/LogFile.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "UserManager.h"
+#include "../lib/Tuning/TuningUserManager.h"
 
 
 class TuningClientTcpClient : public TuningTcpClient, public TcpClientStatistics
@@ -16,7 +16,7 @@ public:
 						  TuningSignalManager* signalManager,
 						  Log::LogFile* log,
 						  TuningLog::TuningLog* tuningLog,
-						  UserManager* userManager);
+						  TuningUserManager* userManager);
 
 	virtual void writeLogAlert(const QString& message) override;
 	virtual void writeLogError(const QString& message) override;
@@ -44,6 +44,6 @@ private:
 
 	TuningLog::TuningLog* m_tuningLog = nullptr;
 
-	UserManager* m_userManager = nullptr;
+	TuningUserManager* m_userManager = nullptr;
 
 };

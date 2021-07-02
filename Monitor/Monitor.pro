@@ -67,6 +67,7 @@ SOURCES += main.cpp \
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
     ../lib/SoftwareSettings.cpp \
+    ../lib/Tuning/TuningUserManager.cpp \
     ../lib/Ui/DialogSignalSnapshot.cpp \
     ../lib/Ui/DialogTcpStatistics.cpp \
     ../lib/Ui/DragDropHelper.cpp \
@@ -122,6 +123,7 @@ HEADERS  += \
     ../lib/ConstStrings.h \
 	../UtilsLib/ILogFile.h \
     ../lib/SoftwareSettings.h \
+    ../lib/Tuning/TuningUserManager.h \
     ../lib/Ui/DialogSignalSnapshot.h \
     ../lib/Ui/DialogTcpStatistics.h \
     ../lib/Ui/DragDropHelper.h \
@@ -210,6 +212,11 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 #
 LIBS += -L$$DESTDIR
 LIBS += -L.
+
+# Authorization
+#
+win32:LIBS += -lAdvapi32
+unix:LIBS += -lpam -lpam_misc
 
 # VFrame30 library
 #

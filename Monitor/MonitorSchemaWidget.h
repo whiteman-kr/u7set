@@ -4,11 +4,26 @@
 #include "../VFrame30/ClientSchemaWidget.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
+#include "../lib/Tuning/TuningUserManager.h"
 
 
 class MonitorSchemaView;
 struct SchemaHistoryItem;
 
+class MonitorTuningController : public VFrame30::TuningController
+{
+	Q_OBJECT
+
+public:
+	MonitorTuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, TuningUserManager* tuningUserManager, QWidget* parent = nullptr);
+
+protected:
+	virtual bool checkTuningAccess() const override;
+
+private:
+	QWidget* m_parentWidget = nullptr;
+	TuningUserManager* m_tuningUserManager = nullptr;
+};
 
 //
 //

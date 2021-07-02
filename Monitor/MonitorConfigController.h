@@ -50,6 +50,10 @@ struct ConfigSettings
 	QStringList tuningSources;
 	ConfigConnection tuningService;
 
+	bool tuningLogin = false;
+	QStringList tuningUserAccounts;
+	int tuningSessionTimeout = 0;
+
 	QString globalScript;
 	QString onConfigurationArrivedScript;
 	QImage logoImage;

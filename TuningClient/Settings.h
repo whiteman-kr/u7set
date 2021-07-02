@@ -2,7 +2,7 @@
 #define SETTINGS_H
 
 #include "../CommonLib/HostAddressPort.h"
-#include "UserManager.h"
+#include "../lib/Tuning/TuningUserManager.h"
 #include "../lib/Tuning/TuningTcpClient.h"
 #include "../lib/SoftwareSettings.h"
 

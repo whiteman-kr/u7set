@@ -24,5 +24,7 @@
         <file>Images/CloseButtonGray.svg</file>
         <file>Images/SchemaList.svg</file>
         <file>Images/SchemaFolder.svg</file>
+        <file>Images/KeyOff.svg</file>
+        <file>Images/KeyOn.svg</file>
     </qresource>
 </RCC>

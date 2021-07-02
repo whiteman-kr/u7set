@@ -641,6 +641,10 @@ bool MonitorConfigController::applyCurSettingsProfile(std::shared_ptr<const Soft
 	{
 		outSetting->tuningService = ConfigConnection(ms.tuningServiceID, ms.tuningServiceIP, ms.tuningServicePort);
 		outSetting->tuningSources = ms.getTuningSources();
+
+		outSetting->tuningLogin = ms.tuningLogin;
+		outSetting->tuningUserAccounts = ms.getUsersAccounts();
+		outSetting->tuningSessionTimeout = ms.tuningSessionTimeout;
 	}
 	else
 	{
@@ -648,6 +652,10 @@ bool MonitorConfigController::applyCurSettingsProfile(std::shared_ptr<const Soft
 		//
 		outSetting->tuningService = ConfigConnection();
 		outSetting->tuningSources.clear();
+
+		outSetting->tuningLogin = false;
+		outSetting->tuningUserAccounts.clear();
+		outSetting->tuningSessionTimeout = 0;
 	}
 
 	return true;

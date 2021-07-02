@@ -6,7 +6,8 @@
 #include "TuningWorkspace.h"
 #include "SchemasWorkspace.h"
 #include "ConfigController.h"
-#include "UserManager.h"
+#include "LogonWorkspace.h"
+#include "../lib/Tuning/TuningUserManager.h"
 #include "DialogTuningSources.h"
 #include "../lib/Ui/DialogTcpStatistics.h"
 
@@ -25,7 +26,7 @@ public:
 	explicit MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = 0);
 	~MainWindow();
 
-	UserManager* userManager();
+	TuningUserManager* userManager();
 
 private:
 	void createActions();
@@ -56,7 +57,7 @@ private:
 
 	QLabel* m_noWorkspaceLabel = nullptr;
 
-	UserManager m_userManager;
+	TuningUserManager m_userManager;
 public:
 
 	int m_mainWindowTimerId_250ms = -1;

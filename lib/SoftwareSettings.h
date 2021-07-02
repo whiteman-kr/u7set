@@ -504,6 +504,10 @@ public:
 	int tuningServicePort = 0;
 	QString tuningSources;
 
+	bool tuningLogin = false;
+	QString tuningUserAccounts;
+	int tuningSessionTimeout = 0;
+
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
@@ -515,6 +519,7 @@ private:
 public:
 	QStringList getSchemaTags() const;
 	QStringList getTuningSources() const;
+	QStringList getUsersAccounts() const;
 
 	void clear();
 };
@@ -555,8 +560,9 @@ public:
 	int statusFlagFunction = 0;	// LmStatusFlagMode::None
 
 	bool loginPerOperation = false;
-	QString usersAccounts;
-	int loginSessionLength = 120;
+	bool tuningLogin = false;
+	QString tuningUserAccounts;
+	int tuningSessionTimeout = 120;
 
 	bool filterByEquipment = true;
 	bool filterBySchema = true;

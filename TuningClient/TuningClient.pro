@@ -60,7 +60,9 @@ SOURCES +=\
     ../lib/ClientBehavior.cpp \
     ../lib/ComparatorSet.cpp \
     ../lib/SoftwareSettings.cpp \
+    ../lib/Tuning/TuningUserManager.cpp \
     ../lib/Ui/DialogTcpStatistics.cpp \
+    LogonWorkspace.cpp \
 	MainWindow.cpp \
     TuningPage.cpp \
     Settings.cpp \
@@ -71,10 +73,8 @@ SOURCES +=\
     DialogSettings.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
-    UserManager.cpp \
     DialogProperties.cpp \
     ../lib/Ui/DialogSourceInfo.cpp \
-    DialogPassword.cpp \
     Main.cpp \
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/Tuning/TuningFilterEditor.cpp \
@@ -105,7 +105,9 @@ HEADERS  += MainWindow.h \
     ../lib/ConstStrings.h \
 	../UtilsLib/ILogFile.h \
     ../lib/SoftwareSettings.h \
+    ../lib/Tuning/TuningUserManager.h \
     ../lib/Ui/DialogTcpStatistics.h \
+    LogonWorkspace.h \
     Stable.h \
     TuningPage.h \
     Settings.h \
@@ -117,9 +119,7 @@ HEADERS  += MainWindow.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../CommonLib/PropertyObject.h \
-    UserManager.h \
     DialogProperties.h \
-    DialogPassword.h \
     Main.h \
     ../lib/Tuning/TuningFilter.h \
     ../lib/Tuning/TuningFilterEditor.h \
@@ -147,7 +147,6 @@ HEADERS  += MainWindow.h \
 
 FORMS    += \
     DialogSettings.ui \
-    DialogPassword.ui \
     SwitchFiltersPageOptions.ui \
     TuningSignalInfo.ui
 

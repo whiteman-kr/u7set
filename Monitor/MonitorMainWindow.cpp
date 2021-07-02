@@ -64,7 +64,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	// Creating signals controllers for VFrame30
 	//
 	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(&theSignals);
-	m_tuningController = std::make_unique<VFrame30::TuningController>(&theTuningSignals, nullptr);
+	m_tuningController = std::make_unique<MonitorTuningController>(&theTuningSignals, nullptr, &m_tuningUserManager);
 	m_logController = std::make_unique<VFrame30::LogController>(&m_LogFile);
 
 	// --
@@ -82,6 +82,9 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	createMenus();
 	createToolBars();
 	createStatusBar();
+
+	connect(&m_tuningUserManager, &TuningUserManager::loggedIn, this, &MonitorMainWindow::slot_loggedIn);
+	connect(&m_tuningUserManager, &TuningUserManager::loggedOut, this, &MonitorMainWindow::slot_loggedOut);
 
 	// --
 	//
@@ -187,6 +190,26 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 		updateStatusBar();
 	}
 
+	// Show tuning session remaining time and log out if it expires
+	//
+	if (m_tuningUserManager.isLoggedIn() == true)
+	{
+		if (m_tuningUserManager.tuningSessionTimeout() > 0)
+		{
+			int s = m_tuningUserManager.logoutPendingSeconds();
+
+			QTime logoutTime(0, 0, 0);
+			logoutTime = logoutTime.addSecs(s);
+
+			m_loginUserTimeoutAction->setText(m_tuningUserManager.loggedInUser() + "\n" + logoutTime.toString("hh:mm:ss"));
+
+			if (s <= 0)
+			{
+				m_tuningUserManager.logout();
+			}
+		}
+	}
+
 	return;
 }
 
@@ -259,6 +282,58 @@ void MonitorMainWindow::restoreWindowState()
 	return;
 }
 
+void MonitorMainWindow::showTuningLoginControls()
+{
+
+
+	// Show/hide login controls
+	//
+	if (m_configController.configuration().tuningEnabled == true && m_tuningUserManager.tuningLogin() == true)
+	{
+		m_loginAction->setVisible(true);
+		m_loginUserTimeoutAction->setVisible(true);
+
+		if (m_tuningUserManager.tuningSessionTimeout() > 0)
+		{
+			m_loginUserTimeoutAction->setText(QString(tr("Logged Out\n00:00:00")));
+			m_loginUserTimeoutAction->setToolTip(tr("Click to re-login with current user"));
+		}
+		else
+		{
+			m_loginUserTimeoutAction->setText(QString(tr("Logged Out")));
+			m_loginUserTimeoutAction->setToolTip(tr("Click to log out current user"));
+		}
+
+		// Adjust m_loginUserNameLabel width to have place for all usernames
+		//
+		int maxUsernameSpace = -1;
+
+		QWidget* loginUserTimeoutActionWidget = m_toolBar->widgetForAction(m_loginUserTimeoutAction);
+		if (loginUserTimeoutActionWidget == nullptr)
+		{
+			Q_ASSERT(loginUserTimeoutActionWidget);
+		}
+		else
+		{
+			for (const QString& userName : m_tuningUserManager.tuningUserAccounts())
+			{
+				int space = loginUserTimeoutActionWidget->fontMetrics().horizontalAdvance(userName);
+				if (space > maxUsernameSpace)
+				{
+					maxUsernameSpace = space;
+				}
+			}
+
+			loginUserTimeoutActionWidget->setFixedWidth(maxUsernameSpace + 5);
+		}
+	}
+	else
+	{
+		m_loginAction->setVisible(false);
+		m_loginUserTimeoutAction->setVisible(false);
+	}
+}
+
 void MonitorMainWindow::showLogo()
 {
 	Q_ASSERT(m_logoLabel);
@@ -267,6 +342,13 @@ void MonitorMainWindow::showLogo()
 	{
 		m_logoLabel->clear();
 
+		return;
+	}
+
+	static bool prevShowLogo = false;
+
+	if (prevShowLogo == MonitorAppSettings::instance().showLogo())
+	{
 		return;
 	}
 
@@ -291,6 +373,8 @@ void MonitorMainWindow::showLogo()
 		logo = logo.scaledToHeight(logoMaxHeight, Qt::SmoothTransformation);
 	}
 
+	prevShowLogo = MonitorAppSettings::instance().showLogo();
+
 	// Show logo if it was enabled in settings
 	//
 	if (MonitorAppSettings::instance().showLogo() == true)
@@ -301,6 +385,11 @@ void MonitorMainWindow::showLogo()
 	{
 		m_logoLabel->clear();
 	}
+
+
+	m_logoSeparator->setVisible(MonitorAppSettings::instance().showLogo() == true &&
+								 m_configController.configuration().tuningEnabled == true &&
+								 m_tuningUserManager.tuningLogin() == true);
 
 	return;
 }
@@ -452,6 +541,16 @@ void MonitorMainWindow::createActions()
 	m_findSignalAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
 	connect(m_findSignalAction, &QAction::triggered, this, &MonitorMainWindow::slot_findSignal);
 
+	m_loginAction = new QAction(tr("Login"), this);
+	m_loginAction->setToolTip(tr("Log in to change tunable values"));
+	m_loginAction->setIcon(QIcon(":/Images/Images/KeyOff.svg"));
+	m_loginAction->setEnabled(true);
+	connect(m_loginAction, &QAction::triggered, this, &MonitorMainWindow::slot_login);
+
+	m_loginUserTimeoutAction = new QAction(tr("Logged Out"), this);
+	m_loginUserTimeoutAction->setEnabled(false);
+	connect(m_loginUserTimeoutAction, &QAction::triggered, this, &MonitorMainWindow::slot_reLogin);
+
 	return;
 }
 
@@ -563,6 +662,17 @@ void MonitorMainWindow::createToolBars()
 	m_spacer = new QWidget(this);
 	m_spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 	m_toolBar->addWidget(m_spacer);
+
+	// Login action and widget
+	//
+	m_toolBar->addAction(m_loginAction);
+	m_loginAction->setVisible(false);
+
+	m_toolBar->addAction(m_loginUserTimeoutAction);
+	m_loginUserTimeoutAction->setVisible(false);
+
+	m_logoSeparator = m_toolBar->addSeparator();
+	m_logoSeparator->setVisible(false);
 
 	// Create logo for toolbar
 	//
@@ -923,33 +1033,6 @@ void MonitorMainWindow::debug()
 #endif	// QT_DEBUG
 }
 
-void MonitorMainWindow::activateRequested()
-{
-	// To move window to top, add WindowStaysOnTopHint flag. In linux X11Bypass tag required
-	// to do this. When flags added - activateWindow and show it to apply changes. After that, window
-	// will be every time on top, so we need remove WindowStaysOnTop flag, apply changes, and only then remove
-	// X11Bypass flag.
-	//
-//	this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
-//	this->activateWindow();
-//	this->show();
-//	this->setWindowFlags(this->windowFlags() & (~Qt::WindowStaysOnTopHint));
-//	this->activateWindow();
-//	this->show();
-//	this->setWindowFlags(this->windowFlags() & (~Qt::X11BypassWindowManagerHint));
-//	this->activateWindow();
-//	this->show();
-
-	// WARNING: Windows prevents from stealing focus, to avoid it set registry key
-	// Computer\HKEY_CURRENT_USER\Control Panel\Desktop\ForegroundLockTimeout to 0
-	// Restart computer
-	//
-	this->activateWindow();
-	this->show();
-
-	return;
-}
-
 void MonitorMainWindow::slot_archive()
 {
 	qDebug() << "";
@@ -1169,6 +1252,24 @@ void MonitorMainWindow::slot_updateActions(bool schemaWidgetSelected)
 
 void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 {
+	// Log out from tuning
+	//
+	if (m_tuningUserManager.isLoggedIn() == true)
+	{
+		m_tuningUserManager.logout();
+	}
+
+	// Refresh TuningUserManager configuration
+	//
+	m_tuningUserManager.setConfiguration(configuration.tuningLogin,
+								   configuration.tuningUserAccounts,
+								   false/*loginPerOperation*/,
+								   configuration.tuningSessionTimeout);
+
+	showTuningLoginControls();
+
+	// Close TuningTcpClient
+	//
 	if (m_tuningTcpClientThread != nullptr)
 	{
 		m_tuningController->resetTcpClient();
@@ -1180,7 +1281,7 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 		m_tuningTcpClient = nullptr;
 	}
 
-	// TuningTcpClient
+	// Create TuningTcpClient if tuning is enabled
 	//
 	if (configuration.tuningEnabled == true)
 	{
@@ -1222,6 +1323,89 @@ void MonitorMainWindow::slot_unknownClient()
 	return;
 }
 
+void MonitorMainWindow::activateRequested()
+{
+	// To move window to top, add WindowStaysOnTopHint flag. In linux X11Bypass tag required
+	// to do this. When flags added - activateWindow and show it to apply changes. After that, window
+	// will be every time on top, so we need remove WindowStaysOnTop flag, apply changes, and only then remove
+	// X11Bypass flag.
+	//
+//	this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
+//	this->activateWindow();
+//	this->show();
+//	this->setWindowFlags(this->windowFlags() & (~Qt::WindowStaysOnTopHint));
+//	this->activateWindow();
+//	this->show();
+//	this->setWindowFlags(this->windowFlags() & (~Qt::X11BypassWindowManagerHint));
+//	this->activateWindow();
+//	this->show();
+
+	// WARNING: Windows prevents from stealing focus, to avoid it set registry key
+	// Computer\HKEY_CURRENT_USER\Control Panel\Desktop\ForegroundLockTimeout to 0
+	// Restart computer
+	//
+	this->activateWindow();
+	this->show();
+
+	return;
+}
+
+void MonitorMainWindow::slot_login()
+{
+	if (m_tuningUserManager.isLoggedIn() == true)
+	{
+		m_tuningUserManager.logout();
+	}
+	else
+	{
+		m_tuningUserManager.login(this);
+	}
+}
+
+void MonitorMainWindow::slot_reLogin()
+{
+	if (m_tuningUserManager.tuningSessionTimeout() > 0 && m_tuningUserManager.isLoggedIn() == true)
+	{
+		m_tuningUserManager.reLogin(this);
+	}
+	else
+	{
+		slot_login();
+	}
+}
+
+void MonitorMainWindow::slot_loggedIn()
+{
+	m_loginAction->setIcon(QIcon(":/Images/Images/KeyOn.svg"));
+
+	m_LogFile.writeMessage(tr("Tuning logged in, username: %1.").arg(m_tuningUserManager.loggedInUser()));
+
+	if (m_tuningUserManager.tuningSessionTimeout() == 0)
+	{
+		m_loginUserTimeoutAction->setText(m_tuningUserManager.loggedInUser());
+	}
+
+	m_loginUserTimeoutAction->setEnabled(true);
+}
+
+void MonitorMainWindow::slot_loggedOut()
+{
+	m_loginAction->setIcon(QIcon(":/Images/Images/KeyOff.svg"));
+
+	m_LogFile.writeMessage(tr("Tuning logged out."));
+
+	if (m_tuningUserManager.tuningSessionTimeout() > 0)
+	{
+		m_loginUserTimeoutAction->setText(QString(tr("Logged Out\n00:00:00")));
+	}
+	else
+	{
+		m_loginUserTimeoutAction->setText(QString(tr("Logged Out")));
+	}
+
+	m_loginUserTimeoutAction->setEnabled(false);
+}
+
 MonitorConfigController* MonitorMainWindow::configController()
 {
 	return &m_configController;
@@ -1240,6 +1424,16 @@ TcpSignalClient* MonitorMainWindow::tcpSignalClient()
 const TcpSignalClient* MonitorMainWindow::tcpSignalClient() const
 {
 	return m_tcpSignalClient;
+}
+
+TuningUserManager& MonitorMainWindow::userManager()
+{
+	return m_tuningUserManager;
+}
+
+const TuningUserManager& MonitorMainWindow::userManager() const
+{
+	return m_tuningUserManager;
 }
 
 MonitorToolBar::MonitorToolBar(const QString& tittle, QWidget* parent) :

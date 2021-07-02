@@ -6,7 +6,7 @@
 namespace VFrame30
 {
 
-	TuningController::TuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QObject* parent) :
+	TuningController::TuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QWidget* parent) :
 		QObject(parent),
 		m_signalManager(signalManager),
 		m_tcpClient(tcpClient)
@@ -84,7 +84,7 @@ namespace VFrame30
 			return false;
 		}
 
-		if (writingEnabled() == false)
+		if (checkTuningAccess() == false)
 		{
 			return true;	// Access is denied, this is not an error
 		}
@@ -217,7 +217,7 @@ namespace VFrame30
 			return;
 		}
 
-		if (writingEnabled() == false)
+		if (checkTuningAccess() == false)
 		{
 			return;	// Access is denied, this is not an error
 		}
@@ -227,7 +227,7 @@ namespace VFrame30
 		return;
 	}
 
-	bool TuningController::writingEnabled() const
+	bool TuningController::checkTuningAccess() const
 	{
 		return true;
 	}

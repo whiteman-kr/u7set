@@ -76,7 +76,7 @@ namespace VFrame30
 
 	public:
 		TuningController() = delete;
-		TuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QObject* parent = nullptr);
+		TuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QWidget* parent = nullptr);
 
 		void setTcpClient(ITuningTcpClient* tcpClient);
 		void resetTcpClient();
@@ -98,7 +98,7 @@ namespace VFrame30
 		void apply();
 
 	protected:
-		virtual bool writingEnabled() const;
+		virtual bool checkTuningAccess() const;
 
 	private:
 		ITuningSignalManager* m_signalManager = nullptr;

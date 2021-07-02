@@ -50,7 +50,17 @@ namespace Builder
 			return false;
 		}
 
+		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningClientSettings>();
+
 		bool result = true;
+
+		// Check tuning users list
+		//
+		if (settings->tuningUserAccounts.split(';', Qt::SkipEmptyParts).isEmpty() == true)
+		{
+			m_log->errEQP6202(m_software->equipmentIdTemplate());
+			return false;
+		}
 
 		QStringList equipmentList;
 

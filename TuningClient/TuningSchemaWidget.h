@@ -12,10 +12,10 @@ class TuningClientTuningController : public VFrame30::TuningController
 	Q_OBJECT
 
 public:
-	TuningClientTuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QObject* parent = nullptr);
+	TuningClientTuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QWidget* parent = nullptr);
 
 protected:
-	virtual bool writingEnabled() const override;
+	virtual bool checkTuningAccess() const override;
 };
 
 

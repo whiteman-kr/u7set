@@ -2,7 +2,7 @@
 #include "MainWindow.h"
 #include <QApplication>
 #include "Settings.h"
-#include "UserManager.h"
+#include "../lib/Tuning/TuningUserManager.h"
 #include <QCommandLineParser>
 #include "../VFrame30/VFrame30Library.h"
 

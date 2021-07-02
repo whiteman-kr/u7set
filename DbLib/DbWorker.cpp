@@ -376,6 +376,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0354.sql", "Upgrade to version 354, OCM RxAppDataOffset set to 0, RxAppDataSize set to 2560, Monitor tags set to applogic monitor"},
 	{":/DatabaseUpgrade/Upgrade0355.sql", "Upgrade to version 355, Added to LM1-SR04 AFBs with sync in/outs : integrator, deriv, triggers, latches, time counters, comparators, damper"},
 	{":/DatabaseUpgrade/Upgrade0356.sql", "Upgrade to version 356, LM1-SR04, added AfbComponent DAMP FP syn in/out pins, required for simulator"},
+	{":/DatabaseUpgrade/Upgrade0357.sql", "Upgrade to version 357, TuningSecurity properties have been modified in TuningClient and added to Monitor preset"},
 };
 
 int DbWorker::counter = 0;

@@ -13,6 +13,35 @@
 #include "../VFrame30/MacrosExpander.h"
 
 //
+//MonitorTuningController
+//
+
+MonitorTuningController::MonitorTuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, TuningUserManager* tuningUserManager, QWidget* parent):
+	VFrame30::TuningController(signalManager, tcpClient, parent),
+	m_tuningUserManager(tuningUserManager),
+	m_parentWidget(parent)
+{
+
+}
+
+
+bool MonitorTuningController::checkTuningAccess() const
+{
+	if (m_tuningUserManager == nullptr)
+	{
+		Q_ASSERT(m_tuningUserManager);
+		return false;
+	}
+
+	if (m_tuningUserManager->login(m_parentWidget) == false)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+//
 //
 //	MonitorSchemaWidget
 //

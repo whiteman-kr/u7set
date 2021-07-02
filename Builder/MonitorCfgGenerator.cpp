@@ -64,10 +64,19 @@ namespace Builder
 
 		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 
-		// Generate tuning signals file
-		//
 		if (settings->tuningEnabled == true)
 		{
+			// Check tuning users list
+			//
+			if (settings->tuningLogin == true &&
+				settings->tuningUserAccounts.split(';', Qt::SkipEmptyParts).isEmpty() == true)
+			{
+				m_log->errEQP6202(m_software->equipmentIdTemplate());
+				return false;
+			}
+
+			// Generate tuning signals file
+			//
 			result &= writeTuningSignals();
 		}
 

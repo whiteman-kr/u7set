@@ -121,7 +121,7 @@ MainWindow::~MainWindow()
 	delete m_tuningLog;
 }
 
-UserManager* MainWindow::userManager()
+TuningUserManager* MainWindow::userManager()
 {
 	return &m_userManager;
 }
@@ -517,7 +517,7 @@ void MainWindow::createWorkspace()
 
 	// Create login workspace
 
-	if (m_userManager.logonMode() == LogonMode::Permanent && m_userManager.users().empty() == false)
+	if (m_userManager.loginPerOperation() == false && m_userManager.tuningUserAccounts().empty() == false)
 	{
 		m_logonWorkspace = new LogonWorkspace(&m_userManager, this);
 

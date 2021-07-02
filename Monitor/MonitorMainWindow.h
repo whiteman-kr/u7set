@@ -13,6 +13,7 @@
 #include "../UtilsLib/LogFile.h"
 #include "../lib/Ui/DialogAlert.h"
 #include "../lib/Ui/DialogTcpStatistics.h"
+#include "../lib/Tuning/TuningUserManager.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;
@@ -50,6 +51,7 @@ protected:
 	void saveWindowState();
 	void restoreWindowState();
 
+	void showTuningLoginControls();
 	void showLogo();
 
 	// Private methods
@@ -100,6 +102,12 @@ protected:
 	//void checkMonitorSingleInstance();
 	void activateRequested();
 
+	void slot_login();
+	void slot_reLogin();
+
+	void slot_loggedIn();
+	void slot_loggedOut();
+
 	// Properties
 	//
 public:
@@ -108,6 +116,9 @@ public:
 
 	TcpSignalClient* tcpSignalClient();
 	const TcpSignalClient* tcpSignalClient() const;
+
+	TuningUserManager& userManager();
+	const TuningUserManager& userManager() const;
 
 protected:
 
@@ -120,7 +131,7 @@ private:
 	MonitorSchemaManager m_schemaManager;
 
 	std::unique_ptr<VFrame30::AppSignalController> m_appSignalController;
-	std::unique_ptr<VFrame30::TuningController> m_tuningController;
+	std::unique_ptr<MonitorTuningController> m_tuningController;
 	std::unique_ptr<VFrame30::LogController> m_logController;
 
 	TcpSignalClient* m_tcpSignalClient = nullptr;
@@ -175,6 +186,10 @@ private:
 	QAction* m_signalSnapshotAction = nullptr;
 	QAction* m_findSignalAction = nullptr;
 
+	QAction* m_loginAction = nullptr;
+	QAction* m_loginUserTimeoutAction = nullptr;
+	QAction* m_logoSeparator = nullptr;
+
 	// Logo
 	//
 	QLabel* m_logoLabel = nullptr;
@@ -206,6 +221,8 @@ private:
 
 	DialogDataSources* m_dialogDataSources = nullptr;
 	DialogTcpStatistics* m_dialogStatistics = nullptr;
+
+	TuningUserManager m_tuningUserManager;
 };
 
 

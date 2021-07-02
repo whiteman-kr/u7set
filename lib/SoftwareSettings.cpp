@@ -2166,6 +2166,16 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 
 	//
 
+	xml.writeStartElement(XmlElement::SECURITY);
+
+	xml.writeBoolAttribute(EquipmentPropNames::TUNING_LOGIN, tuningLogin);
+	xml.writeStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, tuningUserAccounts);
+	xml.writeIntAttribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, tuningSessionTimeout);
+
+	xml.writeEndElement();			// </TuningSecurity>
+
+	//
+
 	writeEndSettings(xml);;			// </Settings>
 
 	return true;
@@ -2232,6 +2242,11 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.findElement(EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID);
 	result &= xml.readStringElement(EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID, &tuningSources);
 
+	result &= xml.findElement(XmlElement::SECURITY);
+	result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_LOGIN, &tuningLogin);
+	result &= xml.readStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, &tuningUserAccounts);
+	result &= xml.readIntAttribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, &tuningSessionTimeout);
+
 	return result;
 }
 
@@ -2243,6 +2258,11 @@ QStringList MonitorSettings::getSchemaTags() const
 QStringList MonitorSettings::getTuningSources() const
 {
 	return  tuningSources.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
+}
+
+QStringList MonitorSettings::getUsersAccounts() const
+{
+	return  tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
 }
 
 void MonitorSettings::clear()
@@ -2586,6 +2606,23 @@ void MonitorSettings::clear()
 
 		tuningSources = tuningSourcesList.join(Separator::SEMICOLON);
 
+		// Tuning Security
+
+		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::TUNING_LOGIN, &tuningLogin, log);
+
+		result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::TUNING_USER_ACCOUNTS, &tuningUserAccounts, log);
+
+		tuningUserAccounts.replace(' ', ';');
+		tuningUserAccounts.replace('\n', ';');
+		tuningUserAccounts.remove('\r');
+		QStringList userList = tuningUserAccounts.split(';', Qt::SkipEmptyParts);
+
+		tuningUserAccounts = userList.join(Separator::SEMICOLON);
+
+		result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::TUNING_SESSION_TIMEOUT, &tuningSessionTimeout, log);
+
+		//
+
 		return true;
 	}
 
@@ -2617,9 +2654,11 @@ bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_LIST, showSchemasList);
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_TABS, showSchemasTabs);
 	xml.writeIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, statusFlagFunction);
+
+	xml.writeBoolAttribute(EquipmentPropNames::TUNING_LOGIN, tuningLogin);
+	xml.writeStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, tuningUserAccounts);
+	xml.writeIntAttribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, tuningSessionTimeout);
 	xml.writeBoolAttribute(EquipmentPropNames::LOGIN_PER_OPERATION, loginPerOperation);
-	xml.writeStringAttribute(EquipmentPropNames::USER_ACCOUNTS, usersAccounts);
-	xml.writeIntAttribute(EquipmentPropNames::LOGIN_SESSION_LENGTH, loginSessionLength);
 
 	xml.writeBoolAttribute(EquipmentPropNames::FILTER_BY_EQUIPMENT, filterByEquipment);
 	xml.writeBoolAttribute(EquipmentPropNames::FILTER_BY_SCHEMA, filterBySchema);
@@ -2688,9 +2727,10 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= resultStatusFlagFunction;
 
+	result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_LOGIN, &tuningLogin);
+	result &= xml.readStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, &tuningUserAccounts);
+	result &= xml.readIntAttribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, &tuningSessionTimeout);
 	result &= xml.readBoolAttribute(EquipmentPropNames::LOGIN_PER_OPERATION, &loginPerOperation);
-	result &= xml.readStringAttribute(EquipmentPropNames::USER_ACCOUNTS, &usersAccounts);
-	result &= xml.readIntAttribute(EquipmentPropNames::LOGIN_SESSION_LENGTH, &loginSessionLength);
 
 	result &= xml.readBoolAttribute(EquipmentPropNames::FILTER_BY_EQUIPMENT, &filterByEquipment);
 	result &= xml.readBoolAttribute(EquipmentPropNames::FILTER_BY_SCHEMA, &filterBySchema);
@@ -2711,7 +2751,7 @@ QStringList TuningClientSettings::getSchemaTags() const
 
 QStringList TuningClientSettings::getUsersAccounts() const
 {
-	return  usersAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
+	return  tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
 }
 
 const TuningClientSettings& TuningClientSettings::operator = (const TuningClientSettings& src)
@@ -2729,9 +2769,10 @@ const TuningClientSettings& TuningClientSettings::operator = (const TuningClient
 
 	statusFlagFunction = src.statusFlagFunction;
 
+	tuningLogin = src.tuningLogin;
+	tuningUserAccounts = src.tuningUserAccounts;
+	tuningSessionTimeout = src.tuningSessionTimeout;
 	loginPerOperation = src.loginPerOperation;
-	usersAccounts = src.usersAccounts;
-	loginSessionLength = src.loginSessionLength;
 
 	filterByEquipment = src.filterByEquipment;
 	filterBySchema = src.filterBySchema;
@@ -2752,9 +2793,10 @@ bool TuningClientSettings::appearanceChanged(const TuningClientSettings& src) co
 		showSchemas != src.showSchemas ||
 		showSignals != src.showSignals ||
 		statusFlagFunction != src.statusFlagFunction ||
-		loginPerOperation != src.loginPerOperation ||
-		loginSessionLength != src.loginSessionLength ||
-		usersAccounts != src.usersAccounts)
+		tuningLogin != src.tuningLogin ||
+		tuningSessionTimeout != src.tuningSessionTimeout ||
+		tuningUserAccounts != src.tuningUserAccounts ||
+		loginPerOperation != src.loginPerOperation)
 	{
 		return true;
 	}
@@ -2874,18 +2916,20 @@ bool TuningClientSettings::connectionChanged(const TuningClientSettings& src) co
 		//
 		result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::STATUS_FLAG_FUNCTION, &statusFlagFunction, log);
 
+		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::TUNING_LOGIN, &tuningLogin, log);
+
+		result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::TUNING_USER_ACCOUNTS, &tuningUserAccounts, log);
+
+		tuningUserAccounts.replace(' ', ';');
+		tuningUserAccounts.replace('\n', ';');
+		tuningUserAccounts.remove('\r');
+		QStringList userList = tuningUserAccounts.split(';', Qt::SkipEmptyParts);
+
+		tuningUserAccounts = userList.join(Separator::SEMICOLON);
+
+		result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::TUNING_SESSION_TIMEOUT, &tuningSessionTimeout, log);
+
 		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::LOGIN_PER_OPERATION, &loginPerOperation, log);
-
-		result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::USER_ACCOUNTS, &usersAccounts, log);
-
-		usersAccounts.replace(' ', ';');
-		usersAccounts.replace('\n', ';');
-		usersAccounts.remove('\r');
-		QStringList userList = usersAccounts.split(';', Qt::SkipEmptyParts);
-
-		usersAccounts = userList.join(Separator::SEMICOLON);
-
-		result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::LOGIN_SESSION_LENGTH, &loginSessionLength, log);
 
 		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::FILTER_BY_EQUIPMENT, &filterByEquipment, log);
 		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::FILTER_BY_SCHEMA, &filterBySchema, log);

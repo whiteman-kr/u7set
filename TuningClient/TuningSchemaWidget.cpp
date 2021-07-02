@@ -3,17 +3,17 @@
 #include "../VFrame30/MonitorSchema.h"
 
 //
-//TuningSchemaWidget
+//TuningClientTuningController
 //
 
-TuningClientTuningController::TuningClientTuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QObject* parent):
+TuningClientTuningController::TuningClientTuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QWidget* parent):
 	VFrame30::TuningController(signalManager, tcpClient, parent)
 {
 
 }
 
 
-bool TuningClientTuningController::writingEnabled() const
+bool TuningClientTuningController::checkTuningAccess() const
 {
 	if (theMainWindow->userManager()->login(theMainWindow) == false)
 	{
