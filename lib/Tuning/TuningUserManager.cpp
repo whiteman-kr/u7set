@@ -304,10 +304,10 @@ bool TuningUserManager::requestPassword(QWidget* parent)
 
 #ifdef Q_OS_LINUX
 
-int UserManager::pamConverse(int n, const struct pam_message **msg,
+int TuningUserManager::pamConverse(int n, const struct pam_message **msg,
     struct pam_response **resp, void *data)
 {
-    UserManager* ob = static_cast<UserManager*>(data);
+	TuningUserManager* ob = static_cast<TuningUserManager*>(data);
 
     QString strp = ob->conversePassword;
     QByteArray ba = strp.toLatin1();
