@@ -8223,13 +8223,13 @@ namespace Builder
 	///		%1 TuningService EquipmentID
 	///
 	/// Description:
-	///		Tuning User Accounts should be set if TuningEnabled and TuningLogin properties are set in Monitor or TuningClient applications.
+	///		Tuning User Accounts should be set if TuningLogin is set in Monitor or TuningClient applications.
 	///
 	void IssueLogger::errEQP6202(QString tuningClientMonitorId)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6202,
-				  tr("Property TuningUserAccounts can't be empty in (%1) software if TuningEnabled and TuningLogin properties are set to 'true'.").
+				  tr("Property TuningUserAccounts can't be empty in (%1) software if TuningLogin is set to 'true'.").
 						arg(tuningClientMonitorId));
 	}
 

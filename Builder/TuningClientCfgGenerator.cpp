@@ -56,7 +56,8 @@ namespace Builder
 
 		// Check tuning users list
 		//
-		if (settings->tuningUserAccounts.split(';', Qt::SkipEmptyParts).isEmpty() == true)
+		if (settings->tuningLogin == true &&
+			settings->tuningUserAccounts.split(';', Qt::SkipEmptyParts).isEmpty() == true)
 		{
 			m_log->errEQP6202(m_software->equipmentIdTemplate());
 			return false;
