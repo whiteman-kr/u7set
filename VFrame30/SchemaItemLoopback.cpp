@@ -185,6 +185,14 @@ namespace VFrame30
 
 		DrawHelper::drawText(painter, m_font, itemUnit(), loopbackId(), textRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
+		// Draw highlights
+		//
+		if (drawParam->hightlightIds().contains(loopbackId()) == true)
+		{
+			QRectF highlightRect = boundingRectInDocPt(drawParam);
+			drawHighlightRect(drawParam, highlightRect);
+		}
+
 		return;
 	}
 
@@ -306,6 +314,14 @@ namespace VFrame30
 		painter->setPen(textColor());
 
 		DrawHelper::drawText(painter, m_font, itemUnit(), loopbackId(), textRect, Qt::AlignHCenter | Qt::AlignVCenter);
+
+		// Draw highlights
+		//
+		if (drawParam->hightlightIds().contains(loopbackId()) == true)
+		{
+			QRectF highlightRect = boundingRectInDocPt(drawParam);
+			drawHighlightRect(drawParam, highlightRect);
+		}
 
 		return;
 	}

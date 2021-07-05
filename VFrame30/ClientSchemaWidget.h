@@ -1,5 +1,4 @@
-#ifndef CLIENTSCHEMAWIDGET_H
-#define CLIENTSCHEMAWIDGET_H
+#pragma once
 
 #include "BaseSchemaWidget.h"
 #include "ClientSchemaView.h"
@@ -97,4 +96,3 @@ namespace VFrame30
 
 }
 
-#endif // CLIENTSCHEMAWIDGET_H

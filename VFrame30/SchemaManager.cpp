@@ -1,4 +1,5 @@
 #include "SchemaManager.h"
+#include "LogicSchema.h"
 
 namespace VFrame30
 {
@@ -41,6 +42,13 @@ namespace VFrame30
 		else
 		{
 			qDebug() << "SchemaManager::schema: Can't load schema " << schemaId;
+
+			// and there is no such scheme (((
+			// Just create an empty one, so wi can display at least blank space
+			//
+			schema = std::make_shared<VFrame30::LogicSchema>();
+			schema->setSchemaId("EMPTYSCHEMA");
+			schema->setCaption("Empty Schema");
 		}
 
 		return schema;

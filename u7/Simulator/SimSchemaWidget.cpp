@@ -10,6 +10,7 @@
 #include "../VFrame30/SchemaItemIndicator.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemUfb.h"
+#include "../VFrame30/SchemaItemLoopback.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/MacrosExpander.h"
 
@@ -105,7 +106,7 @@ void SimSchemaWidget::contextMenuRequested(const QPoint& pos)
 			if (VFrame30::SchemaItemSignal* schemaItemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
 				schemaItemSignal != nullptr)
 			{
-				signalContextMenu(schemaItemSignal->appSignalIdList(), schemaItemSignal->impactAppSignalIdList(), {});
+				signalContextMenu(schemaItemSignal->appSignalIdList(), schemaItemSignal->impactAppSignalIdList(), {}, {});
 				break;
 			}
 
@@ -113,7 +114,7 @@ void SimSchemaWidget::contextMenuRequested(const QPoint& pos)
 				schemaItem != nullptr)
 			{
 				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);
-				signalContextMenu(signalList, {}, {});
+				signalContextMenu(signalList, {}, {}, {});
 				break;
 			}
 
@@ -121,7 +122,7 @@ void SimSchemaWidget::contextMenuRequested(const QPoint& pos)
 				schemaItem != nullptr)
 			{
 				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);
-				signalContextMenu(signalList, {}, {});
+				signalContextMenu(signalList, {}, {}, {});
 				break;
 			}
 
@@ -129,14 +130,14 @@ void SimSchemaWidget::contextMenuRequested(const QPoint& pos)
 				schemaItem != nullptr)
 			{
 				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);
-				signalContextMenu(signalList, {}, {});
+				signalContextMenu(signalList, {}, {}, {});
 				break;
 			}
 
 			if (VFrame30::SchemaItemReceiver* schemaItemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
 				schemaItemReceiver != nullptr)
 			{
-				signalContextMenu(schemaItemReceiver->appSignalIdsAsList(), {}, {});
+				signalContextMenu(schemaItemReceiver->appSignalIdsAsList(), {}, {}, {});
 				break;
 			}
 
@@ -156,7 +157,14 @@ void SimSchemaWidget::contextMenuRequested(const QPoint& pos)
 					}
 				}
 
-				signalContextMenu(signalList, {}, {});
+				signalContextMenu(signalList, {}, {}, {});
+				break;
+			}
+
+			if (VFrame30::SchemaItemLoopback* schemaItemLoopback = dynamic_cast<VFrame30::SchemaItemLoopback*>(item.get());
+				schemaItemLoopback != nullptr)
+			{
+				signalContextMenu({}, {}, schemaItemLoopback->loopbackId(), {});
 				break;
 			}
 		}
@@ -165,22 +173,21 @@ void SimSchemaWidget::contextMenuRequested(const QPoint& pos)
 	return;
 }
 
-void SimSchemaWidget::signalContextMenu(const QStringList& appSignals, const QStringList& impactSignals, const QList<QMenu*> customMenu)
+void SimSchemaWidget::signalContextMenu(QStringList appSignals,
+										QStringList impactSignals,
+										QString loopbackId,
+										const QList<QMenu*> customMenu)
 {
 	// To set, it will sort list and exclude same ids
 	//
-	std::set<QString> signalListSet;
-	for (const QString& s : appSignals)
-	{
-		signalListSet.insert(s);
-	}
+	appSignals.sort();
+	appSignals.removeDuplicates();
 
-	std::set<QString> impactSignalListSet;
-	for (const QString& s : impactSignals)
-	{
-		impactSignalListSet.insert(s);
-	}
+	impactSignals.sort();
+	impactSignals.removeDuplicates();
 
+	// --
+	//
 	SimWidget* simWidget = nullptr;
 	QWidget* parent = this->parentWidget();
 	while (parent != nullptr)
@@ -209,7 +216,7 @@ void SimSchemaWidget::signalContextMenu(const QStringList& appSignals, const QSt
 	QMenu* schemasSubMenu = menu.addMenu(tr("Schemas"));
 
 	std::set<QString> signalsSchemasSet;
-	for (const QString& s : signalListSet)
+	for (const QString& s : appSignals)
 	{
 		QStringList schemaIds = m_simulator->schemasByAppSignalId(s);
 
@@ -220,7 +227,7 @@ void SimSchemaWidget::signalContextMenu(const QStringList& appSignals, const QSt
 	}
 
 	std::set<QString> impactSignalsSchemasSet;
-	for (const QString& s : impactSignalListSet)
+	for (const QString& s : impactSignals)
 	{
 		QStringList schemaIds = m_simulator->schemasByAppSignalId(s);
 
@@ -230,17 +237,32 @@ void SimSchemaWidget::signalContextMenu(const QStringList& appSignals, const QSt
 		}
 	}
 
-	if (signalsSchemasSet.empty() == true && impactSignalsSchemasSet.empty() == true)
+	std::set<QString> loopbackSchemas;
+	if (loopbackId.isEmpty() == false)
+	{
+		QStringList schemaIds = m_simulator->schemasByLoopbackId(loopbackId);
+
+		for (const QString& schemaId : schemaIds)
+		{
+			loopbackSchemas.insert(schemaId);
+		}
+	}
+
+	if (signalsSchemasSet.empty() == true &&
+		impactSignalsSchemasSet.empty() == true &&
+		loopbackSchemas.empty() == true)
 	{
 		schemasSubMenu->setDisabled(true);
 	}
 	else
 	{
+		// App Signals
+		//
 		for (const QString& schemaId : signalsSchemasSet)
 		{
-			auto f = [schemaId, &appSignals, &impactSignals, simWidget]() -> void
+			auto f = [schemaId, &appSignals, &impactSignals, loopbackId, simWidget]() -> void
 					 {
-						simWidget->openSchemaTabPage(schemaId, appSignals + impactSignals);
+						simWidget->openSchemaTabPage(schemaId, (appSignals + impactSignals) << loopbackId);
 					 };
 
 			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
@@ -249,16 +271,32 @@ void SimSchemaWidget::signalContextMenu(const QStringList& appSignals, const QSt
 			connect(a, &QAction::triggered, this, f);
 		}
 
-		if (signalsSchemasSet.empty() == false && impactSignalsSchemasSet.empty() == false)
-		{
-			schemasSubMenu->addSeparator();
-		}
+		// Impact signals
+		//
+		schemasSubMenu->addSeparator();
 
 		for (const QString& schemaId : impactSignalsSchemasSet)
 		{
-			auto f = [schemaId, &appSignals, &impactSignals, simWidget]() -> void
+			auto f = [schemaId, &appSignals, &impactSignals, loopbackId, simWidget]() -> void
 					 {
-						simWidget->openSchemaTabPage(schemaId, appSignals + impactSignals);
+						simWidget->openSchemaTabPage(schemaId, (appSignals + impactSignals) << loopbackId);
+					 };
+
+			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
+
+			QAction* a = schemasSubMenu->addAction(actionCaption);
+			connect(a, &QAction::triggered, this, f);
+		}
+
+		// Loopback
+		//
+		schemasSubMenu->addSeparator();
+
+		for (const QString& schemaId : loopbackSchemas)
+		{
+			auto f = [schemaId, &appSignals, &impactSignals, loopbackId, simWidget]() -> void
+					 {
+						simWidget->openSchemaTabPage(schemaId, (appSignals + impactSignals) << loopbackId);
 					 };
 
 			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
@@ -283,7 +321,7 @@ void SimSchemaWidget::signalContextMenu(const QStringList& appSignals, const QSt
 	QAction* appSignalSeparator = menu.addSeparator();
 	appSignalSeparator->setText(tr("Signals"));
 
-	for (const QString& s : signalListSet)
+	for (const QString& s : appSignals)
 	{
 		bool ok = false;
 		AppSignalParam signal =	m_simulator->appSignalManager().signalParam(s, &ok);
@@ -300,15 +338,15 @@ void SimSchemaWidget::signalContextMenu(const QStringList& appSignals, const QSt
 		connect(a, &QAction::triggered, this, f);
 	}
 
-	if (impactSignalListSet.empty() == false)
+	if (impactSignals.empty() == false)
 	{
-		if (signalListSet.empty() == false)
+		if (appSignals.empty() == false)
 		{
 			QAction* impactSignalSeparator = menu.addSeparator();
 			impactSignalSeparator->setText(tr("Impact Signals"));
 		}
 
-		for (const QString& s : impactSignalListSet)
+		for (const QString& s : impactSignals)
 		{
 			bool ok = false;
 			AppSignalParam signal =	m_simulator->appSignalManager().signalParam(s, &ok);

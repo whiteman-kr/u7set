@@ -407,16 +407,6 @@ namespace VFrame30
 		//
 		std::shared_ptr<VFrame30::Schema> schema = schemaManager()->schema(schemaId);
 
-		if (schema == nullptr)
-		{
-			// and there is no startSchemaId (((
-			// Just create an empty schema
-			//
-			schema = std::make_shared<VFrame30::LogicSchema>();
-			schema->setSchemaId("EMPTYSCHEMA");
-			schema->setCaption("Empty Schema");
-		}
-
 		// Run onShowScript
 		//
 		schema->onShowEvent(clientSchemaView()->jsEngine());

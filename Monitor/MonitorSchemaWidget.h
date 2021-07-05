@@ -57,7 +57,10 @@ public:
 	//
 public slots:
 	void contextMenuRequested(const QPoint& pos);
-	void signalContextMenu(const QStringList& appSignals, const QStringList& impactSignals, const QList<QMenu*>& customMenu);
+	void signalContextMenu(QStringList appSignals,
+						   QStringList impactSignals,
+						   QStringList loopbacks,
+						   const QList<QMenu*>& customMenu);
 	void signalInfo(QString appSignalId);
 
 	// Properties

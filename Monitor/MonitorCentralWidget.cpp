@@ -307,7 +307,7 @@ void MonitorCentralWidget::slot_selectSchemaForCurrentTab(QString schemaId)
 
 void MonitorCentralWidget::slot_signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu)
 {
-	currentTab()->signalContextMenu(signalList, {}, customMenu);
+	currentTab()->signalContextMenu(signalList, {}, {}, customMenu);
 }
 
 void MonitorCentralWidget::slot_signalInfo(QString signalId)

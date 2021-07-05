@@ -146,7 +146,7 @@ namespace VFrame30
 		virtual QStringList getLabels() const;
 		virtual std::vector<QUuid> getGuids() const;
 
-		virtual QString details(const QString& path) const;			// form details JSON object (signal list)
+		virtual QString details(const QString& path) const;				// form details JSON object (signal list)
 		static SchemaDetails parseDetails(const QString& detailsString);// parse details section (from DB), result is signal list
 
 		std::shared_ptr<SchemaItem> getItemById(const QUuid& id) const;
@@ -339,6 +339,7 @@ namespace VFrame30
 
 		bool hasEquipmentId(const QString& equipmentId) const;
 		bool hasSignal(const QString& signalId) const;
+		bool hasLoopback(const QString& loopbackId) const;
 
 	public:
 		int m_version = 0;
@@ -394,6 +395,7 @@ namespace VFrame30
 		std::shared_ptr<SchemaDetails> schemaDetails(int index) const;
 
 		QStringList schemasByAppSignalId(const QString& appSignalId) const;
+		QStringList schemasByLoopbackId(const QString& loopbackId) const;
 
 		int schemaCount() const;
 		QString schemaCaptionById(const QString& schemaId) const;

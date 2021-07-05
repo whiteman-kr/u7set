@@ -9,6 +9,7 @@
 #include "../VFrame30/SchemaItemIndicator.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemUfb.h"
+#include "../VFrame30/SchemaItemLoopback.h"
 #include "../VFrame30/MonitorSchema.h"
 #include "../VFrame30/MacrosExpander.h"
 
@@ -83,6 +84,7 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 
 	QStringList signalList;
 	QStringList impactSignalList;
+	QStringList loopbacks;
 
 	for (const SchemaItemPtr& item : items)
 	{
@@ -138,9 +140,16 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 
 			continue;
 		}
+
+		if (VFrame30::SchemaItemLoopback* schemaItemLoopback = dynamic_cast<VFrame30::SchemaItemLoopback*>(item.get());
+			schemaItemLoopback != nullptr)
+		{
+			loopbacks.push_back(schemaItemLoopback->loopbackId());
+			continue;
+		}
 	}
 
-	if (signalList.isEmpty() == false || impactSignalList.isEmpty() == false)
+	if (signalList.isEmpty() == false || impactSignalList.isEmpty() == false || loopbacks.isEmpty() == false)
 	{
 		auto f = [](QString& s)
 			{
@@ -153,27 +162,25 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 		std::ranges::for_each(signalList, f);
 		std::ranges::for_each(impactSignalList, f);
 
-		signalContextMenu(signalList, impactSignalList, {});
+		signalContextMenu(signalList, impactSignalList, loopbacks, {});
 	}
 
 	return;
 }
 
-void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const QStringList& impactSignals, const QList<QMenu*>& customMenu)
+void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
+											QStringList impactSignals,
+											QStringList loopbacks,
+											const QList<QMenu*>& customMenu)
 {
-	// To set, it will sort list and exclude same ids
-	//
-	std::set<QString> signalListSet;
-	for (const QString& s : appSignals)
-	{
-		signalListSet.insert(s);
-	}
+	appSignals.sort();
+	appSignals.removeDuplicates();
 
-	std::set<QString> impactSignalListSet;
-	for (const QString& s : impactSignals)
-	{
-		impactSignalListSet.insert(s);
-	}
+	impactSignals.sort();
+	impactSignals.removeDuplicates();
+
+	loopbacks.sort();
+	loopbacks.removeDuplicates();
 
 	// Compose menu
 	//
@@ -184,7 +191,7 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 	QMenu* schemasSubMenu = menu.addMenu(tr("Schemas"));
 
 	std::set<QString> signalsSchemasSet;
-	for (const QString& s : signalListSet)
+	for (const QString& s : appSignals)
 	{
 		QStringList schemaIds = schemaManager()->monitorConfigController()->schemasByAppSignalId(s);
 
@@ -195,7 +202,7 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 	}
 
 	std::set<QString> impactSignalsSchemasSet;
-	for (const QString& s : impactSignalListSet)
+	for (const QString& s : impactSignals)
 	{
 		QStringList schemaIds = schemaManager()->monitorConfigController()->schemasByAppSignalId(s);
 
@@ -205,7 +212,22 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 		}
 	}
 
-	if (signalsSchemasSet.empty() == true && impactSignalsSchemasSet.empty() == true)
+	std::set<QString> loopbackSchemas;
+	for (const QString& l : loopbacks)
+	{
+		QStringList schemaIds = schemaManager()->monitorConfigController()->schemasByLoopbackId(l);
+
+		for (const QString& schemaId : schemaIds)
+		{
+			impactSignalsSchemasSet.insert(schemaId);
+		}
+	}
+
+	// --
+	//
+	if (signalsSchemasSet.empty() == true &&
+		impactSignalsSchemasSet.empty() == true &&
+		loopbackSchemas.empty() == true)
 	{
 		schemasSubMenu->setDisabled(true);
 	}
@@ -213,10 +235,13 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 	{
 		for (const QString& schemaId : signalsSchemasSet)
 		{
-			auto f = [this, schemaId, &appSignals, &impactSignals]() -> void
-					 {
-						setSchema(schemaId, appSignals + impactSignals);
-					 };
+			auto f = [this, schemaId, &appSignals, &impactSignals, &loopbacks]()
+					{
+						if (schemaId != this->schemaId())
+						{
+							setSchema(schemaId, appSignals + impactSignals + loopbacks);
+						}
+					};
 
 			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
 
@@ -224,26 +249,44 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 			connect(a, &QAction::triggered, this, f);
 		}
 
-		if (signalsSchemasSet.empty() == false && impactSignalsSchemasSet.empty() == false)
-		{
-			schemasSubMenu->addSeparator();
-		}
+		schemasSubMenu->addSeparator();
 
 		for (const QString& schemaId : impactSignalsSchemasSet)
 		{
-			auto f = [this, schemaId, &appSignals, &impactSignals]() -> void
-					 {
+			auto f = [this, schemaId, &appSignals, &impactSignals, &loopbacks]()
+					{
 						if (schemaId != this->schemaId())
 						{
-							setSchema(schemaId, appSignals + impactSignals);
+							setSchema(schemaId, appSignals + impactSignals + loopbacks);
 						}
-					 };
+					};
 
 			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
 
 			QAction* a = schemasSubMenu->addAction(actionCaption);
 			connect(a, &QAction::triggered, this, f);
 		}
+
+		// Loopbacks
+		//
+		schemasSubMenu->addSeparator();
+
+		for (const QString& schemaId : loopbackSchemas)
+		{
+			auto f = [this, schemaId, &appSignals, &impactSignals, &loopbacks]()
+					{
+						if (schemaId != this->schemaId())
+						{
+							setSchema(schemaId, appSignals + impactSignals + loopbacks);
+						}
+					};
+
+			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
+
+			QAction* a = schemasSubMenu->addAction(actionCaption);
+			connect(a, &QAction::triggered, this, f);
+		}
+
 	}
 
 	// Custom menus
@@ -261,7 +304,7 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 	QAction* appSignalSeparator = menu.addSeparator();
 	appSignalSeparator->setText(tr("Signals"));
 
-	for (const QString& s : signalListSet)
+	for (const QString& s : appSignals)
 	{
 		bool ok = false;
 		AppSignalParam signal =	theSignals.signalParam(s, &ok);
@@ -278,15 +321,15 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& appSignals, const
 		connect(a, &QAction::triggered, this, f);
 	}
 
-	if (impactSignalListSet.empty() == false)
+	if (impactSignals.empty() == false)
 	{
-		if (signalListSet.empty() == false)
+		if (appSignals.empty() == false)
 		{
 			QAction* impactSignalSeparator = menu.addSeparator();
 			impactSignalSeparator->setText(tr("Impact Signals"));
 		}
 
-		for (const QString& s : impactSignalListSet)
+		for (const QString& s : impactSignals)
 		{
 			bool ok = false;
 

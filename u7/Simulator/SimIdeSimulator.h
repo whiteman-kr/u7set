@@ -30,6 +30,7 @@ public:
 	std::set<QString> schemaAppSignals(const QString& schemaId);
 
 	QStringList schemasByAppSignalId(const QString& appSignalId) const;
+	QStringList schemasByLoopbackId(const QString& loopbackId) const;
 
 private:
 	VFrame30::SchemaDetailsSet m_schemaDetails;

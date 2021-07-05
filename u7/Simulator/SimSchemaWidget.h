@@ -48,8 +48,12 @@ signals:
 	// Slots
 	//
 public slots:
-	void contextMenuRequested(const QPoint &pos);
-	void signalContextMenu(const QStringList& appSignals, const QStringList& impactSignals, const QList<QMenu*> customMenu);
+	void contextMenuRequested(const QPoint& pos);
+
+	void signalContextMenu(QStringList appSignals,
+						   QStringList impactSignals,
+						   QString loopbackId,
+						   const QList<QMenu*> customMenu);
 
 protected slots:
 	void updateSchema();

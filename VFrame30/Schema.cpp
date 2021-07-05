@@ -1787,7 +1787,7 @@ namespace VFrame30
 		//
 		QStringList labels = schema->getLabels();
 
-		// Get list of receivers/transmitters
+		// Get list of receivers/transmitters and loopbacks
 		//
 		QSet<QString> connections;
 		QSet<QString> loopbacks;
@@ -2252,7 +2252,12 @@ namespace VFrame30
 
 	bool SchemaDetails::hasSignal(const QString& signalId) const
 	{
-		return m_signals.find(signalId) != std::cend(m_signals);
+		return m_signals.contains(signalId);
+	}
+
+	bool SchemaDetails::hasLoopback(const QString& loopbackId) const
+	{
+		return m_loopbacks.contains(loopbackId);
 	}
 
 	SchemaDetailsSet::SchemaDetailsSet() :
@@ -2413,6 +2418,24 @@ namespace VFrame30
 			Q_ASSERT(schemaDetails);
 
 			if (schemaDetails->hasSignal(appSignalId) == true)
+			{
+				result.push_back(schemaId);
+			}
+		}
+
+		return result;
+	}
+
+	QStringList SchemaDetailsSet::schemasByLoopbackId(const QString& loopbackId) const
+	{
+		QStringList result;
+		result.reserve(16);
+
+		for (const auto&[schemaId, schemaDetails] : m_details)
+		{
+			Q_ASSERT(schemaDetails);
+
+			if (schemaDetails->hasLoopback(loopbackId) == true)
 			{
 				result.push_back(schemaId);
 			}

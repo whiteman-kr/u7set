@@ -123,6 +123,7 @@ public:
 	std::set<QString> schemaAppSignals(const QString& schemaId);
 
 	QStringList schemasByAppSignalId(const QString& appSignalId) const;
+	QStringList schemasByLoopbackId(const QString& loopbackId) const;
 
 	ConfigSettings configuration() const;
 	QString configurationStartSchemaId() const;

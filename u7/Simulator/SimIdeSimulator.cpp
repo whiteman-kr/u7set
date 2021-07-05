@@ -100,3 +100,8 @@ QStringList SimIdeSimulator::schemasByAppSignalId(const QString& appSignalId) co
 	return m_schemaDetails.schemasByAppSignalId(appSignalId);
 }
 
+QStringList SimIdeSimulator::schemasByLoopbackId(const QString& loopbackId) const
+{
+	return m_schemaDetails.schemasByLoopbackId(loopbackId);
+}
+

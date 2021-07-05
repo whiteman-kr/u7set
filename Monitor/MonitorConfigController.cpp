@@ -696,6 +696,12 @@ QStringList MonitorConfigController::schemasByAppSignalId(const QString& appSign
 	return m_schemaDetailsSet.schemasByAppSignalId(appSignalId);
 }
 
+QStringList MonitorConfigController::schemasByLoopbackId(const QString& loopbackId) const
+{
+	QMutexLocker l(&m_mutex);
+	return m_schemaDetailsSet.schemasByLoopbackId(loopbackId);
+}
+
 ConfigSettings MonitorConfigController::configuration() const
 {
 	QMutexLocker locker(&m_confugurationMutex);
