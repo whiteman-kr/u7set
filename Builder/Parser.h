@@ -170,6 +170,10 @@ namespace Builder
 		const std::list<AppLogicItem>& items() const;
 		std::list<AppLogicItem>& items();
 
+		const std::map<QUuid, AppLogicItem>& fblItemsAcc() const;
+		std::map<QUuid, AppLogicItem>& fblItemsAcc();
+		void setFblItemsAcc(std::map<QUuid, AppLogicItem> v);
+
 	private:
 		QString m_equipmentId;							// EuqipmentId or UFB SchemaID
 		QString m_lmDescriptionFile;					// LogicModule description filename

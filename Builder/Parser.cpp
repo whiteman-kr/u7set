@@ -651,7 +651,7 @@ namespace Builder
 		//
 		std::multimap<QUuid, AppLogicItem> outputPinToInputItem;				// Key is QUuid of output connected to input
 
-		for (const std::pair<QUuid, AppLogicItem>& currentItem : constFblItems)
+		for (const std::pair<QUuid, AppLogicItem> currentItem : constFblItems)
 		{
 			const AppLogicItem& appLogicItem = currentItem.second;
 			const std::shared_ptr<VFrame30::FblItemRect>& fblItem = appLogicItem.m_fblItem;
@@ -680,7 +680,7 @@ namespace Builder
 
 		std::map<QUuid, std::vector<AppLogicItem>> itemsWithInputs;		// Key is QUuid of output
 
-		for (const std::pair<QUuid, AppLogicItem>& currentItem : constFblItems)
+		for (const std::pair<QUuid, AppLogicItem> currentItem : constFblItems)
 		{
 			const std::vector<VFrame30::AfbPin>& outputs = currentItem.second.m_fblItem->outputs();
 
@@ -1158,29 +1158,26 @@ namespace Builder
 	{
 		// Find item iteself
 		//
-		auto itemIt = std::find_if(m_items.begin(), m_items.end(),
-								   [&itemGuid](const AppLogicItem& ali)
-								   {
-										return ali.m_fblItem->guid() == itemGuid;
-								   });
+		auto itemIt = m_fblItemsAcc.find(itemGuid);
 
-		if (itemIt == m_items.end())
+		if (itemIt == m_fblItemsAcc.end())
 		{
 			// Item for removing is not found
 			//
-			assert(itemIt != m_items.end());
+			Q_ASSERT(itemIt != m_fblItemsAcc.end());
 			return false;
 		}
 
-		const AppLogicItem& item = *itemIt;
+		const AppLogicItem& item = itemIt->second;
+		Q_ASSERT(itemGuid == item.m_fblItem->guid());
 
 		if (item.m_fblItem->isInOutSignalElement() == false ||
 			item.m_fblItem->inputsCount() != 1 ||
 			item.m_fblItem->outputsCount() != 1)
 		{
-			assert(item.m_fblItem->isInOutSignalElement() == true);
-			assert(item.m_fblItem->inputsCount() == 1);
-			assert(item.m_fblItem->outputsCount() == 1);
+			Q_ASSERT(item.m_fblItem->isInOutSignalElement() == true);
+			Q_ASSERT(item.m_fblItem->inputsCount() == 1);
+			Q_ASSERT(item.m_fblItem->outputsCount() == 1);
 			return false;
 		}
 
@@ -1193,48 +1190,50 @@ namespace Builder
 		//
 		if (in.associatedIOs().size() != 1)
 		{
-			assert(in.associatedIOs().size() == 1);
+			Q_ASSERT(in.associatedIOs().size() == 1);
 			return false;
 		}
 
 		const QUuid& sourceOutputUuid = in.associatedIOs().front();
-		auto sourceItemIt = std::find_if(m_items.begin(), m_items.end(),
-								   [&sourceOutputUuid](const AppLogicItem& ali)
+		auto sourceItemIt = std::find_if(m_fblItemsAcc.begin(), m_fblItemsAcc.end(),
+								   [&sourceOutputUuid](std::pair<const QUuid, Builder::AppLogicItem> alip)
 								   {
-										return ali.m_fblItem->hasOutput(sourceOutputUuid);
+										return alip.second.m_fblItem->hasOutput(sourceOutputUuid);
 								   });
-		if (sourceItemIt == m_items.end())
+
+		if (sourceItemIt == m_fblItemsAcc.end())
 		{
 			// Schema is not consistent?
 			//
-			assert(sourceItemIt != m_items.end());
+			Q_ASSERT(sourceItemIt != m_fblItemsAcc.end());
 			return false;
 		}
 
-		AppLogicItem& sourceItem = *sourceItemIt;
+		AppLogicItem& sourceItem = sourceItemIt->second;
 		VFrame30::AfbPin& sourceItemOutPin = sourceItem.m_fblItem->output(sourceOutputUuid);
 
 		// Find all target items
 		//
 		if (out.associatedIOs().empty() == true)
 		{
-			assert(out.associatedIOs().empty() == false);
+			Q_ASSERT(out.associatedIOs().empty() == false);
 			return false;
 		}
 
 		for (const QUuid& targetInputUuid : out.associatedIOs())
 		{
-			auto targetItemIt = std::find_if(m_items.begin(), m_items.end(),
-									   [&targetInputUuid](const AppLogicItem& ali)
+			auto targetItemIt = std::find_if(m_fblItemsAcc.begin(), m_fblItemsAcc.end(),
+									   [&targetInputUuid](std::pair<const QUuid, Builder::AppLogicItem> alip)
 									   {
-											return ali.m_fblItem->hasInput(targetInputUuid);
+											return alip.second.m_fblItem->hasInput(targetInputUuid);
 									   });
-			if (targetItemIt == m_items.end())
+
+			if (targetItemIt == m_fblItemsAcc.end())
 			{
 				continue;
 			}
 
-			AppLogicItem& targetItem = *targetItemIt;
+			AppLogicItem& targetItem = targetItemIt->second;
 			VFrame30::AfbPin& targetItemInputPin = targetItem.m_fblItem->input(targetInputUuid);
 
 			AppLogicData::bindTwoPins(sourceItemOutPin, targetItemInputPin);
@@ -1245,7 +1244,7 @@ namespace Builder
 
 		// Remove item from the item list
 		//
-		m_items.erase(itemIt);
+		m_fblItemsAcc.erase(itemIt);
 
 		return true;
 	}
@@ -1515,7 +1514,6 @@ namespace Builder
 
 			// Associate items to each other
 			//
-
 			assert(inputLogicItem.m_fblItem->inputsCount() == 1);		// Check fake input
 			assert(outputLogicItem.m_fblItem->outputsCount() == 1);		// Check fake output
 
@@ -1547,6 +1545,21 @@ namespace Builder
 	std::list<AppLogicItem>& AppLogicModule::items()
 	{
 		return m_items;
+	}
+
+	const std::map<QUuid, AppLogicItem>& AppLogicModule::fblItemsAcc() const
+	{
+		return m_fblItemsAcc;
+	}
+
+	std::map<QUuid, AppLogicItem>& AppLogicModule::fblItemsAcc()
+	{
+		return m_fblItemsAcc;
+	}
+
+	void AppLogicModule::setFblItemsAcc(std::map<QUuid, AppLogicItem> v)
+	{
+		m_fblItemsAcc = std::move(v);
 	}
 
 
@@ -1798,16 +1811,10 @@ namespace Builder
 				return false;
 			}
 
-			bool checkResult = module->checkItemsRelationsConsistency(log);
-			if (checkResult == false)
-			{
-				return false;
-			}
-
 			// Fake Items are used in special cases:
 			// 1. UFB has direct connect from input to output
 			//    [in_1]-+-----------------+-[out_1]
-			// 2. SchemaItemUfb has loop withot any items
+			// 2. SchemaItemUfb has loop without any items
 			//        +-[UFB]-+
 			//        |       |
 			//        +-------+
@@ -1816,25 +1823,24 @@ namespace Builder
 			//
 			//
 			std::vector<SchemaItemPtr> fakeItems;
-			fakeItems.reserve(128);
+			fakeItems.reserve(8192);
 
 			// Find VFrame30::SchemaItemUfb and insert AFTER them actual ufbs
 			//
-			for (auto itemIt = module->items().begin(); itemIt != module->items().end(); ++itemIt)
+			std::map<QUuid, AppLogicItem> itemsAfterExpanding = module->fblItemsAcc();
+
+			for (auto itemIt = itemsAfterExpanding.begin(); itemIt != itemsAfterExpanding.end(); ++itemIt)
 			{
-				const AppLogicItem& item = *itemIt;
+				QUuid uuid = itemIt->first;
+				const AppLogicItem& item = itemIt->second;
 
 				auto logicSchema = std::dynamic_pointer_cast<VFrame30::LogicSchema>(item.m_schema);
-				if (logicSchema == nullptr)
-				{
-					// item.m_schema can be UfbSchema - then it is just expanded ufb because
-					// after injecting ufb items itemIt is set to these nes items (and they have item.m_schema as UfbSchema)
-					//
-					continue;
-				}
 
 				if (item.m_fblItem->isType<VFrame30::SchemaItemUfb>() == false)
 				{
+					// This is not UFB just continue
+					//
+					itemsAfterExpanding[uuid] = item;
 					continue;
 				}
 
@@ -1875,8 +1881,8 @@ namespace Builder
 
 				// Intermidiate check, to make sure all the new guids were set right and relations are kept in consistency
 				//
-				checkResult = ufbCopy->checkItemsRelationsConsistency(log);
-				if (checkResult == false)
+				if (bool checkResult = ufbCopy->checkItemsRelationsConsistency(log);
+					checkResult == false)
 				{
 					// The error is signaled in checkItemsRelationsConsistency
 					//
@@ -1918,7 +1924,12 @@ namespace Builder
 							fakeItems.push_back(inOutItem);
 
 							AppLogicItem fakeAli(inOutItem, logicSchema);
-							module->items().push_back(fakeAli);	// Order is not important here, this item will be removed later
+
+							itemsAfterExpanding[uuid] = item;
+
+							Q_ASSERT(itemsAfterExpanding.contains(fakeAli.m_fblItem->guid()) == false);
+
+							itemsAfterExpanding[fakeAli.m_fblItem->guid()] = fakeAli;
 						}
 					}
 				}
@@ -1947,10 +1958,9 @@ namespace Builder
 					//
 					AppLogicItem sourceItem;
 
-					for (AppLogicItem& ali : module->items())
+					for (const auto&[fblguuid, ali] : itemsAfterExpanding)
 					{
-						bool found = ali.m_fblItem->hasOutput(outputGuid);
-						if (found == true)
+						if (ali.m_fblItem->hasOutput(outputGuid) == true)
 						{
 							sourceItem = ali;
 							break;
@@ -2125,7 +2135,7 @@ namespace Builder
 					std::vector<VFrame30::AfbPin*> targetItems;
 					targetItems.reserve(16);
 
-					for (AppLogicItem& ali : module->items())
+					for (auto&[aliuuid, ali] : itemsAfterExpanding)
 					{
 						std::vector<VFrame30::AfbPin>& inputs = ali.m_fblItem->inputs();
 
@@ -2485,12 +2495,27 @@ namespace Builder
 
 				// Inject ufb schema items
 				//
-				module->items().insert(itemIt, ufbItemsCopy.begin(), ufbItemsCopy.end());
+				for (auto& ufbitem : ufbItemsCopy)
+				{
+					QUuid ufbitemuuid = ufbitem.m_fblItem->guid();
+
+					if (itemsAfterExpanding.contains(ufbitemuuid) == true)
+					{
+						Q_ASSERT(itemsAfterExpanding.contains(ufbitemuuid) == false);
+
+						log->errINT1001(QString("Module %1 has items with the same uuid").arg(module->equipmentId()), ufbitem.m_schema->schemaId(), ufbitemuuid);
+
+						result = false;
+						break;
+					}
+
+					itemsAfterExpanding[ufbitemuuid] = ufbitem;
+				}
 
 				// Remove expanded VFrame30::SchemaItemUfb, and set new value to the iterator
 				//
-				module->items().erase(itemIt);
-				itemIt = module->items().begin();			// Dumb way, but it works :)
+				itemsAfterExpanding.erase(itemIt);
+				itemIt = itemsAfterExpanding.begin();			// Dumb way, but it works :)
 			}
 
 			if (result == false)
@@ -2499,6 +2524,10 @@ namespace Builder
 				//
 				return false;
 			}
+
+			// Set all items with expanded
+			//
+			module->setFblItemsAcc(std::move(itemsAfterExpanding));
 
 			// Remove Fake Items
 			//
@@ -2509,18 +2538,16 @@ namespace Builder
 
 			// --
 			//
-			checkResult = module->checkItemsRelationsConsistency(log);
-			if (checkResult == false)
+			if (bool checkResult = module->checkItemsRelationsConsistency(log);
+				checkResult == false)
 			{
 				return false;
 			}
 
 			// Check if any UFB left
 			//
-			for (auto itemIt = module->items().begin(); itemIt != module->items().end(); ++itemIt)
+			for (const auto&[itemuuid, item] : module->fblItemsAcc())
 			{
-				const AppLogicItem& item = *itemIt;
-
 				if (item.m_fblItem->isType<VFrame30::SchemaItemUfb>() == true)
 				{
 					log->errINT1001(QString("After expanding UFB items, there is SchemaItemUfb left %1").arg(item.m_fblItem->label()), item.m_schema->schemaId(), item.m_fblItem->guid());
@@ -2975,6 +3002,15 @@ namespace Builder
 		//
 		readyParseDataContainer.setToAppData(applicationData(), m_log);
 
+		// Expand User Functioanl Block on places of SchemaIntemUfb
+		//
+		ok = m_applicationData->expandUfbs(m_log);
+
+		if (ok == false)
+		{
+			result = false;
+		}
+
 		// The result is set of AppLogicModule (m_modules), but items are not ordered yet
 		// Order itmes in all modules
 		//
@@ -3006,15 +3042,6 @@ namespace Builder
 		{
 			result = false;
 			return result;
-		}
-
-		// Expand User Functioanl Block on places of SchemaIntemUfb
-		//
-		ok = m_applicationData->expandUfbs(m_log);
-
-		if (ok == false)
-		{
-			result = false;
 		}
 
 		// Check UFBs LooopbackSource.loopbackId for uniness
@@ -4323,7 +4350,6 @@ namespace Builder
 		{
 			std::shared_ptr<VFrame30::SchemaLayer> moduleLayer = VFrame30::SchemaLayer::Create(layerData);	// We don't want to spoil layer, it cab be used later
 																											// In stroring schamas, in TuningClient, et cetera.
-
 			if (moduleLayer.get() == nullptr)
 			{
 				Q_ASSERT(moduleLayer);
@@ -5327,7 +5353,7 @@ namespace Builder
 		const AppLogicData* appLogicData = applicationData();
 		const auto& ufbs = appLogicData->ufbs();
 
-		for (const std::pair<QString, std::shared_ptr<AppLogicModule>>& ufb : ufbs)
+		for (const std::pair<QString, std::shared_ptr<AppLogicModule>> ufb : ufbs)
 		{
 			const std::list<AppLogicItem>& items = ufb.second->items();
 
@@ -5346,7 +5372,7 @@ namespace Builder
 			m_runOrder.setRunOrder(ufb.second->equipmentId(), schemaItemRunOrder);
 		}
 
-		// Set Schema Ityem Run Order for drawing on schemas
+		// Set Schema Item Run Order for drawing on schemas
 		//
 		const auto& logicModules = appLogicData->modules();
 

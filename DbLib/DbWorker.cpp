@@ -1256,7 +1256,7 @@ void DbWorker::slot_cloneProject(QString projectName, QString password, QString 
 			return;
 		}
 
-		addLogRecord(db, QString("About to clone project to.").arg(newDatabaseName));
+		addLogRecord(db, QString("About to clone project to %1.").arg(newDatabaseName));
 
 		result = db_checkUserPassword(db, username, password);
 		if (result == false)
@@ -1326,7 +1326,6 @@ void DbWorker::slot_deleteProject(QString projectName, QString password, bool do
 		{
 			this->m_progress->setCompleted(true);			// set complete flag on return
 		});
-
 	// Check parameters
 	//
 	projectName = projectName.trimmed();

@@ -220,6 +220,7 @@ test job:
     - /^release.*$/
     - develop
     - /experimental/
+    - /^exp.*$/
   script:
     - "dir env:"    
     - "echo $Env:CI_COMMIT_SHA"
