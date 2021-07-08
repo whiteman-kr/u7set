@@ -20,6 +20,57 @@ namespace Builder
 
 	// ------------------------------------------------------------------------
 	//
+	//		JsBusSignal
+	//
+	// ------------------------------------------------------------------------
+
+	class JsBusSignal : public QObject
+	{
+		Q_OBJECT
+
+		Q_PROPERTY(QString SignalID READ propSignalId)
+		Q_PROPERTY(QString Caption READ propCaption)
+
+		Q_PROPERTY(E::SignalType SignalType READ propSignalType)
+		Q_PROPERTY(E::AnalogAppSignalFormat AnalogFormat READ propAnalogFormat)
+
+		Q_PROPERTY(int OffsetB READ offsetB)
+		Q_PROPERTY(int OffsetW READ offsetW)
+		Q_PROPERTY(int OffsetBits READ offsetBits)
+
+		Q_PROPERTY(int SizeB READ sizeB)
+		Q_PROPERTY(int SizeW READ sizeW)
+		Q_PROPERTY(int SizeBits READ sizeBits)
+
+	public:
+		JsBusSignal(QObject* parent, const BusSignal* signal, int offsetW);
+
+	public:
+		QString propSignalId() const;
+		QString propCaption() const;
+
+		E::SignalType propSignalType();
+		E::AnalogAppSignalFormat propAnalogFormat();
+
+		int propInbusSizeBits() const;
+
+		int offsetB() const;
+		int offsetW() const;
+		int offsetBits() const;
+
+		int sizeB() const;
+		int sizeW() const;
+		int sizeBits() const;
+
+	private:
+		const BusSignal* m_signal = nullptr;
+		int m_offsetW = 0;
+	};
+
+	Q_DECLARE_METATYPE(QList<JsBusSignal*>)
+
+	// ------------------------------------------------------------------------
+	//
 	//		JsSignalSet
 	//
 	// ------------------------------------------------------------------------
@@ -34,8 +85,17 @@ namespace Builder
 	public:
 		JsSignalSet(SignalSet* signalSet);
 		Q_INVOKABLE QObject* getSignalByEquipmentID(const QString& equpmentID);
+		Q_INVOKABLE QList<JsBusSignal*> getFlatBusSignalsList(const QString& busTypeId);
+
+	private:
+		void parseFlatBusSignals(const QString& busTypeId, QList<JsBusSignal*>& busSignals, int offset);
 	};
 
+	// ------------------------------------------------------------------------
+	//
+	//		ConfigurationBuilder
+	//
+	// ------------------------------------------------------------------------
 
 	class ConfigurationBuilder : QObject
 	{
