@@ -1389,7 +1389,7 @@ namespace Builder
 
 					int switchCounter = co.incChangeCount(*dependantIsAbove);
 
-					if (switchCounter >= 32)
+					if (switchCounter >= LoopbackThreshold)
 					{
 						if (m_signaledItems.contains(currentItem.m_fblItem->label()) == false)
 						{

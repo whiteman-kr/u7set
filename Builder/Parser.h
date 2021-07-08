@@ -182,6 +182,8 @@ namespace Builder
 
 		//
 		QHash<QString, bool> m_signaledItems;
+
+		static const int LoopbackThreshold = 32;
 	};
 
 
