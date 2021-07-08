@@ -117,24 +117,34 @@ namespace Builder
 		return nullptr;
 	}
 
-	QList<JsBusSignal*> JsSignalSet::getFlatBusSignalsList(const QString& busTypeId)
+	QVariantList JsSignalSet::getFlatBusSignalsList(const QString& busTypeId)
 	{
-		QList<JsBusSignal*> busSignals;
+		QVariantList busSignals;
 
 		parseFlatBusSignals(busTypeId, busSignals, 0);
 
 		// Sort signals by offset
 
 		std::sort(busSignals.begin(), busSignals.end(),
-			[](const JsBusSignal* s1, const JsBusSignal* s2)
+			[](const QVariant& s1, const QVariant& s2)
 			{
-				return s1->offsetW() < s2->offsetW();
+				const JsBusSignal* v1 = s1.value<Builder::JsBusSignal*>();
+				const JsBusSignal* v2 = s2.value<Builder::JsBusSignal*>();
+
+				if (v1 == nullptr || v2 == nullptr)
+				{
+					Q_ASSERT(v1);
+					Q_ASSERT(v2);
+					return false;
+				}
+
+				return v1->offsetW() < v2->offsetW();
 			});
 
 		return busSignals;
 	}
 
-	void JsSignalSet::parseFlatBusSignals(const QString& busTypeId, QList<JsBusSignal*>& busSignals, int offset)
+	void JsSignalSet::parseFlatBusSignals(const QString& busTypeId, QVariantList& busSignals, int offset)
 	{
 		BusShared busShared = m_signalSet->getBus(busTypeId);
 		if (busShared == nullptr)
@@ -156,7 +166,7 @@ namespace Builder
 			case E::SignalType::Discrete:
 				{
 					JsBusSignal* bsResult = new JsBusSignal(this, &bs, offset + bs.inbusAddr.offset());
-					busSignals.push_back(bsResult);
+					busSignals.push_back(QVariant::fromValue<JsBusSignal*>(bsResult));
 				}
 				break;
 			default:
@@ -196,9 +206,11 @@ namespace Builder
 		assert(m_log);
 		assert(m_buildResultWriter);
 
-		qRegisterMetaType<QList<JsBusSignal*>>();
 		qRegisterMetaType<E::SignalType>();
 		qRegisterMetaType<E::AnalogAppSignalFormat>();
+
+		qRegisterMetaType<Builder::JsBusSignal*>();
+
 
 		return;
 	}

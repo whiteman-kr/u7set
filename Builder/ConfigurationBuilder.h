@@ -67,8 +67,6 @@ namespace Builder
 		int m_offsetW = 0;
 	};
 
-	Q_DECLARE_METATYPE(QList<JsBusSignal*>)
-
 	// ------------------------------------------------------------------------
 	//
 	//		JsSignalSet
@@ -85,10 +83,10 @@ namespace Builder
 	public:
 		JsSignalSet(SignalSet* signalSet);
 		Q_INVOKABLE QObject* getSignalByEquipmentID(const QString& equpmentID);
-		Q_INVOKABLE QList<JsBusSignal*> getFlatBusSignalsList(const QString& busTypeId);
+		Q_INVOKABLE QVariantList getFlatBusSignalsList(const QString& busTypeId);
 
 	private:
-		void parseFlatBusSignals(const QString& busTypeId, QList<JsBusSignal*>& busSignals, int offset);
+		void parseFlatBusSignals(const QString& busTypeId, QVariantList& busSignals, int offset);
 	};
 
 	// ------------------------------------------------------------------------
@@ -139,3 +137,5 @@ namespace Builder
 	};
 
 }
+
+Q_DECLARE_METATYPE(Builder::JsBusSignal*)
