@@ -22,6 +22,7 @@ linux build job:
     - /^release.*$/
     - develop
     - /experimental/
+    - /^exp.*$/
   tags:
     - gcc
   script:
@@ -59,6 +60,7 @@ windows build job:
     - /^release.*$/
     - develop
     - /experimental/
+    - /^exp.*$/
   tags:
     - vs2017
   script:
