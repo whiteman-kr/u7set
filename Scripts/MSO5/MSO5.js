@@ -410,24 +410,50 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 	{
 		const LAN_COUNT = 2;
 
-		let lanOffset = 276;
+		ptr = 276;
 
 		for (let lan = 1; lan <= LAN_COUNT; lan++)
 		{
+
 			let lanPartCount = 0;
 
-			ptr = lanOffset;
+			let addressData = module.propertyValue("LAN" + lan + "AddressData");
+
+			var addressDataStrings = addressData.split("\n");
+
+			for (let s = 0; s < addressDataStrings.length; s++)
+			{
+				var addressDataString = addressDataStrings[s].trim();
+				if (addressDataString.length == 0)
+				{
+					continue;
+				}
+				
+				lanPartCount++;
+			}
+
+			// ProtocolVersion
 
 			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN" + lan + "_CFG ProtocolVersion = 1 \r\n");
 
 			if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LAN" + lan + "_CFG ProtocolVersion ", 1) == false) {
 				return false;
 			}
+			ptr += 2;
 
-			let addressData = module.propertyValue("LAN" + lan + "AddressData");
+			//QuantityOfRecords
 
-			var addressDataStrings = addressData.split("\n");
+			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN" + lan + "_CFG Quantity of records = " + lanPartCount + "\r\n");
 
+			if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LAN" + lan + "_CFG_Quantity", lanPartCount) == false) {
+				return false;
+			}
+			ptr += 2;
+
+			ptr += 2; // Reserve 1
+
+			ptr += 2; // Reserve 2
+			
 			for (let s = 0; s < addressDataStrings.length; s++)
 			{
 				var addressDataString = addressDataStrings[s].trim();
@@ -481,8 +507,6 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 					continue;
 				}
 
-				ptr = lanOffset  + 8 + 6 * (partAddr - 1);
-
 				// Write rAddr
 
 				var rAddr = Number.parseInt(rStr.substring(1));
@@ -521,23 +545,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 					return false;
 				}
 				ptr += 2;
-
-				lanPartCount++;
 			} // addressDataStrings
-
-			ptr = lanOffset + 2;
-
-			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN" + lan + "_CFG Quantity of records = " + lanPartCount + "\r\n");
-
-			if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LAN" + lan + "_CFG_Quantity", lanPartCount) == false) {
-				return false;
-			}
-			ptr += 2;
-
-			// Switch to the next LAN, it is located directly after current LAN
-
-			lanOffset = lanOffset + 8 + 6 * lanPartCount;
-
 		} // lan
 	}
 
