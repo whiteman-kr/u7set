@@ -697,6 +697,11 @@ function generate_lm_1_rev3(builder: Builder, root: ScriptDeviceObject, module: 
 			return false;
 		}
 
+		if ((diagWordsIoCount & 1) != 0)
+		{
+			diagWordsIoCount++;	// Align to word
+		}
+
 		diagWordsCount += diagWordsIoCount;
 
 		// I/o module diag data size

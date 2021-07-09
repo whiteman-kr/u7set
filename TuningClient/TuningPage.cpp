@@ -70,8 +70,6 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 			return QBrush();
 		}
 
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
-
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
 		if (state.controlIsEnabled() == false)
@@ -98,10 +96,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 			return QBrush(color);
 		}
 
-		TuningValue tvDefault(defaultValue(asp));
-		tvDefault.setType(asp.tuningType());
-
-		if (tvDefault != state.value())
+		if (state.isTuningDefault() == false)
 		{
 			QColor color = theSettings.m_columnDefaultMismatchBackColor;
 			return QBrush(color);
@@ -1168,10 +1163,7 @@ void TuningPage::fillObjectsList()
 					continue;
 				}
 
-				TuningValue tvDefault(m_model->defaultValue(asp));
-				tvDefault.setType(asp.tuningType());
-
-				if (tvDefault == state.value())
+				if (state.isTuningDefault() == true)
 				{
 					// Value is set to default
 					continue;
@@ -2362,10 +2354,10 @@ void TuningPage::slot_setAll()
 				continue;
 			}
 
-			TuningValue tvDefault = m_model->defaultValue(asp);
-
-			if (tvDefault != state.value() && ok == true)
+			if (state.isTuningDefault() == false && ok == true)
 			{
+				TuningValue tvDefault = m_model->defaultValue(asp);
+
 				if(tvDefault < asp.tuningLowBound() || tvDefault > asp.tuningHighBound())
 				{
 					QString message = tr("Invalid default value '%1' in signal %2 [%3]")

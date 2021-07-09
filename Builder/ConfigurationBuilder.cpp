@@ -13,6 +13,77 @@
 
 namespace Builder
 {
+	// ------------------------------------------------------------------------
+	//
+	//		JsBusSignal
+	//
+	// ------------------------------------------------------------------------
+
+	JsBusSignal::JsBusSignal(QObject* parent, const BusSignal* signal, int offsetW, QString busTypeId)
+		:QObject(parent),
+		  m_signal(signal),
+		  m_offsetW(offsetW),
+		  m_busTypeId(busTypeId)
+	{
+
+	}
+
+	QString JsBusSignal::propSignalId() const
+	{
+		return m_signal->signalID;
+	}
+
+	QString JsBusSignal::propCaption() const
+	{
+		return m_signal->caption;
+	}
+
+	QString JsBusSignal::propBusTypeId() const
+	{
+		return m_busTypeId;
+	}
+
+	E::SignalType JsBusSignal::propSignalType()
+	{
+		return m_signal->signalType;
+	}
+
+	E::AnalogAppSignalFormat JsBusSignal::propAnalogFormat()
+	{
+		return m_signal->analogFormat;
+	}
+
+	int JsBusSignal::offsetB() const
+	{
+		const int SHIFT_1_BIT = 1;
+		return m_offsetW << SHIFT_1_BIT;
+	}
+
+	int JsBusSignal::offsetW() const
+	{
+		return m_offsetW;
+	}
+
+	int JsBusSignal::offsetBits() const
+	{
+		const int SHIFT_3_BITS = 3;
+		return m_offsetW << SHIFT_3_BITS;
+	}
+
+	int JsBusSignal::sizeB() const
+	{
+		return static_cast<int>(ceil(m_signal->inbusSizeBits / 8.0));
+	}
+
+	int JsBusSignal::sizeW() const
+	{
+		return static_cast<int>(ceil(m_signal->inbusSizeBits / 16.0));
+	}
+
+	int JsBusSignal::sizeBits() const
+	{
+		return m_signal->inbusSizeBits;
+	}
 
 	// ------------------------------------------------------------------------
 	//
@@ -52,6 +123,84 @@ namespace Builder
 		return nullptr;
 	}
 
+	bool JsSignalSet::busExists(const QString& busTypeId)
+	{
+		BusShared busShared = m_signalSet->getBus(busTypeId);
+		if (busShared == nullptr)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	QVariantList JsSignalSet::getFlatBusSignalsList(const QString& busTypeId)
+	{
+		QVariantList busSignals;
+
+		if (parseFlatBusSignals(busTypeId, busSignals, 0) == false)
+		{
+			return {};
+		}
+
+		// Sort signals by offset
+
+		std::sort(busSignals.begin(), busSignals.end(),
+			[](const QVariant& s1, const QVariant& s2)
+			{
+				const JsBusSignal* v1 = s1.value<Builder::JsBusSignal*>();
+				const JsBusSignal* v2 = s2.value<Builder::JsBusSignal*>();
+
+				if (v1 == nullptr || v2 == nullptr)
+				{
+					Q_ASSERT(v1);
+					Q_ASSERT(v2);
+					return false;
+				}
+
+				return v1->offsetW() < v2->offsetW();
+			});
+
+		return busSignals;
+	}
+
+	bool JsSignalSet::parseFlatBusSignals(const QString& busTypeId, QVariantList& busSignals, int offset)
+	{
+		BusShared busShared = m_signalSet->getBus(busTypeId);
+		if (busShared == nullptr)
+		{
+			Q_ASSERT(busShared);
+			return false;
+		}
+
+		for (const BusSignal& bs : busShared->busSignals())
+		{
+			switch (bs.signalType)
+			{
+			case E::SignalType::Bus:
+				{
+					if (parseFlatBusSignals(bs.busTypeID, busSignals, offset + bs.inbusAddr.offset()) == false)
+					{
+						return false;
+					}
+				}
+				break;
+			case E::SignalType::Analog:
+			case E::SignalType::Discrete:
+				{
+					JsBusSignal* bsResult = new JsBusSignal(this, &bs, offset + bs.inbusAddr.offset(), busShared->busTypeID());
+					busSignals.push_back(QVariant::fromValue<JsBusSignal*>(bsResult));
+				}
+				break;
+			default:
+				Q_ASSERT(false);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	// ------------------------------------------------------------------------
 	//
 	//		ConfigurationBuilder
@@ -79,6 +228,12 @@ namespace Builder
 		assert(m_opticModuleStorage);
 		assert(m_log);
 		assert(m_buildResultWriter);
+
+		qRegisterMetaType<E::SignalType>();
+		qRegisterMetaType<E::AnalogAppSignalFormat>();
+
+		qRegisterMetaType<Builder::JsBusSignal*>();
+
 
 		return;
 	}
@@ -455,13 +610,13 @@ namespace Builder
 		int configUartId = lmDescription->flashMemory().m_configUartId;
 
 		m_buildResultWriter->firmwareWriter()->createFirmware(subsysStrID,
-										 subsysID,
-										 configUartId,
-										 "Configuration",
-										 frameSize,
-										 frameCount,
-										 lmDescription->lmDescriptionFile(subsystemModules[0]),
-										lmDescription->descriptionNumber());
+															  subsysID,
+															  configUartId,
+															  "Configuration",
+															  frameSize,
+															  frameCount,
+															  lmDescription->lmDescriptionFile(subsystemModules[0]),
+				lmDescription->descriptionNumber());
 
 		m_buildResultWriter->firmwareWriter()->setScriptFirmware(subsysStrID, configUartId);
 
@@ -521,10 +676,10 @@ namespace Builder
 		if (jsResult.isError() == true)
 		{
 			QString errorMessage = tr("Uncaught exception while generating module configuration '%1': %2, lineNumber: %3, Stack: %4, ")
-									.arg(lmDescription->configurationStringFile())
-									.arg(jsResult.toString())
-									.arg(jsResult.property("lineNumber").toInt())
-									.arg(jsResult.property("stack").toString());
+								   .arg(lmDescription->configurationStringFile())
+								   .arg(jsResult.toString())
+								   .arg(jsResult.property("lineNumber").toInt())
+								   .arg(jsResult.property("stack").toString());
 
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, errorMessage);
 			return false;
@@ -587,9 +742,9 @@ namespace Builder
 			}
 
 			if (p->caption() == QLatin1String("ConfigurationScript") ||
-					p->caption() == QLatin1String("SpecificProperties") ||
-					p->caption() == QLatin1String("SignalSpecificProperties") ||
-					p->caption() == QLatin1String("EquipmentIDTemplate"))
+				p->caption() == QLatin1String("SpecificProperties") ||
+				p->caption() == QLatin1String("SignalSpecificProperties") ||
+				p->caption() == QLatin1String("EquipmentIDTemplate"))
 			{
 				continue;
 			}
