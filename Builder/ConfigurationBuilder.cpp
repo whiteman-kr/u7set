@@ -19,10 +19,11 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 
-	JsBusSignal::JsBusSignal(QObject* parent, const BusSignal* signal, int offsetW)
+	JsBusSignal::JsBusSignal(QObject* parent, const BusSignal* signal, int offsetW, QString busTypeId)
 		:QObject(parent),
 		  m_signal(signal),
-		  m_offsetW(offsetW)
+		  m_offsetW(offsetW),
+		  m_busTypeId(busTypeId)
 	{
 
 	}
@@ -35,6 +36,11 @@ namespace Builder
 	QString JsBusSignal::propCaption() const
 	{
 		return m_signal->caption;
+	}
+
+	QString JsBusSignal::propBusTypeId() const
+	{
+		return m_busTypeId;
 	}
 
 	E::SignalType JsBusSignal::propSignalType()
@@ -117,11 +123,25 @@ namespace Builder
 		return nullptr;
 	}
 
+	bool JsSignalSet::busExists(const QString& busTypeId)
+	{
+		BusShared busShared = m_signalSet->getBus(busTypeId);
+		if (busShared == nullptr)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
 	QVariantList JsSignalSet::getFlatBusSignalsList(const QString& busTypeId)
 	{
 		QVariantList busSignals;
 
-		parseFlatBusSignals(busTypeId, busSignals, 0);
+		if (parseFlatBusSignals(busTypeId, busSignals, 0) == false)
+		{
+			return {};
+		}
 
 		// Sort signals by offset
 
@@ -144,13 +164,13 @@ namespace Builder
 		return busSignals;
 	}
 
-	void JsSignalSet::parseFlatBusSignals(const QString& busTypeId, QVariantList& busSignals, int offset)
+	bool JsSignalSet::parseFlatBusSignals(const QString& busTypeId, QVariantList& busSignals, int offset)
 	{
 		BusShared busShared = m_signalSet->getBus(busTypeId);
 		if (busShared == nullptr)
 		{
 			Q_ASSERT(busShared);
-			return;
+			return false;
 		}
 
 		for (const BusSignal& bs : busShared->busSignals())
@@ -159,23 +179,26 @@ namespace Builder
 			{
 			case E::SignalType::Bus:
 				{
-					parseFlatBusSignals(bs.busTypeID, busSignals, offset + bs.inbusAddr.offset());
+					if (parseFlatBusSignals(bs.busTypeID, busSignals, offset + bs.inbusAddr.offset()) == false)
+					{
+						return false;
+					}
 				}
 				break;
 			case E::SignalType::Analog:
 			case E::SignalType::Discrete:
 				{
-					JsBusSignal* bsResult = new JsBusSignal(this, &bs, offset + bs.inbusAddr.offset());
+					JsBusSignal* bsResult = new JsBusSignal(this, &bs, offset + bs.inbusAddr.offset(), busShared->busTypeID());
 					busSignals.push_back(QVariant::fromValue<JsBusSignal*>(bsResult));
 				}
 				break;
 			default:
 				Q_ASSERT(false);
-				return;
+				return false;
 			}
 		}
 
-		return;
+		return true;
 	}
 
 	// ------------------------------------------------------------------------

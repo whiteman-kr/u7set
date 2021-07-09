@@ -30,6 +30,7 @@ namespace Builder
 
 		Q_PROPERTY(QString SignalID READ propSignalId)
 		Q_PROPERTY(QString Caption READ propCaption)
+		Q_PROPERTY(QString BusTypeID READ propBusTypeId)
 
 		Q_PROPERTY(E::SignalType SignalType READ propSignalType)
 		Q_PROPERTY(E::AnalogAppSignalFormat AnalogFormat READ propAnalogFormat)
@@ -43,11 +44,12 @@ namespace Builder
 		Q_PROPERTY(int SizeBits READ sizeBits)
 
 	public:
-		JsBusSignal(QObject* parent, const BusSignal* signal, int offsetW);
+		JsBusSignal(QObject* parent, const BusSignal* signal, int offsetW, QString busTypeId);
 
 	public:
 		QString propSignalId() const;
 		QString propCaption() const;
+		QString propBusTypeId() const;
 
 		E::SignalType propSignalType();
 		E::AnalogAppSignalFormat propAnalogFormat();
@@ -65,6 +67,7 @@ namespace Builder
 	private:
 		const BusSignal* m_signal = nullptr;
 		int m_offsetW = 0;
+		QString m_busTypeId;
 	};
 
 	// ------------------------------------------------------------------------
@@ -83,10 +86,12 @@ namespace Builder
 	public:
 		JsSignalSet(SignalSet* signalSet);
 		Q_INVOKABLE QObject* getSignalByEquipmentID(const QString& equpmentID);
+
+		Q_INVOKABLE bool busExists(const QString& busTypeId);
 		Q_INVOKABLE QVariantList getFlatBusSignalsList(const QString& busTypeId);
 
 	private:
-		void parseFlatBusSignals(const QString& busTypeId, QVariantList& busSignals, int offset);
+		[[nodiscard]] bool parseFlatBusSignals(const QString& busTypeId, QVariantList& busSignals, int offset);
 	};
 
 	// ------------------------------------------------------------------------

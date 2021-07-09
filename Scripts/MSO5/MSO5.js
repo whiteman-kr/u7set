@@ -219,8 +219,15 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 
 	} // p
 
-	// VOTE_CFG
+	// ------------------------------------------------------------ VOTE_CFG ---------------------------------------------------------
+
+	var modbusDataLengthArray = [];
+
 	{
+		let votePartCount = 0;
+		const maxVotePartCount = 48;
+		const maxVotePartSizeW = 128;
+
 		const MSO5Discrete = 1;
 		const MSO5Float = 2;
 		const MSO5SignedInt = 3;
@@ -253,13 +260,13 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 
 		let txBusTypeId = module.propertyValue("TxBusTypeId");
 
-		let busSignalList = signalSet.getFlatBusSignalsList(txBusTypeId)
-		if (busSignalList == null) {
+		if (signalSet.busExists(txBusTypeId) == false)
+		{
 			log.writeError(module.equipmentId +  ", Bus " + txBusTypeId + " was not found!");
 			return false;
 		}
 
-		let partCount = 0;
+		let busSignalList = signalSet.getFlatBusSignalsList(txBusTypeId)
 
 		let i = 0;
 
@@ -287,7 +294,12 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 				for (let j = i + 1; j < busSignalList.length; j++) {
 					let bs2 = busSignalList[j];
 
-					if (bs.SignalType == bs2.SignalType && bs.AnalogFormat == bs2.AnalogFormat && bs.SizeW == bs2.SizeW && bs2.OffsetW <= partOffset + partDataSize) {
+					if (bs.SignalType == bs2.SignalType && 
+						bs.AnalogFormat == bs2.AnalogFormat && 
+						bs.SizeW == bs2.SizeW && 
+						bs.BusTypeID == bs2.BusTypeID && 
+						bs2.OffsetW <= partOffset + partDataSize &&
+						partDataSize + bs2.SizeW <= maxVotePartSizeW) {
 
 						/*
 						if (bs2.SignalType == SignalTypeAnalog) {
@@ -298,9 +310,9 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 						}
 						*/
 
-						if (bs2.OffsetW != partOffset)
+						if (bs2.OffsetW != partOffset)	// Same offset can be for discrete signals, skip them
 						{
-							partDataSize += bs2.SizeW;
+							partDataSize += bs2.SizeW;	
 						}
 						i = j + 1;
 					}
@@ -317,12 +329,20 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 				i++;	// This will end the loop
 			}
 
-			partCount++;
+			votePartCount++;
+
+			if (votePartCount > maxVotePartCount)
+			{
+				log.writeError(module.equipmentId +  ", TX Bus part count is more than 48 parts.");
+				return false;
+			}
 
 			let partDataType = -1;
+			let partDataTypeStr = "";
 
 			if (bs.SignalType == SignalTypeDiscrete) {
 				partDataType = MSO5Discrete;
+				partDataTypeStr = "(discrete)";
 			}
 			else {
 				if (bs.SignalType == SignalTypeAnalog) {
@@ -330,11 +350,13 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 						case AnalogAppSignalFormatFloat32:
 							{
 								partDataType = MSO5Float;
+								partDataTypeStr = "(float32)";
 							}
 							break;
 						case AnalogAppSignalFormatSignedInt:
 							{
 								partDataType = MSO5SignedInt;
+								partDataTypeStr = "(int)";
 							}
 							break;
 						default:
@@ -347,12 +369,16 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 					return false;
 				}
 			}
+
+			// Add part data size to array
+
+			modbusDataLengthArray.push(partDataSize);
 			
 			// Offset
 
-			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : VOTE_CFG Part " + partCount + " Offset = " + partOffset + "\r\n");
+			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : VOTE_CFG Part " + votePartCount + " Offset = " + partOffset + "\r\n");
 
-			if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "VOTE_CFG " + partCount + " Offset", partOffset) == false) {
+			if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "VOTE_CFG_" + votePartCount + "_Offset", partOffset) == false) {
 				return false;
 			}
 			ptr += 2;
@@ -361,27 +387,163 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 
 			let dataSizeType = (partDataSize << 8) + partDataType;
 
-			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : VOTE_CFG Part " + partCount + " DataSize = " + partDataSize + ", DataType = " + partDataType + ", DatsSizeType = " + dataSizeType + "\r\n");
+			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : VOTE_CFG Part " + votePartCount + " DataSize = " + partDataSize + ", DataType = " + partDataType + " " + partDataTypeStr +  ", BusTypeID = " + bs.BusTypeID + ", DatsSizeType = " + dataSizeType + "\r\n");
 
-			if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "VOTE_CFG " + partCount + " DatsSizeType", dataSizeType) == false) {
+			if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "VOTE_CFG_" + votePartCount + "_DatsSizeType", dataSizeType) == false) {
 				return false;
-				ptr += 2;
 			}
+			ptr += 2;
 		}
 
 		// PartCount
 
-		confFirmware.writeLog("    [" + frame + ":" + ptrQuantityOfRecords + "] : VOTE_CFG_QuantityOfRecords = " + partCount + "\r\n");
+		confFirmware.writeLog("    [" + frame + ":" + ptrQuantityOfRecords + "] : VOTE_CFG_QuantityOfRecords = " + votePartCount + "\r\n");
 
-		if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptrQuantityOfRecords, "VOTE_CFG_QuantityOfRecords", partCount) == false) {
+		if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptrQuantityOfRecords, "VOTE_CFG_QuantityOfRecords", votePartCount) == false) {
 			return false;
 		}
 		ptr += 2;
 	}
 
-	//----------------------------------------
+	// ------------------------------------------------------------ LAN_CFG ---------------------------------------------------------
 
-    ptr = 120;
+	{
+		const LAN_COUNT = 2;
+
+		let lanOffset = 276;
+
+		for (let lan = 1; lan <= LAN_COUNT; lan++)
+		{
+			let lanPartCount = 0;
+
+			ptr = lanOffset;
+
+			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN" + lan + "_CFG ProtocolVersion = 1 \r\n");
+
+			if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LAN" + lan + "_CFG ProtocolVersion ", 1) == false) {
+				return false;
+			}
+
+			let addressData = module.propertyValue("LAN" + lan + "AddressData");
+
+			var addressDataStrings = addressData.split("\n");
+
+			for (let s = 0; s < addressDataStrings.length; s++)
+			{
+				var addressDataString = addressDataStrings[s].trim();
+				if (addressDataString.length == 0)
+				{
+					continue;
+				}
+
+				var addressValues = addressDataString.split(" ");
+
+				if (addressValues.length != 3)
+				{
+					log.writeError(module.equipmentId +  ", LAN" + lan + "AddressData string '" + addressDataString + "' has incorrect format!");
+					continue;
+				}
+
+				// PART
+
+				var partStr = addressValues[0].trim();
+				if (partStr.search("^PART\\d+$") == -1)
+				{
+					log.writeError(module.equipmentId +  ", LAN" + lan + "AddressData string '" + addressDataString + "', field '"+ partStr + "' has incorrect format!");
+					continue;
+				}
+
+				// R
+
+				var rStr = addressValues[1].trim();
+				if (rStr.search("^R\\d+$") == -1)
+				{
+					log.writeError(module.equipmentId +  ", LAN" + lan + "AddressData string '" + addressDataString + "', field '"+ rStr + "' has incorrect format!");
+					continue;
+				}
+
+				// W
+
+				var wStr = addressValues[2].trim();
+				if (wStr.search("^W\\d+$") == -1)
+				{
+					log.writeError(module.equipmentId +  ", LAN" + lan + "AddressData string '" + addressDataString + "', field '"+ wStr + "' has incorrect format!");
+					continue;
+				}
+
+				// Get partAddr
+
+				var partAddr = Number.parseInt(partStr.substring(4));
+
+				if (partAddr < 1 || partAddr > 48)
+				{
+					log.writeError(module.equipmentId +  ", LAN" + lan + "AddressData string '" + addressDataString + "', field PART '"+ partAddr + "' has incorrect value (expected 1..48)!");	
+					continue;
+				}
+
+				ptr = lanOffset  + 8 + 6 * (partAddr - 1);
+
+				// Write rAddr
+
+				var rAddr = Number.parseInt(rStr.substring(1));
+				
+				confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN" + lan + "_CFG Part " + partAddr + " ReadSizeAddress = " + rAddr + "\r\n");
+
+				if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LAN" + lan + "_CFG_Part_" + partAddr + "_ReadSizeAddress", rAddr) == false) {
+					return false;
+				}
+				ptr += 2;
+	
+				// Write wAddr
+
+				var wAddr = Number.parseInt(wStr.substring(1));
+
+				confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN" + lan + "_CFG Part " + partAddr + " WriteSizeAddress = " + wAddr + "\r\n");
+
+				if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LAN" + lan + "_CFG_Part_" + partAddr + "_WriteSizeAddress", wAddr) == false) {
+					return false;
+				}
+				ptr += 2;
+
+				// Write DataSize
+
+				if ((partAddr - 1) >  (modbusDataLengthArray.length - 1))
+				{
+					log.writeError(module.equipmentId +  ", LAN" + lan + "AddressData string '" + addressDataString + "', PART '"+ partAddr + "' data size was not found!");	
+					continue;
+				}
+
+				let dataSize = modbusDataLengthArray[partAddr - 1];
+
+				confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN" + lan + "_CFG Part " + partAddr + " DataSize = " + dataSize + "\r\n");
+
+				if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LAN" + lan + "_CFG_Part_" + partAddr + "_DataSize", dataSize) == false) {
+					return false;
+				}
+				ptr += 2;
+
+				lanPartCount++;
+			} // addressDataStrings
+
+			ptr = lanOffset + 2;
+
+			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN" + lan + "_CFG Quantity of records = " + lanPartCount + "\r\n");
+
+			if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LAN" + lan + "_CFG_Quantity", lanPartCount) == false) {
+				return false;
+			}
+			ptr += 2;
+
+			// Switch to the next LAN, it is located directly after current LAN
+
+			lanOffset = lanOffset + 8 + 6 * lanPartCount;
+
+		} // lan
+	}
+
+	//---------------------------------------- CRC ------------------------------------------------------
+
+    ptr = 868;
     
     // crc
     let stringCrc64 = storeCrc64(confFirmware, log, LMNumber, module.equipmentId, frame, 0, ptr, ptr);   //CRC-64
@@ -392,8 +554,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = 0x" + stringCrc64 + "\r\n");
     ptr += 8;    
 
-    // reserved
-    ptr += 880;
+    ptr = 1008;
     
     // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
     //
