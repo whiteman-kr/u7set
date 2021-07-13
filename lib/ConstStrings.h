@@ -150,13 +150,16 @@ namespace EquipmentPropNames
 	inline const QString TUNING_LOW_BOUND("TuningLowBound");
 	inline const QString TUNING_HIGH_BOUND("TuningHighBound");
 
-
 	// Tuning Authorization properties
 	//
 	inline const QString TUNING_LOGIN("TuningLogin");
 	inline const QString TUNING_USER_ACCOUNTS("TuningUserAccounts");
 	inline const QString TUNING_SESSION_TIMEOUT("TuningSessionTimeout");
 	inline const QString LOGIN_PER_OPERATION("LoginPerOperation");
+
+	// Opto modules properties
+	//
+	inline const QString ALLOW_INCHASSIS_OPTO_CONNECTIONS("AllowInchassisOptoConnections");
 }
 
 namespace XmlElement

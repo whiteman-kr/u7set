@@ -404,6 +404,8 @@ namespace Hardware
 		bool calculateTxSignalsAddresses();
 		bool copyOpticalPortsTxInRxSignals();
 
+		bool allowInchassisOptoConnections() const;
+
 	private:
 		void sortPortsByEquipmentIDAscending(QVector<OptoPort*>& getPorts);
 
