@@ -466,3 +466,12 @@ namespace Manufacturer
 	inline const QString SITE("radiy.com");
 }
 
+namespace Busses
+{
+	inline const QString SIGNAL_ID_SEPARATOR(".");
+
+	inline const QString MACRO_BUS_TYPE("$(BusType)");
+	inline const QString MACRO_BUS_APP_SIGNAL_ID("$(BusAppSignalID)");
+	inline const QString MACRO_BUS_CUSTOM_APP_SIGNAL_ID("$(BusCustomAppSignalID)");
+	inline const QString MACRO_BUS_CAPTION("$(BusCaption)");
+}
