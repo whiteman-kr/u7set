@@ -9403,26 +9403,54 @@ namespace Builder
 			return false;
 		}
 
-		if (busSignal.is_SignedInt32_To_Unsigned16_BE_NoScale_coversion() == true)
+		if (busSignal.is_SInt32_To_UInt16_BE_NoScale_conversion() == true)
 		{
-			return get_SignedInt32_To_Unsigned16_BE_NoScale_inbusSignalCoversionCode(code, inputSignal, busChildSignal, busSignal);
+			return get_SInt32_To_UInt16_BE_NoScale_inbusSignalConversionCode(code, inputSignal, busChildSignal, busSignal);
+		}
+
+		if (busSignal.is_SInt32_To_SInt16_BE_NoScale_conversion() == true)
+		{
+			return get_SInt32_To_SInt16_BE_NoScale_inbusSignalConversionCode(code, inputSignal, busChildSignal, busSignal);
 		}
 
 		LOG_INTERNAL_ERROR(m_log);
 		return false;
 	}
 
-	bool ModuleLogicCompiler::get_SignedInt32_To_Unsigned16_BE_NoScale_inbusSignalCoversionCode(CodeSnippet* code,
-																								const UalSignal* inputSignal,
-																								const UalSignal* busChildSignal,
-																								const BusSignal& busSignal)
+	bool ModuleLogicCompiler::get_SInt32_To_UInt16_BE_NoScale_inbusSignalConversionCode(CodeSnippet* code,
+																						const UalSignal* inputSignal,
+																						const UalSignal* busChildSignal,
+																						const BusSignal& busSignal)
 	{
-		if (busSignal.is_SignedInt32_To_Unsigned16_BE_NoScale_coversion() == false)
+		if (busSignal.is_SInt32_To_UInt16_BE_NoScale_conversion() == false)
 		{
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
+		return get_SInt32_LowWord_CoversionCode(code, inputSignal, busChildSignal, QString("SInt32_To_UInt16_BE_NoScale"));
+	}
+
+	bool ModuleLogicCompiler::get_SInt32_To_SInt16_BE_NoScale_inbusSignalConversionCode(CodeSnippet* code,
+																						const UalSignal* inputSignal,
+																						const UalSignal* busChildSignal,
+																						const BusSignal& busSignal)
+	{
+		if (busSignal.is_SInt32_To_SInt16_BE_NoScale_conversion() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		return get_SInt32_LowWord_CoversionCode(code, inputSignal, busChildSignal, QString("SInt32_To_SInt16_BE_NoScale"));
+
+	}
+
+	bool ModuleLogicCompiler::get_SInt32_LowWord_CoversionCode( CodeSnippet* code,
+																const UalSignal* inputSignal,
+																const UalSignal* busChildSignal,
+																const QString& conversionDescription)
+	{
 		CodeItem cmd;
 
 		if (inputSignal->isConst() == true)
@@ -9430,12 +9458,18 @@ namespace Builder
 			quint16 constValue = inputSignal->constAnalogIntValue() & 0xFFFF;					// get low word of const
 
 			cmd.movConst(busChildSignal->ualAddr().offset(), constValue);
-			cmd.setComment(QString("%1 <= %2 (SignedInt32_To_Unsigned16_BE_NoScale)").arg(busChildSignal->refSignalIDsJoined()).arg(constValue));
+			cmd.setComment(QString("%1 <= %2 (%3)").
+						   arg(busChildSignal->refSignalIDsJoined()).
+						   arg(constValue).
+						   arg(conversionDescription));
 		}
 		else
 		{
 			cmd.mov(busChildSignal->ualAddr().offset(), inputSignal->ualAddr().offset() + 1);	// move low word of inputSignal only
-			cmd.setComment(QString("%1 <= %2 (SignedInt32_To_Unsigned16_BE_NoScale)").arg(busChildSignal->refSignalIDsJoined()).arg(inputSignal->refSignalIDsJoined()));
+			cmd.setComment(QString("%1 <= %2 (%3)").
+						   arg(busChildSignal->refSignalIDsJoined()).
+						   arg(inputSignal->refSignalIDsJoined()).
+						   arg(conversionDescription));
 		}
 
 		code->append(cmd);
