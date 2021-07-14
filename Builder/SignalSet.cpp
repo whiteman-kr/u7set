@@ -448,8 +448,8 @@ namespace Builder
 	{
 		AppSignal* newSignal = new AppSignal();
 
-		newSignal->setAppSignalID(QString(busParentSignal.appSignalID() + BusSignal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
-		newSignal->setCustomAppSignalID(QString(busParentSignal.customAppSignalID() + BusSignal::BUS_SIGNAL_ID_SEPARATOR + busSignal.signalID));
+		newSignal->setAppSignalID(QString(busParentSignal.appSignalID() + ::Busses::SIGNAL_ID_SEPARATOR + busSignal.signalID));
+		newSignal->setCustomAppSignalID(QString(busParentSignal.customAppSignalID() + ::Busses::SIGNAL_ID_SEPARATOR + busSignal.signalID));
 
 		QString caption = expandBusSignalCaptionTemplate(busParentSignal, bus, busSignal);
 
@@ -590,10 +590,10 @@ namespace Builder
 	{
 		QString caption = busSignal.caption;
 
-		caption.replace(BusSignal::BUS_TYPE, bus->busTypeID());
-		caption.replace(BusSignal::BUS_APP_SIGNAL_ID, busParentSignal.appSignalID());
-		caption.replace(BusSignal::BUS_CUSTOM_APP_SIGNAL_ID, busParentSignal.customAppSignalID());
-		caption.replace(BusSignal::BUS_CAPTION, busParentSignal.caption());
+		caption.replace(::Busses::MACRO_BUS_TYPE, bus->busTypeID());
+		caption.replace(::Busses::MACRO_BUS_APP_SIGNAL_ID, busParentSignal.appSignalID());
+		caption.replace(::Busses::MACRO_BUS_CUSTOM_APP_SIGNAL_ID, busParentSignal.customAppSignalID());
+		caption.replace(::Busses::MACRO_BUS_CAPTION, busParentSignal.caption());
 
 		return caption;
 	}

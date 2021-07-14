@@ -4,7 +4,7 @@
 #include "../VFrame30/Bus.h"
 #include "IssueLogger.h"
 #include "BuildResultWriter.h"
-
+#include "../lib/ConstStrings.h"
 
 namespace Builder
 {
@@ -12,14 +12,6 @@ namespace Builder
 
 	class BusSignal
 	{
-	public:
-		static const QString BUS_SIGNAL_ID_SEPARATOR;
-
-		static const QString BUS_TYPE;
-		static const QString BUS_APP_SIGNAL_ID;
-		static const QString BUS_CUSTOM_APP_SIGNAL_ID;
-		static const QString BUS_CAPTION;
-
 	public:
 		QString signalID;
 		QString caption;
@@ -48,7 +40,8 @@ namespace Builder
 		bool conversionRequired() const;
 
 		bool hasKnownConversion() const;
-		bool is_SignedInt32_To_Unsigned16_BE_NoScale_coversion() const;
+		bool is_SInt32_To_UInt16_BE_NoScale_conversion() const;
+		bool is_SInt32_To_SInt16_BE_NoScale_conversion() const;
 
 		void init(const Busses& busses, const VFrame30::BusSignal& bs);
 		bool isOverlaped(const BusSignal& bs);
