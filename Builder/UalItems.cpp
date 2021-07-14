@@ -1470,6 +1470,20 @@ namespace Builder
 		return m_refSignals[0];
 	}
 
+	E::SignalInOutType UalSignal::inOutType() const
+	{
+		if (isBusChild() == true && isFrombusConversionRequired() == true)
+		{
+			// bus child signal that required frombus conversion
+			// will be placed in LM memory as INTERNAL signal
+			// and conversion code will be generated
+			//
+			return E::SignalInOutType::Internal;
+		}
+
+		return m_refSignals[0]->inOutType();
+	}
+
 	bool UalSignal::isCompatible(const AppSignal* s, IssueLogger* log) const
 	{
 		TEST_PTR_RETURN_FALSE(log);
@@ -1913,6 +1927,12 @@ namespace Builder
 				continue;
 			}
 
+			if (childSignal->isFrombusConversionRequired() == true)
+			{
+				// this bus child signal will be aquired as converted analog internal signal
+				continue;
+			}
+
 			int busBitAddr = regBufAddr.bitAddress();
 			int busSignalBitAddr = busSignal.inbusAddr.bitAddress();
 
@@ -1980,6 +2000,12 @@ namespace Builder
 			{
 				Q_ASSERT(false);
 				result = false;
+				continue;
+			}
+
+			if (childSignal->isFrombusConversionRequired() == true)
+			{
+				// this bus child signal will be aquired as converted analog internal signal
 				continue;
 			}
 

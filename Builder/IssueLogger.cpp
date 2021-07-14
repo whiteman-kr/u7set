@@ -7151,6 +7151,27 @@ namespace Builder
 						arg(itemLabel).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5196
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Unknown conversion from inbus signal %1 to app signal %2 (Logic schema %3).
+	///
+	/// Parameters:
+	///		%1 Bus child signal appSignalID
+	///		%2 App signalID
+	///		%3 Logic schemaID
+	///
+	/// Description:
+	///		Unknown conversion from inbus signal to app signal. Check types of signals.
+	///
+	void IssueLogger::errALC5196(QString signalID, QString inbusSignalID, QString schemaID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5196,
+				  QString(tr("Unknown conversion from inbus signal %1 to app signal %2 (Logic schema %3).")).
+							arg(inbusSignalID).arg(signalID).arg(schemaID));
+	}
 
 	/// IssueCode: ALC5800
 	///

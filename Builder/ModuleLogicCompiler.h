@@ -484,16 +484,50 @@ namespace Builder
 		UalSignal* getBusComposerBusSignal(const UalItem* composerItem, bool* connectedToTedrminatorOnly);
 		bool generateAnalogSignalToBusAnalogInputCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
 
-		bool getAnalogSignalToInbusSignalConversionCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
-		bool get_SInt32_To_UInt16_BE_NoScale_inbusSignalConversionCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
-		bool get_SInt32_To_SInt16_BE_NoScale_inbusSignalConversionCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
-		bool get_SInt32_LowWord_CoversionCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const QString& conversionDescription);
+		bool getAnalogSignalToInbusSignalConversionCode(CodeSnippet* code,
+														const UalSignal* inputSignal,
+														const UalSignal* busChildSignal,
+														const BusSignal& busSignal);
+		bool get_SInt32_To_UInt16_BE_NoScale_inbusConversionCode(CodeSnippet* code,
+																const UalSignal* inputSignal,
+																const UalSignal* busChildSignal,
+																const Address16& inbusSignalAddr);
+		bool get_SInt32_To_SInt16_BE_NoScale_inbusConversionCode(CodeSnippet* code,
+																const UalSignal* inputSignal,
+																const UalSignal* busChildSignal,
+																const Address16& inbusSignalAddr);
+		bool get_SInt32_LowWord_ConversionCode(CodeSnippet* code,
+											   const UalSignal* inputSignal,
+											   const UalSignal* busChildSignal,
+											   const Address16& inbusSignalAddr,
+											   const QString& conversionDescription);
 
 		bool generateDiscreteSignalToBusDiscreteInputCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
 		bool generateDiscreteSignalToBusBusInputCode(CodeSnippet* code, UalSignal* inputSignal, UalSignal* busChildSignal);
 		bool generateBusSignalToBusBusInputCode(CodeSnippet* code, UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
 
-		bool generateDiscreteSignalToBusExtractorCode(CodeSnippet* code, const UalItem* ualItem);
+		bool generateBusExtractorCode(CodeSnippet* code, const UalItem* ualItem);
+		bool generateBusExtractorCode(CodeSnippet* code, const UalItem* ualItem, UalSignal* inputBusSignal);
+
+		bool generateFrombusConversionCode(CodeSnippet* code,
+										   const UalItem* ualItem,
+										   const UalSignal *inputBusSignal,
+										   const BusSignal& busSignal,
+										   UalSignal* busChildSignal);
+
+		bool get_UInt16_To_SInt32_BE_NoScale_frombusConversionCode(CodeSnippet* code,
+																	const UalSignal* inputBusSignal,
+																	const BusSignal& busSignal,
+																	const UalSignal* busChildSignal);
+		bool get_SInt16_To_SInt32_BE_NoScale_frombusConversionCode(CodeSnippet* code,
+																	const UalSignal* inputBusSignal,
+																	const BusSignal& busSignal,
+																	const UalSignal* busChildSignal);
+
+		bool generateDiscreteSignalToBusExtractorCode(CodeSnippet* code,
+													  const UalItem* ualItem,
+													  const LogicPin& inPin,
+													  const UalSignal* inputSignal);
 
 		bool generateMemCopyCode(Address16 toAddr, Address16 fromAddr, int sizeW, const QString& comment, CodeSnippet* code);
 
@@ -698,6 +732,7 @@ namespace Builder
 		QHash<QString, AppSignal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => AppSignal*
 		QHash<QString, AppSignal*> m_equipmentSignals;			// equipment signals to app signals map, signal EquipmentID => Signal*
 		std::map<QString, UalSignal*> m_optoPortValiditySignal;	// OptoPort EquipmentID => OptoPort validity signal
+		std::map<QString, UalSignal*> m_busChildSignalsRequiredConversion;	// Bus child signal required conversion ID => Corresponding CONVERTED UAL signal
 
 		::std::set<QString> m_signalsWithFlagsIDs;
 		::std::unordered_set<UalSignal*> m_signalsWithFlagsAndFlagSignals;
