@@ -147,9 +147,10 @@ namespace Builder
 		//
 
 		int getModuleDataOffset(int place) const;
-		int getModuleRegDataOffset(int place) const;
 
-		void getFile(QStringList& memFile);
+		void getFile(QStringList& memFile,
+					 const std::vector<std::tuple<QString, Address16, int>>& discreteSignalHeapItems,
+					 const std::vector<std::tuple<QString, Address16, int>>& analogAndBusSignalHeapItems);
 
 		bool appendUalSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals);
 		bool appendRegSignals(MemoryArea& memArea, const QVector<UalSignal*>& ualSignals, bool setUalAddrEqualToRegBufAddr);

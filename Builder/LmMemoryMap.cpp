@@ -401,7 +401,9 @@ namespace Builder
 		return m_modules.module[place - 1].startAddress();;
 	}
 
-	void LmMemoryMap::getFile(QStringList& memFile)
+	void LmMemoryMap::getFile(QStringList& memFile,
+							  const std::vector<std::tuple<QString, Address16, int>>& discreteSignalHeapItems,
+							  const std::vector<std::tuple<QString, Address16, int>>& analogAndBusSignalHeapItems)
 	{
 		memFile.append(QString(" LM's memory map"));
 		memFile.append("");
@@ -448,6 +450,20 @@ namespace Builder
 
 		addRecord(memFile, m_appBitAdressed.discreteSignalsHeap, "discrete signals heap");
 		memFile.append("");
+
+		for(auto [appSignalID, addr16, sizeBits] : discreteSignalHeapItems)
+		{
+			memFile.append(QString(" %1.%2            00000.0%3  - %4").
+							arg(addr16.offset(), 5, 10, Latin1Char::ZERO).
+							arg(addr16.bit(), 2, 10, Latin1Char::ZERO).
+							arg(sizeBits).
+							arg(appSignalID));
+		}
+
+		if (discreteSignalHeapItems.size() != 0)
+		{
+			memFile.append("");
+		}
 
 		//
 
@@ -499,6 +515,20 @@ namespace Builder
 
 		addRecord(memFile, m_appWordAdressed.analogAndBusSignalsHeap, "analog and bus signals heap");
 		memFile.append("");
+
+		for(auto [appSignalID, addr16, sizeBits] : analogAndBusSignalHeapItems)
+		{
+			memFile.append(QString(" %1     %2     %3     - %4").
+							arg(addr16.offset(), 5, 10, Latin1Char::ZERO).
+							arg(addr16.offset() - m_appWordAdressed.analogAndBusSignalsHeap.startAddress(), 5, 10, Latin1Char::ZERO).
+							arg(sizeBits / SIZE_16BIT, 5, 10, Latin1Char::ZERO).
+							arg(appSignalID));
+		}
+
+		if (analogAndBusSignalHeapItems.size() != 0)
+		{
+			memFile.append("");
+		}
 	}
 
 	void LmMemoryMap::addSection(QStringList& memFile, MemoryArea& memArea, const QString& title, int sectionStartAddrW)

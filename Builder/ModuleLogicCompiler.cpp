@@ -13282,7 +13282,9 @@ namespace Builder
 
 		QStringList memFile;
 
-		m_memoryMap.getFile(memFile);
+		m_memoryMap.getFile(memFile,
+							m_ualSignals.discreteSignalsHeap().getHeapItemsLog(),
+							m_ualSignals.analogAndBusSignalsHeap().getHeapItemsLog());
 
 		buildFile = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.mem").
 											arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), memFile);
