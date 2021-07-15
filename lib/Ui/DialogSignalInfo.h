@@ -30,7 +30,34 @@ class SignalFlagsWidget : public QWidget
 	Q_OBJECT
 
 public:
-	enum class SignalFlagsFields
+	SignalFlagsWidget(QWidget* parent = nullptr);
+
+protected:
+	void paintEvent(QPaintEvent *event);
+	void mouseMoveEvent(QMouseEvent *event);
+
+	virtual bool flagState(int flagNo, bool* const flagValid, bool* const flagValue, bool* const flagAlert) const = 0;
+
+protected:
+	std::vector<QString> m_flagNames;
+	std::vector<QString> m_flagTooltips;
+
+private:
+	QRect flag2Rect(int flagNo);
+	int point2Flag(const QPoint& pt);
+
+private:
+	const int m_colCount = 5;
+	const int m_rowCount = 2;
+
+	int m_lastFlagAbove = -1;
+
+};
+
+class AppSignalFlagsWidget : public SignalFlagsWidget
+{
+public:
+	enum class AppSignalFlagsFields
 	{
 		Valid = 0,
 		StateAvailable,
@@ -38,32 +65,42 @@ public:
 		Blocked,
 		Mismatch,
 		AboveHighLimit,
-		BelowLowLimit,
-		Count
+		BelowLowLimit
 	};
 
-
-public:
-	SignalFlagsWidget(QWidget* parent = nullptr);
+	AppSignalFlagsWidget(QWidget* parent = nullptr);
 
 	void updateControl(AppSignalStateFlags flags);
 
-protected:
-	void paintEvent(QPaintEvent *event);
-	void mouseMoveEvent(QMouseEvent *event);
-
 private:
-	QRect flag2Rect(int flagNo);
-	int point2Flag(const QPoint& pt);
+	bool flagState(int flagNo, bool* const flagValid, bool* const flagValue, bool* const flagAlert) const override;
 
 private:
 	AppSignalStateFlags m_flags;
+};
 
-	const int m_colCount = 5;
-	const int m_rowCount = 2;
+class TuningSignalFlagsWidget : public SignalFlagsWidget
+{
+public:
+	enum class TuningSignalFlagsFields
+	{
+		Valid = 0,
+		OutOfRange,
+		WriteInProgress,
+		ControlIsEnabled,
+		WritingIsEnabled,
+		TuningDefault
+	};
 
-	int m_lastFlagAbove = -1;
+	TuningSignalFlagsWidget(QWidget* parent = nullptr);
 
+	void updateControl(TuningSignalStateFlags flags);
+
+private:
+	bool flagState(int flagNo, bool* const flagValid, bool* const flagValue, bool* const flagAlert) const override;
+
+private:
+	TuningSignalStateFlags m_flags;
 };
 
 
@@ -152,25 +189,26 @@ private:
 	void removeTabPage(const QString& tabName);
 
 	//
-	void updateSingnalData();
+	void fillSignalData();
 
 	void fillSignalInfo();
 	void fillProperties();
 	void fillExtProperties();
 	void fillSetpoints();
 	void fillSchemas();
-	void updateTuningTab();
+	void fillTuningTab();
 
 	//
-	void updateDynamicData();
-
-	void updateState();
+	void updateSignalData();
+	void updateAppSignalState();
 	void updateSetpoints();
+	void updateTuningSignalState();
 
 	//
 	void stateContextMenu(QPoint pos);
 
-	QString signalStateText(const AppSignalParam& param, const AppSignalState& state, E::ValueViewType viewType, int precision);
+	QString appSignalStateText(const AppSignalParam& param, const AppSignalState& state, E::ValueViewType viewType, int precision);
+	QString tuningSignalStateText(const AppSignalParam& param, const TuningSignalState& state, E::ValueViewType viewType, int precision);
 
 private:
 	Ui::DialogSignalInfo *ui;
@@ -196,7 +234,6 @@ private:
 	int m_contextMenuSetpointIndex = -1;
 
 	bool m_firstShow = true;
-
 };
 
 class QLabelAppSignalDragAndDrop : public QLabel
