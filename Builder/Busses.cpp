@@ -43,16 +43,6 @@ namespace Builder
 		return true;
 	}
 
-	bool BusSignal::hasKnownConversion() const
-	{
-		bool result = false;
-
-		result |= is_SInt32_To_UInt16_BE_NoScale_conversion();
-		result |= is_SInt32_To_SInt16_BE_NoScale_conversion();
-
-		return result;
-	}
-
 	bool BusSignal::is_SInt32_To_UInt16_BE_NoScale_conversion() const
 	{
 		return 	signalType == E::SignalType::Analog &&

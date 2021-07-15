@@ -427,7 +427,7 @@ namespace Builder
 		void errALC5170(QString lmEquipmentID, QString appSignalID, QUuid itemUuid, QString schemaID);	// LM's %1 native signal %2 can't be received via opto connection (Logic schema %3)
 		void errALC5171(QString appSignalID, QString equipmentSignalID);				// Internal application signal %1 cannot be linked to equipment input/output signal %2.
 		void errALC5172(QString inputCaption, QString itemLabel, QUuid itemUuid, QString schemaID);			// Non-discrete busses is not allowed on input '%1'. (Item %2, logic schema %3).
-		void errALC5173(QString signalCaption, QString fbCaption, QUuid itemUuid);		// Required signal %1 of AFB %2 is missing.
+		void errALC5173(QString signalCaption, QString fbCaption, QUuid itemUuid);		// Required pin %1 of AFB %2 is missing.
 		void errALC5174(QString fbCaption, QUuid itemUuid);								// Required AFB %1 is missing.
 		void errALC5175(QString signalID, QString inFormat, QString outFormat);			// Unknown conversion of signal %1 from %2 to %3 format.
 		void errALC5176(QString signalID, QString propertyName);						// Specific property %1 is not exists in signal %2
@@ -450,6 +450,7 @@ namespace Builder
 		void wrnALC5193(QString appSignalID, QString portID, QString connectionID);		// Rx signal %1 specified in port %2 raw data description isn't assigned to receiver (Connection %3).
 		void wrnALC5194(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 with manual settings are overlapped.
 		void errALC5195(QString itemLabel, QUuid itemID, QString schemaID);							// Named signal isn't connected to set_flags item output. Flags cannot be set. (Item %1, schema %2).
+		void errALC5196(QString signalID, QString inbusSignalID, QString schemaID);		// Unknown conversion from inbus signal %1 to app signal %2 (Logic schema %3).
 
 		// firmware writing errors
 

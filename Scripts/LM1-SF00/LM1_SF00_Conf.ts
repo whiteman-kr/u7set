@@ -325,7 +325,8 @@ let LMNumberCount: number = 0;
 //let configScriptVersion: number = 38;		// If TuningEnable/AppDataEnable/DiagDataEnable flag is false, IP address is zero
 //let configScriptVersion: number = 39;		// Description is added for LmNumberCount and UniqueID
 //let configScriptVersion: number = 40;		// Let is used instead of var
-let configScriptVersion: number = 41;		// ScriptDeviceObject is used
+//let configScriptVersion: number = 41;		// ScriptDeviceObject is used
+let configScriptVersion: number = 42;		// DiagDataSize is written for i/o module frame
 
 //
 
@@ -493,6 +494,15 @@ function generate_lm_1_rev3(builder: Builder, root: ScriptDeviceObject, module: 
 			return false;
 		}
 	}
+
+	const MODULEID_LM1_SF00: number = 0x1100;
+	const MODULEID_LM1_SF01: number = 0x1101;
+
+	const MODULEID_LM1_SR01: number = 0x11A0;
+	const MODULEID_LM1_SR02: number = 0x11A1;
+	const MODULEID_LM1_SR03: number = 0x11A2;
+	const MODULEID_LM1_SR04: number = 0x11B0;
+	const MODULEID_LM8_SR10: number = 0x11D0;
 
 	// Variables
 	//
@@ -696,6 +706,23 @@ function generate_lm_1_rev3(builder: Builder, root: ScriptDeviceObject, module: 
 			return false;
 		}
 
+		if (moduleId == MODULEID_LM1_SR03 ||
+			moduleId == MODULEID_LM1_SR04 ||
+			moduleId == MODULEID_LM8_SR10) {
+
+			if ((diagWordsIoCount & 1) != 0) {
+				diagWordsIoCount++;	// Align to word
+			}
+
+			// I/o module diag data size
+			//
+			ptr = 1006;
+			if (setData16(confFirmware, log, LMNumber, ioModule.equipmentId, frame, ptr, "DiagDataSize", diagWordsIoCount) == false) {
+				return false;
+			}
+			confFirmware.writeLog("    [" + frame + ":" + ptr + "] DiagDataSize = " + diagWordsIoCount + "\r\n");
+		}
+	
 		diagWordsCount += diagWordsIoCount;
 	}
 

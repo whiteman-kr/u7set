@@ -481,7 +481,7 @@ namespace Builder
 		AppSignal* signal() const;
 
 		E::SignalType signalType() const { return m_refSignals[0]->signalType(); }
-		E::SignalInOutType inOutType() const { return m_refSignals[0]->inOutType(); }
+		E::SignalInOutType inOutType() const;
 		E::AnalogAppSignalFormat analogSignalFormat() const { return m_refSignals[0]->analogSignalFormat(); }
 		int dataSize() const { return m_refSignals[0]->dataSize(); }
 		int sizeW() const { return m_refSignals[0]->sizeW(); }
@@ -529,6 +529,10 @@ namespace Builder
 
 		bool isBusChild() const { return m_parentBusSignal != nullptr; }
 		void setParentBusSignal(UalSignal* parentBusSignal) { m_parentBusSignal = parentBusSignal; }
+		bool isFrombusConversionRequired() const { return m_frombusConversionRequired; }
+		void setFrombusConversionRequired(bool required) { m_frombusConversionRequired = required; }
+		bool isFrombusConversionCodeAlreadyGenerated() const { return m_frombusConversionCodeIsAlreadyGenerated; }
+		bool setFrombusConversionCodeIsAlreadyGenerated() { return m_frombusConversionCodeIsAlreadyGenerated = true; }
 
 		bool anyParentBusIsAcquired() const;
 
@@ -578,6 +582,7 @@ namespace Builder
 		BusShared bus() const { return m_bus; }
 
 		UalSignal* getBusChildSignal(const QString& busSignalID);
+		const UalSignal* getParentBusSignal() const { return m_parentBusSignal; }
 
 		void setAcquired(bool acquired);
 
@@ -629,7 +634,9 @@ namespace Builder
 		bool m_isOutput = false;
 		bool m_isAcquired = false;
 
-		UalSignal* m_parentBusSignal = nullptr;			// if not nullptr - this ual signal is bus child
+		UalSignal* m_parentBusSignal = nullptr;				// if not nullptr - this ual signal is bus child
+		bool m_frombusConversionRequired = false;			// set to corresponding value in bus extractor processing
+		bool m_frombusConversionCodeIsAlreadyGenerated = false;
 
 		bool m_computed = false;
 		bool m_resultSaved = false;

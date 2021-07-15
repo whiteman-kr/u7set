@@ -6645,7 +6645,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Required signal %1 of AFB %2 is missing.
+	/// Title: Required pin %1 of AFB %2 is missing.
 	///
 	/// Parameters:
 	///		%1 functional block signal caption
@@ -6653,7 +6653,7 @@ namespace Builder
 	///		%3 application logic item Uuid
 	///
 	/// Description:
-	///		Required signal of specified AFB is missing. Contact to RPCT developers.
+	///		Required pin of specified AFB is missing. Contact to RPCT developers.
 	///
 	void IssueLogger::errALC5173(QString signalCaption, QString fbCaption, QUuid itemUuid)
 	{
@@ -6661,7 +6661,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5173,
-				  QString(tr("Required signal %1 of AFB %2 is missing.")).
+				  QString(tr("Required pin %1 of AFB %2 is missing.")).
 				  arg(signalCaption).arg(fbCaption));
 	}
 
@@ -7151,6 +7151,27 @@ namespace Builder
 						arg(itemLabel).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5196
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Unknown conversion from inbus signal %1 to app signal %2 (Logic schema %3).
+	///
+	/// Parameters:
+	///		%1 Bus child signal appSignalID
+	///		%2 App signalID
+	///		%3 Logic schemaID
+	///
+	/// Description:
+	///		Unknown conversion from inbus signal to app signal. Check types of signals.
+	///
+	void IssueLogger::errALC5196(QString signalID, QString inbusSignalID, QString schemaID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5196,
+				  QString(tr("Unknown conversion from inbus signal %1 to app signal %2 (Logic schema %3).")).
+							arg(inbusSignalID).arg(signalID).arg(schemaID));
+	}
 
 	/// IssueCode: ALC5800
 	///
