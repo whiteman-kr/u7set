@@ -475,3 +475,12 @@ namespace Busses
 	inline const QString MACRO_BUS_CUSTOM_APP_SIGNAL_ID("$(BusCustomAppSignalID)");
 	inline const QString MACRO_BUS_CAPTION("$(BusCaption)");
 }
+
+namespace MuxPin
+{
+	inline const QString SELECT("i_sel");
+	inline const QString X1("i_x1_data");
+	inline const QString X2("i_x2_data");
+	inline const QString OUTPUT("o_result");
+}
+

@@ -5149,7 +5149,8 @@ namespace Builder
 		//	+ internal
 		//  - enableTuning
 		//	+ used in UAL
-		//  - bus child
+		//	+ bus child == false
+		//  + bus_child == true && FromBusConversionRequierd == true
 		//	+ auto analog internal signals (auto generated in m_appSignals)
 
 		for(UalSignal* s : m_ualSignals)
@@ -5157,7 +5158,7 @@ namespace Builder
 			TEST_PTR_CONTINUE(s);
 
 			if (s->isConst() == false &&
-				s->isBusChild() == false &&
+				(s->isBusChild() == false || (s->isBusChild() == true && s->isFrombusConversionRequired() == true )) &&
 				s->isAcquired() == false &&
 				s->isAnalog() == true &&
 				s->isInternal() == true &&
@@ -6199,7 +6200,7 @@ namespace Builder
 
 				if (fb.inputSignalIndex == -1)
 				{
-					// Required signal %1 of AFB %2 is missing.
+					// Required pin %1 of AFB %2 is missing.
 					//
 					m_log->errALC5173(FB_SCALE_INPUT_SIGNAL_CAPTION, fbCaption, QUuid());
 					result = false;
@@ -6217,7 +6218,7 @@ namespace Builder
 
 				if (fb.outputSignalIndex == -1)
 				{
-					// Required signal %1 of AFB %2 is missing.
+					// Required pin %1 of AFB %2 is missing.
 					//
 					m_log->errALC5173(FB_SCALE_INPUT_SIGNAL_CAPTION, fbCaption, QUuid());
 					result = false;
@@ -9353,7 +9354,7 @@ namespace Builder
 
 		if (busSignal.conversionRequired() == true)
 		{
-			return getAnalogSignalToInbusSignalConversionCode(code, inputSignal, busChildSignal, busSignal);
+			return generateInbusConversionCode(code, inputSignal, busChildSignal, busSignal);
 		}
 
 		QString inputSignalIDs = inputSignal->refSignalIDsJoined();
@@ -9401,12 +9402,12 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::getAnalogSignalToInbusSignalConversionCode(CodeSnippet* code,
+	bool ModuleLogicCompiler::generateInbusConversionCode(CodeSnippet* code,
 																		 const UalSignal* inputSignal,
 																		 const UalSignal* busChildSignal,
 																		 const BusSignal& busSignal)
 	{
-		if (busSignal.hasKnownConversion() == false)
+		if (hasKnownConversion(busSignal) == false)
 		{
 			// Unknown conversion of signal %1 to inbus signal %2 (Logic schema %3)
 			//
@@ -9438,37 +9439,37 @@ namespace Builder
 
 		if (busSignal.is_SInt32_To_UInt16_BE_NoScale_conversion() == true)
 		{
-			return get_SInt32_To_UInt16_BE_NoScale_inbusConversionCode(code, inputSignal, busChildSignal, inbusSignalAddr);
+			return gen_SInt32_To_UInt16_BE_NoScale_inbusConversionCode(code, inputSignal, busChildSignal, inbusSignalAddr);
 		}
 
 		if (busSignal.is_SInt32_To_SInt16_BE_NoScale_conversion() == true)
 		{
-			return get_SInt32_To_SInt16_BE_NoScale_inbusConversionCode(code, inputSignal, busChildSignal, inbusSignalAddr);
+			return gen_SInt32_To_SInt16_BE_NoScale_inbusConversionCode(code, inputSignal, busChildSignal, inbusSignalAddr);
 		}
 
 		LOG_INTERNAL_ERROR(m_log);
 		return false;
 	}
 
-	bool ModuleLogicCompiler::get_SInt32_To_UInt16_BE_NoScale_inbusConversionCode(CodeSnippet* code,
+	bool ModuleLogicCompiler::gen_SInt32_To_UInt16_BE_NoScale_inbusConversionCode(CodeSnippet* code,
 																				const UalSignal* inputSignal,
 																				const UalSignal* busChildSignal,
 																				const Address16& inbusSignalAddr)
 	{
-		return get_SInt32_LowWord_ConversionCode(code, inputSignal, busChildSignal, inbusSignalAddr,
+		return gen_SInt32_LowWord_ConversionCode(code, inputSignal, busChildSignal, inbusSignalAddr,
 												 QString("SInt32_To_UInt16_BE_NoScale"));
 	}
 
-	bool ModuleLogicCompiler::get_SInt32_To_SInt16_BE_NoScale_inbusConversionCode(CodeSnippet* code,
+	bool ModuleLogicCompiler::gen_SInt32_To_SInt16_BE_NoScale_inbusConversionCode(CodeSnippet* code,
 																				const UalSignal* inputSignal,
 																				const UalSignal* busChildSignal,
 																				const Address16& inbusSignalAddr)
 	{
-		return get_SInt32_LowWord_ConversionCode(code, inputSignal, busChildSignal, inbusSignalAddr,
+		return gen_SInt32_LowWord_ConversionCode(code, inputSignal, busChildSignal, inbusSignalAddr,
 												 QString("SInt32_To_SInt16_BE_NoScale"));
 	}
 
-	bool ModuleLogicCompiler::get_SInt32_LowWord_ConversionCode(CodeSnippet* code,
+	bool ModuleLogicCompiler::gen_SInt32_LowWord_ConversionCode(CodeSnippet* code,
 																const UalSignal* inputSignal,
 																const UalSignal* busChildSignal,
 																const Address16& inbusSignalAddr,
@@ -9805,19 +9806,18 @@ namespace Builder
 				continue;
 			}
 
-			result &= generateFrombusConversionCode(code, ualItem, inputBusSignal, bs, busChildSignal);
+			result &= generateFrombusConversionCode(code, inputBusSignal, bs, busChildSignal);
 		}
 
 		return result;
 	}
 
 	bool ModuleLogicCompiler::generateFrombusConversionCode(CodeSnippet* code,
-														   const UalItem* ualItem,
 														   const UalSignal* inputBusSignal,
 														   const BusSignal& busSignal,
 														   UalSignal* busChildSignal)
 	{
-		if (busSignal.hasKnownConversion() == false)
+		if (hasKnownConversion(busSignal) == false)
 		{
 			// Unknown conversion from inbus signal %1 to app signal %2 (Logic schema %3)
 			//
@@ -9831,18 +9831,18 @@ namespace Builder
 
 		if (busSignal.is_SInt32_To_UInt16_BE_NoScale_conversion() == true)
 		{
-			result = get_UInt16_To_SInt32_BE_NoScale_frombusConversionCode(&frombusConvCode, inputBusSignal, busSignal, busChildSignal);
+			result = gen_UInt16_To_SInt32_BE_NoScale_frombusConversionCode(&frombusConvCode, inputBusSignal, busSignal, busChildSignal);
 		}
 
 		if (busSignal.is_SInt32_To_SInt16_BE_NoScale_conversion() == true)
 		{
-			result = get_SInt16_To_SInt32_BE_NoScale_frombusConversionCode(&frombusConvCode, inputBusSignal, busSignal, busChildSignal);
+			result = gen_SInt16_To_SInt32_BE_NoScale_frombusConversionCode(&frombusConvCode, inputBusSignal, busSignal, busChildSignal);
 		}
 
 		if (result == true)
 		{
-			code->comment_nl(QString("BusExtractor %1 processing. Frombus coversion code for signal %2.%3").
-							 arg(ualItem->label()).arg(inputBusSignal->appSignalID()).arg(busSignal.signalID));
+			code->comment_nl(QString("Frombus coversion code for signal %1.%2").
+							 arg(inputBusSignal->appSignalID()).arg(busSignal.signalID));
 			code->append(frombusConvCode);
 
 			code->newLine();
@@ -9853,7 +9853,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::get_UInt16_To_SInt32_BE_NoScale_frombusConversionCode(CodeSnippet* code,
+	bool ModuleLogicCompiler::gen_UInt16_To_SInt32_BE_NoScale_frombusConversionCode(CodeSnippet* code,
 																						  const UalSignal* inputBusSignal,
 																						  const BusSignal& busSignal,
 																						  const UalSignal* busChildSignal)
@@ -9862,25 +9862,8 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(inputBusSignal, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(busChildSignal, m_log);
 
-		if (inputBusSignal->ualAddrIsValid() == false)
-		{
-			// Undefined UAL address of signal %1 (Logic schema %2).
-			//
-			m_log->errALC5105(inputBusSignal->appSignalID(),
-							  inputBusSignal->ualItemGuid(),
-							  inputBusSignal->ualItemSchemaID());
-			return false;
-		}
-
-		if (busChildSignal->ualAddrIsValid() == false)
-		{
-			// Undefined UAL address of signal %1 (Logic schema %2).
-			//
-			m_log->errALC5105(busChildSignal->appSignalID(),
-							  busChildSignal->ualItemGuid(),
-							  busChildSignal->ualItemSchemaID());
-			return false;
-		}
+		CHECK_UAL_ADDR_RETURN_FALSE(inputBusSignal);
+		CHECK_UAL_ADDR_RETURN_FALSE(busChildSignal);
 
 		if (busSignal.inbusAddr.bit() != 0)
 		{
@@ -9909,12 +9892,79 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::get_SInt16_To_SInt32_BE_NoScale_frombusConversionCode(CodeSnippet* code,
+	bool ModuleLogicCompiler::gen_SInt16_To_SInt32_BE_NoScale_frombusConversionCode(CodeSnippet* code,
 																				  const UalSignal* inputBusSignal,
 																				  const BusSignal& busSignal,
 																				  const UalSignal* busChildSignal)
 	{
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(inputBusSignal, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(busChildSignal, m_log);
+
+		CHECK_UAL_ADDR_RETURN_FALSE(inputBusSignal);
+		CHECK_UAL_ADDR_RETURN_FALSE(busChildSignal);
+
+		if (busSignal.inbusAddr.bit() != 0)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		RETURN_IF_FALSE(getAfbInfo_MUX());
+
+		// write SInt16 into Low word of SInt32
+		//
+		Address16 sint16Addr = inputBusSignal->ualAddr();
+		sint16Addr.addWord(busSignal.inbusAddr.offset());
+
+		Address16 lowWordAddr = busChildSignal->ualAddr();
+		lowWordAddr.add1Word();
+
+		CodeItem cmd;
+
+		cmd.mov(lowWordAddr, sint16Addr);
+		code->append(cmd);
+
+		// Extend sign bit of SInt16 into High word of SInt32
+		//
+
+		sint16Addr.setBit(15);
+
+		cmd.writeFuncBlockBit(m_afbInfo_MUX->opCode, 0,
+							  m_afbInfo_MUX->getPinOpIndex(MuxPin::SELECT), sint16Addr,
+							  m_afbInfo_MUX->caption);
+		code->append(cmd);
+
+		cmd.writeFuncBlockConst(m_afbInfo_MUX->opCode, 0,
+								m_afbInfo_MUX->getPinOpIndex(MuxPin::X1), 0,
+								m_afbInfo_MUX->caption);
+		code->append(cmd);
+
+		cmd.writeFuncBlockConst(m_afbInfo_MUX->opCode, 0,
+								m_afbInfo_MUX->getPinOpIndex(MuxPin::X2), 0xFFFF,
+								m_afbInfo_MUX->caption);
+		code->append(cmd);
+
+		cmd.start(m_afbInfo_MUX->opCode, 0, m_afbInfo_MUX->caption, m_afbInfo_MUX->runTime);
+		code->append(cmd);
+
+		cmd.readFuncBlock(busChildSignal->ualAddr().offset(),
+						  m_afbInfo_MUX->opCode, 0,
+						  m_afbInfo_MUX->getPinOpIndex(MuxPin::OUTPUT),
+						  m_afbInfo_MUX->caption);
+		code->append(cmd);
+
 		return true;
+	}
+
+	bool ModuleLogicCompiler::hasKnownConversion(const BusSignal& busSignal) const
+	{
+		bool result = false;
+
+		result |= busSignal.is_SInt32_To_UInt16_BE_NoScale_conversion();
+		result |= busSignal.is_SInt32_To_SInt16_BE_NoScale_conversion();
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::generateDiscreteSignalToBusExtractorCode(CodeSnippet* code,
@@ -14785,6 +14835,68 @@ namespace Builder
 		}
 	}
 
+	bool ModuleLogicCompiler::getAfbInfo(std::shared_ptr<AfbInfo> afbInfo) const
+	{
+		if (afbInfo->caption.isEmpty() == true)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		std::shared_ptr<Afb::AfbComponent> afbComp = m_lmDescription->component(afbInfo->caption);
+
+		if (afbComp == nullptr)
+		{
+			// Required AFB %1 is missing.
+			//
+			m_log->errALC5174(afbInfo->caption, QUuid());
+			return false;
+		}
+
+		afbInfo->opCode = afbComp->opCode();
+
+		for(auto& pinInfo : afbInfo->pinOpIndex)
+		{
+			int pinOpIndex = afbComp->pinOpIndex(pinInfo.first);
+
+			if (pinOpIndex == -1)
+			{
+				// Required pin %1 of AFB %2 is missing.
+				//
+				m_log->errALC5173(pinInfo.first, afbInfo->caption, QUuid());
+				return false;
+			}
+			else
+			{
+				afbInfo->pinOpIndex.insert_or_assign(pinInfo.first, pinOpIndex);
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::getAfbInfo_MUX()
+	{
+		if (m_afbInfo_MUX == nullptr)
+		{
+			std::shared_ptr<AfbInfo> muxInfo = std::make_shared<AfbInfo>();
+
+			muxInfo->caption = QString("MUX");
+			muxInfo->pinOpIndex.insert({MuxPin::SELECT, -1});
+			muxInfo->pinOpIndex.insert({MuxPin::X1, -1});
+			muxInfo->pinOpIndex.insert({MuxPin::X2, -1});
+			muxInfo->pinOpIndex.insert({MuxPin::OUTPUT, -1});
+
+			if (getAfbInfo(muxInfo) == true)
+			{
+				muxInfo->runTime = 7;
+				m_afbInfo_MUX = muxInfo;
+			}
+		}
+
+		return m_afbInfo_MUX != nullptr;
+	}
+
 	// ---------------------------------------------------------------------------------------
 	//
 	// ModuleLogicCompiler::Module class implementation
@@ -14824,4 +14936,23 @@ namespace Builder
 
 		return device->moduleFamily();
 	}
+
+	// ---------------------------------------------------------------------------------------
+	//
+	// ModuleLogicCompiler::AfbInfo struct implementation
+	//
+	// ---------------------------------------------------------------------------------------
+
+	int ModuleLogicCompiler::AfbInfo::getPinOpIndex(const QString& pinCaption)
+	{
+		auto p = pinOpIndex.find(pinCaption);
+
+		if (p == pinOpIndex.end())
+		{
+			return -1;
+		}
+
+		return p->second;
+	}
+
 }

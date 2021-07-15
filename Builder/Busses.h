@@ -39,7 +39,6 @@ namespace Builder
 
 		bool conversionRequired() const;
 
-		bool hasKnownConversion() const;
 		bool is_SInt32_To_UInt16_BE_NoScale_conversion() const;
 		bool is_SInt32_To_SInt16_BE_NoScale_conversion() const;
 

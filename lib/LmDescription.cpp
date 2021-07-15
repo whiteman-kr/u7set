@@ -1227,6 +1227,25 @@ std::shared_ptr<Afb::AfbComponent> LmDescription::component(int opCode) const
 	return it->second;
 }
 
+std::shared_ptr<Afb::AfbComponent> LmDescription::component(const QString& caption) const
+{
+	for(auto& afbComponent : m_afbComponents)
+	{
+		if (afbComponent.second == nullptr)
+		{
+			Q_ASSERT(afbComponent.second != nullptr);
+			continue;
+		}
+
+		if (afbComponent.second->caption() == caption)
+		{
+			return afbComponent.second;
+		}
+	}
+
+	return nullptr;
+}
+
 const std::map<int, std::shared_ptr<Afb::AfbComponent>>& LmDescription::afbComponents() const
 {
 	return m_afbComponents;

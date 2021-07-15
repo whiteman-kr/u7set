@@ -207,6 +207,7 @@ public:
 	const std::vector<std::shared_ptr<Afb::AfbElement>>& afbs() const;
 
 	std::shared_ptr<Afb::AfbComponent> component(int opCode) const;
+	std::shared_ptr<Afb::AfbComponent> component(const QString& caption) const;
 	const std::map<int, std::shared_ptr<Afb::AfbComponent>>& afbComponents() const;
 
 	LmCommand command(int commandCode) const;
