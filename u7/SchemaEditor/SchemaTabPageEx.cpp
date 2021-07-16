@@ -4501,6 +4501,11 @@ void SchemaControlTabPageEx::showFileProperties()
 
 	for (const auto& file : selectedFiles)
 	{
+		if (file->isFolder() == true)
+		{
+			continue;
+		}
+
 		if (file->state() == E::VcsState::CheckedOut &&
 			(file->userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator() == true))
 		{
@@ -4508,6 +4513,11 @@ void SchemaControlTabPageEx::showFileProperties()
 		}
 
 		requestFiles.push_back(*file);
+	}
+
+	if (requestFiles.empty() == true)
+	{
+		return;
 	}
 
 	// If schema is opened, can't edit its' properties
