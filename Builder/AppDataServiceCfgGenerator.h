@@ -26,8 +26,7 @@ namespace Builder
 		bool writeAppSignalsXml();
 		bool addLinkToAppSignalsFile();
 
-		bool writeBatFile();
-		bool writeShFile();
+		bool writeRunScriptFile(const QString& profile, const AppDataServiceSettings& settings, E::OS os);
 
 		bool findAppDataSourceAssociatedSignals(DataSource& appDataSource);
 

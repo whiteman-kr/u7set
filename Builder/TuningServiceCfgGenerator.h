@@ -24,8 +24,7 @@ namespace Builder
 	private:
 		bool writeTuningSources();
 
-		bool writeBatFile();
-		bool writeShFile();
+		bool writeRunScriptFile(const QString& profile, const TuningServiceSettings& settings, E::OS os);
 
 	private:
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;

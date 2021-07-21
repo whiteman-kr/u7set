@@ -920,111 +920,139 @@ namespace Builder
 		return true;
 	}
 
-	QString SoftwareCfgGenerator::getBuildInfoCommentsForBat()
+	QString SoftwareCfgGenerator::getBuildInfoComments(E::OS os) const
 	{
+		QString commStart = getCommentStart(os);
+
 		BuildInfo&& b = m_buildResultWriter->buildInfo();
 
-		QString comments = "@rem Project: " + b.project + "\n";
-		comments += "@rem BuildNo: " + QString::number(b.id) + "\n";
-		comments += "@rem Date: " + b.dateStr() + "\n";
-		comments += "@rem Changeset: " + QString::number(b.changeset) + "\n";
-		comments += "@rem User: " + b.user + "\n";
-		comments += "@rem Workstation: " + b.workstation + "\n\n";
+		QString comments;
+
+		comments += commStart + " Project: " + b.project + "\n";
+		comments += commStart + " BuildNo: " + QString::number(b.id) + "\n";
+		comments += commStart + " Date: " + b.dateStr() + "\n";
+		comments += commStart + " Changeset: " + QString::number(b.changeset) + "\n";
+		comments += commStart + " User: " + b.user + "\n";
+		comments += commStart + " Workstation: " + b.workstation + "\n\n";
 
 		return comments;
 	}
 
-	QString SoftwareCfgGenerator::getBuildInfoCommentsForSh()
+	QString SoftwareCfgGenerator::getCommonCmdLine(const HostAddressPort& cfgSrvIp1,
+													const HostAddressPort& cfgSrvIp2,
+													E::OS os,
+													bool runAsConsoleApp)
 	{
-		BuildInfo&& b = m_buildResultWriter->buildInfo();
-
-		QString comments = "#!/bin/bash\n\n";
-
-		comments += "# Project: " + b.project + "\n";
-		comments += "# BuildNo: " + QString::number(b.id) + "\n";
-		comments += "# Date: " + b.dateStr() + "\n";
-		comments += "# Changeset: " + QString::number(b.changeset) + "\n";
-		comments += "# User: " + b.user + "\n";
-		comments += "# Workstation: " + b.workstation + "\n\n";
-
-		return comments;
-	}
-
-	bool SoftwareCfgGenerator::getConfigIp(QString* cfgIP1, QString* cfgIP2)
-	{
-		TEST_PTR_RETURN_FALSE(m_log);
-
-		TEST_PTR_LOG_RETURN_FALSE(m_equipment, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(m_software, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(cfgIP1, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(cfgIP2, m_log);
-
-		cfgIP1->clear();
-		cfgIP2->clear();
-
-		QString cfgServiceID1;
-		QString cfgServiceID2;
-
-		HostAddressPort cfgServiceIP1;
-		HostAddressPort cfgServiceIP2;
-
-		bool result = true;
-
-		result = SoftwareSettingsGetter::getCfgServiceConnection(m_equipment, m_software,
-														   &cfgServiceID1, &cfgServiceIP1,
-														   &cfgServiceID2, &cfgServiceIP2,
-														   m_log);
-		if (result == false)
+		static const std::map<E::SoftwareType, QString> servicesBins =
 		{
-			return false;
+			{ E::SoftwareType::AppDataService, QString("AppDataSrv") },
+			{ E::SoftwareType::ArchiveService, QString("ArchSrv") },
+			{ E::SoftwareType::DiagDataService, QString("DiagDataSrv") },
+			{ E::SoftwareType::TuningService, QString("TuningSrv") },
+			{ E::SoftwareType::TestClient, QString("TestClient") },
+			{ E::SoftwareType::TuningClient, QString("TuningClient") },
+			{ E::SoftwareType::Monitor, QString("Monitor") },
+			{ E::SoftwareType::Metrology, QString("Metrology") },
+		};
+
+		auto it = servicesBins.find(m_software->softwareType());
+
+		if (it == servicesBins.end())
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, "Exe-file name not found for software type " + E::valueToString<E::SoftwareType>(m_software->softwareType()));
+			return QString();
 		}
 
-		if (cfgServiceID1.isEmpty() == false)
+		QString cmdLine;
+
+		switch(os)
 		{
-			*cfgIP1 = cfgServiceIP1.addressPortStr();
+		case E::OS::Windows:
+			cmdLine = it->second + ".exe";
+			break;
+
+		case E::OS::Linux:
+			cmdLine = "./" + it->second;
+			break;
+
+		default:
+			Q_ASSERT(false);
+			return QString();
 		}
 
-		if (cfgServiceID2.isEmpty() == false)
+		if (runAsConsoleApp == true)
 		{
-			*cfgIP2 = cfgServiceIP2.addressPortStr();
+			cmdLine += " -e";
 		}
 
-		return true;
-	}
-
-	bool SoftwareCfgGenerator::getServiceParameters(QString& parameters)
-	{
-		parameters += " -e";
-
-		QString cfgIP1;
-		QString cfgIP2;
-
-		if (getConfigIp(&cfgIP1, &cfgIP2) == false)
-		{
-			return false;
-		}
-
-		if (cfgIP1.isEmpty() == true && cfgIP2.isEmpty() == true)
+		if (cfgSrvIp1.isEmpty() == true && cfgSrvIp2.isEmpty() == true)
 		{
 			m_log->errALC5140(m_software->equipmentIdTemplate());
-			return false;
+			return QString();
 		}
 
-		if (cfgIP1.isEmpty() == true)
+		cmdLine += " -cfgip1=" + (cfgSrvIp1.isEmpty() == false ? cfgSrvIp1.addressPortStr() :  cfgSrvIp2.addressPortStr());
+		cmdLine += " -cfgip2=" + (cfgSrvIp2.isEmpty() == false ? cfgSrvIp2.addressPortStr() :  cfgSrvIp1.addressPortStr());
+
+		cmdLine += " -id=" + m_software->equipmentIdTemplate();
+
+		return cmdLine;
+	}
+
+	QString SoftwareCfgGenerator::getCommentStart(E::OS os) const
+	{
+		switch(os)
 		{
-			cfgIP1 = cfgIP2;
+		case E::OS::Windows:
+			return "@rem";
+
+		case E::OS::Linux:
+			return "#";
+
+		default:
+			Q_ASSERT(false);
 		}
 
-		if (cfgIP2.isEmpty() == true)
+		return QString();
+	}
+
+	QString SoftwareCfgGenerator::getRunScriptDirectory(E::OS os) const
+	{
+		switch(os)
 		{
-			cfgIP2 = cfgIP1;
+		case E::OS::Windows:
+			return Directory::RUN_SERVICE_SCRIPTS_WINDOWS;
+
+		case E::OS::Linux:
+			return Directory::RUN_SERVICE_SCRIPTS_LINUX;
+
+		default:
+			Q_ASSERT(false);
 		}
 
-		parameters += " -cfgip1=" + cfgIP1 + " -cfgip2=" + cfgIP2;
+		return QString();
+	}
 
-		parameters += " -id=" + m_software->equipmentIdTemplate();
+	QString SoftwareCfgGenerator::getRunScriptName(const QString& profile, E::OS os) const
+	{
+		QString extention;
 
-		return true;
+		switch(os)
+		{
+		case E::OS::Windows:
+			extention = "bat";
+			break;
+
+		case E::OS::Linux:
+			extention = "sh";
+			break;
+
+		default:
+			Q_ASSERT(false);
+			return QString();
+		}
+
+		return profile + "_" + m_software->equipmentIdTemplate().toLower() + "." + extention;
 	}
 }
 

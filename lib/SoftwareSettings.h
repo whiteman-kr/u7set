@@ -304,6 +304,12 @@ public:
 
 	QString equipmentID;
 
+	QString cfgServiceID1;
+	HostAddressPort cfgServiceIP1;
+
+	QString cfgServiceID2;
+	HostAddressPort cfgServiceIP2;
+
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 
@@ -348,6 +354,12 @@ private:
 class ArchivingServiceSettings : public SoftwareSettings
 {
 public:
+	QString cfgServiceID1;
+	HostAddressPort cfgServiceIP1;
+
+	QString cfgServiceID2;
+	HostAddressPort cfgServiceIP2;
+
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 
@@ -436,6 +448,12 @@ private:
 class MetrologySettings : public SoftwareSettings
 {
 public:
+	QString cfgServiceID1;
+	HostAddressPort cfgServiceIP1;
+
+	QString cfgServiceID2;
+	HostAddressPort cfgServiceIP2;
+
 	bool appDataServicePropertyIsValid1 = false;
 	QString appDataServiceID1;
 	QString appDataServiceIP1;
@@ -475,6 +493,12 @@ private:
 class MonitorSettings : public SoftwareSettings
 {
 public:
+	QString cfgServiceID1;
+	HostAddressPort cfgServiceIP1;
+
+	QString cfgServiceID2;
+	HostAddressPort cfgServiceIP2;
+
 	QString startSchemaId;
 	QString schemaTags;
 
@@ -546,6 +570,12 @@ public:
 class TuningClientSettings : public SoftwareSettings
 {
 public:
+	QString cfgServiceID1;
+	HostAddressPort cfgServiceIP1;
+
+	QString cfgServiceID2;
+	HostAddressPort cfgServiceIP2;
+
 	QString tuningServiceID;
 	QString tuningServiceIP;
 	int tuningServicePort = 0;

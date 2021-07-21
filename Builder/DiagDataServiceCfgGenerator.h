@@ -17,5 +17,8 @@ namespace Builder
 
 		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfigurationStep1() override;
+
+	private:
+		bool writeRunScriptFile(const QString& profile, const DiagDataServiceSettings& settings, E::OS os);
 	};
 }
