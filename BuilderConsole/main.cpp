@@ -306,12 +306,14 @@ int startBuild(QString buildArgsFileName)
 	//
 	int result = QCoreApplication::instance()->exec();
 
+	delete buildTask;
+
 	// Shutting down
 	//
 	Builder::shutdown();
 	DbController::shutdown();
-	Hardware::shutdown();
 	VFrame30::shutdown();
+	Hardware::shutdown();
 
 	return result;
 }
