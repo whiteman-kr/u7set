@@ -247,6 +247,12 @@ test job:
     - "# ----------------------------------------------"
     - "if (Test-Path c:/temp/build/test_simulator) { Remove-Item c:/temp/build/test_simulator -Recurse -Force; }"
     - "&$Env:CI_PROJECT_DIR/bin/release/BuilderConsole.exe $Env:CI_PROJECT_DIR/Test/BuilderConsoleArgs.xml"
+    
+#Run Compiler tests
+    - "# ----------------------------------------------"
+    - "#               Run Compiler tests"
+    - "# ----------------------------------------------"
+    - "&$Env:CI_PROJECT_DIR/bin/release/BuilderConsole.exe $Env:CI_PROJECT_DIR/Test/CompilerTestsArgs.xml"
 
 #Run Sim AFB Tests
     - "# ----------------------------------------------"
