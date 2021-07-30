@@ -22,7 +22,12 @@ namespace Builder
 			return false;
 		}
 
-		return m_settingsSet.addProfile<ArchivingServiceSettingsGetter>(profile, settingsGetter);
+		bool result = m_settingsSet.addProfile<ArchivingServiceSettingsGetter>(profile, settingsGetter);
+
+		result &=  writeRunScriptFile(profile, settingsGetter, E::OS::Windows);
+		result &=  writeRunScriptFile(profile, settingsGetter, E::OS::Linux);
+
+		return result;
 	}
 
 	bool ArchivingServiceCfgGenerator::generateConfigurationStep1()
@@ -32,8 +37,6 @@ namespace Builder
 		do
 		{
 			if (writeArchSignalsFile() == false) break;
-			if (writeBatFile() == false) break;
-			if (writeShFile() == false) break;
 
 			result = true;
 		}
@@ -82,60 +85,28 @@ namespace Builder
 		return m_cfgXml->addLinkToFile(buildFile);
 	}
 
-	bool ArchivingServiceCfgGenerator::writeBatFile()
+	bool ArchivingServiceCfgGenerator::writeRunScriptFile(const QString& profile,
+														  const ArchivingServiceSettings& settings,
+														  E::OS os)
 	{
 		TEST_PTR_RETURN_FALSE(m_software);
 
-		QString content = getBuildInfoCommentsForBat();
+		QString content = getBuildInfoComments(os);
 
-		content += "ArchSrv.exe";
+		QString cmdLine = getCommonCmdLine(settings.cfgServiceIP1, settings.cfgServiceIP2, os, true);
 
-		QString parameters;
-		if (getServiceParameters(parameters) == false)
+		if (cmdLine.isEmpty() == true)
 		{
 			return false;
 		}
 
-		std::shared_ptr<const ArchivingServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<ArchivingServiceSettings>();
+		cmdLine += QString(" -location=%1").arg(settings.archiveLocation);
 
-		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+		content += cmdLine;
 
-		parameters += QString(" -location=%1").arg(settings->archiveLocation);
-
-		content += parameters;
-
-		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
-
-		TEST_PTR_RETURN_FALSE(buildFile);
-
-		return true;
-	}
-
-	bool ArchivingServiceCfgGenerator::writeShFile()
-	{
-		TEST_PTR_RETURN_FALSE(m_software);
-
-		QString content = getBuildInfoCommentsForSh();
-
-		content += "./ArchSrv";
-
-		QString parameters;
-
-		if (getServiceParameters(parameters) == false)
-		{
-			return false;
-		}
-
-		std::shared_ptr<const ArchivingServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<ArchivingServiceSettings>();
-
-		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
-
-		parameters += QString(" -location=%1").arg(settings->archiveLocation);
-
-		content += parameters;
-
-		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
-
+		BuildFile* buildFile = m_buildResultWriter->addFile(getRunScriptDirectory(os),
+															getRunScriptName(profile, os),
+															content);
 		TEST_PTR_RETURN_FALSE(buildFile);
 
 		return true;

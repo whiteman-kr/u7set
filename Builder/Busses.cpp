@@ -1,16 +1,8 @@
 #include "Busses.h"
 #include "../UtilsLib/WUtils.h"
 
-
 namespace Builder
 {
-	const QString BusSignal::BUS_SIGNAL_ID_SEPARATOR(".");
-
-	const QString BusSignal::BUS_TYPE("$(BusType)");
-	const QString BusSignal::BUS_APP_SIGNAL_ID("$(BusAppSignalID)");
-	const QString BusSignal::BUS_CUSTOM_APP_SIGNAL_ID("$(BusCustomAppSignalID)");
-	const QString BusSignal::BUS_CAPTION("$(BusCaption)");
-
 	bool BusSignal::conversionRequired() const
 	{
 		switch(signalType)
@@ -51,20 +43,22 @@ namespace Builder
 		return true;
 	}
 
-	bool BusSignal::hasKnownConversion() const
-	{
-		bool result = false;
-
-		result |= is_SignedInt32_To_Unsigned16_BE_NoScale_coversion();
-
-		return result;
-	}
-
-	bool BusSignal::is_SignedInt32_To_Unsigned16_BE_NoScale_coversion() const
+	bool BusSignal::is_SInt32_To_UInt16_BE_NoScale_conversion() const
 	{
 		return 	signalType == E::SignalType::Analog &&
 				analogFormat == E::AnalogAppSignalFormat::SignedInt32 &&
 				inbusAnalogFormat == E::DataFormat::UnsignedInt &&
+				inbusSizeBits == SIZE_16BIT &&
+				inbusAnalogByteOrder == E::ByteOrder::BigEndian &&
+				busAnalogLowLimit == inbusAnalogLowLimit &&
+				busAnalogHighLimit == inbusAnalogHighLimit;
+	}
+
+	bool BusSignal::is_SInt32_To_SInt16_BE_NoScale_conversion() const
+	{
+		return 	signalType == E::SignalType::Analog &&
+				analogFormat == E::AnalogAppSignalFormat::SignedInt32 &&
+				inbusAnalogFormat == E::DataFormat::SignedInt &&
 				inbusSizeBits == SIZE_16BIT &&
 				inbusAnalogByteOrder == E::ByteOrder::BigEndian &&
 				busAnalogLowLimit == inbusAnalogLowLimit &&

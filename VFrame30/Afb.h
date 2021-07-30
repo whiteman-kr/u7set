@@ -170,6 +170,7 @@ namespace Afb
 			return (static_cast<size_t>(pinOpIndex) >= m_pinExists.size())
 					? false: m_pinExists[pinOpIndex];
 		}
+
 		QString pinCaption(int pinOpIndex) const noexcept
 		{
 			auto it = m_pins.find(pinOpIndex);
@@ -179,6 +180,19 @@ namespace Afb
 			}
 
 			return QLatin1String("[UnknownPin ") + QString::number(pinOpIndex) + QLatin1String("]");
+		}
+
+		int pinOpIndex(const QString& pinCaption) const noexcept
+		{
+			for(auto& pinInfo : m_pins)
+			{
+				if (pinInfo.second.caption() == pinCaption)
+				{
+					return pinInfo.first;	// pin opIndex
+				}
+			}
+
+			return -1;
 		}
 
 	private:

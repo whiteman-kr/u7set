@@ -150,13 +150,16 @@ namespace EquipmentPropNames
 	inline const QString TUNING_LOW_BOUND("TuningLowBound");
 	inline const QString TUNING_HIGH_BOUND("TuningHighBound");
 
-
 	// Tuning Authorization properties
 	//
 	inline const QString TUNING_LOGIN("TuningLogin");
 	inline const QString TUNING_USER_ACCOUNTS("TuningUserAccounts");
 	inline const QString TUNING_SESSION_TIMEOUT("TuningSessionTimeout");
 	inline const QString LOGIN_PER_OPERATION("LoginPerOperation");
+
+	// Opto modules properties
+	//
+	inline const QString ALLOW_INCHASSIS_OPTO_CONNECTIONS("AllowInchassisOptoConnections");
 }
 
 namespace XmlElement
@@ -313,7 +316,10 @@ namespace Directory
 
 	inline const QString REPORTS("Reports");
 	inline const QString OPTO_VHD("Opto-vhd");
-	inline const QString RUN_SERVICE_SCRIPTS("RunServiceScripts");
+
+	inline const QString RUN_SERVICE_SCRIPTS_WINDOWS("RunServiceScripts/Windows");
+	inline const QString RUN_SERVICE_SCRIPTS_LINUX("RunServiceScripts/Linux");
+
 	inline const QString BIN("Bin");
 }
 
@@ -461,5 +467,23 @@ namespace Manufacturer
 {
 	inline const QString RADIY("Radiy");
 	inline const QString SITE("radiy.com");
+}
+
+namespace Busses
+{
+	inline const QString SIGNAL_ID_SEPARATOR(".");
+
+	inline const QString MACRO_BUS_TYPE("$(BusType)");
+	inline const QString MACRO_BUS_APP_SIGNAL_ID("$(BusAppSignalID)");
+	inline const QString MACRO_BUS_CUSTOM_APP_SIGNAL_ID("$(BusCustomAppSignalID)");
+	inline const QString MACRO_BUS_CAPTION("$(BusCaption)");
+}
+
+namespace MuxPin
+{
+	inline const QString SELECT("i_sel");
+	inline const QString X1("i_x1_data");
+	inline const QString X2("i_x2_data");
+	inline const QString OUTPUT("o_result");
 }
 

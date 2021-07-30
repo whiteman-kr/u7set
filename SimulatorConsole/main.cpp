@@ -107,9 +107,21 @@ bool runScript(QString scriptFileName, qint64 timeout, Sim::Simulator* simulator
 	return ok;
 }
 
+class ProtobufLibShutdowner
+{
+public:
+	~ProtobufLibShutdowner()
+	{
+		google::protobuf::ShutdownProtobufLibrary();
+	}
+};
 
 int main(int argc, char *argv[])
 {
+	ProtobufLibShutdowner pbLibShutdowner;
+
+	Q_UNUSED(pbLibShutdowner);
+
 	originalMessageHandler = qInstallMessageHandler(messageOutputHandler);
 
 	QCoreApplication app(argc, argv);
@@ -220,8 +232,6 @@ int main(int argc, char *argv[])
 	{
 		std::cout << "FAILED\n";
 	}
-
-	google::protobuf::ShutdownProtobufLibrary();
 
 	return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

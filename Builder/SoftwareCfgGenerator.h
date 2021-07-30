@@ -76,12 +76,19 @@ namespace Builder
 
 		static bool loadFileFromDatabase(DbController* db, int parentId, const QString& fileName, QString *errorCode, QByteArray* data);
 
-		QString getBuildInfoCommentsForBat();
-		QString getBuildInfoCommentsForSh();
-		bool getConfigIp(QString* cfgIP1, QString* cfgIP2);
-		bool getServiceParameters(QString &parameters);
+		QString getBuildInfoComments(E::OS os) const;
+		QString getCommonCmdLine(const HostAddressPort& cfgSrvIp1,
+								  const HostAddressPort& cfgSrvIp2,
+								  E::OS os,
+								  bool runAsConsoleApp);
+
+		QString getCommentStart(E::OS os) const;
+		QString getRunScriptDirectory(E::OS os) const;
+		QString getRunScriptName(const QString& profile, E::OS os) const;
 
 		QString softwareCfgSubdir() const { return m_software->equipmentIdTemplate(); }
+
+	private:
 
 	protected:
 		Context* m_context = nullptr;

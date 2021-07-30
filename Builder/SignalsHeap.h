@@ -40,6 +40,8 @@ namespace Builder
 
 		const QStringList& getHeapLog() const;
 
+		const std::vector<std::tuple<QString, Address16, int>>& getHeapItemsLog() const;
+
 	private:
 
 		void logInit();
@@ -65,6 +67,7 @@ namespace Builder
 
 		bool m_firstGetWriteAddr = true;
 		QStringList m_heapLog;
+		std::vector<std::tuple<QString, Address16, int>> m_heapItemsLog;
 	};
 }
 

@@ -2645,6 +2645,22 @@ namespace Hardware
 		return result;
 	}
 
+	bool OptoModule::allowInchassisOptoConnections() const
+	{
+		TEST_PTR_LOG_RETURN_FALSE(m_deviceModule, m_log);
+
+		bool allowInchassisOptoConnections = false;
+
+		if (m_deviceModule->propertyExists(EquipmentPropNames::ALLOW_INCHASSIS_OPTO_CONNECTIONS) == true)
+		{
+			QVariant value = m_deviceModule->propertyValue(EquipmentPropNames::ALLOW_INCHASSIS_OPTO_CONNECTIONS);
+
+			allowInchassisOptoConnections = value.toBool();
+		}
+
+		return allowInchassisOptoConnections;
+	}
+
 	void OptoModule::sortPortsByEquipmentIDAscending(QVector<OptoPort*>& ports)
 	{
 		int count = ports.count();
@@ -3649,10 +3665,24 @@ namespace Hardware
 
 			if (optoPort1->lmID() == optoPort2->lmID())
 			{
-				//  Opto ports of the same chassis is linked via connection '%1'.
-				//
-				m_log->errALC5022(connectionID);
-				return false;
+				OptoModuleShared m1 = getOptoModule(optoPort1);
+
+				TEST_PTR_LOG_RETURN_FALSE(m1, m_log);
+
+				OptoModuleShared m2 = getOptoModule(optoPort2);
+
+				TEST_PTR_LOG_RETURN_FALSE(m2, m_log);
+
+				bool inchassisConnectionAllowed =	m1->allowInchassisOptoConnections() ||
+													m2->allowInchassisOptoConnections();
+
+				if (inchassisConnectionAllowed == false)
+				{
+					//  Opto ports of the same chassis is linked via connection '%1'.
+					//
+					m_log->errALC5022(connectionID);
+					return false;
+				}
 			}
 
 			if (optoPort2->connectionID().isEmpty() == true)

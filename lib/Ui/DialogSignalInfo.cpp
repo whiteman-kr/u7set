@@ -156,25 +156,8 @@ SignalFlagsWidget::SignalFlagsWidget(QWidget *parent)
 	setMouseTracking(true);
 }
 
-void SignalFlagsWidget::updateControl(AppSignalStateFlags flags)
-{
-	m_flags = flags;
-	update();
-}
-
 void SignalFlagsWidget::paintEvent(QPaintEvent *)
 {
-
-	static const std::array<QString, static_cast<int>(SignalFlagsFields::Count)> flagNames =
-		{
-			QStringLiteral("VALID"),
-			QStringLiteral("ST.AVAIL"),
-			QStringLiteral("SIM"),
-			QStringLiteral("LOCK"),
-			QStringLiteral("MISMATCH"),
-			QStringLiteral("HIGH"),
-			QStringLiteral("LOW")
-		};
 
 	static const QString flagValueFalse = QStringLiteral(" (0)");
 	static const QString flagValueTrue = QStringLiteral(" (1)");
@@ -194,72 +177,12 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 		{
 			// Draw the rectangle for flag
 			//
-			bool flagValue = false;
 			bool flagValid = true;
+			bool flagValue = false;
+			bool flagAlert = false;
 
-			if (flagNo < static_cast<int>(SignalFlagsFields::Count))
+			if (flagState(flagNo, &flagValid, &flagValue, &flagAlert) == true)
 			{
-				bool flagAlert = false;
-
-				SignalFlagsFields flag = static_cast<SignalFlagsFields>(flagNo);
-
-				if (flag != SignalFlagsFields::StateAvailable && m_flags.stateAvailable == false)
-				{
-					// Flag is not valid
-					//
-					flagValid = false;
-					flagAlert = true;
-				}
-				else
-				{
-					// Flag is valid, get its value
-					//
-					switch (flag)
-					{
-					case SignalFlagsFields::Valid:
-						flagValue = m_flags.valid;
-						break;
-
-					case SignalFlagsFields::StateAvailable:
-						flagValue = m_flags.stateAvailable;
-						break;
-
-					case SignalFlagsFields::Simulated:
-						flagValue = m_flags.simulated;
-						break;
-
-					case SignalFlagsFields::Blocked:
-						flagValue = m_flags.blocked;
-						break;
-
-					case SignalFlagsFields::Mismatch:
-						flagValue = m_flags.mismatch;
-						break;
-
-					case SignalFlagsFields::AboveHighLimit:
-						flagValue = m_flags.aboveHighLimit;
-						break;
-
-					case SignalFlagsFields::BelowLowLimit:
-						flagValue = m_flags.belowLowLimit;
-						break;
-
-					default:
-						Q_ASSERT(false);
-					}
-
-					flagAlert = flagValue;
-
-					// Valid and StateAvailable flags colors are inverted
-					//
-					if (flag == SignalFlagsFields::Valid ||	flag == SignalFlagsFields::StateAvailable)
-					{
-						flagAlert = !flagAlert;
-					}
-				}
-
-				//
-
 				painter.setBrush(flagAlert == true ? alertBrush : noAlertBrush);
 			}
 			else
@@ -275,11 +198,11 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 			// Draw the text description for flag
 			//
 
-			if (flagNo < static_cast<int>(SignalFlagsFields::Count))
+			if (flagNo < static_cast<int>(m_flagNames.size()))
 			{
 				painter.setPen(Qt::white);
 
-				QString text = flagNames[flagNo];
+				QString text = m_flagNames[flagNo];
 
 				if (flagValid == true)
 				{
@@ -308,26 +231,15 @@ void SignalFlagsWidget::mouseMoveEvent(QMouseEvent *event)
 		return;
 	}
 
-	static const std::array<QString, static_cast<int>(SignalFlagsFields::Count)> flagTooltips =
-		{
-			QStringLiteral("Signal Validity\n\nSet to 1 when validity signal of the signal is set to 1.\nSet to 0 when validity signal of the signal is set to 0.\nIf no validity signal exists - equal to \"ST.AVAIL\" flag."),
-			QStringLiteral("Signal State is Available\n\nSet to 1 if application data is received from LM.\nSet to 0 if no application data is received from LM."),
-			QStringLiteral("Signal is Simulated\n\nSet to 1 when simulation signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no simulation signal exists, also set to 0."),
-			QStringLiteral("Signal is Locked\n\nSet to 1 when locking signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no locking signal exists, also set to 0."),
-			QStringLiteral("Signal is Mismatched\n\nSet to 1 when mismatch signal is set to 1 (see AFB mismatch),\notherwise set to 0. If no mismatch signal exists, also set to 0."),
-			QStringLiteral("Signal Value is High\n\nSet to 1 when signal value is greater than\nHighEngineeringUnits limit, otherwise set to 0."),
-			QStringLiteral("Signal Value is Low\n\nSet to 1 when signal value is less than\nLowEngineeringUnits limit, otherwise set to 0."),
-		};
-
 	int flagAbove = point2Flag(event->pos());
 
 	if (m_lastFlagAbove != flagAbove)
 	{
 		m_lastFlagAbove = flagAbove;
 
-		if (flagAbove >= 0 && flagAbove < static_cast<int>(SignalFlagsFields::Count))
+		if (flagAbove >= 0 && flagAbove < static_cast<int>(m_flagTooltips.size()))
 		{
-			QToolTip::showText(mapToGlobal(event->pos()), flagTooltips[flagAbove], this);
+			QToolTip::showText(mapToGlobal(event->pos()), m_flagTooltips[flagAbove], this);
 		}
 		else
 		{
@@ -357,7 +269,7 @@ QRect SignalFlagsWidget::flag2Rect(int flagNo)
 
 int SignalFlagsWidget::point2Flag(const QPoint& pt)
 {
-	for (int i = 0; i < static_cast<int>(SignalFlagsFields::Count); i++)
+	for (int i = 0; i < static_cast<int>(m_flagNames.size()); i++)
 	{
 		QRect r = flag2Rect(i);
 
@@ -368,6 +280,234 @@ int SignalFlagsWidget::point2Flag(const QPoint& pt)
 	}
 
 	return -1;
+}
+
+//
+// AppSignalFlagsWidget
+//
+
+AppSignalFlagsWidget::AppSignalFlagsWidget(QWidget* parent)
+	:SignalFlagsWidget(parent)
+{
+	m_flagNames =
+		{
+			QStringLiteral("VALID"),
+			QStringLiteral("ST.AVAIL"),
+			QStringLiteral("SIM"),
+			QStringLiteral("LOCK"),
+			QStringLiteral("MISMATCH"),
+			QStringLiteral("HIGH"),
+			QStringLiteral("LOW")
+		};
+
+	m_flagTooltips =
+		{
+			QStringLiteral("Signal Validity\n\nSet to 1 when validity signal of the signal is set to 1.\nSet to 0 when validity signal of the signal is set to 0.\nIf no validity signal exists - equal to \"ST.AVAIL\" flag."),
+			QStringLiteral("Signal State is Available\n\nSet to 1 if application data is received from LM.\nSet to 0 if no application data is received from LM."),
+			QStringLiteral("Signal is Simulated\n\nSet to 1 when simulation signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no simulation signal exists, also set to 0."),
+			QStringLiteral("Signal is Locked\n\nSet to 1 when locking signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no locking signal exists, also set to 0."),
+			QStringLiteral("Signal is Mismatched\n\nSet to 1 when mismatch signal is set to 1 (see AFB mismatch),\notherwise set to 0. If no mismatch signal exists, also set to 0."),
+			QStringLiteral("Signal Value is High\n\nSet to 1 when signal value is greater than\nHighEngineeringUnits limit, otherwise set to 0."),
+			QStringLiteral("Signal Value is Low\n\nSet to 1 when signal value is less than\nLowEngineeringUnits limit, otherwise set to 0."),
+		};
+
+}
+
+void AppSignalFlagsWidget::updateControl(AppSignalStateFlags flags)
+{
+	m_flags = flags;
+	update();
+}
+
+bool AppSignalFlagsWidget::flagState(int flagNo, bool* const flagValid, bool* const flagValue, bool* const flagAlert) const
+{
+	if (flagValid == nullptr || flagValue == nullptr || flagAlert == nullptr)
+	{
+		Q_ASSERT(flagValid);
+		Q_ASSERT(flagValue);
+		Q_ASSERT(flagAlert);
+		return false;
+	}
+
+	if (flagNo >= static_cast<int>(m_flagNames.size()))
+	{
+		return false;
+	}
+
+	AppSignalFlagsFields flag = static_cast<AppSignalFlagsFields>(flagNo);
+
+	if (m_flags.stateAvailable == false && flag != AppSignalFlagsFields::StateAvailable)
+	{
+		// Flag is not valid
+		//
+		*flagValid = false;
+		*flagAlert = true;
+
+		return true;
+	}
+
+	*flagValid = true;
+
+	// Flag is valid, get its value
+	//
+	switch (flag)
+	{
+	case AppSignalFlagsFields::Valid:
+		*flagValue = m_flags.valid;
+		break;
+
+	case AppSignalFlagsFields::StateAvailable:
+		*flagValue = m_flags.stateAvailable;
+		break;
+
+	case AppSignalFlagsFields::Simulated:
+		*flagValue = m_flags.simulated;
+		break;
+
+	case AppSignalFlagsFields::Blocked:
+		*flagValue = m_flags.blocked;
+		break;
+
+	case AppSignalFlagsFields::Mismatch:
+		*flagValue = m_flags.mismatch;
+		break;
+
+	case AppSignalFlagsFields::AboveHighLimit:
+		*flagValue = m_flags.aboveHighLimit;
+		break;
+
+	case AppSignalFlagsFields::BelowLowLimit:
+		*flagValue = m_flags.belowLowLimit;
+		break;
+
+	default:
+		Q_ASSERT(false);
+		*flagValue = false;
+	}
+
+	*flagAlert = *flagValue;
+
+	// Valid and StateAvailable flags colors are inverted
+	//
+	if (flag == AppSignalFlagsFields::Valid ||	flag == AppSignalFlagsFields::StateAvailable)
+	{
+		*flagAlert = !*flagAlert;
+	}
+
+	return true;
+}
+
+
+//
+// TuningSignalFlagsWidget
+//
+
+TuningSignalFlagsWidget::TuningSignalFlagsWidget(QWidget* parent)
+	:SignalFlagsWidget(parent)
+{
+	m_flagNames =
+		{
+			QStringLiteral("VALID"),
+			QStringLiteral("RANGE"),
+			QStringLiteral("WRITING"),
+			QStringLiteral("CONTROL"),
+			QStringLiteral("ACCESS"),
+			QStringLiteral("DEFAULT"),
+		};
+
+	m_flagTooltips =
+		{
+			QStringLiteral("Signal validity\n\nSet to 1 if tuning data is received from LM.\nSet to 0 if no tuning data is received from LM."),
+			QStringLiteral("Signal is out of range\n\nSet to 1 when tuning value is out of range, otherwise set to 0."),
+			QStringLiteral("Writing in progress\n\nSet to 1 when writing a value is in progress. Resets to 0 after writing was finished "),
+			QStringLiteral("Control is enabled\n\nSet to 1 when  tuning control for LM is enabled by TuningService, otherwise set to 0.\n\nNOTE: if SingleLmControl property of TuningService is set to false, this flag is always set to 1."),
+			QStringLiteral("Writing is enabled\n\nSet to 1 when LM access key is set, otherwise set to 0.\n\nNOTE: this flag is used only when StatusFlagFunction property\nof TuningClient  is set to 'AccessKey'."),
+			QStringLiteral("Default value\n\nSet to 1 tuning signal value is set to default value,\notherwise set to 0."),
+		};
+
+}
+
+void TuningSignalFlagsWidget::updateControl(TuningSignalStateFlags flags)
+{
+	m_flags = flags;
+	update();
+}
+
+bool TuningSignalFlagsWidget::flagState(int flagNo, bool* const flagValid, bool* const flagValue, bool* const flagAlert) const
+{
+	if (flagValid == nullptr || flagValue == nullptr || flagAlert == nullptr)
+	{
+		Q_ASSERT(flagValid);
+		Q_ASSERT(flagValue);
+		Q_ASSERT(flagAlert);
+		return false;
+	}
+
+	if (flagNo >= static_cast<int>(m_flagNames.size()))
+	{
+		return false;
+	}
+
+	TuningSignalFlagsFields flag = static_cast<TuningSignalFlagsFields>(flagNo);
+
+	if (m_flags.valid == false && flag != TuningSignalFlagsFields::Valid)
+	{
+		// Flag is not valid
+		//
+		*flagValid = false;
+		*flagAlert = true;
+
+		return true;
+	}
+
+	*flagValid = true;
+
+	// Flag is valid, get its value
+	//
+	switch (flag)
+	{
+	case TuningSignalFlagsFields::Valid:
+		*flagValue = m_flags.valid;
+		break;
+
+	case TuningSignalFlagsFields::OutOfRange:
+		*flagValue = m_flags.outOfRange;
+		break;
+
+	case TuningSignalFlagsFields::WriteInProgress:
+		*flagValue = m_flags.writeInProgress;
+		break;
+
+	case TuningSignalFlagsFields::ControlIsEnabled:
+		*flagValue = m_flags.controlIsEnabled;
+		break;
+
+	case TuningSignalFlagsFields::WritingIsEnabled:
+		*flagValue = m_flags.writingIsEnabled;
+		break;
+
+	case TuningSignalFlagsFields::TuningDefault:
+		*flagValue = m_flags.tuningDefault;
+		break;
+
+	default:
+		Q_ASSERT(false);
+		*flagValue = false;
+	}
+
+	*flagAlert = *flagValue;
+
+	// Valid and StateAvailable flags colors are inverted
+	//
+	if (flag == TuningSignalFlagsFields::Valid ||
+		flag == TuningSignalFlagsFields::ControlIsEnabled ||
+		flag == TuningSignalFlagsFields::WritingIsEnabled ||
+		flag == TuningSignalFlagsFields::TuningDefault)
+	{
+		*flagAlert = !*flagAlert;
+	}
+
+	return true;
 }
 
 //
@@ -530,7 +670,7 @@ void DialogSignalInfo::updateSignal(const AppSignalParam& signal)
 {
 	m_signal = signal;
 
-	updateSingnalData();
+	fillSignalData();
 
 	return;
 }
@@ -732,6 +872,19 @@ void DialogSignalInfo::on_pushButtonSetZero_clicked()
 		return;
 	}
 
+	int result = QMessageBox::warning(this, qAppName(),
+									  tr("Are you sure you want to write value '%1'\n\nto signal '%2' ('%3')?")
+									  .arg(0).
+									  arg(m_signal.customSignalId()).
+									  arg(m_signal.caption()),
+									  QMessageBox::Yes|QMessageBox::No,
+									  QMessageBox::No);
+
+	if (result != QMessageBox::Yes)
+	{
+		return;
+	}
+
 	m_tuningController->writeValue(m_signal.appSignalId(), false);
 }
 
@@ -740,6 +893,19 @@ void DialogSignalInfo::on_pushButtonSetOne_clicked()
 	if (m_tuningController == nullptr || m_signal.isDiscrete() == false)
 	{
 		Q_ASSERT(false);
+		return;
+	}
+
+	int result = QMessageBox::warning(this, qAppName(),
+									  tr("Are you sure you want to write value '%1'\n\nto signal '%2' ('%3')?")
+									  .arg(1).
+									  arg(m_signal.customSignalId()).
+									  arg(m_signal.caption()),
+									  QMessageBox::Yes|QMessageBox::No,
+									  QMessageBox::No);
+
+	if (result != QMessageBox::Yes)
+	{
 		return;
 	}
 
@@ -756,12 +922,30 @@ void DialogSignalInfo::on_pushButtonSetValue_clicked()
 
 	QString strValue = ui->editInputValue->text();
 
+	if (strValue.isEmpty() == true)
+	{
+		return;
+	}
+
 	bool ok = false;
 
 	double value = strValue.toDouble(&ok);
 	if (ok == false)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Invalid input value!"));
+		return;
+	}
+
+	int result = QMessageBox::warning(this, qAppName(),
+									  tr("Are you sure you want to write value '%1'\n\nto signal '%2' ('%3')?")
+									  .arg(strValue).
+									  arg(m_signal.customSignalId()).
+									  arg(m_signal.caption()),
+									  QMessageBox::Yes|QMessageBox::No,
+									  QMessageBox::No);
+
+	if (result != QMessageBox::Yes)
+	{
 		return;
 	}
 
@@ -797,9 +981,9 @@ void DialogSignalInfo::showEvent(QShowEvent* /*e*/)
 
 	// Fill signal information
 
-	updateSingnalData();
+	fillSignalData();
 
-	updateDynamicData();
+	updateSignalData();
 
 	return;
 }
@@ -810,7 +994,7 @@ void DialogSignalInfo::timerEvent(QTimerEvent* event)
 
 	if  (event->timerId() == m_updateStateTimerId)
 	{
-		updateDynamicData();
+		updateSignalData();
 	}
 }
 
@@ -1000,7 +1184,7 @@ void DialogSignalInfo::removeTabPage(const QString& tabName)
 	}
 }
 
-void DialogSignalInfo::updateSingnalData()
+void DialogSignalInfo::fillSignalData()
 {
 	// Fill signal information
 
@@ -1016,7 +1200,7 @@ void DialogSignalInfo::updateSingnalData()
 	fillExtProperties();
 	fillSetpoints();
 	fillSchemas();
-	updateTuningTab();
+	fillTuningTab();
 
 	return;
 }
@@ -1046,6 +1230,8 @@ void DialogSignalInfo::fillSignalInfo()
 	font.setPixelSize(m_currentFontSize);
 	ui->labelValue->setFont(font);
 	ui->labelValueTuning->setFont(font);
+	ui->labelStrUnit->setFont(font);
+	ui->labelStrUnitTuning->setFont(font);
 
 	ui->editAppSignalID->setText(m_signal.appSignalId());
 	ui->editCustomAppSignalID->setText(m_signal.customSignalId());
@@ -1506,7 +1692,7 @@ void DialogSignalInfo::fillSchemas()
 	ui->treeSchemas->sortByColumn(0, Qt::AscendingOrder);
 }
 
-void DialogSignalInfo::updateTuningTab()
+void DialogSignalInfo::fillTuningTab()
 {
 	const QString tuningTabPageName = QObject::tr("Tuning");
 
@@ -1550,17 +1736,23 @@ void DialogSignalInfo::updateTuningTab()
 
 }
 
-void DialogSignalInfo::updateDynamicData()
+void DialogSignalInfo::updateSignalData()
 {
-	updateState();
+	updateAppSignalState();
+
 	updateSetpoints();
+
+	if (m_signal.enableTuning() == true && tuningEnabled() == true)
+	{
+		updateTuningSignalState();
+	}
 }
 
-void DialogSignalInfo::updateState()
+void DialogSignalInfo::updateAppSignalState()
 {
 	bool ok = false;
 
-	AppSignalState state = m_appSignalManager->signalState(m_signal.hash(), &ok);
+	AppSignalState appSignalState = m_appSignalManager->signalState(m_signal.hash(), &ok);
 	if (ok == false)
 	{
 		return;
@@ -1574,11 +1766,14 @@ void DialogSignalInfo::updateState()
 	{
 		ui->labelValue->setMaximumHeight(labelHeight);
 		ui->labelValueTuning->setMaximumHeight(labelHeight);
+
+		ui->labelStrUnit->setMaximumHeight(labelHeight);
+		ui->labelStrUnitTuning->setMaximumHeight(labelHeight);
 	}
 
 	// Generate value string even if signal is not valid
 	//
-	QString strValue = signalStateText(m_signal, state, m_viewType, m_currentPrecision);
+	QString strValue = appSignalStateText(m_signal, appSignalState, m_viewType, m_currentPrecision);
 
 	// Calculate word wrap
 	//
@@ -1602,8 +1797,12 @@ void DialogSignalInfo::updateState()
 	{
 		QFont font = ui->labelValue->font();
 		font.setPixelSize(m_currentFontSize);
+
 		ui->labelValue->setFont(font);
 		ui->labelValueTuning->setFont(font);
+
+		ui->labelStrUnit->setFont(font);
+		ui->labelStrUnitTuning->setFont(font);
 	}
 
 	// Set text
@@ -1611,16 +1810,15 @@ void DialogSignalInfo::updateState()
 	if (strValue != ui->labelValue->text())
 	{
 		ui->labelValue->setText(strValue);
-		ui->labelValueTuning->setText(strValue);
 	}
 
-	QDateTime localTime = state.m_time.local.toDateTime();
-	QDateTime plaitTime = state.m_time.plant.toDateTime();
+	QDateTime localTime = appSignalState.m_time.local.toDateTime();
+	QDateTime plaitTime = appSignalState.m_time.plant.toDateTime();
 
 	ui->labelServerTime->setText(localTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
 	ui->labelPlantTime->setText(plaitTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
 
-	ui->widgetFlags->updateControl(state.m_flags);
+	ui->widgetFlags->updateControl(appSignalState.m_flags);
 
 	return;
 }
@@ -1658,7 +1856,7 @@ void DialogSignalInfo::updateSetpoints()
 			}
 			else
 			{
-				item->setText(static_cast<int>(SetpointsColumns::CompareToValue), signalStateText(paramCompare, stateCompare, E::ValueViewType::Dec, paramCompare.precision()));
+				item->setText(static_cast<int>(SetpointsColumns::CompareToValue), appSignalStateText(paramCompare, stateCompare, E::ValueViewType::Dec, paramCompare.precision()));
 			}
 		}
 
@@ -1678,9 +1876,55 @@ void DialogSignalInfo::updateSetpoints()
 			}
 			else
 			{
-				item->setText(static_cast<int>(SetpointsColumns::OutputValue), signalStateText(paramOutput, stateOutput, E::ValueViewType::Dec, paramOutput.precision()));
+				item->setText(static_cast<int>(SetpointsColumns::OutputValue), appSignalStateText(paramOutput, stateOutput, E::ValueViewType::Dec, paramOutput.precision()));
 			}
 		}
+	}
+
+	return;
+}
+
+void DialogSignalInfo::updateTuningSignalState()
+{
+	// Tuning information
+
+	TuningSignalState tuningSignalState = m_tuningController->signalState(m_signal.appSignalId()).value<TuningSignalState>();
+
+	QString strValue = tuningSignalStateText(m_signal, tuningSignalState, m_viewType, m_currentPrecision);
+
+	if (strValue != ui->labelValueTuning->text())
+	{
+		ui->labelValueTuning->setText(strValue);
+	}
+
+	ui->labelSuccessfulReadTime->setText(tuningSignalState.successfulReadTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	ui->labelWriteRequestTime->setText(tuningSignalState.writeRequestTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	ui->labelSuccessfulWriteTime->setText(tuningSignalState.successfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	ui->labelUnsuccessfulWriteTime->setText(tuningSignalState.unsuccessfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+
+	ui->widgetTuningFlags->updateControl(tuningSignalState.m_flags);
+
+	// Enable/disable controls
+
+	bool controlEnabled = tuningSignalState.valid() == true &&
+						  tuningSignalState.controlIsEnabled() == true;// &&
+						  //tuningSignalState.writingIsEnabled() == true;	// This flag is not always used! ???
+
+	if (ui->pushButtonSetOne->isEnabled() != controlEnabled)
+	{
+		ui->pushButtonSetOne->setEnabled(controlEnabled);
+	}
+	if (ui->pushButtonSetZero->isEnabled() != controlEnabled)
+	{
+		ui->pushButtonSetZero->setEnabled(controlEnabled);
+	}
+	if (ui->pushButtonSetValue->isEnabled() != controlEnabled)
+	{
+		ui->pushButtonSetValue->setEnabled(controlEnabled);
+	}
+	if (ui->editInputValue->isEnabled() != controlEnabled)
+	{
+		ui->editInputValue->setEnabled(controlEnabled);
 	}
 
 	return;
@@ -1782,7 +2026,7 @@ void DialogSignalInfo::stateContextMenu(QPoint pos)
 	return;
 }
 
-QString DialogSignalInfo::signalStateText(const AppSignalParam& param, const AppSignalState& state, E::ValueViewType viewType, int precision)
+QString DialogSignalInfo::appSignalStateText(const AppSignalParam& param, const AppSignalState& state, E::ValueViewType viewType, int precision)
 {
 	// Generate value string even if signal is not valid
 	//
@@ -1825,6 +2069,45 @@ QString DialogSignalInfo::signalStateText(const AppSignalParam& param, const App
 		{
 			strValue = QStringLiteral("?");
 		}
+	}
+
+	return strValue;
+}
+
+QString DialogSignalInfo::tuningSignalStateText(const AppSignalParam& param, const TuningSignalState& state, E::ValueViewType viewType, int precision)
+{
+	// Generate value string even if signal is not valid
+	//
+
+	QString strValue;
+
+	if (param.isDiscrete() == true)
+	{
+		strValue = QString("%1").arg(state.m_value.discreteValue());
+	}
+
+	if (param.isAnalog() == true)
+	{
+		double ipart = 0;
+		double fpart = std::modf(state.m_value.toDouble(), &ipart);
+
+		if((viewType == E::ValueViewType::Bin16 || viewType == E::ValueViewType::Bin32 || viewType == E::ValueViewType::Bin64 || viewType == E::ValueViewType::Hex) &&
+		   precision > 0 &&
+		   fpart != 0)
+		{
+			strValue = tr("Only integer value is displayed in HEX or BIN mode.\nSet view precision to zero to see the value.");
+		}
+		else
+		{
+			strValue = AppSignalState::toString(state.m_value.toDouble(), viewType, E::AnalogFormat::f_9, precision);
+		}
+	}
+
+	// Generate non valid string
+	//
+	if (state.m_flags.valid == false)
+	{
+		strValue = QStringLiteral("?");
 	}
 
 	return strValue;

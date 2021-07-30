@@ -17,8 +17,11 @@ namespace Builder
 		virtual bool generateConfigurationStep1() override;
 
 	private:
-		bool writeBatFile();
-		bool writeShFile();
+		bool writeRunScriptFile(const QString& profile, const CfgServiceSettings& settings, E::OS os);
+
+		QString getCommandLine(const QString& profile,
+								const HostAddressPort& clientRequestIP,
+								E::OS os) const;
 	};
 
 }

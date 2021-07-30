@@ -19,8 +19,7 @@ namespace Builder
 	private:
 		bool writeArchSignalsFile();
 
-		bool writeBatFile();
-		bool writeShFile();
+		bool writeRunScriptFile(const QString& profile, const ArchivingServiceSettings& settings, E::OS os);
 	};
 
 }

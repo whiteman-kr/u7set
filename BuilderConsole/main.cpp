@@ -161,38 +161,24 @@ int startBuild(QString buildArgsFileName)
 	}
 	file.close();
 
-	// Some inititializations
-	//
-	VFrame30::init();
-	Hardware::init();
-	DbController::init();
-	Builder::init();
-
-	// Task parented to the application so that it
-	// will be deleted by the application.
-	//
-	BuildTask* buildTask = new BuildTask(QCoreApplication::instance());
-
 	// Read and set task arguments
 	//
 	QDomElement docElem = doc.documentElement();
 
-	QString value;
-
 	// DatabaseAddress
 	//
-	bool ok = getArgumentFromXml(docElem, "DatabaseAddress", &value);
+	QString dbAddress;
+	bool ok = getArgumentFromXml(docElem, "DatabaseAddress", &dbAddress);
 	if (ok == false)
 	{
 		std::cout << "Failed to read DatabaseAddress argument from file!" << std::endl;
 		return 1;
 	}
-	if (value.isEmpty() == true)
+	if (dbAddress.isEmpty() == true)
 	{
 		std::cout << "DatabaseAddress argument can't be empty!" << std::endl;
 		return 1;
 	}
-	buildTask->setDatabaseAddress(value);
 
 	// DatabasePort
 	//
@@ -203,94 +189,111 @@ int startBuild(QString buildArgsFileName)
 		std::cout << "Failed to read DatabasePort argument from file!" << std::endl;
 		return 1;
 	}
-	buildTask->setDatabasePort(port);
 
 	// DatabaseUserName
 	//
-	ok = getArgumentFromXml(docElem, "DatabaseUserName", &value);
+	QString dbUserName;
+	ok = getArgumentFromXml(docElem, "DatabaseUserName", &dbUserName);
 	if (ok == false)
 	{
 		std::cout << "Failed to read DatabaseUserName argument from file!" << std::endl;
 		return 1;
 	}
-	if (value.isEmpty() == true)
+	if (dbUserName.isEmpty() == true)
 	{
 		std::cout << "DatabaseUserName argument can't be empty!" << std::endl;
 		return 1;
 	}
-	buildTask->setDatabaseUserName(value);
 
 	// DatabasePassword
 	//
-	ok = getArgumentFromXml(docElem, "DatabasePassword", &value);
+	QString dbPassword;
+	ok = getArgumentFromXml(docElem, "DatabasePassword", &dbPassword);
 	if (ok == false)
 	{
 		std::cout << "Failed to read DatabasePassword argument from file!" << std::endl;
 		return 1;
 	}
-	if (value.isEmpty() == true)
+	if (dbPassword.isEmpty() == true)
 	{
 		std::cout << "DatabasePassword argument can't be empty!" << std::endl;
 		return 1;
 	}
-	buildTask->setDatabasePassword(value);
 
 	// ProjectName
 	//
-	ok = getArgumentFromXml(docElem, "ProjectName", &value);
+	QString projectName;
+	ok = getArgumentFromXml(docElem, "ProjectName", &projectName);
 	if (ok == false)
 	{
 		std::cout << "Failed to read ProjectName argument from file!" << std::endl;
 		return 1;
 	}
-	if (value.isEmpty() == true)
+	if (projectName.isEmpty() == true)
 	{
 		std::cout << "ProjectName argument can't be empty!" << std::endl;
 		return 1;
 	}
-	buildTask->setProjectName(value);
 
 	// ProjectUserName
 	//
-	ok = getArgumentFromXml(docElem, "ProjectUserName", &value);
+	QString projectUserName;
+	ok = getArgumentFromXml(docElem, "ProjectUserName", &projectUserName);
 	if (ok == false)
 	{
 		std::cout << "Failed to read ProjectUserName argument from file!" << std::endl;
 		return 1;
 	}
-	if (value.isEmpty() == true)
+	if (projectUserName.isEmpty() == true)
 	{
 		std::cout << "ProjectUserName argument can't be empty!" << std::endl;
 		return 1;
 	}
-	buildTask->setProjectUserName(value);
 
 	// ProjectUserPassword
 	//
-	ok = getArgumentFromXml(docElem, "ProjectUserPassword", &value);
+	QString projectUserPassword;
+	ok = getArgumentFromXml(docElem, "ProjectUserPassword", &projectUserPassword);
 	if (ok == false)
 	{
 		std::cout << "Failed to read ProjectUserPassword argument from file!" << std::endl;
 		return 1;
 	}
-	if (value.isEmpty() == true)
+	if (projectUserPassword.isEmpty() == true)
 	{
 		std::cout << "ProjectUserPassword argument can't be empty!" << std::endl;
 		return 1;
 	}
-	buildTask->setProjectUserPassword(value);
 
 	// BuildOutputPath
 	//
-	ok = getArgumentFromXml(docElem, "BuildOutputPath", &value);
+	QString buildPath;
+	ok = getArgumentFromXml(docElem, "BuildOutputPath", &buildPath);
 	if (ok == false)
 	{
 		std::cout << "Failed to read BuildOutputPath argument from file!" << std::endl;
 		return 1;
 	}
-	if (value.isEmpty() == false)
+
+	// Some inititializations
+	//
+	VFrame30::init();
+	Hardware::init();
+	DbController::init();
+	Builder::init();
+
+	BuildTask* buildTask = new BuildTask(nullptr /* QCoreApplication::instance() */);
+
+	buildTask->setDatabaseAddress(dbAddress);
+	buildTask->setDatabasePort(port);
+	buildTask->setDatabaseUserName(dbUserName);
+	buildTask->setDatabasePassword(dbPassword);
+	buildTask->setProjectName(projectName);
+	buildTask->setProjectUserName(projectUserName);
+	buildTask->setProjectUserPassword(projectUserPassword);
+	if (buildPath.isEmpty() == false)
 	{
-		buildTask->setBuildOutputPath(value);
+		buildTask->setBuildOutputPath(buildPath);
 	}
 
 	// This will cause the application to exit when
@@ -306,12 +309,14 @@ int startBuild(QString buildArgsFileName)
 	//
 	int result = QCoreApplication::instance()->exec();
 
+	delete buildTask;
+
 	// Shutting down
 	//
 	Builder::shutdown();
 	DbController::shutdown();
-	Hardware::shutdown();
 	VFrame30::shutdown();
+	Hardware::shutdown();
 
 	return result;
 }
