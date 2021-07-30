@@ -395,6 +395,11 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					appendProperty(item, page, MO_PARAM_MEASURE_ENTIRE_MODULE);
 					measuremoduleGroup->addSubProperty(item);
 
+					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MEASURE_SHOWN_ON_SCHEMAS]));
+					item->setValue(m_options.module().measureShownOnSchemas());
+					appendProperty(item, page, MO_PARAM_MEASURE_SHOWN_ON_SCHEMAS);
+					measuremoduleGroup->addSubProperty(item);
+
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_WARN_IF_MEASURED]));
 					item->setValue(m_options.module().warningIfMeasured());
 					appendProperty(item, page, MO_PARAM_WARN_IF_MEASURED);
@@ -1161,6 +1166,7 @@ void DialogOptions::applyProperty()
 					case MO_PARAM_MEASURE_INT_INSTEAD_IN:	m_options.module().setMeasureInterInsteadIn(value.toBool());				break;
 					case MO_PARAM_MEASURE_LIN_AND_CMP:		m_options.module().setMeasureLinAndCmp(value.toBool());						break;
 					case MO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.module().setMeasureEntireModule(value.toBool());					break;
+					case MO_PARAM_MEASURE_SHOWN_ON_SCHEMAS:	m_options.module().setMeasureShownOnSchemas(value.toBool());				break;
 					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());					break;
 					case MO_PARAM_MAX_IMPUT_COUNT:			m_options.module().setMaxInputCount(value.toInt());							break;
 					default:								assert(0);

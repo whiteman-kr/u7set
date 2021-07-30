@@ -828,8 +828,8 @@ void PanelStatistics::selectSignalForMeasure()
 //			return;
 //		}
 
-		theSignalBase.statistics().createSignalList();
-		theSignalBase.statistics().createComparatorList();
+		theSignalBase.statistics().createSignalList(theOptions.module().measureShownOnSchemas());
+		theSignalBase.statistics().createComparatorList(theOptions.module().measureShownOnSchemas());
 
 		updateList();
 

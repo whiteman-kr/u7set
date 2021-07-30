@@ -320,18 +320,20 @@ const char* const		ModuleParamName[] =
 						QT_TRANSLATE_NOOP("Options.h", "Measure Internal signal instead Input signal"),
 						QT_TRANSLATE_NOOP("Options.h", "Measure linearity and comparators together"),
 						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
+						QT_TRANSLATE_NOOP("Options.h", "Measure only signals that are displayed in schemas"),
 						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
 						QT_TRANSLATE_NOOP("Options.h", "Maximum number of inputs for input module"),
 };
 
-const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName[0]);
+const int				MO_PARAM_COUNT						= sizeof(ModuleParamName)/sizeof(ModuleParamName[0]);
 
-const int				MO_PARAM_SUFFIX_SN				= 0,
-						MO_PARAM_MEASURE_INT_INSTEAD_IN	= 1,
-						MO_PARAM_MEASURE_LIN_AND_CMP	= 2,
-						MO_PARAM_MEASURE_ENTIRE_MODULE	= 3,
-						MO_PARAM_WARN_IF_MEASURED		= 4,
-						MO_PARAM_MAX_IMPUT_COUNT		= 5;
+const int				MO_PARAM_SUFFIX_SN					= 0,
+						MO_PARAM_MEASURE_INT_INSTEAD_IN		= 1,
+						MO_PARAM_MEASURE_LIN_AND_CMP		= 2,
+						MO_PARAM_MEASURE_ENTIRE_MODULE		= 3,
+						MO_PARAM_MEASURE_SHOWN_ON_SCHEMAS	= 4,
+						MO_PARAM_WARN_IF_MEASURED			= 5,
+						MO_PARAM_MAX_IMPUT_COUNT			= 6;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -359,6 +361,9 @@ public:
 	bool				measureEntireModule() const { return m_measureEntireModule; }
 	void				setMeasureEntireModule(bool measure) { m_measureEntireModule = measure; }
 
+	bool				measureShownOnSchemas() const { return m_measureShownOnSchemas; }
+	void				setMeasureShownOnSchemas(bool measure) { m_measureShownOnSchemas = measure; }
+
 	bool				warningIfMeasured() const { return m_warningIfMeasured; }
 	void				setWarningIfMeasured(bool enable) { m_warningIfMeasured = enable; }
 
@@ -378,10 +383,10 @@ private:
 
 	QString				m_suffixSN;													// suffix to identify the signal of module serial number
 
-
 	bool				m_measureInterInsteadIn = false;							// measure internal signal instead input signal
 	bool				m_measureLinAndCmp = false;									// measure linearity and comparators together
 	bool				m_measureEntireModule = false;								// measure all inputs of module in series
+	bool				m_measureShownOnSchemas = false;							// measure only signals that are displayed in schemas
 	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
 
 	int					m_maxInputCount = Metrology::InputCount;					// maximum number of inputs for input mofule

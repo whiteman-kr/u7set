@@ -1620,9 +1620,12 @@ bool SignalBase::enableForMeasure(Metrology::ConnectionType connectionType, Metr
 		return false;
 	}
 
-	if (param.location().shownOnSchemas() == false)
+	if (theOptions.module().measureShownOnSchemas() == true)
 	{
-		return false;
+		if (param.location().shownOnSchemas() == false)
+		{
+			return false;
+		}
 	}
 
 	switch (connectionType)
@@ -2043,7 +2046,7 @@ void SignalBase::initSignals()
 	initRackParam();
 	initConnectionSignals();
 	m_tuningBase.signalBase().createSignalList();
-	m_statisticsBase.createSignalList();
+	m_statisticsBase.createSignalList(theOptions.module().measureShownOnSchemas());
 
 	qDebug() << __FUNCTION__ << "Signals have been initialized" << " Time for init: " << responseTime.elapsed() << " ms";
 }
@@ -2650,7 +2653,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 		pInputSignal->param().setComparatorList(metrologyComparatorList);
 	}
 
-	m_statisticsBase.createComparatorList();
+	m_statisticsBase.createComparatorList(theOptions.module().measureShownOnSchemas());
 
 	return true;
 }

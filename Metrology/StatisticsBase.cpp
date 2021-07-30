@@ -200,7 +200,7 @@ int StatisticsBase::count(int measureType) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsBase::createSignalList()
+void StatisticsBase::createSignalList(bool shownOnSchemas)
 {
 	QMutexLocker l(&m_signalMutex);
 
@@ -229,9 +229,12 @@ void StatisticsBase::createSignalList()
 			continue;
 		}
 
-		if (param.location().shownOnSchemas() == false)
+		if (shownOnSchemas == true)
 		{
-			continue;
+			if (param.location().shownOnSchemas() == false)
+			{
+				continue;
+			}
 		}
 
 		if (param.isAnalog() == false)
@@ -270,7 +273,7 @@ void StatisticsBase::createSignalList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticsBase::createComparatorList()
+void StatisticsBase::createComparatorList(bool shownOnSchemas)
 {
 	QMutexLocker l(&m_signalMutex);
 
@@ -299,9 +302,12 @@ void StatisticsBase::createComparatorList()
 			continue;
 		}
 
-		if (param.location().shownOnSchemas() == false)
+		if (shownOnSchemas == true)
 		{
-			continue;
+			if (param.location().shownOnSchemas() == false)
+			{
+				continue;
+			}
 		}
 
 		if (param.isAnalog() == false)
