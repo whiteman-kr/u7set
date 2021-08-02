@@ -1859,8 +1859,20 @@ void MainWindow::showOptions()
 
 	// reconnect ConfigSocket
 	//
+	bool reconnectCS = false;
+
 	if (options.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) ||
 		options.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY))
+	{
+		reconnectCS = true;
+	}
+
+	if (options.module().measureShownOnSchemas() != theOptions.module().measureShownOnSchemas())
+	{
+		reconnectCS = true;
+	}
+
+	if (reconnectCS == true)
 	{
 		stopSignalSocket();
 		stopTuningSocket();

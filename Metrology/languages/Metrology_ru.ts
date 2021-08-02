@@ -1584,7 +1584,7 @@ Please choose a different group or channel.</source>
     <message>
         <location filename="../DialogSignalList.cpp" line="219"/>
         <source>Type I/O</source>
-        <translation>Типы вход/выход</translation>
+        <translation>Тип входной/выходной</translation>
     </message>
     <message>
         <location filename="../DialogSignalList.cpp" line="242"/>
@@ -1629,7 +1629,7 @@ Please choose a different group or channel.</source>
     <message>
         <location filename="../DialogSignalList.h" line="16"/>
         <source>Chassis</source>
-        <translation>Корзина</translation>
+        <translation>Шасси</translation>
     </message>
     <message>
         <location filename="../DialogSignalList.h" line="17"/>
@@ -1639,7 +1639,7 @@ Please choose a different group or channel.</source>
     <message>
         <location filename="../DialogSignalList.h" line="18"/>
         <source>Place</source>
-        <translation>Место</translation>
+        <translation>Вх/Вых</translation>
     </message>
     <message>
         <location filename="../DialogSignalList.h" line="19"/>
@@ -1743,7 +1743,7 @@ Please choose a different group or channel.</source>
     <message>
         <location filename="../DialogObjectProperties.cpp" line="1121"/>
         <source>Chassis</source>
-        <translation>Корзина</translation>
+        <translation>Шасси</translation>
     </message>
     <message>
         <location filename="../DialogObjectProperties.cpp" line="1126"/>
@@ -1753,7 +1753,7 @@ Please choose a different group or channel.</source>
     <message>
         <location filename="../DialogObjectProperties.cpp" line="1131"/>
         <source>Place</source>
-        <translation>Место</translation>
+        <translation>Вх/Вых</translation>
     </message>
     <message>
         <location filename="../DialogObjectProperties.cpp" line="1145"/>
@@ -2971,7 +2971,7 @@ Do you want to repeat the preparation process in order to switch the comparator 
         <location filename="../MeasureViewHeader.cpp" line="27"/>
         <location filename="../MeasureViewHeader.cpp" line="96"/>
         <source>Chassis</source>
-        <translation>Корзина</translation>
+        <translation>Шасси</translation>
     </message>
     <message>
         <location filename="../MeasureViewHeader.cpp" line="28"/>
@@ -2983,7 +2983,7 @@ Do you want to repeat the preparation process in order to switch the comparator 
         <location filename="../MeasureViewHeader.cpp" line="29"/>
         <location filename="../MeasureViewHeader.cpp" line="98"/>
         <source>Place</source>
-        <translation>Место</translation>
+        <translation>Вх/Вых</translation>
     </message>
     <message>
         <location filename="../MeasureViewHeader.cpp" line="30"/>
@@ -3821,7 +3821,7 @@ Do you want to repeat the preparation process in order to switch the comparator 
     <message>
         <location filename="../PanelSignalInfo.h" line="25"/>
         <source>Chassis</source>
-        <translation>Корзина</translation>
+        <translation>Шасси</translation>
     </message>
     <message>
         <location filename="../PanelSignalInfo.h" line="26"/>
@@ -3831,7 +3831,7 @@ Do you want to repeat the preparation process in order to switch the comparator 
     <message>
         <location filename="../PanelSignalInfo.h" line="27"/>
         <source>Place</source>
-        <translation>Место</translation>
+        <translation>Вх/Вых</translation>
     </message>
     <message>
         <location filename="../PanelSignalInfo.h" line="28"/>
@@ -3945,7 +3945,7 @@ Do you want to repeat the preparation process in order to switch the comparator 
     <message>
         <location filename="../PanelStatistics.h" line="33"/>
         <source>Chassis</source>
-        <translation>Корзина</translation>
+        <translation type="unfinished">Шасси</translation>
     </message>
     <message>
         <location filename="../PanelStatistics.h" line="34"/>
@@ -3955,7 +3955,7 @@ Do you want to repeat the preparation process in order to switch the comparator 
     <message>
         <location filename="../PanelStatistics.h" line="35"/>
         <source>Place</source>
-        <translation>Место</translation>
+        <translation>Вх/Вых</translation>
     </message>
     <message>
         <location filename="../PanelStatistics.h" line="36"/>
