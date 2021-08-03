@@ -308,7 +308,8 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		result = textLinearity(row, column, pMeasurement);	break;
 			case Measure::Type::Comparators:	result = textComparator(row, column, pMeasurement);	break;
-			default:							result.clear();
+			default:
+				result.clear();
 		}
 
 		return result;
@@ -428,7 +429,8 @@ namespace Measure
 			case MVC_CMN_L_MEASUREMENT_TIME:		result = m->measureTimeStr(); break;
 			case MVC_CMN_L_CALIBRATOR:				result = m->calibrator(); break;
 
-			default:								result.clear(); break;
+			default:
+				result.clear();
 		}
 
 		if (row > 0)
@@ -521,7 +523,8 @@ namespace Measure
 			case MVC_CMN_C_MEASUREMENT_TIME:		result = m->measureTimeStr(); break;
 			case MVC_CMN_C_CALIBRATOR:				result = m->calibrator(); break;
 
-			default:								result.clear(); break;
+			default:
+				result.clear();
 		}
 
 		if (row > 0)
@@ -1105,7 +1108,6 @@ namespace Measure
 
 			default:
 				assert(0);
-				break;
 		}
 
 		if (pointCount == 0)

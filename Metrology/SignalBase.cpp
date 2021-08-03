@@ -549,7 +549,8 @@ QString IoSignalParam::electricSensorStr() const
 
 			break;
 
-		default: assert(0);
+		default:
+			assert(0);
 	}
 
 	return result;
@@ -876,7 +877,6 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 
 				default:
 					assert(0);
-					break;
 			}
 			break;
 
@@ -1133,10 +1133,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 				break;
 
 			default:
-				{
-					assert(0);
-					break;
-				}
+				assert(0);
 		}
 
 		if (pDestSignal == nullptr || pDestSignal->param().isValid() == false)
@@ -2036,7 +2033,8 @@ void SignalBase::initSignals()
 					case E::SignalType::Analog:		param.setPlace(analogTuningSignalCount++);		break;
 					case E::SignalType::Discrete:	param.setPlace(discreteTuningSignalCount++);	break;
 					case E::SignalType::Bus:		param.setPlace(busTuningSignalCount++);			break;
-					default:						assert(0);
+					default:
+						assert(0);
 				}
 			}
 		}

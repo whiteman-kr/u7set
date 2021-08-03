@@ -45,8 +45,8 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 
 		switch (column)
 		{
-			case SIGNAL_INFO_COLUMN_APP_ID:			result = Qt::AlignLeft;		break;
 			case SIGNAL_INFO_COLUMN_CUSTOM_ID:		result = Qt::AlignLeft;		break;
+			case SIGNAL_INFO_COLUMN_APP_ID:			result = Qt::AlignLeft;		break;
 			case SIGNAL_INFO_COLUMN_EQUIPMENT_ID:	result = Qt::AlignLeft;		break;
 			case SIGNAL_INFO_COLUMN_CAPTION:		result = Qt::AlignLeft;		break;
 			case SIGNAL_INFO_COLUMN_STATE:			result = Qt::AlignCenter;	break;
@@ -58,7 +58,8 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 			case SIGNAL_INFO_COLUMN_EL_SENSOR:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_EN_RANGE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_CALIBRATOR:		result = Qt::AlignCenter;	break;
-			default:								assert(0);
+			default:
+				assert(0);
 		}
 
 		return result;
@@ -164,8 +165,8 @@ QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 
 	switch (column)
 	{
-		case SIGNAL_INFO_COLUMN_APP_ID:			result = ioParam.appSignalID();			break;
 		case SIGNAL_INFO_COLUMN_CUSTOM_ID:		result = ioParam.customSignalID();		break;
+		case SIGNAL_INFO_COLUMN_APP_ID:			result = ioParam.appSignalID();			break;
 		case SIGNAL_INFO_COLUMN_EQUIPMENT_ID:	result = ioParam.equipmentID();			break;
 		case SIGNAL_INFO_COLUMN_CAPTION:		result = ioParam.caption();				break;
 		case SIGNAL_INFO_COLUMN_STATE:			result = stateStr;						break;
@@ -177,7 +178,8 @@ QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 		case SIGNAL_INFO_COLUMN_EL_SENSOR:		result = ioParam.electricSensorStr();	break;
 		case SIGNAL_INFO_COLUMN_EN_RANGE:		result = ioParam.engineeringRangeStr();	break;
 		case SIGNAL_INFO_COLUMN_CALIBRATOR:		result = ioParam.calibratorStr();		break;
-		default:								assert(0);
+		default:
+			assert(0);
 	}
 
 	return result;

@@ -558,7 +558,8 @@ namespace Measure
 			case Measure::ErrorType::Absolute:	str = QString::number(m_error[limitType][errorType], 'f', precision) + " " + m_unit[limitType];	break;
 			case Measure::ErrorType::Reduce:
 			case Measure::ErrorType::Relative:	str = QString::number(m_error[limitType][errorType], 'f', 3) + " %" ;							break;
-			default:							assert(0);
+			default:
+				assert(0);
 		}
 
 		return str;
@@ -627,7 +628,8 @@ namespace Measure
 			case Measure::ErrorType::Absolute:	str = QString::number(m_errorLimit[limitType][errorType], 'f', m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
 			case Measure::ErrorType::Reduce:
 			case Measure::ErrorType::Relative:	str = QString::number(m_errorLimit[limitType][errorType], 'f', 3) + " %";												break;
-			default:							assert(0);
+			default:
+				assert(0);
 		}
 
 		return str;
@@ -784,7 +786,8 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		pMeasurement = static_cast<LinearityItem*> (this) + index;	break;
 			case Measure::Type::Comparators:	pMeasurement = static_cast<ComparatorItem*> (this) + index;	break;
-			default:							assert(0);
+			default:
+				assert(0);
 		}
 
 		return pMeasurement;
@@ -889,7 +892,8 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		*static_cast<LinearityItem*> (this) = *static_cast <LinearityItem*> (&from);		break;
 			case Measure::Type::Comparators:	*static_cast<ComparatorItem*> (this) = *static_cast <ComparatorItem*> (&from);	break;
-			default:							assert(0);
+			default:
+				assert(0);
 		}
 
 		return *this;
@@ -938,7 +942,8 @@ namespace Measure
 			case Metrology::ConnectionType::Input_C_Output_F:
 			case Metrology::ConnectionType::Input_Output:
 			case Metrology::ConnectionType::Tuning_Output:			fill_measure_output(ioParam);	break;
-			default:												assert(0);
+			default:
+				assert(0);
 		}
 	}
 
@@ -1575,7 +1580,6 @@ namespace Measure
 
 						default:
 							assert(0);
-							break;
 					}
 
 				}
@@ -1678,7 +1682,6 @@ namespace Measure
 
 						default:
 							assert(0);
-							break;
 					}
 
 				}
@@ -1716,14 +1719,12 @@ namespace Measure
 
 						default:
 							assert(0);
-							break;
 					}
 				}
 				break;
 
 			default:
 				assert(0);
-				break;
 		}
 
 		return uncertainty;
@@ -2025,7 +2026,8 @@ namespace Measure
 			case Metrology::ConnectionType::Input_Internal:
 			case Metrology::ConnectionType::Input_DP_Internal_F:
 			case Metrology::ConnectionType::Input_C_Internal_F:		fill_measure_internal(ioParam);	break;
-			default:												assert(0);
+			default:
+				assert(0);
 		}
 	}
 
@@ -2389,7 +2391,6 @@ namespace Measure
 
 			default:
 				assert(0);
-				break;
 		}
 	}
 
@@ -2559,7 +2560,8 @@ namespace Measure
 					{
 						case Measure::Type::Linearity:		data.pMeasurement = new LinearityItem[static_cast<quint64>(data.recordCount)];	break;
 						case Measure::Type::Comparators:	data.pMeasurement = new ComparatorItem[static_cast<quint64>(data.recordCount)];	break;
-						default:							assert(0);
+						default:
+							assert(0);
 					}
 
 					if (data.pMeasurement == nullptr)
@@ -2580,7 +2582,8 @@ namespace Measure
 						{
 							case Measure::Type::Linearity:		delete [] static_cast<LinearityItem*> (data.pMeasurement);	break;
 							case Measure::Type::Comparators:	delete [] static_cast<ComparatorItem*> (data.pMeasurement);	break;
-							default:							assert(0);
+							default:
+								assert(0);
 						}
 					}
 
@@ -2689,7 +2692,8 @@ namespace Measure
 			{
 				case Measure::Type::Linearity:		pMeasureAppend = new LinearityItem;		break;
 				case Measure::Type::Comparators:	pMeasureAppend = new ComparatorItem;	break;
-				default:							assert(0);								break;
+				default:
+					assert(0);
 			}
 
 			if (pMeasureAppend == nullptr)
@@ -2770,7 +2774,8 @@ namespace Measure
 			{
 				case Measure::Type::Linearity:		delete [] static_cast<LinearityItem*> (table.pMeasurement);		break;
 				case Measure::Type::Comparators:	delete [] static_cast<ComparatorItem*> (table.pMeasurement);	break;
-				default:							assert(0);
+				default:
+					assert(0);
 			}
 		}
 

@@ -29,7 +29,8 @@ namespace Measure
 				case PointSensor::T_0_200_C:	sensorValue = value * 200 / 100;		break;
 				case PointSensor::T_0_400_C:	sensorValue = value * 400 / 100;		break;
 
-				default:						assert(0);
+				default:
+					assert(0);
 			}
 
 			m_sensorValue[sensor] = sensorValue;

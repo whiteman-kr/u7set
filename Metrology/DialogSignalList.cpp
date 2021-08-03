@@ -37,8 +37,8 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 
 		switch (column)
 		{
-			case SIGNAL_LIST_COLUMN_APP_ID:				result = Qt::AlignLeft;		break;
 			case SIGNAL_LIST_COLUMN_CUSTOM_ID:			result = Qt::AlignLeft;		break;
+			case SIGNAL_LIST_COLUMN_APP_ID:				result = Qt::AlignLeft;		break;
 			case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:		result = Qt::AlignLeft;		break;
 			case SIGNAL_LIST_COLUMN_CAPTION:			result = Qt::AlignLeft;		break;
 			case SIGNAL_LIST_COLUMN_RACK:				result = Qt::AlignCenter;	break;
@@ -54,7 +54,8 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 			case SIGNAL_LIST_COLUMN_TUN_SIGNAL:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:	result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_TUN_RANGE:			result = Qt::AlignCenter;	break;
-			default:									assert(0);
+			default:
+				assert(0);
 		}
 
 		return result;
@@ -159,8 +160,8 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 
 	switch (column)
 	{
-		case SIGNAL_LIST_COLUMN_APP_ID:				result = param.appSignalID();					break;
 		case SIGNAL_LIST_COLUMN_CUSTOM_ID:			result = param.customAppSignalID();				break;
+		case SIGNAL_LIST_COLUMN_APP_ID:				result = param.appSignalID();					break;
 		case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:		result = param.equipmentID();					break;
 		case SIGNAL_LIST_COLUMN_CAPTION:			result = param.caption();						break;
 		case SIGNAL_LIST_COLUMN_RACK:				result = param.location().rack().caption();		break;
@@ -176,7 +177,8 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 		case SIGNAL_LIST_COLUMN_TUN_SIGNAL:			result = param.enableTuningStr();				break;
 		case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:	result = qApp->translate("MetrologySignal", param.tuningDefaultValueStr().toUtf8());break;
 		case SIGNAL_LIST_COLUMN_TUN_RANGE:			result = param.tuningRangeStr();				break;
-		default:									assert(0);
+		default:
+			assert(0);
 	}
 
 	return result;

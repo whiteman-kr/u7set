@@ -97,7 +97,8 @@ QString MetrologyConnectionTable::text(int row, int column, const Metrology::Con
 		case METROLOGY_CONNECTION_COLUMN_IN_ID:		result = connection.appSignalID(Metrology::ConnectionIoType::Source);			break;
 		case METROLOGY_CONNECTION_COLUMN_TYPE:		result = qApp->translate("MetrologyConnection", connection.typeStr().toUtf8());	break;
 		case METROLOGY_CONNECTION_COLUMN_OUT_ID:	result = connection.appSignalID(Metrology::ConnectionIoType::Destination);		break;
-		default:									assert(0);
+		default:
+			assert(0);
 	}
 
 	return result;
@@ -332,7 +333,8 @@ void DialogMetrologyConnectionItem::selectSignal(int ioType)
 	{
 		case Metrology::ConnectionIoType::Source:		m_pInputSignalIDEdit->setText(pSignal->param().appSignalID());	break;
 		case Metrology::ConnectionIoType::Destination:	m_pOutputSignalIDEdit->setText(pSignal->param().appSignalID());	break;
-		default:										assert(0);														break;
+		default:
+			assert(0);
 	}
 }
 

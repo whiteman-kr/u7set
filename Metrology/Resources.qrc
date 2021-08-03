@@ -42,5 +42,8 @@
         <file>languages/Metrology_ru.qm</file>
         <file>languages/Metrology_ru.ts</file>
         <file>icons/Graph.png</file>
+        <file>icons/NextFind.png</file>
+        <file>icons/PreviousFind.png</file>
+        <file>icons/SelectForMeasure.png</file>
     </qresource>
 </RCC>

@@ -689,15 +689,15 @@ const int				MWO_PARAM_FONT						= 0,
 
 const char* const		TypeSignalID[] =
 {
+						QT_TRANSLATE_NOOP("Options.h", "SignalID"),
 						QT_TRANSLATE_NOOP("Options.h", "AppSignalID"),
-						QT_TRANSLATE_NOOP("Options.h", "CustomAppSignalID"),
 						QT_TRANSLATE_NOOP("Options.h", "EquipmentID"),
 };
 
 const int				SIGNAL_ID_TYPE_COUNT		= sizeof(TypeSignalID)/sizeof(TypeSignalID[0]);
 
-const int				SIGNAL_ID_TYPE_APP			= 0,
-						SIGNAL_ID_TYPE_CUSTOM		= 1,
+const int				SIGNAL_ID_TYPE_CUSTOM		= 0,
+						SIGNAL_ID_TYPE_APP			= 1,
 						SIGNAL_ID_TYPE_EQUIPMENT	= 2;
 
 // ----------------------------------------------------------------------------------------------

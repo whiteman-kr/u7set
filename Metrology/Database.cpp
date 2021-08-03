@@ -325,7 +325,8 @@ QString SqlFieldBase::extFieldName(int index)
 		case QVariant::Int:		result = QString("%1 INTEGER").arg(f.name());								break;
 		case QVariant::Double:	result = QString("%1 DOUBLE(0, %2)").arg(f.name()).arg(f.precision());		break;
 		case QVariant::String:	result = QString("%1 VARCHAR(%2)").arg(f.name()).arg(f.length());			break;
-		default:				result.clear();
+		default:
+			result.clear();
 	}
 
 	return result;
@@ -1427,7 +1428,6 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 			default:
 				assert(0);
-				break;
 		}
 
 		if (query.exec() == false)
@@ -1585,7 +1585,6 @@ bool Database::open()
 
 		default:
 			assert(0);
-			break;
 	}
 
 	if (m_database.open() == false)

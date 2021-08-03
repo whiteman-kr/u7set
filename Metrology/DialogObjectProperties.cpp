@@ -1081,14 +1081,14 @@ void DialogSignalProperty::createPropertyList()
 
 		QtProperty* signalIdGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Signal ID"));
 
+			item = m_pManager->addProperty(QVariant::String, tr("SignalID"));
+			item->setValue(m_param.customAppSignalID());
+			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_CUSTOM_ID);
+			signalIdGroup->addSubProperty(item);
+
 			item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
 			item->setValue(m_param.appSignalID());
 			item->setAttribute(QLatin1String("readOnly"), true);
-			signalIdGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("CustomAppSignalID"));
-			item->setValue(m_param.customAppSignalID());
-			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_CUSTOM_ID);
 			signalIdGroup->addSubProperty(item);
 
 			item = m_pManager->addProperty(QVariant::String, tr("EquipmentID"));
@@ -1534,13 +1534,13 @@ void DialogComparatorProperty::createPropertyList()
 			}
 			else
 			{
-				item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
-				item->setValue(m_comparatorEx.inputSignal()->param().appSignalID());
+				item = m_pManager->addProperty(QVariant::String, tr("SignalID"));
+				item->setValue(m_comparatorEx.inputSignal()->param().customAppSignalID());
 				item->setAttribute(QLatin1String("readOnly"), true);
 				inputGroup->addSubProperty(item);
 
-				item = m_pManager->addProperty(QVariant::String, tr("CustomAppSignalID"));
-				item->setValue(m_comparatorEx.inputSignal()->param().customAppSignalID());
+				item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
+				item->setValue(m_comparatorEx.inputSignal()->param().appSignalID());
 				item->setAttribute(QLatin1String("readOnly"), true);
 				inputGroup->addSubProperty(item);
 
@@ -1626,13 +1626,13 @@ void DialogComparatorProperty::createPropertyList()
 				}
 				else
 				{
-					item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
-					item->setValue(m_comparatorEx.compareSignal()->param().appSignalID());
+					item = m_pManager->addProperty(QVariant::String, tr("SignalID"));
+					item->setValue(m_comparatorEx.compareSignal()->param().customAppSignalID());
 					item->setAttribute(QLatin1String("readOnly"), true);
 					compareGroup->addSubProperty(item);
 
-					item = m_pManager->addProperty(QVariant::String, tr("CustomAppSignalID"));
-					item->setValue(m_comparatorEx.compareSignal()->param().customAppSignalID());
+					item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
+					item->setValue(m_comparatorEx.compareSignal()->param().appSignalID());
 					item->setAttribute(QLatin1String("readOnly"), true);
 					compareGroup->addSubProperty(item);
 
@@ -1705,13 +1705,13 @@ void DialogComparatorProperty::createPropertyList()
 				}
 				else
 				{
-					item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
-					item->setValue(m_comparatorEx.hysteresisSignal()->param().appSignalID());
+					item = m_pManager->addProperty(QVariant::String, tr("SignalID"));
+					item->setValue(m_comparatorEx.hysteresisSignal()->param().customAppSignalID());
 					item->setAttribute(QLatin1String("readOnly"), true);
 					hysteresisGroup->addSubProperty(item);
 
-					item = m_pManager->addProperty(QVariant::String, tr("CustomAppSignalID"));
-					item->setValue(m_comparatorEx.hysteresisSignal()->param().customAppSignalID());
+					item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
+					item->setValue(m_comparatorEx.hysteresisSignal()->param().appSignalID());
 					item->setAttribute(QLatin1String("readOnly"), true);
 					hysteresisGroup->addSubProperty(item);
 
@@ -1755,13 +1755,13 @@ void DialogComparatorProperty::createPropertyList()
 		}
 		else
 		{
-			item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
-			item->setValue(m_comparatorEx.outputSignal()->param().appSignalID());
+			item = m_pManager->addProperty(QVariant::String, tr("SignalID"));
+			item->setValue(m_comparatorEx.outputSignal()->param().customAppSignalID());
 			item->setAttribute(QLatin1String("readOnly"), true);
 			outputGroup->addSubProperty(item);
 
-			item = m_pManager->addProperty(QVariant::String, tr("CustomAppSignalID"));
-			item->setValue(m_comparatorEx.outputSignal()->param().customAppSignalID());
+			item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
+			item->setValue(m_comparatorEx.outputSignal()->param().appSignalID());
 			item->setAttribute(QLatin1String("readOnly"), true);
 			outputGroup->addSubProperty(item);
 

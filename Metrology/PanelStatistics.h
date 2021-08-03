@@ -7,6 +7,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QAction>
+#include <QToolBar>
 #include <QVBoxLayout>
 #include <QHeaderView>
 #include <QTableView>
@@ -22,8 +23,8 @@
 
 const char* const			StatisticsColumn[] =
 {
+							QT_TRANSLATE_NOOP("PanelStatistics", "SignalID"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "AppSignalID"),
-							QT_TRANSLATE_NOOP("PanelStatistics", "CustomSignalID"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "EquipmentID"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Caption"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Comparator value"),
@@ -40,13 +41,13 @@ const char* const			StatisticsColumn[] =
 							QT_TRANSLATE_NOOP("PanelStatistics", "Connection"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Measure count"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "State"),
-
 };
+
 
 const int					STATISTICS_COLUMN_COUNT				= sizeof(StatisticsColumn)/sizeof(StatisticsColumn[0]);
 
-const int					STATISTICS_COLUMN_APP_ID			= 0,
-							STATISTICS_COLUMN_CUSTOM_ID			= 1,
+const int					STATISTICS_COLUMN_CUSTOM_ID			= 0,
+							STATISTICS_COLUMN_APP_ID			= 1,
 							STATISTICS_COLUMN_EQUIPMENT_ID		= 2,
 							STATISTICS_COLUMN_CAPTION			= 3,
 							STATISTICS_COLUMN_CMP_VALUE			= 4,
@@ -67,8 +68,8 @@ const int					STATISTICS_COLUMN_APP_ID			= 0,
 
 const int					StatisticsColumnWidth[STATISTICS_COLUMN_COUNT] =
 {
-							250,	// STATISTICS_COLUMN_APP_ID
 							250,	// STATISTICS_COLUMN_CUSTOM_ID
+							250,	// STATISTICS_COLUMN_APP_ID
 							250,	// STATISTICS_COLUMN_EQUIPMENT_ID
 							150,	// STATISTICS_COLUMN_CAPTION
 							150,	// STATISTICS_COLUMN_CMP_VALUE
@@ -85,7 +86,6 @@ const int					StatisticsColumnWidth[STATISTICS_COLUMN_COUNT] =
 							100,	// STATISTICS_COLUMN_SIGNAL_CONNECTION
 							100,	// STATISTICS_COLUMN_MEASURE_COUNT
 							100,	// STATISTICS_COLUMN_MEASURE_STATE
-
 };
 
 // ==============================================================================================
@@ -142,6 +142,8 @@ private:
 	QMainWindow* m_pStatisticsWindow = nullptr;
 
 	QMenuBar* m_pMenuBar = nullptr;
+	QToolBar* m_pToolBar = nullptr;
+
 	QMenu* m_pSignalMenu = nullptr;
 	QMenu* m_pEditMenu = nullptr;
 	QMenu* m_pViewMenu = nullptr;
@@ -151,16 +153,17 @@ private:
 	QAction* m_pExportAction = nullptr;
 
 	QAction* m_pSelectSignalForMeasure = nullptr;
-	QAction* m_pFindSignalInStatisticsList = nullptr;
 	QAction* m_pFindSignalInMeasureList = nullptr;
 
-	QAction* m_pFindAction = nullptr;
 	QAction* m_pCopyAction = nullptr;
 	QAction* m_pSelectAllAction = nullptr;
 	QAction* m_pSignalPropertyAction = nullptr;
 
+	QAction* m_pShowSearchToolBarAction = nullptr;
 	QAction* m_pGotoNextNotMeasuredAction = nullptr;
 	QAction* m_pGotoNextInvalidAction = nullptr;
+
+	QLineEdit* m_pFindTextEdit = nullptr;
 
 	QStatusBar* m_pStatusBar;
 	QLabel* m_statusEmpty = nullptr;
@@ -188,6 +191,7 @@ private:
 
 	void updateVisibleColunm();
 	void hideColumn(int column, bool hide);
+	int firstVisibleColumn();
 
 protected:
 
@@ -220,18 +224,17 @@ private slots:
 		//
 	void exportSignal();
 	void selectSignalForMeasure();
-	void findSignalInStatisticsList();
 	void findSignalInMeasureList();
 
 		// Edit
 		//
-	void find();
 	void copy();
 	void selectAll();
 	void onProperty();
 
 		// View
 		//
+	void showSearchToolBar();
 	void gotoNextNotMeasured();
 	void gotoNextInvalid();
 
@@ -244,7 +247,14 @@ private slots:
 
 	// slots for list
 	//
-	void onListDoubleClicked(const QModelIndex&) { selectSignalForMeasure(); }
+	void onListDoubleClicked(const QModelIndex&);
+
+	// slots for find
+	//
+	int findText(int startRow, bool reverseFind);
+	void onFindTextChanged(const QString& text);
+	void onFindPrevious();
+	void onFindNext();
 };
 
 // ==============================================================================================

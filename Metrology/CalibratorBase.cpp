@@ -400,7 +400,8 @@ std::shared_ptr<CalibratorManager> CalibratorBase::calibratorForMeasure(int inde
 		case Measure::Kind::OneRack:
 		case Measure::Kind::OneModule:	pManager = firstConnectedCalibrator();	break;	// we need only one - connected;
 		case Measure::Kind::MultiRack:	pManager = calibratorManager(index);	break;
-		default:						assert(0);
+		default:
+			assert(0);
 	}
 
 	return pManager;

@@ -8,8 +8,8 @@
 
 const char* const			SignalListColumn[] =
 {
+							QT_TRANSLATE_NOOP("DialogSignalList", "SignalID"),
 							QT_TRANSLATE_NOOP("DialogSignalList", "AppSignalID"),
-							QT_TRANSLATE_NOOP("DialogSignalList", "CustomSignalID"),
 							QT_TRANSLATE_NOOP("DialogSignalList", "EquipmentID"),
 							QT_TRANSLATE_NOOP("DialogSignalList", "Caption"),
 							QT_TRANSLATE_NOOP("DialogSignalList", "Rack"),
@@ -29,8 +29,8 @@ const char* const			SignalListColumn[] =
 
 const int					SIGNAL_LIST_COLUMN_COUNT			= sizeof(SignalListColumn)/sizeof(SignalListColumn[0]);
 
-const int					SIGNAL_LIST_COLUMN_APP_ID			= 0,
-							SIGNAL_LIST_COLUMN_CUSTOM_ID		= 1,
+const int					SIGNAL_LIST_COLUMN_CUSTOM_ID		= 0,
+							SIGNAL_LIST_COLUMN_APP_ID			= 1,
 							SIGNAL_LIST_COLUMN_EQUIPMENT_ID		= 2,
 							SIGNAL_LIST_COLUMN_CAPTION			= 3,
 							SIGNAL_LIST_COLUMN_RACK				= 4,
@@ -49,8 +49,8 @@ const int					SIGNAL_LIST_COLUMN_APP_ID			= 0,
 
 const int					SignalListColumnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 {
-							250,	// SIGNAL_LIST_COLUMN_APP_ID
 							250,	// SIGNAL_LIST_COLUMN_CUSTOM_ID
+							250,	// SIGNAL_LIST_COLUMN_APP_ID
 							250,	// SIGNAL_LIST_COLUMN_EQUIPMENT_ID
 							150,	// SIGNAL_LIST_COLUMN_CAPTION
 							100,	// SIGNAL_LIST_COLUMN_RACK
