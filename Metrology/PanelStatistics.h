@@ -15,6 +15,7 @@
 #include <QLabel>
 #include <QStatusBar>
 #include <QKeyEvent>
+#include <QClipboard>
 
 #include "MeasureBase.h"
 #include "SignalBase.h"
@@ -156,6 +157,7 @@ private:
 	QAction* m_pFindSignalInMeasureList = nullptr;
 
 	QAction* m_pCopyAction = nullptr;
+	QAction* m_pCopyCellAction = nullptr;
 	QAction* m_pSelectAllAction = nullptr;
 	QAction* m_pSignalPropertyAction = nullptr;
 
@@ -229,6 +231,7 @@ private slots:
 		// Edit
 		//
 	void copy();
+	void copyCell();
 	void selectAll();
 	void onProperty();
 

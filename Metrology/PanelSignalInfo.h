@@ -132,6 +132,7 @@ private:
 	QAction* m_pShowSignalMoveUpAction = nullptr;
 	QAction* m_pShowSignalMoveDownAction = nullptr;
 	QAction* m_pCopyAction = nullptr;
+	QAction* m_pCopyCellAction = nullptr;
 	QAction* m_pSignalPropertyAction = nullptr;
 
 	QAction* m_pColumnAction[SIGNAL_INFO_COLUMN_COUNT];
@@ -186,6 +187,7 @@ private slots:
 	void showSignalMoveUp();
 	void showSignalMoveDown();
 	void copy();
+	void copyCell();
 	void signalProperty();
 
 	void onContextMenu(QPoint);

@@ -198,6 +198,7 @@ void DialogTuningSourceList::createInterface()
 void DialogTuningSourceList::createContextMenu()
 {
 	addContextAction(m_pCopyAction);
+	addContextAction(m_pCopyCellAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

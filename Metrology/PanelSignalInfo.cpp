@@ -429,6 +429,9 @@ void PanelSignalInfo::createContextMenu()
 	m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
 	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
 
+	m_pCopyCellAction = m_pContextMenu->addAction(tr("Copy cell"));
+	m_pCopyCellAction->setIcon(QIcon(":/icons/Copy.png"));
+
 	m_pContextMenu->addSeparator();
 
 	m_pSignalPropertyAction = m_pContextMenu->addAction(tr("Propertу ..."));
@@ -437,6 +440,7 @@ void PanelSignalInfo::createContextMenu()
 	connect(m_pShowNoValidAction, &QAction::triggered, this, &PanelSignalInfo::showNoValid);
 	connect(m_pShowElectricValueAction, &QAction::triggered, this, &PanelSignalInfo::showElectricValue);
 	connect(m_pCopyAction, &QAction::triggered, this, &PanelSignalInfo::copy);
+	connect(m_pCopyCellAction, &QAction::triggered, this, &PanelSignalInfo::copyCell);
 	connect(m_pSignalPropertyAction, &QAction::triggered, this, &PanelSignalInfo::signalProperty);
 }
 
@@ -842,6 +846,19 @@ void PanelSignalInfo::copy()
 {
 	CopyData copyData(m_pView, false);
 	copyData.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelSignalInfo::copyCell()
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	QClipboard* clipboard = QApplication::clipboard();
+	clipboard->setText(m_pView->model()->data(m_pView->currentIndex()).toString());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

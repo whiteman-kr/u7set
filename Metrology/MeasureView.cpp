@@ -929,6 +929,14 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	void View::copyCell()
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(model()->data(currentIndex()).toString());
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	void View::showGraph(int graphType)
 	{
 		if (graphType < 0 || graphType >= MVG_TYPE_COUNT)

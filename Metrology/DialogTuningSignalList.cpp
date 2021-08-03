@@ -274,6 +274,7 @@ void DialogTuningSignalList::createContextMenu()
 	addContextMenu(m_pViewTypeADMenu);
 	addContextSeparator();
 	addContextAction(m_pCopyAction);
+	addContextAction(m_pCopyCellAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -174,6 +174,7 @@ void DialogRackList::createInterface()
 void DialogRackList::createContextMenu()
 {
 	addContextAction(m_pCopyAction);
+	addContextAction(m_pCopyCellAction);
 	addContextSeparator();
 	addContextAction(m_pPropertyAction);
 }

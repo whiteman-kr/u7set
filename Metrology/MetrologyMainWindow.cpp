@@ -146,6 +146,11 @@ void MainWindow::createActions()
 	m_pCopyMeasureAction->setToolTip(tr("Copy of the measurements"));
 	connect(m_pCopyMeasureAction, &QAction::triggered, this, &MainWindow::copyMeasure);
 
+	m_pCopyCellMeasureAction = new QAction(tr("Copy cell"), this);
+	m_pCopyCellMeasureAction->setIcon(QIcon(":/icons/Copy.png"));
+	m_pCopyCellMeasureAction->setToolTip(tr("Copy cell of the measurements"));
+	connect(m_pCopyCellMeasureAction, &QAction::triggered, this, &MainWindow::copyCellMeasure);
+
 	m_pRemoveMeasureAction = new QAction(tr("&Delete"), this);
 	m_pRemoveMeasureAction->setShortcut(Qt::CTRL + Qt::Key_Delete);
 	m_pRemoveMeasureAction->setIcon(QIcon(":/icons/Remove.png"));
@@ -781,6 +786,7 @@ void MainWindow::createContextMenu()
 	m_pContextMenu = new QMenu(this);
 
 	m_pContextMenu->addAction(m_pCopyMeasureAction);
+	m_pContextMenu->addAction(m_pCopyCellMeasureAction);
 	m_pContextMenu->addSeparator();
 	m_pContextMenu->addAction(m_pRemoveMeasureAction);
 
@@ -1589,6 +1595,19 @@ void MainWindow::copyMeasure()
 	}
 
 	pView->copy();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::copyCellMeasure()
+{
+	Measure::View* pView = activeMeasureView();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	pView->copyCell();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

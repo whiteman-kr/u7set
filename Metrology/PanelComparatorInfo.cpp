@@ -210,12 +210,16 @@ void PanelComparatorInfo::createContextMenu()
 //	m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
 //	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
 
-//	m_pContextMenu->addSeparator();
+	m_pCopyCellAction = m_pContextMenu->addAction(tr("Copy cell"));
+	m_pCopyCellAction->setIcon(QIcon(":/icons/Copy.png"));
+
+	m_pContextMenu->addSeparator();
 
 	m_pComparatorPropertyAction = m_pContextMenu->addAction(tr("Propertу ..."));
 	m_pComparatorPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
 //	connect(m_pCopyAction, &QAction::triggered, this, &PanelComparatorInfo::copy);
+	connect(m_pCopyCellAction, &QAction::triggered, this, &PanelComparatorInfo::copyCell);
 	connect(m_pComparatorPropertyAction, &QAction::triggered, this, &PanelComparatorInfo::comparatorProperty);
 
 	// init context menu
@@ -438,6 +442,19 @@ void PanelComparatorInfo::copy()
 {
 	CopyData copyData(m_pView, false);
 	copyData.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelComparatorInfo::copyCell()
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	QClipboard* clipboard = QApplication::clipboard();
+	clipboard->setText(m_pView->model()->data(m_pView->currentIndex()).toString());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

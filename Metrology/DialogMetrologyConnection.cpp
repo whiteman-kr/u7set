@@ -662,6 +662,7 @@ void DialogMetrologyConnection::createContextMenu()
 	addContextAction(m_pMoveDownAction);
 	addContextSeparator();
 	addContextAction(m_pCopyAction);
+	addContextAction(m_pCopyCellAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

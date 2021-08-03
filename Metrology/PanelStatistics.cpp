@@ -353,7 +353,9 @@ void PanelStatistics::createInterface()
 
 	m_pCopyAction = m_pEditMenu->addAction(tr("&Copy"));
 	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
-	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
+
+	m_pCopyCellAction = m_pEditMenu->addAction(tr("Copy cell"));
+	m_pCopyCellAction->setIcon(QIcon(":/icons/Copy.png"));
 
 	m_pSelectAllAction = m_pEditMenu->addAction(tr("Select &All"));
 	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
@@ -386,6 +388,7 @@ void PanelStatistics::createInterface()
 	connect(m_pExportAction, &QAction::triggered, this, &PanelStatistics::exportSignal);
 
 	connect(m_pCopyAction, &QAction::triggered, this, &PanelStatistics::copy);
+	connect(m_pCopyCellAction, &QAction::triggered, this, &PanelStatistics::copyCell);
 	connect(m_pSelectAllAction, &QAction::triggered, this, &PanelStatistics::selectAll);
 	connect(m_pSignalPropertyAction, &QAction::triggered, this, &PanelStatistics::onProperty);
 
@@ -498,6 +501,7 @@ void PanelStatistics::createContextMenu()
 	m_pFindSignalInMeasureList->setIcon(QIcon(":/icons/Find.png"));
 	m_pContextMenu->addSeparator();
 	m_pContextMenu->addAction(m_pCopyAction);
+	m_pContextMenu->addAction(m_pCopyCellAction);
 	m_pContextMenu->addSeparator();
 	m_pContextMenu->addAction(m_pSignalPropertyAction);
 
@@ -1072,6 +1076,19 @@ void PanelStatistics::copy()
 {
 	CopyData copyData(m_pView, false);
 	copyData.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelStatistics::copyCell()
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	QClipboard* clipboard = QApplication::clipboard();
+	clipboard->setText(m_pView->model()->data(m_pView->currentIndex()).toString());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

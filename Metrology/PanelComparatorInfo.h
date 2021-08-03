@@ -81,6 +81,7 @@ private:
 
 	QMenu* m_pContextMenu = nullptr;
 	QAction* m_pCopyAction = nullptr;
+	QAction* m_pCopyCellAction = nullptr;
 	QAction* m_pComparatorPropertyAction = nullptr;
 
 	void createInterface();
@@ -119,6 +120,7 @@ private slots:
 	// slots of menu
 	//
 	void copy();
+	void copyCell();
 	void comparatorProperty();
 
 	void onContextMenu(QPoint);

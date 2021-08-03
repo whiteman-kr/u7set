@@ -288,6 +288,7 @@ void DialogSignalList::createContextMenu()
 	addContextMenu(m_pViewTypeIOMenu);
 	addContextSeparator();
 	addContextAction(m_pCopyAction);
+	addContextAction(m_pCopyCellAction);
 	addContextSeparator();
 	addContextAction(m_pPropertyAction);
 }

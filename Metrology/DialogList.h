@@ -11,6 +11,7 @@
 #include <QTableView>
 #include <QDialogButtonBox>
 #include <QKeyEvent>
+#include <QClipboard>
 
 #include "DialogObjectProperties.h"
 
@@ -244,6 +245,7 @@ protected:
 	QAction*				m_pExportAction = nullptr;
 	QAction*				m_pFindAction = nullptr;
 	QAction*				m_pCopyAction = nullptr;
+	QAction*				m_pCopyCellAction = nullptr;
 	QAction*				m_pSelectAllAction = nullptr;
 	QAction*				m_pPropertyAction = nullptr;
 
@@ -294,7 +296,8 @@ private slots:
 	virtual void			onExport();
 	virtual void			onFind();
 	virtual void			onCopy();
-	virtual void			onSelectAll() { m_pView->selectAll(); }
+	virtual void			onCopyCell();
+	virtual void			onSelectAll();
 	virtual void			onProperties();
 
 	void					onContextMenu(QPoint);
