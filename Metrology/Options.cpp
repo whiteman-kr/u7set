@@ -1398,6 +1398,27 @@ QString LanguageTypeCaption(int type)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+QString SignalIDTypeCaption(int type)
+{
+	QString caption;
+
+	switch (type)
+	{
+		case SignalIDType::CustomID:	caption = QT_TRANSLATE_NOOP("Options", "SignalID");		break;
+		case SignalIDType::AppSignalID:	caption = QT_TRANSLATE_NOOP("Options", "AppSignalID");	break;
+		case SignalIDType::EquipmentID:	caption = QT_TRANSLATE_NOOP("Options", "EquipmentID");	break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return caption;
+};
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 bool compareDouble(double lDouble, double rDouble)
 {
 	return std::nextafter(lDouble, std::numeric_limits<double>::lowest()) <= rDouble && std::nextafter(lDouble, std::numeric_limits<double>::max()) >= rDouble;

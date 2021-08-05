@@ -285,7 +285,7 @@ PanelSignalInfo::PanelSignalInfo(const SignalInfoOption& signalInfo, QWidget* pa
 	connect(&theSignalBase, &SignalBase::activeSignalChanged,
 			this, &PanelSignalInfo::activeSignalChanged, Qt::QueuedConnection);
 
-	hideColumn(SIGNAL_INFO_COLUMN_CUSTOM_ID, true);
+	hideColumn(SIGNAL_INFO_COLUMN_APP_ID, true);
 	hideColumn(SIGNAL_INFO_COLUMN_EQUIPMENT_ID, true);
 	hideColumn(SIGNAL_INFO_COLUMN_RACK, true);
 	hideColumn(SIGNAL_INFO_COLUMN_CHASSIS, true);

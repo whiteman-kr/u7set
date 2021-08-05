@@ -309,7 +309,7 @@ void DialogSignalList::updateVisibleColunm()
 		hideColumn(c, false);
 	}
 
-	hideColumn(SIGNAL_LIST_COLUMN_CUSTOM_ID, true);
+	hideColumn(SIGNAL_LIST_COLUMN_APP_ID, true);
 	hideColumn(SIGNAL_LIST_COLUMN_EQUIPMENT_ID, true);
 	hideColumn(SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS, true);
 

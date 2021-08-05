@@ -494,19 +494,29 @@
         <translation>Схема</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.cpp" line="246"/>
+        <location filename="../DialogComparatorList.cpp" line="286"/>
         <source>Comparators</source>
         <translation>Уставки</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.cpp" line="250"/>
+        <location filename="../DialogComparatorList.cpp" line="290"/>
         <source>&amp;Comparator</source>
         <translation>&amp;Уставки</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.cpp" line="251"/>
+        <location filename="../DialogComparatorList.cpp" line="291"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
+    </message>
+    <message>
+        <location filename="../DialogComparatorList.cpp" line="292"/>
+        <source>&amp;View</source>
+        <translation>&amp;Вид</translation>
+    </message>
+    <message>
+        <location filename="../DialogComparatorList.cpp" line="293"/>
+        <source>Type SignalID</source>
+        <translation>Тип SignalID</translation>
     </message>
 </context>
 <context>
@@ -716,113 +726,135 @@
 <context>
     <name>DialogMetrologyConnection</name>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="587"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="638"/>
         <source>Metrology connections</source>
         <translation>Соединение сигналов</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="591"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="642"/>
         <source>&amp;Connection</source>
         <translation>&amp;Соединение</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="592"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="643"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="596"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="644"/>
+        <source>&amp;View</source>
+        <translation>&amp;Вид</translation>
+    </message>
+    <message>
+        <location filename="../DialogMetrologyConnection.cpp" line="645"/>
+        <source>Type SignalID</source>
+        <translation>Тип SignalID</translation>
+    </message>
+    <message>
+        <location filename="../DialogMetrologyConnection.cpp" line="649"/>
         <source>&amp;Create ...</source>
         <translation>&amp;Создать ...</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="600"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="653"/>
         <source>&amp;Edit ...</source>
         <translation>&amp;Изменить ...</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="603"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="656"/>
         <source>&amp;Remove</source>
         <translation>&amp;Удалить</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="609"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="662"/>
         <source>Move &amp;Up</source>
         <translation>Переместить &amp;вверх</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="612"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="665"/>
         <source>Move &amp;Down</source>
         <translation>Переместить &amp;вниз</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="619"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="672"/>
         <source>&amp;Import ...</source>
         <translation>&amp;Импорт ...</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="749"/>
-        <location filename="../DialogMetrologyConnection.cpp" line="794"/>
-        <location filename="../DialogMetrologyConnection.cpp" line="844"/>
+        <source>SignalID</source>
+        <translation type="vanished">SignalID</translation>
+    </message>
+    <message>
+        <source>AppSignalID</source>
+        <translation type="vanished">AppSignalID</translation>
+    </message>
+    <message>
+        <source>EquipmentID</source>
+        <translation type="vanished">EquipmentID</translation>
+    </message>
+    <message>
+        <location filename="../DialogMetrologyConnection.cpp" line="846"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="891"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="941"/>
         <source>Connection already exist!</source>
         <translation>Соединение уже существует!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="823"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="920"/>
         <source>Please, select сonnection for edit!</source>
         <translation>Выберите соединение для редактирования!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="873"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="970"/>
         <source>Please, select connection for remove!</source>
         <translation>Выберите соединения для удаления!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="878"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="975"/>
         <source>Do you want delete %1 connection(s)?</source>
         <translation>Вы хотите удалить %1 соединений?</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="912"/>
-        <location filename="../DialogMetrologyConnection.cpp" line="964"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="1009"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="1061"/>
         <source>Please, select сonnection for move!</source>
         <translation>Выберите соединение для перемещения!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="1007"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="1104"/>
         <source>CSV files (*.csv)</source>
         <translation>CSV файлы (*.csv)</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="1010"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="1107"/>
         <source>Export to file</source>
         <translation>Экспорт в файл</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="1030"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="1127"/>
         <source>Import from file</source>
         <translation>Импорт из файла</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="1021"/>
-        <location filename="../DialogMetrologyConnection.cpp" line="1040"/>
-        <location filename="../DialogMetrologyConnection.cpp" line="1047"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="1118"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="1137"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="1144"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="1021"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="1118"/>
         <source>Failed to export!</source>
         <translation>Ошибка экспорта!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="1040"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="1137"/>
         <source>Could not open file: %1
 file is not found!</source>
         <translation>Невозможно открыть файл: %1 файл не найден!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="1047"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="1144"/>
         <source>Could not open file</source>
         <translation>Невозможно открыть файл</translation>
     </message>
@@ -845,97 +877,97 @@ file is not found!</source>
 <context>
     <name>DialogMetrologyConnectionItem</name>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="149"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="196"/>
         <source>Create connection</source>
         <translation>Создать соединение</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="154"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="201"/>
         <source>Edit connection</source>
         <translation>Редактировать соединение</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="163"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="210"/>
         <source>Connection type</source>
         <translation>Тип соединения</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="176"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="223"/>
         <source>AppSignalID (source)</source>
         <translation>AppSignalID (Источник)</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="178"/>
-        <location filename="../DialogMetrologyConnection.cpp" line="197"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="225"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="244"/>
         <source>Select ...</source>
         <translation>Выбрать ...</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="195"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="242"/>
         <source>AppSignalID (destination)</source>
         <translation>AppSignalID (Приёмник)</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="349"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="396"/>
         <source>Please, select connection type!</source>
         <translation>Выберите тип соединения!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="368"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="415"/>
         <source>Please, select input signal!</source>
         <translation>Выберите входной сигнал!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="378"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="425"/>
         <source>Signal %1 is not found.
 Please, select input signal!</source>
         <translation>Сигнал %1 не найден.
 Выберите входной сигнал!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="388"/>
-        <location filename="../DialogMetrologyConnection.cpp" line="420"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="435"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="467"/>
         <source>Signal %1 is not analog.
 Please, select analog signal!</source>
         <translation>Сигнал %1 не алоговый.
 Выберите алоговый сигнал!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="400"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="447"/>
         <source>Please, select output signal!</source>
         <translation>Выберите выходной сигнал!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="410"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="457"/>
         <source>Signal %1 is not found.
 Please, select output signal!</source>
         <translation>Сигнал %1 не найден.
 Выберите выходной сигнал!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="442"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="489"/>
         <source>Signal %1 is not input signal!</source>
         <translation>Сигнал %1 - не Входной сигнал!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="452"/>
-        <location filename="../DialogMetrologyConnection.cpp" line="525"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="499"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="572"/>
         <source>Signal %1 has wrong electric limit!</source>
         <translation>Сигнал %1 - имеет не верный электрический диапазон!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="466"/>
-        <location filename="../DialogMetrologyConnection.cpp" line="498"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="513"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="545"/>
         <source>Signal %1 is not internal signal!</source>
         <translation>Сигнал %1 - не Внутренний сигнал!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="476"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="523"/>
         <source>Signal %1 is not tuning signal!</source>
         <translation>Сигнал %1 - не сигнал Тюнинга!</translation>
     </message>
     <message>
-        <location filename="../DialogMetrologyConnection.cpp" line="515"/>
+        <location filename="../DialogMetrologyConnection.cpp" line="562"/>
         <source>Signal %1 is not output signal!</source>
         <translation>Сигнал %1 - не Выходной сигнал!</translation>
     </message>
@@ -3401,8 +3433,24 @@ Do you want to repeat the preparation process in order to switch the comparator 
         <translation>Русский</translation>
     </message>
     <message>
+        <location filename="../Options.cpp" line="1407"/>
+        <source>SignalID</source>
+        <translation>SignalID</translation>
+    </message>
+    <message>
+        <location filename="../Options.cpp" line="1408"/>
+        <source>AppSignalID</source>
+        <translation>AppSignalID</translation>
+    </message>
+    <message>
+        <location filename="../Options.cpp" line="1409"/>
+        <source>EquipmentID</source>
+        <translation>EquipmentID</translation>
+    </message>
+    <message>
         <location filename="../Options.cpp" line="780"/>
         <location filename="../Options.cpp" line="1391"/>
+        <location filename="../Options.cpp" line="1412"/>
         <source>Unknown</source>
         <translation>Не определен</translation>
     </message>
@@ -3437,7 +3485,6 @@ Do you want to repeat the preparation process in order to switch the comparator 
     <message>
         <location filename="../Options.h" line="107"/>
         <location filename="../Options.h" line="110"/>
-        <location filename="../Options.h" line="694"/>
         <source>EquipmentID</source>
         <translation>EquipmentID</translation>
     </message>
@@ -3575,14 +3622,12 @@ Do you want to repeat the preparation process in order to switch the comparator 
         <translation>Отображать точность измеренного и номинального значения от калибратора</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="692"/>
         <source>SignalID</source>
-        <translation>SignalID</translation>
+        <translation type="vanished">SignalID</translation>
     </message>
     <message>
-        <location filename="../Options.h" line="693"/>
         <source>AppSignalID</source>
-        <translation>AppSignalID</translation>
+        <translation type="vanished">AppSignalID</translation>
     </message>
     <message>
         <source>CustomAppSignalID</source>
@@ -3740,7 +3785,7 @@ Do you want to repeat the preparation process in order to switch the comparator 
     <message>
         <location filename="../Options.h" line="532"/>
         <source>Enable to measure hysteresis of comparators</source>
-        <translation>Разрешить измерять зону возврата</translation>
+        <translation>Измерять зону возврата</translation>
     </message>
     <message>
         <location filename="../Options.h" line="963"/>

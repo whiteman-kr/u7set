@@ -42,7 +42,7 @@ namespace Measure
 
 		//
 		//
-		m_connectionAppSignalID.clear();
+		m_connectionSignalID.clear();
 		m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 		m_appSignalID.clear();
@@ -103,14 +103,14 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString Item::connectionAppSignalID() const
+	QString Item::connectionSignalID() const
 	{
 		if (m_connectionType == Metrology::ConnectionType::Unused)
 		{
 			return QString();
 		}
 
-		return m_connectionAppSignalID;
+		return m_connectionSignalID;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -847,7 +847,7 @@ namespace Measure
 
 		//
 		//
-		m_connectionAppSignalID = from.m_connectionAppSignalID;
+		m_connectionSignalID = from.m_connectionSignalID;
 		m_connectionType = from.m_connectionType;
 
 		m_appSignalID = from.m_appSignalID;
@@ -890,7 +890,7 @@ namespace Measure
 		//
 		switch(m_measureType)
 		{
-			case Measure::Type::Linearity:		*static_cast<LinearityItem*> (this) = *static_cast <LinearityItem*> (&from);		break;
+			case Measure::Type::Linearity:		*static_cast<LinearityItem*> (this) = *static_cast <LinearityItem*> (&from);	break;
 			case Measure::Type::Comparators:	*static_cast<ComparatorItem*> (this) = *static_cast <ComparatorItem*> (&from);	break;
 			default:
 				assert(0);
@@ -1031,7 +1031,7 @@ namespace Measure
 		// features
 		//
 
-		setConnectionAppSignalID(inParam.appSignalID());
+		setConnectionSignalID(inParam.customAppSignalID());
 		setConnectionType(connectionType);
 
 		setAppSignalID(inParam.appSignalID());
@@ -1039,17 +1039,19 @@ namespace Measure
 		setEquipmentID(inParam.equipmentID());
 		setCaption(inParam.caption());
 
+		Metrology::SignalLocation location = inParam.location();
+
 		if (inParam.location().moduleSerialNoID().isEmpty() == false)
 		{
 			Hash serialNumberModuleHash = calcHash(inParam.location().moduleSerialNoID());
 			const Metrology::SignalState& signalState = theSignalBase.signalState(serialNumberModuleHash);
 			if (signalState.valid() == true)
 			{
-				inParam.location().setModuleSerialNo(static_cast<int>(signalState.value()));
+				location.setModuleSerialNo(static_cast<int>(signalState.value()));
 			}
 		}
 
-		setLocation(inParam.location());
+		setLocation(location);
 
 		setCalibratorData(ioParam);
 
@@ -1163,7 +1165,7 @@ namespace Measure
 		// features
 		//
 
-		setConnectionAppSignalID(inParam.appSignalID());
+		setConnectionSignalID(inParam.customAppSignalID());
 		setConnectionType(connectionType);
 
 		setAppSignalID(outParam.appSignalID());
@@ -1171,17 +1173,19 @@ namespace Measure
 		setEquipmentID(outParam.equipmentID());
 		setCaption(outParam.caption());
 
+		Metrology::SignalLocation location = inParam.location();
+
 		if (inParam.location().moduleSerialNoID().isEmpty() == false)
 		{
 			Hash serialNumberModuleHash = calcHash(inParam.location().moduleSerialNoID());
-			Metrology::SignalState signalState = theSignalBase.signalState(serialNumberModuleHash);
+			const Metrology::SignalState& signalState = theSignalBase.signalState(serialNumberModuleHash);
 			if (signalState.valid() == true)
 			{
-				inParam.location().setModuleSerialNo(static_cast<int>(signalState.value()));
+				location.setModuleSerialNo(static_cast<int>(signalState.value()));
 			}
 		}
 
-		setLocation(inParam.location());
+		setLocation(location);
 
 		setCalibratorData(ioParam);
 
@@ -1297,7 +1301,7 @@ namespace Measure
 		// features
 		//
 
-		setConnectionAppSignalID(inParam.appSignalID());
+		setConnectionSignalID(inParam.customAppSignalID());
 		setConnectionType(connectionType);
 
 		setAppSignalID(outParam.appSignalID());
@@ -1305,17 +1309,19 @@ namespace Measure
 		setEquipmentID(outParam.equipmentID());
 		setCaption(outParam.caption());
 
+		Metrology::SignalLocation location = outParam.location();
+
 		if (outParam.location().moduleSerialNoID().isEmpty() == false)
 		{
 			Hash serialNumberModuleHash = calcHash(outParam.location().moduleSerialNoID());
 			Metrology::SignalState signalState = theSignalBase.signalState(serialNumberModuleHash);
 			if (signalState.valid() == true)
 			{
-				outParam.location().setModuleSerialNo(static_cast<int>(signalState.value()));
+				location.setModuleSerialNo(static_cast<int>(signalState.value()));
 			}
 		}
 
-		setLocation(outParam.location());
+		setLocation(location);
 
 		setCalibratorData(ioParam);
 
@@ -2126,7 +2132,7 @@ namespace Measure
 		// features
 		//
 
-		setConnectionAppSignalID(inParam.appSignalID());
+		setConnectionSignalID(inParam.customAppSignalID());
 		setConnectionType(connectionType);
 
 		setAppSignalID(inParam.appSignalID());
@@ -2134,17 +2140,19 @@ namespace Measure
 		setEquipmentID(inParam.equipmentID());
 		setCaption(inParam.caption());
 
+		Metrology::SignalLocation location = inParam.location();
+
 		if (inParam.location().moduleSerialNoID().isEmpty() == false)
 		{
 			Hash serialNumberModuleHash = calcHash(inParam.location().moduleSerialNoID());
-			Metrology::SignalState signalState = theSignalBase.signalState(serialNumberModuleHash);
+			const Metrology::SignalState& signalState = theSignalBase.signalState(serialNumberModuleHash);
 			if (signalState.valid() == true)
 			{
-				inParam.location().setModuleSerialNo(static_cast<int>(signalState.value()));
+				location.setModuleSerialNo(static_cast<int>(signalState.value()));
 			}
 		}
 
-		setLocation(inParam.location());
+		setLocation(location);
 
 		setCalibratorData(ioParam);
 
@@ -2269,7 +2277,7 @@ namespace Measure
 		// features
 		//
 
-		setConnectionAppSignalID(inParam.appSignalID());
+		setConnectionSignalID(inParam.customAppSignalID());
 		setConnectionType(connectionType);
 
 		setAppSignalID(outParam.appSignalID());
@@ -2277,17 +2285,19 @@ namespace Measure
 		setEquipmentID(outParam.equipmentID());
 		setCaption(outParam.caption());
 
+		Metrology::SignalLocation location = inParam.location();
+
 		if (inParam.location().moduleSerialNoID().isEmpty() == false)
 		{
 			Hash serialNumberModuleHash = calcHash(inParam.location().moduleSerialNoID());
-			Metrology::SignalState signalState = theSignalBase.signalState(serialNumberModuleHash);
+			const Metrology::SignalState& signalState = theSignalBase.signalState(serialNumberModuleHash);
 			if (signalState.valid() == true)
 			{
-				inParam.location().setModuleSerialNo(static_cast<int>(signalState.value()));
+				location.setModuleSerialNo(static_cast<int>(signalState.value()));
 			}
 		}
 
-		setLocation(inParam.location());
+		setLocation(location);
 
 		setCalibratorData(ioParam);
 
@@ -2343,7 +2353,7 @@ namespace Measure
 			return QString("Unknown");
 		}
 
-		return qApp->translate("MetrologySignal.h", Metrology::CmpValueTypeCpation(m_cmpValueType).toUtf8());
+		return qApp->translate("MetrologySignal", Metrology::CmpValueTypeCpation(m_cmpValueType).toUtf8());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

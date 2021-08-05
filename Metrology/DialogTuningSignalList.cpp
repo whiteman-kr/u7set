@@ -290,7 +290,7 @@ void DialogTuningSignalList::updateVisibleColunm()
 		hideColumn(c, false);
 	}
 
-	hideColumn(TUN_SIGNAL_LIST_COLUMN_CUSTOM_ID, true);
+	hideColumn(TUN_SIGNAL_LIST_COLUMN_APP_ID, true);
 	hideColumn(TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID, true);
 
 	if (m_typeAD == E::SignalType::Discrete)

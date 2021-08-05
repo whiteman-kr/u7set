@@ -9,14 +9,14 @@
 
 const char* const			ComparatorListColumn[] =
 {
-							QT_TRANSLATE_NOOP("DialogComparatorList", "AppSignalID (Input/Internal)"),
+							QT_TRANSLATE_NOOP("DialogComparatorList", "SignalID (Input/Internal)"),
 							QT_TRANSLATE_NOOP("DialogComparatorList", "Set point"),
 							QT_TRANSLATE_NOOP("DialogComparatorList", "Hysteresis"),
 							QT_TRANSLATE_NOOP("DialogComparatorList", "Signal type"),
 							QT_TRANSLATE_NOOP("DialogComparatorList", "Electric range"),
 							QT_TRANSLATE_NOOP("DialogComparatorList", "Electric sensor"),
 							QT_TRANSLATE_NOOP("DialogComparatorList", "Engineering range"),
-							QT_TRANSLATE_NOOP("DialogComparatorList", "AppSignalID (Discrete)"),
+							QT_TRANSLATE_NOOP("DialogComparatorList", "SignalID (Discrete)"),
 							QT_TRANSLATE_NOOP("DialogComparatorList", "Schema"),
 };
 
@@ -59,11 +59,15 @@ public:
 
 public:
 
-	QString					text(int row, int column, Metrology::Signal* pInSignal, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const;
+	void setTypeID(SignalIDType typeID) { m_typeID = typeID; };
+
+	QString text(int row, int column, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const;
 
 private:
 
-	QVariant				data(const QModelIndex &index, int role) const override;
+	SignalIDType m_typeID = SignalIDType::CustomID;
+
+	QVariant data(const QModelIndex &index, int role) const override;
 };
 
 // ==============================================================================================
@@ -79,24 +83,35 @@ public:
 
 private:
 
-	QMenu*					m_pComparatorMenu = nullptr;
-	QMenu*					m_pEditMenu = nullptr;
+	QMenu* m_pComparatorMenu = nullptr;
+	QMenu* m_pEditMenu = nullptr;
+	QMenu* m_pViewMenu = nullptr;
+	QMenu* m_pViewTypeIDMenu = nullptr;
 
-	ComparatorListTable		m_comparatorTable;
+	QAction* m_pTypeIDActionList[SignalIDTypeCount];
 
-	void					createInterface();
-	void					createContextMenu();
+	ComparatorListTable m_comparatorTable;
+
+	void createInterface();
+	void createContextMenu();
+
+	static SignalIDType	m_typeID;
+	void setTypeID(SignalIDType typeID);
 
 public slots:
 
-	void					updateVisibleColunm() override;
-	void					updateList() override;				// slots for updating
+	void updateVisibleColunm() override;
+	void updateList() override;				// slots for updating
 
 private slots:
 
+	// View
+	//
+	void showTypeID(QAction* action);
+
 	// slots of menu
 	//
-	void					onProperties() override;
+	void onProperties() override;
 };
 
 // ==============================================================================================

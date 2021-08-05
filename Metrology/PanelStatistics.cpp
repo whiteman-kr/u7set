@@ -760,7 +760,7 @@ void PanelStatistics::updateVisibleColunm()
 		hideColumn(c, false);
 	}
 
-	hideColumn(STATISTICS_COLUMN_CUSTOM_ID, true);
+	hideColumn(STATISTICS_COLUMN_APP_ID, true);
 	hideColumn(STATISTICS_COLUMN_EQUIPMENT_ID, true);
 	hideColumn(STATISTICS_COLUMN_CMP_VALUE, m_measureType != Measure::Type::Comparators);
 	hideColumn(STATISTICS_COLUMN_CMP_NO, m_measureType != Measure::Type::Comparators);
@@ -866,7 +866,7 @@ void PanelStatistics::selectSignalForMeasure()
 				 "For example, type of connection: \"Input\" -> \"%2\".\n\n"
 				 "To create a new connection between signals, select \"View\"->\"Metrology connections...\"\n\n"
 				 "Do you want to create new connection now?")
-				.arg(si.signal()->param().appSignalID())
+				.arg(si.signal()->param().customAppSignalID())
 				.arg(qApp->translate("MetrologySignal", si.signal()->param().signalTypeStr().toUtf8()));
 
 		int result = QMessageBox::question(this, windowTitle(), str);

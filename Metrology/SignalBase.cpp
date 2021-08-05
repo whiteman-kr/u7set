@@ -835,7 +835,7 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 	switch(measureKind)
 	{
 		case Measure::Kind::OneRack:
-			m_signalID = param.appSignalID();
+			m_signalID = param.customAppSignalID();
 			m_caption = param.caption();
 			break;
 

@@ -309,7 +309,7 @@ private slots:
 
 	// slots for list
 	//
-	void					onListDoubleClicked(const QModelIndex&);
+	virtual void			onListDoubleClicked(const QModelIndex&);
 
 	// slots of buttons
 	//

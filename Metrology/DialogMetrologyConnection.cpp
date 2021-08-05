@@ -41,7 +41,7 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 	{
 		if (column == METROLOGY_CONNECTION_COLUMN_IN_ID)
 		{
-			Metrology::Signal* pSignal = theSignalBase.signalPtr(connection.appSignalID(Metrology::ConnectionIoType::Source));
+			Metrology::Signal* pSignal = connection.metrologySignal(Metrology::ConnectionIoType::Source);
 			if (pSignal == nullptr || pSignal->param().isValid() == false)
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
@@ -58,7 +58,7 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 
 		if (column == METROLOGY_CONNECTION_COLUMN_OUT_ID)
 		{
-			Metrology::Signal* pSignal = theSignalBase.signalPtr(connection.appSignalID(Metrology::ConnectionIoType::Destination));
+			Metrology::Signal* pSignal = connection.metrologySignal(Metrology::ConnectionIoType::Destination);
 			if (pSignal == nullptr || pSignal->param().isValid() == false)
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
@@ -94,9 +94,56 @@ QString MetrologyConnectionTable::text(int row, int column, const Metrology::Con
 
 	switch (column)
 	{
-		case METROLOGY_CONNECTION_COLUMN_IN_ID:		result = connection.appSignalID(Metrology::ConnectionIoType::Source);			break;
-		case METROLOGY_CONNECTION_COLUMN_TYPE:		result = qApp->translate("MetrologyConnection", connection.typeStr().toUtf8());	break;
-		case METROLOGY_CONNECTION_COLUMN_OUT_ID:	result = connection.appSignalID(Metrology::ConnectionIoType::Destination);		break;
+		case METROLOGY_CONNECTION_COLUMN_IN_ID:
+			{
+				Metrology::Signal* pSignal = connection.metrologySignal(Metrology::ConnectionIoType::Source);
+				if (pSignal == nullptr || pSignal->param().isValid() == false)
+				{
+					result = connection.appSignalID(Metrology::ConnectionIoType::Source);
+				}
+				else
+				{
+					switch (m_typeID)
+					{
+						case SignalIDType::CustomID:	result = pSignal->param().customAppSignalID();	break;
+						case SignalIDType::AppSignalID:	result = pSignal->param().appSignalID();		break;
+						case SignalIDType::EquipmentID:	result = pSignal->param().equipmentID();		break;
+						default:
+							assert(0);
+							result = QString();
+					}
+				}
+			}
+			break;
+
+		case METROLOGY_CONNECTION_COLUMN_TYPE:
+			{
+				result = qApp->translate("MetrologyConnection", connection.typeStr().toUtf8());
+			}
+			break;
+
+		case METROLOGY_CONNECTION_COLUMN_OUT_ID:
+			{
+				Metrology::Signal* pSignal = connection.metrologySignal(Metrology::ConnectionIoType::Destination);
+				if (pSignal == nullptr || pSignal->param().isValid() == false)
+				{
+					result = connection.appSignalID(Metrology::ConnectionIoType::Destination);
+				}
+				else
+				{
+					switch (m_typeID)
+					{
+						case SignalIDType::CustomID:	result = pSignal->param().customAppSignalID();	break;
+						case SignalIDType::AppSignalID:	result = pSignal->param().appSignalID();		break;
+						case SignalIDType::EquipmentID:	result = pSignal->param().equipmentID();		break;
+						default:
+							assert(0);
+							result = QString();
+					}
+				}
+			}
+			break;
+
 		default:
 			assert(0);
 	}
@@ -544,6 +591,10 @@ void DialogMetrologyConnectionItem::onOk()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+SignalIDType DialogMetrologyConnection::m_typeID = SignalIDType::CustomID;
+
+// -------------------------------------------------------------------------------------------------------------------
+
 DialogMetrologyConnection::DialogMetrologyConnection(QWidget* parent) :
 	DialogList(0.36, 0.4, true, parent)
 {
@@ -590,6 +641,8 @@ void DialogMetrologyConnection::createInterface()
 	//
 	m_pConnectionMenu = new QMenu(tr("&Connection"), this);
 	m_pEditMenu = new QMenu(tr("&Edit"), this);
+	m_pViewMenu = new QMenu(tr("&View"), this);
+	m_pViewTypeIDMenu = new QMenu(tr("Type SignalID"), this);
 
 	// action
 	//
@@ -625,10 +678,19 @@ void DialogMetrologyConnection::createInterface()
 	m_pEditMenu->addAction(m_pCopyAction);
 	m_pEditMenu->addAction(m_pSelectAllAction);
 
+	for(int typeID = 0; typeID < SignalIDTypeCount; typeID++)
+	{
+		m_pTypeIDActionList[typeID] = m_pViewTypeIDMenu->addAction(SignalIDTypeCaption(typeID));
+		m_pTypeIDActionList[typeID]->setCheckable(true);
+	}
+
+	m_pViewMenu->addMenu(m_pViewTypeIDMenu);
+
 	//
 	//
 	addMenu(m_pConnectionMenu);
 	addMenu(m_pEditMenu);
+	addMenu(m_pViewMenu);
 
 	//
 	//
@@ -638,6 +700,7 @@ void DialogMetrologyConnection::createInterface()
 	connect(m_pMoveUpAction, &QAction::triggered, this, &DialogMetrologyConnection::onMoveUp);
 	connect(m_pMoveDownAction, &QAction::triggered, this, &DialogMetrologyConnection::onMoveDown);
 	connect(m_pImportAction, &QAction::triggered, this, &DialogMetrologyConnection::onImport);
+	connect(m_pViewTypeIDMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &DialogMetrologyConnection::showTypeID);
 
 	//
 	//
@@ -648,6 +711,10 @@ void DialogMetrologyConnection::createInterface()
 	//
 	DialogList::createHeaderContexMenu(METROLOGY_CONNECTION_COLUMN_COUNT, MetrologyConnectionColumn, MetrologyConnectionColumnWidth);
 	createContextMenu();
+
+	//
+	//
+	setTypeID(m_typeID);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -663,6 +730,8 @@ void DialogMetrologyConnection::createContextMenu()
 	addContextSeparator();
 	addContextAction(m_pCopyAction);
 	addContextAction(m_pCopyCellAction);
+	addContextSeparator();
+	addContextAction(m_pPropertyAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -688,6 +757,34 @@ void DialogMetrologyConnection::updateList()
 	}
 
 	m_connectionTable.set(connectionList);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogMetrologyConnection::setTypeID(SignalIDType typeID)
+{
+	// clear all items of menu
+	//
+	for(int t = 0; t < SignalIDTypeCount; t++)
+	{
+		if (m_pTypeIDActionList[t] == nullptr)
+		{
+			continue;
+		}
+
+		m_pTypeIDActionList[t]->setChecked((bool) (t == typeID));
+	}
+
+	//
+	//
+	if (ERR_SIGNAL_ID_TYPE(typeID) == true)
+	{
+		return;
+	}
+
+	m_typeID = typeID;
+
+	m_connectionTable.setTypeID(m_typeID);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1116,7 +1213,80 @@ void DialogMetrologyConnection::onImport()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void DialogMetrologyConnection::showTypeID(QAction* action)
+{
+	if (action == nullptr)
+	{
+		return;
+	}
+
+	for (int typeID = 0; typeID < SignalIDTypeCount; typeID++)
+	{
+		if (m_pTypeIDActionList[typeID] != action)
+		{
+			continue;
+		}
+
+		setTypeID(static_cast<SignalIDType>(typeID));
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void DialogMetrologyConnection::onProperties()
+{
+	QTableView* pView = view();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	int row = pView->currentIndex().row();
+	if (row < 0 || row >= m_connectionTable.count())
+	{
+		return;
+	}
+
+	Metrology::Connection connection = m_connectionTable.at(row);
+	if (connection.isValid() == false)
+	{
+		return;
+	}
+
+	int column = pView->currentIndex().column();
+	if (column < 0 || column >= METROLOGY_CONNECTION_COLUMN_COUNT)
+	{
+		return;
+	}
+
+	Metrology::Signal* pSignal = nullptr;
+
+	switch (column)
+	{
+		case METROLOGY_CONNECTION_COLUMN_IN_ID:		pSignal = connection.metrologySignal(Metrology::ConnectionIoType::Source);			break;
+		case METROLOGY_CONNECTION_COLUMN_OUT_ID:	pSignal = connection.metrologySignal(Metrology::ConnectionIoType::Destination);		break;
+		default:
+			return;
+	}
+
+	if (pSignal == nullptr)
+	{
+		return;
+	}
+
+	Metrology::SignalParam& param = pSignal->param();
+	if (param.isValid() == false)
+	{
+		return;
+	}
+
+	DialogSignalProperty dialog(param, this);
+	dialog.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogMetrologyConnection::onListDoubleClicked(const QModelIndex&)
 {
 	onEdit();
 }

@@ -1308,7 +1308,7 @@ bool MainWindow::signalIsMeasured(const MeasureSignal& activeSignal, QString& si
 		m_measureBase.updateStatisticsItem(m_measureType, si);
 		if (si.isMeasured() == true)
 		{
-			signalID.append(pMetrologySignal->param().appSignalID() + "\n");
+			signalID.append(pMetrologySignal->param().customAppSignalID() + "\n");
 
 			isMeasured = true;
 		}

@@ -93,6 +93,8 @@ namespace Measure
 
 		void createContextMenu();
 
+		int firstVisibleColumn();
+
 	signals:
 
 		void removeFromBase(Measure::Type measureType, const std::vector<int>& keyList);

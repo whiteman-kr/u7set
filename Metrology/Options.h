@@ -687,18 +687,18 @@ const int				MWO_PARAM_FONT						= 0,
 
 // ----------------------------------------------------------------------------------------------
 
-const char* const		TypeSignalID[] =
+enum SignalIDType
 {
-						QT_TRANSLATE_NOOP("Options.h", "SignalID"),
-						QT_TRANSLATE_NOOP("Options.h", "AppSignalID"),
-						QT_TRANSLATE_NOOP("Options.h", "EquipmentID"),
+	CustomID	= 0,
+	AppSignalID	= 1,
+	EquipmentID	= 2,
 };
 
-const int				SIGNAL_ID_TYPE_COUNT		= sizeof(TypeSignalID)/sizeof(TypeSignalID[0]);
+const int SignalIDTypeCount = 3;
 
-const int				SIGNAL_ID_TYPE_CUSTOM		= 0,
-						SIGNAL_ID_TYPE_APP			= 1,
-						SIGNAL_ID_TYPE_EQUIPMENT	= 2;
+#define ERR_SIGNAL_ID_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= SignalIDTypeCount)
+
+QString SignalIDTypeCaption(int type);
 
 // ----------------------------------------------------------------------------------------------
 

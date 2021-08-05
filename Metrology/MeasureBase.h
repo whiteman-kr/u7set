@@ -154,8 +154,8 @@ namespace Measure
 		bool isSignalValid() const { return m_signalValid; }
 		void setSignalValid(bool valid) { m_signalValid = valid; }
 
-		QString connectionAppSignalID() const;
-		void setConnectionAppSignalID(const QString& appSignalID) { m_connectionAppSignalID = appSignalID; }
+		QString connectionSignalID() const;
+		void setConnectionSignalID(const QString& signalID) { m_connectionSignalID = signalID; }
 
 		Metrology::ConnectionType connectionType() const { return m_connectionType; }
 		int connectionTypeInt() const { return TO_INT(m_connectionType); }
@@ -250,7 +250,7 @@ namespace Measure
 
 		bool m_signalValid = true;											// signal is valid during the measurement
 
-		QString m_connectionAppSignalID;
+		QString m_connectionSignalID;
 		Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 		QString m_appSignalID;
