@@ -2071,7 +2071,7 @@ void EquipmentView::updateFromPreset()
 
 	// Show confirmation dialog
 	//
-	DialogUpdateFromPreset dialog(theSettings.isExpertMode(), presetsToUpdate, this);
+	DialogUpdateFromPreset dialog(true/*theSettings.isExpertMode() -- ALWAYS ALLOW*/, presetsToUpdate, this);
 
 	if (int result = dialog.exec();
 		result != QDialog::Accepted)
@@ -2081,7 +2081,8 @@ void EquipmentView::updateFromPreset()
 
 	QStringList forceUpdateProperties;
 
-	if (theSettings.isExpertMode() == true)
+	// ALWAYS ALLOW
+	//if (theSettings.isExpertMode() == true)
 	{
 		// Get properties which must be updated even if they not meant to update
 		//

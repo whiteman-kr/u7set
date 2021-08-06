@@ -242,6 +242,10 @@ namespace Sim
 	{
 		qDebug() << "ScriptWorkerThread::interruptScript()";
 
+		// Pause must be called first!!!
+		//
+		m_scriptSimulator->simulator()->control().pause();
+
 		m_jsEngine->setInterrupted(true);
 
 		// Wait for thread finishing
