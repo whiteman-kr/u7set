@@ -549,7 +549,8 @@ QString IoSignalParam::electricSensorStr() const
 
 			break;
 
-		default: assert(0);
+		default:
+			assert(0);
 	}
 
 	return result;
@@ -834,7 +835,7 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 	switch(measureKind)
 	{
 		case Measure::Kind::OneRack:
-			m_signalID = param.appSignalID();
+			m_signalID = param.customAppSignalID();
 			m_caption = param.caption();
 			break;
 
@@ -876,7 +877,6 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 
 				default:
 					assert(0);
-					break;
 			}
 			break;
 
@@ -1133,10 +1133,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind,
 				break;
 
 			default:
-				{
-					assert(0);
-					break;
-				}
+				assert(0);
 		}
 
 		if (pDestSignal == nullptr || pDestSignal->param().isValid() == false)
@@ -1620,9 +1617,12 @@ bool SignalBase::enableForMeasure(Metrology::ConnectionType connectionType, Metr
 		return false;
 	}
 
-	if (param.location().shownOnSchemas() == false)
+	if (theOptions.module().measureShownOnSchemas() == true)
 	{
-		return false;
+		if (param.location().shownOnSchemas() == false)
+		{
+			return false;
+		}
 	}
 
 	switch (connectionType)
@@ -2033,7 +2033,8 @@ void SignalBase::initSignals()
 					case E::SignalType::Analog:		param.setPlace(analogTuningSignalCount++);		break;
 					case E::SignalType::Discrete:	param.setPlace(discreteTuningSignalCount++);	break;
 					case E::SignalType::Bus:		param.setPlace(busTuningSignalCount++);			break;
-					default:						assert(0);
+					default:
+						assert(0);
 				}
 			}
 		}
@@ -2043,7 +2044,7 @@ void SignalBase::initSignals()
 	initRackParam();
 	initConnectionSignals();
 	m_tuningBase.signalBase().createSignalList();
-	m_statisticsBase.createSignalList();
+	m_statisticsBase.createSignalList(theOptions.module().measureShownOnSchemas());
 
 	qDebug() << __FUNCTION__ << "Signals have been initialized" << " Time for init: " << responseTime.elapsed() << " ms";
 }
@@ -2650,7 +2651,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 		pInputSignal->param().setComparatorList(metrologyComparatorList);
 	}
 
-	m_statisticsBase.createComparatorList();
+	m_statisticsBase.createComparatorList(theOptions.module().measureShownOnSchemas());
 
 	return true;
 }

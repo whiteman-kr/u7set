@@ -16,7 +16,12 @@ namespace Builder
 			return false;
 		}
 
-		return m_settingsSet.addProfile<TestClientSettings>(profile, settingsGetter);
+		bool result = m_settingsSet.addProfile<TestClientSettings>(profile, settingsGetter);
+
+		result &= writeRunScriptFile(profile, settingsGetter, E::OS::Windows);
+		result &= writeRunScriptFile(profile, settingsGetter, E::OS::Linux);
+
+		return result;
 	}
 
 	bool TestClientCfgGenerator::generateConfigurationStep1()
@@ -26,8 +31,6 @@ namespace Builder
 		do
 		{
 			if (linkAppSignalsFile() == false) break;
-			if (writeBatFile() == false) break;
-			if (writeShFile() == false) break;
 
 			result = true;
 		}
@@ -92,46 +95,28 @@ namespace Builder
 		return true;
 	}
 
-	bool TestClientCfgGenerator::writeBatFile()
+	bool TestClientCfgGenerator::writeRunScriptFile(const QString& profile,
+													const TestClientSettings& settings,
+													E::OS os)
 	{
 		TEST_PTR_RETURN_FALSE(m_software);
 
-		QString content = getBuildInfoCommentsForBat();
+		QString content = getBuildInfoComments(os);
 
-		content += "TestAppDataSrv.exe";
+		QString cmdLine = getCommonCmdLine(settings.cfgService1_clientRequestIP,
+											settings.cfgService1_clientRequestIP,
+											os, true);
 
-		QString parameters;
-		if (getServiceParameters(parameters) == false)
-		{
-			return false;
-		}
-		content += parameters.mid(3);	// Skip -e parameter
-
-		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
-
-		TEST_PTR_RETURN_FALSE(buildFile);
-
-		return true;
-	}
-
-	bool TestClientCfgGenerator::writeShFile()
-	{
-		TEST_PTR_RETURN_FALSE(m_software);
-
-		QString content = getBuildInfoCommentsForSh();
-
-		content += "./TestAppDataSrv";
-
-		QString parameters;
-
-		if (getServiceParameters(parameters) == false)
+		if (cmdLine.isEmpty() == true)
 		{
 			return false;
 		}
 
-		content += parameters.mid(3);	// Skip -e parameter
+		content += cmdLine;
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+		BuildFile* buildFile = m_buildResultWriter->addFile(getRunScriptDirectory(os),
+															getRunScriptName(profile, os),
+															content);
 
 		TEST_PTR_RETURN_FALSE(buildFile);
 

@@ -16,7 +16,7 @@ namespace Builder
 
 	private:
 		bool linkAppSignalsFile();
-		bool writeBatFile();
-		bool writeShFile();
+
+		bool writeRunScriptFile(const QString& profile, const TestClientSettings& settings, E::OS os);
 	};
 }

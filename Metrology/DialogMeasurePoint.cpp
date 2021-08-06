@@ -209,7 +209,6 @@ void DialogMeasurePoint::updateRangeType()
 
 		default:
 			assert(0);
-			break;
 	}
 }
 

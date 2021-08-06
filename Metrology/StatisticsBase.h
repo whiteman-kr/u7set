@@ -88,8 +88,8 @@ public:
 	int invalidMeasureCount() const { return m_invalidMeasureCount; }
 	void setInvalidMeasureCount(int count) { m_invalidMeasureCount = count; }
 
-	void createSignalList();
-	void createComparatorList();
+	void createSignalList(bool shownOnSchemas);
+	void createComparatorList(bool shownOnSchemas);
 
 	StatisticsItem item(int index) const;
 	StatisticsItem item(int measureType, int index) const;

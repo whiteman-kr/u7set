@@ -8,6 +8,7 @@
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QValueAxis>
 #include <QVBoxLayout>
+#include <QClipboard>
 
 #include "MeasureViewHeader.h"
 #include "MeasureBase.h"
@@ -92,6 +93,8 @@ namespace Measure
 
 		void createContextMenu();
 
+		int firstVisibleColumn();
+
 	signals:
 
 		void removeFromBase(Measure::Type measureType, const std::vector<int>& keyList);
@@ -109,6 +112,7 @@ namespace Measure
 		void removeMeasure();
 
 		void copy();
+		void copyCell();
 
 		void showGraph(int graphType);
 	};

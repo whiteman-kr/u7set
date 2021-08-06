@@ -9,8 +9,8 @@
 const char* const			TuningSignalColumn[] =
 {
 							QT_TRANSLATE_NOOP("DialogTuningSignalList", "Rack"),
+							QT_TRANSLATE_NOOP("DialogTuningSignalList", "SignalID"),
 							QT_TRANSLATE_NOOP("DialogTuningSignalList", "AppSignalID"),
-							QT_TRANSLATE_NOOP("DialogTuningSignalList", "CustomSignalID"),
 							QT_TRANSLATE_NOOP("DialogTuningSignalList", "EquipmentID"),
 							QT_TRANSLATE_NOOP("DialogTuningSignalList", "Caption"),
 							QT_TRANSLATE_NOOP("DialogTuningSignalList", "State"),
@@ -21,8 +21,8 @@ const char* const			TuningSignalColumn[] =
 const int					TUN_SIGNAL_LIST_COLUMN_COUNT		= sizeof(TuningSignalColumn)/sizeof(TuningSignalColumn[0]);
 
 const int					TUN_SIGNAL_LIST_COLUMN_RACK			= 0,
-							TUN_SIGNAL_LIST_COLUMN_APP_ID		= 1,
-							TUN_SIGNAL_LIST_COLUMN_CUSTOM_ID	= 2,
+							TUN_SIGNAL_LIST_COLUMN_CUSTOM_ID	= 1,
+							TUN_SIGNAL_LIST_COLUMN_APP_ID		= 2,
 							TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID	= 3,
 							TUN_SIGNAL_LIST_COLUMN_CAPTION		= 4,
 							TUN_SIGNAL_LIST_COLUMN_STATE		= 5,
@@ -32,8 +32,8 @@ const int					TUN_SIGNAL_LIST_COLUMN_RACK			= 0,
 const int					TuningSignalColumnWidth[TUN_SIGNAL_LIST_COLUMN_COUNT] =
 {
 							100,	 // TUN_SIGNAL_LIST_COLUMN_RACK
-							250,	 // TUN_SIGNAL_LIST_COLUMN_APP_ID
 							250,	 // TUN_SIGNAL_LIST_COLUMN_CUSTOM_ID
+							250,	 // TUN_SIGNAL_LIST_COLUMN_APP_ID
 							250,	 // TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID
 							150,	 // TUN_SIGNAL_LIST_COLUMN_CAPTION
 							100,	 // TUN_SIGNAL_LIST_COLUMN_VALUE

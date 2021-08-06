@@ -576,6 +576,13 @@ public:
 	};
 	Q_ENUM(ServiceRunMode)
 
+	enum class OS
+	{
+		Windows,
+		Linux
+	};
+	Q_ENUM(OS)
+
 	// For Monitor
 	//
 	enum class ValueViewType

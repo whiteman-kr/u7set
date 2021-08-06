@@ -706,6 +706,9 @@ namespace Builder
 
 		void finalizeHeaps();
 
+		const SignalsHeap& discreteSignalsHeap() const { return m_discreteSignalsHeap; }
+		const SignalsHeap& analogAndBusSignalsHeap() const { return m_analogAndBusSignalsHeap; }
+
 		void getHeapsLog(QStringList* log) const;
 
 		std::shared_ptr<Hardware::DeviceModule> lm() const;

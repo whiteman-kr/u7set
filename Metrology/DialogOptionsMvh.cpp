@@ -243,7 +243,6 @@ void DialogOptionsMeasureViewHeader::cellChanged(int row, int column)
 			break;
 		default:
 			assert(0);
-			break;
 	}
 
 	updateList();
@@ -326,7 +325,6 @@ void DialogOptionsMeasureViewHeader::onEdit(int row, int column)
 
 		default:
 			assert(0);
-			break;
 	}
 }
 

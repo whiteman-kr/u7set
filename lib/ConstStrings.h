@@ -316,7 +316,10 @@ namespace Directory
 
 	inline const QString REPORTS("Reports");
 	inline const QString OPTO_VHD("Opto-vhd");
-	inline const QString RUN_SERVICE_SCRIPTS("RunServiceScripts");
+
+	inline const QString RUN_SERVICE_SCRIPTS_WINDOWS("RunServiceScripts/Windows");
+	inline const QString RUN_SERVICE_SCRIPTS_LINUX("RunServiceScripts/Linux");
+
 	inline const QString BIN("Bin");
 }
 

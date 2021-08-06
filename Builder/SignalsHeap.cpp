@@ -323,6 +323,11 @@ namespace Builder
 		return m_heapLog;
 	}
 
+	const std::vector<std::tuple<QString, Address16, int>>& SignalsHeap::getHeapItemsLog() const
+	{
+		return m_heapItemsLog;
+	}
+
 	void SignalsHeap::logInit()
 	{
 		if (m_generateLog == false)
@@ -370,6 +375,8 @@ namespace Builder
 
 	void SignalsHeap::logAppendToHeap(const HeapItem& heapItem)
 	{
+		m_heapItemsLog.push_back({heapItem.appSignalID, heapItem.address16(), heapItem.sizeBits});
+
 		if (m_generateLog == false)
 		{
 			return;

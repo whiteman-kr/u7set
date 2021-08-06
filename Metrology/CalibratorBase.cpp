@@ -191,12 +191,16 @@ void CalibratorBase::createInitDialog(QWidget* parent)
 		m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
 		m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
 
+		m_pCopyCellAction = new QAction(tr("Copy cell"), this);
+		m_pCopyCellAction->setIcon(QIcon(":/icons/Copy.png"));
+
 		m_pMenuBar->addMenu(m_pCalibratorMenu);
 
 		connect(m_pInitAction, &QAction::triggered, this, &CalibratorBase::onInitialization);
 		connect(m_pManageAction, &QAction::triggered, this, &CalibratorBase::onManage);
 		connect(m_pSettingsAction, &QAction::triggered, this, static_cast<void (CalibratorBase::*)()>(&CalibratorBase::onSettings));
 		connect(m_pCopyAction, &QAction::triggered, this, &CalibratorBase::onCopy);
+		connect(m_pCopyCellAction, &QAction::triggered, this, &CalibratorBase::onCopyCell);
 
 		QVBoxLayout* mainLayout = new QVBoxLayout;
 		mainLayout->setMenuBar(m_pMenuBar);
@@ -400,7 +404,8 @@ std::shared_ptr<CalibratorManager> CalibratorBase::calibratorForMeasure(int inde
 		case Measure::Kind::OneRack:
 		case Measure::Kind::OneModule:	pManager = firstConnectedCalibrator();	break;	// we need only one - connected;
 		case Measure::Kind::MultiRack:	pManager = calibratorManager(index);	break;
-		default:						assert(0);
+		default:
+			assert(0);
 	}
 
 	return pManager;
@@ -681,6 +686,19 @@ void CalibratorBase::onCopy()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void CalibratorBase::onCopyCell()
+{
+	if (m_pCalibratorView == nullptr)
+	{
+		return;
+	}
+
+	QClipboard* clipboard = QApplication::clipboard();
+	clipboard->setText(m_pCalibratorView->model()->data(m_pCalibratorView->currentIndex()).toString());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void CalibratorBase::onContextMenu(QPoint)
 {
 	QMenu* menu = new QMenu(m_pCalibratorView);
@@ -689,6 +707,7 @@ void CalibratorBase::onContextMenu(QPoint)
 	menu->addAction(m_pSettingsAction);
 	menu->addSeparator();
 	menu->addAction(m_pCopyAction);
+	menu->addAction(m_pCopyCellAction);
 
 	menu->exec(QCursor::pos());
 }

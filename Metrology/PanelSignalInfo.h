@@ -16,8 +16,8 @@
 
 const char* const			SignalInfoColumn[] =
 {
+							QT_TRANSLATE_NOOP("PanelSignalInfo", "SignalID"),
 							QT_TRANSLATE_NOOP("PanelSignalInfo", "AppSignalID"),
-							QT_TRANSLATE_NOOP("PanelSignalInfo", "CustomSignalID"),
 							QT_TRANSLATE_NOOP("PanelSignalInfo", "EquipmentID"),
 							QT_TRANSLATE_NOOP("PanelSignalInfo", "Caption"),
 							QT_TRANSLATE_NOOP("PanelSignalInfo", "State"),
@@ -33,8 +33,8 @@ const char* const			SignalInfoColumn[] =
 
 const int					SIGNAL_INFO_COLUMN_COUNT		= sizeof(SignalInfoColumn)/sizeof(SignalInfoColumn[0]);
 
-const int					SIGNAL_INFO_COLUMN_APP_ID		= 0,
-							SIGNAL_INFO_COLUMN_CUSTOM_ID	= 1,
+const int					SIGNAL_INFO_COLUMN_CUSTOM_ID	= 0,
+							SIGNAL_INFO_COLUMN_APP_ID		= 1,
 							SIGNAL_INFO_COLUMN_EQUIPMENT_ID	= 2,
 							SIGNAL_INFO_COLUMN_CAPTION		= 3,
 							SIGNAL_INFO_COLUMN_STATE		= 4,
@@ -48,9 +48,9 @@ const int					SIGNAL_INFO_COLUMN_APP_ID		= 0,
 							SIGNAL_INFO_COLUMN_CALIBRATOR	= 12;
 
 const int					SignalInfoColumnWidth[SIGNAL_INFO_COLUMN_COUNT] =
-{
-							250,	// SIGNAL_INFO_COLUMN_APP_ID
+{						
 							250,	// SIGNAL_INFO_COLUMN_CUSTOM_ID
+							250,	// SIGNAL_INFO_COLUMN_APP_ID
 							250,	// SIGNAL_LIST_COLUMN_EQUIPMENT_ID
 							150,	// SIGNAL_INFO_COLUMN_CAPTION
 							150,	// SIGNAL_INFO_COLUMN_STATE
@@ -132,6 +132,7 @@ private:
 	QAction* m_pShowSignalMoveUpAction = nullptr;
 	QAction* m_pShowSignalMoveDownAction = nullptr;
 	QAction* m_pCopyAction = nullptr;
+	QAction* m_pCopyCellAction = nullptr;
 	QAction* m_pSignalPropertyAction = nullptr;
 
 	QAction* m_pColumnAction[SIGNAL_INFO_COLUMN_COUNT];
@@ -186,6 +187,7 @@ private slots:
 	void showSignalMoveUp();
 	void showSignalMoveDown();
 	void copy();
+	void copyCell();
 	void signalProperty();
 
 	void onContextMenu(QPoint);

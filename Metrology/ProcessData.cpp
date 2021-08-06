@@ -325,7 +325,7 @@ void FindData::createInterface(QTableView* pView)
 	m_pFindTextEdit = new QLineEdit(m_findText, this);
 	m_pFindTextEdit->setPlaceholderText(tr("Search Text"));
 	m_pFindTextEdit->setCompleter(m_findCompleter.completer());
-	//m_pFindTextEdit->setClearButtonEnabled(true);
+	m_pFindTextEdit->setClearButtonEnabled(true);
 
 	m_findNextButton = new QPushButton(tr(" Find next ..."), this);
 
@@ -340,6 +340,33 @@ void FindData::createInterface(QTableView* pView)
 	connect(m_findNextButton, &QPushButton::clicked, this, &FindData::findNext);
 
 	emit findTextChanged();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int FindData::firstVisibleColumn()
+{
+	if (m_pView == nullptr)
+	{
+		return 0;
+	}
+
+	int visibleColumn = 0;
+
+	int columnCount = m_pView->model()->columnCount();
+	for(int column = 0; column < columnCount; column++)
+	{
+		if (m_pView->isColumnHidden(column) == true)
+		{
+			continue;
+		}
+
+		visibleColumn = column;
+
+		break;
+	}
+
+	return visibleColumn;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -362,7 +389,7 @@ void FindData::findTextChanged()
 	int foundRow = find(-1);
 	if (foundRow != -1)
 	{
-		m_pView->setCurrentIndex(m_pView->model()->index(foundRow, 0));
+		m_pView->setCurrentIndex(m_pView->model()->index(foundRow, firstVisibleColumn()));
 	}
 
 	enableFindNextButton(foundRow);
@@ -382,7 +409,7 @@ void FindData::findNext()
 	int foundRow = find(startRow);
 	if (foundRow != -1)
 	{
-		m_pView->setCurrentIndex(m_pView->model()->index(foundRow, 0));
+		m_pView->setCurrentIndex(m_pView->model()->index(foundRow, firstVisibleColumn()));
 	}
 
 	enableFindNextButton(foundRow);
@@ -434,7 +461,7 @@ int FindData::find(int start)
 			break;
 		}
 
-		if (foundRow != -1)
+		if (foundRow != -1) 	// already find
 		{
 			break;
 		}

@@ -141,7 +141,7 @@ namespace Measure
 			{
 				case Measure::Type::Linearity:
 
-					if (columnIndex == MVC_CMN_L_APP_ID || columnIndex == MVC_CMN_L_ERROR_RESULT)
+					if (columnIndex == MVC_CMN_L_CUSTOM_ID || columnIndex == MVC_CMN_L_ERROR_RESULT)
 					{
 						return theOptions.measureView().fontBold();
 					}
@@ -150,7 +150,7 @@ namespace Measure
 
 				case Measure::Type::Comparators:
 
-					if (columnIndex == MVC_CMN_C_APP_ID || columnIndex == MVC_CMN_C_ERROR_RESULT)
+					if (columnIndex == MVC_CMN_C_CUSTOM_ID || columnIndex == MVC_CMN_C_ERROR_RESULT)
 					{
 						return theOptions.measureView().fontBold();
 					}
@@ -308,7 +308,8 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		result = textLinearity(row, column, pMeasurement);	break;
 			case Measure::Type::Comparators:	result = textComparator(row, column, pMeasurement);	break;
-			default:							result.clear();
+			default:
+				result.clear();
 		}
 
 		return result;
@@ -371,7 +372,7 @@ namespace Measure
 			case MVC_CMN_L_INDEX:					result = QString::number(m->measureID()); break;
 
 			case MVC_CMN_L_MODULE_SN:				result = m->location().moduleSerialNoStr(); break;
-			case MVC_CMN_L_CONNECT_APP_ID:			result = m->connectionAppSignalID(); break;
+			case MVC_CMN_L_CONNECT_APP_ID:			result = m->connectionSignalID(); break;
 			case MVC_CMN_L_CONNECT_TYPE:			result = m->connectionTypeStr(); break;
 			case MVC_CMN_L_APP_ID:					result = m->appSignalID(); break;
 			case MVC_CMN_L_CUSTOM_ID:				result = m->customAppSignalID(); break;
@@ -428,7 +429,8 @@ namespace Measure
 			case MVC_CMN_L_MEASUREMENT_TIME:		result = m->measureTimeStr(); break;
 			case MVC_CMN_L_CALIBRATOR:				result = m->calibrator(); break;
 
-			default:								result.clear(); break;
+			default:
+				result.clear();
 		}
 
 		if (row > 0)
@@ -487,7 +489,7 @@ namespace Measure
 			case MVC_CMN_C_INDEX:					result = QString::number(m->measureID()); break;
 
 			case MVC_CMN_C_MODULE_SN:				result = m->location().moduleSerialNoStr(); break;
-			case MVC_CMN_C_CONNECT_APP_ID:			result = m->connectionAppSignalID(); break;
+			case MVC_CMN_C_CONNECT_APP_ID:			result = m->connectionSignalID(); break;
 			case MVC_CMN_C_CONNECT_TYPE:			result = m->connectionTypeStr(); break;
 			case MVC_CMN_C_APP_ID:					result = m->appSignalID(); break;
 			case MVC_CMN_C_CUSTOM_ID:				result = m->customAppSignalID(); break;
@@ -521,7 +523,8 @@ namespace Measure
 			case MVC_CMN_C_MEASUREMENT_TIME:		result = m->measureTimeStr(); break;
 			case MVC_CMN_C_CALIBRATOR:				result = m->calibrator(); break;
 
-			default:								result.clear(); break;
+			default:
+				result.clear();
 		}
 
 		if (row > 0)
@@ -834,6 +837,28 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	int View::firstVisibleColumn()
+	{
+		int visibleColumn = 0;
+
+		int columnCount = model()->columnCount();
+		for(int column = 0; column < columnCount; column++)
+		{
+			if (isColumnHidden(column) == true)
+			{
+				continue;
+			}
+
+			visibleColumn = column;
+
+			break;
+		}
+
+		return visibleColumn;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	void View::appendMeasure(Measure::Item* pMeasurement)
 	{
 		if (pMeasurement == nullptr)
@@ -855,7 +880,7 @@ namespace Measure
 			return;
 		}
 
-		setCurrentIndex(model()->index(m_table.count() - 1, MVC_CMN_L_APP_ID));
+		setCurrentIndex(model()->index(m_table.count() - 1, firstVisibleColumn()));
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -926,6 +951,14 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	void View::copyCell()
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(model()->data(currentIndex()).toString());
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	void View::showGraph(int graphType)
 	{
 		if (graphType < 0 || graphType >= MVG_TYPE_COUNT)
@@ -985,7 +1018,7 @@ namespace Measure
 			return;
 		}
 
-		pChart->setTitle(pLinearityMeasurement->appSignalID() + " - " + pLinearityMeasurement->caption());
+		pChart->setTitle(pLinearityMeasurement->customAppSignalID() + " - " + pLinearityMeasurement->caption());
 		pChart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
 
 		// Add lines
@@ -1105,7 +1138,6 @@ namespace Measure
 
 			default:
 				assert(0);
-				break;
 		}
 
 		if (pointCount == 0)
@@ -1160,7 +1192,7 @@ namespace Measure
 		// QDialog
 		//
 		QDialog dialog(this, Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-		dialog.setWindowTitle(tr("Graph - %1").arg(pLinearityMeasurement->appSignalID()));
+		dialog.setWindowTitle(tr("Graph - %1").arg(pLinearityMeasurement->customAppSignalID()));
 
 		QRect screen = QDesktopWidget().availableGeometry(this);
 		dialog.resize(static_cast<int>(screen.width() * 0.7), static_cast<int>(screen.height() * 0.4));
@@ -1245,13 +1277,14 @@ void ChartView::keyPressEvent(QKeyEvent* event)
 {
 	switch (event->key())
 	{
-		case Qt::Key_Plus:	chart()->zoomIn();						break;
-		case Qt::Key_Minus:	chart()->zoomOut();						break;
-		case Qt::Key_Left:	chart()->scroll(-10, 0);				break;
-		case Qt::Key_Right:	chart()->scroll(10, 0);					break;
-		case Qt::Key_Up:	chart()->scroll(0, 10);					break;
-		case Qt::Key_Down:	chart()->scroll(0, -10);				break;
-		default:			QGraphicsView::keyPressEvent(event);	break;
+		case Qt::Key_Plus:	chart()->zoomIn();			break;
+		case Qt::Key_Minus:	chart()->zoomOut();			break;
+		case Qt::Key_Left:	chart()->scroll(-10, 0);	break;
+		case Qt::Key_Right:	chart()->scroll(10, 0);		break;
+		case Qt::Key_Up:	chart()->scroll(0, 10);		break;
+		case Qt::Key_Down:	chart()->scroll(0, -10);	break;
+		default:
+			QGraphicsView::keyPressEvent(event);
 	}
 }
 

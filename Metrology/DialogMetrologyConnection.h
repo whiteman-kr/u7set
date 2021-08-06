@@ -9,8 +9,8 @@
 const char* const			MetrologyConnectionColumn[] =
 {
 							QT_TRANSLATE_NOOP("DialogMetrologyConnection", "Type"),
-							QT_TRANSLATE_NOOP("DialogMetrologyConnection", "AppSignalID (source)"),
-							QT_TRANSLATE_NOOP("DialogMetrologyConnection", "AppSignalID (destination)"),
+							QT_TRANSLATE_NOOP("DialogMetrologyConnection", "SignalID (source)"),
+							QT_TRANSLATE_NOOP("DialogMetrologyConnection", "SignalID (destination)"),
 };
 
 const int					METROLOGY_CONNECTION_COLUMN_COUNT			= sizeof(MetrologyConnectionColumn)/sizeof(MetrologyConnectionColumn[0]);
@@ -39,9 +39,13 @@ public:
 
 public:
 
+	void setTypeID(SignalIDType typeID) { m_typeID = typeID; };
+
 	QString text(int row, int column, const Metrology::Connection& connection) const;
 
 private:
+
+	SignalIDType m_typeID = SignalIDType::CustomID;
 
 	QVariant data(const QModelIndex &index, int role) const override;
 
@@ -112,6 +116,8 @@ private:
 
 	QMenu* m_pConnectionMenu = nullptr;
 	QMenu* m_pEditMenu = nullptr;
+	QMenu* m_pViewMenu = nullptr;
+	QMenu* m_pViewTypeIDMenu = nullptr;
 
 	QAction* m_pCreateAction = nullptr;
 	QAction* m_pEditAction = nullptr;
@@ -120,6 +126,7 @@ private:
 	QAction* m_pMoveDownAction = nullptr;
 	QAction* m_pImportAction = nullptr;
 
+	QAction* m_pTypeIDActionList[SignalIDTypeCount];
 
 	MetrologyConnectionTable m_connectionTable;
 
@@ -130,6 +137,9 @@ private:
 
 	Metrology::Signal* m_pOutputSignal = nullptr;
 	bool createConnectionBySignal(Metrology::Signal* pSignal);
+
+	static SignalIDType	m_typeID;
+	void setTypeID(SignalIDType typeID);
 
 public slots:
 
@@ -152,10 +162,17 @@ private slots:
 	void onExport() override;
 	void onImport();
 
+		// View
+		//
+	void showTypeID(QAction* action);
+
 	// slots for list
 	//
 	void onProperties() override;
 
+	// slots for list
+	//
+	void onListDoubleClicked(const QModelIndex&) override;
 };
 
 // ==============================================================================================

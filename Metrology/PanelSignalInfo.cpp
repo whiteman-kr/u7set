@@ -45,8 +45,8 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 
 		switch (column)
 		{
-			case SIGNAL_INFO_COLUMN_APP_ID:			result = Qt::AlignLeft;		break;
 			case SIGNAL_INFO_COLUMN_CUSTOM_ID:		result = Qt::AlignLeft;		break;
+			case SIGNAL_INFO_COLUMN_APP_ID:			result = Qt::AlignLeft;		break;
 			case SIGNAL_INFO_COLUMN_EQUIPMENT_ID:	result = Qt::AlignLeft;		break;
 			case SIGNAL_INFO_COLUMN_CAPTION:		result = Qt::AlignLeft;		break;
 			case SIGNAL_INFO_COLUMN_STATE:			result = Qt::AlignCenter;	break;
@@ -58,7 +58,8 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 			case SIGNAL_INFO_COLUMN_EL_SENSOR:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_EN_RANGE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_CALIBRATOR:		result = Qt::AlignCenter;	break;
-			default:								assert(0);
+			default:
+				assert(0);
 		}
 
 		return result;
@@ -164,8 +165,8 @@ QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 
 	switch (column)
 	{
-		case SIGNAL_INFO_COLUMN_APP_ID:			result = ioParam.appSignalID();			break;
 		case SIGNAL_INFO_COLUMN_CUSTOM_ID:		result = ioParam.customSignalID();		break;
+		case SIGNAL_INFO_COLUMN_APP_ID:			result = ioParam.appSignalID();			break;
 		case SIGNAL_INFO_COLUMN_EQUIPMENT_ID:	result = ioParam.equipmentID();			break;
 		case SIGNAL_INFO_COLUMN_CAPTION:		result = ioParam.caption();				break;
 		case SIGNAL_INFO_COLUMN_STATE:			result = stateStr;						break;
@@ -177,7 +178,8 @@ QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 		case SIGNAL_INFO_COLUMN_EL_SENSOR:		result = ioParam.electricSensorStr();	break;
 		case SIGNAL_INFO_COLUMN_EN_RANGE:		result = ioParam.engineeringRangeStr();	break;
 		case SIGNAL_INFO_COLUMN_CALIBRATOR:		result = ioParam.calibratorStr();		break;
-		default:								assert(0);
+		default:
+			assert(0);
 	}
 
 	return result;
@@ -283,7 +285,7 @@ PanelSignalInfo::PanelSignalInfo(const SignalInfoOption& signalInfo, QWidget* pa
 	connect(&theSignalBase, &SignalBase::activeSignalChanged,
 			this, &PanelSignalInfo::activeSignalChanged, Qt::QueuedConnection);
 
-	hideColumn(SIGNAL_INFO_COLUMN_CUSTOM_ID, true);
+	hideColumn(SIGNAL_INFO_COLUMN_APP_ID, true);
 	hideColumn(SIGNAL_INFO_COLUMN_EQUIPMENT_ID, true);
 	hideColumn(SIGNAL_INFO_COLUMN_RACK, true);
 	hideColumn(SIGNAL_INFO_COLUMN_CHASSIS, true);
@@ -427,6 +429,9 @@ void PanelSignalInfo::createContextMenu()
 	m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
 	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
 
+	m_pCopyCellAction = m_pContextMenu->addAction(tr("Copy cell"));
+	m_pCopyCellAction->setIcon(QIcon(":/icons/Copy.png"));
+
 	m_pContextMenu->addSeparator();
 
 	m_pSignalPropertyAction = m_pContextMenu->addAction(tr("Propertу ..."));
@@ -435,6 +440,7 @@ void PanelSignalInfo::createContextMenu()
 	connect(m_pShowNoValidAction, &QAction::triggered, this, &PanelSignalInfo::showNoValid);
 	connect(m_pShowElectricValueAction, &QAction::triggered, this, &PanelSignalInfo::showElectricValue);
 	connect(m_pCopyAction, &QAction::triggered, this, &PanelSignalInfo::copy);
+	connect(m_pCopyCellAction, &QAction::triggered, this, &PanelSignalInfo::copyCell);
 	connect(m_pSignalPropertyAction, &QAction::triggered, this, &PanelSignalInfo::signalProperty);
 }
 
@@ -840,6 +846,19 @@ void PanelSignalInfo::copy()
 {
 	CopyData copyData(m_pView, false);
 	copyData.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelSignalInfo::copyCell()
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	QClipboard* clipboard = QApplication::clipboard();
+	clipboard->setText(m_pView->model()->data(m_pView->currentIndex()).toString());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -115,6 +115,8 @@ private:
 
 	void			createInterface(QTableView* pView);
 
+	int				firstVisibleColumn();
+
 	int				find(int start);
 	void			enableFindNextButton(int start);
 

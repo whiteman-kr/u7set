@@ -36,14 +36,15 @@ QVariant TuningSignalTable::data(const QModelIndex &index, int role) const
 		switch (column)
 		{
 			case TUN_SIGNAL_LIST_COLUMN_RACK:			result = Qt::AlignCenter;	break;
-			case TUN_SIGNAL_LIST_COLUMN_APP_ID:			result = Qt::AlignLeft;		break;
 			case TUN_SIGNAL_LIST_COLUMN_CUSTOM_ID:		result = Qt::AlignLeft;		break;
+			case TUN_SIGNAL_LIST_COLUMN_APP_ID:			result = Qt::AlignLeft;		break;
 			case TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID:	result = Qt::AlignLeft;		break;
 			case TUN_SIGNAL_LIST_COLUMN_CAPTION:		result = Qt::AlignLeft;		break;
 			case TUN_SIGNAL_LIST_COLUMN_STATE:			result = Qt::AlignCenter;	break;
 			case TUN_SIGNAL_LIST_COLUMN_DEFAULT:		result = Qt::AlignCenter;	break;
 			case TUN_SIGNAL_LIST_COLUMN_RANGE:			result = Qt::AlignCenter;	break;
-			default:									assert(0);
+			default:
+				assert(0);
 		}
 
 		return result;
@@ -111,14 +112,15 @@ QString TuningSignalTable::text(int row, int column, Metrology::Signal* pSignal)
 	switch (column)
 	{
 		case TUN_SIGNAL_LIST_COLUMN_RACK:			result = param.location().rack().caption();	break;
-		case TUN_SIGNAL_LIST_COLUMN_APP_ID:			result = param.appSignalID();				break;
 		case TUN_SIGNAL_LIST_COLUMN_CUSTOM_ID:		result = param.customAppSignalID();			break;
+		case TUN_SIGNAL_LIST_COLUMN_APP_ID:			result = param.appSignalID();				break;
 		case TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID:	result = param.equipmentID();				break;
 		case TUN_SIGNAL_LIST_COLUMN_CAPTION:		result = param.caption();					break;
 		case TUN_SIGNAL_LIST_COLUMN_STATE:			result = signalStateStr(pSignal);			break;
 		case TUN_SIGNAL_LIST_COLUMN_DEFAULT:		result = qApp->translate("MetrologySignal", param.tuningDefaultValueStr().toUtf8());break;
 		case TUN_SIGNAL_LIST_COLUMN_RANGE:			result = param.tuningRangeStr();			break;
-		default:									assert(0);
+		default:
+			assert(0);
 	}
 
 	return result;
@@ -272,6 +274,7 @@ void DialogTuningSignalList::createContextMenu()
 	addContextMenu(m_pViewTypeADMenu);
 	addContextSeparator();
 	addContextAction(m_pCopyAction);
+	addContextAction(m_pCopyCellAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -287,7 +290,7 @@ void DialogTuningSignalList::updateVisibleColunm()
 		hideColumn(c, false);
 	}
 
-	hideColumn(TUN_SIGNAL_LIST_COLUMN_CUSTOM_ID, true);
+	hideColumn(TUN_SIGNAL_LIST_COLUMN_APP_ID, true);
 	hideColumn(TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID, true);
 
 	if (m_typeAD == E::SignalType::Discrete)

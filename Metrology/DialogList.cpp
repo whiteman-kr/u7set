@@ -52,6 +52,9 @@ void DialogList::createInterface(double width, double height, bool hasButtons)
 	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
 	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
 
+	m_pCopyCellAction = new QAction(tr("Copy cell"), this);
+	m_pCopyCellAction->setIcon(QIcon(":/icons/Copy.png"));
+
 	m_pSelectAllAction = new QAction(tr("Select &All"), this);
 	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
 	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
@@ -64,6 +67,7 @@ void DialogList::createInterface(double width, double height, bool hasButtons)
 	connect(m_pExportAction, &QAction::triggered, this, &DialogList::onExport);
 	connect(m_pFindAction, &QAction::triggered, this, &DialogList::onFind);
 	connect(m_pCopyAction, &QAction::triggered, this, &DialogList::onCopy);
+	connect(m_pCopyCellAction, &QAction::triggered, this, &DialogList::onCopyCell);
 	connect(m_pSelectAllAction, &QAction::triggered, this, &DialogList::onSelectAll);
 	connect(m_pPropertyAction, &QAction::triggered, this, &DialogList::onProperties);
 
@@ -332,6 +336,26 @@ void DialogList::onCopy()
 {
 	CopyData copyData(m_pView, false);
 	copyData.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogList::onCopyCell()
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	QClipboard* clipboard = QApplication::clipboard();
+	clipboard->setText(m_pView->model()->data(m_pView->currentIndex()).toString());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogList::onSelectAll()
+{
+	m_pView->selectAll();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

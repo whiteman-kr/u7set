@@ -42,7 +42,7 @@ namespace Measure
 
 		//
 		//
-		m_connectionAppSignalID.clear();
+		m_connectionSignalID.clear();
 		m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
 		m_appSignalID.clear();
@@ -103,14 +103,14 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString Item::connectionAppSignalID() const
+	QString Item::connectionSignalID() const
 	{
 		if (m_connectionType == Metrology::ConnectionType::Unused)
 		{
 			return QString();
 		}
 
-		return m_connectionAppSignalID;
+		return m_connectionSignalID;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -558,7 +558,8 @@ namespace Measure
 			case Measure::ErrorType::Absolute:	str = QString::number(m_error[limitType][errorType], 'f', precision) + " " + m_unit[limitType];	break;
 			case Measure::ErrorType::Reduce:
 			case Measure::ErrorType::Relative:	str = QString::number(m_error[limitType][errorType], 'f', 3) + " %" ;							break;
-			default:							assert(0);
+			default:
+				assert(0);
 		}
 
 		return str;
@@ -627,7 +628,8 @@ namespace Measure
 			case Measure::ErrorType::Absolute:	str = QString::number(m_errorLimit[limitType][errorType], 'f', m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
 			case Measure::ErrorType::Reduce:
 			case Measure::ErrorType::Relative:	str = QString::number(m_errorLimit[limitType][errorType], 'f', 3) + " %";												break;
-			default:							assert(0);
+			default:
+				assert(0);
 		}
 
 		return str;
@@ -784,7 +786,8 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		pMeasurement = static_cast<LinearityItem*> (this) + index;	break;
 			case Measure::Type::Comparators:	pMeasurement = static_cast<ComparatorItem*> (this) + index;	break;
-			default:							assert(0);
+			default:
+				assert(0);
 		}
 
 		return pMeasurement;
@@ -844,7 +847,7 @@ namespace Measure
 
 		//
 		//
-		m_connectionAppSignalID = from.m_connectionAppSignalID;
+		m_connectionSignalID = from.m_connectionSignalID;
 		m_connectionType = from.m_connectionType;
 
 		m_appSignalID = from.m_appSignalID;
@@ -887,9 +890,10 @@ namespace Measure
 		//
 		switch(m_measureType)
 		{
-			case Measure::Type::Linearity:		*static_cast<LinearityItem*> (this) = *static_cast <LinearityItem*> (&from);		break;
+			case Measure::Type::Linearity:		*static_cast<LinearityItem*> (this) = *static_cast <LinearityItem*> (&from);	break;
 			case Measure::Type::Comparators:	*static_cast<ComparatorItem*> (this) = *static_cast <ComparatorItem*> (&from);	break;
-			default:							assert(0);
+			default:
+				assert(0);
 		}
 
 		return *this;
@@ -938,7 +942,8 @@ namespace Measure
 			case Metrology::ConnectionType::Input_C_Output_F:
 			case Metrology::ConnectionType::Input_Output:
 			case Metrology::ConnectionType::Tuning_Output:			fill_measure_output(ioParam);	break;
-			default:												assert(0);
+			default:
+				assert(0);
 		}
 	}
 
@@ -1026,7 +1031,7 @@ namespace Measure
 		// features
 		//
 
-		setConnectionAppSignalID(inParam.appSignalID());
+		setConnectionSignalID(inParam.customAppSignalID());
 		setConnectionType(connectionType);
 
 		setAppSignalID(inParam.appSignalID());
@@ -1034,17 +1039,19 @@ namespace Measure
 		setEquipmentID(inParam.equipmentID());
 		setCaption(inParam.caption());
 
+		Metrology::SignalLocation location = inParam.location();
+
 		if (inParam.location().moduleSerialNoID().isEmpty() == false)
 		{
 			Hash serialNumberModuleHash = calcHash(inParam.location().moduleSerialNoID());
 			const Metrology::SignalState& signalState = theSignalBase.signalState(serialNumberModuleHash);
 			if (signalState.valid() == true)
 			{
-				inParam.location().setModuleSerialNo(static_cast<int>(signalState.value()));
+				location.setModuleSerialNo(static_cast<int>(signalState.value()));
 			}
 		}
 
-		setLocation(inParam.location());
+		setLocation(location);
 
 		setCalibratorData(ioParam);
 
@@ -1158,7 +1165,7 @@ namespace Measure
 		// features
 		//
 
-		setConnectionAppSignalID(inParam.appSignalID());
+		setConnectionSignalID(inParam.customAppSignalID());
 		setConnectionType(connectionType);
 
 		setAppSignalID(outParam.appSignalID());
@@ -1166,17 +1173,19 @@ namespace Measure
 		setEquipmentID(outParam.equipmentID());
 		setCaption(outParam.caption());
 
+		Metrology::SignalLocation location = inParam.location();
+
 		if (inParam.location().moduleSerialNoID().isEmpty() == false)
 		{
 			Hash serialNumberModuleHash = calcHash(inParam.location().moduleSerialNoID());
-			Metrology::SignalState signalState = theSignalBase.signalState(serialNumberModuleHash);
+			const Metrology::SignalState& signalState = theSignalBase.signalState(serialNumberModuleHash);
 			if (signalState.valid() == true)
 			{
-				inParam.location().setModuleSerialNo(static_cast<int>(signalState.value()));
+				location.setModuleSerialNo(static_cast<int>(signalState.value()));
 			}
 		}
 
-		setLocation(inParam.location());
+		setLocation(location);
 
 		setCalibratorData(ioParam);
 
@@ -1292,7 +1301,7 @@ namespace Measure
 		// features
 		//
 
-		setConnectionAppSignalID(inParam.appSignalID());
+		setConnectionSignalID(inParam.customAppSignalID());
 		setConnectionType(connectionType);
 
 		setAppSignalID(outParam.appSignalID());
@@ -1300,17 +1309,19 @@ namespace Measure
 		setEquipmentID(outParam.equipmentID());
 		setCaption(outParam.caption());
 
+		Metrology::SignalLocation location = outParam.location();
+
 		if (outParam.location().moduleSerialNoID().isEmpty() == false)
 		{
 			Hash serialNumberModuleHash = calcHash(outParam.location().moduleSerialNoID());
 			Metrology::SignalState signalState = theSignalBase.signalState(serialNumberModuleHash);
 			if (signalState.valid() == true)
 			{
-				outParam.location().setModuleSerialNo(static_cast<int>(signalState.value()));
+				location.setModuleSerialNo(static_cast<int>(signalState.value()));
 			}
 		}
 
-		setLocation(outParam.location());
+		setLocation(location);
 
 		setCalibratorData(ioParam);
 
@@ -1575,7 +1586,6 @@ namespace Measure
 
 						default:
 							assert(0);
-							break;
 					}
 
 				}
@@ -1678,7 +1688,6 @@ namespace Measure
 
 						default:
 							assert(0);
-							break;
 					}
 
 				}
@@ -1716,14 +1725,12 @@ namespace Measure
 
 						default:
 							assert(0);
-							break;
 					}
 				}
 				break;
 
 			default:
 				assert(0);
-				break;
 		}
 
 		return uncertainty;
@@ -2025,7 +2032,8 @@ namespace Measure
 			case Metrology::ConnectionType::Input_Internal:
 			case Metrology::ConnectionType::Input_DP_Internal_F:
 			case Metrology::ConnectionType::Input_C_Internal_F:		fill_measure_internal(ioParam);	break;
-			default:												assert(0);
+			default:
+				assert(0);
 		}
 	}
 
@@ -2124,7 +2132,7 @@ namespace Measure
 		// features
 		//
 
-		setConnectionAppSignalID(inParam.appSignalID());
+		setConnectionSignalID(inParam.customAppSignalID());
 		setConnectionType(connectionType);
 
 		setAppSignalID(inParam.appSignalID());
@@ -2132,17 +2140,19 @@ namespace Measure
 		setEquipmentID(inParam.equipmentID());
 		setCaption(inParam.caption());
 
+		Metrology::SignalLocation location = inParam.location();
+
 		if (inParam.location().moduleSerialNoID().isEmpty() == false)
 		{
 			Hash serialNumberModuleHash = calcHash(inParam.location().moduleSerialNoID());
-			Metrology::SignalState signalState = theSignalBase.signalState(serialNumberModuleHash);
+			const Metrology::SignalState& signalState = theSignalBase.signalState(serialNumberModuleHash);
 			if (signalState.valid() == true)
 			{
-				inParam.location().setModuleSerialNo(static_cast<int>(signalState.value()));
+				location.setModuleSerialNo(static_cast<int>(signalState.value()));
 			}
 		}
 
-		setLocation(inParam.location());
+		setLocation(location);
 
 		setCalibratorData(ioParam);
 
@@ -2267,7 +2277,7 @@ namespace Measure
 		// features
 		//
 
-		setConnectionAppSignalID(inParam.appSignalID());
+		setConnectionSignalID(inParam.customAppSignalID());
 		setConnectionType(connectionType);
 
 		setAppSignalID(outParam.appSignalID());
@@ -2275,17 +2285,19 @@ namespace Measure
 		setEquipmentID(outParam.equipmentID());
 		setCaption(outParam.caption());
 
+		Metrology::SignalLocation location = inParam.location();
+
 		if (inParam.location().moduleSerialNoID().isEmpty() == false)
 		{
 			Hash serialNumberModuleHash = calcHash(inParam.location().moduleSerialNoID());
-			Metrology::SignalState signalState = theSignalBase.signalState(serialNumberModuleHash);
+			const Metrology::SignalState& signalState = theSignalBase.signalState(serialNumberModuleHash);
 			if (signalState.valid() == true)
 			{
-				inParam.location().setModuleSerialNo(static_cast<int>(signalState.value()));
+				location.setModuleSerialNo(static_cast<int>(signalState.value()));
 			}
 		}
 
-		setLocation(inParam.location());
+		setLocation(location);
 
 		setCalibratorData(ioParam);
 
@@ -2341,7 +2353,7 @@ namespace Measure
 			return QString("Unknown");
 		}
 
-		return qApp->translate("MetrologySignal.h", Metrology::CmpValueTypeCpation(m_cmpValueType).toUtf8());
+		return qApp->translate("MetrologySignal", Metrology::CmpValueTypeCpation(m_cmpValueType).toUtf8());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -2389,7 +2401,6 @@ namespace Measure
 
 			default:
 				assert(0);
-				break;
 		}
 	}
 
@@ -2559,7 +2570,8 @@ namespace Measure
 					{
 						case Measure::Type::Linearity:		data.pMeasurement = new LinearityItem[static_cast<quint64>(data.recordCount)];	break;
 						case Measure::Type::Comparators:	data.pMeasurement = new ComparatorItem[static_cast<quint64>(data.recordCount)];	break;
-						default:							assert(0);
+						default:
+							assert(0);
 					}
 
 					if (data.pMeasurement == nullptr)
@@ -2580,7 +2592,8 @@ namespace Measure
 						{
 							case Measure::Type::Linearity:		delete [] static_cast<LinearityItem*> (data.pMeasurement);	break;
 							case Measure::Type::Comparators:	delete [] static_cast<ComparatorItem*> (data.pMeasurement);	break;
-							default:							assert(0);
+							default:
+								assert(0);
 						}
 					}
 
@@ -2689,7 +2702,8 @@ namespace Measure
 			{
 				case Measure::Type::Linearity:		pMeasureAppend = new LinearityItem;		break;
 				case Measure::Type::Comparators:	pMeasureAppend = new ComparatorItem;	break;
-				default:							assert(0);								break;
+				default:
+					assert(0);
 			}
 
 			if (pMeasureAppend == nullptr)
@@ -2770,7 +2784,8 @@ namespace Measure
 			{
 				case Measure::Type::Linearity:		delete [] static_cast<LinearityItem*> (table.pMeasurement);		break;
 				case Measure::Type::Comparators:	delete [] static_cast<ComparatorItem*> (table.pMeasurement);	break;
-				default:							assert(0);
+				default:
+					assert(0);
 			}
 		}
 

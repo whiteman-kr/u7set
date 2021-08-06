@@ -1043,6 +1043,14 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeStringElement(EquipmentPropNames::EQUIPMENT_ID, equipmentID);
 
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1, cfgServiceID1);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+							 EquipmentPropNames::CFG_SERVICE_PORT1, cfgServiceIP1);
+
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID2, cfgServiceID2);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+							 EquipmentPropNames::CFG_SERVICE_PORT2, cfgServiceIP2);
+
 	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
 							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
 	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
@@ -1111,6 +1119,14 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 	RETURN_IF_FALSE(result);
 
 	result &= xml.readStringElement(EquipmentPropNames::EQUIPMENT_ID, &equipmentID, true);
+
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgServiceID1, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+									  EquipmentPropNames::CFG_SERVICE_PORT1, &cfgServiceIP1);
+
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID2, &cfgServiceID2, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+									  EquipmentPropNames::CFG_SERVICE_PORT2, &cfgServiceIP2);
 
 	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
 									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
@@ -1216,6 +1232,10 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 		TEST_PTR_RETURN_FALSE(log);
 		TEST_PTR_LOG_RETURN_FALSE(software, log);
 
+		const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
+
+		TEST_PTR_LOG_RETURN_FALSE(equipment, log);
+
 		bool result = true;
 
 		equipmentID = software->equipmentIdTemplate();
@@ -1246,6 +1266,9 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::SINGLE_LM_CONTROL, &singleLmControl, log);
 		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, log);
+
+		result &= getCfgServiceConnection(equipment, software, &cfgServiceID1, &cfgServiceIP1,
+										  &cfgServiceID2, &cfgServiceIP2, log);
 
 		// for a now tuningSimIP isn't read from equipment
 
@@ -1458,6 +1481,14 @@ bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1, cfgServiceID1);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+							 EquipmentPropNames::CFG_SERVICE_PORT1, cfgServiceIP1);
+
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID2, cfgServiceID2);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+							 EquipmentPropNames::CFG_SERVICE_PORT2, cfgServiceIP2);
+
 	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
 							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
 	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
@@ -1486,6 +1517,14 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 	result = startSettingsReading(xml);
 
 	RETURN_IF_FALSE(result);
+
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgServiceID1, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+									  EquipmentPropNames::CFG_SERVICE_PORT1, &cfgServiceIP1);
+
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID2, &cfgServiceID2, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+									  EquipmentPropNames::CFG_SERVICE_PORT2, &cfgServiceIP2);
 
 	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
 									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
@@ -1523,6 +1562,10 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 
 		TEST_PTR_RETURN_FALSE(log);
 		TEST_PTR_LOG_RETURN_FALSE(software, log);
+
+		const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
+
+		TEST_PTR_LOG_RETURN_FALSE(equipment, log);
 
 		bool result = true;
 
@@ -1562,6 +1605,9 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 		result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::ARCHIVE_SHORT_TERM_PERIOD, &shortTermArchivePeriod, log);
 		result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::ARCHIVE_LONG_TERM_PERIOD, &longTermArchivePeriod, log);
 		result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::ARCHIVE_LOCATION, &archiveLocation, log);
+
+		result &= getCfgServiceConnection(equipment, software, &cfgServiceID1, &cfgServiceIP1,
+										  &cfgServiceID2, &cfgServiceIP2, log);
 
 		RETURN_IF_FALSE(result);
 
@@ -1903,6 +1949,14 @@ bool MetrologySettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1, cfgServiceID1);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+							 EquipmentPropNames::CFG_SERVICE_PORT1, cfgServiceIP1);
+
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID2, cfgServiceID2);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+							 EquipmentPropNames::CFG_SERVICE_PORT2, cfgServiceIP2);
+
 	xml.writeStartElement(XmlElement::APP_DATA_SERVICE);
 
 	xml.writeBoolAttribute(XmlAttribute::APP_DATA_SERVICE_PROPERTY_IS_VALID1, appDataServicePropertyIsValid1);
@@ -1938,6 +1992,14 @@ bool MetrologySettings::readFromXml(XmlReadHelper& xml)
 	result = startSettingsReading(xml);
 
 	RETURN_IF_FALSE(result);
+
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgServiceID1, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+									  EquipmentPropNames::CFG_SERVICE_PORT1, &cfgServiceIP1);
+
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID2, &cfgServiceID2, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+									  EquipmentPropNames::CFG_SERVICE_PORT2, &cfgServiceIP2);
 
 	// AppDataService
 	//
@@ -2001,6 +2063,8 @@ bool MetrologySettings::readFromXml(XmlReadHelper& xml)
 		result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::APP_DATA_SERVICE_ID1, &appDataServiceID1, log);
 		result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::APP_DATA_SERVICE_ID2, &appDataServiceID2, log);
 
+		result &= getCfgServiceConnection(equipment, software, &cfgServiceID1, &cfgServiceIP1,
+										  &cfgServiceID2, &cfgServiceIP2, log);
 		RETURN_IF_FALSE(result);
 
 		if (appDataServiceID1.isEmpty() == true &&
@@ -2104,6 +2168,16 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 
 	//
 
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1, cfgServiceID1);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+							 EquipmentPropNames::CFG_SERVICE_PORT1, cfgServiceIP1);
+
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID2, cfgServiceID2);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+							 EquipmentPropNames::CFG_SERVICE_PORT2, cfgServiceIP2);
+
+	//
+
 	xml.writeStringElement(EquipmentPropNames::START_SCHEMA_ID, startSchemaId);
 	xml.writeStringElement(EquipmentPropNames::SCHEMA_TAGS, schemaTags);
 
@@ -2191,6 +2265,15 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 
 	RETURN_IF_FALSE(result);
 
+	//
+
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgServiceID1, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+									  EquipmentPropNames::CFG_SERVICE_PORT1, &cfgServiceIP1);
+
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID2, &cfgServiceID2, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+									  EquipmentPropNames::CFG_SERVICE_PORT2, &cfgServiceIP2);
 	//
 
 	result &= xml.findElement(EquipmentPropNames::START_SCHEMA_ID);
@@ -2318,11 +2401,18 @@ void MonitorSettings::clear()
 		TEST_PTR_RETURN_FALSE(log);
 		TEST_PTR_LOG_RETURN_FALSE(software, log);
 
+		const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
+
+		TEST_PTR_LOG_RETURN_FALSE(equipment, log);
+
 		bool result = true;
+
+		result &= getCfgServiceConnection(equipment, software, &cfgServiceID1, &cfgServiceIP1,
+										  &cfgServiceID2, &cfgServiceIP2, log);
 
 		// StartSchemaID
 		//
-		result = DeviceHelper::getStrProperty(software, EquipmentPropNames::START_SCHEMA_ID, &startSchemaId, log);
+		result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::START_SCHEMA_ID, &startSchemaId, log);
 
 		RETURN_IF_FALSE(result);
 
@@ -2638,6 +2728,18 @@ bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
+	//
+
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1, cfgServiceID1);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+							 EquipmentPropNames::CFG_SERVICE_PORT1, cfgServiceIP1);
+
+	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID2, cfgServiceID2);
+	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+							 EquipmentPropNames::CFG_SERVICE_PORT2, cfgServiceIP2);
+
+	//
+
 	xml.writeStartElement(XmlElement::TUNING_SERVICE);
 
 	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tuningServiceID);
@@ -2681,6 +2783,14 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 	result = startSettingsReading(xml);
 
 	RETURN_IF_FALSE(result);
+
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgServiceID1, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
+									  EquipmentPropNames::CFG_SERVICE_PORT1, &cfgServiceIP1);
+
+	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID2, &cfgServiceID2, true);
+	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
+									  EquipmentPropNames::CFG_SERVICE_PORT2, &cfgServiceIP2);
 
 	result &= xml.findElement(XmlElement::TUNING_SERVICE);
 
@@ -2843,12 +2953,6 @@ bool TuningClientSettings::connectionChanged(const TuningClientSettings& src) co
 
 		// ConfigurationService connections checking
 		//
-		QString cfgServiceID1;
-		QString cfgServiceID2;
-
-		HostAddressPort cfgServiceIP1;
-		HostAddressPort cfgServiceIP2;
-
 		result = getCfgServiceConnection(	equipment,
 											software,
 											&cfgServiceID1, &cfgServiceIP1,

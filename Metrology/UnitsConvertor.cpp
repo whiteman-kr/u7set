@@ -558,7 +558,8 @@ double UnitsConvertor::conversionDegree(double val, const UnitsConvertType& conv
 	{
 		case UnitsConvertType::CelsiusToFahrenheit:	retVal = (val * (9.0 / 5.0)) + 32;		break;
 		case UnitsConvertType::FahrenheitToCelsius:	retVal = ((val - 32) * (5.0 / 9.0));	break;
-		default:									assert(0);
+		default:
+			assert(0);
 	}
 
 	return retVal;
@@ -711,7 +712,6 @@ double UnitsConvertor::conversionByConnection(double val, int connectionType, co
 
 		default:
 			Q_ASSERT(0);		// undefinded ConversionDirection
-			break;
 	}
 
 	return retVal;
@@ -906,7 +906,6 @@ UnitsConvertModule UnitsConvertor::getModuleType(int unitID, int sensorType)
 
 		default:
 			assert(0);
-			break;
 	}
 
 	return moduleType;

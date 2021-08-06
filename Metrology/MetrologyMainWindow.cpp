@@ -146,6 +146,11 @@ void MainWindow::createActions()
 	m_pCopyMeasureAction->setToolTip(tr("Copy of the measurements"));
 	connect(m_pCopyMeasureAction, &QAction::triggered, this, &MainWindow::copyMeasure);
 
+	m_pCopyCellMeasureAction = new QAction(tr("Copy cell"), this);
+	m_pCopyCellMeasureAction->setIcon(QIcon(":/icons/Copy.png"));
+	m_pCopyCellMeasureAction->setToolTip(tr("Copy cell of the measurements"));
+	connect(m_pCopyCellMeasureAction, &QAction::triggered, this, &MainWindow::copyCellMeasure);
+
 	m_pRemoveMeasureAction = new QAction(tr("&Delete"), this);
 	m_pRemoveMeasureAction->setShortcut(Qt::CTRL + Qt::Key_Delete);
 	m_pRemoveMeasureAction->setIcon(QIcon(":/icons/Remove.png"));
@@ -781,6 +786,7 @@ void MainWindow::createContextMenu()
 	m_pContextMenu = new QMenu(this);
 
 	m_pContextMenu->addAction(m_pCopyMeasureAction);
+	m_pContextMenu->addAction(m_pCopyCellMeasureAction);
 	m_pContextMenu->addSeparator();
 	m_pContextMenu->addAction(m_pRemoveMeasureAction);
 
@@ -1104,7 +1110,6 @@ void MainWindow::setMeasureType(int measureType)
 
 		default:
 			assert(0);
-			break;
 	}
 
 	//
@@ -1251,7 +1256,7 @@ bool MainWindow::signalIsMeasured(const MeasureSignal& activeSignal, QString& si
 
 	switch (m_connectionType)
 	{
-		case Metrology::ConnectionType::Unused:	ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);	break;
+		case Metrology::ConnectionType::Unused:	ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);		break;
 		default:								ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);	break;
 	}
 
@@ -1298,13 +1303,12 @@ bool MainWindow::signalIsMeasured(const MeasureSignal& activeSignal, QString& si
 
 			default:
 				assert(0);
-				break;
 		}
 
 		m_measureBase.updateStatisticsItem(m_measureType, si);
 		if (si.isMeasured() == true)
 		{
-			signalID.append(pMetrologySignal->param().appSignalID() + "\n");
+			signalID.append(pMetrologySignal->param().customAppSignalID() + "\n");
 
 			isMeasured = true;
 		}
@@ -1567,7 +1571,8 @@ void MainWindow::exportMeasure()
 	{
 		case Measure::Type::Linearity:		fileName = "Linearity";		break;
 		case Measure::Type::Comparators:	fileName = "Comparators";	break;
-		default:							assert(0);
+		default:
+			assert(0);
 	}
 
 	if (fileName.isEmpty() == true)
@@ -1590,6 +1595,19 @@ void MainWindow::copyMeasure()
 	}
 
 	pView->copy();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::copyCellMeasure()
+{
+	Measure::View* pView = activeMeasureView();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	pView->copyCell();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1709,8 +1727,8 @@ void MainWindow::showConnectionList()
 	//
 	loadOnToolBar_Connection();
 
-	theSignalBase.statistics().createSignalList();
-	theSignalBase.statistics().createComparatorList();
+	theSignalBase.statistics().createSignalList(theOptions.module().measureShownOnSchemas());
+	theSignalBase.statistics().createComparatorList(theOptions.module().measureShownOnSchemas());
 
 	if (m_pStatisticsPanel == nullptr)
 	{
@@ -1859,8 +1877,20 @@ void MainWindow::showOptions()
 
 	// reconnect ConfigSocket
 	//
+	bool reconnectCS = false;
+
 	if (options.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) ||
 		options.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY))
+	{
+		reconnectCS = true;
+	}
+
+	if (options.module().measureShownOnSchemas() != theOptions.module().measureShownOnSchemas())
+	{
+		reconnectCS = true;
+	}
+
+	if (reconnectCS == true)
 	{
 		stopSignalSocket();
 		stopTuningSocket();
@@ -2867,7 +2897,6 @@ void MainWindow::measureThreadStoped()
 				break;
 			default:
 				assert(0);
-				break;
 		}
 	}
 
@@ -2956,7 +2985,6 @@ void MainWindow::measureThreadMsgBox(int type, QString text, int* result)
 
 		default:
 			assert(0);
-			break;
 	}
 }
 

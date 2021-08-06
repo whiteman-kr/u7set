@@ -85,6 +85,7 @@ private:
 							// menu - Edit
 							//
 	QAction*				m_pCopyMeasureAction = nullptr;
+	QAction*				m_pCopyCellMeasureAction = nullptr;
 	QAction*				m_pRemoveMeasureAction = nullptr;
 	QAction*				m_pSelectAllMeasureAction = nullptr;
 
@@ -250,6 +251,7 @@ private slots:
 	// menu - Edit
 	//
 	void					copyMeasure();
+	void					copyCellMeasure();
 	void					removeMeasure();
 	void					selectAllMeasure();
 

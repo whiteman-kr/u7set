@@ -945,7 +945,7 @@ void MeasureThread::measureCompratorsInSeries()
 															.arg(cmp + 1)
 															.arg(static_cast<int>(!activeDiscreteOutputState));
 
-						strInvalidComaprator.append(tr("%1\n").arg(param.appSignalID()));
+						strInvalidComaprator.append(tr("%1\n").arg(param.customAppSignalID()));
 
 						strInvalidComaprator.append(tr(	"\nDo you want to repeat the preparation process "
 															"in order to switch the comparator "
@@ -1526,7 +1526,7 @@ void MeasureThread::measureCompratorsInParallel()
 					}
 					else
 					{
-						strInvalidComaprators.append(tr("%1\n").arg(param.appSignalID()));
+						strInvalidComaprators.append(tr("%1\n").arg(param.customAppSignalID()));
 					}
 				}
 

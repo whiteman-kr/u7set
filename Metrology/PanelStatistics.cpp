@@ -87,8 +87,8 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 
 		switch (column)
 		{
-			case STATISTICS_COLUMN_APP_ID:				result = Qt::AlignLeft;		break;
 			case STATISTICS_COLUMN_CUSTOM_ID:			result = Qt::AlignLeft;		break;
+			case STATISTICS_COLUMN_APP_ID:				result = Qt::AlignLeft;		break;
 			case STATISTICS_COLUMN_EQUIPMENT_ID:		result = Qt::AlignLeft;		break;
 			case STATISTICS_COLUMN_CAPTION:				result = Qt::AlignLeft;		break;
 			case STATISTICS_COLUMN_CMP_VALUE:			result = Qt::AlignLeft;		break;
@@ -105,8 +105,8 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 			case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_MEASURE_COUNT:		result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_STATE:				result = Qt::AlignCenter;	break;
-
-			default:									assert(0);
+			default:
+				assert(0);
 		}
 
 		return result;
@@ -236,8 +236,8 @@ QString StatisticsTable::text(int row, int column, const StatisticsItem& si) con
 
 	switch (column)
 	{
-		case STATISTICS_COLUMN_APP_ID:				result = visible ? param.appSignalID() : QString();											break;
 		case STATISTICS_COLUMN_CUSTOM_ID:			result = visible ? param.customAppSignalID() : QString();									break;
+		case STATISTICS_COLUMN_APP_ID:				result = visible ? param.appSignalID() : QString();											break;
 		case STATISTICS_COLUMN_EQUIPMENT_ID:		result = visible ? param.equipmentID() : QString();											break;
 		case STATISTICS_COLUMN_CAPTION:				result = visible ? param.caption() : QString();												break;
 		case STATISTICS_COLUMN_CMP_VALUE:			result = comparatorValue;																	break;
@@ -254,7 +254,8 @@ QString StatisticsTable::text(int row, int column, const StatisticsItem& si) con
 		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticsBase", si.connectionTypeStr().trimmed().toUtf8());		break;
 		case STATISTICS_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();																break;
 		case STATISTICS_COLUMN_STATE:				result = qApp->translate("StatisticsBase", si.stateStr().toUtf8());							break;
-		default:									assert(0);
+		default:
+			assert(0);
 	}
 
 	return result;
@@ -338,7 +339,7 @@ void PanelStatistics::createInterface()
 
 	m_pStatisticsWindow->installEventFilter(this);
 
-	//
+	// Menu
 	//
 	m_pMenuBar = new QMenuBar(m_pStatisticsWindow);
 	m_pSignalMenu = new QMenu(tr("&Results"), m_pStatisticsWindow);
@@ -348,14 +349,13 @@ void PanelStatistics::createInterface()
 	m_pExportAction = m_pSignalMenu->addAction(tr("&Export ..."));
 	m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
 
-	m_pFindAction = m_pEditMenu->addAction(tr("&Find ..."));
-	m_pFindAction->setIcon(QIcon(":/icons/Find.png"));
-
 	m_pEditMenu->addSeparator();
 
 	m_pCopyAction = m_pEditMenu->addAction(tr("&Copy"));
 	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
-	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
+
+	m_pCopyCellAction = m_pEditMenu->addAction(tr("Copy cell"));
+	m_pCopyCellAction->setIcon(QIcon(":/icons/Copy.png"));
 
 	m_pSelectAllAction = m_pEditMenu->addAction(tr("Select &All"));
 	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
@@ -367,12 +367,19 @@ void PanelStatistics::createInterface()
 
 	m_pEditMenu->addSeparator();
 
+	m_pShowSearchToolBarAction = m_pViewMenu->addAction(tr("Show search panel"));
+	m_pShowSearchToolBarAction->setCheckable(true);
+	m_pShowSearchToolBarAction->setChecked(true);
+
+	m_pViewMenu->addSeparator();
+
 	m_pViewGotoMenu = new QMenu(tr("Go to next"), m_pStatisticsWindow);
+
 	m_pGotoNextNotMeasuredAction = m_pViewGotoMenu->addAction(tr("Not measured"));
 	m_pGotoNextInvalidAction = m_pViewGotoMenu->addAction(tr("Invalid"));
 
 	m_pViewMenu->addMenu(m_pViewGotoMenu);
-	m_pViewMenu->addSeparator();
+
 
 	m_pMenuBar->addMenu(m_pSignalMenu);
 	m_pMenuBar->addMenu(m_pEditMenu);
@@ -380,20 +387,43 @@ void PanelStatistics::createInterface()
 
 	connect(m_pExportAction, &QAction::triggered, this, &PanelStatistics::exportSignal);
 
-	connect(m_pFindAction, &QAction::triggered, this, &PanelStatistics::find);
 	connect(m_pCopyAction, &QAction::triggered, this, &PanelStatistics::copy);
+	connect(m_pCopyCellAction, &QAction::triggered, this, &PanelStatistics::copyCell);
 	connect(m_pSelectAllAction, &QAction::triggered, this, &PanelStatistics::selectAll);
 	connect(m_pSignalPropertyAction, &QAction::triggered, this, &PanelStatistics::onProperty);
 
+	connect(m_pShowSearchToolBarAction, &QAction::triggered, this, &PanelStatistics::showSearchToolBar);
 	connect(m_pGotoNextNotMeasuredAction, &QAction::triggered, this, &PanelStatistics::gotoNextNotMeasured);
 	connect(m_pGotoNextInvalidAction, &QAction::triggered, this, &PanelStatistics::gotoNextInvalid);
 
 	m_pStatisticsWindow->setMenuBar(m_pMenuBar);
 
+	// ToolBar
 	//
+	m_pToolBar = new QToolBar(m_pStatisticsWindow);
+
+	m_pFindTextEdit = new QLineEdit(QString(), m_pToolBar);
+	m_pFindTextEdit->setPlaceholderText(tr("Search Text"));
+	m_pFindTextEdit->setClearButtonEnabled(true);
+	connect(m_pFindTextEdit, &QLineEdit::textChanged, this, &PanelStatistics::onFindTextChanged);
+
+	m_pToolBar->addWidget(m_pFindTextEdit);
+	QAction* findPreviousAction = m_pToolBar->addAction(QIcon(":/icons/PreviousFind.png"), tr("Find previous"));
+	connect(findPreviousAction, &QAction::triggered, this, &PanelStatistics::onFindPrevious);
+
+	QAction* findNextAction = m_pToolBar->addAction(QIcon(":/icons/NextFind.png"), tr("Find next"));
+	connect(findNextAction, &QAction::triggered, this, &PanelStatistics::onFindNext);
+
+	m_pToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+	m_pToolBar->setWindowTitle(tr("Search text ToolBar"));
+	m_pStatisticsWindow->addToolBarBreak(Qt::TopToolBarArea);
+	m_pStatisticsWindow->addToolBar(m_pToolBar);
+
+	// View
 	//
 	m_pView = new QTableView(m_pStatisticsWindow);
 	m_pView->setModel(&m_signalTable);
+
 	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
@@ -465,13 +495,13 @@ void PanelStatistics::createContextMenu()
 	m_pContextMenu = new QMenu(tr(""), m_pStatisticsWindow);
 
 	m_pSelectSignalForMeasure = m_pContextMenu->addAction(tr("&Select signal for measuring"));
+	m_pSelectSignalForMeasure->setIcon(QIcon(":/icons/SelectForMeasure.png"));
 	m_pContextMenu->addSeparator();
-	m_pFindSignalInStatisticsList = m_pContextMenu->addAction(tr("&Find signal in the statistics list ..."));
-	m_pFindSignalInStatisticsList->setIcon(QIcon(":/icons/Find.png"));
 	m_pFindSignalInMeasureList = m_pContextMenu->addAction(tr("&Find signal in the measure list ..."));
 	m_pFindSignalInMeasureList->setIcon(QIcon(":/icons/Find.png"));
 	m_pContextMenu->addSeparator();
 	m_pContextMenu->addAction(m_pCopyAction);
+	m_pContextMenu->addAction(m_pCopyCellAction);
 	m_pContextMenu->addSeparator();
 	m_pContextMenu->addAction(m_pSignalPropertyAction);
 
@@ -481,8 +511,13 @@ void PanelStatistics::createContextMenu()
 	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &PanelStatistics::onContextMenu);
 
 	connect(m_pSelectSignalForMeasure, &QAction::triggered, this, &PanelStatistics::selectSignalForMeasure);
-	connect(m_pFindSignalInStatisticsList, &QAction::triggered, this, &PanelStatistics::findSignalInStatisticsList);
 	connect(m_pFindSignalInMeasureList, &QAction::triggered, this, &PanelStatistics::findSignalInMeasureList);
+
+	//
+	//
+	QFont f = m_pSelectSignalForMeasure->font();
+	f.setBold(true);
+	m_pSelectSignalForMeasure->setFont(f);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -538,6 +573,7 @@ void PanelStatistics::setViewFont(const QFont& font)
 	}
 
 	m_pView->setFont(font);
+
 	QSize cellSize = QFontMetrics(font).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 }
@@ -637,7 +673,7 @@ void PanelStatistics::activeSignalChanged(const MeasureSignal& activeSignal)
 		return;
 	}
 
-	m_pView->setCurrentIndex(m_pView->model()->index(foundIndex, 0));
+	m_pView->setCurrentIndex(m_pView->model()->index(foundIndex, firstVisibleColumn()));
 }
 
 
@@ -724,7 +760,7 @@ void PanelStatistics::updateVisibleColunm()
 		hideColumn(c, false);
 	}
 
-	hideColumn(STATISTICS_COLUMN_CUSTOM_ID, true);
+	hideColumn(STATISTICS_COLUMN_APP_ID, true);
 	hideColumn(STATISTICS_COLUMN_EQUIPMENT_ID, true);
 	hideColumn(STATISTICS_COLUMN_CMP_VALUE, m_measureType != Measure::Type::Comparators);
 	hideColumn(STATISTICS_COLUMN_CMP_NO, m_measureType != Measure::Type::Comparators);
@@ -760,6 +796,33 @@ void PanelStatistics::hideColumn(int column, bool hide)
 		m_pView->showColumn(column);
 		m_pColumnAction[column]->setChecked(true);
 	}
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int PanelStatistics::firstVisibleColumn()
+{
+	if (m_pView == nullptr)
+	{
+		return 0;
+	}
+
+	int visibleColumn = 0;
+
+	for(int column = 0; column < STATISTICS_COLUMN_COUNT; column++)
+	{
+		if (m_pView->isColumnHidden(column) == true)
+		{
+			continue;
+		}
+
+		visibleColumn = column;
+
+		break;
+	}
+
+	return visibleColumn;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -803,7 +866,7 @@ void PanelStatistics::selectSignalForMeasure()
 				 "For example, type of connection: \"Input\" -> \"%2\".\n\n"
 				 "To create a new connection between signals, select \"View\"->\"Metrology connections...\"\n\n"
 				 "Do you want to create new connection now?")
-				.arg(si.signal()->param().appSignalID())
+				.arg(si.signal()->param().customAppSignalID())
 				.arg(qApp->translate("MetrologySignal", si.signal()->param().signalTypeStr().toUtf8()));
 
 		int result = QMessageBox::question(this, windowTitle(), str);
@@ -828,8 +891,8 @@ void PanelStatistics::selectSignalForMeasure()
 //			return;
 //		}
 
-		theSignalBase.statistics().createSignalList();
-		theSignalBase.statistics().createComparatorList();
+		theSignalBase.statistics().createSignalList(theOptions.module().measureShownOnSchemas());
+		theSignalBase.statistics().createComparatorList(theOptions.module().measureShownOnSchemas());
 
 		updateList();
 
@@ -863,7 +926,6 @@ void PanelStatistics::selectSignalForMeasure()
 
 		default:
 			assert(0);
-			break;
 	}
 
 	if (pSignal == nullptr || pSignal->param().isValid() == false)
@@ -987,13 +1049,6 @@ void PanelStatistics::selectSignalForMeasure()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelStatistics::findSignalInStatisticsList()
-{
-	find();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void PanelStatistics::findSignalInMeasureList()
 {
 	int statisticItemIndex = m_pView->currentIndex().row();
@@ -1017,23 +1072,23 @@ void PanelStatistics::findSignalInMeasureList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelStatistics::find()
+void PanelStatistics::copy()
+{
+	CopyData copyData(m_pView, false);
+	copyData.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelStatistics::copyCell()
 {
 	if (m_pView == nullptr)
 	{
 		return;
 	}
 
-	FindData* dialog = new FindData(m_pView);
-	dialog->exec();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void PanelStatistics::copy()
-{
-	CopyData copyData(m_pView, false);
-	copyData.exec();
+	QClipboard* clipboard = QApplication::clipboard();
+	clipboard->setText(m_pView->model()->data(m_pView->currentIndex()).toString());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1095,8 +1150,24 @@ void PanelStatistics::onProperty()
 
 		default:
 			assert(0);
-			break;
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelStatistics::showSearchToolBar()
+{
+	if (m_pToolBar == nullptr)
+	{
+		return;
+	}
+
+	if (m_pShowSearchToolBarAction == nullptr)
+	{
+		return;
+	}
+
+	m_pToolBar->setVisible(m_pShowSearchToolBarAction->isChecked());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1132,7 +1203,7 @@ void PanelStatistics::gotoNextNotMeasured()
 		return;
 	}
 
-	m_pView->setCurrentIndex(m_pView->model()->index(foundIndex, 0));
+	m_pView->setCurrentIndex(m_pView->model()->index(foundIndex, firstVisibleColumn()));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1168,7 +1239,7 @@ void PanelStatistics::gotoNextInvalid()
 		return;
 	}
 
-	m_pView->setCurrentIndex(m_pView->model()->index(foundIndex, 0));
+	m_pView->setCurrentIndex(m_pView->model()->index(foundIndex, firstVisibleColumn()));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1227,6 +1298,142 @@ void PanelStatistics::onColumnAction(QAction* action)
 
 			break;
 		}
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelStatistics::onListDoubleClicked(const QModelIndex&)
+{
+	selectSignalForMeasure();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int PanelStatistics::findText(int startRow, bool reverseFind)
+{
+	if (m_pView == nullptr)
+	{
+		return - 1;
+	}
+
+	int rowCount = m_pView->model()->rowCount();
+	int columnCount = m_pView->model()->columnCount();
+
+	if (rowCount == 0 || columnCount == 0)
+	{
+		return -1;
+	}
+
+	QString findText = m_pFindTextEdit->text();
+	if (findText.isEmpty() == true)
+	{
+		return -1;
+	}
+
+	int foundRow = -1;
+	int currentRow = startRow;
+
+	while(foundRow == -1)
+	{
+		if (reverseFind == false)
+		{
+			if (currentRow > rowCount)
+			{
+				break;
+			}
+
+			currentRow ++;
+		}
+		else
+		{
+			if (currentRow < 0)
+			{
+				break;
+			}
+
+			currentRow --;
+		}
+
+		for(int column = 0; column < columnCount; column++)
+		{
+			if (m_pView->isColumnHidden(column) == true)
+			{
+				continue;
+			}
+
+			QString text = m_pView->model()->data(m_pView->model()->index(currentRow, column)).toString();
+
+			if (text.contains(findText, Qt::CaseInsensitive) == false)
+			{
+				continue;
+			}
+
+			foundRow = currentRow;
+
+			break;
+		}
+	}
+
+	return foundRow;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelStatistics::onFindTextChanged(const QString& text)
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	m_pView->clearSelection();
+
+	if (text.isEmpty() == true)
+	{
+		return;
+	}
+
+	int foundRow = findText(-1, false);
+	if (foundRow != -1)
+	{
+		m_pView->setCurrentIndex(m_pView->model()->index(foundRow, firstVisibleColumn()));
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelStatistics::onFindPrevious()
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	int startRow = m_pView->currentIndex().row();
+
+	int foundRow = findText(startRow, true);
+	if (foundRow != -1)
+	{
+		m_pView->setCurrentIndex(m_pView->model()->index(foundRow, firstVisibleColumn()));
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelStatistics::onFindNext()
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	int startRow = m_pView->currentIndex().row();
+
+	int foundRow = findText(startRow, false);
+	if (foundRow != -1)
+	{
+		m_pView->setCurrentIndex(m_pView->model()->index(foundRow, firstVisibleColumn()));
 	}
 }
 

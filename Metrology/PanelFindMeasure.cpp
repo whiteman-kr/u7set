@@ -123,7 +123,8 @@ QString FindMeasureTable::text(int row, int column) const
 	{
 		case FIND_MEASURE_COLUMN_ROW:	result = QString::number(item.row() + 1);	break;
 		case FIND_MEASURE_COLUMN_TEXT:	result = item.text();						break;
-		default:						assert(0);
+		default:
+			assert(0);
 	}
 
 	return result;
@@ -172,7 +173,7 @@ void PanelFindMeasure::createInterface()
 	m_findTextEdit = new QLineEdit(m_findText, toolBar);
 	m_findTextEdit->setPlaceholderText(tr("Search Text"));
 	m_findTextEdit->setCompleter(m_findCompleter.completer());
-	//m_findTextEdit->setClearButtonEnabled(true);
+	m_findTextEdit->setClearButtonEnabled(true);
 
 	toolBar->addWidget(m_findTextEdit);
 	QAction* action = toolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));

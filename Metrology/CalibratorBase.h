@@ -16,6 +16,7 @@
 #include <QTimer>
 #include <QTableWidget>
 #include <QProgressBar>
+#include <QClipboard>
 
 #include "Calibrator.h"
 #include "CalibratorManager.h"
@@ -99,6 +100,7 @@ private:
 	QAction* m_pManageAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 	QAction* m_pCopyAction = nullptr;
+	QAction* m_pCopyCellAction = nullptr;
 
 	QTableWidget* m_pCalibratorView = nullptr;
 	QProgressBar* m_pCalibratorProgress = nullptr;
@@ -130,6 +132,7 @@ public slots:
 	void onSettings();							// Slot of calibrator menu - Edit setting
 	void onSettings(int row, int);				// Slot for edit serial port and type of calibrator
 	void onCopy();								// Slot of calibrator menu - Copy serail number
+	void onCopyCell();							// Slot of calibrator menu - Copy serail number
 	void onContextMenu(QPoint);					// Slot of context menu
 
 	void onCalibratorConnected();				// Slots events from calibrator

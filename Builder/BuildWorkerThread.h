@@ -149,7 +149,7 @@ namespace Builder
 				{
 					.func = &BuildWorkerThread::taskGenerationModulesConfiguration,
 					.name = "Modules Configuration Generation",
-					.breakOnFailed = false
+					.breakOnFailed = true
 				},
 				{
 					.func = &BuildWorkerThread::taskGenerationBitstreamFile,

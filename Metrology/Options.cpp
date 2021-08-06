@@ -567,6 +567,7 @@ void ModuleOption::load()
 	m_measureInterInsteadIn = s.value(QString("%1MeasureInterInsteadIn").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_measureLinAndCmp = s.value(QString("%1MeasureLinAndCmp").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_measureEntireModule = s.value(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), false).toBool();
+	m_measureShownOnSchemas = s.value(QString("%1MeasureShownOnSchemas").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), true).toBool();
 
 	m_maxInputCount = s.value(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), Metrology::InputCount).toInt();
@@ -583,6 +584,7 @@ void ModuleOption::save()
 	s.setValue(QString("%1MeasureInterInsteadIn").arg(MODULE_OPTIONS_KEY), m_measureInterInsteadIn);
 	s.setValue(QString("%1MeasureLinAndCmp").arg(MODULE_OPTIONS_KEY), m_measureLinAndCmp);
 	s.setValue(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), m_measureEntireModule);
+	s.setValue(QString("%1MeasureShownOnSchemas").arg(MODULE_OPTIONS_KEY), m_measureShownOnSchemas);
 	s.setValue(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), m_warningIfMeasured);
 
 	s.setValue(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), m_maxInputCount);
@@ -597,6 +599,7 @@ ModuleOption& ModuleOption::operator=(const ModuleOption& from)
 	m_measureInterInsteadIn = from.m_measureInterInsteadIn;
 	m_measureLinAndCmp = from.m_measureLinAndCmp;
 	m_measureEntireModule = from.m_measureEntireModule;
+	m_measureShownOnSchemas = from.m_measureShownOnSchemas;
 	m_warningIfMeasured = from.m_warningIfMeasured;
 
 	m_maxInputCount = from.m_maxInputCount;
@@ -1007,7 +1010,7 @@ void MeasureViewOption::load()
 				}
 
 				QString caption = Measure::TypeCaption(measureType);
-				QString language = qApp->translate("Options", LanguageTypeCaption(languageType).toUtf8());
+				QString language = LanguageTypeCaption(languageType);
 
 				m_column[measureType][languageType][column].setTitle(s.value(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.title()).toString());
 				m_column[measureType][languageType][column].setWidth(s.value(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.width()).toInt());
@@ -1053,7 +1056,7 @@ void MeasureViewOption::save()
 				}
 
 				QString caption = Measure::TypeCaption(measureType);
-				QString language = qApp->translate("Options", LanguageTypeCaption(languageType).toUtf8());
+				QString language = LanguageTypeCaption(languageType);
 
 				s.setValue(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.title());
 				s.setValue(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.width());
@@ -1383,6 +1386,27 @@ QString LanguageTypeCaption(int type)
 	{
 		case LanguageType::English:	caption = QT_TRANSLATE_NOOP("Options", "English");	break;
 		case LanguageType::Russian:	caption = QT_TRANSLATE_NOOP("Options", "Russian");	break;
+		default:
+			Q_ASSERT(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return caption;
+};
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+QString SignalIDTypeCaption(int type)
+{
+	QString caption;
+
+	switch (type)
+	{
+		case SignalIDType::CustomID:	caption = QT_TRANSLATE_NOOP("Options", "SignalID");		break;
+		case SignalIDType::AppSignalID:	caption = QT_TRANSLATE_NOOP("Options", "AppSignalID");	break;
+		case SignalIDType::EquipmentID:	caption = QT_TRANSLATE_NOOP("Options", "EquipmentID");	break;
 		default:
 			Q_ASSERT(0);
 			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
