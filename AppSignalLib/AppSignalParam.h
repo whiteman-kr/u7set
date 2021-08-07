@@ -454,7 +454,7 @@ public:
 	static const int NO_UNIT_ID = 1;
 
 private:
-	Hash m_hash = 0;					// Hash from m_appSignalId
+	Hash m_hash = UNDEFINED_HASH;				// Hash from m_appSignalId
 	QString m_appSignalId;
 	QString m_customSignalId;
 	QString m_caption;
