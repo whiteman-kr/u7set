@@ -25,7 +25,7 @@ ChooseUfbDialog::ChooseUfbDialog(const std::vector<std::shared_ptr<VFrame30::Ufb
 	connect(ui->quickSearch, &QLineEdit::textChanged, this, &ChooseUfbDialog::fillTree);
 	connect(ui->ufbElements, &QTreeWidget::itemSelectionChanged, this, &ChooseUfbDialog::itemSelectionChanged);
 
-	connect(ui->ok, &QPushButton::clicked, this, &ChooseUfbDialog::accept);
+	connect(ui->ok, &QPushButton::clicked, this, &ChooseUfbDialog::okPressed);
 	connect(ui->cancel, &QPushButton::clicked, this, &ChooseUfbDialog::reject);
 	connect(ui->ufbElements, &QTreeWidget::doubleClicked, this, &ChooseUfbDialog::itemDoubleClicked);
 
@@ -162,6 +162,18 @@ void ChooseUfbDialog::itemDoubleClicked(QModelIndex index)
 
 			break;
 		}
+	}
+
+	return;
+}
+
+void ChooseUfbDialog::okPressed()
+{
+	auto selected = ui->ufbElements->selectionModel()->selectedIndexes();
+
+	if (selected.empty() == false)
+	{
+		itemDoubleClicked(selected.front());
 	}
 
 	return;

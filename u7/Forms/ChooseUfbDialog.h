@@ -21,6 +21,7 @@ private:
 	void fillTree();
 	void itemSelectionChanged();
 	void itemDoubleClicked(QModelIndex index);
+	void okPressed();
 
 public:
 	std::shared_ptr<VFrame30::UfbSchema> result();
