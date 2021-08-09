@@ -2091,11 +2091,11 @@ namespace Builder
 			return false;
 		}
 
-		int timeout100msTimer = timeout < 0 ?
+		qint64 timeout100msTimer = timeout < 0 ?
 									36000000 :	// Some big number (around 1000h)
 									timeout / 100 + 1;
 
-		for (int wtm = 0; wtm < timeout100msTimer; wtm ++)
+		for (qint64 wtm = 0; wtm < timeout100msTimer; wtm ++)
 		{
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{

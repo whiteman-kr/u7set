@@ -179,13 +179,10 @@ namespace Sim
 		// Load Software - file /Common/Software.xml
 		//
 		{
-			QString softwareFileName = buildPath + Directory::COMMON + "/" + File::SOFTWARE_XML;
-			bool ok = m_software.loadSoftwareXml(softwareFileName);
+			bool ok = m_software.load(buildPath);
 
 			if (ok == false)
 			{
-				m_log.writeError(QObject::tr("Load sofware description error, file %1 not found or corrupted").arg(softwareFileName));
-
 				clearImpl();
 				return false;
 			}

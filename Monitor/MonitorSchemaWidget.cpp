@@ -78,6 +78,10 @@ void MonitorSchemaWidget::createActions()
 
 void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 {
+	// Reset highlights
+	//
+	clientSchemaView()->setHighlightIds({});
+
 	// Signals items
 	//
 	std::vector<SchemaItemPtr> items = itemsUnderCursor(pos);
@@ -243,9 +247,11 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 						}
 					};
 
-			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
+			QAction* a = schemasSubMenu->addAction(schemaId);
 
-			QAction* a = schemasSubMenu->addAction(actionCaption);
+			a->setCheckable(true);
+			a->setChecked(schema()->schemaId() == schemaId);
+
 			connect(a, &QAction::triggered, this, f);
 		}
 
