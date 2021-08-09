@@ -331,15 +331,15 @@ void EquipmentTabPage::CreateActions()
 	m_inOutsToSignals->setStatusTip(tr("Add intputs/outputs to application logic signals..."));
 	m_inOutsToSignals->setEnabled(false);
 	//m_inOutsToSignals->setVisible(false);
-	connect(m_inOutsToSignals, &QAction::triggered, m_equipmentView, &EquipmentView::addInOutsToSignals);
+	connect(m_inOutsToSignals, &QAction::triggered, m_equipmentView, QOverload<>::of(&EquipmentView::addInOutsToSignals));
 
 	m_showAppSignals = new QAction(tr("Show Application Signals"), this);
 	m_showAppSignals->setStatusTip(tr("Show application signals for object and all its children"));
 	m_showAppSignals->setEnabled(false);
-	connect(m_showAppSignals, &QAction::triggered, m_equipmentView, &EquipmentView::showAppSignals);
+	connect(m_showAppSignals, &QAction::triggered, m_equipmentView, [ev = m_equipmentView](){ ev->showAppSignals(false, false); });
 
-	m_addAppSignal = new QAction(tr("Add Application Signal"), this);
-	m_addAppSignal->setStatusTip(tr("Add new application signal to device"));
+	m_addAppSignal = new QAction(tr("Add Application Signal(s)"), this);
+	m_addAppSignal->setStatusTip(tr("Add new application signal(s) to device"));
 	m_addAppSignal->setEnabled(false);
 	connect(m_addAppSignal, &QAction::triggered, m_equipmentView, &EquipmentView::addAppSignal);
 
@@ -659,6 +659,8 @@ void EquipmentTabPage::setActionState()
 	if (isConfigurationMode() == true &&
 		selectedIndexList.size() == 1)
 	{
+		// Allow to add signals for all module
+		//
 		auto device = m_equipmentModel->deviceObject(selectedIndexList.front());
 		assert(device);
 
@@ -684,6 +686,30 @@ void EquipmentTabPage::setActionState()
 		{
 			m_replaceAction->setEnabled(true);
 		}
+	}
+
+	if (m_inOutsToSignals->isEnabled() == false &&		// Could be already enabled in prev condition
+		isConfigurationMode() == true &&
+		selectedIndexList.isEmpty() == false)
+	{
+		// Allow to add selected signals
+		//
+		bool allSelectedAreAppSignals = true;
+
+		for (auto& si : selectedIndexList)
+		{
+			auto device = m_equipmentModel->deviceObject(si);
+			assert(device);
+
+			if (device->isAppSignal() == false)
+			{
+				allSelectedAreAppSignals = false;
+				break;
+			}
+		}
+
+		m_inOutsToSignals->setEnabled(allSelectedAreAppSignals);
+		m_inOutsToSignals->setVisible(true);
 	}
 
 	// Add AppLogic Schema to LM
