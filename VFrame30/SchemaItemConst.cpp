@@ -114,7 +114,7 @@ namespace VFrame30
 
 		// --
 		//
-		setPrecision(m_precision);			// This function will set Precision for valueFloat property
+		setPrecision(constitem.precision());			// This function will set Precision for valueFloat property
 		m_analogFormat = static_cast<E::AnalogFormat>(constitem.analogformat());
 
 		m_horzAlign = static_cast<E::HorzAlign>(constitem.horzalign());
