@@ -7,6 +7,7 @@
 
 class SimSchemaView;
 class SimIdeSimulator;
+class SimWidget;
 
 namespace VFrame30
 {
@@ -40,6 +41,7 @@ protected:
 	// Methods
 	//
 protected:
+	SimWidget* simWidget();
 
 	// Signals
 	//

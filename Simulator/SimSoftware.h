@@ -5,18 +5,28 @@
 
 namespace  Sim
 {
+	class Simulator;
+	class Application;
+	class AppMonitor;
+
 
 	class Software
 	{
 	public:
-		Software(Simulator* simulator);
+		explicit Software(Simulator* simulator);
 
 	public:
 		void clear();
-		bool loadSoftwareXml(QString fileName);
+		bool load(QString buildPath);
+		bool loadSoftwareXml(QString buildPath);
 
 		bool startSimulation(QString profileName);
 		bool stopSimulation();
+
+		// Monitor
+		//
+		QStringList monitors() const;		// Returns EquipmentIDs of all Monitors
+		std::shared_ptr<AppMonitor> monitor(QString equipmentId) const;
 
 		// AppDataService
 		//
@@ -38,8 +48,9 @@ namespace  Sim
 
 	private:
 		Simulator* m_simulator = nullptr;
+		mutable ScopedLog m_log;
 
-		std::vector<SoftwareXmlInfo> m_software;
+		std::vector<std::shared_ptr<Application>> m_software;
 
 		std::atomic<bool> m_enabled{false};
 
@@ -53,14 +64,50 @@ namespace  Sim
 		std::map<QString, std::shared_ptr<Sim::TuningServiceCommunicator>> m_tuningServiceCommunicators;
 	};
 
+
+	class Application
+	{
+	public:
+		Application(const SoftwareXmlInfo& info);
+		virtual ~Application() = default;
+
+		virtual bool load(QString appDir);
+
+	public:
+		const QString& equipmentId() const;
+		E::SoftwareType softwareType() const;
+
+		const SoftwareXmlInfo& info() const;
+
+	private:
+		SoftwareXmlInfo m_info;
+	};
+
+
+	class AppMonitor : public Application
+	{
+	public:
+		AppMonitor(const SoftwareXmlInfo& info);
+		~AppMonitor() = default;
+
+		virtual bool load(QString appDir) override;
+
+	public:
+		QString globalScript() const;
+
+	private:
+		QString m_globalScript;
+	};
+
+
 	template<typename T>
 	std::shared_ptr<const T> Software::getSettingsProfile(const QString& softwareEquipmentID, const QString& profile) const
 	{
-		for(const SoftwareXmlInfo& swInfo : m_software)
+		for(const auto& app : m_software)
 		{
-			if (swInfo.equipmentID == softwareEquipmentID)
+			if (app->equipmentId() == softwareEquipmentID)
 			{
-				return swInfo.getSettingsProfile<T>(profile);
+				return app->info().getSettingsProfile<T>(profile);
 			}
 		}
 

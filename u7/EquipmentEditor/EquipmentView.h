@@ -55,7 +55,10 @@ public slots:
 	QModelIndex addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentModelIndex, bool clearPrevSelection);
 
 	void addInOutsToSignals();
-	void showAppSignals(bool refreshSignalList = false);			// Show application signals for this object
+	void addInOutsToSignals(std::shared_ptr<Hardware::DeviceModule> module);
+	void addInOutsToSignals(std::vector<std::shared_ptr<Hardware::DeviceAppSignal>> hardwareAppSignals);
+
+	void showAppSignals(bool refreshSignalList, bool exactMatch);			// Show application signals for this object
 	void addAppSignal();
 
 	void addLogicSchemaToLm();

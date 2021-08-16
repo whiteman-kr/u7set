@@ -84,6 +84,10 @@ protected slots:
 	void tabCurrentChanged(int index);
 	void tabBarContextMenuRequest(const QPoint& pos);
 
+public:
+	SimSchemaManager& schemaManager();
+	const SimSchemaManager& schemaManager() const;
+
 private:
 	bool m_slaveWindow = false;				// Cannot have output pane, do not stores its state
 	bool m_showEventFired = false;			// Save of widget state possible only after showEvent, otherwise stae will be starge, even can hide all child widgets.

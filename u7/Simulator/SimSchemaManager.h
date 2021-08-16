@@ -24,9 +24,14 @@ public:
 	SimIdeSimulator* simulator();
 	const SimIdeSimulator* simulator() const;
 
+	QString monitorId() const;
+	void setMonitorId(QString equipmentId, bool emitUpdate);
+
 	// Data
 	//
 private:
 	SimIdeSimulator* m_simulator = nullptr;
+
+	QString m_monitorId;
 };
 

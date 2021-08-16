@@ -302,7 +302,7 @@ namespace VFrame30
 				text = signal.customSignalId();
 				if (text.isEmpty() == true)
 				{
-					text = QLatin1String("?");
+					text = drawParam->isEditMode() ? signal.appSignalId() : QLatin1String("?");
 				}
 			}
 			else
@@ -317,7 +317,7 @@ namespace VFrame30
 				text = impactSignal.customSignalId();
 				if (text.isEmpty() == true)
 				{
-					text = QLatin1String("?");
+					text = drawParam->isEditMode() ? impactSignal.appSignalId() : QLatin1String("?");
 				}
 			}
 			else
@@ -333,7 +333,7 @@ namespace VFrame30
 
 				if (text.isEmpty() == true)
 				{
-					text = QLatin1String("?");
+					text = drawParam->isEditMode() ? signal.appSignalId() : QLatin1String("?");
 				}
 			}
 			else
@@ -348,7 +348,7 @@ namespace VFrame30
 				text = impactSignal.caption();
 				if (text.isEmpty() == true)
 				{
-					text = QLatin1String("?");
+					text = drawParam->isEditMode() ? impactSignal.appSignalId() : QLatin1String("?");
 				}
 			}
 			else
@@ -518,6 +518,7 @@ namespace VFrame30
 		for (const QString& id : signalIds)
 		{
 			appSignals[signalIndex].setAppSignalId(id);
+			appSignals[signalIndex].setCustomSignalId(id);
 			appSignalStates[signalIndex].m_flags.valid = false;
 
 			if (drawParam->appSignalController() != nullptr)
@@ -529,12 +530,21 @@ namespace VFrame30
 					appSignals[signalIndex] = AppSignalParam();
 					appSignalStates[signalIndex] = AppSignalState();
 
-					appSignals[signalIndex].setAppSignalId(id);		// If signal is not found it allows to show AppSignalID at least
+					appSignals[signalIndex].setAppSignalId(id);			// If signal is not found it allows to show AppSignalID at least
+					appSignals[signalIndex].setCustomSignalId(id);		// If signal is not found it allows to show AppSignalID at least
 				}
 				else
 				{
-					appSignals[signalIndex] = drawParam->appSignalController()->signalParam(id, nullptr);
+					bool signalFound = false;
+
+					appSignals[signalIndex] = drawParam->appSignalController()->signalParam(id, &signalFound);
 					appSignalStates[signalIndex] = drawParam->appSignalController()->signalState(id, nullptr);
+
+					if (signalFound == false)
+					{
+						appSignals[signalIndex].setAppSignalId(id);
+						appSignals[signalIndex].setCustomSignalId(id);
+					}
 				}
 			}
 
@@ -559,6 +569,7 @@ namespace VFrame30
 		for (const QString& id : impactSignalIds)
 		{
 			impactAppSignals[signalIndex].setAppSignalId(id);
+			impactAppSignals[signalIndex].setCustomSignalId(id);
 			impactAppSignalStates[signalIndex].m_flags.valid = false;
 
 			signalIndex ++;
@@ -571,8 +582,16 @@ namespace VFrame30
 			{
 				// Get signal description/state
 				//
+				bool signalFound = false;
+
 				impactAppSignals[signalIndex] = drawParam->appSignalController()->signalParam(id, nullptr);
 				impactAppSignalStates[signalIndex] = drawParam->appSignalController()->signalState(id, nullptr);
+
+				if (signalFound == false)
+				{
+					impactAppSignals[signalIndex].setAppSignalId(id);			// At least show AppSignalID
+					impactAppSignals[signalIndex].setCustomSignalId(id);		// At least show AppSignalID
+				}
 			}
 
 			signalIndex ++;
@@ -961,6 +980,7 @@ namespace VFrame30
 
 		AppSignalParam signal;
 		signal.setAppSignalId(appSignalId);
+		signal.setCustomSignalId(appSignalId);
 
 		AppSignalState signalState;
 		signalState.m_flags.valid = false;
@@ -972,8 +992,16 @@ namespace VFrame30
 			}
 			else
 			{
-				signal = drawParam->appSignalController()->signalParam(appSignalId, nullptr);
+				bool signalFound = false;
+
+				signal = drawParam->appSignalController()->signalParam(appSignalId, &signalFound);
 				signalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);
+
+				if (signalFound == false)
+				{
+					signal.setAppSignalId(appSignalId);			// At least show AppSignalID
+					signal.setCustomSignalId(appSignalId);		// At least show AppSignalID
+				}
 			}
 		}
 
@@ -983,14 +1011,23 @@ namespace VFrame30
 
 		AppSignalParam impactSignal;
 		impactSignal.setAppSignalId(impactAppSignalId);
+		impactSignal.setCustomSignalId(impactAppSignalId);
 
 		AppSignalState impactSignalState;
 		impactSignalState.m_flags.valid = false;
 
 		if (drawParam->appSignalController() != nullptr && isCommented() == false)
 		{
+			bool signalFound = false;
+
 			impactSignal = drawParam->appSignalController()->signalParam(impactAppSignalId, nullptr);
 			impactSignalState = drawParam->appSignalController()->signalState(impactAppSignalId, nullptr);
+
+			if (signalFound == false)
+			{
+				impactSignal.setAppSignalId(impactAppSignalId);			// At least show AppSignalID
+				impactSignal.setCustomSignalId(impactAppSignalId);		// At least show AppSignalID
+			}
 		}
 
 		// --

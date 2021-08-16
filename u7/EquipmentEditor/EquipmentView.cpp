@@ -973,20 +973,69 @@ void EquipmentView::addInOutsToSignals()
 {
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
 
-	if (selectedIndexList.size() != 1)
+	if (selectedIndexList.isEmpty() == true)
 	{
-		Q_ASSERT(false);	// how did we get here?
+		Q_ASSERT(selectedIndexList.isEmpty() == false);	// how did we get here?
 		return;
 	}
 
-	auto device = equipmentModel()->deviceObject(selectedIndexList.front());
-	if (device == nullptr)
+	// There are two possible options:
+	//	- Add signal for ONE selected module
+	//	- Add selected AppSignals
+	//
 	{
-		Q_ASSERT(device);
-		return;
+		auto device = equipmentModel()->deviceObject(selectedIndexList.front());
+		if (device == nullptr)
+		{
+			Q_ASSERT(device);
+			return;
+		}
+
+		// Add signal for ONE selected module
+		//
+		if (selectedIndexList.size() == 1 && device->isModule() == true)
+		{
+			std::shared_ptr<Hardware::DeviceModule> module = device->toModule();
+			Q_ASSERT(module);
+
+			addInOutsToSignals(module);
+			return;
+		}
 	}
 
-	auto module = device->toModule();
+	// Add selected AppSignals
+	//
+
+	// Check all selected are AppSignals
+	//
+	std::vector<std::shared_ptr<Hardware::DeviceAppSignal>> hardwareAppSignals;
+	hardwareAppSignals.reserve(selectedIndexList.size());
+
+	for (auto si : selectedIndexList)
+	{
+		auto deviceObject = equipmentModel()->deviceObject(si);
+		if (deviceObject == nullptr)
+		{
+			Q_ASSERT(deviceObject);
+			return;
+		}
+
+		if (deviceObject->isAppSignal() == false)
+		{
+			Q_ASSERT(deviceObject->isAppSignal());
+			return;
+		}
+
+		hardwareAppSignals.push_back(deviceObject->toAppSignal());
+	}
+
+	addInOutsToSignals(hardwareAppSignals);
+
+	return;
+}
+
+void EquipmentView::addInOutsToSignals(std::shared_ptr<Hardware::DeviceModule> module)
+{
 	if (module == nullptr)
 	{
 		Q_ASSERT(module);
@@ -1151,14 +1200,128 @@ void EquipmentView::addInOutsToSignals()
 		//
 		if (addedSignals.empty() == false)
 		{
-			showAppSignals(true);
+			showAppSignals(true, false);
 		}
 	}
 
 	return;
 }
 
-void EquipmentView::showAppSignals(bool refreshSignalList /*= false*/)
+void EquipmentView::addInOutsToSignals(std::vector<std::shared_ptr<Hardware::DeviceAppSignal>> hardwareAppSignals)
+{
+	Q_ASSERT(hardwareAppSignals.empty() == false);
+
+	// Check if the Place property is correct for signals and all their parents
+	//
+	for (auto has : hardwareAppSignals)
+	{
+		std::shared_ptr<Hardware::DeviceObject> checkPlaceObject = has;
+
+		while (checkPlaceObject != nullptr)
+		{
+			if (checkPlaceObject->isRoot() == false && checkPlaceObject->place() < 0)
+			{
+				QMessageBox::critical(this,
+									  QApplication::applicationName(),
+									  tr("Object's %1 property Place is %2, set the correct value (>=0).")
+									  .arg(checkPlaceObject->equipmentId())
+									  .arg(checkPlaceObject->place())
+									  );
+				return;
+			}
+
+			checkPlaceObject = checkPlaceObject->parent();
+		}
+	}
+
+	// Get all hardware inputs outputs
+	//
+	std::vector<Hardware::DeviceAppSignal*> inOuts;
+
+	for (auto has : hardwareAppSignals)
+	{
+		if (has->function() == E::SignalFunction::Input ||
+			has->function() == E::SignalFunction::Output ||
+			has->function() == E::SignalFunction::Validity)
+		{
+			inOuts.push_back(has.get());
+		}
+	}
+
+	if (inOuts.empty() == true)
+	{
+		return;
+	}
+
+	// Expand StrID for signals
+	//
+	std::vector<std::shared_ptr<Hardware::DeviceObject>> equipmentDevices;
+	equipmentDevices.reserve(inOuts.size());
+
+	for (const Hardware::DeviceAppSignal* has : inOuts)		// has - hardware app signal
+	{
+		QByteArray bytes;
+		has->saveToByteArray(&bytes);	// save and restore to keep equpment version after expanding strid
+
+		std::shared_ptr<Hardware::DeviceObject> newObject = Hardware::DeviceObject::Create(bytes);
+		equipmentDevices.push_back(newObject);
+
+		newObject->setEquipmentIdTemplate(has->equipmentId());	// Setting expanded EquipmentID
+	}
+
+	inOuts.clear();
+	for (auto devo : equipmentDevices)
+	{
+		inOuts.push_back(devo->toAppSignal().get());
+	}
+
+	// Add signals to the project DB
+	//
+	std::sort(std::begin(inOuts), std::end(inOuts),
+		[](Hardware::DeviceObject* a, Hardware::DeviceObject* b)
+		{
+			return a->equipmentIdTemplate() < b->equipmentIdTemplate();
+		});
+
+	std::vector<AppSignal> addedSignals;
+
+	bool result = db()->autoAddSignals(&inOuts, &addedSignals, this);
+
+	qDebug() << "Signals added:" << addedSignals.size();
+
+	if (result == true)
+	{
+		QString messageText;
+
+		if (addedSignals.empty() == true)
+		{
+			messageText = tr("Application Logic signlas for inputs/outputs were not added. Apparently they were added earlier.");
+		}
+
+		if (addedSignals.size() == 1)
+		{
+			messageText = tr("1 Appllication Logic signal for inputs/Ooutputs was added.");
+		}
+
+		if (addedSignals.size() > 1)
+		{
+			messageText = tr("%1 Appllication Logic signals for inputs/outputs were added.").arg(addedSignals.size());
+		}
+
+		QMessageBox::information(this, qAppName(), messageText);
+
+		// Show application signals for current module
+		//
+		if (addedSignals.empty() == false)
+		{
+			showAppSignals(true, true);
+		}
+	}
+
+	return;
+}
+
+void EquipmentView::showAppSignals(bool refreshSignalList /*= false*/, bool exactMatch)
 {
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
 
@@ -1177,7 +1340,14 @@ void EquipmentView::showAppSignals(bool refreshSignalList /*= false*/)
 
 		if (device != nullptr)
 		{
-			strIds.push_back(device->equipmentId() + "*");
+			if (exactMatch == true)
+			{
+				strIds.push_back(device->equipmentId());
+			}
+			else
+			{
+				strIds.push_back(device->equipmentId() + "*");
+			}
 		}
 	}
 
@@ -2071,7 +2241,7 @@ void EquipmentView::updateFromPreset()
 
 	// Show confirmation dialog
 	//
-	DialogUpdateFromPreset dialog(theSettings.isExpertMode(), presetsToUpdate, this);
+	DialogUpdateFromPreset dialog(true/*theSettings.isExpertMode() -- ALWAYS ALLOW*/, presetsToUpdate, this);
 
 	if (int result = dialog.exec();
 		result != QDialog::Accepted)
@@ -2081,7 +2251,8 @@ void EquipmentView::updateFromPreset()
 
 	QStringList forceUpdateProperties;
 
-	if (theSettings.isExpertMode() == true)
+	// ALWAYS ALLOW
+	//if (theSettings.isExpertMode() == true)
 	{
 		// Get properties which must be updated even if they not meant to update
 		//

@@ -2091,10 +2091,22 @@ namespace Builder
 			return false;
 		}
 
-		ok = simulator.waitScript(timeout < 0 ? ULONG_MAX : static_cast<unsigned long>(timeout));
-		if (ok == false)
+		qint64 timeout100msTimer = timeout < 0 ?
+									36000000 :	// Some big number (around 1000h)
+									timeout / 100 + 1;
+
+		for (qint64 wtm = 0; wtm < timeout100msTimer; wtm ++)
 		{
-			return false;
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;	// simulator.stopScript(); will be called on destructr od simulator
+			}
+
+			ok = simulator.waitScript(100);
+			if (ok == true)
+			{
+				break;
+			}
 		}
 
 		ok = simulator.scriptResult();

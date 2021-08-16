@@ -1137,15 +1137,18 @@ void SimWidget::tabBarContextMenuRequest(const QPoint& pos)
 		return;
 	}
 
-//	QMenu menu;
-//	menu.addAction(tr("Detach"));
-//	menu.addAction(tr("Close"));
-
-//	menu.exec(m_tabWidget->tabBar()->mapToGlobal(pos));
-
 	return;
 }
 
+SimSchemaManager& SimWidget::schemaManager()
+{
+	return m_schemaManager;
+}
+
+const SimSchemaManager& SimWidget::schemaManager() const
+{
+	return m_schemaManager;
+}
 
 //
 //	SimulatorToolBar
