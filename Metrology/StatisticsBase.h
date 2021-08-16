@@ -48,6 +48,8 @@ public:
 
 	bool isMeasured() const { return m_measureCount != 0; }
 
+	QString positionID() const;
+
 private:
 
 	Metrology::Signal* m_pSignal = nullptr;

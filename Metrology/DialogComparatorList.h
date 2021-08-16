@@ -10,6 +10,7 @@
 const char* const			ComparatorListColumn[] =
 {
 							QT_TRANSLATE_NOOP("DialogComparatorList", "SignalID (Input/Internal)"),
+							QT_TRANSLATE_NOOP("DialogComparatorList", "Comparator No"),
 							QT_TRANSLATE_NOOP("DialogComparatorList", "Set point"),
 							QT_TRANSLATE_NOOP("DialogComparatorList", "Hysteresis"),
 							QT_TRANSLATE_NOOP("DialogComparatorList", "Signal type"),
@@ -23,19 +24,21 @@ const char* const			ComparatorListColumn[] =
 const int					COMPARATOR_LIST_COLUMN_COUNT			= sizeof(ComparatorListColumn)/sizeof(ComparatorListColumn[0]);
 
 const int					COMPARATOR_LIST_COLUMN_INPUT			= 0,
-							COMPARATOR_LIST_COLUMN_SETPOINT			= 1,
-							COMPARATOR_LIST_COLUMN_HYSTERESIS		= 2,
-							COMPARATOR_LIST_COLUMN_TYPE				= 3,
-							COMPARATOR_LIST_COLUMN_EL_RANGE			= 4,
-							COMPARATOR_LIST_COLUMN_EL_SENSOR		= 5,
-							COMPARATOR_LIST_COLUMN_EN_RANGE			= 6,
-							COMPARATOR_LIST_COLUMN_OUTPUT			= 7,
-							COMPARATOR_LIST_COLUMN_SCHEMA			= 8;
+							COMPARATOR_LIST_COLUMN_CMP_NO			= 1,
+							COMPARATOR_LIST_COLUMN_SETPOINT			= 2,
+							COMPARATOR_LIST_COLUMN_HYSTERESIS		= 3,
+							COMPARATOR_LIST_COLUMN_TYPE				= 4,
+							COMPARATOR_LIST_COLUMN_EL_RANGE			= 5,
+							COMPARATOR_LIST_COLUMN_EL_SENSOR		= 6,
+							COMPARATOR_LIST_COLUMN_EN_RANGE			= 7,
+							COMPARATOR_LIST_COLUMN_OUTPUT			= 8,
+							COMPARATOR_LIST_COLUMN_SCHEMA			= 9;
 
 
 const int					ComparatorListColumnWidth[COMPARATOR_LIST_COLUMN_COUNT] =
 {
 							250,	// COMPARATOR_LIST_COLUMN_INPUT
+							 50,	// COMPARATOR_LIST_COLUMN_CMP_NO
 							250,	// COMPARATOR_LIST_COLUMN_SETPOINT
 							250,	// COMPARATOR_LIST_COLUMN_HYSTERESIS
 							100,	// COMPARATOR_LIST_COLUMN_TYPE
@@ -59,13 +62,13 @@ public:
 
 public:
 
-	void setTypeID(SignalIDType typeID) { m_typeID = typeID; };
+	void setTypeID(Metrology::SignalIDType idType) { m_idType = idType; };
 
 	QString text(int row, int column, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const;
 
 private:
 
-	SignalIDType m_typeID = SignalIDType::CustomID;
+	Metrology::SignalIDType m_idType = Metrology::SignalIDType::CustomID;
 
 	QVariant data(const QModelIndex &index, int role) const override;
 };
@@ -88,15 +91,15 @@ private:
 	QMenu* m_pViewMenu = nullptr;
 	QMenu* m_pViewTypeIDMenu = nullptr;
 
-	QAction* m_pTypeIDActionList[SignalIDTypeCount];
+	QAction* m_pTypeIDActionList[Metrology::SignalIDTypeCount];
 
 	ComparatorListTable m_comparatorTable;
 
 	void createInterface();
 	void createContextMenu();
 
-	static SignalIDType	m_typeID;
-	void setTypeID(SignalIDType typeID);
+	static Metrology::SignalIDType	m_idType;
+	void setTypeID(Metrology::SignalIDType idType);
 
 public slots:
 

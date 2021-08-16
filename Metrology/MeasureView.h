@@ -28,8 +28,8 @@ namespace Measure
 
 	public:
 
-		int measureType() const { return m_measureType; }
-		void setMeasureType(int measureType) { m_measureType = measureType; }
+		Measure::Type measureType() const { return m_measureType; }
+		void setMeasureType(Measure::Type measureType) { m_measureType = measureType; }
 
 		int count() const { return TO_INT(m_measureCount); }
 
@@ -48,7 +48,7 @@ namespace Measure
 
 	private:
 
-		int m_measureType = Measure::Type::NoMeasureType;
+		Measure::Type m_measureType = Measure::Type::NoMeasureType;
 
 		ViewHeader m_header;
 

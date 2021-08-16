@@ -1009,7 +1009,7 @@ void MeasureViewOption::load()
 					continue;
 				}
 
-				QString caption = Measure::TypeCaption(measureType);
+				QString caption = Measure::TypeCaption(static_cast<Measure::Type>(measureType));
 				QString language = LanguageTypeCaption(languageType);
 
 				m_column[measureType][languageType][column].setTitle(s.value(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.title()).toString());
@@ -1055,7 +1055,7 @@ void MeasureViewOption::save()
 					continue;
 				}
 
-				QString caption = Measure::TypeCaption(measureType);
+				QString caption = Measure::TypeCaption(static_cast<Measure::Type>(measureType));
 				QString language = LanguageTypeCaption(languageType);
 
 				s.setValue(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.title());
@@ -1386,27 +1386,6 @@ QString LanguageTypeCaption(int type)
 	{
 		case LanguageType::English:	caption = QT_TRANSLATE_NOOP("Options", "English");	break;
 		case LanguageType::Russian:	caption = QT_TRANSLATE_NOOP("Options", "Russian");	break;
-		default:
-			Q_ASSERT(0);
-			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
-	}
-
-	return caption;
-};
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-QString SignalIDTypeCaption(int type)
-{
-	QString caption;
-
-	switch (type)
-	{
-		case SignalIDType::CustomID:	caption = QT_TRANSLATE_NOOP("Options", "SignalID");		break;
-		case SignalIDType::AppSignalID:	caption = QT_TRANSLATE_NOOP("Options", "AppSignalID");	break;
-		case SignalIDType::EquipmentID:	caption = QT_TRANSLATE_NOOP("Options", "EquipmentID");	break;
 		default:
 			Q_ASSERT(0);
 			caption = QT_TRANSLATE_NOOP("Options", "Unknown");

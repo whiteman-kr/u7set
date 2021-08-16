@@ -22,7 +22,7 @@ DialogOptionsMeasureViewHeader::DialogOptionsMeasureViewHeader(const MeasureView
 
 	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
 	{
-		m_measureTypeList->addItem(qApp->translate("MeasureBase", Measure::TypeCaption(measureType).toUtf8()));
+		m_measureTypeList->addItem(qApp->translate("MeasureBase", Measure::TypeCaption(static_cast<Measure::Type>(measureType)).toUtf8()));
 	}
 	m_measureTypeList->setCurrentIndex(m_measureType);
 

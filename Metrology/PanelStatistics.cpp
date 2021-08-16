@@ -91,16 +91,15 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 			case STATISTICS_COLUMN_APP_ID:				result = Qt::AlignLeft;		break;
 			case STATISTICS_COLUMN_EQUIPMENT_ID:		result = Qt::AlignLeft;		break;
 			case STATISTICS_COLUMN_CAPTION:				result = Qt::AlignLeft;		break;
-			case STATISTICS_COLUMN_CMP_VALUE:			result = Qt::AlignLeft;		break;
 			case STATISTICS_COLUMN_CMP_NO:				result = Qt::AlignCenter;	break;
-			case STATISTICS_COLUMN_CMP_OUT_ID:			result = Qt::AlignLeft;		break;
+			case STATISTICS_COLUMN_CMP_VALUE:			result = Qt::AlignLeft;		break;
 			case STATISTICS_COLUMN_RACK:				result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_CHASSIS:				result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_MODULE:				result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_PLACE:				result = Qt::AlignCenter;	break;
+			case STATISTICS_COLUMN_EN_RANGE:			result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_EL_RANGE:			result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_EL_SENSOR:			result = Qt::AlignCenter;	break;
-			case STATISTICS_COLUMN_EN_RANGE:			result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_SIGNAL_TYPE:			result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_MEASURE_COUNT:		result = Qt::AlignCenter;	break;
@@ -124,7 +123,7 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 	{
 		if (ERR_METROLOGY_CONNECTION_TYPE(si.connectionType()) == true)
 		{
-			if (column == STATISTICS_COLUMN_SIGNAL_TYPE || column == STATISTICS_COLUMN_SIGNAL_CONNECTION)
+			if (column == STATISTICS_COLUMN_SIGNAL_CONNECTION)
 			{
 				return QColor(Qt::red);
 			}
@@ -210,18 +209,16 @@ QString StatisticsTable::text(int row, int column, const StatisticsItem& si) con
 		return QString();
 	}
 
-	QString comparatorValue;
 	QString comparatorNo;
-	QString comparatorOutputID;
+	QString comparatorValue;
 
 	if (theSignalBase.statistics().measureType() == Measure::Type::Comparators)
 	{
-		std::shared_ptr<Metrology::ComparatorEx> comparator = si.comparator();
-		if (comparator != nullptr)
+		std::shared_ptr<Metrology::ComparatorEx> comparatorEx = si.comparator();
+		if (comparatorEx != nullptr)
 		{
-			comparatorValue = comparator->compareDefaultValueStr();
-			comparatorNo = QString::number(comparator->index() + 1);
-			comparatorOutputID = comparator->output().appSignalID();
+			comparatorNo = comparatorEx->indexStr();
+			comparatorValue = comparatorEx->compareDefaultValueStr(Metrology::SignalIDType::CustomID);
 		}
 	}
 
@@ -237,19 +234,18 @@ QString StatisticsTable::text(int row, int column, const StatisticsItem& si) con
 	switch (column)
 	{
 		case STATISTICS_COLUMN_CUSTOM_ID:			result = visible ? param.customAppSignalID() : QString();									break;
-		case STATISTICS_COLUMN_APP_ID:				result = visible ? param.appSignalID() : QString();											break;
-		case STATISTICS_COLUMN_EQUIPMENT_ID:		result = visible ? param.equipmentID() : QString();											break;
+		case STATISTICS_COLUMN_APP_ID:				result = visible ? param.appSignalID(): QString();											break;
+		case STATISTICS_COLUMN_EQUIPMENT_ID:		result = visible ? param.equipmentID(): QString();											break;
 		case STATISTICS_COLUMN_CAPTION:				result = visible ? param.caption() : QString();												break;
-		case STATISTICS_COLUMN_CMP_VALUE:			result = comparatorValue;																	break;
 		case STATISTICS_COLUMN_CMP_NO:				result = comparatorNo;																		break;
-		case STATISTICS_COLUMN_CMP_OUT_ID:			result = comparatorOutputID;																break;
+		case STATISTICS_COLUMN_CMP_VALUE:			result = comparatorValue;																	break;
 		case STATISTICS_COLUMN_RACK:				result = visible ? param.location().rack().caption() : QString();							break;
 		case STATISTICS_COLUMN_CHASSIS:				result = visible ? param.location().chassisStr() : QString();								break;
 		case STATISTICS_COLUMN_MODULE:				result = visible ? param.location().moduleStr() : QString();								break;
 		case STATISTICS_COLUMN_PLACE:				result = visible ? param.location().placeStr() : QString();									break;
+		case STATISTICS_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();														break;
 		case STATISTICS_COLUMN_EL_RANGE:			result = param.electricRangeStr();															break;
 		case STATISTICS_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();														break;
-		case STATISTICS_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();														break;
 		case STATISTICS_COLUMN_SIGNAL_TYPE:			result = qApp->translate("MetrologySignal", param.signalTypeStr().toUtf8());				break;
 		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticsBase", si.connectionTypeStr().trimmed().toUtf8());		break;
 		case STATISTICS_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();																break;
@@ -656,6 +652,12 @@ void PanelStatistics::activeSignalChanged(const MeasureSignal& activeSignal)
 		return;
 	}
 
+	int column = firstVisibleColumn();
+	if (column < 0 || column >= STATISTICS_COLUMN_COUNT)
+	{
+		return;
+	}
+
 	int foundIndex = -1;
 
 	int statisticCount = theSignalBase.statistics().count();
@@ -673,9 +675,8 @@ void PanelStatistics::activeSignalChanged(const MeasureSignal& activeSignal)
 		return;
 	}
 
-	m_pView->setCurrentIndex(m_pView->model()->index(foundIndex, firstVisibleColumn()));
+	m_pView->setCurrentIndex(m_pView->model()->index(foundIndex, column));
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -762,9 +763,8 @@ void PanelStatistics::updateVisibleColunm()
 
 	hideColumn(STATISTICS_COLUMN_APP_ID, true);
 	hideColumn(STATISTICS_COLUMN_EQUIPMENT_ID, true);
-	hideColumn(STATISTICS_COLUMN_CMP_VALUE, m_measureType != Measure::Type::Comparators);
 	hideColumn(STATISTICS_COLUMN_CMP_NO, m_measureType != Measure::Type::Comparators);
-	hideColumn(STATISTICS_COLUMN_CMP_OUT_ID, true);
+	hideColumn(STATISTICS_COLUMN_CMP_VALUE, m_measureType != Measure::Type::Comparators);
 	hideColumn(STATISTICS_COLUMN_CHASSIS, true);
 	hideColumn(STATISTICS_COLUMN_MODULE, true);
 	hideColumn(STATISTICS_COLUMN_PLACE, true);
@@ -797,7 +797,6 @@ void PanelStatistics::hideColumn(int column, bool hide)
 		m_pColumnAction[column]->setChecked(true);
 	}
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -1051,6 +1050,11 @@ void PanelStatistics::selectSignalForMeasure()
 
 void PanelStatistics::findSignalInMeasureList()
 {
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
 	int statisticItemIndex = m_pView->currentIndex().row();
 	if (statisticItemIndex < 0 || statisticItemIndex >= theSignalBase.statistics().count())
 	{
@@ -1067,7 +1071,7 @@ void PanelStatistics::findSignalInMeasureList()
 		return;
 	}
 
-	emit showFindMeasurePanel(pSignal->param().appSignalID());
+	emit showFindMeasurePanel(pSignal->param().customAppSignalID());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1107,13 +1111,18 @@ void PanelStatistics::selectAll()
 
 void PanelStatistics::onProperty()
 {
-	int index = m_pView->currentIndex().row();
-	if (index < 0 || index >= theSignalBase.statistics().count())
+	if (m_pView == nullptr)
 	{
 		return;
 	}
 
-	const StatisticsItem& si = theSignalBase.statistics().item(index);
+	int statisticItemIndex = m_pView->currentIndex().row();
+	if (statisticItemIndex < 0 || statisticItemIndex >= theSignalBase.statistics().count())
+	{
+		return;
+	}
+
+	const StatisticsItem& si = theSignalBase.statistics().item(statisticItemIndex);
 
 	switch (m_measureType)
 	{
@@ -1179,8 +1188,14 @@ void PanelStatistics::gotoNextNotMeasured()
 		return;
 	}
 
-	int statisticCount = theSignalBase.statistics().count();
-	if (statisticCount == 0)
+	int statisticItemCount = theSignalBase.statistics().count();
+	if (statisticItemCount == 0)
+	{
+		return;
+	}
+
+	int column = firstVisibleColumn();
+	if (column < 0 || column >= STATISTICS_COLUMN_COUNT)
 	{
 		return;
 	}
@@ -1188,7 +1203,7 @@ void PanelStatistics::gotoNextNotMeasured()
 	int startIndex = m_pView->currentIndex().row() ;
 	int foundIndex = -1;
 
-	for(int i = startIndex + 1; i < statisticCount; i++)
+	for(int i = startIndex + 1; i < statisticItemCount; i++)
 	{
 		if (theSignalBase.statistics().item(i).isMeasured() == false)
 		{
@@ -1203,7 +1218,7 @@ void PanelStatistics::gotoNextNotMeasured()
 		return;
 	}
 
-	m_pView->setCurrentIndex(m_pView->model()->index(foundIndex, firstVisibleColumn()));
+	m_pView->setCurrentIndex(m_pView->model()->index(foundIndex, column));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1215,8 +1230,14 @@ void PanelStatistics::gotoNextInvalid()
 		return;
 	}
 
-	int statisticCount = theSignalBase.statistics().count();
-	if (statisticCount == 0)
+	int statisticItemCount = theSignalBase.statistics().count();
+	if (statisticItemCount == 0)
+	{
+		return;
+	}
+
+	int column = firstVisibleColumn();
+	if (column < 0 || column >= STATISTICS_COLUMN_COUNT)
 	{
 		return;
 	}
@@ -1224,7 +1245,7 @@ void PanelStatistics::gotoNextInvalid()
 	int startIndex = m_pView->currentIndex().row() ;
 	int foundIndex = -1;
 
-	for(int i = startIndex + 1; i < statisticCount; i++)
+	for(int i = startIndex + 1; i < statisticItemCount; i++)
 	{
 		if (theSignalBase.statistics().item(i).state() == StatisticsItem::State::Failed)
 		{
@@ -1239,7 +1260,7 @@ void PanelStatistics::gotoNextInvalid()
 		return;
 	}
 
-	m_pView->setCurrentIndex(m_pView->model()->index(foundIndex, firstVisibleColumn()));
+	m_pView->setCurrentIndex(m_pView->model()->index(foundIndex, column));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1247,6 +1268,11 @@ void PanelStatistics::gotoNextInvalid()
 void PanelStatistics::onContextMenu(QPoint)
 {
 	if (m_pContextMenu == nullptr)
+	{
+		return;
+	}
+
+	if (m_pView == nullptr)
 	{
 		return;
 	}
@@ -1274,9 +1300,8 @@ void PanelStatistics::onHeaderContextMenu(QPoint)
 		return;
 	}
 
-	m_pColumnAction[STATISTICS_COLUMN_CMP_VALUE]->setDisabled(m_measureType != Measure::Type::Comparators);
 	m_pColumnAction[STATISTICS_COLUMN_CMP_NO]->setDisabled(m_measureType != Measure::Type::Comparators);
-	m_pColumnAction[STATISTICS_COLUMN_CMP_OUT_ID]->setDisabled(m_measureType != Measure::Type::Comparators);
+	m_pColumnAction[STATISTICS_COLUMN_CMP_VALUE]->setDisabled(m_measureType != Measure::Type::Comparators);
 
 	m_headerContextMenu->exec(QCursor::pos());
 }
@@ -1411,12 +1436,19 @@ void PanelStatistics::onFindPrevious()
 	}
 
 	int startRow = m_pView->currentIndex().row();
+	if (startRow < 0 || startRow >= m_pView->model()->rowCount())
+	{
+		return;
+	}
 
 	int foundRow = findText(startRow, true);
-	if (foundRow != -1)
+	if (foundRow == -1)
 	{
-		m_pView->setCurrentIndex(m_pView->model()->index(foundRow, firstVisibleColumn()));
+		return;
 	}
+
+	m_pView->setCurrentIndex(m_pView->model()->index(foundRow, firstVisibleColumn()));
+	m_pView->setFocus();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1429,12 +1461,19 @@ void PanelStatistics::onFindNext()
 	}
 
 	int startRow = m_pView->currentIndex().row();
+	if (startRow < 0 || startRow >= m_pView->model()->rowCount())
+	{
+		return;
+	}
 
 	int foundRow = findText(startRow, false);
-	if (foundRow != -1)
+	if (foundRow == -1)
 	{
-		m_pView->setCurrentIndex(m_pView->model()->index(foundRow, firstVisibleColumn()));
+		return;
 	}
+
+	m_pView->setCurrentIndex(m_pView->model()->index(foundRow, firstVisibleColumn()));
+	m_pView->setFocus();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

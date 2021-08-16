@@ -654,7 +654,7 @@ void MainWindow::createMeasureViews()
 
 		pView->loadMeasurements(m_measureBase);
 
-		m_pMainTab->addTab(pView, qApp->translate("MeasureBase", Measure::TypeCaption(measureType).toUtf8()));
+		m_pMainTab->addTab(pView, qApp->translate("MeasureBase", Measure::TypeCaption(static_cast<Measure::Type>(measureType)).toUtf8()));
 
 		pView->setFrameStyle(QFrame::NoFrame);
 
@@ -838,7 +838,7 @@ void MainWindow::loadOnToolBar_MeasureKind()
 				selectedItem = measureKind;
 			}
 
-			m_pMeasureKindList->addItem(qApp->translate("MeasureBase", Measure::KindCaption(measureKind).toUtf8()), measureKind);
+			m_pMeasureKindList->addItem(qApp->translate("MeasureBase", Measure::KindCaption(static_cast<Measure::Kind>(measureKind)).toUtf8()), measureKind);
 		}
 
 	m_pMeasureKindList->blockSignals(false);
@@ -3245,9 +3245,9 @@ void MainWindow::stopTuningSocket()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::showFindMeasurePanel(const QString& appSignalID)
+void MainWindow::showFindMeasurePanel(const QString& signalID)
 {
-	if (appSignalID.isEmpty() == true)
+	if (signalID.isEmpty() == true)
 	{
 		return;
 	}
@@ -3258,7 +3258,7 @@ void MainWindow::showFindMeasurePanel(const QString& appSignalID)
 	}
 
 	m_pFindMeasurePanel->show();
-	m_pFindMeasurePanel->setFindText(appSignalID);
+	m_pFindMeasurePanel->setFindText(signalID);
 	emit m_pFindMeasurePanel->find();
 }
 

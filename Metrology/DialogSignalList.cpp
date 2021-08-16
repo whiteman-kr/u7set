@@ -45,15 +45,15 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 			case SIGNAL_LIST_COLUMN_CHASSIS:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_MODULE:				result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_PLACE:				result = Qt::AlignCenter;	break;
-			case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:	result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_ADC_RANGE:			result = Qt::AlignCenter;	break;
+			case SIGNAL_LIST_COLUMN_EN_RANGE:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_EL_RANGE:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_EL_SENSOR:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_PH_RANGE:			result = Qt::AlignCenter;	break;
-			case SIGNAL_LIST_COLUMN_EN_RANGE:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_TUN_SIGNAL:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:	result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_TUN_RANGE:			result = Qt::AlignCenter;	break;
+			case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:	result = Qt::AlignCenter;	break;
 			default:
 				assert(0);
 		}
@@ -65,17 +65,17 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 	{
 		switch (column)
 		{
-			case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:
-
-				if (pSignal->param().isAnalog() == true && pSignal->param().location().shownOnSchemas() == true)
-				{
-					return QColor(0xA0, 0xFF, 0xA0);
-				}
-				break;
-
 			case SIGNAL_LIST_COLUMN_ADC_RANGE:
 
 				if (pSignal->param().highADC() - pSignal->param().lowADC() <= 0)
+				{
+					return QColor(0xFF, 0xA0, 0xA0);
+				}
+				break;
+
+			case SIGNAL_LIST_COLUMN_EN_RANGE:
+
+				if (pSignal->param().engineeringRangeIsValid() == false)
 				{
 					return QColor(0xFF, 0xA0, 0xA0);
 				}
@@ -105,19 +105,19 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 				}
 				break;
 
-			case SIGNAL_LIST_COLUMN_EN_RANGE:
-
-			    if (pSignal->param().engineeringRangeIsValid() == false)
-				{
-					return QColor(0xFF, 0xA0, 0xA0);
-				}
-				break;
-
 			case SIGNAL_LIST_COLUMN_TUN_RANGE:
 
 				if (pSignal->param().tuningRangeIsValid() == false)
 				{
 					return QColor(0xFF, 0xA0, 0xA0);
+				}
+				break;
+
+			case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:
+
+				if (pSignal->param().isAnalog() == true && pSignal->param().location().shownOnSchemas() == true)
+				{
+					return QColor(0xA0, 0xFF, 0xA0);
 				}
 				break;
 		}
@@ -168,15 +168,15 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 		case SIGNAL_LIST_COLUMN_CHASSIS:			result = param.location().chassisStr();			break;
 		case SIGNAL_LIST_COLUMN_MODULE:				result = param.location().moduleStr();			break;
 		case SIGNAL_LIST_COLUMN_PLACE:				result = param.location().placeStr();			break;
-		case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:	result = qApp->translate("MetrologySignal", param.location().shownOnSchemasStr().toUtf8());	break;
 		case SIGNAL_LIST_COLUMN_ADC_RANGE:			result = param.adcRangeStr(true);				break;
+		case SIGNAL_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();			break;
 		case SIGNAL_LIST_COLUMN_EL_RANGE:			result = param.electricRangeStr();				break;
 		case SIGNAL_LIST_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();			break;
 		case SIGNAL_LIST_COLUMN_PH_RANGE:			result = param.physicalRangeStr();				break;
-		case SIGNAL_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();			break;
 		case SIGNAL_LIST_COLUMN_TUN_SIGNAL:			result = param.enableTuningStr();				break;
 		case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:	result = qApp->translate("MetrologySignal", param.tuningDefaultValueStr().toUtf8());break;
 		case SIGNAL_LIST_COLUMN_TUN_RANGE:			result = param.tuningRangeStr();				break;
+		case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:	result = qApp->translate("MetrologySignal", param.location().shownOnSchemasStr().toUtf8());	break;
 		default:
 			assert(0);
 	}
@@ -343,10 +343,10 @@ void DialogSignalList::updateVisibleColunm()
 		case E::SignalType::Discrete:
 
 			hideColumn(SIGNAL_LIST_COLUMN_ADC_RANGE, true);
+			hideColumn(SIGNAL_LIST_COLUMN_EN_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_EL_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_EL_SENSOR, true);
 			hideColumn(SIGNAL_LIST_COLUMN_PH_RANGE, true);
-			hideColumn(SIGNAL_LIST_COLUMN_EN_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_TUN_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_TUN_RANGE, true);
 
@@ -355,10 +355,10 @@ void DialogSignalList::updateVisibleColunm()
 		case E::SignalType::Bus:
 
 			hideColumn(SIGNAL_LIST_COLUMN_ADC_RANGE, true);
+			hideColumn(SIGNAL_LIST_COLUMN_EN_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_EL_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_EL_SENSOR, true);
 			hideColumn(SIGNAL_LIST_COLUMN_PH_RANGE, true);
-			hideColumn(SIGNAL_LIST_COLUMN_EN_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_TUN_SIGNAL, true);
 			hideColumn(SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL, true);
 			hideColumn(SIGNAL_LIST_COLUMN_TUN_RANGE, true);
@@ -408,6 +408,8 @@ void DialogSignalList::updateList()
 
 		signalList.push_back(pSignal);
 	}
+
+	std::sort(signalList.begin(), signalList.end(), [](Metrology::Signal* si1, Metrology::Signal* si2) { return si1->param().location().positionID() < si2->param().location().positionID(); });
 
 	m_signalTable.set(signalList);
 }

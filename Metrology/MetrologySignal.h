@@ -154,6 +154,8 @@ namespace Metrology
 			QString				contact() const { return m_contact; }
 			void				setContact(const QString& contact) { m_contact = contact; }
 
+			QString				positionID() const;
+
 			bool				shownOnSchemas() const { return m_shownOnSchemas; }
 			QString				shownOnSchemasStr() const;
 			void				setShownOnSchemas(bool show) { m_shownOnSchemas = show; }
@@ -348,6 +350,21 @@ namespace Metrology
 
 	// ==============================================================================================
 
+	enum SignalIDType
+	{
+		CustomID	= 0,
+		AppSignalID	= 1,
+		EquipmentID	= 2,
+	};
+
+	const int SignalIDTypeCount = 3;
+
+	#define ERR_SIGNAL_ID_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Metrology::SignalIDTypeCount)
+
+	QString SignalIDTypeCaption(int type);
+
+	// ==============================================================================================
+
 	enum CmpValueType
 	{
 		NoCmpValueType	= -1,
@@ -398,19 +415,24 @@ namespace Metrology
 		bool signalsIsValid() const;
 
 		int index() const { return m_index; }
+		QString indexStr() const;
 		void setIndex(int index) { m_index = index; }
 
 		Metrology::Signal* inputSignal() const { return m_inputSignal; }
 		void setInputSignal(Metrology::Signal* pSignal) { m_inputSignal = pSignal; }
+		QString inputSignalID(SignalIDType idType) const;
 
 		Metrology::Signal* compareSignal() const { return m_compareSignal; }
 		void setCompareSignal(Metrology::Signal* pSignal) { m_compareSignal = pSignal; }
+		QString compareSignalID(SignalIDType idType) const;
 
 		Metrology::Signal* hysteresisSignal() const { return m_hysteresisSignal; }
 		void setHysteresisSignal(Metrology::Signal* pSignal) { m_hysteresisSignal = pSignal; }
+		QString hysteresisSignalID(SignalIDType idType) const;
 
 		Metrology::Signal* outputSignal() const { return m_outputSignal; }
 		void setOutputSignal(Metrology::Signal* pSignal) { m_outputSignal = pSignal; }
+		QString outputSignalID(SignalIDType idType) const;
 
 		DeviationType deviation() const { return m_deviationType; }
 		void setDeviation(DeviationType type) { m_deviationType = type; }
@@ -419,20 +441,26 @@ namespace Metrology
 
 		int valuePrecision() const;
 
+		// compare Value and SignalID
+		//
 		double compareOnlineValue(int cmpValueType);
 		double compareOnlineValue(CmpValueType cmpValueType);			// current online (run time) value: return value of set point or hysteresis, depended from cmpValueType
-		QString compareOnlineValueStr(int cmpValueType);
-		QString compareOnlineValueStr(CmpValueType cmpValueType);		// str current oline (run time) value
-		double compareConstValue() const;								// default offine value
-		QString compareDefaultValueStr() const;							// str default offine value
+		QString compareOnlineValueStr(CmpValueType cmpValueType);		// current oline (run time) value - string
 
+		double compareConstValue() const;								// const offine value
+		QString compareDefaultValueStr(SignalIDType idType) const;		// const offine value of ID - string
+
+		// hysteresis Value and SignalID
+		//
 		double hysteresisOnlineValue();									// current oline (run time) value
-		QString hysteresisOnlineValueStr();								// str current oline (run time) value
-		QString hysteresisDefaultValueStr() const;						// str default offine value
+		QString hysteresisDefaultValueStr(SignalIDType idType) const;	// const offine value of ID - string
 
+		// output Value
+		//
 		bool outputState() const;
 		QString outputStateStr() const;
 		QString outputStateStr(const QString& forTrue, const QString& forFalse) const;
+
 	};
 
 	// ==============================================================================================

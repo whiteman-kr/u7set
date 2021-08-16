@@ -103,11 +103,11 @@ QString MetrologyConnectionTable::text(int row, int column, const Metrology::Con
 				}
 				else
 				{
-					switch (m_typeID)
+					switch (m_idType)
 					{
-						case SignalIDType::CustomID:	result = pSignal->param().customAppSignalID();	break;
-						case SignalIDType::AppSignalID:	result = pSignal->param().appSignalID();		break;
-						case SignalIDType::EquipmentID:	result = pSignal->param().equipmentID();		break;
+						case Metrology::SignalIDType::CustomID:		result = pSignal->param().customAppSignalID();	break;
+						case Metrology::SignalIDType::AppSignalID:	result = pSignal->param().appSignalID();		break;
+						case Metrology::SignalIDType::EquipmentID:	result = pSignal->param().equipmentID();		break;
 						default:
 							assert(0);
 							result = QString();
@@ -131,11 +131,11 @@ QString MetrologyConnectionTable::text(int row, int column, const Metrology::Con
 				}
 				else
 				{
-					switch (m_typeID)
+					switch (m_idType)
 					{
-						case SignalIDType::CustomID:	result = pSignal->param().customAppSignalID();	break;
-						case SignalIDType::AppSignalID:	result = pSignal->param().appSignalID();		break;
-						case SignalIDType::EquipmentID:	result = pSignal->param().equipmentID();		break;
+						case Metrology::SignalIDType::CustomID:		result = pSignal->param().customAppSignalID();	break;
+						case Metrology::SignalIDType::AppSignalID:	result = pSignal->param().appSignalID();		break;
+						case Metrology::SignalIDType::EquipmentID:	result = pSignal->param().equipmentID();		break;
 						default:
 							assert(0);
 							result = QString();
@@ -591,7 +591,7 @@ void DialogMetrologyConnectionItem::onOk()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalIDType DialogMetrologyConnection::m_typeID = SignalIDType::CustomID;
+Metrology::SignalIDType DialogMetrologyConnection::m_idType = Metrology::SignalIDType::CustomID;
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -678,9 +678,9 @@ void DialogMetrologyConnection::createInterface()
 	m_pEditMenu->addAction(m_pCopyAction);
 	m_pEditMenu->addAction(m_pSelectAllAction);
 
-	for(int typeID = 0; typeID < SignalIDTypeCount; typeID++)
+	for(int typeID = 0; typeID < Metrology::SignalIDTypeCount; typeID++)
 	{
-		m_pTypeIDActionList[typeID] = m_pViewTypeIDMenu->addAction(SignalIDTypeCaption(typeID));
+		m_pTypeIDActionList[typeID] = m_pViewTypeIDMenu->addAction(Metrology::SignalIDTypeCaption(typeID));
 		m_pTypeIDActionList[typeID]->setCheckable(true);
 	}
 
@@ -714,7 +714,7 @@ void DialogMetrologyConnection::createInterface()
 
 	//
 	//
-	setTypeID(m_typeID);
+	setTypeID(m_idType);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -761,30 +761,30 @@ void DialogMetrologyConnection::updateList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogMetrologyConnection::setTypeID(SignalIDType typeID)
+void DialogMetrologyConnection::setTypeID(Metrology::SignalIDType idType)
 {
 	// clear all items of menu
 	//
-	for(int t = 0; t < SignalIDTypeCount; t++)
+	for(int t = 0; t < Metrology::SignalIDTypeCount; t++)
 	{
 		if (m_pTypeIDActionList[t] == nullptr)
 		{
 			continue;
 		}
 
-		m_pTypeIDActionList[t]->setChecked((bool) (t == typeID));
+		m_pTypeIDActionList[t]->setChecked((bool) (t == idType));
 	}
 
 	//
 	//
-	if (ERR_SIGNAL_ID_TYPE(typeID) == true)
+	if (ERR_SIGNAL_ID_TYPE(idType) == true)
 	{
 		return;
 	}
 
-	m_typeID = typeID;
+	m_idType = idType;
 
-	m_connectionTable.setTypeID(m_typeID);
+	m_connectionTable.setTypeID(m_idType);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1220,14 +1220,14 @@ void DialogMetrologyConnection::showTypeID(QAction* action)
 		return;
 	}
 
-	for (int typeID = 0; typeID < SignalIDTypeCount; typeID++)
+	for (int typeID = 0; typeID < Metrology::SignalIDTypeCount; typeID++)
 	{
 		if (m_pTypeIDActionList[typeID] != action)
 		{
 			continue;
 		}
 
-		setTypeID(static_cast<SignalIDType>(typeID));
+		setTypeID(static_cast<Metrology::SignalIDType>(typeID));
 	}
 }
 

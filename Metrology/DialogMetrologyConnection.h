@@ -39,13 +39,13 @@ public:
 
 public:
 
-	void setTypeID(SignalIDType typeID) { m_typeID = typeID; };
+	void setTypeID(Metrology::SignalIDType idType) { m_idType = idType; };
 
 	QString text(int row, int column, const Metrology::Connection& connection) const;
 
 private:
 
-	SignalIDType m_typeID = SignalIDType::CustomID;
+	Metrology::SignalIDType m_idType = Metrology::SignalIDType::CustomID;
 
 	QVariant data(const QModelIndex &index, int role) const override;
 
@@ -126,7 +126,7 @@ private:
 	QAction* m_pMoveDownAction = nullptr;
 	QAction* m_pImportAction = nullptr;
 
-	QAction* m_pTypeIDActionList[SignalIDTypeCount];
+	QAction* m_pTypeIDActionList[Metrology::SignalIDTypeCount];
 
 	MetrologyConnectionTable m_connectionTable;
 
@@ -138,8 +138,8 @@ private:
 	Metrology::Signal* m_pOutputSignal = nullptr;
 	bool createConnectionBySignal(Metrology::Signal* pSignal);
 
-	static SignalIDType	m_typeID;
-	void setTypeID(SignalIDType typeID);
+	static Metrology::SignalIDType	m_idType;
+	void setTypeID(Metrology::SignalIDType idType);
 
 public slots:
 

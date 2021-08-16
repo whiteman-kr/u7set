@@ -20,7 +20,7 @@ namespace Measure
 
 	#define ERR_MEASURE_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Measure::TypeCount)
 
-	QString TypeCaption(int measureType);
+	QString TypeCaption(Measure::Type measureType);
 
 	// ==============================================================================================
 
@@ -36,7 +36,7 @@ namespace Measure
 
 	#define ERR_MEASURE_KIND(kind) (TO_INT(kind) < 0 || TO_INT(kind) >= Measure::KindCount)
 
-	QString KindCaption(int measureKind);
+	QString KindCaption(Measure::Kind measureKind);
 
 	// ==============================================================================================
 
@@ -51,7 +51,7 @@ namespace Measure
 
 	#define ERR_MEASURE_LIMIT_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Measure::LimitTypeCount)
 
-	QString LimitTypeCaption(int measureType);
+	QString LimitTypeCaption(Measure::LimitType measureType);
 
 	// ==============================================================================================
 
@@ -67,7 +67,7 @@ namespace Measure
 
 	#define ERR_MEASURE_ERROR_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Measure::ErrorTypeCount)
 
-	QString ErrorTypeCaption(int errorType);
+	QString ErrorTypeCaption(Measure::ErrorType errorType);
 
 	// ==============================================================================================
 
@@ -82,7 +82,7 @@ namespace Measure
 
 	#define ERR_MEASURE_ERROR_RESULT(result) (TO_INT(result) < 0 || TO_INT(result) >= Measure::ErrorResultCount)
 
-	QString ErrorResultCaption(int errorResult);
+	QString ErrorResultCaption(Measure::ErrorResult errorResult);
 
 	// ==============================================================================================
 
@@ -103,7 +103,7 @@ namespace Measure
 
 	#define ERR_MEASURE_ADDITIONAL_PARAM(param) (TO_INT(param) < 0 || TO_INT(param) >= Measure::AdditionalParamCount)
 
-	QString AdditionalParamCaption(int param);
+	QString AdditionalParamCaption(Measure::AdditionalParam param);
 
 	// ==============================================================================================
 
@@ -208,15 +208,15 @@ namespace Measure
 		void calcError();
 
 		double error(LimitType limitType, ErrorType errorType) const;
-		QString errorStr() const;
+		QString errorStr(Measure::Type measureType) const;
 		void setError(LimitType limitType, ErrorType errorType, double value);
 
 		double errorLimit(LimitType limitType, ErrorType errorType) const;
-		QString errorLimitStr() const;
+		QString errorLimitStr(Measure::Type measureType) const;
 		void setErrorLimit(LimitType limitType, ErrorType errorType, double value);
 
-		int errorResult() const;
-		QString errorResultStr() const;
+		Measure::ErrorResult errorResult(Measure::Type measureType) const;
+		QString errorResultStr(Measure::Type measureType) const;
 
 		QDateTime measureTime() const { return m_measureTime; }
 		QString measureTimeStr() const;

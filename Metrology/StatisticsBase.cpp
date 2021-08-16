@@ -136,6 +136,31 @@ QString StatisticsItem::stateStr() const
 }
 
 // -------------------------------------------------------------------------------------------------------------------
+
+QString StatisticsItem::positionID() const
+{
+	if (m_pSignal == nullptr)
+	{
+		return QString();
+	}
+
+	const Metrology::SignalParam& param = m_pSignal->param();
+	if (param.isValid() == false)
+	{
+		return QString();
+	}
+
+	QString posID =	QString::number(param.inOutTypeInt()).rightJustified(2, '0') +
+					QString::number(m_connectionType).rightJustified(4, '0') +
+					QString::number(param.location().rack().index()).rightJustified(4, '0') +
+					QString::number(param.location().chassis()).rightJustified(4, '0') +
+					QString::number(param.location().module()).rightJustified(4, '0') +
+					QString::number(param.location().place()).rightJustified(4, '0');
+
+	return posID;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -267,6 +292,12 @@ void StatisticsBase::createSignalList(bool shownOnSchemas)
 
 		m_statisticList[Measure::Type::Linearity].push_back(si);
 	}
+
+
+	// sort by position
+	//
+	StatisticList& list = m_statisticList[Measure::Type::Linearity];
+	std::sort(list.begin(), list.end(), [](const StatisticsItem& si1, const StatisticsItem& si2) { return si1.positionID() < si2.positionID(); });
 
 	qDebug() << __FUNCTION__ << " Time for create: " << responseTime.elapsed() << " ms";
 }

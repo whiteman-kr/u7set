@@ -478,7 +478,22 @@ namespace Measure
 
 	void Item::calcError()
 	{
-		double errorLimit = theOptions.linearity().errorLimit();
+		if (ERR_MEASURE_TYPE(m_measureType) == true)
+		{
+			assert(0);
+			return;
+		}
+
+		double errorLimit = 0;
+
+		switch (m_measureType)
+		{
+			case Measure::Type::Linearity:		errorLimit = theOptions.linearity().errorLimit();	break;
+			case Measure::Type::Comparators:	errorLimit = theOptions.comparator().errorLimit();	break;
+			default:
+				assert(0);
+				return;
+		}
 
 		for(int type = 0; type < Measure::LimitTypeCount; type++)
 		{
@@ -515,8 +530,14 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString Item::errorStr() const
+	QString Item::errorStr(Measure::Type measureType) const
 	{
+		if (ERR_MEASURE_TYPE(measureType) == true)
+		{
+			assert(0);
+			return QString();
+		}
+
 		if (theOptions.measureView().showNoValid() == false)
 		{
 			if (isSignalValid() == false)
@@ -527,7 +548,17 @@ namespace Measure
 
 		int precision = DefaultElectricUnitPrecesion;
 
-		LimitType limitType = static_cast<LimitType>(theOptions.linearity().limitType());
+		LimitType limitType = LimitType::NoLimitType;
+
+		switch (measureType)
+		{
+			case Measure::Type::Linearity:		limitType = static_cast<LimitType>(theOptions.linearity().limitType());		break;
+			case Measure::Type::Comparators:	limitType = static_cast<LimitType>(theOptions.comparator().limitType());	break;
+			default:
+				assert(0);
+				return QString();
+		}
+
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
 			assert(0);
@@ -544,7 +575,17 @@ namespace Measure
 			}
 		}
 
-		int errorType = theOptions.linearity().errorType();
+		ErrorType errorType = ErrorType::NoErrorType;
+
+		switch (measureType)
+		{
+			case Measure::Type::Linearity:		errorType = static_cast<ErrorType>(theOptions.linearity().errorType());		break;
+			case Measure::Type::Comparators:	errorType = static_cast<ErrorType>(theOptions.comparator().errorType());	break;
+			default:
+				assert(0);
+				return QString();
+		}
+
 		if (ERR_MEASURE_ERROR_TYPE(errorType) == true)
 		{
 			assert(0);
@@ -605,16 +646,42 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString Item::errorLimitStr() const
+	QString Item::errorLimitStr(Measure::Type measureType) const
 	{
-		int limitType = theOptions.linearity().limitType();
+		if (ERR_MEASURE_TYPE(measureType) == true)
+		{
+			assert(0);
+			return QString();
+		}
+
+		LimitType limitType = LimitType::NoLimitType;
+
+		switch (measureType)
+		{
+			case Measure::Type::Linearity:		limitType = static_cast<LimitType>(theOptions.linearity().limitType());		break;
+			case Measure::Type::Comparators:	limitType = static_cast<LimitType>(theOptions.comparator().limitType());	break;
+			default:
+				assert(0);
+				return QString();
+		}
+
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
 			assert(0);
 			return QString();
 		}
 
-		int errorType = theOptions.linearity().errorType();
+		ErrorType errorType = ErrorType::NoErrorType;
+
+		switch (measureType)
+		{
+			case Measure::Type::Linearity:		errorType = static_cast<ErrorType>(theOptions.linearity().errorType());		break;
+			case Measure::Type::Comparators:	errorType = static_cast<ErrorType>(theOptions.comparator().errorType());	break;
+			default:
+				assert(0);
+				return QString();
+		}
+
 		if (ERR_MEASURE_ERROR_TYPE(errorType) == true)
 		{
 			assert(0);
@@ -656,16 +723,42 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	int Item::errorResult() const
+	Measure::ErrorResult Item::errorResult(Measure::Type measureType) const
 	{
-		int limitType = theOptions.linearity().limitType();
+		if (ERR_MEASURE_TYPE(measureType) == true)
+		{
+			assert(0);
+			return Measure::ErrorResult::NoErrorResult;
+		}
+
+		LimitType limitType = LimitType::NoLimitType;
+
+		switch (measureType)
+		{
+			case Measure::Type::Linearity:		limitType = static_cast<LimitType>(theOptions.linearity().limitType());		break;
+			case Measure::Type::Comparators:	limitType = static_cast<LimitType>(theOptions.comparator().limitType());	break;
+			default:
+				assert(0);
+				return Measure::ErrorResult::NoErrorResult;
+		}
+
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
 			assert(0);
 			return Measure::ErrorResult::NoErrorResult;
 		}
 
-		int errorType = theOptions.linearity().errorType();
+		ErrorType errorType = ErrorType::NoErrorType;
+
+		switch (measureType)
+		{
+			case Measure::Type::Linearity:		errorType = static_cast<ErrorType>(theOptions.linearity().errorType());		break;
+			case Measure::Type::Comparators:	errorType = static_cast<ErrorType>(theOptions.comparator().errorType());	break;
+			default:
+				assert(0);
+				return Measure::ErrorResult::NoErrorResult;
+		}
+
 		if (ERR_MEASURE_ERROR_TYPE(errorType) == true)
 		{
 			assert(0);
@@ -682,8 +775,14 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString Item::errorResultStr() const
+	QString Item::errorResultStr(Measure::Type measureType) const
 	{
+		if (ERR_MEASURE_TYPE(measureType) == true)
+		{
+			assert(0);
+			return QString();
+		}
+
 		if (theOptions.measureView().showNoValid() == false)
 		{
 			if (isSignalValid() == false)
@@ -692,7 +791,7 @@ namespace Measure
 			}
 		}
 
-		int errResult = errorResult();
+		Measure::ErrorResult errResult = errorResult(measureType);
 		if (ERR_MEASURE_ERROR_RESULT(errResult) == true)
 		{
 			return QString();
@@ -2364,8 +2463,8 @@ namespace Measure
 
 		switch (m_cmpType)
 		{
-			case E::CmpType::Greate:	typeStr = ">";	break;
-			case E::CmpType::Less:		typeStr = "<";	break;
+			case E::CmpType::Greate:	typeStr = QChar(9650);	break;
+			case E::CmpType::Less:		typeStr = QChar(9660);	break;
 		}
 
 		return typeStr;
@@ -2986,14 +3085,34 @@ namespace Measure
 			return;
 		}
 
-		LimitType limitType = static_cast<LimitType>(theOptions.linearity().limitType());
+		LimitType limitType = LimitType::NoLimitType;
+
+		switch (measureType)
+		{
+			case Measure::Type::Linearity:		limitType = static_cast<LimitType>(theOptions.linearity().limitType());		break;
+			case Measure::Type::Comparators:	limitType = static_cast<LimitType>(theOptions.comparator().limitType());	break;
+			default:
+				assert(0);
+				return;
+		}
+
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
 			assert(0);
 			return;
 		}
 
-		ErrorType errorType = static_cast<ErrorType>(theOptions.linearity().errorType());
+		ErrorType errorType = ErrorType::NoErrorType;
+
+		switch (measureType)
+		{
+			case Measure::Type::Linearity:		errorType = static_cast<ErrorType>(theOptions.linearity().errorType());		break;
+			case Measure::Type::Comparators:	errorType = static_cast<ErrorType>(theOptions.comparator().errorType());	break;
+			default:
+				assert(0);
+				return;
+		}
+
 		if (ERR_MEASURE_ERROR_TYPE(errorType) == true)
 		{
 			assert(0);
@@ -3187,7 +3306,7 @@ namespace Measure
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString TypeCaption(int measureType)
+	QString TypeCaption(Measure::Type measureType)
 	{
 		QString caption;
 
@@ -3203,7 +3322,7 @@ namespace Measure
 		return caption;
 	};
 
-	QString KindCaption(int measureKind)
+	QString KindCaption(Measure::Kind measureKind)
 	{
 		QString caption;
 
@@ -3221,7 +3340,7 @@ namespace Measure
 		return caption;
 	};
 
-	QString LimitTypeCaption(int measureLimitType)
+	QString LimitTypeCaption(Measure::LimitType measureLimitType)
 	{
 		QString caption;
 
@@ -3237,7 +3356,7 @@ namespace Measure
 		return caption;
 	};
 
-	QString ErrorTypeCaption(int errorType)
+	QString ErrorTypeCaption(Measure::ErrorType errorType)
 	{
 		QString caption;
 
@@ -3254,7 +3373,7 @@ namespace Measure
 		return caption;
 	};
 
-	QString ErrorResultCaption(int errorResult)
+	QString ErrorResultCaption(Measure::ErrorResult errorResult)
 	{
 		QString caption;
 
@@ -3270,7 +3389,7 @@ namespace Measure
 		return caption;
 	};
 
-	QString MeasureAdditionalParamCaption(int param)
+	QString MeasureAdditionalParamCaption(Measure::AdditionalParam param)
 	{
 		QString caption;
 

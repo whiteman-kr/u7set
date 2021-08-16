@@ -348,7 +348,7 @@ private slots:
 
 	// Slots for panels
 	//
-	void					showFindMeasurePanel(const QString& appSignalID);
+	void					showFindMeasurePanel(const QString& signalID);
 };
 
 // ==============================================================================================

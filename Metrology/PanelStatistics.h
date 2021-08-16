@@ -28,16 +28,15 @@ const char* const			StatisticsColumn[] =
 							QT_TRANSLATE_NOOP("PanelStatistics", "AppSignalID"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "EquipmentID"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Caption"),
-							QT_TRANSLATE_NOOP("PanelStatistics", "Comparator value"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Comparator No"),
-							QT_TRANSLATE_NOOP("PanelStatistics", "Comparator Output ID"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Set point"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Rack"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Chassis"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Module"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Place"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Engineering range"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Electric range"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Electric sensor"),
-							QT_TRANSLATE_NOOP("PanelStatistics", "Engineering range"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Signal type"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Connection"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Measure count"),
@@ -51,20 +50,19 @@ const int					STATISTICS_COLUMN_CUSTOM_ID			= 0,
 							STATISTICS_COLUMN_APP_ID			= 1,
 							STATISTICS_COLUMN_EQUIPMENT_ID		= 2,
 							STATISTICS_COLUMN_CAPTION			= 3,
-							STATISTICS_COLUMN_CMP_VALUE			= 4,
-							STATISTICS_COLUMN_CMP_NO			= 5,
-							STATISTICS_COLUMN_CMP_OUT_ID		= 6,
-							STATISTICS_COLUMN_RACK				= 7,
-							STATISTICS_COLUMN_CHASSIS			= 8,
-							STATISTICS_COLUMN_MODULE			= 9,
-							STATISTICS_COLUMN_PLACE				= 10,
+							STATISTICS_COLUMN_CMP_NO			= 4,
+							STATISTICS_COLUMN_CMP_VALUE			= 5,
+							STATISTICS_COLUMN_RACK				= 6,
+							STATISTICS_COLUMN_CHASSIS			= 7,
+							STATISTICS_COLUMN_MODULE			= 8,
+							STATISTICS_COLUMN_PLACE				= 9,
+							STATISTICS_COLUMN_EN_RANGE			= 10,
 							STATISTICS_COLUMN_EL_RANGE			= 11,
 							STATISTICS_COLUMN_EL_SENSOR			= 12,
-							STATISTICS_COLUMN_EN_RANGE			= 13,
-							STATISTICS_COLUMN_SIGNAL_TYPE		= 14,
-							STATISTICS_COLUMN_SIGNAL_CONNECTION	= 15,
-							STATISTICS_COLUMN_MEASURE_COUNT		= 16,
-							STATISTICS_COLUMN_STATE				= 17;
+							STATISTICS_COLUMN_SIGNAL_TYPE		= 13,
+							STATISTICS_COLUMN_SIGNAL_CONNECTION	= 14,
+							STATISTICS_COLUMN_MEASURE_COUNT		= 15,
+							STATISTICS_COLUMN_STATE				= 16;
 
 
 const int					StatisticsColumnWidth[STATISTICS_COLUMN_COUNT] =
@@ -73,16 +71,15 @@ const int					StatisticsColumnWidth[STATISTICS_COLUMN_COUNT] =
 							250,	// STATISTICS_COLUMN_APP_ID
 							250,	// STATISTICS_COLUMN_EQUIPMENT_ID
 							150,	// STATISTICS_COLUMN_CAPTION
-							150,	// STATISTICS_COLUMN_CMP_VALUE
 							 50,	// STATISTICS_COLUMN_CMP_NO
-							250,	// STATISTICS_COLUMN_CMP_OUT_ID
+							150,	// STATISTICS_COLUMN_CMP_VALUE
 							100,	// STATISTICS_COLUMN_RACK
 							 60,	// STATISTICS_COLUMN_CHASSIS
 							 60,	// STATISTICS_COLUMN_MODULE
 							 60,	// STATISTICS_COLUMN_PLACE
+							150,	// STATISTICS_COLUMN_EN_RANGE
 							150,	// STATISTICS_COLUMN_EL_RANGE
 							100,	// STATISTICS_COLUMN_EL_SENSOR
-							150,	// STATISTICS_COLUMN_EN_RANGE
 							100,	// STATISTICS_COLUMN_SIGNAL_TYPE
 							100,	// STATISTICS_COLUMN_SIGNAL_CONNECTION
 							100,	// STATISTICS_COLUMN_MEASURE_COUNT
@@ -109,15 +106,15 @@ public:
 
 	void updateSignal(Hash signalHash);
 
+	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
+
 private:
 
 	int m_statisticsItemCount = 0;
 
 	int columnCount(const QModelIndex &parent) const override;
 	int rowCount(const QModelIndex &parent=QModelIndex()) const override;
-
-	QVariant headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const override;
-	QVariant data(const QModelIndex &index, int role) const override;
 };
 
 // ==============================================================================================
@@ -205,7 +202,7 @@ signals:
 	void setRack(int index);
 	void setMeasureSignal(int index);
 
-	void showFindMeasurePanel(const QString& appSignalID);
+	void showFindMeasurePanel(const QString& signalID);
 
 public slots:
 

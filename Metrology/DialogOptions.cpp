@@ -436,7 +436,7 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					QStringList errorTypeList;
 					for(int e = 0; e < Measure::ErrorTypeCount; e++)
 					{
-						errorTypeList.append(qApp->translate("MeasureBase", Measure::ErrorTypeCaption(e).toUtf8()));
+						errorTypeList.append(qApp->translate("MeasureBase", Measure::ErrorTypeCaption(static_cast<Measure::ErrorType>(e)).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), errorTypeList);
 					item->setValue(m_options.linearity().errorType());
@@ -447,7 +447,7 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					QStringList showErrorFromLimitList;
 					for(int t = 0; t < Measure::LimitTypeCount; t++)
 					{
-						showErrorFromLimitList.append(qApp->translate("MeasureBase", Measure::LimitTypeCaption(t).toUtf8()));
+						showErrorFromLimitList.append(qApp->translate("MeasureBase", Measure::LimitTypeCaption(static_cast<Measure::LimitType>(t)).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
 					item->setValue(m_options.linearity().limitType());
@@ -575,7 +575,7 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					QStringList errorTypeList;
 					for(int e = 0; e < Measure::ErrorTypeCount; e++)
 					{
-						errorTypeList.append(qApp->translate("MeasureBase", Measure::ErrorTypeCaption(e).toUtf8()));
+						errorTypeList.append(qApp->translate("MeasureBase", Measure::ErrorTypeCaption(static_cast<Measure::ErrorType>(e)).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), errorTypeList);
 					item->setValue(m_options.comparator().errorType());
@@ -586,7 +586,7 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					QStringList showErrorFromLimitList;
 					for(int t = 0; t < Measure::LimitTypeCount; t++)
 					{
-						showErrorFromLimitList.append(qApp->translate("MeasureBase", Measure::LimitTypeCaption(t).toUtf8()));
+						showErrorFromLimitList.append(qApp->translate("MeasureBase", Measure::LimitTypeCaption(static_cast<Measure::LimitType>(t)).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
 					item->setValue(m_options.comparator().limitType());

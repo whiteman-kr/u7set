@@ -687,21 +687,6 @@ const int				MWO_PARAM_FONT						= 0,
 
 // ----------------------------------------------------------------------------------------------
 
-enum SignalIDType
-{
-	CustomID	= 0,
-	AppSignalID	= 1,
-	EquipmentID	= 2,
-};
-
-const int SignalIDTypeCount = 3;
-
-#define ERR_SIGNAL_ID_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= SignalIDTypeCount)
-
-QString SignalIDTypeCaption(int type);
-
-// ----------------------------------------------------------------------------------------------
-
 #define					COLOR_NOT_ERROR				QColor(0xA0, 0xFF, 0xA0)
 #define					COLOR_OVER_LIMIT_ERROR		QColor(0xFF, 0xA0, 0xA0)
 #define					COLOR_OVER_CONTROL_ERROR	QColor(0xFF, 0xD0, 0xA0)

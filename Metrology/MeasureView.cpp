@@ -229,7 +229,7 @@ namespace Measure
 						}
 					}
 
-					if (pLinearityMeasurement->errorResult() != Measure::ErrorResult::Ok)
+					if (pLinearityMeasurement->errorResult(m_measureType) != Measure::ErrorResult::Ok)
 					{
 						result = theOptions.measureView().colorErrorLimit();
 						break;
@@ -261,7 +261,7 @@ namespace Measure
 						}
 					}
 
-					if (pComparatorMeasurement->errorResult() != Measure::ErrorResult::Ok)
+					if (pComparatorMeasurement->errorResult(m_measureType) != Measure::ErrorResult::Ok)
 					{
 						result = theOptions.measureView().colorErrorLimit();
 						break;
@@ -422,9 +422,9 @@ namespace Measure
 			case MVC_CMN_L_BORDER:					result = m->additionalParamStr(limitType, Measure::AdditionalParam::LowHighBorder); break;
 			case MVC_CMN_L_UNCERTAINTY:				result = m->additionalParamStr(limitType, Measure::AdditionalParam::Uncertainty); break;
 
-			case MVC_CMN_L_ERROR:					result = m->errorStr(); break;
-			case MVC_CMN_L_ERROR_LIMIT:				result = m->errorLimitStr(); break;
-			case MVC_CMN_L_ERROR_RESULT:			result = m->errorResultStr(); break;
+			case MVC_CMN_L_ERROR:					result = m->errorStr(m_measureType); break;
+			case MVC_CMN_L_ERROR_LIMIT:				result = m->errorLimitStr(m_measureType); break;
+			case MVC_CMN_L_ERROR_RESULT:			result = m->errorResultStr(m_measureType); break;
 
 			case MVC_CMN_L_MEASUREMENT_TIME:		result = m->measureTimeStr(); break;
 			case MVC_CMN_L_CALIBRATOR:				result = m->calibrator(); break;
@@ -516,9 +516,9 @@ namespace Measure
 			case MVC_CMN_C_CMP_ID:					result = m->compareAppSignalID(); break;
 			case MVC_CMN_C_OUT_ID:					result = m->outputAppSignalID(); break;
 
-			case MVC_CMN_C_ERROR:					result = m->errorStr(); break;
-			case MVC_CMN_C_ERROR_LIMIT:				result = m->errorLimitStr(); break;
-			case MVC_CMN_C_ERROR_RESULT:			result = m->errorResultStr(); break;
+			case MVC_CMN_C_ERROR:					result = m->errorStr(m_measureType); break;
+			case MVC_CMN_C_ERROR_LIMIT:				result = m->errorLimitStr(m_measureType); break;
+			case MVC_CMN_C_ERROR_RESULT:			result = m->errorResultStr(m_measureType); break;
 
 			case MVC_CMN_C_MEASUREMENT_TIME:		result = m->measureTimeStr(); break;
 			case MVC_CMN_C_CALIBRATOR:				result = m->calibrator(); break;

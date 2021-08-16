@@ -164,6 +164,17 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	QString SignalLocation::positionID() const
+	{
+		QString posID =	rackCaption() +
+						QString::number(m_chassis).rightJustified(4, '0') +
+						QString::number(m_module).rightJustified(4, '0') +
+						QString::number(m_place).rightJustified(4, '0');
+		return posID;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	QString SignalLocation::shownOnSchemasStr() const
 	{
 		return m_shownOnSchemas == true ? QT_TRANSLATE_NOOP("MetrologySignal", "Yes") : QString();
@@ -900,6 +911,25 @@ namespace Metrology
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
+	QString SignalIDTypeCaption(int type)
+	{
+		QString caption;
+
+		switch (type)
+		{
+			case SignalIDType::CustomID:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "SignalID");		break;
+			case SignalIDType::AppSignalID:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "AppSignalID");	break;
+			case SignalIDType::EquipmentID:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "EquipmentID");	break;
+			default:
+				Q_ASSERT(0);
+				caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+		}
+
+		return caption;
+	};
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	QString CmpValueTypeCpation(CmpValueType type)
 	{
 		QString caption;
@@ -986,14 +1016,126 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	QString ComparatorEx::indexStr() const
+	{
+		if (m_index == -1)
+		{
+			return QString("N/A");
+		}
+
+		return QString::number(m_index + 1);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString ComparatorEx::inputSignalID(SignalIDType idType) const
+	{
+		QString signalID;
+
+		if (m_inputSignal == nullptr || m_inputSignal->param().isValid() == false)
+		{
+			signalID = input().appSignalID();
+		}
+		else
+		{
+			switch (idType)
+			{
+				case Metrology::SignalIDType::CustomID:		signalID = m_inputSignal->param().customAppSignalID();	break;
+				case Metrology::SignalIDType::AppSignalID:	signalID = m_inputSignal->param().appSignalID();		break;
+				case Metrology::SignalIDType::EquipmentID:	signalID = m_inputSignal->param().equipmentID();		break;
+				default:
+					assert(0);
+			}
+		}
+
+		return signalID;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString ComparatorEx::compareSignalID(SignalIDType idType) const
+	{
+		QString signalID;
+
+		if (m_compareSignal == nullptr || m_compareSignal->param().isValid() == false)
+		{
+			signalID = compare().appSignalID();
+		}
+		else
+		{
+			switch (idType)
+			{
+				case Metrology::SignalIDType::CustomID:		signalID = m_compareSignal->param().customAppSignalID();	break;
+				case Metrology::SignalIDType::AppSignalID:	signalID = m_compareSignal->param().appSignalID();			break;
+				case Metrology::SignalIDType::EquipmentID:	signalID = m_compareSignal->param().equipmentID();			break;
+				default:
+					assert(0);
+			}
+		}
+
+		return signalID;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString ComparatorEx::hysteresisSignalID(SignalIDType idType) const
+	{
+		QString signalID;
+
+		if (m_hysteresisSignal == nullptr || m_hysteresisSignal->param().isValid() == false)
+		{
+			signalID = hysteresis().appSignalID();
+		}
+		else
+		{
+			switch (idType)
+			{
+				case Metrology::SignalIDType::CustomID:		signalID = m_hysteresisSignal->param().customAppSignalID();	break;
+				case Metrology::SignalIDType::AppSignalID:	signalID = m_hysteresisSignal->param().appSignalID();		break;
+				case Metrology::SignalIDType::EquipmentID:	signalID = m_hysteresisSignal->param().equipmentID();		break;
+				default:
+					assert(0);
+			}
+		}
+
+		return signalID;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString ComparatorEx::outputSignalID(SignalIDType idType) const
+	{
+		QString signalID;
+
+		if (m_outputSignal == nullptr || m_outputSignal->param().isValid() == false)
+		{
+			signalID = output().appSignalID();
+		}
+		else
+		{
+			switch (idType)
+			{
+				case Metrology::SignalIDType::CustomID:		signalID = m_outputSignal->param().customAppSignalID();	break;
+				case Metrology::SignalIDType::AppSignalID:	signalID = m_outputSignal->param().appSignalID();		break;
+				case Metrology::SignalIDType::EquipmentID:	signalID = m_outputSignal->param().equipmentID();		break;
+				default:
+					assert(0);
+			}
+		}
+
+		return signalID;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	QString ComparatorEx::cmpTypeStr() const
 	{
 		QString typeStr;
 
 		switch (cmpType())
 		{
-			case E::CmpType::Greate:	typeStr = QString(">");	break;
-			case E::CmpType::Less:		typeStr = QString("<");	break;
+			case E::CmpType::Greate:	typeStr = QChar(9650);	break;
+			case E::CmpType::Less:		typeStr = QChar(9660);	break;
 		}
 
 		return typeStr;
@@ -1030,7 +1172,7 @@ namespace Metrology
 			return 0.0;
 		}
 
-		double hysteresisValue = hysteresisOnlineValue();	// get hysteresis value
+		double hysteresisValue = hysteresisOnlineValue();								// get hysteresis value
 
 		//
 		//
@@ -1086,13 +1228,6 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::compareOnlineValueStr(int cmpValueType)
-	{
-		return compareOnlineValueStr(static_cast<CmpValueType>(cmpValueType));
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
 	QString ComparatorEx::compareOnlineValueStr(CmpValueType cmpValueType)
 	{
 		if (ERR_METROLOGY_CMP_VALUE_TYPE(cmpValueType) == true)
@@ -1123,20 +1258,42 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::compareDefaultValueStr() const
+	QString ComparatorEx::compareDefaultValueStr(SignalIDType idType) const
 	{
 		QString value;
 
-		value += cmpTypeStr() + " ";
-
 		if (compare().isConst() == true)
 		{
-			value += QString::number(compareConstValue(), 'f', valuePrecision());			// if compare is const then hysteresis also const
+			double compareValue = compareConstValue();
+
+			value = QString::number(compareValue, 'f', valuePrecision());
+
+			if (m_inputSignal != nullptr)
+			{
+				const SignalParam& param = m_inputSignal->param();
+				if (param.isValid() == true)
+				{
+					if (param.unit().isEmpty() == false)
+					{
+						value += " " + param.unit();
+					}
+
+					if (param.electricRangeIsValid() == true)
+					{
+						UnitsConvertor uc;
+						double electric = uc.conversion(compareValue, UnitsConvertType::PhysicalToElectric, param);
+
+						value += "  [" + QString::number(electric, 'f', param.electricPrecision()) + " " + param.electricUnitStr() + "]";
+					}
+				}
+			}
 		}
 		else
 		{
-			value += compare().appSignalID();
+			value = compareSignalID(idType);
 		}
+
+		value.insert(0, cmpTypeStr() + " ");
 
 		return value;
 	}
@@ -1165,14 +1322,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::hysteresisOnlineValueStr()
-	{
-		return QString::number(hysteresisOnlineValue(), 'f', valuePrecision());
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	QString ComparatorEx::hysteresisDefaultValueStr() const
+	QString ComparatorEx::hysteresisDefaultValueStr(SignalIDType idType) const
 	{
 		QString value;
 
@@ -1182,17 +1332,23 @@ namespace Metrology
 		}
 		else
 		{
-			value = hysteresis().appSignalID();
-		}
 
-		if (m_deviationType != DeviationType::Unused)
-		{
-			value = QT_TRANSLATE_NOOP("MetrologySignal", "Unused");
+			value = hysteresisSignalID(idType);
+
+			switch (cmpType())
+			{
+				case E::CmpType::Less:		value.insert(0, "+ "); break;
+				case E::CmpType::Greate:	value.insert(0, "- "); break;
+			}
+
+			if (m_deviationType != DeviationType::Unused)
+			{
+				value = QT_TRANSLATE_NOOP("MetrologySignal", "Unused");
+			}
 		}
 
 		return value;
 	}
-
 
 	// -------------------------------------------------------------------------------------------------------------------
 
@@ -1240,5 +1396,4 @@ namespace Metrology
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
-
 }
