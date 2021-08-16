@@ -219,164 +219,187 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 
 	} // p
 
-	let txBusTypeId = module.propertyValue("TxBusTypeId");
+	// ------------------------------------------------------------ VOTE_CFG ---------------------------------------------------------
 
-	if (txBusTypeId.length != 0) {
+	var txBusDataStartAddressArray = [];
+	var rxBusDataStartAddressArray = [];
+	
+	var txModbusDataLengthArray = [];
+	var rxModbusDataLengthArray = [];
 
-		var modbusDataLengthArray = [];
+	const LAN_TYPE_TX = 0;
+	const LAN_TYPE_RX = 1;
 
-		// ------------------------------------------------------------ VOTE_CFG ---------------------------------------------------------
+	const maxVotePartCount = 48;
 
-		{
-			let votePartCount = 0;
-			const maxVotePartCount = 48;
-			const maxVotePartSizeW = 128;
+	for (let lanType = LAN_TYPE_TX; lanType <= LAN_TYPE_RX; lanType++)
+	{
+		let lanTypeName = lanType == LAN_TYPE_TX ? "Tx" : "Rx";
 
-			const MSO5Discrete = 1;
-			const MSO5Float = 2;
-			const MSO5SignedInt = 3;
+		let votePartCount = 0;
+		const maxVotePartSizeW = 128;
 
-			const SignalTypeAnalog = 0;
-			const SignalTypeDiscrete = 1;
-			const SignalTypeBus = 2;
+		const MSO5Discrete = 1;
+		const MSO5Float = 2;
+		const MSO5SignedInt = 3;
 
-			const AnalogAppSignalFormatSignedInt = 1;
-			const AnalogAppSignalFormatFloat32 = 2;
+		const SignalTypeAnalog = 0;
+		const SignalTypeDiscrete = 1;
+		const SignalTypeBus = 2;
 
-			// Version of protocol
+		const AnalogAppSignalFormatSignedInt = 1;
+		const AnalogAppSignalFormatFloat32 = 2;
 
-			ptr = 80;
+		// Version of protocol
 
+		ptr = 80;
+
+		if (lanType == LAN_TYPE_TX) {
 			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : VOTE_CFG_ProtocolVersion = " + 1 + "\r\n");
 
 			if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "ProtocolVersion", 1) == false) {
 				return false;
 			}
 			ptr += 2;
+		}
 
-			// Quantity of records will be filled later
+		// Quantity of records will be filled later
 
-			const ptrQuantityOfRecords = ptr;
+		const ptrQuantityOfRecords = ptr;
 
-			ptr += 2;
+		ptr += 2;
 
-			// Parse bus signals
+		// Parse bus signals
 
-			if (signalSet.busExists(txBusTypeId) == false) {
-				log.writeError(module.equipmentId + ", Bus " + txBusTypeId + " was not found!");
+		let busTypeId = module.propertyValue(lanTypeName + "BusTypeId");
+
+		if (signalSet.busExists(busTypeId) == false)
+		{
+			log.writeError(module.equipmentId +  ", Bus " + busTypeId + " was not found!");
+			return false;
+		}
+
+		confFirmware.writeLog("Parsing Bus " + busTypeId + "\r\n");
+
+		let busSignalList = signalSet.getFlatBusSignalsList(busTypeId)
+
+		let i = 0;
+
+		while (i < busSignalList.length)
+		{
+
+			let bs = busSignalList[i];
+
+			/*
+			if (bs.SignalType == SignalTypeAnalog) {
+				confFirmware.writeLog(bs.SignalID + " IA OffsetW: " + bs.OffsetW +  "SizeW: " + bs.SizeW + "\r\n");
+			}
+			else {
+				confFirmware.writeLog(bs.SignalID + " ID OffsetW: " + bs.OffsetW + " SizeW: " + bs.SizeW + "\r\n");
+			}*/
+			
+
+			let partOffset = bs.OffsetW;
+			let partDataSize = bs.SizeW;
+
+			// Look for the last signal with the same parameters
+
+			if (i < busSignalList.length - 1) {
+
+				for (let j = i + 1; j < busSignalList.length; j++) {
+					let bs2 = busSignalList[j];
+
+					if (bs.SignalType == bs2.SignalType && 
+						bs.AnalogFormat == bs2.AnalogFormat && 
+						bs.SizeW == bs2.SizeW && 
+						bs.BusTypeID == bs2.BusTypeID && 
+						bs2.OffsetW <= partOffset + partDataSize &&
+						partDataSize + bs2.SizeW <= maxVotePartSizeW) {
+
+						/*
+						if (bs2.SignalType == SignalTypeAnalog) {
+							confFirmware.writeLog(bs2.SignalID + " JA OffsetW: " + bs2.OffsetW + "SizeW: " + bs2.SizeW + "\r\n");
+						}
+						else {
+							confFirmware.writeLog(bs2.SignalID + " JD OffsetW: " + bs2.OffsetW + " SizeW: " + bs2.SizeW + "\r\n");
+						}*/
+						
+
+						if (bs2.OffsetW != partOffset)	// Same offset can be for discrete signals, skip them
+						{
+							partDataSize += bs2.SizeW;	
+						}
+						i = j + 1;
+					}
+					else {
+						//confFirmware.writeLog("OTHER\r\n");
+						i = j;
+						break;
+					}
+				}
+			}
+			else
+			{
+				//confFirmware.writeLog("END\r\n");
+				i++;	// This will end the loop
+			}
+
+			votePartCount++;
+
+			if (votePartCount > maxVotePartCount)
+			{
+				log.writeError(module.equipmentId +  ", TX Bus part count is more than 48 parts.");
 				return false;
 			}
 
-			let busSignalList = signalSet.getFlatBusSignalsList(txBusTypeId)
+			let partDataType = -1;
+			let partDataTypeStr = "";
 
-			let i = 0;
-
-			while (i < busSignalList.length) {
-
-				let bs = busSignalList[i];
-
-				/*
+			if (bs.SignalType == SignalTypeDiscrete) {
+				partDataType = MSO5Discrete;
+				partDataTypeStr = "(discrete)";
+			}
+			else {
 				if (bs.SignalType == SignalTypeAnalog) {
-					confFirmware.writeLog(bs.SignalID + " IA OffsetW: " + bs.OffsetW +  "SizeW: " + bs.SizeW + "\r\n");
-				}
-				else {
-					confFirmware.writeLog(bs.SignalID + " ID OffsetW: " + bs.OffsetW + " SizeW: " + bs.SizeW + "\r\n");
-				}
-				*/
-
-				let partOffset = bs.OffsetW;
-				let partDataSize = bs.SizeW;
-
-				// Look for the last signal with the same parameters
-
-				if (i < busSignalList.length - 1) {
-
-					for (let j = i + 1; j < busSignalList.length; j++) {
-						let bs2 = busSignalList[j];
-
-						if (bs.SignalType == bs2.SignalType &&
-							bs.AnalogFormat == bs2.AnalogFormat &&
-							bs.SizeW == bs2.SizeW &&
-							bs.BusTypeID == bs2.BusTypeID &&
-							bs2.OffsetW <= partOffset + partDataSize &&
-							partDataSize + bs2.SizeW <= maxVotePartSizeW) {
-
-							/*
-							if (bs2.SignalType == SignalTypeAnalog) {
-								confFirmware.writeLog(bs2.SignalID + " JA OffsetW: " + bs2.OffsetW + "SizeW: " + bs2.SizeW + "\r\n");
-							}
-							else {
-								confFirmware.writeLog(bs2.SignalID + " JD OffsetW: " + bs2.OffsetW + " SizeW: " + bs2.SizeW + "\r\n");
-							}
-							*/
-
-							if (bs2.OffsetW != partOffset)	// Same offset can be for discrete signals, skip them
+					switch (bs.AnalogFormat) {
+						case AnalogAppSignalFormatFloat32:
 							{
-								partDataSize += bs2.SizeW;
+								partDataType = MSO5Float;
+								partDataTypeStr = "(float32)";
 							}
-							i = j + 1;
-						}
-						else {
-							//confFirmware.writeLog("OTHER\r\n");
-							i = j;
 							break;
-						}
+						case AnalogAppSignalFormatSignedInt:
+							{
+								partDataType = MSO5SignedInt;
+								partDataTypeStr = "(int)";
+							}
+							break;
+						default:
+							log.errINT1001(module.equipmentId + ", Bus " + txBusTypeId + ", Signal " + bs.SignalID + " - unknown AnalogFormat");
+							return false;
 					}
 				}
 				else {
-					//confFirmware.writeLog("END\r\n");
-					i++;	// This will end the loop
-				}
-
-				votePartCount++;
-
-				if (votePartCount > maxVotePartCount) {
-					log.writeError(module.equipmentId + ", TX Bus part count is more than 48 parts.");
+					log.errINT1001(module.equipmentId + ", Bus " + txBusTypeId + ", Signal " + bs.SignalID + " - unknown SignalType");
 					return false;
 				}
+			}
 
-				let partDataType = -1;
-				let partDataTypeStr = "";
+			if (lanType == LAN_TYPE_TX) {
 
-				if (bs.SignalType == SignalTypeDiscrete) {
-					partDataType = MSO5Discrete;
-					partDataTypeStr = "(discrete)";
-				}
-				else {
-					if (bs.SignalType == SignalTypeAnalog) {
-						switch (bs.AnalogFormat) {
-							case AnalogAppSignalFormatFloat32:
-								{
-									partDataType = MSO5Float;
-									partDataTypeStr = "(float32)";
-								}
-								break;
-							case AnalogAppSignalFormatSignedInt:
-								{
-									partDataType = MSO5SignedInt;
-									partDataTypeStr = "(int)";
-								}
-								break;
-							default:
-								log.errINT1001(module.equipmentId + ", Bus " + txBusTypeId + ", Signal " + bs.SignalID + " - unknown AnalogFormat");
-								return false;
-						}
-					}
-					else {
-						log.errINT1001(module.equipmentId + ", Bus " + txBusTypeId + ", Signal " + bs.SignalID + " - unknown SignalType");
-						return false;
-					}
-				}
+				// Add part offset to array
+
+				txBusDataStartAddressArray.push(partOffset);
 
 				// Add part data size to array
 
-				modbusDataLengthArray.push(partDataSize);
+				txModbusDataLengthArray.push(partDataSize);
 
 				// Offset
 
-				confFirmware.writeLog("    [" + frame + ":" + ptr + "] : VOTE_CFG Part " + votePartCount + " Offset = " + partOffset + "\r\n");
+				confFirmware.writeLog("    [" + frame + ":" + ptr + "] : TxVOTE_CFG Part " + votePartCount + " Offset = " + partOffset + "\r\n");
 
-				if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "VOTE_CFG_" + votePartCount + "_Offset", partOffset) == false) {
+				if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "TxVOTE_CFG_" + votePartCount + "_Offset", partOffset) == false) {
 					return false;
 				}
 				ptr += 2;
@@ -385,157 +408,251 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 
 				let dataSizeType = (partDataSize << 8) + partDataType;
 
-				confFirmware.writeLog("    [" + frame + ":" + ptr + "] : VOTE_CFG Part " + votePartCount + " DataSize = " + partDataSize + ", DataType = " + partDataType + " " + partDataTypeStr + ", BusTypeID = " + bs.BusTypeID + ", DatsSizeType = " + dataSizeType + "\r\n");
+				confFirmware.writeLog("    [" + frame + ":" + ptr + "] : TxVOTE_CFG Part " + votePartCount + " DataSize = " + partDataSize + ", DataType = " + partDataType + " " + partDataTypeStr + ", BusTypeID = " + bs.BusTypeID + ", DatsSizeType = " + dataSizeType + "\r\n");
 
-				if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "VOTE_CFG_" + votePartCount + "_DatsSizeType", dataSizeType) == false) {
+				if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "TxVOTE_CFG_" + votePartCount + "_DatsSizeType", dataSizeType) == false) {
 					return false;
 				}
 				ptr += 2;
 			}
+			else
+			{
+				// Add part offset to array
 
-			// PartCount
+				confFirmware.writeLog("    [--:--] : RxVOTE_CFG Part " + votePartCount + " Offset = " + partOffset + "\r\n");
 
-			confFirmware.writeLog("    [" + frame + ":" + ptrQuantityOfRecords + "] : VOTE_CFG_QuantityOfRecords = " + votePartCount + "\r\n");
+				rxBusDataStartAddressArray.push(partOffset);
+
+				// Add part data size to array
+
+				rxModbusDataLengthArray.push(partDataSize);
+
+				confFirmware.writeLog("    [--:--] : RxVOTE_CFG Part " + votePartCount + " DataSize = " + partDataSize + ", DataType = " + partDataType + " " + partDataTypeStr + ", BusTypeID = " + bs.BusTypeID + "\r\n");
+			}
+		}
+
+		// PartCount
+		if (lanType == LAN_TYPE_TX) {
+
+			confFirmware.writeLog("    [" + frame + ":" + ptrQuantityOfRecords + "] : TxVOTE_CFG_QuantityOfRecords = " + votePartCount + "\r\n");
 
 			if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptrQuantityOfRecords, "VOTE_CFG_QuantityOfRecords", votePartCount) == false) {
 				return false;
 			}
 			ptr += 2;
-		}//VOTE_CFG
+		}
+		else{
+			confFirmware.writeLog("    [00:00] : RxVOTE_CFG_QuantityOfRecords = " + votePartCount + "\r\n");
+		}
+	}//lanType
 
-		// ------------------------------------------------------------ LAN_CFG ---------------------------------------------------------
+	// ------------------------------------------------------------ LAN_CFG ---------------------------------------------------------
 
+	{
+		const LAN_COUNT = 2;
+
+		ptr = 276;
+
+		for (let lan = 1; lan <= LAN_COUNT; lan++)
 		{
-			const LAN_COUNT = 2;
 
-			ptr = 276;
+			confFirmware.writeLog("Writing LAN" + lan + " configuration\r\n");
 
-			for (let lan = 1; lan <= LAN_COUNT; lan++) {
+			// ProtocolVersion
 
+			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN" + lan + "_CFG ProtocolVersion = 1 \r\n");
+
+			if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LAN" + lan + "_CFG ProtocolVersion ", 1) == false) {
+				return false;
+			}
+			ptr += 2;
+
+			let txQuantityOfRecordsPtr = ptr;
+			ptr += 2;
+
+			let rxQuantityOfRecordsPtr = ptr;
+			ptr += 2;
+
+			for (let lanType = LAN_TYPE_TX; lanType <= LAN_TYPE_RX; lanType++)
+			{
 				let lanPartCount = 0;
 
-				let addressData = module.propertyValue("LAN" + lan + "AddressData");
+				let lanTypeName = lanType == LAN_TYPE_TX ? "Tx" : "Rx";
+
+				confFirmware.writeLog("Direction: " + lanTypeName + "\r\n");
+
+				let addressData = module.propertyValue("LAN" + lan +  lanTypeName + "AddressData");
 
 				var addressDataStrings = addressData.split("\n");
 
-				for (let s = 0; s < addressDataStrings.length; s++) {
+				// Count number of records
+
+				for (let s = 0; s < addressDataStrings.length; s++)
+				{
 					var addressDataString = addressDataStrings[s].trim();
-					if (addressDataString.length == 0) {
+					if (addressDataString.length == 0)
+					{
 						continue;
 					}
-
+					
 					lanPartCount++;
 				}
 
-				// ProtocolVersion
-
-				confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN" + lan + "_CFG ProtocolVersion = 1 \r\n");
-
-				if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LAN" + lan + "_CFG ProtocolVersion ", 1) == false) {
-					return false;
-				}
-				ptr += 2;
-
 				//QuantityOfRecords
 
-				confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN" + lan + "_CFG Quantity of records = " + lanPartCount + "\r\n");
+				let quantityOfRecordsPtr = lanType == LAN_TYPE_TX ? txQuantityOfRecordsPtr : rxQuantityOfRecordsPtr;
+				
+				confFirmware.writeLog("    [" + frame + ":" + quantityOfRecordsPtr + "] : LAN" + lan + lanTypeName +"_CFG Quantity of records = " + lanPartCount + "\r\n");
 
-				if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LAN" + lan + "_CFG_Quantity", lanPartCount) == false) {
+				if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, quantityOfRecordsPtr, "LAN" + lan + lanTypeName + "_CFG_Quantity", lanPartCount) == false) {
 					return false;
 				}
-				ptr += 2;
 
 				ptr += 2; // Reserve 1
 
 				ptr += 2; // Reserve 2
-
-				for (let s = 0; s < addressDataStrings.length; s++) {
-					var addressDataString = addressDataStrings[s].trim();
-					if (addressDataString.length == 0) {
+			
+				for (let s = 0; s < addressDataStrings.length; s++)
+				{
+					let addressDataString = addressDataStrings[s].trim();
+					if (addressDataString.length == 0)
+					{
 						continue;
 					}
 
-					var addressValues = addressDataString.split(" ");
+					let addressValues = addressDataString.split(" ");
 
-					if (addressValues.length != 3) {
-						log.writeError(module.equipmentId + ", LAN" + lan + "AddressData string '" + addressDataString + "' has incorrect format!");
+					if (addressValues.length != 2)
+					{
+						log.writeError(module.equipmentId +  ", LAN" + lan + lanTypeName + "AddressData string '" + addressDataString + "' has incorrect format!");
 						continue;
 					}
 
 					// PART
 
-					var partStr = addressValues[0].trim();
-					if (partStr.search("^PART\\d+$") == -1) {
-						log.writeError(module.equipmentId + ", LAN" + lan + "AddressData string '" + addressDataString + "', field '" + partStr + "' has incorrect format!");
+					let partStr = addressValues[0].trim();
+					if (partStr.search("^PART\\d+$") == -1)
+					{
+						log.writeError(module.equipmentId +  ", LAN" + lan + lanTypeName + "AddressData string '" + addressDataString + "', field '"+ partStr + "' has incorrect format!");
 						continue;
 					}
 
-					// R
+					// ADDR
 
-					var rStr = addressValues[1].trim();
-					if (rStr.search("^R\\d+$") == -1) {
-						log.writeError(module.equipmentId + ", LAN" + lan + "AddressData string '" + addressDataString + "', field '" + rStr + "' has incorrect format!");
+					let addrStr = addressValues[1].trim();
+					if (addrStr.search("^ADDR\\d+$") == -1)
+					{
+						log.writeError(module.equipmentId +  ", LAN" + lan + lanTypeName + "AddressData string '" + addressDataString + "', field '"+ addrStr + "' has incorrect format!");
 						continue;
 					}
 
-					// W
+					// Get part
 
-					var wStr = addressValues[2].trim();
-					if (wStr.search("^W\\d+$") == -1) {
-						log.writeError(module.equipmentId + ", LAN" + lan + "AddressData string '" + addressDataString + "', field '" + wStr + "' has incorrect format!");
+					let part = Number.parseInt(partStr.substring(4));
+
+					if (part < 1 || part > maxVotePartCount)
+					{
+						log.writeError(module.equipmentId +  ", LAN" + lan + lanTypeName + "AddressData string '" + addressDataString + "', field PART '"+ part + "' has incorrect value (expected 1..48)!");	
 						continue;
 					}
 
-					// Get partAddr
+					// Get Addresses for wAddr and rAddr and swap them for RX
 
-					var partAddr = Number.parseInt(partStr.substring(4));
+					let rAddrPtr = ptr;
+					ptr += 2;
 
-					if (partAddr < 1 || partAddr > 48) {
-						log.writeError(module.equipmentId + ", LAN" + lan + "AddressData string '" + addressDataString + "', field PART '" + partAddr + "' has incorrect value (expected 1..48)!");
-						continue;
+					let wAddrPtr = ptr;
+					ptr += 2;
+
+					if (lanType == LAN_TYPE_RX)
+					{
+						let temp = wAddrPtr;
+						wAddrPtr = rAddrPtr;
+						rAddrPtr = temp;
 					}
-
+					
 					// Write rAddr
 
-					var rAddr = Number.parseInt(rStr.substring(1));
+					let rAddr = 0; 
 
-					confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN" + lan + "_CFG Part " + partAddr + " ReadSizeAddress = " + rAddr + "\r\n");
+					if (lanType == LAN_TYPE_TX)
+					{
+						// Take rAddr from txBusDataStartAddressArray
 
-					if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LAN" + lan + "_CFG_Part_" + partAddr + "_ReadSizeAddress", rAddr) == false) {
+						if ((part - 1) > (txBusDataStartAddressArray.length - 1)) {
+							log.writeError(module.equipmentId + ", LAN" + lan + lanTypeName + "AddressData string '" + addressDataString + "', PART '" + part + "' part offset was not found!");
+							continue;
+						}
+
+						rAddr = txBusDataStartAddressArray[part - 1];
+					}
+					else
+					{
+						// Take rAddr from rxBusDataStartAddressArray
+
+						if ((part - 1) > (rxBusDataStartAddressArray.length - 1)) {
+							log.writeError(module.equipmentId + ", LAN" + lan + lanTypeName + "AddressData string '" + addressDataString + "', PART '" + part + "' part offset was not found!");
+							continue;
+						}
+
+						rAddr = rxBusDataStartAddressArray[part - 1];
+					}
+					
+					confFirmware.writeLog("    [" + frame + ":" + rAddrPtr + "] : LAN" + lan + lanTypeName + "_CFG Part " + part + " ReadSizeAddress = " + rAddr + "\r\n");
+
+					if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, rAddrPtr, "LAN" + lan + lanTypeName + "_CFG_Part_" + part + "_ReadSizeAddress", rAddr) == false) {
 						return false;
 					}
-					ptr += 2;
-
+					
 					// Write wAddr
 
-					var wAddr = Number.parseInt(wStr.substring(1));
+					var wAddr = Number.parseInt(addrStr.substring(4));
 
-					confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN" + lan + "_CFG Part " + partAddr + " WriteSizeAddress = " + wAddr + "\r\n");
+					confFirmware.writeLog("    [" + frame + ":" + wAddrPtr + "] : LAN" + lan + "_CFG Part " + part + " WriteSizeAddress = " + wAddr + "\r\n");
 
-					if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LAN" + lan + "_CFG_Part_" + partAddr + "_WriteSizeAddress", wAddr) == false) {
+					if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, wAddrPtr, "LAN" + lan + lanTypeName + "_CFG_Part_" + part + "_WriteSizeAddress", wAddr) == false) {
 						return false;
 					}
-					ptr += 2;
 
 					// Write DataSize
 
-					if ((partAddr - 1) > (modbusDataLengthArray.length - 1)) {
-						log.writeError(module.equipmentId + ", LAN" + lan + "AddressData string '" + addressDataString + "', PART '" + partAddr + "' data size was not found!");
-						continue;
+					let dataSize = 0;
+
+					if (lanType == LAN_TYPE_TX) {
+						if ((part - 1) > (txModbusDataLengthArray.length - 1)) {
+							log.writeError(module.equipmentId + ", LAN" + lan + lanTypeName + "AddressData string '" + addressDataString + "', PART '" + part + "' data size was not found!");
+							continue;
+						}
+
+						dataSize = txModbusDataLengthArray[part - 1];
+					}
+					else
+					{
+						if ((part - 1) > (rxModbusDataLengthArray.length - 1)) {
+							log.writeError(module.equipmentId + ", LAN" + lan + lanTypeName + "AddressData string '" + addressDataString + "', PART '" + part + "' data size was not found!");
+							continue;
+						}
+
+						dataSize = rxModbusDataLengthArray[part - 1];
 					}
 
-					let dataSize = modbusDataLengthArray[partAddr - 1];
+					confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN" + lan + lanTypeName + "_CFG Part " + part + " DataSize = " + dataSize + "\r\n");
 
-					confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN" + lan + "_CFG Part " + partAddr + " DataSize = " + dataSize + "\r\n");
-
-					if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LAN" + lan + "_CFG_Part_" + partAddr + "_DataSize", dataSize) == false) {
+					if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LAN" + lan + lanTypeName + "_CFG_Part_" + part + "_DataSize", dataSize) == false) {
 						return false;
 					}
 					ptr += 2;
+
+					if (ptr >= 868)
+					{
+						log.writeError(module.equipmentId +  ", LAN configuration is too large.");
+						// Configuration is too large
+						///////////
+					}
 				} // addressDataStrings
-			} // lan
-		} // LAN_CFG
-	}	// txBusTypeId.length != 0
+			} // lanType
+		}// lan
+	}
 
 	//---------------------------------------- CRC ------------------------------------------------------
 
