@@ -233,9 +233,13 @@ namespace Measure
 		bool foundInStatistics() const { return m_foundInStatistics; }
 		void setFoundInStatistics(bool signalIsfound) { m_foundInStatistics = signalIsfound; }
 
+		bool hasWrongRange() const { return m_hasWrongRange; }
+		void setHasWrongRange(bool wrongRange) { m_hasWrongRange = wrongRange; }
+
 		Item* at(int index);
 
 		virtual bool findInStatisticsItem(const StatisticsItem& si);
+		virtual bool rangeIsOkInStatisticsItem(const StatisticsItem& si);
 		virtual void updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si);
 
 		Item& operator=(Item& from);
@@ -280,6 +284,7 @@ namespace Measure
 		int m_reportType = -1;												// report type
 
 		bool m_foundInStatistics = true;									// after loading find signal in the statistics list
+		bool m_hasWrongRange = false;										// after loading check signal range in the statistics list
 	};
 
 	// ==============================================================================================
@@ -419,6 +424,7 @@ namespace Measure
 		void updateStatisticsBase(Measure::Type measureType);
 		void updateStatisticsBase(Measure::Type measureType, Hash signalHash);
 		static void markNotExistMeasuremetsFromStatistics(Measure::Base* pThis);
+		static void markWrongRangeFromStatistics(Measure::Base* pThis);
 
 	private:
 

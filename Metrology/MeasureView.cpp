@@ -168,6 +168,13 @@ namespace Measure
 			{
 				return QColor(Qt::lightGray);
 			}
+			else
+			{
+				if (pMeasurement->hasWrongRange() == true)
+				{
+					return QColor(Qt::red);
+				}
+			}
 
 			return QVariant();
 		}

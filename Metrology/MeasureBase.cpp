@@ -80,6 +80,7 @@ namespace Measure
 		m_reportType = -1;
 
 		m_foundInStatistics = true;
+		m_hasWrongRange = false;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -912,6 +913,58 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	bool Item::rangeIsOkInStatisticsItem(const StatisticsItem& si)
+	{
+		Metrology::Signal* pSignal = si.signal();
+		if (pSignal == nullptr || pSignal->param().isValid() == false)
+		{
+			return false;
+		}
+
+		// Measure::LimitType::Electric
+		//
+
+		if (pSignal->param().inOutType() == E::SignalInOutType::Input ||  pSignal->param().inOutType() == E::SignalInOutType::Output)
+		{
+			if (lowLimit(Measure::LimitType::Electric) != pSignal->param().electricLowLimit())
+			{
+				return false;
+			}
+
+			if (highLimit(Measure::LimitType::Electric) != pSignal->param().electricHighLimit())
+			{
+				return false;
+			}
+
+			if (unit(Measure::LimitType::Electric) != pSignal->param().electricUnitStr())
+			{
+				return false;
+			}
+		}
+
+		// Measure::LimitType::Engineering
+		//
+
+		if (lowLimit(Measure::LimitType::Engineering) != pSignal->param().lowEngineeringUnits())
+		{
+			return false;
+		}
+
+		if (highLimit(Measure::LimitType::Engineering) != pSignal->param().highEngineeringUnits())
+		{
+			return false;
+		}
+
+		if (unit(Measure::LimitType::Engineering) != pSignal->param().unit())
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	void Item::updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
@@ -958,20 +1011,20 @@ namespace Measure
 
 		m_calibratorPrecision = from.m_calibratorPrecision;
 
-		for(int t = 0; t < Measure::LimitTypeCount; t++)
+		for(int l = 0; l < Measure::LimitTypeCount; l++)
 		{
-			m_nominal[t] = from.m_nominal[t];
-			m_measure[t] = from.m_measure[t];
+			m_nominal[l] = from.m_nominal[l];
+			m_measure[l] = from.m_measure[l];
 
-			m_lowLimit[t] = from.m_lowLimit[t];
-			m_highLimit[t] = from.m_highLimit[t];
-			m_unit[t] = from.m_unit[t];
-			m_limitPrecision[t] = from.m_limitPrecision[t];
+			m_lowLimit[l] = from.m_lowLimit[l];
+			m_highLimit[l] = from.m_highLimit[l];
+			m_unit[l] = from.m_unit[l];
+			m_limitPrecision[l] = from.m_limitPrecision[l];
 
 			for(int e = 0; e < Measure::ErrorTypeCount; e++)
 			{
-				m_error[t][e] = from.m_error[t][e];
-				m_errorLimit[t][e] = from.m_errorLimit[t][e];
+				m_error[l][e] = from.m_error[l][e];
+				m_errorLimit[l][e] = from.m_errorLimit[l][e];
 			}
 		}
 
@@ -984,6 +1037,7 @@ namespace Measure
 		m_reportType = from.m_reportType;
 
 		m_foundInStatistics = from.m_foundInStatistics;
+		m_hasWrongRange = from.m_hasWrongRange;
 
 		//
 		//
@@ -2900,6 +2954,7 @@ namespace Measure
 	void Base::signalBaseLoaded()
 	{
 		QtConcurrent::run(Base::markNotExistMeasuremetsFromStatistics, this);
+		QtConcurrent::run(Base::markWrongRangeFromStatistics, this);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -3293,6 +3348,63 @@ namespace Measure
 				if (pMeasurement->findInStatisticsItem(si) == true)
 				{
 					pMeasurement->setFoundInStatistics(true);
+				}
+			}
+		}
+
+		emit pThis->updateMeasureView();
+
+		qDebug() << __FUNCTION__ << "- Signals were marked, " << " Time for marked: " << responseTime.elapsed() << " ms";
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void Base::markWrongRangeFromStatistics(Measure::Base* pThis)
+	{
+		if (pThis == nullptr)
+		{
+			return;
+		}
+
+		QElapsedTimer responseTime;
+		responseTime.start();
+
+		QMutexLocker l(&pThis->m_measureMutex);
+
+		for (auto pMeasurement : pThis->m_measureList)
+		{
+			if (pMeasurement == nullptr)
+			{
+				continue;
+			}
+
+			Measure::Type measureType = pMeasurement->measureType();
+			if (ERR_MEASURE_TYPE(measureType) == true)
+			{
+				continue;
+			}
+
+			pMeasurement->setHasWrongRange(false);
+
+			int count = theSignalBase.statistics().count(measureType);
+			for(int s = 0; s < count; s++)
+			{
+				const StatisticsItem& si = theSignalBase.statistics().item(measureType, s);
+
+				Metrology::Signal* pSignal = si.signal();
+				if (pSignal == nullptr || pSignal->param().isValid() == false)
+				{
+					continue;;
+				}
+
+				if (pMeasurement->appSignalID() != pSignal->param().appSignalID())
+				{
+					continue;
+				}
+
+				if (pMeasurement->rangeIsOkInStatisticsItem(si) == false)
+				{
+					pMeasurement->setHasWrongRange(true);
 				}
 			}
 		}
