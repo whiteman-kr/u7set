@@ -1053,7 +1053,7 @@ void DialogSignalProperty::createPropertyList()
 		return;
 	}
 
-	setWindowTitle(tr("Propertу - %1").arg(m_param.customAppSignalID()));
+	setWindowTitle(tr("Propertу of signal - %1").arg(m_param.customAppSignalID()));
 
 	//
 	//
@@ -1504,6 +1504,10 @@ void DialogComparatorProperty::createPropertyList()
 	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
 	move(screen.center() - rect().center());
 
+	setWindowTitle(tr("Propertу of comparator"));
+
+	//
+	//
 	UnitsConvertor uc;
 
 	QMetaEnum meu = QMetaEnum::fromType<E::CmpType>();
@@ -2031,7 +2035,7 @@ void DialogMeasureProperty::createPropertyList()
 		return;
 	}
 
-	setWindowTitle(tr("Propertу - %1").arg(m_pMeasurement->customAppSignalID()));
+	setWindowTitle(tr("Propertу of measurement - %1").arg(m_pMeasurement->customAppSignalID()));
 
 	//
 	//

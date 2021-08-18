@@ -260,6 +260,7 @@ bool ConfigSocket::readComparatorSet(const QByteArray& fileData)
 	QElapsedTimer responseTime;
 	responseTime.start();
 
+	m_comparatorSet.clear();
 	m_comparatorSet.serializeFrom(fileData);
 
 	qDebug() << __FUNCTION__ << "Comparators were loaded" << " Time for load: " << responseTime.elapsed() << " ms";
