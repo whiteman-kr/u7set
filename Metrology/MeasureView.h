@@ -114,8 +114,9 @@ namespace Measure
 
 		//
 		//
-		void copy();
-		void copyCell();
+		void onCopy();
+		void onCopyCell();
+		void onProperty();
 
 		void showChart(ChartType chartType);
 

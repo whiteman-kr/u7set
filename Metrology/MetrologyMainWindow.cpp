@@ -112,19 +112,19 @@ void MainWindow::createActions()
 	m_pStartMeasureAction->setShortcut(Qt::Key_F5);
 	m_pStartMeasureAction->setIcon(QIcon(":/icons/Start.png"));
 	m_pStartMeasureAction->setToolTip(tr("To start the measurement process"));
-	connect(m_pStartMeasureAction, &QAction::triggered, this, &MainWindow::startMeasure);
+	connect(m_pStartMeasureAction, &QAction::triggered, this, &MainWindow::onStartMeasure);
 
 	m_pStopMeasureAction = new QAction(tr("Stop"), this);
 	m_pStopMeasureAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
 	m_pStopMeasureAction->setIcon(QIcon(":/icons/Stop.png"));
 	m_pStopMeasureAction->setToolTip(tr("To stop the measurement process"));
-	connect(m_pStopMeasureAction, &QAction::triggered, this, &MainWindow::stopMeasure);
+	connect(m_pStopMeasureAction, &QAction::triggered, this, &MainWindow::onStopMeasure);
 
 	m_pExportMeasureAction = new QAction(tr("&Export ..."), this);
 	m_pExportMeasureAction->setShortcut(Qt::CTRL + Qt::Key_E);
 	m_pExportMeasureAction->setIcon(QIcon(":/icons/Export.png"));
 	m_pExportMeasureAction->setToolTip(tr("Export measurements"));
-	connect(m_pExportMeasureAction, &QAction::triggered, this, &MainWindow::exportMeasure);
+	connect(m_pExportMeasureAction, &QAction::triggered, this, &MainWindow::onExportMeasure);
 
 	m_pPreviousSignalAction = new QAction(tr("Previous signal"), this);
 	m_pPreviousSignalAction->setShortcut(Qt::CTRL + Qt::Key_Left);
@@ -141,27 +141,31 @@ void MainWindow::createActions()
 	// Edit
 	//
 	m_pCopyMeasureAction = new QAction(tr("&Copy"), this);
-	m_pCopyMeasureAction->setShortcut(Qt::CTRL + Qt::Key_C);
 	m_pCopyMeasureAction->setIcon(QIcon(":/icons/Copy.png"));
 	m_pCopyMeasureAction->setToolTip(tr("Copy of the measurements"));
-	connect(m_pCopyMeasureAction, &QAction::triggered, this, &MainWindow::copyMeasure);
+	connect(m_pCopyMeasureAction, &QAction::triggered, this, &MainWindow::onCopyMeasure);
 
 	m_pCopyCellMeasureAction = new QAction(tr("Copy cell"), this);
 	m_pCopyCellMeasureAction->setIcon(QIcon(":/icons/Copy.png"));
 	m_pCopyCellMeasureAction->setToolTip(tr("Copy cell of the measurements"));
-	connect(m_pCopyCellMeasureAction, &QAction::triggered, this, &MainWindow::copyCellMeasure);
+	connect(m_pCopyCellMeasureAction, &QAction::triggered, this, &MainWindow::onCopyCellMeasure);
 
 	m_pRemoveMeasureAction = new QAction(tr("&Delete"), this);
 	m_pRemoveMeasureAction->setShortcut(Qt::CTRL + Qt::Key_Delete);
 	m_pRemoveMeasureAction->setIcon(QIcon(":/icons/Remove.png"));
 	m_pRemoveMeasureAction->setToolTip(tr("Delete the selected measurements"));
-	connect(m_pRemoveMeasureAction, &QAction::triggered, this, &MainWindow::removeMeasure);
+	connect(m_pRemoveMeasureAction, &QAction::triggered, this, &MainWindow::onRemoveMeasure);
+
+	m_pMeasurePropertyAction = new QAction(tr("Propertу ..."), this);
+	m_pMeasurePropertyAction->setIcon(QIcon(":/icons/Property.png"));
+	m_pMeasurePropertyAction->setToolTip(tr("Property of the measurements"));
+	connect(m_pMeasurePropertyAction, &QAction::triggered, this, &MainWindow::onMeasureProperty);
 
 	m_pSelectAllMeasureAction = new QAction(tr("Select &All"), this);
 	m_pSelectAllMeasureAction->setShortcut(Qt::CTRL + Qt::Key_A);
 	m_pSelectAllMeasureAction->setIcon(QIcon(":/icons/SelectAll.png"));
 	m_pSelectAllMeasureAction->setToolTip(tr("Select all measurements"));
-	connect(m_pSelectAllMeasureAction, &QAction::triggered, this, &MainWindow::selectAllMeasure);
+	connect(m_pSelectAllMeasureAction, &QAction::triggered, this, &MainWindow::onSelectAllMeasure);
 
 	// View
 	//
@@ -276,9 +280,9 @@ void MainWindow::createMenu()
 	m_pEditMenu = pMenuBar->addMenu(tr("&Edit"));
 
 	m_pEditMenu->addAction(m_pCopyMeasureAction);
-	m_pEditMenu->addAction(m_pRemoveMeasureAction);
+	m_pEditMenu->addAction(m_pCopyCellMeasureAction);
 	m_pEditMenu->addSeparator();
-	m_pEditMenu->addAction(m_pSelectAllMeasureAction);
+	m_pEditMenu->addAction(m_pRemoveMeasureAction);
 	m_pEditMenu->addSeparator();
 
 	// View
@@ -789,6 +793,8 @@ void MainWindow::createContextMenu()
 	m_pContextMenu->addAction(m_pCopyCellMeasureAction);
 	m_pContextMenu->addSeparator();
 	m_pContextMenu->addAction(m_pRemoveMeasureAction);
+	m_pContextMenu->addSeparator();
+	m_pContextMenu->addAction(m_pMeasurePropertyAction);
 
 	// init context menu
 	//
@@ -1437,7 +1443,7 @@ int MainWindow::getMaxComparatorCount(const MeasureSignal& activeSignal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::startMeasure()
+void MainWindow::onStartMeasure()
 {
 	if (ERR_MEASURE_TYPE(m_measureType) == true)
 	{
@@ -1475,7 +1481,7 @@ void MainWindow::startMeasure()
 		{
 			if (changeInputSignalOnInternal(activeSignal) == true)
 			{
-				emit startMeasure();
+				emit onStartMeasure();
 				return;
 			}
 		}
@@ -1540,7 +1546,7 @@ void MainWindow::startMeasure()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::stopMeasure()
+void MainWindow::onStopMeasure()
 {
 	if (m_measureThread.isFinished() == true)
 	{
@@ -1552,7 +1558,7 @@ void MainWindow::stopMeasure()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::exportMeasure()
+void MainWindow::onExportMeasure()
 {
 	Measure::View* pMeasureView = activeMeasureView();
 	if (pMeasureView == nullptr)
@@ -1586,7 +1592,7 @@ void MainWindow::exportMeasure()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::copyMeasure()
+void MainWindow::onCopyMeasure()
 {
 	Measure::View* pView = activeMeasureView();
 	if (pView == nullptr)
@@ -1594,12 +1600,12 @@ void MainWindow::copyMeasure()
 		return;
 	}
 
-	pView->copy();
+	pView->onCopy();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::copyCellMeasure()
+void MainWindow::onCopyCellMeasure()
 {
 	Measure::View* pView = activeMeasureView();
 	if (pView == nullptr)
@@ -1607,12 +1613,12 @@ void MainWindow::copyCellMeasure()
 		return;
 	}
 
-	pView->copyCell();
+	pView->onCopyCell();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::removeMeasure()
+void MainWindow::onRemoveMeasure()
 {
 	Measure::View* pView = activeMeasureView();
 	if (pView == nullptr)
@@ -1625,7 +1631,20 @@ void MainWindow::removeMeasure()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::selectAllMeasure()
+void MainWindow::onMeasureProperty()
+{
+	Measure::View* pView = activeMeasureView();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	pView->onProperty();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::onSelectAllMeasure()
 {
 	Measure::View* pView = activeMeasureView();
 	if (pView == nullptr)
@@ -2887,7 +2906,7 @@ void MainWindow::measureThreadStoped()
 
 					m_pMainTab->setCurrentIndex(Measure::Type::Comparators);
 
-					emit startMeasure();
+					emit onStartMeasure();
 					return;
 				}
 			case Measure::Type::Comparators:
@@ -2907,7 +2926,7 @@ void MainWindow::measureThreadStoped()
 		bool signalIsSelected = setNextMeasureSignalFromModule();
 		if (signalIsSelected == true)
 		{
-			emit startMeasure();
+			emit onStartMeasure();
 			return;
 		}
 	}

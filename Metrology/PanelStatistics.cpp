@@ -353,7 +353,7 @@ void PanelStatistics::createInterface()
 	m_pCopyCellAction = m_pEditMenu->addAction(tr("Copy cell"));
 	m_pCopyCellAction->setIcon(QIcon(":/icons/Copy.png"));
 
-	m_pSelectAllAction = m_pEditMenu->addAction(tr("Select &All"));
+	m_pSelectAllAction = new QAction(tr("Select &All"), m_pStatisticsWindow);
 	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
 
 	m_pEditMenu->addSeparator();

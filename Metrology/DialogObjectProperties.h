@@ -376,6 +376,36 @@ private slots:
 	void						onOk();
 };
 
+// Measurement property
+//
+// ==============================================================================================
+
+class DialogMeasureProperty : public QDialog
+{
+	Q_OBJECT
+
+public:
+
+	explicit DialogMeasureProperty(Measure::Item* pMeasurement, QWidget* parent = nullptr);
+	virtual ~DialogMeasureProperty() override;
+
+private:
+
+	Measure::Item*				m_pMeasurement = nullptr;
+
+	// Property list
+	//
+	QtVariantPropertyManager*	m_pManager = nullptr;
+	QtVariantEditorFactory*		m_pFactory = nullptr;
+	QtTreePropertyBrowser*		m_pEditor = nullptr;
+
+	// buttons
+	//
+	QDialogButtonBox*			m_buttonBox = nullptr;
+
+	void						createPropertyList();
+};
+
 // ==============================================================================================
 
 #endif // DIALOGOBJECTPROPERTY_H

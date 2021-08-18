@@ -1053,8 +1053,10 @@ void DialogSignalProperty::createPropertyList()
 		return;
 	}
 
-	setWindowTitle(tr("Propertу - %1").arg(m_param.appSignalID()));
+	setWindowTitle(tr("Propertу - %1").arg(m_param.customAppSignalID()));
 
+	//
+	//
 	QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 	QStringList electricUnitList;
 	for(int u = 0; u < meu.keyCount(); u++)
@@ -1106,6 +1108,10 @@ void DialogSignalProperty::createPropertyList()
 			item->setAttribute(QLatin1String("readOnly"), true);
 			signalIdGroup->addSubProperty(item);
 
+			item = m_pManager->addProperty(QVariant::Int, tr("Count of comparators"));
+			item->setValue(m_param.comparatorCount());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			signalIdGroup->addSubProperty(item);
 
 		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
 
@@ -1963,6 +1969,220 @@ void DialogComparatorProperty::onPropertyExpanded(QtBrowserItem* item)
 void DialogComparatorProperty::onOk()
 {
 	accept();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+DialogMeasureProperty::DialogMeasureProperty(Measure::Item* pMeasurement, QWidget* parent) :
+	QDialog(parent),
+	m_pMeasurement(pMeasurement)
+
+{
+	if (pMeasurement == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	createPropertyList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DialogMeasureProperty::~DialogMeasureProperty()
+{
+	if (m_pManager != nullptr)
+	{
+		delete m_pManager;
+		m_pManager = nullptr;
+	}
+
+	if (m_pFactory != nullptr)
+	{
+		delete m_pFactory;
+		m_pFactory = nullptr;
+	}
+
+	if (m_pEditor != nullptr)
+	{
+		delete m_pEditor;
+		m_pEditor = nullptr;
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogMeasureProperty::createPropertyList()
+{
+	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
+	setWindowIcon(QIcon(":/icons/Property.png"));
+	setWindowTitle(tr("Propertу"));
+
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.3));
+	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.3));
+	move(screen.center() - rect().center());
+
+	if (m_pMeasurement == nullptr)
+	{
+		assert(0);
+		return;
+	}
+
+	setWindowTitle(tr("Propertу - %1").arg(m_pMeasurement->customAppSignalID()));
+
+	//
+	//
+	QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
+	QStringList electricUnitList;
+	for(int u = 0; u < meu.keyCount(); u++)
+	{
+		electricUnitList.append(meu.key(u));
+	}
+
+
+	QVBoxLayout* mainLayout = new QVBoxLayout;
+
+	// create property list
+	//
+
+	QtVariantProperty* item = nullptr;
+
+	m_pManager = new QtVariantPropertyManager;
+	m_pFactory = new QtVariantEditorFactory;
+	m_pEditor = new QtTreePropertyBrowser;
+
+	// create property groups
+	//
+
+		// id group
+
+		QtProperty* signalIdGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Signal ID"));
+
+			item = m_pManager->addProperty(QVariant::String, tr("SignalID"));
+			item->setValue(m_pMeasurement->customAppSignalID());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			signalIdGroup->addSubProperty(item);
+
+			item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
+			item->setValue(m_pMeasurement->appSignalID());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			signalIdGroup->addSubProperty(item);
+
+			item = m_pManager->addProperty(QVariant::String, tr("EquipmentID"));
+			item->setValue(m_pMeasurement->equipmentID());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			signalIdGroup->addSubProperty(item);
+
+			item = m_pManager->addProperty(QVariant::String, tr("Caption"));
+			item->setValue(m_pMeasurement->caption());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			signalIdGroup->addSubProperty(item);
+
+		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
+
+		// position group
+
+		QtProperty* positionGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Position"));
+
+			item = m_pManager->addProperty(QVariant::String, tr("Module SN"));
+			item->setValue(m_pMeasurement->location().moduleSerialNoStr());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			positionGroup->addSubProperty(item);
+
+			item = m_pManager->addProperty(QVariant::String, tr("Rack"));
+			item->setValue(m_pMeasurement->location().rack().caption());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			positionGroup->addSubProperty(item);
+
+			item = m_pManager->addProperty(QVariant::Int, tr("Chassis"));
+			item->setValue(m_pMeasurement->location().chassis());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			positionGroup->addSubProperty(item);
+
+			item = m_pManager->addProperty(QVariant::Int, tr("Module"));
+			item->setValue(m_pMeasurement->location().module());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			positionGroup->addSubProperty(item);
+
+			item = m_pManager->addProperty(QVariant::Int, tr("Place"));
+			item->setValue(m_pMeasurement->location().place());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			positionGroup->addSubProperty(item);
+
+		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
+
+		// limits group
+
+		QtProperty* limitsGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Limits"));
+
+			item = m_pManager->addProperty(QVariant::String, tr("Engineering range"));
+			item->setValue(m_pMeasurement->limitStr(Measure::LimitType::Engineering));
+			item->setAttribute(QLatin1String("readOnly"), true);
+			limitsGroup->addSubProperty(item);
+
+			item = m_pManager->addProperty(QVariant::String, tr("Electric range"));
+			item->setValue(m_pMeasurement->limitStr(Measure::LimitType::Electric));
+			item->setAttribute(QLatin1String("readOnly"), true);
+			limitsGroup->addSubProperty(item);
+
+		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
+
+		// Error
+
+		QtProperty* errorsGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Errors"));
+
+			item = m_pManager->addProperty(QVariant::String, tr("Measurement time"));
+			item->setValue(m_pMeasurement->measureTimeStr());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			errorsGroup->addSubProperty(item);
+
+			item = m_pManager->addProperty(QVariant::String, tr("Error"));
+			item->setValue(m_pMeasurement->errorStr(m_pMeasurement->measureType()));
+			item->setAttribute(QLatin1String("readOnly"), true);
+			errorsGroup->addSubProperty(item);
+
+			item = m_pManager->addProperty(QVariant::String, tr("Limit of error"));
+			item->setValue(m_pMeasurement->errorLimitStr(m_pMeasurement->measureType()));
+			item->setAttribute(QLatin1String("readOnly"), true);
+			errorsGroup->addSubProperty(item);
+
+			item = m_pManager->addProperty(QVariant::String, tr("Result"));
+			item->setValue(m_pMeasurement->errorResultStr(m_pMeasurement->measureType()));
+			item->setAttribute(QLatin1String("readOnly"), true);
+			errorsGroup->addSubProperty(item);
+
+		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
+
+	// show or hide property groups
+	//
+	m_pEditor->addProperty(signalIdGroup);
+	QtBrowserItem* m_browserItemList = m_pEditor->addProperty(positionGroup);
+	m_pEditor->addProperty(limitsGroup);
+	m_pEditor->addProperty(errorsGroup);
+
+	m_pEditor->setExpanded(m_browserItemList, false);
+
+	//
+	//
+	m_pEditor->setPropertiesWithoutValueMarked(true);
+	m_pEditor->setRootIsDecorated(false);
+
+	// create buttons ok and cancel
+	//
+	m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+
+	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &DialogMeasureProperty::accept);
+	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &DialogMeasureProperty::reject);
+
+	// add layouts
+	//
+	mainLayout->addWidget(m_pEditor);
+	mainLayout->addWidget(m_buttonBox);
+
+	setLayout(mainLayout);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

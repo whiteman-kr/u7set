@@ -6,6 +6,7 @@
 
 #include "Database.h"
 #include "ProcessData.h"
+#include "DialogObjectProperties.h"
 #include "Options.h"
 
 namespace Measure
@@ -920,18 +921,18 @@ namespace Measure
 				continue;
 			}
 
-			Measure::Item* pMeasuremet = m_model.at(index);
-			if (pMeasuremet == nullptr)
+			Measure::Item* pMeasurement = m_model.at(index);
+			if (pMeasurement == nullptr)
 			{
 				continue;
 			}
 
-			if (pMeasuremet->measureType() != m_measureType)
+			if (pMeasurement->measureType() != m_measureType)
 			{
 				continue;
 			}
 
-			keyList.push_back(pMeasuremet->measureID());
+			keyList.push_back(pMeasurement->measureID());
 
 			removeIndexList.push_back(index);
 		}
@@ -960,7 +961,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void View::copy()
+	void View::onCopy()
 	{
 		CopyData copyData(this, false);
 		copyData.exec();
@@ -968,10 +969,35 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void View::copyCell()
+	void View::onCopyCell()
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(model()->data(currentIndex()).toString());
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void View::onProperty()
+	{
+		int measureIndex = currentIndex().row();
+		if (measureIndex < 0 || measureIndex >= m_model.count())
+		{
+			return;
+		}
+
+		Measure::Item* pMeasurement = m_model.at(measureIndex);
+		if (pMeasurement == nullptr)
+		{
+			return;
+		}
+
+		if (pMeasurement->measureType() != m_measureType)
+		{
+			return;
+		}
+
+		DialogMeasureProperty dialog(pMeasurement, this);
+		dialog.exec();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
