@@ -13,15 +13,15 @@ function generate_aimsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 
     let inController =  inControllerObject.toController();
 
-	var ptr = 0;
-    
+    var ptr = 0;
+
     var moduleSignalsCount = 32;
 	
 	var tsConstant = 100 * 0.000001;	// 100 us
     
     var defaultTf = (5 * 0.001) / tsConstant;	// 5 ms
 	
-	var defaultFlags = 0x0a;
+	var defaultFlags = 0x14;	//10100
 						
 
     var defaultHighBound = 24.576;
@@ -172,17 +172,35 @@ function generate_aimsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 			}
             
 			filteringTime = tf / tsConstant;
+			
+			// Flags
 		
+			var flags = 0;
+			
+			var unitEnable = signal.propertyValue("UnitEnable");
+			if (unitEnable == undefined) 
+			{
+				log.errCFG3000("UnitEnable", signalStrId);
+				return false;
+			}
+			
+			if (unitEnable == true)
+			{
+				flags |= 1;
+			}
+			
 			// Calculate flags and ranges depending on signal type
 			
-			var inputRange = signal.propertyValue("InputRange");
-			if (inputRange == undefined) 
+			var sensorType = signal.propertyValue("SensorType");
+			if (sensorType == undefined) 
 			{
-				log.errCFG3000("InputRange", signalStrId);
+				log.errCFG3000("SensorType", signalStrId);
 				return false;
 			}
 				
-			var flags = inputRange;
+			flags |= (sensorType << 1);
+			
+			// K1, K2
 
 			var y1 = lowEngineeringUnits;
 			var y2 = highEngineeringUnits;
@@ -244,7 +262,7 @@ function generate_aimsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 
     // final crc
 	
-	ptr = 632;
+	ptr = 888;
 	
     var stringCrc64 = storeCrc64(confFirmware, log, LMNumber, module.equipmentId, frame, 0, ptr, ptr);   //CRC-64
 	if (stringCrc64 == "")
@@ -258,7 +276,7 @@ function generate_aimsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 
     // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
     //
-    var dataTransmittingEnableFlag = true;
+    var dataTransmittingEnableFlag = false;
     var dataReceiveEnableFlag = true;
     
     var flags = 0;
@@ -267,7 +285,7 @@ function generate_aimsr(confFirmware, module, LMNumber, frame, log, signalSet, o
     if (dataReceiveEnableFlag == true)
         flags |= 2;
     
-    var configFramesQuantity = 5;
+    var configFramesQuantity = 7;
     var dataFramesQuantity = 0;
  
     let txId = module.customModuleFamily + module.moduleVersion;
