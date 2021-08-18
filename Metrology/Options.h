@@ -662,7 +662,7 @@ const int LanguageTypeCount = 2;
 
 #define ERR_LANGUAGE_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= LanguageTypeCount)
 
-QString LanguageTypeCaption(int type);
+QString LanguageTypeCaption(LanguageType type);
 
 // ----------------------------------------------------------------------------------------------
 
@@ -736,10 +736,16 @@ public:
 	bool				precesionByCalibrator() const { return m_precesionByCalibrator; }
 	void				setPrecesionByCalibrator(bool enable) { m_precesionByCalibrator = enable; }
 
+	QMap<QString, int>	columnsWidth(Measure::Type measureType) const;
+	void				setColumnsWidth(Measure::Type measureType, const QMap<QString, int>& map);
+
 	//
 	//
 	void				load();
 	void				save();
+
+	void				loadColumnsWidth();
+	void				saveColumnsWidth();
 
 	//
 	//
@@ -760,6 +766,9 @@ private:
 
 	bool				m_showNoValid = false;										// show measuring value if signal is not valid
 	bool				m_precesionByCalibrator = false;							// show accuracy for measure value and nominal value from calibrator
+
+	QMap<QString, int>	m_columnsWidth[Measure::TypeCount];
+
 };
 
 // ==============================================================================================
@@ -830,10 +839,16 @@ public:
 	int					timeForUpdate() const { return m_timeForUpdate; }
 	void				setTimeForUpdate(int ms) { m_timeForUpdate = ms; }
 
+	QMap<QString, int>	columnsWidth() const { return m_columnsWidth; }
+	void				setColumnsWidth(const QMap<QString, int>& map) { m_columnsWidth = map; }
+
 	//
 	//
 	void				load();
 	void				save();
+
+	void				loadColumnsWidth();
+	void				saveColumnsWidth();
 
 	//
 	//
@@ -851,6 +866,8 @@ private:
 	QColor				m_colorFlagUnderflow = COLOR_FLAG_OVERBREAK;
 
 	int					m_timeForUpdate = 250; // 250 ms
+
+	QMap<QString, int>	m_columnsWidth;
 };
 
 // ==============================================================================================
@@ -935,6 +952,41 @@ private:
 	QColor				m_colorStateTrue = COLOR_COMPARATOR_STATE_TRUE;
 
 	int					m_timeForUpdate = 250; // 250 ms
+};
+
+// ==============================================================================================
+
+#define					STATISTICS_OPTIONS_KEY		"Options/Statistics/"
+
+// ----------------------------------------------------------------------------------------------
+
+class StatisticsOption : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit StatisticsOption(QObject* parent = nullptr);
+	explicit StatisticsOption(const StatisticsOption& from, QObject* parent = nullptr);
+	virtual ~StatisticsOption() override;
+
+public:
+
+	QMap<QString, int>	columnsWidth() const { return m_columnsWidth; }
+	void				setColumnsWidth(const QMap<QString, int>& map) { m_columnsWidth = map; }
+
+	//
+	//
+	void				load();
+	void				save();
+
+	//
+	//
+	StatisticsOption&	operator=(const StatisticsOption& from);
+
+private:
+
+	QMap<QString, int>	m_columnsWidth;
 };
 
 // ==============================================================================================
@@ -1119,6 +1171,9 @@ public:
 	ComparatorInfoOption&	comparatorInfo() { return m_comparatorInfo; }
 	void					setComparatorInfo(const ComparatorInfoOption& comparatorInfo) { m_comparatorInfo = comparatorInfo; }
 
+	StatisticsOption&		statistics() { return m_statistics; }
+	void					setStatistics(const StatisticsOption& statistics) { m_statistics = statistics; }
+
 	DatabaseOption&			database() { return m_database; }
 	void					setDatabase(const DatabaseOption& database) { m_database = database; }
 
@@ -1157,6 +1212,7 @@ private:
 
 	SignalInfoOption		m_signalInfo;
 	ComparatorInfoOption	m_comparatorInfo;
+	StatisticsOption		m_statistics;
 
 	DatabaseOption			m_database;
 

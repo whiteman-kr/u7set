@@ -172,8 +172,9 @@ private:
 	QTableView* m_pView = nullptr;
 	StatisticsTable m_signalTable;
 
-	QAction* m_pColumnAction[STATISTICS_COLUMN_COUNT];
 	QMenu* m_headerContextMenu = nullptr;
+	QAction* m_pColumnAction[STATISTICS_COLUMN_COUNT];
+	QMap<QString, int> m_columnsWidth;
 
 	Measure::Base* m_pMeasureBase = nullptr;
 
@@ -190,6 +191,8 @@ private:
 
 	void updateVisibleColunm();
 	void hideColumn(int column, bool hide);
+	void restoreColumnsWidth();
+	void saveColumnsWidth();
 	int firstVisibleColumn();
 
 protected:
@@ -244,6 +247,7 @@ private slots:
 	//
 	void onHeaderContextMenu(QPoint);
 	void onColumnAction(QAction* action);
+	void onColumnResized(int, int, int);
 
 	// slots for list
 	//

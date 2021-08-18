@@ -14,13 +14,13 @@ namespace Measure
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
-	Table::Table(QObject*)
+	Model::Model(QObject*)
 	{
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	Table::~Table()
+	Model::~Model()
 	{
 		QMutexLocker l(&m_measureMutex);
 
@@ -29,7 +29,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	bool Table::columnIsVisible(int column)
+	bool Model::columnIsVisible(int column)
 	{
 		if (column < 0 || column >= m_header.count())
 		{
@@ -52,21 +52,21 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	int Table::columnCount(const QModelIndex&) const
+	int Model::columnCount(const QModelIndex&) const
 	{
 		return m_header.count();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	int Table::rowCount(const QModelIndex&) const
+	int Model::rowCount(const QModelIndex&) const
 	{
 		return TO_INT(m_measureCount);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QVariant Table::headerData(int section, Qt::Orientation orientation, int role) const
+	QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const
 	{
 		if (role != Qt::DisplayRole)
 		{
@@ -94,7 +94,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QVariant Table::data(const QModelIndex &index, int role) const
+	QVariant Model::data(const QModelIndex &index, int role) const
 	{
 		if (ERR_MEASURE_TYPE(m_measureType) == true)
 		{
@@ -186,7 +186,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QColor Table::backgroundColor(int row, int column, Measure::Item* pMeasurement) const
+	QColor Model::backgroundColor(int row, int column, Measure::Item* pMeasurement) const
 	{
 		if (row < 0 || row >= TO_INT(m_measureCount))
 		{
@@ -280,7 +280,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString Table::text(int row, int column, Measure::Item* pMeasurement) const
+	QString Model::text(int row, int column, Measure::Item* pMeasurement) const
 	{
 		if (row < 0 || row >= TO_INT(m_measureCount))
 		{
@@ -318,7 +318,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString Table::textLinearity(int row, int column, Measure::Item* pMeasurement) const
+	QString Model::textLinearity(int row, int column, Measure::Item* pMeasurement) const
 	{
 		if (row < 0 || row >= TO_INT(m_measureCount))
 		{
@@ -453,7 +453,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString Table::textComparator(int row, int column, Measure::Item* pMeasurement) const
+	QString Model::textComparator(int row, int column, Measure::Item* pMeasurement) const
 	{
 		if (row < 0 || row >= TO_INT(m_measureCount))
 		{
@@ -547,7 +547,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	bool Table::append(Measure::Item* pMeasurement)
+	bool Model::append(Measure::Item* pMeasurement)
 	{
 		if (pMeasurement == nullptr)
 		{
@@ -579,7 +579,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	Measure::Item* Table::at(int index) const
+	Measure::Item* Model::at(int index) const
 	{
 		QMutexLocker l(&m_measureMutex);
 
@@ -593,7 +593,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Table::remove(const std::vector<int>& removeIndexList)
+	void Model::remove(const std::vector<int>& removeIndexList)
 	{
 		// remove from MeasureTable
 		//
@@ -628,7 +628,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Table::set(const std::vector<Measure::Item*>& list_add)
+	void Model::set(const std::vector<Measure::Item*>& list_add)
 	{
 		quint64 count = list_add.size();
 		if (count == 0)
@@ -650,7 +650,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Table::clear()
+	void Model::clear()
 	{
 		quint64 count = m_measureCount;
 		if (count == 0)
@@ -678,9 +678,9 @@ namespace Measure
 		QTableView(parent),
 		m_measureType(measureType)
 	{
-		m_table.header().init(measureType);
-		m_table.setMeasureType(measureType);
-		setModel(&m_table);
+		m_model.header().init(measureType);
+		m_model.setMeasureType(measureType);
+		setModel(&m_model);
 
 		setSelectionBehavior(QAbstractItemView::SelectRows);
 		setWordWrap(false);
@@ -703,6 +703,10 @@ namespace Measure
 		// create header context menu
 		//
 		m_headerContextMenu = new QMenu(this);
+		if (m_headerContextMenu == nullptr)
+		{
+			return;
+		}
 
 		horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
 		connect(horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &View::onHeaderContextMenu);
@@ -713,14 +717,19 @@ namespace Measure
 
 	void View::updateColumn()
 	{
+		if (m_headerContextMenu == nullptr)
+		{
+			return;
+		}
+
 		m_headerContextMenu->clear();
 
-		m_table.header().updateColumnState();
+		m_model.header().updateColumnState();
 
-		int count = m_table.header().count();
+		int count = m_model.header().count();
 		for (int index = 0; index < count; index++)
 		{
-			HeaderColumn* pColumn = m_table.header().column(index);
+			HeaderColumn* pColumn = m_model.header().column(index);
 			if (pColumn == nullptr)
 			{
 				continue;
@@ -741,98 +750,10 @@ namespace Measure
 			}
 		}
 
-		connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered),
-				this, &View::onHeaderContextAction);
+		connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &View::onColumnAction);
 
 		QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
 		verticalHeader()->setDefaultSectionSize(cellSize.height());
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	void View::loadMeasurements(const Measure::Base& measureBase)
-	{
-		m_table.clear();
-
-		std::vector<Measure::Item*> measureList;
-
-		int measureCount = measureBase.count();
-		for (int i = 0; i < measureCount; i++)
-		{
-			Measure::Item* pMeasurement = measureBase.measurement(i);
-			if (pMeasurement == nullptr)
-			{
-				continue;
-			}
-
-			if (pMeasurement->measureType() != m_measureType)
-			{
-				continue;
-			}
-
-			measureList.push_back(pMeasurement);
-		}
-
-		m_table.set(measureList);
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	void View::onHeaderContextMenu(QPoint)
-	{
-		if (m_headerContextMenu == nullptr)
-		{
-			return;
-		}
-
-		m_headerContextMenu->exec(QCursor::pos());
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	void View::onHeaderContextAction(QAction* action)
-	{
-		if (action == nullptr)
-		{
-			return;
-		}
-
-		int index = action->data().toInt();
-		if (index < 0 || index >= m_table.header().count())
-		{
-			return;
-		}
-
-		HeaderColumn* pColumn = m_table.header().column(index);
-		if (pColumn == nullptr)
-		{
-			return;
-		}
-
-		setColumnHidden(index, action->isChecked() == false);
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	void View::onColumnResized(int index, int, int width)
-	{
-		if (index < 0 || index >= m_table.header().count())
-		{
-			return;
-		}
-
-		HeaderColumn* pColumn = m_table.header().column(index);
-		if (pColumn == nullptr)
-		{
-			return;
-		}
-
-		if (pColumn->enableVisible() == false || width == 0)
-		{
-			return;
-		}
-
-		pColumn->setWidth(width);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -859,6 +780,102 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	void View::restoreColumnsWidth()
+	{
+		for (int column = 0; column < m_model.header().count(); column++)
+		{
+			HeaderColumn* pColumn = m_model.header().column(column);
+			if (pColumn == nullptr)
+			{
+				continue;
+			}
+
+			QString columnName = pColumn->title();
+
+			int pos = columnName.indexOf(QChar::LineFeed);
+			if (pos != -1)
+			{
+				columnName = columnName.left(pos);
+			}
+
+			auto it = m_columnsWidth.find(columnName);
+			if (it != m_columnsWidth.end())
+			{
+				int width = it.value();
+
+				if (width == 0)
+				{
+					setColumnHidden(column, true);
+				}
+				else
+				{
+					setColumnWidth(column, width);
+				}
+			}
+		}
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void View::saveColumnsWidth()
+	{
+		QMap<QString, int> columnsWidth;
+
+		for (int column = 0; column < m_model.header().count(); column++)
+		{
+			HeaderColumn* pColumn = m_model.header().column(column);
+			if (pColumn == nullptr)
+			{
+				continue;
+			}
+
+			QString columnName = pColumn->title();
+
+			int pos = columnName.indexOf(QChar::LineFeed);
+			if (pos != -1)
+			{
+				columnName = columnName.left(pos);
+			}
+
+			columnsWidth[columnName] = columnWidth(column);
+		}
+
+		m_columnsWidth = columnsWidth;
+
+		theOptions.measureView().setColumnsWidth(m_measureType, columnsWidth);
+		theOptions.signalInfo().saveColumnsWidth();
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void View::loadMeasurements(const Measure::Base& measureBase)
+	{
+		m_model.clear();
+
+		std::vector<Measure::Item*> measureList;
+
+		int measureCount = measureBase.count();
+		for (int i = 0; i < measureCount; i++)
+		{
+			Measure::Item* pMeasurement = measureBase.measurement(i);
+			if (pMeasurement == nullptr)
+			{
+				continue;
+			}
+
+			if (pMeasurement->measureType() != m_measureType)
+			{
+				continue;
+			}
+
+			measureList.push_back(pMeasurement);
+		}
+
+		m_model.set(measureList);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	void View::appendMeasure(Measure::Item* pMeasurement)
 	{
 		if (pMeasurement == nullptr)
@@ -875,19 +892,19 @@ namespace Measure
 		//
 		// append into MeasureTable
 		//
-		if (m_table.append(pMeasurement) == false)
+		if (m_model.append(pMeasurement) == false)
 		{
 			return;
 		}
 
-		setCurrentIndex(model()->index(m_table.count() - 1, firstVisibleColumn()));
+		setCurrentIndex(model()->index(m_model.count() - 1, firstVisibleColumn()));
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	void View::removeMeasure()
 	{
-		int measureCount = m_table.count();
+		int measureCount = m_model.count();
 		if (measureCount == 0)
 		{
 			return;
@@ -903,7 +920,7 @@ namespace Measure
 				continue;
 			}
 
-			Measure::Item* pMeasuremet = m_table.at(index);
+			Measure::Item* pMeasuremet = m_model.at(index);
 			if (pMeasuremet == nullptr)
 			{
 				continue;
@@ -934,7 +951,7 @@ namespace Measure
 
 		// remove from MeasureTable
 		//
-		m_table.remove(removeIndexList);
+		m_model.remove(removeIndexList);
 
 		// remove from Database and MesaureBase
 		//
@@ -959,14 +976,14 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void View::showGraph(int graphType)
+	void View::showChart(ChartType chartType)
 	{
-		if (graphType < 0 || graphType >= MVG_TYPE_COUNT)
+		if (ERR_GRAPH_TYPE_TYPE(chartType) == true)
 		{
 			return;
 		}
 
-		int measureCount = m_table.count();
+		int measureCount = m_model.count();
 		if (measureCount == 0)
 		{
 			return;
@@ -978,7 +995,7 @@ namespace Measure
 			return;
 		}
 
-		Measure::Item* pMeasurement = m_table.at(index);
+		Measure::Item* pMeasurement = m_model.at(index);
 		if (pMeasurement == nullptr)
 		{
 			return;
@@ -994,13 +1011,12 @@ namespace Measure
 		//
 		Measure::LimitType limitType = Measure::LimitType::NoLimitType;
 
-		switch (graphType)
+		switch (chartType)
 		{
-			case MVG_TYPE_LIN_EL:
-			case MVG_TYPE_20VAL_EL:	limitType = Measure::LimitType::Electric;		break;
-			case MVG_TYPE_LIN_EN:
-			case MVG_TYPE_20VAL_EN:	limitType = Measure::LimitType::Engineering;	break;
-
+			case ChartType::LinearityEl:
+			case ChartType::Value20El:		limitType = Measure::LimitType::Electric;		break;
+			case ChartType::LinearityEn:
+			case ChartType::Value20En:		limitType = Measure::LimitType::Engineering;	break;
 			default:
 				assert(0);
 		}
@@ -1025,10 +1041,10 @@ namespace Measure
 		//
 		int pointCount = 0;
 
-		switch (graphType)
+		switch (chartType)
 		{
-			case MVG_TYPE_LIN_EL:
-			case MVG_TYPE_LIN_EN:
+			case ChartType::LinearityEl:
+			case ChartType::LinearityEn:
 				{
 					QtCharts::QLineSeries* pNominalSeries = new QtCharts::QLineSeries();
 					QtCharts::QLineSeries* pMeasureSeries = new QtCharts::QLineSeries();
@@ -1060,7 +1076,7 @@ namespace Measure
 
 					for (int i = 0; i < measureCount; i++)
 					{
-						Measure::Item* pMeasurementI = m_table.at(i);
+						Measure::Item* pMeasurementI = m_model.at(i);
 						if (pMeasurementI == nullptr)
 						{
 							continue;
@@ -1110,8 +1126,8 @@ namespace Measure
 				}
 				break;
 
-			case MVG_TYPE_20VAL_EL:
-			case MVG_TYPE_20VAL_EN:
+			case ChartType::Value20El:
+			case ChartType::Value20En:
 				{
 					QtCharts::QLineSeries* pMeasureSeries = new QtCharts::QLineSeries();
 					if (pMeasureSeries == nullptr)
@@ -1207,87 +1223,67 @@ namespace Measure
 
 		dialog.exec();
 	}
-}
 
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------------------------------------------------
 
-ChartView::ChartView(QtCharts::QChart* chart, QWidget* parent) :
-	QChartView(chart, parent),
-	m_isTouching(false)
-{
-	setRubberBand(QChartView::RectangleRubberBand);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool ChartView::viewportEvent(QEvent* event)
-{
-	if (event->type() == QEvent::TouchBegin)
+	void View::onHeaderContextMenu(QPoint)
 	{
-		m_isTouching = true;
+		if (m_headerContextMenu == nullptr)
+		{
+			return;
+		}
 
-		chart()->setAnimationOptions(QtCharts::QChart::NoAnimation);
+		m_headerContextMenu->exec(QCursor::pos());
 	}
 
-	return QChartView::viewportEvent(event);
-}
+	// -------------------------------------------------------------------------------------------------------------------
 
-// -------------------------------------------------------------------------------------------------------------------
-
-void ChartView::mousePressEvent(QMouseEvent* event)
-{
-	if (m_isTouching == true)
+	void View::onColumnAction(QAction* action)
 	{
-		return;
+		if (action == nullptr)
+		{
+			return;
+		}
+
+		int index = action->data().toInt();
+		if (index < 0 || index >= m_model.header().count())
+		{
+			return;
+		}
+
+		HeaderColumn* pColumn = m_model.header().column(index);
+		if (pColumn == nullptr)
+		{
+			return;
+		}
+
+		setColumnHidden(index, action->isChecked() == false);
 	}
 
-	QChartView::mousePressEvent(event);
-}
+	// -------------------------------------------------------------------------------------------------------------------
 
-// -------------------------------------------------------------------------------------------------------------------
-
-void ChartView::mouseMoveEvent(QMouseEvent* event)
-{
-	if (m_isTouching == true)
+	void View::onColumnResized(int index, int, int width)
 	{
-		return;
+		if (index < 0 || index >= m_model.header().count())
+		{
+			return;
+		}
+
+		HeaderColumn* pColumn = m_model.header().column(index);
+		if (pColumn == nullptr)
+		{
+			return;
+		}
+
+		if (pColumn->enableVisible() == false || width == 0)
+		{
+			return;
+		}
+
+		pColumn->setWidth(width);
 	}
 
-	QChartView::mouseMoveEvent(event);
+	// -------------------------------------------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------------------------------------------------
 }
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ChartView::mouseReleaseEvent(QMouseEvent* event)
-{
-	if (m_isTouching == true)
-	{
-		m_isTouching = false;
-	}
-
-	chart()->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
-
-	QChartView::mouseReleaseEvent(event);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-void ChartView::keyPressEvent(QKeyEvent* event)
-{
-	switch (event->key())
-	{
-		case Qt::Key_Plus:	chart()->zoomIn();			break;
-		case Qt::Key_Minus:	chart()->zoomOut();			break;
-		case Qt::Key_Left:	chart()->scroll(-10, 0);	break;
-		case Qt::Key_Right:	chart()->scroll(10, 0);		break;
-		case Qt::Key_Up:	chart()->scroll(0, 10);		break;
-		case Qt::Key_Down:	chart()->scroll(0, -10);	break;
-		default:
-			QGraphicsView::keyPressEvent(event);
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------

@@ -358,25 +358,25 @@ void PanelFindMeasure::find()
 
 	m_table.clear();
 
-	int rowCount = m_pMeasureView->table().count();
-	int columnCount = m_pMeasureView->table().header().count();
+	int rowCount = m_pMeasureView->measureModel().count();
+	int columnCount = m_pMeasureView->measureModel().header().count();
 
 	for(int row = 0; row < rowCount; row ++)
 	{
 		for(int column = 0; column < columnCount; column++)
 		{
-			if (m_pMeasureView->table().columnIsVisible(column) == false)
+			if (m_pMeasureView->measureModel().columnIsVisible(column) == false)
 			{
 				continue;
 			}
 
-			Measure::Item* pMeasurement = m_pMeasureView->table().at(row);
+			Measure::Item* pMeasurement = m_pMeasureView->measureModel().at(row);
 			if (pMeasurement == nullptr)
 			{
 				continue;
 			}
 
-			QString text = m_pMeasureView->table().text(row, column, pMeasurement);
+			QString text = m_pMeasureView->measureModel().text(row, column, pMeasurement);
 			if (text.isEmpty() == true)
 			{
 				continue;
@@ -426,13 +426,13 @@ void PanelFindMeasure::selectItemInMeasureView()
 	FindItem fi = m_table.at(indexFindItem);
 
 	int row = fi.row();
-	if (row < 0 || row >= m_pMeasureView->table().count())
+	if (row < 0 || row >= m_pMeasureView->measureModel().count())
 	{
 		return;
 	}
 
 	int column = fi.column();
-	if (column < 0 || column > m_pMeasureView->table().header().count())
+	if (column < 0 || column > m_pMeasureView->measureModel().header().count())
 	{
 		return;
 	}

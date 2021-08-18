@@ -50,6 +50,7 @@ SOURCES += \
 	../lib/Tuning/TuningSignalState.cpp \
 	../lib/Ui/DialogAbout.cpp \
 	../lib/ComparatorSet.cpp \
+	ChartView.cpp \
 	DialogCalculator.cpp \
 	DialogComparatorList.cpp \
 	DialogList.cpp \
@@ -96,6 +97,7 @@ SOURCES += \
 	Visa/visa.h
 
 HEADERS  += \
+    ChartView.h \
     Stable.h \
 	../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \

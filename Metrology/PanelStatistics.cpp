@@ -423,13 +423,24 @@ void PanelStatistics::createInterface()
 	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
-	for(int column = 0; column < STATISTICS_COLUMN_COUNT; column++)
-	{
-		m_pView->setColumnWidth(column, StatisticsColumnWidth[column]);
-	}
-
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_pView->setWordWrap(false);
+
+	m_columnsWidth = theOptions.statistics().columnsWidth();
+
+	if (m_columnsWidth.isEmpty() == true)
+	{
+		for(int column = 0; column < STATISTICS_COLUMN_COUNT; column++)
+		{
+			m_pView->setColumnWidth(column, StatisticsColumnWidth[column]);
+		}
+	}
+	else
+	{
+		restoreColumnsWidth();
+	}
+
+	connect(m_pView->horizontalHeader(), &QHeaderView::sectionResized, this, &PanelStatistics::onColumnResized);
 
 	connect(m_pView, &QTableView::doubleClicked , this, &PanelStatistics::onListDoubleClicked);
 
@@ -464,7 +475,27 @@ void PanelStatistics::createHeaderContexMenu()
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
-			m_pColumnAction[column]->setChecked(true);
+
+			if (m_columnsWidth.isEmpty() == true)
+			{
+				m_pColumnAction[column]->setChecked(true);
+			}
+			else
+			{
+				QString columnName = StatisticsColumn[column];
+
+				int pos = columnName.indexOf(QChar::LineFeed);
+				if (pos != -1)
+				{
+					columnName = columnName.left(pos);
+				}
+
+				auto it = m_columnsWidth.find(columnName);
+				if (it != m_columnsWidth.end())
+				{
+					m_pColumnAction[column]->setChecked(it.value() != 0);
+				}
+			}
 		}
 	}
 
@@ -756,20 +787,47 @@ void PanelStatistics::updateStatusBar()
 
 void PanelStatistics::updateVisibleColunm()
 {
-	for(int c = 0; c < STATISTICS_COLUMN_COUNT; c++)
+	if (m_pView == nullptr)
 	{
-		hideColumn(c, false);
+		return;
 	}
 
-	hideColumn(STATISTICS_COLUMN_APP_ID, true);
-	hideColumn(STATISTICS_COLUMN_EQUIPMENT_ID, true);
-	hideColumn(STATISTICS_COLUMN_CMP_NO, m_measureType != Measure::Type::Comparators);
-	hideColumn(STATISTICS_COLUMN_CMP_VALUE, m_measureType != Measure::Type::Comparators);
-	hideColumn(STATISTICS_COLUMN_CHASSIS, true);
-	hideColumn(STATISTICS_COLUMN_MODULE, true);
-	hideColumn(STATISTICS_COLUMN_PLACE, true);
-	hideColumn(STATISTICS_COLUMN_EL_RANGE, true);
-	hideColumn(STATISTICS_COLUMN_EL_SENSOR, true);
+	if (m_columnsWidth.isEmpty() == true)
+	{
+		for(int column = 0; column < STATISTICS_COLUMN_COUNT; column++)
+		{
+			hideColumn(column, false);
+		}
+
+		hideColumn(STATISTICS_COLUMN_APP_ID, true);
+		hideColumn(STATISTICS_COLUMN_EQUIPMENT_ID, true);
+		hideColumn(STATISTICS_COLUMN_CMP_NO, m_measureType != Measure::Type::Comparators);
+		hideColumn(STATISTICS_COLUMN_CMP_VALUE, m_measureType != Measure::Type::Comparators);
+		hideColumn(STATISTICS_COLUMN_CHASSIS, true);
+		hideColumn(STATISTICS_COLUMN_MODULE, true);
+		hideColumn(STATISTICS_COLUMN_PLACE, true);
+		hideColumn(STATISTICS_COLUMN_EL_RANGE, true);
+		hideColumn(STATISTICS_COLUMN_EL_SENSOR, true);
+	}
+	else
+	{
+		for(int column = 0; column < STATISTICS_COLUMN_COUNT; column++)
+		{
+			QString columnName = StatisticsColumn[column];
+
+			int pos = columnName.indexOf(QChar::LineFeed);
+			if (pos != -1)
+			{
+				columnName = columnName.left(pos);
+			}
+
+			auto it = m_columnsWidth.find(columnName);
+			if (it != m_columnsWidth.end())
+			{
+				hideColumn(column, it.value() == 0);
+			}
+		}
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -796,6 +854,72 @@ void PanelStatistics::hideColumn(int column, bool hide)
 		m_pView->showColumn(column);
 		m_pColumnAction[column]->setChecked(true);
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelStatistics::restoreColumnsWidth()
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	for (int column = 0; column < STATISTICS_COLUMN_COUNT; column++)
+	{
+		QString columnName = StatisticsColumn[column];
+
+		int pos = columnName.indexOf(QChar::LineFeed);
+		if (pos != -1)
+		{
+			columnName = columnName.left(pos);
+		}
+
+		auto it = m_columnsWidth.find(columnName);
+		if (it != m_columnsWidth.end())
+		{
+			int width = it.value();
+
+			if (width == 0)
+			{
+				m_pView->hideColumn(column);
+			}
+			else
+			{
+				m_pView->setColumnWidth(column, width);
+			}
+		}
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelStatistics::saveColumnsWidth()
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	QMap<QString, int> columnsWidth;
+
+	for (int column = 0; column < STATISTICS_COLUMN_COUNT; column++)
+	{
+		QString columnName = StatisticsColumn[column];
+
+		int pos = columnName.indexOf(QChar::LineFeed);
+		if (pos != -1)
+		{
+			columnName = columnName.left(pos);
+		}
+
+		columnsWidth[columnName] = m_pView->columnWidth(column);
+	}
+
+	m_columnsWidth = columnsWidth;
+
+	theOptions.statistics().setColumnsWidth(columnsWidth);
+	theOptions.statistics().save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1310,6 +1434,11 @@ void PanelStatistics::onHeaderContextMenu(QPoint)
 
 void PanelStatistics::onColumnAction(QAction* action)
 {
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
 	if (action == nullptr)
 	{
 		return;
@@ -1321,9 +1450,21 @@ void PanelStatistics::onColumnAction(QAction* action)
 		{
 			hideColumn(column, !action->isChecked());
 
+			if (action->isChecked() == true)
+			{
+				m_pView->setColumnWidth(column, StatisticsColumnWidth[column]);
+			}
+
 			break;
 		}
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelStatistics::onColumnResized(int, int, int )
+{
+	saveColumnsWidth();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

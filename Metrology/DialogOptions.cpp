@@ -841,7 +841,7 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					QStringList valueTypeList;
 					for(int t = 0; t < LanguageTypeCount; t++)
 					{
-						valueTypeList.append(qApp->translate("Options", LanguageTypeCaption(t).toUtf8()));
+						valueTypeList.append(qApp->translate("Options", LanguageTypeCaption(static_cast<LanguageType>(t)).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), valueTypeList);
 					item->setValue(m_options.language().languageType());

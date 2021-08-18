@@ -51,8 +51,6 @@ namespace Measure
 
 		bool				enableDuplicate() const { return m_enableDuplicate; }
 
-		HeaderColumn&		operator=(const HeaderColumn& from);
-
 	private:
 
 		int					m_index = -1;
@@ -189,16 +187,6 @@ const int				MVC_CMN_C_INDEX				= 0,
 						MVC_CMN_C_ERROR_RESULT		= 24,
 						MVC_CMN_C_MEASUREMENT_TIME	= 25,
 						MVC_CMN_C_CALIBRATOR		= 26;
-
-// ==============================================================================================
-
-const int				MVG_TYPE_UNDEFINED			= -1,
-						MVG_TYPE_LIN_EL				= 0,
-						MVG_TYPE_LIN_EN				= 1,
-						MVG_TYPE_20VAL_EL			= 2,
-						MVG_TYPE_20VAL_EN			= 3;
-
-const int				MVG_TYPE_COUNT				= 4;
 
 // ==============================================================================================
 

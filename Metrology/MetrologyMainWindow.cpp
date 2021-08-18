@@ -1785,7 +1785,7 @@ void MainWindow::showGraphLinEl()
 		return;
 	}
 
-	emit pView->showGraph(MVG_TYPE_LIN_EL);
+	emit pView->showChart(ChartType::LinearityEl);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1798,7 +1798,7 @@ void MainWindow::showGraphLinEn()
 		return;
 	}
 
-	emit pView->showGraph(MVG_TYPE_LIN_EN);
+	emit pView->showChart(ChartType::LinearityEn);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1811,7 +1811,7 @@ void MainWindow::showGraph20El()
 		return;
 	}
 
-	emit pView->showGraph(MVG_TYPE_20VAL_EL);
+	emit pView->showChart(ChartType::Value20El);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1824,7 +1824,7 @@ void MainWindow::showGraph20En()
 		return;
 	}
 
-	emit pView->showGraph(MVG_TYPE_20VAL_EN);
+	emit pView->showChart(ChartType::Value20En);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

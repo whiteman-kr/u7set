@@ -966,6 +966,31 @@ void MeasureViewOption::setUpdateColumnView(Measure::Type measureType, bool stat
 	m_updateColumnView[measureType] = state;
 }
 
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QMap<QString, int> MeasureViewOption::columnsWidth(Measure::Type measureType) const
+{
+	if (ERR_MEASURE_TYPE(measureType) == true)
+	{
+		return QMap<QString, int>();
+	}
+
+	return m_columnsWidth[measureType];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureViewOption::setColumnsWidth(Measure::Type measureType, const QMap<QString, int>& map)
+{
+	if (ERR_MEASURE_TYPE(measureType) == true)
+	{
+		return;
+	}
+
+	m_columnsWidth[measureType] = map;
+}
+
 // -------------------------------------------------------------------------------------------------------------------
 
 void MeasureViewOption::load()
@@ -977,6 +1002,8 @@ void MeasureViewOption::load()
 	int languageType = theOptions.language().languageType();
 	if (ERR_LANGUAGE_TYPE(languageType) == false)
 	{
+		QString language = LanguageTypeCaption(static_cast<LanguageType>(languageType));
+
 		// init
 		//
 		Measure::ViewHeader header;
@@ -1001,6 +1028,8 @@ void MeasureViewOption::load()
 		//
 		for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
 		{
+			QString caption = Measure::TypeCaption(static_cast<Measure::Type>(measureType));
+
 			for(int column = 0; column < Measure::MaxColumnCount; column++)
 			{
 				const Measure::HeaderColumn& c = m_column[measureType][languageType][column];
@@ -1009,12 +1038,9 @@ void MeasureViewOption::load()
 					continue;
 				}
 
-				QString caption = Measure::TypeCaption(static_cast<Measure::Type>(measureType));
-				QString language = LanguageTypeCaption(languageType);
-
 				m_column[measureType][languageType][column].setTitle(s.value(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.title()).toString());
-				m_column[measureType][languageType][column].setWidth(s.value(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.width()).toInt());
-				m_column[measureType][languageType][column].setVisible(s.value(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.enableVisible()).toBool());
+				m_column[measureType][languageType][column].setWidth(s.value(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()), c.width()).toInt());
+				m_column[measureType][languageType][column].setVisible(s.value(QString("%1/Header/%2/%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()), c.enableVisible()).toBool());
 			}
 		}
 	}
@@ -1031,6 +1057,8 @@ void MeasureViewOption::load()
 
 	m_showNoValid = s.value(QString("%1ShowNoValid").arg(MEASURE_VIEW_OPTIONS_KEY), false).toBool();
 	m_precesionByCalibrator = s.value(QString("%1ShowPrecesionByCalibrator").arg(MEASURE_VIEW_OPTIONS_KEY), false).toBool();
+
+	loadColumnsWidth();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1044,8 +1072,12 @@ void MeasureViewOption::save()
 	int languageType = theOptions.language().languageType();
 	if (ERR_LANGUAGE_TYPE(languageType) == false)
 	{
+		QString language = LanguageTypeCaption(static_cast<LanguageType>(languageType));
+
 		for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
 		{
+			QString caption = Measure::TypeCaption(static_cast<Measure::Type>(measureType));
+
 			for(int column = 0; column < Measure::MaxColumnCount; column++)
 			{
 				const Measure::HeaderColumn& c = m_column[measureType][languageType][column];
@@ -1055,12 +1087,9 @@ void MeasureViewOption::save()
 					continue;
 				}
 
-				QString caption = Measure::TypeCaption(static_cast<Measure::Type>(measureType));
-				QString language = LanguageTypeCaption(languageType);
-
 				s.setValue(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.title());
-				s.setValue(QString("%1/Header/%2/%3/%4/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.width());
-				s.setValue(QString("%1/Header/%2/%3/%4/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.enableVisible());
+				s.setValue(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()), c.width());
+				s.setValue(QString("%1/Header/%2/%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()), c.enableVisible());
 			}
 		}
 	}
@@ -1075,6 +1104,36 @@ void MeasureViewOption::save()
 
 	s.setValue(QString("%1ShowNoValid").arg(MEASURE_VIEW_OPTIONS_KEY), m_showNoValid);
 	s.setValue(QString("%1ShowPrecesionByCalibrator").arg(MEASURE_VIEW_OPTIONS_KEY), m_precesionByCalibrator);
+
+	saveColumnsWidth();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureViewOption::loadColumnsWidth()
+{
+	QSettings s;
+
+	for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
+	{
+		QString caption = Measure::TypeCaption(static_cast<Measure::Type>(measureType));
+
+		m_columnsWidth[measureType] = s.value(QString("%1ColumnsWidth%2").arg(SIGNAL_INFO_OPTIONS_KEY).arg(caption)).value<QMap<QString,int>>();
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureViewOption::saveColumnsWidth()
+{
+	QSettings s;
+
+	for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
+	{
+		QString caption = Measure::TypeCaption(static_cast<Measure::Type>(measureType));
+
+		s.setValue(QString("%1ColumnsWidth%2").arg(SIGNAL_INFO_OPTIONS_KEY).arg(caption), QVariant::fromValue(m_columnsWidth[measureType]));
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1148,6 +1207,8 @@ void SignalInfoOption::load()
 	m_colorFlagUnderflow = s.value(QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERBREAK.rgb()).toUInt();
 
 	m_timeForUpdate = s.value(QString("%1TimeForUpdate").arg(SIGNAL_INFO_OPTIONS_KEY), 250).toInt();
+
+	loadColumnsWidth();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1166,6 +1227,26 @@ void SignalInfoOption::save()
 	s.setValue(QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagUnderflow.rgb());
 
 	s.setValue(QString("%1TimeForUpdate").arg(SIGNAL_INFO_OPTIONS_KEY), m_timeForUpdate);
+
+	saveColumnsWidth();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoOption::loadColumnsWidth()
+{
+	QSettings s;
+
+	m_columnsWidth = s.value(QString("%1ColumnsWidth").arg(SIGNAL_INFO_OPTIONS_KEY)).value<QMap<QString,int>>();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoOption::saveColumnsWidth()
+{
+	QSettings s;
+
+	s.setValue(QString("%1ColumnsWidth").arg(SIGNAL_INFO_OPTIONS_KEY), QVariant::fromValue(m_columnsWidth));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1182,6 +1263,8 @@ SignalInfoOption& SignalInfoOption::operator=(const SignalInfoOption& from)
 	m_colorFlagUnderflow = from.m_colorFlagUnderflow;
 
 	m_timeForUpdate = from.m_timeForUpdate;
+
+	m_columnsWidth = from.m_columnsWidth;
 
 	return *this;
 }
@@ -1257,6 +1340,57 @@ ComparatorInfoOption& ComparatorInfoOption::operator=(const ComparatorInfoOption
 	m_colorStateTrue = from.m_colorStateTrue;
 
 	m_timeForUpdate = from.m_timeForUpdate;
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+StatisticsOption::StatisticsOption(QObject* parent) :
+	QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+StatisticsOption::StatisticsOption(const StatisticsOption& from, QObject* parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
+StatisticsOption::~StatisticsOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void StatisticsOption::load()
+{
+	QSettings s;
+
+	m_columnsWidth = s.value(QString("%1ColumnsWidth").arg(STATISTICS_OPTIONS_KEY)).value<QMap<QString,int>>();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void StatisticsOption::save()
+{
+	QSettings s;
+
+	s.setValue(QString("%1ColumnsWidth").arg(STATISTICS_OPTIONS_KEY), QVariant::fromValue(m_columnsWidth));
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+StatisticsOption& StatisticsOption::operator=(const StatisticsOption& from)
+{
+	m_columnsWidth = from.m_columnsWidth;
 
 	return *this;
 }
@@ -1378,7 +1512,7 @@ LanguageOption& LanguageOption::operator=(const LanguageOption& from)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LanguageTypeCaption(int type)
+QString LanguageTypeCaption(LanguageType type)
 {
 	QString caption;
 
@@ -1410,6 +1544,7 @@ bool compareDouble(double lDouble, double rDouble)
 Options::Options(QObject* parent) :
 	QObject(parent)
 {
+	qRegisterMetaTypeStreamOperators<QMap<QString,int>>("QMap<QString,int>");
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1442,6 +1577,7 @@ void Options::load()
 
 	m_signalInfo.load();
 	m_comparatorInfo.load();
+	m_statistics.load();
 
 	m_module.load();
 	m_linearity.load();
@@ -1465,6 +1601,7 @@ void Options::save()
 
 	m_signalInfo.save();
 	m_comparatorInfo.save();
+	m_statistics.save();
 
 	m_module.save();
 	m_linearity.save();
@@ -1542,6 +1679,7 @@ Options& Options::operator=(const Options& from)
 
 	m_signalInfo = from.m_signalInfo;
 	m_comparatorInfo = from.m_comparatorInfo;
+	m_statistics = from.m_statistics;
 
 	m_module = from.m_module;
 	m_linearity = from.m_linearity;

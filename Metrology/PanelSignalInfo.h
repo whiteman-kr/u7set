@@ -135,8 +135,9 @@ private:
 	QAction* m_pCopyCellAction = nullptr;
 	QAction* m_pSignalPropertyAction = nullptr;
 
-	QAction* m_pColumnAction[SIGNAL_INFO_COLUMN_COUNT];
 	QMenu* m_headerContextMenu = nullptr;
+	QAction* m_pColumnAction[SIGNAL_INFO_COLUMN_COUNT];
+	QMap<QString, int> m_columnsWidth;
 
 	void createInterface();
 	void createHeaderContexMenu();
@@ -145,6 +146,8 @@ private:
 	void appendMetrologyConnetionMenu();
 
 	void hideColumn(int column, bool hide);
+	void restoreColumnsWidth();
+	void saveColumnsWidth();
 
 	QTimer* m_updateSignalStateTimer = nullptr;
 	void startSignalStateTimer(int timeout);
@@ -196,6 +199,8 @@ private slots:
 	//
 	void onHeaderContextMenu(QPoint);
 	void onColumnAction(QAction* action);
+	void onColumnResized(int, int, int);
+
 	// slots for list
 	//
 	void onListDoubleClicked(const QModelIndex&) { signalProperty(); }

@@ -285,13 +285,16 @@ PanelSignalInfo::PanelSignalInfo(const SignalInfoOption& signalInfo, QWidget* pa
 	connect(&theSignalBase, &SignalBase::activeSignalChanged,
 			this, &PanelSignalInfo::activeSignalChanged, Qt::QueuedConnection);
 
-	hideColumn(SIGNAL_INFO_COLUMN_APP_ID, true);
-	hideColumn(SIGNAL_INFO_COLUMN_EQUIPMENT_ID, true);
-	hideColumn(SIGNAL_INFO_COLUMN_RACK, true);
-	hideColumn(SIGNAL_INFO_COLUMN_CHASSIS, true);
-	hideColumn(SIGNAL_INFO_COLUMN_MODULE, true);
-	hideColumn(SIGNAL_INFO_COLUMN_PLACE, true);
-	hideColumn(SIGNAL_INFO_COLUMN_EL_SENSOR, true);
+	if (m_columnsWidth.isEmpty() == true)
+	{
+		hideColumn(SIGNAL_INFO_COLUMN_APP_ID, true);
+		hideColumn(SIGNAL_INFO_COLUMN_EQUIPMENT_ID, true);
+		hideColumn(SIGNAL_INFO_COLUMN_RACK, true);
+		hideColumn(SIGNAL_INFO_COLUMN_CHASSIS, true);
+		hideColumn(SIGNAL_INFO_COLUMN_MODULE, true);
+		hideColumn(SIGNAL_INFO_COLUMN_PLACE, true);
+		hideColumn(SIGNAL_INFO_COLUMN_EL_SENSOR, true);
+	}
 
 	startSignalStateTimer(m_signalInfo.timeForUpdate());
 }
@@ -322,14 +325,24 @@ void PanelSignalInfo::createInterface()
 
 	m_pSignalInfoWindow->setCentralWidget(m_pView);
 
-	for(int column = 0; column < SIGNAL_INFO_COLUMN_COUNT; column++)
-	{
-		m_pView->setColumnWidth(column, SignalInfoColumnWidth[column]);
-	}
-
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_pView->setWordWrap(false);
 
+	m_columnsWidth = theOptions.signalInfo().columnsWidth();
+
+	if (m_columnsWidth.isEmpty() == true)
+	{
+		for(int column = 0; column < SIGNAL_INFO_COLUMN_COUNT; column++)
+		{
+			m_pView->setColumnWidth(column, SignalInfoColumnWidth[column]);
+		}
+	}
+	else
+	{
+		restoreColumnsWidth();
+	}
+
+	connect(m_pView->horizontalHeader(), &QHeaderView::sectionResized, this, &PanelSignalInfo::onColumnResized);
 	connect(m_pView, &QTableView::doubleClicked , this, &PanelSignalInfo::onListDoubleClicked);
 
 	setWidget(m_pSignalInfoWindow);
@@ -339,6 +352,11 @@ void PanelSignalInfo::createInterface()
 
 void PanelSignalInfo::createHeaderContexMenu()
 {
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
 	// init header context menu
 	//
 	m_pView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -352,7 +370,27 @@ void PanelSignalInfo::createHeaderContexMenu()
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
-			m_pColumnAction[column]->setChecked(true);
+
+			if (m_columnsWidth.isEmpty() == true)
+			{
+				m_pColumnAction[column]->setChecked(true);
+			}
+			else
+			{
+				QString columnName = SignalInfoColumn[column];
+
+				int pos = columnName.indexOf(QChar::LineFeed);
+				if (pos != -1)
+				{
+					columnName = columnName.left(pos);
+				}
+
+				auto it = m_columnsWidth.find(columnName);
+				if (it != m_columnsWidth.end())
+				{
+					m_pColumnAction[column]->setChecked(it.value() != 0);
+				}
+			}
 		}
 	}
 
@@ -536,6 +574,72 @@ void PanelSignalInfo::hideColumn(int column, bool hide)
 		m_pView->showColumn(column);
 		m_pColumnAction[column]->setChecked(true);
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelSignalInfo::restoreColumnsWidth()
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	for (int column = 0; column < SIGNAL_INFO_COLUMN_COUNT; column++)
+	{
+		QString columnName = SignalInfoColumn[column];
+
+		int pos = columnName.indexOf(QChar::LineFeed);
+		if (pos != -1)
+		{
+			columnName = columnName.left(pos);
+		}
+
+		auto it = m_columnsWidth.find(columnName);
+		if (it != m_columnsWidth.end())
+		{
+			int width = it.value();
+
+			if (width == 0)
+			{
+				m_pView->hideColumn(column);
+			}
+			else
+			{
+				m_pView->setColumnWidth(column, width);
+			}
+		}
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelSignalInfo::saveColumnsWidth()
+{
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	QMap<QString, int> columnsWidth;
+
+	for (int column = 0; column < SIGNAL_INFO_COLUMN_COUNT; column++)
+	{
+		QString columnName = SignalInfoColumn[column];
+
+		int pos = columnName.indexOf(QChar::LineFeed);
+		if (pos != -1)
+		{
+			columnName = columnName.left(pos);
+		}
+
+		columnsWidth[columnName] = m_pView->columnWidth(column);
+	}
+
+	m_columnsWidth = columnsWidth;
+
+	theOptions.signalInfo().setColumnsWidth(columnsWidth);
+	theOptions.signalInfo().saveColumnsWidth();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -907,6 +1011,11 @@ void PanelSignalInfo::onHeaderContextMenu(QPoint)
 
 void PanelSignalInfo::onColumnAction(QAction* action)
 {
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
 	if (action == nullptr)
 	{
 		return;
@@ -918,9 +1027,21 @@ void PanelSignalInfo::onColumnAction(QAction* action)
 		{
 			hideColumn(column, !action->isChecked());
 
+			if (action->isChecked() == true)
+			{
+				m_pView->setColumnWidth(column, SignalInfoColumnWidth[column]);
+			}
+
 			break;
 		}
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelSignalInfo::onColumnResized(int, int, int )
+{
+	saveColumnsWidth();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

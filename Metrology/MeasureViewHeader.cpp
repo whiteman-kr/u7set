@@ -192,24 +192,6 @@ namespace Measure
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
-
-	HeaderColumn& HeaderColumn::operator=(const HeaderColumn& from)
-	{
-		m_index = from.m_index;
-		m_uniqueTitle = from.m_uniqueTitle;
-
-		m_title = from.m_title;
-		m_enableVisible = from.m_enableVisible;
-		m_width = from.m_width;
-
-		m_alignment = from.m_alignment;
-
-		m_enableDuplicate = from.m_enableDuplicate;
-
-		return *this;
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
@@ -280,7 +262,6 @@ namespace Measure
 			c = theOptions.measureView().m_column[measureType][languageType][column];
 			c.setIndex(column);
 		}
-
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

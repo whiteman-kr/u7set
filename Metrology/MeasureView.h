@@ -12,19 +12,20 @@
 
 #include "MeasureViewHeader.h"
 #include "MeasureBase.h"
+#include "ChartView.h"
 
 namespace Measure
 {
 	// ==============================================================================================
 
-	class Table : public QAbstractTableModel
+	class Model : public QAbstractTableModel
 	{
 		Q_OBJECT
 
 	public:
 
-		explicit Table(QObject* parent = nullptr);
-		virtual ~Table() override;
+		explicit Model(QObject* parent = nullptr);
+		virtual ~Model() override;
 
 	public:
 
@@ -80,20 +81,23 @@ namespace Measure
 	public:
 
 		Measure::Type measureType() const { return m_measureType; }
-		Table& table() { return m_table; }
+		Model& measureModel() { return m_model; }
 
 		void updateColumn();
 
 	private:
 
 		Measure::Type m_measureType = Measure::Type::NoMeasureType;
-		Table m_table;
+		Model m_model;
 
 		QMenu* m_headerContextMenu = nullptr;
+		QMap<QString, int> m_columnsWidth;
 
 		void createContextMenu();
 
 		int firstVisibleColumn();
+		void restoreColumnsWidth();
+		void saveColumnsWidth();
 
 	signals:
 
@@ -101,44 +105,27 @@ namespace Measure
 
 	public slots:
 
-		void onHeaderContextMenu(QPoint);
-		void onHeaderContextAction(QAction* action);
-
-		void onColumnResized(int index, int, int width);
-
+		// slots of measure
+		//
 		void loadMeasurements(const Measure::Base& measureBase);
 
 		void appendMeasure(Measure::Item* pMeasurement);
 		void removeMeasure();
 
+		//
+		//
 		void copy();
 		void copyCell();
 
-		void showGraph(int graphType);
+		void showChart(ChartType chartType);
+
+		// slots for list header, to hide or show columns
+		//
+		void onHeaderContextMenu(QPoint);
+		void onColumnAction(QAction* action);
+		void onColumnResized(int index, int, int width);
 	};
 }
-
-// ==============================================================================================
-
-class ChartView : public QtCharts::QChartView
-{
-
-public:
-
-	ChartView(QtCharts::QChart* chart, QWidget* parent = nullptr);
-
-protected:
-
-	bool viewportEvent(QEvent* event) override;
-	void mousePressEvent(QMouseEvent* event) override;
-	void mouseMoveEvent(QMouseEvent* event) override;
-	void mouseReleaseEvent(QMouseEvent* event) override;
-	void keyPressEvent(QKeyEvent* event) override;
-
-private:
-
-	bool m_isTouching = false;
-};
 
 // ==============================================================================================
 
