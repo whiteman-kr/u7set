@@ -305,6 +305,45 @@ namespace Log
 
 		connect(this, &LogFileWorker::readStart, this, &LogFileWorker::slot_load);
 
+		// Create shared memory to lock file writing
+
+		m_sharedMemory = std::make_unique<QSharedMemory>();
+		m_sharedMemory->setKey(qAppName() + m_logName);
+
+		bool ok = m_sharedMemory->create(sizeof(bool));
+
+		if (ok == true)
+		{
+			// If it was created then it must be initialized
+			//
+			m_sharedMemory->lock();
+
+			bool locked = false;
+			std::memcpy(m_sharedMemory->data(), &locked, sizeof(locked));
+
+			m_sharedMemory->unlock();
+		}
+		else
+		{
+			if (m_sharedMemory->error() == QSharedMemory::SharedMemoryError::AlreadyExists)
+			{
+				bool aok = m_sharedMemory->attach();
+				Q_ASSERT(aok);
+
+				if (aok == false)
+				{
+					QString errorString = tr("LogFileWorker: can't attach to QSharedMemory");
+					emit writeFailure(errorString);
+				}
+			}
+			else
+			{
+				Q_ASSERT(false);
+
+				QString errorString = tr("LogFileWorker: can't create QSharedMemory: %1").arg(m_sharedMemory->errorString());
+				emit writeFailure(errorString);
+			}
+		}
 	}
 
 	void LogFileWorker::onThreadFinished()
@@ -497,6 +536,61 @@ namespace Log
 		return true;
 	}
 
+	bool LogFileWorker::lockShared(bool lock, bool* alreadyLocked)
+	{
+		// read currentLocked
+
+		bool currentLocked = false;
+
+		bool lok = m_sharedMemory->lock();
+		if (lok == false)
+		{
+			Q_ASSERT(lok);
+			return false;
+		}
+
+		std::memcpy(&currentLocked, m_sharedMemory->data(), sizeof(currentLocked));
+
+		bool uok = m_sharedMemory->unlock();
+		if (uok == false)
+		{
+			Q_ASSERT(uok);
+			return false;
+		}
+
+		if (alreadyLocked != nullptr)
+		{
+			*alreadyLocked = currentLocked;
+		}
+
+		// if already locked or unlocked, return true
+
+		if (lock == currentLocked)
+		{
+			return true;
+		}
+
+		// write lock
+
+		lok = m_sharedMemory->lock();
+		if (lok == false)
+		{
+			Q_ASSERT(lok);
+			return false;
+		}
+
+		std::memcpy(m_sharedMemory->data(), &lock, sizeof(lock));
+
+		uok = m_sharedMemory->unlock();
+		if (uok == false)
+		{
+			Q_ASSERT(uok);
+			return false;
+		}
+
+		return true;
+	}
+
 	bool LogFileWorker::flush(QString* errorString)
 	{
 		if (errorString == nullptr)
@@ -515,6 +609,43 @@ namespace Log
 		}
 
 		QString fileName = getLogFileName(m_currentFileNumber);
+
+		// Try to lock log file for writing
+
+		bool alreadyLocked = false;
+
+		bool lok = lockShared(true, &alreadyLocked);
+
+		if (lok == false)
+		{
+			*errorString = tr("Error locking log file %1 by QSharedMemory.").arg(fileName);
+
+			m_queue.clear();
+
+			return false;
+		}
+
+		if (alreadyLocked == true)
+		{
+			const int maxLogQueueSize = 1000;
+
+			if (m_queue.size() > maxLogQueueSize)
+			{
+				*errorString = tr("Log file %1 is locked by another instance and queue size exceeds maximum, queue cleared.").arg(fileName);
+
+				m_queue.clear();
+
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
+
+		// Create unlocker pointer
+
+		std::shared_ptr<int> unlockerPtr(NULL, [&](int *) { lockShared(false, nullptr); });
 
 		// Check current file size and switch to the next file if needed
 		{
@@ -711,6 +842,47 @@ namespace Log
 
 	void LogFileWorker::slot_load(bool currentSessionOnly)
 	{
+		// Try to lock the log
+
+		bool lockSuccess = false;
+
+		for (int i = 0; i < 100; i++)
+		{
+			bool alreadyLocked = false;
+
+			bool lok = lockShared(true, &alreadyLocked);
+
+			if (lok == false)
+			{
+				Q_ASSERT(lok);
+
+				emit readComplete();
+				return;
+			}
+
+			if (alreadyLocked == false)
+			{
+				lockSuccess = true;
+				break;
+			}
+
+			QThread::msleep(10);
+		}
+
+		if (lockSuccess == false)
+		{
+			qDebug() << "LogFileWorker::slot_load, could not lock the log for reading";
+
+			emit readComplete();
+			return;
+		}
+
+		// Create unlocker pointer
+
+		std::shared_ptr<int> unlockerPtr(NULL, [&](int *) { lockShared(false, nullptr); });
+
+		// Read the log
+
 		std::vector<LogFileRecord> readResult;
 
 		for (int i = 0; i < m_maxFilesCount; i++)

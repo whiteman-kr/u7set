@@ -77,6 +77,8 @@ namespace Log
 
 		bool writeLogFileInfo(QFile& file, const QDateTime& startTime, const QDateTime& endTime, int recordsCount);
 
+		bool lockShared(bool lock, bool* alreadyLocked = nullptr);
+
 		bool flush(QString* errorString);
 
 		bool switchToNextLogFile(QString* errorString);
@@ -119,6 +121,8 @@ namespace Log
 
 		QMutex m_readMutex;
 		std::vector<LogFileRecord> m_readResult;
+
+		std::unique_ptr<QSharedMemory> m_sharedMemory;
 	};
 
 	class LogRecordModel : public QAbstractItemModel
