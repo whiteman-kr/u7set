@@ -78,7 +78,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 		}
 		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TX id for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
 				
-		ptr = 12 * 2 + p * 2;
+		ptr = 9 * 2 + p * 2;
 		value = optoPort.rxDataSizeW();
 		if (setData16(confFirmware, log, LMNumber, controller.equipmentId, frame, ptr, "RX data words quantity for TxRx Block (Opto) " + (p + 1), value) == false)
 		{
@@ -97,7 +97,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 			}
 		}
 
-		ptr = 15 * 2 + p * 4;
+		ptr = 12 * 2 + p * 4;
 		if (setData32(confFirmware, log, LMNumber, controller.equipmentId, frame, ptr, "TxRx Block (Opto) Data UID " + (p + 1), dataUID) == false)
 		{
 			return false;
@@ -106,7 +106,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 
 	} // p
 	
-	let ptr = 21 * 2;
+	let ptr = 18 * 2;
 	
 	let lanPortCount = module.propertyValue("LanPortCount");
 	
@@ -114,6 +114,8 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 	{
 		let controllerID = module.equipmentId + "_ETHERNET0";
 		controllerID = controllerID + (p + 1);
+
+		confFirmware.writeLog("    LAN " + (p + 1) + ": Controller ID = " + controllerID + "\r\n");
 	    
 		let controllerObject = module.childByEquipmentId(controllerID);
 		if (controllerObject == null || controllerObject.isController() == false)
@@ -220,6 +222,8 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 	} // p
 
 	// ------------------------------------------------------------ VOTE_CFG ---------------------------------------------------------
+
+	confFirmware.writeLog("Writing VOTE_CFG Configuration\r\n");
 
 	var txBusDataStartAddressArray = [];
 	var rxBusDataStartAddressArray = [];
@@ -442,7 +446,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 			ptr += 2;
 		}
 		else{
-			confFirmware.writeLog("    [00:00] : RxVOTE_CFG_QuantityOfRecords = " + votePartCount + "\r\n");
+			confFirmware.writeLog("    [--:--] : RxVOTE_CFG_QuantityOfRecords = " + votePartCount + "\r\n");
 		}
 	}//lanType
 
