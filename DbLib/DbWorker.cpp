@@ -378,6 +378,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0356.sql", "Upgrade to version 356, LM1-SR04, added AfbComponent DAMP FP syn in/out pins, required for simulator"},
 	{":/DatabaseUpgrade/Upgrade0357.sql", "Upgrade to version 357, TuningSecurity properties have been modified in TuningClient and added to Monitor preset"},
 	{":/DatabaseUpgrade/Upgrade0358.sql", "Upgrade to version 358, DiagDataSize field was added to LM1-SR03 and LM1-SR04 configuration i/o module frame"},
+	{":/DatabaseUpgrade/Upgrade0359.sql", "Upgrade to version 359, MSO-4 description and configuration script update"},
 };
 
 int DbWorker::counter = 0;
