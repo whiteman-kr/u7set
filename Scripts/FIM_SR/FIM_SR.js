@@ -12,7 +12,7 @@ function generate_fimsr(confFirmware, module, LMNumber, frame, log, signalSet, o
     let defaultTf = valToADC(0 / tsConstant, 0, 65535, 0, 0xffff);
     let defaultHighBound = 4000;
     let defaultLowBound = 0.1;
-	let defaultK1 = 1.0;
+	let defaultK1 = 0.0;
 	let defaultK2 = 0.0;
 	let defaultWordOfFlags = 0;
     
@@ -288,6 +288,21 @@ function generate_fimsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 			if (highValidRange > highValidRangeMaxEngineering)
 			{
 				log.errCFG3010("HighValidRange", highValidRange, lowValidRangeMinEngineering, highValidRangeMaxEngineering, decimalPlaces, signalStrId);
+			}
+
+			// UnitEnable
+
+			var unitEnable = signal.propertyValue("UnitEnable");
+			if (unitEnable == undefined) 
+			{
+				log.errCFG3000("UnitEnable", signalStrId);
+				return false;
+			}
+			
+			if (unitEnable == false)
+			{
+				k1 = 0.0;
+				k2 = 0.0;
 			}
 			
 			//
