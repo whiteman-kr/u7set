@@ -535,13 +535,21 @@
 <context>
     <name>DialogComparatorProperty</name>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1500"/>
         <source>Propertу</source>
+        <translation type="vanished">Свойства</translation>
+    </message>
+    <message>
+        <source>Propertу of comparator</source>
+        <translation type="vanished">Свойства уставки</translation>
+    </message>
+    <message>
+        <location filename="../DialogObjectProperties.cpp" line="1500"/>
+        <source>Property</source>
         <translation>Свойства</translation>
     </message>
     <message>
         <location filename="../DialogObjectProperties.cpp" line="1507"/>
-        <source>Propertу of comparator</source>
+        <source>Property of comparator</source>
         <translation>Свойства уставки</translation>
     </message>
     <message>
@@ -744,17 +752,25 @@
 <context>
     <name>DialogMeasureProperty</name>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2025"/>
         <source>Propertу</source>
-        <translation>Свойства</translation>
+        <translation type="vanished">Свойства</translation>
     </message>
     <message>
         <source>Propertу - %1</source>
         <translation type="vanished">Свойства - %1</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2038"/>
         <source>Propertу of measurement - %1</source>
+        <translation type="vanished">Свойства измерения - %1</translation>
+    </message>
+    <message>
+        <location filename="../DialogObjectProperties.cpp" line="2025"/>
+        <source>Property</source>
+        <translation>Свойства</translation>
+    </message>
+    <message>
+        <location filename="../DialogObjectProperties.cpp" line="2038"/>
+        <source>Property of measurement - %1</source>
         <translation>Свойства измерения - %1</translation>
     </message>
     <message>
@@ -1485,8 +1501,12 @@ Please, select output signal!</source>
 <context>
     <name>DialogProjectProperty</name>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="55"/>
         <source>Propertу</source>
+        <translation type="vanished">Свойства</translation>
+    </message>
+    <message>
+        <location filename="../DialogObjectProperties.cpp" line="55"/>
+        <source>Property</source>
         <translation>Свойства</translation>
     </message>
     <message>
@@ -1548,8 +1568,12 @@ Please, select output signal!</source>
 <context>
     <name>DialogRackGroupProperty</name>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="461"/>
         <source>Propertу - rack groups</source>
+        <translation type="vanished">Свойства - группы шкафа</translation>
+    </message>
+    <message>
+        <location filename="../DialogObjectProperties.cpp" line="461"/>
+        <source>Property - rack groups</source>
         <translation>Свойства - группы шкафа</translation>
     </message>
     <message>
@@ -1594,8 +1618,12 @@ Please, select output signal!</source>
     </message>
     <message>
         <location filename="../DialogObjectProperties.cpp" line="869"/>
-        <source>Propertу - %1</source>
+        <source>Property - %1</source>
         <translation>Свойства - %1</translation>
+    </message>
+    <message>
+        <source>Propertу - %1</source>
+        <translation type="vanished">Свойства - %1</translation>
     </message>
     <message>
         <location filename="../DialogObjectProperties.cpp" line="948"/>
@@ -1679,18 +1707,26 @@ To create a group of racks, click menu &quot;Racks&quot; - &quot;Groups ...&quot
 <context>
     <name>DialogRackProperty</name>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="218"/>
         <source>Propertу</source>
+        <translation type="vanished">Свойства</translation>
+    </message>
+    <message>
+        <source>Propertу of the rack</source>
+        <translation type="vanished">Свойства шкафа</translation>
+    </message>
+    <message>
+        <location filename="../DialogObjectProperties.cpp" line="218"/>
+        <source>Property</source>
         <translation>Свойства</translation>
     </message>
     <message>
         <location filename="../DialogObjectProperties.cpp" line="231"/>
-        <source>Propertу - %1</source>
-        <translation></translation>
+        <source>Property of rack - %1</source>
+        <translation>Свойства шкафа - %1</translation>
     </message>
     <message>
         <location filename="../DialogObjectProperties.cpp" line="246"/>
-        <source>Propertу of the rack</source>
+        <source>Property of the rack</source>
         <translation>Свойства шкафа</translation>
     </message>
     <message>
@@ -1886,9 +1922,8 @@ Please choose a different group or channel.</source>
 <context>
     <name>DialogSignalProperty</name>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1043"/>
         <source>Propertу</source>
-        <translation>Свойства</translation>
+        <translation type="vanished">Свойства</translation>
     </message>
     <message>
         <source>Propertу - %1</source>
@@ -1915,8 +1950,17 @@ Please choose a different group or channel.</source>
         <translation type="vanished">CustomAppSignalID</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1056"/>
         <source>Propertу of signal - %1</source>
+        <translation type="vanished">Свойства сигнала - %1</translation>
+    </message>
+    <message>
+        <location filename="../DialogObjectProperties.cpp" line="1043"/>
+        <source>Property</source>
+        <translation>Свойства</translation>
+    </message>
+    <message>
+        <location filename="../DialogObjectProperties.cpp" line="1056"/>
+        <source>Property of signal - %1</source>
         <translation>Свойства сигнала - %1</translation>
     </message>
     <message>

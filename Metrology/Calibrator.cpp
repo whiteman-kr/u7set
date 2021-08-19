@@ -1154,7 +1154,7 @@ bool Calibrator::stepDown()
 
 		case CalibratorType::Rgl1062:
 
-			m_sourceValue -= 1;
+			m_sourceValue -= 0.1;
 
 			break;
 
@@ -1264,7 +1264,7 @@ bool Calibrator::stepUp()
 
 		case CalibratorType::Rgl1062:
 
-			m_sourceValue += 1;
+			m_sourceValue += 0.1;
 
 			break;
 

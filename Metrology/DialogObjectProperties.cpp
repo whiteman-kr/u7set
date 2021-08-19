@@ -52,7 +52,7 @@ void DialogProjectProperty::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Propertу"));
+	setWindowTitle(tr("Property"));
 
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
 	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
@@ -215,7 +215,7 @@ void DialogRackProperty::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Propertу"));
+	setWindowTitle(tr("Property"));
 
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
 	setMinimumSize(static_cast<int>(screen.width() * 0.15), static_cast<int>(screen.height() * 0.15));
@@ -228,7 +228,7 @@ void DialogRackProperty::createPropertyList()
 		return;
 	}
 
-	setWindowTitle(tr("Propertу - %1").arg(m_rack.caption()));
+	setWindowTitle(tr("Property of rack - %1").arg(m_rack.caption()));
 
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 
@@ -243,7 +243,7 @@ void DialogRackProperty::createPropertyList()
 
 	//
 	//
-	QtProperty* rackGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Propertу of the rack"));
+	QtProperty* rackGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Property of the rack"));
 
 		item = m_pManager->addProperty(QVariant::String, tr("Caption"));
 		item->setValue(m_rack.caption());
@@ -458,7 +458,7 @@ void DialogRackGroupProperty::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Propertу - rack groups"));
+	setWindowTitle(tr("Property - rack groups"));
 
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
 	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
@@ -866,7 +866,7 @@ void DialogRackGroupProperty::groupSelected()
 		return;
 	}
 
-	setWindowTitle(tr("Propertу - %1").arg(group.caption()));
+	setWindowTitle(tr("Property - %1").arg(group.caption()));
 
 	updateRackList();
 }
@@ -1040,7 +1040,7 @@ void DialogSignalProperty::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Propertу"));
+	setWindowTitle(tr("Property"));
 
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
 	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
@@ -1053,7 +1053,7 @@ void DialogSignalProperty::createPropertyList()
 		return;
 	}
 
-	setWindowTitle(tr("Propertу of signal - %1").arg(m_param.customAppSignalID()));
+	setWindowTitle(tr("Property of signal - %1").arg(m_param.customAppSignalID()));
 
 	//
 	//
@@ -1497,14 +1497,14 @@ void DialogComparatorProperty::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Propertу"));
+	setWindowTitle(tr("Property"));
 
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
 	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
 	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
 	move(screen.center() - rect().center());
 
-	setWindowTitle(tr("Propertу of comparator"));
+	setWindowTitle(tr("Property of comparator"));
 
 	//
 	//
@@ -2022,7 +2022,7 @@ void DialogMeasureProperty::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Property.png"));
-	setWindowTitle(tr("Propertу"));
+	setWindowTitle(tr("Property"));
 
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
 	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.3));
@@ -2035,7 +2035,7 @@ void DialogMeasureProperty::createPropertyList()
 		return;
 	}
 
-	setWindowTitle(tr("Propertу of measurement - %1").arg(m_pMeasurement->customAppSignalID()));
+	setWindowTitle(tr("Property of measurement - %1").arg(m_pMeasurement->customAppSignalID()));
 
 	//
 	//
