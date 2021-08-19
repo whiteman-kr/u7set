@@ -319,7 +319,7 @@ namespace Log
 			m_sharedMemory->lock();
 
 			bool locked = false;
-			std::memcpy(m_sharedMemory->data(), &locked, sizeof(locked));
+			memcpy(m_sharedMemory->data(), &locked, sizeof(locked));
 
 			m_sharedMemory->unlock();
 		}
@@ -549,7 +549,7 @@ namespace Log
 			return false;
 		}
 
-		std::memcpy(&currentLocked, m_sharedMemory->data(), sizeof(currentLocked));
+		memcpy(&currentLocked, m_sharedMemory->data(), sizeof(currentLocked));
 
 		bool uok = m_sharedMemory->unlock();
 		if (uok == false)
@@ -579,7 +579,7 @@ namespace Log
 			return false;
 		}
 
-		std::memcpy(m_sharedMemory->data(), &lock, sizeof(lock));
+		memcpy(m_sharedMemory->data(), &lock, sizeof(lock));
 
 		uok = m_sharedMemory->unlock();
 		if (uok == false)
