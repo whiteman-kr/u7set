@@ -9,6 +9,7 @@
 
 const char* const			ComparatorListColumn[] =
 {
+							QT_TRANSLATE_NOOP("DialogComparatorList", "Rack"),
 							QT_TRANSLATE_NOOP("DialogComparatorList", "SignalID (Input/Internal)"),
 							QT_TRANSLATE_NOOP("DialogComparatorList", "Comparator No"),
 							QT_TRANSLATE_NOOP("DialogComparatorList", "Set point"),
@@ -23,20 +24,22 @@ const char* const			ComparatorListColumn[] =
 
 const int					COMPARATOR_LIST_COLUMN_COUNT			= sizeof(ComparatorListColumn)/sizeof(ComparatorListColumn[0]);
 
-const int					COMPARATOR_LIST_COLUMN_INPUT			= 0,
-							COMPARATOR_LIST_COLUMN_CMP_NO			= 1,
-							COMPARATOR_LIST_COLUMN_SETPOINT			= 2,
-							COMPARATOR_LIST_COLUMN_HYSTERESIS		= 3,
-							COMPARATOR_LIST_COLUMN_TYPE				= 4,
-							COMPARATOR_LIST_COLUMN_EL_RANGE			= 5,
-							COMPARATOR_LIST_COLUMN_EL_SENSOR		= 6,
-							COMPARATOR_LIST_COLUMN_EN_RANGE			= 7,
-							COMPARATOR_LIST_COLUMN_OUTPUT			= 8,
-							COMPARATOR_LIST_COLUMN_SCHEMA			= 9;
+const int					COMPARATOR_LIST_COLUMN_RACK				= 0,
+							COMPARATOR_LIST_COLUMN_INPUT			= 1,
+							COMPARATOR_LIST_COLUMN_CMP_NO			= 2,
+							COMPARATOR_LIST_COLUMN_SETPOINT			= 3,
+							COMPARATOR_LIST_COLUMN_HYSTERESIS		= 4,
+							COMPARATOR_LIST_COLUMN_TYPE				= 5,
+							COMPARATOR_LIST_COLUMN_EL_RANGE			= 6,
+							COMPARATOR_LIST_COLUMN_EL_SENSOR		= 7,
+							COMPARATOR_LIST_COLUMN_EN_RANGE			= 8,
+							COMPARATOR_LIST_COLUMN_OUTPUT			= 9,
+							COMPARATOR_LIST_COLUMN_SCHEMA			= 10;
 
 
 const int					ComparatorListColumnWidth[COMPARATOR_LIST_COLUMN_COUNT] =
 {
+							100,	// COMPARATOR_LIST_COLUMN_RACK
 							250,	// COMPARATOR_LIST_COLUMN_INPUT
 							 50,	// COMPARATOR_LIST_COLUMN_CMP_NO
 							250,	// COMPARATOR_LIST_COLUMN_SETPOINT
@@ -91,6 +94,8 @@ private:
 	QMenu* m_pViewMenu = nullptr;
 	QMenu* m_pViewTypeIDMenu = nullptr;
 
+	QAction* m_pEnableMeasureAction = nullptr;
+	QAction* m_pDisableMeasureAction = nullptr;
 	QAction* m_pTypeIDActionList[Metrology::SignalIDTypeCount];
 
 	ComparatorListTable m_comparatorTable;
@@ -108,12 +113,16 @@ public slots:
 
 private slots:
 
-	// View
-	//
-	void showTypeID(QAction* action);
-
 	// slots of menu
 	//
+		// View
+		//
+	void showTypeID(QAction* action);
+
+		// Edit
+		//
+	void onEnableMeasure();
+	void onDisableMeasure();
 	void onProperties() override;
 };
 

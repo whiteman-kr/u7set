@@ -342,6 +342,10 @@ void DialogTuningSignalList::updateList()
 		signalList.push_back(pSignal);
 	}
 
+	std::sort(signalList.begin(), signalList.end(),
+				[](Metrology::Signal* s1, Metrology::Signal* s2)
+				{ return s1->param().location().positionID() < s2->param().location().positionID(); });
+
 	m_signalTable.set(signalList);
 }
 

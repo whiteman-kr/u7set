@@ -287,6 +287,8 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 	int rackCount = 0;
 	result &= xml.readIntAttribute(XmlAttribute::COUNT, &rackCount);
 
+	std::vector<Metrology::RackParam> rackList;
+
 	for(int r = 0; r < rackCount; r++)
 	{
 		if (xml.findElement("Rack") == false)
@@ -303,6 +305,16 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 			continue;
 		}
 
+		rackList.push_back(rack);
+	}
+
+	std::sort(rackList.begin(), rackList.end(),
+				[](const Metrology::RackParam& r1, const Metrology::RackParam& r2)
+				{ return r1.caption() < r2.caption(); });
+
+
+	for(const Metrology::RackParam& rack : rackList)
+	{
 		theSignalBase.racks().append(rack);
 	}
 

@@ -133,6 +133,17 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 			}
 		}
 
+		if (theSignalBase.statistics().measureType() == Measure::Type::Comparators)
+		{
+			if (si.comparator() != nullptr)
+			{
+				if (si.comparator()->enableMeasure() == false)
+				{
+					return QColor(Qt::lightGray);
+				}
+			}
+		}
+
 //		if (pSignal->param().isInput() || pSignal->param().isOutput() == true)
 //		{
 //			if (pSignal->param().electricRangeIsValid() == false)

@@ -707,7 +707,12 @@ void MeasureThread::measureCompratorsInSeries()
 			std::shared_ptr<Metrology::ComparatorEx> comparatorEx = param.comparator(cmp);
 			if (comparatorEx == nullptr || comparatorEx->signalsIsValid() == false)
 			{
-				break;
+				continue;
+			}
+
+			if (comparatorEx->enableMeasure() == false)
+			{
+				continue;
 			}
 
 			bool goToNextComparator = false;
@@ -1274,6 +1279,11 @@ void MeasureThread::measureCompratorsInParallel()
 							continue;
 						}
 
+						if (comparatorEx->enableMeasure() == false)
+						{
+							continue;
+						}
+
 						//
 						//
 						double compareVal = comparatorEx->compareOnlineValue(cmpValueType);		// get compare value
@@ -1446,6 +1456,12 @@ void MeasureThread::measureCompratorsInParallel()
 									continue;
 								}
 
+								if (comparatorEx->enableMeasure() == false)
+								{
+									currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
+									continue;
+								}
+
 								// if  state of comparator = logical 0, then you do not need to wait
 								//
 								if (comparatorEx->outputState() == activeDiscreteOutputState)
@@ -1513,6 +1529,12 @@ void MeasureThread::measureCompratorsInParallel()
 
 					std::shared_ptr<Metrology::ComparatorEx> comparatorEx = param.comparator(cmp);
 					if (comparatorEx == nullptr || comparatorEx->signalsIsValid() == false)
+					{
+						currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
+						continue;
+					}
+
+					if (comparatorEx->enableMeasure() == false)
 					{
 						currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
 						continue;
@@ -1614,6 +1636,12 @@ void MeasureThread::measureCompratorsInParallel()
 
 					std::shared_ptr<Metrology::ComparatorEx> comparatorEx = param.comparator(cmp);
 					if (comparatorEx == nullptr || comparatorEx->signalsIsValid() == false)
+					{
+						currentStateComparatorsInAllChannels |= (0x1ULL << ch);
+						continue;
+					}
+
+					if (comparatorEx->enableMeasure() == false)
 					{
 						currentStateComparatorsInAllChannels |= (0x1ULL << ch);
 						continue;
@@ -1760,6 +1788,11 @@ void MeasureThread::measureCompratorsInParallel()
 
 				std::shared_ptr<Metrology::ComparatorEx> comparatorEx = param.comparator(cmp);
 				if (comparatorEx == nullptr || comparatorEx->signalsIsValid() == false)
+				{
+					continue;
+				}
+
+				if (comparatorEx->enableMeasure() == false)
 				{
 					continue;
 				}

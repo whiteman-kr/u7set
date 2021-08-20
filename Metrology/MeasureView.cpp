@@ -921,9 +921,10 @@ namespace Measure
 		std::vector<int> keyList;
 		std::vector<int> removeIndexList;
 
-		for(int index = 0; index < measureCount; index++)
+		for(auto selectedIndex : selectionModel()->selectedRows())
 		{
-			if (selectionModel()->isRowSelected(index, QModelIndex()) == false)
+			int index = selectedIndex.row();
+			if (index < 0 || index >= m_model.count())
 			{
 				continue;
 			}
@@ -956,6 +957,8 @@ namespace Measure
 		{
 			return;
 		}
+
+		std::sort(removeIndexList.begin(), removeIndexList.end());
 
 		// remove from MeasureTable
 		//

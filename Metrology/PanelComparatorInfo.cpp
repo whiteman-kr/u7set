@@ -59,6 +59,16 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 		return m_comparatorInfo.font();
 	}
 
+	if (role == Qt::ForegroundRole)
+	{
+		if (comparatorEx->enableMeasure() == false)
+		{
+			return QColor(Qt::lightGray);
+		}
+
+		return QVariant();
+	}
+
 	if (role == Qt::BackgroundRole)
 	{
 		if (comparatorEx->outputState() == true)
@@ -207,6 +217,17 @@ void PanelComparatorInfo::createContextMenu()
 	//
 	m_pContextMenu = new QMenu(tr(""), m_pComparatorInfoWindow);
 
+
+	m_pMeasureMenu = new QMenu(tr("Measure"), m_pComparatorInfoWindow);
+
+	m_pEnableMeasureAction = m_pMeasureMenu->addAction(tr("Enable"));
+	m_pDisableMeasureAction = m_pMeasureMenu->addAction(tr("Disable"));
+
+	m_pContextMenu->addMenu(m_pMeasureMenu);
+
+	m_pContextMenu->addSeparator();
+
+
 //	m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
 //	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
 
@@ -218,9 +239,11 @@ void PanelComparatorInfo::createContextMenu()
 	m_pComparatorPropertyAction = m_pContextMenu->addAction(tr("Propertу ..."));
 	m_pComparatorPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
-//	connect(m_pCopyAction, &QAction::triggered, this, &PanelComparatorInfo::copy);
-	connect(m_pCopyCellAction, &QAction::triggered, this, &PanelComparatorInfo::copyCell);
-	connect(m_pComparatorPropertyAction, &QAction::triggered, this, &PanelComparatorInfo::comparatorProperty);
+	connect(m_pEnableMeasureAction, &QAction::triggered, this, &PanelComparatorInfo::onEnableMeasure);
+	connect(m_pDisableMeasureAction, &QAction::triggered, this, &PanelComparatorInfo::onDisableMeasure);
+//	connect(m_pCopyAction, &QAction::triggered, this, &PanelComparatorInfo::onCopy);
+	connect(m_pCopyCellAction, &QAction::triggered, this, &PanelComparatorInfo::onCopyCell);
+	connect(m_pComparatorPropertyAction, &QAction::triggered, this, &PanelComparatorInfo::onComparatorProperty);
 
 	// init context menu
 	//
@@ -324,6 +347,46 @@ void PanelComparatorInfo::setComparatorInfo(const ComparatorInfoOption& comparat
 
 void PanelComparatorInfo::onContextMenu(QPoint)
 {
+	int index = m_pView->currentIndex().row();
+	if (index < 0 || index >= m_comparatorTable.count())
+	{
+		return;
+	}
+
+	const Metrology::SignalParam& inParam = m_comparatorTable.at(index).param(Metrology::ConnectionIoType::Source);
+	if (inParam.isValid() == false)
+	{
+		return;
+	}
+
+	int indexComparator = m_pView->currentIndex().column();
+	if (indexComparator < 0 || indexComparator >= inParam.comparatorCount())
+	{
+		return;
+	}
+
+	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = inParam.comparator(indexComparator);
+	if (comparatorEx == nullptr)
+	{
+		return;
+	}
+
+	if (m_pEnableMeasureAction == nullptr || m_pDisableMeasureAction == nullptr)
+	{
+		return;
+	}
+
+	if (comparatorEx->enableMeasure() == true)
+	{
+		m_pEnableMeasureAction->setEnabled(false);
+		m_pDisableMeasureAction->setEnabled(true);
+	}
+	else
+	{
+		m_pEnableMeasureAction->setEnabled(true);
+		m_pDisableMeasureAction->setEnabled(false);
+	}
+
 	m_pContextMenu->exec(QCursor::pos());
 }
 
@@ -337,7 +400,7 @@ bool PanelComparatorInfo::eventFilter(QObject* object, QEvent* event)
 
 		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
-			comparatorProperty();
+			onComparatorProperty();
 		}
 	}
 
@@ -438,6 +501,68 @@ void PanelComparatorInfo::updateComparatorState()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void PanelComparatorInfo::onEnableMeasure()
+{
+	int index = m_pView->currentIndex().row();
+	if (index < 0 || index >= m_comparatorTable.count())
+	{
+		return;
+	}
+
+	const Metrology::SignalParam& inParam = m_comparatorTable.at(index).param(Metrology::ConnectionIoType::Source);
+	if (inParam.isValid() == false)
+	{
+		return;
+	}
+
+	int indexComparator = m_pView->currentIndex().column();
+	if (indexComparator < 0 || indexComparator >= inParam.comparatorCount())
+	{
+		return;
+	}
+
+	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = inParam.comparator(indexComparator);
+	if (comparatorEx == nullptr)
+	{
+		return;
+	}
+
+	comparatorEx->setEnableMeasure(true);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelComparatorInfo::onDisableMeasure()
+{
+	int index = m_pView->currentIndex().row();
+	if (index < 0 || index >= m_comparatorTable.count())
+	{
+		return;
+	}
+
+	const Metrology::SignalParam& inParam = m_comparatorTable.at(index).param(Metrology::ConnectionIoType::Source);
+	if (inParam.isValid() == false)
+	{
+		return;
+	}
+
+	int indexComparator = m_pView->currentIndex().column();
+	if (indexComparator < 0 || indexComparator >= inParam.comparatorCount())
+	{
+		return;
+	}
+
+	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = inParam.comparator(indexComparator);
+	if (comparatorEx == nullptr)
+	{
+		return;
+	}
+
+	comparatorEx->setEnableMeasure(false);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void PanelComparatorInfo::copy()
 {
 	CopyData copyData(m_pView, false);
@@ -446,7 +571,7 @@ void PanelComparatorInfo::copy()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelComparatorInfo::copyCell()
+void PanelComparatorInfo::onCopyCell()
 {
 	if (m_pView == nullptr)
 	{
@@ -459,7 +584,7 @@ void PanelComparatorInfo::copyCell()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelComparatorInfo::comparatorProperty()
+void PanelComparatorInfo::onComparatorProperty()
 {
 	int index = m_pView->currentIndex().row();
 	if (index < 0 || index >= m_comparatorTable.count())

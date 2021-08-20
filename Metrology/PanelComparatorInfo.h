@@ -80,6 +80,9 @@ private:
 	ComparatorInfoTable m_comparatorTable;
 
 	QMenu* m_pContextMenu = nullptr;
+	QMenu* m_pMeasureMenu = nullptr;
+	QAction* m_pEnableMeasureAction = nullptr;
+	QAction* m_pDisableMeasureAction = nullptr;
 	QAction* m_pCopyAction = nullptr;
 	QAction* m_pCopyCellAction = nullptr;
 	QAction* m_pComparatorPropertyAction = nullptr;
@@ -119,15 +122,17 @@ private slots:
 
 	// slots of menu
 	//
+	void onEnableMeasure();
+	void onDisableMeasure();
 	void copy();
-	void copyCell();
-	void comparatorProperty();
+	void onCopyCell();
+	void onComparatorProperty();
 
 	void onContextMenu(QPoint);
 
 	// slots for list
 	//
-	void onListDoubleClicked(const QModelIndex&) { comparatorProperty(); }
+	void onListDoubleClicked(const QModelIndex&) { onComparatorProperty(); }
 };
 
 // ==============================================================================================

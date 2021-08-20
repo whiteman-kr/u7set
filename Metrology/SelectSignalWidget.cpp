@@ -408,7 +408,7 @@ SelectSignalPopup::SelectSignalPopup(int defaultSignalIndex, const std::vector<S
 	//
 	m_edit = new QLineEdit{this};
 	m_edit->setPlaceholderText(tr("Filter"));
-	//m_edit->setClearButtonEnabled(true);
+	m_edit->setClearButtonEnabled(true);
 
 	// List
 	//

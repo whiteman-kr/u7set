@@ -51,126 +51,127 @@ namespace Metrology
 
 	class RackParam
 	{
-		public:
-			RackParam() {}
-			RackParam(int index, const QString& equipmentID, const QString& caption);
-			virtual ~RackParam() {}
+	public:
+		RackParam() {}
+		RackParam(int index, const QString& equipmentID, const QString& caption);
+		virtual ~RackParam() {}
 
-		private:
+	public:
 
-			int					m_index = -1;		// index of rack in the m_equipmentID
+		bool				isValid() const;
+		void				clear();
 
-			Hash				m_hash = 0;			// hash calcHash from rack m_equipmentID
+		int					index() const { return m_index; }
+		void				setIndex(int index) { m_index = index; }
 
-			QString				m_equipmentID;		// rack equipmentID
-			QString				m_caption;			// rack caption
+		Hash				hash() const { return m_hash; }
 
-			int					m_groupIndex = -1;	// for multichannel measuring - index rack group (several racks can be combine in groups)
-			int					m_channel = -1;		// for multichannel measuring - index channel in rack group
+		QString				equipmentID() const { return m_equipmentID; }
+		void				setEquipmentID(const QString& equipmentID);
 
-		public:
+		QString				caption() const { return m_caption; }
+		void				setCaption(const QString& caption) { m_caption = caption; }
 
-			bool				isValid() const;
-			void				clear();
+		int					groupIndex() const { return m_groupIndex; }
+		void				setGroupIndex(int index) { m_groupIndex = index; }
 
-			int					index() const { return m_index; }
-			void				setIndex(int index) { m_index = index; }
+		int					channel() const { return m_channel; }
+		QString				channelStr() const;
+		void				setChannel(int channel) { m_channel = channel; }
 
-			Hash				hash() const { return m_hash; }
+		// serialize
+		//
 
-			QString				equipmentID() const { return m_equipmentID; }
-			void				setEquipmentID(const QString& equipmentID);
+		bool				readFromXml(XmlReadHelper& xml);
+		void				writeToXml(XmlWriteHelper& xml);
 
-			QString				caption() const { return m_caption; }
-			void				setCaption(const QString& caption) { m_caption = caption; }
+	private:
 
-			int					groupIndex() const { return m_groupIndex; }
-			void				setGroupIndex(int index) { m_groupIndex = index; }
+		int					m_index = -1;		// index of rack in the m_equipmentID
 
-			int					channel() const { return m_channel; }
-			QString				channelStr() const;
-			void				setChannel(int channel) { m_channel = channel; }
+		Hash				m_hash = 0;			// hash calcHash from rack m_equipmentID
 
-			// serialize
-			//
+		QString				m_equipmentID;		// rack equipmentID
+		QString				m_caption;			// rack caption
 
-			bool				readFromXml(XmlReadHelper& xml);
-			void				writeToXml(XmlWriteHelper& xml);
+		int					m_groupIndex = -1;	// for multichannel measuring - index rack group (several racks can be combine in groups)
+		int					m_channel = -1;		// for multichannel measuring - index channel in rack group
+
 	};
 
 	// ==============================================================================================
 
 	class SignalLocation
 	{
-		public:
-			SignalLocation() {}
-			SignalLocation(bool shownOnSchemas);
-			virtual ~SignalLocation() {}
+	public:
+		SignalLocation() {}
+		SignalLocation(bool shownOnSchemas);
+		virtual ~SignalLocation() {}
 
-		private:
+	public:
 
-			RackParam			m_rack;						// rack EquipmentID
+		void				clear();
 
-			QString				m_chassisID;				// chassis EquipmentID
-			int					m_chassis = -1;				// number of chassis
+		RackParam&			rack() { return m_rack; }
+		QString				rackCaption(bool showIndex = false) const;
+		void				setRack(const RackParam& rack) { m_rack = rack; }
 
-			QString				m_moduleID;					// module EquipmentID
-			int					m_module = -1;				// number of module
+		QString				chassisID() const { return m_chassisID; }
+		void				setChassisID(const QString& chassisID) { m_chassisID = chassisID; }
 
-			int					m_place = -1;				// number of place
-			QString				m_contact;					// for input: _IN00A or _IN00B, for output: only _OUT00
+		int					chassis() const { return m_chassis; }
+		QString				chassisStr() const;
+		void				setChassis(int chassis) { m_chassis = chassis; }
 
-			bool				m_shownOnSchemas = false;	// signal is shown in the schemas - only analog signals
+		QString				moduleID() const { return m_moduleID; }
+		void				setModuleID(const QString& moduleID) { m_moduleID = moduleID; }
 
-			QString				m_moduleSerialNoID;			// AppSignalID serial number of module	- write online
-			int					m_moduleSerialNo = 0;		// serial number of module				- write online
+		int					module() const { return m_module; }
+		QString				moduleStr() const;
+		void				setModule(int module) { m_module = module; }
 
-		public:
+		int					place() const { return m_place; }
+		QString				placeStr() const;
+		void				setPlace(int place) { m_place = place; }
 
-			void				clear();
+		QString				contact() const { return m_contact; }
+		void				setContact(const QString& contact) { m_contact = contact; }
 
-			RackParam&			rack() { return m_rack; }
-			QString				rackCaption(bool showIndex = false) const;
-			void				setRack(const RackParam& rack) { m_rack = rack; }
+		QString				positionID() const;
 
-			QString				chassisID() const { return m_chassisID; }
-			void				setChassisID(const QString& chassisID) { m_chassisID = chassisID; }
+		bool				shownOnSchemas() const { return m_shownOnSchemas; }
+		QString				shownOnSchemasStr() const;
+		void				setShownOnSchemas(bool show) { m_shownOnSchemas = show; }
 
-			int					chassis() const { return m_chassis; }
-			QString				chassisStr() const;
-			void				setChassis(int chassis) { m_chassis = chassis; }
+		QString				moduleSerialNoID() const { return m_moduleSerialNoID; }
+		void				setModuleSerialNoID(const QString& appSignalID) { m_moduleSerialNoID = appSignalID; }
 
-			QString				moduleID() const { return m_moduleID; }
-			void				setModuleID(const QString& moduleID) { m_moduleID = moduleID; }
+		int					moduleSerialNo() const { return m_moduleSerialNo; }
+		QString				moduleSerialNoStr() const;
+		void				setModuleSerialNo(int serialNo) { m_moduleSerialNo = serialNo; }
 
-			int					module() const { return m_module; }
-			QString				moduleStr() const;
-			void				setModule(int module) { m_module = module; }
+		// serialize
+		//
+		void				serializeTo(Proto::MetrologySignalLocation *l) const;
+		bool				serializeFrom(const Proto::MetrologySignalLocation& l);
 
-			int					place() const { return m_place; }
-			QString				placeStr() const;
-			void				setPlace(int place) { m_place = place; }
+	private:
 
-			QString				contact() const { return m_contact; }
-			void				setContact(const QString& contact) { m_contact = contact; }
+		RackParam			m_rack;						// rack EquipmentID
 
-			QString				positionID() const;
+		QString				m_chassisID;				// chassis EquipmentID
+		int					m_chassis = -1;				// number of chassis
 
-			bool				shownOnSchemas() const { return m_shownOnSchemas; }
-			QString				shownOnSchemasStr() const;
-			void				setShownOnSchemas(bool show) { m_shownOnSchemas = show; }
+		QString				m_moduleID;					// module EquipmentID
+		int					m_module = -1;				// number of module
 
-			QString				moduleSerialNoID() const { return m_moduleSerialNoID; }
-			void				setModuleSerialNoID(const QString& appSignalID) { m_moduleSerialNoID = appSignalID; }
+		int					m_place = -1;				// number of place
+		QString				m_contact;					// for input: _IN00A or _IN00B, for output: only _OUT00
 
-			int					moduleSerialNo() const { return m_moduleSerialNo; }
-			QString				moduleSerialNoStr() const;
-			void				setModuleSerialNo(int serialNo) { m_moduleSerialNo = serialNo; }
+		bool				m_shownOnSchemas = false;	// signal is shown in the schemas - only analog signals
 
-			// serialize
-			//
-			void				serializeTo(Proto::MetrologySignalLocation *l) const;
-			bool				serializeFrom(const Proto::MetrologySignalLocation& l);
+		QString				m_moduleSerialNoID;			// AppSignalID serial number of module	- write online
+		int					m_moduleSerialNo = 0;		// serial number of module				- write online
 	};
 
 	// ==============================================================================================
@@ -182,26 +183,6 @@ namespace Metrology
 		SignalParam() {}
 		SignalParam(const ::AppSignal& signal, const SignalLocation& location);
 		virtual ~SignalParam() override {}
-
-	private:
-
-		SignalLocation			m_location;
-
-		double					m_electricLowLimit = 0;
-		double					m_electricHighLimit = 0;
-
-		E::ElectricUnit			m_electricUnitID = E::ElectricUnit::NoUnit;
-		E::SensorType			m_electricSensorType = E::SensorType::NoSensor;
-		double					m_electricRLoad = 0;
-
-		double					m_electricR0 = 0;
-		int						m_electricPrecision = 4;
-
-		double					m_physicalLowLimit = 0;
-		double					m_physicalHighLimit = 0;
-
-		std::vector<std::shared_ptr<ComparatorEx>> m_comparatorList;
-		int						m_comparatorCount = 0;
 
 	public:
 
@@ -284,6 +265,26 @@ namespace Metrology
 		//
 		void					serializeTo(Proto::MetrologySignal *ms) const;
 		bool					serializeFrom(const Proto::MetrologySignal& ms);
+
+	private:
+
+		SignalLocation			m_location;
+
+		double					m_electricLowLimit = 0;
+		double					m_electricHighLimit = 0;
+
+		E::ElectricUnit			m_electricUnitID = E::ElectricUnit::NoUnit;
+		E::SensorType			m_electricSensorType = E::SensorType::NoSensor;
+		double					m_electricRLoad = 0;
+
+		double					m_electricR0 = 0;
+		int						m_electricPrecision = 4;
+
+		double					m_physicalLowLimit = 0;
+		double					m_physicalHighLimit = 0;
+
+		std::vector<std::shared_ptr<ComparatorEx>> m_comparatorList;
+		int						m_comparatorCount = 0;
 	};
 
 	// ==============================================================================================
@@ -301,12 +302,6 @@ namespace Metrology
 		SignalState(double value, const AppSignalStateFlags& flags) : m_value(value), m_flags(flags)  {}
 		virtual ~SignalState() {}
 
-	private:
-
-		double m_value = 0;
-
-		AppSignalStateFlags m_flags;
-
 	public:
 
 		void setState(const AppSignalState& state) { m_value = state.m_value; m_flags = state.m_flags; }
@@ -320,6 +315,12 @@ namespace Metrology
 
 		bool valid() const { return m_flags.valid; }
 		void setValid(bool valid) { m_flags.valid = valid; }
+
+	private:
+
+		double m_value = 0;
+
+		AppSignalStateFlags m_flags;
 	};
 
 	// ==============================================================================================
@@ -332,11 +333,6 @@ namespace Metrology
 		explicit Signal(const SignalParam& param);
 		virtual ~Signal() {}
 
-	private:
-
-		SignalParam m_param;
-		SignalState m_state;
-
 	public:
 
 		SignalParam& param() { return m_param; }
@@ -346,6 +342,11 @@ namespace Metrology
 		SignalState& state() { return m_state; }
 		const SignalState& state() const { return m_state; }
 		void setState(const Metrology::SignalState& state) { m_state = state; }
+
+	private:
+
+		SignalParam m_param;
+		SignalState m_state;
 	};
 
 	// ==============================================================================================
@@ -394,20 +395,6 @@ namespace Metrology
 			Down,
 			Up,
 		};
-
-	private:
-
-		int m_index = -1;
-
-		Metrology::Signal* m_inputSignal = nullptr;
-		Metrology::Signal* m_compareSignal = nullptr;
-		Metrology::Signal* m_hysteresisSignal = nullptr;
-		Metrology::Signal* m_outputSignal = nullptr;
-
-		DeviationType m_deviationType = DeviationType::Unused;		// for comparators Equal and NotEqual; for comparators Less and Greate deviationType = DeviationType::NoUsed
-
-		double m_compareValue = 0;
-		double m_hysteresisValue = 0;
 
 	public:
 
@@ -461,6 +448,30 @@ namespace Metrology
 		QString outputStateStr() const;
 		QString outputStateStr(const QString& forTrue, const QString& forFalse) const;
 
+		// enable measure
+		//
+		bool enableMeasure() const { return m_enableMeasure; };
+		void setEnableMeasure(bool enable) { m_enableMeasure = enable; };
+
+		//
+		//
+		QString sortID() const;
+
+	private:
+
+		int m_index = -1;
+
+		Metrology::Signal* m_inputSignal = nullptr;
+		Metrology::Signal* m_compareSignal = nullptr;
+		Metrology::Signal* m_hysteresisSignal = nullptr;
+		Metrology::Signal* m_outputSignal = nullptr;
+
+		DeviationType m_deviationType = DeviationType::Unused;		// for comparators Equal and NotEqual; for comparators Less and Greate deviationType = DeviationType::NoUsed
+
+		double m_compareValue = 0;
+		double m_hysteresisValue = 0;
+
+		bool m_enableMeasure = true;
 	};
 
 	// ==============================================================================================

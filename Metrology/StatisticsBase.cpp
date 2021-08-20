@@ -152,7 +152,7 @@ QString StatisticsItem::positionID() const
 
 	QString posID =	QString::number(param.inOutTypeInt()).rightJustified(2, '0') +
 					QString::number(m_connectionType).rightJustified(4, '0') +
-					QString::number(param.location().rack().index()).rightJustified(4, '0') +
+					param.location().rack().caption() +
 					QString::number(param.location().chassis()).rightJustified(4, '0') +
 					QString::number(param.location().module()).rightJustified(4, '0') +
 					QString::number(param.location().place()).rightJustified(4, '0');
@@ -297,7 +297,9 @@ void StatisticsBase::createSignalList(bool shownOnSchemas)
 	// sort by position
 	//
 	StatisticList& list = m_statisticList[Measure::Type::Linearity];
-	std::sort(list.begin(), list.end(), [](const StatisticsItem& si1, const StatisticsItem& si2) { return si1.positionID() < si2.positionID(); });
+	std::sort(list.begin(), list.end(),
+				[](const StatisticsItem& s1, const StatisticsItem& s2)
+				{ return s1.positionID() < s2.positionID(); });
 
 	qDebug() << __FUNCTION__ << " Time for create: " << responseTime.elapsed() << " ms";
 }
@@ -317,6 +319,8 @@ void StatisticsBase::createComparatorList(bool shownOnSchemas)
 
 	QElapsedTimer responseTime;
 	responseTime.start();
+
+	std::vector<Metrology::Signal*> signalList;
 
 	int count = theSignalBase.signalCount();
 	for(int i = 0; i < count; i++)
@@ -364,15 +368,29 @@ void StatisticsBase::createComparatorList(bool shownOnSchemas)
 			}
 		}
 
-		int comparatorCount = param.comparatorCount();
-		if (comparatorCount == 0)
+		if (param.hasComparators() == false)
 		{
 			continue;
 		}
 
+		signalList.push_back(pSignal);
+	}
+
+	std::sort(signalList.begin(), signalList.end(),
+				[](Metrology::Signal* s1, Metrology::Signal* s2)
+				{ return s1->param().location().positionID() < s2->param().location().positionID(); });
+
+	for(Metrology::Signal* pSignal : signalList)
+	{
+		if (pSignal == nullptr || pSignal->param().isValid() == false)
+		{
+			continue;
+		}
+
+		int comparatorCount = pSignal->param().comparatorCount();
 		for(int с = 0; с < comparatorCount; с++)
 		{
-			StatisticsItem si(pSignal, param.comparator(с));
+			StatisticsItem si(pSignal, pSignal->param().comparator(с));
 
 			/*
 			if (param.isInternal() == true)
@@ -386,6 +404,8 @@ void StatisticsBase::createComparatorList(bool shownOnSchemas)
 
 			m_statisticList[Measure::Type::Comparators].push_back(si);
 		}
+
+
 	}
 
 	qDebug() << __FUNCTION__ << " Time for create: " << responseTime.elapsed() << " ms";

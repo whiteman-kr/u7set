@@ -1950,14 +1950,6 @@ int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionT
 						m_rackList.push_back(param.location().rack());
 					}
 				}
-
-				// sort by index
-				//
-				std::sort(m_rackList.begin(), m_rackList.end(),
-						[](const Metrology::RackParam& rack1, const Metrology::RackParam& rack2) -> bool
-						{
-							return rack1.index() < rack2.index();
-						});
 			}
 			break;
 
@@ -1990,6 +1982,14 @@ int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionT
 		default:
 			assert(0);
 	}
+
+	// sort by caption
+	//
+	std::sort(m_rackList.begin(), m_rackList.end(),
+			[](const Metrology::RackParam& rack1, const Metrology::RackParam& rack2) -> bool
+			{
+				return rack1.caption() < rack2.caption();
+			});
 
 	return TO_INT(m_rackList.size());
 }
@@ -2392,7 +2392,27 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 		signalIndex++;
 	}
 
-	return TO_INT(signalIndex);
+	// sort by position
+	//
+	std::sort(m_signalMeasureList.begin(), m_signalMeasureList.end(),
+				[](const MeasureSignal& ms1, const MeasureSignal& ms2)
+				{
+					Metrology::Signal* pS1 = ms1.multiChannelSignal(Metrology::ConnectionIoType::Source).firstMetrologySignal();
+					if (pS1 == nullptr || pS1->param().isValid() == false)
+					{
+						return false;
+					}
+
+					Metrology::Signal* pS2 = ms2.multiChannelSignal(Metrology::ConnectionIoType::Source).firstMetrologySignal();
+					if (pS2 == nullptr || pS2->param().isValid() == false)
+					{
+						return false;
+					}
+
+					return pS1->param().location().positionID() < pS2->param().location().positionID();
+				});
+
+	return TO_INT(m_signalMeasureList.size());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2568,7 +2588,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 			continue;
 		}
 
-		std::vector<std::shared_ptr<Metrology::ComparatorEx>> metrologyComparatorList;
+		std::vector<std::shared_ptr<Metrology::ComparatorEx>> signalComparatorList;
 
 		std::vector<std::shared_ptr<Comparator>> comparatorList = comparatorSet.getByInputSignalID(appSignalID);
 		for(std::shared_ptr<Comparator> comparator : comparatorList)
@@ -2583,25 +2603,23 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 						//
 						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
-						comparatorEx->setIndex(TO_INT(metrologyComparatorList.size()));
 						initComparatorSignals(comparatorEx.get());
 
 						comparatorEx->setCmpType(E::CmpType::Less);
 						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Up);
 
-						metrologyComparatorList.push_back(comparatorEx);
+						signalComparatorList.push_back(comparatorEx);
 
 						//
 						//
 						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
-						comparatorEx->setIndex(TO_INT(metrologyComparatorList.size()));
 						initComparatorSignals(comparatorEx.get());
 
 						comparatorEx->setCmpType(E::CmpType::Greate);
 						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Down);
 
-						metrologyComparatorList.push_back(comparatorEx);
+						signalComparatorList.push_back(comparatorEx);
 					}
 
 					break;
@@ -2612,25 +2630,23 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 						//
 						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
-						comparatorEx->setIndex(TO_INT(metrologyComparatorList.size()));
 						initComparatorSignals(comparatorEx.get());
 
 						comparatorEx->setCmpType(E::CmpType::Greate);
 						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Up);
 
-						metrologyComparatorList.push_back(comparatorEx);
+						signalComparatorList.push_back(comparatorEx);
 
 						//
 						//
 						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
-						comparatorEx->setIndex(TO_INT(metrologyComparatorList.size()));
 						initComparatorSignals(comparatorEx.get());
 
 						comparatorEx->setCmpType(E::CmpType::Less);
 						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Down);
 
-						metrologyComparatorList.push_back(comparatorEx);
+						signalComparatorList.push_back(comparatorEx);
 					}
 
 					break;
@@ -2639,16 +2655,19 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 					{
 						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
-						comparatorEx->setIndex(TO_INT(metrologyComparatorList.size()));
 						initComparatorSignals(comparatorEx.get());
-						metrologyComparatorList.push_back(comparatorEx);
+						signalComparatorList.push_back(comparatorEx);
 					}
 
 					break;
 			}
 		}
 
-		pInputSignal->param().setComparatorList(metrologyComparatorList);
+		std::sort(signalComparatorList.begin(), signalComparatorList.end(),
+					[](std::shared_ptr<Metrology::ComparatorEx> c1, std::shared_ptr<Metrology::ComparatorEx> c2)
+					{ return c1->sortID() < c2->sortID(); });
+
+		pInputSignal->param().setComparatorList(signalComparatorList);
 	}
 
 	m_statisticsBase.createComparatorList(theOptions.module().measureShownOnSchemas());

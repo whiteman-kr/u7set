@@ -454,46 +454,51 @@
     </message>
     <message>
         <location filename="../DialogComparatorList.h" line="12"/>
+        <source>Rack</source>
+        <translation>Шкаф</translation>
+    </message>
+    <message>
+        <location filename="../DialogComparatorList.h" line="13"/>
         <source>SignalID (Input/Internal)</source>
         <translation>SignalID (Входной/Внутренний)</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.h" line="13"/>
+        <location filename="../DialogComparatorList.h" line="14"/>
         <source>Comparator No</source>
         <translation>Уставка No</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.h" line="14"/>
+        <location filename="../DialogComparatorList.h" line="15"/>
         <source>Set point</source>
         <translation>Уставка</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.h" line="15"/>
+        <location filename="../DialogComparatorList.h" line="16"/>
         <source>Hysteresis</source>
         <translation>Зона возврата</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.h" line="16"/>
+        <location filename="../DialogComparatorList.h" line="17"/>
         <source>Signal type</source>
         <translation>Тип сигнала</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.h" line="17"/>
+        <location filename="../DialogComparatorList.h" line="18"/>
         <source>Electric range</source>
         <translation>Электрический диапазон</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.h" line="18"/>
+        <location filename="../DialogComparatorList.h" line="19"/>
         <source>Electric sensor</source>
         <translation>Тип датчика</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.h" line="19"/>
+        <location filename="../DialogComparatorList.h" line="20"/>
         <source>Engineering range</source>
         <translation>Физический диапазон</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.h" line="20"/>
+        <location filename="../DialogComparatorList.h" line="21"/>
         <source>SignalID (Discrete)</source>
         <translation>SignalID (Дискретный)</translation>
     </message>
@@ -502,34 +507,44 @@
         <translation type="vanished">AppSignalID (Дискретный)</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.h" line="21"/>
+        <location filename="../DialogComparatorList.h" line="22"/>
         <source>Schema</source>
         <translation>Схема</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.cpp" line="213"/>
+        <location filename="../DialogComparatorList.cpp" line="222"/>
         <source>Comparators</source>
         <translation>Уставки</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.cpp" line="217"/>
+        <location filename="../DialogComparatorList.cpp" line="226"/>
         <source>&amp;Comparator</source>
         <translation>&amp;Уставки</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.cpp" line="218"/>
+        <location filename="../DialogComparatorList.cpp" line="227"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.cpp" line="219"/>
+        <location filename="../DialogComparatorList.cpp" line="228"/>
         <source>&amp;View</source>
         <translation>&amp;Вид</translation>
     </message>
     <message>
-        <location filename="../DialogComparatorList.cpp" line="220"/>
+        <location filename="../DialogComparatorList.cpp" line="229"/>
         <source>Type SignalID</source>
         <translation>Тип SignalID</translation>
+    </message>
+    <message>
+        <location filename="../DialogComparatorList.cpp" line="235"/>
+        <source>Enable measure</source>
+        <translation>Разрешить измерение</translation>
+    </message>
+    <message>
+        <location filename="../DialogComparatorList.cpp" line="236"/>
+        <source>Disable measure</source>
+        <translation>Запретить измерение</translation>
     </message>
 </context>
 <context>
@@ -2856,37 +2871,37 @@ Tuning signals: %1</source>
 <context>
     <name>Measure::View</name>
     <message>
-        <location filename="../MeasureView.cpp" line="954"/>
+        <location filename="../MeasureView.cpp" line="955"/>
         <source>Do you want delete %1 measurement(s)?</source>
         <translation>Вы хотите удалить %1 измерений?</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="1091"/>
+        <location filename="../MeasureView.cpp" line="1094"/>
         <source>Nominal</source>
         <translation>Номинал</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="1094"/>
+        <location filename="../MeasureView.cpp" line="1097"/>
         <source>Measure</source>
         <translation>Измеренное</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="1105"/>
+        <location filename="../MeasureView.cpp" line="1108"/>
         <source>Low limit</source>
         <translation>Верхний предел</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="1108"/>
+        <location filename="../MeasureView.cpp" line="1111"/>
         <source>High limit</source>
         <translation>Нижний предел</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="1172"/>
+        <location filename="../MeasureView.cpp" line="1175"/>
         <source>Measure (Nominal = %1)</source>
         <translation>Измеренное (Номинал = %1)</translation>
     </message>
     <message>
-        <location filename="../MeasureView.cpp" line="1244"/>
+        <location filename="../MeasureView.cpp" line="1247"/>
         <source>Graph - %1</source>
         <translation>График - %1</translation>
     </message>
@@ -3120,38 +3135,38 @@ You have used the positive (+) part of the electrical range.</source>
     </message>
     <message>
         <location filename="../MeasureThread.cpp" line="622"/>
-        <location filename="../MeasureThread.cpp" line="1103"/>
-        <location filename="../MeasureThread.cpp" line="1733"/>
+        <location filename="../MeasureThread.cpp" line="1108"/>
+        <location filename="../MeasureThread.cpp" line="1761"/>
         <source>Save measurement </source>
         <translation>Сохранение измерения </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="753"/>
-        <location filename="../MeasureThread.cpp" line="1229"/>
+        <location filename="../MeasureThread.cpp" line="758"/>
+        <location filename="../MeasureThread.cpp" line="1234"/>
         <source>Comparator %1, Prepare %2</source>
         <translation>Уставка %1, Подготовка %2</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="756"/>
-        <location filename="../MeasureThread.cpp" line="1232"/>
+        <location filename="../MeasureThread.cpp" line="761"/>
+        <location filename="../MeasureThread.cpp" line="1237"/>
         <source>Hysteresis of comparator %1, Prepare %2</source>
         <translation>Зона возврата уставки %1, Подготовка %2</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="890"/>
-        <location filename="../MeasureThread.cpp" line="1400"/>
+        <location filename="../MeasureThread.cpp" line="895"/>
+        <location filename="../MeasureThread.cpp" line="1410"/>
         <source>Comparator %1, additional delay</source>
         <translation>Уставка %1, дополнительная задержка</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="893"/>
-        <location filename="../MeasureThread.cpp" line="1403"/>
+        <location filename="../MeasureThread.cpp" line="898"/>
+        <location filename="../MeasureThread.cpp" line="1413"/>
         <source>Hysteresis of comparator %1, additional delay</source>
         <translation>Зона возврата уставки %1, дополнительная задержка</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="944"/>
-        <location filename="../MeasureThread.cpp" line="1483"/>
+        <location filename="../MeasureThread.cpp" line="949"/>
+        <location filename="../MeasureThread.cpp" line="1499"/>
         <source>Comparator %1, for following signals, is already in state of logical &quot;%2&quot;:
 
 </source>
@@ -3160,30 +3175,30 @@ You have used the positive (+) part of the electrical range.</source>
 </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="948"/>
-        <location filename="../MeasureThread.cpp" line="1529"/>
+        <location filename="../MeasureThread.cpp" line="953"/>
+        <location filename="../MeasureThread.cpp" line="1551"/>
         <source>%1
 </source>
         <translation>%1
 </translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="950"/>
-        <location filename="../MeasureThread.cpp" line="1541"/>
+        <location filename="../MeasureThread.cpp" line="955"/>
+        <location filename="../MeasureThread.cpp" line="1563"/>
         <source>
 Do you want to repeat the preparation process in order to switch the comparator to state of logical &quot;%1&quot;, click &quot;Yes&quot;. Go to next comparator, click &quot;No&quot;</source>
         <translation>
 Вы хотите повторить процесс подготовок, чтобы переключать уставку в состояние лог. &quot;%1&quot;, тогда выберите &quot;Да&quot;. Перейти к следующей уставке, выберите &quot;Нет&quot;</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="990"/>
-        <location filename="../MeasureThread.cpp" line="1577"/>
+        <location filename="../MeasureThread.cpp" line="995"/>
+        <location filename="../MeasureThread.cpp" line="1599"/>
         <source>Comparator %1, Step %2</source>
         <translation>Уставка %1, Шаг %2</translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="993"/>
-        <location filename="../MeasureThread.cpp" line="1580"/>
+        <location filename="../MeasureThread.cpp" line="998"/>
+        <location filename="../MeasureThread.cpp" line="1602"/>
         <source>Hysteresis of comparator %1, Step %2</source>
         <translation>Зона возврата уставки %1, Шаг %2</translation>
     </message>
@@ -3611,7 +3626,7 @@ Do you want to repeat the preparation process in order to switch the comparator 
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../MetrologySignal.h" line="291"/>
+        <location filename="../MetrologySignal.h" line="292"/>
         <source>No valid</source>
         <translation>Не валидный</translation>
     </message>
@@ -4032,22 +4047,37 @@ Do you want to repeat the preparation process in order to switch the comparator 
 <context>
     <name>PanelComparatorInfo</name>
     <message>
-        <location filename="../PanelComparatorInfo.cpp" line="147"/>
+        <location filename="../PanelComparatorInfo.cpp" line="157"/>
         <source>Panel comparator information</source>
         <translation>Панель информации об уставках</translation>
     </message>
     <message>
-        <location filename="../PanelComparatorInfo.cpp" line="175"/>
+        <location filename="../PanelComparatorInfo.cpp" line="185"/>
         <source>Comparator %1</source>
         <translation>Уставка %1</translation>
     </message>
     <message>
-        <location filename="../PanelComparatorInfo.cpp" line="213"/>
+        <location filename="../PanelComparatorInfo.cpp" line="221"/>
+        <source>Measure</source>
+        <translation>Измерение</translation>
+    </message>
+    <message>
+        <location filename="../PanelComparatorInfo.cpp" line="223"/>
+        <source>Enable</source>
+        <translation>Разрешить</translation>
+    </message>
+    <message>
+        <location filename="../PanelComparatorInfo.cpp" line="224"/>
+        <source>Disable</source>
+        <translation>Запретить</translation>
+    </message>
+    <message>
+        <location filename="../PanelComparatorInfo.cpp" line="234"/>
         <source>Copy cell</source>
         <translation>Копировать ячейку</translation>
     </message>
     <message>
-        <location filename="../PanelComparatorInfo.cpp" line="218"/>
+        <location filename="../PanelComparatorInfo.cpp" line="239"/>
         <source>Propertу ...</source>
         <translation>Свойства ...</translation>
     </message>
@@ -4332,27 +4362,27 @@ Do you want to repeat the preparation process in order to switch the comparator 
         <translation>Годен</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="312"/>
+        <location filename="../PanelStatistics.cpp" line="323"/>
         <source>Panel statistics (Checklist)</source>
         <translation>Панель статистики (чек-лист)</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="341"/>
+        <location filename="../PanelStatistics.cpp" line="352"/>
         <source>&amp;Results</source>
         <translation>&amp;Результаты</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="342"/>
+        <location filename="../PanelStatistics.cpp" line="353"/>
         <source>&amp;Edit</source>
         <translation>&amp;Правка</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="343"/>
+        <location filename="../PanelStatistics.cpp" line="354"/>
         <source>&amp;View</source>
         <translation>&amp;Вид</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="345"/>
+        <location filename="../PanelStatistics.cpp" line="356"/>
         <source>&amp;Export ...</source>
         <translation>&amp;Экспорт ...</translation>
     </message>
@@ -4361,67 +4391,67 @@ Do you want to repeat the preparation process in order to switch the comparator 
         <translation type="vanished">&amp;Найти ...</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="350"/>
+        <location filename="../PanelStatistics.cpp" line="361"/>
         <source>&amp;Copy</source>
         <translation>&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="353"/>
+        <location filename="../PanelStatistics.cpp" line="364"/>
         <source>Copy cell</source>
         <translation>Копировать ячейку</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="356"/>
+        <location filename="../PanelStatistics.cpp" line="367"/>
         <source>Select &amp;All</source>
         <translation>Выделить &amp;все</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="361"/>
+        <location filename="../PanelStatistics.cpp" line="372"/>
         <source>Propertу ...</source>
         <translation>Свойства ...</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="366"/>
+        <location filename="../PanelStatistics.cpp" line="377"/>
         <source>Show search panel</source>
         <translation>Показать панель поиска</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="372"/>
+        <location filename="../PanelStatistics.cpp" line="383"/>
         <source>Go to next</source>
         <translation>Перейти к следующему</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="374"/>
+        <location filename="../PanelStatistics.cpp" line="385"/>
         <source>Not measured</source>
         <translation>Не измеренному</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="375"/>
+        <location filename="../PanelStatistics.cpp" line="386"/>
         <source>Invalid</source>
         <translation>Плохому</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="402"/>
+        <location filename="../PanelStatistics.cpp" line="413"/>
         <source>Search Text</source>
         <translation>Текст поиска</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="407"/>
+        <location filename="../PanelStatistics.cpp" line="418"/>
         <source>Find previous</source>
         <translation>Найти предыдущее</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="410"/>
+        <location filename="../PanelStatistics.cpp" line="421"/>
         <source>Find next</source>
         <translation>Продолжить поиск</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="414"/>
+        <location filename="../PanelStatistics.cpp" line="425"/>
         <source>Search text ToolBar</source>
         <translation>Toolbar поиска</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="524"/>
+        <location filename="../PanelStatistics.cpp" line="535"/>
         <source>&amp;Select signal for measuring</source>
         <translation>&amp;Выбрать сигнал для измерения</translation>
     </message>
@@ -4430,22 +4460,22 @@ Do you want to repeat the preparation process in order to switch the comparator 
         <translation type="vanished">Найти сигнал в списке &amp;статистики ...</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="527"/>
+        <location filename="../PanelStatistics.cpp" line="538"/>
         <source>&amp;Find signal in the measure list ...</source>
         <translation>Найти сигнал в списке &amp;измерений ...</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="767"/>
+        <location filename="../PanelStatistics.cpp" line="778"/>
         <source> Invalid: %1</source>
         <translation> Плохих: %1</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="771"/>
+        <location filename="../PanelStatistics.cpp" line="782"/>
         <source> Measured: %1 / %2</source>
         <translation> Измеренных: %1 / %2</translation>
     </message>
     <message>
-        <location filename="../PanelStatistics.cpp" line="987"/>
+        <location filename="../PanelStatistics.cpp" line="998"/>
         <source>Signal %1 is &quot;%2&quot; signal.
 To measure this signal you have to create connection with input signal.
 For example, type of connection: &quot;Input&quot; -&gt; &quot;%2&quot;.

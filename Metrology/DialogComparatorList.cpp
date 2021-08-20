@@ -45,6 +45,7 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 
 		switch (column)
 		{
+			case COMPARATOR_LIST_COLUMN_RACK:			result = Qt::AlignLeft;		break;
 			case COMPARATOR_LIST_COLUMN_INPUT:			result = Qt::AlignLeft;		break;
 			case COMPARATOR_LIST_COLUMN_CMP_NO:			result = Qt::AlignCenter;	break;
 			case COMPARATOR_LIST_COLUMN_SETPOINT:		result = Qt::AlignLeft;		break;
@@ -70,11 +71,18 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		}
 		else
 		{
-			if (column == COMPARATOR_LIST_COLUMN_HYSTERESIS)
+			if (comparatorEx->enableMeasure() == false)
 			{
-				if (comparatorEx->deviation() != Metrology::ComparatorEx::DeviationType::Unused)
+				return QColor(Qt::lightGray);
+			}
+			else
+			{
+				if (column == COMPARATOR_LIST_COLUMN_HYSTERESIS)
 				{
-					return QColor(Qt::lightGray);
+					if (comparatorEx->deviation() != Metrology::ComparatorEx::DeviationType::Unused)
+					{
+						return QColor(Qt::blue);
+					}
 				}
 			}
 		}
@@ -167,6 +175,7 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 
 	switch (column)
 	{
+		case COMPARATOR_LIST_COLUMN_RACK:				result = param.location().rackCaption();										break;
 		case COMPARATOR_LIST_COLUMN_INPUT:				result = visible ? comparatorEx->inputSignalID(m_idType) : QString();			break;
 		case COMPARATOR_LIST_COLUMN_CMP_NO:				result = comparatorEx->indexStr();												break;
 		case COMPARATOR_LIST_COLUMN_SETPOINT:			result = comparatorEx->compareDefaultValueStr(m_idType);						break;
@@ -223,6 +232,9 @@ void DialogComparatorList::createInterface()
 	//
 	m_pComparatorMenu->addAction(m_pExportAction);
 
+	m_pEnableMeasureAction = m_pEditMenu->addAction(tr("Enable measure"));
+	m_pDisableMeasureAction = m_pEditMenu->addAction(tr("Disable measure"));
+	m_pEditMenu->addSeparator();
 	m_pEditMenu->addAction(m_pFindAction);
 	m_pEditMenu->addSeparator();
 	m_pEditMenu->addAction(m_pCopyAction);
@@ -238,6 +250,8 @@ void DialogComparatorList::createInterface()
 
 	m_pViewMenu->addMenu(m_pViewTypeIDMenu);
 
+	connect(m_pEnableMeasureAction, &QAction::triggered, this, &DialogComparatorList::onEnableMeasure);
+	connect(m_pDisableMeasureAction, &QAction::triggered, this, &DialogComparatorList::onDisableMeasure);
 	connect(m_pViewTypeIDMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &DialogComparatorList::showTypeID);
 
 	//
@@ -280,6 +294,7 @@ void DialogComparatorList::updateVisibleColunm()
 		hideColumn(c, false);
 	}
 
+	hideColumn(COMPARATOR_LIST_COLUMN_RACK, true);
 	hideColumn(COMPARATOR_LIST_COLUMN_CMP_NO, true);
 	hideColumn(COMPARATOR_LIST_COLUMN_EL_SENSOR, true);
 	hideColumn(COMPARATOR_LIST_COLUMN_SCHEMA, true);
@@ -293,6 +308,7 @@ void DialogComparatorList::updateList()
 
 	m_comparatorTable.clear();
 
+	std::vector<Metrology::Signal*> signalList;
 	std::vector<std::shared_ptr<Metrology::ComparatorEx>> comparatorList;
 
 	int count = theSignalBase.signalCount();
@@ -311,6 +327,25 @@ void DialogComparatorList::updateList()
 		}
 
 		if (param.isAnalog() == false)
+		{
+			continue;
+		}
+
+		if (param.hasComparators() == false)
+		{
+			continue;
+		}
+
+		signalList.push_back(pSignal);
+	}
+
+	std::sort(signalList.begin(), signalList.end(),
+				[](Metrology::Signal* s1, Metrology::Signal* s2)
+				{ return s1->param().location().positionID() < s2->param().location().positionID(); });
+
+	for(auto pSignal : signalList)
+	{
+		if (pSignal == nullptr || pSignal->param().isValid() == false)
 		{
 			continue;
 		}
@@ -376,6 +411,62 @@ void DialogComparatorList::showTypeID(QAction* action)
 		}
 
 		setTypeID(static_cast<Metrology::SignalIDType>(typeID));
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogComparatorList::onEnableMeasure()
+{
+	QTableView* pView = view();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	for(auto selectedIndex : pView->selectionModel()->selectedRows())
+	{
+		int indexRow = selectedIndex.row();
+		if (indexRow < 0 || indexRow >= m_comparatorTable.count())
+		{
+			return;
+		}
+
+		std::shared_ptr<Metrology::ComparatorEx> comparatorEx = m_comparatorTable.at(indexRow);
+		if (comparatorEx == nullptr)
+		{
+			return;
+		}
+
+		comparatorEx->setEnableMeasure(true);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogComparatorList::onDisableMeasure()
+{
+	QTableView* pView = view();
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	for(auto selectedIndex : pView->selectionModel()->selectedRows())
+	{
+		int indexRow = selectedIndex.row();
+		if (indexRow < 0 || indexRow >= m_comparatorTable.count())
+		{
+			return;
+		}
+
+		std::shared_ptr<Metrology::ComparatorEx> comparatorEx = m_comparatorTable.at(indexRow);
+		if (comparatorEx == nullptr)
+		{
+			return;
+		}
+
+		comparatorEx->setEnableMeasure(false);
 	}
 }
 

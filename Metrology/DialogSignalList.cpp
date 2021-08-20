@@ -409,7 +409,9 @@ void DialogSignalList::updateList()
 		signalList.push_back(pSignal);
 	}
 
-	std::sort(signalList.begin(), signalList.end(), [](Metrology::Signal* si1, Metrology::Signal* si2) { return si1->param().location().positionID() < si2->param().location().positionID(); });
+	std::sort(signalList.begin(), signalList.end(),
+				[](Metrology::Signal* s1, Metrology::Signal* s2)
+				{ return s1->param().location().positionID() < s2->param().location().positionID(); });
 
 	m_signalTable.set(signalList);
 }

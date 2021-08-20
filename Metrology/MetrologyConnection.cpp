@@ -474,7 +474,9 @@ namespace Metrology
 	{
 		QMutexLocker l(&m_connectionMutex);
 
-		std::sort(begin(m_connectionList), end(m_connectionList), [](const Connection& c1, const Connection& c2) { return c1.strID() < c2.strID(); });
+		std::sort(begin(m_connectionList), end(m_connectionList),
+					[](const Connection& c1, const Connection& c2)
+					{ return c1.strID() < c2.strID(); });
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

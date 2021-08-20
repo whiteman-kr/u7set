@@ -477,9 +477,9 @@ void PanelSignalInfo::createContextMenu()
 
 	connect(m_pShowNoValidAction, &QAction::triggered, this, &PanelSignalInfo::showNoValid);
 	connect(m_pShowElectricValueAction, &QAction::triggered, this, &PanelSignalInfo::showElectricValue);
-	connect(m_pCopyAction, &QAction::triggered, this, &PanelSignalInfo::copy);
-	connect(m_pCopyCellAction, &QAction::triggered, this, &PanelSignalInfo::copyCell);
-	connect(m_pSignalPropertyAction, &QAction::triggered, this, &PanelSignalInfo::signalProperty);
+	connect(m_pCopyAction, &QAction::triggered, this, &PanelSignalInfo::onCopy);
+	connect(m_pCopyCellAction, &QAction::triggered, this, &PanelSignalInfo::onCopyCell);
+	connect(m_pSignalPropertyAction, &QAction::triggered, this, &PanelSignalInfo::onSignalProperty);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -714,7 +714,7 @@ bool PanelSignalInfo::eventFilter(QObject* object, QEvent* event)
 
 		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
-			signalProperty();
+			onSignalProperty();
 		}
 	}
 
@@ -946,7 +946,7 @@ void PanelSignalInfo::showSignalMoveDown()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelSignalInfo::copy()
+void PanelSignalInfo::onCopy()
 {
 	CopyData copyData(m_pView, false);
 	copyData.exec();
@@ -954,7 +954,7 @@ void PanelSignalInfo::copy()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelSignalInfo::copyCell()
+void PanelSignalInfo::onCopyCell()
 {
 	if (m_pView == nullptr)
 	{
@@ -967,7 +967,7 @@ void PanelSignalInfo::copyCell()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelSignalInfo::signalProperty()
+void PanelSignalInfo::onSignalProperty()
 {
 	int index = m_pView->currentIndex().row();
 	if (index < 0 || index >= m_signalParamTable.count())

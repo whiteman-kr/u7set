@@ -894,6 +894,13 @@ namespace Metrology
 
 	void SignalParam::setComparatorList(const std::vector<std::shared_ptr<ComparatorEx>>& comparators)
 	{
+		int i = 0;
+
+		for(auto comparator: comparators)
+		{
+			comparator->setIndex(i++);
+		}
+
 		m_comparatorList = comparators;
 		m_comparatorCount = TO_INT(m_comparatorList.size());
 	}
@@ -1373,6 +1380,26 @@ namespace Metrology
 	{
 		return outputStateStr(	QT_TRANSLATE_NOOP("MetrologySignal", "True"),
 								QT_TRANSLATE_NOOP("MetrologySignal", "False"));
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString ComparatorEx::sortID() const
+	{
+		QString id;
+
+		if (compare().isConst() == true)
+		{
+			id = "!"+QString::number(compareConstValue(), 'f', valuePrecision());
+		}
+		else
+		{
+			id = compare().appSignalID() + output().appSignalID();
+		}
+
+		id += QString::number(static_cast<int>(cmpType()));
+
+		return id;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

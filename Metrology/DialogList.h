@@ -36,6 +36,7 @@ public:
 	TYPE at(int index) const;
 
 	void updateColumn(int column);
+	void updateRow(int row);
 
 protected:
 
@@ -172,6 +173,24 @@ void ListTable<TYPE>::updateColumn(int column)
 	}
 
 	for (int row = 0; row < m_columnCount; row ++)
+	{
+		QModelIndex cellIndex = index(row, column);
+
+		emit dataChanged(cellIndex, cellIndex, QVector<int>() << Qt::DisplayRole);
+	}
+}
+
+// ----------------------------------------------------------------------------------------------
+
+template <typename TYPE>
+void ListTable<TYPE>::updateRow(int row)
+{
+	if (row < 0 || row >= m_rowCount)
+	{
+		return;
+	}
+
+	for (int column = 0; column < m_columnCount; column ++)
 	{
 		QModelIndex cellIndex = index(row, column);
 

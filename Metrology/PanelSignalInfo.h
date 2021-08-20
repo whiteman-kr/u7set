@@ -189,9 +189,9 @@ private slots:
 	void showElectricValue();
 	void showSignalMoveUp();
 	void showSignalMoveDown();
-	void copy();
-	void copyCell();
-	void signalProperty();
+	void onCopy();
+	void onCopyCell();
+	void onSignalProperty();
 
 	void onContextMenu(QPoint);
 
@@ -203,7 +203,7 @@ private slots:
 
 	// slots for list
 	//
-	void onListDoubleClicked(const QModelIndex&) { signalProperty(); }
+	void onListDoubleClicked(const QModelIndex&) { onSignalProperty(); }
 };
 
 // ==============================================================================================
