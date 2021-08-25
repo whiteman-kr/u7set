@@ -415,11 +415,11 @@ void PanelStatistics::createInterface()
 	connect(m_pFindTextEdit, &QLineEdit::textChanged, this, &PanelStatistics::onFindTextChanged);
 
 	m_pToolBar->addWidget(m_pFindTextEdit);
-	QAction* findPreviousAction = m_pToolBar->addAction(QIcon(":/icons/PreviousFind.png"), tr("Find previous"));
-	connect(findPreviousAction, &QAction::triggered, this, &PanelStatistics::onFindPrevious);
+	m_pFindPreviousAction = m_pToolBar->addAction(QIcon(":/icons/PreviousFind.png"), tr("Find previous"));
+	connect(m_pFindPreviousAction, &QAction::triggered, this, &PanelStatistics::onFindPrevious);
 
-	QAction* findNextAction = m_pToolBar->addAction(QIcon(":/icons/NextFind.png"), tr("Find next"));
-	connect(findNextAction, &QAction::triggered, this, &PanelStatistics::onFindNext);
+	m_pFindNextAction = m_pToolBar->addAction(QIcon(":/icons/NextFind.png"), tr("Find next"));
+	connect(m_pFindNextAction, &QAction::triggered, this, &PanelStatistics::onFindNext);
 
 	m_pToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
 	m_pToolBar->setWindowTitle(tr("Search text ToolBar"));
@@ -1576,6 +1576,8 @@ void PanelStatistics::onFindTextChanged(const QString& text)
 	{
 		m_pView->setCurrentIndex(m_pView->model()->index(foundRow, firstVisibleColumn()));
 	}
+
+	updateFindActions(foundRow);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1594,13 +1596,13 @@ void PanelStatistics::onFindPrevious()
 	}
 
 	int foundRow = findText(startRow, true);
-	if (foundRow == -1)
+	if (foundRow != -1)
 	{
-		return;
+		m_pView->setCurrentIndex(m_pView->model()->index(foundRow, firstVisibleColumn()));
+		m_pView->setFocus();
 	}
 
-	m_pView->setCurrentIndex(m_pView->model()->index(foundRow, firstVisibleColumn()));
-	m_pView->setFocus();
+	updateFindActions(foundRow);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1619,13 +1621,46 @@ void PanelStatistics::onFindNext()
 	}
 
 	int foundRow = findText(startRow, false);
-	if (foundRow == -1)
+	if (foundRow != -1)
+	{
+		m_pView->setCurrentIndex(m_pView->model()->index(foundRow, firstVisibleColumn()));
+		m_pView->setFocus();
+	}
+
+	updateFindActions(foundRow);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PanelStatistics::updateFindActions(int foundRow)
+{
+	if (m_pFindPreviousAction == nullptr || m_pFindNextAction == nullptr)
 	{
 		return;
 	}
 
-	m_pView->setCurrentIndex(m_pView->model()->index(foundRow, firstVisibleColumn()));
-	m_pView->setFocus();
+	if (foundRow == -1)
+	{
+		m_pFindPreviousAction->setEnabled(false);
+		m_pFindNextAction->setEnabled(false);
+		return;
+	}
+
+	m_pFindPreviousAction->setEnabled(true);
+	m_pFindNextAction->setEnabled(true);
+
+	int foundPreviousRow = findText(foundRow, true);
+	int foundNextRow = findText(foundRow, false);
+
+	if (foundPreviousRow == -1)
+	{
+		m_pFindPreviousAction->setEnabled(false);
+	}
+
+	if (foundNextRow == -1)
+	{
+		m_pFindNextAction->setEnabled(false);
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

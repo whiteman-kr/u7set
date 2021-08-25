@@ -163,6 +163,8 @@ private:
 	QAction* m_pGotoNextInvalidAction = nullptr;
 
 	QLineEdit* m_pFindTextEdit = nullptr;
+	QAction* m_pFindPreviousAction = nullptr;
+	QAction* m_pFindNextAction = nullptr;
 
 	QStatusBar* m_pStatusBar;
 	QLabel* m_statusEmpty = nullptr;
@@ -259,6 +261,7 @@ private slots:
 	void onFindTextChanged(const QString& text);
 	void onFindPrevious();
 	void onFindNext();
+	void updateFindActions(int foundRow);
 };
 
 // ==============================================================================================
