@@ -274,8 +274,8 @@ function generate_lm_1_rev3(builder, root, module, confFirmware, log, signalSet,
     const MODULEID_LM1_SF01 = 0x1101;
     const MODULEID_LM1_SR01 = 0x11A0;
     const MODULEID_LM1_SR02 = 0x11A1;
-    const MODULEID_LM1_SR03 = 0x11A2;
-    const MODULEID_LM1_SR04 = 0x11B0;
+    const MODULEID_LM1_SR03 = 0x11A3; // Was 0x11A2 before 25.08.2021
+    const MODULEID_LM1_SR04 = 0x11B2; // Was 0x11B0 before 25.08.2021
     const MODULEID_LM8_SR10 = 0x11D0;
     // Variables
     //
