@@ -1452,6 +1452,7 @@ void DialogSignalProperty::onOk()
 
 bool DialogComparatorProperty::m_showGroupHeader[COMPARATOR_PROPERTY_GROUP_COUNT] =
 {
+	true,	//	COMPARATOR_PROPERTY_GROUP_SCHEMA
 	true,	//	COMPARATOR_PROPERTY_GROUP_INPUT
 	false,	//	COMPARATOR_PROPERTY_GROUP_COMPARE
 	false,	//	COMPARATOR_PROPERTY_GROUP_HYSTERESIS
@@ -1530,6 +1531,17 @@ void DialogComparatorProperty::createPropertyList()
 
 	// create property groups
 	//
+
+		// schema group
+
+		QtProperty* schemaGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Schema"));
+
+			item = m_pManager->addProperty(QVariant::String, tr("SchemaID"));
+			item->setValue(m_comparatorEx.schemaID());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			schemaGroup->addSubProperty(item);
+
+		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
 
 		// input group
 
@@ -1791,6 +1803,7 @@ void DialogComparatorProperty::createPropertyList()
 	// show or hide property groups
 	//
 
+	m_browserItemList[COMPARATOR_PROPERTY_GROUP_SCHEMA] = m_pEditor->addProperty(schemaGroup);
 	m_browserItemList[COMPARATOR_PROPERTY_GROUP_INPUT] = m_pEditor->addProperty(inputGroup);
 	m_browserItemList[COMPARATOR_PROPERTY_GROUP_COMPARE] = m_pEditor->addProperty(compareGroup);
 	m_browserItemList[COMPARATOR_PROPERTY_GROUP_HYSTERESIS] = m_pEditor->addProperty(hysteresisGroup);

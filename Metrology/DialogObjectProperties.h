@@ -304,6 +304,7 @@ private slots:
 
 const char* const				ComparatorPropertyGroup[] =
 {
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "Schema"),
 								QT_TRANSLATE_NOOP("DialogObjectProperty", "Signal ID"),
 								QT_TRANSLATE_NOOP("DialogObjectProperty", "Position"),
 								QT_TRANSLATE_NOOP("DialogObjectProperty", "Electric range: "),
@@ -312,10 +313,11 @@ const char* const				ComparatorPropertyGroup[] =
 
 const int						COMPARATOR_PROPERTY_GROUP_COUNT				= sizeof(ComparatorPropertyGroup)/sizeof(ComparatorPropertyGroup[0]);
 
-const int						COMPARATOR_PROPERTY_GROUP_INPUT				= 0,
-								COMPARATOR_PROPERTY_GROUP_COMPARE			= 1,
-								COMPARATOR_PROPERTY_GROUP_HYSTERESIS		= 2,
-								COMPARATOR_PROPERTY_GROUP_OUTPUT			= 3;
+const int						COMPARATOR_PROPERTY_GROUP_SCHEMA			= 0,
+								COMPARATOR_PROPERTY_GROUP_INPUT				= 1,
+								COMPARATOR_PROPERTY_GROUP_COMPARE			= 2,
+								COMPARATOR_PROPERTY_GROUP_HYSTERESIS		= 3,
+								COMPARATOR_PROPERTY_GROUP_OUTPUT			= 4;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -359,12 +361,12 @@ private:
 	//
 	QDialogButtonBox*			m_buttonBox = nullptr;
 
-	static bool					m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT];
-	QtBrowserItem*				m_browserItemList[SIGNAL_PROPERTY_GROUP_COUNT];
+	static bool					m_showGroupHeader[COMPARATOR_PROPERTY_GROUP_COUNT];
+	QtBrowserItem*				m_browserItemList[COMPARATOR_PROPERTY_GROUP_COUNT];
 
 	QMap<QtProperty*,int>		m_propertyMap;
 
-	QtProperty*					m_propertyGroupList[SIGNAL_PROPERTY_GROUP_COUNT];
+	QtProperty*					m_propertyGroupList[COMPARATOR_PROPERTY_GROUP_COUNT];
 
 	void						createPropertyList();
 

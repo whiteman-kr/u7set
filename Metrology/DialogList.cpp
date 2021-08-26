@@ -50,7 +50,7 @@ void DialogList::createInterface(double width, double height, bool hasButtons)
 
 	m_pCopyAction = new QAction(tr("&Copy"), this);
 	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
-	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
+	//m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
 
 	m_pCopyCellAction = new QAction(tr("Copy cell"), this);
 	m_pCopyCellAction->setIcon(QIcon(":/icons/Copy.png"));

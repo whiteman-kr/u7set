@@ -585,9 +585,9 @@ public:
 
 private:
 
-	double				m_errorLimit = 0.2;										// permissible error is given by specified documents
+	double				m_errorLimit = 0.1;										// permissible error is given by specified documents
 	double				m_startValueForCompare = 0.1;							// start value is given by metrologists
-	int					m_errorType = Measure::ErrorType::Reduce;					// type of error absolute or reduced
+	int					m_errorType = Measure::ErrorType::Reduce;				// type of error absolute or reduced
 	int					m_limitType = Measure::LimitType::Electric;				// type of displaing error denend on limit
 
 	int					m_startComparatorIndex = 0;								// start the measurement with the сomparators under the number ...
@@ -736,16 +736,12 @@ public:
 	bool				precesionByCalibrator() const { return m_precesionByCalibrator; }
 	void				setPrecesionByCalibrator(bool enable) { m_precesionByCalibrator = enable; }
 
-	QMap<QString, int>	columnsWidth(Measure::Type measureType) const;
-	void				setColumnsWidth(Measure::Type measureType, const QMap<QString, int>& map);
-
 	//
 	//
 	void				load();
 	void				save();
 
-	void				loadColumnsWidth();
-	void				saveColumnsWidth();
+	void				saveColumnWidth(Measure::Type measureType, const Measure::HeaderColumn& c);
 
 	//
 	//
@@ -766,9 +762,6 @@ private:
 
 	bool				m_showNoValid = false;										// show measuring value if signal is not valid
 	bool				m_precesionByCalibrator = false;							// show accuracy for measure value and nominal value from calibrator
-
-	QMap<QString, int>	m_columnsWidth[Measure::TypeCount];
-
 };
 
 // ==============================================================================================

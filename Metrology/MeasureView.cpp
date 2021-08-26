@@ -78,10 +78,10 @@ namespace Measure
 
 		if (orientation == Qt::Horizontal)
 		{
-			HeaderColumn* column = m_header.column(section);
-			if (column != nullptr)
+			HeaderColumn* pColumn = m_header.column(section);
+			if (pColumn != nullptr)
 			{
-				result = column->title();
+				result = pColumn->title();
 			}
 		}
 
@@ -746,18 +746,23 @@ namespace Measure
 			setColumnWidth(index, pColumn->width());
 			setColumnHidden(index, pColumn->enableVisible() == false);
 
-			if (pColumn->enableVisible() == true)
+			if (pColumn->enableVisible() == false)
 			{
-				QAction* pAction = m_headerContextMenu->addAction(pColumn->title());
-				if (pAction != nullptr)
-				{
-					pAction->setCheckable(true);
-					pAction->setChecked(true);
-					pAction->setData(index);
-				}
+				continue;
 			}
+
+			QAction* pAction = m_headerContextMenu->addAction(pColumn->title());
+			if (pAction == nullptr)
+			{
+				continue;
+			}
+
+			pAction->setCheckable(true);
+			pAction->setChecked(true);
+			pAction->setData(index);
 		}
 
+		disconnect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &View::onColumnAction);
 		connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &View::onColumnAction);
 
 		QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
@@ -784,74 +789,6 @@ namespace Measure
 		}
 
 		return visibleColumn;
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	void View::restoreColumnsWidth()
-	{
-		for (int column = 0; column < m_model.header().count(); column++)
-		{
-			HeaderColumn* pColumn = m_model.header().column(column);
-			if (pColumn == nullptr)
-			{
-				continue;
-			}
-
-			QString columnName = pColumn->title();
-
-			int pos = columnName.indexOf(QChar::LineFeed);
-			if (pos != -1)
-			{
-				columnName = columnName.left(pos);
-			}
-
-			auto it = m_columnsWidth.find(columnName);
-			if (it != m_columnsWidth.end())
-			{
-				int width = it.value();
-
-				if (width == 0)
-				{
-					setColumnHidden(column, true);
-				}
-				else
-				{
-					setColumnWidth(column, width);
-				}
-			}
-		}
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	void View::saveColumnsWidth()
-	{
-		QMap<QString, int> columnsWidth;
-
-		for (int column = 0; column < m_model.header().count(); column++)
-		{
-			HeaderColumn* pColumn = m_model.header().column(column);
-			if (pColumn == nullptr)
-			{
-				continue;
-			}
-
-			QString columnName = pColumn->title();
-
-			int pos = columnName.indexOf(QChar::LineFeed);
-			if (pos != -1)
-			{
-				columnName = columnName.left(pos);
-			}
-
-			columnsWidth[columnName] = columnWidth(column);
-		}
-
-		m_columnsWidth = columnsWidth;
-
-		theOptions.measureView().setColumnsWidth(m_measureType, columnsWidth);
-		theOptions.signalInfo().saveColumnsWidth();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -1317,6 +1254,8 @@ namespace Measure
 		}
 
 		pColumn->setWidth(width);
+
+		theOptions.measureView().saveColumnWidth(m_measureType, *pColumn);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

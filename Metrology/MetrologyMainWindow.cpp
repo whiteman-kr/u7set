@@ -1928,16 +1928,20 @@ void MainWindow::showOptions()
 	//
 	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
 	{
-		if (theOptions.measureView().updateColumnView(static_cast<Measure::Type>(measureType)) == false)
+		Measure::Type mesaure_Type = static_cast<Measure::Type>(measureType);
+
+		if (theOptions.measureView().updateColumnView(mesaure_Type) == false)
 		{
 			continue;
 		}
 
-		Measure::View* pView = measureView(static_cast<Measure::Type>(measureType));
+		Measure::View* pView = measureView(mesaure_Type);
 		if (pView == nullptr)
 		{
 			continue;
 		}
+
+		pView->measureModel().header().init(mesaure_Type);
 
 		pView->updateColumn();
 	}

@@ -91,13 +91,10 @@ namespace Measure
 		Model m_model;
 
 		QMenu* m_headerContextMenu = nullptr;
-		QMap<QString, int> m_columnsWidth;
 
 		void createContextMenu();
 
 		int firstVisibleColumn();
-		void restoreColumnsWidth();
-		void saveColumnsWidth();
 
 	signals:
 

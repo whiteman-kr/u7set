@@ -47,47 +47,57 @@ public:
 	explicit DialogOptionsMeasureViewHeader(const MeasureViewOption& header, QWidget* parent = nullptr);
 	virtual ~DialogOptionsMeasureViewHeader() override;
 
-	MeasureViewOption	m_header;
-
 public:
 
-	Measure::Type		measureType() const { return m_measureType; }
+	Measure::Type measureType() const { return m_measureType; }
+
+	MeasureViewOption& header() { return m_header; }
 
 private:
 
-	Measure::Type		m_measureType = Measure::Type::Linearity;
-	LanguageType		m_languageType = LanguageType::English;
+	Measure::Type m_measureType = Measure::Type::Linearity;
+	LanguageType m_languageType = LanguageType::English;
+
+	MeasureViewOption m_header;
 
 	// elements of interface
 	//
-	QLabel*				m_measureTypeLabel = nullptr;
-	QComboBox*			m_measureTypeList = nullptr;
+	QLabel* m_pMeasureTypeLabel = nullptr;
+	QComboBox* m_pMeasureTypeList = nullptr;
+	QPushButton* m_pDefaultButton = nullptr;
 
-	QTableWidget*		m_columnList = nullptr;
+	QTableWidget* m_pColumnList = nullptr;
 
-	bool				m_updatingList = false;
+	bool m_updatingList = false;
 
-	void				setHeaderList();
-	void				updateList();
-	void				clearList();
+	void setHeaderList();
+	void updateList();
+	void clearList();
 
 protected:
 
-	void				keyPressEvent(QKeyEvent* e) override;
-	void				showEvent(QShowEvent* e) override;
+	void keyPressEvent(QKeyEvent* e) override;
+	void showEvent(QShowEvent* e) override;
 
 signals:
 
-	void				updateMeasureViewPage(bool isDialog);
+	void updateMeasureViewPage(bool isDialog);
 
 private slots:
 
-	void				setMeasureType(int measureType);
+	//
+	//
+	void setMeasureType(int measureType);
+	void onDefault();
 
-	void				cellChanged(int,int);
-	void				currentCellChanged(int,int,int,int);
+	//
+	//
+	void cellChanged(int,int);
+	void currentCellChanged(int,int,int,int);
 
-	void				onEdit(int row, int column);
+	//
+	//
+	void onEdit(int row, int column);
 };
 
 // ==============================================================================================

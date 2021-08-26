@@ -813,7 +813,7 @@ void ComparatorOption::load()
 {
 	QSettings s;
 
-	m_errorLimit = s.value(QString("%1ErrorLimit").arg(COMPARATOR_OPTIONS_KEY), 0.2).toDouble();
+	m_errorLimit = s.value(QString("%1ErrorLimit").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
 	m_startValueForCompare = s.value(QString("%1StartValueForCompare").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
 	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), Measure::ErrorType::Reduce).toInt();
 	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(COMPARATOR_OPTIONS_KEY), Measure::LimitType::Electric).toInt();
@@ -966,31 +966,6 @@ void MeasureViewOption::setUpdateColumnView(Measure::Type measureType, bool stat
 	m_updateColumnView[measureType] = state;
 }
 
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QMap<QString, int> MeasureViewOption::columnsWidth(Measure::Type measureType) const
-{
-	if (ERR_MEASURE_TYPE(measureType) == true)
-	{
-		return QMap<QString, int>();
-	}
-
-	return m_columnsWidth[measureType];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MeasureViewOption::setColumnsWidth(Measure::Type measureType, const QMap<QString, int>& map)
-{
-	if (ERR_MEASURE_TYPE(measureType) == true)
-	{
-		return;
-	}
-
-	m_columnsWidth[measureType] = map;
-}
-
 // -------------------------------------------------------------------------------------------------------------------
 
 void MeasureViewOption::load()
@@ -1012,7 +987,8 @@ void MeasureViewOption::load()
 		{
 			header.setMeasureType(static_cast<Measure::Type>(measureType));
 
-			for(int column = 0; column < Measure::MaxColumnCount; column++)
+			int coulumnCount = header.count();
+			for(int column = 0; column < coulumnCount; column++)
 			{
 				Measure::HeaderColumn* pColumn = header.column(column);
 				if (pColumn == nullptr)
@@ -1032,15 +1008,15 @@ void MeasureViewOption::load()
 
 			for(int column = 0; column < Measure::MaxColumnCount; column++)
 			{
-				const Measure::HeaderColumn& c = m_column[measureType][languageType][column];
+				Measure::HeaderColumn& c = m_column[measureType][languageType][column];
 				if (c.title().isEmpty() == true)
 				{
 					continue;
 				}
 
-				m_column[measureType][languageType][column].setTitle(s.value(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.title()).toString());
-				m_column[measureType][languageType][column].setWidth(s.value(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()), c.width()).toInt());
-				m_column[measureType][languageType][column].setVisible(s.value(QString("%1/Header/%2/%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()), c.enableVisible()).toBool());
+				c.setTitle(s.value(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.title()).toString());
+				c.setWidth(s.value(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()), c.width()).toInt());
+				c.setVisible(s.value(QString("%1/Header/%2/%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()), c.enableVisible()).toBool());
 			}
 		}
 	}
@@ -1057,8 +1033,6 @@ void MeasureViewOption::load()
 
 	m_showNoValid = s.value(QString("%1ShowNoValid").arg(MEASURE_VIEW_OPTIONS_KEY), false).toBool();
 	m_precesionByCalibrator = s.value(QString("%1ShowPrecesionByCalibrator").arg(MEASURE_VIEW_OPTIONS_KEY), false).toBool();
-
-	loadColumnsWidth();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1104,35 +1078,30 @@ void MeasureViewOption::save()
 
 	s.setValue(QString("%1ShowNoValid").arg(MEASURE_VIEW_OPTIONS_KEY), m_showNoValid);
 	s.setValue(QString("%1ShowPrecesionByCalibrator").arg(MEASURE_VIEW_OPTIONS_KEY), m_precesionByCalibrator);
-
-	saveColumnsWidth();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewOption::loadColumnsWidth()
+void MeasureViewOption::saveColumnWidth(Measure::Type measureType, const Measure::HeaderColumn& c)
 {
 	QSettings s;
 
-	for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
-	{
-		QString caption = Measure::TypeCaption(static_cast<Measure::Type>(measureType));
+	QString caption = Measure::TypeCaption(static_cast<Measure::Type>(measureType));
 
-		m_columnsWidth[measureType] = s.value(QString("%1ColumnsWidth%2").arg(SIGNAL_INFO_OPTIONS_KEY).arg(caption)).value<QMap<QString,int>>();
+	s.setValue(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()), c.width());
+
+	int languageType = theOptions.language().languageType();
+	if (ERR_LANGUAGE_TYPE(languageType) == true)
+	{
+		return;
 	}
-}
 
-// -------------------------------------------------------------------------------------------------------------------
-
-void MeasureViewOption::saveColumnsWidth()
-{
-	QSettings s;
-
-	for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
+	for(int column = 0; column < Measure::MaxColumnCount; column++)
 	{
-		QString caption = Measure::TypeCaption(static_cast<Measure::Type>(measureType));
-
-		s.setValue(QString("%1ColumnsWidth%2").arg(SIGNAL_INFO_OPTIONS_KEY).arg(caption), QVariant::fromValue(m_columnsWidth[measureType]));
+		if (m_column[measureType][languageType][column].uniqueTitle() == c.uniqueTitle())
+		{
+			m_column[measureType][languageType][column].setWidth(c.width());
+		}
 	}
 }
 

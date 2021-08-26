@@ -415,10 +415,13 @@ void PanelStatistics::createInterface()
 	connect(m_pFindTextEdit, &QLineEdit::textChanged, this, &PanelStatistics::onFindTextChanged);
 
 	m_pToolBar->addWidget(m_pFindTextEdit);
+
 	m_pFindPreviousAction = m_pToolBar->addAction(QIcon(":/icons/PreviousFind.png"), tr("Find previous"));
+	m_pFindPreviousAction->setEnabled(false);
 	connect(m_pFindPreviousAction, &QAction::triggered, this, &PanelStatistics::onFindPrevious);
 
 	m_pFindNextAction = m_pToolBar->addAction(QIcon(":/icons/NextFind.png"), tr("Find next"));
+	m_pFindNextAction->setEnabled(false);
 	connect(m_pFindNextAction, &QAction::triggered, this, &PanelStatistics::onFindNext);
 
 	m_pToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
@@ -1435,8 +1438,8 @@ void PanelStatistics::onHeaderContextMenu(QPoint)
 		return;
 	}
 
-	m_pColumnAction[STATISTICS_COLUMN_CMP_NO]->setDisabled(m_measureType != Measure::Type::Comparators);
-	m_pColumnAction[STATISTICS_COLUMN_CMP_VALUE]->setDisabled(m_measureType != Measure::Type::Comparators);
+	//m_pColumnAction[STATISTICS_COLUMN_CMP_NO]->setDisabled(m_measureType != Measure::Type::Comparators);
+	//m_pColumnAction[STATISTICS_COLUMN_CMP_VALUE]->setDisabled(m_measureType != Measure::Type::Comparators);
 
 	m_headerContextMenu->exec(QCursor::pos());
 }

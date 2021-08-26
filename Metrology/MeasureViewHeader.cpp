@@ -219,8 +219,12 @@ namespace Measure
 			return;
 		}
 
+		// set measure type
+		//
 		m_measureType = measureType;
 
+		// set column count
+		//
 		for(int column = 0; column < MaxColumnCount; column++)
 		{
 			if (m_column[measureType][column].title().isEmpty() == false)
@@ -248,8 +252,12 @@ namespace Measure
 			return;
 		}
 
+		//
+		//
 		setMeasureType(measureType);
 
+		//
+		//
 		for(int column = 0; column < MaxColumnCount; column++)
 		{
 			HeaderColumn& c = m_column[measureType][column];

@@ -1213,13 +1213,14 @@ void DialogOptions::applyProperty()
 			{
 				switch(param)
 				{
-					case CO_PARAM_ERROR_LIMIT:				m_options.comparator().setErrorLimit(value.toDouble());						break;
-					case CO_PARAM_START_VALUE:				m_options.comparator().setStartValueForCompare(value.toDouble());			break;
-					case CO_PARAM_ERROR_TYPE:				m_options.comparator().setErrorType(value.toInt());							break;
+					case CO_PARAM_ERROR_LIMIT:				m_options.comparator().setErrorLimit(value.toDouble());							break;
+					case CO_PARAM_START_VALUE:				m_options.comparator().setStartValueForCompare(value.toDouble());				break;
+					case CO_PARAM_ERROR_TYPE:				m_options.comparator().setErrorType(value.toInt());
+															m_options.measureView().setUpdateColumnView(Measure::Type::Comparators, true);	break;
 					case CO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.comparator().setLimitType(value.toInt());
 															m_options.measureView().setUpdateColumnView(Measure::Type::Comparators, true);	break;
-					case CO_PARAM_COMPARATOR_INDEX:			m_options.comparator().setStartComparatorIndex(value.toInt() - 1);			break;
-					case CO_PARAM_ENABLE_HYSTERESIS:		m_options.comparator().setEnableMeasureHysteresis(value.toBool());			break;
+					case CO_PARAM_COMPARATOR_INDEX:			m_options.comparator().setStartComparatorIndex(value.toInt() - 1);				break;
+					case CO_PARAM_ENABLE_HYSTERESIS:		m_options.comparator().setEnableMeasureHysteresis(value.toBool());				break;
 					default:
 						assert(0);
 				}
@@ -1447,7 +1448,7 @@ void DialogOptions::updateMeasureViewPage(bool isDialog)
 	{
 		// get options from dialog
 		//
-		m_options.setMeasureView(dialog->m_header);
+		m_options.setMeasureView(dialog->header());
 
 		Measure::Type measureType = dialog->measureType();
 		if (ERR_MEASURE_TYPE(measureType) == false)
@@ -1459,7 +1460,7 @@ void DialogOptions::updateMeasureViewPage(bool isDialog)
 	{
 		// set options to dialog
 		//
-		dialog->m_header = m_options.measureView();
+		dialog->header() = m_options.measureView();
 	}
 }
 

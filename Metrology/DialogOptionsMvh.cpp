@@ -16,34 +16,39 @@ DialogOptionsMeasureViewHeader::DialogOptionsMeasureViewHeader(const MeasureView
 
 	QHBoxLayout* measureTypeLayout = new QHBoxLayout;
 
-	m_measureTypeLabel = new QLabel(tr("Measure type: "), this);
+	m_pMeasureTypeLabel = new QLabel(tr("Measure type: "), this);
 
-	m_measureTypeList = new QComboBox(this);
+	m_pMeasureTypeList = new QComboBox(this);
 
 	for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
 	{
-		m_measureTypeList->addItem(qApp->translate("MeasureBase", Measure::TypeCaption(static_cast<Measure::Type>(measureType)).toUtf8()));
+		m_pMeasureTypeList->addItem(qApp->translate("MeasureBase", Measure::TypeCaption(static_cast<Measure::Type>(measureType)).toUtf8()));
 	}
-	m_measureTypeList->setCurrentIndex(m_measureType);
+	m_pMeasureTypeList->setCurrentIndex(m_measureType);
 
-	measureTypeLayout->addWidget(m_measureTypeLabel);
-	measureTypeLayout->addWidget(m_measureTypeList);
+	m_pDefaultButton = new QPushButton(tr("Default"), this);
+
+	measureTypeLayout->addWidget(m_pMeasureTypeLabel);
+	measureTypeLayout->addWidget(m_pMeasureTypeList);
 	measureTypeLayout->addStretch();
+	measureTypeLayout->addWidget(m_pDefaultButton);
+	m_pDefaultButton->hide();
 
 	m_languageType = static_cast<LanguageType>(theOptions.language().languageType());
 
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 
-	m_columnList = new QTableWidget;
+	m_pColumnList = new QTableWidget;
 	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
-	m_columnList->verticalHeader()->setDefaultSectionSize(cellSize.height());
+	m_pColumnList->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
 	mainLayout->addLayout(measureTypeLayout);
-	mainLayout->addWidget(m_columnList);
+	mainLayout->addWidget(m_pColumnList);
 
 	setLayout(mainLayout);
 
-	connect(m_measureTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogOptionsMeasureViewHeader::setMeasureType);
+	connect(m_pMeasureTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogOptionsMeasureViewHeader::setMeasureType);
+	connect(m_pDefaultButton, &QPushButton::clicked, this, &DialogOptionsMeasureViewHeader::onDefault);
 
 	setHeaderList();
 }
@@ -66,21 +71,21 @@ void DialogOptionsMeasureViewHeader::setHeaderList()
 		horizontalHeaderLabels.append(qApp->translate("DialogOptionsMvh", MvhColumn[c]));
 	}
 
-	m_columnList->setColumnCount(horizontalHeaderLabels.count());
-	m_columnList->setHorizontalHeaderLabels(horizontalHeaderLabels);
-	m_columnList->verticalHeader()->hide();
+	m_pColumnList->setColumnCount(horizontalHeaderLabels.count());
+	m_pColumnList->setHorizontalHeaderLabels(horizontalHeaderLabels);
+	m_pColumnList->verticalHeader()->hide();
 
 	for(int c = 0; c < MVH_COLUMN_COUNT; c++)
 	{
-		m_columnList->setColumnWidth(c, MvhColumnWidth[c]);
+		m_pColumnList->setColumnWidth(c, MvhColumnWidth[c]);
 	}
 
-	connect(m_columnList, &QTableWidget::cellDoubleClicked, this, &DialogOptionsMeasureViewHeader::onEdit);
-	connect(m_columnList, &QTableWidget::cellChanged, this, &DialogOptionsMeasureViewHeader::cellChanged);
-	connect(m_columnList, &QTableWidget::currentCellChanged, this, &DialogOptionsMeasureViewHeader::currentCellChanged);
+	connect(m_pColumnList, &QTableWidget::cellDoubleClicked, this, &DialogOptionsMeasureViewHeader::onEdit);
+	connect(m_pColumnList, &QTableWidget::cellChanged, this, &DialogOptionsMeasureViewHeader::cellChanged);
+	connect(m_pColumnList, &QTableWidget::currentCellChanged, this, &DialogOptionsMeasureViewHeader::currentCellChanged);
 
 	IntDelegate* delegate = new IntDelegate(this);
-	m_columnList->setItemDelegateForColumn(MVH_COLUMN_WIDTH, delegate);
+	m_pColumnList->setItemDelegateForColumn(MVH_COLUMN_WIDTH, delegate);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -110,12 +115,12 @@ void DialogOptionsMeasureViewHeader::updateList()
 		}
 	}
 
-	m_columnList->setRowCount(rowCount);
+	m_pColumnList->setRowCount(rowCount);
 
 	m_updatingList = true;
 	QTableWidgetItem* cell = nullptr;
 	QStringList verticalHeaderLabels;
-	QFont boldFont = m_columnList->font();
+	QFont boldFont = m_pColumnList->font();
 	boldFont.setBold(true);
 
 	// update list
@@ -135,7 +140,7 @@ void DialogOptionsMeasureViewHeader::updateList()
 			cell->setForeground(Qt::lightGray);
 		}
 
-		m_columnList->setItem(index, MVH_COLUMN_TITLE, cell);
+		m_pColumnList->setItem(index, MVH_COLUMN_TITLE, cell);
 
 		cell = new QTableWidgetItem(visible ? tr("True") : tr("False"));
 		cell->setTextAlignment(Qt::AlignHCenter);
@@ -144,7 +149,7 @@ void DialogOptionsMeasureViewHeader::updateList()
 			cell->setForeground(Qt::lightGray);
 		}
 
-		m_columnList->setItem(index, MVH_COLUMN_VISIBLE, cell);
+		m_pColumnList->setItem(index, MVH_COLUMN_VISIBLE, cell);
 
 		cell = new QTableWidgetItem(QString::number(column.width()));
 		cell->setTextAlignment(Qt::AlignHCenter);
@@ -153,10 +158,10 @@ void DialogOptionsMeasureViewHeader::updateList()
 			cell->setForeground(Qt::lightGray);
 		}
 
-		m_columnList->setItem(index, MVH_COLUMN_WIDTH, cell);
+		m_pColumnList->setItem(index, MVH_COLUMN_WIDTH, cell);
 	}
 
-	m_columnList->setVerticalHeaderLabels(verticalHeaderLabels);
+	m_pColumnList->setVerticalHeaderLabels(verticalHeaderLabels);
 	m_updatingList = false;
 
 	emit updateMeasureViewPage(true);
@@ -166,14 +171,14 @@ void DialogOptionsMeasureViewHeader::updateList()
 
 void DialogOptionsMeasureViewHeader::clearList()
 {
-	int columnCount = m_columnList->columnCount();
-	int rowCount = m_columnList->rowCount();
+	int columnCount = m_pColumnList->columnCount();
+	int rowCount = m_pColumnList->rowCount();
 
 	for(int column = 0; column < columnCount; column++)
 	{
 		for(int row = 0; row < rowCount; row++)
 		{
-			QTableWidgetItem* item = m_columnList->item(row, column);
+			QTableWidgetItem* item = m_pColumnList->item(row, column);
 			if (item != nullptr)
 			{
 				delete item;
@@ -198,6 +203,42 @@ void DialogOptionsMeasureViewHeader::setMeasureType(int measureType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void DialogOptionsMeasureViewHeader::onDefault()
+{
+	if (ERR_MEASURE_TYPE(m_measureType) == true)
+	{
+		return;
+	}
+
+//	int languageType = theOptions.language().languageType();
+//	if (ERR_LANGUAGE_TYPE(languageType) == true)
+//	{
+//		return;
+//	}
+
+//	Measure::ViewHeader header;
+
+//	header.setMeasureType(m_measureType);
+
+//	int columnCount = header.count();
+//	for(int column = 0; column < columnCount; column++)
+//	{
+//		Measure::HeaderColumn* pColumn = header.column(column);
+//		if (pColumn == nullptr)
+//		{
+//			continue;
+//		}
+
+//		qDebug() << pColumn->title() << pColumn->enableVisible() << pColumn->width();
+
+//		m_header.m_column[m_measureType][languageType][column] = *pColumn;
+//	}
+
+	updateList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void DialogOptionsMeasureViewHeader::cellChanged(int row, int column)
 {
 	if (m_updatingList == true)
@@ -215,17 +256,17 @@ void DialogOptionsMeasureViewHeader::cellChanged(int row, int column)
 		return;
 	}
 
-	if (m_columnList == nullptr)
+	if (m_pColumnList == nullptr)
 	{
 		return;
 	}
 
-	if (row < 0 || row >= m_columnList->rowCount())
+	if (row < 0 || row >= m_pColumnList->rowCount())
 	{
 		return;
 	}
 
-	QTableWidgetItem* item = m_columnList->item(row, column);
+	QTableWidgetItem* item = m_pColumnList->item(row, column);
 	if (item == nullptr)
 	{
 		return;
@@ -247,7 +288,7 @@ void DialogOptionsMeasureViewHeader::cellChanged(int row, int column)
 
 	updateList();
 
-	m_columnList->setFocus();
+	m_pColumnList->setFocus();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -256,11 +297,11 @@ void DialogOptionsMeasureViewHeader::currentCellChanged(int, int column, int, in
 {
 	if (column == MVH_COLUMN_WIDTH)
 	{
-		m_columnList->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::AnyKeyPressed);
+		m_pColumnList->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::AnyKeyPressed);
 	}
 	else
 	{
-		m_columnList->setEditTriggers(QAbstractItemView::NoEditTriggers);
+		m_pColumnList->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	}
 }
 
@@ -268,22 +309,22 @@ void DialogOptionsMeasureViewHeader::currentCellChanged(int, int column, int, in
 
 void DialogOptionsMeasureViewHeader::onEdit(int row, int column)
 {
-	if (row < 0 || row >= m_columnList->rowCount())
+	if (row < 0 || row >= m_pColumnList->rowCount())
 	{
 		return;
 	}
 
-	if (column < 0 || column >= m_columnList->columnCount())
+	if (column < 0 || column >= m_pColumnList->columnCount())
 	{
 		return;
 	}
 
-	if (m_columnList == nullptr)
+	if (m_pColumnList == nullptr)
 	{
 		return;
 	}
 
-	QTableWidgetItem* cell = m_columnList->item(row, column);
+	QTableWidgetItem* cell = m_pColumnList->item(row, column);
 	if (cell == nullptr)
 	{
 		return;
@@ -305,7 +346,7 @@ void DialogOptionsMeasureViewHeader::onEdit(int row, int column)
 	{
 		case MVH_COLUMN_TITLE:
 			{
-				m_columnList->editItem(cell);
+				m_pColumnList->editItem(cell);
 			}
 			break;
 
@@ -319,7 +360,7 @@ void DialogOptionsMeasureViewHeader::onEdit(int row, int column)
 
 		case MVH_COLUMN_WIDTH:
 			{
-				m_columnList->editItem(cell);
+				m_pColumnList->editItem(cell);
 			}
 			break;
 
@@ -334,8 +375,8 @@ void DialogOptionsMeasureViewHeader::keyPressEvent(QKeyEvent* e)
 {
 	if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
 	{
-		int row = m_columnList->currentRow();
-		int column = m_columnList->currentColumn();
+		int row = m_pColumnList->currentRow();
+		int column = m_pColumnList->currentColumn();
 		onEdit(row, column);
 
 		return;
