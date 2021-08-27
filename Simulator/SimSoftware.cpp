@@ -120,7 +120,7 @@ namespace  Sim
 	QStringList Software::monitors() const
 	{
 		QStringList result;
-		result.reserve(m_software.size());
+		result.reserve(static_cast<int>(m_software.size()));
 
 		for (const auto& app : m_software)
 		{

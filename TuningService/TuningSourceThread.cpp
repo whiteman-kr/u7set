@@ -597,7 +597,10 @@ namespace Tuning
 
 			m_waitReply = false;
 
-			qDebug() << "NoReply " << C_STR(m_sourceIP.addressStr());
+
+			qDebug() << C_STR(QString("NoReply from %1 [RUP frame No = %2]").
+								arg(m_sourceIP.addressStr()).
+								arg(m_request.rupFotipV2.rupHeader.numerator));
 
 			m_retryCount++;
 
