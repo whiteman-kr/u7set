@@ -34,6 +34,8 @@ namespace Builder
 
 		Q_PROPERTY(E::SignalType SignalType READ propSignalType)
 		Q_PROPERTY(E::AnalogAppSignalFormat AnalogFormat READ propAnalogFormat)
+		Q_PROPERTY(E::DataFormat DataFormat READ propDataFormat)
+		Q_PROPERTY(E::ByteOrder ByteOrder READ propByteOrder)
 
 		Q_PROPERTY(int OffsetB READ offsetB)
 		Q_PROPERTY(int OffsetW READ offsetW)
@@ -51,8 +53,10 @@ namespace Builder
 		QString propCaption() const;
 		QString propBusTypeId() const;
 
-		E::SignalType propSignalType();
-		E::AnalogAppSignalFormat propAnalogFormat();
+		E::SignalType propSignalType() const;
+		E::AnalogAppSignalFormat propAnalogFormat() const;
+		E::DataFormat propDataFormat() const;
+		E::ByteOrder propByteOrder() const;
 
 		int propInbusSizeBits() const;
 

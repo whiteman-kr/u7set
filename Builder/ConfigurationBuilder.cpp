@@ -43,14 +43,24 @@ namespace Builder
 		return m_busTypeId;
 	}
 
-	E::SignalType JsBusSignal::propSignalType()
+	E::SignalType JsBusSignal::propSignalType() const
 	{
 		return m_signal->signalType;
 	}
 
-	E::AnalogAppSignalFormat JsBusSignal::propAnalogFormat()
+	E::AnalogAppSignalFormat JsBusSignal::propAnalogFormat() const
 	{
 		return m_signal->analogFormat;
+	}
+
+	E::DataFormat JsBusSignal::propDataFormat() const
+	{
+		return m_signal->inbusAnalogFormat;
+	}
+
+	E::ByteOrder JsBusSignal::propByteOrder() const
+	{
+		return m_signal->inbusAnalogByteOrder;
 	}
 
 	int JsBusSignal::offsetB() const
