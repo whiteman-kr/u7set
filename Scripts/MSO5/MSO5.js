@@ -244,12 +244,18 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 		const maxVotePartSizeW = 128;
 
 		const MSO5Discrete = 1;
-		const MSO5Float = 2;
-		const MSO5SignedInt = 3;
+		const MSO5Float32 = 2;
+		const MSO5SignedInt32 = 3;
+		const MSO5UnsignedInt16 = 4;
+		const MSO5SignedInt16 = 5;
 
 		const SignalTypeAnalog = 0;
 		const SignalTypeDiscrete = 1;
 		const SignalTypeBus = 2;
+
+		const DataFormatUnsignedInt = 0;
+		const DataFormatSignedInt = 1;
+		const DataFormatFloat = 2;
 
 		const AnalogAppSignalFormatSignedInt = 1;
 		const AnalogAppSignalFormatFloat32 = 2;
@@ -315,6 +321,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 
 					if (bs.SignalType == bs2.SignalType && 
 						bs.AnalogFormat == bs2.AnalogFormat && 
+						bs.DataFormat == bs2.DataFormat && 
 						bs.SizeW == bs2.SizeW && 
 						bs.BusTypeID == bs2.BusTypeID && 
 						bs2.OffsetW <= partOffset + partDataSize &&
@@ -368,16 +375,46 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 					switch (bs.AnalogFormat) {
 						case AnalogAppSignalFormatFloat32:
 							{
-								partDataType = MSO5Float;
+								partDataType = MSO5Float32;
 								partDataTypeStr = "(float32)";
+								break;
 							}
-							break;
 						case AnalogAppSignalFormatSignedInt:
 							{
-								partDataType = MSO5SignedInt;
-								partDataTypeStr = "(int)";
+								switch (bs.DataFormat) {
+									case DataFormatSignedInt:
+										{
+											switch (bs.SizeBits) {
+												case 16:
+													{
+														partDataType = MSO5SignedInt16;
+														partDataTypeStr = "(int16)";
+														break;
+													}
+													case 32:
+													{
+														partDataType = MSO5SignedInt32;
+														partDataTypeStr = "(int32)";
+														break;
+													}
+													default:
+													log.errINT1001(module.equipmentId + ", Bus " + txBusTypeId + ", Signal " + bs.SignalID + " - wrong SizeBits (" + bs.SizeBits + ")");
+													break;
+											}
+											break;
+										}
+									case DataFormatUnsignedInt:
+										{
+											partDataType = MSO5UnsignedInt16;
+											partDataTypeStr = "(uint16)";
+											break;
+										}
+									default:
+										log.errINT1001(module.equipmentId + ", Bus " + txBusTypeId + ", Signal " + bs.SignalID + " - wrong DataFormat");
+										break;
+								}
+								break;
 							}
-							break;
 						default:
 							log.errINT1001(module.equipmentId + ", Bus " + txBusTypeId + ", Signal " + bs.SignalID + " - unknown AnalogFormat");
 							return false;
@@ -477,6 +514,10 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 			let rxQuantityOfRecordsPtr = ptr;
 			ptr += 2;
 
+			ptr += 2; // Reserve 1
+
+			ptr += 2; // Reserve 2
+		
 			for (let lanType = LAN_TYPE_TX; lanType <= LAN_TYPE_RX; lanType++)
 			{
 				let lanPartCount = 0;
@@ -512,10 +553,6 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 					return false;
 				}
 
-				ptr += 2; // Reserve 1
-
-				ptr += 2; // Reserve 2
-			
 				for (let s = 0; s < addressDataStrings.length; s++)
 				{
 					let addressDataString = addressDataStrings[s].trim();
