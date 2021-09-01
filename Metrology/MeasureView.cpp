@@ -943,8 +943,50 @@ namespace Measure
 			return;
 		}
 
+		double errorLimit = pMeasurement->errorLimit(Measure::LimitType::Electric, Measure::ErrorType::Reduce);
+
 		DialogMeasureProperty dialog(pMeasurement, this);
-		dialog.exec();
+		if (dialog.exec() != QDialog::Accepted)
+		{
+			return;
+		}
+
+		if (compareDouble(errorLimit, pMeasurement->errorLimit(Measure::LimitType::Electric, Measure::ErrorType::Reduce)) == true)
+		{
+			return;
+		}
+
+		errorLimit = pMeasurement->errorLimit(Measure::LimitType::Electric, Measure::ErrorType::Reduce);
+
+		std::vector<Measure::Item*> measurementList;
+
+		for(auto selectedIndex : selectionModel()->selectedRows())
+		{
+			int index = selectedIndex.row();
+			if (index < 0 || index >= m_model.count())
+			{
+				continue;
+			}
+
+			Measure::Item* pMeasurement = m_model.at(index);
+			if (pMeasurement == nullptr)
+			{
+				continue;
+			}
+
+			if (pMeasurement->measureType() != m_measureType)
+			{
+				continue;
+			}
+
+			pMeasurement->calcErrorLimit(errorLimit);
+
+			measurementList.push_back(pMeasurement);
+		}
+
+		// update in Database
+		//
+		emit updateInBase(m_measureType, measurementList);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

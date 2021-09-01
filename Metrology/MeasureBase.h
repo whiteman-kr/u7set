@@ -207,6 +207,7 @@ namespace Measure
 		QString limitStr(LimitType limitType) const;
 
 		void calcError();
+		void calcErrorLimit(double errorLimit);
 
 		double error(LimitType limitType, ErrorType errorType) const;
 		QString errorStr(Measure::Type measureType) const;

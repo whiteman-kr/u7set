@@ -480,6 +480,11 @@ private slots:
 //
 // ==============================================================================================
 
+
+const int						MEASURE_PROPERTY_ITEM_ERROR_LIMIT		= 0;
+
+// ----------------------------------------------------------------------------------------------
+
 class DialogMeasureProperty : public QDialog
 {
 	Q_OBJECT
@@ -503,7 +508,13 @@ private:
 	//
 	QDialogButtonBox*			m_buttonBox = nullptr;
 
+	QMap<QtProperty*,int>		m_propertyMap;
+
 	void						createPropertyList();
+
+private slots:
+
+	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
 };
 
 // ==============================================================================================

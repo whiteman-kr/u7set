@@ -680,6 +680,7 @@ void MainWindow::createMeasureViews()
 		//
 		//
 
+		connect(pView, &Measure::View::updateInBase, &theDatabase, &Database::updateInBase);
 		connect(pView, &Measure::View::removeFromBase, &theDatabase, &Database::removeFromBase);
 		connect(pView, &Measure::View::removeFromBase, &m_measureBase, &Measure::Base::removeFromBase);
 

@@ -1105,6 +1105,8 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 	for (int r = 0; r < count; r++)
 	{
+		// for append record - request, or for update record - request + QString("%1").arg(key[r]
+		//
 		if (query.prepare(key == nullptr ? request :  request + QString("%1").arg(key[r])) == false)
 		{
 			continue;
@@ -1152,7 +1154,12 @@ int SqlTable::write(void* pRecord, int count, int* key)
 						break;
 					}
 
-					measure->setMeasureID(lastKey() + 1);
+					if (key == nullptr)
+					{
+						// for append record
+						//
+						measure->setMeasureID(lastKey() + 1);
+					}
 
 					query.bindValue(field++, measure->measureID());
 
@@ -1333,7 +1340,12 @@ int SqlTable::write(void* pRecord, int count, int* key)
 						break;
 					}
 
-					measure->setMeasureID(lastKey() + 1);
+					if (key == nullptr)
+					{
+						// for append record
+						//
+						measure->setMeasureID(lastKey() + 1);
+					}
 
 					query.bindValue(field++, measure->measureID());
 
@@ -1432,6 +1444,8 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 		if (query.exec() == false)
 		{
+			qDebug() << __FUNCTION__ << query.lastError().text();
+
 			continue;
 		}
 
@@ -1888,12 +1902,105 @@ bool Database::removeMeasure(Measure::Type measuteType, const std::vector<int>& 
 
 // -------------------------------------------------------------------------------------------------------------------
 
+bool Database::updateMeasure(Measure::Type measuteType, const std::vector<Measure::Item*>& list)
+{
+	bool result = false;
+
+	std::vector<int> keyList;
+
+	for (int type = 0; type < SQL_TABLE_COUNT; type++)
+	{
+		if (SqlTableByMeasureType[type] != measuteType)
+		{
+			continue;
+		}
+
+		SqlTable& table = m_table[type];
+
+		if (table.open() == false)
+		{
+			continue;
+		}
+
+		switch (measuteType)
+		{
+			case Measure::Type::Linearity:
+				{
+					std::vector<Measure::LinearityItem> measurementList;
+
+					for (Measure::Item* pMeasurement : list)
+					{
+						if (pMeasurement == nullptr)
+						{
+							continue;
+						}
+
+						measurementList.push_back(*dynamic_cast<Measure::LinearityItem*>(pMeasurement));
+						keyList.push_back(pMeasurement->measureID());
+					}
+
+					if (table.write((void*) measurementList.data(), TO_INT(keyList.size()), keyList.data()) == TO_INT(keyList.size()))
+					{
+						result = true;
+					}
+				}
+
+				break;
+
+			case Measure::Type::Comparators:
+				{
+					std::vector<Measure::ComparatorItem> measurementList;
+
+					for (Measure::Item* pMeasurement : list)
+					{
+						if (pMeasurement == nullptr)
+						{
+							continue;
+						}
+
+						measurementList.push_back(*dynamic_cast<Measure::ComparatorItem*>(pMeasurement));
+						keyList.push_back(pMeasurement->measureID());
+					}
+
+					if (table.write((void*) measurementList.data(), TO_INT(keyList.size()), keyList.data()) == TO_INT(keyList.size()))
+					{
+						result = true;
+					}
+				}
+
+				break;
+
+			default:
+				assert(0);
+		}
+
+		table.close();
+
+		break;
+	}
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void Database::removeFromBase(Measure::Type measureType, const std::vector<int>& keyList)
 {
 	bool result = removeMeasure(static_cast<Measure::Type>(measureType), keyList);
 	if (result == false)
 	{
 		QMessageBox::critical(nullptr, tr("Delete measurements"), tr("Error remove measurements from database"));
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void Database::updateInBase(Measure::Type measureType, const std::vector<Measure::Item*>& list)
+{
+	bool result = updateMeasure(static_cast<Measure::Type>(measureType), list);
+	if (result == false)
+	{
+		QMessageBox::critical(nullptr, tr("Update measurements"), tr("Error update measurements from database"));
 	}
 }
 

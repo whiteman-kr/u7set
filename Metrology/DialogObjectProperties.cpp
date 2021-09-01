@@ -2346,8 +2346,8 @@ void DialogMeasureProperty::createPropertyList()
 	setWindowTitle(tr("Property"));
 
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.3));
-	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.3));
+	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.26));
+	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.26));
 	move(screen.center() - rect().center());
 
 	if (m_pMeasurement == nullptr)
@@ -2459,23 +2459,15 @@ void DialogMeasureProperty::createPropertyList()
 
 		QtProperty* errorsGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Errors"));
 
+			item = m_pManager->addProperty(QVariant::Double, tr("Limit of error (%)"));
+			item->setValue(m_pMeasurement->errorLimit(Measure::LimitType::Electric, Measure::ErrorType::Reduce));
+			item->setAttribute(QLatin1String("singleStep"), 0.1);
+			item->setAttribute(QLatin1String("decimals"), 3);
+			m_propertyMap.insert(item, MEASURE_PROPERTY_ITEM_ERROR_LIMIT);
+			errorsGroup->addSubProperty(item);
+
 			item = m_pManager->addProperty(QVariant::String, tr("Measurement time"));
 			item->setValue(m_pMeasurement->measureTimeStr());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			errorsGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("Error"));
-			item->setValue(m_pMeasurement->errorStr(m_pMeasurement->measureType()));
-			item->setAttribute(QLatin1String("readOnly"), true);
-			errorsGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("Limit of error"));
-			item->setValue(m_pMeasurement->errorLimitStr(m_pMeasurement->measureType()));
-			item->setAttribute(QLatin1String("readOnly"), true);
-			errorsGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("Result"));
-			item->setValue(m_pMeasurement->errorResultStr(m_pMeasurement->measureType()));
 			item->setAttribute(QLatin1String("readOnly"), true);
 			errorsGroup->addSubProperty(item);
 
@@ -2495,6 +2487,8 @@ void DialogMeasureProperty::createPropertyList()
 	m_pEditor->setPropertiesWithoutValueMarked(true);
 	m_pEditor->setRootIsDecorated(false);
 
+	connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogMeasureProperty::onPropertyValueChanged);
+
 	// create buttons ok and cancel
 	//
 	m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
@@ -2509,6 +2503,37 @@ void DialogMeasureProperty::createPropertyList()
 
 	setLayout(mainLayout);
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogMeasureProperty::onPropertyValueChanged(QtProperty* property, const QVariant &value)
+{
+	if (property == nullptr)
+	{
+		return;
+	}
+
+	if (m_propertyMap.contains(property) == false)
+	{
+		return;
+	}
+
+	int index = m_propertyMap[property];
+	if (index < 0 || index >= COMPARATOR_PROPERTY_ITEM_COUNT)
+	{
+		return;
+	}
+
+	switch(index)
+	{
+		case MEASURE_PROPERTY_ITEM_ERROR_LIMIT:
+			{
+				m_pMeasurement->calcErrorLimit(value.toDouble());
+			}
+			break;
+	}
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------

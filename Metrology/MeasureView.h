@@ -99,6 +99,7 @@ namespace Measure
 	signals:
 
 		void removeFromBase(Measure::Type measureType, const std::vector<int>& keyList);
+		void updateInBase(Measure::Type measureType, const std::vector<Measure::Item*>& list);
 
 	public slots:
 

@@ -479,6 +479,19 @@ namespace Measure
 
 	void Item::calcError()
 	{
+		// calc errors vlue
+		//
+		for(int type = 0; type < Measure::LimitTypeCount; type++)
+		{
+			LimitType limitType = static_cast<LimitType>(type);
+
+			setError(limitType, Measure::ErrorType::Absolute,		std::abs(nominal(limitType)-measure(limitType)));
+			setError(limitType, Measure::ErrorType::Reduce,			std::abs(((nominal(limitType)-measure(limitType)) / (highLimit(limitType) - lowLimit(limitType))) * 100.0));
+			setError(limitType, Measure::ErrorType::Relative,		std::abs(((nominal(limitType)-measure(limitType)) / nominal(limitType)) * 100.0));
+		}
+
+		// calc error limits vlue
+		//
 		if (ERR_MEASURE_TYPE(m_measureType) == true)
 		{
 			assert(0);
@@ -496,13 +509,16 @@ namespace Measure
 				return;
 		}
 
+		calcErrorLimit(errorLimit);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void Item::calcErrorLimit(double errorLimit)
+	{
 		for(int type = 0; type < Measure::LimitTypeCount; type++)
 		{
 			LimitType limitType = static_cast<LimitType>(type);
-
-			setError(limitType, Measure::ErrorType::Absolute,		std::abs(nominal(limitType)-measure(limitType)));
-			setError(limitType, Measure::ErrorType::Reduce,			std::abs(((nominal(limitType)-measure(limitType)) / (highLimit(limitType) - lowLimit(limitType))) * 100.0));
-			setError(limitType, Measure::ErrorType::Relative,		std::abs(((nominal(limitType)-measure(limitType)) / nominal(limitType)) * 100.0));
 
 			setErrorLimit(limitType, Measure::ErrorType::Absolute,	std::abs((highLimit(limitType) - lowLimit(limitType)) * errorLimit / 100.0));
 			setErrorLimit(limitType, Measure::ErrorType::Reduce,	errorLimit);

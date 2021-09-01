@@ -329,6 +329,7 @@ public:
 
 	bool				appendMeasure(Measure::Item* pMeasurement);
 	bool				removeMeasure(Measure::Type measuteType, const std::vector<int>& keyList);
+	bool				updateMeasure(Measure::Type measuteType, const std::vector<Measure::Item*>& list);
 
 private:
 
@@ -348,6 +349,7 @@ public slots:
 
 	void				appendToBase(Measure::Item* pMeasurement);
 	void				removeFromBase(Measure::Type measureType, const std::vector<int>& keyList);
+	void				updateInBase(Measure::Type measureType, const std::vector<Measure::Item*>& list);
 };
 
 // ==============================================================================================
