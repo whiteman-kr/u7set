@@ -968,7 +968,7 @@ namespace Measure
 				continue;
 			}
 
-			Measure::Item* pMeasurement = m_model.at(index);
+			pMeasurement = m_model.at(index);
 			if (pMeasurement == nullptr)
 			{
 				continue;

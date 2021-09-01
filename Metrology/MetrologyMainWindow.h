@@ -112,6 +112,7 @@ private:
 
 							// menu - ?
 							//
+	QAction*				m_pShowUserManualAction = nullptr;
 	QAction*				m_pAboutQtAction = nullptr;
 	QAction*				m_pAboutConnectionAction = nullptr;
 	QAction*				m_pAboutAppAction = nullptr;
@@ -280,6 +281,7 @@ private slots:
 
 	// menu - ?
 	//
+	void					showUserManual();
 	void					aboutQt();
 	void					aboutConnection();
 	void					aboutApp();

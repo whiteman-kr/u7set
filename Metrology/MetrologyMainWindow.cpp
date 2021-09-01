@@ -13,6 +13,7 @@
 
 #include "../lib/Ui/DialogAbout.h"
 #include "../lib/ConstStrings.h"
+#include "../UtilsLib/Ui/UiTools.h"
 
 #include "CalibratorBase.h"
 #include "Database.h"
@@ -246,6 +247,11 @@ void MainWindow::createActions()
 
 	// ?
 	//
+	m_pShowUserManualAction = new QAction(tr("User Manual ..."), this);
+	m_pShowUserManualAction->setIcon(QIcon(":/icons/About Сonnection.png"));
+	m_pShowUserManualAction->setToolTip(tr("Show User Manual"));
+	connect(m_pShowUserManualAction, &QAction::triggered, this, &MainWindow::showUserManual);
+
 	m_pAboutQtAction = new QAction(tr("About Qt ..."), this);
 	m_pAboutQtAction->setIcon(QIcon(":/icons/About Сonnection.png"));
 	m_pAboutQtAction->setToolTip(tr("Show Qt information"));
@@ -330,8 +336,9 @@ void MainWindow::createMenu()
 	//
 	m_pInfoMenu = pMenuBar->addMenu(tr("&?"));
 
-	m_pInfoMenu->addAction(m_pAboutQtAction);
+	m_pInfoMenu->addAction(m_pShowUserManualAction);
 	m_pInfoMenu->addSeparator();
+	m_pInfoMenu->addAction(m_pAboutQtAction);
 	m_pInfoMenu->addAction(m_pAboutConnectionAction);
 	m_pInfoMenu->addAction(m_pAboutAppAction);
 }
@@ -1985,6 +1992,13 @@ void MainWindow::showOptions()
 	{
 		m_pStatisticsPanel->updateList();
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showUserManual()
+{
+	UiTools::openHelp(QApplication::applicationDirPath() + "/docs/Mertology_User_Manual.pdf", this);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

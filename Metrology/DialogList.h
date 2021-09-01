@@ -13,6 +13,7 @@
 #include <QDialogButtonBox>
 #include <QKeyEvent>
 #include <QClipboard>
+#include <QComboBox>
 
 // ==============================================================================================
 

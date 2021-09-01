@@ -97,13 +97,13 @@ SOURCES += \
 	Visa/visa.h
 
 HEADERS  += \
-    ChartView.h \
-    Stable.h \
 	../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
 	../lib/Tuning/TuningSignalState.h \
 	../lib/Ui/DialogAbout.h \
 	../lib/ComparatorSet.h \
+    ChartView.h \
+    Stable.h \
 	DialogCalculator.h \
 	DialogComparatorList.h \
 	DialogList.h \
@@ -160,7 +160,8 @@ TRANSLATIONS = languages/Metrology_ru.ts \
 
 DISTFILES += \
     ../Proto/network.proto \
-	../Proto/serialization.proto
+	../Proto/serialization.proto \
+    docs/Mertology_User_Manual.pdf
 
 # Add curent dir to a list of library directory paths
 #
