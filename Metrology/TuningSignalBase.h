@@ -157,10 +157,12 @@ public:
 
 	void createSignalList();
 
-	int append(Metrology::Signal* pSignal);
+	int append(const Metrology::Signal& signal);
 
-	Metrology::Signal* signal(const Hash& hash) const;
-	Metrology::Signal* signal(int index) const;
+	Metrology::Signal* signalPtr(int index) const;
+
+	Metrology::Signal signal(const Hash& hash) const;
+	Metrology::Signal signal(int index) const;
 
 	Metrology::SignalState state(const Hash& hash) const;
 	void setState(const Network::TuningSignalState& state);
@@ -170,12 +172,16 @@ public:
 private:
 
 	mutable QMutex m_signalMutex;
-	std::vector<Metrology::Signal*> m_signalList;
+	std::vector<Metrology::Signal> m_signalList;
 	QMap<Hash, int> m_signalHashMap;
 
 signals:
 
 	void signalsCreated();
+
+public slots:
+
+	void signalParamChanged(const QString& appSignalID);
 };
 
 // ==============================================================================================

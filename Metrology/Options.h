@@ -10,8 +10,8 @@
 
 #include "../OnlineLib/SocketIO.h"
 #include "../lib/SoftwareSettings.h"
-#include "MetrologySignal.h"
 
+#include "MetrologySignal.h"
 #include "MeasureViewHeader.h"
 #include "MeasureBase.h"
 #include "MeasurePointBase.h"
@@ -776,6 +776,8 @@ const char* const		SignalInfoParam[] =
 						QT_TRANSLATE_NOOP("Options.h", "Show measuring value if signal is not valid"),
 						QT_TRANSLATE_NOOP("Options.h", "Show electric state"),
 						QT_TRANSLATE_NOOP("Options.h", "Color flag no validity"),
+						QT_TRANSLATE_NOOP("Options.h", "Color flag simulation"),
+						QT_TRANSLATE_NOOP("Options.h", "Color flag blocking"),
 						QT_TRANSLATE_NOOP("Options.h", "Color flag overflow"),
 						QT_TRANSLATE_NOOP("Options.h", "Color flag underflow"),
 						QT_TRANSLATE_NOOP("Options.h", "Time for updating state of signal (ms)"),
@@ -787,13 +789,17 @@ const int				SIO_PARAM_FONT					= 0,
 						SIO_PARAM_SHOW_NO_VALID			= 1,
 						SIO_PARAM_ELECTRIC_STATE		= 2,
 						SIO_PARAM_COLOR_FLAG_VALID		= 3,
-						SIO_PARAM_COLOR_FLAG_OVERFLOW	= 4,
-						SIO_PARAM_COLOR_FLAG_UNDERFLOW	= 5,
-						SIO_PARAM_TIME_FOR_UPDATE		= 6;
+						SIO_PARAM_COLOR_FLAG_SIM		= 4,
+						SIO_PARAM_COLOR_FLAG_LOCK		= 5,
+						SIO_PARAM_COLOR_FLAG_OVERFLOW	= 6,
+						SIO_PARAM_COLOR_FLAG_UNDERFLOW	= 7,
+						SIO_PARAM_TIME_FOR_UPDATE		= 8;
 
 // ----------------------------------------------------------------------------------------------
 
 #define					COLOR_FLAG_VALID		QColor(0xFF, 0xA0, 0xA0)
+#define					COLOR_FLAG_SIM			QColor(0x50, 0xA0, 0xFF)
+#define					COLOR_FLAG_LOCK			QColor(0xA0, 0xA0, 0xA0)
 #define					COLOR_FLAG_OVERFLOW		QColor(0xFF, 0xD0, 0xA0)
 #define					COLOR_FLAG_OVERBREAK	QColor(0xFF, 0xD0, 0xA0)
 
@@ -822,6 +828,12 @@ public:
 
 	QColor				colorFlagValid() const { return m_colorFlagValid; }
 	void				setColorFlagValid(QColor color) { m_colorFlagValid = color; }
+
+	QColor				colorFlagSim() const { return m_colorFlagSim; }
+	void				setColorFlagSim(QColor color) { m_colorFlagSim = color; }
+
+	QColor				colorFlagLock() const { return m_colorFlagLock; }
+	void				setColorFlagLock(QColor color) { m_colorFlagLock = color; }
 
 	QColor				colorFlagOverflow() const { return m_colorFlagOverflow; }
 	void				setColorFlagOverflow(QColor color) { m_colorFlagOverflow = color; }
@@ -855,6 +867,8 @@ private:
 	bool				m_showElectricState = false;
 
 	QColor				m_colorFlagValid = COLOR_FLAG_VALID;
+	QColor				m_colorFlagSim = COLOR_FLAG_SIM;
+	QColor				m_colorFlagLock = COLOR_FLAG_LOCK;
 	QColor				m_colorFlagOverflow = COLOR_FLAG_OVERFLOW;
 	QColor				m_colorFlagUnderflow = COLOR_FLAG_OVERBREAK;
 
@@ -872,8 +886,8 @@ private:
 const char* const		ComparatorInfoParam[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "Font of signal information list"),
-						QT_TRANSLATE_NOOP("Options.h", "Displaying text, if comparator has state \"logical 0\""),
-						QT_TRANSLATE_NOOP("Options.h", "Displaying text, if comparator has state \"logical 1\""),
+						QT_TRANSLATE_NOOP("Options.h", "Color, if comparator in the mode \"Simulated\""),
+						QT_TRANSLATE_NOOP("Options.h", "Color, if comparator in the mode \"Blocked\""),
 						QT_TRANSLATE_NOOP("Options.h", "Color, if comparator has state \"logical 0\""),
 						QT_TRANSLATE_NOOP("Options.h", "Color, if comparator has state \"logical 1\""),
 						QT_TRANSLATE_NOOP("Options.h", "Time for updating state of comparator (ms)"),
@@ -882,13 +896,16 @@ const char* const		ComparatorInfoParam[] =
 const int				CIO_PARAM_COUNT						= sizeof(ComparatorInfoParam)/sizeof(ComparatorInfoParam[0]);
 
 const int				CIO_PARAM_FONT						= 0,
-						CIO_PARAM_DISPLAYING_STATE_FALSE	= 1,
-						CIO_PARAM_DISPLAYING_STATE_TRUE		= 2,
+						CIO_PARAM_COLOR_FLAG_SIM			= 1,
+						CIO_PARAM_COLOR_FLAG_LOCK			= 2,
 						CIO_PARAM_COLOR_STATE_FALSE			= 3,
 						CIO_PARAM_COLOR_STATE_TRUE			= 4,
 						CIO_PARAM_TIME_FOR_UPDATE			= 5;
 
 // ----------------------------------------------------------------------------------------------
+
+#define					COLOR_COMPARATOR_FLAG_SIM			QColor(0x50, 0xA0, 0xFF)
+#define					COLOR_COMPARATOR_FLAG_LOCK			QColor(0xA0, 0xA0, 0xA0)
 
 #define					COLOR_COMPARATOR_STATE_FALSE		QColor(0xFF, 0xFF, 0xFF)
 #define					COLOR_COMPARATOR_STATE_TRUE			QColor(0xA0, 0xFF, 0xA0)
@@ -910,11 +927,11 @@ public:
 	QFont				font() const { return m_font; }
 	void				setFont(const QString& fontStr)	{ m_font.fromString(fontStr); }
 
-	QString				displayingStateFalse() const { return m_displayingStateFalse; }
-	void				setDisplayingStateFalse(const QString& state) { m_displayingStateFalse = state; }
+	QColor				colorFlagSim() const { return m_colorFlagSim; }
+	void				setColorFlagSim(QColor color) { m_colorFlagSim = color; }
 
-	QString				displayingStateTrue() const { return m_displayingStateTrue; }
-	void				setDisplayingStateTrue(const QString& state) { m_displayingStateTrue = state; }
+	QColor				colorFlagLock() const { return m_colorFlagLock; }
+	void				setColorFlagLock(QColor color) { m_colorFlagLock = color; }
 
 	QColor				colorStateFalse() const { return m_colorStateFalse; }
 	void				setColorStateFalse(QColor color) { m_colorStateFalse = color; }
@@ -938,8 +955,8 @@ private:
 
 	QFont				m_font;
 
-	QString				m_displayingStateFalse;
-	QString				m_displayingStateTrue;
+	QColor				m_colorFlagSim = COLOR_COMPARATOR_FLAG_SIM;
+	QColor				m_colorFlagLock = COLOR_COMPARATOR_FLAG_LOCK;
 
 	QColor				m_colorStateFalse = COLOR_COMPARATOR_STATE_FALSE;
 	QColor				m_colorStateTrue = COLOR_COMPARATOR_STATE_TRUE;

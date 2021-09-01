@@ -12,6 +12,7 @@
 #include <QComboBox>
 
 #include "../CommonLib/Types.h"
+
 #include "UnitsConvertor.h"
 
 // ==============================================================================================

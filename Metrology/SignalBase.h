@@ -238,6 +238,10 @@ public:
 	int						hashForRequestStateCount() const;
 	Hash					hashForRequestState(int index);
 
+	void					appendHashForRequestState(const Hash& hash);
+	void					appendHashForRequestState(const std::set<Hash>& list);
+	void					removeLastHashForRequestState(int count);
+
 	// racks for measure
 	//
 	RackBase&				racks() { return m_rackBase; }

@@ -51,6 +51,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent)
 	//
 	theSignalBase.racks().groups().load();		// load rack groups for multichannel measuring
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
+	connect(&theSignalBase, &SignalBase::signalParamChanged, &theSignalBase.tuning().signalBase(), &TuningSignalBase::signalParamChanged, Qt::QueuedConnection);
 	connect(&theSignalBase.tuning().signalBase(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
 
 	// load measurement base
@@ -638,6 +639,11 @@ void MainWindow::createPanels()
 
 		connect(this, &MainWindow::measureKindChanged, m_pComparatorInfoPanel, &PanelComparatorInfo::measureKindChanged);
 		connect(this, &MainWindow::connectionTypeChanged, m_pComparatorInfoPanel, &PanelComparatorInfo::connectionTypeChanged);
+
+		if (m_pStatisticsPanel != nullptr)
+		{
+			connect(m_pComparatorInfoPanel, &PanelComparatorInfo::updateSignalInList, m_pStatisticsPanel, &PanelStatistics::updateSignalInList, Qt::QueuedConnection);
+		}
 	}
 }
 

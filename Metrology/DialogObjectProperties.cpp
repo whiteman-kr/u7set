@@ -987,6 +987,116 @@ void DialogRackGroupProperty::onOk()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+QVariant PrComparatorListTable::data(const QModelIndex &index, int role) const
+{
+	if (index.isValid() == false)
+	{
+		return QVariant();
+	}
+
+	int row = index.row();
+	if (row < 0 || row >= count())
+	{
+		return QVariant();
+	}
+
+	int column = index.column();
+	if (column < 0 || column > m_columnCount)
+	{
+		return QVariant();
+	}
+
+	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = at(row);
+	if (comparatorEx == nullptr)
+	{
+		return QVariant();
+	}
+
+	Metrology::Signal* pInSignal = comparatorEx->inputSignal();
+	if (pInSignal == nullptr || pInSignal->param().isValid() == false)
+	{
+		return QVariant();
+	}
+
+	if (role == Qt::ForegroundRole)
+	{
+		if (comparatorEx->signalsIsValid()  == false)
+		{
+			return QColor(Qt::red);
+		}
+		else
+		{
+			if (comparatorEx->enableMeasure() == false)
+			{
+				return QColor(Qt::lightGray);
+			}
+		}
+
+		return QVariant();
+	}
+
+	if (role == Qt::BackgroundRole)
+	{
+		if (column == PR_COMPARATOR_LIST_COLUMN_SETPOINT)
+		{
+			if (comparatorEx->outputState() == true)
+			{
+				return theOptions.comparatorInfo().colorStateTrue();
+			}
+			else
+			{
+				return theOptions.comparatorInfo().colorStateFalse();
+			}
+		}
+	}
+
+	if (role == Qt::DisplayRole || role == Qt::EditRole)
+	{
+		return text(row, column, comparatorEx);
+	}
+
+	return QVariant();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString PrComparatorListTable::text(int row, int column, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const
+{
+	if (row < 0 || row >= count())
+	{
+		return QString();
+	}
+
+	if (column < 0 || column > m_columnCount)
+	{
+		return QString();
+	}
+
+	if (comparatorEx == nullptr)
+	{
+		return QString();
+	}
+
+	//
+	//
+	QString result;
+
+	switch (column)
+	{
+		case PR_COMPARATOR_LIST_COLUMN_CMP_TO:		result = comparatorEx->compareTo(Metrology::SignalIDType::CustomID);					break;
+		case PR_COMPARATOR_LIST_COLUMN_SETPOINT:	result = comparatorEx->compareOnlineValueStr(Metrology::CmpValueType::SetPoint, true);	break;
+		case PR_COMPARATOR_LIST_COLUMN_OUTPUT:		result = comparatorEx->outputSignalID(Metrology::SignalIDType::CustomID);				break;
+		default:
+			assert(0);
+	}
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 bool DialogSignalProperty::m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT] =
 {
 	true,	//	SIGNAL_PROPERTY_GROUP_ID
@@ -1036,6 +1146,41 @@ DialogSignalProperty::~DialogSignalProperty()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void DialogSignalProperty::createContextMenu()
+{
+	if (m_pComparatorView == nullptr)
+	{
+		return;
+	}
+
+	// create context menu
+	//
+	m_pContextMenu = new QMenu(tr(""), this);
+
+
+	m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
+	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+
+	m_pCopyCellAction = m_pContextMenu->addAction(tr("Copy cell"));
+	m_pCopyCellAction->setIcon(QIcon(":/icons/Copy.png"));
+
+	m_pContextMenu->addSeparator();
+
+	m_pComparatorPropertyAction = m_pContextMenu->addAction(tr("Propertу ..."));
+	m_pComparatorPropertyAction->setIcon(QIcon(":/icons/Property.png"));
+
+	connect(m_pCopyAction, &QAction::triggered, this, &DialogSignalProperty::onCopy);
+	connect(m_pCopyCellAction, &QAction::triggered, this, &DialogSignalProperty::onCopyCell);
+	connect(m_pComparatorPropertyAction, &QAction::triggered, this, &DialogSignalProperty::onComparatorProperty);
+
+	// init context menu
+	//
+	m_pComparatorView->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_pComparatorView, &QTableWidget::customContextMenuRequested, this, &DialogSignalProperty::onContextMenu);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void DialogSignalProperty::createPropertyList()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
@@ -1044,7 +1189,7 @@ void DialogSignalProperty::createPropertyList()
 
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
 	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
-	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
+	resize(static_cast<int>(screen.width() * 0.38), static_cast<int>(screen.height() * 0.25));
 	move(screen.center() - rect().center());
 
 	if (m_param.isValid() == false)
@@ -1067,6 +1212,14 @@ void DialogSignalProperty::createPropertyList()
 
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 
+	// create tab
+	//
+
+	m_pTab = new QTabWidget();
+	m_pTab->setTabPosition(QTabWidget::North);
+
+	//connect(m_pTab, &QTabWidget::currentChanged, this, &DialogSignalProperty::onPropertyType);
+
 	// create property list
 	//
 
@@ -1076,9 +1229,81 @@ void DialogSignalProperty::createPropertyList()
 	m_pFactory = new QtVariantEditorFactory;
 	m_pEditor = new QtTreePropertyBrowser;
 
+	// create compartor list
+	//
+	m_pComparatorView = new QTableView(this);
+	m_comparatorTable.setColumnCaption(DialogSignalProperty::metaObject()->className(), PR_COMPARATOR_LIST_COLUMN_COUNT, PrComparatorListColumn);
+	m_pComparatorView->setModel(&m_comparatorTable);
+
+	QSize cellSize = QFontMetrics(font()).size(Qt::TextSingleLine,"A");
+	m_pComparatorView->verticalHeader()->setDefaultSectionSize(cellSize.height());
+
+	m_pComparatorView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_pComparatorView->setWordWrap(false);
+
+	for(int column = 0; column < PR_COMPARATOR_LIST_COLUMN_COUNT; column++)
+	{
+		m_pComparatorView->setColumnWidth(column, PrComparatorListColumnWidth[column]);
+	}
+
+	createContextMenu();
+
+	// load comparators
+	//
+	std::vector<std::shared_ptr<Metrology::ComparatorEx>> comparatorList;
+
+	int comparatorCount = m_param.comparatorCount();
+	for (int c = 0; c < comparatorCount; c++)
+	{
+		std::shared_ptr<Metrology::ComparatorEx> comparatorEx = m_param.comparator(c);
+		if (comparatorEx == nullptr)
+		{
+			continue;
+		}
+
+		comparatorList.push_back(comparatorEx);
+
+		if (comparatorEx->compare().isConst() == false)
+		{
+			Metrology::Signal* pCmpSignal = comparatorEx->compareSignal();
+			if (pCmpSignal != nullptr && pCmpSignal->param().isValid() == true)
+			{
+				m_requestStateList.insert(pCmpSignal->param().hash());
+			}
+		}
+
+		if (comparatorEx->hysteresis().isConst() == false)
+		{
+			Metrology::Signal* pHysSignal = comparatorEx->hysteresisSignal();
+			if (pHysSignal != nullptr && pHysSignal->param().isValid() == true)
+			{
+				m_requestStateList.insert(pHysSignal->param().hash());
+			}
+		}
+
+		Metrology::Signal* pOutSignal = comparatorEx->outputSignal();
+		if (pOutSignal != nullptr && pOutSignal->param().isValid() == true)
+		{
+			m_requestStateList.insert(pOutSignal->param().hash());
+		}
+	}
+
+	m_comparatorTable.set(comparatorList);
+	theSignalBase.appendHashForRequestState(m_requestStateList);
+
+	// start timer for updating comparator state
+	//
+	m_updateComparatorStateTimer = new QTimer(this);
+	connect(m_updateComparatorStateTimer, &QTimer::timeout, this, &DialogSignalProperty::updateComparatorState);
+	m_updateComparatorStateTimer->start(theOptions.comparatorInfo().timeForUpdate());
+
+	// add tab items
+	//
+	m_pTab->addTab(m_pEditor, tr("Signal"));
+	m_pTab->addTab(m_pComparatorView, tr("Comparators"));
+
 	// create property groups
 	//
-
 		// id group
 
 		QtProperty* signalIdGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Signal ID"));
@@ -1310,12 +1535,14 @@ void DialogSignalProperty::createPropertyList()
 	m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 
 	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &DialogSignalProperty::onOk);
-	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &DialogSignalProperty::reject);
+	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &DialogSignalProperty::onCancel);
 
 	// add layouts
 	//
-	mainLayout->addWidget(m_pEditor);
+	mainLayout->addWidget(m_pTab);
+	//mainLayout->addWidget(m_pEditor);
 	mainLayout->addWidget(m_buttonBox);
+
 
 	setLayout(mainLayout);
 }
@@ -1433,6 +1660,67 @@ void DialogSignalProperty::onPropertyExpanded(QtBrowserItem* item)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void DialogSignalProperty::onContextMenu(QPoint)
+{
+	m_pContextMenu->exec(QCursor::pos());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogSignalProperty::onCopy()
+{
+	CopyData copyData(m_pComparatorView, false);
+	copyData.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogSignalProperty::onCopyCell()
+{
+	if (m_pComparatorView == nullptr)
+	{
+		return;
+	}
+
+	QClipboard* clipboard = QApplication::clipboard();
+	clipboard->setText(m_pComparatorView->model()->data(m_pComparatorView->currentIndex()).toString());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogSignalProperty::onComparatorProperty()
+{
+	int index = m_pComparatorView->currentIndex().row();
+	if (index < 0 || index >= m_comparatorTable.count())
+	{
+		return;
+	}
+
+	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = m_comparatorTable.at(index);
+	if (comparatorEx == nullptr)
+	{
+		return;
+	}
+
+	DialogComparatorProperty dialog(*comparatorEx, this);
+	int result = dialog.exec();
+	if (result != QDialog::Accepted)
+	{
+		return;
+	}
+
+	*comparatorEx = dialog.comparator();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogSignalProperty::updateComparatorState()
+{
+	m_comparatorTable.updateColumn(PR_COMPARATOR_LIST_COLUMN_SETPOINT);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void DialogSignalProperty::onOk()
 {
 	if (m_param.isValid() == false)
@@ -1443,7 +1731,27 @@ void DialogSignalProperty::onOk()
 
 	theSignalBase.setSignalParam(m_param.hash(), m_param);
 
+	theSignalBase.removeLastHashForRequestState(TO_INT(m_requestStateList.size()));
+
 	accept();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogSignalProperty::onCancel()
+{
+	theSignalBase.removeLastHashForRequestState(TO_INT(m_requestStateList.size()));
+
+	reject();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogSignalProperty::closeEvent(QCloseEvent* e)
+{
+	theSignalBase.removeLastHashForRequestState(TO_INT(m_requestStateList.size()));
+
+	QDialog::closeEvent(e);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

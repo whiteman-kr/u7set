@@ -1198,7 +1198,7 @@ namespace Measure
 		{
 			Hash serialNumberModuleHash = calcHash(inParam.location().moduleSerialNoID());
 			const Metrology::SignalState& signalState = theSignalBase.signalState(serialNumberModuleHash);
-			if (signalState.valid() == true)
+			if (signalState.flags().valid == true)
 			{
 				location.setModuleSerialNo(static_cast<int>(signalState.value()));
 			}
@@ -1222,7 +1222,7 @@ namespace Measure
 		// measure
 		//
 
-		setSignalValid(theSignalBase.signalState(inParam.hash()).valid());
+		setSignalValid(theSignalBase.signalState(inParam.hash()).flags().valid);
 
 		double averageElVal = 0;
 		double averageEnVal = 0;
@@ -1332,7 +1332,7 @@ namespace Measure
 		{
 			Hash serialNumberModuleHash = calcHash(inParam.location().moduleSerialNoID());
 			const Metrology::SignalState& signalState = theSignalBase.signalState(serialNumberModuleHash);
-			if (signalState.valid() == true)
+			if (signalState.flags().valid == true)
 			{
 				location.setModuleSerialNo(static_cast<int>(signalState.value()));
 			}
@@ -1357,7 +1357,7 @@ namespace Measure
 		// measure
 		//
 
-		setSignalValid(theSignalBase.signalState(outParam.hash()).valid());
+		setSignalValid(theSignalBase.signalState(outParam.hash()).flags().valid);
 
 		double averageElVal = 0;
 		double averagePhVal = 0;
@@ -1468,7 +1468,7 @@ namespace Measure
 		{
 			Hash serialNumberModuleHash = calcHash(outParam.location().moduleSerialNoID());
 			Metrology::SignalState signalState = theSignalBase.signalState(serialNumberModuleHash);
-			if (signalState.valid() == true)
+			if (signalState.flags().valid == true)
 			{
 				location.setModuleSerialNo(static_cast<int>(signalState.value()));
 			}
@@ -1493,7 +1493,7 @@ namespace Measure
 		// measure
 		//
 
-		setSignalValid(theSignalBase.signalState(outParam.hash()).valid());
+		setSignalValid(theSignalBase.signalState(outParam.hash()).flags().valid);
 
 		double averageElVal = 0;
 		double averagePhVal = 0;
@@ -2299,7 +2299,7 @@ namespace Measure
 		{
 			Hash serialNumberModuleHash = calcHash(inParam.location().moduleSerialNoID());
 			const Metrology::SignalState& signalState = theSignalBase.signalState(serialNumberModuleHash);
-			if (signalState.valid() == true)
+			if (signalState.flags().valid == true)
 			{
 				location.setModuleSerialNo(static_cast<int>(signalState.value()));
 			}
@@ -2331,7 +2331,7 @@ namespace Measure
 		// measure
 		//
 
-		setSignalValid(theSignalBase.signalState(inParam.hash()).valid());
+		setSignalValid(theSignalBase.signalState(inParam.hash()).flags().valid);
 		setSignalValid(true);
 
 		electric = ioParam.isNegativeRange() ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
@@ -2444,7 +2444,7 @@ namespace Measure
 		{
 			Hash serialNumberModuleHash = calcHash(inParam.location().moduleSerialNoID());
 			const Metrology::SignalState& signalState = theSignalBase.signalState(serialNumberModuleHash);
-			if (signalState.valid() == true)
+			if (signalState.flags().valid == true)
 			{
 				location.setModuleSerialNo(static_cast<int>(signalState.value()));
 			}
@@ -2477,7 +2477,7 @@ namespace Measure
 		// measure
 		//
 
-		setSignalValid(theSignalBase.signalState(outParam.hash()).valid());
+		setSignalValid(theSignalBase.signalState(outParam.hash()).flags().valid);
 		setSignalValid(true);
 
 		electric = ioParam.isNegativeRange() ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();

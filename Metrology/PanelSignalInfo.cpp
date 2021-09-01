@@ -103,15 +103,25 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 				return m_signalInfo.colorFlagValid();
 			}
 
-//			if (state.flags().overflow == true)
-//			{
-//				return m_signalInfo.colorFlagOverflow();
-//			}
+			if (state.flags().blocked == true)
+			{
+				return m_signalInfo.colorFlagLock();
+			}
 
-//			if (state.flags().underflow == true)
-//			{
-//				return m_signalInfo.colorFlagUnderflow();
-//			}
+			if (state.flags().simulated == true)
+			{
+				return m_signalInfo.colorFlagSim();
+			}
+
+			if (state.flags().belowLowLimit == true)
+			{
+				return m_signalInfo.colorFlagOverflow();
+			}
+
+			if (state.flags().aboveHighLimit == true)
+			{
+				return m_signalInfo.colorFlagUnderflow();
+			}
 		}
 
 		return QVariant();
@@ -401,6 +411,11 @@ void PanelSignalInfo::createHeaderContexMenu()
 
 void PanelSignalInfo::initContextMenu()
 {
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
 	// init context menu
 	//
 	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -411,6 +426,11 @@ void PanelSignalInfo::initContextMenu()
 
 void PanelSignalInfo::createContextMenu()
 {
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
 	if (m_pContextMenu != nullptr)
 	{
 		delete m_pContextMenu;

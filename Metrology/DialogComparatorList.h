@@ -2,7 +2,6 @@
 #define DIALOGCOMPARATORLIST_H
 
 #include "MetrologySignal.h"
-
 #include "DialogList.h"
 
 // ==============================================================================================

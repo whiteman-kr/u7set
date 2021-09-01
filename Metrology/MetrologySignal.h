@@ -176,6 +176,21 @@ namespace Metrology
 
 	// ==============================================================================================
 
+	enum SignalIDType
+	{
+		CustomID	= 0,
+		AppSignalID	= 1,
+		EquipmentID	= 2,
+	};
+
+	const int SignalIDTypeCount = 3;
+
+	#define ERR_SIGNAL_ID_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Metrology::SignalIDTypeCount)
+
+	QString SignalIDTypeCaption(int type);
+
+	// ==============================================================================================
+
 	class SignalParam : public ::AppSignal
 	{
 	public:
@@ -189,6 +204,8 @@ namespace Metrology
 		bool					isValid() const;
 
 		void					setParam(const ::AppSignal& signal, const SignalLocation& location);
+
+		QString					signalID(SignalIDType idType) const;
 
 		void					setAppSignalID(const QString& appSignalID);
 
@@ -313,7 +330,6 @@ namespace Metrology
 		const AppSignalStateFlags& flags() const { return m_flags; }
 		void setFlags(const AppSignalStateFlags& flags) { m_flags = flags; }
 
-		bool valid() const { return m_flags.valid; }
 		void setValid(bool valid) { m_flags.valid = valid; }
 
 	private:
@@ -348,21 +364,6 @@ namespace Metrology
 		SignalParam m_param;
 		SignalState m_state;
 	};
-
-	// ==============================================================================================
-
-	enum SignalIDType
-	{
-		CustomID	= 0,
-		AppSignalID	= 1,
-		EquipmentID	= 2,
-	};
-
-	const int SignalIDTypeCount = 3;
-
-	#define ERR_SIGNAL_ID_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Metrology::SignalIDTypeCount)
-
-	QString SignalIDTypeCaption(int type);
 
 	// ==============================================================================================
 
@@ -431,16 +432,17 @@ namespace Metrology
 		// compare Value and SignalID
 		//
 		double compareOnlineValue(int cmpValueType);
-		double compareOnlineValue(CmpValueType cmpValueType);			// current online (run time) value: return value of set point or hysteresis, depended from cmpValueType
-		QString compareOnlineValueStr(CmpValueType cmpValueType);		// current oline (run time) value - string
+		double compareOnlineValue(CmpValueType cmpValueType);					// current online (run time) value: return value of set point or hysteresis, depended from cmpValueType
+		QString compareOnlineValueStr(CmpValueType cmpValueType, bool full);	// current oline (run time) value - string
 
-		double compareConstValue() const;								// const offine value
-		QString compareDefaultValueStr(SignalIDType idType) const;		// const offine value of ID - string
+		double compareConstValue() const;										// const offine value
+		QString compareDefaultValueStr(SignalIDType idType) const;				// const offine value of ID - string
+		QString compareTo(SignalIDType idType) const;							// const or compare ID
 
 		// hysteresis Value and SignalID
 		//
-		double hysteresisOnlineValue();									// current oline (run time) value
-		QString hysteresisDefaultValueStr(SignalIDType idType) const;	// const offine value of ID - string
+		double hysteresisOnlineValue();											// current oline (run time) value
+		QString hysteresisDefaultValueStr(SignalIDType idType) const;			// const offine value of ID - string
 
 		// output Value
 		//
@@ -466,7 +468,7 @@ namespace Metrology
 		Metrology::Signal* m_hysteresisSignal = nullptr;
 		Metrology::Signal* m_outputSignal = nullptr;
 
-		DeviationType m_deviationType = DeviationType::Unused;		// for comparators Equal and NotEqual; for comparators Less and Greate deviationType = DeviationType::NoUsed
+		DeviationType m_deviationType = DeviationType::Unused;					// for comparators Equal and NotEqual; for comparators Less and Greate deviationType = DeviationType::NoUsed
 
 		double m_compareValue = 0;
 		double m_hysteresisValue = 0;

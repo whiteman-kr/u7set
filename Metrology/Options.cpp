@@ -1172,6 +1172,8 @@ void SignalInfoOption::load()
 	m_showElectricState = s.value(QString("%1ShowElectricState").arg(SIGNAL_INFO_OPTIONS_KEY), false).toBool();
 
 	m_colorFlagValid = s.value(QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_VALID.rgb()).toUInt();
+	m_colorFlagSim = s.value(QString("%1ColorFlagSim").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_SIM.rgb()).toUInt();
+	m_colorFlagLock = s.value(QString("%1ColorFlagLock").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_LOCK.rgb()).toUInt();
 	m_colorFlagOverflow = s.value(QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERFLOW.rgb()).toUInt();
 	m_colorFlagUnderflow = s.value(QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERBREAK.rgb()).toUInt();
 
@@ -1192,6 +1194,8 @@ void SignalInfoOption::save()
 	s.setValue(QString("%1ShowElectricState").arg(SIGNAL_INFO_OPTIONS_KEY), m_showElectricState);
 
 	s.setValue(QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagValid.rgb());
+	s.setValue(QString("%1ColorFlagSim").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagSim.rgb());
+	s.setValue(QString("%1ColorFlagLock").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagLock.rgb());
 	s.setValue(QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagOverflow.rgb());
 	s.setValue(QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagUnderflow.rgb());
 
@@ -1228,6 +1232,8 @@ SignalInfoOption& SignalInfoOption::operator=(const SignalInfoOption& from)
 	m_showElectricState = from.m_showElectricState;
 
 	m_colorFlagValid = from.m_colorFlagValid;
+	m_colorFlagSim = from.m_colorFlagSim;
+	m_colorFlagLock = from.m_colorFlagLock;
 	m_colorFlagOverflow = from.m_colorFlagOverflow;
 	m_colorFlagUnderflow = from.m_colorFlagUnderflow;
 
@@ -1270,8 +1276,8 @@ void ComparatorInfoOption::load()
 
 	m_font.fromString(s.value(QString("%1Font").arg(COMPARATOR_INFO_OPTIONS_KEY), "Segoe UI, 10").toString());
 
-	m_displayingStateFalse = s.value(QString("%1DisplayingStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), "False").toString();
-	m_displayingStateTrue = s.value(QString("%1DisplayingStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), "True").toString();
+	m_colorFlagSim = s.value(QString("%1ColorFlagSim").arg(COMPARATOR_INFO_OPTIONS_KEY), COLOR_COMPARATOR_FLAG_SIM.rgb()).toUInt();
+	m_colorFlagLock = s.value(QString("%1ColorFlagLock").arg(COMPARATOR_INFO_OPTIONS_KEY), COLOR_COMPARATOR_FLAG_LOCK.rgb()).toUInt();
 
 	m_colorStateFalse = s.value(QString("%1ColorStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), COLOR_COMPARATOR_STATE_FALSE.rgb()).toUInt();
 	m_colorStateTrue = s.value(QString("%1ColorStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), COLOR_COMPARATOR_STATE_TRUE.rgb()).toUInt();
@@ -1287,8 +1293,8 @@ void ComparatorInfoOption::save()
 
 	s.setValue(QString("%1Font").arg(COMPARATOR_INFO_OPTIONS_KEY), m_font.toString());
 
-	s.setValue(QString("%1DisplayingStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), m_displayingStateFalse);
-	s.setValue(QString("%1DisplayingStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), m_displayingStateTrue);
+	s.setValue(QString("%1ColorFlagSim").arg(COMPARATOR_INFO_OPTIONS_KEY), m_colorFlagSim.rgb());
+	s.setValue(QString("%1ColorFlagLock").arg(COMPARATOR_INFO_OPTIONS_KEY), m_colorFlagLock.rgb());
 
 	s.setValue(QString("%1ColorStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), m_colorStateFalse.rgb());
 	s.setValue(QString("%1ColorStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), m_colorStateTrue.rgb());
@@ -1302,8 +1308,8 @@ ComparatorInfoOption& ComparatorInfoOption::operator=(const ComparatorInfoOption
 {
 	m_font = from.m_font;
 
-	m_displayingStateFalse = from.m_displayingStateFalse;
-	m_displayingStateTrue = from.m_displayingStateTrue;
+	m_colorFlagSim = from.m_colorFlagSim;
+	m_colorFlagLock = from.m_colorFlagLock;
 
 	m_colorStateFalse = from.m_colorStateFalse;
 	m_colorStateTrue = from.m_colorStateTrue;

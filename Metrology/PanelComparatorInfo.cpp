@@ -54,6 +54,8 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
+	const Metrology::SignalState& outState = comparatorEx->outputSignal()->state();
+
 	if (role == Qt::FontRole)
 	{
 		return m_comparatorInfo.font();
@@ -61,6 +63,11 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::ForegroundRole)
 	{
+		if (outState.flags().simulated == true || outState.flags().blocked == true)
+		{
+			return QVariant();
+		}
+
 		if (comparatorEx->enableMeasure() == false)
 		{
 			return QColor(Qt::lightGray);
@@ -71,6 +78,16 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::BackgroundRole)
 	{
+		if (outState.flags().blocked == true)
+		{
+			return m_comparatorInfo.colorFlagLock();
+		}
+
+		if (outState.flags().simulated == true)
+		{
+			return m_comparatorInfo.colorFlagSim();
+		}
+
 		if (comparatorEx->outputState() == true)
 		{
 			return m_comparatorInfo.colorStateTrue();
@@ -103,15 +120,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<Metrology::ComparatorEx> compa
 		return QString();
 	}
 
-	QString stateStr;
-
-	stateStr += comparatorEx->cmpTypeStr();
-	stateStr += " ";
-	stateStr += comparatorEx->compareOnlineValueStr(Metrology::CmpValueType::SetPoint);
-	stateStr += " : ";
-	stateStr += comparatorEx->outputStateStr(m_comparatorInfo.displayingStateTrue(), m_comparatorInfo.displayingStateFalse());
-
-	return stateStr;
+	return comparatorEx->compareOnlineValueStr(Metrology::CmpValueType::SetPoint, true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -213,6 +222,11 @@ void PanelComparatorInfo::createInterface()
 
 void PanelComparatorInfo::createContextMenu()
 {
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
 	// create context menu
 	//
 	m_pContextMenu = new QMenu(tr(""), m_pComparatorInfoWindow);
@@ -528,6 +542,8 @@ void PanelComparatorInfo::onEnableMeasure()
 	}
 
 	comparatorEx->setEnableMeasure(true);
+
+	emit updateSignalInList(inParam.hash());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -559,6 +575,8 @@ void PanelComparatorInfo::onDisableMeasure()
 	}
 
 	comparatorEx->setEnableMeasure(false);
+
+	emit updateSignalInList(inParam.hash());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

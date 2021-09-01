@@ -1,11 +1,12 @@
 #pragma once
 
-#include "../CommonLib/Hash.h"
-#include "../UtilsLib/Crc.h"
-#include "MetrologySignal.h"
-
 #include <QMutex>
 #include <QVector>
+
+#include "../CommonLib/Hash.h"
+#include "../UtilsLib/Crc.h"
+
+#include "MetrologySignal.h"
 
 namespace Metrology
 {

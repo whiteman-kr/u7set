@@ -210,7 +210,7 @@ void TuningSignalBase::createSignalList()
 			continue;
 		}
 
-		append(pSignal);
+		append(*pSignal);
 	}
 
 	emit signalsCreated();
@@ -219,14 +219,9 @@ void TuningSignalBase::createSignalList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int TuningSignalBase::append(Metrology::Signal* pSignal)
+int TuningSignalBase::append(const Metrology::Signal& signal)
 {
-	if (pSignal == nullptr)
-	{
-		return -1;
-	}
-
-	Metrology::SignalParam& param = pSignal->param();
+	const Metrology::SignalParam& param = signal.param();
 	if (param.isValid() == false || param.enableTuning() == false)
 	{
 		return -1;
@@ -239,7 +234,7 @@ int TuningSignalBase::append(Metrology::Signal* pSignal)
 		return -1;
 	}
 
-	m_signalList.push_back(pSignal);
+	m_signalList.push_back(signal);
 	int index = TO_INT(m_signalList.size() - 1);
 
 	m_signalHashMap[param.hash()] = index;
@@ -249,25 +244,25 @@ int TuningSignalBase::append(Metrology::Signal* pSignal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::Signal* TuningSignalBase::signal(const Hash& hash) const
+Metrology::Signal TuningSignalBase::signal(const Hash& hash) const
 {
 	if (hash == UNDEFINED_HASH)
 	{
 		assert(hash != UNDEFINED_HASH);
-		return nullptr;
+		return Metrology::Signal();
 	}
 
 	QMutexLocker l(&m_signalMutex);
 
 	if (m_signalHashMap.contains(hash) == false)
 	{
-		return nullptr;
+		return Metrology::Signal();
 	}
 	int index = m_signalHashMap[hash];
 
 	if (index < 0 || index >= TO_INT(m_signalList.size()))
 	{
-		return nullptr;
+		return Metrology::Signal();
 	}
 
 	return m_signalList[static_cast<quint64>(index)];
@@ -275,7 +270,21 @@ Metrology::Signal* TuningSignalBase::signal(const Hash& hash) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::Signal* TuningSignalBase::signal(int index) const
+Metrology::Signal TuningSignalBase::signal(int index) const
+{
+	QMutexLocker l(&m_signalMutex);
+
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
+	{
+		return Metrology::Signal();
+	}
+
+	return m_signalList[static_cast<quint64>(index)];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+Metrology::Signal* TuningSignalBase::signalPtr(int index) const
 {
 	QMutexLocker l(&m_signalMutex);
 
@@ -284,7 +293,9 @@ Metrology::Signal* TuningSignalBase::signal(int index) const
 		return nullptr;
 	}
 
-	return m_signalList[static_cast<quint64>(index)];
+	const Metrology::Signal* pSignal = &m_signalList[static_cast<quint64>(index)];
+
+	return const_cast<Metrology::Signal*>(pSignal);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -311,13 +322,13 @@ Metrology::SignalState TuningSignalBase::state(const Hash& hash) const
 		return Metrology::SignalState();
 	}
 
-	Metrology::Signal* pSignal = m_signalList[static_cast<quint64>(index)];
-	if (pSignal == nullptr)
+	const Metrology::Signal& signal = m_signalList[static_cast<quint64>(index)];
+	if (signal.param().isValid() == false)
 	{
 		return Metrology::SignalState();
 	}
 
-	return pSignal->state();
+	return signal.state();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -344,15 +355,15 @@ void TuningSignalBase::setState(const Network::TuningSignalState& state)
 		return;
 	}
 
-	Metrology::Signal* pSignal = m_signalList[static_cast<quint64>(index)];
-	if (pSignal == nullptr)
+	Metrology::Signal& signal = m_signalList[static_cast<quint64>(index)];
+	if (signal.param().isValid() == false)
 	{
 		return;
 	}
 
-	pSignal->state().setValid(state.valid());
+	signal.state().setValid(state.valid());
 
-	pSignal->state().setValue(TuningSignalState(state).toDouble());
+	signal.state().setValue(TuningSignalState(state).toDouble());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -365,15 +376,57 @@ void TuningSignalBase::setNovalid()
 
 	for(quint64 i = 0; i < count; i++)
 	{
-		Metrology::Signal* pSignal = m_signalList[i];
-		if (pSignal == nullptr)
+		Metrology::Signal& signal = m_signalList[i];
+		if (signal.param().isValid() == false)
 		{
 			continue;
 		}
 
-		pSignal->state().setValid(false);
+		signal.state().setValid(false);
 	}
+
+	qDebug() << "TuningSignalBase::setNovalid()";
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void TuningSignalBase::signalParamChanged(const QString& appSignalID)
+{
+	if (appSignalID.isEmpty() == true)
+	{
+		assert(0);
+		return;
+	}
+
+	Hash hash = calcHash(appSignalID);
+	if (hash == UNDEFINED_HASH)
+	{
+		return;
+	}
+
+	QMutexLocker l(&m_signalMutex);
+
+	if (m_signalHashMap.contains(hash) == false)
+	{
+		return;
+	}
+
+	int index = m_signalHashMap[hash];
+
+	if (index < 0 || index >= TO_INT(m_signalList.size()))
+	{
+		return;
+	}
+
+	Metrology::Signal& signal = m_signalList[static_cast<quint64>(index)];
+	if (signal.param().isValid() == false)
+	{
+		return;
+	}
+
+	signal.setParam(theSignalBase.signalParam(hash));
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------

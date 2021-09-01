@@ -1,7 +1,6 @@
 #pragma once
 
-//#include "../lib/MetrologySignal.h"
-
+#include "MetrologyConnection.h"
 #include "DialogList.h"
 
 // ==============================================================================================

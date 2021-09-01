@@ -55,12 +55,12 @@ public:
 public:
 
 
-	QString					signalStateStr(Metrology::Signal* pSignal) const;
-	QString					text(int row, int column, Metrology::Signal* pSignal) const;
+	QString signalStateStr(Metrology::Signal* pSignal) const;
+	QString text(int row, int column, Metrology::Signal* pSignal) const;
 
 private:
 
-	QVariant				data(const QModelIndex &index, int role) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
 };
 
 // ==============================================================================================
@@ -76,52 +76,52 @@ public:
 
 private:
 
-	QMenu*					m_pSignalMenu = nullptr;
-	QMenu*					m_pEditMenu = nullptr;
-	QMenu*					m_pViewMenu = nullptr;
-	QMenu*					m_pViewTypeADMenu = nullptr;
+	QMenu* m_pSignalMenu = nullptr;
+	QMenu* m_pEditMenu = nullptr;
+	QMenu* m_pViewMenu = nullptr;
+	QMenu* m_pViewTypeADMenu = nullptr;
 
-	QAction*				m_pSetValueAction = nullptr;
+	QAction* m_pSetValueAction = nullptr;
 
-	QAction*				m_pTypeAnalogAction = nullptr;
-	QAction*				m_pTypeDiscreteAction = nullptr;
-	QAction*				m_pTypeBusAction = nullptr;
+	QAction* m_pTypeAnalogAction = nullptr;
+	QAction* m_pTypeDiscreteAction = nullptr;
+	QAction* m_pTypeBusAction = nullptr;
 
-	TuningSignalTable		m_signalTable;
+	TuningSignalTable m_signalTable;
 
-	static E::SignalType	m_typeAD;
+	static E::SignalType m_typeAD;
 
-	void					createInterface();
-	void					createContextMenu();
+	void createInterface();
+	void createContextMenu();
 
-	QTimer*					m_updateSignalStateTimer = nullptr;
-	void					startSignalStateTimer();
-	void					stopSignalStateTimer();
+	QTimer* m_updateSignalStateTimer = nullptr;
+	void startSignalStateTimer();
+	void stopSignalStateTimer();
 
 public slots:
 
 	// slots for updating source signal list
 	//
-	void					updateVisibleColunm() override;
-	void					updateList() override;
+	void updateVisibleColunm() override;
+	void updateList() override;
 
 private slots:
 
 	// slot informs that signal for measure has updated his state
 	//
-	void					updateState();
+	void updateState();
 
 	// slots of menu
 	//
-							// Signal
-							//
-	void					onProperties() override;
+		// Signal
+		//
+	void onProperties() override;
 
-							// View
-							//
-	void					showTypeAnalog();
-	void					showTypeDiscrete();
-	void					showTypeBus();
+		// View
+		//
+	void showTypeAnalog();
+	void showTypeDiscrete();
+	void showTypeBus();
 };
 
 // ==============================================================================================
@@ -137,21 +137,20 @@ public:
 
 private:
 
-	QLineEdit*				m_stateEdit = nullptr;
+	QLineEdit* m_stateEdit = nullptr;
 
-	Metrology::SignalParam	m_param;
+	Metrology::SignalParam m_param;
 
-	void					createInterface();
+	void createInterface();
 
 private slots:
 
 	// slots of buttons
 	//
-	void					onOk();		// for analog signal
+	void onOk();		// for analog signal
 
-	void					onYes();	// for discrete signal
-	void					onNo();		// for discrete signal
-
+	void onYes();		// for discrete signal
+	void onNo();		// for discrete signal
 };
 
 // ==============================================================================================

@@ -254,6 +254,24 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	QString SignalParam::signalID(SignalIDType idType) const
+	{
+		QString signalID;
+
+		switch (idType)
+		{
+			case Metrology::SignalIDType::CustomID:		signalID = customAppSignalID();	break;
+			case Metrology::SignalIDType::AppSignalID:	signalID = appSignalID();		break;
+			case Metrology::SignalIDType::EquipmentID:	signalID = equipmentID();		break;
+			default:
+				assert(0);
+		}
+
+		return signalID;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	void SignalParam::setAppSignalID(const QString& appSignalID)
 	{
 		AppSignal::setAppSignalID(appSignalID);
@@ -1223,7 +1241,7 @@ namespace Metrology
 		{
 			if (m_compareSignal != nullptr)
 			{
-				if (m_compareSignal->param().isValid() == true && m_compareSignal->state().valid() == true)
+				if (m_compareSignal->param().isValid() == true && m_compareSignal->state().flags().valid == true)
 				{
 					m_compareValue = m_compareSignal->state().value() + deviation;
 				}
@@ -1235,14 +1253,38 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString ComparatorEx::compareOnlineValueStr(CmpValueType cmpValueType)
+	QString ComparatorEx::compareOnlineValueStr(CmpValueType cmpValueType, bool full)
 	{
 		if (ERR_METROLOGY_CMP_VALUE_TYPE(cmpValueType) == true)
 		{
 			return QString();
 		}
 
-		return QString::number(compareOnlineValue(cmpValueType), 'f', valuePrecision());
+		QString compareValue = QString::number(compareOnlineValue(cmpValueType), 'f', valuePrecision());
+
+		if (compare().isConst() == false)
+		{
+			if (m_compareSignal != nullptr)
+			{
+				if (m_compareSignal->state().flags().valid == false)
+				{
+					compareValue = QString("?");
+				}
+			}
+		}
+
+		QString resultValue;
+
+		if (full == false)
+		{
+			resultValue = compareValue;
+		}
+		else
+		{
+			resultValue = cmpTypeStr() + " " + compareValue + " : " + outputStateStr();
+		}
+
+		return resultValue;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -1307,6 +1349,25 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	QString ComparatorEx::compareTo(SignalIDType idType) const
+	{
+		QString value;
+
+		if (compare().isConst() == true)
+		{
+			value = QString("const");
+		}
+		else
+		{
+			value = compareSignalID(idType);
+		}
+
+		return value;
+	}
+
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	double ComparatorEx::hysteresisOnlineValue()
 	{
 		if (hysteresis().isConst() == true)
@@ -1317,7 +1378,7 @@ namespace Metrology
 		{
 			if (m_hysteresisSignal != nullptr)
 			{
-				if (m_hysteresisSignal->param().isValid() == true && m_hysteresisSignal->state().valid() == true)
+				if (m_hysteresisSignal->param().isValid() == true && m_hysteresisSignal->state().flags().valid == true)
 				{
 					m_hysteresisValue = m_hysteresisSignal->state().value();
 				}
@@ -1366,7 +1427,7 @@ namespace Metrology
 			return false;
 		}
 
-		if (m_outputSignal->param().isValid() == false || m_outputSignal->state().valid() == false)
+		if (m_outputSignal->param().isValid() == false || m_outputSignal->state().flags().valid == false)
 		{
 			return false;
 		}

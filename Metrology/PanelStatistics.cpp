@@ -392,16 +392,16 @@ void PanelStatistics::createInterface()
 	m_pMenuBar->addMenu(m_pEditMenu);
 	m_pMenuBar->addMenu(m_pViewMenu);
 
-	connect(m_pExportAction, &QAction::triggered, this, &PanelStatistics::exportSignal);
+	connect(m_pExportAction, &QAction::triggered, this, &PanelStatistics::onExportSignal);
 
-	connect(m_pCopyAction, &QAction::triggered, this, &PanelStatistics::copy);
-	connect(m_pCopyCellAction, &QAction::triggered, this, &PanelStatistics::copyCell);
-	connect(m_pSelectAllAction, &QAction::triggered, this, &PanelStatistics::selectAll);
+	connect(m_pCopyAction, &QAction::triggered, this, &PanelStatistics::onCopy);
+	connect(m_pCopyCellAction, &QAction::triggered, this, &PanelStatistics::onCopyCell);
+	connect(m_pSelectAllAction, &QAction::triggered, this, &PanelStatistics::onSelectAll);
 	connect(m_pSignalPropertyAction, &QAction::triggered, this, &PanelStatistics::onProperty);
 
 	connect(m_pShowSearchToolBarAction, &QAction::triggered, this, &PanelStatistics::showSearchToolBar);
-	connect(m_pGotoNextNotMeasuredAction, &QAction::triggered, this, &PanelStatistics::gotoNextNotMeasured);
-	connect(m_pGotoNextInvalidAction, &QAction::triggered, this, &PanelStatistics::gotoNextInvalid);
+	connect(m_pGotoNextNotMeasuredAction, &QAction::triggered, this, &PanelStatistics::onGotoNextNotMeasured);
+	connect(m_pGotoNextInvalidAction, &QAction::triggered, this, &PanelStatistics::onGotoNextInvalid);
 
 	m_pStatisticsWindow->setMenuBar(m_pMenuBar);
 
@@ -551,8 +551,8 @@ void PanelStatistics::createContextMenu()
 	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &PanelStatistics::onContextMenu);
 
-	connect(m_pSelectSignalForMeasure, &QAction::triggered, this, &PanelStatistics::selectSignalForMeasure);
-	connect(m_pFindSignalInMeasureList, &QAction::triggered, this, &PanelStatistics::findSignalInMeasureList);
+	connect(m_pSelectSignalForMeasure, &QAction::triggered, this, &PanelStatistics::onSelectSignalForMeasure);
+	connect(m_pFindSignalInMeasureList, &QAction::triggered, this, &PanelStatistics::onFindSignalInMeasureList);
 
 	//
 	//
@@ -597,7 +597,7 @@ bool PanelStatistics::eventFilter(QObject* object, QEvent* event)
 
 		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{
-			selectSignalForMeasure();
+			onSelectSignalForMeasure();
 		}
 	}
 
@@ -964,7 +964,7 @@ int PanelStatistics::firstVisibleColumn()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelStatistics::exportSignal()
+void PanelStatistics::onExportSignal()
 {
 	ExportData* dialog = new ExportData(m_pView, false, "Statistics");
 	dialog->exec();
@@ -972,7 +972,7 @@ void PanelStatistics::exportSignal()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelStatistics::selectSignalForMeasure()
+void PanelStatistics::onSelectSignalForMeasure()
 {
 	if (m_pView == nullptr)
 	{
@@ -1186,7 +1186,7 @@ void PanelStatistics::selectSignalForMeasure()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelStatistics::findSignalInMeasureList()
+void PanelStatistics::onFindSignalInMeasureList()
 {
 	if (m_pView == nullptr)
 	{
@@ -1214,7 +1214,7 @@ void PanelStatistics::findSignalInMeasureList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelStatistics::copy()
+void PanelStatistics::onCopy()
 {
 	CopyData copyData(m_pView, false);
 	copyData.exec();
@@ -1222,7 +1222,7 @@ void PanelStatistics::copy()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelStatistics::copyCell()
+void PanelStatistics::onCopyCell()
 {
 	if (m_pView == nullptr)
 	{
@@ -1235,7 +1235,7 @@ void PanelStatistics::copyCell()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelStatistics::selectAll()
+void PanelStatistics::onSelectAll()
 {
 	if (m_pView == nullptr)
 	{
@@ -1319,7 +1319,7 @@ void PanelStatistics::showSearchToolBar()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelStatistics::gotoNextNotMeasured()
+void PanelStatistics::onGotoNextNotMeasured()
 {
 	if (m_pView == nullptr)
 	{
@@ -1361,7 +1361,7 @@ void PanelStatistics::gotoNextNotMeasured()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PanelStatistics::gotoNextInvalid()
+void PanelStatistics::onGotoNextInvalid()
 {
 	if (m_pView == nullptr)
 	{
@@ -1485,7 +1485,7 @@ void PanelStatistics::onColumnResized(int, int, int )
 
 void PanelStatistics::onListDoubleClicked(const QModelIndex&)
 {
-	selectSignalForMeasure();
+	onSelectSignalForMeasure();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

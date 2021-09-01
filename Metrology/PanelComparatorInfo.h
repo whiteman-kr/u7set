@@ -110,6 +110,10 @@ protected:
 
 	bool eventFilter(QObject* object, QEvent* event) override;
 
+signals:
+
+	void updateSignalInList(Hash signalHash);
+
 public slots:
 
 	void measureKindChanged(Measure::Kind measureKind);

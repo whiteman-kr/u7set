@@ -1,5 +1,7 @@
 #include "DialogTuningSignalList.h"
 
+#include "Options.h"
+
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -65,7 +67,7 @@ QVariant TuningSignalTable::data(const QModelIndex &index, int role) const
 	{
 		if (column == TUN_SIGNAL_LIST_COLUMN_STATE)
 		{
-			if (pSignal->state().valid() == false)
+			if (pSignal->state().flags().valid == false)
 			{
 				return theOptions.signalInfo().colorFlagValid();
 			}
@@ -141,7 +143,7 @@ QString TuningSignalTable::signalStateStr(Metrology::Signal* pSignal) const
 		return QString();
 	}
 
-	if (pSignal->state().valid() == false)
+	if (pSignal->state().flags().valid == false)
 	{
 		return qApp->translate("MetrologySignal", Metrology::SignalNoValid);
 	}
@@ -322,7 +324,7 @@ void DialogTuningSignalList::updateList()
 	int signalCount = theSignalBase.tuning().signalBase().count();
 	for(int i = 0; i < signalCount; i++)
 	{
-		Metrology::Signal* pSignal = theSignalBase.tuning().signalBase().signal(i);
+		Metrology::Signal* pSignal = theSignalBase.tuning().signalBase().signalPtr(i);
 		if (pSignal == nullptr)
 		{
 			continue;

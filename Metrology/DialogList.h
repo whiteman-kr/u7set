@@ -7,13 +7,12 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QAction>
+#include <QGroupBox>
 #include <QVBoxLayout>
 #include <QTableView>
 #include <QDialogButtonBox>
 #include <QKeyEvent>
 #include <QClipboard>
-
-#include "DialogObjectProperties.h"
 
 // ==============================================================================================
 
@@ -121,7 +120,7 @@ void ListTable<TYPE>::clear()
 template <typename TYPE>
 void ListTable<TYPE>::set(const std::vector<TYPE>& list_add)
 {
-	int itemCount = TO_INT(list_add.size());
+	int itemCount = static_cast<int>(list_add.size());
 	if (itemCount == 0)
 	{
 		return;
@@ -172,7 +171,7 @@ void ListTable<TYPE>::updateColumn(int column)
 		return;
 	}
 
-	for (int row = 0; row < m_columnCount; row ++)
+	for (int row = 0; row < m_rowCount; row ++)
 	{
 		QModelIndex cellIndex = index(row, column);
 

@@ -1819,6 +1819,52 @@ Hash SignalBase::hashForRequestState(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void SignalBase::appendHashForRequestState(const Hash& hash)
+{
+	if (hash == UNDEFINED_HASH)
+	{
+		return;
+	}
+
+	QMutexLocker l(&m_stateMutex);
+
+	m_requestStateList.push_back(hash);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalBase::appendHashForRequestState(const std::set<Hash>& list)
+{
+	for (const Hash& hash : list)
+	{
+		if (hash == UNDEFINED_HASH)
+		{
+			continue;
+		}
+
+		appendHashForRequestState(hash);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalBase::removeLastHashForRequestState(int count)
+{
+	QMutexLocker l(&m_stateMutex);
+
+	if (count >= TO_INT(m_requestStateList.size()))
+	{
+		return;
+	}
+
+	for(int i = 0; i < count; i++)
+	{
+		m_requestStateList.pop_back();
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 int SignalBase::rackForMeasureCount() const
 {
 	QMutexLocker l(&m_rackMutex);

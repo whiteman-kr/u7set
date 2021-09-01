@@ -21,8 +21,12 @@
 #include "../qtpropertybrowser/src/qtvariantproperty.h"
 #include "../qtpropertybrowser/src/qttreepropertybrowser.h"
 
+#include "MetrologySignal.h"
+#include "DialogList.h"
 #include "Options.h"
 
+// ==============================================================================================
+//
 // Project property
 //
 // ==============================================================================================
@@ -71,6 +75,8 @@ private:
 	void						createPropertyList();
 };
 
+// ==============================================================================================
+//
 // Rack property
 //
 // ==============================================================================================
@@ -125,6 +131,8 @@ private slots:
 	void						onOk();
 };
 
+// ==============================================================================================
+//
 // Rack group property
 //
 // ==============================================================================================
@@ -211,8 +219,52 @@ private slots:
 	void						onOk();
 };
 
+// ==============================================================================================
+//
 // Signal property
 //
+// ==============================================================================================
+
+const char* const				PrComparatorListColumn[] =
+{
+								QT_TRANSLATE_NOOP("DialogSignalProperty", "Compare to"),
+								QT_TRANSLATE_NOOP("DialogSignalProperty", "Set point"),
+								QT_TRANSLATE_NOOP("DialogSignalProperty", "SignalID (Discrete)"),
+};
+
+const int						PR_COMPARATOR_LIST_COLUMN_COUNT			= sizeof(PrComparatorListColumn)/sizeof(PrComparatorListColumn[0]);
+
+const int						PR_COMPARATOR_LIST_COLUMN_CMP_TO		= 0,
+								PR_COMPARATOR_LIST_COLUMN_SETPOINT		= 1,
+								PR_COMPARATOR_LIST_COLUMN_OUTPUT		= 2;
+
+const int						PrComparatorListColumnWidth[PR_COMPARATOR_LIST_COLUMN_COUNT] =
+{
+								250,	// PR_COMPARATOR_LIST_COLUMN_CMP_TO
+								150,	// PR_COMPARATOR_LIST_COLUMN_SETPOINT
+								250,	// PR_COMPARATOR_LIST_COLUMN_OUTPUT
+};
+
+// ==============================================================================================
+
+class PrComparatorListTable : public ListTable<std::shared_ptr<Metrology::ComparatorEx>>
+{
+	Q_OBJECT
+
+public:
+
+	explicit PrComparatorListTable(QObject* parent = nullptr) { Q_UNUSED(parent) }
+	virtual ~PrComparatorListTable() override {}
+
+public:
+
+	QString text(int row, int column, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const;
+
+private:
+
+	QVariant data(const QModelIndex &index, int role) const override;
+};
+
 // ==============================================================================================
 
 const char* const				SignalPropertyGroup[] =
@@ -269,16 +321,37 @@ private:
 
 	Metrology::SignalParam		m_param;
 
+	//
+	//
+	QTabWidget*					m_pTab = nullptr;
+
 	// Property list
 	//
 	QtVariantPropertyManager*	m_pManager = nullptr;
 	QtVariantEditorFactory*		m_pFactory = nullptr;
 	QtTreePropertyBrowser*		m_pEditor = nullptr;
 
+	//
+	//
+	QMenu*						m_pContextMenu = nullptr;
+	QAction*					m_pCopyAction = nullptr;
+	QAction*					m_pCopyCellAction = nullptr;
+	QAction*					m_pComparatorPropertyAction = nullptr;
+
+	QTableView*					m_pComparatorView = nullptr;
+	PrComparatorListTable		m_comparatorTable;
+	std::set<Hash>				m_requestStateList;
+
 	// buttons
 	//
 	QDialogButtonBox*			m_buttonBox = nullptr;
 
+	// timer
+	//
+	QTimer*						m_updateComparatorStateTimer = nullptr;
+
+	//
+	//
 	static bool					m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT];
 	QtBrowserItem*				m_browserItemList[SIGNAL_PROPERTY_GROUP_COUNT];
 
@@ -286,18 +359,41 @@ private:
 
 	QtProperty*					m_propertyGroupList[SIGNAL_PROPERTY_GROUP_COUNT];
 
+	void						createContextMenu();
 	void						createPropertyList();
 
 	void						updateGroupHeader(int index);
 
+protected:
+
+	void						closeEvent(QCloseEvent* e) override;
+
 private slots:
 
+	// slots of editor
+	//
 	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
 	void						onPropertyExpanded(QtBrowserItem* item);
 
+	// slots of menu
+	//
+	void						onContextMenu(QPoint);
+	void						onCopy();
+	void						onCopyCell();
+	void						onComparatorProperty();
+
+	// slots of timer
+	//
+	void						updateComparatorState();
+
+	// slots of dialog
+	//
 	void						onOk();
+	void						onCancel();
 };
 
+// ==============================================================================================
+//
 // Comparator property
 //
 // ==============================================================================================
@@ -378,6 +474,8 @@ private slots:
 	void						onOk();
 };
 
+// ==============================================================================================
+//
 // Measurement property
 //
 // ==============================================================================================

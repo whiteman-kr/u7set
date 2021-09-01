@@ -693,6 +693,16 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					appendProperty(item, page, SIO_PARAM_COLOR_FLAG_VALID);
 					colorGroup->addSubProperty(item);
 
+					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_COLOR_FLAG_SIM]));
+					item->setValue(m_options.signalInfo().colorFlagSim());
+					appendProperty(item, page, SIO_PARAM_COLOR_FLAG_SIM);
+					colorGroup->addSubProperty(item);
+
+					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_COLOR_FLAG_LOCK]));
+					item->setValue(m_options.signalInfo().colorFlagLock());
+					appendProperty(item, page, SIO_PARAM_COLOR_FLAG_LOCK);
+					colorGroup->addSubProperty(item);
+
 					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_COLOR_FLAG_OVERFLOW]));
 					item->setValue(m_options.signalInfo().colorFlagOverflow());
 					appendProperty(item, page, SIO_PARAM_COLOR_FLAG_OVERFLOW);
@@ -734,19 +744,17 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					appendProperty(item, page, CIO_PARAM_FONT);
 					fontGroup->addSubProperty(item);
 
-				QtProperty* stateGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Displaying comparator state"));
-
-					item = manager->addProperty(QVariant::String, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_DISPLAYING_STATE_FALSE]));
-					item->setValue(m_options.comparatorInfo().displayingStateFalse());
-					appendProperty(item, page, CIO_PARAM_DISPLAYING_STATE_FALSE);
-					stateGroup->addSubProperty(item);
-
-					item = manager->addProperty(QVariant::String, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_DISPLAYING_STATE_TRUE]));
-					item->setValue(m_options.comparatorInfo().displayingStateTrue());
-					appendProperty(item, page, CIO_PARAM_DISPLAYING_STATE_TRUE);
-					stateGroup->addSubProperty(item);
-
 				QtProperty* colorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Colors"));
+
+					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_COLOR_FLAG_SIM]));
+					item->setValue(m_options.comparatorInfo().colorFlagSim());
+					appendProperty(item, page, CIO_PARAM_COLOR_FLAG_SIM);
+					colorGroup->addSubProperty(item);
+
+					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_COLOR_FLAG_LOCK]));
+					item->setValue(m_options.comparatorInfo().colorFlagLock());
+					appendProperty(item, page, CIO_PARAM_COLOR_FLAG_LOCK);
+					colorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_COLOR_STATE_FALSE]));
 					item->setValue(m_options.comparatorInfo().colorStateFalse());
@@ -768,11 +776,12 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(fontGroup);
-				editor->addProperty(stateGroup);
 				editor->addProperty(colorGroup);
 				editor->addProperty(timeGroup);
 
 				expandProperty(editor, OPTION_PAGE_COMPARATOR_INFO, CIO_PARAM_FONT, false);
+				expandProperty(editor, OPTION_PAGE_COMPARATOR_INFO, CIO_PARAM_COLOR_FLAG_SIM, false);
+				expandProperty(editor, OPTION_PAGE_COMPARATOR_INFO, CIO_PARAM_COLOR_FLAG_LOCK, false);
 				expandProperty(editor, OPTION_PAGE_COMPARATOR_INFO, CIO_PARAM_COLOR_STATE_FALSE, false);
 				expandProperty(editor, OPTION_PAGE_COMPARATOR_INFO, CIO_PARAM_COLOR_STATE_TRUE, false);
 			}
@@ -1260,6 +1269,8 @@ void DialogOptions::applyProperty()
 				case SIO_PARAM_SHOW_NO_VALID:			m_options.signalInfo().setShowNoValid(value.toBool());							break;
 				case SIO_PARAM_ELECTRIC_STATE:			m_options.signalInfo().setShowElectricState(value.toBool());					break;
 				case SIO_PARAM_COLOR_FLAG_VALID:		m_options.signalInfo().setColorFlagValid(QColor(value.toString()));				break;
+				case SIO_PARAM_COLOR_FLAG_SIM:			m_options.signalInfo().setColorFlagSim(QColor(value.toString()));				break;
+				case SIO_PARAM_COLOR_FLAG_LOCK:			m_options.signalInfo().setColorFlagLock(QColor(value.toString()));				break;
 				case SIO_PARAM_COLOR_FLAG_OVERFLOW:		m_options.signalInfo().setColorFlagOverflow(QColor(value.toString()));			break;
 				case SIO_PARAM_COLOR_FLAG_UNDERFLOW:	m_options.signalInfo().setColorFlagUnderflow(QColor(value.toString()));			break;
 				case SIO_PARAM_TIME_FOR_UPDATE:			m_options.signalInfo().setTimeForUpdate(value.toInt());							break;
@@ -1274,8 +1285,8 @@ void DialogOptions::applyProperty()
 			switch(param)
 			{
 				case CIO_PARAM_FONT:					m_options.comparatorInfo().setFont(value.toString());							break;
-				case CIO_PARAM_DISPLAYING_STATE_FALSE:	m_options.comparatorInfo().setDisplayingStateFalse(value.toString());			break;
-				case CIO_PARAM_DISPLAYING_STATE_TRUE:	m_options.comparatorInfo().setDisplayingStateTrue(value.toString());			break;
+				case CIO_PARAM_COLOR_FLAG_SIM:			m_options.comparatorInfo().setColorFlagSim(QColor(value.toString()));			break;
+				case CIO_PARAM_COLOR_FLAG_LOCK:			m_options.comparatorInfo().setColorFlagLock(QColor(value.toString()));			break;
 				case CIO_PARAM_COLOR_STATE_FALSE:		m_options.comparatorInfo().setColorStateFalse(QColor(value.toString()));		break;
 				case CIO_PARAM_COLOR_STATE_TRUE:		m_options.comparatorInfo().setColorStateTrue(QColor(value.toString()));			break;
 				case CIO_PARAM_TIME_FOR_UPDATE:			m_options.comparatorInfo().setTimeForUpdate(value.toInt());						break;

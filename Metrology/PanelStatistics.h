@@ -226,22 +226,22 @@ private slots:
 	//
 		// Signal
 		//
-	void exportSignal();
-	void selectSignalForMeasure();
-	void findSignalInMeasureList();
+	void onExportSignal();
+	void onSelectSignalForMeasure();
+	void onFindSignalInMeasureList();
 
 		// Edit
 		//
-	void copy();
-	void copyCell();
-	void selectAll();
+	void onCopy();
+	void onCopyCell();
+	void onSelectAll();
 	void onProperty();
 
 		// View
 		//
 	void showSearchToolBar();
-	void gotoNextNotMeasured();
-	void gotoNextInvalid();
+	void onGotoNextNotMeasured();
+	void onGotoNextInvalid();
 
 	void onContextMenu(QPoint);
 

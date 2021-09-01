@@ -1,8 +1,8 @@
 #include "DialogComparatorList.h"
 
-#include "UnitsConvertor.h"
-
 #include "SignalBase.h"
+#include "DialogObjectProperties.h"
+#include "UnitsConvertor.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -359,7 +359,7 @@ void DialogComparatorList::updateList()
 				continue;
 			}
 
-			comparatorList.push_back(pSignal->param().comparator(c));
+			comparatorList.push_back(comparatorEx);
 		}
 	}
 
