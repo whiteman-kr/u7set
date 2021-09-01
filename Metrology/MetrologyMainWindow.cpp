@@ -246,14 +246,19 @@ void MainWindow::createActions()
 
 	// ?
 	//
+	m_pAboutQtAction = new QAction(tr("About Qt ..."), this);
+	m_pAboutQtAction->setIcon(QIcon(":/icons/About Сonnection.png"));
+	m_pAboutQtAction->setToolTip(tr("Show Qt information"));
+	connect(m_pAboutQtAction, &QAction::triggered, this, &MainWindow::aboutQt);
+
 	m_pAboutConnectionAction = new QAction(tr("About connect to server ..."), this);
 	m_pAboutConnectionAction->setIcon(QIcon(":/icons/About Сonnection.png"));
-	m_pAboutConnectionAction->setToolTip(QString());
+	m_pAboutConnectionAction->setToolTip(tr("About connect to server"));
 	connect(m_pAboutConnectionAction, &QAction::triggered, this, &MainWindow::aboutConnection);
 
 	m_pAboutAppAction = new QAction(tr("About Metrology ..."), this);
 	m_pAboutAppAction->setIcon(QIcon(":/icons/About Application.png"));
-	m_pAboutAppAction->setToolTip(QString());
+	m_pAboutAppAction->setToolTip(tr("About Metrology Application"));
 	connect(m_pAboutAppAction, &QAction::triggered, this, &MainWindow::aboutApp);
 }
 
@@ -325,6 +330,8 @@ void MainWindow::createMenu()
 	//
 	m_pInfoMenu = pMenuBar->addMenu(tr("&?"));
 
+	m_pInfoMenu->addAction(m_pAboutQtAction);
+	m_pInfoMenu->addSeparator();
 	m_pInfoMenu->addAction(m_pAboutConnectionAction);
 	m_pInfoMenu->addAction(m_pAboutAppAction);
 }
@@ -1977,6 +1984,13 @@ void MainWindow::showOptions()
 	{
 		m_pStatisticsPanel->updateList();
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::aboutQt()
+{
+	QMessageBox::aboutQt(this, qAppName());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
