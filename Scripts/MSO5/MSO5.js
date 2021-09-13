@@ -723,7 +723,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
     if (dataReceiveEnableFlag == true)
         flags |= 2;
     
-    let configFramesQuantity = 1;
+    let configFramesQuantity = 7;
     let dataFramesQuantity = 0;
 	if (txWordsCount > 0)
 	{
