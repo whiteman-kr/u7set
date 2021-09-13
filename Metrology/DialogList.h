@@ -1,5 +1,4 @@
-#ifndef DIALOGLIST_H
-#define DIALOGLIST_H
+#pragma once
 
 #include <QDebug>
 #include <QScreen>
@@ -337,4 +336,3 @@ private slots:
 
 // ==============================================================================================
 
-#endif // DIALOGLIST_H
