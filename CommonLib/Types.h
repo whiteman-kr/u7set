@@ -266,7 +266,8 @@ public:
 		Tuning = 1,
 		AppData = 2,
 		DiagData = 4,
-		AppAndDiagData = 6
+		AppAndDiagData = 6,
+		TuningAndAppAndDiagData = 7
 	};
 	Q_ENUM(LanControllerType)
 
