@@ -12,7 +12,8 @@ class OutputLog;
 
 const int ProtocolMaxVersion = 1;					// The maximum protocol version, changing it, change CONF_HEADER typedef
 
-const uint16_t ConfigurationUartId = 0x0103;
+const uint16_t ConfigurationUartMask = 0x000F;		// The least 4bit of CONF_HEADER::moduleUartId
+const uint16_t ConfigurationUartValue = 0x0003;		// The least 4bit of CONF_HEADER::moduleUartId
 
 const uint16_t IdentificationFrameIndex = 0x0000;	// Frame index for security data
 const uint16_t ConfiguartionFrameIndex = 0x0001;	// Frame index for configuration data (CONF_SERVICE_DATA)

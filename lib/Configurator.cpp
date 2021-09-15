@@ -1036,7 +1036,8 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 			throw tr("Communication error.");
 		}
 
-		if (moduleUarts.size() == 1 && moduleUarts[0] == ConfigurationUartId)
+		if (moduleUarts.size() == 1 &&
+			(moduleUarts[0] & ConfigurationUartMask) == ConfigurationUartValue)
 		{
 			throw tr("Wrong UART, use Bitstream Configuration port.");
 		}
@@ -1099,7 +1100,7 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 		{
 			// Skip configuration UART
 			//
-			if (moduleUartId == ConfigurationUartId)
+			if ((moduleUartId & ConfigurationUartMask) == ConfigurationUartValue)
 			{
 				continue;
 			}
@@ -1409,7 +1410,7 @@ void Configurator::readServiceInformationWorker(int /*param*/)
 
 				// Check if the connector in the configuartion UART
 				//
-				if (moduleUartId  != ConfigurationUartId)
+				if ((moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
 				{
 					throw tr("Wrong UART, use Service Configuration port.");
 				}
@@ -1567,6 +1568,12 @@ bool Configurator::readFirmwareWorker(std::vector<ModuleFirmwareData>* firmwareD
 			throw tr("Communication error.");
 		}
 
+		if (moduleUarts.size() == 1 &&
+			(moduleUarts[0] & ConfigurationUartMask) == ConfigurationUartValue)
+		{
+			throw tr("Wrong UART, use Bitstream Configuration port.");
+		}
+
 		//
 		// Parse PING Header Info
 		//
@@ -1628,7 +1635,7 @@ bool Configurator::readFirmwareWorker(std::vector<ModuleFirmwareData>* firmwareD
 		//
 		for (int moduleUartId : moduleUarts)
 		{
-			if (moduleUartId == ConfigurationUartId)
+			if ((moduleUartId & ConfigurationUartMask) == ConfigurationUartValue)
 			{
 				// Skip service UART
 				continue;
@@ -1868,7 +1875,7 @@ void Configurator::uploadServiceInformation(quint32 factoryNo, QDate manufacture
 
 				// Check if the connector in the configuartion UART
 				//
-				if (moduleUartId  != ConfigurationUartId)
+				if ((moduleUartId & ConfigurationUartMask) != ConfigurationUartValue)
 				{
 					throw tr("Wrong UART, use Service Configuration port.");
 				}

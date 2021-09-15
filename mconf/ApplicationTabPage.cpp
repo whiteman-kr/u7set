@@ -96,7 +96,6 @@ ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget *parent)
 
 		m_uartIdTypes[0x101] = tr("AppLogic");
 		m_uartIdTypes[0x102] = tr("Configuration");
-		m_uartIdTypes[0x103] = tr("Service");
 		m_uartIdTypes[0x104] = tr("Tuning");
 
 		pLeftLayout->addWidget(new QLabel(tr("Module UART List:")));
@@ -500,7 +499,17 @@ void ApplicationTabPage::detectUartsComplete(std::vector<int> uartIds)
 		return;
 	}
 
-	m_uartIds = uartIds;
+	if (uartIds.size() == 1 &&
+		(uartIds[0] & ConfigurationUartMask) == ConfigurationUartValue)
+	{
+		m_uartIds.clear();
+
+		QMessageBox::critical(this, qApp->applicationName(), tr("Wrong UART, use Bitstream Configuration port."));
+	}
+	else
+	{
+		m_uartIds = uartIds;
+	}
 
 	fillUartsList();
 }
@@ -573,10 +582,17 @@ void ApplicationTabPage::fillUartsList()
 
 			QString typeStr = tr("Custom");
 
-			auto typeIt = m_uartIdTypes.find(uartId);
-			if (typeIt != m_uartIdTypes.end())
+			if ((uartId & ConfigurationUartMask) == ConfigurationUartValue)
 			{
-				typeStr = typeIt->second;
+				typeStr = tr("Service");
+			}
+			else
+			{
+				auto typeIt = m_uartIdTypes.find(uartId);
+				if (typeIt != m_uartIdTypes.end())
+				{
+					typeStr = typeIt->second;
+				}
 			}
 
 			QTreeWidgetItem* item = new QTreeWidgetItem();
@@ -584,7 +600,7 @@ void ApplicationTabPage::fillUartsList()
 			item->setText(static_cast<int>(UartListColumn::Type), typeStr);
 			item->setData(static_cast<int>(UartListColumn::Id), Qt::UserRole, uartId);
 
-			if (uartId == ConfigurationUartId)
+			if ((uartId & ConfigurationUartMask) == ConfigurationUartValue)
 			{
 				item->setText(static_cast<int>(UartListColumn::Process), "N/A");
 			}
