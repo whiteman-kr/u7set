@@ -29,9 +29,6 @@ namespace VFrame30
 
 		void Ajust(QPainter* painter, double startX, double startY, double zoom) const;
 
-	public:
-		void exportToPdf(QString fileName, const Session& session, bool infoMode) const;
-
 		// Methods
 		//
 	public:

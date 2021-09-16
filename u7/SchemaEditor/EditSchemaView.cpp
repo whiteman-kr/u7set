@@ -1635,3 +1635,74 @@ bool EditSchemaView::isItemSelected(const SchemaItemPtr& item)
 	auto findResult = std::find(m_selectedItems.begin(), m_selectedItems.end(), item);
 	return findResult != m_selectedItems.end();
 }
+
+void EditSchemaView::exportToPdf(const QString& fileName, bool infoMode)
+{
+	if (schema().get() == nullptr)
+	{
+		return;
+	}
+
+	// --
+	//
+	QPdfWriter pdfWriter(fileName);
+
+	pdfWriter.setTitle(schema()->caption());
+
+	QPageSize pageSize;
+	double pageWidth = schema()->docWidth();
+	double pageHeight = schema()->docHeight();
+
+	if (schema()->unit() == SchemaUnit::Inch)
+	{
+		pageSize = QPageSize(QSizeF(pageWidth, pageHeight), QPageSize::Inch);
+	}
+	else
+	{
+		assert(schema()->unit() == SchemaUnit::Display);
+		pageSize = QPageSize(QSize(static_cast<int>(pageWidth), static_cast<int>(pageHeight)));
+
+		pdfWriter.setResolution(72);	// 72 is from enum QPageLayout::Unit help,
+										// QPageLayout::Point	1	1/!!! 72th !!!! of an inch
+	}
+
+	pdfWriter.setPageSize(pageSize);
+	pdfWriter.setPageMargins(QMarginsF(0, 0, pageWidth, pageHeight));
+
+	// --
+	//
+	QPainter p(&pdfWriter);
+	VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
+
+	drawParam.setInfoMode(infoMode);
+	drawParam.session() = session();
+	drawParam.setAppSignalController(&m_appSignalController);
+
+
+	// Calc size
+	//
+	int widthInPixel = schema()->GetDocumentWidth(p.device()->logicalDpiX(), 100.0);		// Export 100% zoom
+	int heightInPixel = schema()->GetDocumentHeight(p.device()->logicalDpiY(), 100.0);		// Export 100% zoom
+
+	// Clear device
+	//
+	p.fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
+	p.setRenderHint(QPainter::Antialiasing);
+
+	// Ajust QPainter
+	//
+	//Ajust(&p, 0, 0, 100.0);		// Export 100% zoom
+	Ajust(&p, 0, 0, 100.0);		// Export 100% zoom
+
+	// Draw Schema
+	//
+	QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
+
+	schema()->Draw(&drawParam, clipRect);
+
+	// Ending
+	//
+
+	return;
+}
+

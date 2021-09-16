@@ -82,6 +82,9 @@ public:
 	bool removeFromSelection(const SchemaItemPtr& item, bool emitSectionChanged = true);
 	bool isItemSelected(const SchemaItemPtr& item);
 
+public:
+	void exportToPdf(const QString& fileName, bool infoMode);
+
 	// Data
 	//
 private:

@@ -4442,7 +4442,7 @@ void EditSchemaWidget::exportToPdf()
 
 	qDebug() << "Export schema " << schema()->caption() << " " << schema()->schemaId() << " to PDF, " << fileName;
 
-	editSchemaView()->exportToPdf(fileName, editSchemaView()->session(), theSettings.infoMode());
+	editSchemaView()->exportToPdf(fileName, theSettings.infoMode());
 
 	return;
 }
