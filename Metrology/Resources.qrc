@@ -45,5 +45,6 @@
         <file>icons/NextFind.png</file>
         <file>icons/PreviousFind.png</file>
         <file>icons/SelectForMeasure.png</file>
+        <file>docs/Mertology_User_Manual.pdf</file>
     </qresource>
 </RCC>

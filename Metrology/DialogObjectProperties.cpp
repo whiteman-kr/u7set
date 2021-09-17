@@ -540,8 +540,6 @@ void DialogRackGroupProperty::createPropertyList()
 			item->setValue(0);
 			m_propertyMap.insert(item, channel);
 			racks->addSubProperty(item);
-
-			racks->addSubProperty(item);
 		}
 
 	m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
@@ -608,7 +606,7 @@ void DialogRackGroupProperty::updateGroupList(const Hash& hash)
 
 	for(int i = 0; i < count; i++)
 	{
-		RackGroup group = m_groupBase.group(i);
+		const RackGroup& group = m_groupBase.group(i);
 		if (group.isValid() == false)
 		{
 			continue;
@@ -658,14 +656,14 @@ void DialogRackGroupProperty::updateRackList()
 			continue;
 		}
 
-		QString rackID = group.rackID(channel);
+		const QString& rackID = group.rackID(channel);
 		if (rackID.isEmpty() == true)
 		{
 			property->setValue(0);
 			continue;
 		}
 
-		Metrology::RackParam rack = m_rackBase.rack(rackID);
+		const Metrology::RackParam& rack = m_rackBase.rack(rackID);
 		if (rack.isValid() == false)
 		{
 			property->setValue(0);

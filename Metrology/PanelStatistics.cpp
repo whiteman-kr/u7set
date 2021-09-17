@@ -1125,6 +1125,7 @@ void PanelStatistics::onSelectSignalForMeasure()
 				break;
 
 			case Measure::Kind::MultiRack:
+			case Measure::Kind::MultiRack_MC:
 
 				if (rack.index() != pSignal->param().location().rack().groupIndex())
 				{

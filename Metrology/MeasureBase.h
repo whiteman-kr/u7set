@@ -31,9 +31,10 @@ namespace Measure
 		OneRack			= 0,
 		OneModule		= 1,
 		MultiRack		= 2,
+		MultiRack_MC	= 3,
 	};
 
-	const int KindCount	= 3;
+	const int KindCount	= 4;
 
 	#define ERR_MEASURE_KIND(kind) (TO_INT(kind) < 0 || TO_INT(kind) >= Measure::KindCount)
 

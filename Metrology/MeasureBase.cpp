@@ -3457,9 +3457,10 @@ namespace Measure
 		switch (measureKind)
 		{
 
-			case Measure::Kind::OneRack:	caption = QT_TRANSLATE_NOOP("MeasureBase", " Single channel");	break;
-			case Measure::Kind::OneModule:	caption = QT_TRANSLATE_NOOP("MeasureBase", " Single module");	break;
-			case Measure::Kind::MultiRack:	caption = QT_TRANSLATE_NOOP("MeasureBase", " Multi channel");	break;
+			case Measure::Kind::OneRack:		caption = QT_TRANSLATE_NOOP("MeasureBase", " Single channel");		break;
+			case Measure::Kind::OneModule:		caption = QT_TRANSLATE_NOOP("MeasureBase", " Single module");		break;
+			case Measure::Kind::MultiRack:		caption = QT_TRANSLATE_NOOP("MeasureBase", " Multi channel");		break;
+			case Measure::Kind::MultiRack_MC:	caption = QT_TRANSLATE_NOOP("MeasureBase", " Multi channel - MC");	break;
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");

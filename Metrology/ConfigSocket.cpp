@@ -312,9 +312,10 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 				[](const Metrology::RackParam& r1, const Metrology::RackParam& r2)
 				{ return r1.caption() < r2.caption(); });
 
-
-	for(const Metrology::RackParam& rack : rackList)
+	int rackIndex = 0;
+	for(Metrology::RackParam& rack : rackList)
 	{
+		rack.setIndex(rackIndex++);
 		theSignalBase.racks().append(rack);
 	}
 

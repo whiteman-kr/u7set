@@ -490,10 +490,11 @@ void MeasureThread::run()
 			{
 				case Measure::Kind::OneRack:
 				case Measure::Kind::OneModule:
+				case Measure::Kind::MultiRack:
 					measureCompratorsInSeries();
 					break;
 
-				case Measure::Kind::MultiRack:
+				case Measure::Kind::MultiRack_MC:
 					measureCompratorsInParallel();
 					break;
 

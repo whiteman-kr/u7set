@@ -155,13 +155,9 @@ FORMS    +=
 RESOURCES += \
     Resources.qrc
 
-TRANSLATIONS = languages/Metrology_ru.ts \
-    languages/Metrology_ru.qm
-
 DISTFILES += \
     ../Proto/network.proto \
-	../Proto/serialization.proto \
-    docs/Mertology_User_Manual.pdf
+    ../Proto/serialization.proto
 
 # Add curent dir to a list of library directory paths
 #

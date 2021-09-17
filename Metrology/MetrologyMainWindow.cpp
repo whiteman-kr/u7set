@@ -852,7 +852,7 @@ void MainWindow::loadOnToolBar_MeasureKind()
 
 		for(int measureKind = 0; measureKind < Measure::KindCount; measureKind++)
 		{
-			if (measureKind == Measure::Kind::MultiRack)
+			if (measureKind == Measure::Kind::MultiRack || measureKind == Measure::Kind::MultiRack_MC)
 			{
 				if (theSignalBase.racks().groups().count() == 0)
 				{
@@ -1705,7 +1705,7 @@ void MainWindow::showRackList()
 
 	theSignalBase.initRackParam();
 
-	if (m_measureKind == Measure::Kind::MultiRack)
+	if (m_measureKind == Measure::Kind::MultiRack || m_measureKind == Measure::Kind::MultiRack_MC)
 	{
 		loadOnToolBar_Racks();
 	}
@@ -2078,7 +2078,7 @@ void MainWindow::setMeasureKind(int index)
 
 	//
 	//
-	if (m_measureKind == Measure::Kind::MultiRack)
+	if (m_measureKind == Measure::Kind::MultiRack || m_measureKind == Measure::Kind::MultiRack_MC)
 	{
 		if (theSignalBase.racks().groups().count() == 0)
 		{
