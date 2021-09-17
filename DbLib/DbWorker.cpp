@@ -380,6 +380,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0358.sql", "Upgrade to version 358, DiagDataSize field was added to LM1-SR03 and LM1-SR04 configuration i/o module frame"},
 	{":/DatabaseUpgrade/Upgrade0359.sql", "Upgrade to version 359, MSO-4 description and configuration script update"},
 	{":/DatabaseUpgrade/Upgrade0360.sql", "Upgrade to version 360, LM1-SR03 and LM1-SR04 ID changed"},
+	{":/DatabaseUpgrade/Upgrade0361.sql", "Upgrade to version 361, tconv_bo_16 and tconv_bo_32 AFB have been added to all LMs"},
 };
 
 int DbWorker::counter = 0;
