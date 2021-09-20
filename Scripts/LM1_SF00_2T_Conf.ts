@@ -748,12 +748,12 @@ function generate_lm(builder: Builder, root: ScriptDeviceObject, module: ScriptD
 	let lanFrame: number = lanConfigFrame;
 
 
-	/*if (moduleId == MODULEID_LM1_SR05) {
+	if (moduleId == MODULEID_LM1_SR05) {
 		
 		// Tuning Controller is in LAN 2 and LAN 3
 
 	}
-	else */{
+	else {
 
 		// Tuning
 		//
@@ -843,14 +843,14 @@ function generate_lm(builder: Builder, root: ScriptDeviceObject, module: ScriptD
 
 		confFirmware.writeLog("    Ethernet Controller " + module.equipmentId + ethernetcontrollerId + "\r\n");
 
-		/*if (moduleId == MODULEID_LM1_SR05) {
+		if (moduleId == MODULEID_LM1_SR05) {
 
 			// Tuning Controller is in LAN 2 and LAN 3
 
 			if (fillLanServiceData(confFirmware, SoftwareType.TuningService, root, module, ethernetcontrollerId, tuningLan, log) == false) {
 				return false;
 			}
-		}*/
+		}
 
 		if (fillLanServiceData(confFirmware, SoftwareType.AppDataService, root, module, ethernetcontrollerId, appLan, log) == false) {
 			return false;
@@ -860,7 +860,7 @@ function generate_lm(builder: Builder, root: ScriptDeviceObject, module: ScriptD
 			return false;
 		}
 
-		/*if (moduleId == MODULEID_LM1_SR05) {
+		if (moduleId == MODULEID_LM1_SR05) {
 
 			let lans: LanConfig[] = [];
 			lans.push(appLan);
@@ -871,7 +871,7 @@ function generate_lm(builder: Builder, root: ScriptDeviceObject, module: ScriptD
 				return false;
 			}
 		}
-		else */{
+		else {
 			if (generate_LANConfiguration_v1(confFirmware, lanFrame, module, ethernetcontrollerId, appLan, diagLan, log) == false) {
 				return false;
 			}

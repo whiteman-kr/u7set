@@ -275,10 +275,10 @@ function generate_lm(builder, root, module, confFirmware, log, signalSet, subsys
     const MODULEID_LM1_SF01 = 0x1101;
     const MODULEID_LM1_SR01 = 0x11A0;
     const MODULEID_LM1_SR02 = 0x11A1;
-    const MODULEID_LM1_SR03_OLD = 0x11A2;
-    const MODULEID_LM1_SR04_OLD = 0x11B0;
-    const MODULEID_LM1_SR03 = 0x11A3; // Was 0x11A2 (MODULEID_LM1_SR03_OLD) before 25.08.2021
-    const MODULEID_LM1_SR04 = 0x11B2; // Was 0x11B0 (MODULEID_LM1_SR04_OLD) before 25.08.2021
+    const MODULEID_LM1_SR03 = 0x11A2;
+    const MODULEID_LM1_SR04 = 0x11B0;
+    const MODULEID_LM1_SR20 = 0x11A3;
+    const MODULEID_LM1_SR05 = 0x11B2;
     const MODULEID_LM8_SR10 = 0x11D0;
     // Variables
     //
@@ -437,8 +437,8 @@ function generate_lm(builder, root, module, confFirmware, log, signalSet, subsys
             log.errCFG3000("TxDiagDataSize", ioEquipmentID);
             return false;
         }
-        if (moduleId == MODULEID_LM1_SR03 ||
-            moduleId == MODULEID_LM1_SR04 ||
+        if (moduleId == MODULEID_LM1_SR20 ||
+            moduleId == MODULEID_LM1_SR05 ||
             moduleId == MODULEID_LM8_SR10) {
             if ((diagWordsIoCount & 1) != 0) {
                 diagWordsIoCount++; // Align to word
@@ -458,10 +458,12 @@ function generate_lm(builder, root, module, confFirmware, log, signalSet, subsys
     //
     confFirmware.writeLog("Writing LAN configuration.\r\n");
     let lanFrame = lanConfigFrame;
-    if (moduleId == MODULEID_LM1_SR04) {
+    /*if (moduleId == MODULEID_LM1_SR05) {
+        
         // Tuning Controller is in LAN 2 and LAN 3
+
     }
-    else {
+    else */ {
         // Tuning
         //
         let tuningLan = {
@@ -532,28 +534,32 @@ function generate_lm(builder, root, module, confFirmware, log, signalSet, subsys
         }
         let ethernetcontrollerId = "_ETHERNET0" + (i + 2);
         confFirmware.writeLog("    Ethernet Controller " + module.equipmentId + ethernetcontrollerId + "\r\n");
-        if (moduleId == MODULEID_LM1_SR04) {
+        /*if (moduleId == MODULEID_LM1_SR05) {
+
             // Tuning Controller is in LAN 2 and LAN 3
+
             if (fillLanServiceData(confFirmware, SoftwareType.TuningService, root, module, ethernetcontrollerId, tuningLan, log) == false) {
                 return false;
             }
-        }
+        }*/
         if (fillLanServiceData(confFirmware, SoftwareType.AppDataService, root, module, ethernetcontrollerId, appLan, log) == false) {
             return false;
         }
         if (fillLanServiceData(confFirmware, SoftwareType.DiagDataService, root, module, ethernetcontrollerId, diagLan, log) == false) {
             return false;
         }
-        if (moduleId == MODULEID_LM1_SR04) {
-            let lans = [];
+        /*if (moduleId == MODULEID_LM1_SR05) {
+
+            let lans: LanConfig[] = [];
             lans.push(appLan);
             lans.push(diagLan);
             lans.push(tuningLan);
+
             if (generate_LANConfiguration_v2(confFirmware, lanFrame, module, ethernetcontrollerId, lans, log) == false) {
                 return false;
             }
         }
-        else {
+        else */ {
             if (generate_LANConfiguration_v1(confFirmware, lanFrame, module, ethernetcontrollerId, appLan, diagLan, log) == false) {
                 return false;
             }
