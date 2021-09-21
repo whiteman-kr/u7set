@@ -297,7 +297,8 @@ AppSignalFlagsWidget::AppSignalFlagsWidget(QWidget* parent)
 			QStringLiteral("LOCK"),
 			QStringLiteral("MISMATCH"),
 			QStringLiteral("HIGH"),
-			QStringLiteral("LOW")
+			QStringLiteral("LOW"),
+			QStringLiteral("SW.SIM"),
 		};
 
 	m_flagTooltips =
@@ -309,6 +310,7 @@ AppSignalFlagsWidget::AppSignalFlagsWidget(QWidget* parent)
 			QStringLiteral("Signal is Mismatched\n\nSet to 1 when mismatch signal is set to 1 (see AFB mismatch),\notherwise set to 0. If no mismatch signal exists, also set to 0."),
 			QStringLiteral("Signal Value is High\n\nSet to 1 when signal value is greater than\nHighEngineeringUnits limit, otherwise set to 0."),
 			QStringLiteral("Signal Value is Low\n\nSet to 1 when signal value is less than\nLowEngineeringUnits limit, otherwise set to 0."),
+			QStringLiteral("Signal Value simulated by software."),
 		};
 
 }
@@ -378,6 +380,10 @@ bool AppSignalFlagsWidget::flagState(int flagNo, bool* const flagValid, bool* co
 
 	case AppSignalFlagsFields::BelowLowLimit:
 		*flagValue = m_flags.belowLowLimit;
+		break;
+
+	case AppSignalFlagsFields::SwSimulated:
+		*flagValue = m_flags.swSimulated;
 		break;
 
 	default:
