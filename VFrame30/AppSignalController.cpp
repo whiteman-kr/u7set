@@ -278,4 +278,19 @@ namespace VFrame30
 					false;
 	}
 
+	int ScriptAppSignalController::precision(QString signalId) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(m_appSignalManager);
+			return {};
+		}
+
+		bool ok = false;
+
+		AppSignalParam asp = m_appSignalManager->signalParam(::calcHash(signalId), &ok);
+
+		return (ok == true && asp.isAnalog() == true) ? asp.precision() : 0;
+	}
+
 }

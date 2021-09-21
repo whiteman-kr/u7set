@@ -131,6 +131,9 @@ namespace VFrame30
 		/// \brief Returns <b>true</b> for analog signals.
 		bool isAnalog(QString signalId) const;
 
+		/// \brief Returns precision for analog signals. If signal is discrete or not found, returns 0.
+		int precision(QString signalId) const;
+
 		// Data
 		//
 	private:
