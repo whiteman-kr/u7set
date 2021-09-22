@@ -236,7 +236,7 @@ namespace VFrame30
 
 		if (m_svgRenderer.has_value() == false)
 		{
-			QByteArray data = m_svgData.toLocal8Bit();
+			QByteArray data = m_svgData.toUtf8();
 			m_svgRenderer.emplace(data);
 		}
 
