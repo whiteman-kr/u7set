@@ -686,7 +686,7 @@ bool ExportData::saveExcelFile(const QString& fileName)
 			continue;
 		}
 
-		helper.setCellValue(1, column, m_pView->model()->headerData(column, Qt::Horizontal).toString().toLocal8Bit());
+		helper.setCellValue(1, column, m_pView->model()->headerData(column, Qt::Horizontal).toString().toUtf8());
 	}
 
 	int rowCount = m_pView->model()->rowCount();
@@ -708,7 +708,7 @@ bool ExportData::saveExcelFile(const QString& fileName)
 				continue;
 			}
 
-			helper.setCellValue(row + 2, column, m_pView->model()->data(m_pView->model()->index(row, column)).toString().toLocal8Bit());
+			helper.setCellValue(row + 2, column, m_pView->model()->data(m_pView->model()->index(row, column)).toString().toUtf8());
 		}
 
 		setValue(row);
@@ -758,7 +758,7 @@ bool ExportData::saveCsvFile(const QString &fileName)
 			}
 		}
 
-		file.write(m_pView->model()->headerData(column, Qt::Horizontal).toString().toLocal8Bit());
+		file.write(m_pView->model()->headerData(column, Qt::Horizontal).toString().toUtf8());
 		file.write(";");
 	}
 
@@ -785,7 +785,7 @@ bool ExportData::saveCsvFile(const QString &fileName)
 				}
 			}
 
-			file.write(m_pView->model()->data(m_pView->model()->index(row, column)).toString().toLocal8Bit());
+			file.write(m_pView->model()->data(m_pView->model()->index(row, column)).toString().toUtf8());
 			file.write(";");
 		}
 

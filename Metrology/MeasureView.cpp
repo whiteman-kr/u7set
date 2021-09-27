@@ -157,6 +157,9 @@ namespace Measure
 					}
 
 					break;
+
+				default:
+					assert(0);
 			}
 
 			return theOptions.measureView().font();
@@ -181,7 +184,31 @@ namespace Measure
 
 		if (role == Qt::BackgroundRole)
 		{
-			return backgroundColor(rowIndex, columnIndex, pMeasurement);
+			switch(m_measureType)
+			{
+				case Measure::Type::Linearity:
+
+					if (columnIndex == MVC_CMN_L_ERROR_RESULT)
+					{
+						return backgroundColor(pMeasurement);
+					}
+
+					break;
+
+				case Measure::Type::Comparators:
+
+					if (columnIndex == MVC_CMN_C_ERROR_RESULT)
+					{
+						return backgroundColor(pMeasurement);
+					}
+
+					break;
+
+				default:
+					assert(0);
+			}
+
+			return QVariant();
 		}
 
 		if (role == Qt::DisplayRole || role == Qt::EditRole)
@@ -194,96 +221,32 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QColor Model::backgroundColor(int row, int column, Measure::Item* pMeasurement) const
+	QColor Model::backgroundColor(Measure::Item* pMeasurement) const
 	{
-		if (row < 0 || row >= TO_INT(m_measureCount))
+		if (ERR_MEASURE_TYPE(m_measureType) == true)
 		{
-			return Qt::white;
-		}
-
-		if (column < 0 || column > m_header.count())
-		{
-			return Qt::white;
+			return theOptions.measureView().colorErrorLimit();
 		}
 
 		if (pMeasurement == nullptr)
 		{
-			return Qt::white;
+			return theOptions.measureView().colorErrorLimit();
 		}
 
-		QColor result = Qt::white;
-
-		switch(m_measureType)
+		if (theOptions.measureView().showNoValid() == false)
 		{
-			case Measure::Type::Linearity:
-				{
-					if (column != MVC_CMN_L_ERROR_RESULT)
-					{
-						break;
-					}
-
-					Measure::LinearityItem* pLinearityMeasurement = static_cast<Measure::LinearityItem*> (pMeasurement);
-					if (pLinearityMeasurement == nullptr)
-					{
-						break;
-					}
-
-					if (theOptions.measureView().showNoValid() == false)
-					{
-						if (pLinearityMeasurement->isSignalValid() == false)
-						{
-							result = theOptions.measureView().colorErrorLimit();
-							break;
-						}
-					}
-
-					if (pLinearityMeasurement->errorResult(m_measureType) != Measure::ErrorResult::Ok)
-					{
-						result = theOptions.measureView().colorErrorLimit();
-						break;
-					}
-
-					result = theOptions.measureView().colorNotError();
-				}
-				break;
-
-			case Measure::Type::Comparators:
-				{
-					if (column != MVC_CMN_C_ERROR_RESULT)
-					{
-						break;
-					}
-
-					Measure::ComparatorItem* pComparatorMeasurement = static_cast<Measure::ComparatorItem*> (pMeasurement);
-					if (pComparatorMeasurement == nullptr)
-					{
-						break;
-					}
-
-					if (theOptions.measureView().showNoValid() == false)
-					{
-						if (pComparatorMeasurement->isSignalValid() == false)
-						{
-							result = theOptions.measureView().colorErrorLimit();
-							break;
-						}
-					}
-
-					if (pComparatorMeasurement->errorResult(m_measureType) != Measure::ErrorResult::Ok)
-					{
-						result = theOptions.measureView().colorErrorLimit();
-						break;
-					}
-
-					result = theOptions.measureView().colorNotError();
-				}
-				break;
-
-			default:
-				assert(0);
+			if (pMeasurement->isSignalValid() == false)
+			{
+				return theOptions.measureView().colorErrorLimit();
+			}
 		}
 
-		return result;
+		if (pMeasurement->errorResult(m_measureType) != Measure::ErrorResult::Ok)
+		{
+			return theOptions.measureView().colorErrorLimit();
+		}
+
+		return theOptions.measureView().colorNotError();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -316,6 +279,7 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		result = textLinearity(row, column, pMeasurement);	break;
 			case Measure::Type::Comparators:	result = textComparator(row, column, pMeasurement);	break;
+
 			default:
 				result.clear();
 		}

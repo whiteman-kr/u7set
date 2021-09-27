@@ -1661,6 +1661,14 @@ void MainWindow::onMeasureProperty()
 	}
 
 	pView->onProperty();
+
+	if (m_pStatisticsPanel == nullptr)
+	{
+		assert(m_pStatisticsPanel);
+		return;
+	}
+
+	m_pStatisticsPanel->updateList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1982,7 +1990,6 @@ void MainWindow::showOptions()
 		m_pComparatorInfoPanel->setComparatorInfo(theOptions.comparatorInfo());
 	}
 
-
 	// if changed error type or limitType
 	//
 	if (	options.linearity().errorType() != theOptions.linearity().errorType() ||
@@ -1992,6 +1999,49 @@ void MainWindow::showOptions()
 	{
 		m_pStatisticsPanel->updateList();
 	}
+
+	// load database of measurements
+	//
+	//	if (options.database().locationPath() != theOptions.database().locationPath())
+	//	{
+	//		for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
+	//		{
+	//			Measure::View* pView = measureView(static_cast<Measure::Type>(measureType));
+	//			if (pView == nullptr)
+	//			{
+	//				continue;
+	//			}
+
+	//			pView->measureModel().clear();
+	//		}
+
+	//		m_measureBase.clear();
+
+	//		theDatabase.close();
+
+	//		theDatabase.setDatabaseOption(theOptions.database());
+	//		bool result = theDatabase.open();
+
+	//		if (result == true )
+	//		{
+	//			theOptions.linearity().points().load();
+
+	//			for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
+	//			{
+	//				Measure::Type mesaure_Type = static_cast<Measure::Type>(measureType);
+
+	//				m_measureBase.load(mesaure_Type);
+
+	//				Measure::View* pView = measureView(mesaure_Type);
+	//				if (pView == nullptr)
+	//				{
+	//					continue;
+	//				}
+
+	//				pView->loadMeasurements(m_measureBase);
+	//			}
+	//		}
+	//	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

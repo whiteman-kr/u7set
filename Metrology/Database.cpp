@@ -1426,7 +1426,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 						break;
 					}
 
-					query.bindValue(field++, group->Index());
+					query.bindValue(field++, group->index());
 					query.bindValue(field++, group->caption());
 
 					query.bindValue(field++, group->rackID(Metrology::Channel_0));
