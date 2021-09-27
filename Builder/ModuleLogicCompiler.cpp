@@ -4940,6 +4940,8 @@ namespace Builder
 			if (s->isAcquired() == true &&
 				s->isAnalog() == true &&
 				s->isBusChild() == true &&
+				s->isFrombusConversionRequired() == false &&	// if isFrombusConversionRequired() == true,
+																// this signal acquire as Internal Analog (after frombus conversion)
 				s->isConst() == false &&
 				s->anyParentBusIsAcquired() == false)
 			{

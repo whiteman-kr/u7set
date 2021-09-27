@@ -1875,13 +1875,17 @@ namespace Builder
 		return m_ualAddr.isValid();
 	}
 
-	bool UalSignal::setRegBufAddr(Address16 regBufAddr)
+	bool UalSignal::setRegBufAddr(Address16 regBufAddr, QString* err)
 	{
 		assert(regBufAddr.isValid() == true);
 
 		if (m_regBufAddr.isValid() == true)
 		{
-			assert(false);				// m_regBufAddr is already set
+			if (err != nullptr)
+			{
+				*err = QString("RegBufAddr already set for signal %1").arg(appSignalID());
+			}
+
 			return false;
 		}
 
@@ -1940,7 +1944,7 @@ namespace Builder
 
 			addr.addBit(busBitAddr + busSignalBitAddr);
 
-			result &= childSignal->setRegBufAddr(addr);
+			result &= childSignal->setRegBufAddr(addr, err);
 		}
 
 		return result;

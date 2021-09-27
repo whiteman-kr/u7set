@@ -679,11 +679,21 @@ namespace Builder
 				ualSignal->setUalAddr(addr);
 			}
 
-			bool res = ualSignal->setRegBufAddr(addr);
+			QString err;
+
+			bool res = ualSignal->setRegBufAddr(addr, &err);
 
 			if (res == false)
 			{
-				LOG_INTERNAL_ERROR(m_log);
+				if (err.isEmpty() == true)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+				}
+				else
+				{
+					LOG_INTERNAL_ERROR_MSG(m_log, QString("Error setRegBufAddr: %1").arg(err));
+				}
+
 				result = false;
 			}
 
@@ -724,7 +734,9 @@ namespace Builder
 
 			Address16 addr = addrOfConst;
 
-			ualSignal->setRegBufAddr(addr);
+			QString err;
+
+			result &= ualSignal->setRegBufAddr(addr, &err);
 
 			addr.addWord(-m_appWordAdressed.memory.startAddress());			// minus is OK!
 
@@ -883,7 +895,9 @@ namespace Builder
 
 			m_appWordAdressed.acquiredDiscreteConstSignals.appendUalRefSignals(addr, ualSignal, true);
 
-			ualSignal->setRegBufAddr(addr);
+			QString err;
+
+			result &= ualSignal->setRegBufAddr(addr, &err);
 
 			addr.addWord(-m_appWordAdressed.memory.startAddress());			// minus is OK!
 

@@ -467,7 +467,7 @@ namespace Builder
 		bool checkUalAddr() const;
 
 		Address16 regBufAddr() const { return m_regBufAddr; }
-		bool setRegBufAddr(Address16 regBufAddr);
+		bool setRegBufAddr(Address16 regBufAddr, QString* err);
 
 		bool checkRegBufAddr() const;
 
