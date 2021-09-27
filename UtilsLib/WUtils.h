@@ -153,3 +153,21 @@ inline quint16 __checkAndCastToQuint16(int value)
 
 bool partitionOfInteger(int number, const std::vector<int>& availableParts, std::vector<int>* resultPartition);
 bool partitionOfInteger(int number, const QVector<int>& availableParts, QVector<int>* partition);
+
+template <class T>
+	std::enable_if_t<std::is_same<T, float>::value, bool>	// check that T is type of float
+isFloatEquals(T v1, T v2)
+{
+	return std::nextafter(v1, std::numeric_limits<float>::lowest()) <= v2 &&
+							std::nextafter(v1, std::numeric_limits<float>::max()) >= v2;
+}
+
+template <class T>
+	std::enable_if_t<std::is_same<T, double>::value, bool>	// check that T is type of double
+isDoubleEquals(T v1, T v2)
+{
+	return std::nextafter(v1, std::numeric_limits<double>::lowest()) <= v2 &&
+							std::nextafter(v1, std::numeric_limits<double_t>::max()) >= v2;
+}
+
+

@@ -50,7 +50,7 @@ namespace Builder
 
 	E::AnalogAppSignalFormat JsBusSignal::propAnalogFormat() const
 	{
-		return m_signal->analogFormat;
+		return m_signal->inOutAnalogFormat;
 	}
 
 	E::DataFormat JsBusSignal::propDataFormat() const

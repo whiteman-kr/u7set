@@ -246,10 +246,10 @@ namespace Builder
 		m_appBitAdressed.memory.lock();
 
 		m_appBitAdressed.bitAccumulator.setStartAddress(appLogicBitData.startAddress());
-		m_appBitAdressed.bitAccumulator.setSizeW(2);        // bit accumulator has 2 word (32bit) size
+		m_appBitAdressed.bitAccumulator.setSizeW(BIT_ACCUMULATOR_SIZE_W);        // bit accumulator has 2 word (32bit) size
 
 		m_appBitAdressed.constBits.setStartAddress(appLogicBitData.startAddress());
-		m_appBitAdressed.constBits.setSizeW(2);				// const bits: bit 0 == 0, bit 1 == 1
+		m_appBitAdressed.constBits.setSizeW(1);				// const bits: bit 0 == 0, bit 1 == 1
 
 		m_appBitAdressed.acquiredDiscreteOutputSignals.setStartAddress(appLogicBitData.startAddress());
 		m_appBitAdressed.acquiredDiscreteInternalSignals.setStartAddress(appLogicBitData.startAddress());
@@ -299,7 +299,7 @@ namespace Builder
 		m_appWordAdressed.nonAcquiredInternalBuses.setStartAddress(appLogicWordData.startAddress());
 
 		m_appWordAdressed.wordAccumulator.setStartAddress(appLogicWordData.startAddress());
-		m_appWordAdressed.wordAccumulator.setSizeW(2);        // word accumulator has 2 word size
+		m_appWordAdressed.wordAccumulator.setSizeW(WORD_ACCUMULATOR_SIZE_W);        // word accumulator has 2 word size
 
 		return recalculateAddresses();
 	}
@@ -309,7 +309,7 @@ namespace Builder
 		// recalc application bit-addressed memory mapping
 		//
 		m_appBitAdressed.bitAccumulator.setStartAddress(m_appBitAdressed.memory.startAddress());
-		m_appBitAdressed.bitAccumulator.setSizeW(2);			// bit accumulator 32 bit size
+		m_appBitAdressed.bitAccumulator.setSizeW(BIT_ACCUMULATOR_SIZE_W);			// bit accumulator 32 bit size
 
 		m_appBitAdressed.constBits.setStartAddress(m_appBitAdressed.bitAccumulator.nextAddress());
 		m_appBitAdressed.constBits.setSizeW(1);					// const bits: bit 0 == 0, bit 1 == 1
@@ -375,7 +375,7 @@ namespace Builder
 		m_appWordAdressed.nonAcquiredInternalBuses.setStartAddress(m_appWordAdressed.nonAcquiredOutputBuses.nextAddress());
 
 		m_appWordAdressed.wordAccumulator.setStartAddress(m_appWordAdressed.nonAcquiredInternalBuses.nextAddress());
-		m_appWordAdressed.wordAccumulator.setSizeW(2);
+		m_appWordAdressed.wordAccumulator.setSizeW(WORD_ACCUMULATOR_SIZE_W);
 
 		m_appWordAdressed.analogAndBusSignalsHeap.setStartAddress(m_appWordAdressed.wordAccumulator.nextAddress());
 
@@ -679,21 +679,11 @@ namespace Builder
 				ualSignal->setUalAddr(addr);
 			}
 
-			QString err;
-
-			bool res = ualSignal->setRegBufAddr(addr, &err);
+			bool res = ualSignal->setRegBufAddr(addr);
 
 			if (res == false)
 			{
-				if (err.isEmpty() == true)
-				{
-					LOG_INTERNAL_ERROR(m_log);
-				}
-				else
-				{
-					LOG_INTERNAL_ERROR_MSG(m_log, QString("Error setRegBufAddr: %1").arg(err));
-				}
-
+				LOG_INTERNAL_ERROR(m_log);
 				result = false;
 			}
 
@@ -734,9 +724,7 @@ namespace Builder
 
 			Address16 addr = addrOfConst;
 
-			QString err;
-
-			result &= ualSignal->setRegBufAddr(addr, &err);
+			ualSignal->setRegBufAddr(addr);
 
 			addr.addWord(-m_appWordAdressed.memory.startAddress());			// minus is OK!
 
@@ -895,9 +883,7 @@ namespace Builder
 
 			m_appWordAdressed.acquiredDiscreteConstSignals.appendUalRefSignals(addr, ualSignal, true);
 
-			QString err;
-
-			result &= ualSignal->setRegBufAddr(addr, &err);
+			ualSignal->setRegBufAddr(addr);
 
 			addr.addWord(-m_appWordAdressed.memory.startAddress());			// minus is OK!
 

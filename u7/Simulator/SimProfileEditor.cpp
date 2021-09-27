@@ -15,7 +15,7 @@ R"(// Syntaxis:
 //
 
 //
-// Profile example to set communiaction of IDE Simulator and AppDataService and TuningService on localhost
+// Profile example to set communication of IDE Simulator and AppDataService and TuningService on localhost
 //
 [Local]
 

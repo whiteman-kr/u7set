@@ -479,11 +479,94 @@ namespace Busses
 	inline const QString MACRO_BUS_CAPTION("$(BusCaption)");
 }
 
-namespace MuxPin
+namespace Afb
 {
-	inline const QString SELECT("i_sel");
-	inline const QString X1("i_x1_data");
-	inline const QString X2("i_x2_data");
-	inline const QString OUTPUT("o_result");
+	//
+
+	inline const QString SCALE("SCALE");
+
+	inline const QString SCALE_PIN_CONF("i_conf");
+	inline const QString SCALE_PIN_K1("i_scal_k1_coef");
+	inline const QString SCALE_PIN_K2("i_scal_k2_coef");
+	inline const QString SCALE_PIN_X_UI("i_ui_data");
+	inline const QString SCALE_PIN_X_SI_FP("i_si_fp_data");
+	inline const QString SCALE_PIN_Y_UI("i_ui_data");
+	inline const QString SCALE_PIN_Y_SI_FP("i_si_fp_data");
+
+	inline const QString SCALE_SI32_SI32("scale_si_si");
+	inline const QString SCALE_SI32_FP32("scale_si_fp");
+	inline const QString SCALE_SI32_UI16("scale_si_16ui");
+
+	inline const QString SCALE_FP32_SI32("scale_fp_si");
+	inline const QString SCALE_FP32_FP32("scale_fp_fp");
+	inline const QString SCALE_FP32_UI16("scale_fp_16ui");
+
+	inline const QString SCALE_UI16_SI32("scale_16ui_si");
+	inline const QString SCALE_UI16_FP32("scale_16ui_fp");
+	inline const QString SCALE_UI16_UI16("scale_16ui_16ui");
+
+	inline const QString SCALE_PARAM_X1("X1");
+	inline const QString SCALE_PARAM_X2("X2");
+	inline const QString SCALE_PARAM_Y1("Y1");
+	inline const QString SCALE_PARAM_Y2("Y2");
+
+	//
+
+	inline const QString TCONV_SI32_FP32("tconv_si_fp");
+	inline const QString TCONV_FP32_SI32("tconv_fp_si");
+
+	inline const QString TCONV_BO_16("tconv_bo_16");
+	inline const QString TCONV_BO_32("tconv_bo_32");
+
+	inline const QString TCONV_SI16_SI32("tconv_si16_si32");
+	inline const QString TCONV_UI16_SI32("tconv_ui16_si32");
+
+	//
+
+	inline const QString SWITCH_SI("switch_si");
+
+	inline const QString SWITCH_SI_PIN_SELECT("i_sel");
+	inline const QString SWITCH_SI_PIN_X1("i_x1_data");
+	inline const QString SWITCH_SI_PIN_X2("i_x2_data");
+	inline const QString SWITCH_SI_PIN_OUTPUT("o_result");
+
+	// Software generated type conversions
+	//
+	inline const QString SW_TCONV_SI32_SI16("sw_tconv_si32_si16");
+	inline const QString SW_TCONV_SI32_UI16("sw_tconv_si32_ui16");
+
+	inline const QString SW_TCONV_SI16_SI32("sw_tconv_si16_si32");
+	inline const QString SW_TCONV_UI16_SI32("sw_tconv_ui16_si32");
+
+	//
+
+	inline const QString NO_AFB("");
+	inline const QString OR("|");
+
+
+	//
+
+	inline const QString IN_PIN_CAPTION("in");
+	inline const QString OUT_PIN_CAPTION("out");
+
+	inline const QString IN_1_PIN_CAPTION("in_1");
+	inline const QString IN_2_PIN_CAPTION("in_2");
+	inline const QString IN_3_PIN_CAPTION("in_3");
+	inline const QString IN_4_PIN_CAPTION("in_4");
+
+	inline const QString OUT_1_PIN_CAPTION("out_1");
+	inline const QString OUT_2_PIN_CAPTION("out_2");
+	inline const QString OUT_3_PIN_CAPTION("out_3");
+	inline const QString OUT_4_PIN_CAPTION("out_4");
+
+	inline const QString SIMLOCK_SIM_PIN_CAPTION("sim");
+	inline const QString SIMLOCK_BLOCK_PIN_CAPTION("block");
+
+	inline const QString VALIDITY_PIN_CAPTION("validity");
+	inline const QString SIMULATED_PIN_CAPTION("simulated");
+	inline const QString BLOCKED_PIN_CAPTION("blocked");
+	inline const QString MISMATCH_PIN_CAPTION("mismatch");
+	inline const QString HIGH_LIMIT_PIN_CAPTION("high_limit");
+	inline const QString LOW_LIMIT_PIN_CAPTION("low_limit");
 }
 

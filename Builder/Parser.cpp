@@ -3692,7 +3692,7 @@ namespace Builder
 		}
 
 		Afb::AfbElementCollection afbs;
-		afbs.setElements(lmd->afbs());
+		afbs.setElements(lmd->afbElements());
 
 		// Check AFBs
 		//

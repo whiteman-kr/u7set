@@ -95,6 +95,9 @@ namespace Builder
 	{
 		Q_OBJECT
 
+		const int WORD_ACCUMULATOR_SIZE_W = 4;			// 4 words is reserved for Int64 and Double processing
+		const int BIT_ACCUMULATOR_SIZE_W = 2;
+
 	public:
 		LmMemoryMap(IssueLogger* log);
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "../UtilsLib/Address16.h"
 #include "../VFrame30/Bus.h"
 #include "IssueLogger.h"
@@ -10,8 +12,85 @@ namespace Builder
 {
 	class Busses;
 
+	struct InbusConvDescription
+	{
+		// Input/Output analog bus child signal format
+		//
+		E::AnalogAppSignalFormat busSignalFormat = E::AnalogAppSignalFormat::SignedInt32;
+
+		// Inbus analog signal format
+		//
+		E::DataFormat inbusAnalogFormat  = E::DataFormat::SignedInt;
+		int inbusSizeBits = 0;
+
+		// Inbus conversion chain description
+		//
+
+		// Scaling AFB, if scaling required
+		//
+		QString inbusScalingAfb;
+		int inbusScalingResultSizeBits = 0;
+		bool inbusTypeConvAfterScalingRequired = false;
+
+		// Inbus type conversion AFB, if type conversion required
+		//
+		QString inbusTypeConversionAfb;
+		int inbusTypeConversionResultSizeBits = 0;
+
+		// Frombus conversion chain description
+		//
+
+		// Type conversion AFB, if type conversion required
+		//
+		bool frombusTypeConvBeforeScalingRequired = false;
+		QString frombusTypeConversionAfb;
+		int frombusTypeConversionResultSizeBits = 0;
+
+		QString frombusScalingAfb;
+		int frombusScalingResultSizeBits = 0;
+
+		bool isValid() const { return inbusSizeBits != 0; }
+	};
+
 	class BusSignal
 	{
+	private:
+
+		inline static const std::vector<InbusConvDescription> m_inbusConvDescriptions =
+		{
+			// SI32 -> SI32
+			//
+			{ E::AnalogAppSignalFormat::SignedInt32, E::DataFormat::SignedInt, SIZE_32BIT,
+				Afb::SCALE_SI32_SI32, SIZE_32BIT, false, Afb::NO_AFB, SIZE_32BIT,
+				false, Afb::NO_AFB, SIZE_32BIT, Afb::SCALE_SI32_SI32, SIZE_32BIT },
+
+			// SI32 -> FP32
+
+			{ E::AnalogAppSignalFormat::SignedInt32, E::DataFormat::Float, SIZE_32BIT,
+				Afb::SCALE_SI32_FP32, SIZE_32BIT, false, Afb::TCONV_SI32_FP32, SIZE_32BIT,
+				false, Afb::NO_AFB, SIZE_32BIT, Afb::SCALE_SI32_FP32, SIZE_32BIT },
+
+			// SI32 -> SI16
+			//
+			{ E::AnalogAppSignalFormat::SignedInt32, E::DataFormat::SignedInt, SIZE_16BIT,
+				Afb::SCALE_SI32_SI32, SIZE_32BIT, true, Afb::SW_TCONV_SI32_SI16, SIZE_16BIT,
+				true, Afb::TCONV_SI16_SI32 + Afb::OR + Afb::SW_TCONV_SI16_SI32, SIZE_32BIT, Afb::SCALE_SI32_SI32, SIZE_32BIT },
+
+			// SI32 -> UI16
+			//
+			{ E::AnalogAppSignalFormat::SignedInt32, E::DataFormat::UnsignedInt, SIZE_16BIT,
+				Afb::SCALE_SI32_UI16, SIZE_32BIT, false, Afb::SW_TCONV_SI32_UI16, SIZE_16BIT,
+				false, Afb::TCONV_UI16_SI32 + Afb::OR + Afb::SW_TCONV_UI16_SI32, SIZE_32BIT, Afb::SCALE_UI16_SI32, SIZE_32BIT },
+
+/*
+
+			{ E::AnalogAppSignalFormat::Float32, E::DataFormat::SignedInt, SIZE_32, "scale_fp_si", SIZE_32BIT, false, "tconv_fp_si", SIZE_32BIT },
+			{ E::AnalogAppSignalFormat::Float32, E::DataFormat::Float, SIZE_32, "scale_fp_fp", SIZE_32BIT, false, "", SIZE_32BIT },
+			{ E::AnalogAppSignalFormat::Float32, E::DataFormat::SignedInt, SIZE_16, "scale_fp_si", SIZE_32BIT, true, "sw_tconv_si_16si", SIZE_16BIT },
+			{ E::AnalogAppSignalFormat::Float32, E::DataFormat::UnsignedInt, SIZE_16, "scale_fp_si", SIZE_32BIT, true, "sw_tconv_si_16ui", SIZE_16BIT },*/
+
+		};
+
 	public:
 		QString signalID;
 		QString caption;
@@ -20,17 +99,17 @@ namespace Builder
 		QString busTypeID;
 		QString units;
 
-		// analog signals conversion parameters
+		// Bus child analog signal params (In/Out signal for BusComposer and BusExtractor respectively)
 		//
-		E::AnalogAppSignalFormat analogFormat = E::AnalogAppSignalFormat::Float32;
+		E::AnalogAppSignalFormat inOutAnalogFormat = E::AnalogAppSignalFormat::Float32;
+		double inOutAnalogLowLimit = 0.0;
+		double inOutAnalogHighLimit = 65535.0;
 
-		int inbusSizeBits = 0;
-
+		// Params of analog signal stored in bus
+		//
 		E::DataFormat inbusAnalogFormat  = E::DataFormat::SignedInt;
+		int inbusSizeBits = 0;
 		E::ByteOrder inbusAnalogByteOrder = E::ByteOrder::BigEndian;
-
-		double busAnalogLowLimit = 0.0;
-		double busAnalogHighLimit = 65535.0;
 
 		double inbusAnalogLowLimit = 0.0;
 		double inbusAnalogHighLimit = 65535.0;
@@ -39,8 +118,27 @@ namespace Builder
 
 		bool conversionRequired() const;
 
-		bool is_SInt32_To_UInt16_BE_NoScale_conversion() const;
-		bool is_SInt32_To_SInt16_BE_NoScale_conversion() const;
+//		bool is_SInt32_To_UInt16_BE_NoScale_conversion() const;
+//		bool is_SInt32_To_SInt16_BE_NoScale_conversion() const;
+
+		// Order of inbus signal conversion:
+		//
+		// Scaling -> Type conversion -> ByteOrder conversion
+		//
+		// Order of frombus signal conversion:
+		//
+		// ByteOrder conversion -> Type conversion -> Scaling
+		//
+		// In some cases Scaling and Type conversion can be performed in time of Scaling
+		//
+		bool scalingRequired() const;
+		bool typeConversionRequired() const;
+		bool byteOrderConversionRequired() const;
+
+		void getInbusScalingCoefficients(double* k, double* b) const;
+		void getFrombusScalingCoefficients(double* k, double* b) const;
+
+		InbusConvDescription getInbusConvDescription() const;
 
 		void init(const Busses& busses, const VFrame30::BusSignal& bs);
 		bool isOverlaped(const BusSignal& bs);

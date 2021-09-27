@@ -873,7 +873,7 @@ void MainWindow::updateUfbsAfbsBusses()
 				int updatedCount = 0;
 				QString updateErrorMessage;
 
-				ok = schema->updateAllSchemaItemFbs(logicModuleDescription->afbs(), &updatedCount, &updateErrorMessage);
+				ok = schema->updateAllSchemaItemFbs(logicModuleDescription->afbElements(), &updatedCount, &updateErrorMessage);
 
 				if (ok == false)
 				{

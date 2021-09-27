@@ -213,71 +213,6 @@ namespace Builder
 		{
 			m_fblInstance.insert(logicAfb->opCode(), -1);			// init by -1, but used instances values is beginning from 0
 		}
-
-		// add AfbElement in/out signals to m_fblsSignals map
-		//
-
-/*		const std::vector<LogicAfbSignal>& inputSignals = logicAfb->inputSignals();
-
-		for(LogicAfbSignal signal : inputSignals)
-		{
-			StrIDIndex si;
-
-			si.strID = logicAfb->strID();
-			si.index = signal.operandIndex();
-
-			if (m_afbSignals.contains(si))
-			{
-				assert(false);
-				continue;
-			}
-
-			m_afbSignals.insert(si, signal);
-		}
-
-		const std::vector<LogicAfbSignal>& outputSignals = logicAfb->outputSignals();
-
-		for(LogicAfbSignal signal : outputSignals)
-		{
-			StrIDIndex si;
-
-			si.strID = logicAfb->strID();
-			si.index = signal.operandIndex();
-
-			if (m_afbSignals.contains(si))
-			{
-				assert(false);
-				continue;
-			}
-
-			m_afbSignals.insert(si, signal);
-		}
-*/
-		// add AfbElement params to m_fblsParams map
-		//
-
-/*		std::vector<LogicAfbParam>& params = logicAfb->params();
-
-		for(LogicAfbParam param : params)
-		{
-			if (param.operandIndex() == UalAfb::FOR_USER_ONLY_PARAM_INDEX)
-			{
-				continue;
-			}
-
-			StrIDIndex si;
-
-			si.strID = logicAfb->strID();
-			si.index = param.operandIndex();
-
-			if (m_afbParams.contains(si))
-			{
-				assert(false);
-				continue;
-			}
-
-			m_afbParams.insert(si, &param);
-		}*/
 	}
 
 	void AfblsMap::clear()
@@ -292,23 +227,6 @@ namespace Builder
 
 		HashedVector<QString, Afbl*>::clear();
 	}
-
-/*	const LogicAfbSignal AfblsMap::getAfbSignal(const QString& afbStrID, int signalIndex)
-	{
-		StrIDIndex si;
-
-		si.strID = afbStrID;
-		si.index = signalIndex;
-
-		if (m_afbSignals.contains(si))
-		{
-			return m_afbSignals.value(si);
-		}
-
-		assert(false);
-
-		return LogicAfbSignal();
-	}*/
 
 	int AfblsMap::getUsedInstances(int opCode) const
 	{
@@ -548,6 +466,16 @@ namespace Builder
 		return m_type;
 	}
 
+	QString UalItem::schemaID() const
+	{
+		if (m_appLogicItem.m_schema != nullptr)
+		{
+			return m_appLogicItem.m_schema->schemaId();
+		}
+
+		return QString("Internal Processing");
+	}
+
 	const LogicPin* UalItem::getPin(QUuid pinUuid) const
 	{
 		const std::vector<LogicPin>& inputPins = inputs();
@@ -598,6 +526,22 @@ namespace Builder
 		return nullptr;
 	}
 
+	bool UalItem::setParamValueByCaption(const QString& paramCaption, const QVariant& value)
+	{
+		std::vector<Afb::AfbParam>& ps = params();
+
+		for(Afb::AfbParam& p : ps)
+		{
+			if (p.caption() == paramCaption)
+			{
+				p.afbParamValue().setValue(value);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	// ---------------------------------------------------------------------------------------
 	//
 	// AppFbParamValue class implementation
@@ -612,51 +556,53 @@ namespace Builder
 	{
 		Q_ASSERT(afbParam.afbParamValue().reference().isEmpty() == true);
 
-		QVariant qv = afbParam.afbParamValue().value();
-
 		m_opName = afbParam.opName();
 		m_caption = afbParam.caption();
 		m_operandIndex = afbParam.operandIndex();
 		m_instantiator = afbParam.instantiator();
 		m_visible = afbParam.visible();
 
-		if (afbParam.isDiscrete())
+		m_type = afbParam.type();
+
+		switch(m_type)
 		{
-			m_type = E::SignalType::Discrete;
+		case E::SignalType::Discrete:
+
 			m_dataFormat = E::DataFormat::UnsignedInt;
 			m_dataSize = 1;
 
-			m_unsignedIntValue = qv.toUInt();
-		}
-		else
-		{
-			assert(afbParam.isAnalog());
+			break;
 
-			m_type = E::SignalType::Analog;
+		case E::SignalType::Analog:
+
 			m_dataSize = afbParam.size();
 
 			switch(afbParam.dataFormat())
 			{
 			case E::DataFormat::SignedInt:
 				m_dataFormat = E::DataFormat::SignedInt;
-				m_signedIntValue = qv.toInt();
 				break;
 
 			case E::DataFormat::UnsignedInt:
 				m_dataFormat = E::DataFormat::UnsignedInt;
-				m_unsignedIntValue = qv.toUInt();
 				break;
 
 			case E::DataFormat::Float:
-				assert(m_dataSize == SIZE_32BIT);
+				Q_ASSERT(m_dataSize == SIZE_32BIT);
 				m_dataFormat = E::DataFormat::Float;
-				m_floatValue = qv.toFloat();
 				break;
 
 			default:
-				assert(false);
+				Q_ASSERT(false);
 			}
+
+			break;
+
+		default:
+			Q_ASSERT(false);
 		}
+
+		setValue(afbParam.afbParamValue().value());
 	}
 
 	quint32 AppFbParamValue::unsignedIntValue() const
@@ -682,23 +628,58 @@ namespace Builder
 
 	void AppFbParamValue::setSignedIntValue(qint32 value)
 	{
-		assert(isSignedInt32() == true);
+		Q_ASSERT(isSignedInt32() == true);
 
 		m_signedIntValue = value;
 	}
 
 	float AppFbParamValue::floatValue() const
 	{
-		assert(isFloat32() == true);
+		Q_ASSERT(isFloat32() == true);
 
 		return static_cast<float>(m_floatValue);
 	}
 
 	void AppFbParamValue::setFloatValue(double value)
 	{
-		assert(isFloat32() == true);
+		Q_ASSERT(isFloat32() == true);
 
 		m_floatValue = value;
+	}
+
+	void AppFbParamValue::setValue(const QVariant& qv)
+	{
+		switch(m_type)
+		{
+		case E::SignalType::Discrete:
+			m_unsignedIntValue = qv.toUInt();
+			break;
+
+		case E::SignalType::Analog:
+
+			switch(m_dataFormat)
+			{
+			case E::DataFormat::SignedInt:
+				m_signedIntValue = qv.toInt();
+				break;
+
+			case E::DataFormat::UnsignedInt:
+				m_unsignedIntValue = qv.toUInt();
+				break;
+
+			case E::DataFormat::Float:
+				m_floatValue = qv.toFloat();
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
+
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
 	}
 
 	QString AppFbParamValue::toString() const
@@ -731,29 +712,6 @@ namespace Builder
 	// AppFb class implementation
 	//
 	// ---------------------------------------------------------------------------------------
-
-	const QString UalAfb::IN_PIN_CAPTION("in");
-	const QString UalAfb::OUT_PIN_CAPTION("out");
-
-	const QString UalAfb::IN_1_PIN_CAPTION("in_1");
-	const QString UalAfb::IN_2_PIN_CAPTION("in_2");
-	const QString UalAfb::IN_3_PIN_CAPTION("in_3");
-	const QString UalAfb::IN_4_PIN_CAPTION("in_4");
-
-	const QString UalAfb::OUT_1_PIN_CAPTION("out_1");
-	const QString UalAfb::OUT_2_PIN_CAPTION("out_2");
-	const QString UalAfb::OUT_3_PIN_CAPTION("out_3");
-	const QString UalAfb::OUT_4_PIN_CAPTION("out_4");
-
-	const QString UalAfb::SIMLOCK_SIM_PIN_CAPTION("sim");
-	const QString UalAfb::SIMLOCK_BLOCK_PIN_CAPTION("block");
-
-	const QString UalAfb::VALIDITY_PIN_CAPTION("validity");
-	const QString UalAfb::SIMULATED_PIN_CAPTION("simulated");
-	const QString UalAfb::BLOCKED_PIN_CAPTION("blocked");
-	const QString UalAfb::MISMATCH_PIN_CAPTION("mismatch");
-	const QString UalAfb::HIGH_LIMIT_PIN_CAPTION("high_limit");
-	const QString UalAfb::LOW_LIMIT_PIN_CAPTION("low_limit");
 
 	UalAfb::UalAfb(const UalItem& appItem, bool isBusProcessingAfb) :
 		UalItem(appItem),
@@ -890,10 +848,7 @@ namespace Builder
 
 	bool UalAfb::getAfbSignalByPinUuid(QUuid pinUuid, LogicAfbSignal* afbSignal) const
 	{
-		if (afbSignal == nullptr)
-		{
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(afbSignal);
 
 		for(const LogicPin& inPin : inputs())
 		{
@@ -911,8 +866,46 @@ namespace Builder
 			}
 		}
 
-		LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-				  QString(tr("Not found signal with pin Uuid = %1 in FB %2")).arg(pinUuid.toString()).arg(caption()));
+		LOG_INTERNAL_ERROR_MSG(m_log, QString(tr("Can't find signal with pin Uuid = %1 in AFB %2")).
+										arg(pinUuid.toString()).arg(caption()));
+		return false;
+	}
+
+	bool UalAfb::getAfbSignalByCaption(const QString& pinCaption, LogicAfbSignal* afbSignal) const
+	{
+		TEST_PTR_RETURN_FALSE(afbSignal);
+
+		for(const LogicPin& inPin : inputs())
+		{
+			if (inPin.caption() == pinCaption)
+			{
+				return getAfbSignalByPin(inPin, afbSignal);
+			}
+		}
+
+		for(const LogicPin& outPin : outputs())
+		{
+			if (outPin.caption() == pinCaption)
+			{
+				return getAfbSignalByPin(outPin, afbSignal);
+			}
+		}
+
+		LOG_INTERNAL_ERROR_MSG(m_log, QString(tr("Can't find signal with pin caption = %1 in AFB %2")).
+										arg(pinCaption).arg(caption()));
+		return false;
+	}
+
+	bool UalAfb::setParamValueByCaption(const QString& paramCaption, const QVariant& value)
+	{
+		for(AppFbParamValue& param : m_paramValuesArray)
+		{
+			if (param.caption() == paramCaption)
+			{
+				param.setValue(value);
+				return true;
+			}
+		}
 
 		return false;
 	}
@@ -1582,7 +1575,7 @@ namespace Builder
 		{
 		case E::SignalType::Analog:
 		case E::SignalType::Discrete:
-			return m_refSignals[0]->isCompatibleFormat(busSignal.signalType, busSignal.analogFormat, E::ByteOrder::BigEndian);
+			return m_refSignals[0]->isCompatibleFormat(busSignal.signalType, busSignal.inOutAnalogFormat, E::ByteOrder::BigEndian);
 
 		case E::SignalType::Bus:
 
@@ -1875,17 +1868,13 @@ namespace Builder
 		return m_ualAddr.isValid();
 	}
 
-	bool UalSignal::setRegBufAddr(Address16 regBufAddr, QString* err)
+	bool UalSignal::setRegBufAddr(Address16 regBufAddr)
 	{
 		assert(regBufAddr.isValid() == true);
 
 		if (m_regBufAddr.isValid() == true)
 		{
-			if (err != nullptr)
-			{
-				*err = QString("RegBufAddr already set for signal %1").arg(appSignalID());
-			}
-
+			assert(false);				// m_regBufAddr is already set
 			return false;
 		}
 
@@ -1944,7 +1933,7 @@ namespace Builder
 
 			addr.addBit(busBitAddr + busSignalBitAddr);
 
-			result &= childSignal->setRegBufAddr(addr, err);
+			result &= childSignal->setRegBufAddr(addr);
 		}
 
 		return result;

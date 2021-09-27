@@ -467,7 +467,7 @@ namespace Builder
 
 			newSignal->setUnit(busSignal.units);
 			newSignal->setDataSize(SIZE_32BIT);
-			newSignal->setAnalogSignalFormat(busSignal.analogFormat);
+			newSignal->setAnalogSignalFormat(busSignal.inOutAnalogFormat);
 
 			newSignal->setSpecPropStruct(AppSignalDefaultSpecPropStruct::BUS_CHILD_ANALOG);
 			newSignal->createSpecPropValues();
@@ -475,11 +475,11 @@ namespace Builder
 			newSignal->setLowADC(static_cast<int>(busSignal.inbusAnalogLowLimit));
 			newSignal->setHighADC(static_cast<int>(busSignal.inbusAnalogHighLimit));
 
-			newSignal->setLowEngineeringUnits(busSignal.busAnalogLowLimit);
-			newSignal->setHighEngineeringUnits(busSignal.busAnalogHighLimit);
+			newSignal->setLowEngineeringUnits(busSignal.inOutAnalogLowLimit);
+			newSignal->setHighEngineeringUnits(busSignal.inOutAnalogHighLimit);
 
-			newSignal->setLowValidRange(busSignal.busAnalogLowLimit);
-			newSignal->setHighValidRange(busSignal.busAnalogHighLimit);
+			newSignal->setLowValidRange(busSignal.inOutAnalogLowLimit);
+			newSignal->setHighValidRange(busSignal.inOutAnalogHighLimit);
 			break;
 
 		case E::SignalType::Discrete:
