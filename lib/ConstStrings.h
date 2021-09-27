@@ -525,10 +525,10 @@ namespace Afb
 
 	inline const QString SWITCH_SI("switch_si");
 
-	inline const QString SWITCH_SI_PIN_SELECT("i_sel");
-	inline const QString SWITCH_SI_PIN_X1("i_x1_data");
-	inline const QString SWITCH_SI_PIN_X2("i_x2_data");
-	inline const QString SWITCH_SI_PIN_OUTPUT("o_result");
+	inline const QString SWITCH_SI_PIN_SELECT("sel");
+	inline const QString SWITCH_SI_PIN_X1("in_x1");
+	inline const QString SWITCH_SI_PIN_X2("in_x2");
+	inline const QString SWITCH_SI_PIN_OUTPUT("out");
 
 	// Software generated type conversions
 	//

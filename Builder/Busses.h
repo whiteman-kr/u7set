@@ -68,7 +68,7 @@ namespace Builder
 
 			{ E::AnalogAppSignalFormat::SignedInt32, E::DataFormat::Float, SIZE_32BIT,
 				Afb::SCALE_SI32_FP32, SIZE_32BIT, false, Afb::TCONV_SI32_FP32, SIZE_32BIT,
-				false, Afb::NO_AFB, SIZE_32BIT, Afb::SCALE_SI32_FP32, SIZE_32BIT },
+				false, Afb::TCONV_SI32_FP32, SIZE_32BIT, Afb::SCALE_FP32_SI32, SIZE_32BIT },
 
 			// SI32 -> SI16
 			//

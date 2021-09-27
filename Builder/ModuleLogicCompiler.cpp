@@ -10414,17 +10414,15 @@ namespace Builder
 			{
 				saveResultToAccumulator = true;		// for subsequent scaling
 
-/*				result &= genFrombusTypeConversionCode(frombusConvCode, inputSignal, busChildSignal, busSignal, busComposerLabel,
-													 convDesc, readValueFromAccumulator, saveResultToAccumulator,
-													 inbusSignalAddr); */
+				result &= genFrombusTypeConversionCode(&frombusConvCode, inputBusSignal, busSignal, busChildSignal,
+													   busExtractorLabel, convDesc, readValueFromAccumulator,
+													   saveResultToAccumulator, inbusSignalAddr);
 
 				readValueFromAccumulator = true;
 			}
 
-			saveResultToAccumulator = false;
-
-/*			result &= genFrombusScalingCode(frombusConvCode, inputSignal, busChildSignal, busSignal, busComposerLabel,
-										  convDesc, false , saveResultToAccumulator);*/
+			result &= genFrombusScalingCode(&frombusConvCode, inputBusSignal, busSignal, busChildSignal,
+											busExtractorLabel, convDesc, readValueFromAccumulator, false, inbusSignalAddr);
 		}
 		else
 		{
@@ -10432,9 +10430,9 @@ namespace Builder
 			{
 				saveResultToAccumulator = false;
 
-/*				result &= genFrombusTypeConversionCode(frombusConvCode, inputSignal, busChildSignal, busSignal, busComposerLabel,
-													 convDesc, readValueFromAccumulator, saveResultToAccumulator,
-													 inbusSignalAddr);*/
+				result &= genFrombusTypeConversionCode(&frombusConvCode, inputBusSignal, busSignal, busChildSignal,
+													   busExtractorLabel, convDesc, readValueFromAccumulator,
+													   saveResultToAccumulator, inbusSignalAddr);
 			}
 		}
 
@@ -10473,8 +10471,6 @@ namespace Builder
 		}
 
 		return result;
-
-		return true;
 	}
 
 	bool ModuleLogicCompiler::genFrombusByteOrderConversionCode(CodeSnippet* code,
@@ -10739,7 +10735,7 @@ namespace Builder
 				cmd.start(swtch->opcode(), swtch->instance(), swtch->caption(), swtch->runTime());
 				code->append(cmd);
 
-				cmd.readFuncBlock(readAddr,
+				cmd.readFuncBlock(writeAddr,
 								  swtch->opcode(), swtch->instance(),
 								  output->afbOperandIndex(),
 								  swtch->caption());
@@ -10807,9 +10803,9 @@ namespace Builder
 	}
 
 	bool ModuleLogicCompiler::genFrombusScalingCode(CodeSnippet* code,
-													const UalSignal* inputSignal,
-													const UalSignal* busChildSignal,
+													const UalSignal* inputBusSignal,
 													const BusSignal& busSignal,
+													const UalSignal* busChildSignal,
 													const QString& busExtractorLabel,
 													const InbusConvDescription& convDesc,
 													bool readValueFromAccumulator,

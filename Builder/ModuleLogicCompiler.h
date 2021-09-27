@@ -591,10 +591,10 @@ namespace Builder
 											const Address16& inbusSignalAddr);
 
 		bool genFrombusScalingCode(CodeSnippet* code,
-								 const UalSignal* inputSignal,
-								 const UalSignal* busChildSignal,
+								 const UalSignal* inputBusSignal,
 								 const BusSignal& busSignal,
-								 const QString& busComposerLabel,
+								 const UalSignal* busChildSignal,
+								 const QString& busExtractorLabel,
 								 const InbusConvDescription &convDesc,
 								 bool readValueFromAccumulator,
 								 bool saveResultToAccumulator,
