@@ -37,7 +37,7 @@ namespace Measure
 		ViewHeader& header() { return m_header; }
 		bool columnIsVisible(int column);
 
-		QColor backgroundColor(int row, int column, Measure::Item* pMeasurement) const;
+		QColor backgroundColor(Measure::Item* pMeasurement) const;
 		QString text(int row, int column, Measure::Item* pMeasurement) const;
 
 		bool append(Measure::Item* pMeasurement);

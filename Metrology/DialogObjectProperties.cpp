@@ -775,7 +775,7 @@ void DialogRackGroupProperty::onPropertyValueChanged(QtProperty* property, const
 	}
 
 	rack.setChannel(channel);
-	rack.setGroupIndex(group.Index());
+	rack.setGroupIndex(group.index());
 	m_rackBase.setRack(rack.index(), rack);
 
 	group.setRackID(channel, rack.equipmentID());

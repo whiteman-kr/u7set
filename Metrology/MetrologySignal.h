@@ -2,10 +2,8 @@
 
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../lib/ComparatorSet.h"
-
 #include "../HardwareLib/DeviceObject.h"
 #include "../UtilsLib/XmlHelper.h"
-
 #include "../Proto/ProtoSerialization.h"
 
 // Attention !!!
@@ -87,15 +85,15 @@ namespace Metrology
 
 	private:
 
-		int					m_index = -1;		// index of rack in the m_equipmentID
+		int					m_index = -1;				// index of rack in the m_equipmentID
 
-		Hash				m_hash = 0;			// hash calcHash from rack m_equipmentID
+		Hash				m_hash = UNDEFINED_HASH;	// hash calcHash from rack m_equipmentID
 
-		QString				m_equipmentID;		// rack equipmentID
-		QString				m_caption;			// rack caption
+		QString				m_equipmentID;				// rack equipmentID
+		QString				m_caption;					// rack caption
 
-		int					m_groupIndex = -1;	// for multichannel measuring - index rack group (several racks can be combine in groups)
-		int					m_channel = -1;		// for multichannel measuring - index channel in rack group
+		int					m_groupIndex = -1;			// for multichannel measuring - index rack group (several racks can be combine in groups)
+		int					m_channel = -1;				// for multichannel measuring - index channel in rack group
 
 	};
 

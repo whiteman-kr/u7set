@@ -856,6 +856,8 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 												   m_location.module(),
 												   m_location.place());
 
+					// m_signalID.append("(" + m_location.contact() + ")");
+
 					break;
 
 				case E::SignalInOutType::Internal:
@@ -1738,6 +1740,11 @@ bool SignalBase::enableForMeasure(Metrology::ConnectionType connectionType, Metr
 				{
 					return false;
 				}
+
+				if (pDestSignal->param().location().chassis() == -1 || pDestSignal->param().location().module() == -1 || pDestSignal->param().location().place() == -1)
+				{
+					return false;
+				}
 			}
 			break;
 
@@ -1782,6 +1789,11 @@ bool SignalBase::enableForMeasure(Metrology::ConnectionType connectionType, Metr
 				}
 
 				if (pDestSignal->param().electricRangeIsValid() == false)
+				{
+					return false;
+				}
+
+				if (pDestSignal->param().location().chassis() == -1 || pDestSignal->param().location().module() == -1 || pDestSignal->param().location().place() == -1)
 				{
 					return false;
 				}
@@ -2015,13 +2027,12 @@ int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionT
 						continue;
 					}
 
-					QString caption = group.caption();
-					if (caption.isEmpty() == true)
+					if (group.caption().isEmpty() == true)
 					{
 						continue;
 					}
 
-					Metrology::RackParam rack(g, QString("GROUP_%1").arg(g), group.caption());
+					Metrology::RackParam rack(group.index(), QString("GROUP_%1").arg(group.index()), group.caption());
 
 					m_rackList.push_back(rack);
 				}
@@ -2318,7 +2329,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 					}
 
 					QString id;
-					id = QString::asprintf("%d - %d - %d",
+					id = QString::asprintf("%02d - %02d - %02d",
 										   param.location().rack().index(),
 										   param.location().chassis(),
 										   param.location().module());
@@ -2327,18 +2338,18 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 
 					if (mesaureSignalMap.contains(hashid) == true)
 					{
-						quint64 index = mesaureSignalMap[hashid];
-						if (index < m_signalMeasureList.size())
+						quint64 signalIndex = mesaureSignalMap[hashid];
+						if (signalIndex >= 0 && signalIndex < m_signalMeasureList.size())
 						{
 							int channel = param.location().place() - 1;
 							if (channel >= 0 && channel < measureSignal.channelCount())
 							{
-								if (m_signalMeasureList[index].metrologySignal(connectionType, channel) != nullptr)
+								if (m_signalMeasureList[signalIndex].metrologySignal(connectionType, channel) != nullptr)
 								{
 									continue;
 								}
 
-								if (m_signalMeasureList[index].setMetrologySignal(measureKind,
+								if (m_signalMeasureList[signalIndex].setMetrologySignal(measureKind,
 																				  m_connectionBase,
 																				  connectionType,
 																				  channel,
@@ -2379,7 +2390,8 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 					}
 
 					QString id;
-					id = QString::asprintf("%d - %d - %d - %d - ",
+
+					id = QString::asprintf("%02d - %02d - %02d - %02d - ",
 										   param.location().rack().groupIndex(),
 										   param.location().chassis(),
 										   param.location().module(),
@@ -2390,13 +2402,13 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 
 					if (mesaureSignalMap.contains(hashid) == true)
 					{
-						quint64 index = mesaureSignalMap[hashid];
-						if (index < m_signalMeasureList.size())
+						quint64 signalIndex = mesaureSignalMap[hashid];
+						if (signalIndex >= 0 && signalIndex < m_signalMeasureList.size())
 						{
 							int channel = param.location().rack().channel();
 							if (channel >= 0 && channel < measureSignal.channelCount())
 							{
-								if (m_signalMeasureList[index].setMetrologySignal(measureKind,
+								if (m_signalMeasureList[signalIndex].setMetrologySignal(measureKind,
 																				  m_connectionBase,
 																				  connectionType,
 																				  channel,

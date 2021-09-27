@@ -504,6 +504,7 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		errorLimit = theOptions.linearity().errorLimit();	break;
 			case Measure::Type::Comparators:	errorLimit = theOptions.comparator().errorLimit();	break;
+
 			default:
 				assert(0);
 				return;
@@ -571,6 +572,7 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		limitType = static_cast<LimitType>(theOptions.linearity().limitType());		break;
 			case Measure::Type::Comparators:	limitType = static_cast<LimitType>(theOptions.comparator().limitType());	break;
+
 			default:
 				assert(0);
 				return QString();
@@ -598,6 +600,7 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		errorType = static_cast<ErrorType>(theOptions.linearity().errorType());		break;
 			case Measure::Type::Comparators:	errorType = static_cast<ErrorType>(theOptions.comparator().errorType());	break;
+
 			default:
 				assert(0);
 				return QString();
@@ -616,6 +619,7 @@ namespace Measure
 			case Measure::ErrorType::Absolute:	str = QString::number(m_error[limitType][errorType], 'f', precision) + " " + m_unit[limitType];	break;
 			case Measure::ErrorType::Reduce:
 			case Measure::ErrorType::Relative:	str = QString::number(m_error[limitType][errorType], 'f', 3) + " %" ;							break;
+
 			default:
 				assert(0);
 		}
@@ -677,6 +681,7 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		limitType = static_cast<LimitType>(theOptions.linearity().limitType());		break;
 			case Measure::Type::Comparators:	limitType = static_cast<LimitType>(theOptions.comparator().limitType());	break;
+
 			default:
 				assert(0);
 				return QString();
@@ -694,6 +699,7 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		errorType = static_cast<ErrorType>(theOptions.linearity().errorType());		break;
 			case Measure::Type::Comparators:	errorType = static_cast<ErrorType>(theOptions.comparator().errorType());	break;
+
 			default:
 				assert(0);
 				return QString();
@@ -712,6 +718,7 @@ namespace Measure
 			case Measure::ErrorType::Absolute:	str = QString::number(m_errorLimit[limitType][errorType], 'f', m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
 			case Measure::ErrorType::Reduce:
 			case Measure::ErrorType::Relative:	str = QString::number(m_errorLimit[limitType][errorType], 'f', 3) + " %";												break;
+
 			default:
 				assert(0);
 		}
@@ -754,6 +761,7 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		limitType = static_cast<LimitType>(theOptions.linearity().limitType());		break;
 			case Measure::Type::Comparators:	limitType = static_cast<LimitType>(theOptions.comparator().limitType());	break;
+
 			default:
 				assert(0);
 				return Measure::ErrorResult::NoErrorResult;
@@ -771,6 +779,7 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		errorType = static_cast<ErrorType>(theOptions.linearity().errorType());		break;
 			case Measure::Type::Comparators:	errorType = static_cast<ErrorType>(theOptions.comparator().errorType());	break;
+
 			default:
 				assert(0);
 				return Measure::ErrorResult::NoErrorResult;
@@ -902,6 +911,7 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		pMeasurement = static_cast<LinearityItem*> (this) + index;	break;
 			case Measure::Type::Comparators:	pMeasurement = static_cast<ComparatorItem*> (this) + index;	break;
+
 			default:
 				assert(0);
 		}
@@ -1061,6 +1071,7 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		*static_cast<LinearityItem*> (this) = *static_cast <LinearityItem*> (&from);	break;
 			case Measure::Type::Comparators:	*static_cast<ComparatorItem*> (this) = *static_cast <ComparatorItem*> (&from);	break;
+
 			default:
 				assert(0);
 		}
@@ -1111,6 +1122,7 @@ namespace Measure
 			case Metrology::ConnectionType::Input_C_Output_F:
 			case Metrology::ConnectionType::Input_Output:
 			case Metrology::ConnectionType::Tuning_Output:			fill_measure_output(ioParam);	break;
+
 			default:
 				assert(0);
 		}
@@ -2201,6 +2213,7 @@ namespace Measure
 			case Metrology::ConnectionType::Input_Internal:
 			case Metrology::ConnectionType::Input_DP_Internal_F:
 			case Metrology::ConnectionType::Input_C_Internal_F:		fill_measure_internal(ioParam);	break;
+
 			default:
 				assert(0);
 		}
@@ -2739,6 +2752,7 @@ namespace Measure
 					{
 						case Measure::Type::Linearity:		data.pMeasurement = new LinearityItem[static_cast<quint64>(data.recordCount)];	break;
 						case Measure::Type::Comparators:	data.pMeasurement = new ComparatorItem[static_cast<quint64>(data.recordCount)];	break;
+
 						default:
 							assert(0);
 					}
@@ -2761,6 +2775,7 @@ namespace Measure
 						{
 							case Measure::Type::Linearity:		delete [] static_cast<LinearityItem*> (data.pMeasurement);	break;
 							case Measure::Type::Comparators:	delete [] static_cast<ComparatorItem*> (data.pMeasurement);	break;
+
 							default:
 								assert(0);
 						}
@@ -2953,6 +2968,7 @@ namespace Measure
 			{
 				case Measure::Type::Linearity:		delete [] static_cast<LinearityItem*> (table.pMeasurement);		break;
 				case Measure::Type::Comparators:	delete [] static_cast<ComparatorItem*> (table.pMeasurement);	break;
+
 				default:
 					assert(0);
 			}
@@ -3162,6 +3178,7 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		limitType = static_cast<LimitType>(theOptions.linearity().limitType());		break;
 			case Measure::Type::Comparators:	limitType = static_cast<LimitType>(theOptions.comparator().limitType());	break;
+
 			default:
 				assert(0);
 				return;
@@ -3179,6 +3196,7 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		errorType = static_cast<ErrorType>(theOptions.linearity().errorType());		break;
 			case Measure::Type::Comparators:	errorType = static_cast<ErrorType>(theOptions.comparator().errorType());	break;
+
 			default:
 				assert(0);
 				return;
@@ -3343,7 +3361,7 @@ namespace Measure
 
 		for (auto pMeasurement : pThis->m_measureList)
 		{
-			if (pMeasurement == nullptr)
+			if (pMeasurement == nullptr || pMeasurement->signalHash() == UNDEFINED_HASH)
 			{
 				continue;
 			}
@@ -3442,6 +3460,7 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Measurements of linearity");	break;
 			case Measure::Type::Comparators:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Measurements of comparators");	break;
+
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
@@ -3461,6 +3480,7 @@ namespace Measure
 			case Measure::Kind::OneModule:		caption = QT_TRANSLATE_NOOP("MeasureBase", " Single module");		break;
 			case Measure::Kind::MultiRack:		caption = QT_TRANSLATE_NOOP("MeasureBase", " Multi channel");		break;
 			case Measure::Kind::MultiRack_MC:	caption = QT_TRANSLATE_NOOP("MeasureBase", " Multi channel - MC");	break;
+
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
@@ -3477,6 +3497,7 @@ namespace Measure
 		{
 			case Measure::LimitType::Electric:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Electric");		break;
 			case Measure::LimitType::Engineering:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Engineering");	break;
+
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
@@ -3494,6 +3515,7 @@ namespace Measure
 			case Measure::ErrorType::Absolute:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Absolute");	break;
 			case Measure::ErrorType::Reduce:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Reduce");	break;
 			case Measure::ErrorType::Relative:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Relative");	break;
+
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
@@ -3510,6 +3532,7 @@ namespace Measure
 		{
 			case Measure::ErrorResult::Ok:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Ok");		break;
 			case Measure::ErrorResult::Failed:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Failed");	break;
+
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
@@ -3529,6 +3552,7 @@ namespace Measure
 			case Measure::AdditionalParam::StandardDeviation:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Standard deviation");	break;
 			case Measure::AdditionalParam::LowHighBorder:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Low High border");		break;
 			case Measure::AdditionalParam::Uncertainty:			caption = QT_TRANSLATE_NOOP("MeasureBase", "Uncertainty");			break;
+
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
