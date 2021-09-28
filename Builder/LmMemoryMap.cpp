@@ -299,7 +299,7 @@ namespace Builder
 		m_appWordAdressed.nonAcquiredInternalBuses.setStartAddress(appLogicWordData.startAddress());
 
 		m_appWordAdressed.wordAccumulator.setStartAddress(appLogicWordData.startAddress());
-		m_appWordAdressed.wordAccumulator.setSizeW(WORD_ACCUMULATOR_SIZE_W);        // word accumulator has 2 word size
+		m_appWordAdressed.wordAccumulator.setSizeW(WORD_ACCUMULATOR_SIZE_W * 2);			// 2 accumulators allocation
 
 		return recalculateAddresses();
 	}
@@ -375,7 +375,7 @@ namespace Builder
 		m_appWordAdressed.nonAcquiredInternalBuses.setStartAddress(m_appWordAdressed.nonAcquiredOutputBuses.nextAddress());
 
 		m_appWordAdressed.wordAccumulator.setStartAddress(m_appWordAdressed.nonAcquiredInternalBuses.nextAddress());
-		m_appWordAdressed.wordAccumulator.setSizeW(WORD_ACCUMULATOR_SIZE_W);
+		m_appWordAdressed.wordAccumulator.setSizeW(WORD_ACCUMULATOR_SIZE_W * 2);
 
 		m_appWordAdressed.analogAndBusSignalsHeap.setStartAddress(m_appWordAdressed.wordAccumulator.nextAddress());
 
@@ -510,7 +510,7 @@ namespace Builder
 		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredOutputBuses, "non acquired output buses");
 		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredInternalBuses, "non acquired internal buses");
 
-		addRecord(memFile, m_appWordAdressed.wordAccumulator, "word accumulator");
+		addRecord(memFile, m_appWordAdressed.wordAccumulator, "2 word accumulators ");
 		memFile.append("");
 
 		addRecord(memFile, m_appWordAdressed.analogAndBusSignalsHeap, "analog and bus signals heap");

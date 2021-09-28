@@ -746,6 +746,7 @@ namespace Builder
 
 		int bitAccumulatorAddress() const;
 		int wordAccumulatorAddress() const;
+		int wordAccumulator2Address() const;
 
 	private:
 		// input parameters

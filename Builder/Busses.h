@@ -56,40 +56,7 @@ namespace Builder
 	{
 	private:
 
-		inline static const std::vector<InbusConvDescription> m_inbusConvDescriptions =
-		{
-			// SI32 -> SI32
-			//
-			{ E::AnalogAppSignalFormat::SignedInt32, E::DataFormat::SignedInt, SIZE_32BIT,
-				Afb::SCALE_SI32_SI32, SIZE_32BIT, false, Afb::NO_AFB, SIZE_32BIT,
-				false, Afb::NO_AFB, SIZE_32BIT, Afb::SCALE_SI32_SI32, SIZE_32BIT },
-
-			// SI32 -> FP32
-
-			{ E::AnalogAppSignalFormat::SignedInt32, E::DataFormat::Float, SIZE_32BIT,
-				Afb::SCALE_SI32_FP32, SIZE_32BIT, false, Afb::TCONV_SI32_FP32, SIZE_32BIT,
-				false, Afb::TCONV_SI32_FP32, SIZE_32BIT, Afb::SCALE_FP32_SI32, SIZE_32BIT },
-
-			// SI32 -> SI16
-			//
-			{ E::AnalogAppSignalFormat::SignedInt32, E::DataFormat::SignedInt, SIZE_16BIT,
-				Afb::SCALE_SI32_SI32, SIZE_32BIT, true, Afb::SW_TCONV_SI32_SI16, SIZE_16BIT,
-				true, Afb::TCONV_SI16_SI32 + Afb::OR + Afb::SW_TCONV_SI16_SI32, SIZE_32BIT, Afb::SCALE_SI32_SI32, SIZE_32BIT },
-
-			// SI32 -> UI16
-			//
-			{ E::AnalogAppSignalFormat::SignedInt32, E::DataFormat::UnsignedInt, SIZE_16BIT,
-				Afb::SCALE_SI32_UI16, SIZE_32BIT, false, Afb::SW_TCONV_SI32_UI16, SIZE_16BIT,
-				false, Afb::TCONV_UI16_SI32 + Afb::OR + Afb::SW_TCONV_UI16_SI32, SIZE_32BIT, Afb::SCALE_UI16_SI32, SIZE_32BIT },
-
-/*
-
-			{ E::AnalogAppSignalFormat::Float32, E::DataFormat::SignedInt, SIZE_32, "scale_fp_si", SIZE_32BIT, false, "tconv_fp_si", SIZE_32BIT },
-			{ E::AnalogAppSignalFormat::Float32, E::DataFormat::Float, SIZE_32, "scale_fp_fp", SIZE_32BIT, false, "", SIZE_32BIT },
-			{ E::AnalogAppSignalFormat::Float32, E::DataFormat::SignedInt, SIZE_16, "scale_fp_si", SIZE_32BIT, true, "sw_tconv_si_16si", SIZE_16BIT },
-			{ E::AnalogAppSignalFormat::Float32, E::DataFormat::UnsignedInt, SIZE_16, "scale_fp_si", SIZE_32BIT, true, "sw_tconv_si_16ui", SIZE_16BIT },*/
-
-		};
+		static const std::vector<InbusConvDescription> m_inbusConvDescriptions;
 
 	public:
 		QString signalID;

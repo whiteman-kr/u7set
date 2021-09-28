@@ -9588,12 +9588,14 @@ namespace Builder
 
 		bool result = true;
 
+		CodeSnippet inbusConvCode;
+
 		if (scalingRequired == true)
 		{
 			saveResultToAccumulator = convDesc.inbusTypeConvAfterScalingRequired == true ||
 										byteOrderConvRequired == true;
 
-			result &= genInbusScalingCode(code, inputSignal, busChildSignal, busSignal, busComposerLabel,
+			result &= genInbusScalingCode(&inbusConvCode, inputSignal, busChildSignal, busSignal, busComposerLabel,
 										  convDesc, false, saveResultToAccumulator, inbusSignalAddr);
 
 			readValueFromAccumulator = saveResultToAccumulator;
@@ -9603,7 +9605,7 @@ namespace Builder
 
 				saveResultToAccumulator = byteOrderConvRequired;
 
-				result &= genInbusTypeConversionCode(code, inputSignal, busChildSignal, busSignal, busComposerLabel,
+				result &= genInbusTypeConversionCode(&inbusConvCode, inputSignal, busChildSignal, busSignal, busComposerLabel,
 													 convDesc, readValueFromAccumulator, saveResultToAccumulator,
 													 inbusSignalAddr);
 
@@ -9616,7 +9618,7 @@ namespace Builder
 			{
 				saveResultToAccumulator = byteOrderConvRequired;
 
-				result &= genInbusTypeConversionCode(code, inputSignal, busChildSignal, busSignal, busComposerLabel,
+				result &= genInbusTypeConversionCode(&inbusConvCode, inputSignal, busChildSignal, busSignal, busComposerLabel,
 													 convDesc, readValueFromAccumulator, saveResultToAccumulator,
 													 inbusSignalAddr);
 
@@ -9626,22 +9628,20 @@ namespace Builder
 
 		if (byteOrderConvRequired == true)
 		{
-			result &= genInbusByteOrderConversionCode(code, inputSignal, busChildSignal, busSignal, busComposerLabel,
+			result &= genInbusByteOrderConversionCode(&inbusConvCode, inputSignal, busChildSignal, busSignal, busComposerLabel,
 													convDesc, readValueFromAccumulator, false /* always save to inBusSignal */,
 													inbusSignalAddr);
 		}
 
-/*		if (busSignal.is_SInt32_To_UInt16_BE_NoScale_conversion() == true)
+		if (result == true)
 		{
-			return gen_SInt32_To_UInt16_BE_NoScale_inbusConversionCode(code, inputSignal, busChildSignal, inbusSignalAddr);
-		}
+			code->comment_nl(QString("Inbus conversion code for signal %1 -> %2.%3").
+							 arg(inputSignal->appSignalID()).
+							 arg(parentBusSignal->appSignalID()).arg(busSignal.caption));
+			code->append(inbusConvCode);
 
-		if (busSignal.is_SInt32_To_SInt16_BE_NoScale_conversion() == true)
-		{
-			return gen_SInt32_To_SInt16_BE_NoScale_inbusConversionCode(code, inputSignal, busChildSignal, inbusSignalAddr);
+			code->newLine();
 		}
-
-		LOG_INTERNAL_ERROR(m_log);*/
 
 		return result;
 	}
@@ -10436,33 +10436,11 @@ namespace Builder
 			}
 		}
 
-
-/*		if (hasKnownConversion(busSignal) == false)
-		{
-			// Unknown conversion from inbus signal %1 to app signal %2 (Logic schema %3)
-			//
-			m_log->errALC5196(busChildSignal->appSignalID(), busSignal.signalID, busChildSignal->ualItemSchemaID());
-			return false;
-		}
-
-		bool result = false;
-
-		CodeSnippet frombusConvCode;
-
-		if (busSignal.is_SInt32_To_UInt16_BE_NoScale_conversion() == true)
-		{
-			result = gen_UInt16_To_SInt32_BE_NoScale_frombusConversionCode(&frombusConvCode, inputBusSignal, busSignal, busChildSignal);
-		}
-
-		if (busSignal.is_SInt32_To_SInt16_BE_NoScale_conversion() == true)
-		{
-			result = gen_SInt16_To_SInt32_BE_NoScale_frombusConversionCode(&frombusConvCode, inputBusSignal, busSignal, busChildSignal);
-		} */
-
 		if (result == true)
 		{
-			code->comment_nl(QString("Frombus coversion code for signal %1.%2").
-							 arg(inputBusSignal->appSignalID()).arg(busSignal.signalID));
+			code->comment_nl(QString("Frombus coversion code for signal %1.%2 -> %3").
+								arg(inputBusSignal->appSignalID()).arg(busSignal.signalID).
+								arg(busChildSignal->appSignalID()));
 			code->append(frombusConvCode);
 
 			code->newLine();
@@ -10700,28 +10678,32 @@ namespace Builder
 					writeAddr = accAddr;
 				}
 
+				Address16 acc2Addr(wordAccumulator2Address(), 0);
+
 				// Construct unsigned value
 
-				cmd.writeFuncBlock(swtch->opcode(), swtch->instance(),
-									x1->afbOperandIndex() + 1, readAddr,
-									swtch->caption());
+				cmd.movConst(acc2Addr.offset(), 0);
 				code->append(cmd);
 
-				cmd.writeFuncBlockConst(swtch->opcode(), swtch->instance(),
-										x1->afbOperandIndex(), 0,
-										swtch->caption());
+				cmd.mov(acc2Addr.offset() + 1, readAddr.offset());
+				code->append(cmd);
+
+				cmd.writeFuncBlock32(swtch->opcode(), swtch->instance(),
+									x1->afbOperandIndex(), acc2Addr,
+									swtch->caption());
 				code->append(cmd);
 
 				// Construct signed value
 
-				cmd.writeFuncBlock(swtch->opcode(), swtch->instance(),
-									x2->afbOperandIndex() + 1, readAddr,
-									swtch->caption());
+				cmd.movConst(acc2Addr.offset(), 0xFFFF);
 				code->append(cmd);
 
-				cmd.writeFuncBlockConst(swtch->opcode(), swtch->instance(),
-										x2->afbOperandIndex(), 0xFFFF,
-										swtch->caption());
+				cmd.mov(acc2Addr.offset() + 1, readAddr.offset());
+				code->append(cmd);
+
+				cmd.writeFuncBlock32(swtch->opcode(), swtch->instance(),
+									x2->afbOperandIndex(), acc2Addr,
+									swtch->caption());
 				code->append(cmd);
 
 				// Move sign bit to Select pin
@@ -10735,7 +10717,7 @@ namespace Builder
 				cmd.start(swtch->opcode(), swtch->instance(), swtch->caption(), swtch->runTime());
 				code->append(cmd);
 
-				cmd.readFuncBlock(writeAddr,
+				cmd.readFuncBlock32(writeAddr,
 								  swtch->opcode(), swtch->instance(),
 								  output->afbOperandIndex(),
 								  swtch->caption());
@@ -15951,6 +15933,11 @@ namespace Builder
 	int ModuleLogicCompiler::wordAccumulatorAddress() const
 	{
 		return m_memoryMap.wordAccumulatorAddress();
+	}
+
+	int ModuleLogicCompiler::wordAccumulator2Address() const
+	{
+		return m_memoryMap.wordAccumulator2Address();
 	}
 
 	// ---------------------------------------------------------------------------------------

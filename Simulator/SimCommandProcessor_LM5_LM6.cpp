@@ -6329,7 +6329,7 @@ namespace Sim
 
 		case 2: // Swap Endians for 32 -> 32
 			{
-				quint32 input = instance->param(i_data_16)->dwordValue();
+				quint32 input = instance->param(i_data_32)->dwordValue();
 
 #if Q_BYTE_ORDER == Q_BIG_ENDIAN
 				quint32 result = qToLittleEndian<quint32>(input);
