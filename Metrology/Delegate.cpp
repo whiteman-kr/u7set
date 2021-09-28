@@ -14,7 +14,7 @@ IntDelegate::IntDelegate(QObject* parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QWidget* IntDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /* option */, const QModelIndex& /* index */) const
+QWidget* IntDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const
 {
 	QLineEdit* editor = new QLineEdit(parent);
 
@@ -34,7 +34,7 @@ DoubleDelegate::DoubleDelegate(QObject* parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QWidget* DoubleDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /* option */, const QModelIndex& /* index */) const
+QWidget* DoubleDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const
 {
 	QLineEdit* editor = new QLineEdit(parent);
 
@@ -86,7 +86,10 @@ void ColorDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option,
 
 			painter->setRenderHint(QPainter::TextAntialiasing);
 			painter->setPen(option.palette.text().color());
-			painter->drawText(textRect, Qt::AlignLeft, QString("[%1, %2, %3]").arg(color.red()).arg(color.green()).arg(color.blue()));
+			painter->drawText(textRect, Qt::AlignLeft, QString("[%1, %2, %3]").
+														arg(color.red()).
+														arg(color.green()).
+														arg(color.blue()));
 		}
 	else
 	{
@@ -131,7 +134,9 @@ void FindTextDelegate::paint(QPainter* painter, const QStyleOptionViewItem &opti
 	QSize offerTextSize = option.fontMetrics.size(Qt::TextSingleLine, offerText);
 	QSize selectTextSize = option.fontMetrics.size(Qt::TextSingleLine, selectText);
 
-	selectTextRect.setRect(option.rect.left() + offerTextSize.width() + 6, option.rect.top() + 2, selectTextSize.width() + 1, selectTextSize.height() - 2);
+	selectTextRect.setRect(	option.rect.left() + offerTextSize.width() + 6,
+							option.rect.top() + 2, selectTextSize.width() + 1,
+							selectTextSize.height() - 2);
 	painter->fillRect(selectTextRect, QColor(0xFF, 0xF0, 0x0F));
 
 	painter->setRenderHint(QPainter::TextAntialiasing);

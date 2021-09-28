@@ -1003,8 +1003,8 @@ void PanelStatistics::onSelectSignalForMeasure()
 				 "For example, type of connection: \"Input\" -> \"%2\".\n\n"
 				 "To create a new connection between signals, select \"View\"->\"Metrology connections...\"\n\n"
 				 "Do you want to create new connection now?")
-				.arg(si.signal()->param().customAppSignalID())
-				.arg(qApp->translate("MetrologySignal", si.signal()->param().signalTypeStr().toUtf8()));
+				.arg(si.signal()->param().customAppSignalID(),
+					 qApp->translate("MetrologySignal", si.signal()->param().signalTypeStr().toUtf8()));
 
 		int result = QMessageBox::question(this, windowTitle(), str);
 		if (result == QMessageBox::No)

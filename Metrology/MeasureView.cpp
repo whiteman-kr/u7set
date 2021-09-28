@@ -822,7 +822,8 @@ namespace Measure
 		std::vector<int> keyList;
 		std::vector<int> removeIndexList;
 
-		for(auto selectedIndex : selectionModel()->selectedRows())
+		const QModelIndexList selectedList = selectionModel()->selectedRows();
+		for(auto selectedIndex : selectedList)
 		{
 			int index = selectedIndex.row();
 			if (index < 0 || index >= m_model.count())
@@ -924,7 +925,8 @@ namespace Measure
 
 		std::vector<Measure::Item*> measurementList;
 
-		for(auto selectedIndex : selectionModel()->selectedRows())
+		const QModelIndexList selectedList = selectionModel()->selectedRows();
+		for(auto selectedIndex : selectedList)
 		{
 			int index = selectedIndex.row();
 			if (index < 0 || index >= m_model.count())

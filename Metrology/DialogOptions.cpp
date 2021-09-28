@@ -958,7 +958,13 @@ void DialogOptions::expandProperty(QtTreePropertyBrowser* pEditor, int page, int
 		return;
 	}
 
-	pEditor->setExpanded(pEditor->items(pProperty)[0], expanded);
+	QtBrowserItem* pItem = pEditor->items(pProperty).at(0);
+	if (pItem == nullptr)
+	{
+		return;
+	}
+
+	pEditor->setExpanded(pItem, expanded);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

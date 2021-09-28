@@ -743,6 +743,9 @@ double UnitsConvertor::r0_from_signal(const AppSignal& signal)
 
 				case E::SensorType::Ohm_Ni50_W1617:		r0 = 50; break;
 				case E::SensorType::Ohm_Ni100_W1617:	r0 = 100; break;
+
+				default:
+					r0 = 0;
 			}
 		}
 	}
@@ -1091,7 +1094,7 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Output(double elVal, doubl
 
 	if (waitUnitID != unitID)
 	{
-		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect electric unit: \"%1\" for mode: \"%2\"").arg(QMetaEnum::fromType<E::ElectricUnit>().key(unitID)).arg(QMetaEnum::fromType<E::OutputMode>().key(outputMode)));
+		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect electric unit: \"%1\" for mode: \"%2\"").arg(QMetaEnum::fromType<E::ElectricUnit>().key(unitID), QMetaEnum::fromType<E::OutputMode>().key(outputMode)));
 	}
 
 	double phVal = (elVal - electricLowLimit) * (OUT_PH_HIGH_LIMIT - OUT_PH_LOW_LIMIT) / (electricHighLimit - electricLowLimit) + OUT_PH_LOW_LIMIT;

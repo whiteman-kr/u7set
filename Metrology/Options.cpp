@@ -1014,9 +1014,9 @@ void MeasureViewOption::load()
 					continue;
 				}
 
-				c.setTitle(s.value(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.title()).toString());
-				c.setWidth(s.value(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()), c.width()).toInt());
-				c.setVisible(s.value(QString("%1/Header/%2/%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()), c.enableVisible()).toBool());
+				c.setTitle(s.value(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY, caption, c.uniqueTitle(), language), c.title()).toString());
+				c.setWidth(s.value(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY, caption, c.uniqueTitle()), c.width()).toInt());
+				c.setVisible(s.value(QString("%1/Header/%2/%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY, caption, c.uniqueTitle()), c.enableVisible()).toBool());
 			}
 		}
 	}
@@ -1061,9 +1061,9 @@ void MeasureViewOption::save()
 					continue;
 				}
 
-				s.setValue(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()).arg(language), c.title());
-				s.setValue(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()), c.width());
-				s.setValue(QString("%1/Header/%2/%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()), c.enableVisible());
+				s.setValue(QString("%1/Header/%2/%3/%4/Title").arg(MEASURE_VIEW_OPTIONS_KEY, caption, c.uniqueTitle(), language), c.title());
+				s.setValue(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY, caption, c.uniqueTitle()), c.width());
+				s.setValue(QString("%1/Header/%2/%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY, caption, c.uniqueTitle()), c.enableVisible());
 			}
 		}
 	}
@@ -1088,7 +1088,7 @@ void MeasureViewOption::saveColumnWidth(Measure::Type measureType, const Measure
 
 	QString caption = Measure::TypeCaption(static_cast<Measure::Type>(measureType));
 
-	s.setValue(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(caption).arg(c.uniqueTitle()), c.width());
+	s.setValue(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY, caption, c.uniqueTitle()), c.width());
 
 	int languageType = theOptions.language().languageType();
 	if (ERR_LANGUAGE_TYPE(languageType) == true)

@@ -424,7 +424,8 @@ void DialogComparatorList::onEnableMeasure()
 		return;
 	}
 
-	for(auto selectedIndex : pView->selectionModel()->selectedRows())
+	const QModelIndexList selectedList = pView->selectionModel()->selectedRows();
+	for(auto selectedIndex : selectedList)
 	{
 		int indexRow = selectedIndex.row();
 		if (indexRow < 0 || indexRow >= m_comparatorTable.count())
@@ -452,7 +453,8 @@ void DialogComparatorList::onDisableMeasure()
 		return;
 	}
 
-	for(auto selectedIndex : pView->selectionModel()->selectedRows())
+	const QModelIndexList selectedList = pView->selectionModel()->selectedRows();
+	for(auto selectedIndex : selectedList)
 	{
 		int indexRow = selectedIndex.row();
 		if (indexRow < 0 || indexRow >= m_comparatorTable.count())

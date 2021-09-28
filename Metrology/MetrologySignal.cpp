@@ -383,6 +383,12 @@ namespace Metrology
 								qph = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricR0);
 
 								break;
+
+							case E::ElectricUnit::NoUnit:
+								break;
+
+							default:
+								assert(0);
 						}
 
 						break;
@@ -397,6 +403,9 @@ namespace Metrology
 						qpl = uc.electricToPhysical_Output(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, signal.outputMode());
 						qph = uc.electricToPhysical_Output(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, signal.outputMode());
 
+						break;
+
+					default:
 						break;
 				}
 			}
@@ -614,6 +623,9 @@ namespace Metrology
 					typeStr += " " + electricR0Str();
 				}
 
+				break;
+
+			default:
 				break;
 		}
 
@@ -890,6 +902,9 @@ namespace Metrology
 				break;
 
 			case E::SignalType::Discrete:						type = TuningValueType::Discrete;		break;
+
+			default:
+				break;
 		}
 
 		return type;
@@ -1160,6 +1175,9 @@ namespace Metrology
 		{
 			case E::CmpType::Greate:	typeStr = QChar(9650);	break;
 			case E::CmpType::Less:		typeStr = QChar(9660);	break;
+
+			default:
+				typeStr.clear();
 		}
 
 		return typeStr;
@@ -1212,6 +1230,9 @@ namespace Metrology
 					{
 						case E::CmpType::Less:		deviation = hysteresisValue;	break;
 						case E::CmpType::Greate:	deviation -= hysteresisValue;	break;
+
+						default:
+							deviation = 0;
 					}
 				}
 
@@ -1406,6 +1427,9 @@ namespace Metrology
 			{
 				case E::CmpType::Less:		value.insert(0, "+ "); break;
 				case E::CmpType::Greate:	value.insert(0, "- "); break;
+
+				default:
+					value.insert(0, "  ");
 			}
 
 			if (m_deviationType != DeviationType::Unused)

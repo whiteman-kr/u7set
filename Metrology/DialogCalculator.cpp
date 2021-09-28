@@ -517,8 +517,8 @@ void DialogCalculator::conversionTr()
 		if (degreeVal < degreeLowLimit || degreeVal > degreeHighLimit)
 		{
 			m_pTrElectricEdit->setText(	tr("Out of range: %1 .. %2").
-										arg(QString::number(degreeLowLimit, 'f', DefaultElectricUnitPrecesion)).
-										arg(QString::number(degreeHighLimit, 'f', DefaultElectricUnitPrecesion)));
+										arg(QString::number(degreeLowLimit, 'f', DefaultElectricUnitPrecesion),
+											QString::number(degreeHighLimit, 'f', DefaultElectricUnitPrecesion)));
 
 			m_pTrElectricEdit->setCursorPosition(0);
 		}
@@ -538,8 +538,8 @@ void DialogCalculator::conversionTr()
 		if (electricVal < electricLimit.lowLimit*  r0 / 100 || electricVal > electricLimit.highLimit*  r0 / 100)
 		{
 			m_pTrDegreeEdit->setText(	tr("Out of range: %1 .. %2").
-										arg(QString::number(electricLimit.lowLimit, 'f', DefaultElectricUnitPrecesion)).
-										arg(QString::number(electricLimit.highLimit, 'f', DefaultElectricUnitPrecesion)));
+										arg(QString::number(electricLimit.lowLimit, 'f', DefaultElectricUnitPrecesion),
+											QString::number(electricLimit.highLimit, 'f', DefaultElectricUnitPrecesion)));
 
 			m_pTrDegreeEdit->setCursorPosition(0);
 		}
@@ -585,8 +585,8 @@ void DialogCalculator::conversionTc()
 		if (degreeVal < degreeLowLimit || degreeVal > degreeHighLimit)
 		{
 			m_pTcElectricEdit->setText(	tr("Out of range: %1 .. %2").
-										arg(QString::number(degreeLowLimit, 'f', DefaultElectricUnitPrecesion)).
-										arg(QString::number(degreeHighLimit, 'f', DefaultElectricUnitPrecesion)));
+										arg(QString::number(degreeLowLimit, 'f', DefaultElectricUnitPrecesion),
+											QString::number(degreeHighLimit, 'f', DefaultElectricUnitPrecesion)));
 
 			m_pTcElectricEdit->setCursorPosition(0);
 		}
@@ -607,8 +607,8 @@ void DialogCalculator::conversionTc()
 		if (electricVal < electricLimit.lowLimit || electricVal > electricLimit.highLimit)
 		{
 			m_pTcDegreeEdit->setText(	tr("Out of range: %1 .. %2").
-										arg(QString::number(electricLimit.lowLimit, 'f', DefaultElectricUnitPrecesion)).
-										arg(QString::number(electricLimit.highLimit, 'f', DefaultElectricUnitPrecesion)));
+										arg(QString::number(electricLimit.lowLimit, 'f', DefaultElectricUnitPrecesion),
+											QString::number(electricLimit.highLimit, 'f', DefaultElectricUnitPrecesion)));
 
 			m_pTcDegreeEdit->setCursorPosition(0);
 		}

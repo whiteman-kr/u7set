@@ -111,8 +111,8 @@ namespace Metrology
 
 		strID =	QString("%1_%2_%3").
 				arg(m_type, 3, 10, QChar('0')).
-				arg(m_connectionSignal[ConnectionIoType::Source].appSignalID()).
-				arg(m_connectionSignal[ConnectionIoType::Destination].appSignalID());
+				arg(m_connectionSignal[ConnectionIoType::Source].appSignalID(),
+					m_connectionSignal[ConnectionIoType::Destination].appSignalID());
 
 		return strID;
 	}
@@ -188,6 +188,9 @@ namespace Metrology
 					return false;
 				}
 
+				break;
+
+			default:
 				break;
 		}
 
