@@ -120,6 +120,16 @@ namespace Sim
 		return result;
 	}
 
+	quint16 ScriptLogicModule::readRamUnsignedInt16(RamAddress address, E::LogicModuleRamAccess access)
+	{
+		return readRamWord(address, access);
+	}
+
+	qint16 ScriptLogicModule::readRamSignedInt16(RamAddress address, E::LogicModuleRamAccess access)
+	{
+		return static_cast<qint16>(readRamWord(address, access));
+	}
+
 	quint32 ScriptLogicModule::readRamDword(RamAddress address, E::LogicModuleRamAccess access)
 	{
 		quint32 result = {};

@@ -6321,8 +6321,8 @@ namespace Sim
 		{
 		case 1: // Swap Endians for 16 -> 16
 			{
-				qint16 input = instance->param(i_data_16)->wordValue();
-				qint16 result = (input >> 8) | (input << 8);
+				quint16 input = instance->param(i_data_16)->wordValue();
+				quint16 result = (input >> 8) | (input << 8);
 				instance->addParamWord(o_data_16, result);
 			}
 			break;

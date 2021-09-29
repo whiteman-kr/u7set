@@ -39,6 +39,8 @@ namespace Sim
 	public slots:
 		quint16 readRamBit(RamAddress address, E::LogicModuleRamAccess access);
 		quint16 readRamWord(RamAddress address, E::LogicModuleRamAccess access);
+		quint16 readRamUnsignedInt16(RamAddress address, E::LogicModuleRamAccess access);
+		qint16 readRamSignedInt16(RamAddress address, E::LogicModuleRamAccess access);
 		quint32 readRamDword(RamAddress address, E::LogicModuleRamAccess access);
 		qint32 readRamSignedInt(RamAddress address, E::LogicModuleRamAccess access);
 		float readRamFloat(RamAddress address, E::LogicModuleRamAccess access);

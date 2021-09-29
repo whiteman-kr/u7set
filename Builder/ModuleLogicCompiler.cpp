@@ -9793,8 +9793,8 @@ namespace Builder
 
 			if (readValueFromAccumulator == true)
 			{
-				cmd.mov(writeAddr, accAddr);
-				code->append(cmd);
+				cmd.mov(writeAddr.offset(), accAddr.offset() + 1);			// read low word
+				*code << cmd;
 			}
 			else
 			{
@@ -9817,7 +9817,7 @@ namespace Builder
 								   arg(inputSignal->refSignalIDsJoined()));
 				}
 
-				code->append(cmd);
+				*code << cmd;
 			}
 
 			return true;
@@ -10402,7 +10402,7 @@ namespace Builder
 			saveResultToAccumulator = scalingRequired || typeConvRequired;
 
 			result &= genFrombusByteOrderConversionCode(&frombusConvCode, inputBusSignal, busSignal, busChildSignal,
-														busExtractorLabel, convDesc, readValueFromAccumulator, false,
+														busExtractorLabel, convDesc, readValueFromAccumulator, saveResultToAccumulator,
 														inbusSignalAddr);
 
 			readValueFromAccumulator = saveResultToAccumulator;
@@ -10440,7 +10440,7 @@ namespace Builder
 		{
 			code->comment_nl(QString("Frombus coversion code for signal %1.%2 -> %3").
 								arg(inputBusSignal->appSignalID()).arg(busSignal.signalID).
-								arg(busChildSignal->appSignalID()));
+								arg(busChildSignal->refSignalIDsJoined()));
 			code->append(frombusConvCode);
 
 			code->newLine();

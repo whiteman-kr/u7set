@@ -1920,6 +1920,12 @@ namespace Builder
 		return sizeW;
 	}
 
+	CodeSnippet& CodeSnippet::operator << (const CodeItem& ci)
+	{
+		append(ci);
+		return *this;
+	}
+
 	// -----------------------------------------------------------------------------------------------
 	//
 	// CodeSnippetMetrics struct implementation

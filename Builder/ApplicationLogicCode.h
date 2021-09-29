@@ -419,7 +419,10 @@ namespace Builder
 		void calculate(CodeSnippetMetrics* codeFragmentMetrics);
 
 		int sizeW() const;
+
+		CodeSnippet& operator << (const CodeItem& ci);
 	};
+
 
 	class ApplicationLogicCode : public QObject
 	{
