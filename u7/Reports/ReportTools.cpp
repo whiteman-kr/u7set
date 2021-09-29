@@ -228,9 +228,12 @@ void DialogReportFileTypeParams::fillTree()
 // ReportSchemaView
 //
 
-ReportSchemaView::ReportSchemaView(QWidget* parent):
+ReportSchemaView::ReportSchemaView(AppSignalSetProvider* signalSetProvider, QWidget* parent):
+	m_appSignalProvider(signalSetProvider),
+	m_appSignalController(&m_appSignalProvider, nullptr),
 	VFrame30::SchemaView(parent)
 {
+	Q_ASSERT(signalSetProvider);
 }
 
 ReportSchemaView::~ReportSchemaView()
@@ -311,7 +314,11 @@ void ReportSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, cons
 			}
 		}
 	}
+}
 
+VFrame30::AppSignalController* ReportSchemaView::appSignalController()
+{
+	return &m_appSignalController;
 }
 
 //
@@ -866,6 +873,7 @@ void ReportGenerator::printSchema(QPdfWriter* pdfWriter,
 	VFrame30::CDrawParam drawParam(painter, schema.get(), m_schemaView, schema->gridSize(), schema->pinGridStep());
 	drawParam.setInfoMode(false);
 	drawParam.session() = m_schemaView->session();
+	drawParam.setAppSignalController(m_schemaView->appSignalController());
 
 	m_schemaView->setSchema(schema, true);
 	m_schemaView->adjust(painter, schemaLeft, schemaTop, zoom * 100.0);		// Export 100% zoom

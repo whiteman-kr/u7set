@@ -202,13 +202,14 @@ void SchemasReportDialog::pageSetupClicked()
 //
 
 SchemasReportGeneratorThread::SchemasReportGeneratorThread(const QString& serverIp,
-											   int serverPort,
-											   const QString& serverUserName,
-											   const QString& serverPassword,
-											   const QString& projectName,
-											   const QString& userName,
-											   const QString& userPassword,
-											   QWidget* parent):
+														   int serverPort,
+														   const QString& serverUserName,
+														   const QString& serverPassword,
+														   const QString& projectName,
+														   const QString& userName,
+														   const QString& userPassword,
+														   AppSignalSetProvider* signalSetProvider,
+														   QWidget* parent):
 	m_serverIp(serverIp),
 	m_serverPort(serverPort),
 	m_serverUserName(serverUserName),
@@ -216,7 +217,8 @@ SchemasReportGeneratorThread::SchemasReportGeneratorThread(const QString& server
 	m_projectName(projectName),
 	m_userName(userName),
 	m_userPassword(userPassword),
-	m_parent(parent)
+	m_parent(parent),
+	m_appSignalProvider(signalSetProvider)
 {
 
 }
@@ -244,7 +246,7 @@ void SchemasReportGeneratorThread::run(TaskType task,
 {
 	// Create View
 
-	ReportSchemaView* schemaView = new ReportSchemaView(m_parent);
+	ReportSchemaView* schemaView = new ReportSchemaView(m_appSignalProvider, m_parent);
 
 	schemaView->session().setProject(m_projectName);
 	schemaView->session().setUsername(m_userName);

@@ -99,6 +99,7 @@ public:
 					const QString& projectName,
 					const QString& userName,
 					const QString& userPassword,
+					AppSignalSetProvider* appSignalProvider,
 					QWidget* parent);
 
 };
