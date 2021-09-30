@@ -16,15 +16,19 @@ function assert(condition, message)
 var lm1;
 var lm1Description;
 
-var constBusSignal;
-var constBusUalAddr;
+const SI32_CONST = 1000;
+const SI32_VAR_SIGNAL_ID = "#LM1_TUN_SINT32";
 
-var varBusSignal;
-var varBusUalAddr;
+var si32ConstBusUalAddr;
+var si32VarBusUalAddr;
+
+const FP32_CONST = 1234.51;
+const FP32_VAR_SIGNAL_ID = "#LM1_TUN_FP32";
+
+var fp32ConstBusUalAddr;
+var fp32VarBusUalAddr;
 
 var devUtils;
-
-const SI32_CONST = 1000;
 
 // initTestCase() - will be called before the first test function is executed.
 //
@@ -38,27 +42,39 @@ function initTestCase(sim)
     sim.startForMs(5);                  // Run simulation for 5 ms, it warms up all modules
 	
 	devUtils = sim.devUtils();
-	assert(devUtils != null);
+    assert(devUtils !== null);
 	
 	let lm1ID = "SYSTEMID_RACK01_FSCC01_MD00";
 	
 	lm1 = sim.logicModule(lm1ID);
-	assert(lm1 != null);
+    assert(lm1 !== null);
 	
 	lm1Description = sim.scriptLmDescription(lm1ID);
-	assert(lm1Description != null);
+    assert(lm1Description !== null);
 	
 	//
 	
-	constBusSignal = sim.signalParamExt("#LM1_CONST_SI32_INBUS_CONV");
-	assert(constBusSignal != null);
-	constBusUalAddr = constBusSignal.ualAddr;
+    let si32ConstBusSignal = sim.signalParamExt("#LM1_CONST_SI32_INBUS_CONV");
+    assert(si32ConstBusSignal !== null);
+    si32ConstBusUalAddr = si32ConstBusSignal.ualAddr;
 
 	//
 	
-	varBusSignal = sim.signalParamExt("#LM1_VAR_SI32_INBUS_CONV");
-	assert(varBusSignal != null);
-	varBusUalAddr = varBusSignal.ualAddr;
+    let si32VarBusSignal = sim.signalParamExt("#LM1_VAR_SI32_INBUS_CONV");
+    assert(si32VarBusSignal !== null);
+    si32VarBusUalAddr = si32VarBusSignal.ualAddr;
+
+    //
+
+    let fp32ConstBusSignal = sim.signalParamExt("#LM1_CONST_FP32_INBUS_CONV");
+    assert(fp32ConstBusSignal !== null);
+    fp32ConstBusUalAddr = fp32ConstBusSignal.ualAddr;
+
+    //
+
+    let fp32VarBusSignal = sim.signalParamExt("#LM1_VAR_FP32_INBUS_CONV");
+    assert(fp32VarBusSignal !== null);
+    fp32VarBusUalAddr = fp32VarBusSignal.ualAddr;
 
     return;
 }
@@ -91,70 +107,74 @@ function test_conversion_SI32_SI32_NS(sim)
 {
 	// check const conversion
 
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 12, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 12, 0);
 	
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt(addr, RamReadWriteAccess) === SI32_CONST);
 	assert(sim.signalValue("#LM1_CONST_SI32_SI32_NS") === SI32_CONST);
 
 	// check variable conversion
+
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_SI32_NS";
 	
-	addr = sim.createRamAddress(varBusUalAddr.offset + 12, 0);
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 12, 0);
 	
 	let v = 123456;
 
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt(addr, RamReadWriteAccess) === v);
-	assert(sim.signalValue("#LM1_VAR_SI32_SI32_NS") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
 	v = -32945879;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt(addr, RamReadWriteAccess) === v);
-	assert(sim.signalValue("#LM1_VAR_SI32_SI32_NS") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 }
 
 function test_conversion_SI32_FP32_NS(sim)
 {
 	// check const conversion
 	
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 0, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 0, 0);
 	
 	sim.startForMs(5);
 	assert(lm1.readRamFloat(addr, RamReadWriteAccess) === SI32_CONST);
 	assert(sim.signalValue("#LM1_CONST_SI32_FP32_NS") === SI32_CONST);
 
 	// check variable conversion
+
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_FP32_NS";
 	
-	addr = sim.createRamAddress(varBusUalAddr.offset + 0, 0);
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 0, 0);
 	
 	let v = -34567;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamFloat(addr, RamReadWriteAccess) === v);
-	assert(sim.signalValue("#LM1_VAR_SI32_FP32_NS") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
 	v = 1223344;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamFloat(addr, RamReadWriteAccess) === v);
-	assert(sim.signalValue("#LM1_VAR_SI32_FP32_NS") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", -999912345);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, -999912345);
 	sim.startForMs(5);
-	assert(lm1.readRamFloat(addr, RamReadWriteAccess) == -999912320);
-	assert(sim.signalValue("#LM1_VAR_SI32_FP32_NS") === -999912320);		// not precise value
+    assert(lm1.readRamFloat(addr, RamReadWriteAccess) === -999912320);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === -999912320);		// not precise value
 }
 
 function test_conversion_SI32_SI16_NS(sim)
 {
 	// check const conversion
 	
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 8, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 8, 0);
 	
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === SI32_CONST);
@@ -162,58 +182,62 @@ function test_conversion_SI32_SI16_NS(sim)
 
 	// check variable conversion
 
-	addr = sim.createRamAddress(varBusUalAddr.offset + 8, 0);
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_SI16_NS";
+
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 8, 0);
 	
 	let v = -31500;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === v);
-	assert(sim.signalValue("#LM1_VAR_SI32_SI16_NS") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
 	v = 27100;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === v);	
-	assert(sim.signalValue("#LM1_VAR_SI32_SI16_NS") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", 56000);					// overflow
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 56000);					// overflow
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === -9536);	
-	assert(sim.signalValue("#LM1_VAR_SI32_SI16_NS") === -9536);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === -9536);
 }
 
 function test_conversion_SI32_UI16_NS(sim)
 {
 	// check const conversion
 	
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 20, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 20, 0);
 
 	sim.startForMs(5);
 	assert(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess) === SI32_CONST);	
 	assert(sim.signalValue("#LM1_CONST_SI32_UI16_NS") === SI32_CONST);		
 
 	// check variable conversion
+
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_UI16_NS";
 	
-	addr = sim.createRamAddress(varBusUalAddr.offset + 20, 0);
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 20, 0);
 	
 	let v = 1400;
 
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess) === v);	
-	assert(sim.signalValue("#LM1_VAR_SI32_UI16_NS") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", 67000);					// overflow
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 67000);					// overflow
 	sim.startForMs(5);
 	assert(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess) === 1464);	
-	assert(sim.signalValue("#LM1_VAR_SI32_UI16_NS") === 1464);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === 1464);
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", -7000);					// underflow
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, -7000);					// underflow
 	sim.startForMs(5);
 	assert(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess) === 58536);	
-	assert(sim.signalValue("#LM1_VAR_SI32_UI16_NS") === 58536);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === 58536);
 }
 
 function test_conversion_SI32_SI32_SC(sim)
@@ -222,29 +246,31 @@ function test_conversion_SI32_SI32_SC(sim)
 	
 	// check const conversion
 
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 16, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 16, 0);
 
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt(addr, RamReadWriteAccess) === SI32_CONST * 2 + 20);	
 	assert(sim.signalValue("#LM1_CONST_SI32_SI32_SC") === SI32_CONST);
 	
 	// check variable conversion
+
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_SI32_SC";
 	
-	addr = sim.createRamAddress(varBusUalAddr.offset + 16, 0);
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 16, 0);
 	
 	let v = 12000;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt(addr, RamReadWriteAccess) === v * 2 + 20);
-	assert(sim.signalValue("#LM1_VAR_SI32_SI32_SC") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
 	v = -3000;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt(addr, RamReadWriteAccess) === v * 2 + 20);
-	assert(sim.signalValue("#LM1_VAR_SI32_SI32_SC") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 }
 
 function test_conversion_SI32_FP32_SC(sim)
@@ -253,36 +279,38 @@ function test_conversion_SI32_FP32_SC(sim)
 	
 	// check const conversion
 
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 4, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 4, 0);
 
 	sim.startForMs(5);
 	assert(lm1.readRamFloat(addr, RamReadWriteAccess) === SI32_CONST * 0.5 - 5);	
 	assert(sim.signalValue("#LM1_CONST_SI32_FP32_SC") === SI32_CONST);
 	
 	// check variable conversion
+
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_FP32_SC";
 	
-	addr = sim.createRamAddress(varBusUalAddr.offset + 4, 0);
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 4, 0);
 	
 	let v = 11000;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamFloat(addr, RamReadWriteAccess) === v * 0.5 - 5);
-	assert(sim.signalValue("#LM1_VAR_SI32_FP32_SC") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
 	v = -3100;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamFloat(addr, RamReadWriteAccess) === v * 0.5 - 5);
-	assert(sim.signalValue("#LM1_VAR_SI32_FP32_SC") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
 	v = 85458247;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamFloat(addr, RamReadWriteAccess) === 42729120);		// not precise value
-	assert(sim.signalValue("#LM1_VAR_SI32_FP32_SC") === 85458248);			// not precise value
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === 85458248);			// not precise value
 }
 
 function test_conversion_SI32_SI16_SC(sim)
@@ -291,34 +319,36 @@ function test_conversion_SI32_SI16_SC(sim)
 	
 	// check const conversion
 
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 10, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 10, 0);
 
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === SI32_CONST * 0.25 + 5);	
-	assert(sim.signalValue("#LM1_CONST_SI32_SI16_SC") === SI32_CONST);
+    assert(sim.signalValue("#LM1_CONST_SI32_SI16_SC") === SI32_CONST);
 	
 	// check variable conversion
 
-	addr = sim.createRamAddress(varBusUalAddr.offset + 10, 0);
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_SI16_SC";
+
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 10, 0);
 	
 	let v = 11000;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === v * 0.25 + 5);
-	assert(sim.signalValue("#LM1_VAR_SI32_SI16_SC") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
 	v = -3100;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === v * 0.25 + 5);
-	assert(sim.signalValue("#LM1_VAR_SI32_SI16_SC") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", 111);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 111);
 	sim.startForMs(5);
-	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === 32);			// truncated value of 32.75
-	assert(sim.signalValue("#LM1_VAR_SI32_SI16_SC") === 108);					// not precise value
+    assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === 32);	// truncated value of 32.75
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === 108);					// not precise value
 }
 
 function test_conversion_SI32_UI16_SC(sim)
@@ -327,7 +357,7 @@ function test_conversion_SI32_UI16_SC(sim)
 	
 	// check const conversion
 
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 22	, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 22	, 0);
 
 	sim.startForMs(5);
 	assert(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess) === (SI32_CONST * 1.1 + 10) - 1);	// not precise value
@@ -335,27 +365,28 @@ function test_conversion_SI32_UI16_SC(sim)
 	
 	// check variable conversion
 
-	addr = sim.createRamAddress(varBusUalAddr.offset + 22, 0);
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_UI16_SC";
+
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 22, 0);
 	
 	let v = 55000;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess) === 60508);		// not precise value
-	assert(sim.signalValue("#LM1_VAR_SI32_UI16_SC") === v - 2);					// not precise value
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v - 2);					// not precise value
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", 3);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 3);
 	sim.startForMs(5);
 	assert(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess) === 13);			// truncated value of 13.3
-	assert(sim.signalValue("#LM1_VAR_SI32_UI16_SC") === 2);						// not precise value
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === 2);						// not precise value
 }
-
 
 function test_conversion_SI32_SI32_NS_BO(sim)
 {
 	// check const conversion
 
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 14, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 14, 0);
 	
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt(addr, RamReadWriteAccess) === devUtils.reverseSignedInt32(SI32_CONST));
@@ -363,62 +394,66 @@ function test_conversion_SI32_SI32_NS_BO(sim)
 
 	// check variable conversion
 	
-	addr = sim.createRamAddress(varBusUalAddr.offset + 14, 0);
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_SI32_NS_BO";
+
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 14, 0);
 	
 	let v = 87654321;
 
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt(addr, RamReadWriteAccess) === devUtils.reverseSignedInt32(v));
-	assert(sim.signalValue("#LM1_VAR_SI32_SI32_NS_BO") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
 	v = -1234567;
 
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt(addr, RamReadWriteAccess) === devUtils.reverseSignedInt32(v));
-	assert(sim.signalValue("#LM1_VAR_SI32_SI32_NS_BO") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 }
 
 function test_conversion_SI32_FP32_NS_BO(sim)
 {
 	// check const conversion
 	
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 2, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 2, 0);
 	
 	sim.startForMs(5);
 	assert(lm1.readRamFloat(addr, RamReadWriteAccess) === devUtils.reverseFloat(SI32_CONST));
 	assert(sim.signalValue("#LM1_CONST_SI32_FP32_NS_BO") === SI32_CONST);
 
 	// check variable conversion
+
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_FP32_NS_BO";
 	
-	addr = sim.createRamAddress(varBusUalAddr.offset + 2, 0);
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 2, 0);
 	
 	let v = -345670;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamFloat(addr, RamReadWriteAccess) === devUtils.reverseFloat(v));
-	assert(sim.signalValue("#LM1_VAR_SI32_FP32_NS_BO") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
 	v = 1220000;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamFloat(addr, RamReadWriteAccess) === devUtils.reverseFloat(v));
-	assert(sim.signalValue("#LM1_VAR_SI32_FP32_NS_BO") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", -999912345);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, -999912345);
 	sim.startForMs(5);
-	assert(lm1.readRamFloat(addr, RamReadWriteAccess) == devUtils.reverseFloat(-999912320));
-	assert(sim.signalValue("#LM1_VAR_SI32_FP32_NS_BO") === -999912320);		// not precise value 
+    assert(lm1.readRamFloat(addr, RamReadWriteAccess) === devUtils.reverseFloat(-999912320));
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === -999912320);		// not precise value
 }
 
 function test_conversion_SI32_SI16_NS_BO(sim)
 {
 	// check const conversion
 	
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 9, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 9, 0);
 	
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === devUtils.reverseSignedInt16(SI32_CONST));
@@ -426,33 +461,35 @@ function test_conversion_SI32_SI16_NS_BO(sim)
 
 	// check variable conversion
 
-	addr = sim.createRamAddress(varBusUalAddr.offset + 9, 0);
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_SI16_NS_BO";
+
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 9, 0);
 	
 	let v = -1500;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === devUtils.reverseSignedInt16(v));
-	assert(sim.signalValue("#LM1_VAR_SI32_SI16_NS_BO") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
 	v = 17100;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === devUtils.reverseSignedInt16(v));	
-	assert(sim.signalValue("#LM1_VAR_SI32_SI16_NS_BO") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", 56000);					// overflow
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 56000);					// overflow
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === devUtils.reverseSignedInt16(-9536));	
-	assert(sim.signalValue("#LM1_VAR_SI32_SI16_NS_BO") === -9536);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === -9536);
 }
 
 function test_conversion_SI32_UI16_NS_BO(sim)
 {
 	// check const conversion
 	
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 21, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 21, 0);
 
 	sim.startForMs(5);
 	assert(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess) === devUtils.reverseUnsignedInt16(SI32_CONST));	
@@ -460,24 +497,26 @@ function test_conversion_SI32_UI16_NS_BO(sim)
 
 	// check variable conversion
 
-	addr = sim.createRamAddress(varBusUalAddr.offset + 21, 0);
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_UI16_NS_BO";
+
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 21, 0);
 	
 	let v = 54000;
 
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess) === devUtils.reverseUnsignedInt16(v));	
-	assert(sim.signalValue("#LM1_VAR_SI32_UI16_NS_BO") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", 67000);					// overflow
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 67000);					// overflow
 	sim.startForMs(5);
 	assert(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess) === devUtils.reverseUnsignedInt16(1464));	
-	assert(sim.signalValue("#LM1_VAR_SI32_UI16_NS_BO") === 1464);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === 1464);
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", -7000);					// underflow
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, -7000);					// underflow
 	sim.startForMs(5);
 	assert(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess) === devUtils.reverseUnsignedInt16(58536));	
-	assert(sim.signalValue("#LM1_VAR_SI32_UI16_NS_BO") === 58536);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === 58536);
 }
 
 function test_conversion_SI32_SI32_SC_BO(sim)
@@ -486,7 +525,7 @@ function test_conversion_SI32_SI32_SC_BO(sim)
 	
 	// check const conversion
 
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 18, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 18, 0);
 
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt(addr, RamReadWriteAccess) === devUtils.reverseSignedInt32(SI32_CONST * (-1)));	
@@ -494,21 +533,23 @@ function test_conversion_SI32_SI32_SC_BO(sim)
 
 	// check variable conversion
 
-	addr = sim.createRamAddress(varBusUalAddr.offset + 18, 0);
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_SI32_SC_BO";
+
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 18, 0);
 	
 	let v = 12000;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt(addr, RamReadWriteAccess) === devUtils.reverseSignedInt32(v * (-1)));
-	assert(sim.signalValue("#LM1_VAR_SI32_SI32_SC_BO") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
 	v = -3000;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt(addr, RamReadWriteAccess) === devUtils.reverseSignedInt32(v * (-1)));
-	assert(sim.signalValue("#LM1_VAR_SI32_SI32_SC_BO") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 }
 
 function test_conversion_SI32_FP32_SC_BO(sim)
@@ -517,32 +558,34 @@ function test_conversion_SI32_FP32_SC_BO(sim)
 	
 	// check const conversion
 
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 6, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 6, 0);
 
 	sim.startForMs(5);
 	assert(sim.signalValue("#LM1_CONST_SI32_FP32_SC_BO") === SI32_CONST);
 	
 	// check variable conversion
+
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_FP32_SC_BO";
 	
-	addr = sim.createRamAddress(varBusUalAddr.offset + 6, 0);
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 6, 0);
 	
 	let v = 11019;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
-	assert(sim.signalValue("#LM1_VAR_SI32_FP32_SC_BO") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
 	v = -3133;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
-	assert(sim.signalValue("#LM1_VAR_SI32_FP32_SC_BO") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
 	v = 2147483616;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
-	assert(sim.signalValue("#LM1_VAR_SI32_FP32_SC_BO") === 2147483647);			// not precise value
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === 2147483647);			// not precise value
 }
 
 function test_conversion_SI32_SI16_SC_BO(sim)
@@ -551,7 +594,7 @@ function test_conversion_SI32_SI16_SC_BO(sim)
 	
 	// check const conversion
 
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 11, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 11, 0);
 
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === devUtils.reverseSignedInt16(SI32_CONST * 1 - 2));	
@@ -559,28 +602,30 @@ function test_conversion_SI32_SI16_SC_BO(sim)
 	
 	// check variable conversion
 
-	addr = sim.createRamAddress(varBusUalAddr.offset + 11, 0);
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_SI16_SC_BO";
+
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 11, 0);
 	
 	let v = 11111;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === devUtils.reverseSignedInt16(v * 1 - 2));
-	assert(sim.signalValue("#LM1_VAR_SI32_SI16_SC_BO") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
 	v = -3122;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === devUtils.reverseSignedInt16(v * 1 - 2));
-	assert(sim.signalValue("#LM1_VAR_SI32_SI16_SC_BO") === v);
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 	
 	v = 0;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamSignedInt16(addr, RamReadWriteAccess) === devUtils.reverseSignedInt16(v * 1 - 2));	
-	assert(sim.signalValue("#LM1_VAR_SI32_SI16_SC_BO") === v);		
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === v);
 }
 
 function test_conversion_SI32_UI16_SC_BO(sim)
@@ -591,7 +636,7 @@ function test_conversion_SI32_UI16_SC_BO(sim)
 	
 	// check const conversion
 
-	let addr = sim.createRamAddress(constBusUalAddr.offset + 23	, 0);
+    let addr = sim.createRamAddress(si32ConstBusUalAddr.offset + 23	, 0);
 
 	sim.startForMs(5);
 	assert(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess) === devUtils.reverseUnsignedInt16(SI32_CONST * K));
@@ -599,16 +644,17 @@ function test_conversion_SI32_UI16_SC_BO(sim)
 	
 	// check variable conversion
 
-	addr = sim.createRamAddress(varBusUalAddr.offset + 23, 0);
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_SI32_UI16_SC_BO";
+
+    addr = sim.createRamAddress(si32VarBusUalAddr.offset + 23, 0);
 	
 	let v = 44000;
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", v);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, v);
 	sim.startForMs(5);
 	assert(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess) === devUtils.reverseUnsignedInt16(14665));		// not precise value, precise = 14666
-	assert(sim.signalValue("#LM1_VAR_SI32_UI16_SC_BO") === 43995);												// not precise value
+    assert(sim.signalValue(VAR_OUT_SIGNAL_ID) === 43995);												// not precise value
 }
-
 
 function test_SI32_TO_UI16_INBUS_CONVERSION(sim)
 {
@@ -619,7 +665,7 @@ function test_SI32_TO_UI16_INBUS_CONVERSION(sim)
 	// Set values of input Signed Int 32 signal
 	//
 
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", 0);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 0);
 	sim.startForMs(5);
 
 	assert(sim.signalValue("#LM1_SI32_CONV01") === 0);
@@ -627,7 +673,7 @@ function test_SI32_TO_UI16_INBUS_CONVERSION(sim)
 	
 	//
 	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", 35000);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 35000);
 	sim.startForMs(5);
 
 	assert(sim.signalValue("#LM1_SI32_CONV01") === 35000);
@@ -635,7 +681,7 @@ function test_SI32_TO_UI16_INBUS_CONVERSION(sim)
 	
 	//
 
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", 65535);			// Highest UInt16 value
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 65535);			// Highest UInt16 value
 	sim.startForMs(5);
 
 	assert(sim.signalValue("#LM1_SI32_CONV01") === 65535);
@@ -643,7 +689,7 @@ function test_SI32_TO_UI16_INBUS_CONVERSION(sim)
 	
 	//
 
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", 65536);			// UInt16 overflow!
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 65536);			// UInt16 overflow!
 	sim.startForMs(5);
 
 	assert(sim.signalValue("#LM1_SI32_CONV01") === 0);
@@ -651,7 +697,7 @@ function test_SI32_TO_UI16_INBUS_CONVERSION(sim)
 	
 	//
 
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", 65537);			// UInt16 overflow!
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 65537);			// UInt16 overflow!
 	sim.startForMs(5);
 
 	assert(sim.signalValue("#LM1_SI32_CONV01") === 1);
@@ -659,7 +705,7 @@ function test_SI32_TO_UI16_INBUS_CONVERSION(sim)
 
 	//
 
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", -1);				// UInt16 underflow!
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, -1);				// UInt16 underflow!
 	sim.startForMs(5);
 
 	assert(sim.signalValue("#LM1_SI32_CONV01") === 65535);
@@ -742,7 +788,7 @@ function test_AUTO_SIGNAL_FROMBUS_CONVERSION(sim)
 	
 	// Set values of input Unsigned Int 32 signal
 	//
-	sim.overrideSignalValue("#LM1_TUN_SINT32_01", 321);
+    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 321);
 	sim.startForMs(5);
 	
 	assert(sim.signalValue("#LM1_RES03") === 321 - 10);

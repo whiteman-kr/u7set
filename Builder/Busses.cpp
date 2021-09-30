@@ -29,13 +29,11 @@ namespace Builder
 			Afb::SCALE_SI32_UI16, SIZE_32BIT, false, Afb::SW_TCONV_SI32_UI16, SIZE_16BIT,
 			false, Afb::TCONV_UI16_SI32 + Afb::OR + Afb::SW_TCONV_UI16_SI32, SIZE_32BIT, Afb::SCALE_UI16_SI32, SIZE_32BIT },
 
-	/*
+		// FP32 -> FP32
 
-		{ E::AnalogAppSignalFormat::Float32, E::DataFormat::SignedInt, SIZE_32, "scale_fp_si", SIZE_32BIT, false, "tconv_fp_si", SIZE_32BIT },
-		{ E::AnalogAppSignalFormat::Float32, E::DataFormat::Float, SIZE_32, "scale_fp_fp", SIZE_32BIT, false, "", SIZE_32BIT },
-		{ E::AnalogAppSignalFormat::Float32, E::DataFormat::SignedInt, SIZE_16, "scale_fp_si", SIZE_32BIT, true, "sw_tconv_si_16si", SIZE_16BIT },
-		{ E::AnalogAppSignalFormat::Float32, E::DataFormat::UnsignedInt, SIZE_16, "scale_fp_si", SIZE_32BIT, true, "sw_tconv_si_16ui", SIZE_16BIT },*/
-
+		{ E::AnalogAppSignalFormat::Float32, E::DataFormat::Float, SIZE_32BIT,
+			Afb::SCALE_FP32_FP32, SIZE_32BIT, false, Afb::NO_AFB, SIZE_32BIT,
+			false, Afb::NO_AFB, SIZE_32BIT, Afb::SCALE_FP32_FP32, SIZE_32BIT },
 	};
 
 	bool BusSignal::conversionRequired() const

@@ -459,7 +459,8 @@ namespace Builder
 										  const LogicAfbSignal& inAfbSignal,
 										  const UalSignal* inUalSignal,
 										  const BusProcessingStepInfo& bpStepInfo,
-										  const Address16& readAddr);
+										  const Address16& readAddr,
+										  bool ignoreTypeChecking);
 
 		bool generateSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
 											 const LogicAfbSignal& inAfbSignal,

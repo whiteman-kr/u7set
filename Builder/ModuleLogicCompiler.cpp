@@ -8363,7 +8363,7 @@ namespace Builder
 				continue;
 			}
 
-			result &= generateSignalToAfbInputCode(code, ualAfb, inAfbSignal, inUalSignal, bpStepInfo, Address16());
+			result &= generateSignalToAfbInputCode(code, ualAfb, inAfbSignal, inUalSignal, bpStepInfo, Address16(), false);
 		}
 
 		return result;
@@ -8374,7 +8374,8 @@ namespace Builder
 														   const LogicAfbSignal& inAfbSignal,
 														   const UalSignal* inUalSignal,
 														   const BusProcessingStepInfo& bpStepInfo,
-														   const Address16& readAddr)
+														   const Address16& readAddr,
+														   bool ignoreTypeChecking)
 	{
 		// inUalSignal can be NULL
 		//
@@ -8385,12 +8386,15 @@ namespace Builder
 
 		if (inUalSignal != nullptr)
 		{
-			if (inUalSignal->isCanBeConnectedTo(*ualAfb, inAfbSignal, log()) == false)
+			if (ignoreTypeChecking == false)
 			{
-				// Uncompatible signals connection (Logic schema '%1').
-				//
-				m_log->errALC5117(ualAfb->guid(), ualAfb->label(), inUalSignal->ualItemGuid(), inUalSignal->ualItemLabel(), ualAfb->schemaID());
-				return false;
+				if (inUalSignal->isCanBeConnectedTo(*ualAfb, inAfbSignal, log()) == false)
+				{
+					// Uncompatible signals connection (Logic schema '%1').
+					//
+					m_log->errALC5117(ualAfb->guid(), ualAfb->label(), inUalSignal->ualItemGuid(), inUalSignal->ualItemLabel(), ualAfb->schemaID());
+					return false;
+				}
 			}
 
 			// inUalSignal and inAfbSignal are compatible
@@ -9547,21 +9551,26 @@ namespace Builder
 															const BusSignal& busSignal,
 															const QString& busComposerLabel)
 	{
-		InbusConvDescription convDesc = busSignal.getInbusConvDescription();
-
-		if (convDesc.isValid() == false)
-		{
-			// Unknown conversion of signal %1 to inbus signal %2 (Logic schema %3)
-			//
-			m_log->errALC5153(inputSignal->appSignalID(), busChildSignal->appSignalID(), busChildSignal->ualItemSchemaID());
-			return false;
-		}
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(inputSignal, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(busChildSignal, m_log);
 
 		const UalSignal* parentBusSignal = busChildSignal->getParentBusSignal();
 
 		if (parentBusSignal == nullptr)
 		{
 			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		InbusConvDescription convDesc = busSignal.getInbusConvDescription();
+
+		if (convDesc.isValid() == false)
+		{
+			// Unknown conversion of signal %1 to inbus signal %2 (Logic schema %3)
+			//
+			m_log->errALC5153(inputSignal->appSignalID(), parentBusSignal->appSignalID() + "." + busSignal.caption,
+								busChildSignal->ualItemSchemaID());
 			return false;
 		}
 
@@ -9731,12 +9740,12 @@ namespace Builder
 
 		if (readValueFromAccumulator == true)
 		{
-			result &= generateSignalToAfbInputCode(code, scale, inSignal, nullptr, BusProcessingStepInfo(),	accAddr);
+			result &= generateSignalToAfbInputCode(code, scale, inSignal, nullptr, BusProcessingStepInfo(),	accAddr, false);
 		}
 		else
 		{
 			result &= generateSignalToAfbInputCode(code, scale, inSignal, inputSignal,
-												   BusProcessingStepInfo(), Address16());
+												   BusProcessingStepInfo(), Address16(), false);
 		}
 
 		result &= startAfb(code, scale, BusProcessingStepInfo());
@@ -9866,12 +9875,12 @@ namespace Builder
 
 		if (readValueFromAccumulator == true)
 		{
-			result &= generateSignalToAfbInputCode(code, tconv, inSignal, nullptr, BusProcessingStepInfo(),	accAddr);
+			result &= generateSignalToAfbInputCode(code, tconv, inSignal, nullptr, BusProcessingStepInfo(),	accAddr, false);
 		}
 		else
 		{
 			result &= generateSignalToAfbInputCode(code, tconv, inSignal, inputSignal,
-												   BusProcessingStepInfo(), Address16());
+												   BusProcessingStepInfo(), Address16(), false);
 		}
 
 		result &= startAfb(code, tconv, BusProcessingStepInfo());
@@ -9972,12 +9981,12 @@ namespace Builder
 
 		if (readValueFromAccumulator == true)
 		{
-			result &= generateSignalToAfbInputCode(code, boTconv, inSignal, nullptr, BusProcessingStepInfo(), accAddr);
+			result &= generateSignalToAfbInputCode(code, boTconv, inSignal, nullptr, BusProcessingStepInfo(), accAddr, true);
 		}
 		else
 		{
 			result &= generateSignalToAfbInputCode(code, boTconv, inSignal, inputSignal,
-												   BusProcessingStepInfo(), Address16());
+												   BusProcessingStepInfo(), Address16(), true);
 		}
 
 		result &= startAfb(code, boTconv, BusProcessingStepInfo());
@@ -10362,13 +10371,18 @@ namespace Builder
 														   UalSignal* busChildSignal,
 														   const QString& busExtractorLabel)
 	{
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(inputBusSignal, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(busChildSignal, m_log);
+
 		InbusConvDescription convDesc = busSignal.getInbusConvDescription();
 
 		if (convDesc.isValid() == false)
 		{
 			// Unknown conversion from inbus signal %1 to app signal %2 (Logic schema %3)
 			//
-			m_log->errALC5196(busChildSignal->appSignalID(), busSignal.signalID, busChildSignal->ualItemSchemaID());
+			m_log->errALC5196(busChildSignal->appSignalID(), inputBusSignal->appSignalID() + "." + busSignal.signalID,
+							  busChildSignal->ualItemSchemaID());
 			return false;
 		}
 
@@ -10535,12 +10549,12 @@ namespace Builder
 		if (readValueFromAccumulator == true)
 		{
 			result &= generateSignalToAfbInputCode(code, boTconv, inSignal, nullptr,
-												   BusProcessingStepInfo(), accAddr);
+												   BusProcessingStepInfo(), accAddr, true);
 		}
 		else
 		{
 			result &= generateSignalToAfbInputCode(code, boTconv, inSignal, nullptr,
-												   BusProcessingStepInfo(), inbusSignalAddr);
+												   BusProcessingStepInfo(), inbusSignalAddr, true);
 		}
 
 		result &= startAfb(code, boTconv, BusProcessingStepInfo());
@@ -10767,7 +10781,7 @@ namespace Builder
 			readAddr = accAddr;
 		}
 
-		result &= generateSignalToAfbInputCode(code, tconv, inSignal, nullptr, BusProcessingStepInfo(), readAddr);
+		result &= generateSignalToAfbInputCode(code, tconv, inSignal, nullptr, BusProcessingStepInfo(), readAddr, false);
 
 		result &= startAfb(code, tconv, BusProcessingStepInfo());
 
@@ -10874,7 +10888,7 @@ namespace Builder
 			readAddr = accAddr;
 		}
 
-		result &= generateSignalToAfbInputCode(code, scale, inSignal, nullptr, BusProcessingStepInfo(),	readAddr);
+		result &= generateSignalToAfbInputCode(code, scale, inSignal, nullptr, BusProcessingStepInfo(),	readAddr, false);
 
 		result &= startAfb(code, scale, BusProcessingStepInfo());
 
