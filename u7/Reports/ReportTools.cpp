@@ -872,6 +872,7 @@ void ReportGenerator::printSchema(QPdfWriter* pdfWriter,
 
 	VFrame30::CDrawParam drawParam(painter, schema.get(), m_schemaView, schema->gridSize(), schema->pinGridStep());
 	drawParam.setInfoMode(false);
+	drawParam.setPdfMode(true);
 	drawParam.session() = m_schemaView->session();
 	drawParam.setAppSignalController(m_schemaView->appSignalController());
 

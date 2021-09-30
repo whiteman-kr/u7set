@@ -1,6 +1,7 @@
 #pragma once
 #include "SchemaItemControl.h"
 #include "PropertyNames.h"
+#include "FontParam.h"
 
 namespace VFrame30
 {
@@ -168,6 +169,11 @@ namespace VFrame30
 		explicit SchemaItemPushButton(SchemaUnit unit);
 		virtual ~SchemaItemPushButton(void);
 
+		// Draw Functions
+		//
+	public:
+		virtual void draw(CDrawParam* drawParam, const Schema*schema, const SchemaLayer* layer) const final;
+
 		// Serialization
 		//
 	protected:
@@ -225,6 +231,9 @@ namespace VFrame30
 
 		QString scriptToggled() const;
 		void setScriptToggled(const QString& value);
+
+	private:
+		void drawButtonControl(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const;
 
 	private:
 		QString m_text = {"Button"};

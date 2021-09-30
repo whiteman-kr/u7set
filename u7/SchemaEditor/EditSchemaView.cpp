@@ -1675,6 +1675,7 @@ void EditSchemaView::exportToPdf(const QString& fileName, bool infoMode)
 	VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 
 	drawParam.setInfoMode(infoMode);
+	drawParam.setPdfMode(true);
 	drawParam.session() = session();
 	drawParam.setAppSignalController(&m_appSignalController);
 

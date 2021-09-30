@@ -1,6 +1,7 @@
 #pragma once
 #include "SchemaItemControl.h"
 #include "PropertyNames.h"
+#include "FontParam.h"
 
 class QLineEdit;
 
@@ -186,6 +187,11 @@ namespace VFrame30
 		explicit SchemaItemLineEdit(SchemaUnit unit);
 		virtual ~SchemaItemLineEdit(void);
 
+		// Draw Functions
+		//
+	public:
+		virtual void draw(CDrawParam* drawParam, const Schema*, const SchemaLayer* layer) const final;
+
 		// Serialization
 		//
 	protected:
@@ -239,6 +245,9 @@ namespace VFrame30
 
 		QString scriptTextChanged() const;
 		void setScriptTextChanged(const QString& value);
+
+	private:
+		void drawLineEditControl(CDrawParam* drawParam, const Schema*, const SchemaLayer* layer) const;
 
 	private:
 		QString m_text = {"0.0"};

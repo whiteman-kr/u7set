@@ -294,6 +294,16 @@ namespace VFrame30
 		m_infoMode = value;
 	}
 
+	bool CDrawParam::pdfMode() const noexcept
+	{
+		return m_pdfMode;
+	}
+
+	void CDrawParam::setPdfMode(bool value)
+	{
+		m_pdfMode = value;
+	}
+
 	bool CDrawParam::blinkPhase() const noexcept
 	{
 		return m_blinkPhase;
