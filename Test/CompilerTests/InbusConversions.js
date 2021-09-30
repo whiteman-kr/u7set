@@ -22,7 +22,7 @@ const SI32_VAR_SIGNAL_ID = "#LM1_TUN_SINT32";
 var si32ConstBusUalAddr;
 var si32VarBusUalAddr;
 
-const FP32_CONST = 1234.51;
+const FP32_CONST = 1234.5;
 const FP32_VAR_SIGNAL_ID = "#LM1_TUN_FP32";
 
 var fp32ConstBusUalAddr;
@@ -658,154 +658,194 @@ function test_conversion_SI32_UI16_SC_BO(sim)
 
 function test_SI32_TO_UI16_INBUS_CONVERSION(sim)
 {
-	// Set filler1 to non-zero value
-	//
-	sim.overrideSignalValue("#LM1_TUN_SINT32_FILLER", 33);
-	
-	// Set values of input Signed Int 32 signal
-	//
+    // Set filler1 to non-zero value
+    //
+    sim.overrideSignalValue("#LM1_TUN_SINT32_FILLER", 33);
 
-    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 0);
-	sim.startForMs(5);
+    // Set values of input Signed Int 32 signal
+    //
 
-	assert(sim.signalValue("#LM1_SI32_CONV01") === 0);
-	assert(sim.signalValue("#LM1_RES01") === 0);
-	
-	//
-	
-    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 35000);
-	sim.startForMs(5);
+    sim.overrideSignalValue("#LM1_TUN_SINT32_01", 0);
+    sim.startForMs(5);
 
-	assert(sim.signalValue("#LM1_SI32_CONV01") === 35000);
-	assert(sim.signalValue("#LM1_RES01") === 35000 * 2);
-	
-	//
+    assert(sim.signalValue("#LM1_SI32_CONV01") === 0);
+    assert(sim.signalValue("#LM1_RES01") === 0);
 
-    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 65535);			// Highest UInt16 value
-	sim.startForMs(5);
+    //
 
-	assert(sim.signalValue("#LM1_SI32_CONV01") === 65535);
-	assert(sim.signalValue("#LM1_RES01") === 65535 * 2);
-	
-	//
+    sim.overrideSignalValue("#LM1_TUN_SINT32_01", 35000);
+    sim.startForMs(5);
 
-    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 65536);			// UInt16 overflow!
-	sim.startForMs(5);
+    assert(sim.signalValue("#LM1_SI32_CONV01") === 35000);
+    assert(sim.signalValue("#LM1_RES01") === 35000 * 2);
 
-	assert(sim.signalValue("#LM1_SI32_CONV01") === 0);
-	assert(sim.signalValue("#LM1_RES01") === 0);
-	
-	//
+    //
 
-    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 65537);			// UInt16 overflow!
-	sim.startForMs(5);
+    sim.overrideSignalValue("#LM1_TUN_SINT32_01", 65535);			// Highest UInt16 value
+    sim.startForMs(5);
 
-	assert(sim.signalValue("#LM1_SI32_CONV01") === 1);
-	assert(sim.signalValue("#LM1_RES01") === 2);
+    assert(sim.signalValue("#LM1_SI32_CONV01") === 65535);
+    assert(sim.signalValue("#LM1_RES01") === 65535 * 2);
 
-	//
+    //
 
-    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, -1);				// UInt16 underflow!
-	sim.startForMs(5);
+    sim.overrideSignalValue("#LM1_TUN_SINT32_01", 65536);			// UInt16 overflow!
+    sim.startForMs(5);
 
-	assert(sim.signalValue("#LM1_SI32_CONV01") === 65535);
-	assert(sim.signalValue("#LM1_RES01") === 65535 * 2);
+    assert(sim.signalValue("#LM1_SI32_CONV01") === 0);
+    assert(sim.signalValue("#LM1_RES01") === 0);
+
+    //
+
+    sim.overrideSignalValue("#LM1_TUN_SINT32_01", 65537);			// UInt16 overflow!
+    sim.startForMs(5);
+
+    assert(sim.signalValue("#LM1_SI32_CONV01") === 1);
+    assert(sim.signalValue("#LM1_RES01") === 2);
+
+    //
+
+    sim.overrideSignalValue("#LM1_TUN_SINT32_01", -1);				// UInt16 underflow!
+    sim.startForMs(5);
+
+    assert(sim.signalValue("#LM1_SI32_CONV01") === 65535);
+    assert(sim.signalValue("#LM1_RES01") === 65535 * 2);
 
     return;
 }
 
+// ---------------------------------------------------------------------------------------------------------------------------
+
+function isFloatsEqual(f1, f2)
+{
+    return f1.toFixed(3) === f2.toFixed(3);
+}
+
+function test_conversion_FP32_FP32_NS(sim)
+{
+    // check const conversion
+
+    let addr = sim.createRamAddress(fp32ConstBusUalAddr.offset + 0, 0);
+
+    sim.startForMs(5);
+    assert(lm1.readRamFloat(addr, RamReadWriteAccess) === FP32_CONST);
+    assert(sim.signalValue("#LM1_CONST_FP32_FP32_NS") === FP32_CONST);
+
+    // check variable conversion
+
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_FP32_FP32_NS";
+
+    addr = sim.createRamAddress(fp32VarBusUalAddr.offset + 0, 0);
+
+    let v = 3546.9;
+
+    sim.overrideSignalValue(FP32_VAR_SIGNAL_ID, v);
+    sim.startForMs(5);
+    assert(isFloatsEqual(lm1.readRamFloat(addr, RamReadWriteAccess), v));
+    assert(isFloatsEqual(sim.signalValue(VAR_OUT_SIGNAL_ID), v));
+
+    v = -329.923;
+
+    sim.overrideSignalValue(FP32_VAR_SIGNAL_ID, v);
+    sim.startForMs(5);
+    assert(isFloatsEqual(lm1.readRamFloat(addr, RamReadWriteAccess), v));
+    assert(isFloatsEqual(sim.signalValue(VAR_OUT_SIGNAL_ID), v));
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------
+/*
 function test_SI32_TO_SI16_INBUS_CONVERSION(sim)
 {
-	// Set filler2 to non-zero value
-	//
-	sim.overrideSignalValue("#LM1_TUN_SINT32_FILLER", 77);
-	
-	// Set values of input Signed Int 32 signal
-	//
-	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_02", 0);
-	sim.startForMs(5);
+    // Set filler2 to non-zero value
+    //
+    sim.overrideSignalValue("#LM1_TUN_SINT32_FILLER", 77);
 
-	assert(sim.signalValue("#LM1_SI32_CONV02") === 0);
-	assert(sim.signalValue("#LM1_RES02") === 0);
-	
-	//
-	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_02", 4321);
-	sim.startForMs(5);
+    // Set values of input Signed Int 32 signal
+    //
 
-	assert(sim.signalValue("#LM1_SI32_CONV02") === 4321);
-	assert(sim.signalValue("#LM1_RES02") === 4321 * 2);
-	
-	//
+    sim.overrideSignalValue("#LM1_TUN_SINT32_02", 0);
+    sim.startForMs(5);
 
-	sim.overrideSignalValue("#LM1_TUN_SINT32_02", 32767);
-	sim.startForMs(5);
+    assert(sim.signalValue("#LM1_SI32_CONV02") === 0);
+    assert(sim.signalValue("#LM1_RES02") === 0);
 
-	assert(sim.signalValue("#LM1_SI32_CONV02") === 32767);			// SInt16 highest positive value
-	assert(sim.signalValue("#LM1_RES02") === 32767 * 2);
-	
-	//
-	
-	sim.overrideSignalValue("#LM1_TUN_SINT32_02", 32768);			// SInt16 overflow!
-	sim.startForMs(5);
+    //
 
-	assert(sim.signalValue("#LM1_SI32_CONV02") === -32768);				
-	assert(sim.signalValue("#LM1_RES02") === -32768 * 2);
-	
-	//
+    sim.overrideSignalValue("#LM1_TUN_SINT32_02", 4321);
+    sim.startForMs(5);
 
-	sim.overrideSignalValue("#LM1_TUN_SINT32_02", -456);
-	sim.startForMs(5);
+    assert(sim.signalValue("#LM1_SI32_CONV02") === 4321);
+    assert(sim.signalValue("#LM1_RES02") === 4321 * 2);
 
-	assert(sim.signalValue("#LM1_SI32_CONV02") === -456);
-	assert(sim.signalValue("#LM1_RES02") === -456 * 2);
-	
-	//
+    //
 
-	sim.overrideSignalValue("#LM1_TUN_SINT32_02", -32768);			// SInt16 lowest negative value
-	sim.startForMs(5);
+    sim.overrideSignalValue("#LM1_TUN_SINT32_02", 32767);
+    sim.startForMs(5);
 
-	assert(sim.signalValue("#LM1_SI32_CONV02") === -32768);
-	assert(sim.signalValue("#LM1_RES02") === -32768 * 2);
+    assert(sim.signalValue("#LM1_SI32_CONV02") === 32767);			// SInt16 highest positive value
+    assert(sim.signalValue("#LM1_RES02") === 32767 * 2);
 
-	//
+    //
 
-	sim.overrideSignalValue("#LM1_TUN_SINT32_02", -32769);			// SInt16 underflow!
-	sim.startForMs(5);
+    sim.overrideSignalValue("#LM1_TUN_SINT32_02", 32768);			// SInt16 overflow!
+    sim.startForMs(5);
 
-	assert(sim.signalValue("#LM1_SI32_CONV02") === 32767);
-	assert(sim.signalValue("#LM1_RES02") === 32767 * 2);
+    assert(sim.signalValue("#LM1_SI32_CONV02") === -32768);
+    assert(sim.signalValue("#LM1_RES02") === -32768 * 2);
+
+    //
+
+    sim.overrideSignalValue("#LM1_TUN_SINT32_02", -456);
+    sim.startForMs(5);
+
+    assert(sim.signalValue("#LM1_SI32_CONV02") === -456);
+    assert(sim.signalValue("#LM1_RES02") === -456 * 2);
+
+    //
+
+    sim.overrideSignalValue("#LM1_TUN_SINT32_02", -32768);			// SInt16 lowest negative value
+    sim.startForMs(5);
+
+    assert(sim.signalValue("#LM1_SI32_CONV02") === -32768);
+    assert(sim.signalValue("#LM1_RES02") === -32768 * 2);
+
+    //
+
+    sim.overrideSignalValue("#LM1_TUN_SINT32_02", -32769);			// SInt16 underflow!
+    sim.startForMs(5);
+
+    assert(sim.signalValue("#LM1_SI32_CONV02") === 32767);
+    assert(sim.signalValue("#LM1_RES02") === 32767 * 2);
 
     return;
 }
 
 function test_AUTO_SIGNAL_FROMBUS_CONVERSION(sim)
 {
-	// Set filler1, filler2 to non-zero value
-	//
-	sim.overrideSignalValue("#LM1_TUN_SINT32_FILLER", 200002);
-	
-	// Set values of input Unsigned Int 32 signal
-	//
-    sim.overrideSignalValue(SI32_VAR_SIGNAL_ID, 321);
-	sim.startForMs(5);
-	
-	assert(sim.signalValue("#LM1_RES03") === 321 - 10);
-	assert(sim.signalValue("#LM1_RES04") === 321 + 10);
+    // Set filler1, filler2 to non-zero value
+    //
+    sim.overrideSignalValue("#LM1_TUN_SINT32_FILLER", 200002);
 
-	assert(sim.signalValue("#LM1_FILLER_RES01") === 200002);
+    // Set values of input Unsigned Int 32 signal
+    //
+    sim.overrideSignalValue("#LM1_TUN_SINT32_01", 321);
+    sim.startForMs(5);
 
-	// Set values of input Signed Int 32 signal
-	//
-	sim.overrideSignalValue("#LM1_TUN_SINT32_02", -765);
-	sim.startForMs(5);
-	
-	assert(sim.signalValue("#LM1_RES05") === -765 - (-11));
-	assert(sim.signalValue("#LM1_RES06") === -765 + (-11));
-	
-	assert(sim.signalValue("#LM1_FILLER_RES02") === 200002);
-	
-	return;
+    assert(sim.signalValue("#LM1_RES03") === 321 - 10);
+    assert(sim.signalValue("#LM1_RES04") === 321 + 10);
+
+    assert(sim.signalValue("#LM1_FILLER_RES01") === 200002);
+
+    // Set values of input Signed Int 32 signal
+    //
+    sim.overrideSignalValue("#LM1_TUN_SINT32_02", -765);
+    sim.startForMs(5);
+
+    assert(sim.signalValue("#LM1_RES05") === -765 - (-11));
+    assert(sim.signalValue("#LM1_RES06") === -765 + (-11));
+
+    assert(sim.signalValue("#LM1_FILLER_RES02") === 200002);
+
+    return;
 }
-
+*/
