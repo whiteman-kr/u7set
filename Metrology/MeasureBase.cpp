@@ -1612,7 +1612,7 @@ namespace Measure
 
 				// according to GOST 8.508-84 paragraph 3.4.1 formula 42
 				//
-			double systemError = std::abs(measure(limitType) - nominal(limitType));
+			double systemError = measure(limitType) - nominal(limitType);
 
 			setAdditionalParam(limitType, Measure::AdditionalParam::SystemDeviation, systemError);
 
