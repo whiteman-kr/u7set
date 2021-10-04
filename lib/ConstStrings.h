@@ -538,11 +538,17 @@ namespace Afb
 	inline const QString SW_TCONV_SI16_SI32("sw_tconv_si16_si32");
 	inline const QString SW_TCONV_UI16_SI32("sw_tconv_ui16_si32");
 
+	inline const QString SW_TCONV_FP32_SI16("sw_tconv_fp32_si16");
+	inline const QString SW_TCONV_FP32_UI16("sw_tconv_fp32_ui16");
+
+	inline const QString SW_TCONV_SI16_FP32("sw_tconv_si16_fp32");
+	inline const QString SW_TCONV_UI16_FP32("sw_tconv_ui16_fp32");
+
 	//
 
 	inline const QString NO_AFB("");
 	inline const QString OR("|");
-
+	inline const QString NEXT(",");
 
 	//
 

@@ -170,6 +170,11 @@ namespace Sim
 		return result;
 	}
 
+	qint32 ScriptLogicModule::readRamSignedInt32(RamAddress address, E::LogicModuleRamAccess access)
+	{
+		return readRamSignedInt(address, access);
+	}
+
 	float ScriptLogicModule::readRamFloat(RamAddress address, E::LogicModuleRamAccess access)
 	{
 		float result = {};

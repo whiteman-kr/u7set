@@ -9774,6 +9774,7 @@ namespace Builder
 														const Address16& inbusSignalAddr)
 	{
 		Q_ASSERT(busSignal.typeConversionRequired() == true);
+		Q_ASSERT(inputSignal->isAnalog() == true);
 
 		QString tconvAfbCaption = convDesc.inbusTypeConversionAfb;
 
@@ -9787,11 +9788,24 @@ namespace Builder
 		Address16 accAddr(wordAccumulatorAddress(), 0);
 
 		if (tconvAfbCaption == Afb::SW_TCONV_SI32_SI16 ||
-			tconvAfbCaption == Afb::SW_TCONV_SI32_UI16)
+			tconvAfbCaption == Afb::SW_TCONV_SI32_UI16 ||
+			tconvAfbCaption == Afb::SW_TCONV_FP32_SI16 ||
+			tconvAfbCaption == Afb::SW_TCONV_FP32_UI16)
 		{
 			// software type conversion
 			//
 			CodeItem cmd;
+
+			if (tconvAfbCaption == Afb::SW_TCONV_FP32_SI16 ||
+				tconvAfbCaption == Afb::SW_TCONV_FP32_UI16)
+			{
+				bool res = genInbusTconvCode(code, inputSignal, busChildSignal, busSignal, busComposerLabel, Afb::TCONV_FP32_SI32,
+										readValueFromAccumulator, true, inbusSignalAddr);
+
+				RETURN_IF_FALSE(res);
+
+				readValueFromAccumulator = true;
+			}
 
 			Address16 writeAddr = inbusSignalAddr;
 
@@ -9809,13 +9823,35 @@ namespace Builder
 			{
 				if (inputSignal->isConst() == true)
 				{
-					quint16 constValue = inputSignal->constAnalogIntValue() & 0xFFFF;					// get low word of const
+					quint16 constValue = 0;
+
+					switch(inputSignal->analogSignalFormat())
+					{
+					case E::AnalogAppSignalFormat::SignedInt32:
+						constValue = inputSignal->constAnalogIntValue() & 0xFFFF;					// get low word of const
+
+						cmd.setComment(QString("%1 <= %2 (low word of %3)").
+									   arg(busChildSignal->refSignalIDsJoined()).
+									   arg(constValue).
+									   arg(inputSignal->constAnalogIntValue()));
+						break;
+
+					case E::AnalogAppSignalFormat::Float32:
+						constValue = static_cast<qint32>(inputSignal->constAnalogFloatValue()) & 0xFFFF;
+
+						cmd.setComment(QString("%1 <= %2 (low word of int(%3))").
+									   arg(busChildSignal->refSignalIDsJoined()).
+									   arg(constValue).
+									   arg(inputSignal->constAnalogFloatValue()));
+						break;
+
+					default:
+						Q_ASSERT(false);
+						LOG_INTERNAL_ERROR(m_log);
+						return false;
+					}
 
 					cmd.movConst(writeAddr.offset(), constValue);
-					cmd.setComment(QString("%1 <= %2 (low word of %3)").
-								   arg(busChildSignal->refSignalIDsJoined()).
-								   arg(constValue).
-								   arg(inputSignal->constAnalogIntValue()));
 				}
 				else
 				{
@@ -9830,6 +9866,31 @@ namespace Builder
 			}
 
 			return true;
+		}
+
+		bool result = genInbusTconvCode(code, inputSignal, busChildSignal, busSignal, busComposerLabel, tconvAfbCaption,
+								   readValueFromAccumulator, saveResultToAccumulator, inbusSignalAddr);
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::genInbusTconvCode(CodeSnippet* code,
+										   const UalSignal* inputSignal,
+										   const UalSignal* busChildSignal,
+										   const BusSignal& busSignal,
+										   const QString& busComposerLabel,
+										   const QString& tconvAfbCaption,
+										   bool readValueFromAccumulator,
+										   bool saveResultToAccumulator,
+										   const Address16& inbusSignalAddr)
+	{
+		Q_UNUSED(busSignal);
+
+		if (tconvAfbCaption.isEmpty() == true)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("AFB is't assigned for type conversion from %1 to bus child signal %2").
+											arg(inputSignal->appSignalID()).arg(busChildSignal->appSignalID()));
+			return false;
 		}
 
 		std::shared_ptr<Afb::AfbElement> tconvElem = m_lmDescription->afbElement(tconvAfbCaption);
@@ -9862,6 +9923,8 @@ namespace Builder
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
+
+		Address16 accAddr(wordAccumulatorAddress(), 0);
 
 		bool result = true;
 
@@ -9908,6 +9971,9 @@ namespace Builder
 															bool saveResultToAccumulator,
 															const Address16& inbusSignalAddr)
 	{
+		Q_UNUSED(busChildSignal);
+		Q_UNUSED(convDesc);
+
 		if (saveResultToAccumulator == true)
 		{
 			// saveResultToAccumulator must be FALSE
@@ -10002,56 +10068,6 @@ namespace Builder
 		}
 
 		return result;
-	}
-
-	bool ModuleLogicCompiler::gen_SInt32_To_UInt16_BE_NoScale_inbusConversionCode(CodeSnippet* code,
-																				const UalSignal* inputSignal,
-																				const UalSignal* busChildSignal,
-																				const Address16& inbusSignalAddr)
-	{
-		return gen_SInt32_LowWord_ConversionCode(code, inputSignal, busChildSignal, inbusSignalAddr,
-												 QString("SInt32_To_UInt16_BE_NoScale"));
-	}
-
-	bool ModuleLogicCompiler::gen_SInt32_To_SInt16_BE_NoScale_inbusConversionCode(CodeSnippet* code,
-																				const UalSignal* inputSignal,
-																				const UalSignal* busChildSignal,
-																				const Address16& inbusSignalAddr)
-	{
-		return gen_SInt32_LowWord_ConversionCode(code, inputSignal, busChildSignal, inbusSignalAddr,
-												 QString("SInt32_To_SInt16_BE_NoScale"));
-	}
-
-	bool ModuleLogicCompiler::gen_SInt32_LowWord_ConversionCode(CodeSnippet* code,
-																const UalSignal* inputSignal,
-																const UalSignal* busChildSignal,
-																const Address16& inbusSignalAddr,
-																const QString& conversionDescription)
-	{
-		CodeItem cmd;
-
-		if (inputSignal->isConst() == true)
-		{
-			quint16 constValue = inputSignal->constAnalogIntValue() & 0xFFFF;					// get low word of const
-
-			cmd.movConst(inbusSignalAddr.offset(), constValue);
-			cmd.setComment(QString("%1 <= %2 (%3)").
-						   arg(busChildSignal->refSignalIDsJoined()).
-						   arg(constValue).
-						   arg(conversionDescription));
-		}
-		else
-		{
-			cmd.mov(inbusSignalAddr.offset(), inputSignal->ualAddr().offset() + 1);	// move low word of inputSignal only
-			cmd.setComment(QString("%1 <= %2 (%3)").
-						   arg(busChildSignal->refSignalIDsJoined()).
-						   arg(inputSignal->refSignalIDsJoined()).
-						   arg(conversionDescription));
-		}
-
-		code->append(cmd);
-
-		return true;
 	}
 
 	bool ModuleLogicCompiler::generateDiscreteSignalToBusDiscreteInputCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal)
@@ -10475,6 +10491,9 @@ namespace Builder
 																bool saveResultToAccumulator,
 																const Address16& inbusSignalAddr)
 	{
+		Q_UNUSED(inputBusSignal);
+		Q_UNUSED(convDesc);
+
 		if (readValueFromAccumulator == true)
 		{
 			// readValueFromAccumulator must be FALSE
@@ -10602,145 +10621,212 @@ namespace Builder
 			return false;
 		}
 
-		Address16 accAddr(wordAccumulatorAddress(), 0);
-
 		std::shared_ptr<Afb::AfbElement> tconvElem = m_lmDescription->afbElement(tconvAfbCaptions[0]);
 
-		if (tconvElem == nullptr)
+		if (tconvElem != nullptr)
 		{
-			if (tconvAfbCaptions.size() < 2)
+			bool result = genFrombusTconvCode(code, inputBusSignal, busSignal, busChildSignal, busExtractorLabel, tconvAfbCaptions[0],
+											 readValueFromAccumulator, saveResultToAccumulator, inbusSignalAddr);
+
+			return result;
+		}
+
+		Address16 accAddr(wordAccumulatorAddress(), 0);
+
+		if (tconvAfbCaptions.size() < 2)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("AFB isn't assigned for frombus type conversion of bus child signal %1").
+											arg(busChildSignal->appSignalID()));
+			return false;
+		}
+
+		tconvAfbCaption = tconvAfbCaptions[1];
+
+		bool prevSaveResultToAccumulator = saveResultToAccumulator;
+		bool toFloatConversionRequired = false;
+
+		if (tconvAfbCaption == Afb::SW_TCONV_SI16_FP32 ||
+			tconvAfbCaption == Afb::SW_TCONV_UI16_FP32)
+		{
+			saveResultToAccumulator = true;
+			toFloatConversionRequired = true;
+
+			if (tconvAfbCaption == Afb::SW_TCONV_UI16_FP32)
 			{
-				LOG_INTERNAL_ERROR_MSG(m_log, QString("AFB isn't assigned for frombus type conversion of bus child signal %1").
-												arg(busChildSignal->appSignalID()));
+				tconvAfbCaption = Afb::SW_TCONV_UI16_SI32;
+			}
+
+			if (tconvAfbCaption == Afb::SW_TCONV_SI16_FP32)
+			{
+				tconvAfbCaption = Afb::SW_TCONV_SI16_SI32;
+			}
+		}
+
+		if (tconvAfbCaption == Afb::SW_TCONV_UI16_SI32)
+		{
+			CodeItem cmd;
+
+			Address16 readAddr = inbusSignalAddr;
+
+			if (readValueFromAccumulator == true)
+			{
+				readAddr = accAddr;
+			}
+
+			Address16 writeAddr = busChildSignal->ualAddr();
+
+			if (saveResultToAccumulator == true)
+			{
+				writeAddr = accAddr;
+			}
+
+			Address16 accAddr2(wordAccumulator2Address(), 0);
+
+			cmd.movConst(accAddr2.offset(), 0);						// write 0 in high word
+			code->append(cmd);
+			cmd.mov(accAddr2.offset() + 1, readAddr.offset());			// write value in low word
+			code->append(cmd);
+			cmd.mov32(writeAddr, accAddr2);
+			code->append(cmd);
+
+			if (toFloatConversionRequired == false)
+			{
+				return true;
+			}
+		}
+
+		if (tconvAfbCaption == Afb::SW_TCONV_SI16_SI32)
+		{
+			std::shared_ptr<Afb::AfbElement> switchElem = m_lmDescription->afbElement(Afb::SWITCH_SI);
+
+			if (switchElem == nullptr)
+			{
+				// Required AFB %1 is missing.
+				//
+				m_log->errALC5174(Afb::SWITCH_SI, QUuid());
 				return false;
 			}
 
-			tconvAfbCaption = tconvAfbCaptions[1];
+			QString errMsg;
 
-			if (tconvAfbCaption == Afb::SW_TCONV_UI16_SI32)
+			UalItem switchItem(switchElem, errMsg);
+
+			switchItem.setLabel(busExtractorLabel);
+
+			UalAfb* swtch = createUalAfb(switchItem);
+
+			const LogicPin* select = swtch->getPin(Afb::SWITCH_SI_PIN_SELECT);
+			const LogicPin* x1 = swtch->getPin(Afb::SWITCH_SI_PIN_X1);
+			const LogicPin* x2 = swtch->getPin(Afb::SWITCH_SI_PIN_X2);
+			const LogicPin* output = swtch->getPin(Afb::SWITCH_SI_PIN_OUTPUT);
+
+			if (select == nullptr ||
+				x1 == nullptr ||
+				x2 == nullptr ||
+				output == nullptr)
 			{
-				CodeItem cmd;
-
-				Address16 readAddr = inbusSignalAddr;
-
-				if (readValueFromAccumulator == true)
-				{
-					readAddr = accAddr;
-				}
-
-				Address16 writeAddr = busChildSignal->ualAddr();
-
-				if (saveResultToAccumulator == true)
-				{
-					writeAddr = accAddr;
-				}
-
-				cmd.movConst(writeAddr.offset(), 0);						// write 0 in high word
-				code->append(cmd);
-				cmd.mov(writeAddr.offset() + 1, readAddr.offset());			// write value in low word
-				code->append(cmd);
-				return true;
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
 			}
 
-			if (tconvAfbCaption == Afb::SW_TCONV_SI16_SI32)
+			CodeItem cmd;
+
+			Address16 readAddr = inbusSignalAddr;
+
+			if (readValueFromAccumulator == true)
 			{
-				std::shared_ptr<Afb::AfbElement> switchElem = m_lmDescription->afbElement(Afb::SWITCH_SI);
-
-				if (switchElem == nullptr)
-				{
-					// Required AFB %1 is missing.
-					//
-					m_log->errALC5174(Afb::SWITCH_SI, QUuid());
-					return false;
-				}
-
-				QString errMsg;
-
-				UalItem switchItem(switchElem, errMsg);
-
-				switchItem.setLabel(busExtractorLabel);
-
-				UalAfb* swtch = createUalAfb(switchItem);
-
-				const LogicPin* select = swtch->getPin(Afb::SWITCH_SI_PIN_SELECT);
-				const LogicPin* x1 = swtch->getPin(Afb::SWITCH_SI_PIN_X1);
-				const LogicPin* x2 = swtch->getPin(Afb::SWITCH_SI_PIN_X2);
-				const LogicPin* output = swtch->getPin(Afb::SWITCH_SI_PIN_OUTPUT);
-
-				if (select == nullptr ||
-					x1 == nullptr ||
-					x2 == nullptr ||
-					output == nullptr)
-				{
-					LOG_INTERNAL_ERROR(m_log);
-					return false;
-				}
-
-				CodeItem cmd;
-
-				Address16 readAddr = inbusSignalAddr;
-
-				if (readValueFromAccumulator == true)
-				{
-					readAddr = accAddr;
-				}
-
-				Address16 writeAddr = busChildSignal->ualAddr();
-
-				if (saveResultToAccumulator == true)
-				{
-					writeAddr = accAddr;
-				}
-
-				Address16 acc2Addr(wordAccumulator2Address(), 0);
-
-				// Construct unsigned value
-
-				cmd.movConst(acc2Addr.offset(), 0);
-				code->append(cmd);
-
-				cmd.mov(acc2Addr.offset() + 1, readAddr.offset());
-				code->append(cmd);
-
-				cmd.writeFuncBlock32(swtch->opcode(), swtch->instance(),
-									x1->afbOperandIndex(), acc2Addr,
-									swtch->caption());
-				code->append(cmd);
-
-				// Construct signed value
-
-				cmd.movConst(acc2Addr.offset(), 0xFFFF);
-				code->append(cmd);
-
-				cmd.mov(acc2Addr.offset() + 1, readAddr.offset());
-				code->append(cmd);
-
-				cmd.writeFuncBlock32(swtch->opcode(), swtch->instance(),
-									x2->afbOperandIndex(), acc2Addr,
-									swtch->caption());
-				code->append(cmd);
-
-				// Move sign bit to Select pin
-
-				readAddr.setBit(15);
-
-				cmd.writeFuncBlockBit(swtch->opcode(), swtch->instance(),
-									  select->afbOperandIndex(), readAddr, swtch->caption());
-				code->append(cmd);
-
-				cmd.start(swtch->opcode(), swtch->instance(), swtch->caption(), swtch->runTime());
-				code->append(cmd);
-
-				cmd.readFuncBlock32(writeAddr,
-								  swtch->opcode(), swtch->instance(),
-								  output->afbOperandIndex(),
-								  swtch->caption());
-				code->append(cmd);
-				return true;
+				readAddr = accAddr;
 			}
 
-			LOG_INTERNAL_ERROR_MSG(m_log, QString("AFB is't assigned for frombus type conversion of bus child signal %1").
-												arg(busChildSignal->appSignalID()));
+			Address16 writeAddr = busChildSignal->ualAddr();
+
+			if (saveResultToAccumulator == true)
+			{
+				writeAddr = accAddr;
+			}
+
+			Address16 acc2Addr(wordAccumulator2Address(), 0);
+
+			// Construct unsigned value
+
+			cmd.movConst(acc2Addr.offset(), 0);
+			code->append(cmd);
+
+			cmd.mov(acc2Addr.offset() + 1, readAddr.offset());
+			code->append(cmd);
+
+			cmd.writeFuncBlock32(swtch->opcode(), swtch->instance(),
+								x1->afbOperandIndex(), acc2Addr,
+								swtch->caption());
+			code->append(cmd);
+
+			// Construct signed value
+
+			cmd.movConst(acc2Addr.offset(), 0xFFFF);
+			code->append(cmd);
+
+			cmd.mov(acc2Addr.offset() + 1, readAddr.offset());
+			code->append(cmd);
+
+			cmd.writeFuncBlock32(swtch->opcode(), swtch->instance(),
+								x2->afbOperandIndex(), acc2Addr,
+								swtch->caption());
+			code->append(cmd);
+
+			// Move sign bit to Select pin
+
+			readAddr.setBit(15);
+
+			cmd.writeFuncBlockBit(swtch->opcode(), swtch->instance(),
+								  select->afbOperandIndex(), readAddr, swtch->caption());
+			code->append(cmd);
+
+			cmd.start(swtch->opcode(), swtch->instance(), swtch->caption(), swtch->runTime());
+			code->append(cmd);
+
+			cmd.readFuncBlock32(writeAddr,
+							  swtch->opcode(), swtch->instance(),
+							  output->afbOperandIndex(),
+							  swtch->caption());
+			code->append(cmd);
+
+			if (toFloatConversionRequired == false)
+			{
+				return true;
+			}
+		}
+
+		if (toFloatConversionRequired == true)
+		{
+			bool result = genFrombusTconvCode(code, inputBusSignal, busSignal, busChildSignal, busExtractorLabel,
+											  Afb::TCONV_SI32_FP32,
+											 true, prevSaveResultToAccumulator, inbusSignalAddr);
+			return result;
+		}
+
+		LOG_INTERNAL_ERROR_MSG(m_log, QString("AFB is't assigned for frombus type conversion of bus child signal %1").
+											arg(busChildSignal->appSignalID()));
+		return false;
+	}
+
+	bool ModuleLogicCompiler::genFrombusTconvCode(CodeSnippet* code,
+												const UalSignal* inputBusSignal,
+												const BusSignal& busSignal,
+												const UalSignal* busChildSignal,
+												const QString& busExtractorLabel,
+												const QString& tconvAfbCaption,
+												bool readValueFromAccumulator,
+												bool saveResultToAccumulator,
+												const Address16& inbusSignalAddr)
+	{
+		Q_UNUSED(inputBusSignal);
+		Q_UNUSED(busSignal);
+
+		std::shared_ptr<Afb::AfbElement> tconvElem = m_lmDescription->afbElement(tconvAfbCaption);
+
+		if (tconvElem == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
@@ -10774,6 +10860,8 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
+		Address16 accAddr(wordAccumulatorAddress(), 0);
+
 		Address16 readAddr(inbusSignalAddr);
 
 		if (readValueFromAccumulator == true)
@@ -10798,6 +10886,7 @@ namespace Builder
 		return result;
 	}
 
+
 	bool ModuleLogicCompiler::genFrombusScalingCode(CodeSnippet* code,
 													const UalSignal* inputBusSignal,
 													const BusSignal& busSignal,
@@ -10808,6 +10897,8 @@ namespace Builder
 													bool saveResultToAccumulator,
 													const Address16& inbusSignalAddr)
 	{
+		Q_UNUSED(inputBusSignal);
+
 		if (saveResultToAccumulator == true)
 		{
 			// saveResultToAccumulator must be FALSE
@@ -10904,120 +10995,6 @@ namespace Builder
 
 		return result;
 	}
-
-	bool ModuleLogicCompiler::gen_UInt16_To_SInt32_BE_NoScale_frombusConversionCode(CodeSnippet* code,
-																						  const UalSignal* inputBusSignal,
-																						  const BusSignal& busSignal,
-																						  const UalSignal* busChildSignal)
-	{
-		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(inputBusSignal, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(busChildSignal, m_log);
-
-		CHECK_UAL_ADDR_RETURN_FALSE(inputBusSignal);
-		CHECK_UAL_ADDR_RETURN_FALSE(busChildSignal);
-
-		if (busSignal.inbusAddr.bit() != 0)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		CodeItem cmd;
-
-		// write 0 into High word of SInt32
-		//
-		cmd.movConst(busChildSignal->ualAddr(), 0);
-		code->append(cmd);
-
-		// write UInt16 into Low word of SInt32
-		//
-		Address16 uint16Addr = inputBusSignal->ualAddr();
-		uint16Addr.addWord(busSignal.inbusAddr.offset());
-
-		Address16 lowWordAddr = busChildSignal->ualAddr();
-		lowWordAddr.add1Word();
-
-		cmd.mov(lowWordAddr, uint16Addr);
-		code->append(cmd);
-
-		return true;
-	}
-
-	bool ModuleLogicCompiler::gen_SInt16_To_SInt32_BE_NoScale_frombusConversionCode(CodeSnippet* code,
-																				  const UalSignal* inputBusSignal,
-																				  const BusSignal& busSignal,
-																				  const UalSignal* busChildSignal)
-	{
-/*		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(inputBusSignal, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(busChildSignal, m_log);
-
-		CHECK_UAL_ADDR_RETURN_FALSE(inputBusSignal);
-		CHECK_UAL_ADDR_RETURN_FALSE(busChildSignal);
-
-		if (busSignal.inbusAddr.bit() != 0)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		RETURN_IF_FALSE(getAfbInfo_MUX());
-
-		// write SInt16 into Low word of SInt32
-		//
-		Address16 sint16Addr = inputBusSignal->ualAddr();
-		sint16Addr.addWord(busSignal.inbusAddr.offset());
-
-		Address16 lowWordAddr = busChildSignal->ualAddr();
-		lowWordAddr.add1Word();
-
-		CodeItem cmd;
-
-		cmd.mov(lowWordAddr, sint16Addr);
-		code->append(cmd);
-
-		// Extend sign bit of SInt16 into High word of SInt32
-		//
-
-		sint16Addr.setBit(15);
-
-		cmd.writeFuncBlockBit(m_afbInfo_MUX->opCode, 0,
-							  m_afbInfo_MUX->getPinOpIndex(Afb::MUX_PIN_SELECT), sint16Addr,
-							  m_afbInfo_MUX->caption);
-		code->append(cmd);
-
-		cmd.writeFuncBlockConst(m_afbInfo_MUX->opCode, 0,
-								m_afbInfo_MUX->getPinOpIndex(Afb::MUX_PIN_X1), 0,
-								m_afbInfo_MUX->caption);
-		code->append(cmd);
-
-		cmd.writeFuncBlockConst(m_afbInfo_MUX->opCode, 0,
-								m_afbInfo_MUX->getPinOpIndex(Afb::MUX_PIN_X2), 0xFFFF,
-								m_afbInfo_MUX->caption);
-		code->append(cmd);
-
-		cmd.start(m_afbInfo_MUX->opCode, 0, m_afbInfo_MUX->caption, m_afbInfo_MUX->runTime);
-		code->append(cmd);
-
-		cmd.readFuncBlock(busChildSignal->ualAddr().offset(),
-						  m_afbInfo_MUX->opCode, 0,
-						  m_afbInfo_MUX->getPinOpIndex(Afb::MUX_PIN_OUTPUT),
-						  m_afbInfo_MUX->caption);
-		code->append(cmd);
-*/
-		return true;
-	}
-/*
-	bool ModuleLogicCompiler::hasKnownConversion(const BusSignal& busSignal) const
-	{
-		bool result = false;
-
-		result |= busSignal.is_SInt32_To_UInt16_BE_NoScale_conversion();
-		result |= busSignal.is_SInt32_To_SInt16_BE_NoScale_conversion();
-
-		return result;
-	}*/
 
 	bool ModuleLogicCompiler::generateDiscreteSignalToBusExtractorCode(CodeSnippet* code,
 																	   const UalItem* ualItem,
