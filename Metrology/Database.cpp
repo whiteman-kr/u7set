@@ -469,7 +469,7 @@ int SqlTable::lastKey() const
 		return SQL_INVALID_KEY;
 	}
 
-	QSqlQuery query(QString("SELECT max(%1) FROM %2").arg(m_fieldBase.field(SQL_FIELD_KEY).name()).arg(m_info.caption()));
+	QSqlQuery query(QString("SELECT max(%1) FROM %2").arg(m_fieldBase.field(SQL_FIELD_KEY).name(), m_info.caption()));
 	if (query.next() == false)
 	{
 		return SQL_INVALID_KEY;

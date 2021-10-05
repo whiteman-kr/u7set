@@ -1502,7 +1502,7 @@ void MainWindow::onStartMeasure()
 		{
 			if (changeInputSignalOnInternal(activeSignal) == true)
 			{
-				emit onStartMeasure();
+				onStartMeasure();
 				return;
 			}
 		}
@@ -1514,7 +1514,7 @@ void MainWindow::onStartMeasure()
 		if (comparatorCount == 0)
 		{
 			m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Program);
-			emit measureThreadStoped();
+			measureThreadStoped();
 			return;
 		}
 	}
@@ -1552,7 +1552,7 @@ void MainWindow::onStartMeasure()
 			if (result == QMessageBox::No)
 			{
 				m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Program);
-				emit measureThreadStoped();
+				measureThreadStoped();
 				return;
 			}
 		}
@@ -1833,7 +1833,7 @@ void MainWindow::showGraphLinEl()
 		return;
 	}
 
-	emit pView->showChart(ChartType::LinearityEl);
+	pView->showChart(ChartType::LinearityEl);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1846,7 +1846,7 @@ void MainWindow::showGraphLinEn()
 		return;
 	}
 
-	emit pView->showChart(ChartType::LinearityEn);
+	pView->showChart(ChartType::LinearityEn);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1859,7 +1859,7 @@ void MainWindow::showGraph20El()
 		return;
 	}
 
-	emit pView->showChart(ChartType::Value20El);
+	pView->showChart(ChartType::Value20El);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1872,7 +1872,7 @@ void MainWindow::showGraph20En()
 		return;
 	}
 
-	emit pView->showChart(ChartType::Value20En);
+	pView->showChart(ChartType::Value20En);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2605,7 +2605,7 @@ void MainWindow::calibratorConnectedChanged(int count)
 				continue;
 			}
 
-			calibratorInfo.append(tr("Calibrator %1: %2, %3\n").arg(i+1).arg(pCalibrator->typeStr()).arg(pCalibrator->serialNo()));
+			calibratorInfo.append(tr("Calibrator %1: %2, %3\n").arg(i+1).arg(pCalibrator->typeStr(), pCalibrator->serialNo()));
 		}
 
 		m_statusCalibratorCount->setToolTip(calibratorInfo);
@@ -2995,7 +2995,7 @@ void MainWindow::measureThreadStoped()
 
 					m_pMainTab->setCurrentIndex(Measure::Type::Comparators);
 
-					emit onStartMeasure();
+					onStartMeasure();
 					return;
 				}
 			case Measure::Type::Comparators:
@@ -3015,7 +3015,7 @@ void MainWindow::measureThreadStoped()
 		bool signalIsSelected = setNextMeasureSignalFromModule();
 		if (signalIsSelected == true)
 		{
-			emit onStartMeasure();
+			onStartMeasure();
 			return;
 		}
 	}
@@ -3059,6 +3059,9 @@ void MainWindow::measureThreadInfo(const MeasureThreadInfo& info)
 			}
 
 			m_statusMeasureTimeout->setValue(info.timeout());
+
+		default:
+			assert(0);
 	}
 }
 
@@ -3367,7 +3370,7 @@ void MainWindow::showFindMeasurePanel(const QString& signalID)
 
 	m_pFindMeasurePanel->show();
 	m_pFindMeasurePanel->setFindText(signalID);
-	emit m_pFindMeasurePanel->find();
+	m_pFindMeasurePanel->find();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

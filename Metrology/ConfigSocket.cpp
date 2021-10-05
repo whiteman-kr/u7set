@@ -165,6 +165,11 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 			result &= readComparatorSet(fileData);					// fill ComparatorSet
 		}
 
+		if (result == false)
+		{
+			qDebug() << __FUNCTION__ << "File read error:" << bfi.pathFileName;
+		}
+
 		m_loadedFiles.append(bfi.pathFileName);
 	}
 

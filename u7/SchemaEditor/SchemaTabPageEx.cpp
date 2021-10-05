@@ -4429,13 +4429,14 @@ void SchemaControlTabPageEx::exportToPdf()
 	}
 
 	SchemasReportGeneratorThread r(theSettings.serverIpAddress(),
-							 theSettings.serverPort(),
-							 theSettings.serverUsername(),
-							 theSettings.serverPassword(),
-							 db()->currentProject().projectName(),
-							 db()->currentUser().username(),
-							 db()->currentUser().password(),
-							 this);
+								   theSettings.serverPort(),
+								   theSettings.serverUsername(),
+								   theSettings.serverPassword(),
+								   db()->currentProject().projectName(),
+								   db()->currentUser().username(),
+								   db()->currentUser().password(),
+								   m_signalSetProvider,
+								   this);
 
 	r.exportSchemasToPdf(pdfDirectory, files);
 
@@ -4477,13 +4478,14 @@ void SchemaControlTabPageEx::exportToAlbum()
 	QSettings{}.setValue("SchemeEditor/Export/AlbumPath", albumPath);
 
 	SchemasReportGeneratorThread r(theSettings.serverIpAddress(),
-							 theSettings.serverPort(),
-							 theSettings.serverUsername(),
-							 theSettings.serverPassword(),
-							 db()->currentProject().projectName(),
-							 db()->currentUser().username(),
-							 db()->currentUser().password(),
-							 this);
+								   theSettings.serverPort(),
+								   theSettings.serverUsername(),
+								   theSettings.serverPassword(),
+								   db()->currentProject().projectName(),
+								   db()->currentUser().username(),
+								   db()->currentUser().password(),
+								   m_signalSetProvider,
+								   this);
 
 	r.exportSchemasToAlbum(albumPath, files, albumPageLayout);
 

@@ -256,8 +256,7 @@ bool MeasureThread::setCalibratorUnit()
 			{
 				emit msgBox(QMessageBox::Information,
 							tr("Calibrator: %1 - %2 can not set source mode.").
-							arg(pCalibrator->typeStr()).
-							arg(pCalibrator->portName()));
+							arg(pCalibrator->typeStr(), pCalibrator->portName()));
 				m_activeIoParamList[ch].setCalibratorManager(nullptr);
 			}
 
@@ -279,8 +278,7 @@ bool MeasureThread::setCalibratorUnit()
 			{
 				emit msgBox(QMessageBox::Information,
 							tr("Calibrator: %1 - %2 can not set measure mode.").
-							arg(pCalibrator->typeStr()).
-							arg(pCalibrator->portName()));
+							arg(pCalibrator->typeStr(), pCalibrator->portName()));
 
 				m_activeIoParamList[ch].setCalibratorManager(nullptr);
 			}
@@ -305,8 +303,7 @@ bool MeasureThread::setCalibratorUnit()
 			{
 				emit msgBox(QMessageBox::Information,
 							tr("Calibrator: %1 - %2 can not set measure mode.").
-							arg(pCalibrator->typeStr()).
-							arg(pCalibrator->portName()));
+							arg(pCalibrator->typeStr(), pCalibrator->portName()));
 				m_activeIoParamList[ch].setCalibratorManager(nullptr);
 			}
 		}
@@ -375,14 +372,13 @@ bool MeasureThread::prepareCalibrator(std::shared_ptr<CalibratorManager> pCalibr
 	if (limit.isValid() == false)
 	{
 		emit msgBox(QMessageBox::Critical,	tr("Calibrator: %1 - %2 can not set unit \"%3\".").
-											arg(pCalibrator->typeStr()).
-											arg(pCalibrator->portName()).
-											arg(qApp->translate("Calibrator", CalibratorUnitCaption(calibratorUnit).toUtf8())));
+											arg(pCalibrator->typeStr(), pCalibrator->portName(),
+												qApp->translate("Calibrator", CalibratorUnitCaption(calibratorUnit).toUtf8())));
 		return false;
 	}
 
 
-	m_info.setMessage(tr("Prepare calibrator: %1 %2").arg(pCalibrator->typeStr()).arg(pCalibrator->portName()));
+	m_info.setMessage(tr("Prepare calibrator: %1 %2").arg(pCalibrator->typeStr(), pCalibrator->portName()));
 	emit sendMeasureInfo(m_info);
 
 	bool result = pCalibratorManager->setUnit(calibratorMode, calibratorUnit);
@@ -1141,7 +1137,7 @@ void MeasureThread::measureCompratorsInParallel()
 {
 	quint64 COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_0 = 0;
 	quint64 COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_1 = 0;
-	quint64 currentStateComparatorsInAllChannels = COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_0;
+	quint64 currentStateComparatorsInAllChannels = 0;
 
 	// get max amount of comparators
 	// get state for all comparators in state of logical "1"

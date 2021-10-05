@@ -1122,6 +1122,7 @@ void MainWindow::projectDifference()
 										db()->currentProject().projectName(),
 										db()->currentUser().username(),
 										db()->currentUser().password(),
+										m_signalSetProvider,
 										this);
 	}
 
@@ -1146,13 +1147,14 @@ void MainWindow::createSchemasAlbums()
 	QSettings{}.setValue("MainWindow/Export/AlbumPath", albumPath);
 
 	SchemasReportGeneratorThread r(theSettings.serverIpAddress(),
-							 theSettings.serverPort(),
-							 theSettings.serverUsername(),
-							 theSettings.serverPassword(),
-							 db()->currentProject().projectName(),
-							 db()->currentUser().username(),
-							 db()->currentUser().password(),
-							 this);
+								   theSettings.serverPort(),
+								   theSettings.serverUsername(),
+								   theSettings.serverPassword(),
+								   db()->currentProject().projectName(),
+								   db()->currentUser().username(),
+								   db()->currentUser().password(),
+								   m_signalSetProvider,
+								   this);
 
 	r.exportAllSchemasToAlbum(albumPath, albumFileTypeParams);
 	return;

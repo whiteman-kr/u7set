@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../VFrame30/SchemaView.h"
+#include "../VFrame30/AppSignalController.h"
+#include "SchemaEditor/EditSchemaSignalProvider.h"
 
 class DbController;
 
@@ -76,13 +78,19 @@ enum class ReportSchemaCompareAction
 class ReportSchemaView : public VFrame30::SchemaView
 {
 public:
-	ReportSchemaView(QWidget* parent);
+	ReportSchemaView(AppSignalSetProvider* signalSetProvider, QWidget* parent);
 
 	virtual ~ReportSchemaView();
 
 	void adjust(QPainter* painter, double startX, double startY, double zoom) const;
 
 	void drawCompareOutlines(VFrame30::CDrawParam* drawParam, const QRectF& clipRect, const std::map<QUuid, ReportSchemaCompareAction>& compareActions);
+
+	VFrame30::AppSignalController* appSignalController();
+
+private:
+	EditSchemaAppSignalProvider m_appSignalProvider;
+	VFrame30::AppSignalController m_appSignalController;
 };
 
 //

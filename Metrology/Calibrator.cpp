@@ -58,6 +58,9 @@ void Calibrator::clear()
 			#endif
 
 			break;
+
+		default:
+			break;
 	}
 
 	m_connected = false;
@@ -118,8 +121,7 @@ bool Calibrator::open()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration type").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -174,6 +176,9 @@ bool Calibrator::portIsOpen() const
 			#endif
 
 			break;
+
+		default:
+			return false;
 	}
 
 	return true;
@@ -188,8 +193,7 @@ bool Calibrator::openPort()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration type").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -219,10 +223,8 @@ bool Calibrator::openPort()
 					m_lastError = QString("Calibrator error! "
 										  "Function: %1, Serial port: %2, "
 										  "Error description: %3 (%4)").
-											arg(__FUNCTION__).
-											arg(m_portName).
-											arg(m_port.errorString()).
-											arg(m_port.error());
+											arg(__FUNCTION__, m_portName,
+												m_port.errorString(), QString::number(m_port.error()));
 					qDebug("%s", qPrintable(m_lastError));
 					emit error(m_lastError);
 					return false;
@@ -246,8 +248,7 @@ bool Calibrator::openPort()
 						{
 							m_lastError = QString("Calibrator error! "
 												  "Function: %1, USB port: %2").
-													arg(__FUNCTION__).
-													arg(m_portName);
+													arg(__FUNCTION__, m_portName);
 							qDebug("%s", qPrintable(m_lastError));
 							emit error(m_lastError);
 							return false;
@@ -258,6 +259,9 @@ bool Calibrator::openPort()
 			}
 
 			break;
+
+		default:
+			return false;
 	}
 
 	setWaitResponse(true);
@@ -274,8 +278,7 @@ bool Calibrator::getIDN()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Port is not open").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -287,8 +290,7 @@ bool Calibrator::getIDN()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Command send is failed").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -316,8 +318,7 @@ bool Calibrator::getIDN()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration name").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -345,8 +346,7 @@ bool Calibrator::getIDN()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration serial number").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -396,8 +396,7 @@ CalibratorLimit Calibrator::getLimit(CalibratorMode mode, CalibratorUnit unit)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Port is not open").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return CalibratorLimit();
@@ -408,8 +407,7 @@ CalibratorLimit Calibrator::getLimit(CalibratorMode mode, CalibratorUnit unit)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration type").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return CalibratorLimit();
@@ -467,8 +465,7 @@ CalibratorLimit Calibrator::currentMeasureLimit()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Port is not open").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return CalibratorLimit();
@@ -479,8 +476,7 @@ CalibratorLimit Calibrator::currentMeasureLimit()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration type").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return CalibratorLimit();
@@ -503,8 +499,7 @@ CalibratorLimit Calibrator::currentSourceLimit()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Port is not open").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return CalibratorLimit();
@@ -515,8 +510,7 @@ CalibratorLimit Calibrator::currentSourceLimit()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration type").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return CalibratorLimit();
@@ -539,8 +533,7 @@ bool Calibrator::write(QString cmd)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Port is not open").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -551,8 +544,7 @@ bool Calibrator::write(QString cmd)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration type").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -571,8 +563,7 @@ bool Calibrator::write(QString cmd)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Empty command").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -594,8 +585,7 @@ bool Calibrator::write(QString cmd)
 					m_lastError = QString("Calibrator error! "
 										  "Function: %1, Serial port: %2, "
 										  "Error description: Command is sent is not fully").
-											arg(__FUNCTION__).
-											arg(m_portName);
+											arg(__FUNCTION__, m_portName);
 					qDebug("%s", qPrintable(m_lastError));
 					emit error(m_lastError);
 					return false;
@@ -621,8 +611,7 @@ bool Calibrator::write(QString cmd)
 						m_lastError = QString("Calibrator error! "
 											  "Function: %1, Serial port: %2, "
 											  "Error description: Command is sent is not fully").
-												arg(__FUNCTION__).
-												arg(m_portName);
+												arg(__FUNCTION__, m_portName);
 						qDebug("%s", qPrintable(m_lastError));
 						emit error(m_lastError);
 						return false;
@@ -634,6 +623,9 @@ bool Calibrator::write(QString cmd)
 			}
 
 			break;
+
+		default:
+			return false;
 	}
 
 	//qDebug("Port: " + m_portName.toLocal8Bit() + " send: "+ cmd.toLocal8Bit());
@@ -650,8 +642,7 @@ bool Calibrator::read()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Port is not open").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -662,8 +653,7 @@ bool Calibrator::read()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration type").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -717,8 +707,7 @@ bool Calibrator::read()
 					m_lastError = QString("Calibrator error! "
 										  "Function: %1, Serial port: %2, "
 										  "Error description: Calibrator don't sent a response").
-											arg(__FUNCTION__).
-											arg(m_portName);
+											arg(__FUNCTION__, m_portName);
 					qDebug("%s", qPrintable(m_lastError));
 					emit error(m_lastError);
 
@@ -743,8 +732,7 @@ bool Calibrator::read()
 						m_lastError = QString("Calibrator error! "
 											  "Function: %1, USB port: %2, "
 											  "Error description: Calibrator don't sent a response").
-												arg(__FUNCTION__).
-												arg(m_portName);
+												arg(__FUNCTION__, m_portName);
 						qDebug("%s", qPrintable(m_lastError));
 						emit error(m_lastError);
 
@@ -759,6 +747,9 @@ bool Calibrator::read()
 			}
 
 			break;
+
+		default:
+			Q_ASSERT(0);
 	}
 
 	m_lastResponse = requestData;
@@ -792,8 +783,7 @@ bool Calibrator::setUnit(int mode, int unit)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Port is not open").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -804,8 +794,7 @@ bool Calibrator::setUnit(int mode, int unit)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration type").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -816,8 +805,7 @@ bool Calibrator::setUnit(int mode, int unit)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined mode").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError)); emit error(m_lastError);
 		return false;
 	}
@@ -827,8 +815,7 @@ bool Calibrator::setUnit(int mode, int unit)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined unit").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -840,8 +827,7 @@ bool Calibrator::setUnit(int mode, int unit)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't find limit").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -852,8 +838,7 @@ bool Calibrator::setUnit(int mode, int unit)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Command for set unit is empty").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -865,8 +850,7 @@ bool Calibrator::setUnit(int mode, int unit)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Command send is failed").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -888,12 +872,13 @@ bool Calibrator::setUnit(int mode, int unit)
 
 		default:
 
-			assert(false);
+			Q_ASSERT(false);
 			m_mode = CalibratorMode::NoCalibratorMode;
 			return false;
 	}
 
-	//qDebug("Function: %s, Serial port: " + m_portName.toLocal8Bit() + ", Mode: %s, Unit: %s", __FUNCTION__, CalibratorModeCaption(mode), CalibratorUnitCaption(unit));
+	//qDebug("Function: %s, Serial port: " + m_portName.toLocal8Bit() + ",
+	// Mode: %s, Unit: %s", __FUNCTION__, CalibratorModeCaption(mode), CalibratorUnitCaption(unit));
 
 	emit unitIsChanged();
 
@@ -909,8 +894,7 @@ bool Calibrator::setValue(double value)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Port is not open").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -921,8 +905,7 @@ bool Calibrator::setValue(double value)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration type").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -933,8 +916,7 @@ bool Calibrator::setValue(double value)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined mode").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -945,8 +927,7 @@ bool Calibrator::setValue(double value)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined unit").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -964,8 +945,7 @@ bool Calibrator::setValue(double value)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't find limit").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -977,7 +957,7 @@ bool Calibrator::setValue(double value)
 	{
 		case CalibratorType::TrxII:
 			{
-				cmdSetValue = QString("%1%2").arg(param.cmdSetValue).arg(QString::number(value, 'f', limit.precesion));
+				cmdSetValue = QString("%1%2").arg(param.cmdSetValue, QString::number(value, 'f', limit.precesion));
 			}
 			break;
 
@@ -986,11 +966,11 @@ bool Calibrator::setValue(double value)
 				switch (m_sourceUnit)
 				{
 					case CalibratorUnit::Hz:
-						cmdSetValue = QString("%1%2").arg(param.cmdSetValue).arg(QString::number(value/1000, 'f', 4));
+						cmdSetValue = QString("%1%2").arg(param.cmdSetValue, QString::number(value/1000, 'f', 4));
 						break;
 
 					default:
-						cmdSetValue = QString("%1%2").arg(param.cmdSetValue).arg(QString::number(value, 'f', limit.precesion));
+						cmdSetValue = QString("%1%2").arg(param.cmdSetValue, QString::number(value, 'f', limit.precesion));
 						break;
 				}
 			}
@@ -1005,6 +985,9 @@ bool Calibrator::setValue(double value)
 					case CalibratorUnit::mA:	decimal = 3;	break;
 					case CalibratorUnit::uA:	decimal = 6;	break;
 					case CalibratorUnit::nA:	decimal = 9;	break;
+
+					default:
+						decimal = 0;
 				}
 
 				if (decimal == 0)
@@ -1012,18 +995,21 @@ bool Calibrator::setValue(double value)
 					break;
 				}
 
-				cmdSetValue = QString("%1%2e-%3").arg(param.cmdSetValue).arg(QString::number(value, 'f', limit.precesion + 6)).arg(decimal);
+				cmdSetValue = QString("%1%2e-%3").arg(	param.cmdSetValue,
+														QString::number(value, 'f', limit.precesion + 6)).
+														arg(decimal);
 			}
 			break;
 
 		case CalibratorType::Rgl1062:
 			{
-				cmdSetValue = QString("%1%2").arg(param.cmdSetValue).arg(QString::number(value, 'f', limit.precesion));
+				cmdSetValue = QString("%1%2").arg(	param.cmdSetValue,
+													QString::number(value, 'f', limit.precesion));
 			}
 			break;
 
 		default:
-			assert(false);
+			Q_ASSERT(false);
 	}
 
 	if (cmdSetValue.isEmpty() == true)
@@ -1031,8 +1017,7 @@ bool Calibrator::setValue(double value)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Empty command").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1044,8 +1029,7 @@ bool Calibrator::setValue(double value)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Command send is failed").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1065,8 +1049,7 @@ bool Calibrator::stepDown()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Port is not open").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1077,8 +1060,7 @@ bool Calibrator::stepDown()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration type").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1089,8 +1071,7 @@ bool Calibrator::stepDown()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined mode").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1101,8 +1082,7 @@ bool Calibrator::stepDown()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined unit").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1114,8 +1094,7 @@ bool Calibrator::stepDown()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't find limit").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1159,7 +1138,7 @@ bool Calibrator::stepDown()
 			break;
 
 		default:
-			assert(0);
+			Q_ASSERT(0);
 			break;
 	}
 
@@ -1175,8 +1154,7 @@ bool Calibrator::stepUp()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Port is not open").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1187,8 +1165,7 @@ bool Calibrator::stepUp()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration type").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1199,8 +1176,7 @@ bool Calibrator::stepUp()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined mode").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1211,8 +1187,7 @@ bool Calibrator::stepUp()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined unit").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1224,8 +1199,7 @@ bool Calibrator::stepUp()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't find limit").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1269,7 +1243,7 @@ bool Calibrator::stepUp()
 			break;
 
 		default:
-			assert(0);
+			Q_ASSERT(0);
 			break;
 	}
 
@@ -1285,8 +1259,7 @@ double Calibrator::getValue()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Port is not open").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return 0;
@@ -1297,8 +1270,7 @@ double Calibrator::getValue()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration type").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return 0;
@@ -1316,8 +1288,7 @@ double Calibrator::getValue()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Empty command").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return 0;
@@ -1332,8 +1303,7 @@ double Calibrator::getValue()
 			m_lastError = QString("Calibrator error! "
 								  "Function: %1, Serial port: %2, "
 								  "Error description: Command send is failed").
-									arg(__FUNCTION__).
-									arg(m_portName);
+									arg(__FUNCTION__, m_portName);
 			qDebug("%s", qPrintable(m_lastError));
 			emit error(m_lastError);
 			return false;
@@ -1372,8 +1342,7 @@ bool Calibrator::beep()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Port is not open").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1385,8 +1354,7 @@ bool Calibrator::beep()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Command send is failed").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1404,8 +1372,7 @@ bool Calibrator::reset()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Port is not open").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1418,8 +1385,7 @@ bool Calibrator::reset()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Command send is failed").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1439,8 +1405,7 @@ bool Calibrator::setRemoteControl(bool enable)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration type").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1454,7 +1419,9 @@ bool Calibrator::setRemoteControl(bool enable)
 		case CalibratorType::Calys75:	cmd = enable == true ? CALYS75_REMOTE_CONTROL : CALYS75_MANUAL_CONTROL;	break;
 		case CalibratorType::Ktl6221:	cmd = enable == true ? KTHL6221_OUTPUT_ON : cmd = KTHL6221_OUTPUT_OFF;	break;
 		case CalibratorType::Rgl1062:	cmd = enable == true ? RGL1062_OUTPUT_ON : cmd = RGL1062_OUTPUT_OFF;	break;
-		default:						assert(0);																break;
+
+		default:
+			Q_ASSERT(0);
 	}
 
 	bool result = write(cmd);
@@ -1463,8 +1430,7 @@ bool Calibrator::setRemoteControl(bool enable)
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Command send is failed").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return false;
@@ -1487,8 +1453,7 @@ void Calibrator::parseResponse()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Don't defined calibration type").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 		return;
@@ -1499,8 +1464,7 @@ void Calibrator::parseResponse()
 		m_lastError = QString("Calibrator error! "
 							  "Function: %1, Serial port: %2, "
 							  "Error description: Empty response").
-								arg(__FUNCTION__).
-								arg(m_portName);
+								arg(__FUNCTION__, m_portName);
 		qDebug("%s", qPrintable(m_lastError));
 		emit error(m_lastError);
 
@@ -1579,9 +1543,9 @@ void Calibrator::parseResponse()
 
 			m_sourceValue = value.toDouble();
 
-			switch (m_sourceUnit)
+			if (m_sourceUnit == CalibratorUnit::Hz)
 			{
-				case CalibratorUnit::Hz:	m_sourceValue *= 1000; break;
+				m_sourceValue *= 1000;
 			}
 
 			break;
@@ -1599,6 +1563,9 @@ void Calibrator::parseResponse()
 				case CalibratorUnit::mA:	m_sourceValue *= 1e+3;		break;
 				case CalibratorUnit::uA:	m_sourceValue *= 1e+6;		break;
 				case CalibratorUnit::nA:	m_sourceValue *= 1e+9;		break;
+
+				default:
+					m_sourceValue *= 1e+3;
 			}
 
 			break;
@@ -1614,7 +1581,7 @@ void Calibrator::parseResponse()
 			break;
 
 		default:
-			assert(0);
+			Q_ASSERT(0);
 	}
 
 
@@ -1712,6 +1679,7 @@ QString CalibratorTypeCaption(int сalibratorType)
 		case CalibratorType::Calys75:	caption = "CALYS-75";		break;
 		case CalibratorType::Ktl6221:	caption = "KEITHLEY-6221";	break;
 		case CalibratorType::Rgl1062:	caption = "RIGOL-DG1062Z";	break;
+
 		default:
 			Q_ASSERT(0);
 			caption = QT_TRANSLATE_NOOP("Calibrator", "Unknown");
@@ -1730,6 +1698,7 @@ QString CalibratorIdnCaption(int сalibratorType)
 		case CalibratorType::Calys75:	caption = "Calys 75";		break;
 		case CalibratorType::Ktl6221:	caption = "MODEL 6221";		break;
 		case CalibratorType::Rgl1062:	caption = "DG1062Z";		break;
+
 		default:
 			Q_ASSERT(0);
 			caption = QT_TRANSLATE_NOOP("Calibrator", "Unknown");
@@ -1748,6 +1717,9 @@ CalibratorInterface getCalibratorInterface(int calibratorType)
 		case CalibratorType::Calys75:	interface = CalibratorInterface::Serial;	break;
 		case CalibratorType::Ktl6221:	interface = CalibratorInterface::Serial;	break;
 		case CalibratorType::Rgl1062:	interface = CalibratorInterface::USB;		break;
+
+		default:
+			interface = CalibratorInterface::NoCalibratorInterface;
 	}
 
 	return interface;
@@ -1761,6 +1733,7 @@ QString CalibratorModeCaption(int сalibratorMode)
 	{
 		case CalibratorMode::MeasureMode:	caption = QT_TRANSLATE_NOOP("Calibrator", "Measure");	break;
 		case CalibratorMode::SourceMode:	caption = QT_TRANSLATE_NOOP("Calibrator", "Source");	break;
+
 		default:
 			Q_ASSERT(0);
 			caption = QT_TRANSLATE_NOOP("Calibrator", "Unknown");
@@ -1783,6 +1756,7 @@ QString CalibratorUnitCaption(int сalibratorUnit)
 		case CalibratorUnit::Hz:		caption = QT_TRANSLATE_NOOP("Calibrator", "Hz");			break;
 		case CalibratorUnit::OhmLow:	caption = QT_TRANSLATE_NOOP("Calibrator", "Ohm (Low)");		break;
 		case CalibratorUnit::OhmHigh:	caption = QT_TRANSLATE_NOOP("Calibrator", "Ohm (High)");	break;
+
 		default:
 			Q_ASSERT(0);
 			caption = QT_TRANSLATE_NOOP("Calibrator", "Unknown");

@@ -668,6 +668,9 @@ QString IoSignalParam::engineeringRangeStr() const
 				}
 			}
 		}
+
+		default:
+			break;
 	}
 
 	return result;
@@ -2338,18 +2341,18 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 
 					if (mesaureSignalMap.contains(hashid) == true)
 					{
-						quint64 signalIndex = mesaureSignalMap[hashid];
-						if (signalIndex >= 0 && signalIndex < m_signalMeasureList.size())
+						quint64 signalIndexMap = mesaureSignalMap[hashid];
+						if (signalIndexMap < m_signalMeasureList.size())
 						{
 							int channel = param.location().place() - 1;
 							if (channel >= 0 && channel < measureSignal.channelCount())
 							{
-								if (m_signalMeasureList[signalIndex].metrologySignal(connectionType, channel) != nullptr)
+								if (m_signalMeasureList[signalIndexMap].metrologySignal(connectionType, channel) != nullptr)
 								{
 									continue;
 								}
 
-								if (m_signalMeasureList[signalIndex].setMetrologySignal(measureKind,
+								if (m_signalMeasureList[signalIndexMap].setMetrologySignal(measureKind,
 																				  m_connectionBase,
 																				  connectionType,
 																				  channel,
@@ -2402,13 +2405,13 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 
 					if (mesaureSignalMap.contains(hashid) == true)
 					{
-						quint64 signalIndex = mesaureSignalMap[hashid];
-						if (signalIndex >= 0 && signalIndex < m_signalMeasureList.size())
+						quint64 signalIndexMap = mesaureSignalMap[hashid];
+						if (signalIndexMap < m_signalMeasureList.size())
 						{
 							int channel = param.location().rack().channel();
 							if (channel >= 0 && channel < measureSignal.channelCount())
 							{
-								if (m_signalMeasureList[signalIndex].setMetrologySignal(measureKind,
+								if (m_signalMeasureList[signalIndexMap].setMetrologySignal(measureKind,
 																				  m_connectionBase,
 																				  connectionType,
 																				  channel,
@@ -2654,7 +2657,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 		std::vector<std::shared_ptr<Metrology::ComparatorEx>> signalComparatorList;
 
 		std::vector<std::shared_ptr<Comparator>> comparatorList = comparatorSet.getByInputSignalID(appSignalID);
-		for(std::shared_ptr<Comparator> comparator : comparatorList)
+		for(const std::shared_ptr<Comparator>& comparator : comparatorList)
 		{
 			std::shared_ptr<Metrology::ComparatorEx> comparatorEx;
 

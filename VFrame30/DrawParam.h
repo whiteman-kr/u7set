@@ -70,6 +70,9 @@ namespace VFrame30
 		bool infoMode() const noexcept;
 		void setInfoMode(bool value);
 
+		bool pdfMode() const noexcept;
+		void setPdfMode(bool value);
+
 		bool blinkPhase() const noexcept;
 		void setBlinkPhase(bool value);
 
@@ -108,6 +111,7 @@ namespace VFrame30
 		int m_pinGridStep = 0;
 		bool m_isEditMode = true;
 		bool m_infoMode = false;
+		bool m_pdfMode = false;
 		bool m_blinkPhase = false;
 		bool m_drawNotesLayer = true;
 

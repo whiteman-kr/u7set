@@ -944,8 +944,7 @@ bool DialogRackGroupProperty::foundDuplicateRacks()
 			if (duplicate.groupCaption1 == duplicate.groupCaption2)
 			{
 				strDuplicates.append(tr("%1 - group \"%2\", channels %3 and %4\n")
-									.arg(duplicate.rackID)
-									.arg(duplicate.groupCaption1)
+									.arg(duplicate.rackID, duplicate.groupCaption1)
 									.arg(duplicate.channel1).arg(duplicate.channel2));
 			}
 			else
@@ -1431,6 +1430,9 @@ void DialogSignalProperty::createPropertyList()
 					m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_R0);
 					electricRangeGroup->addSubProperty(item);
 
+					break;
+
+				default:
 					break;
 			}
 

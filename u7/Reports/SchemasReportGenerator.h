@@ -55,13 +55,14 @@ class SchemasReportGeneratorThread
 {
 public:
 	SchemasReportGeneratorThread(const QString& serverIp,
-						   int serverPort,
-						   const QString& serverUserName,
-						   const QString& serverPassword,
-						   const QString& projectName,
-						   const QString& userName,
-						   const QString& userPassword,
-						   QWidget* parent);
+								 int serverPort,
+								 const QString& serverUserName,
+								 const QString& serverPassword,
+								 const QString& projectName,
+								 const QString& userName,
+								 const QString& userPassword,
+								 AppSignalSetProvider* signalSetProvider,
+								 QWidget* parent);
 
 	void exportSchemasToPdf(const QString& filePath, const std::vector<DbFileInfo>& files);
 	void exportSchemasToAlbum(const QString& filePath, const std::vector<DbFileInfo>& files, const QPageLayout& pageLayout);
@@ -87,6 +88,7 @@ private:
 	QString m_userPassword;
 
 	QWidget* m_parent = nullptr;
+	AppSignalSetProvider* m_appSignalProvider = nullptr;
 };
 
 //

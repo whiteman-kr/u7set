@@ -1612,7 +1612,7 @@ namespace Measure
 
 				// according to GOST 8.508-84 paragraph 3.4.1 formula 42
 				//
-			double systemError = std::abs(measure(limitType) - nominal(limitType));
+			double systemError = measure(limitType) - nominal(limitType);
 
 			setAdditionalParam(limitType, Measure::AdditionalParam::SystemDeviation, systemError);
 
@@ -2548,6 +2548,9 @@ namespace Measure
 		{
 			case E::CmpType::Greate:	typeStr = QChar(9650);	break;
 			case E::CmpType::Less:		typeStr = QChar(9660);	break;
+
+			default:
+				typeStr.clear();
 		}
 
 		return typeStr;
@@ -2567,16 +2570,19 @@ namespace Measure
 		{
 			case Metrology::CmpValueType::SetPoint:
 
-				m_cmpType = cmpType;
+				m_cmpType = cmpType;	// default
 
 				break;
 
 			case Metrology::CmpValueType::Hysteresis:
 
-				switch (cmpType)
+				switch (cmpType)		// inversion
 				{
 					case E::CmpType::Less:		m_cmpType = E::CmpType::Greate;	break;
 					case E::CmpType::Greate:	m_cmpType = E::CmpType::Less;	break;
+
+					default:			// for metrology only Great of Less
+						break;
 				}
 
 				break;

@@ -136,10 +136,9 @@ void CompleterData::load(const QString& optionsKey)
 	for(int i = 0; i < m_count; i++)
 	{
 		QString recentFindText = s.value(QString("%1/%2/Text%3").
-										 arg(optionsKey).
-										 arg(COMPLETER_OPTIONS_KEY).
-										 arg(i),
-										 QString()).toString();
+										 arg(optionsKey, COMPLETER_OPTIONS_KEY).
+										 arg(i)).toString();
+
 		if (recentFindText.isEmpty() == true)
 		{
 			continue;
@@ -172,8 +171,7 @@ void CompleterData::save(const QString& optionsKey)
 	for(int i = 0; i < count; i++)
 	{
 		s.setValue(QString("%1/%2/Text%3").
-				   arg(optionsKey).
-				   arg(COMPLETER_OPTIONS_KEY).
+				   arg(optionsKey, COMPLETER_OPTIONS_KEY).
 				   arg(i),
 				   m_filterCompleterList[i]);
 	}
@@ -339,7 +337,7 @@ void FindData::createInterface(QTableView* pView)
 	connect(m_pFindTextEdit, &QLineEdit::textChanged, this, &FindData::findTextChanged);
 	connect(m_findNextButton, &QPushButton::clicked, this, &FindData::findNext);
 
-	emit findTextChanged();
+	findTextChanged();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -766,7 +764,7 @@ bool ExportData::saveCsvFile(const QString &fileName)
 
 	int rowCount = m_pView->model()->rowCount();
 
-	setRange(0, rowCount);
+	emit setRange(0, rowCount);
 
 	for(int row = 0; row < rowCount; row++)
 	{
@@ -792,7 +790,7 @@ bool ExportData::saveCsvFile(const QString &fileName)
 		file.write("\n");
 		file.flush();
 
-		setValue(row);
+		emit setValue(row);
 	}
 
 	file.close();

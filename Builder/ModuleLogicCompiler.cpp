@@ -11619,10 +11619,23 @@ namespace Builder
 			{
 				cmp->setInAnalogSignalFormat(ualSignal->analogSignalFormat());
 
-				cmp->input().setSignalParams(	ualSignal->appSignalID(),
-												ualSignal->isAcquired(),
-												ualSignal->isConst(),
-												ualSignal->constValueIfConst());
+				for(const AppSignal* inputSignal : ualSignal->refSignals())
+				{
+					if (inputSignal == nullptr)
+					{
+						continue;
+					}
+
+					if (inputSignal->isOutput() == true)
+					{
+						continue;
+					}
+
+					cmp->input().setSignalParams(	inputSignal->appSignalID(),
+													ualSignal->isAcquired(),
+													ualSignal->isConst(),
+													ualSignal->constValueIfConst());
+				}
 			}
 
 			// compare Signal

@@ -808,6 +808,9 @@ bool DialogMetrologyConnection::createConnectionBySignal(Metrology::Signal* pSig
 	{
 		case E::SignalInOutType::Internal:	type = Metrology::ConnectionType::Input_Internal;	break;
 		case E::SignalInOutType::Output:	type = Metrology::ConnectionType::Input_Output;		break;
+
+		default:
+			break;
 	}
 
 	if (type == Metrology::ConnectionType::NoConnectionType)

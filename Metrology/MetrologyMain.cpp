@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 
 	if (theOptions.language().languageType() == LanguageType::Russian)
 	{
-		if (translator.load(QString(":%1/%2").arg(LANGUAGE_OPTIONS_DIR).arg(LANGUAGE_OPTIONS_FILE_RU)) == true)
+		if (translator.load(QString(":%1/%2").arg(LANGUAGE_OPTIONS_DIR, LANGUAGE_OPTIONS_FILE_RU)) == true)
 		{
 			qApp->installTranslator(&translator);
 		}
