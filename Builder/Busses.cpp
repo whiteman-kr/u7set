@@ -65,28 +65,6 @@ namespace Builder
 		return result;
 	}
 
-/*	bool BusSignal::is_SInt32_To_UInt16_BE_NoScale_conversion() const
-	{
-		return 	signalType == E::SignalType::Analog &&
-				inOutAnalogFormat == E::AnalogAppSignalFormat::SignedInt32 &&
-				inbusAnalogFormat == E::DataFormat::UnsignedInt &&
-				inbusSizeBits == SIZE_16BIT &&
-				inbusAnalogByteOrder == E::ByteOrder::BigEndian &&
-				inOutAnalogLowLimit == inbusAnalogLowLimit &&
-				inOutAnalogHighLimit == inbusAnalogHighLimit;
-	}
-
-	bool BusSignal::is_SInt32_To_SInt16_BE_NoScale_conversion() const
-	{
-		return 	signalType == E::SignalType::Analog &&
-				inOutAnalogFormat == E::AnalogAppSignalFormat::SignedInt32 &&
-				inbusAnalogFormat == E::DataFormat::SignedInt &&
-				inbusSizeBits == SIZE_16BIT &&
-				inbusAnalogByteOrder == E::ByteOrder::BigEndian &&
-				inOutAnalogLowLimit == inbusAnalogLowLimit &&
-				inOutAnalogHighLimit == inbusAnalogHighLimit;
-	} */
-
 	bool BusSignal::scalingRequired() const
 	{
 		double k = 0;
@@ -136,91 +114,6 @@ namespace Builder
 	{
 		return inbusAnalogByteOrder == E::ByteOrder::LittleEndian;
 	}
-
-/*
-	bool BusSignal::scalingWithTypeConversionExists() const
-	{
-		Q_ASSERT(signalType == E::SignalType::Analog);
-
-		switch(analogFormat)
-		{
-		case E::AnalogAppSignalFormat::Float32:
-
-			return	(inbusAnalogFormat == E::DataFormat::Float && inbusSizeBits == SIZE_32BIT) ||
-					(inbusAnalogFormat == E::DataFormat::SignedInt && inbusSizeBits == SIZE_32BIT) ||
-					(inbusAnalogFormat == E::DataFormat::UnsignedInt && inbusSizeBits == SIZE_16BIT);
-
-		case E::AnalogAppSignalFormat::SignedInt32:
-
-			return	(inbusAnalogFormat == E::DataFormat::Float && inbusSizeBits == SIZE_32BIT) ||
-					(inbusAnalogFormat == E::DataFormat::SignedInt && inbusSizeBits == SIZE_32BIT) ||
-					(inbusAnalogFormat == E::DataFormat::UnsignedInt && inbusSizeBits == SIZE_16BIT);
-
-		default:
-			Q_ASSERT(false);
-		}
-
-		return false;
-	}*/
-/*
-	QString BusSignal::getScaleAfbCaption() const
-	{
-		Q_ASSERT(signalType == E::SignalType::Analog);
-
-		static const std::vector<std::tuple<E::DataFormat, int, QString>> fromFloat32ScaleAfbs =
-		{
-			{ E::DataFormat::Float, SIZE_32BIT, "scale_fp_fp" },
-
-			{ E::DataFormat::SignedInt, SIZE_32BIT, "scale_fp_si" },
-			{ E::DataFormat::SignedInt, SIZE_16BIT, "scale_fp_si" },
-
-			{ E::DataFormat::UnsignedInt, SIZE_16BIT, "scale_fp_16ui" }
-		};
-
-		static const std::vector<std::tuple<E::DataFormat, int, QString>> fromSInt32ScaleAfbs =
-		{
-			{ E::DataFormat::Float, SIZE_32BIT, "scale_si_fp" },
-
-			{ E::DataFormat::SignedInt, SIZE_32BIT, "scale_si_si" },
-			{ E::DataFormat::SignedInt, SIZE_16BIT, "scale_si_si" },
-
-			{ E::DataFormat::UnsignedInt, SIZE_16BIT, "scale_16ui_si" }
-		};
-
-		const std::vector<std::tuple<E::DataFormat, int, QString>>* scaleAfbs = nullptr;
-
-		switch(analogFormat)
-		{
-		case E::AnalogAppSignalFormat::Float32:
-			scaleAfbs = &fromFloat32ScaleAfbs;
-			break;
-
-		case E::AnalogAppSignalFormat::SignedInt32:
-			scaleAfbs = &fromSInt32ScaleAfbs;
-			break;
-
-		default:
-			Q_ASSERT(false);
-			return QString();
-		}
-
-		E::DataFormat dataFormat = E::DataFormat::Float;
-		int sizeBits = 0;
-		QString scaleAfbCaption;
-
-		for(auto& t : *scaleAfbs)
-		{
-			std::tie(dataFormat, sizeBits, scaleAfbCaption) = t;
-
-			if (dataFormat == inbusAnalogFormat &&
-				sizeBits == inbusSizeBits)
-			{
-				return scaleAfbCaption;
-			}
-		}
-
-		return QString();
-	}*/
 
 	InbusConvDescription BusSignal::getInbusConvDescription() const
 	{

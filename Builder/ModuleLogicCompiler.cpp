@@ -15879,56 +15879,6 @@ namespace Builder
 		}
 	}
 
-	ModuleLogicCompiler::AfbElementInfoShared ModuleLogicCompiler::getAfbElementInfo(const QString& caption)
-	{
-		if (caption.isEmpty() == true)
-		{
-			Q_ASSERT(false);
-			return nullptr;
-		}
-
-		auto it = m_afbElementsInfo.find(caption);
-
-		if (it != m_afbElementsInfo.end())
-		{
-			return it->second;
-		}
-
-		std::shared_ptr<Afb::AfbElement> afbElem = m_lmDescription->afbElement(caption);
-
-		if (afbElem == nullptr)
-		{
-			// Required AFB %1 is missing.
-			//
-			m_log->errALC5174(caption, QUuid());
-			return nullptr;
-		}
-
-		AfbElementInfoShared afbElemInfo = std::make_shared<AfbElementInfo>();
-
-		afbElemInfo->caption = caption;
-		afbElemInfo->opCode = afbElem->opCode();
-
-		for(auto& s : afbElem->inputSignals())
-		{
-			afbElemInfo->pinOpIndex.insert({s.caption(), s.operandIndex()});
-		}
-
-		for(auto& s : afbElem->outputSignals())
-		{
-			afbElemInfo->pinOpIndex.insert({s.caption(), s.operandIndex()});
-		}
-
-		for(auto& p : afbElem->params())
-		{
-			afbElemInfo->pinOpIndex.insert({p.caption(), p.operandIndex()});
-		}
-
-		m_afbElementsInfo.insert({caption, afbElemInfo});
-
-		return afbElemInfo;
-	}
-
 	int ModuleLogicCompiler::bitAccumulatorAddress() const
 	{
 		return m_memoryMap.bitAccumulatorAddress();
@@ -15961,7 +15911,6 @@ namespace Builder
 		return device->isInputModule();
 	}
 
-
 	bool ModuleLogicCompiler::Module::isOutputModule() const
 	{
 		if (device == nullptr)
@@ -15983,23 +15932,4 @@ namespace Builder
 
 		return device->moduleFamily();
 	}
-
-	// ---------------------------------------------------------------------------------------
-	//
-	// ModuleLogicCompiler::AfbInfo struct implementation
-	//
-	// ---------------------------------------------------------------------------------------
-
-	int ModuleLogicCompiler::AfbElementInfo::getPinOpIndex(const QString& pinCaption)
-	{
-		auto p = pinOpIndex.find(pinCaption);
-
-		if (p == pinOpIndex.end())
-		{
-			return -1;
-		}
-
-		return p->second;
-	}
-
 }

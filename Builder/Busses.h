@@ -81,13 +81,6 @@ namespace Builder
 		double inbusAnalogLowLimit = 0.0;
 		double inbusAnalogHighLimit = 65535.0;
 
-		//
-
-		bool conversionRequired() const;
-
-//		bool is_SInt32_To_UInt16_BE_NoScale_conversion() const;
-//		bool is_SInt32_To_SInt16_BE_NoScale_conversion() const;
-
 		// Order of inbus signal conversion:
 		//
 		// Scaling -> Type conversion -> ByteOrder conversion
@@ -98,6 +91,8 @@ namespace Builder
 		//
 		// In some cases Scaling and Type conversion can be performed in time of Scaling
 		//
+		bool conversionRequired() const;
+
 		bool scalingRequired() const;
 		bool typeConversionRequired() const;
 		bool byteOrderConversionRequired() const;

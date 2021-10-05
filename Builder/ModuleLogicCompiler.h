@@ -146,19 +146,6 @@ namespace Builder
 			bool isLastStep() const { return currentStep == (stepsNumber - 1); }
 		};
 
-		struct AfbElementInfo
-		{
-			QString caption;
-			int opCode = -1;
-			int runTime = 0;
-
-			std::map<QString, int> pinOpIndex;
-
-			int getPinOpIndex(const QString& pinCaption);
-		};
-
-		using AfbElementInfoShared = std::shared_ptr<AfbElementInfo>;
-
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
 		~ModuleLogicCompiler();
@@ -167,8 +154,6 @@ namespace Builder
 		AppSignal* getSignal(const QString& appSignalID);
 
 		IssueLogger* log() { return m_log; }
-
-//		const LogicAfbSignal getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbls.getAfbSignal(afbStrID, signalIndex); }
 
 		bool pass1();
 		bool pass2();
@@ -739,8 +724,6 @@ namespace Builder
 
 		void getChassisSignalsWithEquipmentID(QString& equipmentID, std::vector<const AppSignal *>* resultSignalList);
 
-		AfbElementInfoShared getAfbElementInfo(const QString& caption);
-
 		int bitAccumulatorAddress() const;
 		int wordAccumulatorAddress() const;
 		int wordAccumulator2Address() const;
@@ -877,8 +860,6 @@ namespace Builder
 		ResourcesUsageInfo m_resourcesUsageInfo;
 
 		QVector<FbScal> m_fbScal;
-
-		std::map<QString, AfbElementInfoShared> m_afbElementsInfo;
 
 		static const int FB_SCALE_16UI_FP_INDEX = 0;
 		static const int FB_SCALE_16UI_SI_INDEX = 1;
