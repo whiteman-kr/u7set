@@ -25,7 +25,7 @@ public:
 
 protected:
 	virtual void timerEvent(QTimerEvent* event) override;
-	int addSchemaTabPage(QString schemaId, const QVariantHash& variables);
+	int addSchemaTabPage(const QString& schemaId, const QVariantHash& variables);
 
 	// Signals
 signals:
