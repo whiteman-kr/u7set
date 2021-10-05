@@ -1072,7 +1072,6 @@ function test_conversion_FP32_UI16_NS_BO(sim)
     sim.startForMs(5);
     assert(isFloatsEqual(parseFloat(devUtils.reverseUnsignedInt16(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess)).toString()) + 0.5,
                          FP32_CONST));
-    log.writeText(sim.signalValue("#LM1_CONST_FP32_UI16_NS_BO"));
     assert(isFloatsEqual(sim.signalValue("#LM1_CONST_FP32_UI16_NS_BO") + 0.5, FP32_CONST));
 
     // check variable conversion
@@ -1090,10 +1089,59 @@ function test_conversion_FP32_UI16_NS_BO(sim)
     assert(isFloatsEqual(sim.signalValue(VAR_OUT_SIGNAL_ID), 47001.0));                                         // round value
 }
 
+function test_conversion_FP32_UI16_SC(sim)
+{
+    // inbus = 0.5 * x + 10
+    // check const conversion
 
+    let addr = sim.createRamAddress(fp32ConstBusUalAddr.offset + 22, 0);
+
+    sim.startForMs(5);
+    assert(isFloatsEqual(parseFloat(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess).toString()), parseFloat("627.0")));  // truncated value of 627.25
+    assert(isFloatsEqual(sim.signalValue("#LM1_CONST_FP32_UI16_SC") + 0.5, FP32_CONST));        // not precise value
+
+    // check variable conversion
+
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_FP32_UI16_SC";
+
+    addr = sim.createRamAddress(fp32VarBusUalAddr.offset + 22, 0);
+
+    let v = 2000.2;
+
+    sim.overrideSignalValue(FP32_VAR_SIGNAL_ID, v);
+    sim.startForMs(5);
+    assert(isFloatsEqual(parseFloat(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess).toString()), 1010.0));     // truncated value of 1010.1
+    assert(isFloatsEqual(sim.signalValue(VAR_OUT_SIGNAL_ID), 2000.0));                                          // not precise value
+}
+
+function test_conversion_FP32_UI16_SC_BO(sim)
+{
+    // inbus = 0.5 * x + 10
+    // check const conversion
+
+    let addr = sim.createRamAddress(fp32ConstBusUalAddr.offset + 23, 0);
+
+    sim.startForMs(5);
+    assert(isFloatsEqual(parseFloat(devUtils.reverseUnsignedInt16(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess)).toString()),
+                         parseFloat("627.0")));  // truncated value of 627.25
+    assert(isFloatsEqual(sim.signalValue("#LM1_CONST_FP32_UI16_SC_BO") + 0.5, FP32_CONST));        // not precise value
+
+    // check variable conversion
+
+    const VAR_OUT_SIGNAL_ID = "#LM1_VAR_FP32_UI16_SC_BO";
+
+    addr = sim.createRamAddress(fp32VarBusUalAddr.offset + 23, 0);
+
+    let v = 2000.2;
+
+    sim.overrideSignalValue(FP32_VAR_SIGNAL_ID, v);
+    sim.startForMs(5);
+    assert(isFloatsEqual(parseFloat(devUtils.reverseUnsignedInt16(lm1.readRamUnsignedInt16(addr, RamReadWriteAccess)).toString()),
+                         1010.0));     // truncated value of 1010.1
+    assert(isFloatsEqual(sim.signalValue(VAR_OUT_SIGNAL_ID), 2000.0));                                          // not precise value
+}
 
 // ---------------------------------------------------------------------------------------------------------------------------
-/*
 
 function test_SI32_TO_UI16_INBUS_CONVERSION(sim)
 {
@@ -1247,4 +1295,3 @@ function test_AUTO_SIGNAL_FROMBUS_CONVERSION(sim)
 
     return;
 }
-*/
