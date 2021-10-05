@@ -3,6 +3,7 @@
 #include <QtGlobal>
 #include <QElapsedTimer>
 #include <QDebug>
+#include <cmath>
 
 #define ASSERT_RESULT_FALSE_BREAK	Q_ASSERT(false); \
 									result = false; \
