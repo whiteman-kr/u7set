@@ -150,6 +150,8 @@ HEADERS  += \
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
+TRANSLATIONS = languages/Metrology_ru.ts
+
 FORMS    +=
 
 RESOURCES += \

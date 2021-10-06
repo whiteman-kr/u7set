@@ -846,7 +846,8 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setAdditionalParam(limitType, Measure::AdditionalParam::MaxValue, query.value(field++).toDouble());
 					measure->setAdditionalParam(limitType, Measure::AdditionalParam::SystemDeviation, query.value(field++).toDouble());
 					measure->setAdditionalParam(limitType, Measure::AdditionalParam::StandardDeviation, query.value(field++).toDouble());
-					measure->setAdditionalParam(limitType, Measure::AdditionalParam::LowHighBorder, query.value(field++).toDouble());
+					measure->setAdditionalParam(limitType, Measure::AdditionalParam::LowBorder, query.value(field++).toDouble());
+					measure->setAdditionalParam(limitType, Measure::AdditionalParam::HighBorder, query.value(field++).toDouble());
 					measure->setAdditionalParam(limitType, Measure::AdditionalParam::Uncertainty, query.value(field++).toDouble());
 				}
 				break;
@@ -1253,9 +1254,9 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::MaxValue));
 					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::SystemDeviation));
 					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::StandardDeviation));
-					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::LowHighBorder));
+					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::LowBorder));
+					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::HighBorder));
 					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::Uncertainty));
-					query.bindValue(field++, 0);
 					query.bindValue(field++, 0);
 					query.bindValue(field++, 0);
 					query.bindValue(field++, 0);

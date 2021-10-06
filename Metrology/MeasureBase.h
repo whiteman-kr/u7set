@@ -94,13 +94,14 @@ namespace Measure
 		MaxValue			= 0,
 		SystemDeviation		= 1,
 		StandardDeviation	= 2,
-		LowHighBorder		= 3,
-		Uncertainty			= 4,
+		LowBorder			= 3,
+		HighBorder			= 4,
+		Uncertainty			= 5,
 	};
 
-	const int AdditionalParamCount = 5;
+	const int AdditionalParamCount = 6;
 
-				// now used 5 (1 .. 5)
+				// now used 6 (1 .. 6)
 				// maximum 16 items (0 .. 15)
 
 	#define ERR_MEASURE_ADDITIONAL_PARAM(param) (TO_INT(param) < 0 || TO_INT(param) >= Measure::AdditionalParamCount)

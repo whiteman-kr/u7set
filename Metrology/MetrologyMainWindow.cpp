@@ -3060,6 +3060,8 @@ void MainWindow::measureThreadInfo(const MeasureThreadInfo& info)
 
 			m_statusMeasureTimeout->setValue(info.timeout());
 
+			break;
+
 		default:
 			assert(0);
 	}
