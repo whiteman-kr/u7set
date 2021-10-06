@@ -322,7 +322,7 @@ namespace Builder
 		bool calculate_LATCH_paramValues();
 		bool calculate_LIM_paramValues();
 		bool calculate_DEAD_ZONE_paramValues();
-		bool calculate_DEAD_ZONE_paramValues_ldn4();
+		bool calculate_DEAD_ZONE_paramValues_LM1_SR04();
 		bool calculate_POL_paramValues();
 		bool calculate_DERIV_paramValues();
 		bool calculate_MISMATCH_paramValues();
