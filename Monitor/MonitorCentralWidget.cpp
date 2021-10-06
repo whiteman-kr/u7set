@@ -77,22 +77,33 @@ void MonitorCentralWidget::timerEvent(QTimerEvent* event)
 	return;
 }
 
-int MonitorCentralWidget::addSchemaTabPage(QString schemaId, const QVariantHash& variables)
+int MonitorCentralWidget::addSchemaTabPage(const QString& schemaId, const QVariantHash& variables)
 {
-	std::shared_ptr<VFrame30::Schema> tabSchema = m_schemaManager->schema(schemaId);
+	std::shared_ptr<VFrame30::Schema> tabSchema;
 
+	if (m_schemaManager->hasSchema(schemaId) == true)
+	{
+		tabSchema = m_schemaManager->schema(schemaId);
+	}
+	else
+	{
+		QString startSchemaId = m_schemaManager->monitorConfigController()->configurationStartSchemaId();
+
+		if (m_schemaManager->hasSchema(startSchemaId) == true)
+		{
+			// If schema is not found try to set StartSchemaID
+			//
+			tabSchema = m_schemaManager->schema(startSchemaId);
+		}
+	}
+
+	// Schema still not found, create empty schema
+	//
 	if (tabSchema == nullptr)
 	{
-		// If schema is not fount try to set StartSchemaID
-		//
-		tabSchema = m_schemaManager->schema(m_schemaManager->monitorConfigController()->configurationStartSchemaId());
-
-		if (tabSchema == nullptr)
-		{
-			tabSchema = std::make_shared<VFrame30::MonitorSchema>();
-			tabSchema->setSchemaId("EMPTYSCHEMA");
-			tabSchema->setCaption("Empty Schema");
-		}
+		tabSchema = std::make_shared<VFrame30::MonitorSchema>();
+		tabSchema->setSchemaId("EMPTYSCHEMA");
+		tabSchema->setCaption("Empty Schema");
 	}
 
 	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(tabSchema,
