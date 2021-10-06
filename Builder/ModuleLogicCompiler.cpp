@@ -11617,25 +11617,18 @@ namespace Builder
 			//
 			if (pin.caption() == "in")
 			{
-				cmp->setInAnalogSignalFormat(ualSignal->analogSignalFormat());
+				QString appSignalID;
+				bool result = getNearestInSignalID(pin, &appSignalID);
 
-				for(const AppSignal* inputSignal : ualSignal->refSignals())
+				if ( result == false || appSignalID.isEmpty())
 				{
-					if (inputSignal == nullptr)
-					{
-						continue;
-					}
-
-					if (inputSignal->isOutput() == true)
-					{
-						continue;
-					}
-
-					cmp->input().setSignalParams(	inputSignal->appSignalID(),
-													ualSignal->isAcquired(),
-													ualSignal->isConst(),
-													ualSignal->constValueIfConst());
+					appSignalID = ualSignal->appSignalID();
 				}
+
+				cmp->input().setSignalParams(	appSignalID,
+												ualSignal->isAcquired(),
+												ualSignal->isConst(),
+												ualSignal->constValueIfConst());
 			}
 
 			// compare Signal
