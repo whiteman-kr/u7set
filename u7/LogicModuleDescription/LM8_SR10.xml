@@ -11393,7 +11393,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db1_fp_v1"       Caption="db1_fp"       Version="1.0011">
+		<AFB id="#db1_fp_v1"       Caption="db1_fp"       Version="1.0012">
 			<Properties>				
 				<Description>Dead zone Block with float data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -11404,17 +11404,17 @@ function createInputSignals(videoItemFblElement, afbElement)
 				<MinHeight>8</MinHeight>
 			</Properties>
 			<Inputs>
-				<Pin OpName="i_st" Caption="in_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
 				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="6" Size="32"/>           
+				<Pin OpName="i_sync_in" Caption="s_in" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
 			</Inputs>
 			<Outputs>
-				<Pin OpName="o_st" Caption="out_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="9" Size="32"/>
 				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="17" Size="1"/>
+				<Pin OpName="o_sync_out" Caption="s_out" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
 			</Outputs>
 			<Params>
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -11451,7 +11451,8 @@ function createInputSignals(videoItemFblElement, afbElement)
 						<Changed>
 (function(videoItemFblElement, afbElement)
 {
-	return createOutputSignals(videoItemFblElement, afbElement);
+    createOutputSignals(videoItemFblElement, afbElement);
+    createSyncSignals(videoItemFblElement, afbElement);
 })
 						</Changed>
 					</Script>
@@ -11463,7 +11464,8 @@ function createInputSignals(videoItemFblElement, afbElement)
 						<Changed>
 (function(videoItemFblElement, afbElement)
 {
-	return createOutputSignals(videoItemFblElement, afbElement);
+    createOutputSignals(videoItemFblElement, afbElement);
+    createSyncSignals(videoItemFblElement, afbElement);
 })
 						</Changed>
 					</Script>
@@ -11475,7 +11477,8 @@ function createInputSignals(videoItemFblElement, afbElement)
 						<Changed>
 (function(videoItemFblElement, afbElement)
 {
-	return createOutputSignals(videoItemFblElement, afbElement);
+    createOutputSignals(videoItemFblElement, afbElement);
+    createSyncSignals(videoItemFblElement, afbElement);
 })
 						</Changed>
 					</Script>
@@ -11487,7 +11490,8 @@ function createInputSignals(videoItemFblElement, afbElement)
 						<Changed>
 (function(videoItemFblElement, afbElement)
 {
-	return createOutputSignals(videoItemFblElement, afbElement);
+    createOutputSignals(videoItemFblElement, afbElement);
+    createSyncSignals(videoItemFblElement, afbElement);
 })
 						</Changed>
 					</Script>
@@ -11499,8 +11503,22 @@ function createInputSignals(videoItemFblElement, afbElement)
 						<Changed>
 (function(videoItemFblElement, afbElement)
 {
-	return createOutputSignals(videoItemFblElement, afbElement);
+    createOutputSignals(videoItemFblElement, afbElement);
+    createSyncSignals(videoItemFblElement, afbElement);
 })
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="SyncStatePins" Caption="SyncStatePins" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				    <Value>0</Value>
+					<Default>0</Default>
+					<Script>
+					    <Changed>
+						    (function(videoItemFblElement, afbElement)
+							{
+							    createSyncSignals(videoItemFblElement, afbElement);
+								createOutputSignals(videoItemFblElement, afbElement);
+							})
 						</Changed>
 					</Script>
 				</Param>
@@ -11531,6 +11549,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
 	}
 
+        createOutput(videoItemFblElement, afbElement, "SyncStatePins", "s_out");
 	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
@@ -11541,17 +11560,35 @@ function createOutputSignals(videoItemFblElement, afbElement)
 
 	return true;
 }
+function createSyncSignals(videoItemFblElement, afbElement)
+	{
+		videoItemFblElement.removeInputSignal("s_in");
+
+                var show = videoItemFblElement.getParamBoolValue("SyncStatePins");
+		if (show == true)
+		{
+			var s = afbElement.getAfbSignalByCaption("s_in");
+			if (s != null)
+			{
+			    videoItemFblElement.addInputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+			}
+		}
+
+                videoItemFblElement.adjustHeight();
+		return true;
+	}
 				</Library>
 				<AfterCreation>
 (function(videoItemFblElement, afbElement)
 {
-	return createOutputSignals(videoItemFblElement, afbElement);
+    createOutputSignals(videoItemFblElement, afbElement);
+    createSyncSignals(videoItemFblElement, afbElement);
 })
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db1_si_v1"       Caption="db1_si"       Version="1.0010">
+		<AFB id="#db1_si_v1"       Caption="db1_si"       Version="1.0012">
 			<Properties>				
 				<Description>Dead zone Block with signed int data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -11563,11 +11600,9 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<MinHeight>8</MinHeight>				
 			</Properties>
 			<Inputs>
-				<Pin OpName="i_st" Caption="in_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
 				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="6" Size="32"/>           
 			</Inputs>
 			<Outputs>
-				<Pin OpName="o_st" Caption="out_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="9" Size="32"/>
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="17" Size="1"/>
@@ -11668,7 +11703,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db2_fp_v1"       Caption="db2_fp"       Version="1.0011">
+		<AFB id="#db2_fp_v1"       Caption="db2_fp"       Version="1.0012">
 			<Properties>
 				<Description>Dead zone Block with float data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -11679,17 +11714,17 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<MinHeight>8</MinHeight>				
 			</Properties>
 			<Inputs>
-				<Pin OpName="i_st" Caption="in_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
 				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="6" Size="32"/>           
+				<Pin OpName="i_sync_in" Caption="s_in" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
 			</Inputs>
 			<Outputs>
-				<Pin OpName="o_st" Caption="out_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="9" Size="32"/>
 				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="12" Size="1"/>
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="17" Size="1"/>
+				<Pin OpName="o_sync_out" Caption="s_out" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
 			</Outputs>
 			<Params>
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
@@ -11726,7 +11761,8 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed>
 (function(videoItemFblElement, afbElement)
 {
-	return createOutputSignals(videoItemFblElement, afbElement);
+    createOutputSignals(videoItemFblElement, afbElement);
+    createSyncSignals(videoItemFblElement, afbElement);
 })
 						</Changed>
 					</Script>
@@ -11738,7 +11774,8 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed>
 (function(videoItemFblElement, afbElement)
 {
-	return createOutputSignals(videoItemFblElement, afbElement);
+    createOutputSignals(videoItemFblElement, afbElement);
+    createSyncSignals(videoItemFblElement, afbElement);
 })
 						</Changed>
 					</Script>
@@ -11750,7 +11787,8 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed>
 (function(videoItemFblElement, afbElement)
 {
-	return createOutputSignals(videoItemFblElement, afbElement);
+    createOutputSignals(videoItemFblElement, afbElement);
+    createSyncSignals(videoItemFblElement, afbElement);
 })
 						</Changed>
 					</Script>
@@ -11762,7 +11800,8 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed>
 (function(videoItemFblElement, afbElement)
 {
-	return createOutputSignals(videoItemFblElement, afbElement);
+    createOutputSignals(videoItemFblElement, afbElement);
+    createSyncSignals(videoItemFblElement, afbElement);
 })
 						</Changed>
 					</Script>
@@ -11774,8 +11813,22 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						<Changed>
 (function(videoItemFblElement, afbElement)
 {
-	return createOutputSignals(videoItemFblElement, afbElement);
+    createOutputSignals(videoItemFblElement, afbElement);
+    createSyncSignals(videoItemFblElement, afbElement);
 })
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="SyncStatePins" Caption="SyncStatePins" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				    <Value>0</Value>
+					<Default>0</Default>
+					<Script>
+					    <Changed>
+						    (function(videoItemFblElement, afbElement)
+							{
+							    createSyncSignals(videoItemFblElement, afbElement);
+								createOutputSignals(videoItemFblElement, afbElement);
+							})
 						</Changed>
 					</Script>
 				</Param>
@@ -11806,6 +11859,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
 	}
 
+        createOutput(videoItemFblElement, afbElement, "SyncStatePins", "s_out");
 	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
 	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
@@ -11816,17 +11870,36 @@ function createOutputSignals(videoItemFblElement, afbElement)
 
 	return true;
 }
+
+function createSyncSignals(videoItemFblElement, afbElement)
+	{
+		videoItemFblElement.removeInputSignal("s_in");
+
+                var show = videoItemFblElement.getParamBoolValue("SyncStatePins");
+		if (show == true)
+		{
+			var s = afbElement.getAfbSignalByCaption("s_in");
+			if (s != null)
+			{
+			    videoItemFblElement.addInputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+			}
+		}
+
+                videoItemFblElement.adjustHeight();
+		return true;
+	}
 				</Library>
 				<AfterCreation>
 (function(videoItemFblElement, afbElement)
 {
-	return createOutputSignals(videoItemFblElement, afbElement);
+    createOutputSignals(videoItemFblElement, afbElement);
+    createSyncSignals(videoItemFblElement, afbElement);
 })
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db2_si_v1"       Caption="db2_si"       Version="1.0011">
+		<AFB id="#db2_si_v1"       Caption="db2_si"       Version="1.0012">
 			<Properties>
 				<Description>Dead zone Block with signed int data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -11838,11 +11911,9 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<MinHeight>8</MinHeight>				
 			</Properties>
 			<Inputs>
-				<Pin OpName="i_st" Caption="in_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
 				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="6" Size="32"/>           
 			</Inputs>
 			<Outputs>
-				<Pin OpName="o_st" Caption="out_state" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
 				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="9" Size="32"/>
 				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="17" Size="1"/>
