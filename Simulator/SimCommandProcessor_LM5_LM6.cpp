@@ -2774,12 +2774,13 @@ namespace Sim
 		// Logic
 		//
 		std::array<quint16, 16> alertedCount = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
 		quint16 mask = 0x0001;
-		for (size_t i = 0; i < 16; i++, mask <<= 1)
+		for (size_t i = 0; i < std::size(alertedCount); i++, mask <<= 1)
 		{
 			for (size_t inputIndex = 0; inputIndex < yCount; inputIndex++)
 			{
-				if ((inputs[inputIndex] & mask) == 1)
+				if ((inputs[inputIndex] & mask) != 0)
 				{
 					alertedCount[i] ++;
 				}
@@ -2793,7 +2794,7 @@ namespace Sim
 		quint16 err_st = 0;
 
 		mask = 0x0001;
-		for (size_t i = 0; i < 16; i++, mask <<= 1)
+		for (size_t i = 0; i < std::size(alertedCount); i++, mask <<= 1)
 		{
 			int ac = alertedCount[i];
 

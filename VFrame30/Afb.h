@@ -459,11 +459,6 @@ private:
 		Q_INVOKABLE QObject* getAfbSignalByOpIndex(int opIndex);
 		Q_INVOKABLE QObject* getAfbSignalByCaption(QString caption);
 
-		// Methods
-		//
-	public:
-		void updateParams(const std::vector<AfbParam>& params);
-
 	// Properties and Datas
 	//
 	public:
