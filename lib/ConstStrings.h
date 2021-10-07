@@ -574,5 +574,9 @@ namespace Afb
 	inline const QString MISMATCH_PIN_CAPTION("mismatch");
 	inline const QString HIGH_LIMIT_PIN_CAPTION("high_limit");
 	inline const QString LOW_LIMIT_PIN_CAPTION("low_limit");
+
+	inline const QString PARAM_I_CONF("i_conf");
+	inline const QString PARAM_I_DATA_X1("i_data_x1");
+	inline const QString PARAM_I_DATA_X2("i_data_x2");
 }
 

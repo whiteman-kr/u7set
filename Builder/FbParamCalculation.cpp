@@ -180,11 +180,11 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -219,11 +219,11 @@ namespace Builder
 
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf);
 
@@ -251,11 +251,11 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -285,11 +285,11 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -357,14 +357,14 @@ namespace Builder
 
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 		requiredParams.append("i_sp_s");
 		requiredParams.append("i_sp_r");
 		requiredParams.append("hysteresis");
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 		AppFbParamValue& sSettingParam = m_paramValuesArray["i_sp_s"];
 		AppFbParamValue& rSettingParam = m_paramValuesArray["i_sp_r"];
 		AppFbParamValue& hysteresisParam = m_paramValuesArray["hysteresis"];
@@ -498,7 +498,7 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 
 		bool isConstDamper = caption() == "dampc_si" ||	caption() == "dampc_fp";
 
@@ -509,7 +509,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -548,12 +548,12 @@ namespace Builder
 
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 		requiredParams.append("i_count");
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 		AppFbParamValue& i_count = m_paramValuesArray["i_count"];
 
 		CHECK_UNSIGNED_INT(i_conf)
@@ -615,11 +615,11 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -655,7 +655,7 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 		requiredParams.append("i_scal_k1_coef");
 		requiredParams.append("i_scal_k2_coef");
 		requiredParams.append("x1");
@@ -665,7 +665,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 		AppFbParamValue& k1Param = m_paramValuesArray["i_scal_k1_coef"];
 		AppFbParamValue& k2Param = m_paramValuesArray["i_scal_k2_coef"];
 		AppFbParamValue& x1Param = m_paramValuesArray["x1"];
@@ -919,7 +919,7 @@ namespace Builder
 		//
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 
 		QString x_data_str = "i_x%1_data";
 
@@ -948,7 +948,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -1189,11 +1189,11 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -1305,7 +1305,7 @@ namespace Builder
 			hasHysteresisParam = false;
 		}
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 
 		if (hasHysteresisParam == true)
 		{
@@ -1314,7 +1314,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -1416,11 +1416,11 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -1448,7 +1448,7 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 
 		bool isConstLimiter = caption() == "limc_fp" || caption() == "limc_si";
 
@@ -1460,7 +1460,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf);
 
@@ -1527,24 +1527,24 @@ namespace Builder
 
 	bool UalAfb::calculate_DEAD_ZONE_paramValues()
 	{
-		if (lmDescriptionNumber() == 4	/* LM1_SR04 */)
+		if (lmDescriptionNumber() == 4)
 		{
 			return calculate_DEAD_ZONE_paramValues_LM1_SR04();
 		}
 
-		if (lmDescriptionNumber() == 10	/* LM8_SR10 */)
+		if (lmDescriptionNumber() == 10)
 		{
-			return calculate_DEAD_ZONE_paramValues_LM1_SR04();
+			return calculate_DEAD_ZONE_paramValues_LM8_SR10();
 		}
 
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 		requiredParams.append("i_data_x");
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 		AppFbParamValue& i_data_x = m_paramValuesArray["i_data_x"];
 
 		CHECK_UNSIGNED_INT(i_conf);
@@ -1598,15 +1598,15 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
-		requiredParams.append("i_data_x1");
-		requiredParams.append("i_data_x2");
+		requiredParams.append(Afb::PARAM_I_CONF);
+		requiredParams.append(Afb::PARAM_I_DATA_X1);
+		requiredParams.append(Afb::PARAM_I_DATA_X2);
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
-		AppFbParamValue& i_data_x1 = m_paramValuesArray["i_data_x1"];
-		AppFbParamValue& i_data_x2 = m_paramValuesArray["i_data_x2"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AppFbParamValue& i_data_x1 = m_paramValuesArray[Afb::PARAM_I_DATA_X1];
+		AppFbParamValue& i_data_x2 = m_paramValuesArray[Afb::PARAM_I_DATA_X2];
 
 		CHECK_UNSIGNED_INT(i_conf);
 
@@ -1699,17 +1699,23 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
-		requiredParams.append("i_data_x1");
-		requiredParams.append("i_data_x2");
+		requiredParams.append(Afb::PARAM_I_CONF);
+		requiredParams.append(Afb::PARAM_I_DATA_X1);
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
-		AppFbParamValue& i_data_x1 = m_paramValuesArray["i_data_x1"];
-		AppFbParamValue& i_data_x2 = m_paramValuesArray["i_data_x2"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AppFbParamValue& i_data_x1 = m_paramValuesArray[Afb::PARAM_I_DATA_X1];
 
 		CHECK_UNSIGNED_INT(i_conf);
+
+		if (i_conf.unsignedIntValue() == 2 ||
+			i_conf.unsignedIntValue() == 4)
+		{
+			requiredParams.append(Afb::PARAM_I_DATA_X2);
+
+			CHECK_REQUIRED_PARAMETERS(requiredParams);
+		}
 
 		m_runTime = 5 + 4;
 
@@ -1728,24 +1734,29 @@ namespace Builder
 				return false;
 			}
 
-			CHECK_SIGNED_INT32(i_data_x2);
-
-			if (i_data_x2.signedIntValue() < 0)
+			if (i_conf.unsignedIntValue() == 2)
 			{
-				// Value of parameter '%1.%2' must be greater or equal to 0.
-				//
-				m_log->errALC5043(caption(), i_data_x2.caption(), guid());
+				AppFbParamValue& i_data_x2 = m_paramValuesArray[Afb::PARAM_I_DATA_X2];
 
-				return false;
-			}
+				CHECK_SIGNED_INT32(i_data_x2);
 
-			if (i_data_x2.signedIntValue() < i_data_x1.signedIntValue())
-			{
-				// Value of parameter %1.%2 must be greater or equal then the value of %1.%3.
-				//
-				m_log->errALC5158(caption(), i_data_x2.caption(), i_data_x1.caption(), guid(), schemaID(), label());
+				if (i_data_x2.signedIntValue() < 0)
+				{
+					// Value of parameter '%1.%2' must be greater or equal to 0.
+					//
+					m_log->errALC5043(caption(), i_data_x2.caption(), guid());
 
-				return false;
+					return false;
+				}
+
+				if (i_data_x2.signedIntValue() < i_data_x1.signedIntValue())
+				{
+					// Value of parameter %1.%2 must be greater or equal then the value of %1.%3.
+					//
+					m_log->errALC5158(caption(), i_data_x2.caption(), i_data_x1.caption(), guid(), schemaID(), label());
+
+					return false;
+				}
 			}
 
 			break;
@@ -1763,24 +1774,29 @@ namespace Builder
 				return false;
 			}
 
-			CHECK_FLOAT32(i_data_x2);
-
-			if (i_data_x2.floatValue() < 0)
+			if (i_conf.unsignedIntValue() == 4)
 			{
-				// Value of parameter '%1.%2' must be greater or equal to 0.
-				//
-				m_log->errALC5043(caption(), i_data_x2.caption(), guid());
+				AppFbParamValue& i_data_x2 = m_paramValuesArray[Afb::PARAM_I_DATA_X2];
 
-				return false;
-			}
+				CHECK_FLOAT32(i_data_x2);
 
-			if (i_data_x2.floatValue() < i_data_x1.floatValue())
-			{
-				// Value of parameter %1.%2 must be greater or equal then the value of %1.%3.
-				//
-				m_log->errALC5158(caption(), i_data_x2.caption(), i_data_x1.caption(), guid(), schemaID(), label());
+				if (i_data_x2.floatValue() < 0)
+				{
+					// Value of parameter '%1.%2' must be greater or equal to 0.
+					//
+					m_log->errALC5043(caption(), i_data_x2.caption(), guid());
 
-				return false;
+					return false;
+				}
+
+				if (i_data_x2.floatValue() < i_data_x1.floatValue())
+				{
+					// Value of parameter %1.%2 must be greater or equal then the value of %1.%3.
+					//
+					m_log->errALC5158(caption(), i_data_x2.caption(), i_data_x1.caption(), guid(), schemaID(), label());
+
+					return false;
+				}
 			}
 
 			break;
@@ -1804,7 +1820,7 @@ namespace Builder
 
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 
 		for(quint32 n = 1; n <= COEF_MAX_NUM; n++)
 		{
@@ -1813,7 +1829,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf);
 
@@ -1897,7 +1913,7 @@ namespace Builder
 		AppFbParamValue* i_conf = nullptr;
 		AppFbParamValue* i_conf_n = nullptr;
 
-		CHECK_AND_GET_REQUIRED_PARAMETER("i_conf", i_conf);
+		CHECK_AND_GET_REQUIRED_PARAMETER(Afb::PARAM_I_CONF, i_conf);
 		CHECK_AND_GET_REQUIRED_PARAMETER("i_conf_n", i_conf_n);
 
 		CHECK_UNSIGNED_INT(*i_conf);
@@ -2088,11 +2104,11 @@ namespace Builder
 
 		QStringList requiredParams;
 
-		requiredParams.append("i_conf");
+		requiredParams.append(Afb::PARAM_I_CONF);
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		// i_conf must have value from 1 to 4
 		//
@@ -2127,7 +2143,7 @@ namespace Builder
 
 		AppFbParamValue* i_conf = nullptr;
 
-		CHECK_AND_GET_REQUIRED_PARAMETER("i_conf", i_conf);
+		CHECK_AND_GET_REQUIRED_PARAMETER(Afb::PARAM_I_CONF, i_conf);
 
 		CHECK_UNSIGNED_INT(*i_conf);
 
@@ -2156,7 +2172,7 @@ namespace Builder
 		AppFbParamValue* i_t_high = nullptr;
 		AppFbParamValue* i_t_low = nullptr;
 
-		CHECK_AND_GET_REQUIRED_PARAMETER("i_conf", i_conf);
+		CHECK_AND_GET_REQUIRED_PARAMETER(Afb::PARAM_I_CONF, i_conf);
 		CHECK_AND_GET_REQUIRED_PARAMETER("i_t_high", i_t_high);
 		CHECK_AND_GET_REQUIRED_PARAMETER("i_t_low", i_t_low);
 
