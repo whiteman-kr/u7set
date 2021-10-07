@@ -391,7 +391,8 @@ namespace Measure
 
 			case MVC_CMN_L_SYSTEM_DEVIATION:		result = m->additionalParamStr(limitType, Measure::AdditionalParam::SystemDeviation); break;
 			case MVC_CMN_L_SD:						result = m->additionalParamStr(limitType, Measure::AdditionalParam::StandardDeviation); break;
-			case MVC_CMN_L_BORDER:					result = m->additionalParamStr(limitType, Measure::AdditionalParam::LowHighBorder); break;
+			case MVC_CMN_L_LOW_BORDER:				result = m->additionalParamStr(limitType, Measure::AdditionalParam::LowBorder); break;
+			case MVC_CMN_L_HIGH_BORDER:				result = m->additionalParamStr(limitType, Measure::AdditionalParam::HighBorder); break;
 			case MVC_CMN_L_UNCERTAINTY:				result = m->additionalParamStr(limitType, Measure::AdditionalParam::Uncertainty); break;
 
 			case MVC_CMN_L_ERROR:					result = m->errorStr(m_measureType); break;

@@ -1632,21 +1632,20 @@ namespace Measure
 			setAdditionalParam(limitType, Measure::AdditionalParam::StandardDeviation, sco);
 
 
-				// according to GOST 8.207-76 paragraph 2.4
-				//
-			double estimateSCO = sco / sqrt(static_cast<double>(measureCount()));
-
-				// Student's rate according to GOST 27.202 on P = 0.95
+			// Student's rate according to GOST 27.202 on P = 0.95
 				// or GOST 8.207-76 application 2 (last page)
 				//
 			double k_student = studentK(measureCount(), CT_PROPABILITY_95);
 
-
-				// according to GOST 8.207-76 paragraph 3.2
+				// according to RD 34.11.206-88
 				//
-			double border = k_student * estimateSCO;
+			double lowBorder = systemError - k_student * sco;
 
-			setAdditionalParam(limitType, Measure::AdditionalParam::LowHighBorder, border);
+			setAdditionalParam(limitType, Measure::AdditionalParam::LowBorder, lowBorder);
+
+			double highBorder = systemError + k_student * sco;
+
+			setAdditionalParam(limitType, Measure::AdditionalParam::HighBorder, highBorder);
 
 
 				// Uncertainty of measurement to Document: EA-04/02 M:2013
@@ -2039,11 +2038,6 @@ namespace Measure
 		}
 
 		QString valueStr = QString::number(m_additionalParam[limitType][paramType], 'f', 4);
-
-		if (paramType == Measure::AdditionalParam::LowHighBorder)
-		{
-			valueStr.insert(0, "± ");
-		}
 
 		return valueStr;
 	}
@@ -3556,7 +3550,8 @@ namespace Measure
 			case Measure::AdditionalParam::MaxValue:			caption = QT_TRANSLATE_NOOP("MeasureBase", "Measure value max");	break;
 			case Measure::AdditionalParam::SystemDeviation:		caption = QT_TRANSLATE_NOOP("MeasureBase", "System deviation");		break;
 			case Measure::AdditionalParam::StandardDeviation:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Standard deviation");	break;
-			case Measure::AdditionalParam::LowHighBorder:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Low High border");		break;
+			case Measure::AdditionalParam::LowBorder:			caption = QT_TRANSLATE_NOOP("MeasureBase", "Low border");			break;
+			case Measure::AdditionalParam::HighBorder:			caption = QT_TRANSLATE_NOOP("MeasureBase", "High border");			break;
 			case Measure::AdditionalParam::Uncertainty:			caption = QT_TRANSLATE_NOOP("MeasureBase", "Uncertainty");			break;
 
 			default:

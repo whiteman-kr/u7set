@@ -11433,15 +11433,6 @@ function createInputSignals(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>                   
-				<Param OpName="i_data_x2" Caption="DataX2" Visible="true" OpIndex="3" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>                   
 				<Param OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
@@ -11579,15 +11570,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					</Script>
 				</Param>
 				<Param OpName="i_data_x1" Caption="DataX1" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>           
-				<Param OpName="i_data_x2" Caption="DataX2" Visible="true" OpIndex="3" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>0</Value>
 					<Default>0</Default>
 					<LowLimit>0</LowLimit>
