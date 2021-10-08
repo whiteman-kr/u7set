@@ -236,47 +236,23 @@ bool DataSource::setInfo(const Network::DataSourceInfo& proto)
 
 bool DataSource::lanControllerFunctions(E::LanControllerType type, bool* tuning, bool* appData, bool* diagData)
 {
-	if (tuning == nullptr ||
-		appData == nullptr ||
-		diagData == nullptr)
+	TEST_PTR_RETURN_FALSE(tuning);
+	TEST_PTR_RETURN_FALSE(appData);
+	TEST_PTR_RETURN_FALSE(diagData);
+
+	if (type == E::LanControllerType::Unknown)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
-	bool result = true;
+	quint32 intType = static_cast<quint32>(type);
 
-	*tuning = *appData = *diagData = false;
+	*tuning = (intType & static_cast<quint32>(E::LanControllerType::Tuning)) != 0;
+	*appData = (intType & static_cast<quint32>(E::LanControllerType::AppData)) != 0;
+	*diagData = (intType & static_cast<quint32>(E::LanControllerType::DiagData)) != 0;
 
-	switch(type)
-	{
-	case E::LanControllerType::Unknown:
-		assert(false);
-		result = false;
-		break;
-
-	case E::LanControllerType::Tuning:
-		*tuning = true;
-		break;
-
-	case E::LanControllerType::AppData:
-		*appData = true;
-		break;
-
-	case E::LanControllerType::DiagData:
-		*diagData = true;
-		break;
-
-	case E::LanControllerType::AppAndDiagData:
-		*appData = *diagData = true;
-		break;
-
-	default:
-		assert(false);
-		result = false;
-	}
-
-	return result;
+	return true;
 }
 
 quint64 DataSource::generateID() const

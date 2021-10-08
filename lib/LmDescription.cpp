@@ -957,19 +957,17 @@ bool LmDescription::OptoInterface::load(const QDomDocument& document, QString* e
 
 bool LmDescription::LanController::isProvideTuning() const
 {
-	return m_type == E::LanControllerType::Tuning;
+	return (static_cast<int>(m_type) & static_cast<int>(E::LanControllerType::Tuning)) != 0;
 }
 
 bool LmDescription::LanController::isProvideAppData() const
 {
-	return  m_type == E::LanControllerType::AppData ||
-			m_type == E::LanControllerType::AppAndDiagData;
+	return (static_cast<int>(m_type) & static_cast<int>(E::LanControllerType::AppData)) != 0;
 }
 
 bool LmDescription::LanController::isProvideDiagData() const
 {
-	return  m_type == E::LanControllerType::DiagData ||
-			m_type == E::LanControllerType::AppAndDiagData;
+	return (static_cast<int>(m_type) & static_cast<int>(E::LanControllerType::DiagData)) != 0;
 }
 
 int LmDescription::Lan::lanControllerCount() const

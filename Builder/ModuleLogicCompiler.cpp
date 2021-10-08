@@ -4238,17 +4238,17 @@ namespace Builder
 
 		// common code for IPEN (FotipV1) and FotipV2 tuning protocols and data
 		//
-		bool tuningPropertyExists = false;
+		bool tuningLanExists = false;
 		bool tuningEnabled = false;
 
-		bool result = getTuningSettings(&tuningPropertyExists, &tuningEnabled);
+		bool result = getTuningSettings(&tuningLanExists, &tuningEnabled);
 
 		if (result == false)
 		{
 			return false;
 		}
 
-		if (tuningPropertyExists == false)
+		if (tuningLanExists == false)
 		{
 			return true;
 		}
@@ -4388,56 +4388,70 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getTuningSettings(bool* tuningPropertyExists, bool* tuningEnabled)
+	bool ModuleLogicCompiler::getTuningSettings(bool* tuningLanExists, bool* tuningEnabled)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(m_lmDescription, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(tuningLanExists, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(tuningEnabled, m_log);
+
+		*tuningLanExists = false;
+		*tuningEnabled = false;
 
 		const LmDescription::Lan& lan = m_lmDescription->lan();
 
-		int tuningControllerNo = -1;
-
-		// search ethernet controller that provide tuning
+		// search ethernet controller(s) that provide tuning
 		//
+		std::vector<int> tuningLans;
+
 		for(const LmDescription::LanController& lanController : lan.m_lanControllers)
 		{
 			if (lanController.isProvideTuning() == true)
 			{
-				tuningControllerNo = lanController.m_place;
-				break;
+				tuningLans.push_back(lanController.m_place);
 			}
 		}
 
-		if (tuningControllerNo == -1)
+		if (tuningLans.size() == 0)
 		{
 			// no tuning controllers found
 			//
-			*tuningPropertyExists = false;
 			return true;
 		}
 
-		QString suffix = LanControllerInfoHelper::getLanControllerSuffix(tuningControllerNo);
+		*tuningLanExists = true;
 
-		Hardware::DeviceController* adapter = DeviceHelper::getChildControllerBySuffix(m_lm, suffix, m_log);
-
-		if (adapter == nullptr)
+		for(int tuningLanNo : tuningLans)
 		{
-			assert(false);
-			return false;
+			QString suffix = LanControllerInfoHelper::getLanControllerSuffix(tuningLanNo);
+
+			Hardware::DeviceController* adapter = DeviceHelper::getChildControllerBySuffix(m_lm, suffix, m_log);
+
+			if (adapter == nullptr)
+			{
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Ethernet controller with suffix %1 is not found in module %2").
+											arg(suffix).arg(m_lm->equipmentIdTemplate()));
+				return false;
+			}
+
+			if (DeviceHelper::isPropertyExists(adapter, EquipmentPropNames::TUNING_ENABLE) == false)
+			{
+				continue;
+			}
+
+			bool tunEnabled = false;
+
+			bool res = DeviceHelper::getBoolProperty(adapter, EquipmentPropNames::TUNING_ENABLE,
+													 &tunEnabled, m_log);
+			if (res == false)
+			{
+				return false;
+			}
+
+			*tuningEnabled |= tunEnabled;
 		}
 
-		if (DeviceHelper::isPropertyExists(adapter, EquipmentPropNames::TUNING_ENABLE) == false)
-		{
-			*tuningPropertyExists = false;
-			return true;
-		}
-
-		*tuningPropertyExists = true;
-
-		bool res = DeviceHelper::getBoolProperty(adapter,
-		                                         EquipmentPropNames::TUNING_ENABLE,
-												 tuningEnabled,
-												 m_log);
-		return res;
+		return true;
 	}
 
 	bool ModuleLogicCompiler::disposeSignalsInHeap()

@@ -231,65 +231,17 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 
 bool LanControllerInfoHelper::isProvideTuning(E::LanControllerType lanControllerType)
 {
-	switch(lanControllerType)
-	{
-	case E::LanControllerType::Tuning:
-
-		return true;
-
-	case E::LanControllerType::AppData:
-	case E::LanControllerType::DiagData:
-	case E::LanControllerType::AppAndDiagData:
-
-		return false;
-
-	default:
-		Q_ASSERT(false);
-	}
-
-	return false;
+	return (static_cast<int>(lanControllerType) & static_cast<int>(E::LanControllerType::Tuning)) != 0;
 }
 
 bool LanControllerInfoHelper::isProvideAppData(E::LanControllerType lanControllerType)
 {
-	switch(lanControllerType)
-	{
-	case E::LanControllerType::AppData:
-	case E::LanControllerType::AppAndDiagData:
-
-		return true;
-
-	case E::LanControllerType::Tuning:
-	case E::LanControllerType::DiagData:
-
-		return false;
-
-	default:
-		Q_ASSERT(false);
-	}
-
-	return false;
+	return (static_cast<int>(lanControllerType) & static_cast<int>(E::LanControllerType::AppData)) != 0;
 }
 
 bool LanControllerInfoHelper::isProvideDiagData(E::LanControllerType lanControllerType)
 {
-	switch(lanControllerType)
-	{
-	case E::LanControllerType::DiagData:
-	case E::LanControllerType::AppAndDiagData:
-
-		return true;
-
-	case E::LanControllerType::Tuning:
-	case E::LanControllerType::AppData:
-
-		return false;
-
-	default:
-		Q_ASSERT(false);
-	}
-
-	return false;
+	return (static_cast<int>(lanControllerType) & static_cast<int>(E::LanControllerType::DiagData)) != 0;
 }
 
 QString LanControllerInfoHelper::getLanControllerSuffix(int controllerNo)
