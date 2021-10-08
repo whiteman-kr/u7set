@@ -3554,8 +3554,6 @@ namespace Sim
 				//
 				median.value = (operands[0].value + operands[1].value) / 2;
 				median.operandIndex = 0;
-				maxOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
-				minOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
 				zero = median.value == 0 ? 0x0001 : 0x0000;
 				break;
 
@@ -3654,9 +3652,6 @@ namespace Sim
 			case 2:
 				// Specific case, return medium
 				//
-				maxOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
-				minOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
-
 				median = operands[0];
 
 				median.value.addFloatingPoint(operands[1].value);
