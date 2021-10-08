@@ -14,8 +14,7 @@ QT       += sql
 QT       += qml
 QT       += xml
 QT       += charts
-
-#axcontainer
+QT       += axcontainer
 
 TARGET = Metrology
 TEMPLATE = app
@@ -63,6 +62,7 @@ SOURCES += \
 	DialogSignalList.cpp \
 	DialogTuningSignalList.cpp \
 	DialogTuningSourceList.cpp \
+	ExcelHelper.cpp \
 	MetrologyMain.cpp \
 	MetrologyMainWindow.cpp \
 	MetrologyConnection.cpp \
@@ -103,6 +103,7 @@ HEADERS  += \
 	../lib/Ui/DialogAbout.h \
 	../lib/ComparatorSet.h \
     ChartView.h \
+    ExcelHelper.h \
     Stable.h \
 	DialogCalculator.h \
 	DialogComparatorList.h \

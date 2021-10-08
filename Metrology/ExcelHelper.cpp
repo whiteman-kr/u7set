@@ -59,7 +59,7 @@ ExcelExportHelper::~ExcelExportHelper()
 		if (m_closeExcelOnExit == false)
 		{
 			m_pExcelApplication->setProperty("DisplayAlerts", 1);
-			m_pExcelApplication->dynamicCall("SetVisible(bool)", true );
+			m_pExcelApplication->dynamicCall("SetVisible(bool)", true);
 		}
 
 		if (m_pWorkbook != nullptr && m_closeExcelOnExit == true)
@@ -108,7 +108,14 @@ bool ExcelExportHelper::setCellValue(int lineIndex, int columnIndex, const QStri
 		return false;
 	}
 
-    cell->setProperty("Value",value);
+	if (lineIndex == 1)
+	{
+		QAxObject *font = cell->querySubObject("Font");
+		font->setProperty("Bold", true);
+	}
+
+	cell->setProperty("NumberFormat", "@");
+	cell->setProperty("Value",value);
 
 	delete cell;
 	cell = nullptr;
@@ -118,6 +125,11 @@ bool ExcelExportHelper::setCellValue(int lineIndex, int columnIndex, const QStri
 
 void ExcelExportHelper::saveAs(const QString& fileName)
 {
+	if (m_pWorkbook == nullptr)
+	{
+		return;
+	}
+
 	if (fileName.isEmpty() == true)
 	{
 		throw invalid_argument("'fileName' is empty!");
@@ -129,12 +141,14 @@ void ExcelExportHelper::saveAs(const QString& fileName)
 	}
 
 	if (QFile::exists(fileName) == true)
-    {
+	{
 		if (QFile::remove(fileName) == false)
-        {
-            throw new exception(QString("Failed to remove file '%1'").arg(fileName).toStdString().c_str());
-        }
-    }
+		{
+			throw new exception(QString("Failed to remove file '%1'").arg(fileName).toStdString().c_str());
+		}
+	}
 
 	m_pWorkbook->dynamicCall("SaveAs (const QString&)", fileName);
+
+	m_closeExcelOnExit = true;
 }

@@ -11,6 +11,7 @@
 #include <QSettings>
 #include <QtConcurrent>
 
+#include "ExcelHelper.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -610,8 +611,11 @@ void ExportData::exec()
 		return;
 	}
 
-	//QString filter = tr("Excel files (*.xlsx);;CSV files (*.csv)");
 	QString filter = tr("CSV files (*.csv)");
+
+	#ifdef Q_OS_WIN
+			filter.append(tr(";;Excel files (*.xlsx)"));
+	#endif
 
 	QString fileName = QFileDialog::getSaveFileName(m_pProgressDialog,
 													qApp->translate("ExportData", EXPORT_WINDOW_TITLE),
@@ -620,6 +624,19 @@ void ExportData::exec()
 	if (fileName.isEmpty() == true)
 	{
 		return;
+	}
+
+	fileName.replace("/", QDir::separator());
+
+	if (QFile::exists(fileName) == true)
+	{
+		if (QFile::remove(fileName) == false)
+		{
+			QMessageBox::information(m_pProgressDialog,
+									 qApp->translate("ExportData", EXPORT_WINDOW_TITLE),
+									 tr("File \"%1\" is bloked!").arg(fileName));
+			return;
+		}
 	}
 
 	m_pProgressDialog->show();
@@ -661,8 +678,7 @@ void ExportData::startExportThread(ExportData* pThis, const QString& fileName)
 
 bool ExportData::saveExcelFile(const QString& fileName)
 {
-	Q_UNUSED(fileName)
-	/*if (m_pView == nullptr)
+	if (m_pView == nullptr)
 	{
 		return false;
 	}
@@ -676,6 +692,8 @@ bool ExportData::saveExcelFile(const QString& fileName)
 
 	ExcelExportHelper helper;
 
+	int cellColumn = 1;
+
 	int columnCount = m_pView->model()->columnCount();
 	for(int column = 0; column < columnCount; column++)
 	{
@@ -684,13 +702,12 @@ bool ExportData::saveExcelFile(const QString& fileName)
 			continue;
 		}
 
-		helper.setCellValue(1, column, m_pView->model()->headerData(column, Qt::Horizontal).toString().toUtf8());
+		helper.setCellValue(1, cellColumn++, m_pView->model()->headerData(column, Qt::Horizontal).toString().toUtf8());
 	}
 
 	int rowCount = m_pView->model()->rowCount();
-	rowCount = 10;
 
-	setRange(0, rowCount);
+	emit setRange(0, rowCount);
 
 	for(int row = 0; row < rowCount; row++)
 	{
@@ -699,6 +716,8 @@ bool ExportData::saveExcelFile(const QString& fileName)
 			break;
 		}
 
+		cellColumn = 1;
+
 		for(int column = 0; column < columnCount; column++)
 		{
 			if (m_pView->isColumnHidden(column) == true)
@@ -706,18 +725,13 @@ bool ExportData::saveExcelFile(const QString& fileName)
 				continue;
 			}
 
-			helper.setCellValue(row + 2, column, m_pView->model()->data(m_pView->model()->index(row, column)).toString().toUtf8());
+			helper.setCellValue(row + 2, cellColumn++, m_pView->model()->data(m_pView->model()->index(row, column)).toString().toUtf8());
 		}
 
-		setValue(row);
+		emit setValue(row);
 	}
 
-	if (m_exportCancel == true)
-	{
-		return false;
-	}
-
-	helper.saveAs(fileName);*/
+	helper.saveAs(fileName);
 
 	return true;
 }
