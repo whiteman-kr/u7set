@@ -7882,6 +7882,7 @@ namespace Builder
 		bool result = true;
 
 		CodeSnippet analogsRefreshCode;
+		CodeSnippet discreteRefreshCode;
 		CodeSnippet bussesRefreshCode;
 
 		for(const UalSignal* lbSignal :  loopbacksUalSignals)
@@ -7913,8 +7914,9 @@ namespace Builder
 			case E::Discrete:
 				if (m_memoryMap.addressInBitMemory(lbSignal->ualAddr().offset()) == false)
 				{
-					LOG_INTERNAL_ERROR(m_log);
-					result = false;					// why discrete in not bit-addressed memory
+					// refeshing code is generated only for discretes NOT placed in bit-addressed memory
+					//
+					getRefreshingCode(&discreteRefreshCode, loopbackIDs, lbSignal);
 				}
 				break;
 
@@ -7932,6 +7934,12 @@ namespace Builder
 		if (analogsRefreshCode.isEmpty() == false)
 		{
 			refreshingCode.append(analogsRefreshCode);
+			refreshingCode.newLine();
+		}
+
+		if (discreteRefreshCode.isEmpty() == false)
+		{
+			refreshingCode.append(discreteRefreshCode);
 			refreshingCode.newLine();
 		}
 
@@ -7968,12 +7976,15 @@ namespace Builder
 			sizeW = lbSignal->dataSize() / WORD_SIZE;
 			break;
 
+		case E::Discrete:
+			sizeW = 1;
+			break;
+
 		case E::Bus:
 			sizeW = lbSignal->bus()->sizeW();
 			busStr = QString("bustype %1 ").arg(lbSignal->busTypeID());
 			break;
 
-		case E::Discrete:
 		default:
 			assert(false);
 			return false;
@@ -8006,7 +8017,7 @@ namespace Builder
 
 			if (firstCommand == true)
 			{
-				cmd.setComment(QString("loopback %1 (%2signal %3)").arg(loopbackID).arg(busStr).arg(lbSignal->signal()->appSignalID()));
+				cmd.setComment(QString("refreshing loopback %1 (%2signal %3)").arg(loopbackID).arg(busStr).arg(lbSignal->signal()->appSignalID()));
 				firstCommand = false;
 			}
 
