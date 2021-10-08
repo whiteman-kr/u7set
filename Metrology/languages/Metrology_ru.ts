@@ -2367,17 +2367,17 @@ Range of signal: %1</source>
 <context>
     <name>ExportData</name>
     <message>
-        <location filename="../ProcessData.cpp" line="562"/>
+        <location filename="../ProcessData.cpp" line="563"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
     <message>
-        <location filename="../ProcessData.cpp" line="602"/>
+        <location filename="../ProcessData.cpp" line="603"/>
         <source>Export</source>
         <translation>Экспорт</translation>
     </message>
     <message>
-        <location filename="../ProcessData.cpp" line="609"/>
+        <location filename="../ProcessData.cpp" line="610"/>
         <source>Data is absent!</source>
         <translation>Данные отсутствую!</translation>
     </message>
@@ -2387,7 +2387,17 @@ Range of signal: %1</source>
         <translation>CSV файлы (*.csv)</translation>
     </message>
     <message>
-        <location filename="../ProcessData.cpp" line="814"/>
+        <location filename="../ProcessData.cpp" line="617"/>
+        <source>;;Excel files (*.xlsx)</source>
+        <translation>;;Excel файлы (*.xlsx)</translation>
+    </message>
+    <message>
+        <location filename="../ProcessData.cpp" line="637"/>
+        <source>File &quot;%1&quot; is bloked!</source>
+        <translation>Файл %1 заблокирован!</translation>
+    </message>
+    <message>
+        <location filename="../ProcessData.cpp" line="832"/>
         <source>Export is complited!</source>
         <translation>Экспорт завершен!</translation>
     </message>
@@ -2400,17 +2410,17 @@ Range of signal: %1</source>
 <context>
     <name>FindData</name>
     <message>
-        <location filename="../ProcessData.cpp" line="318"/>
+        <location filename="../ProcessData.cpp" line="319"/>
         <source>Find</source>
         <translation>Найти</translation>
     </message>
     <message>
-        <location filename="../ProcessData.cpp" line="324"/>
+        <location filename="../ProcessData.cpp" line="325"/>
         <source>Search Text</source>
         <translation>Текст поиска</translation>
     </message>
     <message>
-        <location filename="../ProcessData.cpp" line="328"/>
+        <location filename="../ProcessData.cpp" line="329"/>
         <source> Find next ...</source>
         <translation> Найти далее ...</translation>
     </message>

@@ -678,46 +678,25 @@ void ExportData::startExportThread(ExportData* pThis, const QString& fileName)
 
 bool ExportData::saveExcelFile(const QString& fileName)
 {
-	if (m_pView == nullptr)
-	{
-		return false;
-	}
+	#ifdef Q_OS_WIN
 
-	if (fileName.isEmpty() == true)
-	{
-		return false;
-	}
-
-	m_exportCancel = false;
-
-	ExcelExportHelper helper;
-
-	int cellColumn = 1;
-
-	int columnCount = m_pView->model()->columnCount();
-	for(int column = 0; column < columnCount; column++)
-	{
-		if (m_pView->isColumnHidden(column) == true)
+		if (m_pView == nullptr)
 		{
-			continue;
+			return false;
 		}
 
-		helper.setCellValue(1, cellColumn++, m_pView->model()->headerData(column, Qt::Horizontal).toString().toUtf8());
-	}
-
-	int rowCount = m_pView->model()->rowCount();
-
-	emit setRange(0, rowCount);
-
-	for(int row = 0; row < rowCount; row++)
-	{
-		if (m_exportCancel == true)
+		if (fileName.isEmpty() == true)
 		{
-			break;
+			return false;
 		}
 
-		cellColumn = 1;
+		m_exportCancel = false;
 
+		ExcelExportHelper helper;
+
+		int cellColumn = 1;
+
+		int columnCount = m_pView->model()->columnCount();
 		for(int column = 0; column < columnCount; column++)
 		{
 			if (m_pView->isColumnHidden(column) == true)
@@ -725,13 +704,38 @@ bool ExportData::saveExcelFile(const QString& fileName)
 				continue;
 			}
 
-			helper.setCellValue(row + 2, cellColumn++, m_pView->model()->data(m_pView->model()->index(row, column)).toString().toUtf8());
+			helper.setCellValue(1, cellColumn++, m_pView->model()->headerData(column, Qt::Horizontal).toString().toUtf8());
 		}
 
-		emit setValue(row);
-	}
+		int rowCount = m_pView->model()->rowCount();
 
-	helper.saveAs(fileName);
+		emit setRange(0, rowCount);
+
+		for(int row = 0; row < rowCount; row++)
+		{
+			if (m_exportCancel == true)
+			{
+				break;
+			}
+
+			cellColumn = 1;
+
+			for(int column = 0; column < columnCount; column++)
+			{
+				if (m_pView->isColumnHidden(column) == true)
+				{
+					continue;
+				}
+
+				helper.setCellValue(row + 2, cellColumn++, m_pView->model()->data(m_pView->model()->index(row, column)).toString().toUtf8());
+			}
+
+			emit setValue(row);
+		}
+
+		helper.saveAs(fileName);
+
+	#endif
 
 	return true;
 }

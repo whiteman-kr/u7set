@@ -1,9 +1,12 @@
 #ifndef EXCELHELPER_H
 #define EXCELHELPER_H
 
+#ifdef Q_OS_WIN
+
 #include <ActiveQt/qaxobject.h>
 #include <ActiveQt/qaxbase.h>
-#include <QString>
+
+#endif
 
 //Expected in .pro file: QT += axcontainer
 //
@@ -17,13 +20,17 @@ public:
 
 private:
 
-	QAxObject*			m_pExcelApplication = nullptr;
-	QAxObject*			m_pWorkbooks = nullptr;
-	QAxObject*			m_pWorkbook = nullptr;
-	QAxObject*			m_pSheets = nullptr;
-	QAxObject*			m_pSheet = nullptr;
+	#ifdef Q_OS_WIN
 
-	bool				m_closeExcelOnExit = false;
+		QAxObject*			m_pExcelApplication = nullptr;
+		QAxObject*			m_pWorkbooks = nullptr;
+		QAxObject*			m_pWorkbook = nullptr;
+		QAxObject*			m_pSheets = nullptr;
+		QAxObject*			m_pSheet = nullptr;
+
+		bool				m_closeExcelOnExit = false;
+
+	#endif
 
 public:
 

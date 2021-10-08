@@ -14,8 +14,15 @@ QT       += sql
 QT       += qml
 QT       += xml
 QT       += charts
-QT       += axcontainer
 
+# For Microsoft Excel
+#
+win32 {
+    QT       += axcontainer
+}
+
+#
+#
 TARGET = Metrology
 TEMPLATE = app
 
