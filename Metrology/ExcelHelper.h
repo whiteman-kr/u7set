@@ -3,13 +3,13 @@
 
 #ifdef Q_OS_WIN
 
-#include <ActiveQt/qaxobject.h>
-#include <ActiveQt/qaxbase.h>
+	#include <ActiveQt/qaxobject.h>
+	#include <ActiveQt/qaxbase.h>
 
 #endif
 
-//Expected in .pro file: QT += axcontainer
-//
+// ==============================================================================================
+
 class ExcelExportHelper
 {
 public:
@@ -42,7 +42,11 @@ public:
 
 #endif // EXCELHELPER_H
 
-//	example
+// ==============================================================================================
+
+//	example.cpp
+//
+//Expected in .pro file: QT += axcontainer
 //
 //	try
 //	{
@@ -59,3 +63,5 @@ public:
 //	{
 //		QMessageBox::critical(this, "Error - Demo", e.what());
 //	}
+
+// ==============================================================================================

@@ -19,6 +19,10 @@ QT       += charts
 #
 win32 {
     QT       += axcontainer
+    #
+    # Files - ExcelHelper.cpp, ExcelHelper.h
+    # Files - ProcessData.cpp, ProcessData.h
+    #
 }
 
 #
