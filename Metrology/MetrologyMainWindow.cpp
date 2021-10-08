@@ -2048,7 +2048,7 @@ void MainWindow::showOptions()
 
 void MainWindow::showUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath() + "/docs/Mertology_User_Manual.pdf", this);
+	UiTools::openHelp(QApplication::applicationDirPath() + "/docs/Metrology_User_Manual.pdf", this);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
