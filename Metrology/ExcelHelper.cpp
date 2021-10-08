@@ -1,6 +1,3 @@
-#include <ActiveQt/qaxobject.h>
-#include <ActiveQt/qaxbase.h>
-
 #include <QString>
 #include <QFile>
 #include <stdexcept>
