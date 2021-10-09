@@ -351,6 +351,7 @@ namespace Sim
 		// Analog Conversion
 		//
 		void afb_tconv_v0(AfbComponentInstance* instance);
+		void afb_tconv_v1(AfbComponentInstance* instance);
 
 		// INDICATION, OpCode 29
 		//

@@ -12,6 +12,9 @@ namespace Sim
 			{"LM1_SR02", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
 			{"LM1_SR03", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
 			{"LM1_SR04", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR05", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM1_SR20", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM8_SR10", [](DeviceEmulator* device)			{	return new CommandProcessor_LM5_LM6(device);	}},
 		};
 
 	CommandProcessor::CommandProcessor(DeviceEmulator* device) :
