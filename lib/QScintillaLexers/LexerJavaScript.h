@@ -1,7 +1,7 @@
 #ifndef LexerJavaScript_H
 #define LexerJavaScript_H
 
-#include "../../QScintilla/Qt4Qt5/Qsci/qscilexerjavascript.h"
+#include "../../QScintilla/src/Qsci/qscilexerjavascript.h"
 
 class LexerJavaScript : public QsciLexerJavaScript
 {

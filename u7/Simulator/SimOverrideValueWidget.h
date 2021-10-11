@@ -1,7 +1,7 @@
 #pragma once
 #include "../../Simulator/Simulator.h"
 #include "../../Simulator/SimOverrideSignals.h"
-#include "../../QScintilla/Qt4Qt5/Qsci/qsciscintilla.h"
+#include "../../QScintilla/src/Qsci/qsciscintilla.h"
 #include "../../lib/QScintillaLexers/LexerJavaScript.h"
 #include "../../DbLib/DbController.h"
 #include "../../lib/QDoublevalidatorEx.h"

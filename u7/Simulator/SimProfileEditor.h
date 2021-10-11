@@ -2,7 +2,7 @@
 
 #include "../../Simulator/SimProfiles.h"
 #include "../DbLib/DbController.h"
-#include "../QScintilla/Qt4Qt5/Qsci/qsciscintilla.h"
+#include "../QScintilla/src/Qsci/qsciscintilla.h"
 #include "../lib/QScintillaLexers/LexerJavaScript.h"
 
 class SimProfileEditor : public QDialog

@@ -449,8 +449,8 @@ win32:LIBS += -lGdi32
 LIBS += -lQScintilla
 win32:PRE_TARGETDEPS += $$DESTDIR/QScintilla.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libQScintilla.a
-INCLUDEPATH += ./../QScintilla/Qt4Qt5
-DEPENDPATH += ./../QScintilla/Qt4Qt5
+INCLUDEPATH += ./../QScintilla/src
+DEPENDPATH += ./../QScintilla/src
 
 # VFrame30 library
 #
