@@ -124,6 +124,14 @@
   <zorder></zorder>
   <zorder></zorder>
  </widget>
+ <tabstops>
+  <tabstop>quickSearch</tabstop>
+  <tabstop>ufbElements</tabstop>
+  <tabstop>caption</tabstop>
+  <tabstop>description</tabstop>
+  <tabstop>ok</tabstop>
+  <tabstop>cancel</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
