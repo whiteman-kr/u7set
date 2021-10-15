@@ -1709,10 +1709,10 @@ namespace TrendLib
 			return;
 		}
 
-		int size = lines.size();
+		qsizetype size = lines.size();
 		const QPointF* ptrToFirst = lines.constData();
 
-		int index = 0;
+		qsizetype index = 0;
 		for (; index < size; index++)
 		{
 			if (ptrToFirst->x() < left &&

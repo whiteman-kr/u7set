@@ -1319,7 +1319,7 @@ namespace VFrame30
 		//tags.replace(';', QChar::LineFeed);
 		//tags.replace(',', QChar::LineFeed);	QChar::LineFeed
 
-		m_tags = tags.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
+		m_tags = tags.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
 
 		for (QString& t : m_tags)
 		{

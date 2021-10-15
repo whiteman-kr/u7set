@@ -17,7 +17,7 @@ namespace VFrame30
 	private:
 		static SchemaUnit m_regionalUnit;
 
-		// ћинимальный грид, дл€ схем, используетс€ дл€ позиционировани€ (выравнивание€) пинов в Fbl едементах
+		// Minimum grid for schemas. Used for positioning pins in FBL items
 		//
 		static const double m_defaultGridSizeIn;
 		static const double m_defaultGridSizeMm;

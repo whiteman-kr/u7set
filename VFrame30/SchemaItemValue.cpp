@@ -292,7 +292,12 @@ namespace VFrame30
 		if (text.isEmpty() == false)
 		{
 			painter->setPen(textColor());
-			DrawHelper::drawText(painter, m_font, itemUnit(), text, rect, horzAlign() | vertAlign());
+			DrawHelper::drawText(painter,
+								 m_font,
+								 itemUnit(),
+								 text,
+								 rect,
+								 static_cast<int>(horzAlign()) | static_cast<int>(vertAlign()));
 		}
 
 		return;
@@ -307,20 +312,20 @@ namespace VFrame30
 
 		QString result = text;
 
-		QRegExp reStartIndex("\\$\\([a-zA-Z0-9]+");	// Search for $([SomeText])
+		QRegularExpression reStartIndex("\\$\\([a-zA-Z0-9]+");	// Search for $([SomeText])
 
-		int index = 0;
+		qsizetype index = 0;
 		while (index < result.size())
 		{
 			// Find macro bounds
 			//
-			int startIndexOfMacro = result.indexOf(reStartIndex, index);
+			qsizetype startIndexOfMacro = result.indexOf(reStartIndex, index);
 			if (startIndexOfMacro == -1)
 			{
 				break;
 			}
 
-			int endIndexOfMacro = result.indexOf(')', startIndexOfMacro + 1);
+			qsizetype endIndexOfMacro = result.indexOf(')', startIndexOfMacro + 1);
 			if (endIndexOfMacro == -1)
 			{
 				break;
@@ -522,7 +527,7 @@ namespace VFrame30
 
 	void SchemaItemValue::setSignalIdsString(const QString& value)
 	{
-		m_signalIds = value.split(QRegExp("\\s+"), Qt::SkipEmptyParts);
+		m_signalIds = value.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
 	}
 
 	QStringList SchemaItemValue::signalIds() const

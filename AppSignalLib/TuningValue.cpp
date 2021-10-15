@@ -189,9 +189,9 @@ QVariant TuningValue::toVariant() const
 
 void TuningValue::fromVariant(QVariant value)
 {
-	switch (static_cast<QMetaType::Type>(value.type()))	// From help: Although this function is declared as returning QVariant::Type, the return value
-														// should be interpreted as QMetaType::Type. In particular, QVariant::UserType is returned here only
-														// if the value is equal or greater than QMetaType::User.
+	switch (static_cast<QMetaType::Type>(value.typeId()))	// From help: Although this function is declared as returning QVariant::Type, the return value
+															// should be interpreted as QMetaType::Type. In particular, QVariant::UserType is returned here only
+															// if the value is equal or greater than QMetaType::User.
 	{
 	case QMetaType::Bool:
 

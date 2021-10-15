@@ -45,7 +45,7 @@ DialogTcpStatistics::DialogTcpStatistics(QWidget* parent) :
 	headerLabels << tr("Request Count");
 	headerLabels << tr("Reply Count");
 
-	m_treeWidget->setColumnCount(headerLabels.size());
+	m_treeWidget->setColumnCount(static_cast<int>(headerLabels.size()));
 	m_treeWidget->setHeaderLabels(headerLabels);
 
 	m_treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);

@@ -300,7 +300,7 @@ void TcpAppSourcesState::requestAppDataSourcesInfo()
 
 void TcpAppSourcesState::processAppDataSourcesInfo(const QByteArray& data)
 {
-	bool ok = m_getDataSourcesInfoReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_getDataSourcesInfoReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{
@@ -349,7 +349,7 @@ void TcpAppSourcesState::processAppDataSourcesState(const QByteArray& data)
 {
 	QMutexLocker l(&m_appDataSourceStatesMutex);
 
-	bool ok = m_getAppDataSourcesStateReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_getAppDataSourcesStateReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{

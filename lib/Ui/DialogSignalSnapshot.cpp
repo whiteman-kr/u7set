@@ -489,12 +489,12 @@ void SignalSnapshotModel::fillSignals()
 
 			for (const QString& mask : m_masks)
 			{
-				QRegExp rx(mask.trimmed());
-				rx.setPatternSyntax(QRegExp::Wildcard);
+				QRegularExpression rx(mask.trimmed());
+				//rx.setPatternSyntax(QRegularExpression::Wildcard); Qt6 porting... no direct setPatternSyntax in QRegularExpression
 
 				for (const QString& strId : strIdList)
 				{
-					if (rx.exactMatch(strId))
+					if (rx.match(strId).hasMatch() == true)
 					{
 						result = true;
 						break;

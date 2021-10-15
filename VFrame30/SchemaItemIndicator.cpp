@@ -115,7 +115,7 @@ namespace VFrame30
 		indicatorMessage->set_backgroundcolor(m_backgroundColor.rgba());
 		indicatorMessage->set_linecolor(m_lineColor.rgba());
 
-		indicatorMessage->mutable_signalcolors()->Reserve(m_signalColors.size());
+		indicatorMessage->mutable_signalcolors()->Reserve(static_cast<int>(m_signalColors.size()));
 		for (const QColor& bc : m_signalColors)
 		{
 			indicatorMessage->mutable_signalcolors()->Add(bc.rgba());
@@ -440,7 +440,7 @@ namespace VFrame30
 
 	void SchemaItemIndicator::setSignalIdsString(const QString& value)
 	{
-		setSignalIds(value.split(QRegExp("\\s+"), Qt::SkipEmptyParts));
+		setSignalIds(value.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts));
 	}
 
 	QStringList SchemaItemIndicator::signalIds() const
@@ -616,7 +616,7 @@ namespace VFrame30
 		// Update specific properties for current indiocator type
 		//
 		removeCategoryProperties(PropertyNames::indicatorSettings);
-		indicatorObject()->createProperties(this, m_signalIds.size());
+		indicatorObject()->createProperties(this, static_cast<int>(m_signalIds.size()));
 
 		emit propertyListChanged();
 

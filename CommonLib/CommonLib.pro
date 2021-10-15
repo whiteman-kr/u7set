@@ -7,21 +7,8 @@ CONFIG += staticlib
 
 INCLUDEPATH += $$PWD
 
-# c++20 support
-#
-unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
-win32:QMAKE_CXXFLAGS += /std:c++latest
-
+include(../compiler.pri)
 include(../warnings.pri)
-
-# Optimization flags
-#
-win32 {
-}
-unix {
-    CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
-	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
-}
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

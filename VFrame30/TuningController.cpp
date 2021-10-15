@@ -99,8 +99,8 @@ namespace VFrame30
 		}
 
 		// Adjust value type to match signal type
-
-		QMetaType::Type valueType = static_cast<QMetaType::Type>(value.type());
+		//
+		auto valueType = value.metaType().id();
 
 		if (valueType != QMetaType::Bool &&
 			valueType != QMetaType::Int &&

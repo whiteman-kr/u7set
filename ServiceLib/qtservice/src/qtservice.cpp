@@ -456,7 +456,7 @@ void QtServiceBasePrivate::startService()
 
 int QtServiceBasePrivate::run(bool asService, const QStringList &argList)
 {
-    int argc = argList.size();
+	int argc = static_cast<int>(argList.size());
     QVector<char *> argv(argc);
     QList<QByteArray> argvData;
     for (int i = 0; i < argc; ++i)

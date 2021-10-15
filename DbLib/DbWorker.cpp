@@ -5427,9 +5427,9 @@ void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState
 	//
 	QString request = QString("SELECT * FROM checkout_signals(%1,ARRAY[").arg(currentUser().userId());
 
-	int count = signalIDs->count();
+	qsizetype count = signalIDs->count();
 
-	for(int i = 0; i < count; i++)
+	for(qsizetype i = 0; i < count; i++)
 	{
 		if (i < count - 1)
 		{
@@ -5788,12 +5788,12 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 
 	// --
 	//
-	int count = signalIDs->count();
+	qsizetype count = signalIDs->count();
 
 	QString request = QString("SELECT * FROM checkin_signals(%1, ARRAY[")
 		.arg(currentUser().userId());
 
-	for(int i=0; i < count; i++)
+	for(qsizetype i = 0; i < count; i++)
 	{
 		if (i < count-1)
 		{
@@ -5946,7 +5946,7 @@ QString DbWorker::initAppSignalFromDeviceAppSignal(const Hardware::DeviceAppSign
 	}
 	else
 	{
-		int pos = deviceSignalEquipmentID.lastIndexOf(QChar('_'));
+		qsizetype pos = deviceSignalEquipmentID.lastIndexOf(QChar('_'));
 
 		if (pos != -1)
 		{

@@ -178,7 +178,7 @@ void RtTrendTcpClient::requestTrendManagement()
 
 void RtTrendTcpClient::processTrendManagement(const QByteArray& data)
 {
-	bool ok = m_managementReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_managementReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{
@@ -228,7 +228,7 @@ void RtTrendTcpClient::requestTrendStateChanges()
 
 void RtTrendTcpClient::processTrendStateChanges(const QByteArray& data)
 {
-	bool ok = m_stateChangesReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_stateChangesReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{

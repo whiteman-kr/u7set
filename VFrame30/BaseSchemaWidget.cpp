@@ -132,8 +132,8 @@ namespace VFrame30
 		{
 			// Scrolling mode
 			//
-			int dx = event->x() - m_mousePos.x();
-			int dy = event->y() - m_mousePos.y();
+			int dx = event->pos().x() - m_mousePos.x();
+			int dy = event->pos().y() - m_mousePos.y();
 
 			horizontalScrollBar()->setValue(m_horzScrollBarValue - dx);
 			verticalScrollBar()->setValue(m_vertScrollBarValue - dy);

@@ -331,7 +331,7 @@ void MonitorArchiveWidget::ensureVisible()
 {
 	setVisible(true);	// Widget must be visible for correct work of QApplication::desktop()->screenGeometry
 
-	QRect screenRect  = QApplication::desktop()->availableGeometry(this);
+	QRect screenRect  = screen()->availableGeometry();
 	QRect intersectRect = screenRect.intersected(frameGeometry());
 
 	if (isMinimized() == true)
@@ -466,7 +466,7 @@ void MonitorArchiveWidget::dropEvent(QDropEvent* event)
 	QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
 
 	::Proto::AppSignalSet protoSetMessage;
-	bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+	bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{

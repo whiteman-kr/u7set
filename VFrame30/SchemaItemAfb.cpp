@@ -799,7 +799,7 @@ namespace VFrame30
 				//
 				const Afb::AfbParam& currentParam = *foundExistingParam;
 
-				if (p.afbParamValue().value().type() == currentParam.afbParamValue().value().type())
+				if (p.afbParamValue().value().metaType() == currentParam.afbParamValue().value().metaType())
 				{
 					p.setAfbParamValue(currentParam.afbParamValue());
 					//qDebug() << "Param: " << currentParam.caption() << ", value: " << p.afbParamValue().toString();
@@ -994,7 +994,7 @@ namespace VFrame30
 			return -1;
 		}
 
-		if (result.type() >= QVariant::UserType && result.userType() == qMetaTypeId<Afb::AfbParamValue>())
+		if (result.metaType().id() == qMetaTypeId<Afb::AfbParamValue>())
 		{
 			Afb::AfbParamValue v = result.value<Afb::AfbParamValue>();
 			return v.value().toInt();
@@ -1011,7 +1011,7 @@ namespace VFrame30
 			return false;
 		}
 
-		if (result.type() >= QVariant::UserType && result.userType() == qMetaTypeId<Afb::AfbParamValue>())
+		if (result.metaType().id() == qMetaTypeId<Afb::AfbParamValue>())
 		{
 			Afb::AfbParamValue v = result.value<Afb::AfbParamValue>();
 			return v.value().toBool();

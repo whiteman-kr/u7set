@@ -4,6 +4,7 @@
 
 #include "AfbParamValue.h"
 #include <optional>
+#include <QRegularExpression>
 
 namespace Afb
 {
@@ -92,8 +93,8 @@ namespace Afb
 	{
 		// Check if string is reference
 		//
-		QRegExp rx("^\\$\\(([A-Za-z_]+[A-Za-z\\d_]*\\.)*[A-Za-z_]+[A-Za-z\\d_]*\\)$");	// $(A_2A.BB_.CC3)
-		if (rx.exactMatch(str) == true)
+		QRegularExpression rx("^\\$\\(([A-Za-z_]+[A-Za-z\\d_]*\\.)*[A-Za-z_]+[A-Za-z\\d_]*\\)$");	// $(A_2A.BB_.CC3)
+		if (rx.match(str).hasMatch() == true)
 		{
 			m_reference = str;
 			return true;

@@ -124,7 +124,7 @@ bool ExportPrint::exportToTextDocument(QTableView* tableView, QTextDocument* doc
 		selectedIndexes = tableView->selectionModel()->selectedRows();
 		std::sort(selectedIndexes.begin(), selectedIndexes.end());
 
-		rowCount = selectedIndexes.size();
+		rowCount = static_cast<int>(selectedIndexes.size());
 	}
 
 	int columnCount = model->columnCount();

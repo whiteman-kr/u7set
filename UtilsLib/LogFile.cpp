@@ -12,10 +12,10 @@
 #include <QAbstractItemModel>
 #include <QComboBox>
 #include <QUuid>
+#include <QScreen>
 #include <QTableView>
 #include <QFileDialog>
 #include <QHeaderView>
-#include <QDesktopWidget>
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QLineEdit>
@@ -71,7 +71,7 @@ namespace Log
 
 		// Session Hash
 
-		int tabPos = str.indexOf('\t');
+		qsizetype tabPos = str.indexOf('\t');
 		if (tabPos == -1)
 		{
 			return false;
@@ -396,7 +396,7 @@ namespace Log
 			return false;
 		}
 
-		int serviceLineLength = s.length();
+		qsizetype serviceLineLength = s.length();
 
 		s = logStream.readLine();
 		if (s.isNull() || s.length() != serviceLineLength)
@@ -1072,9 +1072,9 @@ namespace Log
 		return true;
 	}
 
-	double LogRecordModel::columnWidthPercent(int index)
+	double LogRecordModel::columnWidthPercent(size_t index)
 	{
-		if (index < 0 || index >= m_columnsWidthPercent.size())
+		if (index >= m_columnsWidthPercent.size())
 		{
 			assert(false);
 			return 100;
@@ -1308,14 +1308,13 @@ namespace Log
 		//
 
 		connect(m_worker, &LogFileWorker::readComplete, this, &LogFileDialog::onReadComplete);
-
 		connect(m_worker, &LogFileWorker::recordArrived, this, &LogFileDialog::onRecordArrived);
 
 		m_worker->read(true);
 		enableControls(false);
 
 		// Restore settings
-
+		//
 		QSettings s;
 
 		QPoint windowPos = s.value("LogFileDialog/windowPos", QPoint(-1, -1)).toPoint();
@@ -1327,7 +1326,7 @@ namespace Log
 		}
 		else
 		{
-			QRect desktopRect = QApplication::desktop()->availableGeometry(this);
+			QRect desktopRect = this->screen()->availableGeometry();
 			int x = (desktopRect.width() - width()) / 2;
 			int y = (desktopRect.height() - height()) / 2;
 			move(QPoint(x, y));

@@ -60,7 +60,7 @@ void CommandLineParser::setCmdLineArgs(int argc, char** argv)
 }
 
 
-int CommandLineParser::argCount() const
+qsizetype CommandLineParser::argCount() const
 {
 	return m_cmdLineArgs.count() + 1;	// 1 == application path arg
 }
@@ -100,7 +100,7 @@ void CommandLineParser::parse()
 
 	QVector<QString> cmdLineArgs = m_cmdLineArgs;	// make copy
 
-	for(int len = m_maxOptionLen; len >= MIN_OPTION_LEN; len--)
+	for(qsizetype len = m_maxOptionLen; len >= MIN_OPTION_LEN; len--)
 	{
 		for(Option& op : m_options)
 		{
@@ -128,7 +128,7 @@ void CommandLineParser::parse()
 					{
 						op.isSet = true;
 
-						int pos = cmdLineArg.indexOf("=");
+						qsizetype pos = cmdLineArg.indexOf("=");
 
 						if (pos != -1)
 						{
@@ -148,7 +148,7 @@ void CommandLineParser::parse()
 					{
 						op.isSet = true;
 
-						int pos = cmdLineArg.indexOf("=");
+						qsizetype pos = cmdLineArg.indexOf("=");
 
 						if (pos != -1)
 						{
@@ -156,8 +156,8 @@ void CommandLineParser::parse()
 
 							op.values = value.split(",", Qt::KeepEmptyParts);
 
-							int valueIndex = 0;
-							int settingsCount = op.settingsNames.count();
+							qsizetype valueIndex = 0;
+							qsizetype settingsCount = op.settingsNames.count();
 
 							for(QString opValue : op.values)
 							{
@@ -324,7 +324,7 @@ QString CommandLineParser::helpText() const
 {
 	QStringList opStrs;
 
-	int opMaxLen = 0;
+	qsizetype opMaxLen = 0;
 
 	for(const Option& op : m_options)
 	{
@@ -360,7 +360,7 @@ QString CommandLineParser::helpText() const
 			assert(false);
 		}
 
-		int len = opStrs.last().length();
+		qsizetype len = opStrs.last().length();
 
 		if (len > opMaxLen)
 		{
@@ -420,7 +420,7 @@ bool CommandLineParser::addOption(OptionType type,
 
 	m_options.insert(name, op);
 
-	int optionLen = op.name.length();
+	qsizetype optionLen = op.name.length();
 
 	if (optionLen > m_maxOptionLen)
 	{

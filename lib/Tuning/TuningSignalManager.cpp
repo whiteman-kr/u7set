@@ -32,7 +32,7 @@ bool TuningSignalManager::load(const QByteArray& data)
 	reset();
 
 	::Proto::AppSignalSet message;
-	bool ok = message.ParseFromArray(data.constData(), data.size());
+	bool ok = message.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{

@@ -593,7 +593,7 @@ namespace Tcp
 
 		int offset = m_reply.currentpart() * FILE_PART_SIZE;
 
-		int size = m_fileData.size() - offset;
+		qsizetype size = m_fileData.size() - offset;
 
 		if (size > FILE_PART_SIZE)
 		{
@@ -609,7 +609,7 @@ namespace Tcp
 		m_reply.set_md5(m_md5Generator.result().toStdString());
 
 		m_reply.set_currentpart(m_reply.currentpart() + 1);
-		m_reply.set_currentpartsize(size);
+		m_reply.set_currentpartsize(static_cast<qint32>(size));
 
 		m_reply.set_errorcode(static_cast<int>(FileTransferResult::Ok));
 

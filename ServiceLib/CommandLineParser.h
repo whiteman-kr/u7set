@@ -26,7 +26,7 @@ public:
 
 	void setCmdLineArgs(int argc, char** argv);
 
-	int argCount() const;
+	qsizetype argCount() const;
 
 	// optionName should be specified without "-"
 	//
@@ -86,6 +86,6 @@ private:
 	bool m_parsed = false;
 	bool m_cmdLineArgsIsSet = false;
 
-	const int MIN_OPTION_LEN = 2;
-	int m_maxOptionLen = 0;
+	const qsizetype MIN_OPTION_LEN = 2;
+	qsizetype m_maxOptionLen = 0;
 };

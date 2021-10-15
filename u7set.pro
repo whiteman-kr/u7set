@@ -6,35 +6,35 @@ SUBDIRS += Protobuf \
     	QScintilla/src/qscintilla.pro \
         qtpropertybrowser \
         TrendView \
-	AppSignalLib \
-        UtilsLib \
-        OnlineLib \
-        ServiceLib \
-        HardwareLib \
-	CommonLib \
-	VFrame30 \
-        DbLib \
-        Simulator \
-        SimulatorConsole \
-        Builder \
-        BuilderConsole \
-        u7 \
-        Metrology \
-        BaseService \
-        ServiceControlManager \
-        ConfigurationService \
-        ArchivingService \
+		AppSignalLib \
+		UtilsLib \
+		OnlineLib \
+		ServiceLib \
+		HardwareLib \
+		CommonLib \
+		VFrame30 \
+		DbLib \
+#        Simulator \
+#        SimulatorConsole \
+#        Builder \
+#        BuilderConsole \
+#        u7 \
+#        Metrology \
+#        BaseService \
+#        ServiceControlManager \
+#        ConfigurationService \
+#        ArchivingService \
         Monitor \
-        TuningService \
-        AppDataService \
-        DiagDataService \
-        TuningClient \
-        mconf \
-        PacketSource \
-        PacketViewer \
-        UalTester \
-        SimulatorTests \
-        u7databaseTests
+#        TuningService \
+#        AppDataService \
+#        DiagDataService \
+#        TuningClient \
+#        mconf \
+#        PacketSource \
+#        PacketViewer \
+#        UalTester \
+#        SimulatorTests \
+#        u7databaseTests
 
 PacketSource.subdir = ./Tools/PacketSource
 PacketViewer.subdir = ./Tools/PacketViewer

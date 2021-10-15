@@ -155,7 +155,7 @@ namespace Log
 		bool processRecordFilter(const LogFileRecord& record) const;
 
 	public:
-		double columnWidthPercent(int index);
+		double columnWidthPercent(size_t index);
 
 		virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 		virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;

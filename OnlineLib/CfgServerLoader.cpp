@@ -129,7 +129,7 @@ void CfgServer::readBuildXml()
 			continue;
 		}
 
-		if (xmlReader.name() == "BuildInfo")
+		if (xmlReader.name() == QLatin1String("BuildInfo"))
 		{
 			m_buildInfo.readFromXml(xmlReader);
 			continue;
@@ -137,7 +137,7 @@ void CfgServer::readBuildXml()
 
 		// find "file" element
 		//
-		if (xmlReader.name() != "File")
+		if (xmlReader.name() != QLatin1String("File"))
 		{
 			continue;
 		}
@@ -219,10 +219,8 @@ CfgLoader::CfgLoader(const SoftwareInfo& softwareInfo,
 						std::shared_ptr<CircularLogger> logger) :
 	Tcp::FileClient(softwareInfo, "", serverAddressPort1, serverAddressPort2),
 	m_enableDownloadConfiguration(enableDownloadCfg),
-	m_mutex(QMutex::Recursive),
 	m_logger(logger),
-	m_timer(this),
-	m_getFileBlockedMutex(QMutex::RecursionMode::NonRecursive)
+	m_timer(this)
 {
 	changeApp(softwareInfo.equipmentID(), appInstance);
 }
@@ -842,7 +840,7 @@ bool CfgLoader::readConfigurationXml()
 			continue;
 		}
 
-		if (xmlReader.name() == "BuildInfo")
+		if (xmlReader.name() == QLatin1String("BuildInfo"))
 		{
 			m_buildInfo.readFromXml(xmlReader);
 			continue;
@@ -850,7 +848,7 @@ bool CfgLoader::readConfigurationXml()
 
 		// find "file" element
 		//
-		if (xmlReader.name() != "File")
+		if (xmlReader.name() != QLatin1String("File"))
 		{
 			continue;
 		}
@@ -1038,8 +1036,7 @@ CfgLoaderThread::CfgLoaderThread(	const SoftwareInfo& softwareInfo,
 	m_server1(serverAddressPort1),
 	m_server2(serverAddressPort2),
 	m_enableDownloadCfg(enableDownloadCfg),
-	m_logger(logger),
-	m_mutex(QMutex::Recursive)
+	m_logger(logger)
 {
 	AUTO_LOCK(m_mutex);
 

@@ -462,7 +462,7 @@ void TuningTcpClient::requestTuningSourcesInfo()
 
 void TuningTcpClient::processTuningSourcesInfo(const QByteArray& data)
 {
-	bool ok = m_tuningSourcesInfoReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_tuningSourcesInfoReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{
@@ -531,7 +531,7 @@ void TuningTcpClient::requestTuningSourcesState()
 
 void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 {
-	bool ok = m_tuningSourcesStatesReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_tuningSourcesStatesReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{
@@ -670,7 +670,7 @@ void TuningTcpClient::requestActivateTuningSource(const QString& equipmentId, bo
 
 void TuningTcpClient::processActivateTuningSource(const QByteArray& data)
 {
-	bool ok = m_activateTuningSourceReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_activateTuningSourceReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{
@@ -760,7 +760,7 @@ void TuningTcpClient::requestReadTuningSignals()
 
 void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 {
-	bool ok = m_readTuningSignalsReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_readTuningSignalsReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{
@@ -913,7 +913,7 @@ void TuningTcpClient::requestWriteTuningSignals()
 		//
 		int writeTuningSignalCount = TDS_TUNING_MAX_WRITE_RECORDS;
 
-		if (writeTuningSignalCount >= m_writeQueue.size())
+		if (writeTuningSignalCount >= static_cast<int>(m_writeQueue.size()))
 		{
 			writeTuningSignalCount = static_cast<int>(m_writeQueue.size());
 		}
@@ -949,7 +949,7 @@ void TuningTcpClient::requestWriteTuningSignals()
 
 void TuningTcpClient::processWriteTuningSignals(const QByteArray& data)
 {
-	bool ok = m_writeTuningSignalsReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_writeTuningSignalsReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{
@@ -1010,7 +1010,7 @@ void TuningTcpClient::requestApplyTuningSignals()
 
 void TuningTcpClient::processApplyTuningSignals(const QByteArray& data)
 {
-	bool ok = m_applyTuningSignalsReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_applyTuningSignalsReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{

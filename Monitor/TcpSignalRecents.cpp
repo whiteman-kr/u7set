@@ -282,7 +282,7 @@ void TcpSignalRecents::requestSignalState()
 
 void TcpSignalRecents::processSignalState(const QByteArray& data)
 {
-	bool ok = m_getSignalStateReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_getSignalStateReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{

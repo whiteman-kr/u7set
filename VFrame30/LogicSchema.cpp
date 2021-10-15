@@ -291,7 +291,7 @@ namespace VFrame30
 
 	int LogicSchema::channelCount() const
 	{
-		return m_equipmentIds.size();
+		return static_cast<int>(m_equipmentIds.size());
 	}
 
 	int LogicSchema::nextCounterValue()

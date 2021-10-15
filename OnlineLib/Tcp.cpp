@@ -43,7 +43,6 @@ namespace Tcp
 	// -------------------------------------------------------------------------------------
 
 	SocketWorker::SocketWorker(const SoftwareInfo& softwareInfo) :
-		m_mutex(QMutex::Recursive),
 		m_timeoutTimer(this)
 	{
 		m_state.localSoftwareInfo = softwareInfo;
@@ -612,7 +611,7 @@ namespace Tcp
 
 	bool Server::sendReply(const QByteArray& replyData)
 	{
-		return sendReply(replyData.constData(), replyData.size());
+		return sendReply(replyData.constData(), static_cast<quint32>(replyData.size()));
 	}
 
 	bool Server::sendReply(google::protobuf::Message& protobufMessage)
@@ -1238,7 +1237,7 @@ namespace Tcp
 
 	bool Client::sendRequest(quint32 requestID, const QByteArray& requestData)
 	{
-		return sendRequest(requestID, requestData.constData(), requestData.size());
+		return sendRequest(requestID, requestData.constData(), static_cast<quint32>(requestData.size()));
 	}
 
 	bool Client::sendRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)

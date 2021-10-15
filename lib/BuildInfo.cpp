@@ -27,7 +27,7 @@ namespace Builder
 
 	void BuildInfo::readFromXml(QXmlStreamReader& xmlReader)
 	{
-		if (xmlReader.name() != "BuildInfo")
+		if (xmlReader.name() != QLatin1String("BuildInfo"))
 		{
 			assert(false);
 			return;
@@ -75,7 +75,7 @@ namespace Builder
 
 	void BuildFileInfo::readFromXml(QXmlStreamReader& xmlReader)
 	{
-		if (xmlReader.name() != "File")
+		if (xmlReader.name() != QLatin1String("File"))
 		{
 			assert(false);
 			return;
@@ -95,7 +95,7 @@ namespace Builder
 
 		xmlReader.readNext();
 
-		while (!(xmlReader.tokenType() == QXmlStreamReader::EndElement && xmlReader.name() == "File"))
+		while (!(xmlReader.tokenType() == QXmlStreamReader::EndElement && xmlReader.name() == QLatin1String("File")))
 		{
 			if (xmlReader.tokenType() == QXmlStreamReader::StartElement)
 			{

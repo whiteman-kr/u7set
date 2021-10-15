@@ -42,9 +42,9 @@ inline Hash calcHash(const QByteArray& data)
 {
 	Hash hash = 0;
 	const char* prt = data.constData();
-	int dataSize = data.size();
+	qsizetype dataSize = data.size();
 
-	for (int i = 0; i < dataSize; ++i)
+	for (qsizetype i = 0; i < dataSize; ++i)
 	{
 		hash += (hash << 5) + *prt;
 		prt++;
@@ -67,7 +67,7 @@ inline Hash calcHash(const void* data, size_t byteSize)
 	return hash;
 }
 
-inline quint16 calcHash16(const void* src, int l)
+inline quint16 calcHash16(const void* src, qsizetype l)
 {
 	if (src == nullptr)
 	{

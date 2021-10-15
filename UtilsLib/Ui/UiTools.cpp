@@ -7,11 +7,11 @@
 #include <QIcon>
 #include <QStyle>
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QPainter>
 #include <QMessageBox>
 #include <QDateTime>
 #include <QDesktopServices>
+#include <QScreen>
 
 //
 // UiTools
@@ -56,7 +56,7 @@ void UiTools::adjustDialogPlacement(QDialog* dialog)
 
 	QRect windowRect = QRect(dialog->pos(), dialog->frameSize());
 
-	QRect desktopRect = QApplication::desktop()->availableGeometry(dialog);
+	QRect desktopRect = dialog->screen()->availableGeometry();
 
 	if (windowRect.left() < desktopRect.left())
 	{

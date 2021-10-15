@@ -172,7 +172,7 @@ namespace Tcp
 		ConnectionState m_state;
 
 		mutable QMutex m_stateMutex;
-		mutable QMutex m_mutex;
+		mutable QRecursiveMutex m_mutex;
 
 		bool m_enableTimeoutTimer = true;
 		QTimer m_timeoutTimer;

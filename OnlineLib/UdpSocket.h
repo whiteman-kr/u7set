@@ -18,7 +18,7 @@ class UdpServerSocket;
 struct RequestHeader
 {
 	quint32 id;
-	quint32 clientID;
+	quint64 clientID;
 	quint32 version;
 	quint32 no;
 	quint32 errorCode;
@@ -49,8 +49,8 @@ public:
 	quint32 ID() const { return header()->id; }
 	void setID(quint32 id) { header()->id = id; }
 
-	quint32 clientID() const { return header()->clientID; }
-	void setClientID(quint32 clientID) { header()->clientID = clientID; }
+	quint64 clientID() const { return header()->clientID; }
+	void setClientID(quint64 clientID) { header()->clientID = clientID; }
 
 	quint32 version() const { return header()->version; }
 	void setVersion(quint32 version) { header()->version = version; }
@@ -182,7 +182,7 @@ private:
 	State m_state = State::ReadyToSend;
 	quint32 m_requestNo = 1;
 	quint32 m_protocolVersion = 1;
-	quint32 m_clientID = 0;
+	quint64 m_clientID = 0;
 
 	int m_msTimeout = 100;
 	int m_retryCount = 0;

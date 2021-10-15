@@ -268,7 +268,7 @@ void ArchiveTcpClient::processStart(const QByteArray& data)
 
 	// Parse protobuffer message
 	//
-	bool ok = m_startReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_startReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{
@@ -340,7 +340,7 @@ void ArchiveTcpClient::processNext(const QByteArray& data)
 {
 	// Parse protobuffer message
 	//
-	bool ok = m_nextReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_nextReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{
@@ -456,7 +456,7 @@ void ArchiveTcpClient::processCancel(const QByteArray& data)
 {
 	// Parse protobuffer message
 	//
-	bool ok = m_cancelReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_cancelReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{

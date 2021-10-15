@@ -9,8 +9,9 @@ namespace VFrame30
 {
 	class CDrawParam;
 
-	// Интерфейс для SchemItem который хранит координаты в виде прямоугольника, координаты должны быть нормализированы.
-	// Хранятся либо в дюймах либо в точках в зависимости от Unit
+	// Interface for SchemaItem for getting position in the way of rectangle.
+	// Must be normalized.
+	// Returns in inches or display points depending on SchemaItem::unit
 	//
 	class IPosRect
 	{
@@ -32,8 +33,6 @@ namespace VFrame30
 	};
 
 
-	// Реализация базовых интерефейсов для элементов прямоугольного типа
-	//
 	/*! \class PosRectImpl
 		\brief PosRectImpl
 	*/
@@ -99,30 +98,15 @@ namespace VFrame30
 	public:
 		void drawHighlightRect(CDrawParam* drawParam, const QRectF& rect) const;
 
-		// Рисование элемента при его создании изменении
-		//
 		virtual void drawOutline(CDrawParam* drawParam) const override;
-
-		// Draw item issue
-		//
 		virtual void drawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const override;
-
-		// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
-		//
 		virtual void drawSelection(CDrawParam* drawParam, bool drawSizeBar) const override;
-
 		virtual void drawCompareAction(CDrawParam* drawParam, QColor color) const override;
-
-		// Draw comment "dim"
-		//
 		virtual void drawCommentDim(CDrawParam* drawParam) const override;
 
 		// Determine and Calculation Functions
 		//
 	public:
-		// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
-		// координаты и размер прямоугольника заданы в дюймах или пикселях
-		// 
 		virtual bool isIntersectRect(double x, double y, double width, double height) const override;
 
 		// Get SchemaItem bounding rectangle in itemUnit()
@@ -155,7 +139,7 @@ namespace VFrame30
 		virtual double heightDocPt() const override;
 		virtual void setHeightDocPt(double value) override;
 
-		// Реализация интерефейса ISchemaItemPropertiesPos
+		// ISchemaItemPropertiesPos implementation
 		//
 	public:
 		virtual double left() const override;

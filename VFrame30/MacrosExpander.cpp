@@ -62,20 +62,20 @@ namespace VFrame30
 	{
 		QString result = str;
 
-		QRegExp reStartIndex("\\$\\([a-zA-Z0-9]+[\\.]?[a-zA-Z0-9]*");	// Search for $(SomeText[.][SomeText])
+		QRegularExpression reStartIndex("\\$\\([a-zA-Z0-9]+[\\.]?[a-zA-Z0-9]*");	// Search for $(SomeText[.][SomeText])
 
-		int index = 0;
+		qsizetype index = 0;
 		while (index < result.size())
 		{
 			// Find macro bounds
 			//
-			int startIndexOfMacro = result.indexOf(reStartIndex, index);
+			qsizetype startIndexOfMacro = result.indexOf(reStartIndex, index);
 			if (startIndexOfMacro == -1)
 			{
 				break;
 			}
 
-			int endIndexOfMacro = result.indexOf(')', startIndexOfMacro + 1);
+			qsizetype endIndexOfMacro = result.indexOf(')', startIndexOfMacro + 1);
 			if (endIndexOfMacro == -1)
 			{
 				break;

@@ -18,24 +18,24 @@ namespace VFrame30
 	// Rounding functions
 	//
 
-	// Округление, до целого.
+	// Round to even
 	//
 	double Round(double value);
 
-	// Округление, числа до указанного количсетва знаков дробной части.
+	// Rounding to 'digits' after point
 	//
 	double Round(double value, int digits);
 
-	// Округление, числа до указанного количсетва знаков дробной части.
-	// mode указывает, округлять отбрасыыанием дробной части, или AwayFromZero, т.е. 1.5 -> 2.0
+	// Rounding number to 'digits' decimal places after point
+	// mode - fraction or AwayFromZero, e.g. 1.5 -> 2.0
 	//
 	double Round(double value, int digits, MidpointRounding mode);
 
-	// По сути floor, используется для приведения координат при SchemaUnit::Display
+	// This is floor for SchemaUnit::Display
 	//
 	double RoundDisplayPoint(double value);
 
-	// Округлить значение в зависимости от типа региональной метрики
+	// Round value dpending on regional metrics
 	//
 	double RoundPoint(double p, SchemaUnit unit);
 
@@ -52,14 +52,11 @@ namespace VFrame30
 	QPointF snapToGrid(double x, double y, double gridSize);
 	double snapToGrid(const double value, const double gridSize);
 
-	/// <summary>
-	/// Опредение пересечения двух отрезков
-	/// </summary>
-	/// <returns>true - отрезки пересекаются</returns>
+	// Detect two lines intersection
+	//
 	bool IsLineIntersected(double ax1, double ay1, double ax2, double ay2, double bx1, double by1, double bx2, double by2);
 
-	/// <summary>
-	/// Определение, пересекает ли линия указанный прямоугольник
-	/// </summary>
+	// Detect line and rect intersection
+	//
 	bool IsLineIntersectRect(double ax1, double ay1, double ax2, double ay2, const QRectF& intersectRectangle);
 }

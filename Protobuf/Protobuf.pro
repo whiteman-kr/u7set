@@ -12,10 +12,7 @@ CONFIG += staticlib
 
 CONFIG += warn_off
 
-# std::clamp is part op cpp17
-#
-unix:QMAKE_CXXFLAGS += --std=c++20
-win32:QMAKE_CXXFLAGS += /std:c++latest
+include(../compiler.pri)
 
 # DESTDIR
 #

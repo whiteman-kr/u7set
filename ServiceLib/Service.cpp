@@ -58,8 +58,7 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 	m_serviceRunMode(runMode),
 	m_settings(QSettings::SystemScope, Manufacturer::RADIY, serviceName, this),
 	m_cmdLineParser(argc, argv),
-	m_softwareSettingsSet(softwareInfo.softwareType()),
-	m_spMutex(QMutex::RecursionMode::Recursive)
+	m_softwareSettingsSet(softwareInfo.softwareType())
 {
 	TEST_PTR_RETURN(argv);
 

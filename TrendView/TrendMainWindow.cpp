@@ -131,7 +131,7 @@ namespace TrendLib
 			showNormal();
 		}
 
-		QRect screenRect  = QApplication::desktop()->availableGeometry(this);
+		QRect screenRect = this->screen()->availableGeometry();
 		QRect intersectRect = screenRect.intersected(frameGeometry());
 
 		if (isMaximized() == false &&
@@ -529,7 +529,7 @@ namespace TrendLib
 		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
 
 		::Proto::AppSignalSet protoSetMessage;
-		bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+		bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 		if (ok == false)
 		{
@@ -1138,7 +1138,7 @@ namespace TrendLib
 	{
 		QVariant v = m_timeCombo->currentData();
 
-		if (v.isValid() && v.type() == QVariant::LongLong)
+		if (v.isValid() && v.metaType().id() == QMetaType::LongLong)
 		{
 			qint64 t = v.value<qint64>();
 

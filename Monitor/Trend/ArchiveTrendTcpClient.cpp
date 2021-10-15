@@ -176,7 +176,7 @@ void ArchiveTrendTcpClient::processStart(const QByteArray& data)
 {
 	qDebug() << "ARCHS_GET_APP_SIGNALS_STATES_START Reqest->Reply time: " << m_startRequestTime.elapsed();
 
-	bool ok = m_startReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_startReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{
@@ -226,7 +226,7 @@ void ArchiveTrendTcpClient::requestNext()
 
 void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 {
-	bool ok = m_nextReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_nextReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{

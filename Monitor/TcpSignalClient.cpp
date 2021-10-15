@@ -156,7 +156,7 @@ void TcpSignalClient::requestSignalListStart()
 
 void TcpSignalClient::processSignalListStart(const QByteArray& data)
 {
-	bool ok = m_getSignalListStartReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_getSignalListStartReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 	if (ok == false)
 	{
 		Q_ASSERT(ok);
@@ -232,7 +232,7 @@ void TcpSignalClient::requestSignalListNext(int part)
 
 void TcpSignalClient::processSignalListNext(const QByteArray& data)
 {
-	bool ok = m_getSignalListNextReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_getSignalListNextReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{
@@ -313,7 +313,7 @@ void TcpSignalClient::requestSignalParam(int startIndex)
 
 void TcpSignalClient::processSignalParam(const QByteArray& data)
 {
-	bool ok = m_getSignalParamReply.ParseFromArray(data.constData(), data.size());
+	bool ok = m_getSignalParamReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 	if (ok == false)
 	{
@@ -373,7 +373,7 @@ void TcpSignalClient::requestSignalStateChanges()
 
 void TcpSignalClient::processSignalStateChanges(const QByteArray& data)
 {
-	if (bool ok = m_getSignalStateChangesReply.ParseFromArray(data.constData(), data.size());
+	if (bool ok = m_getSignalStateChangesReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 		ok == false)
 	{
 		Q_ASSERT(ok);
@@ -455,7 +455,7 @@ void TcpSignalClient::requestSignalState(int startIndex)
 
 void TcpSignalClient::processSignalState(const QByteArray& data)
 {
-	if (bool ok = m_getSignalStateReply.ParseFromArray(data.constData(), data.size());
+	if (bool ok = m_getSignalStateReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 		ok == false)
 	{
 		Q_ASSERT(ok);

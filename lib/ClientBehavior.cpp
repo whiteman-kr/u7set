@@ -300,14 +300,14 @@ bool MonitorBehavior::loadFromXml(QXmlStreamReader& reader)
 	{
 		// SignalTagToColor
 		//
-		if(reader.name() == "SignalTagToColor")
+		if(reader.name() == QLatin1String("SignalTagToColor"))
 		{
 			continue;
 		}
 
 		// Item
 		//
-		if(reader.name() == "Item")
+		if(reader.name() == QLatin1String("Item"))
 		{
 			QString tag;
 			if (reader.attributes().hasAttribute("tag"))
@@ -398,7 +398,7 @@ bool TuningClientBehavior::loadFromXml(QXmlStreamReader& reader)
 	{
 		// TagToColor tag
 		//
-		if(reader.name() == "TagToColor")
+		if(reader.name() == QLatin1String("TagToColor"))
 		{
 			reader.readNext();
 			continue;
@@ -406,7 +406,7 @@ bool TuningClientBehavior::loadFromXml(QXmlStreamReader& reader)
 
 		// Item tag
 		//
-		if(reader.name() == "Item")
+		if(reader.name() == QLatin1String("Item"))
 		{
 			QString tag;
 			if (reader.attributes().hasAttribute("tag"))
@@ -642,7 +642,7 @@ bool ClientBehaviorStorage::load(const QByteArray& data, QString* errorCode)
 		return !reader.hasError();
 	}
 
-	if (reader.name() != "Behavior")
+	if (reader.name() != QLatin1String("Behavior"))
 	{
 		reader.raiseError(QObject::tr("The file is not an Behavior file."));
 		*errorCode = reader.errorString();
@@ -653,7 +653,7 @@ bool ClientBehaviorStorage::load(const QByteArray& data, QString* errorCode)
 	//
 	while (reader.readNextStartElement())
 	{
-		if(reader.name() == "MonitorBehavior")
+		if(reader.name() == QLatin1String("MonitorBehavior"))
 		{
 			std::shared_ptr<MonitorBehavior> s = std::make_shared<MonitorBehavior>();
 
@@ -669,7 +669,7 @@ bool ClientBehaviorStorage::load(const QByteArray& data, QString* errorCode)
 		}
 		else
 		{
-			if(reader.name() == "TuningClientBehavior")
+			if(reader.name() == QLatin1String("TuningClientBehavior"))
 			{
 				std::shared_ptr<TuningClientBehavior> s = std::make_shared<TuningClientBehavior>();
 

@@ -17,7 +17,7 @@ TagSelectorWidget::TagSelectorWidget(QWidget* parent)
 	//
 	m_flowLayout = new TagSelector::FlowLayout;
 
-	m_flowLayout->setMargin(0);
+	m_flowLayout->setContentsMargins(0, 0, 0, 0);
 	m_flowLayout->setSpacing(0);
 
 	setLayout(m_flowLayout);
@@ -410,7 +410,7 @@ namespace TagSelector
 
 	int FlowLayout::count() const
 	{
-		return itemList.size();
+		return static_cast<int>(itemList.size());
 	}
 
 	QLayoutItem *FlowLayout::itemAt(int index) const
@@ -460,7 +460,9 @@ namespace TagSelector
 		foreach (item, itemList)
 			size = size.expandedTo(item->minimumSize());
 
-		size += QSize(2*margin(), 2*margin());
+		int margin = contentsMargins().left();
+		size += QSize(2 * margin, 2 * margin);
+
 		return size;
 	}
 

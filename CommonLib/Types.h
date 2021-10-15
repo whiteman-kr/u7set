@@ -819,7 +819,7 @@ public:
 	}
 };
 
-inline uint qHash(E::AppSignalStateFlagType t, uint seed)
+inline size_t qHash(E::AppSignalStateFlagType t, size_t seed)
 {
 	return ::qHash(static_cast<int>(t), seed);
 }

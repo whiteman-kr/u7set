@@ -148,7 +148,7 @@ namespace VFrame30
 			QVariant propValue = prop->value();
 			QString propValueText;
 
-			switch (static_cast<QMetaType::Type>(propValue.type()))
+			switch (propValue.metaType().id())
 			{
 			case QMetaType::QString:
 				{

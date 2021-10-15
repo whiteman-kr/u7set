@@ -4,8 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += core gui widgets sql network xmlpatterns qml svg serialport xml printsupport testlib concurrent
-win32:QT += winextras
+QT += core gui widgets sql network qml svg serialport xml printsupport testlib concurrent
 
 # --
 # In Qt 5 using testlib module adds a console option via the MODULE_CONFIG mechanism.

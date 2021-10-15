@@ -453,8 +453,8 @@ void MonitorMainWindow::createActions()
 	m_schemaListAction->setCheckable(true);
 	m_schemaListAction->setChecked(QSettings().value("m_schemaListAction.checked").toBool());
 	m_schemaListAction->setShortcuts(QList<QKeySequence>{}
-									 <<  QKeySequence{Qt::CTRL + Qt::Key_QuoteLeft}
-									 <<  QKeySequence{Qt::CTRL + Qt::Key_AsciiTilde});
+									 <<  QKeySequence{Qt::CTRL | Qt::Key_QuoteLeft}
+									 <<  QKeySequence{Qt::CTRL | Qt::Key_AsciiTilde});
 	connect(m_schemaListAction, &QAction::toggled, this, &MonitorMainWindow::schemaTreeListToggled);
 
 	m_newTabAction = new QAction(tr("New Tab"), this);
@@ -492,14 +492,14 @@ void MonitorMainWindow::createActions()
 	m_zoom100Action = new QAction(tr("Zoom 100%"), this);
 	m_zoom100Action->setStatusTip(tr("Set zoom to 100%"));
 	m_zoom100Action->setEnabled(true);
-	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
+	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Asterisk));
 	connect(m_zoom100Action, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoom100);
 
 	m_zoomToFitAction = new QAction(tr("Fit to Screen"), this);
 	m_zoomToFitAction->setStatusTip(tr("Set zoom to fit screen"));
 	m_zoomToFitAction->setIcon(QIcon(":/Images/Images/ZoomFitToScreen.svg"));
 	m_zoomToFitAction->setEnabled(true);
-	m_zoomToFitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Slash));
+	m_zoomToFitAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Slash));
 	connect(m_zoomToFitAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoomToFit);
 
 	m_historyBack = new QAction(tr("Go Back"), this);
@@ -538,7 +538,7 @@ void MonitorMainWindow::createActions()
 	m_findSignalAction->setStatusTip(tr("Find signal by it's ID"));
 	m_findSignalAction->setIcon(QIcon(":/Images/Images/FindSignal.svg"));
 	m_findSignalAction->setEnabled(true);
-	m_findSignalAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
+	m_findSignalAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_F));
 	connect(m_findSignalAction, &QAction::triggered, this, &MonitorMainWindow::slot_findSignal);
 
 	m_loginAction = new QAction(tr("Login"), this);
@@ -1468,7 +1468,7 @@ void MonitorToolBar::dragEnterEvent(QDragEnterEvent* event)
 		QVariant d = a->data();
 
 		if (d.isValid() &&
-			d.type() == QVariant::String)
+			d.typeId() == QMetaType::QString)
 		{
 			if (d.toString() == QLatin1String("IAmIndependentTrend"))
 			{
@@ -1485,14 +1485,14 @@ void MonitorToolBar::dragEnterEvent(QDragEnterEvent* event)
 	}
 
 	if (trendActionWidget != nullptr &&
-		trendActionWidget->geometry().contains(event->pos()) &&
+		trendActionWidget->geometry().contains(event->position().toPoint()) &&
 		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
 	{
 		event->acceptProposedAction();
 	}
 
 	if (archiveActionWidget != nullptr &&
-		archiveActionWidget->geometry().contains(event->pos()) &&
+		archiveActionWidget->geometry().contains(event->position().toPoint()) &&
 		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
 	{
 		event->acceptProposedAction();
@@ -1517,7 +1517,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 	{
 		QVariant d = a->data();
 		if (d.isValid() &&
-			d.type() == QVariant::String)
+			d.typeId() == QMetaType::QString)
 		{
 			if (d.toString() == QLatin1String("IAmIndependentTrend"))
 			{
@@ -1535,7 +1535,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 
 	if (trendAction != nullptr &&
 		trendActionWidget != nullptr &&
-		trendActionWidget->geometry().contains(event->pos()) &&
+		trendActionWidget->geometry().contains(event->position().toPoint()) &&
 		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
 	{
 		// Lets assume parent isMaonitorMainWindow
@@ -1552,7 +1552,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
 
 		::Proto::AppSignalSet protoSetMessage;
-		bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+		bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 		if (ok == false)
 		{
@@ -1586,7 +1586,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 
 	if (archiveAction != nullptr &&
 		archiveActionWidget != nullptr &&
-		archiveActionWidget->geometry().contains(event->pos()) &&
+		archiveActionWidget->geometry().contains(event->position().toPoint()) &&
 		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
 	{
 		// Lets assume parent isMonitorMainWindow
@@ -1603,7 +1603,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
 
 		::Proto::AppSignalSet protoSetMessage;
-		bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+		bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 		if (ok == false)
 		{

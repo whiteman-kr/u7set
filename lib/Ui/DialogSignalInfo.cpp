@@ -1025,7 +1025,7 @@ void DialogSignalInfo::dragEnterEvent(QDragEnterEvent* event)
 	QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
 
 	::Proto::AppSignalSet protoSetMessage;
-	bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+	bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 	if (ok == false)
 	{
 		return;
@@ -1080,7 +1080,7 @@ void DialogSignalInfo::dropEvent(QDropEvent* event)
 	QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
 
 	::Proto::AppSignalSet protoSetMessage;
-	bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+	bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 	if (ok == false)
 	{
 		event->acceptProposedAction();
@@ -1847,9 +1847,10 @@ void DialogSignalInfo::updateSetpoints()
 		}
 
 		// CompareTo
-
-		QVariant compareToData = item->data(static_cast<int>(SetpointsColumns::CompareTo), Qt::UserRole);
-		if (compareToData.isNull() == false && compareToData.canConvert(qMetaTypeId<AppSignalParam>()) == true)
+		//
+		if (QVariant compareToData = item->data(static_cast<int>(SetpointsColumns::CompareTo), Qt::UserRole);
+			compareToData.isNull() == false &&
+			compareToData.canConvert<AppSignalParam>() == true)
 		{
 			const AppSignalParam& paramCompare = compareToData.value<AppSignalParam>();
 
@@ -1867,9 +1868,10 @@ void DialogSignalInfo::updateSetpoints()
 		}
 
 		// Output
-
-		QVariant outputData = item->data(static_cast<int>(SetpointsColumns::Output), Qt::UserRole);
-		if (outputData.isNull() == false && outputData.canConvert(qMetaTypeId<AppSignalParam>()) == true)
+		//
+		if (QVariant outputData = item->data(static_cast<int>(SetpointsColumns::Output), Qt::UserRole);
+			outputData.isNull() == false &&
+			outputData.canConvert<AppSignalParam>() == true)
 		{
 			const AppSignalParam& paramOutput = outputData.value<AppSignalParam>();
 

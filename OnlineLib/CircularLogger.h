@@ -40,7 +40,7 @@ private:
 	QString m_fileName;
 	QFile m_file;
 	QTextStream m_stream;
-	int m_fileGrowing = 0;
+	qsizetype m_fileGrowing = 0;
 
 	QString m_logName;
 	QString m_path;

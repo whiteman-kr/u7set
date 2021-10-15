@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets sql network xmlpatterns qml svg xml
+QT       += core gui widgets sql network qml svg xml
  
 
 TARGET = TuningClient

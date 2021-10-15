@@ -7,9 +7,7 @@
 #include <QtConcurrent>
 
 DbController::DbController() :
-	m_worker(nullptr),
-	m_operationMutex(QMutex::NonRecursive)
-
+	m_worker(nullptr)
 {
 	m_thread.setObjectName("DbWorkerThread");
 
@@ -2937,8 +2935,7 @@ bool DbController::getTags(std::vector<DbTag>* tags)
 	}
 
 	QTextStream in(file->data());
-
-	in.setCodec("UTF-8");
+	in.setEncoding(QStringConverter::Utf8);
 
 	while (in.atEnd() == false)
 	{

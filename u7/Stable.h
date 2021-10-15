@@ -51,17 +51,12 @@
 #include <QtCore>
 #include <QtGui>
 #include <QtXml>
-#include <QtXmlPatterns>
 #include <QtSvg>
 #include <QtSerialPort>
 #include <QtDebug>
 #include <QtQml>
 #include <QtNetwork>
 #include <QtSql>
-
-#ifdef Q_OS_WINDOWS
-	#include <QtWinExtras>
-#endif
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

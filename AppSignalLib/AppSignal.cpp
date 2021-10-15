@@ -148,7 +148,7 @@ bool AppSignalSpecPropValue::setValue(const QString& name, const QVariant& value
 		return false;
 	}
 
-	if (m_value.type() != value.type())
+	if (m_value.metaType() != value.metaType())
 	{
 		assert(false);
 		return false;
@@ -177,40 +177,36 @@ bool AppSignalSpecPropValue::save(Proto::SignalSpecPropValue* protoValue) const
 	protoValue->Clear();
 
 	protoValue->set_name(m_name.toStdString());
-	protoValue->set_type(static_cast<int>(m_value.type()));
+	protoValue->set_type(m_value.metaType().id());
 	protoValue->set_isenum(m_isEnum);
 
-	switch(m_value.type())
+	switch(m_value.metaType().id())
 	{
-	case QVariant::Invalid:
-		assert(false);
-		return true;
-
-	case QVariant::Int:
+	case QMetaType::Int:
 		protoValue->set_int32val(m_value.toInt());
 		return true;
 
-	case QVariant::UInt:
+	case QMetaType::UInt:
 		protoValue->set_uint32val(m_value.toUInt());
 		return true;
 
-	case QVariant::LongLong:
+	case QMetaType::LongLong:
 		protoValue->set_int64val(m_value.toLongLong());
 		return true;
 
-	case QVariant::ULongLong:
+	case QMetaType::ULongLong:
 		protoValue->set_uint64val(m_value.toULongLong());
 		return true;
 
-	case QVariant::Double:
+	case QMetaType::Double:
 		protoValue->set_doubleval(m_value.toDouble());
 		return true;
 
-	case QVariant::Bool:
+	case QMetaType::Bool:
 		protoValue->set_boolval(m_value.toBool());
 		return true;
 
-	case QVariant::String:
+	case QMetaType::QString:
 		protoValue->set_stringval(m_value.toString().toStdString());
 		return true;
 
@@ -225,12 +221,12 @@ bool AppSignalSpecPropValue::load(const Proto::SignalSpecPropValue& protoValue)
 {
 	m_name = QString::fromStdString(protoValue.name());
 
-	QVariant::Type type = static_cast<QVariant::Type>(protoValue.type());
+	QMetaType::Type type = static_cast<QMetaType::Type>(protoValue.type());
 
 	m_isEnum = protoValue.isenum();
 
 #ifdef QT_DEBUG
-	if (m_isEnum == true && type != QVariant::Int)
+	if (m_isEnum == true && type != QMetaType::Int)
 	{
 		assert(false);
 	}
@@ -238,41 +234,37 @@ bool AppSignalSpecPropValue::load(const Proto::SignalSpecPropValue& protoValue)
 
 	switch(type)
 	{
-	case QVariant::Invalid:
-		m_value = QVariant();
-		return true;
-
-	case QVariant::Int:
+	case QMetaType::Int:
 		assert(protoValue.has_int32val());
 		m_value.setValue(protoValue.int32val());
 		return true;
 
-	case QVariant::UInt:
+	case QMetaType::UInt:
 		assert(protoValue.has_uint32val());
 		m_value.setValue(protoValue.uint32val());
 		return true;
 
-	case QVariant::LongLong:
+	case QMetaType::LongLong:
 		assert(protoValue.has_int64val());
 		m_value.setValue(protoValue.int64val());
 		return true;
 
-	case QVariant::ULongLong:
+	case QMetaType::ULongLong:
 		assert(protoValue.has_uint64val());
 		m_value.setValue(protoValue.uint64val());
 		return true;
 
-	case QVariant::Double:
+	case QMetaType::Double:
 		assert(protoValue.has_doubleval());
 		m_value.setValue(protoValue.doubleval());
 		return true;
 
-	case QVariant::Bool:
+	case QMetaType::Bool:
 		assert(protoValue.has_boolval());
 		m_value.setValue(protoValue.boolval());
 		return true;
 
-	case QVariant::String:
+	case QMetaType::QString:
 		assert(protoValue.has_stringval());
 		m_value.setValue(QString::fromStdString(protoValue.stringval()));
 		return true;
@@ -388,7 +380,7 @@ bool AppSignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropSt
 
 			// checking that property end value types are equal
 			//
-			if (property->value().type() == value.type() && property->isEnum() == isEnum)
+			if (property->value().metaType() == value.metaType() && property->isEnum() == isEnum)
 			{
 				// equal, update existing value if nessesery
 				//
@@ -539,7 +531,7 @@ bool AppSignalSpecPropValues::parseValuesFromArray(const QByteArray& protoData)
 
 	Proto::SignalSpecPropValues protoValues;
 
-	bool result = protoValues.ParseFromArray(protoData.constData(), protoData.size());
+	bool result = protoValues.ParseFromArray(protoData.constData(), static_cast<int>(protoData.size()));
 
 	if (result == false)
 	{
@@ -1261,7 +1253,7 @@ void AppSignal::loadProtoData(const QByteArray& protoDataArray)
 {
 	Proto::ProtoAppSignalData protoData;
 
-	bool res = protoData.ParseFromArray(protoDataArray.constData(), protoDataArray.size());
+	bool res = protoData.ParseFromArray(protoDataArray.constData(), static_cast<int>(protoDataArray.size()));
 
 	assert(res == true);
 	Q_UNUSED(res)
@@ -2144,7 +2136,7 @@ double AppSignal::getSpecPropDouble(const QString& name, QString* err) const
 		return 0;
 	}
 
-	assert(qv.type() == QVariant::Double && isEnum == false);
+	assert(qv.metaType().id() == QMetaType::Double && isEnum == false);
 
 	return qv.toDouble();
 }
@@ -2166,7 +2158,7 @@ int AppSignal::getSpecPropInt(const QString& name, QString* err) const
 		return 0;
 	}
 
-	assert(qv.type() == QVariant::Int && isEnum == false);
+	assert(qv.metaType().id() == QMetaType::Int && isEnum == false);
 
 	return qv.toInt();
 }
@@ -2188,7 +2180,7 @@ unsigned int AppSignal::getSpecPropUInt(const QString& name, QString* err) const
 		return 0;
 	}
 
-	assert(qv.type() == QVariant::UInt && isEnum == false);
+	assert(qv.metaType().id() == QMetaType::UInt && isEnum == false);
 
 	return qv.toUInt();
 }
@@ -2211,7 +2203,7 @@ int AppSignal::getSpecPropEnum(const QString& name, QString* err) const
 		return 0;
 	}
 
-	assert(qv.type() == QVariant::Int && isEnum == true);
+	assert(qv.metaType().id() == QMetaType::Int && isEnum == true);
 
 	return qv.toInt();
 }
@@ -2429,7 +2421,7 @@ void AppSignalSet::buildID2IndexMap()
 {
 	m_strID2IndexMap.clear();
 
-	int signalCount = count();
+	qsizetype signalCount = count();
 
 	if (signalCount == 0)
 	{
@@ -2438,7 +2430,7 @@ void AppSignalSet::buildID2IndexMap()
 
 	m_strID2IndexMap.reserve(static_cast<int>(signalCount * 1.3));
 
-	for(int i = 0; i < signalCount; i++)
+	for(qsizetype i = 0; i < signalCount; i++)
 	{
 		AppSignal& s = (*this)[i];
 
@@ -2448,7 +2440,7 @@ void AppSignalSet::buildID2IndexMap()
 		}
 		else
 		{
-			updateID2IndexInMap(s.appSignalID(), i);
+			updateID2IndexInMap(s.appSignalID(), static_cast<int>(i));
 		}
 	}
 }
@@ -2462,7 +2454,7 @@ void AppSignalSet::updateID2IndexInMap(const AppSignal* appSignal)
 {
 	TEST_PTR_RETURN(appSignal);
 
-	int index = keyIndex(appSignal->ID());
+	qsizetype index = keyIndex(appSignal->ID());
 
 	updateID2IndexInMap(appSignal->appSignalID(), index);
 }
@@ -2547,7 +2539,7 @@ void AppSignalSet::remove(const int& signalID)
 	m_groupSignals.remove(signal.signalGroupID(), signalID);
 }
 
-void AppSignalSet::removeAt(const int index)
+void AppSignalSet::removeAt(const qsizetype index)
 {
 	const AppSignal& signal = SignalPtrOrderedHash::operator [](index);
 
@@ -2570,9 +2562,9 @@ QVector<int> AppSignalSet::getChannelSignalsID(int signalGroupID) const
 
 	QList<int> signalsID = m_groupSignals.values(signalGroupID);
 
-	int signalCount = signalsID.count();
+	qsizetype signalCount = signalsID.count();
 
-	for(int i = 0; i< signalCount; i++)
+	for(qsizetype i = 0; i< signalCount; i++)
 	{
 		channelSignalsID.append(signalsID.at(i));
 	}
@@ -2582,9 +2574,9 @@ QVector<int> AppSignalSet::getChannelSignalsID(int signalGroupID) const
 
 void AppSignalSet::resetAddresses()
 {
-	int signalCount = count();
+	qsizetype signalCount = count();
 
-	for(int i = 0; i < signalCount; i++)
+	for(qsizetype i = 0; i < signalCount; i++)
 	{
 		(*this)[i].resetAddresses();
 	}
@@ -2605,7 +2597,7 @@ bool AppSignalSet::serializeFromProtoFile(const QString& filePath)
 
 	::Proto::AppSignalSet protoAppSignalSet;
 
-	bool result = protoAppSignalSet.ParseFromArray(fileData.constData(), fileData.size());
+	bool result = protoAppSignalSet.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
 
 	if (result == false)
 	{
@@ -2639,11 +2631,11 @@ int AppSignalSet::getMaxID()
 		return m_maxID;
 	}
 
-	int count = SignalPtrOrderedHash::count();
+	qsizetype count = SignalPtrOrderedHash::count();
 
 	m_maxID = -1;
 
-	for(int i = 0; i < count; i++)
+	for(qsizetype i = 0; i < count; i++)
 	{
 		int keyI = key(i);
 
@@ -2661,7 +2653,7 @@ QStringList AppSignalSet::appSignalIdsList(bool removeNumberSign, bool sort) con
 	QStringList result;
 	result.reserve(count());
 
-	for (int i = 0; i < count(); i++)
+	for (qsizetype i = 0; i < count(); i++)
 	{
 		const AppSignal& signal = operator[](i);
 		const QString& appSignalId = signal.appSignalID();

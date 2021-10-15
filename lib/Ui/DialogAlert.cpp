@@ -2,7 +2,6 @@
 
 #include <QDialog>
 #include <QDateTime>
-#include <QDesktopWidget>
 #include <QScreen>
 
 #include "../UtilsLib/Ui/UiTools.h"
@@ -62,7 +61,7 @@ DialogAlert::DialogAlert(QWidget* parent, QString title):
 	}
 	else
 	{
-		QRect desktopRect = QApplication::desktop()->availableGeometry(this);
+		QRect desktopRect = this->screen()->availableGeometry();
 		int x = (desktopRect.width() - width()) / 2;
 		int y = (desktopRect.height() - height()) / 2;
 		move(QPoint(x, y));
@@ -111,21 +110,16 @@ void DialogAlert::onAlertArrived(QString text)
 	}
 	else
 	{
-		QDesktopWidget* desktop = QApplication::desktop();
-		if (desktop == nullptr)
-		{
-			Q_ASSERT(desktop);
-		}
-		else
-		{
-			int dialogScreen = desktop->screenNumber(this);
-			int appScreen = desktop->screenNumber(parentWidget());
+		QScreen* parentScreen = parent->screen();
+		Q_ASSERT(parentScreen);
 
-			if (dialogScreen != appScreen)
-			{
-				QRect appScreenRect = desktop->screenGeometry(parent);
-				move(appScreenRect.center() - rect().center());
-			}
+		QScreen* dialogScreen = this->screen();
+		Q_ASSERT(dialogScreen);
+
+		if (dialogScreen->serialNumber() != parentScreen->serialNumber())
+		{
+			QRect appScreenRect = parentScreen->geometry();
+			this->move(appScreenRect.center() - rect().center());
 		}
 	}
 

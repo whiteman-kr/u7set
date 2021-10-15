@@ -595,7 +595,7 @@ bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 
 	xml.writeStartElement(XmlElement::CLIENTS);
-	xml.writeIntAttribute(XmlAttribute::COUNT, clients.count());
+	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(clients.count()));
 
 	for(const QPair<QString, E::SoftwareType>& pair : clients)
 	{
@@ -1096,7 +1096,7 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tc.equipmentID);
 
 		xml.writeStartElement(XmlElement::TUNING_SOURCES);
-		xml.writeIntAttribute(XmlAttribute::COUNT, tc.sourcesIDs.count());
+		xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(tc.sourcesIDs.count()));
 		xml.writeString(tc.sourcesIDs.join(Separator::SEMICOLON));
 		xml.writeEndElement();		// TUNING_SOURCES
 

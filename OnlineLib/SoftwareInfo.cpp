@@ -46,7 +46,7 @@ void SoftwareInfo::init(E::SoftwareType softwareType,
 
 	QString qUsername("USERNAME");
 	wchar_t username[16];
-	int ln = qUsername.toWCharArray(username);
+	qsizetype ln = qUsername.toWCharArray(username);
 	username[ln] = '\0';
 
 	wchar_t* buf = nullptr;

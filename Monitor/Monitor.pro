@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += core gui widgets network xmlpatterns qml xml svg printsupport
+QT += core gui widgets network qml xml svg printsupport
 
 #QT += testlib
 #QT.testlib.CONFIG -= console
@@ -14,23 +14,8 @@ TEMPLATE = app
 
 INCLUDEPATH += $$PWD
 
-# c++20 support
-#
-unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
-win32:QMAKE_CXXFLAGS += /std:c++latest
-
+include(../compiler.pri)
 include(../warnings.pri)
-
-# Optimization flags
-#
-win32 {
-        CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -Od
-        CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O2
-}
-unix {
-        CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
-        CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
-}
 
 #Application icon
 win32:RC_ICONS += Images/Monitor.ico

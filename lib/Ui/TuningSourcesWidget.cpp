@@ -46,7 +46,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningTcpClient* tcpClient, QWidg
 	headerLabels << tr("Value");
 	headerLabels << QString();
 
-	m_treeWidget->setColumnCount(headerLabels.size());
+	m_treeWidget->setColumnCount(static_cast<int>(headerLabels.size()));
 	m_treeWidget->setHeaderLabels(headerLabels);
 
 	QTreeWidgetItem* infoItem = new QTreeWidgetItem(QStringList() << tr("1-Source Information"));
@@ -423,7 +423,7 @@ TuningSourcesWidget::TuningSourcesWidget(TuningTcpClient* tcpClient, bool hasAct
 	headerLabels << tr("RequestCount");
 	headerLabels << tr("ReplyCount");
 
-	m_treeWidget->setColumnCount(headerLabels.size());
+	m_treeWidget->setColumnCount(static_cast<int>(headerLabels.size()));
 	m_treeWidget->setHeaderLabels(headerLabels);
 
 	update(false);

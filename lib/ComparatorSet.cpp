@@ -558,7 +558,7 @@ bool ComparatorSet::serializeFrom(const QByteArray& fileData)
 {
 	::Proto::ComparatorSet protoComparatorSet;
 
-	bool result = protoComparatorSet.ParseFromArray(fileData.constData(), fileData.size());
+	bool result = protoComparatorSet.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
 	if (result == false)
 	{
 		return false;

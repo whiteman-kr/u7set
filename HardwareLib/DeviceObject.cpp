@@ -1186,7 +1186,7 @@ namespace Hardware
 		if (m_equipmentId != value)
 		{
 			m_equipmentId = value;
-			m_equipmentId.replace(QRegExp(QStringLiteral("[^a-zA-Z0-9#$_()]")), QStringLiteral("#"));
+			m_equipmentId.replace(QRegularExpression(QStringLiteral("[^a-zA-Z0-9#$_()]")), QStringLiteral("#"));
 		}
 	}
 
@@ -2649,12 +2649,13 @@ R"DELIM({
 			std::shared_ptr<Hardware::DeviceObject> equipmentSharedPointer = m_root;
 			m_root.reset();
 
-			QtConcurrent::run(
-				[](std::shared_ptr<Hardware::DeviceObject> deviceObject)
-				{
-					deviceObject.reset();
-				},
-				equipmentSharedPointer);
+			QFuture<void> f = QtConcurrent::run(
+									[](std::shared_ptr<Hardware::DeviceObject> deviceObject)
+									{
+										deviceObject.reset();
+									},
+									equipmentSharedPointer);
+			Q_UNUSED(f);
 		}
 
 		return;
@@ -2860,10 +2861,10 @@ R"DELIM({
 						}
 
 						QVariant tmp = QVariant::fromValue(attr.value(p->caption()).toString());
-						bool result = tmp.convert(p->value().userType());
+						bool result = tmp.convert(p->value().metaType());
 						if (result == false)
 						{
-							Q_ASSERT(tmp.canConvert(p->value().userType()));
+							Q_ASSERT(tmp.canConvert(p->value().metaType()));
 						}
 						else
 						{
@@ -2914,11 +2915,11 @@ R"DELIM({
 
 		QString resultStr;
 
-		int searchStartPos = 0;
+		qsizetype searchStartPos = 0;
 
 		do
 		{
-			int macroStartPos = templateStr.indexOf(TemplateMacro::START_TOKEN, searchStartPos);
+			qsizetype macroStartPos = templateStr.indexOf(TemplateMacro::START_TOKEN, searchStartPos);
 
 			if (macroStartPos == -1)
 			{
@@ -2930,7 +2931,7 @@ R"DELIM({
 
 			resultStr += templateStr.mid(searchStartPos, macroStartPos - searchStartPos);
 
-			int macroEndPos = templateStr.indexOf(TemplateMacro::END_TOKEN, macroStartPos + 2);
+			qsizetype macroEndPos = templateStr.indexOf(TemplateMacro::END_TOKEN, macroStartPos + 2);
 
 			if (macroEndPos == -1)
 			{

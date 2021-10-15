@@ -227,7 +227,7 @@ private:
 
 	static const int CONFIGURATION_XML_FILE_INDEX = 0;
 
-	mutable QMutex m_mutex;
+	mutable QRecursiveMutex m_mutex;
 
 	QString m_appEquipmentID;
 
@@ -361,7 +361,7 @@ private:
 
 	//
 
-	mutable QMutex m_mutex;
+	mutable QRecursiveMutex m_mutex;
 
 	CfgLoader* m_cfgLoader = nullptr;
 	SimpleThread* m_thread = nullptr;

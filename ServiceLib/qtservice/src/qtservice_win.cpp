@@ -770,10 +770,10 @@ class QtServiceAppEventFilter : public QAbstractNativeEventFilter
 {
 public:
     QtServiceAppEventFilter() {}
-    bool nativeEventFilter(const QByteArray &eventType, void *message, long *result);
+	virtual bool nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result) override;
 };
 
-bool QtServiceAppEventFilter::nativeEventFilter(const QByteArray &, void *message, long *result)
+bool QtServiceAppEventFilter::nativeEventFilter(const QByteArray &, void *message, qintptr *result)
 {
 	MSG *winMessage = reinterpret_cast<MSG*>(message);
     if (winMessage->message == WM_ENDSESSION && (winMessage->lParam & ENDSESSION_LOGOFF)) {

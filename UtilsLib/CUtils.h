@@ -6,15 +6,6 @@
 #include <QDateTime>
 #include "../CommonLib/Types.h"
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4800)
-#endif
-#include <QtWidgets/QDesktopWidget>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
 
 class CUtils
 {
@@ -27,54 +18,54 @@ public:
 			return true;
 		}
 
-		int maskLen = mask.length();
-		int strLen = str.length();
+		int maskLen = static_cast<int>(mask.length());
+		int strLen = static_cast<int>(str.length());
 
-		int maskPos = 0;	// текущая позиция маски
-		int strPos = 0;		// текущая позиция строки
+		int maskPos = 0;	// Curent mask position
+		int strPos = 0;		// Currner row position
 
 		while(true)
 		{
-			if (strPos == strLen && maskPos == maskLen)		// дошли до конца строки и маски строки совпали
+			if (strPos == strLen && maskPos == maskLen)		// Came to the end of row and mask, matched rows
 			{
 				return true;
 			}
 
-			if (strPos == strLen)		// дошли до конца строки строки не совпали
+			if (strPos == strLen)		// Came to the end of the row and raws are not mathcing
 			{
 				return false;
 			}
 
-			if (maskPos == maskLen)		// дошли до конца маски - строки не совпали
+			if (maskPos == maskLen)		// Came to the end of the mask - rows are not matching
 			{
 				return false;
 			}
 
 			QChar m = mask.at(maskPos);
 
-			if (m == '~')				// если в маске встретили тильду - вернуть
+			if (m == '~')				// If '~' in the mask - return
 			{
 				return true;
 			}
 
-			if (m == '?')				// ? - пропустить символ и начать сначала
+			if (m == '?')				// ? - skip char and start from the begining
 			{
 				maskPos++;
 				strPos++;
 				continue;
 			}
 
-			if (m == '*')				//* - пропустить все до первого символа "_"
+			if (m == '*')				// * - skip everything to "_"
 			{
 				while (str.at(strPos) != '_')
 				{
 					strPos++;
 
-					if (strPos == strLen)		// дошли до конца строки - строки совпали
+					if (strPos == strLen)		// Came to the end - raws matched
 					{
 						if (maskPos == maskLen - 1)
 						{
-							return true;		//строки совпали если это последняя звездочка
+							return true;		// Rows are matched and this is the last *
 						}
 						else
 						{
@@ -87,7 +78,7 @@ public:
 				continue;
 			}
 
-			if (str.at(strPos) != m)			// очередные символы не совпали
+			if (str.at(strPos) != m)			// Again chars are not matched
 			{
 				return false;
 			}

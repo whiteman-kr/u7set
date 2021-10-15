@@ -192,7 +192,7 @@ namespace TrendLib
 		//
 		::Proto::TrendWidget message;
 
-		ok = message.ParseFromArray(uncommpressedData.constData(), uncommpressedData.size());
+		ok = message.ParseFromArray(uncommpressedData.constData(), static_cast<int>(uncommpressedData.size()));
 
 		if (ok == false)
 		{

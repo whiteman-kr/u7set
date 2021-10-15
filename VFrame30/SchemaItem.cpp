@@ -403,37 +403,46 @@ namespace VFrame30
 
 			QVariant value = p->value();
 
-			if (value.type() == QVariant::Uuid)
+			switch (value.metaType().id())
 			{
-				QString valueText = value.toString();
-
-				if (valueText.contains(text, cs) == true)
+			case QMetaType::QUuid:
 				{
-					result.push_back({p->caption(), valueText});
-					continue;
+					QString valueText = value.toString();
+
+					if (valueText.contains(text, cs) == true)
+					{
+						result.push_back({p->caption(), valueText});
+						continue;
+					}
 				}
-			}
+				break;
 
-			if (value.type() == QVariant::String)
-			{
-				QString valueText = value.toString();
-
-				if (valueText.contains(text, cs) == true)
+			case QMetaType::QString:
 				{
-					result.push_back({p->caption(), valueText});
-					continue;
+					QString valueText = value.toString();
+
+					if (valueText.contains(text, cs) == true)
+					{
+						result.push_back({p->caption(), valueText});
+						continue;
+					}
 				}
-			}
+				break;
 
-			if (value.type() == QVariant::StringList)
-			{
-				QStringList valueText = value.toStringList();
-
-				if (valueText.contains(text, cs) == true)
+			case QMetaType::QStringList:
 				{
-					result.push_back({p->caption(), valueText.join(QChar::LineFeed)});
-					continue;
+					QStringList valueText = value.toStringList();
+
+					if (valueText.contains(text, cs) == true)
+					{
+						result.push_back({p->caption(), valueText.join(QChar::LineFeed)});
+						continue;
+					}
 				}
+				break;
+
+			default:
+				break;
 			}
 		}
 
@@ -447,7 +456,7 @@ namespace VFrame30
 			return 0;
 		}
 
-		int replaceCount = 0;
+		qsizetype replaceCount = 0;
 
 		// Search all other text, visible, properties
 		// Keep search conditions in consistency with SchemaItem::searchTextByProps
@@ -464,45 +473,53 @@ namespace VFrame30
 
 			QVariant value = p->value();
 
-			if (value.type() == QVariant::String)
+			switch (value.metaType().id())
 			{
-				QString oldValueText = value.toString();
-				QString replacedText = value.toString();
-
-				replaceCount += oldValueText.count(findText, cs);
-
-				replacedText.replace(findText, replaceWith, cs);
-
-				if (oldValueText != replacedText)
+			case QMetaType::QString:
 				{
-					p->setValue(QVariant(replacedText));
+					QString oldValueText = value.toString();
+					QString replacedText = value.toString();
+
+					replaceCount += oldValueText.count(findText, cs);
+
+					replacedText.replace(findText, replaceWith, cs);
+
+					if (oldValueText != replacedText)
+					{
+						p->setValue(QVariant(replacedText));
+					}
 				}
-			}
+				break;
 
-			if (value.type() == QVariant::StringList)
-			{
-				QStringList valueLiest = value.toStringList();
-				QStringList newValues;
-
-				int oldreplaceCount = replaceCount;
-
-				for (QString& valueText : valueLiest)
+			case QMetaType::QStringList:
 				{
-					replaceCount += valueText.count(findText, cs);
+					QStringList valueLiest = value.toStringList();
+					QStringList newValues;
 
-					valueText.replace(findText, replaceWith, cs);
+					qsizetype oldreplaceCount = replaceCount;
 
-					newValues.push_back(valueText);
+					for (QString& valueText : valueLiest)
+					{
+						replaceCount += valueText.count(findText, cs);
+
+						valueText.replace(findText, replaceWith, cs);
+
+						newValues.push_back(valueText);
+					}
+
+					if (oldreplaceCount != replaceCount)
+					{
+						p->setValue(QVariant(newValues));
+					}
 				}
+				break;
 
-				if (oldreplaceCount != replaceCount)
-				{
-					p->setValue(QVariant(newValues));
-				}
+			default:
+				break;
 			}
 		}
 
-		return replaceCount;
+		return static_cast<int>(replaceCount);
 	}
 
 	// Drawing Functions
@@ -571,7 +588,7 @@ namespace VFrame30
 							 itemUnit(),
 							 m_lastScriptError,
 							 r,
-							 Qt::TextDontClip | Qt::AlignTop | Qt::AlignLeft);
+							 static_cast<int>(Qt::TextDontClip) | static_cast<int>(Qt::AlignTop) | static_cast<int>(Qt::AlignLeft));
 
 		return;
 	}
@@ -900,7 +917,7 @@ namespace VFrame30
 		//tags.replace(';', QChar::LineFeed);
 		//tags.replace(',', QChar::LineFeed);	QChar::LineFeed
 
-		m_tags = tags.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
+		m_tags = tags.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
 
 		for (QString& t : m_tags)
 		{
@@ -943,13 +960,13 @@ namespace VFrame30
 		// Implicit tag is item type (SchemaItemRect, SchemaItemInput, etc...)
 		//
 		const QString className = metaObject()->className();
-		QStringRef clearClassName;
+		QStringView clearClassName;
 
 		auto findResult = className.lastIndexOf("::");
 		if (findResult != -1)
 		{
 			Q_ASSERT(findResult + 2 < className.size());
-			clearClassName = className.midRef(findResult + 2);
+			clearClassName = QStringView{className}.mid(findResult + 2);
 		}
 
 		return clearClassName.compare(tag, Qt::CaseInsensitive) == 0;

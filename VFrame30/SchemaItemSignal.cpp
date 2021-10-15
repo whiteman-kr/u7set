@@ -618,7 +618,7 @@ namespace VFrame30
 			columntHeight = rect.height();
 		}
 
-		int lineCount = signalIds.size();
+		qsizetype lineCount = signalIds.size();
 		if (multiLine() == false && lineCount != 0)
 		{
 			lineCount = 1;
@@ -660,7 +660,7 @@ namespace VFrame30
 		std::vector<CellDrawParam> cells;
 		cells.reserve(m_columns.size() * lineCount);		// It will be expanded more if is singleline and has [impact]states
 
-		for (int row = 0; row < lineCount; row++)
+		for (int row = 0; row < static_cast<int>(lineCount); row++)
 		{
 			double top = drawParam->gridToDpiY(rect.top() + row * columntHeight);
 			double startOffset = 0;
@@ -724,7 +724,7 @@ namespace VFrame30
 											   text,
 											   cellFillColor(row, cellColumnIndex),
 											   cellTextColor(row, cellColumnIndex),
-											   column.horzAlign | Qt::AlignVCenter,
+											   static_cast<int>(column.horzAlign) | static_cast<int>(Qt::AlignVCenter),
 											   m_font.drawSize() / 8.0);
 
 							cellColumnIndex ++;
@@ -764,7 +764,7 @@ namespace VFrame30
 											   text,
 											   cellFillColor(row, cellColumnIndex),
 											   cellTextColor(row, cellColumnIndex),
-											   column.horzAlign | Qt::AlignVCenter,
+											   static_cast<int>(column.horzAlign | Qt::AlignVCenter),
 											   m_font.drawSize() / 8.0);
 
 							cellColumnIndex ++;
@@ -1215,7 +1215,9 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	{
 		if (m_multiLine == true)
 		{
-			int linesCount = qBound(1, m_appSignalIds.size(), 64);
+			int linesCount = qBound(1,
+									static_cast<int>(m_appSignalIds.size()),
+									64);
 			return linesCount * gridSize * pinGridStep;
 		}
 		else
@@ -1606,7 +1608,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		{
 			if (multiLine() == true)
 			{
-				return m_appSignalIds.size();
+				return static_cast<int>(m_appSignalIds.size());
 			}
 			else
 			{
@@ -1627,7 +1629,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		}
 		else
 		{
-			int result = 0;
+			qsizetype result = 0;
 			for (const Column& c : m_columns)
 			{
 				switch (c.data)
@@ -1643,7 +1645,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 				}
 			}
 
-			return result;
+			return static_cast<int>(result);
 		}
 	}
 

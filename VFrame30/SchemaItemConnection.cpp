@@ -92,7 +92,7 @@ namespace VFrame30
 
 	void SchemaItemConnection::setConnectionIds(const QString& value)
 	{
-		m_connectionIds = value.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
+		m_connectionIds = value.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
 
 		if (double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
 			heightDocPt() < minHeight)
@@ -256,7 +256,7 @@ namespace VFrame30
 
 		// --
 		//
-		int pinCount = std::max(connectionIdsAsList().size(), inputsCount());
+		int pinCount = std::max(static_cast<int>(connectionIdsAsList().size()), inputsCount());
 
 		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
 		double minHeight = VFrame30::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
@@ -575,7 +575,9 @@ namespace VFrame30
 
 		// --
 		//
-		int pinCount = qBound(2, connectionIdsAsList().size() + appSignalIdsAsList().size(), 256);
+		int pinCount = qBound(2,
+							  static_cast<int>(connectionIdsAsList().size() + appSignalIdsAsList().size()),
+							  256);
 
 		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
 		double minHeight = VFrame30::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
@@ -611,7 +613,7 @@ namespace VFrame30
 
 	void SchemaItemReceiver::setAppSignalIds(const QString& value)
 	{
-		setAppSignalIdsAsList(value.split(QRegExp("\\s+"), Qt::SkipEmptyParts));
+		setAppSignalIdsAsList(value.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts));
 		return;
 	}
 

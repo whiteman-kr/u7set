@@ -20,8 +20,8 @@ public:
 	HostAddressPort(const QString& address, int port);
 
 	HostAddressPort& operator=(const HostAddressPort &other) = default;
-	bool operator==(const HostAddressPort &other);
-	bool operator!=(const HostAddressPort &other);
+	bool operator==(const HostAddressPort &other) const;
+	bool operator!=(const HostAddressPort &other) const;
 
 	void setAddress(quint32 ip4Addr);
 
@@ -123,12 +123,12 @@ inline HostAddressPort::HostAddressPort(const QString& address, int port)
 	m_port = static_cast<quint16>(port);
 }
 
-inline bool HostAddressPort::operator==(const HostAddressPort& other)
+inline bool HostAddressPort::operator==(const HostAddressPort& other) const
 {
 	return m_hostAddress == other.m_hostAddress && m_port == other.m_port;
 }
 
-inline bool HostAddressPort::operator!=(const HostAddressPort& other)
+inline bool HostAddressPort::operator!=(const HostAddressPort& other) const
 {
 	return m_hostAddress != other.m_hostAddress || m_port != other.m_port;
 }

@@ -128,7 +128,7 @@ public:
 	QString name() const { return m_name; }
 	void setName(const QString& name) { m_name = name; }
 
-	QVariant::Type type() const { return m_value.type(); }
+	QMetaType type() const { return m_value.metaType(); }
 	QVariant value() const { return m_value; }
 	bool isEnum() const {return m_isEnum; }
 
@@ -439,7 +439,7 @@ public:
 
 	void setTags(const QStringList& tags);
 	void setTags(const std::set<QString>& tags) { m_tags = tags; }
-	void setTagsStr(const QString& tagsStr) { setTags(tagsStr.split(QRegExp("\\W+"), Qt::SkipEmptyParts)); }
+	void setTagsStr(const QString& tagsStr) { setTags(tagsStr.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts)); }
 
 	bool hasTags() const { return m_tags.size() > 0; }
 	bool hasTag(const QString& tag) const { return m_tags.find(tag.toLower().trimmed()) != m_tags.end(); }
@@ -720,7 +720,7 @@ public:
 	void append(AppSignal* signal);
 
 	virtual void remove(const int& signalID) override;
-	virtual void removeAt(const int index) override;
+	virtual void removeAt(const qsizetype index) override;
 
 	QVector<int> getChannelSignalsID(const AppSignal& signal) const;
 	QVector<int> getChannelSignalsID(int signalGroupID) const;

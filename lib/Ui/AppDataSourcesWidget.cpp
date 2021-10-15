@@ -51,7 +51,7 @@ DialogAppDataSourceInfo::DialogAppDataSourceInfo(TcpAppSourcesState* tcpClient, 
 	headerLabels << tr("Value");
 	headerLabels << QString();
 
-	m_treeWidget->setColumnCount(headerLabels.size());
+	m_treeWidget->setColumnCount(static_cast<int>(headerLabels.size()));
 	m_treeWidget->setHeaderLabels(headerLabels);
 
 	QTreeWidgetItem* infoItem = new QTreeWidgetItem(QStringList() << tr("1-Source Information"));
@@ -309,7 +309,7 @@ AppDataSourcesWidget::AppDataSourcesWidget(TcpAppSourcesState* tcpClient,  bool 
 	headerLabels << tr("ReceivedCount");
 	headerLabels << tr("Receiving Rate, KB/sec");
 
-	m_treeWidget->setColumnCount(headerLabels.size());
+	m_treeWidget->setColumnCount(static_cast<int>(headerLabels.size()));
 	m_treeWidget->setHeaderLabels(headerLabels);
 
 	update(false);

@@ -425,8 +425,8 @@ public:
 	[[nodiscard]] int parentId() const noexcept;
 	void setParentId(int value);
 
-	[[nodiscard]] virtual int size() const;
-	void setSize(int size);
+	[[nodiscard]] virtual qsizetype size() const;
+	void setSize(qsizetype size);
 
 	[[nodiscard]] bool deleted() const;
 	void setDeleted(bool value);
@@ -469,7 +469,7 @@ protected:
 	QString m_fileName;
 	int m_fileId = DbFileInfo::Null;
 	int m_parentId = 0;
-	int m_size = 0;
+	qsizetype m_size = 0;
 	bool m_deleted = false;				// File was deleted from database, from all tables, such FileInfo does not exist anymore
 
 	int m_changeset = 0;
@@ -534,7 +534,7 @@ public:
 	void swapData(QByteArray& data);
 	void clearData();
 
-	[[nodiscard]] virtual int size() const override;
+	[[nodiscard]] virtual qsizetype size() const override;
 
 	// Data
 	//

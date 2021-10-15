@@ -15,7 +15,7 @@ QString CsvFile::getCsvString(const QStringList& strings, bool replaceSeparators
 
 	QString result;
 
-	int count = strings.size();
+	qsizetype count = strings.size();
 
 	for (QString s : strings)
 	{

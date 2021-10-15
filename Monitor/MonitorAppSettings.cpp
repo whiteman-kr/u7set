@@ -4,7 +4,6 @@
 
 MonitorAppSettings::MonitorAppSettings()
 {
-	 qRegisterMetaTypeStreamOperators<QList<int>>("QList<int>");
 }
 
 MonitorAppSettings& MonitorAppSettings::instance()

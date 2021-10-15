@@ -798,7 +798,7 @@ namespace Afb
 			return false;
 		}
 
-		if (xmlReader->name() != "AfbElementParam")
+		if (xmlReader->name() != QLatin1String("AfbElementParam"))
 		{
 			xmlReader->raiseError(QObject::tr("AfbElementParam expected."));
 			return !xmlReader->hasError();

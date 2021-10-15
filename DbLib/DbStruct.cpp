@@ -182,7 +182,7 @@ QString DbProjectProperties::suppressWarningsAsString() const
 
 void DbProjectProperties::setSuppressWarnings(const QString& value)
 {
-	QStringList sl = value.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
+	QStringList sl = value.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
 
 	m_suppressWarnings.clear();
 	m_suppressWarnings.reserve(sl.size());
@@ -691,9 +691,9 @@ std::shared_ptr<DbFileInfo> DbFileTree::child(int parentId, int index) const
 	const auto& ch = it->second;
 	assert(ch.m_fileId == parentId);
 
-	if (index >= ch.m_children.size())
+	if (index >= static_cast<int>(ch.m_children.size()))
 	{
-		assert(index < ch.m_children.size());
+		assert(index < static_cast<int>(ch.m_children.size()));
 		return {};
 	}
 
@@ -1042,7 +1042,7 @@ void DbFileInfo::setFileName(const QString& value)
 
 QString DbFileInfo::extension() const noexcept
 {
-	int pointPos = m_fileName.lastIndexOf('.');
+	qsizetype pointPos = m_fileName.lastIndexOf('.');
 	if (pointPos == -1)
 	{
 		return {};
@@ -1051,13 +1051,13 @@ QString DbFileInfo::extension() const noexcept
 	return m_fileName.right(m_fileName.size() - pointPos - 1);
 }
 
-int DbFileInfo::size() const
+qsizetype DbFileInfo::size() const
 {
 	// If we have any date, return th size of the data, else we retrurn fake size
 	return m_size;
 }
 
-void DbFileInfo::setSize(int size)
+void DbFileInfo::setSize(qsizetype size)
 {
 	m_size = size;
 }
@@ -1226,7 +1226,7 @@ void DbFileInfo::setDirectoryAttribute(bool value)
 
 QString DbFileInfo::fullPathToFileName(const QString& fullPathName)
 {
-	int pos = fullPathName.lastIndexOf('/');
+	qsizetype pos = fullPathName.lastIndexOf('/');
 	if (pos == -1)
 	{
 		return fullPathName;
@@ -1328,7 +1328,7 @@ const static char* rawhex = {"000102030405060708090a0b0c0d0e0f"
     QString hex(rawhex);
     const QChar* hexptr = hex.data();
 
-	int fileSize = m_data.size();
+	qsizetype fileSize = m_data.size();
 	const char* dataptr = m_data.constData();
 
 	for (int i = 0; i < fileSize; i++)
@@ -1371,7 +1371,7 @@ const static char* rawhex = {"000102030405060708090a0b0c0d0e0f"
 	QString hex(rawhex);
 	const QChar* hexptr = hex.data();
 
-	int fileSize = data.size();
+	qsizetype fileSize = data.size();
 	const char* dataptr = data.constData();
 
 	for (int i = 0; i < fileSize; i++)
@@ -1426,7 +1426,7 @@ void DbFile::clearData()
 	m_size = 0;
 }
 
-int DbFile::size() const
+qsizetype DbFile::size() const
 {
 	// If we have any date, return th size of the data, else we retrurn fake size
 	return m_data.size();

@@ -5,28 +5,14 @@ TARGET = ServiceLib
 TEMPLATE = lib
 CONFIG += staticlib
 
-#win32:LIBS += -lGdi32
+include(../compiler.pri)
+include(../warnings.pri)
+include(./qtservice/src/qtservice.pri)
+
+DEFINES -= QT_DISABLE_DEPRECATED_BEFORE=0x060000
 
 INCLUDEPATH += $$PWD
 INCLUDEPATH += ./../Protobuf
-
-# c++20 support
-#
-unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
-win32:QMAKE_CXXFLAGS += /std:c++latest
-
-include(../warnings.pri)
-
-include(./qtservice/src/qtservice.pri)
-
-# Optimization flags
-#
-win32 {
-}
-unix {
-    CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
-	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
-}
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

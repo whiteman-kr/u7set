@@ -795,17 +795,19 @@ public:
 
 		// Enum can be inside QVariant
 		//
-		const QMetaObject* mo = QMetaType::metaObjectForType(m_value.userType());
+		m_value.metaType();
+
+		const QMetaObject* mo = m_value.metaType().metaObject();
 		if (mo == nullptr)
 		{
 			return false;
 		}
 
 		QString typeStr(QString::fromLatin1(m_value.typeName()));
-		QStringRef typeNameRef(&typeStr);
+		QStringView typeNameRef(typeStr);
 
-		int doubleColumnIndex = typeNameRef.lastIndexOf(QLatin1String("::"));
-		if (doubleColumnIndex != -1)
+		if (qsizetype doubleColumnIndex = typeNameRef.lastIndexOf(QLatin1String("::"));
+			doubleColumnIndex != -1)
 		{
 			typeNameRef = typeNameRef.mid(doubleColumnIndex + 2);
 		}
@@ -850,7 +852,7 @@ public:
 		{
 			// Enum can be inside QVariant
 			//
-			const QMetaObject* mo = QMetaType::metaObjectForType(m_value.userType());
+			const QMetaObject* mo = m_value.metaType().metaObject();
 			if (mo == nullptr)
 			{
 				Q_ASSERT(mo);
@@ -858,10 +860,11 @@ public:
 			}
 
 			QString typeStr(QString::fromLatin1(m_value.typeName()));
-			QStringRef typeNameRef(&typeStr);
+			QStringView typeNameRef(typeStr);
 
-			int doubleColumnIndex = typeNameRef.lastIndexOf(QLatin1String("::"));
-			if (doubleColumnIndex != -1)
+
+			if (qsizetype doubleColumnIndex = typeNameRef.lastIndexOf(QLatin1String("::"));
+				doubleColumnIndex != -1)
 			{
 				typeNameRef = typeNameRef.mid(doubleColumnIndex + 2);
 			}
@@ -906,11 +909,11 @@ public:
 			return;
 		}
 
-		if (value.canConvert(m_value.type()) == true)
+		if (value.canConvert(m_value.metaType()) == true)
 		{
 			QVariant v(value);
 
-			bool ok = v.convert(m_value.type());
+			bool ok = v.convert(m_value.metaType());
 			Q_ASSERT(ok);
 			Q_UNUSED(ok);
 
@@ -920,24 +923,13 @@ public:
 			return;
 		}
 
-		if (value.canConvert(m_value.userType()) == true)
-		{
-			QVariant v(value);
-
-			bool ok = v.convert(m_value.userType());
-			Q_ASSERT(ok);
-			Q_UNUSED(ok);
-
-			m_value.setValue(v);
-			checkLimits();
-			return;
-		}
-
-		Q_ASSERT(m_value.type() == value.type());
+		Q_ASSERT(m_value.metaType().id() == value.metaType().id());
 
 		m_value = value;
 
 		checkLimits();
+
+		return;
 	}
 
 	class QVariantEx final : public QVariant
@@ -945,7 +937,12 @@ public:
 	public:
 		void setEnumHack(int value)
 		{
-			this->d.data.i = value;
+			QVariant vint(value);
+
+			[[maybe_unused]] bool ok = vint.convert(this->metaType());
+			Q_ASSERT(ok);
+
+			this->setValue(vint);
 		}
 	};
 
@@ -964,9 +961,9 @@ public:
 	virtual void setEnumValue(const char* value) noexcept final	// Overriden from class Propery
 	{
 		if (QVariant v(value);
-			v.canConvert(m_value.userType()) == true)
+			v.canConvert(m_value.metaType()) == true)
 		{
-			bool ok = v.convert(m_value.userType());
+			bool ok = v.convert(m_value.metaType());
 			if (ok == true)
 			{
 				m_value.setValue(v);
@@ -987,7 +984,7 @@ private:
 	{
 		QVariant value;
 
-		if (m_value.type() >= QMetaType::User && m_value.userType() == qMetaTypeId<Afb::AfbParamValue>())
+		if (m_value.metaType().id() == qMetaTypeId<Afb::AfbParamValue>())
 		{
 			auto afbParamValue = m_value.value<Afb::AfbParamValue>();
 
@@ -1008,7 +1005,7 @@ private:
 
 		if (m_lowLimit.isValid() == true)
 		{
-			Q_ASSERT(value.canConvert(m_lowLimit.type()) == true);
+			Q_ASSERT(value.canConvert(m_lowLimit.metaType()) == true);
 
             auto operatorLs =
                 [](auto op1, auto op2) -> bool
@@ -1018,7 +1015,7 @@ private:
 
 			bool less = false;
 
-			switch (static_cast<QMetaType::Type>(value.type()))
+			switch (static_cast<QMetaType::Type>(value.metaType().id()))
 			{
 			case QMetaType::Int:
 				assert(value.canConvert<int>());
@@ -1067,7 +1064,7 @@ private:
 
 			if (less == true)
 			{
-				if (m_value.type() >= QMetaType::User && m_value.userType() == qMetaTypeId<Afb::AfbParamValue>())
+				if (m_value.metaType().id() == qMetaTypeId<Afb::AfbParamValue>())
 				{
 					Afb::AfbParamValue afbParamValue = m_value.value<Afb::AfbParamValue>();
 
@@ -1086,7 +1083,7 @@ private:
 
 		if (m_highLimit.isValid() == true)
 		{
-			Q_ASSERT(value.canConvert(m_highLimit.type()) == true);
+			Q_ASSERT(value.canConvert(m_highLimit.metaType()) == true);
 
             auto operatorGt =
                 [](auto op1, auto op2) -> bool
@@ -1096,7 +1093,7 @@ private:
 
 			bool gt = false;
 
-			switch (static_cast<QMetaType::Type>(value.type()))
+			switch (value.metaType().id())
 			{
 			case QMetaType::Int:
 				assert(value.canConvert<int>());
@@ -1145,7 +1142,7 @@ private:
 
 			if (gt == true)
 			{
-				if (m_value.type() >= QMetaType::User && m_value.userType() == qMetaTypeId<Afb::AfbParamValue>())
+				if (m_value.metaType().id() == qMetaTypeId<Afb::AfbParamValue>())
 				{
 					Afb::AfbParamValue afbParamValue = m_value.value<Afb::AfbParamValue>();
 
@@ -1293,13 +1290,13 @@ public:
 
 	void setValue(const QVariant& value) noexcept final	// Overriden from class Propery
 	{
-		if (value.type() == QVariant::Int)
+		if (value.metaType().id() == QMetaType::Int)
 		{
 			setEnumValue(value.toInt());
 			return;
 		}
 
-		if (value.type() == QVariant::String)
+		if (value.metaType().id() == QMetaType::QString)
 		{
 			int key = m_enumValues->key(value.toString());
 			setEnumValue(key);
@@ -1472,13 +1469,13 @@ public:
 
 	virtual void setValue(const QVariant& value) noexcept final		// Overriden from class Propery
 	{
-		if (value.type() == QVariant::Int)
+		if (value.metaType().id() == QMetaType::Int)
 		{
 			setEnumValue(value.toInt());
 			return;
 		}
 
-		if (value.type() == QVariant::String)
+		if (value.metaType().id() == QMetaType::QString)
 		{
 			setEnumValue(value.toString().toStdString().data());
 			return;
@@ -2377,7 +2374,7 @@ public:
 			});
 
 			if (it != newProperties.end() &&
-				(*it)->value().type() == p->value().type() &&
+				(*it)->value().metaType() == p->value().metaType() &&
 				p != (*it))
 			{
 				someValuesWereRestored = true;
@@ -3081,8 +3078,8 @@ public:
 			return enumValues;
 		}
 
-		int openBrace = strType.indexOf('[');
-		int closeBrace = strType.lastIndexOf(']');
+		qsizetype openBrace = strType.indexOf('[');
+		qsizetype closeBrace = strType.lastIndexOf(']');
 
 		if (openBrace == -1 || closeBrace == -1 || openBrace >= closeBrace)
 		{

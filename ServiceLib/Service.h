@@ -168,7 +168,7 @@ private:
 
 	Service* m_service = nullptr;
 
-	mutable QMutex m_spMutex;
+	mutable QRecursiveMutex m_spMutex;
 	SessionParams m_sessionParams;
 
 	static int m_instanceNo;
