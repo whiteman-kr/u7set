@@ -111,6 +111,14 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 			}
 		}
 
+		if (pInSignal->param().isOutput() == true)
+		{
+			if (column == COMPARATOR_LIST_COLUMN_TYPE)
+			{
+				return QColor(0xFF, 0xA0, 0xA0);
+			}
+		}
+
 		return QVariant();
 	}
 

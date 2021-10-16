@@ -101,6 +101,11 @@ QString MetrologyConnectionTable::text(int row, int column, const Metrology::Con
 				if (pSignal == nullptr || pSignal->param().isValid() == false)
 				{
 					result = connection.appSignalID(Metrology::ConnectionIoType::Source);
+
+					if (result == ConnectionUndefinedID)
+					{
+						result = tr("Input is not set");
+					}
 				}
 				else
 				{
@@ -109,6 +114,7 @@ QString MetrologyConnectionTable::text(int row, int column, const Metrology::Con
 						case Metrology::SignalIDType::CustomID:		result = pSignal->param().customAppSignalID();	break;
 						case Metrology::SignalIDType::AppSignalID:	result = pSignal->param().appSignalID();		break;
 						case Metrology::SignalIDType::EquipmentID:	result = pSignal->param().equipmentID();		break;
+
 						default:
 							assert(0);
 							result = QString();
@@ -137,6 +143,7 @@ QString MetrologyConnectionTable::text(int row, int column, const Metrology::Con
 						case Metrology::SignalIDType::CustomID:		result = pSignal->param().customAppSignalID();	break;
 						case Metrology::SignalIDType::AppSignalID:	result = pSignal->param().appSignalID();		break;
 						case Metrology::SignalIDType::EquipmentID:	result = pSignal->param().equipmentID();		break;
+
 						default:
 							assert(0);
 							result = QString();
@@ -381,6 +388,7 @@ void DialogMetrologyConnectionItem::selectSignal(int ioType)
 	{
 		case Metrology::ConnectionIoType::Source:		m_pInputSignalIDEdit->setText(pSignal->param().appSignalID());	break;
 		case Metrology::ConnectionIoType::Destination:	m_pOutputSignalIDEdit->setText(pSignal->param().appSignalID());	break;
+
 		default:
 			assert(0);
 	}
@@ -668,6 +676,10 @@ void DialogMetrologyConnection::createInterface()
 
 	m_pConnectionMenu->addSeparator();
 
+	m_pPotentialConnectionsAction = m_pConnectionMenu->addAction(tr("Create potential connections"));
+
+	m_pConnectionMenu->addSeparator();
+
 	m_pConnectionMenu->addAction(m_pExportAction);
 
 	m_pImportAction = m_pConnectionMenu->addAction(tr("&Import ..."));
@@ -700,6 +712,7 @@ void DialogMetrologyConnection::createInterface()
 	connect(m_pRemoveAction, &QAction::triggered, this, &DialogMetrologyConnection::onRremove);
 	connect(m_pMoveUpAction, &QAction::triggered, this, &DialogMetrologyConnection::onMoveUp);
 	connect(m_pMoveDownAction, &QAction::triggered, this, &DialogMetrologyConnection::onMoveDown);
+	connect(m_pPotentialConnectionsAction, &QAction::triggered, this, &DialogMetrologyConnection::onPotentialConnections);
 	connect(m_pImportAction, &QAction::triggered, this, &DialogMetrologyConnection::onImport);
 	connect(m_pViewTypeIDMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &DialogMetrologyConnection::showTypeID);
 
@@ -1103,6 +1116,91 @@ void DialogMetrologyConnection::onMoveDown()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void DialogMetrologyConnection::onPotentialConnections()
+{
+	int signalCount = theSignalBase.signalCount();
+	for (int i = 0; i < signalCount; i++)
+	{
+		Metrology::Signal* pSignal = theSignalBase.signalPtr(i);
+		if (pSignal == nullptr)
+		{
+			continue;
+		}
+
+		const Metrology::SignalParam& param = pSignal->param();
+		if (param.isValid() == false)
+		{
+			continue;
+		}
+
+		if (param.isAnalog() == false)
+		{
+			continue;
+		}
+
+		Metrology::ConnectionType сonnectionType = Metrology::ConnectionType::Unused;
+
+		switch (param.inOutType())
+		{
+			case E::SignalInOutType::Internal:
+
+				if (param.hasComparators() == false)
+				{
+					continue;
+				}
+
+				сonnectionType = Metrology::ConnectionType::Input_Internal;
+
+				break;
+
+			case E::SignalInOutType::Output:
+
+				if (param.electricRangeIsValid() == false)
+				{
+					continue;
+				}
+
+				if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
+				{
+					continue;
+				}
+
+				сonnectionType = Metrology::ConnectionType::Input_Output;
+
+				break;
+
+			default:
+				continue;
+		}
+
+		if (ERR_METROLOGY_CONNECTION_TYPE(сonnectionType) == true)
+		{
+			continue;
+		}
+
+		int found = m_connectionBase.findConnectionIndex(Metrology::ConnectionIoType::Destination, сonnectionType, pSignal);
+		if (found != -1)
+		{
+			continue;
+		}
+
+		Metrology::Connection connection;
+
+		connection.setAppSignalID(Metrology::ConnectionIoType::Source, ConnectionUndefinedID);
+		connection.setType(сonnectionType);
+		connection.setAppSignalID(Metrology::ConnectionIoType::Destination, param.appSignalID());
+		connection.setSignal(Metrology::ConnectionIoType::Destination, pSignal);
+
+		m_connectionBase.append(connection);
+	}
+
+	m_connectionBase.sort();
+
+	updateList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void DialogMetrologyConnection::onExport()
 {
 	QString filter = tr("CSV files (*.csv)");
@@ -1212,6 +1310,8 @@ void DialogMetrologyConnection::onImport()
 
 	m_connectionBase.sort();
 
+	//
+	//
 	updateList();
 }
 
@@ -1269,6 +1369,7 @@ void DialogMetrologyConnection::onProperties()
 	{
 		case METROLOGY_CONNECTION_COLUMN_IN_ID:		pSignal = connection.metrologySignal(Metrology::ConnectionIoType::Source);			break;
 		case METROLOGY_CONNECTION_COLUMN_OUT_ID:	pSignal = connection.metrologySignal(Metrology::ConnectionIoType::Destination);		break;
+
 		default:
 			return;
 	}
