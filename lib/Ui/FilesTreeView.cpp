@@ -447,6 +447,11 @@ QModelIndex FileTreeModel::parent(const QModelIndex& childIndex) const
 
 int FileTreeModel::rowCount(const QModelIndex& parentIndex) const
 {
+	if (parentIndex.column() > 0)
+	{
+		return 0;
+	}
+
 	const FileTreeModelItem* parent = fileItem(parentIndex);
 
 	if (parent == nullptr)
