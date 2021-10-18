@@ -2422,6 +2422,11 @@ void DialogMeasureProperty::createPropertyList()
 			item->setAttribute(QLatin1String("readOnly"), true);
 			positionGroup->addSubProperty(item);
 
+			item = m_pManager->addProperty(QVariant::String, tr("Module type"));
+			item->setValue(m_pMeasurement->location().moduleCaption());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			positionGroup->addSubProperty(item);
+
 			item = m_pManager->addProperty(QVariant::String, tr("Rack"));
 			item->setValue(m_pMeasurement->location().rack().caption());
 			item->setAttribute(QLatin1String("readOnly"), true);

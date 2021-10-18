@@ -57,6 +57,7 @@ int SqlFieldBase::init(int objectType, int)
 			append("Caption",						QVariant::String, 256);
 
 			append("ModuleSN",						QVariant::Int);
+			append("ModuleCaption",					QVariant::String, 64);
 			append("RackIndex",						QVariant::Int);
 			append("RackCaption",					QVariant::String, 64);
 			append("Channel",						QVariant::Int);
@@ -187,6 +188,7 @@ int SqlFieldBase::init(int objectType, int)
 			append("Caption",						QVariant::String, 256);
 
 			append("ModuleSN",						QVariant::Int);
+			append("ModuleCaption",					QVariant::String, 64);
 			append("RackIndex",						QVariant::Int);
 			append("RackCaption",					QVariant::String, 64);
 			append("Channel",						QVariant::Int);
@@ -770,6 +772,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setCaption(query.value(field++).toString());
 
 					measure->location().setModuleSerialNo(query.value(field++).toInt());
+					measure->location().setModuleCaption(query.value(field++).toString());
 					measure->location().rack().setIndex(query.value(field++).toInt());
 					measure->location().rack().setCaption(query.value(field++).toString());
 					measure->location().rack().setChannel(query.value(field++).toInt());
@@ -937,6 +940,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setCaption(query.value(field++).toString());
 
 					measure->location().setModuleSerialNo(query.value(field++).toInt());
+					measure->location().setModuleCaption(query.value(field++).toString());
 					measure->location().rack().setIndex(query.value(field++).toInt());
 					measure->location().rack().setCaption(query.value(field++).toString());
 					measure->location().rack().setChannel(query.value(field++).toInt());
@@ -1176,6 +1180,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->caption());
 
 					query.bindValue(field++, measure->location().moduleSerialNo());
+					query.bindValue(field++, measure->location().moduleCaption());
 					query.bindValue(field++, measure->location().rack().index());
 					query.bindValue(field++, measure->location().rack().caption());
 					query.bindValue(field++, measure->location().rack().channel());
@@ -1362,6 +1367,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->caption());
 
 					query.bindValue(field++, measure->location().moduleSerialNo());
+					query.bindValue(field++, measure->location().moduleCaption());
 					query.bindValue(field++, measure->location().rack().index());
 					query.bindValue(field++, measure->location().rack().caption());
 					query.bindValue(field++, measure->location().rack().channel());

@@ -17,6 +17,7 @@ namespace Measure
 		{
 			HeaderColumn("MVC_CMN_L_INDEX", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Index"), 100, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_ENABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_L_MODULE_SN", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Module SN"), 100, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
+			HeaderColumn("MVC_CMN_L_MODULE_TYPE", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Module type"), 100, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_L_CONNECT_APP_ID", QT_TRANSLATE_NOOP("MeasureViewHeader",	"ConnectSignalID"), 150, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_L_CONNECT_TYPE", QT_TRANSLATE_NOOP("MeasureViewHeader",	"ConnectType"), 100, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_L_CUSTOM_ID", QT_TRANSLATE_NOOP("MeasureViewHeader",	"SignalID"), 150, MVC_CMN_SHOW, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
@@ -78,7 +79,6 @@ namespace Measure
 			HeaderColumn(),
 			HeaderColumn(),
 			HeaderColumn(),
-			HeaderColumn(),
 		},
 
 		// Measurements of comparators
@@ -86,6 +86,7 @@ namespace Measure
 		{
 			HeaderColumn("MVC_CMN_C_INDEX", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Index"), 100, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_ENABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_C_MODULE_SN", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Module SN"), 100, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
+			HeaderColumn("MVC_CMN_C_MODULE_TYPE", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Module type"), 100, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_C_CONNECT_APP_ID", QT_TRANSLATE_NOOP("MeasureViewHeader",	"ConnectSignalID"), 150, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_C_CONNECT_TYPE", QT_TRANSLATE_NOOP("MeasureViewHeader",	"ConnectType"), 100, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_C_CUSTOM_ID", QT_TRANSLATE_NOOP("MeasureViewHeader",	"SignalID"), 150, MVC_CMN_SHOW, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
@@ -111,7 +112,6 @@ namespace Measure
 			HeaderColumn("MVC_CMN_C_ERROR_RESULT", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Result"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_C_MEASUREMENT_TIME", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Measurement time"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_C_CALIBRATOR", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Calibrator"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-			HeaderColumn(),
 			HeaderColumn(),
 			HeaderColumn(),
 			HeaderColumn(),
