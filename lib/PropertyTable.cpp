@@ -677,6 +677,12 @@ namespace ExtWidgets
 				return;
 			}
 
+			if ((event->modifiers() & Qt::ControlModifier) != 0 && event->key() == Qt::Key_C)
+			{
+				emit copyKeyPressed();
+				return;
+			}
+
 			if (event->text().isEmpty() == false)
 			{
 				emit symbolKeyPressed(event->text());
@@ -766,6 +772,8 @@ namespace ExtWidgets
 		connect(m_tableView, &PropertyTableView::mousePressed, this, &PropertyTable::onCellClicked);
 		connect(m_tableView, &PropertyTableView::symbolKeyPressed, this, &PropertyTable::onCellSymbolKeyPressed);
 		connect(m_tableView, &PropertyTableView::spaceKeyPressed, this, &PropertyTable::onCellToggleKeyPressed);
+		connect(m_tableView, &PropertyTableView::copyKeyPressed, this, &PropertyTable::onCellCopyKeyPressed);
+
 
 		// Edit Delegate
 
@@ -1001,6 +1009,101 @@ namespace ExtWidgets
 		{
 			toggleSelected();
 		}
+	}
+
+	void PropertyTable::onCellCopyKeyPressed()
+	{
+		QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
+		if (selectedIndexes.empty() == true)
+		{
+			return;
+		}
+
+		std::sort(selectedIndexes.begin(), selectedIndexes.end(), [](const QModelIndex& left, const QModelIndex& right) -> bool
+		{
+			if (left.row() == right.row())
+			{
+				return left.column() < right.column();
+			}
+
+			return left.row() < right.row();
+		}
+		);
+
+		// Calculate the leftmost column
+		//
+		int firstColumn = selectedIndexes[0].column();
+
+		for (const QModelIndex& mi : selectedIndexes)
+		{
+			if (mi.column() < firstColumn)
+			{
+				firstColumn = mi.column();
+			}
+		}
+
+		// Build the result
+		//
+		QString result;
+
+		int lastRow = selectedIndexes[0].row();
+
+		int lastColumn = firstColumn;
+
+		for (const QModelIndex& mi : selectedIndexes)
+		{
+			if (lastRow != mi.row())
+			{
+				// Switch to the next row
+				//
+				lastRow = mi.row();
+				lastColumn = firstColumn;
+
+				result += "\n";
+			}
+
+			// Fill tabs between columns
+			//
+			for (int c = lastColumn; c < mi.column(); c++)
+			{
+				result += "\t";
+			}
+
+			lastColumn = mi.column();
+
+			// Add propery text to the clipboard
+			//
+			std::shared_ptr<PropertyObject> po = m_proxyModel.propertyObjectByIndex(mi);
+			if (po == nullptr)
+			{
+				Q_ASSERT(po);
+				return;
+			}
+
+			int row = -1;
+
+			std::shared_ptr<Property> p = m_proxyModel.propertyByIndex(mi, &row);
+			if (p == nullptr)
+			{
+				Q_ASSERT(p);
+				return;
+			}
+
+			if (expandValuesToAllRows() == false &&
+				p->value().userType() != QVariant::StringList &&
+				row > 0)
+			{
+				continue;
+			}
+
+			result += PropertyTools::propertyValueText(p.get(), row);
+		}
+
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->clear();
+		clipboard->setText(result);
+
+		return;
 	}
 
 	void PropertyTable::onShowErrorMessage (QString message)
