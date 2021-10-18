@@ -1784,6 +1784,7 @@ void MainWindow::showConnectionList()
 		return;
 	}
 
+	m_pStatisticsPanel->connectionTypeChanged(m_connectionType);
 	m_pStatisticsPanel->updateList();
 }
 
