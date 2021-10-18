@@ -13,9 +13,9 @@
 
 const QString LanControllerInfoHelper::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR("_ETHERNET0%1");
 
-bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
-										int lanControllerNo,
+bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 										E::LanControllerType lanControllerType,
+										int lanControllerNo,
 										LanControllerInfo* lanControllerInfo,
 										const Hardware::EquipmentSet& equipmentSet,
 										Builder::IssueLogger* log)
@@ -39,16 +39,10 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 
 	lanControllerInfo->equipmentID = deviceController->equipmentIdTemplate();
 
-	lanControllerInfo->tuningProvided = false;
-	lanControllerInfo->appDataProvided = false;
-	lanControllerInfo->diagDataProvided = false;
-
-	if (isProvideTuning(lanControllerType) == true)
+	if (LanControllerInfo::isProvideTuning(lanControllerType) == true)
 	{
 		// tuning adapter
 		//
-		lanControllerInfo->tuningProvided = true;
-
 		result &= DeviceHelper::getBoolProperty(deviceController, EquipmentPropNames::TUNING_ENABLE,
 												&lanControllerInfo->tuningEnable, log);
 		QHostAddress tuningIP;
@@ -100,12 +94,10 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 		}
 	}
 
-	if (isProvideAppData(lanControllerType) == true)
+	if (LanControllerInfo::isProvideAppData(lanControllerType) == true)
 	{
 		// application data adapter
 		//
-		lanControllerInfo->appDataProvided = true;
-
 		result &= DeviceHelper::getBoolProperty(deviceController, EquipmentPropNames::APP_DATA_ENABLE,
 												&lanControllerInfo->appDataEnable, log);
 		QHostAddress appDataIP;
@@ -162,12 +154,10 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 		}
 	}
 
-	if (isProvideDiagData(lanControllerType) == true)
+	if (LanControllerInfo::isProvideDiagData(lanControllerType) == true)
 	{
 		// diagnostics data adapter
 		//
-		lanControllerInfo->diagDataProvided = true;
-
 		result &= DeviceHelper::getBoolProperty(deviceController, EquipmentPropNames::DIAG_DATA_ENABLE,
 												&lanControllerInfo->diagDataEnable, log);
 		QHostAddress diagDataIP;
@@ -227,21 +217,6 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 	}
 
 	return result;
-}
-
-bool LanControllerInfoHelper::isProvideTuning(E::LanControllerType lanControllerType)
-{
-	return (static_cast<int>(lanControllerType) & static_cast<int>(E::LanControllerType::Tuning)) != 0;
-}
-
-bool LanControllerInfoHelper::isProvideAppData(E::LanControllerType lanControllerType)
-{
-	return (static_cast<int>(lanControllerType) & static_cast<int>(E::LanControllerType::AppData)) != 0;
-}
-
-bool LanControllerInfoHelper::isProvideDiagData(E::LanControllerType lanControllerType)
-{
-	return (static_cast<int>(lanControllerType) & static_cast<int>(E::LanControllerType::DiagData)) != 0;
 }
 
 QString LanControllerInfoHelper::getLanControllerSuffix(int controllerNo)

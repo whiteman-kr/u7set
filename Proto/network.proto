@@ -93,6 +93,53 @@ message GetAppSignalStateChangesReply
 	repeated Proto.AppSignalState appSignalStates = 5;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
 }
 
+message LanControllerInfo
+{
+	optional string equipmentID = 1;
+	optional int32 controllerNo = 2 [default = -1];
+	optional int32 lanControllerType = 3 [default = 0];		// E::LanControllerType values
+
+	// tuning parameters
+
+	optional bool tuningEnable = 10 [default = false];
+	optional string tuningIP = 11;
+	optional int32 tuningPort = 12 [default = 0];
+	optional string tuningServiceID = 13;
+	optional string tuningServiceIP = 14;
+	optional int32 tuningServicePort = 15 [default = 0];
+	optional string tuningServiceNetmask = 16;
+	optional string tuningAssociatedSignals = 17;
+
+	// app data parameters
+
+	optional bool appDataEnable = 20 [default = false];
+	optional string appDataIP = 21;
+	optional int32 appDataPort = 22 [default = 0];
+	optional string appDataServiceID = 23;
+	optional string appDataServiceIP = 24;
+	optional int32 appDataServicePort = 25 [default = 0];
+	optional string appDataServiceNetmask = 26;
+	optional uint32 appDataUID = 27 [default = 0];
+	optional int32 appDataSizeBytes = 28 [default = 0];
+	optional int32 appDataFramesQuantity = 29 [default = 0];
+	optional int32 overrideAppDataWordCount = 30 [default = -1];
+	optional string appDataAssociatedSignals = 31;
+
+	// diag data parameters
+
+	optional bool diagDataEnable = 40 [default = false];
+	optional string diagDataIP = 41;
+	optional int32 diagDataPort = 42 [default = 0];
+	optional string diagDataServiceID = 43;
+	optional string diagDataServiceIP = 44;
+	optional int32 diagDataServicePort = 45 [default = 0];
+	optional string diagDataServiceNetmask = 46;
+	optional uint32 diagDataUID = 47 [default = 0];
+	optional int32 diagDataSizeBytes = 48 [default = 0];
+	optional int32 diagDataFramesQuantity = 49 [default = 0];
+	optional int32 overrideDiagDataWordCount = 50 [default = -1];
+	optional string diagDataAssociatedSignals = 51;
+}
 
 // Getting Data Sources info
 //
@@ -101,22 +148,18 @@ message DataSourceInfo
 {
     optional uint64 id = 1 [default = 0];		    // unique id
 
-    optional string lmEquipmentID = 2;
-    optional string lmCaption = 3;
-    optional int32 lmDataType = 4 [default = 0];
-    optional string lmIP = 5;
-    optional int32 lmPort = 6 [default = 0];
-	optional int32 lmSubsystemKey = 7 [default = 0];
-	optional string lmSubsystemID = 8;
-    optional string lmSubsystemChannel = 9;
-    optional int32 lmNumber = 10 [default = 0];
-    optional int32 lmModuleType = 11 [default = 0];
-    optional string lmAdapterID = 12;
-    optional bool lmDataEnable = 13 [default = false];
-	optional uint32 lmDataID = 14 [default = 0];
-    optional uint64 lmUniqueID = 15 [default = 0];
-    optional int32 lmRupFramesQuantity = 16 [default = 0];
-	optional string lmPresetName = 17;
+	optional string moduleEquipmentID = 2;
+	optional string modulePresetName = 3;
+	optional int32 moduleType = 4 [default = 0];
+	optional string moduleCaption = 5;
+	optional uint64 moduleUniqueID = 6;
+
+	optional string subsystemID = 7;
+	optional int32 subsystemKey = 8 [default = 0];
+	optional int32 lmNumber = 9 [default = 0];
+	optional string subsystemChannel = 10;
+
+	optional LanControllerInfo lanControllerInfo = 11;
 }
 
 message GetDataSourcesInfoRequest

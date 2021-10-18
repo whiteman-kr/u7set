@@ -465,7 +465,7 @@ namespace Tuning
 
 		for(const TuningSource& tuningSource : m_tuningSources)
 		{
-			if (tuningSourceEquipmentID.isEmpty() == false && tuningSource.lmEquipmentID() != tuningSourceEquipmentID)
+			if (tuningSourceEquipmentID.isEmpty() == false && tuningSource.moduleEquipmentID() != tuningSourceEquipmentID)
 			{
 				continue;
 			}
@@ -474,7 +474,7 @@ namespace Tuning
 			{
 				DEBUG_LOG_MSG(m_logger,
 							  QString("Tuning source %1 has no signals. Controlling thread wouldn't be run.").
-							  arg(tuningSource.lmEquipmentID()));
+							  arg(tuningSource.moduleEquipmentID()));
 				continue;
 			}
 

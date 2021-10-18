@@ -35,6 +35,7 @@ SOURCES += \
     ../lib/Tuning/TuningSourceState.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/WidgetUtils.cpp \
+	../lib/LanControllerInfo.cpp \
 	../AppDataService/DynamicAppSignalState.cpp \
 	../AppDataService/AppDataSource.cpp \
 	../AppDataService/RtTrendsServer.cpp \
@@ -56,9 +57,10 @@ HEADERS  += \
 	Stable.h \
     ../lib/SoftwareSettings.h \
     ../lib/DataSource.h \
+	../lib/Tuning/TuningSourceState.h \
+	../lib/Tuning/TuningSignalState.h \
     ../lib/WidgetUtils.h \
-    ../lib/Tuning/TuningSourceState.h \
-    ../lib/Tuning/TuningSignalState.h \
+	../lib/LanControllerInfo.h \
 	../AppDataService/DynamicAppSignalState.h \
 	../AppDataService/AppDataSource.h \
 	../AppDataService/RtTrendsServer.h \

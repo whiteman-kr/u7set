@@ -11,99 +11,61 @@
 #include "../OnlineLib/DataProtocols.h"
 #include "../OnlineLib/SocketIO.h"
 #include "../CommonLib/Times.h"
+#include "../CommonLib/HostAddressPort.h"
 #include "ConstStrings.h"
+#include "LanControllerInfo.h"
 
 class DataSource
 {
-public:
-	enum class DataType
-	{
-		App,
-		Diag,
-		Tuning,
-	};
-
-	static const QString DATA_TYPE_APP;
-	static const QString DATA_TYPE_DIAG;
-	static const QString DATA_TYPE_TUNING;
-
-private:
-
 public:
 	DataSource();
 	virtual ~DataSource();
 
 	// LM's properties
 	//
-	DataType lmDataType() const { return m_lmDataType; }
-	int lmDataTypeInt() const { return static_cast<int>(m_lmDataType); }
-	QString lmDataTypeStr() const { return dataTypeToString(m_lmDataType); }
-	void setLmDataType(DataType dataType) { m_lmDataType = dataType; }
+	QString moduleEquipmentID() const { return m_moduleEquipmentID; }
+	void setModuleEquipmentID(const QString& equipmentID) { m_moduleEquipmentID = equipmentID; }
 
-	QString lmEquipmentID() const { return m_lmEquipmentID; }
-	void setLmEquipmentID(const QString& lmEquipmentID) { m_lmEquipmentID = lmEquipmentID; }
-
-	QString lmPresetName() const { return m_lmPresetName; }
-	void setLmPresetName(const QString& lmPresetName) { m_lmPresetName = lmPresetName; }
+	QString modulePresetName() const { return m_modulePresetName; }
+	void setModulePresetName(const QString& presetName) { m_modulePresetName = presetName; }
 
 	int lmNumber() const { return m_lmNumber; }
-	void setLmNumber(int lmNumber) { m_lmNumber = lmNumber; }
+	void setLmNumber(int number) { m_lmNumber = number; }
 
-	QString lmSubsystemChannel() const { return m_lmSubsystemChannel; }
-	void setLmSubsystemChannel(const QString& lmChannel) { m_lmSubsystemChannel = lmChannel; }
+	QString subsystemChannel() const { return m_subsystemChannel; }
+	void setSubsystemChannel(const QString& channel) { m_subsystemChannel = channel; }
 
-	int lmSubsystemKey() const { return m_lmSubsystemKey; }
-	void setLmSubsystemKey(int subsystemKey) { m_lmSubsystemKey = subsystemKey; }
+	int subsystemKey() const { return m_subsystemKey; }
+	void setSubsystemKey(int key) { m_subsystemKey = key; }
 
-	int lmModuleType() const { return m_lmModuleType; }
-	void setLmModuleType(int lmModueType) { m_lmModuleType = lmModueType; }
+	int moduleType() const { return m_moduleType; }
+	void setModuleType(int moduleType) { m_moduleType = moduleType; }
 
-	QString lmSubsystemID() const { return m_lmSubsystemID; }
-	void setLmSubsystemID(const QString& lmSubsystemID) { m_lmSubsystemID = lmSubsystemID; }
+	quint64 moduleUniqueID() const { return m_moduleUniqueID; }
+	void setModuleUniqueID(quint64 uid) { m_moduleUniqueID = uid; }
 
-	QString lmCaption() const { return m_lmCaption; }
-	void setLmCaption(const QString& lmCaption) { m_lmCaption = lmCaption; }
+	QString subsystemID() const { return m_subsystemID; }
+	void setSubsystemID(const QString& id) { m_subsystemID = id; }
 
-	QString lmAdapterID() const { return m_lmAdapterID; }
-	void setLmAdapterID(const QString& lmAdapterID) { m_lmAdapterID = lmAdapterID; }
-
-	bool lmDataEnable() const { return m_lmDataEnable; }
-	void setLmDataEnable(bool lmDataEnable) { m_lmDataEnable = lmDataEnable; }
-
-	QString lmAddressStr() const { return m_lmAddressPort.addressStr(); }
-	quint32 lmAddress32() const { return m_lmAddressPort.address32(); }
-
-	void setLmAddressStr(const QString& addressStr) { m_lmAddressPort.setAddress(addressStr); }
-
-	QHostAddress lmAddress() const { return m_lmAddressPort.address(); }
-	HostAddressPort lmAddressPort() const { return m_lmAddressPort; }
-	void setLmAddressPort(const HostAddressPort& addrPort) { m_lmAddressPort = addrPort; }
-
-	int lmPort() const { return m_lmAddressPort.port(); }
-	void setLmPort(int port) { Q_ASSERT(port >= 0 && port <= 65535); m_lmAddressPort.setPort(static_cast<quint16>(port)); }
-
-	int lmRupFramesQuantity() const { return m_lmRupFramesQuantity; }
-	void setLmRupFramesQuantity(int lmRupFramesQuantity) { m_lmRupFramesQuantity = lmRupFramesQuantity; }
-
-	quint64 lmUniqueID() const { return m_lmUniqueID; }
-	void setLmUniqueID(quint64 uniqueID) { m_lmUniqueID = uniqueID; }
-
-	quint32 lmDataID() const { return m_lmDataID; }
-	void setLmDataID(quint32 lmDataID) { m_lmDataID = lmDataID; }
-
-	int lmDataSize() const { return m_lmDataSize; }
-	void setLmDataSize(int lmDataSize) { m_lmDataSize = lmDataSize; }
-
-	QString serviceID()	 const { return m_serviceID; }
-	void setServiceID(const QString& serviceID) { m_serviceID = serviceID; }
+	QString moduleCaption() const { return m_moduleCaption; }
+	void setModuleCaption(const QString& lmCaption) { m_moduleCaption = lmCaption; }
 
 	quint64 ID() const { return m_id; }
 	void setID(quint64 id) { m_id = id; }
 
-	//
+	const LanControllerInfo& lanControllerInfo() const { return m_lanControllerInfo; }
+	LanControllerInfo& lanControllerInfo() { return m_lanControllerInfo; }
 
-	static QString dataTypeToString(DataType lmDataType);
-	static DataType stringToDataType(const QString& dataTypeStr);
+	void addAssociatedSignal(E::LanControllerType lanType, const QString& signalID);
+	void clearAssociatedSignals(E::LanControllerType lanType);
+	const QStringList& associatedSignals(E::LanControllerType lanType) const;
+
+	HostAddressPort lanHostAddressPort() const;
+	quint32 lanAddress32() const { return lanHostAddressPort().address32(); }
+
+	int moduleWorkcycle_ms() const { return m_moduleWorkcycle_mcs / 1000; }
+
+	//
 
 	void writeToXml(XmlWriteHelper& xml) const;
 	bool readFromXml(XmlReadHelper& xml);
@@ -111,50 +73,31 @@ public:
 	virtual void writeAdditionalSectionsToXml(XmlWriteHelper&) const;
 	virtual bool readAdditionalSectionsFromXml(XmlReadHelper&);
 
-	void addAssociatedSignal(const QString& appSignalID) { m_associatedSignals.append(appSignalID); }
-	void clearAssociatedSignals() { m_associatedSignals.clear(); }
-
-	const QStringList& associatedSignals() const { return m_associatedSignals; }
-
-	bool getInfo(Network::DataSourceInfo* protoInfo) const;
-	bool setInfo(const Network::DataSourceInfo& proto);
-
-	int lmWorkcycle_mcs() const { return m_lmWorkcycle_mcs; }
-	int lmWorkcycle_ms() const { return m_lmWorkcycle_mcs / 1000; }
-
-	static bool lanControllerFunctions(E::LanControllerType type, bool* tuning, bool* appData, bool* diagData);
+	bool saveToProto(Network::DataSourceInfo* protoInfo, bool includeSignals) const;
+	bool loadFromProto(const Network::DataSourceInfo& proto);
 
 private:
 	quint64 generateID() const;
 
 private:
-	// Properties from LM
-	//
-	DataType m_lmDataType = DataType::App;
-	QString m_lmEquipmentID;
-	QString m_lmPresetName;
+	quint64 m_id = 0;						// generate by DataSource::generateID() after readFromXml
+
+	QString m_moduleEquipmentID;
+	QString m_modulePresetName;
+	int m_moduleType = 0;
+	QString m_moduleCaption;
+	quint64 m_moduleUniqueID = 0;			// generic 64-bit UniqueID of configuration, tuning and appLogic EEPROMs of LM
+
+	QString m_subsystemID;
+	int m_subsystemKey = 0;
 	int m_lmNumber = 0;
-	int m_lmModuleType = 0;
-	int m_lmSubsystemKey = 0;
-	QString m_lmSubsystemChannel;				// A, B, C...
-	QString m_lmSubsystemID;
-	QString m_lmCaption;
-	QString m_lmAdapterID;
-	bool m_lmDataEnable = false;
-	HostAddressPort m_lmAddressPort;
-	quint32 m_lmDataID = 0;
-	quint64 m_lmUniqueID = 0;				// generic 64-bit UniqueID of configuration, tuning and appLogic EEPROMs of LM
-	int m_lmDataSize = 0;
-	int m_lmRupFramesQuantity = 0;
-	int m_lmWorkcycle_mcs = 5000;
+	QString m_subsystemChannel;				// A, B, C...
 
-	QString m_serviceID;
+	LanControllerInfo m_lanControllerInfo;
 
-	QStringList m_associatedSignals;
+	int m_moduleWorkcycle_mcs = 5000;		// module workcycle in MICROseconds
 
-	//
-
-	quint64 m_id = 0;					// generate by DataSource::generateID() after readFromXml
+	static QStringList m_emptyList;
 };
 
 

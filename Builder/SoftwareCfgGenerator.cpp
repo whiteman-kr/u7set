@@ -575,7 +575,7 @@ namespace Builder
 				LanControllerInfo lanControllerInfo;
 				Hardware::Software* software = nullptr;
 
-				result &= LanControllerInfoHelper::getInfo(*lm, lanController.m_place, lanController.m_type,
+				result &= LanControllerInfoHelper::getInfo(*lm, lanController.m_type, lanController.m_place,
 														   &lanControllerInfo, *context->m_equipmentSet.get(), log);
 
 				if (result == false)
@@ -583,7 +583,7 @@ namespace Builder
 					continue;
 				}
 
-				if (lanControllerInfo.tuningProvided == true &&
+				if (lanControllerInfo.isProvideTuning() == true &&
 					lanControllerInfo.tuningEnable == true)
 				{
 					if (lanControllerInfo.tuningServiceID.isEmpty() == true)
@@ -622,7 +622,7 @@ namespace Builder
 					}
 				}
 
-				if (lanControllerInfo.appDataProvided == true &&
+				if (lanControllerInfo.isProvideAppData() == true &&
 					lanControllerInfo.appDataEnable == true)
 				{
 					if (lanControllerInfo.appDataServiceID.isEmpty() == true)
@@ -661,7 +661,7 @@ namespace Builder
 					}
 				}
 
-				if (lanControllerInfo.diagDataProvided == true &&
+				if (lanControllerInfo.isProvideDiagData() == true &&
 					lanControllerInfo.diagDataEnable == true)
 				{
 					if (lanControllerInfo.diagDataServiceID.isEmpty() == true)

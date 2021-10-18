@@ -19,7 +19,7 @@ Hash AppDataSourceState::id() const
 
 QString AppDataSourceState::equipmentId() const
 {
-	return info.lmequipmentid().c_str();
+	return QString::fromStdString(info.moduleequipmentid());
 }
 
 void AppDataSourceState::setNewState(const ::Network::AppDataSourceState& newState)
@@ -328,7 +328,7 @@ void TcpAppSourcesState::processAppDataSourcesInfo(const QByteArray& data)
 		AppDataSourceState ads;
 		ads.info = dsi;
 
-		Hash hash = ::calcHash(QString::fromStdString(ads.info.lmequipmentid()));
+		Hash hash = ::calcHash(QString::fromStdString(ads.info.moduleequipmentid()));
 
 		assert(m_appDataSourceStates.count(hash) == 0);
 

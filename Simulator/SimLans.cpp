@@ -25,7 +25,7 @@ namespace Sim
 	{
 		for (const ::LanControllerInfo& lc : logicModuleInfo.lanControllers)
 		{
-			if (lc.isTuning() == true)
+			if (lc.isProvideTuning() == true)
 			{
 				std::shared_ptr<TuningServiceCommunicator> tuningServiceCommunicator;
 
@@ -45,13 +45,13 @@ namespace Sim
 				m_interfaces.emplace_back(std::move(i));
 			}
 
-			if (lc.isAppData() == true)
+			if (lc.isProvideAppData() == true)
 			{
 				auto i = std::make_unique<AppDataLanInterface>(lc, this);
 				m_interfaces.emplace_back(std::move(i));
 			}
 
-			if (lc.isDiagData() == true)
+			if (lc.isProvideDiagData() == true)
 			{
 				auto i = std::make_unique<DiagDataLanInterface>(lc, this);
 				m_interfaces.emplace_back(std::move(i));

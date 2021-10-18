@@ -99,27 +99,29 @@ namespace Builder
 
 				Tuning::TuningSource ts;
 
-				result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm, DataSource::DataType::Tuning,
-													   lanController.m_place,
-													   lanController.m_type,
-													   m_context,
-													   &ts);
+				result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm,
+														E::LanControllerType::Tuning,
+														lanController.m_place,
+														m_context,
+														&ts);
 				if (result == false)
 				{
 					continue;
 				}
 
-				if (ts.lmDataEnable() == false || ts.serviceID() != m_software->equipmentIdTemplate())
+				const LanControllerInfo& tsLan = ts.lanControllerInfo();
+
+				if (tsLan.tuningEnable == false || tsLan.tuningServiceID != m_software->equipmentIdTemplate())
 				{
 					continue;
 				}
 
-				if ((ts.lmAddress().toIPv4Address() & receivingNetmask) != receivingSubnet)
+				if ((ts.lanHostAddressPort().address32() & receivingNetmask) != receivingSubnet)
 				{
 					// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
 					//
-					m_log->errCFG3043(ts.lmAddress().toString(),
-									  ts.lmAdapterID(),
+					m_log->errCFG3043(tsLan.tuningIP,
+									  tsLan.equipmentID,
 									  settings->tuningDataIP.addressStr(),
 									  m_software->equipmentIdTemplate());
 					result = false;

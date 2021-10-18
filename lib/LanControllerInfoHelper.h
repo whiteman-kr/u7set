@@ -10,15 +10,11 @@ class LanControllerInfoHelper
 {
 public:
 	static bool getInfo(	const Hardware::DeviceModule& lm,
-							int lanControllerNo,
 							E::LanControllerType lanControllerType,
+							int lanControllerNo,
 							LanControllerInfo* lanControllerInfo,
 							const Hardware::EquipmentSet& equipmentSet,
 							Builder::IssueLogger* log);
-
-	static bool isProvideTuning(E::LanControllerType lanControllerType);
-	static bool isProvideAppData(E::LanControllerType lanControllerType);
-	static bool isProvideDiagData(E::LanControllerType lanControllerType);
 
 	static QString getLanControllerSuffix(int controllerNo);
 

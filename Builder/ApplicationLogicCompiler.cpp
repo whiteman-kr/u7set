@@ -225,20 +225,8 @@ namespace Builder
 
 				bool res = true;
 
-				res = LanControllerInfoHelper::getInfo(*lm, lanController.m_place, lanController.m_type,
+				res = LanControllerInfoHelper::getInfo(*lm, lanController.m_type, lanController.m_place,
 				                                 &lanControllerInfo, *equipmentSet(), log());
-				if (res == false)
-				{
-					result = false;
-					continue;
-				}
-
-				bool tuning = false;
-				bool appData = false;
-				bool diagData = false;
-
-				res = DataSource::lanControllerFunctions(lanController.m_type, &tuning, &appData, &diagData);
-
 				if (res == false)
 				{
 					LOG_INTERNAL_ERROR(log());
@@ -246,7 +234,7 @@ namespace Builder
 					continue;
 				}
 
-				if (tuning == true)
+				if (LanControllerInfo::isProvideTuning(lanController.m_type) == true)
 				{
 					if (lanControllerInfo.tuningEnable == true)
 					{
@@ -267,7 +255,7 @@ namespace Builder
 					}
 				}
 
-				if (appData == true)
+				if (LanControllerInfo::isProvideAppData(lanController.m_type) == true)
 				{
 					if (lanControllerInfo.appDataEnable == true)
 					{
@@ -288,7 +276,7 @@ namespace Builder
 					}
 				}
 
-				if (diagData == true)
+				if (LanControllerInfo::isProvideDiagData(lanController.m_type) == true)
 				{
 					if (lanControllerInfo.diagDataEnable == true)
 					{

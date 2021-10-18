@@ -776,7 +776,7 @@ void PacketSourceModel::initDataSources(QHash<quint32, std::shared_ptr<DataSourc
 
 				std::shared_ptr<DataSourceOnline> ds = std::make_shared<DataSourceOnline>();
 				ds->setID(ip);
-				ds->setLmCaption(QString("Data Source %1").arg(key));
+				ds->setModuleCaption(QString("Data Source %1").arg(key));
 				ds->setLmAddressStr(ha.toString());
 				ds->setLmRupFramesQuantity(1);
 

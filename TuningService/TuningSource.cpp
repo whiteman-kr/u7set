@@ -12,7 +12,6 @@ namespace Tuning
 
 	TuningSource::TuningSource()
 	{
-		setLmDataType(DataSource::DataType::Tuning);
 	}
 
 	TuningSource::~TuningSource()
@@ -43,7 +42,7 @@ namespace Tuning
 	{
 		if (m_tuningData == nullptr)
 		{
-			TuningData td(lmEquipmentID());
+			TuningData td(moduleEquipmentID());
 			td.writeToXml(xml);
 			return;
 		}
@@ -96,8 +95,8 @@ namespace Tuning
 
 		for(const TuningSource& source : *this)
 		{
-			m_ip2Source.insert(source.lmAddress32(), index);
-			m_id2Source.insert(source.lmEquipmentID(), index);
+			m_ip2Source.insert(source.lanHostAddressPort().address32(), index);
+			m_id2Source.insert(source.moduleEquipmentID(), index);
 
 			index++;
 		}

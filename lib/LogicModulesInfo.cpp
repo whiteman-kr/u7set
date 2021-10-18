@@ -7,21 +7,6 @@
 //
 // -----------------------------------------------------------------------------------
 
-const QString LogicModulesInfo::ELEM_LOGIC_MODULES("LogicModules");
-const QString LogicModulesInfo::ELEM_LOGIC_MODULE("LogicModule");
-
-const QString LogicModulesInfo::ELEM_LAN_CONTROLLERS("LanControllers");
-const QString LogicModulesInfo::ELEM_LAN_CONTROLLER("LanController");
-
-const QString LogicModulesInfo::ELEM_TUNING_PARAMS("TuningParams");
-const QString LogicModulesInfo::ELEM_APP_DATA_PARAMS("AppDataParams");
-const QString LogicModulesInfo::ELEM_DIAG_DATA_PARAMS("DiagDataParams");
-
-const QString LogicModulesInfo::ATTR_TUNING_PROVIDED("TuningProvided");
-const QString LogicModulesInfo::ATTR_APP_DATA_PROVIDED("AppDataProvided");
-const QString LogicModulesInfo::ATTR_DIAG_DATA_PROVIDED("DiagDataProvided");
-
-
 bool LogicModulesInfo::load(const QString& fileName, QString* errMsg)
 {
 	if (errMsg == nullptr)
@@ -77,9 +62,9 @@ bool LogicModulesInfo::load(const QByteArray& xmlData, QString* errMsg)
 
 	QDomElement logicModulesElem = xmlDoc.documentElement();
 
-	if (logicModulesElem.isNull() == true || logicModulesElem.tagName() != ELEM_LOGIC_MODULES)
+	if (logicModulesElem.isNull() == true || logicModulesElem.tagName() != XmlElement::LOGIC_MODULES)
 	{
-		*errMsg = DomXmlHelper::errElementNotFound(ELEM_LOGIC_MODULES);
+		*errMsg = DomXmlHelper::errElementNotFound(XmlElement::LOGIC_MODULES);
 		return false;
 	}
 
@@ -92,7 +77,7 @@ bool LogicModulesInfo::load(const QByteArray& xmlData, QString* errMsg)
 		return false;
 	}
 
-	QDomNodeList lmsNodes = logicModulesElem.elementsByTagName(ELEM_LOGIC_MODULE);
+	QDomNodeList lmsNodes = logicModulesElem.elementsByTagName(XmlElement::LOGIC_MODULE);
 
 	if (lmsNodes.count() != lmsCount)
 	{
@@ -142,9 +127,9 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 		return false;
 	}
 
-	if (lmNode.isElement() == false || lmNode.nodeName() != LogicModulesInfo::ELEM_LOGIC_MODULE)
+	if (lmNode.isElement() == false || lmNode.nodeName() != XmlElement::LOGIC_MODULE)
 	{
-		*errMsg = DomXmlHelper::errElementNotFound(LogicModulesInfo::ELEM_LOGIC_MODULE);
+		*errMsg = DomXmlHelper::errElementNotFound(XmlElement::LOGIC_MODULE);
 		return false;
 	}
 
@@ -208,11 +193,11 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 		return false;
 	}
 
-	QDomNodeList lanControllersNodes = lmElem.elementsByTagName(ELEM_LAN_CONTROLLERS);
+	QDomNodeList lanControllersNodes = lmElem.elementsByTagName(XmlElement::LAN_CONTROLLERS);
 
 	if (lanControllersNodes.count() != 1)
 	{
-		*errMsg = DomXmlHelper::errElementNotFound(ELEM_LAN_CONTROLLERS);
+		*errMsg = DomXmlHelper::errElementNotFound(XmlElement::LAN_CONTROLLERS);
 		return false;
 	}
 
@@ -220,7 +205,7 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 
 	if (lanControllersElem.isNull() == true)
 	{
-		*errMsg = DomXmlHelper::errElementNotFound(ELEM_LAN_CONTROLLERS);
+		*errMsg = DomXmlHelper::errElementNotFound(XmlElement::LAN_CONTROLLERS);
 		return false;
 	}
 
@@ -228,7 +213,7 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 
 	result &= DomXmlHelper::getIntAttribute(lanControllersElem, XmlAttribute::COUNT, &lanControllersCount, errMsg);
 
-	QDomNodeList lanControllerNodes = lmElem.elementsByTagName(ELEM_LAN_CONTROLLER);
+	QDomNodeList lanControllerNodes = lmElem.elementsByTagName(XmlElement::LAN_CONTROLLER);
 
 	if (lanControllerNodes.count() != lanControllersCount)
 	{
@@ -242,141 +227,11 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 	{
 		QDomNode lanControllerNode = lanControllerNodes.at(i);
 
-		result &= load(&lmi->lanControllers[i], lanControllerNode, errMsg);
+		result &= lmi->lanControllers[i].readFromXml(lanControllerNode, errMsg);
 
 		if (result == false)
 		{
 			break;
-		}
-	}
-
-	return result;
-}
-
-bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControllerNode, QString* errMsg)
-{
-	if (lci == nullptr)
-	{
-		Q_ASSERT(false);
-		return false;
-	}
-
-	if (lanControllerNode.isElement() == false || lanControllerNode.nodeName() != LogicModulesInfo::ELEM_LAN_CONTROLLER)
-	{
-		*errMsg = DomXmlHelper::errElementNotFound(LogicModulesInfo::ELEM_LOGIC_MODULE);
-		return false;
-	}
-
-	bool result = true;
-
-	QDomElement lcElem = lanControllerNode.toElement();
-
-	result &= DomXmlHelper::getStringAttribute(lcElem, EquipmentPropNames::EQUIPMENT_ID, &lci->equipmentID, errMsg);
-	result &= DomXmlHelper::getIntAttribute(lcElem, EquipmentPropNames::CONTROLLER_NO, &lci->controllerNo, errMsg);
-
-	QString lanControllerTypeStr;
-
-	result &= DomXmlHelper::getStringAttribute(lcElem, EquipmentPropNames::LAN_CONTROLLER_TYPE, &lanControllerTypeStr, errMsg);
-
-	bool ok = false;
-
-	lci->lanControllerType = E::stringToValue<E::LanControllerType>(lanControllerTypeStr, &ok);
-
-	if (ok == false)
-	{
-		*errMsg = "File corruption! Can't convert LanControllerType to E::LanControllerType value";
-		return false;
-	}
-
-	result &= DomXmlHelper::getBoolAttribute(lcElem, ATTR_TUNING_PROVIDED, &lci->tuningProvided, errMsg);
-	result &= DomXmlHelper::getBoolAttribute(lcElem, ATTR_APP_DATA_PROVIDED, &lci->appDataProvided, errMsg);
-	result &= DomXmlHelper::getBoolAttribute(lcElem, ATTR_DIAG_DATA_PROVIDED, &lci->diagDataProvided, errMsg);
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	if (lci->tuningProvided == true)
-	{
-		QDomElement tuningElem;
-
-		result &= DomXmlHelper::getSingleChildElement(lcElem, ELEM_TUNING_PARAMS, &tuningElem, errMsg);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		result &= DomXmlHelper::getBoolAttribute(tuningElem, EquipmentPropNames::TUNING_ENABLE, &lci->tuningEnable, errMsg);
-		result &= DomXmlHelper::getStringAttribute(tuningElem, EquipmentPropNames::TUNING_IP, &lci->tuningIP, errMsg);
-		result &= DomXmlHelper::getIntAttribute(tuningElem, EquipmentPropNames::TUNING_PORT, &lci->tuningPort, errMsg);
-		result &= DomXmlHelper::getStringAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_ID, &lci->tuningServiceID, errMsg);
-		result &= DomXmlHelper::getStringAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_IP, &lci->tuningServiceIP, errMsg);
-		result &= DomXmlHelper::getIntAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_PORT, &lci->tuningServicePort, errMsg);
-		result &= DomXmlHelper::getStringAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_NETMASK, &lci->tuningServiceNetmask, errMsg);
-
-		if (result == false)
-		{
-			return false;
-		}
-	}
-
-	if (lci->appDataProvided == true)
-	{
-		QDomElement appDataElem;
-
-		result &= DomXmlHelper::getSingleChildElement(lcElem, ELEM_APP_DATA_PARAMS, &appDataElem, errMsg);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		result &= DomXmlHelper::getBoolAttribute(appDataElem, EquipmentPropNames::APP_DATA_ENABLE, &lci->appDataEnable, errMsg);
-		result &= DomXmlHelper::getStringAttribute(appDataElem, EquipmentPropNames::APP_DATA_IP, &lci->appDataIP, errMsg);
-		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::APP_DATA_PORT, &lci->appDataPort, errMsg);
-		result &= DomXmlHelper::getStringAttribute(appDataElem, EquipmentPropNames::APP_DATA_SERVICE_ID, &lci->appDataServiceID, errMsg);
-		result &= DomXmlHelper::getStringAttribute(appDataElem, EquipmentPropNames::APP_DATA_SERVICE_IP, &lci->appDataServiceIP, errMsg);
-		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::APP_DATA_SERVICE_PORT, &lci->appDataServicePort, errMsg);
-		result &= DomXmlHelper::getStringAttribute(appDataElem, EquipmentPropNames::APP_DATA_SERVICE_NETMASK, &lci->appDataServiceNetmask, errMsg);
-		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::APP_DATA_SIZE_BYTES, &lci->appDataSizeBytes, errMsg);
-		result &= DomXmlHelper::getUInt32Attribute(appDataElem, EquipmentPropNames::APP_DATA_UID, &lci->appDataUID, errMsg);
-		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, &lci->appDataFramesQuantity, errMsg);
-		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, &lci->overrideAppDataWordCount, errMsg);
-
-		if (result == false)
-		{
-			return false;
-		}
-	}
-
-	if (lci->diagDataProvided == true)
-	{
-		QDomElement diagDataElem;
-
-		result &= DomXmlHelper::getSingleChildElement(lcElem, ELEM_DIAG_DATA_PARAMS, &diagDataElem, errMsg);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		result &= DomXmlHelper::getBoolAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_ENABLE, &lci->diagDataEnable, errMsg);
-		result &= DomXmlHelper::getStringAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_IP, &lci->diagDataIP, errMsg);
-		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_PORT, &lci->diagDataPort, errMsg);
-		result &= DomXmlHelper::getStringAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SERVICE_ID, &lci->diagDataServiceID, errMsg);
-		result &= DomXmlHelper::getStringAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SERVICE_IP, &lci->diagDataServiceIP, errMsg);
-		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SERVICE_PORT, &lci->diagDataServicePort, errMsg);
-		result &= DomXmlHelper::getStringAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SERVICE_NETMASK, &lci->diagDataServiceNetmask, errMsg);
-		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SIZE_BYTES, &lci->diagDataSizeBytes, errMsg);
-		result &= DomXmlHelper::getUInt32Attribute(diagDataElem, EquipmentPropNames::DIAG_DATA_UID, &lci->diagDataUID, errMsg);
-		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, &lci->diagDataFramesQuantity, errMsg);
-		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, &lci->overrideDiagDataWordCount, errMsg);
-
-		if (result == false)
-		{
-			return false;
 		}
 	}
 
@@ -428,7 +283,7 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 		xml.writeStartDocument();
 
 		{
-			xml.writeStartElement(LogicModulesInfo::ELEM_LOGIC_MODULES);
+			xml.writeStartElement(XmlElement::LOGIC_MODULES);
 
 			xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(logicModulesInfo.size()));
 
@@ -437,7 +292,7 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 				save(lmInfo, xml);
 			}
 
-			xml.writeEndElement();
+			xml.writeEndElement();	//		/XmlElement::LOGIC_MODULES
 		}
 
 		xml.writeEndDocument();
@@ -505,10 +360,10 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 
 			LanControllerInfo& lci = lmInfo->lanControllers[i];
 
-			result &= LanControllerInfoHelper::getInfo(	*lmModule, lc.m_place, lc.m_type, &lci,
+			result &= LanControllerInfoHelper::getInfo(	*lmModule, lc.m_type, lc.m_place, &lci,
 														*m_context.m_equipmentSet.get(), log());
 
-			if (lci.appDataProvided == true && lci.appDataEnable == true)
+			if (lci.isProvideAppData() == true && lci.appDataEnable == true)
 			{
 				lmInfo->appDataEnable = true;
 
@@ -527,7 +382,7 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 				lmInfo->appDataUID = lci.appDataUID;
 			}
 
-			if (lci.diagDataProvided == true && lci.diagDataEnable == true)
+			if (lci.isProvideDiagData() == true && lci.diagDataEnable == true)
 			{
 				lmInfo->diagDataEnable = true;
 
@@ -552,7 +407,7 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 
 	bool LogicModulesInfoWriter::save(const LogicModuleInfo& lmInfo, XmlWriteHelper& xml) const
 	{
-		xml.writeStartElement(ELEM_LOGIC_MODULE);
+		xml.writeStartElement(XmlElement::LOGIC_MODULE);
 
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, lmInfo.equipmentID);
 		xml.writeStringAttribute(EquipmentPropNames::CAPTION, lmInfo.caption);
@@ -579,92 +434,25 @@ bool LogicModulesInfo::load(LanControllerInfo* lci, const QDomNode& lanControlle
 		xml.writeStringAttribute(EquipmentPropNames::PRESET_NAME, lmInfo.presetName);
 		xml.writeStringAttribute(EquipmentPropNames::LM_DESCRIPTION_FILE, lmInfo.lmDescriptionFile);
 
-		xml.writeStartElement(ELEM_LAN_CONTROLLERS);
+		//
+
+		xml.writeStartElement(XmlElement::LAN_CONTROLLERS);
 		xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(lmInfo.lanControllers.size()));
 
 		for(const LanControllerInfo& lci : lmInfo.lanControllers)
 		{
-			save(lci, xml);
+			lci.writeToXml(xml);
 		}
 
-		xml.writeEndElement();	//		/ELEM_LAN_CONTROLLERS
+		xml.writeEndElement();	//		/XmlElement::LAN_CONTROLLERS
 
-		xml.writeEndElement();	//	/ELEM_LOGIC_MODULE
+		//
+
+		xml.writeEndElement();	//	/XmlElement::LOGIC_MODULE
 
 		return true;
 	}
 
-	bool LogicModulesInfoWriter::save(const LanControllerInfo& lci, XmlWriteHelper& xml) const
-	{
-		xml.writeStartElement(ELEM_LAN_CONTROLLER);
-
-		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, lci.equipmentID);
-		xml.writeIntAttribute(EquipmentPropNames::CONTROLLER_NO, lci.controllerNo);
-		xml.writeStringAttribute(EquipmentPropNames::LAN_CONTROLLER_TYPE,
-								 E::valueToString<E::LanControllerType>(lci.lanControllerType));
-		xml.writeBoolAttribute(ATTR_TUNING_PROVIDED, lci.tuningProvided);
-		xml.writeBoolAttribute(ATTR_APP_DATA_PROVIDED, lci.appDataProvided);
-		xml.writeBoolAttribute(ATTR_DIAG_DATA_PROVIDED, lci.diagDataProvided);
-
-		if (lci.tuningProvided == true)
-		{
-			xml.writeStartElement(ELEM_TUNING_PARAMS);
-
-			xml.writeBoolAttribute(EquipmentPropNames::TUNING_ENABLE, lci.tuningEnable);
-			xml.writeStringAttribute(EquipmentPropNames::TUNING_IP, lci.tuningIP);
-			xml.writeIntAttribute(EquipmentPropNames::TUNING_PORT, lci.tuningPort);
-			xml.writeStringAttribute(EquipmentPropNames::TUNING_SERVICE_ID, lci.tuningServiceID);
-			xml.writeStringAttribute(EquipmentPropNames::TUNING_SERVICE_IP, lci.tuningServiceIP);
-			xml.writeIntAttribute(EquipmentPropNames::TUNING_SERVICE_PORT, lci.tuningServicePort);
-			xml.writeStringAttribute(EquipmentPropNames::TUNING_SERVICE_NETMASK, lci.tuningServiceNetmask);
-
-			xml.writeEndElement();	//	/ELEM_TUNING_PARAMS
-		}
-
-		if (lci.appDataProvided == true)
-		{
-			xml.writeStartElement(ELEM_APP_DATA_PARAMS);
-
-			xml.writeBoolAttribute(EquipmentPropNames::APP_DATA_ENABLE, lci.appDataEnable);
-			xml.writeStringAttribute(EquipmentPropNames::APP_DATA_IP, lci.appDataIP);
-			xml.writeIntAttribute(EquipmentPropNames::APP_DATA_PORT, lci.appDataPort);
-			xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID, lci.appDataServiceID);
-			xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_IP, lci.appDataServiceIP);
-			xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SERVICE_PORT, lci.appDataServicePort);
-			xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_NETMASK, lci.appDataServiceNetmask);
-			xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, lci.appDataSizeBytes);
-			xml.writeUInt32Attribute(EquipmentPropNames::APP_DATA_UID, lci.appDataUID, false);
-			xml.writeUInt32Attribute(EquipmentPropNames::HEX_APP_DATA_UID, lci.appDataUID, true);
-			xml.writeIntAttribute(EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, lci.appDataFramesQuantity);
-			xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, lci.overrideAppDataWordCount);
-
-			xml.writeEndElement();	//	/ELEM_APP_DATA_PARAMS
-		}
-
-		if (lci.diagDataProvided == true)
-		{
-			xml.writeStartElement(ELEM_DIAG_DATA_PARAMS);
-
-			xml.writeBoolAttribute(EquipmentPropNames::DIAG_DATA_ENABLE, lci.diagDataEnable);
-			xml.writeStringAttribute(EquipmentPropNames::DIAG_DATA_IP, lci.diagDataIP);
-			xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_PORT, lci.diagDataPort);
-			xml.writeStringAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_ID, lci.diagDataServiceID);
-			xml.writeStringAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_IP, lci.diagDataServiceIP);
-			xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_PORT, lci.diagDataServicePort);
-			xml.writeStringAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_NETMASK, lci.diagDataServiceNetmask);
-			xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, lci.diagDataSizeBytes);
-			xml.writeUInt32Attribute(EquipmentPropNames::DIAG_DATA_UID, lci.diagDataUID, false);
-			xml.writeUInt32Attribute(EquipmentPropNames::HEX_DIAG_DATA_UID, lci.diagDataUID, true);
-			xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, lci.diagDataFramesQuantity);
-			xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, lci.overrideDiagDataWordCount);
-
-			xml.writeEndElement();	//	/ELEM_DIAG_DATA_PARAMS
-		}
-
-		xml.writeEndElement();	//	/ELEM_LAN_CONTROLLER
-
-		return true;
-	}
 #endif
 
 

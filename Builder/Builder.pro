@@ -60,6 +60,7 @@ DEFINES += IS_BUILDER
 SOURCES += \
     ../lib/ClientBehavior.cpp \
     ../lib/DeviceHelper.cpp \
+	../lib/LanControllerInfo.cpp \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/LogicModulesInfo.cpp \
     ../lib/OutputLog.cpp \

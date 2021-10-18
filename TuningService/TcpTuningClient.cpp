@@ -49,7 +49,7 @@ namespace Tuning
 		{
 			Tuning::TuningSource source;
 
-			source.setInfo(m_getDataSourcesInfoReply.datasourceinfo(i));
+			source.loadFromProto(m_getDataSourcesInfoReply.datasourceinfo(i));
 
 			QString str = QString("Tuning source '%1', %2").arg(source.lmAdapterID()).arg(source.lmAddressStr());
 

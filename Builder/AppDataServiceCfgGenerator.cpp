@@ -97,13 +97,14 @@ namespace Builder
 
 				DataSource ds;
 
-				result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm, DataSource::DataType::App,
+				result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm,
+																			E::LanControllerType::AppData,
 																			lanController.m_place,
-																			lanController.m_type,
 																			m_context,
 																			&ds);
+				const LanControllerInfo& dsLan = ds.lanControllerInfo();
 
-				if (ds.lmDataEnable() == false || ds.serviceID() != m_software->equipmentIdTemplate())
+				if (dsLan.appDataEnable == false || dsLan.appDataServiceID != m_software->equipmentIdTemplate())
 				{
 					continue;
 				}
@@ -117,12 +118,12 @@ namespace Builder
 					continue;
 				}
 
-				if ((ds.lmAddress().toIPv4Address() & receivingNetmask) != receivingSubnet)
+				if ((ds.lanHostAddressPort().address32() & receivingNetmask) != receivingSubnet)
 				{
 					// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
 					//
-					m_log->errCFG3043(ds.lmAddress().toString(),
-									  ds.lmAdapterID(),
+					m_log->errCFG3043(dsLan.appDataIP,
+									  dsLan.equipmentID,
 									  settings->appDataReceivingIP.addressStr(),
 									  equipmentID());
 					result = false;
@@ -291,7 +292,7 @@ namespace Builder
 
 	bool AppDataServiceCfgGenerator::findAppDataSourceAssociatedSignals(DataSource& appDataSource)
 	{
-		Hardware::DeviceObject* lm = m_equipment->deviceObject(appDataSource.lmEquipmentID()).get();
+		Hardware::DeviceObject* lm = m_equipment->deviceObject(appDataSource.moduleEquipmentID()).get();
 
 		if (lm == nullptr)
 		{
@@ -327,7 +328,7 @@ namespace Builder
 
 			if (chassis == dataSourceChassis)
 			{
-				appDataSource.addAssociatedSignal(appSignal.appSignalID());
+				appDataSource.addAssociatedSignal(E::LanControllerType::AppData, appSignal.appSignalID());
 
 				m_associatedAppSignals.insert(appSignal.appSignalID(), true);
 			}

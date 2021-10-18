@@ -103,7 +103,7 @@ bool SoftwareSettingsSet::writeToXml(XmlWriteHelper& xml)
 	bool result = true;
 
 	xml.writeStartElement(XmlElement::SETTINGS_SET);
-	xml.writeSoftwareTypeAttribute(m_softwareType);
+	xml.writeEnumAttribute(EquipmentPropNames::SOFTWARE_TYPE, m_softwareType);
 	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(m_settingsMap.size()));
 
 	for(auto p : m_settingsMap)
@@ -142,7 +142,7 @@ bool SoftwareSettingsSet::readFromXml(XmlReadHelper& xml)
 
 	E::SoftwareType swType;
 
-	result &=xml.readSoftwareTypeAttribute(&swType);
+	result &=xml.readEnumAttribute(EquipmentPropNames::SOFTWARE_TYPE, &swType);
 
 	if (result == false)
 	{
@@ -213,7 +213,7 @@ QString SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType swType, co
 
 	xml.writeStartElement(XmlElement::SETTINGS_SET);
 
-	xml.writeSoftwareTypeAttribute(swType);
+	xml.writeEnumAttribute(EquipmentPropNames::SOFTWARE_TYPE, swType);
 	xml.writeIntAttribute(XmlAttribute::COUNT, 1);
 
 	settings.writeToXml(xml);
@@ -465,9 +465,8 @@ bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_p
 	}
 
 	bool SoftwareSettingsGetter::getLmPropertiesFromDevice(	const Hardware::DeviceModule* lm,
-															DataSource::DataType dataType,
-															int adapterNo,
 															E::LanControllerType lanControllerType,
+															int adapterNo,
 															const Builder::Context* context,
 															DataSource* ds)
 	{
@@ -479,11 +478,10 @@ bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_p
 		TEST_PTR_LOG_RETURN_FALSE(lm, log);
 		TEST_PTR_LOG_RETURN_FALSE(ds, log);
 
-		ds->setLmDataType(dataType);
-		ds->setLmEquipmentID(lm->equipmentIdTemplate());
-		ds->setLmPresetName(lm->presetName());
-		ds->setLmModuleType(lm->moduleType());
-		ds->setLmCaption(lm->caption());
+		ds->setModuleEquipmentID(lm->equipmentIdTemplate());
+		ds->setModulePresetName(lm->presetName());
+		ds->setModuleType(lm->moduleType());
+		ds->setModuleCaption(lm->caption());
 
 		bool result = true;
 
@@ -496,8 +494,8 @@ bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_p
 		result &= DeviceHelper::getStrProperty(lm, EquipmentPropNames::SUBSYSTEM_ID, &subsystemID, log);
 
 		ds->setLmNumber(lmNumber);
-		ds->setLmSubsystemChannel(subsystemChannel);
-		ds->setLmSubsystemID(subsystemID);
+		ds->setSubsystemChannel(subsystemChannel);
+		ds->setSubsystemID(subsystemID);
 
 		int subsystemKey = context->m_subsystems->subsystemKey(subsystemID);
 
@@ -509,68 +507,22 @@ bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_p
 			return false;
 		}
 
-		ds->setLmSubsystemKey(subsystemKey);
+		ds->setSubsystemKey(subsystemKey);
 
 		auto pos = context->m_lmsUniqueIDs.find(lm->equipmentIdTemplate());
 
 		if (pos != context->m_lmsUniqueIDs.end())
 		{
-			ds->setLmUniqueID(pos->second);
+			ds->setModuleUniqueID(pos->second);
 		}
 		else
 		{
 			Q_ASSERT(false);		// LM uniqueID isn't found
-			ds->setLmUniqueID(0);
+			ds->setModuleUniqueID(0);
 		}
 
-		LanControllerInfo lanControllerInfo;
-
-		result &= LanControllerInfoHelper::getInfo(*lm, adapterNo, lanControllerType,
-												   &lanControllerInfo, *context->m_equipmentSet.get(), log);
-
-		ds->setLmAdapterID(lanControllerInfo.equipmentID);
-
-		switch(dataType)
-		{
-		case DataSource::DataType::App:
-
-			assert(lanControllerType == E::LanControllerType::AppData || lanControllerType == E::LanControllerType::AppAndDiagData);
-
-			ds->setLmDataEnable(lanControllerInfo.appDataEnable);
-			ds->setLmAddressPort(HostAddressPort(lanControllerInfo.appDataIP, lanControllerInfo.appDataPort));
-			ds->setLmDataID(lanControllerInfo.appDataUID);
-			ds->setLmDataSize(lanControllerInfo.appDataSizeBytes);
-			ds->setLmRupFramesQuantity(lanControllerInfo.appDataFramesQuantity);
-			ds->setServiceID(lanControllerInfo.appDataServiceID);
-			break;
-
-		case DataSource::DataType::Diag:
-
-			assert(lanControllerType == E::LanControllerType::DiagData || lanControllerType == E::LanControllerType::AppAndDiagData);
-
-			ds->setLmDataEnable(lanControllerInfo.diagDataEnable);
-			ds->setLmAddressPort(HostAddressPort(lanControllerInfo.diagDataIP, lanControllerInfo.diagDataPort));
-			ds->setLmDataID(lanControllerInfo.diagDataUID);
-			ds->setLmDataSize(lanControllerInfo.diagDataSizeBytes);
-			ds->setLmRupFramesQuantity(lanControllerInfo.diagDataFramesQuantity);
-			ds->setServiceID(lanControllerInfo.diagDataServiceID);
-			break;
-
-		case DataSource::DataType::Tuning:
-
-			assert(lanControllerType == E::LanControllerType::Tuning);
-
-			ds->setLmDataEnable(lanControllerInfo.tuningEnable);
-			ds->setLmAddressPort(HostAddressPort(lanControllerInfo.tuningIP, lanControllerInfo.tuningPort));
-			ds->setLmDataID(0);
-			ds->setLmDataSize(0);
-			ds->setLmRupFramesQuantity(0);
-			ds->setServiceID(lanControllerInfo.tuningServiceID);
-			break;
-
-		default:
-			assert(false);
-		}
+		result &= LanControllerInfoHelper::getInfo(*lm, lanControllerType, adapterNo,
+												   &ds->lanControllerInfo(), *context->m_equipmentSet.get(), log);
 
 		return result;
 	}
@@ -1329,27 +1281,29 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 				Tuning::TuningSource ts;
 
-				result &= getLmPropertiesFromDevice(lm, DataSource::DataType::Tuning,
-													   lanController.m_place,
-													   lanController.m_type,
-													   context,
-													   &ts);
+				result &= getLmPropertiesFromDevice(lm,
+													E::LanControllerType::Tuning,
+													lanController.m_place,
+													context,
+													&ts);
 				if (result == false)
 				{
 					continue;
 				}
 
-				if (ts.lmDataEnable() == false || ts.serviceID() != software->equipmentIdTemplate())
+				const LanControllerInfo& tsLan = ts.lanControllerInfo();
+
+				if (tsLan.tuningEnable == false || tsLan.tuningServiceID != software->equipmentIdTemplate())
 				{
 					continue;
 				}
 
-				if ((ts.lmAddress().toIPv4Address() & receivingNetmask) != receivingSubnet)
+				if ((ts.lanHostAddressPort().address32() & receivingNetmask) != receivingSubnet)
 				{
 					// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
 					//
-					log->errCFG3043(ts.lmAddress().toString(),
-									  ts.lmAdapterID(),
+					log->errCFG3043(tsLan.tuningIP,
+									  tsLan.equipmentID,
 									  tuningDataIP.addressStr(),
 									  software->equipmentIdTemplate());
 					result = false;
@@ -1358,9 +1312,9 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 				TuningServiceSettings::TuningSource tunSrc;
 
-				tunSrc.lmEquipmentID = ts.lmEquipmentID();
-				tunSrc.portEquipmentID = ts.lmAdapterID();
-				tunSrc.tuningDataIP = ts.lmAddressPort();
+				tunSrc.lmEquipmentID = ts.moduleEquipmentID();
+				tunSrc.portEquipmentID = tsLan.equipmentID;
+				tunSrc.tuningDataIP = ts.lanHostAddressPort();
 
 				sources.push_back(tunSrc);
 			}

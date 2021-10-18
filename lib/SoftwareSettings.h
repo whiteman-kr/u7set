@@ -159,9 +159,8 @@ std::shared_ptr<const T> SoftwareSettingsSet::getSettingsDefaultProfile() const
 											Builder::IssueLogger* log);
 
 		static bool getLmPropertiesFromDevice(	const Hardware::DeviceModule* lm,
-												DataSource::DataType dataType,
-												int adapterNo,
 												E::LanControllerType lanControllerType,
+												int adapterNo,
 												const Builder::Context* context,
 												DataSource* ds);
 

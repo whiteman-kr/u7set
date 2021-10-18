@@ -1,6 +1,10 @@
 #pragma once
 
 #include "../CommonLib/Types.h"
+#include "../UtilsLib/XmlHelper.h"
+#include "../UtilsLib/DomXmlHelper.h"
+#include "../UtilsLib/WUtils.h"
+#include "../Proto/network.pb.h"
 
 struct LanControllerInfo
 {
@@ -8,9 +12,8 @@ struct LanControllerInfo
 	int controllerNo = -1;				// == place
 	E::LanControllerType lanControllerType = E::LanControllerType::Unknown;
 
-	// only for adapterType == E::LanControllerType::Tuning
+	// used if LAN controller provide Tuning
 	//
-	bool tuningProvided = false;
 	bool tuningEnable = false;
 	QString tuningIP;
 	int tuningPort = 0;
@@ -18,10 +21,11 @@ struct LanControllerInfo
 	QString tuningServiceIP;
 	int tuningServicePort = 0;
 	QString tuningServiceNetmask;
+	quint64 tuningDataUID = 0;
+	QStringList tuningAssociatedSignals;
 
-	// only for adapterType == E::LanControllerType::AppData or E::LanControllerType::AppAndDiagData
+	// used if LAN controller provide AppData
 	//
-	bool appDataProvided = false;
 	bool appDataEnable = false;
 	QString appDataIP;
 	int appDataPort = 0;
@@ -33,10 +37,10 @@ struct LanControllerInfo
 	int appDataSizeBytes = 0;
 	int appDataFramesQuantity = 0;
 	int overrideAppDataWordCount = -1;
+	QStringList appDataAssociatedSignals;
 
-	// only for adapterType == E::LanControllerType::DiagData or E::LanControllerType::AppAndDiagData
+	// used if LAN controller provide DiagData
 	//
-	bool diagDataProvided = false;
 	bool diagDataEnable = false;
 	QString diagDataIP;
 	int diagDataPort = 0;
@@ -48,21 +52,24 @@ struct LanControllerInfo
 	int diagDataSizeBytes = 0;
 	int diagDataFramesQuantity = 0;
 	int overrideDiagDataWordCount = -1;
+	QStringList diagDataAssociatedSignals;
 
-	// --
 	//
-	bool isTuning() const
-	{
-		return (static_cast<int>(lanControllerType) & static_cast<int>(E::LanControllerType::Tuning)) != 0;
-	}
 
-	bool isAppData() const
-	{
-		return (static_cast<int>(lanControllerType) & static_cast<int>(E::LanControllerType::AppData)) != 0;
-	}
+	static bool isProvideTuning(E::LanControllerType lanControllerType);
+	static bool isProvideAppData(E::LanControllerType lanControllerType);
+	static bool isProvideDiagData(E::LanControllerType lanControllerType);
 
-	bool isDiagData() const
-	{
-		return (static_cast<int>(lanControllerType) & static_cast<int>(E::LanControllerType::DiagData)) != 0;
-	}
+	//
+
+	bool isProvideTuning() const;
+	bool isProvideAppData() const;
+	bool isProvideDiagData() const;
+
+	bool writeToXml(XmlWriteHelper& xml)const;
+	bool readFromXml(XmlReadHelper& xml);
+	bool readFromXml(const QDomNode& lanControllerNode, QString* errMsg);
+
+	void saveToProto(Network::LanControllerInfo* proto, bool includeSignals) const;
+	void loadFromProto(const Network::LanControllerInfo& proto);
 };

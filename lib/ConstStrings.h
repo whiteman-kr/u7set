@@ -200,6 +200,20 @@ namespace XmlElement
 	inline const QString APP_DATA_SERVICES("AppDataServices");
 
 	inline const QString SECURITY("TuningSecurity");
+
+	inline const QString LOGIC_MODULES("LogicModules");
+	inline const QString LOGIC_MODULE("LogicModule");
+
+	inline const QString LAN_CONTROLLERS("LanControllers");
+	inline const QString LAN_CONTROLLER("LanController");
+
+	inline const QString TUNING_PARAMS("TuningParams");
+	inline const QString APP_DATA_PARAMS("AppDataParams");
+	inline const QString DIAG_DATA_PARAMS("DiagDataParams");
+
+	inline const QString TUNING_ASSOCIATED_SIGNALS("TuningAssociatedSignals");
+	inline const QString APP_DATA_ASSOCIATED_SIGNALS("AppDataAssociatedSignals");
+	inline const QString DIAG_DATA_ASSOCIATED_SIGNALS("DiagDataAssociatedSignals");
 }
 
 namespace XmlAttribute

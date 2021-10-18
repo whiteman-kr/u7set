@@ -387,11 +387,11 @@ bool ConfigSocket::readAppDataSource(const QByteArray& fileData)
 
 		si.index = i;
 
-		si.caption = ds.lmCaption();
-		si.equipmentID = ds.lmEquipmentID();
+		si.caption = ds.moduleCaption();
+		si.equipmentID = ds.moduleEquipmentID();
 
-		si.moduleType = ds.lmModuleType();
-		si.subSystem = ds.lmSubsystemID();
+		si.moduleType = ds.moduleType();
+		si.subSystem = ds.subsystemID();
 		si.frameCount = ds.lmRupFramesQuantity();
 		si.dataID = ds.lmDataID();
 

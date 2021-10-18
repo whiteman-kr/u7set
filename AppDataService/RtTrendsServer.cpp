@@ -214,7 +214,7 @@ namespace RtTrends
 
 			TEST_PTR_CONTINUE(source);
 
-			int samplePeriodCounter = getSamplePeriodCounter(newSamplePeriod, source->lmWorkcycle_ms());
+			int samplePeriodCounter = getSamplePeriodCounter(newSamplePeriod, source->moduleWorkcycle_ms());
 
 			DynamicAppSignalState* state = m_signalStates.getStateByHash(signalHash);
 
@@ -252,7 +252,7 @@ namespace RtTrends
 			ASSERT_RETURN_FALSE;
 		}
 
-		int lmWorkcycle_ms = source->lmWorkcycle_ms();
+		int lmWorkcycle_ms = source->moduleWorkcycle_ms();
 
 		int samplePeriodCounter = getSamplePeriodCounter(samplePeriod, lmWorkcycle_ms);
 
