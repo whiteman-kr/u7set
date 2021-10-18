@@ -1361,6 +1361,11 @@ void DialogSignalProperty::createPropertyList()
 			item->setAttribute(QLatin1String("readOnly"), true);
 			positionGroup->addSubProperty(item);
 
+			item = m_pManager->addProperty(QVariant::String, tr("Module type"));
+			item->setValue(m_param.location().moduleCaption());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			positionGroup->addSubProperty(item);
+
 		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
 
 		// electric range group

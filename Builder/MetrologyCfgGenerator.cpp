@@ -406,6 +406,7 @@ namespace Builder
 
 			case Hardware::DeviceType::Module:
 				l.setModuleID(pDeviceObject->equipmentId());
+				l.setModuleCaption(pDeviceObject->caption());
 				l.setModule(pDeviceObject->place());
 				break;
 

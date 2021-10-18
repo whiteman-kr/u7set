@@ -340,6 +340,47 @@ QString IoSignalParam::moduleStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
+QString IoSignalParam::moduleCaption() const
+{
+	QMutexLocker l(&m_mutex);
+
+	QString result;
+
+	if (m_connectionType == Metrology::ConnectionType::Unused)
+	{
+		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
+		if (param.isValid() == true)
+		{
+			result = param.location().moduleCaption();
+		}
+	}
+	else
+	{
+		const Metrology::SignalParam& inParam = m_param[Metrology::ConnectionIoType::Source];
+		if (inParam.isValid() == true)
+		{
+			result = inParam.location().moduleCaption() + MULTI_TEXT_DEVIDER;
+		}
+
+		const Metrology::SignalParam& outParam = m_param[Metrology::ConnectionIoType::Destination];
+		if (outParam.isValid() == true)
+		{
+			if (inParam.location().moduleCaption() != outParam.location().moduleCaption())
+			{
+				result += outParam.location().moduleCaption();
+			}
+			else
+			{
+				result = outParam.location().moduleCaption();
+			}
+		}
+	}
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 QString IoSignalParam::placeStr() const
 {
 	QMutexLocker l(&m_mutex);

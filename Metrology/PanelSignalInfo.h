@@ -25,6 +25,7 @@ const char* const			SignalInfoColumn[] =
 							QT_TRANSLATE_NOOP("PanelSignalInfo", "Chassis"),
 							QT_TRANSLATE_NOOP("PanelSignalInfo", "Module"),
 							QT_TRANSLATE_NOOP("PanelSignalInfo", "Place"),
+							QT_TRANSLATE_NOOP("PanelSignalInfo", "Module type"),
 							QT_TRANSLATE_NOOP("PanelSignalInfo", "Engineering range"),
 							QT_TRANSLATE_NOOP("PanelSignalInfo", "Electric range"),
 							QT_TRANSLATE_NOOP("PanelSignalInfo", "Electric sensor"),
@@ -42,10 +43,11 @@ const int					SIGNAL_INFO_COLUMN_CUSTOM_ID	= 0,
 							SIGNAL_INFO_COLUMN_CHASSIS		= 6,
 							SIGNAL_INFO_COLUMN_MODULE		= 7,
 							SIGNAL_INFO_COLUMN_PLACE		= 8,
-							SIGNAL_INFO_COLUMN_EN_RANGE		= 9,
-							SIGNAL_INFO_COLUMN_EL_RANGE		= 10,
-							SIGNAL_INFO_COLUMN_EL_SENSOR	= 11,
-							SIGNAL_INFO_COLUMN_CALIBRATOR	= 12;
+							SIGNAL_INFO_COLUMN_MODULE_TYPE	= 9,
+							SIGNAL_INFO_COLUMN_EN_RANGE		= 10,
+							SIGNAL_INFO_COLUMN_EL_RANGE		= 11,
+							SIGNAL_INFO_COLUMN_EL_SENSOR	= 12,
+							SIGNAL_INFO_COLUMN_CALIBRATOR	= 13;
 
 const int					SignalInfoColumnWidth[SIGNAL_INFO_COLUMN_COUNT] =
 {						
@@ -58,6 +60,7 @@ const int					SignalInfoColumnWidth[SIGNAL_INFO_COLUMN_COUNT] =
 							 60,	// SIGNAL_INFO_COLUMN_CHASSIS
 							 60,	// SIGNAL_INFO_COLUMN_MODULE
 							 60,	// SIGNAL_INFO_COLUMN_PLACE
+							100,	// SIGNAL_INFO_COLUMN_MODULE_TYPE
 							150,	// SIGNAL_INFO_COLUMN_EN_RANGE
 							150,	// SIGNAL_INFO_COLUMN_EL_RANGE
 							100,	// SIGNAL_INFO_COLUMN_EL_SENSOR

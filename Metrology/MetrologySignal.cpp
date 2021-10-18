@@ -114,6 +114,7 @@ namespace Metrology
 		m_chassis = -1;
 
 		m_moduleID.clear();
+		m_moduleCaption.clear();
 		m_module = -1;
 
 		m_place = -1;
@@ -201,6 +202,7 @@ namespace Metrology
 		l->set_chassis(m_chassis);
 
 		l->set_moduleid(m_moduleID.toStdString());
+		l->set_modulecaption(m_moduleCaption.toStdString());
 		l->set_module(m_module);
 
 		l->set_place(m_place);
@@ -219,6 +221,7 @@ namespace Metrology
 		m_chassis = l.chassis();
 
 		m_moduleID = QString::fromStdString(l.moduleid());
+		m_moduleCaption = QString::fromStdString(l.modulecaption());
 		m_module = l.module();
 
 		m_place = l.place();

@@ -24652,6 +24652,7 @@ class MetrologySignalLocation PROTOBUF_FINAL :
     kChassisIDFieldNumber = 2,
     kModuleIDFieldNumber = 4,
     kContactFieldNumber = 7,
+    kModuleCaptionFieldNumber = 9,
     kShownOnSchemasFieldNumber = 8,
     kPlaceFieldNumber = 6,
     kChassisFieldNumber = 3,
@@ -24737,6 +24738,26 @@ class MetrologySignalLocation PROTOBUF_FINAL :
   std::string* _internal_mutable_contact();
   public:
 
+  // optional string moduleCaption = 9;
+  bool has_modulecaption() const;
+  private:
+  bool _internal_has_modulecaption() const;
+  public:
+  void clear_modulecaption();
+  const std::string& modulecaption() const;
+  void set_modulecaption(const std::string& value);
+  void set_modulecaption(std::string&& value);
+  void set_modulecaption(const char* value);
+  void set_modulecaption(const char* value, size_t size);
+  std::string* mutable_modulecaption();
+  std::string* release_modulecaption();
+  void set_allocated_modulecaption(std::string* modulecaption);
+  private:
+  const std::string& _internal_modulecaption() const;
+  void _internal_set_modulecaption(const std::string& value);
+  std::string* _internal_mutable_modulecaption();
+  public:
+
   // optional bool shownOnSchemas = 8 [default = false];
   bool has_shownonschemas() const;
   private:
@@ -24802,6 +24823,7 @@ class MetrologySignalLocation PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr chassisid_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr moduleid_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr contact_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr modulecaption_;
   bool shownonschemas_;
   ::PROTOBUF_NAMESPACE_ID::int32 place_;
   ::PROTOBUF_NAMESPACE_ID::int32 chassis_;
@@ -55622,7 +55644,7 @@ inline void MetrologySignalLocation::set_allocated_chassisid(std::string* chassi
 
 // optional int32 chassis = 3 [default = -1];
 inline bool MetrologySignalLocation::_internal_has_chassis() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
   return value;
 }
 inline bool MetrologySignalLocation::has_chassis() const {
@@ -55630,7 +55652,7 @@ inline bool MetrologySignalLocation::has_chassis() const {
 }
 inline void MetrologySignalLocation::clear_chassis() {
   chassis_ = -1;
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 MetrologySignalLocation::_internal_chassis() const {
   return chassis_;
@@ -55640,12 +55662,85 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 MetrologySignalLocation::chassis() const {
   return _internal_chassis();
 }
 inline void MetrologySignalLocation::_internal_set_chassis(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000080u;
   chassis_ = value;
 }
 inline void MetrologySignalLocation::set_chassis(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_chassis(value);
   // @@protoc_insertion_point(field_set:Proto.MetrologySignalLocation.chassis)
+}
+
+// optional string moduleCaption = 9;
+inline bool MetrologySignalLocation::_internal_has_modulecaption() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool MetrologySignalLocation::has_modulecaption() const {
+  return _internal_has_modulecaption();
+}
+inline void MetrologySignalLocation::clear_modulecaption() {
+  modulecaption_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline const std::string& MetrologySignalLocation::modulecaption() const {
+  // @@protoc_insertion_point(field_get:Proto.MetrologySignalLocation.moduleCaption)
+  return _internal_modulecaption();
+}
+inline void MetrologySignalLocation::set_modulecaption(const std::string& value) {
+  _internal_set_modulecaption(value);
+  // @@protoc_insertion_point(field_set:Proto.MetrologySignalLocation.moduleCaption)
+}
+inline std::string* MetrologySignalLocation::mutable_modulecaption() {
+  // @@protoc_insertion_point(field_mutable:Proto.MetrologySignalLocation.moduleCaption)
+  return _internal_mutable_modulecaption();
+}
+inline const std::string& MetrologySignalLocation::_internal_modulecaption() const {
+  return modulecaption_.Get();
+}
+inline void MetrologySignalLocation::_internal_set_modulecaption(const std::string& value) {
+  _has_bits_[0] |= 0x00000010u;
+  modulecaption_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void MetrologySignalLocation::set_modulecaption(std::string&& value) {
+  _has_bits_[0] |= 0x00000010u;
+  modulecaption_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.MetrologySignalLocation.moduleCaption)
+}
+inline void MetrologySignalLocation::set_modulecaption(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000010u;
+  modulecaption_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.MetrologySignalLocation.moduleCaption)
+}
+inline void MetrologySignalLocation::set_modulecaption(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000010u;
+  modulecaption_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.MetrologySignalLocation.moduleCaption)
+}
+inline std::string* MetrologySignalLocation::_internal_mutable_modulecaption() {
+  _has_bits_[0] |= 0x00000010u;
+  return modulecaption_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* MetrologySignalLocation::release_modulecaption() {
+  // @@protoc_insertion_point(field_release:Proto.MetrologySignalLocation.moduleCaption)
+  if (!_internal_has_modulecaption()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000010u;
+  return modulecaption_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void MetrologySignalLocation::set_allocated_modulecaption(std::string* modulecaption) {
+  if (modulecaption != nullptr) {
+    _has_bits_[0] |= 0x00000010u;
+  } else {
+    _has_bits_[0] &= ~0x00000010u;
+  }
+  modulecaption_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), modulecaption,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.MetrologySignalLocation.moduleCaption)
 }
 
 // optional string moduleID = 4;
@@ -55723,7 +55818,7 @@ inline void MetrologySignalLocation::set_allocated_moduleid(std::string* modulei
 
 // optional int32 module = 5 [default = -1];
 inline bool MetrologySignalLocation::_internal_has_module() const {
-  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
   return value;
 }
 inline bool MetrologySignalLocation::has_module() const {
@@ -55731,7 +55826,7 @@ inline bool MetrologySignalLocation::has_module() const {
 }
 inline void MetrologySignalLocation::clear_module() {
   module_ = -1;
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 MetrologySignalLocation::_internal_module() const {
   return module_;
@@ -55741,7 +55836,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 MetrologySignalLocation::module() const {
   return _internal_module();
 }
 inline void MetrologySignalLocation::_internal_set_module(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000100u;
   module_ = value;
 }
 inline void MetrologySignalLocation::set_module(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -55751,7 +55846,7 @@ inline void MetrologySignalLocation::set_module(::PROTOBUF_NAMESPACE_ID::int32 v
 
 // optional int32 place = 6 [default = -1];
 inline bool MetrologySignalLocation::_internal_has_place() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
   return value;
 }
 inline bool MetrologySignalLocation::has_place() const {
@@ -55759,7 +55854,7 @@ inline bool MetrologySignalLocation::has_place() const {
 }
 inline void MetrologySignalLocation::clear_place() {
   place_ = -1;
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 MetrologySignalLocation::_internal_place() const {
   return place_;
@@ -55769,7 +55864,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 MetrologySignalLocation::place() const {
   return _internal_place();
 }
 inline void MetrologySignalLocation::_internal_set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
   place_ = value;
 }
 inline void MetrologySignalLocation::set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -55852,7 +55947,7 @@ inline void MetrologySignalLocation::set_allocated_contact(std::string* contact)
 
 // optional bool shownOnSchemas = 8 [default = false];
 inline bool MetrologySignalLocation::_internal_has_shownonschemas() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
 inline bool MetrologySignalLocation::has_shownonschemas() const {
@@ -55860,7 +55955,7 @@ inline bool MetrologySignalLocation::has_shownonschemas() const {
 }
 inline void MetrologySignalLocation::clear_shownonschemas() {
   shownonschemas_ = false;
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline bool MetrologySignalLocation::_internal_shownonschemas() const {
   return shownonschemas_;
@@ -55870,7 +55965,7 @@ inline bool MetrologySignalLocation::shownonschemas() const {
   return _internal_shownonschemas();
 }
 inline void MetrologySignalLocation::_internal_set_shownonschemas(bool value) {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
   shownonschemas_ = value;
 }
 inline void MetrologySignalLocation::set_shownonschemas(bool value) {
