@@ -302,13 +302,13 @@ namespace Builder
 	{
 		QString busTypeIdStr("BusTypeID");
 
-		int maxBusTypeIdLen = busTypeIdStr.length();
+		qsizetype maxBusTypeIdLen = busTypeIdStr.length();
 
 		for(const BusSignal& s : m_signals)
 		{
 			if (s.signalType == E::SignalType::Bus)
 			{
-				int len = s.busTypeID.length();
+				qsizetype len = s.busTypeID.length();
 
 				if (maxBusTypeIdLen < len)
 				{
@@ -697,11 +697,11 @@ namespace Builder
 
 		// sort inBusSignals by bitAddress
 		//
-		int count = inBusSignals.count();
+		qsizetype count = inBusSignals.count();
 
-		for(int i = 0; i < count - 1; i++)
+		for(qsizetype i = 0; i < count - 1; i++)
 		{
-			for(int k = i + 1; k < count; k++)
+			for(qsizetype k = i + 1; k < count; k++)
 			{
 				if (inBusSignals[i].second > inBusSignals[k].second)
 				{
@@ -714,7 +714,7 @@ namespace Builder
 
 		// calculate signals addresses in bus
 		//
-		for(const QPair<QString, int> inBusSignal : inBusSignals)
+		for(const QPair<QString, int>& inBusSignal : inBusSignals)
 		{
 			VFrame30::BusSignal& srcBusSignal = getBusSignal(inBusSignal.first);
 
@@ -770,15 +770,15 @@ namespace Builder
 	{
 		bool result = true;
 
-		int count = m_signals.count();
+		qsizetype count = m_signals.count();
 
 		int maxBitAddress = m_sizeW * SIZE_16BIT;
 
 		// check signals overlapping
 		//
-		for(int i = 0; i < count - 1; i++)
+		for(qsizetype i = 0; i < count - 1; i++)
 		{
-			for(int k = i + 1; k < count; k++)
+			for(qsizetype k = i + 1; k < count; k++)
 			{
 				if(m_signals[i].isOverlaped(m_signals[k]) == true)
 				{
@@ -792,7 +792,7 @@ namespace Builder
 
 		// check signals offsets
 		//
-		for(int i = 0; i < count; i++)
+		for(qsizetype i = 0; i < count; i++)
 		{
 			const BusSignal& s = m_signals[i];
 
@@ -1013,7 +1013,7 @@ namespace Builder
 
 				bool hasUnresolvedChildBus = false;
 
-				for(const QString childBusID : childBussesIDs)
+				for(const QString& childBusID : childBussesIDs)
 				{
 					if (orderedBusses.contains(childBusID) == true)
 					{

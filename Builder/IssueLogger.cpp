@@ -2382,7 +2382,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4080(QString schema, QString pannelSchemaId)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 4080, schema);
+		addSchemaIssue(OutputMessageLevel::Error, 4080, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4080,
@@ -2405,7 +2405,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4081(QString schema)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 4081, schema);
+		addSchemaIssue(OutputMessageLevel::Error, 4081, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4081,
@@ -2428,7 +2428,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4082(QString schema, QString pannelSchemaId)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 4082, schema);
+		addSchemaIssue(OutputMessageLevel::Error, 4082, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4082,

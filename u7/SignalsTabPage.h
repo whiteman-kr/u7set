@@ -288,7 +288,7 @@ protected:
 
 private:
 	void addSignalIfNeeded(const AppSignal& signal);
-	bool match(QString signalProperty, int& start, int& end);
+	bool match(QString signalProperty, qsizetype& start, qsizetype& end);
 	bool checkForEditableSignal(const AppSignal& signal);
 	bool checkForUniqueSignalId(const QString& original, const QString& replaced);
 	bool checkForCorrectSignalId(const QString& replaced);
@@ -357,7 +357,7 @@ private:
 	bool m_isMatchToCurrentSignalSet = false;
 	QSet<QString> m_signalIds;
 	QSet<QString> m_repeatedSignalIds;
-	QRegExp m_regExp4Id;
+	QRegularExpression m_regExp4Id;
 	int m_currentUserId = -1;
 	bool m_currentUserIsAdmin = false;
 	bool m_shouldReopen = true;

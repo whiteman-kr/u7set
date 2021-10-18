@@ -201,8 +201,10 @@ void initNewSignal(AppSignal& signal)
 			continue;
 		}
 
-		QVariant::Type type = propertyManager.type(i);
-		if (type == QVariant::String && propertyManager.value(&signal, i, theSettings.isExpertMode()).toString().isEmpty() == false)
+		QVariant propertyManagerValue = propertyManager.value(&signal, i, theSettings.isExpertMode());
+		QMetaType type = propertyManagerValue.metaType();
+
+		if (type.id() == QMetaType::QString && propertyManagerValue.toString().isEmpty() == false)
 		{
 			continue;
 		}
@@ -426,7 +428,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 
 	// Save
 	//
-	for (int i = m_signalVector.count() - 1; i >= 0; i--)
+	for (qsizetype i = m_signalVector.count() - 1; i >= 0; i--)
 	{
 		AppSignal& signal = *m_signalVector[i];
 

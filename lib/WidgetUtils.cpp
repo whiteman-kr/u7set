@@ -8,14 +8,14 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QAction>
-#include <QDesktopWidget>
 #include <QScreen>
 
 void saveWindowPosition(QWidget* window, QString widgetKey)
 {
 	QSettings settings;
-	int screenNumber = QApplication::desktop()->screenNumber(window);
-	settings.setValue(widgetKey + "/screenNumber", screenNumber);
+	QString screenSerialNumber = window->screen()->serialNumber();
+
+	settings.setValue(widgetKey + "/screenSerialNumber", screenSerialNumber);
 	settings.setValue(widgetKey + "/geometry", window->geometry());
 }
 
@@ -25,18 +25,34 @@ void setWindowPosition(QWidget* window, QString widgetKey)
 	{
 		return;
 	}
-	QSettings settings;
-	int screenNumber = settings.value(widgetKey + "/screenNumber", QApplication::desktop()->screenNumber(window)).toInt();
 
-	if (QGuiApplication::screens().size() <= screenNumber)
+	QSettings settings;
+	QString screenSerialNumber = settings.value(widgetKey + "/screenSerialNumber").toString();
+
+	QList<QScreen*> systemScreens = QGuiApplication::screens();
+	if (systemScreens.empty() == true)
 	{
 		return;
 	}
-	QScreen* currentScreen = QGuiApplication::screens()[screenNumber];
+
+	QScreen* currentScreen = nullptr;
+
+	for (auto s : systemScreens)
+	{
+		if (s->serialNumber() == screenSerialNumber)
+		{
+			currentScreen = s;
+			break;
+		}
+	}
+
 	if (currentScreen == nullptr)
 	{
-		return;
+		currentScreen = systemScreens[0];
 	}
+
+	Q_ASSERT(currentScreen);
+
 	QRect screenRect = currentScreen->geometry();
 	QPoint center = screenRect.center();
 
@@ -135,7 +151,7 @@ void TableDataVisibilityController::saveAllHeaderGeomery()
 		return;
 	}
 	auto header = m_tableView->horizontalHeader();
-	int columnCount = m_columnNameList.count();
+	int columnCount = static_cast<int>(m_columnNameList.count());
 	for (int i = 0; i < columnCount; i++)
 	{
 		bool visible = !header->isSectionHidden(i);
@@ -153,7 +169,7 @@ void TableDataVisibilityController::checkNewColumns()
 {
 	auto* model = m_tableView->model();
 
-	int columnCount = m_columnNameList.count();
+	qsizetype columnCount = m_columnNameList.count();
 	int newColumnCount = model->columnCount();
 
 	if (columnCount == newColumnCount)

@@ -32,7 +32,7 @@ void JsVariantList::append(QVariant v)
 
 int JsVariantList::jsSize()
 {
-	return m_list.size();
+	return static_cast<int>(m_list.size());
 }
 
 QVariant JsVariantList::jsAt(int i)
@@ -135,7 +135,7 @@ namespace Hardware
 		auto reportWriter = [&dest](const QStringList& header, const std::vector<QStringList>& strings)
 			{
 
-			std::vector<int> columnWidth;
+			std::vector<qsizetype> columnWidth;
 
 			// Count column width
 
@@ -451,7 +451,7 @@ namespace Hardware
 						//
 						bool lineOfZeroes = true;
 
-						for (int ip = 0; ip < frameStringWidth * sizeof(quint16); ip++)
+						for (int ip = 0; ip < static_cast<int>(frameStringWidth * sizeof(quint16)); ip++)
 						{
 							if (dataBytePos + ip >= frameSize)
 							{

@@ -16,6 +16,11 @@ TEMPLATE = app
 DEFINES += Q_CONSOLE_APP
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
+include(../../compiler.pri)
+#include(../../warnings.pri)
+CONFIG -= warn_on
+CONFIG += warn_off
+
 # DESTDIR
 #
 win32 {
@@ -26,13 +31,6 @@ unix {
     CONFIG(debug, debug|release): DESTDIR = ../../bin_unix/debug
     CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
 }
-
-# c++20 support
-#
-unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
-win32:QMAKE_CXXFLAGS += /std:c++latest
-
-CONFIG += warn_off
 
 #	SignalTests.cpp \
 

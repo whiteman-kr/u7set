@@ -572,11 +572,11 @@ namespace SimOverrideUI
 			m.addAction(s,
 						[s, this]()
 						{
-							int r = QMessageBox::question(this,
-														  qAppName(),
-														  tr("All current changes will be lost."),
-														  QMessageBox::StandardButton::Ok,
-														  QMessageBox::StandardButton::Cancel | QMessageBox::Default | QMessageBox::Escape);
+							QMessageBox::StandardButton r = QMessageBox::question(this,
+																				  qAppName(),
+																				  tr("All current changes will be lost."),
+																				  QMessageBox::StandardButton::Cancel | QMessageBox::Default | QMessageBox::Escape,
+																				  QMessageBox::StandardButton::Ok);
 
 							if (r != QMessageBox::StandardButton::Ok)
 							{
@@ -607,11 +607,11 @@ namespace SimOverrideUI
 							return;
 						}
 
-						int r = QMessageBox::question(this,
-													  qAppName(),
-													  tr("All current changes will be lost."),
-													  QMessageBox::StandardButton::Ok,
-													  QMessageBox::StandardButton::Cancel | QMessageBox::Default | QMessageBox::Escape);
+						QMessageBox::StandardButton r = QMessageBox::question(this,
+																			  qAppName(),
+																			  tr("All current changes will be lost."),
+																			  QMessageBox::StandardButton::Cancel | QMessageBox::Default | QMessageBox::Escape,
+																			  QMessageBox::StandardButton::Ok);
 
 						if (r != QMessageBox::StandardButton::Ok)
 						{
@@ -649,11 +649,11 @@ namespace SimOverrideUI
 				m.addAction(s,
 					[savePropertyName = s, this]()
 					{
-						int r = QMessageBox::question(this,
-													  qAppName(),
-													  tr("Record %1 already exists. Do you want to overwite it?").arg(savePropertyName),
-													  QMessageBox::StandardButton::Yes,
-													  QMessageBox::StandardButton::No | QMessageBox::Default | QMessageBox::Escape);
+					QMessageBox::StandardButton r = QMessageBox::question(this,
+																		  qAppName(),
+																		  tr("Record %1 already exists. Do you want to overwite it?").arg(savePropertyName),
+																		  QMessageBox::StandardButton::No | QMessageBox::Default | QMessageBox::Escape,
+																		  QMessageBox::StandardButton::Yes);
 
 						if (r == QMessageBox::StandardButton::No)
 						{
@@ -679,11 +679,11 @@ namespace SimOverrideUI
 
 						if (savesProperties.contains(text) == true)
 						{
-							int r = QMessageBox::question(this,
-														  qAppName(),
-														  tr("Record %1 already exists. Do you want to overwite it?").arg(text),
-														  QMessageBox::StandardButton::Yes,
-														  QMessageBox::StandardButton::No | QMessageBox::Default | QMessageBox::Escape);
+							QMessageBox::StandardButton r = QMessageBox::question(this,
+																				  qAppName(),
+																				  tr("Record %1 already exists. Do you want to overwite it?").arg(text),
+																				  QMessageBox::StandardButton::No | QMessageBox::Default | QMessageBox::Escape,
+																				  QMessageBox::StandardButton::Yes);
 
 							if (r == QMessageBox::StandardButton::No)
 							{
@@ -704,11 +704,11 @@ namespace SimOverrideUI
 				removeMenu->addAction(tr("Remove %1").arg(s),
 									  [this, s]()
 									  {
-										int r = QMessageBox::question(this,
-																	  qAppName(),
-																	  tr("Record %1 will be removed.").arg(s),
-																	  QMessageBox::StandardButton::Ok,
-																	  QMessageBox::StandardButton::Cancel | QMessageBox::Default | QMessageBox::Escape);
+					QMessageBox::StandardButton r = QMessageBox::question(this,
+																		  qAppName(),
+																		  tr("Record %1 will be removed.").arg(s),
+																		  QMessageBox::StandardButton::Cancel | QMessageBox::Default | QMessageBox::Escape,
+																		  QMessageBox::StandardButton::Ok);
 
 										if (r != QMessageBox::StandardButton::Ok)
 										{

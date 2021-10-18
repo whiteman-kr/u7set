@@ -764,7 +764,8 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 		{
 			return Qt::AlignCenter;
 		}
-		return Qt::AlignLeft + Qt::AlignVCenter;
+
+		return QVariant{Qt::AlignLeft | Qt::AlignVCenter};
 	}
 
 	if (role == Qt::DisplayRole)

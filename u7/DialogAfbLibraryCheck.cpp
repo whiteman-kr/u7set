@@ -39,8 +39,7 @@ DialogAfbLibraryCheck::DialogAfbLibraryCheck(DbController* db, QWidget* parent)
 	QComboBox* lmDescriptionsCombo = new QComboBox();
 	lmDescriptionsCombo->setMinimumWidth(250);
 
-	connect(lmDescriptionsCombo, static_cast<void(QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged),
-			this, &DialogAfbLibraryCheck::libraryFileChanged);
+	connect(lmDescriptionsCombo, &QComboBox::currentTextChanged, this, &DialogAfbLibraryCheck::libraryFileChanged);
 
 	QHBoxLayout* comboLayout = new QHBoxLayout();
 	comboLayout->addWidget(lmDescriptionsCombo);

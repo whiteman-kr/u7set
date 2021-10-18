@@ -17,8 +17,8 @@ QWidget* SubsystemListEditorDelegate::createEditor(QWidget *parent, const QStyle
     {
         QLineEdit* edit = new QLineEdit(parent);
 
-        QRegExp rx("[\\d]{1,2}");
-        edit->setValidator(new QRegExpValidator(rx, edit));
+		QRegularExpression rx("[\\d]{1,2}");
+		edit->setValidator(new QRegularExpressionValidator(rx, edit));
 
         return edit;
     }
@@ -27,8 +27,8 @@ QWidget* SubsystemListEditorDelegate::createEditor(QWidget *parent, const QStyle
     {
         QLineEdit* edit = new QLineEdit(parent);
 
-        QRegExp rx("^[A-Za-z][A-Za-z\\d]*$");
-        edit->setValidator(new QRegExpValidator(rx, edit));
+		QRegularExpression rx("^[A-Za-z][A-Za-z\\d]*$");
+		edit->setValidator(new QRegularExpressionValidator(rx, edit));
 
         return edit;
     }
@@ -140,7 +140,7 @@ void DialogSubsystemListEditor::showEvent(QShowEvent*)
 {
 	// Resize depends on monitor size, DPI, resolution
 	//
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 
 	resize(static_cast<int>(screen.width() * 0.30),
 		   static_cast<int>(screen.height() * 0.60));

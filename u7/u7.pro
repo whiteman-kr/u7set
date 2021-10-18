@@ -23,12 +23,13 @@ TEMPLATE = app
 INCLUDEPATH += $$PWD
 INCLUDEPATH += $$PWD/../lib
 
-# c++20 support
-#
-unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
-win32:QMAKE_CXXFLAGS += /std:c++latest
-
+include(../compiler.pri)
 include(../warnings.pri)
+
+# Stable.h
+#
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 #Application icon
 win32:RC_ICONS += Images/u7.ico
@@ -44,6 +45,7 @@ unix {
     CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
     CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
+
 # /DESTDIR
 #
 
@@ -414,23 +416,6 @@ DISTFILES += \
     LogicModuleDescription/LM1_SR03.xml \
     LogicModuleDescription/LM1_SF40.xml
 
-CONFIG += precompile_header
-PRECOMPILED_HEADER = Stable.h
-
-# Optimization flags
-#
-win32 {
-    CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -Od
-    CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O2
-}
-unix {
-    CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
-    CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
-}
-
-# QtPropertyBrowser
-#
-include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
 # Add curent dir to a list of library directory paths
 #

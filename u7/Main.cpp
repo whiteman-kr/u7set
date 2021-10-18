@@ -60,10 +60,8 @@ int main(int argc, char *argv[])
 
 		GlobalMessanger::instance();		// Create instance of GlobalMessanger
 
-		// Read settings
+		// --
 		//
-		theSettings.load();
-
 		qRegisterMetaType<std::vector<int>>();
 		qRegisterMetaType<E::SignalType>();
 		qRegisterMetaType<TimeStamp>();
@@ -73,7 +71,12 @@ int main(int argc, char *argv[])
 		qRegisterMetaType<QVector<int>>();
 		qRegisterMetaType<ID_AppSignalID>();
 		qRegisterMetaType<QVector<ID_AppSignalID>>();
+		qRegisterMetaType<QMap<QString, int>>("QMap<QString,int>");
 		qRegisterMetaType<std::optional<std::vector<int>>>("std::optional<std::vector<int>>");
+
+		// Read settings
+		//
+		theSettings.load();
 
 		// Init TrendLib resources
 		//

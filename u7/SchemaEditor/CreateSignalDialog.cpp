@@ -36,12 +36,12 @@ CreateSignalDialog::CreateSignalDialog(DbController* dbc, CreatingSignalDialogOp
 
 		QLineEdit* appSiganalIdEdit = new QLineEdit;
 		appSiganalIdEdit->setPlaceholderText(tr("#APPSIGNALID"));
-		appSiganalIdEdit->setValidator(new QRegExpValidator(QRegExp(AppSignal::IDENTIFICATORS_VALIDATOR), this));
+		appSiganalIdEdit->setValidator(new QRegularExpressionValidator(QRegularExpression(AppSignal::IDENTIFICATORS_VALIDATOR), this));
 		m_appSiganalIds.push_back(appSiganalIdEdit);
 
 		QLineEdit* customSiganalIdEdit = new QLineEdit;
 		customSiganalIdEdit->setPlaceholderText(tr("SIGNALID"));
-		customSiganalIdEdit->setValidator(new QRegExpValidator(QRegExp(AppSignal::IDENTIFICATORS_VALIDATOR), this));
+		customSiganalIdEdit->setValidator(new QRegularExpressionValidator(QRegularExpression(AppSignal::IDENTIFICATORS_VALIDATOR), this));
 		m_customSiganalIds.push_back(customSiganalIdEdit);
 	}
 
@@ -588,7 +588,7 @@ void CreateSignalDialog::accept()
 	}
 
 	QStringList tempString = m_result.appSignalIds;
-	int duplicates = tempString.removeDuplicates();
+	qsizetype duplicates = tempString.removeDuplicates();
 
 	if (duplicates != 0)
 	{

@@ -37,7 +37,7 @@ DialogConnections::DialogConnections(DbController* db, QWidget* parent)
 	l << tr("State");
 	l << tr("User");
 
-	m_connectionsTree->setColumnCount(l.size());
+	m_connectionsTree->setColumnCount(static_cast<int>(l.size()));
 	m_connectionsTree->setHeaderLabels(l);
 
 	int il = 0;
@@ -760,7 +760,7 @@ void DialogConnections::onPaste()
 	}
 
 	Proto::EnvelopeSet envelopeSet;
-	if (envelopeSet.ParseFromArray(data.constData(), data.size()) == false)
+	if (envelopeSet.ParseFromArray(data.constData(), static_cast<int>(data.size())) == false)
 	{
 		return;
 	}
@@ -1200,7 +1200,7 @@ void DialogConnections::updateTreeItemText(QTreeWidgetItem* item)
 
 void DialogConnections::updateButtonsEnableState()
 {
-	int selectedCount = 0;
+	qsizetype selectedCount = 0;
 	int checkedInCount = 0;
 	int checkedOutCount = 0;
 

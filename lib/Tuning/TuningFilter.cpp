@@ -1914,14 +1914,15 @@ bool TuningFilter::processMaskList(const QString& s, const QStringList& masks) c
 		bool invertMask = m.contains('!');
 		m.remove('!');
 
-		QRegExp rx(m.trimmed());
-		rx.setPatternSyntax(QRegExp::Wildcard);
+		QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(m.trimmed()));
+		//rx.setPatternSyntax(QRegExp::Wildcard);
 
 		if (invertMask == false)
 		{
 			directCount++;
 
-			if (rx.exactMatch(s) == true)
+			auto matchResult = rx.match(s);		// rx.exactMatch(s)
+			if (matchResult.hasMatch() == true)
 			{
 				directMatch++;
 			}
@@ -1931,7 +1932,8 @@ bool TuningFilter::processMaskList(const QString& s, const QStringList& masks) c
 		{
 			invertedCount++;
 
-			if (rx.exactMatch(s) == false)
+			auto matchResult = rx.match(s);		// rx.exactMatch(s)
+			if (matchResult.hasMatch() == false)
 			{
 				invertedMatch++;
 			}
@@ -2032,7 +2034,7 @@ bool TuningFilterStorage::load(const QByteArray &data, QString* errorCode)
 		return !reader.hasError();
 	}
 
-	if (reader.name() != "ObjectFilterStorage")
+	if (reader.name() != QLatin1String("ObjectFilterStorage"))
 	{
 		reader.raiseError(QObject::tr("The file is not an ObjectFilterStorage file."));
 		*errorCode = reader.errorString();
@@ -2084,8 +2086,6 @@ bool TuningFilterStorage::save(QByteArray& data)
 {
 	QXmlStreamWriter writer(&data);
 
-	writer.setCodec("UTF-8");
-
 	writer.setAutoFormatting(true);
 
 	writer.writeStartDocument();
@@ -2106,8 +2106,6 @@ bool TuningFilterStorage::save(QByteArray& data)
 bool TuningFilterStorage::save(QByteArray& data, TuningFilter::Source saveSourceType) const
 {
     QXmlStreamWriter writer(&data);
-
-	writer.setCodec("UTF-8");
 
     writer.setAutoFormatting(true);
 

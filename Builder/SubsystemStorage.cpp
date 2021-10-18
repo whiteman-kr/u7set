@@ -81,7 +81,7 @@ namespace Builder
 			return !reader.hasError();
 		}
 
-		if (reader.name() != "Subsystems")
+		if (reader.name() != QLatin1String("Subsystems"))
 		{
 			reader.raiseError(QObject::tr("The file is not an Subsystems file."));
 			errorCode = reader.errorString();
@@ -92,7 +92,7 @@ namespace Builder
 		//
 		while (reader.readNextStartElement())
 		{
-			if (reader.name() == "Subsystem")
+			if (reader.name() == QLatin1String("Subsystem"))
 			{
 				std::shared_ptr<Hardware::Subsystem> s = std::make_shared<Hardware::Subsystem>();
 

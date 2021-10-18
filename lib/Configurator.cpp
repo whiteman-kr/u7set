@@ -214,13 +214,14 @@ void CONF_IDENTIFICATION_DATA_V1::dump(QStringList& out) const
 	out << "Configuration counter: " + QString().setNum(count);
 
 	out << "First time configured: ";
-	out << "__Date: " + QDateTime().fromTime_t(static_cast<uint>(firstConfiguration.date)).toString();
+
+	out << "__Date: " + QDateTime().fromSecsSinceEpoch(static_cast<uint>(firstConfiguration.date)).toString();
 	out << "__Host: " + QString(firstConfiguration.host);
 	out << "__ConfigurationId: " + firstConfiguration.configurationId.toQUuid().toString();
 	out << "__Configurator factory no: " + QString().setNum(firstConfiguration.configuratorFactoryNo);
 
 	out << "Last time configured: ";
-	out << "__Date: " + QDateTime().fromTime_t(static_cast<uint>(lastConfiguration.date)).toString();
+	out << "__Date: " + QDateTime().fromSecsSinceEpoch(static_cast<uint>(lastConfiguration.date)).toString();
 	out << "__Host: " + QString(lastConfiguration.host);
 	out << "__ConfigurationId: " + lastConfiguration.configurationId.toQUuid().toString();
 	out << "__Configurator factory no: " + QString().setNum(lastConfiguration.configuratorFactoryNo);
@@ -242,7 +243,7 @@ void CONF_IDENTIFICATION_DATA_V1::createFirstConfiguration()
 
 	//
 	firstConfiguration.configurationId = QUuid::createUuid();	// Add this record to database
-	firstConfiguration.date = QDateTime::currentDateTime().toTime_t();
+	firstConfiguration.date = QDateTime::currentDateTime().toSecsSinceEpoch();
 
 	//#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
 	firstConfiguration.configuratorFactoryNo = 0;
@@ -261,7 +262,7 @@ void CONF_IDENTIFICATION_DATA_V1::createNextConfiguration()
 
 	CONF_IDENTIFICATION_DATA_V1::CONF_IDENTIFICATION_RECORD lastConfiguration = CONF_IDENTIFICATION_DATA_V1::CONF_IDENTIFICATION_RECORD();
 	lastConfiguration.configurationId = QUuid::createUuid();				// Add this record to database
-	lastConfiguration.date = QDateTime().currentDateTime().toTime_t();
+	lastConfiguration.date = QDateTime().currentDateTime().toSecsSinceEpoch();
 
 	//#pragma message(__FUNCTION__ "When we will ha configurator factory, enter here it")
 	lastConfiguration.configuratorFactoryNo = 0;
@@ -283,7 +284,7 @@ void CONF_IDENTIFICATION_DATA_V2::dump(QStringList& out) const
 	out << "Configuration counter: " + QString().setNum(count);
 
 	out << "First time configured: ";
-	out << "__Date: " + QDateTime().fromTime_t(static_cast<uint>(firstConfiguration.date)).toString();
+	out << "__Date: " + QDateTime().fromSecsSinceEpoch(static_cast<uint>(firstConfiguration.date)).toString();
 	out << "__Host: " + QString(firstConfiguration.host);
 	out << "__User: " + QString(firstConfiguration.userName);
 	out << "__Build No: " + QString::number(firstConfiguration.buildNo).rightJustified(6, '0');
@@ -291,7 +292,7 @@ void CONF_IDENTIFICATION_DATA_V2::dump(QStringList& out) const
 	out << "__ConfigurationId: " + firstConfiguration.configurationId.toQUuid().toString();
 
 	out << "Last time configured: ";
-	out << "__Date: " + QDateTime().fromTime_t(static_cast<uint>(lastConfiguration.date)).toString();
+	out << "__Date: " + QDateTime().fromSecsSinceEpoch(static_cast<uint>(lastConfiguration.date)).toString();
 	out << "__Host: " + QString(lastConfiguration.host);
 	out << "__User: " + QString(lastConfiguration.userName);
 	out << "__Build No: " + QString::number(lastConfiguration.buildNo).rightJustified(6, '0');
@@ -311,7 +312,7 @@ void CONF_IDENTIFICATION_DATA_V2::createFirstConfiguration(Hardware::ModuleFirmw
 
 	//
 	firstConfiguration.configurationId = QUuid::createUuid();	// Add this record to database
-	firstConfiguration.date = QDateTime::currentDateTime().toTime_t();
+	firstConfiguration.date = QDateTime::currentDateTime().toSecsSinceEpoch();
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(firstConfiguration.host) - 1);
 	std::strncpy(firstConfiguration.host, hostName.toStdString().data(), sizeof(firstConfiguration.host));
@@ -334,7 +335,7 @@ void CONF_IDENTIFICATION_DATA_V2::createNextConfiguration(Hardware::ModuleFirmwa
 	count ++;			// Incerement configartion counter
 
 	lastConfiguration.configurationId = QUuid::createUuid();				// Add this record to database
-	lastConfiguration.date = QDateTime().currentDateTime().toTime_t();
+	lastConfiguration.date = QDateTime().currentDateTime().toSecsSinceEpoch();
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
 	std::strncpy(lastConfiguration.host, hostName.toStdString().data(), sizeof(lastConfiguration.host));
@@ -581,9 +582,9 @@ bool Configurator::send(int moduleUartId,
 
 	// Generate packet
 	//
-	std::vector<quint8> buffer;				//
-	int expecetedDataBytes = 0;				// Expecting reply in expecetedDataBytes to read from device + sizeof(CONF_HEADER)
-	int headerSize = 0;
+	std::vector<quint8> buffer;					//
+	size_t expecetedDataBytes = 0;				// Expecting reply in expecetedDataBytes to read from device + sizeof(CONF_HEADER)
+	size_t headerSize = 0;
 
 	switch (opcode)
 	{
@@ -721,7 +722,7 @@ bool Configurator::send(int moduleUartId,
 	// Read reply
 	//
 	std::vector<quint8> recBuffer;
-	int recSize = headerSize + expecetedDataBytes;
+	size_t recSize = headerSize + expecetedDataBytes;
 
 	for (int tc = 0; tc < 100; tc++)
 	{

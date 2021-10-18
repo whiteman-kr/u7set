@@ -35,7 +35,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	l << tr("Date");
 	l << tr("Result");
 
-	m_pBuildTree->setColumnCount(l.size());
+	m_pBuildTree->setColumnCount(static_cast<int>(l.size()));
 	m_pBuildTree->setHeaderLabels(l);
 	m_pBuildTree->setRootIsDecorated(false);
 	m_pBuildTree->header()->hide();
@@ -61,7 +61,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	l.clear();
 	l << tr("Subsystem");
 
-	m_pSubsystemsListWidget->setColumnCount(l.size());
+	m_pSubsystemsListWidget->setColumnCount(static_cast<int>(l.size()));
 	m_pSubsystemsListWidget->setHeaderLabels(l);
 
 	int il = 0;
@@ -84,7 +84,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	l << tr("Upload Count");
 	l << tr("Status");
 
-	m_pUartListWidget->setColumnCount(l.size());
+	m_pUartListWidget->setColumnCount(static_cast<int>(l.size()));
 	m_pUartListWidget->setHeaderLabels(l);
 
 	il = 0;
@@ -836,13 +836,13 @@ bool UploadTabPage::readBuildInfo(const QString& buildPath, Builder::BuildInfo* 
 			continue;
 		}
 
-		if (xmlReader.name() == "BuildInfo")
+		if (xmlReader.name() == QLatin1String("BuildInfo"))
 		{
 			buildInfo->readFromXml(xmlReader);
 			buildInfoFound = true;
 		}
 
-		if (xmlReader.name() == "BuildResult")
+		if (xmlReader.name() == QLatin1String("BuildResult"))
 		{
 			bool ok = false;
 

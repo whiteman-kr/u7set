@@ -35,9 +35,9 @@ namespace Sim
 			{
 				QVariant propValue = p->value();
 
-				if ((value.type() == QVariant::String && propValue.type() != QVariant::String) ||
-					(value.type() != QVariant::String && propValue.type() == QVariant::String) ||
-					value.canConvert(propValue.type()) == false)
+				if ((value.typeId() == QMetaType::QString && propValue.typeId() != QMetaType::QString) ||
+					(value.typeId() != QMetaType::QString && propValue.typeId() == QMetaType::QString) ||
+					value.canConvert(propValue.metaType()) == false)
 				{
 					*errorMessage = QObject::tr("Property %1 has incompatible type").arg(propertyCaption);
 					continue;
@@ -184,11 +184,11 @@ namespace Sim
 
 		QStringList strings = string.split(QChar::LineFeed, Qt::SkipEmptyParts);
 
-		QRegExp regExpProfile("^\\[[a-zA-Z\\d_]+\\]");
-		QRegExp regExpProperty("^[A-Z\\d_]+.\\w+\\s*=\\s*\"?[\\w\\s.\\+\\-/\\\\:]+\"?;");	// OBJECT1.a_1 = " hello+-./\: ";
-		QRegExp regExpUInt("^(?:0|[1-9][0-9]*)$");
-		QRegExp regExpInt("^-?(?:0|[1-9][0-9]*)$");
-		QRegExp regExpDouble("^-?(?:0|[1-9][0-9]*)\\.?[0-9]+([e|E][+-]?[0-9]+)?$");
+		QRegularExpression regExpProfile("^\\[[a-zA-Z\\d_]+\\]");
+		QRegularExpression regExpProperty("^[A-Z\\d_]+.\\w+\\s*=\\s*\"?[\\w\\s.\\+\\-/\\\\:]+\"?;");	// OBJECT1.a_1 = " hello+-./\: ";
+		QRegularExpression regExpUInt("^(?:0|[1-9][0-9]*)$");
+		QRegularExpression regExpInt("^-?(?:0|[1-9][0-9]*)$");
+		QRegularExpression regExpDouble("^-?(?:0|[1-9][0-9]*)\\.?[0-9]+([e|E][+-]?[0-9]+)?$");
 
 		QString currentProfile = "Generic";
 
@@ -206,12 +206,11 @@ namespace Sim
 				continue;
 			}
 
-			int pos = regExpProfile.indexIn(str);
-			if (pos != -1 && regExpProfile.capturedTexts().size() == 1)
+			if (auto expProfileMatch = regExpProfile.match(str);
+				expProfileMatch.hasMatch() == true && expProfileMatch.capturedTexts().size() == 1)
 			{
-				str = regExpProfile.cap(0);
-
-				str = str.remove(QRegExp("[\\[\\]]"));
+				str = expProfileMatch.captured(0);
+				str = str.remove(QRegularExpression("[\\[\\]]"));
 
 				if (str.isEmpty() == true)
 				{
@@ -229,13 +228,13 @@ namespace Sim
 				return false;
 			}
 
-			pos = regExpProperty.indexIn(str);
-			if (pos != -1 && regExpProperty.capturedTexts().size() == 1)
+			if (auto propertyMatch = regExpProperty.match(str);
+				propertyMatch.hasMatch() == true && propertyMatch.capturedTexts().size() == 1)
 			{
-				str = regExpProperty.cap(0);
+				str = propertyMatch.captured(0);
 
-				int ptPos = str.indexOf('.');
-				int eqPos = str.indexOf('=');
+				qsizetype ptPos = str.indexOf('.');
+				qsizetype eqPos = str.indexOf('=');
 
 				QString equipmentId = str.left(ptPos).trimmed();
 				QString propertyName = str.mid(ptPos + 1, eqPos - ptPos - 1).trimmed();
@@ -264,19 +263,19 @@ namespace Sim
 				//
 				do
 				{
-					if (regExpUInt.exactMatch(propertyString) == true)
+					if (regExpUInt.match(propertyString).hasMatch() == true)
 					{
 						propertyValue = propertyValue.toUInt();
 						break;
 					}
 
-					if (regExpInt.exactMatch(propertyString) == true)
+					if (regExpInt.match(propertyString).hasMatch() == true)
 					{
 						propertyValue = propertyValue.toInt();
 						break;
 					}
 
-					if (regExpDouble.exactMatch(propertyString) == true)
+					if (regExpDouble.match(propertyString).hasMatch() == true)
 					{
 						propertyValue = propertyValue.toDouble();
 						break;

@@ -286,10 +286,10 @@ namespace ExtWidgets
 
 		switch(lv.userType())
 		{
-		case QVariant::Int:
-		case QVariant::UInt:
+		case QMetaType::Int:
+		case QMetaType::UInt:
 		case QMetaType::Float:
-		case QVariant::Double:
+		case QMetaType::Double:
 			{
 				return lv.toDouble() < rv.toDouble();
 				break;
@@ -451,7 +451,7 @@ namespace ExtWidgets
 				{
 					int type = p.get()->value().userType();
 
-					if (type == QVariant::StringList)
+					if (type == QMetaType::QStringList)
 					{
 						QStringList l = p.get()->value().toStringList();
 
@@ -542,7 +542,7 @@ namespace ExtWidgets
 			}
 
 			if (m_propertyTable->expandValuesToAllRows() == false &&
-					p->value().userType() != QVariant::StringList &&  row > 0)
+					p->value().userType() != QMetaType::QStringList &&  row > 0)
 			{
 				return QVariant();
 			}
@@ -564,7 +564,7 @@ namespace ExtWidgets
 			}
 
 			if (m_propertyTable->expandValuesToAllRows() == false &&
-					p->value().userType() != QVariant::StringList &&  row > 0)
+					p->value().userType() != QMetaType::QStringList &&  row > 0)
 			{
 				return QVariant();
 			}
@@ -613,7 +613,7 @@ namespace ExtWidgets
 			userType = v.value().userType();
 		}
 
-		if (userType == QVariant::Bool)
+		if (userType == QMetaType::Bool)
 		{
 			return QAbstractTableModel::flags(index);
 		}
@@ -979,7 +979,7 @@ namespace ExtWidgets
 
 	void PropertyTable::onCellClicked()
 	{
-		if (getSelectionType() == QVariant::Bool)
+		if (getSelectionType() == QMetaType::Bool)
 		{
 			toggleSelected();
 		}
@@ -987,7 +987,7 @@ namespace ExtWidgets
 
 	void PropertyTable::onCellSymbolKeyPressed(QString key)
 	{
-		if (getSelectionType() != QVariant::Bool && isSelectionReadOnly() == false)
+		if (getSelectionType() != QMetaType::Bool && isSelectionReadOnly() == false)
 		{
 			m_itemDelegate->setInitText(key);
 
@@ -997,7 +997,7 @@ namespace ExtWidgets
 
 	void PropertyTable::onCellToggleKeyPressed()
 	{
-		if (getSelectionType() == QVariant::Bool)
+		if (getSelectionType() == QMetaType::Bool)
 		{
 			toggleSelected();
 		}
@@ -1043,7 +1043,7 @@ namespace ExtWidgets
 					return;
 				}
 
-				if (po->value().userType() == QVariant::StringList)
+				if (po->value().userType() == QMetaType::QStringList)
 				{
 					addRowOperationsEnabled = true;
 
@@ -1080,8 +1080,8 @@ namespace ExtWidgets
 
 			int selectionType = getSelectionType();
 
-			if (selectionType == QVariant::String ||
-					selectionType == QVariant::StringList)
+			if (selectionType == QMetaType::QString ||
+					selectionType == QMetaType::QStringList)
 			{
 				QAction* a = menu.addAction(tr("Replace..."));
 				connect(a, &QAction::triggered, this, &PropertyTable::onReplace);
@@ -1142,8 +1142,8 @@ namespace ExtWidgets
 	{
 		int selectionType = getSelectionType();
 
-		if (selectionType != QVariant::String &&
-				selectionType != QVariant::StringList)
+		if (selectionType != QMetaType::QString &&
+				selectionType != QMetaType::QStringList)
 		{
 			return;
 		}
@@ -1194,16 +1194,16 @@ namespace ExtWidgets
 				return;
 			}
 
-			if (p->value().userType() == QVariant::String)
+			if (p->value().userType() == QMetaType::QString)
 			{
 				QString s = p->value().toString();
 
 				s = s.replace(replaceWhat, replaceTo, caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
 
-				modifiedObjectsData.insertMulti(p->caption(), std::make_pair(po, s));
+				modifiedObjectsData.insert(p->caption(), std::make_pair(po, s));
 			}
 
-			if (p->value().userType() == QVariant::StringList)
+			if (p->value().userType() == QMetaType::QStringList)
 			{
 				// StringList property can have more than one modified string.
 				// Because of this we need to take already added value from multiRowValues and make new modification.
@@ -1251,7 +1251,7 @@ namespace ExtWidgets
 			const std::shared_ptr<PropertyObject>& po = key.second;
 			const QVariant& value = it.second;
 
-			modifiedObjectsData.insertMulti(propertyName, std::make_pair(po, value));
+			modifiedObjectsData.insert(propertyName, std::make_pair(po, value));
 		}
 
 		if (modifiedObjectsData.empty() == true)
@@ -1303,7 +1303,7 @@ namespace ExtWidgets
 				return;
 			}
 
-			if (p->value().userType() == QVariant::StringList && newValue.userType() == QVariant::String)
+			if (p->value().userType() == QMetaType::QStringList && newValue.userType() == QMetaType::QString)
 			{
 				QStringList l = p->value().toStringList();
 
@@ -1318,7 +1318,7 @@ namespace ExtWidgets
 				newValue = l;
 			}
 
-			modifiedObjectsData.insertMulti(p->caption(), std::make_pair(po, newValue));
+			modifiedObjectsData.insert(p->caption(), std::make_pair(po, newValue));
 		}
 
 		if (modifiedObjectsData.empty() == true)
@@ -1357,7 +1357,7 @@ namespace ExtWidgets
 		bool groupByCategory = m_buttonGroupByCategory->isChecked() == true;
 
 		{
-			QMap<QString, std::shared_ptr<Property>> propertyItems;
+			QMultiMap<QString, std::shared_ptr<Property>> propertyItems;
 
 			std::map<QString, QString> propertyNames; // contains map [NameCategory, Name]
 
@@ -1425,7 +1425,7 @@ namespace ExtWidgets
 
 					//
 
-					propertyItems.insertMulti(propertyName, p);
+					propertyItems.insert(propertyName, p);
 
 					if (propertyNames.find(propertyName) == propertyNames.end())
 					{
@@ -1508,7 +1508,7 @@ namespace ExtWidgets
 
 				int type = p.get()->value().userType();
 
-				if (type == QVariant::StringList)
+				if (type == QMetaType::QStringList)
 				{
 					QStringList l = p.get()->value().toStringList();
 
@@ -1522,15 +1522,15 @@ namespace ExtWidgets
 						type == TuningValue::tuningValueTypeId() ||
 						type == qMetaTypeId<Afb::AfbParamValue>() ||
 						type == FilePathPropertyType::filePathTypeId() ||
-						type == QVariant::Int ||
-						type == QVariant::UInt ||
+						type == QMetaType::Int ||
+						type == QMetaType::UInt ||
 						type == QMetaType::Float ||
-						type == QVariant::Double ||
-						type == QVariant::Bool ||
-						type == QVariant::Color ||
-						type == QVariant::Uuid ||
-						type == QVariant::String ||
-						type == QVariant::StringList)
+						type == QMetaType::Double ||
+						type == QMetaType::Bool ||
+						type == QMetaType::QColor ||
+						type == QMetaType::QUuid ||
+						type == QMetaType::QString ||
+						type == QMetaType::QStringList)
 				{
 					pto.properties.push_back(p);
 				}
@@ -1581,7 +1581,7 @@ namespace ExtWidgets
 			}
 
 			if (expandValuesToAllRows() == false &&
-					userType != QVariant::StringList &&
+					userType != QMetaType::QStringList &&
 					row > 0)
 			{
 				// empty cell with no-repeated value is selected
@@ -1677,11 +1677,11 @@ namespace ExtWidgets
 				continue;
 			}
 
-			if (p->value().userType() == QVariant::Bool)
+			if (p->value().userType() == QMetaType::Bool)
 			{
 				bool b = p->value().toBool();
 
-				modifiedObjectsData.insertMulti(p->caption(), std::make_pair(po, !b));
+				modifiedObjectsData.insert(p->caption(), std::make_pair(po, !b));
 			}
 
 			if (p->value().userType() == qMetaTypeId<Afb::AfbParamValue>())
@@ -1692,7 +1692,7 @@ namespace ExtWidgets
 
 				v.setValue(!b);
 
-				modifiedObjectsData.insertMulti(p->caption(), std::make_pair(po, v.toVariant()));
+				modifiedObjectsData.insert(p->caption(), std::make_pair(po, v.toVariant()));
 			}
 		}
 
@@ -1736,7 +1736,7 @@ namespace ExtWidgets
 			return;
 		}
 
-		if (p->value().userType() != QVariant::StringList)
+		if (p->value().userType() != QMetaType::QStringList)
 		{
 			Q_ASSERT(false);
 			return;
@@ -1797,7 +1797,7 @@ namespace ExtWidgets
 			return;
 		}
 
-		if (p->value().userType() != QVariant::StringList)
+		if (p->value().userType() != QMetaType::QStringList)
 		{
 			Q_ASSERT(false);
 			return;
@@ -1840,7 +1840,7 @@ namespace ExtWidgets
 		{
 			QString colName = m_tableView->model()->headerData(i, Qt::Horizontal).toString();
 
-			int nPos = colName.indexOf(QChar::LineFeed);
+			qsizetype nPos = colName.indexOf(QChar::LineFeed);
 			if (nPos != -1)
 			{
 				colName = colName.left(nPos);
@@ -1861,7 +1861,7 @@ namespace ExtWidgets
 		{
 			QString colName = m_tableView->model()->headerData(i, Qt::Horizontal).toString();
 
-			int nPos = colName.indexOf(QChar::LineFeed);
+			qsizetype nPos = colName.indexOf(QChar::LineFeed);
 			if (nPos != -1)
 			{
 				colName = colName.left(nPos);

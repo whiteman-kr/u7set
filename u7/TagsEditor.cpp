@@ -27,7 +27,7 @@ TagsEditor::TagsEditor(DbController* dbController, QWidget* parent):
 	l << tr("Tag");
 	l << tr("Description");
 	m_tagsList->setHeaderLabels(l);
-	m_tagsList->setColumnCount(l.size());
+	m_tagsList->setColumnCount(static_cast<int>(l.size()));
 
 	connect(m_tagsList, &QTreeWidget::itemChanged, this, &TagsEditor::tagsListItemChanged);
 	connect(m_tagsList, &QTreeWidget::itemPressed, this, &TagsEditor::tagsListItemPressed);
@@ -196,7 +196,7 @@ void TagsEditor::updateChecks(const QString& text)
 {
 	// Get exitsing tags
 
-	QStringList textTags = text.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
+	QStringList textTags = text.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
 	for (QString& t : textTags)
 	{
 		t = t.trimmed();
@@ -232,7 +232,7 @@ void TagsEditor::updateTags()
 
 	// Get exitsing tags
 
-	QStringList tags = text.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
+	QStringList tags = text.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
 	for (QString& t : tags)
 	{
 		t = t.trimmed();

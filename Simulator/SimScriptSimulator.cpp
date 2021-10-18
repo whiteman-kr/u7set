@@ -32,19 +32,22 @@ namespace Sim
 
 		// Run watchdog thread
 		//
-		QtConcurrent::run(
-					[waitThread = this,
-					timeout = this->m_scriptSimulator->executionTimeout(),
-					log = ScopedLog{m_log}]
-					() mutable
-					{
-						bool ok = waitThread->wait(static_cast<unsigned long>(timeout));
-						if (ok == false)
-						{
-							log.writeError("Script execution timeout.");
-							waitThread->interruptScript();
-						}
-					});
+		QFuture<void> wdResult = QtConcurrent::run(
+							[waitThread = this,
+							timeout = this->m_scriptSimulator->executionTimeout(),
+							log = ScopedLog{m_log}]
+							() mutable
+							{
+								bool ok = waitThread->wait(static_cast<unsigned long>(timeout));
+								if (ok == false)
+								{
+									log.writeError("Script execution timeout.");
+									waitThread->interruptScript();
+								}
+							});
+
+		Q_UNUSED(wdResult);
+
 
 		// --
 		//

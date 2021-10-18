@@ -86,8 +86,8 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	//
 	m_showControlTabAccelerator = new QAction{tr("Schemas Control"), this};
 	m_showControlTabAccelerator->setShortcuts(QList<QKeySequence>{}
-											  <<  QKeySequence{Qt::CTRL + Qt::Key_QuoteLeft}
-											  <<  QKeySequence{Qt::CTRL + Qt::Key_AsciiTilde}
+											  <<  QKeySequence{Qt::CTRL | Qt::Key_QuoteLeft}
+											  <<  QKeySequence{Qt::CTRL | Qt::Key_AsciiTilde}
 											  );
 	m_showControlTabAccelerator->setShortcutContext(Qt::ApplicationShortcut);
 
@@ -215,8 +215,8 @@ void SimWidget::createToolBar()
 
 	m_runAction = new QAction{QIcon(":/Images/Images/SimRun.svg"), tr("Run simulation for complete project"), this};
 	QList<QKeySequence> runsKeys;
-	runsKeys << Qt::CTRL + Qt::Key_R;
-	runsKeys << Qt::CTRL + Qt::Key_F5;
+	runsKeys << QKeySequence{Qt::CTRL | Qt::Key_R};
+	runsKeys << QKeySequence{Qt::CTRL | Qt::Key_F5};
 	m_runAction->setShortcuts(runsKeys);
 	connect(m_runAction, &QAction::triggered, this, &SimWidget::runSimulation);
 
@@ -224,7 +224,7 @@ void SimWidget::createToolBar()
 	connect(m_pauseAction, &QAction::triggered, this, &SimWidget::pauseSimulation);
 
 	m_stopAction = new QAction{QIcon(":/Images/Images/SimStop.svg"), tr("Stop current simulation"), this};
-	m_stopAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
+	m_stopAction->setShortcut(Qt::SHIFT | Qt::Key_F5);
 	connect(m_stopAction, &QAction::triggered, this, &SimWidget::stopSimulation);
 
 	m_allowLanComm = new QAction{QIcon(":/Images/Images/SimAllowRegData.svg"), tr("Allow LogicModules' Application Data transmittion to AppDataSrv"), this};
@@ -506,7 +506,7 @@ using namespace std::chrono;
 					   .arg(currentTime.toString(QStringLiteral("hh:mm:ss")));
 
 	QString text = tr("%1d %2:%3:%4\n%6")
-					.arg(days, dateText.size() - 10, 10, QChar(' '))
+					.arg(days, static_cast<int>(dateText.size()) - 10, 10, QChar(' '))
 					.arg(hours, 2, 10, QChar('0'))
 					.arg(minutes, 2, 10, QChar('0'))
 					.arg(seconds, 2, 10, QChar('0'))
@@ -1184,7 +1184,7 @@ void SimToolBar::dragEnterEvent(QDragEnterEvent* event)
 		QVariant d = a->data();
 
 		if (d.isValid() &&
-			d.type() == QVariant::String)
+			d.typeId() == QMetaType::QString)
 		{
 			if (d.toString() == QLatin1String("IAmIndependentTrend"))
 			{
@@ -1195,7 +1195,7 @@ void SimToolBar::dragEnterEvent(QDragEnterEvent* event)
 	}
 
 	if (trendActionWidget != nullptr &&
-		trendActionWidget->geometry().contains(event->pos()) &&
+		trendActionWidget->geometry().contains(event->position().toPoint()) &&
 		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
 	{
 		event->acceptProposedAction();
@@ -1218,7 +1218,7 @@ void SimToolBar::dropEvent(QDropEvent* event)
 	{
 		QVariant d = a->data();
 		if (d.isValid() &&
-			d.type() == QVariant::String)
+			d.typeId() == QMetaType::QString)
 		{
 			if (d.toString() == QLatin1String("IAmIndependentTrend"))
 			{
@@ -1230,7 +1230,7 @@ void SimToolBar::dropEvent(QDropEvent* event)
 
 	if (trendAction != nullptr &&
 		trendActionWidget != nullptr &&
-		trendActionWidget->geometry().contains(event->pos()) &&
+		trendActionWidget->geometry().contains(event->position().toPoint()) &&
 		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
 	{
 		// Lets assume parent isManitorMainWindow
@@ -1247,7 +1247,7 @@ void SimToolBar::dropEvent(QDropEvent* event)
 		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
 
 		::Proto::AppSignalSet protoSetMessage;
-		bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+		bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 		if (ok == false)
 		{

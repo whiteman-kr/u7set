@@ -2433,7 +2433,7 @@ void MonitorSettings::clear()
 
 		RETURN_IF_FALSE(result);
 
-		QStringList schemaTagList = schemaTags.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
+		QStringList schemaTagList = schemaTags.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
 
 		for (QString& tag : schemaTagList)
 		{
@@ -3042,7 +3042,7 @@ bool TuningClientSettings::connectionChanged(const TuningClientSettings& src) co
 
 		result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::SCHEMA_TAGS, &schemaTags, log);
 
-		QStringList schemaTagList = schemaTags.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
+		QStringList schemaTagList = schemaTags.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
 
 		schemaTags = schemaTagList.join(Separator::SEMICOLON);
 

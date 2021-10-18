@@ -60,7 +60,7 @@ namespace Builder
 
 		//
 
-		QHash<int, QString> m_busSignals;
+		QHash<qsizetype, QString> m_busSignals;
 
 		Busses m_busses;
 

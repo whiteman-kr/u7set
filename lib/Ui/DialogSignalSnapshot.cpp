@@ -489,8 +489,9 @@ void SignalSnapshotModel::fillSignals()
 
 			for (const QString& mask : m_masks)
 			{
-				QRegularExpression rx(mask.trimmed());
-				//rx.setPatternSyntax(QRegularExpression::Wildcard); Qt6 porting... no direct setPatternSyntax in QRegularExpression
+				QString wildcardMask = QRegularExpression::wildcardToRegularExpression(mask.trimmed());
+				QRegularExpression rx(wildcardMask);
+				//rx.setPatternSyntax(QRegExp::Wildcard); Qt6 porting... no direct setPatternSyntax in QRegularExpression
 
 				for (const QString& strId : strIdList)
 				{

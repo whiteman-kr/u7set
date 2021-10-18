@@ -226,7 +226,7 @@ void EditSchemaWidget::createActions()
 	m_infoModeAction->setCheckable(true);
 	m_infoModeAction->setChecked(theSettings.isInfoMode());
 	m_infoModeAction->setMenuRole(QAction::NoRole);
-	m_infoModeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_I));
+	m_infoModeAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_I));
 	m_infoModeAction->setShortcutVisibleInContextMenu(true);
 	connect(m_infoModeAction, &QAction::toggled, this, [this](bool checked)
 		{
@@ -244,7 +244,7 @@ void EditSchemaWidget::createActions()
 	m_detachWindow = new QAction(tr("Detach/Attach Window"), this);
 	m_detachWindow->setStatusTip(tr("Detach/attach window..."));
 	m_detachWindow->setEnabled(true);
-	m_detachWindow->setShortcut(Qt::ALT + Qt::Key_D);
+	m_detachWindow->setShortcut(Qt::ALT | Qt::Key_D);
 	m_detachWindow->setShortcutVisibleInContextMenu(true);
 	connect(m_detachWindow, &QAction::triggered, this, &EditSchemaWidget::detachOrAttachWindow);
 
@@ -658,7 +658,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_sameWidthAction = new QAction(tr("Same Width"), this);
 	m_sameWidthAction->setEnabled(false);
-	m_sameWidthAction->setShortcut(Qt::ALT + Qt::Key_W);
+	m_sameWidthAction->setShortcut(Qt::ALT | Qt::Key_W);
 	m_sameWidthAction->setShortcutVisibleInContextMenu(true);
 	connect(m_sameWidthAction, &QAction::triggered, this, &EditSchemaWidget::sameWidth);
 	addAction(m_sameWidthAction);
@@ -667,7 +667,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_sameHeightAction = new QAction(tr("Same Height"), this);
 	m_sameHeightAction->setEnabled(false);
-	m_sameHeightAction->setShortcut(Qt::ALT + Qt::Key_H);
+	m_sameHeightAction->setShortcut(Qt::ALT | Qt::Key_H);
 	m_sameHeightAction->setShortcutVisibleInContextMenu(true);
 	connect(m_sameHeightAction, &QAction::triggered, this, &EditSchemaWidget::sameHeight);
 	addAction(m_sameHeightAction);
@@ -722,7 +722,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_bringToFrontAction = new QAction(tr("Bring to Front"), this);
 	m_bringToFrontAction->setEnabled(false);
-	m_bringToFrontAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Home));
+	m_bringToFrontAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Home));
 	m_bringToFrontAction->setShortcutVisibleInContextMenu(true);
 	connect(m_bringToFrontAction, &QAction::triggered, this, &EditSchemaWidget::bringToFront);
 	addAction(m_bringToFrontAction);
@@ -731,7 +731,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_bringForwardAction = new QAction(tr("Bring Forward"), this);
 	m_bringForwardAction->setEnabled(false);
-	m_bringForwardAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_PageUp));
+	m_bringForwardAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_PageUp));
 	m_bringForwardAction->setShortcutVisibleInContextMenu(true);
 	connect(m_bringForwardAction, &QAction::triggered, this, &EditSchemaWidget::bringForward);
 	addAction(m_bringForwardAction);
@@ -740,7 +740,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_sendToBackAction = new QAction(tr("Send to Back"), this);
 	m_sendToBackAction->setEnabled(false);
-	m_sendToBackAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_End));
+	m_sendToBackAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_End));
 	m_sendToBackAction->setShortcutVisibleInContextMenu(true);
 	connect(m_sendToBackAction, &QAction::triggered, this, &EditSchemaWidget::sendToBack);
 	addAction(m_sendToBackAction);
@@ -749,7 +749,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_sendBackwardAction = new QAction(tr("Send Backward"), this);
 	m_sendBackwardAction->setEnabled(false);
-	m_sendBackwardAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_PageDown));
+	m_sendBackwardAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_PageDown));
 	m_sendBackwardAction->setShortcutVisibleInContextMenu(true);
 	connect(m_sendBackwardAction, &QAction::triggered, this, &EditSchemaWidget::sendBackward);
 	addAction(m_sendBackwardAction);
@@ -803,7 +803,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_zoom100Action = new QAction(tr("Zoom 100%"), this);
 	m_zoom100Action->setEnabled(true);
-	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
+	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Asterisk));
 	m_zoom100Action->setShortcutVisibleInContextMenu(true);
 	connect(m_zoom100Action, &QAction::triggered, this, &VFrame30::BaseSchemaWidget::zoom100);
 	addAction(m_zoom100Action);
@@ -856,7 +856,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_toggleCommentAction = new QAction(tr("Comment/Uncomment"), this);
 	m_toggleCommentAction->setEnabled(false);
-	m_toggleCommentAction->setShortcut(Qt::CTRL + Qt::Key_Slash);
+	m_toggleCommentAction->setShortcut(Qt::CTRL | Qt::Key_Slash);
 	m_toggleCommentAction->setShortcutVisibleInContextMenu(true);
 	connect(m_toggleCommentAction, &QAction::triggered, this, &EditSchemaWidget::toggleComment);
 	addAction(m_toggleCommentAction);
@@ -865,7 +865,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_lockAction = new QAction(tr("Lock/Unlock"), this);
 	m_lockAction->setEnabled(false);
-	m_lockAction->setShortcut(Qt::CTRL + Qt::Key_L);
+	m_lockAction->setShortcut(Qt::CTRL | Qt::Key_L);
 	m_lockAction->setShortcutVisibleInContextMenu(true);
 	connect(m_lockAction, &QAction::triggered, this, &EditSchemaWidget::toggleLock);
 	addAction(m_lockAction);
@@ -905,14 +905,14 @@ void EditSchemaWidget::createActions()
 	// Other
 	//
 	m_addAppSignalAction = new QAction(tr("AddAppSignal"), this);
-	m_addAppSignalAction->setShortcut(Qt::ALT + Qt::Key_N);
+	m_addAppSignalAction->setShortcut(Qt::ALT | Qt::Key_N);
 	m_addAppSignalAction->setShortcutVisibleInContextMenu(true);
 	m_addAppSignalAction->setEnabled(false);
 	connect(m_addAppSignalAction, &QAction::triggered, this, &EditSchemaWidget::addNewAppSignalSelected);
 	addAction(m_addAppSignalAction);
 
 	m_appSignalPropertiesAction = new QAction(tr("AppSignalProperties"), this);
-	m_appSignalPropertiesAction->setShortcut(Qt::ALT + Qt::Key_S);
+	m_appSignalPropertiesAction->setShortcut(Qt::ALT | Qt::Key_S);
 	m_appSignalPropertiesAction->setShortcutVisibleInContextMenu(true);
 	m_appSignalPropertiesAction->setEnabled(false);
 	connect(m_appSignalPropertiesAction, &QAction::triggered, this, &EditSchemaWidget::appSignalsSelectedProperties);
@@ -922,7 +922,8 @@ void EditSchemaWidget::createActions()
 	// Create Sub Menus
 	//
 	m_fileMenu = new QMenu(this);
-	m_fileAction->setMenu(m_fileMenu);
+	//m_fileAction->setMenu(m_fileMenu);		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	int QT6_TO_DO_m_fileAction_setMenu;
 		m_fileMenu->addAction(m_detachWindow);
 		m_fileMenu->addSeparator();
 		m_fileMenu->addAction(m_fileCheckOutAction);
@@ -940,7 +941,8 @@ void EditSchemaWidget::createActions()
 		m_fileMenu->addAction(m_fileCloseAction);
 
 	m_addMenu = new QMenu(this);
-	m_addAction->setMenu(m_addMenu);
+	//m_addAction->setMenu(m_addMenu);		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	int QT6_TO_DO_m_addAction_setMenu;
 		m_addMenu->addAction(m_addLineAction);
 		m_addMenu->addAction(m_addRectAction);
 		m_addMenu->addAction(m_addPathAction);
@@ -1014,7 +1016,8 @@ void EditSchemaWidget::createActions()
 		}
 
 	m_editMenu = new QMenu(this);
-	m_editAction->setMenu(m_editMenu);
+	//m_editAction->setMenu(m_editMenu);	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	int QT6_m_editAction;
 		m_editMenu->addAction(m_undoAction);
 		m_editMenu->addAction(m_redoAction);
 		m_editMenu->addAction(m_editSeparatorAction0);
@@ -1027,7 +1030,8 @@ void EditSchemaWidget::createActions()
 		m_editMenu->addAction(m_deleteAction);
 
 	m_sizeAndPosMenu = new QMenu(this);
-	m_sizeAndPosAction->setMenu(m_sizeAndPosMenu);
+	//m_sizeAndPosAction->setMenu(m_sizeAndPosMenu);	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	int QT6_m_sizeAndPosAction;
 		m_sizeAndPosMenu->addAction(m_sameWidthAction);
 		m_sizeAndPosMenu->addAction(m_sameHeightAction);
 		m_sizeAndPosMenu->addAction(m_sameSizeAction);
@@ -1038,20 +1042,23 @@ void EditSchemaWidget::createActions()
 		m_sizeAndPosMenu->addAction(m_alignBottomAction);
 
 	m_orderMenu = new QMenu(this);
-	m_orderAction->setMenu(m_orderMenu);
+	//m_orderAction->setMenu(m_orderMenu);	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	int QT6_m_orderAction;
 		m_orderMenu->addAction(m_bringToFrontAction);
 		m_orderMenu->addAction(m_bringForwardAction);
 		m_orderMenu->addAction(m_sendBackwardAction);
 		m_orderMenu->addAction(m_sendToBackAction);
 
 	m_transformMenu = new QMenu(this);
-		m_transformAction->setMenu(m_transformMenu);
+	//m_transformAction->setMenu(m_transformMenu);	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	int QT6_m_transformAction;
 		m_transformMenu->addAction(m_transformIntoInputAction);
 		m_transformMenu->addAction(m_transformIntoInOutAction);
 		m_transformMenu->addAction(m_transformIntoOutputAction);
 
 	m_viewMenu = new QMenu(this);
-	m_viewAction->setMenu(m_viewMenu);
+	//m_viewAction->setMenu(m_viewMenu);	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	int QT6_m_viewAction;
 		m_viewMenu->addAction(m_zoomInAction);
 		m_viewMenu->addAction(m_zoomOutAction);
 		m_viewMenu->addAction(m_zoom100Action);
@@ -4325,7 +4332,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 					QAction* signalAction = new QAction(s, &menu);
 					if (signalStrIds.size() == 1)	// If not 1, then this shorcut will be added to "All Signals %1 Properties..."
 					{
-						signalAction->setShortcut(Qt::ALT + Qt::Key_S);
+						signalAction->setShortcut(Qt::ALT | Qt::Key_S);
 						signalAction->setShortcutVisibleInContextMenu(true);
 					}
 
@@ -4343,7 +4350,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 				if (signalStrIds.size() > 1)
 				{
 					QAction* allSignals = new QAction(tr("All Signals %1 Properties...").arg(signalStrIds.size()), &menu);
-					allSignals->setShortcut(Qt::ALT + Qt::Key_S);
+					allSignals->setShortcut(Qt::ALT | Qt::Key_S);
 					allSignals->setShortcutVisibleInContextMenu(true);
 					connect(allSignals, &QAction::triggered, this, &EditSchemaWidget::appSignalsSelectedProperties);
 
@@ -4366,7 +4373,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 			if (itemSignal != nullptr)
 			{
 				QAction* addSignal = new QAction(tr("Add New App Signal..."), &menu);
-				addSignal->setShortcut(Qt::ALT + Qt::Key_N);
+				addSignal->setShortcut(Qt::ALT | Qt::Key_N);
 				addSignal->setShortcutVisibleInContextMenu(true);
 
 				// Highlight this menu item if it was selected last time
@@ -5397,7 +5404,7 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 			m_editEngine->runSetProperty(VFrame30::PropertyNames::type, QVariant::fromValue(newType), item);
 		}
 
-		QRegExp rx("^\\$\\(([A-Za-z0-9_]+\\.)*[A-Za-z0-9_]+\\)$");	// $(AA.BB.CC)
+		QRegularExpression rx("^\\$\\(([A-Za-z0-9_]+\\.)*[A-Za-z0-9_]+\\)$");	// $(AA.BB.CC)
 
 		switch (newType)
 		{
@@ -5406,7 +5413,7 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 				Afb::AfbParamValue param = intValue;
 
 				QString text = intValueEdit->text().trimmed();
-				if (rx.exactMatch(text) == true)
+				if (rx.match(text).hasMatch() == true)
 				{
 					param.setReference(text);
 				}
@@ -5434,7 +5441,7 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 				Afb::AfbParamValue param = floatValue;
 
 				QString text = floatValueEdit->text().trimmed();
-				if (rx.exactMatch(text) == true)
+				if (rx.match(text).hasMatch() == true)
 				{
 					param.setReference(text);
 				}
@@ -5462,7 +5469,7 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 				Afb::AfbParamValue param = discreteValue;
 
 				QString text = discreteValueEdit->text().trimmed();
-				if (rx.exactMatch(text) == true)
+				if (rx.match(text).hasMatch() == true)
 				{
 					param.setReference(text);
 				}
@@ -6419,7 +6426,7 @@ void EditSchemaWidget::editPaste()
 		QByteArray cbData = mimeData->data(SchemaItemClipboardData::mimeType);
 
 		::Proto::EnvelopeSet message;
-		bool ok = message.ParseFromArray(cbData.constData(), cbData.size());
+		bool ok = message.ParseFromArray(cbData.constData(), static_cast<int>(cbData.size()));
 
 		if (ok == false)
 		{

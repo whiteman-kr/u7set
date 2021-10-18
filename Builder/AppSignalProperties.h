@@ -10,7 +10,7 @@ struct AppSignalPropertyDescription
 {
 	QString name;
 	QString caption;
-	QVariant::Type type;
+	QMetaType::Type type;
 
 	std::vector<std::pair<int, QString>> enumValues;
 
@@ -130,7 +130,7 @@ AppSignalProperties::addPropertyDescription(const QString& name,
 	newProperty.caption = generateCaption(name);
 
 	newProperty.enumValues = E::enumValues<TYPE>();
-	newProperty.type = QVariant::Int;
+	newProperty.type = QMetaType::Int;
 
 	newProperty.valueGetter = [getter](const AppSignal* s){ return TO_INT(getter(*s)); };
 	if (setter == nullptr)
@@ -158,12 +158,12 @@ AppSignalProperties::addPropertyDescription(const QString& name,
 	newProperty.name = name;
 	newProperty.caption = generateCaption(name);
 
-	newProperty.type = static_cast<QVariant::Type>(qMetaTypeId<TYPE>());
+	newProperty.type = static_cast<QMetaType::Type>(qMetaTypeId<TYPE>());
 
 	newProperty.valueGetter = [getter](const AppSignal* s)
 	{
 		QVariant value = QVariant::fromValue<TYPE>(getter(*s));
-		if (value.type() == QVariant::String)
+		if (value.typeId() == QMetaType::QString)
 		{
 			value = QVariant::fromValue<QString>(value.toString().replace(QChar::LineFeed, QChar::Space));
 		}
@@ -192,7 +192,7 @@ AppSignalProperties::addPropertyDescription(const QString& name,
 	newProperty.name = name;
 	newProperty.caption = generateCaption(name);
 
-	newProperty.type = static_cast<QVariant::Type>(qMetaTypeId<TuningValue>());
+	newProperty.type = static_cast<QMetaType::Type>(qMetaTypeId<TuningValue>());
 
 	newProperty.valueGetter = [getter](const AppSignal* s){ return getter(*s).toVariant(); };
 	if (setter == nullptr)
@@ -204,7 +204,7 @@ AppSignalProperties::addPropertyDescription(const QString& name,
 		newProperty.valueSetter = [getter, setter](AppSignal* s, const QVariant& v)
 		{
 			TuningValue newValue(getter(*s));
-			if (v.type() == QVariant::String)
+			if (v.typeId() == QMetaType::QString)
 			{
 				bool ok = false;
 				newValue.fromString(v.toString(), &ok);

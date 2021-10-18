@@ -474,7 +474,7 @@ namespace Builder
 		const AppSignal& constSignal() { return *m_refSignals[0]; }
 
 		const QVector<AppSignal*>& refSignals() const { return m_refSignals; }
-		int refSignalsCount() const { return m_refSignals.count(); }
+		int refSignalsCount() const { return static_cast<int>(m_refSignals.count()); }
 
 		bool isCompatible(const AppSignal* s, IssueLogger* log) const;
 		bool isCanBeConnectedTo(const UalItem &ualItem, const LogicAfbSignal& afbSignal, IssueLogger* log) const;

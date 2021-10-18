@@ -17,7 +17,7 @@ DialogShortcuts::DialogShortcuts(QWidget* parent)
 	headerLabels << tr("Shortcut");
 	headerLabels << tr("Description");
 
-	m_treeWidget->setColumnCount(headerLabels.size());
+	m_treeWidget->setColumnCount(static_cast<int>(headerLabels.size()));
 	m_treeWidget->setHeaderLabels(headerLabels);
 
 	//

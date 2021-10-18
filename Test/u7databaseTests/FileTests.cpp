@@ -1164,8 +1164,8 @@ void FileTests::is_file_checkedout()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	QVERIFY2(query.value("checkedOutInstanceId").toUuid() != 0, qPrintable("Error: no record in column \"checkedOutInstanceId\" from \"file\""));
-	QVERIFY2(query.value("checkedInInstanceId").toUuid() == 0, qPrintable("Error: there must not be record in column \"checkedInInstanceId\" from \"file\""));
+	QVERIFY2(query.value("checkedOutInstanceId").toUuid().isNull() == false, qPrintable("Error: no record in column \"checkedOutInstanceId\" from \"file\""));
+	QVERIFY2(query.value("checkedInInstanceId").toUuid().isNull() == true, qPrintable("Error: there must not be record in column \"checkedInInstanceId\" from \"file\""));
 
 	// Try checkedIn file
 	//

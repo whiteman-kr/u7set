@@ -1,6 +1,5 @@
 #include "DlgMetrologyConnection.h"
 
-#include <QDesktopWidget>
 #include <QApplication>
 #include <QFileDialog>
 #include <QClipboard>
@@ -275,7 +274,7 @@ DialogMetrologyConnectionItem::~DialogMetrologyConnectionItem()
 void DialogMetrologyConnectionItem::createInterface()
 {
 	setWindowFlags(Qt::Window | Qt::WindowCloseButtonHint);
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 	resize(static_cast<int>(screen.width() * 0.20), static_cast<int>(screen.height() * 0.08));
 	move(screen.center() - rect().center());
 
@@ -682,7 +681,7 @@ void DialogMetrologyConnection::createInterface()
 	setWindowIcon(QIcon(":/Images/Images/MetrologyConnection.svg"));
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 	resize(static_cast<int>(screen.width() * 0.5), static_cast<int>(screen.height() * 0.5));
 	move(screen.center() - rect().center());
 
@@ -715,19 +714,19 @@ void DialogMetrologyConnection::createInterface()
 
 	m_pCopyAction = new QAction(tr("&Copy As Text"), this);
 	m_pCopyAction->setIcon(QIcon(":/Images/Images/Copy.svg"));
-	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
+	m_pCopyAction->setShortcut(Qt::CTRL | Qt::Key_C);
 
 	m_pExportAction = new QAction(tr("&Export ..."), this);
 	m_pExportAction->setIcon(QIcon(":/Images/Images/SchemaUpload.svg"));
-	m_pExportAction->setShortcut(Qt::CTRL + Qt::Key_E);
+	m_pExportAction->setShortcut(Qt::CTRL | Qt::Key_E);
 
 	m_pImportAction = new QAction(tr("&Import ..."), this);
 	m_pImportAction->setIcon(QIcon(":/Images/Images/SchemaDownload.svg"));
-	m_pImportAction->setShortcut(Qt::CTRL + Qt::Key_I);
+	m_pImportAction->setShortcut(Qt::CTRL | Qt::Key_I);
 
 	m_pSelectAllAction = new QAction(tr("Select &All"), this);
 	m_pSelectAllAction->setIcon(QIcon(":/Images/Images/SelectAll.svg"));
-	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
+	m_pSelectAllAction->setShortcut(Qt::CTRL | Qt::Key_A);
 
 	connect(m_pEditAction, &QAction::triggered, this, &DialogMetrologyConnection::editConnection);
 	connect(m_pCreateAction, &QAction::triggered, this, &DialogMetrologyConnection::newConnection);
@@ -1011,9 +1010,9 @@ void DialogMetrologyConnection::updateList()
 			m_findText.append("*");
 		}
 
-		QRegExp rx(m_findText);
-		rx.setPatternSyntax(QRegExp::Wildcard);
-		rx.setCaseSensitivity(Qt::CaseInsensitive);
+		QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(m_findText));
+		//rx.setPatternSyntax(QRegExp::Wildcard);
+		//rx.setCaseSensitivity(Qt::CaseInsensitive);	CaseInsensitive by default?
 
 		int count = m_connectionBase.count();
 		for(int i = 0; i < count; i++)
@@ -1024,7 +1023,8 @@ void DialogMetrologyConnection::updateList()
 
 			for(int ioType = 0; ioType < Metrology::ConnectionIoTypeCount; ioType++)
 			{
-				if(rx.exactMatch(connection.appSignalID(ioType)) == true)
+				//if(rx.exactMatch(connection.appSignalID(ioType)) == true)
+				if(rx.match(connection.appSignalID(ioType)).hasMatch() == true)
 				{
 					found = true;
 				}
@@ -1317,7 +1317,7 @@ void DialogMetrologyConnection::removeConnection()
 		return;
 	}
 
-	int selectedConnectionCount = m_pView->selectionModel()->selectedRows().count();
+	qsizetype selectedConnectionCount = m_pView->selectionModel()->selectedRows().count();
 	if (selectedConnectionCount == 0)
 	{
 		QMessageBox::information(this, m_windowTitle, tr("Please, select connection for delete!"));
@@ -1335,7 +1335,7 @@ void DialogMetrologyConnection::removeConnection()
 
 	QVector<int> removeIndexList;
 
-	for( int i = 0; i < selectedConnectionCount; i++)
+	for(qsizetype i = 0; i < selectedConnectionCount; i++)
 	{
 		int tableIndex = pSourceProxyModel->mapToSource(m_pView->selectionModel()->selectedRows().at(i)).row();
 		if (tableIndex < 0 && tableIndex >= m_connectionTable.connectionCount())
@@ -1402,14 +1402,14 @@ void DialogMetrologyConnection::unremoveConnection()
 		return;
 	}
 
-	int selectedConnectionCount = m_pView->selectionModel()->selectedRows().count();
+	qsizetype selectedConnectionCount = m_pView->selectionModel()->selectedRows().count();
 	if (selectedConnectionCount == 0)
 	{
 		QMessageBox::information(this, m_windowTitle, tr("Please, select connection for undo delete!"));
 		return;
 	}
 
-	for( int i = 0; i < selectedConnectionCount; i++)
+	for(qsizetype i = 0; i < selectedConnectionCount; i++)
 	{
 		int tableIndex = pSourceProxyModel->mapToSource(m_pView->selectionModel()->selectedRows().at(i)).row();
 		if (tableIndex < 0 && tableIndex >= m_connectionTable.connectionCount())
@@ -1476,7 +1476,7 @@ void DialogMetrologyConnection::restoreConnection()
 		return;
 	}
 
-	int selectedConnectionCount = m_pView->selectionModel()->selectedRows().count();
+	qsizetype selectedConnectionCount = m_pView->selectionModel()->selectedRows().count();
 	if (selectedConnectionCount == 0)
 	{
 		QMessageBox::information(this, m_windowTitle, tr("Please, select connection for restore!"));
@@ -1485,7 +1485,7 @@ void DialogMetrologyConnection::restoreConnection()
 
 	int restoredIndex = -1;
 
-	for( int i = 0; i < selectedConnectionCount; i++)
+	for(qsizetype i = 0; i < selectedConnectionCount; i++)
 	{
 		int tableIndex = pSourceProxyModel->mapToSource(m_pView->selectionModel()->selectedRows().at(i)).row();
 		if (tableIndex >= 0 && tableIndex < m_connectionTable.connectionCount())
@@ -1708,7 +1708,7 @@ void DialogMetrologyConnection::copy()
 		return;
 	}
 
-	int selectedConnectionCount = m_pView->selectionModel()->selectedRows().count();
+	qsizetype selectedConnectionCount = m_pView->selectionModel()->selectedRows().count();
 	if (selectedConnectionCount == 0)
 	{
 		return;
@@ -1774,8 +1774,8 @@ void DialogMetrologyConnection::onContextMenu(QPoint)
 	bool enableUnremove = false;
 	bool enableRestore = false;
 
-	int selectedConnectionCount = m_pView->selectionModel()->selectedRows().count();
-	for( int i = 0; i < selectedConnectionCount; i++)
+	qsizetype selectedConnectionCount = m_pView->selectionModel()->selectedRows().count();
+	for(qsizetype i = 0; i < selectedConnectionCount; i++)
 	{
 		int conncetionIndex = pSourceProxyModel->mapToSource(m_pView->selectionModel()->selectedRows().at(i)).row();
 
@@ -1858,7 +1858,7 @@ void DialogMetrologyConnection::saveColumnsWidth()
 	{
 		QString columnName = m_pView->model()->headerData(i, Qt::Horizontal).toString();
 
-		int pos = columnName.indexOf(QChar::LineFeed);
+		qsizetype pos = columnName.indexOf(QChar::LineFeed);
 		if (pos != -1)
 		{
 			columnName = columnName.left(pos);
@@ -1881,7 +1881,7 @@ void DialogMetrologyConnection::restoreColumnsWidth()
 	{
 		QString columnName = m_pView->model()->headerData(i, Qt::Horizontal).toString();
 
-		int pos = columnName.indexOf(QChar::LineFeed);
+		qsizetype pos = columnName.indexOf(QChar::LineFeed);
 		if (pos != -1)
 		{
 			columnName = columnName.left(pos);
@@ -1953,7 +1953,7 @@ void DialogComment::createInterface()
 	setWindowTitle(tr("Check In"));
 	setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.15));
 	move(screen.center() - rect().center());
 

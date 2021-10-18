@@ -182,9 +182,9 @@ namespace Builder
 
 		QVector<AppSignal*> signalsToWrite;
 
-		int signalCount = m_signalSet->count();
+		qsizetype signalCount = m_signalSet->count();
 
-		for(int i = 0; i < signalCount; i++)
+		for(qsizetype i = 0; i < signalCount; i++)
 		{
 			AppSignal& signal = (*m_signalSet)[i];
 
@@ -222,7 +222,7 @@ namespace Builder
 		// Writing signals
 		//
 		xml.writeStartElement("Signals");
-		xml.writeIntAttribute("Count", signalsToWrite.count());
+		xml.writeIntAttribute("Count", static_cast<int>(signalsToWrite.count()));
 
 		for(AppSignal* signal : signalsToWrite)
 		{
@@ -301,9 +301,9 @@ namespace Builder
 
 		const Hardware::DeviceChassis* dataSourceChassis = lm->getParentChassis();
 
-		int signalCount = m_signalSet->count();
+		qsizetype signalCount = m_signalSet->count();
 
-		for(int i = 0; i < signalCount; i++)
+		for(qsizetype i = 0; i < signalCount; i++)
 		{
 			const AppSignal& appSignal =  (*m_signalSet)[i];
 

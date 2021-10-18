@@ -134,9 +134,9 @@ namespace Builder
 		//
 		tuningSet->Clear();
 
-		int signalsCount = signalSet->count();
+		qsizetype signalsCount = signalSet->count();
 
-		for (int i = 0; i < signalsCount; i++)
+		for (qsizetype i = 0; i < signalsCount; i++)
 		{
 			const AppSignal& s = (*signalSet)[i];
 
@@ -158,9 +158,10 @@ namespace Builder
 					continue;
 				}
 
-				QRegExp rx(m);
-				rx.setPatternSyntax(QRegExp::Wildcard);
-				if (rx.exactMatch(s.lmEquipmentID()))
+				QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(m));
+				//rx.setPatternSyntax(QRegExp::Wildcard);
+
+				if (rx.match(s.lmEquipmentID()).hasMatch() == true)		// exactMatch
 				{
 					result = true;
 					break;

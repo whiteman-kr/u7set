@@ -227,7 +227,7 @@ void BuildTabPage::CreateActions()
 	addAction(m_findNextAction);
 
 	m_prevIssueAction = new QAction(tr("Prev Issue"), this);
-	m_prevIssueAction->setShortcut(Qt::SHIFT + Qt::Key_F6);
+	m_prevIssueAction->setShortcut(Qt::SHIFT | Qt::Key_F6);
 	connect(m_prevIssueAction, &QAction::triggered, this, &BuildTabPage::prevIssue);
 	addAction(m_prevIssueAction);
 
@@ -465,7 +465,7 @@ void BuildTabPage::prevIssue()
 
 	// Find issue
 	//
-	QRegExp rx(regExpVal);
+	QRegularExpression rx(regExpVal);
 	bool found = m_outputWidget->find(rx, QTextDocument::FindBackward);
 
 	if (found == false)
@@ -526,7 +526,7 @@ void BuildTabPage::nextIssue()
 
 	// Find Issue
 	//
-	QRegExp rx(regExpVal);
+	QRegularExpression rx(regExpVal);
 	bool found = m_outputWidget->find(rx);
 
 	if (found == false)

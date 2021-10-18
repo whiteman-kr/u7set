@@ -139,7 +139,7 @@ namespace  Tuning
 
 			sortSignalsByAcquiredProperty(signalList);
 
-			int signalCount = signalList.size();
+			int signalCount = static_cast<int>(signalList.size());
 
 			switch(t)
 			{
@@ -457,14 +457,14 @@ namespace  Tuning
 
 	int TuningData::getSignalsCount() const
 	{
-		int count = 0;
+		qsizetype count = 0;
 
 		for(int i = TYPE_ANALOG_FLOAT; i < TYPES_COUNT; i++)
 		{
 			count += m_tuningSignals[i].count();
 		}
 
-		return count;
+		return static_cast<int>(count);
 	}
 
 	void TuningData::getMetadataFields(QStringList& metadataFields, int* metadataVersion) const
@@ -528,7 +528,7 @@ namespace  Tuning
 
 		for(QVector<AppSignal*>& signalList : m_tuningSignals)
 		{
-			signalCount += signalList.count();
+			signalCount += static_cast<int>(signalList.count());
 		}
 
 		xml.writeIntAttribute(TUNING_ALL_SIGNALS_COUNT, signalCount);
@@ -547,7 +547,7 @@ namespace  Tuning
 
 			xml.writeStartElement(typeSection[type]);	//	<typeSection[type]>
 
-			xml.writeIntAttribute(TUNING_SIGNALS_COUNT, tuningSignals.count());
+			xml.writeIntAttribute(TUNING_SIGNALS_COUNT, static_cast<int>(tuningSignals.count()));
 
 			for(AppSignal* signal : tuningSignals)
 			{
@@ -683,7 +683,7 @@ namespace  Tuning
 
 	void TuningData::sortSignalsByAcquiredProperty(QVector<AppSignal *>& tuningSignals)
 	{
-		int count = tuningSignals.count();
+		qsizetype count = tuningSignals.count();
 
 		QVector<AppSignal*> acquired;
 		QVector<AppSignal*> nonAcquired;
@@ -716,11 +716,11 @@ namespace  Tuning
 
 	void TuningData::sortByAppSignalID(QVector<AppSignal*>& signalList)
 	{
-		int count = signalList.size();
+		qsizetype count = signalList.size();
 
-		for(int i = 0; i < count - 1; i++)
+		for(qsizetype i = 0; i < count - 1; i++)
 		{
-			for(int k = i + 1; k < count; k++)
+			for(qsizetype k = i + 1; k < count; k++)
 			{
 				AppSignal* s1 = signalList[i];
 				AppSignal* s2 = signalList[k];

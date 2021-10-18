@@ -21,16 +21,16 @@ QWidget* TagsToColorDelegate::createEditor(QWidget *parent, const QStyleOptionVi
 
 	if (index.column() == static_cast<int>(MonitorBehaviorEditWidget::Columns::Tag))
 	{
-		QRegExp rx("[A-Za-z\\d]*$");
-		edit->setValidator(new QRegExpValidator(rx, edit));
+		QRegularExpression rx("[A-Za-z\\d]*$");
+		edit->setValidator(new QRegularExpressionValidator(rx, edit));
 	}
 
 	if (index.column() == static_cast<int>(MonitorBehaviorEditWidget::Columns::Color1) ||
 			index.column() == static_cast<int>(MonitorBehaviorEditWidget::Columns::Color2))
 	{
 
-		QRegExp rx("^[#][A-Fa-f\\d]*$");
-		edit->setValidator(new QRegExpValidator(rx, edit));
+		QRegularExpression rx("^[#][A-Fa-f\\d]*$");
+		edit->setValidator(new QRegularExpressionValidator(rx, edit));
 	}
 
 	return edit;
@@ -1036,7 +1036,7 @@ void DialogClientBehavior::showEvent(QShowEvent*)
 {
 	// Resize depends on monitor size, DPI, resolution
 	//
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 
 	resize(static_cast<int>(screen.width() * 0.60),
 		   static_cast<int>(screen.height() * 0.50));

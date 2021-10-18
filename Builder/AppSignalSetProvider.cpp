@@ -118,12 +118,12 @@ void AppSignalPropertyManager::setValue(AppSignal* signal, int propertyIndex, co
 	m_propertyDescription[static_cast<size_t>(propertyIndex)].valueSetter(signal, value);
 }
 
-QVariant::Type AppSignalPropertyManager::type(const int propertyIndex) const
+QMetaType::Type AppSignalPropertyManager::type(const int propertyIndex) const
 {
 	if (isNotCorrect(propertyIndex))
 	{
 		assert(false);
-		return QVariant::Invalid;
+		return QMetaType::UnknownType;
 	}
 	return m_propertyDescription[static_cast<size_t>(propertyIndex)].type;
 }
@@ -227,7 +227,7 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal &signal)
 
 		QString propertyName = specificProperty->caption();
 		bool propertyIsEnum = specificProperty->isEnum();
-		QVariant::Type type = specificProperty->value().type();
+		QMetaType::Type type = static_cast<QMetaType::Type>(specificProperty->value().typeId());
 
 		newProperty.name = propertyName;
 		newProperty.caption = AppSignalProperties::generateCaption(propertyName);
@@ -251,7 +251,7 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal &signal)
 				return QVariant();
 			}
 
-			assert(qv.type() == type);
+			assert(qv.typeId() == type);
 
 			return qv;
 		};
@@ -270,11 +270,11 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal &signal)
 
 		switch (newProperty.type)
 		{
-		case QVariant::String:
-		case QVariant::Double:
-		case QVariant::Int:
-		case QVariant::UInt:
-		case QVariant::Bool:
+		case QMetaType::QString:
+		case QMetaType::Double:
+		case QMetaType::Int:
+		case QMetaType::UInt:
+		case QMetaType::Bool:
 			break;
 		default:
 			assert(false);
@@ -348,14 +348,14 @@ void AppSignalPropertyManager::reloadPropertyBehaviour()
 
 	QString uncorrectFileMessage =  QString("Uncorrect format of file \"%1\"").arg(Db::File::SignalPropertyBehaviorFileName);
 
-	int nameIndex = fieldNameList.indexOf("PropertyName");
+	qsizetype nameIndex = fieldNameList.indexOf("PropertyName");
 	if (nameIndex < 0)
 	{
 		QMessageBox::critical(m_parentWidget, "Error", uncorrectFileMessage + ": PropertyName column not found");
 		return;
 	}
 
-	int precisionIndex = fieldNameList.indexOf("DependsOnPrecision");
+	qsizetype precisionIndex = fieldNameList.indexOf("DependsOnPrecision");
 	if (precisionIndex < 0)
 	{
 		QMessageBox::critical(m_parentWidget, "Error", uncorrectFileMessage + ": DependosOnPrecision column not found");
@@ -367,7 +367,7 @@ void AppSignalPropertyManager::reloadPropertyBehaviour()
 	{
 		for (int j = 0; j < IN_OUT_TYPE_COUNT; j++)
 		{
-			typeIndexes[static_cast<size_t>(i * SIGNAL_TYPE_COUNT + j)] = fieldNameList.indexOf(typeName(i, j));
+			typeIndexes[static_cast<size_t>(i * SIGNAL_TYPE_COUNT + j)] = static_cast<int>(fieldNameList.indexOf(typeName(i, j)));
 		}
 	}
 
@@ -1206,7 +1206,7 @@ QVector<int> AppSignalSetProvider::cloneSignals(const QSet<int>& signalIDs)
 
 		dbController()->addSignal(type, &groupSignals, m_parentWidget);
 
-		int prevSize = resultSignalIDs.size();
+		qsizetype prevSize = resultSignalIDs.size();
 		resultSignalIDs.resize(prevSize + groupSignals.count());
 
 		for (int i = 0; i < groupSignals.count(); i++)

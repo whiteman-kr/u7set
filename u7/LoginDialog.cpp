@@ -47,7 +47,7 @@ void LoginDialog::showEvent(QShowEvent*)
 	// Resize depends on monitor size, DPI, resolution
 	//
 	QSize resizeTo = size();
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 	resizeTo.setWidth(static_cast<int>(screen.size().width() * 0.15));
 
 	resize(resizeTo);

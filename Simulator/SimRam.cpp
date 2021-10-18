@@ -99,7 +99,7 @@ namespace Sim
 
 		if (allZeroes == true)
 		{
-			for (int i = 0; i < std::min(m_data.size(), 32) / 2; i++, offest++)
+			for (int i = 0; i < std::min(static_cast<int>(m_data.size()), 32) / 2; i++, offest++)
 			{
 				quint16 data;
 				readWord(offest, &data, E::ByteOrder::BigEndian, true);
@@ -184,7 +184,7 @@ namespace Sim
 			assert(zeroBasedOffsetW >= 0 && zeroBasedOffsetW < m_data.size() / 2);
 
 			quint16* dataPtr = reinterpret_cast<quint16*>(m_data.data()) + zeroBasedOffsetW;
-			qint32 wordsToOverride = data.size() / 2;
+			qint32 wordsToOverride = static_cast<qint32>(data.size() / 2);
 			for (qint32 i = 0; i < wordsToOverride; i++)
 			{
 				m_overrideData[zeroBasedOffsetW++].applyOverlapping(dataPtr++);

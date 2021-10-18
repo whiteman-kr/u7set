@@ -147,8 +147,8 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 	// Set height and width
 	//
-	QRegExp rx("^[A-Za-z\\d_]{1,64}$");
-	QRegExpValidator* strIdValidator = new QRegExpValidator(rx, this);
+	QRegularExpression rx("^[A-Za-z\\d_]{1,64}$");
+	auto strIdValidator = new QRegularExpressionValidator(rx, this);
 	ui->strdIdEdit->setValidator(strIdValidator);
 
 	ui->strdIdEdit->setText(schema->schemaId());

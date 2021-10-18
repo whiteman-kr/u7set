@@ -23,7 +23,7 @@ SchemaLayersDialog::SchemaLayersDialog(EditSchemaView* schemaView, QWidget *pare
 	header << tr("Active");
 	header << tr("Show");
 	header << tr("Print");
-	ui->m_layersList->setColumnCount(header.size());
+	ui->m_layersList->setColumnCount(static_cast<int>(header.size()));
 	ui->m_layersList->setHeaderLabels(header);
 	ui->m_layersList->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -71,7 +71,7 @@ void SchemaLayersDialog::showEvent(QShowEvent*)
 {
 	// Resize depends on monitor size, DPI, resolution
 	//
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 
 	resize(static_cast<int>(screen.width() * 0.20),
 		   static_cast<int>(screen.height() * 0.15));

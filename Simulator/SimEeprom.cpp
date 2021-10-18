@@ -194,10 +194,10 @@ namespace Sim
 	{
 		// eepromOffset - in bytes
 		//
-		if (eepromOffset < 0 || eepromOffset > m_data.size() - sizeof(TYPE))
+		if (eepromOffset < 0 || eepromOffset > static_cast<int>(m_data.size() - sizeof(TYPE)))
 		{
 			assert(eepromOffset >= 0 &&
-				   eepromOffset - sizeof(TYPE) <= m_data.size());
+				   static_cast<qsizetype>(eepromOffset - sizeof(TYPE)) <= m_data.size());
 			return 0;
 		}
 

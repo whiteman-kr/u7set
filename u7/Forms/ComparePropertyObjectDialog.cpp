@@ -175,7 +175,7 @@ void ComparePropertyObjectDialog::showEvent(QShowEvent*)
 {
 	// Resize depends on monitor size, DPI, resolution
 	//
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 
 	resize(static_cast<int>(screen.width() * 0.30),
 		   static_cast<int>(screen.height() * 0.45));

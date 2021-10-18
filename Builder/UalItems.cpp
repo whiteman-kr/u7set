@@ -2019,11 +2019,11 @@ namespace Builder
 	{
 		// sorting m_refSignals by appSignalID ascending
 		//
-		int count = m_refSignals.count();
+		qsizetype count = m_refSignals.count();
 
-		for(int i = 0; i < count - 1; i++)
+		for(qsizetype i = 0; i < count - 1; i++)
 		{
-			for(int k = i + 1; k < count; k++)
+			for(qsizetype k = i + 1; k < count; k++)
 			{
 				if (m_refSignals[i]->appSignalID() > m_refSignals[k]->appSignalID())
 				{

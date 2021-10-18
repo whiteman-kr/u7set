@@ -62,7 +62,7 @@ namespace Builder
 			// Let's assume that module (LM) has a Chassis parent, and LM's id is like SYSTEM_RACK_CHASSIS_LM.
 			// Try to cut ID to chassis
 			//
-			int lastUnderscoreIndex = lm.lastIndexOf('_');
+			qsizetype lastUnderscoreIndex = lm.lastIndexOf('_');
 			if (lastUnderscoreIndex != -1)
 			{
 				lm = lm.left(lastUnderscoreIndex + 1);
@@ -312,7 +312,7 @@ namespace Builder
 			return !reader.hasError();
 		}
 
-		if (reader.name() != "Connections")
+		if (reader.name() != QLatin1String("Connections"))
 		{
 			reader.raiseError(QObject::tr("The file is not an Connections file."));
 			*errorMessage = reader.errorString();
@@ -323,7 +323,7 @@ namespace Builder
 		//
 		while (reader.readNextStartElement())
 		{
-			if (reader.name() == "Connection")
+			if (reader.name() == QLatin1String("Connection"))
 			{
 				std::shared_ptr<Hardware::Connection> c = std::make_shared<Hardware::Connection>();
 

@@ -138,7 +138,7 @@ namespace Hardware
 		const QVector<TxRxSignalShared>& txSignals() const { return m_txSignals; }
 		const QVector<TxRxSignalShared>& rxSignals() const { return m_rxSignals; }
 
-		int rxSignalsCount() const { return m_rxSignals.count(); }
+		int rxSignalsCount() const { return static_cast<int>(m_rxSignals.count()); }
 
 		void getTxAnalogSignals(QVector<TxRxSignalShared>& txSignals, bool excludeRawSignals) const;
 		void getTxDiscreteSignals(QVector<TxRxSignalShared>& txSignals, bool excludeRawSignals) const;
@@ -230,7 +230,7 @@ namespace Hardware
 		int txBusSignalsSizeW() const { return m_txBusSignalsSizeW; }
 		int txDiscreteSignalsSizeW() const { return m_txDiscreteSignalsSizeW; }
 
-		int txSignalsCount() const { return m_txSignals.count();}
+		int txSignalsCount() const { return static_cast<int>(m_txSignals.count());}
 
 		int portNo() const { return m_portNo; }
 

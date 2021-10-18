@@ -18,7 +18,7 @@ SimBasePage::SimBasePage(SimIdeSimulator* simulator, QWidget* parent)
 	setBackgroundRole(QPalette::Window);
 
 	m_closeAction = new QAction(tr("Close"), this);
-	m_closeAction->setShortcut(Qt::CTRL + Qt::Key_W);	// QKeySequence::Close leads to CTRL+F4 somehow (((
+	m_closeAction->setShortcut(Qt::CTRL | Qt::Key_W);	// QKeySequence::Close leads to CTRL+F4 somehow (((
 	connect(m_closeAction, &QAction::triggered, this, &SimBasePage::deleteLater);
 	addAction(m_closeAction);
 

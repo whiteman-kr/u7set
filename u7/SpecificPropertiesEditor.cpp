@@ -342,7 +342,7 @@ void SpecificPropertyModel::remove(QModelIndexList indexes)
 
 	std::sort(rowsToDelete.begin(), rowsToDelete.end(),  std::greater<int>());
 
-	beginRemoveRows(QModelIndex(), rowCount() - indexes.size(), rowCount() - 1);
+	beginRemoveRows(QModelIndex(), static_cast<int>(rowCount() - indexes.size()), rowCount() - 1);
 
 	for (int row : rowsToDelete)
 	{
@@ -361,9 +361,9 @@ void SpecificPropertyModel::remove(QModelIndexList indexes)
 
 	m_sortedIndexes.resize(m_propertyDescriptions.size());
 
-	for (int i = 0; i < m_sortedIndexes.size(); i++)
+	for (size_t i = 0; i < m_sortedIndexes.size(); i++)
 	{
-		m_sortedIndexes[i] = i;
+		m_sortedIndexes[i] = static_cast<int>(i);
 	}
 
 	sort(m_sortColumn, m_sortOrder);
@@ -532,8 +532,8 @@ bool SpecificPropertyModel::checkLimits(QString* errorMsg)
 
 		if (lowLimit.isNull() == false &&
 		    highLimit.isNull() == false &&
-		    lowLimit.canConvert(QMetaType::Double) == true &&
-		    highLimit.canConvert(QMetaType::Double) == true)
+			lowLimit.canConvert(QMetaType::fromType<double>()) == true &&
+			highLimit.canConvert(QMetaType::fromType<double>()) == true)
 		{
 			double lowLimitDouble = lowLimit.toDouble();
 			double highLimitDouble = highLimit.toDouble();
@@ -545,7 +545,7 @@ bool SpecificPropertyModel::checkLimits(QString* errorMsg)
 			}
 
 			if (defaultValue.isNull() == false &&
-			    defaultValue.canConvert(QMetaType::Double) == true)
+				defaultValue.canConvert(QMetaType::fromType<double>()) == true)
 			{
 				double defaultValueDouble = defaultValue.toDouble();
 
@@ -933,13 +933,13 @@ void SpecificPropertiesEditor::setText(const QString& text)
 			// --
 			//
 			bool startedFromDynamicEnum = strType.trimmed().startsWith(QLatin1String("DynamicEnum"), Qt::CaseInsensitive);
-			int openBrace = strType.indexOf('[');
-			int closeBrace = strType.lastIndexOf(']');
+			qsizetype openBrace = strType.indexOf('[');
+			qsizetype closeBrace = strType.lastIndexOf(']');
 
 			if (openBrace != -1 &&
-					closeBrace != -1 &&
-					openBrace < closeBrace &&
-					startedFromDynamicEnum == true)
+				closeBrace != -1 &&
+				openBrace < closeBrace &&
+				startedFromDynamicEnum == true)
 			{
 				QString valuesString = strType.mid(openBrace + 1, closeBrace - openBrace - 1);
 				valuesString.remove(' ');
@@ -951,7 +951,7 @@ void SpecificPropertiesEditor::setText(const QString& text)
 			{
 				auto [propertyType, propertyOk] = PropertyObject::parseSpecificPropertyType(strType);
 
-						if (propertyOk == false)
+				if (propertyOk == false)
 				{
 					QString message = tr("SpecificProperties: Specific property type is not recognized: %1").arg(strType);
 					QMessageBox::critical(this, qAppName(), message);

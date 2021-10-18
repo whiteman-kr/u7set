@@ -175,7 +175,7 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	
 	}
 	else
 	{
-		QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+		QRect screen = parentWidget()->screen()->availableGeometry();
 
 		resize(static_cast<int>(screen.width() * 0.35),
 			   static_cast<int>(screen.height() * 0.35));

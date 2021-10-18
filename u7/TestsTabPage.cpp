@@ -338,7 +338,7 @@ QSize OutputDockWidgetTitleButton::sizeHint() const
 	return QSize(size, size);
 }
 
-void OutputDockWidgetTitleButton::enterEvent(QEvent* event)
+void OutputDockWidgetTitleButton::enterEvent(QEnterEvent* event)
 {
 	if (isEnabled()) update();
 	QAbstractButton::enterEvent(event);
@@ -463,7 +463,7 @@ void OutputDockWidget::prevIssue(const QLatin1String& prefix)
 
 	// Find issue
 	//
-	QRegExp rx(regExpVal);
+	QRegularExpression rx(regExpVal);
 	bool found = m_logTextEdit->find(rx, QTextDocument::FindBackward);
 
 	if (found == false)
@@ -532,7 +532,7 @@ void OutputDockWidget::nextIssue(const QLatin1String& prefix)
 
 	// Find Issue
 	//
-	QRegExp rx(regExpVal);
+	QRegularExpression rx(regExpVal);
 	bool found = m_logTextEdit->find(rx);
 
 	if (found == false)
@@ -2967,7 +2967,7 @@ void TestsWidget::createTestsDock()
 	QStringList header;
 	header << tr("File Name");
 	m_openFilesTreeWidget->setHeaderLabels(header);
-	m_openFilesTreeWidget->setColumnCount(header.size());
+	m_openFilesTreeWidget->setColumnCount(static_cast<int>(header.size()));
 	m_openFilesTreeWidget->setHeaderHidden(true);
 	m_openFilesTreeWidget->setSortingEnabled(true);
 	m_openFilesTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);

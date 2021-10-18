@@ -50,7 +50,7 @@ public:
 
 	void setValue(AppSignal* signal, int propertyIndex, const QVariant& value, bool isExpert);
 
-	QVariant::Type type(const int propertyIndex) const;
+	QMetaType::Type type(const int propertyIndex) const;
 	E::PropertyBehaviourType getBehaviour(const AppSignal& signal, const int propertyIndex) const;
 	E::PropertyBehaviourType getBehaviour(E::SignalType type, E::SignalInOutType directionType, const int propertyIndex) const;
 	bool dependsOnPrecision(const int propertyIndex) const;
@@ -90,37 +90,37 @@ private:
 	std::vector<AppSignalPropertyDescription> m_basicPropertyDescription = {
 		{ AppSignalPropNames::APP_SIGNAL_ID,
 		  AppSignalPropNames::APP_SIGNAL_ID,
-		  QVariant::String, {},
+		  QMetaType::QString, {},
 		  [](const AppSignal* s){ return s->appSignalID(); },
 		  [](AppSignal* s, QVariant v){ s->setAppSignalID(v.toString()); }, },
 
 		{ AppSignalPropNames::CUSTOM_APP_SIGNAL_ID,
 		  AppSignalPropNames::CUSTOM_APP_SIGNAL_ID,
-		  QVariant::String, {},
+		  QMetaType::QString, {},
 		  [](const AppSignal* s){ return s->customAppSignalID(); },
 		  [](AppSignal* s, QVariant v){ s->setCustomAppSignalID(v.toString()); }, },
 
 		{ AppSignalPropNames::EQUIPMENT_ID,
 		  AppSignalPropNames::EQUIPMENT_ID,
-		  QVariant::String, {},
+		  QMetaType::QString, {},
 		  [](const AppSignal* s){ return s->equipmentID(); },
 		  [](AppSignal* s, QVariant v){ s->setEquipmentID(v.toString()); }, },
 
 		{ AppSignalPropNames::BUS_TYPE_ID,
 		  AppSignalPropNames::BUS_TYPE_ID,
-		  QVariant::String, {},
+		  QMetaType::QString, {},
 		  [](const AppSignal* s){ return s->busTypeID(); },
 		  [](AppSignal* s, QVariant v){ s->setBusTypeID(v.toString()); }, },
 
 		{ AppSignalPropNames::TYPE,
 		  "A/D/B",
-		  QVariant::String, {},
+		  QMetaType::QString, {},
 		  [](const AppSignal* s){ return E::valueToString<E::SignalType>(s->signalType()).left(1); },
 		  nullptr },
 
 		{ AppSignalPropNames::IN_OUT_TYPE,
 		  "Input-output type",
-		  QVariant::Int, E::enumValues<E::SignalInOutType>(),
+		  QMetaType::Int, E::enumValues<E::SignalInOutType>(),
 		  [](const AppSignal* s){ return TO_INT(s->inOutType()); },
 		  [](AppSignal* s, QVariant v){ s->setInOutType(IntToEnum<E::SignalInOutType>(v.toInt())); }, },
 	};
@@ -145,7 +145,7 @@ public:
 	const AppSignalSet& signalSet() const	{ return m_signalSet; }
 	static void trimSignalTextFields(AppSignal& signal);
 
-	int signalCount() { return m_signalSet.count(); }
+	int signalCount() { return static_cast<int>(m_signalSet.count()); }
 	AppSignal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
 	AppSignal* getSignalByStrID(const QString signalStrID);
 	QVector<int> getChannelSignalsID(int signalGroupID) { return m_signalSet.getChannelSignalsID(signalGroupID); }

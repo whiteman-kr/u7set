@@ -38,7 +38,7 @@ ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget *parent)
 	QStringList l;
 	l << tr("Subsystem");
 
-	m_subsystemsListTree->setColumnCount(l.size());
+	m_subsystemsListTree->setColumnCount(static_cast<int>(l.size()));
 	m_subsystemsListTree->setHeaderLabels(l);
 
 	int il = 0;
@@ -68,7 +68,7 @@ ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget *parent)
 	l << tr("Upload Count");
 	l << tr("Status");
 
-	m_bitstreamUartListTree->setColumnCount(l.size());
+	m_bitstreamUartListTree->setColumnCount(static_cast<int>(l.size()));
 	m_bitstreamUartListTree->setHeaderLabels(l);
 
 	il = 0;
@@ -108,7 +108,7 @@ ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget *parent)
 		l << tr("Type");
 		l << tr("Process");
 
-		m_pUartsListTree->setColumnCount(l.size());
+		m_pUartsListTree->setColumnCount(static_cast<int>(l.size()));
 		m_pUartsListTree->setHeaderLabels(l);
 
 		il = 0;

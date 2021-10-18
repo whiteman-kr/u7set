@@ -68,6 +68,7 @@ protected slots:
 private:
 	QMenu* m_addObjectMenu = nullptr;
 	QAction* m_addObjectAction = nullptr;
+	//QPushButton* m_addObjectButton = nullptr;
 		QAction* m_addSystemAction = nullptr;
 		QAction* m_addRackAction = nullptr;
 		QAction* m_addChassisAction = nullptr;

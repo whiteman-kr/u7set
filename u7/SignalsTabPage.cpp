@@ -87,37 +87,37 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 
 	switch (manager.type(col))
 	{
-	case QVariant::String:
+	case QMetaType::QString:
 	{
 		QLineEdit* le = new QLineEdit(parent);
 
 		if (manager.name(col).right(2) == "ID")
 		{
-			QRegExp rx4ID(AppSignal::IDENTIFICATORS_VALIDATOR);
-			le->setValidator(new QRegExpValidator(rx4ID, le));
+			QRegularExpression rx4ID(AppSignal::IDENTIFICATORS_VALIDATOR);
+			le->setValidator(new QRegularExpressionValidator(rx4ID, le));
 		}
 		else
 		{
-			QRegExp rx4Name("^.+$");
-			le->setValidator(new QRegExpValidator(rx4Name, le));
+			QRegularExpression rx4Name("^.+$");
+			le->setValidator(new QRegularExpressionValidator(rx4Name, le));
 		}
 
 		return le;
 	}
-	case QVariant::Double:
+	case QMetaType::Double:
 	{
 		QLineEdit* le = new QLineEdit(parent);
 		le->setValidator(new QDoubleValidator(le));
 		return le;
 	}
-	case QVariant::Int:
-	case QVariant::UInt:
+	case QMetaType::Int:
+	case QMetaType::UInt:
 	{
 		QLineEdit* le = new QLineEdit(parent);
 		le->setValidator(new QIntValidator(le));
 		return le;
 	}
-	case QVariant::Bool:
+	case QMetaType::Bool:
 	{
 		QComboBox* cb = new QComboBox(parent);
 		cb->addItems(QStringList() << tr("False") << tr("True"));
@@ -185,9 +185,9 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		return;
 	}
 
-	QVariant::Type type = manager.type(col);
+	QMetaType::Type type = manager.type(col);
 
-	if (type == QVariant::Bool)
+	if (type == QMetaType::Bool)
 	{
 		if (cb == nullptr)
 		{
@@ -208,10 +208,10 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 
 	switch (type)
 	{
-	case QVariant::String:
-	case QVariant::Double:
-	case QVariant::Int:
-	case QVariant::UInt:
+	case QMetaType::QString:
+	case QMetaType::Double:
+	case QMetaType::Int:
+	case QMetaType::UInt:
 		le->setText(manager.value(&s, col, isExpert).toString());
 		break;
 	default:
@@ -266,9 +266,9 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		return;
 	}
 
-	QVariant::Type type = manager.type(col);
+	QMetaType::Type type = manager.type(col);
 
-	if (type == QVariant::Bool)
+	if (type == QMetaType::Bool)
 	{
 		if (cb == nullptr)
 		{
@@ -293,7 +293,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 
 	switch (type)
 	{
-	case QVariant::String:
+	case QMetaType::QString:
 	{
 		QString name = manager.name(col);
 
@@ -316,13 +316,13 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		manager.setValue(&s, col, value, isExpert);
 		break;
 	}
-	case QVariant::Double:
+	case QMetaType::Double:
 		manager.setValue(&s, col, value.toDouble(), isExpert);
 		break;
-	case QVariant::Int:
+	case QMetaType::Int:
 		manager.setValue(&s, col, value.toInt(), isExpert);
 		break;
-	case QVariant::UInt:
+	case QMetaType::UInt:
 		manager.setValue(&s, col, value.toUInt(), isExpert);
 		break;
 	default:
@@ -458,7 +458,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 		if (value.isValid() && signal.isAnalog() && manager.dependsOnPrecision(col))
 		{
-			switch (static_cast<QMetaType::Type>(value.type()))
+			switch (value.typeId())
 			{
 			case QMetaType::Double:
 			case QMetaType::Float:
@@ -1168,16 +1168,16 @@ void SignalsTabPage::addSignal()
 
 	QLineEdit* signalChannelCountEdit = new QLineEdit(&signalTypeDialog);
 	signalChannelCountEdit->setText("1");
-	QRegExp channelRegExp("[1-6]");
-	QValidator *validator = new QRegExpValidator(channelRegExp, &signalTypeDialog);
+	QRegularExpression channelRegExp("[1-6]");
+	QValidator *validator = new QRegularExpressionValidator(channelRegExp, &signalTypeDialog);
 	signalChannelCountEdit->setValidator(validator);
 
 	fl->addRow(tr("Signal channel count"), signalChannelCountEdit);
 
 	QLineEdit* signalCountEdit = new QLineEdit(&signalTypeDialog);
 	signalCountEdit->setText("1");
-	QRegExp countRegExp("[1-9]\\d{0,3}");
-	validator = new QRegExpValidator(countRegExp, &signalTypeDialog);
+	QRegularExpression countRegExp("[1-9]\\d{0,3}");
+	validator = new QRegularExpressionValidator(countRegExp, &signalTypeDialog);
 	signalCountEdit->setValidator(validator);
 
 	fl->addRow(tr("Signal count"), signalCountEdit);
@@ -1253,7 +1253,7 @@ void SignalsTabPage::addSignal()
 
 				if (channelCount > 1)
 				{
-					suffix += "_" + QString('A' + i);
+					suffix += "_" + QString(QChar('A' + i));
 				}
 
 				signalVector[i].setAppSignalID((signalVector[i].appSignalID() + suffix).toUpper());
@@ -1974,7 +1974,8 @@ void CheckedoutSignalsModel::setAllCheckStates(bool state)
 	{
 		states[i] = state ? Qt::Checked : Qt::Unchecked;
 	}
-	emit dataChanged(index(0, 0), index(states.count() - 1, 0), QVector<int>() << Qt::CheckStateRole);
+
+	emit dataChanged(index(0, 0), index(static_cast<int>(states.count()) - 1, 0), QVector<int>() << Qt::CheckStateRole);
 }
 
 void CheckedoutSignalsModel::setCheckState(int row, Qt::CheckState state)
@@ -2003,7 +2004,8 @@ CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel *sourceModel, TableDataV
 
 	QVBoxLayout* vl1 = new QVBoxLayout;
 	QVBoxLayout* vl2 = new QVBoxLayout;
-	vl2->setMargin(0);
+
+	vl2->setContentsMargins(0, 0, 0, 0);
 
 	m_signalsView = new QTableView(this);
 	m_proxyModel = new CheckedoutSignalsModel(sourceModel, m_signalsView, this);
@@ -2288,29 +2290,30 @@ bool SignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) co
 
 	for (QString idMask : m_strIdMasks)
 	{
-		QRegExp rx(idMask.trimmed());
-		rx.setPatternSyntax(QRegExp::Wildcard);
+		QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(idMask.trimmed()));
+		//rx.setPatternSyntax(QRegExp::Wildcard);
+
 		bool result = false;
 
 		switch (m_idFilterField)
 		{
 			case FI_ANY:
-				result = rx.exactMatch(currentSignal.appSignalID().trimmed()) ||
-						rx.exactMatch(currentSignal.customAppSignalID().trimmed()) ||
-						rx.exactMatch(currentSignal.equipmentID().trimmed()) ||
-						rx.exactMatch(currentSignal.caption().trimmed());
+				result = rx.match(currentSignal.appSignalID().trimmed()).hasMatch() ||
+						 rx.match(currentSignal.customAppSignalID().trimmed()).hasMatch() ||
+						 rx.match(currentSignal.equipmentID().trimmed()).hasMatch() ||
+						 rx.match(currentSignal.caption().trimmed()).hasMatch();
 				break;
 			case FI_APP_SIGNAL_ID:
-				result = rx.exactMatch(currentSignal.appSignalID().trimmed());
+				result = rx.match(currentSignal.appSignalID().trimmed()).hasMatch();
 				break;
 			case FI_CUSTOM_APP_SIGNAL_ID:
-				result = rx.exactMatch(currentSignal.customAppSignalID().trimmed());
+				result = rx.match(currentSignal.customAppSignalID().trimmed()).hasMatch();
 				break;
 			case FI_EQUIPMENT_ID:
-				result = rx.exactMatch(currentSignal.equipmentID().trimmed());
+				result = rx.match(currentSignal.equipmentID().trimmed()).hasMatch();
 				break;
 			case FI_CAPTION:
-				result = rx.exactMatch(currentSignal.caption().trimmed());
+				result = rx.match(currentSignal.caption().trimmed()).hasMatch();
 				break;
 			default:
 				assert(false);
@@ -2420,7 +2423,7 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 		{"Comment", [](DbChangeset& c) { return c.comment();}},
 	};
 
-	int changesetColumnCount = changesetColumnDescription.size();
+	int changesetColumnCount = static_cast<int>(changesetColumnDescription.size());
 
 	// Interface
 	//
@@ -2793,8 +2796,8 @@ void FindSignalDialog::updateReplacement(const AppSignal& signal, int row)
 {
 	QString propertyValue = getProperty(signal);
 
-	int start = 0;
-	int end = -1;
+	qsizetype start = 0;
+	qsizetype end = -1;
 
 	QString replaced = propertyValue;
 	while (match(replaced, start, end) == true)
@@ -2837,8 +2840,8 @@ void FindSignalDialog::addSignalIfNeeded(const AppSignal& signal)
 {
 	QString propertyValue = getProperty(signal);
 
-	int start = 0;
-	int end = -1;
+	qsizetype start = 0;
+	qsizetype end = -1;
 	if (match(propertyValue, start, end) == true)
 	{
 		int currentIndex = m_foundListModel->rowCount();
@@ -2853,7 +2856,7 @@ void FindSignalDialog::addSignalIfNeeded(const AppSignal& signal)
 	}
 }
 
-bool FindSignalDialog::match(QString signalProperty, int& start, int& end)
+bool FindSignalDialog::match(QString signalProperty, qsizetype& start, qsizetype& end)
 {
 	if (m_findString == nullptr)
 	{
@@ -2940,7 +2943,7 @@ bool FindSignalDialog::checkForUniqueSignalId(const QString& original, const QSt
 
 bool FindSignalDialog::checkForCorrectSignalId(const QString& replaced)
 {
-	return m_regExp4Id.exactMatch(replaced);
+	return m_regExp4Id.match(replaced).hasMatch();
 }
 
 FindSignalDialog::SearchOptions FindSignalDialog::getCurrentSearchOptions()
@@ -3159,7 +3162,7 @@ void FindSignalDialog::replaceAll()
 					QMessageBox::Yes | QMessageBox::Cancel,
 					this);
 
-		msgBox.setButtonText(QMessageBox::Yes, "Replace all possible");
+		msgBox.button(QMessageBox::Yes)->setText("Replace all possible");
 
 		if (msgBox.exec() == QMessageBox::Cancel)
 		{
@@ -3196,7 +3199,7 @@ void FindSignalDialog::replaceAndFindNext()
 					QMessageBox::Yes | QMessageBox::Cancel,
 					this);
 
-		msgBox.setButtonText(QMessageBox::Yes, "Skip and goto next");
+		msgBox.button(QMessageBox::Yes)->setText("Skip and goto next");
 
 		if (msgBox.exec() == QMessageBox::Yes)
 		{

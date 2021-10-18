@@ -64,9 +64,9 @@ namespace Sim
 
 		// Checks
 		//
-		if (m_dataSizeW > m_ramOverrides.size())
+		if (m_dataSizeW > static_cast<int>(m_ramOverrides.size()))
 		{
-			assert(m_dataSizeW <= m_ramOverrides.size());
+			Q_ASSERT(m_dataSizeW <= static_cast<int>(m_ramOverrides.size()));
 			return;
 		}
 
@@ -76,7 +76,7 @@ namespace Sim
 		{
 		case E::SignalType::Discrete:
 			if (value.isValid() == false ||
-				value.type() != m_value.type())
+				value.typeId() != m_value.typeId())
 			{
 				setDiscreteValue(0);
 			}
@@ -91,7 +91,7 @@ namespace Sim
 			{
 			case E::AnalogAppSignalFormat::SignedInt32:
 				if (value.isValid() == false ||
-					value.type() != m_value.type())
+					value.typeId() != m_value.typeId())
 				{
 					setSignedIntvalue(0);
 				}
@@ -102,7 +102,7 @@ namespace Sim
 				break;
 			case E::AnalogAppSignalFormat::Float32:
 				if (value.isValid() == false ||
-					value.type() != m_value.type())
+					value.typeId() != m_value.typeId())
 				{
 					setFloatValue(0);
 				}
@@ -281,7 +281,7 @@ namespace Sim
 				m_scriptError.clear();
 				m_scriptValueRequiresReset = true;
 
-				if (value.type() == QMetaType::QString)
+				if (value.typeId() == QMetaType::QString)
 				{
 					m_script = value.toString();
 
@@ -311,7 +311,7 @@ namespace Sim
 				}
 				else
 				{
-					assert(value.type() == QMetaType::QString);
+					assert(value.typeId() == QMetaType::QString);
 					m_value = QString("");
 				}
 			}
@@ -643,7 +643,7 @@ namespace Sim
 			emit signalsChanged(addedSignals);
 		}
 
-		return addedSignals.size();
+		return static_cast<int>(addedSignals.size());
 	}
 
 	bool OverrideSignals::addSignal(QString appSignalId, bool enabled, int index, OverrideSignalMethod method, QVariant value, QString script)

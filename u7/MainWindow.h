@@ -161,9 +161,9 @@ private:
 	int m_filesTabPageIndex = 0;
 	FilesTabPage* m_filesTabPage = nullptr;
 
-#ifdef Q_OS_WINDOWS
-	QWinTaskbarButton* m_taskBarButton = nullptr;
-	int m_timerId = -1;
-#endif
+//#ifdef Q_OS_WINDOWS		class QWinTaskbarButton removed from qt6
+//	QWinTaskbarButton* m_taskBarButton = nullptr;
+//	int m_timerId = -1;
+//#endif
 };
 

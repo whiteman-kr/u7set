@@ -193,7 +193,7 @@ int SelectChangesetDialog::getProjectChangeset(DbController* db, QWidget* parent
 
 void SelectChangesetDialog::showEvent(QShowEvent*)
 {
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 
 	resize(static_cast<int>(screen.width() * 0.40),
 		   static_cast<int>(screen.height() * 0.35));

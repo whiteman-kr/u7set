@@ -149,7 +149,7 @@ QModelIndexList FileTreeProxyModel::getPersistentIndexList() const
 
 bool FileTreeProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
-	QString filter = filterRegExp().pattern();
+	QString filter = filterRegularExpression().pattern();
 	if (filter.isEmpty() == true)
 	{
 		return true;
@@ -469,7 +469,7 @@ QVariant FileTreeModel::data(const QModelIndex& index, int role) const
 {
 	if (index.isValid() == false)
 	{
-		return QVariant();
+		return QVariant{};
 	}
 
 	FileTreeModelItem* file = static_cast<FileTreeModelItem*>(index.internalPointer());
@@ -481,10 +481,10 @@ QVariant FileTreeModel::data(const QModelIndex& index, int role) const
 		{
 			QVariant v;
 
-			if (index.column() >= m_columns.size())
+			if (index.column() >= static_cast<int>(m_columns.size()))
 			{
 				Q_ASSERT(false);
-				return QVariant();
+				return QVariant{};
 			}
 
 			Columns column = m_columns[index.column()];
@@ -492,7 +492,7 @@ QVariant FileTreeModel::data(const QModelIndex& index, int role) const
 			switch (column)
 			{
 			case Columns::FileNameColumn:
-				v.setValue<QString>(file->fileName());
+				v = QVariant::fromValue<QString>(file->fileName());
 				break;
 
 			case Columns::FileSizeColumn:
@@ -504,7 +504,7 @@ QVariant FileTreeModel::data(const QModelIndex& index, int role) const
 					if (file->state() == E::VcsState::CheckedOut)
 					{
 						QString state = E::valueToString<E::VcsItemAction>(file->action());
-						v.setValue<QString>(state);
+						v = QVariant::fromValue<QString>(state);
 					}
 				}
 				break;
@@ -540,7 +540,7 @@ QVariant FileTreeModel::data(const QModelIndex& index, int role) const
 
 	case Qt::TextAlignmentRole:
 		{
-			return Qt::AlignLeft + Qt::AlignVCenter;
+			return QVariant{Qt::AlignLeft | Qt::AlignVCenter};
 		}
 		break;
 

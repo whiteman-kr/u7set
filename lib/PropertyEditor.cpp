@@ -5,7 +5,6 @@
 
 #include <QToolButton>
 #include <QFileDialog>
-#include <QDesktopWidget>
 #include <QColorDialog>
 #include <QTextBrowser>
 #include <QPlainTextEdit>
@@ -55,7 +54,7 @@ namespace ExtWidgets
 
 	QString PropertyTools::stringListText(const QVariant& value)
 	{
-		if (value.userType() == QVariant::StringList)
+		if (value.typeId() == QMetaType::QStringList)
 		{
 			const int TextMaxLength = 128;
 
@@ -112,7 +111,7 @@ namespace ExtWidgets
 
 		// all other types
 		//
-		int type = value.userType();
+		int type = value.typeId();
 
 		if (type == FilePathPropertyType::filePathTypeId())
 		{
@@ -146,14 +145,14 @@ namespace ExtWidgets
 
 		switch (type)
 		{
-		case QVariant::Int:
+		case QMetaType::Int:
 		{
 			int val = value.toInt();
 			return QString::number(val);
 		}
 			break;
 
-		case QVariant::UInt:
+		case QMetaType::UInt:
 		{
 			quint32 val = value.toUInt();
 			return QString::number(val);
@@ -166,18 +165,18 @@ namespace ExtWidgets
 			return QString::number(val, numberFormat, p->precision());
 		}
 			break;
-		case QVariant::Double:
+		case QMetaType::Double:
 		{
 			double val = value.toDouble();
 			return QString::number(val, numberFormat, p->precision());
 		}
 			break;
-		case QVariant::Bool:
+		case QMetaType::Bool:
 		{
 			return value.toBool() == true ? "True" : "False";
 		}
 			break;
-		case QVariant::String:
+		case QMetaType::QString:
 		{
 			QString val = value.toString();
 
@@ -192,7 +191,7 @@ namespace ExtWidgets
 		}
 			break;
 
-		case QVariant::StringList:
+		case QMetaType::QStringList:
 		{
 			if (row != -1)
 			{
@@ -212,7 +211,7 @@ namespace ExtWidgets
 		}
 			break;
 
-		case QVariant::Color:
+		case QMetaType::QColor:
 		{
 			QColor color = value.value<QColor>();
 
@@ -220,21 +219,21 @@ namespace ExtWidgets
 		}
 			break;
 
-		case QVariant::Uuid:
+		case QMetaType::QUuid:
 		{
 			QUuid uuid = value.value<QUuid>();
 			return uuid.toString();
 		}
 			break;
 
-		case QVariant::ByteArray:
+		case QMetaType::QByteArray:
 		{
 			QByteArray array = value.value<QByteArray>();
 			return QObject::tr("Data <%1 bytes>").arg(array.size());
 		}
 			break;
 
-		case QVariant::Image:
+		case QMetaType::QImage:
 		{
 			QImage image = value.value<QImage>();
 			return QObject::tr("Image <Width = %1 Height = %2>").arg(image.width()).arg(image.height());
@@ -336,7 +335,7 @@ namespace ExtWidgets
 		}
 
 		QString text = t;
-		text.remove(QRegExp("[\\[,\\]]"));
+		text.remove(QRegularExpression("[\\[,\\]]"));
 
 		QStringList l = text.split(";");
 		if (l.count() != 4)
@@ -449,7 +448,7 @@ namespace ExtWidgets
 
 		switch (value.userType())
 		{
-			case QVariant::Bool:
+			case QMetaType::Bool:
 				{
 					if (sameValue == true)
 					{
@@ -462,7 +461,7 @@ namespace ExtWidgets
 					}
 				}
 				break;
-			case QVariant::Color:
+			case QMetaType::QColor:
 				{
 					if (sameValue == true)
 					{
@@ -471,7 +470,7 @@ namespace ExtWidgets
 					}
 				}
 				break;
-		case QVariant::Image:
+		case QMetaType::QImage:
 			{
 				if (sameValue == true)
 				{
@@ -519,7 +518,7 @@ namespace ExtWidgets
 				break;
 			}
 
-			if (propertyPtr->value().userType() == QVariant::StringList)
+			if (propertyPtr->value().userType() == QMetaType::QStringList)
 			{
 				if (row == -1)
 				{
@@ -561,26 +560,26 @@ namespace ExtWidgets
 
 			switch(propertyPtr->value().userType())
 			{
-			case QVariant::String:
-			case QVariant::Int:
-			case QVariant::UInt:
+			case QMetaType::QString:
+			case QMetaType::Int:
+			case QMetaType::UInt:
 			case QMetaType::Float:
-			case QVariant::Double:
-			case QVariant::Uuid:
-			case QVariant::ByteArray:
-			case QVariant::Image:
+			case QMetaType::Double:
+			case QMetaType::QUuid:
+			case QMetaType::QByteArray:
+			case QMetaType::QImage:
 				{
 					cellEditorType = CellEditorType::Text;
 				}
 				break;
 
-			case QVariant::Bool:
+			case QMetaType::Bool:
 				{
 					cellEditorType = CellEditorType::CheckBox;
 				}
 				break;
 
-			case QVariant::Color:
+			case QMetaType::QColor:
 				{
 					cellEditorType = CellEditorType::Color;
 
@@ -694,7 +693,7 @@ namespace ExtWidgets
 		QStringList headerLabels;
 		headerLabels << tr("Property");
 
-		m_treeWidget->setColumnCount(headerLabels.size());
+		m_treeWidget->setColumnCount(static_cast<int>(headerLabels.size()));
 		m_treeWidget->setHeaderLabels(headerLabels);
 		m_treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 		m_treeWidget->setRootIsDecorated(false);
@@ -1036,7 +1035,7 @@ namespace ExtWidgets
 		return;
 	}
 
-	void PropertyArrayEditorDialog::onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects)
+	void PropertyArrayEditorDialog::onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> /*objects*/)
 	{
 		updateDescriptions();
 	}
@@ -1048,7 +1047,7 @@ namespace ExtWidgets
 		for (auto prop : props)
 		{
 			if (prop->category().isEmpty() == true &&
-					prop->value().userType() == QVariant::String)
+					prop->value().typeId() == QMetaType::QString)
 			{
 				return tr("%1 - %2").arg(objectIndex).arg(prop->value().toString());
 			}
@@ -1256,7 +1255,7 @@ namespace ExtWidgets
 			headerLabels << tr("Colors");
 		}
 
-		m_treeWidget->setColumnCount(headerLabels.size());
+		m_treeWidget->setColumnCount(static_cast<int>(headerLabels.size()));
 		m_treeWidget->setHeaderLabels(headerLabels);
 		m_treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 		m_treeWidget->setRootIsDecorated(false);
@@ -1627,7 +1626,7 @@ namespace ExtWidgets
 
 	bool VectorEditorDialog::isValueStringList() const
 	{
-		return m_valueType == QVariant::StringList;
+		return m_valueType == QMetaType::QStringList;
 	}
 
 	bool VectorEditorDialog::isValueColorVector() const
@@ -1702,7 +1701,7 @@ namespace ExtWidgets
 
 		if (validator.isEmpty() == false)
 		{
-			m_regExpValidator = new QRegExpValidator(QRegExp(validator), this);
+			m_regExpValidator = new QRegularExpressionValidator(QRegularExpression(validator), this);
 		}
 	}
 
@@ -2101,8 +2100,8 @@ namespace ExtWidgets
 
 		m_button->setEnabled(readOnly == false);
 
-		QRegExp regexp("\\[([1,2]?[0-9]{0,2};){3}[1,2]?[0-9]{0,2}\\]");
-		QRegExpValidator* validator = new QRegExpValidator(regexp, this);
+		QRegularExpression regexp("\\[([1,2]?[0-9]{0,2};){3}[1,2]?[0-9]{0,2}\\]");
+		QRegularExpressionValidator* validator = new QRegularExpressionValidator(regexp, this);
 		m_lineEdit->setValidator(validator);
 
 		QTimer::singleShot(0, m_lineEdit, SLOT(setFocus()));
@@ -2377,11 +2376,11 @@ namespace ExtWidgets
 
 	MultiTextEdit::MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, int row, bool readOnly, QWidget* parent):
 		PropertyEditCellWidget(parent),
-		m_propertyEditorBase(propertyEditorBase),
 		m_property(p),
 		m_row(row),
+		m_userType(p->value().userType()),
 		m_readOnly(readOnly),
-		m_userType(p->value().userType())
+		m_propertyEditorBase(propertyEditorBase)
 	{
 
 		if (p == nullptr || m_propertyEditorBase == nullptr)
@@ -2391,9 +2390,9 @@ namespace ExtWidgets
 			return;
 		}
 
-		if (m_userType == QVariant::Uuid)
+		if (m_userType == QMetaType::QUuid)
 		{
-			m_userType = QVariant::String;
+			m_userType = QMetaType::QString;
 		}
 
 		// Create Line Edit
@@ -2402,13 +2401,13 @@ namespace ExtWidgets
 
 		if (p->password() == true)
 		{
-			if (m_userType == QVariant::String)
+			if (m_userType == QMetaType::QString)
 			{
 				m_lineEdit->setEchoMode(QLineEdit::Password);
 			}
 		}
 
-		if (m_userType == QVariant::ByteArray || m_userType == QVariant::Image)
+		if (m_userType == QMetaType::QByteArray || m_userType == QMetaType::QImage)
 		{
 			m_lineEdit->setReadOnly(true);
 		}
@@ -2428,8 +2427,8 @@ namespace ExtWidgets
 		{
 			if (m_property->specificEditor() != E::PropertySpecificEditor::LoadFileDialog)// for LoadFileDialog, Validator is used as mask
 			{
-				QRegExp regexp(p->validator());
-				QRegExpValidator* v = new QRegExpValidator(regexp, this);
+				QRegularExpression regexp(p->validator());
+				QRegularExpressionValidator* v = new QRegularExpressionValidator(regexp, this);
 				m_lineEdit->setValidator(v);
 			}
 		}
@@ -2438,9 +2437,9 @@ namespace ExtWidgets
 		// Create Button for File, ByteArray, Strings and String List
 		//
 		if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog ||
-				m_userType == QVariant::ByteArray ||
-				(m_userType == QVariant::String && p->password() == false) ||
-				(m_userType == QVariant::StringList && m_row != -1))
+			m_userType == QMetaType::QByteArray ||
+			(m_userType == QMetaType::QString && p->password() == false) ||
+			(m_userType == QMetaType::QStringList && m_row != -1))
 		{
 			m_button = new QToolButton(parent);
 			m_button->setText("...");
@@ -2515,7 +2514,7 @@ namespace ExtWidgets
 		}
 		else
 		{
-			if (m_userType == QVariant::Image)
+			if (m_userType == QMetaType::QImage)
 			{
 				Q_ASSERT(false);	// Images should have E::PropertySpecificEditor::LoadFileDialog type
 				return;
@@ -2541,7 +2540,7 @@ namespace ExtWidgets
 
 		switch (m_userType)
 		{
-			case QVariant::ByteArray:
+			case QMetaType::QByteArray:
 			{
 				if (editBytes != m_oldValue)
 				{
@@ -2556,7 +2555,7 @@ namespace ExtWidgets
 			}
 			break;
 
-			case QVariant::Image:
+			case QMetaType::QImage:
 			{
 				QImage image;
 				if (image.loadFromData(editBytes) == false)
@@ -2623,7 +2622,7 @@ namespace ExtWidgets
 
 		switch (m_userType)
 		{
-		case QVariant::ByteArray:
+		case QMetaType::QByteArray:
 			{
 				QByteArray ba = property->value().toByteArray();
 				m_oldValue = ba;
@@ -2632,7 +2631,7 @@ namespace ExtWidgets
 				m_lineEdit->setReadOnly(true);
 			}
 			break;
-		case QVariant::Image:
+		case QMetaType::QImage:
 			{
 				QImage image = property->value().value<QImage>();
 				m_oldValue = image;
@@ -2641,7 +2640,7 @@ namespace ExtWidgets
 				m_lineEdit->setReadOnly(true);
 			}
 			break;
-		case QVariant::String:
+		case QMetaType::QString:
 			{
 				QString editText = property->value().toString();
 				m_oldValue = editText;
@@ -2659,7 +2658,7 @@ namespace ExtWidgets
 				m_lineEdit->setReadOnly(readOnly == true || longText == true);
 			}
 			break;
-		case QVariant::StringList:
+		case QMetaType::QStringList:
 			{
 				QStringList l = property->value().toStringList();
 				if (m_row < 0 || m_row >= static_cast<int>(l.size()))
@@ -2684,13 +2683,13 @@ namespace ExtWidgets
 				m_lineEdit->setReadOnly(readOnly == true || longText == true);
 			}
 			break;
-		case QVariant::Int:
+		case QMetaType::Int:
 		{
 			m_oldValue = property->value().toInt();
 			m_lineEdit->setText(QString::number(m_oldValue.toInt()));
 		}
 			break;
-		case QVariant::UInt:
+		case QMetaType::UInt:
 		{
 			m_oldValue = property->value().toUInt();
 			m_lineEdit->setText(QString::number(m_oldValue.toUInt()));
@@ -2703,7 +2702,7 @@ namespace ExtWidgets
 
 		}
 			break;
-		case QVariant::Double:
+		case QMetaType::Double:
 		{
 			m_oldValue = property->value().toDouble();
 			m_lineEdit->setText(QString::number(m_oldValue.toDouble(), numberFormat, property->precision()));
@@ -2768,8 +2767,8 @@ namespace ExtWidgets
 
 		switch (m_userType)
 		{
-		case QVariant::String:
-		case QVariant::StringList:
+		case QMetaType::QString:
+		case QMetaType::QStringList:
 		{
 			if (m_lineEdit->text() != m_oldValue.toString() || m_oldValue.isNull() == true)
 			{
@@ -2778,17 +2777,17 @@ namespace ExtWidgets
 			}
 		}
 		break;
-		case QVariant::ByteArray:
+		case QMetaType::QByteArray:
 			{
 				Q_ASSERT(false);	// No editing allowed
 			}
 			break;
-		case QVariant::Image:
+		case QMetaType::QImage:
 			{
 				Q_ASSERT(false);	// No editing allowed
 			}
 			break;
-		case QVariant::Int:
+		case QMetaType::Int:
 			{
 				bool ok = false;
 				int value = m_lineEdit->text().toInt(&ok);
@@ -2800,7 +2799,7 @@ namespace ExtWidgets
 				}
 			}
 			break;
-		case QVariant::UInt:
+		case QMetaType::UInt:
 			{
 				bool ok = false;
 				uint value = m_lineEdit->text().toUInt(&ok);
@@ -2824,7 +2823,7 @@ namespace ExtWidgets
 				}
 			}
 			break;
-		case QVariant::Double:
+		case QMetaType::Double:
 			{
 				bool ok = false;
 				double value = m_lineEdit->text().toDouble(&ok);
@@ -2887,8 +2886,8 @@ namespace ExtWidgets
 	//
 	MultiArrayEdit::MultiArrayEdit(PropertyEditorBase* propertyEditorBase, QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
 		PropertyEditCellWidget(parent),
-		m_property(p),
 		m_currentValue(p->value()),
+		m_property(p),
 		m_propertyEditorBase(propertyEditorBase)
 	{
 
@@ -2913,7 +2912,7 @@ namespace ExtWidgets
 			m_lineEdit->setText("<PropertyList>");
 		}
 
-		if (m_currentValue.userType() == QVariant::StringList)
+		if (m_currentValue.userType() == QMetaType::QStringList)
 		{
 			m_lineEdit->setText("<StringList>");
 		}
@@ -2945,7 +2944,7 @@ namespace ExtWidgets
 
 		m_currentValue = property->value();
 
-		if (m_currentValue.userType() == QVariant::StringList)
+		if (m_currentValue.userType() == QMetaType::QStringList)
 		{
 			m_lineEdit->setText(PropertyTools::stringListText(m_currentValue));
 			return;
@@ -2971,7 +2970,7 @@ namespace ExtWidgets
 	{
 		if (variantIsPropertyVector(m_currentValue) == false &&
 				variantIsPropertyList(m_currentValue) == false &&
-				m_currentValue.userType() != QVariant::StringList &&
+				m_currentValue.userType() != QMetaType::QStringList &&
 				m_currentValue.userType() != qMetaTypeId<QVector<QColor>>())
 		{
 			Q_ASSERT(false);
@@ -2990,7 +2989,7 @@ namespace ExtWidgets
 			newValue = d.value();
 		}
 
-		if (m_currentValue.userType() == QVariant::StringList || m_currentValue.userType() == qMetaTypeId<QVector<QColor>>())
+		if (m_currentValue.typeId() == QMetaType::QStringList || m_currentValue.typeId() == qMetaTypeId<QVector<QColor>>())
 		{
 			VectorEditorDialog d(this, m_property->caption(), m_currentValue);
 			if (d.exec() != QDialog::Accepted)
@@ -3013,7 +3012,7 @@ namespace ExtWidgets
 		}
 		else
 		{
-			if (m_currentValue.userType() == QVariant::StringList)
+			if (m_currentValue.typeId() == QMetaType::QStringList)
 			{
 				m_lineEdit->setText(PropertyTools::stringListText(m_currentValue));
 			}
@@ -3126,7 +3125,7 @@ namespace ExtWidgets
 		}
 		else
 		{
-			Q_ASSERT(m_userType == QVariant::Bool);
+			Q_ASSERT(m_userType == QMetaType::Bool);
 			state = propertyPtr->value().toBool() ? Qt::Checked : Qt::Unchecked;
 		}
 
@@ -3173,7 +3172,7 @@ namespace ExtWidgets
 		}
 		else
 		{
-			Q_ASSERT(m_userType == QVariant::Bool);
+			Q_ASSERT(m_userType == QMetaType::Bool);
 			emit valueChanged(state == Qt::Checked ? true : false);
 		}
 	}
@@ -3238,8 +3237,8 @@ namespace ExtWidgets
 
 	PropertyEditorDelegate::PropertyEditorDelegate(PropertyTreeWidget* treeWidget, PropertyEditor* propretyEditor) :
 		QItemDelegate(treeWidget),
-		m_treeWidget(treeWidget),
-		m_propertyEditor(propretyEditor)
+		m_propertyEditor(propretyEditor),
+		m_treeWidget(treeWidget)
 	{
 	}
 
@@ -3488,7 +3487,7 @@ namespace ExtWidgets
 		labels << tr("Property");
 		labels << tr("Value");
 		m_treeWidget->setHeaderLabels(labels);
-		m_treeWidget->setColumnCount(labels.size());
+		m_treeWidget->setColumnCount(static_cast<int>(labels.size()));
 		m_treeWidget->setAutoFillBackground(true);
 		m_treeWidget->setSelectionBehavior(QTreeWidget::SelectRows);
 		m_treeWidget->setSelectionMode(QTreeWidget::SingleSelection);
@@ -3665,16 +3664,16 @@ namespace ExtWidgets
 
 			// Bool
 
-			if (value.type() == QVariant::Bool)
+			if (value.typeId() == QMetaType::Bool)
 			{
 				text = "<Different values>";
 			}
 
-			if (value.userType() == qMetaTypeId<Afb::AfbParamValue>())
+			if (value.typeId() == qMetaTypeId<Afb::AfbParamValue>())
 			{
 				Afb::AfbParamValue v = value.value<Afb::AfbParamValue>();
 
-				if (v.value().userType() == QVariant::Bool)
+				if (v.value().userType() == QMetaType::Bool)
 				{
 					text = "<Different values>";
 				}
@@ -3773,7 +3772,7 @@ namespace ExtWidgets
 
 	void PropertyEditor::onCellEditKeyPressed()
 	{
-		if (getSelectionType() != QVariant::Bool)
+		if (getSelectionType() != QMetaType::Bool)
 		{
 			startEditing();
 		}
@@ -3783,7 +3782,7 @@ namespace ExtWidgets
 	{
 		int selectionType = getSelectionType();
 
-		if (selectionType == QVariant::Bool)
+		if (selectionType == QMetaType::Bool)
 		{
 			toggleSelected();
 		}
@@ -3999,7 +3998,7 @@ namespace ExtWidgets
 				}
 			}
 
-			if (p->specific() && p->value().userType() == QVariant::Double)
+			if (p->specific() && p->value().userType() == QMetaType::Double)
 			{
 				bool ok1 = false;
 				bool ok2 = false;
@@ -4012,7 +4011,7 @@ namespace ExtWidgets
 				}
 			}
 
-			if (p->specific() && p->value().userType() == QVariant::Int)
+			if (p->specific() && p->value().userType() == QMetaType::Int)
 			{
 				bool ok1 = false;
 				bool ok2 = false;
@@ -4025,7 +4024,7 @@ namespace ExtWidgets
 				}
 			}
 
-			if (p->specific() && p->value().userType() == QVariant::UInt)
+			if (p->specific() && p->value().userType() == QMetaType::UInt)
 			{
 				bool ok1 = false;
 				bool ok2 = false;
@@ -4225,7 +4224,7 @@ namespace ExtWidgets
 			 return;
 		 }
 
-		if (p->value().userType() == QVariant::Bool)
+		if (p->value().userType() == QMetaType::Bool)
 		{
 			bool b = p->value().toBool();
 

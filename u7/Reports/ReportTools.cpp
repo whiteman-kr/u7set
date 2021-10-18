@@ -439,7 +439,7 @@ void ReportTable::render(const ReportObjectContext& context) const
 						</style>\
 					</head>\
 				<body>\
-					<table width=\"100%\">").arg(m_charFormat.fontFamily()).arg(m_charFormat.fontPointSize());
+					<table width=\"100%\">").arg(m_charFormat.font().family()).arg(m_charFormat.fontPointSize());
 
 	html += "<thead><tr>";
 	for (int c = 0; c < cols; c++)

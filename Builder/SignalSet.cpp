@@ -40,7 +40,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		int signalCount = count();
+		qsizetype signalCount = count();
 
 		if (signalCount == 0)
 		{
@@ -50,14 +50,14 @@ namespace Builder
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, QString(tr("Checking application signals...")));
 
-		QHash<QString, int> appSignalIDs;
-		QHash<QString, int> customAppSignalIDs;
+		QHash<QString, qsizetype> appSignalIDs;
+		QHash<QString, qsizetype> customAppSignalIDs;
 
-		appSignalIDs.reserve(static_cast<int>(signalCount * 1.3));
+		appSignalIDs.reserve(static_cast<qsizetype>(signalCount * 1.3));
 
 		m_busSignals.clear();
 
-		for(int i = 0; i < signalCount; i++)
+		for(qsizetype i = 0; i < signalCount; i++)
 		{
 			AppSignal& s = (*this)[i];
 
@@ -212,13 +212,13 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(equipment);
 
-		int signalCount = count();
+		qsizetype signalCount = count();
 
 		bool result = true;
 
 		m_signalToLm.clear();
 
-		for(int i = 0; i < signalCount; i++)
+		for(qsizetype i = 0; i < signalCount; i++)
 		{
 			AppSignal& s = (*this)[i];
 
@@ -313,9 +313,9 @@ namespace Builder
 
 	void SignalSet::initCalculatedSignalsProperties()
 	{
-		int signalsCount = count();
+		qsizetype signalsCount = count();
 
-		for(int i = 0; i < signalsCount; i++)
+		for(qsizetype i = 0; i < signalsCount; i++)
 		{
 			AppSignal& s = (*this)[i];
 
@@ -325,9 +325,9 @@ namespace Builder
 
 	void SignalSet::cacheSpecPropValues()
 	{
-		int signalsCount = count();
+		qsizetype signalsCount = count();
 
-		for(int i = 0; i < signalsCount; i++)
+		for(qsizetype i = 0; i < signalsCount; i++)
 		{
 			AppSignal& s = (*this)[i];
 
@@ -337,7 +337,7 @@ namespace Builder
 
 	bool SignalSet::expandTemplates(Hardware::EquipmentSet* equipment)
 	{
-		int signalCount = count();
+		qsizetype signalCount = count();
 
 		if (signalCount == 0)
 		{
@@ -350,7 +350,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(int i = 0; i < signalCount; i++)
+		for(qsizetype i = 0; i < signalCount; i++)
 		{
 			AppSignal& s = (*this)[i];
 
@@ -511,9 +511,9 @@ namespace Builder
 	{
 		QVector<int> excludedFromBuidSignalsIDs;
 
-		int signalCount = count();
+		qsizetype signalCount = count();
 
-		for(int i = 0; i < signalCount; i++)
+		for(qsizetype i = 0; i < signalCount; i++)
 		{
 			const AppSignal& s = (*this)[i];
 

@@ -7,11 +7,11 @@
 Settings theSettings;
 
 //
-// QMap<QString,int> serialization stuff
+// QMap<QString, int> serialization stuff
 //
 
 #ifndef QT_NO_DATASTREAM
-QDataStream& operator<<(QDataStream &stream, const QMap<QString,int> &map)
+QDataStream& operator<< (QDataStream& stream, const QMap<QString, int> &map)
 {
 	QMap<QString, int>::const_iterator i = map.constBegin();
 	while (i != map.constEnd())
@@ -25,7 +25,7 @@ QDataStream& operator<<(QDataStream &stream, const QMap<QString,int> &map)
 	return stream;
 }
 
-QDataStream& operator>>(QDataStream &stream, QMap<QString,int> &map)
+QDataStream& operator>> (QDataStream& stream, QMap<QString, int> &map)
 {
 	QString key;
 	int value = 0;
@@ -43,6 +43,7 @@ QDataStream& operator>>(QDataStream &stream, QMap<QString,int> &map)
 	}
 	return stream;
 }
+
 #endif
 
 //
@@ -125,11 +126,9 @@ Settings::Settings() :
 	#ifdef Q_OS_WIN32
 		m_configuratorSerialPort("\\\\.\\COM3"),
 	#endif
-	m_buildOutputPath(QDir().toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::DataLocation))),
+	m_buildOutputPath(QDir().toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))),
 	m_expertMode(false)
 {
-    qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
-	qRegisterMetaTypeStreamOperators<QMap<QString,int>>("QMap<QString,int>");
 }
 
 Settings::~Settings()
@@ -317,7 +316,7 @@ void Settings::loadUserScope()
 
 	m_schemaItemPropertiesPropertyFilter = s.value("SchemaItemPropertiesDialog/PropertiesMask").toString();
 	m_schemaItemPropertiesExpandValuesToAllRows = s.value("SchemaItemPropertiesDialog/ExpandValuesToAllRows", m_schemaItemPropertiesExpandValuesToAllRows).toBool();
-	m_schemaItemPropertiesColumnsWidth = s.value("SchemaItemPropertiesDialog/ColumnsWidth").value<QMap<QString,int>>();
+	m_schemaItemPropertiesColumnsWidth = s.value("SchemaItemPropertiesDialog/ColumnsWidth").value<QMap<QString, int>>();
 	m_schemaItemPropertiesGroupByCategory = s.value("SchemaItemPropertiesDialog/GroupByCategory", m_schemaItemPropertiesGroupByCategory).toBool();
 	m_schemaItemPropertiesGeometry = s.value("SchemaItemPropertiesDialog/Geometry").toByteArray();
 
@@ -335,7 +334,7 @@ void Settings::loadUserScope()
 	m_buildWarningLevel = s.value("BuildTabPage/m_buildWarningLevel").toBool();
 	m_buildSerachCompleter = s.value("BuildTabPage/m_buildSerachCompleter").toStringList();
 
-	m_dialogMetrologyConnectionColumnsWidth = s.value("DialogMetrologyConnection/ColumnsWidth").value<QMap<QString,int>>();
+	m_dialogMetrologyConnectionColumnsWidth = s.value("DialogMetrologyConnection/ColumnsWidth").value<QMap<QString, int>>();
 	m_dialogMetrologyConnectionGeometry = s.value("DialogMetrologyConnection/Geometry").toByteArray();
 
 	return;

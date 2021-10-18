@@ -409,7 +409,7 @@ namespace Builder
 						  << "IdrPhase Time, %"
 						  << "AlpPhase Time, %";
 
-		int maxIdLength = header.length();
+		qsizetype maxIdLength = header.length();
 
 		QStringList afbsUsage;
 
@@ -472,7 +472,7 @@ namespace Builder
 				continue;
 			}
 
-			int captionLength = afbsUsageHeader[1].length();
+			qsizetype captionLength = afbsUsageHeader[1].length();
 			for(const ModuleLogicCompiler::AfblUsageInfo& afblUsage : info.afblUsageInfo)
 			{
 				captionLength = std::max(captionLength, afblUsage.caption.length());
@@ -485,9 +485,9 @@ namespace Builder
 			QString headerRow = "  ";
 			QString delimiterRow = "--";
 
-			for (int j = 0; j < afbsUsageHeader.count(); j++)
+			for (qsizetype j = 0; j < afbsUsageHeader.count(); j++)
 			{
-				int length = (j == 1) ? captionLength : afbsUsageHeader[j].length();
+				qsizetype length = (j == 1) ? captionLength : afbsUsageHeader[j].length();
 				headerRow += " | " + afbsUsageHeader[j].leftJustified(length);
 				delimiterRow += "-+-" + QString().leftJustified(length, '-');
 			}
@@ -525,7 +525,7 @@ namespace Builder
 			{
 				expectedRowQuantity = fileContent.count();
 			}
-			int reportRowQuantity = std::min(expectedRowQuantity, fileContent.count());
+			int reportRowQuantity = std::min(expectedRowQuantity, static_cast<int>(fileContent.count()));
 
 			result << "   | " + header.leftJustified(maxIdLength, ' ') + " | " + restHeaderColumns.join(" | ");
 
@@ -1159,7 +1159,7 @@ namespace Builder
 
 		opticModuleStorage()->getOptoModulesSorted(modules);
 
-		int count = modules.count();
+		qsizetype count = modules.count();
 
 		if (count == 0)
 		{
@@ -1172,7 +1172,7 @@ namespace Builder
 
 		QString str;
 
-		for(int i = 0; i < count; i++)
+		for(qsizetype i = 0; i < count; i++)
 		{
 			Hardware::OptoModuleShared module = modules[i];
 
@@ -1231,9 +1231,9 @@ namespace Builder
 
 		// fill signals
 		//
-		int signalCount = signalSet()->count();
+		qsizetype signalCount = signalSet()->count();
 
-		for(int i = 0; i < signalCount; i++)
+		for(qsizetype i = 0; i < signalCount; i++)
 		{
 			const AppSignal& s = (*signalSet())[i];
 
@@ -1371,7 +1371,7 @@ namespace Builder
 			xml.writeStringAttribute("Caption", subsystem->caption());
 			xml.writeIntAttribute("Index", subsystem->index());
 			xml.writeIntAttribute("Key", subsystem->key());
-			xml.writeIntAttribute("ModulesCount", subsysModuleIds.count());
+			xml.writeIntAttribute("ModulesCount", static_cast<int>(subsysModuleIds.count()));
 
 			for(const QString& moduleID : subsysModuleIds)
 			{

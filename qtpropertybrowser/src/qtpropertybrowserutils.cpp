@@ -105,13 +105,15 @@ void QtCursorDatabase::clear()
 
 void QtCursorDatabase::appendCursor(Qt::CursorShape shape, const QString &name, const QIcon &icon)
 {
-    if (m_cursorShapeToValue.contains(shape))
-        return;
-    const int value = m_cursorNames.count();
-    m_cursorNames.append(name);
-    m_cursorIcons.insert(value, icon);
-    m_valueToCursorShape.insert(value, shape);
-    m_cursorShapeToValue.insert(shape, value);
+	if (m_cursorShapeToValue.contains(shape))
+		return;
+
+	const int value = static_cast<int>(m_cursorNames.count());
+
+	m_cursorNames.append(name);
+	m_cursorIcons.insert(value, icon);
+	m_valueToCursorShape.insert(value, shape);
+	m_cursorShapeToValue.insert(shape, value);
 }
 
 QStringList QtCursorDatabase::cursorShapeNames() const
@@ -286,7 +288,7 @@ void QtBoolEdit::mousePressEvent(QMouseEvent *event)
 void QtBoolEdit::paintEvent(QPaintEvent *)
 {
     QStyleOption opt;
-    opt.init(this);
+	opt.initFrom(this);
     QPainter p(this);
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }
@@ -298,7 +300,7 @@ QtKeySequenceEdit::QtKeySequenceEdit(QWidget *parent)
 {
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->addWidget(m_lineEdit);
-    layout->setMargin(0);
+	layout->setContentsMargins(0, 0, 0, 0);
     m_lineEdit->installEventFilter(this);
     m_lineEdit->setReadOnly(true);
     m_lineEdit->setFocusProxy(this);
@@ -317,7 +319,7 @@ bool QtKeySequenceEdit::eventFilter(QObject *o, QEvent *e)
             QAction *action = itAction.next();
             action->setShortcut(QKeySequence());
             QString actionString = action->text();
-            const int pos = actionString.lastIndexOf(QLatin1Char('\t'));
+			const qsizetype pos = actionString.lastIndexOf(QLatin1Char('\t'));
             if (pos > 0)
                 actionString.remove(pos, actionString.length() - pos);
             action->setText(actionString);
@@ -432,7 +434,7 @@ void QtKeySequenceEdit::keyReleaseEvent(QKeyEvent *e)
 void QtKeySequenceEdit::paintEvent(QPaintEvent *)
 {
     QStyleOption opt;
-    opt.init(this);
+	opt.initFrom(this);
     QPainter p(this);
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }

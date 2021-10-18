@@ -183,7 +183,7 @@ void MainWindow::showEvent(QShowEvent*)
 {
 	// Ensure widget is visible
 	//
-	QRect screenRect  = QApplication::desktop()->availableGeometry(this);
+	QRect screenRect  = this->screen()->availableGeometry();
 	QRect intersectRect = screenRect.intersected(frameGeometry());
 
 	if (isMaximized() == false &&
@@ -201,22 +201,22 @@ void MainWindow::showEvent(QShowEvent*)
 			   static_cast<int>(screenRect.height() * 0.7));
 	}
 
-#ifdef Q_OS_WINDOWS
-	m_taskBarButton = new QWinTaskbarButton(this);
-	m_taskBarButton->setWindow(windowHandle());
-#endif
+//#ifdef Q_OS_WINDOWS
+//	m_taskBarButton = new QWinTaskbarButton(this);
+//	m_taskBarButton->setWindow(windowHandle());
+//#endif
 
 	return;
 }
 
 void MainWindow::timerEvent(QTimerEvent* /*event*/)
 {
-#ifdef Q_OS_WINDOWS
-	if (m_buildTabPage->isBuildRunning() == true && m_taskBarButton != nullptr)
-	{
-		m_taskBarButton->progress()->setValue(m_buildTabPage->progress());
-	}
-#endif
+//#ifdef Q_OS_WINDOWS
+//	if (m_buildTabPage->isBuildRunning() == true && m_taskBarButton != nullptr)
+//	{
+//		m_taskBarButton->progress()->setValue(m_buildTabPage->progress());
+//	}
+//#endif
 }
 
 void MainWindow::saveWindowState()
@@ -341,7 +341,7 @@ void MainWindow::createActions()
 	m_debugAction = new QAction(tr("Debug Mode"), this);
 	m_debugAction->setStatusTip(tr("Set debug mode, some extra messages will be displayed"));
 	m_debugAction->setEnabled(true);
-	m_debugAction->setShortcut(QKeySequence(Qt::CTRL + Qt::ALT + Qt::Key_D));
+	m_debugAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_D));
 	connect(m_debugAction, &QAction::triggered, this, &MainWindow::debug);
 	addAction(m_debugAction);
 
@@ -349,7 +349,7 @@ void MainWindow::createActions()
 	m_startBuildAction->setStatusTip(tr("Build opened project"));
 	m_startBuildAction->setEnabled(false);
 	QList<QKeySequence> bks;
-	bks << QKeySequence(Qt::CTRL + Qt::Key_B);
+	bks << QKeySequence(Qt::CTRL | Qt::Key_B);
 	bks << QKeySequence(Qt::Key_F7);
 	m_startBuildAction->setShortcuts(bks);
 	connect(m_startBuildAction, &QAction::triggered, this, &MainWindow::startBuild);
@@ -1251,22 +1251,22 @@ void MainWindow::projectClosed()
 
 void MainWindow::buildStarted()
 {
-#ifdef Q_OS_WINDOWS
-	Q_ASSERT(m_taskBarButton);
+//#ifdef Q_OS_WINDOWS
+//	Q_ASSERT(m_taskBarButton);
 
-	m_taskBarButton->progress()->setRange(0, 100);
-	m_taskBarButton->progress()->show();
+//	m_taskBarButton->progress()->setRange(0, 100);
+//	m_taskBarButton->progress()->show();
 
-	m_timerId = startTimer(50);
-#endif
+//	m_timerId = startTimer(50);
+//#endif
 }
 
 void MainWindow::buildFinished(int /*errorCount*/)
 {
-#ifdef Q_OS_WINDOWS
-	m_taskBarButton->progress()->hide();
-	killTimer(m_timerId);
-#endif
+//#ifdef Q_OS_WINDOWS
+//	m_taskBarButton->progress()->hide();
+//	killTimer(m_timerId);
+//#endif
 }
 
 

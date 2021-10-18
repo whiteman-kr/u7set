@@ -407,7 +407,7 @@ bool DataSourcesXML<TYPE>::writeToXml(const QVector<TYPE>& dataSources, QByteArr
 	xml.writeStartDocument();
 
 	xml.writeStartElement(XmlElement::DATA_SOURCES);
-	xml.writeIntAttribute(XmlAttribute::COUNT, dataSources.count());
+	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(dataSources.count()));
 
 	for(const TYPE& ds : dataSources)
 	{

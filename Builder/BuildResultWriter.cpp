@@ -9,7 +9,7 @@
 #include <QCryptographicHash>
 #include <QStandardPaths>
 #include <QHostInfo>
-#include <QTextCodec>
+
 
 namespace Builder
 {
@@ -113,11 +113,9 @@ namespace Builder
 		QByteArray data;
 
 		QTextStream textStream(&data);
-
-		textStream.setCodec("UTF-8");
+		textStream.setEncoding(QStringConverter::Utf8);
 
 		textStream << dataString;
-
 		textStream.flush();
 
 		if (m_info.compressed == true)
@@ -146,8 +144,7 @@ namespace Builder
 		QByteArray data;
 
 		QTextStream textStream(&data);
-
-		textStream.setCodec("UTF-8");
+		textStream.setEncoding(QStringConverter::Utf8);
 
 		for(auto string : stringList)
 		{

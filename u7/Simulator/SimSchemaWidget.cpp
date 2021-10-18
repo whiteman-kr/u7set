@@ -75,13 +75,13 @@ void SimSchemaWidget::createActions()
 	m_zoom100Action = new QAction(tr("Zoom 100%"), this);
 	m_zoom100Action->setStatusTip(tr("Set zoom to 100%"));
 	m_zoom100Action->setEnabled(true);
-	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
+	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Asterisk));
 	connect(m_zoom100Action, &QAction::triggered, this, &SimSchemaWidget::zoom100);
 
 	m_zoomToFitAction = new QAction(tr("Fit to Screen"), this);
 	m_zoomToFitAction->setStatusTip(tr("Set zoom to fit the screen"));
 	m_zoomToFitAction->setEnabled(true);
-	m_zoomToFitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Slash));
+	m_zoomToFitAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Slash));
 	connect(m_zoomToFitAction, &QAction::triggered, this, &SimSchemaWidget::zoomToFit);
 
 	addAction(m_zoomInAction);

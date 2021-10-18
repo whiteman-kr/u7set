@@ -65,7 +65,7 @@ namespace Builder
 		int count() const;
 
 	private:
-		mutable QMutex m_mutex{QMutex::RecursionMode::Recursive};
+		mutable QRecursiveMutex m_mutex;
 
 		std::map<QUuid, OutputMessageLevel> m_items;		// Item ussuses
 		std::map<QString, Counter> m_schemas;				// Item ussuses

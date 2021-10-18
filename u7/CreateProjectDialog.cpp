@@ -40,9 +40,9 @@ void CreateProjectDialog::on_okButton_clicked()
 		return;
 	}
 
-	if (projectName.count(QRegExp("[A-Za-z_0-9]")) != projectName.size())
+	if (projectName.count(QRegularExpression("[A-Za-z_0-9]")) != projectName.size())
 	{
-		QMessageBox::critical(this, qApp->applicationName(), QString("The project name contains illegal characters: %1").arg(projectName.remove(QRegExp("[A-Za-z_0-9]"))));
+		QMessageBox::critical(this, qApp->applicationName(), QString("The project name contains illegal characters: %1").arg(projectName.remove(QRegularExpression("[A-Za-z_0-9]"))));
 		return;
 	}
 

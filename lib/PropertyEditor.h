@@ -250,7 +250,7 @@ namespace ExtWidgets
 		void cancelButtonPressed();
 
 	protected:
-		QRegExpValidator* m_regExpValidator = nullptr;
+		QRegularExpressionValidator* m_regExpValidator = nullptr;
 
 	private:
 		bool m_modified = false;

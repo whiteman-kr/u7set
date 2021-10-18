@@ -91,7 +91,7 @@ void DataSource::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeStartElement(XmlElement::ASSOCIATED_SIGNALS);
 
-	xml.writeIntAttribute(XmlAttribute::COUNT, m_associatedSignals.count());
+	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(m_associatedSignals.count()));
 
 	xml.writeString(m_associatedSignals.join(","));
 

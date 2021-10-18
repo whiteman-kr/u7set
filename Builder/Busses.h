@@ -190,7 +190,7 @@ namespace Builder
 		BusShared getBus(const QString& busTypeID) const;
 		int getBusSizeBits(const QString& busTypeID) const;
 
-		int count() const { return m_busses.count(); }
+		int count() const { return static_cast<int>(m_busses.count()); }
 
 	private:
 		bool getBusInitOrder(QVector<BusShared>* busInitOrder);

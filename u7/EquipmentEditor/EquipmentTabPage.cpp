@@ -16,11 +16,6 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 {
 	assert(dbcontroller != nullptr);
 
-	// For saving to QSettings
-	//
-	qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
-	qRegisterMetaTypeStreamOperators<QMap<QString,int>>("QMap<QString,int>");
-
 	//
 	// Controls
 	//
@@ -181,7 +176,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 		m_propertyEditor->setSplitterPosition(s.value("EquipmentTabPage/m_propertyEditor/splitterPosition", 150).toInt());
 		m_propertyTable->setPropertyFilter(s.value("EquipmentTabPage/m_propertyTable/propertyFilter").toString());
-		m_propertyTable->setColumnsWidth(s.value("EquipmentTabPage/m_propertyTable/getColumnsWidth").value<QMap<QString,int>>());
+		m_propertyTable->setColumnsWidth(s.value("EquipmentTabPage/m_propertyTable/getColumnsWidth").value<QMap<QString, int>>());
 		m_propertyTable->setGroupByCategory(s.value("EquipmentTabPage/m_propertyTable/groupByCategory").toBool());
 	}
 
@@ -229,8 +224,17 @@ void EquipmentTabPage::CreateActions()
 
 	m_addObjectAction = new QAction(tr("Add Object"), this);
 	m_addObjectAction->setEnabled(true);
-	m_addObjectAction->setMenu(m_addObjectMenu);
+	//m_addObjectButton->setMenu(m_addObjectMenu);		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+	int WARNING_m_addObjectButton_setMenu;
+
+//	m_addObjectButton = new QPushButton(tr("Add Object"), this);
+//	m_addObjectButton->setEnabled(true);
+//	m_addObjectButton->setMenu(m_addObjectMenu);
+
 	connect(m_addObjectAction, &QAction::triggered, this, &EquipmentTabPage::addObjectTriggered);
+
+//	connect(m_addObjectButton, &QPushButton::clicked, this, &EquipmentTabPage::addObjectTriggered);
+//	connect(m_addObjectAction, &QAction::enabledChanged, [b = m_addObjectButton](bool enabled){	b->setEnabled(enabled);	});
 
 		m_addSystemAction = new QAction(tr("System"), this);
 		m_addSystemAction->setStatusTip(tr("Add system to the configuration..."));
@@ -290,7 +294,9 @@ void EquipmentTabPage::CreateActions()
 
 	m_addNewPresetAction = new QAction(tr("Add New Preset"), this);
 	m_addNewPresetAction->setEnabled(true);
-	m_addNewPresetAction->setMenu(m_addPresetMenu);
+	//m_addNewPresetAction->setMenu(m_addPresetMenu);		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	int WARNING_m_m_addNewPresetAction_setMenu;
+
 	connect(m_addNewPresetAction, &QAction::triggered, this, &EquipmentTabPage::addNewPresetTriggered);
 
 		m_addPresetRackAction = new QAction(tr("Preset Rack"), this);

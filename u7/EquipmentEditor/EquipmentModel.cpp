@@ -160,7 +160,7 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				break;
 
 			case ObjectTypeColumn:
-				v.setValue<QString>(Hardware::DeviceTypeNames[static_cast<size_t>(device->deviceType())]);
+				v = Hardware::DeviceTypeNames[static_cast<size_t>(device->deviceType())];
 				break;
 
 			case ObjectEquipmentIdColumn:
@@ -186,7 +186,7 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				if (deviceFileInfo->state() == E::VcsState::CheckedOut)
 				{
 					QString state = E::valueToString<E::VcsItemAction>(deviceFileInfo->action());
-					v.setValue<QString>(state);
+					v = state;
 				}
 				break;
 
@@ -207,7 +207,7 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 		break;
 
 	case Qt::TextAlignmentRole:
-		return Qt::AlignLeft + Qt::AlignVCenter;
+		return QVariant{Qt::AlignLeft | Qt::AlignVCenter};
 
 	case Qt::ForegroundRole:
 		return QBrush{index.column() == ObjectTypeColumn ?

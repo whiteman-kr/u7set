@@ -3,23 +3,8 @@ QT += core sql network xml widgets gui serialport qml
 TARGET = mconf
 TEMPLATE = app
 
-# c++20 support
-#
-unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
-win32:QMAKE_CXXFLAGS += /std:c++latest
-
+include(../compiler.pri)
 include(../warnings.pri)
-
-# Optimization flags
-#
-win32 {
-        CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -Od
-        CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O2
-}
-unix {
-        CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
-        CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
-}
 
 # Application icon
 win32:RC_ICONS += Images/MConf.ico

@@ -31,7 +31,6 @@ void createTemplateFile(const QString& fileName)
 
 	QXmlStreamWriter writer(&data);
 
-	writer.setCodec("UTF-8");
 	writer.setAutoFormatting(true);
 	writer.writeStartDocument();
 	writer.writeStartElement("BuilderArguments");

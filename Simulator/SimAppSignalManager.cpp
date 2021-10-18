@@ -218,7 +218,7 @@ namespace Sim
 		QByteArray uncompressedData = qUncompress(data);
 
 		::Proto::AppSignalSet message;
-		ok = message.ParseFromArray(uncompressedData.constData(), uncompressedData.size());
+		ok = message.ParseFromArray(uncompressedData.constData(), static_cast<int>(uncompressedData.size()));
 
 		if (ok == false)
 		{

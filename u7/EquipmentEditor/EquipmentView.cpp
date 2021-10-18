@@ -447,7 +447,7 @@ void EquipmentView::replaceObject()
 					QVariant srcValue = src->propertyValue(dstProp->caption());
 
 					if (srcValue.isValid() == false ||
-						srcValue.type() != dstProp->value().type())
+						srcValue.typeId() != dstProp->value().typeId())
 					{
 						continue;
 					}
@@ -1764,7 +1764,7 @@ void EquipmentView::pasteDevices()
 	QByteArray cbData = mimeData->data(EquipmentView::mimeType);
 
 	::Proto::EnvelopeSet messageItems;
-	bool ok = messageItems.ParseFromArray(cbData.constData(), cbData.size());
+	bool ok = messageItems.ParseFromArray(cbData.constData(), static_cast<int>(cbData.size()));
 
 	if (ok == false)
 	{
@@ -1777,7 +1777,7 @@ void EquipmentView::pasteDevices()
 	cbData = mimeData->data(EquipmentView::mimeTypeShortDescription);
 
 	::Proto::EnvelopeSetShortDescription messageDescr;
-	ok = messageDescr.ParseFromArray(cbData.constData(), cbData.size());
+	ok = messageDescr.ParseFromArray(cbData.constData(), static_cast<int>(cbData.size()));
 
 	if (ok == false)
 	{
@@ -1912,7 +1912,7 @@ bool EquipmentView::canPaste() const
 	QByteArray cbData = mimeData->data(EquipmentView::mimeTypeShortDescription);
 
 	::Proto::EnvelopeSetShortDescription message;
-	bool ok = message.ParseFromArray(cbData.constData(), cbData.size());
+	bool ok = message.ParseFromArray(cbData.constData(), static_cast<int>(cbData.size()));
 
 	if (ok == false)
 	{

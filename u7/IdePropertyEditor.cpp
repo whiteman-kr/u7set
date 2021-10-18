@@ -84,7 +84,7 @@ bool IdePropertyEditorHelper::restorePropertyTextEditorSize(std::shared_ptr<Prop
 	{
 		// Resize depends on monitor size, DPI, resolution
 		//
-		QRect screen = QDesktopWidget().availableGeometry(dialog->parentWidget());
+		QRect screen = dialog->parentWidget()->screen()->availableGeometry();
 
 		dialog->resize(static_cast<int>(screen.width() * 0.20),
 			   static_cast<int>(screen.height() * 0.30));
@@ -679,7 +679,7 @@ void IdeCodeEditor::replaceAll(QString findText, QString replaceText, bool selec
 		selectedText = m_textEdit->text();
 	}
 
-	int counter = selectedText.count(findText, caseSensitive == true ? Qt::CaseSensitive : Qt::CaseInsensitive);
+	qsizetype counter = selectedText.count(findText, caseSensitive == true ? Qt::CaseSensitive : Qt::CaseInsensitive);
 
 	if (counter == 0)
 	{
@@ -827,9 +827,9 @@ IdeTuningFiltersEditor::IdeTuningFiltersEditor(DbController* dbController, QWidg
 	bool ok = m_dbController->getTunableSignals(&tuningSignalSet, parent);
 	if (ok == true)
 	{
-		int count = tuningSignalSet.count();
+		qsizetype count = tuningSignalSet.count();
 
-		for (int i = 0; i < count; i++)
+		for (qsizetype i = 0; i < count; i++)
 		{
 			Proto::AppSignal* pas = appSignalSet.add_appsignal();
 			tuningSignalSet[i].serializeTo(pas);

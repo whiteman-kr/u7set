@@ -38,8 +38,8 @@ DialogTagInput::DialogTagInput(QWidget* parent, const QString& title, const QStr
 	}
 	if (validator.isEmpty() == false)
 	{
-		QRegExp rx(validator);
-		m_edit->setValidator(new QRegExpValidator(rx, m_edit));
+		QRegularExpression rx(validator);
+		m_edit->setValidator(new QRegularExpressionValidator(rx, m_edit));
 	}
 
 	QHBoxLayout* buttonsLayout = new QHBoxLayout();
@@ -77,8 +77,8 @@ QWidget* DialogTagsEditorDelegate::createEditor(QWidget *parent, const QStyleOpt
 	{
 		QLineEdit* edit = new QLineEdit(parent);
 
-		QRegExp rx("^[A-Za-z][A-Za-z_\\d]*$");
-		edit->setValidator(new QRegExpValidator(rx, edit));
+		QRegularExpression rx("^[A-Za-z][A-Za-z_\\d]*$");
+		edit->setValidator(new QRegularExpressionValidator(rx, edit));
 
 		return edit;
 	}
@@ -121,8 +121,8 @@ void DialogTagsEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel 
 
 DialogTagsEditor::DialogTagsEditor(DbController* pDbController, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	ui(new Ui::DialogTagsEditor),
-	m_dbController(pDbController)
+	m_dbController(pDbController),
+	ui(new Ui::DialogTagsEditor)
 {
 	assert(db());
 
@@ -134,7 +134,7 @@ DialogTagsEditor::DialogTagsEditor(DbController* pDbController, QWidget *parent)
 	l << tr("Tag");
 	l << tr("Description");
 	ui->m_list->setHeaderLabels(l);
-	ui->m_list->setColumnCount(l.size());
+	ui->m_list->setColumnCount(static_cast<int>(l.size()));
 
 	std::vector<DbTag> tags;
 
@@ -175,7 +175,7 @@ void DialogTagsEditor::showEvent(QShowEvent*)
 {
 	// Resize depends on monitor size, DPI, resolution
 	//
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 
 	resize(static_cast<int>(screen.width() * 0.25),
 		   static_cast<int>(screen.height() * 0.25));

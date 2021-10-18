@@ -93,7 +93,12 @@ namespace Sim
 			m_device.reset();
 		}
 
-		return QtConcurrent::run<bool>(&m_device, &DeviceEmulator::runWorkcycle, currentTime, currentDateTime, workcycle);
+		auto f = [this](std::chrono::microseconds currentTime, QDateTime currentDateTime, qint64 workcycle) -> bool
+		{
+			return this->m_device.runWorkcycle(currentTime, currentDateTime, workcycle);
+		};
+
+		return QtConcurrent::run(f, currentTime, currentDateTime, workcycle);
 	}
 
 	bool LogicModule::receiveConnectionsData(std::chrono::microseconds currentTime)

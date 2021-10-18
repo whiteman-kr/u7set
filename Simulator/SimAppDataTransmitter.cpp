@@ -253,7 +253,7 @@ namespace Sim
 		{
 			rupHeader.frameNumber = reverseUint16(static_cast<quint16>(frameNo));
 
-			int inFrameDataSize = extAppData.appData.size() - (frameNo * RUP_FRAME_DATA_SIZE);
+			int inFrameDataSize = static_cast<int>(extAppData.appData.size()) - (frameNo * RUP_FRAME_DATA_SIZE);
 
 			if (inFrameDataSize > RUP_FRAME_DATA_SIZE)
 			{

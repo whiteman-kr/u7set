@@ -4,7 +4,7 @@ CONFIG += ordered
 
 SUBDIRS += Protobuf \
     	QScintilla/src/qscintilla.pro \
-        qtpropertybrowser \
+#        qtpropertybrowser \
         TrendView \
 		AppSignalLib \
 		UtilsLib \
@@ -14,11 +14,11 @@ SUBDIRS += Protobuf \
 		CommonLib \
 		VFrame30 \
 		DbLib \
-#        Simulator \
-#        SimulatorConsole \
-#        Builder \
-#        BuilderConsole \
-#        u7 \
+		Simulator \
+		SimulatorConsole \
+		Builder \
+		BuilderConsole \
+		u7 \
 #        Metrology \
 #        BaseService \
 #        ServiceControlManager \
@@ -29,12 +29,12 @@ SUBDIRS += Protobuf \
 #        AppDataService \
 #        DiagDataService \
 #        TuningClient \
-#        mconf \
+        mconf \
 #        PacketSource \
 #        PacketViewer \
 #        UalTester \
-#        SimulatorTests \
-#        u7databaseTests
+        SimulatorTests \
+        u7databaseTests
 
 PacketSource.subdir = ./Tools/PacketSource
 PacketViewer.subdir = ./Tools/PacketViewer

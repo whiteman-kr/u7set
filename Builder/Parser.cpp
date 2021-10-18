@@ -2227,16 +2227,16 @@ namespace Builder
 								// Check type
 								//
 								QVariant propertyValue = property->value();
-								if (propertyValue.canConvert(qMetaTypeId<Afb::AfbParamValue>()) == true)
+								if (propertyValue.canConvert<Afb::AfbParamValue>() == true)
 								{
 									propertyValue = propertyValue.value<Afb::AfbParamValue>().value();
 								}
 
 								// Convert to the target type if required
 								//
-								if (propertyValue.type() != param.afbParamValue().value().type())
+								if (propertyValue.typeId() != param.afbParamValue().value().typeId())
 								{
-									bool convertOk = propertyValue.convert(param.afbParamValue().value().type());
+									bool convertOk = propertyValue.convert(param.afbParamValue().value().metaType());
 									if (convertOk == false)
 									{
 										// Properties haû eincompatible types
@@ -2293,16 +2293,16 @@ namespace Builder
 									// Check type
 									//
 									QVariant propertyValue = property->value();
-									if (propertyValue.canConvert(qMetaTypeId<Afb::AfbParamValue>()) == true)
+									if (propertyValue.canConvert<Afb::AfbParamValue>() == true)
 									{
 										propertyValue = propertyValue.value<Afb::AfbParamValue>().value();
 									}
 
 									// Convert to the target type if required
 									//
-									if (propertyValue.type() != param.value().type())
+									if (propertyValue.typeId() != param.value().typeId())
 									{
-										bool convertOk = propertyValue.convert(param.value().type());
+										bool convertOk = propertyValue.convert(param.value().metaType());
 										if (convertOk == false)
 										{
 											// Properties have incompatible types
@@ -2373,7 +2373,7 @@ namespace Builder
 							continue;
 						}
 
-						if (property->value().canConvert(QMetaType::QString) == false)
+						if (property->value().canConvert<QString>() == false)
 						{
 							// Properties hav incompatible types
 							//
@@ -2406,7 +2406,7 @@ namespace Builder
 						{
 							// Multichannel -- appSignalIds.size() > 1
 							//
-							int equipmentIdIndex = logicSchema->equipmentIdList().indexOf(module->equipmentId());
+							qsizetype equipmentIdIndex = logicSchema->equipmentIdList().indexOf(module->equipmentId());
 
 							if (equipmentIdIndex == -1)
 							{
@@ -3385,7 +3385,7 @@ namespace Builder
 
 		// Check for the same guids
 		//
-		for (const std::pair<QUuid, QString>& uuidPair : uuids)
+		for (const std::pair<QUuid, QString> uuidPair : uuids)
 		{
 			if (uuids.count(uuidPair.first) != 1)
 			{
@@ -3396,7 +3396,7 @@ namespace Builder
 
 		// Check for the same labels
 		//
-		for (const std::pair<QString, QString>& labelPair : labels)
+		for (const std::pair<QString, QString> labelPair : labels)
 		{
 			if (labels.count(labelPair.first) != 1)
 			{
@@ -3423,7 +3423,7 @@ namespace Builder
 
 			std::set<QString> pins;
 
-			for (const std::shared_ptr<VFrame30::SchemaLayer> layer : ufb->Layers)
+			for (const std::shared_ptr<VFrame30::SchemaLayer>& layer : ufb->Layers)
 			{
 				if (layer->compile() == false)
 				{
@@ -4452,7 +4452,7 @@ namespace Builder
 			return true;
 		}
 
-		int equipmentIdIndex = schema->equipmentIdList().indexOf(equipmentId);
+		qsizetype equipmentIdIndex = schema->equipmentIdList().indexOf(equipmentId);
 
 		if (equipmentIdIndex == -1)
 		{

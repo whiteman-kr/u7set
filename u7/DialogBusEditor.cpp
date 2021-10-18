@@ -49,7 +49,7 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	l << tr("State");
 	l << tr("User");
 
-	m_busTree->setColumnCount(l.size());
+	m_busTree->setColumnCount(static_cast<int>(l.size()));
 	m_busTree->setHeaderLabels(l);
 
 	int il = 0;
@@ -103,7 +103,7 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	l << tr("Format");
 	l << tr("Placement");
 
-	m_signalsTree->setColumnCount(l.size());
+	m_signalsTree->setColumnCount(static_cast<int>(l.size()));
 	m_signalsTree->setHeaderLabels(l);
 
 	il = 0;
@@ -566,7 +566,7 @@ void DialogBusEditor::onPaste()
 	}
 
 	Proto::EnvelopeSet envelopeSet;
-	if (envelopeSet.ParseFromArray(data.constData(), data.size()) == false)
+	if (envelopeSet.ParseFromArray(data.constData(), static_cast<int>(data.size())) == false)
 	{
 		return;
 	}
@@ -1207,11 +1207,10 @@ bool DialogBusEditor::checkBusNames()
 
 			if (busI->busTypeId() == busJ->busTypeId())
 			{
-				int result = QMessageBox::warning(this, qAppName(),
-												  tr("Busses with duplicated ID found! Are you sure you want to continue?"),
-												  QMessageBox::StandardButton::Yes,
-												  QMessageBox::StandardButton::No | QMessageBox::Default | QMessageBox::Escape
-												  );
+				QMessageBox::StandardButton result = QMessageBox::warning(this, qAppName(),
+																		  tr("Busses with duplicated ID found! Are you sure you want to continue?"),
+																		  QMessageBox::StandardButton::No | QMessageBox::Default | QMessageBox::Escape,
+																		  QMessageBox::StandardButton::Yes);
 				if (result == QMessageBox::StandardButton::Yes)
 				{
 					return true;
@@ -1516,7 +1515,7 @@ void DialogBusEditor::updateButtonsEnableState()
 
 	QList<QTreeWidgetItem*> selectedBusItems = m_busTree->selectedItems();
 
-	int selectedBusCount = selectedBusItems.size();
+	qsizetype selectedBusCount = selectedBusItems.size();
 
 	for (auto item : selectedBusItems)
 	{
@@ -1536,7 +1535,7 @@ void DialogBusEditor::updateButtonsEnableState()
 
 	QList<QTreeWidgetItem*> selectedSignalItems = m_signalsTree->selectedItems();
 
-	int selectedSignalCount = selectedSignalItems.size();
+	qsizetype selectedSignalCount = selectedSignalItems.size();
 
 	// --
 	//

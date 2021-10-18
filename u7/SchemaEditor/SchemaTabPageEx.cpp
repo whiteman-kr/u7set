@@ -2092,8 +2092,8 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, AppSignalSetProvider* sign
 	//
 	m_showControlTabAccelerator = new QAction{tr("Schemas Control"), this};
 	m_showControlTabAccelerator->setShortcuts(QList<QKeySequence>{}
-											  <<  QKeySequence{Qt::CTRL + Qt::Key_QuoteLeft}
-											  <<  QKeySequence{Qt::CTRL + Qt::Key_AsciiTilde}
+											  <<  QKeySequence{Qt::CTRL | Qt::Key_QuoteLeft}
+											  <<  QKeySequence{Qt::CTRL | Qt::Key_AsciiTilde}
 											  );
 	m_showControlTabAccelerator->setShortcutContext(Qt::ApplicationShortcut);
 
@@ -5112,7 +5112,7 @@ void EditSchemaTabPageEx::ensureVisible()
 {
 	setVisible(true);	// Widget must be visible for correct work of QApplication::desktop()->screenGeometry
 
-	QRect screenRect  = QApplication::desktop()->availableGeometry(this);
+	QRect screenRect  = this->screen()->availableGeometry();
 	QRect intersectRect = screenRect.intersected(frameGeometry());
 
 	if (isMinimized() == true)
