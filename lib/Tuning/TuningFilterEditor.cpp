@@ -127,7 +127,7 @@ ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(TuningSignalManager* signal
 	headers << tr("Caption");
 	headers << tr("Value");
 
-	m_filterValuesTree->setColumnCount(headers.size());
+	m_filterValuesTree->setColumnCount(static_cast<int>(headers.size()));
 	m_filterValuesTree->setHeaderLabels(headers);
 	rightLayout->addWidget(m_filterValuesTree);
 
@@ -1281,7 +1281,7 @@ void TuningFilterEditor::on_m_presetsTree_itemSelectionChanged()
 {
 	QList<QTreeWidgetItem*> selectedItems = m_presetsTree->selectedItems();
 
-	int presetsCount = selectedItems.size();
+	qsizetype presetsCount = selectedItems.size();
 
 	m_addPreset->setEnabled(m_readOnly == false);
 	m_addPresetAction->setEnabled(m_addPreset->isEnabled());
@@ -1414,7 +1414,7 @@ void TuningFilterEditor::initUserInterface(QByteArray mainSplitterState, int pro
 	headerLabels << tr("Caption");
 	headerLabels << tr("Type");
 
-	m_presetsTree->setColumnCount(headerLabels.size());
+	m_presetsTree->setColumnCount(static_cast<int>(headerLabels.size()));
 	m_presetsTree->setHeaderLabels(headerLabels);
 	m_presetsTree->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
 

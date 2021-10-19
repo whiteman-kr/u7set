@@ -232,7 +232,7 @@ void SchemasWorkspace::createSchemasList()
 	headerLabels << tr("ID");
 	headerLabels << tr("Caption");
 
-	m_schemasList->setColumnCount(headerLabels.size());
+	m_schemasList->setColumnCount(static_cast<int>(headerLabels.size()));
 	m_schemasList->setHeaderLabels(headerLabels);
 	m_schemasList->setSelectionMode(QAbstractItemView::SingleSelection);
 

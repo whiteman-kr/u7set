@@ -50,7 +50,6 @@ Settings::Settings():
 	m_configuratorPort2(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST),
 	m_language("en")
 {
-    qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
 }
 
 void Settings::StoreSystem()

@@ -4,7 +4,6 @@
 #include "DialogFilterEditor.h"
 
 #include <QApplication>
-#include <QDesktopWidget>
 
 #include "../lib/Tuning/TuningFilter.h"
 #include "../UtilsLib/LogFile.h"

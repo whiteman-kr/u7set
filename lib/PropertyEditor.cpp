@@ -1,4 +1,5 @@
 #include "Stable.h"
+
 #include "../lib/PropertyEditor.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../AppSignalLib/TuningValue.h"
@@ -7,8 +8,16 @@
 #include <QFileDialog>
 #include <QColorDialog>
 #include <QTextBrowser>
-#include <QPlainTextEdit>
 #include <QDesktopServices>
+
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable : 4244)
+#endif
+#include <QPlainTextEdit>
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
 
 namespace ExtWidgets
 {

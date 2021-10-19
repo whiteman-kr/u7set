@@ -12,12 +12,11 @@ TEMPLATE = app
 
 INCLUDEPATH += $$PWD
 
-# c++20 support
-#
-unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
-win32:QMAKE_CXXFLAGS += /std:c++latest
-
+include(../compiler.pri)
 include(../warnings.pri)
+
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 # generate PDBs for release
 #
@@ -149,9 +148,6 @@ FORMS    += \
     DialogSettings.ui \
     SwitchFiltersPageOptions.ui \
     TuningSignalInfo.ui
-
-CONFIG += precompile_header
-PRECOMPILED_HEADER = Stable.h
 
 TRANSLATIONS = languages/TuningClient_ru.ts
 

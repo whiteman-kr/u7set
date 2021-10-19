@@ -468,7 +468,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 
 		headerLabels << tr("");
 
-		m_filterTree->setColumnCount(headerLabels.size());
+		m_filterTree->setColumnCount(static_cast<int>(headerLabels.size()));
 		m_filterTree->setHeaderLabels(headerLabels);
 
 		// Set column width

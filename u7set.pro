@@ -28,7 +28,7 @@ SUBDIRS += Protobuf \
 		TuningService \
         AppDataService \
 		DiagDataService \
-#        TuningClient \
+        TuningClient \
         mconf \
 #        PacketSource \
 #        PacketViewer \
