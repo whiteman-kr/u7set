@@ -82,6 +82,9 @@ public:
 	bool readHostAddressPort(const QString& nameIP, const QString &namePort, HostAddressPort *hostAddressPort);
 	bool readHostAddress(const QString& name, QHostAddress *hostAddress);
 
+	template<typename ENUM_TYPE>
+	bool readEnumValueAttribute(const QString& name, ENUM_TYPE* value);
+
 	bool findElement(const QString& elementName);
 	bool checkElement(const QString& elementName);
 
@@ -89,3 +92,27 @@ private:
 	QXmlStreamReader* m_xmlReader = nullptr;
 	QXmlStreamReader* m_xmlLocalReader = nullptr;
 };
+
+template<typename ENUM_TYPE>
+bool XmlReadHelper::readEnumValueAttribute(const QString& name, ENUM_TYPE* value)
+{
+	if(value == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	{
+		return false;
+	}
+
+	bool result = false;
+
+	QString str = m_xmlReader->attributes().value(name).toString();
+
+	*value = static_cast<ENUM_TYPE>(str.toInt(&result, 0));
+
+	return result;
+}
+

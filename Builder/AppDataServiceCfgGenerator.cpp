@@ -172,13 +172,8 @@ namespace Builder
 
 		xml.setAutoFormatting(true);
 		xml.writeStartDocument();
-		xml.writeStartElement("AppSignals");
-		xml.writeIntAttribute("buildID", m_buildResultWriter->buildInfo().id);
-
-		// Writing units
-		xml.writeStartElement("Units");
-		xml.writeIntAttribute("Count", 0);
-		xml.writeEndElement();				// Units
+		xml.writeStartElement(XmlElement::APP_SIGNALS);
+		xml.writeIntAttribute(XmlAttribute::BUILD_ID, m_buildResultWriter->buildInfo().id);
 
 		QVector<AppSignal*> signalsToWrite;
 
@@ -201,7 +196,7 @@ namespace Builder
 				hasWrongField = true;
 			}
 
-			switch (static_cast<E::ByteOrder>(signal.byteOrderInt()))
+			switch (signal.byteOrder())
 			{
 				case E::ByteOrder::LittleEndian:
 				case E::ByteOrder::BigEndian:
@@ -221,8 +216,8 @@ namespace Builder
 
 		// Writing signals
 		//
-		xml.writeStartElement("Signals");
-		xml.writeIntAttribute("Count", signalsToWrite.count());
+		xml.writeStartElement(XmlElement::SIGNALS);
+		xml.writeIntAttribute(XmlAttribute::COUNT, signalsToWrite.count());
 
 		for(AppSignal* signal : signalsToWrite)
 		{
@@ -235,7 +230,9 @@ namespace Builder
 		xml.writeEndElement();	// </AppSignals>
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), "AppSignals.xml", CfgFileId::APP_SIGNALS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(),
+															File::APP_SIGNALS_XML,
+															CfgFileId::APP_SIGNALS, "",  data);
 
 		if (buildFile == nullptr)
 		{

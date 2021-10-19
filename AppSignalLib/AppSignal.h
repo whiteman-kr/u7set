@@ -259,7 +259,6 @@ public:
 	void setBusTypeID(const QString& busTypeID) { m_busTypeID = busTypeID; }
 
 	E::Channel channel() const { return m_channel; }
-	int channelInt() const { return TO_INT(m_channel); }
 
 	bool excludeFromBuild() const { return m_excludeFromBuild; }
 	void setExcludeFromBuild(bool excludeFromBuild) { m_excludeFromBuild = excludeFromBuild; }
@@ -270,7 +269,6 @@ public:
 	// Signal type
 
 	E::SignalType signalType() const { return m_signalType; }
-	int signalTypeInt() const { return TO_INT(m_signalType); }
 	void setSignalType(E::SignalType type);
 
 	bool isAnalog() const { return m_signalType == E::SignalType::Analog; }
@@ -278,7 +276,6 @@ public:
 	bool isBus() const { return m_signalType == E::SignalType::Bus; }
 
 	E::SignalInOutType inOutType() const { return m_inOutType; }
-	int inOutTypeInt() const { return TO_INT(m_inOutType); }
 	void setInOutType(E::SignalInOutType inOutType) { m_inOutType = inOutType; }
 
 	bool isInput() const { return m_inOutType == E::SignalInOutType::Input; }
@@ -296,11 +293,9 @@ public:
 	int sizeBit() const { return m_dataSize; }
 
 	E::ByteOrder byteOrder() const { return m_byteOrder; }
-	int byteOrderInt() const { return TO_INT(m_byteOrder); }
 	void setByteOrder(E::ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 
 	E::AnalogAppSignalFormat analogSignalFormat() const { return m_analogSignalFormat; }
-	int analogSignalFormatInt() const { return TO_INT(m_analogSignalFormat); }
 	void setAnalogSignalFormat(E::AnalogAppSignalFormat dataFormat);
 
 	E::DataFormat dataFormat() const;

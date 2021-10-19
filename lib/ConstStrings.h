@@ -200,6 +200,10 @@ namespace XmlElement
 	inline const QString APP_DATA_SERVICES("AppDataServices");
 
 	inline const QString SECURITY("TuningSecurity");
+
+	inline const QString APP_SIGNALS("AppSignals");
+	inline const QString SIGNALS("Signals");
+	inline const QString SIGNAL_ELEM("Signal");
 }
 
 namespace XmlAttribute
@@ -209,6 +213,13 @@ namespace XmlAttribute
 	inline const QString ID("ID");
 	inline const QString IDs("IDs");
 	inline const QString TYPE("Type");
+	inline const QString BUILD_ID("BuildID");
+	inline const QString CHANNEL("Channel");
+	inline const QString APP_SIGNAL_ID("AppSignalID");
+	inline const QString CUSTOM_APP_SIGNAL_ID("CustomAppSignalID");
+	inline const QString EQUIPMENT_ID("EquipmentID");
+	inline const QString DATA_FORMAT("DataFormat");
+	inline const QString DATA_SIZE("DataSize");
 
 	inline const QString DATA_ID("DataID");
 	inline const QString HEX_DATA_ID("HexDataID");
@@ -326,6 +337,7 @@ namespace Directory
 namespace File
 {
 	inline const QString APP_SIGNALS_ASGS("AppSignals.asgs");
+	inline const QString APP_SIGNALS_XML("AppSignals.xml");
 	inline const QString COMPARATORS_SET("Comparators.set");
 	inline const QString APP_DATA_SOURCES_XML("AppDataSources.xml");
 	inline const QString TUNING_SOURCES_XML("TuningSources.xml");
@@ -385,6 +397,7 @@ namespace AppSignalPropNames
 	inline const QString BUS_TYPE_ID("BusTypeID");
 	inline const QString CAPTION("Caption");
 	inline const QString ANALOG_SIGNAL_FORMAT("AnalogSignalFormat");
+	inline const QString DATA_FORMAT("DataFormat");
 	inline const QString DATA_SIZE("DataSize");
 	inline const QString LOW_ADC("LowADC");
 	inline const QString HIGH_ADC("HighADC");
@@ -398,10 +411,13 @@ namespace AppSignalPropNames
 	inline const QString ELECTRIC_LOW_LIMIT("ElectricLowLimit");
 	inline const QString ELECTRIC_HIGH_LIMIT("ElectricHighLimit");
 	inline const QString ELECTRIC_UNIT("ElectricUnit");
+	inline const QString ELECTRIC_UNIT_STR("ElectricUnitStr");
 	inline const QString RLOAD_OHM("Rload_Ohm");
 	inline const QString SENSOR_TYPE("SensorType");
+	inline const QString SENSOR_TYPE_STR("SensorTypeStr");
 	inline const QString R0_OHM("R0_Ohm");
 	inline const QString OUTPUT_MODE("OutputMode");
+	inline const QString OUTPUT_MODE_STR("OutputModeStr");
 	inline const QString ACQUIRE("Acquire");
 	inline const QString ARCHIVE("Archive");
 	inline const QString DECIMAL_PLACES("DecimalPlaces");
@@ -416,8 +432,18 @@ namespace AppSignalPropNames
 	inline const QString TUNING_DEFAULT_VALUE("TuningDefaultValue");
 	inline const QString TUNING_LOW_BOUND("TuningLowBound");
 	inline const QString TUNING_HIGH_BOUND("TuningHighBound");
+	inline const QString SPEC_PROP_STRUCT("SpecPropStruct");
 	inline const QString SPECIFIC_PROPERTIES_STRUCT("SpecificPropertiesStruct");
+	inline const QString PROTO_SPEC_PROP_VALUES("ProtoSpecPropValues");
 	inline const QString TAGS("Tags");
+	inline const QString UAL_ADDR_OFFSET("UalAddrOffset");
+	inline const QString UAL_ADDR_BIT("UalAddrBit");
+	inline const QString VALUE_OFFSET("ValueOffset");
+	inline const QString VALUE_BIT("ValueBit");
+	inline const QString VALIDITY_OFFSET("ValidityOffset");
+	inline const QString VALIDITY_BIT("ValidityBit");
+	inline const QString TUNING_OFFSET("TuningOffset");
+	inline const QString TUNING_BIT("TuningBit");
 
 	inline const QString MISPRINT_lowEngineeringUnitsCaption("LowEngeneeringUnits");
 	inline const QString MISPRINT_highEngineeringUnitsCaption("HighEngeneeringUnits");
