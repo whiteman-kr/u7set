@@ -75,6 +75,7 @@ void ChartView::keyPressEvent(QKeyEvent* event)
 		case Qt::Key_Right:	chart()->scroll(10, 0);		break;
 		case Qt::Key_Up:	chart()->scroll(0, 10);		break;
 		case Qt::Key_Down:	chart()->scroll(0, -10);	break;
+
 		default:
 			QGraphicsView::keyPressEvent(event);
 	}

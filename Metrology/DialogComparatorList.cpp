@@ -56,6 +56,7 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 			case COMPARATOR_LIST_COLUMN_EN_RANGE:		result = Qt::AlignCenter;	break;
 			case COMPARATOR_LIST_COLUMN_OUTPUT:			result = Qt::AlignLeft;		break;
 			case COMPARATOR_LIST_COLUMN_SCHEMA:			result = Qt::AlignLeft;		break;
+
 			default:
 				assert(0);
 		}
@@ -194,6 +195,7 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 		case COMPARATOR_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();											break;
 		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->outputSignalID(m_idType);								break;
 		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();												break;
+
 		default:
 			assert(0);
 	}

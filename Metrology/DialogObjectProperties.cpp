@@ -1083,6 +1083,7 @@ QString PrComparatorListTable::text(int row, int column, std::shared_ptr<Metrolo
 		case PR_COMPARATOR_LIST_COLUMN_CMP_TO:		result = comparatorEx->compareTo(Metrology::SignalIDType::CustomID);					break;
 		case PR_COMPARATOR_LIST_COLUMN_SETPOINT:	result = comparatorEx->compareOnlineValueStr(Metrology::CmpValueType::SetPoint, true);	break;
 		case PR_COMPARATOR_LIST_COLUMN_OUTPUT:		result = comparatorEx->outputSignalID(Metrology::SignalIDType::CustomID);				break;
+
 		default:
 			assert(0);
 	}
@@ -1624,15 +1625,10 @@ void DialogSignalProperty::updateGroupHeader(int index)
 
 	switch(index)
 	{
-		case SIGNAL_PROPERTY_GROUP_ID:
-			header = tr("Signal ID");
-			break;
-		case SIGNAL_PROPERTY_GROUP_EL_RANGE:
-			header = SignalPropertyGroup[index] + m_param.electricRangeStr();
-			break;
-		case SIGNAL_PROPERTY_GROUP_EN_RANGE:
-			header = SignalPropertyGroup[index] + m_param.engineeringRangeStr();
-			break;
+		case SIGNAL_PROPERTY_GROUP_ID:			header = tr("Signal ID");												break;
+		case SIGNAL_PROPERTY_GROUP_EL_RANGE:	header = SignalPropertyGroup[index] + m_param.electricRangeStr();		break;
+		case SIGNAL_PROPERTY_GROUP_EN_RANGE:	header = SignalPropertyGroup[index] + m_param.engineeringRangeStr();	break;
+
 		default:
 			assert(0);
 	}

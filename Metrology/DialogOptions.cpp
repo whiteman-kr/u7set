@@ -262,6 +262,7 @@ PropertyPage* DialogOptions::createPage(int page)
 		case OPTION_PAGE_LANGUAGE:				pPropertyPage = createPropertyList(page);	break;
 		case OPTION_PAGE_LINEARITY_POINT:
 		case OPTION_PAGE_MEASURE_VIEW_COLUMN:	pPropertyPage = createPropertyDialog(page);	break;
+
 		default:
 			assert(nullptr);
 	}
@@ -302,7 +303,9 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					case OPTION_PAGE_CONFIG_SOCKET:	socketType = SOCKET_TYPE_CONFIG;	break;
 					case OPTION_PAGE_SIGNAL_SOCKET:	socketType = SOCKET_TYPE_SIGNAL;	break;
 					case OPTION_PAGE_TUNING_SOCKET:	socketType = SOCKET_TYPE_TUNING;	break;
-					default:						socketType = -1;					break;
+
+					default:
+						socketType = -1;
 				}
 
 				if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
@@ -491,6 +494,7 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					{
 						case Measure::LinearityDivision::Manual:	item->setEnabled(false);	break;
 						case Measure::LinearityDivision::Automatic:	item->setEnabled(true);		break;
+
 						default:
 							assert(0);
 					}
@@ -505,6 +509,7 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					{
 						case Measure::LinearityDivision::Manual:	item->setEnabled(false);	break;
 						case Measure::LinearityDivision::Automatic:	item->setEnabled(true);		break;
+
 						default:
 							assert(0);
 					}
@@ -519,6 +524,7 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					{
 						case Measure::LinearityDivision::Manual:	item->setEnabled(false);	break;
 						case Measure::LinearityDivision::Automatic:	item->setEnabled(true);		break;
+
 						default:
 							assert(0);
 					}
@@ -909,7 +915,6 @@ PropertyPage* DialogOptions::createPropertyDialog(int page)
 
 		default:
 			assert(nullptr);
-			break;
 	}
 
 	if (pDialogPage != nullptr)
@@ -1145,10 +1150,12 @@ void DialogOptions::applyProperty()
 
 				switch (page)
 				{
-					case OPTION_PAGE_CONFIG_SOCKET: socketType = SOCKET_TYPE_CONFIG;													break;
-					case OPTION_PAGE_SIGNAL_SOCKET: socketType = SOCKET_TYPE_SIGNAL;													break;
-					case OPTION_PAGE_TUNING_SOCKET: socketType = SOCKET_TYPE_TUNING;													break;
-					default:						socketType = -1;																	break;
+					case OPTION_PAGE_CONFIG_SOCKET: socketType = SOCKET_TYPE_CONFIG;	break;
+					case OPTION_PAGE_SIGNAL_SOCKET: socketType = SOCKET_TYPE_SIGNAL;	break;
+					case OPTION_PAGE_TUNING_SOCKET: socketType = SOCKET_TYPE_TUNING;	break;
+
+					default:
+						socketType = -1;
 				}
 
 				if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
@@ -1166,6 +1173,7 @@ void DialogOptions::applyProperty()
 					case SOCKET_CLIENT_PARAM_EQUIPMENT_ID2:	sco.setEquipmentID(SOCKET_SERVER_TYPE_RESERVE, value.toString());			break;
 					case SOCKET_CLIENT_PARAM_SERVER_IP2:	sco.setServerIP(SOCKET_SERVER_TYPE_RESERVE, value.toString());				break;
 					case SOCKET_CLIENT_PARAM_SERVER_PORT2:	sco.setServerPort(SOCKET_SERVER_TYPE_RESERVE, value.toInt());				break;
+
 					default:
 						assert(0);
 				}
@@ -1187,6 +1195,7 @@ void DialogOptions::applyProperty()
 					case MO_PARAM_MEASURE_SHOWN_ON_SCHEMAS:	m_options.module().setMeasureShownOnSchemas(value.toBool());				break;
 					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());					break;
 					case MO_PARAM_MAX_IMPUT_COUNT:			m_options.module().setMaxInputCount(value.toInt());							break;
+
 					default:
 						assert(0);
 				}
@@ -1236,6 +1245,7 @@ void DialogOptions::applyProperty()
 															m_options.measureView().setUpdateColumnView(Measure::Type::Comparators, true);	break;
 					case CO_PARAM_COMPARATOR_INDEX:			m_options.comparator().setStartComparatorIndex(value.toInt() - 1);				break;
 					case CO_PARAM_ENABLE_HYSTERESIS:		m_options.comparator().setEnableMeasureHysteresis(value.toBool());				break;
+
 					default:
 						assert(0);
 				}
@@ -1252,6 +1262,7 @@ void DialogOptions::applyProperty()
 					case MWO_PARAM_COLOR_CONTROL_ERROR:		m_options.measureView().setColorErrorControl(QColor(value.toString()));		break;
 					case MWO_PARAM_SHOW_NO_VALID:			m_options.measureView().setShowNoValid(value.toBool());						break;
 					case MWO_PARAM_PRECESION_BY_CALIBRATOR:	m_options.measureView().setPrecesionByCalibrator(value.toBool());			break;
+
 					default:
 						assert(0);
 				}
@@ -1280,6 +1291,7 @@ void DialogOptions::applyProperty()
 				case SIO_PARAM_COLOR_FLAG_OVERFLOW:		m_options.signalInfo().setColorFlagOverflow(QColor(value.toString()));			break;
 				case SIO_PARAM_COLOR_FLAG_UNDERFLOW:	m_options.signalInfo().setColorFlagUnderflow(QColor(value.toString()));			break;
 				case SIO_PARAM_TIME_FOR_UPDATE:			m_options.signalInfo().setTimeForUpdate(value.toInt());							break;
+
 				default:
 					assert(0);
 			}
@@ -1296,6 +1308,7 @@ void DialogOptions::applyProperty()
 				case CIO_PARAM_COLOR_STATE_FALSE:		m_options.comparatorInfo().setColorStateFalse(QColor(value.toString()));		break;
 				case CIO_PARAM_COLOR_STATE_TRUE:		m_options.comparatorInfo().setColorStateTrue(QColor(value.toString()));			break;
 				case CIO_PARAM_TIME_FOR_UPDATE:			m_options.comparatorInfo().setTimeForUpdate(value.toInt());						break;
+
 				default:
 					assert(0);
 			}
@@ -1308,6 +1321,7 @@ void DialogOptions::applyProperty()
 				{
 					case DBO_PARAM_LOCATION_PATH:		m_options.database().setLocationPath(value.toString());							break;
 					case DBO_PARAM_TYPE:				m_options.database().setType(value.toBool());									break;
+
 					default:
 						assert(0);
 				}
@@ -1321,6 +1335,7 @@ void DialogOptions::applyProperty()
 					case DBO_PARAM_ON_START:			m_options.database().setOnStart(value.toBool());								break;
 					case DBO_PARAM_ON_EXIT:				m_options.database().setOnExit(value.toBool());									break;
 					case DBO_PARAM_COPY_PATH:			m_options.database().setBackupPath(value.toString());							break;
+
 					default:
 						assert(0);
 				}
@@ -1332,6 +1347,7 @@ void DialogOptions::applyProperty()
 				switch(param)
 				{
 					case LNO_PARAM_LANGUAGE_TYPE:		m_options.language().setLanguageType(value.toInt());							break;
+
 					default:
 						assert(0);
 				}
@@ -1404,6 +1420,7 @@ void DialogOptions::updateLinearityPage(bool isDialog)
 		{
 			case Measure::LinearityDivision::Manual:	property->setEnabled(false);	break;
 			case Measure::LinearityDivision::Automatic:	property->setEnabled(true);		break;
+
 			default:
 				assert(0);
 		}
@@ -1418,6 +1435,7 @@ void DialogOptions::updateLinearityPage(bool isDialog)
 		{
 			case Measure::LinearityDivision::Manual:	property->setEnabled(false);	break;
 			case Measure::LinearityDivision::Automatic:	property->setEnabled(true);		break;
+
 			default:
 				assert(0);
 		}
@@ -1432,6 +1450,7 @@ void DialogOptions::updateLinearityPage(bool isDialog)
 		{
 			case Measure::LinearityDivision::Manual:	property->setEnabled(false);	break;
 			case Measure::LinearityDivision::Automatic:	property->setEnabled(true);		break;
+
 			default:
 				assert(0);
 		}

@@ -707,7 +707,7 @@ void LinearityOption::load()
 {
 	QSettings s;
 
-	m_errorLimit = s.value(QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), 0.2).toDouble();
+	m_errorLimit = s.value(QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), 0.1).toDouble();
 	m_errorType = s.value(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), Measure::ErrorType::Reduce).toInt();
 	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(LINEARITY_OPTIONS_KEY), Measure::LimitType::Electric).toInt();
 
@@ -775,6 +775,7 @@ QString LinearityViewTypeCaption(int type)
 		case LinearityViewType::Extended:			caption = QT_TRANSLATE_NOOP("Options", "Extended (show columns for metrological certification)");	break;
 		case LinearityViewType::DetailElectric:		caption = QT_TRANSLATE_NOOP("Options", "Detail electric (show all measurements at one point)");		break;
 		case LinearityViewType::DetailEngineering:	caption = QT_TRANSLATE_NOOP("Options", "Detail engineering (show all measurements at one point)");	break;
+
 		default:
 			Q_ASSERT(0);
 			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
@@ -1495,6 +1496,7 @@ QString LanguageTypeCaption(LanguageType type)
 	{
 		case LanguageType::English:	caption = QT_TRANSLATE_NOOP("Options", "English");	break;
 		case LanguageType::Russian:	caption = QT_TRANSLATE_NOOP("Options", "Russian");	break;
+
 		default:
 			Q_ASSERT(0);
 			caption = QT_TRANSLATE_NOOP("Options", "Unknown");

@@ -264,6 +264,7 @@ namespace Metrology
 			case Metrology::SignalIDType::CustomID:		signalID = customAppSignalID();	break;
 			case Metrology::SignalIDType::AppSignalID:	signalID = appSignalID();		break;
 			case Metrology::SignalIDType::EquipmentID:	signalID = equipmentID();		break;
+
 			default:
 				assert(0);
 		}
@@ -507,6 +508,7 @@ namespace Metrology
 			case E::SignalInOutType::Input:		typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Input");	break;
 			case E::SignalInOutType::Internal:	typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Internal");	break;
 			case E::SignalInOutType::Output:	typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Output");	break;
+
 			default:
 				Q_ASSERT(0);
 				typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Unknown");
@@ -962,6 +964,7 @@ namespace Metrology
 			case SignalIDType::CustomID:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "SignalID");		break;
 			case SignalIDType::AppSignalID:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "AppSignalID");	break;
 			case SignalIDType::EquipmentID:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "EquipmentID");	break;
+
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("Options", "Unknown");
@@ -980,6 +983,7 @@ namespace Metrology
 		{
 			case CmpValueType::SetPoint:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "Set point");	break;
 			case CmpValueType::Hysteresis:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "Hysteresis");	break;
+
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("MetrologySignal", "Unknown");
@@ -1085,6 +1089,7 @@ namespace Metrology
 				case Metrology::SignalIDType::CustomID:		signalID = m_inputSignal->param().customAppSignalID();	break;
 				case Metrology::SignalIDType::AppSignalID:	signalID = m_inputSignal->param().appSignalID();		break;
 				case Metrology::SignalIDType::EquipmentID:	signalID = m_inputSignal->param().equipmentID();		break;
+
 				default:
 					assert(0);
 			}
@@ -1110,6 +1115,7 @@ namespace Metrology
 				case Metrology::SignalIDType::CustomID:		signalID = m_compareSignal->param().customAppSignalID();	break;
 				case Metrology::SignalIDType::AppSignalID:	signalID = m_compareSignal->param().appSignalID();			break;
 				case Metrology::SignalIDType::EquipmentID:	signalID = m_compareSignal->param().equipmentID();			break;
+
 				default:
 					assert(0);
 			}
@@ -1135,6 +1141,7 @@ namespace Metrology
 				case Metrology::SignalIDType::CustomID:		signalID = m_hysteresisSignal->param().customAppSignalID();	break;
 				case Metrology::SignalIDType::AppSignalID:	signalID = m_hysteresisSignal->param().appSignalID();		break;
 				case Metrology::SignalIDType::EquipmentID:	signalID = m_hysteresisSignal->param().equipmentID();		break;
+
 				default:
 					assert(0);
 			}
@@ -1160,6 +1167,7 @@ namespace Metrology
 				case Metrology::SignalIDType::CustomID:		signalID = m_outputSignal->param().customAppSignalID();	break;
 				case Metrology::SignalIDType::AppSignalID:	signalID = m_outputSignal->param().appSignalID();		break;
 				case Metrology::SignalIDType::EquipmentID:	signalID = m_outputSignal->param().equipmentID();		break;
+
 				default:
 					assert(0);
 			}

@@ -1283,8 +1283,12 @@ bool MainWindow::signalIsMeasured(const MeasureSignal& activeSignal, QString& si
 
 	switch (m_connectionType)
 	{
-		case Metrology::ConnectionType::Unused:	ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);		break;
-		default:								ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);	break;
+		case Metrology::ConnectionType::Unused:
+			ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);
+			break;
+		default:
+			ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);
+			break;
 	}
 
 	if (ioSignal.isEmpty() == true)
@@ -1598,6 +1602,7 @@ void MainWindow::onExportMeasure()
 	{
 		case Measure::Type::Linearity:		fileName = "Linearity";		break;
 		case Measure::Type::Comparators:	fileName = "Comparators";	break;
+
 		default:
 			assert(0);
 	}
@@ -2999,11 +3004,13 @@ void MainWindow::measureThreadStoped()
 					onStartMeasure();
 					return;
 				}
+
 			case Measure::Type::Comparators:
 				{
 					m_pMainTab->setCurrentIndex(Measure::Type::Linearity);
 				}
 				break;
+
 			default:
 				assert(0);
 		}

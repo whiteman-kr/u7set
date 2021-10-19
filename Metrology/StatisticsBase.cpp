@@ -127,6 +127,7 @@ QString StatisticsItem::stateStr() const
 	{
 		case State::Failed:		state = QT_TRANSLATE_NOOP("StatisticsBase", "Failed");	break;
 		case State::Success:	state = QT_TRANSLATE_NOOP("StatisticsBase", "Ok");		break;
+
 		default:
 			assert(0);
 			state = QT_TRANSLATE_NOOP("StatisticsBase", "Unknown");

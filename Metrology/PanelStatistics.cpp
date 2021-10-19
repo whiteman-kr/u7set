@@ -105,6 +105,7 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 			case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_MEASURE_COUNT:		result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_STATE:				result = Qt::AlignCenter;	break;
+
 			default:
 				assert(0);
 		}
@@ -263,6 +264,7 @@ QString StatisticsTable::text(int row, int column, const StatisticsItem& si) con
 		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticsBase", si.connectionTypeStr().trimmed().toUtf8());		break;
 		case STATISTICS_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();																break;
 		case STATISTICS_COLUMN_STATE:				result = qApp->translate("StatisticsBase", si.stateStr().toUtf8());							break;
+
 		default:
 			assert(0);
 	}

@@ -502,7 +502,7 @@ private:
 
 	Measure::PointBase	m_pointBase;												// list of measurement points
 
-	double				m_errorLimit = 0.2;											// permissible error is given by specified documents
+	double				m_errorLimit = 0.1;											// permissible error is given by specified documents
 	int					m_errorType = Measure::ErrorType::Reduce;					// type of error absolute or reduced
 	int					m_limitType = Measure::LimitType::Electric;					// type of displaing error denend on limit
 

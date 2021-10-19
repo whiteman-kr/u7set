@@ -343,6 +343,7 @@ namespace Measure
 			case LinearityViewType::Extended:			limitType = static_cast<Measure::LimitType>(theOptions.linearity().limitType());	break;
 			case LinearityViewType::DetailElectric:		limitType = Measure::LimitType::Electric;											break;
 			case LinearityViewType::DetailEngineering:	limitType = Measure::LimitType::Engineering;										break;
+
 			default:
 				assert(0);
 				return QString();
@@ -1017,6 +1018,7 @@ namespace Measure
 			case ChartType::Value20El:		limitType = Measure::LimitType::Electric;		break;
 			case ChartType::LinearityEn:
 			case ChartType::Value20En:		limitType = Measure::LimitType::Engineering;	break;
+
 			default:
 				assert(0);
 		}
