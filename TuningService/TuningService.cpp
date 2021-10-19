@@ -486,7 +486,7 @@ namespace Tuning
 																	  m_logger,
 																	  m_tuningLog);
 
-			m_sourceThreadMap.insert(tuningSource.lmAddress32(), sourceThread);
+			m_sourceThreadMap.insert(tuningSource.lanAddress32(), sourceThread);
 
 			sourceThread->start();
 			sourceThread->waitWhileHandlerInitialized();

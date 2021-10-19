@@ -33,6 +33,7 @@ SOURCES += \
     ../lib/BuildInfo.cpp \
     ../lib/DataSource.cpp \
 	../lib/SoftwareSettings.cpp \
+	../lib/LanControllerInfo.cpp \
 	TuningService.cpp \
 	TcpTuningServer.cpp \
 	TcpTuningClient.cpp \
@@ -49,6 +50,7 @@ HEADERS += \
     ../lib/BuildInfo.h \
     ../lib/DataSource.h \
 	../lib/SoftwareSettings.h \
+	../lib/LanControllerInfo.h \
 	TuningService.h \
 	TcpTuningServer.h \
 	TcpTuningClient.h \

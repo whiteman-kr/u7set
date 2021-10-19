@@ -522,7 +522,7 @@ bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_p
 		}
 
 		result &= LanControllerInfoHelper::getInfo(*lm, lanControllerType, adapterNo,
-												   &ds->lanControllerInfo(), *context->m_equipmentSet.get(), log);
+												   *context, false, &ds->lanControllerInfo(), log);
 
 		return result;
 	}

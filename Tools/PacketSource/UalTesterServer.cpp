@@ -118,8 +118,8 @@ void UalTesterServer::onGetTuningSourcesInfoRequest(const char *requestData, qui
 			Network::DataSourceInfo* protoInfo = m_getTuningSourcesInfoReply.add_tuningsourceinfo();
 
 			protoInfo->set_id(static_cast<quint64>(i));
-			protoInfo->set_lmequipmentid(pSource->info().equipmentID.toStdString());
-			protoInfo->set_lmcaption(pSource->info().caption.toStdString());
+			protoInfo->set_moduleequipmentid(pSource->info().equipmentID.toStdString());
+			protoInfo->set_modulecaption(pSource->info().caption.toStdString());
 		}
 	}
 

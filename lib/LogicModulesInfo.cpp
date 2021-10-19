@@ -360,8 +360,8 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 
 			LanControllerInfo& lci = lmInfo->lanControllers[i];
 
-			result &= LanControllerInfoHelper::getInfo(	*lmModule, lc.m_type, lc.m_place, &lci,
-														*m_context.m_equipmentSet.get(), log());
+			result &= LanControllerInfoHelper::getInfo(	*lmModule, lc.m_type, lc.m_place,
+														m_context, false, &lci, log());
 
 			if (lci.isProvideAppData() == true && lci.appDataEnable == true)
 			{

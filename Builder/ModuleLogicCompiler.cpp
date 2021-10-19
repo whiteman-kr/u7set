@@ -5761,7 +5761,7 @@ namespace Builder
 
 		QVector<AppSignal*> tunigableSignals;
 
-		m_tuningData->getSignals(tunigableSignals);
+		m_tuningData->getSignals(&tunigableSignals);
 
 		for(AppSignal* s : tunigableSignals)
 		{

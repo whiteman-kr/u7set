@@ -689,9 +689,9 @@ namespace Tuning
 			TEST_PTR_CONTINUE(tuningSource.tuningData());
 
 			QVector<AppSignal*> signalList;
-			tuningSource.tuningData()->getSignals(signalList);
+			tuningSource.tuningData()->getSignals(&signalList);
 
-			quint32 ip = tuningSource.lmAddress32();
+			quint32 ip = tuningSource.lanAddress32();
 
 			if (signalList.isEmpty() == true)
 			{

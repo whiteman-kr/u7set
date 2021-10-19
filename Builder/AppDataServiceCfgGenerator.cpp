@@ -328,7 +328,7 @@ namespace Builder
 
 			if (chassis == dataSourceChassis)
 			{
-				appDataSource.addAssociatedSignal(E::LanControllerType::AppData, appSignal.appSignalID());
+				appDataSource.appendAssociatedSignal(E::LanControllerType::AppData, appSignal.appSignalID());
 
 				m_associatedAppSignals.insert(appSignal.appSignalID(), true);
 			}

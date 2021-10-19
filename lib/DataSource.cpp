@@ -18,7 +18,7 @@ DataSource::~DataSource()
 {
 }
 
-void DataSource::addAssociatedSignal(E::LanControllerType lanType, const QString& signalID)
+void DataSource::appendAssociatedSignal(E::LanControllerType lanType, const QString& signalID)
 {
 	Q_ASSERT(m_lanControllerInfo.lanControllerType == lanType);
 
@@ -124,15 +124,15 @@ void DataSource::writeToXml(XmlWriteHelper& xml) const
 {
 	xml.writeStartElement(XmlElement::DATA_SOURCE);
 
-	xml.writeStringAttribute(XmlAttribute::LM_ID, m_moduleEquipmentID);
-	xml.writeStringAttribute(XmlAttribute::LM_PRESET_NAME, m_modulePresetName);
-	xml.writeIntAttribute(XmlAttribute::LM_MODULE_TYPE, m_moduleType, true);
-	xml.writeStringAttribute(XmlAttribute::LM_SUBSYSTEM_ID, m_subsystemID);
-	xml.writeIntAttribute(XmlAttribute::LM_SUBSYSTEM_KEY, m_subsystemKey);
+	xml.writeStringAttribute(XmlAttribute::MODULE_EQUIPMENT_ID, m_moduleEquipmentID);
+	xml.writeStringAttribute(XmlAttribute::MODULE_PRESET_NAME, m_modulePresetName);
+	xml.writeIntAttribute(XmlAttribute::MODULE_TYPE, m_moduleType, true);
+	xml.writeStringAttribute(XmlAttribute::SUBSYSTEM_ID, m_subsystemID);
+	xml.writeIntAttribute(XmlAttribute::SUBSYSTEM_KEY, m_subsystemKey);
 	xml.writeIntAttribute(XmlAttribute::LM_NUMBER, m_lmNumber);
-	xml.writeStringAttribute(XmlAttribute::LM_CHANNEL, m_subsystemChannel);
-	xml.writeStringAttribute(XmlAttribute::LM_CAPTION, m_moduleCaption);
-	xml.writeUInt64Attribute(XmlAttribute::LM_UNIQUE_ID, m_moduleUniqueID, true);
+	xml.writeStringAttribute(XmlAttribute::SUBSYSTEM_CHANNEL, m_subsystemChannel);
+	xml.writeStringAttribute(XmlAttribute::CAPTION, m_moduleCaption);
+	xml.writeUInt64Attribute(XmlAttribute::MODULE_UNIQUE_ID, m_moduleUniqueID, true);
 
 	m_lanControllerInfo.writeToXml(xml);
 
@@ -150,15 +150,15 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 
 	bool result = true;
 
-	result &= xml.readStringAttribute(XmlAttribute::LM_ID, &m_moduleEquipmentID);
-	result &= xml.readStringAttribute(XmlAttribute::LM_PRESET_NAME, &m_modulePresetName);
-	result &= xml.readIntAttribute(XmlAttribute::LM_MODULE_TYPE, &m_moduleType);
-	result &= xml.readStringAttribute(XmlAttribute::LM_SUBSYSTEM_ID,&m_subsystemID);
-	result &= xml.readIntAttribute(XmlAttribute::LM_SUBSYSTEM_KEY, &m_subsystemKey);
+	result &= xml.readStringAttribute(XmlAttribute::MODULE_EQUIPMENT_ID, &m_moduleEquipmentID);
+	result &= xml.readStringAttribute(XmlAttribute::MODULE_PRESET_NAME, &m_modulePresetName);
+	result &= xml.readIntAttribute(XmlAttribute::MODULE_TYPE, &m_moduleType);
+	result &= xml.readStringAttribute(XmlAttribute::SUBSYSTEM_ID,&m_subsystemID);
+	result &= xml.readIntAttribute(XmlAttribute::SUBSYSTEM_KEY, &m_subsystemKey);
 	result &= xml.readIntAttribute(XmlAttribute::LM_NUMBER, &m_lmNumber);
-	result &= xml.readStringAttribute(XmlAttribute::LM_CHANNEL,&m_subsystemChannel);
-	result &= xml.readStringAttribute(XmlAttribute::LM_CAPTION, &m_moduleCaption);
-	result &= xml.readUInt64Attribute(XmlAttribute::LM_UNIQUE_ID, &m_moduleUniqueID);
+	result &= xml.readStringAttribute(XmlAttribute::SUBSYSTEM_CHANNEL,&m_subsystemChannel);
+	result &= xml.readStringAttribute(XmlAttribute::CAPTION, &m_moduleCaption);
+	result &= xml.readUInt64Attribute(XmlAttribute::MODULE_UNIQUE_ID, &m_moduleUniqueID);
 
 	result &= m_lanControllerInfo.readFromXml(xml);
 

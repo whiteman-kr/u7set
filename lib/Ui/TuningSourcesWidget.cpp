@@ -195,7 +195,7 @@ void DialogTuningSourceInfo::updateData()
 	setDataItemText("Caption", ts.info.modulecaption().c_str());
 	setDataItemNumber("DataType", ts.info.lancontrollerinfo().lancontrollertype());
 	setDataItemText("IP", ts.info.lancontrollerinfo().tuningip().c_str());
-	setDataItemNumber("Port", ts.info.lancontrollerinfo().port());
+	setDataItemNumber("Port", ts.info.lancontrollerinfo().tuningport());
 	setDataItemText("Channel", ts.info.subsystemchannel().c_str());
 	setDataItemNumber("SubsystemID", ts.info.subsystemkey());
 	setDataItemText("Subsystem", ts.info.subsystemid().c_str());
@@ -204,7 +204,9 @@ void DialogTuningSourceInfo::updateData()
 	setDataItemText("LmModuleType", tr("%1 (%2h)").arg(QString::number(ts.info.moduletype())).arg(QString::number(ts.info.moduletype(), 16)));
 	setDataItemText("LmAdapterID", ts.info.lancontrollerinfo().equipmentid().c_str());
 	setDataItemNumber("LmDataEnable", ts.info.lancontrollerinfo().tuningenable());
-	setDataItemText("LmDataID", tr("%1 (%2h)").arg(QString::number(ts.info.lmdataid())).arg(QString::number(ts.info.lmdataid(), 16)));
+	setDataItemText("LmDataID", tr("%1 (%2h)").
+						arg(QString::number(ts.info.lancontrollerinfo().tuningdatauid())).
+						arg(QString::number(ts.info.lancontrollerinfo().tuningdatauid(), 16)));
 
 	// state
 
@@ -503,13 +505,13 @@ void TuningSourcesWidget::update(bool refreshOnly)
 
 			TuningSource& ts = tsi[i];
 
-			connectionStrings << ts.info.lmequipmentid().c_str();
-			connectionStrings << ts.info.lmip().c_str();
-			connectionStrings << QString::number(ts.info.lmport());
+			connectionStrings << ts.info.moduleequipmentid().c_str();
+			connectionStrings << ts.info.lancontrollerinfo().tuningip().c_str();
+			connectionStrings << QString::number(ts.info.lancontrollerinfo().tuningport());
 
-			connectionStrings << ts.info.lmsubsystemchannel().c_str();
+			connectionStrings << ts.info.subsystemchannel().c_str();
 
-			connectionStrings << ts.info.lmsubsystemid().c_str();
+			connectionStrings << ts.info.subsystemid().c_str();
 			connectionStrings << QString::number(ts.info.lmnumber());
 
 			QTreeWidgetItem* item = new QTreeWidgetItem(connectionStrings);

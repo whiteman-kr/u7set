@@ -16,12 +16,15 @@ const QString LanControllerInfoHelper::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR("
 bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 										E::LanControllerType lanControllerType,
 										int lanControllerNo,
+										const Builder::Context& context,
+										bool ignoreTuningData,
 										LanControllerInfo* lanControllerInfo,
-										const Hardware::EquipmentSet& equipmentSet,
 										Builder::IssueLogger* log)
 {
 	TEST_PTR_RETURN_FALSE(log);
 	TEST_PTR_LOG_RETURN_FALSE(lanControllerInfo, log);
+
+	Hardware::EquipmentSet& equipmentSet = *context.m_equipmentSet.get();
 
 	lanControllerInfo->controllerNo = lanControllerNo;
 	lanControllerInfo->lanControllerType = lanControllerType;
@@ -89,6 +92,25 @@ bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 					result &= DeviceHelper::getStrProperty(tunService,
 														   EquipmentPropNames::TUNING_DATA_NETMASK,
 														   &lanControllerInfo->tuningServiceNetmask, log);
+				}
+
+				if (ignoreTuningData == true)
+				{
+					lanControllerInfo->tuningDataUID = 0;
+				}
+				else
+				{
+					Tuning::TuningData* tuningData = context.m_tuningDataStorage->value(lm.equipmentIdTemplate(), nullptr);
+
+					if (tuningData == nullptr)
+					{
+						LOG_INTERNAL_ERROR_MSG(log, QString("Tuning data is not found for module %1").arg(lm.equipmentIdTemplate()));
+						result = false;
+					}
+					else
+					{
+						lanControllerInfo->tuningDataUID = tuningData->uniqueID();
+					}
 				}
 			}
 		}

@@ -429,7 +429,7 @@ void TcpAppDataServer::onGetAppDataSourcesInfoRequest()
 	for(const AppDataSourceShared source : dataSources)
 	{
 		Network::DataSourceInfo* protoInfo = m_getDataSourcesInfoReply.add_datasourceinfo();
-		source->getInfo(protoInfo);
+		source->saveToProto(protoInfo, false);
 	}
 
 	m_getDataSourcesInfoReply.set_error(TO_INT(NetworkError::Success));

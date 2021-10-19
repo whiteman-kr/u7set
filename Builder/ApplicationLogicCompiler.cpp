@@ -226,7 +226,7 @@ namespace Builder
 				bool res = true;
 
 				res = LanControllerInfoHelper::getInfo(*lm, lanController.m_type, lanController.m_place,
-				                                 &lanControllerInfo, *equipmentSet(), log());
+												 *m_context, true, &lanControllerInfo, log());
 				if (res == false)
 				{
 					LOG_INTERNAL_ERROR(log());

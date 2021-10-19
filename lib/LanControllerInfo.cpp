@@ -52,6 +52,7 @@ bool LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::TUNING_SERVICE_IP, tuningServiceIP);
 		xml.writeIntAttribute(EquipmentPropNames::TUNING_SERVICE_PORT, tuningServicePort);
 		xml.writeStringAttribute(EquipmentPropNames::TUNING_SERVICE_NETMASK, tuningServiceNetmask);
+		xml.writeUInt64Attribute(EquipmentPropNames::TUNING_DATA_UID, tuningDataUID, true);
 
 		xml.writeStringElement(XmlElement::TUNING_ASSOCIATED_SIGNALS, tuningAssociatedSignals.join(Separator::COMMA));
 	}
@@ -143,6 +144,7 @@ bool LanControllerInfo::readFromXml(XmlReadHelper& xml)
 		result &= xml.readStringAttribute(EquipmentPropNames::TUNING_SERVICE_IP, &tuningServiceIP);
 		result &= xml.readIntAttribute(EquipmentPropNames::TUNING_SERVICE_PORT, &tuningServicePort);
 		result &= xml.readStringAttribute(EquipmentPropNames::TUNING_SERVICE_NETMASK, &tuningServiceNetmask);
+		result &= xml.readUInt64Attribute(EquipmentPropNames::TUNING_DATA_UID, &tuningDataUID);
 
 		QString tuningSignals;
 
@@ -265,6 +267,7 @@ bool LanControllerInfo::readFromXml(const QDomNode& lanControllerNode, QString* 
 		result &= DomXmlHelper::getStringAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_IP, &tuningServiceIP, errMsg);
 		result &= DomXmlHelper::getIntAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_PORT, &tuningServicePort, errMsg);
 		result &= DomXmlHelper::getStringAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_NETMASK, &tuningServiceNetmask, errMsg);
+		result &= DomXmlHelper::getUInt64Attribute(tuningElem, EquipmentPropNames::TUNING_DATA_UID, &tuningDataUID, errMsg);
 
 		QDomElement tuningSignals;
 
@@ -366,6 +369,7 @@ void LanControllerInfo::saveToProto(Network::LanControllerInfo* proto, bool incl
 	proto->set_tuningserviceip(tuningServiceIP.toStdString());
 	proto->set_tuningserviceport(tuningServicePort);
 	proto->set_tuningservicenetmask(tuningServiceNetmask.toStdString());
+	proto->set_tuningdatauid(tuningDataUID);
 
 	if (includeSignals == true)
 	{
@@ -438,6 +442,7 @@ void LanControllerInfo::loadFromProto(const Network::LanControllerInfo& proto)
 	tuningServiceIP = QString::fromStdString(proto.tuningserviceip());
 	tuningServicePort = proto.tuningserviceport();
 	tuningServiceNetmask = QString::fromStdString(proto.tuningservicenetmask());
+	tuningDataUID = proto.tuningdatauid();
 	tuningAssociatedSignals = QString::fromStdString(proto.tuningassociatedsignals()).split(Separator::COMMA, Qt::SkipEmptyParts);
 
 	//

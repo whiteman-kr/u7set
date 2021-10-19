@@ -576,7 +576,7 @@ namespace Builder
 				Hardware::Software* software = nullptr;
 
 				result &= LanControllerInfoHelper::getInfo(*lm, lanController.m_type, lanController.m_place,
-														   &lanControllerInfo, *context->m_equipmentSet.get(), log);
+														   *context, false, &lanControllerInfo, log);
 
 				if (result == false)
 				{

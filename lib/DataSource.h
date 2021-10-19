@@ -56,12 +56,13 @@ public:
 	const LanControllerInfo& lanControllerInfo() const { return m_lanControllerInfo; }
 	LanControllerInfo& lanControllerInfo() { return m_lanControllerInfo; }
 
-	void addAssociatedSignal(E::LanControllerType lanType, const QString& signalID);
+	void appendAssociatedSignal(E::LanControllerType lanType, const QString& signalID);
 	void clearAssociatedSignals(E::LanControllerType lanType);
 	const QStringList& associatedSignals(E::LanControllerType lanType) const;
 
 	HostAddressPort lanHostAddressPort() const;
 	quint32 lanAddress32() const { return lanHostAddressPort().address32(); }
+	QString lanEquipmentID() const { return m_lanControllerInfo.equipmentID; }
 
 	int moduleWorkcycle_ms() const { return m_moduleWorkcycle_mcs / 1000; }
 

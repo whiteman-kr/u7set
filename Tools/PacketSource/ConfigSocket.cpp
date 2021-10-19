@@ -392,20 +392,20 @@ bool ConfigSocket::readAppDataSource(const QByteArray& fileData)
 
 		si.moduleType = ds.moduleType();
 		si.subSystem = ds.subsystemID();
-		si.frameCount = ds.lmRupFramesQuantity();
-		si.dataID = ds.lmDataID();
+		si.frameCount = ds.lanControllerInfo().appDataFramesQuantity;
+		si.dataID = ds.lanControllerInfo().appDataUID;
 
-		si.lmIP = ds.lmAddressPort();
+		si.lmIP = ds.lanHostAddressPort();
 		si.appDataSrvIP = m_appDataSrvIP;
 
-		si.signalCount = ds.associatedSignals().count();
+		si.signalCount = ds.associatedSignals(E::LanControllerType::AppData).count();
 
 		// Source
 		//
 		PS::Source source;
 
 		source.info() = si;
-		source.associatedSignalList() = ds.associatedSignals();
+		source.associatedSignalList() = ds.associatedSignals(E::LanControllerType::AppData);
 		source.frameBase().setFrameCount(si.frameCount);
 
 		m_pscore->sourceBase().append(source);

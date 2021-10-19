@@ -19,7 +19,7 @@ namespace Tuning
 			return;
 		}
 
-		source->saveToProto(&m_sourceInfo);
+		source->saveToProto(&m_sourceInfo, false);
 	}
 
 	void TuningSourceContext::getSourceInfo(Network::DataSourceInfo* si) const
@@ -158,7 +158,7 @@ namespace Tuning
 
 			QVector<AppSignal*> sourceSignals;
 
-			tuningData->getSignals(sourceSignals);
+			tuningData->getSignals(&sourceSignals);
 
 			for(const AppSignal* signal : sourceSignals)
 			{

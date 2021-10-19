@@ -31,6 +31,16 @@ namespace Tuning
 		}
 
 		m_tuningData = tuningData;
+
+		QVector<AppSignal*> tunableSignals;
+
+		tuningData->getSignals(&tunableSignals);
+
+		for(const AppSignal* s : tunableSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+			appendAssociatedSignal(E::LanControllerType::Tuning, s->appSignalID());
+		}
 	}
 
 	const TuningData* TuningSource::tuningData() const

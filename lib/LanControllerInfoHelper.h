@@ -4,16 +4,18 @@
 #include "../HardwareLib/DeviceObject.h"
 #include "ConstStrings.h"
 #include "../Builder/IssueLogger.h"
+#include "../Builder/Context.h"
 #include "LanControllerInfo.h"
 
 class LanControllerInfoHelper
 {
 public:
-	static bool getInfo(	const Hardware::DeviceModule& lm,
+	static bool getInfo(const Hardware::DeviceModule& lm,
 							E::LanControllerType lanControllerType,
 							int lanControllerNo,
+							const Builder::Context& context,
+							bool ignoreTuningData,
 							LanControllerInfo* lanControllerInfo,
-							const Hardware::EquipmentSet& equipmentSet,
 							Builder::IssueLogger* log);
 
 	static QString getLanControllerSuffix(int controllerNo);

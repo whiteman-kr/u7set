@@ -58,7 +58,7 @@ namespace Tuning
 
 		int usedFramesCount() const { return m_tuningDataUsedFramesCount; }
 
-		void getSignals(QVector<AppSignal *>& signalList) const;
+		void getSignals(QVector<AppSignal *>* signalList) const;
 
 		const QVector<AppSignal*>& getAnalogFloatSignals() const { return m_tuningSignals[TYPE_ANALOG_FLOAT]; }
 		const QVector<AppSignal*>& getAnalogIntSignals() const { return m_tuningSignals[TYPE_ANALOG_INT32]; }

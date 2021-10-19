@@ -243,7 +243,7 @@ namespace Tuning
 		m_isSimulationMode = swRunMode == E::SoftwareRunMode::Simulation;
 
 		m_sourceEquipmentID = source.moduleEquipmentID();
-		m_sourceIP = source.lmAddressPort();
+		m_sourceIP = source.lanHostAddressPort();
 		m_sourceUniqueID = source.moduleUniqueID();
 		m_lmNumber = static_cast<quint16>(source.lmNumber());
 		m_lmModuleType = static_cast<quint16>(source.moduleType());
@@ -534,7 +534,7 @@ namespace Tuning
 
 		QVector<AppSignal*> tuningSignals;
 
-		td->getSignals(tuningSignals);
+		td->getSignals(&tuningSignals);
 
 		int signalCount = tuningSignals.count();
 

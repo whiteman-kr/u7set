@@ -51,7 +51,7 @@ namespace Tuning
 
 			source.loadFromProto(m_getDataSourcesInfoReply.datasourceinfo(i));
 
-			QString str = QString("Tuning source '%1', %2").arg(source.lmAdapterID()).arg(source.lmAddressStr());
+			QString str = QString("Tuning source '%1', %2").arg(source.lanEquipmentID()).arg(source.lanHostAddressPort().addressPortStr());
 
 			qDebug() << C_STR(str);
 		}

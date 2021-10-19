@@ -108,7 +108,8 @@ message LanControllerInfo
 	optional string tuningServiceIP = 14;
 	optional int32 tuningServicePort = 15 [default = 0];
 	optional string tuningServiceNetmask = 16;
-	optional string tuningAssociatedSignals = 17;
+	optional uint64 tuningdatauid = 17;
+	optional string tuningAssociatedSignals = 18;
 
 	// app data parameters
 
