@@ -393,7 +393,7 @@ void CfgCheckerWorker::onThreadStarted()
 {
 	if (m_workFolder.isEmpty() == true)
 	{
-		m_workFolder = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+		m_workFolder = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 	}
 
 	QDir workDirectory(m_workFolder);

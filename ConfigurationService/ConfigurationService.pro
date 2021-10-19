@@ -12,10 +12,13 @@ QT  += qml
 QT  += xml
 
 TARGET = CfgSrv
-CONFIG   += console
-CONFIG   -= app_bundle
+CONFIG += console
+CONFIG -= app_bundle
 
 TEMPLATE = app
+
+include(../compiler.pri)
+include(../warnings.pri)
 
 # DESTDIR
 #
@@ -27,13 +30,6 @@ unix {
 	CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
-
-# c++20 support
-#
-unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
-win32:QMAKE_CXXFLAGS += /std:c++latest
-
-include(../warnings.pri)
 
 SOURCES += \
     ../lib/BuildInfo.cpp \

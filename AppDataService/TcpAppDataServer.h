@@ -133,7 +133,7 @@ public:
 							std::shared_ptr<CircularLogger> logger);
 
 	const QVector<QString>& acquiredAppSignalIDs() const { return m_acquiredAppSignalIDs; }
-	int acquiredAppSignalIDsCount() const { return m_acquiredAppSignalIDs.count(); }
+	int acquiredAppSignalIDsCount() const { return static_cast<int>(m_acquiredAppSignalIDs.count()); }
 
 	const AppSignals& appSignals() const { return m_appSignals; }
 	const AppDataSourcesIP& appDataSources() const { return  m_appDataSources; }

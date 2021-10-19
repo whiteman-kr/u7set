@@ -74,7 +74,7 @@ public:
 	QString getSignalID(Hash signalHash);
 	bool isSignalExists(Hash signalHash) const { return m_archFiles.contains(signalHash); }
 
-	int getFilesCount() const { return m_archFiles.count(); }
+	int getFilesCount() const { return static_cast<int>(m_archFiles.count()); }
 	void getSignalsHashes(QVector<Hash>* hashes);
 
 	void saveState(const SimpleAppSignalState& state);

@@ -327,7 +327,7 @@ namespace RtTrends
 			return;
 		}
 
-		const QHash<Hash, SignalStatesQueue*>& trackedSignals = m_session->trackedSignals();
+		const QList<SignalStatesQueue*> trackedSignals = m_session->trackedSignals().values();
 
 		int states = 0;
 

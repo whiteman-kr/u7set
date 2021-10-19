@@ -137,7 +137,7 @@ bool ArchFileToRead::gotoNextRecord()
 
 ArchFindResult ArchFileToRead::openPartitionToStartReading()
 {
-	int partitionsCount = m_partitionsInfo.count();
+	qsizetype partitionsCount = m_partitionsInfo.count();
 
 	if (partitionsCount == 0)
 	{
@@ -171,7 +171,7 @@ ArchFindResult ArchFileToRead::openPartitionToStartReading()
 	//
 	m_partitionToReadIndex = 0;
 
-	for(int i = 1 /* it is Ok */ ; i < partitionsCount; i++)
+	for(qsizetype i = 1 /* it is Ok */ ; i < partitionsCount; i++)
 	{
 		const ArchFilePartition::Info& pi = m_partitionsInfo[i];
 
@@ -180,7 +180,7 @@ ArchFindResult ArchFileToRead::openPartitionToStartReading()
 			break;
 		}
 
-		m_partitionToReadIndex = i;
+		m_partitionToReadIndex = static_cast<int>(i);
 	}
 
 	int prevMoveDirection = 0;
@@ -568,9 +568,9 @@ bool ArchRequest::getMultipleFilesNextRecord(Hash* hash, ArchFileRecord* record)
 
 	m_lastFileIndex = -1;
 
-	int archFileToReadCount = m_archFilesToRead.count();
+	qsizetype archFileToReadCount = m_archFilesToRead.count();
 
-	for(int i = 0 ; i < archFileToReadCount; i++)
+	for(qsizetype i = 0 ; i < archFileToReadCount; i++)
 	{
 		ArchFileToRead* archFileToRead = m_archFilesToRead[i];
 
@@ -590,7 +590,7 @@ bool ArchRequest::getMultipleFilesNextRecord(Hash* hash, ArchFileRecord* record)
 			minTime = recordTime;
 
 			m_lastRecordTime = recordTime;
-			m_lastFileIndex = i;
+			m_lastFileIndex = static_cast<int>(i);
 
 			*record = rec;
 			*hash = h;

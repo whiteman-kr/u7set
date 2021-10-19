@@ -448,7 +448,7 @@ bool AppDataServiceWorker::readAppSignals(const QByteArray& fileData)
 {
 	::Proto::AppSignalSet signalSet;
 
-	bool result = signalSet.ParseFromArray(fileData.constData(), fileData.size());
+	bool result = signalSet.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
 
 	if (result == false)
 	{

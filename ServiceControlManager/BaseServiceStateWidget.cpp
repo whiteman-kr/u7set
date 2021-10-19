@@ -5,7 +5,6 @@
 #include <QToolBar>
 #include <QMessageBox>
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QTableView>
 #include <QHeaderView>
 #include <QStandardItemModel>

@@ -365,7 +365,7 @@ void TcpTuningServiceClient::orderTuningSignalParamPortion()
 {
 	m_getAppSignalParamRequest.Clear();
 
-	int signalsLeft = std::min(ADS_GET_APP_SIGNAL_PARAM_MAX, m_signalHashes.size() - m_loadedSignalParamQuantity);
+	int signalsLeft = std::min(ADS_GET_APP_SIGNAL_PARAM_MAX, static_cast<int>(m_signalHashes.size() - m_loadedSignalParamQuantity));
 
 	if (signalsLeft <= 0)
 	{
@@ -429,7 +429,7 @@ void TcpTuningServiceClient::orderTuningSignalStatePortion()
 {
 	m_getTuningSignalStateRequest.Clear();
 
-	int signalsLeft = std::min(TDS_TUNING_MAX_READ_STATES, m_signalHashes.size() - m_updatedSignalStateQuantity);
+	int signalsLeft = std::min(TDS_TUNING_MAX_READ_STATES, static_cast<int>(m_signalHashes.size() - m_updatedSignalStateQuantity));
 
 	if (signalsLeft <= 0)
 	{

@@ -10,6 +10,7 @@
 #include <QHostAddress>
 #include <QMenuBar>
 #include <QToolBar>
+#include <QActionGroup>
 #include <QApplication>
 #include "ScanOptionsWidget.h"
 #include "ServiceTableModel.h"

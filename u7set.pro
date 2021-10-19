@@ -21,13 +21,13 @@ SUBDIRS += Protobuf \
 		u7 \
 #        Metrology \
 #        BaseService \
-#        ServiceControlManager \
-#        ConfigurationService \
-#        ArchivingService \
+        ServiceControlManager \
+		ConfigurationService \
+        ArchivingService \
         Monitor \
-#        TuningService \
-#        AppDataService \
-#        DiagDataService \
+		TuningService \
+        AppDataService \
+		DiagDataService \
 #        TuningClient \
         mconf \
 #        PacketSource \

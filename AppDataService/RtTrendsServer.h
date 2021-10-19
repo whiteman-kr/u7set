@@ -45,7 +45,7 @@ namespace RtTrends
 
 		void getTrackedSignalHashes(QVector<Hash>* hashes);
 
-		const QHash<Hash, SignalStatesQueue*>& trackedSignals() const { return m_trackedSignals; }
+		const QMultiHash<Hash, SignalStatesQueue*>& trackedSignals() const { return m_trackedSignals; }
 
 	private:
 		static std::atomic<int> m_globalID;

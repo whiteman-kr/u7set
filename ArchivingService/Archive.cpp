@@ -590,7 +590,7 @@ void Archive::writeArchFilesInfoFile(const QVector<QVector<ArchFile*>>& archFile
 	{
 		info << QString("Group %1\n\n").arg(QString("%1").arg(g, 2, 16, QChar('0')).toUpper());
 
-		int filesCount = archFilesGroups[g].size();
+		qsizetype filesCount = archFilesGroups[g].size();
 
 		if (filesCount == 0)
 		{
@@ -598,7 +598,7 @@ void Archive::writeArchFilesInfoFile(const QVector<QVector<ArchFile*>>& archFile
 			continue;
 		}
 
-		for(int i = 0; i < filesCount; i++)
+		for(qsizetype i = 0; i < filesCount; i++)
 		{
 			ArchFile* archFile = archFilesGroups[g][i];
 
@@ -717,7 +717,7 @@ ArchFile* Archive::getNextRegularFile()
 
 void Archive::pushBackInRegularFilesQueue(ArchFile* file)
 {
-	int removed = m_regularFilesQueue.removeAll(file);
+	qsizetype removed = m_regularFilesQueue.removeAll(file);
 
 	if (removed != 1)
 	{

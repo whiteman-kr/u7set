@@ -478,7 +478,7 @@ void ArchFile::setArchFullPath(const QString& archFullPath)
 	m_path = QString("%1/%2/%3").
 					arg(archFullPath).
 					arg(lastByteOfHash).
-					arg(m_appSignalID.remove(QRegExp("[^0-9A-Za-z_]")));
+					arg(m_appSignalID.remove(QRegularExpression("[^0-9A-Za-z_]")));
 
 	m_writablePartition.init(m_path, true);
 }
@@ -575,7 +575,7 @@ QVector<ArchFilePartition::Info> ArchFile::getArchPartitionsInfo(const QString& 
 
 	// Arch file name format: 2018_12_31_23_59.sta (or lta))
 
-	QRegExp archFileNameTemplate(ARCH_FILE_NAME_TEMPLATE);
+	QRegularExpression archFileNameTemplate(ARCH_FILE_NAME_TEMPLATE);
 
 	QDirIterator di(path, QDir::Files);
 

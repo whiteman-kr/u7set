@@ -244,7 +244,7 @@ bool ArchivingService::loadArchSignalsProto(const QByteArray& fileData)
 
 	m_archSignalsProto = new Proto::ArchSignals;
 
-	bool result = m_archSignalsProto->ParseFromArray(reinterpret_cast<const void*>(fileData.constData()), fileData.size());
+	bool result = m_archSignalsProto->ParseFromArray(reinterpret_cast<const void*>(fileData.constData()), static_cast<int>(fileData.size()));
 
 	return result;
 }

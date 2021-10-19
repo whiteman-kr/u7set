@@ -127,7 +127,7 @@ void AppDataSource::prepare(const AppSignals& appSignals, DynamicAppSignalStates
 		m_signalStates.append(dynState);
 	}
 
-	m_acquiredSignalsCount = m_signalStates.count();
+	m_acquiredSignalsCount = static_cast<int>(m_signalStates.count());
 
 	int queueSize = m_acquiredSignalsCount * 3;
 

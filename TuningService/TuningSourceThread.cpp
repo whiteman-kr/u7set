@@ -536,10 +536,10 @@ namespace Tuning
 
 		td->getSignals(tuningSignals);
 
-		int signalCount = tuningSignals.count();
+		int signalCount = static_cast<int>(tuningSignals.count());
 
 		m_tuningSignals.resize(signalCount);
-		m_hash2SignalIndexMap.reserve(static_cast<int>(signalCount * 1.2));
+		m_hash2SignalIndexMap.reserve(static_cast<qsizetype>(signalCount * 1.2));
 
 		for(int i = 0; i < signalCount; i++)
 		{
@@ -891,7 +891,7 @@ namespace Tuning
 		case FotipV2::OpCode::Write:
 			{
 				int signalIndex = tuningCmd.write.signalIndex;
-				int signalCount = m_tuningSignals.count();
+				qsizetype signalCount = m_tuningSignals.count();
 
 				if (signalIndex < 0 || signalIndex >= signalCount)
 				{
@@ -1175,7 +1175,7 @@ namespace Tuning
 
 		qint64 updateTime = QDateTime::currentMSecsSinceEpoch();
 
-		int tuningSignalsCount = m_tuningSignals.count();
+		qsizetype tuningSignalsCount = m_tuningSignals.count();
 
 		for(int signalIndex : frameSignals)
 		{

@@ -1,6 +1,6 @@
 #include "ScanOptionsWidget.h"
 #include "ServiceTableModel.h"
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 #include <QLineEdit>
 #include <QFormLayout>
 #include <QComboBox>
@@ -17,8 +17,8 @@ ScanOptionsWidget::ScanOptionsWidget(ServiceTableModel* serviceModel, QWidget *p
 	m_serviceModel(serviceModel)
 {
 	setWindowTitle(tr("Scan settings"));
-	QRegExp re("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:/(?:[12]?[0-9]|3[0-2]?)?)\\b");
-	QRegExpValidator* rev = new QRegExpValidator(re, this);
+	QRegularExpression re("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:/(?:[12]?[0-9]|3[0-2]?)?)\\b");
+	QRegularExpressionValidator* rev = new QRegularExpressionValidator(re, this);
 	m_addressEdit = new QLineEdit(this);
 	m_addressEdit->setValidator(rev);
 
