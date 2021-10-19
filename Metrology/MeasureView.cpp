@@ -188,6 +188,14 @@ namespace Measure
 			{
 				case Measure::Type::Linearity:
 
+					if (columnIndex == MVC_CMN_L_MODULE_SN)
+					{
+						if (pMeasurement->location().moduleSerialNo() == 0)
+						{
+							return QColor(Qt::yellow);
+						}
+					}
+
 					if (columnIndex == MVC_CMN_L_ERROR_RESULT)
 					{
 						return backgroundColor(pMeasurement);
@@ -196,6 +204,14 @@ namespace Measure
 					break;
 
 				case Measure::Type::Comparators:
+
+					if (columnIndex == MVC_CMN_C_MODULE_SN)
+					{
+						if (pMeasurement->location().moduleSerialNo() == 0)
+						{
+							return QColor(Qt::yellow);
+						}
+					}
 
 					if (columnIndex == MVC_CMN_C_ERROR_RESULT)
 					{

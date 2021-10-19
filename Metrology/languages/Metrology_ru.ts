@@ -3735,6 +3735,14 @@ Do you want to repeat the preparation process in order to switch the comparator 
     </message>
 </context>
 <context>
+    <name>MetrologyMain</name>
+    <message>
+        <location filename="../MetrologyMain.cpp" line="18"/>
+        <source>The application is already running!</source>
+        <translation>Приложение уже запущено!</translation>
+    </message>
+</context>
+<context>
     <name>MetrologySignal</name>
     <message>
         <location filename="../MetrologySignal.cpp" line="179"/>

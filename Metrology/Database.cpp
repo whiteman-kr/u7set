@@ -262,7 +262,6 @@ int SqlFieldBase::init(int objectType, int)
 
 		default:
 			assert(0);
-			break;
 	}
 
 	int fieldCount = count();
@@ -327,6 +326,7 @@ QString SqlFieldBase::extFieldName(int index)
 		case QVariant::Int:		result = QString("%1 INTEGER").arg(f.name());								break;
 		case QVariant::Double:	result = QString("%1 DOUBLE(0, %2)").arg(f.name()).arg(f.precision());		break;
 		case QVariant::String:	result = QString("%1 VARCHAR(%2)").arg(f.name()).arg(f.length());			break;
+
 		default:
 			result.clear();
 	}
@@ -828,7 +828,10 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					{
 						case SQL_TABLE_LINEARITY_ADD_VAL_EL:	limitType = Measure::LimitType::Electric;		break;
 						case SQL_TABLE_LINEARITY_ADD_VAL_EN:	limitType = Measure::LimitType::Engineering;	break;
-						default:								limitType = Measure::LimitType::NoLimitType;	break;
+
+						default:
+							assert(0);
+							limitType = Measure::LimitType::NoLimitType;
 					}
 
 					if (limitType == Measure::LimitType::NoLimitType)
@@ -864,7 +867,10 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					{
 						case SQL_TABLE_LINEARITY_20_EL:	limitType = Measure::LimitType::Electric;		break;
 						case SQL_TABLE_LINEARITY_20_EN:	limitType = Measure::LimitType::Engineering;	break;
-						default:						limitType = Measure::LimitType::NoLimitType;	break;
+
+						default:
+							assert(0);
+							limitType = Measure::LimitType::NoLimitType;
 					}
 
 					if (limitType == Measure::LimitType::NoLimitType)
@@ -1018,7 +1024,6 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
 			default:
 				assert(0);
-				break;
 		}
 
 		readedCount ++;
@@ -1238,7 +1243,10 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					{
 						case SQL_TABLE_LINEARITY_ADD_VAL_EL:	limitType = Measure::LimitType::Electric;		break;
 						case SQL_TABLE_LINEARITY_ADD_VAL_EN:	limitType = Measure::LimitType::Engineering;	break;
-						default:								limitType = Measure::LimitType::NoLimitType;	break;
+
+						default:
+							assert(0);
+							limitType = Measure::LimitType::NoLimitType;
 					}
 
 					if (limitType == Measure::LimitType::NoLimitType)
@@ -1284,7 +1292,10 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					{
 						case SQL_TABLE_LINEARITY_20_EL:	limitType = Measure::LimitType::Electric;		break;
 						case SQL_TABLE_LINEARITY_20_EN:	limitType = Measure::LimitType::Engineering;	break;
-						default:						limitType = Measure::LimitType::NoLimitType;	break;
+
+						default:
+							assert(0);
+							limitType = Measure::LimitType::NoLimitType;
 					}
 
 					if (limitType == Measure::LimitType::NoLimitType)

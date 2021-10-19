@@ -41,6 +41,16 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	// щne instance of the application
+	//
+	QLockFile lockFile(QDir::temp().absoluteFilePath("Metrology.lock"));
+
+	if(lockFile.tryLock(100) == false)
+	{
+		QMessageBox::information(nullptr, a.applicationName(), a.translate("MetrologyMain", "The application is already running!"));
+		return 1;
+	}
+
 	// init SoftwareInfo
 	//
 	SoftwareInfo si;
