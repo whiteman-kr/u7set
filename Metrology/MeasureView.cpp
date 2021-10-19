@@ -340,9 +340,9 @@ namespace Measure
 		switch (theOptions.linearity().viewType())
 		{
 			case LinearityViewType::Simple:
-			case LinearityViewType::Extended:			limitType = static_cast<Measure::LimitType>(theOptions.linearity().limitType());	break;
-			case LinearityViewType::DetailElectric:		limitType = Measure::LimitType::Electric;											break;
-			case LinearityViewType::DetailEngineering:	limitType = Measure::LimitType::Engineering;										break;
+			case LinearityViewType::Extended:			limitType = m->limitTypeByRange(theOptions.linearity().calcErrorByRange());		break;
+			case LinearityViewType::DetailElectric:		limitType = Measure::LimitType::Electric;										break;
+			case LinearityViewType::DetailEngineering:	limitType = Measure::LimitType::Engineering;									break;
 
 			default:
 				assert(0);

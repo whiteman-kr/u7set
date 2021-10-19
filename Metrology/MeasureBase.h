@@ -53,7 +53,23 @@ namespace Measure
 
 	#define ERR_MEASURE_LIMIT_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Measure::LimitTypeCount)
 
-	QString LimitTypeCaption(Measure::LimitType measureType);
+	QString LimitTypeCaption(Measure::LimitType limitType);
+
+	// ==============================================================================================
+
+	enum CalcErrorRange
+	{
+		NoCalcErrorFrom		= -1,
+		BySignalType		= 0,
+		ByElectricRange		= 1,
+		ByEngineeringRange	= 2,
+	};
+
+	const int CalcErrorRangeCount = 3;
+
+	#define ERR_MEASURE_CALC_ERROR_RANGE(byRange) (TO_INT(byRange) < 0 || TO_INT(byRange) >= Measure::CalcErrorRangeCount)
+
+	QString CalcErrorRangeCaption(Measure::CalcErrorRange byRange);
 
 	// ==============================================================================================
 
@@ -165,6 +181,9 @@ namespace Measure
 		QString connectionTypeStr() const;
 		void setConnectionType(Metrology::ConnectionType type) { m_connectionType = type; }
 		void setConnectionType(int type) { m_connectionType =  static_cast<Metrology::ConnectionType>(type); }
+
+		Measure::LimitType limitTypeByRange(int byRange) const;
+		Measure::LimitType limitTypeByRange(Measure::CalcErrorRange byRange) const;
 
 		QString appSignalID() const { return m_appSignalID; }
 		void setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; setSignalHash(m_appSignalID); }

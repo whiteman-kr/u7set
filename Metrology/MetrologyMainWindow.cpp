@@ -1999,9 +1999,9 @@ void MainWindow::showOptions()
 	// if changed error type or limitType
 	//
 	if (	options.linearity().errorType() != theOptions.linearity().errorType() ||
-			options.linearity().limitType() != theOptions.linearity().limitType() ||
+			options.linearity().calcErrorByRange() != theOptions.linearity().calcErrorByRange() ||
 			options.comparator().errorType() != theOptions.comparator().errorType() ||
-			options.comparator().limitType() != theOptions.comparator().limitType())
+			options.comparator().calcErrorByRange() != theOptions.comparator().calcErrorByRange())
 	{
 		m_pStatisticsPanel->updateList();
 	}
