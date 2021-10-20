@@ -265,14 +265,29 @@ private:
 
 // ----------------------------------------------------------------------------------------------
 
-class ProjectInfo: public QObject
+const char* const				ProjectPropertyGroup[] =
+{
+								QT_TRANSLATE_NOOP("Options.h", "1 Project"),
+								QT_TRANSLATE_NOOP("Options.h", "2 Host"),
+								QT_TRANSLATE_NOOP("Options.h", "3 File version"),
+};
+
+const int						PROJECT_PROPERTY_GROUP_COUNT			= sizeof(ProjectPropertyGroup)/sizeof(ProjectPropertyGroup[0]);
+
+const int						PROJECT_PROPERTY_GROUP_INFO				= 0,
+								PROJECT_PROPERTY_GROUP_HOST				= 1,
+								PROJECT_PROPERTY_GROUP_VERSION			= 2;
+
+// ----------------------------------------------------------------------------------------------
+
+class ProjectInfo: public PropertyObject
 {
 	Q_OBJECT
 
 public:
 
-	explicit ProjectInfo(QObject* parent = nullptr);
-	explicit ProjectInfo(const ProjectInfo& from, QObject* parent = nullptr);
+	explicit ProjectInfo();
+	explicit ProjectInfo(const ProjectInfo& from);
 	virtual ~ProjectInfo() override;
 
 public:
@@ -297,6 +312,8 @@ public:
 	ProjectInfo&		operator=(const ProjectInfo& from);
 
 private:
+
+	void				appendProperties();
 
 	QString				m_projectName;
 	int					m_id = -1;

@@ -15,6 +15,8 @@
 #include <QDialogButtonBox>
 #include <QMessageBox>
 
+
+#include "../lib/PropertyEditor.h"
 #include "../CommonLib/Hash.h"
 
 #include "../qtpropertybrowser/src/qtpropertymanager.h"
@@ -31,21 +33,6 @@
 //
 // ==============================================================================================
 
-const char* const				ProjectPropertyGroup[] =
-{
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Project"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Host"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "File version"),
-};
-
-const int						PROJECT_PROPERTY_GROUP_COUNT			= sizeof(ProjectPropertyGroup)/sizeof(ProjectPropertyGroup[0]);
-
-const int						PROJECT_PROPERTY_GROUP_INFO				= 0,
-								PROJECT_PROPERTY_GROUP_HOST				= 1,
-								PROJECT_PROPERTY_GROUP_VERSION			= 2;
-
-// ----------------------------------------------------------------------------------------------
-
 class DialogProjectProperty : public QDialog
 {
 	Q_OBJECT
@@ -57,22 +44,10 @@ public:
 
 private:
 
-	ProjectInfo					m_info;
+	ProjectInfo m_info;
+	ExtWidgets::PropertyEditor*	m_pPropertyEditor = nullptr;
 
-	// Property list
-	//
-	QtVariantPropertyManager*	m_pManager = nullptr;
-	QtVariantEditorFactory*		m_pFactory = nullptr;
-	QtTreePropertyBrowser*		m_pEditor = nullptr;
-
-	static bool					m_showGroupHeader[PROJECT_PROPERTY_GROUP_COUNT];
-	QtBrowserItem*				m_browserItemList[PROJECT_PROPERTY_GROUP_COUNT];
-
-	QMap<QtProperty*,int>		m_propertyMap;
-
-	QtProperty*					m_propertyGroupList[PROJECT_PROPERTY_GROUP_COUNT];
-
-	void						createPropertyList();
+	void createPropertyList();
 };
 
 // ==============================================================================================
@@ -479,7 +454,6 @@ private slots:
 // Measurement property
 //
 // ==============================================================================================
-
 
 const int						MEASURE_PROPERTY_ITEM_ERROR_LIMIT		= 0;
 

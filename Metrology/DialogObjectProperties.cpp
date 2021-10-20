@@ -6,15 +6,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-bool DialogProjectProperty::m_showGroupHeader[PROJECT_PROPERTY_GROUP_COUNT] =
-{
-	true,	//	PROJECT_PROPERTY_GROUP_INFO
-	true,	//	PROJECT_PROPERTY_GROUP_DEVELOP
-	true,	//	PROJECT_PROPERTY_GROUP_VERSION
-};
-
-// -------------------------------------------------------------------------------------------------------------------
-
 DialogProjectProperty::DialogProjectProperty(const ProjectInfo& param, QWidget* parent) :
 	QDialog(parent)
 {
@@ -27,23 +18,6 @@ DialogProjectProperty::DialogProjectProperty(const ProjectInfo& param, QWidget* 
 
 DialogProjectProperty::~DialogProjectProperty()
 {
-	if (m_pManager != nullptr)
-	{
-		delete m_pManager;
-		m_pManager = nullptr;
-	}
-
-	if (m_pFactory != nullptr)
-	{
-		delete m_pFactory;
-		m_pFactory = nullptr;
-	}
-
-	if (m_pEditor != nullptr)
-	{
-		delete m_pEditor;
-		m_pEditor = nullptr;
-	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -55,115 +29,40 @@ void DialogProjectProperty::createPropertyList()
 	setWindowTitle(tr("Property"));
 
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
-	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
+	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.20));
+	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.20));
 	move(screen.center() - rect().center());
 
 	setWindowTitle(tr("Project - %1").arg(m_info.projectName()));
-
-	QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
-	QStringList electricUnitList;
-	for(int u = 0; u < meu.keyCount(); u++)
-	{
-		electricUnitList.append(meu.key(u));
-	}
-
 
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	// create property list
 	//
-
-	QtVariantProperty* item = nullptr;
-
-	m_pManager = new QtVariantPropertyManager;
-	m_pFactory = new QtVariantEditorFactory;
-	m_pEditor = new QtTreePropertyBrowser;
-
-	// create property groups
-	//
-
-		// info group
-
-		QtProperty* infoGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Project information"));
-
-			item = m_pManager->addProperty(QVariant::String, tr("Project name"));
-			item->setValue(m_info.projectName());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			infoGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::Int, tr("Project ID"));
-			item->setValue(m_info.id());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			infoGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("Date"));
-			item->setValue(m_info.date());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			infoGroup->addSubProperty(item);
-
-		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
-
-		// host group
-
-		QtProperty* hostGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Host"));
-
-
-			item = m_pManager->addProperty(QVariant::String, tr("User"));
-			item->setValue(m_info.user());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			hostGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("Workstation"));
-			item->setValue(m_info.workstation());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			hostGroup->addSubProperty(item);
-
-		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
-
-		// position group
-
-		QtProperty* versionGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("File version"));
-
-			item = m_pManager->addProperty(QVariant::Int, tr("Database Version"));
-			item->setValue(m_info.dbVersion());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			versionGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::Int, tr("Config File Version"));
-			item->setValue(m_info.cfgFileVersion());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			versionGroup->addSubProperty(item);
-
-		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
-
-	// show or hide property groups
-	//
-
-	m_browserItemList[PROJECT_PROPERTY_GROUP_INFO] = m_pEditor->addProperty(infoGroup);
-	m_browserItemList[PROJECT_PROPERTY_GROUP_HOST] = m_pEditor->addProperty(hostGroup);
-	m_browserItemList[PROJECT_PROPERTY_GROUP_VERSION] = m_pEditor->addProperty(versionGroup);
-
-
-	for(int g = 0; g < PROJECT_PROPERTY_GROUP_COUNT; g++)
+	m_pPropertyEditor = new ExtWidgets::PropertyEditor(this);
+	if (m_pPropertyEditor == nullptr)
 	{
-		if (m_browserItemList[g] == nullptr)
-		{
-			continue;
-		}
-
-		m_pEditor->setExpanded(m_browserItemList[g], m_showGroupHeader[g]);
+		return;
 	}
 
+	m_pPropertyEditor->setSplitterPosition(300);
+	m_pPropertyEditor->setReadOnly(false);
+
 	//
 	//
-	m_pEditor->setPropertiesWithoutValueMarked(true);
-	m_pEditor->setRootIsDecorated(false);
+	QList<std::shared_ptr<PropertyObject>> projectObjects;
+
+	std::shared_ptr<ProjectInfo> property = std::make_shared<ProjectInfo>(m_info);
+	projectObjects.push_back(property);
+
+	m_pPropertyEditor->setObjects(projectObjects);
 
 	// add layouts
 	//
-	mainLayout->addWidget(m_pEditor);
+	mainLayout->addWidget(m_pPropertyEditor);
 
+	//
+	//
 	setLayout(mainLayout);
 }
 
