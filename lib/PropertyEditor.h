@@ -4,6 +4,32 @@
 #include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/AfbParamValue.h"
 
+/*
+
+PropertyEditor class can edit following types of properties contained in PropertyObject classes:
+
+PropertyVector
+PropertyList
+Enum
+TuningValue
+Afb::AfbParamValue
+<QVector<QColor>>
+QMetaType::QFont
+QMetaType::QDateTime
+QMetaType::Int
+QMetaType::UInt
+QMetaType::Float
+QMetaType::Double
+QMetaType::Bool
+QMetaType::QString
+QMetaType::QStringList
+QMetaType::QColor
+QMetaType::QUuid
+QMetaType::QByteArray
+QMetaType::QImage
+
+*/
+
 class QPlainTextEdit;
 
 namespace ExtWidgets
@@ -79,6 +105,7 @@ namespace ExtWidgets
 
 		static QIcon drawCheckBox(int state, bool enabled);
 		static QIcon drawImage(const QImage& image);
+                static QIcon drawFont(const QFont& font);
 		static QIcon propertyIcon(Property* p, bool sameValue, bool enabled);
 
 		PropertyEditCellWidget* createCellEditor(std::shared_ptr<Property> propertyPtr, bool sameValue, bool readOnly, QWidget* parent);
@@ -95,9 +122,8 @@ namespace ExtWidgets
 			Text,
 			Array,
 			Enum,
-			FilePath,
 			CheckBox,
-			Color
+                        Color
 		};
 
 		bool m_expertMode = false;
@@ -308,46 +334,6 @@ namespace ExtWidgets
 	signals:
 		void valueChanged(QVariant value);
 
-	};
-
-	//
-	// MultiFilePathEdit
-	//
-	struct FilePathPropertyType
-	{
-		FilePathPropertyType() :
-			filter("*.*")
-		{
-		}
-
-		QString filePath;
-		QString filter;
-
-		static int filePathTypeId();
-	};
-
-	class MultiFilePathEdit : public PropertyEditCellWidget
-	{
-		Q_OBJECT
-
-	public:
-		explicit MultiFilePathEdit(QWidget* parent, bool readOnly);
-		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
-
-	public slots:
-		void onEditingFinished();
-
-	private slots:
-		void onButtonPressed();
-
-	private:
-		bool eventFilter(QObject* watched, QEvent* event) override;
-
-	private:
-		QLineEdit* m_lineEdit = nullptr;
-        QToolButton* m_button = nullptr;
-		bool m_escape = false;
-		QVariant m_oldPath;
 	};
 
 	//
@@ -660,6 +646,9 @@ namespace ExtWidgets
 		int splitterPosition() const;
 		void setSplitterPosition(int pos);
 
+                bool alternateCategories() const;
+                void setAlternateCategories(bool value);
+
 		void autoAdjustSplitterPosition();
 
 		bool isPropertyExists(const QString& propertyName) const;
@@ -703,6 +692,8 @@ namespace ExtWidgets
 		std::map<QString, PropertyEditorObject> m_treeObjects;
 		QList<std::shared_ptr<PropertyObject>> m_objects;
 		PropertyEditorDelegate* m_itemDelegate = nullptr;
+
+                bool m_alternateCategories = false;
 	};
 
 	extern PropertyEditorSettings thePropertyEditorSettings;
@@ -710,6 +701,5 @@ namespace ExtWidgets
 
 
 Q_DECLARE_METATYPE(std::shared_ptr<Property>)
-Q_DECLARE_METATYPE(ExtWidgets::FilePathPropertyType)
 Q_DECLARE_METATYPE(QVector<QColor>)
 

@@ -452,7 +452,7 @@ void SchemasReportGenerator::exportFilesToPdf()
 
 		fileName.replace('/', '_');
 
-		int pos = fileName.lastIndexOf('.');
+		qsizetype pos = fileName.lastIndexOf('.');
 		if (pos != -1)
 		{
 			fileName = fileName.left(pos);

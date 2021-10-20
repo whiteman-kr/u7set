@@ -1521,7 +1521,6 @@ namespace ExtWidgets
 				if (p->isEnum() == true ||
 						type == TuningValue::tuningValueTypeId() ||
 						type == qMetaTypeId<Afb::AfbParamValue>() ||
-						type == FilePathPropertyType::filePathTypeId() ||
 						type == QMetaType::Int ||
 						type == QMetaType::UInt ||
 						type == QMetaType::Float ||

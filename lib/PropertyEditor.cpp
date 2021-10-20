@@ -6,6 +6,7 @@
 
 #include <QToolButton>
 #include <QFileDialog>
+#include <QFontDialog>
 #include <QColorDialog>
 #include <QTextBrowser>
 #include <QDesktopServices>
@@ -121,12 +122,6 @@ namespace ExtWidgets
 		// all other types
 		//
 		int type = value.typeId();
-
-		if (type == FilePathPropertyType::filePathTypeId())
-		{
-			FilePathPropertyType f = value.value<FilePathPropertyType>();
-			return f.filePath;
-		}
 
 		if (type == TuningValue::tuningValueTypeId())
 		{
@@ -246,6 +241,13 @@ namespace ExtWidgets
 		{
 			QImage image = value.value<QImage>();
 			return QObject::tr("Image <Width = %1 Height = %2>").arg(image.width()).arg(image.height());
+		}
+			break;
+
+		case QMetaType::QFont:
+		{
+			QFont font = value.value<QFont>();
+			return QObject::tr("[%1, %2]").arg(font.family()).arg(font.pointSize());
 		}
 			break;
 
@@ -433,6 +435,26 @@ namespace ExtWidgets
 		return QIcon();
 	}
 
+	QIcon PropertyEditorBase::drawFont(const QFont& font)
+	{
+		const QStyle* style = QApplication::style();
+		const int indicatorWidth = style->pixelMetric(QStyle::PM_IndicatorWidth);
+		const int indicatorHeight = style->pixelMetric(QStyle::PM_IndicatorHeight);
+
+		QPixmap pixmap = QPixmap(indicatorWidth, indicatorHeight);
+		pixmap.fill(Qt::transparent);
+
+		QFont f = font;
+		f.setPixelSize(indicatorHeight);
+
+		QPainter painter(&pixmap);
+		painter.setFont(f);
+
+		painter.drawText(pixmap.rect(), "A", Qt::AlignHCenter | Qt::AlignVCenter);
+
+		return QIcon(pixmap);
+	}
+
 	QIcon PropertyEditorBase::propertyIcon(Property* p, bool sameValue, bool enabled)
 	{
 		QVariant value = p->value();
@@ -488,6 +510,15 @@ namespace ExtWidgets
 				}
 			}
 			break;
+		case QMetaType::QFont:
+			{
+				if (sameValue == true)
+				{
+					QFont font = value.value<QFont>();
+					return drawFont(font);
+				}
+			}
+			break;
 		}
 		return QIcon();
 	}
@@ -518,12 +549,6 @@ namespace ExtWidgets
 			if (propertyPtr->isEnum())
 			{
 				cellEditorType = CellEditorType::Enum;
-				break;
-			}
-
-			if (propertyPtr->value().userType() == FilePathPropertyType::filePathTypeId())
-			{
-				cellEditorType = CellEditorType::FilePath;
 				break;
 			}
 
@@ -577,6 +602,7 @@ namespace ExtWidgets
 			case QMetaType::QUuid:
 			case QMetaType::QByteArray:
 			case QMetaType::QImage:
+			case QMetaType::QFont:
 				{
 					cellEditorType = CellEditorType::Text;
 				}
@@ -591,7 +617,6 @@ namespace ExtWidgets
 			case QMetaType::QColor:
 				{
 					cellEditorType = CellEditorType::Color;
-
 				}
 				break;
 
@@ -622,12 +647,6 @@ namespace ExtWidgets
 		case CellEditorType::Enum:
 			{
 				editor = new MultiEnumEdit(parent, propertyPtr, readOnly);
-			}
-			break;
-
-		case CellEditorType::FilePath:
-			{
-				editor = new MultiFilePathEdit(parent, readOnly);
 			}
 			break;
 
@@ -1644,15 +1663,6 @@ namespace ExtWidgets
 	}
 
 	//
-	// ------------ FilePathPropertyType ------------
-	//
-
-	int FilePathPropertyType::filePathTypeId()
-	{
-		return qMetaTypeId<FilePathPropertyType>();
-	}
-
-	//
 	// ------------ PropertyEditorHelp ------------
 	//
 
@@ -1893,110 +1903,7 @@ namespace ExtWidgets
 		return;
 	}
 
-	//
-	// ------------ MultiFilePathEdit ------------
-	//
-
-	MultiFilePathEdit::MultiFilePathEdit(QWidget* parent, bool readOnly):
-		PropertyEditCellWidget(parent)
-	{
-		m_lineEdit = new QLineEdit(parent);
-
-        m_button = new QToolButton(parent);
-        m_button->setText("...");
-
-		connect(m_lineEdit, &QLineEdit::editingFinished, this, &MultiFilePathEdit::onEditingFinished);
-
-		connect(m_button, &QToolButton::clicked, this, &MultiFilePathEdit::onButtonPressed);
-
-		QHBoxLayout* lt = new QHBoxLayout;
-		lt->setContentsMargins(0, 0, 0, 0);
-		lt->setSpacing(0);
-		lt->addWidget(m_lineEdit);
-        lt->addWidget(m_button, 0, Qt::AlignRight);
-
-		setLayout(lt);
-
-		m_lineEdit->installEventFilter(this);
-		m_lineEdit->setReadOnly(readOnly == true);
-
-		m_button->setEnabled(readOnly == false);
-
-		QTimer::singleShot(0, m_lineEdit, SLOT(setFocus()));
-	}
-
-	bool MultiFilePathEdit::eventFilter(QObject* watched, QEvent* event)
-	{
-		if (m_lineEdit == nullptr)
-		{
-			Q_ASSERT(m_lineEdit);
-			return QWidget::eventFilter(watched, event);
-		}
-
-		if (watched == m_lineEdit && event->type() == QEvent::KeyPress)
-		{
-			QKeyEvent* ke = static_cast<QKeyEvent*>(event);
-			if (ke->key() == Qt::Key_Escape)
-			{
-				m_escape = true;
-			}
-		}
-
-		return QWidget::eventFilter(watched, event);
-	}
-
-	void MultiFilePathEdit::onButtonPressed()
-	{
-		FilePathPropertyType f = m_oldPath.value<FilePathPropertyType>();
-
-		QString filePath = QFileDialog::getOpenFileName(this, tr("Select file"), f.filePath, f.filter);
-		if (filePath.isEmpty() == true)
-		{
-			return;
-		}
-
-		f.filePath = QDir::toNativeSeparators(filePath);
-
-        m_oldPath = QVariant::fromValue(f);
-        m_lineEdit->setText(f.filePath);
-
-		emit valueChanged(QVariant::fromValue(f));
-	}
-
-	void MultiFilePathEdit::setValue(std::shared_ptr<Property> property, bool readOnly)
-	{
-		if (m_lineEdit == nullptr)
-		{
-			Q_ASSERT(m_lineEdit);
-			return;
-		}
-
-        m_oldPath = property->value();
-
-        FilePathPropertyType f = property->value().value<FilePathPropertyType>();
-		m_lineEdit->setText(f.filePath);
-		m_lineEdit->setReadOnly(readOnly == true);
-
-		m_button->setEnabled(readOnly == false);
-	}
-
-	void MultiFilePathEdit::onEditingFinished()
-	{
-		if (m_escape == false)
-		{
-			QString t = m_lineEdit->text();
-
-			FilePathPropertyType f = m_oldPath.value<FilePathPropertyType>();
-
-			if (f.filePath != t)
-			{
-				f.filePath = t;
-				emit valueChanged(QVariant::fromValue(f));
-			}
-		}
-	}
-
-	// ------------ QtMultiEnumEdit ------------
+	// ------------ MultiEnumEdit ------------
 	//
 	MultiEnumEdit::MultiEnumEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
 		PropertyEditCellWidget(parent)
@@ -2443,9 +2350,12 @@ namespace ExtWidgets
 		}
 
 
-		// Create Button for File, ByteArray, Strings and String List
+		// Create Button for File dialogs, Font, ByteArray, Strings and String List
 		//
 		if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog ||
+			m_property->specificEditor() == E::PropertySpecificEditor::ChooseFileDialog ||
+			m_property->specificEditor() == E::PropertySpecificEditor::ChooseDirectoryDialog ||
+			m_userType == QMetaType::QFont ||
 			m_userType == QMetaType::QByteArray ||
 			(m_userType == QMetaType::QString && p->password() == false) ||
 			(m_userType == QMetaType::QStringList && m_row != -1))
@@ -2453,9 +2363,13 @@ namespace ExtWidgets
 			m_button = new QToolButton(parent);
 			m_button->setText("...");
 
-			if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog)
+			if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog ||
+				m_property->specificEditor() == E::PropertySpecificEditor::ChooseFileDialog ||
+				m_property->specificEditor() == E::PropertySpecificEditor::ChooseDirectoryDialog ||
+				m_userType == QMetaType::QFont)
 			{
-				// If property is read-only, button is enabled except for LoadFileDialog
+				// If property is read-only, button is enabled except for dialogs
+				//
 				m_button->setEnabled(m_readOnly == false);
 			}
 
@@ -2500,8 +2414,10 @@ namespace ExtWidgets
 
 	void MultiTextEdit::onButtonPressed()
 	{
+		bool commonEditor = true;
+
 		QString editText;
-		QByteArray editBytes;
+		QByteArray editBytes;	// for LoadFileDialog
 
 		if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog)
 		{
@@ -2520,9 +2436,69 @@ namespace ExtWidgets
 
 			editBytes = f.readAll();
 			editText = editBytes.toStdString().c_str();
+
+			commonEditor = false;
 		}
-		else
+
+		if (m_property->specificEditor() == E::PropertySpecificEditor::ChooseFileDialog)
 		{
+			QString fileName = QFileDialog::getOpenFileName(this->parentWidget(), tr("Select File"), QString(), m_property->validator());
+			if (fileName.isEmpty() == true)
+			{
+				return;
+			}
+
+			fileName = QDir::toNativeSeparators(fileName);
+
+			editText = fileName;
+
+			commonEditor = false;
+		}
+
+		if (m_property->specificEditor() == E::PropertySpecificEditor::ChooseDirectoryDialog)
+		{
+			QString dirName = QFileDialog::getExistingDirectory(this->parentWidget(), tr("Select Directory"));
+			if (dirName.isEmpty() == true)
+			{
+				return;
+			}
+
+			dirName = QDir::toNativeSeparators(dirName);
+
+			editText = dirName;
+
+			commonEditor = false;
+		}
+
+		if (m_userType == QMetaType::QFont)
+		{
+
+			QFont oldFont = m_oldValue.value<QFont>();
+
+			bool ok = false;
+			QFont font = QFontDialog::getFont( &ok, oldFont, this);
+			if (ok == true) {
+
+				if (font != oldFont)
+				{
+					emit valueChanged(font);
+				}
+
+				m_oldValue = font;
+
+				m_lineEdit->blockSignals(true);
+				m_lineEdit->setText(tr("[%1, %2]").arg(font.family()).arg(font.pointSize()));
+				m_lineEdit->setReadOnly(true);
+				m_lineEdit->blockSignals(false);
+
+			}
+			return;
+		}
+
+		if (commonEditor == true)
+		{
+			// Common text editor
+			//
 			if (m_userType == QMetaType::QImage)
 			{
 				Q_ASSERT(false);	// Images should have E::PropertySpecificEditor::LoadFileDialog type
@@ -2545,7 +2521,6 @@ namespace ExtWidgets
 		}
 
 		// update LineEdit
-
 
 		switch (m_userType)
 		{
@@ -2717,6 +2692,15 @@ namespace ExtWidgets
 			m_lineEdit->setText(QString::number(m_oldValue.toDouble(), numberFormat, property->precision()));
 		}
 			break;
+		case QMetaType::QFont:
+			{
+				QFont font = property->value().value<QFont>();
+				m_oldValue = font;
+
+				m_lineEdit->setText(tr("[%1, %2]").arg(font.family()).arg(font.pointSize()));
+				m_lineEdit->setReadOnly(true);
+			}
+			break;
 		default:
 			if (m_userType == TuningValue::tuningValueTypeId())
 			{
@@ -2842,6 +2826,11 @@ namespace ExtWidgets
 					m_oldValue = value;
 					emit valueChanged(value);
 				}
+			}
+			break;
+		case QMetaType::QFont:
+			{
+				Q_ASSERT(false);	// No editing allowed
 			}
 			break;
 		default:
@@ -3598,6 +3587,16 @@ namespace ExtWidgets
 		m_treeWidget->setColumnWidth(static_cast<int>(PropertyEditorColumns::Caption), pos);
 	}
 
+	bool PropertyEditor::alternateCategories() const
+	{
+		return m_alternateCategories;
+	}
+
+	void PropertyEditor::setAlternateCategories(bool value)
+	{
+		m_alternateCategories = value;
+	}
+
 	void PropertyEditor::autoAdjustSplitterPosition()
 	{
 		m_treeWidget->resizeColumnToContents(static_cast<int>(PropertyEditorColumns::Caption));
@@ -4099,6 +4098,13 @@ namespace ExtWidgets
 		{
 			groupItem = new QTreeWidgetItem(QStringList() << category);
 			m_treeWidget->addTopLevelItem(groupItem);
+
+			if (alternateCategories() == true)
+			{
+				groupItem->setBackground(static_cast<int>(PropertyEditorColumns::Caption), QColor(0xf0, 0xf0, 0xf0));
+				groupItem->setBackground(static_cast<int>(PropertyEditorColumns::Value), QColor(0xf0, 0xf0, 0xf0));
+			}
+
 		}
 
 		// Add the property now

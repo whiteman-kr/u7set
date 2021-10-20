@@ -504,7 +504,9 @@ public:
 		SpecificPropertyStruct,
 		LoadFileDialog,
 		Svg,
-		Tags
+		Tags,
+		ChooseFileDialog,
+		ChooseDirectoryDialog
 	};
 	Q_ENUM(PropertySpecificEditor)
 
