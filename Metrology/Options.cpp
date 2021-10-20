@@ -426,17 +426,16 @@ SocketOption& SocketOption::operator=(const SocketOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ProjectInfo::ProjectInfo()
+ProjectInfo::ProjectInfo(QObject* parent) :
+	QObject(parent)
 {
-	appendProperties();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ProjectInfo::ProjectInfo(const ProjectInfo& from)
+ProjectInfo::ProjectInfo(const ProjectInfo& from, QObject* parent) :
+	QObject(parent)
 {
-	appendProperties();
-
 	*this = from;
 }
 
@@ -446,34 +445,6 @@ ProjectInfo::~ProjectInfo()
 {
 }
 
-// -------------------------------------------------------------------------------------------------------------------
-
-void ProjectInfo::appendProperties()
-{
-	ADD_PROPERTY_GETTER(QString, tr("Project name"), true, ProjectInfo::projectName)
-		->setCategory(qApp->translate("Options.h", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_INFO]))
-		.setViewOrder(0);
-	ADD_PROPERTY_GETTER(int, tr("Project ID"), true, ProjectInfo::id)
-		->setCategory(qApp->translate("Options.h", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_INFO]))
-		.setViewOrder(1);
-	ADD_PROPERTY_GETTER(QString, tr("Date"), true, ProjectInfo::date)
-		->setCategory(qApp->translate("Options.h", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_INFO]))
-		.setViewOrder(2);
-
-	ADD_PROPERTY_GETTER(QString, tr("User"), true, ProjectInfo::user)
-		->setCategory(qApp->translate("Options.h", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_HOST]))
-		.setViewOrder(0);
-	ADD_PROPERTY_GETTER(QString, tr("Workstation"), true, ProjectInfo::workstation)
-		->setCategory(qApp->translate("Options.h", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_HOST]))
-		.setViewOrder(1);
-
-	ADD_PROPERTY_GETTER(int, tr("Database Version"), true, ProjectInfo::dbVersion)
-		->setCategory(qApp->translate("Options.h", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_VERSION]))
-		.setViewOrder(0);
-	ADD_PROPERTY_GETTER(int, tr("Config File Version"), true, ProjectInfo::cfgFileVersion)
-		->setCategory(qApp->translate("Options.h", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_VERSION]))
-		.setViewOrder(1);
-}
 
 // -------------------------------------------------------------------------------------------------------------------
 

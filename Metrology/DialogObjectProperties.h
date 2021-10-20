@@ -33,6 +33,36 @@
 //
 // ==============================================================================================
 
+const char* const				ProjectPropertyGroup[] =
+{
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Project"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Host"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "3 File version"),
+};
+
+const int						PROJECT_PROPERTY_GROUP_COUNT			= sizeof(ProjectPropertyGroup)/sizeof(ProjectPropertyGroup[0]);
+
+const int						PROJECT_PROPERTY_GROUP_INFO				= 0,
+								PROJECT_PROPERTY_GROUP_HOST				= 1,
+								PROJECT_PROPERTY_GROUP_VERSION			= 2;
+
+// ----------------------------------------------------------------------------------------------
+
+class ProjectInfo_: public ProjectInfo, public PropertyObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit ProjectInfo_(const ProjectInfo& info);
+
+private:
+
+	void appendProperties();
+};
+
+// ----------------------------------------------------------------------------------------------
+
 class DialogProjectProperty : public QDialog
 {
 	Q_OBJECT

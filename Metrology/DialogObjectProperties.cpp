@@ -6,6 +6,44 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+ProjectInfo_::ProjectInfo_(const ProjectInfo& info) : ProjectInfo(info)
+{
+	appendProperties();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ProjectInfo_::appendProperties()
+{
+	ADD_PROPERTY_GETTER(QString, "Project name", true, ProjectInfo_::projectName)
+		->setCategory(qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_INFO]))
+		.setViewOrder(0);
+	ADD_PROPERTY_GETTER(int, tr("Project ID"), true, ProjectInfo_::id)
+		->setCategory(qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_INFO]))
+		.setViewOrder(1);
+	ADD_PROPERTY_GETTER(QString, tr("Date"), true, ProjectInfo_::date)
+		->setCategory(qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_INFO]))
+		.setViewOrder(2);
+
+	ADD_PROPERTY_GETTER(QString, tr("User"), true, ProjectInfo_::user)
+		->setCategory(qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_HOST]))
+		.setViewOrder(0);
+	ADD_PROPERTY_GETTER(QString, tr("Workstation"), true, ProjectInfo_::workstation)
+		->setCategory(qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_HOST]))
+		.setViewOrder(1);
+
+	ADD_PROPERTY_GETTER(int, tr("Database Version"), true, ProjectInfo_::dbVersion)
+		->setCategory(qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_VERSION]))
+		.setViewOrder(0);
+	ADD_PROPERTY_GETTER(int, tr("Config File Version"), true, ProjectInfo_::cfgFileVersion)
+		->setCategory(qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_VERSION]))
+		.setViewOrder(1);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 DialogProjectProperty::DialogProjectProperty(const ProjectInfo& param, QWidget* parent) :
 	QDialog(parent)
 {
@@ -29,8 +67,8 @@ void DialogProjectProperty::createPropertyList()
 	setWindowTitle(tr("Property"));
 
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.20));
-	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.20));
+	setMinimumSize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
+	resize(static_cast<int>(screen.width() * 0.3), static_cast<int>(screen.height() * 0.25));
 	move(screen.center() - rect().center());
 
 	setWindowTitle(tr("Project - %1").arg(m_info.projectName()));
@@ -52,7 +90,8 @@ void DialogProjectProperty::createPropertyList()
 	//
 	QList<std::shared_ptr<PropertyObject>> projectObjects;
 
-	std::shared_ptr<ProjectInfo> property = std::make_shared<ProjectInfo>(m_info);
+	std::shared_ptr<ProjectInfo_> property = std::make_shared<ProjectInfo_>(m_info);
+
 	projectObjects.push_back(property);
 
 	m_pPropertyEditor->setObjects(projectObjects);
