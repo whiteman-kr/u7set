@@ -48,15 +48,17 @@ const int						PROJECT_PROPERTY_GROUP_INFO				= 0,
 
 // ----------------------------------------------------------------------------------------------
 
-class ProjectInfo_: public ProjectInfo, public PropertyObject
+class ProjectInfo_: public PropertyObject
 {
 	Q_OBJECT
 
 public:
 
-	explicit ProjectInfo_(const ProjectInfo& info);
+	explicit ProjectInfo_(ProjectInfo* info);
 
 private:
+
+	ProjectInfo* m_info = nullptr;
 
 	void appendProperties();
 };
