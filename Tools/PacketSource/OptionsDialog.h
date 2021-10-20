@@ -1,7 +1,6 @@
 #ifndef SOURCEOPTIONS_H
 #define SOURCEOPTIONS_H
 
-#include <QDesktopWidget>
 #include <QDialog>
 #include <QGroupBox>
 #include <QVBoxLayout>

@@ -80,8 +80,8 @@ SendTuningFrameWidget::SendTuningFrameWidget(PacketSourceModel* packetSourceMode
 	m_sourcePortEdit->setValidator(portValidator);
 	m_sourcePortEdit->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/sourcePort", "2000").toString());
 
-	QRegExp re("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:/(?:[12]?[0-9]|3[0-2]?)?)\\b");
-	QRegExpValidator* ipValidator = new QRegExpValidator(re, this);
+	QRegularExpression re("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:/(?:[12]?[0-9]|3[0-2]?)?)\\b");
+	auto ipValidator = new QRegularExpressionValidator(re, this);
 	m_destinationAddressEdit->setValidator(ipValidator);
 	m_destinationAddressEdit->setText(settings.value("PacketSourceModel/SendTuningFrameWidget/destinationAddress", m_sourceAddressCombo->currentText().split("/")[0]).toString());
 

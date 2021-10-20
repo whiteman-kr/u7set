@@ -769,7 +769,7 @@ void PacketSourceModel::initDataSources(QHash<quint32, std::shared_ptr<DataSourc
 		{
 			if (currentModule->propertyValue(prop).isValid())
 			{
-				int key = dataSources.count() + 1;
+				int key = static_cast<int>(dataSources.count()) + 1;
 				QString ipStr = currentModule->propertyValue(prop).toString();
 				QHostAddress ha(ipStr);
 				quint32 ip = ha.toIPv4Address();
@@ -781,7 +781,7 @@ void PacketSourceModel::initDataSources(QHash<quint32, std::shared_ptr<DataSourc
 				ds->setLmRupFramesQuantity(1);
 
 				QString signalPrefix = currentModule->parent()->equipmentId();
-				int signalPrefixLength = signalPrefix.length();
+				int signalPrefixLength = static_cast<int>(signalPrefix.length());
 				for (int i = 0; i < signalSet.count(); i++)
 				{
 					if (signalSet[i].equipmentID().left(signalPrefixLength) == signalPrefix)

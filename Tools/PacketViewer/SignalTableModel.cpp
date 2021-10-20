@@ -36,7 +36,7 @@ SignalTableModel::~SignalTableModel()
 
 int SignalTableModel::rowCount(const QModelIndex&) const
 {
-	return m_relatedSignalIndexes.size();
+	return static_cast<int>(m_relatedSignalIndexes.size());
 }
 
 int SignalTableModel::columnCount(const QModelIndex&) const

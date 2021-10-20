@@ -30,7 +30,7 @@ bool OptionsDialog::createInterface()
 	setWindowIcon(QIcon(":/Images/Options.svg"));
 	setWindowTitle(tr("Options"));
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 	resize(static_cast<int>(screen.width() * 0.25), static_cast<int>(screen.height() * 0.2));
 	move(screen.center() - rect().center());
 

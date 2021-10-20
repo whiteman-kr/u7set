@@ -56,7 +56,7 @@ int TuningSourceBase::count() const
 
 	m_sourceMutex.lock();
 
-		count = m_sourceList.count();
+		count = static_cast<int>(m_sourceList.count());
 
 	m_sourceMutex.unlock();
 
@@ -73,7 +73,7 @@ int TuningSourceBase::append(const TuningSource& source)
 		{
 			m_sourceList.append(source);
 
-			index = m_sourceList.count() - 1;
+			index = static_cast<int>(m_sourceList.count() - 1);
 
 			m_sourceIdMap[source.sourceID() ] = index;
 		}

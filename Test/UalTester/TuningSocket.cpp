@@ -397,7 +397,7 @@ int TuningSocket::cmdSourceStateCount() const
 
 	m_sourceStateMutex.lock();
 
-		count = m_cmdSourceStateList.count();
+		count = static_cast<int>(m_cmdSourceStateList.count());
 
 	m_sourceStateMutex.unlock();
 
@@ -445,7 +445,7 @@ int TuningSocket::cmdSignalStateCount() const
 
 	m_signalStateMutex.lock();
 
-		count = m_cmdSignalStateList.count();
+		count = static_cast<int>(m_cmdSignalStateList.count());
 
 	m_signalStateMutex.unlock();
 

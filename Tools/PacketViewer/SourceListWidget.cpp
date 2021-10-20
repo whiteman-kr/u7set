@@ -143,12 +143,12 @@ void SourceListWidget::loadProjectList()
 	QDirIterator it(m_rootPath, QStringList() << "*build.xml", QDir::Files, QDirIterator::Subdirectories);
 	while (it.hasNext()) {
 		QString path = it.next();
-		int lastSlash = path.lastIndexOf('/');
+		qsizetype lastSlash = path.lastIndexOf('/');
 		QString projectPath = path.left(lastSlash);
 		if (QDirIterator(projectPath, QStringList() << "*appSignals.xml", QDir::Files, QDirIterator::Subdirectories).hasNext() &&
 				QDirIterator(projectPath, QStringList() << "*equipment.xml", QDir::Files, QDirIterator::Subdirectories).hasNext())
 		{
-			int prevSlash = path.lastIndexOf('/', lastSlash - 1);
+			qsizetype prevSlash = path.lastIndexOf('/', lastSlash - 1);
 			m_projectListCombo->addItem(path.mid(prevSlash + 1, lastSlash - prevSlash - 1));
 		}
 	}

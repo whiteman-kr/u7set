@@ -19,7 +19,7 @@ public:
 
 public:
 
-	int argCout() { return m_cmdLineParser.argCount(); }
+	int argCout() { return static_cast<int>(m_cmdLineParser.argCount()); }
 
 	QString cfgEquipmentID() const { return m_cfgEquipmentID; }
 	HostAddressPort cfgServIP() const { return m_cfgSrvIP; }

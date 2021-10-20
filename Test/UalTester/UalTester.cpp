@@ -59,6 +59,7 @@ void UalTester::slot_loadConfiguration(const QByteArray configurationXmlData,
 									   SessionParams sessionParams,
 									   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 {
+	Q_UNUSED(configurationXmlData);
 	Q_UNUSED(sessionParams);
 
 	if (m_cfgLoaderThread == nullptr)
@@ -206,7 +207,7 @@ bool UalTester::readAppSignals(const QByteArray& cfgFileData)
 {
 	::Proto::AppSignalSet signalSet;
 
-	bool result = signalSet.ParseFromArray(cfgFileData.constData(), cfgFileData.size());
+	bool result = signalSet.ParseFromArray(cfgFileData.constData(), static_cast<int>(cfgFileData.size()));
 
 	if (result == false)
 	{
@@ -439,8 +440,8 @@ int UalTester::runTestFile()
 
 	int totalErrorCount = 0;
 
-	int testCount = m_testfile.testList().count();
-	for(int testIndex = startTestIndex; testIndex < testCount; testIndex++)
+	qsizetype testCount = m_testfile.testList().count();
+	for(qsizetype testIndex = startTestIndex; testIndex < testCount; testIndex++)
 	{
 		if (m_cmdLineParam.enableContinueTest() == false)							// for cmd line param -errignore
 		{
@@ -499,8 +500,8 @@ int UalTester::runTestFile()
 
 						//
 						//
-						int paramCount = cmd.paramList().count();
-						for(int i = 0; i < paramCount; i++)
+						qsizetype paramCount = cmd.paramList().count();
+						for(qsizetype i = 0; i < paramCount; i++)
 						{
 							TestCmdParam param = cmd.paramList().at(i);
 							if (param.isEmtpy() == true)
@@ -602,8 +603,8 @@ int UalTester::runTestFile()
 					{
 						QVector<Hash> signalHashList;
 
-						int paramCount = cmd.paramList().count();
-						for(int i = 0; i < paramCount; i++)
+						qsizetype paramCount = cmd.paramList().count();
+						for(qsizetype i = 0; i < paramCount; i++)
 						{
 							TestCmdParam param = cmd.paramList().at(i);
 							if (param.isEmtpy() == true)
@@ -818,8 +819,8 @@ int UalTester::runTestFile()
 							}
 							else
 							{
-								int resCount = test.resultList().count();
-								for (int i = 0; i < resCount; i++)
+								qsizetype resCount = test.resultList().count();
+								for (qsizetype i = 0; i < resCount; i++)
 								{
 									DEBUG_LOG_MSG(m_log, test.resultList().at(i));
 								}

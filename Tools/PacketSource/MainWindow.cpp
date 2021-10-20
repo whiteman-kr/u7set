@@ -59,7 +59,7 @@ void MainWindow::createActions()
 	connect(m_sourceStartAction, &QAction::triggered, this, &MainWindow::startSource);
 
 	m_sourceStopAction = new QAction(tr("Stop"), this);
-	m_sourceStopAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
+	m_sourceStopAction->setShortcut(Qt::SHIFT | Qt::Key_F5);
 	m_sourceStopAction->setIcon(QIcon(":/Images/Stop.svg"));
 	m_sourceStopAction->setToolTip(tr("Stop all sources"));
 	connect(m_sourceStopAction, &QAction::triggered, this, &MainWindow::stopSource);
@@ -76,25 +76,25 @@ void MainWindow::createActions()
 	connect(m_signalSetStateAction, &QAction::triggered, this, &MainWindow::setSignalState);
 
 	m_signalInitAction = new QAction(tr("Initialization"), this);
-	m_signalInitAction->setShortcut(Qt::CTRL + Qt::Key_I);
+	m_signalInitAction->setShortcut(Qt::CTRL | Qt::Key_I);
 	m_signalInitAction->setIcon(QIcon(":/Images/Init.svg"));
 	m_signalInitAction->setToolTip(tr("Initialization all signals"));
 	connect(m_signalInitAction, &QAction::triggered, this, &MainWindow::initSignalsState);
 
 	m_signalHistoryAction = new QAction(tr("History ..."), this);
-	m_signalHistoryAction->setShortcut(Qt::CTRL + Qt::Key_H);
+	m_signalHistoryAction->setShortcut(Qt::CTRL | Qt::Key_H);
 	m_signalHistoryAction->setIcon(QIcon(":/Images/History.svg"));
 	m_signalHistoryAction->setToolTip(tr("Hystory of signals state"));
 	connect(m_signalHistoryAction, &QAction::triggered, this, &MainWindow::history);
 
 	m_signalSaveStatesAction = new QAction(tr("Save signals state ..."), this);
-	m_signalSaveStatesAction->setShortcut(Qt::CTRL + Qt::Key_S);
+	m_signalSaveStatesAction->setShortcut(Qt::CTRL | Qt::Key_S);
 	m_signalSaveStatesAction->setIcon(QIcon(":/Images/Upload.svg"));
 	m_signalSaveStatesAction->setToolTip(tr("Save signals state"));
 	connect(m_signalSaveStatesAction, &QAction::triggered, this, &MainWindow::saveSignalsState);
 
 	m_signalRestoreStatesAction = new QAction(tr("Restore signals state ..."), this);
-	m_signalRestoreStatesAction->setShortcut(Qt::CTRL + Qt::Key_R);
+	m_signalRestoreStatesAction->setShortcut(Qt::CTRL | Qt::Key_R);
 	m_signalRestoreStatesAction->setIcon(QIcon(":/Images/Download.svg"));
 	m_signalRestoreStatesAction->setToolTip(tr("Restore signals state"));
 	connect(m_signalRestoreStatesAction, &QAction::triggered, this, &MainWindow::restoreSignalsState);
@@ -108,7 +108,7 @@ void MainWindow::createActions()
 	// ?
 	//
 	m_optionAction = new QAction(tr("&Options"), this);
-	m_optionAction->setShortcut(Qt::CTRL + Qt::Key_O);
+	m_optionAction->setShortcut(Qt::CTRL | Qt::Key_O);
 	m_optionAction->setIcon(QIcon(":/Images/Options.svg"));
 	m_optionAction->setToolTip(tr("Options of sources"));
 	connect(m_optionAction, &QAction::triggered, this, &MainWindow::onOptions);
@@ -221,7 +221,7 @@ void MainWindow::createPanels()
 		if (dataAction != nullptr)
 		{
 			dataAction->setText(tr("&Frame of data ..."));
-			dataAction->setShortcut(Qt::CTRL + Qt::Key_D);
+			dataAction->setShortcut(Qt::CTRL | Qt::Key_D);
 			dataAction->setIcon(QIcon(":/Images/FrameData.svg"));
 			dataAction->setToolTip(tr("Frame of data"));
 
@@ -252,7 +252,7 @@ void MainWindow::createPanels()
 		if (findAction != nullptr)
 		{
 			findAction->setText(tr("&Find ..."));
-			findAction->setShortcut(Qt::CTRL + Qt::Key_F);
+			findAction->setShortcut(Qt::CTRL | Qt::Key_F);
 			findAction->setIcon(QIcon(":/Images/Find.svg"));
 			findAction->setToolTip(tr("Find signal"));
 
@@ -578,7 +578,7 @@ void MainWindow::configSocketUnknownAdsEquipmentID(const QStringList& adsIDList)
 		pSelectIdDialog->setWindowTitle(tr("Select EquipmentID"));
 		pSelectIdDialog->setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
 
-		QRect screen = QDesktopWidget().availableGeometry(this);
+		QRect screen = this->screen()->availableGeometry();
 		pSelectIdDialog->resize(static_cast<int>(screen.width() * 0.20), static_cast<int>(screen.height() * 0.02));
 		pSelectIdDialog->move(screen.center() - pSelectIdDialog->rect().center());
 
@@ -799,14 +799,14 @@ void MainWindow::startSource()
 		return;
 	}
 
-	int count = m_pSourceView->selectionModel()->selectedRows().count();
+	qsizetype count = m_pSourceView->selectionModel()->selectedRows().count();
 	if (count == 0)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select source!"));
 		return;
 	}
 
-	for( int i = 0; i < count; i++)
+	for(qsizetype i = 0; i < count; i++)
 	{
 		int sourceIndex = pSourceProxyModel->mapToSource(m_pSourceView->selectionModel()->selectedRows().at(i)).row();
 		m_pscore.sourceBase().runSourece(sourceIndex);
@@ -828,14 +828,14 @@ void MainWindow::stopSource()
 		return;
 	}
 
-	int count = m_pSourceView->selectionModel()->selectedRows().count();
+	qsizetype count = m_pSourceView->selectionModel()->selectedRows().count();
 	if (count == 0)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select source!"));
 		return;
 	}
 
-	for( int i = 0; i < count; i++)
+	for(qsizetype i = 0; i < count; i++)
 	{
 		int sourceIndex = pSourceProxyModel->mapToSource(m_pSourceView->selectionModel()->selectedRows().at(i)).row();
 		m_pscore.sourceBase().stopSourece(sourceIndex);
@@ -912,8 +912,8 @@ void MainWindow::setSignalState()
 
 	//
 	//
-	int rowCount = rows.count();
-	for (int r = 0; r < rowCount; r++)
+	qsizetype rowCount = rows.count();
+	for (qsizetype r = 0; r < rowCount; r++)
 	{
 		int signalIndex = pSignalProxyModel->mapToSource(rows[r]).row();
 		if (signalIndex < 0 || signalIndex >= m_signalTable.signalCount())
@@ -1352,8 +1352,8 @@ void MainWindow::onSignalContextMenu(QPoint)
 
 	if (pFirstSignal != nullptr)
 	{
-		int rowCount = rows.count();
-		for (int r = 1; r < rowCount; r++)
+		qsizetype rowCount = rows.count();
+		for (qsizetype r = 1; r < rowCount; r++)
 		{
 			int signalIndex = pSignalProxyModel->mapToSource(rows[r]).row();
 			if (signalIndex < 0 || signalIndex >= m_signalTable.signalCount())

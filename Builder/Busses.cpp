@@ -824,7 +824,7 @@ namespace Builder
 		m_busSignalIndexes.clear();
 		m_discreteSignalIndexes.clear();
 
-		int count = m_signals.count();
+		int count = static_cast<int>(m_signals.count());
 
 		for(int i = 0; i < count; i++)
 		{

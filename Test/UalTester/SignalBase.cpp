@@ -23,7 +23,7 @@ int SignalBase::signalCount() const
 
 	m_signalMutex.lock();
 
-		count = m_signalList.count();
+		count = static_cast<int>(m_signalList.count());
 
 	m_signalMutex.unlock();
 
@@ -55,7 +55,7 @@ int SignalBase::appendSignal(const AppSignal& param)
 		if (m_signalHashMap.contains(param.hash()) == false)
 		{
 			m_signalList.append(TestSignal(param));
-			index = m_signalList.count() - 1;
+			index = static_cast<int>(m_signalList.count() - 1);
 
 			m_signalHashMap.insert(param.hash(), index);
 		}
@@ -384,7 +384,7 @@ int SignalBase::hashForRequestStateCount() const
 
 	m_stateMutex.lock();
 
-		count = m_requestStateList.count();
+		count = static_cast<int>(m_requestStateList.count());
 
 	m_stateMutex.unlock();
 

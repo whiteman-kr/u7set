@@ -93,7 +93,6 @@
 #include <QClipboard>
 #include <QCloseEvent>
 
-#include <QDesktopWidget>
 #include <QErrorMessage>
 
 #include <QFileDialog>

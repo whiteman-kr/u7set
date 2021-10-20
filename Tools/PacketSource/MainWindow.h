@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QMainWindow>
-#include <QDesktopWidget>
 #include <QSettings>
 #include <QMessageBox>
 #include <QMenuBar>

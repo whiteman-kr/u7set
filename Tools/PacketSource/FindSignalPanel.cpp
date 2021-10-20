@@ -331,13 +331,13 @@ void FindSignalPanel::createContextMenu()
 
 	m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
 	m_pCopyAction->setIcon(QIcon(":/Images/Copy.svg"));
-	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
+	m_pCopyAction->setShortcut(Qt::CTRL | Qt::Key_C);
 
 	m_pContextMenu->addSeparator();
 
 	m_pSelectAllAction = m_pContextMenu->addAction(tr("Select &All"));
 	m_pSelectAllAction->setIcon(QIcon(":/Images/SelectAll.svg"));
-	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
+	m_pSelectAllAction->setShortcut(Qt::CTRL | Qt::Key_A);
 
 	connect(m_pCopyAction, &QAction::triggered, this, &FindSignalPanel::copy);
 	connect(m_pSelectAllAction, &QAction::triggered, this, &FindSignalPanel::selectAll);
@@ -457,9 +457,9 @@ void FindSignalPanel::find()
 		m_findText.append("*");
 	}
 
-	QRegExp rx(m_findText);
-	rx.setPatternSyntax(QRegExp::Wildcard);
-	rx.setCaseSensitivity(Qt::CaseInsensitive);
+	QRegularExpression rx(QRegularExpression::fromWildcard(m_findText));
+	//rx.setPatternSyntax(QRegExp::Wildcard);
+	//rx.setCaseSensitivity(Qt::CaseInsensitive);
 
 	std::vector<FindItem> findItemList;
 
@@ -489,7 +489,7 @@ void FindSignalPanel::find()
 				continue;
 			}
 
-			if(rx.exactMatch(text) == false)
+			if(rx.match(text).hasMatch() == false)
 			{
 				continue;
 			}

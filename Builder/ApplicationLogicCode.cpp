@@ -1261,11 +1261,11 @@ namespace Builder
 				cmdStr += QString("%1 ").arg(codeWordStr).toUpper();
 			}
 
-			int tabLen = 32 - (cmdStr.length() - 1 + 3);
+			qsizetype tabLen = 32 - (cmdStr.length() - 1 + 3);
 
-			int tabCount = tabLen / 8 + ((tabLen % 8) ? 1 : 0);
+			qsizetype tabCount = tabLen / 8 + ((tabLen % 8) ? 1 : 0);
 
-			for(int i = 0; i < tabCount; i++)
+			for(qsizetype i = 0; i < tabCount; i++)
 			{
 				cmdStr += "\t";
 			}
@@ -1286,14 +1286,14 @@ namespace Builder
 
 		if (m_comment.isEmpty() == false)
 		{
-			int tabLen = 72 - 32 - mnemo.length();
+			qsizetype tabLen = 72 - 32 - mnemo.length();
 
 			if (tabLen <= 0)
 			{
 				tabLen += 16;
 			}
 
-			int tabCount = tabLen / 8 + ((tabLen % 8) ? 1 : 0);
+			qsizetype tabCount = tabLen / 8 + ((tabLen % 8) ? 1 : 0);
 
 			for(int i = 0; i < tabCount; i++)
 			{
@@ -1977,7 +1977,7 @@ namespace Builder
 	{
 		m_codeItems.append(codeItem);
 
-		int lastIndex = m_codeItems.size() - 1;
+		qsizetype lastIndex = m_codeItems.size() - 1;
 
 		m_codeItems[lastIndex].setAddress(m_commandAddress);
 
@@ -2139,9 +2139,9 @@ namespace Builder
 
 		// find last command for compute address depth
 		//
-		int codeItemsCount = m_codeItems.count();
+		qsizetype codeItemsCount = m_codeItems.count();
 
-		for(int i = codeItemsCount - 1; i >= 0; i--)
+		for(qsizetype i = codeItemsCount - 1; i >= 0; i--)
 		{
 			if (m_codeItems[i].isComment() == true)
 			{
@@ -2192,9 +2192,9 @@ namespace Builder
 
 			assert((binCode.count() % 2) == 0);
 
-			int bytesCount = binCode.count();
+			qsizetype bytesCount = binCode.count();
 
-			for(int i = 0; i < bytesCount; i++)
+			for(qsizetype i = 0; i < bytesCount; i++)
 			{
 				if (i == 0)
 				{
@@ -2225,10 +2225,10 @@ namespace Builder
 				codeStr += str;
 			}
 
-			int tabLen = 40 - (codeStr.length() - 1 + 8);
-			int tabCount = tabLen / 8 + ((tabLen % 8) ? 1 : 0);
+			qsizetype tabLen = 40 - (codeStr.length() - 1 + 8);
+			qsizetype tabCount = tabLen / 8 + ((tabLen % 8) ? 1 : 0);
 
-			for(int i = 0; i < tabCount; i++)
+			for(qsizetype i = 0; i < tabCount; i++)
 			{
 				codeStr += "\t";
 			}

@@ -95,7 +95,7 @@ QString TestCmdParam::valueStr(bool addParamName, int precise)
 
 				// remove unnecessary 0
 				//
-				int pos = str.indexOf('.');
+				qsizetype pos = str.indexOf('.');
 				if (pos == -1)
 				{
 					break;
@@ -334,7 +334,7 @@ bool TestCmd::parse(const QString& line)
 
 	// remove all after comment "//"
 	//
-	int pos = m_line.indexOf("//");
+	qsizetype pos = m_line.indexOf("//");
 	if (pos != -1)
 	{
 		m_comment = m_line.right(m_line.length() - pos);
@@ -374,7 +374,7 @@ bool TestCmd::parse(const QString& line)
 
 bool TestCmd::parseCmdTest()
 {
-	int spacePos = m_line.indexOf(' ');
+	qsizetype spacePos = m_line.indexOf(' ');
 	if (spacePos == -1)
 	{
 		QString errorStr = QString("(line %1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
@@ -453,7 +453,7 @@ bool TestCmd::parseCmdEndtest()
 
 bool TestCmd::parseCmdSchema()
 {
-	int spacePos = m_line.indexOf(' ');
+	qsizetype spacePos = m_line.indexOf(' ');
 	if (spacePos == -1)
 	{
 		QString errorStr = QString("(line %1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
@@ -480,7 +480,7 @@ bool TestCmd::parseCmdSchema()
 
 bool TestCmd::parseCmdCompatible()
 {
-	int spacePos = m_line.indexOf(' ');
+	qsizetype spacePos = m_line.indexOf(' ');
 	if (spacePos == -1)
 	{
 		QString errorStr = QString("(line %1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
@@ -500,7 +500,7 @@ bool TestCmd::parseCmdCompatible()
 
 	TestCmdParam param;
 
-	int argCount = argList.count();
+	qsizetype argCount = argList.count();
 	for(int i = 0; i < argCount; i++)
 	{
 		QString preset = argList[i].simplified();
@@ -527,7 +527,7 @@ bool TestCmd::parseCmdCompatible()
 
 bool TestCmd::parseCmdConst()
 {
-	int space1Pos = m_line.indexOf(' ');
+	qsizetype space1Pos = m_line.indexOf(' ');
 	if (space1Pos == -1)
 	{
 		QString errorStr = QString("(line %1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
@@ -535,7 +535,7 @@ bool TestCmd::parseCmdConst()
 		return false;
 	}
 
-	int space2Pos = m_line.indexOf(' ', space1Pos + 1);
+	qsizetype space2Pos = m_line.indexOf(' ', space1Pos + 1);
 	if (space2Pos == -1)
 	{
 		QString errorStr = QString("(line %1) Error : Failed const type").arg(m_lineIndex);
@@ -578,8 +578,8 @@ bool TestCmd::parseCmdConst()
 
 	TestCmdParam param;
 
-	int argCount = argList.count();
-	for(int i = 0; i < argCount; i++)
+	qsizetype argCount = argList.count();
+	for(qsizetype i = 0; i < argCount; i++)
 	{
 		QString arg = argList[i].simplified();
 		if(arg.isEmpty() == true)
@@ -678,7 +678,7 @@ bool TestCmd::parseCmdConst()
 
 bool TestCmd::parseCmdVar()
 {
-	int space1Pos = m_line.indexOf(' ');
+	qsizetype space1Pos = m_line.indexOf(' ');
 	if (space1Pos == -1)
 	{
 		QString errorStr = QString("(line %1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
@@ -686,7 +686,7 @@ bool TestCmd::parseCmdVar()
 		return false;
 	}
 
-	int space2Pos = m_line.indexOf(' ', space1Pos + 1);
+	qsizetype space2Pos = m_line.indexOf(' ', space1Pos + 1);
 	if (space2Pos == -1)
 	{
 		QString errorStr = QString("(line %1) Error : Failed variable type").arg(m_lineIndex);
@@ -729,7 +729,7 @@ bool TestCmd::parseCmdVar()
 
 	TestCmdParam param;
 
-	int argCount = argList.count();
+	qsizetype argCount = argList.count();
 	for(int i = 0; i < argCount; i++)
 	{
 		QString arg = argList[i].simplified();
@@ -836,7 +836,7 @@ bool TestCmd::parseCmdSet()
 		return false;
 	}
 
-	int spacePos = m_line.indexOf(' ');
+	qsizetype spacePos = m_line.indexOf(' ');
 	if (spacePos == -1)
 	{
 		QString errorStr = QString("(line %1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
@@ -856,7 +856,7 @@ bool TestCmd::parseCmdSet()
 
 	TestCmdParam param;
 
-	int argCount = argList.count();
+	qsizetype argCount = argList.count();
 	for(int i = 0; i < argCount; i++)
 	{
 		QString arg = argList[i].simplified();
@@ -956,7 +956,7 @@ bool TestCmd::parseCmdCheck()
 		return false;
 	}
 
-	int spacePos = m_line.indexOf(' ');
+	qsizetype spacePos = m_line.indexOf(' ');
 	if (spacePos == -1)
 	{
 		QString errorStr = QString("(line %1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
@@ -976,7 +976,7 @@ bool TestCmd::parseCmdCheck()
 
 	TestCmdParam param;
 
-	int argCount = argList.count();
+	qsizetype argCount = argList.count();
 	for(int i = 0; i < argCount; i++)
 	{
 		QString arg = argList[i].simplified();
@@ -1089,7 +1089,7 @@ bool TestCmd::parseCmdCheck()
 
 bool TestCmd::parseCmdDelay()
 {
-	int spacePos = m_line.indexOf(' ');
+	qsizetype spacePos = m_line.indexOf(' ');
 	if (spacePos == -1)
 	{
 		QString errorStr = QString("(line %1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
@@ -1122,7 +1122,7 @@ bool TestCmd::parseCmdDelay()
 
 bool TestCmd::parseCmdRunSource()
 {
-	int spacePos = m_line.indexOf(' ');
+	qsizetype spacePos = m_line.indexOf(' ');
 	if (spacePos == -1)
 	{
 		QString errorStr = QString("(line %1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
@@ -1149,7 +1149,7 @@ bool TestCmd::parseCmdRunSource()
 
 bool TestCmd::parseCmdStopSource()
 {
-	int spacePos = m_line.indexOf(' ');
+	qsizetype spacePos = m_line.indexOf(' ');
 	if (spacePos == -1)
 	{
 		QString errorStr = QString("(line %1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
@@ -1202,8 +1202,8 @@ bool TestCmd::isUniqueTestID(const QString& testID)
 		return false;
 	}
 
-	int cmdCount = m_pTestFile->commandList().count();
-	for(int c = 0; c < cmdCount; c++)
+	qsizetype cmdCount = m_pTestFile->commandList().count();
+	for(qsizetype c = 0; c < cmdCount; c++)
 	{
 		TestCmd cmd = m_pTestFile->commandList().at(c);
 		if (cmd.type() != TF_CMD_TEST)
@@ -1211,8 +1211,8 @@ bool TestCmd::isUniqueTestID(const QString& testID)
 			continue;
 		}
 
-		int paramCount = cmd.paramList().count();
-		for(int p = 0; p < paramCount; p++)
+		qsizetype paramCount = cmd.paramList().count();
+		for(qsizetype p = 0; p < paramCount; p++)
 		{
 			TestCmdParam param = cmd.paramList().at(p);
 			if (param.name() != PARAM_TEST_ID)
@@ -1248,8 +1248,8 @@ bool TestCmd::isUniqueConstOrVarName(const QString& name, const QVector<TestCmdP
 		return false;
 	}
 
-	int paramCount = paramList.count();
-	for(int i = 0; i < paramCount; i++)
+	qsizetype paramCount = paramList.count();
+	for(qsizetype i = 0; i < paramCount; i++)
 	{
 		if (paramList[i].name() == name)
 		{
@@ -1259,8 +1259,8 @@ bool TestCmd::isUniqueConstOrVarName(const QString& name, const QVector<TestCmdP
 		}
 	}
 
-	int cmdCount = m_pTestFile->commandList().count();
-	for(int c = 0; c < cmdCount; c++)
+	qsizetype cmdCount = m_pTestFile->commandList().count();
+	for(qsizetype c = 0; c < cmdCount; c++)
 	{
 		TestCmd cmd = m_pTestFile->commandList().at(c);
 		if (cmd.type() != TF_CMD_CONST && cmd.type() != TF_CMD_VAR)
@@ -1268,8 +1268,8 @@ bool TestCmd::isUniqueConstOrVarName(const QString& name, const QVector<TestCmdP
 			continue;
 		}
 
-		int prmCount = cmd.paramList().count();
-		for(int p = 0; p < prmCount; p++)
+		qsizetype prmCount = cmd.paramList().count();
+		for(qsizetype p = 0; p < prmCount; p++)
 		{
 			if (cmd.paramList().at(p).name() == name)
 			{
@@ -1308,8 +1308,8 @@ TestCmdParam TestCmd::paramFromConstOrVar(const QString& name, const QString& va
 
 	TestCmdParam param;
 
-	int cmdCount = m_pTestFile->commandList().count();
-	for(int c = 0; c < cmdCount; c++)
+	qsizetype cmdCount = m_pTestFile->commandList().count();
+	for(qsizetype c = 0; c < cmdCount; c++)
 	{
 		TestCmd cmd = m_pTestFile->commandList().at(c);
 		if (cmd.type() != TF_CMD_CONST && cmd.type() != TF_CMD_VAR)
@@ -1317,8 +1317,8 @@ TestCmdParam TestCmd::paramFromConstOrVar(const QString& name, const QString& va
 			continue;
 		}
 
-		int paramCount = cmd.paramList().count();
-		for(int p = 0; p < paramCount; p++)
+		qsizetype paramCount = cmd.paramList().count();
+		for(qsizetype p = 0; p < paramCount; p++)
 		{
 			if (cmd.paramList().at(p).name() == value)
 			{
@@ -1515,7 +1515,7 @@ int TestItem::cmdCount()
 
 	m_mutex.lock();
 
-		count = m_commandList.count();
+		count = static_cast<int>(m_commandList.count());
 
 	m_mutex.unlock();
 
@@ -1597,8 +1597,8 @@ void TestFile::printErrorlist()
 
 	m_errorList.append(QString("Found error(s): %1").arg(m_errorList.count()));
 
-	int errorCount = m_errorList.count();
-	for(int i = 0; i < errorCount; i++)
+	qsizetype errorCount = m_errorList.count();
+	for(qsizetype i = 0; i < errorCount; i++)
 	{
 		std::cout << m_errorList[i].toLocal8Bit().constData() << std::endl;
 	}
@@ -1678,8 +1678,8 @@ void TestFile::close()
 
 void TestFile::createTestList()
 {
-	int cmdIndex = 0;
-	int cmdCount = m_commandList.count();
+	qsizetype cmdIndex = 0;
+	qsizetype cmdCount = m_commandList.count();
 
 	while(cmdIndex < cmdCount)
 	{
@@ -1692,8 +1692,8 @@ void TestFile::createTestList()
 			//
 			QString testName;
 
-			int paramCount = cmd.paramList().count();
-			for(int i = 0; i < paramCount; i++)
+			qsizetype paramCount = cmd.paramList().count();
+			for(qsizetype i = 0; i < paramCount; i++)
 			{
 				TestCmdParam param = cmd.paramList().at(i);
 				if (param.type() != TestCmdParamType::String)
@@ -1723,8 +1723,8 @@ void TestFile::createTestList()
 
 				if (cmd.type() == TF_CMD_COMPATIBLE)
 				{
-					int prmCount = cmd.paramList().count();
-					for(int i = 0; i < prmCount; i++)
+					qsizetype prmCount = cmd.paramList().count();
+					for(qsizetype i = 0; i < prmCount; i++)
 					{
 						test.compatibleList().append(cmd.paramList().at(i).value().toString());
 					}

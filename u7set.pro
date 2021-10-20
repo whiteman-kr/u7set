@@ -30,9 +30,9 @@ SUBDIRS += Protobuf \
 		DiagDataService \
         TuningClient \
         mconf \
-#        PacketSource \
-#        PacketViewer \
-#        UalTester \
+		PacketSource \
+		PacketViewer \
+		UalTester \
         SimulatorTests \
         u7databaseTests
 

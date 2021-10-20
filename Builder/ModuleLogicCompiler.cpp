@@ -430,12 +430,12 @@ namespace Builder
 	{
 		bool result = true;
 
-		int signalCount = m_signals->count();
+		qsizetype signalCount = m_signals->count();
 
 		m_chassisSignals.clear();
 		m_ioSignals.clear();
 
-		for(int i = 0; i < signalCount; i++)
+		for(qsizetype i = 0; i < signalCount; i++)
 		{
 			AppSignal& s = (*m_signals)[i];
 
@@ -5062,11 +5062,11 @@ namespace Builder
 
 		// sort array be appSignalID
 
-		int count = m_analogOutputSignalsToConversion.count();
+		qsizetype count = m_analogOutputSignalsToConversion.count();
 
-		for(int i = 0; i < count - 1; i++)
+		for(qsizetype i = 0; i < count - 1; i++)
 		{
-			for(int k = i + 1; k < count; k++)
+			for(qsizetype k = i + 1; k < count; k++)
 			{
 				AppSignal* si = m_analogOutputSignalsToConversion[i];
 				AppSignal* sk = m_analogOutputSignalsToConversion[k];
@@ -5476,11 +5476,11 @@ namespace Builder
 
 		QVector<QString>&& vPortIDs = QVector<QString>::fromList(portIDs);
 
-		int count = vPortIDs.count();
+		qsizetype count = vPortIDs.count();
 
-		for(int i = 0; i < count - 1; i++)
+		for(qsizetype i = 0; i < count - 1; i++)
 		{
-			for(int k = i + 1; k < count; k++)
+			for(qsizetype k = i + 1; k < count; k++)
 			{
 				QString s1ID = vPortIDs[i];
 				QString s2ID = vPortIDs[k];
@@ -5558,11 +5558,11 @@ namespace Builder
 
 	void ModuleLogicCompiler::sortSignalList(QVector<UalSignal*>& signalList)
 	{
-		int count = signalList.count();
+		qsizetype count = signalList.count();
 
-		for(int i = 0; i < count - 1; i++)
+		for(qsizetype i = 0; i < count - 1; i++)
 		{
-			for(int k = i + 1; k < count; k++)
+			for(qsizetype k = i + 1; k < count; k++)
 			{
 				UalSignal* s1 = signalList[i];
 				UalSignal* s2 = signalList[k];
@@ -12486,7 +12486,7 @@ namespace Builder
 
 		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
 
-		int signalsCount = signalsList.count();
+		qsizetype signalsCount = signalsList.count();
 
 		int count = 0;
 
@@ -13392,9 +13392,9 @@ namespace Builder
 
 		port->getTxDiscreteSignals(txDiscreteSignals, true);
 
-		int count = txDiscreteSignals.count();
+		qsizetype count = txDiscreteSignals.count();
 
-		int wordCount = count / WORD_SIZE + ((count % WORD_SIZE) ? 1 : 0);
+		qsizetype wordCount = count / WORD_SIZE + ((count % WORD_SIZE) ? 1 : 0);
 
 		int bitAccumulatorAddress = m_memoryMap.bitAccumulatorAddress();
 

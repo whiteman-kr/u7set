@@ -304,8 +304,8 @@ void SignalStateDialog::createInterface()
 				QLabel* stateLabel = new QLabel(tr("Please, input new state of analog signal:"));
 				stateLabel->setAlignment(Qt::AlignHCenter);
 
-				QRegExp rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
-				QValidator *validator = new QRegExpValidator(rx, this);
+				QRegularExpression rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
+				QValidator *validator = new QRegularExpressionValidator(rx, this);
 
 				QString strState, formatStr;
 				switch (m_pSignal->analogSignalFormat())
