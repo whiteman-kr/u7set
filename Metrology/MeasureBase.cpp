@@ -3569,9 +3569,9 @@ namespace Measure
 
 		switch (byRange)
 		{
-			case Measure::CalcErrorRange::BySignalType:			caption = QT_TRANSLATE_NOOP("MeasureBase", "Depended from signal type");	break;
 			case Measure::CalcErrorRange::ByElectricRange:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Electric range");				break;
 			case Measure::CalcErrorRange::ByEngineeringRange:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Engineering range");			break;
+			case Measure::CalcErrorRange::BySignalType:			caption = QT_TRANSLATE_NOOP("MeasureBase", "Depended from signal type");	break;
 
 			default:
 				Q_ASSERT(0);

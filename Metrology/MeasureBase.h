@@ -60,9 +60,9 @@ namespace Measure
 	enum CalcErrorRange
 	{
 		NoCalcErrorFrom		= -1,
-		BySignalType		= 0,
-		ByElectricRange		= 1,
-		ByEngineeringRange	= 2,
+		ByElectricRange		= 0,
+		ByEngineeringRange	= 1,
+		BySignalType		= 2,
 	};
 
 	const int CalcErrorRangeCount = 3;

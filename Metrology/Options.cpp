@@ -709,7 +709,7 @@ void LinearityOption::load()
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), 0.1).toDouble();
 	m_errorType = s.value(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), Measure::ErrorType::Reduce).toInt();
-	m_calcErrorByRange = s.value(QString("%1CalcErrorByRange").arg(LINEARITY_OPTIONS_KEY), Measure::CalcErrorRange::BySignalType).toInt();
+	m_calcErrorByRange = s.value(QString("%1CalcErrorByRange").arg(LINEARITY_OPTIONS_KEY), Measure::CalcErrorRange::ByElectricRange).toInt();
 
 	m_measureTimeInPoint = s.value(QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
 	m_measureCountInPoint = s.value(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), Measure::MaxMeasurementInPoint).toInt();
@@ -816,7 +816,7 @@ void ComparatorOption::load()
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
 	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), Measure::ErrorType::Reduce).toInt();
-	m_calcErrorByRange = s.value(QString("%1CalcErrorByRange").arg(COMPARATOR_OPTIONS_KEY), Measure::CalcErrorRange::BySignalType).toInt();
+	m_calcErrorByRange = s.value(QString("%1CalcErrorByRange").arg(COMPARATOR_OPTIONS_KEY), Measure::CalcErrorRange::ByElectricRange).toInt();
 	m_startValueForCompare = s.value(QString("%1StartValueForCompare").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
 
 	m_startComparatorIndex = s.value(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();

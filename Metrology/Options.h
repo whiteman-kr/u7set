@@ -504,7 +504,7 @@ private:
 
 	double				m_errorLimit = 0.1;														// permissible error is given by specified documents
 	int					m_errorType = Measure::ErrorType::Reduce;								// type of error absolute or reduced
-	int					m_calcErrorByRange = Measure::CalcErrorRange::BySignalType;				// error is calculated by the range
+	int					m_calcErrorByRange = Measure::CalcErrorRange::ByElectricRange;			// error is calculated by the range
 
 	int					m_measureTimeInPoint = 1;												// time, in seconds, during which will be made ​​N measurements at each point
 	int					m_measureCountInPoint = Measure::MaxMeasurementInPoint;					// count of measurements in a point, according to GOST MI-2002 application 7
@@ -587,7 +587,7 @@ private:
 
 	double				m_errorLimit = 0.1;														// permissible error is given by specified documents
 	int					m_errorType = Measure::ErrorType::Reduce;								// type of error absolute or reduced
-	int					m_calcErrorByRange = Measure::CalcErrorRange::BySignalType;				// error is calculated by the range
+	int					m_calcErrorByRange = Measure::CalcErrorRange::ByElectricRange;			// error is calculated by the range
 	double				m_startValueForCompare = 0.1;											// start value is given by metrologists
 
 	int					m_startComparatorIndex = 0;												// start the measurement with the сomparators under the number ...
