@@ -36,6 +36,9 @@ public:
 	void writeAddress16Attribute(const QString& name, const Address16& addr16);
 	void writeSoftwareTypeAttribute(E::SoftwareType swType);
 
+	template<typename ENUM_TYPE>
+	void writeEnumValueAttribute(const QString& name, ENUM_TYPE value);			// writes Int value of enum item
+
 	void writeString(const QString& str);
 
 	void writeStringElement(const QString& name, const QString& value);
@@ -49,6 +52,13 @@ private:
 	QXmlStreamWriter* m_xmlWriter = nullptr;
 	QXmlStreamWriter* m_xmlLocalWriter = nullptr;
 };
+
+template<typename ENUM_TYPE>
+void XmlWriteHelper::writeEnumValueAttribute(const QString& name, ENUM_TYPE value)
+{
+	writeIntAttribute(name, static_cast<int>(value));
+}
+
 
 class XmlReadHelper
 {
@@ -66,14 +76,17 @@ public:
 	bool atEnd();
 
 	bool readStringAttribute(const QString& name, QString* value);
-	bool readIntAttribute(const QString& name, int* value);
-	bool readBoolAttribute(const QString& name, bool* value);
-	bool readUInt64Attribute(const QString& name, qulonglong* value);
-	bool readUInt32Attribute(const QString& name, quint32* value);
-	bool readDoubleAttribute(const QString& name, double* value);
-	bool readFloatAttribute(const QString& name, float* value);
+	bool readIntAttribute(const QString& name, int* value, bool ignoreEmpty = false);
+	bool readBoolAttribute(const QString& name, bool* value, bool ignoreEmpty = false);
+	bool readUInt64Attribute(const QString& name, qulonglong* value, bool ignoreEmpty = false);
+	bool readUInt32Attribute(const QString& name, quint32* value, bool ignoreEmpty = false);
+	bool readDoubleAttribute(const QString& name, double* value, bool ignoreEmpty = false);
+	bool readFloatAttribute(const QString& name, float* value, bool ignoreEmpty = false);
 	bool readAddress16Attribute(const QString& name, Address16* value);
 	bool readSoftwareTypeAttribute(E::SoftwareType* swType);
+
+	template<typename ENUM_TYPE>
+	bool readEnumValueAttribute(const QString& name, ENUM_TYPE* value);			// reads Int value and cast it to enum item
 
 	bool readStringElement(const QString& elementName, QString* value, bool find = false);
 	bool readIntElement(const QString& elementName, int* value, bool find = false);
@@ -81,9 +94,6 @@ public:
 
 	bool readHostAddressPort(const QString& nameIP, const QString &namePort, HostAddressPort *hostAddressPort);
 	bool readHostAddress(const QString& name, QHostAddress *hostAddress);
-
-	template<typename ENUM_TYPE>
-	bool readEnumValueAttribute(const QString& name, ENUM_TYPE* value);
 
 	bool findElement(const QString& elementName);
 	bool checkElement(const QString& elementName);
