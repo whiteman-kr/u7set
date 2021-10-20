@@ -184,8 +184,8 @@ namespace Sim
 
 		QStringList strings = string.split(QChar::LineFeed, Qt::SkipEmptyParts);
 
-		QRegularExpression regExpProfile("^\\[[a-zA-Z\\d_]+\\]");
-		QRegularExpression regExpProperty("^[A-Z\\d_]+.\\w+\\s*=\\s*\"?[\\w\\s.\\+\\-/\\\\:]+\"?;");	// OBJECT1.a_1 = " hello+-./\: ";
+		QRegularExpression regExpProfile("^\\[[a-zA-Z\\d_]+\\]$");
+		QRegularExpression regExpProperty("^[A-Z\\d_]+.\\w+\\s*=\\s*\"?[\\w\\s.\\+\\-/\\\\:]+\"?;$");	// OBJECT1.a_1 = " hello+-./\: ";
 		QRegularExpression regExpUInt("^(?:0|[1-9][0-9]*)$");
 		QRegularExpression regExpInt("^-?(?:0|[1-9][0-9]*)$");
 		QRegularExpression regExpDouble("^-?(?:0|[1-9][0-9]*)\\.?[0-9]+([e|E][+-]?[0-9]+)?$");
