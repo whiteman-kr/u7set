@@ -134,6 +134,63 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	Measure::LimitType Item::limitTypeByRange(int byRange) const
+	{
+		return limitTypeByRange(static_cast<Measure::CalcErrorRange>(byRange));
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	Measure::LimitType Item::limitTypeByRange(Measure::CalcErrorRange byRange) const
+	{
+		Measure::LimitType limitType = Measure::LimitType::NoLimitType;
+
+		switch (byRange)
+		{
+			case BySignalType:
+
+				switch (m_connectionType)
+				{
+					case Metrology::Unused:
+					case Metrology::Input_Internal:
+					case Metrology::Input_DP_Internal_F:
+					case Metrology::Input_C_Internal_F:
+
+						limitType = Measure::LimitType::Engineering;
+						break;
+
+					case Metrology::Input_Output:
+					case Metrology::Input_DP_Output_F:
+					case Metrology::Input_C_Output_F:
+					case Metrology::Tuning_Output:
+
+						limitType = Measure::LimitType::Electric;
+						break;
+
+					default:
+						assert(0);
+				}
+				break;
+
+			case ByElectricRange:
+
+				limitType = Measure::LimitType::Electric;
+				break;
+
+			case ByEngineeringRange:
+
+				limitType = Measure::LimitType::Engineering;
+				break;
+
+			default:
+				assert(0);
+		}
+
+		return limitType;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	double Item::nominal(LimitType limitType) const
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
@@ -570,8 +627,8 @@ namespace Measure
 
 		switch (measureType)
 		{
-			case Measure::Type::Linearity:		limitType = static_cast<LimitType>(theOptions.linearity().limitType());		break;
-			case Measure::Type::Comparators:	limitType = static_cast<LimitType>(theOptions.comparator().limitType());	break;
+			case Measure::Type::Linearity:		limitType = limitTypeByRange(theOptions.linearity().calcErrorByRange());	break;
+			case Measure::Type::Comparators:	limitType = limitTypeByRange(theOptions.comparator().calcErrorByRange());	break;
 
 			default:
 				assert(0);
@@ -679,8 +736,8 @@ namespace Measure
 
 		switch (measureType)
 		{
-			case Measure::Type::Linearity:		limitType = static_cast<LimitType>(theOptions.linearity().limitType());		break;
-			case Measure::Type::Comparators:	limitType = static_cast<LimitType>(theOptions.comparator().limitType());	break;
+			case Measure::Type::Linearity:		limitType = limitTypeByRange(theOptions.linearity().calcErrorByRange());	break;
+			case Measure::Type::Comparators:	limitType = limitTypeByRange(theOptions.comparator().calcErrorByRange());	break;
 
 			default:
 				assert(0);
@@ -759,8 +816,8 @@ namespace Measure
 
 		switch (measureType)
 		{
-			case Measure::Type::Linearity:		limitType = static_cast<LimitType>(theOptions.linearity().limitType());		break;
-			case Measure::Type::Comparators:	limitType = static_cast<LimitType>(theOptions.comparator().limitType());	break;
+			case Measure::Type::Linearity:		limitType = limitTypeByRange(theOptions.linearity().calcErrorByRange());	break;
+			case Measure::Type::Comparators:	limitType = limitTypeByRange(theOptions.comparator().calcErrorByRange());	break;
 
 			default:
 				assert(0);
@@ -3172,24 +3229,6 @@ namespace Measure
 			return;
 		}
 
-		LimitType limitType = LimitType::NoLimitType;
-
-		switch (measureType)
-		{
-			case Measure::Type::Linearity:		limitType = static_cast<LimitType>(theOptions.linearity().limitType());		break;
-			case Measure::Type::Comparators:	limitType = static_cast<LimitType>(theOptions.comparator().limitType());	break;
-
-			default:
-				assert(0);
-				return;
-		}
-
-		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
-		{
-			assert(0);
-			return;
-		}
-
 		ErrorType errorType = ErrorType::NoErrorType;
 
 		switch (measureType)
@@ -3229,6 +3268,24 @@ namespace Measure
 
 			if (pMeasurement->signalHash() != signalHash)
 			{
+				continue;
+			}
+
+			LimitType limitType = LimitType::NoLimitType;
+
+			switch (measureType)
+			{
+				case Measure::Type::Linearity:		limitType = pMeasurement->limitTypeByRange(theOptions.linearity().calcErrorByRange());	break;
+				case Measure::Type::Comparators:	limitType = pMeasurement->limitTypeByRange(theOptions.comparator().calcErrorByRange());	break;
+
+				default:
+					assert(0);
+					continue;
+			}
+
+			if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
+			{
+				assert(0);
 				continue;
 			}
 
@@ -3489,14 +3546,32 @@ namespace Measure
 		return caption;
 	};
 
-	QString LimitTypeCaption(Measure::LimitType measureLimitType)
+	QString LimitTypeCaption(Measure::LimitType limitType)
 	{
 		QString caption;
 
-		switch (measureLimitType)
+		switch (limitType)
 		{
 			case Measure::LimitType::Electric:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Electric");		break;
 			case Measure::LimitType::Engineering:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Engineering");	break;
+
+			default:
+				Q_ASSERT(0);
+				caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
+		}
+
+		return caption;
+	};
+
+	QString CalcErrorRangeCaption(Measure::CalcErrorRange byRange)
+	{
+		QString caption;
+
+		switch (byRange)
+		{
+			case Measure::CalcErrorRange::ByElectricRange:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Electric range");				break;
+			case Measure::CalcErrorRange::ByEngineeringRange:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Engineering range");			break;
+			case Measure::CalcErrorRange::BySignalType:			caption = QT_TRANSLATE_NOOP("MeasureBase", "Depended from signal type");	break;
 
 			default:
 				Q_ASSERT(0);

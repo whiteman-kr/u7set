@@ -445,6 +445,7 @@ ProjectInfo::~ProjectInfo()
 {
 }
 
+
 // -------------------------------------------------------------------------------------------------------------------
 
 void ProjectInfo::save()
@@ -709,7 +710,7 @@ void LinearityOption::load()
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), 0.1).toDouble();
 	m_errorType = s.value(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), Measure::ErrorType::Reduce).toInt();
-	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(LINEARITY_OPTIONS_KEY), Measure::LimitType::Electric).toInt();
+	m_calcErrorByRange = s.value(QString("%1CalcErrorByRange").arg(LINEARITY_OPTIONS_KEY), Measure::CalcErrorRange::ByElectricRange).toInt();
 
 	m_measureTimeInPoint = s.value(QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
 	m_measureCountInPoint = s.value(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), Measure::MaxMeasurementInPoint).toInt();
@@ -729,7 +730,7 @@ void LinearityOption::save()
 
 	s.setValue(QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), m_errorLimit);
 	s.setValue(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), m_errorType);
-	s.setValue(QString("%1ShowErrorFromLimit").arg(LINEARITY_OPTIONS_KEY), m_limitType);
+	s.setValue(QString("%1CalcErrorByRange").arg(LINEARITY_OPTIONS_KEY), m_calcErrorByRange);
 
 	s.setValue(QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureTimeInPoint);
 	s.setValue(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureCountInPoint);
@@ -749,7 +750,7 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 
 	m_errorLimit = from.m_errorLimit;
 	m_errorType = from.m_errorType;
-	m_limitType = from.m_limitType;
+	m_calcErrorByRange = from.m_calcErrorByRange;
 
 	m_measureTimeInPoint = from.m_measureTimeInPoint;
 	m_measureCountInPoint = from.m_measureCountInPoint;
@@ -815,9 +816,9 @@ void ComparatorOption::load()
 	QSettings s;
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
-	m_startValueForCompare = s.value(QString("%1StartValueForCompare").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
 	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), Measure::ErrorType::Reduce).toInt();
-	m_limitType = s.value(QString("%1ShowErrorFromLimit").arg(COMPARATOR_OPTIONS_KEY), Measure::LimitType::Electric).toInt();
+	m_calcErrorByRange = s.value(QString("%1CalcErrorByRange").arg(COMPARATOR_OPTIONS_KEY), Measure::CalcErrorRange::ByElectricRange).toInt();
+	m_startValueForCompare = s.value(QString("%1StartValueForCompare").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
 
 	m_startComparatorIndex = s.value(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
 	m_enableMeasureHysteresis = s.value(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
@@ -830,9 +831,9 @@ void ComparatorOption::save()
 	QSettings s;
 
 	s.setValue(QString("%1ErrorLimit").arg(COMPARATOR_OPTIONS_KEY), m_errorLimit);
-	s.setValue(QString("%1StartValueForCompare").arg(COMPARATOR_OPTIONS_KEY), m_startValueForCompare);
 	s.setValue(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), m_errorType);
-	s.setValue(QString("%1ShowErrorFromLimit").arg(COMPARATOR_OPTIONS_KEY), m_limitType);
+	s.setValue(QString("%1CalcErrorByRange").arg(COMPARATOR_OPTIONS_KEY), m_calcErrorByRange);
+	s.setValue(QString("%1StartValueForCompare").arg(COMPARATOR_OPTIONS_KEY), m_startValueForCompare);
 
 	s.setValue(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), m_startComparatorIndex);
 	s.setValue(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), m_enableMeasureHysteresis);
@@ -843,9 +844,9 @@ void ComparatorOption::save()
 ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
 {
 	m_errorLimit = from.m_errorLimit;
-	m_startValueForCompare = from.m_startValueForCompare;
 	m_errorType = from.m_errorType;
-	m_limitType = from.m_limitType;
+	m_calcErrorByRange = from.m_calcErrorByRange;
+	m_startValueForCompare = from.m_startValueForCompare;
 
 	m_startComparatorIndex = from.m_startComparatorIndex;
 	m_enableMeasureHysteresis = from.m_enableMeasureHysteresis;
