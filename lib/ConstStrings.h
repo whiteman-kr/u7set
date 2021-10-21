@@ -276,6 +276,7 @@ namespace CfgFileId
 {
 	inline const QString APP_DATA_SOURCES("APP_DATA_SOURCES");
 	inline const QString APP_SIGNALS("APP_SIGNALS");
+	inline const QString APP_SIGNALS_EXT("APP_SIGNALS_EXT");
 	inline const QString APP_SIGNAL_SET("APP_SIGNAL_SET");
 	inline const QString COMPARATOR_SET("COMPARATOR_SET");
 	inline const QString UNIT_SET("UNIT_SET");
@@ -338,6 +339,7 @@ namespace File
 {
 	inline const QString APP_SIGNALS_ASGS("AppSignals.asgs");
 	inline const QString APP_SIGNALS_XML("AppSignals.xml");
+	inline const QString APP_SIGNALS_EXT_XML("AppSignalsExt.xml");
 	inline const QString COMPARATORS_SET("Comparators.set");
 	inline const QString APP_DATA_SOURCES_XML("AppDataSources.xml");
 	inline const QString TUNING_SOURCES_XML("TuningSources.xml");
@@ -397,7 +399,6 @@ namespace AppSignalPropNames
 	inline const QString BUS_TYPE_ID("BusTypeID");
 	inline const QString CAPTION("Caption");
 	inline const QString ANALOG_SIGNAL_FORMAT("AnalogSignalFormat");
-	inline const QString DATA_FORMAT("DataFormat");
 	inline const QString DATA_SIZE("DataSize");
 	inline const QString LOW_ADC("LowADC");
 	inline const QString HIGH_ADC("HighADC");
@@ -428,22 +429,22 @@ namespace AppSignalPropNames
 	inline const QString SPREAD_TOLERANCE("SpreadTolerance");
 	inline const QString BYTE_ORDER_PROP("ByteOrder");
 	inline const QString EQUIPMENT_ID("EquipmentID");
+
 	inline const QString ENABLE_TUNING("EnableTuning");
+	inline const QString TUNING_VALUE_TYPE("TuningValueType");
+	inline const QString TUNING_VALUE_TYPE_STR("TuningValueTypeStr");
 	inline const QString TUNING_DEFAULT_VALUE("TuningDefaultValue");
 	inline const QString TUNING_LOW_BOUND("TuningLowBound");
 	inline const QString TUNING_HIGH_BOUND("TuningHighBound");
+
 	inline const QString SPEC_PROP_STRUCT("SpecPropStruct");
 	inline const QString SPECIFIC_PROPERTIES_STRUCT("SpecificPropertiesStruct");
 	inline const QString PROTO_SPEC_PROP_VALUES("ProtoSpecPropValues");
 	inline const QString TAGS("Tags");
-	inline const QString UAL_ADDR_OFFSET("UalAddrOffset");
-	inline const QString UAL_ADDR_BIT("UalAddrBit");
-	inline const QString VALUE_OFFSET("ValueOffset");
-	inline const QString VALUE_BIT("ValueBit");
-	inline const QString VALIDITY_OFFSET("ValidityOffset");
-	inline const QString VALIDITY_BIT("ValidityBit");
-	inline const QString TUNING_OFFSET("TuningOffset");
-	inline const QString TUNING_BIT("TuningBit");
+	inline const QString UAL_ADDR("UalAddr");
+	inline const QString REG_VALUE_ADDR("RegValueAddr");
+	inline const QString REG_VALIDITY_ADDR("RegValidityAddr");
+	inline const QString TUNING_ADDR("TuningAddr");
 
 	inline const QString MISPRINT_lowEngineeringUnitsCaption("LowEngeneeringUnits");
 	inline const QString MISPRINT_highEngineeringUnitsCaption("HighEngeneeringUnits");

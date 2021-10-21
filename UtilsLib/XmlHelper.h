@@ -28,6 +28,7 @@ public:
 	void writeStringAttribute(const QString& name, const QString& value);
 	void writeIntAttribute(const QString& name, int value, bool hex = false);
 	void writeBoolAttribute(const QString& name, bool value);
+	void writeInt64Attribute(const QString& name, qint64 value, bool hex = false);
 	void writeUInt64Attribute(const QString& name, quint64 value, bool hex = false);
 	void writeUInt32Attribute(const QString& name, quint32 value, bool hex);
 	void writeDoubleAttribute(const QString& name, double value);
@@ -37,7 +38,10 @@ public:
 	void writeSoftwareTypeAttribute(E::SoftwareType swType);
 
 	template<typename ENUM_TYPE>
-	void writeEnumValueAttribute(const QString& name, ENUM_TYPE value);			// writes Int value of enum item
+	void writeEnumValueAttribute(const QString& name, ENUM_TYPE value);		// writes Int value of enum item
+
+	template<typename ENUM_TYPE>
+	void writeEnumAttribute(const QString& name, ENUM_TYPE value);			// writes Int value and Str name of enum item
 
 	void writeString(const QString& str);
 
@@ -48,6 +52,8 @@ public:
 	void writeHostAddressPort(const QString& nameIP, const QString& namePort, const HostAddressPort& hostAddressPort);
 	void writeHostAddress(const QString& nameIP, const QHostAddress& hostAddress);
 
+	void writeQVariantAttribute(const QString& name, const QVariant& qv);
+
 private:
 	QXmlStreamWriter* m_xmlWriter = nullptr;
 	QXmlStreamWriter* m_xmlLocalWriter = nullptr;
@@ -56,9 +62,23 @@ private:
 template<typename ENUM_TYPE>
 void XmlWriteHelper::writeEnumValueAttribute(const QString& name, ENUM_TYPE value)
 {
+	static_assert(std::is_enum<ENUM_TYPE>::value == true);
+
+	// writes Int value of enum item
+	//
 	writeIntAttribute(name, static_cast<int>(value));
 }
 
+template<typename ENUM_TYPE>
+void XmlWriteHelper::writeEnumAttribute(const QString& name, ENUM_TYPE value)
+{
+	static_assert(std::is_enum<ENUM_TYPE>::value == true);
+
+	// writes Int value and Str name of enum item
+	//
+	writeEnumValueAttribute(name, value);
+	writeStringAttribute(name + QString("Str"), E::valueToString<ENUM_TYPE>(value));
+}
 
 class XmlReadHelper
 {
@@ -78,6 +98,7 @@ public:
 	bool readStringAttribute(const QString& name, QString* value);
 	bool readIntAttribute(const QString& name, int* value, bool ignoreEmpty = false);
 	bool readBoolAttribute(const QString& name, bool* value, bool ignoreEmpty = false);
+	bool readInt64Attribute(const QString& name, qlonglong* value, bool ignoreEmpty = false);
 	bool readUInt64Attribute(const QString& name, qulonglong* value, bool ignoreEmpty = false);
 	bool readUInt32Attribute(const QString& name, quint32* value, bool ignoreEmpty = false);
 	bool readDoubleAttribute(const QString& name, double* value, bool ignoreEmpty = false);
@@ -97,6 +118,10 @@ public:
 
 	bool findElement(const QString& elementName);
 	bool checkElement(const QString& elementName);
+
+	QXmlStreamAttributes attributes() const { return m_xmlReader->attributes(); }
+
+	bool readQVariantAttribute(const QString& name, QVariant* qv);
 
 private:
 	QXmlStreamReader* m_xmlReader = nullptr;

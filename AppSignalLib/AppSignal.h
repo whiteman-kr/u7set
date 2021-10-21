@@ -174,6 +174,7 @@ public:
 	//bool save(Proto::SignalSpecPropValues* protoValues) const;
 
 	const QVector<AppSignalSpecPropValue>& values() const { return m_specPropValues; }
+	QVector<AppSignalSpecPropValue>& values() { return m_specPropValues; }
 
 	void append(const AppSignalSpecPropValue& value);
 
@@ -524,16 +525,17 @@ public:
 
 	//
 
+	void writeToAzpzXml(XmlWriteHelper& xml);
+
 	void writeToXml(XmlWriteHelper& xml);
 	void writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString());
 	void writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString());
-	void writeTuningValuesToXml(XmlWriteHelper& xml);
 
 	bool readFromXml(XmlReadHelper& xml);
 	bool readTuningValuesFromXml(XmlReadHelper& xml);
 
-	void serializeTo(Proto::AppSignal* s) const;
-	void serializeFrom(const Proto::AppSignal &s);
+	void saveToProto(Proto::AppSignal* s) const;
+	void loadFromProto(const Proto::AppSignal &s);
 
 	void initCalculatedProperties();
 

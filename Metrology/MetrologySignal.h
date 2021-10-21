@@ -282,8 +282,8 @@ namespace Metrology
 
 		// serialize
 		//
-		void					serializeTo(Proto::MetrologySignal *ms) const;
-		bool					serializeFrom(const Proto::MetrologySignal& ms);
+		void					saveToProto(Proto::MetrologySignal *ms) const;
+		bool					loadFromProto(const Proto::MetrologySignal& ms);
 
 	private:
 

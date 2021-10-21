@@ -470,7 +470,7 @@ void ConfigSocket::loadSignalBase(ConfigSocket* pThis)
 		const ::Proto::MetrologySignal& protoAppSignal = pThis->m_protoMetrologySignalSet.metrologysignal(i);
 
 		Metrology::SignalParam param;
-		param.serializeFrom(protoAppSignal);
+		param.loadFromProto(protoAppSignal);
 
 		theSignalBase.appendSignal(param);
 

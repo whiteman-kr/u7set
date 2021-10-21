@@ -1381,6 +1381,84 @@ QString AppSignal::regValueAddrStr() const
 	return QString("(reg %1:%2)").arg(regValueAddr().offset()).arg(regValueAddr().bit());
 }
 
+
+void AppSignal::writeToAzpzXml(XmlWriteHelper& xml)
+{
+	//
+	// Writing AppSignals.xml for old AZPZ software
+	//
+
+	xml.writeStartElement("Signal");	// <Signal>
+
+	xml.writeIntAttribute("ID", ID());
+	xml.writeIntAttribute("GroupID", signalGroupID());
+	xml.writeIntAttribute("InstanceID", signalInstanceID());
+	xml.writeIntAttribute("Channel", TO_INT(channel()));
+	xml.writeIntAttribute("Type", TO_INT(signalType()));
+	xml.writeStringAttribute("AppSignalID", appSignalID());
+	xml.writeStringAttribute("CustomAppSignalID", customAppSignalID());
+	xml.writeStringAttribute("Caption", caption());
+	xml.writeStringAttribute("EquipmentID", equipmentID());
+	xml.writeIntAttribute("DataFormat", TO_INT(analogSignalFormat()));
+	xml.writeIntAttribute("DataSize", dataSize());
+
+	writeIntSpecPropAttribute(xml, AppSignalPropNames::LOW_ADC);
+	writeIntSpecPropAttribute(xml, AppSignalPropNames::HIGH_ADC);
+	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::LOW_ENGINEERING_UNITS);
+	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::HIGH_ENGINEERING_UNITS);
+	xml.writeIntAttribute("UnitID", 0);
+	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::LOW_VALID_RANGE);
+	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::HIGH_VALID_RANGE);
+	xml.writeDoubleAttribute("UnbalanceLimit", 1);
+	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::ELECTRIC_LOW_LIMIT, "InputLowLimit");
+	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::ELECTRIC_HIGH_LIMIT, "InputHighLimit");
+	writeIntSpecPropAttribute(xml, AppSignalPropNames::ELECTRIC_UNIT, "InputUnitID");
+	writeIntSpecPropAttribute(xml, AppSignalPropNames::SENSOR_TYPE, "InputSensorID");
+	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::ELECTRIC_LOW_LIMIT, "OutputLowLimit");
+	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::ELECTRIC_HIGH_LIMIT, "OutputHighLimit");
+	writeIntSpecPropAttribute(xml, AppSignalPropNames::ELECTRIC_UNIT, "OutputUnitID");
+
+	writeIntSpecPropAttribute(xml, AppSignalPropNames::OUTPUT_MODE);
+
+	writeIntSpecPropAttribute(xml, AppSignalPropNames::SENSOR_TYPE, "OutputSensorID");
+	xml.writeBoolAttribute("Acquire", acquire());
+	xml.writeBoolAttribute("Calculated", false);
+	xml.writeIntAttribute("NormalState", 0);
+	xml.writeIntAttribute("DecimalPlaces", decimalPlaces());
+	xml.writeDoubleAttribute("Aperture", coarseAperture());
+	xml.writeIntAttribute("InOutType", TO_INT(inOutType()));
+	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::FILTERING_TIME);
+	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::SPREAD_TOLERANCE);
+	xml.writeIntAttribute("ByteOrder", TO_INT(byteOrder()));
+
+	xml.writeBoolAttribute("EnableTuning", enableTuning());
+	xml.writeStringAttribute("TuningValueType", tuningDefaultValue().typeStr());
+	xml.writeStringAttribute("TuningDefaultValue", tuningDefaultValue().toString());
+	xml.writeStringAttribute("TuningLowBound", tuningLowBound().toString());
+	xml.writeStringAttribute("TuningHighBound", tuningHighBound().toString());
+
+	xml.writeStringAttribute("BusTypeID", busTypeID());
+	xml.writeBoolAttribute("AdaptiveAperture", adaptiveAperture());
+
+	xml.writeIntAttribute("RamAddrOffset", ualAddr().offset());
+	xml.writeIntAttribute("RamAddrBit", ualAddr().bit());
+	xml.writeIntAttribute("ValueOffset", regValueAddr().offset());
+	xml.writeIntAttribute("ValueBit", regValueAddr().bit());
+	xml.writeIntAttribute("ValidityOffset", regValidityAddr().offset());
+	xml.writeIntAttribute("ValidityBit", regValidityAddr().bit());
+
+	xml.writeIntAttribute("TuningOffset", tuningAddr().offset());
+	xml.writeIntAttribute("TuningBit", tuningAddr().bit());
+
+	// write spec properties
+
+	// xml.writeStringAttribute("SpecPropStruct", specPropStruct());
+	// xml.writeStringAttribute("SpecPropValues", QString(protoSpecPropValues().toHex()));
+
+	xml.writeEndElement();				// </Signal>
+}
+
+
 void AppSignal::writeToXml(XmlWriteHelper& xml)
 {
 	xml.writeStartElement(XmlElement::SIGNAL_ELEM);	// <Signal>
@@ -1395,63 +1473,92 @@ void AppSignal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute(AppSignalPropNames::SIGNAL_GROUP_ID, m_signalGroupID);
 	xml.writeIntAttribute(AppSignalPropNames::SIGNAL_INSTANCE_ID, m_signalInstanceID);
 
-	xml.writeEnumValueAttribute(AppSignalPropNames::TYPE, m_signalType);
-	xml.writeEnumValueAttribute(AppSignalPropNames::IN_OUT_TYPE, m_inOutType);
-	xml.writeEnumValueAttribute(AppSignalPropNames::BYTE_ORDER_PROP, m_byteOrder);
-	xml.writeEnumValueAttribute(AppSignalPropNames::DATA_FORMAT, m_analogSignalFormat);
+	xml.writeEnumAttribute(AppSignalPropNames::TYPE, m_signalType);
+	xml.writeEnumAttribute(AppSignalPropNames::IN_OUT_TYPE, m_inOutType);
+	xml.writeEnumAttribute(AppSignalPropNames::BYTE_ORDER_PROP, m_byteOrder);
+	xml.writeEnumAttribute(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, m_analogSignalFormat);
 	xml.writeIntAttribute(AppSignalPropNames::DATA_SIZE, m_dataSize);
-	xml.writeStringAttribute(AppSignalPropNames::BUS_TYPE_ID, m_busTypeID);
-	xml.writeEnumValueAttribute(AppSignalPropNames::CHANNEL, m_channel);
+	xml.writeEnumAttribute(AppSignalPropNames::CHANNEL, m_channel);
 
+	xml.writeStringAttribute(AppSignalPropNames::BUS_TYPE_ID, m_busTypeID);
 	xml.writeStringAttribute(AppSignalPropNames::UNIT, m_unit);
 
-	writeIntSpecPropAttribute(xml, AppSignalPropNames::LOW_ADC);
-	writeIntSpecPropAttribute(xml, AppSignalPropNames::HIGH_ADC);
-	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::LOW_ENGINEERING_UNITS);
-	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::HIGH_ENGINEERING_UNITS);
-	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::LOW_VALID_RANGE);
-	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::HIGH_VALID_RANGE);
-
-	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::ELECTRIC_LOW_LIMIT);
-	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::ELECTRIC_HIGH_LIMIT);
-	writeIntSpecPropAttribute(xml, AppSignalPropNames::ELECTRIC_UNIT);
-	writeEnumValueStrSpecPropAttribute<E::ElectricUnit>(xml, *this, AppSignalPropNames::ELECTRIC_UNIT, AppSignalPropNames::ELECTRIC_UNIT_STR);
-
-	writeIntSpecPropAttribute(xml, AppSignalPropNames::SENSOR_TYPE);
-	writeEnumValueStrSpecPropAttribute<E::SensorType>(xml, *this, AppSignalPropNames::SENSOR_TYPE, AppSignalPropNames::SENSOR_TYPE_STR);
-
-	writeIntSpecPropAttribute(xml, AppSignalPropNames::OUTPUT_MODE);
-	writeEnumValueStrSpecPropAttribute<E::OutputMode>(xml, *this, AppSignalPropNames::OUTPUT_MODE, AppSignalPropNames::OUTPUT_MODE_STR);
-
-	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::FILTERING_TIME);
+	xml.writeAddress16Attribute(AppSignalPropNames::UAL_ADDR, m_ualAddr);
 
 	xml.writeBoolAttribute(AppSignalPropNames::ACQUIRE, m_acquire);
+
+	if (m_acquire == true)
+	{
+		xml.writeAddress16Attribute(AppSignalPropNames::REG_VALUE_ADDR, m_regValueAddr);
+		xml.writeAddress16Attribute(AppSignalPropNames::REG_VALIDITY_ADDR, m_regValidityAddr);
+	}
+
 	xml.writeBoolAttribute(AppSignalPropNames::ARCHIVE, m_archive);
 
-	writeDoubleSpecPropAttribute(xml, AppSignalPropNames::SPREAD_TOLERANCE);
-	xml.writeBoolAttribute(AppSignalPropNames::ADAPTIVE_APERTURE, m_adaptiveAperture);
-	xml.writeDoubleAttribute(AppSignalPropNames::FINE_APERTURE, m_fineAperture);
-	xml.writeDoubleAttribute(AppSignalPropNames::COARSE_APERTURE, m_coarseAperture);
-	xml.writeDoubleAttribute("Aperture", m_coarseAperture);		// for old AZPZ software compatibility
-	xml.writeIntAttribute(AppSignalPropNames::DECIMAL_PLACES, m_decimalPlaces);
+	if (isAnalog() == true)
+	{
+		xml.writeBoolAttribute(AppSignalPropNames::ADAPTIVE_APERTURE, m_adaptiveAperture);
+		xml.writeDoubleAttribute(AppSignalPropNames::FINE_APERTURE, m_fineAperture);
+		xml.writeDoubleAttribute(AppSignalPropNames::COARSE_APERTURE, m_coarseAperture);
+		xml.writeIntAttribute(AppSignalPropNames::DECIMAL_PLACES, m_decimalPlaces);
+	}
 
-	writeTuningValuesToXml(xml);
+	xml.writeBoolAttribute(AppSignalPropNames::ENABLE_TUNING, m_enableTuning);
 
-	xml.writeIntAttribute(AppSignalPropNames::UAL_ADDR_OFFSET, m_ualAddr.offset());
-	xml.writeIntAttribute(AppSignalPropNames::UAL_ADDR_BIT, m_ualAddr.bit());
+	if (m_enableTuning == true)
+	{
+		xml.writeIntAttribute(AppSignalPropNames::TUNING_VALUE_TYPE, TO_INT(m_tuningDefaultValue.type()));
+		xml.writeStringAttribute(AppSignalPropNames::TUNING_VALUE_TYPE_STR, m_tuningDefaultValue.typeStr());
 
-	xml.writeIntAttribute(AppSignalPropNames::VALUE_OFFSET, m_regValueAddr.offset());
-	xml.writeIntAttribute(AppSignalPropNames::VALUE_BIT, m_regValueAddr.bit());
-	xml.writeIntAttribute(AppSignalPropNames::VALIDITY_OFFSET, m_regValidityAddr.offset());
-	xml.writeIntAttribute(AppSignalPropNames::VALIDITY_BIT, m_regValidityAddr.bit());
+		xml.writeStringAttribute(AppSignalPropNames::TUNING_DEFAULT_VALUE, tuningDefaultValue().toString());
+		xml.writeStringAttribute(AppSignalPropNames::TUNING_LOW_BOUND, tuningLowBound().toString());
+		xml.writeStringAttribute(AppSignalPropNames::TUNING_HIGH_BOUND, tuningHighBound().toString());
 
-	xml.writeIntAttribute(AppSignalPropNames::TUNING_OFFSET, m_tuningAddr.offset());
-	xml.writeIntAttribute(AppSignalPropNames::TUNING_BIT, m_tuningAddr.bit());
+		xml.writeAddress16Attribute(AppSignalPropNames::TUNING_ADDR, m_tuningAddr);
+	}
 
 	// write spec properties
-
+	//
 	xml.writeStringAttribute(AppSignalPropNames::SPEC_PROP_STRUCT, m_specPropStruct);
-	xml.writeStringAttribute(AppSignalPropNames::PROTO_SPEC_PROP_VALUES, QString(m_protoSpecPropValues.toHex()));
+
+	cacheSpecPropValues();
+
+	for(const AppSignalSpecPropValue& spv :  m_cachedSpecPropValues->values())
+	{
+		if (spv.isEnum() == false)
+		{
+			xml.writeQVariantAttribute(spv.name(), spv.value());
+		}
+		else
+		{
+			QString name = spv.name();
+
+			if (name == AppSignalPropNames::ELECTRIC_UNIT)
+			{
+				E::ElectricUnit e = static_cast<E::ElectricUnit>(spv.value().toInt());
+				xml.writeEnumAttribute(name, e);
+				continue;
+			}
+
+			if (name == AppSignalPropNames::SENSOR_TYPE)
+			{
+				E::SensorType e = static_cast<E::SensorType>(spv.value().toInt());
+				xml.writeEnumAttribute(name, e);
+				continue;
+			}
+
+			if (name == AppSignalPropNames::OUTPUT_MODE)
+			{
+				E::OutputMode e = static_cast<E::OutputMode>(spv.value().toInt());
+				xml.writeEnumAttribute(name, e);
+				continue;
+			}
+
+			Q_ASSERT(false);		// unknown E::* enum type!
+		}
+	}
+
+	xml.writeStringAttribute(AppSignalPropNames::TAGS, tags().join(Separator::COMMA));
 
 	xml.writeEndElement();				// </Signal>
 }
@@ -1488,20 +1595,6 @@ void AppSignal::writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& pr
 	}
 }
 
-void AppSignal::writeTuningValuesToXml(XmlWriteHelper& xml)
-{
-	xml.writeBoolAttribute("EnableTuning", enableTuning());
-
-	assert(tuningDefaultValue().type() == tuningLowBound().type());
-	assert(tuningDefaultValue().type() == tuningHighBound().type());
-
-	xml.writeStringAttribute("TuningValueType", tuningDefaultValue().typeStr());
-
-	xml.writeStringAttribute("TuningDefaultValue", tuningDefaultValue().toString());
-	xml.writeStringAttribute("TuningLowBound", tuningLowBound().toString());
-	xml.writeStringAttribute("TuningHighBound", tuningHighBound().toString());
-}
-
 bool AppSignal::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
@@ -1524,139 +1617,120 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readEnumValueAttribute(AppSignalPropNames::TYPE, &m_signalType);
 	result &= xml.readEnumValueAttribute(AppSignalPropNames::IN_OUT_TYPE, &m_inOutType);
 	result &= xml.readEnumValueAttribute(AppSignalPropNames::BYTE_ORDER_PROP, &m_byteOrder);
-	result &= xml.readEnumValueAttribute(AppSignalPropNames::DATA_FORMAT, &m_analogSignalFormat);
+	result &= xml.readEnumValueAttribute(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, &m_analogSignalFormat);
 	result &= xml.readIntAttribute(AppSignalPropNames::DATA_SIZE, &m_dataSize);
-	result &= xml.readStringAttribute(AppSignalPropNames::BUS_TYPE_ID, &m_busTypeID);
 	result &= xml.readEnumValueAttribute(AppSignalPropNames::CHANNEL, &m_channel);
 
+	result &= xml.readStringAttribute(AppSignalPropNames::BUS_TYPE_ID, &m_busTypeID);
 	result &= xml.readStringAttribute(AppSignalPropNames::UNIT, &m_unit);
 
-	// Attention!!!
-	//
-	// Values of specific properties is read from XML but NOT SET!!!
-	// Because setPropValue* operations are too slow
-
-	int intSpecPropValue = 0;
-	double doubleSpecPropValue = 0;
-	QString strSpecPropValue;
-
-	result &= xml.readIntAttribute(AppSignalPropNames::LOW_ADC, &intSpecPropValue, true);
-	result &= xml.readIntAttribute(AppSignalPropNames::HIGH_ADC, &intSpecPropValue, true);
-	result &= xml.readDoubleAttribute(AppSignalPropNames::LOW_ENGINEERING_UNITS, &doubleSpecPropValue, true);
-	result &= xml.readDoubleAttribute(AppSignalPropNames::HIGH_ENGINEERING_UNITS, &doubleSpecPropValue, true);
-	result &= xml.readDoubleAttribute(AppSignalPropNames::LOW_VALID_RANGE, &doubleSpecPropValue, true);
-	result &= xml.readDoubleAttribute(AppSignalPropNames::HIGH_VALID_RANGE, &doubleSpecPropValue, true);
-
-	result &= xml.readDoubleAttribute(AppSignalPropNames::ELECTRIC_LOW_LIMIT, &doubleSpecPropValue, true);
-	result &= xml.readDoubleAttribute(AppSignalPropNames::ELECTRIC_HIGH_LIMIT, &doubleSpecPropValue, true);
-	result &= xml.readIntAttribute(AppSignalPropNames::ELECTRIC_UNIT, &intSpecPropValue, true);
-	result &= xml.readStringAttribute(AppSignalPropNames::ELECTRIC_UNIT_STR, &strSpecPropValue);
-
-	result &= xml.readIntAttribute(AppSignalPropNames::SENSOR_TYPE, &intSpecPropValue, true);
-	result &= xml.readStringAttribute(AppSignalPropNames::SENSOR_TYPE_STR, &strSpecPropValue);
-
-	result &= xml.readIntAttribute(AppSignalPropNames::OUTPUT_MODE, &intSpecPropValue, true);
-	result &= xml.readStringAttribute(AppSignalPropNames::OUTPUT_MODE_STR, &strSpecPropValue);
-
-	result &= xml.readDoubleAttribute(AppSignalPropNames::FILTERING_TIME, &doubleSpecPropValue, true);
+	result &= xml.readAddress16Attribute(AppSignalPropNames::UAL_ADDR, &m_ualAddr);
 
 	result &= xml.readBoolAttribute(AppSignalPropNames::ACQUIRE, &m_acquire);
-	result &= xml.readBoolAttribute(AppSignalPropNames::ARCHIVE, &m_archive);
 
-	result &= xml.readDoubleAttribute(AppSignalPropNames::SPREAD_TOLERANCE, &doubleSpecPropValue, true);
-	result &= xml.readBoolAttribute(AppSignalPropNames::ADAPTIVE_APERTURE, &m_adaptiveAperture);
-	result &= xml.readDoubleAttribute(AppSignalPropNames::FINE_APERTURE, &m_fineAperture);
-	result &= xml.readDoubleAttribute(AppSignalPropNames::COARSE_APERTURE, &m_coarseAperture);
-	result &= xml.readIntAttribute(AppSignalPropNames::DECIMAL_PLACES, &m_decimalPlaces);
-
-	result &= readTuningValuesFromXml(xml);
-
-	int offset = -1;
-	int bit = -1;
-
-	result &= xml.readIntAttribute(AppSignalPropNames::UAL_ADDR_OFFSET, &offset);
-	result &= xml.readIntAttribute(AppSignalPropNames::UAL_ADDR_BIT, &bit);
-
-	m_ualAddr.setOffset(offset);
-	m_ualAddr.setBit(bit);
-
-	offset = bit = -1;
-
-	result &= xml.readIntAttribute(AppSignalPropNames::VALUE_OFFSET, &offset);
-	result &= xml.readIntAttribute(AppSignalPropNames::VALUE_BIT, &bit);
-
-	m_regValueAddr.setOffset(offset);
-	m_regValueAddr.setBit(bit);
-
-	offset = bit = -1;
-
-	result &= xml.readIntAttribute(AppSignalPropNames::VALIDITY_OFFSET, &offset);
-	result &= xml.readIntAttribute(AppSignalPropNames::VALIDITY_BIT, &bit);
-
-	m_regValidityAddr.setOffset(offset);
-	m_regValidityAddr.setBit(bit);
-
-	offset = bit = -1;
-
-	result &= xml.readIntAttribute(AppSignalPropNames::TUNING_OFFSET, &offset);
-	result &= xml.readIntAttribute(AppSignalPropNames::TUNING_BIT, &bit);
-
-	m_tuningAddr.setOffset(offset);
-	m_tuningAddr.setBit(bit);
-
-	// read spec properties
-
-	result &= xml.readStringAttribute(AppSignalPropNames::SPEC_PROP_STRUCT, &m_specPropStruct);
-
-	QString hexArray;
-
-	result &= xml.readStringAttribute(AppSignalPropNames::PROTO_SPEC_PROP_VALUES, &hexArray);
-
-	m_protoSpecPropValues = QByteArray(hexArray.toLatin1());
-
-	return result;
-}
-
-bool AppSignal::readTuningValuesFromXml(XmlReadHelper &xml)
-{
-	bool result = true;
-
-	result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
-
-	QString tuningValueTypeStr;
-
-	result &= xml.readStringAttribute("TuningValueType", &tuningValueTypeStr);
-
-	TuningValueType tvType = TuningValue::typeFromStr(tuningValueTypeStr);
-
-	if (tvType != TuningValue::getTuningValueType(m_signalType, m_analogSignalFormat))
+	if (m_acquire == true)
 	{
-		assert(false);
-		return false;
+		result &= xml.readAddress16Attribute(AppSignalPropNames::REG_VALUE_ADDR, &m_regValueAddr);
+		result &= xml.readAddress16Attribute(AppSignalPropNames::REG_VALIDITY_ADDR, &m_regValidityAddr);
+	}
+	else
+	{
+		m_regValueAddr.reset();
+		m_regValidityAddr.reset();
 	}
 
-	updateTuningValuesType();
+	result &= xml.readBoolAttribute(AppSignalPropNames::ARCHIVE, &m_archive);
 
-	QString valueStr;
+	if (isAnalog() == true)
+	{
+		result &= xml.readBoolAttribute(AppSignalPropNames::ADAPTIVE_APERTURE, &m_adaptiveAperture);
+		result &= xml.readDoubleAttribute(AppSignalPropNames::FINE_APERTURE, &m_fineAperture);
+		result &= xml.readDoubleAttribute(AppSignalPropNames::COARSE_APERTURE, &m_coarseAperture);
+		result &= xml.readIntAttribute(AppSignalPropNames::DECIMAL_PLACES, &m_decimalPlaces);
+	}
+	else
+	{
+		m_adaptiveAperture = false;
+		m_fineAperture = 0;
+		m_coarseAperture = 0;
+		m_decimalPlaces = 0;
+	}
 
-	bool conversionResult = true;
+	result &= xml.readBoolAttribute(AppSignalPropNames::ENABLE_TUNING, &m_enableTuning);
 
-	result &= xml.readStringAttribute("TuningDefaultValue", &valueStr);
-	m_tuningDefaultValue.fromString(valueStr, &conversionResult);
-	result &= conversionResult;
+	if (m_enableTuning == true)
+	{
+		int v = 0;
+		result &= xml.readIntAttribute(AppSignalPropNames::TUNING_VALUE_TYPE, &v);
 
-	result &= xml.readStringAttribute("TuningLowBound", &valueStr);
-	m_tuningLowBound.fromString(valueStr, &conversionResult);
-	result &= conversionResult;
+		TuningValueType tvt = static_cast<TuningValueType>(v);
 
-	result &= xml.readStringAttribute("TuningHighBound", &valueStr);
-	m_tuningHighBound.fromString(valueStr, &conversionResult);
-	result &= conversionResult;
+		updateTuningValuesType();
+
+		Q_ASSERT(m_tuningDefaultValue.type() == tvt);
+
+		QString sv;
+		bool ok = true;
+
+		result = xml.readStringAttribute(AppSignalPropNames::TUNING_DEFAULT_VALUE, &sv);
+		m_tuningDefaultValue.fromString(sv, &ok);
+		result &= ok;
+
+		result = xml.readStringAttribute(AppSignalPropNames::TUNING_LOW_BOUND, &sv);
+		m_tuningLowBound.fromString(sv, &ok);
+		result &= ok;
+
+		result = xml.readStringAttribute(AppSignalPropNames::TUNING_HIGH_BOUND, &sv);
+		m_tuningHighBound.fromString(sv, &ok);
+		result &= ok;
+
+		result &= xml.readAddress16Attribute(AppSignalPropNames::UAL_ADDR, &m_tuningAddr);
+	}
+
+	result = xml.readStringAttribute(AppSignalPropNames::SPEC_PROP_STRUCT, &m_specPropStruct);
+
+	AppSignalSpecPropValues spvs;
+
+	spvs.createFromSpecPropStruct(m_specPropStruct);
+
+	QXmlStreamAttributes attrs = xml.attributes();
+
+	for(AppSignalSpecPropValue& spv : spvs.values())
+	{
+		QString name = spv.name();
+
+		if (attrs.hasAttribute(name) == false)
+		{
+			result = false;
+			continue;
+		}
+
+		if (spv.isEnum() == false)
+		{
+			QVariant qv = spv.value();			// to set Type of qv equal to Type of spv.value()
+			result = xml.readQVariantAttribute(name, &qv);
+			spv.setValue(name, qv, false);
+		}
+		else
+		{
+			int iv = 0;
+			result &= xml.readIntAttribute(name, &iv);
+			spv.setValue(name, QVariant(iv), true);
+		}
+	}
+
+	spvs.serializeValuesToArray(&m_protoSpecPropValues);
+
+	QString tagsStr;
+
+	result = xml.readStringAttribute(AppSignalPropNames::TAGS, &tagsStr);
+
+	setTags(tagsStr.split(Separator::COMMA, Qt::SkipEmptyParts));
 
 	return result;
 }
 
-void AppSignal::serializeTo(Proto::AppSignal* s) const
+void AppSignal::saveToProto(Proto::AppSignal* s) const
 {
 	if (s == nullptr)
 	{
@@ -1882,7 +1956,7 @@ void AppSignal::serializeTo(Proto::AppSignal* s) const
 	}
 }
 
-void AppSignal::serializeFrom(const Proto::AppSignal& s)
+void AppSignal::loadFromProto(const Proto::AppSignal& s)
 {
 	// Signal identificators
 
@@ -2635,7 +2709,7 @@ bool AppSignalSet::serializeFromProtoFile(const QString& filePath)
 
 		AppSignal* newSignal = new AppSignal;
 
-		newSignal->serializeFrom(protoAppSignal);
+		newSignal->loadFromProto(protoAppSignal);
 
 		append(newSignal->ID(), newSignal);
 	}

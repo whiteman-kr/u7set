@@ -31,7 +31,6 @@ namespace Builder
 		bool findAppDataSourceAssociatedSignals(DataSource& appDataSource);
 
 	private:
-		QStringList m_associatedLMs;
-		QHash<QString, bool> m_associatedAppSignals;
+		std::set<QString> m_associatedAppSignals;
 	};
 }

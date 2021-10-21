@@ -1239,7 +1239,7 @@ namespace Builder
 
 			::Proto::AppSignal* protoAppSignal = protoAppSignalSet.add_appsignal();
 
-			s.serializeTo(protoAppSignal);
+			s.saveToProto(protoAppSignal);
 		}
 
 		int dataSize = static_cast<int>(protoAppSignalSet.ByteSizeLong());

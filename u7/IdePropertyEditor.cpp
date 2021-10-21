@@ -832,7 +832,7 @@ IdeTuningFiltersEditor::IdeTuningFiltersEditor(DbController* dbController, QWidg
 		for (int i = 0; i < count; i++)
 		{
 			Proto::AppSignal* pas = appSignalSet.add_appsignal();
-			tuningSignalSet[i].serializeTo(pas);
+			tuningSignalSet[i].saveToProto(pas);
 		}
 	}
 

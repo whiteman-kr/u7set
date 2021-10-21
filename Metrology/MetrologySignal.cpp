@@ -429,7 +429,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void SignalParam::serializeTo(Proto::MetrologySignal *ms) const
+	void SignalParam::saveToProto(Proto::MetrologySignal *ms) const
 	{
 		if (ms == nullptr)
 		{
@@ -445,7 +445,7 @@ namespace Metrology
 		}
 
 		Proto::AppSignal* protoAppSignal = ms->mutable_appsignal();
-		pSignal->serializeTo(protoAppSignal);
+		pSignal->saveToProto(protoAppSignal);
 
 		Proto::MetrologySignalLocation* protoLocation = ms->mutable_location();
 		m_location.serializeTo(protoLocation);
@@ -466,7 +466,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	bool SignalParam::serializeFrom(const Proto::MetrologySignal& ms)
+	bool SignalParam::loadFromProto(const Proto::MetrologySignal& ms)
 	{
 		AppSignal* pSignal = dynamic_cast<AppSignal*>(this);
 		if (pSignal == nullptr)
@@ -476,7 +476,7 @@ namespace Metrology
 		}
 
 		const Proto::AppSignal& protoAppSignal = ms.appsignal();
-		pSignal->serializeFrom(protoAppSignal);
+		pSignal->loadFromProto(protoAppSignal);
 
 		const Proto::MetrologySignalLocation& protoLocation = ms.location();
 		m_location.serializeFrom(protoLocation);
