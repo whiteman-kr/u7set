@@ -805,6 +805,10 @@ namespace Builder
 			LOG_MESSAGE(log, str);
 		}
 
+		// Dump
+		//
+		//dump();
+
 		return result;
 	}
 
@@ -850,7 +854,7 @@ namespace Builder
 
 			// Set new item guid
 			//
-			ali.m_fblItem->setGuid(QUuid::createUuid());
+			ali.m_fblItem->setGuid(Link::getNextId());
 
 			// Set new label
 			//
@@ -864,7 +868,7 @@ namespace Builder
 			auto& aliInputs = ali.m_fblItem->inputs();
 			for (VFrame30::AfbPin& pin : aliInputs)
 			{
-				QUuid newPinGuid = QUuid::createUuid();
+				QUuid newPinGuid = Link::getNextId();
 				oldToNewPins[pin.guid()] = newPinGuid;
 
 				pin.setGuid(newPinGuid);
@@ -873,7 +877,7 @@ namespace Builder
 			auto& aliOutputs = ali.m_fblItem->outputs();
 			for (VFrame30::AfbPin& pin : aliOutputs)
 			{
-				QUuid newPinGuid = QUuid::createUuid();
+				QUuid newPinGuid = Link::getNextId();
 				oldToNewPins[pin.guid()] = newPinGuid;
 
 				pin.setGuid(newPinGuid);
@@ -2090,6 +2094,8 @@ namespace Builder
 						continue;
 					}
 
+					//qDebug() << "ufbItemPin: " << ufbItemPin.guid();
+
 					// [ufbIntItem]-+------+-[ufbOutputBlock] .... [UFB:ufbItem]-+---+---+-[targetItem1]
 					//                                                               |         ...
 					//                                                               +---+-[targetItemN]
@@ -2108,6 +2114,8 @@ namespace Builder
 
 					if (foundUfbOutputIt == ufbItemsCopy.end())
 					{
+						// Cannot find %1 input/output in UFB %2, SchemaItem %1 (LogicSchema  %3).
+						//
 						log->errALP4012(logicSchema->schemaId(), ufbItem->label(), ufbItemPin.caption(), ufbItem->guid());
 						result = false;
 						continue;
@@ -2129,6 +2137,8 @@ namespace Builder
 						result = false;
 						continue;
 					}
+
+					//qDebug() << ufbOutputBlockPin: " << ufbOutputBlockPin.guid() << " --[ufbOutputBlockPin] ";
 
 					// targetItem1....targetItemN
 					//
