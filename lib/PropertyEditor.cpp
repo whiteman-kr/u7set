@@ -10,6 +10,7 @@
 #include <QColorDialog>
 #include <QTextBrowser>
 #include <QDesktopServices>
+#include <QScrollBar>
 
 #ifdef _MSC_VER
 	#pragma warning(push)
@@ -3516,6 +3517,12 @@ namespace ExtWidgets
 
 	void PropertyEditor::clear()
 	{
+		if(m_treeObjects.empty() == false)
+		{
+			saveScrollPosition();
+			saveExpandedGroups();
+		}
+
 		m_treeWidget->clear();
 
 		m_treeObjects.clear();
@@ -3575,6 +3582,22 @@ namespace ExtWidgets
 		}
 
 		return;
+	}
+
+	int PropertyEditor::categoryViewOrder(const QString& category) const
+	{
+		const auto it = m_categoryOrders.find(category);
+		return it == m_categoryOrders.end() ? 65535 : it->second;
+	}
+
+	void PropertyEditor::setCategoryViewOrder(const QString& category, int order)
+	{
+		m_categoryOrders[category] = order;
+	}
+
+	void PropertyEditor::setCategoryViewOrders(const std::map<QString, int>& orders)
+	{
+		m_categoryOrders = orders;
 	}
 
 	int PropertyEditor::splitterPosition() const
@@ -4050,9 +4073,21 @@ namespace ExtWidgets
 
 		// Sort here
 
-		std::sort(propertyEditorObjects.begin(), propertyEditorObjects.end(), [](const PropertyEditorObject& o1, const PropertyEditorObject& o2){
-			return std::make_tuple(o1.property->category(), o1.property->viewOrder(), o1.property->caption()) <
-					std::make_tuple(o2.property->category(), o2.property->viewOrder(), o2.property->caption());
+		std::sort(propertyEditorObjects.begin(), propertyEditorObjects.end(), [this](const PropertyEditorObject& o1, const PropertyEditorObject& o2){
+			QString category1 = o1.property->category();
+			if (category1.isEmpty() == true)
+			{
+				category1 = defaultSpecificPropertyCategory();
+			}
+
+			QString category2 = o2.property->category();
+			if (category2.isEmpty() == true)
+			{
+				category2 = defaultSpecificPropertyCategory();
+			}
+
+			return std::make_tuple(categoryViewOrder(category1), category1, o1.property->viewOrder(), o1.property->caption()) <
+					std::make_tuple(categoryViewOrder(category2), category2, o2.property->viewOrder(), o2.property->caption());
 
 		});
 
@@ -4062,6 +4097,10 @@ namespace ExtWidgets
 		{
 			createProperty(poe);
 		}
+
+		restoreExpandedGroups();
+
+		restoreScrollPosition();
 
 		return;
 	}
@@ -4132,10 +4171,10 @@ namespace ExtWidgets
 		//
 		groupItem->addChild(item);
 
-		if (groupItem->isExpanded() == false)
-		{
-			groupItem->setExpanded(true);
-		}
+		//if (groupItem->isExpanded() == false)
+		//{
+//			groupItem->setExpanded(true);
+//		}
 
 		return;
 	}
@@ -4261,6 +4300,68 @@ namespace ExtWidgets
 			updatePropertyValue(p->caption());
 		}
 
+
+		return;
+	}
+
+	void PropertyEditor::saveExpandedGroups()
+	{
+		m_notExpandedCategories.clear();
+
+		for (int i = 0; i < m_treeWidget->topLevelItemCount(); i++)
+		{
+			QTreeWidgetItem* item = m_treeWidget->topLevelItem(i);
+
+			if (item->isExpanded() == false)
+			{
+				m_notExpandedCategories.emplace(item->text(0));
+			}
+		}
+
+		return;
+	}
+
+	void PropertyEditor::restoreExpandedGroups()
+	{
+		for (int i = 0; i < m_treeWidget->topLevelItemCount(); i++)
+		{
+			QTreeWidgetItem* item = m_treeWidget->topLevelItem(i);
+
+			if (m_notExpandedCategories.contains(item->text(0)) == false)
+			{
+				item->setExpanded(true);
+			}
+		}
+
+		return;
+	}
+
+	void PropertyEditor::saveScrollPosition()
+	{
+		QTreeWidgetItem* item = m_treeWidget->itemAt(m_treeWidget->rect().width() / 2, m_treeWidget->rect().top());
+		if (item == nullptr)
+		{
+			m_firstVisibleItemText.clear();
+		}
+		else
+		{
+			m_firstVisibleItemText = item->text(0);
+		}
+
+		return;
+	}
+
+	void PropertyEditor::restoreScrollPosition()
+	{
+		if (m_firstVisibleItemText.isEmpty() == false)
+		{
+			QList<QTreeWidgetItem*> items = m_treeWidget->findItems(m_firstVisibleItemText, Qt::MatchExactly | Qt::MatchRecursive, 0);
+
+			if (items.size() == 1)
+			{
+				m_treeWidget->scrollToItem(items[0], QAbstractItemView::PositionAtTop);
+			}
+		}
 
 		return;
 	}

@@ -641,14 +641,19 @@ namespace ExtWidgets
 		void setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects);
 		void setObjects(const QList<std::shared_ptr<PropertyObject>>& objects);
 
+		int categoryViewOrder(const QString& category) const;
+		void setCategoryViewOrder(const QString& category, int order);
+		void setCategoryViewOrders(const std::map<QString, int>& orders);
+
 		// Properties and support
 		//
 		int splitterPosition() const;
 		void setSplitterPosition(int pos);
 
-                bool alternateCategories() const;
-                void setAlternateCategories(bool value);
+		bool alternateCategories() const;
+		void setAlternateCategories(bool value);
 
+		//
 		void autoAdjustSplitterPosition();
 
 		bool isPropertyExists(const QString& propertyName) const;
@@ -684,16 +689,29 @@ namespace ExtWidgets
 		int getSelectionType();	// returns -1 if no type is selected or they are different
 		void startEditing();
 		void toggleSelected();
+		void saveExpandedGroups();
+		void restoreExpandedGroups();
+		void saveScrollPosition();
+		void restoreScrollPosition();
 
 	private:
 		// Private Data
 		//
 		PropertyTreeWidget* m_treeWidget = nullptr;
+
 		std::map<QString, PropertyEditorObject> m_treeObjects;
+
 		QList<std::shared_ptr<PropertyObject>> m_objects;
+
 		PropertyEditorDelegate* m_itemDelegate = nullptr;
 
-                bool m_alternateCategories = false;
+		bool m_alternateCategories = false;
+
+		std::map<QString, int> m_categoryOrders;
+
+		std::set<QString> m_notExpandedCategories;
+
+		QString m_firstVisibleItemText;
 	};
 
 	extern PropertyEditorSettings thePropertyEditorSettings;
