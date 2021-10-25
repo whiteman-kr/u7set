@@ -26,6 +26,17 @@ namespace Builder
 	class SignalSet;
 	class LmDescriptionSet;
 
+	struct Uuid
+	{
+		enum class Area
+		{
+			Link,
+			UfbDeepCopy
+		};
+
+		static QUuid getNextId(Area area);
+	};
+
 	struct Link
 	{
 		Link() = default;
@@ -33,8 +44,6 @@ namespace Builder
 
 		VFrame30::SchemaPoint ptBegin() const;
 		VFrame30::SchemaPoint ptEnd() const;
-
-		static QUuid getNextId();
 
 		bool isPinOnLink(VFrame30::SchemaPoint pt) const;
 
