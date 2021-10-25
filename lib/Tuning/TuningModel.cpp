@@ -291,7 +291,7 @@ TuningModel::TuningModel(TuningSignalManager* tuningSignalManager, const std::ve
 		}
 		else
 		{
-			m_columnsNamesMap[static_cast<TuningModelColumns>(valueColumn)] = tr("Value %1").arg(c);
+			m_columnsNamesMap[static_cast<TuningModelColumns>(valueColumn)] = tr("Value %1").arg(c + 1);
 		}
 	}
 

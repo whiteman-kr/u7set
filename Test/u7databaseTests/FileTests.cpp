@@ -4,6 +4,7 @@
 #include "FileTests.h"
 #include "../../DbLib/DbController.h"
 
+
 void FileTests::getObjectState(QSqlQuery& q, ObjectState& os)
 {
 	os.id = q.value(0).toInt();
@@ -4296,4 +4297,5 @@ void FileTests::check_in_treeTest()
 
 		fileNumber++;
 	}
+	
 }

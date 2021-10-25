@@ -244,7 +244,7 @@ namespace Sim
 			Hash hash = signalMessage.calcparam().hash();
 
 			ok &= signalParams[hash].load(signalMessage);
-			signalParamsExt[hash].serializeFrom(signalMessage);
+			signalParamsExt[hash].loadFromProto(signalMessage);
 
 			customToAppSignalId[::calcHash(signalParams[hash].customSignalId())] = hash;
 		}

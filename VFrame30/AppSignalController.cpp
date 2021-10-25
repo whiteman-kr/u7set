@@ -203,6 +203,17 @@ namespace VFrame30
 		return engine->toScriptValue(s);
 	}
 
+	QString ScriptAppSignalController::equipmentToAppSiganlId(QString equipmentId) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(m_appSignalManager);
+			return {};
+		}
+
+		return m_appSignalManager->equipmentToAppSiganlId(equipmentId);
+	}
+
 	QJSValue ScriptAppSignalController::signalState(QString signalId) const
 	{
 		return signalState(::calcHash(signalId));

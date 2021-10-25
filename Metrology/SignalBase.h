@@ -51,6 +51,7 @@ public:
 	QString rackCaption() const;
 	QString chassisStr() const;
 	QString moduleStr() const;
+	QString moduleCaption() const;
 	QString placeStr() const;
 	QString caption() const;
 	QString electricRangeStr() const;

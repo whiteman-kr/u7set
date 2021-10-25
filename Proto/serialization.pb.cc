@@ -1731,6 +1731,7 @@ constexpr MetrologySignalLocation::MetrologySignalLocation(
   , chassisid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , moduleid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , contact_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , modulecaption_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , shownonschemas_(false)
   , place_(-1)
   , chassis_(-1)
@@ -3501,6 +3502,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   PROTOBUF_FIELD_OFFSET(::Proto::MetrologySignalLocation, rackid_),
   PROTOBUF_FIELD_OFFSET(::Proto::MetrologySignalLocation, chassisid_),
   PROTOBUF_FIELD_OFFSET(::Proto::MetrologySignalLocation, chassis_),
+  PROTOBUF_FIELD_OFFSET(::Proto::MetrologySignalLocation, modulecaption_),
   PROTOBUF_FIELD_OFFSET(::Proto::MetrologySignalLocation, moduleid_),
   PROTOBUF_FIELD_OFFSET(::Proto::MetrologySignalLocation, module_),
   PROTOBUF_FIELD_OFFSET(::Proto::MetrologySignalLocation, place_),
@@ -3508,12 +3510,13 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   PROTOBUF_FIELD_OFFSET(::Proto::MetrologySignalLocation, shownonschemas_),
   0,
   1,
-  6,
-  2,
   7,
-  5,
-  3,
   4,
+  2,
+  8,
+  6,
+  3,
+  5,
   PROTOBUF_FIELD_OFFSET(::Proto::MetrologySignal, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::MetrologySignal, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -3671,11 +3674,11 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 1638, 1654, sizeof(::Proto::Comparator)},
   { 1665, 1672, sizeof(::Proto::LmComparatorSet)},
   { 1674, -1, sizeof(::Proto::ComparatorSet)},
-  { 1680, 1693, sizeof(::Proto::MetrologySignalLocation)},
-  { 1701, 1717, sizeof(::Proto::MetrologySignal)},
-  { 1728, -1, sizeof(::Proto::MetrologySignalSet)},
-  { 1734, 1745, sizeof(::Proto::SimOverrideSignal)},
-  { 1751, -1, sizeof(::Proto::SimOverrideSignalWorkspace)},
+  { 1680, 1694, sizeof(::Proto::MetrologySignalLocation)},
+  { 1703, 1719, sizeof(::Proto::MetrologySignal)},
+  { 1730, -1, sizeof(::Proto::MetrologySignalSet)},
+  { 1736, 1747, sizeof(::Proto::SimOverrideSignal)},
+  { 1753, -1, sizeof(::Proto::SimOverrideSignalWorkspace)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -4244,37 +4247,38 @@ const char descriptor_table_protodef_serialization_2eproto[] PROTOBUF_SECTION_VA
   "lmEquipmentID\030\001 \001(\t\022%\n\ncomparator\030\002 \003(\0132"
   "\021.Proto.Comparator\"@\n\rComparatorSet\022/\n\017l"
   "mComparatorSet\030\001 \003(\0132\026.Proto.LmComparato"
-  "rSet\"\272\001\n\027MetrologySignalLocation\022\016\n\006rack"
+  "rSet\"\321\001\n\027MetrologySignalLocation\022\016\n\006rack"
   "ID\030\001 \001(\t\022\021\n\tchassisID\030\002 \001(\t\022\023\n\007chassis\030\003"
-  " \001(\005:\002-1\022\020\n\010moduleID\030\004 \001(\t\022\022\n\006module\030\005 \001"
-  "(\005:\002-1\022\021\n\005place\030\006 \001(\005:\002-1\022\017\n\007contact\030\007 \001"
-  "(\t\022\035\n\016shownOnSchemas\030\010 \001(\010:\005false\"\347\002\n\017Me"
-  "trologySignal\022#\n\tappSignal\030\001 \001(\0132\020.Proto"
-  ".AppSignal\0220\n\010location\030\002 \001(\0132\036.Proto.Met"
-  "rologySignalLocation\022\033\n\020electricLowLimit"
-  "\030\003 \001(\001:\0010\022\034\n\021electricHighLimit\030\004 \001(\001:\0010\022"
-  "\031\n\016electricUnitID\030\005 \001(\005:\0011\022\035\n\022electricSe"
-  "nsorType\030\006 \001(\005:\0011\022\030\n\relectricRload\030\013 \001(\001"
-  ":\0010\022\025\n\nelectricR0\030\007 \001(\001:\0010\022\034\n\021electricPr"
-  "ecision\030\010 \001(\005:\0014\022\033\n\020physicalLowLimit\030\t \001"
-  "(\001:\0010\022\034\n\021physicalHighLimit\030\n \001(\001:\0010\"E\n\022M"
-  "etrologySignalSet\022/\n\017metrologySignal\030\001 \003"
-  "(\0132\026.Proto.MetrologySignal\"\240\001\n\021SimOverri"
-  "deSignal\022\017\n\007enabled\030\002 \001(\010\022\r\n\005index\030\003 \001(\005"
-  "\022\023\n\013appSignalId\030\n \001(\t\022\026\n\016overrideMethod\030"
-  "\036 \001(\005\022&\n\roverrideValue\030( \001(\0132\017.Proto.qva"
-  "riant\022\026\n\016overrideScript\0302 \001(\t\"O\n\032SimOver"
-  "rideSignalWorkspace\0221\n\017overrideSignals\030\002"
-  " \003(\0132\030.Proto.SimOverrideSignal*3\n\nSchema"
-  "Unit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inc"
-  "h\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n"
-  "\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022"
-  "\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013Unsign"
-  "edInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002"
+  " \001(\005:\002-1\022\025\n\rmoduleCaption\030\t \001(\t\022\020\n\010modul"
+  "eID\030\004 \001(\t\022\022\n\006module\030\005 \001(\005:\002-1\022\021\n\005place\030\006"
+  " \001(\005:\002-1\022\017\n\007contact\030\007 \001(\t\022\035\n\016shownOnSche"
+  "mas\030\010 \001(\010:\005false\"\347\002\n\017MetrologySignal\022#\n\t"
+  "appSignal\030\001 \001(\0132\020.Proto.AppSignal\0220\n\010loc"
+  "ation\030\002 \001(\0132\036.Proto.MetrologySignalLocat"
+  "ion\022\033\n\020electricLowLimit\030\003 \001(\001:\0010\022\034\n\021elec"
+  "tricHighLimit\030\004 \001(\001:\0010\022\031\n\016electricUnitID"
+  "\030\005 \001(\005:\0011\022\035\n\022electricSensorType\030\006 \001(\005:\0011"
+  "\022\030\n\relectricRload\030\013 \001(\001:\0010\022\025\n\nelectricR0"
+  "\030\007 \001(\001:\0010\022\034\n\021electricPrecision\030\010 \001(\005:\0014\022"
+  "\033\n\020physicalLowLimit\030\t \001(\001:\0010\022\034\n\021physical"
+  "HighLimit\030\n \001(\001:\0010\"E\n\022MetrologySignalSet"
+  "\022/\n\017metrologySignal\030\001 \003(\0132\026.Proto.Metrol"
+  "ogySignal\"\240\001\n\021SimOverrideSignal\022\017\n\007enabl"
+  "ed\030\002 \001(\010\022\r\n\005index\030\003 \001(\005\022\023\n\013appSignalId\030\n"
+  " \001(\t\022\026\n\016overrideMethod\030\036 \001(\005\022&\n\roverride"
+  "Value\030( \001(\0132\017.Proto.qvariant\022\026\n\016override"
+  "Script\0302 \001(\t\"O\n\032SimOverrideSignalWorkspa"
+  "ce\0221\n\017overrideSignals\030\002 \003(\0132\030.Proto.SimO"
+  "verrideSignal*3\n\nSchemaUnit\022\013\n\007Display\020\000"
+  "\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connection"
+  "Dirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFbl"
+  "SignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\r"
+  "FblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSigned"
+  "Int\020\001\022\t\n\005Float\020\002"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_serialization_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_serialization_2eproto = {
-  false, false, 19393, descriptor_table_protodef_serialization_2eproto, "serialization.proto", 
+  false, false, 19416, descriptor_table_protodef_serialization_2eproto, "serialization.proto", 
   &descriptor_table_serialization_2eproto_once, nullptr, 0, 104,
   schemas, file_default_instances, TableStruct_serialization_2eproto::offsets,
   file_level_metadata_serialization_2eproto, file_level_enum_descriptors_serialization_2eproto, file_level_service_descriptors_serialization_2eproto,
@@ -43973,22 +43977,25 @@ class MetrologySignalLocation::_Internal {
     (*has_bits)[0] |= 2u;
   }
   static void set_has_chassis(HasBits* has_bits) {
-    (*has_bits)[0] |= 64u;
+    (*has_bits)[0] |= 128u;
+  }
+  static void set_has_modulecaption(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
   }
   static void set_has_moduleid(HasBits* has_bits) {
     (*has_bits)[0] |= 4u;
   }
   static void set_has_module(HasBits* has_bits) {
-    (*has_bits)[0] |= 128u;
+    (*has_bits)[0] |= 256u;
   }
   static void set_has_place(HasBits* has_bits) {
-    (*has_bits)[0] |= 32u;
+    (*has_bits)[0] |= 64u;
   }
   static void set_has_contact(HasBits* has_bits) {
     (*has_bits)[0] |= 8u;
   }
   static void set_has_shownonschemas(HasBits* has_bits) {
-    (*has_bits)[0] |= 16u;
+    (*has_bits)[0] |= 32u;
   }
 };
 
@@ -44022,6 +44029,11 @@ MetrologySignalLocation::MetrologySignalLocation(const MetrologySignalLocation& 
     contact_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_contact(), 
       GetArena());
   }
+  modulecaption_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_modulecaption()) {
+    modulecaption_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_modulecaption(), 
+      GetArena());
+  }
   ::memcpy(&shownonschemas_, &from.shownonschemas_,
     static_cast<size_t>(reinterpret_cast<char*>(&module_) -
     reinterpret_cast<char*>(&shownonschemas_)) + sizeof(module_));
@@ -44033,6 +44045,7 @@ rackid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlrea
 chassisid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 moduleid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 contact_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+modulecaption_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 shownonschemas_ = false;
 place_ = -1;
 chassis_ = -1;
@@ -44051,6 +44064,7 @@ void MetrologySignalLocation::SharedDtor() {
   chassisid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   moduleid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   contact_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  modulecaption_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void MetrologySignalLocation::ArenaDtor(void* object) {
@@ -44070,7 +44084,7 @@ void MetrologySignalLocation::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
+  if (cached_has_bits & 0x0000001fu) {
     if (cached_has_bits & 0x00000001u) {
       rackid_.ClearNonDefaultToEmpty();
     }
@@ -44083,13 +44097,16 @@ void MetrologySignalLocation::Clear() {
     if (cached_has_bits & 0x00000008u) {
       contact_.ClearNonDefaultToEmpty();
     }
+    if (cached_has_bits & 0x00000010u) {
+      modulecaption_.ClearNonDefaultToEmpty();
+    }
   }
-  if (cached_has_bits & 0x000000f0u) {
+  if (cached_has_bits & 0x000000e0u) {
     shownonschemas_ = false;
     place_ = -1;
     chassis_ = -1;
-    module_ = -1;
   }
+  module_ = -1;
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -44178,6 +44195,17 @@ const char* MetrologySignalLocation::_InternalParse(const char* ptr, ::PROTOBUF_
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
+      // optional string moduleCaption = 9;
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 74)) {
+          auto str = _internal_mutable_modulecaption();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.MetrologySignalLocation.moduleCaption");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
       default: {
       handle_unusual:
         if ((tag & 7) == 4 || tag == 0) {
@@ -44229,7 +44257,7 @@ failure:
   }
 
   // optional int32 chassis = 3 [default = -1];
-  if (cached_has_bits & 0x00000040u) {
+  if (cached_has_bits & 0x00000080u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_chassis(), target);
   }
@@ -44245,13 +44273,13 @@ failure:
   }
 
   // optional int32 module = 5 [default = -1];
-  if (cached_has_bits & 0x00000080u) {
+  if (cached_has_bits & 0x00000100u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_module(), target);
   }
 
   // optional int32 place = 6 [default = -1];
-  if (cached_has_bits & 0x00000020u) {
+  if (cached_has_bits & 0x00000040u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(6, this->_internal_place(), target);
   }
@@ -44267,9 +44295,19 @@ failure:
   }
 
   // optional bool shownOnSchemas = 8 [default = false];
-  if (cached_has_bits & 0x00000010u) {
+  if (cached_has_bits & 0x00000020u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(8, this->_internal_shownonschemas(), target);
+  }
+
+  // optional string moduleCaption = 9;
+  if (cached_has_bits & 0x00000010u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_modulecaption().data(), static_cast<int>(this->_internal_modulecaption().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.MetrologySignalLocation.moduleCaption");
+    target = stream->WriteStringMaybeAliased(
+        9, this->_internal_modulecaption(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -44318,33 +44356,40 @@ size_t MetrologySignalLocation::ByteSizeLong() const {
           this->_internal_contact());
     }
 
-    // optional bool shownOnSchemas = 8 [default = false];
+    // optional string moduleCaption = 9;
     if (cached_has_bits & 0x00000010u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_modulecaption());
+    }
+
+    // optional bool shownOnSchemas = 8 [default = false];
+    if (cached_has_bits & 0x00000020u) {
       total_size += 1 + 1;
     }
 
     // optional int32 place = 6 [default = -1];
-    if (cached_has_bits & 0x00000020u) {
+    if (cached_has_bits & 0x00000040u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_place());
     }
 
     // optional int32 chassis = 3 [default = -1];
-    if (cached_has_bits & 0x00000040u) {
+    if (cached_has_bits & 0x00000080u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_chassis());
     }
 
-    // optional int32 module = 5 [default = -1];
-    if (cached_has_bits & 0x00000080u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-          this->_internal_module());
-    }
-
   }
+  // optional int32 module = 5 [default = -1];
+  if (cached_has_bits & 0x00000100u) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_module());
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -44391,18 +44436,21 @@ void MetrologySignalLocation::MergeFrom(const MetrologySignalLocation& from) {
       _internal_set_contact(from._internal_contact());
     }
     if (cached_has_bits & 0x00000010u) {
-      shownonschemas_ = from.shownonschemas_;
+      _internal_set_modulecaption(from._internal_modulecaption());
     }
     if (cached_has_bits & 0x00000020u) {
-      place_ = from.place_;
+      shownonschemas_ = from.shownonschemas_;
     }
     if (cached_has_bits & 0x00000040u) {
-      chassis_ = from.chassis_;
+      place_ = from.place_;
     }
     if (cached_has_bits & 0x00000080u) {
-      module_ = from.module_;
+      chassis_ = from.chassis_;
     }
     _has_bits_[0] |= cached_has_bits;
+  }
+  if (cached_has_bits & 0x00000100u) {
+    _internal_set_module(from._internal_module());
   }
 }
 
@@ -44432,6 +44480,7 @@ void MetrologySignalLocation::InternalSwap(MetrologySignalLocation* other) {
   chassisid_.Swap(&other->chassisid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   moduleid_.Swap(&other->moduleid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   contact_.Swap(&other->contact_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  modulecaption_.Swap(&other->modulecaption_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   swap(shownonschemas_, other->shownonschemas_);
   swap(place_, other->place_);
   swap(chassis_, other->chassis_);

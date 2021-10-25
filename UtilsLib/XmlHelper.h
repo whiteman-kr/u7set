@@ -28,6 +28,7 @@ public:
 	void writeStringAttribute(const QString& name, const QString& value);
 	void writeIntAttribute(const QString& name, int value, bool hex = false);
 	void writeBoolAttribute(const QString& name, bool value);
+	void writeInt64Attribute(const QString& name, qint64 value, bool hex = false);
 	void writeUInt64Attribute(const QString& name, quint64 value, bool hex = false);
 	void writeUInt32Attribute(const QString& name, quint32 value, bool hex);
 	void writeDoubleAttribute(const QString& name, double value);
@@ -35,6 +36,12 @@ public:
 	void writeFloatAttribute(const QString& name, float value);
 	void writeAddress16Attribute(const QString& name, const Address16& addr16);
 	void writeSoftwareTypeAttribute(E::SoftwareType swType);
+
+	template<typename ENUM_TYPE>
+	void writeEnumValueAttribute(const QString& name, ENUM_TYPE value);		// writes Int value of enum item
+
+	template<typename ENUM_TYPE>
+	void writeEnumAttribute(const QString& name, ENUM_TYPE value);			// writes Int value and Str name of enum item
 
 	void writeString(const QString& str);
 
@@ -45,10 +52,33 @@ public:
 	void writeHostAddressPort(const QString& nameIP, const QString& namePort, const HostAddressPort& hostAddressPort);
 	void writeHostAddress(const QString& nameIP, const QHostAddress& hostAddress);
 
+	void writeQVariantAttribute(const QString& name, const QVariant& qv);
+
 private:
 	QXmlStreamWriter* m_xmlWriter = nullptr;
 	QXmlStreamWriter* m_xmlLocalWriter = nullptr;
 };
+
+template<typename ENUM_TYPE>
+void XmlWriteHelper::writeEnumValueAttribute(const QString& name, ENUM_TYPE value)
+{
+	static_assert(std::is_enum<ENUM_TYPE>::value == true);
+
+	// writes Int value of enum item
+	//
+	writeIntAttribute(name, static_cast<int>(value));
+}
+
+template<typename ENUM_TYPE>
+void XmlWriteHelper::writeEnumAttribute(const QString& name, ENUM_TYPE value)
+{
+	static_assert(std::is_enum<ENUM_TYPE>::value == true);
+
+	// writes Int value and Str name of enum item
+	//
+	writeEnumValueAttribute(name, value);
+	writeStringAttribute(name + QString("Str"), E::valueToString<ENUM_TYPE>(value));
+}
 
 class XmlReadHelper
 {
@@ -66,14 +96,18 @@ public:
 	bool atEnd();
 
 	bool readStringAttribute(const QString& name, QString* value);
-	bool readIntAttribute(const QString& name, int* value);
-	bool readBoolAttribute(const QString& name, bool* value);
-	bool readUInt64Attribute(const QString& name, qulonglong* value);
-	bool readUInt32Attribute(const QString& name, quint32* value);
-	bool readDoubleAttribute(const QString& name, double* value);
-	bool readFloatAttribute(const QString& name, float* value);
+	bool readIntAttribute(const QString& name, int* value, bool ignoreEmpty = false);
+	bool readBoolAttribute(const QString& name, bool* value, bool ignoreEmpty = false);
+	bool readInt64Attribute(const QString& name, qlonglong* value, bool ignoreEmpty = false);
+	bool readUInt64Attribute(const QString& name, qulonglong* value, bool ignoreEmpty = false);
+	bool readUInt32Attribute(const QString& name, quint32* value, bool ignoreEmpty = false);
+	bool readDoubleAttribute(const QString& name, double* value, bool ignoreEmpty = false);
+	bool readFloatAttribute(const QString& name, float* value, bool ignoreEmpty = false);
 	bool readAddress16Attribute(const QString& name, Address16* value);
 	bool readSoftwareTypeAttribute(E::SoftwareType* swType);
+
+	template<typename ENUM_TYPE>
+	bool readEnumValueAttribute(const QString& name, ENUM_TYPE* value);			// reads Int value and cast it to enum item
 
 	bool readStringElement(const QString& elementName, QString* value, bool find = false);
 	bool readIntElement(const QString& elementName, int* value, bool find = false);
@@ -85,7 +119,35 @@ public:
 	bool findElement(const QString& elementName);
 	bool checkElement(const QString& elementName);
 
+	QXmlStreamAttributes attributes() const { return m_xmlReader->attributes(); }
+
+	bool readQVariantAttribute(const QString& name, QVariant* qv);
+
 private:
 	QXmlStreamReader* m_xmlReader = nullptr;
 	QXmlStreamReader* m_xmlLocalReader = nullptr;
 };
+
+template<typename ENUM_TYPE>
+bool XmlReadHelper::readEnumValueAttribute(const QString& name, ENUM_TYPE* value)
+{
+	if(value == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	{
+		return false;
+	}
+
+	bool result = false;
+
+	QString str = m_xmlReader->attributes().value(name).toString();
+
+	*value = static_cast<ENUM_TYPE>(str.toInt(&result, 0));
+
+	return result;
+}
+

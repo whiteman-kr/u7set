@@ -7,23 +7,27 @@
 
 const char* const			MetrologyConnectionColumn[] =
 {
-							QT_TRANSLATE_NOOP("DialogMetrologyConnection", "Type"),
 							QT_TRANSLATE_NOOP("DialogMetrologyConnection", "SignalID (source)"),
+							QT_TRANSLATE_NOOP("DialogMetrologyConnection", "Type"),
 							QT_TRANSLATE_NOOP("DialogMetrologyConnection", "SignalID (destination)"),
 };
 
 const int					METROLOGY_CONNECTION_COLUMN_COUNT			= sizeof(MetrologyConnectionColumn)/sizeof(MetrologyConnectionColumn[0]);
 
-const int					METROLOGY_CONNECTION_COLUMN_TYPE			= 0,
-							METROLOGY_CONNECTION_COLUMN_IN_ID			= 1,
+const int					METROLOGY_CONNECTION_COLUMN_IN_ID			= 0,
+							METROLOGY_CONNECTION_COLUMN_TYPE			= 1,
 							METROLOGY_CONNECTION_COLUMN_OUT_ID			= 2;
 
 const int					MetrologyConnectionColumnWidth[METROLOGY_CONNECTION_COLUMN_COUNT] =
 {
-							150,	// METROLOGY_CONNECTION_COLUMN_TYPE
 							250,	// METROLOGY_CONNECTION_COLUMN_IN_ID
+							150,	// METROLOGY_CONNECTION_COLUMN_TYPE
 							250,	// METROLOGY_CONNECTION_COLUMN_OUT_ID
 };
+
+// ==============================================================================================
+
+const char* const			ConnectionUndefinedID = "#UNDEFINED_ID";
 
 // ==============================================================================================
 
@@ -123,6 +127,7 @@ private:
 	QAction* m_pRemoveAction = nullptr;
 	QAction* m_pMoveUpAction = nullptr;
 	QAction* m_pMoveDownAction = nullptr;
+	QAction* m_pPotentialConnectionsAction = nullptr;
 	QAction* m_pImportAction = nullptr;
 
 	QAction* m_pTypeIDActionList[Metrology::SignalIDTypeCount];
@@ -158,6 +163,7 @@ private slots:
 	void onRremove();
 	void onMoveUp();
 	void onMoveDown();
+	void onPotentialConnections();
 	void onExport() override;
 	void onImport();
 

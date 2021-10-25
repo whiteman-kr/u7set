@@ -170,6 +170,27 @@ namespace Builder
 				return false;
 			}
 
+			if (s.isSpecPropExists(AppSignalPropNames::OUTPUT_MODE) == true &&
+				E::contains<E::OutputMode>(s.outputMode()) == false)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 has wrong outputRangeMode field").arg(s.appSignalID()));
+				result = false;
+			}
+
+			if (s.isSpecPropExists(AppSignalPropNames::OUTPUT_MODE) == true &&
+				E::contains<E::OutputMode>(s.outputMode()) == false)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 has wrong outputRangeMode field").arg(s.appSignalID()));
+				result = false;
+			}
+
+			if (s.byteOrder() != E::ByteOrder::LittleEndian &&
+				s.byteOrder() != E::ByteOrder::BigEndian)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 has wrong byteOrder field").arg(s.appSignalID()));
+				result = false;
+			}
+
 			// check tunable signals properties
 			//
 			if (s.enableTuning() == true)

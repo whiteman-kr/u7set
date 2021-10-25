@@ -389,9 +389,9 @@ bool MeasureThread::prepareCalibrator(std::shared_ptr<CalibratorManager> pCalibr
 		case CalibratorType::Calys75:	QThread::msleep(500);	break;
 		case CalibratorType::Ktl6221:	QThread::msleep(500);	break;
 		case CalibratorType::Rgl1062:	QThread::msleep(100);	break;
+
 		default:
 			assert(0);
-			break;
 	}
 
 	return result;
@@ -486,23 +486,16 @@ void MeasureThread::run()
 			{
 				case Measure::Kind::OneRack:
 				case Measure::Kind::OneModule:
-				case Measure::Kind::MultiRack:
-					measureCompratorsInSeries();
-					break;
-
-				case Measure::Kind::MultiRack_MC:
-					measureCompratorsInParallel();
-					break;
+				case Measure::Kind::MultiRack:		measureCompratorsInSeries();	break;
+				case Measure::Kind::MultiRack_MC:	measureCompratorsInParallel();	break;
 
 				default:
 					assert(0);
-					break;
 			}
 			break;
 
 		default:
 			assert(0);
-			break;
 	}
 }
 
@@ -677,6 +670,7 @@ void MeasureThread::measureCompratorsInSeries()
 			case Metrology::ConnectionType::Unused:
 				param = ioParam.param(Metrology::ConnectionIoType::Source);
 				break;
+
 			default:
 				param = ioParam.param(Metrology::ConnectionIoType::Destination);
 				break;
@@ -815,7 +809,9 @@ void MeasureThread::measureCompratorsInSeries()
 								{
 									case E::CmpType::Less:		engineeringVal = compareVal + deltaVal;	break;	// becomes higher than the set point (if the set point is Less)
 									case E::CmpType::Greate:	engineeringVal = compareVal - deltaVal;	break;	// falls below the set point (if the set point for Greate)
-									default:					break;
+
+									default:
+										break;
 								}
 
 								break;
@@ -826,7 +822,9 @@ void MeasureThread::measureCompratorsInSeries()
 								{
 									case E::CmpType::Less:		engineeringVal = compareVal - deltaVal;	break;	// becomes higher than the hysteresis (if the hysteresis is Less)
 									case E::CmpType::Greate:	engineeringVal = compareVal + deltaVal;	break;	// falls below the hysteresis (if the hysteresis for Greate)
-									default:					break;
+
+									default:
+										break;
 								}
 
 								break;
@@ -1330,7 +1328,9 @@ void MeasureThread::measureCompratorsInParallel()
 								{
 									case E::CmpType::Less:		engineeringVal = compareVal + deltaVal;	break;	// becomes higher than the set point (if the set point is Less)
 									case E::CmpType::Greate:	engineeringVal = compareVal - deltaVal;	break;	// falls below the set point (if the set point for Greate)
-									default:					continue;
+
+									default:
+										continue;
 								}
 
 								break;
@@ -1341,7 +1341,9 @@ void MeasureThread::measureCompratorsInParallel()
 								{
 									case E::CmpType::Less:		engineeringVal = compareVal - deltaVal;	break;	// becomes higher than the hysteresis (if the hysteresis is Less)
 									case E::CmpType::Greate:	engineeringVal = compareVal + deltaVal;	break;	// falls below the hysteresis (if the hysteresis for Greate)
-									default:					continue;
+
+									default:
+										continue;
 								}
 
 								break;

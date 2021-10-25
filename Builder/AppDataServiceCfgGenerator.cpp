@@ -167,22 +167,28 @@ namespace Builder
 			return true;
 		}
 
-		QByteArray data;
-		XmlWriteHelper xml(&data);
+		QByteArray azpzData;
+		XmlWriteHelper azpzXml(&azpzData);
 
-		xml.setAutoFormatting(true);
-		xml.writeStartDocument();
-		xml.writeStartElement("AppSignals");
-		xml.writeIntAttribute("buildID", m_buildResultWriter->buildInfo().id);
+		azpzXml.setAutoFormatting(true);
+		azpzXml.writeStartDocument();
+		azpzXml.writeStartElement(XmlElement::APP_SIGNALS);
+		azpzXml.writeIntAttribute(XmlAttribute::BUILD_ID, m_buildResultWriter->buildInfo().id);
+		azpzXml.writeStartElement(XmlElement::SIGNALS);
+		azpzXml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_associatedAppSignals.size()));
 
-		// Writing units
-		xml.writeStartElement("Units");
-		xml.writeIntAttribute("Count", 0);
-		xml.writeEndElement();				// Units
+		QByteArray extData;
+		XmlWriteHelper extXml(&extData);
 
-		QVector<AppSignal*> signalsToWrite;
+		extXml.setAutoFormatting(true);
+		extXml.writeStartDocument();
+		extXml.writeStartElement(XmlElement::APP_SIGNALS);
+		extXml.writeIntAttribute(XmlAttribute::BUILD_ID, m_buildResultWriter->buildInfo().id);
+		extXml.writeStartElement(XmlElement::SIGNALS);
+		extXml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_associatedAppSignals.size()));
 
 		qsizetype signalCount = m_signalSet->count();
+		int writtenSignalsCount = 0;
 
 		for(qsizetype i = 0; i < signalCount; i++)
 		{
@@ -193,49 +199,38 @@ namespace Builder
 				continue;
 			}
 
-			bool hasWrongField = false;
+			signal.writeToAzpzXml(azpzXml);
+			signal.writeToXml(extXml);
 
-			if (signal.isSpecPropExists(AppSignalPropNames::OUTPUT_MODE) == true && E::contains<E::OutputMode>(signal.outputMode()) == false)
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}
-
-			switch (static_cast<E::ByteOrder>(signal.byteOrderInt()))
-			{
-				case E::ByteOrder::LittleEndian:
-				case E::ByteOrder::BigEndian:
-					break;
-				default:
-					LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong byteOrder field").arg(signal.appSignalID()));
-					hasWrongField = true;
-			}
-
-			if (hasWrongField)
-			{
-				continue;
-			}
-
-			signalsToWrite.append(&signal);
+			writtenSignalsCount++;
 		}
 
-		// Writing signals
-		//
-		xml.writeStartElement("Signals");
-		xml.writeIntAttribute("Count", static_cast<int>(signalsToWrite.count()));
-
-		for(AppSignal* signal : signalsToWrite)
+		if (writtenSignalsCount != m_associatedAppSignals.size())
 		{
-			signal->writeToXml(xml);
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
 		}
 
-		signalsToWrite.clear();
+		azpzXml.writeEndElement();	// </Signals>
+		azpzXml.writeEndElement();	// </AppSignals>
+		azpzXml.writeEndDocument();
 
-		xml.writeEndElement();	// </Signals>
-		xml.writeEndElement();	// </AppSignals>
-		xml.writeEndDocument();
+		extXml.writeEndElement();	// </Signals>
+		extXml.writeEndElement();	// </AppSignals>
+		extXml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), "AppSignals.xml", CfgFileId::APP_SIGNALS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(),
+															File::APP_SIGNALS_XML,
+															CfgFileId::APP_SIGNALS, "", azpzData);
+
+		if (buildFile == nullptr)
+		{
+			return false;
+		}
+
+		buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(),
+													File::APP_SIGNALS_EXT_XML,
+													CfgFileId::APP_SIGNALS_EXT, "", extData);
 
 		if (buildFile == nullptr)
 		{
@@ -329,7 +324,7 @@ namespace Builder
 			{
 				appDataSource.addAssociatedSignal(appSignal.appSignalID());
 
-				m_associatedAppSignals.insert(appSignal.appSignalID(), true);
+				m_associatedAppSignals.insert(appSignal.appSignalID());
 			}
 		}
 

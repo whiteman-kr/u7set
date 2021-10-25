@@ -127,6 +127,7 @@ QString StatisticsItem::stateStr() const
 	{
 		case State::Failed:		state = QT_TRANSLATE_NOOP("StatisticsBase", "Failed");	break;
 		case State::Success:	state = QT_TRANSLATE_NOOP("StatisticsBase", "Ok");		break;
+
 		default:
 			assert(0);
 			state = QT_TRANSLATE_NOOP("StatisticsBase", "Unknown");
@@ -150,7 +151,7 @@ QString StatisticsItem::positionID() const
 		return QString();
 	}
 
-	QString posID =	QString::number(param.inOutTypeInt()).rightJustified(2, '0') +
+	QString posID =	QString::number(TO_INT(param.inOutType())).rightJustified(2, '0') +
 					QString::number(m_connectionType).rightJustified(4, '0') +
 					param.location().rack().caption() +
 					QString::number(param.location().chassis()).rightJustified(4, '0') +

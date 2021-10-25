@@ -1,4 +1,4 @@
-QT += qml network xml
+QT += qml network xml concurrent
 
 TARGET = HardwareLib
 

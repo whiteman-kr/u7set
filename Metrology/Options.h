@@ -298,6 +298,8 @@ public:
 
 private:
 
+	void				appendProperties();
+
 	QString				m_projectName;
 	int					m_id = -1;
 	QString				m_date;
@@ -402,7 +404,7 @@ const char* const		LinearityParamName[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "Limit of error (%)"),
 						QT_TRANSLATE_NOOP("Options.h", "Type of error"),
-						QT_TRANSLATE_NOOP("Options.h", "Show error from limit"),
+						QT_TRANSLATE_NOOP("Options.h", "Error is calculated by the range"),
 						QT_TRANSLATE_NOOP("Options.h", "Measure time in a point (sec)"),
 						QT_TRANSLATE_NOOP("Options.h", "Count of measurements in a point"),
 						QT_TRANSLATE_NOOP("Options.h", "Division of the measure range"),
@@ -417,7 +419,7 @@ const int				LO_PARAM_COUNT					= sizeof(LinearityParamName)/sizeof(LinearityPar
 
 const int				LO_PARAM_ERROR_LIMIT			= 0,
 						LO_PARAM_ERROR_TYPE				= 1,
-						LO_PARAM_SHOW_ERROR_FROM_LIMIT	= 2,
+						LO_PARAM_CALC_ERROR_BY_RANGE	= 2,
 						LO_PARAM_MEASURE_TIME			= 3,
 						LO_PARAM_MEASURE_IN_POINT		= 4,
 						LO_PARAM_RANGE_TYPE				= 5,
@@ -466,8 +468,8 @@ public:
 	int					errorType() const { return m_errorType; }
 	void				setErrorType(int type) { m_errorType = type; }
 
-	int					limitType() const { return m_limitType; }
-	void				setLimitType(int type) { m_limitType = type; }
+	int					calcErrorByRange() const { return m_calcErrorByRange; }
+	void				setCalcErrorByRange(int byRange) { m_calcErrorByRange = byRange; }
 
 	int					measureTimeInPoint() const { return m_measureTimeInPoint; }
 	void				setMeasureTimeInPoint(int sec) { m_measureTimeInPoint = sec; }
@@ -500,20 +502,20 @@ public:
 
 private:
 
-	Measure::PointBase	m_pointBase;												// list of measurement points
+	Measure::PointBase	m_pointBase;															// list of measurement points
 
-	double				m_errorLimit = 0.2;											// permissible error is given by specified documents
-	int					m_errorType = Measure::ErrorType::Reduce;					// type of error absolute or reduced
-	int					m_limitType = Measure::LimitType::Electric;					// type of displaing error denend on limit
+	double				m_errorLimit = 0.1;														// permissible error is given by specified documents
+	int					m_errorType = Measure::ErrorType::Reduce;								// type of error absolute or reduced
+	int					m_calcErrorByRange = Measure::CalcErrorRange::ByElectricRange;			// error is calculated by the range
 
-	int					m_measureTimeInPoint = 1;									// time, in seconds, during which will be made ​​N measurements at each point
-	int					m_measureCountInPoint = Measure::MaxMeasurementInPoint;		// count of measurements in a point, according to GOST MI-2002 application 7
+	int					m_measureTimeInPoint = 1;												// time, in seconds, during which will be made ​​N measurements at each point
+	int					m_measureCountInPoint = Measure::MaxMeasurementInPoint;					// count of measurements in a point, according to GOST MI-2002 application 7
 
-	int					m_divisionType = Measure::LinearityDivision::Manual;		// type of division measure range: manual - 0 or automatic - 1
-	double				m_lowLimitRange = Measure::LinearityRangeLow;				// lower limit of the range for automatic division
-	double				m_highLimitRange = Measure::LinearityRangeHigh;				// high limit of the range for automatic division
+	int					m_divisionType = Measure::LinearityDivision::Manual;					// type of division measure range: manual - 0 or automatic - 1
+	double				m_lowLimitRange = Measure::LinearityRangeLow;							// lower limit of the range for automatic division
+	double				m_highLimitRange = Measure::LinearityRangeHigh;							// high limit of the range for automatic division
 
-	int					m_viewType = LinearityViewType::Simple;						// type of measurements list extended or simple
+	int					m_viewType = LinearityViewType::Simple;									// type of measurements list extended or simple
 };
 
 // ==============================================================================================
@@ -525,9 +527,9 @@ private:
 const char* const		ComparatorParamName[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "Limit of error (%)"),
-						QT_TRANSLATE_NOOP("Options.h", "Start value (%)"),
 						QT_TRANSLATE_NOOP("Options.h", "Error type"),
-						QT_TRANSLATE_NOOP("Options.h", "Show error from limit"),
+						QT_TRANSLATE_NOOP("Options.h", "Error is calculated by the range"),
+						QT_TRANSLATE_NOOP("Options.h", "Start value (%)"),
 						QT_TRANSLATE_NOOP("Options.h", "Start measurement from the сomparator"),
 						QT_TRANSLATE_NOOP("Options.h", "Enable to measure hysteresis of comparators"),
 };
@@ -535,9 +537,9 @@ const char* const		ComparatorParamName[] =
 const int				CO_PARAM_COUNT					= sizeof(ComparatorParamName)/sizeof(ComparatorParamName[0]);
 
 const int				CO_PARAM_ERROR_LIMIT			= 0,
-						CO_PARAM_START_VALUE			= 1,
-						CO_PARAM_ERROR_TYPE				= 2,
-						CO_PARAM_SHOW_ERROR_FROM_LIMIT	= 3,
+						CO_PARAM_ERROR_TYPE				= 1,
+						CO_PARAM_CALC_ERROR_BY_RANGE	= 2,
+						CO_PARAM_START_VALUE			= 3,
 						CO_PARAM_COMPARATOR_INDEX		= 4,
 						CO_PARAM_ENABLE_HYSTERESIS		= 5;
 
@@ -559,14 +561,14 @@ public:
 	double				errorLimit() const { return m_errorLimit; }
 	void				setErrorLimit(double errorLimit) { m_errorLimit = errorLimit; }
 
-	double				startValueForCompare() const { return m_startValueForCompare; }
-	void				setStartValueForCompare(double value) { m_startValueForCompare = value; }
-
 	int					errorType() const { return m_errorType; }
 	void				setErrorType(int type) { m_errorType = type; }
 
-	int					limitType() const { return m_limitType; }
-	void				setLimitType(int type) { m_limitType = type; }
+	int					calcErrorByRange() const { return m_calcErrorByRange; }
+	void				setCalcErrorByRange(int byRange) { m_calcErrorByRange = byRange; }
+
+	double				startValueForCompare() const { return m_startValueForCompare; }
+	void				setStartValueForCompare(double value) { m_startValueForCompare = value; }
 
 	int					startComparatorIndex() const { return m_startComparatorIndex; }
 	void				setStartComparatorIndex(int index) { m_startComparatorIndex = index; }
@@ -585,13 +587,13 @@ public:
 
 private:
 
-	double				m_errorLimit = 0.1;										// permissible error is given by specified documents
-	double				m_startValueForCompare = 0.1;							// start value is given by metrologists
-	int					m_errorType = Measure::ErrorType::Reduce;				// type of error absolute or reduced
-	int					m_limitType = Measure::LimitType::Electric;				// type of displaing error denend on limit
+	double				m_errorLimit = 0.1;														// permissible error is given by specified documents
+	int					m_errorType = Measure::ErrorType::Reduce;								// type of error absolute or reduced
+	int					m_calcErrorByRange = Measure::CalcErrorRange::ByElectricRange;			// error is calculated by the range
+	double				m_startValueForCompare = 0.1;											// start value is given by metrologists
 
-	int					m_startComparatorIndex = 0;								// start the measurement with the сomparators under the number ...
-	bool				m_enableMeasureHysteresis = false;						// enable flag to measure hysteresis of сomparator
+	int					m_startComparatorIndex = 0;												// start the measurement with the сomparators under the number ...
+	bool				m_enableMeasureHysteresis = false;										// enable flag to measure hysteresis of сomparator
 };
 
 // ==============================================================================================

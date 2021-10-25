@@ -1283,8 +1283,12 @@ bool MainWindow::signalIsMeasured(const MeasureSignal& activeSignal, QString& si
 
 	switch (m_connectionType)
 	{
-		case Metrology::ConnectionType::Unused:	ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);		break;
-		default:								ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);	break;
+		case Metrology::ConnectionType::Unused:
+			ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);
+			break;
+		default:
+			ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);
+			break;
 	}
 
 	if (ioSignal.isEmpty() == true)
@@ -1598,6 +1602,7 @@ void MainWindow::onExportMeasure()
 	{
 		case Measure::Type::Linearity:		fileName = "Linearity";		break;
 		case Measure::Type::Comparators:	fileName = "Comparators";	break;
+
 		default:
 			assert(0);
 	}
@@ -1784,6 +1789,7 @@ void MainWindow::showConnectionList()
 		return;
 	}
 
+	m_pStatisticsPanel->connectionTypeChanged(m_connectionType);
 	m_pStatisticsPanel->updateList();
 }
 
@@ -1993,9 +1999,9 @@ void MainWindow::showOptions()
 	// if changed error type or limitType
 	//
 	if (	options.linearity().errorType() != theOptions.linearity().errorType() ||
-			options.linearity().limitType() != theOptions.linearity().limitType() ||
+			options.linearity().calcErrorByRange() != theOptions.linearity().calcErrorByRange() ||
 			options.comparator().errorType() != theOptions.comparator().errorType() ||
-			options.comparator().limitType() != theOptions.comparator().limitType())
+			options.comparator().calcErrorByRange() != theOptions.comparator().calcErrorByRange())
 	{
 		m_pStatisticsPanel->updateList();
 	}
@@ -2998,11 +3004,13 @@ void MainWindow::measureThreadStoped()
 					onStartMeasure();
 					return;
 				}
+
 			case Measure::Type::Comparators:
 				{
 					m_pMainTab->setCurrentIndex(Measure::Type::Linearity);
 				}
 				break;
+
 			default:
 				assert(0);
 		}

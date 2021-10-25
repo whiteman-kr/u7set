@@ -114,6 +114,7 @@ namespace Metrology
 		m_chassis = -1;
 
 		m_moduleID.clear();
+		m_moduleCaption.clear();
 		m_module = -1;
 
 		m_place = -1;
@@ -201,6 +202,7 @@ namespace Metrology
 		l->set_chassis(m_chassis);
 
 		l->set_moduleid(m_moduleID.toStdString());
+		l->set_modulecaption(m_moduleCaption.toStdString());
 		l->set_module(m_module);
 
 		l->set_place(m_place);
@@ -219,6 +221,7 @@ namespace Metrology
 		m_chassis = l.chassis();
 
 		m_moduleID = QString::fromStdString(l.moduleid());
+		m_moduleCaption = QString::fromStdString(l.modulecaption());
 		m_module = l.module();
 
 		m_place = l.place();
@@ -261,6 +264,7 @@ namespace Metrology
 			case Metrology::SignalIDType::CustomID:		signalID = customAppSignalID();	break;
 			case Metrology::SignalIDType::AppSignalID:	signalID = appSignalID();		break;
 			case Metrology::SignalIDType::EquipmentID:	signalID = equipmentID();		break;
+
 			default:
 				assert(0);
 		}
@@ -425,7 +429,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void SignalParam::serializeTo(Proto::MetrologySignal *ms) const
+	void SignalParam::saveToProto(Proto::MetrologySignal *ms) const
 	{
 		if (ms == nullptr)
 		{
@@ -441,7 +445,7 @@ namespace Metrology
 		}
 
 		Proto::AppSignal* protoAppSignal = ms->mutable_appsignal();
-		pSignal->serializeTo(protoAppSignal);
+		pSignal->saveToProto(protoAppSignal);
 
 		Proto::MetrologySignalLocation* protoLocation = ms->mutable_location();
 		m_location.serializeTo(protoLocation);
@@ -462,7 +466,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	bool SignalParam::serializeFrom(const Proto::MetrologySignal& ms)
+	bool SignalParam::loadFromProto(const Proto::MetrologySignal& ms)
 	{
 		AppSignal* pSignal = dynamic_cast<AppSignal*>(this);
 		if (pSignal == nullptr)
@@ -472,7 +476,7 @@ namespace Metrology
 		}
 
 		const Proto::AppSignal& protoAppSignal = ms.appsignal();
-		pSignal->serializeFrom(protoAppSignal);
+		pSignal->loadFromProto(protoAppSignal);
 
 		const Proto::MetrologySignalLocation& protoLocation = ms.location();
 		m_location.serializeFrom(protoLocation);
@@ -504,6 +508,7 @@ namespace Metrology
 			case E::SignalInOutType::Input:		typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Input");	break;
 			case E::SignalInOutType::Internal:	typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Internal");	break;
 			case E::SignalInOutType::Output:	typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Output");	break;
+
 			default:
 				Q_ASSERT(0);
 				typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Unknown");
@@ -959,6 +964,7 @@ namespace Metrology
 			case SignalIDType::CustomID:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "SignalID");		break;
 			case SignalIDType::AppSignalID:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "AppSignalID");	break;
 			case SignalIDType::EquipmentID:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "EquipmentID");	break;
+
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("Options", "Unknown");
@@ -977,6 +983,7 @@ namespace Metrology
 		{
 			case CmpValueType::SetPoint:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "Set point");	break;
 			case CmpValueType::Hysteresis:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "Hysteresis");	break;
+
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("MetrologySignal", "Unknown");
@@ -1082,6 +1089,7 @@ namespace Metrology
 				case Metrology::SignalIDType::CustomID:		signalID = m_inputSignal->param().customAppSignalID();	break;
 				case Metrology::SignalIDType::AppSignalID:	signalID = m_inputSignal->param().appSignalID();		break;
 				case Metrology::SignalIDType::EquipmentID:	signalID = m_inputSignal->param().equipmentID();		break;
+
 				default:
 					assert(0);
 			}
@@ -1107,6 +1115,7 @@ namespace Metrology
 				case Metrology::SignalIDType::CustomID:		signalID = m_compareSignal->param().customAppSignalID();	break;
 				case Metrology::SignalIDType::AppSignalID:	signalID = m_compareSignal->param().appSignalID();			break;
 				case Metrology::SignalIDType::EquipmentID:	signalID = m_compareSignal->param().equipmentID();			break;
+
 				default:
 					assert(0);
 			}
@@ -1132,6 +1141,7 @@ namespace Metrology
 				case Metrology::SignalIDType::CustomID:		signalID = m_hysteresisSignal->param().customAppSignalID();	break;
 				case Metrology::SignalIDType::AppSignalID:	signalID = m_hysteresisSignal->param().appSignalID();		break;
 				case Metrology::SignalIDType::EquipmentID:	signalID = m_hysteresisSignal->param().equipmentID();		break;
+
 				default:
 					assert(0);
 			}
@@ -1157,6 +1167,7 @@ namespace Metrology
 				case Metrology::SignalIDType::CustomID:		signalID = m_outputSignal->param().customAppSignalID();	break;
 				case Metrology::SignalIDType::AppSignalID:	signalID = m_outputSignal->param().appSignalID();		break;
 				case Metrology::SignalIDType::EquipmentID:	signalID = m_outputSignal->param().equipmentID();		break;
+
 				default:
 					assert(0);
 			}

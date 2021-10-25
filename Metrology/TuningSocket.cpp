@@ -394,6 +394,7 @@ void TuningSocket::requestWriteTuningSignals()
 			case TuningValueType::SignedInt64:	tv->set_intvalue(cmd.value().toLongLong());		break;
 			case TuningValueType::Float:
 			case TuningValueType::Double:		tv->set_doublevalue(cmd.value().toDouble());	break;
+
 			default:
 				assert(false);
 				continue;

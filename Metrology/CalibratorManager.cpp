@@ -351,6 +351,7 @@ void CalibratorManager::enableInterface(bool enable)
 			m_pRemoteControlCheck->setText(tr("Remote control"));
 			m_pRemoteControlCheck->setVisible(true);
 			break;
+
 		case CalibratorType::Ktl6221:
 			m_pRemoteControlCheck->setText(tr("Output ON/OFF"));
 			m_pRemoteControlCheck->setVisible(true);

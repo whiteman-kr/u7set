@@ -15,6 +15,7 @@ const char* const			SignalListColumn[] =
 							QT_TRANSLATE_NOOP("DialogSignalList", "Chassis"),
 							QT_TRANSLATE_NOOP("DialogSignalList", "Module"),
 							QT_TRANSLATE_NOOP("DialogSignalList", "Place"),
+							QT_TRANSLATE_NOOP("DialogSignalList", "Module type"),
 							QT_TRANSLATE_NOOP("DialogSignalList", "ADC range"),
 							QT_TRANSLATE_NOOP("DialogSignalList", "Engineering range"),
 							QT_TRANSLATE_NOOP("DialogSignalList", "Electric range"),
@@ -36,15 +37,16 @@ const int					SIGNAL_LIST_COLUMN_CUSTOM_ID		= 0,
 							SIGNAL_LIST_COLUMN_CHASSIS			= 5,
 							SIGNAL_LIST_COLUMN_MODULE			= 6,
 							SIGNAL_LIST_COLUMN_PLACE			= 7,
-							SIGNAL_LIST_COLUMN_ADC_RANGE		= 8,
-							SIGNAL_LIST_COLUMN_EN_RANGE			= 9,
-							SIGNAL_LIST_COLUMN_EL_RANGE			= 10,
-							SIGNAL_LIST_COLUMN_EL_SENSOR		= 11,
-							SIGNAL_LIST_COLUMN_PH_RANGE			= 12,
-							SIGNAL_LIST_COLUMN_TUN_SIGNAL		= 13,
-							SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL	= 14,
-							SIGNAL_LIST_COLUMN_TUN_RANGE		= 15,
-							SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS	= 16;
+							SIGNAL_LIST_COLUMN_MODULE_TYPE		= 8,
+							SIGNAL_LIST_COLUMN_ADC_RANGE		= 9,
+							SIGNAL_LIST_COLUMN_EN_RANGE			= 10,
+							SIGNAL_LIST_COLUMN_EL_RANGE			= 11,
+							SIGNAL_LIST_COLUMN_EL_SENSOR		= 12,
+							SIGNAL_LIST_COLUMN_PH_RANGE			= 13,
+							SIGNAL_LIST_COLUMN_TUN_SIGNAL		= 14,
+							SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL	= 15,
+							SIGNAL_LIST_COLUMN_TUN_RANGE		= 16,
+							SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS	= 17;
 
 const int					SignalListColumnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 {
@@ -56,6 +58,7 @@ const int					SignalListColumnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 							 60,	// SIGNAL_LIST_COLUMN_CHASSIS
 							 60,	// SIGNAL_LIST_COLUMN_MODULE
 							 60,	// SIGNAL_LIST_COLUMN_PLACE
+							100,	// SIGNAL_LIST_COLUMN_MODULE_TYPE
 							120,	// SIGNAL_LIST_COLUMN_ADC
 							150,	// SIGNAL_LIST_COLUMN_EN_RANGE
 							150,	// SIGNAL_LIST_COLUMN_EL_RANGE

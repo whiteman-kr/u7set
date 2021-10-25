@@ -378,7 +378,7 @@ void TcpAppDataClient::onGetAppSignalReply(const char* replyData, quint32 replyD
 			break;
 		}
 
-		m_signalParams[startIndex + i].serializeFrom(m_getSignalsReply.appsignals(i));
+		m_signalParams[startIndex + i].loadFromProto(m_getSignalsReply.appsignals(i));
 	}
 
 	m_getParamsCurrentPart++;

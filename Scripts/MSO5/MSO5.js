@@ -13,7 +13,24 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 			return false;
 		}
 	}
-	
+
+	// Build number
+
+	let ptr = 0;
+
+	let buildNo = confFirmware.buildNumber();
+	if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "BuildNo", buildNo) == false) {
+		return false;
+	}
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"]: BuildNo = " + buildNo + "\r\n");
+	ptr += 2;
+
+	ptr += 4 * 2; // Reserved
+
+	// Opto
+
+	const optoDataPtr = 5 * 2;
+
 	let optoPortCount = module.propertyValue("OptoPortCount");
 	
 	let txWordsCount = 0;
@@ -46,7 +63,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 		confFirmware.writeLog("    OptoPort " + controller.equipmentId + ": connection ID = " + optoPort.equipmentID() + 
 			" (" + optoPort.connectionID() + ")\r\n");
 					
-		let ptr = 0 + p * 2;
+		ptr = optoDataPtr + p * 2;
 		
 		let startAddress = optoPort.txStartAddress();
 		
@@ -56,7 +73,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 		}
 		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TX startAddress for TxRx Block (Opto) " + (p + 1) + " = " + startAddress + "\r\n");
 				
-		ptr = 3 * 2 + p * 2;
+		ptr = optoDataPtr + 3 * 2 + p * 2;
 		let value = optoPort.txDataSizeW();
 		if (setData16(confFirmware, log, LMNumber, controller.equipmentId, frame, ptr, "TX data words quantity for TxRx Block (Opto) " + (p + 1), value) == false)
 		{
@@ -70,7 +87,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 			txWordsCount = txPortWordsCount;
 		}
 				
-		ptr = 6 * 2 + p * 2;
+		ptr = optoDataPtr + 6 * 2 + p * 2;
 		value = optoPort.portID();
 		if (setData16(confFirmware, log, LMNumber, controller.equipmentId, frame, ptr, "TX id for TxRx Block (Opto) " + (p + 1), value) == false)
 		{
@@ -78,7 +95,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 		}
 		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TX id for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
 				
-		ptr = 9 * 2 + p * 2;
+		ptr = optoDataPtr + 9 * 2 + p * 2;
 		value = optoPort.rxDataSizeW();
 		if (setData16(confFirmware, log, LMNumber, controller.equipmentId, frame, ptr, "RX data words quantity for TxRx Block (Opto) " + (p + 1), value) == false)
 		{
@@ -97,7 +114,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 			}
 		}
 
-		ptr = 12 * 2 + p * 4;
+		ptr = optoDataPtr + 12 * 2 + p * 4;
 		if (setData32(confFirmware, log, LMNumber, controller.equipmentId, frame, ptr, "TxRx Block (Opto) Data UID " + (p + 1), dataUID) == false)
 		{
 			return false;
@@ -106,7 +123,9 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 
 	} // p
 	
-	let ptr = 18 * 2;
+	const lanDataPtr = 23 * 2;
+
+	ptr = lanDataPtr;
 	
 	let lanPortCount = module.propertyValue("LanPortCount");
 	
@@ -223,6 +242,8 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 
 	// ------------------------------------------------------------ VOTE_CFG ---------------------------------------------------------
 
+	let voteDataPtr = 45 * 2;
+
 	confFirmware.writeLog("Writing VOTE_CFG Configuration\r\n");
 
 	var txBusDataStartAddressArray = [];
@@ -262,7 +283,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 
 		// Version of protocol
 
-		ptr = 80;
+		ptr = voteDataPtr;
 
 		if (lanType == LAN_TYPE_TX) {
 			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : VOTE_CFG_ProtocolVersion = " + 1 + "\r\n");
@@ -492,7 +513,9 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 	{
 		const LAN_COUNT = 2;
 
-		ptr = 276;
+		const niosDataPtr = 143 * 2;
+
+		ptr = niosDataPtr;
 
 		for (let lan = 1; lan <= LAN_COUNT; lan++)
 		{
