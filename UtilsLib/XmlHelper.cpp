@@ -200,32 +200,32 @@ void XmlWriteHelper::writeHostAddress(const QString& nameIP, const QHostAddress&
 
 void XmlWriteHelper::writeQVariantAttribute(const QString& name, const QVariant& qv)
 {
-	switch(qv.type())
+	switch(qv.typeId())
 	{
-	case QVariant::Type::Bool:
+	case QMetaType::Type::Bool:
 		writeBoolAttribute(name, qv.toBool());
 		break;
 
-	case QVariant::Type::Int:
+	case QMetaType::Type::Int:
 		writeInt64Attribute(name, qv.toInt());
 		break;
 
-	case QVariant::Type::LongLong:
+	case QMetaType::Type::LongLong:
 		writeInt64Attribute(name, qv.toLongLong());
 
-	case QVariant::Type::UInt:
+	case QMetaType::Type::UInt:
 		writeUInt64Attribute(name, qv.toUInt());
 		break;
 
-	case QVariant::Type::ULongLong:
+	case QMetaType::Type::ULongLong:
 		writeUInt64Attribute(name, qv.toULongLong());
 		break;
 
-	case QVariant::Type::Double:
+	case QMetaType::Type::Double:
 		writeDoubleAttribute(name, qv.toDouble());
 		break;
 
-	case QVariant::Type::String:
+	case QMetaType::Type::QString:
 		writeStringAttribute(name, qv.toString());
 		break;
 
@@ -724,9 +724,9 @@ bool XmlReadHelper::readQVariantAttribute(const QString& name, QVariant* qv)
 
 	bool result = true;
 
-	switch(qv->type())
+	switch(qv->typeId())
 	{
-	case QVariant::Type::Bool:
+	case QMetaType::Type::Bool:
 		{
 			bool v = false;
 			readBoolAttribute(name, &v);
@@ -734,7 +734,7 @@ bool XmlReadHelper::readQVariantAttribute(const QString& name, QVariant* qv)
 		}
 		break;
 
-	case QVariant::Type::Int:
+	case QMetaType::Type::Int:
 		{
 			int v = 0;
 			result = readIntAttribute(name, &v);
@@ -742,7 +742,7 @@ bool XmlReadHelper::readQVariantAttribute(const QString& name, QVariant* qv)
 		}
 		break;
 
-	case QVariant::Type::LongLong:
+	case QMetaType::Type::LongLong:
 		{
 			qlonglong v = 0;
 			result = readInt64Attribute(name, &v);
@@ -750,7 +750,7 @@ bool XmlReadHelper::readQVariantAttribute(const QString& name, QVariant* qv)
 		}
 		break;
 
-	case QVariant::Type::UInt:
+	case QMetaType::Type::UInt:
 		{
 			uint v = 0;
 			result = readUInt32Attribute(name, &v);
@@ -758,7 +758,7 @@ bool XmlReadHelper::readQVariantAttribute(const QString& name, QVariant* qv)
 		}
 		break;
 
-	case QVariant::Type::ULongLong:
+	case QMetaType::Type::ULongLong:
 		{
 			qulonglong v = 0;
 			result = readUInt64Attribute(name, &v);
@@ -766,7 +766,7 @@ bool XmlReadHelper::readQVariantAttribute(const QString& name, QVariant* qv)
 		}
 		break;
 
-	case QVariant::Type::Double:
+	case QMetaType::Type::Double:
 		{
 			double v = 0;
 			result = readDoubleAttribute(name, &v);
@@ -774,7 +774,7 @@ bool XmlReadHelper::readQVariantAttribute(const QString& name, QVariant* qv)
 		}
 		break;
 
-	case QVariant::Type::String:
+	case QMetaType::Type::QString:
 		{
 			QString v = 0;
 			result = readStringAttribute(name, &v);

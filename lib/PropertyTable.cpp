@@ -1090,7 +1090,7 @@ namespace ExtWidgets
 			}
 
 			if (expandValuesToAllRows() == false &&
-				p->value().userType() != QVariant::StringList &&
+				p->value().typeId() != QMetaType::QStringList &&
 				row > 0)
 			{
 				continue;
