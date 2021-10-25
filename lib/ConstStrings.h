@@ -208,6 +208,8 @@ namespace XmlElement
 
 namespace XmlAttribute
 {
+	inline const QString ENUM_VALUE_SUFFIX("Val");
+
 	inline const QString CAPTION("Caption");
 	inline const QString COUNT("Count");
 	inline const QString ID("ID");
@@ -445,6 +447,7 @@ namespace AppSignalPropNames
 	inline const QString REG_VALUE_ADDR("RegValueAddr");
 	inline const QString REG_VALIDITY_ADDR("RegValidityAddr");
 	inline const QString TUNING_ADDR("TuningAddr");
+	inline const QString TUNING_ABS_ADDR("TuningAbsAddr");
 
 	inline const QString MISPRINT_lowEngineeringUnitsCaption("LowEngeneeringUnits");
 	inline const QString MISPRINT_highEngineeringUnitsCaption("HighEngeneeringUnits");

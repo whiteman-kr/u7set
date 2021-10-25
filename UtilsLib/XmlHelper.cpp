@@ -295,17 +295,19 @@ bool XmlReadHelper::readStringAttribute(const QString& name, QString* value)
 		return false;
 	}
 
-	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	QXmlStreamAttributes attrs = m_xmlReader->attributes();
+
+	if (attrs.hasAttribute(name) == false)
 	{
 		return false;
 	}
 
-	*value = m_xmlReader->attributes().value(name).toString();
+	*value = attrs.value(name).toString();
 
 	return true;
 }
 
-bool XmlReadHelper::readIntAttribute(const QString& name, int* value, bool ignoreEmpty)
+bool XmlReadHelper::readIntAttribute(const QString& name, int* value)
 {
 	if(value == nullptr)
 	{
@@ -313,26 +315,21 @@ bool XmlReadHelper::readIntAttribute(const QString& name, int* value, bool ignor
 		return false;
 	}
 
-	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	QString str;
+
+	bool result = readStringAttribute(name, &str);
+
+	if (result == false)
 	{
 		return false;
 	}
-
-	QString str = m_xmlReader->attributes().value(name).toString();
-
-	if (ignoreEmpty == true && str.isEmpty() == true)
-	{
-		return true;
-	}
-
-	bool result = false;
 
 	*value = str.toInt(&result, 0);
 
 	return result;
 }
 
-bool XmlReadHelper::readBoolAttribute(const QString& name, bool* value, bool ignoreEmpty)
+bool XmlReadHelper::readBoolAttribute(const QString& name, bool* value)
 {
 	if(value == nullptr)
 	{
@@ -349,10 +346,7 @@ bool XmlReadHelper::readBoolAttribute(const QString& name, bool* value, bool ign
 		return false;
 	}
 
-	if (ignoreEmpty == true && boolStr.isEmpty() == true)
-	{
-		return true;
-	}
+	boolStr = boolStr.trimmed().toLower();
 
 	if (boolStr == "true")
 	{
@@ -374,7 +368,7 @@ bool XmlReadHelper::readBoolAttribute(const QString& name, bool* value, bool ign
 	return true;
 }
 
-bool XmlReadHelper::readInt64Attribute(const QString& name, qlonglong *value, bool ignoreEmpty)
+bool XmlReadHelper::readInt64Attribute(const QString& name, qlonglong *value)
 {
 	if(value == nullptr)
 	{
@@ -382,26 +376,21 @@ bool XmlReadHelper::readInt64Attribute(const QString& name, qlonglong *value, bo
 		return false;
 	}
 
-	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	QString str;
+
+	bool result = readStringAttribute(name, &str);
+
+	if (result == false)
 	{
 		return false;
 	}
-
-	QString str = m_xmlReader->attributes().value(name).toString();
-
-	if (ignoreEmpty == true && str.isEmpty() == true)
-	{
-		return true;
-	}
-
-	bool result = true;
 
 	*value = str.toLongLong(&result, 0);
 
 	return result;
 }
 
-bool XmlReadHelper::readUInt64Attribute(const QString& name, qulonglong *value, bool ignoreEmpty)
+bool XmlReadHelper::readUInt64Attribute(const QString& name, qulonglong *value)
 {
 	if(value == nullptr)
 	{
@@ -409,26 +398,21 @@ bool XmlReadHelper::readUInt64Attribute(const QString& name, qulonglong *value, 
 		return false;
 	}
 
-	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	QString str;
+
+	bool result = readStringAttribute(name, &str);
+
+	if (result == false)
 	{
 		return false;
 	}
-
-	QString str = m_xmlReader->attributes().value(name).toString();
-
-	if (ignoreEmpty == true && str.isEmpty() == true)
-	{
-		return true;
-	}
-
-	bool result = true;
 
 	*value = str.toULongLong(&result, 0);
 
 	return result;
 }
 
-bool XmlReadHelper::readUInt32Attribute(const QString& name, quint32* value, bool ignoreEmpty)
+bool XmlReadHelper::readUInt32Attribute(const QString& name, quint32* value)
 {
 	if(value == nullptr)
 	{
@@ -436,26 +420,21 @@ bool XmlReadHelper::readUInt32Attribute(const QString& name, quint32* value, boo
 		return false;
 	}
 
-	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	QString str;
+
+	bool result = readStringAttribute(name, &str);
+
+	if (result == false)
 	{
 		return false;
 	}
-
-	QString str = m_xmlReader->attributes().value(name).toString();
-
-	if (ignoreEmpty == true && str.isEmpty() == true)
-	{
-		return true;
-	}
-
-	bool result = true;
 
 	*value = str.toULong(&result, 0);
 
 	return result;
 }
 
-bool XmlReadHelper::readDoubleAttribute(const QString& name, double* value, bool ignoreEmpty)
+bool XmlReadHelper::readDoubleAttribute(const QString& name, double* value)
 {
 	if(value == nullptr)
 	{
@@ -463,26 +442,21 @@ bool XmlReadHelper::readDoubleAttribute(const QString& name, double* value, bool
 		return false;
 	}
 
-	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	QString str;
+
+	bool result = readStringAttribute(name, &str);
+
+	if (result == false)
 	{
 		return false;
 	}
-
-	QString str = m_xmlReader->attributes().value(name).toString();
-
-	if (ignoreEmpty == true && str.isEmpty() == true)
-	{
-		return true;
-	}
-
-	bool result = false;
 
 	*value = str.toDouble(&result);
 
 	return result;
 }
 
-bool XmlReadHelper::readFloatAttribute(const QString& name, float* value, bool ignoreEmpty)
+bool XmlReadHelper::readFloatAttribute(const QString& name, float* value)
 {
 	if(value == nullptr)
 	{
@@ -490,19 +464,14 @@ bool XmlReadHelper::readFloatAttribute(const QString& name, float* value, bool i
 		return false;
 	}
 
-	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	QString str;
+
+	bool result = readStringAttribute(name, &str);
+
+	if (result == false)
 	{
 		return false;
 	}
-
-	QString str = m_xmlReader->attributes().value(name).toString();
-
-	if (ignoreEmpty == true && str.isEmpty() == true)
-	{
-		return true;
-	}
-
-	bool result = false;
 
 	*value = str.toFloat(&result);
 
