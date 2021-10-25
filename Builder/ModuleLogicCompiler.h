@@ -349,7 +349,8 @@ namespace Builder
 
 		bool listsUniquenessCheck() const;
 		bool listUniquenessCheck(QHash<UalSignal*, UalSignal*>& signalsMap, const QVector<UalSignal*>& signalList) const;
-		void sortSignalList(QVector<UalSignal*> &signalList);
+		void sortSignalList(QVector<UalSignal*>& signalList);
+		void sortSignalList(QVector<const UalSignal*>& signalList);
 
 		bool disposeSignalsInMemory();
 
