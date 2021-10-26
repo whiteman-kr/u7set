@@ -516,7 +516,7 @@ void RackBase::updateParamFromGroups()
 				continue;
 			}
 
-			r.setGroupIndex(group.Index());
+			r.setGroupIndex(group.index());
 			r.setChannel(channel);
 
 			setRack(r.hash(), r);

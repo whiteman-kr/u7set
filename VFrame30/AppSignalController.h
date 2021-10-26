@@ -118,6 +118,9 @@ namespace VFrame30
 		QJSValue signalParam(QString signalId) const;		// Returns AppSignalParam
 		QJSValue signalParam(Hash signalHash) const;		// Returns AppSignalParam
 
+		/// \brief Returns AppSignalID for specified EquipmentID, note: such conversion is possible for input/output signals and impossible for internal LogigModule signals (returns an empty string).
+		QString equipmentToAppSiganlId(QString equipmentId) const;
+
 		/// \brief Returns AppSignalState structure of signal specified by <b>signalId</b>. If error occurs, the return value is <b>undefined</b>.
 		QJSValue signalState(QString signalId) const;		// Returns AppSignalState
 		QJSValue signalState(Hash signalHash) const;		// Returns AppSignalState
@@ -130,6 +133,9 @@ namespace VFrame30
 
 		/// \brief Returns <b>true</b> for analog signals.
 		bool isAnalog(QString signalId) const;
+
+		/// \brief Returns precision for analog signals. If signal is discrete or not found, returns 0.
+		int precision(QString signalId) const;
 
 		// Data
 		//

@@ -111,8 +111,8 @@ namespace Metrology
 
 		strID =	QString("%1_%2_%3").
 				arg(m_type, 3, 10, QChar('0')).
-				arg(m_connectionSignal[ConnectionIoType::Source].appSignalID()).
-				arg(m_connectionSignal[ConnectionIoType::Destination].appSignalID());
+				arg(m_connectionSignal[ConnectionIoType::Source].appSignalID(),
+					m_connectionSignal[ConnectionIoType::Destination].appSignalID());
 
 		return strID;
 	}
@@ -188,6 +188,9 @@ namespace Metrology
 					return false;
 				}
 
+				break;
+
+			default:
 				break;
 		}
 
@@ -758,6 +761,7 @@ namespace Metrology
 			case Input_C_Internal_F:	caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Input °С -> Internal °F");		break;
 			case Input_C_Output_F:		caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Input °С -> Output °F");		break;
 			case Tuning_Output:			caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Tuning -> Output");				break;
+
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("MetrologyConnection", "Unknown");

@@ -1,12 +1,15 @@
 #ifndef EXCELHELPER_H
 #define EXCELHELPER_H
 
-#include <ActiveQt/qaxobject.h>
-#include <ActiveQt/qaxbase.h>
-#include <QString>
+#ifdef Q_OS_WIN
 
-//Expected in .pro file: QT += axcontainer
-//
+	#include <ActiveQt/qaxobject.h>
+	#include <ActiveQt/qaxbase.h>
+
+#endif
+
+// ==============================================================================================
+
 class ExcelExportHelper
 {
 public:
@@ -17,13 +20,17 @@ public:
 
 private:
 
-	QAxObject*			m_pExcelApplication = nullptr;
-	QAxObject*			m_pWorkbooks = nullptr;
-	QAxObject*			m_pWorkbook = nullptr;
-	QAxObject*			m_pSheets = nullptr;
-	QAxObject*			m_pSheet = nullptr;
+	#ifdef Q_OS_WIN
 
-	bool				m_closeExcelOnExit = false;
+		QAxObject*			m_pExcelApplication = nullptr;
+		QAxObject*			m_pWorkbooks = nullptr;
+		QAxObject*			m_pWorkbook = nullptr;
+		QAxObject*			m_pSheets = nullptr;
+		QAxObject*			m_pSheet = nullptr;
+
+		bool				m_closeExcelOnExit = false;
+
+	#endif
 
 public:
 
@@ -35,7 +42,11 @@ public:
 
 #endif // EXCELHELPER_H
 
-//	example
+// ==============================================================================================
+
+//	example.cpp
+//
+//Expected in .pro file: QT += axcontainer
 //
 //	try
 //	{
@@ -52,3 +63,5 @@ public:
 //	{
 //		QMessageBox::critical(this, "Error - Demo", e.what());
 //	}
+
+// ==============================================================================================

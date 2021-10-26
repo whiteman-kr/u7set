@@ -81,6 +81,7 @@ namespace VFrame30
 		valueMessage->set_fillcolor(m_fillColor.rgba());
 		valueMessage->set_drawrect(m_drawRect);
 		valueMessage->set_fillrect(m_fillRect);
+		valueMessage->set_currentimageid(m_currentImageId.toStdString());
 
 		return true;
 	}
@@ -127,6 +128,7 @@ namespace VFrame30
 		m_fillColor = QColor::fromRgba(valueMessage.fillcolor());
 		m_drawRect = valueMessage.drawrect();
 		m_fillRect = valueMessage.fillrect();
+		m_currentImageId = valueMessage.currentimageid().data();
 
 		return loadOk;
 	}

@@ -25,6 +25,21 @@
 
 namespace Builder
 {
+	QUuid Uuid::getNextId(Area area)
+	{
+		// The problem
+		// Links has some id, and this id is used for maps, if we want all links have the same order from build to build for the same logic,
+		// we must keep same id for same links
+		//
+		thread_local static uint64_t newid[2] = {0, static_cast<uint64_t>(area)};
+		newid[0] ++;
+
+		QByteArray ba = QByteArray::fromRawData(reinterpret_cast<const char*>(newid), 16);
+		QUuid u = QUuid::fromRfc4122(ba);
+
+		return u;
+	}
+
 
 	Link::Link(const std::list<VFrame30::SchemaPoint>& points) :
 		m_points(points)
@@ -54,29 +69,14 @@ namespace Builder
 		return m_points.back();
 	}
 
-	QUuid Link::getNextId()
-	{
-		// The problem
-		// Links has some id, and this id is used for maps, if we want all links have the same order from build to build for the same logic,
-		// we must keep same id for same links
-		//
-		thread_local static uint64_t newid[2] = {0, 0};
-		newid[0] ++;
-
-		QByteArray ba = QByteArray::fromRawData(reinterpret_cast<const char*>(newid), 16);
-		QUuid u = QUuid::fromRfc4122(ba);
-
-		return u;
-	}
-
 	bool Link::isPinOnLink(VFrame30::SchemaPoint pt) const
 	{
 		VFrame30::CHorzVertLinks hvl;
 
-		QUuid fakeId = Link::getNextId();
+		QUuid fakeId = Uuid::getNextId(Uuid::Area::Link);
 		hvl.AddLinks(m_points, fakeId);
 
-		bool result = hvl.IsPinOnLink(pt, Link::getNextId());	// Must be othe Quuid, as if it the same return value always false
+		bool result = hvl.IsPinOnLink(pt, Uuid::getNextId(Uuid::Area::Link));	// Must be othe Quuid, as if it the same return value always false
 
 		return result;
 	}
@@ -805,6 +805,10 @@ namespace Builder
 			LOG_MESSAGE(log, str);
 		}
 
+		// Dump
+		//
+		//dump();
+
 		return result;
 	}
 
@@ -850,7 +854,7 @@ namespace Builder
 
 			// Set new item guid
 			//
-			ali.m_fblItem->setGuid(QUuid::createUuid());
+			ali.m_fblItem->setGuid(Uuid::getNextId(Uuid::Area::UfbDeepCopy));
 
 			// Set new label
 			//
@@ -864,7 +868,7 @@ namespace Builder
 			auto& aliInputs = ali.m_fblItem->inputs();
 			for (VFrame30::AfbPin& pin : aliInputs)
 			{
-				QUuid newPinGuid = QUuid::createUuid();
+				QUuid newPinGuid = Uuid::getNextId(Uuid::Area::UfbDeepCopy);
 				oldToNewPins[pin.guid()] = newPinGuid;
 
 				pin.setGuid(newPinGuid);
@@ -873,7 +877,7 @@ namespace Builder
 			auto& aliOutputs = ali.m_fblItem->outputs();
 			for (VFrame30::AfbPin& pin : aliOutputs)
 			{
-				QUuid newPinGuid = QUuid::createUuid();
+				QUuid newPinGuid = Uuid::getNextId(Uuid::Area::UfbDeepCopy);
 				oldToNewPins[pin.guid()] = newPinGuid;
 
 				pin.setGuid(newPinGuid);
@@ -2108,6 +2112,8 @@ namespace Builder
 
 					if (foundUfbOutputIt == ufbItemsCopy.end())
 					{
+						// Cannot find %1 input/output in UFB %2, SchemaItem %1 (LogicSchema  %3).
+						//
 						log->errALP4012(logicSchema->schemaId(), ufbItem->label(), ufbItemPin.caption(), ufbItem->guid());
 						result = false;
 						continue;
@@ -3385,7 +3391,7 @@ namespace Builder
 
 		// Check for the same guids
 		//
-		for (const std::pair<QUuid, QString>& uuidPair : uuids)
+		for (const std::pair<QUuid, QString> uuidPair : uuids)
 		{
 			if (uuids.count(uuidPair.first) != 1)
 			{
@@ -3396,7 +3402,7 @@ namespace Builder
 
 		// Check for the same labels
 		//
-		for (const std::pair<QString, QString>& labelPair : labels)
+		for (const std::pair<QString, QString> labelPair : labels)
 		{
 			if (labels.count(labelPair.first) != 1)
 			{
@@ -3423,7 +3429,7 @@ namespace Builder
 
 			std::set<QString> pins;
 
-			for (const std::shared_ptr<VFrame30::SchemaLayer> layer : ufb->Layers)
+			for (const std::shared_ptr<VFrame30::SchemaLayer>& layer : ufb->Layers)
 			{
 				if (layer->compile() == false)
 				{
@@ -3692,7 +3698,7 @@ namespace Builder
 		}
 
 		Afb::AfbElementCollection afbs;
-		afbs.setElements(lmd->afbs());
+		afbs.setElements(lmd->afbElements());
 
 		// Check AFBs
 		//
@@ -4828,7 +4834,7 @@ namespace Builder
 				{
 					std::shared_ptr<VFrame30::SchemaItemLink> fakeLink = std::make_shared<VFrame30::SchemaItemLink>(fblItem->itemUnit());
 
-					fakeLink->setGuid(Link::getNextId());	// fake links must have the same uuid from build to build (if schema was not changed)
+					fakeLink->setGuid(Uuid::getNextId(Uuid::Area::Link));	// fake links must have the same uuid from build to build (if schema was not changed)
 
 					VFrame30::SchemaPoint pos = pt.point();
 
@@ -4842,7 +4848,7 @@ namespace Builder
 				{
 					std::shared_ptr<VFrame30::SchemaItemLink> fakeLink = std::make_shared<VFrame30::SchemaItemLink>(fblItem->itemUnit());
 
-					fakeLink->setGuid(Link::getNextId());	// fake links must have the same uuid from build to build (if schema was not changed)
+					fakeLink->setGuid(Uuid::getNextId(Uuid::Area::Link));	// fake links must have the same uuid from build to build (if schema was not changed)
 
 					VFrame30::SchemaPoint pos = pt.point();
 

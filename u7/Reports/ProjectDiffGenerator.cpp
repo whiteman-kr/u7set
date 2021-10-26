@@ -250,11 +250,12 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 									 const QString& projectName,
 									 const QString& userName,
 									 const QString& userPassword,
+									 AppSignalSetProvider* appSignalProvider,
 									 QWidget* parent)
 {
 	// Create schema view
 
-	ReportSchemaView* schemaView = new ReportSchemaView(parent);
+	ReportSchemaView* schemaView = new ReportSchemaView(appSignalProvider, parent);
 
 	schemaView->session().setProject(projectName);
 	schemaView->session().setUsername(userName);

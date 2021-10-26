@@ -52,7 +52,10 @@ public slots:
 	void choosePreset(Hardware::DeviceType type);
 
 	std::shared_ptr<Hardware::DeviceObject> addPresetToConfiguration(const DbFileInfo& fileInfo, bool addToEquipment);
-	QModelIndex addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentModelIndex, bool clearPrevSelection);
+	QModelIndex addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object,
+								QModelIndex parentModelIndex,
+								bool clearPrevSelection,
+								bool newUuids);
 
 	void addInOutsToSignals();
 	void addInOutsToSignals(std::shared_ptr<Hardware::DeviceModule> module);
@@ -69,7 +72,9 @@ public slots:
 
 	void copySelectedDevices();
 	void pasteDevices();
-	void pasteDevices(const ::Proto::EnvelopeSet& messageItems, const Proto::EnvelopeSetShortDescription& messageDescr);
+	void pasteDevices(const ::Proto::EnvelopeSet& messageItems,
+					  const Proto::EnvelopeSetShortDescription& messageDescr,
+					  bool newUuids);
 	bool canPaste() const;
 	bool canPaste(const ::Proto::EnvelopeSetShortDescription& message) const;
 

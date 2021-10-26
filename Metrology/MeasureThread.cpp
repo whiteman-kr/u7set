@@ -256,8 +256,7 @@ bool MeasureThread::setCalibratorUnit()
 			{
 				emit msgBox(QMessageBox::Information,
 							tr("Calibrator: %1 - %2 can not set source mode.").
-							arg(pCalibrator->typeStr()).
-							arg(pCalibrator->portName()));
+							arg(pCalibrator->typeStr(), pCalibrator->portName()));
 				m_activeIoParamList[ch].setCalibratorManager(nullptr);
 			}
 
@@ -279,8 +278,7 @@ bool MeasureThread::setCalibratorUnit()
 			{
 				emit msgBox(QMessageBox::Information,
 							tr("Calibrator: %1 - %2 can not set measure mode.").
-							arg(pCalibrator->typeStr()).
-							arg(pCalibrator->portName()));
+							arg(pCalibrator->typeStr(), pCalibrator->portName()));
 
 				m_activeIoParamList[ch].setCalibratorManager(nullptr);
 			}
@@ -305,8 +303,7 @@ bool MeasureThread::setCalibratorUnit()
 			{
 				emit msgBox(QMessageBox::Information,
 							tr("Calibrator: %1 - %2 can not set measure mode.").
-							arg(pCalibrator->typeStr()).
-							arg(pCalibrator->portName()));
+							arg(pCalibrator->typeStr(), pCalibrator->portName()));
 				m_activeIoParamList[ch].setCalibratorManager(nullptr);
 			}
 		}
@@ -375,14 +372,13 @@ bool MeasureThread::prepareCalibrator(std::shared_ptr<CalibratorManager> pCalibr
 	if (limit.isValid() == false)
 	{
 		emit msgBox(QMessageBox::Critical,	tr("Calibrator: %1 - %2 can not set unit \"%3\".").
-											arg(pCalibrator->typeStr()).
-											arg(pCalibrator->portName()).
-											arg(qApp->translate("Calibrator", CalibratorUnitCaption(calibratorUnit).toUtf8())));
+											arg(pCalibrator->typeStr(), pCalibrator->portName(),
+												qApp->translate("Calibrator", CalibratorUnitCaption(calibratorUnit).toUtf8())));
 		return false;
 	}
 
 
-	m_info.setMessage(tr("Prepare calibrator: %1 %2").arg(pCalibrator->typeStr()).arg(pCalibrator->portName()));
+	m_info.setMessage(tr("Prepare calibrator: %1 %2").arg(pCalibrator->typeStr(), pCalibrator->portName()));
 	emit sendMeasureInfo(m_info);
 
 	bool result = pCalibratorManager->setUnit(calibratorMode, calibratorUnit);
@@ -393,9 +389,9 @@ bool MeasureThread::prepareCalibrator(std::shared_ptr<CalibratorManager> pCalibr
 		case CalibratorType::Calys75:	QThread::msleep(500);	break;
 		case CalibratorType::Ktl6221:	QThread::msleep(500);	break;
 		case CalibratorType::Rgl1062:	QThread::msleep(100);	break;
+
 		default:
 			assert(0);
-			break;
 	}
 
 	return result;
@@ -490,23 +486,16 @@ void MeasureThread::run()
 			{
 				case Measure::Kind::OneRack:
 				case Measure::Kind::OneModule:
-				case Measure::Kind::MultiRack:
-					measureCompratorsInSeries();
-					break;
-
-				case Measure::Kind::MultiRack_MC:
-					measureCompratorsInParallel();
-					break;
+				case Measure::Kind::MultiRack:		measureCompratorsInSeries();	break;
+				case Measure::Kind::MultiRack_MC:	measureCompratorsInParallel();	break;
 
 				default:
 					assert(0);
-					break;
 			}
 			break;
 
 		default:
 			assert(0);
-			break;
 	}
 }
 
@@ -681,6 +670,7 @@ void MeasureThread::measureCompratorsInSeries()
 			case Metrology::ConnectionType::Unused:
 				param = ioParam.param(Metrology::ConnectionIoType::Source);
 				break;
+
 			default:
 				param = ioParam.param(Metrology::ConnectionIoType::Destination);
 				break;
@@ -819,7 +809,9 @@ void MeasureThread::measureCompratorsInSeries()
 								{
 									case E::CmpType::Less:		engineeringVal = compareVal + deltaVal;	break;	// becomes higher than the set point (if the set point is Less)
 									case E::CmpType::Greate:	engineeringVal = compareVal - deltaVal;	break;	// falls below the set point (if the set point for Greate)
-									default:					break;
+
+									default:
+										break;
 								}
 
 								break;
@@ -830,7 +822,9 @@ void MeasureThread::measureCompratorsInSeries()
 								{
 									case E::CmpType::Less:		engineeringVal = compareVal - deltaVal;	break;	// becomes higher than the hysteresis (if the hysteresis is Less)
 									case E::CmpType::Greate:	engineeringVal = compareVal + deltaVal;	break;	// falls below the hysteresis (if the hysteresis for Greate)
-									default:					break;
+
+									default:
+										break;
 								}
 
 								break;
@@ -1141,7 +1135,7 @@ void MeasureThread::measureCompratorsInParallel()
 {
 	quint64 COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_0 = 0;
 	quint64 COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_1 = 0;
-	quint64 currentStateComparatorsInAllChannels = COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_0;
+	quint64 currentStateComparatorsInAllChannels = 0;
 
 	// get max amount of comparators
 	// get state for all comparators in state of logical "1"
@@ -1334,7 +1328,9 @@ void MeasureThread::measureCompratorsInParallel()
 								{
 									case E::CmpType::Less:		engineeringVal = compareVal + deltaVal;	break;	// becomes higher than the set point (if the set point is Less)
 									case E::CmpType::Greate:	engineeringVal = compareVal - deltaVal;	break;	// falls below the set point (if the set point for Greate)
-									default:					continue;
+
+									default:
+										continue;
 								}
 
 								break;
@@ -1345,7 +1341,9 @@ void MeasureThread::measureCompratorsInParallel()
 								{
 									case E::CmpType::Less:		engineeringVal = compareVal - deltaVal;	break;	// becomes higher than the hysteresis (if the hysteresis is Less)
 									case E::CmpType::Greate:	engineeringVal = compareVal + deltaVal;	break;	// falls below the hysteresis (if the hysteresis for Greate)
-									default:					continue;
+
+									default:
+										continue;
 								}
 
 								break;

@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 
 	if (theOptions.language().languageType() == LanguageType::Russian)
 	{
-		if (translator.load(QString(":%1/%2").arg(LANGUAGE_OPTIONS_DIR).arg(LANGUAGE_OPTIONS_FILE_RU)) == true)
+		if (translator.load(QString(":%1/%2").arg(LANGUAGE_OPTIONS_DIR, LANGUAGE_OPTIONS_FILE_RU)) == true)
 		{
 			qApp->installTranslator(&translator);
 		}
@@ -39,6 +39,16 @@ int main(int argc, char* argv[])
 			QMessageBox::critical(nullptr, "Russian language", QString("Didn't load russian language:\n%1").arg(languageFilePath));
 			theOptions.language().setLanguageType(LanguageType::English);
 		}
+	}
+
+	// щne instance of the application
+	//
+	QLockFile lockFile(QDir::temp().absoluteFilePath("Metrology.lock"));
+
+	if(lockFile.tryLock(100) == false)
+	{
+		QMessageBox::information(nullptr, a.applicationName(), a.translate("MetrologyMain", "The application is already running!"));
+		return 1;
 	}
 
 	// init SoftwareInfo

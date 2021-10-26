@@ -2,7 +2,7 @@
 #define SVGEDITOR_H
 
 #include "../lib/PropertyEditor.h"
-#include "../QScintilla/Qt4Qt5/Qsci/qsciscintilla.h"
+#include "../QScintilla/src/Qsci/qsciscintilla.h"
 #include "../lib/QScintillaLexers/LexerXML.h"
 
 class SvgWidget : public QWidget

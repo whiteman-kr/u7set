@@ -88,6 +88,7 @@
 #include <QAbstractTableModel>
 #include <QAction>
 
+#include <QComboBox>
 #include <QCheckBox>
 #include <QCloseEvent>
 

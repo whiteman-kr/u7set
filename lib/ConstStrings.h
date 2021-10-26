@@ -200,15 +200,28 @@ namespace XmlElement
 	inline const QString APP_DATA_SERVICES("AppDataServices");
 
 	inline const QString SECURITY("TuningSecurity");
+
+	inline const QString APP_SIGNALS("AppSignals");
+	inline const QString SIGNALS("Signals");
+	inline const QString SIGNAL_ELEM("Signal");
 }
 
 namespace XmlAttribute
 {
+	inline const QString ENUM_VALUE_SUFFIX("Val");
+
 	inline const QString CAPTION("Caption");
 	inline const QString COUNT("Count");
 	inline const QString ID("ID");
 	inline const QString IDs("IDs");
 	inline const QString TYPE("Type");
+	inline const QString BUILD_ID("BuildID");
+	inline const QString CHANNEL("Channel");
+	inline const QString APP_SIGNAL_ID("AppSignalID");
+	inline const QString CUSTOM_APP_SIGNAL_ID("CustomAppSignalID");
+	inline const QString EQUIPMENT_ID("EquipmentID");
+	inline const QString DATA_FORMAT("DataFormat");
+	inline const QString DATA_SIZE("DataSize");
 
 	inline const QString DATA_ID("DataID");
 	inline const QString HEX_DATA_ID("HexDataID");
@@ -265,6 +278,7 @@ namespace CfgFileId
 {
 	inline const QString APP_DATA_SOURCES("APP_DATA_SOURCES");
 	inline const QString APP_SIGNALS("APP_SIGNALS");
+	inline const QString APP_SIGNALS_EXT("APP_SIGNALS_EXT");
 	inline const QString APP_SIGNAL_SET("APP_SIGNAL_SET");
 	inline const QString COMPARATOR_SET("COMPARATOR_SET");
 	inline const QString UNIT_SET("UNIT_SET");
@@ -326,6 +340,8 @@ namespace Directory
 namespace File
 {
 	inline const QString APP_SIGNALS_ASGS("AppSignals.asgs");
+	inline const QString APP_SIGNALS_XML("AppSignals.xml");
+	inline const QString APP_SIGNALS_EXT_XML("AppSignalsExt.xml");
 	inline const QString COMPARATORS_SET("Comparators.set");
 	inline const QString APP_DATA_SOURCES_XML("AppDataSources.xml");
 	inline const QString TUNING_SOURCES_XML("TuningSources.xml");
@@ -398,10 +414,13 @@ namespace AppSignalPropNames
 	inline const QString ELECTRIC_LOW_LIMIT("ElectricLowLimit");
 	inline const QString ELECTRIC_HIGH_LIMIT("ElectricHighLimit");
 	inline const QString ELECTRIC_UNIT("ElectricUnit");
+	inline const QString ELECTRIC_UNIT_STR("ElectricUnitStr");
 	inline const QString RLOAD_OHM("Rload_Ohm");
 	inline const QString SENSOR_TYPE("SensorType");
+	inline const QString SENSOR_TYPE_STR("SensorTypeStr");
 	inline const QString R0_OHM("R0_Ohm");
 	inline const QString OUTPUT_MODE("OutputMode");
+	inline const QString OUTPUT_MODE_STR("OutputModeStr");
 	inline const QString ACQUIRE("Acquire");
 	inline const QString ARCHIVE("Archive");
 	inline const QString DECIMAL_PLACES("DecimalPlaces");
@@ -412,12 +431,23 @@ namespace AppSignalPropNames
 	inline const QString SPREAD_TOLERANCE("SpreadTolerance");
 	inline const QString BYTE_ORDER_PROP("ByteOrder");
 	inline const QString EQUIPMENT_ID("EquipmentID");
+
 	inline const QString ENABLE_TUNING("EnableTuning");
+	inline const QString TUNING_VALUE_TYPE("TuningValueType");
+	inline const QString TUNING_VALUE_TYPE_STR("TuningValueTypeStr");
 	inline const QString TUNING_DEFAULT_VALUE("TuningDefaultValue");
 	inline const QString TUNING_LOW_BOUND("TuningLowBound");
 	inline const QString TUNING_HIGH_BOUND("TuningHighBound");
+
+	inline const QString SPEC_PROP_STRUCT("SpecPropStruct");
 	inline const QString SPECIFIC_PROPERTIES_STRUCT("SpecificPropertiesStruct");
+	inline const QString PROTO_SPEC_PROP_VALUES("ProtoSpecPropValues");
 	inline const QString TAGS("Tags");
+	inline const QString UAL_ADDR("UalAddr");
+	inline const QString REG_VALUE_ADDR("RegValueAddr");
+	inline const QString REG_VALIDITY_ADDR("RegValidityAddr");
+	inline const QString TUNING_ADDR("TuningAddr");
+	inline const QString TUNING_ABS_ADDR("TuningAbsAddr");
 
 	inline const QString MISPRINT_lowEngineeringUnitsCaption("LowEngeneeringUnits");
 	inline const QString MISPRINT_highEngineeringUnitsCaption("HighEngeneeringUnits");
@@ -479,11 +509,104 @@ namespace Busses
 	inline const QString MACRO_BUS_CAPTION("$(BusCaption)");
 }
 
-namespace MuxPin
+namespace Afb
 {
-	inline const QString SELECT("i_sel");
-	inline const QString X1("i_x1_data");
-	inline const QString X2("i_x2_data");
-	inline const QString OUTPUT("o_result");
+	//
+
+	inline const QString SCALE("SCALE");
+
+	inline const QString SCALE_PIN_CONF("i_conf");
+	inline const QString SCALE_PIN_K1("i_scal_k1_coef");
+	inline const QString SCALE_PIN_K2("i_scal_k2_coef");
+	inline const QString SCALE_PIN_X_UI("i_ui_data");
+	inline const QString SCALE_PIN_X_SI_FP("i_si_fp_data");
+	inline const QString SCALE_PIN_Y_UI("i_ui_data");
+	inline const QString SCALE_PIN_Y_SI_FP("i_si_fp_data");
+
+	inline const QString SCALE_SI32_SI32("scale_si_si");
+	inline const QString SCALE_SI32_FP32("scale_si_fp");
+	inline const QString SCALE_SI32_UI16("scale_si_16ui");
+
+	inline const QString SCALE_FP32_SI32("scale_fp_si");
+	inline const QString SCALE_FP32_FP32("scale_fp_fp");
+	inline const QString SCALE_FP32_UI16("scale_fp_16ui");
+
+	inline const QString SCALE_UI16_SI32("scale_16ui_si");
+	inline const QString SCALE_UI16_FP32("scale_16ui_fp");
+	inline const QString SCALE_UI16_UI16("scale_16ui_16ui");
+
+	inline const QString SCALE_PARAM_X1("X1");
+	inline const QString SCALE_PARAM_X2("X2");
+	inline const QString SCALE_PARAM_Y1("Y1");
+	inline const QString SCALE_PARAM_Y2("Y2");
+
+	//
+
+	inline const QString TCONV_SI32_FP32("tconv_si_fp");
+	inline const QString TCONV_FP32_SI32("tconv_fp_si");
+
+	inline const QString TCONV_BO_16("tconv_bo_16");
+	inline const QString TCONV_BO_32("tconv_bo_32");
+
+	inline const QString TCONV_SI16_SI32("tconv_si16_si32");
+	inline const QString TCONV_UI16_SI32("tconv_ui16_si32");
+
+	//
+
+	inline const QString SWITCH_SI("switch_si");
+
+	inline const QString SWITCH_SI_PIN_SELECT("sel");
+	inline const QString SWITCH_SI_PIN_X1("in_x1");
+	inline const QString SWITCH_SI_PIN_X2("in_x2");
+	inline const QString SWITCH_SI_PIN_OUTPUT("out");
+
+	// Software generated type conversions
+	//
+	inline const QString SW_TCONV_SI32_SI16("sw_tconv_si32_si16");
+	inline const QString SW_TCONV_SI32_UI16("sw_tconv_si32_ui16");
+
+	inline const QString SW_TCONV_SI16_SI32("sw_tconv_si16_si32");
+	inline const QString SW_TCONV_UI16_SI32("sw_tconv_ui16_si32");
+
+	inline const QString SW_TCONV_FP32_SI16("sw_tconv_fp32_si16");
+	inline const QString SW_TCONV_FP32_UI16("sw_tconv_fp32_ui16");
+
+	inline const QString SW_TCONV_SI16_FP32("sw_tconv_si16_fp32");
+	inline const QString SW_TCONV_UI16_FP32("sw_tconv_ui16_fp32");
+
+	//
+
+	inline const QString NO_AFB("");
+	inline const QString OR("|");
+	inline const QString NEXT(",");
+
+	//
+
+	inline const QString IN_PIN_CAPTION("in");
+	inline const QString OUT_PIN_CAPTION("out");
+
+	inline const QString IN_1_PIN_CAPTION("in_1");
+	inline const QString IN_2_PIN_CAPTION("in_2");
+	inline const QString IN_3_PIN_CAPTION("in_3");
+	inline const QString IN_4_PIN_CAPTION("in_4");
+
+	inline const QString OUT_1_PIN_CAPTION("out_1");
+	inline const QString OUT_2_PIN_CAPTION("out_2");
+	inline const QString OUT_3_PIN_CAPTION("out_3");
+	inline const QString OUT_4_PIN_CAPTION("out_4");
+
+	inline const QString SIMLOCK_SIM_PIN_CAPTION("sim");
+	inline const QString SIMLOCK_BLOCK_PIN_CAPTION("block");
+
+	inline const QString VALIDITY_PIN_CAPTION("validity");
+	inline const QString SIMULATED_PIN_CAPTION("simulated");
+	inline const QString BLOCKED_PIN_CAPTION("blocked");
+	inline const QString MISMATCH_PIN_CAPTION("mismatch");
+	inline const QString HIGH_LIMIT_PIN_CAPTION("high_limit");
+	inline const QString LOW_LIMIT_PIN_CAPTION("low_limit");
+
+	inline const QString PARAM_I_CONF("i_conf");
+	inline const QString PARAM_I_DATA_X1("i_data_x1");
+	inline const QString PARAM_I_DATA_X2("i_data_x2");
 }
 

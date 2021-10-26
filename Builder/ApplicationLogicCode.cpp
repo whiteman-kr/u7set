@@ -471,6 +471,13 @@ namespace Builder
 		movBitConst(addr16.offset(), addr16.bit(), constBit);
 	}
 
+	void CodeItem::writeFuncBlock(int fbType, int fbInstance, int fbParamNo, const Address16& addrFrom, const QString& fbCaption)
+	{
+		Q_ASSERT(addrFrom.bit() == 0);
+
+		writeFuncBlock(fbType, fbInstance, fbParamNo, addrFrom.offset(), fbCaption);
+	}
+
 	void CodeItem::writeFuncBlock(int fbType, int fbInstance, int fbParamNo, int addrFrom, const QString& fbCaption)
 	{
 		Q_ASSERT(addrFrom >= 0);
@@ -485,6 +492,13 @@ namespace Builder
 		m_code.setFbParamNo(fbParamNo);
 		m_code.setWord3(addrFrom);
 		m_code.setFbCaption(fbCaption);
+	}
+
+	void CodeItem::readFuncBlock(const Address16& addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption)
+	{
+		Q_ASSERT(addrTo.bit() == 0);
+
+		readFuncBlock(addrTo.offset(), fbType, fbInstance, fbParamNo, fbCaption);
 	}
 
 	void CodeItem::readFuncBlock(int addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption)
@@ -1904,6 +1918,12 @@ namespace Builder
 		}
 
 		return sizeW;
+	}
+
+	CodeSnippet& CodeSnippet::operator << (const CodeItem& ci)
+	{
+		append(ci);
+		return *this;
 	}
 
 	// -----------------------------------------------------------------------------------------------

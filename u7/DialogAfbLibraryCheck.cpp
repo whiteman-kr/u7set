@@ -207,7 +207,7 @@ void DialogAfbLibraryCheck::libraryFileChanged(const QString& fileName)
 	//
 	m_afbElementTreeWidget->clear();
 
-	m_afbElements = lm.afbs();
+	m_afbElements = lm.afbElements();
 
 	for (std::shared_ptr<Afb::AfbElement> afb : m_afbElements)
 	{

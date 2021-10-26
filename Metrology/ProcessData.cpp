@@ -11,6 +11,7 @@
 #include <QSettings>
 #include <QtConcurrent>
 
+#include "ExcelHelper.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -136,10 +137,9 @@ void CompleterData::load(const QString& optionsKey)
 	for(int i = 0; i < m_count; i++)
 	{
 		QString recentFindText = s.value(QString("%1/%2/Text%3").
-										 arg(optionsKey).
-										 arg(COMPLETER_OPTIONS_KEY).
-										 arg(i),
-										 QString()).toString();
+										 arg(optionsKey, COMPLETER_OPTIONS_KEY).
+										 arg(i)).toString();
+
 		if (recentFindText.isEmpty() == true)
 		{
 			continue;
@@ -172,8 +172,7 @@ void CompleterData::save(const QString& optionsKey)
 	for(int i = 0; i < count; i++)
 	{
 		s.setValue(QString("%1/%2/Text%3").
-				   arg(optionsKey).
-				   arg(COMPLETER_OPTIONS_KEY).
+				   arg(optionsKey, COMPLETER_OPTIONS_KEY).
 				   arg(i),
 				   m_filterCompleterList[i]);
 	}
@@ -339,7 +338,7 @@ void FindData::createInterface(QTableView* pView)
 	connect(m_pFindTextEdit, &QLineEdit::textChanged, this, &FindData::findTextChanged);
 	connect(m_findNextButton, &QPushButton::clicked, this, &FindData::findNext);
 
-	emit findTextChanged();
+	findTextChanged();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -612,8 +611,11 @@ void ExportData::exec()
 		return;
 	}
 
-	//QString filter = tr("Excel files (*.xlsx);;CSV files (*.csv)");
 	QString filter = tr("CSV files (*.csv)");
+
+	#ifdef Q_OS_WIN
+			filter.append(tr(";;Excel files (*.xlsx)"));
+	#endif
 
 	QString fileName = QFileDialog::getSaveFileName(m_pProgressDialog,
 													qApp->translate("ExportData", EXPORT_WINDOW_TITLE),
@@ -622,6 +624,19 @@ void ExportData::exec()
 	if (fileName.isEmpty() == true)
 	{
 		return;
+	}
+
+	fileName.replace("/", QDir::separator());
+
+	if (QFile::exists(fileName) == true)
+	{
+		if (QFile::remove(fileName) == false)
+		{
+			QMessageBox::information(m_pProgressDialog,
+									 qApp->translate("ExportData", EXPORT_WINDOW_TITLE),
+									 tr("File \"%1\" is bloked!").arg(fileName));
+			return;
+		}
 	}
 
 	m_pProgressDialog->show();
@@ -663,44 +678,25 @@ void ExportData::startExportThread(ExportData* pThis, const QString& fileName)
 
 bool ExportData::saveExcelFile(const QString& fileName)
 {
-	Q_UNUSED(fileName)
-	/*if (m_pView == nullptr)
-	{
-		return false;
-	}
+	#ifdef Q_OS_WIN
 
-	if (fileName.isEmpty() == true)
-	{
-		return false;
-	}
-
-	m_exportCancel = false;
-
-	ExcelExportHelper helper;
-
-	int columnCount = m_pView->model()->columnCount();
-	for(int column = 0; column < columnCount; column++)
-	{
-		if (m_pView->isColumnHidden(column) == true)
+		if (m_pView == nullptr)
 		{
-			continue;
+			return false;
 		}
 
-		helper.setCellValue(1, column, m_pView->model()->headerData(column, Qt::Horizontal).toString().toLocal8Bit());
-	}
-
-	int rowCount = m_pView->model()->rowCount();
-	rowCount = 10;
-
-	setRange(0, rowCount);
-
-	for(int row = 0; row < rowCount; row++)
-	{
-		if (m_exportCancel == true)
+		if (fileName.isEmpty() == true)
 		{
-			break;
+			return false;
 		}
 
+		m_exportCancel = false;
+
+		ExcelExportHelper helper;
+
+		int cellColumn = 1;
+
+		int columnCount = m_pView->model()->columnCount();
 		for(int column = 0; column < columnCount; column++)
 		{
 			if (m_pView->isColumnHidden(column) == true)
@@ -708,18 +704,38 @@ bool ExportData::saveExcelFile(const QString& fileName)
 				continue;
 			}
 
-			helper.setCellValue(row + 2, column, m_pView->model()->data(m_pView->model()->index(row, column)).toString().toLocal8Bit());
+			helper.setCellValue(1, cellColumn++, m_pView->model()->headerData(column, Qt::Horizontal).toString().toUtf8());
 		}
 
-		setValue(row);
-	}
+		int rowCount = m_pView->model()->rowCount();
 
-	if (m_exportCancel == true)
-	{
-		return false;
-	}
+		emit setRange(0, rowCount);
 
-	helper.saveAs(fileName);*/
+		for(int row = 0; row < rowCount; row++)
+		{
+			if (m_exportCancel == true)
+			{
+				break;
+			}
+
+			cellColumn = 1;
+
+			for(int column = 0; column < columnCount; column++)
+			{
+				if (m_pView->isColumnHidden(column) == true)
+				{
+					continue;
+				}
+
+				helper.setCellValue(row + 2, cellColumn++, m_pView->model()->data(m_pView->model()->index(row, column)).toString().toUtf8());
+			}
+
+			emit setValue(row);
+		}
+
+		helper.saveAs(fileName);
+
+	#endif
 
 	return true;
 }
@@ -758,7 +774,7 @@ bool ExportData::saveCsvFile(const QString &fileName)
 			}
 		}
 
-		file.write(m_pView->model()->headerData(column, Qt::Horizontal).toString().toLocal8Bit());
+		file.write(m_pView->model()->headerData(column, Qt::Horizontal).toString().toUtf8());
 		file.write(";");
 	}
 
@@ -766,7 +782,7 @@ bool ExportData::saveCsvFile(const QString &fileName)
 
 	int rowCount = m_pView->model()->rowCount();
 
-	setRange(0, rowCount);
+	emit setRange(0, rowCount);
 
 	for(int row = 0; row < rowCount; row++)
 	{
@@ -785,14 +801,14 @@ bool ExportData::saveCsvFile(const QString &fileName)
 				}
 			}
 
-			file.write(m_pView->model()->data(m_pView->model()->index(row, column)).toString().toLocal8Bit());
+			file.write(m_pView->model()->data(m_pView->model()->index(row, column)).toString().toUtf8());
 			file.write(";");
 		}
 
 		file.write("\n");
 		file.flush();
 
-		setValue(row);
+		emit setValue(row);
 	}
 
 	file.close();

@@ -165,6 +165,11 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 			result &= readComparatorSet(fileData);					// fill ComparatorSet
 		}
 
+		if (result == false)
+		{
+			qDebug() << __FUNCTION__ << "File read error:" << bfi.pathFileName;
+		}
+
 		m_loadedFiles.append(bfi.pathFileName);
 	}
 
@@ -465,7 +470,7 @@ void ConfigSocket::loadSignalBase(ConfigSocket* pThis)
 		const ::Proto::MetrologySignal& protoAppSignal = pThis->m_protoMetrologySignalSet.metrologysignal(i);
 
 		Metrology::SignalParam param;
-		param.serializeFrom(protoAppSignal);
+		param.loadFromProto(protoAppSignal);
 
 		theSignalBase.appendSignal(param);
 

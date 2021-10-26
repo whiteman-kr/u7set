@@ -19,7 +19,7 @@ public:
 	bool isValid() const;
 	void clear();
 
-	int Index() const { return m_index; }
+	int index() const { return m_index; }
 	void setIndex(int index) { m_index = index; }
 
 	Hash hash() const { return m_hash; }

@@ -203,6 +203,17 @@ namespace VFrame30
 		return engine->toScriptValue(s);
 	}
 
+	QString ScriptAppSignalController::equipmentToAppSiganlId(QString equipmentId) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(m_appSignalManager);
+			return {};
+		}
+
+		return m_appSignalManager->equipmentToAppSiganlId(equipmentId);
+	}
+
 	QJSValue ScriptAppSignalController::signalState(QString signalId) const
 	{
 		return signalState(::calcHash(signalId));
@@ -276,6 +287,21 @@ namespace VFrame30
 		return ok ?
 					(type == E::SignalType::Analog) :
 					false;
+	}
+
+	int ScriptAppSignalController::precision(QString signalId) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(m_appSignalManager);
+			return {};
+		}
+
+		bool ok = false;
+
+		AppSignalParam asp = m_appSignalManager->signalParam(::calcHash(signalId), &ok);
+
+		return (ok == true && asp.isAnalog() == true) ? asp.precision() : 0;
 	}
 
 }

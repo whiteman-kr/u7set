@@ -89,25 +89,11 @@ namespace Builder
 		void insert(std::shared_ptr<Afb::AfbElement> logicAfb);
 		void clear();
 
-//		const LogicAfbSignal getAfbSignal(const QString &afbStrID, int signalIndex);
-
 		int getUsedInstances(int opCode) const;
 
 	private:
-
-		struct StrIDIndex
-		{
-			QString strID;		// AfbElement strID()
-			int index;			// AfbElementSignal or AfbElementParam index
-
-			operator QString() const { return QString("%1:%2").arg(strID).arg(index); }
-		};
-
 		FblInstanceMap m_fblInstance;						// Fbl opCode -> current instance
 		NonRamFblInstanceMap m_nonRamFblInstance;			// Non RAM Fbl StrID -> instance
-
-//		QHash<QString, LogicAfbSignal> m_afbSignals;
-//		QHash<QString, LogicAfbParam*> m_afbParams;
 	};
 
 	class UalItem : public QObject
@@ -118,7 +104,7 @@ namespace Builder
 		UalItem();
 		UalItem(const UalItem& ualItem);
 		UalItem(const AppLogicItem& appLogicItem);
-		UalItem(std::shared_ptr<Afb::AfbElement> afbElement, QString &errorMsg);
+		UalItem(std::shared_ptr<Afb::AfbElement> afbElement, QString& errorMsg);
 
 		bool init(std::shared_ptr<Afb::AfbElement> afbElement, QString& errorMsg);
 
@@ -164,6 +150,7 @@ namespace Builder
 		VFrame30::AfbPin& output(const QUuid& guid) { return m_appLogicItem.m_fblItem->output(guid); }
 
 		const std::vector<Afb::AfbParam>& params() const { return m_appLogicItem.afbElement().params(); }
+		std::vector<Afb::AfbParam>& params() { return m_appLogicItem.afbElement().params(); }
 
 		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toAfbElement(); }
 		const UalConst* ualConst() const { return m_appLogicItem.m_fblItem->toSchemaItemConst(); }
@@ -181,7 +168,7 @@ namespace Builder
 
 		std::shared_ptr<VFrame30::FblItemRect> itemRect() const { return m_appLogicItem.m_fblItem; }
 
-		QString schemaID() const { return m_appLogicItem.m_schema->schemaId(); }
+		QString schemaID() const;
 		std::shared_ptr<VFrame30::Schema> schema() { return m_appLogicItem.m_schema; }
 
 		QString label() const { return m_appLogicItem.m_fblItem->label(); }
@@ -191,6 +178,8 @@ namespace Builder
 
 		const LogicPin* getPin(QUuid pinUuid) const;
 		const LogicPin* getPin(const QString& pinCaption) const;
+
+		bool setParamValueByCaption(const QString& paramCaption, const QVariant& value);
 
 	protected:
 		AppLogicItem m_appLogicItem;							// structure from parser
@@ -243,6 +232,8 @@ namespace Builder
 		float floatValue() const;
 		void setFloatValue(double value);
 
+		void setValue(const QVariant& qv);
+
 		QString toString() const;
 
 	private:
@@ -270,33 +261,10 @@ namespace Builder
 		// represent all FB items in application logic schemas
 		//
 	public:
-		static const int FOR_USER_ONLY_PARAM_INDEX = -1;				// index of FB's parameters used by user only
-
-		static const QString IN_PIN_CAPTION;
-		static const QString OUT_PIN_CAPTION;
-
-		static const QString IN_1_PIN_CAPTION;
-		static const QString IN_2_PIN_CAPTION;
-		static const QString IN_3_PIN_CAPTION;
-		static const QString IN_4_PIN_CAPTION;
-
-		static const QString OUT_1_PIN_CAPTION;
-		static const QString OUT_2_PIN_CAPTION;
-		static const QString OUT_3_PIN_CAPTION;
-		static const QString OUT_4_PIN_CAPTION;
-
-		static const QString SIMLOCK_SIM_PIN_CAPTION;
-		static const QString SIMLOCK_BLOCK_PIN_CAPTION;
-
-		static const QString VALIDITY_PIN_CAPTION;
-		static const QString SIMULATED_PIN_CAPTION;
-		static const QString BLOCKED_PIN_CAPTION;
-		static const QString MISMATCH_PIN_CAPTION;
-		static const QString HIGH_LIMIT_PIN_CAPTION;
-		static const QString LOW_LIMIT_PIN_CAPTION;
+		static const int FOR_USER_ONLY_PARAM_INDEX = -1;				// index of AFB parameters used by user only
 
 	public:
-		UalAfb(const UalItem &appItem, bool isBusProcessingAfb);
+		UalAfb(const UalItem& appItem, bool isBusProcessingAfb);
 
 		int instance() const { return m_instance; }
 		quint16 opcode() const { return static_cast<quint16>(afb().opCode()); }		// return FB type
@@ -318,6 +286,9 @@ namespace Builder
 		bool getAfbSignalByIndex(int index, LogicAfbSignal* afbSignal) const;
 		bool getAfbSignalByPin(const LogicPin& pin, LogicAfbSignal* afbSignal) const { return getAfbSignalByIndex(pin.afbOperandIndex(), afbSignal); }
 		bool getAfbSignalByPinUuid(QUuid pinUuid, LogicAfbSignal* afbSignal) const;
+		bool getAfbSignalByCaption(const QString& caption, LogicAfbSignal* afbSignal) const;
+
+		bool setParamValueByCaption(const QString& paramCaption, const QVariant& value);
 
 		bool calculateFbParamValues(ModuleLogicCompiler* compiler);			// implemented in file FbParamCalculation.cpp
 
@@ -351,7 +322,8 @@ namespace Builder
 		bool calculate_LATCH_paramValues();
 		bool calculate_LIM_paramValues();
 		bool calculate_DEAD_ZONE_paramValues();
-		bool calculate_DEAD_ZONE_paramValues_ldn4();
+		bool calculate_DEAD_ZONE_paramValues_LM1_SR04();
+		bool calculate_DEAD_ZONE_paramValues_LM8_SR10();
 		bool calculate_POL_paramValues();
 		bool calculate_DERIV_paramValues();
 		bool calculate_MISMATCH_paramValues();

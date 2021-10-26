@@ -3,31 +3,98 @@
 
 namespace Builder
 {
+	const std::vector<InbusConvDescription> BusSignal::m_inbusConvDescriptions =
+	{
+		// SI32 -> SI32
+		//
+		{ E::AnalogAppSignalFormat::SignedInt32, E::DataFormat::SignedInt, SIZE_32BIT,
+			Afb::SCALE_SI32_SI32, SIZE_32BIT, false, Afb::NO_AFB, SIZE_32BIT,
+			false, Afb::NO_AFB, SIZE_32BIT, Afb::SCALE_SI32_SI32, SIZE_32BIT },
+
+		// SI32 -> FP32
+
+		{ E::AnalogAppSignalFormat::SignedInt32, E::DataFormat::Float, SIZE_32BIT,
+			Afb::SCALE_SI32_FP32, SIZE_32BIT, false, Afb::TCONV_SI32_FP32, SIZE_32BIT,
+			false, Afb::TCONV_FP32_SI32, SIZE_32BIT, Afb::SCALE_FP32_SI32, SIZE_32BIT },
+
+		// SI32 -> SI16
+		//
+		{ E::AnalogAppSignalFormat::SignedInt32, E::DataFormat::SignedInt, SIZE_16BIT,
+			Afb::SCALE_SI32_SI32, SIZE_32BIT, true, Afb::SW_TCONV_SI32_SI16, SIZE_16BIT,
+			true, Afb::TCONV_SI16_SI32 + Afb::OR + Afb::SW_TCONV_SI16_SI32, SIZE_32BIT, Afb::SCALE_SI32_SI32, SIZE_32BIT },
+
+		// SI32 -> UI16
+		//
+		{ E::AnalogAppSignalFormat::SignedInt32, E::DataFormat::UnsignedInt, SIZE_16BIT,
+			Afb::SCALE_SI32_UI16, SIZE_32BIT, false, Afb::SW_TCONV_SI32_UI16, SIZE_16BIT,
+			false, Afb::TCONV_UI16_SI32 + Afb::OR + Afb::SW_TCONV_UI16_SI32, SIZE_32BIT, Afb::SCALE_UI16_SI32, SIZE_32BIT },
+
+		// FP32 -> FP32
+
+		{ E::AnalogAppSignalFormat::Float32, E::DataFormat::Float, SIZE_32BIT,
+			Afb::SCALE_FP32_FP32, SIZE_32BIT, false, Afb::NO_AFB, SIZE_32BIT,
+			false, Afb::NO_AFB, SIZE_32BIT, Afb::SCALE_FP32_FP32, SIZE_32BIT },
+
+		// FP32 -> SI16
+
+		{ E::AnalogAppSignalFormat::Float32, E::DataFormat::SignedInt, SIZE_16BIT,
+			Afb::SCALE_FP32_FP32, SIZE_16BIT, true, Afb::SW_TCONV_FP32_SI16, SIZE_16BIT,
+			true, Afb::NO_AFB + Afb::OR + Afb::SW_TCONV_SI16_FP32, SIZE_32BIT, Afb::SCALE_FP32_FP32, SIZE_32BIT },
+
+		// FP32 -> SI32
+
+		{ E::AnalogAppSignalFormat::Float32, E::DataFormat::SignedInt, SIZE_32BIT,
+			Afb::SCALE_FP32_SI32, SIZE_32BIT, false, Afb::TCONV_FP32_SI32, SIZE_32BIT,
+			false, Afb::TCONV_SI32_FP32, SIZE_32BIT, Afb::SCALE_SI32_FP32, SIZE_32BIT },
+
+		// FP32 -> UI16
+
+		{ E::AnalogAppSignalFormat::Float32, E::DataFormat::UnsignedInt, SIZE_16BIT,
+			Afb::SCALE_FP32_UI16, SIZE_16BIT, false, Afb::SW_TCONV_FP32_UI16, SIZE_16BIT,
+			false, Afb::NO_AFB + Afb::OR + Afb::SW_TCONV_UI16_FP32, SIZE_32BIT, Afb::SCALE_UI16_FP32, SIZE_32BIT },
+	};
+
 	bool BusSignal::conversionRequired() const
+	{
+		bool result = false;
+
+		result |= scalingRequired();
+		result |= typeConversionRequired();
+		result |= byteOrderConversionRequired();
+
+		return result;
+	}
+
+	bool BusSignal::scalingRequired() const
+	{
+		double k = 0;
+		double b = 0;
+
+		getInbusScalingCoefficients(&k, &b);
+
+		return isDoubleEquals(k, 1.0) == false ||
+			   isDoubleEquals(b, 0.0) == false;
+	}
+
+	bool BusSignal::typeConversionRequired() const
 	{
 		switch(signalType)
 		{
 		case E::SignalType::Analog:
-			switch(analogFormat)
+			switch(inOutAnalogFormat)
 			{
 			case E::AnalogAppSignalFormat::Float32:
 				return !(inbusAnalogFormat == E::DataFormat::Float &&
-					inbusSizeBits == SIZE_32BIT &&
-					inbusAnalogByteOrder == E::ByteOrder::BigEndian &&
-					busAnalogLowLimit == inbusAnalogLowLimit &&
-					busAnalogHighLimit == inbusAnalogHighLimit);
+						inbusSizeBits == SIZE_32BIT);
 
 			case E::AnalogAppSignalFormat::SignedInt32:
 				return !(inbusAnalogFormat == E::DataFormat::SignedInt &&
-					inbusSizeBits == SIZE_32BIT &&
-					inbusAnalogByteOrder == E::ByteOrder::BigEndian &&
-					busAnalogLowLimit == inbusAnalogLowLimit &&
-					busAnalogHighLimit == inbusAnalogHighLimit);
+						inbusSizeBits == SIZE_32BIT);
 			}
 
 			// switch default
 
-			assert(false);			// unknown E::AnalogAppSignalFormat
+			Q_ASSERT(false);			// unknown E::AnalogAppSignalFormat
 			return true;
 
 		case E::SignalType::Bus:
@@ -38,31 +105,67 @@ namespace Builder
 		}
 
 		// switch default
-		assert(false);			// unknown  E::SignalType
+		Q_ASSERT(false);				// unknown  E::SignalType
 
 		return true;
 	}
 
-	bool BusSignal::is_SInt32_To_UInt16_BE_NoScale_conversion() const
+	bool BusSignal::byteOrderConversionRequired() const
 	{
-		return 	signalType == E::SignalType::Analog &&
-				analogFormat == E::AnalogAppSignalFormat::SignedInt32 &&
-				inbusAnalogFormat == E::DataFormat::UnsignedInt &&
-				inbusSizeBits == SIZE_16BIT &&
-				inbusAnalogByteOrder == E::ByteOrder::BigEndian &&
-				busAnalogLowLimit == inbusAnalogLowLimit &&
-				busAnalogHighLimit == inbusAnalogHighLimit;
+		return inbusAnalogByteOrder == E::ByteOrder::LittleEndian;
 	}
 
-	bool BusSignal::is_SInt32_To_SInt16_BE_NoScale_conversion() const
+	InbusConvDescription BusSignal::getInbusConvDescription() const
 	{
-		return 	signalType == E::SignalType::Analog &&
-				analogFormat == E::AnalogAppSignalFormat::SignedInt32 &&
-				inbusAnalogFormat == E::DataFormat::SignedInt &&
-				inbusSizeBits == SIZE_16BIT &&
-				inbusAnalogByteOrder == E::ByteOrder::BigEndian &&
-				busAnalogLowLimit == inbusAnalogLowLimit &&
-				busAnalogHighLimit == inbusAnalogHighLimit;
+		for(const InbusConvDescription& d : m_inbusConvDescriptions)
+		{
+			if (inOutAnalogFormat == d.busSignalFormat &&
+				inbusAnalogFormat == d.inbusAnalogFormat &&
+				inbusSizeBits == d.inbusSizeBits)
+			{
+				return d;
+			}
+		}
+
+		return InbusConvDescription();
+	}
+
+	void BusSignal::getInbusScalingCoefficients(double* k, double* b) const
+	{
+		TEST_PTR_RETURN(k);
+		TEST_PTR_RETURN(b);
+
+		double x1 = inOutAnalogLowLimit;
+		double x2 = inOutAnalogHighLimit;
+
+		double y1 = inbusAnalogLowLimit;
+		double y2 = inbusAnalogHighLimit;
+
+		//
+		// y = k*x + b
+		//
+
+		*k = (y2 - y1) / (x2 - x1);
+		*b = y1 - x1 * (*k);
+	}
+
+	void BusSignal::getFrombusScalingCoefficients(double* k, double* b) const
+	{
+		TEST_PTR_RETURN(k);
+		TEST_PTR_RETURN(b);
+
+		double x1 = inbusAnalogLowLimit;
+		double x2 = inbusAnalogHighLimit;
+
+		double y1 = inOutAnalogLowLimit;
+		double y2 = inOutAnalogHighLimit;
+
+		//
+		// y = k*x + b
+		//
+
+		*k = (y2 - y1) / (x2 - x1);
+		*b = y1 - x1 * (*k);
 	}
 
 	void BusSignal::init(const Busses& busses, const VFrame30::BusSignal& bs)
@@ -76,7 +179,7 @@ namespace Builder
 		inbusAddr.set(0, 0);
 		inbusAddr.addBit(bs.inbusOffset() * SIZE_8BIT + bs.inbusDiscreteBitNo());
 
-		analogFormat = bs.analogFormat();
+		inOutAnalogFormat = bs.analogFormat();
 
 		switch(bs.type())
 		{
@@ -99,8 +202,8 @@ namespace Builder
 
 		inbusAnalogFormat  = bs.inbusAnalogFormat();
 		inbusAnalogByteOrder = bs.inbusAnalogByteOrder();
-		busAnalogLowLimit = bs.busAnalogLowLimit();
-		busAnalogHighLimit = bs.busAnalogHighLimit();
+		inOutAnalogLowLimit = bs.busAnalogLowLimit();
+		inOutAnalogHighLimit = bs.busAnalogHighLimit();
 		inbusAnalogLowLimit = bs.inbusAnalogLowLimit();
 		inbusAnalogHighLimit = bs.inbusAnalogHighLimit();
 	}

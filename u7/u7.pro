@@ -392,6 +392,9 @@ DISTFILES += \
     Afbl/tct_off_v1.afb \
     Afbl/tct_on_v1.afb \
     Afbl/tct_vibr_v1.afb \
+    LogicModuleDescription/LM1_SR05.xml \
+    LogicModuleDescription/LM1_SR20.xml \
+    LogicModuleDescription/LM8_SR10.xml \
     LogicModuleDescription/MSO4_SR21.xml \
     Ufbl/UFB_A3_LANDSCAPE.templ_ufb \
     Ufbl/UFB_A4_LANDSCAPE.templ_ufb \
@@ -446,8 +449,8 @@ win32:LIBS += -lGdi32
 LIBS += -lQScintilla
 win32:PRE_TARGETDEPS += $$DESTDIR/QScintilla.lib
 unix:PRE_TARGETDEPS += $$DESTDIR/libQScintilla.a
-INCLUDEPATH += ./../QScintilla/Qt4Qt5
-DEPENDPATH += ./../QScintilla/Qt4Qt5
+INCLUDEPATH += ./../QScintilla/src
+DEPENDPATH += ./../QScintilla/src
 
 # VFrame30 library
 #

@@ -138,12 +138,12 @@ LmDescription& LmDescription::operator=(const LmDescription& src)
 		m_afbComponents.insert({p.first, afbComponentCopy});
 	}
 
-	m_afbs.clear();
-	m_afbs.reserve(src.m_afbs.size());
-	for (std::shared_ptr<Afb::AfbElement> afb : src.m_afbs)
+	m_afbElements.clear();
+	m_afbElements.reserve(src.m_afbElements.size());
+	for (std::shared_ptr<Afb::AfbElement> afb : src.m_afbElements)
 	{
 		std::shared_ptr<Afb::AfbElement> afbCopy = std::make_shared<Afb::AfbElement>(*afb.get());
-		m_afbs.push_back(afbCopy);
+		m_afbElements.push_back(afbCopy);
 	}
 
 	return *this;
@@ -520,8 +520,8 @@ bool LmDescription::loadAfbs(const QDomElement& element, QString* errorMessage)
 	//
 	QDomNodeList afbNodeList = element.elementsByTagName(QLatin1String("AFB"));
 
-	m_afbs.clear();
-	m_afbs.reserve(afbNodeList.size());
+	m_afbElements.clear();
+	m_afbElements.reserve(afbNodeList.size());
 
 	for (int i = 0; i < afbNodeList.size(); i++)
 	{
@@ -544,12 +544,12 @@ bool LmDescription::loadAfbs(const QDomElement& element, QString* errorMessage)
 			return false;
 		}
 
-		m_afbs.push_back(afb);
+		m_afbElements.push_back(afb);
 	}
 
 	// Set AFB Components to AFbElement
 	//
-	for (std::shared_ptr<Afb::AfbElement> afb : m_afbs)
+	for (std::shared_ptr<Afb::AfbElement> afb : m_afbElements)
 	{
 		int opCode = afb->opCode();
 
@@ -1211,9 +1211,49 @@ quint32 LmDescription::checkAfbVersionsOffset(bool absoluteValue) const
 	return m_checkAfbVersionsOffset + (absoluteValue ? m_memory.m_appDataOffset : 0);
 }
 
-const std::vector<std::shared_ptr<Afb::AfbElement>>& LmDescription::afbs() const
+const std::vector<std::shared_ptr<Afb::AfbElement>>& LmDescription::afbElements() const
 {
-	return m_afbs;
+	return m_afbElements;
+}
+
+std::vector<std::shared_ptr<Afb::AfbElement>> LmDescription::afbElements(int opCode) const
+{
+	std::vector<std::shared_ptr<Afb::AfbElement>> elements;
+
+	for(auto& elem : m_afbElements)
+	{
+		if (elem->opCode() == opCode)
+		{
+			elements.push_back(elem);
+		}
+	}
+
+	return elements;
+}
+
+std::vector<std::shared_ptr<Afb::AfbElement>> LmDescription::afbElements(const QString& componentCaption) const
+{
+	std::shared_ptr<Afb::AfbComponent> afbComp = component(componentCaption);
+
+	if (afbComp == nullptr)
+	{
+		return std::vector<std::shared_ptr<Afb::AfbElement>>();
+	}
+
+	return afbElements(afbComp->opCode());
+}
+
+const std::shared_ptr<Afb::AfbElement> LmDescription::afbElement(const QString& elementCaption) const
+{
+	for(auto& elem : m_afbElements)
+	{
+		if (elem->caption() == elementCaption)
+		{
+			return elem;
+		}
+	}
+
+	return nullptr;
 }
 
 std::shared_ptr<Afb::AfbComponent> LmDescription::component(int opCode) const

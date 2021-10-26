@@ -173,7 +173,7 @@ namespace Builder
 			}
 
 			::Proto::AppSignal* aspMessage = tuningSet->add_appsignal();
-			s.serializeTo(aspMessage);
+			s.saveToProto(aspMessage);
 		}
 
 		return true;

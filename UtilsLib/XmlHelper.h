@@ -28,6 +28,7 @@ public:
 	void writeStringAttribute(const QString& name, const QString& value);
 	void writeIntAttribute(const QString& name, int value, bool hex = false);
 	void writeBoolAttribute(const QString& name, bool value);
+	void writeInt64Attribute(const QString& name, qint64 value, bool hex = false);
 	void writeUInt64Attribute(const QString& name, quint64 value, bool hex = false);
 	void writeUInt32Attribute(const QString& name, quint32 value, bool hex);
 	void writeDoubleAttribute(const QString& name, double value);
@@ -45,10 +46,46 @@ public:
 	void writeHostAddressPort(const QString& nameIP, const QString& namePort, const HostAddressPort& hostAddressPort);
 	void writeHostAddress(const QString& nameIP, const QHostAddress& hostAddress);
 
+	void writeQVariantAttribute(const QString& name, const QVariant& qv);
+
+	template<typename ENUM_TYPE>
+	void writeEnumKeyAttribute(const QString& name, ENUM_TYPE value);		// writes Str name of enum item
+
+	template<typename ENUM_TYPE>
+	void writeEnumValueAttribute(const QString& name, ENUM_TYPE value);		// writes Int value of enum item
+
+	template<typename ENUM_TYPE>
+	void writeEnumKeyValueAttribute(const QString& name, ENUM_TYPE value);	// writes Str name and Int value of enum item
+
 private:
 	QXmlStreamWriter* m_xmlWriter = nullptr;
 	QXmlStreamWriter* m_xmlLocalWriter = nullptr;
 };
+
+template<typename ENUM_TYPE>
+void XmlWriteHelper::writeEnumKeyAttribute(const QString& name, ENUM_TYPE value)
+{
+	static_assert(std::is_enum<ENUM_TYPE>::value == true);
+
+	writeStringAttribute(name, E::valueToString<ENUM_TYPE>(value));
+}
+
+template<typename ENUM_TYPE>
+void XmlWriteHelper::writeEnumValueAttribute(const QString& name, ENUM_TYPE value)
+{
+	static_assert(std::is_enum<ENUM_TYPE>::value == true);
+
+	writeIntAttribute(name + QString(XmlAttribute::ENUM_VALUE_SUFFIX), static_cast<int>(value));
+}
+
+template<typename ENUM_TYPE>
+void XmlWriteHelper::writeEnumKeyValueAttribute(const QString& name, ENUM_TYPE value)
+{
+	static_assert(std::is_enum<ENUM_TYPE>::value == true);
+
+	writeEnumKeyAttribute(name, value);
+	writeEnumValueAttribute(name, value);
+}
 
 class XmlReadHelper
 {
@@ -68,6 +105,7 @@ public:
 	bool readStringAttribute(const QString& name, QString* value);
 	bool readIntAttribute(const QString& name, int* value);
 	bool readBoolAttribute(const QString& name, bool* value);
+	bool readInt64Attribute(const QString& name, qlonglong* value);
 	bool readUInt64Attribute(const QString& name, qulonglong* value);
 	bool readUInt32Attribute(const QString& name, quint32* value);
 	bool readDoubleAttribute(const QString& name, double* value);
@@ -85,7 +123,78 @@ public:
 	bool findElement(const QString& elementName);
 	bool checkElement(const QString& elementName);
 
+	QXmlStreamAttributes attributes() const { return m_xmlReader->attributes(); }
+
+	bool readQVariantAttribute(const QString& name, QVariant* qv);
+
+	template<typename ENUM_TYPE>
+	bool readEnumKeyAttribute(const QString& name, ENUM_TYPE* value);
+
+	template<typename ENUM_TYPE>
+	bool readEnumValueAttribute(const QString& name, ENUM_TYPE* value);
+
 private:
 	QXmlStreamReader* m_xmlReader = nullptr;
 	QXmlStreamReader* m_xmlLocalReader = nullptr;
 };
+
+template<typename ENUM_TYPE>
+bool XmlReadHelper::readEnumKeyAttribute(const QString& name, ENUM_TYPE* value)
+{
+	static_assert(std::is_enum<ENUM_TYPE>::value == true);
+
+	if(value == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	QString str;
+	bool result = false;
+
+	result = readStringAttribute(name, &str);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	*value = E::stringToValue<ENUM_TYPE>(str, &result);
+
+	return result;
+}
+
+template<typename ENUM_TYPE>
+bool XmlReadHelper::readEnumValueAttribute(const QString& name, ENUM_TYPE* value)
+{
+	static_assert(std::is_enum<ENUM_TYPE>::value == true);
+
+	if(value == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	QString attrName = name + QString(XmlAttribute::ENUM_VALUE_SUFFIX);
+
+	int intVal = 0;
+	bool result = false;
+
+	result = readIntAttribute(attrName, &intVal);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	if (E::contains<ENUM_TYPE>(intVal) == false)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	*value = static_cast<ENUM_TYPE>(intVal);
+
+	return result;
+}
+

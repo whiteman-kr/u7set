@@ -15,8 +15,18 @@ QT       += qml
 QT       += xml
 QT       += charts
 
-#axcontainer
+# For Microsoft Excel
+#
+win32 {
+    QT       += axcontainer
+    #
+    # Files - ExcelHelper.cpp, ExcelHelper.h
+    # Files - ProcessData.cpp, ProcessData.h
+    #
+}
 
+#
+#
 TARGET = Metrology
 TEMPLATE = app
 
@@ -46,6 +56,7 @@ unix {
 
 SOURCES += \
 	../lib/BuildInfo.cpp \
+	../lib/PropertyEditor.cpp \
 	../lib/SoftwareSettings.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
 	../lib/Ui/DialogAbout.cpp \
@@ -63,6 +74,7 @@ SOURCES += \
 	DialogSignalList.cpp \
 	DialogTuningSignalList.cpp \
 	DialogTuningSourceList.cpp \
+	ExcelHelper.cpp \
 	MetrologyMain.cpp \
 	MetrologyMainWindow.cpp \
 	MetrologyConnection.cpp \
@@ -98,11 +110,13 @@ SOURCES += \
 
 HEADERS  += \
 	../lib/BuildInfo.h \
+    ../lib/PropertyEditor.h \
 	../lib/SoftwareSettings.h \
 	../lib/Tuning/TuningSignalState.h \
 	../lib/Ui/DialogAbout.h \
 	../lib/ComparatorSet.h \
     ChartView.h \
+    ExcelHelper.h \
     Stable.h \
 	DialogCalculator.h \
 	DialogComparatorList.h \
@@ -149,6 +163,8 @@ HEADERS  += \
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
+
+TRANSLATIONS = languages/Metrology_ru.ts
 
 FORMS    +=
 

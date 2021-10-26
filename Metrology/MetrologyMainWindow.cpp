@@ -1283,8 +1283,12 @@ bool MainWindow::signalIsMeasured(const MeasureSignal& activeSignal, QString& si
 
 	switch (m_connectionType)
 	{
-		case Metrology::ConnectionType::Unused:	ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);		break;
-		default:								ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);	break;
+		case Metrology::ConnectionType::Unused:
+			ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Source);
+			break;
+		default:
+			ioSignal = activeSignal.multiChannelSignal(Metrology::ConnectionIoType::Destination);
+			break;
 	}
 
 	if (ioSignal.isEmpty() == true)
@@ -1502,7 +1506,7 @@ void MainWindow::onStartMeasure()
 		{
 			if (changeInputSignalOnInternal(activeSignal) == true)
 			{
-				emit onStartMeasure();
+				onStartMeasure();
 				return;
 			}
 		}
@@ -1514,7 +1518,7 @@ void MainWindow::onStartMeasure()
 		if (comparatorCount == 0)
 		{
 			m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Program);
-			emit measureThreadStoped();
+			measureThreadStoped();
 			return;
 		}
 	}
@@ -1552,7 +1556,7 @@ void MainWindow::onStartMeasure()
 			if (result == QMessageBox::No)
 			{
 				m_measureThread.stopMeasure(MeasureThreadInfo::ExitCode::Program);
-				emit measureThreadStoped();
+				measureThreadStoped();
 				return;
 			}
 		}
@@ -1598,6 +1602,7 @@ void MainWindow::onExportMeasure()
 	{
 		case Measure::Type::Linearity:		fileName = "Linearity";		break;
 		case Measure::Type::Comparators:	fileName = "Comparators";	break;
+
 		default:
 			assert(0);
 	}
@@ -1661,6 +1666,14 @@ void MainWindow::onMeasureProperty()
 	}
 
 	pView->onProperty();
+
+	if (m_pStatisticsPanel == nullptr)
+	{
+		assert(m_pStatisticsPanel);
+		return;
+	}
+
+	m_pStatisticsPanel->updateList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1776,6 +1789,7 @@ void MainWindow::showConnectionList()
 		return;
 	}
 
+	m_pStatisticsPanel->connectionTypeChanged(m_connectionType);
 	m_pStatisticsPanel->updateList();
 }
 
@@ -1825,7 +1839,7 @@ void MainWindow::showGraphLinEl()
 		return;
 	}
 
-	emit pView->showChart(ChartType::LinearityEl);
+	pView->showChart(ChartType::LinearityEl);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1838,7 +1852,7 @@ void MainWindow::showGraphLinEn()
 		return;
 	}
 
-	emit pView->showChart(ChartType::LinearityEn);
+	pView->showChart(ChartType::LinearityEn);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1851,7 +1865,7 @@ void MainWindow::showGraph20El()
 		return;
 	}
 
-	emit pView->showChart(ChartType::Value20El);
+	pView->showChart(ChartType::Value20El);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1864,7 +1878,7 @@ void MainWindow::showGraph20En()
 		return;
 	}
 
-	emit pView->showChart(ChartType::Value20En);
+	pView->showChart(ChartType::Value20En);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1982,23 +1996,65 @@ void MainWindow::showOptions()
 		m_pComparatorInfoPanel->setComparatorInfo(theOptions.comparatorInfo());
 	}
 
-
 	// if changed error type or limitType
 	//
 	if (	options.linearity().errorType() != theOptions.linearity().errorType() ||
-			options.linearity().limitType() != theOptions.linearity().limitType() ||
+			options.linearity().calcErrorByRange() != theOptions.linearity().calcErrorByRange() ||
 			options.comparator().errorType() != theOptions.comparator().errorType() ||
-			options.comparator().limitType() != theOptions.comparator().limitType())
+			options.comparator().calcErrorByRange() != theOptions.comparator().calcErrorByRange())
 	{
 		m_pStatisticsPanel->updateList();
 	}
+
+	// load database of measurements
+	//
+	//	if (options.database().locationPath() != theOptions.database().locationPath())
+	//	{
+	//		for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
+	//		{
+	//			Measure::View* pView = measureView(static_cast<Measure::Type>(measureType));
+	//			if (pView == nullptr)
+	//			{
+	//				continue;
+	//			}
+
+	//			pView->measureModel().clear();
+	//		}
+
+	//		m_measureBase.clear();
+
+	//		theDatabase.close();
+
+	//		theDatabase.setDatabaseOption(theOptions.database());
+	//		bool result = theDatabase.open();
+
+	//		if (result == true )
+	//		{
+	//			theOptions.linearity().points().load();
+
+	//			for(int measureType = 0; measureType < Measure::TypeCount; measureType++)
+	//			{
+	//				Measure::Type mesaure_Type = static_cast<Measure::Type>(measureType);
+
+	//				m_measureBase.load(mesaure_Type);
+
+	//				Measure::View* pView = measureView(mesaure_Type);
+	//				if (pView == nullptr)
+	//				{
+	//					continue;
+	//				}
+
+	//				pView->loadMeasurements(m_measureBase);
+	//			}
+	//		}
+	//	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::showUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath() + "/docs/Mertology_User_Manual.pdf", this);
+	UiTools::openHelp(QApplication::applicationDirPath() + "/docs/Metrology_User_Manual.pdf", this);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2555,7 +2611,7 @@ void MainWindow::calibratorConnectedChanged(int count)
 				continue;
 			}
 
-			calibratorInfo.append(tr("Calibrator %1: %2, %3\n").arg(i+1).arg(pCalibrator->typeStr()).arg(pCalibrator->serialNo()));
+			calibratorInfo.append(tr("Calibrator %1: %2, %3\n").arg(i+1).arg(pCalibrator->typeStr(), pCalibrator->serialNo()));
 		}
 
 		m_statusCalibratorCount->setToolTip(calibratorInfo);
@@ -2945,14 +3001,16 @@ void MainWindow::measureThreadStoped()
 
 					m_pMainTab->setCurrentIndex(Measure::Type::Comparators);
 
-					emit onStartMeasure();
+					onStartMeasure();
 					return;
 				}
+
 			case Measure::Type::Comparators:
 				{
 					m_pMainTab->setCurrentIndex(Measure::Type::Linearity);
 				}
 				break;
+
 			default:
 				assert(0);
 		}
@@ -2965,7 +3023,7 @@ void MainWindow::measureThreadStoped()
 		bool signalIsSelected = setNextMeasureSignalFromModule();
 		if (signalIsSelected == true)
 		{
-			emit onStartMeasure();
+			onStartMeasure();
 			return;
 		}
 	}
@@ -3009,6 +3067,11 @@ void MainWindow::measureThreadInfo(const MeasureThreadInfo& info)
 			}
 
 			m_statusMeasureTimeout->setValue(info.timeout());
+
+			break;
+
+		default:
+			assert(0);
 	}
 }
 
@@ -3317,7 +3380,7 @@ void MainWindow::showFindMeasurePanel(const QString& signalID)
 
 	m_pFindMeasurePanel->show();
 	m_pFindMeasurePanel->setFindText(signalID);
-	emit m_pFindMeasurePanel->find();
+	m_pFindMeasurePanel->find();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

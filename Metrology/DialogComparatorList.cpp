@@ -56,6 +56,7 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 			case COMPARATOR_LIST_COLUMN_EN_RANGE:		result = Qt::AlignCenter;	break;
 			case COMPARATOR_LIST_COLUMN_OUTPUT:			result = Qt::AlignLeft;		break;
 			case COMPARATOR_LIST_COLUMN_SCHEMA:			result = Qt::AlignLeft;		break;
+
 			default:
 				assert(0);
 		}
@@ -108,6 +109,14 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 				{
 					return QColor(0xFF, 0xA0, 0xA0);
 				}
+			}
+		}
+
+		if (pInSignal->param().isOutput() == true)
+		{
+			if (column == COMPARATOR_LIST_COLUMN_TYPE)
+			{
+				return QColor(0xFF, 0xA0, 0xA0);
 			}
 		}
 
@@ -186,6 +195,7 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 		case COMPARATOR_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();											break;
 		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->outputSignalID(m_idType);								break;
 		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();												break;
+
 		default:
 			assert(0);
 	}
@@ -424,7 +434,8 @@ void DialogComparatorList::onEnableMeasure()
 		return;
 	}
 
-	for(auto selectedIndex : pView->selectionModel()->selectedRows())
+	const QModelIndexList selectedList = pView->selectionModel()->selectedRows();
+	for(auto selectedIndex : selectedList)
 	{
 		int indexRow = selectedIndex.row();
 		if (indexRow < 0 || indexRow >= m_comparatorTable.count())
@@ -452,7 +463,8 @@ void DialogComparatorList::onDisableMeasure()
 		return;
 	}
 
-	for(auto selectedIndex : pView->selectionModel()->selectedRows())
+	const QModelIndexList selectedList = pView->selectionModel()->selectedRows();
+	for(auto selectedIndex : selectedList)
 	{
 		int indexRow = selectedIndex.row();
 		if (indexRow < 0 || indexRow >= m_comparatorTable.count())

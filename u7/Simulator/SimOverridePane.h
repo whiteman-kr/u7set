@@ -92,6 +92,8 @@ public:
 		ColumnCount
 	};
 
+	bool operator < (const QTreeWidgetItem& other) const;
+
 	Sim::OverrideSignalParam m_overrideSignal;
 };
 

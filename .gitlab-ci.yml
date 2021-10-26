@@ -138,6 +138,9 @@ windows build job:
     - "copy $Env:CI_PROJECT_DIR\\bin_Win64\\visa64.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
     - "copy $Env:CI_PROJECT_DIR\\bin_Win64\\visaConfMgr.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
     - "copy $Env:CI_PROJECT_DIR\\bin_Win64\\visaUtilities.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+# Copy documents
+    - "mkdir \"$Env:CI_PROJECT_DIR/bin/release/docs\""
+    - "copy $Env:CI_PROJECT_DIR\\Metrology\\docs\\Metrology_User_Manual.pdf \"$Env:CI_PROJECT_DIR/bin/release/docs/\""
 
 #Remove some files not requiered for releases
     - "# ----------------------------------------------"
@@ -261,10 +264,10 @@ test job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/test_simulator_v357/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/test_simulator_v362/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
 
 #Run ROVT to check configuration generation
     - "# ----------------------------------------------"
     - "#               Run ROVT tests"
     - "# ----------------------------------------------"
-    - "&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v357\\build"
+    - "&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\test_simulator_v362\\build"

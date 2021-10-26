@@ -247,7 +247,9 @@ namespace Builder
 		void movBitConst(int addrTo, int bitNo, int constBit);
 		void movBitConst(Address16 addr16, int constBit);
 		void writeFuncBlock(int fbType, int fbInstance, int fbParamNo, int addrFrom, const QString& fbCaption);
+		void writeFuncBlock(int fbType, int fbInstance, int fbParamNo, const Address16& addrFrom, const QString& fbCaption);
 		void readFuncBlock(int addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption);
+		void readFuncBlock(const Address16& addrTo, int fbType, int fbInstance, int fbParamNo, const QString& fbCaption);
 		void writeFuncBlockConst(int fbType, int fbInstance, int fbParamNo, int constVal, const QString& fbCaption);
 		void writeFuncBlockBit(int fbType, int fbInstance, int fbParamNo, int addrFrom, int bitNo, const QString& fbCaption);
 		void writeFuncBlockBit(int fbType, int fbInstance, int fbParamNo, Address16 addrFrom, const QString& fbCaption);
@@ -417,7 +419,10 @@ namespace Builder
 		void calculate(CodeSnippetMetrics* codeFragmentMetrics);
 
 		int sizeW() const;
+
+		CodeSnippet& operator << (const CodeItem& ci);
 	};
+
 
 	class ApplicationLogicCode : public QObject
 	{

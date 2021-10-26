@@ -17,6 +17,7 @@ namespace Measure
 		{
 			HeaderColumn("MVC_CMN_L_INDEX", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Index"), 100, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_ENABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_L_MODULE_SN", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Module SN"), 100, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
+			HeaderColumn("MVC_CMN_L_MODULE_TYPE", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Module type"), 100, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_L_CONNECT_APP_ID", QT_TRANSLATE_NOOP("MeasureViewHeader",	"ConnectSignalID"), 150, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_L_CONNECT_TYPE", QT_TRANSLATE_NOOP("MeasureViewHeader",	"ConnectType"), 100, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_L_CUSTOM_ID", QT_TRANSLATE_NOOP("MeasureViewHeader",	"SignalID"), 150, MVC_CMN_SHOW, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
@@ -36,7 +37,8 @@ namespace Measure
 			HeaderColumn("MVC_CMN_L_EN_MEASURE", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Engineering measure"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_L_SYSTEM_DEVIATION", QT_TRANSLATE_NOOP("MeasureViewHeader",	"System deviation"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_L_SD", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Standard deviation"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-			HeaderColumn("MVC_CMN_L_BORDER", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Borders"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+			HeaderColumn("MVC_CMN_L_LOW_BORDER", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Low border"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+			HeaderColumn("MVC_CMN_L_HIGH_BORDER", QT_TRANSLATE_NOOP("MeasureViewHeader",	"High border"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_L_UNCERTAINTY", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Uncertainty"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_L_VALUE_COUNT", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Amount measuremets"), 80, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_L_VALUE_0", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Value 1"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
@@ -77,8 +79,6 @@ namespace Measure
 			HeaderColumn(),
 			HeaderColumn(),
 			HeaderColumn(),
-			HeaderColumn(),
-			HeaderColumn(),
 		},
 
 		// Measurements of comparators
@@ -86,6 +86,7 @@ namespace Measure
 		{
 			HeaderColumn("MVC_CMN_C_INDEX", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Index"), 100, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_ENABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_C_MODULE_SN", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Module SN"), 100, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
+			HeaderColumn("MVC_CMN_C_MODULE_TYPE", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Module type"), 100, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_C_CONNECT_APP_ID", QT_TRANSLATE_NOOP("MeasureViewHeader",	"ConnectSignalID"), 150, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_C_CONNECT_TYPE", QT_TRANSLATE_NOOP("MeasureViewHeader",	"ConnectType"), 100, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_C_CUSTOM_ID", QT_TRANSLATE_NOOP("MeasureViewHeader",	"SignalID"), 150, MVC_CMN_SHOW, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
@@ -111,7 +112,6 @@ namespace Measure
 			HeaderColumn("MVC_CMN_C_ERROR_RESULT", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Result"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_C_MEASUREMENT_TIME", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Measurement time"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 			HeaderColumn("MVC_CMN_C_CALIBRATOR", QT_TRANSLATE_NOOP("MeasureViewHeader",	"Calibrator"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-			HeaderColumn(),
 			HeaderColumn(),
 			HeaderColumn(),
 			HeaderColumn(),
@@ -323,7 +323,8 @@ namespace Measure
 							setColumnVisible(MVC_CMN_L_PERCENT, false);
 							setColumnVisible(MVC_CMN_L_SYSTEM_DEVIATION, false);
 							setColumnVisible(MVC_CMN_L_SD, false);
-							setColumnVisible(MVC_CMN_L_BORDER, false);
+							setColumnVisible(MVC_CMN_L_LOW_BORDER, false);
+							setColumnVisible(MVC_CMN_L_HIGH_BORDER, false);
 							setColumnVisible(MVC_CMN_L_UNCERTAINTY, false);
 
 							for (int m = 0; m < Measure::MaxMeasurementInPoint; m ++)
@@ -343,7 +344,8 @@ namespace Measure
 							setColumnVisible(MVC_CMN_L_PERCENT, true);
 							setColumnVisible(MVC_CMN_L_SYSTEM_DEVIATION, true);
 							setColumnVisible(MVC_CMN_L_SD, true);
-							setColumnVisible(MVC_CMN_L_BORDER, true);
+							setColumnVisible(MVC_CMN_L_LOW_BORDER, true);
+							setColumnVisible(MVC_CMN_L_HIGH_BORDER, true);
 							setColumnVisible(MVC_CMN_L_UNCERTAINTY, true);
 
 							for (int m = 0; m < Measure::MaxMeasurementInPoint; m ++)
@@ -364,7 +366,8 @@ namespace Measure
 							setColumnVisible(MVC_CMN_L_PERCENT, false);
 							setColumnVisible(MVC_CMN_L_SYSTEM_DEVIATION, false);
 							setColumnVisible(MVC_CMN_L_SD, false);
-							setColumnVisible(MVC_CMN_L_BORDER, false);
+							setColumnVisible(MVC_CMN_L_LOW_BORDER, false);
+							setColumnVisible(MVC_CMN_L_HIGH_BORDER, false);
 							setColumnVisible(MVC_CMN_L_UNCERTAINTY, false);
 
 							for (int m = 0; m < Measure::MaxMeasurementInPoint; m ++)

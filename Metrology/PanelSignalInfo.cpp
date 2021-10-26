@@ -54,10 +54,12 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 			case SIGNAL_INFO_COLUMN_CHASSIS:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_MODULE:			result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_PLACE:			result = Qt::AlignCenter;	break;
+			case SIGNAL_INFO_COLUMN_MODULE_TYPE:	result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_EN_RANGE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_EL_RANGE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_EL_SENSOR:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_CALIBRATOR:		result = Qt::AlignCenter;	break;
+
 			default:
 				assert(0);
 		}
@@ -184,10 +186,12 @@ QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 		case SIGNAL_INFO_COLUMN_CHASSIS:		result = ioParam.chassisStr();			break;
 		case SIGNAL_INFO_COLUMN_MODULE:			result = ioParam.moduleStr();			break;
 		case SIGNAL_INFO_COLUMN_PLACE:			result = ioParam.placeStr();			break;
+		case SIGNAL_INFO_COLUMN_MODULE_TYPE:	result = ioParam.moduleCaption();		break;
 		case SIGNAL_INFO_COLUMN_EN_RANGE:		result = ioParam.engineeringRangeStr();	break;
 		case SIGNAL_INFO_COLUMN_EL_RANGE:		result = ioParam.electricRangeStr();	break;
 		case SIGNAL_INFO_COLUMN_EL_SENSOR:		result = ioParam.electricSensorStr();	break;
 		case SIGNAL_INFO_COLUMN_CALIBRATOR:		result = ioParam.calibratorStr();		break;
+
 		default:
 			assert(0);
 	}
@@ -303,6 +307,7 @@ PanelSignalInfo::PanelSignalInfo(const SignalInfoOption& signalInfo, QWidget* pa
 		hideColumn(SIGNAL_INFO_COLUMN_CHASSIS, true);
 		hideColumn(SIGNAL_INFO_COLUMN_MODULE, true);
 		hideColumn(SIGNAL_INFO_COLUMN_PLACE, true);
+		hideColumn(SIGNAL_INFO_COLUMN_MODULE_TYPE, true);
 		hideColumn(SIGNAL_INFO_COLUMN_EL_SENSOR, true);
 	}
 

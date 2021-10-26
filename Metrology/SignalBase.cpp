@@ -340,6 +340,47 @@ QString IoSignalParam::moduleStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
+QString IoSignalParam::moduleCaption() const
+{
+	QMutexLocker l(&m_mutex);
+
+	QString result;
+
+	if (m_connectionType == Metrology::ConnectionType::Unused)
+	{
+		const Metrology::SignalParam& param = m_param[Metrology::ConnectionIoType::Source];
+		if (param.isValid() == true)
+		{
+			result = param.location().moduleCaption();
+		}
+	}
+	else
+	{
+		const Metrology::SignalParam& inParam = m_param[Metrology::ConnectionIoType::Source];
+		if (inParam.isValid() == true)
+		{
+			result = inParam.location().moduleCaption() + MULTI_TEXT_DEVIDER;
+		}
+
+		const Metrology::SignalParam& outParam = m_param[Metrology::ConnectionIoType::Destination];
+		if (outParam.isValid() == true)
+		{
+			if (inParam.location().moduleCaption() != outParam.location().moduleCaption())
+			{
+				result += outParam.location().moduleCaption();
+			}
+			else
+			{
+				result = outParam.location().moduleCaption();
+			}
+		}
+	}
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 QString IoSignalParam::placeStr() const
 {
 	QMutexLocker l(&m_mutex);
@@ -668,6 +709,9 @@ QString IoSignalParam::engineeringRangeStr() const
 				}
 			}
 		}
+
+		default:
+			break;
 	}
 
 	return result;
@@ -855,6 +899,8 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 												   m_location.chassis(),
 												   m_location.module(),
 												   m_location.place());
+
+					// m_signalID.append("(" + m_location.contact() + ")");
 
 					break;
 
@@ -1738,6 +1784,11 @@ bool SignalBase::enableForMeasure(Metrology::ConnectionType connectionType, Metr
 				{
 					return false;
 				}
+
+				if (pDestSignal->param().location().chassis() == -1 || pDestSignal->param().location().module() == -1 || pDestSignal->param().location().place() == -1)
+				{
+					return false;
+				}
 			}
 			break;
 
@@ -1782,6 +1833,11 @@ bool SignalBase::enableForMeasure(Metrology::ConnectionType connectionType, Metr
 				}
 
 				if (pDestSignal->param().electricRangeIsValid() == false)
+				{
+					return false;
+				}
+
+				if (pDestSignal->param().location().chassis() == -1 || pDestSignal->param().location().module() == -1 || pDestSignal->param().location().place() == -1)
 				{
 					return false;
 				}
@@ -2015,13 +2071,12 @@ int SignalBase::createRackListForMeasure(int measureKind, Metrology::ConnectionT
 						continue;
 					}
 
-					QString caption = group.caption();
-					if (caption.isEmpty() == true)
+					if (group.caption().isEmpty() == true)
 					{
 						continue;
 					}
 
-					Metrology::RackParam rack(g, QString("GROUP_%1").arg(g), group.caption());
+					Metrology::RackParam rack(group.index(), QString("GROUP_%1").arg(group.index()), group.caption());
 
 					m_rackList.push_back(rack);
 				}
@@ -2082,6 +2137,7 @@ void SignalBase::initSignals()
 					case E::SignalType::Analog:		param.setPlace(analogTuningSignalCount++);		break;
 					case E::SignalType::Discrete:	param.setPlace(discreteTuningSignalCount++);	break;
 					case E::SignalType::Bus:		param.setPlace(busTuningSignalCount++);			break;
+
 					default:
 						assert(0);
 				}
@@ -2318,7 +2374,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 					}
 
 					QString id;
-					id = QString::asprintf("%d - %d - %d",
+					id = QString::asprintf("%02d - %02d - %02d",
 										   param.location().rack().index(),
 										   param.location().chassis(),
 										   param.location().module());
@@ -2327,18 +2383,18 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 
 					if (mesaureSignalMap.contains(hashid) == true)
 					{
-						quint64 index = mesaureSignalMap[hashid];
-						if (index < m_signalMeasureList.size())
+						quint64 signalIndexMap = mesaureSignalMap[hashid];
+						if (signalIndexMap < m_signalMeasureList.size())
 						{
 							int channel = param.location().place() - 1;
 							if (channel >= 0 && channel < measureSignal.channelCount())
 							{
-								if (m_signalMeasureList[index].metrologySignal(connectionType, channel) != nullptr)
+								if (m_signalMeasureList[signalIndexMap].metrologySignal(connectionType, channel) != nullptr)
 								{
 									continue;
 								}
 
-								if (m_signalMeasureList[index].setMetrologySignal(measureKind,
+								if (m_signalMeasureList[signalIndexMap].setMetrologySignal(measureKind,
 																				  m_connectionBase,
 																				  connectionType,
 																				  channel,
@@ -2379,7 +2435,8 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 					}
 
 					QString id;
-					id = QString::asprintf("%d - %d - %d - %d - ",
+
+					id = QString::asprintf("%02d - %02d - %02d - %02d - ",
 										   param.location().rack().groupIndex(),
 										   param.location().chassis(),
 										   param.location().module(),
@@ -2390,13 +2447,13 @@ int SignalBase::createSignalListForMeasure(int measureKind, Metrology::Connectio
 
 					if (mesaureSignalMap.contains(hashid) == true)
 					{
-						quint64 index = mesaureSignalMap[hashid];
-						if (index < m_signalMeasureList.size())
+						quint64 signalIndexMap = mesaureSignalMap[hashid];
+						if (signalIndexMap < m_signalMeasureList.size())
 						{
 							int channel = param.location().rack().channel();
 							if (channel >= 0 && channel < measureSignal.channelCount())
 							{
-								if (m_signalMeasureList[index].setMetrologySignal(measureKind,
+								if (m_signalMeasureList[signalIndexMap].setMetrologySignal(measureKind,
 																				  m_connectionBase,
 																				  connectionType,
 																				  channel,
@@ -2642,7 +2699,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 		std::vector<std::shared_ptr<Metrology::ComparatorEx>> signalComparatorList;
 
 		std::vector<std::shared_ptr<Comparator>> comparatorList = comparatorSet.getByInputSignalID(appSignalID);
-		for(std::shared_ptr<Comparator> comparator : comparatorList)
+		for(const std::shared_ptr<Comparator>& comparator : comparatorList)
 		{
 			std::shared_ptr<Metrology::ComparatorEx> comparatorEx;
 

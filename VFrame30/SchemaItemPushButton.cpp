@@ -1,6 +1,8 @@
 #include "SchemaItemPushButton.h"
 #include "ClientSchemaView.h"
 #include "TuningController.h"
+#include "DrawParam.h"
+#include <QStyleOptionButton>
 
 namespace VFrame30
 {
@@ -59,6 +61,18 @@ namespace VFrame30
 
 	SchemaItemPushButton::~SchemaItemPushButton(void)
 	{
+	}
+
+	void SchemaItemPushButton::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	{
+		// Control is drawn only in PDF mode
+		//
+		if (drawParam->pdfMode() == true)
+		{
+			drawButtonControl(drawParam, schema, layer);
+		}
+
+		return;
 	}
 
 	// Serialization
@@ -612,6 +626,60 @@ namespace VFrame30
 		{
 			m_scriptToggled = value;
 		}
+	}
+
+	void SchemaItemPushButton::drawButtonControl(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* /*layer*/) const
+	{
+		QPainter* p = drawParam->painter();
+
+		const QStyle* style = QApplication::style();
+
+		// Calculate rectangle
+		//
+		QRectF r = boundingRectInDocPt(drawParam);
+
+		// Draw control
+		//
+		p->setBrush(style->standardPalette().button());
+
+		QPen pen;
+		pen.setColor(style->standardPalette().color(QPalette::Normal, QPalette::Dark));
+		pen.setWidthF(1.0 / drawParam->dpiX());
+		p->setPen(pen);
+
+		p->drawRoundedRect(r, 5.0, 5.0, Qt::RelativeSize);
+
+		//p->drawRect(r);
+
+		// Draw text
+		//
+		p->setPen(style->standardPalette().color(QPalette::Normal, QPalette::WindowText));
+
+		FontParam font;
+		font.setName(QStringLiteral("Arial"));
+
+		switch (schema->unit())
+		{
+		case SchemaUnit::Display:
+			font.setSize(12.0, schema->unit());
+			break;
+		case SchemaUnit::Inch:
+			font.setSize(1.0 / 8.0, schema->unit());		// 1/8"
+			break;
+		case SchemaUnit::Millimeter:
+			font.setSize(mm2in(3), schema->unit());
+			break;
+		default:
+			assert(false);
+		}
+
+		DrawHelper::drawText(p,
+							 font,
+							 schema->unit(),
+							 m_text,
+							 r,
+							 Qt::AlignCenter | Qt::AlignHCenter);
+		return;
 	}
 }
 

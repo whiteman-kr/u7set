@@ -2,10 +2,8 @@
 
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../lib/ComparatorSet.h"
-
 #include "../HardwareLib/DeviceObject.h"
 #include "../UtilsLib/XmlHelper.h"
-
 #include "../Proto/ProtoSerialization.h"
 
 // Attention !!!
@@ -87,15 +85,15 @@ namespace Metrology
 
 	private:
 
-		int					m_index = -1;		// index of rack in the m_equipmentID
+		int					m_index = -1;				// index of rack in the m_equipmentID
 
-		Hash				m_hash = 0;			// hash calcHash from rack m_equipmentID
+		Hash				m_hash = UNDEFINED_HASH;	// hash calcHash from rack m_equipmentID
 
-		QString				m_equipmentID;		// rack equipmentID
-		QString				m_caption;			// rack caption
+		QString				m_equipmentID;				// rack equipmentID
+		QString				m_caption;					// rack caption
 
-		int					m_groupIndex = -1;	// for multichannel measuring - index rack group (several racks can be combine in groups)
-		int					m_channel = -1;		// for multichannel measuring - index channel in rack group
+		int					m_groupIndex = -1;			// for multichannel measuring - index rack group (several racks can be combine in groups)
+		int					m_channel = -1;				// for multichannel measuring - index channel in rack group
 
 	};
 
@@ -125,6 +123,9 @@ namespace Metrology
 
 		QString				moduleID() const { return m_moduleID; }
 		void				setModuleID(const QString& moduleID) { m_moduleID = moduleID; }
+
+		QString				moduleCaption() const { return m_moduleCaption; }
+		void				setModuleCaption(const QString& caption) { m_moduleCaption = caption; }
 
 		int					module() const { return m_module; }
 		QString				moduleStr() const;
@@ -163,6 +164,7 @@ namespace Metrology
 		int					m_chassis = -1;				// number of chassis
 
 		QString				m_moduleID;					// module EquipmentID
+		QString				m_moduleCaption;			// module Caption
 		int					m_module = -1;				// number of module
 
 		int					m_place = -1;				// number of place
@@ -280,8 +282,8 @@ namespace Metrology
 
 		// serialize
 		//
-		void					serializeTo(Proto::MetrologySignal *ms) const;
-		bool					serializeFrom(const Proto::MetrologySignal& ms);
+		void					saveToProto(Proto::MetrologySignal *ms) const;
+		bool					loadFromProto(const Proto::MetrologySignal& ms);
 
 	private:
 

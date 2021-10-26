@@ -1,4 +1,5 @@
 #include "SimScriptDevUtils.h"
+#include "../UtilsLib/WUtils.h"
 #include <Simulator.h>
 
 namespace Sim
@@ -65,4 +66,28 @@ namespace Sim
 		return	lmDescription.memory().m_appLogicWordDataOffset;
 	}
 
+	quint32 ScriptDevUtils::reverseUnsignedInt32(quint32 v) const
+	{
+		return reverseUint32(v);
+	}
+
+	qint32 ScriptDevUtils::reverseSignedInt32(quint32 v) const
+	{
+		return reverseInt32(v);
+	}
+
+	quint16 ScriptDevUtils::reverseUnsignedInt16(quint16 v) const
+	{
+		return reverseUint16(v);
+	}
+
+	qint16 ScriptDevUtils::reverseSignedInt16(quint16 v) const
+	{
+		return reverseInt16(v);
+	}
+
+	float ScriptDevUtils::reverseFloat(float v) const
+	{
+		return ::reverseFloat(v);
+	}
 }

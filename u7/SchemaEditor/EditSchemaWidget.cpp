@@ -3910,7 +3910,7 @@ bool EditSchemaWidget::loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::Afb
 
 	// Get the AFBs and return them
 	//
-	std::vector<std::shared_ptr<Afb::AfbElement>> afbs = lm.afbs();
+	std::vector<std::shared_ptr<Afb::AfbElement>> afbs = lm.afbElements();
 
 	std::swap(*out, afbs);
 

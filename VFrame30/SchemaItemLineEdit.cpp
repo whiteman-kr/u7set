@@ -1,6 +1,8 @@
 #include "SchemaItemLineEdit.h"
 #include "ClientSchemaView.h"
 #include "TuningController.h"
+#include "DrawParam.h"
+#include <QStyleOptionFrame>
 
 namespace VFrame30
 {
@@ -54,6 +56,18 @@ namespace VFrame30
 
 	SchemaItemLineEdit::~SchemaItemLineEdit(void)
 	{
+	}
+
+	void SchemaItemLineEdit::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	{
+		// Control is drawn only in PDF mode
+		//
+		if (drawParam->pdfMode() == true)
+		{
+			drawLineEditControl(drawParam, schema, layer);
+		}
+
+		return;
 	}
 
 	// Serialization
@@ -554,6 +568,58 @@ namespace VFrame30
 		{
 			m_scriptTextChanged = value;
 		}
+	}
+
+	void SchemaItemLineEdit::drawLineEditControl(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* /*layer*/) const
+	{
+		QPainter* p = drawParam->painter();
+
+		// Calculate rectangle
+		//
+		QRectF r = boundingRectInDocPt(drawParam);
+
+		const QStyle* style = QApplication::style();
+
+		// Draw control
+		//
+		p->setBrush(style->standardPalette().brush(QPalette::Normal, QPalette::Base));
+
+		QPen pen;
+		pen.setColor(style->standardPalette().color(QPalette::Normal, QPalette::Shadow));
+		pen.setWidthF(1.0 / drawParam->dpiX());
+		p->setPen(pen);
+
+		p->drawRect(r);
+
+		// Draw text
+		//
+		p->setPen(style->standardPalette().color(QPalette::Normal, QPalette::WindowText));
+
+		FontParam font;
+		font.setName(QStringLiteral("Arial"));
+
+		switch (schema->unit())
+		{
+		case SchemaUnit::Display:
+			font.setSize(12.0, schema->unit());
+			break;
+		case SchemaUnit::Inch:
+			font.setSize(1.0 / 8.0, schema->unit());		// 1/8"
+			break;
+		case SchemaUnit::Millimeter:
+			font.setSize(mm2in(3), schema->unit());
+			break;
+		default:
+			assert(false);
+		}
+
+		DrawHelper::drawText(p,
+							 font,
+							 schema->unit(),
+							 m_text,
+							 r,
+							 Qt::AlignCenter | Qt::AlignHCenter);
+		return;
 	}
 
 }

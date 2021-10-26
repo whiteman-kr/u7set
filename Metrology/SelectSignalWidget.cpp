@@ -238,7 +238,8 @@ bool SelectSignalWidget::setCurrentSignalIndex(const QString& signalId)
 
 	if (signal.connectionType() == Metrology::ConnectionType::Unused)
 	{
-		buttonTitle = QString(" %1\n %2").arg(signal.signalId(Metrology::ConnectionIoType::Source)).arg(signal.caption(Metrology::ConnectionIoType::Source));
+		buttonTitle = QString(" %1\n %2").arg(signal.signalId(Metrology::ConnectionIoType::Source),
+											  signal.caption(Metrology::ConnectionIoType::Source));
 	}
 	else
 	{
@@ -313,7 +314,7 @@ void SelectSignalWidget::updateActiveOutputSignal(const MeasureSignal& activeSig
 		return;
 	}
 
-	if (m_currentSignalIndex < 0 || m_currentSignalIndex >= m_signalList.size())
+	if (m_currentSignalIndex < 0 || m_currentSignalIndex >= TO_INT(m_signalList.size()))
 	{
 		return;
 	}
@@ -573,8 +574,8 @@ QVariant SelectSignalModel::data(const QModelIndex& modelIndex, int role) const
 			if (signal.connectionType() == Metrology::ConnectionType::Unused)
 			{
 				str = QString(" %1\n %2").
-						arg(signal.signalId(Metrology::ConnectionIoType::Source)).
-						arg(signal.caption(Metrology::ConnectionIoType::Source));
+						arg(signal.signalId(Metrology::ConnectionIoType::Source),
+							signal.caption(Metrology::ConnectionIoType::Source));
 			}
 			else
 			{

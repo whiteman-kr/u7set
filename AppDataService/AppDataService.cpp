@@ -469,7 +469,7 @@ bool AppDataServiceWorker::readAppSignals(const QByteArray& fileData)
 
 		AppSignal* s = new AppSignal;
 
-		s->serializeFrom(appSignal);
+		s->loadFromProto(appSignal);
 
 		m_appSignals.insert(s->appSignalID(), s);
 	}

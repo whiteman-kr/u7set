@@ -3,7 +3,6 @@
 
 namespace Metrology
 {
-
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
@@ -37,7 +36,7 @@ namespace Metrology
 	{
 		m_index = -1;
 
-		m_hash = 0;
+		m_hash = UNDEFINED_HASH;
 
 		m_equipmentID.clear();
 		m_caption.clear();
@@ -51,7 +50,7 @@ namespace Metrology
 
 		if (equipmentID.isEmpty() == true)
 		{
-			m_hash = 0;
+			m_hash = UNDEFINED_HASH;
 			return;
 		}
 
@@ -82,7 +81,6 @@ namespace Metrology
 
 		return result;
 	}
-
 
 	// -------------------------------------------------------------------------------------------------------------------
 
@@ -116,6 +114,7 @@ namespace Metrology
 		m_chassis = -1;
 
 		m_moduleID.clear();
+		m_moduleCaption.clear();
 		m_module = -1;
 
 		m_place = -1;
@@ -203,6 +202,7 @@ namespace Metrology
 		l->set_chassis(m_chassis);
 
 		l->set_moduleid(m_moduleID.toStdString());
+		l->set_modulecaption(m_moduleCaption.toStdString());
 		l->set_module(m_module);
 
 		l->set_place(m_place);
@@ -221,6 +221,7 @@ namespace Metrology
 		m_chassis = l.chassis();
 
 		m_moduleID = QString::fromStdString(l.moduleid());
+		m_moduleCaption = QString::fromStdString(l.modulecaption());
 		m_module = l.module();
 
 		m_place = l.place();
@@ -263,6 +264,7 @@ namespace Metrology
 			case Metrology::SignalIDType::CustomID:		signalID = customAppSignalID();	break;
 			case Metrology::SignalIDType::AppSignalID:	signalID = appSignalID();		break;
 			case Metrology::SignalIDType::EquipmentID:	signalID = equipmentID();		break;
+
 			default:
 				assert(0);
 		}
@@ -385,6 +387,12 @@ namespace Metrology
 								qph = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricR0);
 
 								break;
+
+							case E::ElectricUnit::NoUnit:
+								break;
+
+							default:
+								assert(0);
 						}
 
 						break;
@@ -399,6 +407,9 @@ namespace Metrology
 						qpl = uc.electricToPhysical_Output(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, signal.outputMode());
 						qph = uc.electricToPhysical_Output(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, signal.outputMode());
 
+						break;
+
+					default:
 						break;
 				}
 			}
@@ -418,7 +429,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void SignalParam::serializeTo(Proto::MetrologySignal *ms) const
+	void SignalParam::saveToProto(Proto::MetrologySignal *ms) const
 	{
 		if (ms == nullptr)
 		{
@@ -434,7 +445,7 @@ namespace Metrology
 		}
 
 		Proto::AppSignal* protoAppSignal = ms->mutable_appsignal();
-		pSignal->serializeTo(protoAppSignal);
+		pSignal->saveToProto(protoAppSignal);
 
 		Proto::MetrologySignalLocation* protoLocation = ms->mutable_location();
 		m_location.serializeTo(protoLocation);
@@ -455,7 +466,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	bool SignalParam::serializeFrom(const Proto::MetrologySignal& ms)
+	bool SignalParam::loadFromProto(const Proto::MetrologySignal& ms)
 	{
 		AppSignal* pSignal = dynamic_cast<AppSignal*>(this);
 		if (pSignal == nullptr)
@@ -465,7 +476,7 @@ namespace Metrology
 		}
 
 		const Proto::AppSignal& protoAppSignal = ms.appsignal();
-		pSignal->serializeFrom(protoAppSignal);
+		pSignal->loadFromProto(protoAppSignal);
 
 		const Proto::MetrologySignalLocation& protoLocation = ms.location();
 		m_location.serializeFrom(protoLocation);
@@ -485,6 +496,7 @@ namespace Metrology
 
 		return true;
 	}
+
 	// -------------------------------------------------------------------------------------------------------------------
 
 	QString SignalParam::signalTypeStr() const
@@ -496,6 +508,7 @@ namespace Metrology
 			case E::SignalInOutType::Input:		typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Input");	break;
 			case E::SignalInOutType::Internal:	typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Internal");	break;
 			case E::SignalInOutType::Output:	typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Output");	break;
+
 			default:
 				Q_ASSERT(0);
 				typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Unknown");
@@ -615,6 +628,9 @@ namespace Metrology
 					typeStr += " " + electricR0Str();
 				}
 
+				break;
+
+			default:
 				break;
 		}
 
@@ -891,6 +907,9 @@ namespace Metrology
 				break;
 
 			case E::SignalType::Discrete:						type = TuningValueType::Discrete;		break;
+
+			default:
+				break;
 		}
 
 		return type;
@@ -945,6 +964,7 @@ namespace Metrology
 			case SignalIDType::CustomID:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "SignalID");		break;
 			case SignalIDType::AppSignalID:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "AppSignalID");	break;
 			case SignalIDType::EquipmentID:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "EquipmentID");	break;
+
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("Options", "Unknown");
@@ -963,6 +983,7 @@ namespace Metrology
 		{
 			case CmpValueType::SetPoint:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "Set point");	break;
 			case CmpValueType::Hysteresis:	caption = QT_TRANSLATE_NOOP("MetrologySignal", "Hysteresis");	break;
+
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("MetrologySignal", "Unknown");
@@ -1068,6 +1089,7 @@ namespace Metrology
 				case Metrology::SignalIDType::CustomID:		signalID = m_inputSignal->param().customAppSignalID();	break;
 				case Metrology::SignalIDType::AppSignalID:	signalID = m_inputSignal->param().appSignalID();		break;
 				case Metrology::SignalIDType::EquipmentID:	signalID = m_inputSignal->param().equipmentID();		break;
+
 				default:
 					assert(0);
 			}
@@ -1093,6 +1115,7 @@ namespace Metrology
 				case Metrology::SignalIDType::CustomID:		signalID = m_compareSignal->param().customAppSignalID();	break;
 				case Metrology::SignalIDType::AppSignalID:	signalID = m_compareSignal->param().appSignalID();			break;
 				case Metrology::SignalIDType::EquipmentID:	signalID = m_compareSignal->param().equipmentID();			break;
+
 				default:
 					assert(0);
 			}
@@ -1118,6 +1141,7 @@ namespace Metrology
 				case Metrology::SignalIDType::CustomID:		signalID = m_hysteresisSignal->param().customAppSignalID();	break;
 				case Metrology::SignalIDType::AppSignalID:	signalID = m_hysteresisSignal->param().appSignalID();		break;
 				case Metrology::SignalIDType::EquipmentID:	signalID = m_hysteresisSignal->param().equipmentID();		break;
+
 				default:
 					assert(0);
 			}
@@ -1143,6 +1167,7 @@ namespace Metrology
 				case Metrology::SignalIDType::CustomID:		signalID = m_outputSignal->param().customAppSignalID();	break;
 				case Metrology::SignalIDType::AppSignalID:	signalID = m_outputSignal->param().appSignalID();		break;
 				case Metrology::SignalIDType::EquipmentID:	signalID = m_outputSignal->param().equipmentID();		break;
+
 				default:
 					assert(0);
 			}
@@ -1161,6 +1186,9 @@ namespace Metrology
 		{
 			case E::CmpType::Greate:	typeStr = QChar(9650);	break;
 			case E::CmpType::Less:		typeStr = QChar(9660);	break;
+
+			default:
+				typeStr.clear();
 		}
 
 		return typeStr;
@@ -1213,6 +1241,9 @@ namespace Metrology
 					{
 						case E::CmpType::Less:		deviation = hysteresisValue;	break;
 						case E::CmpType::Greate:	deviation -= hysteresisValue;	break;
+
+						default:
+							deviation = 0;
 					}
 				}
 
@@ -1407,6 +1438,9 @@ namespace Metrology
 			{
 				case E::CmpType::Less:		value.insert(0, "+ "); break;
 				case E::CmpType::Greate:	value.insert(0, "- "); break;
+
+				default:
+					value.insert(0, "  ");
 			}
 
 			if (m_deviationType != DeviationType::Unused)

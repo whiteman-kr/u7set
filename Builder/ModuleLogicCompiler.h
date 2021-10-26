@@ -146,17 +146,6 @@ namespace Builder
 			bool isLastStep() const { return currentStep == (stepsNumber - 1); }
 		};
 
-		struct AfbInfo
-		{
-			QString caption;
-			int opCode = -1;
-			int runTime = 0;
-
-			std::map<QString, int> pinOpIndex;
-
-			int getPinOpIndex(const QString& pinCaption);
-		};
-
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
 		~ModuleLogicCompiler();
@@ -165,8 +154,6 @@ namespace Builder
 		AppSignal* getSignal(const QString& appSignalID);
 
 		IssueLogger* log() { return m_log; }
-
-//		const LogicAfbSignal getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbls.getAfbSignal(afbStrID, signalIndex); }
 
 		bool pass1();
 		bool pass2();
@@ -362,7 +349,8 @@ namespace Builder
 
 		bool listsUniquenessCheck() const;
 		bool listUniquenessCheck(QHash<UalSignal*, UalSignal*>& signalsMap, const QVector<UalSignal*>& signalList) const;
-		void sortSignalList(QVector<UalSignal*> &signalList);
+		void sortSignalList(QVector<UalSignal*>& signalList);
+		void sortSignalList(QVector<const UalSignal*>& signalList);
 
 		bool disposeSignalsInMemory();
 
@@ -454,15 +442,20 @@ namespace Builder
 											const BusProcessingStepInfo& bpStepInfo);
 
 		bool generateSignalToAfbInputCode(CodeSnippet* code, const UalAfb* ualAfb,
-										  const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
-										  const BusProcessingStepInfo& bpStepInfo);
+										  const LogicAfbSignal& inAfbSignal,
+										  const UalSignal* inUalSignal,
+										  const BusProcessingStepInfo& bpStepInfo,
+										  const Address16& readAddr,
+										  bool ignoreTypeChecking);
 
 		bool generateSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
-											 const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+											 const LogicAfbSignal& inAfbSignal,
+											 const UalSignal* inUalSignal,
 											 const BusProcessingStepInfo& bpStepInfo);
 
 		bool generateDiscreteSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
-													 const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+													 const LogicAfbSignal& inAfbSignal,
+													 const UalSignal* inUalSignal,
 													 const BusProcessingStepInfo& bpStepInfo);
 
 		bool generateBusSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
@@ -475,8 +468,11 @@ namespace Builder
 											 const BusProcessingStepInfo& bpStepInfo);
 
 		bool generateAfbOutputToSignalCode(CodeSnippet* code, const UalAfb* ualAfb,
-										   const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal,
-										   const BusProcessingStepInfo& bpStepInfo);
+										   const LogicAfbSignal& outAfbSignal,
+										   const UalSignal* outUalSignal,
+										   const BusProcessingStepInfo& bpStepInfo,
+										   const Address16& writeAddr,
+										   bool ignoreTypeChecking);
 
 		bool generateAfbBusOutputToBusSignalCode(CodeSnippet* code, const UalAfb* ualAfb,
 												 const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal,
@@ -492,25 +488,58 @@ namespace Builder
 
 		bool generateBusComposerCode(CodeSnippet* code, const UalItem* ualItem);
 		UalSignal* getBusComposerBusSignal(const UalItem* composerItem, bool* connectedToTedrminatorOnly);
-		bool generateAnalogSignalToBusAnalogInputCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
+		bool generateAnalogSignalToBusAnalogInputCode(CodeSnippet* code,
+													  const UalSignal* inputSignal,
+													  const UalSignal* busChildSignal,
+													  const BusSignal& busSignal,
+													  const QString& busComposerLabel);
 
 		bool generateInbusConversionCode(CodeSnippet* code,
-														const UalSignal* inputSignal,
-														const UalSignal* busChildSignal,
-														const BusSignal& busSignal);
-		bool gen_SInt32_To_UInt16_BE_NoScale_inbusConversionCode(CodeSnippet* code,
-																const UalSignal* inputSignal,
-																const UalSignal* busChildSignal,
-																const Address16& inbusSignalAddr);
-		bool gen_SInt32_To_SInt16_BE_NoScale_inbusConversionCode(CodeSnippet* code,
-																const UalSignal* inputSignal,
-																const UalSignal* busChildSignal,
-																const Address16& inbusSignalAddr);
-		bool gen_SInt32_LowWord_ConversionCode(CodeSnippet* code,
-											   const UalSignal* inputSignal,
-											   const UalSignal* busChildSignal,
-											   const Address16& inbusSignalAddr,
-											   const QString& conversionDescription);
+										const UalSignal* inputSignal,
+										const UalSignal* busChildSignal,
+										const BusSignal& busSignal,
+										const QString& busComposerLabel);
+
+		bool genInbusScalingCode(CodeSnippet* code,
+								 const UalSignal* inputSignal,
+								 const UalSignal* busChildSignal,
+								 const BusSignal& busSignal,
+								 const QString& busExtractorLabel,
+								 const InbusConvDescription &convDesc,
+								 bool readValueFromAccumulator,
+								 bool saveResultToAccumulator,
+								 const Address16& inbusSignalAddr);
+
+		bool genInbusTypeConversionCode(CodeSnippet* code,
+									const UalSignal* inputSignal,
+									const UalSignal* busChildSignal,
+									const BusSignal& busSignal,
+									const QString& busComposerLabel,
+									const InbusConvDescription& convDesc,
+									bool readValueFromAccumulator,
+									bool saveResultToAccumulator,
+									const Address16& inbusSignalAddr);
+
+		bool genInbusTconvCode(CodeSnippet* code,
+						   const UalSignal* inputSignal,
+						   const UalSignal* busChildSignal,
+						   const BusSignal& busSignal,
+						   const QString& busComposerLabel,
+						   const QString& tconvAfbCaption,
+						   bool readValueFromAccumulator,
+						   bool saveResultToAccumulator,
+						   const Address16& inbusSignalAddr);
+
+
+		bool genInbusByteOrderConversionCode(CodeSnippet* code,
+											const UalSignal* inputSignal,
+											const UalSignal* busChildSignal,
+											const BusSignal& busSignal,
+											const QString& busComposerLabel,
+											const InbusConvDescription& convDesc,
+											bool readValueFromAccumulator,
+											bool saveResultToAccumulator,
+											const Address16& inbusSignalAddr);
 
 		bool generateDiscreteSignalToBusDiscreteInputCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
 		bool generateDiscreteSignalToBusBusInputCode(CodeSnippet* code, UalSignal* inputSignal, UalSignal* busChildSignal);
@@ -522,18 +551,48 @@ namespace Builder
 		bool generateFrombusConversionCode(CodeSnippet* code,
 										   const UalSignal* inputBusSignal,
 										   const BusSignal& busSignal,
-										   UalSignal* busChildSignal);
+										   UalSignal* busChildSignal,
+										   const QString& busExtractorLabel);
 
-		bool gen_UInt16_To_SInt32_BE_NoScale_frombusConversionCode(CodeSnippet* code,
-																	const UalSignal* inputBusSignal,
-																	const BusSignal& busSignal,
-																	const UalSignal* busChildSignal);
-		bool gen_SInt16_To_SInt32_BE_NoScale_frombusConversionCode(CodeSnippet* code,
-																	const UalSignal* inputBusSignal,
-																	const BusSignal& busSignal,
-																	const UalSignal* busChildSignal);
+		bool genFrombusByteOrderConversionCode(CodeSnippet* code,
+												const UalSignal* inputBusSignal,
+												const BusSignal& busSignal,
+												const UalSignal* busChildSignal,
+												const QString& busExtractorLabel,
+												const InbusConvDescription& convDesc,
+												bool readValueFromAccumulator,
+												bool saveResultToAccumulator,
+												const Address16& inbusSignalAddr);
 
-		bool hasKnownConversion(const BusSignal& busSignal) const;
+		bool genFrombusTypeConversionCode(CodeSnippet* code,
+											const UalSignal* inputBusSignal,
+											const BusSignal& busSignal,
+											const UalSignal* busChildSignal,
+											const QString& busExtractorLabel,
+											const InbusConvDescription& convDesc,
+											bool readValueFromAccumulator,
+											bool saveResultToAccumulator,
+											const Address16& inbusSignalAddr);
+
+		bool genFrombusTconvCode(CodeSnippet* code,
+								const UalSignal* inputBusSignal,
+								const BusSignal& busSignal,
+								const UalSignal* busChildSignal,
+								const QString& busExtractorLabel,
+								const QString& tconvAfbCaption,
+								bool readValueFromAccumulator,
+								bool saveResultToAccumulator,
+								const Address16& inbusSignalAddr);
+
+		bool genFrombusScalingCode(CodeSnippet* code,
+								 const UalSignal* inputBusSignal,
+								 const BusSignal& busSignal,
+								 const UalSignal* busChildSignal,
+								 const QString& busExtractorLabel,
+								 const InbusConvDescription &convDesc,
+								 bool readValueFromAccumulator,
+								 bool saveResultToAccumulator,
+								 const Address16& inbusSignalAddr);
 
 		bool generateDiscreteSignalToBusExtractorCode(CodeSnippet* code,
 													  const UalItem* ualItem,
@@ -666,8 +725,9 @@ namespace Builder
 
 		void getChassisSignalsWithEquipmentID(QString& equipmentID, std::vector<const AppSignal *>* resultSignalList);
 
-		bool getAfbInfo(std::shared_ptr<AfbInfo> afbInfo) const;
-		bool getAfbInfo_MUX();
+		int bitAccumulatorAddress() const;
+		int wordAccumulatorAddress() const;
+		int wordAccumulator2Address() const;
 
 	private:
 		// input parameters
@@ -801,7 +861,6 @@ namespace Builder
 		ResourcesUsageInfo m_resourcesUsageInfo;
 
 		QVector<FbScal> m_fbScal;
-		std::shared_ptr<AfbInfo> m_afbInfo_MUX;
 
 		static const int FB_SCALE_16UI_FP_INDEX = 0;
 		static const int FB_SCALE_16UI_SI_INDEX = 1;

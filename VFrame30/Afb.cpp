@@ -2317,33 +2317,6 @@ namespace Afb
 		return nullptr;
 	}
 
-	void AfbElement::updateParams(const std::vector<AfbParam>& params)
-	{
-		std::vector<AfbParam> newParams;
-		newParams.reserve(params.size());
-
-		for (const AfbParam& p : params)
-		{
-			std::vector<AfbParam>::iterator found = std::find_if(m_params.begin(), m_params.end(),
-																 [&p](const AfbParam& mp)
-			{
-				return p.opName() == mp.opName() && p.type() == mp.type();
-			});
-
-			if (found != m_params.end())
-			{
-				found->update(p.type(), p.dataFormat(), p.byteOrder(), p.lowLimit(), p.highLimit());
-				newParams.push_back(*found);
-			}
-			else
-			{
-				newParams.push_back(p);
-			}
-		}
-
-		return;
-	}
-
 	// Properties and Data
 	//
 	const QString& AfbElement::strID() const

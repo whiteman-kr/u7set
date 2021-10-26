@@ -216,7 +216,7 @@ bool AppSignalParam::load(const ::Proto::AppSignal& message)
 {
 	AppSignal s;
 
-	s.serializeFrom(message);
+	s.loadFromProto(message);
 	s.cacheSpecPropValues();
 
 	m_hash = message.calcparam().hash();

@@ -95,6 +95,9 @@ namespace Builder
 	{
 		Q_OBJECT
 
+		const int WORD_ACCUMULATOR_SIZE_W = 4;			// 4 words is reserved for Int64 and Double processing
+		const int BIT_ACCUMULATOR_SIZE_W = 2;
+
 	public:
 		LmMemoryMap(IssueLogger* log);
 
@@ -123,6 +126,7 @@ namespace Builder
 
 		int bitAccumulatorAddress() const { return m_appBitAdressed.bitAccumulator.startAddress(); }
 		int wordAccumulatorAddress() const { return m_appWordAdressed.wordAccumulator.startAddress(); }
+		int wordAccumulator2Address() const { return m_appWordAdressed.wordAccumulator.startAddress() + WORD_ACCUMULATOR_SIZE_W; }
 
 		int appWordMemoryAnalogAndBusSignalsHeapStart() const { return m_appWordAdressed.analogAndBusSignalsHeap.startAddress(); }
 		void setAppWordMemoryAnalogAndBusSignalsHeapSizeW(int sizeW) { m_appWordAdressed.analogAndBusSignalsHeap.setSizeW(sizeW); }

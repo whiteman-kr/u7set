@@ -1,6 +1,6 @@
 // This is the SIP interface definition for QsciPrinter.
 //
-// Copyright (c) 2020 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2021 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
@@ -34,6 +34,8 @@ public:
             int pagenr);
     int magnification() const;
     virtual void setMagnification(int magnification);
+    virtual int printRange(QsciScintillaBase *qsb, QPainter &painter,
+            int from = -1, int to = -1);
     virtual int printRange(QsciScintillaBase *qsb, int from = -1, int to = -1);
     QsciScintilla::WrapMode wrapMode() const;
     virtual void setWrapMode(QsciScintilla::WrapMode);

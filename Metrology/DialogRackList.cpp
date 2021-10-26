@@ -47,7 +47,9 @@ QVariant RackListTable::data(const QModelIndex &index, int role) const
 			case RACK_LIST_COLUMN_ID:		result = Qt::AlignLeft;		break;
 			case RACK_LIST_COLUMN_GROUP:	result = Qt::AlignCenter;	break;
 			case RACK_LIST_COLUMN_CHANNEL:	result = Qt::AlignCenter;	break;
-			default:						assert(0);
+
+			default:
+				assert(0);
 		}
 
 		return result;
@@ -101,7 +103,9 @@ QString RackListTable::text(int row, int column, const Metrology::RackParam* pRa
 		case RACK_LIST_COLUMN_ID:		result = pRack->equipmentID();	break;
 		case RACK_LIST_COLUMN_GROUP:	result = groupCaption;			break;
 		case RACK_LIST_COLUMN_CHANNEL:	result = pRack->channelStr();	break;
-		default:						assert(0);
+
+		default:
+			assert(0);
 	}
 
 	return result;

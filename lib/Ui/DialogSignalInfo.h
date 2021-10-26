@@ -65,7 +65,8 @@ public:
 		Blocked,
 		Mismatch,
 		AboveHighLimit,
-		BelowLowLimit
+		BelowLowLimit,
+		SwSimulated
 	};
 
 	AppSignalFlagsWidget(QWidget* parent = nullptr);

@@ -55,6 +55,7 @@ QVariant TuningSourceTable::data(const QModelIndex &index, int role) const
 			case TUN_SOURCE_LIST_COLUMN_REQUESTS:		result = Qt::AlignCenter;	break;
 			case TUN_SOURCE_LIST_COLUMN_REPLIES:		result = Qt::AlignCenter;	break;
 			case TUN_SOURCE_LIST_COLUMN_COMMANDS:		result = Qt::AlignCenter;	break;
+
 			default:
 				assert(0);
 		}
@@ -131,6 +132,7 @@ QString TuningSourceTable::text(int row, int column, const TuningSource& source,
 		case TUN_SOURCE_LIST_COLUMN_REQUESTS:		result = QString::number(state.requestCount());			break;
 		case TUN_SOURCE_LIST_COLUMN_REPLIES:		result = QString::number(state.replyCount());			break;
 		case TUN_SOURCE_LIST_COLUMN_COMMANDS:		result = QString::number(state.commandQueueSize());		break;
+
 		default:
 			assert(0);
 	}

@@ -201,6 +201,7 @@ INCLUDEPATH += ./../Protobuf
 DISTFILES += \
     ../Proto/network.proto \
     ../Proto/serialization.proto \
-    ../Test/CompilerTests/CompilerTests.js
+    ../Test/CompilerTests/CompilerTests.js \
+    ../Test/CompilerTests/InbusConversions.js
 
 

@@ -157,6 +157,9 @@ namespace Measure
 					}
 
 					break;
+
+				default:
+					assert(0);
 			}
 
 			return theOptions.measureView().font();
@@ -181,7 +184,47 @@ namespace Measure
 
 		if (role == Qt::BackgroundRole)
 		{
-			return backgroundColor(rowIndex, columnIndex, pMeasurement);
+			switch(m_measureType)
+			{
+				case Measure::Type::Linearity:
+
+					if (columnIndex == MVC_CMN_L_MODULE_SN)
+					{
+						if (pMeasurement->location().moduleSerialNo() == 0)
+						{
+							return QColor(Qt::yellow);
+						}
+					}
+
+					if (columnIndex == MVC_CMN_L_ERROR_RESULT)
+					{
+						return backgroundColor(pMeasurement);
+					}
+
+					break;
+
+				case Measure::Type::Comparators:
+
+					if (columnIndex == MVC_CMN_C_MODULE_SN)
+					{
+						if (pMeasurement->location().moduleSerialNo() == 0)
+						{
+							return QColor(Qt::yellow);
+						}
+					}
+
+					if (columnIndex == MVC_CMN_C_ERROR_RESULT)
+					{
+						return backgroundColor(pMeasurement);
+					}
+
+					break;
+
+				default:
+					assert(0);
+			}
+
+			return QVariant();
 		}
 
 		if (role == Qt::DisplayRole || role == Qt::EditRole)
@@ -194,96 +237,32 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QColor Model::backgroundColor(int row, int column, Measure::Item* pMeasurement) const
+	QColor Model::backgroundColor(Measure::Item* pMeasurement) const
 	{
-		if (row < 0 || row >= TO_INT(m_measureCount))
+		if (ERR_MEASURE_TYPE(m_measureType) == true)
 		{
-			return Qt::white;
-		}
-
-		if (column < 0 || column > m_header.count())
-		{
-			return Qt::white;
+			return theOptions.measureView().colorErrorLimit();
 		}
 
 		if (pMeasurement == nullptr)
 		{
-			return Qt::white;
+			return theOptions.measureView().colorErrorLimit();
 		}
 
-		QColor result = Qt::white;
-
-		switch(m_measureType)
+		if (theOptions.measureView().showNoValid() == false)
 		{
-			case Measure::Type::Linearity:
-				{
-					if (column != MVC_CMN_L_ERROR_RESULT)
-					{
-						break;
-					}
-
-					Measure::LinearityItem* pLinearityMeasurement = static_cast<Measure::LinearityItem*> (pMeasurement);
-					if (pLinearityMeasurement == nullptr)
-					{
-						break;
-					}
-
-					if (theOptions.measureView().showNoValid() == false)
-					{
-						if (pLinearityMeasurement->isSignalValid() == false)
-						{
-							result = theOptions.measureView().colorErrorLimit();
-							break;
-						}
-					}
-
-					if (pLinearityMeasurement->errorResult(m_measureType) != Measure::ErrorResult::Ok)
-					{
-						result = theOptions.measureView().colorErrorLimit();
-						break;
-					}
-
-					result = theOptions.measureView().colorNotError();
-				}
-				break;
-
-			case Measure::Type::Comparators:
-				{
-					if (column != MVC_CMN_C_ERROR_RESULT)
-					{
-						break;
-					}
-
-					Measure::ComparatorItem* pComparatorMeasurement = static_cast<Measure::ComparatorItem*> (pMeasurement);
-					if (pComparatorMeasurement == nullptr)
-					{
-						break;
-					}
-
-					if (theOptions.measureView().showNoValid() == false)
-					{
-						if (pComparatorMeasurement->isSignalValid() == false)
-						{
-							result = theOptions.measureView().colorErrorLimit();
-							break;
-						}
-					}
-
-					if (pComparatorMeasurement->errorResult(m_measureType) != Measure::ErrorResult::Ok)
-					{
-						result = theOptions.measureView().colorErrorLimit();
-						break;
-					}
-
-					result = theOptions.measureView().colorNotError();
-				}
-				break;
-
-			default:
-				assert(0);
+			if (pMeasurement->isSignalValid() == false)
+			{
+				return theOptions.measureView().colorErrorLimit();
+			}
 		}
 
-		return result;
+		if (pMeasurement->errorResult(m_measureType) != Measure::ErrorResult::Ok)
+		{
+			return theOptions.measureView().colorErrorLimit();
+		}
+
+		return theOptions.measureView().colorNotError();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -316,6 +295,7 @@ namespace Measure
 		{
 			case Measure::Type::Linearity:		result = textLinearity(row, column, pMeasurement);	break;
 			case Measure::Type::Comparators:	result = textComparator(row, column, pMeasurement);	break;
+
 			default:
 				result.clear();
 		}
@@ -360,9 +340,10 @@ namespace Measure
 		switch (theOptions.linearity().viewType())
 		{
 			case LinearityViewType::Simple:
-			case LinearityViewType::Extended:			limitType = static_cast<Measure::LimitType>(theOptions.linearity().limitType());	break;
-			case LinearityViewType::DetailElectric:		limitType = Measure::LimitType::Electric;											break;
-			case LinearityViewType::DetailEngineering:	limitType = Measure::LimitType::Engineering;										break;
+			case LinearityViewType::Extended:			limitType = m->limitTypeByRange(theOptions.linearity().calcErrorByRange());		break;
+			case LinearityViewType::DetailElectric:		limitType = Measure::LimitType::Electric;										break;
+			case LinearityViewType::DetailEngineering:	limitType = Measure::LimitType::Engineering;									break;
+
 			default:
 				assert(0);
 				return QString();
@@ -380,6 +361,7 @@ namespace Measure
 			case MVC_CMN_L_INDEX:					result = QString::number(m->measureID()); break;
 
 			case MVC_CMN_L_MODULE_SN:				result = m->location().moduleSerialNoStr(); break;
+			case MVC_CMN_L_MODULE_TYPE:				result = m->location().moduleCaption(); break;
 			case MVC_CMN_L_CONNECT_APP_ID:			result = m->connectionSignalID(); break;
 			case MVC_CMN_L_CONNECT_TYPE:			result = m->connectionTypeStr(); break;
 			case MVC_CMN_L_APP_ID:					result = m->appSignalID(); break;
@@ -427,7 +409,8 @@ namespace Measure
 
 			case MVC_CMN_L_SYSTEM_DEVIATION:		result = m->additionalParamStr(limitType, Measure::AdditionalParam::SystemDeviation); break;
 			case MVC_CMN_L_SD:						result = m->additionalParamStr(limitType, Measure::AdditionalParam::StandardDeviation); break;
-			case MVC_CMN_L_BORDER:					result = m->additionalParamStr(limitType, Measure::AdditionalParam::LowHighBorder); break;
+			case MVC_CMN_L_LOW_BORDER:				result = m->additionalParamStr(limitType, Measure::AdditionalParam::LowBorder); break;
+			case MVC_CMN_L_HIGH_BORDER:				result = m->additionalParamStr(limitType, Measure::AdditionalParam::HighBorder); break;
 			case MVC_CMN_L_UNCERTAINTY:				result = m->additionalParamStr(limitType, Measure::AdditionalParam::Uncertainty); break;
 
 			case MVC_CMN_L_ERROR:					result = m->errorStr(m_measureType); break;
@@ -497,6 +480,7 @@ namespace Measure
 			case MVC_CMN_C_INDEX:					result = QString::number(m->measureID()); break;
 
 			case MVC_CMN_C_MODULE_SN:				result = m->location().moduleSerialNoStr(); break;
+			case MVC_CMN_C_MODULE_TYPE:				result = m->location().moduleCaption(); break;
 			case MVC_CMN_C_CONNECT_APP_ID:			result = m->connectionSignalID(); break;
 			case MVC_CMN_C_CONNECT_TYPE:			result = m->connectionTypeStr(); break;
 			case MVC_CMN_C_APP_ID:					result = m->appSignalID(); break;
@@ -858,7 +842,8 @@ namespace Measure
 		std::vector<int> keyList;
 		std::vector<int> removeIndexList;
 
-		for(auto selectedIndex : selectionModel()->selectedRows())
+		const QModelIndexList selectedList = selectionModel()->selectedRows();
+		for(auto selectedIndex : selectedList)
 		{
 			int index = selectedIndex.row();
 			if (index < 0 || index >= m_model.count())
@@ -960,7 +945,8 @@ namespace Measure
 
 		std::vector<Measure::Item*> measurementList;
 
-		for(auto selectedIndex : selectionModel()->selectedRows())
+		const QModelIndexList selectedList = selectionModel()->selectedRows();
+		for(auto selectedIndex : selectedList)
 		{
 			int index = selectedIndex.row();
 			if (index < 0 || index >= m_model.count())
@@ -1032,6 +1018,7 @@ namespace Measure
 			case ChartType::Value20El:		limitType = Measure::LimitType::Electric;		break;
 			case ChartType::LinearityEn:
 			case ChartType::Value20En:		limitType = Measure::LimitType::Engineering;	break;
+
 			default:
 				assert(0);
 		}

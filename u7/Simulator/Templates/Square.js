@@ -1,7 +1,7 @@
 // Square
 //
-var counter = 0;
-var level = 0;
+let counter = 0;
+let level = 0;
 
 (function(lastValue, workcycle)
 {
@@ -10,17 +10,17 @@ var level = 0;
 
     // Feel free to change these params
     //
-    var lowTime = 250;		// ms
-    var highTime = 250;		// ms
+    const lowTime = 250;		// ms
+    const highTime = 250;		// ms
 
-    var amplitude = 100.0;	// Amplitude
-    var base = 0.0;         // Shift base
+    const amplitude = 100.0;	// Amplitude
+    const base = 0.0;           // Shift base
 
     // Calc result
     //
     counter --;
 
-    var result = lastValue;
+    let result = lastValue;
     if (counter <= 0)
     {
         if (level <= 0)

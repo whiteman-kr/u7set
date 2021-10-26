@@ -1,6 +1,6 @@
 // Square for Discrete
 //
-var counter = 0;
+let counter = 0;
 
 (function(lastValue, workcycle)
 {
@@ -9,24 +9,25 @@ var counter = 0;
 
     // Feel free to change these params
     //
-    var lowTime = 300;		// ms
-    var highTime = 200;		// ms
+    const lowTime = 300;		// ms
+    const highTime = 200;		// ms
 
     // Calc result
     //
     counter --;
 
-    var result = lastValue;
+    let result = lastValue;
+
     if (counter <= 0)
     {
-        if (lastValue == 0)
+        if (lastValue === 0)
         {
             counter = highTime / 5; 	// workcycle is 5ms
             result = 1;
         }
         else
         {
-            counter = lowTime / 5; 	// workcycle is 5ms
+            counter = lowTime / 5;      // workcycle is 5ms
             result = 0;
         }
     }

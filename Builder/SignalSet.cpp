@@ -170,6 +170,27 @@ namespace Builder
 				return false;
 			}
 
+			if (s.isSpecPropExists(AppSignalPropNames::OUTPUT_MODE) == true &&
+				E::contains<E::OutputMode>(s.outputMode()) == false)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 has wrong outputRangeMode field").arg(s.appSignalID()));
+				result = false;
+			}
+
+			if (s.isSpecPropExists(AppSignalPropNames::OUTPUT_MODE) == true &&
+				E::contains<E::OutputMode>(s.outputMode()) == false)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 has wrong outputRangeMode field").arg(s.appSignalID()));
+				result = false;
+			}
+
+			if (s.byteOrder() != E::ByteOrder::LittleEndian &&
+				s.byteOrder() != E::ByteOrder::BigEndian)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 has wrong byteOrder field").arg(s.appSignalID()));
+				result = false;
+			}
+
 			// check tunable signals properties
 			//
 			if (s.enableTuning() == true)
@@ -467,7 +488,7 @@ namespace Builder
 
 			newSignal->setUnit(busSignal.units);
 			newSignal->setDataSize(SIZE_32BIT);
-			newSignal->setAnalogSignalFormat(busSignal.analogFormat);
+			newSignal->setAnalogSignalFormat(busSignal.inOutAnalogFormat);
 
 			newSignal->setSpecPropStruct(AppSignalDefaultSpecPropStruct::BUS_CHILD_ANALOG);
 			newSignal->createSpecPropValues();
@@ -475,11 +496,11 @@ namespace Builder
 			newSignal->setLowADC(static_cast<int>(busSignal.inbusAnalogLowLimit));
 			newSignal->setHighADC(static_cast<int>(busSignal.inbusAnalogHighLimit));
 
-			newSignal->setLowEngineeringUnits(busSignal.busAnalogLowLimit);
-			newSignal->setHighEngineeringUnits(busSignal.busAnalogHighLimit);
+			newSignal->setLowEngineeringUnits(busSignal.inOutAnalogLowLimit);
+			newSignal->setHighEngineeringUnits(busSignal.inOutAnalogHighLimit);
 
-			newSignal->setLowValidRange(busSignal.busAnalogLowLimit);
-			newSignal->setHighValidRange(busSignal.busAnalogHighLimit);
+			newSignal->setLowValidRange(busSignal.inOutAnalogLowLimit);
+			newSignal->setHighValidRange(busSignal.inOutAnalogHighLimit);
 			break;
 
 		case E::SignalType::Discrete:

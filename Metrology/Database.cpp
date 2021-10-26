@@ -57,6 +57,7 @@ int SqlFieldBase::init(int objectType, int)
 			append("Caption",						QVariant::String, 256);
 
 			append("ModuleSN",						QVariant::Int);
+			append("ModuleCaption",					QVariant::String, 64);
 			append("RackIndex",						QVariant::Int);
 			append("RackCaption",					QVariant::String, 64);
 			append("Channel",						QVariant::Int);
@@ -187,6 +188,7 @@ int SqlFieldBase::init(int objectType, int)
 			append("Caption",						QVariant::String, 256);
 
 			append("ModuleSN",						QVariant::Int);
+			append("ModuleCaption",					QVariant::String, 64);
 			append("RackIndex",						QVariant::Int);
 			append("RackCaption",					QVariant::String, 64);
 			append("Channel",						QVariant::Int);
@@ -260,7 +262,6 @@ int SqlFieldBase::init(int objectType, int)
 
 		default:
 			assert(0);
-			break;
 	}
 
 	int fieldCount = count();
@@ -325,6 +326,7 @@ QString SqlFieldBase::extFieldName(int index)
 		case QVariant::Int:		result = QString("%1 INTEGER").arg(f.name());								break;
 		case QVariant::Double:	result = QString("%1 DOUBLE(0, %2)").arg(f.name()).arg(f.precision());		break;
 		case QVariant::String:	result = QString("%1 VARCHAR(%2)").arg(f.name()).arg(f.length());			break;
+
 		default:
 			result.clear();
 	}
@@ -469,7 +471,7 @@ int SqlTable::lastKey() const
 		return SQL_INVALID_KEY;
 	}
 
-	QSqlQuery query(QString("SELECT max(%1) FROM %2").arg(m_fieldBase.field(SQL_FIELD_KEY).name()).arg(m_info.caption()));
+	QSqlQuery query(QString("SELECT max(%1) FROM %2").arg(m_fieldBase.field(SQL_FIELD_KEY).name(), m_info.caption()));
 	if (query.next() == false)
 	{
 		return SQL_INVALID_KEY;
@@ -770,6 +772,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setCaption(query.value(field++).toString());
 
 					measure->location().setModuleSerialNo(query.value(field++).toInt());
+					measure->location().setModuleCaption(query.value(field++).toString());
 					measure->location().rack().setIndex(query.value(field++).toInt());
 					measure->location().rack().setCaption(query.value(field++).toString());
 					measure->location().rack().setChannel(query.value(field++).toInt());
@@ -825,7 +828,10 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					{
 						case SQL_TABLE_LINEARITY_ADD_VAL_EL:	limitType = Measure::LimitType::Electric;		break;
 						case SQL_TABLE_LINEARITY_ADD_VAL_EN:	limitType = Measure::LimitType::Engineering;	break;
-						default:								limitType = Measure::LimitType::NoLimitType;	break;
+
+						default:
+							assert(0);
+							limitType = Measure::LimitType::NoLimitType;
 					}
 
 					if (limitType == Measure::LimitType::NoLimitType)
@@ -846,7 +852,8 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setAdditionalParam(limitType, Measure::AdditionalParam::MaxValue, query.value(field++).toDouble());
 					measure->setAdditionalParam(limitType, Measure::AdditionalParam::SystemDeviation, query.value(field++).toDouble());
 					measure->setAdditionalParam(limitType, Measure::AdditionalParam::StandardDeviation, query.value(field++).toDouble());
-					measure->setAdditionalParam(limitType, Measure::AdditionalParam::LowHighBorder, query.value(field++).toDouble());
+					measure->setAdditionalParam(limitType, Measure::AdditionalParam::LowBorder, query.value(field++).toDouble());
+					measure->setAdditionalParam(limitType, Measure::AdditionalParam::HighBorder, query.value(field++).toDouble());
 					measure->setAdditionalParam(limitType, Measure::AdditionalParam::Uncertainty, query.value(field++).toDouble());
 				}
 				break;
@@ -860,7 +867,10 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					{
 						case SQL_TABLE_LINEARITY_20_EL:	limitType = Measure::LimitType::Electric;		break;
 						case SQL_TABLE_LINEARITY_20_EN:	limitType = Measure::LimitType::Engineering;	break;
-						default:						limitType = Measure::LimitType::NoLimitType;	break;
+
+						default:
+							assert(0);
+							limitType = Measure::LimitType::NoLimitType;
 					}
 
 					if (limitType == Measure::LimitType::NoLimitType)
@@ -936,6 +946,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setCaption(query.value(field++).toString());
 
 					measure->location().setModuleSerialNo(query.value(field++).toInt());
+					measure->location().setModuleCaption(query.value(field++).toString());
 					measure->location().rack().setIndex(query.value(field++).toInt());
 					measure->location().rack().setCaption(query.value(field++).toString());
 					measure->location().rack().setChannel(query.value(field++).toInt());
@@ -1013,7 +1024,6 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
 			default:
 				assert(0);
-				break;
 		}
 
 		readedCount ++;
@@ -1175,6 +1185,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->caption());
 
 					query.bindValue(field++, measure->location().moduleSerialNo());
+					query.bindValue(field++, measure->location().moduleCaption());
 					query.bindValue(field++, measure->location().rack().index());
 					query.bindValue(field++, measure->location().rack().caption());
 					query.bindValue(field++, measure->location().rack().channel());
@@ -1232,7 +1243,10 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					{
 						case SQL_TABLE_LINEARITY_ADD_VAL_EL:	limitType = Measure::LimitType::Electric;		break;
 						case SQL_TABLE_LINEARITY_ADD_VAL_EN:	limitType = Measure::LimitType::Engineering;	break;
-						default:								limitType = Measure::LimitType::NoLimitType;	break;
+
+						default:
+							assert(0);
+							limitType = Measure::LimitType::NoLimitType;
 					}
 
 					if (limitType == Measure::LimitType::NoLimitType)
@@ -1253,9 +1267,9 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::MaxValue));
 					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::SystemDeviation));
 					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::StandardDeviation));
-					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::LowHighBorder));
+					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::LowBorder));
+					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::HighBorder));
 					query.bindValue(field++, measure->additionalParam(limitType, Measure::AdditionalParam::Uncertainty));
-					query.bindValue(field++, 0);
 					query.bindValue(field++, 0);
 					query.bindValue(field++, 0);
 					query.bindValue(field++, 0);
@@ -1278,7 +1292,10 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					{
 						case SQL_TABLE_LINEARITY_20_EL:	limitType = Measure::LimitType::Electric;		break;
 						case SQL_TABLE_LINEARITY_20_EN:	limitType = Measure::LimitType::Engineering;	break;
-						default:						limitType = Measure::LimitType::NoLimitType;	break;
+
+						default:
+							assert(0);
+							limitType = Measure::LimitType::NoLimitType;
 					}
 
 					if (limitType == Measure::LimitType::NoLimitType)
@@ -1361,6 +1378,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->caption());
 
 					query.bindValue(field++, measure->location().moduleSerialNo());
+					query.bindValue(field++, measure->location().moduleCaption());
 					query.bindValue(field++, measure->location().rack().index());
 					query.bindValue(field++, measure->location().rack().caption());
 					query.bindValue(field++, measure->location().rack().channel());
@@ -1426,7 +1444,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 						break;
 					}
 
-					query.bindValue(field++, group->Index());
+					query.bindValue(field++, group->index());
 					query.bindValue(field++, group->caption());
 
 					query.bindValue(field++, group->rackID(Metrology::Channel_0));

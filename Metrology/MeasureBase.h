@@ -53,7 +53,23 @@ namespace Measure
 
 	#define ERR_MEASURE_LIMIT_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Measure::LimitTypeCount)
 
-	QString LimitTypeCaption(Measure::LimitType measureType);
+	QString LimitTypeCaption(Measure::LimitType limitType);
+
+	// ==============================================================================================
+
+	enum CalcErrorRange
+	{
+		NoCalcErrorFrom		= -1,
+		ByElectricRange		= 0,
+		ByEngineeringRange	= 1,
+		BySignalType		= 2,
+	};
+
+	const int CalcErrorRangeCount = 3;
+
+	#define ERR_MEASURE_CALC_ERROR_RANGE(byRange) (TO_INT(byRange) < 0 || TO_INT(byRange) >= Measure::CalcErrorRangeCount)
+
+	QString CalcErrorRangeCaption(Measure::CalcErrorRange byRange);
 
 	// ==============================================================================================
 
@@ -94,13 +110,14 @@ namespace Measure
 		MaxValue			= 0,
 		SystemDeviation		= 1,
 		StandardDeviation	= 2,
-		LowHighBorder		= 3,
-		Uncertainty			= 4,
+		LowBorder			= 3,
+		HighBorder			= 4,
+		Uncertainty			= 5,
 	};
 
-	const int AdditionalParamCount = 5;
+	const int AdditionalParamCount = 6;
 
-				// now used 5 (1 .. 5)
+				// now used 6 (1 .. 6)
 				// maximum 16 items (0 .. 15)
 
 	#define ERR_MEASURE_ADDITIONAL_PARAM(param) (TO_INT(param) < 0 || TO_INT(param) >= Measure::AdditionalParamCount)
@@ -164,6 +181,9 @@ namespace Measure
 		QString connectionTypeStr() const;
 		void setConnectionType(Metrology::ConnectionType type) { m_connectionType = type; }
 		void setConnectionType(int type) { m_connectionType =  static_cast<Metrology::ConnectionType>(type); }
+
+		Measure::LimitType limitTypeByRange(int byRange) const;
+		Measure::LimitType limitTypeByRange(Measure::CalcErrorRange byRange) const;
 
 		QString appSignalID() const { return m_appSignalID; }
 		void setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; setSignalHash(m_appSignalID); }

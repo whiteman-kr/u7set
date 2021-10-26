@@ -376,7 +376,7 @@ void ComparatorSet::dump() const
 	qDebug() << "------------------ComparatorSet Dump---------------------";
 	qDebug() << "Comparators: " << m_bySignal.size();
 
-	for (auto bs : m_bySignal)
+	for (const auto& bs : m_bySignal)
 	{
 		qDebug() << "Comparators for signal: " << bs.size();
 		for (const std::shared_ptr<Comparator>& c : bs)
@@ -499,7 +499,7 @@ void ComparatorSet::serializeTo(Proto::ComparatorSet* set) const
 
 		protoLmComparatorSet->set_lmequipmentid(lmComparatorSet->lmID().toStdString());			// set equipmentID of LM in proto message
 
-		for (std::shared_ptr<Comparator> comparator : lmComparatorSet->comparators())			// get all comparator of LM
+		for (const std::shared_ptr<Comparator>& comparator : lmComparatorSet->comparators())	// get all comparator of LM
 		{
 			if (comparator == nullptr)
 			{
