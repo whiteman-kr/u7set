@@ -460,7 +460,7 @@ void ConfigSocket::loadSignalBase(ConfigSocket* pThis)
 			const ::Proto::AppSignal& protoAppSignal = pThis->m_protoAppSignalSet.appsignal(i);
 
 			PS::Signal signal;
-			signal.serializeFrom(protoAppSignal);
+			signal.loadFromProto(protoAppSignal);
 
 			pThis->m_pscore->signalBase().append(signal);
 		}

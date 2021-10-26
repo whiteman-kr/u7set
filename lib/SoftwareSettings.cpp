@@ -103,7 +103,7 @@ bool SoftwareSettingsSet::writeToXml(XmlWriteHelper& xml)
 	bool result = true;
 
 	xml.writeStartElement(XmlElement::SETTINGS_SET);
-	xml.writeEnumAttribute(EquipmentPropNames::SOFTWARE_TYPE, m_softwareType);
+	xml.writeEnumKeyAttribute(EquipmentPropNames::SOFTWARE_TYPE, m_softwareType);
 	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(m_settingsMap.size()));
 
 	for(auto p : m_settingsMap)
@@ -142,7 +142,7 @@ bool SoftwareSettingsSet::readFromXml(XmlReadHelper& xml)
 
 	E::SoftwareType swType;
 
-	result &=xml.readEnumAttribute(EquipmentPropNames::SOFTWARE_TYPE, &swType);
+	result &=xml.readEnumKeyAttribute(EquipmentPropNames::SOFTWARE_TYPE, &swType);
 
 	if (result == false)
 	{
@@ -213,7 +213,7 @@ QString SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType swType, co
 
 	xml.writeStartElement(XmlElement::SETTINGS_SET);
 
-	xml.writeEnumAttribute(EquipmentPropNames::SOFTWARE_TYPE, swType);
+	xml.writeEnumKeyAttribute(EquipmentPropNames::SOFTWARE_TYPE, swType);
 	xml.writeIntAttribute(XmlAttribute::COUNT, 1);
 
 	settings.writeToXml(xml);

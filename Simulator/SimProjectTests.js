@@ -2020,8 +2020,8 @@ function testAfbMedianV7(sim)
     // median_si -- Test for two valid inputs
     //
     assert(sim.signalValue("#TEST_MED_V7_T1_RMED") === 80);
-    assert(sim.signalValue("#TEST_MED_V7_T1_RMAX") === 0);
-    assert(sim.signalValue("#TEST_MED_V7_T1_RMIN") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T1_RMAX") === 100);
+    assert(sim.signalValue("#TEST_MED_V7_T1_RMIN") === 60);
 
     // median_si -- Test for one valid inputs
     //
@@ -2039,8 +2039,8 @@ function testAfbMedianV7(sim)
     // median_fp -- Test for two valid inputs
     //
     assert(sim.signalValue("#TEST_MED_V7_T11_RMED") === 80);
-    assert(sim.signalValue("#TEST_MED_V7_T11_RMAX") === 0);
-    assert(sim.signalValue("#TEST_MED_V7_T11_RMIN") === 0);
+    assert(sim.signalValue("#TEST_MED_V7_T11_RMAX") === 100);
+    assert(sim.signalValue("#TEST_MED_V7_T11_RMIN") === 60);
     assert(sim.signalValue("#TEST_MED_V7_T11_ROV") === 0);
     assert(sim.signalValue("#TEST_MED_V7_T11_RUF") === 0);
     assert(sim.signalValue("#TEST_MED_V7_T11_RZ") === 0);

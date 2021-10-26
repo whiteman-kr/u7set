@@ -676,7 +676,7 @@ namespace Tuning
 
 			Proto::AppSignal* appSignalParam = m_getAppSignalParamReply.add_appsignals();
 
-			signal->serializeTo(appSignalParam);
+			signal->saveToProto(appSignalParam);
 		}
 
 		sendReply(m_getAppSignalParamReply);

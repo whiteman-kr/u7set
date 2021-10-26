@@ -501,6 +501,7 @@ void DialogCalculator::conversionTr()
 		case E::SensorType::Ohm_Cu_a_428:
 		case E::SensorType::Ohm_Cu_a_426:
 		case E::SensorType::Ohm_Ni_a_617:	m_pTrR0Edit->setEnabled(true);		break;
+
 		default:							m_pTrR0Edit->setEnabled(false);		break;
 	}
 

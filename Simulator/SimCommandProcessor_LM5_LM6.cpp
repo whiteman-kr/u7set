@@ -3554,8 +3554,6 @@ namespace Sim
 				//
 				median.value = (operands[0].value + operands[1].value) / 2;
 				median.operandIndex = 0;
-				maxOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
-				minOperand = {0, 0};	// Such wierd behavior is now, subject to chanhe in future version
 				zero = median.value == 0 ? 0x0001 : 0x0000;
 				break;
 
@@ -3654,9 +3652,6 @@ namespace Sim
 			case 2:
 				// Specific case, return medium
 				//
-				maxOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
-				minOperand = {AfbComponentParam{0}, 0};	// Such wierd behavior is now, subject to chanhe in future version
-
 				median = operands[0];
 
 				median.value.addFloatingPoint(operands[1].value);
@@ -6406,6 +6401,157 @@ namespace Sim
 				instance->addParamWord(o_overflow, overflow);
 				instance->addParamWord(o_underflow, underflow);
 				instance->addParamWord(o_nan, nan);
+			}
+			break;
+
+		default:
+			SimException::raise(QStringLiteral("Unknown AFB configuration: %1").arg(conf), Q_FUNC_INFO);
+		}
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::afb_tconv_v1(AfbComponentInstance* instance)
+	{
+		// Define inputs/outputs opIndexes
+		//
+		const int i_conf = 0;
+		const int i_data_16 = 1;
+		const int i_data_32 = 2;
+
+		const int o_data_16 = 4;
+		const int o_data_32 = 5;
+		const int o_overflow = 7;
+		const int o_underflow = 8;
+		const int o_nan = 9;
+		//const int o_tconv_edi = 10;
+		//const int o_version = 11;
+
+		// Get AFB configuration
+		//
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		// Initialization state
+		//
+		//instance->addParamWord(o_tconv_edi, 0);
+		instance->addParamWord(o_data_16, 0);
+		instance->addParamDword(o_data_32, 0);
+		instance->addParamWord(o_overflow, 0);
+		instance->addParamWord(o_underflow, 0);
+		instance->addParamWord(o_nan, 0);
+
+		// Logic with outputs
+		//
+		switch (conf)
+		{
+		case 1: // Swap Endians for 16 -> 16
+			{
+				quint16 input = instance->param(i_data_16)->wordValue();
+				quint16 result = (input >> 8) | (input << 8);
+
+				instance->addParamWord(o_data_16, result);
+			}
+			break;
+
+		case 2: // Swap Endians for 32 -> 32
+			{
+				quint32 input = instance->param(i_data_32)->dwordValue();
+
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+				quint32 result = qToLittleEndian<quint32>(input);
+#else
+				quint32 result = qToBigEndian<quint32>(input);
+#endif
+
+				instance->addParamDword(o_data_32, result);
+			}
+			break;
+
+		case 3: // SI32 -> FP32
+			{
+				qint32 input = instance->param(i_data_32)->signedIntValue();
+				float result = static_cast<float>(input);
+				instance->addParamFloat(o_data_32, result);
+			}
+			break;
+
+		case 4: // FP32 -> SI32
+			{
+				const float input = instance->param(i_data_32)->floatValue();
+
+				// Rounding to the nearest even number
+				//
+				int oldRound = std::fegetround();
+				std::fesetround(FE_TONEAREST);
+
+				qint64 result64 = std::llrint(input);
+				qint32 result32 = static_cast<qint32>(result64);
+
+				std::fesetround(oldRound);
+
+				// Flags
+				//
+				quint16 overflow = 0x0000;
+				if (result64 > std::numeric_limits<qint32>::max())
+				{
+					overflow = 0x0001;
+					result32 = std::numeric_limits<qint32>::max();
+				}
+
+				if (result64 < std::numeric_limits<qint32>::lowest())
+				{
+					overflow = 0x0001;
+					result32 = std::numeric_limits<qint32>::lowest();
+				}
+
+				if (std::isinf(input) == true)
+				{
+					overflow = 0x0001;
+					result32 = std::signbit(input) ?
+								   std::numeric_limits<qint32>::lowest() :
+								   std::numeric_limits<qint32>::max();
+				}
+
+				quint16 underflow = (std::fpclassify(input) == FP_SUBNORMAL) ? 0x0001 : 0x0000;
+				if (underflow == 0x0001)
+				{
+					result32 = 0;
+				}
+
+				quint16 nan = std::isnan(input);
+				if (nan == 0x0001)
+				{
+					result32 = 0;
+					overflow = 0;
+				}
+
+				// Set result
+				//
+				instance->addParamSignedInt(o_data_32, result32);
+				instance->addParamWord(o_overflow, overflow);
+				instance->addParamWord(o_underflow, underflow);
+				instance->addParamWord(o_nan, nan);
+			}
+			break;
+
+		case 5: // SI(16) -> SI(32)
+			{
+				int16_t result16 = instance->param(i_data_32)->wordValue();		// makes it signed
+				int32_t result32 = result16;									// makes it 32bit wide
+
+				// Set result
+				//
+				instance->addParamSignedInt(o_data_32, result32);
+			}
+			break;
+
+		case 6: // UI(16) -> SI(32)
+			{
+				int32_t result32 = instance->param(i_data_32)->wordValue();
+
+				// Set result
+				//
+				instance->addParamSignedInt(o_data_32, result32);
 			}
 			break;
 

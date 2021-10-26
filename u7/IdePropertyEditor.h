@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../QScintilla/Qt4Qt5/Qsci/qsciscintilla.h"
+#include "../QScintilla/src/Qsci/qsciscintilla.h"
 #include "../lib/QScintillaLexers/LexerXML.h"
 #include "../lib/QScintillaLexers/LexerJavaScript.h"
 

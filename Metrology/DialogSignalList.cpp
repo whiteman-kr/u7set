@@ -46,6 +46,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 			case SIGNAL_LIST_COLUMN_CHASSIS:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_MODULE:				result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_PLACE:				result = Qt::AlignCenter;	break;
+			case SIGNAL_LIST_COLUMN_MODULE_TYPE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_ADC_RANGE:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_EN_RANGE:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_EL_RANGE:			result = Qt::AlignCenter;	break;
@@ -55,6 +56,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 			case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:	result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_TUN_RANGE:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:	result = Qt::AlignCenter;	break;
+
 			default:
 				assert(0);
 		}
@@ -169,6 +171,7 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 		case SIGNAL_LIST_COLUMN_CHASSIS:			result = param.location().chassisStr();			break;
 		case SIGNAL_LIST_COLUMN_MODULE:				result = param.location().moduleStr();			break;
 		case SIGNAL_LIST_COLUMN_PLACE:				result = param.location().placeStr();			break;
+		case SIGNAL_LIST_COLUMN_MODULE_TYPE:		result = param.location().moduleCaption();		break;
 		case SIGNAL_LIST_COLUMN_ADC_RANGE:			result = param.adcRangeStr(true);				break;
 		case SIGNAL_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();			break;
 		case SIGNAL_LIST_COLUMN_EL_RANGE:			result = param.electricRangeStr();				break;
@@ -178,6 +181,7 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 		case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:	result = qApp->translate("MetrologySignal", param.tuningDefaultValueStr().toUtf8());break;
 		case SIGNAL_LIST_COLUMN_TUN_RANGE:			result = param.tuningRangeStr();				break;
 		case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:	result = qApp->translate("MetrologySignal", param.location().shownOnSchemasStr().toUtf8());	break;
+
 		default:
 			assert(0);
 	}

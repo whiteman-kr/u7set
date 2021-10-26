@@ -348,7 +348,7 @@ namespace Builder
 		for(const Metrology::SignalParam& signal : signalsToWrite)
 		{
 			::Proto::MetrologySignal* protoMetrologySignal = protoMetrologySignalSet.add_metrologysignal();
-			signal.serializeTo(protoMetrologySignal);
+			signal.saveToProto(protoMetrologySignal);
 		}
 
 		int dataSize = static_cast<int>(protoMetrologySignalSet.ByteSizeLong());
@@ -406,6 +406,7 @@ namespace Builder
 
 			case Hardware::DeviceType::Module:
 				l.setModuleID(pDeviceObject->equipmentId());
+				l.setModuleCaption(pDeviceObject->caption());
 				l.setModule(pDeviceObject->place());
 				break;
 

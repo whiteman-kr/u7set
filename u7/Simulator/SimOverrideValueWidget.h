@@ -1,7 +1,7 @@
 #pragma once
 #include "../../Simulator/Simulator.h"
 #include "../../Simulator/SimOverrideSignals.h"
-#include "../../QScintilla/Qt4Qt5/Qsci/qsciscintilla.h"
+#include "../../QScintilla/src/Qsci/qsciscintilla.h"
 #include "../../lib/QScintillaLexers/LexerJavaScript.h"
 #include "../../DbLib/DbController.h"
 #include "../../lib/QDoublevalidatorEx.h"
@@ -28,6 +28,12 @@ namespace SimOverrideUI
 
 	public:
 		SInt32SpinBox(qint32 value, QWidget* parent);
+
+	protected:
+		void keyPressEvent(QKeyEvent* event) override;
+
+	signals:
+		 void returnPressed();
 	};
 
 
@@ -94,7 +100,7 @@ namespace SimOverrideUI
 		QDoubleValidatorEx* m_floatEditValidator = nullptr;
 
 		QDoubleSpinBox* m_doubleSpinBox = nullptr;
-		QSpinBox* m_intSpinBox = nullptr;
+		SInt32SpinBox* m_intSpinBox = nullptr;
 		QSpinBox* m_discreteSpinBox = nullptr;
 
 		QDialogButtonBox* m_buttonBox = nullptr;

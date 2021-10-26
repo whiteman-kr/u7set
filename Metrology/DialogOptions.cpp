@@ -262,6 +262,7 @@ PropertyPage* DialogOptions::createPage(int page)
 		case OPTION_PAGE_LANGUAGE:				pPropertyPage = createPropertyList(page);	break;
 		case OPTION_PAGE_LINEARITY_POINT:
 		case OPTION_PAGE_MEASURE_VIEW_COLUMN:	pPropertyPage = createPropertyDialog(page);	break;
+
 		default:
 			assert(nullptr);
 	}
@@ -302,7 +303,9 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					case OPTION_PAGE_CONFIG_SOCKET:	socketType = SOCKET_TYPE_CONFIG;	break;
 					case OPTION_PAGE_SIGNAL_SOCKET:	socketType = SOCKET_TYPE_SIGNAL;	break;
 					case OPTION_PAGE_TUNING_SOCKET:	socketType = SOCKET_TYPE_TUNING;	break;
-					default:						socketType = -1;					break;
+
+					default:
+						socketType = -1;
 				}
 
 				if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
@@ -443,15 +446,15 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					appendProperty(item, page, LO_PARAM_ERROR_TYPE);
 					errorGroup->addSubProperty(item);
 
-					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LinearityParamName[LO_PARAM_SHOW_ERROR_FROM_LIMIT]));
+					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LinearityParamName[LO_PARAM_CALC_ERROR_BY_RANGE]));
 					QStringList showErrorFromLimitList;
-					for(int t = 0; t < Measure::LimitTypeCount; t++)
+					for(int t = 0; t < Measure::CalcErrorRangeCount; t++)
 					{
-						showErrorFromLimitList.append(qApp->translate("MeasureBase", Measure::LimitTypeCaption(static_cast<Measure::LimitType>(t)).toUtf8()));
+						showErrorFromLimitList.append(qApp->translate("MeasureBase", Measure::CalcErrorRangeCaption(static_cast<Measure::CalcErrorRange>(t)).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
-					item->setValue(m_options.linearity().limitType());
-					appendProperty(item, page, LO_PARAM_SHOW_ERROR_FROM_LIMIT);
+					item->setValue(m_options.linearity().calcErrorByRange());
+					appendProperty(item, page, LO_PARAM_CALC_ERROR_BY_RANGE);
 					errorGroup->addSubProperty(item);
 
 				QtProperty* measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measurements at the single point"));
@@ -491,6 +494,7 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					{
 						case Measure::LinearityDivision::Manual:	item->setEnabled(false);	break;
 						case Measure::LinearityDivision::Automatic:	item->setEnabled(true);		break;
+
 						default:
 							assert(0);
 					}
@@ -505,6 +509,7 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					{
 						case Measure::LinearityDivision::Manual:	item->setEnabled(false);	break;
 						case Measure::LinearityDivision::Automatic:	item->setEnabled(true);		break;
+
 						default:
 							assert(0);
 					}
@@ -519,6 +524,7 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					{
 						case Measure::LinearityDivision::Manual:	item->setEnabled(false);	break;
 						case Measure::LinearityDivision::Automatic:	item->setEnabled(true);		break;
+
 						default:
 							assert(0);
 					}
@@ -564,13 +570,6 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					appendProperty(item, page, CO_PARAM_ERROR_LIMIT);
 					errorGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Double, qApp->translate("Options.h", ComparatorParamName[CO_PARAM_START_VALUE]));
-					item->setValue(m_options.comparator().startValueForCompare());
-					item->setAttribute(QLatin1String("singleStep"), 0.1);
-					item->setAttribute(QLatin1String("decimals"), 3);
-					appendProperty(item, page, CO_PARAM_START_VALUE);
-					errorGroup->addSubProperty(item);
-
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", ComparatorParamName[CO_PARAM_ERROR_TYPE]));
 					QStringList errorTypeList;
 					for(int e = 0; e < Measure::ErrorTypeCount; e++)
@@ -582,15 +581,22 @@ PropertyPage* DialogOptions::createPropertyList(int page)
 					appendProperty(item, page, CO_PARAM_ERROR_TYPE);
 					errorGroup->addSubProperty(item);
 
-					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", ComparatorParamName[CO_PARAM_SHOW_ERROR_FROM_LIMIT]));
+					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", ComparatorParamName[CO_PARAM_CALC_ERROR_BY_RANGE]));
 					QStringList showErrorFromLimitList;
-					for(int t = 0; t < Measure::LimitTypeCount; t++)
+					for(int t = 0; t < Measure::CalcErrorRangeCount; t++)
 					{
-						showErrorFromLimitList.append(qApp->translate("MeasureBase", Measure::LimitTypeCaption(static_cast<Measure::LimitType>(t)).toUtf8()));
+						showErrorFromLimitList.append(qApp->translate("MeasureBase", Measure::CalcErrorRangeCaption(static_cast<Measure::CalcErrorRange>(t)).toUtf8()));
 					}
 					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
-					item->setValue(m_options.comparator().limitType());
-					appendProperty(item, page, CO_PARAM_SHOW_ERROR_FROM_LIMIT);
+					item->setValue(m_options.comparator().calcErrorByRange());
+					appendProperty(item, page, CO_PARAM_CALC_ERROR_BY_RANGE);
+					errorGroup->addSubProperty(item);
+
+					item = manager->addProperty(QVariant::Double, qApp->translate("Options.h", ComparatorParamName[CO_PARAM_START_VALUE]));
+					item->setValue(m_options.comparator().startValueForCompare());
+					item->setAttribute(QLatin1String("singleStep"), 0.1);
+					item->setAttribute(QLatin1String("decimals"), 3);
+					appendProperty(item, page, CO_PARAM_START_VALUE);
 					errorGroup->addSubProperty(item);
 
 				QtProperty* permissionsGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Permissions"));
@@ -909,7 +915,6 @@ PropertyPage* DialogOptions::createPropertyDialog(int page)
 
 		default:
 			assert(nullptr);
-			break;
 	}
 
 	if (pDialogPage != nullptr)
@@ -1145,10 +1150,12 @@ void DialogOptions::applyProperty()
 
 				switch (page)
 				{
-					case OPTION_PAGE_CONFIG_SOCKET: socketType = SOCKET_TYPE_CONFIG;													break;
-					case OPTION_PAGE_SIGNAL_SOCKET: socketType = SOCKET_TYPE_SIGNAL;													break;
-					case OPTION_PAGE_TUNING_SOCKET: socketType = SOCKET_TYPE_TUNING;													break;
-					default:						socketType = -1;																	break;
+					case OPTION_PAGE_CONFIG_SOCKET: socketType = SOCKET_TYPE_CONFIG;	break;
+					case OPTION_PAGE_SIGNAL_SOCKET: socketType = SOCKET_TYPE_SIGNAL;	break;
+					case OPTION_PAGE_TUNING_SOCKET: socketType = SOCKET_TYPE_TUNING;	break;
+
+					default:
+						socketType = -1;
 				}
 
 				if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
@@ -1166,6 +1173,7 @@ void DialogOptions::applyProperty()
 					case SOCKET_CLIENT_PARAM_EQUIPMENT_ID2:	sco.setEquipmentID(SOCKET_SERVER_TYPE_RESERVE, value.toString());			break;
 					case SOCKET_CLIENT_PARAM_SERVER_IP2:	sco.setServerIP(SOCKET_SERVER_TYPE_RESERVE, value.toString());				break;
 					case SOCKET_CLIENT_PARAM_SERVER_PORT2:	sco.setServerPort(SOCKET_SERVER_TYPE_RESERVE, value.toInt());				break;
+
 					default:
 						assert(0);
 				}
@@ -1187,6 +1195,7 @@ void DialogOptions::applyProperty()
 					case MO_PARAM_MEASURE_SHOWN_ON_SCHEMAS:	m_options.module().setMeasureShownOnSchemas(value.toBool());				break;
 					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());					break;
 					case MO_PARAM_MAX_IMPUT_COUNT:			m_options.module().setMaxInputCount(value.toInt());							break;
+
 					default:
 						assert(0);
 				}
@@ -1200,7 +1209,7 @@ void DialogOptions::applyProperty()
 					case LO_PARAM_ERROR_LIMIT:				m_options.linearity().setErrorLimit(value.toDouble());						break;
 					case LO_PARAM_ERROR_TYPE:				m_options.linearity().setErrorType(value.toInt());
 															m_options.measureView().setUpdateColumnView(Measure::Type::Linearity, true);break;
-					case LO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.linearity().setLimitType(value.toInt());
+					case LO_PARAM_CALC_ERROR_BY_RANGE:		m_options.linearity().setCalcErrorByRange(value.toInt());
 															m_options.measureView().setUpdateColumnView(Measure::Type::Linearity, true);break;
 					case LO_PARAM_MEASURE_TIME:				m_options.linearity().setMeasureTimeInPoint(value.toInt());					break;
 					case LO_PARAM_MEASURE_IN_POINT:			m_options.linearity().setMeasureCountInPoint(value.toInt());				break;
@@ -1229,13 +1238,14 @@ void DialogOptions::applyProperty()
 				switch(param)
 				{
 					case CO_PARAM_ERROR_LIMIT:				m_options.comparator().setErrorLimit(value.toDouble());							break;
-					case CO_PARAM_START_VALUE:				m_options.comparator().setStartValueForCompare(value.toDouble());				break;
 					case CO_PARAM_ERROR_TYPE:				m_options.comparator().setErrorType(value.toInt());
 															m_options.measureView().setUpdateColumnView(Measure::Type::Comparators, true);	break;
-					case CO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.comparator().setLimitType(value.toInt());
+					case CO_PARAM_CALC_ERROR_BY_RANGE:		m_options.comparator().setCalcErrorByRange(value.toInt());
 															m_options.measureView().setUpdateColumnView(Measure::Type::Comparators, true);	break;
+					case CO_PARAM_START_VALUE:				m_options.comparator().setStartValueForCompare(value.toDouble());				break;
 					case CO_PARAM_COMPARATOR_INDEX:			m_options.comparator().setStartComparatorIndex(value.toInt() - 1);				break;
 					case CO_PARAM_ENABLE_HYSTERESIS:		m_options.comparator().setEnableMeasureHysteresis(value.toBool());				break;
+
 					default:
 						assert(0);
 				}
@@ -1252,6 +1262,7 @@ void DialogOptions::applyProperty()
 					case MWO_PARAM_COLOR_CONTROL_ERROR:		m_options.measureView().setColorErrorControl(QColor(value.toString()));		break;
 					case MWO_PARAM_SHOW_NO_VALID:			m_options.measureView().setShowNoValid(value.toBool());						break;
 					case MWO_PARAM_PRECESION_BY_CALIBRATOR:	m_options.measureView().setPrecesionByCalibrator(value.toBool());			break;
+
 					default:
 						assert(0);
 				}
@@ -1280,6 +1291,7 @@ void DialogOptions::applyProperty()
 				case SIO_PARAM_COLOR_FLAG_OVERFLOW:		m_options.signalInfo().setColorFlagOverflow(QColor(value.toString()));			break;
 				case SIO_PARAM_COLOR_FLAG_UNDERFLOW:	m_options.signalInfo().setColorFlagUnderflow(QColor(value.toString()));			break;
 				case SIO_PARAM_TIME_FOR_UPDATE:			m_options.signalInfo().setTimeForUpdate(value.toInt());							break;
+
 				default:
 					assert(0);
 			}
@@ -1296,6 +1308,7 @@ void DialogOptions::applyProperty()
 				case CIO_PARAM_COLOR_STATE_FALSE:		m_options.comparatorInfo().setColorStateFalse(QColor(value.toString()));		break;
 				case CIO_PARAM_COLOR_STATE_TRUE:		m_options.comparatorInfo().setColorStateTrue(QColor(value.toString()));			break;
 				case CIO_PARAM_TIME_FOR_UPDATE:			m_options.comparatorInfo().setTimeForUpdate(value.toInt());						break;
+
 				default:
 					assert(0);
 			}
@@ -1308,6 +1321,7 @@ void DialogOptions::applyProperty()
 				{
 					case DBO_PARAM_LOCATION_PATH:		m_options.database().setLocationPath(value.toString());							break;
 					case DBO_PARAM_TYPE:				m_options.database().setType(value.toBool());									break;
+
 					default:
 						assert(0);
 				}
@@ -1321,6 +1335,7 @@ void DialogOptions::applyProperty()
 					case DBO_PARAM_ON_START:			m_options.database().setOnStart(value.toBool());								break;
 					case DBO_PARAM_ON_EXIT:				m_options.database().setOnExit(value.toBool());									break;
 					case DBO_PARAM_COPY_PATH:			m_options.database().setBackupPath(value.toString());							break;
+
 					default:
 						assert(0);
 				}
@@ -1332,6 +1347,7 @@ void DialogOptions::applyProperty()
 				switch(param)
 				{
 					case LNO_PARAM_LANGUAGE_TYPE:		m_options.language().setLanguageType(value.toInt());							break;
+
 					default:
 						assert(0);
 				}
@@ -1404,6 +1420,7 @@ void DialogOptions::updateLinearityPage(bool isDialog)
 		{
 			case Measure::LinearityDivision::Manual:	property->setEnabled(false);	break;
 			case Measure::LinearityDivision::Automatic:	property->setEnabled(true);		break;
+
 			default:
 				assert(0);
 		}
@@ -1418,6 +1435,7 @@ void DialogOptions::updateLinearityPage(bool isDialog)
 		{
 			case Measure::LinearityDivision::Manual:	property->setEnabled(false);	break;
 			case Measure::LinearityDivision::Automatic:	property->setEnabled(true);		break;
+
 			default:
 				assert(0);
 		}
@@ -1432,6 +1450,7 @@ void DialogOptions::updateLinearityPage(bool isDialog)
 		{
 			case Measure::LinearityDivision::Manual:	property->setEnabled(false);	break;
 			case Measure::LinearityDivision::Automatic:	property->setEnabled(true);		break;
+
 			default:
 				assert(0);
 		}

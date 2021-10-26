@@ -93,6 +93,22 @@ void XmlWriteHelper::writeBoolAttribute(const QString& name, bool value)
 	writeStringAttribute(name, value ? "true" : "false");
 }
 
+void XmlWriteHelper::writeInt64Attribute(const QString& name, qint64 value, bool hex)
+{
+	QString valueStr;
+
+	if (hex == true)
+	{
+		valueStr = "0x" + QString::number(static_cast<qulonglong>(value), 16).toUpper();
+	}
+	else
+	{
+		valueStr = QString::number(static_cast<qlonglong>(value));
+	}
+
+	m_xmlWriter->writeAttribute(name, valueStr);
+}
+
 void XmlWriteHelper::writeUInt64Attribute(const QString& name, quint64 value, bool hex)
 {
 	QString valueStr;
@@ -176,6 +192,44 @@ void XmlWriteHelper::writeHostAddress(const QString& nameIP, const QHostAddress&
 	writeStringElement(nameIP, hostAddress.toString());
 }
 
+void XmlWriteHelper::writeQVariantAttribute(const QString& name, const QVariant& qv)
+{
+	switch(qv.type())
+	{
+	case QVariant::Type::Bool:
+		writeBoolAttribute(name, qv.toBool());
+		break;
+
+	case QVariant::Type::Int:
+		writeInt64Attribute(name, qv.toInt());
+		break;
+
+	case QVariant::Type::LongLong:
+		writeInt64Attribute(name, qv.toLongLong());
+
+	case QVariant::Type::UInt:
+		writeUInt64Attribute(name, qv.toUInt());
+		break;
+
+	case QVariant::Type::ULongLong:
+		writeUInt64Attribute(name, qv.toULongLong());
+		break;
+
+	case QVariant::Type::Double:
+		writeDoubleAttribute(name, qv.toDouble());
+		break;
+
+	case QVariant::Type::String:
+		writeStringAttribute(name, qv.toString());
+		break;
+
+	default:
+		Q_ASSERT(false);			// writing is not implemented for this QVarian::Type
+	}
+}
+
+
+
 // -------------------------------------------------------------------------------------
 //
 // XmlReadHelper class implementation
@@ -235,12 +289,14 @@ bool XmlReadHelper::readStringAttribute(const QString& name, QString* value)
 		return false;
 	}
 
-	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	QXmlStreamAttributes attrs = m_xmlReader->attributes();
+
+	if (attrs.hasAttribute(name) == false)
 	{
 		return false;
 	}
 
-	*value = m_xmlReader->attributes().value(name).toString();
+	*value = attrs.value(name).toString();
 
 	return true;
 }
@@ -253,14 +309,14 @@ bool XmlReadHelper::readIntAttribute(const QString& name, int* value)
 		return false;
 	}
 
-	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	QString str;
+
+	bool result = readStringAttribute(name, &str);
+
+	if (result == false)
 	{
 		return false;
 	}
-
-	bool result = false;
-
-	QString str = m_xmlReader->attributes().value(name).toString();
 
 	*value = str.toInt(&result, 0);
 
@@ -284,6 +340,8 @@ bool XmlReadHelper::readBoolAttribute(const QString& name, bool* value)
 		return false;
 	}
 
+	boolStr = boolStr.trimmed().toLower();
+
 	if (boolStr == "true")
 	{
 		*value = true;
@@ -304,6 +362,28 @@ bool XmlReadHelper::readBoolAttribute(const QString& name, bool* value)
 	return true;
 }
 
+bool XmlReadHelper::readInt64Attribute(const QString& name, qlonglong *value)
+{
+	if(value == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	QString str;
+
+	bool result = readStringAttribute(name, &str);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	*value = str.toLongLong(&result, 0);
+
+	return result;
+}
+
 bool XmlReadHelper::readUInt64Attribute(const QString& name, qulonglong *value)
 {
 	if(value == nullptr)
@@ -312,16 +392,14 @@ bool XmlReadHelper::readUInt64Attribute(const QString& name, qulonglong *value)
 		return false;
 	}
 
-	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	QString str;
+
+	bool result = readStringAttribute(name, &str);
+
+	if (result == false)
 	{
 		return false;
 	}
-
-	QString str;
-
-	bool result = true;
-
-	str = m_xmlReader->attributes().value(name).toString();
 
 	*value = str.toULongLong(&result, 0);
 
@@ -336,16 +414,14 @@ bool XmlReadHelper::readUInt32Attribute(const QString& name, quint32* value)
 		return false;
 	}
 
-	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	QString str;
+
+	bool result = readStringAttribute(name, &str);
+
+	if (result == false)
 	{
 		return false;
 	}
-
-	QString str;
-
-	bool result = true;
-
-	str = m_xmlReader->attributes().value(name).toString();
 
 	*value = str.toULong(&result, 0);
 
@@ -360,14 +436,16 @@ bool XmlReadHelper::readDoubleAttribute(const QString& name, double* value)
 		return false;
 	}
 
-	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	QString str;
+
+	bool result = readStringAttribute(name, &str);
+
+	if (result == false)
 	{
 		return false;
 	}
 
-	bool result = false;
-
-	*value = m_xmlReader->attributes().value(name).toDouble(&result);
+	*value = str.toDouble(&result);
 
 	return result;
 }
@@ -380,14 +458,16 @@ bool XmlReadHelper::readFloatAttribute(const QString& name, float* value)
 		return false;
 	}
 
-	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	QString str;
+
+	bool result = readStringAttribute(name, &str);
+
+	if (result == false)
 	{
 		return false;
 	}
 
-	bool result = false;
-
-	*value = m_xmlReader->attributes().value(name).toFloat(&result);
+	*value = str.toFloat(&result);
 
 	return result;
 }
@@ -573,5 +653,76 @@ bool XmlReadHelper::checkElement(const QString& elementName)
 	qDebug() << "XmlReadHelper: element does not match. Current - " << name() << ", required -" << elementName;
 
 	return false;
+}
+
+bool XmlReadHelper::readQVariantAttribute(const QString& name, QVariant* qv)
+{
+	TEST_PTR_RETURN_FALSE(qv);
+
+	bool result = true;
+
+	switch(qv->type())
+	{
+	case QVariant::Type::Bool:
+		{
+			bool v = false;
+			readBoolAttribute(name, &v);
+			*qv = v;
+		}
+		break;
+
+	case QVariant::Type::Int:
+		{
+			int v = 0;
+			result = readIntAttribute(name, &v);
+			*qv = v;
+		}
+		break;
+
+	case QVariant::Type::LongLong:
+		{
+			qlonglong v = 0;
+			result = readInt64Attribute(name, &v);
+			*qv = v;
+		}
+		break;
+
+	case QVariant::Type::UInt:
+		{
+			uint v = 0;
+			result = readUInt32Attribute(name, &v);
+			*qv = v;
+		}
+		break;
+
+	case QVariant::Type::ULongLong:
+		{
+			qulonglong v = 0;
+			result = readUInt64Attribute(name, &v);
+			*qv = v;
+		}
+		break;
+
+	case QVariant::Type::Double:
+		{
+			double v = 0;
+			result = readDoubleAttribute(name, &v);
+			*qv = v;
+		}
+		break;
+
+	case QVariant::Type::String:
+		{
+			QString v = 0;
+			result = readStringAttribute(name, &v);
+			*qv = v;
+		}
+		break;
+
+	default:
+		Q_ASSERT(false);			// writing is not implemented for this QVarian::Type
+	}
+
+	return result;
 }
 

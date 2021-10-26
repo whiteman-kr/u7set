@@ -188,6 +188,14 @@ namespace Measure
 			{
 				case Measure::Type::Linearity:
 
+					if (columnIndex == MVC_CMN_L_MODULE_SN)
+					{
+						if (pMeasurement->location().moduleSerialNo() == 0)
+						{
+							return QColor(Qt::yellow);
+						}
+					}
+
 					if (columnIndex == MVC_CMN_L_ERROR_RESULT)
 					{
 						return backgroundColor(pMeasurement);
@@ -196,6 +204,14 @@ namespace Measure
 					break;
 
 				case Measure::Type::Comparators:
+
+					if (columnIndex == MVC_CMN_C_MODULE_SN)
+					{
+						if (pMeasurement->location().moduleSerialNo() == 0)
+						{
+							return QColor(Qt::yellow);
+						}
+					}
 
 					if (columnIndex == MVC_CMN_C_ERROR_RESULT)
 					{
@@ -324,9 +340,10 @@ namespace Measure
 		switch (theOptions.linearity().viewType())
 		{
 			case LinearityViewType::Simple:
-			case LinearityViewType::Extended:			limitType = static_cast<Measure::LimitType>(theOptions.linearity().limitType());	break;
-			case LinearityViewType::DetailElectric:		limitType = Measure::LimitType::Electric;											break;
-			case LinearityViewType::DetailEngineering:	limitType = Measure::LimitType::Engineering;										break;
+			case LinearityViewType::Extended:			limitType = m->limitTypeByRange(theOptions.linearity().calcErrorByRange());		break;
+			case LinearityViewType::DetailElectric:		limitType = Measure::LimitType::Electric;										break;
+			case LinearityViewType::DetailEngineering:	limitType = Measure::LimitType::Engineering;									break;
+
 			default:
 				assert(0);
 				return QString();
@@ -344,6 +361,7 @@ namespace Measure
 			case MVC_CMN_L_INDEX:					result = QString::number(m->measureID()); break;
 
 			case MVC_CMN_L_MODULE_SN:				result = m->location().moduleSerialNoStr(); break;
+			case MVC_CMN_L_MODULE_TYPE:				result = m->location().moduleCaption(); break;
 			case MVC_CMN_L_CONNECT_APP_ID:			result = m->connectionSignalID(); break;
 			case MVC_CMN_L_CONNECT_TYPE:			result = m->connectionTypeStr(); break;
 			case MVC_CMN_L_APP_ID:					result = m->appSignalID(); break;
@@ -462,6 +480,7 @@ namespace Measure
 			case MVC_CMN_C_INDEX:					result = QString::number(m->measureID()); break;
 
 			case MVC_CMN_C_MODULE_SN:				result = m->location().moduleSerialNoStr(); break;
+			case MVC_CMN_C_MODULE_TYPE:				result = m->location().moduleCaption(); break;
 			case MVC_CMN_C_CONNECT_APP_ID:			result = m->connectionSignalID(); break;
 			case MVC_CMN_C_CONNECT_TYPE:			result = m->connectionTypeStr(); break;
 			case MVC_CMN_C_APP_ID:					result = m->appSignalID(); break;
@@ -999,6 +1018,7 @@ namespace Measure
 			case ChartType::Value20El:		limitType = Measure::LimitType::Electric;		break;
 			case ChartType::LinearityEn:
 			case ChartType::Value20En:		limitType = Measure::LimitType::Engineering;	break;
+
 			default:
 				assert(0);
 		}

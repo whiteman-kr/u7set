@@ -45,6 +45,7 @@ QVariant TuningSignalTable::data(const QModelIndex &index, int role) const
 			case TUN_SIGNAL_LIST_COLUMN_STATE:			result = Qt::AlignCenter;	break;
 			case TUN_SIGNAL_LIST_COLUMN_DEFAULT:		result = Qt::AlignCenter;	break;
 			case TUN_SIGNAL_LIST_COLUMN_RANGE:			result = Qt::AlignCenter;	break;
+
 			default:
 				assert(0);
 		}
@@ -121,6 +122,7 @@ QString TuningSignalTable::text(int row, int column, Metrology::Signal* pSignal)
 		case TUN_SIGNAL_LIST_COLUMN_STATE:			result = signalStateStr(pSignal);			break;
 		case TUN_SIGNAL_LIST_COLUMN_DEFAULT:		result = qApp->translate("MetrologySignal", param.tuningDefaultValueStr().toUtf8());break;
 		case TUN_SIGNAL_LIST_COLUMN_RANGE:			result = param.tuningRangeStr();			break;
+
 		default:
 			assert(0);
 	}

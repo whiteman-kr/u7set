@@ -928,3 +928,18 @@ QString QOverrideTreeWidgetItem::appSignalId() const
 {
 	return m_overrideSignal.appSignalId();
 }
+
+bool QOverrideTreeWidgetItem::operator < (const QTreeWidgetItem& other) const
+{
+	int column = treeWidget()->sortColumn();
+
+	switch (static_cast<Columns>(column))
+	{
+	case Columns::Index:
+		return text(column).toInt() < other.text(column).toInt();
+	case Columns::Value:
+		return text(column).toDouble() < other.text(column).toDouble();
+	default:
+		return text(column).toLower() < other.text(column).toLower();
+	}
+}

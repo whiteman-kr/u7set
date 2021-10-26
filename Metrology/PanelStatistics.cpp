@@ -97,6 +97,7 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 			case STATISTICS_COLUMN_CHASSIS:				result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_MODULE:				result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_PLACE:				result = Qt::AlignCenter;	break;
+			case STATISTICS_COLUMN_MODULE_TYPE:			result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_EN_RANGE:			result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_EL_RANGE:			result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_EL_SENSOR:			result = Qt::AlignCenter;	break;
@@ -104,6 +105,7 @@ QVariant StatisticsTable::data(const QModelIndex &index, int role) const
 			case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_MEASURE_COUNT:		result = Qt::AlignCenter;	break;
 			case STATISTICS_COLUMN_STATE:				result = Qt::AlignCenter;	break;
+
 			default:
 				assert(0);
 		}
@@ -254,6 +256,7 @@ QString StatisticsTable::text(int row, int column, const StatisticsItem& si) con
 		case STATISTICS_COLUMN_CHASSIS:				result = visible ? param.location().chassisStr() : QString();								break;
 		case STATISTICS_COLUMN_MODULE:				result = visible ? param.location().moduleStr() : QString();								break;
 		case STATISTICS_COLUMN_PLACE:				result = visible ? param.location().placeStr() : QString();									break;
+		case STATISTICS_COLUMN_MODULE_TYPE:			result = param.location().moduleCaption();													break;
 		case STATISTICS_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();														break;
 		case STATISTICS_COLUMN_EL_RANGE:			result = param.electricRangeStr();															break;
 		case STATISTICS_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();														break;
@@ -261,6 +264,7 @@ QString StatisticsTable::text(int row, int column, const StatisticsItem& si) con
 		case STATISTICS_COLUMN_SIGNAL_CONNECTION:	result = qApp->translate("StatisticsBase", si.connectionTypeStr().trimmed().toUtf8());		break;
 		case STATISTICS_COLUMN_MEASURE_COUNT:		result = si.measureCountStr();																break;
 		case STATISTICS_COLUMN_STATE:				result = qApp->translate("StatisticsBase", si.stateStr().toUtf8());							break;
+
 		default:
 			assert(0);
 	}
@@ -820,6 +824,7 @@ void PanelStatistics::updateVisibleColunm()
 		hideColumn(STATISTICS_COLUMN_CHASSIS, true);
 		hideColumn(STATISTICS_COLUMN_MODULE, true);
 		hideColumn(STATISTICS_COLUMN_PLACE, true);
+		hideColumn(STATISTICS_COLUMN_MODULE_TYPE, true);
 		hideColumn(STATISTICS_COLUMN_EL_RANGE, true);
 		hideColumn(STATISTICS_COLUMN_EL_SENSOR, true);
 	}

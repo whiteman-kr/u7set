@@ -36,8 +36,7 @@ bool LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, equipmentID);
 	xml.writeIntAttribute(EquipmentPropNames::CONTROLLER_NO, controllerNo);
-	xml.writeStringAttribute(EquipmentPropNames::LAN_CONTROLLER_TYPE,
-							 E::valueToString<E::LanControllerType>(lanControllerType));
+	xml.writeEnumKeyAttribute(EquipmentPropNames::LAN_CONTROLLER_TYPE, lanControllerType);
 
 	//
 
@@ -126,7 +125,7 @@ bool LanControllerInfo::readFromXml(XmlReadHelper& xml)
 	result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &equipmentID);
 	result &= xml.readIntAttribute(EquipmentPropNames::CONTROLLER_NO, &controllerNo);
 
-	result &= xml.readEnumAttribute(EquipmentPropNames::LAN_CONTROLLER_TYPE, &lanControllerType);
+	result &= xml.readEnumKeyAttribute(EquipmentPropNames::LAN_CONTROLLER_TYPE, &lanControllerType);
 
 	//
 

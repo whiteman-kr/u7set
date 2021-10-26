@@ -16,7 +16,7 @@
 #include <QXmlStreamReader>
 #include <QFile>
 #include <QMetaProperty>
-#include <QtConcurrent/QtConcurrent>
+#include <QtConcurrent>
 #include <QFuture>
 
 namespace Hardware

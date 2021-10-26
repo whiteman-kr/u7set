@@ -124,6 +124,9 @@ namespace Metrology
 		QString				moduleID() const { return m_moduleID; }
 		void				setModuleID(const QString& moduleID) { m_moduleID = moduleID; }
 
+		QString				moduleCaption() const { return m_moduleCaption; }
+		void				setModuleCaption(const QString& caption) { m_moduleCaption = caption; }
+
 		int					module() const { return m_module; }
 		QString				moduleStr() const;
 		void				setModule(int module) { m_module = module; }
@@ -161,6 +164,7 @@ namespace Metrology
 		int					m_chassis = -1;				// number of chassis
 
 		QString				m_moduleID;					// module EquipmentID
+		QString				m_moduleCaption;			// module Caption
 		int					m_module = -1;				// number of module
 
 		int					m_place = -1;				// number of place
@@ -278,8 +282,8 @@ namespace Metrology
 
 		// serialize
 		//
-		void					serializeTo(Proto::MetrologySignal *ms) const;
-		bool					serializeFrom(const Proto::MetrologySignal& ms);
+		void					saveToProto(Proto::MetrologySignal *ms) const;
+		bool					loadFromProto(const Proto::MetrologySignal& ms);
 
 	private:
 

@@ -243,7 +243,7 @@ void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint
 
 		Proto::AppSignal* appSignalParam = m_getAppSignalParamReply.add_appsignals();
 
-		signal->serializeTo(appSignalParam);
+		signal->saveToProto(appSignalParam);
 	}
 
 	sendReply(m_getAppSignalParamReply);
@@ -284,7 +284,7 @@ void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 re
 
 		Proto::AppSignal* appSignal = m_getAppSignalReply.add_appsignals();
 
-		signal->serializeTo(appSignal);
+		signal->saveToProto(appSignal);
 	}
 
 	sendReply(m_getAppSignalReply);

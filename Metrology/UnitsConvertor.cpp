@@ -558,6 +558,7 @@ double UnitsConvertor::conversionDegree(double val, const UnitsConvertType& conv
 	{
 		case UnitsConvertType::CelsiusToFahrenheit:	retVal = (val * (9.0 / 5.0)) + 32;		break;
 		case UnitsConvertType::FahrenheitToCelsius:	retVal = ((val - 32) * (5.0 / 9.0));	break;
+
 		default:
 			assert(0);
 	}

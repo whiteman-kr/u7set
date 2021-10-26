@@ -81,7 +81,7 @@ void EquipmentView::addSystem()
 	system->setCaption(tr("System"));
 	system->setPlace(0);
 
-	addDeviceObject(system, parentModelIndex, true);
+	addDeviceObject(system, parentModelIndex, true, true);
 
 	emit updateState();
 	return;
@@ -113,7 +113,7 @@ void EquipmentView::addRack()
 	rack->setCaption(tr("Rack"));
 	rack->setPlace(0);
 
-	addDeviceObject(rack, parentModelIndex, true);
+	addDeviceObject(rack, parentModelIndex, true, true);
 
 	emit updateState();
 	return;
@@ -145,7 +145,7 @@ void EquipmentView::addChassis()
 	chassis->setCaption(tr("Chassis"));
 	chassis->setPlace(-1);
 
-	addDeviceObject(chassis, parentModelIndex, true);
+	addDeviceObject(chassis, parentModelIndex, true, true);
 
 	emit updateState();
 	return;
@@ -177,7 +177,7 @@ void EquipmentView::addModule()
 	module->setCaption(tr("Module"));
 	module->setPlace(-1);
 
-	addDeviceObject(module, parentModelIndex, true);
+	addDeviceObject(module, parentModelIndex, true, true);
 
 	emit updateState();
 	return;
@@ -208,7 +208,7 @@ void EquipmentView::addController()
 	controller->setEquipmentIdTemplate("$(PARENT)_CTRLXX");
 	controller->setCaption(tr("Controller"));
 
-	addDeviceObject(controller, parentModelIndex, true);
+	addDeviceObject(controller, parentModelIndex, true, true);
 
 	emit updateState();
 	return;
@@ -239,7 +239,7 @@ void EquipmentView::addSignal()
 	signal->setEquipmentIdTemplate("$(PARENT)_SIGNAL");
 	signal->setCaption(tr("Signal"));
 
-	addDeviceObject(signal, parentModelIndex, true);
+	addDeviceObject(signal, parentModelIndex, true, true);
 
 	emit updateState();
 	return;
@@ -271,7 +271,7 @@ void EquipmentView::addWorkstation()
 	workstation->setCaption(tr("Workstation"));
 	workstation->setPlace(0);
 
-	addDeviceObject(workstation, parentModelIndex, true);
+	addDeviceObject(workstation, parentModelIndex, true, true);
 
 	emit updateState();
 	return;
@@ -303,7 +303,7 @@ void EquipmentView::addSoftware()
 	software->setCaption(tr("Software"));
 	software->setPlace(0);
 
-	addDeviceObject(software, parentModelIndex, true);
+	addDeviceObject(software, parentModelIndex, true, true);
 
 	emit updateState();
 	return;
@@ -484,7 +484,7 @@ void EquipmentView::replaceObject()
 
 		// Add device
 		//
-		addDeviceObject(device, selectionModel()->selectedRows().at(0), true);
+		addDeviceObject(device, selectionModel()->selectedRows().at(0), true, true);
 		emit updateState();
 	}
 
@@ -509,7 +509,7 @@ void EquipmentView::addPresetRack()
 		rack->setPresetRoot(true);
 		rack->setPresetName("PRESET_NAME");
 
-		addDeviceObject(rack, parentModelIndex, true);
+		addDeviceObject(rack, parentModelIndex, true, true);
 	}
 	else
 	{
@@ -537,7 +537,7 @@ void EquipmentView::addPresetChassis()
 		chassis->setPresetRoot(true);
 		chassis->setPresetName("PRESET_NAME");
 
-		addDeviceObject(chassis, parentModelIndex, true);
+		addDeviceObject(chassis, parentModelIndex, true, true);
 	}
 	else
 	{
@@ -564,7 +564,7 @@ void EquipmentView::addPresetModule()
 		module->setPresetRoot(true);
 		module->setPresetName("PRESET_NAME");
 
-		addDeviceObject(module, parentModelIndex, true);
+		addDeviceObject(module, parentModelIndex, true, true);
 	}
 	else
 	{
@@ -590,7 +590,7 @@ void EquipmentView::addPresetController()
 		controller->setPresetRoot(true);
 		controller->setPresetName("PRESET_NAME");
 
-		addDeviceObject(controller, parentModelIndex, true);
+		addDeviceObject(controller, parentModelIndex, true, true);
 	}
 	else
 	{
@@ -617,7 +617,7 @@ void EquipmentView::addPresetWorkstation()
 		workstation->setPresetRoot(true);
 		workstation->setPresetName("PRESET_NAME");
 
-		addDeviceObject(workstation, parentModelIndex, true);
+		addDeviceObject(workstation, parentModelIndex, true, true);
 	}
 	else
 	{
@@ -644,7 +644,7 @@ void EquipmentView::addPresetSoftware()
 		software->setPresetRoot(true);
 		software->setPresetName("PRESET_NAME");
 
-		addDeviceObject(software, parentModelIndex, true);
+		addDeviceObject(software, parentModelIndex, true, true);
 	}
 	else
 	{
@@ -811,7 +811,7 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentView::addPresetToConfiguration(
 	//
 	if (addToEquipment == true)
 	{
-		addDeviceObject(device, parentModelIndex, true);
+		addDeviceObject(device, parentModelIndex, true, true);
 	}
 	else
 	{
@@ -822,7 +822,10 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentView::addPresetToConfiguration(
 	return device;
 }
 
-QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentModelIndex, bool clearPrevSelection)
+QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object,
+										   QModelIndex parentModelIndex,
+										   bool clearPrevSelection,
+										   bool newUuids)
 {
 	if (object == nullptr)
 	{
@@ -857,7 +860,10 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 			}
 		};
 
-	setUuid(object.get());
+	if (newUuids == true)
+	{
+		setUuid(object.get());
+	}
 
 	// Set Parent
 	//
@@ -917,7 +923,7 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 	}
 
 	// Debugging .... parentObject->setChildRestriction("function(device) { return device.Place >=0 && device.Place < 16; }");
-
+	//
 	if (parentObject == nullptr)
 	{
 		Q_ASSERT(parentObject != nullptr);
@@ -1781,12 +1787,14 @@ void EquipmentView::pasteDevices()
 
 	// --
 	//
-	pasteDevices(messageItems, messageDescr);
+	pasteDevices(messageItems, messageDescr, true);
 
 	return;
 }
 
-void EquipmentView::pasteDevices(const ::Proto::EnvelopeSet& messageItems, const ::Proto::EnvelopeSetShortDescription& messageDescr)
+void EquipmentView::pasteDevices(const ::Proto::EnvelopeSet& messageItems,
+								 const Proto::EnvelopeSetShortDescription& messageDescr,
+								 bool newUuids)		// Generate UUIDs is false for importing presets. Preset has PresetObjectUuid which is used for matching preset and its' equipment
 {
 	QModelIndex parentModelIndex;		// current is root
 	QModelIndexList selected = selectionModel()->selectedRows();
@@ -1814,7 +1822,7 @@ void EquipmentView::pasteDevices(const ::Proto::EnvelopeSet& messageItems, const
 	// --
 	//
 
-	// Create objects andd add children
+	// Create objects and add children
 	//
 
 	// function for setting new uuids
@@ -1843,9 +1851,12 @@ void EquipmentView::pasteDevices(const ::Proto::EnvelopeSet& messageItems, const
 			break;
 		}
 
-		setUuid(object.get());		// Set new guids to all objects
+		if (newUuids == true)
+		{
+			setUuid(object.get());		// Set new guids to all objects
+		}
 
-		lastModelIndex = addDeviceObject(object, parentModelIndex, false);
+		lastModelIndex = addDeviceObject(object, parentModelIndex, false, newUuids);
 	}
 
 	if (lastModelIndex.isValid() == true)

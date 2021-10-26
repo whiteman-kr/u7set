@@ -2277,7 +2277,7 @@ SignalsProxyModel::SignalsProxyModel(SignalsModel *sourceModel, QObject *parent)
 bool SignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) const
 {
 	const AppSignal& currentSignal = m_signalSetProvider->getLoadedSignal(source_row);
-	if (!(m_signalType == ST_ANY || m_signalType == currentSignal.signalTypeInt()))
+	if (!(m_signalType == ST_ANY || m_signalType == TO_INT(currentSignal.signalType())))
 	{
 		return false;
 	}

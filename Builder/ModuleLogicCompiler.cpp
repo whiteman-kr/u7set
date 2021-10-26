@@ -5590,6 +5590,26 @@ namespace Builder
 		}
 	}
 
+	void ModuleLogicCompiler::sortSignalList(QVector<const UalSignal*>& signalList)
+	{
+		int count = signalList.count();
+
+		for(int i = 0; i < count - 1; i++)
+		{
+			for(int k = i + 1; k < count; k++)
+			{
+				const UalSignal* s1 = signalList[i];
+				const UalSignal* s2 = signalList[k];
+
+				if (s1->appSignalID() > s2->appSignalID())
+				{
+					signalList[i] = s2;
+					signalList[k] = s1;
+				}
+			}
+		}
+	}
+
 	bool ModuleLogicCompiler::disposeSignalsInMemory()
 	{
 		bool result = false;
@@ -7886,12 +7906,14 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
-		QList<const UalSignal*> loopbacksUalSignals = m_loopbacks.getLoopbacksUalSignals();
+		QVector<const UalSignal*> loopbacksUalSignals = QVector<const UalSignal*>::fromList(m_loopbacks.getLoopbacksUalSignals());
 
 		if (loopbacksUalSignals.isEmpty() == true)
 		{
 			return true;
 		}
+
+		sortSignalList(loopbacksUalSignals);
 
 		bool result = true;
 

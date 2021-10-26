@@ -53,6 +53,27 @@ namespace SimOverrideUI
 		return;
 	}
 
+	void SInt32SpinBox::keyPressEvent(QKeyEvent* event)
+	{
+		if (event->key() == Qt::Key_Enter ||
+			event->key() == Qt::Key_Return)
+		{
+			int pos = 0;
+			QString text = this->cleanText();
+
+			if (this->validate(text, pos) ==  QValidator::Acceptable)
+			{
+				this->setValue(valueFromText(text));
+				this->selectAll();
+				emit returnPressed();
+
+				return;
+			}
+		}
+
+		return QSpinBox::keyPressEvent(event);
+	}
+
 
 	//
 	// OverrideMethodWidget
@@ -139,10 +160,10 @@ namespace SimOverrideUI
 						m_intSpinBox->setDisplayIntegerBase(m_currentBase);
 						m_intSpinBox->setSuffix(m_currentBase == 16 ? " hex" : "");
 
-						connect(m_intSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
-								[this](int value)
+						connect(m_intSpinBox, &SInt32SpinBox::returnPressed,
+								[this]()
 								{
-									this->valueEntered(value);
+									this->valueEntered(this->m_intSpinBox->value());
 								});
 					}
 					break;
@@ -159,7 +180,7 @@ namespace SimOverrideUI
 
 						m_edit = m_floatEdit;
 
-						connect(m_floatEdit, &QLineEdit::editingFinished,
+						connect(m_floatEdit, &QLineEdit::returnPressed,
 								[this]()
 								{
 									bool ok = false;
@@ -279,6 +300,11 @@ namespace SimOverrideUI
 			{
 				valueEntered(m_doubleSpinBox->value());
 				return;
+			}
+
+			if (m_floatEdit != nullptr)
+			{
+				m_floatEdit->returnPressed();
 			}
 		}
 	}

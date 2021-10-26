@@ -1745,7 +1745,7 @@ void EquipmentTabPage::importPreset()
 		return;
 	}
 
-	m_equipmentView->pasteDevices(message.items(), message.description());
+	m_equipmentView->pasteDevices(message.items(), message.description(), false);
 
 	return;
 }

@@ -34,6 +34,7 @@ const char* const			StatisticsColumn[] =
 							QT_TRANSLATE_NOOP("PanelStatistics", "Chassis"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Module"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Place"),
+							QT_TRANSLATE_NOOP("PanelStatistics", "Module type"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Engineering range"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Electric range"),
 							QT_TRANSLATE_NOOP("PanelStatistics", "Electric sensor"),
@@ -56,13 +57,14 @@ const int					STATISTICS_COLUMN_CUSTOM_ID			= 0,
 							STATISTICS_COLUMN_CHASSIS			= 7,
 							STATISTICS_COLUMN_MODULE			= 8,
 							STATISTICS_COLUMN_PLACE				= 9,
-							STATISTICS_COLUMN_EN_RANGE			= 10,
-							STATISTICS_COLUMN_EL_RANGE			= 11,
-							STATISTICS_COLUMN_EL_SENSOR			= 12,
-							STATISTICS_COLUMN_SIGNAL_TYPE		= 13,
-							STATISTICS_COLUMN_SIGNAL_CONNECTION	= 14,
-							STATISTICS_COLUMN_MEASURE_COUNT		= 15,
-							STATISTICS_COLUMN_STATE				= 16;
+							STATISTICS_COLUMN_MODULE_TYPE		= 10,
+							STATISTICS_COLUMN_EN_RANGE			= 11,
+							STATISTICS_COLUMN_EL_RANGE			= 12,
+							STATISTICS_COLUMN_EL_SENSOR			= 13,
+							STATISTICS_COLUMN_SIGNAL_TYPE		= 14,
+							STATISTICS_COLUMN_SIGNAL_CONNECTION	= 15,
+							STATISTICS_COLUMN_MEASURE_COUNT		= 16,
+							STATISTICS_COLUMN_STATE				= 17;
 
 
 const int					StatisticsColumnWidth[STATISTICS_COLUMN_COUNT] =
@@ -77,6 +79,7 @@ const int					StatisticsColumnWidth[STATISTICS_COLUMN_COUNT] =
 							 60,	// STATISTICS_COLUMN_CHASSIS
 							 60,	// STATISTICS_COLUMN_MODULE
 							 60,	// STATISTICS_COLUMN_PLACE
+							100,	// STATISTICS_COLUMN_MODULE_TYPE
 							150,	// STATISTICS_COLUMN_EN_RANGE
 							150,	// STATISTICS_COLUMN_EL_RANGE
 							100,	// STATISTICS_COLUMN_EL_SENSOR

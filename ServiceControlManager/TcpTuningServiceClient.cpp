@@ -411,7 +411,7 @@ void TcpTuningServiceClient::onGetTuningSignalParam(const char *replyData, quint
 
 		assert(signalHash == m_signalHashes[signalIndex]);
 
-		m_signals[signalIndex].serializeFrom(m_getAppSignalParamReply.appsignals(i));
+		m_signals[signalIndex].loadFromProto(m_getAppSignalParamReply.appsignals(i));
 
 		assert(m_signals[signalIndex].hash() == m_signalHashes[signalIndex]);
 	}
