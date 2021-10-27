@@ -1031,7 +1031,7 @@ namespace Hardware
 
 		if (deviceType() == DeviceType::Software)
 		{
-			return false;
+			return childType == DeviceType::Controller;
 		}
 
 		if (deviceType() == DeviceType::Workstation)
