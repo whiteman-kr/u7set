@@ -198,7 +198,6 @@ private:
 	QString m_userName;
 	QString m_userPassword;
 
-	QFont m_font;
 	QFont m_marginFont;
 
 	// Statistics data

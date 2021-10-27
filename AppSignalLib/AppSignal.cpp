@@ -1465,12 +1465,12 @@ void AppSignal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute(AppSignalPropNames::SIGNAL_GROUP_ID, m_signalGroupID);
 	xml.writeIntAttribute(AppSignalPropNames::SIGNAL_INSTANCE_ID, m_signalInstanceID);
 
-	xml.writeEnumAttribute(AppSignalPropNames::TYPE, m_signalType);
-	xml.writeEnumAttribute(AppSignalPropNames::IN_OUT_TYPE, m_inOutType);
-	xml.writeEnumAttribute(AppSignalPropNames::BYTE_ORDER_PROP, m_byteOrder);
-	xml.writeEnumAttribute(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, m_analogSignalFormat);
+	xml.writeEnumKeyValueAttribute(AppSignalPropNames::TYPE, m_signalType);
+	xml.writeEnumKeyValueAttribute(AppSignalPropNames::IN_OUT_TYPE, m_inOutType);
+	xml.writeEnumKeyValueAttribute(AppSignalPropNames::BYTE_ORDER_PROP, m_byteOrder);
+	xml.writeEnumKeyValueAttribute(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, m_analogSignalFormat);
 	xml.writeIntAttribute(AppSignalPropNames::DATA_SIZE, m_dataSize);
-	xml.writeEnumAttribute(AppSignalPropNames::CHANNEL, m_channel);
+	xml.writeEnumKeyValueAttribute(AppSignalPropNames::CHANNEL, m_channel);
 
 	xml.writeStringAttribute(AppSignalPropNames::BUS_TYPE_ID, m_busTypeID);
 	xml.writeStringAttribute(AppSignalPropNames::UNIT, m_unit);
@@ -1507,6 +1507,7 @@ void AppSignal::writeToXml(XmlWriteHelper& xml)
 		xml.writeStringAttribute(AppSignalPropNames::TUNING_HIGH_BOUND, tuningHighBound().toString());
 
 		xml.writeAddress16Attribute(AppSignalPropNames::TUNING_ADDR, m_tuningAddr);
+		xml.writeAddress16Attribute(AppSignalPropNames::TUNING_ABS_ADDR, m_tuningAddr);
 	}
 
 	// write spec properties
@@ -1528,21 +1529,21 @@ void AppSignal::writeToXml(XmlWriteHelper& xml)
 			if (name == AppSignalPropNames::ELECTRIC_UNIT)
 			{
 				E::ElectricUnit e = static_cast<E::ElectricUnit>(spv.value().toInt());
-				xml.writeEnumAttribute(name, e);
+				xml.writeEnumKeyValueAttribute(name, e);
 				continue;
 			}
 
 			if (name == AppSignalPropNames::SENSOR_TYPE)
 			{
 				E::SensorType e = static_cast<E::SensorType>(spv.value().toInt());
-				xml.writeEnumAttribute(name, e);
+				xml.writeEnumKeyValueAttribute(name, e);
 				continue;
 			}
 
 			if (name == AppSignalPropNames::OUTPUT_MODE)
 			{
 				E::OutputMode e = static_cast<E::OutputMode>(spv.value().toInt());
-				xml.writeEnumAttribute(name, e);
+				xml.writeEnumKeyValueAttribute(name, e);
 				continue;
 			}
 
@@ -1664,22 +1665,23 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 		QString sv;
 		bool ok = true;
 
-		result = xml.readStringAttribute(AppSignalPropNames::TUNING_DEFAULT_VALUE, &sv);
+		result &= xml.readStringAttribute(AppSignalPropNames::TUNING_DEFAULT_VALUE, &sv);
 		m_tuningDefaultValue.fromString(sv, &ok);
 		result &= ok;
 
-		result = xml.readStringAttribute(AppSignalPropNames::TUNING_LOW_BOUND, &sv);
+		result &= xml.readStringAttribute(AppSignalPropNames::TUNING_LOW_BOUND, &sv);
 		m_tuningLowBound.fromString(sv, &ok);
 		result &= ok;
 
-		result = xml.readStringAttribute(AppSignalPropNames::TUNING_HIGH_BOUND, &sv);
+		result &= xml.readStringAttribute(AppSignalPropNames::TUNING_HIGH_BOUND, &sv);
 		m_tuningHighBound.fromString(sv, &ok);
 		result &= ok;
 
-		result &= xml.readAddress16Attribute(AppSignalPropNames::UAL_ADDR, &m_tuningAddr);
+		result &= xml.readAddress16Attribute(AppSignalPropNames::TUNING_ADDR, &m_tuningAddr);
+		result &= xml.readAddress16Attribute(AppSignalPropNames::TUNING_ABS_ADDR, &m_tuningAbsAddr);
 	}
 
-	result = xml.readStringAttribute(AppSignalPropNames::SPEC_PROP_STRUCT, &m_specPropStruct);
+	result &= xml.readStringAttribute(AppSignalPropNames::SPEC_PROP_STRUCT, &m_specPropStruct);
 
 	AppSignalSpecPropValues spvs;
 
@@ -1700,7 +1702,7 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 		if (spv.isEnum() == false)
 		{
 			QVariant qv = spv.value();			// to set Type of qv equal to Type of spv.value()
-			result = xml.readQVariantAttribute(name, &qv);
+			result &= xml.readQVariantAttribute(name, &qv);
 			spv.setValue(name, qv, false);
 		}
 		else
@@ -1715,7 +1717,7 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 
 	QString tagsStr;
 
-	result = xml.readStringAttribute(AppSignalPropNames::TAGS, &tagsStr);
+	result &= xml.readStringAttribute(AppSignalPropNames::TAGS, &tagsStr);
 
 	setTags(tagsStr.split(Separator::COMMA, Qt::SkipEmptyParts));
 

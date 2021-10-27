@@ -476,7 +476,7 @@ void DeviceObjectTests::testCanAddChildSoftware()
 	QVERIFY(software->canAddChild(Hardware::DeviceType::Rack) == false);
 	QVERIFY(software->canAddChild(Hardware::DeviceType::Chassis) == false);
 	QVERIFY(software->canAddChild(Hardware::DeviceType::Module) == false);
-	QVERIFY(software->canAddChild(Hardware::DeviceType::Controller) == false);
+	QVERIFY(software->canAddChild(Hardware::DeviceType::Controller) == true);
 	QVERIFY(software->canAddChild(Hardware::DeviceType::AppSignal) == false);
 	QVERIFY(software->canAddChild(Hardware::DeviceType::Workstation) == false);
 	QVERIFY(software->canAddChild(Hardware::DeviceType::Software) == false);

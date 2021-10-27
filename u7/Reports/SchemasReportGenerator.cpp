@@ -366,8 +366,7 @@ SchemasReportGenerator::SchemasReportGenerator(ReportSchemaView* schemaView,
 	m_filePath(filePath),
 	m_inputFiles(files)
 {
-	m_font = QFont("Times", 24);
-	m_marginFont = QFont("Times", static_cast<int>(24 * (96.0 / resolution())));
+	m_marginFont = QFont("Arial", 8);
 
 	return;
 }

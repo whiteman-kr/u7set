@@ -1041,7 +1041,6 @@ void EquipmentTabPage::setActionState()
 
 			case Hardware::DeviceType::Software:
 				m_addControllerAction->setEnabled(true);
-				m_addSignalAction->setEnabled(true);
 
 				if (isConfigurationMode() == true)
 				{
