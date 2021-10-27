@@ -1050,6 +1050,14 @@ namespace Hardware
 			return false;
 		}
 
+		if ((childType == DeviceType::AppSignal || childType == DeviceType::DiagSignal) &&
+			parent() != nullptr && parent()->isSoftware() == true)
+		{
+			// Cannot add any signal to software or software\controller
+			//
+			return false;
+		}
+
 		return true;
 	}
 
