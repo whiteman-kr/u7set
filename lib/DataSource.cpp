@@ -160,6 +160,11 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	result &= xml.readStringAttribute(XmlAttribute::CAPTION, &m_moduleCaption);
 	result &= xml.readUInt64Attribute(XmlAttribute::MODULE_UNIQUE_ID, &m_moduleUniqueID);
 
+	if (xml.findElement(XmlElement::LAN_CONTROLLER) == false)
+	{
+		return false;
+	}
+
 	result &= m_lanControllerInfo.readFromXml(xml);
 
 	result &= readAdditionalSectionsFromXml(xml);

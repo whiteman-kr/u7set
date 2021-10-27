@@ -147,7 +147,7 @@ bool LanControllerInfo::readFromXml(XmlReadHelper& xml)
 
 		QString tuningSignals;
 
-		result &= xml.readStringElement(XmlElement::TUNING_ASSOCIATED_SIGNALS, &tuningSignals);
+		result &= xml.readStringElement(XmlElement::TUNING_ASSOCIATED_SIGNALS, &tuningSignals, true);
 
 		tuningAssociatedSignals = tuningSignals.split(Separator::COMMA, Qt::SkipEmptyParts);
 
@@ -177,7 +177,7 @@ bool LanControllerInfo::readFromXml(XmlReadHelper& xml)
 
 		QString appSignals;
 
-		result &= xml.readStringElement(XmlElement::APP_DATA_ASSOCIATED_SIGNALS, &appSignals);
+		result &= xml.readStringElement(XmlElement::APP_DATA_ASSOCIATED_SIGNALS, &appSignals, true);
 
 		appDataAssociatedSignals = appSignals.split(Separator::COMMA, Qt::SkipEmptyParts);
 
@@ -207,7 +207,7 @@ bool LanControllerInfo::readFromXml(XmlReadHelper& xml)
 
 		QString diagSignals;
 
-		result &= xml.readStringElement(XmlElement::DIAG_DATA_ASSOCIATED_SIGNALS, &diagSignals);
+		result &= xml.readStringElement(XmlElement::DIAG_DATA_ASSOCIATED_SIGNALS, &diagSignals, true);
 
 		diagDataAssociatedSignals = diagSignals.split(Separator::COMMA, Qt::SkipEmptyParts);
 	}
