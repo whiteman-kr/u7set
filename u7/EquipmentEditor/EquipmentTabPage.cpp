@@ -963,96 +963,21 @@ void EquipmentTabPage::setActionState()
 				return;
 			}
 
-			switch (selectedObject->deviceType())
-			{
-			case Hardware::DeviceType::System:
-				m_addSystemAction->setEnabled(true);
-				m_addRackAction->setEnabled(true);
-				m_addChassisAction->setEnabled(true);
-				m_addModuleAction->setEnabled(true);
-				m_addControllerAction->setEnabled(true);
-				m_addSignalAction->setEnabled(true);
-				m_addWorkstationAction->setEnabled(true);
+			m_addSystemAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::System));
+			m_addRackAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Rack));
+			m_addChassisAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Chassis));
+			m_addModuleAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Module));
+			m_addWorkstationAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Workstation));
+			m_addSoftwareAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Software));
+			m_addControllerAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Controller));
+			m_addSignalAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::AppSignal));
 
-				m_addPresetRackAction->setEnabled(true);
-				m_addPresetChassisAction->setEnabled(true);
-				m_addPresetModuleAction->setEnabled(true);
-				m_addPresetControllerAction->setEnabled(true);
-				m_addPresetWorkstationAction->setEnabled(true);
-				break;
-
-			case Hardware::DeviceType::Rack:
-				m_addChassisAction->setEnabled(true);
-				m_addModuleAction->setEnabled(true);
-				m_addControllerAction->setEnabled(true);
-				m_addSignalAction->setEnabled(true);
-				m_addWorkstationAction->setEnabled(true);
-
-				if (isConfigurationMode() == true)
-				{
-					m_addPresetChassisAction->setEnabled(true);
-					m_addPresetModuleAction->setEnabled(true);
-					m_addPresetControllerAction->setEnabled(true);
-					m_addPresetWorkstationAction->setEnabled(true);
-				}
-				break;
-
-			case Hardware::DeviceType::Chassis:
-				m_addModuleAction->setEnabled(true);
-				m_addControllerAction->setEnabled(true);
-				m_addSignalAction->setEnabled(true);
-				m_addWorkstationAction->setEnabled(true);
-
-				if (isConfigurationMode() == true)
-				{
-					m_addPresetModuleAction->setEnabled(true);
-					m_addPresetControllerAction->setEnabled(true);
-					m_addPresetWorkstationAction->setEnabled(true);
-				}
-				break;
-
-			case Hardware::DeviceType::Module:
-				m_addControllerAction->setEnabled(true);
-				m_addSignalAction->setEnabled(true);
-
-				if (isConfigurationMode() == true)
-				{
-					m_addPresetControllerAction->setEnabled(true);
-				}
-				break;
-
-			case Hardware::DeviceType::Workstation:
-				m_addSoftwareAction->setEnabled(true);
-				m_addControllerAction->setEnabled(true);
-				m_addSignalAction->setEnabled(true);
-
-				if (isConfigurationMode() == true)
-				{
-					m_addPresetSoftwareAction->setEnabled(true);
-					m_addPresetControllerAction->setEnabled(true);
-				}
-				break;
-
-			case Hardware::DeviceType::Software:
-				m_addControllerAction->setEnabled(true);
-				m_addSignalAction->setEnabled(true);
-
-				if (isConfigurationMode() == true)
-				{
-					m_addPresetControllerAction->setEnabled(true);
-				}
-				break;
-
-			case Hardware::DeviceType::Controller:
-				m_addSignalAction->setEnabled(true);
-				break;
-
-			case Hardware::DeviceType::AppSignal:
-				break;
-
-			default:
-				assert(false);
-			}
+			m_addPresetRackAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Rack));
+			m_addPresetChassisAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Chassis));
+			m_addPresetModuleAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Module));
+			m_addPresetControllerAction ->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Controller));
+			m_addPresetWorkstationAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Workstation));
+			m_addPresetSoftwareAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Software));
 		}
 	}
 

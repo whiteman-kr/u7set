@@ -426,9 +426,19 @@ void DeviceObjectTests::testCanAddChildController()
 	QVERIFY(controller->canAddChild(Hardware::DeviceType::Chassis) == false);
 	QVERIFY(controller->canAddChild(Hardware::DeviceType::Module) == false);
 	QVERIFY(controller->canAddChild(Hardware::DeviceType::Controller) == false);
-	QVERIFY(controller->canAddChild(Hardware::DeviceType::AppSignal) == true);
 	QVERIFY(controller->canAddChild(Hardware::DeviceType::Workstation) == false);
 	QVERIFY(controller->canAddChild(Hardware::DeviceType::Software) == false);
+
+	// Signal can be added to Controller in Hardware
+	//
+	QVERIFY(controller->canAddChild(Hardware::DeviceType::AppSignal) == true);
+
+	// Signal cannot be added to Controller in Software
+	//
+	auto software = std::make_shared<Hardware::Software>();
+	software->addChild(controller);
+
+	QVERIFY(controller->canAddChild(Hardware::DeviceType::AppSignal) == false);
 
 	return;
 }
@@ -476,7 +486,7 @@ void DeviceObjectTests::testCanAddChildSoftware()
 	QVERIFY(software->canAddChild(Hardware::DeviceType::Rack) == false);
 	QVERIFY(software->canAddChild(Hardware::DeviceType::Chassis) == false);
 	QVERIFY(software->canAddChild(Hardware::DeviceType::Module) == false);
-	QVERIFY(software->canAddChild(Hardware::DeviceType::Controller) == false);
+	QVERIFY(software->canAddChild(Hardware::DeviceType::Controller) == true);
 	QVERIFY(software->canAddChild(Hardware::DeviceType::AppSignal) == false);
 	QVERIFY(software->canAddChild(Hardware::DeviceType::Workstation) == false);
 	QVERIFY(software->canAddChild(Hardware::DeviceType::Software) == false);

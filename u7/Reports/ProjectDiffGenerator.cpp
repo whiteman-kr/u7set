@@ -334,12 +334,10 @@ ProjectDiffGenerator::ProjectDiffGenerator(const QString& fileName,
 {
 	// Init fonts
 
-	double fontScaling = QApplication::screens()[0]->logicalDotsPerInch() / 96.0;
-
-	m_headerFont = QFont("Arial", static_cast<int>(36 / fontScaling), QFont::Bold);
-	m_normalFont = QFont("Arial", static_cast<int>(24 / fontScaling));
-	m_tableFont = QFont("Arial", static_cast<int>(24 / fontScaling));
-	m_marginFont = QFont("Arial", static_cast<int>((24 / fontScaling) * (96.0 / resolution())));
+	m_headerFont = QFont("Arial", 36, QFont::Bold);
+	m_normalFont = QFont("Arial", 24);
+	m_tableFont = QFont("Arial", 24);
+	m_marginFont = QFont("Arial", 8);
 
 	return;
 }
