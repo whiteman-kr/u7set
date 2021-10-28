@@ -109,6 +109,7 @@ namespace Hardware
 	const QString PropertyNames::preset = "Preset";
 	const QString PropertyNames::presetRoot = "PresetRoot";
 	const QString PropertyNames::presetName = "PresetName";
+	const QString PropertyNames::presetVersion = "PresetVersion";
 	const QString PropertyNames::presetObjectUuid = "PresetObjectUuid";
 
 	const QString PropertyNames::lmDescriptionFile = "LmDescriptionFile";
@@ -140,8 +141,7 @@ namespace Hardware
 	//
 	DeviceObject::DeviceObject(DeviceType deviceType, bool preset /*= false*/, QObject* parent /*= nullptr*/) noexcept :
 		PropertyObject(parent),
-		m_deviceType(deviceType),
-		m_preset(preset)
+		m_deviceType(deviceType)
 	{
 		auto uuidProp = ADD_PROPERTY_GETTER(QUuid, PropertyNames::uuid, true, DeviceObject::uuid);
 		uuidProp->setExpert(true);
@@ -164,17 +164,13 @@ namespace Hardware
 		specificProp->setExpert(true);
 		specificProp->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
 
-		auto presetProp = ADD_PROPERTY_GETTER(bool, PropertyNames::preset, true, DeviceObject::preset);
+		auto presetProp = ADD_PROPERTY_GETTER(bool, PropertyNames::preset, true, DeviceObject::isPreset);
 		presetProp->setExpert(true);
 
 		auto presetRootProp = ADD_PROPERTY_GETTER(bool, PropertyNames::presetRoot, true, DeviceObject::presetRoot);
 		presetRootProp->setExpert(true);
 
-		if (preset == true)
-		{
-			auto presetNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::presetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
-			presetNameProp->setExpert(true);
-		}
+		setPreset(preset);
 
 		auto presetObjectUuidProp = ADD_PROPERTY_GETTER(QUuid, PropertyNames::presetObjectUuid, true, DeviceObject::presetObjectUuid);
 		presetObjectUuidProp->setExpert(true);
@@ -307,7 +303,9 @@ namespace Hardware
 		{
 			mutableDeviceObject->set_preset(m_preset);
 
-			mutableDeviceObject->set_presetroot(m_presetRoot);
+			mutableDeviceObject->set_presetroot(presetRoot());
+			mutableDeviceObject->set_presetversion(presetVersion());
+
 			Proto::Write(mutableDeviceObject->mutable_presetname(), m_presetName);
 			Proto::Write(mutableDeviceObject->mutable_presetobjectuuid(), m_presetObjectUuid);
 		}
@@ -360,15 +358,8 @@ namespace Hardware
 			m_childRestriction.clear();
 		}
 
-		if (deviceobject.has_specific_properties_struct() == true)
-		{
-			m_specificPropertiesStruct = QString::fromStdString(deviceobject.specific_properties_struct());
-			parseSpecificPropertiesStruct(m_specificPropertiesStruct);
-		}
-		else
-		{
-			m_specificPropertiesStruct.clear();
-		}
+		m_specificPropertiesStruct = QString::fromStdString(deviceobject.specific_properties_struct());
+		parseSpecificPropertiesStruct(m_specificPropertiesStruct);
 
 		// Load specific properties' values. They are already exists after calling parseSpecificPropertiesStruct()
 		//
@@ -403,31 +394,12 @@ namespace Hardware
 		//
 		if (deviceobject.has_preset() == true && deviceobject.preset() == true)
 		{
-			m_preset = deviceobject.preset();
+			setPreset(deviceobject.preset());
 
-			if (m_preset == true)
-			{
-				auto presetNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::presetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
-				presetNameProp->setExpert(true);
-			}
+			setPresetRoot(deviceobject.presetroot());
+			setPresetVersion(deviceobject.presetversion());
 
-			if (deviceobject.has_presetroot() == true)
-			{
-				m_presetRoot = deviceobject.presetroot();
-			}
-			else
-			{
-				Q_ASSERT(deviceobject.has_presetroot());
-			}
-
-			if (deviceobject.has_presetname() == true)
-			{
-				Proto::Read(deviceobject.presetname(), &m_presetName);
-			}
-			else
-			{
-				Q_ASSERT(deviceobject.has_presetname());
-			}
+			Proto::Read(deviceobject.presetname(), &m_presetName);
 
 			if (deviceobject.has_presetobjectuuid() == true)
 			{
@@ -1156,11 +1128,6 @@ namespace Hardware
 		}
 
 		bool boolResult = result.toBool();
-		if (boolResult == false)
-		{
-			*errorMessage = tr("DeviceObject is not allowed.");
-		}
-
 		return boolResult;
 	}
 
@@ -1317,9 +1284,24 @@ R"DELIM({
 		return json;
 	}
 
-	bool DeviceObject::preset() const
+	bool DeviceObject::isPreset() const
 	{
 		return m_preset;
+	}
+
+	void DeviceObject::setPreset(bool isPreset)
+	{
+		m_preset = isPreset;
+
+		if (m_preset == true)
+		{
+			auto presetNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::presetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
+			presetNameProp->setExpert(true);
+		}
+		else
+		{
+			removeProperty(PropertyNames::presetName);
+		}
 	}
 
 	bool DeviceObject::presetRoot() const
@@ -1330,6 +1312,29 @@ R"DELIM({
 	void DeviceObject::setPresetRoot(bool value)
 	{
 		m_presetRoot = value;
+
+		if (m_presetRoot == true)
+		{
+			auto p = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::presetVersion, true, DeviceObject::presetVersion, DeviceObject::setPresetVersion);
+			p->setUpdateFromPreset(true);
+			p->setExpert(true);
+		}
+		else
+		{
+			removeProperty(PropertyNames::presetVersion);
+		}
+
+		return;
+	}
+
+	int DeviceObject::presetVersion() const
+	{
+		return m_presetVersion;
+	}
+
+	void DeviceObject::setPresetVersion(int value)
+	{
+		m_presetVersion = value;
 	}
 
 	QString DeviceObject::presetName() const
@@ -1981,34 +1986,34 @@ R"DELIM({
 		auto signalSpecPropsStructProp = addProperty<QString, DeviceAppSignal, &DeviceAppSignal::signalSpecPropsStruct, &DeviceAppSignal::setSignalSpecPropsStruct>(PropertyNames::signalSpecificProperties, PropertyNames::categoryAppSignal, true);
 
 		typeProp->setUpdateFromPreset(true);
-		typeProp->setExpert(m_preset);
+		typeProp->setExpert(isPreset());
 
 		functionProp->setUpdateFromPreset(true);
-		functionProp->setExpert(m_preset);
+		functionProp->setExpert(isPreset());
 
 		byteOrderProp->setUpdateFromPreset(true);
-		byteOrderProp->setExpert(m_preset);
+		byteOrderProp->setExpert(isPreset());
 
 		formatProp->setUpdateFromPreset(true);
-		formatProp->setExpert(m_preset);
+		formatProp->setExpert(isPreset());
 
 		memoryAreaProp->setUpdateFromPreset(true);
-		memoryAreaProp->setExpert(m_preset);
+		memoryAreaProp->setExpert(isPreset());
 
 		sizeProp->setUpdateFromPreset(true);
-		sizeProp->setExpert(m_preset);
+		sizeProp->setExpert(isPreset());
 
 		validitySignalId->setUpdateFromPreset(true);
-		validitySignalId->setExpert(m_preset);
+		validitySignalId->setExpert(isPreset());
 
 		valueOffsetProp->setUpdateFromPreset(true);
-		valueOffsetProp->setExpert(m_preset);
+		valueOffsetProp->setExpert(isPreset());
 
 		valueBitProp->setUpdateFromPreset(true);
-		valueBitProp->setExpert(m_preset);
+		valueBitProp->setExpert(isPreset());
 
 		signalSpecPropsStructProp->setUpdateFromPreset(true);
-		signalSpecPropsStructProp->setExpert(m_preset);
+		signalSpecPropsStructProp->setExpert(isPreset());
 		signalSpecPropsStructProp->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
 
 		return;
@@ -2157,7 +2162,7 @@ R"DELIM({
 			m_signalSpecPropsStruct = replaceEngeneeringToEngineering(m_signalSpecPropsStruct);
 		}
 
-		if (m_preset == true)
+		if (isPreset() == true)
 		{
 			setExpertToProperty(PropertyNames::type, true);
 			setExpertToProperty(PropertyNames::function, true);

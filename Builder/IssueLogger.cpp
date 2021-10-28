@@ -1534,6 +1534,60 @@ namespace Builder
 								arg(equipmentID).arg(propertyName).arg(profileID)));
 	}
 
+	/// IssueCode: CFG3100
+	///
+	/// IssueType: Error
+	///
+	/// Title: Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). To update presets select 'Update from Preset' in Equipmemt Editor.
+	///
+	/// Parameters:
+	///         %1 EquipmentID
+	///         %2 PresetVersion of Device
+	///			%3 Preset name
+	///			%4 Actual preset version
+	///
+	/// Description:
+	///			Device has preset version which is not equal to actual preset version in presets. To resolve issue updating from preset is required, select 'Update from Preset' in Equipmemt Editor.
+	///
+	void IssueLogger::errCFG3100(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3100,
+				  QString("Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). To update presets select 'Update from Preset' in Equipmemt Editor.")
+					.arg(equipmentId)
+					.arg(devicePresetVersion)
+					.arg(presetName)
+					.arg(presetVersion)
+				  );
+	}
+
+	/// IssueCode: CFG3101
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). To update presets select 'Update from Preset' in Equipmemt Editor.
+	///
+	/// Parameters:
+	///         %1 EquipmentID
+	///         %2 PresetVersion of Device
+	///			%3 Preset name
+	///			%4 Actual preset version
+	///
+	/// Description:
+	///			Device has preset version which is not equal to actual preset version in presets. To resolve issue updating from preset is required, select 'Update from Preset' in Equipmemt Editor.
+	///
+	void IssueLogger::wrnCFG3101(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion)
+	{
+		LOG_WARNING0(IssueType::FscConfiguration,
+				  3101,
+				  QString("Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). To update presets select 'Update from Preset' in Equipmemt Editor.")
+					.arg(equipmentId)
+					.arg(devicePresetVersion)
+					.arg(presetName)
+					.arg(presetVersion)
+				  );
+	}
+
 	//
 	// ALP			Application Logic Parsing				4000-4999
 	//

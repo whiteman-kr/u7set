@@ -887,7 +887,7 @@ void EquipmentTabPage::setActionState()
 			assert(device);
 
 			if (device == nullptr ||
-				device->preset() != true ||
+				device->isPreset() != true ||
 				device->presetRoot() != true)
 			{
 				selectedArePresetRoots = false;
@@ -957,7 +957,7 @@ void EquipmentTabPage::setActionState()
 			auto selectedObject = m_equipmentModel->deviceObject(singleSelectedIndex);
 			assert(selectedObject != nullptr);
 
-			if (isPresetMode() == true && selectedObject->preset() == false)
+			if (isPresetMode() == true && selectedObject->isPreset() == false)
 			{
 				assert(false);
 				return;
@@ -1031,7 +1031,7 @@ void EquipmentTabPage::setActionState()
 			// In ConfigurationMode it is possible to copy only root items of preset items
 			//
 			if (isConfigurationMode() == true &&
-				device->preset() == true &&
+				device->isPreset() == true &&
 				device->presetRoot() == false)
 			{
 				allowCopyToClipboard = false;
@@ -1526,7 +1526,7 @@ void EquipmentTabPage::exportPreset()
 		auto device = m_equipmentModel->deviceObject(mi);
 
 		if (device == nullptr ||
-			device->preset() != true ||
+			device->isPreset() != true ||
 			device->presetRoot() != true)
 		{
 			assert(device);
@@ -1542,7 +1542,7 @@ void EquipmentTabPage::exportPreset()
 								.arg(db()->currentProject().version());
 		}
 
-		allObjectsArePresetRoots &= device->presetRoot() & device->preset();
+		allObjectsArePresetRoots &= device->presetRoot() & device->isPreset();
 
 		devices.push_back(device.get());
 	}

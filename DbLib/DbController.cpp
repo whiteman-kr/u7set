@@ -515,6 +515,7 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	bool generateAppSignalXml = false;
 	bool generateAppLogicDrawings = false;
 	bool generateExtarDebugInfo = false;
+	bool mismatchPresetVersionAsWarning = false;
 
 	bool runSimTestsOnBuild = true;
 	int simTestsTimeout = true;
@@ -527,6 +528,7 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, &generateAppSignalXml, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppLogicDrawings, &generateAppLogicDrawings, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, &generateExtarDebugInfo, parentWidget);
+	ok &= getProjectProperty(Db::ProjectProperty::MismatchPresetVersionAsWarning, &mismatchPresetVersionAsWarning, parentWidget);
 
 	ok &= getProjectProperty(Db::ProjectProperty::RunSimTestsOnBuild, &runSimTestsOnBuild, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::SimulatorTestsTimeout, &simTestsTimeout, parentWidget);
@@ -545,6 +547,7 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	out->setGenerateAppSignalsXml(generateAppSignalXml);
 	out->setGenerateAppLogicDrawings(generateAppLogicDrawings);
 	out->setGenerateExtraDebugInfo(generateExtarDebugInfo);
+	out->setMismatchPresetVersionAsWarning(mismatchPresetVersionAsWarning);
 
 	out->setRunSimTestsOnBuild(runSimTestsOnBuild);
 	out->setSimTestsTimeout(simTestsTimeout);
@@ -568,6 +571,7 @@ bool DbController::setProjectProperties(const DbProjectProperties& in, QWidget* 
 	ok &= setProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, in.generateAppSignalsXml(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::GenerateAppLogicDrawings, in.generateAppLogicDrawings(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, in.generateExtraDebugInfo(), parentWidget);
+	ok &= setProjectProperty(Db::ProjectProperty::MismatchPresetVersionAsWarning, in.mismatchPresetVersionAsWarning(), parentWidget);
 
 	ok &= setProjectProperty(Db::ProjectProperty::RunSimTestsOnBuild, in.runSimTestsOnBuild(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::SimulatorTestsTimeout, in.simTestsTimeout(), parentWidget);
