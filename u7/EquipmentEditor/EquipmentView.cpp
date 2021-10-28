@@ -833,7 +833,7 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 		return QModelIndex();
 	}
 
-	if (isPresetMode() == true && object->preset() == false)
+	if (isPresetMode() == true && object->isPreset() == false)
 	{
 		Q_ASSERT(false);
 		return QModelIndex();
@@ -871,7 +871,7 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 	//QModelIndex parentIndex;	// Currently it is root;
 
 	if (isPresetMode() == true &&
-		object->preset() == true &&
+		object->isPreset() == true &&
 		object->presetRoot() == true)
 	{
 		parentObject = equipmentModel()->deviceObject(parentModelIndex);
@@ -933,7 +933,7 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 	//  Set presetName, parent object should contain it
 	//
 	if (isPresetMode() == true &&
-		object->preset() == true &&
+		object->isPreset() == true &&
 		object->presetRoot() == false &&
 		parentObject != nullptr)
 	{
@@ -1618,7 +1618,7 @@ void EquipmentView::copySelectedDevices()
 			return;
 		}
 
-		allObjectsArePresetRoots &= device->presetRoot() & device->preset();
+		allObjectsArePresetRoots &= device->presetRoot() & device->isPreset();
 
 		devices.push_back(device.get());
 	}
@@ -2210,7 +2210,6 @@ void EquipmentView::updateFromPreset()
 	std::shared_ptr<Hardware::DeviceObject> presetRoot;
 
 	bool ok = db()->getDeviceTreeLatestVersion(hpFileInfo, &presetRoot, this);
-
 	if (ok == false)
 	{
 		return;
@@ -2275,7 +2274,6 @@ void EquipmentView::updateFromPreset()
 	// Get all equipment from the database
 	//
 	std::shared_ptr<Hardware::DeviceObject> root;
-
 	ok = db()->getDeviceTreeLatestVersion(hcFileInfo, &root, this);
 
 	if (ok == false)
@@ -2298,7 +2296,7 @@ void EquipmentView::updateFromPreset()
 		{
 			Q_ASSERT(object);
 
-			if (object->preset() == true)
+			if (object->isPreset() == true)
 			{
 				const DbFileInfo* objectFileInfo = object->data();
 				Q_ASSERT(objectFileInfo);
@@ -2306,7 +2304,7 @@ void EquipmentView::updateFromPreset()
 				presetFiles.push_back(*objectFileInfo);
 			}
 
-			if (object->preset() == true &&
+			if (object->isPreset() == true &&
 				object->presetRoot() == true)
 			{
 				presetRoots.push_back(object);
@@ -2484,12 +2482,12 @@ void EquipmentView::updateFromPreset()
 		Q_ASSERT(deviceFileInfo);
 
 		if (device == nullptr ||
-			device->preset() == false ||
+			device->isPreset() == false ||
 			deviceFileInfo == nullptr ||
 			deviceFileInfo->fileId() != presetFileInfo.fileId())	// can be not presetRoot
 		{
 			Q_ASSERT(device);
-			Q_ASSERT(device->preset() == true);
+			Q_ASSERT(device->isPreset() == true);
 			Q_ASSERT(deviceFileInfo);
 			Q_ASSERT(deviceFileInfo->fileId() == presetFileInfo.fileId());
 			return;
@@ -2532,6 +2530,10 @@ void EquipmentView::updateFromPreset()
 	equipmentModel()->reset();
 	equipmentModel()->updateUserList();
 
+	// Done
+	//
+	QMessageBox::information(this, QApplication::applicationName(), tr("Update form preset done"));
+
 	return;
 }
 
@@ -2562,7 +2564,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		return false;
 	}
 
-	if (device->preset() == true &&
+	if (device->isPreset() == true &&
 		(preset == nullptr ||
 		device->presetName() != preset->presetName() ||
 		device->presetRoot() != preset->presetRoot()))
@@ -2584,7 +2586,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 	// If it is preset, update object add/delete children
 	//
-	if (device->preset() == true)
+	if (device->isPreset() == true)
 	{
 		if (presetsToUpdate.contains(device->presetName()) == true)
 		{
@@ -2719,7 +2721,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 			// we will have assert in the begining of updateDeviceFromPreset(). So deleted child will be removed from instance even though the prteset
 			// should not be updated
 			//
-			if (deviceChild->preset() == true &&
+			if (deviceChild->isPreset() == true &&
 				deviceChild->presetName() == device->presetName() &&
 				presetChild == nullptr)
 			{
@@ -2742,7 +2744,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 			// update child
 			//
-			if (deviceChild->preset() &&
+			if (deviceChild->isPreset() &&
 				deviceChild->presetName() == device->presetName())
 			{
 				updateDeviceFromPreset(deviceChild,
@@ -2784,7 +2786,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	{
 		std::shared_ptr<Hardware::DeviceObject> deviceChild = device->child(i);
 
-		if (deviceChild->preset() == false)
+		if (deviceChild->isPreset() == false)
 		{
 			updateDeviceFromPreset(deviceChild,
 								   {},			// not intialized, as deviceChild is not preset

@@ -76,6 +76,7 @@ namespace Hardware
 		static const QString preset;
 		static const QString presetRoot;
 		static const QString presetName;
+		static const QString presetVersion;
 		static const QString presetObjectUuid;
 
 		static const QString lmDescriptionFile;
@@ -298,10 +299,15 @@ namespace Hardware
 
 		// Preset
 		//
-		[[nodiscard]] bool preset() const;
-
+		[[nodiscard]] bool isPreset() const;
+private:
+		void setPreset(bool isPreset);
+public:
 		[[nodiscard]] bool presetRoot() const;
 		void setPresetRoot(bool value);
+
+		[[nodiscard]] int presetVersion() const;
+		void setPresetVersion(int value);
 
 		[[nodiscard]] QString presetName() const;
 		void setPresetName(QString value);
@@ -330,14 +336,16 @@ namespace Hardware
 
 		int m_place = -1;
 
+	private:
 		// Preset Data
 		//
 		bool m_preset = false;				// It is preset or part of it
 		bool m_presetRoot = false;			// This object is preset root
+		int m_presetVersion = 0;			// If this object is presetRoot, then this field contains preset version
 		QString m_presetName;				// PresetName, if it is preset
 		QUuid m_presetObjectUuid;			// In configuration this field has uuid of the PRESET object from which it was constructed
 											// In preset edit mode this field has the same value with m_uuid
-	private:
+
 		std::shared_ptr<DbFileInfo> m_data;	// Application-specific value associated with the specified item (DbFileInfo)
 	};
 
