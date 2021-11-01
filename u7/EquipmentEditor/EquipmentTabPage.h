@@ -25,12 +25,13 @@ public:
 protected:
 	void CreateActions();
 
-	bool isPresetMode() const;
-	bool isConfigurationMode() const;
+	[[nodiscard]] bool isPresetMode() const;
+	[[nodiscard]] bool isConfigurationMode() const;
 
 	// Events
 	//
 protected:
+	virtual void contextMenuEvent(QContextMenuEvent* event) override;
 	virtual void closeEvent(QCloseEvent*) override;
 
 public slots:
@@ -44,8 +45,6 @@ public slots:
 
 	void modeSwitched();
 	void showConnections();
-
-	//void moduleConfiguration();
 
 	void setProperties();
 
@@ -66,9 +65,8 @@ protected slots:
 	// Data
 	//
 private:
-	QMenu* m_addObjectMenu = nullptr;
-	QAction* m_addObjectAction = nullptr;
-	//QPushButton* m_addObjectButton = nullptr;
+	QMenu* m_addObjectMenu = new QMenu(tr("Add Object"), this);
+	QAction* m_addObjectButton = nullptr;
 		QAction* m_addSystemAction = nullptr;
 		QAction* m_addRackAction = nullptr;
 		QAction* m_addChassisAction = nullptr;
@@ -95,16 +93,16 @@ private:
 
 	//----------------------------------
 	QAction* m_separatorAction0 = nullptr;
-	QAction* m_inOutsToSignals = nullptr;
+	QAction* m_createInOutsToSignals = nullptr;
+	QAction* m_createInternalAppSignal = nullptr;
 	QAction* m_showAppSignals = nullptr;
-	QAction* m_addAppSignal = nullptr;
 	//----------------------------------
 	QAction* m_separatorSchemaLogic = nullptr;
 	QAction* m_addLogicSchemaToLm = nullptr;
 	QAction* m_showLmsLogicSchemas = nullptr;
 	//----------------------------------
 	QAction* m_separatorOptoConnection = nullptr;
-	QAction* m_addOptoConnection = nullptr;
+	QAction* m_createConnection = nullptr;
 	QAction* m_showObjectConnections = nullptr;
 	QAction* m_showConnections = nullptr;
 

@@ -85,6 +85,8 @@
         <file>Images/SelectAll.svg</file>
         <file>Images/ExportPreset.svg</file>
         <file>Images/ImportPreset.svg</file>
+        <file>Images/AddPreset.svg</file>
+        <file>Images/EquipEditorReplace.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>
@@ -98,4 +100,3 @@
         <file>Simulator/ScriptSample.js</file>
     </qresource>
 </RCC>
-    

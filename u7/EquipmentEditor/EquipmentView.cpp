@@ -975,7 +975,7 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 	return objectModelIndex;
 }
 
-void EquipmentView::addInOutsToSignals()
+void EquipmentView::createInOutsToSignals()
 {
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
 
@@ -1362,7 +1362,7 @@ void EquipmentView::showAppSignals(bool refreshSignalList /*= false*/, bool exac
 	return;
 }
 
-void EquipmentView::addAppSignal()
+void EquipmentView::createInternalAppSignal()
 {
 	qDebug() << "void EquipmentView::addAppSignal()";
 
@@ -1479,7 +1479,7 @@ void EquipmentView::showLogicSchemaForLm()
 	return;
 }
 
-void EquipmentView::addOptoConnection()
+void EquipmentView::createConnection()
 {
 	qDebug() << __FUNCTION__;
 

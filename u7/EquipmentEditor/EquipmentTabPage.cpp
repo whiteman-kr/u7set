@@ -32,77 +32,40 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	// Set context menu to Equipment View
 	//
-	m_equipmentView->setContextMenuPolicy(Qt::ActionsContextMenu);
+	m_equipmentView->setContextMenuPolicy(Qt::DefaultContextMenu);
 
 	// -----------------
-	m_equipmentView->addAction(m_addObjectAction);
+	//
+	m_addObjectMenu->setIcon(QIcon(":/Images/Images/SchemaAddFile.svg"));
 
-		m_addObjectMenu->addAction(m_addSystemAction);
-		m_addObjectMenu->addAction(m_addRackAction);
-		m_addObjectMenu->addAction(m_addChassisAction);
-		m_addObjectMenu->addAction(m_addModuleAction);
-		m_addObjectMenu->addAction(m_addControllerAction);
-		m_addObjectMenu->addAction(m_addSignalAction);
-		m_addObjectMenu->addAction(m_addWorkstationAction);
-		m_addObjectMenu->addAction(m_addSoftwareAction);
-
-	// -----------------
-	m_equipmentView->addAction(m_addFromPresetAction);
-	m_equipmentView->addAction(m_replaceAction);
+	m_addObjectMenu->addAction(m_addSystemAction);
+	m_addObjectMenu->addAction(m_addRackAction);
+	m_addObjectMenu->addAction(m_addChassisAction);
+	m_addObjectMenu->addAction(m_addModuleAction);
+	m_addObjectMenu->addAction(m_addControllerAction);
+	m_addObjectMenu->addAction(m_addSignalAction);
+	m_addObjectMenu->addAction(m_addWorkstationAction);
+	m_addObjectMenu->addAction(m_addSoftwareAction);
 
 	// -----------------
-	m_equipmentView->addAction(m_addNewPresetAction);
+	//
+	m_addPresetMenu->setIcon(QIcon(":/Images/Images/AddPreset.svg"));
 
-		m_addPresetMenu->addAction(m_addPresetRackAction);
-		m_addPresetMenu->addAction(m_addPresetChassisAction);
-		m_addPresetMenu->addAction(m_addPresetModuleAction);
-		m_addPresetMenu->addAction(m_addPresetControllerAction);
-		m_addPresetMenu->addAction(m_addPresetWorkstationAction);
-		m_addPresetMenu->addAction(m_addPresetSoftwareAction);
-
-	// -----------------
-	m_equipmentView->addAction(m_separatorAction0);
-	m_equipmentView->addAction(m_inOutsToSignals);
-	m_equipmentView->addAction(m_showAppSignals);
-	m_equipmentView->addAction(m_addAppSignal);
+	m_addPresetMenu->addAction(m_addPresetRackAction);
+	m_addPresetMenu->addAction(m_addPresetChassisAction);
+	m_addPresetMenu->addAction(m_addPresetModuleAction);
+	m_addPresetMenu->addAction(m_addPresetControllerAction);
+	m_addPresetMenu->addAction(m_addPresetWorkstationAction);
+	m_addPresetMenu->addAction(m_addPresetSoftwareAction);
 
 	// -----------------
-	m_equipmentView->addAction(m_separatorSchemaLogic);
-	m_equipmentView->addAction(m_addLogicSchemaToLm);
-	m_equipmentView->addAction(m_showLmsLogicSchemas);
 
-	// -----------------
-	m_equipmentView->addAction(m_separatorOptoConnection);
-	m_equipmentView->addAction(m_addOptoConnection);
-	m_equipmentView->addAction(m_showObjectConnections);
-	m_equipmentView->addAction(m_showConnections);
-
-	// -----------------
-	m_equipmentView->addAction(m_separatorAction01);
+	// These actions have shortcuts, so they are added to m_equipmentView
+	//
 	m_equipmentView->addAction(m_copyObjectAction);
 	m_equipmentView->addAction(m_pasteObjectAction);
-
-	// -----------------
-	m_equipmentView->addAction(m_separatorAction1);
 	m_equipmentView->addAction(m_deleteObjectAction);
-	// -----------------
-	m_equipmentView->addAction(m_separatorAction2);
-	m_equipmentView->addAction(m_checkOutAction);
-	m_equipmentView->addAction(m_checkInAction);
-	m_equipmentView->addAction(m_undoChangesAction);
-	m_equipmentView->addAction(m_historyAction);
-	m_equipmentView->addAction(m_compareAction);
 	m_equipmentView->addAction(m_refreshAction);
-	// -----------------
-	m_equipmentView->addAction(m_separatorAction3);
-	m_equipmentView->addAction(m_updateFromPresetAction);
-	m_equipmentView->addAction(m_switchModeAction);
-
-	//m_equipmentView->addAction(m_pendingChangesAction);	// Not implemented, removed to be consistent with User Manual
-
-	// -----------------
-	//m_equipmentView->addAction(m_SeparatorAction4);
-	//m_equipmentView->addAction(m_moduleConfigurationAction);
 
 	// Property View
 	//
@@ -129,7 +92,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	// ToolBar
 	//
 	m_toolBar = new QToolBar(this);
-	m_toolBar->addAction(m_addObjectAction);
+	m_toolBar->addAction(m_addObjectButton);
 	m_toolBar->addAction(m_addFromPresetAction);
 	m_toolBar->addAction(m_addNewPresetAction);
 	m_toolBar->addAction(m_replaceAction);
@@ -220,21 +183,11 @@ EquipmentTabPage::~EquipmentTabPage()
 void EquipmentTabPage::CreateActions()
 {
 	//-------------------------------
-	m_addObjectMenu = new QMenu(this);
+	m_addObjectButton = new QAction(tr("Add Object"), this);
+	m_addObjectButton->setIcon(QIcon(":/Images/Images/SchemaAddFile.svg"));
+	m_addObjectButton->setEnabled(true);
 
-	m_addObjectAction = new QAction(tr("Add Object"), this);
-	m_addObjectAction->setEnabled(true);
-	//m_addObjectButton->setMenu(m_addObjectMenu);		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-	int WARNING_m_addObjectButton_setMenu;
-
-//	m_addObjectButton = new QPushButton(tr("Add Object"), this);
-//	m_addObjectButton->setEnabled(true);
-//	m_addObjectButton->setMenu(m_addObjectMenu);
-
-	connect(m_addObjectAction, &QAction::triggered, this, &EquipmentTabPage::addObjectTriggered);
-
-//	connect(m_addObjectButton, &QPushButton::clicked, this, &EquipmentTabPage::addObjectTriggered);
-//	connect(m_addObjectAction, &QAction::enabledChanged, [b = m_addObjectButton](bool enabled){	b->setEnabled(enabled);	});
+	connect(m_addObjectButton, &QAction::triggered, this, &EquipmentTabPage::addObjectTriggered);
 
 		m_addSystemAction = new QAction(tr("System"), this);
 		m_addSystemAction->setStatusTip(tr("Add system to the configuration..."));
@@ -281,21 +234,22 @@ void EquipmentTabPage::CreateActions()
 	//----------------------------------
 	m_addFromPresetAction = new QAction(tr("Add From Preset..."), this);
 	m_addFromPresetAction->setStatusTip(tr("Add preset to the configuration..."));
+	m_addFromPresetAction->setIcon(QIcon{":/Images/Images/AddPreset.svg"});
 	m_addFromPresetAction->setEnabled(true);
 	connect(m_addFromPresetAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPreset);
 
 	m_replaceAction = new QAction(tr("Replace with..."), this);
 	m_replaceAction->setStatusTip(tr("Replace selected object with selected one"));
+	m_replaceAction->setIcon(QIcon{":/Images/Images/EquipEditorReplace.svg"});
 	m_replaceAction->setEnabled(false);
 	connect(m_replaceAction, &QAction::triggered, m_equipmentView, &EquipmentView::replaceObject);
 
 	//----------------------------------
-	m_addPresetMenu = new QMenu(this);
+	m_addPresetMenu = new QMenu(tr("Create Preset"), this);
 
-	m_addNewPresetAction = new QAction(tr("Add New Preset"), this);
+	m_addNewPresetAction = new QAction(tr("Create Preset"), this);
 	m_addNewPresetAction->setEnabled(true);
-	//m_addNewPresetAction->setMenu(m_addPresetMenu);		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	int WARNING_m_m_addNewPresetAction_setMenu;
+	m_addNewPresetAction->setIcon(QIcon{":/Images/Images/AddPreset.svg"});
 
 	connect(m_addNewPresetAction, &QAction::triggered, this, &EquipmentTabPage::addNewPresetTriggered);
 
@@ -333,21 +287,21 @@ void EquipmentTabPage::CreateActions()
 	m_separatorAction0 = new QAction(tr("Application Signals"), this);
 	m_separatorAction0->setSeparator(true);
 
-	m_inOutsToSignals = new QAction(tr("Add Inputs/Outs to App Signals"), this);
-	m_inOutsToSignals->setStatusTip(tr("Add intputs/outputs to application logic signals..."));
-	m_inOutsToSignals->setEnabled(false);
+	m_createInOutsToSignals = new QAction(tr("Create In/Outs AppSignals"), this);
+	m_createInOutsToSignals->setStatusTip(tr("Add intputs/outputs to application logic signals..."));
+	m_createInOutsToSignals->setEnabled(false);
 	//m_inOutsToSignals->setVisible(false);
-	connect(m_inOutsToSignals, &QAction::triggered, m_equipmentView, QOverload<>::of(&EquipmentView::addInOutsToSignals));
+	connect(m_createInOutsToSignals, &QAction::triggered, m_equipmentView, QOverload<>::of(&EquipmentView::createInOutsToSignals));
 
-	m_showAppSignals = new QAction(tr("Show Application Signals"), this);
+	m_createInternalAppSignal = new QAction(tr("Create Internal AppSignal"), this);
+	m_createInternalAppSignal->setStatusTip(tr("Add new interanal application signal to device"));
+	m_createInternalAppSignal->setEnabled(false);
+	connect(m_createInternalAppSignal, &QAction::triggered, m_equipmentView, &EquipmentView::createInternalAppSignal);
+
+	m_showAppSignals = new QAction(tr("Show AppSignals"), this);
 	m_showAppSignals->setStatusTip(tr("Show application signals for object and all its children"));
 	m_showAppSignals->setEnabled(false);
 	connect(m_showAppSignals, &QAction::triggered, m_equipmentView, [ev = m_equipmentView](){ ev->showAppSignals(false, false); });
-
-	m_addAppSignal = new QAction(tr("Add Application Signal(s)"), this);
-	m_addAppSignal->setStatusTip(tr("Add new application signal(s) to device"));
-	m_addAppSignal->setEnabled(false);
-	connect(m_addAppSignal, &QAction::triggered, m_equipmentView, &EquipmentView::addAppSignal);
 
 	//-----------------------------------
 	m_separatorSchemaLogic = new QAction(tr("Application Logic"), this);
@@ -355,12 +309,14 @@ void EquipmentTabPage::CreateActions()
 
 	m_addLogicSchemaToLm = new QAction(tr("Add AppLogic Schema..."), this);
 	m_addLogicSchemaToLm->setStatusTip(tr("Add Application Logic Schema to selected module"));
+	m_addLogicSchemaToLm->setIcon(QIcon{":/Images/Images/SimAppLogicSchemas.svg"});
 	m_addLogicSchemaToLm->setEnabled(false);
 	//m_addLogicSchemaToLm->setVisible(false);
 	connect(m_addLogicSchemaToLm, &QAction::triggered, m_equipmentView, &EquipmentView::addLogicSchemaToLm);
 
 	m_showLmsLogicSchemas = new QAction(tr("Show AppLogic Schemas..."), this);
 	m_showLmsLogicSchemas->setStatusTip(tr("Show Application Logic Schema for selected module"));
+	m_showLmsLogicSchemas->setIcon(QIcon{":/Images/Images/SimAppLogicSchemas.svg"});
 	m_showLmsLogicSchemas->setEnabled(false);
 	//m_showLmsLogicSchemas->setVisible(false);
 	connect(m_showLmsLogicSchemas, &QAction::triggered, m_equipmentView, &EquipmentView::showLogicSchemaForLm);
@@ -369,21 +325,24 @@ void EquipmentTabPage::CreateActions()
 	m_separatorOptoConnection = new QAction(tr("Connections"), this);
 	m_separatorOptoConnection->setSeparator(true);
 
-	m_addOptoConnection = new QAction(tr("Create Opto Connection..."), this);
-	m_addOptoConnection->setStatusTip(tr("Create optical connection for selected opto port(s)"));
-	m_addOptoConnection->setEnabled(false);
+	m_createConnection = new QAction(tr("Create Connection..."), this);
+	m_createConnection->setStatusTip(tr("Create connection for selected port(s)"));
+	m_createConnection->setIcon(QIcon{":/Images/Images/SimConnectionIcon.svg"});
+	m_createConnection->setEnabled(false);
 	//m_addOptoConnection->setVisible(false);
-	connect(m_addOptoConnection, &QAction::triggered, m_equipmentView, &EquipmentView::addOptoConnection);
+	connect(m_createConnection, &QAction::triggered, m_equipmentView, &EquipmentView::createConnection);
 
 
 	m_showObjectConnections = new QAction(tr("Show Object Connections..."), this);
 	m_showObjectConnections->setStatusTip(tr("Show module or opto port connections"));
+	m_showObjectConnections->setIcon(QIcon{":/Images/Images/SimConnectionIcon.svg"});
 	m_showObjectConnections->setEnabled(false);
 	//m_showObjectConnections->setVisible(false);
 	connect(m_showObjectConnections, &QAction::triggered, m_equipmentView, &EquipmentView::showObjectConnections);
 
 	m_showConnections = new QAction(tr("Connections..."), this);
 	m_showConnections->setStatusTip(tr("Edit connections"));
+	m_showConnections->setIcon(QIcon{":/Images/Images/SimConnectionIcon.svg"});
 	m_showConnections->setEnabled(true);
 	connect(m_showConnections, &QAction::triggered, this, &EquipmentTabPage::showConnections);
 
@@ -409,8 +368,8 @@ void EquipmentTabPage::CreateActions()
 	m_separatorAction1 = new QAction(this);
 	m_separatorAction1->setSeparator(true);
 
-	m_deleteObjectAction = new QAction(tr("Delete Equipment"), this);
-	m_deleteObjectAction->setStatusTip(tr("Delete equipment from the configuration..."));
+	m_deleteObjectAction = new QAction(tr("Delete"), this);
+	m_deleteObjectAction->setStatusTip(tr("Delete equipment object..."));
 	m_deleteObjectAction->setIcon(QIcon{":/Images/Images/SchemaDelete.svg"});
 	m_deleteObjectAction->setEnabled(false);
 	m_deleteObjectAction->setShortcut(QKeySequence::Delete);
@@ -482,11 +441,6 @@ void EquipmentTabPage::CreateActions()
 	m_SeparatorAction4 = new QAction(this);
 	m_SeparatorAction4->setSeparator(true);
 
-//	m_moduleConfigurationAction = new QAction(tr("Modules Configuration..."), this);
-//	m_moduleConfigurationAction->setStatusTip(tr("Edit module configuration"));
-//	m_moduleConfigurationAction->setEnabled(false);
-//	connect(m_moduleConfigurationAction, &QAction::triggered, this, &EquipmentTabPage::moduleConfiguration);
-
 	m_separatorPresetExportImport = new QAction{this};
 	m_separatorPresetExportImport->setSeparator(true);
 
@@ -513,6 +467,81 @@ bool EquipmentTabPage::isPresetMode() const
 bool EquipmentTabPage::isConfigurationMode() const
 {
 	return m_equipmentModel->isConfigurationMode();
+}
+
+void EquipmentTabPage::contextMenuEvent(QContextMenuEvent* event)
+{
+	event->accept();
+
+	QMenu contextMenu{this};
+
+	if (isConfigurationMode() == true)
+	{
+		contextMenu.addMenu(m_addObjectMenu);
+		contextMenu.addAction(m_addFromPresetAction);
+		contextMenu.addAction(m_replaceAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_createInOutsToSignals);
+		contextMenu.addAction(m_createInternalAppSignal);
+		contextMenu.addAction(m_showAppSignals);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_addLogicSchemaToLm);
+		contextMenu.addAction(m_showLmsLogicSchemas);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_createConnection);
+		contextMenu.addAction(m_showObjectConnections);
+		contextMenu.addAction(m_showConnections);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_copyObjectAction);
+		contextMenu.addAction(m_pasteObjectAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_deleteObjectAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_checkOutAction);
+		contextMenu.addAction(m_checkInAction);
+		contextMenu.addAction(m_undoChangesAction);
+		contextMenu.addAction(m_historyAction);
+		contextMenu.addAction(m_compareAction);
+		contextMenu.addAction(m_refreshAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_updateFromPresetAction);
+		contextMenu.addAction(m_switchModeAction);
+	}
+	else
+	{
+		contextMenu.addMenu(m_addObjectMenu);
+		contextMenu.addMenu(m_addPresetMenu);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_copyObjectAction);
+		contextMenu.addAction(m_pasteObjectAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_deleteObjectAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_checkOutAction);
+		contextMenu.addAction(m_checkInAction);
+		contextMenu.addAction(m_undoChangesAction);
+		contextMenu.addAction(m_historyAction);
+		contextMenu.addAction(m_compareAction);
+		contextMenu.addAction(m_refreshAction);
+
+		contextMenu.addSeparator();
+		contextMenu.addAction(m_updateFromPresetAction);
+		contextMenu.addAction(m_switchModeAction);
+	}
+
+	contextMenu.exec(event->globalPos());
+
+	return;
 }
 
 void EquipmentTabPage::closeEvent(QCloseEvent* e)
@@ -575,12 +604,12 @@ void EquipmentTabPage::setActionState()
 	assert(m_addPresetControllerAction);
 	assert(m_addPresetWorkstationAction);
 	assert(m_addPresetSoftwareAction);
-	assert(m_inOutsToSignals);
+	assert(m_createInOutsToSignals);
 	assert(m_showAppSignals);
-	assert(m_addAppSignal);
+	assert(m_createInternalAppSignal);
 	assert(m_addLogicSchemaToLm);
 	assert(m_showLmsLogicSchemas);
-	assert(m_addOptoConnection);
+	assert(m_createConnection);
 	assert(m_showObjectConnections);
 	assert(m_exportPresetAction);
 	assert(m_importPresetAction);
@@ -634,12 +663,15 @@ void EquipmentTabPage::setActionState()
 
 	m_replaceAction->setEnabled(false);
 
-	m_inOutsToSignals->setEnabled(false);
+	m_createInOutsToSignals->setEnabled(false);
 	m_showAppSignals->setEnabled(false);
-	m_addAppSignal->setEnabled(false);
+	m_createInternalAppSignal->setEnabled(false);
 	m_addLogicSchemaToLm->setEnabled(false);
+
 	m_showLmsLogicSchemas->setEnabled(false);
-	m_addOptoConnection->setEnabled(false);
+	m_showLmsLogicSchemas->setVisible(false);
+
+	m_createConnection->setEnabled(false);
 	m_showObjectConnections->setEnabled(false);
 
 	m_copyObjectAction->setEnabled(false);
@@ -678,13 +710,13 @@ void EquipmentTabPage::setActionState()
 			// Allow to add signals for any module
 			// it comes from MUM, it is not IO module, it is control
 			//
-			m_inOutsToSignals->setEnabled(true);
-			m_inOutsToSignals->setVisible(true);
+			m_createInOutsToSignals->setEnabled(true);
+			m_createInOutsToSignals->setVisible(true);
 
 			if (module->isLogicModule() == true)
 			{
-				m_addAppSignal->setEnabled(true);
-				m_addAppSignal->setVisible(true);
+				m_createInternalAppSignal->setEnabled(true);
+				m_createInternalAppSignal->setVisible(true);
 			}
 		}
 
@@ -694,7 +726,7 @@ void EquipmentTabPage::setActionState()
 		}
 	}
 
-	if (m_inOutsToSignals->isEnabled() == false &&		// Could be already enabled in prev condition
+	if (m_createInOutsToSignals->isEnabled() == false &&		// Could be already enabled in prev condition
 		isConfigurationMode() == true &&
 		selectedIndexList.isEmpty() == false)
 	{
@@ -714,8 +746,8 @@ void EquipmentTabPage::setActionState()
 			}
 		}
 
-		m_inOutsToSignals->setEnabled(allSelectedAreAppSignals);
-		m_inOutsToSignals->setVisible(true);
+		m_createInOutsToSignals->setEnabled(allSelectedAreAppSignals);
+		m_createInOutsToSignals->setVisible(true);
 	}
 
 	// Add AppLogic Schema to LM
@@ -810,8 +842,8 @@ void EquipmentTabPage::setActionState()
 
 					if (id1.endsWith("_OPTOPORT##") == true)
 					{
-						m_addOptoConnection->setEnabled(true);
-						m_addOptoConnection->setVisible(true);
+						m_createConnection->setEnabled(true);
+						m_createConnection->setVisible(true);
 					}
 				}
 			}
@@ -852,8 +884,8 @@ void EquipmentTabPage::setActionState()
 				if (id1.endsWith("_OPTOPORT##") == true &&
 					id2.endsWith("_OPTOPORT##") == true)
 				{
-					m_addOptoConnection->setEnabled(true);
-					m_addOptoConnection->setVisible(true);
+					m_createConnection->setEnabled(true);
+					m_createConnection->setVisible(true);
 				}
 			}
 		}
@@ -1088,21 +1120,21 @@ void EquipmentTabPage::modeSwitched()
 	const bool visibleEditModeActions = isConfigurationMode();
 
 	m_separatorAction0->setVisible(visibleEditModeActions);
-	m_inOutsToSignals->setVisible(visibleEditModeActions);
+	m_createInOutsToSignals->setVisible(visibleEditModeActions);
 	m_showAppSignals->setVisible(visibleEditModeActions);
-	m_addAppSignal->setVisible(visibleEditModeActions);
+	m_createInternalAppSignal->setVisible(visibleEditModeActions);
 
 	m_separatorAction0->setVisible(visibleEditModeActions);
-	m_inOutsToSignals->setVisible(visibleEditModeActions);
+	m_createInOutsToSignals->setVisible(visibleEditModeActions);
 	m_showAppSignals->setVisible(visibleEditModeActions);
-	m_addAppSignal->setVisible(visibleEditModeActions);
+	m_createInternalAppSignal->setVisible(visibleEditModeActions);
 
 	m_separatorSchemaLogic->setVisible(visibleEditModeActions);
 	m_addLogicSchemaToLm->setVisible(visibleEditModeActions);
 	m_showLmsLogicSchemas->setVisible(visibleEditModeActions);
 
 	m_separatorOptoConnection->setVisible(visibleEditModeActions);
-	m_addOptoConnection->setVisible(visibleEditModeActions);
+	m_createConnection->setVisible(visibleEditModeActions);
 	m_showObjectConnections->setVisible(visibleEditModeActions);
 	m_showConnections->setVisible(visibleEditModeActions);
 
@@ -1132,44 +1164,6 @@ void EquipmentTabPage::showConnections()
 
 	return;
 }
-
-//void EquipmentTabPage::moduleConfiguration()
-//{
-	// Show modules configurations dialog
-	//
-
-
-//	//assert(m_propertyEditor != nullptr);
-
-//	// Get objects from the selected rows
-//	//
-//	QModelIndexList selectedIndexList = m_equipmentView->selectionModel()->selectedRows();
-
-//	if (selectedIndexList.size() != 1)
-//	{
-//		//m_propertyEditor->clear();
-//		return;
-//	}
-
-//	std::shared_ptr<QObject> module;
-
-//	std::shared_ptr<Hardware::DeviceObject> device = m_equipmentModel->deviceObjectSharedPtr(selectedIndexList[0]);
-
-//	if (device.get() == nullptr || dynamic_cast<Hardware::DeviceModule*>(device.get()) == nullptr)
-//	{
-//		assert(device);
-//		assert(dynamic_cast<Hardware::DeviceModule*>(device.get()) != nullptr);
-//		return;
-//	}
-
-
-
-//	// Set objects to the PropertyEditor
-//	//
-//	//m_propertyEditor->setObjects(devices);
-
-//	return;
-//}
 
 void EquipmentTabPage::setProperties()
 {
@@ -1259,7 +1253,6 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> 
 			return;
 		}
 
-
 		QByteArray data;
 		bool ok = device->saveToByteArray(&data);
 
@@ -1294,13 +1287,15 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> 
 
 void EquipmentTabPage::addObjectTriggered()
 {
+	assert(m_addObjectButton);
+
 	if (m_toolBar == nullptr)
 	{
 		assert(m_toolBar);
 		return;
 	}
 
-	QWidget* w = m_toolBar->widgetForAction(m_addObjectAction);
+	QWidget* w = m_toolBar->widgetForAction(m_addObjectButton);
 
 	if (w == nullptr)
 	{

@@ -57,17 +57,17 @@ public slots:
 								bool clearPrevSelection,
 								bool newUuids);
 
-	void addInOutsToSignals();
+	void createInOutsToSignals();
 	void addInOutsToSignals(std::shared_ptr<Hardware::DeviceModule> module);
 	void addInOutsToSignals(std::vector<std::shared_ptr<Hardware::DeviceAppSignal>> hardwareAppSignals);
 
 	void showAppSignals(bool refreshSignalList, bool exactMatch);			// Show application signals for this object
-	void addAppSignal();
+	void createInternalAppSignal();
 
 	void addLogicSchemaToLm();
 	void showLogicSchemaForLm();
 
-	void addOptoConnection();
+	void createConnection();
 	void showObjectConnections();
 
 	void copySelectedDevices();

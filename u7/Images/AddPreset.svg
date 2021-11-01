@@ -1,0 +1,40 @@
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg" version="1.1" xml:space="preserve">
+ <g>
+  <title>Layer 1</title>
+  <g id="svg_10"/>
+  <g id="svg_11"/>
+  <g id="svg_12"/>
+  <g id="svg_13"/>
+  <g id="svg_14"/>
+  <g id="svg_15"/>
+  <g id="svg_16"/>
+  <g id="svg_17"/>
+  <g id="svg_18"/>
+  <g id="svg_19"/>
+  <g id="svg_20"/>
+  <g id="svg_21"/>
+  <g id="svg_22"/>
+  <g id="svg_23"/>
+  <g id="svg_24"/>
+  <rect stroke="#404040" fill="none" x="72.5" y="72.5" width="367.00001" height="367.00001" id="svg_32" stroke-width="35" rx="53"/>
+  <g id="svg_4">
+   <g id="svg_5">
+    <path d="m256,134.095c-10.1,0 -18.286,8.186 -18.286,18.286l0,207.238c0,10.1 8.186,18.286 18.286,18.286c10.1,0 18.286,-8.186 18.286,-18.286l0,-207.238c0,-10.1 -8.186,-18.286 -18.286,-18.286z" fill="#404040" id="svg_6"/>
+   </g>
+  </g>
+  <g id="svg_7" stroke="null">
+   <g id="svg_8" stroke="null">
+    <path d="m359.619,237.714l-207.238,0c-10.1,0 -18.286,8.186 -18.286,18.286c0,10.1 8.186,18.286 18.286,18.286l207.238,0c10.1,0 18.286,-8.186 18.286,-18.286c0,-10.1 -8.186,-18.286 -18.286,-18.286z" fill="#404040" id="svg_9" stroke="null"/>
+   </g>
+  </g>
+  <line fill="none" stroke="#404040" stroke-width="28" x1="64" y1="192" x2="5" y2="192" id="svg_2"/>
+  <line fill="none" stroke="#404040" stroke-width="28" x1="64" y1="320" x2="5" y2="320" id="svg_3"/>
+  <line fill="none" stroke="#404040" stroke-width="28" x1="512" y1="192" x2="453" y2="192" id="svg_28"/>
+  <line fill="none" stroke="#404040" stroke-width="28" x1="512" y1="320" x2="453" y2="320" id="svg_29"/>
+  <line transform="rotate(90 320 29.9289)" fill="none" stroke="#404040" stroke-width="28" x1="349.49997" y1="29.9289" x2="290.49997" y2="29.9289" id="svg_33"/>
+  <line transform="rotate(90 192 29.9289)" fill="none" stroke="#404040" stroke-width="28" x1="221.49997" y1="29.9289" x2="162.49997" y2="29.9289" id="svg_34"/>
+  <line transform="rotate(90 320 479)" fill="none" stroke="#404040" stroke-width="28" x1="349.49982" y1="479.00001" x2="290.49982" y2="479.00001" id="svg_37"/>
+  <line transform="rotate(90 192 479)" fill="none" stroke="#404040" stroke-width="28" x1="221.49982" y1="479.00001" x2="162.49982" y2="479.00001" id="svg_38"/>
+ </g>
+
+</svg>
