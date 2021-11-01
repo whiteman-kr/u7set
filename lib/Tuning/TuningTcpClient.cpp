@@ -144,7 +144,7 @@ void TuningTcpClient::writeTuningSignal(const std::vector<TuningWriteCommand>& d
 
 		for (const TuningWriteCommand& cmd : data)
 		{
-			AppSignalParam param =m_signals->signalParam(cmd.m_hash, &ok);
+			AppSignalParam param = m_signals->signalParam(cmd.m_hash, &ok);
 			if (ok == false)
 			{
 				assert(false);
@@ -157,11 +157,10 @@ void TuningTcpClient::writeTuningSignal(const std::vector<TuningWriteCommand>& d
 				writeLogSignalChange(param, state.value(), cmd.m_value);
 
 				state.m_value = cmd.m_value;
+				state.m_flags.tuningDefault = cmd.m_value == param.tuningDefaultValue();
 				m_signals->setState(cmd.m_hash, state);
 				m_signals->setNewValue(cmd.m_hash, cmd.m_value);
 			}
-
-
 		}
 
 		return;

@@ -4,6 +4,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QTreeWidget>
+#include <QFileDialog>
 
 //
 // DialogChooseTuningSignals
@@ -101,10 +102,12 @@ ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(TuningSignalManager* signal
 	m_addValue = new QPushButton(tr("Add"));
 	connect(m_addValue, &QPushButton::clicked, this, &ChooseTuningSignalsWidget::on_m_add_clicked);
 	midLayout->addWidget(m_addValue);
+	m_addValue->setEnabled(false);
 
 	m_removeValue = new QPushButton(tr("Remove"));
 	connect(m_removeValue, &QPushButton::clicked, this, &ChooseTuningSignalsWidget::on_m_remove_clicked);
 	midLayout->addWidget(m_removeValue);
+	m_removeValue->setEnabled(false);
 
 	midLayout->addStretch();
 
@@ -118,6 +121,7 @@ ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(TuningSignalManager* signal
 	m_filterValuesTree = new QTreeWidget();
 	m_filterValuesTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	m_filterValuesTree->setWordWrap(false);
+	connect(m_filterValuesTree, &QTreeWidget::itemSelectionChanged, this, &ChooseTuningSignalsWidget::on_m_filterValuesTree_itemSelectionChanged);
 	connect(m_filterValuesTree, &QTreeWidget::doubleClicked, this, &ChooseTuningSignalsWidget::on_m_filterValuesTree_doubleClicked);
 
 	QStringList headers;
@@ -138,13 +142,25 @@ ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(TuningSignalManager* signal
 	m_setValue = new QPushButton(tr("Set Value"));
 	connect(m_setValue, &QPushButton::clicked, this, &ChooseTuningSignalsWidget::on_m_setValue_clicked);
 	rightGridLayout->addWidget(m_setValue);
+	m_setValue->setEnabled(false);
 
 	if (requestValuesEnabled == true)
 	{
 		m_setCurrent = new QPushButton(tr("Set Current"));
 		connect(m_setCurrent, &QPushButton::clicked, this, &ChooseTuningSignalsWidget::on_m_setCurrent_clicked);
 		rightGridLayout->addWidget(m_setCurrent);
+		m_setCurrent->setEnabled(false);
 	}
+
+	m_exportValues = new QPushButton(tr("Export..."));
+	connect(m_exportValues, &QPushButton::clicked, this, &ChooseTuningSignalsWidget::on_m_exportValues_clicked);
+	rightGridLayout->addWidget(m_exportValues);
+	m_exportValues->setEnabled(false);
+
+	m_importValues = new QPushButton(tr("Import..."));
+	connect(m_importValues, &QPushButton::clicked, this, &ChooseTuningSignalsWidget::on_m_importValues_clicked);
+	rightGridLayout->addWidget(m_importValues);
+	m_importValues->setEnabled(false);
 
 	rightLayout->addLayout(rightGridLayout);
 
@@ -166,6 +182,8 @@ ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(TuningSignalManager* signal
 
 	m_baseSignalsTable->setModel(m_baseModel);
 
+	connect(m_baseSignalsTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ChooseTuningSignalsWidget::on_m_baseSignalsTableSelectionChanged);
+
 	fillBaseSignalsList();
 
 	// Set column width
@@ -185,21 +203,19 @@ void ChooseTuningSignalsWidget::setReadOnly(bool value)
 {
 	m_readOnly = value;
 
-	if (m_addValue != nullptr)
-	{
-		m_addValue->setEnabled(m_readOnly == false);
-	}
-	if (m_removeValue != nullptr)
-	{
-		m_removeValue->setEnabled(m_readOnly == false);
-	}
-	if (m_setValue != nullptr)
-	{
-		m_setValue->setEnabled(m_readOnly == false);
-	}
+	m_addValue->setEnabled(readOnly() == false &&
+						   m_baseSignalsTable->selectionModel()->selectedRows().size() > 0 &&
+						   m_filter != nullptr);
+
+	QList<QTreeWidgetItem*> selectedFilterValuesItems = m_filterValuesTree->selectedItems();
+
+	m_removeValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() > 0);
+
+	m_setValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() == 1);
+
 	if (m_setCurrent != nullptr)
 	{
-		m_setCurrent->setEnabled(m_readOnly == false);
+		m_setCurrent->setEnabled(readOnly() == false && selectedFilterValuesItems.size() == 1);
 	}
 
 	return;
@@ -209,33 +225,15 @@ void ChooseTuningSignalsWidget::setFilter(std::shared_ptr<TuningFilter> selected
 {
 	m_filter = selectedFilter;
 
-	if (m_filterValuesTree == nullptr)
-	{
-		Q_ASSERT(m_filterValuesTree);
-		return;
-	}
+	m_addValue->setEnabled(readOnly() == false &&
+						   m_baseSignalsTable->selectionModel()->selectedRows().size() > 0 &&
+						   m_filter != nullptr);
 
-	m_filterValuesTree->clear();
+	m_exportValues->setEnabled(selectedFilter != nullptr);
 
-	if (m_filter != nullptr)
-	{
-		std::vector <TuningFilterSignal> values = m_filter->getFilterSignals();
+	m_importValues->setEnabled(readOnly() == false && selectedFilter != nullptr);
 
-		for (const TuningFilterSignal& v: values)
-		{
-			QTreeWidgetItem* item = new QTreeWidgetItem();
-			setFilterValueItemText(item, v);
-			m_filterValuesTree->addTopLevelItem(item);
-		}
-
-		for (int i = 0; i < m_filterValuesTree->columnCount(); i++)
-		{
-			m_filterValuesTree->resizeColumnToContents(i);
-		}
-
-		m_filterValuesTree->setSortingEnabled(true);
-		m_filterValuesTree->sortByColumn(0, Qt::AscendingOrder);
-	}
+	fillFilterValuesTree();
 }
 
 void ChooseTuningSignalsWidget::fillBaseSignalsList()
@@ -385,6 +383,37 @@ void ChooseTuningSignalsWidget::fillBaseSignalsList()
 
 	m_baseModel->setHashes(filteredHashes);
 	m_baseSignalsTable->sortByColumn(m_sortColumn, m_sortOrder);
+}
+
+void ChooseTuningSignalsWidget::fillFilterValuesTree()
+{
+	if (m_filterValuesTree == nullptr)
+	{
+		Q_ASSERT(m_filterValuesTree);
+		return;
+	}
+
+	m_filterValuesTree->clear();
+
+	if (m_filter != nullptr)
+	{
+		std::vector <TuningFilterSignal> values = m_filter->getFilterSignals();
+
+		for (const TuningFilterSignal& v: values)
+		{
+			QTreeWidgetItem* item = new QTreeWidgetItem();
+			setFilterValueItemText(item, v);
+			m_filterValuesTree->addTopLevelItem(item);
+		}
+
+		for (int i = 0; i < m_filterValuesTree->columnCount(); i++)
+		{
+			m_filterValuesTree->resizeColumnToContents(i);
+		}
+
+		m_filterValuesTree->setSortingEnabled(true);
+		m_filterValuesTree->sortByColumn(0, Qt::AscendingOrder);
+	}
 }
 
 void ChooseTuningSignalsWidget::on_m_add_clicked()
@@ -694,6 +723,231 @@ void ChooseTuningSignalsWidget::on_m_setCurrent_clicked()
 	}
 }
 
+void ChooseTuningSignalsWidget::on_m_exportValues_clicked()
+{
+	int columnCount = m_filterValuesTree->columnCount();
+
+	int rowCount = m_filterValuesTree->topLevelItemCount();
+
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Export to CSV"),
+													QString(),
+													tr("CSV (*.csv)"));
+
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	QFile file(fileName);
+	if (file.open(QFile::WriteOnly | QFile::Truncate) == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Error writing file %1!").arg(fileName));
+		return;
+	}
+
+	QTextStream out(&file);
+	out.setCodec("UTF-8");
+
+	QString csvHeader;
+
+	for (int c = 0; c < columnCount; c++)
+	{
+		QString str = m_filterValuesTree->headerItem()->text(c);
+		csvHeader += str;
+		csvHeader += ';';
+	}
+
+	out << csvHeader << "\r\n";
+
+	for (int r = 0; r < rowCount; r++)
+	{
+		QString csvRow;
+
+		QTreeWidgetItem* item = m_filterValuesTree->topLevelItem(r);
+
+		for (int c = 0; c < columnCount; c++)
+		{
+			QString str = item->text(c);
+			csvRow += str;
+			csvRow += ';';
+		}
+
+		out << csvRow << "\r\n";
+	}
+
+	out.flush();
+
+	QMessageBox::information(this, qAppName(), tr("Export complete."));
+
+}
+
+void ChooseTuningSignalsWidget::on_m_importValues_clicked()
+{
+	if (readOnly() == true)
+	{
+		return;
+	}
+
+	if (m_filter == nullptr)
+	{
+		return;
+	}
+
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Import from CSV"),
+													QString(),
+													tr("CSV (*.csv)"));
+
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	QFile file(fileName);
+	if (file.open(QFile::ReadOnly) == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Error writing file %1!").arg(fileName));
+		return;
+	}
+
+	QTextStream in(&file);
+	in.setCodec("UTF-8");
+
+	const int CSV_Columns_Count = 5;
+
+	bool headerString = true;
+
+	std::vector<TuningFilterSignal> csvFilterSignals;	// Load filter signals here
+
+	int signalsAdded = 0;
+	int signalsUpdated = 0;
+
+	while (!in.atEnd())
+	{
+		QString str = in.readLine().trimmed();
+
+		if (str.isEmpty() == true)
+		{
+			break;
+		}
+
+		if (headerString == true)
+		{
+			headerString = false;
+			continue;
+		}
+
+		QStringList strings = str.split(';', Qt::SkipEmptyParts);
+		if (strings.size() != CSV_Columns_Count)
+		{
+			QMessageBox::critical(this, qAppName(), tr("CSV string '%1' should have 5 fields: \n\n\"AppSignalID;CustomAppSignalID;Type;Caption;Value\"!").arg(str));
+			return;
+		}
+
+		// customAppSignalId = strings[0]
+		QString appSignalId = strings[1];
+		QString typeStr = strings[2];
+		//caption = strings[3]
+		QString valueStr = strings[4];
+
+		Hash hash = ::calcHash(appSignalId);
+
+		// Get signal from base
+
+		bool ok = false;
+
+		const AppSignalParam p = m_signalManager->signalParam(hash, &ok);
+
+		if (ok == false)
+		{
+			QMessageBox::critical(this, qAppName(), tr("Error: Signal '%1' was not found in the signals base!").arg(appSignalId));
+			return;
+		}
+
+		TuningValue tv;
+
+		// Read TuningValue Type
+
+		tv.setType(TuningValue::typeFromStr(typeStr));
+
+		// Database type and CSV type should match
+
+		TuningValueType typeFromDatabase = TuningValue::getTuningValueType(p.type(), p.analogSignalFormat());
+
+		if (tv.type() != typeFromDatabase)
+		{
+			TuningValue tvDatabase;
+			tvDatabase.setType(typeFromDatabase);
+
+			QMessageBox::critical(this, qAppName(), tr("Error: Signal '%1' database type '%2' does not match to CSV type '%3'!")
+								  .arg(appSignalId)
+								  .arg(tvDatabase.typeStr())
+								  .arg(tv.typeStr()));
+			return;
+		}
+
+		// Fill TuningFilterSignal
+
+		TuningFilterSignal fs;
+
+		bool signalExists = m_filter->filterSignalExists(hash);
+
+		if (signalExists == true)
+		{
+			ok = m_filter->filterSignal(hash, fs);
+
+			Q_ASSERT(ok);
+
+			Q_ASSERT(fs.appSignalId() == p.appSignalId());
+
+			signalsUpdated++;
+		}
+		else
+		{
+			fs.setAppSignalId(p.appSignalId());
+
+			signalsAdded++;
+		}
+
+		// Set Value
+
+		bool useValue = false;
+
+		tv.fromString(valueStr, &useValue);
+
+		fs.setUseValue(useValue);
+
+		if (useValue == true)
+		{
+			fs.setValue(tv);
+		}
+
+		//
+
+		csvFilterSignals.push_back(fs);
+	}
+
+	// Update filters in the list
+
+	for (const auto& fs : csvFilterSignals)
+	{
+		m_filter->addFilterSignal(fs);
+	}
+
+	fillFilterValuesTree();
+
+	QMessageBox::information(this, qAppName(), tr("Import complete.\n\nAdded: %1 signals\nUpdated: %2 signals").arg(signalsAdded).arg(signalsUpdated));
+
+	return;
+}
+
+void ChooseTuningSignalsWidget::on_m_baseSignalsTableSelectionChanged(const QItemSelection &, const QItemSelection &)
+{
+	m_addValue->setEnabled(readOnly() == false &&
+						   m_baseSignalsTable->selectionModel()->selectedRows().size() > 0 &&
+						   m_filter != nullptr);
+	return;
+}
+
 void ChooseTuningSignalsWidget::on_m_baseApplyFilter_clicked()
 {
 	fillBaseSignalsList();
@@ -709,6 +963,22 @@ void ChooseTuningSignalsWidget::on_m_baseSignalsTable_doubleClicked(const QModel
 	}
 
 	on_m_add_clicked();
+}
+
+void ChooseTuningSignalsWidget::on_m_filterValuesTree_itemSelectionChanged()
+{
+	QList<QTreeWidgetItem*> selectedFilterValuesItems = m_filterValuesTree->selectedItems();
+
+	m_removeValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() > 0);
+
+	m_setValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() == 1);
+
+	if (m_setCurrent != nullptr)
+	{
+		m_setCurrent->setEnabled(readOnly() == false && selectedFilterValuesItems.size() == 1);
+	}
+
+	return;
 }
 
 void ChooseTuningSignalsWidget::on_m_filterValuesTree_doubleClicked(const QModelIndex& index)
