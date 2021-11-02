@@ -9,7 +9,7 @@
 //
 //
 SimulatorTabPage::SimulatorTabPage(DbController* dbc, QWidget* parent) :
-	MainTabPage(dbc, parent)//,
+	MainTabPage(dbc, parent)
 {
 	assert(dbc != nullptr);
 
@@ -28,17 +28,7 @@ SimulatorTabPage::SimulatorTabPage(DbController* dbc, QWidget* parent) :
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SimulatorTabPage::projectOpened);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SimulatorTabPage::projectClosed);
 
-	// Evidently, project is not opened yet
-	//
-
-	//int do_not_forget_to_uncommnet_the_next_line;
-	this->setEnabled(false);
-
 	return;
-}
-
-SimulatorTabPage::~SimulatorTabPage()
-{
 }
 
 void SimulatorTabPage::closeEvent(QCloseEvent* e)
@@ -48,13 +38,11 @@ void SimulatorTabPage::closeEvent(QCloseEvent* e)
 
 void SimulatorTabPage::projectOpened()
 {
-	this->setEnabled(true);
 	return;
 }
 
 void SimulatorTabPage::projectClosed()
 {
-	this->setEnabled(false);
 	return;
 }
 
