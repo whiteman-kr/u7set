@@ -55,6 +55,8 @@ private:
 
 	void fillBaseSignalsList();
 
+	void fillFilterValuesTree();
+
 	void setFilterValueItemText(QTreeWidgetItem* item, const TuningFilterSignal& value);
 
 private:
@@ -88,6 +90,8 @@ private:
 
 	QPushButton* m_setValue = nullptr;
 	QPushButton* m_setCurrent = nullptr;
+	QPushButton* m_exportValues = nullptr;
+	QPushButton* m_importValues = nullptr;
 
 	//
 	bool m_readOnly = false;
@@ -95,6 +99,8 @@ private:
 private slots:
 
 	void baseSortIndicatorChanged(int column, Qt::SortOrder order);
+
+	void on_m_baseSignalsTableSelectionChanged(const QItemSelection &, const QItemSelection &);
 
 	void on_m_baseApplyFilter_clicked();
 
@@ -108,6 +114,8 @@ private slots:
 
 	void on_m_baseSignalsTable_doubleClicked(const QModelIndex& index);
 
+	void on_m_filterValuesTree_itemSelectionChanged();
+
 	void on_m_filterValuesTree_doubleClicked(const QModelIndex& index);
 
 	void on_m_add_clicked();
@@ -117,6 +125,10 @@ private slots:
 	void on_m_setValue_clicked();
 
 	void on_m_setCurrent_clicked();
+
+	void on_m_exportValues_clicked();
+
+	void on_m_importValues_clicked();
 };
 
 class TuningFilterEditor : public QWidget

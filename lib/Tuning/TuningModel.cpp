@@ -645,6 +645,33 @@ void TuningModel::setColumnTypes(std::vector<TuningModelColumns> columnsIndexes)
 
 }
 
+QString TuningModel::columnText(int index) const
+{
+	if (index < 0 || index >= columnCount())
+	{
+		Q_ASSERT(false);
+		return QString();
+	}
+
+	return headerData(index, Qt::Horizontal, Qt::DisplayRole).toString();
+}
+
+QString TuningModel::cellText(int column, int row) const
+{
+	if (column < 0 || column >= columnCount())
+	{
+		Q_ASSERT(false);
+		return QString();
+	}
+	if (row < 0 || row >= rowCount())
+	{
+		Q_ASSERT(false);
+		return QString();
+	}
+
+	return data(createIndex(row, column), Qt::DisplayRole).toString();
+}
+
 void TuningModel::setFont(const QFont& font)
 {
 	if (m_font != nullptr)
