@@ -1477,18 +1477,18 @@ void SchemaFileViewEx::createActions()
 	// --
 	//
 	m_checkOutAction = new QAction(tr("Check Out"), parent());
-	m_checkOutAction->setIcon(QIcon(":/Images/Images/SchemaCheckOut.svg"));
 	m_checkOutAction->setStatusTip(tr("Check Out for edit..."));
+	m_checkOutAction->setIcon(QIcon(":/Images/Images/SchemaCheckOut.svg"));
 	m_checkOutAction->setEnabled(false);
 
 	m_checkInAction = new QAction(tr("Check In"), parent());
-	m_checkInAction->setIcon(QIcon(":/Images/Images/SchemaCheckIn.svg"));
 	m_checkInAction->setStatusTip(tr("Check In pending changes..."));
+	m_checkInAction->setIcon(QIcon(":/Images/Images/SchemaCheckIn.svg"));
 	m_checkInAction->setEnabled(false);
 
 	m_undoChangesAction = new QAction(tr("Undo Changes"), parent());
-	m_undoChangesAction->setIcon(QIcon(":/Images/Images/SchemaUndo.svg"));
 	m_undoChangesAction->setStatusTip(tr("Undo Pending Changes..."));
+	m_undoChangesAction->setIcon(QIcon{":/Images/Images/SchemaUndo.svg"});
 	m_undoChangesAction->setEnabled(false);
 
 	m_historyAction = new QAction(tr("History..."), parent());
@@ -1510,12 +1510,12 @@ void SchemaFileViewEx::createActions()
 	// --
 	//
 	m_exportWorkingcopyAction = new QAction(tr("Export Working Copy..."), parent());
-	m_exportWorkingcopyAction->setIcon(QIcon(":/Images/Images/SchemaDownload.svg"));
+	m_exportWorkingcopyAction->setIcon(QIcon(":/Images/Images/SchemaUpload.svg"));
 	m_exportWorkingcopyAction->setStatusTip(tr("Export workingcopy file to disk..."));
 	m_exportWorkingcopyAction->setEnabled(false);
 
 	m_importWorkingcopyAction = new QAction(tr("Import Working Copy..."), parent());
-	m_importWorkingcopyAction->setIcon(QIcon(":/Images/Images/SchemaUpload.svg"));
+	m_importWorkingcopyAction->setIcon(QIcon(":/Images/Images/SchemaDownload.svg"));
 	m_importWorkingcopyAction->setStatusTip(tr("Import workingcopy file from disk to project file..."));
 	m_importWorkingcopyAction->setEnabled(false);
 
@@ -2231,7 +2231,7 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db, AppSignalSetPro
 
 	createToolBar();
 
-	m_toolBar->setStyleSheet("QToolButton { padding-top: 6px; padding-bottom: 6px; padding-left: 6px; padding-right: 6px;}");
+	m_toolBar->setStyleSheet("QToolButton { padding-top: 3px; padding-bottom: 3px; padding-left: 3px; padding-right: 3px;}");
 	m_toolBar->setIconSize(m_toolBar->iconSize() * 0.9);
 
 	connect(m_filesView->m_openAction, &QAction::triggered, this, &SchemaControlTabPageEx::openSelectedFile);
@@ -2297,6 +2297,11 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db, AppSignalSetPro
 	// --
 	//
 	QGridLayout* layout = new QGridLayout(this);
+
+	auto margins = layout->contentsMargins();
+	margins.setTop(0);
+	layout->setContentsMargins(margins);
+
 	layout->setMenuBar(m_toolBar);						// Set ToolBar here as menu, so no gaps and margins
 	layout->addWidget(m_filesView, 0, 0, 1, 6);
 
@@ -4945,6 +4950,19 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 	connect(m_schemaWidget, &EditSchemaWidget::getCurrentWorkcopy, this, &EditSchemaTabPageEx::getCurrentWorkcopy);
 	connect(m_schemaWidget, &EditSchemaWidget::setCurrentWorkcopy, this, &EditSchemaTabPageEx::setCurrentWorkcopy);
 
+	// Actions
+	//
+	m_fileAction = new QAction(tr("File"), this);
+	m_fileAction->setEnabled(true);
+
+	m_alignAction = new QAction(tr("Align"), this);
+	m_alignAction->setToolTip(tr("Align items' size or position by the first selected item"));
+	m_alignAction->setEnabled(true);
+
+	m_orderAction = new QAction(tr("Order"), this);
+	m_orderAction->setToolTip(tr("Change selected items' order"));
+	m_orderAction->setEnabled(true);
+
 	// ToolBar
 	//
 	m_toolBar = new QToolBar(tr("Toolbar"), this);
@@ -4953,7 +4971,7 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 	m_toolBar->setMovable(false);
 	m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
 
-	m_toolBar->addAction(m_schemaWidget->m_fileAction);
+	m_toolBar->addAction(m_fileAction);
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_schemaWidget->m_addLineAction);
@@ -5031,8 +5049,8 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 	}
 
 	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_schemaWidget->m_orderAction);
-	m_toolBar->addAction(m_schemaWidget->m_sizeAndPosAction);
+	m_toolBar->addAction(m_orderAction);
+	m_toolBar->addAction(m_alignAction);
 
 	m_toolBar->addAction(m_schemaWidget->m_infoModeAction);
 
@@ -5043,9 +5061,9 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 
 	// --
 	//
-	connect(m_schemaWidget->m_fileAction, &QAction::triggered, this, &EditSchemaTabPageEx::fileMenuTriggered);
-	connect(m_schemaWidget->m_orderAction, &QAction::triggered, this, &EditSchemaTabPageEx::itemsOrderTriggered);
-	connect(m_schemaWidget->m_sizeAndPosAction, &QAction::triggered, this, &EditSchemaTabPageEx::sizeAndPosMenuTriggered);
+	connect(m_fileAction, &QAction::triggered, this, &EditSchemaTabPageEx::fileMenuTriggered);
+	connect(m_orderAction, &QAction::triggered, this, &EditSchemaTabPageEx::itemsOrderTriggered);
+	connect(m_alignAction, &QAction::triggered, this, &EditSchemaTabPageEx::sizeAndPosMenuTriggered);
 
 	connect(m_tabWidget, &QTabWidget::currentChanged, m_schemaWidget, &EditSchemaWidget::hideWorkDialogs);
 
@@ -5430,7 +5448,7 @@ void EditSchemaTabPageEx::fileMenuTriggered()
 	}
 
 	m_schemaWidget->updateFileActions();
-	QWidget* w = m_toolBar->widgetForAction(m_schemaWidget->m_fileAction);
+	QWidget* w = m_toolBar->widgetForAction(m_fileAction);
 
 	if (w == nullptr)
 	{
@@ -5441,7 +5459,7 @@ void EditSchemaTabPageEx::fileMenuTriggered()
 	QPoint pt = w->pos();
 	pt.rx() += w->width();
 
-	m_schemaWidget->m_fileMenu->popup(m_toolBar->mapToGlobal(pt));
+	m_schemaWidget->m_fileSubMenu->popup(m_toolBar->mapToGlobal(pt));
 
 	return;
 }
@@ -5454,7 +5472,7 @@ void EditSchemaTabPageEx::sizeAndPosMenuTriggered()
 		return;
 	}
 
-	QWidget* w = m_toolBar->widgetForAction(m_schemaWidget->m_sizeAndPosAction);
+	QWidget* w = m_toolBar->widgetForAction(m_alignAction);
 
 	if (w == nullptr)
 	{
@@ -5465,7 +5483,7 @@ void EditSchemaTabPageEx::sizeAndPosMenuTriggered()
 	QPoint pt = w->pos();
 	pt.rx() += w->width();
 
-	m_schemaWidget->m_sizeAndPosMenu->popup(m_toolBar->mapToGlobal(pt));
+	m_schemaWidget->m_alignSubMenu->popup(m_toolBar->mapToGlobal(pt));
 
 	return;
 }
@@ -5478,7 +5496,7 @@ void EditSchemaTabPageEx::itemsOrderTriggered()
 		return;
 	}
 
-	QWidget* w = m_toolBar->widgetForAction(m_schemaWidget->m_orderAction);
+	QWidget* w = m_toolBar->widgetForAction(m_orderAction);
 
 	if (w == nullptr)
 	{
@@ -5489,7 +5507,7 @@ void EditSchemaTabPageEx::itemsOrderTriggered()
 	QPoint pt = w->pos();
 	pt.rx() += w->width();
 
-	m_schemaWidget->m_orderMenu->popup(m_toolBar->mapToGlobal(pt));
+	m_schemaWidget->m_orderSubMenu->popup(m_toolBar->mapToGlobal(pt));
 
 	return;
 }

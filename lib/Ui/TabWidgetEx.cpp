@@ -45,8 +45,9 @@ void TabBarEx::paintEvent(QPaintEvent* pe)
 		QRect tabrect = tabRect(index);
 
 		p.setPen(QPen(QBrush{topLineColor()}, lineWeight));
-		p.drawLine(tabrect.left(), tabrect.top() + lineWeight / 2,
-				   tabrect.right(), tabrect.top() + lineWeight / 2);
+
+		p.drawLine(tabrect.left(), tabrect.top() + lineWeight,
+				   tabrect.right(), tabrect.top() + lineWeight);
 	}
 
 	return;
@@ -83,23 +84,15 @@ TabWidgetEx::TabWidgetEx(QWidget* parent) :
 	tabBar()->setElideMode(Qt::ElideRight);
 	setTabsClosable(true);
 
-	QSize sz = fontMetrics().size(Qt::TextSingleLine, "A");
-	int h = static_cast<int>(sz.height() * 1.75);
-
 	QString ss = QString(R"(
-QTabBar::tab:top
-{
-height: %1px;
-}
 QTabBar::close-button
 {
-image: url(":/Images/Images/CloseButtonGray.svg");
+	image: url(":/Images/Images/CloseButtonGray.svg");
 }
 QTabBar::close-button:hover
 {
-image: url(":/Images/Images/CloseButtonBlack.svg");
-})")
-				 .arg(h);
+	image: url(":/Images/Images/CloseButtonBlack.svg");
+})");
 
 	setStyleSheet(ss);
 

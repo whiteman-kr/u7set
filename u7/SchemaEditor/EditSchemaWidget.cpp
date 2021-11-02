@@ -221,7 +221,8 @@ void EditSchemaWidget::createActions()
 
 	// Info Mode Action
 	//
-	m_infoModeAction = new QAction(tr("Info Mode"), this);
+	m_infoModeAction = new QAction(tr("Info"), this);
+	m_infoModeAction->setToolTip(tr("Show/Hide information like items' label"));
 	m_infoModeAction->setEnabled(true);
 	m_infoModeAction->setCheckable(true);
 	m_infoModeAction->setChecked(theSettings.isInfoMode());
@@ -238,9 +239,6 @@ void EditSchemaWidget::createActions()
 	//
 	// File
 	//
-	m_fileAction = new QAction(tr("File"), this);
-	m_fileAction->setEnabled(true);
-
 	m_detachWindow = new QAction(tr("Detach/Attach Window"), this);
 	m_detachWindow->setStatusTip(tr("Detach/attach window..."));
 	m_detachWindow->setEnabled(true);
@@ -250,16 +248,19 @@ void EditSchemaWidget::createActions()
 
 	m_fileCheckInAction = new QAction(tr("Check In"), this);
 	m_fileCheckInAction->setStatusTip(tr("Check In changes..."));
+	m_fileCheckInAction->setIcon(QIcon{":/Images/Images/SchemaCheckIn.svg"});
 	m_fileCheckInAction->setEnabled(false);
 	connect(m_fileCheckInAction, &QAction::triggered, this, &EditSchemaWidget::checkInFile);
 
 	m_fileCheckOutAction = new QAction(tr("Check Out"), this);
 	m_fileCheckOutAction->setStatusTip(tr("Check Out for edit..."));
+	m_fileCheckOutAction->setIcon(QIcon{":/Images/Images/SchemaCheckOut.svg"});
 	m_fileCheckOutAction->setEnabled(false);
 	connect(m_fileCheckOutAction, &QAction::triggered, this, &EditSchemaWidget::checkOutFile);
 
 	m_fileUndoChangesAction = new QAction(tr("Undo Changes..."), this);
 	m_fileUndoChangesAction->setStatusTip(tr("Undo Pending Changes..."));
+	m_fileUndoChangesAction->setIcon(QIcon{":/Images/Images/SchemaUndo.svg"});
 	m_fileUndoChangesAction->setEnabled(false);
 	connect(m_fileUndoChangesAction, &QAction::triggered, this, &EditSchemaWidget::undoChangesFile);
 
@@ -285,11 +286,13 @@ void EditSchemaWidget::createActions()
 
 	m_fileExportAction = new QAction(tr("Export File..."), this);
 	m_fileExportAction->setStatusTip(tr("Export file to disk"));
+	m_fileExportAction->setIcon(QIcon{":/Images/Images/SchemaUpload.svg"});
 	m_fileExportAction->setEnabled(true);
 	connect(m_fileExportAction, &QAction::triggered, this, &EditSchemaWidget::getCurrentWorkcopy);
 
 	m_fileImportAction = new QAction(tr("Import file..."), this);
 	m_fileImportAction->setStatusTip(tr("Import file from disk to project"));
+	m_fileImportAction->setIcon(QIcon{":/Images/Images/SchemaDownload.svg"});
 	m_fileImportAction->setEnabled(false);
 	connect(m_fileImportAction, &QAction::triggered, this, &EditSchemaWidget::setCurrentWorkcopy);
 
@@ -306,6 +309,7 @@ void EditSchemaWidget::createActions()
 
 	m_fileCloseAction = new QAction(tr("Close"), this);
 	m_fileCloseAction->setStatusTip(tr("Close file"));
+	m_fileCloseAction->setIcon(QIcon{":/Images/Images/CloseButtonBlack.svg"});
 	m_fileCloseAction->setEnabled(true);
 	m_fileCloseAction->setShortcuts(QKeySequence::Close);
 	m_fileCloseAction->setShortcutVisibleInContextMenu(true);
@@ -315,9 +319,6 @@ void EditSchemaWidget::createActions()
 	//
 	// Add Item
 	//
-	m_addAction = new QAction(tr("Add Item"), this);
-	m_addAction->setEnabled(true);
-
 	m_addLineAction = new QAction(tr("Line"), this);
 	m_addLineAction->setEnabled(true);
 	m_addLineAction->setIcon(QIcon(":/Images/Images/SchemaLine.svg"));
@@ -548,8 +549,6 @@ void EditSchemaWidget::createActions()
 	//
 	// Edit
 	//
-	m_editAction = new QAction(tr("Edit"), this);
-	m_editAction->setEnabled(true);
 
 	// Edit->Undo
 	//
@@ -643,7 +642,7 @@ void EditSchemaWidget::createActions()
 	m_propertiesAction->setShortcut(QKeySequence(tr("Alt+Return")));
 	m_propertiesAction->setShortcutVisibleInContextMenu(true);
 	// Shortcuts Alt+Return and Alt+Numeric Enter are different,
-	// Look for real call of EditSchemaWidget::properties in keyPressEvent!!!!
+	// Look for real call of EditSchemaWidget::properties in keyPressEvent!
 	//
 	connect(m_propertiesAction, &QAction::triggered, this, &EditSchemaWidget::properties);
 	addAction(m_propertiesAction);
@@ -651,8 +650,6 @@ void EditSchemaWidget::createActions()
 	//
 	// Size And Pos (align)
 	//
-	m_sizeAndPosAction = new QAction(tr("Size/Pos"), this);
-	m_sizeAndPosAction->setEnabled(true);
 
 	// Size/Pos->Same Width
 	//
@@ -715,8 +712,6 @@ void EditSchemaWidget::createActions()
 	//
 	// Items Order
 	//
-	m_orderAction = new QAction(tr("Order"), this);
-	m_orderAction->setEnabled(true);
 
 	// Items Order->Bring to Front
 	//
@@ -757,8 +752,8 @@ void EditSchemaWidget::createActions()
 	//
 	// Transform Into
 	//
-	m_transformAction = new QAction(tr("Transform Into"), this);
-	m_transformAction->setEnabled(true);
+	//m_transformAction = new QAction(tr("Transform Into"), this);
+	//m_transformAction->setEnabled(true);
 
 	// Transform Into->Input
 	//
@@ -778,12 +773,11 @@ void EditSchemaWidget::createActions()
 	//
 	// View
 	//
-	m_viewAction = new QAction(tr("View"), this);
-	m_viewAction->setEnabled(true);
 
 	// View->ZoomIn, creating of these actions was moved to VFrame30::BaseSchemaWidget
 	//
 	m_zoomInAction = new QAction(tr("Zoom In"), this);
+	m_zoomInAction->setIcon(QIcon{":/Images/Images/ZoomIn.svg"});
 	m_zoomInAction->setEnabled(true);
 	m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
 	m_zoomInAction->setShortcutVisibleInContextMenu(true);
@@ -793,6 +787,7 @@ void EditSchemaWidget::createActions()
 	// View->ZoomOut
 	//
 	m_zoomOutAction = new QAction(tr("Zoom Out"), this);
+	m_zoomOutAction->setIcon(QIcon{":/Images/Images/ZoomOut.svg"});
 	m_zoomOutAction->setEnabled(true);
 	m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
 	m_zoomOutAction->setShortcutVisibleInContextMenu(true);
@@ -811,6 +806,7 @@ void EditSchemaWidget::createActions()
 	// View->Fit to Screen
 	//
 	m_zoomFitToScreenAction = new QAction(tr("Fit to Screen"), this);
+	m_zoomFitToScreenAction->setIcon(QIcon{":/Images/Images/ZoomFitToScreen.svg"});
 	m_zoomFitToScreenAction->setEnabled(true);
 	//m_zoomFitToScreenAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Slash)); It is comment/uncommnet shortcut ((
 	m_zoomFitToScreenAction->setShortcutVisibleInContextMenu(true);
@@ -921,153 +917,141 @@ void EditSchemaWidget::createActions()
 	//
 	// Create Sub Menus
 	//
-	m_fileMenu = new QMenu(this);
-	//m_fileAction->setMenu(m_fileMenu);		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	int QT6_TO_DO_m_fileAction_setMenu;
-		m_fileMenu->addAction(m_detachWindow);
-		m_fileMenu->addSeparator();
-		m_fileMenu->addAction(m_fileCheckOutAction);
-		m_fileMenu->addAction(m_fileCheckInAction);
-		m_fileMenu->addAction(m_fileUndoChangesAction);
-		m_fileMenu->addAction(m_fileSeparatorAction0);
-		m_fileMenu->addAction(m_fileSaveAction);
-		m_fileMenu->addAction(m_fileExportToPdfAction);
-		m_fileMenu->addAction(m_fileSeparatorAction1);
-		m_fileMenu->addAction(m_fileExportAction);
-		m_fileMenu->addAction(m_fileImportAction);
-		m_fileMenu->addAction(m_fileSeparatorAction2);
-		m_fileMenu->addAction(m_filePropertiesAction);
-		m_fileMenu->addAction(m_fileSeparatorAction3);
-		m_fileMenu->addAction(m_fileCloseAction);
+	m_fileSubMenu = new QMenu(tr("File"), this);
 
-	m_addMenu = new QMenu(this);
-	//m_addAction->setMenu(m_addMenu);		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	int QT6_TO_DO_m_addAction_setMenu;
-		m_addMenu->addAction(m_addLineAction);
-		m_addMenu->addAction(m_addRectAction);
-		m_addMenu->addAction(m_addPathAction);
-		m_addMenu->addAction(m_addTextAction);
-		m_addMenu->addAction(m_addImageAction);
+		m_fileSubMenu->addAction(m_detachWindow);
+		m_fileSubMenu->addSeparator();
+		m_fileSubMenu->addAction(m_fileCheckOutAction);
+		m_fileSubMenu->addAction(m_fileCheckInAction);
+		m_fileSubMenu->addAction(m_fileUndoChangesAction);
+		m_fileSubMenu->addAction(m_fileSeparatorAction0);
+		m_fileSubMenu->addAction(m_fileSaveAction);
+		m_fileSubMenu->addAction(m_fileExportToPdfAction);
+		m_fileSubMenu->addAction(m_fileSeparatorAction1);
+		m_fileSubMenu->addAction(m_fileExportAction);
+		m_fileSubMenu->addAction(m_fileImportAction);
+		m_fileSubMenu->addAction(m_fileSeparatorAction2);
+		m_fileSubMenu->addAction(m_filePropertiesAction);
+		m_fileSubMenu->addAction(m_fileSeparatorAction3);
+		m_fileSubMenu->addAction(m_fileCloseAction);
+
+	m_addSubMenu = new QMenu(tr("Add Item"), this);
+
+		m_addSubMenu->addAction(m_addLineAction);
+		m_addSubMenu->addAction(m_addRectAction);
+		m_addSubMenu->addAction(m_addPathAction);
+		m_addSubMenu->addAction(m_addTextAction);
+		m_addSubMenu->addAction(m_addImageAction);
 		//m_addMenu->addAction(m_addFrameAction);
 
-		m_addMenu->addAction(m_addSeparatorAction0);
+		m_addSubMenu->addAction(m_addSeparatorAction0);
 
 		if (isLogicSchema() == true)
 		{
-			m_addMenu->addAction(m_addLinkAction);
-			m_addMenu->addAction(m_addInputSignalAction);
-			m_addMenu->addAction(m_addInOutSignalAction);
-			m_addMenu->addAction(m_addOutputSignalAction);
-			m_addMenu->addAction(m_addConstantAction);
-			m_addMenu->addAction(m_addTerminatorAction);
+			m_addSubMenu->addAction(m_addLinkAction);
+			m_addSubMenu->addAction(m_addInputSignalAction);
+			m_addSubMenu->addAction(m_addInOutSignalAction);
+			m_addSubMenu->addAction(m_addOutputSignalAction);
+			m_addSubMenu->addAction(m_addConstantAction);
+			m_addSubMenu->addAction(m_addTerminatorAction);
 
-			m_addMenu->addAction(m_addSeparatorAfb);
-			m_addMenu->addAction(m_addAfbAction);
-			m_addMenu->addAction(m_addUfbAction);
+			m_addSubMenu->addAction(m_addSeparatorAfb);
+			m_addSubMenu->addAction(m_addAfbAction);
+			m_addSubMenu->addAction(m_addUfbAction);
 
-			m_addMenu->addAction(m_addSeparatorConn);
-			m_addMenu->addAction(m_addTransmitter);
-			m_addMenu->addAction(m_addReceiver);
+			m_addSubMenu->addAction(m_addSeparatorConn);
+			m_addSubMenu->addAction(m_addTransmitter);
+			m_addSubMenu->addAction(m_addReceiver);
 
-			m_addMenu->addAction(m_addSeparatorLoop);
-			m_addMenu->addAction(m_addLoopbackSource);
-			m_addMenu->addAction(m_addLoopbackTarget);
+			m_addSubMenu->addAction(m_addSeparatorLoop);
+			m_addSubMenu->addAction(m_addLoopbackSource);
+			m_addSubMenu->addAction(m_addLoopbackTarget);
 
-			m_addMenu->addAction(m_addSeparatorBus);
-			m_addMenu->addAction(m_addBusComposer);
-			m_addMenu->addAction(m_addBusExtractor);
+			m_addSubMenu->addAction(m_addSeparatorBus);
+			m_addSubMenu->addAction(m_addBusComposer);
+			m_addSubMenu->addAction(m_addBusExtractor);
 		}
 
 		if (isUfbSchema() == true)
 		{
-			m_addMenu->addAction(m_addLinkAction);
-			m_addMenu->addAction(m_addInputSignalAction);
-			m_addMenu->addAction(m_addOutputSignalAction);
-			m_addMenu->addAction(m_addConstantAction);
-			m_addMenu->addAction(m_addTerminatorAction);
+			m_addSubMenu->addAction(m_addLinkAction);
+			m_addSubMenu->addAction(m_addInputSignalAction);
+			m_addSubMenu->addAction(m_addOutputSignalAction);
+			m_addSubMenu->addAction(m_addConstantAction);
+			m_addSubMenu->addAction(m_addTerminatorAction);
 
-			m_addMenu->addAction(m_addSeparatorAfb);
-			m_addMenu->addAction(m_addAfbAction);
+			m_addSubMenu->addAction(m_addSeparatorAfb);
+			m_addSubMenu->addAction(m_addAfbAction);
 
-			m_addMenu->addAction(m_addSeparatorLoop);
-			m_addMenu->addAction(m_addLoopbackSource);
-			m_addMenu->addAction(m_addLoopbackTarget);
+			m_addSubMenu->addAction(m_addSeparatorLoop);
+			m_addSubMenu->addAction(m_addLoopbackSource);
+			m_addSubMenu->addAction(m_addLoopbackTarget);
 
-			m_addMenu->addAction(m_addSeparatorBus);
-			m_addMenu->addAction(m_addBusComposer);
-			m_addMenu->addAction(m_addBusExtractor);
+			m_addSubMenu->addAction(m_addSeparatorBus);
+			m_addSubMenu->addAction(m_addBusComposer);
+			m_addSubMenu->addAction(m_addBusExtractor);
 		}
 
 		if (isMonitorSchema() == true)
 		{
-			m_addMenu->addAction(m_addValueAction);
-			m_addMenu->addAction(m_addImageValueAction);
-			m_addMenu->addAction(m_addPushButtonAction);
-			m_addMenu->addAction(m_addLineEditAction);
-			m_addMenu->addAction(m_addIndicatorAction);
+			m_addSubMenu->addAction(m_addValueAction);
+			m_addSubMenu->addAction(m_addImageValueAction);
+			m_addSubMenu->addAction(m_addPushButtonAction);
+			m_addSubMenu->addAction(m_addLineEditAction);
+			m_addSubMenu->addAction(m_addIndicatorAction);
 		}
 
 		if (isTuningSchema() == true)
 		{
-			m_addMenu->addAction(m_addValueAction);
-			m_addMenu->addAction(m_addImageValueAction);
-			m_addMenu->addAction(m_addPushButtonAction);
-			m_addMenu->addAction(m_addLineEditAction);
+			m_addSubMenu->addAction(m_addValueAction);
+			m_addSubMenu->addAction(m_addImageValueAction);
+			m_addSubMenu->addAction(m_addPushButtonAction);
+			m_addSubMenu->addAction(m_addLineEditAction);
 		}
 
-	m_editMenu = new QMenu(this);
-	//m_editAction->setMenu(m_editMenu);	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	int QT6_m_editAction;
-		m_editMenu->addAction(m_undoAction);
-		m_editMenu->addAction(m_redoAction);
-		m_editMenu->addAction(m_editSeparatorAction0);
-		m_editMenu->addAction(m_selectAllAction);
-		m_editMenu->addAction(m_editSeparatorAction1);
-		m_editMenu->addAction(m_editCutAction);
-		m_editMenu->addAction(m_editCopyAction);
-		m_editMenu->addAction(m_editPasteAction);
-		m_editMenu->addAction(m_editSeparatorAction2);
-		m_editMenu->addAction(m_deleteAction);
+	m_editSubMenu = new QMenu(tr("Edit"), this);
+		m_editSubMenu->addAction(m_undoAction);
+		m_editSubMenu->addAction(m_redoAction);
+		m_editSubMenu->addAction(m_editSeparatorAction0);
+		m_editSubMenu->addAction(m_selectAllAction);
+		m_editSubMenu->addAction(m_editSeparatorAction1);
+		m_editSubMenu->addAction(m_editCutAction);
+		m_editSubMenu->addAction(m_editCopyAction);
+		m_editSubMenu->addAction(m_editPasteAction);
+		m_editSubMenu->addAction(m_editSeparatorAction2);
+		m_editSubMenu->addAction(m_deleteAction);
 
-	m_sizeAndPosMenu = new QMenu(this);
-	//m_sizeAndPosAction->setMenu(m_sizeAndPosMenu);	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	int QT6_m_sizeAndPosAction;
-		m_sizeAndPosMenu->addAction(m_sameWidthAction);
-		m_sizeAndPosMenu->addAction(m_sameHeightAction);
-		m_sizeAndPosMenu->addAction(m_sameSizeAction);
-		m_sizeAndPosMenu->addAction(m_sizeAndPosSeparatorAction0);
-		m_sizeAndPosMenu->addAction(m_alignLeftAction);
-		m_sizeAndPosMenu->addAction(m_alignRightAction);
-		m_sizeAndPosMenu->addAction(m_alignTopAction);
-		m_sizeAndPosMenu->addAction(m_alignBottomAction);
+	m_alignSubMenu = new QMenu(tr("Align"), this);
+		m_alignSubMenu->addAction(m_sameWidthAction);
+		m_alignSubMenu->addAction(m_sameHeightAction);
+		m_alignSubMenu->addAction(m_sameSizeAction);
+		m_alignSubMenu->addAction(m_sizeAndPosSeparatorAction0);
+		m_alignSubMenu->addAction(m_alignLeftAction);
+		m_alignSubMenu->addAction(m_alignRightAction);
+		m_alignSubMenu->addAction(m_alignTopAction);
+		m_alignSubMenu->addAction(m_alignBottomAction);
 
-	m_orderMenu = new QMenu(this);
-	//m_orderAction->setMenu(m_orderMenu);	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	int QT6_m_orderAction;
-		m_orderMenu->addAction(m_bringToFrontAction);
-		m_orderMenu->addAction(m_bringForwardAction);
-		m_orderMenu->addAction(m_sendBackwardAction);
-		m_orderMenu->addAction(m_sendToBackAction);
+	m_orderSubMenu = new QMenu(tr("Order"), this);
+		m_orderSubMenu->addAction(m_bringToFrontAction);
+		m_orderSubMenu->addAction(m_bringForwardAction);
+		m_orderSubMenu->addAction(m_sendBackwardAction);
+		m_orderSubMenu->addAction(m_sendToBackAction);
 
-	m_transformMenu = new QMenu(this);
-	//m_transformAction->setMenu(m_transformMenu);	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	int QT6_m_transformAction;
-		m_transformMenu->addAction(m_transformIntoInputAction);
-		m_transformMenu->addAction(m_transformIntoInOutAction);
-		m_transformMenu->addAction(m_transformIntoOutputAction);
+	m_transformSubMenu = new QMenu("Transform Into ", this);
+		m_transformSubMenu->addAction(m_transformIntoInputAction);
+		m_transformSubMenu->addAction(m_transformIntoInOutAction);
+		m_transformSubMenu->addAction(m_transformIntoOutputAction);
 
-	m_viewMenu = new QMenu(this);
-	//m_viewAction->setMenu(m_viewMenu);	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	int QT6_m_viewAction;
-		m_viewMenu->addAction(m_zoomInAction);
-		m_viewMenu->addAction(m_zoomOutAction);
-		m_viewMenu->addAction(m_zoom100Action);
-		m_viewMenu->addAction(m_zoomFitToScreenAction);
+	m_viewSubMenu = new QMenu(tr("View"), this);
+		m_viewSubMenu->addAction(m_zoomInAction);
+		m_viewSubMenu->addAction(m_zoomOutAction);
+		m_viewSubMenu->addAction(m_zoom100Action);
+		m_viewSubMenu->addAction(m_zoomFitToScreenAction);
 
 	if (schema()->unit() == SchemaUnit::Display)
 	{
-		m_viewMenu->addAction(m_viewSeparatorAction0);
-		m_viewMenu->addAction(m_snapToGridAction);
+		m_viewSubMenu->addAction(m_viewSeparatorAction0);
+		m_viewSubMenu->addAction(m_snapToGridAction);
 	}
 
 	return;
@@ -4239,14 +4223,26 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 
 	// Disable some actions in ReadOnly mode
 	//
-	m_addAction->setDisabled(readOnly());
+	m_addSubMenu->setDisabled(readOnly());
 	updateFileActions();
 
 	m_propertiesAction->setDisabled(editSchemaView()->selectedItems().empty());
 
 	// Compose menu
 	//
-	QMenu menu(this);
+	QMenu menu{this};
+
+	menu.addMenu(m_fileSubMenu);
+
+	menu.addSeparator();
+	menu.addMenu(m_addSubMenu);
+
+	menu.addSeparator();
+	menu.addMenu(m_viewSubMenu);
+
+	menu.addMenu(m_editSubMenu);
+	menu.addMenu(m_alignSubMenu);
+	menu.addMenu(m_orderSubMenu);
 
 	QList<QAction*> actions;
 
@@ -4266,16 +4262,9 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 		actions.back()->setSeparator(true);
 	}
 
-	actions << m_fileAction;
-	actions << m_viewAction;
-	actions << m_addAction;
-	actions << m_editAction;
-	actions << m_orderAction;
-	actions << m_sizeAndPosAction;
-
 	if (allSelectedAreSignals == true)
 	{
-		actions << m_transformAction;
+		menu.addMenu(m_transformSubMenu);
 	}
 
 	// Signal properties
@@ -4425,7 +4414,9 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 
 	actions << m_propertiesAction;
 
-	menu.exec(actions, mapToGlobal(pos), 0, this);
+	menu.addActions(actions);
+
+	menu.exec(mapToGlobal(pos));
 	return;
 }
 

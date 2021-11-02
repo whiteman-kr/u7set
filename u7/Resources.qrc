@@ -87,6 +87,9 @@
         <file>Images/ImportPreset.svg</file>
         <file>Images/AddPreset.svg</file>
         <file>Images/EquipEditorReplace.svg</file>
+        <file>Images/ZoomFitToScreen.svg</file>
+        <file>Images/ZoomIn.svg</file>
+        <file>Images/ZoomOut.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

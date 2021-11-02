@@ -23,9 +23,10 @@ SimSchemaPage::SimSchemaPage(std::shared_ptr<VFrame30::Schema> schema,
 	QGridLayout* layout = new QGridLayout();
 	layout->addWidget(m_schemaWidget, 0, 0, 1, 1);
 
-	layout->setContentsMargins(2, 0, 2, 2);
-
 	setLayout(layout);
+
+	layout->setContentsMargins(0, 0, 0, 0);
+	layout->setSpacing(0);
 
 	// --
 	//

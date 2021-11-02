@@ -349,7 +349,7 @@ private slots:
 	// Properties
 	//
 public:
-	const DbFileInfo& parentFile() const;
+	[[nodiscard]] const DbFileInfo& parentFile() const;
 
 	// Data
 	//
@@ -389,7 +389,7 @@ public:
 	virtual ~SchemasTabPageEx();
 
 public:
-	bool hasUnsavedSchemas() const;
+	[[nodiscard]] bool hasUnsavedSchemas() const;
 	bool saveUnsavedSchemas();
 	bool resetModified();
 
@@ -482,17 +482,17 @@ protected:
 public:
 	std::shared_ptr<VFrame30::Schema> schema();
 
-	const DbFileInfo& fileInfo() const;
+	[[nodiscard]] const DbFileInfo& fileInfo() const;
 	void setFileInfo(const DbFileInfo& fi);
 
-	bool readOnly() const;
+	[[nodiscard]] bool readOnly() const;
 	void setReadOnly(bool value);
 
-	bool modified() const;
+	[[nodiscard]] bool modified() const;
 	void resetModified();
 
-	bool compareWidget() const;
-	bool isCompareWidget() const;
+	[[nodiscard]] bool compareWidget() const;
+	[[nodiscard]] bool isCompareWidget() const;
 	void setCompareWidget(bool value, std::shared_ptr<VFrame30::Schema> source, std::shared_ptr<VFrame30::Schema> target);
 
 	void setCompareItemActions(const std::map<QUuid, CompareAction>& itemsActions);
@@ -503,4 +503,8 @@ private:
 	EditSchemaWidget* m_schemaWidget = nullptr;
 	QToolBar* m_toolBar = nullptr;
 	QTabWidget* m_tabWidget = nullptr;
+
+	QAction* m_fileAction = nullptr;
+	QAction* m_alignAction = nullptr;
+	QAction* m_orderAction = nullptr;
 };

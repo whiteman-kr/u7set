@@ -647,10 +647,13 @@ SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbContro
 	m_signalIdFieldCombo->addItem(tr("Caption"), FI_CAPTION);
 
 	QToolBar* toolBar = new QToolBar(this);
+	toolBar->setStyleSheet("QToolButton { padding-top: 3px; padding-bottom: 3px; padding-left: 3px; padding-right: 3px;}");
+	toolBar->setIconSize(toolBar->iconSize() * 0.9);
 
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::showDeviceApplicationSignals, this, &SignalsTabPage::changeSignalIdFilter);
 
 	QToolBar* filterToolBar = new QToolBar(this);
+	filterToolBar->setStyleSheet("QToolButton { padding-top: 0px; padding-bottom: 0px; padding-left: 3px; padding-right: 3px;}");
 
 	m_filterEdit = new QLineEdit(this);
 	filterToolBar->addWidget(new QLabel("Filter ", this));
@@ -754,16 +757,17 @@ SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbContro
 	//
 	CreateActions(toolBar);
 
-	toolBar->setStyleSheet("QToolButton { padding: 6px; }");
-	toolBar->setIconSize(toolBar->iconSize() * 0.9);
-
 	//
 	// Layouts
 	//
 
 	QVBoxLayout* pMainLayout = new QVBoxLayout();
 
-	pMainLayout->addWidget(toolBar);
+	QMargins margins = pMainLayout->contentsMargins();
+	margins.setTop(0);
+	pMainLayout->setContentsMargins(margins);
+
+	pMainLayout->setMenuBar(toolBar);			// Set ToolBar as menu -> no gaps and margins
 	pMainLayout->addWidget(filterToolBar);
 	pMainLayout->addWidget(m_signalsView);
 

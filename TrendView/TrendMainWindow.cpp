@@ -225,7 +225,7 @@ namespace TrendLib
 		m_toolBar->setObjectName("TrendToolBar");
 
 		m_toolBar->setMovable(false);
-		m_toolBar->setIconSize(QSize(28, 28));
+		m_toolBar->setIconSize(m_toolBar->iconSize() * 0.9);
 
 		m_toolBar->addAction(ui->actionOpen);
 		m_toolBar->addAction(ui->actionSave);

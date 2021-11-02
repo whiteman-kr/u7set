@@ -399,9 +399,7 @@ friend class EditSchemaTabPageEx;	// EditSchemaTabPageEx has toolbar, and it wil
 private:
 	// File
 	//
-	QMenu* m_fileMenu = nullptr;
-
-	QAction* m_fileAction = nullptr;
+	QMenu* m_fileSubMenu = nullptr;
 		QAction* m_detachWindow = nullptr;
 		// ------------------------------
 		QAction* m_fileCheckOutAction = nullptr;
@@ -424,8 +422,7 @@ private:
 
 	// Add Item
 	//
-	QMenu* m_addMenu = nullptr;
-	QAction* m_addAction = nullptr;
+	QMenu* m_addSubMenu = nullptr;
 		QAction* m_addLineAction = nullptr;
 		QAction* m_addRectAction = nullptr;
 		QAction* m_addPathAction = nullptr;
@@ -465,8 +462,7 @@ private:
 
 	// Edit
 	//
-	QMenu* m_editMenu = nullptr;
-	QAction* m_editAction = nullptr;
+	QMenu* m_editSubMenu = nullptr;
 		QAction* m_undoAction = nullptr;
 		QAction* m_redoAction = nullptr;
 		// ------------------------------
@@ -486,8 +482,7 @@ private:
 
 	// Size and Pos (Align)
 	//
-	QMenu* m_sizeAndPosMenu = nullptr;
-	QAction* m_sizeAndPosAction = nullptr;
+	QMenu* m_alignSubMenu = nullptr;
 		QAction* m_sameWidthAction = nullptr;
 		QAction* m_sameHeightAction = nullptr;
 		QAction* m_sameSizeAction = nullptr;
@@ -500,8 +495,7 @@ private:
 
 	// Order
 	//
-	QMenu* m_orderMenu = nullptr;
-	QAction* m_orderAction = nullptr;
+	QMenu* m_orderSubMenu = nullptr;
 		QAction* m_bringToFrontAction = nullptr;
 		QAction* m_bringForwardAction = nullptr;
 		QAction* m_sendToBackAction = nullptr;
@@ -509,16 +503,14 @@ private:
 
 	// Transform
 	//
-	QMenu* m_transformMenu = nullptr;
-	QAction* m_transformAction = nullptr;
+	QMenu* m_transformSubMenu = nullptr;
 		QAction* m_transformIntoInputAction = nullptr;
 		QAction* m_transformIntoInOutAction = nullptr;
 		QAction* m_transformIntoOutputAction = nullptr;
 
 	// View
 	//
-	QMenu* m_viewMenu = nullptr;
-	QAction* m_viewAction = nullptr;
+	QMenu* m_viewSubMenu = nullptr;
 		QAction* m_zoomInAction = nullptr;
 		QAction* m_zoomOutAction = nullptr;
 		QAction* m_zoom100Action = nullptr;

@@ -41,7 +41,7 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 
 	m_tabWidget = new TabWidgetEx{this};
 	m_tabWidget->tabBarEx()->setDrawTopLine(false);
-	m_tabWidget->setDocumentMode(true);
+	m_tabWidget->setDocumentMode(false);
 	m_tabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	setCentralWidget(m_tabWidget);
@@ -49,7 +49,12 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 	centralWidget()->setAutoFillBackground(true);
 
 	QVBoxLayout* layout = new QVBoxLayout;
+
 	centralWidget()->setLayout(layout);
+
+	auto margins = layout->contentsMargins();
+	margins.setTop(0);
+	layout->setContentsMargins(margins);
 
 	createDocks();
 	createToolBar();
@@ -1161,7 +1166,8 @@ SimToolBar::SimToolBar(const QString& title, QWidget* parent) :
 
 	setObjectName("SimToolBar");
 
-	//setIconSize(iconSize() * 0.9);
+	setStyleSheet("QToolButton { padding-top: 3px; padding-bottom: 3px; padding-left: 3px; padding-right: 3px;}");
+	setIconSize(iconSize() * 0.9);
 
 	toggleViewAction()->setDisabled(true);
 

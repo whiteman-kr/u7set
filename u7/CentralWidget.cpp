@@ -7,10 +7,7 @@ CentralWidget::CentralWidget(QWidget* parent) :
 	QTabWidget(parent)
 {
 	QSize sz = fontMetrics().size(Qt::TextSingleLine, "APPLICATION LOGIC");
-	sz.setHeight(static_cast<int>(sz.height() * 1.75));
-
-	QString ss = QString("QTabBar::tab{ min-width: %1px; min-height: %2px;}").arg(sz.width()).arg(sz.height());
-	tabBar()->setStyleSheet(ss);
+	tabBar()->setStyleSheet(QString("QTabBar::tab{ min-width: %1px;}").arg(sz.width()));
 
 	connect(this, &QTabWidget::currentChanged, this, &CentralWidget::currentChanged);
 }

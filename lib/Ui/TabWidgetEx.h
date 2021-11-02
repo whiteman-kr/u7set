@@ -19,10 +19,10 @@ protected:
 	void paintEvent(QPaintEvent* pe) override;
 
 public:
-	bool drawTopLine() const;
+	[[nodiscard]] bool drawTopLine() const;
 	void setDrawTopLine(bool value);
 
-	QRgb topLineColor() const;
+	[[nodiscard]] QRgb topLineColor() const;
 	void setTopLineColor(QRgb value);
 
 private:
@@ -38,6 +38,6 @@ class TabWidgetEx : public QTabWidget
 public:
 	TabWidgetEx(QWidget* parent);
 
-	TabBarEx* tabBarEx();
-	const TabBarEx* tabBarEx() const;
+	[[nodiscard]] TabBarEx* tabBarEx();
+	[[nodiscard]] const TabBarEx* tabBarEx() const;
 };

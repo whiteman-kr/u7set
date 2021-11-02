@@ -90,16 +90,16 @@ namespace TrendLib
 		// Proprties
 		//
 	public:
-		TrendLib::TrendSignalSet& signalSet();
+		[[nodiscard]] TrendLib::TrendSignalSet& signalSet();
 		const TrendLib::TrendSignalSet& signalSet() const;
 
-		TrendLib::Trend& trend();
+		[[nodiscard]] TrendLib::Trend& trend();
 		const TrendLib::Trend& trend() const;
 
-		E::TrendMode trendMode() const;
+		[[nodiscard]] E::TrendMode trendMode() const;
 		void setTrendMode(E::TrendMode value);
 
-		bool isRealtimeAutoShift() const;
+		[[nodiscard]] bool isRealtimeAutoShift() const;
 
 	protected:
 		Ui::TrendsMainWindow *ui;

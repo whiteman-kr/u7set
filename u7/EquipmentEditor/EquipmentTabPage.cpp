@@ -92,6 +92,9 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	// ToolBar
 	//
 	m_toolBar = new QToolBar(this);
+	m_toolBar->setStyleSheet("QToolButton { padding-top: 3px; padding-bottom: 3px; padding-left: 3px; padding-right: 3px;}");
+	m_toolBar->setIconSize(m_toolBar->iconSize() * 0.9);
+
 	m_toolBar->addAction(m_addObjectButton);
 	m_toolBar->addAction(m_addFromPresetAction);
 	m_toolBar->addAction(m_addNewPresetAction);
@@ -122,12 +125,16 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//
 	// Layouts
 	//
-	QVBoxLayout* pMainLayout = new QVBoxLayout();
+	QGridLayout* layout = new QGridLayout();
 
-	pMainLayout->addWidget(m_toolBar);
-	pMainLayout->addWidget(m_splitter);
+	auto margins = layout->contentsMargins();
+	margins.setTop(0);
+	layout->setContentsMargins(margins);
 
-	setLayout(pMainLayout);
+	layout->setMenuBar(m_toolBar);						// Set ToolBar here as menu, so no gaps and margins
+	layout->addWidget(m_splitter);
+
+	setLayout(layout);
 
 	// Restore state
 	//
