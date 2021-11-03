@@ -1,0 +1,5 @@
+Preset changes log
+
+27.10.2021	Starting the log.
+
+27.10.2021	RPCT-3178, TUNING_SERVICE_2CH.u7devp - added new preset for 2-channel TuningService.
