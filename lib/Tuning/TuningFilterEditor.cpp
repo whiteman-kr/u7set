@@ -746,7 +746,7 @@ void ChooseTuningSignalsWidget::on_m_exportValues_clicked()
 	}
 
 	QTextStream out(&file);
-	out.setCodec("UTF-8");
+	out.setEncoding(QStringConverter::Utf8);
 
 	QString csvHeader;
 
@@ -810,7 +810,7 @@ void ChooseTuningSignalsWidget::on_m_importValues_clicked()
 	}
 
 	QTextStream in(&file);
-	in.setCodec("UTF-8");
+	in.setEncoding(QStringConverter::Utf8);
 
 	const int CSV_Columns_Count = 5;
 

@@ -1919,7 +1919,7 @@ void TuningPage::slot_exportContentsToCSV()
 	}
 
 	QTextStream out(&file);
-	out.setCodec("UTF-8");
+	out.setEncoding(QStringConverter::Utf8);
 
 	QString csvHeader;
 
