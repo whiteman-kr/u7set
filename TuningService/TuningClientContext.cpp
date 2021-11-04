@@ -149,7 +149,7 @@ namespace Tuning
 
 			// fill m_signalToSourceMap
 			//
-			const TuningData* tuningData = source->tuningData();
+			TuningDataSharedConst tuningData = source->tuningData();
 
 			if (tuningData == nullptr)
 			{
@@ -447,14 +447,10 @@ namespace Tuning
 
 	void TuningClientContextMap::init(const TuningServiceSettings& tss, const TuningSources& sources)
 	{
-		for(const TuningServiceSettings::TuningClient& client : tss.clients)
-		{
-			if (contains(client.equipmentID) == true)
-			{
-				assert(false);
-				continue;
-			}
+		std::vector<TuningServiceSettings::TuningClient> clients = tss.getAllUniqueClients();
 
+		for(const auto& client : clients)
+		{
 			TuningClientContext* clientContext = new TuningClientContext(client.equipmentID, client.sourcesIDs, sources);
 
 			insert(client.equipmentID, clientContext);

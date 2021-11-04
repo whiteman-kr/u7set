@@ -12,7 +12,6 @@
 #include "SignalSet.h"
 #include "Context.h"
 
-
 namespace Builder
 {
 
@@ -71,6 +70,10 @@ namespace Builder
 
 	protected:
 		static bool checkLmToSoftwareLinks(Context* context);
+
+		static const Hardware::Software *getConnectedSoftware(const Context* context,
+													   const QString& equipmentID,
+													   bool checkConnectionToControllers);
 
 		static bool joinSchemas(Context* context, VFrame30::Schema* schema, const VFrame30::Schema* pannel, Qt::Edge edge);
 

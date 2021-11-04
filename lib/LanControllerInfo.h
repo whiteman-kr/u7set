@@ -9,8 +9,9 @@
 struct LanControllerInfo
 {
 	QString equipmentID;
-	int controllerNo = -1;				// == place
+	int controllerNo = -1;			// == place
 	E::LanControllerType lanControllerType = E::LanControllerType::Unknown;
+	int channel = 0;				// 0 is a First channel!
 
 	// used if LAN controller provide Tuning
 	//
@@ -21,8 +22,6 @@ struct LanControllerInfo
 	QString tuningServiceIP;
 	int tuningServicePort = 0;
 	QString tuningServiceNetmask;
-	quint64 tuningDataUID = 0;
-	QStringList tuningAssociatedSignals;
 
 	// used if LAN controller provide AppData
 	//
@@ -33,11 +32,6 @@ struct LanControllerInfo
 	QString appDataServiceIP;
 	int appDataServicePort = 0;
 	QString appDataServiceNetmask;
-	quint32 appDataUID = 0;
-	int appDataSizeBytes = 0;
-	int appDataFramesQuantity = 0;
-	int overrideAppDataWordCount = -1;
-	QStringList appDataAssociatedSignals;
 
 	// used if LAN controller provide DiagData
 	//
@@ -48,11 +42,10 @@ struct LanControllerInfo
 	QString diagDataServiceIP;
 	int diagDataServicePort = 0;
 	QString diagDataServiceNetmask;
-	quint32 diagDataUID = 0;
-	int diagDataSizeBytes = 0;
-	int diagDataFramesQuantity = 0;
-	int overrideDiagDataWordCount = -1;
-	QStringList diagDataAssociatedSignals;
+
+	//
+
+	bool isValid() const;
 
 	//
 
@@ -66,10 +59,45 @@ struct LanControllerInfo
 	bool isProvideAppData() const;
 	bool isProvideDiagData() const;
 
-	bool writeToXml(XmlWriteHelper& xml)const;
+	void writeToXml(XmlWriteHelper& xml)const;
 	bool readFromXml(XmlReadHelper& xml);
 	bool readFromXml(const QDomNode& lanControllerNode, QString* errMsg);
 
-	void saveToProto(Network::LanControllerInfo* proto, bool includeSignals) const;
+	void saveToProto(Network::LanControllerInfo* proto) const;
 	void loadFromProto(const Network::LanControllerInfo& proto);
+
+	bool operator == (int conrollerNo) const;
+	bool operator == (const QString& equipmentID) const;
+};
+
+class LanControllersInfo
+{
+public:
+	const LanControllerInfo& getInfo(int controllerNo) const;
+	const LanControllerInfo& getInfo(const QString& controllerEquipmentID) const;
+
+	void writeToXml(XmlWriteHelper& xml)const;
+	bool readFromXml(XmlReadHelper& xml);
+	bool readFromXml(const QDomNode& lanControllersNode, QString* errMsg);
+
+	void resize(int newSize);
+	void clear();
+	void append(const LanControllerInfo& info);
+
+	const std::vector<LanControllerInfo>& operator()() const;
+
+	const LanControllerInfo& operator[](int index) const;
+
+private:
+	const LanControllerInfo& find(int controllerNo) const;
+	const LanControllerInfo& find(const QString& equipmentID) const;
+
+	bool contains(int controllerNo) const;
+	bool contains(const QString& equipmentID) const;
+
+private:
+	std::vector<LanControllerInfo> m_lans;
+
+private:
+	static LanControllerInfo m_notValidInfo;
 };

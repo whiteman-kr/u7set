@@ -161,6 +161,16 @@ void XmlWriteHelper::writeAddress16Attribute(const QString& name, const Address1
 	writeStringAttribute(name, addr16.toString());
 }
 
+void XmlWriteHelper::writeHostAddressPortAttribute(const QString& name, const HostAddressPort& addr)
+{
+	writeStringAttribute(name, addr.addressPortStr());
+}
+
+void XmlWriteHelper::writeQHostAddressAttribute(const QString& name, const QHostAddress& addr)
+{
+	writeStringAttribute(name, addr.toString());
+}
+
 void XmlWriteHelper::writeString(const QString& str)
 {
 	m_xmlWriter->writeCharacters(str);
@@ -283,11 +293,7 @@ bool XmlReadHelper::atEnd()
 
 bool XmlReadHelper::readStringAttribute(const QString& name, QString* value)
 {
-	if(value == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(value);
 
 	QXmlStreamAttributes attrs = m_xmlReader->attributes();
 
@@ -303,20 +309,13 @@ bool XmlReadHelper::readStringAttribute(const QString& name, QString* value)
 
 bool XmlReadHelper::readIntAttribute(const QString& name, int* value)
 {
-	if(value == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(value);
 
 	QString str;
 
 	bool result = readStringAttribute(name, &str);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	*value = str.toInt(&result, 0);
 
@@ -325,20 +324,13 @@ bool XmlReadHelper::readIntAttribute(const QString& name, int* value)
 
 bool XmlReadHelper::readBoolAttribute(const QString& name, bool* value)
 {
-	if(value == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(value);
 
 	QString boolStr;
 
 	bool result = readStringAttribute(name, &boolStr);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	boolStr = boolStr.trimmed().toLower();
 
@@ -362,44 +354,30 @@ bool XmlReadHelper::readBoolAttribute(const QString& name, bool* value)
 	return true;
 }
 
-bool XmlReadHelper::readInt64Attribute(const QString& name, qlonglong *value)
+bool XmlReadHelper::readInt64Attribute(const QString& name, qlonglong* value)
 {
-	if(value == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(value);
 
 	QString str;
 
 	bool result = readStringAttribute(name, &str);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	*value = str.toLongLong(&result, 0);
 
 	return result;
 }
 
-bool XmlReadHelper::readUInt64Attribute(const QString& name, qulonglong *value)
+bool XmlReadHelper::readUInt64Attribute(const QString& name, qulonglong* value)
 {
-	if(value == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(value);
 
 	QString str;
 
 	bool result = readStringAttribute(name, &str);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	*value = str.toULongLong(&result, 0);
 
@@ -408,20 +386,13 @@ bool XmlReadHelper::readUInt64Attribute(const QString& name, qulonglong *value)
 
 bool XmlReadHelper::readUInt32Attribute(const QString& name, quint32* value)
 {
-	if(value == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(value);
 
 	QString str;
 
 	bool result = readStringAttribute(name, &str);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	*value = str.toULong(&result, 0);
 
@@ -430,20 +401,13 @@ bool XmlReadHelper::readUInt32Attribute(const QString& name, quint32* value)
 
 bool XmlReadHelper::readDoubleAttribute(const QString& name, double* value)
 {
-	if(value == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(value);
 
 	QString str;
 
 	bool result = readStringAttribute(name, &str);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	*value = str.toDouble(&result);
 
@@ -452,20 +416,13 @@ bool XmlReadHelper::readDoubleAttribute(const QString& name, double* value)
 
 bool XmlReadHelper::readFloatAttribute(const QString& name, float* value)
 {
-	if(value == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(value);
 
 	QString str;
 
 	bool result = readStringAttribute(name, &str);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	*value = str.toFloat(&result);
 
@@ -474,18 +431,43 @@ bool XmlReadHelper::readFloatAttribute(const QString& name, float* value)
 
 bool XmlReadHelper::readAddress16Attribute(const QString& name, Address16* value)
 {
+	TEST_PTR_RETURN_FALSE(value);
+
 	QString addr16Str;
 
 	bool result = readStringAttribute(name, &addr16Str);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	value->fromString(addr16Str, &result);
 
 	return result;
+}
+
+bool XmlReadHelper::readHostAddressPortAttribute(const QString& name, HostAddressPort* addr)
+{
+	TEST_PTR_RETURN_FALSE(addr);
+
+	QString addrStr;
+
+	bool result = readStringAttribute(name, &addrStr);
+
+	RETURN_IF_FALSE(result);
+
+	return addr->setAddressPortStr(addrStr, 0);
+}
+
+bool XmlReadHelper::readQHostAddressAttribute(const QString& name, QHostAddress* addr)
+{
+	TEST_PTR_RETURN_FALSE(addr);
+
+	QString addrStr;
+
+	bool result = readStringAttribute(name, &addrStr);
+
+	RETURN_IF_FALSE(result);
+
+	return addr->setAddress(addrStr);
 }
 
 bool XmlReadHelper::readStringElement(const QString& elementName, QString* value, bool find)
@@ -505,9 +487,7 @@ bool XmlReadHelper::readStringElement(const QString& elementName, QString* value
 		return false;
 	}
 
-	QString str = m_xmlReader->readElementText();
-
-	*value = str;
+	*value = m_xmlReader->readElementText();
 
 	return true;
 }
@@ -579,11 +559,7 @@ bool XmlReadHelper::readBoolElement(const QString& elementName, bool* value, boo
 
 bool XmlReadHelper::readHostAddressPort(const QString& nameIP, const QString& namePort, HostAddressPort* hostAddressPort)
 {
-	if (hostAddressPort == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(hostAddressPort);
 
 	QString addressStr;
 	int port = 0;
@@ -594,33 +570,25 @@ bool XmlReadHelper::readHostAddressPort(const QString& nameIP, const QString& na
 
 	result &= readIntElement(namePort, &port, true);
 
-	if (result == true)
-	{
-		hostAddressPort->setAddress(addressStr);
-		hostAddressPort->setPort(port);
-	}
+	RETURN_IF_FALSE(result);
+
+	result &= hostAddressPort->setAddress(addressStr);
+	hostAddressPort->setPort(port);
 
 	return result;
 }
 
-bool XmlReadHelper::readHostAddress(const QString& nameIP, QHostAddress *hostAddress)
+bool XmlReadHelper::readHostAddress(const QString& nameIP, QHostAddress* hostAddress)
 {
-	if (hostAddress == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(hostAddress);
 
 	QString addressStr;
 
 	bool result = readStringElement(nameIP, &addressStr, true);
 
-	if (result == true)
-	{
-		hostAddress->setAddress(addressStr);
-	}
+	RETURN_IF_FALSE(result);
 
-	return result;
+	return hostAddress->setAddress(addressStr);
 }
 
 bool XmlReadHelper::findElement(const QString& elementName)
@@ -638,21 +606,12 @@ bool XmlReadHelper::findElement(const QString& elementName)
 		}
 	}
 
-//	qDebug() << "XmlReadHelper: element is not found -" << elementName;
-
 	return false;
 }
 
 bool XmlReadHelper::checkElement(const QString& elementName)
 {
-	if (name() == elementName)
-	{
-		return true;
-	}
-
-	qDebug() << "XmlReadHelper: element does not match. Current - " << name() << ", required -" << elementName;
-
-	return false;
+	return (name() == elementName);
 }
 
 bool XmlReadHelper::readQVariantAttribute(const QString& name, QVariant* qv)
@@ -666,7 +625,7 @@ bool XmlReadHelper::readQVariantAttribute(const QString& name, QVariant* qv)
 	case QVariant::Type::Bool:
 		{
 			bool v = false;
-			readBoolAttribute(name, &v);
+			result = readBoolAttribute(name, &v);
 			*qv = v;
 		}
 		break;
@@ -720,7 +679,8 @@ bool XmlReadHelper::readQVariantAttribute(const QString& name, QVariant* qv)
 		break;
 
 	default:
-		Q_ASSERT(false);			// writing is not implemented for this QVarian::Type
+		Q_ASSERT(false);			// reading is not implemented for this QVarian::Type
+		result = false;
 	}
 
 	return result;

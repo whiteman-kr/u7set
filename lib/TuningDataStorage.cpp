@@ -4,10 +4,8 @@
 #include "TuningDataStorage.h"
 #include "../TuningService/TuningSource.h"
 
-
 namespace  Tuning
 {
-
 	// -------------------------------------------------------------------------------------
 	//
 	// TuningData class implementation
@@ -782,14 +780,31 @@ namespace  Tuning
 	//
 	// -------------------------------------------------------------------------------------
 
-	TuningDataStorage::~TuningDataStorage()
+	bool TuningDataStorage::appendTuningData(const QString& lmEquipmentID, TuningDataShared tuningData)
 	{
-		for(TuningData* tuningData : *this)
+		TEST_PTR_RETURN_FALSE(tuningData);
+
+		if (m_tuningDataMap.contains(lmEquipmentID) == true)
 		{
-			delete tuningData;
+			Q_ASSERT(false);
+			return false;
 		}
 
-		QHash<QString, TuningData*>::clear();
+		m_tuningDataMap.insert({lmEquipmentID, tuningData});
+
+		return true;
+	}
+
+	TuningDataShared TuningDataStorage::getTuningData(const QString& lmEquipmentID)
+	{
+		auto it = m_tuningDataMap.find(lmEquipmentID);
+
+		if (it == m_tuningDataMap.end())
+		{
+			return nullptr;
+		}
+
+		return it->second;
 	}
 
 }

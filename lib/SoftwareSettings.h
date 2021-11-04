@@ -160,6 +160,12 @@ std::shared_ptr<const T> SoftwareSettingsSet::getSettingsDefaultProfile() const
 
 		static bool getLmPropertiesFromDevice(	const Hardware::DeviceModule* lm,
 												E::LanControllerType lanControllerType,
+												const QString& adapterEquipmentID,
+												const Builder::Context* context,
+												DataSource* ds);
+
+		static bool getLmPropertiesFromDevice(	const Hardware::DeviceModule* lm,
+												E::LanControllerType lanControllerType,
 												int adapterNo,
 												const Builder::Context* context,
 												DataSource* ds);
@@ -301,7 +307,29 @@ public:
 		HostAddressPort tuningDataIP;
 	};
 
+	struct ChannelSettings
+	{
+		bool enable = false;
+
+		QString controllerEquipmentID;
+
+		HostAddressPort clientRequestIP;
+		QHostAddress clientRequestNetmask;
+
+		HostAddressPort tuningDataIP;
+		QHostAddress tuningDataNetmask;
+
+		HostAddressPort tuningSimIP;
+
+		std::vector<TuningSource> sources;
+		std::vector<TuningClient> clients;
+	};
+
+	static const int CHANNELS_COUNT = 2;
+
 	QString equipmentID;
+
+	bool singleChannel = true;
 
 	QString cfgServiceID1;
 	HostAddressPort cfgServiceIP1;
@@ -309,19 +337,12 @@ public:
 	QString cfgServiceID2;
 	HostAddressPort cfgServiceIP2;
 
-	HostAddressPort clientRequestIP;
-	QHostAddress clientRequestNetmask;
-
-	HostAddressPort tuningDataIP;
-	QHostAddress tuningDataNetmask;
-
 	bool singleLmControl = true;
 	bool disableModulesTypeChecking = false;
 
-	HostAddressPort tuningSimIP;
+	ChannelSettings channelSettings[CHANNELS_COUNT];
 
-	std::vector<TuningSource> sources;
-	std::vector<TuningClient> clients;
+	std::vector<TuningClient> getAllUniqueClients() const;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only
@@ -341,11 +362,13 @@ private:
 							const Hardware::Software* software) override;
 	private:
 		bool fillTuningSourcesInfo(const Builder::Context* context,
-								   const Hardware::Software* software);
+								   const Hardware::Software* software,
+								   int channel);
 
 		bool fillTuningClientsInfo(const Builder::Context* context,
 								   const Hardware::Software* software,
-								   bool singleLmControlEnabled);
+								   bool singleLmControlEnabled,
+								   int channel);
 	};
 
 #endif

@@ -16,13 +16,9 @@ namespace Tuning
 
 	TuningSource::~TuningSource()
 	{
-		if (m_deleteTuningData == true)
-		{
-			delete m_tuningData;
-		}
 	}
 
-	void TuningSource::setTuningData(TuningData* tuningData)
+	void TuningSource::setTuningData(TuningDataShared tuningData)
 	{
 		if (tuningData == nullptr)
 		{
@@ -43,7 +39,7 @@ namespace Tuning
 		}
 	}
 
-	const TuningData* TuningSource::tuningData() const
+	TuningDataSharedConst TuningSource::tuningData() const
 	{
 		return m_tuningData;
 	}
@@ -64,9 +60,7 @@ namespace Tuning
 	{
 		assert(m_tuningData == nullptr);
 
-		m_tuningData = new TuningData();
-
-		m_deleteTuningData = true;
+		m_tuningData = std::make_shared<TuningData>();
 
 		bool result = m_tuningData->readFromXml(xml);
 
@@ -93,7 +87,6 @@ namespace Tuning
 
 	void TuningSources::clear()
 	{
-		m_ip2Source.clear();
 		m_id2Source.clear();
 
 		QVector<TuningSource>::clear();
@@ -105,23 +98,9 @@ namespace Tuning
 
 		for(const TuningSource& source : *this)
 		{
-			m_ip2Source.insert(source.lanHostAddressPort().address32(), index);
 			m_id2Source.insert(source.moduleEquipmentID(), index);
-
 			index++;
 		}
-	}
-
-	const TuningSource* TuningSources::getSourceByIP(quint32 ip) const
-	{
-		int index = m_ip2Source.value(ip, -1);
-
-		if (index >= 0)
-		{
-			return &(*this)[index];
-		}
-
-		return nullptr;
 	}
 
 	const TuningSource* TuningSources::getSourceByID(const QString& sourceID) const

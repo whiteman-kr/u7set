@@ -209,31 +209,7 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 		return false;
 	}
 
-	int lanControllersCount = 0;
-
-	result &= DomXmlHelper::getIntAttribute(lanControllersElem, XmlAttribute::COUNT, &lanControllersCount, errMsg);
-
-	QDomNodeList lanControllerNodes = lmElem.elementsByTagName(XmlElement::LAN_CONTROLLER);
-
-	if (lanControllerNodes.count() != lanControllersCount)
-	{
-		*errMsg = QString("File corruption! Count of LanController nodes is not equal to LanControllers Count attribute value");
-		return false;
-	}
-
-	lmi->lanControllers.resize(lanControllersCount);
-
-	for(int i = 0; i < lanControllersCount; i++)
-	{
-		QDomNode lanControllerNode = lanControllerNodes.at(i);
-
-		result &= lmi->lanControllers[i].readFromXml(lanControllerNode, errMsg);
-
-		if (result == false)
-		{
-			break;
-		}
-	}
+	lmi->lanControllers.readFromXml(lanControllersNodes.at(0), errMsg);
 
 	return result;
 }
@@ -436,15 +412,7 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 
 		//
 
-		xml.writeStartElement(XmlElement::LAN_CONTROLLERS);
-		xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(lmInfo.lanControllers.size()));
-
-		for(const LanControllerInfo& lci : lmInfo.lanControllers)
-		{
-			lci.writeToXml(xml);
-		}
-
-		xml.writeEndElement();	//		/XmlElement::LAN_CONTROLLERS
+		lmInfo.lanControllers.writeToXml(xml);
 
 		//
 

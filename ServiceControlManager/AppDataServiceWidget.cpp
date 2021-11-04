@@ -311,19 +311,19 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_CAPTION: return source.moduleCaption();
 				case DSC_IP: return source.lanHostAddressPort().addressStr();
 				case DSC_PORT: return source.lanHostAddressPort().portStr();
-				case DSC_RUP_FRAMES_QUANTITY: return source.lanControllerInfo().appDataFramesQuantity;
-				case DSC_DATA_TYPE: return E::valueToString(source.lanControllerInfo().lanControllerType);
+				case DSC_RUP_FRAMES_QUANTITY: return source.lanControllersInfo().appDataFramesQuantity;
+				case DSC_DATA_TYPE: return E::valueToString(source.lanControllersInfo().lanControllerType);
 				case DSC_EQUIPMENT_ID: return source.moduleEquipmentID();
 				case DSC_MODULE_NUMBER: return source.lmNumber();
 				case DSC_MODULE_TYPE: return source.moduleType();
 				case DSC_SUBSYSTEM_ID: return source.subsystemKey();
 			    case DSC_SUBSYSTEM_CAPTION: return source.subsystemID();
 				case DSC_SUBSYSTEM_CHANNEL: return source.subsystemChannel();
-				case DSC_ADAPTER_ID: return source.lanControllerInfo().equipmentID;
-				case DSC_ENABLE_DATA: return source.lanControllerInfo().appDataEnable;
+				case DSC_ADAPTER_ID: return source.lanControllersInfo().equipmentID;
+				case DSC_ENABLE_DATA: return source.lanControllersInfo().appDataEnable;
 				case DSC_DATA_ID: return "0x" + QString("%1").
-										arg(source.lanControllerInfo().appDataUID,
-											sizeof(source.lanControllerInfo().appDataUID) * 2, 16, QChar('0')).toUpper();
+										arg(source.lanControllersInfo().appDataUID,
+											sizeof(source.lanControllersInfo().appDataUID) * 2, 16, QChar('0')).toUpper();
 				case DSC_UNIQUE_ID: return "0x" + QString("%1").arg(source.moduleUniqueID(), sizeof(source.moduleUniqueID()) * 2, 16, QChar('0')).toUpper();
 				case DSC_STATE: return E::valueToString<E::DataSourceState>(TO_INT(source.state()));
 

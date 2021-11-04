@@ -74,7 +74,7 @@ SOURCES += \
     ../lib/ConnectionsInfo.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
 	../lib/ComparatorSet.cpp \
-	../TuningService/TuningDataStorage.cpp \
+	../lib/TuningDataStorage.cpp \
 	../TuningService/TuningSource.cpp \
 	../Metrology/MetrologySignal.cpp \
 	../Metrology/MetrologyConnection.cpp \
@@ -139,10 +139,10 @@ HEADERS += \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/ConnectionsInfo.h \
 	../lib/Tuning/TuningSignalState.h \
+	../lib/TuningDataStorage.h \
 	../lib/ComparatorSet.h \
 	../CommonLib/PropertyObject.h \
 	../TuningService/TuningSource.h \
-	../TuningService/TuningDataStorage.h \
 	../Metrology/MetrologySignal.h \
 	../Metrology/MetrologyConnection.h \
 	../Metrology/UnitsConvertor.h \

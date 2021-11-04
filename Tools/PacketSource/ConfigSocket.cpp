@@ -392,8 +392,8 @@ bool ConfigSocket::readAppDataSource(const QByteArray& fileData)
 
 		si.moduleType = ds.moduleType();
 		si.subSystem = ds.subsystemID();
-		si.frameCount = ds.lanControllerInfo().appDataFramesQuantity;
-		si.dataID = ds.lanControllerInfo().appDataUID;
+		si.frameCount = ds.lanControllersInfo().appDataFramesQuantity;
+		si.dataID = ds.lanControllersInfo().appDataUID;
 
 		si.lmIP = ds.lanHostAddressPort();
 		si.appDataSrvIP = m_appDataSrvIP;

@@ -4253,20 +4253,21 @@ namespace Builder
 			return true;
 		}
 
-		Tuning::TuningData* tuningData = new Tuning::TuningData(lmEquipmentID(),
-																m_lmDescription->flashMemory().m_tuningFrameCount,
-																m_lmDescription->flashMemory().m_tuningFramePayload,
-																m_lmDescription->flashMemory().m_tuningFrameSize,
-																m_lmDescription->memory().m_tuningDataOffset,
-																m_lmDescription->memory().m_tuningDataSize,
-																m_lmDescription->memory().m_tuningDataFrameCount,
-																m_lmDescription->memory().m_tuningDataFramePayload,
-																m_lmDescription->memory().m_tuningDataFrameSize);
+		Tuning::TuningDataShared tuningData =
+				std::make_shared<Tuning::TuningData>(lmEquipmentID(),
+													m_lmDescription->flashMemory().m_tuningFrameCount,
+													m_lmDescription->flashMemory().m_tuningFramePayload,
+													m_lmDescription->flashMemory().m_tuningFrameSize,
+													m_lmDescription->memory().m_tuningDataOffset,
+													m_lmDescription->memory().m_tuningDataSize,
+													m_lmDescription->memory().m_tuningDataFrameCount,
+													m_lmDescription->memory().m_tuningDataFramePayload,
+													m_lmDescription->memory().m_tuningDataFrameSize);
+
 		result = buildTuningSignalsLists(tuningData);
 
 		if (result == false)
 		{
-			delete tuningData;
 			return false;
 		}
 
@@ -4286,7 +4287,6 @@ namespace Builder
 				// Tunable signals is found in module %1 but tuning is not enabled.
 				//
 				m_log->errALC5166(lmEquipmentID());
-				delete tuningData;
 				return false;
 			}
 		}
@@ -4301,19 +4301,18 @@ namespace Builder
 							   QString(tr("Tuning data of LM '%1' exceed available %2 frames")).
 							   arg(lmEquipmentID()).
 							   arg(tuningFrameCount));
-			delete tuningData;
 			return false;
 		}
 
 		tuningData->generateUniqueID(lmEquipmentID());
 
 		m_tuningData = tuningData;
-		m_tuningDataStorage->insert(lmEquipmentID(), tuningData);
+		m_tuningDataStorage->appendTuningData(lmEquipmentID(), tuningData);
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::buildTuningSignalsLists(Tuning::TuningData* tuningData)
+	bool ModuleLogicCompiler::buildTuningSignalsLists(Tuning::TuningDataShared tuningData)
 	{
 		TEST_PTR_RETURN_FALSE(tuningData);
 

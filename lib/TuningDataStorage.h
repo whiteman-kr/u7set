@@ -153,6 +153,9 @@ namespace Tuning
 		int getSignalType(const AppSignal* signal);
 	};
 
+	typedef std::shared_ptr<TuningData> TuningDataShared;
+	typedef std::shared_ptr<const TuningData> TuningDataSharedConst;
+
 
 	// -------------------------------------------------------------------------------------
 	//
@@ -160,10 +163,14 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------------
 
-	class TuningDataStorage : public QHash<QString, TuningData*>
+	class TuningDataStorage
 	{
 	public:
-		~TuningDataStorage();
+		bool appendTuningData(const QString& lmEquipmentID, TuningDataShared tuningData);
+		TuningDataShared getTuningData(const QString& lmEquipmentID);
+
+	private:
+		std::map<QString, TuningDataShared> m_tuningDataMap;
 	};
 
 }

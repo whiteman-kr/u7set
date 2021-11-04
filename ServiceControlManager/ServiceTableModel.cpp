@@ -352,42 +352,45 @@ void ServiceData::parseServiceInfo()
 	{
 	case E::SoftwareType::ConfigurationService:
 	{
-		CfgServiceSettings* cfgServiceSettins = dynamic_cast<CfgServiceSettings*>(pSettings);
-		Q_ASSERT(cfgServiceSettins);
-		clientRequestIp = cfgServiceSettins->clientRequestIP.address32();
-		clientRequestPort = cfgServiceSettins->clientRequestIP.port();
+		CfgServiceSettings* cfgServiceSettings = dynamic_cast<CfgServiceSettings*>(pSettings);
+		Q_ASSERT(cfgServiceSettings);
+		clientRequestIp = cfgServiceSettings->clientRequestIP.address32();
+		clientRequestPort = cfgServiceSettings->clientRequestIP.port();
 	}
 		break;
 	case E::SoftwareType::AppDataService:
 	{
-		AppDataServiceSettings* appDataServiceSettins = dynamic_cast<AppDataServiceSettings*>(pSettings);
-		Q_ASSERT(appDataServiceSettins);
-		clientRequestIp = appDataServiceSettins->clientRequestIP.address32();
-		clientRequestPort = appDataServiceSettins->clientRequestIP.port();
+		AppDataServiceSettings* appDataServiceSettings = dynamic_cast<AppDataServiceSettings*>(pSettings);
+		Q_ASSERT(appDataServiceSettings);
+		clientRequestIp = appDataServiceSettings->clientRequestIP.address32();
+		clientRequestPort = appDataServiceSettings->clientRequestIP.port();
 	}
 		break;
 	case E::SoftwareType::DiagDataService:
 	{
-		DiagDataServiceSettings* diagDataServiceSettins = dynamic_cast<DiagDataServiceSettings*>(pSettings);
-		Q_ASSERT(diagDataServiceSettins);
-		clientRequestIp = diagDataServiceSettins->clientRequestIP.address32();
-		clientRequestPort = diagDataServiceSettins->clientRequestIP.port();
+		DiagDataServiceSettings* diagDataServiceSettings = dynamic_cast<DiagDataServiceSettings*>(pSettings);
+		Q_ASSERT(diagDataServiceSettings);
+		clientRequestIp = diagDataServiceSettings->clientRequestIP.address32();
+		clientRequestPort = diagDataServiceSettings->clientRequestIP.port();
 	}
 		break;
 	case E::SoftwareType::TuningService:
 	{
-		TuningServiceSettings* tuningDataServiceSettins = dynamic_cast<TuningServiceSettings*>(pSettings);
-		Q_ASSERT(tuningDataServiceSettins);
-		clientRequestIp = tuningDataServiceSettins->clientRequestIP.address32();
-		clientRequestPort = tuningDataServiceSettins->clientRequestIP.port();
+		TuningServiceSettings* tuningDataServiceSettings = dynamic_cast<TuningServiceSettings*>(pSettings);
+		Q_ASSERT(tuningDataServiceSettings);
+
+		// TO DO 2ch tuning!
+		//
+		clientRequestIp = tuningDataServiceSettings->channelSettings[0].clientRequestIP.address32();
+		clientRequestPort = tuningDataServiceSettings->channelSettings[0].clientRequestIP.port();
 	}
 		break;
 	case E::SoftwareType::ArchiveService:
 	{
-		ArchivingServiceSettings* archivingServiceSettins = dynamic_cast<ArchivingServiceSettings*>(pSettings);
-		Q_ASSERT(archivingServiceSettins);
-		clientRequestIp = archivingServiceSettins->clientRequestIP.address32();
-		clientRequestPort = archivingServiceSettins->clientRequestIP.port();
+		ArchivingServiceSettings* archivingServiceSettinпs = dynamic_cast<ArchivingServiceSettings*>(pSettings);
+		Q_ASSERT(archivingServiceSettinпs);
+		clientRequestIp = archivingServiceSettinпs->clientRequestIP.address32();
+		clientRequestPort = archivingServiceSettinпs->clientRequestIP.port();
 	}
 		break;
 	default:

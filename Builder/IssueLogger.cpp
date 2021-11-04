@@ -7173,6 +7173,25 @@ namespace Builder
 							arg(inbusSignalID).arg(signalID).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5197
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Tuning data is not found for module %1
+	///
+	/// Parameters:
+	///		%1 Module EquipmentID
+	///
+	/// Description:
+	///		 Tuning data is not found for specified module. Contact to developers.
+	///
+	void IssueLogger::errALC5197(QString moduleEquipmentID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5197,
+				  QString(tr("Tuning data is not found for module %1")).arg(moduleEquipmentID));
+	}
+
 	/// IssueCode: ALC5800
 	///
 	/// IssueType: Warning

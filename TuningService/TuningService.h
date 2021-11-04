@@ -12,7 +12,6 @@ namespace Tuning
 {
 	class TcpTuningServerThread;
 
-
 	class TuningServiceWorker : public ServiceWorker
 	{
 		Q_OBJECT
@@ -33,7 +32,7 @@ namespace Tuning
 		const TuningClientContext* getClientContext(QString clientID) const;
 		const TuningClientContext* getClientContext(const std::string& clientID) const;
 
-		const TuningSourceThread* getSourceThread(quint32 sourceIP) const;
+		TuningSourceThread* getTuningSourceThread(quint32 sourceIP);
 
 		void getAllClientContexts(QVector<const TuningClientContext*>& clientContexts);
 
@@ -83,7 +82,10 @@ namespace Tuning
 		void stopTcpTuningServerThread();
 
 		void runTuningSourceThreads();
-		bool runTuningSourceThread(const QString& tuningSourceEquipmentID);		// if tuningSourceEquipmentID empty - run all sources workers
+		bool runTuningSourceThread(bool runSingleSource,
+								   const QString& tuningSourceEquipmentID);
+
+		TuningSourceThread* createTuningSourceThread(const TuningSource& source);
 		void stopTuningSourceThreads();
 
 		void runSourcesListenerThread();
@@ -104,19 +106,20 @@ namespace Tuning
 		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
 
-		TuningServiceSettings m_cfgSettings;
+		TuningServiceSettings m_settings;
+
+		std::map<QString, Tuning::TuningSourceThread*> m_sourceThreads;		// module EquipmentID => TuningSourceThread*
+		std::map<quint32, Tuning::TuningSourceThread*> m_ip2sourceThread;	// LAN ipV4 => TuningSourceThread*
 
 		TuningSources m_tuningSources;
 
 		CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-		TcpTuningServerThread* m_tcpTuningServerThread = nullptr;
+		std::vector<TcpTuningServerThread*> m_tcpTuningServerThreads;
 
 		mutable QMutex m_mainMutex;
 
-		TuningSourceThreadMap m_sourceThreadMap;
-
-		TuningSocketListenerThread* m_socketListenerThread = nullptr;
+		std::vector<TuningSocketListenerThread*> m_socketListenerThreads;
 
 		TuningClientContextMap m_clientContextMap;
 

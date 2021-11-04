@@ -45,7 +45,7 @@ public:
 	int diagDataSizeBytes = 0;
 	quint32 diagDataUID = 0;
 
-	std::vector<LanControllerInfo> lanControllers;
+	LanControllersInfo lanControllers;
 
 	int moduleType() const { return (moduleFamilyID & 0xFF00) | (moduleVersion & 0x00FF); }
 };
@@ -81,8 +81,6 @@ private:
 	bool fill(const Hardware::DeviceModule* lmModule, LogicModuleInfo* lmInfo);
 
 	bool save(const LogicModuleInfo& lmInfo, XmlWriteHelper& xml) const;
-
-//	bool save(const LanControllerInfo& lci, XmlWriteHelper& xml) const;
 
 private:
 	const Builder::Context& m_context;

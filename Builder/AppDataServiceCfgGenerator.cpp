@@ -102,7 +102,7 @@ namespace Builder
 																			lanController.m_place,
 																			m_context,
 																			&ds);
-				const LanControllerInfo& dsLan = ds.lanControllerInfo();
+				const LanControllerInfo& dsLan = ds.lanControllersInfo();
 
 				if (dsLan.appDataEnable == false || dsLan.appDataServiceID != m_software->equipmentIdTemplate())
 				{

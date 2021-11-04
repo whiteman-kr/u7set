@@ -91,7 +91,7 @@ namespace Sim
 
 		std::atomic<bool> m_enabled{true};		// Allow communication to TuningService
 
-		TuningRequestsProcessingThread* m_processingThread = nullptr;
+		std::vector<TuningRequestsProcessingThread*> m_processingThreads;
 
 		// Queue to write data to LogicModule
 		// Key is LM EquipmentID
@@ -107,6 +107,8 @@ namespace Sim
 	public:
 		TuningRequestsProcessingThread(TuningServiceCommunicator& tsCommunicator,
 									   const QString& curProfileName,
+									   std::shared_ptr<const TuningServiceSettings> settings,
+									   int channel,
 									   ScopedLog& log);
 
 		virtual ~TuningRequestsProcessingThread() override;
@@ -176,9 +178,11 @@ namespace Sim
 	private:
 		TuningServiceCommunicator& m_tsCommunicator;
 		QString m_curProfileName;
+		int m_channel = -1;
 		Simulator& m_sim;
 		ScopedLog& m_log;
 
+		QString m_controllerEquipmentID;
 		HostAddressPort m_tuningRequestsReceivingIP;
 		HostAddressPort m_tuningRepliesSendingIP;
 

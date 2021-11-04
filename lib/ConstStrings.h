@@ -76,9 +76,10 @@ namespace EquipmentPropNames
 	inline const QString TUNING_DATA_PORT("TuningDataPort");
 	inline const QString SINGLE_LM_CONTROL("SingleLmControl");
 	inline const QString DISABLE_MODULES_TYPE_CHECKING("DisableModulesTypeChecking");
-
+	inline const QString ENABLE("Enable");
 	inline const QString TUNING_SIM_IP("TuningSimIP");
 	inline const QString TUNING_SIM_PORT("TuningSimPort");
+	inline const QString CONTROLLER_SUFFIX_CH_TEMPLATE("CH%1");
 
 	// TuningClient properties
 	//
@@ -191,6 +192,8 @@ namespace XmlElement
 	inline const QString TUNING_CLIENT("TuningClient");
 	inline const QString TUNING_SOURCES("TuningSources");
 	inline const QString TUNING_SOURCE("TuningSource");
+	inline const QString TUNING_CHANNEL_TEMPLATE("Channel%1");
+	inline const QString SINGLE_CHANNEL("SingleChannel");
 
 	inline const QString DATA_SOURCES("DataSources");
 	inline const QString DATA_SOURCE("DataSource");
@@ -212,11 +215,10 @@ namespace XmlElement
 	inline const QString APP_DATA_PARAMS("AppDataParams");
 	inline const QString DIAG_DATA_PARAMS("DiagDataParams");
 
-	inline const QString TUNING_ASSOCIATED_SIGNALS("TuningAssociatedSignals");
-	inline const QString APP_DATA_ASSOCIATED_SIGNALS("AppDataAssociatedSignals");
-	inline const QString DIAG_DATA_ASSOCIATED_SIGNALS("DiagDataAssociatedSignals");
-
 	inline const QString APP_SIGNALS("AppSignals");
+	inline const QString TUNING_SIGNALS("TuningSignals");
+	inline const QString DIAG_SIGNALS("DiagSignals");
+
 	inline const QString SIGNALS("Signals");
 	inline const QString SIGNAL_ELEM("Signal");
 }
@@ -260,6 +262,7 @@ namespace XmlAttribute
 	inline const QString TUNING_SERVICE_PROPERTY_IS_VALID("TuningServicePropertyIsValid");
 	inline const QString TUNING_SERVICE_IP("TuningServiceIP");
 	inline const QString TUNING_SERVICE_PORT("TuningServicePort");
+	inline const QString CONTROLLER_EQUIPMENT_ID("ControllerEquipmentID");
 
 	inline const QString SOFTWARE_METROLOGY_ID("SoftwareMetrologyID");
 

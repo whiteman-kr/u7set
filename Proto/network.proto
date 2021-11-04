@@ -98,6 +98,7 @@ message LanControllerInfo
 	optional string equipmentID = 1;
 	optional int32 controllerNo = 2 [default = -1];
 	optional int32 lanControllerType = 3 [default = 0];		// E::LanControllerType values
+	optional int32 channel = 4 [default = 0];
 
 	// tuning parameters
 
@@ -160,7 +161,9 @@ message DataSourceInfo
 	optional int32 lmNumber = 9 [default = 0];
 	optional string subsystemChannel = 10;
 
-	optional LanControllerInfo lanControllerInfo = 11;
+	repeated LanControllerInfo lanControllerInfo = 11;
+
+	optional string profile = 12;
 }
 
 message GetDataSourcesInfoRequest

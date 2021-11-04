@@ -50,19 +50,21 @@ public:
 	QString moduleCaption() const { return m_moduleCaption; }
 	void setModuleCaption(const QString& lmCaption) { m_moduleCaption = lmCaption; }
 
+	int appDataFramesQuantity() const { return m_appDataFramesQuantity; }
+	quint32 appDataUID() const { return m_appDataUID; }
+
 	quint64 ID() const { return m_id; }
 	void setID(quint64 id) { m_id = id; }
 
-	const LanControllerInfo& lanControllerInfo() const { return m_lanControllerInfo; }
-	LanControllerInfo& lanControllerInfo() { return m_lanControllerInfo; }
+	const LanControllersInfo& lanControllersInfo() const { return m_lanControllersInfo; }
+	LanControllersInfo& lanControllersInfo() { return m_lanControllersInfo; }
 
 	void appendAssociatedSignal(E::LanControllerType lanType, const QString& signalID);
 	void clearAssociatedSignals(E::LanControllerType lanType);
 	const QStringList& associatedSignals(E::LanControllerType lanType) const;
 
-	HostAddressPort lanHostAddressPort() const;
-	quint32 lanAddress32() const { return lanHostAddressPort().address32(); }
-	QString lanEquipmentID() const { return m_lanControllerInfo.equipmentID; }
+	QString prfile() const { return m_profile; }
+	void setProfile(QString profile) { m_profile = profile; }
 
 	int moduleWorkcycle_ms() const { return m_moduleWorkcycle_mcs / 1000; }
 
@@ -94,9 +96,27 @@ private:
 	int m_lmNumber = 0;
 	QString m_subsystemChannel;				// A, B, C...
 
-	LanControllerInfo m_lanControllerInfo;
+	quint32 m_appDataUID = 0;
+	int m_appDataSizeBytes = 0;
+	int m_appDataFramesQuantity = 0;
+	int m_overrideAppDataWordCount = -1;
+
+	quint64 m_tuningDataUID = 0;
+
+	quint32 m_diagDataUID = 0;
+	int m_diagDataSizeBytes = 0;
+	int m_diagDataFramesQuantity = 0;
+	int m_overrideDiagDataWordCount = -1;
+
+	LanControllersInfo m_lanControllersInfo;		// array of LanControllerInfo!
 
 	int m_moduleWorkcycle_mcs = 5000;		// module workcycle in MICROseconds
+
+	QString m_profile;
+
+	QStringList m_appSignals;
+	QStringList m_diagSignals;
+	QStringList m_tuningSignals;
 
 	static QStringList m_emptyList;
 };
@@ -365,7 +385,7 @@ bool DataSourcesXML<TYPE>::writeToXml(const QVector<TYPE>& dataSources, QByteArr
 }
 
 template <typename TYPE>
-bool DataSourcesXML<TYPE>::readFromXml(const QByteArray& fileData, QVector<TYPE> *dataSources)
+bool DataSourcesXML<TYPE>::readFromXml(const QByteArray& fileData, QVector<TYPE>* dataSources)
 {
 	TEST_PTR_RETURN_FALSE(dataSources);
 

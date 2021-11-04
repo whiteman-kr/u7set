@@ -44,7 +44,7 @@ namespace Tuning
 
 	void TuningServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 	{
-		QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::TuningService, m_cfgSettings);
+		QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::TuningService, m_settings);
 
 		serviceInfo.set_settingsxml(xmlString.toStdString());
 	}
@@ -86,9 +86,16 @@ namespace Tuning
 		return m_clientContextMap.getClientContext(QString::fromStdString(clientID));
 	}
 
-	const TuningSourceThread* TuningServiceWorker::getSourceThread(quint32 sourceIP) const
+	TuningSourceThread* TuningServiceWorker::getTuningSourceThread(quint32 sourceIP)
 	{
-		return m_sourceThreadMap.value(sourceIP, nullptr);
+		auto it = m_ip2sourceThread.find(sourceIP);
+
+		if (it == m_ip2sourceThread.end())
+		{
+			return nullptr;
+		}
+
+		return it->second;
 	}
 
 	void TuningServiceWorker::getAllClientContexts(QVector<const TuningClientContext*>& clientContexts)
@@ -103,7 +110,7 @@ namespace Tuning
 
 	bool TuningServiceWorker::singleLmControl() const
 	{
-		return m_cfgSettings.singleLmControl;
+		return m_settings.singleLmControl;
 	}
 
 	// called from TcpTuningServer thread!!!
@@ -118,7 +125,7 @@ namespace Tuning
 			return NetworkError::InternalError;
 		}
 
-		if (m_cfgSettings.singleLmControl == false)
+		if (m_settings.singleLmControl == false)
 		{
 			controlledTuningSource->clear();
 			*controlIsActive = false;
@@ -138,7 +145,7 @@ namespace Tuning
 			return NetworkError::Success;
 		}
 
-		bool result = runTuningSourceThread(tuningSourceEquipmentID);
+		bool result = runTuningSourceThread(true, tuningSourceEquipmentID);
 
 		if (result == false)
 		{
@@ -164,7 +171,7 @@ namespace Tuning
 
 		AUTO_LOCK(m_mainMutex);
 
-		if (m_cfgSettings.singleLmControl == true)
+		if (m_settings.singleLmControl == true)
 		{
 			if (m_activeClientInfo.equipmentID().isEmpty() == true)
 			{
@@ -190,7 +197,7 @@ namespace Tuning
 
 		AUTO_LOCK(m_mainMutex);
 
-		if (m_cfgSettings.singleLmControl == true)
+		if (m_settings.singleLmControl == true)
 		{
 			if (m_activeClientInfo.equipmentID() == softwareInfo.equipmentID() &&
 				m_activeClientIP == clientIP)
@@ -217,7 +224,7 @@ namespace Tuning
 
 		AUTO_LOCK(m_mainMutex);
 
-		if (m_cfgSettings.singleLmControl == true)
+		if (m_settings.singleLmControl == true)
 		{
 			m_activeClientInfo = softwareInfo;
 			m_activeClientIP = clientIP;
@@ -322,7 +329,7 @@ namespace Tuning
 
 	void TuningServiceWorker::buildServiceMaps()
 	{
-		m_clientContextMap.init(m_cfgSettings, m_tuningSources);
+		m_clientContextMap.init(m_settings, m_tuningSources);
 	}
 
 
@@ -334,24 +341,36 @@ namespace Tuning
 
 	void TuningServiceWorker::runTcpTuningServerThread()
 	{
-		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, m_logger);
+		Q_ASSERT(m_tcpTuningServerThreads.size() == 0);
 
-		m_tcpTuningServerThread = new TcpTuningServerThread(m_cfgSettings.clientRequestIP,
-															tcpTuningSever,
-															m_logger);
-		m_tcpTuningServerThread->start();
+		for(int channel = 0; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
+		{
+			const TuningServiceSettings::ChannelSettings& ch = m_settings.channelSettings[channel];
+
+			CONTINUE_IF_FALSE(ch.enable);
+
+			TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, channel, m_tuningSources, m_logger);
+
+			auto thread = new TcpTuningServerThread(ch.clientRequestIP,
+													tcpTuningSever,
+													m_logger);
+
+			m_tcpTuningServerThreads.push_back(thread);
+
+			thread->start();
+		}
 	}
 
 	void TuningServiceWorker::stopTcpTuningServerThread()
 	{
-		if (m_tcpTuningServerThread != nullptr)
+		for(auto thread : m_tcpTuningServerThreads)
 		{
-			m_tcpTuningServerThread->quitAndWait();
+			thread->quitAndWait();
 
-			delete m_tcpTuningServerThread;
-
-			m_tcpTuningServerThread = nullptr;
+			delete thread;
 		}
+
+		m_tcpTuningServerThreads.clear();
 	}
 
 	bool TuningServiceWorker::readConfiguration(const QByteArray& cfgXmlData)
@@ -371,7 +390,7 @@ namespace Tuning
 
 			if (typedSettingsPtr != nullptr)
 			{
-				m_cfgSettings = *typedSettingsPtr;
+				m_settings = *typedSettingsPtr;
 			}
 			else
 			{
@@ -446,26 +465,27 @@ namespace Tuning
 
 	void TuningServiceWorker::runTuningSourceThreads()
 	{
-		if (m_cfgSettings.singleLmControl == false)
+		if (m_settings.singleLmControl == false)
 		{
 			// running all TuningSourceWorkers at once if SingleLmControl is disabled
 			//
-			runTuningSourceThread("");
+			runTuningSourceThread(false, QString(""));
 		}
 	}
 
-	bool TuningServiceWorker::runTuningSourceThread(const QString& tuningSourceEquipmentID)
+	bool TuningServiceWorker::runTuningSourceThread(bool runSingleSource,
+													const QString& tuningSourceEquipmentID)
 	{
 		// if tuningSourceEquipmentID empty - run all sources workers
 		// else - run specific source worker
 		//
-		assert(m_sourceThreadMap.size() == 0);
+		assert(m_sourceThreads.size() == 0);
 
 		bool result = false;
 
 		for(const TuningSource& tuningSource : m_tuningSources)
 		{
-			if (tuningSourceEquipmentID.isEmpty() == false && tuningSource.moduleEquipmentID() != tuningSourceEquipmentID)
+			if (runSingleSource == true && tuningSource.moduleEquipmentID() != tuningSourceEquipmentID)
 			{
 				continue;
 			}
@@ -480,36 +500,66 @@ namespace Tuning
 
 			// create TuningSourceWorkerThreads and fill m_sourceWorkerThreadMap
 			//
-			TuningSourceThread* sourceThread = new TuningSourceThread(m_cfgSettings,
-																	  tuningSource,
-																	  sessionParams().softwareRunMode,
-																	  m_logger,
-																	  m_tuningLog);
+			TuningSourceThread* sourceThread = createTuningSourceThread(tuningSource);
 
-			m_sourceThreadMap.insert(tuningSource.lanAddress32(), sourceThread);
-
-			sourceThread->start();
-			sourceThread->waitWhileHandlerInitialized();
+			TEST_PTR_CONTINUE(sourceThread);
 
 			setSourceThreadInTuningClientContexts(sourceThread);
 
 			result = true;
 		}
 
+		for(auto& p : m_sourceThreads)
+		{
+			TuningSourceThread* sourceThread = p.second;
+
+			sourceThread->start();
+			sourceThread->waitWhileHandlersInitialized();
+		}
+
 		return result;
+	}
+
+	TuningSourceThread* TuningServiceWorker::createTuningSourceThread(const TuningSource& source)
+	{
+		auto it = m_sourceThreads.find(source.moduleEquipmentID());
+
+		TuningSourceThread* sourceThread = nullptr;
+
+		if (it == m_sourceThreads.end())
+		{
+			sourceThread = new TuningSourceThread(m_settings,
+												  source,
+												  sessionParams().softwareRunMode,
+												  m_logger,
+												  m_tuningLog);
+
+			m_sourceThreads.insert({source.moduleEquipmentID(), sourceThread});
+		}
+
+		quint32 ipAddr = source.lanAddress32();
+
+		auto it2 = m_ip2sourceThread.find(ipAddr);
+
+		if (it2 == m_ip2sourceThread.end())
+		{
+			m_ip2sourceThread.insert({ipAddr, sourceThread});
+		}
+		else
+		{
+			Q_ASSERT(false);				// duplicate IP
+		}
+
+		return sourceThread;
 	}
 
 	void TuningServiceWorker::stopTuningSourceThreads()
 	{
-		// stop and delete TuningSourcThreads
-		//
-		for(TuningSourceThread* sourceThread : m_sourceThreadMap)
+		for(auto& p : m_sourceThreads)
 		{
-			if (sourceThread == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TuningSourceThread* sourceThread = p.second;
+
+			TEST_PTR_CONTINUE(sourceThread)
 
 			removeSourceThreadFromTuningClientContexts(sourceThread);
 
@@ -517,12 +567,13 @@ namespace Tuning
 			delete sourceThread;
 		}
 
-		m_sourceThreadMap.clear();
+		m_sourceThreads.clear();
+		m_ip2sourceThread.clear();
 	}
 
 	void TuningServiceWorker::runSourcesListenerThread()
 	{
-		if (m_sourceThreadMap.size() == 0)
+		if (m_sourceThreads.size() == 0)
 		{
 			DEBUG_LOG_MSG(m_logger, QString("Tuning sources workers is not running. Listener thread is not run also."));
 			return;
@@ -530,25 +581,36 @@ namespace Tuning
 
 		// create and run TuningSocketListenerThread
 		//
-		assert(m_socketListenerThread == nullptr);
+		Q_ASSERT(m_socketListenerThreads.size() == 0);
 
-		m_socketListenerThread = new TuningSocketListenerThread(m_cfgSettings.tuningDataIP,
-																m_sourceThreadMap,
-																isSimulationMode(),
-																m_logger);
-		m_socketListenerThread->start();
+		for(int channel = 0; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
+		{
+			const TuningServiceSettings::ChannelSettings& ch = m_settings.channelSettings[channel];
+
+			CONTINUE_IF_FALSE(ch.enable);
+
+			auto thread = new TuningSocketListenerThread(*this,
+														 ch.tuningDataIP,
+														 channel,
+														 isSimulationMode(),
+														 m_logger);
+			m_socketListenerThreads.push_back(thread);
+
+			thread->start();
+		}
 	}
 
 	void TuningServiceWorker::stopSourcesListenerThread()
 	{
 		// stop and delete TuningSocketListenerThread
 		//
-		if (m_socketListenerThread != nullptr)
+		for(auto thread : m_socketListenerThreads)
 		{
-			m_socketListenerThread->quitAndWait();
-			delete m_socketListenerThread;
-			m_socketListenerThread = nullptr;
+			thread->quitAndWait();
+			delete thread;
 		}
+
+		m_socketListenerThreads.clear();
 	}
 
 	void TuningServiceWorker::setSourceThreadInTuningClientContexts(TuningSourceThread* thread)
@@ -610,7 +672,7 @@ namespace Tuning
 			return;
 		}
 
-		m_cfgSettings = *typedSettingsPtr;
+		m_settings = *typedSettingsPtr;
 
 		DEBUG_LOG_MSG(m_logger, QString("Configuration reading success"));
 

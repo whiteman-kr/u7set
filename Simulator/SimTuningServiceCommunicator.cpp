@@ -58,9 +58,9 @@ namespace Sim
 			return false;
 		}
 
-		if (m_processingThread != nullptr)
+		for(TuningRequestsProcessingThread* thread : m_processingThreads)
 		{
-			m_processingThread->updateTuningData(lmEquipmentId, portEquipmentId, ramArea, setSorChassisState, timeStamp);
+			thread->updateTuningData(lmEquipmentId, portEquipmentId, ramArea, setSorChassisState, timeStamp);
 		}
 
 		return true;
@@ -73,9 +73,9 @@ namespace Sim
 													  bool setSorChassisState,
 													  TimeStamp timeStamp)
 	{
-		if (m_processingThread != nullptr)
+		for(TuningRequestsProcessingThread* thread : m_processingThreads)
 		{
-			m_processingThread->writeConfirmation(lmEquipmentId, portEquipmentId, confirmedRecords,
+			thread->writeConfirmation(lmEquipmentId, portEquipmentId, confirmedRecords,
 												  ramArea, setSorChassisState, timeStamp);
 		}
 	}
@@ -86,17 +86,17 @@ namespace Sim
 													  bool setSorChassisState,
 													  TimeStamp timeStamp)
 	{
-		if (m_processingThread != nullptr)
+		for(TuningRequestsProcessingThread* thread : m_processingThreads)
 		{
-			m_processingThread->tuningModeEntered(lmEquipmentId, portEquipmentId, ramArea, setSorChassisState, timeStamp);
+			thread->tuningModeEntered(lmEquipmentId, portEquipmentId, ramArea, setSorChassisState, timeStamp);
 		}
 	}
 
 	void TuningServiceCommunicator::tuningModeLeft(const QString& lmEquipmentId, const QString& portEquipmentId)
 	{
-		if (m_processingThread != nullptr)
+		for(TuningRequestsProcessingThread* thread : m_processingThreads)
 		{
-			m_processingThread->tuningModeLeft(lmEquipmentId, portEquipmentId);
+			thread->tuningModeLeft(lmEquipmentId, portEquipmentId);
 		}
 	}
 
@@ -151,23 +151,48 @@ namespace Sim
 
 	void TuningServiceCommunicator::startProcessingThread(const QString& curProfileName)
 	{
-		Q_ASSERT(m_processingThread == nullptr);
+		Q_ASSERT(m_processingThreads.size() == 0);
 
-		m_processingThread = new TuningRequestsProcessingThread(*this, curProfileName, m_log);
-		m_processingThread->start();
+		std::shared_ptr<const TuningServiceSettings> settings =
+			simulator()->software().getSettingsProfile<TuningServiceSettings>(tuningServiceEquipmentID(),
+																			   curProfileName);
+
+		if (settings == nullptr)
+		{
+			Q_ASSERT(false);
+			m_log.writeError(QString("Settings profile '%1' is not found for TuningService %2").
+										arg(curProfileName).arg(tuningServiceEquipmentID()));
+
+			return;
+		}
+
+		for(int channel = 0; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
+		{
+			if (settings->channelSettings[channel].enable == false)
+			{
+				continue;
+			}
+
+			TuningRequestsProcessingThread* thread = new TuningRequestsProcessingThread(*this, curProfileName, settings, channel, m_log);
+
+			m_processingThreads.push_back(thread);
+
+			thread->start();
+		}
 	}
 
 	void TuningServiceCommunicator::stopProcessingThread()
 	{
-		if (m_processingThread != nullptr)
+		for(TuningRequestsProcessingThread* thread : m_processingThreads)
 		{
-			bool res = m_processingThread->quitAndWait(2000);
+			bool res = thread->quitAndWait(2000);
 
 			Q_ASSERT(res == true);
 
-			delete m_processingThread;
-			m_processingThread = nullptr;
+			delete thread;
 		}
+
+		m_processingThreads.clear();
 	}
 
 	void TuningServiceCommunicator::projectUpdated()
@@ -190,29 +215,28 @@ namespace Sim
 
 	TuningRequestsProcessingThread::TuningRequestsProcessingThread(TuningServiceCommunicator& tsCommunicator,
 																   const QString& curProfileName,
+																   std::shared_ptr<const TuningServiceSettings> settings,
+																   int channel,
 																   ScopedLog& log) :
 		m_tsCommunicator(tsCommunicator),
 		m_curProfileName(curProfileName),
+		m_channel(channel),
 		m_sim(*tsCommunicator.simulator()),
 		m_log(log)
 	{
-		std::shared_ptr<const TuningServiceSettings> settings =
-				m_sim.software().getSettingsProfile<TuningServiceSettings>(m_tsCommunicator.tuningServiceEquipmentID(),
-																			   curProfileName);
-
 		if (settings == nullptr)
 		{
 			Q_ASSERT(false);
-			m_log.writeError(QString("Settings profile '%1' is not found for AppDataService %2").
-										arg(curProfileName).arg(m_tsCommunicator.tuningServiceEquipmentID()));
+			return;
 		}
-		else
-		{
-			m_tuningRequestsReceivingIP = settings->tuningSimIP;
-			m_tuningRepliesSendingIP = settings->tuningDataIP;
 
-			initTuningSourcesHandlers(*settings.get());
-		}
+		Q_ASSERT(m_channel >= 0 && m_channel < TuningServiceSettings::CHANNELS_COUNT);
+
+		m_controllerEquipmentID = settings->channelSettings[m_channel].controllerEquipmentID;
+		m_tuningRequestsReceivingIP = settings->channelSettings[m_channel].tuningSimIP;
+		m_tuningRepliesSendingIP = settings->channelSettings[m_channel].tuningDataIP;
+
+		initTuningSourcesHandlers(*settings.get());
 	}
 
 	TuningRequestsProcessingThread::~TuningRequestsProcessingThread()
@@ -314,10 +338,12 @@ namespace Sim
 
 	void TuningRequestsProcessingThread::initTuningSourcesHandlers(const TuningServiceSettings& settings)
 	{
+		Q_ASSERT(m_channel >= 0 && m_channel < TuningServiceSettings::CHANNELS_COUNT);
+
 		m_tuningSourcesByIP.clear();
 		m_tuningSourcesByEquipmentID.clear();
 
-		for(const TuningServiceSettings::TuningSource& ts : settings.sources)
+		for(const TuningServiceSettings::TuningSource& ts : settings.channelSettings[m_channel].sources)
 		{
 			std::shared_ptr<LogicModule> lm = m_sim.logicModule(ts.lmEquipmentID);
 

@@ -20,73 +20,73 @@ DataSource::~DataSource()
 
 void DataSource::appendAssociatedSignal(E::LanControllerType lanType, const QString& signalID)
 {
-	Q_ASSERT(m_lanControllerInfo.lanControllerType == lanType);
+	bool app = false;
+	bool tun = false;
 
-	switch(lanType)
+	if (LanControllerInfo::isProvideAppData(lanType) == true)
 	{
-	case E::LanControllerType::Tuning:
-		m_lanControllerInfo.tuningAssociatedSignals.append(signalID);
-		break;
+		m_appSignals.append(signalID);
+		app = true;
+	}
 
-	case E::LanControllerType::AppData:
-		m_lanControllerInfo.appDataAssociatedSignals.append(signalID);
-		break;
+	if (LanControllerInfo::isProvideTuning(lanType) == true)
+	{
+		m_tuningSignals.append(signalID);
+		tun = true;
+	}
 
-	case E::LanControllerType::DiagData:
-		m_lanControllerInfo.diagDataAssociatedSignals.append(signalID);
-		break;
+	if (LanControllerInfo::isProvideDiagData(lanType) == true)
+	{
+		if (app == true || tun == true)
+		{
+			Q_ASSERT(false);				// diag signal can't be app or tuning signal simultaneously
+		}
 
-	default:
-		Q_ASSERT(false);
+		m_diagSignals.append(signalID);
 	}
 }
 
 void DataSource::clearAssociatedSignals(E::LanControllerType lanType)
 {
-	Q_ASSERT(m_lanControllerInfo.lanControllerType == lanType);
-
-	switch(lanType)
+	if (LanControllerInfo::isProvideAppData(lanType) == true)
 	{
-	case E::LanControllerType::Tuning:
-		m_lanControllerInfo.tuningAssociatedSignals.clear();
-		break;
+		m_appSignals.clear();
+	}
 
-	case E::LanControllerType::AppData:
-		m_lanControllerInfo.appDataAssociatedSignals.clear();
-		break;
+	if (LanControllerInfo::isProvideTuning(lanType) == true)
+	{
+		m_tuningSignals.clear();
+	}
 
-	case E::LanControllerType::DiagData:
-		m_lanControllerInfo.diagDataAssociatedSignals.clear();
-		break;
-
-	default:
-		Q_ASSERT(false);
+	if (LanControllerInfo::isProvideDiagData(lanType) == true)
+	{
+		m_diagSignals.clear();
 	}
 }
 
 const QStringList& DataSource::associatedSignals(E::LanControllerType lanType) const
 {
-	Q_ASSERT(m_lanControllerInfo.lanControllerType == lanType);
-
-	switch(lanType)
+	if (LanControllerInfo::isProvideAppData(lanType) == true)
 	{
-	case E::LanControllerType::Tuning:
-		return m_lanControllerInfo.tuningAssociatedSignals;
-
-	case E::LanControllerType::AppData:
-		return m_lanControllerInfo.appDataAssociatedSignals;
-
-	case E::LanControllerType::DiagData:
-		return m_lanControllerInfo.diagDataAssociatedSignals;
-		break;
-
-	default:
-		Q_ASSERT(false);
+		return m_appSignals;
 	}
+
+	if (LanControllerInfo::isProvideTuning(lanType) == true)
+	{
+		return m_tuningSignals;
+	}
+
+	if (LanControllerInfo::isProvideDiagData(lanType) == true)
+	{
+		return m_diagSignals;
+	}
+
+	Q_ASSERT(false);
 
 	return m_emptyList;
 }
 
+/*
 HostAddressPort DataSource::lanHostAddressPort() const
 {
 	QString ip;
@@ -94,37 +94,38 @@ HostAddressPort DataSource::lanHostAddressPort() const
 
 	int provideCount = 0;
 
-	if (m_lanControllerInfo.isProvideTuning() == true)
+	if (m_lanControllersInfo.isProvideTuning() == true)
 	{
-		ip = m_lanControllerInfo.tuningIP;
-		port = m_lanControllerInfo.tuningPort;
+		ip = m_lanControllersInfo.tuningIP;
+		port = m_lanControllersInfo.tuningPort;
 		provideCount++;
 	}
 
-	if (m_lanControllerInfo.isProvideAppData() == true)
+	if (m_lanControllersInfo.isProvideAppData() == true)
 	{
-		ip = m_lanControllerInfo.appDataIP;
-		port = m_lanControllerInfo.appDataPort;
+		ip = m_lanControllersInfo.appDataIP;
+		port = m_lanControllersInfo.appDataPort;
 		provideCount++;
 	}
 
-	if (m_lanControllerInfo.isProvideDiagData() == true)
+	if (m_lanControllersInfo.isProvideDiagData() == true)
 	{
-		ip = m_lanControllerInfo.diagDataIP;
-		port = m_lanControllerInfo.diagDataPort;
+		ip = m_lanControllersInfo.diagDataIP;
+		port = m_lanControllersInfo.diagDataPort;
 		provideCount++;
 	}
 
 	Q_ASSERT(provideCount == 1);
 
 	return HostAddressPort(ip, port);
-}
+}*/
 
 void DataSource::writeToXml(XmlWriteHelper& xml) const
 {
 	xml.writeStartElement(XmlElement::DATA_SOURCE);
 
 	xml.writeStringAttribute(XmlAttribute::MODULE_EQUIPMENT_ID, m_moduleEquipmentID);
+	xml.writeStringAttribute(XmlAttribute::PROFILE, m_profile);
 	xml.writeStringAttribute(XmlAttribute::MODULE_PRESET_NAME, m_modulePresetName);
 	xml.writeIntAttribute(XmlAttribute::MODULE_TYPE, m_moduleType, true);
 	xml.writeStringAttribute(XmlAttribute::SUBSYSTEM_ID, m_subsystemID);
@@ -134,7 +135,25 @@ void DataSource::writeToXml(XmlWriteHelper& xml) const
 	xml.writeStringAttribute(XmlAttribute::CAPTION, m_moduleCaption);
 	xml.writeUInt64Attribute(XmlAttribute::MODULE_UNIQUE_ID, m_moduleUniqueID, true);
 
-	m_lanControllerInfo.writeToXml(xml);
+	xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, m_appDataSizeBytes);
+	xml.writeUInt32Attribute(EquipmentPropNames::APP_DATA_UID, m_appDataUID, false);
+	xml.writeUInt32Attribute(EquipmentPropNames::HEX_APP_DATA_UID, m_appDataUID, true);
+	xml.writeIntAttribute(EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, m_appDataFramesQuantity);
+	xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, m_overrideAppDataWordCount);
+
+	xml.writeUInt64Attribute(EquipmentPropNames::TUNING_DATA_UID, m_tuningDataUID, true);
+
+	xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, m_diagDataSizeBytes);
+	xml.writeUInt32Attribute(EquipmentPropNames::DIAG_DATA_UID, m_diagDataUID, false);
+	xml.writeUInt32Attribute(EquipmentPropNames::HEX_DIAG_DATA_UID, m_diagDataUID, true);
+	xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, m_diagDataFramesQuantity);
+	xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, m_overrideDiagDataWordCount);
+
+	m_lanControllersInfo.writeToXml(xml);
+
+	xml.writeStringElement(XmlElement::APP_SIGNALS, m_appSignals.join(Separator::COMMA));
+	xml.writeStringElement(XmlElement::TUNING_SIGNALS, m_tuningSignals.join(Separator::COMMA));
+	xml.writeStringElement(XmlElement::DIAG_SIGNALS, m_diagSignals.join(Separator::COMMA));
 
 	writeAdditionalSectionsToXml(xml);
 
@@ -151,6 +170,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	bool result = true;
 
 	result &= xml.readStringAttribute(XmlAttribute::MODULE_EQUIPMENT_ID, &m_moduleEquipmentID);
+	result &= xml.readStringAttribute(XmlAttribute::PROFILE, &m_profile);
 	result &= xml.readStringAttribute(XmlAttribute::MODULE_PRESET_NAME, &m_modulePresetName);
 	result &= xml.readIntAttribute(XmlAttribute::MODULE_TYPE, &m_moduleType);
 	result &= xml.readStringAttribute(XmlAttribute::SUBSYSTEM_ID,&m_subsystemID);
@@ -160,12 +180,25 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	result &= xml.readStringAttribute(XmlAttribute::CAPTION, &m_moduleCaption);
 	result &= xml.readUInt64Attribute(XmlAttribute::MODULE_UNIQUE_ID, &m_moduleUniqueID);
 
-	if (xml.findElement(XmlElement::LAN_CONTROLLER) == false)
+	if (xml.findElement(XmlElement::LAN_CONTROLLERS) == false)
 	{
 		return false;
 	}
+	result &= m_lanControllersInfo.readFromXml(xml);
 
-	result &= m_lanControllerInfo.readFromXml(xml);
+	QString signalsStr;
+
+	result &= xml.readStringElement(XmlElement::APP_SIGNALS, &signalsStr, true);
+
+	m_appSignals = signalsStr.split(Separator::COMMA, Qt::SkipEmptyParts);
+
+	result &= xml.readStringElement(XmlElement::TUNING_SIGNALS, &signalsStr, true);
+
+	m_tuningSignals = signalsStr.split(Separator::COMMA, Qt::SkipEmptyParts);
+
+	result &= xml.readStringElement(XmlElement::DIAG_SIGNALS, &signalsStr, true);
+
+	m_diagSignals = signalsStr.split(Separator::COMMA, Qt::SkipEmptyParts);
 
 	result &= readAdditionalSectionsFromXml(xml);
 
@@ -193,6 +226,7 @@ bool DataSource::saveToProto(Network::DataSourceInfo* proto, bool includeSignals
 
 	proto->set_id(m_id);
 	proto->set_moduleequipmentid(m_moduleEquipmentID.toStdString());
+	proto->set_profile(m_profile.toStdString());
 	proto->set_modulepresetname(m_modulePresetName.toStdString());
 	proto->set_moduletype(m_moduleType);
 	proto->set_modulecaption(m_moduleCaption.toStdString());
@@ -202,7 +236,13 @@ bool DataSource::saveToProto(Network::DataSourceInfo* proto, bool includeSignals
 	proto->set_lmnumber(m_lmNumber);
 	proto->set_subsystemchannel(m_subsystemChannel.toStdString());
 
-	m_lanControllerInfo.saveToProto(proto->mutable_lancontrollerinfo(), includeSignals);
+	proto->clear_lancontrollerinfo();
+
+	for(const LanControllerInfo& lci : m_lanControllersInfo())
+	{
+		Network::LanControllerInfo* protoLci = proto->add_lancontrollerinfo();
+		lci.saveToProto(protoLci);
+	}
 
 	return true;
 }
@@ -211,6 +251,7 @@ bool DataSource::loadFromProto(const Network::DataSourceInfo& proto)
 {
 	m_id = proto.id();
 	m_moduleEquipmentID = QString::fromStdString(proto.moduleequipmentid());
+	m_profile = QString::fromStdString(proto.profile());
 	m_modulePresetName = QString::fromStdString(proto.modulepresetname());
 	m_moduleType = proto.moduletype();
 	m_moduleCaption = QString::fromStdString(proto.modulecaption());
@@ -220,14 +261,24 @@ bool DataSource::loadFromProto(const Network::DataSourceInfo& proto)
 	m_lmNumber = proto.lmnumber();
 	m_subsystemChannel = QString::fromStdString(proto.subsystemchannel());
 
-	m_lanControllerInfo.loadFromProto(proto.lancontrollerinfo());
+	m_lanControllersInfo.clear();
+
+	int count = proto.lancontrollerinfo_size();
+
+	for(int i = 0; i < count; i++)
+	{
+		LanControllerInfo lci;
+		lci.loadFromProto(proto.lancontrollerinfo(i));
+
+		m_lanControllersInfo.append(lci);
+	}
 
 	return true;
 }
 
 quint64 DataSource::generateID() const
 {
-	if (m_lanControllerInfo.equipmentID.isEmpty())
+	if (m_lanControllersInfo().size() == 0)
 	{
 		Q_ASSERT(false);
 		return 0;
@@ -235,17 +286,21 @@ quint64 DataSource::generateID() const
 
 	Crc64 crc;
 
-	crc.add(m_lanControllerInfo.equipmentID);
-	crc.add(TO_INT(m_lanControllerInfo.lanControllerType));
+	for(const LanControllerInfo& lci :  m_lanControllersInfo())
+	{
+		crc.add(lci.equipmentID);
+		crc.add(TO_INT(lci.lanControllerType));
+		crc.add(lci.channel);
 
-	crc.add(m_lanControllerInfo.tuningIP);
-	crc.add(m_lanControllerInfo.tuningPort);
+		crc.add(lci.tuningIP);
+		crc.add(lci.tuningPort);
 
-	crc.add(m_lanControllerInfo.appDataIP);
-	crc.add(m_lanControllerInfo.appDataPort);
+		crc.add(lci.appDataIP);
+		crc.add(lci.appDataPort);
 
-	crc.add(m_lanControllerInfo.diagDataIP);
-	crc.add(m_lanControllerInfo.diagDataPort);
+		crc.add(lci.diagDataIP);
+		crc.add(lci.diagDataPort);
+	}
 
 	return crc.result();
 }
@@ -281,9 +336,9 @@ bool DataSourceOnline::initQueue()
 {
 	int queueSize = FastThreadSafeQueue<RupFrameTime>::MIN_QUEUE_SIZE;
 
-	if (lanControllerInfo().appDataFramesQuantity > 0)
+	if (appDataFramesQuantity() > 0)
 	{
-		queueSize = lanControllerInfo().appDataFramesQuantity * 200 * 3;	// 3 seconds queue;
+		queueSize = appDataFramesQuantity() * 200 * 3;	// 3 seconds queue;
 	}
 
 	m_rupFrameTimeQueue.resize(queueSize);
@@ -684,16 +739,16 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 			//
 			m_receivedDataID = rupFrameHeader.dataId;
 
-			if (m_receivedDataID != lanControllerInfo().appDataUID)
+			if (m_receivedDataID != appDataUID())
 			{
 				m_errorDataID++;
 
 				if (m_errorDataID > 0 && (m_errorDataID % 500) == 0)
 				{
 					QString msg = QString("Wrong DataID from %1 (0x%2, waiting 0x%3), packet processing skiped").
-							arg(lanControllerInfo().appDataIP).
+							arg(lanControllersInfo().appDataIP).
 							arg(QString::number(rupFrameHeader.dataId, 16)).
-							arg(QString::number(lanControllerInfo().appDataUID, 16));
+							arg(QString::number(lanControllersInfo().appDataUID, 16));
 
 					qDebug() << C_STR(msg);
 				}

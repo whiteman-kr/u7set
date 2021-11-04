@@ -466,6 +466,27 @@ bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_p
 
 	bool SoftwareSettingsGetter::getLmPropertiesFromDevice(	const Hardware::DeviceModule* lm,
 															E::LanControllerType lanControllerType,
+															const QString& adapterEquipmentID,
+															const Builder::Context* context,
+															DataSource* ds)
+	{
+		Hardware::DeviceController* controller = DeviceHelper::getChildControllerBySuffix(lm, adapterEquipmentID, context->m_log);
+
+		if (controller == nullptr)
+		{
+			// Controller %1 is not found in module %2.
+			//
+			context->m_log->errCFG3004(adapterEquipmentID, lm->equipmentIdTemplate());
+
+			return false;
+		}
+
+		return getLmPropertiesFromDevice(lm, lanControllerType, controller->place(), context, ds);
+	}
+
+
+	bool SoftwareSettingsGetter::getLmPropertiesFromDevice(	const Hardware::DeviceModule* lm,
+															E::LanControllerType lanControllerType,
 															int adapterNo,
 															const Builder::Context* context,
 															DataSource* ds)
@@ -989,11 +1010,39 @@ bool DiagDataServiceSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
+std::vector<TuningServiceSettings::TuningClient> TuningServiceSettings::getAllUniqueClients() const
+{
+	std::vector<TuningClient> allUniqueClients;
+
+	std::set<QString> addedClients;
+
+	for(int ch = 0; ch < CHANNELS_COUNT; ch++)
+	{
+		const auto& channelClients = channelSettings[ch].clients;
+
+		for(const TuningClient& client : channelClients)
+		{
+			if (addedClients.contains(client.equipmentID))
+			{
+				continue;
+			}
+
+			allUniqueClients.push_back(client);
+
+			addedClients.insert(client.equipmentID);
+		}
+	}
+
+	return allUniqueClients;
+}
+
+
 bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
 	xml.writeStringElement(EquipmentPropNames::EQUIPMENT_ID, equipmentID);
+	xml.writeBoolElement(XmlElement::SINGLE_CHANNEL, singleChannel);
 
 	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1, cfgServiceID1);
 	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
@@ -1003,59 +1052,71 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
 							 EquipmentPropNames::CFG_SERVICE_PORT2, cfgServiceIP2);
 
-	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
-							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
-	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
-	xml.writeHostAddressPort(EquipmentPropNames::TUNING_DATA_IP,
-							 EquipmentPropNames::TUNING_DATA_PORT, tuningDataIP);
-	xml.writeHostAddress(EquipmentPropNames::TUNING_DATA_NETMASK, tuningDataNetmask);
 	xml.writeBoolElement(EquipmentPropNames::SINGLE_LM_CONTROL, singleLmControl);
 	xml.writeBoolElement(EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, disableModulesTypeChecking);
-	xml.writeHostAddressPort(EquipmentPropNames::TUNING_SIM_IP,
-							 EquipmentPropNames::TUNING_SIM_PORT,
-							 tuningSimIP);
 
-	// write tuning sources info
-	//
-	xml.writeStartElement(XmlElement::TUNING_SOURCES);
-	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(sources.size()));
-
-	for(uint i = 0; i < sources.size(); i++)
+	for(int channel = 0; channel < CHANNELS_COUNT; channel++)
 	{
-		const TuningSource& ts = sources[i];
+		const ChannelSettings& ch = channelSettings[channel];
 
-		xml.writeStartElement(XmlElement::TUNING_SOURCE);
+		xml.writeStartElement(XmlElement::TUNING_CHANNEL_TEMPLATE.arg(channel + 1));		// <Channel ....>
 
-		xml.writeStringAttribute(EquipmentPropNames::LM_EQUIPMENT_ID, ts.lmEquipmentID);
-		xml.writeStringAttribute(EquipmentPropNames::PORT_EQUIPMENT_ID, ts.portEquipmentID);
-		xml.writeStringAttribute(EquipmentPropNames::TUNING_DATA_IP, ts.tuningDataIP.addressPortStr());
+		xml.writeBoolAttribute(EquipmentPropNames::ENABLE, ch.enable);
+		xml.writeStringAttribute(XmlAttribute::CONTROLLER_EQUIPMENT_ID, ch.controllerEquipmentID);
+		xml.writeHostAddressPortAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, ch.clientRequestIP);
+		xml.writeQHostAddressAttribute(EquipmentPropNames::CLIENT_REQUEST_NETMASK, ch.clientRequestNetmask);
+		xml.writeHostAddressPortAttribute(EquipmentPropNames::TUNING_DATA_IP, ch.tuningDataIP);
+		xml.writeQHostAddressAttribute(EquipmentPropNames::TUNING_DATA_NETMASK, ch.tuningDataNetmask);
+		xml.writeHostAddressPortAttribute(EquipmentPropNames::TUNING_SIM_IP, ch.tuningSimIP);
 
-		xml.writeEndElement();		// TUNING_SOURCE
-	}
-
-	xml.writeEndElement();			// TUNING_SOURCES
-
-	// write tuning clients info
-	//
-	xml.writeStartElement(XmlElement::TUNING_CLIENTS);
-	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(clients.size()));
-
-	for(uint i = 0; i < clients.size(); i++)
-	{
-		const TuningClient& tc = clients[i];
-
-		xml.writeStartElement(XmlElement::TUNING_CLIENT);
-		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tc.equipmentID);
+		// write tuning sources info
+		//
+		const std::vector<TuningSource>& srcs = ch.sources;
 
 		xml.writeStartElement(XmlElement::TUNING_SOURCES);
-		xml.writeIntAttribute(XmlAttribute::COUNT, tc.sourcesIDs.count());
-		xml.writeString(tc.sourcesIDs.join(Separator::SEMICOLON));
-		xml.writeEndElement();		// TUNING_SOURCES
+		xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(srcs.size()));
 
-		xml.writeEndElement();		// TUNING_CLIENT
+		for(uint i = 0; i < srcs.size(); i++)
+		{
+			const TuningSource& ts = srcs[i];
+
+			xml.writeStartElement(XmlElement::TUNING_SOURCE);
+
+			xml.writeStringAttribute(EquipmentPropNames::LM_EQUIPMENT_ID, ts.lmEquipmentID);
+			xml.writeStringAttribute(EquipmentPropNames::PORT_EQUIPMENT_ID, ts.portEquipmentID);
+			xml.writeStringAttribute(EquipmentPropNames::TUNING_DATA_IP, ts.tuningDataIP.addressPortStr());
+
+			xml.writeEndElement();		// TUNING_SOURCE
+		}
+
+		xml.writeEndElement();			// TUNING_SOURCES
+
+		// write tuning clients info
+		//
+		const std::vector<TuningClient>& clnts = ch.clients;
+
+		xml.writeStartElement(XmlElement::TUNING_CLIENTS);
+		xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(clnts.size()));
+
+		for(uint i = 0; i < clnts.size(); i++)
+		{
+			const TuningClient& tc = clnts[i];
+
+			xml.writeStartElement(XmlElement::TUNING_CLIENT);
+			xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tc.equipmentID);
+
+			xml.writeStartElement(XmlElement::TUNING_SOURCES);
+			xml.writeIntAttribute(XmlAttribute::COUNT, tc.sourcesIDs.count());
+			xml.writeString(tc.sourcesIDs.join(Separator::SEMICOLON));
+			xml.writeEndElement();		// TUNING_SOURCES
+
+			xml.writeEndElement();		// TUNING_CLIENT
+		}
+
+		xml.writeEndElement();			// TUNING_CLIENTS
+
+		xml.writeEndElement();			// </Channel>
 	}
-
-	xml.writeEndElement();			// TUNING_CLIENTS
 
 	writeEndSettings(xml);			// </Settings>
 
@@ -1072,6 +1133,8 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readStringElement(EquipmentPropNames::EQUIPMENT_ID, &equipmentID, true);
 
+	result &= xml.readBoolElement(XmlElement::SINGLE_CHANNEL, &singleChannel, true);
+
 	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgServiceID1, true);
 	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
 									  EquipmentPropNames::CFG_SERVICE_PORT1, &cfgServiceIP1);
@@ -1080,87 +1143,102 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
 									  EquipmentPropNames::CFG_SERVICE_PORT2, &cfgServiceIP2);
 
-	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
-									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
-	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
-	result &= xml.readHostAddressPort(EquipmentPropNames::TUNING_DATA_IP,
-									  EquipmentPropNames::TUNING_DATA_PORT, &tuningDataIP);
-	result &= xml.readHostAddress(EquipmentPropNames::TUNING_DATA_NETMASK, &tuningDataNetmask);
-
 	result &= xml.readBoolElement(EquipmentPropNames::SINGLE_LM_CONTROL, &singleLmControl, true);
 	result &= xml.readBoolElement(EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, true);
 
-	result &= xml.readHostAddressPort(EquipmentPropNames::TUNING_SIM_IP,
-									  EquipmentPropNames::TUNING_SIM_PORT, &tuningSimIP);
-
-	// read tuning sources info
-	//
-	result &= xml.findElement(XmlElement::TUNING_SOURCES);
-
-	int sourcesCount = 0;
-
-	result &= xml.readIntAttribute(XmlAttribute::COUNT, &sourcesCount);
-
-	RETURN_IF_FALSE(result);
-
-	for(int i = 0; i < sourcesCount; i++)
+	for(int channel = 0; channel < CHANNELS_COUNT; channel++)
 	{
-		TuningSource ts;
+		result &= xml.findElement(XmlElement::TUNING_CHANNEL_TEMPLATE.arg(channel + 1));
 
-		result &= xml.findElement(XmlElement::TUNING_SOURCE);
-		result &= xml.readStringAttribute(EquipmentPropNames::LM_EQUIPMENT_ID, &ts.lmEquipmentID);
-		result &= xml.readStringAttribute(EquipmentPropNames::PORT_EQUIPMENT_ID, &ts.portEquipmentID);
+		CONTINUE_IF_FALSE(result);
 
-		QString addressPortStr;
+		ChannelSettings& ch = channelSettings[channel];
 
-		result &= xml.readStringAttribute(EquipmentPropNames::TUNING_DATA_IP, &addressPortStr);
+		result &= xml.readBoolAttribute(EquipmentPropNames::ENABLE, &ch.enable);
 
-		BREAK_IF_FALSE(result);
+		result &= xml.readStringAttribute(XmlAttribute::CONTROLLER_EQUIPMENT_ID, &ch.controllerEquipmentID);
+		result &= xml.readHostAddressPortAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &ch.clientRequestIP);
+		result &= xml.readQHostAddressAttribute(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &ch.clientRequestNetmask);
+		result &= xml.readHostAddressPortAttribute(EquipmentPropNames::TUNING_DATA_IP, &ch.tuningDataIP);
+		result &= xml.readQHostAddressAttribute(EquipmentPropNames::TUNING_DATA_NETMASK, &ch.tuningDataNetmask);
+		result &= xml.readHostAddressPortAttribute(EquipmentPropNames::TUNING_SIM_IP, &ch.tuningSimIP);
 
-		ts.tuningDataIP.setAddressPortStr(addressPortStr, PORT_LM_TUNING);
-
-		sources.push_back(ts);
-	}
-
-	RETURN_IF_FALSE(result);
-
-	// read tuning clients info
-	//
-	clients.clear();
-
-	result = xml.findElement(XmlElement::TUNING_CLIENTS);
-
-	RETURN_IF_FALSE(result);
-
-	int clientsCount = 0;
-
-	result = xml.readIntAttribute(XmlAttribute::COUNT, &clientsCount);
-
-	RETURN_IF_FALSE(result);
-
-	for(int i = 0; i < clientsCount; i++)
-	{
-		TuningClient tc;
-
-		result &= xml.findElement(XmlElement::TUNING_CLIENT);
-		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tc.equipmentID);
+		// read tuning sources info
+		//
 		result &= xml.findElement(XmlElement::TUNING_SOURCES);
 
-		int srcsCount = 0;
+		int sourcesCount = 0;
 
-		result &= xml.readIntAttribute(XmlAttribute::COUNT, &srcsCount);
+		result &= xml.readIntAttribute(XmlAttribute::COUNT, &sourcesCount);
 
-		QString sourcesIDs;
+		RETURN_IF_FALSE(result);
 
-		result &= xml.readStringElement(XmlElement::TUNING_SOURCES, &sourcesIDs);
+		std::vector<TuningSource>& srcs = ch.sources;
 
-		BREAK_IF_FALSE(result);
+		srcs.clear();
 
-		tc.sourcesIDs = sourcesIDs.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
+		for(int i = 0; i < sourcesCount; i++)
+		{
+			TuningSource ts;
 
-		Q_ASSERT(tc.sourcesIDs.count() == srcsCount);
+			result &= xml.findElement(XmlElement::TUNING_SOURCE);
+			result &= xml.readStringAttribute(EquipmentPropNames::LM_EQUIPMENT_ID, &ts.lmEquipmentID);
+			result &= xml.readStringAttribute(EquipmentPropNames::PORT_EQUIPMENT_ID, &ts.portEquipmentID);
 
-		clients.push_back(tc);
+			QString addressPortStr;
+
+			result &= xml.readStringAttribute(EquipmentPropNames::TUNING_DATA_IP, &addressPortStr);
+
+			BREAK_IF_FALSE(result);
+
+			ts.tuningDataIP.setAddressPortStr(addressPortStr, PORT_LM_TUNING);
+
+			srcs.push_back(ts);
+		}
+
+		RETURN_IF_FALSE(result);
+
+		// read tuning clients info
+		//
+
+		std::vector<TuningClient>& clnts = ch.clients;
+
+		clnts.clear();
+
+		result = xml.findElement(XmlElement::TUNING_CLIENTS);
+
+		RETURN_IF_FALSE(result);
+
+		int clientsCount = 0;
+
+		result = xml.readIntAttribute(XmlAttribute::COUNT, &clientsCount);
+
+		RETURN_IF_FALSE(result);
+
+		for(int i = 0; i < clientsCount; i++)
+		{
+			TuningClient tc;
+
+			result &= xml.findElement(XmlElement::TUNING_CLIENT);
+			result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tc.equipmentID);
+			result &= xml.findElement(XmlElement::TUNING_SOURCES);
+
+			int srcsCount = 0;
+
+			result &= xml.readIntAttribute(XmlAttribute::COUNT, &srcsCount);
+
+			QString sourcesIDs;
+
+			result &= xml.readStringElement(XmlElement::TUNING_SOURCES, &sourcesIDs);
+
+			BREAK_IF_FALSE(result);
+
+			tc.sourcesIDs = sourcesIDs.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
+
+			Q_ASSERT(tc.sourcesIDs.count() == srcsCount);
+
+			clnts.push_back(tc);
+		}
 	}
 
 	return result;
@@ -1192,41 +1270,131 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 		equipmentID = software->equipmentIdTemplate();
 
-		result &= DeviceHelper::getIpPortProperty(software,
-												  EquipmentPropNames::CLIENT_REQUEST_IP,
-												  EquipmentPropNames::CLIENT_REQUEST_PORT,
-												  &clientRequestIP, false, "", 0, log);
-
-		result &= DeviceHelper::getIPv4Property(software,
-												EquipmentPropNames::CLIENT_REQUEST_NETMASK,
-												&clientRequestNetmask, false, "", log);
-
-		result &= DeviceHelper::getIpPortProperty(software,
-												  EquipmentPropNames::TUNING_DATA_IP,
-												  EquipmentPropNames::TUNING_DATA_PORT,
-												  &tuningDataIP, false, "", 0, log);
-
-		result &= DeviceHelper::getIPv4Property(software,
-												EquipmentPropNames::TUNING_DATA_NETMASK,
-												&tuningDataNetmask, false, "", log);
-
-		result &= DeviceHelper::getIpPortProperty(software,
-												  EquipmentPropNames::TUNING_SIM_IP,
-												  EquipmentPropNames::TUNING_SIM_PORT,
-												  &tuningSimIP, true, Socket::IP_LOCALHOST,
-												  PORT_LM_TUNING, log);
-
 		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::SINGLE_LM_CONTROL, &singleLmControl, log);
 		result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, log);
 
 		result &= getCfgServiceConnection(equipment, software, &cfgServiceID1, &cfgServiceIP1,
 										  &cfgServiceID2, &cfgServiceIP2, log);
 
-		// for a now tuningSimIP isn't read from equipment
+		std::vector<const Hardware::DeviceController*> controllers;
 
-		result &= fillTuningSourcesInfo(context, software);
+		bool hasControllers = true;
 
-		result &= fillTuningClientsInfo(context, software, singleLmControl);
+		for(int channel = 0; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
+		{
+			const Hardware::DeviceController* controller =
+					DeviceHelper::getChildControllerBySuffix(software,
+															 EquipmentPropNames::CONTROLLER_SUFFIX_CH_TEMPLATE.arg(channel + 1));
+			if (controller == nullptr)
+			{
+				hasControllers = false;
+			}
+
+			controllers.push_back(controller);
+		}
+
+		if (hasControllers == true)
+		{
+			singleChannel = false;
+
+			for(int i = 0; i < TuningServiceSettings::CHANNELS_COUNT; i++)
+			{
+				const Hardware::DeviceController* controller = controllers[i];
+				ChannelSettings& ch = channelSettings[i];
+
+				ch.controllerEquipmentID = controller->equipmentIdTemplate();
+
+				result &= DeviceHelper::getBoolProperty(controller,
+														EquipmentPropNames::ENABLE,
+														&ch.enable, log);
+
+				result &= DeviceHelper::getIpPortProperty(controller,
+														  EquipmentPropNames::CLIENT_REQUEST_IP,
+														  EquipmentPropNames::CLIENT_REQUEST_PORT,
+														  &ch.clientRequestIP, false, "", 0, log);
+
+				result &= DeviceHelper::getIPv4Property(controller,
+														EquipmentPropNames::CLIENT_REQUEST_NETMASK,
+														&ch.clientRequestNetmask, false, "", log);
+
+				result &= DeviceHelper::getIpPortProperty(controller,
+														  EquipmentPropNames::TUNING_DATA_IP,
+														  EquipmentPropNames::TUNING_DATA_PORT,
+														  &ch.tuningDataIP, false, "", 0, log);
+
+				result &= DeviceHelper::getIPv4Property(controller,
+														EquipmentPropNames::TUNING_DATA_NETMASK,
+														&ch.tuningDataNetmask, false, "", log);
+
+				result &= DeviceHelper::getIpPortProperty(controller,
+														  EquipmentPropNames::TUNING_SIM_IP,
+														  EquipmentPropNames::TUNING_SIM_PORT,
+														  &ch.tuningSimIP, true, Socket::IP_LOCALHOST,
+														  PORT_LM_TUNING, log);
+			}
+		}
+		else
+		{
+			// Reading of single-channel TuningService preset
+			//
+			singleChannel = true;
+
+			ChannelSettings& ch1 = channelSettings[0];
+
+			ch1.enable = true;
+
+			ch1.controllerEquipmentID = equipmentID;
+
+			result &= DeviceHelper::getIpPortProperty(software,
+													  EquipmentPropNames::CLIENT_REQUEST_IP,
+													  EquipmentPropNames::CLIENT_REQUEST_PORT,
+													  &ch1.clientRequestIP, false, "", 0, log);
+
+			result &= DeviceHelper::getIPv4Property(software,
+													EquipmentPropNames::CLIENT_REQUEST_NETMASK,
+													&ch1.clientRequestNetmask, false, "", log);
+
+			result &= DeviceHelper::getIpPortProperty(software,
+													  EquipmentPropNames::TUNING_DATA_IP,
+													  EquipmentPropNames::TUNING_DATA_PORT,
+													  &ch1.tuningDataIP, false, "", 0, log);
+
+			result &= DeviceHelper::getIPv4Property(software,
+													EquipmentPropNames::TUNING_DATA_NETMASK,
+													&ch1.tuningDataNetmask, false, "", log);
+
+			result &= DeviceHelper::getIpPortProperty(software,
+													  EquipmentPropNames::TUNING_SIM_IP,
+													  EquipmentPropNames::TUNING_SIM_PORT,
+													  &ch1.tuningSimIP, true, Socket::IP_LOCALHOST,
+													  PORT_LM_TUNING, log);
+
+			ChannelSettings& ch2 = channelSettings[1];
+
+			ch2.enable = false;
+
+			ch2.controllerEquipmentID.clear();
+			ch2.clientRequestIP = HostAddressPort();
+			ch2.clientRequestNetmask = QHostAddress();
+			ch2.tuningDataIP = HostAddressPort();
+			ch2.tuningDataNetmask = QHostAddress();
+			ch2.tuningSimIP = HostAddressPort();
+		}
+
+		for(int channel = 0; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
+		{
+			channelSettings[channel].sources.clear();
+			channelSettings[channel].clients.clear();
+
+			if (channelSettings[channel].enable == false)
+			{
+				continue;
+			}
+
+			result &= fillTuningSourcesInfo(context, software, channel);
+
+			result &= fillTuningClientsInfo(context, software, singleLmControl, channel);
+		}
 
 		if (context->m_projectProperties.safetyProject() == true && singleLmControl == false)
 		{
@@ -1240,17 +1408,26 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 	}
 
 	bool TuningServiceSettingsGetter::fillTuningSourcesInfo(const Builder::Context* context,
-															const Hardware::Software* software)
+															const Hardware::Software* software,
+															int channel)
 	{
-		sources.clear();
+		Q_ASSERT(channel >=0 && channel < CHANNELS_COUNT);
 
 		Builder::IssueLogger* log = context->m_log;
 
 		bool result = true;
 
-		quint32 receivingNetmask = tuningDataNetmask.toIPv4Address();
+		ChannelSettings& ch = channelSettings[channel];
 
-		quint32 receivingSubnet = tuningDataIP.address32() & receivingNetmask;
+		QString controllerEquipmentID = ch.controllerEquipmentID;
+
+		quint32 receivingNetmask = ch.tuningDataNetmask.toIPv4Address();
+
+		quint32 receivingSubnet = ch.tuningDataIP.address32() & receivingNetmask;
+
+		HostAddressPort tuningDataIP = ch.tuningDataIP;
+
+		std::vector<TuningSource>& srcs = ch.sources;
 
 		for(Hardware::DeviceModule* lm : context->m_lmModules)
 		{
@@ -1293,7 +1470,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 				const LanControllerInfo& tsLan = ts.lanControllerInfo();
 
-				if (tsLan.tuningEnable == false || tsLan.tuningServiceID != software->equipmentIdTemplate())
+				if (tsLan.tuningEnable == false || tsLan.tuningServiceID != controllerEquipmentID)
 				{
 					continue;
 				}
@@ -1316,7 +1493,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 				tunSrc.portEquipmentID = tsLan.equipmentID;
 				tunSrc.tuningDataIP = ts.lanHostAddressPort();
 
-				sources.push_back(tunSrc);
+				srcs.push_back(tunSrc);
 			}
 		}
 
@@ -1325,9 +1502,10 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* context,
 															const Hardware::Software* software,
-															bool singleLmControlEnabled)
+															bool singleLmControlEnabled,
+															int channel)
 	{
-		clients.clear();
+		Q_ASSERT(channel >=0 && channel < CHANNELS_COUNT);
 
 		Builder::IssueLogger* log = context->m_log;
 
@@ -1341,8 +1519,11 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 			return false;
 		}
 
+		QString controllerEquipmentID = channelSettings[channel].controllerEquipmentID;
+
 		Hardware::equipmentWalker(root,
-			[this, &software, &result, &singleLmControlEnabled, &log](Hardware::DeviceObject* currentDevice)
+			[this, &software, controllerEquipmentID, channel, &result, &singleLmControlEnabled, &log]
+								  (Hardware::DeviceObject* currentDevice)
 			{
 				if (currentDevice->isSoftware() == false)
 				{
@@ -1377,7 +1558,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 					return;
 				}
 
-				if (tuningServiceID != software->equipmentIdTemplate())
+				if (tuningServiceID != controllerEquipmentID)
 				{
 					return;
 				}
@@ -1402,7 +1583,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 					{
 						// Monitor %1 cannot be connected to TuningService %2 with enabled SingleLmControl mode.
 						//
-						log->errALC5150(tuningClient->equipmentIdTemplate(), software->equipmentIdTemplate());
+						log->errALC5150(tuningClient->equipmentIdTemplate(), controllerEquipmentID);
 						result = false;
 					}
 				}
@@ -1416,7 +1597,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 				result &= DeviceHelper::getStrListProperty(tuningClient, EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID,
 														   &tc.sourcesIDs, log);
 
-				this->clients.push_back(tc);
+				this->channelSettings[channel].clients.push_back(tc);
 			}
 		);
 

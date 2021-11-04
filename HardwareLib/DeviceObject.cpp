@@ -803,6 +803,29 @@ namespace Hardware
 		return nullptr;
 	}
 
+	const Hardware::Software* DeviceObject::getParentSoftware() const
+	{
+		const Hardware::DeviceObject* deviceObject = this;
+
+		do
+		{
+			deviceObject = deviceObject->parent().get();
+
+			if (deviceObject == nullptr)
+			{
+				break;
+			}
+
+			if (deviceObject->isSoftware())
+			{
+				return deviceObject->toSoftware().get();
+			}
+		}
+		while(deviceObject != nullptr);
+
+		return nullptr;
+	}
+
 	const Hardware::DeviceChassis* DeviceObject::getParentChassis() const
 	{
 		const Hardware::DeviceObject* deviceObject = this;

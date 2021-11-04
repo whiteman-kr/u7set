@@ -148,18 +148,22 @@ void TuningServiceWidget::updateStateInfo()
 		return;
 	}
 
+	// TO DO 2ch tuning!
+	//
+	TuningServiceSettings::ChannelSettings ch = tuningSettings->channelSettings[0];
+
 	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), tuningSettings->equipmentID);
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), tuningSettings->clientRequestIP.addressStr());
-	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), tuningSettings->clientRequestNetmask.toString());
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), ch.clientRequestIP.addressStr());
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), ch.clientRequestNetmask.toString());
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(3, 1), tuningSettings->tuningDataIP.addressStr());
-	m_settingsTabModel->setData(m_settingsTabModel->index(4, 1), tuningSettings->tuningDataNetmask.toString());
+	m_settingsTabModel->setData(m_settingsTabModel->index(3, 1), ch.tuningDataIP.addressStr());
+	m_settingsTabModel->setData(m_settingsTabModel->index(4, 1), ch.tuningDataNetmask.toString());
 
 	m_settingsTabModel->setData(m_settingsTabModel->index(5, 1), tuningSettings->singleLmControl ? tr("True") : tr("False"));
 	m_settingsTabModel->setData(m_settingsTabModel->index(6, 1), tuningSettings->disableModulesTypeChecking ? tr("True") : tr("False"));
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(7, 1), tuningSettings->tuningSimIP.addressStr());
+	m_settingsTabModel->setData(m_settingsTabModel->index(7, 1), ch.tuningSimIP.addressStr());
 }
 
 void TuningServiceWidget::createTcpConnection(quint32 ip, quint16 port)

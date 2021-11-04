@@ -34,6 +34,7 @@ SOURCES += \
     ../lib/DataSource.cpp \
 	../lib/SoftwareSettings.cpp \
 	../lib/LanControllerInfo.cpp \
+	../lib/TuningDataStorage.cpp \
 	TuningService.cpp \
 	TcpTuningServer.cpp \
 	TcpTuningClient.cpp \
@@ -41,9 +42,7 @@ SOURCES += \
 	TuningMemory.cpp \
 	TuningClientContext.cpp \
 	TuningServiceMain.cpp \
-	TuningSourceThread.cpp \
-	TuningDataStorage.cpp
-
+	TuningSourceThread.cpp
 
 HEADERS += \
 	Stable.h \
@@ -51,14 +50,14 @@ HEADERS += \
     ../lib/DataSource.h \
 	../lib/SoftwareSettings.h \
 	../lib/LanControllerInfo.h \
+	../lib/TuningDataStorage.h \
 	TuningService.h \
 	TcpTuningServer.h \
 	TcpTuningClient.h \
 	TuningSource.h \
 	TuningMemory.h \
 	TuningClientContext.h \
-	TuningSourceThread.h \
-	TuningDataStorage.h
+	TuningSourceThread.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

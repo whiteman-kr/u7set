@@ -2,6 +2,7 @@
 #include "../UtilsLib/WUtils.h"
 #include "../OnlineLib/DataProtocols.h"
 #include "../HardwareLib/DeviceObject.h"
+#include "../lib/TuningDataStorage.h"
 #include "DeviceHelper.h"
 #include "LanControllerInfoHelper.h"
 
@@ -100,11 +101,13 @@ bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 				}
 				else
 				{
-					Tuning::TuningData* tuningData = context.m_tuningDataStorage->value(lm.equipmentIdTemplate(), nullptr);
+					Tuning::TuningDataShared tuningData = context.m_tuningDataStorage->getTuningData(lm.equipmentIdTemplate());
 
 					if (tuningData == nullptr)
 					{
-						LOG_INTERNAL_ERROR_MSG(log, QString("Tuning data is not found for module %1").arg(lm.equipmentIdTemplate()));
+						// Tuning data is not found for module %1
+						//
+						log->errALC5197(lm.equipmentIdTemplate());
 						result = false;
 					}
 					else
