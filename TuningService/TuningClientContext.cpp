@@ -19,7 +19,7 @@ namespace Tuning
 			return;
 		}
 
-		source->saveToProto(&m_sourceInfo, false);
+		source->saveToProto(&m_sourceInfo);
 	}
 
 	void TuningSourceContext::getSourceInfo(Network::DataSourceInfo* si) const

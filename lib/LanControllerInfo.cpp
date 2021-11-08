@@ -11,6 +11,21 @@ bool LanControllerInfo::isValid() const
 	return equipmentID.isEmpty() == false;
 }
 
+quint32 LanControllerInfo::appDataIP32() const
+{
+	return QHostAddress(appDataIP).toIPv4Address();
+}
+
+quint32 LanControllerInfo::tuningIP32() const
+{
+	return QHostAddress(tuningIP).toIPv4Address();
+}
+
+quint32 LanControllerInfo::diagDataIP32() const
+{
+	return QHostAddress(diagDataIP).toIPv4Address();
+}
+
 bool LanControllerInfo::isProvideTuning(E::LanControllerType lanControllerType)
 {
 	return (static_cast<int>(lanControllerType) & static_cast<int>(E::LanControllerType::Tuning)) != 0;
@@ -48,7 +63,6 @@ void LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, equipmentID);
 	xml.writeIntAttribute(EquipmentPropNames::CONTROLLER_NO, controllerNo);
 	xml.writeEnumKeyAttribute(EquipmentPropNames::LAN_CONTROLLER_TYPE, lanControllerType);
-	xml.writeIntAttribute(XmlAttribute::CHANNEL, channel + 1);
 
 	//
 
@@ -63,6 +77,12 @@ void LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_IP, appDataServiceIP);
 		xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SERVICE_PORT, appDataServicePort);
 		xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_NETMASK, appDataServiceNetmask);
+
+		xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, appDataSizeBytes);
+		xml.writeUInt32Attribute(EquipmentPropNames::APP_DATA_UID, appDataUID, false);
+		xml.writeUInt32Attribute(EquipmentPropNames::HEX_APP_DATA_UID, appDataUID, true);
+		xml.writeIntAttribute(EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, appDataFramesQuantity);
+		xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, overrideAppDataWordCount);
 	}
 
 	xml.writeEndElement();	//	/XmlElement::APP_DATA_PARAMS
@@ -80,6 +100,9 @@ void LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::TUNING_SERVICE_IP, tuningServiceIP);
 		xml.writeIntAttribute(EquipmentPropNames::TUNING_SERVICE_PORT, tuningServicePort);
 		xml.writeStringAttribute(EquipmentPropNames::TUNING_SERVICE_NETMASK, tuningServiceNetmask);
+
+		xml.writeUInt64Attribute(EquipmentPropNames::TUNING_DATA_UID, tuningDataUID);
+		xml.writeUInt64Attribute(EquipmentPropNames::HEX_TUNING_DATA_UID, tuningDataUID);
 	}
 
 	xml.writeEndElement();	//	/XmlElement::TUNING_PARAMS
@@ -97,6 +120,12 @@ void LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_IP, diagDataServiceIP);
 		xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_PORT, diagDataServicePort);
 		xml.writeStringAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_NETMASK, diagDataServiceNetmask);
+
+		xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, diagDataSizeBytes);
+		xml.writeUInt32Attribute(EquipmentPropNames::DIAG_DATA_UID, diagDataUID, false);
+		xml.writeUInt32Attribute(EquipmentPropNames::HEX_DIAG_DATA_UID, diagDataUID, true);
+		xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, diagDataFramesQuantity);
+		xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, overrideDiagDataWordCount);
 	}
 
 	xml.writeEndElement();	//	/XmlElement::DIAG_DATA_PARAMS
@@ -119,9 +148,6 @@ bool LanControllerInfo::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute(EquipmentPropNames::CONTROLLER_NO, &controllerNo);
 	result &= xml.readEnumKeyAttribute(EquipmentPropNames::LAN_CONTROLLER_TYPE, &lanControllerType);
 
-	result &= xml.readIntAttribute(XmlAttribute::CHANNEL, &channel);
-	channel--;
-
 	//
 
 	if (xml.findElement(XmlElement::APP_DATA_PARAMS) == false)
@@ -138,6 +164,11 @@ bool LanControllerInfo::readFromXml(XmlReadHelper& xml)
 		result &= xml.readStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_IP, &appDataServiceIP);
 		result &= xml.readIntAttribute(EquipmentPropNames::APP_DATA_SERVICE_PORT, &appDataServicePort);
 		result &= xml.readStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_NETMASK, &appDataServiceNetmask);
+
+		result &= xml.readIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, &appDataSizeBytes);
+		result &= xml.readUInt32Attribute(EquipmentPropNames::APP_DATA_UID, &appDataUID);
+		result &= xml.readIntAttribute(EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, &appDataFramesQuantity);
+		result &= xml.readIntAttribute(EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, &overrideAppDataWordCount);
 
 		RETURN_IF_FALSE(result);
 	}
@@ -159,6 +190,8 @@ bool LanControllerInfo::readFromXml(XmlReadHelper& xml)
 		result &= xml.readIntAttribute(EquipmentPropNames::TUNING_SERVICE_PORT, &tuningServicePort);
 		result &= xml.readStringAttribute(EquipmentPropNames::TUNING_SERVICE_NETMASK, &tuningServiceNetmask);
 
+		result &= xml.readUInt64Attribute(EquipmentPropNames::TUNING_DATA_UID, &tuningDataUID);
+
 		RETURN_IF_FALSE(result);
 	}
 
@@ -178,6 +211,11 @@ bool LanControllerInfo::readFromXml(XmlReadHelper& xml)
 		result &= xml.readStringAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_IP, &diagDataServiceIP);
 		result &= xml.readIntAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_PORT, &diagDataServicePort);
 		result &= xml.readStringAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_NETMASK, &diagDataServiceNetmask);
+
+		result &= xml.readIntAttribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, &diagDataSizeBytes);
+		result &= xml.readUInt32Attribute(EquipmentPropNames::DIAG_DATA_UID, &diagDataUID);
+		result &= xml.readIntAttribute(EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, &diagDataFramesQuantity);
+		result &= xml.readIntAttribute(EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, &overrideDiagDataWordCount);
 	}
 
 	return result;
@@ -215,9 +253,6 @@ bool LanControllerInfo::readFromXml(const QDomNode& lanControllerNode, QString* 
 		return false;
 	}
 
-	result &= DomXmlHelper::getIntAttribute(lcElem, XmlAttribute::CHANNEL, &channel, errMsg);
-	channel--;
-
 	RETURN_IF_FALSE(result);
 
 	//
@@ -237,6 +272,11 @@ bool LanControllerInfo::readFromXml(const QDomNode& lanControllerNode, QString* 
 		result &= DomXmlHelper::getStringAttribute(appDataElem, EquipmentPropNames::APP_DATA_SERVICE_IP, &appDataServiceIP, errMsg);
 		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::APP_DATA_SERVICE_PORT, &appDataServicePort, errMsg);
 		result &= DomXmlHelper::getStringAttribute(appDataElem, EquipmentPropNames::APP_DATA_SERVICE_NETMASK, &appDataServiceNetmask, errMsg);
+
+		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::APP_DATA_SIZE_BYTES, &appDataSizeBytes, errMsg);
+		result &= DomXmlHelper::getUInt32Attribute(appDataElem, EquipmentPropNames::APP_DATA_UID, &appDataUID, errMsg);
+		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, &appDataFramesQuantity, errMsg);
+		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, &overrideAppDataWordCount, errMsg);
 
 		RETURN_IF_FALSE(result);
 	}
@@ -259,6 +299,8 @@ bool LanControllerInfo::readFromXml(const QDomNode& lanControllerNode, QString* 
 		result &= DomXmlHelper::getIntAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_PORT, &tuningServicePort, errMsg);
 		result &= DomXmlHelper::getStringAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_NETMASK, &tuningServiceNetmask, errMsg);
 
+		result &= DomXmlHelper::getUInt64Attribute(tuningElem, EquipmentPropNames::TUNING_DATA_UID, &tuningDataUID, errMsg);
+
 		RETURN_IF_FALSE(result);
 	}
 
@@ -279,6 +321,11 @@ bool LanControllerInfo::readFromXml(const QDomNode& lanControllerNode, QString* 
 		result &= DomXmlHelper::getStringAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SERVICE_IP, &diagDataServiceIP, errMsg);
 		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SERVICE_PORT, &diagDataServicePort, errMsg);
 		result &= DomXmlHelper::getStringAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SERVICE_NETMASK, &diagDataServiceNetmask, errMsg);
+
+		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SIZE_BYTES, &diagDataSizeBytes, errMsg);
+		result &= DomXmlHelper::getUInt32Attribute(diagDataElem, EquipmentPropNames::DIAG_DATA_UID, &diagDataUID, errMsg);
+		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, &diagDataFramesQuantity, errMsg);
+		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, &overrideDiagDataWordCount, errMsg);
 
 		RETURN_IF_FALSE(result);
 	}
@@ -495,14 +542,71 @@ const std::vector<LanControllerInfo>& LanControllersInfo::operator ()() const
 
 const LanControllerInfo& LanControllersInfo::operator[](int index) const
 {
-	if (index >=0 && index < m_lans.size())
+	return findByIndex(index);
+}
+
+const LanControllerInfo& LanControllersInfo::getFirstCompatibleController(E::LanControllerType type) const
+{
+	for(const LanControllerInfo& lci : m_lans)
 	{
-		return m_lans[index];
+		if (TO_INT(lci.lanControllerType) && TO_INT(type) != 0)
+		{
+			return lci;
+		}
 	}
 
-	Q_ASSERT(false);
-
 	return m_notValidInfo;
+}
+
+std::vector<quint32> LanControllersInfo::tuningIP32addresses() const
+{
+	std::vector<quint32> addresses;
+
+	for(const LanControllerInfo& lci : m_lans)
+	{
+		if (lci.isProvideTuning() == true)
+		{
+			addresses.push_back(lci.tuningIP32());
+		}
+	}
+
+	return addresses;
+}
+
+std::vector<quint32> LanControllersInfo::appDataIP32addresses() const
+{
+	std::vector<quint32> addresses;
+
+	for(const LanControllerInfo& lci : m_lans)
+	{
+		if (lci.isProvideAppData() == true)
+		{
+			addresses.push_back(lci.appDataIP32());
+		}
+	}
+
+	return addresses;
+}
+
+std::vector<HostAddressPort> LanControllersInfo::appDataHostAddressPorts() const
+{
+	std::vector<HostAddressPort> addresses;
+
+	for(const LanControllerInfo& lci : m_lans)
+	{
+		if (lci.isProvideAppData() == true)
+		{
+			addresses.push_back(HostAddressPort(lci.appDataIP, lci.appDataPort));
+		}
+	}
+
+	return addresses;
+
+}
+
+LanControllerInfo& LanControllersInfo::operator[](int index)
+{
+	return const_cast<LanControllerInfo&>(findByIndex(index));
 }
 
 const LanControllerInfo& LanControllersInfo::find(int controllerNo) const
@@ -514,7 +618,7 @@ const LanControllerInfo& LanControllersInfo::find(int controllerNo) const
 		return *it;
 	}
 
-	Q_ASSERT(false);
+//	Q_ASSERT(false);
 
 	return m_notValidInfo;
 }
@@ -528,10 +632,23 @@ const LanControllerInfo& LanControllersInfo::find(const QString& equipmentID) co
 		return *it;
 	}
 
+//	Q_ASSERT(false);
+
+	return m_notValidInfo;
+}
+
+const LanControllerInfo& LanControllersInfo::findByIndex(int index) const
+{
+	if (index >=0 && index < m_lans.size())
+	{
+		return m_lans[index];
+	}
+
 	Q_ASSERT(false);
 
 	return m_notValidInfo;
 }
+
 
 bool LanControllersInfo::contains(int controllerNo) const
 {
@@ -542,6 +659,7 @@ bool LanControllersInfo::contains(const QString& equipmentID) const
 {
 	return std::find(m_lans.begin(), m_lans.end(), equipmentID) != m_lans.end();
 }
+
 
 
 

@@ -1534,6 +1534,30 @@ namespace Builder
 								arg(equipmentID).arg(propertyName).arg(profileID)));
 	}
 
+	/// IssueCode: CFG3046
+	///
+	/// IssueType: Error
+	///
+	/// Title: Value of properties pair %1:%2 of objects %3 and %4 are equal!
+	///
+	/// Parameters:
+	///         %1 Property1
+	///         %2 Property2
+	///			%3 Object1 ID
+	/// 		%4 Object3 ID
+	///
+	/// Description:
+	///			Value of specified properties pair should't be equal.
+	///
+	void IssueLogger::errCFG3046(QString prop1, QString prop2,
+								 QString obj1, QString obj2)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3046,
+				  QString(tr("Value of properties pair %1:%2 of objects %3 and %4 are equal.").
+								arg(prop1).arg(prop2).arg(obj1).arg(obj2)));
+	}
+
 	//
 	// ALP			Application Logic Parsing				4000-4999
 	//

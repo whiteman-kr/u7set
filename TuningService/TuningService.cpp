@@ -338,12 +338,11 @@ namespace Tuning
 		m_clientContextMap.clear();
 	}
 
-
 	void TuningServiceWorker::runTcpTuningServerThread()
 	{
 		Q_ASSERT(m_tcpTuningServerThreads.size() == 0);
 
-		for(int channel = 0; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
+		for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
 		{
 			const TuningServiceSettings::ChannelSettings& ch = m_settings.channelSettings[channel];
 
@@ -449,16 +448,25 @@ namespace Tuning
 		return result;
 	}
 
-	bool TuningServiceWorker::readTuningDataSources(const QByteArray& fileData)
+	bool TuningServiceWorker::readTuningDataSources(const QByteArray& fileData, const QString& profile)
 	{
-		bool result = true;
+		m_tuningSources.clear();
 
-		result = DataSourcesXML<TuningSource>::readFromXml(fileData, &m_tuningSources);
+		TuningSources sources;
 
-		if (result == true)
+		bool result = DataSourcesXML<TuningSource>::readFromXml(fileData, &sources);
+
+		RETURN_IF_FALSE(result);
+
+		for(const TuningSource& ts : sources)
 		{
-			m_tuningSources.buildMaps();
+			if (ts.profile() == profile)
+			{
+				m_tuningSources.push_back(ts);
+			}
 		}
+
+		m_tuningSources.buildMaps();
 
 		return result;
 	}
@@ -537,17 +545,20 @@ namespace Tuning
 			m_sourceThreads.insert({source.moduleEquipmentID(), sourceThread});
 		}
 
-		quint32 ipAddr = source.lanAddress32();
+		std::vector<quint32> IPs = source.lanControllersInfo().tuningIP32addresses();
 
-		auto it2 = m_ip2sourceThread.find(ipAddr);
+		for(auto ip : IPs)
+		{
+			auto it2 = m_ip2sourceThread.find(ip);
 
-		if (it2 == m_ip2sourceThread.end())
-		{
-			m_ip2sourceThread.insert({ipAddr, sourceThread});
-		}
-		else
-		{
-			Q_ASSERT(false);				// duplicate IP
+			if (it2 == m_ip2sourceThread.end())
+			{
+				m_ip2sourceThread.insert({ip, sourceThread});
+			}
+			else
+			{
+				Q_ASSERT(false);				// duplicate IP
+			}
 		}
 
 		return sourceThread;
@@ -583,7 +594,7 @@ namespace Tuning
 		//
 		Q_ASSERT(m_socketListenerThreads.size() == 0);
 
-		for(int channel = 0; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
+		for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
 		{
 			const TuningServiceSettings::ChannelSettings& ch = m_settings.channelSettings[channel];
 
@@ -696,7 +707,7 @@ namespace Tuning
 
 			if (bfi.ID == CfgFileId::TUNING_SOURCES)
 			{
-				result &= readTuningDataSources(fileData);
+				result &= readTuningDataSources(fileData, sessionParams.currentSettingsProfile);
 			}
 
 			if (result == true)

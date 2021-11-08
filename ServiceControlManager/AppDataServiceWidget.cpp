@@ -309,21 +309,21 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				// DataSourceInfo
 				//
 				case DSC_CAPTION: return source.moduleCaption();
-				case DSC_IP: return source.lanHostAddressPort().addressStr();
-				case DSC_PORT: return source.lanHostAddressPort().portStr();
-				case DSC_RUP_FRAMES_QUANTITY: return source.lanControllersInfo().appDataFramesQuantity;
-				case DSC_DATA_TYPE: return E::valueToString(source.lanControllersInfo().lanControllerType);
+				case DSC_IP: return source.lanControllersInfo()[0].appDataIP;
+				case DSC_PORT: return source.lanControllersInfo()[0].appDataPort;
+				case DSC_RUP_FRAMES_QUANTITY: return source.lanControllersInfo()[0].appDataFramesQuantity;
+				case DSC_DATA_TYPE: return E::valueToString(source.lanControllersInfo()[0].lanControllerType);
 				case DSC_EQUIPMENT_ID: return source.moduleEquipmentID();
 				case DSC_MODULE_NUMBER: return source.lmNumber();
 				case DSC_MODULE_TYPE: return source.moduleType();
 				case DSC_SUBSYSTEM_ID: return source.subsystemKey();
 			    case DSC_SUBSYSTEM_CAPTION: return source.subsystemID();
 				case DSC_SUBSYSTEM_CHANNEL: return source.subsystemChannel();
-				case DSC_ADAPTER_ID: return source.lanControllersInfo().equipmentID;
-				case DSC_ENABLE_DATA: return source.lanControllersInfo().appDataEnable;
+				case DSC_ADAPTER_ID: return source.lanControllersInfo()[0].equipmentID;
+				case DSC_ENABLE_DATA: return source.lanControllersInfo()[0].appDataEnable;
 				case DSC_DATA_ID: return "0x" + QString("%1").
-										arg(source.lanControllersInfo().appDataUID,
-											sizeof(source.lanControllersInfo().appDataUID) * 2, 16, QChar('0')).toUpper();
+										arg(source.lanControllersInfo()[0].appDataUID,
+											sizeof(source.lanControllersInfo()[0].appDataUID) * 2, 16, QChar('0')).toUpper();
 				case DSC_UNIQUE_ID: return "0x" + QString("%1").arg(source.moduleUniqueID(), sizeof(source.moduleUniqueID()) * 2, 16, QChar('0')).toUpper();
 				case DSC_STATE: return E::valueToString<E::DataSourceState>(TO_INT(source.state()));
 
@@ -427,7 +427,7 @@ void DataSourcesStateModel::reloadList()
 	{
 		m_dataSource = m_clientSocket->dataSources();
 		std::sort(m_dataSource.begin(), m_dataSource.end(), [](const DataSource* ds1, const DataSource* ds2) {
-			return ds1->lanAddress32() < ds2->lanAddress32();
+			return ds1->lanControllersInfo()[0].appDataIP32() < ds2->lanControllersInfo()[0].appDataIP32();
 		});
 	}
 	endResetModel();

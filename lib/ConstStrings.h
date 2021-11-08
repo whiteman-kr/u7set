@@ -15,6 +15,7 @@ namespace EquipmentPropNames
 	inline const QString TUNING_SERVICE_PORT("TuningServicePort");
 	inline const QString TUNING_SERVICE_NETMASK("TuningServiceNetmask");
 	inline const QString TUNING_DATA_UID("TuningDataUID");
+	inline const QString HEX_TUNING_DATA_UID("HexTuningDataUID");
 	inline const QString TUNING_SOURCE_EQUIPMENT_ID("TuningSourceEquipmentID");
 
 	inline const QString APP_DATA_ENABLE("AppDataEnable");

@@ -193,20 +193,20 @@ void DialogTuningSourceInfo::updateData()
 	setDataItemText("ID", tr("%1 (%2h)").arg(QString::number(ts.info.id())).arg(QString::number(ts.info.id(), 16)));
 	setDataItemText("EquipmentID", ts.info.moduleequipmentid().c_str());
 	setDataItemText("Caption", ts.info.modulecaption().c_str());
-	setDataItemNumber("DataType", ts.info.lancontrollerinfo().lancontrollertype());
-	setDataItemText("IP", ts.info.lancontrollerinfo().tuningip().c_str());
-	setDataItemNumber("Port", ts.info.lancontrollerinfo().tuningport());
+	setDataItemNumber("DataType", ts.info.lancontrollerinfo()[0].lancontrollertype());
+	setDataItemText("IP", ts.info.lancontrollerinfo()[0].tuningip().c_str());
+	setDataItemNumber("Port", ts.info.lancontrollerinfo()[0].tuningport());
 	setDataItemText("Channel", ts.info.subsystemchannel().c_str());
 	setDataItemNumber("SubsystemID", ts.info.subsystemkey());
 	setDataItemText("Subsystem", ts.info.subsystemid().c_str());
 
 	setDataItemNumber("LmNumber", ts.info.lmnumber());
 	setDataItemText("LmModuleType", tr("%1 (%2h)").arg(QString::number(ts.info.moduletype())).arg(QString::number(ts.info.moduletype(), 16)));
-	setDataItemText("LmAdapterID", ts.info.lancontrollerinfo().equipmentid().c_str());
-	setDataItemNumber("LmDataEnable", ts.info.lancontrollerinfo().tuningenable());
+	setDataItemText("LmAdapterID", ts.info.lancontrollerinfo()[0].equipmentid().c_str());
+	setDataItemNumber("LmDataEnable", ts.info.lancontrollerinfo()[0].tuningenable());
 	setDataItemText("LmDataID", tr("%1 (%2h)").
-						arg(QString::number(ts.info.lancontrollerinfo().tuningdatauid())).
-						arg(QString::number(ts.info.lancontrollerinfo().tuningdatauid(), 16)));
+						arg(QString::number(ts.info.lancontrollerinfo()[0].tuningdatauid())).
+						arg(QString::number(ts.info.lancontrollerinfo()[0].tuningdatauid(), 16)));
 
 	// state
 
@@ -506,8 +506,8 @@ void TuningSourcesWidget::update(bool refreshOnly)
 			TuningSource& ts = tsi[i];
 
 			connectionStrings << ts.info.moduleequipmentid().c_str();
-			connectionStrings << ts.info.lancontrollerinfo().tuningip().c_str();
-			connectionStrings << QString::number(ts.info.lancontrollerinfo().tuningport());
+			connectionStrings << ts.info.lancontrollerinfo()[0].tuningip().c_str();
+			connectionStrings << QString::number(ts.info.lancontrollerinfo()[0].tuningport());
 
 			connectionStrings << ts.info.subsystemchannel().c_str();
 

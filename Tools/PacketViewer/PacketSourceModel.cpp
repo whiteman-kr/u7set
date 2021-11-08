@@ -689,9 +689,16 @@ void Source::reloadProject()
 	{
 		iterator.next();
 
-		if (iterator.value()->lanAddress32() == ip())
+		std::shared_ptr<DataSourceOnline> dso = iterator.value();
+
+		std::vector<quint32> IPs = dso->lanControllersInfo().appDataIP32addresses();
+
+		for(auto ipAddr : IPs)
 		{
-			m_signalTableModel->addDataSource(iterator.value().get());
+			if (ipAddr == ip())
+			{
+				m_signalTableModel->addDataSource(dso.get());
+			}
 		}
 	}
 	m_signalTableModel->endReloadProject();

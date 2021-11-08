@@ -23,7 +23,7 @@ namespace Sim
 
 	bool Lans::init(const ::LogicModuleInfo& logicModuleInfo)
 	{
-		for (const ::LanControllerInfo& lc : logicModuleInfo.lanControllers)
+		for (const ::LanControllerInfo& lc : logicModuleInfo.lanControllers())
 		{
 			if (lc.isProvideTuning() == true)
 			{

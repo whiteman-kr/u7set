@@ -156,8 +156,8 @@ void TuningSocket::replyTuningSourcesInfo(const char* replyData, quint32 replyDa
 
 		qDebug() << "TuningSocket::replyTuningSourcesInfo - : " << i <<
 					". SubsystemID:" << dsi.subsystemid().c_str() <<
-					", EquipmentID:" << dsi.moduleequipmentid().c_str() <<
-					", IP:" << dsi.lancontrollerinfo().tuningip().c_str();
+					", EquipmentID:" << dsi.moduleequipmentid().c_str(); /* <<
+					", IP:" << dsi.lancontrollerinfo().tuningip().c_str();*/
 	}
 
 	theSignalBase.tuning().sourceBase().sortByID();

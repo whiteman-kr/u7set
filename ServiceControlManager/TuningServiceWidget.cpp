@@ -244,8 +244,8 @@ void TuningServiceWidget::reloadTuningSourcesList()
 	{
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 0), ts.equipmentId());
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 1), QString::fromStdString(ts.info.modulecaption()));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 2), QString::fromStdString(ts.info.lancontrollerinfo().tuningip()));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 3), ts.info.lancontrollerinfo().tuningport());
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 2), QString::fromStdString(ts.info.lancontrollerinfo(0).tuningip()));
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 3), ts.info.lancontrollerinfo(0).tuningport());
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 4), QString::fromStdString(ts.info.subsystemchannel()));
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 5), ts.info.subsystemkey());
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 6), QString::fromStdString(ts.info.subsystemid()));

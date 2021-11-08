@@ -166,7 +166,7 @@ namespace Sim
 			return;
 		}
 
-		for(int channel = 0; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
+		for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
 		{
 			if (settings->channelSettings[channel].enable == false)
 			{
@@ -232,7 +232,7 @@ namespace Sim
 
 		Q_ASSERT(m_channel >= 0 && m_channel < TuningServiceSettings::CHANNELS_COUNT);
 
-		m_controllerEquipmentID = settings->channelSettings[m_channel].controllerEquipmentID;
+		m_controllerEquipmentID = settings->channelSettings[m_channel].serviceControllerEquipmentID;
 		m_tuningRequestsReceivingIP = settings->channelSettings[m_channel].tuningSimIP;
 		m_tuningRepliesSendingIP = settings->channelSettings[m_channel].tuningDataIP;
 

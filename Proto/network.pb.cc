@@ -194,17 +194,14 @@ constexpr LanControllerInfo::LanControllerInfo(
   , tuningserviceid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , tuningserviceip_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , tuningservicenetmask_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , tuningassociatedsignals_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , appdataip_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , appdataserviceid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , appdataserviceip_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , appdataservicenetmask_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , appdataassociatedsignals_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , diagdataip_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , diagdataserviceid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , diagdataserviceip_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , diagdataservicenetmask_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , diagdataassociatedsignals_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , lancontrollertype_(0)
   , channel_(0)
   , tuningport_(0)
@@ -1197,7 +1194,6 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, tuningserviceport_),
   PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, tuningservicenetmask_),
   PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, tuningdatauid_),
-  PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, tuningassociatedsignals_),
   PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, appdataenable_),
   PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, appdataip_),
   PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, appdataport_),
@@ -1209,7 +1205,6 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, appdatasizebytes_),
   PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, appdataframesquantity_),
   PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, overrideappdatawordcount_),
-  PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, appdataassociatedsignals_),
   PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, diagdataenable_),
   PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, diagdataip_),
   PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, diagdataport_),
@@ -1221,44 +1216,40 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, diagdatasizebytes_),
   PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, diagdataframesquantity_),
   PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, overridediagdatawordcount_),
-  PROTOBUF_FIELD_OFFSET(::Network::LanControllerInfo, diagdataassociatedsignals_),
   0,
-  35,
-  16,
-  17,
-  22,
+  32,
+  13,
+  14,
+  19,
   1,
-  18,
+  15,
   2,
   3,
-  19,
+  16,
   4,
+  17,
   20,
   5,
-  23,
+  18,
   6,
-  21,
   7,
+  22,
   8,
-  25,
-  9,
-  26,
-  27,
-  28,
-  36,
-  10,
+  23,
   24,
-  11,
-  30,
-  12,
-  13,
-  31,
-  14,
-  32,
+  25,
   33,
+  21,
+  9,
+  27,
+  10,
+  11,
+  28,
+  12,
   29,
-  34,
-  15,
+  30,
+  26,
+  31,
   PROTOBUF_FIELD_OFFSET(::Network::DataSourceInfo, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Network::DataSourceInfo, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -2038,60 +2029,60 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 72, 81, sizeof(::Network::GetAppSignalStateReply)},
   { 85, -1, sizeof(::Network::GetAppSignalStateChangesRequest)},
   { 90, 100, sizeof(::Network::GetAppSignalStateChangesReply)},
-  { 105, 147, sizeof(::Network::LanControllerInfo)},
-  { 184, 201, sizeof(::Network::DataSourceInfo)},
-  { 213, -1, sizeof(::Network::GetDataSourcesInfoRequest)},
-  { 218, 225, sizeof(::Network::GetDataSourcesInfoReply)},
-  { 227, 242, sizeof(::Network::AppDataReceiveState)},
-  { 252, 287, sizeof(::Network::AppDataSourceState)},
-  { 317, 324, sizeof(::Network::GetAppDataSourcesStatesReply)},
-  { 326, 338, sizeof(::Network::AppDataServiceState)},
-  { 345, 361, sizeof(::Network::SoftwareInfo)},
-  { 372, -1, sizeof(::Network::GetServiceInfoRequest)},
-  { 377, 384, sizeof(::Network::SessionParams)},
-  { 386, 397, sizeof(::Network::ServiceInfo)},
-  { 403, 410, sizeof(::Network::GetServiceInfoReply)},
-  { 412, 420, sizeof(::Network::ConfigurationServiceState)},
-  { 423, 433, sizeof(::Network::ServiceClientInfo)},
-  { 438, -1, sizeof(::Network::ServiceClients)},
-  { 444, 455, sizeof(::Network::BuildInfo)},
-  { 461, 469, sizeof(::Network::ConfigurationServiceSettings)},
-  { 472, 480, sizeof(::Network::ServiceSettings)},
-  { 483, -1, sizeof(::Network::GetTuningSourcesInfo)},
-  { 488, 498, sizeof(::Network::GetTuningSourcesInfoReply)},
-  { 503, -1, sizeof(::Network::GetTuningSourcesStates)},
-  { 508, 515, sizeof(::Network::SignalsAssociatedToTuningSource)},
-  { 517, 524, sizeof(::Network::TuningSourceFilling)},
-  { 526, 578, sizeof(::Network::TuningSourceState)},
-  { 625, 635, sizeof(::Network::GetTuningSourcesStatesReply)},
-  { 640, 648, sizeof(::Network::ChangeConrolledTuningSourceRequest)},
-  { 651, 659, sizeof(::Network::ChangeConrolledTuningSourceReply)},
-  { 662, -1, sizeof(::Network::TuningSignalsRead)},
-  { 668, 689, sizeof(::Network::TuningSignalState)},
-  { 705, 712, sizeof(::Network::TuningSignalsReadReply)},
-  { 714, 721, sizeof(::Network::TuningWriteCommand)},
-  { 723, 730, sizeof(::Network::TuningSignalsWrite)},
-  { 732, 739, sizeof(::Network::TuningSignalWriteResult)},
-  { 741, 748, sizeof(::Network::TuningSignalsWriteReply)},
-  { 750, -1, sizeof(::Network::TuningSignalsApply)},
-  { 755, 761, sizeof(::Network::TuningSignalsApplyReply)},
-  { 762, 769, sizeof(::Network::DataSourceWrite)},
-  { 771, 777, sizeof(::Network::DataSourceWriteReply)},
-  { 778, -1, sizeof(::Network::PacketSourceExit)},
-  { 783, 789, sizeof(::Network::PacketSourceExitReply)},
-  { 790, 797, sizeof(::Network::SaveAppSignalsStatesToArchiveRequest)},
-  { 799, 806, sizeof(::Network::SaveAppSignalsStatesToArchiveReply)},
-  { 808, 819, sizeof(::Network::GetAppSignalStatesFromArchiveStartRequest)},
-  { 825, 834, sizeof(::Network::GetAppSignalStatesFromArchiveStartReply)},
-  { 838, 844, sizeof(::Network::GetAppSignalStatesFromArchiveNextRequest)},
-  { 845, 860, sizeof(::Network::GetAppSignalStatesFromArchiveNextReply)},
-  { 870, 876, sizeof(::Network::GetAppSignalStatesFromArchiveCancelRequest)},
-  { 877, 885, sizeof(::Network::GetAppSignalStatesFromArchiveCancelReply)},
-  { 888, 897, sizeof(::Network::RtTrendsManagementRequest)},
-  { 901, 910, sizeof(::Network::RtTrendsManagementReply)},
-  { 914, -1, sizeof(::Network::RtTrendsGetStateChangesRequest)},
-  { 919, 927, sizeof(::Network::RtTrendsGetStateChangesReply)},
-  { 930, 942, sizeof(::Network::GetFileReply)},
+  { 105, 144, sizeof(::Network::LanControllerInfo)},
+  { 178, 195, sizeof(::Network::DataSourceInfo)},
+  { 207, -1, sizeof(::Network::GetDataSourcesInfoRequest)},
+  { 212, 219, sizeof(::Network::GetDataSourcesInfoReply)},
+  { 221, 236, sizeof(::Network::AppDataReceiveState)},
+  { 246, 281, sizeof(::Network::AppDataSourceState)},
+  { 311, 318, sizeof(::Network::GetAppDataSourcesStatesReply)},
+  { 320, 332, sizeof(::Network::AppDataServiceState)},
+  { 339, 355, sizeof(::Network::SoftwareInfo)},
+  { 366, -1, sizeof(::Network::GetServiceInfoRequest)},
+  { 371, 378, sizeof(::Network::SessionParams)},
+  { 380, 391, sizeof(::Network::ServiceInfo)},
+  { 397, 404, sizeof(::Network::GetServiceInfoReply)},
+  { 406, 414, sizeof(::Network::ConfigurationServiceState)},
+  { 417, 427, sizeof(::Network::ServiceClientInfo)},
+  { 432, -1, sizeof(::Network::ServiceClients)},
+  { 438, 449, sizeof(::Network::BuildInfo)},
+  { 455, 463, sizeof(::Network::ConfigurationServiceSettings)},
+  { 466, 474, sizeof(::Network::ServiceSettings)},
+  { 477, -1, sizeof(::Network::GetTuningSourcesInfo)},
+  { 482, 492, sizeof(::Network::GetTuningSourcesInfoReply)},
+  { 497, -1, sizeof(::Network::GetTuningSourcesStates)},
+  { 502, 509, sizeof(::Network::SignalsAssociatedToTuningSource)},
+  { 511, 518, sizeof(::Network::TuningSourceFilling)},
+  { 520, 572, sizeof(::Network::TuningSourceState)},
+  { 619, 629, sizeof(::Network::GetTuningSourcesStatesReply)},
+  { 634, 642, sizeof(::Network::ChangeConrolledTuningSourceRequest)},
+  { 645, 653, sizeof(::Network::ChangeConrolledTuningSourceReply)},
+  { 656, -1, sizeof(::Network::TuningSignalsRead)},
+  { 662, 683, sizeof(::Network::TuningSignalState)},
+  { 699, 706, sizeof(::Network::TuningSignalsReadReply)},
+  { 708, 715, sizeof(::Network::TuningWriteCommand)},
+  { 717, 724, sizeof(::Network::TuningSignalsWrite)},
+  { 726, 733, sizeof(::Network::TuningSignalWriteResult)},
+  { 735, 742, sizeof(::Network::TuningSignalsWriteReply)},
+  { 744, -1, sizeof(::Network::TuningSignalsApply)},
+  { 749, 755, sizeof(::Network::TuningSignalsApplyReply)},
+  { 756, 763, sizeof(::Network::DataSourceWrite)},
+  { 765, 771, sizeof(::Network::DataSourceWriteReply)},
+  { 772, -1, sizeof(::Network::PacketSourceExit)},
+  { 777, 783, sizeof(::Network::PacketSourceExitReply)},
+  { 784, 791, sizeof(::Network::SaveAppSignalsStatesToArchiveRequest)},
+  { 793, 800, sizeof(::Network::SaveAppSignalsStatesToArchiveReply)},
+  { 802, 813, sizeof(::Network::GetAppSignalStatesFromArchiveStartRequest)},
+  { 819, 828, sizeof(::Network::GetAppSignalStatesFromArchiveStartReply)},
+  { 832, 838, sizeof(::Network::GetAppSignalStatesFromArchiveNextRequest)},
+  { 839, 854, sizeof(::Network::GetAppSignalStatesFromArchiveNextReply)},
+  { 864, 870, sizeof(::Network::GetAppSignalStatesFromArchiveCancelRequest)},
+  { 871, 879, sizeof(::Network::GetAppSignalStatesFromArchiveCancelReply)},
+  { 882, 891, sizeof(::Network::RtTrendsManagementRequest)},
+  { 895, 904, sizeof(::Network::RtTrendsManagementReply)},
+  { 908, -1, sizeof(::Network::RtTrendsGetStateChangesRequest)},
+  { 913, 921, sizeof(::Network::RtTrendsGetStateChangesReply)},
+  { 924, 936, sizeof(::Network::GetFileReply)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -2188,7 +2179,7 @@ const char descriptor_table_protodef_network_2eproto[] PROTOBUF_SECTION_VARIABLE
   "\n\rserverTimeUtc\030\002 \001(\003\022\027\n\017serverTimeLocal"
   "\030\003 \001(\003\022\035\n\022pendingStatesCount\030\004 \001(\005:\0010\022.\n"
   "\017appSignalStates\030\005 \003(\0132\025.Proto.AppSignal"
-  "State\"\236\010\n\021LanControllerInfo\022\023\n\013equipment"
+  "State\"\270\007\n\021LanControllerInfo\022\023\n\013equipment"
   "ID\030\001 \001(\t\022\030\n\014controllerNo\030\002 \001(\005:\002-1\022\034\n\021la"
   "nControllerType\030\003 \001(\005:\0010\022\022\n\007channel\030\004 \001("
   "\005:\0010\022\033\n\014tuningEnable\030\n \001(\010:\005false\022\020\n\010tun"
@@ -2196,245 +2187,243 @@ const char descriptor_table_protodef_network_2eproto[] PROTOBUF_SECTION_VARIABLE
   "ningServiceID\030\r \001(\t\022\027\n\017tuningServiceIP\030\016"
   " \001(\t\022\034\n\021tuningServicePort\030\017 \001(\005:\0010\022\034\n\024tu"
   "ningServiceNetmask\030\020 \001(\t\022\025\n\rtuningdataui"
-  "d\030\021 \001(\004\022\037\n\027tuningAssociatedSignals\030\022 \001(\t"
-  "\022\034\n\rappDataEnable\030\024 \001(\010:\005false\022\021\n\tappDat"
-  "aIP\030\025 \001(\t\022\026\n\013appDataPort\030\026 \001(\005:\0010\022\030\n\020app"
-  "DataServiceID\030\027 \001(\t\022\030\n\020appDataServiceIP\030"
-  "\030 \001(\t\022\035\n\022appDataServicePort\030\031 \001(\005:\0010\022\035\n\025"
-  "appDataServiceNetmask\030\032 \001(\t\022\025\n\nappDataUI"
-  "D\030\033 \001(\r:\0010\022\033\n\020appDataSizeBytes\030\034 \001(\005:\0010\022"
-  " \n\025appDataFramesQuantity\030\035 \001(\005:\0010\022$\n\030ove"
-  "rrideAppDataWordCount\030\036 \001(\005:\002-1\022 \n\030appDa"
-  "taAssociatedSignals\030\037 \001(\t\022\035\n\016diagDataEna"
-  "ble\030( \001(\010:\005false\022\022\n\ndiagDataIP\030) \001(\t\022\027\n\014"
-  "diagDataPort\030* \001(\005:\0010\022\031\n\021diagDataService"
-  "ID\030+ \001(\t\022\031\n\021diagDataServiceIP\030, \001(\t\022\036\n\023d"
-  "iagDataServicePort\030- \001(\005:\0010\022\036\n\026diagDataS"
-  "erviceNetmask\030. \001(\t\022\026\n\013diagDataUID\030/ \001(\r"
-  ":\0010\022\034\n\021diagDataSizeBytes\0300 \001(\005:\0010\022!\n\026dia"
-  "gDataFramesQuantity\0301 \001(\005:\0010\022%\n\031override"
-  "DiagDataWordCount\0302 \001(\005:\002-1\022!\n\031diagDataA"
-  "ssociatedSignals\0303 \001(\t\"\277\002\n\016DataSourceInf"
-  "o\022\r\n\002id\030\001 \001(\004:\0010\022\031\n\021moduleEquipmentID\030\002 "
-  "\001(\t\022\030\n\020modulePresetName\030\003 \001(\t\022\025\n\nmoduleT"
-  "ype\030\004 \001(\005:\0010\022\025\n\rmoduleCaption\030\005 \001(\t\022\026\n\016m"
-  "oduleUniqueID\030\006 \001(\004\022\023\n\013subsystemID\030\007 \001(\t"
-  "\022\027\n\014subsystemKey\030\010 \001(\005:\0010\022\023\n\010lmNumber\030\t "
-  "\001(\005:\0010\022\030\n\020subsystemChannel\030\n \001(\t\0225\n\021lanC"
-  "ontrollerInfo\030\013 \003(\0132\032.Network.LanControl"
-  "lerInfo\022\017\n\007profile\030\014 \001(\t\"\033\n\031GetDataSourc"
-  "esInfoRequest\"\\\n\027GetDataSourcesInfoReply"
-  "\022\020\n\005error\030\001 \001(\005:\0010\022/\n\016dataSourceInfo\030\002 \003"
-  "(\0132\027.Network.DataSourceInfo\"\300\002\n\023AppDataR"
-  "eceiveState\022\030\n\rreceivingRate\030\001 \001(\005:\0010\022\033\n"
-  "\020udpReceivingRate\030\002 \001(\005:\0010\022!\n\026rupFramesR"
-  "eceivingRate\030\003 \001(\005:\0010\022\031\n\016rupFramesCount\030"
-  "\004 \001(\003:\0010\022\031\n\016simFramesCount\030\005 \001(\003:\0010\022\032\n\017e"
-  "rrDatagramSize\030\006 \001(\003:\0010\022\030\n\rerrSimVersion"
-  "\030\007 \001(\003:\0010\022$\n\031errUnknownAppDataSourceIP\030\010"
-  " \001(\003:\0010\022\031\n\016errRupFrameCRC\030\t \001(\003:\0010\022\"\n\027er"
-  "rNotExpectedSimPacket\030\n \001(\003:\0010\"\240\007\n\022AppDa"
-  "taSourceState\022\r\n\002id\030\001 \001(\004:\0010\022\033\n\014dataRece"
-  "ives\030\002 \001(\010:\005false\022\021\n\006uptime\030\003 \001(\003:\0010\022\031\n\016"
-  "receivedDataID\030\004 \001(\004:\0010\022 \n\025rupFramesQueu"
-  "eCurSize\030\005 \001(\005:\0010\022#\n\030rupFramesQueueCurMa"
-  "xSize\030\006 \001(\005:\0010\022\034\n\021dataReceivingRate\030\007 \001("
-  "\001:\0010\022\033\n\020receivedDataSize\030\010 \001(\003:\0010\022\036\n\023rec"
-  "eivedFramesCount\030\t \001(\003:\0010\022\036\n\023receivedPac"
-  "ketCount\030\n \001(\003:\0010\022\032\n\017lostPacketCount\030\013 \001"
-  "(\003:\0010\022$\n\025dataProcessingEnabled\030\014 \001(\010:\005fa"
-  "lse\022\037\n\024processedPacketCount\030\r \001(\003:\0010\022\037\n\024"
-  "lastPacketSystemTime\030\016 \001(\003:\0010\022\034\n\021rupFram"
-  "ePlantTime\030\017 \001(\003:\0010\022\034\n\021rupFrameNumerator"
-  "\030\020 \001(\r:\0010\022#\n\030signalStatesQueueCurSize\030\021 "
-  "\001(\005:\0010\022&\n\033signalStatesQueueCurMaxSize\030\022 "
-  "\001(\005:\0010\022\037\n\024acquiredSignalsCount\030\023 \001(\005:\0010\022"
-  "\037\n\024errorProtocolVersion\030\024 \001(\003:\0010\022\036\n\023erro"
-  "rFramesQuantity\030\025 \001(\003:\0010\022\027\n\014errorFrameNo"
-  "\030\026 \001(\003:\0010\022\026\n\013errorDataID\030\027 \001(\003:\0010\022\031\n\016err"
-  "orFrameSize\030\030 \001(\003:\0010\022\"\n\027errorDuplicatePl"
-  "antTime\030\031 \001(\003:\0010\022%\n\032errorNonmonotonicPla"
-  "ntTime\030\032 \001(\003:\0010\022\025\n\rlmEquipmentID\030\033 \001(\t\022\035"
-  "\n\022rupFramesQueueSize\030\034 \001(\005:\0010\022 \n\025signalS"
-  "tatesQueueSize\030\035 \001(\005:\0010\022\020\n\005state\030\036 \001(\005:\001"
-  "0\"k\n\034GetAppDataSourcesStatesReply\022\020\n\005err"
-  "or\030\001 \001(\005:\0010\0229\n\024appDataSourcesStates\030\002 \003("
-  "\0132\033.Network.AppDataSourceState\"\220\002\n\023AppDa"
-  "taServiceState\022$\n\025CfgServiceIsConnected\030"
-  "\001 \002(\010:\005false\022\027\n\014CfgServiceIp\030\002 \001(\r:\0010\022\031\n"
-  "\016CfgServicePort\030\003 \001(\005:\0010\022(\n\031ArchiveServi"
-  "ceIsConnected\030\004 \002(\010:\005false\022\033\n\020ArchiveSer"
-  "viceIp\030\005 \001(\r:\0010\022\035\n\022ArchiveServicePort\030\006 "
-  "\001(\005:\0010\0229\n\023appDataReceiveState\030\007 \001(\0132\034.Ne"
-  "twork.AppDataReceiveState\"\377\001\n\014SoftwareIn"
-  "fo\022\032\n\014softwareType\030\001 \002(\005:\0048000\022\023\n\013equipm"
-  "entId\030\002 \002(\t\022\027\n\014majorVersion\030\003 \002(\005:\0010\022\027\n\014"
-  "minorVersion\030\004 \002(\005:\0010\022\023\n\010commitNo\030\005 \002(\005:"
-  "\0010\022\023\n\013buildBranch\030\006 \002(\t\022\021\n\tcommitSHA\030\007 \002"
-  "(\t\022\020\n\010userName\030\010 \002(\t\022\022\n\007buildNo\030\t \002(\005:\0010"
-  "\022\016\n\003crc\030\n \002(\r:\0010\022\031\n\021clientDescription\030\013 "
-  "\001(\t\"\027\n\025GetServiceInfoRequest\"K\n\rSessionP"
-  "arams\022\036\n\026currentSettingsProfile\030\001 \001(\t\022\032\n"
-  "\017softwareRunMode\030\002 \001(\005:\0010\"\304\001\n\013ServiceInf"
-  "o\022+\n\014softwareInfo\030\001 \002(\0132\025.Network.Softwa"
-  "reInfo\022\021\n\006uptime\030\002 \001(\003:\0010\022\027\n\014serviceStat"
-  "e\030\003 \001(\005:\0010\022\030\n\rserviceUptime\030\004 \001(\003:\0010\022-\n\r"
-  "sessionParams\030\005 \001(\0132\026.Network.SessionPar"
-  "ams\022\023\n\013settingsXml\030\006 \001(\t\"R\n\023GetServiceIn"
-  "foReply\022\020\n\005error\030\001 \002(\005:\0010\022)\n\013serviceInfo"
-  "\030\002 \002(\0132\024.Network.ServiceInfo\"x\n\031Configur"
-  "ationServiceState\022\035\n\025currentBuildDirecto"
-  "ry\030\001 \002(\t\022!\n\031checkBuildAttemptQuantity\030\002 "
-  "\002(\005\022\031\n\021buildCheckerState\030\003 \002(\005\"\205\001\n\021Servi"
-  "ceClientInfo\022\n\n\002ip\030\003 \002(\005\022\016\n\006uptime\030\005 \002(\003"
-  "\022\020\n\010isActual\030\006 \002(\010\022\025\n\rreplyQuantity\030\007 \002("
-  "\003\022+\n\014softwareInfo\030\013 \002(\0132\025.Network.Softwa"
-  "reInfo\"=\n\016ServiceClients\022+\n\007clients\030\001 \003("
-  "\0132\032.Network.ServiceClientInfo\"s\n\tBuildIn"
-  "fo\022\017\n\007project\030\001 \002(\t\022\016\n\002id\030\002 \002(\005:\002-1\022\014\n\004d"
-  "ate\030\004 \002(\003\022\024\n\tchangeset\030\005 \002(\005:\0010\022\014\n\004user\030"
-  "\006 \002(\t\022\023\n\013workstation\030\007 \002(\t\"e\n\034Configurat"
-  "ionServiceSettings\022\023\n\013equipmentID\030\001 \002(\t\022"
-  "\031\n\021autoloadBuildPath\030\002 \002(\t\022\025\n\rworkDirect"
-  "ory\030\003 \002(\t\"L\n\017ServiceSettings\022\023\n\013equipmen"
-  "tID\030\001 \002(\t\022\021\n\tconfigIP1\030\002 \002(\t\022\021\n\tconfigIP"
-  "2\030\003 \002(\t\"\026\n\024GetTuningSourcesInfo\"\263\001\n\031GetT"
-  "uningSourcesInfoReply\022\020\n\005error\030\001 \001(\005:\0010\022"
-  "1\n\020tuningSourceInfo\030\002 \003(\0132\027.Network.Data"
-  "SourceInfo\022!\n\023singleLmControlMode\030\003 \001(\010:"
-  "\004true\022\026\n\016activeClientID\030\004 \001(\t\022\026\n\016activeC"
-  "lientIP\030\005 \001(\t\"\030\n\026GetTuningSourcesStates\""
-  "G\n\037SignalsAssociatedToTuningSource\022\020\n\010so"
-  "urceID\030\001 \002(\004\022\022\n\nsignalHash\030\002 \003(\004\"n\n\023Tuni"
-  "ngSourceFilling\022\023\n\013signalCount\030\001 \002(\004\022B\n\020"
-  "signalsPerSource\030\002 \003(\0132(.Network.Signals"
-  "AssociatedToTuningSource\"\273\013\n\021TuningSourc"
-  "eState\022\023\n\010sourceID\030\001 \001(\004:\0010\022\026\n\007isReply\030\002"
-  " \001(\010:\005false\022\027\n\014requestCount\030\003 \001(\003:\0010\022\025\n\n"
-  "replyCount\030\004 \001(\003:\0010\022\033\n\020commandQueueSize\030"
-  "\005 \001(\005:\0010\022\034\n\021errUntimelyReplay\030\006 \001(\003:\0010\022\022"
-  "\n\007errSent\030\007 \001(\003:\0010\022\031\n\016errPartialSent\030\010 \001"
-  "(\003:\0010\022\027\n\014errReplySize\030\t \001(\003:\0010\022\025\n\nerrNoR"
-  "eply\030\n \001(\003:\0010\022 \n\025errRupProtocolVersion\030\013"
-  " \001(\003:\0010\022\032\n\017errRupFrameSize\030\014 \001(\003:\0010\022\036\n\023e"
-  "rrRupNonTuningData\030\r \001(\003:\0010\022\033\n\020errRupMod"
-  "uleType\030\016 \001(\003:\0010\022\037\n\024errRupFramesQuantity"
-  "\030\017 \001(\003:\0010\022\034\n\021errRupFrameNumber\030\020 \001(\003:\0010\022"
-  "\"\n\027errFotipProtocolVersion\030\021 \001(\003:\0010\022\033\n\020e"
-  "rrFotipUniqueID\030\022 \001(\003:\0010\022\033\n\020errFotipLmNu"
-  "mber\030\023 \001(\003:\0010\022 \n\025errFotipSubsystemCode\030\024"
-  " \001(\003:\0010\022 \n\025errFotipOperationCode\030\025 \001(\003:\001"
-  "0\022\034\n\021errFotipFrameSize\030\026 \001(\003:\0010\022\032\n\017errFo"
-  "tipRomSize\030\027 \001(\003:\0010\022\037\n\024errFotipRomFrameS"
-  "ize\030\030 \001(\003:\0010\022&\n\033fotipFlagBoundsCheckSucc"
-  "ess\030\031 \001(\003:\0010\022 \n\025fotipFlagWriteSuccess\030\032 "
-  "\001(\003:\0010\022\037\n\024fotipFlagDataTypeErr\030\033 \001(\003:\0010\022"
-  "\035\n\022fotipFlagOpCodeErr\030\034 \001(\003:\0010\022 \n\025fotipF"
-  "lagStartAddrErr\030\035 \001(\003:\0010\022\036\n\023fotipFlagRom"
-  "SizeErr\030\036 \001(\003:\0010\022#\n\030fotipFlagRomFrameSiz"
-  "eErr\030\037 \001(\003:\0010\022 \n\025fotipFlagFrameSizeErr\030 "
-  " \001(\003:\0010\022&\n\033fotipFlagProtocolVersionErr\030!"
-  " \001(\003:\0010\022#\n\030fotipFlagSubsystemKeyErr\030\" \001("
-  "\003:\0010\022\036\n\023fotipFlagUniueIDErr\030# \001(\003:\0010\022\035\n\022"
-  "fotipFlagOffsetErr\030$ \001(\003:\0010\022 \n\025fotipFlag"
-  "ApplySuccess\030% \001(\003:\0010\022\032\n\017fotipFlagSetSOR"
-  "\030& \001(\003:\0010\022!\n\026errAnalogLowBoundCheck\030\' \001("
-  "\003:\0010\022\"\n\027errAnalogHighBoundCheck\030( \001(\003:\0010"
-  "\022\024\n\terrRupCRC\030) \001(\003:\0010\022\036\n\017controlIsActiv"
-  "e\030* \001(\010:\005false\022\025\n\006setSOR\030+ \001(\010:\005false\022!\n"
-  "\022hasUnappliedParams\030, \001(\010:\005false\022\036\n\017writ"
-  "ingDisabled\030- \001(\010:\005false\022#\n\030fotipFlagWri"
-  "tingDisabled\030. \001(\003:\0010\022\037\n\024errTuningFrameU"
-  "pdate\030/ \001(\003:\0010\"\272\001\n\033GetTuningSourcesState"
-  "sReply\022\020\n\005error\030\001 \001(\005:\0010\0226\n\022tuningSource"
-  "sState\030\002 \003(\0132\032.Network.TuningSourceState"
-  "\022!\n\023singleLmControlMode\030\003 \001(\010:\004true\022\026\n\016a"
-  "ctiveClientID\030\004 \001(\t\022\026\n\016activeClientIP\030\005 "
-  "\001(\t\"z\n\"ChangeConrolledTuningSourceReques"
-  "t\022\023\n\013takeControl\030\001 \001(\010\022\037\n\027tuningSourceEq"
-  "uipmentID\030\002 \001(\t\022\036\n\017activateControl\030\003 \001(\010"
-  ":\005false\"\177\n ChangeConrolledTuningSourceRe"
-  "ply\022\020\n\005error\030\001 \001(\005:\0010\022)\n!controlledTunin"
-  "gSourceEquipmentID\030\002 \001(\t\022\036\n\017controlIsAct"
-  "ive\030\003 \001(\010:\005false\"\'\n\021TuningSignalsRead\022\022\n"
-  "\nsignalHash\030\002 \003(\004\"\360\003\n\021TuningSignalState\022"
-  "\025\n\nsignalHash\030\001 \001(\006:\0010\022\020\n\005error\030\002 \001(\005:\0010"
-  "\022\024\n\005valid\030\003 \001(\010:\005false\022!\n\005value\030\004 \001(\0132\022."
-  "Proto.TuningValue\022(\n\014readLowBound\030\005 \001(\0132"
-  "\022.Proto.TuningValue\022)\n\rreadHighBound\030\006 \001"
-  "(\0132\022.Proto.TuningValue\022\036\n\017writeInProgres"
-  "s\030\007 \001(\010:\005false\022\031\n\016writeErrorCode\030\010 \001(\005:\001"
-  "0\022\026\n\013writeClient\030\t \001(\006:\0010\022\035\n\022successfulR"
-  "eadTime\030\n \001(\020:\0010\022\033\n\020writeRequestTime\030\013 \001"
-  "(\020:\0010\022\036\n\023successfulWriteTime\030\014 \001(\020:\0010\022 \n"
-  "\025unsuccessfulWriteTime\030\r \001(\020:\0010\022\025\n\006setSO"
-  "R\030\016 \001(\010:\005false\022\036\n\017writingDisabled\030\017 \001(\010:"
-  "\005false\022\034\n\rtuningDefault\030\020 \001(\010:\005false\"a\n\026"
-  "TuningSignalsReadReply\022\020\n\005error\030\001 \001(\005:\0010"
-  "\0225\n\021tuningSignalState\030\002 \003(\0132\032.Network.Tu"
-  "ningSignalState\"N\n\022TuningWriteCommand\022\025\n"
-  "\nsignalHash\030\001 \001(\004:\0010\022!\n\005value\030\002 \001(\0132\022.Pr"
-  "oto.TuningValue\"]\n\022TuningSignalsWrite\022\030\n"
-  "\tautoApply\030\002 \001(\010:\005false\022-\n\010commands\030\003 \003("
-  "\0132\033.Network.TuningWriteCommand\"B\n\027Tuning"
-  "SignalWriteResult\022\025\n\nsignalHash\030\001 \001(\004:\0010"
-  "\022\020\n\005error\030\002 \001(\005:\0010\"b\n\027TuningSignalsWrite"
-  "Reply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013writeResult\030\002"
-  " \003(\0132 .Network.TuningSignalWriteResult\"\024"
-  "\n\022TuningSignalsApply\"+\n\027TuningSignalsApp"
-  "lyReply\022\020\n\005error\030\001 \001(\005:\0010\"B\n\017DataSourceW"
-  "rite\022\031\n\021sourceEquipmentID\030\001 \001(\t\022\024\n\005state"
-  "\030\002 \001(\010:\005false\"(\n\024DataSourceWriteReply\022\020\n"
-  "\005error\030\001 \001(\005:\0010\"\022\n\020PacketSourceExit\")\n\025P"
-  "acketSourceExitReply\022\020\n\005error\030\001 \001(\005:\0010\"q"
-  "\n$SaveAppSignalsStatesToArchiveRequest\022\031"
-  "\n\021clientEquipmentID\030\001 \001(\t\022.\n\017appSignalSt"
-  "ates\030\002 \003(\0132\025.Proto.AppSignalState\"N\n\"Sav"
-  "eAppSignalsStatesToArchiveReply\022\020\n\005error"
-  "\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\"\271\001\n)Ge"
-  "tAppSignalStatesFromArchiveStartRequest\022"
-  "\031\n\021clientEquipmentID\030\001 \001(\t\022\023\n\010timeType\030\002"
-  " \001(\005:\0011\022\024\n\tstartTime\030\003 \001(\020:\0010\022\022\n\007endTime"
-  "\030\004 \001(\020:\0010\022\024\n\014signalHashes\030\005 \003(\004\022\034\n\016remov"
-  "ePeriodic\030\006 \001(\010:\004true\"~\n\'GetAppSignalSta"
-  "tesFromArchiveStartReply\022\020\n\005error\030\001 \001(\005:"
-  "\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013errorStrin"
-  "g\030\004 \001(\t\022\024\n\trequestID\030\003 \001(\r:\0010\"@\n(GetAppS"
-  "ignalStatesFromArchiveNextRequest\022\024\n\treq"
-  "uestID\030\001 \001(\r:\0010\"\271\002\n&GetAppSignalStatesFr"
-  "omArchiveNextReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\t"
-  "archError\030\002 \001(\005:\003100\022\024\n\trequestID\030\003 \001(\r:"
-  "\0010\022\023\n\013errorString\030\n \001(\t\022\030\n\tdataReady\030\004 \001"
-  "(\010:\005false\022\033\n\020totalStatesCount\030\005 \001(\005:\0010\022\032"
-  "\n\017sentStatesCount\030\006 \001(\005:\0010\022\034\n\021statesInPa"
-  "rtCount\030\007 \001(\005:\0010\022\031\n\nisLastPart\030\010 \001(\010:\005fa"
-  "lse\022.\n\017appSignalStates\030\t \003(\0132\025.Proto.App"
-  "SignalState\"B\n*GetAppSignalStatesFromArc"
-  "hiveCancelRequest\022\024\n\trequestID\030\001 \001(\r:\0010\""
-  "i\n(GetAppSignalStatesFromArchiveCancelRe"
-  "ply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005"
-  ":\003100\022\023\n\013errorString\030\003 \001(\t\"\204\001\n\031RtTrendsM"
-  "anagementRequest\022\031\n\021clientEquipmentID\030\001 "
-  "\001(\t\022\024\n\014samplePeriod\030\002 \001(\005\022\032\n\022appendSigna"
-  "lHashes\030\003 \003(\004\022\032\n\022deleteSignalHashes\030\004 \003("
-  "\004\"s\n\027RtTrendsManagementReply\022\020\n\005error\030\001 "
-  "\001(\005:\0010\022\023\n\013errorString\030\002 \001(\t\022\024\n\014samplePer"
-  "iod\030\003 \001(\005\022\033\n\023trackedSignalHashes\030\004 \003(\004\" "
-  "\n\036RtTrendsGetStateChangesRequest\"r\n\034RtTr"
-  "endsGetStateChangesReply\022\020\n\005error\030\001 \001(\005:"
-  "\0010\022\023\n\013errorString\030\002 \001(\t\022+\n\014signalStates\030"
-  "\003 \003(\0132\025.Proto.AppSignalState\"\247\001\n\014GetFile"
-  "Reply\022\024\n\terrorCode\030\001 \002(\005:\0010\022\023\n\010fileSize\030"
-  "\002 \001(\003:\0010\022\025\n\ntotalParts\030\003 \001(\005:\0010\022\026\n\013curre"
-  "ntPart\030\004 \001(\005:\0010\022\032\n\017currentPartSize\030\005 \001(\005"
-  ":\0010\022\013\n\003md5\030\006 \001(\014\022\024\n\014filePartData\030\n \001(\014"
+  "d\030\021 \001(\004\022\034\n\rappDataEnable\030\024 \001(\010:\005false\022\021\n"
+  "\tappDataIP\030\025 \001(\t\022\026\n\013appDataPort\030\026 \001(\005:\0010"
+  "\022\030\n\020appDataServiceID\030\027 \001(\t\022\030\n\020appDataSer"
+  "viceIP\030\030 \001(\t\022\035\n\022appDataServicePort\030\031 \001(\005"
+  ":\0010\022\035\n\025appDataServiceNetmask\030\032 \001(\t\022\025\n\nap"
+  "pDataUID\030\033 \001(\r:\0010\022\033\n\020appDataSizeBytes\030\034 "
+  "\001(\005:\0010\022 \n\025appDataFramesQuantity\030\035 \001(\005:\0010"
+  "\022$\n\030overrideAppDataWordCount\030\036 \001(\005:\002-1\022\035"
+  "\n\016diagDataEnable\030( \001(\010:\005false\022\022\n\ndiagDat"
+  "aIP\030) \001(\t\022\027\n\014diagDataPort\030* \001(\005:\0010\022\031\n\021di"
+  "agDataServiceID\030+ \001(\t\022\031\n\021diagDataService"
+  "IP\030, \001(\t\022\036\n\023diagDataServicePort\030- \001(\005:\0010"
+  "\022\036\n\026diagDataServiceNetmask\030. \001(\t\022\026\n\013diag"
+  "DataUID\030/ \001(\r:\0010\022\034\n\021diagDataSizeBytes\0300 "
+  "\001(\005:\0010\022!\n\026diagDataFramesQuantity\0301 \001(\005:\001"
+  "0\022%\n\031overrideDiagDataWordCount\0302 \001(\005:\002-1"
+  "\"\277\002\n\016DataSourceInfo\022\r\n\002id\030\001 \001(\004:\0010\022\031\n\021mo"
+  "duleEquipmentID\030\002 \001(\t\022\030\n\020modulePresetNam"
+  "e\030\003 \001(\t\022\025\n\nmoduleType\030\004 \001(\005:\0010\022\025\n\rmodule"
+  "Caption\030\005 \001(\t\022\026\n\016moduleUniqueID\030\006 \001(\004\022\023\n"
+  "\013subsystemID\030\007 \001(\t\022\027\n\014subsystemKey\030\010 \001(\005"
+  ":\0010\022\023\n\010lmNumber\030\t \001(\005:\0010\022\030\n\020subsystemCha"
+  "nnel\030\n \001(\t\0225\n\021lanControllerInfo\030\013 \003(\0132\032."
+  "Network.LanControllerInfo\022\017\n\007profile\030\014 \001"
+  "(\t\"\033\n\031GetDataSourcesInfoRequest\"\\\n\027GetDa"
+  "taSourcesInfoReply\022\020\n\005error\030\001 \001(\005:\0010\022/\n\016"
+  "dataSourceInfo\030\002 \003(\0132\027.Network.DataSourc"
+  "eInfo\"\300\002\n\023AppDataReceiveState\022\030\n\rreceivi"
+  "ngRate\030\001 \001(\005:\0010\022\033\n\020udpReceivingRate\030\002 \001("
+  "\005:\0010\022!\n\026rupFramesReceivingRate\030\003 \001(\005:\0010\022"
+  "\031\n\016rupFramesCount\030\004 \001(\003:\0010\022\031\n\016simFramesC"
+  "ount\030\005 \001(\003:\0010\022\032\n\017errDatagramSize\030\006 \001(\003:\001"
+  "0\022\030\n\rerrSimVersion\030\007 \001(\003:\0010\022$\n\031errUnknow"
+  "nAppDataSourceIP\030\010 \001(\003:\0010\022\031\n\016errRupFrame"
+  "CRC\030\t \001(\003:\0010\022\"\n\027errNotExpectedSimPacket\030"
+  "\n \001(\003:\0010\"\240\007\n\022AppDataSourceState\022\r\n\002id\030\001 "
+  "\001(\004:\0010\022\033\n\014dataReceives\030\002 \001(\010:\005false\022\021\n\006u"
+  "ptime\030\003 \001(\003:\0010\022\031\n\016receivedDataID\030\004 \001(\004:\001"
+  "0\022 \n\025rupFramesQueueCurSize\030\005 \001(\005:\0010\022#\n\030r"
+  "upFramesQueueCurMaxSize\030\006 \001(\005:\0010\022\034\n\021data"
+  "ReceivingRate\030\007 \001(\001:\0010\022\033\n\020receivedDataSi"
+  "ze\030\010 \001(\003:\0010\022\036\n\023receivedFramesCount\030\t \001(\003"
+  ":\0010\022\036\n\023receivedPacketCount\030\n \001(\003:\0010\022\032\n\017l"
+  "ostPacketCount\030\013 \001(\003:\0010\022$\n\025dataProcessin"
+  "gEnabled\030\014 \001(\010:\005false\022\037\n\024processedPacket"
+  "Count\030\r \001(\003:\0010\022\037\n\024lastPacketSystemTime\030\016"
+  " \001(\003:\0010\022\034\n\021rupFramePlantTime\030\017 \001(\003:\0010\022\034\n"
+  "\021rupFrameNumerator\030\020 \001(\r:\0010\022#\n\030signalSta"
+  "tesQueueCurSize\030\021 \001(\005:\0010\022&\n\033signalStates"
+  "QueueCurMaxSize\030\022 \001(\005:\0010\022\037\n\024acquiredSign"
+  "alsCount\030\023 \001(\005:\0010\022\037\n\024errorProtocolVersio"
+  "n\030\024 \001(\003:\0010\022\036\n\023errorFramesQuantity\030\025 \001(\003:"
+  "\0010\022\027\n\014errorFrameNo\030\026 \001(\003:\0010\022\026\n\013errorData"
+  "ID\030\027 \001(\003:\0010\022\031\n\016errorFrameSize\030\030 \001(\003:\0010\022\""
+  "\n\027errorDuplicatePlantTime\030\031 \001(\003:\0010\022%\n\032er"
+  "rorNonmonotonicPlantTime\030\032 \001(\003:\0010\022\025\n\rlmE"
+  "quipmentID\030\033 \001(\t\022\035\n\022rupFramesQueueSize\030\034"
+  " \001(\005:\0010\022 \n\025signalStatesQueueSize\030\035 \001(\005:\001"
+  "0\022\020\n\005state\030\036 \001(\005:\0010\"k\n\034GetAppDataSources"
+  "StatesReply\022\020\n\005error\030\001 \001(\005:\0010\0229\n\024appData"
+  "SourcesStates\030\002 \003(\0132\033.Network.AppDataSou"
+  "rceState\"\220\002\n\023AppDataServiceState\022$\n\025CfgS"
+  "erviceIsConnected\030\001 \002(\010:\005false\022\027\n\014CfgSer"
+  "viceIp\030\002 \001(\r:\0010\022\031\n\016CfgServicePort\030\003 \001(\005:"
+  "\0010\022(\n\031ArchiveServiceIsConnected\030\004 \002(\010:\005f"
+  "alse\022\033\n\020ArchiveServiceIp\030\005 \001(\r:\0010\022\035\n\022Arc"
+  "hiveServicePort\030\006 \001(\005:\0010\0229\n\023appDataRecei"
+  "veState\030\007 \001(\0132\034.Network.AppDataReceiveSt"
+  "ate\"\377\001\n\014SoftwareInfo\022\032\n\014softwareType\030\001 \002"
+  "(\005:\0048000\022\023\n\013equipmentId\030\002 \002(\t\022\027\n\014majorVe"
+  "rsion\030\003 \002(\005:\0010\022\027\n\014minorVersion\030\004 \002(\005:\0010\022"
+  "\023\n\010commitNo\030\005 \002(\005:\0010\022\023\n\013buildBranch\030\006 \002("
+  "\t\022\021\n\tcommitSHA\030\007 \002(\t\022\020\n\010userName\030\010 \002(\t\022\022"
+  "\n\007buildNo\030\t \002(\005:\0010\022\016\n\003crc\030\n \002(\r:\0010\022\031\n\021cl"
+  "ientDescription\030\013 \001(\t\"\027\n\025GetServiceInfoR"
+  "equest\"K\n\rSessionParams\022\036\n\026currentSettin"
+  "gsProfile\030\001 \001(\t\022\032\n\017softwareRunMode\030\002 \001(\005"
+  ":\0010\"\304\001\n\013ServiceInfo\022+\n\014softwareInfo\030\001 \002("
+  "\0132\025.Network.SoftwareInfo\022\021\n\006uptime\030\002 \001(\003"
+  ":\0010\022\027\n\014serviceState\030\003 \001(\005:\0010\022\030\n\rserviceU"
+  "ptime\030\004 \001(\003:\0010\022-\n\rsessionParams\030\005 \001(\0132\026."
+  "Network.SessionParams\022\023\n\013settingsXml\030\006 \001"
+  "(\t\"R\n\023GetServiceInfoReply\022\020\n\005error\030\001 \002(\005"
+  ":\0010\022)\n\013serviceInfo\030\002 \002(\0132\024.Network.Servi"
+  "ceInfo\"x\n\031ConfigurationServiceState\022\035\n\025c"
+  "urrentBuildDirectory\030\001 \002(\t\022!\n\031checkBuild"
+  "AttemptQuantity\030\002 \002(\005\022\031\n\021buildCheckerSta"
+  "te\030\003 \002(\005\"\205\001\n\021ServiceClientInfo\022\n\n\002ip\030\003 \002"
+  "(\005\022\016\n\006uptime\030\005 \002(\003\022\020\n\010isActual\030\006 \002(\010\022\025\n\r"
+  "replyQuantity\030\007 \002(\003\022+\n\014softwareInfo\030\013 \002("
+  "\0132\025.Network.SoftwareInfo\"=\n\016ServiceClien"
+  "ts\022+\n\007clients\030\001 \003(\0132\032.Network.ServiceCli"
+  "entInfo\"s\n\tBuildInfo\022\017\n\007project\030\001 \002(\t\022\016\n"
+  "\002id\030\002 \002(\005:\002-1\022\014\n\004date\030\004 \002(\003\022\024\n\tchangeset"
+  "\030\005 \002(\005:\0010\022\014\n\004user\030\006 \002(\t\022\023\n\013workstation\030\007"
+  " \002(\t\"e\n\034ConfigurationServiceSettings\022\023\n\013"
+  "equipmentID\030\001 \002(\t\022\031\n\021autoloadBuildPath\030\002"
+  " \002(\t\022\025\n\rworkDirectory\030\003 \002(\t\"L\n\017ServiceSe"
+  "ttings\022\023\n\013equipmentID\030\001 \002(\t\022\021\n\tconfigIP1"
+  "\030\002 \002(\t\022\021\n\tconfigIP2\030\003 \002(\t\"\026\n\024GetTuningSo"
+  "urcesInfo\"\263\001\n\031GetTuningSourcesInfoReply\022"
+  "\020\n\005error\030\001 \001(\005:\0010\0221\n\020tuningSourceInfo\030\002 "
+  "\003(\0132\027.Network.DataSourceInfo\022!\n\023singleLm"
+  "ControlMode\030\003 \001(\010:\004true\022\026\n\016activeClientI"
+  "D\030\004 \001(\t\022\026\n\016activeClientIP\030\005 \001(\t\"\030\n\026GetTu"
+  "ningSourcesStates\"G\n\037SignalsAssociatedTo"
+  "TuningSource\022\020\n\010sourceID\030\001 \002(\004\022\022\n\nsignal"
+  "Hash\030\002 \003(\004\"n\n\023TuningSourceFilling\022\023\n\013sig"
+  "nalCount\030\001 \002(\004\022B\n\020signalsPerSource\030\002 \003(\013"
+  "2(.Network.SignalsAssociatedToTuningSour"
+  "ce\"\273\013\n\021TuningSourceState\022\023\n\010sourceID\030\001 \001"
+  "(\004:\0010\022\026\n\007isReply\030\002 \001(\010:\005false\022\027\n\014request"
+  "Count\030\003 \001(\003:\0010\022\025\n\nreplyCount\030\004 \001(\003:\0010\022\033\n"
+  "\020commandQueueSize\030\005 \001(\005:\0010\022\034\n\021errUntimel"
+  "yReplay\030\006 \001(\003:\0010\022\022\n\007errSent\030\007 \001(\003:\0010\022\031\n\016"
+  "errPartialSent\030\010 \001(\003:\0010\022\027\n\014errReplySize\030"
+  "\t \001(\003:\0010\022\025\n\nerrNoReply\030\n \001(\003:\0010\022 \n\025errRu"
+  "pProtocolVersion\030\013 \001(\003:\0010\022\032\n\017errRupFrame"
+  "Size\030\014 \001(\003:\0010\022\036\n\023errRupNonTuningData\030\r \001"
+  "(\003:\0010\022\033\n\020errRupModuleType\030\016 \001(\003:\0010\022\037\n\024er"
+  "rRupFramesQuantity\030\017 \001(\003:\0010\022\034\n\021errRupFra"
+  "meNumber\030\020 \001(\003:\0010\022\"\n\027errFotipProtocolVer"
+  "sion\030\021 \001(\003:\0010\022\033\n\020errFotipUniqueID\030\022 \001(\003:"
+  "\0010\022\033\n\020errFotipLmNumber\030\023 \001(\003:\0010\022 \n\025errFo"
+  "tipSubsystemCode\030\024 \001(\003:\0010\022 \n\025errFotipOpe"
+  "rationCode\030\025 \001(\003:\0010\022\034\n\021errFotipFrameSize"
+  "\030\026 \001(\003:\0010\022\032\n\017errFotipRomSize\030\027 \001(\003:\0010\022\037\n"
+  "\024errFotipRomFrameSize\030\030 \001(\003:\0010\022&\n\033fotipF"
+  "lagBoundsCheckSuccess\030\031 \001(\003:\0010\022 \n\025fotipF"
+  "lagWriteSuccess\030\032 \001(\003:\0010\022\037\n\024fotipFlagDat"
+  "aTypeErr\030\033 \001(\003:\0010\022\035\n\022fotipFlagOpCodeErr\030"
+  "\034 \001(\003:\0010\022 \n\025fotipFlagStartAddrErr\030\035 \001(\003:"
+  "\0010\022\036\n\023fotipFlagRomSizeErr\030\036 \001(\003:\0010\022#\n\030fo"
+  "tipFlagRomFrameSizeErr\030\037 \001(\003:\0010\022 \n\025fotip"
+  "FlagFrameSizeErr\030  \001(\003:\0010\022&\n\033fotipFlagPr"
+  "otocolVersionErr\030! \001(\003:\0010\022#\n\030fotipFlagSu"
+  "bsystemKeyErr\030\" \001(\003:\0010\022\036\n\023fotipFlagUniue"
+  "IDErr\030# \001(\003:\0010\022\035\n\022fotipFlagOffsetErr\030$ \001"
+  "(\003:\0010\022 \n\025fotipFlagApplySuccess\030% \001(\003:\0010\022"
+  "\032\n\017fotipFlagSetSOR\030& \001(\003:\0010\022!\n\026errAnalog"
+  "LowBoundCheck\030\' \001(\003:\0010\022\"\n\027errAnalogHighB"
+  "oundCheck\030( \001(\003:\0010\022\024\n\terrRupCRC\030) \001(\003:\0010"
+  "\022\036\n\017controlIsActive\030* \001(\010:\005false\022\025\n\006setS"
+  "OR\030+ \001(\010:\005false\022!\n\022hasUnappliedParams\030, "
+  "\001(\010:\005false\022\036\n\017writingDisabled\030- \001(\010:\005fal"
+  "se\022#\n\030fotipFlagWritingDisabled\030. \001(\003:\0010\022"
+  "\037\n\024errTuningFrameUpdate\030/ \001(\003:\0010\"\272\001\n\033Get"
+  "TuningSourcesStatesReply\022\020\n\005error\030\001 \001(\005:"
+  "\0010\0226\n\022tuningSourcesState\030\002 \003(\0132\032.Network"
+  ".TuningSourceState\022!\n\023singleLmControlMod"
+  "e\030\003 \001(\010:\004true\022\026\n\016activeClientID\030\004 \001(\t\022\026\n"
+  "\016activeClientIP\030\005 \001(\t\"z\n\"ChangeConrolled"
+  "TuningSourceRequest\022\023\n\013takeControl\030\001 \001(\010"
+  "\022\037\n\027tuningSourceEquipmentID\030\002 \001(\t\022\036\n\017act"
+  "ivateControl\030\003 \001(\010:\005false\"\177\n ChangeConro"
+  "lledTuningSourceReply\022\020\n\005error\030\001 \001(\005:\0010\022"
+  ")\n!controlledTuningSourceEquipmentID\030\002 \001"
+  "(\t\022\036\n\017controlIsActive\030\003 \001(\010:\005false\"\'\n\021Tu"
+  "ningSignalsRead\022\022\n\nsignalHash\030\002 \003(\004\"\360\003\n\021"
+  "TuningSignalState\022\025\n\nsignalHash\030\001 \001(\006:\0010"
+  "\022\020\n\005error\030\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010:\005false"
+  "\022!\n\005value\030\004 \001(\0132\022.Proto.TuningValue\022(\n\014r"
+  "eadLowBound\030\005 \001(\0132\022.Proto.TuningValue\022)\n"
+  "\rreadHighBound\030\006 \001(\0132\022.Proto.TuningValue"
+  "\022\036\n\017writeInProgress\030\007 \001(\010:\005false\022\031\n\016writ"
+  "eErrorCode\030\010 \001(\005:\0010\022\026\n\013writeClient\030\t \001(\006"
+  ":\0010\022\035\n\022successfulReadTime\030\n \001(\020:\0010\022\033\n\020wr"
+  "iteRequestTime\030\013 \001(\020:\0010\022\036\n\023successfulWri"
+  "teTime\030\014 \001(\020:\0010\022 \n\025unsuccessfulWriteTime"
+  "\030\r \001(\020:\0010\022\025\n\006setSOR\030\016 \001(\010:\005false\022\036\n\017writ"
+  "ingDisabled\030\017 \001(\010:\005false\022\034\n\rtuningDefaul"
+  "t\030\020 \001(\010:\005false\"a\n\026TuningSignalsReadReply"
+  "\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030"
+  "\002 \003(\0132\032.Network.TuningSignalState\"N\n\022Tun"
+  "ingWriteCommand\022\025\n\nsignalHash\030\001 \001(\004:\0010\022!"
+  "\n\005value\030\002 \001(\0132\022.Proto.TuningValue\"]\n\022Tun"
+  "ingSignalsWrite\022\030\n\tautoApply\030\002 \001(\010:\005fals"
+  "e\022-\n\010commands\030\003 \003(\0132\033.Network.TuningWrit"
+  "eCommand\"B\n\027TuningSignalWriteResult\022\025\n\ns"
+  "ignalHash\030\001 \001(\004:\0010\022\020\n\005error\030\002 \001(\005:\0010\"b\n\027"
+  "TuningSignalsWriteReply\022\020\n\005error\030\001 \001(\005:\001"
+  "0\0225\n\013writeResult\030\002 \003(\0132 .Network.TuningS"
+  "ignalWriteResult\"\024\n\022TuningSignalsApply\"+"
+  "\n\027TuningSignalsApplyReply\022\020\n\005error\030\001 \001(\005"
+  ":\0010\"B\n\017DataSourceWrite\022\031\n\021sourceEquipmen"
+  "tID\030\001 \001(\t\022\024\n\005state\030\002 \001(\010:\005false\"(\n\024DataS"
+  "ourceWriteReply\022\020\n\005error\030\001 \001(\005:\0010\"\022\n\020Pac"
+  "ketSourceExit\")\n\025PacketSourceExitReply\022\020"
+  "\n\005error\030\001 \001(\005:\0010\"q\n$SaveAppSignalsStates"
+  "ToArchiveRequest\022\031\n\021clientEquipmentID\030\001 "
+  "\001(\t\022.\n\017appSignalStates\030\002 \003(\0132\025.Proto.App"
+  "SignalState\"N\n\"SaveAppSignalsStatesToArc"
+  "hiveReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError"
+  "\030\002 \001(\005:\003100\"\271\001\n)GetAppSignalStatesFromAr"
+  "chiveStartRequest\022\031\n\021clientEquipmentID\030\001"
+  " \001(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003"
+  " \001(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014signalHas"
+  "hes\030\005 \003(\004\022\034\n\016removePeriodic\030\006 \001(\010:\004true\""
+  "~\n\'GetAppSignalStatesFromArchiveStartRep"
+  "ly\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:"
+  "\003100\022\023\n\013errorString\030\004 \001(\t\022\024\n\trequestID\030\003"
+  " \001(\r:\0010\"@\n(GetAppSignalStatesFromArchive"
+  "NextRequest\022\024\n\trequestID\030\001 \001(\r:\0010\"\271\002\n&Ge"
+  "tAppSignalStatesFromArchiveNextReply\022\020\n\005"
+  "error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\024"
+  "\n\trequestID\030\003 \001(\r:\0010\022\023\n\013errorString\030\n \001("
+  "\t\022\030\n\tdataReady\030\004 \001(\010:\005false\022\033\n\020totalStat"
+  "esCount\030\005 \001(\005:\0010\022\032\n\017sentStatesCount\030\006 \001("
+  "\005:\0010\022\034\n\021statesInPartCount\030\007 \001(\005:\0010\022\031\n\nis"
+  "LastPart\030\010 \001(\010:\005false\022.\n\017appSignalStates"
+  "\030\t \003(\0132\025.Proto.AppSignalState\"B\n*GetAppS"
+  "ignalStatesFromArchiveCancelRequest\022\024\n\tr"
+  "equestID\030\001 \001(\r:\0010\"i\n(GetAppSignalStatesF"
+  "romArchiveCancelReply\022\020\n\005error\030\001 \001(\005:\0010\022"
+  "\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013errorString\030\003"
+  " \001(\t\"\204\001\n\031RtTrendsManagementRequest\022\031\n\021cl"
+  "ientEquipmentID\030\001 \001(\t\022\024\n\014samplePeriod\030\002 "
+  "\001(\005\022\032\n\022appendSignalHashes\030\003 \003(\004\022\032\n\022delet"
+  "eSignalHashes\030\004 \003(\004\"s\n\027RtTrendsManagemen"
+  "tReply\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013errorString\030"
+  "\002 \001(\t\022\024\n\014samplePeriod\030\003 \001(\005\022\033\n\023trackedSi"
+  "gnalHashes\030\004 \003(\004\" \n\036RtTrendsGetStateChan"
+  "gesRequest\"r\n\034RtTrendsGetStateChangesRep"
+  "ly\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013errorString\030\002 \001("
+  "\t\022+\n\014signalStates\030\003 \003(\0132\025.Proto.AppSigna"
+  "lState\"\247\001\n\014GetFileReply\022\024\n\terrorCode\030\001 \002"
+  "(\005:\0010\022\023\n\010fileSize\030\002 \001(\003:\0010\022\025\n\ntotalParts"
+  "\030\003 \001(\005:\0010\022\026\n\013currentPart\030\004 \001(\005:\0010\022\032\n\017cur"
+  "rentPartSize\030\005 \001(\005:\0010\022\013\n\003md5\030\006 \001(\014\022\024\n\014fi"
+  "lePartData\030\n \001(\014"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_network_2eproto_deps[1] = {
   &::descriptor_table_serialization_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_network_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_network_2eproto = {
-  false, false, 10558, descriptor_table_protodef_network_2eproto, "network.proto", 
+  false, false, 10456, descriptor_table_protodef_network_2eproto, "network.proto", 
   &descriptor_table_network_2eproto_once, descriptor_table_network_2eproto_deps, 1, 66,
   schemas, file_default_instances, TableStruct_network_2eproto::offsets,
   file_level_metadata_network_2eproto, file_level_enum_descriptors_network_2eproto, file_level_service_descriptors_network_2eproto,
@@ -5278,22 +5267,22 @@ class LanControllerInfo::_Internal {
     (*has_bits)[0] |= 1u;
   }
   static void set_has_controllerno(HasBits* has_bits) {
-    (*has_bits)[1] |= 8u;
+    (*has_bits)[1] |= 1u;
   }
   static void set_has_lancontrollertype(HasBits* has_bits) {
-    (*has_bits)[0] |= 65536u;
+    (*has_bits)[0] |= 8192u;
   }
   static void set_has_channel(HasBits* has_bits) {
-    (*has_bits)[0] |= 131072u;
+    (*has_bits)[0] |= 16384u;
   }
   static void set_has_tuningenable(HasBits* has_bits) {
-    (*has_bits)[0] |= 4194304u;
+    (*has_bits)[0] |= 524288u;
   }
   static void set_has_tuningip(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
   }
   static void set_has_tuningport(HasBits* has_bits) {
-    (*has_bits)[0] |= 262144u;
+    (*has_bits)[0] |= 32768u;
   }
   static void set_has_tuningserviceid(HasBits* has_bits) {
     (*has_bits)[0] |= 4u;
@@ -5302,88 +5291,79 @@ class LanControllerInfo::_Internal {
     (*has_bits)[0] |= 8u;
   }
   static void set_has_tuningserviceport(HasBits* has_bits) {
-    (*has_bits)[0] |= 524288u;
+    (*has_bits)[0] |= 65536u;
   }
   static void set_has_tuningservicenetmask(HasBits* has_bits) {
     (*has_bits)[0] |= 16u;
   }
   static void set_has_tuningdatauid(HasBits* has_bits) {
-    (*has_bits)[0] |= 1048576u;
-  }
-  static void set_has_tuningassociatedsignals(HasBits* has_bits) {
-    (*has_bits)[0] |= 32u;
+    (*has_bits)[0] |= 131072u;
   }
   static void set_has_appdataenable(HasBits* has_bits) {
-    (*has_bits)[0] |= 8388608u;
+    (*has_bits)[0] |= 1048576u;
   }
   static void set_has_appdataip(HasBits* has_bits) {
-    (*has_bits)[0] |= 64u;
+    (*has_bits)[0] |= 32u;
   }
   static void set_has_appdataport(HasBits* has_bits) {
-    (*has_bits)[0] |= 2097152u;
+    (*has_bits)[0] |= 262144u;
   }
   static void set_has_appdataserviceid(HasBits* has_bits) {
-    (*has_bits)[0] |= 128u;
+    (*has_bits)[0] |= 64u;
   }
   static void set_has_appdataserviceip(HasBits* has_bits) {
-    (*has_bits)[0] |= 256u;
+    (*has_bits)[0] |= 128u;
   }
   static void set_has_appdataserviceport(HasBits* has_bits) {
-    (*has_bits)[0] |= 33554432u;
+    (*has_bits)[0] |= 4194304u;
   }
   static void set_has_appdataservicenetmask(HasBits* has_bits) {
-    (*has_bits)[0] |= 512u;
+    (*has_bits)[0] |= 256u;
   }
   static void set_has_appdatauid(HasBits* has_bits) {
-    (*has_bits)[0] |= 67108864u;
+    (*has_bits)[0] |= 8388608u;
   }
   static void set_has_appdatasizebytes(HasBits* has_bits) {
-    (*has_bits)[0] |= 134217728u;
-  }
-  static void set_has_appdataframesquantity(HasBits* has_bits) {
-    (*has_bits)[0] |= 268435456u;
-  }
-  static void set_has_overrideappdatawordcount(HasBits* has_bits) {
-    (*has_bits)[1] |= 16u;
-  }
-  static void set_has_appdataassociatedsignals(HasBits* has_bits) {
-    (*has_bits)[0] |= 1024u;
-  }
-  static void set_has_diagdataenable(HasBits* has_bits) {
     (*has_bits)[0] |= 16777216u;
   }
-  static void set_has_diagdataip(HasBits* has_bits) {
-    (*has_bits)[0] |= 2048u;
+  static void set_has_appdataframesquantity(HasBits* has_bits) {
+    (*has_bits)[0] |= 33554432u;
   }
-  static void set_has_diagdataport(HasBits* has_bits) {
-    (*has_bits)[0] |= 1073741824u;
-  }
-  static void set_has_diagdataserviceid(HasBits* has_bits) {
-    (*has_bits)[0] |= 4096u;
-  }
-  static void set_has_diagdataserviceip(HasBits* has_bits) {
-    (*has_bits)[0] |= 8192u;
-  }
-  static void set_has_diagdataserviceport(HasBits* has_bits) {
-    (*has_bits)[0] |= 2147483648u;
-  }
-  static void set_has_diagdataservicenetmask(HasBits* has_bits) {
-    (*has_bits)[0] |= 16384u;
-  }
-  static void set_has_diagdatauid(HasBits* has_bits) {
-    (*has_bits)[1] |= 1u;
-  }
-  static void set_has_diagdatasizebytes(HasBits* has_bits) {
+  static void set_has_overrideappdatawordcount(HasBits* has_bits) {
     (*has_bits)[1] |= 2u;
   }
-  static void set_has_diagdataframesquantity(HasBits* has_bits) {
+  static void set_has_diagdataenable(HasBits* has_bits) {
+    (*has_bits)[0] |= 2097152u;
+  }
+  static void set_has_diagdataip(HasBits* has_bits) {
+    (*has_bits)[0] |= 512u;
+  }
+  static void set_has_diagdataport(HasBits* has_bits) {
+    (*has_bits)[0] |= 134217728u;
+  }
+  static void set_has_diagdataserviceid(HasBits* has_bits) {
+    (*has_bits)[0] |= 1024u;
+  }
+  static void set_has_diagdataserviceip(HasBits* has_bits) {
+    (*has_bits)[0] |= 2048u;
+  }
+  static void set_has_diagdataserviceport(HasBits* has_bits) {
+    (*has_bits)[0] |= 268435456u;
+  }
+  static void set_has_diagdataservicenetmask(HasBits* has_bits) {
+    (*has_bits)[0] |= 4096u;
+  }
+  static void set_has_diagdatauid(HasBits* has_bits) {
     (*has_bits)[0] |= 536870912u;
   }
-  static void set_has_overridediagdatawordcount(HasBits* has_bits) {
-    (*has_bits)[1] |= 4u;
+  static void set_has_diagdatasizebytes(HasBits* has_bits) {
+    (*has_bits)[0] |= 1073741824u;
   }
-  static void set_has_diagdataassociatedsignals(HasBits* has_bits) {
-    (*has_bits)[0] |= 32768u;
+  static void set_has_diagdataframesquantity(HasBits* has_bits) {
+    (*has_bits)[0] |= 67108864u;
+  }
+  static void set_has_overridediagdatawordcount(HasBits* has_bits) {
+    (*has_bits)[0] |= 2147483648u;
   }
 };
 
@@ -5422,11 +5402,6 @@ LanControllerInfo::LanControllerInfo(const LanControllerInfo& from)
     tuningservicenetmask_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_tuningservicenetmask(), 
       GetArena());
   }
-  tuningassociatedsignals_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (from._internal_has_tuningassociatedsignals()) {
-    tuningassociatedsignals_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_tuningassociatedsignals(), 
-      GetArena());
-  }
   appdataip_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (from._internal_has_appdataip()) {
     appdataip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_appdataip(), 
@@ -5445,11 +5420,6 @@ LanControllerInfo::LanControllerInfo(const LanControllerInfo& from)
   appdataservicenetmask_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (from._internal_has_appdataservicenetmask()) {
     appdataservicenetmask_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_appdataservicenetmask(), 
-      GetArena());
-  }
-  appdataassociatedsignals_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (from._internal_has_appdataassociatedsignals()) {
-    appdataassociatedsignals_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_appdataassociatedsignals(), 
       GetArena());
   }
   diagdataip_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -5472,11 +5442,6 @@ LanControllerInfo::LanControllerInfo(const LanControllerInfo& from)
     diagdataservicenetmask_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_diagdataservicenetmask(), 
       GetArena());
   }
-  diagdataassociatedsignals_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (from._internal_has_diagdataassociatedsignals()) {
-    diagdataassociatedsignals_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_diagdataassociatedsignals(), 
-      GetArena());
-  }
   ::memcpy(&lancontrollertype_, &from.lancontrollertype_,
     static_cast<size_t>(reinterpret_cast<char*>(&overrideappdatawordcount_) -
     reinterpret_cast<char*>(&lancontrollertype_)) + sizeof(overrideappdatawordcount_));
@@ -5489,17 +5454,14 @@ tuningip_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlr
 tuningserviceid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 tuningserviceip_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 tuningservicenetmask_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-tuningassociatedsignals_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 appdataip_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 appdataserviceid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 appdataserviceip_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 appdataservicenetmask_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-appdataassociatedsignals_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 diagdataip_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 diagdataserviceid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 diagdataserviceip_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 diagdataservicenetmask_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-diagdataassociatedsignals_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&lancontrollertype_) - reinterpret_cast<char*>(this)),
     0, static_cast<size_t>(reinterpret_cast<char*>(&diagdatasizebytes_) -
@@ -5522,17 +5484,14 @@ void LanControllerInfo::SharedDtor() {
   tuningserviceid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   tuningserviceip_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   tuningservicenetmask_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  tuningassociatedsignals_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   appdataip_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   appdataserviceid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   appdataserviceip_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   appdataservicenetmask_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  appdataassociatedsignals_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   diagdataip_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   diagdataserviceid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   diagdataserviceip_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   diagdataservicenetmask_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  diagdataassociatedsignals_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void LanControllerInfo::ArenaDtor(void* object) {
@@ -5569,57 +5528,50 @@ void LanControllerInfo::Clear() {
       tuningservicenetmask_.ClearNonDefaultToEmpty();
     }
     if (cached_has_bits & 0x00000020u) {
-      tuningassociatedsignals_.ClearNonDefaultToEmpty();
-    }
-    if (cached_has_bits & 0x00000040u) {
       appdataip_.ClearNonDefaultToEmpty();
     }
-    if (cached_has_bits & 0x00000080u) {
+    if (cached_has_bits & 0x00000040u) {
       appdataserviceid_.ClearNonDefaultToEmpty();
     }
-  }
-  if (cached_has_bits & 0x0000ff00u) {
-    if (cached_has_bits & 0x00000100u) {
+    if (cached_has_bits & 0x00000080u) {
       appdataserviceip_.ClearNonDefaultToEmpty();
     }
-    if (cached_has_bits & 0x00000200u) {
+  }
+  if (cached_has_bits & 0x00001f00u) {
+    if (cached_has_bits & 0x00000100u) {
       appdataservicenetmask_.ClearNonDefaultToEmpty();
     }
-    if (cached_has_bits & 0x00000400u) {
-      appdataassociatedsignals_.ClearNonDefaultToEmpty();
-    }
-    if (cached_has_bits & 0x00000800u) {
+    if (cached_has_bits & 0x00000200u) {
       diagdataip_.ClearNonDefaultToEmpty();
     }
-    if (cached_has_bits & 0x00001000u) {
+    if (cached_has_bits & 0x00000400u) {
       diagdataserviceid_.ClearNonDefaultToEmpty();
     }
-    if (cached_has_bits & 0x00002000u) {
+    if (cached_has_bits & 0x00000800u) {
       diagdataserviceip_.ClearNonDefaultToEmpty();
     }
-    if (cached_has_bits & 0x00004000u) {
+    if (cached_has_bits & 0x00001000u) {
       diagdataservicenetmask_.ClearNonDefaultToEmpty();
     }
-    if (cached_has_bits & 0x00008000u) {
-      diagdataassociatedsignals_.ClearNonDefaultToEmpty();
-    }
+  }
+  if (cached_has_bits & 0x0000e000u) {
+    ::memset(&lancontrollertype_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&tuningport_) -
+        reinterpret_cast<char*>(&lancontrollertype_)) + sizeof(tuningport_));
   }
   if (cached_has_bits & 0x00ff0000u) {
-    ::memset(&lancontrollertype_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&appdataenable_) -
-        reinterpret_cast<char*>(&lancontrollertype_)) + sizeof(appdataenable_));
+    ::memset(&tuningserviceport_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&appdatauid_) -
+        reinterpret_cast<char*>(&tuningserviceport_)) + sizeof(appdatauid_));
   }
   if (cached_has_bits & 0xff000000u) {
-    ::memset(&diagdataenable_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&diagdataserviceport_) -
-        reinterpret_cast<char*>(&diagdataenable_)) + sizeof(diagdataserviceport_));
+    ::memset(&appdatasizebytes_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&diagdatasizebytes_) -
+        reinterpret_cast<char*>(&appdatasizebytes_)) + sizeof(diagdatasizebytes_));
+    overridediagdatawordcount_ = -1;
   }
   cached_has_bits = _has_bits_[1];
-  if (cached_has_bits & 0x0000001fu) {
-    ::memset(&diagdatauid_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&diagdatasizebytes_) -
-        reinterpret_cast<char*>(&diagdatauid_)) + sizeof(diagdatasizebytes_));
-    overridediagdatawordcount_ = -1;
+  if (cached_has_bits & 0x00000003u) {
     controllerno_ = -1;
     overrideappdatawordcount_ = -1;
   }
@@ -5745,17 +5697,6 @@ const char* LanControllerInfo::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional string tuningAssociatedSignals = 18;
-      case 18:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 146)) {
-          auto str = _internal_mutable_tuningassociatedsignals();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.LanControllerInfo.tuningAssociatedSignals");
-          #endif  // !NDEBUG
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
       // optional bool appDataEnable = 20 [default = false];
       case 20:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 160)) {
@@ -5853,17 +5794,6 @@ const char* LanControllerInfo::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 240)) {
           _Internal::set_has_overrideappdatawordcount(&_has_bits_);
           overrideappdatawordcount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional string appDataAssociatedSignals = 31;
-      case 31:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 250)) {
-          auto str = _internal_mutable_appdataassociatedsignals();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.LanControllerInfo.appDataAssociatedSignals");
-          #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -5967,17 +5897,6 @@ const char* LanControllerInfo::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional string diagDataAssociatedSignals = 51;
-      case 51:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 154)) {
-          auto str = _internal_mutable_diagdataassociatedsignals();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.LanControllerInfo.diagDataAssociatedSignals");
-          #endif  // !NDEBUG
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
       default: {
       handle_unusual:
         if ((tag & 7) == 4 || tag == 0) {
@@ -6019,26 +5938,26 @@ failure:
 
   cached_has_bits = _has_bits_[1];
   // optional int32 controllerNo = 2 [default = -1];
-  if (cached_has_bits & 0x00000008u) {
+  if (cached_has_bits & 0x00000001u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_controllerno(), target);
   }
 
   cached_has_bits = _has_bits_[0];
   // optional int32 lanControllerType = 3 [default = 0];
-  if (cached_has_bits & 0x00010000u) {
+  if (cached_has_bits & 0x00002000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_lancontrollertype(), target);
   }
 
   // optional int32 channel = 4 [default = 0];
-  if (cached_has_bits & 0x00020000u) {
+  if (cached_has_bits & 0x00004000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(4, this->_internal_channel(), target);
   }
 
   // optional bool tuningEnable = 10 [default = false];
-  if (cached_has_bits & 0x00400000u) {
+  if (cached_has_bits & 0x00080000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(10, this->_internal_tuningenable(), target);
   }
@@ -6054,7 +5973,7 @@ failure:
   }
 
   // optional int32 tuningPort = 12 [default = 0];
-  if (cached_has_bits & 0x00040000u) {
+  if (cached_has_bits & 0x00008000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(12, this->_internal_tuningport(), target);
   }
@@ -6080,7 +5999,7 @@ failure:
   }
 
   // optional int32 tuningServicePort = 15 [default = 0];
-  if (cached_has_bits & 0x00080000u) {
+  if (cached_has_bits & 0x00010000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(15, this->_internal_tuningserviceport(), target);
   }
@@ -6096,29 +6015,19 @@ failure:
   }
 
   // optional uint64 tuningdatauid = 17;
-  if (cached_has_bits & 0x00100000u) {
+  if (cached_has_bits & 0x00020000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(17, this->_internal_tuningdatauid(), target);
   }
 
-  // optional string tuningAssociatedSignals = 18;
-  if (cached_has_bits & 0x00000020u) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->_internal_tuningassociatedsignals().data(), static_cast<int>(this->_internal_tuningassociatedsignals().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Network.LanControllerInfo.tuningAssociatedSignals");
-    target = stream->WriteStringMaybeAliased(
-        18, this->_internal_tuningassociatedsignals(), target);
-  }
-
   // optional bool appDataEnable = 20 [default = false];
-  if (cached_has_bits & 0x00800000u) {
+  if (cached_has_bits & 0x00100000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(20, this->_internal_appdataenable(), target);
   }
 
   // optional string appDataIP = 21;
-  if (cached_has_bits & 0x00000040u) {
+  if (cached_has_bits & 0x00000020u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_appdataip().data(), static_cast<int>(this->_internal_appdataip().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
@@ -6128,13 +6037,13 @@ failure:
   }
 
   // optional int32 appDataPort = 22 [default = 0];
-  if (cached_has_bits & 0x00200000u) {
+  if (cached_has_bits & 0x00040000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(22, this->_internal_appdataport(), target);
   }
 
   // optional string appDataServiceID = 23;
-  if (cached_has_bits & 0x00000080u) {
+  if (cached_has_bits & 0x00000040u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_appdataserviceid().data(), static_cast<int>(this->_internal_appdataserviceid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
@@ -6144,7 +6053,7 @@ failure:
   }
 
   // optional string appDataServiceIP = 24;
-  if (cached_has_bits & 0x00000100u) {
+  if (cached_has_bits & 0x00000080u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_appdataserviceip().data(), static_cast<int>(this->_internal_appdataserviceip().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
@@ -6154,13 +6063,13 @@ failure:
   }
 
   // optional int32 appDataServicePort = 25 [default = 0];
-  if (cached_has_bits & 0x02000000u) {
+  if (cached_has_bits & 0x00400000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(25, this->_internal_appdataserviceport(), target);
   }
 
   // optional string appDataServiceNetmask = 26;
-  if (cached_has_bits & 0x00000200u) {
+  if (cached_has_bits & 0x00000100u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_appdataservicenetmask().data(), static_cast<int>(this->_internal_appdataservicenetmask().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
@@ -6170,49 +6079,39 @@ failure:
   }
 
   // optional uint32 appDataUID = 27 [default = 0];
-  if (cached_has_bits & 0x04000000u) {
+  if (cached_has_bits & 0x00800000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(27, this->_internal_appdatauid(), target);
   }
 
   // optional int32 appDataSizeBytes = 28 [default = 0];
-  if (cached_has_bits & 0x08000000u) {
+  if (cached_has_bits & 0x01000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(28, this->_internal_appdatasizebytes(), target);
   }
 
   // optional int32 appDataFramesQuantity = 29 [default = 0];
-  if (cached_has_bits & 0x10000000u) {
+  if (cached_has_bits & 0x02000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(29, this->_internal_appdataframesquantity(), target);
   }
 
   cached_has_bits = _has_bits_[1];
   // optional int32 overrideAppDataWordCount = 30 [default = -1];
-  if (cached_has_bits & 0x00000010u) {
+  if (cached_has_bits & 0x00000002u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(30, this->_internal_overrideappdatawordcount(), target);
   }
 
   cached_has_bits = _has_bits_[0];
-  // optional string appDataAssociatedSignals = 31;
-  if (cached_has_bits & 0x00000400u) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->_internal_appdataassociatedsignals().data(), static_cast<int>(this->_internal_appdataassociatedsignals().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Network.LanControllerInfo.appDataAssociatedSignals");
-    target = stream->WriteStringMaybeAliased(
-        31, this->_internal_appdataassociatedsignals(), target);
-  }
-
   // optional bool diagDataEnable = 40 [default = false];
-  if (cached_has_bits & 0x01000000u) {
+  if (cached_has_bits & 0x00200000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(40, this->_internal_diagdataenable(), target);
   }
 
   // optional string diagDataIP = 41;
-  if (cached_has_bits & 0x00000800u) {
+  if (cached_has_bits & 0x00000200u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_diagdataip().data(), static_cast<int>(this->_internal_diagdataip().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
@@ -6222,13 +6121,13 @@ failure:
   }
 
   // optional int32 diagDataPort = 42 [default = 0];
-  if (cached_has_bits & 0x40000000u) {
+  if (cached_has_bits & 0x08000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(42, this->_internal_diagdataport(), target);
   }
 
   // optional string diagDataServiceID = 43;
-  if (cached_has_bits & 0x00001000u) {
+  if (cached_has_bits & 0x00000400u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_diagdataserviceid().data(), static_cast<int>(this->_internal_diagdataserviceid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
@@ -6238,7 +6137,7 @@ failure:
   }
 
   // optional string diagDataServiceIP = 44;
-  if (cached_has_bits & 0x00002000u) {
+  if (cached_has_bits & 0x00000800u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_diagdataserviceip().data(), static_cast<int>(this->_internal_diagdataserviceip().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
@@ -6248,13 +6147,13 @@ failure:
   }
 
   // optional int32 diagDataServicePort = 45 [default = 0];
-  if (cached_has_bits & 0x80000000u) {
+  if (cached_has_bits & 0x10000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(45, this->_internal_diagdataserviceport(), target);
   }
 
   // optional string diagDataServiceNetmask = 46;
-  if (cached_has_bits & 0x00004000u) {
+  if (cached_has_bits & 0x00001000u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_diagdataservicenetmask().data(), static_cast<int>(this->_internal_diagdataservicenetmask().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
@@ -6263,42 +6162,28 @@ failure:
         46, this->_internal_diagdataservicenetmask(), target);
   }
 
-  cached_has_bits = _has_bits_[1];
   // optional uint32 diagDataUID = 47 [default = 0];
-  if (cached_has_bits & 0x00000001u) {
+  if (cached_has_bits & 0x20000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(47, this->_internal_diagdatauid(), target);
   }
 
   // optional int32 diagDataSizeBytes = 48 [default = 0];
-  if (cached_has_bits & 0x00000002u) {
+  if (cached_has_bits & 0x40000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(48, this->_internal_diagdatasizebytes(), target);
   }
 
-  cached_has_bits = _has_bits_[0];
   // optional int32 diagDataFramesQuantity = 49 [default = 0];
-  if (cached_has_bits & 0x20000000u) {
+  if (cached_has_bits & 0x04000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(49, this->_internal_diagdataframesquantity(), target);
   }
 
-  cached_has_bits = _has_bits_[1];
   // optional int32 overrideDiagDataWordCount = 50 [default = -1];
-  if (cached_has_bits & 0x00000004u) {
+  if (cached_has_bits & 0x80000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(50, this->_internal_overridediagdatawordcount(), target);
-  }
-
-  cached_has_bits = _has_bits_[0];
-  // optional string diagDataAssociatedSignals = 51;
-  if (cached_has_bits & 0x00008000u) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->_internal_diagdataassociatedsignals().data(), static_cast<int>(this->_internal_diagdataassociatedsignals().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Network.LanControllerInfo.diagDataAssociatedSignals");
-    target = stream->WriteStringMaybeAliased(
-        51, this->_internal_diagdataassociatedsignals(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -6354,228 +6239,207 @@ size_t LanControllerInfo::ByteSizeLong() const {
           this->_internal_tuningservicenetmask());
     }
 
-    // optional string tuningAssociatedSignals = 18;
-    if (cached_has_bits & 0x00000020u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-          this->_internal_tuningassociatedsignals());
-    }
-
     // optional string appDataIP = 21;
-    if (cached_has_bits & 0x00000040u) {
+    if (cached_has_bits & 0x00000020u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_appdataip());
     }
 
     // optional string appDataServiceID = 23;
-    if (cached_has_bits & 0x00000080u) {
+    if (cached_has_bits & 0x00000040u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_appdataserviceid());
     }
 
-  }
-  if (cached_has_bits & 0x0000ff00u) {
     // optional string appDataServiceIP = 24;
-    if (cached_has_bits & 0x00000100u) {
+    if (cached_has_bits & 0x00000080u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_appdataserviceip());
     }
 
+  }
+  if (cached_has_bits & 0x0000ff00u) {
     // optional string appDataServiceNetmask = 26;
-    if (cached_has_bits & 0x00000200u) {
+    if (cached_has_bits & 0x00000100u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_appdataservicenetmask());
     }
 
-    // optional string appDataAssociatedSignals = 31;
-    if (cached_has_bits & 0x00000400u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-          this->_internal_appdataassociatedsignals());
-    }
-
     // optional string diagDataIP = 41;
-    if (cached_has_bits & 0x00000800u) {
+    if (cached_has_bits & 0x00000200u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_diagdataip());
     }
 
     // optional string diagDataServiceID = 43;
-    if (cached_has_bits & 0x00001000u) {
+    if (cached_has_bits & 0x00000400u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_diagdataserviceid());
     }
 
     // optional string diagDataServiceIP = 44;
-    if (cached_has_bits & 0x00002000u) {
+    if (cached_has_bits & 0x00000800u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_diagdataserviceip());
     }
 
     // optional string diagDataServiceNetmask = 46;
-    if (cached_has_bits & 0x00004000u) {
+    if (cached_has_bits & 0x00001000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_diagdataservicenetmask());
     }
 
-    // optional string diagDataAssociatedSignals = 51;
-    if (cached_has_bits & 0x00008000u) {
-      total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-          this->_internal_diagdataassociatedsignals());
-    }
-
-  }
-  if (cached_has_bits & 0x00ff0000u) {
     // optional int32 lanControllerType = 3 [default = 0];
-    if (cached_has_bits & 0x00010000u) {
+    if (cached_has_bits & 0x00002000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_lancontrollertype());
     }
 
     // optional int32 channel = 4 [default = 0];
-    if (cached_has_bits & 0x00020000u) {
+    if (cached_has_bits & 0x00004000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_channel());
     }
 
     // optional int32 tuningPort = 12 [default = 0];
-    if (cached_has_bits & 0x00040000u) {
+    if (cached_has_bits & 0x00008000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_tuningport());
     }
 
+  }
+  if (cached_has_bits & 0x00ff0000u) {
     // optional int32 tuningServicePort = 15 [default = 0];
-    if (cached_has_bits & 0x00080000u) {
+    if (cached_has_bits & 0x00010000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_tuningserviceport());
     }
 
     // optional uint64 tuningdatauid = 17;
-    if (cached_has_bits & 0x00100000u) {
+    if (cached_has_bits & 0x00020000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
           this->_internal_tuningdatauid());
     }
 
     // optional int32 appDataPort = 22 [default = 0];
-    if (cached_has_bits & 0x00200000u) {
+    if (cached_has_bits & 0x00040000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_appdataport());
     }
 
     // optional bool tuningEnable = 10 [default = false];
-    if (cached_has_bits & 0x00400000u) {
+    if (cached_has_bits & 0x00080000u) {
       total_size += 1 + 1;
     }
 
     // optional bool appDataEnable = 20 [default = false];
-    if (cached_has_bits & 0x00800000u) {
+    if (cached_has_bits & 0x00100000u) {
       total_size += 2 + 1;
     }
 
-  }
-  if (cached_has_bits & 0xff000000u) {
     // optional bool diagDataEnable = 40 [default = false];
-    if (cached_has_bits & 0x01000000u) {
+    if (cached_has_bits & 0x00200000u) {
       total_size += 2 + 1;
     }
 
     // optional int32 appDataServicePort = 25 [default = 0];
-    if (cached_has_bits & 0x02000000u) {
+    if (cached_has_bits & 0x00400000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_appdataserviceport());
     }
 
     // optional uint32 appDataUID = 27 [default = 0];
-    if (cached_has_bits & 0x04000000u) {
+    if (cached_has_bits & 0x00800000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
           this->_internal_appdatauid());
     }
 
+  }
+  if (cached_has_bits & 0xff000000u) {
     // optional int32 appDataSizeBytes = 28 [default = 0];
-    if (cached_has_bits & 0x08000000u) {
+    if (cached_has_bits & 0x01000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_appdatasizebytes());
     }
 
     // optional int32 appDataFramesQuantity = 29 [default = 0];
-    if (cached_has_bits & 0x10000000u) {
+    if (cached_has_bits & 0x02000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_appdataframesquantity());
     }
 
     // optional int32 diagDataFramesQuantity = 49 [default = 0];
-    if (cached_has_bits & 0x20000000u) {
+    if (cached_has_bits & 0x04000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_diagdataframesquantity());
     }
 
     // optional int32 diagDataPort = 42 [default = 0];
-    if (cached_has_bits & 0x40000000u) {
+    if (cached_has_bits & 0x08000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_diagdataport());
     }
 
     // optional int32 diagDataServicePort = 45 [default = 0];
-    if (cached_has_bits & 0x80000000u) {
+    if (cached_has_bits & 0x10000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_diagdataserviceport());
     }
 
-  }
-  cached_has_bits = _has_bits_[1];
-  if (cached_has_bits & 0x0000001fu) {
     // optional uint32 diagDataUID = 47 [default = 0];
-    if (cached_has_bits & 0x00000001u) {
+    if (cached_has_bits & 0x20000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
           this->_internal_diagdatauid());
     }
 
     // optional int32 diagDataSizeBytes = 48 [default = 0];
-    if (cached_has_bits & 0x00000002u) {
+    if (cached_has_bits & 0x40000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_diagdatasizebytes());
     }
 
     // optional int32 overrideDiagDataWordCount = 50 [default = -1];
-    if (cached_has_bits & 0x00000004u) {
+    if (cached_has_bits & 0x80000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_overridediagdatawordcount());
     }
 
+  }
+  cached_has_bits = _has_bits_[1];
+  if (cached_has_bits & 0x00000003u) {
     // optional int32 controllerNo = 2 [default = -1];
-    if (cached_has_bits & 0x00000008u) {
+    if (cached_has_bits & 0x00000001u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_controllerno());
     }
 
     // optional int32 overrideAppDataWordCount = 30 [default = -1];
-    if (cached_has_bits & 0x00000010u) {
+    if (cached_has_bits & 0x00000002u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_overrideappdatawordcount());
@@ -6631,110 +6495,102 @@ void LanControllerInfo::MergeFrom(const LanControllerInfo& from) {
       _internal_set_tuningservicenetmask(from._internal_tuningservicenetmask());
     }
     if (cached_has_bits & 0x00000020u) {
-      _internal_set_tuningassociatedsignals(from._internal_tuningassociatedsignals());
-    }
-    if (cached_has_bits & 0x00000040u) {
       _internal_set_appdataip(from._internal_appdataip());
     }
-    if (cached_has_bits & 0x00000080u) {
+    if (cached_has_bits & 0x00000040u) {
       _internal_set_appdataserviceid(from._internal_appdataserviceid());
+    }
+    if (cached_has_bits & 0x00000080u) {
+      _internal_set_appdataserviceip(from._internal_appdataserviceip());
     }
   }
   if (cached_has_bits & 0x0000ff00u) {
     if (cached_has_bits & 0x00000100u) {
-      _internal_set_appdataserviceip(from._internal_appdataserviceip());
-    }
-    if (cached_has_bits & 0x00000200u) {
       _internal_set_appdataservicenetmask(from._internal_appdataservicenetmask());
     }
-    if (cached_has_bits & 0x00000400u) {
-      _internal_set_appdataassociatedsignals(from._internal_appdataassociatedsignals());
-    }
-    if (cached_has_bits & 0x00000800u) {
+    if (cached_has_bits & 0x00000200u) {
       _internal_set_diagdataip(from._internal_diagdataip());
     }
-    if (cached_has_bits & 0x00001000u) {
+    if (cached_has_bits & 0x00000400u) {
       _internal_set_diagdataserviceid(from._internal_diagdataserviceid());
     }
-    if (cached_has_bits & 0x00002000u) {
+    if (cached_has_bits & 0x00000800u) {
       _internal_set_diagdataserviceip(from._internal_diagdataserviceip());
     }
-    if (cached_has_bits & 0x00004000u) {
+    if (cached_has_bits & 0x00001000u) {
       _internal_set_diagdataservicenetmask(from._internal_diagdataservicenetmask());
     }
-    if (cached_has_bits & 0x00008000u) {
-      _internal_set_diagdataassociatedsignals(from._internal_diagdataassociatedsignals());
+    if (cached_has_bits & 0x00002000u) {
+      lancontrollertype_ = from.lancontrollertype_;
     }
+    if (cached_has_bits & 0x00004000u) {
+      channel_ = from.channel_;
+    }
+    if (cached_has_bits & 0x00008000u) {
+      tuningport_ = from.tuningport_;
+    }
+    _has_bits_[0] |= cached_has_bits;
   }
   if (cached_has_bits & 0x00ff0000u) {
     if (cached_has_bits & 0x00010000u) {
-      lancontrollertype_ = from.lancontrollertype_;
-    }
-    if (cached_has_bits & 0x00020000u) {
-      channel_ = from.channel_;
-    }
-    if (cached_has_bits & 0x00040000u) {
-      tuningport_ = from.tuningport_;
-    }
-    if (cached_has_bits & 0x00080000u) {
       tuningserviceport_ = from.tuningserviceport_;
     }
-    if (cached_has_bits & 0x00100000u) {
+    if (cached_has_bits & 0x00020000u) {
       tuningdatauid_ = from.tuningdatauid_;
     }
-    if (cached_has_bits & 0x00200000u) {
+    if (cached_has_bits & 0x00040000u) {
       appdataport_ = from.appdataport_;
     }
-    if (cached_has_bits & 0x00400000u) {
+    if (cached_has_bits & 0x00080000u) {
       tuningenable_ = from.tuningenable_;
     }
-    if (cached_has_bits & 0x00800000u) {
+    if (cached_has_bits & 0x00100000u) {
       appdataenable_ = from.appdataenable_;
+    }
+    if (cached_has_bits & 0x00200000u) {
+      diagdataenable_ = from.diagdataenable_;
+    }
+    if (cached_has_bits & 0x00400000u) {
+      appdataserviceport_ = from.appdataserviceport_;
+    }
+    if (cached_has_bits & 0x00800000u) {
+      appdatauid_ = from.appdatauid_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
   if (cached_has_bits & 0xff000000u) {
     if (cached_has_bits & 0x01000000u) {
-      diagdataenable_ = from.diagdataenable_;
-    }
-    if (cached_has_bits & 0x02000000u) {
-      appdataserviceport_ = from.appdataserviceport_;
-    }
-    if (cached_has_bits & 0x04000000u) {
-      appdatauid_ = from.appdatauid_;
-    }
-    if (cached_has_bits & 0x08000000u) {
       appdatasizebytes_ = from.appdatasizebytes_;
     }
-    if (cached_has_bits & 0x10000000u) {
+    if (cached_has_bits & 0x02000000u) {
       appdataframesquantity_ = from.appdataframesquantity_;
     }
-    if (cached_has_bits & 0x20000000u) {
+    if (cached_has_bits & 0x04000000u) {
       diagdataframesquantity_ = from.diagdataframesquantity_;
     }
-    if (cached_has_bits & 0x40000000u) {
+    if (cached_has_bits & 0x08000000u) {
       diagdataport_ = from.diagdataport_;
     }
-    if (cached_has_bits & 0x80000000u) {
+    if (cached_has_bits & 0x10000000u) {
       diagdataserviceport_ = from.diagdataserviceport_;
+    }
+    if (cached_has_bits & 0x20000000u) {
+      diagdatauid_ = from.diagdatauid_;
+    }
+    if (cached_has_bits & 0x40000000u) {
+      diagdatasizebytes_ = from.diagdatasizebytes_;
+    }
+    if (cached_has_bits & 0x80000000u) {
+      overridediagdatawordcount_ = from.overridediagdatawordcount_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
   cached_has_bits = from._has_bits_[1];
-  if (cached_has_bits & 0x0000001fu) {
+  if (cached_has_bits & 0x00000003u) {
     if (cached_has_bits & 0x00000001u) {
-      diagdatauid_ = from.diagdatauid_;
-    }
-    if (cached_has_bits & 0x00000002u) {
-      diagdatasizebytes_ = from.diagdatasizebytes_;
-    }
-    if (cached_has_bits & 0x00000004u) {
-      overridediagdatawordcount_ = from.overridediagdatawordcount_;
-    }
-    if (cached_has_bits & 0x00000008u) {
       controllerno_ = from.controllerno_;
     }
-    if (cached_has_bits & 0x00000010u) {
+    if (cached_has_bits & 0x00000002u) {
       overrideappdatawordcount_ = from.overrideappdatawordcount_;
     }
     _has_bits_[1] |= cached_has_bits;
@@ -6769,17 +6625,14 @@ void LanControllerInfo::InternalSwap(LanControllerInfo* other) {
   tuningserviceid_.Swap(&other->tuningserviceid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   tuningserviceip_.Swap(&other->tuningserviceip_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   tuningservicenetmask_.Swap(&other->tuningservicenetmask_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  tuningassociatedsignals_.Swap(&other->tuningassociatedsignals_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   appdataip_.Swap(&other->appdataip_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   appdataserviceid_.Swap(&other->appdataserviceid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   appdataserviceip_.Swap(&other->appdataserviceip_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   appdataservicenetmask_.Swap(&other->appdataservicenetmask_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  appdataassociatedsignals_.Swap(&other->appdataassociatedsignals_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   diagdataip_.Swap(&other->diagdataip_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   diagdataserviceid_.Swap(&other->diagdataserviceid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   diagdataserviceip_.Swap(&other->diagdataserviceip_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   diagdataservicenetmask_.Swap(&other->diagdataservicenetmask_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  diagdataassociatedsignals_.Swap(&other->diagdataassociatedsignals_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(LanControllerInfo, diagdatasizebytes_)
       + sizeof(LanControllerInfo::diagdatasizebytes_)

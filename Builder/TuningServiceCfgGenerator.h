@@ -3,8 +3,6 @@
 #include "SoftwareCfgGenerator.h"
 #include "../lib/SoftwareSettings.h"
 #include "../lib/TuningDataStorage.h"
-#include "../TuningService/TuningSource.h"
-#include "Builder.h"
 
 namespace Builder
 {

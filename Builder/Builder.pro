@@ -67,6 +67,7 @@ SOURCES += \
     ../lib/LogicModuleSet.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/DataSource.cpp \
+	../lib/SoftwareSettingsGetter.cpp \
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/LmDescription.cpp \
@@ -133,6 +134,7 @@ HEADERS += \
     ../lib/LogicModuleSet.h \
     ../lib/SoftwareSettings.h \
     ../lib/DataSource.h \
+	../lib/SoftwareSettingsGetter.h \
     ../lib/Tuning/TuningFilter.h \
     ../lib/BuildInfo.h \
     ../lib/LmDescription.h \

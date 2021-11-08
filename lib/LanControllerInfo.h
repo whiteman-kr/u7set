@@ -5,23 +5,13 @@
 #include "../UtilsLib/DomXmlHelper.h"
 #include "../UtilsLib/WUtils.h"
 #include "../Proto/network.pb.h"
+#include "../CommonLib/HostAddressPort.h"
 
 struct LanControllerInfo
 {
 	QString equipmentID;
 	int controllerNo = -1;			// == place
 	E::LanControllerType lanControllerType = E::LanControllerType::Unknown;
-	int channel = 0;				// 0 is a First channel!
-
-	// used if LAN controller provide Tuning
-	//
-	bool tuningEnable = false;
-	QString tuningIP;
-	int tuningPort = 0;
-	QString tuningServiceID;
-	QString tuningServiceIP;
-	int tuningServicePort = 0;
-	QString tuningServiceNetmask;
 
 	// used if LAN controller provide AppData
 	//
@@ -32,6 +22,21 @@ struct LanControllerInfo
 	QString appDataServiceIP;
 	int appDataServicePort = 0;
 	QString appDataServiceNetmask;
+	quint32 appDataUID = 0;
+	int appDataSizeBytes = 0;
+	int appDataFramesQuantity = 0;
+	int overrideAppDataWordCount = -1;
+
+	// used if LAN controller provide Tuning
+	//
+	bool tuningEnable = false;
+	QString tuningIP;
+	int tuningPort = 0;
+	QString tuningServiceID;
+	QString tuningServiceIP;
+	int tuningServicePort = 0;
+	QString tuningServiceNetmask;
+	quint64 tuningDataUID = 0;
 
 	// used if LAN controller provide DiagData
 	//
@@ -42,10 +47,20 @@ struct LanControllerInfo
 	QString diagDataServiceIP;
 	int diagDataServicePort = 0;
 	QString diagDataServiceNetmask;
+	quint32 diagDataUID = 0;
+	int diagDataSizeBytes = 0;
+	int diagDataFramesQuantity = 0;
+	int overrideDiagDataWordCount = -1;
 
 	//
 
 	bool isValid() const;
+
+	//
+
+	quint32 appDataIP32() const;
+	quint32 tuningIP32() const;
+	quint32 diagDataIP32() const;
 
 	//
 
@@ -87,10 +102,18 @@ public:
 	const std::vector<LanControllerInfo>& operator()() const;
 
 	const LanControllerInfo& operator[](int index) const;
+	LanControllerInfo& operator[](int index);
+
+	const LanControllerInfo& getFirstCompatibleController(E::LanControllerType type) const;
+
+	std::vector<quint32> tuningIP32addresses() const;
+	std::vector<quint32> appDataIP32addresses() const;
+	std::vector<HostAddressPort> appDataHostAddressPorts() const;
 
 private:
 	const LanControllerInfo& find(int controllerNo) const;
 	const LanControllerInfo& find(const QString& equipmentID) const;
+	const LanControllerInfo& findByIndex(int index) const;
 
 	bool contains(int controllerNo) const;
 	bool contains(const QString& equipmentID) const;

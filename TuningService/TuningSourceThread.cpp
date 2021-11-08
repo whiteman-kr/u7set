@@ -254,12 +254,14 @@ namespace Tuning
 {
 		Q_ASSERT(m_channel >=0 && m_channel < TuningServiceSettings::CHANNELS_COUNT);
 
+		const TuningServiceSettings::ChannelSettings& ch = settings.channelSettings[channel];
+
 		m_isSimulationMode = swRunMode == E::SoftwareRunMode::Simulation;
 
 		const TuningSource& source = m_sourceThread.source();
 
 		m_sourceEquipmentID = source.moduleEquipmentID();
-		m_sourceIP = source.lanHostAddressPort();
+		m_sourceIP = ch.tuningDataIP;
 		m_sourceUniqueID = source.moduleUniqueID();
 		m_lmNumber = static_cast<quint16>(source.lmNumber());
 		m_lmModuleType = static_cast<quint16>(source.moduleType());
@@ -1665,7 +1667,7 @@ namespace Tuning
 
 		int signalCount = tuningSignals.count();
 
-		m_tuningSignals.reserve(signalCount);
+		m_tuningSignals.resize(signalCount);
 
 		for(int i = 0; i < signalCount; i++)
 		{
@@ -1706,15 +1708,16 @@ namespace Tuning
 
 		Q_ASSERT(m_handlers.size() == 0);
 
-		m_handlers.reserve(TuningServiceSettings::CHANNELS_COUNT);
+		m_handlers.resize(TuningServiceSettings::CHANNELS_COUNT);
 
-		for(int channel = 0; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
+		for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
 		{
 			const TuningServiceSettings::ChannelSettings& ch = m_settings.channelSettings[channel];
 
 			if (ch.enable == false)
 			{
 				m_handlers[channel] = nullptr;
+				continue;
 			}
 
 			TuningChannelHandler* handler = new TuningChannelHandler(*this, m_settings, channel, m_swRunMode, m_logger, m_tuningLog);

@@ -216,7 +216,7 @@ bool DataSource::readAdditionalSectionsFromXml(XmlReadHelper&)
 	return true;
 }
 
-bool DataSource::saveToProto(Network::DataSourceInfo* proto, bool includeSignals) const
+bool DataSource::saveToProto(Network::DataSourceInfo* proto) const
 {
 	if (proto == nullptr)
 	{
@@ -290,7 +290,6 @@ quint64 DataSource::generateID() const
 	{
 		crc.add(lci.equipmentID);
 		crc.add(TO_INT(lci.lanControllerType));
-		crc.add(lci.channel);
 
 		crc.add(lci.tuningIP);
 		crc.add(lci.tuningPort);
@@ -594,7 +593,8 @@ QString DataSourceOnline::getTimeStr(qint64 timeMs) const
 				arg(date.year(), 4, 10, QLatin1Char('0'));
 }
 
-void DataSourceOnline::pushRupFrame(qint64 serverTime,
+void DataSourceOnline::pushRupFrame(quint32 sourceIP,
+									qint64 serverTime,
 									bool isSimFrame,
 									const Rup::Frame& rupFrame,
 									const QThread* thread)
@@ -603,6 +603,7 @@ void DataSourceOnline::pushRupFrame(qint64 serverTime,
 
 	if (rupFrameTime != nullptr)
 	{
+		rupFrameTime->sourceIP = sourceIP;
 		rupFrameTime->serverTime = serverTime;
 		rupFrameTime->isSimFrame = isSimFrame;
 		memcpy(&rupFrameTime->rupFrame, &rupFrame, sizeof(rupFrame));
@@ -746,9 +747,9 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 				if (m_errorDataID > 0 && (m_errorDataID % 500) == 0)
 				{
 					QString msg = QString("Wrong DataID from %1 (0x%2, waiting 0x%3), packet processing skiped").
-							arg(lanControllersInfo().appDataIP).
+							arg(rupFrameTime->sourceIP).
 							arg(QString::number(rupFrameHeader.dataId, 16)).
-							arg(QString::number(lanControllersInfo().appDataUID, 16));
+							arg(QString::number(appDataUID(), 16));
 
 					qDebug() << C_STR(msg);
 				}

@@ -110,7 +110,6 @@ message LanControllerInfo
 	optional int32 tuningServicePort = 15 [default = 0];
 	optional string tuningServiceNetmask = 16;
 	optional uint64 tuningdatauid = 17;
-	optional string tuningAssociatedSignals = 18;
 
 	// app data parameters
 
@@ -125,7 +124,6 @@ message LanControllerInfo
 	optional int32 appDataSizeBytes = 28 [default = 0];
 	optional int32 appDataFramesQuantity = 29 [default = 0];
 	optional int32 overrideAppDataWordCount = 30 [default = -1];
-	optional string appDataAssociatedSignals = 31;
 
 	// diag data parameters
 
@@ -140,7 +138,6 @@ message LanControllerInfo
 	optional int32 diagDataSizeBytes = 48 [default = 0];
 	optional int32 diagDataFramesQuantity = 49 [default = 0];
 	optional int32 overrideDiagDataWordCount = 50 [default = -1];
-	optional string diagDataAssociatedSignals = 51;
 }
 
 // Getting Data Sources info

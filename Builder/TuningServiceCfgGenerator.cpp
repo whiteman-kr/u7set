@@ -1,6 +1,8 @@
 #include "TuningServiceCfgGenerator.h"
 #include "Context.h"
-
+#include "Builder.h"
+#include "../TuningService/TuningSource.h"
+#include "../lib/SoftwareSettingsGetter.h"
 
 namespace Builder
 {
@@ -69,12 +71,21 @@ namespace Builder
 
 			TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 
-			for(int channel = 0; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
+			std::set<QString> alreadyAppendSources;
+
+			for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
 			{
 				const TuningServiceSettings::ChannelSettings& ch = settings->channelSettings[channel];
 
 				for(const TuningServiceSettings::TuningSource& tunSrc : ch.sources)
 				{
+					if (alreadyAppendSources.contains(tunSrc.lmEquipmentID) == true)
+					{
+						continue;
+					}
+
+					alreadyAppendSources.insert(tunSrc.lmEquipmentID);
+
 					std::shared_ptr<Hardware::DeviceObject> device = m_equipment->deviceObject(tunSrc.lmEquipmentID);
 
 					if (device == nullptr)
@@ -97,14 +108,11 @@ namespace Builder
 
 					Tuning::TuningSource ts;
 
-					ts.setChannel(channel);
 					ts.setProfile(profile);
 
 					result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm,
 															E::LanControllerType::Tuning,
-															tunSrc.portEquipmentID,
-															m_context,
-															&ts);
+															m_context, &ts);
 					if (result == false)
 					{
 						continue;

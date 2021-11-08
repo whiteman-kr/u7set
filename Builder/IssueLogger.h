@@ -180,6 +180,9 @@ namespace Builder
 		void errCFG3044(QString equipmentID, QString profileID);	// Equipment object %1 is not found (Settings profile - %2).
 		void errCFG3045(QString equipmentID, QString propertyName, QString profileID);	// Property %1.%2 is not found (Settings profile - %3).
 
+		void errCFG3046(QString prop1, QString prop2,
+						QString obj1, QString obj2);				// Value of properties pair %1:%2 of objects %3 and %4 are equal.
+
 
 		// ALP			Application Logic Parsing				4000-4999
 		//

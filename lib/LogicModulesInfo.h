@@ -41,6 +41,8 @@ public:
 	int appDataSizeBytes = 0;
 	quint32 appDataUID = 0;
 
+	quint64 tuningDataUID = 0;
+
 	bool diagDataEnable = false;
 	int diagDataSizeBytes = 0;
 	quint32 diagDataUID = 0;

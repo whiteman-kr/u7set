@@ -63,7 +63,7 @@ public:
 	void clearAssociatedSignals(E::LanControllerType lanType);
 	const QStringList& associatedSignals(E::LanControllerType lanType) const;
 
-	QString prfile() const { return m_profile; }
+	QString profile() const { return m_profile; }
 	void setProfile(QString profile) { m_profile = profile; }
 
 	int moduleWorkcycle_ms() const { return m_moduleWorkcycle_mcs / 1000; }
@@ -76,8 +76,12 @@ public:
 	virtual void writeAdditionalSectionsToXml(XmlWriteHelper&) const;
 	virtual bool readAdditionalSectionsFromXml(XmlReadHelper&);
 
-	bool saveToProto(Network::DataSourceInfo* protoInfo, bool includeSignals) const;
+	bool saveToProto(Network::DataSourceInfo* protoInfo) const;
 	bool loadFromProto(const Network::DataSourceInfo& proto);
+
+	//
+
+	//
 
 private:
 	quint64 generateID() const;
@@ -127,6 +131,7 @@ class DataSourceOnline : public DataSource
 private:
 	struct RupFrameTime
 	{
+		quint32 sourceIP = 0;
 		qint64 serverTime = 0;
 		bool isSimFrame = false;
 
@@ -223,7 +228,8 @@ public:
 
 	// Functions used by receiver thread
 	//
-	void pushRupFrame(qint64 serverTime,
+	void pushRupFrame(quint32 sourceIP,
+					  qint64 serverTime,
 					  bool isSimFrame,
 					  const Rup::Frame& rupFrame,
 					  const QThread* thread);

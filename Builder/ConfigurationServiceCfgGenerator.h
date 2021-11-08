@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
-#include "../lib/SoftwareSettings.h"
 
 namespace Builder
 {

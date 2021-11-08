@@ -695,12 +695,12 @@ namespace Tuning
 			QVector<AppSignal*> signalList;
 			tuningSource.tuningData()->getSignals(&signalList);
 
-			quint32 ip = tuningSource.lanAddress32();
-
 			if (signalList.isEmpty() == true)
 			{
 				continue;
 			}
+
+			std::vector<quint32> IPs = tuningSource.lanControllersInfo().tuningIP32addresses();
 
 			for(const AppSignal* signal : signalList)
 			{
@@ -709,7 +709,12 @@ namespace Tuning
 				Hash signalHash = calcHash(signal->appSignalID());
 
 				m_signalHash2SignalPtr.insert(signalHash, signal);
-				m_signalHash2SourceIP.insert(signalHash, ip);
+
+				for(auto ip : IPs)
+				{
+					m_signalHash2SourceIP.insert(signalHash, ip);
+				}
+
 				m_sourceId2SignalHash.insert(tuningSource.ID(), signalHash);
 			}
 		}

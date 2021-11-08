@@ -1,6 +1,12 @@
 #include "AppDataServiceCfgGenerator.h"
 #include "Builder.h"
 
+#include "../UtilsLib/XmlHelper.h"
+#include "../UtilsLib/WUtils.h"
+#include "../lib/DeviceHelper.h"
+#include "../lib/DataSource.h"
+#include "../lib/SoftwareSettingsGetter.h"
+
 class DataSource;
 
 namespace Builder
@@ -75,36 +81,15 @@ namespace Builder
 				continue;
 			}
 
-			std::shared_ptr<LmDescription> lmDescription = m_context->m_lmDescriptions->get(lm);
+			DataSource ds;
 
-			if (lmDescription == nullptr)
-			{
-				LOG_INTERNAL_ERROR_MSG(m_log, QString("LmDescription is not found for module %1").arg(lm->equipmentIdTemplate()));
-				result = false;
-				continue;
-			}
-
-			const LmDescription::Lan& lan = lmDescription->lan();
-
+			result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm, E::LanControllerType::AppData,
+																		m_context, &ds);
 			int connectedAdaptersCount = 0;
 
-			for(const LmDescription::LanController& lanController : lan.m_lanControllers)
+			for(const LanControllerInfo& lan : ds.lanControllersInfo()())
 			{
-				if (lanController.isProvideAppData() == false)
-				{
-					continue;
-				}
-
-				DataSource ds;
-
-				result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm,
-																			E::LanControllerType::AppData,
-																			lanController.m_place,
-																			m_context,
-																			&ds);
-				const LanControllerInfo& dsLan = ds.lanControllersInfo();
-
-				if (dsLan.appDataEnable == false || dsLan.appDataServiceID != m_software->equipmentIdTemplate())
+				if (lan.appDataEnable == false || lan.appDataServiceID != m_software->equipmentIdTemplate())
 				{
 					continue;
 				}
@@ -118,12 +103,12 @@ namespace Builder
 					continue;
 				}
 
-				if ((ds.lanHostAddressPort().address32() & receivingNetmask) != receivingSubnet)
+				if ((QHostAddress(lan.appDataIP).toIPv4Address() & receivingNetmask) != receivingSubnet)
 				{
 					// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
 					//
-					m_log->errCFG3043(dsLan.appDataIP,
-									  dsLan.equipmentID,
+					m_log->errCFG3043(lan.appDataIP,
+									  lan.equipmentID,
 									  settings->appDataReceivingIP.addressStr(),
 									  equipmentID());
 					result = false;

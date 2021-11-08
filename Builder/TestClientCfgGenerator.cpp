@@ -1,5 +1,8 @@
 #include "TestClientCfgGenerator.h"
 
+#include "../lib/SoftwareSettings.h"
+#include "../lib/SoftwareSettingsGetter.h"
+
 namespace Builder
 {
 	TestClientCfgGenerator::TestClientCfgGenerator(Context* context, Hardware::Software* software) :

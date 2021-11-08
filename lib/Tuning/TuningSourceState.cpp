@@ -21,7 +21,7 @@ QString TuningSource::equipmentId() const
 
 QString TuningSource::lanEquipmentId() const
 {
-	return QString::fromStdString(info.lancontrollerinfo().equipmentid());
+	return QString::fromStdString(info.lancontrollerinfo(0).equipmentid());
 }
 
 void TuningSource::setNewState(const ::Network::TuningSourceState& newState)

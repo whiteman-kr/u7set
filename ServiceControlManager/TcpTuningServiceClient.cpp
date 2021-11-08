@@ -248,7 +248,7 @@ void TcpTuningServiceClient::onGetTuningSourcesInfo(const char *replyData, quint
 
 		for (const TuningSource& ts : m_tuningSources)
 		{
-			if (ts.id() == dsi.id() && ts.lanEquipmentId() == QString::fromStdString(dsi.lancontrollerinfo().equipmentid()))
+			if (ts.id() == dsi.id() && ts.lanEquipmentId() == QString::fromStdString(dsi.lancontrollerinfo(0).equipmentid()))
 			{
 				isAlreadyExists = true;
 				break;

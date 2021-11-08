@@ -525,7 +525,7 @@ namespace Builder
 		xmlWriter.writeStartElement(XmlElement::SOFTWARE);
 
 		xmlWriter.writeAttribute(XmlAttribute::CAPTION, m_software->caption());
-		xmlWriter.writeAttribute(XmlAttribute::ID, m_software->equipmentIdTemplate());
+		xmlWriter.writeAttribute(XmlAttribute::EQUIPMENT_ID, m_software->equipmentIdTemplate());
 		xmlWriter.writeAttribute(XmlAttribute::TYPE, QString("%1").arg(static_cast<int>(m_software->softwareType())));
 
 		if (finalizeSection == true)

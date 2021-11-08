@@ -244,9 +244,53 @@ bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 	return result;
 }
 
+bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
+									E::LanControllerType lanControllerType,
+									const Builder::Context& context,
+									bool ignoreTuningData,
+									LanControllersInfo* lanControllersInfo,
+									Builder::IssueLogger* log)
+{
+	TEST_PTR_RETURN_FALSE(log);
+	TEST_PTR_LOG_RETURN_FALSE(lanControllersInfo, log);
+
+	std::shared_ptr<LmDescription> lmDescription = context.m_lmDescriptions->get(&lm);
+
+	if (lmDescription == nullptr)
+	{
+		LOG_INTERNAL_ERROR_MSG(log, QString("LmDescription is not found for module %1").arg(lm.equipmentIdTemplate()));
+		return false;
+	}
+
+	lanControllersInfo->clear();
+
+	const LmDescription::Lan& lan = lmDescription->lan();
+
+	bool result = true;
+
+	for(const LmDescription::LanController& lanController : lan.m_lanControllers)
+	{
+		if ((TO_INT(lanController.m_type) & (TO_INT(lanControllerType))) == 0)
+		{
+			// this lanController is not provide function selected by lanControllerType
+			continue;
+		}
+
+		LanControllerInfo lanInfo;
+
+		result &= getInfo(lm, lanControllerType, lanController.m_place,
+						  context, ignoreTuningData, &lanInfo, log);
+
+		if (result == true)
+		{
+			lanControllersInfo->append(lanInfo);
+		}
+	}
+
+	return result;
+}
+
 QString LanControllerInfoHelper::getLanControllerSuffix(int controllerNo)
 {
 	return QString(LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR).arg(controllerNo);
 }
-
-

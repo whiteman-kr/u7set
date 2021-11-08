@@ -162,20 +162,20 @@ void DialogAppDataSourceInfo::updateData()
 	setDataItemText("ID", tr("%1 (%2h)").arg(QString::number(ds.info.id())).arg(QString::number(ds.info.id(), 16)));
 	setDataItemText("EquipmentID", QString::fromStdString(ds.info.moduleequipmentid()));
 	setDataItemText("Caption", QString::fromStdString(ds.info.modulecaption()));
-	setDataItemNumber("DataType", ds.info.lancontrollerinfo().lancontrollertype());
-	setDataItemText("IP", QString::fromStdString(ds.info.lancontrollerinfo().appdataip()));
-	setDataItemNumber("Port", ds.info.lancontrollerinfo().appdataport());
+	setDataItemNumber("DataType", ds.info.lancontrollerinfo()[0].lancontrollertype());
+	setDataItemText("IP", QString::fromStdString(ds.info.lancontrollerinfo()[0].appdataip()));
+	setDataItemNumber("Port", ds.info.lancontrollerinfo()[0].appdataport());
 	setDataItemText("Channel", QString::fromStdString(ds.info.subsystemchannel()));
 	setDataItemNumber("SubsystemID", ds.info.subsystemkey());
 	setDataItemText("Subsystem", QString::fromStdString(ds.info.subsystemid()));
 
 	setDataItemNumber("LmNumber", ds.info.lmnumber());
 	setDataItemText("LmModuleType", tr("%1 (%2h)").arg(QString::number(ds.info.moduletype())).arg(QString::number(ds.info.moduletype(), 16)));
-	setDataItemText("LmAdapterID", QString::fromStdString(ds.info.lancontrollerinfo().equipmentid()));
-	setDataItemNumber("LmDataEnable", ds.info.lancontrollerinfo().appdataenable());
+	setDataItemText("LmAdapterID", QString::fromStdString(ds.info.lancontrollerinfo()[0].equipmentid()));
+	setDataItemNumber("LmDataEnable", ds.info.lancontrollerinfo()[0].appdataenable());
 	setDataItemText("LmDataID", tr("%1 (%2h)").
-						arg(QString::number(ds.info.lancontrollerinfo().appdatauid())).
-						arg(QString::number(ds.info.lancontrollerinfo().appdatauid(), 16)));
+						arg(QString::number(ds.info.lancontrollerinfo()[0].appdatauid())).
+						arg(QString::number(ds.info.lancontrollerinfo()[0].appdatauid(), 16)));
 
 	setDataItemText("DataReceives", ds.state.datareceives() ? "Yes" : "No");
 
@@ -383,8 +383,8 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 			}
 
 			connectionStrings << adsState.info.moduleequipmentid().c_str();
-			connectionStrings << adsState.info.lancontrollerinfo().appdataip().c_str();
-			connectionStrings << QString::number(adsState.info.lancontrollerinfo().appdataport());
+			connectionStrings << adsState.info.lancontrollerinfo()[0].appdataip().c_str();
+			connectionStrings << QString::number(adsState.info.lancontrollerinfo()[0].appdataport());
 
 			connectionStrings << adsState.info.subsystemchannel().c_str();
 

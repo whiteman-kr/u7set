@@ -164,7 +164,7 @@ namespace Sim
 				continue;
 			}
 
-			for(const LanControllerInfo& lci : lmi.lanControllers)
+			for(const LanControllerInfo& lci : lmi.lanControllers())
 			{
 				if (lci.isProvideAppData() == true && lci.appDataEnable == true)
 				{

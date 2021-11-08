@@ -68,7 +68,7 @@ bool SoftwareXmlInfo::readFromXml(XmlReadHelper& xmlReader)
 	bool result = true;
 
 	result &= xmlReader.readStringAttribute(XmlAttribute::CAPTION, &caption);
-	result &= xmlReader.readStringAttribute(XmlAttribute::ID, &equipmentID);
+	result &= xmlReader.readStringAttribute(XmlAttribute::EQUIPMENT_ID, &equipmentID);
 
 	int typeInt = 0;
 
@@ -83,6 +83,12 @@ bool SoftwareXmlInfo::readFromXml(XmlReadHelper& xmlReader)
 	}
 
 	m_settingsSet.setSoftwareType(static_cast<E::SoftwareType>(typeInt));
+
+
+	if (equipmentID == "SYSTEMID_RACK01_WS00_TUNS")
+	{
+		DEBUG_STOP;
+	}
 
 	result = m_settingsSet.readFromXml(xmlReader);
 

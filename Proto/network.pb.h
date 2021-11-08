@@ -2483,17 +2483,14 @@ class LanControllerInfo PROTOBUF_FINAL :
     kTuningServiceIDFieldNumber = 13,
     kTuningServiceIPFieldNumber = 14,
     kTuningServiceNetmaskFieldNumber = 16,
-    kTuningAssociatedSignalsFieldNumber = 18,
     kAppDataIPFieldNumber = 21,
     kAppDataServiceIDFieldNumber = 23,
     kAppDataServiceIPFieldNumber = 24,
     kAppDataServiceNetmaskFieldNumber = 26,
-    kAppDataAssociatedSignalsFieldNumber = 31,
     kDiagDataIPFieldNumber = 41,
     kDiagDataServiceIDFieldNumber = 43,
     kDiagDataServiceIPFieldNumber = 44,
     kDiagDataServiceNetmaskFieldNumber = 46,
-    kDiagDataAssociatedSignalsFieldNumber = 51,
     kLanControllerTypeFieldNumber = 3,
     kChannelFieldNumber = 4,
     kTuningPortFieldNumber = 12,
@@ -2616,26 +2613,6 @@ class LanControllerInfo PROTOBUF_FINAL :
   std::string* _internal_mutable_tuningservicenetmask();
   public:
 
-  // optional string tuningAssociatedSignals = 18;
-  bool has_tuningassociatedsignals() const;
-  private:
-  bool _internal_has_tuningassociatedsignals() const;
-  public:
-  void clear_tuningassociatedsignals();
-  const std::string& tuningassociatedsignals() const;
-  void set_tuningassociatedsignals(const std::string& value);
-  void set_tuningassociatedsignals(std::string&& value);
-  void set_tuningassociatedsignals(const char* value);
-  void set_tuningassociatedsignals(const char* value, size_t size);
-  std::string* mutable_tuningassociatedsignals();
-  std::string* release_tuningassociatedsignals();
-  void set_allocated_tuningassociatedsignals(std::string* tuningassociatedsignals);
-  private:
-  const std::string& _internal_tuningassociatedsignals() const;
-  void _internal_set_tuningassociatedsignals(const std::string& value);
-  std::string* _internal_mutable_tuningassociatedsignals();
-  public:
-
   // optional string appDataIP = 21;
   bool has_appdataip() const;
   private:
@@ -2716,26 +2693,6 @@ class LanControllerInfo PROTOBUF_FINAL :
   std::string* _internal_mutable_appdataservicenetmask();
   public:
 
-  // optional string appDataAssociatedSignals = 31;
-  bool has_appdataassociatedsignals() const;
-  private:
-  bool _internal_has_appdataassociatedsignals() const;
-  public:
-  void clear_appdataassociatedsignals();
-  const std::string& appdataassociatedsignals() const;
-  void set_appdataassociatedsignals(const std::string& value);
-  void set_appdataassociatedsignals(std::string&& value);
-  void set_appdataassociatedsignals(const char* value);
-  void set_appdataassociatedsignals(const char* value, size_t size);
-  std::string* mutable_appdataassociatedsignals();
-  std::string* release_appdataassociatedsignals();
-  void set_allocated_appdataassociatedsignals(std::string* appdataassociatedsignals);
-  private:
-  const std::string& _internal_appdataassociatedsignals() const;
-  void _internal_set_appdataassociatedsignals(const std::string& value);
-  std::string* _internal_mutable_appdataassociatedsignals();
-  public:
-
   // optional string diagDataIP = 41;
   bool has_diagdataip() const;
   private:
@@ -2814,26 +2771,6 @@ class LanControllerInfo PROTOBUF_FINAL :
   const std::string& _internal_diagdataservicenetmask() const;
   void _internal_set_diagdataservicenetmask(const std::string& value);
   std::string* _internal_mutable_diagdataservicenetmask();
-  public:
-
-  // optional string diagDataAssociatedSignals = 51;
-  bool has_diagdataassociatedsignals() const;
-  private:
-  bool _internal_has_diagdataassociatedsignals() const;
-  public:
-  void clear_diagdataassociatedsignals();
-  const std::string& diagdataassociatedsignals() const;
-  void set_diagdataassociatedsignals(const std::string& value);
-  void set_diagdataassociatedsignals(std::string&& value);
-  void set_diagdataassociatedsignals(const char* value);
-  void set_diagdataassociatedsignals(const char* value, size_t size);
-  std::string* mutable_diagdataassociatedsignals();
-  std::string* release_diagdataassociatedsignals();
-  void set_allocated_diagdataassociatedsignals(std::string* diagdataassociatedsignals);
-  private:
-  const std::string& _internal_diagdataassociatedsignals() const;
-  void _internal_set_diagdataassociatedsignals(const std::string& value);
-  std::string* _internal_mutable_diagdataassociatedsignals();
   public:
 
   // optional int32 lanControllerType = 3 [default = 0];
@@ -3123,17 +3060,14 @@ class LanControllerInfo PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr tuningserviceid_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr tuningserviceip_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr tuningservicenetmask_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr tuningassociatedsignals_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr appdataip_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr appdataserviceid_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr appdataserviceip_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr appdataservicenetmask_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr appdataassociatedsignals_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr diagdataip_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr diagdataserviceid_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr diagdataserviceip_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr diagdataservicenetmask_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr diagdataassociatedsignals_;
   ::PROTOBUF_NAMESPACE_ID::int32 lancontrollertype_;
   ::PROTOBUF_NAMESPACE_ID::int32 channel_;
   ::PROTOBUF_NAMESPACE_ID::int32 tuningport_;
@@ -15417,7 +15351,7 @@ inline void LanControllerInfo::set_allocated_equipmentid(std::string* equipmenti
 
 // optional int32 controllerNo = 2 [default = -1];
 inline bool LanControllerInfo::_internal_has_controllerno() const {
-  bool value = (_has_bits_[1] & 0x00000008u) != 0;
+  bool value = (_has_bits_[1] & 0x00000001u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_controllerno() const {
@@ -15425,7 +15359,7 @@ inline bool LanControllerInfo::has_controllerno() const {
 }
 inline void LanControllerInfo::clear_controllerno() {
   controllerno_ = -1;
-  _has_bits_[1] &= ~0x00000008u;
+  _has_bits_[1] &= ~0x00000001u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_controllerno() const {
   return controllerno_;
@@ -15435,7 +15369,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::controllerno() const {
   return _internal_controllerno();
 }
 inline void LanControllerInfo::_internal_set_controllerno(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[1] |= 0x00000008u;
+  _has_bits_[1] |= 0x00000001u;
   controllerno_ = value;
 }
 inline void LanControllerInfo::set_controllerno(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -15445,7 +15379,7 @@ inline void LanControllerInfo::set_controllerno(::PROTOBUF_NAMESPACE_ID::int32 v
 
 // optional int32 lanControllerType = 3 [default = 0];
 inline bool LanControllerInfo::_internal_has_lancontrollertype() const {
-  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_lancontrollertype() const {
@@ -15453,7 +15387,7 @@ inline bool LanControllerInfo::has_lancontrollertype() const {
 }
 inline void LanControllerInfo::clear_lancontrollertype() {
   lancontrollertype_ = 0;
-  _has_bits_[0] &= ~0x00010000u;
+  _has_bits_[0] &= ~0x00002000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_lancontrollertype() const {
   return lancontrollertype_;
@@ -15463,7 +15397,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::lancontrollertype() con
   return _internal_lancontrollertype();
 }
 inline void LanControllerInfo::_internal_set_lancontrollertype(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00010000u;
+  _has_bits_[0] |= 0x00002000u;
   lancontrollertype_ = value;
 }
 inline void LanControllerInfo::set_lancontrollertype(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -15473,7 +15407,7 @@ inline void LanControllerInfo::set_lancontrollertype(::PROTOBUF_NAMESPACE_ID::in
 
 // optional int32 channel = 4 [default = 0];
 inline bool LanControllerInfo::_internal_has_channel() const {
-  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_channel() const {
@@ -15481,7 +15415,7 @@ inline bool LanControllerInfo::has_channel() const {
 }
 inline void LanControllerInfo::clear_channel() {
   channel_ = 0;
-  _has_bits_[0] &= ~0x00020000u;
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_channel() const {
   return channel_;
@@ -15491,7 +15425,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::channel() const {
   return _internal_channel();
 }
 inline void LanControllerInfo::_internal_set_channel(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00020000u;
+  _has_bits_[0] |= 0x00004000u;
   channel_ = value;
 }
 inline void LanControllerInfo::set_channel(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -15501,7 +15435,7 @@ inline void LanControllerInfo::set_channel(::PROTOBUF_NAMESPACE_ID::int32 value)
 
 // optional bool tuningEnable = 10 [default = false];
 inline bool LanControllerInfo::_internal_has_tuningenable() const {
-  bool value = (_has_bits_[0] & 0x00400000u) != 0;
+  bool value = (_has_bits_[0] & 0x00080000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_tuningenable() const {
@@ -15509,7 +15443,7 @@ inline bool LanControllerInfo::has_tuningenable() const {
 }
 inline void LanControllerInfo::clear_tuningenable() {
   tuningenable_ = false;
-  _has_bits_[0] &= ~0x00400000u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline bool LanControllerInfo::_internal_tuningenable() const {
   return tuningenable_;
@@ -15519,7 +15453,7 @@ inline bool LanControllerInfo::tuningenable() const {
   return _internal_tuningenable();
 }
 inline void LanControllerInfo::_internal_set_tuningenable(bool value) {
-  _has_bits_[0] |= 0x00400000u;
+  _has_bits_[0] |= 0x00080000u;
   tuningenable_ = value;
 }
 inline void LanControllerInfo::set_tuningenable(bool value) {
@@ -15602,7 +15536,7 @@ inline void LanControllerInfo::set_allocated_tuningip(std::string* tuningip) {
 
 // optional int32 tuningPort = 12 [default = 0];
 inline bool LanControllerInfo::_internal_has_tuningport() const {
-  bool value = (_has_bits_[0] & 0x00040000u) != 0;
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_tuningport() const {
@@ -15610,7 +15544,7 @@ inline bool LanControllerInfo::has_tuningport() const {
 }
 inline void LanControllerInfo::clear_tuningport() {
   tuningport_ = 0;
-  _has_bits_[0] &= ~0x00040000u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_tuningport() const {
   return tuningport_;
@@ -15620,7 +15554,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::tuningport() const {
   return _internal_tuningport();
 }
 inline void LanControllerInfo::_internal_set_tuningport(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00040000u;
+  _has_bits_[0] |= 0x00008000u;
   tuningport_ = value;
 }
 inline void LanControllerInfo::set_tuningport(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -15776,7 +15710,7 @@ inline void LanControllerInfo::set_allocated_tuningserviceip(std::string* tuning
 
 // optional int32 tuningServicePort = 15 [default = 0];
 inline bool LanControllerInfo::_internal_has_tuningserviceport() const {
-  bool value = (_has_bits_[0] & 0x00080000u) != 0;
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_tuningserviceport() const {
@@ -15784,7 +15718,7 @@ inline bool LanControllerInfo::has_tuningserviceport() const {
 }
 inline void LanControllerInfo::clear_tuningserviceport() {
   tuningserviceport_ = 0;
-  _has_bits_[0] &= ~0x00080000u;
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_tuningserviceport() const {
   return tuningserviceport_;
@@ -15794,7 +15728,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::tuningserviceport() con
   return _internal_tuningserviceport();
 }
 inline void LanControllerInfo::_internal_set_tuningserviceport(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00080000u;
+  _has_bits_[0] |= 0x00010000u;
   tuningserviceport_ = value;
 }
 inline void LanControllerInfo::set_tuningserviceport(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -15877,7 +15811,7 @@ inline void LanControllerInfo::set_allocated_tuningservicenetmask(std::string* t
 
 // optional uint64 tuningdatauid = 17;
 inline bool LanControllerInfo::_internal_has_tuningdatauid() const {
-  bool value = (_has_bits_[0] & 0x00100000u) != 0;
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_tuningdatauid() const {
@@ -15885,7 +15819,7 @@ inline bool LanControllerInfo::has_tuningdatauid() const {
 }
 inline void LanControllerInfo::clear_tuningdatauid() {
   tuningdatauid_ = PROTOBUF_ULONGLONG(0);
-  _has_bits_[0] &= ~0x00100000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint64 LanControllerInfo::_internal_tuningdatauid() const {
   return tuningdatauid_;
@@ -15895,7 +15829,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint64 LanControllerInfo::tuningdatauid() const 
   return _internal_tuningdatauid();
 }
 inline void LanControllerInfo::_internal_set_tuningdatauid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _has_bits_[0] |= 0x00100000u;
+  _has_bits_[0] |= 0x00020000u;
   tuningdatauid_ = value;
 }
 inline void LanControllerInfo::set_tuningdatauid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
@@ -15903,82 +15837,9 @@ inline void LanControllerInfo::set_tuningdatauid(::PROTOBUF_NAMESPACE_ID::uint64
   // @@protoc_insertion_point(field_set:Network.LanControllerInfo.tuningdatauid)
 }
 
-// optional string tuningAssociatedSignals = 18;
-inline bool LanControllerInfo::_internal_has_tuningassociatedsignals() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
-  return value;
-}
-inline bool LanControllerInfo::has_tuningassociatedsignals() const {
-  return _internal_has_tuningassociatedsignals();
-}
-inline void LanControllerInfo::clear_tuningassociatedsignals() {
-  tuningassociatedsignals_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline const std::string& LanControllerInfo::tuningassociatedsignals() const {
-  // @@protoc_insertion_point(field_get:Network.LanControllerInfo.tuningAssociatedSignals)
-  return _internal_tuningassociatedsignals();
-}
-inline void LanControllerInfo::set_tuningassociatedsignals(const std::string& value) {
-  _internal_set_tuningassociatedsignals(value);
-  // @@protoc_insertion_point(field_set:Network.LanControllerInfo.tuningAssociatedSignals)
-}
-inline std::string* LanControllerInfo::mutable_tuningassociatedsignals() {
-  // @@protoc_insertion_point(field_mutable:Network.LanControllerInfo.tuningAssociatedSignals)
-  return _internal_mutable_tuningassociatedsignals();
-}
-inline const std::string& LanControllerInfo::_internal_tuningassociatedsignals() const {
-  return tuningassociatedsignals_.Get();
-}
-inline void LanControllerInfo::_internal_set_tuningassociatedsignals(const std::string& value) {
-  _has_bits_[0] |= 0x00000020u;
-  tuningassociatedsignals_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void LanControllerInfo::set_tuningassociatedsignals(std::string&& value) {
-  _has_bits_[0] |= 0x00000020u;
-  tuningassociatedsignals_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Network.LanControllerInfo.tuningAssociatedSignals)
-}
-inline void LanControllerInfo::set_tuningassociatedsignals(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000020u;
-  tuningassociatedsignals_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Network.LanControllerInfo.tuningAssociatedSignals)
-}
-inline void LanControllerInfo::set_tuningassociatedsignals(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000020u;
-  tuningassociatedsignals_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Network.LanControllerInfo.tuningAssociatedSignals)
-}
-inline std::string* LanControllerInfo::_internal_mutable_tuningassociatedsignals() {
-  _has_bits_[0] |= 0x00000020u;
-  return tuningassociatedsignals_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* LanControllerInfo::release_tuningassociatedsignals() {
-  // @@protoc_insertion_point(field_release:Network.LanControllerInfo.tuningAssociatedSignals)
-  if (!_internal_has_tuningassociatedsignals()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000020u;
-  return tuningassociatedsignals_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void LanControllerInfo::set_allocated_tuningassociatedsignals(std::string* tuningassociatedsignals) {
-  if (tuningassociatedsignals != nullptr) {
-    _has_bits_[0] |= 0x00000020u;
-  } else {
-    _has_bits_[0] &= ~0x00000020u;
-  }
-  tuningassociatedsignals_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), tuningassociatedsignals,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Network.LanControllerInfo.tuningAssociatedSignals)
-}
-
 // optional bool appDataEnable = 20 [default = false];
 inline bool LanControllerInfo::_internal_has_appdataenable() const {
-  bool value = (_has_bits_[0] & 0x00800000u) != 0;
+  bool value = (_has_bits_[0] & 0x00100000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_appdataenable() const {
@@ -15986,7 +15847,7 @@ inline bool LanControllerInfo::has_appdataenable() const {
 }
 inline void LanControllerInfo::clear_appdataenable() {
   appdataenable_ = false;
-  _has_bits_[0] &= ~0x00800000u;
+  _has_bits_[0] &= ~0x00100000u;
 }
 inline bool LanControllerInfo::_internal_appdataenable() const {
   return appdataenable_;
@@ -15996,7 +15857,7 @@ inline bool LanControllerInfo::appdataenable() const {
   return _internal_appdataenable();
 }
 inline void LanControllerInfo::_internal_set_appdataenable(bool value) {
-  _has_bits_[0] |= 0x00800000u;
+  _has_bits_[0] |= 0x00100000u;
   appdataenable_ = value;
 }
 inline void LanControllerInfo::set_appdataenable(bool value) {
@@ -16006,7 +15867,7 @@ inline void LanControllerInfo::set_appdataenable(bool value) {
 
 // optional string appDataIP = 21;
 inline bool LanControllerInfo::_internal_has_appdataip() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_appdataip() const {
@@ -16014,7 +15875,7 @@ inline bool LanControllerInfo::has_appdataip() const {
 }
 inline void LanControllerInfo::clear_appdataip() {
   appdataip_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline const std::string& LanControllerInfo::appdataip() const {
   // @@protoc_insertion_point(field_get:Network.LanControllerInfo.appDataIP)
@@ -16032,30 +15893,30 @@ inline const std::string& LanControllerInfo::_internal_appdataip() const {
   return appdataip_.Get();
 }
 inline void LanControllerInfo::_internal_set_appdataip(const std::string& value) {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000020u;
   appdataip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void LanControllerInfo::set_appdataip(std::string&& value) {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000020u;
   appdataip_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Network.LanControllerInfo.appDataIP)
 }
 inline void LanControllerInfo::set_appdataip(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000020u;
   appdataip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Network.LanControllerInfo.appDataIP)
 }
 inline void LanControllerInfo::set_appdataip(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000020u;
   appdataip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Network.LanControllerInfo.appDataIP)
 }
 inline std::string* LanControllerInfo::_internal_mutable_appdataip() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000020u;
   return appdataip_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* LanControllerInfo::release_appdataip() {
@@ -16063,14 +15924,14 @@ inline std::string* LanControllerInfo::release_appdataip() {
   if (!_internal_has_appdataip()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000020u;
   return appdataip_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void LanControllerInfo::set_allocated_appdataip(std::string* appdataip) {
   if (appdataip != nullptr) {
-    _has_bits_[0] |= 0x00000040u;
+    _has_bits_[0] |= 0x00000020u;
   } else {
-    _has_bits_[0] &= ~0x00000040u;
+    _has_bits_[0] &= ~0x00000020u;
   }
   appdataip_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), appdataip,
       GetArena());
@@ -16079,7 +15940,7 @@ inline void LanControllerInfo::set_allocated_appdataip(std::string* appdataip) {
 
 // optional int32 appDataPort = 22 [default = 0];
 inline bool LanControllerInfo::_internal_has_appdataport() const {
-  bool value = (_has_bits_[0] & 0x00200000u) != 0;
+  bool value = (_has_bits_[0] & 0x00040000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_appdataport() const {
@@ -16087,7 +15948,7 @@ inline bool LanControllerInfo::has_appdataport() const {
 }
 inline void LanControllerInfo::clear_appdataport() {
   appdataport_ = 0;
-  _has_bits_[0] &= ~0x00200000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_appdataport() const {
   return appdataport_;
@@ -16097,7 +15958,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::appdataport() const {
   return _internal_appdataport();
 }
 inline void LanControllerInfo::_internal_set_appdataport(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00200000u;
+  _has_bits_[0] |= 0x00040000u;
   appdataport_ = value;
 }
 inline void LanControllerInfo::set_appdataport(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -16107,7 +15968,7 @@ inline void LanControllerInfo::set_appdataport(::PROTOBUF_NAMESPACE_ID::int32 va
 
 // optional string appDataServiceID = 23;
 inline bool LanControllerInfo::_internal_has_appdataserviceid() const {
-  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_appdataserviceid() const {
@@ -16115,7 +15976,7 @@ inline bool LanControllerInfo::has_appdataserviceid() const {
 }
 inline void LanControllerInfo::clear_appdataserviceid() {
   appdataserviceid_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline const std::string& LanControllerInfo::appdataserviceid() const {
   // @@protoc_insertion_point(field_get:Network.LanControllerInfo.appDataServiceID)
@@ -16133,30 +15994,30 @@ inline const std::string& LanControllerInfo::_internal_appdataserviceid() const 
   return appdataserviceid_.Get();
 }
 inline void LanControllerInfo::_internal_set_appdataserviceid(const std::string& value) {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000040u;
   appdataserviceid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void LanControllerInfo::set_appdataserviceid(std::string&& value) {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000040u;
   appdataserviceid_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Network.LanControllerInfo.appDataServiceID)
 }
 inline void LanControllerInfo::set_appdataserviceid(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000040u;
   appdataserviceid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Network.LanControllerInfo.appDataServiceID)
 }
 inline void LanControllerInfo::set_appdataserviceid(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000040u;
   appdataserviceid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Network.LanControllerInfo.appDataServiceID)
 }
 inline std::string* LanControllerInfo::_internal_mutable_appdataserviceid() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000040u;
   return appdataserviceid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* LanControllerInfo::release_appdataserviceid() {
@@ -16164,14 +16025,14 @@ inline std::string* LanControllerInfo::release_appdataserviceid() {
   if (!_internal_has_appdataserviceid()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000040u;
   return appdataserviceid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void LanControllerInfo::set_allocated_appdataserviceid(std::string* appdataserviceid) {
   if (appdataserviceid != nullptr) {
-    _has_bits_[0] |= 0x00000080u;
+    _has_bits_[0] |= 0x00000040u;
   } else {
-    _has_bits_[0] &= ~0x00000080u;
+    _has_bits_[0] &= ~0x00000040u;
   }
   appdataserviceid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), appdataserviceid,
       GetArena());
@@ -16180,7 +16041,7 @@ inline void LanControllerInfo::set_allocated_appdataserviceid(std::string* appda
 
 // optional string appDataServiceIP = 24;
 inline bool LanControllerInfo::_internal_has_appdataserviceip() const {
-  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_appdataserviceip() const {
@@ -16188,7 +16049,7 @@ inline bool LanControllerInfo::has_appdataserviceip() const {
 }
 inline void LanControllerInfo::clear_appdataserviceip() {
   appdataserviceip_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline const std::string& LanControllerInfo::appdataserviceip() const {
   // @@protoc_insertion_point(field_get:Network.LanControllerInfo.appDataServiceIP)
@@ -16206,30 +16067,30 @@ inline const std::string& LanControllerInfo::_internal_appdataserviceip() const 
   return appdataserviceip_.Get();
 }
 inline void LanControllerInfo::_internal_set_appdataserviceip(const std::string& value) {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000080u;
   appdataserviceip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void LanControllerInfo::set_appdataserviceip(std::string&& value) {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000080u;
   appdataserviceip_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Network.LanControllerInfo.appDataServiceIP)
 }
 inline void LanControllerInfo::set_appdataserviceip(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000080u;
   appdataserviceip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Network.LanControllerInfo.appDataServiceIP)
 }
 inline void LanControllerInfo::set_appdataserviceip(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000080u;
   appdataserviceip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Network.LanControllerInfo.appDataServiceIP)
 }
 inline std::string* LanControllerInfo::_internal_mutable_appdataserviceip() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000080u;
   return appdataserviceip_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* LanControllerInfo::release_appdataserviceip() {
@@ -16237,14 +16098,14 @@ inline std::string* LanControllerInfo::release_appdataserviceip() {
   if (!_internal_has_appdataserviceip()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000080u;
   return appdataserviceip_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void LanControllerInfo::set_allocated_appdataserviceip(std::string* appdataserviceip) {
   if (appdataserviceip != nullptr) {
-    _has_bits_[0] |= 0x00000100u;
+    _has_bits_[0] |= 0x00000080u;
   } else {
-    _has_bits_[0] &= ~0x00000100u;
+    _has_bits_[0] &= ~0x00000080u;
   }
   appdataserviceip_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), appdataserviceip,
       GetArena());
@@ -16253,7 +16114,7 @@ inline void LanControllerInfo::set_allocated_appdataserviceip(std::string* appda
 
 // optional int32 appDataServicePort = 25 [default = 0];
 inline bool LanControllerInfo::_internal_has_appdataserviceport() const {
-  bool value = (_has_bits_[0] & 0x02000000u) != 0;
+  bool value = (_has_bits_[0] & 0x00400000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_appdataserviceport() const {
@@ -16261,7 +16122,7 @@ inline bool LanControllerInfo::has_appdataserviceport() const {
 }
 inline void LanControllerInfo::clear_appdataserviceport() {
   appdataserviceport_ = 0;
-  _has_bits_[0] &= ~0x02000000u;
+  _has_bits_[0] &= ~0x00400000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_appdataserviceport() const {
   return appdataserviceport_;
@@ -16271,7 +16132,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::appdataserviceport() co
   return _internal_appdataserviceport();
 }
 inline void LanControllerInfo::_internal_set_appdataserviceport(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x02000000u;
+  _has_bits_[0] |= 0x00400000u;
   appdataserviceport_ = value;
 }
 inline void LanControllerInfo::set_appdataserviceport(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -16281,7 +16142,7 @@ inline void LanControllerInfo::set_appdataserviceport(::PROTOBUF_NAMESPACE_ID::i
 
 // optional string appDataServiceNetmask = 26;
 inline bool LanControllerInfo::_internal_has_appdataservicenetmask() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_appdataservicenetmask() const {
@@ -16289,7 +16150,7 @@ inline bool LanControllerInfo::has_appdataservicenetmask() const {
 }
 inline void LanControllerInfo::clear_appdataservicenetmask() {
   appdataservicenetmask_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline const std::string& LanControllerInfo::appdataservicenetmask() const {
   // @@protoc_insertion_point(field_get:Network.LanControllerInfo.appDataServiceNetmask)
@@ -16307,30 +16168,30 @@ inline const std::string& LanControllerInfo::_internal_appdataservicenetmask() c
   return appdataservicenetmask_.Get();
 }
 inline void LanControllerInfo::_internal_set_appdataservicenetmask(const std::string& value) {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000100u;
   appdataservicenetmask_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void LanControllerInfo::set_appdataservicenetmask(std::string&& value) {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000100u;
   appdataservicenetmask_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Network.LanControllerInfo.appDataServiceNetmask)
 }
 inline void LanControllerInfo::set_appdataservicenetmask(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000100u;
   appdataservicenetmask_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Network.LanControllerInfo.appDataServiceNetmask)
 }
 inline void LanControllerInfo::set_appdataservicenetmask(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000100u;
   appdataservicenetmask_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Network.LanControllerInfo.appDataServiceNetmask)
 }
 inline std::string* LanControllerInfo::_internal_mutable_appdataservicenetmask() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000100u;
   return appdataservicenetmask_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* LanControllerInfo::release_appdataservicenetmask() {
@@ -16338,14 +16199,14 @@ inline std::string* LanControllerInfo::release_appdataservicenetmask() {
   if (!_internal_has_appdataservicenetmask()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000100u;
   return appdataservicenetmask_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void LanControllerInfo::set_allocated_appdataservicenetmask(std::string* appdataservicenetmask) {
   if (appdataservicenetmask != nullptr) {
-    _has_bits_[0] |= 0x00000200u;
+    _has_bits_[0] |= 0x00000100u;
   } else {
-    _has_bits_[0] &= ~0x00000200u;
+    _has_bits_[0] &= ~0x00000100u;
   }
   appdataservicenetmask_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), appdataservicenetmask,
       GetArena());
@@ -16354,7 +16215,7 @@ inline void LanControllerInfo::set_allocated_appdataservicenetmask(std::string* 
 
 // optional uint32 appDataUID = 27 [default = 0];
 inline bool LanControllerInfo::_internal_has_appdatauid() const {
-  bool value = (_has_bits_[0] & 0x04000000u) != 0;
+  bool value = (_has_bits_[0] & 0x00800000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_appdatauid() const {
@@ -16362,7 +16223,7 @@ inline bool LanControllerInfo::has_appdatauid() const {
 }
 inline void LanControllerInfo::clear_appdatauid() {
   appdatauid_ = 0u;
-  _has_bits_[0] &= ~0x04000000u;
+  _has_bits_[0] &= ~0x00800000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 LanControllerInfo::_internal_appdatauid() const {
   return appdatauid_;
@@ -16372,7 +16233,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 LanControllerInfo::appdatauid() const {
   return _internal_appdatauid();
 }
 inline void LanControllerInfo::_internal_set_appdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x04000000u;
+  _has_bits_[0] |= 0x00800000u;
   appdatauid_ = value;
 }
 inline void LanControllerInfo::set_appdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -16382,7 +16243,7 @@ inline void LanControllerInfo::set_appdatauid(::PROTOBUF_NAMESPACE_ID::uint32 va
 
 // optional int32 appDataSizeBytes = 28 [default = 0];
 inline bool LanControllerInfo::_internal_has_appdatasizebytes() const {
-  bool value = (_has_bits_[0] & 0x08000000u) != 0;
+  bool value = (_has_bits_[0] & 0x01000000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_appdatasizebytes() const {
@@ -16390,7 +16251,7 @@ inline bool LanControllerInfo::has_appdatasizebytes() const {
 }
 inline void LanControllerInfo::clear_appdatasizebytes() {
   appdatasizebytes_ = 0;
-  _has_bits_[0] &= ~0x08000000u;
+  _has_bits_[0] &= ~0x01000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_appdatasizebytes() const {
   return appdatasizebytes_;
@@ -16400,7 +16261,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::appdatasizebytes() cons
   return _internal_appdatasizebytes();
 }
 inline void LanControllerInfo::_internal_set_appdatasizebytes(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x08000000u;
+  _has_bits_[0] |= 0x01000000u;
   appdatasizebytes_ = value;
 }
 inline void LanControllerInfo::set_appdatasizebytes(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -16410,7 +16271,7 @@ inline void LanControllerInfo::set_appdatasizebytes(::PROTOBUF_NAMESPACE_ID::int
 
 // optional int32 appDataFramesQuantity = 29 [default = 0];
 inline bool LanControllerInfo::_internal_has_appdataframesquantity() const {
-  bool value = (_has_bits_[0] & 0x10000000u) != 0;
+  bool value = (_has_bits_[0] & 0x02000000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_appdataframesquantity() const {
@@ -16418,7 +16279,7 @@ inline bool LanControllerInfo::has_appdataframesquantity() const {
 }
 inline void LanControllerInfo::clear_appdataframesquantity() {
   appdataframesquantity_ = 0;
-  _has_bits_[0] &= ~0x10000000u;
+  _has_bits_[0] &= ~0x02000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_appdataframesquantity() const {
   return appdataframesquantity_;
@@ -16428,7 +16289,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::appdataframesquantity()
   return _internal_appdataframesquantity();
 }
 inline void LanControllerInfo::_internal_set_appdataframesquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x10000000u;
+  _has_bits_[0] |= 0x02000000u;
   appdataframesquantity_ = value;
 }
 inline void LanControllerInfo::set_appdataframesquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -16438,7 +16299,7 @@ inline void LanControllerInfo::set_appdataframesquantity(::PROTOBUF_NAMESPACE_ID
 
 // optional int32 overrideAppDataWordCount = 30 [default = -1];
 inline bool LanControllerInfo::_internal_has_overrideappdatawordcount() const {
-  bool value = (_has_bits_[1] & 0x00000010u) != 0;
+  bool value = (_has_bits_[1] & 0x00000002u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_overrideappdatawordcount() const {
@@ -16446,7 +16307,7 @@ inline bool LanControllerInfo::has_overrideappdatawordcount() const {
 }
 inline void LanControllerInfo::clear_overrideappdatawordcount() {
   overrideappdatawordcount_ = -1;
-  _has_bits_[1] &= ~0x00000010u;
+  _has_bits_[1] &= ~0x00000002u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_overrideappdatawordcount() const {
   return overrideappdatawordcount_;
@@ -16456,7 +16317,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::overrideappdatawordcoun
   return _internal_overrideappdatawordcount();
 }
 inline void LanControllerInfo::_internal_set_overrideappdatawordcount(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[1] |= 0x00000010u;
+  _has_bits_[1] |= 0x00000002u;
   overrideappdatawordcount_ = value;
 }
 inline void LanControllerInfo::set_overrideappdatawordcount(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -16464,82 +16325,9 @@ inline void LanControllerInfo::set_overrideappdatawordcount(::PROTOBUF_NAMESPACE
   // @@protoc_insertion_point(field_set:Network.LanControllerInfo.overrideAppDataWordCount)
 }
 
-// optional string appDataAssociatedSignals = 31;
-inline bool LanControllerInfo::_internal_has_appdataassociatedsignals() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
-  return value;
-}
-inline bool LanControllerInfo::has_appdataassociatedsignals() const {
-  return _internal_has_appdataassociatedsignals();
-}
-inline void LanControllerInfo::clear_appdataassociatedsignals() {
-  appdataassociatedsignals_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000400u;
-}
-inline const std::string& LanControllerInfo::appdataassociatedsignals() const {
-  // @@protoc_insertion_point(field_get:Network.LanControllerInfo.appDataAssociatedSignals)
-  return _internal_appdataassociatedsignals();
-}
-inline void LanControllerInfo::set_appdataassociatedsignals(const std::string& value) {
-  _internal_set_appdataassociatedsignals(value);
-  // @@protoc_insertion_point(field_set:Network.LanControllerInfo.appDataAssociatedSignals)
-}
-inline std::string* LanControllerInfo::mutable_appdataassociatedsignals() {
-  // @@protoc_insertion_point(field_mutable:Network.LanControllerInfo.appDataAssociatedSignals)
-  return _internal_mutable_appdataassociatedsignals();
-}
-inline const std::string& LanControllerInfo::_internal_appdataassociatedsignals() const {
-  return appdataassociatedsignals_.Get();
-}
-inline void LanControllerInfo::_internal_set_appdataassociatedsignals(const std::string& value) {
-  _has_bits_[0] |= 0x00000400u;
-  appdataassociatedsignals_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void LanControllerInfo::set_appdataassociatedsignals(std::string&& value) {
-  _has_bits_[0] |= 0x00000400u;
-  appdataassociatedsignals_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Network.LanControllerInfo.appDataAssociatedSignals)
-}
-inline void LanControllerInfo::set_appdataassociatedsignals(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000400u;
-  appdataassociatedsignals_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Network.LanControllerInfo.appDataAssociatedSignals)
-}
-inline void LanControllerInfo::set_appdataassociatedsignals(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000400u;
-  appdataassociatedsignals_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Network.LanControllerInfo.appDataAssociatedSignals)
-}
-inline std::string* LanControllerInfo::_internal_mutable_appdataassociatedsignals() {
-  _has_bits_[0] |= 0x00000400u;
-  return appdataassociatedsignals_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* LanControllerInfo::release_appdataassociatedsignals() {
-  // @@protoc_insertion_point(field_release:Network.LanControllerInfo.appDataAssociatedSignals)
-  if (!_internal_has_appdataassociatedsignals()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000400u;
-  return appdataassociatedsignals_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void LanControllerInfo::set_allocated_appdataassociatedsignals(std::string* appdataassociatedsignals) {
-  if (appdataassociatedsignals != nullptr) {
-    _has_bits_[0] |= 0x00000400u;
-  } else {
-    _has_bits_[0] &= ~0x00000400u;
-  }
-  appdataassociatedsignals_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), appdataassociatedsignals,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Network.LanControllerInfo.appDataAssociatedSignals)
-}
-
 // optional bool diagDataEnable = 40 [default = false];
 inline bool LanControllerInfo::_internal_has_diagdataenable() const {
-  bool value = (_has_bits_[0] & 0x01000000u) != 0;
+  bool value = (_has_bits_[0] & 0x00200000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_diagdataenable() const {
@@ -16547,7 +16335,7 @@ inline bool LanControllerInfo::has_diagdataenable() const {
 }
 inline void LanControllerInfo::clear_diagdataenable() {
   diagdataenable_ = false;
-  _has_bits_[0] &= ~0x01000000u;
+  _has_bits_[0] &= ~0x00200000u;
 }
 inline bool LanControllerInfo::_internal_diagdataenable() const {
   return diagdataenable_;
@@ -16557,7 +16345,7 @@ inline bool LanControllerInfo::diagdataenable() const {
   return _internal_diagdataenable();
 }
 inline void LanControllerInfo::_internal_set_diagdataenable(bool value) {
-  _has_bits_[0] |= 0x01000000u;
+  _has_bits_[0] |= 0x00200000u;
   diagdataenable_ = value;
 }
 inline void LanControllerInfo::set_diagdataenable(bool value) {
@@ -16567,7 +16355,7 @@ inline void LanControllerInfo::set_diagdataenable(bool value) {
 
 // optional string diagDataIP = 41;
 inline bool LanControllerInfo::_internal_has_diagdataip() const {
-  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_diagdataip() const {
@@ -16575,7 +16363,7 @@ inline bool LanControllerInfo::has_diagdataip() const {
 }
 inline void LanControllerInfo::clear_diagdataip() {
   diagdataip_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline const std::string& LanControllerInfo::diagdataip() const {
   // @@protoc_insertion_point(field_get:Network.LanControllerInfo.diagDataIP)
@@ -16593,30 +16381,30 @@ inline const std::string& LanControllerInfo::_internal_diagdataip() const {
   return diagdataip_.Get();
 }
 inline void LanControllerInfo::_internal_set_diagdataip(const std::string& value) {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00000200u;
   diagdataip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void LanControllerInfo::set_diagdataip(std::string&& value) {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00000200u;
   diagdataip_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Network.LanControllerInfo.diagDataIP)
 }
 inline void LanControllerInfo::set_diagdataip(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00000200u;
   diagdataip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Network.LanControllerInfo.diagDataIP)
 }
 inline void LanControllerInfo::set_diagdataip(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00000200u;
   diagdataip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Network.LanControllerInfo.diagDataIP)
 }
 inline std::string* LanControllerInfo::_internal_mutable_diagdataip() {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00000200u;
   return diagdataip_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* LanControllerInfo::release_diagdataip() {
@@ -16624,14 +16412,14 @@ inline std::string* LanControllerInfo::release_diagdataip() {
   if (!_internal_has_diagdataip()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00000200u;
   return diagdataip_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void LanControllerInfo::set_allocated_diagdataip(std::string* diagdataip) {
   if (diagdataip != nullptr) {
-    _has_bits_[0] |= 0x00000800u;
+    _has_bits_[0] |= 0x00000200u;
   } else {
-    _has_bits_[0] &= ~0x00000800u;
+    _has_bits_[0] &= ~0x00000200u;
   }
   diagdataip_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), diagdataip,
       GetArena());
@@ -16640,7 +16428,7 @@ inline void LanControllerInfo::set_allocated_diagdataip(std::string* diagdataip)
 
 // optional int32 diagDataPort = 42 [default = 0];
 inline bool LanControllerInfo::_internal_has_diagdataport() const {
-  bool value = (_has_bits_[0] & 0x40000000u) != 0;
+  bool value = (_has_bits_[0] & 0x08000000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_diagdataport() const {
@@ -16648,7 +16436,7 @@ inline bool LanControllerInfo::has_diagdataport() const {
 }
 inline void LanControllerInfo::clear_diagdataport() {
   diagdataport_ = 0;
-  _has_bits_[0] &= ~0x40000000u;
+  _has_bits_[0] &= ~0x08000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_diagdataport() const {
   return diagdataport_;
@@ -16658,7 +16446,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::diagdataport() const {
   return _internal_diagdataport();
 }
 inline void LanControllerInfo::_internal_set_diagdataport(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x40000000u;
+  _has_bits_[0] |= 0x08000000u;
   diagdataport_ = value;
 }
 inline void LanControllerInfo::set_diagdataport(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -16668,7 +16456,7 @@ inline void LanControllerInfo::set_diagdataport(::PROTOBUF_NAMESPACE_ID::int32 v
 
 // optional string diagDataServiceID = 43;
 inline bool LanControllerInfo::_internal_has_diagdataserviceid() const {
-  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_diagdataserviceid() const {
@@ -16676,7 +16464,7 @@ inline bool LanControllerInfo::has_diagdataserviceid() const {
 }
 inline void LanControllerInfo::clear_diagdataserviceid() {
   diagdataserviceid_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline const std::string& LanControllerInfo::diagdataserviceid() const {
   // @@protoc_insertion_point(field_get:Network.LanControllerInfo.diagDataServiceID)
@@ -16694,30 +16482,30 @@ inline const std::string& LanControllerInfo::_internal_diagdataserviceid() const
   return diagdataserviceid_.Get();
 }
 inline void LanControllerInfo::_internal_set_diagdataserviceid(const std::string& value) {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00000400u;
   diagdataserviceid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void LanControllerInfo::set_diagdataserviceid(std::string&& value) {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00000400u;
   diagdataserviceid_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Network.LanControllerInfo.diagDataServiceID)
 }
 inline void LanControllerInfo::set_diagdataserviceid(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00000400u;
   diagdataserviceid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Network.LanControllerInfo.diagDataServiceID)
 }
 inline void LanControllerInfo::set_diagdataserviceid(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00000400u;
   diagdataserviceid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Network.LanControllerInfo.diagDataServiceID)
 }
 inline std::string* LanControllerInfo::_internal_mutable_diagdataserviceid() {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00000400u;
   return diagdataserviceid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* LanControllerInfo::release_diagdataserviceid() {
@@ -16725,14 +16513,14 @@ inline std::string* LanControllerInfo::release_diagdataserviceid() {
   if (!_internal_has_diagdataserviceid()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00000400u;
   return diagdataserviceid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void LanControllerInfo::set_allocated_diagdataserviceid(std::string* diagdataserviceid) {
   if (diagdataserviceid != nullptr) {
-    _has_bits_[0] |= 0x00001000u;
+    _has_bits_[0] |= 0x00000400u;
   } else {
-    _has_bits_[0] &= ~0x00001000u;
+    _has_bits_[0] &= ~0x00000400u;
   }
   diagdataserviceid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), diagdataserviceid,
       GetArena());
@@ -16741,7 +16529,7 @@ inline void LanControllerInfo::set_allocated_diagdataserviceid(std::string* diag
 
 // optional string diagDataServiceIP = 44;
 inline bool LanControllerInfo::_internal_has_diagdataserviceip() const {
-  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_diagdataserviceip() const {
@@ -16749,7 +16537,7 @@ inline bool LanControllerInfo::has_diagdataserviceip() const {
 }
 inline void LanControllerInfo::clear_diagdataserviceip() {
   diagdataserviceip_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline const std::string& LanControllerInfo::diagdataserviceip() const {
   // @@protoc_insertion_point(field_get:Network.LanControllerInfo.diagDataServiceIP)
@@ -16767,30 +16555,30 @@ inline const std::string& LanControllerInfo::_internal_diagdataserviceip() const
   return diagdataserviceip_.Get();
 }
 inline void LanControllerInfo::_internal_set_diagdataserviceip(const std::string& value) {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00000800u;
   diagdataserviceip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void LanControllerInfo::set_diagdataserviceip(std::string&& value) {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00000800u;
   diagdataserviceip_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Network.LanControllerInfo.diagDataServiceIP)
 }
 inline void LanControllerInfo::set_diagdataserviceip(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00000800u;
   diagdataserviceip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Network.LanControllerInfo.diagDataServiceIP)
 }
 inline void LanControllerInfo::set_diagdataserviceip(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00000800u;
   diagdataserviceip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Network.LanControllerInfo.diagDataServiceIP)
 }
 inline std::string* LanControllerInfo::_internal_mutable_diagdataserviceip() {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00000800u;
   return diagdataserviceip_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* LanControllerInfo::release_diagdataserviceip() {
@@ -16798,14 +16586,14 @@ inline std::string* LanControllerInfo::release_diagdataserviceip() {
   if (!_internal_has_diagdataserviceip()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00000800u;
   return diagdataserviceip_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void LanControllerInfo::set_allocated_diagdataserviceip(std::string* diagdataserviceip) {
   if (diagdataserviceip != nullptr) {
-    _has_bits_[0] |= 0x00002000u;
+    _has_bits_[0] |= 0x00000800u;
   } else {
-    _has_bits_[0] &= ~0x00002000u;
+    _has_bits_[0] &= ~0x00000800u;
   }
   diagdataserviceip_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), diagdataserviceip,
       GetArena());
@@ -16814,7 +16602,7 @@ inline void LanControllerInfo::set_allocated_diagdataserviceip(std::string* diag
 
 // optional int32 diagDataServicePort = 45 [default = 0];
 inline bool LanControllerInfo::_internal_has_diagdataserviceport() const {
-  bool value = (_has_bits_[0] & 0x80000000u) != 0;
+  bool value = (_has_bits_[0] & 0x10000000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_diagdataserviceport() const {
@@ -16822,7 +16610,7 @@ inline bool LanControllerInfo::has_diagdataserviceport() const {
 }
 inline void LanControllerInfo::clear_diagdataserviceport() {
   diagdataserviceport_ = 0;
-  _has_bits_[0] &= ~0x80000000u;
+  _has_bits_[0] &= ~0x10000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_diagdataserviceport() const {
   return diagdataserviceport_;
@@ -16832,7 +16620,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::diagdataserviceport() c
   return _internal_diagdataserviceport();
 }
 inline void LanControllerInfo::_internal_set_diagdataserviceport(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x80000000u;
+  _has_bits_[0] |= 0x10000000u;
   diagdataserviceport_ = value;
 }
 inline void LanControllerInfo::set_diagdataserviceport(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -16842,7 +16630,7 @@ inline void LanControllerInfo::set_diagdataserviceport(::PROTOBUF_NAMESPACE_ID::
 
 // optional string diagDataServiceNetmask = 46;
 inline bool LanControllerInfo::_internal_has_diagdataservicenetmask() const {
-  bool value = (_has_bits_[0] & 0x00004000u) != 0;
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_diagdataservicenetmask() const {
@@ -16850,7 +16638,7 @@ inline bool LanControllerInfo::has_diagdataservicenetmask() const {
 }
 inline void LanControllerInfo::clear_diagdataservicenetmask() {
   diagdataservicenetmask_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00004000u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline const std::string& LanControllerInfo::diagdataservicenetmask() const {
   // @@protoc_insertion_point(field_get:Network.LanControllerInfo.diagDataServiceNetmask)
@@ -16868,30 +16656,30 @@ inline const std::string& LanControllerInfo::_internal_diagdataservicenetmask() 
   return diagdataservicenetmask_.Get();
 }
 inline void LanControllerInfo::_internal_set_diagdataservicenetmask(const std::string& value) {
-  _has_bits_[0] |= 0x00004000u;
+  _has_bits_[0] |= 0x00001000u;
   diagdataservicenetmask_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void LanControllerInfo::set_diagdataservicenetmask(std::string&& value) {
-  _has_bits_[0] |= 0x00004000u;
+  _has_bits_[0] |= 0x00001000u;
   diagdataservicenetmask_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Network.LanControllerInfo.diagDataServiceNetmask)
 }
 inline void LanControllerInfo::set_diagdataservicenetmask(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00004000u;
+  _has_bits_[0] |= 0x00001000u;
   diagdataservicenetmask_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Network.LanControllerInfo.diagDataServiceNetmask)
 }
 inline void LanControllerInfo::set_diagdataservicenetmask(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00004000u;
+  _has_bits_[0] |= 0x00001000u;
   diagdataservicenetmask_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Network.LanControllerInfo.diagDataServiceNetmask)
 }
 inline std::string* LanControllerInfo::_internal_mutable_diagdataservicenetmask() {
-  _has_bits_[0] |= 0x00004000u;
+  _has_bits_[0] |= 0x00001000u;
   return diagdataservicenetmask_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* LanControllerInfo::release_diagdataservicenetmask() {
@@ -16899,14 +16687,14 @@ inline std::string* LanControllerInfo::release_diagdataservicenetmask() {
   if (!_internal_has_diagdataservicenetmask()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00004000u;
+  _has_bits_[0] &= ~0x00001000u;
   return diagdataservicenetmask_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void LanControllerInfo::set_allocated_diagdataservicenetmask(std::string* diagdataservicenetmask) {
   if (diagdataservicenetmask != nullptr) {
-    _has_bits_[0] |= 0x00004000u;
+    _has_bits_[0] |= 0x00001000u;
   } else {
-    _has_bits_[0] &= ~0x00004000u;
+    _has_bits_[0] &= ~0x00001000u;
   }
   diagdataservicenetmask_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), diagdataservicenetmask,
       GetArena());
@@ -16915,7 +16703,7 @@ inline void LanControllerInfo::set_allocated_diagdataservicenetmask(std::string*
 
 // optional uint32 diagDataUID = 47 [default = 0];
 inline bool LanControllerInfo::_internal_has_diagdatauid() const {
-  bool value = (_has_bits_[1] & 0x00000001u) != 0;
+  bool value = (_has_bits_[0] & 0x20000000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_diagdatauid() const {
@@ -16923,7 +16711,7 @@ inline bool LanControllerInfo::has_diagdatauid() const {
 }
 inline void LanControllerInfo::clear_diagdatauid() {
   diagdatauid_ = 0u;
-  _has_bits_[1] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x20000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 LanControllerInfo::_internal_diagdatauid() const {
   return diagdatauid_;
@@ -16933,7 +16721,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 LanControllerInfo::diagdatauid() const {
   return _internal_diagdatauid();
 }
 inline void LanControllerInfo::_internal_set_diagdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[1] |= 0x00000001u;
+  _has_bits_[0] |= 0x20000000u;
   diagdatauid_ = value;
 }
 inline void LanControllerInfo::set_diagdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -16943,7 +16731,7 @@ inline void LanControllerInfo::set_diagdatauid(::PROTOBUF_NAMESPACE_ID::uint32 v
 
 // optional int32 diagDataSizeBytes = 48 [default = 0];
 inline bool LanControllerInfo::_internal_has_diagdatasizebytes() const {
-  bool value = (_has_bits_[1] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x40000000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_diagdatasizebytes() const {
@@ -16951,7 +16739,7 @@ inline bool LanControllerInfo::has_diagdatasizebytes() const {
 }
 inline void LanControllerInfo::clear_diagdatasizebytes() {
   diagdatasizebytes_ = 0;
-  _has_bits_[1] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x40000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_diagdatasizebytes() const {
   return diagdatasizebytes_;
@@ -16961,7 +16749,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::diagdatasizebytes() con
   return _internal_diagdatasizebytes();
 }
 inline void LanControllerInfo::_internal_set_diagdatasizebytes(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[1] |= 0x00000002u;
+  _has_bits_[0] |= 0x40000000u;
   diagdatasizebytes_ = value;
 }
 inline void LanControllerInfo::set_diagdatasizebytes(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -16971,7 +16759,7 @@ inline void LanControllerInfo::set_diagdatasizebytes(::PROTOBUF_NAMESPACE_ID::in
 
 // optional int32 diagDataFramesQuantity = 49 [default = 0];
 inline bool LanControllerInfo::_internal_has_diagdataframesquantity() const {
-  bool value = (_has_bits_[0] & 0x20000000u) != 0;
+  bool value = (_has_bits_[0] & 0x04000000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_diagdataframesquantity() const {
@@ -16979,7 +16767,7 @@ inline bool LanControllerInfo::has_diagdataframesquantity() const {
 }
 inline void LanControllerInfo::clear_diagdataframesquantity() {
   diagdataframesquantity_ = 0;
-  _has_bits_[0] &= ~0x20000000u;
+  _has_bits_[0] &= ~0x04000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_diagdataframesquantity() const {
   return diagdataframesquantity_;
@@ -16989,7 +16777,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::diagdataframesquantity(
   return _internal_diagdataframesquantity();
 }
 inline void LanControllerInfo::_internal_set_diagdataframesquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x20000000u;
+  _has_bits_[0] |= 0x04000000u;
   diagdataframesquantity_ = value;
 }
 inline void LanControllerInfo::set_diagdataframesquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -16999,7 +16787,7 @@ inline void LanControllerInfo::set_diagdataframesquantity(::PROTOBUF_NAMESPACE_I
 
 // optional int32 overrideDiagDataWordCount = 50 [default = -1];
 inline bool LanControllerInfo::_internal_has_overridediagdatawordcount() const {
-  bool value = (_has_bits_[1] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x80000000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_overridediagdatawordcount() const {
@@ -17007,7 +16795,7 @@ inline bool LanControllerInfo::has_overridediagdatawordcount() const {
 }
 inline void LanControllerInfo::clear_overridediagdatawordcount() {
   overridediagdatawordcount_ = -1;
-  _has_bits_[1] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x80000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_overridediagdatawordcount() const {
   return overridediagdatawordcount_;
@@ -17017,85 +16805,12 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::overridediagdatawordcou
   return _internal_overridediagdatawordcount();
 }
 inline void LanControllerInfo::_internal_set_overridediagdatawordcount(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[1] |= 0x00000004u;
+  _has_bits_[0] |= 0x80000000u;
   overridediagdatawordcount_ = value;
 }
 inline void LanControllerInfo::set_overridediagdatawordcount(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_overridediagdatawordcount(value);
   // @@protoc_insertion_point(field_set:Network.LanControllerInfo.overrideDiagDataWordCount)
-}
-
-// optional string diagDataAssociatedSignals = 51;
-inline bool LanControllerInfo::_internal_has_diagdataassociatedsignals() const {
-  bool value = (_has_bits_[0] & 0x00008000u) != 0;
-  return value;
-}
-inline bool LanControllerInfo::has_diagdataassociatedsignals() const {
-  return _internal_has_diagdataassociatedsignals();
-}
-inline void LanControllerInfo::clear_diagdataassociatedsignals() {
-  diagdataassociatedsignals_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00008000u;
-}
-inline const std::string& LanControllerInfo::diagdataassociatedsignals() const {
-  // @@protoc_insertion_point(field_get:Network.LanControllerInfo.diagDataAssociatedSignals)
-  return _internal_diagdataassociatedsignals();
-}
-inline void LanControllerInfo::set_diagdataassociatedsignals(const std::string& value) {
-  _internal_set_diagdataassociatedsignals(value);
-  // @@protoc_insertion_point(field_set:Network.LanControllerInfo.diagDataAssociatedSignals)
-}
-inline std::string* LanControllerInfo::mutable_diagdataassociatedsignals() {
-  // @@protoc_insertion_point(field_mutable:Network.LanControllerInfo.diagDataAssociatedSignals)
-  return _internal_mutable_diagdataassociatedsignals();
-}
-inline const std::string& LanControllerInfo::_internal_diagdataassociatedsignals() const {
-  return diagdataassociatedsignals_.Get();
-}
-inline void LanControllerInfo::_internal_set_diagdataassociatedsignals(const std::string& value) {
-  _has_bits_[0] |= 0x00008000u;
-  diagdataassociatedsignals_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void LanControllerInfo::set_diagdataassociatedsignals(std::string&& value) {
-  _has_bits_[0] |= 0x00008000u;
-  diagdataassociatedsignals_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Network.LanControllerInfo.diagDataAssociatedSignals)
-}
-inline void LanControllerInfo::set_diagdataassociatedsignals(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00008000u;
-  diagdataassociatedsignals_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Network.LanControllerInfo.diagDataAssociatedSignals)
-}
-inline void LanControllerInfo::set_diagdataassociatedsignals(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00008000u;
-  diagdataassociatedsignals_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Network.LanControllerInfo.diagDataAssociatedSignals)
-}
-inline std::string* LanControllerInfo::_internal_mutable_diagdataassociatedsignals() {
-  _has_bits_[0] |= 0x00008000u;
-  return diagdataassociatedsignals_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* LanControllerInfo::release_diagdataassociatedsignals() {
-  // @@protoc_insertion_point(field_release:Network.LanControllerInfo.diagDataAssociatedSignals)
-  if (!_internal_has_diagdataassociatedsignals()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00008000u;
-  return diagdataassociatedsignals_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void LanControllerInfo::set_allocated_diagdataassociatedsignals(std::string* diagdataassociatedsignals) {
-  if (diagdataassociatedsignals != nullptr) {
-    _has_bits_[0] |= 0x00008000u;
-  } else {
-    _has_bits_[0] &= ~0x00008000u;
-  }
-  diagdataassociatedsignals_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), diagdataassociatedsignals,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Network.LanControllerInfo.diagDataAssociatedSignals)
 }
 
 // -------------------------------------------------------------------

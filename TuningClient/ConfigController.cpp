@@ -591,7 +591,7 @@ bool ConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigS
 
 	// Read StrID attribute
 	//
-	QString appEquipmentId = softwareElement.attribute("ID");
+	QString appEquipmentId = softwareElement.attribute(EquipmentPropNames::EQUIPMENT_ID);
 
 	if (theSettings.instanceStrId() != appEquipmentId)
 	{
