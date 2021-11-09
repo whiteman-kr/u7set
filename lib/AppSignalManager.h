@@ -64,6 +64,8 @@ public:
 	virtual bool signalHasTag(Hash signalHash, const QString& tag) const final;
 	virtual bool signalHasTag(const QString& appSignalId, const QString& tag) const final;
 
+	virtual QStringList signalIdsByTag(const QString& tag) const final;
+
 	virtual E::SignalType signalType(Hash signalHash, bool* found) const final;
 	virtual E::SignalType signalType(const QString& appSignalId, bool* found) const final;
 
@@ -86,6 +88,7 @@ private:
 	mutable QReadWriteLock m_paramsLocker;
 	std::unordered_map<Hash, AppSignalParam> m_signalParams;			// Key is hash from AppSignalID (hash from hash here, not nice)
 	std::unordered_map<QString, QString> m_signalParamByEquipmentId;	// Key is EquipmentId - value is AppSignalID
+	std::unordered_map<QString, QStringList> m_tagToAppSignals;			// Key is tag - value is list of AppSignalIDs with this tag
 
 	mutable QReadWriteLock m_statesLocker;
 	std::unordered_map<Hash, AppSignalState> m_signalStates;

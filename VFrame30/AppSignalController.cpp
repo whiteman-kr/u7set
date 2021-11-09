@@ -304,4 +304,15 @@ namespace VFrame30
 		return (ok == true && asp.isAnalog() == true) ? asp.precision() : 0;
 	}
 
+	QStringList ScriptAppSignalController::signalIdsByTag(QString tag) const
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			assert(m_appSignalManager);
+			return {};
+		}
+
+		return m_appSignalManager->signalIdsByTag(tag);
+	}
+
 }

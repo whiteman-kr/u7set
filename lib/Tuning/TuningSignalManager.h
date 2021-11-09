@@ -47,6 +47,8 @@ public:
 	virtual TuningSignalState state(Hash hash, bool* found) const override;
 	virtual TuningSignalState state(const QString& appSignalId, bool* found) const override;
 
+	virtual QStringList signalIdsByTag(const QString& tag) const override;
+
 	// State manipulation
 	//
 public:
@@ -76,8 +78,9 @@ private:
 
 	// Objects storage
 	//
-	mutable QMutex m_signalsMutex;						// For access to m_signals
+	mutable QMutex m_signalsMutex;									// For access to m_signals
 	std::unordered_map<Hash, AppSignalParam> m_signals;
+	std::unordered_map<QString, QStringList> m_tagToAppSignals;		// Key is tag - value is list of AppSignalIDs with this tag
 
 	// States storage
 	//

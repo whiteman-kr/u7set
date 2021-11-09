@@ -31,6 +31,8 @@ public:
 	virtual bool signalHasTag(Hash signalHash, const QString& tag) const = 0;
 	virtual bool signalHasTag(const QString& appSignalId, const QString& tag) const = 0;
 
+	virtual QStringList signalIdsByTag(const QString& tag) const = 0;
+
 	virtual E::SignalType signalType(Hash signalHash, bool* found) const = 0;
 	virtual E::SignalType signalType(const QString& appSignalId, bool* found) const = 0;
 
