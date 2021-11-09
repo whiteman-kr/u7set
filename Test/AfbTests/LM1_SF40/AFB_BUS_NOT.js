@@ -52,8 +52,10 @@ function cleanup(sim)
     return;
 }
 
-// Test 1
-//
+
+	//Test
+	//Schema AFB_BUS_NOT element tests
+
 
 function test_NOT_BUS_5_Signal_1(sim)
 {
@@ -110,5 +112,8 @@ function test_NOT_BUS_5_Signal_0_1(sim)
 
 	return;
 }
+
+
+
 
 
