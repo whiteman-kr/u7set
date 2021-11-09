@@ -1754,6 +1754,7 @@ namespace Measure
 		double sco = additionalParam(limitType, Measure::AdditionalParam::StandardDeviation);
 
 		// Uncertainty of measurement to Document: EA-04/02 M:2013
+		// Instruction of Radiy: 460009.034-I19
 		//
 		double uncertainty = 0;
 
@@ -1785,18 +1786,10 @@ namespace Measure
 
 					switch (limitType)
 					{
-						case Measure::LimitType::Electric:		// input electric
-							{
-								double MPe = 1 / pow(10.0, sourceLimit.precesion);
-
-								// this is formula for case 2 from documet about uncertainty
-								//
-								uncertainty = Kox * sqrt( pow(sco, 2) + (pow(dEj,2) / 3) + (pow(MPe,2) / 3) );
-							}
-							break;
-
 						case Measure::LimitType::Engineering:
 							{
+								// case 1 of instruction
+								//
 								double Kxj = 0;
 
 								if (inParam.isLinearRange() == true)
@@ -1812,19 +1805,33 @@ namespace Measure
 									Kxj = measure(Measure::LimitType::Engineering) / pCalibrator->sourceValue();
 								}
 
+								// Least significant unit (Engineering limit)
+								//
 								double MPx = 1 / pow(10.0, limitPrecision(Measure::LimitType::Engineering));
 
-								// this is formula for case 1 from documet about uncertainty
+								// this is formula 1 for item 2 from documet about uncertainty
 								//
 								uncertainty = Kox * sqrt( pow(sco, 2) + (pow(Kxj,2) * pow(dEj,2) / 3) + (pow(MPx,2) / 3) );
 							}
+							break;
 
+						case Measure::LimitType::Electric: // input electric
+							{
+								// case 2 of instruction
+								//
+								// Least significant unit (Electric limit)
+								//
+								double MPe = 1 / pow(10.0, sourceLimit.precesion);
+
+								// this is formula 7 for item 3 from documet about uncertainty
+								//
+								uncertainty = Kox * sqrt( pow(sco, 2) + (pow(dEj,2) / 3) + (pow(MPe,2) / 3) );
+							}
 							break;
 
 						default:
 							assert(0);
 					}
-
 				}
 				break;
 
@@ -1868,8 +1875,40 @@ namespace Measure
 
 					switch (limitType)
 					{
-						case Measure::LimitType::Electric:		// output electric
+						case Measure::LimitType::Engineering:
 							{
+								// case 1 of instruction
+								//
+								double Kxj = 0;
+
+								if (inParam.isLinearRange() == true)
+								{
+									// for linear electrical ranges (mA and V) Kxj is calculated differently
+									//
+									Kxj = (highLimit(Measure::LimitType::Engineering) - lowLimit(Measure::LimitType::Engineering)) / (inParam.electricHighLimit() - inParam.electricLowLimit());
+								}
+								else
+								{
+									// for non-linear electrical ranges (mV and Ohms) Kxj is calculated differently
+									// Output measure avg Engineering / Input source mV or Ohms
+									//
+									Kxj = measure(Measure::LimitType::Engineering) / pCalibrator->sourceValue();
+								}
+
+								// Least significant unit (Engineering limit)
+								//
+								double MPx = 1 / pow(10.0, limitPrecision(Measure::LimitType::Engineering));
+
+								// this is formula 1 for item 2 from documet about uncertainty
+								//
+								uncertainty = Kox * sqrt( pow(sco, 2) + (pow(Kxj,2) * pow(dEj,2) / 3) + (pow(MPx,2) / 3) );
+							}
+							break;
+
+						case Measure::LimitType::Electric:	// output electric
+							{
+								// case 4 of instruction
+								//
 								double Kij = 0;
 
 								if (inParam.isLinearRange() == true)
@@ -1888,45 +1927,19 @@ namespace Measure
 
 								}
 
+								// Least significant unit (Electric limit)
+								//
 								double MPi = 1 / pow(10.0, measureLimit.precesion);
 
-								// this is formula for case 3 from documet about uncertainty
+								// this is formula 9 for item 5 from documet about uncertainty
 								//
 								uncertainty = Kox * sqrt( pow(sco, 2) + (pow(Kij,2) * pow(dEj,2) / 3) + (pow(dIj,2) / 3) + (pow(MPi,2) / 12) );
 							}
 							break;
 
-						case Measure::LimitType::Engineering:
-							{
-								double Kxj = 0;
-
-								if (inParam.isLinearRange() == true)
-								{
-									// for linear electrical ranges (mA and V) Kxj is calculated differently
-									//
-									Kxj = (highLimit(Measure::LimitType::Engineering) - lowLimit(Measure::LimitType::Engineering)) / (inParam.electricHighLimit() - inParam.electricLowLimit());
-								}
-								else
-								{
-									// for non-linear electrical ranges (mV and Ohms) Kxj is calculated differently
-									// Output measure avg ENGINEER / Input source mV or Ohms
-									//
-									Kxj = measure(Measure::LimitType::Engineering) / pCalibrator->sourceValue();
-								}
-
-								double MPx = 1 / pow(10.0, limitPrecision(Measure::LimitType::Engineering));
-
-								// this is formula for case 1 from documet about uncertainty
-								//
-								uncertainty = Kox * sqrt( pow(sco, 2) + (pow(Kxj,2) * pow(dEj,2) / 3) + (pow(MPx,2) / 3) );
-							}
-
-							break;
-
 						default:
 							assert(0);
 					}
-
 				}
 				break;
 
@@ -1946,18 +1959,19 @@ namespace Measure
 
 					switch (limitType)
 					{
+						case Measure::LimitType::Engineering:	// because we have not electric input, therefore uncertainty we will be calc by output electric
 						case Measure::LimitType::Electric:		// output electric
-						case Measure::LimitType::Engineering:		// because we have not input therefore uncertainty we will be calc by electric
 							{
-								// this is formula for case 4 from documet about uncertainty
+								// case 3 of instruction
+								//
+								// Least significant unit (Electric limit)
 								//
 								double MPi = 1 / pow(10.0, measureLimit.precesion);
 
-								// this is formula for case 4 from documet about uncertainty
+								// this is formula 8 for item 4 from documet about uncertainty
 								//
-								uncertainty = Kox * sqrt( pow(sco, 2) + (pow(dIj,2) / 3) + (pow(MPi,2) / 3) );
+								uncertainty = Kox * sqrt( pow(sco, 2) + (pow(dIj,2) / 3) + (pow(MPi,2) / 12) );
 							}
-
 							break;
 
 						default:
