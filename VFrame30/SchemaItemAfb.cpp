@@ -692,6 +692,31 @@ namespace VFrame30
 		return true;
 	}
 
+	bool SchemaItemAfb::setAfbParamByOpName(const QString& opName, double value)
+	{
+		if (opName.isEmpty() == true)
+		{
+			assert(opName.isEmpty() != true);
+			return false;
+		}
+
+		auto found = std::find_if(m_afbElement.params().begin(), m_afbElement.params().end(), [&opName](const Afb::AfbParam& p)
+			{
+				return p.opName() == opName;
+			});
+
+		if (found == m_afbElement.params().end())
+		{
+			assert(found != m_afbElement.params().end());
+			return false;
+		}
+
+		Afb::AfbParamValue& v = found->afbParamValue();
+		v.setValue(value);
+
+		return true;
+	}
+
 	QVariant SchemaItemAfb::getAfbParam(const QString& name)
 	{
 		for (Afb::AfbParam& p : m_afbElement.params())
