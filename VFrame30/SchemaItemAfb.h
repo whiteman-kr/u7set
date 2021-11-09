@@ -39,7 +39,8 @@ namespace VFrame30
 		virtual QString buildName() const final;
 
 		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Schema> schema, QString* errorMsg);
-		Q_INVOKABLE bool setAfbParamByOpName(const QString& opName, const Afb::AfbParamValue& value);
+		bool setAfbParamByOpName(const QString& opName, const Afb::AfbParamValue& value);
+		Q_INVOKABLE bool setAfbParamByOpName(const QString& opName, double value);
 
 		QVariant getAfbParam(const QString& name);
 		Afb::AfbParam afbParam(const QString& name);

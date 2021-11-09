@@ -239,6 +239,7 @@ void TuningSignalManager::validateStates()
 		we_debug = !we_debug;
 
 		s.m_value = asp.tuningDefaultValue();
+		s.m_flags.tuningDefault = s.value() == asp.tuningDefaultValue();
 		s.m_lowBound = asp.tuningLowBound();
 		s.m_highBound = asp.tuningHighBound();
 		setState(hash, s);

@@ -301,7 +301,7 @@ private:
 	//
 	QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4), QPageLayout::Orientation::Portrait, QMarginsF(15, 15, 15, 15));
 
-	int m_pageResolution = 300;
+	int m_pageResolution = 600;
 
 	std::vector<ReportMarginItem> m_marginItems;
 	ReportSchemaView* m_schemaView = nullptr;

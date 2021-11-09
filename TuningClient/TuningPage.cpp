@@ -9,6 +9,7 @@
 
 #include <QTableView>
 #include <QInputDialog>
+#include <QFileDialog>
 
 
 //
@@ -1795,6 +1796,11 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 		submenuA->addAction(a);
 	}
 
+	submenuA->addSeparator();
+
+	a = new QAction(tr("Export Current View to CSV..."), &menu);
+	connect(a, &QAction::triggered, this, &TuningPage::slot_exportContentsToCSV);
+	submenuA->addAction(a);
 
 	menu.exec(QCursor::pos());
 
@@ -1888,6 +1894,63 @@ void TuningPage::slot_saveSignalsToExistingFilter()
 
 	addSelectedSignalsToFilter(d->chosenFilter());
 
+}
+
+void TuningPage::slot_exportContentsToCSV()
+{
+	int columnCount = m_model->columnCount();
+
+	int rowCount = m_model->rowCount();
+
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Export to CSV"),
+							   QString(),
+							   tr("CSV (*.csv)"));
+
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	QFile file(fileName);
+	if (file.open(QFile::WriteOnly | QFile::Truncate) == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Error writing file %1!").arg(fileName));
+		return;
+	}
+
+	QTextStream out(&file);
+	out.setCodec("UTF-8");
+
+	QString csvHeader;
+
+	for (int c = 0; c < columnCount; c++)
+	{
+		QString str = m_model->columnText(c);
+		csvHeader += str;
+		csvHeader += ';';
+	}
+
+	out << csvHeader << "\r\n";
+
+	for (int r = 0; r < rowCount; r++)
+	{
+		QString csvRow;
+
+		for (int c = 0; c < columnCount; c++)
+		{
+			QString str = m_model->cellText(c, r);
+			csvRow += str;
+			csvRow += ';';
+		}
+
+		out << csvRow << "\r\n";
+	}
+
+	out.flush();
+
+	QMessageBox::information(this, qAppName(), tr("Export complete."));
+
+	return;
 }
 
 void TuningPage::slot_restoreValuesFromExistingFilter()

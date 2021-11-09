@@ -88,9 +88,13 @@ public:
 
 	void addColumn(TuningModelColumns column);
 	void removeColumn(TuningModelColumns column);
+
 	TuningModelColumns columnType(int index) const;
 	std::vector<TuningModelColumns> columnTypes();
 	void setColumnTypes(std::vector<TuningModelColumns> columnTypes);
+
+	QString columnText(int index) const;
+	QString cellText(int column, int row) const;
 
 	// Font
 

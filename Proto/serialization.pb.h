@@ -15377,10 +15377,11 @@ class DeviceObject PROTOBUF_FINAL :
     kAppSignalFieldNumber = 106,
     kWorkstationFieldNumber = 107,
     kSoftwareFieldNumber = 108,
-    kChildCountHintFieldNumber = 36,
     kPlaceFieldNumber = 5,
     kPresetFieldNumber = 32,
     kPresetRootFieldNumber = 33,
+    kChildCountHintFieldNumber = 36,
+    kPresetVersionFieldNumber = 37,
   };
   // repeated .Proto.Property properties = 7;
   int properties_size() const;
@@ -15708,19 +15709,6 @@ class DeviceObject PROTOBUF_FINAL :
       ::Proto::Software* software);
   ::Proto::Software* unsafe_arena_release_software();
 
-  // optional int32 childCountHint = 36 [default = 0];
-  bool has_childcounthint() const;
-  private:
-  bool _internal_has_childcounthint() const;
-  public:
-  void clear_childcounthint();
-  ::PROTOBUF_NAMESPACE_ID::int32 childcounthint() const;
-  void set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_childcounthint() const;
-  void _internal_set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
   // optional int32 place = 5 [default = 0];
   bool has_place() const;
   private:
@@ -15760,6 +15748,32 @@ class DeviceObject PROTOBUF_FINAL :
   void _internal_set_presetroot(bool value);
   public:
 
+  // optional int32 childCountHint = 36 [default = 0];
+  bool has_childcounthint() const;
+  private:
+  bool _internal_has_childcounthint() const;
+  public:
+  void clear_childcounthint();
+  ::PROTOBUF_NAMESPACE_ID::int32 childcounthint() const;
+  void set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_childcounthint() const;
+  void _internal_set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 presetVersion = 37;
+  bool has_presetversion() const;
+  private:
+  bool _internal_has_presetversion() const;
+  public:
+  void clear_presetversion();
+  ::PROTOBUF_NAMESPACE_ID::int32 presetversion() const;
+  void set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_presetversion() const;
+  void _internal_set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceObject)
  private:
   class _Internal;
@@ -15790,10 +15804,11 @@ class DeviceObject PROTOBUF_FINAL :
   ::Proto::DeviceAppSignal* appsignal_;
   ::Proto::Workstation* workstation_;
   ::Proto::Software* software_;
-  ::PROTOBUF_NAMESPACE_ID::int32 childcounthint_;
   ::PROTOBUF_NAMESPACE_ID::int32 place_;
   bool preset_;
   bool presetroot_;
+  ::PROTOBUF_NAMESPACE_ID::int32 childcounthint_;
+  ::PROTOBUF_NAMESPACE_ID::int32 presetversion_;
   friend struct ::TableStruct_serialization_2eproto;
 };
 // -------------------------------------------------------------------
@@ -44156,7 +44171,7 @@ inline void DeviceObject::set_allocated_childrestriction(::Proto::wstring* child
 
 // optional int32 place = 5 [default = 0];
 inline bool DeviceObject::_internal_has_place() const {
-  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_place() const {
@@ -44164,7 +44179,7 @@ inline bool DeviceObject::has_place() const {
 }
 inline void DeviceObject::clear_place() {
   place_ = 0;
-  _has_bits_[0] &= ~0x00020000u;
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_place() const {
   return place_;
@@ -44174,7 +44189,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::place() const {
   return _internal_place();
 }
 inline void DeviceObject::_internal_set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00020000u;
+  _has_bits_[0] |= 0x00010000u;
   place_ = value;
 }
 inline void DeviceObject::set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -44296,7 +44311,7 @@ DeviceObject::properties() const {
 
 // optional bool preset = 32 [default = false];
 inline bool DeviceObject::_internal_has_preset() const {
-  bool value = (_has_bits_[0] & 0x00040000u) != 0;
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_preset() const {
@@ -44304,7 +44319,7 @@ inline bool DeviceObject::has_preset() const {
 }
 inline void DeviceObject::clear_preset() {
   preset_ = false;
-  _has_bits_[0] &= ~0x00040000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline bool DeviceObject::_internal_preset() const {
   return preset_;
@@ -44314,7 +44329,7 @@ inline bool DeviceObject::preset() const {
   return _internal_preset();
 }
 inline void DeviceObject::_internal_set_preset(bool value) {
-  _has_bits_[0] |= 0x00040000u;
+  _has_bits_[0] |= 0x00020000u;
   preset_ = value;
 }
 inline void DeviceObject::set_preset(bool value) {
@@ -44324,7 +44339,7 @@ inline void DeviceObject::set_preset(bool value) {
 
 // optional bool presetRoot = 33 [default = false];
 inline bool DeviceObject::_internal_has_presetroot() const {
-  bool value = (_has_bits_[0] & 0x00080000u) != 0;
+  bool value = (_has_bits_[0] & 0x00040000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_presetroot() const {
@@ -44332,7 +44347,7 @@ inline bool DeviceObject::has_presetroot() const {
 }
 inline void DeviceObject::clear_presetroot() {
   presetroot_ = false;
-  _has_bits_[0] &= ~0x00080000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline bool DeviceObject::_internal_presetroot() const {
   return presetroot_;
@@ -44342,7 +44357,7 @@ inline bool DeviceObject::presetroot() const {
   return _internal_presetroot();
 }
 inline void DeviceObject::_internal_set_presetroot(bool value) {
-  _has_bits_[0] |= 0x00080000u;
+  _has_bits_[0] |= 0x00040000u;
   presetroot_ = value;
 }
 inline void DeviceObject::set_presetroot(bool value) {
@@ -44518,7 +44533,7 @@ inline void DeviceObject::set_allocated_presetobjectuuid(::Proto::Uuid* presetob
 
 // optional int32 childCountHint = 36 [default = 0];
 inline bool DeviceObject::_internal_has_childcounthint() const {
-  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  bool value = (_has_bits_[0] & 0x00080000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_childcounthint() const {
@@ -44526,7 +44541,7 @@ inline bool DeviceObject::has_childcounthint() const {
 }
 inline void DeviceObject::clear_childcounthint() {
   childcounthint_ = 0;
-  _has_bits_[0] &= ~0x00010000u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_childcounthint() const {
   return childcounthint_;
@@ -44536,12 +44551,40 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::childcounthint() const {
   return _internal_childcounthint();
 }
 inline void DeviceObject::_internal_set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00010000u;
+  _has_bits_[0] |= 0x00080000u;
   childcounthint_ = value;
 }
 inline void DeviceObject::set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_childcounthint(value);
   // @@protoc_insertion_point(field_set:Proto.DeviceObject.childCountHint)
+}
+
+// optional int32 presetVersion = 37;
+inline bool DeviceObject::_internal_has_presetversion() const {
+  bool value = (_has_bits_[0] & 0x00100000u) != 0;
+  return value;
+}
+inline bool DeviceObject::has_presetversion() const {
+  return _internal_has_presetversion();
+}
+inline void DeviceObject::clear_presetversion() {
+  presetversion_ = 0;
+  _has_bits_[0] &= ~0x00100000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_presetversion() const {
+  return presetversion_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::presetversion() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.presetVersion)
+  return _internal_presetversion();
+}
+inline void DeviceObject::_internal_set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00100000u;
+  presetversion_ = value;
+}
+inline void DeviceObject::set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_presetversion(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceObject.presetVersion)
 }
 
 // optional .Proto.DeviceRoot Root = 100;

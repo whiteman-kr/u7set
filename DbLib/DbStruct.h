@@ -49,6 +49,7 @@ namespace Db
 		constexpr static const char* GenerateExtraDebugInfo = "Generate Extra Debug Info";		// Generate extra debug information on build
 		constexpr static const char* RunSimTestsOnBuild = "Run Simulator Tests on Build";		// Run simulator based tests on build project
 		constexpr static const char* SimulatorTestsTimeout = "Simulator Tests Timeout";			// Simulator run tests script timeout
+		constexpr static const char* MismatchPresetVersionAsWarning = "Mismatch Preset Version as Warning";	// If preset version mismatch is detected, treat it as a warning
 	};
 
 	class File
@@ -213,6 +214,9 @@ public:
 	[[nodiscard]] bool generateExtraDebugInfo() const;
 	void setGenerateExtraDebugInfo(bool value);
 
+	[[nodiscard]] bool mismatchPresetVersionAsWarning() const;
+	void setMismatchPresetVersionAsWarning(bool value);
+
 private:
 	QString m_description;
 	bool m_safetyProject = true;
@@ -223,6 +227,7 @@ private:
 	bool m_generateAppSignalsXml = false;
 	bool m_generateAppLogicDrawings = false;
 	bool m_generateExtraDebugInfo = false;
+	bool m_mismatchPresetVersionAsWarning = false;				// If preset version mismatch is detected, treat it as a warning
 };
 
 

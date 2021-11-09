@@ -48,23 +48,6 @@ const int						PROJECT_PROPERTY_GROUP_INFO				= 0,
 
 // ----------------------------------------------------------------------------------------------
 
-class ProjectInfo_: public PropertyObject
-{
-	Q_OBJECT
-
-public:
-
-	explicit ProjectInfo_(ProjectInfo* info);
-
-private:
-
-	ProjectInfo* m_info = nullptr;
-
-	void appendProperties();
-};
-
-// ----------------------------------------------------------------------------------------------
-
 class DialogProjectProperty : public QDialog
 {
 	Q_OBJECT
@@ -75,6 +58,13 @@ public:
 	virtual ~DialogProjectProperty() override;
 
 private:
+
+	class PropertyPattern: public PropertyObject
+	{
+	public:
+		explicit PropertyPattern(ProjectInfo* pObject);
+		ProjectInfo* m_pObject = nullptr;
+	};
 
 	ProjectInfo m_info;
 	ExtWidgets::PropertyEditor*	m_pPropertyEditor = nullptr;

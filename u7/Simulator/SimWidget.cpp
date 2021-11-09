@@ -58,7 +58,9 @@ SimWidget::SimWidget(std::shared_ptr<SimIdeSimulator> simulator,
 
 	// --
 	//
+	connect(db, &DbController::projectOpened, this, &SimWidget::closeBuild);		// SimProject could be opened manually by browsing
 	connect(db, &DbController::projectOpened, this, &SimWidget::projectOpened);
+
 	connect(db, &DbController::projectClosed, this, &SimWidget::closeBuild);
 	connect(db, &DbController::projectClosed, this, &SimWidget::projectClosed);
 
@@ -590,6 +592,7 @@ void SimWidget::updateActions()
 
 void SimWidget::projectOpened(DbProject)
 {
+	emit needCloseChildWindows();
 	emit needUpdateActions();
 }
 
@@ -602,27 +605,43 @@ void SimWidget::openBuild()
 {
 	m_simulator->control().stop();
 
-	QSettings settings;
-
-	QString project = db()->currentProject().projectName().toLower();
-	QString lastPath = settings.value("SimulatorWidget/ProjectLastPath/" + project).toString();
-
-	SimSelectBuildDialog d(project, lastPath, this);
-	int result = d.exec();
-
-	if (result == QDialog::Accepted)
+	if (dbc()->isProjectOpened() == true)
 	{
-		lastPath = d.resultBuildPath();
+		QSettings settings;
 
-		bool ok = loadBuild(lastPath);
+		QString project = db()->currentProject().projectName().toLower();
+		QString lastPath = settings.value("SimulatorWidget/ProjectLastPath/" + project).toString();
 
-		if (ok == true)
+		SimSelectBuildDialog d(project, lastPath, this);
+		int result = d.exec();
+
+		if (result == QDialog::Accepted)
 		{
-			settings.setValue("SimulatorWidget/ProjectLastPath/" + project, lastPath);
+			lastPath = d.resultBuildPath();
+
+			if (bool ok = loadBuild(lastPath);
+				ok == true)
+			{
+				settings.setValue("SimulatorWidget/ProjectLastPath/" + project, lastPath);
+			}
+		}
+	}
+	else
+	{
+		QString lastPath = QSettings{}.value("SimulatorWidget/ProjectLastPath/NoOpenProject").toString();
+
+		lastPath = QFileDialog::getExistingDirectory(this, "Open Build", lastPath);
+
+		if (lastPath.isEmpty() == false)
+		{
+			loadBuild(lastPath);
+
+			QSettings{}.setValue("SimulatorWidget/ProjectLastPath/NoOpenProject", lastPath);
 		}
 	}
 
 	emit needUpdateActions();
+
 	return;
 }
 
