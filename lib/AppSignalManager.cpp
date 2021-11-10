@@ -24,6 +24,7 @@ void AppSignalManager::reset()
 		QWriteLocker wl(&m_paramsLocker);
 		m_signalParams.clear();
 		m_signalParamByEquipmentId.clear();
+		m_tagToAppSignals.clear();
 	}
 
 	{
@@ -58,6 +59,23 @@ void AppSignalManager::addSignal(const AppSignalParam& appSignal)
 	//
 	m_signalParamByEquipmentId[QStringLiteral("@") + appSignal.equipmentId()] = appSignal.appSignalId();
 
+	// Add tags to m_signaIdsByTag
+	//
+	const QString& appSignalId = appSignal.appSignalId();
+
+	for (const std::set<QString>& tags = appSignal.tags();
+		 const QString& tag : tags)
+	{
+		QStringList& l = m_tagToAppSignals[tag];
+
+		if (l.isEmpty() == true)
+		{
+			l.reserve(1024);
+		}
+
+		l.push_back(appSignalId);
+	}
+
 	return;
 }
 
@@ -73,6 +91,23 @@ void AppSignalManager::addSignals(const std::vector<AppSignalParam>& appSignals)
 		// but we need it particularly for Monitor to distinct AppSignalID from EquimpentID.
 		//
 		m_signalParamByEquipmentId[QStringLiteral("@") + s.equipmentId()] = s.appSignalId();
+
+		// Add tags to m_signaIdsByTag
+		//
+		const QString& appSignalId = s.appSignalId();
+
+		for (const std::set<QString>& tags = s.tags();
+			 const QString& tag : tags)
+		{
+			QStringList& l = m_tagToAppSignals[tag];
+
+			if (l.isEmpty() == true)
+			{
+				l.reserve(1024);
+			}
+
+			l.push_back(appSignalId);
+		}
 	}
 
 	return;
@@ -399,6 +434,21 @@ E::SignalType AppSignalManager::signalType(Hash signalHash, bool* found) const
 	return result == m_signalParams.end() ?
 				E::SignalType::Discrete :
 				result->second.type();
+}
+
+QStringList AppSignalManager::signalIdsByTag(const QString& tag) const
+{
+	QReadLocker rl(&m_paramsLocker);
+
+	auto it = m_tagToAppSignals.find(tag);
+	if (it == m_tagToAppSignals.end())
+	{
+		return {};
+	}
+	else
+	{
+		return it->second;
+	}
 }
 
 E::SignalType AppSignalManager::signalType(const QString& appSignalId, bool* found) const

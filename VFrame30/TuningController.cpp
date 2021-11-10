@@ -76,6 +76,17 @@ namespace VFrame30
 		return result;
 	}
 
+	QStringList TuningController::signalIdsByTag(QString tag) const
+	{
+		if (m_signalManager == nullptr)
+		{
+			assert(m_signalManager);
+			return {};
+		}
+
+		return m_signalManager->signalIdsByTag(tag);
+	}
+
 	bool TuningController::writeValue(QString appSignalId, QVariant value)
 	{
 		if (m_tcpClient == nullptr)

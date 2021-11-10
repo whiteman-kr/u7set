@@ -382,6 +382,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0360.sql", "Upgrade to version 360, LM1-SR03 and LM1-SR04 ID changed"},
 	{":/DatabaseUpgrade/Upgrade0361.sql", "Upgrade to version 361, tconv_bo_16 and tconv_bo_32 AFB have been added to all LMs"},
 	{":/DatabaseUpgrade/Upgrade0362.sql", "Upgrade to version 362, Added synchronization pins to DeadZone in LM8-SR10"},
+	{":/DatabaseUpgrade/Upgrade0363.sql", "Upgrade to version 363, Using setParamIntValue instead of setAfbParamByOpName in voter AFB in all LMs"},
 };
 
 int DbWorker::counter = 0;

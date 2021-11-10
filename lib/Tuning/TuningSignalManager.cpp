@@ -17,6 +17,7 @@ void TuningSignalManager::reset()
 	{
 		QMutexLocker l(&m_signalsMutex);
 		m_signals.clear();
+		m_tagToAppSignals.clear();
 	}
 
 	{
@@ -49,22 +50,45 @@ bool TuningSignalManager::load(const ::Proto::AppSignalSet& message)
 	reset();
 
 	bool ok = true;
+
 	std::unordered_map<Hash, AppSignalParam> loadedSignals;
 	loadedSignals.reserve(message.appsignal_size());
+
+	std::unordered_map<QString, QStringList> tagToAppSignals;
+	tagToAppSignals.reserve(256);
 
 	for (int i = 0; i < message.appsignal_size(); i++)
 	{
 		const ::Proto::AppSignal& appSignalMessage = message.appsignal(i);
 
-		AppSignalParam appSignalParam;
+		Hash hash = ::calcHash(QString::fromStdString(appSignalMessage.appsignalid()));
+
+		AppSignalParam& appSignalParam = loadedSignals[hash];
 		ok &= appSignalParam.load(appSignalMessage);
 
-		loadedSignals.insert({appSignalParam.hash(), appSignalParam});
+		// Add tags to m_signaIdsByTag
+		//
+		const QString& appSignalId = appSignalParam.appSignalId();
+
+		for (const std::set<QString>& tags = appSignalParam.tags();
+			 const QString& tag : tags)
+		{
+			QStringList& l = tagToAppSignals[tag];
+
+			if (l.isEmpty() == true)
+			{
+				l.reserve(1024);
+			}
+
+			l.push_back(appSignalId);
+		}
 	}
 
 	{
 		QMutexLocker l(&m_signalsMutex);
+
 		std::swap(loadedSignals, m_signals);
+		std::swap(tagToAppSignals, m_tagToAppSignals);
 	}
 
 	emit signalsLoaded();
@@ -212,6 +236,21 @@ TuningSignalState TuningSignalManager::state(const QString& appSignalId, bool* f
 {
 	Hash signalHash = ::calcHash(appSignalId);
 	return state(signalHash, found);
+}
+
+QStringList TuningSignalManager::signalIdsByTag(const QString& tag) const
+{
+	QMutexLocker rl(&m_signalsMutex);
+
+	auto it = m_tagToAppSignals.find(tag);
+	if (it == m_tagToAppSignals.end())
+	{
+		return {};
+	}
+	else
+	{
+		return it->second;
+	}
 }
 
 void TuningSignalManager::validateStates()
