@@ -40,7 +40,6 @@ namespace VFrame30
 
 		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Schema> schema, QString* errorMsg);
 		bool setAfbParamByOpName(const QString& opName, const Afb::AfbParamValue& value);
-		Q_INVOKABLE bool setAfbParamByOpName(const QString& opName, double value);
 
 		QVariant getAfbParam(const QString& name);
 		Afb::AfbParam afbParam(const QString& name);
@@ -59,8 +58,16 @@ namespace VFrame30
 	protected:
 		void addSpecificParamProperties();
 		bool executeScript(const QString& script, const Afb::AfbElement& afb, QString* errorMessage);
+
+		Q_INVOKABLE double getParamDoubleValue(const QString& name);
+		Q_INVOKABLE bool setParamDoubleValue(const QString& name, double value);
+
 		Q_INVOKABLE int getParamIntValue(const QString& name);
+		Q_INVOKABLE bool setParamIntValue(const QString& name, int value);
+
 		Q_INVOKABLE bool getParamBoolValue(const QString& name);
+		Q_INVOKABLE bool setParamBoolValue(const QString& name, bool value);
+
 		Q_INVOKABLE bool setParamVisible(const QString& name, bool visible);
 
 		Q_INVOKABLE void addInputSignal(QString caption, int type, int opIndex, int size);

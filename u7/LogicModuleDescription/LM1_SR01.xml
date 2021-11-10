@@ -610,7 +610,7 @@
 
                                 if (xCount &gt;= yCount)
 								{
-								    videoItemFblElement.setAfbParamByOpName("i_conf_x", yCount - 1);
+                                                                    videoItemFblElement.setParamIntValue("i_conf_x", yCount - 1);
 									return false;
 								}
 								return true;
@@ -641,7 +641,7 @@
 
                                 if (yCount &lt;= xCount)
 								{
-								    videoItemFblElement.setAfbParamByOpName("i_conf_y", xCount + 1);
+                                                                    videoItemFblElement.setParamIntValue("i_conf_y", xCount + 1);
 								}
 
                                 return createInputSignals(videoItemFblElement, afbElement);
@@ -11754,7 +11754,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 
 	if (xCount &gt;= yCount)
 	{	
-		videoItemFblElement.setAfbParamByOpName("i_conf_x", yCount - 1);
+                videoItemFblElement.setParamIntValue("i_conf_x", yCount - 1);
 		return false;
 	}
 	return true;
@@ -11785,7 +11785,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 
 	if (yCount &lt;= xCount)
 	{	
-		videoItemFblElement.setAfbParamByOpName("i_conf_y", xCount + 1);
+                videoItemFblElement.setParamIntValue("i_conf_y", xCount + 1);
 	}
 
 	return createInputSignals(videoItemFblElement, afbElement);
