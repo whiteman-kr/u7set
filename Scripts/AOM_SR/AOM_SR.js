@@ -28,7 +28,7 @@ function generate_aomsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 	// ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
     //
 
-    for (var i = 1; i < moduleSignalsCount - 1; i++)
+    for (var i = 1; i < moduleSignalsCount + 1; i++)
     {
 		var signalStrId = module.equipmentId + "_CTRLOUT";
 		if (i < 10)
