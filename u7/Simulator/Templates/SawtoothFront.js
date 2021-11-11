@@ -13,6 +13,7 @@ let counter = 0;
     const time = 500;			// ms, going up
     const amplitude = 100.0;	// Amplitude
     const base = 0.0;			// Shift base
+    const noise = false;		// Allow adding noise to result
 
     // Calc result
     //
@@ -27,5 +28,23 @@ let counter = 0;
         counter = (time - 5) / 5;
     }
 
-    return base + amplitude - delta * counter;	// Return value for signal overriding
+    let result = base + amplitude - delta * counter;
+
+    // Add noise if noise is allowed
+    //
+    if (noise === true)
+    {
+        const prob = 0.03;				// High peaks probability
+        const k = amplitude / 50.0;
+
+        let r = (Math.random() * 2 - 1) * k
+
+        result = Math.random() < prob ?
+                    result += r * 7 :
+                    result += r;
+    }
+
+    return result;	// Return value for signal overriding
 })
+
+
