@@ -1544,7 +1544,7 @@ namespace Builder
 	///         %1 Property1
 	///         %2 Property2
 	///			%3 Object1 ID
-	/// 		%4 Object3 ID
+	/// 		%4 Object2 ID
 	///
 	/// Description:
 	///			Value of specified properties pair should't be equal.
@@ -1557,6 +1557,54 @@ namespace Builder
 				  QString(tr("Value of properties pair %1:%2 of objects %3 and %4 are equal.").
 								arg(prop1).arg(prop2).arg(obj1).arg(obj2)));
 	}
+
+	/// IssueCode: CFG3047
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1.%2 should refer to one of software controllers: %3
+	///
+	/// Parameters:
+	///         %1 Device object EquipmentID
+	///			%2 Property Name
+	///         %3 List of controllers IDs
+	///
+	/// Description:
+	///			Specified object property should refer to one of available software controllers.
+	///			Check equipment configuration.
+	///
+	void IssueLogger::errCFG3047(QString objectID, QString propertyName, QString controillersList)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3047,
+				  QString(tr("Property %1.%2 should refer to one of software controllers: %3").
+								arg(objectID).arg(propertyName).arg(controillersList)));
+	}
+
+	/// IssueCode: CFG3048
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1.%2 should refer to Software or Software child controller object.
+	///
+	/// Parameters:
+	///         %1 Device object EquipmentID
+	///			%2 Property Name
+	///
+	/// Description:
+	///			Specified object property should refer to Software or Software child controller object.
+	///			Check equipment configuration.
+	///
+	void IssueLogger::errCFG3048(QString objectID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3048,
+				  QString(tr("Property %1.%2 should refer to Software or Software child controller object.").
+								arg(objectID).arg(propertyName)));
+	}
+
+	void errCFG3048(QString objectID, QString propertyName, QString controillersList);	// Property %1.%2 should refer to Software or SoftwareController object.
+
 
 	//
 	// ALP			Application Logic Parsing				4000-4999

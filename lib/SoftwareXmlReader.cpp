@@ -74,6 +74,12 @@ bool SoftwareXmlInfo::readFromXml(XmlReadHelper& xmlReader)
 
 	result &= xmlReader.readIntAttribute(XmlAttribute::TYPE, &typeInt);
 
+	QString controllersIDs;
+
+	result &= xmlReader.readStringAttribute(XmlAttribute::SOFTWARE_CONTROLLERS, &controllersIDs);
+
+	softwareControllersIDs = controllersIDs.split(Separator::COMMA, Qt::SkipEmptyParts);
+
 	RETURN_IF_FALSE(result);
 
 	if (E::contains<E::SoftwareType>(typeInt) == false)
@@ -83,12 +89,6 @@ bool SoftwareXmlInfo::readFromXml(XmlReadHelper& xmlReader)
 	}
 
 	m_settingsSet.setSoftwareType(static_cast<E::SoftwareType>(typeInt));
-
-
-	if (equipmentID == "SYSTEMID_RACK01_WS00_TUNS")
-	{
-		DEBUG_STOP;
-	}
 
 	result = m_settingsSet.readFromXml(xmlReader);
 

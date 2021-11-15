@@ -35,7 +35,7 @@ namespace Sim
 
 					if (tuningServiceCommunicator == nullptr)
 					{
-						log().writeAlert(QString("TuningService %1 not forund for LAN port %2")
+						log().writeAlert(QString("TuningService %1 not found for LAN port %2")
 										 .arg(lc.tuningServiceID)
 										 .arg(lc.equipmentID));
 					}

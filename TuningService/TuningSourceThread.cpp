@@ -256,12 +256,37 @@ namespace Tuning
 
 		const TuningServiceSettings::ChannelSettings& ch = settings.channelSettings[channel];
 
+		if (ch.enable == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
 		m_isSimulationMode = swRunMode == E::SoftwareRunMode::Simulation;
 
 		const TuningSource& source = m_sourceThread.source();
 
 		m_sourceEquipmentID = source.moduleEquipmentID();
-		m_sourceIP = ch.tuningDataIP;
+
+		TuningServiceSettings::TuningSource ts = ch.getTuningSource(m_sourceEquipmentID);
+
+		if (ts.isValid() == false)
+		{
+			DEBUG_LOG_ERR(logger, QString("Undefined tuning source %1 (TuningChannelHandler contruction)").
+									arg(m_sourceEquipmentID));
+			return;
+		}
+
+		LanControllerInfo lci = source.lanControllersInfo().getInfo(ts.portEquipmentID);
+
+		if (lci.isValid() == false)
+		{
+			DEBUG_LOG_ERR(logger, QString("Undefined ethernet controller %1 (TuningChannelHandler contruction)").
+									arg(ts.portEquipmentID));
+			return;
+		}
+
+		m_sourceIP = lci.tuningHostAddressPort();
 		m_sourceUniqueID = source.moduleUniqueID();
 		m_lmNumber = static_cast<quint16>(source.lmNumber());
 		m_lmModuleType = static_cast<quint16>(source.moduleType());

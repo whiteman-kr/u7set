@@ -215,6 +215,8 @@ public:
 		QString lmEquipmentID;
 		QString portEquipmentID;
 		HostAddressPort tuningDataIP;
+
+		bool isValid() { return lmEquipmentID.isEmpty() == false; }
 	};
 
 	struct ChannelSettings
@@ -233,13 +235,15 @@ public:
 
 		std::vector<TuningSource> sources;
 		std::vector<TuningClient> clients;
+
+		TuningSource getTuningSource(const QString& sourceEquipmentID) const;
 	};
 
 	static const int CHANNELS_COUNT = 2;
 
 	QString equipmentID;
 
-	bool singleChannel = true;
+	int channelCount = 0;
 
 	QString cfgServiceID1;
 	HostAddressPort cfgServiceIP1;

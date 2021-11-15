@@ -229,7 +229,6 @@ namespace Builder
 												 *m_context, true, &lanControllerInfo, log());
 				if (res == false)
 				{
-					LOG_INTERNAL_ERROR(log());
 					result = false;
 					continue;
 				}

@@ -52,9 +52,17 @@ struct LanControllerInfo
 	int diagDataFramesQuantity = 0;
 	int overrideDiagDataWordCount = -1;
 
+	HostAddressPort diagDataHostAddressPort() { return HostAddressPort(diagDataIP, diagDataPort); }
+
 	//
 
 	bool isValid() const;
+
+	//
+
+	HostAddressPort appDataHostAddressPort() const;
+	HostAddressPort tuningHostAddressPort() const;
+	HostAddressPort diagDataHostAddressPort() const;
 
 	//
 

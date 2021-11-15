@@ -183,6 +183,8 @@ namespace Builder
 		void errCFG3046(QString prop1, QString prop2,
 						QString obj1, QString obj2);				// Value of properties pair %1:%2 of objects %3 and %4 are equal.
 
+		void errCFG3047(QString objectID, QString propertyName, QString controillersList);	// Property %1.%2 should refer to one of software controllers: %3
+		void errCFG3048(QString objectID, QString propertyName);	// Property %1.%2 should refer to Software or Software child controller object.
 
 		// ALP			Application Logic Parsing				4000-4999
 		//

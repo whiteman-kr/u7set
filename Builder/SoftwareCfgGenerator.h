@@ -96,6 +96,7 @@ namespace Builder
 	protected:
 		Context* m_context = nullptr;
 		Hardware::Software* m_software = nullptr;
+		QStringList m_softwareControllersIDs;
 		DbController* m_dbController = nullptr;
 		SignalSet* m_signalSet = nullptr;
 		Hardware::EquipmentSet* m_equipment = nullptr;

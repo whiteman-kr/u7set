@@ -80,7 +80,50 @@ bool SoftwareSettingsGetter::getSoftwareConnection(const Hardware::EquipmentSet*
 		return false;
 	}
 
-	const Hardware::Software* connectedSoftware = DeviceHelper::getSoftware(equipment, *connectedSoftwareID);
+	const Hardware::Software* connectedSoftware = nullptr;
+
+	const std::shared_ptr<Hardware::DeviceObject> sharedConnectedObject = equipment->deviceObject(*connectedSoftwareID);
+
+	if (sharedConnectedObject == nullptr)
+	{
+		// Property '%1.%2' is linked to undefined software ID '%3'.
+		//
+		log->errCFG3021(thisSoftware->equipmentIdTemplate(), propConnectedSoftwareID, *connectedSoftwareID);
+		return false;
+	}
+
+	const Hardware::DeviceObject* connectedObject = sharedConnectedObject.get();
+
+	if (connectedObject->isSoftware() == true)
+	{
+		QStringList controllersIDs;
+
+		if (DeviceHelper::isTwoChannelSoftware(connectedObject, &controllersIDs) == true)
+		{
+			// Property %1.%2 should refer to one of software controllers: %3
+			//
+			log->errCFG3047(thisSoftware->equipmentIdTemplate(),
+							propConnectedSoftwareID,
+							controllersIDs.join(Separator::COMMA_SPACE));
+			return false;
+		}
+
+		connectedSoftware = connectedObject->toSoftware().get();
+	}
+	else
+	{
+		if (connectedObject->isController() == true)
+		{
+			connectedSoftware = connectedObject->getParentSoftware();
+		}
+		else
+		{
+			// Property %1.%2 should refer to Software or Software child controller object.
+			//
+			log->errCFG3048(thisSoftware->equipmentIdTemplate(), propConnectedSoftwareID);
+			return false;
+		}
+	}
 
 	if (connectedSoftware == nullptr)
 	{
@@ -101,7 +144,7 @@ bool SoftwareSettingsGetter::getSoftwareConnection(const Hardware::EquipmentSet*
 		}
 	}
 
-	result = DeviceHelper::getIpPortProperty(	connectedSoftware,
+	result = DeviceHelper::getIpPortProperty(	connectedObject,
 												propConnectedSoftwareIP,
 												propConnectedSoftwarePort,
 												connectedSoftwareIP,
@@ -493,7 +536,7 @@ bool TuningServiceSettingsGetter::readFromDevice(const Builder::Context* context
 
 	if (hasControllers == true)
 	{
-		singleChannel = false;
+		channelCount = TuningServiceSettings::CHANNELS_COUNT;
 
 		for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
 		{
@@ -535,7 +578,7 @@ bool TuningServiceSettingsGetter::readFromDevice(const Builder::Context* context
 	{
 		// Reading of single-channel TuningService preset
 		//
-		singleChannel = true;
+		channelCount = 1;
 
 		ChannelSettings& ch1 = channelSettings[0];
 
@@ -713,7 +756,7 @@ bool TuningServiceSettingsGetter::fillTuningSourcesInfo(const Builder::Context* 
 				log->errCFG3043(lan.tuningIP,
 								  lan.equipmentID,
 								  tuningDataIP.addressStr(),
-								  software->equipmentIdTemplate());
+								  srvControllerEquipmentID);
 				result = false;
 				continue;
 			}

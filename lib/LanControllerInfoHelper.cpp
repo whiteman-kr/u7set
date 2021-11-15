@@ -36,6 +36,9 @@ bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 
 	if (deviceController == nullptr)
 	{
+		// Can't find child controller with suffix %1 in object %2
+		//
+		log->errCFG3025(suffix, lm.equipmentIdTemplate());
 		return false;
 	}
 
@@ -79,6 +82,22 @@ bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 			else
 			{
 				const Hardware::DeviceObject* tunService = equipmentSet.deviceObject(lanControllerInfo->tuningServiceID).get();
+
+				if (tunService->isController() == false)
+				{
+					QStringList controllersIDs;
+
+					if (DeviceHelper::isTwoChannelSoftware(tunService, &controllersIDs) == true)
+					{
+						// Property %1.%2 should refer to one of software controllers: %3
+						//
+						log->errCFG3047(deviceController->equipmentIdTemplate(),
+										EquipmentPropNames::TUNING_SERVICE_ID,
+										controllersIDs.join(Separator::COMMA_SPACE));
+
+						return false;
+					}
+				}
 
 				if (tunService != nullptr)
 				{

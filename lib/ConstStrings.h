@@ -80,7 +80,7 @@ namespace EquipmentPropNames
 	inline const QString ENABLE("Enable");
 	inline const QString TUNING_SIM_IP("TuningSimIP");
 	inline const QString TUNING_SIM_PORT("TuningSimPort");
-	inline const QString CONTROLLER_SUFFIX_CH_TEMPLATE("CH%1");
+	inline const QString CONTROLLER_SUFFIX_CH_TEMPLATE("_CH%1");
 
 	// TuningClient properties
 	//
@@ -194,7 +194,7 @@ namespace XmlElement
 	inline const QString TUNING_SOURCES("TuningSources");
 	inline const QString TUNING_SOURCE("TuningSource");
 	inline const QString TUNING_CHANNEL_TEMPLATE("Channel%1");
-	inline const QString SINGLE_CHANNEL("SingleChannel");
+	inline const QString CHANNEL_COUNT("ChannelCount");
 
 	inline const QString DATA_SOURCES("DataSources");
 	inline const QString DATA_SOURCE("DataSource");
@@ -240,6 +240,7 @@ namespace XmlAttribute
 	inline const QString EQUIPMENT_ID("EquipmentID");
 	inline const QString DATA_FORMAT("DataFormat");
 	inline const QString DATA_SIZE("DataSize");
+	inline const QString SOFTWARE_CONTROLLERS("SoftwareControllers");
 
 	inline const QString DATA_ID("DataID");
 	inline const QString HEX_DATA_ID("HexDataID");

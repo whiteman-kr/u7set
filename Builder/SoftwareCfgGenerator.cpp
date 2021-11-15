@@ -26,6 +26,8 @@ namespace Builder
 		m_settingsSet(software->softwareType())
 	{
 		assert(context);
+
+		m_softwareControllersIDs = DeviceHelper::getSoftwareControllersIDs(software);
 	}
 
 	SoftwareCfgGenerator::~SoftwareCfgGenerator()
@@ -527,6 +529,8 @@ namespace Builder
 		xmlWriter.writeAttribute(XmlAttribute::CAPTION, m_software->caption());
 		xmlWriter.writeAttribute(XmlAttribute::EQUIPMENT_ID, m_software->equipmentIdTemplate());
 		xmlWriter.writeAttribute(XmlAttribute::TYPE, QString("%1").arg(static_cast<int>(m_software->softwareType())));
+		xmlWriter.writeAttribute(XmlAttribute::SOFTWARE_CONTROLLERS,
+								 m_softwareControllersIDs.join(Separator::COMMA));
 
 		if (finalizeSection == true)
 		{

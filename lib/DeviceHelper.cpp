@@ -1,6 +1,7 @@
 #include "../lib/DeviceHelper.h"
 #include "../UtilsLib/WUtils.h"
 #include "../OnlineLib/SocketIO.h"
+#include "../lib/ConstStrings.h"
 #include <QHostAddress>
 
 
@@ -81,7 +82,6 @@ bool DeviceHelper::getUIntProperty(const Hardware::DeviceObject* device, const Q
 
 	return true;
 }
-
 
 bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString* value, Builder::IssueLogger* log)
 {
@@ -710,6 +710,72 @@ const Hardware::Software* DeviceHelper::getSoftware(const Hardware::EquipmentSet
 	}
 
 	return device->toSoftware().get();
+}
+
+QStringList DeviceHelper::getSoftwareControllersIDs(const Hardware::Software* software)
+{
+	if (software == nullptr)
+	{
+		Q_ASSERT(false);
+		return QStringList();
+	}
+
+	QStringList controllersIDs;
+
+	for(const std::shared_ptr<Hardware::DeviceObject>& child : software->children())
+	{
+		if (child == nullptr)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		if (child->isController() == true)
+		{
+			controllersIDs.append(child->equipmentIdTemplate());
+		}
+	}
+
+	return controllersIDs;
+}
+
+
+bool DeviceHelper::isTwoChannelSoftware(const Hardware::DeviceObject* swObject, QStringList* channelsCntrollersIds)
+{
+	if (swObject->isSoftware() == false)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	if (channelsCntrollersIds != nullptr)
+	{
+		channelsCntrollersIds->clear();
+	}
+
+	for(int ch = CHANNEL_1; ch < 2;  ch++)
+	{
+		QString suffix = EquipmentPropNames::CONTROLLER_SUFFIX_CH_TEMPLATE.arg(ch + 1);
+
+		Hardware::DeviceObject* controller = getChildControllerBySuffix(swObject, suffix, nullptr);
+
+		if (controller == nullptr || controller->isController() == false)
+		{
+			if (channelsCntrollersIds != nullptr)
+			{
+				channelsCntrollersIds->clear();
+			}
+
+			return false;
+		}
+
+		if (channelsCntrollersIds != nullptr)
+		{
+			channelsCntrollersIds->append(controller->equipmentIdTemplate());
+		}
+	}
+
+	return true;
 }
 
 void DeviceHelper::logPropertyNotFoundError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)

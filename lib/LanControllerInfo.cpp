@@ -11,6 +11,21 @@ bool LanControllerInfo::isValid() const
 	return equipmentID.isEmpty() == false;
 }
 
+HostAddressPort LanControllerInfo::appDataHostAddressPort() const
+{
+	return HostAddressPort(appDataIP, appDataPort);
+}
+
+HostAddressPort LanControllerInfo::tuningHostAddressPort() const
+{
+	return HostAddressPort(tuningIP, tuningPort);
+}
+
+HostAddressPort LanControllerInfo::diagDataHostAddressPort() const
+{
+	return HostAddressPort(diagDataIP, diagDataPort);
+}
+
 quint32 LanControllerInfo::appDataIP32() const
 {
 	return QHostAddress(appDataIP).toIPv4Address();

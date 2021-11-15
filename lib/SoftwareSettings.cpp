@@ -547,6 +547,19 @@ bool DiagDataServiceSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
+TuningServiceSettings::TuningSource TuningServiceSettings::ChannelSettings::getTuningSource(const QString& sourceEquipmentID) const
+{
+	for(const TuningSource& ts : sources)
+	{
+		if (ts.lmEquipmentID == sourceEquipmentID)
+		{
+			return ts;
+		}
+	}
+
+	return TuningSource();
+}
+
 std::vector<TuningServiceSettings::TuningClient> TuningServiceSettings::getAllUniqueClients() const
 {
 	std::vector<TuningClient> allUniqueClients;
@@ -578,7 +591,7 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	writeStartSettings(xml);
 
 	xml.writeStringElement(EquipmentPropNames::EQUIPMENT_ID, equipmentID);
-	xml.writeBoolElement(XmlElement::SINGLE_CHANNEL, singleChannel);
+	xml.writeIntElement(XmlElement::CHANNEL_COUNT, channelCount);
 
 	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1, cfgServiceID1);
 	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
@@ -591,7 +604,7 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeBoolElement(EquipmentPropNames::SINGLE_LM_CONTROL, singleLmControl);
 	xml.writeBoolElement(EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, disableModulesTypeChecking);
 
-	for(int channel = CHANNEL_1; channel < CHANNELS_COUNT; channel++)
+	for(int channel = CHANNEL_1; channel < channelCount; channel++)
 	{
 		const ChannelSettings& ch = channelSettings[channel];
 
@@ -673,7 +686,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readStringElement(EquipmentPropNames::EQUIPMENT_ID, &equipmentID, true);
 
-	result &= xml.readBoolElement(XmlElement::SINGLE_CHANNEL, &singleChannel, true);
+	result &= xml.readIntElement(XmlElement::CHANNEL_COUNT, &channelCount, true);
 
 	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgServiceID1, true);
 	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
@@ -686,7 +699,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readBoolElement(EquipmentPropNames::SINGLE_LM_CONTROL, &singleLmControl, true);
 	result &= xml.readBoolElement(EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, true);
 
-	for(int channel = CHANNEL_1; channel < CHANNELS_COUNT; channel++)
+	for(int channel = CHANNEL_1; channel < channelCount; channel++)
 	{
 		result &= xml.findElement(XmlElement::TUNING_CHANNEL_TEMPLATE.arg(channel + 1));
 
