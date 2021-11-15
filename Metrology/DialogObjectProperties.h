@@ -62,7 +62,11 @@ private:
 	class PropertyPattern: public PropertyObject
 	{
 	public:
+
 		explicit PropertyPattern(ProjectInfo* pObject);
+
+	private:
+
 		ProjectInfo* m_pObject = nullptr;
 	};
 
@@ -477,7 +481,21 @@ private slots:
 //
 // ==============================================================================================
 
-const int						MEASURE_PROPERTY_ITEM_ERROR_LIMIT		= 0;
+
+const char* const				MeasurePropertyGroup[] =
+{
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Signal ID"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Position"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "3 Limits"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "4 Errors"),
+};
+
+const int						MEASURE_PROPERTY_GROUP_COUNT			= sizeof(MeasurePropertyGroup)/sizeof(MeasurePropertyGroup[0]);
+
+const int						MEASURE_PROPERTY_GROUP_SIGNAL_ID		= 0,
+								MEASURE_PROPERTY_GROUP_POS				= 1,
+								MEASURE_PROPERTY_GROUP_LIMITS			= 2,
+								MEASURE_PROPERTY_GROUP_ERRORS			= 3;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -492,25 +510,37 @@ public:
 
 private:
 
+	class PropertyPattern: public PropertyObject
+	{
+	public:
+
+		explicit PropertyPattern(Measure::Item* pObject);
+
+	private:
+
+		Measure::Item* m_pObject = nullptr;
+
+		QString engineeringLimitStr();
+		QString electricLimitStr();
+
+		double errorLimit();
+		void setErrorLimit(double value);
+	};
+
 	Measure::Item*				m_pMeasurement = nullptr;
 
-	// Property list
 	//
-	QtVariantPropertyManager*	m_pManager = nullptr;
-	QtVariantEditorFactory*		m_pFactory = nullptr;
-	QtTreePropertyBrowser*		m_pEditor = nullptr;
-
-	// buttons
 	//
+	ExtWidgets::PropertyEditor*	m_pPropertyEditor = nullptr;
 	QDialogButtonBox*			m_buttonBox = nullptr;
 
-	QMap<QtProperty*,int>		m_propertyMap;
-
+	//
+	//
 	void						createPropertyList();
 
 private slots:
 
-	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
+	void						onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects);
 };
 
 // ==============================================================================================

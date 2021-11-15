@@ -2259,23 +2259,127 @@ DialogMeasureProperty::DialogMeasureProperty(Measure::Item* pMeasurement, QWidge
 
 DialogMeasureProperty::~DialogMeasureProperty()
 {
-	if (m_pManager != nullptr)
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DialogMeasureProperty::PropertyPattern::PropertyPattern(Measure::Item* pObject) : m_pObject(pObject)
+{
+	if (m_pObject == nullptr)
 	{
-		delete m_pManager;
-		m_pManager = nullptr;
+		return;
 	}
 
-	if (m_pFactory != nullptr)
+	QString groupSignalID = qApp->translate("DialogObjectProperty", MeasurePropertyGroup[MEASURE_PROPERTY_GROUP_SIGNAL_ID]);
+
+	ADD_PROPERTY_GETTER(QString, "SignalID", true, m_pObject->Measure::Item::customAppSignalID)
+		->setCategory(groupSignalID)
+		.setViewOrder(0)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER(QString, tr("AppSignalID"), true, m_pObject->Measure::Item::appSignalID)
+		->setCategory(groupSignalID)
+		.setViewOrder(1)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER(QString, tr("EquipmentID"), true, m_pObject->Measure::Item::equipmentID)
+		->setCategory(groupSignalID)
+		.setViewOrder(2)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER(QString, tr("Caption"), true, m_pObject->Measure::Item::caption)
+		->setCategory(groupSignalID)
+		.setViewOrder(3)
+		.setReadOnly(true);
+
+
+	QString groupPosition = qApp->translate("DialogObjectProperty", MeasurePropertyGroup[MEASURE_PROPERTY_GROUP_POS]);
+
+	ADD_PROPERTY_GETTER(QString, tr("Module SN"), true, m_pObject->location().Metrology::SignalLocation::moduleSerialNoStr)
+		->setCategory(groupPosition)
+		.setViewOrder(0)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER(QString, tr("Module type"), true, m_pObject->location().Metrology::SignalLocation::moduleCaption)
+		->setCategory(groupPosition)
+		.setViewOrder(1)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER(QString, tr("Rack"), true, m_pObject->location().Metrology::SignalLocation::rackCaption)
+		->setCategory(groupPosition)
+		.setViewOrder(2)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER(int, tr("Chassis"), true, m_pObject->location().Metrology::SignalLocation::chassis)
+		->setCategory(groupPosition)
+		.setViewOrder(3)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER(int, tr("Module"), true, m_pObject->location().Metrology::SignalLocation::module)
+		->setCategory(groupPosition)
+		.setViewOrder(4)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER(int, tr("Place"), true, m_pObject->location().Metrology::SignalLocation::place)
+		->setCategory(groupPosition)
+		.setViewOrder(5)
+		.setReadOnly(true);
+
+
+	QString groupLimits = qApp->translate("DialogObjectProperty", MeasurePropertyGroup[MEASURE_PROPERTY_GROUP_LIMITS]);
+
+	ADD_PROPERTY_GETTER(QString, tr("Engineering range"), true, PropertyPattern::engineeringLimitStr)
+		->setCategory(groupLimits)
+		.setViewOrder(0)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER(QString, tr("Electric range"), true, PropertyPattern::electricLimitStr)
+		->setCategory(groupLimits)
+		.setViewOrder(1)
+		.setReadOnly(true);
+
+
+	QString groupErrors = qApp->translate("DialogObjectProperty", MeasurePropertyGroup[MEASURE_PROPERTY_GROUP_ERRORS]);
+
+	ADD_PROPERTY_GETTER_SETTER(double, tr("Limit of error (%)"), true, PropertyPattern::errorLimit, PropertyPattern::setErrorLimit)
+		->setCategory(groupErrors)
+		.setViewOrder(0)
+		.setPrecision(3);
+	ADD_PROPERTY_GETTER(QString, tr("Measurement time"), true, m_pObject->Measure::Item::measureTimeStr)
+		->setCategory(groupErrors)
+		.setViewOrder(1)
+		.setReadOnly(true);
+}
+
+QString DialogMeasureProperty::PropertyPattern::engineeringLimitStr()
+{
+	if (m_pObject == nullptr)
 	{
-		delete m_pFactory;
-		m_pFactory = nullptr;
+		return QString();
 	}
 
-	if (m_pEditor != nullptr)
+	return m_pObject->limitStr(Measure::LimitType::Engineering);
+}
+
+QString DialogMeasureProperty::PropertyPattern::electricLimitStr()
+{
+	if (m_pObject == nullptr)
 	{
-		delete m_pEditor;
-		m_pEditor = nullptr;
+		return QString();
 	}
+
+	return m_pObject->limitStr(Measure::LimitType::Electric);
+}
+
+double DialogMeasureProperty::PropertyPattern::errorLimit()
+{
+	if (m_pObject == nullptr)
+	{
+		return 0;
+	}
+
+	return m_pObject->errorLimit(Measure::LimitType::Electric, Measure::ErrorType::Reduce);
+}
+
+void DialogMeasureProperty::PropertyPattern::setErrorLimit(double value)
+{
+	if (m_pObject == nullptr)
+	{
+		return;
+	}
+
+	return m_pObject->calcErrorLimit(value);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2313,127 +2417,25 @@ void DialogMeasureProperty::createPropertyList()
 
 	// create property list
 	//
+	m_pPropertyEditor = new ExtWidgets::PropertyEditor(this);
+	if (m_pPropertyEditor == nullptr)
+	{
+		return;
+	}
 
-	QtVariantProperty* item = nullptr;
-
-	m_pManager = new QtVariantPropertyManager;
-	m_pFactory = new QtVariantEditorFactory;
-	m_pEditor = new QtTreePropertyBrowser;
-
-	// create property groups
-	//
-
-		// id group
-
-		QtProperty* signalIdGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Signal ID"));
-
-			item = m_pManager->addProperty(QVariant::String, tr("SignalID"));
-			item->setValue(m_pMeasurement->customAppSignalID());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			signalIdGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
-			item->setValue(m_pMeasurement->appSignalID());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			signalIdGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("EquipmentID"));
-			item->setValue(m_pMeasurement->equipmentID());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			signalIdGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("Caption"));
-			item->setValue(m_pMeasurement->caption());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			signalIdGroup->addSubProperty(item);
-
-		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
-
-		// position group
-
-		QtProperty* positionGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Position"));
-
-			item = m_pManager->addProperty(QVariant::String, tr("Module SN"));
-			item->setValue(m_pMeasurement->location().moduleSerialNoStr());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			positionGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("Module type"));
-			item->setValue(m_pMeasurement->location().moduleCaption());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			positionGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("Rack"));
-			item->setValue(m_pMeasurement->location().rack().caption());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			positionGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::Int, tr("Chassis"));
-			item->setValue(m_pMeasurement->location().chassis());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			positionGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::Int, tr("Module"));
-			item->setValue(m_pMeasurement->location().module());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			positionGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::Int, tr("Place"));
-			item->setValue(m_pMeasurement->location().place());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			positionGroup->addSubProperty(item);
-
-		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
-
-		// limits group
-
-		QtProperty* limitsGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Limits"));
-
-			item = m_pManager->addProperty(QVariant::String, tr("Engineering range"));
-			item->setValue(m_pMeasurement->limitStr(Measure::LimitType::Engineering));
-			item->setAttribute(QLatin1String("readOnly"), true);
-			limitsGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("Electric range"));
-			item->setValue(m_pMeasurement->limitStr(Measure::LimitType::Electric));
-			item->setAttribute(QLatin1String("readOnly"), true);
-			limitsGroup->addSubProperty(item);
-
-		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
-
-		// Error
-
-		QtProperty* errorsGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Errors"));
-
-			item = m_pManager->addProperty(QVariant::Double, tr("Limit of error (%)"));
-			item->setValue(m_pMeasurement->errorLimit(Measure::LimitType::Electric, Measure::ErrorType::Reduce));
-			item->setAttribute(QLatin1String("singleStep"), 0.1);
-			item->setAttribute(QLatin1String("decimals"), 3);
-			m_propertyMap.insert(item, MEASURE_PROPERTY_ITEM_ERROR_LIMIT);
-			errorsGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("Measurement time"));
-			item->setValue(m_pMeasurement->measureTimeStr());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			errorsGroup->addSubProperty(item);
-
-		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
-
-	// show or hide property groups
-	//
-	m_pEditor->addProperty(signalIdGroup);
-	QtBrowserItem* m_browserItemList = m_pEditor->addProperty(positionGroup);
-	m_pEditor->addProperty(limitsGroup);
-	m_pEditor->addProperty(errorsGroup);
-
-	m_pEditor->setExpanded(m_browserItemList, false);
+	m_pPropertyEditor->setSplitterPosition(300);
 
 	//
 	//
-	m_pEditor->setPropertiesWithoutValueMarked(true);
-	m_pEditor->setRootIsDecorated(false);
+	QList<std::shared_ptr<PropertyObject>> projectObjects;
 
-	connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogMeasureProperty::onPropertyValueChanged);
+	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(m_pMeasurement);
+
+	projectObjects.push_back(property);
+
+	m_pPropertyEditor->setObjects(projectObjects);
+
+	connect(m_pPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogMeasureProperty::onPropertyValueChanged);
 
 	// create buttons ok and cancel
 	//
@@ -2444,7 +2446,7 @@ void DialogMeasureProperty::createPropertyList()
 
 	// add layouts
 	//
-	mainLayout->addWidget(m_pEditor);
+	mainLayout->addWidget(m_pPropertyEditor);
 	mainLayout->addWidget(m_buttonBox);
 
 	setLayout(mainLayout);
@@ -2452,34 +2454,17 @@ void DialogMeasureProperty::createPropertyList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogMeasureProperty::onPropertyValueChanged(QtProperty* property, const QVariant &value)
+void DialogMeasureProperty::onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
-	if (property == nullptr)
+	for (const std::shared_ptr<PropertyObject>& modifiedFilter : objects)
 	{
-		return;
-	}
-
-	if (m_propertyMap.contains(property) == false)
-	{
-		return;
-	}
-
-	int index = m_propertyMap[property];
-	if (index < 0 || index >= COMPARATOR_PROPERTY_ITEM_COUNT)
-	{
-		return;
-	}
-
-	switch(index)
-	{
-		case MEASURE_PROPERTY_ITEM_ERROR_LIMIT:
-			{
-				m_pMeasurement->calcErrorLimit(value.toDouble());
-			}
-			break;
+		if (modifiedFilter.get() == nullptr)
+		{
+			assert(0);
+			return;
+		}
 	}
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
