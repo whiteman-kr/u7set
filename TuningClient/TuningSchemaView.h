@@ -11,8 +11,7 @@ class TuningSchemaView : public VFrame30::ClientSchemaView
 
 public:
 	TuningSchemaView(TuningSchemaManager* schemaManager, QWidget* parent = nullptr);
-	virtual ~TuningSchemaView();
-
+	virtual ~TuningSchemaView() = default;
 };
 
 #endif // TUNINGSCHEMAVIEW_H

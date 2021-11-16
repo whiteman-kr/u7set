@@ -4,6 +4,7 @@
 #include "ClientSchemaView.h"
 #include "Schema.h"
 #include "SchemaManager.h"
+#include "ISchemaViewHistory.h"
 
 namespace VFrame30
 {
@@ -28,15 +29,13 @@ namespace VFrame30
 	};
 
 
-	class ClientSchemaWidget : public BaseSchemaWidget
+	class ClientSchemaWidget : public BaseSchemaWidget, public ISchemaViewHistory
 	{
 		Q_OBJECT
 
-	private:
-		ClientSchemaWidget() = delete;
-
 	public:
-		ClientSchemaWidget(SchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schema, VFrame30::SchemaManager* schemaManager, QWidget* parent);
+		ClientSchemaWidget() = delete;
+		ClientSchemaWidget(ClientSchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schema, VFrame30::SchemaManager* schemaManager, QWidget* parent);
 		virtual ~ClientSchemaWidget();
 
 	protected:
@@ -45,20 +44,23 @@ namespace VFrame30
 
 		std::vector<SchemaItemPtr> itemsUnderCursor(const QPoint& pos);
 
-		// History functions
+		// History functions, ISchemaViewHistory
 		//
 	public:
-		bool canBackHistory() const;
-		bool canForwardHistory() const;
+		[[nodiscard]] virtual bool canBackHistory() const override;
+		[[nodiscard]] virtual bool canForwardHistory() const override;
 
-		void historyBack();
-		void historyForward();
+		virtual void historyBack() override;
+		virtual void historyForward() override;
+
+		// End of ISchemaViewHistory
+		//
 
 		void resetHistory();
 		void resetForwardHistory();
 
 		void restoreState(const SchemaHistoryItem& historyState);
-		SchemaHistoryItem currentHistoryState() const;
+		[[nodiscard]] SchemaHistoryItem currentHistoryState() const;
 
 		void emitHistoryChanged();
 
@@ -68,19 +70,19 @@ namespace VFrame30
 		// Signals
 		//
 	signals:
-		void signal_schemaChanged(ClientSchemaWidget* widget, VFrame30::Schema* schema);
+		void signal_schemaChanged(VFrame30::ClientSchemaWidget* widget, VFrame30::Schema* schema);
 		void signal_historyChanged(bool enableBack, bool enableForward);
 
 		// Properties
 		//
 	public:
-		QString schemaId() const;
-		QString caption() const;
+		[[nodiscard]] QString schemaId() const;
+		[[nodiscard]] QString caption() const;
 
-		VFrame30::SchemaManager* schemaManager();
+		[[nodiscard]] VFrame30::SchemaManager* schemaManager();
 
-		ClientSchemaView* clientSchemaView();
-		const ClientSchemaView* clientSchemaView() const;
+		[[nodiscard]] ClientSchemaView* clientSchemaView();
+		[[nodiscard]] const ClientSchemaView* clientSchemaView() const;
 
 		// Data
 		//

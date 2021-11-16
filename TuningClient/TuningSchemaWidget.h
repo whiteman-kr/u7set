@@ -15,7 +15,7 @@ public:
 	TuningClientTuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QWidget* parent = nullptr);
 
 protected:
-	virtual bool checkTuningAccess() const override;
+	[[nodiscard]] virtual bool checkTuningAccess() const override;
 };
 
 
@@ -23,17 +23,15 @@ class TuningSchemaWidget : public VFrame30::ClientSchemaWidget
 {
 	Q_OBJECT
 
-private:
-	TuningSchemaWidget() = delete;
-
 public:
+	TuningSchemaWidget() = delete;
 	TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
 					   TuningClientTuningController* tuningController,
 					   VFrame30::LogController* logController,
 					   std::shared_ptr<VFrame30::Schema> schema,
 					   TuningSchemaManager* schemaManager,
 					   QWidget* parent);
-	virtual ~TuningSchemaWidget();
+	virtual ~TuningSchemaWidget() = default;
 
 	//TuningSchemaView* tuningSchemaView();
 

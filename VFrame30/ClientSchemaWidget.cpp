@@ -21,7 +21,7 @@ namespace VFrame30
 	}
 
 
-	ClientSchemaWidget::ClientSchemaWidget(SchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schema, VFrame30::SchemaManager* schemaManager, QWidget* parent) :
+	ClientSchemaWidget::ClientSchemaWidget(ClientSchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schema, VFrame30::SchemaManager* schemaManager, QWidget* parent) :
 		BaseSchemaWidget(schema, schemaView, parent),
 		m_schemaManager(schemaManager)
 	{
@@ -239,7 +239,7 @@ namespace VFrame30
 
 	bool ClientSchemaWidget::canBackHistory() const
 	{
-		bool enableBack = m_backHistory.size() > 1;		// m_backHistory has at leas
+		bool enableBack = m_backHistory.size() > 1;		// m_backHistory has at least 2 items
 		return enableBack;
 	}
 
@@ -251,7 +251,7 @@ namespace VFrame30
 
 	void ClientSchemaWidget::historyBack()
 	{
-		if (m_backHistory.empty() == true)
+		if (canBackHistory() == false)
 		{
 			return;
 		}
@@ -278,7 +278,7 @@ namespace VFrame30
 
 	void ClientSchemaWidget::historyForward()
 	{
-		if (m_forwardHistory.empty() == true)
+		if (canForwardHistory() == false)
 		{
 			return;
 		}

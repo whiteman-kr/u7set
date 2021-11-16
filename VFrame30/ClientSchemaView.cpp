@@ -1,4 +1,5 @@
 #include "ClientSchemaView.h"
+#include "ClientSchemaWidget.h"
 #include "DrawParam.h"
 #include "PropertyNames.h"
 #include "../CommonLib/Times.h"
@@ -8,18 +9,18 @@ namespace VFrame30
 	//
 	// ScriptSchemaView
 	//
-	ScriptSchemaView::ScriptSchemaView(ClientSchemaView* clientSchemaView, QObject* parent) :
+	ScriptSchemaView::ScriptSchemaView(ClientSchemaView* clientSchemaView,
+									   ISchemaViewHistory* schemaViewHistory,
+									   QObject* parent) :
 		QObject(parent),
-		m_clientSchemaView(clientSchemaView)
+		m_clientSchemaView(clientSchemaView),
+		m_schemaViewHistory(schemaViewHistory)
 	{
 		assert(m_clientSchemaView);
-		qDebug() << "ScriptSchemaView::ScriptSchemaView";
-		return;
-	}
 
-	ScriptSchemaView::~ScriptSchemaView()
-	{
-		qDebug() << "ScriptSchemaView::~ScriptSchemaView";
+		// m_schemaViewHistory can be nullptr if widget does not support history (like edit widget)
+		//
+		return;
 	}
 
 	void ScriptSchemaView::debugOutput(QString str)
@@ -110,6 +111,36 @@ namespace VFrame30
 		}
 
 		m_clientSchemaView->update();
+		return;
+	}
+
+	bool ScriptSchemaView::canBackHistory() const
+	{
+		return m_schemaViewHistory ? m_schemaViewHistory->canBackHistory() : false;
+	}
+
+	bool ScriptSchemaView::canForwardHistory() const
+	{
+		return m_schemaViewHistory ? m_schemaViewHistory->canForwardHistory() : false;
+	}
+
+	void ScriptSchemaView::historyBack()
+	{
+		if (m_schemaViewHistory != nullptr)
+		{
+			m_schemaViewHistory->historyBack();
+		}
+
+		return;
+	}
+
+	void ScriptSchemaView::historyForward()
+	{
+		if (m_schemaViewHistory != nullptr)
+		{
+			m_schemaViewHistory->historyForward();
+		}
+
 		return;
 	}
 
@@ -208,9 +239,12 @@ namespace VFrame30
 	//
 	// ClientSchemaView
 	//
-	ClientSchemaView::ClientSchemaView(VFrame30::SchemaManager* schemaManager, QWidget* parent) :
+	ClientSchemaView::ClientSchemaView(VFrame30::SchemaManager* schemaManager,
+									   ISchemaViewHistory* schemaViewHistory,
+									   QWidget* parent) :
 		VFrame30::SchemaView(parent),
-		m_schemaManager(schemaManager)
+		m_schemaManager(schemaManager),
+		m_schemaViewHistory(schemaViewHistory)
 	{
 		assert(schemaManager);
 
@@ -587,7 +621,7 @@ namespace VFrame30
 		{
 			// create global variable "view"
 			//
-			m_scriptSchemaView = std::make_unique<ScriptSchemaView>(this);
+			m_scriptSchemaView = std::make_unique<ScriptSchemaView>(this, m_schemaViewHistory);
 
 			{
 				QQmlEngine::setObjectOwnership(m_scriptSchemaView.get(), QQmlEngine::CppOwnership);
