@@ -82,11 +82,6 @@ private:
 //
 // ==============================================================================================
 
-const char* const				RACK_PROPERTY_CAPTION_GROUP		= QT_TRANSLATE_NOOP("DialogObjectProperty", "Group");
-const char* const				RACK_PROPERTY_CAPTION_CHANNEL	= QT_TRANSLATE_NOOP("DialogObjectProperty", "Channel");
-
-// ----------------------------------------------------------------------------------------------
-
 class DialogRackProperty : public QDialog
 {
 	Q_OBJECT
@@ -153,71 +148,74 @@ public:
 
 public:
 
-	RackBase&					racks() { return m_rackBase; }
-	RackGroupBase&				rackGroups() { return m_groupBase; }
+	RackBase& racks() { return m_rackBase; }
+	RackGroupBase& rackGroups() { return m_groupBase; }
 
 private:
 
-	RackBase					m_rackBase;
-	RackGroupBase				m_groupBase;
+	class PropertyPattern: public PropertyObject
+	{
+	public:
+
+		explicit PropertyPattern(RackBase* pObject);
+
+	private:
+
+		RackBase* m_pObject = nullptr;
+	};
+
+	RackBase m_rackBase;
+	RackGroupBase m_groupBase;
 
 	//
 	//
-	QMenuBar*					m_pMenuBar = nullptr;
-	QMenu*						m_pGroupMenu = nullptr;
-	QMenu*						m_pContextMenu = nullptr;
+	QMenuBar* m_pMenuBar = nullptr;
+	QMenu* m_pGroupMenu = nullptr;
+	QMenu* m_pContextMenu = nullptr;
 
-	QAction*					m_pAppendGroupAction = nullptr;
-	QAction*					m_pRemoveGroupAction = nullptr;
+	QAction* m_pAppendGroupAction = nullptr;
+	QAction* m_pRemoveGroupAction = nullptr;
 
-	// Group list
+
 	//
-	QTableWidget*				m_pGroupView = nullptr;
-
-	void						updateGroupList(const Hash& hash = UNDEFINED_HASH);
-
-	// Property list
 	//
-	QtVariantPropertyManager*	m_pManager = nullptr;
-	QtVariantEditorFactory*		m_pFactory = nullptr;
-	QtTreePropertyBrowser*		m_pEditor = nullptr;
+	QTableWidget* m_pGroupView = nullptr;
+	ExtWidgets::PropertyEditor* m_pPropertyEditor = nullptr;
+	QDialogButtonBox* m_buttonBox = nullptr;
 
-	void						createPropertyList();
-
-	void						updateRackList();
-
-	// buttons
 	//
-	QDialogButtonBox*			m_buttonBox = nullptr;
+	//
+	void createPropertyList();
 
-	QMap<QtProperty*,int>		m_propertyMap;
+	void updateGroupList(const Hash& hash = UNDEFINED_HASH);
+	void updateRackList();
 
-	bool						foundDuplicateRacks();
+	bool foundDuplicateRacks();
 
 protected:
 
-	bool						event(QEvent* e) override;
+	bool event(QEvent* e) override;
 
 private slots:
 
 	// slots of menu
 	//
-	void						appendGroup();
-	void						removeGroup();
+	void appendGroup();
+	void removeGroup();
 
 	// slots of property list
 	//
-	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
+	void onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects);
 
 	// slot of view
 	//
-	void						onContextMenu(QPoint);
-	void						captionGroupChanged(int row, int column);
-	void						groupSelected();
+	void onContextMenu(QPoint);
+	void captionGroupChanged(int row, int column);
+	void groupSelected();
 
 	// slots of buttons
 	//
-	void						onOk();
+	void onOk();
 };
 
 // ==============================================================================================

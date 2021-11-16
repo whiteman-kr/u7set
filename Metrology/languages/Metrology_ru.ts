@@ -568,128 +568,128 @@
         <translation type="vanished">Свойства уставки</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1799"/>
+        <location filename="../DialogObjectProperties.cpp" line="1807"/>
         <source>Property</source>
         <translation>Свойства</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1806"/>
+        <location filename="../DialogObjectProperties.cpp" line="1814"/>
         <source>Property of comparator</source>
         <translation>Свойства уставки</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1835"/>
+        <location filename="../DialogObjectProperties.cpp" line="1843"/>
         <source>Schema</source>
         <translation>Схема</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1837"/>
+        <location filename="../DialogObjectProperties.cpp" line="1845"/>
         <source>SchemaID</source>
         <translation>SchemaID</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1846"/>
+        <location filename="../DialogObjectProperties.cpp" line="1854"/>
         <source>Input</source>
         <translation>Вход</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1850"/>
-        <location filename="../DialogObjectProperties.cpp" line="1862"/>
-        <location filename="../DialogObjectProperties.cpp" line="1942"/>
-        <location filename="../DialogObjectProperties.cpp" line="1954"/>
-        <location filename="../DialogObjectProperties.cpp" line="2021"/>
-        <location filename="../DialogObjectProperties.cpp" line="2033"/>
-        <location filename="../DialogObjectProperties.cpp" line="2071"/>
-        <location filename="../DialogObjectProperties.cpp" line="2083"/>
+        <location filename="../DialogObjectProperties.cpp" line="1858"/>
+        <location filename="../DialogObjectProperties.cpp" line="1870"/>
+        <location filename="../DialogObjectProperties.cpp" line="1950"/>
+        <location filename="../DialogObjectProperties.cpp" line="1962"/>
+        <location filename="../DialogObjectProperties.cpp" line="2029"/>
+        <location filename="../DialogObjectProperties.cpp" line="2041"/>
+        <location filename="../DialogObjectProperties.cpp" line="2079"/>
+        <location filename="../DialogObjectProperties.cpp" line="2091"/>
         <source>AppSignalID</source>
         <translation>AppSignalID</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1857"/>
-        <location filename="../DialogObjectProperties.cpp" line="1949"/>
-        <location filename="../DialogObjectProperties.cpp" line="2028"/>
-        <location filename="../DialogObjectProperties.cpp" line="2078"/>
+        <location filename="../DialogObjectProperties.cpp" line="1865"/>
+        <location filename="../DialogObjectProperties.cpp" line="1957"/>
+        <location filename="../DialogObjectProperties.cpp" line="2036"/>
+        <location filename="../DialogObjectProperties.cpp" line="2086"/>
         <source>SignalID</source>
         <translation>SignalID</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1867"/>
-        <location filename="../DialogObjectProperties.cpp" line="1959"/>
-        <location filename="../DialogObjectProperties.cpp" line="2038"/>
-        <location filename="../DialogObjectProperties.cpp" line="2088"/>
+        <location filename="../DialogObjectProperties.cpp" line="1875"/>
+        <location filename="../DialogObjectProperties.cpp" line="1967"/>
+        <location filename="../DialogObjectProperties.cpp" line="2046"/>
+        <location filename="../DialogObjectProperties.cpp" line="2096"/>
         <source>EquipmentID</source>
         <translation>EquipmentID</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1872"/>
-        <location filename="../DialogObjectProperties.cpp" line="1964"/>
-        <location filename="../DialogObjectProperties.cpp" line="2043"/>
-        <location filename="../DialogObjectProperties.cpp" line="2093"/>
+        <location filename="../DialogObjectProperties.cpp" line="1880"/>
+        <location filename="../DialogObjectProperties.cpp" line="1972"/>
+        <location filename="../DialogObjectProperties.cpp" line="2051"/>
+        <location filename="../DialogObjectProperties.cpp" line="2101"/>
         <source>Caption</source>
         <translation>Наименование</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1877"/>
+        <location filename="../DialogObjectProperties.cpp" line="1885"/>
         <source>Signal type</source>
         <translation>Тип сигнала</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1884"/>
-        <location filename="../DialogObjectProperties.cpp" line="1971"/>
-        <location filename="../DialogObjectProperties.cpp" line="2050"/>
+        <location filename="../DialogObjectProperties.cpp" line="1892"/>
+        <location filename="../DialogObjectProperties.cpp" line="1979"/>
+        <location filename="../DialogObjectProperties.cpp" line="2058"/>
         <source>Electric range</source>
         <translation>Электрический диапазон</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1890"/>
-        <location filename="../DialogObjectProperties.cpp" line="1977"/>
-        <location filename="../DialogObjectProperties.cpp" line="2056"/>
+        <location filename="../DialogObjectProperties.cpp" line="1898"/>
+        <location filename="../DialogObjectProperties.cpp" line="1985"/>
+        <location filename="../DialogObjectProperties.cpp" line="2064"/>
         <source>Engineering range</source>
         <translation>Физический диапазон</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1901"/>
+        <location filename="../DialogObjectProperties.cpp" line="1909"/>
         <source>Compare - const</source>
         <translation>Сравнение - const</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1902"/>
+        <location filename="../DialogObjectProperties.cpp" line="1910"/>
         <source>Compare - dynamic</source>
         <translation>Сравнение - dynamic</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1904"/>
+        <location filename="../DialogObjectProperties.cpp" line="1912"/>
         <source>Type</source>
         <translation>Тип</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1915"/>
+        <location filename="../DialogObjectProperties.cpp" line="1923"/>
         <source>Electric value, </source>
         <translation>Электрическое значение, </translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1926"/>
-        <location filename="../DialogObjectProperties.cpp" line="2007"/>
+        <location filename="../DialogObjectProperties.cpp" line="1934"/>
+        <location filename="../DialogObjectProperties.cpp" line="2015"/>
         <source>Engineering value, %1</source>
         <translation>Физическое значение, %1</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1985"/>
+        <location filename="../DialogObjectProperties.cpp" line="1993"/>
         <source>Precision</source>
         <translation>Точность</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1994"/>
+        <location filename="../DialogObjectProperties.cpp" line="2002"/>
         <source>Hysteresis - const</source>
         <translation>Зона возврата - const</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1994"/>
+        <location filename="../DialogObjectProperties.cpp" line="2002"/>
         <source>Hysteresis - dynamic</source>
         <translation>Зона возврата - dynamic</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2067"/>
+        <location filename="../DialogObjectProperties.cpp" line="2075"/>
         <source>Output</source>
         <translation>Выход</translation>
     </message>
@@ -799,12 +799,12 @@
         <translation type="vanished">Свойства измерения - %1</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2440"/>
+        <location filename="../DialogObjectProperties.cpp" line="2448"/>
         <source>Property</source>
         <translation>Свойства</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2453"/>
+        <location filename="../DialogObjectProperties.cpp" line="2461"/>
         <source>Property of measurement - %1</source>
         <translation>Свойства измерения - %1</translation>
     </message>
@@ -813,21 +813,22 @@
         <translation type="vanished">ID сигнала</translation>
     </message>
     <message>
+        <location filename="../DialogObjectProperties.cpp" line="2332"/>
         <source>SignalID</source>
-        <translation type="vanished">SignalID</translation>
+        <translation>SignalID</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2328"/>
+        <location filename="../DialogObjectProperties.cpp" line="2336"/>
         <source>AppSignalID</source>
         <translation>AppSignalID</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2332"/>
+        <location filename="../DialogObjectProperties.cpp" line="2340"/>
         <source>EquipmentID</source>
         <translation>EquipmentID</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2336"/>
+        <location filename="../DialogObjectProperties.cpp" line="2344"/>
         <source>Caption</source>
         <translation>Наименование</translation>
     </message>
@@ -836,32 +837,32 @@
         <translation type="vanished">Позиция</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2344"/>
+        <location filename="../DialogObjectProperties.cpp" line="2352"/>
         <source>Module SN</source>
         <translation>S/N модуля</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2348"/>
+        <location filename="../DialogObjectProperties.cpp" line="2356"/>
         <source>Module type</source>
         <translation>Тип модуля</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2352"/>
+        <location filename="../DialogObjectProperties.cpp" line="2360"/>
         <source>Rack</source>
         <translation>Шкаф</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2356"/>
+        <location filename="../DialogObjectProperties.cpp" line="2364"/>
         <source>Chassis</source>
         <translation>Шасси</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2360"/>
+        <location filename="../DialogObjectProperties.cpp" line="2368"/>
         <source>Module</source>
         <translation>Модуль</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2364"/>
+        <location filename="../DialogObjectProperties.cpp" line="2372"/>
         <source>Place</source>
         <translation>Вх/Вых</translation>
     </message>
@@ -870,12 +871,12 @@
         <translation type="vanished">Диапазоны</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2372"/>
+        <location filename="../DialogObjectProperties.cpp" line="2380"/>
         <source>Engineering range</source>
         <translation>Физический диапазон</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2376"/>
+        <location filename="../DialogObjectProperties.cpp" line="2384"/>
         <source>Electric range</source>
         <translation>Электрический диапазон</translation>
     </message>
@@ -884,12 +885,12 @@
         <translation type="vanished">Погрешность</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2384"/>
+        <location filename="../DialogObjectProperties.cpp" line="2392"/>
         <source>Limit of error (%)</source>
         <translation>Допустимая погрешность (%)</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="2388"/>
+        <location filename="../DialogObjectProperties.cpp" line="2396"/>
         <source>Measurement time</source>
         <translation>Время измерения</translation>
     </message>
@@ -1213,69 +1214,67 @@ Please, select output signal!</source>
         <translation>3 Версия файла</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="85"/>
         <source>Group</source>
-        <translation>Группа</translation>
+        <translation type="vanished">Группа</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="86"/>
         <source>Channel</source>
-        <translation>Канал</translation>
+        <translation type="vanished">Канал</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="282"/>
-        <location filename="../DialogObjectProperties.h" line="496"/>
+        <location filename="../DialogObjectProperties.h" line="272"/>
+        <location filename="../DialogObjectProperties.h" line="486"/>
         <source>1 Signal ID</source>
         <translation>1 ID сигнала</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="283"/>
-        <location filename="../DialogObjectProperties.h" line="497"/>
+        <location filename="../DialogObjectProperties.h" line="273"/>
+        <location filename="../DialogObjectProperties.h" line="487"/>
         <source>2 Position</source>
         <translation>2 Позиция</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="284"/>
+        <location filename="../DialogObjectProperties.h" line="274"/>
         <source>3 Electric range: </source>
         <translation>3 Электрический диапазон: </translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="285"/>
+        <location filename="../DialogObjectProperties.h" line="275"/>
         <source>4 Engineering range: </source>
         <translation>4 Физический диапазон: </translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="414"/>
+        <location filename="../DialogObjectProperties.h" line="404"/>
         <source>Signal ID</source>
         <translation>ID сигнала</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="415"/>
+        <location filename="../DialogObjectProperties.h" line="405"/>
         <source>Position</source>
         <translation>Позиция</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="416"/>
+        <location filename="../DialogObjectProperties.h" line="406"/>
         <source>Electric range: </source>
         <translation>Электрический диапазон: </translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="417"/>
+        <location filename="../DialogObjectProperties.h" line="407"/>
         <source>Engineering range: </source>
         <translation>Физический диапазон: </translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="498"/>
+        <location filename="../DialogObjectProperties.h" line="488"/>
         <source>3 Limits</source>
         <translation>3 Диапазоны</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="499"/>
+        <location filename="../DialogObjectProperties.h" line="489"/>
         <source>4 Errors</source>
         <translation>4 Погрешность</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="413"/>
+        <location filename="../DialogObjectProperties.h" line="403"/>
         <source>Schema</source>
         <translation>Схема</translation>
     </message>
@@ -1635,8 +1634,9 @@ Please, select output signal!</source>
         <translation type="vanished">Информация о проекте</translation>
     </message>
     <message>
+        <location filename="../DialogObjectProperties.cpp" line="34"/>
         <source>Project name</source>
-        <translation type="vanished">Наименование проекта</translation>
+        <translation>Наименование проекта</translation>
     </message>
     <message>
         <location filename="../DialogObjectProperties.cpp" line="37"/>
@@ -1684,52 +1684,58 @@ Please, select output signal!</source>
         <translation type="vanished">Свойства - группы шкафа</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="450"/>
+        <location filename="../DialogObjectProperties.cpp" line="442"/>
+        <location filename="../DialogObjectProperties.cpp" line="642"/>
+        <location filename="../DialogObjectProperties.cpp" line="741"/>
+        <source>Channel</source>
+        <translation>Канал</translation>
+    </message>
+    <message>
+        <location filename="../DialogObjectProperties.cpp" line="457"/>
         <source>Property - rack groups</source>
         <translation>Свойства - группы шкафа</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="460"/>
+        <location filename="../DialogObjectProperties.cpp" line="467"/>
         <source>&amp;Group</source>
         <translation>&amp;Группа</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="462"/>
+        <location filename="../DialogObjectProperties.cpp" line="469"/>
         <source>&amp;Append</source>
         <translation>&amp;Создать</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="465"/>
+        <location filename="../DialogObjectProperties.cpp" line="472"/>
         <source>&amp;Remove</source>
         <translation>&amp;Удалить</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="506"/>
+        <location filename="../DialogObjectProperties.cpp" line="438"/>
         <source>Racks</source>
         <translation>Шкафы</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="510"/>
         <source>Channel %1</source>
-        <translation>Канал %1</translation>
+        <translation type="vanished">Канал %1</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="700"/>
+        <location filename="../DialogObjectProperties.cpp" line="703"/>
         <source>Do you want delete group &quot;%1&quot;?</source>
         <translation>Удалить группу %1?</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="823"/>
+        <location filename="../DialogObjectProperties.cpp" line="831"/>
         <source>Group caption</source>
         <translation>Наименование группы</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="824"/>
+        <location filename="../DialogObjectProperties.cpp" line="832"/>
         <source>Group caption &quot;%1&quot; already exists!</source>
         <translation>Наименование группы &quot;%1&quot; уже существует!</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="856"/>
+        <location filename="../DialogObjectProperties.cpp" line="864"/>
         <source>Property - %1</source>
         <translation>Свойства - %1</translation>
     </message>
@@ -1738,21 +1744,21 @@ Please, select output signal!</source>
         <translation type="vanished">Свойства - %1</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="935"/>
+        <location filename="../DialogObjectProperties.cpp" line="943"/>
         <source>%1 - group &quot;%2&quot;, channels %3 and %4
 </source>
         <translation>%1 - группа &quot;%2&quot;, каналы %3 и %4
 </translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="941"/>
+        <location filename="../DialogObjectProperties.cpp" line="949"/>
         <source>%1 - group &quot;%2&quot; channel %3 and group &quot;%4&quot; channel %5
 </source>
         <translation>%1 - группа &quot;%2&quot; канал %3 и группа &quot;%4&quot; канал %5
 </translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="951"/>
+        <location filename="../DialogObjectProperties.cpp" line="959"/>
         <source>Found same racks:
 
 </source>
@@ -1761,7 +1767,7 @@ Please, select output signal!</source>
 </translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="952"/>
+        <location filename="../DialogObjectProperties.cpp" line="960"/>
         <source>Same racks</source>
         <translation>Одинаковые шкафы</translation>
     </message>
@@ -1827,51 +1833,56 @@ To create a group of racks, click menu &quot;Racks&quot; - &quot;Groups ...&quot
         <translation type="vanished">Свойства шкафа</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="241"/>
+        <location filename="../DialogObjectProperties.cpp" line="224"/>
         <source>Property</source>
         <translation>Свойства</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="254"/>
+        <location filename="../DialogObjectProperties.cpp" line="237"/>
         <source>Property of rack - %1</source>
         <translation>Свойства шкафа - %1</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="210"/>
+        <location filename="../DialogObjectProperties.cpp" line="193"/>
         <source>Property of the rack</source>
         <translation>Свойства шкафа</translation>
     </message>
     <message>
+        <location filename="../DialogObjectProperties.cpp" line="195"/>
         <source>Caption</source>
-        <translation type="vanished">Наименование</translation>
+        <translation>Наименование</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="217"/>
+        <location filename="../DialogObjectProperties.cpp" line="200"/>
         <source>EquipmentID</source>
         <translation>EquipmentID</translation>
     </message>
     <message>
+        <location filename="../DialogObjectProperties.cpp" line="205"/>
+        <location filename="../DialogObjectProperties.cpp" line="294"/>
         <source>Group</source>
-        <translation type="vanished">Группа</translation>
+        <translation>Группа</translation>
     </message>
     <message>
+        <location filename="../DialogObjectProperties.cpp" line="211"/>
+        <location filename="../DialogObjectProperties.cpp" line="305"/>
         <source>Channel</source>
-        <translation type="vanished">Канал</translation>
+        <translation>Канал</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="371"/>
+        <location filename="../DialogObjectProperties.cpp" line="353"/>
         <source>Another rack &quot;%1&quot; already has the same group or channel.
 Please choose a different group or channel.</source>
         <translation>Другой шкаф &quot;%1&quot; уже существует в такай же группе или канале.
 Выберите другую группу или другой канал.</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="373"/>
+        <location filename="../DialogObjectProperties.cpp" line="355"/>
         <source>Same racks</source>
         <translation>Одинаковые шкафы</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="396"/>
+        <location filename="../DialogObjectProperties.cpp" line="378"/>
         <source>Please, fill the field &quot;Channel&quot;</source>
         <translation>Заполните поле &quot;Канал&quot;</translation>
     </message>
@@ -2044,18 +2055,18 @@ Please choose a different group or channel.</source>
         <translation type="vanished">Свойства - %1</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1296"/>
-        <location filename="../DialogObjectProperties.cpp" line="1617"/>
+        <location filename="../DialogObjectProperties.cpp" line="1304"/>
+        <location filename="../DialogObjectProperties.cpp" line="1625"/>
         <source>Signal ID</source>
         <translation>ID сигнала</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1298"/>
+        <location filename="../DialogObjectProperties.cpp" line="1306"/>
         <source>SignalID</source>
         <translation>SignalID</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1303"/>
+        <location filename="../DialogObjectProperties.cpp" line="1311"/>
         <source>AppSignalID</source>
         <translation>AppSignalID</translation>
     </message>
@@ -2068,141 +2079,141 @@ Please choose a different group or channel.</source>
         <translation type="vanished">Свойства сигнала - %1</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1148"/>
+        <location filename="../DialogObjectProperties.cpp" line="1156"/>
         <source>&amp;Copy</source>
         <translation>&amp;Копировать</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1151"/>
+        <location filename="../DialogObjectProperties.cpp" line="1159"/>
         <source>Copy cell</source>
         <translation>Копировать ячейку</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1156"/>
+        <location filename="../DialogObjectProperties.cpp" line="1164"/>
         <source>Propertу ...</source>
         <translation>Свойства ...</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1175"/>
+        <location filename="../DialogObjectProperties.cpp" line="1183"/>
         <source>Property</source>
         <translation>Свойства</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1188"/>
+        <location filename="../DialogObjectProperties.cpp" line="1196"/>
         <source>Property of signal - %1</source>
         <translation>Свойства сигнала - %1</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1289"/>
+        <location filename="../DialogObjectProperties.cpp" line="1297"/>
         <source>Signal</source>
         <translation>Сигнал</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1290"/>
+        <location filename="../DialogObjectProperties.cpp" line="1298"/>
         <source>Comparators</source>
         <translation>Уставки</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1308"/>
+        <location filename="../DialogObjectProperties.cpp" line="1316"/>
         <source>EquipmentID</source>
         <translation>EquipmentID</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1313"/>
+        <location filename="../DialogObjectProperties.cpp" line="1321"/>
         <source>Caption</source>
         <translation>Наименование</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1318"/>
+        <location filename="../DialogObjectProperties.cpp" line="1326"/>
         <source>Signal type</source>
         <translation>Тип сигнала</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1323"/>
+        <location filename="../DialogObjectProperties.cpp" line="1331"/>
         <source>Count of comparators</source>
         <translation>Количество уставок</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1332"/>
+        <location filename="../DialogObjectProperties.cpp" line="1340"/>
         <source>Position</source>
         <translation>Позиция</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1334"/>
+        <location filename="../DialogObjectProperties.cpp" line="1342"/>
         <source>Rack</source>
         <translation>Шкаф</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1339"/>
+        <location filename="../DialogObjectProperties.cpp" line="1347"/>
         <source>Chassis</source>
         <translation>Шасси</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1344"/>
+        <location filename="../DialogObjectProperties.cpp" line="1352"/>
         <source>Module</source>
         <translation>Модуль</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1349"/>
+        <location filename="../DialogObjectProperties.cpp" line="1357"/>
         <source>Place</source>
         <translation>Вх/Вых</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1354"/>
+        <location filename="../DialogObjectProperties.cpp" line="1362"/>
         <source>Module type</source>
         <translation>Тип модуля</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1368"/>
-        <location filename="../DialogObjectProperties.cpp" line="1451"/>
+        <location filename="../DialogObjectProperties.cpp" line="1376"/>
+        <location filename="../DialogObjectProperties.cpp" line="1459"/>
         <source>Low limit</source>
         <translation>Верхний предел</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1375"/>
-        <location filename="../DialogObjectProperties.cpp" line="1458"/>
+        <location filename="../DialogObjectProperties.cpp" line="1383"/>
+        <location filename="../DialogObjectProperties.cpp" line="1466"/>
         <source>High limit</source>
         <translation>Нижний предел</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1382"/>
-        <location filename="../DialogObjectProperties.cpp" line="1465"/>
+        <location filename="../DialogObjectProperties.cpp" line="1390"/>
+        <location filename="../DialogObjectProperties.cpp" line="1473"/>
         <source>Unit</source>
         <translation>Единицы измерения</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1388"/>
+        <location filename="../DialogObjectProperties.cpp" line="1396"/>
         <source>Sensor type</source>
         <translation>Тип датчика</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1410"/>
+        <location filename="../DialogObjectProperties.cpp" line="1418"/>
         <source>RLoad</source>
         <translation>R нагрузки</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1421"/>
+        <location filename="../DialogObjectProperties.cpp" line="1429"/>
         <source>R0</source>
         <translation>R0</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.cpp" line="1434"/>
-        <location filename="../DialogObjectProperties.cpp" line="1470"/>
+        <location filename="../DialogObjectProperties.cpp" line="1442"/>
+        <location filename="../DialogObjectProperties.cpp" line="1478"/>
         <source>Precision</source>
         <translation>Точность</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="240"/>
+        <location filename="../DialogObjectProperties.h" line="230"/>
         <source>Compare to</source>
         <translation>Сравнить с</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="241"/>
+        <location filename="../DialogObjectProperties.h" line="231"/>
         <source>Set point</source>
         <translation>Уставка</translation>
     </message>
     <message>
-        <location filename="../DialogObjectProperties.h" line="242"/>
+        <location filename="../DialogObjectProperties.h" line="232"/>
         <source>SignalID (Discrete)</source>
         <translation>SignalID (Дискретный)</translation>
     </message>

@@ -31,31 +31,31 @@ DialogProjectProperty::PropertyPattern::PropertyPattern(ProjectInfo* pObject) : 
 
 	QString groupInfo = qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_INFO]);
 
-	ADD_PROPERTY_GETTER(QString, tr("Project name"), true, m_pObject->ProjectInfo::projectName)
+	ADD_PROPERTY_GETTER(QString, DialogProjectProperty::tr("Project name"), true, m_pObject->ProjectInfo::projectName)
 		->setCategory(groupInfo)
 		.setViewOrder(0);
-	ADD_PROPERTY_GETTER(int, tr("Project ID"), true, m_pObject->ProjectInfo::id)
+	ADD_PROPERTY_GETTER(int, DialogProjectProperty::tr("Project ID"), true, m_pObject->ProjectInfo::id)
 		->setCategory(groupInfo)
 		.setViewOrder(1);
-	ADD_PROPERTY_GETTER(QString, tr("Date"), true, m_pObject->ProjectInfo::date)
+	ADD_PROPERTY_GETTER(QString, DialogProjectProperty::tr("Date"), true, m_pObject->ProjectInfo::date)
 		->setCategory(groupInfo)
 		.setViewOrder(2);
 
 	QString groupHost = qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_HOST]);
 
-	ADD_PROPERTY_GETTER(QString, tr("User"), true, m_pObject->ProjectInfo::user)
+	ADD_PROPERTY_GETTER(QString, DialogProjectProperty::tr("User"), true, m_pObject->ProjectInfo::user)
 		->setCategory(groupHost)
 		.setViewOrder(0);
-	ADD_PROPERTY_GETTER(QString, tr("Workstation"), true, m_pObject->ProjectInfo::workstation)
+	ADD_PROPERTY_GETTER(QString, DialogProjectProperty::tr("Workstation"), true, m_pObject->ProjectInfo::workstation)
 		->setCategory(groupHost)
 		.setViewOrder(1);
 
 	QString groupVersion = qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_VERSION]);
 
-	ADD_PROPERTY_GETTER(int, tr("Database Version"), true, m_pObject->ProjectInfo::dbVersion)
+	ADD_PROPERTY_GETTER(int, DialogProjectProperty::tr("Database Version"), true, m_pObject->ProjectInfo::dbVersion)
 		->setCategory(groupVersion)
 		.setViewOrder(0);
-	ADD_PROPERTY_GETTER(int, tr("Config File Version"), true, m_pObject->ProjectInfo::cfgFileVersion)
+	ADD_PROPERTY_GETTER(int, DialogProjectProperty::tr("Config File Version"), true, m_pObject->ProjectInfo::cfgFileVersion)
 		->setCategory(groupVersion)
 		.setViewOrder(1);
 }
@@ -86,7 +86,7 @@ void DialogProjectProperty::createPropertyList()
 	}
 
 	m_pPropertyEditor->setSplitterPosition(300);
-	m_pPropertyEditor->setReadOnly(false);
+	m_pPropertyEditor->setReadOnly(true);
 
 	//
 	//
@@ -150,7 +150,7 @@ DialogRackProperty::PropertyPattern::PropertyPattern(Metrology::RackParam* pObje
 	//
 	std::vector<std::pair<QString, int>> enumGroups;
 
-	enumGroups.push_back( {QString(), 0  } );
+	enumGroups.push_back({QString(), 0});
 
 	int groupCount = pRackBase->groups().count();
 	for(int g = 0; g < groupCount; g++)
@@ -161,7 +161,7 @@ DialogRackProperty::PropertyPattern::PropertyPattern(Metrology::RackParam* pObje
 			continue;
 		}
 
-		enumGroups.push_back( {group.caption(), g + 1} );
+		enumGroups.push_back({group.caption(), g + 1});
 	}
 
 	QString strDefaultGroup;
@@ -175,10 +175,10 @@ DialogRackProperty::PropertyPattern::PropertyPattern(Metrology::RackParam* pObje
 	//
 	std::vector<std::pair<QString, int>> enumChannels;
 
-	enumChannels.push_back( {QString(), 0  } );
+	enumChannels.push_back({QString(), 0});
 	for(int ch = 0; ch < Metrology::ChannelCount; ch++)
 	{
-		enumChannels.push_back( {QString::number(ch + 1), ch + 1} );
+		enumChannels.push_back({QString::number(ch + 1), ch + 1});
 	}
 
 	QString strDefaultChannel;
@@ -190,25 +190,25 @@ DialogRackProperty::PropertyPattern::PropertyPattern(Metrology::RackParam* pObje
 
 	// append properties
 	//
-	QString groupInfo = tr("Property of the rack");
+	QString groupInfo = DialogRackProperty::tr("Property of the rack");
 
-	ADD_PROPERTY_GETTER(QString, tr("Caption"), true, m_pObject->Metrology::RackParam::caption)
+	ADD_PROPERTY_GETTER(QString, DialogRackProperty::tr("Caption"), true, m_pObject->Metrology::RackParam::caption)
 		->setCategory(groupInfo)
 		.setViewOrder(0)
 		.setReadOnly(true);
 
-	ADD_PROPERTY_GETTER(QString, tr("EquipmentID"), true, m_pObject->Metrology::RackParam::equipmentID)
+	ADD_PROPERTY_GETTER(QString, DialogRackProperty::tr("EquipmentID"), true, m_pObject->Metrology::RackParam::equipmentID)
 		->setCategory(groupInfo)
 		.setViewOrder(1)
 		.setReadOnly(true);
 
-	addDynamicEnumProperty(qApp->translate("DialogObjectProperty", RACK_PROPERTY_CAPTION_GROUP), enumGroups, true)
+	addDynamicEnumProperty(DialogRackProperty::tr("Group"), enumGroups, true)
 		->setCategory(groupInfo)
 		.setViewOrder(2)
 		.setReadOnly(true)
 		.setValue(strDefaultGroup);
 
-	addDynamicEnumProperty(qApp->translate("DialogObjectProperty", RACK_PROPERTY_CAPTION_CHANNEL), enumChannels, true)
+	addDynamicEnumProperty(DialogRackProperty::tr("Channel"), enumChannels, true)
 		->setCategory(groupInfo)
 		.setViewOrder(3)
 		.setReadOnly(true)
@@ -240,7 +240,6 @@ void DialogRackProperty::createPropertyList()
 
 	// create property list
 	//
-
 	m_pPropertyEditor = new ExtWidgets::PropertyEditor(this);
 	if (m_pPropertyEditor == nullptr)
 	{
@@ -248,7 +247,7 @@ void DialogRackProperty::createPropertyList()
 	}
 
 	m_pPropertyEditor->setSplitterPosition(150);
-	m_pPropertyEditor->setReadOnly(false);
+	m_pPropertyEditor->setReadOnly(true);
 
 	//
 	//
@@ -277,6 +276,8 @@ void DialogRackProperty::createPropertyList()
 	setLayout(mainLayout);
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+
 void DialogRackProperty::onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
 	for (const std::shared_ptr<PropertyObject>& modifiedFilter : objects)
@@ -290,38 +291,36 @@ void DialogRackProperty::onPropertyValueChanged(QList<std::shared_ptr<PropertyOb
 
 		//
 		//
-		auto propertGroup = properties->propertyByCaption(qApp->translate("DialogObjectProperty", RACK_PROPERTY_CAPTION_GROUP));
-		if (propertGroup != nullptr)
+		auto propertyGroup = properties->propertyByCaption(DialogRackProperty::tr("Group"));
+		if (propertyGroup != nullptr)
 		{
-			if (propertGroup->isEnum() == true)
+			if (propertyGroup->isEnum() == true)
 			{
-				m_rack.setGroupIndex(propertGroup->value().toInt() - 1);
-
-				if (m_rack.groupIndex() == -1)
-				{
-					m_rack.setChannel(-1);
-				}
+				m_rack.setGroupIndex(propertyGroup->value().toInt() - 1);
 			}
 		}
 
 		//
 		//
-		auto propertChannel = properties->propertyByCaption(qApp->translate("DialogObjectProperty", RACK_PROPERTY_CAPTION_CHANNEL));
-		if (propertChannel != nullptr)
+		auto propertyChannel = properties->propertyByCaption(DialogRackProperty::tr("Channel"));
+		if (propertyChannel != nullptr)
 		{
-			if (propertChannel->isEnum() == true)
+			if (propertyChannel->isEnum() == true)
 			{
 				if (m_rack.groupIndex() == -1)
 				{
 					m_rack.setChannel(-1);
+					propertyChannel->setValue(0);
 				}
 				else
 				{
-					m_rack.setChannel(propertChannel->value().toInt() - 1);
+					m_rack.setChannel(propertyChannel->value().toInt() - 1);
 				}
 			}
 		}
 	}
+
+	m_pPropertyEditor->updatePropertiesValues();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -405,22 +404,47 @@ DialogRackGroupProperty::DialogRackGroupProperty(const RackBase& rackBase, QWidg
 
 DialogRackGroupProperty::~DialogRackGroupProperty()
 {
-	if (m_pManager != nullptr)
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DialogRackGroupProperty::PropertyPattern::PropertyPattern(RackBase* pObject) : m_pObject(pObject)
+{
+	if (m_pObject == nullptr)
 	{
-		delete m_pManager;
-		m_pManager = nullptr;
+		return;
 	}
 
-	if (m_pFactory != nullptr)
+	// prepare enum racks
+	//
+	std::vector<std::pair<QString, int>> enumRacks;
+
+	enumRacks.push_back({QString(), 0});
+
+	int rackCount = m_pObject->count();
+	for(int r = 0; r < rackCount; r++)
 	{
-		delete m_pFactory;
-		m_pFactory = nullptr;
+		Metrology::RackParam rack = m_pObject->rack(r);
+		if (rack.isValid() == false)
+		{
+			continue;
+		}
+
+		enumRacks.push_back({rack.caption(), r + 1});
 	}
 
-	if (m_pEditor != nullptr)
+	// append properties
+	//
+	QString groupRacks = DialogRackGroupProperty::tr("Racks");
+
+	for(int channel = 0; channel < Metrology::ChannelCount; channel++)
 	{
-		delete m_pEditor;
-		m_pEditor = nullptr;
+		QString strHeader = DialogRackGroupProperty::tr("Channel") + " " + QString::number(channel + 1);
+
+		addDynamicEnumProperty(strHeader, enumRacks, true)
+			->setCategory(groupRacks)
+			.setViewOrder(channel)
+			.setValue(QString());
 	}
 }
 
@@ -478,51 +502,26 @@ void DialogRackGroupProperty::createPropertyList()
 
 	// create property list
 	//
-	QtVariantProperty* item = nullptr;
+	m_pPropertyEditor = new ExtWidgets::PropertyEditor(this);
+	if (m_pPropertyEditor == nullptr)
+	{
+		return;
+	}
 
-	m_pManager = new QtVariantPropertyManager;
-	m_pFactory = new QtVariantEditorFactory;
-	m_pEditor = new QtTreePropertyBrowser;
-
-	//
-	//
-	QtProperty* racks = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Racks"));
-
-		for(int channel = 0; channel < Metrology::ChannelCount; channel++)
-		{
-			item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Channel %1").arg(channel + 1));
-
-			int rackCount = m_rackBase.count();
-
-			QStringList rackList;
-			rackList.append(QString());
-
-			for(int i = 0; i < rackCount; i++)
-			{
-				Metrology::RackParam rack = m_rackBase.rack(i);
-				if (rack.isValid() == false)
-				{
-					continue;
-				}
-
-				rackList.append(rack.caption());
-			}
-
-			item->setAttribute(QLatin1String("enumNames"), rackList);
-			item->setValue(0);
-			m_propertyMap.insert(item, channel);
-			racks->addSubProperty(item);
-		}
-
-	m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
-	m_pEditor->addProperty(racks);
+	m_pPropertyEditor->setSplitterPosition(150);
+	m_pPropertyEditor->setReadOnly(false);
 
 	//
 	//
-	m_pEditor->setPropertiesWithoutValueMarked(true);
-	m_pEditor->setRootIsDecorated(false);
+	QList<std::shared_ptr<PropertyObject>> projectObjects;
 
-	connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogRackGroupProperty::onPropertyValueChanged);
+	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_rackBase);
+
+	projectObjects.push_back(property);
+
+	m_pPropertyEditor->setObjects(projectObjects);
+
+	connect(m_pPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogRackGroupProperty::onPropertyValueChanged);
 
 	// create buttons ok and cancel
 	//
@@ -536,7 +535,7 @@ void DialogRackGroupProperty::createPropertyList()
 	QHBoxLayout* listLayout = new QHBoxLayout;
 
 	listLayout->addWidget(m_pGroupView);
-	listLayout->addWidget(m_pEditor);
+	listLayout->addWidget(m_pPropertyEditor);
 
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 
@@ -596,7 +595,18 @@ void DialogRackGroupProperty::updateGroupList(const Hash& hash)
 
 	m_pGroupView->blockSignals(false);
 
-	if (pSelectItem != nullptr)
+	if (pSelectItem == nullptr)
+	{
+		if (m_pGroupView->rowCount() > 0 )
+		{
+			QTableWidgetItem* item = m_pGroupView->item(0, RACK_GROUP_COLUMN_CAPTION);
+			if (item != nullptr)
+			{
+				m_pGroupView->setCurrentItem(item);
+			}
+		}
+	}
+	else
 	{
 		m_pGroupView->setCurrentItem(pSelectItem);
 	}
@@ -618,32 +628,42 @@ void DialogRackGroupProperty::updateRackList()
 		return;
 	}
 
-	QtVariantProperty* property = nullptr;
-
-	for(int channel = 0; channel < Metrology::ChannelCount; channel++)
+	for (const std::shared_ptr<PropertyObject>& modifiedFilter : m_pPropertyEditor->objects())
 	{
-		property = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(channel));
-		if (property == nullptr)
+		auto properties = modifiedFilter.get();
+		if (properties == nullptr)
 		{
+			assert(0);
 			continue;
 		}
 
-		const QString& rackID = group.rackID(channel);
-		if (rackID.isEmpty() == true)
+		for(int channel = 0; channel < Metrology::ChannelCount; channel++)
 		{
-			property->setValue(0);
-			continue;
-		}
+			auto propertyChannel = properties->propertyByCaption(tr("Channel") + " " + QString::number(channel + 1));
+			if (propertyChannel == nullptr)
+			{
+				continue;
+			}
 
-		const Metrology::RackParam& rack = m_rackBase.rack(rackID);
-		if (rack.isValid() == false)
-		{
-			property->setValue(0);
-			continue;
-		}
+			const QString& rackID = group.rackID(channel);
+			if (rackID.isEmpty() == true)
+			{
+				propertyChannel->setValue(0);
+				continue;
+			}
 
-		property->setValue(rack.index()+1);
+			const Metrology::RackParam& rack = m_rackBase.rack(rackID);
+			if (rack.isValid() == false)
+			{
+				propertyChannel->setValue(0);
+				continue;
+			}
+
+			propertyChannel->setValue(rack.index() + 1);
+		}
 	}
+
+	m_pPropertyEditor->updatePropertiesValues();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -693,13 +713,8 @@ void DialogRackGroupProperty::removeGroup()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogRackGroupProperty::onPropertyValueChanged(QtProperty* property, const QVariant &value)
+void DialogRackGroupProperty::onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
-	if (property == nullptr)
-	{
-		return;
-	}
-
 	int index = m_pGroupView->currentIndex().row();
 	if (index < 0 || index > m_groupBase.count())
 	{
@@ -712,46 +727,56 @@ void DialogRackGroupProperty::onPropertyValueChanged(QtProperty* property, const
 		return;
 	}
 
-	if (m_propertyMap.contains(property) == false)
+	for (const std::shared_ptr<PropertyObject>& modifiedFilter : objects)
 	{
-		return;
-	}
-
-	int channel = m_propertyMap[property];
-	if (channel < 0 || channel >= Metrology::ChannelCount)
-	{
-		return;
-	}
-
-	int rackIndex = value.toInt() - 1;
-	if (rackIndex < 0 || rackIndex >= m_rackBase.count())
-	{
-		if (group.rackID(channel).isEmpty() == false)
+		auto properties = modifiedFilter.get();
+		if (properties == nullptr)
 		{
-			group.setRackID(channel, QString());
-			m_groupBase.setGroup(index, group);
+			assert(0);
+			continue;
 		}
 
-		return;
+		for(int channel = 0; channel < Metrology::ChannelCount; channel++)
+		{
+			auto propertyChannel = properties->propertyByCaption(tr("Channel") + " " + QString::number(channel + 1));
+			if (propertyChannel == nullptr)
+			{
+				continue;
+			}
+
+			int rackIndex = propertyChannel->value().toInt() - 1;
+			if (rackIndex < 0 || rackIndex >= m_rackBase.count())
+			{
+				// clear
+				//
+				if (group.rackID(channel).isEmpty() == false)
+				{
+					group.setRackID(channel, QString());
+					m_groupBase.setGroup(index, group);
+				}
+
+				continue;
+			}
+
+			Metrology::RackParam rack = m_rackBase.rack(rackIndex);
+			if (rack.isValid() == false)
+			{
+				continue;
+			}
+
+			if (group.rackID(channel) == rack.equipmentID())
+			{
+				continue;
+			}
+
+			rack.setChannel(channel);
+			rack.setGroupIndex(group.index());
+			m_rackBase.setRack(rack.index(), rack);
+
+			group.setRackID(channel, rack.equipmentID());
+			m_groupBase.setGroup(index, group);
+		}
 	}
-
-	Metrology::RackParam rack = m_rackBase.rack(rackIndex);
-	if (rack.isValid() == false)
-	{
-		return;
-	}
-
-	if (group.rackID(channel) == rack.equipmentID())
-	{
-		return;
-	}
-
-	rack.setChannel(channel);
-	rack.setGroupIndex(group.index());
-	m_rackBase.setRack(rack.index(), rack);
-
-	group.setRackID(channel, rack.equipmentID());
-	m_groupBase.setGroup(index, group);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2304,19 +2329,19 @@ DialogMeasureProperty::PropertyPattern::PropertyPattern(Measure::Item* pObject) 
 
 	QString groupSignalID = qApp->translate("DialogObjectProperty", MeasurePropertyGroup[MEASURE_PROPERTY_GROUP_SIGNAL_ID]);
 
-	ADD_PROPERTY_GETTER(QString, tr("SignalID"), true, m_pObject->Measure::Item::customAppSignalID)
+	ADD_PROPERTY_GETTER(QString, DialogMeasureProperty::tr("SignalID"), true, m_pObject->Measure::Item::customAppSignalID)
 		->setCategory(groupSignalID)
 		.setViewOrder(0)
 		.setReadOnly(true);
-	ADD_PROPERTY_GETTER(QString, tr("AppSignalID"), true, m_pObject->Measure::Item::appSignalID)
+	ADD_PROPERTY_GETTER(QString, DialogMeasureProperty::tr("AppSignalID"), true, m_pObject->Measure::Item::appSignalID)
 		->setCategory(groupSignalID)
 		.setViewOrder(1)
 		.setReadOnly(true);
-	ADD_PROPERTY_GETTER(QString, tr("EquipmentID"), true, m_pObject->Measure::Item::equipmentID)
+	ADD_PROPERTY_GETTER(QString, DialogMeasureProperty::tr("EquipmentID"), true, m_pObject->Measure::Item::equipmentID)
 		->setCategory(groupSignalID)
 		.setViewOrder(2)
 		.setReadOnly(true);
-	ADD_PROPERTY_GETTER(QString, tr("Caption"), true, m_pObject->Measure::Item::caption)
+	ADD_PROPERTY_GETTER(QString, DialogMeasureProperty::tr("Caption"), true, m_pObject->Measure::Item::caption)
 		->setCategory(groupSignalID)
 		.setViewOrder(3)
 		.setReadOnly(true);
@@ -2324,27 +2349,27 @@ DialogMeasureProperty::PropertyPattern::PropertyPattern(Measure::Item* pObject) 
 
 	QString groupPosition = qApp->translate("DialogObjectProperty", MeasurePropertyGroup[MEASURE_PROPERTY_GROUP_POS]);
 
-	ADD_PROPERTY_GETTER(QString, tr("Module SN"), true, m_pObject->location().Metrology::SignalLocation::moduleSerialNoStr)
+	ADD_PROPERTY_GETTER(QString, DialogMeasureProperty::tr("Module SN"), true, m_pObject->location().Metrology::SignalLocation::moduleSerialNoStr)
 		->setCategory(groupPosition)
 		.setViewOrder(0)
 		.setReadOnly(true);
-	ADD_PROPERTY_GETTER(QString, tr("Module type"), true, m_pObject->location().Metrology::SignalLocation::moduleCaption)
+	ADD_PROPERTY_GETTER(QString, DialogMeasureProperty::tr("Module type"), true, m_pObject->location().Metrology::SignalLocation::moduleCaption)
 		->setCategory(groupPosition)
 		.setViewOrder(1)
 		.setReadOnly(true);
-	ADD_PROPERTY_GETTER(QString, tr("Rack"), true, m_pObject->location().Metrology::SignalLocation::rackCaption)
+	ADD_PROPERTY_GETTER(QString, DialogMeasureProperty::tr("Rack"), true, m_pObject->location().Metrology::SignalLocation::rackCaption)
 		->setCategory(groupPosition)
 		.setViewOrder(2)
 		.setReadOnly(true);
-	ADD_PROPERTY_GETTER(int, tr("Chassis"), true, m_pObject->location().Metrology::SignalLocation::chassis)
+	ADD_PROPERTY_GETTER(int, DialogMeasureProperty::tr("Chassis"), true, m_pObject->location().Metrology::SignalLocation::chassis)
 		->setCategory(groupPosition)
 		.setViewOrder(3)
 		.setReadOnly(true);
-	ADD_PROPERTY_GETTER(int, tr("Module"), true, m_pObject->location().Metrology::SignalLocation::module)
+	ADD_PROPERTY_GETTER(int, DialogMeasureProperty::tr("Module"), true, m_pObject->location().Metrology::SignalLocation::module)
 		->setCategory(groupPosition)
 		.setViewOrder(4)
 		.setReadOnly(true);
-	ADD_PROPERTY_GETTER(int, tr("Place"), true, m_pObject->location().Metrology::SignalLocation::place)
+	ADD_PROPERTY_GETTER(int, DialogMeasureProperty::tr("Place"), true, m_pObject->location().Metrology::SignalLocation::place)
 		->setCategory(groupPosition)
 		.setViewOrder(5)
 		.setReadOnly(true);
@@ -2352,11 +2377,11 @@ DialogMeasureProperty::PropertyPattern::PropertyPattern(Measure::Item* pObject) 
 
 	QString groupLimits = qApp->translate("DialogObjectProperty", MeasurePropertyGroup[MEASURE_PROPERTY_GROUP_LIMITS]);
 
-	ADD_PROPERTY_GETTER(QString, tr("Engineering range"), true, PropertyPattern::engineeringLimitStr)
+	ADD_PROPERTY_GETTER(QString, DialogMeasureProperty::tr("Engineering range"), true, PropertyPattern::engineeringLimitStr)
 		->setCategory(groupLimits)
 		.setViewOrder(0)
 		.setReadOnly(true);
-	ADD_PROPERTY_GETTER(QString, tr("Electric range"), true, PropertyPattern::electricLimitStr)
+	ADD_PROPERTY_GETTER(QString, DialogMeasureProperty::tr("Electric range"), true, PropertyPattern::electricLimitStr)
 		->setCategory(groupLimits)
 		.setViewOrder(1)
 		.setReadOnly(true);
@@ -2364,11 +2389,11 @@ DialogMeasureProperty::PropertyPattern::PropertyPattern(Measure::Item* pObject) 
 
 	QString groupErrors = qApp->translate("DialogObjectProperty", MeasurePropertyGroup[MEASURE_PROPERTY_GROUP_ERRORS]);
 
-	ADD_PROPERTY_GETTER_SETTER(double, tr("Limit of error (%)"), true, PropertyPattern::errorLimit, PropertyPattern::setErrorLimit)
+	ADD_PROPERTY_GETTER_SETTER(double, DialogMeasureProperty::tr("Limit of error (%)"), true, PropertyPattern::errorLimit, PropertyPattern::setErrorLimit)
 		->setCategory(groupErrors)
 		.setViewOrder(0)
 		.setPrecision(3);
-	ADD_PROPERTY_GETTER(QString, tr("Measurement time"), true, m_pObject->Measure::Item::measureTimeStr)
+	ADD_PROPERTY_GETTER(QString, DialogMeasureProperty::tr("Measurement time"), true, m_pObject->Measure::Item::measureTimeStr)
 		->setCategory(groupErrors)
 		.setViewOrder(1)
 		.setReadOnly(true);
@@ -2456,6 +2481,7 @@ void DialogMeasureProperty::createPropertyList()
 	}
 
 	m_pPropertyEditor->setSplitterPosition(300);
+	m_pPropertyEditor->setReadOnly(false);
 
 	//
 	//
