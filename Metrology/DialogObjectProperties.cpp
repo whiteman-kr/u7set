@@ -31,7 +31,7 @@ DialogProjectProperty::PropertyPattern::PropertyPattern(ProjectInfo* pObject) : 
 
 	QString groupInfo = qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_INFO]);
 
-	ADD_PROPERTY_GETTER(QString, "Project name", true, m_pObject->ProjectInfo::projectName)
+	ADD_PROPERTY_GETTER(QString, tr("Project name"), true, m_pObject->ProjectInfo::projectName)
 		->setCategory(groupInfo)
 		.setViewOrder(0);
 	ADD_PROPERTY_GETTER(int, tr("Project ID"), true, m_pObject->ProjectInfo::id)
@@ -130,23 +130,89 @@ DialogRackProperty::DialogRackProperty(const Metrology::RackParam& rack, const R
 
 DialogRackProperty::~DialogRackProperty()
 {
-	if (m_pManager != nullptr)
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DialogRackProperty::PropertyPattern::PropertyPattern(Metrology::RackParam* pObject, RackBase* pRackBase) : m_pObject(pObject)
+{
+	if (m_pObject == nullptr)
 	{
-		delete m_pManager;
-		m_pManager = nullptr;
+		return;
 	}
 
-	if (m_pFactory != nullptr)
+	if (pRackBase == nullptr)
 	{
-		delete m_pFactory;
-		m_pFactory = nullptr;
+		return;
 	}
 
-	if (m_pEditor != nullptr)
+	// prepare enum groups
+	//
+	std::vector<std::pair<QString, int>> enumGroups;
+
+	enumGroups.push_back( {QString(), 0  } );
+
+	int groupCount = pRackBase->groups().count();
+	for(int g = 0; g < groupCount; g++)
 	{
-		delete m_pEditor;
-		m_pEditor = nullptr;
+		RackGroup group = pRackBase->groups().group(g);
+		if (group.isValid() == false)
+		{
+			continue;
+		}
+
+		enumGroups.push_back( {group.caption(), g + 1} );
 	}
+
+	QString strDefaultGroup;
+	RackGroup defaultGroup = pRackBase->groups().group(m_pObject->groupIndex());
+	if (defaultGroup.isValid() == true)
+	{
+		strDefaultGroup = defaultGroup.caption();
+	}
+
+	// prepare enum channels
+	//
+	std::vector<std::pair<QString, int>> enumChannels;
+
+	enumChannels.push_back( {QString(), 0  } );
+	for(int ch = 0; ch < Metrology::ChannelCount; ch++)
+	{
+		enumChannels.push_back( {QString::number(ch + 1), ch + 1} );
+	}
+
+	QString strDefaultChannel;
+	int defaultChannel = m_pObject->channel();
+	if (defaultChannel >= 0 && defaultChannel < Metrology::ChannelCount)
+	{
+		strDefaultChannel = QString::number(defaultChannel + 1);
+	}
+
+	// append properties
+	//
+	QString groupInfo = tr("Property of the rack");
+
+	ADD_PROPERTY_GETTER(QString, tr("Caption"), true, m_pObject->Metrology::RackParam::caption)
+		->setCategory(groupInfo)
+		.setViewOrder(0)
+		.setReadOnly(true);
+
+	ADD_PROPERTY_GETTER(QString, tr("EquipmentID"), true, m_pObject->Metrology::RackParam::equipmentID)
+		->setCategory(groupInfo)
+		.setViewOrder(1)
+		.setReadOnly(true);
+
+	addDynamicEnumProperty(qApp->translate("DialogObjectProperty", RACK_PROPERTY_CAPTION_GROUP), enumGroups, true)
+		->setCategory(groupInfo)
+		.setViewOrder(2)
+		.setReadOnly(true)
+		.setValue(strDefaultGroup);
+
+	addDynamicEnumProperty(qApp->translate("DialogObjectProperty", RACK_PROPERTY_CAPTION_CHANNEL), enumChannels, true)
+		->setCategory(groupInfo)
+		.setViewOrder(3)
+		.setReadOnly(true)
+		.setValue(strDefaultChannel);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -175,68 +241,26 @@ void DialogRackProperty::createPropertyList()
 	// create property list
 	//
 
-	QtVariantProperty* item = nullptr;
+	m_pPropertyEditor = new ExtWidgets::PropertyEditor(this);
+	if (m_pPropertyEditor == nullptr)
+	{
+		return;
+	}
 
-	m_pManager = new QtVariantPropertyManager;
-	m_pFactory = new QtVariantEditorFactory;
-	m_pEditor = new QtTreePropertyBrowser;
-
-	//
-	//
-	QtProperty* rackGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Property of the rack"));
-
-		item = m_pManager->addProperty(QVariant::String, tr("Caption"));
-		item->setValue(m_rack.caption());
-		item->setAttribute(QLatin1String("readOnly"), true);
-		m_propertyMap.insert(item, RACK_PROPERTY_ITEM_CAPTION);
-		rackGroup->addSubProperty(item);
-
-		item = m_pManager->addProperty(QVariant::String, tr("EquipmentID"));
-		item->setValue(m_rack.equipmentID());
-		item->setAttribute(QLatin1String("readOnly"), true);
-		m_propertyMap.insert(item, RACK_PROPERTY_ITEM_ID);
-		rackGroup->addSubProperty(item);
-
-		item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Group"));
-		QStringList groupList;
-		groupList.append(QString());
-		int groupCount = m_rackBase.groups().count();
-		for(int g = 0; g < groupCount; g++)
-		{
-			RackGroup group = m_rackBase.groups().group(g);
-			if (group.isValid() == false)
-			{
-				continue;
-			}
-
-			groupList.append(group.caption());
-		}
-		item->setAttribute(QLatin1String("enumNames"), groupList);
-		item->setValue(m_rack.groupIndex() + 1);
-		m_propertyMap.insert(item, RACK_PROPERTY_ITEM_GROUP);
-		rackGroup->addSubProperty(item);
-
-		item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Channel"));
-		QStringList channelList;
-		channelList.append(QString());
-		for(int ch = 0; ch < Metrology::ChannelCount; ch++)
-		{
-			channelList.append(QString::number(ch + 1));
-		}
-		item->setAttribute(QLatin1String("enumNames"), channelList);
-		item->setValue(m_rack.channel() + 1);
-		m_propertyMap.insert(item, RACK_PROPERTY_ITEM_CHANNEL);
-		rackGroup->addSubProperty(item);
-
-	m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
-	m_pEditor->addProperty(rackGroup);
+	m_pPropertyEditor->setSplitterPosition(150);
+	m_pPropertyEditor->setReadOnly(false);
 
 	//
 	//
-	m_pEditor->setPropertiesWithoutValueMarked(true);
-	m_pEditor->setRootIsDecorated(false);
+	QList<std::shared_ptr<PropertyObject>> projectObjects;
 
-	connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogRackProperty::onPropertyValueChanged);
+	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_rack, &m_rackBase);
+
+	projectObjects.push_back(property);
+
+	m_pPropertyEditor->setObjects(projectObjects);
+
+	connect(m_pPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogRackProperty::onPropertyValueChanged);
 
 	// create buttons ok and cancel
 	//
@@ -247,48 +271,56 @@ void DialogRackProperty::createPropertyList()
 
 	// add layouts
 	//
-	mainLayout->addWidget(m_pEditor);
+	mainLayout->addWidget(m_pPropertyEditor);
 	mainLayout->addWidget(m_buttonBox);
 
 	setLayout(mainLayout);
 }
 
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogRackProperty::onPropertyValueChanged(QtProperty* property, const QVariant &value)
+void DialogRackProperty::onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
-	if (property == nullptr)
+	for (const std::shared_ptr<PropertyObject>& modifiedFilter : objects)
 	{
-		return;
-	}
+		auto properties = modifiedFilter.get();
+		if (properties == nullptr)
+		{
+			assert(0);
+			continue;
+		}
 
-	if (m_propertyMap.contains(property) == false)
-	{
-		return;
-	}
-
-	int propertyIndex = m_propertyMap[property];
-	if (propertyIndex < 0 || propertyIndex >= RACK_PROPERTY_ITEM_COUNT)
-	{
-		return;
-	}
-
-	switch(propertyIndex)
-	{
-		case RACK_PROPERTY_ITEM_GROUP:
-
-			m_rack.setGroupIndex(value.toInt()-1);
-
-			if (m_rack.groupIndex() == -1)
+		//
+		//
+		auto propertGroup = properties->propertyByCaption(qApp->translate("DialogObjectProperty", RACK_PROPERTY_CAPTION_GROUP));
+		if (propertGroup != nullptr)
+		{
+			if (propertGroup->isEnum() == true)
 			{
-				m_rack.setChannel(-1);
+				m_rack.setGroupIndex(propertGroup->value().toInt() - 1);
+
+				if (m_rack.groupIndex() == -1)
+				{
+					m_rack.setChannel(-1);
+				}
 			}
+		}
 
-			break;
-
-		case RACK_PROPERTY_ITEM_CHANNEL:
-			m_rack.setChannel(value.toInt()-1);
-			break;
+		//
+		//
+		auto propertChannel = properties->propertyByCaption(qApp->translate("DialogObjectProperty", RACK_PROPERTY_CAPTION_CHANNEL));
+		if (propertChannel != nullptr)
+		{
+			if (propertChannel->isEnum() == true)
+			{
+				if (m_rack.groupIndex() == -1)
+				{
+					m_rack.setChannel(-1);
+				}
+				else
+				{
+					m_rack.setChannel(propertChannel->value().toInt() - 1);
+				}
+			}
+		}
 	}
 }
 
@@ -2272,7 +2304,7 @@ DialogMeasureProperty::PropertyPattern::PropertyPattern(Measure::Item* pObject) 
 
 	QString groupSignalID = qApp->translate("DialogObjectProperty", MeasurePropertyGroup[MEASURE_PROPERTY_GROUP_SIGNAL_ID]);
 
-	ADD_PROPERTY_GETTER(QString, "SignalID", true, m_pObject->Measure::Item::customAppSignalID)
+	ADD_PROPERTY_GETTER(QString, tr("SignalID"), true, m_pObject->Measure::Item::customAppSignalID)
 		->setCategory(groupSignalID)
 		.setViewOrder(0)
 		.setReadOnly(true);
@@ -2461,7 +2493,7 @@ void DialogMeasureProperty::onPropertyValueChanged(QList<std::shared_ptr<Propert
 		if (modifiedFilter.get() == nullptr)
 		{
 			assert(0);
-			return;
+			continue;
 		}
 	}
 }

@@ -82,12 +82,8 @@ private:
 //
 // ==============================================================================================
 
-const int						RACK_PROPERTY_ITEM_ID		= 0,
-								RACK_PROPERTY_ITEM_CAPTION	= 1,
-								RACK_PROPERTY_ITEM_GROUP	= 2,
-								RACK_PROPERTY_ITEM_CHANNEL	= 3;
-
-const int						RACK_PROPERTY_ITEM_COUNT	= 4;
+const char* const				RACK_PROPERTY_CAPTION_GROUP		= QT_TRANSLATE_NOOP("DialogObjectProperty", "Group");
+const char* const				RACK_PROPERTY_CAPTION_CHANNEL	= QT_TRANSLATE_NOOP("DialogObjectProperty", "Channel");
 
 // ----------------------------------------------------------------------------------------------
 
@@ -102,34 +98,38 @@ public:
 
 public:
 
-	Metrology::RackParam		rack() const { return m_rack; }
+	Metrology::RackParam rack() const { return m_rack; }
 
 private:
 
-	Metrology::RackParam		m_rack;
-	RackBase					m_rackBase;
+	class PropertyPattern: public PropertyObject
+	{
+	public:
 
-	// Property list
+		explicit PropertyPattern(Metrology::RackParam* pObject, RackBase* pRackBase);
+
+	private:
+
+		Metrology::RackParam* m_pObject = nullptr;
+	};
+
+	Metrology::RackParam m_rack;
+	RackBase m_rackBase;
+
 	//
-	QtVariantPropertyManager*	m_pManager = nullptr;
-	QtVariantEditorFactory*		m_pFactory = nullptr;
-	QtTreePropertyBrowser*		m_pEditor = nullptr;
-
-	// buttons
 	//
-	QDialogButtonBox*			m_buttonBox = nullptr;
+	ExtWidgets::PropertyEditor* m_pPropertyEditor = nullptr;
+	QDialogButtonBox* m_buttonBox = nullptr;
 
-	QMap<QtProperty*,int>		m_propertyMap;
+	void createPropertyList();
 
-	void						createPropertyList();
-
-	bool						foundDuplicateGroups();
+	bool foundDuplicateGroups();
 
 private slots:
 
-	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
+	void onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects);
 
-	void						onOk();
+	void onOk();
 };
 
 // ==============================================================================================
@@ -270,10 +270,10 @@ private:
 
 const char* const				SignalPropertyGroup[] =
 {
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Signal ID"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Position"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Electric range: "),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Engineering range: "),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Signal ID"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Position"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "3 Electric range: "),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "4 Engineering range: "),
 };
 
 const int						SIGNAL_PROPERTY_GROUP_COUNT				= sizeof(SignalPropertyGroup)/sizeof(SignalPropertyGroup[0]);
@@ -527,20 +527,20 @@ private:
 		void setErrorLimit(double value);
 	};
 
-	Measure::Item*				m_pMeasurement = nullptr;
+	Measure::Item* m_pMeasurement = nullptr;
 
 	//
 	//
 	ExtWidgets::PropertyEditor*	m_pPropertyEditor = nullptr;
-	QDialogButtonBox*			m_buttonBox = nullptr;
+	QDialogButtonBox* m_buttonBox = nullptr;
 
 	//
 	//
-	void						createPropertyList();
+	void createPropertyList();
 
 private slots:
 
-	void						onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects);
+	void onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects);
 };
 
 // ==============================================================================================
