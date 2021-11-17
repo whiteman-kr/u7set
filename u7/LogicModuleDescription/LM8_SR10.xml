@@ -375,7 +375,7 @@
 			<Pin OpName="o_funct_edi"	OpIndex ="12"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="13"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="INT"		OpCode="17"	HasRam="true"	ImpVersion="6"		VersionOpIndex="29"	MaxInstCount="256" SimulationFunc="afb_int_v6_tiunlim">
+		<AFBComponent Caption="INT"		OpCode="17"	HasRam="true"	ImpVersion="7"		VersionOpIndex="29"	MaxInstCount="256" SimulationFunc="afb_int_v7_tiunlim">
 			<Pin OpName="i_ki"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_ti"		OpIndex ="2"	PinType = "Param"/>
 			<Pin OpName="i_max"		OpIndex ="4"	PinType = "Param"/>
@@ -502,7 +502,7 @@
 			<Pin OpName="o_nan"		OpIndex ="27"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="28"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="MISMATCH"	OpCode="27"	HasRam="false"	ImpVersion="3"		VersionOpIndex="22"	MaxInstCount="256" SimulationFunc="afb_mismatch_v3">
+		<AFBComponent Caption="MISMATCH"	OpCode="27"	HasRam="false"	ImpVersion="4"		VersionOpIndex="22"	MaxInstCount="256" SimulationFunc="afb_mismatch_v4">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_conf_n"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_ust"		OpIndex ="2"	PinType = "Param"/>
@@ -638,7 +638,7 @@
 
                                 if (xCount &gt;= yCount)
 								{
-								    videoItemFblElement.setAfbParamByOpName("i_conf_x", yCount - 1);
+                                                                    videoItemFblElement.setParamIntValue("i_conf_x", yCount - 1);
 									return false;
 								}
 								return true;
@@ -669,7 +669,7 @@
 
                                 if (yCount &lt;= xCount)
 								{
-								    videoItemFblElement.setAfbParamByOpName("i_conf_y", xCount + 1);
+                                                                    videoItemFblElement.setParamIntValue("i_conf_y", xCount + 1);
 								}
 
                                 return createInputSignals(videoItemFblElement, afbElement);
@@ -15179,7 +15179,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 
 	if (xCount &gt;= yCount)
 	{	
-		videoItemFblElement.setAfbParamByOpName("i_conf_x", yCount - 1);
+                videoItemFblElement.setParamIntValue("i_conf_x", yCount - 1);
 		return false;
 	}
 	return true;
@@ -15210,7 +15210,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 
 	if (yCount &lt;= xCount)
 	{	
-		videoItemFblElement.setAfbParamByOpName("i_conf_y", xCount + 1);
+                videoItemFblElement.setParamIntValue("i_conf_y", xCount + 1);
 	}
 
 	return createInputSignals(videoItemFblElement, afbElement);

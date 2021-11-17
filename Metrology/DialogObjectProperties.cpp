@@ -6,49 +6,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ProjectInfo_::ProjectInfo_(ProjectInfo* info) : m_info(info)
-{
-	appendProperties();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ProjectInfo_::appendProperties()
-{
-	if (m_info == nullptr)
-	{
-		return;
-	}
-
-	ADD_PROPERTY_GETTER(QString, "Project name", true, m_info->ProjectInfo::projectName)
-		->setCategory(qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_INFO]))
-		.setViewOrder(0);
-	ADD_PROPERTY_GETTER(int, tr("Project ID"), true, m_info->ProjectInfo::id)
-		->setCategory(qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_INFO]))
-		.setViewOrder(1);
-	ADD_PROPERTY_GETTER(QString, tr("Date"), true, m_info->ProjectInfo::date)
-		->setCategory(qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_INFO]))
-		.setViewOrder(2);
-
-	ADD_PROPERTY_GETTER(QString, tr("User"), true, m_info->ProjectInfo::user)
-		->setCategory(qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_HOST]))
-		.setViewOrder(0);
-	ADD_PROPERTY_GETTER(QString, tr("Workstation"), true, m_info->ProjectInfo::workstation)
-		->setCategory(qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_HOST]))
-		.setViewOrder(1);
-
-	ADD_PROPERTY_GETTER(int, tr("Database Version"), true, m_info->ProjectInfo::dbVersion)
-		->setCategory(qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_VERSION]))
-		.setViewOrder(0);
-	ADD_PROPERTY_GETTER(int, tr("Config File Version"), true, m_info->ProjectInfo::cfgFileVersion)
-		->setCategory(qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_VERSION]))
-		.setViewOrder(1);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
 DialogProjectProperty::DialogProjectProperty(const ProjectInfo& param, QWidget* parent) :
 	QDialog(parent)
 {
@@ -61,6 +18,46 @@ DialogProjectProperty::DialogProjectProperty(const ProjectInfo& param, QWidget* 
 
 DialogProjectProperty::~DialogProjectProperty()
 {
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DialogProjectProperty::PropertyPattern::PropertyPattern(ProjectInfo* pObject) : m_pObject(pObject)
+{
+	if (m_pObject == nullptr)
+	{
+		return;
+	}
+
+	QString groupInfo = qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_INFO]);
+
+	ADD_PROPERTY_GETTER(QString, "Project name", true, m_pObject->ProjectInfo::projectName)
+		->setCategory(groupInfo)
+		.setViewOrder(0);
+	ADD_PROPERTY_GETTER(int, tr("Project ID"), true, m_pObject->ProjectInfo::id)
+		->setCategory(groupInfo)
+		.setViewOrder(1);
+	ADD_PROPERTY_GETTER(QString, tr("Date"), true, m_pObject->ProjectInfo::date)
+		->setCategory(groupInfo)
+		.setViewOrder(2);
+
+	QString groupHost = qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_HOST]);
+
+	ADD_PROPERTY_GETTER(QString, tr("User"), true, m_pObject->ProjectInfo::user)
+		->setCategory(groupHost)
+		.setViewOrder(0);
+	ADD_PROPERTY_GETTER(QString, tr("Workstation"), true, m_pObject->ProjectInfo::workstation)
+		->setCategory(groupHost)
+		.setViewOrder(1);
+
+	QString groupVersion = qApp->translate("DialogObjectProperty", ProjectPropertyGroup[PROJECT_PROPERTY_GROUP_VERSION]);
+
+	ADD_PROPERTY_GETTER(int, tr("Database Version"), true, m_pObject->ProjectInfo::dbVersion)
+		->setCategory(groupVersion)
+		.setViewOrder(0);
+	ADD_PROPERTY_GETTER(int, tr("Config File Version"), true, m_pObject->ProjectInfo::cfgFileVersion)
+		->setCategory(groupVersion)
+		.setViewOrder(1);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -95,7 +92,7 @@ void DialogProjectProperty::createPropertyList()
 	//
 	QList<std::shared_ptr<PropertyObject>> projectObjects;
 
-	std::shared_ptr<ProjectInfo_> property = std::make_shared<ProjectInfo_>(&m_info);
+	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_info);
 
 	projectObjects.push_back(property);
 
@@ -1356,7 +1353,7 @@ void DialogSignalProperty::createPropertyList()
 			{
 				case E::ElectricUnit::mA:
 
-					if (m_param.sensorType() != E::SensorType::V_0_5)
+					if (m_param.sensorType() != E::SensorType::V_0_5 && m_param.sensorType() != E::SensorType::V_m10_p10)
 					{
 						break;
 					}

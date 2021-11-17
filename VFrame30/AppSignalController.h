@@ -67,7 +67,7 @@ namespace VFrame30
 		\n
 		<b>Example:</b>
 
-		\code
+		\code{.js}
 		// Get static parameters of the signal "#SIGNALID_001"
 		//
 		let param = signals.signalParam("#SIGNALID_001");
@@ -95,11 +95,22 @@ namespace VFrame30
 
 		// Further processing
 		//
-
 		if (state.valid === true)
 		{
 			let text = param.caption;
 			...
+		}
+		\endcode
+
+		\code{.js}
+		// Getting signal list with specified tag
+		//
+		let ids = signals.signalIdsByTag("actuator");
+
+		for (let i = 0; i < ids.length; i++)
+		{
+			// ids[i] contains AppSignalID of signal with tag "actuator"
+			//
 		}
 		\endcode
 	*/
@@ -136,6 +147,9 @@ namespace VFrame30
 
 		/// \brief Returns precision for analog signals. If signal is discrete or not found, returns 0.
 		int precision(QString signalId) const;
+
+		/// \brief Returns list of AppSignalIDs with specified <b>tag</b>.
+		QStringList signalIdsByTag(QString tag) const;
 
 		// Data
 		//

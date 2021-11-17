@@ -7,15 +7,16 @@
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
 
-
+//
 // MonitorView
 //
 MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
-						 VFrame30::AppSignalController* appSignalController,
-						 VFrame30::TuningController* tuningController,
-						 VFrame30::LogController* logController,
-						 QWidget* parent)
-	: VFrame30::ClientSchemaView(schemaManager, parent)
+									 VFrame30::ISchemaViewHistory* schemaViewHistory,
+									 VFrame30::AppSignalController* appSignalController,
+									 VFrame30::TuningController* tuningController,
+									 VFrame30::LogController* logController,
+									 QWidget* parent)
+	: VFrame30::ClientSchemaView(schemaManager, schemaViewHistory, parent)
 {
 	setAppSignalController(appSignalController);
 	setTuningController(tuningController);
@@ -29,11 +30,6 @@ MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 	return;
 }
 
-
-MonitorSchemaView::~MonitorSchemaView()
-{
-	return;
-}
 
 void MonitorSchemaView::paintEvent(QPaintEvent* event)
 {

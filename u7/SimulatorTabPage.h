@@ -13,7 +13,7 @@ class SimulatorTabPage : public MainTabPage
 
 public:
 	SimulatorTabPage(DbController* dbc, QWidget* parent);
-	virtual ~SimulatorTabPage();
+	virtual ~SimulatorTabPage() = default;
 
 	// Public methods
 	//

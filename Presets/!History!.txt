@@ -1,0 +1,12 @@
+Preset changes log
+
+AOM_SR
+	11.11.2021	Version: 1	AOM-SR_v1.u7devp		RPCT-3188:  Bugfix: Configuration is now generating for outputs 31 and 32
+	11.11.2021	Version: 2	AOM-SR_v2.u7devp		RPCT-3188:  Validity signals are added to output controller
+
+BVB-15
+	08.11.2021	Version: 1	BVB-15_v1.u7devp		RPCT-3015:  CustomModuleFamily was specified for BVB-15 preset
+
+TUNING_SERVICE_2CH
+	27.10.2021	Version: 0	TUNING_SERVICE_2CH_v0.u7devp	RPCT-3178: Added new preset for 2-channel TuningService.
+

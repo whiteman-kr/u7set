@@ -680,7 +680,7 @@ bool TuningServiceSettingsGetter::readFromDevice(const Builder::Context* context
 			continue;
 		}
 
-		result &= fillTuningSourcesInfo(context, software, channel);
+		result &= fillTuningSourcesInfo(context, channel);
 
 		result &= fillTuningClientsInfo(context, software, singleLmControl, channel);
 	}
@@ -697,7 +697,6 @@ bool TuningServiceSettingsGetter::readFromDevice(const Builder::Context* context
 }
 
 bool TuningServiceSettingsGetter::fillTuningSourcesInfo(const Builder::Context* context,
-														const Hardware::Software* software,
 														int channel)
 {
 	Q_ASSERT(channel >=0 && channel < CHANNELS_COUNT);

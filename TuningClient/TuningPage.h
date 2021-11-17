@@ -124,6 +124,8 @@ private slots:
 
 	void slot_saveSignalsToExistingFilter();
 
+	void slot_exportContentsToCSV();
+
 	void slot_restoreValuesFromExistingFilter();
 
 	void slot_setAnalogFormat(E::AnalogFormat analogFormat);

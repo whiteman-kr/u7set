@@ -5,11 +5,9 @@
 #include "../VFrame30/MonitorSchema.h"
 
 TuningSchemaView::TuningSchemaView(TuningSchemaManager* schemaManager, QWidget* parent /*= nullptr*/)
-	:  VFrame30::ClientSchemaView(schemaManager, parent)
+	:  VFrame30::ClientSchemaView(schemaManager, nullptr, parent)
 {
 
-	// --
-	//
 	QJSEngine* engine = jsEngine();
 
 	if (engine == nullptr)
@@ -26,9 +24,7 @@ TuningSchemaView::TuningSchemaView(TuningSchemaManager* schemaManager, QWidget* 
 	}
 
 	runScript(scriptValue, "run configurationArrivedScript", true);
-}
 
-TuningSchemaView::~TuningSchemaView()
-{
+	return;
 }
 

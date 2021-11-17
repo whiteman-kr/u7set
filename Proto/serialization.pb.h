@@ -2846,9 +2846,30 @@ class ExportedDevicePreset PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kCompressedThisFieldNumber = 3,
     kDescriptionFieldNumber = 1,
     kItemsFieldNumber = 2,
   };
+  // optional bytes compressedThis = 3;
+  bool has_compressedthis() const;
+  private:
+  bool _internal_has_compressedthis() const;
+  public:
+  void clear_compressedthis();
+  const std::string& compressedthis() const;
+  void set_compressedthis(const std::string& value);
+  void set_compressedthis(std::string&& value);
+  void set_compressedthis(const char* value);
+  void set_compressedthis(const void* value, size_t size);
+  std::string* mutable_compressedthis();
+  std::string* release_compressedthis();
+  void set_allocated_compressedthis(std::string* compressedthis);
+  private:
+  const std::string& _internal_compressedthis() const;
+  void _internal_set_compressedthis(const std::string& value);
+  std::string* _internal_mutable_compressedthis();
+  public:
+
   // optional .Proto.EnvelopeSetShortDescription description = 1;
   bool has_description() const;
   private:
@@ -2894,6 +2915,7 @@ class ExportedDevicePreset PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr compressedthis_;
   ::Proto::EnvelopeSetShortDescription* description_;
   ::Proto::EnvelopeSet* items_;
   friend struct ::TableStruct_serialization_2eproto;
@@ -15377,10 +15399,11 @@ class DeviceObject PROTOBUF_FINAL :
     kAppSignalFieldNumber = 106,
     kWorkstationFieldNumber = 107,
     kSoftwareFieldNumber = 108,
-    kChildCountHintFieldNumber = 36,
     kPlaceFieldNumber = 5,
     kPresetFieldNumber = 32,
     kPresetRootFieldNumber = 33,
+    kChildCountHintFieldNumber = 36,
+    kPresetVersionFieldNumber = 37,
   };
   // repeated .Proto.Property properties = 7;
   int properties_size() const;
@@ -15708,19 +15731,6 @@ class DeviceObject PROTOBUF_FINAL :
       ::Proto::Software* software);
   ::Proto::Software* unsafe_arena_release_software();
 
-  // optional int32 childCountHint = 36 [default = 0];
-  bool has_childcounthint() const;
-  private:
-  bool _internal_has_childcounthint() const;
-  public:
-  void clear_childcounthint();
-  ::PROTOBUF_NAMESPACE_ID::int32 childcounthint() const;
-  void set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_childcounthint() const;
-  void _internal_set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
   // optional int32 place = 5 [default = 0];
   bool has_place() const;
   private:
@@ -15760,6 +15770,32 @@ class DeviceObject PROTOBUF_FINAL :
   void _internal_set_presetroot(bool value);
   public:
 
+  // optional int32 childCountHint = 36 [default = 0];
+  bool has_childcounthint() const;
+  private:
+  bool _internal_has_childcounthint() const;
+  public:
+  void clear_childcounthint();
+  ::PROTOBUF_NAMESPACE_ID::int32 childcounthint() const;
+  void set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_childcounthint() const;
+  void _internal_set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 presetVersion = 37;
+  bool has_presetversion() const;
+  private:
+  bool _internal_has_presetversion() const;
+  public:
+  void clear_presetversion();
+  ::PROTOBUF_NAMESPACE_ID::int32 presetversion() const;
+  void set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_presetversion() const;
+  void _internal_set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceObject)
  private:
   class _Internal;
@@ -15790,10 +15826,11 @@ class DeviceObject PROTOBUF_FINAL :
   ::Proto::DeviceAppSignal* appsignal_;
   ::Proto::Workstation* workstation_;
   ::Proto::Software* software_;
-  ::PROTOBUF_NAMESPACE_ID::int32 childcounthint_;
   ::PROTOBUF_NAMESPACE_ID::int32 place_;
   bool preset_;
   bool presetroot_;
+  ::PROTOBUF_NAMESPACE_ID::int32 childcounthint_;
+  ::PROTOBUF_NAMESPACE_ID::int32 presetversion_;
   friend struct ::TableStruct_serialization_2eproto;
 };
 // -------------------------------------------------------------------
@@ -27987,7 +28024,7 @@ inline void EnvelopeSetShortDescription::set_presetroot(bool value) {
 
 // optional .Proto.EnvelopeSetShortDescription description = 1;
 inline bool ExportedDevicePreset::_internal_has_description() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
   PROTOBUF_ASSUME(!value || description_ != nullptr);
   return value;
 }
@@ -27996,7 +28033,7 @@ inline bool ExportedDevicePreset::has_description() const {
 }
 inline void ExportedDevicePreset::clear_description() {
   if (description_ != nullptr) description_->Clear();
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline const ::Proto::EnvelopeSetShortDescription& ExportedDevicePreset::_internal_description() const {
   const ::Proto::EnvelopeSetShortDescription* p = description_;
@@ -28014,14 +28051,14 @@ inline void ExportedDevicePreset::unsafe_arena_set_allocated_description(
   }
   description_ = description;
   if (description) {
-    _has_bits_[0] |= 0x00000001u;
+    _has_bits_[0] |= 0x00000002u;
   } else {
-    _has_bits_[0] &= ~0x00000001u;
+    _has_bits_[0] &= ~0x00000002u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.ExportedDevicePreset.description)
 }
 inline ::Proto::EnvelopeSetShortDescription* ExportedDevicePreset::release_description() {
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
   ::Proto::EnvelopeSetShortDescription* temp = description_;
   description_ = nullptr;
   if (GetArena() != nullptr) {
@@ -28031,13 +28068,13 @@ inline ::Proto::EnvelopeSetShortDescription* ExportedDevicePreset::release_descr
 }
 inline ::Proto::EnvelopeSetShortDescription* ExportedDevicePreset::unsafe_arena_release_description() {
   // @@protoc_insertion_point(field_release:Proto.ExportedDevicePreset.description)
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
   ::Proto::EnvelopeSetShortDescription* temp = description_;
   description_ = nullptr;
   return temp;
 }
 inline ::Proto::EnvelopeSetShortDescription* ExportedDevicePreset::_internal_mutable_description() {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
   if (description_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::EnvelopeSetShortDescription>(GetArena());
     description_ = p;
@@ -28060,9 +28097,9 @@ inline void ExportedDevicePreset::set_allocated_description(::Proto::EnvelopeSet
       description = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, description, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000001u;
+    _has_bits_[0] |= 0x00000002u;
   } else {
-    _has_bits_[0] &= ~0x00000001u;
+    _has_bits_[0] &= ~0x00000002u;
   }
   description_ = description;
   // @@protoc_insertion_point(field_set_allocated:Proto.ExportedDevicePreset.description)
@@ -28070,7 +28107,7 @@ inline void ExportedDevicePreset::set_allocated_description(::Proto::EnvelopeSet
 
 // optional .Proto.EnvelopeSet items = 2;
 inline bool ExportedDevicePreset::_internal_has_items() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
   PROTOBUF_ASSUME(!value || items_ != nullptr);
   return value;
 }
@@ -28079,7 +28116,7 @@ inline bool ExportedDevicePreset::has_items() const {
 }
 inline void ExportedDevicePreset::clear_items() {
   if (items_ != nullptr) items_->Clear();
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline const ::Proto::EnvelopeSet& ExportedDevicePreset::_internal_items() const {
   const ::Proto::EnvelopeSet* p = items_;
@@ -28097,14 +28134,14 @@ inline void ExportedDevicePreset::unsafe_arena_set_allocated_items(
   }
   items_ = items;
   if (items) {
-    _has_bits_[0] |= 0x00000002u;
+    _has_bits_[0] |= 0x00000004u;
   } else {
-    _has_bits_[0] &= ~0x00000002u;
+    _has_bits_[0] &= ~0x00000004u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.ExportedDevicePreset.items)
 }
 inline ::Proto::EnvelopeSet* ExportedDevicePreset::release_items() {
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
   ::Proto::EnvelopeSet* temp = items_;
   items_ = nullptr;
   if (GetArena() != nullptr) {
@@ -28114,13 +28151,13 @@ inline ::Proto::EnvelopeSet* ExportedDevicePreset::release_items() {
 }
 inline ::Proto::EnvelopeSet* ExportedDevicePreset::unsafe_arena_release_items() {
   // @@protoc_insertion_point(field_release:Proto.ExportedDevicePreset.items)
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
   ::Proto::EnvelopeSet* temp = items_;
   items_ = nullptr;
   return temp;
 }
 inline ::Proto::EnvelopeSet* ExportedDevicePreset::_internal_mutable_items() {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000004u;
   if (items_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::EnvelopeSet>(GetArena());
     items_ = p;
@@ -28143,12 +28180,85 @@ inline void ExportedDevicePreset::set_allocated_items(::Proto::EnvelopeSet* item
       items = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, items, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000002u;
+    _has_bits_[0] |= 0x00000004u;
   } else {
-    _has_bits_[0] &= ~0x00000002u;
+    _has_bits_[0] &= ~0x00000004u;
   }
   items_ = items;
   // @@protoc_insertion_point(field_set_allocated:Proto.ExportedDevicePreset.items)
+}
+
+// optional bytes compressedThis = 3;
+inline bool ExportedDevicePreset::_internal_has_compressedthis() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool ExportedDevicePreset::has_compressedthis() const {
+  return _internal_has_compressedthis();
+}
+inline void ExportedDevicePreset::clear_compressedthis() {
+  compressedthis_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& ExportedDevicePreset::compressedthis() const {
+  // @@protoc_insertion_point(field_get:Proto.ExportedDevicePreset.compressedThis)
+  return _internal_compressedthis();
+}
+inline void ExportedDevicePreset::set_compressedthis(const std::string& value) {
+  _internal_set_compressedthis(value);
+  // @@protoc_insertion_point(field_set:Proto.ExportedDevicePreset.compressedThis)
+}
+inline std::string* ExportedDevicePreset::mutable_compressedthis() {
+  // @@protoc_insertion_point(field_mutable:Proto.ExportedDevicePreset.compressedThis)
+  return _internal_mutable_compressedthis();
+}
+inline const std::string& ExportedDevicePreset::_internal_compressedthis() const {
+  return compressedthis_.Get();
+}
+inline void ExportedDevicePreset::_internal_set_compressedthis(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  compressedthis_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ExportedDevicePreset::set_compressedthis(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  compressedthis_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.ExportedDevicePreset.compressedThis)
+}
+inline void ExportedDevicePreset::set_compressedthis(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  compressedthis_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.ExportedDevicePreset.compressedThis)
+}
+inline void ExportedDevicePreset::set_compressedthis(const void* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  compressedthis_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.ExportedDevicePreset.compressedThis)
+}
+inline std::string* ExportedDevicePreset::_internal_mutable_compressedthis() {
+  _has_bits_[0] |= 0x00000001u;
+  return compressedthis_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ExportedDevicePreset::release_compressedthis() {
+  // @@protoc_insertion_point(field_release:Proto.ExportedDevicePreset.compressedThis)
+  if (!_internal_has_compressedthis()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return compressedthis_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ExportedDevicePreset::set_allocated_compressedthis(std::string* compressedthis) {
+  if (compressedthis != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  compressedthis_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), compressedthis,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.ExportedDevicePreset.compressedThis)
 }
 
 // -------------------------------------------------------------------
@@ -44156,7 +44266,7 @@ inline void DeviceObject::set_allocated_childrestriction(::Proto::wstring* child
 
 // optional int32 place = 5 [default = 0];
 inline bool DeviceObject::_internal_has_place() const {
-  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_place() const {
@@ -44164,7 +44274,7 @@ inline bool DeviceObject::has_place() const {
 }
 inline void DeviceObject::clear_place() {
   place_ = 0;
-  _has_bits_[0] &= ~0x00020000u;
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_place() const {
   return place_;
@@ -44174,7 +44284,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::place() const {
   return _internal_place();
 }
 inline void DeviceObject::_internal_set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00020000u;
+  _has_bits_[0] |= 0x00010000u;
   place_ = value;
 }
 inline void DeviceObject::set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -44296,7 +44406,7 @@ DeviceObject::properties() const {
 
 // optional bool preset = 32 [default = false];
 inline bool DeviceObject::_internal_has_preset() const {
-  bool value = (_has_bits_[0] & 0x00040000u) != 0;
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_preset() const {
@@ -44304,7 +44414,7 @@ inline bool DeviceObject::has_preset() const {
 }
 inline void DeviceObject::clear_preset() {
   preset_ = false;
-  _has_bits_[0] &= ~0x00040000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline bool DeviceObject::_internal_preset() const {
   return preset_;
@@ -44314,7 +44424,7 @@ inline bool DeviceObject::preset() const {
   return _internal_preset();
 }
 inline void DeviceObject::_internal_set_preset(bool value) {
-  _has_bits_[0] |= 0x00040000u;
+  _has_bits_[0] |= 0x00020000u;
   preset_ = value;
 }
 inline void DeviceObject::set_preset(bool value) {
@@ -44324,7 +44434,7 @@ inline void DeviceObject::set_preset(bool value) {
 
 // optional bool presetRoot = 33 [default = false];
 inline bool DeviceObject::_internal_has_presetroot() const {
-  bool value = (_has_bits_[0] & 0x00080000u) != 0;
+  bool value = (_has_bits_[0] & 0x00040000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_presetroot() const {
@@ -44332,7 +44442,7 @@ inline bool DeviceObject::has_presetroot() const {
 }
 inline void DeviceObject::clear_presetroot() {
   presetroot_ = false;
-  _has_bits_[0] &= ~0x00080000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline bool DeviceObject::_internal_presetroot() const {
   return presetroot_;
@@ -44342,7 +44452,7 @@ inline bool DeviceObject::presetroot() const {
   return _internal_presetroot();
 }
 inline void DeviceObject::_internal_set_presetroot(bool value) {
-  _has_bits_[0] |= 0x00080000u;
+  _has_bits_[0] |= 0x00040000u;
   presetroot_ = value;
 }
 inline void DeviceObject::set_presetroot(bool value) {
@@ -44518,7 +44628,7 @@ inline void DeviceObject::set_allocated_presetobjectuuid(::Proto::Uuid* presetob
 
 // optional int32 childCountHint = 36 [default = 0];
 inline bool DeviceObject::_internal_has_childcounthint() const {
-  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  bool value = (_has_bits_[0] & 0x00080000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_childcounthint() const {
@@ -44526,7 +44636,7 @@ inline bool DeviceObject::has_childcounthint() const {
 }
 inline void DeviceObject::clear_childcounthint() {
   childcounthint_ = 0;
-  _has_bits_[0] &= ~0x00010000u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_childcounthint() const {
   return childcounthint_;
@@ -44536,12 +44646,40 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::childcounthint() const {
   return _internal_childcounthint();
 }
 inline void DeviceObject::_internal_set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00010000u;
+  _has_bits_[0] |= 0x00080000u;
   childcounthint_ = value;
 }
 inline void DeviceObject::set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_childcounthint(value);
   // @@protoc_insertion_point(field_set:Proto.DeviceObject.childCountHint)
+}
+
+// optional int32 presetVersion = 37;
+inline bool DeviceObject::_internal_has_presetversion() const {
+  bool value = (_has_bits_[0] & 0x00100000u) != 0;
+  return value;
+}
+inline bool DeviceObject::has_presetversion() const {
+  return _internal_has_presetversion();
+}
+inline void DeviceObject::clear_presetversion() {
+  presetversion_ = 0;
+  _has_bits_[0] &= ~0x00100000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_presetversion() const {
+  return presetversion_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::presetversion() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.presetVersion)
+  return _internal_presetversion();
+}
+inline void DeviceObject::_internal_set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00100000u;
+  presetversion_ = value;
+}
+inline void DeviceObject::set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_presetversion(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceObject.presetVersion)
 }
 
 // optional .Proto.DeviceRoot Root = 100;

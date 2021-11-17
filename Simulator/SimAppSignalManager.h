@@ -87,6 +87,8 @@ namespace Sim
 		virtual bool signalHasTag(Hash signalHash, const QString& tag) const override;
 		virtual bool signalHasTag(const QString& appSignalId, const QString& tag) const override;
 
+		virtual QStringList signalIdsByTag(const QString& tag) const override;
+
 		virtual E::SignalType signalType(Hash signalHash, bool* found) const final;
 		virtual E::SignalType signalType(const QString& appSignalId, bool* found) const final;
 
@@ -110,14 +112,15 @@ namespace Sim
 
 		mutable QReadWriteLock m_signalParamLock{QReadWriteLock::Recursive};
 		std::unordered_map<Hash, AppSignalParam> m_signalParams;
-		std::unordered_map<Hash, AppSignal> m_signalParamsExt;			// Except AppSignalParam, we need Signal as it has more information (like offset in memory)
+		std::unordered_map<Hash, AppSignal> m_signalParamsExt;		// Except AppSignalParam, we need Signal as it has more information (like offset in memory)
 		std::unordered_map<Hash, Hash> m_customToAppSignalId;
+		std::unordered_map<QString, QStringList> m_tagToAppSignals;	// Key is tag - value is list of AppSignalIDs with this tag
 
 		// SimRuntime data
 		//
 		mutable QReadWriteLock m_ramLock{QReadWriteLock::Recursive};
-		std::map<Hash, Ram> m_ram;			// key is hash EquipmentID
-		std::map<Hash, Times> m_ramTimes;	// RAM memory update time - key is hash EquipmentID
+		std::map<Hash, Ram> m_ram;									// key is hash EquipmentID
+		std::map<Hash, Times> m_ramTimes;							// RAM memory update time - key is hash EquipmentID
 		std::unordered_map<Hash, FlagsReadStruct> m_flagsStruct;	// Signnal has a set of flags, which are signals itself, this structure contains addressed for such flag signals
 
 		// Realtime trends data

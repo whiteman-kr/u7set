@@ -6,6 +6,7 @@
 #include "AppSignalController.h"
 #include "LogController.h"
 #include "SchemaItem.h"
+#include "ISchemaViewHistory.h"
 #include "../lib/ClientBehavior.h"
 
 class QPaintEvent;
@@ -130,8 +131,10 @@ namespace VFrame30
 		Q_PROPERTY(int SchemaCount READ schemaCount)
 
 	public:
-		explicit ScriptSchemaView(ClientSchemaView* clientSchemaView, QObject* parent = nullptr);
-		~ScriptSchemaView();
+		explicit ScriptSchemaView(ClientSchemaView* clientSchemaView,
+								  ISchemaViewHistory* schemaViewHistory,
+								  QObject* parent = nullptr);
+		virtual ~ScriptSchemaView() = default;
 
 		// Public slots which are part of Script API
 		//
@@ -152,6 +155,25 @@ namespace VFrame30
 		QObject* findWidget(QString objectName);		// Find Widget associated with SchemaItem
 
 		void update();									// Update (redraw) schema view
+
+		// History functions
+		//
+
+		/// \brief Returns <b>true</b> if back history sequence is not empty, call <b>historyBack</b> to set the previous schema view.
+		///
+		bool canBackHistory() const;
+
+		/// \brief Returns <b>true</b> if forward history sequence is not empty, call <b>historyForward</b> to set the next schema view.
+		///
+		bool canForwardHistory() const;
+
+		/// \brief Select the previous schema view from sequence of earlier opened schemas. Use <b>canBackHistory</b> to detect if operation is possible.
+		///
+		void historyBack();
+
+		/// \brief Select the next schema view from sequence of earlier opened schemas. Use <b>canForwardHistory</b> to detect if operation is possible.
+		///
+		void historyForward();
 
 		// Message Box functions
 		//
@@ -220,6 +242,7 @@ namespace VFrame30
 		//
 	private:
 		ClientSchemaView* m_clientSchemaView = nullptr;
+		ISchemaViewHistory* m_schemaViewHistory = nullptr;
 	};
 
 
@@ -231,7 +254,9 @@ namespace VFrame30
 		Q_OBJECT
 
 	public:
-		explicit ClientSchemaView(VFrame30::SchemaManager* schemaManager, QWidget* parent = nullptr);
+		explicit ClientSchemaView(VFrame30::SchemaManager* schemaManager,
+								  ISchemaViewHistory* schemaViewHistory,
+								  QWidget* parent = nullptr);
 		virtual ~ClientSchemaView();
 
 	public:
@@ -316,6 +341,7 @@ namespace VFrame30
 
 	private:
 		VFrame30::SchemaManager* m_schemaManager = nullptr;
+		VFrame30::ISchemaViewHistory* m_schemaViewHistory = nullptr;		// Can be nullptr if widget does not support history navigation
 
 		TuningController* m_tuningController = nullptr;
 		AppSignalController* m_appSignalController = nullptr;

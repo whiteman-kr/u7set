@@ -34,7 +34,7 @@ namespace VFrame30
 		\n
 		<b>Example:</b>
 
-		\code
+		\code{.js}
 		// Request signal state by identifier "#APPSIGNALID"
 		//
 		let state = tuning.signalState("#APPSIGNALID");
@@ -69,6 +69,18 @@ namespace VFrame30
 			return;
 		}
 		\endcode
+
+		\code{.js}
+		// Getting signal list with specified tag
+		//
+		let ids = tuning.signalIdsByTag("sim");
+
+		for (let i = 0; i < ids.length; i++)
+		{
+			// ids[i] contains AppSignalID of signal with tag "sim"
+			//
+		}
+		\endcode
 	*/
 	class TuningController : public QObject
 	{
@@ -81,15 +93,19 @@ namespace VFrame30
 		void setTcpClient(ITuningTcpClient* tcpClient);
 		void resetTcpClient();
 
-	public slots:
+	public:
 		AppSignalParam signalParam(const QString& appSignalId, bool* ok);
 		TuningSignalState signalState(const QString& appSignalId, bool* ok);
 
+	public slots:
 		/// \brief Returns AppSignalParam structure or undefined if signal does not exist.
 		QVariant signalParam(const QString& appSignalId);	// If no signal with specified appSignalID found, QVariant is undefined
 
 		/// \brief Returns TuningSignalState structure or undefined if signal does not exist.
 		QVariant signalState(const QString& appSignalId);	// If no signal with specified appSignalID found, QVariant is undefined
+
+		/// \brief Returns list of AppSignalIDs with specified <b>tag</b>.
+		QStringList signalIdsByTag(QString tag) const;
 
 		/// \brief Writes value of tuning signal. On success, returns true. Returns false if signal is not found, connection to TuningService is not established or value is out of range.
 		bool writeValue(QString appSignalId, QVariant value);

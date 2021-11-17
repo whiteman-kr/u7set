@@ -126,6 +126,10 @@ DbProjectProperties::DbProjectProperties()
 	p->setCategory("Build");
 	p->setDescription("Generate extra debug information on build");
 
+	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::MismatchPresetVersionAsWarning, true, DbProjectProperties::mismatchPresetVersionAsWarning, DbProjectProperties::setMismatchPresetVersionAsWarning);
+	p->setCategory("Build");
+	p->setDescription("If preset version mismatch is detected, treat it as a warning");
+
 	// --
 	//
 	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::RunSimTestsOnBuild, true, DbProjectProperties::runSimTestsOnBuild, DbProjectProperties::setRunSimTestsOnBuild);
@@ -259,6 +263,16 @@ bool DbProjectProperties::generateExtraDebugInfo() const
 void DbProjectProperties::setGenerateExtraDebugInfo(bool value)
 {
 	m_generateExtraDebugInfo = value;
+}
+
+bool DbProjectProperties::mismatchPresetVersionAsWarning() const
+{
+		return m_mismatchPresetVersionAsWarning;
+}
+
+void DbProjectProperties::setMismatchPresetVersionAsWarning(bool value)
+{
+	m_mismatchPresetVersionAsWarning = value;
 }
 
 

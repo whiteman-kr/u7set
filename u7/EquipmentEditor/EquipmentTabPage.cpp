@@ -887,7 +887,7 @@ void EquipmentTabPage::setActionState()
 			assert(device);
 
 			if (device == nullptr ||
-				device->preset() != true ||
+				device->isPreset() != true ||
 				device->presetRoot() != true)
 			{
 				selectedArePresetRoots = false;
@@ -957,7 +957,7 @@ void EquipmentTabPage::setActionState()
 			auto selectedObject = m_equipmentModel->deviceObject(singleSelectedIndex);
 			assert(selectedObject != nullptr);
 
-			if (isPresetMode() == true && selectedObject->preset() == false)
+			if (isPresetMode() == true && selectedObject->isPreset() == false)
 			{
 				assert(false);
 				return;
@@ -1031,7 +1031,7 @@ void EquipmentTabPage::setActionState()
 			// In ConfigurationMode it is possible to copy only root items of preset items
 			//
 			if (isConfigurationMode() == true &&
-				device->preset() == true &&
+				device->isPreset() == true &&
 				device->presetRoot() == false)
 			{
 				allowCopyToClipboard = false;
@@ -1526,7 +1526,7 @@ void EquipmentTabPage::exportPreset()
 		auto device = m_equipmentModel->deviceObject(mi);
 
 		if (device == nullptr ||
-			device->preset() != true ||
+			device->isPreset() != true ||
 			device->presetRoot() != true)
 		{
 			assert(device);
@@ -1536,13 +1536,14 @@ void EquipmentTabPage::exportPreset()
 
 		if (firstDeviceName.isEmpty() == true)
 		{
-			firstDeviceName = QString{"%1_%2_dbv%3.u7devp"}
-								.arg(device->presetName())
-								.arg(db()->currentProject().projectName())
-								.arg(db()->currentProject().version());
+			int presetVersion = device->propertyValue(Hardware::PropertyNames::presetVersion).toInt();
+
+			firstDeviceName = QString{"%1_v%2.u7devp"}
+								.arg(device->caption())
+								.arg(presetVersion);
 		}
 
-		allObjectsArePresetRoots &= device->presetRoot() & device->preset();
+		allObjectsArePresetRoots &= device->presetRoot() & device->isPreset();
 
 		devices.push_back(device.get());
 	}
@@ -1582,7 +1583,6 @@ void EquipmentTabPage::exportPreset()
 		}
 
 		assert(out);
-
 		latestDevices.push_back(out);
 	}
 
@@ -1598,7 +1598,7 @@ void EquipmentTabPage::exportPreset()
 	descriptionMessage->set_preseteditor(isPresetMode());
 	descriptionMessage->set_presetroot(allObjectsArePresetRoots);
 
-	for (std::shared_ptr<Hardware::DeviceObject> device : latestDevices)
+	for (std::shared_ptr<Hardware::DeviceObject>& device : latestDevices)
 	{
 		::Proto::Envelope* protoDevice = setMessage->add_items();
 		device->SaveObjectTree(protoDevice);
@@ -1606,17 +1606,25 @@ void EquipmentTabPage::exportPreset()
 		descriptionMessage->add_classnamehash(protoDevice->classnamehash());
 	}
 
-	// Save objects (EnvelopeSet) to byte array
+	// Compress and save to file
 	//
 	{
+		std::string data = message.SerializeAsString();
+		QByteArray compressedData = qCompress(QByteArray::fromRawData(data.data(), static_cast<int>(data.size())));
+
+		::Proto::ExportedDevicePreset compressedMessage;
+		compressedMessage.mutable_description()->operator=(*descriptionMessage);
+		compressedMessage.set_compressedthis(compressedData.toStdString());
+
 		std::fstream output(fileName.toStdString(), std::ios::out | std::ios::binary);
+
 		if (output.is_open() == false || output.bad() == true)
 		{
 			QMessageBox::critical(this, qAppName(), tr("Write file %1 error.").arg(fileName));
 			return;
 		}
 
-		bool ok = message.SerializeToOstream(&output);
+		bool ok = compressedMessage.SerializeToOstream(&output);
 		if (ok == false)
 		{
 			QMessageBox::critical(this, qAppName(), tr("Write file %1 error.").arg(fileName));
@@ -1650,13 +1658,28 @@ void EquipmentTabPage::importPreset()
 
 	// --
 	//
-	::Proto::ExportedDevicePreset message;
+	::Proto::ExportedDevicePreset fileMessage;
 
-	bool ok = message.ParseFromIstream(&input);
+	bool ok = fileMessage.ParseFromIstream(&input);
 	if (ok == false)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Pase file %1 error. File may be corrupted.").arg(fileName));
 		return;
+	}
+
+	// Check if data was compressed then uncompress it
+	//
+	::Proto::ExportedDevicePreset message;
+
+	if (fileMessage.has_compressedthis() == true)
+	{
+		QByteArray compressedData = QByteArray::fromRawData(fileMessage.compressedthis().data(), static_cast<int>(fileMessage.compressedthis().size()));
+		QByteArray uncompressedData = qUncompress(compressedData);
+		message.ParseFromArray(uncompressedData.constData(), uncompressedData.size());
+	}
+	else
+	{
+		message = fileMessage;
 	}
 
 	// Save data to clipboard

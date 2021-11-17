@@ -52,8 +52,10 @@ function cleanup(sim)
     return;
 }
 
-// Test 1
-//
+
+	//Test
+	//Schema AFB_BUS_OR element tests
+	
 
 function test_OR_BUS_5_Signal_1_1(sim)
 {
@@ -178,4 +180,5 @@ function test_OR_BUS_5_Signal_1_0_1(sim)
 
 	return;
 }	
+
 

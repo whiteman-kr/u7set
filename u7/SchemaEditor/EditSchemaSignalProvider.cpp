@@ -185,6 +185,14 @@ E::SignalType EditSchemaAppSignalProvider::signalType(Hash signalHash, bool* fou
 	return E::SignalType::Analog;
 }
 
+QStringList EditSchemaAppSignalProvider::signalIdsByTag(const QString& /*tag*/) const
+{
+	// No simulation of this function in edit schema mode
+	//
+	Q_ASSERT(false);
+	return {};
+}
+
 E::SignalType EditSchemaAppSignalProvider::signalType(const QString& appSignalId, bool* found) const
 {
 	return signalType(::calcHash(appSignalId), found);
@@ -329,4 +337,10 @@ TuningSignalState EditSchemaTuningSignalProvider::state(const QString& appSignal
 	}
 
 	return result;
+}
+
+QStringList EditSchemaTuningSignalProvider::signalIdsByTag(const QString& /*tag*/) const
+{
+	Q_ASSERT(false);
+	return {};
 }

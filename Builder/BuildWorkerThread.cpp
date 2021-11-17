@@ -413,6 +413,143 @@ namespace Builder
 		return true;
 	}
 
+	bool BuildWorkerThread::taskCheckPresetVersions()
+	{
+		assert(m_context);
+		assert(m_context->m_db.isProjectOpened() == true);
+		assert(m_context->m_equipmentSet->root() != nullptr);
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			return false;
+		}
+
+		// Load preset versions, get All preset Roots
+		//
+		DbController& dbc = m_context->m_db;
+		IssueLogger* log = m_context->m_log;
+
+		bool mismatchIsWarning = m_context->m_projectProperties.mismatchPresetVersionAsWarning();
+
+		// Get preset file list
+		//
+		std::vector<DbFileInfo> presetFiles;
+		bool ok = dbc.getFileList(&presetFiles, DbDir::HardwarePresetsDir, true, nullptr);
+
+		if (ok == false)
+		{
+			m_context->m_log->errPDB2001(dbc.systemFileId(DbDir::HardwarePresetsDir), "", dbc.lastError());
+			return false;
+		}
+
+		// Load files' latest version
+		//
+		std::vector<std::shared_ptr<DbFile>> presetLatesFiles;
+		ok = dbc.getLatestVersion(presetFiles, &presetLatesFiles, nullptr);
+
+		if (ok == false)
+		{
+			log->errPDB2002(0, QString("[all files in %1/]").arg(dbc.systemFileId(DbDir::HardwarePresetsDir)), dbc.lastError());
+			return false;
+		}
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			return false;
+		}
+
+		// Parse files to DeviceObject
+		//
+		std::map<QString, int> presetNameToVersion;						// Key is presetName, value is presetVersion
+
+		std::vector<std::shared_ptr<Hardware::DeviceObject>> presets;
+		presets.reserve(presetLatesFiles.size());
+
+		for (std::shared_ptr<DbFile>& file : presetLatesFiles)
+		{
+			std::shared_ptr<Hardware::DeviceObject> d = Hardware::DeviceObject::Create(file->data());
+			Q_ASSERT(d);
+
+			if (d == nullptr)
+			{
+				log->errCMN0010(Db::File::systemDirToName(DbDir::HardwarePresetsDir));
+				return false;
+			}
+
+			if (d->isPreset() == false || d->presetRoot() == false)
+			{
+				continue;
+			}
+
+			presetNameToVersion[d->presetName()] = d->presetVersion();
+		}
+
+		presetLatesFiles.clear();	//Just free memory
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			return false;
+		}
+
+		// Check preset versions
+		//
+		bool result = true;
+		std::shared_ptr<Hardware::DeviceObject> root = m_context->m_equipmentSet->root();
+
+		std::function<void(std::shared_ptr<Hardware::DeviceObject>&)> checkFunction =
+				[&checkFunction, &presetNameToVersion, &result, mismatchIsWarning, log](std::shared_ptr<Hardware::DeviceObject>& device) ->void
+				{
+					if (QThread::currentThread()->isInterruptionRequested() == true)
+					{
+						return;
+					}
+
+					if (device->isPreset() == true && device->presetRoot() == true)
+					{
+						auto it = presetNameToVersion.find(device->presetName());
+						if (it != presetNameToVersion.end())
+						{
+							int presetVersion = it->second;		// Actual preset version from presets
+
+							if (device->presetVersion() != presetVersion)
+							{
+								// PresetDevice in Equipment and Preset itself have different versions
+								//
+								if (mismatchIsWarning == true)
+								{
+									log->wrnCFG3101(device->equipmentIdTemplate(), device->presetVersion(), device->caption(), presetVersion);
+								}
+								else
+								{
+									log->errCFG3100(device->equipmentIdTemplate(), device->presetVersion(), device->caption(), presetVersion);
+									result = false;
+								}
+							}
+						}
+						else
+						{
+							// Such preset was not found in $root$/HP
+							// That is not an error, it really can happen
+							//
+						}
+					}
+
+					for (auto child : device->children())
+					{
+						if (QThread::currentThread()->isInterruptionRequested() == true)
+						{
+							return;
+						}
+
+						checkFunction(child);
+					}
+				};
+
+		checkFunction(root);
+
+		return result;
+	}
+
 	bool BuildWorkerThread::taskLoadBusTypes()
 	{
 		m_context->m_busSet = std::make_shared<VFrame30::BusSet>();

@@ -46,6 +46,8 @@ const UnitSensorTypePair SensorTypeByUnit[] =
 	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_R },
 	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_S },
 	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_T },
+	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_L },
+	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_M },
 };
 
 const int	SENSOR_TYPE_BY_UNIT_COUNT = sizeof(SensorTypeByUnit) / sizeof(SensorTypeByUnit[0]);

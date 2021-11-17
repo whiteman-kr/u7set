@@ -70,6 +70,7 @@ HEADERS += \
     ../lib/ClientBehavior.h \
     ../lib/ComparatorSet.h \
 	../UtilsLib/ILogFile.h \
+    ISchemaViewHistory.h \
     Indicator.h \
     IndicatorArrowIndicator.h \
     IndicatorHistogramVert.h \

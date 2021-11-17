@@ -21,14 +21,14 @@ function generate_aomsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 	
     var moduleSignalsCount = 32;
     var defaultTf = 0;
-	var defaultFlags = 0x7;
+	var defaultFlags = 0x0e;
 	var defaultK1 = 1.0;
 	var defaultK2 = 0.0;
 	
 	// ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
     //
 
-    for (var i = 1; i < moduleSignalsCount - 1; i++)
+    for (var i = 1; i < moduleSignalsCount + 1; i++)
     {
 		var signalStrId = module.equipmentId + "_CTRLOUT";
 		if (i < 10)
@@ -146,7 +146,21 @@ function generate_aomsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 				}
 			}
 				
-			var flags = outputMode;
+			var unitEnable = signal.propertyValue("UnitEnable");
+			if (unitEnable == undefined) 
+			{
+				log.errCFG3000("UnitEnable", signalStrId);
+				return false;
+			}
+			
+			var flags = 0;
+			
+			if (unitEnable == true)
+			{
+				flags |= 1;
+			}
+
+			flags |= (outputModeCode << 1);
 			
 			// IN AOM_SR outputs x and y are reversed (x is engineering, y is ADC)
 

@@ -24,7 +24,7 @@ protected slots:
 	virtual void accept() override;
 
 public:
-	QString resultBuildPath() const;
+	[[nodiscard]] QString resultBuildPath() const;
 
 private:
 	Ui::SimSelectBuildDialog *ui;

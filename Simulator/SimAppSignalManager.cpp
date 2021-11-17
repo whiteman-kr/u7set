@@ -179,6 +179,7 @@ namespace Sim
 			m_signalParams.clear();
 			m_signalParamsExt.clear();
 			m_customToAppSignalId.clear();
+			m_tagToAppSignals.clear();
 		}
 
 		{
@@ -243,10 +244,29 @@ namespace Sim
 			//
 			Hash hash = signalMessage.calcparam().hash();
 
-			ok &= signalParams[hash].load(signalMessage);
+			AppSignalParam& signalParam = signalParams[hash];
+			ok &= signalParam.load(signalMessage);
+
 			signalParamsExt[hash].loadFromProto(signalMessage);
 
 			customToAppSignalId[::calcHash(signalParams[hash].customSignalId())] = hash;
+
+			// Add tags to m_signaIdsByTag
+			//
+			const QString& appSignalId = signalParam.appSignalId();
+
+			for (const std::set<QString>& tags = signalParam.tags();
+				 const QString& tag : tags)
+			{
+				QStringList& l = m_tagToAppSignals[tag];
+
+				if (l.isEmpty() == true)
+				{
+					l.reserve(1024);
+				}
+
+				l.push_back(appSignalId);
+			}
 		}
 
 		for (const auto&[h, s] : signalParamsExt)
@@ -913,6 +933,21 @@ static const AppSignalParam dummy;
 	bool AppSignalManager::signalHasTag(const QString& appSignalId, const QString& tag) const
 	{
 		return signalHasTag(::calcHash(appSignalId), tag);
+	}
+
+	QStringList AppSignalManager::signalIdsByTag(const QString& tag) const
+	{
+		QReadLocker rl(&m_signalParamLock);
+
+		auto it = m_tagToAppSignals.find(tag);
+		if (it == m_tagToAppSignals.end())
+		{
+			return {};
+		}
+		else
+		{
+			return it->second;
+		}
 	}
 
 	E::SignalType AppSignalManager::signalType(Hash signalHash, bool* found) const

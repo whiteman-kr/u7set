@@ -163,6 +163,9 @@ message ExportedDevicePreset
 {
     optional EnvelopeSetShortDescription description = 1;
 	optional EnvelopeSet items = 2;
+	optional bytes compressedThis = 3;				// Compressed THIS object, contains message ExportedDevicePreset itself
+	                                                // As exported presets already exist, we cannot use standard way of Envelope.compressedObject
+													// so this field added to particulary this struct
 }
 
 //------------------------------------------------------------------------------------------
@@ -981,6 +984,7 @@ message DeviceObject
 	optional wstring presetName = 34;
 	optional Uuid presetObjectUuid = 35;
 	optional int32 childCountHint = 36 [default = 0];	// Hint for calling m_children.reserve()
+	optional int32 presetVersion = 37;
 
 	// Derived from Hardware::DeviceObject
 	//

@@ -80,7 +80,6 @@ public:
 						const Hardware::Software* software) override;
 private:
 	bool fillTuningSourcesInfo(const Builder::Context* context,
-							   const Hardware::Software* software,
 							   int channel);
 
 	bool fillTuningClientsInfo(const Builder::Context* context,

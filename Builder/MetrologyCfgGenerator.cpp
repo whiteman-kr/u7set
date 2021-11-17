@@ -553,7 +553,7 @@ namespace Builder
 		}
 		else
 		{
-			if (signal.sensorType() != E::SensorType::V_0_5)
+			if (signal.sensorType() != E::SensorType::V_0_5 && signal.sensorType() != E::SensorType::V_m10_p10)
 			{
 				return false;
 			}

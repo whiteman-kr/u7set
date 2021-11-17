@@ -986,6 +986,48 @@ namespace VFrame30
 
 	}
 
+	double SchemaItemAfb::getParamDoubleValue(const QString& name)
+	{
+		QVariant result = getAfbParam(name);
+		if (result.isNull() || result.isValid() == false)
+		{
+			return -1;
+		}
+
+		if (result.type() >= QVariant::UserType && result.userType() == qMetaTypeId<Afb::AfbParamValue>())
+		{
+			Afb::AfbParamValue v = result.value<Afb::AfbParamValue>();
+			return v.value().toDouble();
+		}
+
+		return result.toDouble();
+	}
+
+	bool SchemaItemAfb::setParamDoubleValue(const QString& opName, double value)
+	{
+		if (opName.isEmpty() == true)
+		{
+			assert(opName.isEmpty() != true);
+			return false;
+		}
+
+		auto found = std::find_if(m_afbElement.params().begin(), m_afbElement.params().end(), [&opName](const Afb::AfbParam& p)
+			{
+				return p.opName() == opName;
+			});
+
+		if (found == m_afbElement.params().end())
+		{
+			assert(found != m_afbElement.params().end());
+			return false;
+		}
+
+		Afb::AfbParamValue& v = found->afbParamValue();
+		v.setValue(value);
+
+		return true;
+	}
+
 	int SchemaItemAfb::getParamIntValue(const QString& name)
 	{
 		QVariant result = getAfbParam(name);
@@ -1003,6 +1045,31 @@ namespace VFrame30
 		return result.toInt();
 	}
 
+	bool SchemaItemAfb::setParamIntValue(const QString& opName, int value)
+	{
+		if (opName.isEmpty() == true)
+		{
+			assert(opName.isEmpty() != true);
+			return false;
+		}
+
+		auto found = std::find_if(m_afbElement.params().begin(), m_afbElement.params().end(), [&opName](const Afb::AfbParam& p)
+			{
+				return p.opName() == opName;
+			});
+
+		if (found == m_afbElement.params().end())
+		{
+			assert(found != m_afbElement.params().end());
+			return false;
+		}
+
+		Afb::AfbParamValue& v = found->afbParamValue();
+		v.setValue(value);
+
+		return true;
+	}
+
 	bool SchemaItemAfb::getParamBoolValue(const QString& name)
 	{
 		QVariant result = getAfbParam(name);
@@ -1018,6 +1085,31 @@ namespace VFrame30
 		}
 
 		return result.toBool();
+	}
+
+	bool SchemaItemAfb::setParamBoolValue(const QString& opName, bool value)
+	{
+		if (opName.isEmpty() == true)
+		{
+			assert(opName.isEmpty() != true);
+			return false;
+		}
+
+		auto found = std::find_if(m_afbElement.params().begin(), m_afbElement.params().end(), [&opName](const Afb::AfbParam& p)
+			{
+				return p.opName() == opName;
+			});
+
+		if (found == m_afbElement.params().end())
+		{
+			assert(found != m_afbElement.params().end());
+			return false;
+		}
+
+		Afb::AfbParamValue& v = found->afbParamValue();
+		v.setValue(value);
+
+		return true;
 	}
 
 	bool SchemaItemAfb::setParamVisible(const QString& name, bool visible)
