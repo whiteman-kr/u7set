@@ -283,19 +283,6 @@ const int						SIGNAL_PROPERTY_GROUP_SIGNAL_ID			= 0,
 
 // ----------------------------------------------------------------------------------------------
 
-const int						SIGNAL_PROPERTY_ITEM_EL_RANGE_LOW		= 2,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_HIGH		= 3,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT		= 4,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR	= 5,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_RLOAD		= 6,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_R0		= 7,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION	= 8;
-
-
-const int						SIGNAL_PROPERTY_ITEM_COUNT				= 13;
-
-// ----------------------------------------------------------------------------------------------
-
 class DialogSignalProperty : public QDialog
 {
 	Q_OBJECT
