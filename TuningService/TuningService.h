@@ -88,13 +88,15 @@ namespace Tuning
 		TuningSourceThread* createTuningSourceThread(const TuningSource& source);
 		void stopTuningSourceThreads();
 
-		void runSourcesListenerThread();
-		void stopSourcesListenerThread();
+		void runSourcesListenerThreads();
+		void stopSourcesListenerThreads();
 
 		void setSourceThreadInTuningClientContexts(TuningSourceThread* thread);
 		void removeSourceThreadFromTuningClientContexts(TuningSourceThread* thread);
 
 		bool isSimulationMode() const;
+
+		bool isSourceHandlerExistsForChannel(int channel) const;
 
 	private slots:
 		void onConfigurationReady(const QByteArray configurationXmlData,

@@ -73,6 +73,15 @@ namespace Sim
 													  bool setSorChassisState,
 													  TimeStamp timeStamp)
 	{
+		QString ids;
+
+		for(auto id : confirmedRecords)
+		{
+			ids += QString::number(id) + " ";
+		}
+
+		qDebug() << "TuningServiceCommunicator write confirm IDs = " << C_STR(ids) ;
+
 		for(TuningRequestsProcessingThread* thread : m_processingThreads)
 		{
 			thread->writeConfirmation(lmEquipmentId, portEquipmentId, confirmedRecords,
@@ -152,6 +161,11 @@ namespace Sim
 	void TuningServiceCommunicator::startProcessingThread(const QString& curProfileName)
 	{
 		Q_ASSERT(m_processingThreads.size() == 0);
+
+		if (m_tuningServiceEquipmentID == "SYSTEMID_RACK01_WS00_TS2CH")
+		{
+			DEBUG_STOP;
+		}
 
 		std::shared_ptr<const TuningServiceSettings> settings =
 			simulator()->software().getSettingsProfile<TuningServiceSettings>(tuningServiceEquipmentID(),
@@ -269,15 +283,14 @@ namespace Sim
 		if (tsh != nullptr)
 		{
 			tsh->updateTuningData(ramArea, setSorChassisState, timeStamp);
+
+			m_queueMutex.lock();
+
+			m_writeConfirmationQueue.emplace(lmEquipmentID, portEquipmentID, confirmedRecords);
+
+			m_queueMutex.unlock();
 		}
-
-		m_queueMutex.lock();
-
-		m_writeConfirmationQueue.emplace(lmEquipmentID, portEquipmentID, confirmedRecords);
-
-		m_queueMutex.unlock();
 	}
-
 
 	void TuningRequestsProcessingThread::tuningModeEntered(const QString& lmEquipmentId,
 														   const QString& portEquipmentId,
@@ -518,6 +531,15 @@ namespace Sim
 			m_writeConfirmationQueue.pop();
 
 			m_queueMutex.unlock();
+
+			QString ids;
+
+			for(auto id : wc.confirmedRecordsIDs)
+			{
+				ids += QString::number(id) + " ";
+			}
+
+			qDebug() << "receive Write confirm " << C_STR(wc.portEquipmentID) << "waitIDs " << C_STR(ids);
 
 			processedCount++;
 
@@ -1162,6 +1184,8 @@ namespace Sim
 
 			*sendReplyImmediately = true;
 		}
+
+		qDebug() << "Write request " << C_STR(m_portEquipmentID) << "waitID" << m_waitingConfirmationID.value();
 	}
 
 	void TuningSourceHandler::processApplyRequest(bool* sendReplyImmediately)

@@ -238,15 +238,15 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------
 
-	TuningChannelHandler::TuningChannelHandler(	TuningSourceThread& srcThread,
-												const TuningServiceSettings& settings,
-												int channel,
+	TuningChannelHandler::TuningChannelHandler(TuningSourceThread& srcThread,
+												const TuningChannelInfo& channelInfo,
+												bool disableModulesTypeChecking,
 												E::SoftwareRunMode swRunMode,
 												CircularLoggerShared logger,
 												CircularLoggerShared tuningLog) :
 		m_sourceThread(srcThread),
 		m_stat(srcThread.sourceStatistics()),
-		m_channel(channel),
+		m_channel(channelInfo.channel),
 		m_logger(logger),
 		m_tuningLog(tuningLog),
 		m_socket(nullptr),
@@ -254,47 +254,21 @@ namespace Tuning
 {
 		Q_ASSERT(m_channel >=0 && m_channel < TuningServiceSettings::CHANNELS_COUNT);
 
-		const TuningServiceSettings::ChannelSettings& ch = settings.channelSettings[channel];
-
-		if (ch.enable == false)
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
 		m_isSimulationMode = swRunMode == E::SoftwareRunMode::Simulation;
 
 		const TuningSource& source = m_sourceThread.source();
 
-		m_sourceEquipmentID = source.moduleEquipmentID();
-
-		TuningServiceSettings::TuningSource ts = ch.getTuningSource(m_sourceEquipmentID);
-
-		if (ts.isValid() == false)
-		{
-			DEBUG_LOG_ERR(logger, QString("Undefined tuning source %1 (TuningChannelHandler contruction)").
-									arg(m_sourceEquipmentID));
-			return;
-		}
-
-		LanControllerInfo lci = source.lanControllersInfo().getInfo(ts.portEquipmentID);
-
-		if (lci.isValid() == false)
-		{
-			DEBUG_LOG_ERR(logger, QString("Undefined ethernet controller %1 (TuningChannelHandler contruction)").
-									arg(ts.portEquipmentID));
-			return;
-		}
-
-		m_sourceIP = lci.tuningHostAddressPort();
+		m_moduleEquipmentID = source.moduleEquipmentID();
+		m_portEquipmentID = channelInfo.portEquipmentID;
+		m_sourceIP = channelInfo.tuningDataIP;
 		m_sourceUniqueID = source.moduleUniqueID();
 		m_lmNumber = static_cast<quint16>(source.lmNumber());
 		m_lmModuleType = static_cast<quint16>(source.moduleType());
 		m_subsystemCode = static_cast<quint16>(source.subsystemKey());
 
-		m_disableModulesTypeChecking = settings.disableModulesTypeChecking;
+		m_disableModulesTypeChecking = disableModulesTypeChecking;
 
-		m_tuningSimIP = settings.channelSettings[channel].tuningSimIP;
+		m_tuningSimIP = channelInfo.tuningSimIP;
 
 		auto td = source.tuningData();
 
@@ -321,7 +295,7 @@ namespace Tuning
 
 	QString TuningChannelHandler::sourceEquipmentID() const
 	{
-		return m_sourceEquipmentID;
+		return m_portEquipmentID;
 	}
 
 	int TuningChannelHandler::channel() const
@@ -333,8 +307,8 @@ namespace Tuning
 	{
 		m_stat.controlIsActive = true;
 
-		DEBUG_LOG_MSG(m_logger, QString("Tuning source %1 (%2) channel %3 handler is started").
-					  arg(m_sourceEquipmentID).
+		DEBUG_LOG_MSG(m_logger, QString("Tuning source %1 (%2, channel %3)  handler is started").
+					  arg(m_portEquipmentID).
 					  arg(m_sourceIP.addressPortStr()).
 					  arg(m_channel + 1));
 
@@ -345,7 +319,7 @@ namespace Tuning
 	{
 		m_stat.controlIsActive = false;
 
-		DEBUG_LOG_MSG(m_logger, QString("Tuning source %1 (%2) handler is stopped").arg(m_sourceEquipmentID).arg(m_sourceIP.addressPortStr()));
+		DEBUG_LOG_MSG(m_logger, QString("Tuning source %1 (%2) handler is stopped").arg(m_portEquipmentID).arg(m_sourceIP.addressPortStr()));
 	}
 
 	bool TuningChannelHandler::isInitialized() const
@@ -405,7 +379,7 @@ namespace Tuning
 		if ((m_stat.replyCount % 100) == 0)
 		{
 			qDebug() << C_STR(QString("Receive %1 replies from %2, NoReplies = %3").
-							  arg(m_stat.replyCount).arg(m_sourceEquipmentID).arg(m_stat.errNoReply));
+							  arg(m_stat.replyCount).arg(m_portEquipmentID).arg(m_stat.errNoReply));
 		}
 
 		processReply(m_reply);
@@ -452,9 +426,10 @@ namespace Tuning
 			m_waitReply = false;
 
 
-			qDebug() << C_STR(QString("NoReply from %1 [RUP frame No = %2]").
-								arg(m_sourceIP.addressStr()).
-								arg(m_request.rupFotipV2.rupHeader.numerator));
+			qDebug() << C_STR(QString("NoReply from %1 (%2) [RUP frame No = %3]").
+							  arg(m_portEquipmentID).
+							  arg(m_sourceIP.addressPortStr()).
+							  arg(m_request.rupFotipV2.rupHeader.numerator));
 
 			m_retryCount++;
 
@@ -1050,7 +1025,7 @@ namespace Tuning
 			m_stat.errRupModuleType++;
 			result &= false;
 
-			qDebug() << "Invalid moduleType of" << m_sourceEquipmentID << "( waiting" << m_lmModuleType << ", receiving" << rupHeader.moduleType << ")";
+			qDebug() << "Invalid moduleType of" << m_portEquipmentID << "( waiting" << m_lmModuleType << ", receiving" << rupHeader.moduleType << ")";
 		}
 
 		if (rupHeader.framesQuantity != 1)
@@ -1236,7 +1211,7 @@ namespace Tuning
 	{
 		TEST_PTR_RETURN(appSignalID);
 
-		QString str = QString("LM=%1 Client=%2 User=%3").arg(m_sourceEquipmentID).arg(cmd.clientEquipmentID).arg(cmd.user);
+		QString str = QString("LM=%1 Client=%2 User=%3").arg(m_portEquipmentID).arg(cmd.clientEquipmentID).arg(cmd.user);
 
 		QString logStr;
 
@@ -1297,7 +1272,7 @@ namespace Tuning
 				}
 
 				logStr = QString("WRITE reply&nbsp;&nbsp;&nbsp;LM=%1 Signal=%2 CurValue=%3 %4SOR=%5").
-							arg(m_sourceEquipmentID).
+							arg(m_portEquipmentID).
 							arg(ts->appSignalID()).
 							arg(ts->currentValue().toString()).
 							arg(checkResultStr).
@@ -1307,7 +1282,7 @@ namespace Tuning
 
 		case FotipV2::OpCode::Apply:
 			logStr = QString("APPLY reply&nbsp;&nbsp;&nbsp;LM=%1 Result=%2 SOR=%3").
-						arg(m_sourceEquipmentID).
+						arg(m_portEquipmentID).
 						arg(reply.fotipFrame.header.flags.succesfulApply == 1 ? "Success" : "Fail").
 						arg(m_stat.setSOR == true ? 1 : 0);
 			break;
@@ -1336,13 +1311,14 @@ namespace Tuning
 											E::SoftwareRunMode swRunMode,
 											CircularLoggerShared logger,
 											CircularLoggerShared tuningLog) :
-		m_settings(settings),
 		m_source(source),
 		m_swRunMode(swRunMode),
 		m_logger(logger),
 		m_tuningLog(tuningLog)
 	{
 		m_stat.dataSourceID = m_source.ID();		// ID generated by DataSource::generateID()
+
+		m_disableModulesTypeChecking = settings.disableModulesTypeChecking;
 
 		m_tuningData = m_source.tuningData();
 
@@ -1357,6 +1333,34 @@ namespace Tuning
 		m_tuningDataFrameCount = m_tuningData->tuningDataFrameCount();
 
 		m_tuningMem.init(m_tuningDataOffsetW, m_tuningDataFramePayloadW, m_tuningDataFrameCount);
+
+		//
+
+		for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
+		{
+			const TuningServiceSettings::ChannelSettings& ch = settings.channelSettings[channel];
+
+			if (ch.enable == false)
+			{
+				continue;
+			}
+
+			TuningServiceSettings::TuningSource tsrc = ch.getTuningSource(m_source.moduleEquipmentID());
+
+			if (tsrc.isValid() == false)
+			{
+				continue;
+			}
+
+			TuningChannelInfo tci;
+
+			tci.portEquipmentID = tsrc.portEquipmentID;
+			tci.channel = channel;
+			tci.tuningDataIP = tsrc.tuningDataIP;
+			tci.tuningSimIP = ch.tuningSimIP;
+
+			m_tuningChannelsInfo.push_back(tci);
+		}
 	}
 
 	void TuningSourceThread::pushReply(int channel, const RupFotipV2& reply)
@@ -1508,8 +1512,10 @@ namespace Tuning
 
 			bool allInitialized = true;
 
-			for(const TuningChannelHandler* handler : m_handlers)
+			for(auto&p : m_handlers)
 			{
+				const TuningChannelHandler* handler = p.second;
+
 				allInitialized &= handler->isInitialized();
 			}
 
@@ -1633,6 +1639,19 @@ namespace Tuning
 		}
 	}
 
+	bool TuningSourceThread::isSourceHandlerExistsForChannel(int channel) const
+	{
+		for(const TuningChannelInfo& tci : m_tuningChannelsInfo)
+		{
+			if (tci.channel == channel)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	void TuningSourceThread::run()
 	{
 		initTuningSignals();
@@ -1652,10 +1671,13 @@ namespace Tuning
 				msCount = 0;
 			}
 
-			for(TuningChannelHandler* handler : m_handlers)
+			for(auto& p : m_handlers)
 			{
+				TuningChannelHandler* handler = p.second;
+
 				if (handler == nullptr)
 				{
+					Q_ASSERT(false);
 					continue;
 				}
 
@@ -1733,21 +1755,12 @@ namespace Tuning
 
 		Q_ASSERT(m_handlers.size() == 0);
 
-		m_handlers.resize(TuningServiceSettings::CHANNELS_COUNT);
-
-		for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
+		for(const TuningChannelInfo& tci :m_tuningChannelsInfo)
 		{
-			const TuningServiceSettings::ChannelSettings& ch = m_settings.channelSettings[channel];
+			TuningChannelHandler* handler = new TuningChannelHandler(*this, tci, m_disableModulesTypeChecking,
+																	 m_swRunMode, m_logger, m_tuningLog);
 
-			if (ch.enable == false)
-			{
-				m_handlers[channel] = nullptr;
-				continue;
-			}
-
-			TuningChannelHandler* handler = new TuningChannelHandler(*this, m_settings, channel, m_swRunMode, m_logger, m_tuningLog);
-
-			m_handlers[channel] = handler;
+			m_handlers.insert({tci.channel, handler});
 
 			handler->startHandler();
 		}
@@ -1757,12 +1770,18 @@ namespace Tuning
 	{
 		AUTO_LOCK(m_handlersMutex);
 
-		for(TuningChannelHandler* handler : m_handlers)
+		for(auto& p : m_handlers)
 		{
+			TuningChannelHandler* handler = p.second;
+
 			if (handler != nullptr)
 			{
 				handler->stopHandler();
 				delete handler;
+			}
+			else
+			{
+				Q_ASSERT(false);
 			}
 		}
 
@@ -1783,11 +1802,17 @@ namespace Tuning
 	{
 		bool anyChannelReply = false;
 
-		for(const TuningChannelHandler* handler : m_handlers)
+		for(auto& p: m_handlers)
 		{
+			const TuningChannelHandler* handler = p.second;
+
 			if (handler != nullptr)
 			{
 				anyChannelReply |= handler->isReply();
+			}
+			else
+			{
+				Q_ASSERT(false);
 			}
 		}
 
@@ -1811,49 +1836,57 @@ namespace Tuning
 	{
 		AUTO_LOCK(m_handlersMutex);
 
-		for(TuningChannelHandler* handler : m_handlers)
+		for(auto& p : m_handlers)
 		{
-			if (handler != nullptr)
+			TuningChannelHandler* handler = p.second;
+
+			TEST_PTR_CONTINUE(handler);
+
+			handler->pushTuningCommand(cmd);
+
+			switch(cmd.opCode)
 			{
-				handler->pushTuningCommand(cmd);
+			case FotipV2::OpCode::Read:
+				break;
 
-				switch(cmd.opCode)
-				{
-				case FotipV2::OpCode::Read:
-					break;
+			case FotipV2::OpCode::Write:
+				LOG_MSG(m_logger, QString("Enqueue WRITE command: source %1 channel %2 (%3), signal %4, value %5").
+							  arg(sourceEquipmentID()).
+							  arg(handler->channel() + 1).
+							  arg(handler->sourceIP().addressPortStr()).
+							  arg(appSignalID).
+							  arg(cmd.write.newTuningValue.toString()));
+				break;
 
-				case FotipV2::OpCode::Write:
-					LOG_MSG(m_logger, QString("Enqueue WRITE command: source %1 channel %2 (%3), signal %4, value %5").
-								  arg(sourceEquipmentID()).
-								  arg(handler->channel() + 1).
-								  arg(handler->sourceIP().addressPortStr()).
-								  arg(appSignalID).
-								  arg(cmd.write.newTuningValue.toString()));
-					break;
+			case FotipV2::OpCode::Apply:
+				DEBUG_LOG_MSG(m_logger, QString("Enqueue APPLY command: source %1 channel %2 (%3)").
+							  arg(sourceEquipmentID()).
+							  arg(handler->channel() + 1).
+							  arg(handler->sourceIP().addressPortStr()));
+				break;
 
-				case FotipV2::OpCode::Apply:
-					DEBUG_LOG_MSG(m_logger, QString("Enqueue APPLY command: source %1 channel %2 (%3)").
-								  arg(sourceEquipmentID()).
-								  arg(handler->channel() + 1).
-								  arg(handler->sourceIP().addressPortStr()));
-					break;
-
-				default:
-					Q_ASSERT(false);
-				}
+			default:
+				Q_ASSERT(false);
 			}
 		}
 	}
 
 	const TuningChannelHandler* TuningSourceThread::privateGetChannelHandler(int channel) const
 	{
-		if (channel < 0 || channel >= m_handlers.size())
+		if (channel < 0 || channel >= TuningServiceSettings::CHANNELS_COUNT)
 		{
 			Q_ASSERT(false);
 			return nullptr;
 		}
 
-		return m_handlers[channel];
+		auto it = m_handlers.find(channel);
+
+		if (it == m_handlers.end())
+		{
+			return nullptr;
+		}
+
+		return it->second;
 	}
 
 	const TuningSignal* TuningSourceThread::privateGetTuningSignal(Hash hash) const
@@ -1932,11 +1965,14 @@ namespace Tuning
 			//
 			connect(m_socket, &QUdpSocket::readyRead, this, &TuningSocketListener::onSocketReadyRead);
 
-			DEBUG_LOG_MSG(m_logger, QString(tr("Tuning listening socket is created and bound to %1")).arg(m_listenIP.addressPortStr()));
+			DEBUG_LOG_MSG(m_logger, QString(tr("Tuning channel %1 listening socket is created and bound to %2")).
+						  arg(m_channel + 1).arg(m_listenIP.addressPortStr()));
 		}
 		else
 		{
-			DEBUG_LOG_ERR(m_logger, QString(tr("Tuning listening socket error binding to %1")).arg(m_listenIP.addressPortStr()));
+			DEBUG_LOG_ERR(m_logger, QString(tr("Tuning channel %1 listening socket error binding to %2")).
+						  arg(m_channel + 1).
+						  arg(m_listenIP.addressPortStr()));
 
 			// error binding
 			//

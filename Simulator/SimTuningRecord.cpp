@@ -2,10 +2,12 @@
 
 namespace Sim
 {
-	qint64 TuningRecord::s_indexCounter = 0;
+	std::atomic<qint64> TuningRecord::s_indexCounter = 0;
 
 	TuningRecord TuningRecord::createApplyChanges(const QString& lmEquipmentId, const QString& portEquipmentId)
 	{
+		qDebug() << "TuningRecord: port " << C_STR(portEquipmentId) << "ApplyChanges" << (s_indexCounter+1);
+
 		return TuningRecord{RecordType::ApplyChanges,
 					lmEquipmentId,
 					portEquipmentId,
@@ -21,6 +23,8 @@ namespace Sim
 										   quint32 value,
 										   quint32 mask)
 	{
+		qDebug() << "TuningRecord: port " << C_STR(portEquipmentId) << "WriteDword" << (s_indexCounter+1);
+
 		return TuningRecord{RecordType::WriteDword,
 					lmEquipmentId,
 					portEquipmentId,
@@ -36,6 +40,8 @@ namespace Sim
 												 quint32 offsetW,
 												 qint32 value)
 	{
+		qDebug() << "TuningRecord: port " << C_STR(portEquipmentId) << "WriteSignedInt32" << (s_indexCounter+1);
+
 		return TuningRecord{RecordType::WriteSignedInt32,
 					lmEquipmentId,
 					portEquipmentId,
@@ -50,6 +56,8 @@ namespace Sim
 										   quint32 offsetW,
 										   float value)
 	{
+		qDebug() << "TuningRecord: port " << C_STR(portEquipmentId) << "WriteFloat" << (s_indexCounter+1);
+
 		return TuningRecord{RecordType::WriteFloat,
 					lmEquipmentId,
 					portEquipmentId,

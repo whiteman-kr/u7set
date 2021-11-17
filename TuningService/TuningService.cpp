@@ -134,7 +134,7 @@ namespace Tuning
 
 		AUTO_LOCK(m_mainMutex);							// !!!!
 
-		stopSourcesListenerThread();
+		stopSourcesListenerThreads();
 
 		stopTuningSourceThreads();
 
@@ -154,7 +154,7 @@ namespace Tuning
 			return NetworkError::InternalError;
 		}
 
-		runSourcesListenerThread();
+		runSourcesListenerThreads();
 
 		*controlledTuningSource = tuningSourceEquipmentID;
 		*controlIsActive = true;
@@ -305,7 +305,7 @@ namespace Tuning
 
 		m_mainMutex.lock();
 
-		stopSourcesListenerThread();
+		stopSourcesListenerThreads();
 		stopTuningSourceThreads();
 		clearServiceMaps();
 
@@ -320,7 +320,7 @@ namespace Tuning
 
 		buildServiceMaps();
 		runTuningSourceThreads();
-		runSourcesListenerThread();
+		runSourcesListenerThreads();
 
 		m_mainMutex.unlock();
 
@@ -482,7 +482,7 @@ namespace Tuning
 	}
 
 	bool TuningServiceWorker::runTuningSourceThread(bool runSingleSource,
-													const QString& tuningSourceEquipmentID)
+													const QString& singleSourceEquipmentID)
 	{
 		// if tuningSourceEquipmentID empty - run all sources workers
 		// else - run specific source worker
@@ -493,7 +493,12 @@ namespace Tuning
 
 		for(const TuningSource& tuningSource : m_tuningSources)
 		{
-			if (runSingleSource == true && tuningSource.moduleEquipmentID() != tuningSourceEquipmentID)
+			if (runSingleSource == true && tuningSource.moduleEquipmentID() != singleSourceEquipmentID)
+			{
+				continue;
+			}
+
+			if (m_settings.isSourceExists(tuningSource.moduleEquipmentID()) == false)
 			{
 				continue;
 			}
@@ -534,16 +539,19 @@ namespace Tuning
 
 		TuningSourceThread* sourceThread = nullptr;
 
-		if (it == m_sourceThreads.end())
+		if (it != m_sourceThreads.end())
 		{
-			sourceThread = new TuningSourceThread(m_settings,
-												  source,
-												  sessionParams().softwareRunMode,
-												  m_logger,
-												  m_tuningLog);
-
-			m_sourceThreads.insert({source.moduleEquipmentID(), sourceThread});
+			Q_ASSERT(false);			// attempt to run duplicate TuningSourceThread
+			return nullptr;
 		}
+
+		sourceThread = new TuningSourceThread(m_settings,
+											  source,
+											  sessionParams().softwareRunMode,
+											  m_logger,
+											  m_tuningLog);
+
+		m_sourceThreads.insert({source.moduleEquipmentID(), sourceThread});
 
 		std::vector<quint32> IPs = source.lanControllersInfo().tuningIP32addresses();
 
@@ -582,7 +590,7 @@ namespace Tuning
 		m_ip2sourceThread.clear();
 	}
 
-	void TuningServiceWorker::runSourcesListenerThread()
+	void TuningServiceWorker::runSourcesListenerThreads()
 	{
 		if (m_sourceThreads.size() == 0)
 		{
@@ -598,6 +606,14 @@ namespace Tuning
 		{
 			const TuningServiceSettings::ChannelSettings& ch = m_settings.channelSettings[channel];
 
+			if (isSourceHandlerExistsForChannel(channel) == false)
+			{
+				DEBUG_LOG_MSG(m_logger,
+							  QString("No tuning sources found for channel %1. Therefore Listener of IP %2 will not be run.").
+							  arg(channel + 1).arg(ch.tuningDataIP.addressPortStr()));
+				continue;
+			}
+
 			CONTINUE_IF_FALSE(ch.enable);
 
 			auto thread = new TuningSocketListenerThread(*this,
@@ -611,7 +627,7 @@ namespace Tuning
 		}
 	}
 
-	void TuningServiceWorker::stopSourcesListenerThread()
+	void TuningServiceWorker::stopSourcesListenerThreads()
 	{
 		// stop and delete TuningSocketListenerThread
 		//
@@ -659,6 +675,21 @@ namespace Tuning
 	bool TuningServiceWorker::isSimulationMode() const
 	{
 		return sessionParams().softwareRunMode == E::SoftwareRunMode::Simulation;
+	}
+
+	bool TuningServiceWorker::isSourceHandlerExistsForChannel(int channel) const
+	{
+		for(auto& p : m_sourceThreads)
+		{
+			TEST_PTR_CONTINUE(p.second);
+
+			if (p.second->isSourceHandlerExistsForChannel(channel) == true)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	void TuningServiceWorker::onConfigurationReady(const QByteArray configurationXmlData,

@@ -248,12 +248,20 @@ namespace Tuning
 
 	class TuningSourceThread;
 
+	struct TuningChannelInfo
+	{
+		QString portEquipmentID;
+		int channel = 0;
+		HostAddressPort tuningDataIP;
+		HostAddressPort tuningSimIP;
+	};
+
 	class TuningChannelHandler
 	{
 	public:
 		TuningChannelHandler(TuningSourceThread& srcThread,
-							const TuningServiceSettings& settings,
-							int channel,
+							const TuningChannelInfo& channelInfo,
+							bool disableModulesTypeChecking,
 							E::SoftwareRunMode swRunMode,
 							CircularLoggerShared logger,
 							CircularLoggerShared tuningLog);
@@ -329,7 +337,8 @@ namespace Tuning
 
 		// data from tuning source
 		//
-		QString m_sourceEquipmentID;
+		QString m_moduleEquipmentID;
+		QString m_portEquipmentID;
 		HostAddressPort m_sourceIP;
 
 		quint64 m_sourceUniqueID = 0;
@@ -423,6 +432,8 @@ namespace Tuning
 
 		SourceStatistics& sourceStatistics() { return m_stat; }
 
+		bool isSourceHandlerExistsForChannel(int channel) const;
+
 	private:
 		void run() override;
 
@@ -442,8 +453,9 @@ namespace Tuning
 		const TuningSignal* privateGetTuningSignal(Hash hash) const;
 
 	private:
-		const TuningServiceSettings& m_settings;
+		std::vector<TuningChannelInfo> m_tuningChannelsInfo;
 		const TuningSource& m_source;
+		bool m_disableModulesTypeChecking = false;
 		E::SoftwareRunMode m_swRunMode = E::SoftwareRunMode::Normal;
 		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
@@ -456,7 +468,7 @@ namespace Tuning
 		//
 
 		mutable QMutex m_handlersMutex;
-		std::vector<TuningChannelHandler*> m_handlers;
+		std::map<int, TuningChannelHandler*> m_handlers;			// channel => TuningChannelHandler
 
 		//
 

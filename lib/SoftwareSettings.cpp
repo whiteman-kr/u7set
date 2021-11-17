@@ -586,6 +586,31 @@ std::vector<TuningServiceSettings::TuningClient> TuningServiceSettings::getAllUn
 	return allUniqueClients;
 }
 
+bool TuningServiceSettings::isSourceExists(const QString& moduleEquipmentID) const
+{
+	for(int i = CHANNEL_1; i < CHANNELS_COUNT; i++)
+	{
+		ChannelSettings ch = channelSettings[i];
+
+		if (ch.enable == true)
+		{
+			for(auto& src : ch.sources)
+			{
+				if (src.lmEquipmentID == moduleEquipmentID)
+				{
+					return true;
+				}
+			}
+		}
+		else
+		{
+			Q_ASSERT(ch.sources.size() == 0);
+		}
+	}
+
+	return false;
+}
+
 bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);

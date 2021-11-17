@@ -257,6 +257,7 @@ public:
 	ChannelSettings channelSettings[CHANNELS_COUNT];
 
 	std::vector<TuningClient> getAllUniqueClients() const;
+	bool isSourceExists(const QString& moduleEquipmentID) const;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only

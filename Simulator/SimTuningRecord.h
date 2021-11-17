@@ -25,7 +25,7 @@ namespace Sim
 
 		qint64 recordIndex;
 
-		static qint64 s_indexCounter;
+		static std::atomic<qint64> s_indexCounter;
 
 		// Create Recrd functions
 		//
