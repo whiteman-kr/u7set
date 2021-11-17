@@ -270,34 +270,27 @@ const char* const				SignalPropertyGroup[] =
 {
 								QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Signal ID"),
 								QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Position"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "3 Electric range: "),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "4 Engineering range: "),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "3 Electric range"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "4 Engineering range"),
 };
 
 const int						SIGNAL_PROPERTY_GROUP_COUNT				= sizeof(SignalPropertyGroup)/sizeof(SignalPropertyGroup[0]);
 
-const int						SIGNAL_PROPERTY_GROUP_ID				= 0,
+const int						SIGNAL_PROPERTY_GROUP_SIGNAL_ID			= 0,
 								SIGNAL_PROPERTY_GROUP_POSITION			= 1,
 								SIGNAL_PROPERTY_GROUP_EL_RANGE			= 2,
 								SIGNAL_PROPERTY_GROUP_EN_RANGE			= 3;
 
 // ----------------------------------------------------------------------------------------------
 
-const int						SIGNAL_PROPERTY_ITEM_CUSTOM_ID			= 0,
-								SIGNAL_PROPERTY_ITEM_CAPTION			= 1,
-
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_LOW		= 2,
+const int						SIGNAL_PROPERTY_ITEM_EL_RANGE_LOW		= 2,
 								SIGNAL_PROPERTY_ITEM_EL_RANGE_HIGH		= 3,
 								SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT		= 4,
 								SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR	= 5,
 								SIGNAL_PROPERTY_ITEM_EL_RANGE_RLOAD		= 6,
 								SIGNAL_PROPERTY_ITEM_EL_RANGE_R0		= 7,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION	= 8,
+								SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION	= 8;
 
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW		= 9,
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH		= 10,
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_UNIT		= 11,
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_PRECISION	= 12;
 
 const int						SIGNAL_PROPERTY_ITEM_COUNT				= 13;
 
@@ -314,81 +307,86 @@ public:
 
 public:
 
-	Metrology::SignalParam		param() const { return m_param; }
+	Metrology::SignalParam param() const { return m_param; }
 
 private:
 
-	Metrology::SignalParam		m_param;
+	class PropertyPattern: public PropertyObject
+	{
+	public:
+
+		explicit PropertyPattern(Metrology::SignalParam* pObject);
+
+	private:
+
+		Metrology::SignalParam* m_pObject = nullptr;
+	};
+
+	Metrology::SignalParam m_param;
 
 	//
 	//
-	QTabWidget*					m_pTab = nullptr;
-
-	// Property list
-	//
-	QtVariantPropertyManager*	m_pManager = nullptr;
-	QtVariantEditorFactory*		m_pFactory = nullptr;
-	QtTreePropertyBrowser*		m_pEditor = nullptr;
+	QTabWidget* m_pTab = nullptr;
 
 	//
 	//
-	QMenu*						m_pContextMenu = nullptr;
-	QAction*					m_pCopyAction = nullptr;
-	QAction*					m_pCopyCellAction = nullptr;
-	QAction*					m_pComparatorPropertyAction = nullptr;
+	ExtWidgets::PropertyEditor* m_pPropertyEditor = nullptr;
 
-	QTableView*					m_pComparatorView = nullptr;
-	PrComparatorListTable		m_comparatorTable;
-	std::set<Hash>				m_requestStateList;
+	//
+	//
+	QMenu* m_pContextMenu = nullptr;
+	QAction* m_pCopyAction = nullptr;
+	QAction* m_pCopyCellAction = nullptr;
+	QAction* m_pComparatorPropertyAction = nullptr;
+
+	QTableView* m_pComparatorView = nullptr;
+	PrComparatorListTable m_comparatorTable;
+	std::set<Hash> m_requestStateList;
 
 	// buttons
 	//
-	QDialogButtonBox*			m_buttonBox = nullptr;
+	QDialogButtonBox* m_buttonBox = nullptr;
 
 	// timer
 	//
-	QTimer*						m_updateComparatorStateTimer = nullptr;
+	QTimer* m_updateComparatorStateTimer = nullptr;
 
 	//
 	//
-	static bool					m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT];
-	QtBrowserItem*				m_browserItemList[SIGNAL_PROPERTY_GROUP_COUNT];
+	static bool m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT];
+	QtBrowserItem* m_browserItemList[SIGNAL_PROPERTY_GROUP_COUNT];
 
-	QMap<QtProperty*,int>		m_propertyMap;
+	QtProperty* m_propertyGroupList[SIGNAL_PROPERTY_GROUP_COUNT];
 
-	QtProperty*					m_propertyGroupList[SIGNAL_PROPERTY_GROUP_COUNT];
-
-	void						createContextMenu();
-	void						createPropertyList();
-
-	void						updateGroupHeader(int index);
+	void createContextMenu();
+	void createPropertyList();
 
 protected:
 
-	void						closeEvent(QCloseEvent* e) override;
+	void closeEvent(QCloseEvent* e) override;
 
 private slots:
 
 	// slots of editor
 	//
-	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
-	void						onPropertyExpanded(QtBrowserItem* item);
+	void onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects);
+	void onPropertyExpanded(QtBrowserItem* item);
 
 	// slots of menu
 	//
-	void						onContextMenu(QPoint);
-	void						onCopy();
-	void						onCopyCell();
-	void						onComparatorProperty();
+	void onContextMenu(QPoint);
+	void onCopy();
+	void onCopyCell();
+	void onComparatorProperty();
 
 	// slots of timer
 	//
-	void						updateComparatorState();
+	void updateComparatorState();
 
 	// slots of dialog
 	//
-	void						onOk();
-	void						onCancel();
+	void onOk();
+	void onCancel();
 };
 
 // ==============================================================================================
@@ -399,11 +397,11 @@ private slots:
 
 const char* const				ComparatorPropertyGroup[] =
 {
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Schema"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Signal ID"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Position"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Electric range: "),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Engineering range: "),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Schema"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Input"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "3 Compare"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "4 Hysteresis"),
+								QT_TRANSLATE_NOOP("DialogObjectProperty", "5 Output"),
 };
 
 const int						COMPARATOR_PROPERTY_GROUP_COUNT				= sizeof(ComparatorPropertyGroup)/sizeof(ComparatorPropertyGroup[0]);
@@ -491,7 +489,7 @@ const char* const				MeasurePropertyGroup[] =
 const int						MEASURE_PROPERTY_GROUP_COUNT			= sizeof(MeasurePropertyGroup)/sizeof(MeasurePropertyGroup[0]);
 
 const int						MEASURE_PROPERTY_GROUP_SIGNAL_ID		= 0,
-								MEASURE_PROPERTY_GROUP_POS				= 1,
+								MEASURE_PROPERTY_GROUP_POSITION			= 1,
 								MEASURE_PROPERTY_GROUP_LIMITS			= 2,
 								MEASURE_PROPERTY_GROUP_ERRORS			= 3;
 

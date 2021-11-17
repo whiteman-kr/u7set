@@ -1094,7 +1094,7 @@ QString PrComparatorListTable::text(int row, int column, std::shared_ptr<Metrolo
 
 bool DialogSignalProperty::m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT] =
 {
-	true,	//	SIGNAL_PROPERTY_GROUP_ID
+	true,	//	SIGNAL_PROPERTY_GROUP_SIGNAL_ID
 	false,	//	SIGNAL_PROPERTY_GROUP_POSITION
 	false,	//	SIGNAL_PROPERTY_GROUP_EL_RANGE
 	false,	//	SIGNAL_PROPERTY_GROUP_EN_RANGE
@@ -1120,23 +1120,138 @@ DialogSignalProperty::DialogSignalProperty(const Metrology::SignalParam& param, 
 
 DialogSignalProperty::~DialogSignalProperty()
 {
-	if (m_pManager != nullptr)
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DialogSignalProperty::PropertyPattern::PropertyPattern(Metrology::SignalParam* pObject) : m_pObject(pObject)
+{
+	if (m_pObject == nullptr)
 	{
-		delete m_pManager;
-		m_pManager = nullptr;
+		return;
 	}
 
-	if (m_pFactory != nullptr)
+	QString groupSignalID = qApp->translate("DialogObjectProperty", SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_SIGNAL_ID]);
+
+	ADD_PROPERTY_GETTER_SETTER(QString, DialogSignalProperty::tr("SignalID"), true, m_pObject->Metrology::SignalParam::customAppSignalID, m_pObject->Metrology::SignalParam::setCustomAppSignalID)
+		->setCategory(groupSignalID)
+		.setViewOrder(0);
+	ADD_PROPERTY_GETTER(QString, DialogSignalProperty::tr("AppSignalID"), true, m_pObject->Metrology::SignalParam::appSignalID)
+		->setCategory(groupSignalID)
+		.setViewOrder(1)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER(QString, DialogSignalProperty::tr("EquipmentID"), true, m_pObject->Metrology::SignalParam::equipmentID)
+		->setCategory(groupSignalID)
+		.setViewOrder(2)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER_SETTER(QString, DialogSignalProperty::tr("Caption"), true, m_pObject->Metrology::SignalParam::caption, m_pObject->Metrology::SignalParam::setCaption)
+		->setCategory(groupSignalID)
+		.setViewOrder(3);
+	ADD_PROPERTY_GETTER(QString, DialogSignalProperty::tr("Signal type"), true, m_pObject->Metrology::SignalParam::signalTypeStr)
+		->setCategory(groupSignalID)
+		.setViewOrder(4)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER(int, DialogSignalProperty::tr("Count of comparators"), true, m_pObject->Metrology::SignalParam::comparatorCount)
+		->setCategory(groupSignalID)
+		.setViewOrder(5)
+		.setReadOnly(true);
+
+
+	QString groupPosition = qApp->translate("DialogObjectProperty", SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_POSITION]);
+
+	ADD_PROPERTY_GETTER(QString, DialogSignalProperty::tr("Rack"), true, m_pObject->location().Metrology::SignalLocation::rackCaption)
+		->setCategory(groupPosition)
+		.setViewOrder(0)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER(int, DialogSignalProperty::tr("Chassis"), true, m_pObject->location().Metrology::SignalLocation::chassis)
+		->setCategory(groupPosition)
+		.setViewOrder(1)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER(int, DialogSignalProperty::tr("Module"), true, m_pObject->location().Metrology::SignalLocation::module)
+		->setCategory(groupPosition)
+		.setViewOrder(2)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER(int, DialogSignalProperty::tr("Place"), true, m_pObject->location().Metrology::SignalLocation::place)
+		->setCategory(groupPosition)
+		.setViewOrder(3)
+		.setReadOnly(true);
+	ADD_PROPERTY_GETTER(QString, DialogSignalProperty::tr("Module type"), true, m_pObject->location().Metrology::SignalLocation::moduleCaption)
+		->setCategory(groupPosition)
+		.setViewOrder(4)
+		.setReadOnly(true);
+
+
+	QString groupElectricLimit = qApp->translate("DialogObjectProperty", SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EL_RANGE]);
+
+	ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Electric low limit"), true, m_pObject->Metrology::SignalParam::electricLowLimit, m_pObject->Metrology::SignalParam::setElectricLowLimit)
+		->setCategory(groupElectricLimit)
+		.setViewOrder(0)
+		.setPrecision(m_pObject->electricPrecision());
+	ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Electric high limit"), true, m_pObject->Metrology::SignalParam::electricHighLimit, m_pObject->Metrology::SignalParam::setElectricHighLimit)
+		->setCategory(groupElectricLimit)
+		.setViewOrder(1)
+		.setPrecision(m_pObject->electricPrecision());
+	ADD_PROPERTY_GETTER_SETTER(E::ElectricUnit, DialogSignalProperty::tr("Electric unit"), true, m_pObject->Metrology::SignalParam::electricUnitID, m_pObject->Metrology::SignalParam::setElectricUnitID)
+		->setCategory(groupElectricLimit)
+		.setViewOrder(2);
+	ADD_PROPERTY_GETTER_SETTER(E::SensorType, DialogSignalProperty::tr("Electric sensor type"), true, m_pObject->Metrology::SignalParam::electricSensorType, m_pObject->Metrology::SignalParam::setElectricSensorType)
+		->setCategory(groupElectricLimit)
+		.setViewOrder(3);
+
+	switch (m_pObject->electricUnitID())
 	{
-		delete m_pFactory;
-		m_pFactory = nullptr;
+		case E::ElectricUnit::mA:
+
+			if (m_pObject->sensorType() != E::SensorType::V_0_5 && m_pObject->sensorType() != E::SensorType::V_m10_p10)
+			{
+				break;
+			}
+
+			ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Electric RLoad"), true, m_pObject->Metrology::SignalParam::electricRLoad, m_pObject->Metrology::SignalParam::setElectricRLoad)
+					->setCategory(groupElectricLimit)
+					.setViewOrder(4)
+					.setPrecision(0);
+			break;
+
+		case E::ElectricUnit::Ohm:
+
+			if (m_pObject->sensorType() == E::SensorType::NoSensor || m_pObject->sensorType() == E::SensorType::Ohm_Raw ||
+				m_pObject->sensorType() == E::SensorType::Ohm_Pt21 || m_pObject->sensorType() == E::SensorType::Ohm_Cu23)
+			{
+				break;
+			}
+
+			ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Electric R0"), true, m_pObject->Metrology::SignalParam::electricR0, m_pObject->Metrology::SignalParam::setElectricR0)
+					->setCategory(groupElectricLimit)
+					.setViewOrder(4)
+					.setPrecision(0);
+			break;
+
+		default:
+			break;
 	}
 
-	if (m_pEditor != nullptr)
-	{
-		delete m_pEditor;
-		m_pEditor = nullptr;
-	}
+	ADD_PROPERTY_GETTER_SETTER(int, DialogSignalProperty::tr("Electric precision"), true, m_pObject->Metrology::SignalParam::electricPrecision, m_pObject->Metrology::SignalParam::setElectricPrecision)
+		->setCategory(groupElectricLimit)
+		.setViewOrder(5);
+
+
+	QString groupEngineeringLimit = qApp->translate("DialogObjectProperty", SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE]);
+
+	ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Engineering low limit"), true, m_pObject->Metrology::SignalParam::lowEngineeringUnits, m_pObject->Metrology::SignalParam::setLowEngineeringUnits)
+		->setCategory(groupEngineeringLimit)
+		.setViewOrder(0)
+		.setPrecision(m_pObject->decimalPlaces());
+	ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Engineering high limit"), true, m_pObject->Metrology::SignalParam::highEngineeringUnits, m_pObject->Metrology::SignalParam::setHighEngineeringUnits)
+		->setCategory(groupEngineeringLimit)
+		.setViewOrder(1)
+		.setPrecision(m_pObject->decimalPlaces());
+	ADD_PROPERTY_GETTER_SETTER(QString, DialogSignalProperty::tr("Engineering unit"), true, m_pObject->Metrology::SignalParam::unit, m_pObject->Metrology::SignalParam::setUnit)
+		->setCategory(groupEngineeringLimit)
+		.setViewOrder(2);
+	ADD_PROPERTY_GETTER_SETTER(int, DialogSignalProperty::tr("Engineering precision"), true, m_pObject->Metrology::SignalParam::decimalPlaces, m_pObject->Metrology::SignalParam::setDecimalPlaces)
+		->setCategory(groupEngineeringLimit)
+		.setViewOrder(3);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1213,16 +1328,28 @@ void DialogSignalProperty::createPropertyList()
 	m_pTab = new QTabWidget();
 	m_pTab->setTabPosition(QTabWidget::North);
 
-	//connect(m_pTab, &QTabWidget::currentChanged, this, &DialogSignalProperty::onPropertyType);
-
 	// create property list
 	//
+	m_pPropertyEditor = new ExtWidgets::PropertyEditor(this);
+	if (m_pPropertyEditor == nullptr)
+	{
+		return;
+	}
 
-	QtVariantProperty* item = nullptr;
+	m_pPropertyEditor->setSplitterPosition(350);
+	m_pPropertyEditor->setReadOnly(false);
 
-	m_pManager = new QtVariantPropertyManager;
-	m_pFactory = new QtVariantEditorFactory;
-	m_pEditor = new QtTreePropertyBrowser;
+	//
+	//
+	QList<std::shared_ptr<PropertyObject>> projectObjects;
+
+	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_param);
+
+	projectObjects.push_back(property);
+
+	m_pPropertyEditor->setObjects(projectObjects);
+
+	connect(m_pPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogSignalProperty::onPropertyValueChanged);
 
 	// create compartor list
 	//
@@ -1294,244 +1421,55 @@ void DialogSignalProperty::createPropertyList()
 
 	// add tab items
 	//
-	m_pTab->addTab(m_pEditor, tr("Signal"));
+	m_pTab->addTab(m_pPropertyEditor, tr("Signal"));
 	m_pTab->addTab(m_pComparatorView, tr("Comparators"));
 
-	// create property groups
-	//
-		// id group
-
-		QtProperty* signalIdGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Signal ID"));
-
-			item = m_pManager->addProperty(QVariant::String, tr("SignalID"));
-			item->setValue(m_param.customAppSignalID());
-			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_CUSTOM_ID);
-			signalIdGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
-			item->setValue(m_param.appSignalID());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			signalIdGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("EquipmentID"));
-			item->setValue(m_param.equipmentID());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			signalIdGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("Caption"));
-			item->setValue(m_param.caption());
-			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_CAPTION);
-			signalIdGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("Signal type"));
-			item->setValue(qApp->translate("MetrologySignal", m_param.signalTypeStr().toUtf8()));
-			item->setAttribute(QLatin1String("readOnly"), true);
-			signalIdGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::Int, tr("Count of comparators"));
-			item->setValue(m_param.comparatorCount());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			signalIdGroup->addSubProperty(item);
-
-		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
-
-		// position group
-
-		QtProperty* positionGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Position"));
-
-			item = m_pManager->addProperty(QVariant::String, tr("Rack"));
-			item->setValue(m_param.location().rack().caption());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			positionGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::Int, tr("Chassis"));
-			item->setValue(m_param.location().chassis());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			positionGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::Int, tr("Module"));
-			item->setValue(m_param.location().module());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			positionGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::Int, tr("Place"));
-			item->setValue(m_param.location().place());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			positionGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("Module type"));
-			item->setValue(m_param.location().moduleCaption());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			positionGroup->addSubProperty(item);
-
-		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
-
-		// electric range group
-
-		QtProperty* electricRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(),
-																 qApp->translate(	"DialogObjectProperty",
-																					SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EL_RANGE]) +
-																					m_param.electricRangeStr());
-
-			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
-			item->setValue(m_param.electricLowLimit());
-			item->setAttribute(QLatin1String("singleStep"), 0.001);
-			item->setAttribute(QLatin1String("decimals"), m_param.electricPrecision());
-			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_LOW);
-			electricRangeGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::Double, tr("High limit"));
-			item->setValue(m_param.electricHighLimit());
-			item->setAttribute(QLatin1String("singleStep"), 0.001);
-			item->setAttribute(QLatin1String("decimals"), m_param.electricPrecision());
-			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_HIGH);
-			electricRangeGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Unit"));
-			item->setAttribute(QLatin1String("enumNames"), electricUnitList);
-			item->setValue(m_param.electricUnitID());
-			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT);
-			electricRangeGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Sensor type"));
-			QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
-			QStringList sensorList;
-			for(int s = 0; s < mst.keyCount(); s++)
-			{
-				sensorList.append(mst.key(s));
-			}
-			item->setAttribute(QLatin1String("enumNames"), sensorList);
-			item->setValue(m_param.electricSensorType());
-			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR);
-			electricRangeGroup->addSubProperty(item);
-
-
-			switch (m_param.electricUnitID())
-			{
-				case E::ElectricUnit::mA:
-
-					if (m_param.sensorType() != E::SensorType::V_0_5 && m_param.sensorType() != E::SensorType::V_m10_p10)
-					{
-						break;
-					}
-
-					item = m_pManager->addProperty(QVariant::Double, tr("RLoad"));
-					item->setValue(m_param.electricRLoad());
-					item->setAttribute(QLatin1String("singleStep"), 1);
-					item->setAttribute(QLatin1String("decimals"), 2);
-					m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_RLOAD);
-					electricRangeGroup->addSubProperty(item);
-
-					break;
-
-				case E::ElectricUnit::Ohm:
-
-					item = m_pManager->addProperty(QVariant::Double, tr("R0"));
-					item->setValue(m_param.electricR0());
-					item->setAttribute(QLatin1String("singleStep"), 1);
-					item->setAttribute(QLatin1String("decimals"), 2);
-					m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_R0);
-					electricRangeGroup->addSubProperty(item);
-
-					break;
-
-				default:
-					break;
-			}
-
-			item = m_pManager->addProperty(QVariant::Int, tr("Precision"));
-			item->setValue(m_param.electricPrecision());
-			item->setAttribute(QLatin1String("minimum"), 0);
-			item->setAttribute(QLatin1String("maximum"), 10);
-			item->setAttribute(QLatin1String("singleStep"), 1);
-			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION);
-			electricRangeGroup->addSubProperty(item);
-
-		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
-
-		// engineering range group
-
-		QtProperty* engineeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(),
-																	qApp->translate("DialogObjectProperty",
-																					SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE]) +
-																					m_param.engineeringRangeStr());
-
-			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
-			item->setValue(m_param.lowEngineeringUnits());
-			item->setAttribute(QLatin1String("singleStep"), 0.001);
-			item->setAttribute(QLatin1String("decimals"), m_param.decimalPlaces());
-			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW);
-			engineeringRangeGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::Double, tr("High limit"));
-			item->setValue(m_param.highEngineeringUnits());
-			item->setAttribute(QLatin1String("singleStep"), 0.001);
-			item->setAttribute(QLatin1String("decimals"), m_param.decimalPlaces());
-			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH);
-			engineeringRangeGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::String, tr("Unit"));
-			item->setValue(m_param.unit());
-			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EN_RANGE_UNIT);
-			engineeringRangeGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::Int, tr("Precision"));
-			item->setValue(m_param.decimalPlaces());
-			item->setAttribute(QLatin1String("minimum"), 0);
-			item->setAttribute(QLatin1String("maximum"), 10);
-			item->setAttribute(QLatin1String("singleStep"), 1);
-			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EN_RANGE_PRECISION);
-			engineeringRangeGroup->addSubProperty(item);
-
-		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
-
-	// show or hide property groups
+	// show or hide property groups for qt6
 	//
 
-	m_browserItemList[SIGNAL_PROPERTY_GROUP_ID] = m_pEditor->addProperty(signalIdGroup);
-	m_browserItemList[SIGNAL_PROPERTY_GROUP_POSITION] = m_pEditor->addProperty(positionGroup);
+	//	m_browserItemList[SIGNAL_PROPERTY_GROUP_ID] = m_pEditor->addProperty(signalIdGroup);
+	//	m_browserItemList[SIGNAL_PROPERTY_GROUP_POSITION] = m_pEditor->addProperty(positionGroup);
 
-	if (m_param.isAnalog() == true)
-	{
-		switch (m_param.inOutType())
-		{
-			case E::SignalInOutType::Input:
-			case E::SignalInOutType::Output:
+	//	if (m_param.isAnalog() == true)
+	//	{
+	//		switch (m_param.inOutType())
+	//		{
+	//			case E::SignalInOutType::Input:
+	//			case E::SignalInOutType::Output:
 
 
-				m_browserItemList[SIGNAL_PROPERTY_GROUP_EL_RANGE] = m_pEditor->addProperty(electricRangeGroup);
-				m_browserItemList[SIGNAL_PROPERTY_GROUP_EN_RANGE] = m_pEditor->addProperty(engineeringRangeGroup);
+	//				m_browserItemList[SIGNAL_PROPERTY_GROUP_EL_RANGE] = m_pEditor->addProperty(electricRangeGroup);
+	//				m_browserItemList[SIGNAL_PROPERTY_GROUP_EN_RANGE] = m_pEditor->addProperty(engineeringRangeGroup);
 
-				break;
+	//				break;
 
-			case E::SignalInOutType::Internal:
+	//			case E::SignalInOutType::Internal:
 
-				m_browserItemList[SIGNAL_PROPERTY_GROUP_EN_RANGE] = m_pEditor->addProperty(engineeringRangeGroup);
+	//				m_browserItemList[SIGNAL_PROPERTY_GROUP_EN_RANGE] = m_pEditor->addProperty(engineeringRangeGroup);
 
-				break;
+	//				break;
 
-			default:
-				assert(0);
-		}
-	}
+	//			default:
+	//				assert(0);
+	//		}
+	//	}
 
-	for(int g = 0; g < SIGNAL_PROPERTY_GROUP_COUNT; g++)
-	{
-		if (m_browserItemList[g] == nullptr)
-		{
-			continue;
-		}
+	//	for(int g = 0; g < SIGNAL_PROPERTY_GROUP_COUNT; g++)
+	//	{
+	//		if (m_browserItemList[g] == nullptr)
+	//		{
+	//			continue;
+	//		}
 
-		m_pEditor->setExpanded(m_browserItemList[g], m_showGroupHeader[g]);
-	}
+	//		m_pEditor->setExpanded(m_browserItemList[g], m_showGroupHeader[g]);
+	//	}
 
-	//
-	//
-	m_pEditor->setPropertiesWithoutValueMarked(true);
-	m_pEditor->setRootIsDecorated(false);
+	//	//
+	//	//
+	//	m_pEditor->setPropertiesWithoutValueMarked(true);
+	//	m_pEditor->setRootIsDecorated(false);
 
-	connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &DialogSignalProperty::onPropertyValueChanged);
-	connect(m_pEditor, &QtTreePropertyBrowser::expanded, this, &DialogSignalProperty::onPropertyExpanded);
+	//	connect(m_pEditor, &QtTreePropertyBrowser::expanded, this, &DialogSignalProperty::onPropertyExpanded);
 
 	// create buttons ok and cancel
 	//
@@ -1543,7 +1481,6 @@ void DialogSignalProperty::createPropertyList()
 	// add layouts
 	//
 	mainLayout->addWidget(m_pTab);
-	//mainLayout->addWidget(m_pEditor);
 	mainLayout->addWidget(m_buttonBox);
 
 
@@ -1552,108 +1489,70 @@ void DialogSignalProperty::createPropertyList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogSignalProperty::onPropertyValueChanged(QtProperty* property, const QVariant &value)
+void DialogSignalProperty::onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
-	if (property == nullptr)
+	for (const std::shared_ptr<PropertyObject>& modifiedFilter : objects)
 	{
-		return;
-	}
-
-	if (m_propertyMap.contains(property) == false)
-	{
-		return;
-	}
-
-	int index = m_propertyMap[property];
-	if (index < 0 || index >= SIGNAL_PROPERTY_ITEM_COUNT)
-	{
-		return;
-	}
-
-	int groupIndex = -1;
-
-	switch(index)
-	{
-		case SIGNAL_PROPERTY_ITEM_CUSTOM_ID:			m_param.setCustomAppSignalID(value.toString());										groupIndex = SIGNAL_PROPERTY_GROUP_ID;			break;
-		case SIGNAL_PROPERTY_ITEM_CAPTION:				m_param.setCaption(value.toString());												groupIndex = SIGNAL_PROPERTY_GROUP_ID;			break;
-
-		// electric limit
-		//
-		case SIGNAL_PROPERTY_ITEM_EL_RANGE_LOW:			m_param.setElectricLowLimit(value.toDouble());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EL_RANGE_HIGH:		m_param.setElectricHighLimit(value.toDouble());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT:		m_param.setElectricUnitID(static_cast<E::ElectricUnit>(value.toInt()));				groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR:		m_param.setElectricSensorType(static_cast<E::SensorType>(value.toInt()));			groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EL_RANGE_RLOAD:		m_param.setElectricRLoad(value.toDouble());											groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EL_RANGE_R0:			m_param.setElectricR0(value.toDouble());											groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION:	m_param.setElectricPrecision(value.toInt());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
-
-		// engineering limit
-		//
-		case SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW:			m_param.setLowEngineeringUnits(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH:		m_param.setHighEngineeringUnits(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EN_RANGE_UNIT:		m_param.setUnit(value.toString());													groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EN_RANGE_PRECISION:	m_param.setDecimalPlaces(value.toInt());											groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
-	}
-
-	if (groupIndex < 0 || groupIndex >= SIGNAL_PROPERTY_GROUP_COUNT)
-	{
-		return;
-	}
-
-	updateGroupHeader(groupIndex);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogSignalProperty::updateGroupHeader(int index)
-{
-	if (index < 0 || index >= SIGNAL_PROPERTY_GROUP_COUNT)
-	{
-		return;
-	}
-
-	QtBrowserItem* browserItem = m_browserItemList[index];
-	if (browserItem == nullptr)
-	{
-		return;
-	}
-
-	QString header;
-
-	switch(index)
-	{
-		case SIGNAL_PROPERTY_GROUP_ID:			header = tr("Signal ID");												break;
-		case SIGNAL_PROPERTY_GROUP_EL_RANGE:	header = SignalPropertyGroup[index] + m_param.electricRangeStr();		break;
-		case SIGNAL_PROPERTY_GROUP_EN_RANGE:	header = SignalPropertyGroup[index] + m_param.engineeringRangeStr();	break;
-
-		default:
+		auto properties = modifiedFilter.get();
+		if (properties == nullptr)
+		{
 			assert(0);
+			continue;
+		}
+
+		auto propertyLEL = properties->propertyByCaption(DialogSignalProperty::tr("Electric low limit"));
+		if (propertyLEL != nullptr)
+		{
+			propertyLEL->setPrecision(m_param.electricPrecision());
+		}
+
+		auto propertyHEL = properties->propertyByCaption(DialogSignalProperty::tr("Electric high limit"));
+		if (propertyHEL != nullptr)
+		{
+			propertyHEL->setPrecision(m_param.electricPrecision());
+		}
+
+		auto propertyLEN = properties->propertyByCaption(DialogSignalProperty::tr("Engineering low limit"));
+		if (propertyLEN != nullptr)
+		{
+			propertyLEN->setPrecision(m_param.decimalPlaces());
+		}
+
+		auto propertyHEN = properties->propertyByCaption(DialogSignalProperty::tr("Engineering high limit"));
+		if (propertyHEN != nullptr)
+		{
+			propertyHEN->setPrecision(m_param.decimalPlaces());
+		}
 	}
 
-	browserItem->property()->setPropertyName(header);
+	m_pPropertyEditor->updatePropertiesValues();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void DialogSignalProperty::onPropertyExpanded(QtBrowserItem* item)
 {
-	if (item == nullptr)
-	{
-		return;
-	}
+	Q_UNUSED(item)
 
-	if (m_pEditor == nullptr)
-	{
-		return;
-	}
+//	for qt6
+//
+//	if (item == nullptr)
+//	{
+//		return;
+//	}
 
-	for(int g = 0; g < SIGNAL_PROPERTY_GROUP_COUNT; g++)
-	{
-		if (m_browserItemList[g] == item)
-		{
-			m_showGroupHeader[g] = m_pEditor->isExpanded(item);
-		}
-	}
+//	if (m_pPropertyEditor == nullptr)
+//	{
+//		return;
+//	}
+
+//	for(int g = 0; g < SIGNAL_PROPERTY_GROUP_COUNT; g++)
+//	{
+//		if (m_browserItemList[g] == item)
+//		{
+//			m_showGroupHeader[g] = m_pPropertyEditor->isExpanded(item);
+//		}
+//	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1883,7 +1782,7 @@ void DialogComparatorProperty::createPropertyList()
 				inputGroup->addSubProperty(item);
 
 				item = m_pManager->addProperty(QVariant::String, tr("Signal type"));
-				item->setValue(qApp->translate("MetrologySignal", m_comparatorEx.inputSignal()->param().signalTypeStr().toUtf8()));
+				item->setValue(m_comparatorEx.inputSignal()->param().signalTypeStr());
 				item->setAttribute(QLatin1String("readOnly"), true);
 				inputGroup->addSubProperty(item);
 
@@ -2347,7 +2246,7 @@ DialogMeasureProperty::PropertyPattern::PropertyPattern(Measure::Item* pObject) 
 		.setReadOnly(true);
 
 
-	QString groupPosition = qApp->translate("DialogObjectProperty", MeasurePropertyGroup[MEASURE_PROPERTY_GROUP_POS]);
+	QString groupPosition = qApp->translate("DialogObjectProperty", MeasurePropertyGroup[MEASURE_PROPERTY_GROUP_POSITION]);
 
 	ADD_PROPERTY_GETTER(QString, DialogMeasureProperty::tr("Module SN"), true, m_pObject->location().Metrology::SignalLocation::moduleSerialNoStr)
 		->setCategory(groupPosition)

@@ -514,7 +514,7 @@ namespace Metrology
 				typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Unknown");
 		}
 
-		return typeCaption;
+		return qApp->translate("MetrologySignal", typeCaption.toUtf8());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -680,7 +680,7 @@ namespace Metrology
 	QString SignalParam::electricR0Str() const
 	{
 		QString r0;
-		r0 = QString::asprintf("R0=%0.2f", m_electricR0);
+		r0 = QString::asprintf("R0=%0.0f", m_electricR0);
 		return r0;
 	}
 
