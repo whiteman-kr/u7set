@@ -729,11 +729,6 @@ bool TuningServiceSettingsGetter::fillTuningSourcesInfo(const Builder::Context* 
 
 		Tuning::TuningSource ts;
 
-		if (lm->equipmentIdTemplate() == "SYSTEMID_RACK01_CH06_MD00")
-		{
-			DEBUG_STOP;
-		}
-
 		bool res = getLmPropertiesFromDevice(lm, E::LanControllerType::Tuning,
 											context, &ts);
 		if (res == false)

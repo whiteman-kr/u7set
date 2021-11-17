@@ -225,19 +225,24 @@ namespace Sim
 		return result;
 	}
 
-	void Lans::sendTuningWriteConfirmation(std::vector<qint64> confirmedRecords, const Sim::RamArea& data, bool setSorChassisState, TimeStamp timeStamp)
+	void Lans::sendTuningWriteConfirmation(const QString& portEquipmentId,
+										   qint64 confirmedRecordId,
+										   const Sim::RamArea& data,
+										   bool setSorChassisState,
+										   TimeStamp timeStamp)
 	{
 		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
 		{
-			if (i->isTuning() == true && i->enabled() == true)
+			if (i->isTuning() == true && i->enabled() == true && i->portEquipmentId() == portEquipmentId)
 			{
 				TuningLanInterface* tli = i->toTuningLanInterface();
+
 				if (tli == nullptr)
 				{
 					continue;
 				}
 
-				tli->sendWriteConfirmation(confirmedRecords, data, setSorChassisState, timeStamp);
+				tli->sendWriteConfirmation(confirmedRecordId, data, setSorChassisState, timeStamp);
 			}
 		}
 

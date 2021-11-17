@@ -29,7 +29,11 @@ namespace Sim
 		void tuningModeLeft();
 
 		std::queue<TuningRecord> fetchWriteTuningQueue();
-		void sendWriteConfirmation(std::vector<qint64> confirmedRecords, const Sim::RamArea& ramArea, bool setSorChassisState, TimeStamp timeStamp);
+
+		void sendWriteConfirmation(qint64 confirmedRecordID,
+								   const Sim::RamArea& ramArea,
+								   bool setSorChassisState,
+								   TimeStamp timeStamp);
 
 	public:
 	private:

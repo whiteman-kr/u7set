@@ -70,13 +70,16 @@ namespace Sim
 		return result;
 	}
 
-	void TuningLanInterface::sendWriteConfirmation(std::vector<qint64> confirmedRecords, const Sim::RamArea& ramArea, bool setSorChassisState, TimeStamp timeStamp)
+	void TuningLanInterface::sendWriteConfirmation(qint64 confirmedRecordId,
+												   const Sim::RamArea& ramArea,
+												   bool setSorChassisState,
+												   TimeStamp timeStamp)
 	{
 		if (enabled() == false || m_tuningServiceCommunicator == nullptr)
 		{
 			return;
 		}
 
-		return m_tuningServiceCommunicator->writeConfirmation(std::move(confirmedRecords), lmEquipmentId(), portEquipmentId(), ramArea, setSorChassisState, timeStamp);
+		return m_tuningServiceCommunicator->writeConfirmation(confirmedRecordId, lmEquipmentId(), portEquipmentId(), ramArea, setSorChassisState, timeStamp);
 	}
 }
