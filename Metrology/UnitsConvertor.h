@@ -220,6 +220,9 @@ public:
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoCouple(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType);				// get physical value for blocks of thermocouple signals	- module TIM
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoResistor(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double r0);	// get physical value for blocks of thermoresistor signals	- module RIM
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_Output(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int outputMode);						// get physical value for blocks of output signals			- module AOM
+
+	Q_INVOKABLE QString electricUnitName(int electricUnit) const;
+	Q_INVOKABLE QString sensorTypeName(int sensorType) const;
 };
 
 // ==============================================================================================

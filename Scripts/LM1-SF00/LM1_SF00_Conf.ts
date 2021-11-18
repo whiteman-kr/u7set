@@ -82,6 +82,9 @@ enum SensorType {
 
 	Ohm_Raw = 33,
 
+	mV_Type_L = 36,
+	mV_Type_M = 37,
+	mV_Raw_m1200_p1200 = 38,
 }
 
 enum OutputMode {
@@ -351,7 +354,8 @@ let LMNumberCount: number = 0;
 //let configScriptVersion: number = 41;		// ScriptDeviceObject is used
 //let configScriptVersion: number = 42;		// DiagDataSize is written for i/o module frame for LM8_SR10, LM1_SR03 and LM1_SR04
 //let configScriptVersion: number = 43;		// Tuning LAN configuration is placed in LAN2 and LAN3 for LM1_SR04 LAN 
-let configScriptVersion: number = 44;		// Tuning LAN configuration is placed in LAN1 or LAN2/LAN3 depending on LAN description
+//let configScriptVersion: number = 44;		// Tuning LAN configuration is placed in LAN1 or LAN2/LAN3 depending on LAN description
+let configScriptVersion = 45; 			// Added mV_Type_L, mV_Type_M and mV_Raw_m1200_p1200 sensor types
 
 //
 
