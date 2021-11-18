@@ -9,9 +9,9 @@ namespace VFrame30
 	}
 
 	Session::Session(QString projectId, QString username, QString host) :
-		m_project(projectId),
-		m_username(username),
-		m_host(host)
+		m_project(std::move(projectId)),
+		m_username(std::move(username)),
+		m_host(std::move(host))
 	{
 		ADD_PROPERTY_GETTER(QString, "Project", true, Session::project);
 		ADD_PROPERTY_GETTER(QString, "Username", true, Session::username);
@@ -39,7 +39,7 @@ namespace VFrame30
 
 	void Session::setProject(QString value)
 	{
-		m_project = value;
+		m_project = std::move(value);
 	}
 
 	QString Session::username() const
@@ -49,7 +49,7 @@ namespace VFrame30
 
 	void Session::setUsername(QString value)
 	{
-		m_username = value;
+		m_username = std::move(value);
 	}
 
 	QString Session::host() const
@@ -59,7 +59,7 @@ namespace VFrame30
 
 	void Session::setHost(QString value)
 	{
-		m_host = value;
+		m_host = std::move(value);
 	}
 
 	QString Session::date() const

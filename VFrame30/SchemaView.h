@@ -1,6 +1,14 @@
 #pragma once
 #include "Session.h"
 
+namespace VFrame30Private
+{
+	class SchemaRenderThread
+	{
+
+	};
+}
+
 namespace VFrame30
 {
 	class Schema;
@@ -14,8 +22,8 @@ namespace VFrame30
 		Q_OBJECT
 
 	public:
-		explicit SchemaView(QWidget* parent = 0);
-		explicit SchemaView(std::shared_ptr<Schema> schema, QWidget* parent = 0);
+		explicit SchemaView(QWidget* parent = nullptr);
+		explicit SchemaView(std::shared_ptr<Schema> schema, QWidget* parent = nullptr);
 
 	public:
 		void updateControlWidgets(bool editMode);
@@ -48,7 +56,7 @@ namespace VFrame30
 		// Signals
 		//
 	signals:
-		void signal_schemaChanged(Schema* schema);
+		void signal_schemaChanged(VFrame30::Schema* schema);
 
 		// Properties
 		//
@@ -67,6 +75,7 @@ namespace VFrame30
 
 		Session m_session;
 	};
+
 }
 
 

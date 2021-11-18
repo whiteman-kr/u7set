@@ -103,7 +103,7 @@ namespace VFrame30
 			return;
 		}
 
-		QPolygonF polyline(static_cast<int>(poinlist.size()));
+		QPolygonF polyline(poinlist.size());
 		int index = 0;
 
 		for (auto pt = poinlist.cbegin(); pt != poinlist.cend(); ++pt)
@@ -113,8 +113,16 @@ namespace VFrame30
 		}
 
 		QPen pen(lineColor());
-		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
 		pen.setStyle(static_cast<Qt::PenStyle>(m_lineStyle));
+
+		if (m_weight == 0.0 && drawParam->cosmeticPenWidth() == 0)
+		{
+			pen.setCosmetic(true);
+		}
+		else
+		{
+			pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
+		}
 
 		p->setPen(pen);
 		p->drawPolyline(polyline);
