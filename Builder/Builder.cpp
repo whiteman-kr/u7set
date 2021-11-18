@@ -7,7 +7,6 @@ namespace Builder
 	void init()
 	{
 		qmlRegisterAnonymousType<Hardware::OptoPort>("OptoPort", 1);
-		qmlRegisterAnonymousType<JsVariantList>("JsVariantList", 1);
 		qmlRegisterAnonymousType<UnitsConvertor>("UnitsConvertor", 1);
 
 		qRegisterMetaType<RunOrder>("RunOrder");

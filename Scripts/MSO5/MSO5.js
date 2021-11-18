@@ -155,18 +155,17 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 		//
 		let hashName = "S" + dataIP + module.equipmentId + serverIP + serverPort;
 		let hashList = confFirmware.calcHash64(hashName);
-		let size = hashList.jsSize();
+		let size = hashList.length;
 		if (size != 2) {
 			log.writeError("Hash is not 2 32-bitwords in function generate_mso5!");
 			return false;
 		}
 
-		let h0 = hashList.jsAt(0);
-		let h1 = hashList.jsAt(1);
+		let h = (hashList[0] + hashList[1]);
 
 		let m1 = 0x4200;
-		let m2 = h0 & 0x7fff;
-		let m3 = (h0 >> 16) & 0x7fff;
+		let m2 = h & 0x7fff;
+		let m3 = (h >> 16) & 0x7fff;
 	
 		confFirmware.writeLog("    [" + frame + ":" + ptr + "] : MAC address of MSO5 = " + m1.toString(16) + ":" + m2.toString(16) + ":" + m3.toString(16) + "\r\n");
 		if (setData16(confFirmware, log, LMNumber, ethernetController.equipmentId, frame, ptr, "MAC1", m1) == false) {

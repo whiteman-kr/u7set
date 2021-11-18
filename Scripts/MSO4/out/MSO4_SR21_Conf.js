@@ -591,16 +591,18 @@ function generate_LANConfiguration(confFirmware, log, frame, module, ethernetCon
     //
     let hashName = "S" + regIP + diagIP + moduleEquipmentID + regServiceIP + diagServiceIP;
     let hashList = confFirmware.calcHash64(hashName);
-    let size = hashList.jsSize();
+    let size = hashList.length;
     if (size != 2) {
         log.writeError("Hash is not 2 32-bitwords in function generate_LANConfiguration!");
         return false;
     }
-    let h0 = hashList.jsAt(0);
-    let h1 = hashList.jsAt(1);
+    let h = (hashList[0] + hashList[1]);
     let m1 = 0x4200;
-    let m2 = h0 & 0x7fff;
-    let m3 = (h0 >> 16) & 0x7fff;
+    let m2 = h & 0x7fff;
+    let m3 = (h >> 16) & 0x7fff;
+    if (confFirmware.checkMacForUnique(m1, m2, m3) == false) {
+        log.errINT1001("MAC address " + m1.toString(16) + ":" + m2.toString(16) + ":" + m3.toString(16) + " of " + controllerEquipmentID + " is not unique!");
+    }
     confFirmware.writeLog("    [" + frame + ":" + ptr + "] : MAC address of LM = " + m1.toString(16) + ":" + m2.toString(16) + ":" + m3.toString(16) + "\r\n");
     if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "MAC1", m1) == false) {
         return false;

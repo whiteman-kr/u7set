@@ -156,7 +156,8 @@ let LMNumberCount = 0;
 //let configScriptVersion: number = 42;		// DiagDataSize is written for i/o module frame for LM8_SR10, LM1_SR03 and LM1_SR04
 //let configScriptVersion: number = 43;		// Tuning LAN configuration is placed in LAN2 and LAN3 for LM1_SR04 LAN 
 //let configScriptVersion: number = 44;		// Tuning LAN configuration is placed in LAN1 or LAN2/LAN3 depending on LAN description
-let configScriptVersion = 45; // Added mV_Type_L, mV_Type_M and mV_Raw_m1200_p1200 sensor types
+//let configScriptVersion = 45; 			// Added mV_Type_L, mV_Type_M and mV_Raw_m1200_p1200 sensor types
+let configScriptVersion = 46; // MAC address is checkind for uniqueness, LAN values are set to 0 if LAN is switched off
 //
 function main(builder, root, logicModules, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (logicModules.length != 0) {
@@ -686,21 +687,23 @@ function fillLanServiceData(confFirmware, softwareType, root, module, ethernetco
             lan.serviceIP = service.propertyIP(servicePrefix + "IP");
             lan.servicePort = service.propertyInt(servicePrefix + "Port");
         }
+        lan.dataID = module.propertyValue(overridePrefix + "LANDataUID");
+        if (lan.dataID == undefined) {
+            log.errCFG3000(overridePrefix + "LANDataUID", module.equipmentId);
+            return false;
+        }
+        let overrideTuningWordsCount = ethernetController.propertyInt("Override" + overridePrefix + "DataWordCount");
+        if (overrideTuningWordsCount != -1) {
+            lan.wordsCount = overrideTuningWordsCount;
+            lan.dataID = 0;
+        }
     }
     else {
         // If Enable == false, set service ID is 0 even
+        lan.dataID = 0;
+        lan.wordsCount = 0;
         lan.serviceIP = 0;
         lan.servicePort = 0;
-    }
-    lan.dataID = module.propertyValue(overridePrefix + "LANDataUID");
-    if (lan.dataID == undefined) {
-        log.errCFG3000(overridePrefix + "LANDataUID", module.equipmentId);
-        return false;
-    }
-    let overrideTuningWordsCount = ethernetController.propertyInt("Override" + overridePrefix + "DataWordCount");
-    if (overrideTuningWordsCount != -1) {
-        lan.wordsCount = overrideTuningWordsCount;
-        lan.dataID = 0;
     }
     return true;
 }
@@ -709,30 +712,39 @@ function generate_LANConfiguration_v1(confFirmware, frame, module, ethernetContr
     lan.push(lan1);
     lan.push(lan2);
     let ptr = 0;
-    let moduleEquipmentID = module.equipmentId;
     let controllerEquipmentID = module.equipmentId + ethernetControllerId;
     let LMNumber = module.propertyInt("LMNumber");
-    //mac
-    //
-    let hashName = "S";
-    for (let i = 0; i < lan.length; i++) {
-        hashName += lan[i].ip;
+    let m1 = 0;
+    let m2 = 0;
+    let m3 = 0;
+    if (lan1.ip == 0 && lan2.ip == 0 && lan1.serviceIP == 0 && lan2.serviceIP == 0) {
+        // mac is empty
+        //
     }
-    hashName += moduleEquipmentID;
-    for (let i = 0; i < lan.length; i++) {
-        hashName += lan[i].serviceIP;
+    else {
+        //mac
+        //
+        let hashName = "S";
+        for (let i = 0; i < lan.length; i++) {
+            hashName += lan[i].ip;
+        }
+        hashName += controllerEquipmentID;
+        for (let i = 0; i < lan.length; i++) {
+            hashName += lan[i].serviceIP;
+        }
+        let hashList = confFirmware.calcHash64(hashName);
+        if (hashList.length != 2) {
+            log.writeError("Hash is not 2 32-bitwords in function generate_LANConfiguration!");
+            return false;
+        }
+        let h = (hashList[0] + hashList[1]);
+        m1 = 0x4200;
+        m2 = h & 0x7fff;
+        m3 = (h >> 16) & 0x7fff;
+        if (confFirmware.checkMacForUnique(m1, m2, m3) == false) {
+            log.errINT1001("MAC address " + m1.toString(16) + ":" + m2.toString(16) + ":" + m3.toString(16) + " of " + controllerEquipmentID + " is not unique!");
+        }
     }
-    let hashList = confFirmware.calcHash64(hashName);
-    let size = hashList.jsSize();
-    if (size != 2) {
-        log.writeError("Hash is not 2 32-bitwords in function generate_LANConfiguration!");
-        return false;
-    }
-    let h0 = hashList.jsAt(0);
-    let h1 = hashList.jsAt(1);
-    let m1 = 0x4200;
-    let m2 = h0 & 0x7fff;
-    let m3 = (h0 >> 16) & 0x7fff;
     confFirmware.writeLog("    [" + frame + ":" + ptr + "] : MAC address of LM = " + m1.toString(16) + ":" + m2.toString(16) + ":" + m3.toString(16) + "\r\n");
     if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "MAC1", m1) == false) {
         return false;
@@ -807,7 +819,6 @@ function generate_LANConfiguration_v1(confFirmware, frame, module, ethernetContr
 }
 function generate_LANConfiguration_v2(confFirmware, frame, module, ethernetControllerId, lan, log) {
     let ptr = 0;
-    let moduleEquipmentID = module.equipmentId;
     let controllerEquipmentID = module.equipmentId + ethernetControllerId;
     let LMNumber = module.propertyInt("LMNumber");
     // Version
@@ -818,27 +829,46 @@ function generate_LANConfiguration_v2(confFirmware, frame, module, ethernetContr
         return false;
     }
     ptr += 2;
-    //mac
+    // MAC address
     //
-    let hashName = "S";
+    let m1 = 0;
+    let m2 = 0;
+    let m3 = 0;
+    let macIsEmpty = true;
     for (let i = 0; i < lan.length; i++) {
-        hashName += lan[i].ip;
+        if (lan[i].ip != 0 || lan[i].serviceIP != 0) {
+            macIsEmpty = false;
+            break;
+        }
     }
-    hashName += moduleEquipmentID;
-    for (let i = 0; i < lan.length; i++) {
-        hashName += lan[i].serviceIP;
+    if (macIsEmpty == true) {
+        // mac is empty
+        //
     }
-    let hashList = confFirmware.calcHash64(hashName);
-    let size = hashList.jsSize();
-    if (size != 2) {
-        log.writeError("Hash is not 2 32-bitwords in function generate_LANConfiguration!");
-        return false;
+    else {
+        // mac
+        //
+        let hashName = "S";
+        for (let i = 0; i < lan.length; i++) {
+            hashName += lan[i].ip;
+        }
+        hashName += controllerEquipmentID;
+        for (let i = 0; i < lan.length; i++) {
+            hashName += lan[i].serviceIP;
+        }
+        let hashList = confFirmware.calcHash64(hashName);
+        if (hashList.length != 2) {
+            log.writeError("Hash is not 2 32-bitwords in function generate_LANConfiguration!");
+            return false;
+        }
+        let h = (hashList[0] + hashList[1]);
+        m1 = 0x4200;
+        m2 = h & 0x7fff;
+        m3 = (h >> 16) & 0x7fff;
+        if (confFirmware.checkMacForUnique(m1, m2, m3) == false) {
+            log.errINT1001("MAC address " + m1.toString(16) + ":" + m2.toString(16) + ":" + m3.toString(16) + " of " + controllerEquipmentID + " is not unique!");
+        }
     }
-    let h0 = hashList.jsAt(0);
-    let h1 = hashList.jsAt(1);
-    let m1 = 0x4200;
-    let m2 = h0 & 0x7fff;
-    let m3 = (h0 >> 16) & 0x7fff;
     confFirmware.writeLog("    [" + frame + ":" + ptr + "] : MAC address of LM = " + m1.toString(16) + ":" + m2.toString(16) + ":" + m3.toString(16) + "\r\n");
     if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "MAC1", m1) == false) {
         return false;

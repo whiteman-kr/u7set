@@ -5,25 +5,6 @@
 
 #include "../Metrology/UnitsConvertor.h"
 
-//
-// JsVariantList
-//
-
-class JsVariantList : public QObject
-{
-	Q_OBJECT
-public:
-	JsVariantList(QObject* parent);
-
-	void append(QVariant v);
-	Q_INVOKABLE int jsSize();
-	Q_INVOKABLE QVariant jsAt(int i);
-
-private:
-	QVariantList m_list;
-};
-
-
 namespace Hardware
 {
 	struct UartChannelData
@@ -83,7 +64,7 @@ namespace Hardware
 		Q_INVOKABLE quint32 data32(int frameIndex, int offset);
 		Q_INVOKABLE float dataFloat(int frameIndex, int offset);
 
-		Q_INVOKABLE JsVariantList* calcHash64(QString dataString);
+		Q_INVOKABLE QList<int> calcHash64(QString dataString);
 		Q_INVOKABLE QString storeCrc64(int frameIndex, int start, int count, int offset);
 		Q_INVOKABLE QString storeHash64(int frameIndex, int offset, QString dataString);
 
@@ -97,6 +78,8 @@ namespace Hardware
 		Q_INVOKABLE void jsSetUniqueID(int lmNumber, quint64 uniqueID);
 
 		Q_INVOKABLE UnitsConvertor* jsGetUnitsConvertor();
+
+		Q_INVOKABLE bool checkMacForUnique(quint16 m1, quint16 m2, quint16 m3);
 
 		// Script execution log
 		//
@@ -121,6 +104,8 @@ namespace Hardware
 		// Script execution log, key is Subsystem ID
 		//
 		std::map<QString, QStringList> m_scriptLog;
+
+		std::set<qulonglong> m_macMap;
 
 		// Pointers to firmware and data currently processed by script, used by script functions
 		//
