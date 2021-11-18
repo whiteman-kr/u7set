@@ -19,10 +19,6 @@
 #include "../lib/PropertyEditor.h"
 #include "../CommonLib/Hash.h"
 
-#include "../qtpropertybrowser/src/qtpropertymanager.h"
-#include "../qtpropertybrowser/src/qtvariantproperty.h"
-#include "../qtpropertybrowser/src/qttreepropertybrowser.h"
-
 #include "MetrologySignal.h"
 #include "DialogList.h"
 #include "Options.h"
@@ -341,9 +337,8 @@ private:
 	//
 	//
 	static bool m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT];
-	QtBrowserItem* m_browserItemList[SIGNAL_PROPERTY_GROUP_COUNT];
-
-	QtProperty* m_propertyGroupList[SIGNAL_PROPERTY_GROUP_COUNT];
+	//QtBrowserItem* m_browserItemList[SIGNAL_PROPERTY_GROUP_COUNT];
+	//QtProperty* m_propertyGroupList[SIGNAL_PROPERTY_GROUP_COUNT];
 
 	void createContextMenu();
 	void createPropertyList();
@@ -354,10 +349,10 @@ protected:
 
 private slots:
 
-	// slots of editor
+	// slots of property editor
 	//
 	void onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects);
-	void onPropertyExpanded(QtBrowserItem* item);
+	//void onPropertyExpanded(QtBrowserItem* item);
 
 	// slots of menu
 	//
@@ -401,19 +396,6 @@ const int						COMPARATOR_PROPERTY_GROUP_SCHEMA			= 0,
 
 // ----------------------------------------------------------------------------------------------
 
-const int						COMPARATOR_PROPERTY_ITEM_CMP_TYPE			= 0,
-
-								COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE		= 1,
-								COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE		= 2,
-								COMPARATOR_PROPERTY_ITEM_CMP_PRECESION		= 3,
-
-								COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE		= 4,
-								COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE		= 5;
-
-const int						COMPARATOR_PROPERTY_ITEM_COUNT				= 6;
-
-// ----------------------------------------------------------------------------------------------
-
 class DialogComparatorProperty : public QDialog
 {
 	Q_OBJECT
@@ -425,37 +407,45 @@ public:
 
 public:
 
-	Metrology::ComparatorEx		comparator() const { return m_comparatorEx; }
+	Metrology::ComparatorEx comparator() const { return m_comparatorEx; }
 
 private:
 
-	Metrology::ComparatorEx		m_comparatorEx;
+	class PropertyPattern: public PropertyObject
+	{
+	public:
 
-	// Property list
+		explicit PropertyPattern(Metrology::ComparatorEx* pObject);
+
+		QString comapreTo();
+		double electricConstValue();
+
+	private:
+
+		Metrology::ComparatorEx* m_pObject = nullptr;
+	};
+
+	Metrology::ComparatorEx m_comparatorEx;
+
 	//
-	QtVariantPropertyManager*	m_pManager = nullptr;
-	QtVariantEditorFactory*		m_pFactory = nullptr;
-	QtTreePropertyBrowser*		m_pEditor = nullptr;
-
-	// buttons
 	//
-	QDialogButtonBox*			m_buttonBox = nullptr;
+	ExtWidgets::PropertyEditor* m_pPropertyEditor = nullptr;
+	QDialogButtonBox* m_buttonBox = nullptr;
 
-	static bool					m_showGroupHeader[COMPARATOR_PROPERTY_GROUP_COUNT];
-	QtBrowserItem*				m_browserItemList[COMPARATOR_PROPERTY_GROUP_COUNT];
+	static bool m_showGroupHeader[COMPARATOR_PROPERTY_GROUP_COUNT];
+	//QtBrowserItem* m_browserItemList[COMPARATOR_PROPERTY_GROUP_COUNT];
+	//QtProperty* m_propertyGroupList[COMPARATOR_PROPERTY_GROUP_COUNT];
 
-	QMap<QtProperty*,int>		m_propertyMap;
-
-	QtProperty*					m_propertyGroupList[COMPARATOR_PROPERTY_GROUP_COUNT];
-
-	void						createPropertyList();
+	void createPropertyList();
 
 private slots:
 
-	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
-	void						onPropertyExpanded(QtBrowserItem* item);
+	// slots of property editor
+	//
+	void onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects);
+	//void onPropertyExpanded(QtBrowserItem* item);
 
-	void						onOk();
+	void onOk();
 };
 
 // ==============================================================================================
