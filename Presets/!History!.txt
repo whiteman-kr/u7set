@@ -1,5 +1,8 @@
 Preset changes log
 
+AI_SIM
+	18.11.2021	Version: 0	AIM-SIM_v0.u7devp		CMCASETASK-545:  Added AI-SIM preset
+
 AOM_SR
 	11.11.2021	Version: 1	AOM-SR_v1.u7devp		RPCT-3188:  Bugfix: Configuration is now generating for outputs 31 and 32
 	11.11.2021	Version: 2	AOM-SR_v2.u7devp		RPCT-3188:  Validity signals are added to output controller
