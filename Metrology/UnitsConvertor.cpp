@@ -1024,3 +1024,22 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Output(double elVal, doubl
 	return UnitsConvertResult(phVal);
 }
 
+QString UnitsConvertor::electricUnitName(int electricUnit) const
+{
+	if (E::contains<E::ElectricUnit>(electricUnit) == false)
+	{
+		return tr("Unknown");
+	}
+
+	return E::valueToString<E::ElectricUnit>(static_cast<E::ElectricUnit>(electricUnit));
+}
+
+QString UnitsConvertor::sensorTypeName(int sensorType) const
+{
+	if (E::contains<E::SensorType>(sensorType) == false)
+	{
+		return tr("Unknown");
+	}
+
+	return E::valueToString<E::SensorType>(static_cast<E::SensorType>(sensorType));
+}
