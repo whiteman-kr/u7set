@@ -29,7 +29,7 @@ DialogProjectProperty::PropertyPattern::PropertyPattern(ProjectInfo* pObject) : 
 		return;
 	}
 
-	QString categoryInfo = qApp->translate("DialogObjectProperty", ProjectPropertyCategory[PROJECT_PROPERTY_CATEGORY_INFO]);
+	QString categoryInfo = ProjectPropertyCategoryCaption(ProjectPropertyCategory::Info);
 
 	ADD_PROPERTY_GETTER(QString, DialogProjectProperty::tr("Project name"), true, m_pObject->ProjectInfo::projectName)
 		->setCategory(categoryInfo)
@@ -41,7 +41,7 @@ DialogProjectProperty::PropertyPattern::PropertyPattern(ProjectInfo* pObject) : 
 		->setCategory(categoryInfo)
 		.setViewOrder(2);
 
-	QString categoryHost = qApp->translate("DialogObjectProperty", ProjectPropertyCategory[PROJECT_PROPERTY_CATEGORY_HOST]);
+	QString categoryHost = ProjectPropertyCategoryCaption(ProjectPropertyCategory::Host);
 
 	ADD_PROPERTY_GETTER(QString, DialogProjectProperty::tr("User"), true, m_pObject->ProjectInfo::user)
 		->setCategory(categoryHost)
@@ -50,7 +50,7 @@ DialogProjectProperty::PropertyPattern::PropertyPattern(ProjectInfo* pObject) : 
 		->setCategory(categoryHost)
 		.setViewOrder(1);
 
-	QString categoryVersion = qApp->translate("DialogObjectProperty", ProjectPropertyCategory[PROJECT_PROPERTY_CATEGORY_VERSION]);
+	QString categoryVersion = ProjectPropertyCategoryCaption(ProjectPropertyCategory::Version);
 
 	ADD_PROPERTY_GETTER(int, DialogProjectProperty::tr("Database Version"), true, m_pObject->ProjectInfo::dbVersion)
 		->setCategory(categoryVersion)
@@ -105,6 +105,26 @@ void DialogProjectProperty::createPropertyList()
 	//
 	//
 	setLayout(mainLayout);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString ProjectPropertyCategoryCaption(ProjectPropertyCategory category)
+{
+	QString caption;
+
+	switch (category)
+	{
+		case ProjectPropertyCategory::Info:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Project");		break;
+		case ProjectPropertyCategory::Host:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Host");			break;
+		case ProjectPropertyCategory::Version:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "3 File version");	break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
+	}
+
+	return qApp->translate("DialogObjectProperty", caption.toUtf8());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1092,7 +1112,7 @@ QString PrComparatorListTable::text(int row, int column, std::shared_ptr<Metrolo
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-bool DialogSignalProperty::m_showGroupHeader[SIGNAL_PROPERTY_CATEGORY_COUNT] =
+bool DialogSignalProperty::m_showGroupHeader[SignalPropertyCategoryCount] =
 {
 	true,	//	SIGNAL_PROPERTY_CATEGORY_SIGNAL_ID
 	false,	//	SIGNAL_PROPERTY_CATEGORY_POSITION
@@ -1131,7 +1151,7 @@ DialogSignalProperty::PropertyPattern::PropertyPattern(Metrology::SignalParam* p
 		return;
 	}
 
-	QString categorySignalID = qApp->translate("DialogObjectProperty", SignalPropertyCategory[SIGNAL_PROPERTY_CATEGORY_SIGNAL_ID]);
+	QString categorySignalID = SignalPropertyCategoryCaption(SignalPropertyCategory::SignalID);
 
 	ADD_PROPERTY_GETTER_SETTER(QString, DialogSignalProperty::tr("SignalID"), true, m_pObject->Metrology::SignalParam::customAppSignalID, m_pObject->Metrology::SignalParam::setCustomAppSignalID)
 		->setCategory(categorySignalID)
@@ -1157,7 +1177,7 @@ DialogSignalProperty::PropertyPattern::PropertyPattern(Metrology::SignalParam* p
 		.setReadOnly(true);
 
 
-	QString categoryPosition = qApp->translate("DialogObjectProperty", SignalPropertyCategory[SIGNAL_PROPERTY_CATEGORY_POSITION]);
+	QString categoryPosition = SignalPropertyCategoryCaption(SignalPropertyCategory::SignalPosition);
 
 	ADD_PROPERTY_GETTER(QString, DialogSignalProperty::tr("Rack"), true, m_pObject->location().Metrology::SignalLocation::rackCaption)
 		->setCategory(categoryPosition)
@@ -1181,7 +1201,7 @@ DialogSignalProperty::PropertyPattern::PropertyPattern(Metrology::SignalParam* p
 		.setReadOnly(true);
 
 
-	QString categoryElectricLimit = qApp->translate("DialogObjectProperty", SignalPropertyCategory[SIGNAL_PROPERTY_CATEGORY_EL_RANGE]);
+	QString categoryElectricLimit = SignalPropertyCategoryCaption(SignalPropertyCategory::ElectricLimit);
 
 	ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Electric low limit"), true, m_pObject->Metrology::SignalParam::electricLowLimit, m_pObject->Metrology::SignalParam::setElectricLowLimit)
 		->setCategory(categoryElectricLimit)
@@ -1236,7 +1256,7 @@ DialogSignalProperty::PropertyPattern::PropertyPattern(Metrology::SignalParam* p
 		.setViewOrder(5);
 
 
-	QString categoryEngineeringLimit = qApp->translate("DialogObjectProperty", SignalPropertyCategory[SIGNAL_PROPERTY_CATEGORY_EN_RANGE]);
+	QString categoryEngineeringLimit = SignalPropertyCategoryCaption(SignalPropertyCategory::EngineeringLimit);
 
 	ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Engineering low limit"), true, m_pObject->Metrology::SignalParam::lowEngineeringUnits, m_pObject->Metrology::SignalParam::setLowEngineeringUnits)
 		->setCategory(categoryEngineeringLimit)
@@ -1652,10 +1672,31 @@ void DialogSignalProperty::closeEvent(QCloseEvent* e)
 }
 
 // -------------------------------------------------------------------------------------------------------------------
+
+QString SignalPropertyCategoryCaption(SignalPropertyCategory category)
+{
+	QString caption;
+
+	switch (category)
+	{
+		case SignalPropertyCategory::SignalID:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Signal ID");			break;
+		case SignalPropertyCategory::SignalPosition:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Position");			break;
+		case SignalPropertyCategory::ElectricLimit:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "3 Electric range");	break;
+		case SignalPropertyCategory::EngineeringLimit:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "4 Engineering range");	break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
+	}
+
+	return qApp->translate("DialogObjectProperty", caption.toUtf8());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-bool DialogComparatorProperty::m_showGroupHeader[COMPARATOR_PROPERTY_CATEGORY_COUNT] =
+bool DialogComparatorProperty::m_showGroupHeader[ComparatorPropertyCategoryCount] =
 {
 	true,	//	COMPARATOR_PROPERTY_CATEGORY_SCHEMA
 	true,	//	COMPARATOR_PROPERTY_CATEGORY_INPUT
@@ -1691,7 +1732,7 @@ DialogComparatorProperty::PropertyPattern::PropertyPattern(Metrology::Comparator
 
 	QString electricUnit, engineeringUnit;
 
-	QString categorySchemaID = qApp->translate("DialogObjectProperty", ComparatorPropertyCategory[COMPARATOR_PROPERTY_CATEGORY_SCHEMA]);
+	QString categorySchemaID = ComparatorPropertyCategoryCaption(ComparatorPropertyCategory::Schema);
 
 	ADD_PROPERTY_GETTER(QString, DialogComparatorProperty::tr("SchemaID"), true, m_pObject->Metrology::ComparatorEx::schemaID)
 		->setCategory(categorySchemaID)
@@ -1699,7 +1740,7 @@ DialogComparatorProperty::PropertyPattern::PropertyPattern(Metrology::Comparator
 		.setReadOnly(true);
 
 
-	QString categoryInput = qApp->translate("DialogObjectProperty", ComparatorPropertyCategory[COMPARATOR_PROPERTY_CATEGORY_INPUT]);
+	QString categoryInput = ComparatorPropertyCategoryCaption(ComparatorPropertyCategory::Input);
 
 	if (m_pObject->inputSignal() == nullptr)
 	{
@@ -1758,7 +1799,7 @@ DialogComparatorProperty::PropertyPattern::PropertyPattern(Metrology::Comparator
 	}
 
 
-	QString categoryCompare = qApp->translate("DialogObjectProperty", ComparatorPropertyCategory[COMPARATOR_PROPERTY_CATEGORY_COMPARE]);
+	QString categoryCompare = ComparatorPropertyCategoryCaption(ComparatorPropertyCategory::Comapre);
 
 	ADD_PROPERTY_GETTER(QString, DialogComparatorProperty::tr("Compare to"), true, PropertyPattern::comapreTo)
 		->setCategory(categoryCompare)
@@ -1843,7 +1884,7 @@ DialogComparatorProperty::PropertyPattern::PropertyPattern(Metrology::Comparator
 	}
 
 
-	QString categoryHysteresis = qApp->translate("DialogObjectProperty", ComparatorPropertyCategory[COMPARATOR_PROPERTY_CATEGORY_HYSTERESIS]);
+	QString categoryHysteresis = ComparatorPropertyCategoryCaption(ComparatorPropertyCategory::Hysteresis);
 
 	if (m_pObject->hysteresis().isConst() == true)
 	{
@@ -1901,7 +1942,7 @@ DialogComparatorProperty::PropertyPattern::PropertyPattern(Metrology::Comparator
 	}
 
 
-	QString categoryOutput = qApp->translate("DialogObjectProperty", ComparatorPropertyCategory[COMPARATOR_PROPERTY_CATEGORY_OUTPUT]);
+	QString categoryOutput = ComparatorPropertyCategoryCaption(ComparatorPropertyCategory::Output);
 
 	if (m_pObject->outputSignal() == nullptr)
 	{
@@ -2135,6 +2176,28 @@ void DialogComparatorProperty::onOk()
 }
 
 // -------------------------------------------------------------------------------------------------------------------
+
+QString ComparatorPropertyCategoryCaption(ComparatorPropertyCategory category)
+{
+	QString caption;
+
+	switch (category)
+	{
+		case ComparatorPropertyCategory::Schema:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Schema");		break;
+		case ComparatorPropertyCategory::Input:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Input");			break;
+		case ComparatorPropertyCategory::Comapre:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "3 Compare");		break;
+		case ComparatorPropertyCategory::Hysteresis:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "4 Hysteresis");	break;
+		case ComparatorPropertyCategory::Output:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "5 Output");		break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
+	}
+
+	return qApp->translate("DialogObjectProperty", caption.toUtf8());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -2167,7 +2230,7 @@ DialogMeasureProperty::PropertyPattern::PropertyPattern(Measure::Item* pObject) 
 		return;
 	}
 
-	QString categorySignalID = qApp->translate("DialogObjectProperty", MeasurePropertyCategory[MEASURE_PROPERTY_CATEGORY_SIGNAL_ID]);
+	QString categorySignalID = MeasurePropertyCategoryCaption(MeasurePropertyCategory::MeasureID);
 
 	ADD_PROPERTY_GETTER(QString, DialogMeasureProperty::tr("SignalID"), true, m_pObject->Measure::Item::customAppSignalID)
 		->setCategory(categorySignalID)
@@ -2187,7 +2250,7 @@ DialogMeasureProperty::PropertyPattern::PropertyPattern(Measure::Item* pObject) 
 		.setReadOnly(true);
 
 
-	QString categoryPosition = qApp->translate("DialogObjectProperty", MeasurePropertyCategory[MEASURE_PROPERTY_CATEGORY_POSITION]);
+	QString categoryPosition = MeasurePropertyCategoryCaption(MeasurePropertyCategory::MeasurePosition);
 
 	ADD_PROPERTY_GETTER(QString, DialogMeasureProperty::tr("Module SN"), true, m_pObject->location().Metrology::SignalLocation::moduleSerialNoStr)
 		->setCategory(categoryPosition)
@@ -2215,7 +2278,7 @@ DialogMeasureProperty::PropertyPattern::PropertyPattern(Measure::Item* pObject) 
 		.setReadOnly(true);
 
 
-	QString categoryLimits = qApp->translate("DialogObjectProperty", MeasurePropertyCategory[MEASURE_PROPERTY_CATEGORY_LIMITS]);
+	QString categoryLimits = MeasurePropertyCategoryCaption(MeasurePropertyCategory::Limits);
 
 	ADD_PROPERTY_GETTER(QString, DialogMeasureProperty::tr("Engineering range"), true, PropertyPattern::engineeringLimitStr)
 		->setCategory(categoryLimits)
@@ -2227,7 +2290,7 @@ DialogMeasureProperty::PropertyPattern::PropertyPattern(Measure::Item* pObject) 
 		.setReadOnly(true);
 
 
-	QString categoryErrors = qApp->translate("DialogObjectProperty", MeasurePropertyCategory[MEASURE_PROPERTY_CATEGORY_ERRORS]);
+	QString categoryErrors = MeasurePropertyCategoryCaption(MeasurePropertyCategory::Errors);
 
 	ADD_PROPERTY_GETTER_SETTER(double, DialogMeasureProperty::tr("Limit of error (%)"), true, PropertyPattern::errorLimit, PropertyPattern::setErrorLimit)
 		->setCategory(categoryErrors)
@@ -2362,6 +2425,27 @@ void DialogMeasureProperty::onPropertyValueChanged(QList<std::shared_ptr<Propert
 			continue;
 		}
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasurePropertyCategoryCaption(MeasurePropertyCategory category)
+{
+	QString caption;
+
+	switch (category)
+	{
+		case MeasurePropertyCategory::MeasureID:		caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Signal ID");	break;
+		case MeasurePropertyCategory::MeasurePosition:	caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Position");	break;
+		case MeasurePropertyCategory::Limits:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "3 Limits");	break;
+		case MeasurePropertyCategory::Errors:			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "4 Errors");	break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("DialogObjectProperty", "Unknown");
+	}
+
+	return qApp->translate("DialogObjectProperty", caption.toUtf8());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

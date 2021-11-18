@@ -29,18 +29,18 @@
 //
 // ==============================================================================================
 
-const char* const				ProjectPropertyCategory[] =
+enum ProjectPropertyCategory
 {
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Project"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Host"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "3 File version"),
+	Info = 0,
+	Host = 1,
+	Version = 2,
 };
 
-const int						PROJECT_PROPERTY_CATEGORY_COUNT			= sizeof(ProjectPropertyCategory)/sizeof(ProjectPropertyCategory[0]);
+const int ProjectPropertyCategoryCount = 3;
 
-const int						PROJECT_PROPERTY_CATEGORY_INFO			= 0,
-								PROJECT_PROPERTY_CATEGORY_HOST			= 1,
-								PROJECT_PROPERTY_CATEGORY_VERSION		= 2;
+#define ERR_PROJECT_PROPERTY_CATEGORY(category) (static_cast<int>(category) < 0 || static_cast<int>(category) >= ProjectPropertyCategoryCount)
+
+QString ProjectPropertyCategoryCaption(ProjectPropertyCategory category);
 
 // ----------------------------------------------------------------------------------------------
 
@@ -129,7 +129,7 @@ private slots:
 //
 // ==============================================================================================
 
-const int						RACK_GROUP_COLUMN_CAPTION = 0;
+const int RACK_GROUP_COLUMN_CAPTION = 0;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -262,20 +262,19 @@ private:
 
 // ==============================================================================================
 
-const char* const				SignalPropertyCategory[] =
+enum SignalPropertyCategory
 {
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Signal ID"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Position"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "3 Electric range"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "4 Engineering range"),
+	SignalID = 0,
+	SignalPosition = 1,
+	ElectricLimit = 2,
+	EngineeringLimit = 3,
 };
 
-const int						SIGNAL_PROPERTY_CATEGORY_COUNT				= sizeof(SignalPropertyCategory)/sizeof(SignalPropertyCategory[0]);
+const int SignalPropertyCategoryCount = 4;
 
-const int						SIGNAL_PROPERTY_CATEGORY_SIGNAL_ID			= 0,
-								SIGNAL_PROPERTY_CATEGORY_POSITION			= 1,
-								SIGNAL_PROPERTY_CATEGORY_EL_RANGE			= 2,
-								SIGNAL_PROPERTY_CATEGORY_EN_RANGE			= 3;
+#define ERR_SIGNAL_PROPERTY_CATEGORY(category) (static_cast<int>(category) < 0 || static_cast<int>(category) >= SignalPropertyCategoryCount)
+
+QString SignalPropertyCategoryCaption(SignalPropertyCategory category);
 
 // ----------------------------------------------------------------------------------------------
 
@@ -336,7 +335,7 @@ private:
 
 	//
 	//
-	static bool m_showGroupHeader[SIGNAL_PROPERTY_CATEGORY_COUNT];
+	static bool m_showGroupHeader[SignalPropertyCategoryCount];
 	//QtBrowserItem* m_browserItemList[SIGNAL_PROPERTY_CATEGORY_COUNT];
 	//QtProperty* m_propertyGroupList[SIGNAL_PROPERTY_CATEGORY_COUNT];
 
@@ -377,22 +376,20 @@ private slots:
 //
 // ==============================================================================================
 
-const char* const				ComparatorPropertyCategory[] =
+enum ComparatorPropertyCategory
 {
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Schema"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Input"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "3 Compare"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "4 Hysteresis"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "5 Output"),
+	Schema = 0,
+	Input = 1,
+	Comapre = 2,
+	Hysteresis	= 3,
+	Output = 4,
 };
 
-const int						COMPARATOR_PROPERTY_CATEGORY_COUNT			= sizeof(ComparatorPropertyCategory)/sizeof(ComparatorPropertyCategory[0]);
+const int ComparatorPropertyCategoryCount = 5;
 
-const int						COMPARATOR_PROPERTY_CATEGORY_SCHEMA			= 0,
-								COMPARATOR_PROPERTY_CATEGORY_INPUT			= 1,
-								COMPARATOR_PROPERTY_CATEGORY_COMPARE		= 2,
-								COMPARATOR_PROPERTY_CATEGORY_HYSTERESIS		= 3,
-								COMPARATOR_PROPERTY_CATEGORY_OUTPUT			= 4;
+#define ERR_COMPARATOR_PROPERTY_CATEGORY(category) (static_cast<int>(category) < 0 || static_cast<int>(category) >= ComparatorPropertyCategoryCount)
+
+QString ComparatorPropertyCategoryCaption(ComparatorPropertyCategory category);
 
 // ----------------------------------------------------------------------------------------------
 
@@ -432,7 +429,7 @@ private:
 	ExtWidgets::PropertyEditor* m_pPropertyEditor = nullptr;
 	QDialogButtonBox* m_buttonBox = nullptr;
 
-	static bool m_showGroupHeader[COMPARATOR_PROPERTY_CATEGORY_COUNT];
+	static bool m_showGroupHeader[ComparatorPropertyCategoryCount];
 	//QtBrowserItem* m_browserItemList[COMPARATOR_PROPERTY_CATEGORY_COUNT];
 	//QtProperty* m_propertyGroupList[COMPARATOR_PROPERTY_CATEGORY_COUNT];
 
@@ -454,21 +451,19 @@ private slots:
 //
 // ==============================================================================================
 
-
-const char* const				MeasurePropertyCategory[] =
+enum MeasurePropertyCategory
 {
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Signal ID"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Position"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "3 Limits"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "4 Errors"),
+	MeasureID = 0,
+	MeasurePosition = 1,
+	Limits = 2,
+	Errors = 3,
 };
 
-const int						MEASURE_PROPERTY_CATEGORY_COUNT			= sizeof(MeasurePropertyCategory)/sizeof(MeasurePropertyCategory[0]);
+const int MeasurePropertyCategoryCount = 4;
 
-const int						MEASURE_PROPERTY_CATEGORY_SIGNAL_ID		= 0,
-								MEASURE_PROPERTY_CATEGORY_POSITION		= 1,
-								MEASURE_PROPERTY_CATEGORY_LIMITS		= 2,
-								MEASURE_PROPERTY_CATEGORY_ERRORS		= 3;
+#define ERR_MEASURE_PROPERTY_CATEGORY(category) (static_cast<int>(category) < 0 || static_cast<int>(category) >= MeasurePropertyCategoryCount)
+
+QString MeasurePropertyCategoryCaption(MeasurePropertyCategory category);
 
 // ----------------------------------------------------------------------------------------------
 
