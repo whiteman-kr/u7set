@@ -1,6 +1,8 @@
 #include "TuningServiceCfgGenerator.h"
 #include "Context.h"
-
+#include "Builder.h"
+#include "../TuningService/TuningSource.h"
+#include "../lib/SoftwareSettingsGetter.h"
 
 namespace Builder
 {
@@ -56,92 +58,86 @@ namespace Builder
 
 	bool TuningServiceCfgGenerator::writeTuningSources()
 	{
-		std::shared_ptr<const TuningServiceSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningServiceSettings>();
-
-		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
-
-		QByteArray fileData;
-
-		bool result = true;
+		QStringList profiles = m_settingsSet.getSettingsProfiles();
 
 		QVector<Tuning::TuningSource> tuningSources;
 
-		quint32 receivingNetmask = settings->tuningDataNetmask.toIPv4Address();
+		bool result = true;
 
-		quint32 receivingSubnet = settings->tuningDataIP.address32() & receivingNetmask;
-
-		for(Hardware::DeviceModule* lm : m_context->m_lmModules)
+		for(const QString& profile : profiles)
 		{
-			if (lm == nullptr)
+			std::shared_ptr<const TuningServiceSettings> settings =
+					m_settingsSet.getSettingsProfile<TuningServiceSettings>(profile);
+
+			TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
+			std::set<QString> alreadyAppendSources;
+
+			for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
 			{
-				LOG_NULLPTR_ERROR(m_log);
-				result = false;
-				continue;
-			}
+				const TuningServiceSettings::ChannelSettings& ch = settings->channelSettings[channel];
 
-			std::shared_ptr<LmDescription> lmDescription = m_context->m_lmDescriptions->get(lm);
-
-			if (lmDescription == nullptr)
-			{
-				LOG_INTERNAL_ERROR_MSG(m_log, QString("LmDescription is not found for module %1").arg(lm->equipmentIdTemplate()));
-				result = false;
-				continue;
-			}
-
-			const LmDescription::Lan& lan = lmDescription->lan();
-
-			for(const LmDescription::LanController& lanController : lan.m_lanControllers)
-			{
-				if (lanController.isProvideTuning() == false)
+				for(const TuningServiceSettings::TuningSource& tunSrc : ch.sources)
 				{
-					continue;
+					if (alreadyAppendSources.contains(tunSrc.lmEquipmentID) == true)
+					{
+						continue;
+					}
+
+					alreadyAppendSources.insert(tunSrc.lmEquipmentID);
+
+					std::shared_ptr<Hardware::DeviceObject> device = m_equipment->deviceObject(tunSrc.lmEquipmentID);
+
+					if (device == nullptr)
+					{
+						// Equipment object %1 is not found (Settings profile - %2).
+						//
+						m_log->errCFG3044(tunSrc.lmEquipmentID, profile);
+						result = false;
+						continue;
+					}
+
+					Hardware::DeviceModule* lm = dynamic_cast<Hardware::DeviceModule*>(device.get());
+
+					if (lm == nullptr)
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						result = false;
+						continue;
+					}
+
+					Tuning::TuningSource ts;
+
+					ts.setProfile(profile);
+
+					result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm,
+															E::LanControllerType::Tuning,
+															m_context, &ts);
+					if (result == false)
+					{
+						continue;
+					}
+
+					Tuning::TuningDataShared tuningData = m_context->m_tuningDataStorage->getTuningData(lm->equipmentId());
+
+					if(tuningData != nullptr)
+					{
+						ts.setTuningData(tuningData);
+					}
+					else
+					{
+						// Tuning data is not found for module %1
+						//
+						m_log->errALC5197(lm->equipmentIdTemplate());
+						result = false;
+					}
+
+					tuningSources.push_back(ts);
 				}
-
-				Tuning::TuningSource ts;
-
-				result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm, DataSource::DataType::Tuning,
-													   lanController.m_place,
-													   lanController.m_type,
-													   m_context,
-													   &ts);
-				if (result == false)
-				{
-					continue;
-				}
-
-				if (ts.lmDataEnable() == false || ts.serviceID() != m_software->equipmentIdTemplate())
-				{
-					continue;
-				}
-
-				if ((ts.lmAddress().toIPv4Address() & receivingNetmask) != receivingSubnet)
-				{
-					// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
-					//
-					m_log->errCFG3043(ts.lmAddress().toString(),
-									  ts.lmAdapterID(),
-									  settings->tuningDataIP.addressStr(),
-									  m_software->equipmentIdTemplate());
-					result = false;
-					continue;
-				}
-
-				Tuning::TuningData* tuningData = m_context->m_tuningDataStorage->value(lm->equipmentId(), nullptr);
-
-				if(tuningData != nullptr)
-				{
-					ts.setTuningData(tuningData);
-				}
-				else
-				{
-					LOG_INTERNAL_ERROR_MSG(m_log, QString(tr("Tuning data for LM '%1' is not found")).
-														arg(lm->equipmentIdTemplate()));
-					result = false;
-				}
-
-				tuningSources.push_back(ts);
 			}
 		}
+
+		QByteArray fileData;
 
 		result &= DataSourcesXML<Tuning::TuningSource>::writeToXml(tuningSources, &fileData);
 

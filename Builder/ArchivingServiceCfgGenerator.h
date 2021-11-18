@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
-#include "../lib/SoftwareSettings.h"
 
 namespace Builder
 {
@@ -21,5 +20,4 @@ namespace Builder
 
 		bool writeRunScriptFile(const QString& profile, const ArchivingServiceSettings& settings, E::OS os);
 	};
-
 }

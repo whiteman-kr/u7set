@@ -689,9 +689,16 @@ void Source::reloadProject()
 	{
 		iterator.next();
 
-		if (iterator.value()->lmAddress32() == ip())
+		std::shared_ptr<DataSourceOnline> dso = iterator.value();
+
+		std::vector<quint32> IPs = dso->lanControllersInfo().appDataIP32addresses();
+
+		for(auto ipAddr : IPs)
 		{
-			m_signalTableModel->addDataSource(iterator.value().get());
+			if (ipAddr == ip())
+			{
+				m_signalTableModel->addDataSource(dso.get());
+			}
 		}
 	}
 	m_signalTableModel->endReloadProject();
@@ -776,9 +783,12 @@ void PacketSourceModel::initDataSources(QHash<quint32, std::shared_ptr<DataSourc
 
 				std::shared_ptr<DataSourceOnline> ds = std::make_shared<DataSourceOnline>();
 				ds->setID(ip);
-				ds->setLmCaption(QString("Data Source %1").arg(key));
-				ds->setLmAddressStr(ha.toString());
-				ds->setLmRupFramesQuantity(1);
+				ds->setModuleCaption(QString("Data Source %1").arg(key));
+
+//				????????
+//				ds->setLmAddressStr(ha.toString());
+//				ds->setLmRupFramesQuantity(1);
+//				????????
 
 				QString signalPrefix = currentModule->parent()->equipmentId();
 				int signalPrefixLength = signalPrefix.length();

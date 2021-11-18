@@ -23,20 +23,19 @@ struct dynamicPropertyFieldDefinition
 };
 
 static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList {
-	{ QStringLiteral("EquipmentID"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmequipmentid()); } },
-	{ QStringLiteral("Caption"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmcaption()); } },
-	{ QStringLiteral("DataType"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmdatatype()); } },
-	{ QStringLiteral("IP"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmip()); } },
-	{ QStringLiteral("Port"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmport()); } },
-	{ QStringLiteral("Channel"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmsubsystemchannel()); } },
-	{ QStringLiteral("SubsystemKey"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmsubsystemkey()); } },
-	{ QStringLiteral("SubsystemID"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmsubsystemid()); } },
+	{ QStringLiteral("EquipmentID"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.moduleequipmentid()); } },
+	{ QStringLiteral("Caption"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.modulecaption()); } },
+	{ QStringLiteral("DataType"), [](const Network::DataSourceInfo& info) { return E::valueToString(static_cast<E::LanControllerType>(info.lancontrollerinfo(0).lancontrollertype())); } },
+	{ QStringLiteral("IP"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lancontrollerinfo(0).tuningip()); } },
+	{ QStringLiteral("Port"), [](const Network::DataSourceInfo& info) { return QString::number(info.lancontrollerinfo(0).tuningport()); } },
+	{ QStringLiteral("Channel"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.subsystemchannel()); } },
+	{ QStringLiteral("SubsystemKey"), [](const Network::DataSourceInfo& info) { return QString::number(info.subsystemkey()); } },
+	{ QStringLiteral("SubsystemID"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.subsystemid()); } },
 
 	{ QStringLiteral("LmNumber"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmnumber()); } },
-	{ QStringLiteral("LmModuleType"), [](const Network::DataSourceInfo& info) { return QString::number(info.lmmoduletype()); } },
-	{ QStringLiteral("LmAdapterID"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lmadapterid()); } },
-	{ QStringLiteral("LmDataEnable"), [](const Network::DataSourceInfo& info) { return info.lmdataenable() ? "Yes" : "No"; } },
-	{ QStringLiteral("LmDataID"), [](const Network::DataSourceInfo& info) { return QString("0x%1").arg(info.lmdataid(), sizeof(info.lmdataid()) * 2, 16, QChar('0')); } },
+	{ QStringLiteral("ModuleType"), [](const Network::DataSourceInfo& info) { return QString::number(info.moduletype()); } },
+	{ QStringLiteral("AdapterID"), [](const Network::DataSourceInfo& info) { return QString::fromStdString(info.lancontrollerinfo(0).equipmentid()); } },
+	{ QStringLiteral("TuningEnable"), [](const Network::DataSourceInfo& info) { return info.lancontrollerinfo(0).tuningenable() ? "Yes" : "No"; } },
 
 	{ QStringLiteral("SourceID"), [](const Network::DataSourceInfo& info) { return "0x" + QString("%1").arg(info.id(), sizeof(info.id()) * 2, 16, QChar('0')).toUpper(); } },
 };

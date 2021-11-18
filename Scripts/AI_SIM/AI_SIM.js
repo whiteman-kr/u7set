@@ -1,0 +1,663 @@
+// Generate configuration for module AI_SIM
+//
+//
+
+function generate_ai_sim(confFirmware, module, LMNumber, frame, log, signalSet, opticModuleStorage) {
+
+	const compareEqual = 0;
+	const compareLess = 1;
+	const compareMore = 2;
+
+	const CHANNEL_1_ENABLE_FLAG = 0x1;
+	const CHANNEL_2_ENABLE_FLAG = 0x2;
+	const CHANNEL_OHM_ENABLE_FLAG = 0x4;
+
+	// RMode
+
+	const RMode_2Wire = 0;
+	const RMode_3Wire = 1;
+	const RMode_4Wire = 2;
+
+	const unitsCount = 4;
+
+	const channelsCount = 3;
+	const channelNames = ["A", "B", "C"];
+
+	const defaultR = [250, 250, 100];
+	const resistorNames = ["RLoad", "RLoad", "R0"];
+
+	const tsConstant = 0.0005;	// 0.5 ms
+	const defaultTf = (5 * 0.001) / tsConstant;	// 5 ms
+
+	const defaultFlags = 0;
+
+	const defaultHighBound = [12, 12, 2];
+	const defaultLowBound = [12, 12, 2];
+
+	const defaultK1 = 1.0;
+	const defaultK2 = 0.0;
+
+	let unitsConvertor = confFirmware.jsGetUnitsConvertor();
+	if (unitsConvertor == null) {
+		log.errINT1001("confFirmware.jsGetUnitsConvertor returned null");
+		return false;
+	}
+
+	// ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
+	//
+
+	for (let i = 0; i < unitsCount; i++) {
+
+		const unitPtr = (38 * i) * 2;
+
+		let flags = defaultFlags;
+
+		for (let c = 0; c < channelsCount; c++) {
+
+			let filteringTime = defaultTf;
+
+			let r = defaultR[c];
+			let rConnectionMode = RMode_2Wire;
+
+			let k1 = defaultK1;
+			let k2 = defaultK2;
+
+			let highValidRange = defaultHighBound[c];
+			let lowValidRange = defaultLowBound[c];
+
+			let signalStrId = module.equipmentId + "_CTRLIN_IN0" + (i + 1) + channelNames[c];
+
+			var signal = signalSet.getSignalByEquipmentID(signalStrId);
+
+			if (signal == null) {
+				// Generate default values, there is no signal on this place
+				//
+				log.wrnCFG3007(signalStrId);
+			}
+			else {
+				// TF
+
+				let tf = signal.filteringTime();
+
+				if (tf < 0 * tsConstant || tf > 65535 * tsConstant) {
+					log.errCFG3010("FilteringTime", tf, 0 * tsConstant, 65535 * tsConstant, 6, signalStrId);
+				}
+
+				tf = tf / tsConstant;
+
+				filteringTime = valToADC(tf, 0, 65535, 0, 0xffff);
+
+				// Electric limits
+
+				let electricUnit = signal.propertyValue("ElectricUnit");
+				if (electricUnit == undefined) {
+					log.errCFG3000("ElectricUnit", signalStrId);
+					return false;
+				}
+
+				if (electricUnit == ElectricUnit.NoUnit) {
+
+					// Signal should be excluded from build
+
+					let excludeFromBuild = signal.propertyValue("ExcludeFromBuild");
+					if (excludeFromBuild == undefined) {
+						log.errCFG3000("ExcludeFromBuild", signalStrId);
+						return false;
+					}
+
+					if (excludeFromBuild == false) {
+						log.errCFG3041("ExcludeFromBuild", "false", "true", signalStrId);
+						continue;
+					}
+				}
+				else {
+					// Get SensorType and check if it is valid for chosen ElectricUnit
+
+					let sensorType = signal.propertyValue("SensorType");
+					if (sensorType == undefined) {
+						log.errCFG3000("SensorType", signalStrId);
+						return false;
+					}
+
+					if (electricUnit == ElectricUnit.mA) {
+
+						if (sensorType != SensorType.V_m10_p10) {
+							log.errCFG3041("SensorType", unitsConvertor.sensorTypeName(sensorType), unitsConvertor.sensorTypeName(SensorType.V_m10_p10), signalStrId);
+							continue;
+						}
+
+						// Get RLoad
+
+						r = signal.propertyValue("Rload_Ohm");
+						if (r == undefined) {
+							log.errCFG3000("Rload_Ohm", signalStrId);
+							return false;
+						}
+					}
+
+					if (electricUnit == ElectricUnit.V) {
+
+						if (sensorType != SensorType.V_m10_p10) {
+							log.errCFG3041("SensorType", unitsConvertor.sensorTypeName(sensorType), unitsConvertor.sensorTypeName(SensorType.V_m10_p10), signalStrId);
+							continue;
+						}
+					}
+
+					if (electricUnit == ElectricUnit.mV) {
+
+						if (sensorType == SensorType.NoSensor || sensorType == SensorType.V_m10_p10) {
+							log.errCFG3041("SensorType", unitsConvertor.sensorTypeName(sensorType), "mV_Raw_* or mV_Type_*", signalStrId);
+							continue;
+						}
+					}
+
+					if (electricUnit == ElectricUnit.Ohm) {
+						if (sensorType == SensorType.NoSensor) {
+							log.errCFG3041("SensorType", unitsConvertor.sensorTypeName(sensorType), "Ohm_*", signalStrId);
+							continue;
+						}
+
+						// Get R0
+
+						r = signal.propertyValue("R0_Ohm");
+						if (r == undefined) {
+							log.errCFG3000("R0_Ohm", signalStrId);
+							return false;
+						}
+
+						// Get RTDConfMode
+
+						rConnectionMode = signal.propertyValue("RTDConfMode");
+						if (rConnectionMode == undefined) {
+							log.errCFG3000("RTDConfMode", signalStrId);
+							return false;
+						}
+					}
+
+					// Get required signal properties
+
+					let electricHighLimit = signal.propertyValue("ElectricHighLimit");
+					if (electricHighLimit == undefined) {
+						log.errCFG3000("ElectricHighLimit", signalStrId);
+						return false;
+					}
+
+					let electricLowLimit = signal.propertyValue("ElectricLowLimit");
+					if (electricLowLimit == undefined) {
+						log.errCFG3000("ElectricLowLimit", signalStrId);
+						return false;
+					}
+
+					let decimalPlaces = signal.propertyValue("DecimalPlaces");
+					if (decimalPlaces == undefined) {
+						log.errCFG3000("DecimalPlaces", signalStrId);
+						return false;
+					}
+
+					let highEngineeringUnits = signal.highEngineeringUnits();
+					let lowEngineeringUnits = signal.lowEngineeringUnits();
+
+					highValidRange = signal.highValidRange();
+					lowValidRange = signal.lowValidRange();
+
+					// Check properties of signal
+
+					let signalParamsOk = true;
+
+					if (electricHighLimit < electricLowLimit) {
+						// error
+						log.errCFG3013("ElectricHighLimit", electricHighLimit, compareLess, "ElectricLowLimit", electricLowLimit, 0, signalStrId);
+						signalParamsOk = false;
+					}
+					if (electricHighLimit == electricLowLimit) {
+						// error
+						log.errCFG3013("ElectricHighLimit", electricHighLimit, compareEqual, "ElectricLowLimit", electricLowLimit, 0, signalStrId);
+						signalParamsOk = false;
+					}
+					if (signal.highEngineeringUnits() == signal.lowEngineeringUnits()) {
+						// error
+						log.errCFG3013("HighEngineeringUnits", signal.highEngineeringUnits(), compareEqual, "LowEngineeringUnits", signal.lowEngineeringUnits(), signal.decimalPlaces(), signalStrId);
+						signalParamsOk = false;
+					}
+					if (signal.highValidRange() == signal.lowValidRange()) {
+						// error
+						log.errCFG3013("HighValidRange", signal.highValidRange(), compareEqual, "LowValidRange", signal.lowValidRange(), signal.decimalPlaces(), signalStrId);
+						signalParamsOk = false;
+					}
+					if (signal.highEngineeringUnits() > signal.lowEngineeringUnits() && signal.highValidRange() < signal.lowValidRange()) {
+						// error
+						log.errCFG3013("HighValidRange", signal.highValidRange(), compareLess, "LowValidRange", signal.lowValidRange(), signal.decimalPlaces(), signalStrId);
+						signalParamsOk = false;
+					}
+					if (signal.highEngineeringUnits() < signal.lowEngineeringUnits() && signal.highValidRange() > signal.lowValidRange()) {
+						// error
+						log.errCFG3013("HighValidRange", signal.highValidRange(), compareMore, "LowValidRange", signal.lowValidRange(), signal.decimalPlaces(), signalStrId);
+						signalParamsOk = false;
+					}
+
+					if (signalParamsOk == false) {
+						continue;
+					}
+
+					// Convert electric to physical
+
+					let highPhysicalConvertResult = null;
+					let lowPhysicalConvertResult = null;
+
+					switch (electricUnit) {
+						case ElectricUnit.V:
+						case ElectricUnit.mA:
+							{
+								highPhysicalConvertResult = unitsConvertor.electricToPhysical_Input(electricHighLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType, r);
+								lowPhysicalConvertResult = unitsConvertor.electricToPhysical_Input(electricLowLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType, r);
+							}
+							break;
+						case ElectricUnit.mV:
+							{
+								highPhysicalConvertResult = unitsConvertor.electricToPhysical_ThermoCouple(electricHighLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType);
+								lowPhysicalConvertResult = unitsConvertor.electricToPhysical_ThermoCouple(electricLowLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType);
+							}
+							break;
+						case ElectricUnit.Ohm:
+							{
+								highPhysicalConvertResult = unitsConvertor.electricToPhysical_ThermoResistor(electricHighLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType, r);
+								lowPhysicalConvertResult = unitsConvertor.electricToPhysical_ThermoResistor(electricLowLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType, r);
+							}
+							break;
+						default:
+							log.errCFG3041("ElectricUnit", unitsConvertor.electricUnitName(electricUnit), "V, mA, mV, Ohm", signalStrId);
+							continue;
+
+					}
+
+					if (highPhysicalConvertResult == null || lowPhysicalConvertResult == null) {
+						log.errINT1001("UnitsConvertor call error, module " + module.equipmentId + ", signal " + signalStrId);
+						return false;
+					}
+
+					if (highPhysicalConvertResult.ok == false) {
+						switch (highPhysicalConvertResult.errorCode) {
+							case UnitsConvertorErrorCode.ErrorGeneric:
+								{
+									log.errINT1001(highPhysicalConvertResult.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrId);
+								}
+								break;
+							case UnitsConvertorErrorCode.LowLimitOutOfRange:
+								{
+									log.errCFG3010("ElectricLowLimit", electricLowLimit, highPhysicalConvertResult.expectedLowValidRange, highPhysicalConvertResult.expectedHighValidRange, 4, signalStrId);
+								}
+								break;
+							case UnitsConvertorErrorCode.HighLimitOutOfRange:
+								{
+									log.errCFG3010("ElectricHighLimit", electricHighLimit, highPhysicalConvertResult.expectedLowValidRange, highPhysicalConvertResult.expectedHighValidRange, 4, signalStrId);
+								}
+								break;
+							default:
+								log.errINT1001("unitsConvertor.electricToPhysical_Input() - unknown error code (" + highPhysicalConvertResult.errorCode + "), signal " + signalStrId);
+								return false;
+						}
+						continue;
+					}
+
+					if (lowPhysicalConvertResult.ok == false) {
+						switch (lowPhysicalConvertResult.errorCode) {
+							case UnitsConvertorErrorCode.ErrorGeneric:
+								{
+									log.errINT1001(lowPhysicalConvertResult.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrId);
+								}
+								break;
+							case UnitsConvertorErrorCode.LowLimitOutOfRange:
+								{
+									log.errCFG3010("ElectricLowLimit", electricLowLimit, lowPhysicalConvertResult.expectedLowValidRange, lowPhysicalConvertResult.expectedHighValidRange, 4, signalStrId);
+								}
+								break;
+							case UnitsConvertorErrorCode.HighLimitOutOfRange:
+								{
+									log.errCFG3010("ElectricHighLimit", electricHighLimit, lowPhysicalConvertResult.expectedLowValidRange, lowPhysicalConvertResult.expectedHighValidRange, 4, signalStrId);
+								}
+								break;
+							default:
+								log.errINT1001("unitsConvertor.electricToPhysical_Input() - unknown error code (" + lowPhysicalConvertResult.errorCode + "), signal " + signalStrId);
+								return false;
+						}
+						continue;
+					}
+
+					let physicalLowLimit = lowPhysicalConvertResult.toDouble;
+					let physicalHighLimit = highPhysicalConvertResult.toDouble;
+
+					//log.writeMessage(signalStrId + " physicalLowLimit = " + physicalLowLimit);
+					//log.writeMessage(signalStrId + " physicalHighLimit = " + physicalHighLimit);
+
+					if (physicalHighLimit == physicalLowLimit) {
+						// error
+						log.errCFG3013("physicalLowLimit", physicalLowLimit, compareEqual, "physicalHighLimit", physicalHighLimit, 0, signalStrId);
+						continue;
+					}
+
+					// Calculate coefficients
+
+					let y1 = lowEngineeringUnits;
+					let y2 = highEngineeringUnits;
+
+					let x1 = physicalLowLimit;
+					let x2 = physicalHighLimit;
+
+					if (x1 == x2) // Prevent division by zero
+					{
+						x1 = 0;
+						x2 = 1;
+					}
+
+					k1 = (y2 - y1) / (x2 - x1);	// K
+					k2 = y1 - k1 * x1;			// B
+
+					// Check valid ranges
+
+					let highSensorPhysicalRange = 0;
+					let lowSensorPhysicalRange = 0;
+
+					switch (sensorType) {
+
+						// ---------- mA / V---------------
+
+						case SensorType.V_m10_p10:
+							{
+								switch (electricUnit) {
+									case ElectricUnit.V:
+										highSensorPhysicalRange = 11;
+										lowSensorPhysicalRange = -11;
+										break;
+									case ElectricUnit.mA:
+										highSensorPhysicalRange = 11;
+										lowSensorPhysicalRange = -11;
+										break;
+									default:
+										{
+											log.errINT1001("Wrong electric unit type '" + unitsConvertor.electricUnitName(ElectricUnit) + "' in " + signalStrId);
+											return false;
+										}
+								}
+							}
+							break;
+
+						// ---------- mV ---------------
+
+						case SensorType.mV_Raw_m1200_p1200:
+							highSensorPhysicalRange = 1200;
+							lowSensorPhysicalRange = -1200;
+							break;
+						case SensorType.mV_Type_B:
+							highSensorPhysicalRange = 1815;
+							lowSensorPhysicalRange = 255;
+							break;
+						case SensorType.mV_Type_E:
+							highSensorPhysicalRange = 995;
+							lowSensorPhysicalRange = -195;
+							break;
+						case SensorType.mV_Type_J:
+							highSensorPhysicalRange = 1195;
+							lowSensorPhysicalRange = -205;
+							break;
+						case SensorType.mV_Type_K:
+							highSensorPhysicalRange = 1367;
+							lowSensorPhysicalRange = -195;
+							break;
+						case SensorType.mV_Type_N:
+							highSensorPhysicalRange = 1295;
+							lowSensorPhysicalRange = -195;
+							break;
+						case SensorType.mV_Type_R:
+							highSensorPhysicalRange = 1763;
+							lowSensorPhysicalRange = -45;
+							break;
+						case SensorType.mV_Type_S:
+							highSensorPhysicalRange = 1763;
+							lowSensorPhysicalRange = -45;
+							break;
+						case SensorType.mV_Type_T:
+							highSensorPhysicalRange = 395;
+							lowSensorPhysicalRange = -195;
+							break;
+						case SensorType.mV_Type_L:
+							highSensorPhysicalRange = 795;
+							lowSensorPhysicalRange = -195;
+							break;
+						case SensorType.mV_Type_M:
+							highSensorPhysicalRange = 95;
+							lowSensorPhysicalRange = -195;
+							break;
+
+						// ---------- Ohm ---------------
+
+						case SensorType.Ohm_Raw:
+							highSensorPhysicalRange = 1500;
+							lowSensorPhysicalRange = 0;
+							break;
+						case SensorType.Ohm_Pt_a_385:
+							highSensorPhysicalRange = 850;
+							lowSensorPhysicalRange = -200;
+							break;
+						case SensorType.Ohm_Pt_a_391:
+							highSensorPhysicalRange = 850;
+							lowSensorPhysicalRange = -200;
+							break;
+						case SensorType.Ohm_Cu_a_428:
+							highSensorPhysicalRange = 200;
+							lowSensorPhysicalRange = -180;
+							break;
+						case SensorType.Ohm_Cu_a_426:
+							highSensorPhysicalRange = 200;
+							lowSensorPhysicalRange = -50;
+							break;
+						case SensorType.Ohm_Pt21:
+							highSensorPhysicalRange = 650;
+							lowSensorPhysicalRange = -200;
+							break;
+						case SensorType.Ohm_Cu23:
+							highSensorPhysicalRange = 180;
+							lowSensorPhysicalRange = -50;
+							break;
+						case SensorType.Ohm_Ni_a_617:
+							highSensorPhysicalRange = 180;
+							lowSensorPhysicalRange = -70;
+							break;
+						default:
+							{
+								log.errINT1001("Unknown sensor type '" + unitsConvertor.sensorTypeName(sensorType) + "' in " + signalStrId);
+								return false;
+							}
+					}
+
+					//log.writeMessage(signalStrId + " lowSensorPhysicalRange = " + lowSensorPhysicalRange);
+					//log.writeMessage(signalStrId + " highSensorPhysicalRange = " + highSensorPhysicalRange);
+
+					let lowEngineeringUnitsMin = lowSensorPhysicalRange * k1 + k2;
+					let lowEngineeringUnitsMax = highSensorPhysicalRange * k1 + k2;
+
+					// Round this value to supplied decimal places
+					//
+					lowEngineeringUnitsMin = parseFloat(lowEngineeringUnitsMin.toFixed(decimalPlaces));
+					lowEngineeringUnitsMax = parseFloat(lowEngineeringUnitsMax.toFixed(decimalPlaces));
+
+					//log.writeMessage(signalStrId + " lowEngineeringUnitsMin = " + lowEngineeringUnitsMin);
+					//log.writeMessage(signalStrId + " lowEngineeringUnitsMax = " + lowEngineeringUnitsMax);
+
+					//
+
+					if (lowValidRange < lowEngineeringUnitsMin) {
+						log.errCFG3010("LowValidRange", lowValidRange, lowEngineeringUnitsMin, lowEngineeringUnitsMax, decimalPlaces, signalStrId);
+					}
+					if (highValidRange > lowEngineeringUnitsMax) {
+						log.errCFG3010("HighValidRange", highValidRange, lowEngineeringUnitsMin, lowEngineeringUnitsMax, decimalPlaces, signalStrId);
+					}
+
+					// Configure flags word
+
+					flags |= (1 << c);	// Set Channel Enable bit
+
+					let sensorTypeCode = 0;
+
+					if (electricUnit == ElectricUnit.V) {
+						sensorTypeCode = 0;
+					}
+
+					if (electricUnit == ElectricUnit.mA) {
+						sensorTypeCode = 1;
+					}
+
+					if (electricUnit == ElectricUnit.mV) {
+						switch (sensorType) {
+							case SensorType.mV_Raw_m1200_p1200: sensorTypeCode = 2; break;
+							case SensorType.mV_Type_K: 			sensorTypeCode = 3; break;
+							case SensorType.mV_Type_L:			sensorTypeCode = 4; break;
+							case SensorType.mV_Type_R: 			sensorTypeCode = 5; break;
+							case SensorType.mV_Type_S: 			sensorTypeCode = 6; break;
+							case SensorType.mV_Type_B: 			sensorTypeCode = 7; break;
+							case SensorType.mV_Type_J: 			sensorTypeCode = 8; break;
+							case SensorType.mV_Type_T: 			sensorTypeCode = 9; break;
+							case SensorType.mV_Type_E: 			sensorTypeCode = 0xa; break;
+							case SensorType.mV_Type_N: 			sensorTypeCode = 0xb; break;
+							case SensorType.mV_Type_M: 			sensorTypeCode = 0xc; break;
+							default:
+								log.errINT1001("Unknown sensor type '" + unitsConvertor.sensorTypeName(sensorType) + "' in " + signalStrId);
+								return false;
+						}
+					}
+
+					if (electricUnit == ElectricUnit.Ohm) {
+						switch (sensorType) {
+							case SensorType.Ohm_Raw: 		sensorTypeCode = 0; break;
+							case SensorType.Ohm_Pt_a_385: 	sensorTypeCode = 1; break;
+							case SensorType.Ohm_Pt_a_391: 	sensorTypeCode = 2; break;
+							case SensorType.Ohm_Cu_a_428: 	sensorTypeCode = 3; break;
+							case SensorType.Ohm_Cu_a_426: 	sensorTypeCode = 4; break;
+							case SensorType.Ohm_Pt21: 		sensorTypeCode = 5; break;
+							case SensorType.Ohm_Cu23: 		sensorTypeCode = 6; break;
+							case SensorType.Ohm_Ni_a_617: 	sensorTypeCode = 7; break;
+							default:
+								log.errINT1001("Unknown sensor type '" + unitsConvertor.sensorTypeName(sensorType) + "' in " + signalStrId);
+								return false;
+						}
+
+						flags |= (rConnectionMode << 18);
+					}
+
+					flags |= (sensorTypeCode << (3 + 5 * c));
+
+				}	// End of ElectricUnit is set
+
+				// Write configuration
+
+				let ptr = unitPtr + (2 /*word of flags*/ + c * 2 /*channel offset*/) * 2;
+
+				confFirmware.writeLog("    unit " + (i + 1) + " channel " + channelNames[c] + " (" + unitsConvertor.electricUnitName(electricUnit) +
+					"): [ " + frame + ":" + ptr + "] Tf = " + filteringTime +
+					"; [" + frame + ":" + (ptr + 6 * 2) + "] " + resistorNames[c] + " = " + r +
+					"; [" + frame + ":" + (ptr + 12 * 2) + "] K1 = " + k1 +
+					"; [" + frame + ":" + (ptr + 18 * 2) + "] K2 = " + k2 +
+					"; [" + frame + ":" + (ptr + 24 * 2) + "] HighValidRange = " + highValidRange +
+					"; [" + frame + ":" + (ptr + 30 * 2) + "] LowValidRange = " + lowValidRange + "\r\n");
+
+
+				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "Tf", filteringTime) == false)          // Filtering time constant
+				{
+					return false;
+				}
+				ptr += 6 * 2;
+
+				if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, resistorNames[c], r) == false)      // R
+				{
+					return false;
+				}
+				ptr += 12 * 2;
+
+				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K1", k1) == false)         // K1
+				{
+					return false;
+				}
+				ptr += 18 * 2;
+
+
+				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K2", k2) == false)         // K2
+				{
+					return false;
+				}
+				ptr += 24 * 2;
+
+
+				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "HighValidRange", highValidRange) == false)         // In High bound
+				{
+					return false;
+				}
+				ptr += 30 * 2;
+
+				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LowValidRange", lowValidRange) == false)          // In Low Bound
+				{
+					return false;
+				}
+				ptr += 36 * 2;
+			}
+
+		} // channelsCount
+
+		// Check for Alternative channel is exclusively used
+
+		if ((flags & CHANNEL_OHM_ENABLE_FLAG) != 0) {
+			if ((flags & CHANNEL_1_ENABLE_FLAG) != 0 || (flags & CHANNEL_2_ENABLE_FLAG) != 0) {
+				log.writeError("Alternative (Ohm)channel can be enabled only if primary channels are disabled, Unit " + (i + 1) + ", module " + module.equipmentId);
+			}
+		}
+
+		// Write Flags
+
+		confFirmware.writeLog("    unit " + (i + 1) + ": [" + frame + ":" + unitPtr + "] Flags = " + flags + "\r\n");
+
+		if (setData32(confFirmware, log, LMNumber, module.equipmentId, frame, unitPtr, "WordOfFlags", flags) == false) {
+			return false;
+		}
+
+	} // unitsCount
+
+	// final crc
+
+	let ptr = 376;
+
+	let stringCrc64 = storeCrc64(confFirmware, log, LMNumber, module.equipmentId, frame, 0, ptr, ptr);   //CRC-64
+	if (stringCrc64 == "") {
+		return false;
+	}
+	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = 0x" + stringCrc64 + "\r\n");
+	ptr += 8;
+
+	ptr = 1008;
+
+	// ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
+	//
+	let dataTransmittingEnableFlag = false;
+	let dataReceiveEnableFlag = true;
+
+	let flags = 0;
+	if (dataTransmittingEnableFlag == true)
+		flags |= 1;
+	if (dataReceiveEnableFlag == true)
+		flags |= 2;
+
+	let configFramesQuantity = 3;
+	let dataFramesQuantity = 0;
+
+	let txId = module.customModuleFamily + module.moduleVersion;
+
+	if (generate_txRxIoConfig(confFirmware, module.equipmentId, LMNumber, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId) == false) {
+		return false;
+	}
+	ptr += 8;
+
+	// assert if we not on the correct place
+	//
+	if (ptr != 1016) {
+		ptr = 1016;
+	}
+
+	return true;
+}

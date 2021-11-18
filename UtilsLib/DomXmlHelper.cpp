@@ -200,3 +200,33 @@ bool DomXmlHelper::getUInt32Attribute(const QDomElement& elem, const QString& at
 
 	return true;
 }
+
+bool DomXmlHelper::getUInt64Attribute(const QDomElement& elem, const QString& attrName, quint64* value, QString* errMsg)
+{
+	if (value == nullptr)
+	{
+		Q_ASSERT(false);
+		*errMsg = "Nullptr!";
+		return false;
+	}
+
+	if (elem.hasAttribute(attrName) == false)
+	{
+		*errMsg = errAttributeNotFound(elem, attrName);
+		return false;
+	}
+
+	QString attrValue = elem.attribute(attrName);
+
+	bool ok = false;
+
+	*value = attrValue.toULongLong(&ok, 0);
+
+	if (ok == false)
+	{
+		*errMsg = errAttributeParsing(elem, attrName);
+		return false;
+	}
+
+	return true;
+}

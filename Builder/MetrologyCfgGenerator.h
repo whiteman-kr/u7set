@@ -2,11 +2,6 @@
 
 #include "SoftwareCfgGenerator.h"
 
-#include "../UtilsLib/XmlHelper.h"
-
-#include "../lib/DeviceHelper.h"
-#include "../lib/SoftwareSettings.h"
-
 #include "../Metrology/MetrologySignal.h"
 
 namespace Builder

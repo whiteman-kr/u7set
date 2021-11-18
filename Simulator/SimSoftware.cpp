@@ -76,7 +76,12 @@ namespace  Sim
 			{
 				std::shared_ptr<Sim::TuningServiceCommunicator> tsc = std::make_shared<Sim::TuningServiceCommunicator>(m_simulator, equipmentId);
 
-				m_tuningServiceCommunicators.emplace(equipmentId, std::move(tsc));
+				m_tuningServiceCommunicators.insert({equipmentId, tsc});
+
+				for(const QString& swControllerID : si.softwareControllersIDs)
+				{
+					m_tuningServiceControllers.insert({swControllerID, tsc});
+				}
 			}
 
 			m_software.emplace_back(app);
@@ -174,6 +179,12 @@ namespace  Sim
 		if (it != m_tuningServiceCommunicators.end())
 		{
 			result = it->second;
+		}
+
+		auto it2 = m_tuningServiceControllers.find(equipmentId);
+		if (it2 != m_tuningServiceControllers.end())
+		{
+			result = it2->second;
 		}
 
 		return result;

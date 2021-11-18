@@ -1,5 +1,6 @@
 #include "TuningClientCfgGenerator.h"
 #include "../lib/SoftwareSettings.h"
+#include "../lib/SoftwareSettingsGetter.h"
 #include "../VFrame30/Schema.h"
 #include "../lib/ClientBehavior.h"
 

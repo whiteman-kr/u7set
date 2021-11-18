@@ -490,7 +490,7 @@ void TuningTcpClient::processTuningSourcesInfo(const QByteArray& data)
 		TuningSource ts;
 		ts.info = dsi;
 
-		Hash hash = ::calcHash(QString::fromStdString(ts.info.lmequipmentid()));
+		Hash hash = ::calcHash(QString::fromStdString(ts.info.moduleequipmentid()));
 
 		assert(m_tuningSources.count(hash) == 0);
 
@@ -580,7 +580,7 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 						if (oldSor != newSor)
 						{
 							AppSignalParam param;
-							param.setEquipmentId(QString::fromStdString(ts.info.lmequipmentid()));
+							param.setEquipmentId(QString::fromStdString(ts.info.moduleequipmentid()));
 
 							switch (m_lmStatusFlagMode)
 							{

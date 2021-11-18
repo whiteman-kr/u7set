@@ -95,6 +95,9 @@ public:
 	static const Hardware::DeviceModule* getAssociatedLmOrBvb(const Hardware::DeviceObject* object);
 
 	static const Hardware::Software* getSoftware(const Hardware::EquipmentSet* equipment, const QString& softwareID);
+	static QStringList getSoftwareControllersIDs(const Hardware::Software* software);
+
+	static bool isTwoChannelSoftware(const Hardware::DeviceObject* swObject, QStringList* channelsCntrollersIds = nullptr);
 
 private:
 	static void logPropertyNotFoundError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger* log);

@@ -884,6 +884,9 @@ const int	SIZE_32BIT = 32;
 const int	SIZE_1WORD = 1;
 const int	SIZE_2WORD = 2;
 
+const int	CHANNEL_1 = 0;
+const int	CHANNEL_2 = 1;
+const int	CHANNEL_3 = 2;
 
 // SchemaUnit
 //

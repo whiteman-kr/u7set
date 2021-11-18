@@ -8,6 +8,7 @@ class SoftwareXmlInfo
 public:
 	QString caption;
 	QString equipmentID;
+	QStringList softwareControllersIDs;
 
 	std::shared_ptr<const CfgServiceSettings> cfgServiceSettings(const QString& profile) const;
 	std::shared_ptr<const AppDataServiceSettings> appDataServiceSettings(const QString& profile) const;

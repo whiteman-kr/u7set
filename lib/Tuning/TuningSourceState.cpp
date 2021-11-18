@@ -16,7 +16,12 @@ quint64 TuningSource::id() const
 
 QString TuningSource::equipmentId() const
 {
-	return info.lmequipmentid().c_str();
+	return QString::fromStdString(info.moduleequipmentid());
+}
+
+QString TuningSource::lanEquipmentId() const
+{
+	return QString::fromStdString(info.lancontrollerinfo(0).equipmentid());
 }
 
 void TuningSource::setNewState(const ::Network::TuningSourceState& newState)

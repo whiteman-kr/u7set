@@ -204,13 +204,13 @@ void AppDataReceiverThread::receivePackets()
 
 		lastPacketTime = serverTime;
 
-		quint32 ip = 0;
+		quint32 sourceIP = 0;
 
 		isSimFrame = false;
 
 		if (size == sizeof(Rup::Frame))
 		{
-			ip = from.toIPv4Address();
+			sourceIP = from.toIPv4Address();
 		}
 		else
 		{
@@ -237,7 +237,7 @@ void AppDataReceiverThread::receivePackets()
 					continue;
 				}
 
-				ip = reverseUint32(simFrame.sourceIP);
+				sourceIP = reverseUint32(simFrame.sourceIP);
 
 				m_simFramesCount++;
 
@@ -261,20 +261,20 @@ void AppDataReceiverThread::receivePackets()
 		m_rupFramesReceivedPerSecond++;
 		m_rupFramesCount++;
 
-		AppDataSourceShared dataSource = m_appDataSourcesIP.value(ip, nullptr);
+		AppDataSourceShared dataSource = m_appDataSourcesIP.value(sourceIP, nullptr);
 
 		if (dataSource == nullptr)
 		{
 			m_errUnknownAppDataSourceIP++;
 
-			if (m_unknownAppDataSourcesIP.contains(ip) == false && m_unknownAppDataSourcesIP.count() < 500)
+			if (m_unknownAppDataSourcesIP.contains(sourceIP) == false && m_unknownAppDataSourcesIP.count() < 500)
 			{
-				m_unknownAppDataSourcesIP.insert(ip, ip);
+				m_unknownAppDataSourcesIP.insert(sourceIP, sourceIP);
 			}
 
 			continue;
 		}
 
-		dataSource->pushRupFrame(serverTime, isSimFrame, simFrame.rupFrame, m_thisThread);
+		dataSource->pushRupFrame(sourceIP, serverTime, isSimFrame, simFrame.rupFrame, m_thisThread);
 	}
 }

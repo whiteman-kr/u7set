@@ -2,6 +2,7 @@
 #include "../UtilsLib/WUtils.h"
 #include "../OnlineLib/DataProtocols.h"
 #include "../HardwareLib/DeviceObject.h"
+#include "../lib/TuningDataStorage.h"
 #include "DeviceHelper.h"
 #include "LanControllerInfoHelper.h"
 
@@ -13,15 +14,18 @@
 
 const QString LanControllerInfoHelper::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR("_ETHERNET0%1");
 
-bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
-										int lanControllerNo,
+bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 										E::LanControllerType lanControllerType,
+										int lanControllerNo,
+										const Builder::Context& context,
+										bool ignoreTuningData,
 										LanControllerInfo* lanControllerInfo,
-										const Hardware::EquipmentSet& equipmentSet,
 										Builder::IssueLogger* log)
 {
 	TEST_PTR_RETURN_FALSE(log);
 	TEST_PTR_LOG_RETURN_FALSE(lanControllerInfo, log);
+
+	Hardware::EquipmentSet& equipmentSet = *context.m_equipmentSet.get();
 
 	lanControllerInfo->controllerNo = lanControllerNo;
 	lanControllerInfo->lanControllerType = lanControllerType;
@@ -32,6 +36,9 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 
 	if (deviceController == nullptr)
 	{
+		// Can't find child controller with suffix %1 in object %2
+		//
+		log->errCFG3025(suffix, lm.equipmentIdTemplate());
 		return false;
 	}
 
@@ -39,16 +46,10 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 
 	lanControllerInfo->equipmentID = deviceController->equipmentIdTemplate();
 
-	lanControllerInfo->tuningProvided = false;
-	lanControllerInfo->appDataProvided = false;
-	lanControllerInfo->diagDataProvided = false;
-
-	if (isProvideTuning(lanControllerType) == true)
+	if (LanControllerInfo::isProvideTuning(lanControllerType) == true)
 	{
 		// tuning adapter
 		//
-		lanControllerInfo->tuningProvided = true;
-
 		result &= DeviceHelper::getBoolProperty(deviceController, EquipmentPropNames::TUNING_ENABLE,
 												&lanControllerInfo->tuningEnable, log);
 		QHostAddress tuningIP;
@@ -82,6 +83,22 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 			{
 				const Hardware::DeviceObject* tunService = equipmentSet.deviceObject(lanControllerInfo->tuningServiceID).get();
 
+				if (tunService->isController() == false)
+				{
+					QStringList controllersIDs;
+
+					if (DeviceHelper::isTwoChannelSoftware(tunService, &controllersIDs) == true)
+					{
+						// Property %1.%2 should refer to one of software controllers: %3
+						//
+						log->errCFG3047(deviceController->equipmentIdTemplate(),
+										EquipmentPropNames::TUNING_SERVICE_ID,
+										controllersIDs.join(Separator::COMMA_SPACE));
+
+						return false;
+					}
+				}
+
 				if (tunService != nullptr)
 				{
 					result &= DeviceHelper::getStrProperty(tunService,
@@ -96,16 +113,35 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 														   EquipmentPropNames::TUNING_DATA_NETMASK,
 														   &lanControllerInfo->tuningServiceNetmask, log);
 				}
+
+				if (ignoreTuningData == true)
+				{
+					lanControllerInfo->tuningDataUID = 0;
+				}
+				else
+				{
+					Tuning::TuningDataShared tuningData = context.m_tuningDataStorage->getTuningData(lm.equipmentIdTemplate());
+
+					if (tuningData == nullptr)
+					{
+						// Tuning data is not found for module %1
+						//
+						log->errALC5197(lm.equipmentIdTemplate());
+						result = false;
+					}
+					else
+					{
+						lanControllerInfo->tuningDataUID = tuningData->uniqueID();
+					}
+				}
 			}
 		}
 	}
 
-	if (isProvideAppData(lanControllerType) == true)
+	if (LanControllerInfo::isProvideAppData(lanControllerType) == true)
 	{
 		// application data adapter
 		//
-		lanControllerInfo->appDataProvided = true;
-
 		result &= DeviceHelper::getBoolProperty(deviceController, EquipmentPropNames::APP_DATA_ENABLE,
 												&lanControllerInfo->appDataEnable, log);
 		QHostAddress appDataIP;
@@ -162,12 +198,10 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 		}
 	}
 
-	if (isProvideDiagData(lanControllerType) == true)
+	if (LanControllerInfo::isProvideDiagData(lanControllerType) == true)
 	{
 		// diagnostics data adapter
 		//
-		lanControllerInfo->diagDataProvided = true;
-
 		result &= DeviceHelper::getBoolProperty(deviceController, EquipmentPropNames::DIAG_DATA_ENABLE,
 												&lanControllerInfo->diagDataEnable, log);
 		QHostAddress diagDataIP;
@@ -229,72 +263,53 @@ bool LanControllerInfoHelper::getInfo(	const Hardware::DeviceModule& lm,
 	return result;
 }
 
-bool LanControllerInfoHelper::isProvideTuning(E::LanControllerType lanControllerType)
+bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
+									E::LanControllerType lanControllerType,
+									const Builder::Context& context,
+									bool ignoreTuningData,
+									LanControllersInfo* lanControllersInfo,
+									Builder::IssueLogger* log)
 {
-	switch(lanControllerType)
+	TEST_PTR_RETURN_FALSE(log);
+	TEST_PTR_LOG_RETURN_FALSE(lanControllersInfo, log);
+
+	std::shared_ptr<LmDescription> lmDescription = context.m_lmDescriptions->get(&lm);
+
+	if (lmDescription == nullptr)
 	{
-	case E::LanControllerType::Tuning:
-
-		return true;
-
-	case E::LanControllerType::AppData:
-	case E::LanControllerType::DiagData:
-	case E::LanControllerType::AppAndDiagData:
-
+		LOG_INTERNAL_ERROR_MSG(log, QString("LmDescription is not found for module %1").arg(lm.equipmentIdTemplate()));
 		return false;
-
-	default:
-		Q_ASSERT(false);
 	}
 
-	return false;
-}
+	lanControllersInfo->clear();
 
-bool LanControllerInfoHelper::isProvideAppData(E::LanControllerType lanControllerType)
-{
-	switch(lanControllerType)
+	const LmDescription::Lan& lan = lmDescription->lan();
+
+	bool result = true;
+
+	for(const LmDescription::LanController& lanController : lan.m_lanControllers)
 	{
-	case E::LanControllerType::AppData:
-	case E::LanControllerType::AppAndDiagData:
+		if ((TO_INT(lanController.m_type) & (TO_INT(lanControllerType))) == 0)
+		{
+			// this lanController is not provide function selected by lanControllerType
+			continue;
+		}
 
-		return true;
+		LanControllerInfo lanInfo;
 
-	case E::LanControllerType::Tuning:
-	case E::LanControllerType::DiagData:
+		result &= getInfo(lm, lanControllerType, lanController.m_place,
+						  context, ignoreTuningData, &lanInfo, log);
 
-		return false;
-
-	default:
-		Q_ASSERT(false);
+		if (result == true)
+		{
+			lanControllersInfo->append(lanInfo);
+		}
 	}
 
-	return false;
-}
-
-bool LanControllerInfoHelper::isProvideDiagData(E::LanControllerType lanControllerType)
-{
-	switch(lanControllerType)
-	{
-	case E::LanControllerType::DiagData:
-	case E::LanControllerType::AppAndDiagData:
-
-		return true;
-
-	case E::LanControllerType::Tuning:
-	case E::LanControllerType::AppData:
-
-		return false;
-
-	default:
-		Q_ASSERT(false);
-	}
-
-	return false;
+	return result;
 }
 
 QString LanControllerInfoHelper::getLanControllerSuffix(int controllerNo)
 {
 	return QString(LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR).arg(controllerNo);
 }
-
-

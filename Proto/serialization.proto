@@ -163,6 +163,9 @@ message ExportedDevicePreset
 {
     optional EnvelopeSetShortDescription description = 1;
 	optional EnvelopeSet items = 2;
+	optional bytes compressedThis = 3;				// Compressed THIS object, contains message ExportedDevicePreset itself
+	                                                // As exported presets already exist, we cannot use standard way of Envelope.compressedObject
+													// so this field added to particulary this struct
 }
 
 //------------------------------------------------------------------------------------------

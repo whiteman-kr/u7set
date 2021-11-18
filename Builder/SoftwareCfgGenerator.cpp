@@ -26,6 +26,8 @@ namespace Builder
 		m_settingsSet(software->softwareType())
 	{
 		assert(context);
+
+		m_softwareControllersIDs = DeviceHelper::getSoftwareControllersIDs(software);
 	}
 
 	SoftwareCfgGenerator::~SoftwareCfgGenerator()
@@ -525,8 +527,10 @@ namespace Builder
 		xmlWriter.writeStartElement(XmlElement::SOFTWARE);
 
 		xmlWriter.writeAttribute(XmlAttribute::CAPTION, m_software->caption());
-		xmlWriter.writeAttribute(XmlAttribute::ID, m_software->equipmentIdTemplate());
+		xmlWriter.writeAttribute(XmlAttribute::EQUIPMENT_ID, m_software->equipmentIdTemplate());
 		xmlWriter.writeAttribute(XmlAttribute::TYPE, QString("%1").arg(static_cast<int>(m_software->softwareType())));
+		xmlWriter.writeAttribute(XmlAttribute::SOFTWARE_CONTROLLERS,
+								 m_softwareControllersIDs.join(Separator::COMMA));
 
 		if (finalizeSection == true)
 		{
@@ -555,8 +559,6 @@ namespace Builder
 
 		bool result = true;
 
-		const std::map<QString, Hardware::Software*>& softwareList = context->m_software;
-
 		for(Hardware::DeviceModule* lm : context->m_lmModules)
 		{
 			std::shared_ptr<LmDescription> lmDescription = context->m_lmDescriptions->get(lm);
@@ -573,17 +575,17 @@ namespace Builder
 			for(const LmDescription::LanController& lanController : lan.m_lanControllers)
 			{
 				LanControllerInfo lanControllerInfo;
-				Hardware::Software* software = nullptr;
+				const Hardware::Software* software = nullptr;
 
-				result &= LanControllerInfoHelper::getInfo(*lm, lanController.m_place, lanController.m_type,
-														   &lanControllerInfo, *context->m_equipmentSet.get(), log);
+				result &= LanControllerInfoHelper::getInfo(*lm, lanController.m_type, lanController.m_place,
+														   *context, false, &lanControllerInfo, log);
 
 				if (result == false)
 				{
 					continue;
 				}
 
-				if (lanControllerInfo.tuningProvided == true &&
+				if (lanControllerInfo.isProvideTuning() == true &&
 					lanControllerInfo.tuningEnable == true)
 				{
 					if (lanControllerInfo.tuningServiceID.isEmpty() == true)
@@ -595,9 +597,10 @@ namespace Builder
 					}
 					else
 					{
-						auto sw = softwareList.find(lanControllerInfo.tuningServiceID);
-
-						if (sw == softwareList.end())
+						software = getConnectedSoftware(context,
+														lanControllerInfo.tuningServiceID,
+														true);
+						if (software == nullptr)
 						{
 							// Property '%1.%2' is linked to undefined software ID '%3'.
 							//
@@ -607,8 +610,6 @@ namespace Builder
 						}
 						else
 						{
-							software = sw->second;
-
 							if (software->softwareType() != E::SoftwareType::TuningService)
 							{
 								// Property '%1.%2' is linked to not compatible software '%3'.
@@ -622,7 +623,7 @@ namespace Builder
 					}
 				}
 
-				if (lanControllerInfo.appDataProvided == true &&
+				if (lanControllerInfo.isProvideAppData() == true &&
 					lanControllerInfo.appDataEnable == true)
 				{
 					if (lanControllerInfo.appDataServiceID.isEmpty() == true)
@@ -634,9 +635,11 @@ namespace Builder
 					}
 					else
 					{
-						auto sw = softwareList.find(lanControllerInfo.appDataServiceID);
+						software = getConnectedSoftware(context,
+														lanControllerInfo.appDataServiceID,
+														false);
 
-						if (sw == softwareList.end())
+						if (software == nullptr)
 						{
 							// Property '%1.%2' is linked to undefined software ID '%3'.
 							//
@@ -646,8 +649,6 @@ namespace Builder
 						}
 						else
 						{
-							software = sw->second;
-
 							if (software->softwareType() != E::SoftwareType::AppDataService)
 							{
 								// Property '%1.%2' is linked to not compatible software '%3'.
@@ -661,7 +662,7 @@ namespace Builder
 					}
 				}
 
-				if (lanControllerInfo.diagDataProvided == true &&
+				if (lanControllerInfo.isProvideDiagData() == true &&
 					lanControllerInfo.diagDataEnable == true)
 				{
 					if (lanControllerInfo.diagDataServiceID.isEmpty() == true)
@@ -673,9 +674,11 @@ namespace Builder
 					}
 					else
 					{
-						auto sw = softwareList.find(lanControllerInfo.diagDataServiceID);
+						software = getConnectedSoftware(context,
+														lanControllerInfo.diagDataServiceID,
+														false);
 
-						if (sw == softwareList.end())
+						if (software == nullptr)
 						{
 							// Property '%1.%2' is linked to undefined software ID '%3'.
 							//
@@ -685,8 +688,6 @@ namespace Builder
 						}
 						else
 						{
-							software = sw->second;
-
 							if (software->softwareType() != E::SoftwareType::DiagDataService)
 							{
 								// Property '%1.%2' is linked to not compatible software '%3'.
@@ -703,6 +704,37 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	const Hardware::Software* SoftwareCfgGenerator::getConnectedSoftware(const Context* context,
+																   const QString& equipmentID,
+																   bool checkConnectionToControllers)
+	{
+		auto it = context->m_software.find(equipmentID);
+
+		if (it != context->m_software.end())
+		{
+			return it->second;
+		}
+
+		if (checkConnectionToControllers == false)
+		{
+			return nullptr;
+		}
+
+		auto device = context->m_equipmentSet->deviceObject(equipmentID);
+
+		if (device == nullptr)
+		{
+			return nullptr;
+		}
+
+		if (device->isController() == false)
+		{
+			return nullptr;
+		}
+
+		return device->getParentSoftware();
 	}
 
 	bool SoftwareCfgGenerator::joinSchemas(Context* context, VFrame30::Schema* schema, const VFrame30::Schema* pannel, Qt::Edge edge)

@@ -23,9 +23,9 @@ namespace Sim
 
 	bool Lans::init(const ::LogicModuleInfo& logicModuleInfo)
 	{
-		for (const ::LanControllerInfo& lc : logicModuleInfo.lanControllers)
+		for (const ::LanControllerInfo& lc : logicModuleInfo.lanControllers())
 		{
-			if (lc.isTuning() == true)
+			if (lc.isProvideTuning() == true)
 			{
 				std::shared_ptr<TuningServiceCommunicator> tuningServiceCommunicator;
 
@@ -35,7 +35,7 @@ namespace Sim
 
 					if (tuningServiceCommunicator == nullptr)
 					{
-						log().writeAlert(QString("TuningService %1 not forund for LAN port %2")
+						log().writeAlert(QString("TuningService %1 not found for LAN port %2")
 										 .arg(lc.tuningServiceID)
 										 .arg(lc.equipmentID));
 					}
@@ -45,13 +45,13 @@ namespace Sim
 				m_interfaces.emplace_back(std::move(i));
 			}
 
-			if (lc.isAppData() == true)
+			if (lc.isProvideAppData() == true)
 			{
 				auto i = std::make_unique<AppDataLanInterface>(lc, this);
 				m_interfaces.emplace_back(std::move(i));
 			}
 
-			if (lc.isDiagData() == true)
+			if (lc.isProvideDiagData() == true)
 			{
 				auto i = std::make_unique<DiagDataLanInterface>(lc, this);
 				m_interfaces.emplace_back(std::move(i));
@@ -225,19 +225,24 @@ namespace Sim
 		return result;
 	}
 
-	void Lans::sendTuningWriteConfirmation(std::vector<qint64> confirmedRecords, const Sim::RamArea& data, bool setSorChassisState, TimeStamp timeStamp)
+	void Lans::sendTuningWriteConfirmation(const QString& portEquipmentId,
+										   qint64 confirmedRecordId,
+										   const Sim::RamArea& data,
+										   bool setSorChassisState,
+										   TimeStamp timeStamp)
 	{
 		for (const std::unique_ptr<LanInterface>& i : m_interfaces)
 		{
-			if (i->isTuning() == true && i->enabled() == true)
+			if (i->isTuning() == true && i->enabled() == true && i->portEquipmentId() == portEquipmentId)
 			{
 				TuningLanInterface* tli = i->toTuningLanInterface();
+
 				if (tli == nullptr)
 				{
 					continue;
 				}
 
-				tli->sendWriteConfirmation(confirmedRecords, data, setSorChassisState, timeStamp);
+				tli->sendWriteConfirmation(confirmedRecordId, data, setSorChassisState, timeStamp);
 			}
 		}
 

@@ -1,5 +1,7 @@
 #include "ConfigurationServiceCfgGenerator.h"
 #include "../UtilsLib/WUtils.h"
+#include "../lib/SoftwareSettings.h"
+#include "../lib/SoftwareSettingsGetter.h"
 
 namespace Builder
 {

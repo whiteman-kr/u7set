@@ -1,8 +1,11 @@
 #include "MetrologyCfgGenerator.h"
 
 #include "DbMetrologyConnection.h"
-#include "../lib/SoftwareSettings.h"
 #include "../HardwareLib/DeviceObject.h"
+#include "../UtilsLib/XmlHelper.h"
+#include "../lib/DeviceHelper.h"
+#include "../lib/SoftwareSettings.h"
+#include "../lib/SoftwareSettingsGetter.h"
 
 namespace Builder
 {

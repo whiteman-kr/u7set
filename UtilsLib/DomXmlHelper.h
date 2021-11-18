@@ -20,4 +20,5 @@ public:
 	static bool getBoolAttribute(const QDomElement& elem, const QString& attrName, bool* value, QString* errMsg);
 	static bool getAddress16Attribute(const QDomElement& elem, const QString& attrName, Address16* value, QString* errMsg);
 	static bool getUInt32Attribute(const QDomElement& elem, const QString& attrName, quint32* value, QString* errMsg);
+	static bool getUInt64Attribute(const QDomElement& elem, const QString& attrName, quint64* value, QString* errMsg);
 };

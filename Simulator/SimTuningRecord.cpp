@@ -2,7 +2,7 @@
 
 namespace Sim
 {
-	qint64 TuningRecord::s_indexCounter = 0;
+	std::atomic<qint64> TuningRecord::s_indexCounter = 0;
 
 	TuningRecord TuningRecord::createApplyChanges(const QString& lmEquipmentId, const QString& portEquipmentId)
 	{

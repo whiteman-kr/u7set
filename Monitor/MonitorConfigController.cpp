@@ -565,7 +565,7 @@ bool MonitorConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, 
 
 	// Read StrID attribute
 	//
-	QString appEquipmentId = softwareElement.attribute("ID");
+	QString appEquipmentId = softwareElement.attribute(EquipmentPropNames::EQUIPMENT_ID);
 
 	if (MonitorAppSettings::instance().equipmentId() != appEquipmentId)
 	{

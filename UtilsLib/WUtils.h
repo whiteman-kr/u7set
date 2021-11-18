@@ -84,6 +84,11 @@
 										return false; \
 									}
 
+#define CONTINUE_IF_FALSE(result)	if (result == false) \
+									{ \
+										continue; \
+									}
+
 #define BREAK_IF_FALSE(result)		if (result == false) \
 									{ \
 										break; \

@@ -31,6 +31,7 @@ unix {
 
 SOURCES += \
 	../../lib/DataSource.cpp \
+	../../lib/LanControllerInfo.cpp \
 	main.cpp \
 	SourceListWidget.cpp \
 	PacketSourceModel.cpp \
@@ -44,6 +45,7 @@ HEADERS  += \
 	Stable.h \
 	../../Proto/serialization.pb.h \
 	../../lib/DataSource.h \
+	../../lib/LanControllerInfo.h \
 	SourceListWidget.h \
 	PacketSourceModel.h \
 	SourceStatusWidget.h \

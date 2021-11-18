@@ -4,10 +4,8 @@
 #include "TuningDataStorage.h"
 #include "../TuningService/TuningSource.h"
 
-
 namespace  Tuning
 {
-
 	// -------------------------------------------------------------------------------------
 	//
 	// TuningData class implementation
@@ -378,7 +376,6 @@ namespace  Tuning
 		tuningData->append(reinterpret_cast<const char*>(m_tuningData), m_tuningDataSizeB);
 	}
 
-
 	quint64 TuningData::generateUniqueID(const QString& lmEquipmentID)
 	{
 		Crc64 crc;
@@ -402,17 +399,17 @@ namespace  Tuning
 		return m_uniqueID;
 	}
 
-
-	void TuningData::getSignals(QVector<AppSignal*>& signalList) const
+	void TuningData::getSignals(QVector<AppSignal*>* signalList) const
 	{
-		signalList.clear();
+		TEST_PTR_RETURN(signalList);
+
+		signalList->clear();
 
 		for(const QVector<AppSignal*>& list : m_tuningSignals)
 		{
-			signalList.append(list);
+			signalList->append(list);
 		}
 	}
-
 
 	const QVector<AppSignal *>& TuningData::getSignals(int type) const
 	{
@@ -560,7 +557,6 @@ namespace  Tuning
 		xml.writeEndElement();							//	</ <TuningData>
 	}
 
-
 	bool TuningData::readFromXml(XmlReadHelper& xml)
 	{
 		bool result = true;
@@ -647,7 +643,6 @@ namespace  Tuning
 
 		return result;
 	}
-
 
 	void TuningData::writeBigEndianUint32Bit(quint8* dataPtr, int bitNo, quint32 bitValue)
 	{
@@ -779,21 +774,37 @@ namespace  Tuning
 		return -1;
 	}
 
-
 	// -------------------------------------------------------------------------------------
 	//
 	// TuningDataStorage class implementation
 	//
 	// -------------------------------------------------------------------------------------
 
-	TuningDataStorage::~TuningDataStorage()
+	bool TuningDataStorage::appendTuningData(const QString& lmEquipmentID, TuningDataShared tuningData)
 	{
-		for(TuningData* tuningData : *this)
+		TEST_PTR_RETURN_FALSE(tuningData);
+
+		if (m_tuningDataMap.contains(lmEquipmentID) == true)
 		{
-			delete tuningData;
+			Q_ASSERT(false);
+			return false;
 		}
 
-		QHash<QString, TuningData*>::clear();
+		m_tuningDataMap.insert({lmEquipmentID, tuningData});
+
+		return true;
+	}
+
+	TuningDataShared TuningDataStorage::getTuningData(const QString& lmEquipmentID)
+	{
+		auto it = m_tuningDataMap.find(lmEquipmentID);
+
+		if (it == m_tuningDataMap.end())
+		{
+			return nullptr;
+		}
+
+		return it->second;
 	}
 
 }

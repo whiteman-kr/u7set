@@ -1319,9 +1319,6 @@ namespace Sim
 		{
 			std::queue<TuningRecord> q = m_lans.fetchWriteTuningQueue();
 
-			std::vector<qint64> confirmedRecords;
-			confirmedRecords.reserve(q.size());
-
 			while (q.empty() == false)
 			{
 				const TuningRecord& record =  q.front();
@@ -1335,19 +1332,14 @@ namespace Sim
 					record.writeToRam(mutableRam());
 				}
 
-				confirmedRecords.push_back(record.recordIndex);
-
-				q.pop();
-			}
-
-			// Send confirmations to tuning subsystem
-			//
-			if (confirmedRecords.empty() == false)
-			{
 				auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime);
 				TimeStamp plantTime{ms.count() + QDateTime::currentDateTime().offsetFromUtc() * 1000};
 
-				m_lans.sendTuningWriteConfirmation(confirmedRecords, tuningRamArea(), m_commandProcessor->signalSetSorChassis(), plantTime);
+				// Send confirmations to tuning subsystem
+				//
+				m_lans.sendTuningWriteConfirmation(record.portEquipmentId, record.recordIndex, tuningRamArea(), m_commandProcessor->signalSetSorChassis(), plantTime);
+
+				q.pop();
 			}
 		}
 

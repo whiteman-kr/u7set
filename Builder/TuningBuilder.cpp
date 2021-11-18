@@ -98,40 +98,30 @@ namespace Builder
 											 lmDescription->lmDescriptionFile(m),
 											 lmDescription->descriptionNumber());
 
-			QByteArray data;
-			quint64 uniqueID = 0;
+			Tuning::TuningDataShared tuningData = m_tuningDataStorage->getTuningData(m->equipmentIdTemplate());
 
-			Tuning::TuningDataStorage::iterator it = m_tuningDataStorage->find(m->equipmentId());
-
-			std::vector<QVariantList> descriptionData;
-
-			if (it == m_tuningDataStorage->end())
+			if (tuningData == nullptr)
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								   QString(tr("Tuning data for LM '%1' is not found")).arg(m->propertyValue("EquipmentID").toString()));
+				// Tuning data is not found for module %1
+				//
+				m_log->errALC5197(m->equipmentIdTemplate());
 				return false;
 			}
-			else
-			{
-				Tuning::TuningData *tuningData = it.value();
-				if (tuningData == nullptr)
-				{
-					assert(tuningData);
-					return false;
-				}
 
-				tuningData->getTuningData(&data);
-				uniqueID = tuningData->uniqueID();
+			QByteArray data;
 
-				int metadataFieldsVersion = 0;
+			tuningData->getTuningData(&data);
+			quint64 uniqueID = tuningData->uniqueID();
 
-				QStringList metadataFields;
+			int metadataFieldsVersion = 0;
 
-				tuningData->getMetadataFields(metadataFields, &metadataFieldsVersion);
+			QStringList metadataFields;
 
-				m_firmwareWriter->setDescriptionFields(subsysStrID, tuningUartId, metadataFieldsVersion, metadataFields);
-				descriptionData = tuningData->metadata();
-			}
+			tuningData->getMetadataFields(metadataFields, &metadataFieldsVersion);
+
+			m_firmwareWriter->setDescriptionFields(subsysStrID, tuningUartId, metadataFieldsVersion, metadataFields);
+
+			std::vector<QVariantList> descriptionData = tuningData->metadata();
 
 			if (m_firmwareWriter->setChannelData(subsysStrID, tuningUartId, m->propertyValue("EquipmentID").toString(), channel, frameSize, frameCount, uniqueID, data, descriptionData, m_log) == false)
 			{

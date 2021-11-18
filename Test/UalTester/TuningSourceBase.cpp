@@ -14,8 +14,8 @@ TuningSource::TuningSource()
 
 TuningSource::TuningSource(const Network::DataSourceInfo& info) :
 	m_sourceID (static_cast<qint64>(info.id())),
-	m_equipmentID (QString::fromStdString(info.lmequipmentid())),
-	m_caption (QString::fromStdString(info.lmcaption()))
+	m_equipmentID (QString::fromStdString(info.moduleequipmentid())),
+	m_caption (QString::fromStdString(info.modulecaption()))
 {
 }
 
