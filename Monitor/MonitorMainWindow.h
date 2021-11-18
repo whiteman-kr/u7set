@@ -125,6 +125,7 @@ protected:
 	// Data
 	//
 private:
+	Log::LogFile m_LogFile;						// Must be initialized first
 	InstanceResolver& m_instanceResolver;
 
 	MonitorConfigController m_configController;
@@ -135,18 +136,16 @@ private:
 	std::unique_ptr<VFrame30::LogController> m_logController;
 
 	TcpSignalClient* m_tcpSignalClient = nullptr;
-	SimpleThread* m_tcpClientThread = nullptr;			// +
+	SimpleThread* m_tcpClientThread = nullptr;
 
 	TcpSignalRecents* m_tcpSignalRecents = nullptr;
-	SimpleThread* m_tcpRecentsThread = nullptr;			// +
+	SimpleThread* m_tcpRecentsThread = nullptr;
 
 	MonitorTuningTcpClient* m_tuningTcpClient = nullptr;
-	SimpleThread* m_tuningTcpClientThread = nullptr;	// +
+	SimpleThread* m_tuningTcpClientThread = nullptr;
 
 	TcpAppSourcesState* m_tcpSourcesStateClient = nullptr;
-	SimpleThread* m_sourcesStateClientThread = nullptr;	// +
-
-	Log::LogFile m_LogFile;
+	SimpleThread* m_sourcesStateClientThread = nullptr;
 
 	DialogAlert m_dialogAlert;
 

@@ -29,7 +29,8 @@ HostAddressPort ConfigConnection::address() const
 	return HostAddressPort{m_ip, static_cast<quint16>(m_port)};
 }
 
-MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2) :
+MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile) :
+	HasLogFile(logFile, "ConfigController"),
 	m_softwareInfo(softwareInfo)
 {
 	qRegisterMetaType<ConfigSettings>("ConfigSettings");
@@ -122,10 +123,17 @@ MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInf
 
 	// --
 	//
-	m_cfgLoaderThread = new CfgLoaderThread(m_softwareInfo, m_appInstanceNo, address1,  address2, false, nullptr);
+	m_cfgLoaderThread = new CfgLoaderThread(m_softwareInfo,
+											m_appInstanceNo,
+											address1,
+											address2,
+											false,
+											std::make_shared<CircularLogger>(logFile, "CfgLoaderThread"));
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &MonitorConfigController::slot_configurationReady);
+
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClient, this, &MonitorConfigController::unknownClient);
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClient, [this](){this->writeError(tr("Unknown client %1").arg(MonitorAppSettings::instance().equipmentId()));});
 
 	return;
 }
@@ -176,10 +184,13 @@ bool MonitorConfigController::getFileBlocked(const QString& pathFileName, QByteA
 	}
 
 	bool result = m_cfgLoaderThread->getFileBlocked(pathFileName, fileData, errorStr);
-
 	if (result == false)
 	{
-		qDebug() << "MonitorConfigController::getFileBlocked: Can't get file " << pathFileName;
+		writeError(tr("getFileBlocked() Can't get file %1").arg(pathFileName));
+	}
+	else
+	{
+		writeMessage(tr("getFileBlocked('%1') Success").arg(pathFileName));
 	}
 
 	return result;
@@ -208,7 +219,11 @@ bool MonitorConfigController::getFileBlockedById(const QString& id, QByteArray* 
 
 	if (result == false)
 	{
-		qDebug() << "MonitorConfigController::getFileBlocked: Can't get file with ID" << id;
+		writeError(tr("getFileBlockedById() Can't get fileid %1").arg(id));
+	}
+	else
+	{
+		writeMessage(tr("getFileBlockedById('%1') Success").arg(id));
 	}
 
 	return result;
@@ -233,7 +248,7 @@ bool MonitorConfigController::hasFileId(QString fileId) const
 		return false;
 	}
 
-	return m_cfgLoaderThread->hasFileID(fileId);
+	return m_cfgLoaderThread->hasFileID(std::move(fileId));
 }
 
 Tcp::ConnectionState MonitorConfigController::getConnectionState() const
@@ -266,6 +281,8 @@ void MonitorConfigController::start()
 		return;
 	}
 
+	writeMessage(tr("MonitorConfigController::start()"));
+
 	m_cfgLoaderThread->start();
 	m_cfgLoaderThread->enableDownloadConfiguration();
 
@@ -296,7 +313,6 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 			}
 			else
 			{
-				qDebug() << "ERROR: Cannot get file " <<  scriptFileName << " ," << parsingError;
 				return {};
 			}
 		};
@@ -315,7 +331,6 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 			}
 			else
 			{
-				qDebug() << "ERROR: Cannot get file " <<  fileId << " ," << parsingError;
 				return {};
 			}
 		};
@@ -391,6 +406,9 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 	// Get tuning signal files
 	//
+	theTuningSignals.reset();
+
+	if (readSettings.tuningEnabled == true)
 	{
 		QByteArray data;
 		QString errorString;
@@ -447,6 +465,30 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 	qDebug() << "ArchiveService1 (id, ip, port): " << readSettings.archiveService1.equipmentId() << ", " << readSettings.archiveService1.ip() << ", " << readSettings.archiveService1.port();
 	qDebug() << "ArchiveService2 (id, ip, port): " << readSettings.archiveService2.equipmentId() << ", " << readSettings.archiveService2.ip() << ", " << readSettings.archiveService2.port();
+
+	writeMessage(tr("New configuration arrived: StartSchemaID %1").arg(readSettings.startSchemaId));
+	writeMessage(tr("ADS1 (id, ip, port): %1, %2, %3").arg(readSettings.appDataService1.equipmentId()).arg(readSettings.appDataService1.ip()).arg(readSettings.appDataService1.port()));
+	writeMessage(tr("ADS2 (id, ip, port): %1, %2, %3").arg(readSettings.appDataService2.equipmentId()).arg(readSettings.appDataService2.ip()).arg(readSettings.appDataService2.port()));
+
+	writeMessage(tr("ADS RT Trends 1 (id, ip, port): %1, %2, %3").arg(readSettings.appDataServiceRealtimeTrend1.equipmentId()).arg(readSettings.appDataServiceRealtimeTrend1.ip()).arg(readSettings.appDataServiceRealtimeTrend1.port()));
+	writeMessage(tr("ADS RT Trends 2 (id, ip, port): %1, %2, %3").arg(readSettings.appDataServiceRealtimeTrend2.equipmentId()).arg(readSettings.appDataServiceRealtimeTrend2.ip()).arg(readSettings.appDataServiceRealtimeTrend2.port()));
+
+	writeMessage(tr("ArchiveService1 (id, ip, port): %1, %2, %3").arg(readSettings.archiveService1.equipmentId()).arg(readSettings.archiveService1.ip()).arg(readSettings.archiveService1.port()));
+	writeMessage(tr("ArchiveService2 (id, ip, port): %1, %2, %3").arg(readSettings.archiveService2.equipmentId()).arg(readSettings.archiveService2.ip()).arg(readSettings.archiveService2.port()));
+
+	writeMessage(QString("TuningEnabled = %1").arg(readSettings.tuningEnabled));
+	if (readSettings.tuningEnabled == true)
+	{
+		writeMessage(tr("TuningService (id, ip, port): %1, %2, %3").arg(readSettings.tuningService.equipmentId()).arg(readSettings.tuningService.ip()).arg(readSettings.tuningService.port()));
+		writeMessage(tr("TuningUserAccounts: %1").arg(readSettings.tuningUserAccounts.join(", ")));
+		writeMessage(tr("TuningSources: %1").arg(readSettings.tuningSources.join(", ")));
+		writeMessage(tr("TuningSessionTimeout: %1").arg(readSettings.tuningSessionTimeout));
+	}
+
+	if (readSettings.errorMessage.isEmpty() == false)
+	{
+		writeError(tr("Error: %1").arg(readSettings.errorMessage));
+	}
 
 	// New setpoints
 	//
@@ -519,7 +561,6 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	// Emit signal to inform everybody about new configuration
 	//
 	emit configurationArrived(readSettings);
-
 	emit configurationUpdate();
 
 	return;

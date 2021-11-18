@@ -1,14 +1,18 @@
 #include "ArchiveTcpClient.h"
 #include "MonitorAppSettings.h"
 
-ArchiveTcpClient::ArchiveTcpClient(MonitorConfigController* configController) :
+ArchiveTcpClient::ArchiveTcpClient(MonitorConfigController* configController, ILogFile* logFile) :
 	Tcp::Client(configController->softwareInfo(),
 				configController->configuration().archiveService1.address(),
 				configController->configuration().archiveService2.address(),
 				"ArchiveTcpClient"),
 	TcpClientStatistics(this),
-	m_cfgController(configController)
+	m_cfgController(configController),
+	m_logFile(logFile, "ArchiveTcpClient")
 {
+	Q_ASSERT(configController);
+	Q_ASSERT(logFile);
+
 	setObjectName("ArchiveTcpClient");
 
 	qDebug()
@@ -38,15 +42,35 @@ bool ArchiveTcpClient::requestData(TimeStamp startTime,
 								   bool removePeriodicRecords,
 								   const std::vector<AppSignalParam>& appSignals)
 {
+	m_logFile.writeMessage(QString("requestData(), startTime %1, endTime %2, timeType %3, removePeriodicRecords %4, appSignals: %5")
+							.arg(startTime.toDateTime().toString())
+							.arg(endTime.toDateTime().toString())
+							.arg(E::valueToString(timeType))
+							.arg(removePeriodicRecords)
+							.arg([](const auto& appSignals) -> QString
+									{
+										QStringList result;
+										result.reserve(appSignals.size());
+										for (const AppSignalParam& s : appSignals)
+										{
+											result.push_back(s.appSignalId());
+										}
+										return result.join(", ");
+									}(appSignals))
+						   );
+
 	if (appSignals.size() > ARCH_REQUEST_MAX_SIGNALS)
 	{
-		Q_ASSERT(appSignals.size() <= ARCH_REQUEST_MAX_SIGNALS);
+		m_logFile.writeWarning(QString("requestData() appSignals.size()(%1) > ARCH_REQUEST_MAX_SIGNALS(%2), cancel request")
+								.arg(appSignals.size())
+								.arg(ARCH_REQUEST_MAX_SIGNALS));
 		return false;
 	}
 
 	if (m_requestInProgress == true)
 	{
 		Q_ASSERT(m_requestInProgress == false);
+		m_logFile.writeError(QString("requestData() m_requestInProgress == true, cancel request"));
 		return false;
 	}
 
@@ -70,6 +94,8 @@ bool ArchiveTcpClient::requestData(TimeStamp startTime,
 
 bool ArchiveTcpClient::cancelRequest()
 {
+	m_logFile.writeMessage(QString("cancelRequest()"));
+
 	if (m_requestInProgress == false)
 	{
 		return true;
@@ -93,7 +119,6 @@ bool ArchiveTcpClient::isRequestInProgress() const
 {
 	return m_requestInProgress;
 }
-
 
 void ArchiveTcpClient::timerEvent(QTimerEvent* )
 {
@@ -132,6 +157,7 @@ void ArchiveTcpClient::resetState()
 void ArchiveTcpClient::onClientThreadStarted()
 {
 	qDebug() << "ArchiveTcpClient::onClientThreadStarted()";
+	m_logFile.writeMessage(QString("onClientThreadStarted()"));
 
 	connect(m_cfgController, &MonitorConfigController::configurationArrived,
 			this, &ArchiveTcpClient::slot_configurationArrived,
@@ -145,6 +171,7 @@ void ArchiveTcpClient::onClientThreadStarted()
 void ArchiveTcpClient::onClientThreadFinished()
 {
 	qDebug() << "ArchiveTcpClient::onClientThreadFinished()";
+	m_logFile.writeMessage(QString("onClientThreadFinished()"));
 
 	resetState();
 
@@ -154,6 +181,7 @@ void ArchiveTcpClient::onClientThreadFinished()
 void ArchiveTcpClient::onConnection()
 {
 	qDebug() << "ArchiveTcpClient::onConnection()";
+	m_logFile.writeMessage(QString("onConnection()"));
 
 	Q_ASSERT(isClearToSendRequest() == true);
 
@@ -165,6 +193,7 @@ void ArchiveTcpClient::onConnection()
 void ArchiveTcpClient::onDisconnection()
 {
 	qDebug() << "ArchiveTcpClient::onDisconnection";
+	m_logFile.writeMessage(QString("onDisconnection()"));
 
 	resetState();
 
@@ -174,6 +203,7 @@ void ArchiveTcpClient::onDisconnection()
 void ArchiveTcpClient::onReplyTimeout()
 {
 	qDebug() << "ArchiveTcpClient::onReplyTimeout()";
+	m_logFile.writeWarning(QString("onReplyTimeout()"));
 
 	emitErrorResetState("Request timeout.");
 	closeConnection();
@@ -209,7 +239,10 @@ void ArchiveTcpClient::processReply(quint32 requestID, const char* replyData, qu
 
 	default:
 		Q_ASSERT(false);
+
 		qDebug() << "Wrong requestID in ArchiveTcpClient::processReply() " << requestID;
+		m_logFile.writeError(QString("Wrong requestID in processReply(), requestId %1").arg(requestID));
+
 		emitErrorResetState("Wrong requestID in ArchiveTcpClient::processReply().");
 	}
 
@@ -221,6 +254,7 @@ void ArchiveTcpClient::requestStart()
 	if (isConnected() == false)
 	{
 		emitErrorResetState("No connection to Archive Service.");
+		m_logFile.writeError(QString("requestStart() No connection to Archive Service"));
 		return;
 	}
 
@@ -228,6 +262,7 @@ void ArchiveTcpClient::requestStart()
 	{
 		Q_ASSERT(isClearToSendRequest());
 		emitErrorResetState("No connection to Archive Service.");
+		m_logFile.writeError(QString("requestStart() isClearToSendRequest() == false"));
 		return;
 	}
 
@@ -250,14 +285,26 @@ void ArchiveTcpClient::requestStart()
 
 	m_startRequest.set_removeperiodic(m_requestData.removePrioodicRecords);
 
+	QStringList appSignlList;
+	appSignlList.reserve(m_requestData.appSignals.size());
+
 	for (const std::pair<Hash, QString> sp : m_requestData.appSignals)
 	{
 		m_startRequest.add_signalhashes(sp.first);
+		appSignlList.push_back(sp.second);
 	}
 
 	sendRequest(ARCHS_GET_APP_SIGNALS_STATES_START, m_startRequest);
 
 	m_startRequestTime.start();
+
+	m_logFile.writeMessage(QString("requestStart() sendRequest(ARCHS_GET_APP_SIGNALS_STATES_START), startTime %1, endTime %2, timeStamp %3, removePrioodicRecords %4, appSignals: %5")
+							.arg(m_requestData.startTime.toDateTime().toString())
+							.arg(m_requestData.endTime.toDateTime().toString())
+							.arg(E::valueToString(m_requestData.timeType))
+							.arg(m_requestData.removePrioodicRecords)
+							.arg(appSignlList.join(", "))
+						 );
 
 	return;
 }
@@ -265,21 +312,24 @@ void ArchiveTcpClient::requestStart()
 void ArchiveTcpClient::processStart(const QByteArray& data)
 {
 	qDebug() << "ARCHS_GET_APP_SIGNALS_STATES_START Reqest->Reply time: " << m_startRequestTime.elapsed();
+	m_logFile.writeMessage(QString("processStart(), Reqest->Reply time %1 ms, data.size() %2")
+							.arg(m_startRequestTime.elapsed())
+							.arg(data.size())
+						 );
 
 	// Parse protobuffer message
 	//
 	bool ok = m_startReply.ParseFromArray(data.constData(), data.size());
-
 	if (ok == false)
 	{
 		emitErrorResetState("StartReply data parsing error.");
+		m_logFile.writeError("processStart() StartReply data parsing error.");
 		return;
 	}
 
 	// Process received data
 	//
 	int error = m_startReply.error();
-	//int archError = m_startReply.archerror();
 	QString errorString = QString::fromStdString(m_startReply.errorstring());
 	m_currentRequestId = m_startReply.requestid();
 
@@ -288,6 +338,10 @@ void ArchiveTcpClient::processStart(const QByteArray& data)
 	{
 		emitErrorResetState(errorString);
 
+		m_logFile.writeError(QString("processStart() Received error from ArchiveService: requestId %1, error: %2.")
+								.arg(m_currentRequestId)
+								.arg(errorString));
+
 		qDebug() << "RECEIVED ERROR:   ArchiveTcpClient::processStart, error = "
 				 << errorString
 				 << ", error = " << error
@@ -295,6 +349,8 @@ void ArchiveTcpClient::processStart(const QByteArray& data)
 
 		return;
 	}
+
+	m_logFile.writeMessage(QString("processStart() Received m_currentRequestId %1").arg(m_currentRequestId));
 
 	// Go further
 	//
@@ -307,6 +363,7 @@ void ArchiveTcpClient::requestNext()
 	if (isConnected() == false)
 	{
 		emitErrorResetState("No connection to Archive Service.");
+		m_logFile.writeError(QString("requestNext() No connection to Archive Service"));
 		return;
 	}
 
@@ -314,6 +371,7 @@ void ArchiveTcpClient::requestNext()
 	{
 		Q_ASSERT(isClearToSendRequest());
 		emitErrorResetState("No connection to Archive Service.");
+		m_logFile.writeError(QString("requestNext() isClearToSendRequest() == false"));
 		return;
 	}
 
@@ -331,6 +389,8 @@ void ArchiveTcpClient::requestNext()
 
 	sendRequest(ARCHS_GET_APP_SIGNALS_STATES_NEXT, m_nextRequest);
 
+	m_logFile.writeMessage(QString("requestNext() sendRequest(ARCHS_GET_APP_SIGNALS_STATES_NEXT), m_currentRequestId = %1").arg(m_currentRequestId));
+
 	m_statTcpRequestCount ++;
 
 	return;
@@ -338,6 +398,8 @@ void ArchiveTcpClient::requestNext()
 
 void ArchiveTcpClient::processNext(const QByteArray& data)
 {
+	m_logFile.writeMessage(QString("processNext(), data.size() = %1, requestId = %2").arg(data.size()).arg(m_currentRequestId));
+
 	// Parse protobuffer message
 	//
 	bool ok = m_nextReply.ParseFromArray(data.constData(), data.size());
@@ -345,6 +407,7 @@ void ArchiveTcpClient::processNext(const QByteArray& data)
 	if (ok == false)
 	{
 		emitErrorResetState("NextReply data parsing error.");
+		m_logFile.writeError(QString("processNext() Data parsing error."));
 		return;
 	}
 
@@ -358,6 +421,10 @@ void ArchiveTcpClient::processNext(const QByteArray& data)
 	{
 		emitErrorResetState(errorString);
 
+		m_logFile.writeError(QString("processNext() Received error from ArchiveService: requestId %1, error: %2.")
+								.arg(m_currentRequestId)
+								.arg(errorString));
+
 		qDebug() << "RECEIVED ERROR:   ArchiveTcpClient::processNext, error = "
 				 << errorString
 				 << ", error = " << error
@@ -370,6 +437,10 @@ void ArchiveTcpClient::processNext(const QByteArray& data)
 	{
 		Q_ASSERT(m_currentRequestId == m_nextReply.requestid());
 		emitErrorResetState(tr("Received wrong RequestID, received %1, expected %2").arg(m_nextReply.requestid()).arg(m_currentRequestId));
+
+		m_logFile.writeError(QString("processNext() Received wrong RequestID, received %1, expected %2")
+								.arg(m_nextReply.requestid())
+								.arg(m_currentRequestId));
 		return;
 	}
 
@@ -377,7 +448,7 @@ void ArchiveTcpClient::processNext(const QByteArray& data)
 	{
 		// Data not ready yet, request next part one more time
 		//
-		QThread::msleep(5);
+		QThread::msleep(50);
 		requestNext();
 		return;
 	}
@@ -393,6 +464,7 @@ void ArchiveTcpClient::processNext(const QByteArray& data)
 	// --
 	//
 	qDebug() << "ArchiveTcpClient::processNext, stateCount " << stateCount;
+	m_logFile.writeMessage(QString("processNext() stateCount = %1, requestId = %2").arg(stateCount).arg(m_currentRequestId));
 
 	for (int i = 0; i < stateCount; i++)
 	{
@@ -412,6 +484,7 @@ void ArchiveTcpClient::processNext(const QByteArray& data)
 	if (m_nextReply.islastpart() == true)
 	{
 		qDebug() << "ARCHS_GET_APP_SIGNALS_STATES_NEXT Reqest->Reply time: " << m_startRequestTime.elapsed();
+		m_logFile.writeMessage(QString("processNext() End of request, time %1 ms, requestId %2").arg(m_startRequestTime.elapsed()).arg(m_currentRequestId));
 		resetState();							// END OF REQUEST COMMUNICATION!
 	}
 	else
@@ -429,6 +502,7 @@ void ArchiveTcpClient::requestCancel()
 	if (isConnected() == false)
 	{
 		emitErrorResetState("No connection to Archive Service.");
+		m_logFile.writeError(QString("requestCancel() No connection to Archive Service"));
 		return;
 	}
 
@@ -436,6 +510,7 @@ void ArchiveTcpClient::requestCancel()
 	{
 		Q_ASSERT(isClearToSendRequest());
 		emitErrorResetState("No connection to Archive Service.");
+		m_logFile.writeError(QString("requestCancel() isClearToSendRequest() == false"));
 		return;
 	}
 
@@ -449,11 +524,15 @@ void ArchiveTcpClient::requestCancel()
 
 	sendRequest(ARCHS_GET_APP_SIGNALS_STATES_CANCEL, m_cancelRequest);
 
+	m_logFile.writeMessage(QString("processCancel() sendRequest(ARCHS_GET_APP_SIGNALS_STATES_CANCEL), m_currentRequestId = %1").arg(m_currentRequestId));
+
 	return;
 }
 
 void ArchiveTcpClient::processCancel(const QByteArray& data)
 {
+	m_logFile.writeMessage(QString("processCancel() data.size() = %1, requestId = %2").arg(data.size()).arg(m_currentRequestId));
+
 	// Parse protobuffer message
 	//
 	bool ok = m_cancelReply.ParseFromArray(data.constData(), data.size());
@@ -461,6 +540,7 @@ void ArchiveTcpClient::processCancel(const QByteArray& data)
 	if (ok == false)
 	{
 		emitErrorResetState("CancelReply data parsing error.");
+		m_logFile.writeError(QString("processNext() Data parsing error."));
 		return;
 	}
 
@@ -471,6 +551,11 @@ void ArchiveTcpClient::processCancel(const QByteArray& data)
 	if (errorString.isEmpty() == false)
 	{
 		emitErrorResetState(errorString);
+
+		m_logFile.writeError(QString("processCancel() Received error from ArchiveService: requestId %1, error: %2.")
+								.arg(m_currentRequestId)
+								.arg(errorString));
+
 		qDebug() << "RECEIVED ERROR:   ArchiveTcpClient::processStart, error = "
 				 << errorString
 				 << ", RequestID = " << m_currentRequestId;

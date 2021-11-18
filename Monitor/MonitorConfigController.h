@@ -2,6 +2,7 @@
 
 #include "../OnlineLib/CfgServerLoader.h"
 #include "../OnlineLib/SocketIO.h"
+#include "../UtilsLib/ILogFile.h"
 #include "../lib/ComparatorSet.h"
 #include "../lib/ClientBehavior.h"
 #include "../VFrame30/Schema.h"
@@ -23,7 +24,7 @@ public:
 
 protected:
 	QString m_equipmentId = "UNKNOWN";
-	QString m_ip = "127.0.0.1";
+	QString m_ip = "0.0.0.0";
 	int m_port = 0;
 
 	friend struct ConfigSettings;
@@ -64,14 +65,14 @@ struct ConfigSettings
 };
 
 
-class MonitorConfigController : public QObject
+class MonitorConfigController : public QObject, public HasLogFile
 {
 	Q_OBJECT
 
 public:
 	MonitorConfigController() = delete;
 
-	MonitorConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2);
+	MonitorConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile);
 	virtual ~MonitorConfigController();
 
 	// Methods

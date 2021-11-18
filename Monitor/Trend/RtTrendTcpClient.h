@@ -14,13 +14,13 @@ class RtTrendTcpClient : public Tcp::Client, public TcpClientStatistics
 	Q_OBJECT
 
 public:
-	RtTrendTcpClient(MonitorConfigController* configController);
+	RtTrendTcpClient(MonitorConfigController* configController, ILogFile* logFile);
 	virtual ~RtTrendTcpClient();
 
 	// Methods
 	//
 public:
-	bool setData(E::RtTrendsSamplePeriod samplePeriod, const std::vector<TrendLib::TrendSignalParam> trendSignals);
+	bool setData(E::RtTrendsSamplePeriod samplePeriod, std::vector<TrendLib::TrendSignalParam> trendSignals);
 	bool clearData();
 
 public:
@@ -73,6 +73,7 @@ public:
 	//
 private:
 	MonitorConfigController* m_cfgController = nullptr;
+	HasLogFile m_logFile;
 
 	mutable QMutex m_dataMutex;
 

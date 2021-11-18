@@ -39,19 +39,18 @@ private:
 };
 
 //
-//		ADS_GET_APP_DATA_SOURCES_INFO
+//	ADS_GET_APP_DATA_SOURCES_INFO
 //				|
-//		ADS_GET_APP_DATA_SOURCES_STATES <------+
-//				|						|			Repeat it
-//				+------------------------
+//	ADS_GET_APP_DATA_SOURCES_STATES <------+
+//				|						   |	Repeat it
+//				+--------------------------+
 //
-
 class TcpAppSourcesState : public Tcp::Client, public TcpClientStatistics
 {
 	Q_OBJECT
 
 public:
-	TcpAppSourcesState(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+	TcpAppSourcesState(MonitorConfigController* configController, ILogFile* logFile);
 	virtual ~TcpAppSourcesState();
 
 	std::vector<Hash> appDataSourceHashes();
@@ -87,6 +86,7 @@ signals:
 
 private:
 	MonitorConfigController* m_cfgController = nullptr;
+	HasLogFile m_logFile;
 
 private:
 	int m_requestPeriod = 100;

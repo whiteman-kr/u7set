@@ -14,7 +14,7 @@ class ArchiveTrendTcpClient : public Tcp::Client, public TcpClientStatistics
 	Q_OBJECT
 
 public:
-	ArchiveTrendTcpClient(MonitorConfigController* configController);
+	ArchiveTrendTcpClient(MonitorConfigController* configController, ILogFile* logFile);
 	virtual ~ArchiveTrendTcpClient();
 
 protected:
@@ -74,6 +74,7 @@ private:
 	int m_periodicTimerId = 0;
 
 	MonitorConfigController* m_cfgController = nullptr;
+	HasLogFile m_logFile;
 
 	struct RequestQueue
 	{
@@ -86,6 +87,12 @@ private:
 			return	this->appSignalId == r.appSignalId &&
 					this->hourToRequest == r.hourToRequest &&
 					this->timeType == r.timeType;
+		}
+
+		QString toString()
+		{
+			return QString{"RequestQueue{'%1', TimeType %2, HourToRequest %3}"}
+						.arg(appSignalId, E::valueToString(timeType), hourToRequest.toDateTime().toString());
 		}
 	};
 

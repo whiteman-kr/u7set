@@ -28,7 +28,7 @@ class ArchiveTcpClient : public Tcp::Client, public TcpClientStatistics
 	Q_OBJECT
 
 public:
-	ArchiveTcpClient(MonitorConfigController* configController);
+	ArchiveTcpClient(MonitorConfigController* configController, ILogFile* logFile);
 	virtual ~ArchiveTcpClient();
 
 	// Methods
@@ -93,6 +93,7 @@ protected slots:
 	//
 private:
 	MonitorConfigController* m_cfgController = nullptr;
+	HasLogFile m_logFile;
 	int m_periodicTimerId = 0;
 
 	// State
@@ -120,7 +121,7 @@ private:
 	// Statisctics
 	//
 private:
-	QString m_statRequestDescription = 0;
+	QString m_statRequestDescription;
 	int m_statStateReceived = 0;
 	int m_statTcpRequestCount = 0;
 	int m_statTcpReplyCount = 0;

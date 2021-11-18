@@ -1,14 +1,18 @@
 #include "RtTrendTcpClient.h"
 #include "MonitorAppSettings.h"
 
-RtTrendTcpClient::RtTrendTcpClient(MonitorConfigController* configController) :
+RtTrendTcpClient::RtTrendTcpClient(MonitorConfigController* configController, ILogFile* logFile) :
 	Tcp::Client(configController->softwareInfo(),
 				configController->configuration().appDataServiceRealtimeTrend1.address(),
 				configController->configuration().appDataServiceRealtimeTrend2.address(),
 				"RtTrendTcpClient"),
 	TcpClientStatistics(this),
-	m_cfgController(configController)
+	m_cfgController(configController),
+	m_logFile(logFile, "RtTrendTcpClient")
 {
+	Q_ASSERT(configController);
+	Q_ASSERT(logFile);
+
 	qDebug() << "RtTrendTcpClient::RtTrendTcpClient(...)";
 
 	setObjectName("RtTrendTcpClient");
@@ -21,7 +25,7 @@ RtTrendTcpClient::~RtTrendTcpClient()
 	qDebug() << "RtTrendTcpClient::~RtTrendTcpClient()";
 }
 
-bool RtTrendTcpClient::setData(E::RtTrendsSamplePeriod samplePeriod, const std::vector<TrendLib::TrendSignalParam> trendSignals)
+bool RtTrendTcpClient::setData(E::RtTrendsSamplePeriod samplePeriod, std::vector<TrendLib::TrendSignalParam> trendSignals)
 {
 	QMutexLocker ml(&m_dataMutex);
 
@@ -49,6 +53,7 @@ bool RtTrendTcpClient::clearData()
 void RtTrendTcpClient::onClientThreadStarted()
 {
 	qDebug() << "RtTrendTcpClient::onClientThreadStarted()";
+	m_logFile.writeMessage("onClientThreadStarted()");
 
 	connect(m_cfgController, &MonitorConfigController::configurationArrived,
 			this, &RtTrendTcpClient::slot_configurationArrived,
@@ -60,11 +65,14 @@ void RtTrendTcpClient::onClientThreadStarted()
 void RtTrendTcpClient::onClientThreadFinished()
 {
 	qDebug() << "RtTrendTcpClient::onClientThreadFinished()";
+	m_logFile.writeMessage("onClientThreadFinished()");
 }
 
 void RtTrendTcpClient::onConnection()
 {
 	qDebug() << "RtTrendTcpClient::onConnection()";
+	m_logFile.writeMessage("onConnection()");
+
 	Q_ASSERT(isClearToSendRequest() == true);
 
 	startRequestCycle();
@@ -75,6 +83,8 @@ void RtTrendTcpClient::onConnection()
 void RtTrendTcpClient::onDisconnection()
 {
 	qDebug() << "TrendTcpClient::onDisconnection";
+	m_logFile.writeMessage("onDisconnection()");
+
 	clearData();
 	return;
 }
@@ -82,6 +92,7 @@ void RtTrendTcpClient::onDisconnection()
 void RtTrendTcpClient::onReplyTimeout()
 {
 	qDebug() << "RtTrendTcpClient::onReplyTimeout()";
+	m_logFile.writeWarning("onReplyTimeout()");
 	return;
 }
 
