@@ -383,6 +383,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0361.sql", "Upgrade to version 361, tconv_bo_16 and tconv_bo_32 AFB have been added to all LMs"},
 	{":/DatabaseUpgrade/Upgrade0362.sql", "Upgrade to version 362, Added synchronization pins to DeadZone in LM8-SR10"},
 	{":/DatabaseUpgrade/Upgrade0363.sql", "Upgrade to version 363, Using setParamIntValue instead of setAfbParamByOpName in voter AFB in all LMs"},
+	{":/DatabaseUpgrade/Upgrade0364.sql", "Upgrade to version 364, 2-Tuning LAN Configuration support, Added mV_Type_L, mV_Type_M and mV_Raw_m1200_p1200 sensor types"},
 };
 
 int DbWorker::counter = 0;

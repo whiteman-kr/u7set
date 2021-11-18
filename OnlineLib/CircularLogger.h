@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QTextStream>
 
+#include "../UtilsLib/ILogFile.h"
 #include "../UtilsLib/SimpleThread.h"
 
 // ----------------------------------------------------------------------------------
@@ -79,6 +80,7 @@ public:
 
 public:
 	CircularLogger();
+	explicit CircularLogger(ILogFile* externalLogger, QString context);
 	~CircularLogger();
 
 	bool init(QString logName, QString instanceID, int fileCount, int fileSizeInMB);
@@ -104,6 +106,8 @@ private:
 	void composeAndWriteRecord(RecordType type, const QString& message, const char* function, const char* file, int line, bool debugEcho);
 
 private:
+	std::optional<HasLogFile> m_externalLogger;		// Log is overrided by interface ILogFile (used for Monitro, TuningClient)
+
 	bool m_loggerInitialized = false;
 	bool m_logCodeInfo = true;
 };

@@ -1,8 +1,11 @@
 #include "MetrologyCfgGenerator.h"
 
 #include "DbMetrologyConnection.h"
-#include "../lib/SoftwareSettings.h"
 #include "../HardwareLib/DeviceObject.h"
+#include "../UtilsLib/XmlHelper.h"
+#include "../lib/DeviceHelper.h"
+#include "../lib/SoftwareSettings.h"
+#include "../lib/SoftwareSettingsGetter.h"
 
 namespace Builder
 {
@@ -550,7 +553,7 @@ namespace Builder
 		}
 		else
 		{
-			if (signal.sensorType() != E::SensorType::V_0_5)
+			if (signal.sensorType() != E::SensorType::V_0_5 && signal.sensorType() != E::SensorType::V_m10_p10)
 			{
 				return false;
 			}

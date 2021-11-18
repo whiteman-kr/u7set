@@ -15,10 +15,10 @@
 
 MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
-	m_instanceResolver(instanceResolver),
-	m_configController(softwareInfo, MonitorAppSettings::instance().configuratorAddress1(), MonitorAppSettings::instance().configuratorAddress2()),
-	m_schemaManager(&m_configController),
 	m_LogFile(qAppName()),
+	m_instanceResolver(instanceResolver),
+	m_configController(softwareInfo, MonitorAppSettings::instance().configuratorAddress1(), MonitorAppSettings::instance().configuratorAddress2(), &m_LogFile),
+	m_schemaManager(&m_configController),
 	m_dialogAlert(this)
 {
 	setWindowTitle(MonitorAppSettings::instance().windowCaption());
@@ -28,15 +28,14 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// TcpSignalClient
 	//
-	HostAddressPort fakeAddress(QLatin1String("0.0.0.0"), 0);
-	m_tcpSignalClient = new TcpSignalClient(&m_configController, fakeAddress, fakeAddress);
+	m_tcpSignalClient = new TcpSignalClient(&m_configController, &m_LogFile);
 
 	m_tcpClientThread = new SimpleThread(m_tcpSignalClient);
 	m_tcpClientThread->start();
 
 	// TcpSignalClient
 	//
-	m_tcpSignalRecents = new TcpSignalRecents(&m_configController, fakeAddress, fakeAddress);
+	m_tcpSignalRecents = new TcpSignalRecents(&m_configController, &m_LogFile);
 
 	m_tcpRecentsThread = new SimpleThread(m_tcpSignalRecents);
 	m_tcpRecentsThread->start();
@@ -46,18 +45,13 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// TcpSourcesStateClient
 	//
-	m_tcpSourcesStateClient = new TcpAppSourcesState(&m_configController, fakeAddress, fakeAddress);
+	m_tcpSourcesStateClient = new TcpAppSourcesState(&m_configController, &m_LogFile);
 
 	m_sourcesStateClientThread = new SimpleThread(m_tcpSourcesStateClient);
 	m_sourcesStateClientThread->start();
 
-	// Log file
-	//
-	m_LogFile.writeText("---");
-	m_LogFile.writeMessage(tr("Application started."));
-
 	// DialogAlert
-
+	//
 	connect(&m_LogFile, &Log::LogFile::alertArrived, &m_dialogAlert, &DialogAlert::onAlertArrived);
 	connect(&m_LogFile, &Log::LogFile::writeFailure, &m_dialogAlert, &DialogAlert::onAlertArrived);
 

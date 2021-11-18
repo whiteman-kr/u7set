@@ -383,32 +383,37 @@ bool ConfigSocket::readAppDataSource(const QByteArray& fileData)
 
 		// Source Info
 		//
-		PS::SourceInfo si;
+		std::vector<HostAddressPort> IPs = ds.lanControllersInfo().appDataHostAddressPorts();
 
-		si.index = i;
+		for(const HostAddressPort& ip : IPs)
+		{
+			PS::SourceInfo si;
 
-		si.caption = ds.lmCaption();
-		si.equipmentID = ds.lmEquipmentID();
+			si.index = i;
 
-		si.moduleType = ds.lmModuleType();
-		si.subSystem = ds.lmSubsystemID();
-		si.frameCount = ds.lmRupFramesQuantity();
-		si.dataID = ds.lmDataID();
+			si.caption = ds.moduleCaption();
+			si.equipmentID = ds.moduleEquipmentID();
 
-		si.lmIP = ds.lmAddressPort();
-		si.appDataSrvIP = m_appDataSrvIP;
+			si.moduleType = ds.moduleType();
+			si.subSystem = ds.subsystemID();
+			si.frameCount = ds.appDataFramesQuantity();
+			si.dataID = ds.appDataUID();
 
-		si.signalCount = ds.associatedSignals().count();
+			si.lmIP = ip;
+			si.appDataSrvIP = m_appDataSrvIP;
 
-		// Source
-		//
-		PS::Source source;
+			si.signalCount = ds.associatedSignals(E::LanControllerType::AppData).count();
 
-		source.info() = si;
-		source.associatedSignalList() = ds.associatedSignals();
-		source.frameBase().setFrameCount(si.frameCount);
+			// Source
+			//
+			PS::Source source;
 
-		m_pscore->sourceBase().append(source);
+			source.info() = si;
+			source.associatedSignalList() = ds.associatedSignals(E::LanControllerType::AppData);
+			source.frameBase().setFrameCount(si.frameCount);
+
+			m_pscore->sourceBase().append(source);
+		}
 	}
 
 	qDebug() << "Application Data Sources were loaded:" << dataSourcesCount << ", Time for load:" << responseTime.elapsed() << "ms";

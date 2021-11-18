@@ -47,7 +47,7 @@ namespace Proto
 	class ObjectSerialization
 	{
 	public:
-		ObjectSerialization(ProtoCompress compression = ProtoCompress::Auto, size_t autoCompressionLimit = 4096) noexcept:
+		ObjectSerialization(ProtoCompress compression = ProtoCompress::Auto, size_t autoCompressionLimit = 2048) noexcept:
 			m_compression(compression),
 			m_autoCompressionLimit(autoCompressionLimit)
 		{
@@ -425,7 +425,7 @@ namespace Proto
 		virtual bool LoadData(const Proto::Envelope& message) = 0;
 
 	public:
-		ProtoCompress compression() const
+		[[nodiscard]] ProtoCompress compression() const
 		{
 			return m_compression;
 		}
@@ -434,7 +434,7 @@ namespace Proto
 			m_compression = value;
 		}
 
-		size_t autoCompressionLimit() const
+		[[nodiscard]] size_t autoCompressionLimit() const
 		{
 			return m_autoCompressionLimit;
 		}
@@ -445,7 +445,7 @@ namespace Proto
 
 	private:
 		ProtoCompress m_compression = ProtoCompress::Auto;
-		size_t m_autoCompressionLimit = 4096;
+		size_t m_autoCompressionLimit = 2048;
 	};
 
 	// Helper serialization functions

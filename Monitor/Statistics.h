@@ -1,6 +1,4 @@
-#ifndef STATISTICS_H
-#define STATISTICS_H
-
+#pragma once
 
 class Statistics
 {
@@ -12,4 +10,3 @@ private:
 	QMutex m_mutex;
 };
 
-#endif // STATISTICS_H

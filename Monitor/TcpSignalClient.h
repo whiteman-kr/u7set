@@ -21,13 +21,13 @@
 //				|						      |
 //				+-----------------------------+
 //
-
+//
 class TcpSignalClient : public Tcp::Client, public TcpClientStatistics
 {
 	Q_OBJECT
 
 public:
-	TcpSignalClient(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+	TcpSignalClient(MonitorConfigController* configController, ILogFile* logFile);
 	virtual ~TcpSignalClient();
 
 protected:
@@ -73,6 +73,8 @@ signals:
 private:
 	int m_startStateTimerId = -1;
 	MonitorConfigController* m_cfgController = nullptr;
+
+	HasLogFile m_logFile;
 
 private:
 	// Cache protobug messages

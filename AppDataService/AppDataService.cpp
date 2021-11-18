@@ -422,20 +422,25 @@ bool AppDataServiceWorker::readDataSources(const QByteArray& fileData)
 	{
 		AppDataSourceShared appDataSource = std::make_shared<AppDataSource>(dataSources[i]);
 
-		if (m_appDataSources.contains(appDataSource->lmAdapterID()) == true)
+		for(const LanControllerInfo& lci : appDataSource->lanControllersInfo()())
 		{
-			DEBUG_LOG_ERR(logger(), QString("Duplicate AppDataSource ID %1").arg(appDataSource->lmAdapterID()));
-			continue;
-		}
+			if (m_appDataSources.contains(lci.equipmentID) == true)
+			{
+				DEBUG_LOG_ERR(logger(), QString("Duplicate AppDataSource adapter EquipmentID %1").
+												arg(lci.equipmentID));
+				continue;
+			}
 
-		if (m_appDataSourcesIP.contains(appDataSource->lmAddress32()) == true)
-		{
-			DEBUG_LOG_ERR(logger(), QString("Duplicate AppDataSource IP-address %1").arg(appDataSource->lmAddressPort().addressPortStr()));
-			continue;
-		}
+			if (m_appDataSourcesIP.contains(lci.appDataIP32()) == true)
+			{
+				DEBUG_LOG_ERR(logger(), QString("Duplicate AppDataSource IP-address %1").
+											arg(lci.appDataIP));
+				continue;
+			}
 
-		m_appDataSources.insert(appDataSource->lmAdapterID(), appDataSource);
-		m_appDataSourcesIP.insert(appDataSource->lmAddress32(), appDataSource);
+			m_appDataSources.insert(lci.equipmentID, appDataSource);
+			m_appDataSourcesIP.insert(lci.appDataIP32(), appDataSource);
+		}
 	}
 
 	DEBUG_LOG_MSG(logger(), QString("AppDataSources successfully loaded"));
@@ -538,7 +543,7 @@ void AppDataServiceWorker::prepareAppDataSources()
 	{
 		appDataSource->prepare(m_appSignals, &m_signalStates, m_autoArchivingGroupsCount);
 
-		const QStringList& sourceSignals = appDataSource->associatedSignals();
+		const QStringList& sourceSignals = appDataSource->associatedSignals(E::LanControllerType::AppData);
 
 		for(const QString& signalID : sourceSignals)
 		{

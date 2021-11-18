@@ -6,15 +6,6 @@
 #include "../UtilsLib/WUtils.h"
 #include "../Proto/network.pb.h"
 
-#ifdef IS_BUILDER
-
-#include "DeviceHelper.h"
-#include "../Builder/Context.h"
-#include "../Builder/IssueLogger.h"
-#include "../TuningService/TuningSource.h"
-
-#endif
-
 struct SessionParams
 {
 	QString currentSettingsProfile;
@@ -131,46 +122,6 @@ std::shared_ptr<const T> SoftwareSettingsSet::getSettingsDefaultProfile() const
 	return getSettingsProfile<T>(SettingsProfile::DEFAULT);
 }
 
-
-#ifdef IS_BUILDER
-
-	class SoftwareSettingsGetter
-	{
-	public:
-		virtual ~SoftwareSettingsGetter();
-
-		static bool getSoftwareConnection(const Hardware::EquipmentSet* equipment,
-											const Hardware::Software* thisSoftware,
-											const QString& propConnectedSoBftwareID,
-											const QString& propConnectedSoftwareIP,
-											const QString& propConnectedSoftwarePort,
-											QString* connectedSoftwareID,
-											HostAddressPort* connectedSoftwareIP,
-											bool emptyAllowed,
-											const QString &defaultIP,
-											int defaultPort,
-											E::SoftwareType requiredSoftwareType,
-											Builder::IssueLogger* log);
-
-		static bool getCfgServiceConnection(const Hardware::EquipmentSet* equipment,
-											const Hardware::Software* software,
-											QString* cfgServiceID1, HostAddressPort* cfgServiceAddrPort1,
-											QString* cfgServiceID2, HostAddressPort* cfgServiceAddrPort2,
-											Builder::IssueLogger* log);
-
-		static bool getLmPropertiesFromDevice(	const Hardware::DeviceModule* lm,
-												DataSource::DataType dataType,
-												int adapterNo,
-												E::LanControllerType lanControllerType,
-												const Builder::Context* context,
-												DataSource* ds);
-
-		virtual bool readFromDevice(const Builder::Context* context,
-									const Hardware::Software* software) = 0;
-	};
-
-#endif
-
 class CfgServiceSettings : public SoftwareSettings
 {
 public:
@@ -190,20 +141,6 @@ private:
 public:
 	QStringList knownClients() const;
 };
-
-#ifdef IS_BUILDER
-
-	class CfgServiceSettingsGetter : public CfgServiceSettings, public SoftwareSettingsGetter
-	{
-	public:
-		bool readFromDevice(const Builder::Context* context,
-							const Hardware::Software* software) override;
-
-	private:
-		bool buildClientsList(const Builder::Context* context, const Hardware::Software* software);
-	};
-
-#endif
 
 class AppDataServiceSettings : public SoftwareSettings
 {
@@ -236,17 +173,6 @@ private:
 	friend class SoftwareSettingsSet;
 };
 
-#ifdef IS_BUILDER
-
-	class AppDataServiceSettingsGetter : public AppDataServiceSettings, public SoftwareSettingsGetter
-	{
-	public:
-		bool readFromDevice(const Builder::Context* context,
-							const Hardware::Software* software) override;
-	};
-
-#endif
-
 
 class DiagDataServiceSettings : public SoftwareSettings
 {
@@ -275,17 +201,6 @@ private:
 	friend class SoftwareSettingsSet;
 };
 
-#ifdef IS_BUILDER
-
-	class DiagDataServiceSettingsGetter : public DiagDataServiceSettings, public SoftwareSettingsGetter
-	{
-	public:
-		bool readFromDevice(const Builder::Context* context,
-							const Hardware::Software* software) override;
-	};
-
-#endif
-
 class TuningServiceSettings : public SoftwareSettings
 {
 public:
@@ -300,9 +215,35 @@ public:
 		QString lmEquipmentID;
 		QString portEquipmentID;
 		HostAddressPort tuningDataIP;
+
+		bool isValid() { return lmEquipmentID.isEmpty() == false; }
 	};
 
+	struct ChannelSettings
+	{
+		bool enable = false;
+
+		QString serviceControllerEquipmentID;
+
+		HostAddressPort clientRequestIP;
+		QHostAddress clientRequestNetmask;
+
+		HostAddressPort tuningDataIP;
+		QHostAddress tuningDataNetmask;
+
+		HostAddressPort tuningSimIP;
+
+		std::vector<TuningSource> sources;
+		std::vector<TuningClient> clients;
+
+		TuningSource getTuningSource(const QString& sourceEquipmentID) const;
+	};
+
+	static const int CHANNELS_COUNT = 2;
+
 	QString equipmentID;
+
+	int channelCount = 0;
 
 	QString cfgServiceID1;
 	HostAddressPort cfgServiceIP1;
@@ -310,19 +251,13 @@ public:
 	QString cfgServiceID2;
 	HostAddressPort cfgServiceIP2;
 
-	HostAddressPort clientRequestIP;
-	QHostAddress clientRequestNetmask;
-
-	HostAddressPort tuningDataIP;
-	QHostAddress tuningDataNetmask;
-
 	bool singleLmControl = true;
 	bool disableModulesTypeChecking = false;
 
-	HostAddressPort tuningSimIP;
+	ChannelSettings channelSettings[CHANNELS_COUNT];
 
-	std::vector<TuningSource> sources;
-	std::vector<TuningClient> clients;
+	std::vector<TuningClient> getAllUniqueClients() const;
+	bool isSourceExists(const QString& moduleEquipmentID) const;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only
@@ -332,24 +267,6 @@ private:
 
 	friend class SoftwareSettingsSet;
 };
-
-#ifdef IS_BUILDER
-
-	class TuningServiceSettingsGetter : public TuningServiceSettings, public SoftwareSettingsGetter
-	{
-	public:
-		bool readFromDevice(const Builder::Context* context,
-							const Hardware::Software* software) override;
-	private:
-		bool fillTuningSourcesInfo(const Builder::Context* context,
-								   const Hardware::Software* software);
-
-		bool fillTuningClientsInfo(const Builder::Context* context,
-								   const Hardware::Software* software,
-								   bool singleLmControlEnabled);
-	};
-
-#endif
 
 class ArchivingServiceSettings : public SoftwareSettings
 {
@@ -382,20 +299,6 @@ private:
 
 	friend class SoftwareSettingsSet;
 };
-
-#ifdef IS_BUILDER
-
-	class ArchivingServiceSettingsGetter : public ArchivingServiceSettings, public SoftwareSettingsGetter
-	{
-	public:
-		bool readFromDevice(const Builder::Context* context,
-							const Hardware::Software* software) override;
-
-	private:
-		bool checkSettings(const Hardware::Software* software, Builder::IssueLogger* log);
-	};
-
-#endif
 
 class TestClientSettings : public SoftwareSettings
 {
@@ -433,18 +336,6 @@ private:
 	friend class SoftwareSettingsSet;
 };
 
-#ifdef IS_BUILDER
-
-	class TestClientSettingsGetter : public TestClientSettings, public SoftwareSettingsGetter
-	{
-	public:
-
-		bool readFromDevice(const Builder::Context* context,
-							const Hardware::Software* software) override;
-	};
-
-#endif
-
 class MetrologySettings : public SoftwareSettings
 {
 public:
@@ -479,16 +370,6 @@ private:
 	friend class SoftwareSettingsSet;
 };
 
-#ifdef IS_BUILDER
-
-	class MetrologySettingsGetter : public MetrologySettings, public SoftwareSettingsGetter
-	{
-	public:
-		bool readFromDevice(const Builder::Context* context,
-							const Hardware::Software* software) override;
-	};
-
-#endif
 
 class MonitorSettings : public SoftwareSettings
 {
@@ -548,25 +429,6 @@ public:
 	void clear();
 };
 
-#ifdef IS_BUILDER
-
-	class MonitorSettingsGetter : public MonitorSettings, public SoftwareSettingsGetter
-	{
-	public:
-		bool readFromDevice(const Builder::Context* context,
-							const Hardware::Software* software) override;
-
-
-	private:
-		bool readAppDataServiceAndArchiveSettings(const Builder::Context* context,
-												  const Hardware::Software* software);
-
-		bool readTuningSettings(const Builder::Context* context,
-								const Hardware::Software* software);
-	};
-
-#endif
-
 class TuningClientSettings : public SoftwareSettings
 {
 public:
@@ -617,15 +479,4 @@ public:
 	bool appearanceChanged(const TuningClientSettings& src) const;
 	bool connectionChanged(const TuningClientSettings& src) const;
 };
-
-#ifdef IS_BUILDER
-
-	class TuningClientSettingsGetter : public TuningClientSettings, public SoftwareSettingsGetter
-	{
-	public:
-		bool readFromDevice(const Builder::Context* context,
-							const Hardware::Software* software) override;
-	};
-
-#endif
 

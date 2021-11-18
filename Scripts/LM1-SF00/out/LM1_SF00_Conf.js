@@ -69,6 +69,9 @@ var SensorType;
     SensorType[SensorType["Ohm_Cu_a_426"] = 31] = "Ohm_Cu_a_426";
     SensorType[SensorType["Ohm_Ni_a_617"] = 32] = "Ohm_Ni_a_617";
     SensorType[SensorType["Ohm_Raw"] = 33] = "Ohm_Raw";
+    SensorType[SensorType["mV_Type_L"] = 36] = "mV_Type_L";
+    SensorType[SensorType["mV_Type_M"] = 37] = "mV_Type_M";
+    SensorType[SensorType["mV_Raw_m1200_p1200"] = 38] = "mV_Raw_m1200_p1200";
 })(SensorType || (SensorType = {}));
 var OutputMode;
 (function (OutputMode) {
@@ -96,6 +99,15 @@ function runConfigScript(configScript, confFirmware, ioModule, LMNumber, frame, 
     }
     return true;
 }
+var LanControllerType;
+(function (LanControllerType) {
+    LanControllerType[LanControllerType["Unknown"] = 0] = "Unknown";
+    LanControllerType[LanControllerType["Tuning"] = 1] = "Tuning";
+    LanControllerType[LanControllerType["AppData"] = 2] = "AppData";
+    LanControllerType[LanControllerType["DiagData"] = 4] = "DiagData";
+    LanControllerType[LanControllerType["AppAndDiagData"] = 6] = "AppAndDiagData";
+    LanControllerType[LanControllerType["TuningAndAppAndDiagData"] = 7] = "TuningAndAppAndDiagData";
+})(LanControllerType || (LanControllerType = {}));
 // Strict mode part
 //
 "use strict";
@@ -142,7 +154,9 @@ let LMNumberCount = 0;
 //let configScriptVersion: number = 40;		// Let is used instead of var
 //let configScriptVersion: number = 41;		// ScriptDeviceObject is used
 //let configScriptVersion: number = 42;		// DiagDataSize is written for i/o module frame for LM8_SR10, LM1_SR03 and LM1_SR04
-let configScriptVersion = 43; // Tuning LAN configuration is placed in LAN2 and LAN3 for LM1_SR04 LAN 
+//let configScriptVersion: number = 43;		// Tuning LAN configuration is placed in LAN2 and LAN3 for LM1_SR04 LAN 
+//let configScriptVersion: number = 44;		// Tuning LAN configuration is placed in LAN1 or LAN2/LAN3 depending on LAN description
+let configScriptVersion = 45; // Added mV_Type_L, mV_Type_M and mV_Raw_m1200_p1200 sensor types
 //
 function main(builder, root, logicModules, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (logicModules.length != 0) {
@@ -458,13 +472,29 @@ function generate_lm(builder, root, module, confFirmware, log, signalSet, subsys
     //
     confFirmware.writeLog("Writing LAN configuration.\r\n");
     let lanFrame = lanConfigFrame;
-    /*if (moduleId == MODULEID_LM1_SR05) {
-        
-        // Tuning Controller is in LAN 2 and LAN 3
-
+    let lanControllerCount = logicModuleDescription.Lan_ControllerCount;
+    if (lanControllerCount != 2 && lanControllerCount != 3) {
+        log.writeError(module.equipmentId + ": wrong LAN controllers count (" + lanControllerCount + "), expected 2 or 3.");
+        return false;
     }
-    else */ {
-        // Tuning
+    let doubleTuningConfiguration = false;
+    if (lanControllerCount == 3 &&
+        logicModuleDescription.jsLanControllerType(0) == LanControllerType.Tuning) {
+        doubleTuningConfiguration = false;
+    }
+    else {
+        if (lanControllerCount == 2 &&
+            logicModuleDescription.jsLanControllerType(0) == LanControllerType.TuningAndAppAndDiagData &&
+            logicModuleDescription.jsLanControllerType(1) == LanControllerType.TuningAndAppAndDiagData) {
+            doubleTuningConfiguration = true;
+        }
+        else {
+            log.writeError(module.equipmentId + ": invalid LAN controllers configuration, expected Tuning/2xAppAndDiagData or 2xTuningAndAppAndDiagData");
+            return false;
+        }
+    }
+    if (doubleTuningConfiguration == false) {
+        // Tuning Controller is in LAN 1
         //
         let tuningLan = {
             flags: 0,
@@ -534,33 +564,31 @@ function generate_lm(builder, root, module, confFirmware, log, signalSet, subsys
         }
         let ethernetcontrollerId = "_ETHERNET0" + (i + 2);
         confFirmware.writeLog("    Ethernet Controller " + module.equipmentId + ethernetcontrollerId + "\r\n");
-        /*if (moduleId == MODULEID_LM1_SR05) {
-
+        if (doubleTuningConfiguration == true) {
             // Tuning Controller is in LAN 2 and LAN 3
-
             if (fillLanServiceData(confFirmware, SoftwareType.TuningService, root, module, ethernetcontrollerId, tuningLan, log) == false) {
                 return false;
             }
-        }*/
+        }
         if (fillLanServiceData(confFirmware, SoftwareType.AppDataService, root, module, ethernetcontrollerId, appLan, log) == false) {
             return false;
         }
         if (fillLanServiceData(confFirmware, SoftwareType.DiagDataService, root, module, ethernetcontrollerId, diagLan, log) == false) {
             return false;
         }
-        /*if (moduleId == MODULEID_LM1_SR05) {
-
-            let lans: LanConfig[] = [];
-            lans.push(appLan);
-            lans.push(diagLan);
-            lans.push(tuningLan);
-
-            if (generate_LANConfiguration_v2(confFirmware, lanFrame, module, ethernetcontrollerId, lans, log) == false) {
+        if (doubleTuningConfiguration == false) {
+            // Tuning Controller is in LAN 1
+            if (generate_LANConfiguration_v1(confFirmware, lanFrame, module, ethernetcontrollerId, appLan, diagLan, log) == false) {
                 return false;
             }
         }
-        else */ {
-            if (generate_LANConfiguration_v1(confFirmware, lanFrame, module, ethernetcontrollerId, appLan, diagLan, log) == false) {
+        else {
+            // Tuning Controller is in LAN 2 and LAN 3
+            let lans = [];
+            lans.push(appLan);
+            lans.push(diagLan);
+            lans.push(tuningLan);
+            if (generate_LANConfiguration_v2(confFirmware, lanFrame, module, ethernetcontrollerId, lans, log) == false) {
                 return false;
             }
         }

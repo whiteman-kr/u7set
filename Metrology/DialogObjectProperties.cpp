@@ -1353,7 +1353,7 @@ void DialogSignalProperty::createPropertyList()
 			{
 				case E::ElectricUnit::mA:
 
-					if (m_param.sensorType() != E::SensorType::V_0_5)
+					if (m_param.sensorType() != E::SensorType::V_0_5 && m_param.sensorType() != E::SensorType::V_m10_p10)
 					{
 						break;
 					}

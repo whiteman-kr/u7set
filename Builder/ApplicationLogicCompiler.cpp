@@ -68,6 +68,7 @@ namespace Builder
 			&ApplicationLogicCompiler::writeOptoConnectionsXml,
 //			&ApplicationLogicCompiler::writeOptoModulesReport,
 			&ApplicationLogicCompiler::writeOptoVhdFiles,
+			&ApplicationLogicCompiler::checkSignalsHashes,
 			&ApplicationLogicCompiler::writeAppSignalSetFile,
 			&ApplicationLogicCompiler::writeComparatorSetFile,
 			&ApplicationLogicCompiler::writeSubsystemsXml,
@@ -225,28 +226,15 @@ namespace Builder
 
 				bool res = true;
 
-				res = LanControllerInfoHelper::getInfo(*lm, lanController.m_place, lanController.m_type,
-				                                 &lanControllerInfo, *equipmentSet(), log());
+				res = LanControllerInfoHelper::getInfo(*lm, lanController.m_type, lanController.m_place,
+												 *m_context, true, &lanControllerInfo, log());
 				if (res == false)
 				{
 					result = false;
 					continue;
 				}
 
-				bool tuning = false;
-				bool appData = false;
-				bool diagData = false;
-
-				res = DataSource::lanControllerFunctions(lanController.m_type, &tuning, &appData, &diagData);
-
-				if (res == false)
-				{
-					LOG_INTERNAL_ERROR(log());
-					result = false;
-					continue;
-				}
-
-				if (tuning == true)
+				if (LanControllerInfo::isProvideTuning(lanController.m_type) == true)
 				{
 					if (lanControllerInfo.tuningEnable == true)
 					{
@@ -267,7 +255,7 @@ namespace Builder
 					}
 				}
 
-				if (appData == true)
+				if (LanControllerInfo::isProvideAppData(lanController.m_type) == true)
 				{
 					if (lanControllerInfo.appDataEnable == true)
 					{
@@ -288,7 +276,7 @@ namespace Builder
 					}
 				}
 
-				if (diagData == true)
+				if (LanControllerInfo::isProvideDiagData(lanController.m_type) == true)
 				{
 					if (lanControllerInfo.diagDataEnable == true)
 					{
@@ -1217,6 +1205,38 @@ namespace Builder
 		buildResultWriter()->addFile(Directory::REPORTS, "Opto-modules.txt", "", "", list);
 
 		return true;
+	}
+
+	bool ApplicationLogicCompiler::checkSignalsHashes()
+	{
+		std::map<Hash, QString> hashMap;
+		bool noEqualHashesFound = true;
+
+		int signalCount = signalSet()->count();
+
+		for(int i = 0; i < signalCount; i++)
+		{
+			const AppSignal& s = (*signalSet())[i];
+
+			Hash hash = calcHash(s.appSignalID());
+
+			auto it = hashMap.find(hash);
+
+			if (it == hashMap.end())
+			{
+				hashMap.insert({hash, s.appSignalID()});
+			}
+			else
+			{
+				noEqualHashesFound = false;
+
+				// Signals %1 and %2 have equal hash (%3) of AppSignalIDs.
+				//
+				log()->errALC5198(it->second, s.appSignalID(), hash);
+			}
+		}
+
+		return noEqualHashesFound;
 	}
 
 	bool ApplicationLogicCompiler::writeAppSignalSetFile()

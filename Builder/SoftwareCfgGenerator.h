@@ -12,7 +12,6 @@
 #include "SignalSet.h"
 #include "Context.h"
 
-
 namespace Builder
 {
 
@@ -72,6 +71,10 @@ namespace Builder
 	protected:
 		static bool checkLmToSoftwareLinks(Context* context);
 
+		static const Hardware::Software *getConnectedSoftware(const Context* context,
+													   const QString& equipmentID,
+													   bool checkConnectionToControllers);
+
 		static bool joinSchemas(Context* context, VFrame30::Schema* schema, const VFrame30::Schema* pannel, Qt::Edge edge);
 
 		static bool loadFileFromDatabase(DbController* db, int parentId, const QString& fileName, QString *errorCode, QByteArray* data);
@@ -93,6 +96,7 @@ namespace Builder
 	protected:
 		Context* m_context = nullptr;
 		Hardware::Software* m_software = nullptr;
+		QStringList m_softwareControllersIDs;
 		DbController* m_dbController = nullptr;
 		SignalSet* m_signalSet = nullptr;
 		Hardware::EquipmentSet* m_equipment = nullptr;

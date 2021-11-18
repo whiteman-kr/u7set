@@ -5,6 +5,8 @@
 #include <QHostAddress>
 
 #include "../UtilsLib/Address16.h"
+#include "../UtilsLib/WUtils.h"
+#include "../CommonLib/Types.h"
 
 class HostAddressPort;
 
@@ -35,7 +37,11 @@ public:
 	void writeDoubleAttribute(const QString& name, double value, int decimalPlaces);
 	void writeFloatAttribute(const QString& name, float value);
 	void writeAddress16Attribute(const QString& name, const Address16& addr16);
-	void writeSoftwareTypeAttribute(E::SoftwareType swType);
+	void writeHostAddressPortAttribute(const QString& name, const HostAddressPort& addr);
+	void writeQHostAddressAttribute(const QString& name, const QHostAddress& addr);
+
+	template<typename ENUM_TYPE>
+	void writeEnumAttribute(const QString& name, ENUM_TYPE value);
 
 	void writeString(const QString& str);
 
@@ -87,6 +93,8 @@ void XmlWriteHelper::writeEnumKeyValueAttribute(const QString& name, ENUM_TYPE v
 	writeEnumValueAttribute(name, value);
 }
 
+//
+
 class XmlReadHelper
 {
 public:
@@ -111,7 +119,11 @@ public:
 	bool readDoubleAttribute(const QString& name, double* value);
 	bool readFloatAttribute(const QString& name, float* value);
 	bool readAddress16Attribute(const QString& name, Address16* value);
-	bool readSoftwareTypeAttribute(E::SoftwareType* swType);
+	bool readHostAddressPortAttribute(const QString& name, HostAddressPort* addr);
+	bool readQHostAddressAttribute(const QString& name, QHostAddress* addr);
+
+	template<typename ENUM_TYPE>
+	bool readEnumAttribute(const QString& name, ENUM_TYPE* value);
 
 	bool readStringElement(const QString& elementName, QString* value, bool find = false);
 	bool readIntElement(const QString& elementName, int* value, bool find = false);

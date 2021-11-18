@@ -40,7 +40,7 @@ namespace Sim
 
 		// This function is called by Simulator to provide confiramtion about writing data to RAM
 		//
-		void writeConfirmation(std::vector<qint64> confirmedRecords,
+		void writeConfirmation(qint64 confirmedRecordID,
 							   const QString& lmEquipmentId,
 							   const QString& portEquipmentId,
 							   const RamArea& ramArea,
@@ -91,7 +91,7 @@ namespace Sim
 
 		std::atomic<bool> m_enabled{true};		// Allow communication to TuningService
 
-		TuningRequestsProcessingThread* m_processingThread = nullptr;
+		std::vector<TuningRequestsProcessingThread*> m_processingThreads;
 
 		// Queue to write data to LogicModule
 		// Key is LM EquipmentID
@@ -107,6 +107,8 @@ namespace Sim
 	public:
 		TuningRequestsProcessingThread(TuningServiceCommunicator& tsCommunicator,
 									   const QString& curProfileName,
+									   std::shared_ptr<const TuningServiceSettings> settings,
+									   int channel,
 									   ScopedLog& log);
 
 		virtual ~TuningRequestsProcessingThread() override;
@@ -119,7 +121,7 @@ namespace Sim
 
 		void writeConfirmation(const QString& lmEquipmentID,
 							   const QString& portEquipmentID,
-							   const std::vector<qint64>& confirmedRecords,
+							   qint64 confirmedRecordID,
 							   const RamArea& ramArea,
 							   bool setSorChassisState,
 							   TimeStamp timeStamp);
@@ -159,16 +161,16 @@ namespace Sim
 		{
 			QString lmEquipmentID;
 			QString portEquipmentID;
-			std::vector<qint64> confirmedRecordsIDs;
+			qint64 confirmedRecordID;
 
 			WriteConfirmation()
 			{
 			}
 
-			WriteConfirmation(const QString& lmID, const QString& portID, const std::vector<qint64>& ids) :
+			WriteConfirmation(const QString& lmID, const QString& portID, qint64 id) :
 				lmEquipmentID(lmID),
 				portEquipmentID(portID),
-				confirmedRecordsIDs(ids)
+				confirmedRecordID(id)
 			{
 			}
 		};
@@ -176,9 +178,11 @@ namespace Sim
 	private:
 		TuningServiceCommunicator& m_tsCommunicator;
 		QString m_curProfileName;
+		int m_channel = -1;
 		Simulator& m_sim;
 		ScopedLog& m_log;
 
+		QString m_controllerEquipmentID;
 		HostAddressPort m_tuningRequestsReceivingIP;
 		HostAddressPort m_tuningRepliesSendingIP;
 
@@ -208,7 +212,7 @@ namespace Sim
 		virtual ~TuningSourceHandler();
 
 		void updateTuningData(const RamArea& data, bool setSorChassisState, TimeStamp timeStamp);
-		bool writeConfirmation(const std::vector<qint64>& confirmationIDs, RupFotipV2* reply);
+		bool writeConfirmation(qint64 confirmationID, RupFotipV2* reply);
 
 		void tuningModeEntered(const RamArea& ramArea, bool setSorChassisState, TimeStamp timeStamp);
 		void tuningModeLeft();

@@ -379,6 +379,10 @@ public:
 		uA_m20_p20 = 34,
 
 		Hz_005_50000 = 35,
+
+		mV_Type_L = 36,
+		mV_Type_M = 37,
+		mV_Raw_m1200_p1200 = 38,
 	};
 	Q_ENUM(SensorType)
 
@@ -882,6 +886,9 @@ const int	SIZE_32BIT = 32;
 const int	SIZE_1WORD = 1;
 const int	SIZE_2WORD = 2;
 
+const int	CHANNEL_1 = 0;
+const int	CHANNEL_2 = 1;
+const int	CHANNEL_3 = 2;
 
 // SchemaUnit
 //

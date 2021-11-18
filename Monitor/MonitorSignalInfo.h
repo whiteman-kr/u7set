@@ -32,7 +32,6 @@ private:
 	MonitorConfigController* m_configController = nullptr;
 
 	MonitorCentralWidget* m_centralWidget = nullptr;
-
 };
 
 

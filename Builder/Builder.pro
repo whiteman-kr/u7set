@@ -46,12 +46,14 @@ DEFINES += IS_BUILDER
 SOURCES += \
     ../lib/ClientBehavior.cpp \
     ../lib/DeviceHelper.cpp \
+	../lib/LanControllerInfo.cpp \
     ../lib/LanControllerInfoHelper.cpp \
     ../lib/LogicModulesInfo.cpp \
     ../lib/OutputLog.cpp \
     ../lib/LogicModuleSet.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/DataSource.cpp \
+	../lib/SoftwareSettingsGetter.cpp \
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/LmDescription.cpp \
@@ -59,7 +61,7 @@ SOURCES += \
     ../lib/ConnectionsInfo.cpp \
 	../lib/Tuning/TuningSignalState.cpp \
 	../lib/ComparatorSet.cpp \
-	../TuningService/TuningDataStorage.cpp \
+	../lib/TuningDataStorage.cpp \
 	../TuningService/TuningSource.cpp \
 	../Metrology/MetrologySignal.cpp \
 	../Metrology/MetrologyConnection.cpp \
@@ -118,16 +120,17 @@ HEADERS += \
     ../lib/LogicModuleSet.h \
     ../lib/SoftwareSettings.h \
     ../lib/DataSource.h \
+	../lib/SoftwareSettingsGetter.h \
     ../lib/Tuning/TuningFilter.h \
     ../lib/BuildInfo.h \
     ../lib/LmDescription.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/ConnectionsInfo.h \
 	../lib/Tuning/TuningSignalState.h \
+	../lib/TuningDataStorage.h \
 	../lib/ComparatorSet.h \
 	../CommonLib/PropertyObject.h \
 	../TuningService/TuningSource.h \
-	../TuningService/TuningDataStorage.h \
 	../Metrology/MetrologySignal.h \
 	../Metrology/MetrologyConnection.h \
 	../Metrology/UnitsConvertor.h \

@@ -14,6 +14,8 @@ namespace EquipmentPropNames
 	inline const QString TUNING_SERVICE_IP("TuningServiceIP");
 	inline const QString TUNING_SERVICE_PORT("TuningServicePort");
 	inline const QString TUNING_SERVICE_NETMASK("TuningServiceNetmask");
+	inline const QString TUNING_DATA_UID("TuningDataUID");
+	inline const QString HEX_TUNING_DATA_UID("HexTuningDataUID");
 	inline const QString TUNING_SOURCE_EQUIPMENT_ID("TuningSourceEquipmentID");
 
 	inline const QString APP_DATA_ENABLE("AppDataEnable");
@@ -75,9 +77,10 @@ namespace EquipmentPropNames
 	inline const QString TUNING_DATA_PORT("TuningDataPort");
 	inline const QString SINGLE_LM_CONTROL("SingleLmControl");
 	inline const QString DISABLE_MODULES_TYPE_CHECKING("DisableModulesTypeChecking");
-
+	inline const QString ENABLE("Enable");
 	inline const QString TUNING_SIM_IP("TuningSimIP");
 	inline const QString TUNING_SIM_PORT("TuningSimPort");
+	inline const QString CONTROLLER_SUFFIX_CH_TEMPLATE("_CH%1");
 
 	// TuningClient properties
 	//
@@ -190,6 +193,8 @@ namespace XmlElement
 	inline const QString TUNING_CLIENT("TuningClient");
 	inline const QString TUNING_SOURCES("TuningSources");
 	inline const QString TUNING_SOURCE("TuningSource");
+	inline const QString TUNING_CHANNEL_TEMPLATE("Channel%1");
+	inline const QString CHANNEL_COUNT("ChannelCount");
 
 	inline const QString DATA_SOURCES("DataSources");
 	inline const QString DATA_SOURCE("DataSource");
@@ -201,7 +206,20 @@ namespace XmlElement
 
 	inline const QString SECURITY("TuningSecurity");
 
+	inline const QString LOGIC_MODULES("LogicModules");
+	inline const QString LOGIC_MODULE("LogicModule");
+
+	inline const QString LAN_CONTROLLERS("LanControllers");
+	inline const QString LAN_CONTROLLER("LanController");
+
+	inline const QString TUNING_PARAMS("TuningParams");
+	inline const QString APP_DATA_PARAMS("AppDataParams");
+	inline const QString DIAG_DATA_PARAMS("DiagDataParams");
+
 	inline const QString APP_SIGNALS("AppSignals");
+	inline const QString TUNING_SIGNALS("TuningSignals");
+	inline const QString DIAG_SIGNALS("DiagSignals");
+
 	inline const QString SIGNALS("Signals");
 	inline const QString SIGNAL_ELEM("Signal");
 }
@@ -222,6 +240,7 @@ namespace XmlAttribute
 	inline const QString EQUIPMENT_ID("EquipmentID");
 	inline const QString DATA_FORMAT("DataFormat");
 	inline const QString DATA_SIZE("DataSize");
+	inline const QString SOFTWARE_CONTROLLERS("SoftwareControllers");
 
 	inline const QString DATA_ID("DataID");
 	inline const QString HEX_DATA_ID("HexDataID");
@@ -245,27 +264,18 @@ namespace XmlAttribute
 	inline const QString TUNING_SERVICE_PROPERTY_IS_VALID("TuningServicePropertyIsValid");
 	inline const QString TUNING_SERVICE_IP("TuningServiceIP");
 	inline const QString TUNING_SERVICE_PORT("TuningServicePort");
+	inline const QString CONTROLLER_EQUIPMENT_ID("ControllerEquipmentID");
 
 	inline const QString SOFTWARE_METROLOGY_ID("SoftwareMetrologyID");
 
-	inline const QString LM_DATA_TYPE("LmDataType");
-	inline const QString LM_ID("LmEquipmentID");
-	inline const QString LM_PRESET_NAME("LmPresetName");
+	inline const QString MODULE_EQUIPMENT_ID("ModuleEquipmentID");
+	inline const QString MODULE_PRESET_NAME("ModulePresetName");
 	inline const QString LM_NUMBER("LmNumber");
-	inline const QString LM_CHANNEL("LmChannel");
-	inline const QString LM_SUBSYSTEM_KEY("LmSubsystemKey");
-	inline const QString LM_SUBSYSTEM_ID("LmSubsystemID");
-	inline const QString LM_MODULE_TYPE("LmModuleType");
-	inline const QString LM_CAPTION("LmCaption");
-	inline const QString LM_ADAPTER_ID("LmAdapterID");
-	inline const QString LM_DATA_ENABLE("LmDataEnable");
-	inline const QString LM_DATA_IP("LmDataIP");
-	inline const QString LM_DATA_PORT("LmDataPort");
-	inline const QString LM_DATA_SIZE("LmDataSize");
-	inline const QString LM_RUP_FRAMES_QUANTITY("LmRupFramesQuantity");
-	inline const QString LM_DATA_ID("LmDataID");
-	inline const QString LM_UNIQUE_ID("LmUniqueID");
-	inline const QString SERVICE_ID("ServiceID");
+	inline const QString SUBSYSTEM_CHANNEL("SubsystemChannel");
+	inline const QString SUBSYSTEM_KEY("SubsystemKey");
+	inline const QString SUBSYSTEM_ID("SubsystemID");
+	inline const QString MODULE_TYPE("ModuleType");
+	inline const QString MODULE_UNIQUE_ID("ModuleUniqueID");
 }
 
 namespace Latin1Char

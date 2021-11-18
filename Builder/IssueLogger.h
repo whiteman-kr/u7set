@@ -179,10 +179,14 @@ namespace Builder
 
 		void errCFG3044(QString equipmentID, QString profileID);	// Equipment object %1 is not found (Settings profile - %2).
 		void errCFG3045(QString equipmentID, QString propertyName, QString profileID);	// Property %1.%2 is not found (Settings profile - %3).
+		void errCFG3046(QString prop1, QString prop2,
+						QString obj1, QString obj2);				// Value of properties pair %1:%2 of objects %3 and %4 are equal.
+
+		void errCFG3047(QString objectID, QString propertyName, QString controillersList);	// Property %1.%2 should refer to one of software controllers: %3
+		void errCFG3048(QString objectID, QString propertyName);	// Property %1.%2 should refer to Software or Software child controller object.
 
 		void errCFG3100(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);		// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipmemt Editor.
 		void wrnCFG3101(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);		// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipmemt Editor.
-
 
 		// ALP			Application Logic Parsing				4000-4999
 		//
@@ -454,6 +458,8 @@ namespace Builder
 		void wrnALC5194(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 with manual settings are overlapped.
 		void errALC5195(QString itemLabel, QUuid itemID, QString schemaID);							// Named signal isn't connected to set_flags item output. Flags cannot be set. (Item %1, schema %2).
 		void errALC5196(QString signalID, QString inbusSignalID, QString schemaID);		// Unknown conversion from inbus signal %1 to app signal %2 (Logic schema %3).
+		void errALC5197(QString moduleEquipmentID);										// Tuning data is not found for module %1
+		void errALC5198(QString appSignalID1, QString appSignalID2, quint64 h);			// Signals %1 and %2 have equal hash (%3) of AppSignalIDs.
 
 		// firmware writing errors
 

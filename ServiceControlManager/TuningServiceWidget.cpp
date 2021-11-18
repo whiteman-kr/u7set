@@ -148,18 +148,22 @@ void TuningServiceWidget::updateStateInfo()
 		return;
 	}
 
+	// TO DO 2ch tuning!
+	//
+	TuningServiceSettings::ChannelSettings ch = tuningSettings->channelSettings[0];
+
 	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), tuningSettings->equipmentID);
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), tuningSettings->clientRequestIP.addressStr());
-	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), tuningSettings->clientRequestNetmask.toString());
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), ch.clientRequestIP.addressStr());
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), ch.clientRequestNetmask.toString());
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(3, 1), tuningSettings->tuningDataIP.addressStr());
-	m_settingsTabModel->setData(m_settingsTabModel->index(4, 1), tuningSettings->tuningDataNetmask.toString());
+	m_settingsTabModel->setData(m_settingsTabModel->index(3, 1), ch.tuningDataIP.addressStr());
+	m_settingsTabModel->setData(m_settingsTabModel->index(4, 1), ch.tuningDataNetmask.toString());
 
 	m_settingsTabModel->setData(m_settingsTabModel->index(5, 1), tuningSettings->singleLmControl ? tr("True") : tr("False"));
 	m_settingsTabModel->setData(m_settingsTabModel->index(6, 1), tuningSettings->disableModulesTypeChecking ? tr("True") : tr("False"));
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(7, 1), tuningSettings->tuningSimIP.addressStr());
+	m_settingsTabModel->setData(m_settingsTabModel->index(7, 1), ch.tuningSimIP.addressStr());
 }
 
 void TuningServiceWidget::createTcpConnection(quint32 ip, quint16 port)
@@ -239,12 +243,12 @@ void TuningServiceWidget::reloadTuningSourcesList()
 	for (const TuningSource& ts : tsList)
 	{
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 0), ts.equipmentId());
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 1), QString::fromStdString(ts.info.lmcaption()));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 2), QString::fromStdString(ts.info.lmip()));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 3), ts.info.lmport());
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 4), QString::fromStdString(ts.info.lmsubsystemchannel()));
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 5), ts.info.lmsubsystemkey());
-		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 6), QString::fromStdString(ts.info.lmsubsystemid()));
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 1), QString::fromStdString(ts.info.modulecaption()));
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 2), QString::fromStdString(ts.info.lancontrollerinfo(0).tuningip()));
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 3), ts.info.lancontrollerinfo(0).tuningport());
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 4), QString::fromStdString(ts.info.subsystemchannel()));
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 5), ts.info.subsystemkey());
+		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 6), QString::fromStdString(ts.info.subsystemid()));
 		m_tuningSourcesTabModel->setData(m_tuningSourcesTabModel->index(row, 7), ts.info.lmnumber());
 
 		for (int j = tuningSourceStaticFieldsHeaderLabels.count(); j < m_tuningSourcesTabModel->columnCount(); j++)

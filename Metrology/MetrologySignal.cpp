@@ -613,7 +613,7 @@ namespace Metrology
 		{
 			case E::ElectricUnit::mA:
 
-				if (m_electricSensorType == E::SensorType::V_0_5)
+				if (m_electricSensorType == E::SensorType::V_0_5 || m_electricSensorType == E::SensorType::V_m10_p10)
 				{
 					typeStr += " " + electricRLoadStr();
 				}
@@ -735,7 +735,8 @@ namespace Metrology
 	{
 		if (	(m_electricUnitID == E::ElectricUnit::mV &&
 				 m_electricSensorType != E::SensorType::mV_Raw_Mul_8 &&
-				 m_electricSensorType != E::SensorType::mV_Raw_Mul_32) ||
+				 m_electricSensorType != E::SensorType::mV_Raw_Mul_32 &&
+				 m_electricSensorType != E::SensorType::mV_Raw_m1200_p1200) ||
 
 				(m_electricUnitID == E::ElectricUnit::Ohm &&
 				 m_electricSensorType != E::SensorType::Ohm_Raw) )

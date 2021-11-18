@@ -11,9 +11,13 @@ namespace Tuning
 
 	const char* TcpTuningServer::SCM_CLIENT_ID = "SCM";
 
-	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service, TuningSources &tuningSources, std::shared_ptr<CircularLogger> logger) :
+	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service,
+									 int channel,
+									 TuningSources& tuningSources,
+									 std::shared_ptr<CircularLogger> logger) :
 		Tcp::Server(service.softwareInfo()),
 		m_service(service),
+		m_channel(channel),
 		m_tuningSources(tuningSources),
 		m_logger(logger)
 	{
@@ -39,7 +43,7 @@ namespace Tuning
 
 	Tcp::Server* TcpTuningServer::getNewInstance()
 	{
-		TcpTuningServer* newServer =  new TcpTuningServer(m_service, m_tuningSources, m_logger);
+		TcpTuningServer* newServer =  new TcpTuningServer(m_service, m_channel, m_tuningSources, m_logger);
 
 		return newServer;
 	}
@@ -310,7 +314,7 @@ namespace Tuning
 				Hash signalHash = m_tuningSignalsReadRequest.signalhash(i);
 				quint32 ip = m_signalHash2SourceIP.value(signalHash);
 
-				const TuningSourceThread* thread = m_service.getSourceThread(ip);
+				const TuningSourceThread* thread = m_service.getTuningSourceThread(ip);
 
 				TEST_PTR_CONTINUE(thread);
 
@@ -689,14 +693,14 @@ namespace Tuning
 			TEST_PTR_CONTINUE(tuningSource.tuningData());
 
 			QVector<AppSignal*> signalList;
-			tuningSource.tuningData()->getSignals(signalList);
-
-			quint32 ip = tuningSource.lmAddress32();
+			tuningSource.tuningData()->getSignals(&signalList);
 
 			if (signalList.isEmpty() == true)
 			{
 				continue;
 			}
+
+			std::vector<quint32> IPs = tuningSource.lanControllersInfo().tuningIP32addresses();
 
 			for(const AppSignal* signal : signalList)
 			{
@@ -705,7 +709,12 @@ namespace Tuning
 				Hash signalHash = calcHash(signal->appSignalID());
 
 				m_signalHash2SignalPtr.insert(signalHash, signal);
-				m_signalHash2SourceIP.insert(signalHash, ip);
+
+				for(auto ip : IPs)
+				{
+					m_signalHash2SourceIP.insert(signalHash, ip);
+				}
+
 				m_sourceId2SignalHash.insert(tuningSource.ID(), signalHash);
 			}
 		}

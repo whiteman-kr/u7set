@@ -155,9 +155,9 @@ void TuningSocket::replyTuningSourcesInfo(const char* replyData, quint32 replyDa
 		theSignalBase.tuning().sourceBase().append(TuningSource(dsi));
 
 		qDebug() << "TuningSocket::replyTuningSourcesInfo - : " << i <<
-					". SubsystemID:" << dsi.lmsubsystemid().c_str() <<
-					", EquipmentID:" << dsi.lmequipmentid().c_str() <<
-					", IP:" << dsi.lmip().c_str();
+					". SubsystemID:" << dsi.subsystemid().c_str() <<
+					", EquipmentID:" << dsi.moduleequipmentid().c_str(); /* <<
+					", IP:" << dsi.lancontrollerinfo().tuningip().c_str();*/
 	}
 
 	theSignalBase.tuning().sourceBase().sortByID();

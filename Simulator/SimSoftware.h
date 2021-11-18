@@ -62,6 +62,7 @@ namespace  Sim
 		// Key is TuningService equipmentId
 		//
 		std::map<QString, std::shared_ptr<Sim::TuningServiceCommunicator>> m_tuningServiceCommunicators;
+		std::map<QString, std::shared_ptr<Sim::TuningServiceCommunicator>> m_tuningServiceControllers;
 	};
 
 

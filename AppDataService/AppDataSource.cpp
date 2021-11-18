@@ -81,7 +81,7 @@ AppDataSource::AppDataSource(const DataSource& dataSource) :
 AppDataSource::AppDataSource(const Network::DataSourceInfo& proto) :
 	m_signalStatesQueue(3)
 {
-	setInfo(proto);
+	loadFromProto(proto);
 }
 
 void AppDataSource::prepare(const AppSignals& appSignals, DynamicAppSignalStates* signalStates, int autoArchivingGroupsCount)
@@ -94,7 +94,7 @@ void AppDataSource::prepare(const AppSignals& appSignals, DynamicAppSignalStates
 
 	m_autoArchivingGroupsCount = autoArchivingGroupsCount;
 
-	const QStringList& sourceAssociatedSignals = associatedSignals();
+	const QStringList& sourceAssociatedSignals = associatedSignals(E::LanControllerType::AppData);
 
 	m_signalStates.clear();
 
@@ -213,7 +213,7 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	proto->set_errorframesize(errorFrameSize());
 	proto->set_errorduplicateplanttime(errorDuplicatePlantTime());
 	proto->set_errornonmonotonicplanttime(errorDuplicatePlantTime());
-	proto->set_lmequipmentid(lmEquipmentID().toStdString());
+	proto->set_lmequipmentid(moduleEquipmentID().toStdString());
 
 	return true;
 }

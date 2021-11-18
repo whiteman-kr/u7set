@@ -5,7 +5,7 @@
 #include "../HardwareLib/Connection.h"
 #include "../CommonLib/OrderedHash.h"
 #include "../lib/ComparatorSet.h"
-#include "../TuningService/TuningDataStorage.h"
+#include "../lib/TuningDataStorage.h"
 #include "../lib/ComparatorSet.h"
 
 #include "BuildResultWriter.h"
@@ -301,7 +301,7 @@ namespace Builder
 		bool checkBusAndBusExtractorCompatibility(UalItem* srcAppItem, BusShared bus, UalItem* destAppItem);
 
 		bool buildTuningData();
-		bool buildTuningSignalsLists(Tuning::TuningData* tuningData);
+		bool buildTuningSignalsLists(Tuning::TuningDataShared tuningData);
 		bool getTuningSettings(bool* tuningPropertyExists, bool* tuningEnabled);
 
 		bool disposeSignalsInHeap();
@@ -881,7 +881,7 @@ namespace Builder
 		QVector<UalItem*> m_scalAppItems;
 		QHash<QString, UalAfb*> m_inOutSignalsToScalAppFbMap;
 
-		Tuning::TuningData* m_tuningData = nullptr;
+		Tuning::TuningDataShared m_tuningData;
 
 		const QVector<ModuleLogicCompiler*>* m_moduleCompilers = nullptr;
 	};

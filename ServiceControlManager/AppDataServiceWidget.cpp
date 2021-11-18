@@ -308,21 +308,23 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 			{
 				// DataSourceInfo
 				//
-				case DSC_CAPTION: return source.lmCaption();
-				case DSC_IP: return source.lmAddressStr();
-				case DSC_PORT: return source.lmPort();
-				case DSC_RUP_FRAMES_QUANTITY: return source.lmRupFramesQuantity();
-				case DSC_DATA_TYPE: return source.lmDataTypeStr();
-				case DSC_EQUIPMENT_ID: return source.lmEquipmentID();
+				case DSC_CAPTION: return source.moduleCaption();
+				case DSC_IP: return source.lanControllersInfo()[0].appDataIP;
+				case DSC_PORT: return source.lanControllersInfo()[0].appDataPort;
+				case DSC_RUP_FRAMES_QUANTITY: return source.lanControllersInfo()[0].appDataFramesQuantity;
+				case DSC_DATA_TYPE: return E::valueToString(source.lanControllersInfo()[0].lanControllerType);
+				case DSC_EQUIPMENT_ID: return source.moduleEquipmentID();
 				case DSC_MODULE_NUMBER: return source.lmNumber();
-				case DSC_MODULE_TYPE: return source.lmModuleType();
-				case DSC_SUBSYSTEM_ID: return source.lmSubsystemKey();
-			    case DSC_SUBSYSTEM_CAPTION: return source.lmSubsystemID();
-				case DSC_SUBSYSTEM_CHANNEL: return source.lmSubsystemChannel();
-				case DSC_ADAPTER_ID: return source.lmAdapterID();
-				case DSC_ENABLE_DATA: return source.lmDataEnable();
-				case DSC_DATA_ID: return "0x" + QString("%1").arg(source.lmDataID(), sizeof(source.lmDataID()) * 2, 16, QChar('0')).toUpper();
-				case DSC_UNIQUE_ID: return "0x" + QString("%1").arg(source.lmUniqueID(), sizeof(source.lmUniqueID()) * 2, 16, QChar('0')).toUpper();
+				case DSC_MODULE_TYPE: return source.moduleType();
+				case DSC_SUBSYSTEM_ID: return source.subsystemKey();
+			    case DSC_SUBSYSTEM_CAPTION: return source.subsystemID();
+				case DSC_SUBSYSTEM_CHANNEL: return source.subsystemChannel();
+				case DSC_ADAPTER_ID: return source.lanControllersInfo()[0].equipmentID;
+				case DSC_ENABLE_DATA: return source.lanControllersInfo()[0].appDataEnable;
+				case DSC_DATA_ID: return "0x" + QString("%1").
+										arg(source.lanControllersInfo()[0].appDataUID,
+											sizeof(source.lanControllersInfo()[0].appDataUID) * 2, 16, QChar('0')).toUpper();
+				case DSC_UNIQUE_ID: return "0x" + QString("%1").arg(source.moduleUniqueID(), sizeof(source.moduleUniqueID()) * 2, 16, QChar('0')).toUpper();
 				case DSC_STATE: return E::valueToString<E::DataSourceState>(TO_INT(source.state()));
 
 				// DataSourceState
@@ -425,7 +427,7 @@ void DataSourcesStateModel::reloadList()
 	{
 		m_dataSource = m_clientSocket->dataSources();
 		std::sort(m_dataSource.begin(), m_dataSource.end(), [](const DataSource* ds1, const DataSource* ds2) {
-			return ds1->lmAddress32() < ds2->lmAddress32();
+			return ds1->lanControllersInfo()[0].appDataIP32() < ds2->lanControllersInfo()[0].appDataIP32();
 		});
 	}
 	endResetModel();
@@ -729,7 +731,7 @@ void AppDataServiceWidget::onAppDataSourceDoubleClicked(const QModelIndex &index
 	for (auto& sourceWidget : m_appDataSourceWidgetList)
 	{
 		TEST_PTR_CONTINUE(sourceWidget);
-		if (sourceWidget->id() == ads->lmUniqueID() && sourceWidget->equipmentId() == ads->lmEquipmentID())
+		if (sourceWidget->id() == ads->moduleUniqueID() && sourceWidget->equipmentId() == ads->moduleEquipmentID())
 		{
 			sourceWidget->show();
 			sourceWidget->raise();
@@ -739,7 +741,7 @@ void AppDataServiceWidget::onAppDataSourceDoubleClicked(const QModelIndex &index
 		}
 	}
 
-	AppDataSourceWidget* newWidget = new AppDataSourceWidget(ads->lmUniqueID(), ads->lmEquipmentID(), this);
+	AppDataSourceWidget* newWidget = new AppDataSourceWidget(ads->moduleUniqueID(), ads->moduleEquipmentID(), this);
 	newWidget->setClientSocket(m_tcpClientSocket);
 
 	newWidget->show();

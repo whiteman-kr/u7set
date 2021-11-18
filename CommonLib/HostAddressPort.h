@@ -48,6 +48,8 @@ public:
 	[[nodiscard]] QString addressStr() const;
 	[[nodiscard]] QString addressStrIfSet() const;
 
+	[[nodiscard]] QString portStr() const;
+
 	void clear();
 	[[nodiscard]] bool isEmpty() const;
 	[[nodiscard]] bool isSet() const;
@@ -245,6 +247,11 @@ inline QString HostAddressPort::addressStrIfSet() const
 	}
 
 	return NOT_SET;
+}
+
+inline QString HostAddressPort::portStr() const
+{
+	return QString::number(m_port);
 }
 
 inline void HostAddressPort::clear()

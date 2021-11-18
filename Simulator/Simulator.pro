@@ -44,6 +44,7 @@ unix {
 SOURCES += \
     ../lib/ConnectionsInfo.cpp \
     ../lib/LmDescription.cpp \
+	../lib/LanControllerInfo.cpp \
 	../lib/LogicModulesInfo.cpp \
     ../lib/SoftwareSettings.cpp \
     ../lib/SoftwareXmlReader.cpp \

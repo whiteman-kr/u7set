@@ -22,20 +22,20 @@ struct dynamicPropertyFieldDefinition
 };
 
 static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList {
-	{ QStringLiteral("Equipment ID"), [](const DataSource& source) { return source.lmEquipmentID(); } },
-	{ QStringLiteral("Data ID"), [](const DataSource& source) { return "0x" + QString("%1").arg(source.lmDataID(), sizeof(source.lmDataID()) * 2, 16, QChar('0')).toUpper(); } },
-	{ QStringLiteral("IP"), [](const DataSource& source) { return source.lmAddressStr(); } },
-	{ QStringLiteral("Enable Data"), [](const DataSource& source) { return source.lmDataEnable() ? "Yes" : "No"; } },
+	{ QStringLiteral("Equipment ID"), [](const DataSource& source) { return source.moduleEquipmentID(); } },
+	{ QStringLiteral("Data ID"), [](const DataSource& source) { return "0x" + QString("%1").arg(source.lanControllersInfo()[0].appDataUID, sizeof(source.lanControllersInfo()[0].appDataUID) * 2, 16, QChar('0')).toUpper(); } },
+	{ QStringLiteral("IP"), [](const DataSource& source) { return source.lanControllersInfo()[0].appDataIP; } },
+	{ QStringLiteral("Enable Data"), [](const DataSource& source) { return source.lanControllersInfo()[0].appDataEnable ? "Yes" : "No"; } },
 
-	{ QStringLiteral("Caption"), [](const DataSource& source) { return source.lmCaption(); } },
-	{ QStringLiteral("Port"), [](const DataSource& source) { return source.lmPort(); } },
-	{ QStringLiteral("RUP frames quantity"), [](const DataSource& source) { return source.lmRupFramesQuantity(); } },
-	{ QStringLiteral("Data type"), [](const DataSource& source) { return QString("%1 (%2)").arg(source.lmDataTypeStr()).arg(source.lmDataTypeInt()); } },
+	{ QStringLiteral("Caption"), [](const DataSource& source) { return source.moduleCaption(); } },
+	{ QStringLiteral("Port"), [](const DataSource& source) { return source.lanControllersInfo()[0].appDataPort; } },
+	{ QStringLiteral("RUP frames quantity"), [](const DataSource& source) { return source.lanControllersInfo()[0].appDataFramesQuantity; } },
+	{ QStringLiteral("Data type"), [](const DataSource& source) { return QString("%1 (%2)").arg(E::valueToString(source.lanControllersInfo()[0].lanControllerType)).arg(TO_INT(source.lanControllersInfo()[0].lanControllerType)); } },
 	{ QStringLiteral("Module number"), [](const DataSource& source) { return source.lmNumber(); } },
-	{ QStringLiteral("Module type"), [](const DataSource& source) { return source.lmNumber(); } },
-	{ QStringLiteral("Subsystem ID"), [](const DataSource& source) { return source.lmSubsystemKey(); } },
-	{ QStringLiteral("Subsystem caption"), [](const DataSource& source) { return source.lmSubsystemID(); } },
-	{ QStringLiteral("Adapter ID"), [](const DataSource& source) { return source.lmAdapterID(); } },
+	{ QStringLiteral("Module type"), [](const DataSource& source) { return source.moduleType(); } },
+	{ QStringLiteral("Subsystem ID"), [](const DataSource& source) { return source.subsystemKey(); } },
+	{ QStringLiteral("Subsystem caption"), [](const DataSource& source) { return source.subsystemID(); } },
+	{ QStringLiteral("Adapter ID"), [](const DataSource& source) { return source.lanControllersInfo()[0].equipmentID; } },
 };
 
 static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList {
@@ -128,7 +128,7 @@ void AppDataSourceWidget::updateStateFields()
 
 	for (AppDataSource* source : m_tcpClientSocket->dataSources())
 	{
-		if (source->lmUniqueID() == m_id && source->lmEquipmentID() == m_equipmentId)
+		if (source->moduleUniqueID() == m_id && source->moduleEquipmentID() == m_equipmentId)
 		{
 			pSource = dynamic_cast<DataSourceOnline*>(source);
 		}
@@ -162,7 +162,7 @@ void AppDataSourceWidget::setClientSocket(TcpAppDataClient *tcpClientSocket)
 
 	for (AppDataSource* source : m_tcpClientSocket->dataSources())
 	{
-		if (source->lmUniqueID() == m_id && source->lmEquipmentID() == m_equipmentId)
+		if (source->moduleUniqueID() == m_id && source->moduleEquipmentID() == m_equipmentId)
 		{
 			pSource = dynamic_cast<DataSource*>(source);
 		}

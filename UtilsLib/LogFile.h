@@ -36,33 +36,31 @@ namespace Log
 		QString text;
 		QStringList textArray;
 
-		QString toString(const QString& sessionHashString);
-
+		QString toString(const QString& sessionHashString) const;
 		bool loadFromString(const QString& source, quint64 currentSessionHash);
-
 	};
 
 	class LogFileWorker : public SimpleThreadWorker
 	{
 		Q_OBJECT
-	public:
 
+	public:
 		LogFileWorker(const QString& fileName, const QString& path, int maxFileSize, int maxFilesCount, quint64 sessionHash);
 		virtual ~LogFileWorker();
 
 		// Writing functions
-
+		//
 		bool write(MessageType type, const QString& text);
 		bool writeArray(const QStringList& textArray);
 
 		// Loading funtcions
-
+		//
 		void read(bool currentSessionOnly);
 
 		void getLoadedData(std::vector<LogFileRecord> *result);
 
 		// Information functions
-
+		//
 		QString logName() const;
 
 	protected:
@@ -102,7 +100,7 @@ namespace Log
 
 	private:
 
-		QTimer *m_timer = nullptr;
+		QTimer* m_timer = nullptr;
 
 		QMutex m_queueMutex;
 		std::vector<LogFileRecord> m_queue;
@@ -119,7 +117,7 @@ namespace Log
 
 		const int m_serviceStringLength = 80;
 
-		QMutex m_readMutex;
+		QMutex m_readLogMutex;						// Locks m_readResult for reading data from log files
 		std::vector<LogFileRecord> m_readResult;
 
 		std::unique_ptr<QSharedMemory> m_sharedMemory;
@@ -191,8 +189,7 @@ namespace Log
 		Q_OBJECT
 
 	public:
-
-		LogFileDialog(LogFileWorker* worker, QWidget* parent, bool showType, std::vector<std::pair<QString, double>> headerTitles);
+		LogFileDialog(LogFileWorker* worker, QWidget* parent, bool showType, const std::vector<std::pair<QString, double>>& headerTitles);
 		virtual ~LogFileDialog();
 
 	private:
@@ -201,24 +198,17 @@ namespace Log
 		void enableControls(bool enable);
 
 	private:
-
 		LogFileWorker* m_worker = nullptr;
 
 		QComboBox* m_typeCombo = nullptr;
-
 		QLineEdit* m_filterLineEdit = nullptr;
-
 		QPushButton* m_allSessions = nullptr;
-
 		QPushButton* m_autoScroll = nullptr;
+		QLabel* m_counterLabel = nullptr;
+		QPushButton* m_export = nullptr;
 
 		LogRecordModel m_model;
-
 		QTableView* m_table = nullptr;
-
-		QLabel* m_counterLabel = nullptr;
-
-		QPushButton* m_export = nullptr;
 
 	private slots:
 		void onTypeComboIndexChanged(int index);
@@ -235,9 +225,9 @@ namespace Log
 	class LogFile : public QObject, public ILogFile
 	{
 		Q_OBJECT
-	public:
 
-		LogFile(const QString& logName, const QString& path = QString(), int maxFileSize = 1048576, int maxFilesCount = 3);
+	public:
+		LogFile(const QString& logName, const QString& path = QString(), int maxFileSize = 1048576, int maxFilesCount = 64);
 		virtual ~LogFile();
 
 		virtual bool writeMessage(const QString& text) override;
@@ -247,27 +237,23 @@ namespace Log
 		virtual bool writeText(const QString& text) override;
 
 		bool writeArray(const QStringList& textArray);
-
 		bool write(MessageType type, const QString& text);
 
-		void view(QWidget* parent, bool showType = true, std::vector<std::pair<QString, double> > headerTitles = std::vector<std::pair<QString, double> >());
+		void view(QWidget* parent, bool showType = true, std::vector<std::pair<QString, double>> headerTitles = {});
 
-		int alertAckCounter() const;
-		int errorAckCounter() const;
-		int warningAckCounter() const;
+		[[nodiscard]] int alertAckCounter() const;
+		[[nodiscard]] int errorAckCounter() const;
+		[[nodiscard]] int warningAckCounter() const;
 
 	signals:
-
 		void writeFailure(QString errorString);
 		void alertArrived(QString text);
 
 	private slots:
 		void onFlushFailure(QString errorString);
-
 		void onDialogFinished(int result);
 
 	private:
-
 		LogFileWorker* m_logFileWorker = nullptr;
 		SimpleThread m_logThread;
 

@@ -58,24 +58,24 @@ namespace Sim
 			return false;
 		}
 
-		if (m_processingThread != nullptr)
+		for(TuningRequestsProcessingThread* thread : m_processingThreads)
 		{
-			m_processingThread->updateTuningData(lmEquipmentId, portEquipmentId, ramArea, setSorChassisState, timeStamp);
+			thread->updateTuningData(lmEquipmentId, portEquipmentId, ramArea, setSorChassisState, timeStamp);
 		}
 
 		return true;
 	}
 
-	void TuningServiceCommunicator::writeConfirmation(std::vector<qint64> confirmedRecords,
+	void TuningServiceCommunicator::writeConfirmation(qint64 confirmedRecordID,
 													  const QString& lmEquipmentId,
 													  const QString& portEquipmentId,
 													  const RamArea& ramArea,
 													  bool setSorChassisState,
 													  TimeStamp timeStamp)
 	{
-		if (m_processingThread != nullptr)
+		for(TuningRequestsProcessingThread* thread : m_processingThreads)
 		{
-			m_processingThread->writeConfirmation(lmEquipmentId, portEquipmentId, confirmedRecords,
+			thread->writeConfirmation(lmEquipmentId, portEquipmentId, confirmedRecordID,
 												  ramArea, setSorChassisState, timeStamp);
 		}
 	}
@@ -86,17 +86,17 @@ namespace Sim
 													  bool setSorChassisState,
 													  TimeStamp timeStamp)
 	{
-		if (m_processingThread != nullptr)
+		for(TuningRequestsProcessingThread* thread : m_processingThreads)
 		{
-			m_processingThread->tuningModeEntered(lmEquipmentId, portEquipmentId, ramArea, setSorChassisState, timeStamp);
+			thread->tuningModeEntered(lmEquipmentId, portEquipmentId, ramArea, setSorChassisState, timeStamp);
 		}
 	}
 
 	void TuningServiceCommunicator::tuningModeLeft(const QString& lmEquipmentId, const QString& portEquipmentId)
 	{
-		if (m_processingThread != nullptr)
+		for(TuningRequestsProcessingThread* thread : m_processingThreads)
 		{
-			m_processingThread->tuningModeLeft(lmEquipmentId, portEquipmentId);
+			thread->tuningModeLeft(lmEquipmentId, portEquipmentId);
 		}
 	}
 
@@ -151,23 +151,48 @@ namespace Sim
 
 	void TuningServiceCommunicator::startProcessingThread(const QString& curProfileName)
 	{
-		Q_ASSERT(m_processingThread == nullptr);
+		Q_ASSERT(m_processingThreads.size() == 0);
 
-		m_processingThread = new TuningRequestsProcessingThread(*this, curProfileName, m_log);
-		m_processingThread->start();
+		std::shared_ptr<const TuningServiceSettings> settings =
+			simulator()->software().getSettingsProfile<TuningServiceSettings>(tuningServiceEquipmentID(),
+																			   curProfileName);
+
+		if (settings == nullptr)
+		{
+			Q_ASSERT(false);
+			m_log.writeError(QString("Settings profile '%1' is not found for TuningService %2").
+										arg(curProfileName).arg(tuningServiceEquipmentID()));
+
+			return;
+		}
+
+		for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
+		{
+			if (settings->channelSettings[channel].enable == false)
+			{
+				continue;
+			}
+
+			TuningRequestsProcessingThread* thread = new TuningRequestsProcessingThread(*this, curProfileName, settings, channel, m_log);
+
+			m_processingThreads.push_back(thread);
+
+			thread->start();
+		}
 	}
 
 	void TuningServiceCommunicator::stopProcessingThread()
 	{
-		if (m_processingThread != nullptr)
+		for(TuningRequestsProcessingThread* thread : m_processingThreads)
 		{
-			bool res = m_processingThread->quitAndWait(2000);
+			bool res = thread->quitAndWait(2000);
 
 			Q_ASSERT(res == true);
 
-			delete m_processingThread;
-			m_processingThread = nullptr;
+			delete thread;
 		}
+
+		m_processingThreads.clear();
 	}
 
 	void TuningServiceCommunicator::projectUpdated()
@@ -190,29 +215,30 @@ namespace Sim
 
 	TuningRequestsProcessingThread::TuningRequestsProcessingThread(TuningServiceCommunicator& tsCommunicator,
 																   const QString& curProfileName,
+																   std::shared_ptr<const TuningServiceSettings> settings,
+																   int channel,
 																   ScopedLog& log) :
 		m_tsCommunicator(tsCommunicator),
 		m_curProfileName(curProfileName),
+		m_channel(channel),
 		m_sim(*tsCommunicator.simulator()),
 		m_log(log)
 	{
-		std::shared_ptr<const TuningServiceSettings> settings =
-				m_sim.software().getSettingsProfile<TuningServiceSettings>(m_tsCommunicator.tuningServiceEquipmentID(),
-																			   curProfileName);
-
 		if (settings == nullptr)
 		{
 			Q_ASSERT(false);
-			m_log.writeError(QString("Settings profile '%1' is not found for AppDataService %2").
-										arg(curProfileName).arg(m_tsCommunicator.tuningServiceEquipmentID()));
+			return;
 		}
-		else
-		{
-			m_tuningRequestsReceivingIP = settings->tuningSimIP;
-			m_tuningRepliesSendingIP = settings->tuningDataIP;
 
-			initTuningSourcesHandlers(*settings.get());
-		}
+		Q_ASSERT(m_channel >= 0 && m_channel < TuningServiceSettings::CHANNELS_COUNT);
+
+		m_controllerEquipmentID = settings->channelSettings[m_channel].serviceControllerEquipmentID;
+		m_tuningRequestsReceivingIP = settings->channelSettings[m_channel].tuningSimIP;
+		m_tuningRepliesSendingIP = settings->channelSettings[m_channel].tuningDataIP;
+
+		initTuningSourcesHandlers(*settings.get());
+
+		qDebug() << "TuningRequestsProcessingThread " << C_STR(tsCommunicator.tuningServiceEquipmentID()) << "channel" << channel+1;
 	}
 
 	TuningRequestsProcessingThread::~TuningRequestsProcessingThread()
@@ -235,7 +261,7 @@ namespace Sim
 
 	void TuningRequestsProcessingThread::writeConfirmation(	const QString& lmEquipmentID,
 															const QString& portEquipmentID,
-															const std::vector<qint64>& confirmedRecords,
+															qint64 confirmedRecordID,
 															const RamArea &ramArea,
 															bool setSorChassisState,
 															TimeStamp timeStamp)
@@ -245,15 +271,14 @@ namespace Sim
 		if (tsh != nullptr)
 		{
 			tsh->updateTuningData(ramArea, setSorChassisState, timeStamp);
+
+			m_queueMutex.lock();
+
+			m_writeConfirmationQueue.emplace(lmEquipmentID, portEquipmentID, confirmedRecordID);
+
+			m_queueMutex.unlock();
 		}
-
-		m_queueMutex.lock();
-
-		m_writeConfirmationQueue.emplace(lmEquipmentID, portEquipmentID, confirmedRecords);
-
-		m_queueMutex.unlock();
 	}
-
 
 	void TuningRequestsProcessingThread::tuningModeEntered(const QString& lmEquipmentId,
 														   const QString& portEquipmentId,
@@ -314,10 +339,12 @@ namespace Sim
 
 	void TuningRequestsProcessingThread::initTuningSourcesHandlers(const TuningServiceSettings& settings)
 	{
+		Q_ASSERT(m_channel >= 0 && m_channel < TuningServiceSettings::CHANNELS_COUNT);
+
 		m_tuningSourcesByIP.clear();
 		m_tuningSourcesByEquipmentID.clear();
 
-		for(const TuningServiceSettings::TuningSource& ts : settings.sources)
+		for(const TuningServiceSettings::TuningSource& ts : settings.channelSettings[m_channel].sources)
 		{
 			std::shared_ptr<LogicModule> lm = m_sim.logicModule(ts.lmEquipmentID);
 
@@ -503,7 +530,7 @@ namespace Sim
 				continue;
 			}
 
-			bool sendReply = tsh->writeConfirmation(wc.confirmedRecordsIDs, &reply.rupFotipV2);
+			bool sendReply = tsh->writeConfirmation(wc.confirmedRecordID, &reply.rupFotipV2);
 
 			if (sendReply == true)
 			{
@@ -680,7 +707,7 @@ namespace Sim
 		m_setSorChassisState.store(setSorChassisState);
 	}
 
-	bool TuningSourceHandler::writeConfirmation(const std::vector<qint64>& confirmationIDs, RupFotipV2* reply)
+	bool TuningSourceHandler::writeConfirmation(qint64 confirmationID, RupFotipV2* reply)
 	{
 		TEST_PTR_RETURN_FALSE(reply);
 
@@ -690,58 +717,51 @@ namespace Sim
 			return false;
 		}
 
-		Q_ASSERT(confirmationIDs.size() == 1);
+		if (confirmationID != m_waitingConfirmationID)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
 		Q_ASSERT(sizeof(*reply) == sizeof(m_delayedReply));
 
 		bool result = false;
 
-		for(qint64 confirmationID : confirmationIDs)
+		m_waitingConfirmationID.reset();
+
+		// read actual tuning data into reply
+		//
+		m_delayedReply.fotipFrame.header.flags.setSOR = m_setSorChassisState == true ? 1 : 0;
+
+		readFrameData(m_delayedReply.fotipFrame.header.startAddressW,
+					  &m_delayedReply.fotipFrame);
+
+		switch(static_cast<FotipV2::OpCode>(m_delayedReply.fotipFrame.header.operationCode))
 		{
-			if (confirmationID != m_waitingConfirmationID)
-			{
-				continue;
-			}
+		case FotipV2::OpCode::Write:
 
-			m_waitingConfirmationID.reset();
+			m_delayedReply.fotipFrame.header.flags.successfulWrite = 1;
+			result = true;
 
-			// read actual tuning data into reply
-			//
-			m_delayedReply.fotipFrame.header.flags.setSOR = m_setSorChassisState == true ? 1 : 0;
-
-			readFrameData(m_delayedReply.fotipFrame.header.startAddressW,
-						  &m_delayedReply.fotipFrame);
-
-			switch(static_cast<FotipV2::OpCode>(m_delayedReply.fotipFrame.header.operationCode))
-			{
-			case FotipV2::OpCode::Write:
-
-				m_delayedReply.fotipFrame.header.flags.successfulWrite = 1;
-				result = true;
-
-				//qDebug() << "Write confirmation " << confirmationID;
-
-				break;
-
-			case FotipV2::OpCode::Apply:
-
-				m_delayedReply.fotipFrame.header.flags.succesfulApply = 1;
-				result = true;
-
-				//qDebug() << "Apply confirmation " << confirmationID;
-
-				break;
-
-			default:
-				Q_ASSERT(false);
-				result = false;
-			}
-
-			if (result == true)
-			{
-				memcpy(reply, &m_delayedReply, sizeof(m_delayedReply));
-			}
+			//qDebug() << "Write confirmation " << confirmationID;
 
 			break;
+
+		case FotipV2::OpCode::Apply:
+
+			m_delayedReply.fotipFrame.header.flags.succesfulApply = 1;
+			result = true;
+
+			break;
+
+		default:
+			Q_ASSERT(false);
+			result = false;
+		}
+
+		if (result == true)
+		{
+			memcpy(reply, &m_delayedReply, sizeof(m_delayedReply));
 		}
 
 		return result;

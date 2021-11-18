@@ -1,6 +1,6 @@
 #include "DiagDataServiceCfgGenerator.h"
 #include "../lib/SoftwareSettings.h"
-
+#include "../lib/SoftwareSettingsGetter.h"
 
 namespace Builder
 {

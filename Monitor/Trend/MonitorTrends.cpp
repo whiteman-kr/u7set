@@ -275,7 +275,7 @@ void MonitorTrendsWidget::createArchiveConnection()
 	Q_ASSERT(m_archiveTcpClient == nullptr);
 	Q_ASSERT(m_archiveTcpClientThread == nullptr);
 
-	m_archiveTcpClient = new ArchiveTrendTcpClient(m_configController);
+	m_archiveTcpClient = new ArchiveTrendTcpClient(m_configController, m_configController->logFile());
 
 	m_archiveTcpClientThread = new SimpleThread(m_archiveTcpClient);	// Archive mode is default one
 	m_archiveTcpClientThread->start();
@@ -296,7 +296,7 @@ void MonitorTrendsWidget::createRealtimeConnection()
 	Q_ASSERT(m_rtTcpClient == nullptr);
 	Q_ASSERT(m_rtTcpClientThread == nullptr);
 
-	m_rtTcpClient = new RtTrendTcpClient(m_configController);
+	m_rtTcpClient = new RtTrendTcpClient(m_configController, m_configController->logFile());
 
 	m_rtTcpClientThread = new SimpleThread(m_rtTcpClient);	// Archive mode is default one
 	m_rtTcpClientThread->start();
@@ -407,7 +407,7 @@ void MonitorTrendsWidget::setRealtimeParams()
 
 	std::vector<TrendLib::TrendSignalParam> signalSetVector = trend().signalSet().trendSignals();
 
-	m_rtTcpClient->setData(samplePeriod, signalSetVector);
+	m_rtTcpClient->setData(samplePeriod, std::move(signalSetVector));
 
 	return;
 }

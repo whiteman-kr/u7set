@@ -68,11 +68,17 @@ bool SoftwareXmlInfo::readFromXml(XmlReadHelper& xmlReader)
 	bool result = true;
 
 	result &= xmlReader.readStringAttribute(XmlAttribute::CAPTION, &caption);
-	result &= xmlReader.readStringAttribute(XmlAttribute::ID, &equipmentID);
+	result &= xmlReader.readStringAttribute(XmlAttribute::EQUIPMENT_ID, &equipmentID);
 
 	int typeInt = 0;
 
 	result &= xmlReader.readIntAttribute(XmlAttribute::TYPE, &typeInt);
+
+	QString controllersIDs;
+
+	result &= xmlReader.readStringAttribute(XmlAttribute::SOFTWARE_CONTROLLERS, &controllersIDs);
+
+	softwareControllersIDs = controllersIDs.split(Separator::COMMA, Qt::SkipEmptyParts);
 
 	RETURN_IF_FALSE(result);
 

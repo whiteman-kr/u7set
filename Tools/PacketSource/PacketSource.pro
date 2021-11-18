@@ -41,6 +41,7 @@ SOURCES += \
     ../../lib/Ui/DialogAbout.cpp \
 	../../lib/DataSource.cpp \
     ../../lib/BuildInfo.cpp \
+	../../lib/LanControllerInfo.cpp \
 	main.cpp \
 	BuildOption.cpp \
 	ConfigSocket.cpp \
@@ -66,6 +67,7 @@ HEADERS += \
     ../../lib/Ui/DialogAbout.h \
 	../../lib/DataSource.h \
     ../../lib/BuildInfo.h \
+	../../lib/LanControllerInfo.h \
 	../../CommonLib/PropertyObject.h \
 	../../CommonLib/Types.h \
 	BuildOption.h \

@@ -14,12 +14,14 @@ class MonitorSchemaView : public VFrame30::ClientSchemaView
 	Q_OBJECT
 
 public:
+	MonitorSchemaView() = delete;
 	explicit MonitorSchemaView(MonitorSchemaManager* schemaManager,
-						 VFrame30::AppSignalController* appSignalController,
-						 VFrame30::TuningController* tuningController,
-						 VFrame30::LogController* logController,
-						 QWidget* parent = nullptr);
-	virtual ~MonitorSchemaView();
+							   VFrame30::ISchemaViewHistory* schemaViewHistory,
+							   VFrame30::AppSignalController* appSignalController,
+							   VFrame30::TuningController* tuningController,
+							   VFrame30::LogController* logController,
+							   QWidget* parent = nullptr);
+	virtual ~MonitorSchemaView() = default;
 
 protected:
 	virtual void paintEvent(QPaintEvent* event) override;

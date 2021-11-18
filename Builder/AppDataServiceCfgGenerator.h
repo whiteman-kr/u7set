@@ -2,10 +2,6 @@
 
 #include "SoftwareCfgGenerator.h"
 #include "../lib/SoftwareSettings.h"
-#include "../UtilsLib/WUtils.h"
-#include "../lib/DeviceHelper.h"
-#include "../UtilsLib/XmlHelper.h"
-#include "../lib/DataSource.h"
 
 namespace Builder
 {

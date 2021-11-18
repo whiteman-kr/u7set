@@ -10,6 +10,7 @@ public:
 
 	quint64 id() const;
 	QString equipmentId() const;
+	QString lanEquipmentId() const;
 
 	void setNewState(const ::Network::TuningSourceState& newState);
 

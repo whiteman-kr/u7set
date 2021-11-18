@@ -1534,6 +1534,75 @@ namespace Builder
 								arg(equipmentID).arg(propertyName).arg(profileID)));
 	}
 
+	/// IssueCode: CFG3046
+	///
+	/// IssueType: Error
+	///
+	/// Title: Value of properties pair %1:%2 of objects %3 and %4 are equal!
+	///
+	/// Parameters:
+	///         %1 Property1
+	///         %2 Property2
+	///			%3 Object1 ID
+	/// 		%4 Object2 ID
+	///
+	/// Description:
+	///			Value of specified properties pair should't be equal.
+	///
+	void IssueLogger::errCFG3046(QString prop1, QString prop2,
+								 QString obj1, QString obj2)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3046,
+				  QString(tr("Value of properties pair %1:%2 of objects %3 and %4 are equal.").
+								arg(prop1).arg(prop2).arg(obj1).arg(obj2)));
+	}
+
+	/// IssueCode: CFG3047
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1.%2 should refer to one of software controllers: %3
+	///
+	/// Parameters:
+	///         %1 Device object EquipmentID
+	///			%2 Property Name
+	///         %3 List of controllers IDs
+	///
+	/// Description:
+	///			Specified object property should refer to one of available software controllers.
+	///			Check equipment configuration.
+	///
+	void IssueLogger::errCFG3047(QString objectID, QString propertyName, QString controillersList)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3047,
+				  QString(tr("Property %1.%2 should refer to one of software controllers: %3").
+								arg(objectID).arg(propertyName).arg(controillersList)));
+	}
+
+	/// IssueCode: CFG3048
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1.%2 should refer to Software or Software child controller object.
+	///
+	/// Parameters:
+	///         %1 Device object EquipmentID
+	///			%2 Property Name
+	///
+	/// Description:
+	///			Specified object property should refer to Software or Software child controller object.
+	///			Check equipment configuration.
+	///
+	void IssueLogger::errCFG3048(QString objectID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3048,
+				  QString(tr("Property %1.%2 should refer to Software or Software child controller object.").
+								arg(objectID).arg(propertyName)));
+	}
+
 	/// IssueCode: CFG3100
 	///
 	/// IssueType: Error
@@ -7225,6 +7294,47 @@ namespace Builder
 				  5196,
 				  QString(tr("Unknown conversion from inbus signal %1 to app signal %2 (Logic schema %3).")).
 							arg(inbusSignalID).arg(signalID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5197
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Tuning data is not found for module %1
+	///
+	/// Parameters:
+	///		%1 Module EquipmentID
+	///
+	/// Description:
+	///		 Tuning data is not found for specified module. Contact to developers.
+	///
+	void IssueLogger::errALC5197(QString moduleEquipmentID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5197,
+				  QString(tr("Tuning data is not found for module %1")).arg(moduleEquipmentID));
+	}
+
+	/// IssueCode: ALC5198
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Signals %1 and %2 have equal hash (%3) of AppSignalIDs.
+	///
+	/// Parameters:
+	///		%1 AppSignalID 1
+	///		%2 AppSignalID 2
+	///     %3 Hash value
+	///
+	/// Description:
+	///		 Specified signals have equal hash of AppSignalIDs. Change one of AppSignalIDs
+	///
+	void IssueLogger::errALC5198(QString appSignalID1, QString appSignalID2, quint64 h)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5198,
+				  QString(tr("Signals %1 and %2 have equal hash (0x%3) of AppSignalIDs.")).
+							arg(appSignalID1).arg(appSignalID2).arg(QString::number(h, 16).toUpper()));
 	}
 
 	/// IssueCode: ALC5800

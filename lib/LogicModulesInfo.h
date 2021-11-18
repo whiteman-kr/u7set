@@ -41,11 +41,13 @@ public:
 	int appDataSizeBytes = 0;
 	quint32 appDataUID = 0;
 
+	quint64 tuningDataUID = 0;
+
 	bool diagDataEnable = false;
 	int diagDataSizeBytes = 0;
 	quint32 diagDataUID = 0;
 
-	std::vector<LanControllerInfo> lanControllers;
+	LanControllersInfo lanControllers;
 
 	int moduleType() const { return (moduleFamilyID & 0xFF00) | (moduleVersion & 0x00FF); }
 };
@@ -63,21 +65,6 @@ public:
 private:
 	bool load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QString* errMsg);
 	bool load(LanControllerInfo* lci, const QDomNode& lanControllerNode, QString* errMsg);
-
-protected:
-	static const QString ELEM_LOGIC_MODULES;
-	static const QString ELEM_LOGIC_MODULE;
-
-	static const QString ELEM_LAN_CONTROLLERS;
-	static const QString ELEM_LAN_CONTROLLER;
-
-	static const QString ELEM_TUNING_PARAMS;
-	static const QString ELEM_APP_DATA_PARAMS;
-	static const QString ELEM_DIAG_DATA_PARAMS;
-
-	static const QString ATTR_TUNING_PROVIDED;
-	static const QString ATTR_APP_DATA_PROVIDED;
-	static const QString ATTR_DIAG_DATA_PROVIDED;
 };
 
 #ifdef IS_BUILDER
@@ -96,8 +83,6 @@ private:
 	bool fill(const Hardware::DeviceModule* lmModule, LogicModuleInfo* lmInfo);
 
 	bool save(const LogicModuleInfo& lmInfo, XmlWriteHelper& xml) const;
-
-	bool save(const LanControllerInfo& lci, XmlWriteHelper& xml) const;
 
 private:
 	const Builder::Context& m_context;

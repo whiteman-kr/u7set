@@ -31,6 +31,7 @@ SOURCES += \
 	../lib/DataSource.cpp \
     ../lib/BuildInfo.cpp \
 	../lib/SoftwareSettings.cpp \
+	../lib/LanControllerInfo.cpp \
 	AppDataService.cpp \
 	AppDataProcessingThread.cpp \
 	AppDataSource.cpp \
@@ -48,6 +49,7 @@ HEADERS += \
     ../lib/DataSource.h \
     ../lib/BuildInfo.h \
 	../lib/SoftwareSettings.h \
+	../lib/LanControllerInfo.h \
 	AppDataService.h \
 	AppDataProcessingThread.h \
 	AppDataSource.h \

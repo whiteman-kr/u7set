@@ -2,8 +2,8 @@
 
 // C includes, must be before c++ includes
 //
-#include <assert.h>
-#include <stdint.h>
+#include <cassert>
+#include <cstdint>
 
 // C++ includes
 //

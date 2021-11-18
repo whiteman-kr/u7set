@@ -287,7 +287,7 @@ static int no = 1;
 
 	// Communication thread
 	//
-	m_tcpClient = new ArchiveTcpClient(configController);
+	m_tcpClient = new ArchiveTcpClient(configController, configController->logFile());
 	m_tcpClientThread = new SimpleThread(m_tcpClient);
 
 	m_tcpClientThread->start();

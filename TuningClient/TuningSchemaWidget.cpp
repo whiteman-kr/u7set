@@ -3,13 +3,11 @@
 #include "../VFrame30/MonitorSchema.h"
 
 //
-//TuningClientTuningController
+// TuningClientTuningController
 //
-
 TuningClientTuningController::TuningClientTuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QWidget* parent):
 	VFrame30::TuningController(signalManager, tcpClient, parent)
 {
-
 }
 
 
@@ -24,9 +22,8 @@ bool TuningClientTuningController::checkTuningAccess() const
 }
 
 //
-//TuningSchemaWidget
+// TuningSchemaWidget
 //
-
 TuningSchemaWidget::TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
 									   TuningClientTuningController* tuningController,
 									   VFrame30::LogController* logController,
@@ -48,7 +45,4 @@ TuningSchemaWidget::TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
 	return;
 }
 
-TuningSchemaWidget::~TuningSchemaWidget()
-{
-}
 
