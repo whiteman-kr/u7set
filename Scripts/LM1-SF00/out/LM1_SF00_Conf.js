@@ -69,6 +69,9 @@ var SensorType;
     SensorType[SensorType["Ohm_Cu_a_426"] = 31] = "Ohm_Cu_a_426";
     SensorType[SensorType["Ohm_Ni_a_617"] = 32] = "Ohm_Ni_a_617";
     SensorType[SensorType["Ohm_Raw"] = 33] = "Ohm_Raw";
+    SensorType[SensorType["mV_Type_L"] = 36] = "mV_Type_L";
+    SensorType[SensorType["mV_Type_M"] = 37] = "mV_Type_M";
+    SensorType[SensorType["mV_Raw_m1200_p1200"] = 38] = "mV_Raw_m1200_p1200";
 })(SensorType || (SensorType = {}));
 var OutputMode;
 (function (OutputMode) {
@@ -152,7 +155,8 @@ let LMNumberCount = 0;
 //let configScriptVersion: number = 41;		// ScriptDeviceObject is used
 //let configScriptVersion: number = 42;		// DiagDataSize is written for i/o module frame for LM8_SR10, LM1_SR03 and LM1_SR04
 //let configScriptVersion: number = 43;		// Tuning LAN configuration is placed in LAN2 and LAN3 for LM1_SR04 LAN 
-let configScriptVersion = 44; // Tuning LAN configuration is placed in LAN1 or LAN2/LAN3 depending on LAN description
+//let configScriptVersion: number = 44;		// Tuning LAN configuration is placed in LAN1 or LAN2/LAN3 depending on LAN description
+let configScriptVersion = 45; // Added mV_Type_L, mV_Type_M and mV_Raw_m1200_p1200 sensor types
 //
 function main(builder, root, logicModules, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (logicModules.length != 0) {
