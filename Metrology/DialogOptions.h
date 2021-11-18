@@ -17,115 +17,67 @@
 
 // ==============================================================================================
 
-const char* const				OptionGroupTitle[] =
+enum OptionGroup
 {
-								QT_TRANSLATE_NOOP("DialogOptions", "Connect to server"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Module"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Linearity"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Comparators"),
-								QT_TRANSLATE_NOOP("DialogOptions", "List of measurements"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Panels information"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Database"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Language"),
+	NoOptionGroup = -1,
+	Server = 0,
+	Module = 1,
+	Linearity = 2,
+	Comparator = 3,
+	MeasureView = 4,
+	PanelInfo = 5,
+	Database = 6,
+	Language = 7,
 };
 
-const int						OPTION_GROUP_COUNT			= sizeof(OptionGroupTitle)/sizeof(OptionGroupTitle[0]);
+const int OptionGroupCount = 8;
 
-const int						OPTION_GROUP_UNDEFINED		= -1,
-								OPTION_GROUP_SERVER			= 0,
-								OPTION_GROUP_MODULE			= 1,
-								OPTION_GROUP_LINEARITY		= 2,
-								OPTION_GROUP_COMPARATOR		= 3,
-								OPTION_GROUP_MEASURE_VIEW	= 4,
-								OPTION_GROUP_PANEL_INFO		= 5,
-								OPTION_GROUP_DATABASE		= 6,
-								OPTION_GROUP_LANGUAGE		= 7;
+#define ERR_OPTION_GROUP(group) (static_cast<int>(group) < 0 || static_cast<int>(group) >= OptionGroupCount)
+
+QString groupCaption(int group);
 
 // ==============================================================================================
 
-const char* const				OptionPageTitle[] =
+
+enum OptionPage
 {
-								QT_TRANSLATE_NOOP("DialogOptions", "Connection to Config Server - TCP/IP"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Connection to Application Data Server - TCP/IP"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Connection to Tuning Server - TCP/IP"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Measuring of module"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Measurements of linearity"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Point of linearity"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Measure comparators"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Displaying data in the list of measurements"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Displaying columns in the list of measurements"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Displaying information of signals"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Displaying information of сomparators"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Database location"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Database backup"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Language of application"),
+	NoOptionPage = -1,
+	Socket_Cfg = 0,
+	Socket_AppDataSrv = 1,
+	Socket_Tuning = 2,
+	Module_Measure = 3,
+	Linearity_Measure = 4,
+	Linearity_Point = 5,
+	Comparator_Measure = 6,
+	MeasureView_Text = 7,
+	MeasureView_Column = 8,
+	Panel_SignalInfo = 9,
+	Panel_ComparatorInfo = 10,
+	Database_Location = 11,
+	Database_Backup = 12,
+	Language_App = 13,
 };
 
-const int						OPTION_PAGE_COUNT				= sizeof(OptionPageTitle)/sizeof(OptionPageTitle[0]);
+const int OptionPageCount = 14;
 
-const int						OPTION_PAGE_UNDEFINED			= -1,
-								OPTION_PAGE_CONFIG_SOCKET		= 0,
-								OPTION_PAGE_SIGNAL_SOCKET		= 1,
-								OPTION_PAGE_TUNING_SOCKET		= 2,
-								OPTION_PAGE_MODULE_MEASURE		= 3,
-								OPTION_PAGE_LINEARITY_MEASURE	= 4,
-								OPTION_PAGE_LINEARITY_POINT		= 5,
-								OPTION_PAGE_COMPARATOR_MEASURE	= 6,
-								OPTION_PAGE_MEASURE_VIEW_TEXT	= 7,
-								OPTION_PAGE_MEASURE_VIEW_COLUMN	= 8,
-								OPTION_PAGE_SIGNAL_INFO			= 9,
-								OPTION_PAGE_COMPARATOR_INFO		= 10,
-								OPTION_PAGE_DATABASE_LOCATION	= 11,
-								OPTION_PAGE_DATABASE_BACKUP		= 12,
-								OPTION_PAGE_LANGUAGE			= 13;
+#define ERR_OPTION_PAGE(page) (static_cast<int>(page) < 0 || static_cast<int>(page) >= OptionPageCount)
 
-// ----------------------------------------------------------------------------------------------
-
-const char* const				OptionPageShortTitle[OPTION_PAGE_COUNT] =
-{
-								QT_TRANSLATE_NOOP("DialogOptions", "ConfigurationService"),
-								QT_TRANSLATE_NOOP("DialogOptions", "AppDataService"),
-								QT_TRANSLATE_NOOP("DialogOptions", "TuningService"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Measuring"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Measurements"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Points"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Measurements"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Displaying"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Columns"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Signal information"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Comparator information"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Location"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Backup"),
-								QT_TRANSLATE_NOOP("DialogOptions", "Language of application "),
-};
-
-// ----------------------------------------------------------------------------------------------
-
-const int						OptionGroupPage[OPTION_PAGE_COUNT] =
-{
-								OPTION_GROUP_SERVER,		// Group: Connect to server --			Page : ConfigService"),
-								OPTION_GROUP_SERVER,		// Group: Connect to server --			Page : AppDataService"),
-								OPTION_GROUP_SERVER,		// Group: Connect to server --			Page : TuningService"),
-								OPTION_GROUP_MODULE,		// Group: Module --						Page : Measuring"),
-								OPTION_GROUP_LINEARITY,		// Group: Linearity --					Page : Measurements"),
-								OPTION_GROUP_LINEARITY,		// Group: Linearity --					Page : Points"),
-								OPTION_GROUP_COMPARATOR,	// Group: Comparators --				Page : Measurements"),
-								OPTION_GROUP_MEASURE_VIEW,	// Group: List of measurements --		Page : Display"),
-								OPTION_GROUP_MEASURE_VIEW,	// Group: List of measurements --		Page : Columns"),
-								OPTION_GROUP_PANEL_INFO,	// Group: Information of signal --		Page : Displaying"),
-								OPTION_GROUP_PANEL_INFO,	// Group: Information of comparator --	Page : Displaying"),
-								OPTION_GROUP_DATABASE,		// Group: Database --					Page : Location"),
-								OPTION_GROUP_DATABASE,		// Group: Database --					Page : Backup"),
-								OPTION_GROUP_LANGUAGE,		// Group: Language of application --	Page : Language"),
-};
+QString pageCaption(OptionPage page);
+QString pageShortCaption(OptionPage page);
+OptionGroup groupByPage(OptionPage page);
 
 // ==============================================================================================
 
-const int						PROPERTY_PAGE_TYPE_UNDEFINED	= -1,
-								PROPERTY_PAGE_TYPE_LIST			= 0,
-								PROPERTY_PAGE_TYPE_DIALOG		= 1;
+enum PropertyPageType
+{
+	NoPageType = -1,
+	List = 0,
+	Dialog = 1,
+};
 
-const int						PROPERTY_PAGE_TYPE_COUNT		= 2;
+const int PropertyPageTypeCount = 2;
+
+#define ERR_PROPERTY_PAGE_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= PropertyPageTypeCount)
 
 // ----------------------------------------------------------------------------------------------
 
@@ -142,26 +94,26 @@ public:
 public:
 
 	QWidget*					getWidget() { return m_pWidget; }
-	int							type() const { return m_type; }
+	PropertyPageType			type() const { return m_type; }
 
-	int							m_page = OPTION_PAGE_UNDEFINED;
+	OptionPage					m_page = OptionPage::NoOptionPage;
 	QTreeWidgetItem*			m_pTreeWidgetItem = nullptr;
 
 	QtTreePropertyBrowser*		treeEditor() { return m_pEditor; }
 
 private:
 
-	int							m_type = PROPERTY_PAGE_TYPE_UNDEFINED;
+	PropertyPageType			m_type = PropertyPageType::NoPageType;
 
 	QWidget*					m_pWidget = nullptr;
 
-	// PROPERTY_PAGE_TYPE_LIST
+	// PropertyPageType::List
 	//
 	QtVariantPropertyManager*	m_pManager = nullptr;
 	QtVariantEditorFactory*		m_pFactory = nullptr;
 	QtTreePropertyBrowser*		m_pEditor = nullptr;
 
-	// PROPERTY_PAGE_TYPE_DIALOG
+	// PropertyPageType::Dialog
 	//
 	QDialog*					m_pDialog = nullptr;
 };
@@ -185,8 +137,8 @@ private:
 
 	Options						m_options;
 
-	static int					m_activePage;
-	bool						setActivePage(int page);
+	static OptionPage			m_activePage;
+	bool						setActivePage(OptionPage page);
 
 	void						createInterface();
 
@@ -201,16 +153,16 @@ private:
 
 	std::vector<PropertyPage*>	m_pageList;
 
-	PropertyPage*				createPage(int page);
-	PropertyPage*				createPropertyList(int page);
-	PropertyPage*				createPropertyDialog(int page);
+	PropertyPage*				createPage(OptionPage page);
+	PropertyPage*				createPropertyList(OptionPage page);
+	PropertyPage*				createPropertyDialog(OptionPage page);
 
 
 	QMap<QtProperty*,int>		m_propertyItemList;
 	QMap<QtProperty*,QVariant>	m_propertyValueList;
 
-	void						appendProperty(QtProperty* property, int page, int param);
-	void						expandProperty(QtTreePropertyBrowser* pEditor, int page, int param, bool expanded);
+	void						appendProperty(QtProperty* property, OptionPage page, int param);
+	void						expandProperty(QtTreePropertyBrowser* pEditor, OptionPage page, int param, bool expanded);
 	void						clearProperty();
 
 	QtProperty*					m_currentPropertyItem = nullptr;
@@ -224,14 +176,14 @@ private:
 
 protected:
 
-	bool						event(QEvent*  e) override;
+	bool						event(QEvent* e) override;
 
 private slots:
 
 	void						onPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
 	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
 
-	void						onBrowserItem(QtBrowserItem*pItem);
+	void						onBrowserItem(QtBrowserItem* pItem);
 
 	void						updateServerPage();
 	void						updateLinearityPage(bool isDialog);

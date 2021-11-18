@@ -8,8 +8,8 @@
 #include <QFont>
 #include <QColor>
 
-#include "../OnlineLib/SocketIO.h"
 #include "../lib/SoftwareSettings.h"
+#include "../OnlineLib/SocketIO.h"
 
 #include "MetrologySignal.h"
 #include "MeasureViewHeader.h"
@@ -97,7 +97,8 @@ const char* const		SocketServerType[] =
 
 const int				SOCKET_SERVER_TYPE_COUNT = sizeof(SocketServerType)/sizeof(SocketServerType[0]);
 
-const int				SOCKET_SERVER_TYPE_PRIMARY = 0,
+const int				SOCKET_SERVER_TYPE_UNDEFINED = -1,
+						SOCKET_SERVER_TYPE_PRIMARY = 0,
 						SOCKET_SERVER_TYPE_RESERVE = 1;
 
 // ----------------------------------------------------------------------------------------------
@@ -166,7 +167,7 @@ public:
 
 private:
 
-	int					m_type = -1;
+	int					m_type = SOCKET_SERVER_TYPE_UNDEFINED;
 
 	CONNECTION_OPTION	m_connectOption[SOCKET_SERVER_TYPE_COUNT];
 };
@@ -182,7 +183,8 @@ const char* const		SocketType[] =
 
 const int				SOCKET_TYPE_COUNT = sizeof(SocketType)/sizeof(SocketType[0]);
 
-const int				SOCKET_TYPE_CONFIG = 0,
+const int				SOCKET_TYPE_UNDEFINED = -1,
+						SOCKET_TYPE_CONFIG = 0,
 						SOCKET_TYPE_SIGNAL = 1,
 						SOCKET_TYPE_TUNING = 2;
 

@@ -1516,7 +1516,7 @@ Please, select output signal!</source>
         <location filename="../DialogOptions.cpp" line="384"/>
         <location filename="../DialogOptions.h" line="51"/>
         <source>Measuring of module</source>
-        <translation>Измерения модуля</translation>
+        <translation>измерения модуля</translation>
     </message>
     <message>
         <location filename="../DialogOptions.cpp" line="411"/>
@@ -1649,12 +1649,12 @@ Please, select output signal!</source>
     <message>
         <location filename="../DialogOptions.h" line="59"/>
         <source>Database location</source>
-        <translation>Расположение базы данных</translation>
+        <translation>расположение базы данных</translation>
     </message>
     <message>
         <location filename="../DialogOptions.h" line="60"/>
         <source>Database backup</source>
-        <translation>Резервная копия базы данных</translation>
+        <translation>резервная копия базы данных</translation>
     </message>
     <message>
         <location filename="../DialogOptions.h" line="97"/>
