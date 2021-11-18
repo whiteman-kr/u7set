@@ -459,6 +459,7 @@ namespace Builder
 		void errALC5195(QString itemLabel, QUuid itemID, QString schemaID);							// Named signal isn't connected to set_flags item output. Flags cannot be set. (Item %1, schema %2).
 		void errALC5196(QString signalID, QString inbusSignalID, QString schemaID);		// Unknown conversion from inbus signal %1 to app signal %2 (Logic schema %3).
 		void errALC5197(QString moduleEquipmentID);										// Tuning data is not found for module %1
+		void errALC5198(QString appSignalID1, QString appSignalID2, quint64 h);			// Signals %1 and %2 have equal hash (%3) of AppSignalIDs.
 
 		// firmware writing errors
 

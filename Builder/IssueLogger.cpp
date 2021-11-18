@@ -7315,6 +7315,28 @@ namespace Builder
 				  QString(tr("Tuning data is not found for module %1")).arg(moduleEquipmentID));
 	}
 
+	/// IssueCode: ALC5198
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Signals %1 and %2 have equal hash (%3) of AppSignalIDs.
+	///
+	/// Parameters:
+	///		%1 AppSignalID 1
+	///		%2 AppSignalID 2
+	///     %3 Hash value
+	///
+	/// Description:
+	///		 Specified signals have equal hash of AppSignalIDs. Change one of AppSignalIDs
+	///
+	void IssueLogger::errALC5198(QString appSignalID1, QString appSignalID2, quint64 h)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5198,
+				  QString(tr("Signals %1 and %2 have equal hash (0x%3) of AppSignalIDs.")).
+							arg(appSignalID1).arg(appSignalID2).arg(QString::number(h, 16).toUpper()));
+	}
+
 	/// IssueCode: ALC5800
 	///
 	/// IssueType: Warning
