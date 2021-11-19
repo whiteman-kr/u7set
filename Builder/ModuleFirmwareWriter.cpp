@@ -1020,9 +1020,9 @@ namespace Hardware
 
 	bool ModuleFirmwareWriter::checkMacForUnique(quint16 m1, quint16 m2, quint16 m3)
 	{
-		qulonglong mac = m1 << 32;
-		mac |= m2 << 16;
-		mac |= m3;
+		qulonglong mac = static_cast<qulonglong>(m1) << 32;
+		mac |= static_cast<qulonglong>(m2) << 16;
+		mac |= static_cast<qulonglong>(m3);
 
 		if (m_macMap.find(mac) != m_macMap.end())
 		{

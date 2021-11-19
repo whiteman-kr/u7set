@@ -305,7 +305,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 
 		if (signalSet.busExists(busTypeId) == false)
 		{
-			log.writeError(module.equipmentId +  ", Bus " + busTypeId + " was not found!");
+			log.writeError("Bus " + busTypeId + " specified in " + module.equipmentId +  "." + lanTypeName + "BusTypeId" + " was not found!");
 			return false;
 		}
 
@@ -379,7 +379,7 @@ function generate_mso5(confFirmware, module, LMNumber, frame, log, signalSet, op
 
 			if (votePartCount > maxVotePartCount)
 			{
-				log.writeError(module.equipmentId +  ", TX Bus part count is more than 48 parts.");
+				log.writeError("TX Bus part count specified in " + module.equipmentId +  "is more than 48 parts.");
 				return false;
 			}
 
