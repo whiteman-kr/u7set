@@ -547,6 +547,19 @@ bool DiagDataServiceSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
+QStringList TuningServiceSettings::TuningClient::sourcesIDs() const
+{
+	QStringList ids;
+
+	for(const TuningSource& ts : drivenSources)
+	{
+		ids.append(ts.lmEquipmentID);
+	}
+
+	return ids;
+}
+
+
 TuningServiceSettings::TuningSource TuningServiceSettings::ChannelSettings::getTuningSource(const QString& sourceEquipmentID) const
 {
 	for(const TuningSource& ts : sources)
@@ -618,6 +631,13 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeStringElement(EquipmentPropNames::EQUIPMENT_ID, equipmentID);
 	xml.writeIntElement(XmlElement::CHANNEL_COUNT, channelCount);
 
+	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+							 EquipmentPropNames::CLIENT_REQUEST_PORT,
+							 clientRequestIP);
+
+	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK,
+						 clientRequestNetmask);
+
 	xml.writeStringElement(EquipmentPropNames::CFG_SERVICE_ID1, cfgServiceID1);
 	xml.writeHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
 							 EquipmentPropNames::CFG_SERVICE_PORT1, cfgServiceIP1);
@@ -640,33 +660,13 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 		if (ch.enable == true)
 		{
 			xml.writeStringAttribute(XmlAttribute::CONTROLLER_EQUIPMENT_ID, ch.serviceControllerEquipmentID);
-			xml.writeHostAddressPortAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, ch.clientRequestIP);
-			xml.writeQHostAddressAttribute(EquipmentPropNames::CLIENT_REQUEST_NETMASK, ch.clientRequestNetmask);
 			xml.writeHostAddressPortAttribute(EquipmentPropNames::TUNING_DATA_IP, ch.tuningDataIP);
 			xml.writeQHostAddressAttribute(EquipmentPropNames::TUNING_DATA_NETMASK, ch.tuningDataNetmask);
 			xml.writeHostAddressPortAttribute(EquipmentPropNames::TUNING_SIM_IP, ch.tuningSimIP);
 
 			// write tuning sources info
 			//
-			const std::vector<TuningSource>& srcs = ch.sources;
-
-			xml.writeStartElement(XmlElement::TUNING_SOURCES);
-			xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(srcs.size()));
-
-			for(uint i = 0; i < srcs.size(); i++)
-			{
-				const TuningSource& ts = srcs[i];
-
-				xml.writeStartElement(XmlElement::TUNING_SOURCE);
-
-				xml.writeStringAttribute(EquipmentPropNames::LM_EQUIPMENT_ID, ts.lmEquipmentID);
-				xml.writeStringAttribute(EquipmentPropNames::PORT_EQUIPMENT_ID, ts.portEquipmentID);
-				xml.writeStringAttribute(EquipmentPropNames::TUNING_DATA_IP, ts.tuningDataIP.addressPortStr());
-
-				xml.writeEndElement();		// TUNING_SOURCE
-			}
-
-			xml.writeEndElement();			// TUNING_SOURCES
+			writeTuningSourcesToXml(xml, ch.sources);
 
 			// write tuning clients info
 			//
@@ -682,10 +682,7 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 				xml.writeStartElement(XmlElement::TUNING_CLIENT);
 				xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tc.equipmentID);
 
-				xml.writeStartElement(XmlElement::TUNING_SOURCES);
-				xml.writeIntAttribute(XmlAttribute::COUNT, tc.sourcesIDs.count());
-				xml.writeString(tc.sourcesIDs.join(Separator::SEMICOLON));
-				xml.writeEndElement();		// TUNING_SOURCES
+				writeTuningSourcesToXml(xml, tc.drivenSources);
 
 				xml.writeEndElement();		// TUNING_CLIENT
 			}
@@ -713,6 +710,13 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readIntElement(XmlElement::CHANNEL_COUNT, &channelCount, true);
 
+	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
+									  EquipmentPropNames::CLIENT_REQUEST_PORT,
+									  &clientRequestIP);
+
+	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK,
+								  &clientRequestNetmask);
+
 	result &= xml.readStringElement(EquipmentPropNames::CFG_SERVICE_ID1, &cfgServiceID1, true);
 	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP1,
 									  EquipmentPropNames::CFG_SERVICE_PORT1, &cfgServiceIP1);
@@ -737,44 +741,11 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 		if (ch.enable == true)
 		{
 			result &= xml.readStringAttribute(XmlAttribute::CONTROLLER_EQUIPMENT_ID, &ch.serviceControllerEquipmentID);
-			result &= xml.readHostAddressPortAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &ch.clientRequestIP);
-			result &= xml.readQHostAddressAttribute(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &ch.clientRequestNetmask);
 			result &= xml.readHostAddressPortAttribute(EquipmentPropNames::TUNING_DATA_IP, &ch.tuningDataIP);
 			result &= xml.readQHostAddressAttribute(EquipmentPropNames::TUNING_DATA_NETMASK, &ch.tuningDataNetmask);
 			result &= xml.readHostAddressPortAttribute(EquipmentPropNames::TUNING_SIM_IP, &ch.tuningSimIP);
 
-			// read tuning sources info
-			//
-			result &= xml.findElement(XmlElement::TUNING_SOURCES);
-
-			int sourcesCount = 0;
-
-			result &= xml.readIntAttribute(XmlAttribute::COUNT, &sourcesCount);
-
-			RETURN_IF_FALSE(result);
-
-			std::vector<TuningSource>& srcs = ch.sources;
-
-			srcs.clear();
-
-			for(int i = 0; i < sourcesCount; i++)
-			{
-				TuningSource ts;
-
-				result &= xml.findElement(XmlElement::TUNING_SOURCE);
-				result &= xml.readStringAttribute(EquipmentPropNames::LM_EQUIPMENT_ID, &ts.lmEquipmentID);
-				result &= xml.readStringAttribute(EquipmentPropNames::PORT_EQUIPMENT_ID, &ts.portEquipmentID);
-
-				QString addressPortStr;
-
-				result &= xml.readStringAttribute(EquipmentPropNames::TUNING_DATA_IP, &addressPortStr);
-
-				BREAK_IF_FALSE(result);
-
-				ts.tuningDataIP.setAddressPortStr(addressPortStr, PORT_LM_TUNING);
-
-				srcs.push_back(ts);
-			}
+			result &= readTuningSourcesFromXml(xml, &ch.sources);
 
 			RETURN_IF_FALSE(result);
 
@@ -801,21 +772,8 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 				result &= xml.findElement(XmlElement::TUNING_CLIENT);
 				result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tc.equipmentID);
-				result &= xml.findElement(XmlElement::TUNING_SOURCES);
 
-				int srcsCount = 0;
-
-				result &= xml.readIntAttribute(XmlAttribute::COUNT, &srcsCount);
-
-				QString sourcesIDs;
-
-				result &= xml.readStringElement(XmlElement::TUNING_SOURCES, &sourcesIDs);
-
-				BREAK_IF_FALSE(result);
-
-				tc.sourcesIDs = sourcesIDs.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
-
-				Q_ASSERT(tc.sourcesIDs.count() == srcsCount);
+				result &= readTuningSourcesFromXml(xml, &tc.drivenSources);
 
 				clnts.push_back(tc);
 			}
@@ -823,8 +781,6 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 		else
 		{
 			ch.serviceControllerEquipmentID.clear();
-			ch.clientRequestIP = HostAddressPort();
-			ch.clientRequestNetmask = QHostAddress();
 			ch.tuningDataIP = HostAddressPort();
 			ch.tuningDataNetmask = QHostAddress();
 			ch.tuningSimIP = HostAddressPort();
@@ -832,6 +788,71 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 			ch.sources.clear();
 			ch.clients.clear();
 		}
+	}
+
+	return result;
+}
+
+bool TuningServiceSettings::writeTuningSourcesToXml(XmlWriteHelper& xml,
+												  const std::vector<TuningSource>& sources)
+{
+	xml.writeStartElement(XmlElement::TUNING_SOURCES);
+	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(sources.size()));
+
+	for(uint i = 0; i < sources.size(); i++)
+	{
+		const TuningSource& ts = sources[i];
+
+		xml.writeStartElement(XmlElement::TUNING_SOURCE);
+
+		xml.writeStringAttribute(EquipmentPropNames::LM_EQUIPMENT_ID, ts.lmEquipmentID);
+		xml.writeStringAttribute(EquipmentPropNames::PORT_EQUIPMENT_ID, ts.portEquipmentID);
+		xml.writeStringAttribute(EquipmentPropNames::TUNING_DATA_IP, ts.tuningDataIP.addressPortStr());
+
+		xml.writeEndElement();		// TUNING_SOURCE
+	}
+
+	xml.writeEndElement();			// TUNING_SOURCES
+
+	return true;
+}
+
+bool TuningServiceSettings::readTuningSourcesFromXml(XmlReadHelper& xml,
+													 std::vector<TuningSource>* sources)
+{
+	TEST_PTR_RETURN_FALSE(sources);
+
+	sources->clear();
+
+	bool result = true;
+
+	// read tuning sources info
+	//
+	result &= xml.findElement(XmlElement::TUNING_SOURCES);
+
+	int sourcesCount = 0;
+
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &sourcesCount);
+
+	RETURN_IF_FALSE(result);
+
+	for(int i = 0; i < sourcesCount; i++)
+	{
+		TuningSource ts;
+
+		result &= xml.findElement(XmlElement::TUNING_SOURCE);
+		result &= xml.readStringAttribute(EquipmentPropNames::LM_EQUIPMENT_ID, &ts.lmEquipmentID);
+		result &= xml.readStringAttribute(EquipmentPropNames::PORT_EQUIPMENT_ID, &ts.portEquipmentID);
+
+		QString addressPortStr;
+
+		result &= xml.readStringAttribute(EquipmentPropNames::TUNING_DATA_IP, &addressPortStr);
+
+		BREAK_IF_FALSE(result);
+
+		ts.tuningDataIP.setAddressPortStr(addressPortStr, PORT_LM_TUNING);
+
+		sources->push_back(ts);
 	}
 
 	return result;

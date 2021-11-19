@@ -96,18 +96,6 @@ bool SoftwareSettingsGetter::getSoftwareConnection(const Hardware::EquipmentSet*
 
 	if (connectedObject->isSoftware() == true)
 	{
-		QStringList controllersIDs;
-
-		if (DeviceHelper::isTwoChannelSoftware(connectedObject, &controllersIDs) == true)
-		{
-			// Property %1.%2 should refer to one of software controllers: %3
-			//
-			log->errCFG3047(thisSoftware->equipmentIdTemplate(),
-							propConnectedSoftwareID,
-							controllersIDs.join(Separator::COMMA_SPACE));
-			return false;
-		}
-
 		connectedSoftware = connectedObject->toSoftware().get();
 	}
 	else
@@ -511,6 +499,15 @@ bool TuningServiceSettingsGetter::readFromDevice(const Builder::Context* context
 
 	equipmentID = software->equipmentIdTemplate();
 
+	result &= DeviceHelper::getIpPortProperty(software,
+											  EquipmentPropNames::CLIENT_REQUEST_IP,
+											  EquipmentPropNames::CLIENT_REQUEST_PORT,
+											  &clientRequestIP, false, "", 0, log);
+
+	result &= DeviceHelper::getIPv4Property(software,
+											EquipmentPropNames::CLIENT_REQUEST_NETMASK,
+											&clientRequestNetmask, false, "", log);
+
 	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::SINGLE_LM_CONTROL, &singleLmControl, log);
 	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, log);
 
@@ -550,15 +547,6 @@ bool TuningServiceSettingsGetter::readFromDevice(const Builder::Context* context
 													&ch.enable, log);
 
 			result &= DeviceHelper::getIpPortProperty(controller,
-													  EquipmentPropNames::CLIENT_REQUEST_IP,
-													  EquipmentPropNames::CLIENT_REQUEST_PORT,
-													  &ch.clientRequestIP, false, "", 0, log);
-
-			result &= DeviceHelper::getIPv4Property(controller,
-													EquipmentPropNames::CLIENT_REQUEST_NETMASK,
-													&ch.clientRequestNetmask, false, "", log);
-
-			result &= DeviceHelper::getIpPortProperty(controller,
 													  EquipmentPropNames::TUNING_DATA_IP,
 													  EquipmentPropNames::TUNING_DATA_PORT,
 													  &ch.tuningDataIP, false, "", 0, log);
@@ -587,15 +575,6 @@ bool TuningServiceSettingsGetter::readFromDevice(const Builder::Context* context
 		ch1.serviceControllerEquipmentID = equipmentID;
 
 		result &= DeviceHelper::getIpPortProperty(software,
-												  EquipmentPropNames::CLIENT_REQUEST_IP,
-												  EquipmentPropNames::CLIENT_REQUEST_PORT,
-												  &ch1.clientRequestIP, false, "", 0, log);
-
-		result &= DeviceHelper::getIPv4Property(software,
-												EquipmentPropNames::CLIENT_REQUEST_NETMASK,
-												&ch1.clientRequestNetmask, false, "", log);
-
-		result &= DeviceHelper::getIpPortProperty(software,
 												  EquipmentPropNames::TUNING_DATA_IP,
 												  EquipmentPropNames::TUNING_DATA_PORT,
 												  &ch1.tuningDataIP, false, "", 0, log);
@@ -615,8 +594,6 @@ bool TuningServiceSettingsGetter::readFromDevice(const Builder::Context* context
 		ch2.enable = false;
 
 		ch2.serviceControllerEquipmentID.clear();
-		ch2.clientRequestIP = HostAddressPort();
-		ch2.clientRequestNetmask = QHostAddress();
 		ch2.tuningDataIP = HostAddressPort();
 		ch2.tuningDataNetmask = QHostAddress();
 		ch2.tuningSimIP = HostAddressPort();
@@ -632,17 +609,6 @@ bool TuningServiceSettingsGetter::readFromDevice(const Builder::Context* context
 
 	if (ch1.enable && ch2.enable)
 	{
-		if (ch1.clientRequestIP.addressPortStr() == ch2.clientRequestIP.addressPortStr())
-		{
-			// Value of properties pair %1:%2 of objects %3 and %4 are equal
-			//
-			log->errCFG3046(EquipmentPropNames::CLIENT_REQUEST_IP,
-							EquipmentPropNames::CLIENT_REQUEST_PORT,
-							ch1.serviceControllerEquipmentID,
-							ch2.serviceControllerEquipmentID);
-			result = false;
-		}
-
 		if (ch1.tuningDataIP.addressPortStr() == ch2.tuningDataIP.addressPortStr())
 		{
 			// Value of properties pair %1:%2 of objects %3 and %4 are equal
@@ -790,7 +756,7 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 	QString controllerEquipmentID = channelSettings[channel].serviceControllerEquipmentID;
 
 	Hardware::equipmentWalker(root,
-		[this, &software, controllerEquipmentID, channel, &result, &singleLmControlEnabled, &log]
+		[this, &context, &software, controllerEquipmentID, channel, &result, &singleLmControlEnabled, &log]
 							  (Hardware::DeviceObject* currentDevice)
 		{
 			if (currentDevice->isSoftware() == false)
@@ -858,14 +824,52 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 
 			// TuningClient is linked to this TuningService
 
-			TuningClient tc;
+			TuningClient tunClient;
 
-			tc.equipmentID = tuningClient->equipmentIdTemplate();
+			tunClient.equipmentID = tuningClient->equipmentIdTemplate();
+
+			QStringList sourcesIDs;
 
 			result &= DeviceHelper::getStrListProperty(tuningClient, EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID,
-													   &tc.sourcesIDs, log);
+													   &sourcesIDs, log);
 
-			this->channelSettings[channel].clients.push_back(tc);
+			if (sourcesIDs.isEmpty() == true)
+			{
+				if (context->m_projectProperties.safetyProject() == true)
+				{
+					// %1.TuningSourceEquipmentID property can't be empty in Safety Project. Specify tuning sources which are processed by this client.
+					//
+					log->errEQP6204(tuningClient->equipmentIdTemplate());
+					result = false;
+				}
+				else
+				{
+					tunClient.drivenSources = channelSettings[channel].sources;
+				}
+			}
+			else
+			{
+				for(const QString& sourceID : sourcesIDs)
+				{
+					TuningSource drivenSource = channelSettings[channel].getTuningSource(sourceID);
+
+					if (drivenSource.isValid() == false)
+					{
+						// Source %1 specified in %2.TuningSourceEquipmentID is not processed by service %3 which the client is connected to.
+						//
+						log-> errEQP6203(sourceID,
+										 tuningClient->equipmentIdTemplate(),
+										 software->equipmentIdTemplate());
+						result = false;
+					}
+					else
+					{
+						tunClient.drivenSources.push_back(drivenSource);
+					}
+				}
+			}
+
+			channelSettings[channel].clients.push_back(tunClient);
 		}
 	);
 

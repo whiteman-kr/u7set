@@ -12,12 +12,10 @@ namespace Tuning
 	const char* TcpTuningServer::SCM_CLIENT_ID = "SCM";
 
 	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service,
-									 int channel,
 									 TuningSources& tuningSources,
 									 std::shared_ptr<CircularLogger> logger) :
 		Tcp::Server(service.softwareInfo()),
 		m_service(service),
-		m_channel(channel),
 		m_tuningSources(tuningSources),
 		m_logger(logger)
 	{
@@ -43,7 +41,7 @@ namespace Tuning
 
 	Tcp::Server* TcpTuningServer::getNewInstance()
 	{
-		TcpTuningServer* newServer =  new TcpTuningServer(m_service, m_channel, m_tuningSources, m_logger);
+		TcpTuningServer* newServer =  new TcpTuningServer(m_service, m_tuningSources, m_logger);
 
 		return newServer;
 	}

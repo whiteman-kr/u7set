@@ -51,7 +51,9 @@ namespace Tuning
 	class TuningClientContext
 	{
 	public:
-		TuningClientContext(const QString& clientID, const QStringList& sourcesIDs, const TuningSources& sources);
+		TuningClientContext(const QString& clientID,
+							const std::vector<TuningServiceSettings::TuningSource>& drivenSources,
+							const TuningSources& sources);
 		~TuningClientContext();
 
 		void getSourcesInfo(QVector<Network::DataSourceInfo>& dataSourcesInfo) const;

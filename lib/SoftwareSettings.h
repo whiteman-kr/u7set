@@ -204,12 +204,6 @@ private:
 class TuningServiceSettings : public SoftwareSettings
 {
 public:
-	struct TuningClient
-	{
-		QString equipmentID;
-		QStringList sourcesIDs;
-	};
-
 	struct TuningSource
 	{
 		QString lmEquipmentID;
@@ -219,14 +213,19 @@ public:
 		bool isValid() { return lmEquipmentID.isEmpty() == false; }
 	};
 
+	struct TuningClient
+	{
+		QString equipmentID;
+		std::vector<TuningSource> drivenSources;
+
+		QStringList sourcesIDs() const;
+	};
+
 	struct ChannelSettings
 	{
 		bool enable = false;
 
 		QString serviceControllerEquipmentID;
-
-		HostAddressPort clientRequestIP;
-		QHostAddress clientRequestNetmask;
 
 		HostAddressPort tuningDataIP;
 		QHostAddress tuningDataNetmask;
@@ -242,6 +241,9 @@ public:
 	static const int CHANNELS_COUNT = 2;
 
 	QString equipmentID;
+
+	HostAddressPort clientRequestIP;
+	QHostAddress clientRequestNetmask;
 
 	int channelCount = 0;
 
@@ -266,6 +268,10 @@ private:
 	bool readFromXml(XmlReadHelper& xml) override;
 
 	friend class SoftwareSettingsSet;
+
+private:
+	static bool writeTuningSourcesToXml(XmlWriteHelper& xml, const std::vector<TuningSource>& sources);
+	static bool readTuningSourcesFromXml(XmlReadHelper& xml, std::vector<TuningSource>* sources);
 };
 
 class ArchivingServiceSettings : public SoftwareSettings

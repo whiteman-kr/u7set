@@ -215,7 +215,7 @@ namespace Builder
 			{
 				if (tc.equipmentID == m_software->equipmentId())
 				{
-					serviceTuningSourcesList = tc.sourcesIDs;
+					serviceTuningSourcesList = tc.sourcesIDs();
 					break;
 				}
 			}

@@ -20,7 +20,6 @@ namespace Tuning
 	{
 	public:
 		TcpTuningServer(TuningServiceWorker& service,
-						int channel,
 						TuningSources& tuningSources,
 						std::shared_ptr<CircularLogger> logger);
 	private:
@@ -53,7 +52,6 @@ namespace Tuning
 		static const char* SCM_CLIENT_ID;
 
 		TuningServiceWorker& m_service;
-		int m_channel = 0;
 
 		TuningSources& m_tuningSources;
 

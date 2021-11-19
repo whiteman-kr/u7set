@@ -131,6 +131,17 @@ namespace Builder
 	{
 		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getSettingsDefaultProfile<MonitorSettings>();
 
+		if (settings->tuningEnabled == false)
+		{
+			return true;
+		}
+
+		if (settings->tuningServiceID.isEmpty() == true)
+		{
+			errrrrrrr
+			wdqw';,d'qw;d,q'wd,qwl;d
+		}
+
 		// Fill list with LAN controller IDs which are connected to the TuningService this client is connected to
 
 		QStringList serviceTuningSourcesList;
@@ -161,7 +172,7 @@ namespace Builder
 			{
 				if (tc.equipmentID == m_software->equipmentId())
 				{
-					serviceTuningSourcesList = tc.sourcesIDs;
+					serviceTuningSourcesList = tc.sourcesIDs();
 					break;
 				}
 			}

@@ -117,7 +117,7 @@ namespace Tuning
 
 		CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-		std::vector<TcpTuningServerThread*> m_tcpTuningServerThreads;
+		TcpTuningServerThread* m_tcpTuningServerThread;
 
 		mutable QMutex m_mainMutex;
 

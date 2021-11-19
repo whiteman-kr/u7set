@@ -381,8 +381,8 @@ void ServiceData::parseServiceInfo()
 
 		// TO DO 2ch tuning!
 		//
-		clientRequestIp = tuningDataServiceSettings->channelSettings[0].clientRequestIP.address32();
-		clientRequestPort = tuningDataServiceSettings->channelSettings[0].clientRequestIP.port();
+		clientRequestIp = tuningDataServiceSettings->clientRequestIP.address32();
+		clientRequestPort = tuningDataServiceSettings->clientRequestIP.port();
 	}
 		break;
 	case E::SoftwareType::ArchiveService:

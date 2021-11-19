@@ -340,36 +340,24 @@ namespace Tuning
 
 	void TuningServiceWorker::runTcpTuningServerThread()
 	{
-		Q_ASSERT(m_tcpTuningServerThreads.size() == 0);
+		Q_ASSERT(m_tcpTuningServerThread == nullptr);
 
-		for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
-		{
-			const TuningServiceSettings::ChannelSettings& ch = m_settings.channelSettings[channel];
+		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, m_logger);
 
-			CONTINUE_IF_FALSE(ch.enable);
-
-			TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, channel, m_tuningSources, m_logger);
-
-			auto thread = new TcpTuningServerThread(ch.clientRequestIP,
-													tcpTuningSever,
-													m_logger);
-
-			m_tcpTuningServerThreads.push_back(thread);
-
-			thread->start();
-		}
+		m_tcpTuningServerThread = new TcpTuningServerThread(m_settings.clientRequestIP,
+												tcpTuningSever,
+												m_logger);
+		m_tcpTuningServerThread->start();
 	}
 
 	void TuningServiceWorker::stopTcpTuningServerThread()
 	{
-		for(auto thread : m_tcpTuningServerThreads)
+		if (m_tcpTuningServerThread != nullptr)
 		{
-			thread->quitAndWait();
-
-			delete thread;
+			m_tcpTuningServerThread->quitAndWait();
+			delete m_tcpTuningServerThread;
+			m_tcpTuningServerThread = nullptr;
 		}
-
-		m_tcpTuningServerThreads.clear();
 	}
 
 	bool TuningServiceWorker::readConfiguration(const QByteArray& cfgXmlData)

@@ -154,8 +154,8 @@ void TuningServiceWidget::updateStateInfo()
 
 	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), tuningSettings->equipmentID);
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), ch.clientRequestIP.addressStr());
-	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), ch.clientRequestNetmask.toString());
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), tuningSettings->clientRequestIP.addressStr());
+	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), tuningSettings->clientRequestNetmask.toString());
 
 	m_settingsTabModel->setData(m_settingsTabModel->index(3, 1), ch.tuningDataIP.addressStr());
 	m_settingsTabModel->setData(m_settingsTabModel->index(4, 1), ch.tuningDataNetmask.toString());
