@@ -1542,12 +1542,6 @@ bool MonitorSettingsGetter::readTuningSettings(const Builder::Context* context,
 
 	QStringList tuningSourcesList = tuningSources.split(QChar(';'), Qt::SkipEmptyParts);
 
-	if (tuningSourcesList.isEmpty() == true)
-	{
-		log->errCFG3022(software->equipmentIdTemplate(), EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID);
-		return false;
-	}
-
 	// Check for valid EquipmentIds
 	//
 	for (const QString& tuningEquipmentID : tuningSourcesList)

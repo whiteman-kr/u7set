@@ -29,11 +29,11 @@ namespace Builder
 	bool TuningClientCfgGenerator::generateConfigurationStep1()
 	{
 		if (m_software == nullptr ||
-				m_software->softwareType() != E::SoftwareType::TuningClient ||
-				m_equipment == nullptr ||
-				m_cfgXml == nullptr ||
-				m_buildResultWriter == nullptr ||
-				m_subsystems == nullptr)
+			m_software->softwareType() != E::SoftwareType::TuningClient ||
+			m_equipment == nullptr ||
+			m_cfgXml == nullptr ||
+			m_buildResultWriter == nullptr ||
+			m_subsystems == nullptr)
 		{
 			assert(m_software);
 			assert(m_software->softwareType() == E::SoftwareType::Monitor);
@@ -74,11 +74,6 @@ namespace Builder
 
 		// Generate tuning signals
 		//
-		if (equipmentList.empty() == true)
-		{
-			log->errCFG3022(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID");
-			return false;
-		}
 
 		result &= createTuningSignals(equipmentList, m_signalSet, &m_tuningSet);
 		if (result == false)
@@ -182,44 +177,110 @@ namespace Builder
 
 	bool TuningClientCfgGenerator::createEquipmentList(QStringList* equipmentList)
 	{
-		QString equipmentString;
-
 		if (equipmentList == nullptr)
 		{
 			assert(equipmentList);
 			return false;
 		}
 
-		//
-		// equipmentList
-		//
+		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningClientSettings>();
+
+		// Fill list with LAN controller IDs which are connected to the TuningService this client is connected to
+
+		QStringList serviceTuningSourcesList;
+
+		std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(settings->tuningServiceID);
+		if (tuningServiceObject == nullptr)
+		{
+			m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, settings->tuningServiceID);
+			return false;
+		}
+
+		std::shared_ptr<Hardware::Software> tuningServiceSoftware = tuningServiceObject->toSoftware();
+		if (tuningServiceSoftware == nullptr)
+		{
+			m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, settings->tuningServiceID);
+			return false;
+		}
+
+		TuningServiceSettingsGetter tsg;
+		if (tsg.readFromDevice(m_context, tuningServiceSoftware.get()) == false)
+		{
+			return false;
+		}
+
+		for (int c = 0; c < tsg.channelCount; c++)
+		{
+			for (const TuningServiceSettings::TuningClient& tc : tsg.channelSettings[c].clients)
+			{
+				if (tc.equipmentID == m_software->equipmentId())
+				{
+					serviceTuningSourcesList = tc.sourcesIDs;
+					break;
+				}
+			}
+		}
+
+		// Read TuningSourceEquipmentID property from TuningClient. If is is filled, check if all strings are present in tuningSourcesList
+
+		QString localTuningSourcesListString;
+
 		bool ok = false;
 
-		equipmentString = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID", &ok).trimmed();
+		localTuningSourcesListString = getObjectProperty<QString>(m_software->equipmentIdTemplate(), EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID, &ok).trimmed();
 		if (ok == false)
 		{
 			return false;
 		}
 
-		// Parse equipmentList
-		//
-		if (equipmentString.isEmpty() == false)
+		if (localTuningSourcesListString.isEmpty() == false)
 		{
-			equipmentString.replace(' ', ';');
-			equipmentString.replace('\n', ';');
-			equipmentString.remove('\r');
-			*equipmentList = equipmentString.split(';');
-		}
+			// Parse equipmentList
+			//
+			localTuningSourcesListString.replace(' ', ';');
+			localTuningSourcesListString.replace('\n', ';');
+			localTuningSourcesListString.remove('\r');
 
-		// Check for valid EquipmentIds
-		//
-		for (const QString& tuningEquipmentID : *equipmentList)
-		{
-			if (m_equipment->deviceObject(tuningEquipmentID) == nullptr)
+			*equipmentList = localTuningSourcesListString.split(';');
+
+			// Check for valid EquipmentIds
+			//
+			for (const QString& localTuningSourceId : *equipmentList)
 			{
-				m_log->errEQP6109(tuningEquipmentID, m_software->equipmentIdTemplate());
+				if (m_equipment->deviceObject(localTuningSourceId) == nullptr)
+				{
+					// This source does not exist
+					//
+					m_log->errEQP6109(localTuningSourceId, m_software->equipmentIdTemplate());
+					return false;
+				}
+
+				if (serviceTuningSourcesList.contains(localTuningSourceId) == false)
+				{
+					// This source is for TuningService which is not connected to this TuningClient
+					//
+					m_log->errEQP6203(localTuningSourceId, m_software->equipmentId(), settings->tuningServiceID);
+					return false;
+				}
+			}
+		}
+		else
+		{
+			// Safety projects does not allow TuningSourceEquipmentID property to be empty
+			//
+			if (m_context->m_projectProperties.safetyProject() == true)
+			{
+				m_log->errEQP6204(m_software->equipmentId());
 				return false;
 			}
+
+			*equipmentList = serviceTuningSourcesList;
+		}
+
+		if (equipmentList->isEmpty() == true)
+		{
+			m_log->errEQP6205(m_software->equipmentId());
+			return false;
 		}
 
 		return true;

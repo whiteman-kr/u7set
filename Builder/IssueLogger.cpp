@@ -8418,6 +8418,72 @@ namespace Builder
 						arg(tuningClientMonitorId));
 	}
 
+	/// IssueCode: EQP6203
+	///
+	/// IssueType: Error
+	///
+	/// Title: Source %1 specified in %2.TuningSourceEquipmentID is not processed by service %3 which the client is connected to.
+	///
+	/// Parameters:
+	///		%1 Specified TuningSourceID
+	///		%2 TuningClient/Monitor EquipmentID
+	///		%3 TuningService EquipmentID
+	///
+	/// Description:
+	///		Specified TuningSourceID is not processed by TuningService which current TuningClient/Monitor connects to.
+	///
+	void IssueLogger::errEQP6203(QString tuningSourceId, QString tuningClientMonitorId, QString tuningServiceId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6203,
+				  tr("Source %1 specified in %2.TuningSourceEquipmentID is not processed by service %3 which the client is connected to.").
+				  arg(tuningSourceId).
+				  arg(tuningClientMonitorId).
+				  arg(tuningServiceId));
+	}
+
+	/// IssueCode: EQP6204
+	///
+	///
+	/// IssueType: Error
+	///
+	/// Title: %1.TuningSourceEquipmentID property can't be empty in Safety Project. Specify tuning sources which are processed by this client.
+	///
+	/// Parameters:
+	///		%1 TuningClient EquipmentID
+	///
+	/// Description:
+	///		TuningSourceEquipmentID property of TuningClient can't be empty in Safety Project. Tuning sources should be specified.
+	///
+	void IssueLogger::errEQP6204(QString tuningClientId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6204,
+				  tr("%1.TuningSourceEquipmentID property can't be empty in Safety Project. Specify tuning sources which are processed by this client.").
+				  arg(tuningClientId));
+	}
+
+	/// IssueCode: EQP6205
+	///
+	///
+	/// IssueType: Error
+	///
+	/// Title: No tuning sources found for %1.
+	///
+	/// Parameters:
+	///		%1 Client EquipmentID
+	///
+	/// Description:
+	///		No tuning sources found for TuningClient or Monitor.
+	///
+	void IssueLogger::errEQP6205(QString tuningClientMonitorId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6205,
+				  tr("No tuning sources found for %1.").
+				  arg(tuningClientMonitorId));
+	}
+
 	/// IssueCode: EQP6210
 	///
 	/// IssueType: Error

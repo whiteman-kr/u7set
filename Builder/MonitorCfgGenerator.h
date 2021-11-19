@@ -17,7 +17,8 @@ namespace Builder
 		virtual bool generateConfigurationStep1() override;
 
 	protected:
-		bool initSchemaTagsAndTuningSources();
+		bool initSchemaTags();
+		bool initTuningSources();
 
 		bool saveScriptProperties(QString scriptProperty, QString fileName);
 
