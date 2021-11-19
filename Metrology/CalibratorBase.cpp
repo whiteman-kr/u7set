@@ -657,7 +657,13 @@ void CalibratorBase::onSettings(int row, int)
 		return;
 	}
 
-	int type = typeCombo->currentIndex();
+	int typeIndex = typeCombo->currentIndex();
+	if (typeIndex == -1)
+	{
+		return;
+	}
+
+	CalibratorType type = static_cast<CalibratorType>(typeIndex);
 	if (ERR_CALIBRATOR_TYPE(type) == true)
 	{
 		return;
@@ -666,7 +672,7 @@ void CalibratorBase::onSettings(int row, int)
 	//
 	//
 	calibrator->setPortName(port);
-	calibrator->setType(typeCombo->currentIndex());
+	calibrator->setType(type);
 
 	//
 	//

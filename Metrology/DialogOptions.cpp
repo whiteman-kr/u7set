@@ -17,35 +17,37 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPage::PropertyPage(QtVariantPropertyManager* manager, QtVariantEditorFactory* factory, QtTreePropertyBrowser* editor)
+PropertyPage::PropertyPage(PropertyPageType pageType, QtVariantPropertyManager* manager, QtVariantEditorFactory* factory, QtTreePropertyBrowser* editor)
+	: m_baseWidget(editor)
+	, m_widgetType(PropertyPageWidgetType::List)
+	, m_pageType(pageType)
 {
-	m_type = PropertyPageType::List;
-
+	//
+	//
 	m_pManager = manager;
 	m_pFactory = factory;
 	m_pEditor = editor;
-
-	m_pWidget = editor;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPage::PropertyPage(QDialog* dialog)
+PropertyPage::PropertyPage(PropertyPageType pageType, QDialog* dialog)
+	: m_baseWidget(dialog)
+	, m_widgetType(PropertyPageWidgetType::Dialog)
+	, m_pageType(pageType)
 {
-	m_type = PropertyPageType::Dialog;
-
+	//
+	//
 	m_pDialog = dialog;
-
-	m_pWidget = dialog;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 PropertyPage::~PropertyPage()
 {
-	switch(m_type)
+	switch(m_widgetType)
 	{
-		case PropertyPageType::List:
+		case PropertyPageWidgetType::List:
 
 			if (m_pManager != nullptr)
 			{
@@ -67,7 +69,7 @@ PropertyPage::~PropertyPage()
 
 			break;
 
-		case PropertyPageType::Dialog:
+		case PropertyPageWidgetType::Dialog:
 
 			if (m_pDialog != nullptr)
 			{
@@ -81,28 +83,28 @@ PropertyPage::~PropertyPage()
 			assert(0);
 	}
 
-	m_type = PropertyPageType::NoPageType;
-	m_page = OptionPage::NoOptionPage;
+	m_widgetType = PropertyPageWidgetType::NoWidgetType;
+	m_pageType = PropertyPageType::NoPageType;
 
-	m_pWidget = nullptr;
+	m_baseWidget = nullptr;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString groupCaption(int group)
+QString groupCaption(PropertyGroupType groupType)
 {
 	QString caption;
 
-	switch (group)
+	switch (groupType)
 	{
-		case OptionGroup::Server:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Connect to server");		break;
-		case OptionGroup::Module:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Module");					break;
-		case OptionGroup::Linearity:	caption = QT_TRANSLATE_NOOP("DialogOptions", "Linearity");				break;
-		case OptionGroup::Comparator:	caption = QT_TRANSLATE_NOOP("DialogOptions", "Comparators");			break;
-		case OptionGroup::MeasureView:	caption = QT_TRANSLATE_NOOP("DialogOptions", "List of measurements");	break;
-		case OptionGroup::PanelInfo:	caption = QT_TRANSLATE_NOOP("DialogOptions", "Panels information");		break;
-		case OptionGroup::Database:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Database");				break;
-		case OptionGroup::Language:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Language");				break;
+		case PropertyGroupType::Server:			caption = QT_TRANSLATE_NOOP("DialogOptions", "Connect to server");		break;
+		case PropertyGroupType::Module:			caption = QT_TRANSLATE_NOOP("DialogOptions", "Module");					break;
+		case PropertyGroupType::Linearity:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Linearity");				break;
+		case PropertyGroupType::Comparator:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Comparators");			break;
+		case PropertyGroupType::MeasureView:	caption = QT_TRANSLATE_NOOP("DialogOptions", "List of measurements");	break;
+		case PropertyGroupType::PanelInfo:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Panels information");		break;
+		case PropertyGroupType::Database:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Database");				break;
+		case PropertyGroupType::Language:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Language");				break;
 
 		default:
 			assert(0);
@@ -114,26 +116,26 @@ QString groupCaption(int group)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString pageCaption(OptionPage page)
+QString pageCaption(PropertyPageType pageType)
 {
 	QString caption;
 
-	switch (page)
+	switch (pageType)
 	{
-		case OptionPage::Socket_Cfg:			caption = QT_TRANSLATE_NOOP("DialogOptions", "Connection to Config Server - TCP/IP");			break;
-		case OptionPage::Socket_AppDataSrv:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Connection to Application Data Server - TCP/IP");	break;
-		case OptionPage::Socket_Tuning:			caption = QT_TRANSLATE_NOOP("DialogOptions", "Connection to Tuning Server - TCP/IP");			break;
-		case OptionPage::Module_Measure:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Measuring of module");							break;
-		case OptionPage::Linearity_Measure:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Measurements of linearity");						break;
-		case OptionPage::Linearity_Point:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Point of linearity");								break;
-		case OptionPage::Comparator_Measure:	caption = QT_TRANSLATE_NOOP("DialogOptions", "Measure comparators");							break;
-		case OptionPage::MeasureView_Text:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Displaying data in the list of measurements");	break;
-		case OptionPage::MeasureView_Column:	caption = QT_TRANSLATE_NOOP("DialogOptions", "Displaying columns in the list of measurements");	break;
-		case OptionPage::Panel_SignalInfo:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Displaying information of signals");				break;
-		case OptionPage::Panel_ComparatorInfo:	caption = QT_TRANSLATE_NOOP("DialogOptions", "Displaying information of сomparators");			break;
-		case OptionPage::Database_Location:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Database location");								break;
-		case OptionPage::Database_Backup:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Database backup");								break;
-		case OptionPage::Language_App:			caption = QT_TRANSLATE_NOOP("DialogOptions", "Language of application");						break;
+		case PropertyPageType::Socket_CfgSrv:			caption = QT_TRANSLATE_NOOP("DialogOptions", "Connection to Config Server - TCP/IP");			break;
+		case PropertyPageType::Socket_AppDataSrv:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Connection to Application Data Server - TCP/IP");	break;
+		case PropertyPageType::Socket_TuningSrv:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Connection to Tuning Server - TCP/IP");			break;
+		case PropertyPageType::Module_Measure:			caption = QT_TRANSLATE_NOOP("DialogOptions", "Measuring of module");							break;
+		case PropertyPageType::Linearity_Measure:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Measurements of linearity");						break;
+		case PropertyPageType::Linearity_Point:			caption = QT_TRANSLATE_NOOP("DialogOptions", "Point of linearity");								break;
+		case PropertyPageType::Comparator_Measure:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Measure comparators");							break;
+		case PropertyPageType::MeasureView_Text:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Displaying data in the list of measurements");	break;
+		case PropertyPageType::MeasureView_Column:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Displaying columns in the list of measurements");	break;
+		case PropertyPageType::Panel_SignalInfo:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Displaying information of signals");				break;
+		case PropertyPageType::Panel_ComparatorInfo:	caption = QT_TRANSLATE_NOOP("DialogOptions", "Displaying information of сomparators");			break;
+		case PropertyPageType::Database_Location:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Database location");								break;
+		case PropertyPageType::Database_Backup:			caption = QT_TRANSLATE_NOOP("DialogOptions", "Database backup");								break;
+		case PropertyPageType::Language_App:			caption = QT_TRANSLATE_NOOP("DialogOptions", "Language of application");						break;
 
 		default:
 			assert(0);
@@ -145,26 +147,26 @@ QString pageCaption(OptionPage page)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString pageShortCaption(OptionPage page)
+QString pageShortCaption(PropertyPageType pageType)
 {
 	QString caption;
 
-	switch (page)
+	switch (pageType)
 	{
-		case OptionPage::Socket_Cfg:			caption = QT_TRANSLATE_NOOP("DialogOptions", "ConfigurationService");		break;
-		case OptionPage::Socket_AppDataSrv:		caption = QT_TRANSLATE_NOOP("DialogOptions", "AppDataService");				break;
-		case OptionPage::Socket_Tuning:			caption = QT_TRANSLATE_NOOP("DialogOptions", "TuningService");				break;
-		case OptionPage::Module_Measure:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Measuring");					break;
-		case OptionPage::Linearity_Measure:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Measurements");				break;
-		case OptionPage::Linearity_Point:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Points");						break;
-		case OptionPage::Comparator_Measure:	caption = QT_TRANSLATE_NOOP("DialogOptions", "Measurements");				break;
-		case OptionPage::MeasureView_Text:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Displaying");					break;
-		case OptionPage::MeasureView_Column:	caption = QT_TRANSLATE_NOOP("DialogOptions", "Columns");					break;
-		case OptionPage::Panel_SignalInfo:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Signal information");			break;
-		case OptionPage::Panel_ComparatorInfo:	caption = QT_TRANSLATE_NOOP("DialogOptions", "Comparator information");		break;
-		case OptionPage::Database_Location:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Location");					break;
-		case OptionPage::Database_Backup:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Backup");						break;
-		case OptionPage::Language_App:			caption = QT_TRANSLATE_NOOP("DialogOptions", "Language of application ");	break;
+		case PropertyPageType::Socket_CfgSrv:			caption = QT_TRANSLATE_NOOP("DialogOptions", "ConfigurationService");		break;
+		case PropertyPageType::Socket_AppDataSrv:		caption = QT_TRANSLATE_NOOP("DialogOptions", "AppDataService");				break;
+		case PropertyPageType::Socket_TuningSrv:		caption = QT_TRANSLATE_NOOP("DialogOptions", "TuningService");				break;
+		case PropertyPageType::Module_Measure:			caption = QT_TRANSLATE_NOOP("DialogOptions", "Measuring");					break;
+		case PropertyPageType::Linearity_Measure:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Measurements");				break;
+		case PropertyPageType::Linearity_Point:			caption = QT_TRANSLATE_NOOP("DialogOptions", "Points");						break;
+		case PropertyPageType::Comparator_Measure:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Measurements");				break;
+		case PropertyPageType::MeasureView_Text:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Displaying");					break;
+		case PropertyPageType::MeasureView_Column:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Columns");					break;
+		case PropertyPageType::Panel_SignalInfo:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Signal information");			break;
+		case PropertyPageType::Panel_ComparatorInfo:	caption = QT_TRANSLATE_NOOP("DialogOptions", "Comparator information");		break;
+		case PropertyPageType::Database_Location:		caption = QT_TRANSLATE_NOOP("DialogOptions", "Location");					break;
+		case PropertyPageType::Database_Backup:			caption = QT_TRANSLATE_NOOP("DialogOptions", "Backup");						break;
+		case PropertyPageType::Language_App:			caption = QT_TRANSLATE_NOOP("DialogOptions", "Language of application ");	break;
 
 		default:
 			assert(0);
@@ -176,30 +178,30 @@ QString pageShortCaption(OptionPage page)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-OptionGroup groupByPage(OptionPage page)
+PropertyGroupType groupByPage(PropertyPageType pageType)
 {
-	OptionGroup group = OptionGroup::NoOptionGroup;
+	PropertyGroupType group = PropertyGroupType::NoGroupType;
 
-	switch (page)
+	switch (pageType)
 	{
-		case OptionPage::Socket_Cfg:			group = OptionGroup::Server;		break;
-		case OptionPage::Socket_AppDataSrv:		group = OptionGroup::Server;		break;
-		case OptionPage::Socket_Tuning:			group = OptionGroup::Server;		break;
-		case OptionPage::Module_Measure:		group = OptionGroup::Module;		break;
-		case OptionPage::Linearity_Measure:		group = OptionGroup::Linearity;		break;
-		case OptionPage::Linearity_Point:		group = OptionGroup::Linearity;		break;
-		case OptionPage::Comparator_Measure:	group = OptionGroup::Comparator;	break;
-		case OptionPage::MeasureView_Text:		group = OptionGroup::MeasureView;	break;
-		case OptionPage::MeasureView_Column:	group = OptionGroup::MeasureView;	break;
-		case OptionPage::Panel_SignalInfo:		group = OptionGroup::PanelInfo;		break;
-		case OptionPage::Panel_ComparatorInfo:	group = OptionGroup::PanelInfo;		break;
-		case OptionPage::Database_Location:		group = OptionGroup::Database;		break;
-		case OptionPage::Database_Backup:		group = OptionGroup::Database;		break;
-		case OptionPage::Language_App:			group = OptionGroup::Language;		break;
+		case PropertyPageType::Socket_CfgSrv:			group = PropertyGroupType::Server;		break;
+		case PropertyPageType::Socket_AppDataSrv:		group = PropertyGroupType::Server;		break;
+		case PropertyPageType::Socket_TuningSrv:		group = PropertyGroupType::Server;		break;
+		case PropertyPageType::Module_Measure:			group = PropertyGroupType::Module;		break;
+		case PropertyPageType::Linearity_Measure:		group = PropertyGroupType::Linearity;	break;
+		case PropertyPageType::Linearity_Point:			group = PropertyGroupType::Linearity;	break;
+		case PropertyPageType::Comparator_Measure:		group = PropertyGroupType::Comparator;	break;
+		case PropertyPageType::MeasureView_Text:		group = PropertyGroupType::MeasureView;	break;
+		case PropertyPageType::MeasureView_Column:		group = PropertyGroupType::MeasureView;	break;
+		case PropertyPageType::Panel_SignalInfo:		group = PropertyGroupType::PanelInfo;	break;
+		case PropertyPageType::Panel_ComparatorInfo:	group = PropertyGroupType::PanelInfo;	break;
+		case PropertyPageType::Database_Location:		group = PropertyGroupType::Database;	break;
+		case PropertyPageType::Database_Backup:			group = PropertyGroupType::Database;	break;
+		case PropertyPageType::Language_App:			group = PropertyGroupType::Language;	break;
 
 		default:
 			assert(0);
-			group = OptionGroup::NoOptionGroup;
+			group = PropertyGroupType::NoGroupType;
 	}
 
 	return group;
@@ -210,7 +212,7 @@ OptionGroup groupByPage(OptionPage page)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-OptionPage DialogOptions::m_activePage = OptionPage::Linearity_Measure;
+PropertyPageType DialogOptions::m_activePage = PropertyPageType::Linearity_Measure;
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -230,7 +232,7 @@ DialogOptions::DialogOptions(const Options& options, QWidget* parent) :
 
 DialogOptions::~DialogOptions()
 {
-	removePages();
+	removePropertyPages();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -245,111 +247,49 @@ void DialogOptions::createInterface()
 	setMinimumSize(static_cast<int>(screen.width() * 0.45), static_cast<int>(screen.height() * 0.3));
 	loadSettings();
 
+	// create property pages
+	//
+	for(int pageIndex = 0; pageIndex < PropertyPageTypeCount ; pageIndex++)
+	{
+		PropertyPageType pageType = static_cast<PropertyPageType>(pageIndex);
+		if (ERR_PROPERTY_PAGE_TYPE(pageType))
+		{
+			continue;
+		}
+
+		std::shared_ptr<PropertyPage> pPropertyPage = createPropertyPage(pageType);
+		if (pPropertyPage.get() == nullptr)
+		{
+			assert(0);
+		}
+
+		m_pagesList.push_back(pPropertyPage);
+	}
+
 	// create interface
 	//
-	m_pagesLayout = createPages();
-	m_buttonsLayout = createButtons();
+	m_pagesTree = new QTreeWidget;
+	m_pagesTree->setHeaderHidden(true);
+	m_pagesTree->setFixedWidth(static_cast<int>(screen.width() * 0.1));
 
-	QVBoxLayout* mainLayout = new QVBoxLayout;
+	m_pagesLayout = new QHBoxLayout ;
 
-	mainLayout->addLayout(m_pagesLayout);
-	mainLayout->addLayout(m_buttonsLayout);
+	m_pPropertyEditor = new ExtWidgets::PropertyEditor(this);
+	if (m_pPropertyEditor == nullptr)
+	{
+		return;
+	}
 
-	setLayout(mainLayout);
+	m_pPropertyEditor->setSplitterPosition(300);
+	m_pPropertyEditor->setReadOnly(true);
 
-	// set active page
+	connect(m_pPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogOptions::onPropertyValueChanged_1);
+
 	//
-	setActivePage(m_activePage);
-}
+	createPropertyPages();
 
-// -------------------------------------------------------------------------------------------------------------------
-
-QHBoxLayout* DialogOptions::createPages()
-{
-	QHBoxLayout* pagesLayout = new QHBoxLayout ;
-
-	m_pPageTree = new QTreeWidget;
-
-	m_pPageTree->setHeaderHidden(true);
-	m_pPageTree->setFixedWidth(200);
-
-	std::vector<QTreeWidgetItem*> groupList;
-
-	for(int group = 0; group < OptionGroupCount; group++)
-	{
-		QTreeWidgetItem* groupTreeItem = new QTreeWidgetItem;
-		groupTreeItem->setText(0, groupCaption(group));
-		m_pPageTree->addTopLevelItem(groupTreeItem);
-
-		groupList.push_back(groupTreeItem);
-	}
-
-	for(int pageIndex = 0; pageIndex < OptionPageCount; pageIndex++)
-	{
-		OptionPage page = static_cast<OptionPage>(pageIndex);
-		if (ERR_OPTION_PAGE(page))
-		{
-			continue;
-		}
-
-		OptionGroup group = groupByPage(page);
-		if (ERR_OPTION_GROUP(group))
-		{
-			continue;
-		}
-
-		if (group < 0 || group >= TO_INT(groupList.size()))
-		{
-			continue;
-		}
-
-		QTreeWidgetItem* groupTreeItem = groupList.at(static_cast<quint64>(group));
-
-		QTreeWidgetItem* pageTreeItem = new QTreeWidgetItem;
-		pageTreeItem->setText(0, pageShortCaption(page));
-		pageTreeItem->setData(0, Qt::UserRole, page);
-
-		groupTreeItem->addChild(pageTreeItem);
-
-		PropertyPage* pPropertyPage = createPage(page);
-		if (pPropertyPage != nullptr)
-		{
-			pPropertyPage->m_page = page;
-			pPropertyPage->m_pTreeWidgetItem = pageTreeItem;
-		}
-
-		m_pageList.push_back(pPropertyPage);
-	}
-
-	connect(m_pPageTree, &QTreeWidget::currentItemChanged , this, &DialogOptions::onPageChanged);
-
-	pagesLayout->addWidget(m_pPageTree);
-
-	return pagesLayout;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void DialogOptions::removePages()
-{
-	m_propertyItemList.clear();
-	m_propertyValueList.clear();
-
-	for(PropertyPage* pPropertyPage : m_pageList)
-	{
-		if (pPropertyPage == nullptr)
-		{
-			continue;
-		}
-
-		delete pPropertyPage;
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QHBoxLayout* DialogOptions::createButtons()
-{
+	// buttonsLayout
+	//
 	QHBoxLayout* buttonsLayout = new QHBoxLayout ;
 
 	QPushButton* okButton = new QPushButton(tr("Ok"));
@@ -362,36 +302,133 @@ QHBoxLayout* DialogOptions::createButtons()
 	connect(okButton, &QPushButton::clicked, this, &DialogOptions::onOk);
 	connect(cancelButton, &QPushButton::clicked, this, &DialogOptions::reject);
 
-	return buttonsLayout;
+	// mainLayout
+	//
+	QVBoxLayout* mainLayout = new QVBoxLayout;
+
+	mainLayout->addLayout(m_pagesLayout);
+	mainLayout->addLayout(buttonsLayout);
+
+	setLayout(mainLayout);
+
+	// set active page
+	//
+	setActivePage(m_activePage);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPage* DialogOptions::createPage(OptionPage page)
+void DialogOptions::createPropertyPages()
 {
-	if (ERR_OPTION_PAGE(page) == true)
+	if (m_pagesTree == nullptr)
+	{
+		return;
+	}
+
+	if (m_pagesLayout == nullptr)
+	{
+		return;
+	}
+
+	// create tree of groups
+	//
+	std::vector<QTreeWidgetItem*> groupList;
+
+	for(int group = 0; group < PropertyGroupTypeCount; group++)
+	{
+		QTreeWidgetItem* groupTreeItem = new QTreeWidgetItem;
+		groupTreeItem->setText(0, groupCaption(static_cast<PropertyGroupType>(group)));
+		m_pagesTree->addTopLevelItem(groupTreeItem);
+
+		groupList.push_back(groupTreeItem);
+	}
+
+	// create tree of pages
+	//
+	for(std::shared_ptr<PropertyPage> pPropertyPage : m_pagesList)
+	{
+		// get page
+		//
+		if (pPropertyPage.get() == nullptr)
+		{
+			assert(0);
+			continue;
+		}
+
+		PropertyPageType pageType = pPropertyPage->pageType();
+		if (ERR_PROPERTY_PAGE_TYPE(pageType) == true)
+		{
+			assert(0);
+			continue;
+		}
+
+		// get group
+		//
+		PropertyGroupType groupType = groupByPage(pageType);
+		if (ERR_PROPERTY_GROUP_TYPE(groupType))
+		{
+			assert(0);
+			continue;
+		}
+
+		if (groupType >= TO_INT(groupList.size()))
+		{
+			assert(0);
+			continue;
+		}
+
+		QTreeWidgetItem* groupTreeItem = groupList.at(static_cast<quint64>(groupType));
+
+		QTreeWidgetItem* pageTreeItem = new QTreeWidgetItem;
+		pageTreeItem->setText(0, pageShortCaption(pageType));
+		pageTreeItem->setData(0, Qt::UserRole, pageType);
+
+		groupTreeItem->addChild(pageTreeItem);
+
+		pPropertyPage->setPageTreeItem(pageTreeItem);
+	}
+
+	connect(m_pagesTree, &QTreeWidget::currentItemChanged , this, &DialogOptions::onPageChanged);
+
+	m_pagesLayout->addWidget(m_pagesTree);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogOptions::removePropertyPages()
+{
+	m_propertyItemList.clear();
+	m_propertyValueList.clear();
+	m_pagesList.clear();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+std::shared_ptr<PropertyPage> DialogOptions::createPropertyPage(PropertyPageType pageType)
+{
+	if (ERR_PROPERTY_PAGE_TYPE(pageType) == true)
 	{
 		return nullptr;
 	}
 
-	PropertyPage* pPropertyPage = nullptr;
+	std::shared_ptr<PropertyPage> pPropertyPage;
 
-	switch (page)
+	switch (pageType)
 	{
-		case OptionPage::Socket_Cfg:
-		case OptionPage::Socket_AppDataSrv:
-		case OptionPage::Socket_Tuning:
-		case OptionPage::Linearity_Measure:
-		case OptionPage::Comparator_Measure:
-		case OptionPage::Module_Measure:
-		case OptionPage::MeasureView_Text:
-		case OptionPage::Panel_SignalInfo:
-		case OptionPage::Panel_ComparatorInfo:
-		case OptionPage::Database_Location:
-		case OptionPage::Database_Backup:
-		case OptionPage::Language_App:			pPropertyPage = createPropertyList(page);	break;
-		case OptionPage::Linearity_Point:
-		case OptionPage::MeasureView_Column:	pPropertyPage = createPropertyDialog(page);	break;
+		case PropertyPageType::Socket_CfgSrv:
+		case PropertyPageType::Socket_AppDataSrv:
+		case PropertyPageType::Socket_TuningSrv:
+		case PropertyPageType::Linearity_Measure:
+		case PropertyPageType::Comparator_Measure:
+		case PropertyPageType::Module_Measure:
+		case PropertyPageType::MeasureView_Text:
+		case PropertyPageType::Panel_SignalInfo:
+		case PropertyPageType::Panel_ComparatorInfo:
+		case PropertyPageType::Database_Location:
+		case PropertyPageType::Database_Backup:
+		case PropertyPageType::Language_App:			pPropertyPage = createPropertyPageList(pageType);	break;
+		case PropertyPageType::Linearity_Point:
+		case PropertyPageType::MeasureView_Column:		pPropertyPage = createPropertyPageDialog(pageType);	break;
 
 		default:
 			assert(nullptr);
@@ -402,9 +439,9 @@ PropertyPage* DialogOptions::createPage(OptionPage page)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPage* DialogOptions::createPropertyList(OptionPage page)
+std::shared_ptr<PropertyPage> DialogOptions::createPropertyPageList(PropertyPageType pageType)
 {
-	if (ERR_OPTION_PAGE(page) == true)
+	if (ERR_PROPERTY_PAGE_TYPE(pageType) == true)
 	{
 		return nullptr;
 	}
@@ -414,32 +451,28 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 
 	QtVariantPropertyManager* manager = new VariantManager();
 	QtVariantEditorFactory* factory = new VariantFactory();
-
-	//QtVariantPropertyManager* manager = new QtVariantPropertyManager;
-	//QtVariantEditorFactory* factory = new QtVariantEditorFactory;
-
 	QtTreePropertyBrowser* editor = new QtTreePropertyBrowser;
 
-	switch (page)
+	switch (pageType)
 	{
-		case OptionPage::Socket_Cfg:
-		case OptionPage::Socket_AppDataSrv:
-		case OptionPage::Socket_Tuning:
+		case PropertyPageType::Socket_CfgSrv:
+		case PropertyPageType::Socket_AppDataSrv:
+		case PropertyPageType::Socket_TuningSrv:
 			{
-				int socketType = -1;
+				SocketType socketType = SocketType::NoSocketType;
 
-				switch (page)
+				switch (pageType)
 				{
-					case OptionPage::Socket_Cfg:		socketType = SOCKET_TYPE_CONFIG;	break;
-					case OptionPage::Socket_AppDataSrv:	socketType = SOCKET_TYPE_SIGNAL;	break;
-					case OptionPage::Socket_Tuning:		socketType = SOCKET_TYPE_TUNING;	break;
+					case PropertyPageType::Socket_CfgSrv:		socketType = SocketType::CfgSrv;	break;
+					case PropertyPageType::Socket_AppDataSrv:	socketType = SocketType::AppDataSrv;	break;
+					case PropertyPageType::Socket_TuningSrv:	socketType = SocketType::TuningSrv;	break;
 
 					default:
 						assert(0);
-						socketType = SOCKET_TYPE_UNDEFINED;
+						socketType = SocketType::NoSocketType;
 				}
 
-				if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
+				if (ERR_SOCKET_TYPE(socketType) == true)
 				{
 					break;
 				}
@@ -449,53 +482,53 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 				QtProperty* serverGroup1 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server (primary)"));
 
 					item = manager->addProperty(QVariant::String, qApp->translate("Options.h", SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_EQUIPMENT_ID1]));
-					item->setValue(sco.equipmentID(SOCKET_SERVER_TYPE_PRIMARY));
-					appendProperty(item, page, SOCKET_CLIENT_PARAM_EQUIPMENT_ID1);
+					item->setValue(sco.equipmentID(ServerType::Primary));
+					appendProperty(item, pageType, SOCKET_CLIENT_PARAM_EQUIPMENT_ID1);
 					serverGroup1->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::String, qApp->translate("Options.h", SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_IP1]));
-					item->setValue(sco.serverIP(SOCKET_SERVER_TYPE_PRIMARY));
-					appendProperty(item, page, SOCKET_CLIENT_PARAM_SERVER_IP1);
+					item->setValue(sco.serverIP(ServerType::Primary));
+					appendProperty(item, pageType, SOCKET_CLIENT_PARAM_SERVER_IP1);
 					serverGroup1->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_PORT1]));
-					item->setValue(sco.serverPort(SOCKET_SERVER_TYPE_PRIMARY));
+					item->setValue(sco.serverPort(ServerType::Primary));
 					item->setAttribute(QLatin1String("minimum"), 1);
 					item->setAttribute(QLatin1String("maximum"), 65535);
 					item->setAttribute(QLatin1String("singleStep"), 1);
-					appendProperty(item, page, SOCKET_CLIENT_PARAM_SERVER_PORT1);
+					appendProperty(item, pageType, SOCKET_CLIENT_PARAM_SERVER_PORT1);
 					serverGroup1->addSubProperty(item);
 
 				QtProperty* serverGroup2 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server (reserve)"));
 
 					item = manager->addProperty(QVariant::String, qApp->translate("Options.h", SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_EQUIPMENT_ID2]));
-					item->setValue(sco.equipmentID(SOCKET_SERVER_TYPE_RESERVE));
-					appendProperty(item, page, SOCKET_CLIENT_PARAM_EQUIPMENT_ID2);
+					item->setValue(sco.equipmentID(ServerType::Reserve));
+					appendProperty(item, pageType, SOCKET_CLIENT_PARAM_EQUIPMENT_ID2);
 					serverGroup2->addSubProperty(item);
 
-					if (socketType == SOCKET_TYPE_CONFIG)
+					if (socketType == SocketType::CfgSrv)
 					{
 						item->setAttribute(QLatin1String("readOnly"), true);
 					}
 
 					item = manager->addProperty(QVariant::String, qApp->translate("Options.h", SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_IP2]));
-					item->setValue(sco.serverIP(SOCKET_SERVER_TYPE_RESERVE));
-					appendProperty(item, page, SOCKET_CLIENT_PARAM_SERVER_IP2);
+					item->setValue(sco.serverIP(ServerType::Reserve));
+					appendProperty(item, pageType, SOCKET_CLIENT_PARAM_SERVER_IP2);
 					serverGroup2->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_PORT2]));
-					item->setValue(sco.serverPort(SOCKET_SERVER_TYPE_RESERVE));
+					item->setValue(sco.serverPort(ServerType::Reserve));
 					item->setAttribute(QLatin1String("minimum"), 1);
 					item->setAttribute(QLatin1String("maximum"), 65535);
 					item->setAttribute(QLatin1String("singleStep"), 1);
-					appendProperty(item, page, SOCKET_CLIENT_PARAM_SERVER_PORT2);
+					appendProperty(item, pageType, SOCKET_CLIENT_PARAM_SERVER_PORT2);
 					serverGroup2->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(serverGroup1);
 
-				if (socketType == SOCKET_TYPE_SIGNAL)
+				if (socketType == SocketType::AppDataSrv)
 				{
 					editor->addProperty(serverGroup2);
 				}
@@ -503,40 +536,40 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 			}
 			break;
 
-		case OptionPage::Module_Measure:
+		case PropertyPageType::Module_Measure:
 			{
 				QtProperty* identificationGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Identification of module"));
 
 					item = manager->addProperty(VariantManager::folerPathTypeId(), qApp->translate("Options.h", ModuleParamName[MO_PARAM_SUFFIX_SN]));
 					item->setValue(m_options.module().suffixSN());
-					appendProperty(item, page, MO_PARAM_SUFFIX_SN);
+					appendProperty(item, pageType, MO_PARAM_SUFFIX_SN);
 					identificationGroup->addSubProperty(item);
 
 				QtProperty* measuremoduleGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measuring of module"));
 
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MEASURE_INT_INSTEAD_IN]));
 					item->setValue(m_options.module().measureInterInsteadIn());
-					appendProperty(item, page, MO_PARAM_MEASURE_INT_INSTEAD_IN);
+					appendProperty(item, pageType, MO_PARAM_MEASURE_INT_INSTEAD_IN);
 					measuremoduleGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MEASURE_LIN_AND_CMP]));
 					item->setValue(m_options.module().measureLinAndCmp());
-					appendProperty(item, page, MO_PARAM_MEASURE_LIN_AND_CMP);
+					appendProperty(item, pageType, MO_PARAM_MEASURE_LIN_AND_CMP);
 					measuremoduleGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MEASURE_ENTIRE_MODULE]));
 					item->setValue(m_options.module().measureEntireModule());
-					appendProperty(item, page, MO_PARAM_MEASURE_ENTIRE_MODULE);
+					appendProperty(item, pageType, MO_PARAM_MEASURE_ENTIRE_MODULE);
 					measuremoduleGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MEASURE_SHOWN_ON_SCHEMAS]));
 					item->setValue(m_options.module().measureShownOnSchemas());
-					appendProperty(item, page, MO_PARAM_MEASURE_SHOWN_ON_SCHEMAS);
+					appendProperty(item, pageType, MO_PARAM_MEASURE_SHOWN_ON_SCHEMAS);
 					measuremoduleGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ModuleParamName[MO_PARAM_WARN_IF_MEASURED]));
 					item->setValue(m_options.module().warningIfMeasured());
-					appendProperty(item, page, MO_PARAM_WARN_IF_MEASURED);
+					appendProperty(item, pageType, MO_PARAM_WARN_IF_MEASURED);
 					measuremoduleGroup->addSubProperty(item);
 
 				QtProperty* limitsGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Limits"));
@@ -544,7 +577,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", ModuleParamName[MO_PARAM_MAX_IMPUT_COUNT]));
 					item->setAttribute(QLatin1String("minimum"), 1);
 					item->setValue(m_options.module().maxInputCount());
-					appendProperty(item, page, MO_PARAM_MAX_IMPUT_COUNT);
+					appendProperty(item, pageType, MO_PARAM_MAX_IMPUT_COUNT);
 					limitsGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
@@ -555,7 +588,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 			}
 			break;
 
-		case OptionPage::Linearity_Measure:
+		case PropertyPageType::Linearity_Measure:
 			{
 				QtProperty* errorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Metrological error"));
 
@@ -563,7 +596,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 					item->setValue(m_options.linearity().errorLimit());
 					item->setAttribute(QLatin1String("singleStep"), 0.1);
 					item->setAttribute(QLatin1String("decimals"), 3);
-					appendProperty(item, page, LO_PARAM_ERROR_LIMIT);
+					appendProperty(item, pageType, LO_PARAM_ERROR_LIMIT);
 					errorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LinearityParamName[LO_PARAM_ERROR_TYPE]));
@@ -574,7 +607,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 					}
 					item->setAttribute(QLatin1String("enumNames"), errorTypeList);
 					item->setValue(m_options.linearity().errorType());
-					appendProperty(item, page, LO_PARAM_ERROR_TYPE);
+					appendProperty(item, pageType, LO_PARAM_ERROR_TYPE);
 					errorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", LinearityParamName[LO_PARAM_CALC_ERROR_BY_RANGE]));
@@ -585,7 +618,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 					}
 					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
 					item->setValue(m_options.linearity().calcErrorByRange());
-					appendProperty(item, page, LO_PARAM_CALC_ERROR_BY_RANGE);
+					appendProperty(item, pageType, LO_PARAM_CALC_ERROR_BY_RANGE);
 					errorGroup->addSubProperty(item);
 
 				QtProperty* measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measurements at the single point"));
@@ -595,7 +628,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 					item->setAttribute(QLatin1String("minimum"), 1);
 					item->setAttribute(QLatin1String("maximum"), 60);
 					item->setAttribute(QLatin1String("singleStep"), 1);
-					appendProperty(item, page, LO_PARAM_MEASURE_TIME);
+					appendProperty(item, pageType, LO_PARAM_MEASURE_TIME);
 					measureGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", LinearityParamName[LO_PARAM_MEASURE_IN_POINT]));
@@ -603,7 +636,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 					item->setAttribute(QLatin1String("minimum"), 1);
 					item->setAttribute(QLatin1String("maximum"), Measure::MaxMeasurementInPoint);
 					item->setAttribute(QLatin1String("singleStep"), 1);
-					appendProperty(item, page, LO_PARAM_MEASURE_IN_POINT);
+					appendProperty(item, pageType, LO_PARAM_MEASURE_IN_POINT);
 					measureGroup->addSubProperty(item);
 
 				QtProperty* pointGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measurement points"));
@@ -616,7 +649,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 					}
 					item->setAttribute(QLatin1String("enumNames"), rangeTypeList);
 					item->setValue(m_options.linearity().divisionType());
-					appendProperty(item, page, LO_PARAM_RANGE_TYPE);
+					appendProperty(item, pageType, LO_PARAM_RANGE_TYPE);
 					pointGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", LinearityParamName[LO_PARAM_POINT_COUNT]));
@@ -629,7 +662,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 						default:
 							assert(0);
 					}
-					appendProperty(item, page, LO_PARAM_POINT_COUNT);
+					appendProperty(item, pageType, LO_PARAM_POINT_COUNT);
 					pointGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Double, qApp->translate("Options.h", LinearityParamName[LO_PARAM_LOW_RANGE]));
@@ -644,7 +677,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 						default:
 							assert(0);
 					}
-					appendProperty(item, page, LO_PARAM_LOW_RANGE);
+					appendProperty(item, pageType, LO_PARAM_LOW_RANGE);
 					pointGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Double, qApp->translate("Options.h", LinearityParamName[LO_PARAM_HIGH_RANGE]));
@@ -659,12 +692,12 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 						default:
 							assert(0);
 					}
-					appendProperty(item, page, LO_PARAM_HIGH_RANGE);
+					appendProperty(item, pageType, LO_PARAM_HIGH_RANGE);
 					pointGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::String, qApp->translate("Options.h", LinearityParamName[LO_PARAM_VALUE_POINTS]));
 					item->setValue(qApp->translate("Options.cpp", m_options.linearity().points().text().toUtf8()));
-					appendProperty(item, page, LO_PARAM_VALUE_POINTS);
+					appendProperty(item, pageType, LO_PARAM_VALUE_POINTS);
 					pointGroup->addSubProperty(item);
 
 
@@ -678,7 +711,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 					}
 					item->setAttribute(QLatin1String("enumNames"), listTypeList);
 					item->setValue(m_options.linearity().viewType());
-					appendProperty(item, page, LO_PARAM_LIST_TYPE);
+					appendProperty(item, pageType, LO_PARAM_LIST_TYPE);
 					showcolumnGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
@@ -690,7 +723,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 			}
 			break;
 
-		case OptionPage::Comparator_Measure:
+		case PropertyPageType::Comparator_Measure:
 			{
 				QtProperty* errorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Metrological error"));
 
@@ -698,7 +731,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 					item->setValue(m_options.comparator().errorLimit());
 					item->setAttribute(QLatin1String("singleStep"), 0.1);
 					item->setAttribute(QLatin1String("decimals"), 3);
-					appendProperty(item, page, CO_PARAM_ERROR_LIMIT);
+					appendProperty(item, pageType, CO_PARAM_ERROR_LIMIT);
 					errorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", ComparatorParamName[CO_PARAM_ERROR_TYPE]));
@@ -709,7 +742,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 					}
 					item->setAttribute(QLatin1String("enumNames"), errorTypeList);
 					item->setValue(m_options.comparator().errorType());
-					appendProperty(item, page, CO_PARAM_ERROR_TYPE);
+					appendProperty(item, pageType, CO_PARAM_ERROR_TYPE);
 					errorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", ComparatorParamName[CO_PARAM_CALC_ERROR_BY_RANGE]));
@@ -720,14 +753,14 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 					}
 					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
 					item->setValue(m_options.comparator().calcErrorByRange());
-					appendProperty(item, page, CO_PARAM_CALC_ERROR_BY_RANGE);
+					appendProperty(item, pageType, CO_PARAM_CALC_ERROR_BY_RANGE);
 					errorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Double, qApp->translate("Options.h", ComparatorParamName[CO_PARAM_START_VALUE]));
 					item->setValue(m_options.comparator().startValueForCompare());
 					item->setAttribute(QLatin1String("singleStep"), 0.1);
 					item->setAttribute(QLatin1String("decimals"), 3);
-					appendProperty(item, page, CO_PARAM_START_VALUE);
+					appendProperty(item, pageType, CO_PARAM_START_VALUE);
 					errorGroup->addSubProperty(item);
 
 				QtProperty* permissionsGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Permissions"));
@@ -736,12 +769,12 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 					item->setValue(m_options.comparator().startComparatorIndex() + 1);
 					item->setAttribute(QLatin1String("minimum"), 1);
 					item->setAttribute(QLatin1String("singleStep"), 1);
-					appendProperty(item, page, CO_PARAM_COMPARATOR_INDEX);
+					appendProperty(item, pageType, CO_PARAM_COMPARATOR_INDEX);
 					permissionsGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", ComparatorParamName[CO_PARAM_ENABLE_HYSTERESIS]));
 					item->setValue(m_options.comparator().enableMeasureHysteresis());
-					appendProperty(item, page, CO_PARAM_ENABLE_HYSTERESIS);
+					appendProperty(item, pageType, CO_PARAM_ENABLE_HYSTERESIS);
 					permissionsGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
@@ -751,42 +784,42 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 			}
 			break;
 
-		case OptionPage::MeasureView_Text:
+		case PropertyPageType::MeasureView_Text:
 			{
 				QtProperty* fontGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Font"));
 
 					item = manager->addProperty(QVariant::Font, qApp->translate("Options.h", MeasureViewParam[MWO_PARAM_FONT]));
 					item->setValue(m_options.measureView().font().toString());
-					appendProperty(item, page, MWO_PARAM_FONT);
+					appendProperty(item, pageType, MWO_PARAM_FONT);
 					fontGroup->addSubProperty(item);
 
 				QtProperty* colorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Colors"));
 
 					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", MeasureViewParam[MWO_PARAM_COLOR_NOT_ERROR]));
 					item->setValue(m_options.measureView().colorNotError());
-					appendProperty(item, page, MWO_PARAM_COLOR_NOT_ERROR);
+					appendProperty(item, pageType, MWO_PARAM_COLOR_NOT_ERROR);
 					colorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", MeasureViewParam[MWO_PARAM_COLOR_LIMIT_ERROR]));
 					item->setValue(m_options.measureView().colorErrorLimit());
-					appendProperty(item, page, MWO_PARAM_COLOR_LIMIT_ERROR);
+					appendProperty(item, pageType, MWO_PARAM_COLOR_LIMIT_ERROR);
 					colorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", MeasureViewParam[MWO_PARAM_COLOR_CONTROL_ERROR]));
 					item->setValue(m_options.measureView().colorErrorControl());
-					appendProperty(item, page, MWO_PARAM_COLOR_CONTROL_ERROR);
+					appendProperty(item, pageType, MWO_PARAM_COLOR_CONTROL_ERROR);
 					colorGroup->addSubProperty(item);
 
 				QtProperty* measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measurements"));
 
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", MeasureViewParam[MWO_PARAM_SHOW_NO_VALID]));
 					item->setValue(m_options.measureView().showNoValid());
-					appendProperty(item, page, MWO_PARAM_SHOW_NO_VALID);
+					appendProperty(item, pageType, MWO_PARAM_SHOW_NO_VALID);
 					measureGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", MeasureViewParam[MWO_PARAM_PRECESION_BY_CALIBRATOR]));
 					item->setValue(m_options.measureView().precesionByCalibrator());
-					appendProperty(item, page, MWO_PARAM_PRECESION_BY_CALIBRATOR);
+					appendProperty(item, pageType, MWO_PARAM_PRECESION_BY_CALIBRATOR);
 					measureGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
@@ -795,66 +828,66 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 				editor->addProperty(colorGroup);
 				editor->addProperty(measureGroup);
 
-				expandProperty(editor, OptionPage::MeasureView_Text, MWO_PARAM_FONT, false);
-				expandProperty(editor, OptionPage::MeasureView_Text, MWO_PARAM_COLOR_NOT_ERROR, false);
-				expandProperty(editor, OptionPage::MeasureView_Text, MWO_PARAM_COLOR_LIMIT_ERROR, false);
-				expandProperty(editor, OptionPage::MeasureView_Text, MWO_PARAM_COLOR_CONTROL_ERROR, false);
+				expandProperty(editor, PropertyPageType::MeasureView_Text, MWO_PARAM_FONT, false);
+				expandProperty(editor, PropertyPageType::MeasureView_Text, MWO_PARAM_COLOR_NOT_ERROR, false);
+				expandProperty(editor, PropertyPageType::MeasureView_Text, MWO_PARAM_COLOR_LIMIT_ERROR, false);
+				expandProperty(editor, PropertyPageType::MeasureView_Text, MWO_PARAM_COLOR_CONTROL_ERROR, false);
 			}
 			break;
 
-		case OptionPage::Panel_SignalInfo:
+		case PropertyPageType::Panel_SignalInfo:
 			{
 				QtProperty* fontGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Font"));
 
 					item = manager->addProperty(QVariant::Font, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_FONT]));
 					item->setValue(m_options.signalInfo().font().toString());
-					appendProperty(item, page, SIO_PARAM_FONT);
+					appendProperty(item, pageType, SIO_PARAM_FONT);
 					fontGroup->addSubProperty(item);
 
 				QtProperty* measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Displaying signal state"));
 
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_SHOW_NO_VALID]));
 					item->setValue(m_options.signalInfo().showNoValid());
-					appendProperty(item, page, SIO_PARAM_SHOW_NO_VALID);
+					appendProperty(item, pageType, SIO_PARAM_SHOW_NO_VALID);
 					measureGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_ELECTRIC_STATE]));
 					item->setValue(m_options.signalInfo().showElectricState());
-					appendProperty(item, page, SIO_PARAM_ELECTRIC_STATE);
+					appendProperty(item, pageType, SIO_PARAM_ELECTRIC_STATE);
 					measureGroup->addSubProperty(item);
 
 				QtProperty* colorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Colors"));
 
 					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_COLOR_FLAG_VALID]));
 					item->setValue(m_options.signalInfo().colorFlagValid());
-					appendProperty(item, page, SIO_PARAM_COLOR_FLAG_VALID);
+					appendProperty(item, pageType, SIO_PARAM_COLOR_FLAG_VALID);
 					colorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_COLOR_FLAG_SIM]));
 					item->setValue(m_options.signalInfo().colorFlagSim());
-					appendProperty(item, page, SIO_PARAM_COLOR_FLAG_SIM);
+					appendProperty(item, pageType, SIO_PARAM_COLOR_FLAG_SIM);
 					colorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_COLOR_FLAG_LOCK]));
 					item->setValue(m_options.signalInfo().colorFlagLock());
-					appendProperty(item, page, SIO_PARAM_COLOR_FLAG_LOCK);
+					appendProperty(item, pageType, SIO_PARAM_COLOR_FLAG_LOCK);
 					colorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_COLOR_FLAG_OVERFLOW]));
 					item->setValue(m_options.signalInfo().colorFlagOverflow());
-					appendProperty(item, page, SIO_PARAM_COLOR_FLAG_OVERFLOW);
+					appendProperty(item, pageType, SIO_PARAM_COLOR_FLAG_OVERFLOW);
 					colorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_COLOR_FLAG_UNDERFLOW]));
 					item->setValue(m_options.signalInfo().colorFlagUnderflow());
-					appendProperty(item, page, SIO_PARAM_COLOR_FLAG_UNDERFLOW);
+					appendProperty(item, pageType, SIO_PARAM_COLOR_FLAG_UNDERFLOW);
 					colorGroup->addSubProperty(item);
 
 				QtProperty* timeGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Time for updating"));
 
 					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", SignalInfoParam[SIO_PARAM_TIME_FOR_UPDATE]));
 					item->setValue(m_options.signalInfo().timeForUpdate());
-					appendProperty(item, page, SIO_PARAM_TIME_FOR_UPDATE);
+					appendProperty(item, pageType, SIO_PARAM_TIME_FOR_UPDATE);
 					timeGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
@@ -864,50 +897,50 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 				editor->addProperty(colorGroup);
 				editor->addProperty(timeGroup);
 
-				expandProperty(editor, OptionPage::Panel_SignalInfo, SIO_PARAM_FONT, false);
-				expandProperty(editor, OptionPage::Panel_SignalInfo, SIO_PARAM_COLOR_FLAG_VALID, false);
-				expandProperty(editor, OptionPage::Panel_SignalInfo, SIO_PARAM_COLOR_FLAG_OVERFLOW, false);
-				expandProperty(editor, OptionPage::Panel_SignalInfo, SIO_PARAM_COLOR_FLAG_UNDERFLOW, false);
+				expandProperty(editor, PropertyPageType::Panel_SignalInfo, SIO_PARAM_FONT, false);
+				expandProperty(editor, PropertyPageType::Panel_SignalInfo, SIO_PARAM_COLOR_FLAG_VALID, false);
+				expandProperty(editor, PropertyPageType::Panel_SignalInfo, SIO_PARAM_COLOR_FLAG_OVERFLOW, false);
+				expandProperty(editor, PropertyPageType::Panel_SignalInfo, SIO_PARAM_COLOR_FLAG_UNDERFLOW, false);
 			}
 
 			break;
 
-		case OptionPage::Panel_ComparatorInfo:
+		case PropertyPageType::Panel_ComparatorInfo:
 			{
 				QtProperty* fontGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Font"));
 
 					item = manager->addProperty(QVariant::Font, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_FONT]));
 					item->setValue(m_options.comparatorInfo().font().toString());
-					appendProperty(item, page, CIO_PARAM_FONT);
+					appendProperty(item, pageType, CIO_PARAM_FONT);
 					fontGroup->addSubProperty(item);
 
 				QtProperty* colorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Colors"));
 
 					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_COLOR_FLAG_SIM]));
 					item->setValue(m_options.comparatorInfo().colorFlagSim());
-					appendProperty(item, page, CIO_PARAM_COLOR_FLAG_SIM);
+					appendProperty(item, pageType, CIO_PARAM_COLOR_FLAG_SIM);
 					colorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_COLOR_FLAG_LOCK]));
 					item->setValue(m_options.comparatorInfo().colorFlagLock());
-					appendProperty(item, page, CIO_PARAM_COLOR_FLAG_LOCK);
+					appendProperty(item, pageType, CIO_PARAM_COLOR_FLAG_LOCK);
 					colorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_COLOR_STATE_FALSE]));
 					item->setValue(m_options.comparatorInfo().colorStateFalse());
-					appendProperty(item, page, CIO_PARAM_COLOR_STATE_FALSE);
+					appendProperty(item, pageType, CIO_PARAM_COLOR_STATE_FALSE);
 					colorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Color, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_COLOR_STATE_TRUE]));
 					item->setValue(m_options.comparatorInfo().colorStateTrue());
-					appendProperty(item, page, CIO_PARAM_COLOR_STATE_TRUE);
+					appendProperty(item, pageType, CIO_PARAM_COLOR_STATE_TRUE);
 					colorGroup->addSubProperty(item);
 
 				QtProperty* timeGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Time for updating"));
 
 					item = manager->addProperty(QVariant::Int, qApp->translate("Options.h", ComparatorInfoParam[CIO_PARAM_TIME_FOR_UPDATE]));
 					item->setValue(m_options.comparatorInfo().timeForUpdate());
-					appendProperty(item, page, CIO_PARAM_TIME_FOR_UPDATE);
+					appendProperty(item, pageType, CIO_PARAM_TIME_FOR_UPDATE);
 					timeGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
@@ -916,22 +949,22 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 				editor->addProperty(colorGroup);
 				editor->addProperty(timeGroup);
 
-				expandProperty(editor, OptionPage::Panel_ComparatorInfo, CIO_PARAM_FONT, false);
-				expandProperty(editor, OptionPage::Panel_ComparatorInfo, CIO_PARAM_COLOR_FLAG_SIM, false);
-				expandProperty(editor, OptionPage::Panel_ComparatorInfo, CIO_PARAM_COLOR_FLAG_LOCK, false);
-				expandProperty(editor, OptionPage::Panel_ComparatorInfo, CIO_PARAM_COLOR_STATE_FALSE, false);
-				expandProperty(editor, OptionPage::Panel_ComparatorInfo, CIO_PARAM_COLOR_STATE_TRUE, false);
+				expandProperty(editor, PropertyPageType::Panel_ComparatorInfo, CIO_PARAM_FONT, false);
+				expandProperty(editor, PropertyPageType::Panel_ComparatorInfo, CIO_PARAM_COLOR_FLAG_SIM, false);
+				expandProperty(editor, PropertyPageType::Panel_ComparatorInfo, CIO_PARAM_COLOR_FLAG_LOCK, false);
+				expandProperty(editor, PropertyPageType::Panel_ComparatorInfo, CIO_PARAM_COLOR_STATE_FALSE, false);
+				expandProperty(editor, PropertyPageType::Panel_ComparatorInfo, CIO_PARAM_COLOR_STATE_TRUE, false);
 			}
 
 			break;
 
-		case OptionPage::Database_Location:
+		case PropertyPageType::Database_Location:
 			{
 				QtProperty* databaseGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location of Database"));
 
 					item = manager->addProperty(VariantManager::folerPathTypeId(), qApp->translate("Options.h", DatabaseParam[DBO_PARAM_LOCATION_PATH]));
 					item->setValue(m_options.database().locationPath());
-					appendProperty(item, page, DBO_PARAM_LOCATION_PATH);
+					appendProperty(item, pageType, DBO_PARAM_LOCATION_PATH);
 					databaseGroup->addSubProperty(item);
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), qApp->translate("Options.h", DatabaseParam[DBO_PARAM_TYPE]));
@@ -942,7 +975,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 					}
 					item->setAttribute(QLatin1String("enumNames"), valueTypeList);
 					item->setValue(m_options.database().type());
-					appendProperty(item, page, DBO_PARAM_TYPE);
+					appendProperty(item, pageType, DBO_PARAM_TYPE);
 					databaseGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
@@ -951,25 +984,25 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 			}
 			break;
 
-		case OptionPage::Database_Backup:
+		case PropertyPageType::Database_Backup:
 			{
 				QtProperty* eventGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Events"));
 
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", DatabaseParam[DBO_PARAM_ON_START]));
 					item->setValue(m_options.database().onStart());
-					appendProperty(item, page, DBO_PARAM_ON_START);
+					appendProperty(item, pageType, DBO_PARAM_ON_START);
 					eventGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Bool, qApp->translate("Options.h", DatabaseParam[DBO_PARAM_ON_EXIT]));
 					item->setValue(m_options.database().onExit());
-					appendProperty(item, page, DBO_PARAM_ON_EXIT);
+					appendProperty(item, pageType, DBO_PARAM_ON_EXIT);
 					eventGroup->addSubProperty(item);
 
 				QtProperty* pathGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location of reserve copy"));
 
 					item = manager->addProperty(VariantManager::folerPathTypeId(), qApp->translate("Options.h", DatabaseParam[DBO_PARAM_COPY_PATH]));
 					item->setValue(m_options.database().backupPath());
-					appendProperty(item, page, DBO_PARAM_COPY_PATH);
+					appendProperty(item, pageType, DBO_PARAM_COPY_PATH);
 					pathGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
@@ -979,7 +1012,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 			}
 			break;
 
-		case OptionPage::Language_App:
+		case PropertyPageType::Language_App:
 			{
 				QtProperty* languageGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Language of application "));
 
@@ -991,7 +1024,7 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 					}
 					item->setAttribute(QLatin1String("enumNames"), valueTypeList);
 					item->setValue(m_options.language().languageType());
-					appendProperty(item, page, LNO_PARAM_LANGUAGE_TYPE);
+					appendProperty(item, pageType, LNO_PARAM_LANGUAGE_TYPE);
 					languageGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
@@ -1010,23 +1043,25 @@ PropertyPage* DialogOptions::createPropertyList(OptionPage page)
 	connect(manager, &QtVariantPropertyManager::valueChanged, this, &DialogOptions::onPropertyValueChanged);
 	connect(editor, &QtTreePropertyBrowser::currentItemChanged, this, &DialogOptions::onBrowserItem);
 
-	return (new PropertyPage(manager, factory, editor));
+	//	create PropertyPage - PropertyPageWidgetType::List
+	//
+	return std::make_shared<PropertyPage>(pageType, manager, factory, editor);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPage* DialogOptions::createPropertyDialog(OptionPage page)
+std::shared_ptr<PropertyPage> DialogOptions::createPropertyPageDialog(PropertyPageType pageType)
 {
-	if (ERR_OPTION_PAGE(page) == true)
+	if (ERR_PROPERTY_PAGE_TYPE(pageType) == true)
 	{
 		return nullptr;
 	}
 
 	QDialog* pDialogPage = nullptr;
 
-	switch (page)
+	switch (pageType)
 	{
-		case OptionPage::Linearity_Point:
+		case PropertyPageType::Linearity_Point:
 			{
 				DialogMeasurePoint* dialog = new DialogMeasurePoint(m_options.linearity());
 				connect(dialog, &DialogMeasurePoint::updateLinearityPage, this, &DialogOptions::updateLinearityPage);
@@ -1035,7 +1070,7 @@ PropertyPage* DialogOptions::createPropertyDialog(OptionPage page)
 			}
 			break;
 
-		case OptionPage::MeasureView_Column:
+		case PropertyPageType::MeasureView_Column:
 			{
 				DialogOptionsMeasureViewHeader* dialog = new DialogOptionsMeasureViewHeader(m_options.measureView());
 				connect(dialog, &DialogOptionsMeasureViewHeader::updateMeasureViewPage, this, &DialogOptions::updateMeasureViewPage);
@@ -1050,45 +1085,47 @@ PropertyPage* DialogOptions::createPropertyDialog(OptionPage page)
 
 	if (pDialogPage != nullptr)
 	{
-		pDialogPage->setWindowTitle(pageCaption(page).toUtf8());
+		pDialogPage->setWindowTitle(pageCaption(pageType));
 	}
 
-	return (new PropertyPage(pDialogPage));
+	//	create PropertyPage - PropertyPageWidgetType::Dialog
+	//
+	return std::make_shared<PropertyPage>(pageType, pDialogPage);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogOptions::appendProperty(QtProperty* property, OptionPage page, int param)
+void DialogOptions::appendProperty(QtProperty* property, PropertyPageType pageType, int param)
 {
 	if (property == nullptr)
 	{
 		return;
 	}
 
-	if (ERR_OPTION_PAGE(page) == true)
+	if (ERR_PROPERTY_PAGE_TYPE(pageType) == true)
 	{
 		return;
 	}
 
-	m_propertyItemList[property] = (page << 8) | param;
+	m_propertyItemList[property] = (pageType << 8) | param;
 	m_propertyValueList[property] = dynamic_cast<QtVariantProperty*>(property)->value();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void DialogOptions::expandProperty(QtTreePropertyBrowser* pEditor, OptionPage page, int param, bool expanded)
+void DialogOptions::expandProperty(QtTreePropertyBrowser* pEditor, PropertyPageType pageType, int param, bool expanded)
 {
 	if (pEditor == nullptr)
 	{
 		return;
 	}
 
-	if (ERR_OPTION_PAGE(page) == true)
+	if (ERR_PROPERTY_PAGE_TYPE(pageType) == true)
 	{
 		return;
 	}
 
-	QtProperty* pProperty = m_propertyItemList.key((page << 8) | param);
+	QtProperty* pProperty = m_propertyItemList.key((pageType << 8) | param);
 	if (pProperty == nullptr)
 	{
 		return;
@@ -1121,46 +1158,51 @@ void DialogOptions::onPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* pre
 	}
 
 	int page = current->data(0, Qt::UserRole).toInt();
-	if (page < 0 || page >= TO_INT(m_pageList.size()))
+	if (page < 0 || page >= TO_INT(m_pagesList.size()))
 	{
 		return;
 	}
 
-	if (ERR_OPTION_PAGE(page) == true)
+	if (ERR_PROPERTY_PAGE_TYPE(page) == true)
 	{
 		return;
 	}
 
-	setActivePage(static_cast<OptionPage>(page));
+	setActivePage(static_cast<PropertyPageType>(page));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool DialogOptions::setActivePage(OptionPage page)
+bool DialogOptions::setActivePage(PropertyPageType pageType)
 {
-	if (ERR_OPTION_PAGE(page) == true)
-	{
-		return false;
-	}
-
 	if (m_pagesLayout == nullptr)
 	{
 		return false;
 	}
 
-	if (page < 0 || page >= TO_INT(m_pageList.size()))
+	if (m_pPropertyEditor == nullptr)
+	{
+		return false;
+	}
+
+	if (ERR_PROPERTY_PAGE_TYPE(pageType) == true)
+	{
+		return false;
+	}
+
+	if (pageType < 0 || pageType >= TO_INT(m_pagesList.size()))
 	{
 		return false;
 	}
 
 	// hide current page
 	//
-	if (m_activePage >= 0 && m_activePage < TO_INT(m_pageList.size()))
+	if (m_activePage >= 0 && m_activePage < TO_INT(m_pagesList.size()))
 	{
-		PropertyPage* pCurrentPage = m_pageList.at(static_cast<quint64>(m_activePage));
-		if (pCurrentPage != nullptr)
+		std::shared_ptr<PropertyPage> pCurrentPage = m_pagesList.at(static_cast<quint64>(m_activePage));
+		if (pCurrentPage.get() != nullptr)
 		{
-			QWidget* pWidget = pCurrentPage->getWidget();
+			QWidget* pWidget = pCurrentPage->baseWidget();
 			if (pWidget != nullptr)
 			{
 				m_pagesLayout->removeWidget(pWidget);
@@ -1171,30 +1213,47 @@ bool DialogOptions::setActivePage(OptionPage page)
 
 	// show new page
 	//
-	PropertyPage* pActivePage = m_pageList.at(static_cast<quint64>(page));
-	if (pActivePage != nullptr)
+	std::shared_ptr<PropertyPage> pActivePage = m_pagesList.at(static_cast<quint64>(pageType));
+	if (pActivePage.get() != nullptr)
 	{
-		QWidget* pWidget = pActivePage->getWidget();
+		QWidget* pWidget = pActivePage->baseWidget();
 		if (pWidget != nullptr)
 		{
-			setWindowTitle(tr("Options - %1").arg(pageCaption(page)));
+			setWindowTitle(tr("Options - %1").arg(pageCaption(pageType)));
 
 			m_pagesLayout->addWidget(pWidget);
 			pWidget->show();
 		}
 	}
 
-	m_activePage = page;
-
 	// select tree item
 	//
-	if (m_pPageTree != nullptr && pActivePage != nullptr)
+	if (m_pagesTree != nullptr && pActivePage.get() != nullptr)
 	{
-		if (pActivePage->m_pTreeWidgetItem != nullptr)
+		if (pActivePage->pageTreeItem() != nullptr)
 		{
-			m_pPageTree->setCurrentItem(pActivePage->m_pTreeWidgetItem);
+			m_pagesTree->setCurrentItem(pActivePage->pageTreeItem());
 		}
 	}
+
+	//
+	//
+	m_activePage = pageType;
+
+	//
+	//
+//	QList<std::shared_ptr<PropertyObject>> propertyObjects;
+//	propertyObjects.push_back(m_pagesList.at(pageType));
+//	m_pPropertyEditor->setObjects(propertyObjects);
+
+//	if (m_pagesList.at(pageType)->widgetType() == PropertyPageWidgetType::List)
+//	{
+//		m_pagesLayout->addWidget(m_pPropertyEditor);
+//	}
+//	else
+//	{
+//		m_pagesLayout->removeWidget(m_pPropertyEditor);
+//	}
 
 	return true;
 }
@@ -1226,6 +1285,20 @@ void DialogOptions::onPropertyValueChanged(QtProperty* property, const QVariant 
 		type == VariantManager::folerPathTypeId())					// folder
 	{
 		applyProperty();
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogOptions::onPropertyValueChanged_1(QList<std::shared_ptr<PropertyObject>> objects)
+{
+	for (const std::shared_ptr<PropertyObject>& modifiedFilter : objects)
+	{
+		if (modifiedFilter.get() == nullptr)
+		{
+			assert(0);
+			continue;
+		}
 	}
 }
 
@@ -1276,8 +1349,8 @@ void DialogOptions::applyProperty()
 
 	int paramId = m_propertyItemList[property];
 
-	int page = (paramId & 0xFF00) >> 8;
-	if (ERR_OPTION_PAGE(page) == true)
+	PropertyPageType pageType = static_cast<PropertyPageType>((paramId & 0xFF00) >> 8);
+	if (ERR_PROPERTY_PAGE_TYPE(pageType) == true)
 	{
 		return;
 	}
@@ -1286,26 +1359,26 @@ void DialogOptions::applyProperty()
 
 	QVariant value = m_currentPropertyValue;
 
-	switch (page)
+	switch (pageType)
 	{
-		case OptionPage::Socket_Cfg:
-		case OptionPage::Socket_AppDataSrv:
-		case OptionPage::Socket_Tuning:
+		case PropertyPageType::Socket_CfgSrv:
+		case PropertyPageType::Socket_AppDataSrv:
+		case PropertyPageType::Socket_TuningSrv:
 			{
-				int socketType = -1;
+				SocketType socketType = SocketType::NoSocketType;
 
-				switch (page)
+				switch (pageType)
 				{
-					case OptionPage::Socket_Cfg:		socketType = SOCKET_TYPE_CONFIG;	break;
-					case OptionPage::Socket_AppDataSrv: socketType = SOCKET_TYPE_SIGNAL;	break;
-					case OptionPage::Socket_Tuning:		socketType = SOCKET_TYPE_TUNING;	break;
+					case PropertyPageType::Socket_CfgSrv:		socketType = SocketType::CfgSrv;	break;
+					case PropertyPageType::Socket_AppDataSrv:	socketType = SocketType::AppDataSrv;	break;
+					case PropertyPageType::Socket_TuningSrv:	socketType = SocketType::TuningSrv;	break;
 
 					default:
 						assert(0);
-						socketType = SOCKET_TYPE_UNDEFINED;
+						socketType = SocketType::NoSocketType;
 				}
 
-				if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
+				if (ERR_SOCKET_TYPE(socketType) == true)
 				{
 					break;
 				}
@@ -1314,12 +1387,12 @@ void DialogOptions::applyProperty()
 
 				switch(param)
 				{
-					case SOCKET_CLIENT_PARAM_EQUIPMENT_ID1:	sco.setEquipmentID(SOCKET_SERVER_TYPE_PRIMARY, value.toString());			break;
-					case SOCKET_CLIENT_PARAM_SERVER_IP1:	sco.setServerIP(SOCKET_SERVER_TYPE_PRIMARY, value.toString());				break;
-					case SOCKET_CLIENT_PARAM_SERVER_PORT1:	sco.setServerPort(SOCKET_SERVER_TYPE_PRIMARY, value.toInt());				break;
-					case SOCKET_CLIENT_PARAM_EQUIPMENT_ID2:	sco.setEquipmentID(SOCKET_SERVER_TYPE_RESERVE, value.toString());			break;
-					case SOCKET_CLIENT_PARAM_SERVER_IP2:	sco.setServerIP(SOCKET_SERVER_TYPE_RESERVE, value.toString());				break;
-					case SOCKET_CLIENT_PARAM_SERVER_PORT2:	sco.setServerPort(SOCKET_SERVER_TYPE_RESERVE, value.toInt());				break;
+					case SOCKET_CLIENT_PARAM_EQUIPMENT_ID1:	sco.setEquipmentID(ServerType::Primary, value.toString());			break;
+					case SOCKET_CLIENT_PARAM_SERVER_IP1:	sco.setServerIP(ServerType::Primary, value.toString());				break;
+					case SOCKET_CLIENT_PARAM_SERVER_PORT1:	sco.setServerPort(ServerType::Primary, value.toInt());				break;
+					case SOCKET_CLIENT_PARAM_EQUIPMENT_ID2:	sco.setEquipmentID(ServerType::Reserve, value.toString());			break;
+					case SOCKET_CLIENT_PARAM_SERVER_IP2:	sco.setServerIP(ServerType::Reserve, value.toString());				break;
+					case SOCKET_CLIENT_PARAM_SERVER_PORT2:	sco.setServerPort(ServerType::Reserve, value.toInt());				break;
 
 					default:
 						assert(0);
@@ -1331,7 +1404,7 @@ void DialogOptions::applyProperty()
 			}
 			break;
 
-		case OptionPage::Module_Measure:
+		case PropertyPageType::Module_Measure:
 			{
 				switch(param)
 				{
@@ -1349,7 +1422,7 @@ void DialogOptions::applyProperty()
 			}
 			break;
 
-		case OptionPage::Linearity_Measure:
+		case PropertyPageType::Linearity_Measure:
 			{
 				switch(param)
 				{
@@ -1371,7 +1444,7 @@ void DialogOptions::applyProperty()
 					case LO_PARAM_HIGH_RANGE:				m_options.linearity().setHighLimitRange(value.toDouble());
 															m_options.linearity().recalcPoints();
 															updateLinearityPage(false);													break;
-					case LO_PARAM_VALUE_POINTS:				setActivePage(OptionPage::Linearity_Point);									break;
+					case LO_PARAM_VALUE_POINTS:				setActivePage(PropertyPageType::Linearity_Point);									break;
 					case LO_PARAM_LIST_TYPE:				m_options.linearity().setViewType(value.toInt());
 															m_options.measureView().setUpdateColumnView(Measure::Type::Linearity,true);	break;
 					default:
@@ -1380,7 +1453,7 @@ void DialogOptions::applyProperty()
 			}
 			break;
 
-		case OptionPage::Comparator_Measure:
+		case PropertyPageType::Comparator_Measure:
 			{
 				switch(param)
 				{
@@ -1399,7 +1472,7 @@ void DialogOptions::applyProperty()
 			}
 			break;
 
-		case OptionPage::MeasureView_Text:
+		case PropertyPageType::MeasureView_Text:
 			{
 				switch(param)
 				{
@@ -1421,11 +1494,11 @@ void DialogOptions::applyProperty()
 			}
 			break;
 
-		case OptionPage::MeasureView_Column:
+		case PropertyPageType::MeasureView_Column:
 
 			break;
 
-		case OptionPage::Panel_SignalInfo:
+		case PropertyPageType::Panel_SignalInfo:
 
 			switch(param)
 			{
@@ -1445,7 +1518,7 @@ void DialogOptions::applyProperty()
 
 			break;
 
-		case OptionPage::Panel_ComparatorInfo:
+		case PropertyPageType::Panel_ComparatorInfo:
 
 			switch(param)
 			{
@@ -1462,7 +1535,7 @@ void DialogOptions::applyProperty()
 
 			break;
 
-		case OptionPage::Database_Location:
+		case PropertyPageType::Database_Location:
 			{
 				switch(param)
 				{
@@ -1475,7 +1548,7 @@ void DialogOptions::applyProperty()
 			}
 			break;
 
-		case OptionPage::Database_Backup:
+		case PropertyPageType::Database_Backup:
 			{
 				switch(param)
 				{
@@ -1489,7 +1562,7 @@ void DialogOptions::applyProperty()
 			}
 			break;
 
-		case OptionPage::Language_App:
+		case PropertyPageType::Language_App:
 			{
 				switch(param)
 				{
@@ -1514,10 +1587,10 @@ void DialogOptions::updateServerPage()
 {
 	QtVariantProperty* property = nullptr;
 
-	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((OptionPage::Socket_Cfg << 8) | SOCKET_CLIENT_PARAM_EQUIPMENT_ID2));
+	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((PropertyPageType::Socket_CfgSrv << 8) | SOCKET_CLIENT_PARAM_EQUIPMENT_ID2));
 	if (property != nullptr)
 	{
-		property->setValue(m_options.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY));
+		property->setValue(m_options.socket().client(SocketType::CfgSrv).equipmentID(ServerType::Primary));
 	}
 }
 
@@ -1525,13 +1598,13 @@ void DialogOptions::updateServerPage()
 
 void DialogOptions::updateLinearityPage(bool isDialog)
 {
-	PropertyPage* page = m_pageList[OptionPage::Linearity_Point];
-	if (page == nullptr)
+	std::shared_ptr<PropertyPage> page = m_pagesList[PropertyPageType::Linearity_Point];
+	if (page.get() == nullptr)
 	{
 		return;
 	}
 
-	DialogMeasurePoint* dialog = dynamic_cast<DialogMeasurePoint*>(page->getWidget());
+	DialogMeasurePoint* dialog = dynamic_cast<DialogMeasurePoint*>(page->baseWidget());
 	if (dialog == nullptr)
 	{
 		return;
@@ -1552,13 +1625,13 @@ void DialogOptions::updateLinearityPage(bool isDialog)
 
 	QtVariantProperty* property = nullptr;
 
-	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((OptionPage::Linearity_Measure << 8) | LO_PARAM_RANGE_TYPE));
+	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((PropertyPageType::Linearity_Measure << 8) | LO_PARAM_RANGE_TYPE));
 	if (property != nullptr)
 	{
 		property->setValue(m_options.linearity().divisionType());
 	}
 
-	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((OptionPage::Linearity_Measure << 8) | LO_PARAM_POINT_COUNT));
+	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((PropertyPageType::Linearity_Measure << 8) | LO_PARAM_POINT_COUNT));
 	if (property != nullptr)
 	{
 		property->setValue(m_options.linearity().points().count());
@@ -1573,7 +1646,7 @@ void DialogOptions::updateLinearityPage(bool isDialog)
 		}
 	}
 
-	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((OptionPage::Linearity_Measure << 8) | LO_PARAM_LOW_RANGE));
+	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((PropertyPageType::Linearity_Measure << 8) | LO_PARAM_LOW_RANGE));
 	if (property != nullptr)
 	{
 		property->setValue(m_options.linearity().lowLimitRange());
@@ -1588,7 +1661,7 @@ void DialogOptions::updateLinearityPage(bool isDialog)
 		}
 	}
 
-	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((OptionPage::Linearity_Measure << 8) | LO_PARAM_HIGH_RANGE));
+	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((PropertyPageType::Linearity_Measure << 8) | LO_PARAM_HIGH_RANGE));
 	if (property != nullptr)
 	{
 		property->setValue(m_options.linearity().highLimitRange());
@@ -1604,7 +1677,7 @@ void DialogOptions::updateLinearityPage(bool isDialog)
 
 	}
 
-	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((OptionPage::Linearity_Measure << 8) | LO_PARAM_VALUE_POINTS));
+	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((PropertyPageType::Linearity_Measure << 8) | LO_PARAM_VALUE_POINTS));
 	if (property != nullptr)
 	{
 		property->setValue(qApp->translate("Options.cpp", m_options.linearity().points().text().toUtf8()));
@@ -1615,13 +1688,13 @@ void DialogOptions::updateLinearityPage(bool isDialog)
 
 void DialogOptions::updateMeasureViewPage(bool isDialog)
 {
-	PropertyPage* page = m_pageList[OptionPage::MeasureView_Column];
-	if (page == nullptr)
+	std::shared_ptr<PropertyPage> page = m_pagesList[PropertyPageType::MeasureView_Column];
+	if (page.get() == nullptr)
 	{
 		return;
 	}
 
-	DialogOptionsMeasureViewHeader* dialog = dynamic_cast<DialogOptionsMeasureViewHeader*> (page->getWidget());
+	DialogOptionsMeasureViewHeader* dialog = dynamic_cast<DialogOptionsMeasureViewHeader*> (page->baseWidget());
 	if (dialog == nullptr)
 	{
 		return;
@@ -1656,7 +1729,7 @@ void DialogOptions::loadSettings()
 	QByteArray geometry = s.value(QString("%1OptionsDialog/geometry").arg(WINDOW_GEOMETRY_OPTIONS_KEY)).toByteArray();
 	restoreGeometry(geometry);
 
-	m_activePage = static_cast<OptionPage>(s.value(QString("%1OptionsDialog/activePage").arg(WINDOW_GEOMETRY_OPTIONS_KEY), OptionPage::Linearity_Measure).toInt());
+	m_activePage = static_cast<PropertyPageType>(s.value(QString("%1OptionsDialog/activePage").arg(WINDOW_GEOMETRY_OPTIONS_KEY), PropertyPageType::Linearity_Measure).toInt());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1682,17 +1755,18 @@ bool DialogOptions::event(QEvent*  e)
 {
 	if (e->type() == QEvent::Hide)
 	{
+		removePropertyPages();
 		saveSettings();
 	}
 
 	if (e->type() == QEvent::KeyRelease)
 	{
-		if (m_activePage >= 0 && m_activePage < TO_INT(m_pageList.size()))
+		if (m_activePage >= 0 && m_activePage < TO_INT(m_pagesList.size()))
 		{
-			PropertyPage* pActivePage = m_pageList.at(m_activePage);
-			if (pActivePage != nullptr)
+			std::shared_ptr<PropertyPage> pActivePage = m_pagesList.at(m_activePage);
+			if (pActivePage.get() != nullptr)
 			{
-				if (pActivePage->type() == PropertyPageType::List)
+				if (pActivePage->widgetType() == PropertyPageWidgetType::List)
 				{
 					QKeyEvent* keyEvent = static_cast<QKeyEvent* >(e);
 
@@ -1708,7 +1782,6 @@ bool DialogOptions::event(QEvent*  e)
 				}
 			}
 		}
-
 	}
 
 	return QDialog::event(e);

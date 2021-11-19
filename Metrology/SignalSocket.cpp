@@ -176,11 +176,11 @@ void SignalSocket::replySignalState(const char* replyData, quint32 replyDataSize
 
 void SignalSocket::configurationLoaded()
 {
-	HostAddressPort addr1 = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(SOCKET_SERVER_TYPE_PRIMARY);
-	HostAddressPort addr2 = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(SOCKET_SERVER_TYPE_RESERVE);
+	HostAddressPort addr1 = theOptions.socket().client(SocketType::AppDataSrv).address(ServerType::Primary);
+	HostAddressPort addr2 = theOptions.socket().client(SocketType::AppDataSrv).address(ServerType::Reserve);
 
-	HostAddressPort currAddr1 = serverAddressPort(SOCKET_SERVER_TYPE_PRIMARY);
-	HostAddressPort currAddr2 = serverAddressPort(SOCKET_SERVER_TYPE_RESERVE);
+	HostAddressPort currAddr1 = serverAddressPort(ServerType::Primary);
+	HostAddressPort currAddr2 = serverAddressPort(ServerType::Reserve);
 
 	if (	addr1.address32() == currAddr1.address32() && addr1.port() == currAddr1.port() &&
 			addr2.address32() == currAddr2.address32() && addr2.port() == currAddr2.port())

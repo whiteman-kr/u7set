@@ -13,13 +13,16 @@
 #include "../qtpropertybrowser/src/qtvariantproperty.h"
 #include "../qtpropertybrowser/src/qttreepropertybrowser.h"
 
+#include "../lib/PropertyEditor.h"
+#include "../CommonLib/PropertyObject.h"
+
 #include "Options.h"
 
 // ==============================================================================================
 
-enum OptionGroup
+enum PropertyGroupType
 {
-	NoOptionGroup = -1,
+	NoGroupType = -1,
 	Server = 0,
 	Module = 1,
 	Linearity = 2,
@@ -30,21 +33,21 @@ enum OptionGroup
 	Language = 7,
 };
 
-const int OptionGroupCount = 8;
+const int PropertyGroupTypeCount = 8;
 
-#define ERR_OPTION_GROUP(group) (static_cast<int>(group) < 0 || static_cast<int>(group) >= OptionGroupCount)
+#define ERR_PROPERTY_GROUP_TYPE(groupType) (static_cast<int>(groupType) < 0 || static_cast<int>(groupType) >= PropertyGroupTypeCount)
 
-QString groupCaption(int group);
+QString groupCaption(PropertyGroupType groupType);
 
 // ==============================================================================================
 
 
-enum OptionPage
+enum PropertyPageType
 {
-	NoOptionPage = -1,
-	Socket_Cfg = 0,
+	NoPageType = -1,
+	Socket_CfgSrv = 0,
 	Socket_AppDataSrv = 1,
-	Socket_Tuning = 2,
+	Socket_TuningSrv = 2,
 	Module_Measure = 3,
 	Linearity_Measure = 4,
 	Linearity_Point = 5,
@@ -58,64 +61,70 @@ enum OptionPage
 	Language_App = 13,
 };
 
-const int OptionPageCount = 14;
+const int PropertyPageTypeCount = 14;
 
-#define ERR_OPTION_PAGE(page) (static_cast<int>(page) < 0 || static_cast<int>(page) >= OptionPageCount)
+#define ERR_PROPERTY_PAGE_TYPE(pageType) (static_cast<int>(pageType) < 0 || static_cast<int>(pageType) >= PropertyPageTypeCount)
 
-QString pageCaption(OptionPage page);
-QString pageShortCaption(OptionPage page);
-OptionGroup groupByPage(OptionPage page);
+QString pageCaption(PropertyPageType pageType);
+QString pageShortCaption(PropertyPageType pageType);
+PropertyGroupType groupByPage(PropertyPageType pageType);
 
 // ==============================================================================================
 
-enum PropertyPageType
+enum PropertyPageWidgetType
 {
-	NoPageType = -1,
+	NoWidgetType = -1,
 	List = 0,
 	Dialog = 1,
 };
 
-const int PropertyPageTypeCount = 2;
+const int PropertyPageWidgetTypeCount = 2;
 
-#define ERR_PROPERTY_PAGE_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= PropertyPageTypeCount)
+#define ERR_PROPERTY_PAGE_WIDGET_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= PropertyPageWidgetTypeCount)
 
 // ----------------------------------------------------------------------------------------------
 
-class PropertyPage : public QObject
+class PropertyPage : public PropertyObject
 {
 	Q_OBJECT
 
 public:
 
-	PropertyPage(QtVariantPropertyManager* manager, QtVariantEditorFactory* factory, QtTreePropertyBrowser* editor);
-	explicit PropertyPage(QDialog* dialog);
+	PropertyPage(PropertyPageType pageType, QtVariantPropertyManager* manager, QtVariantEditorFactory* factory, QtTreePropertyBrowser* editor);
+	explicit PropertyPage(PropertyPageType pageType, QDialog* dialog);
 	virtual ~PropertyPage() override;
 
 public:
 
-	QWidget*					getWidget() { return m_pWidget; }
-	PropertyPageType			type() const { return m_type; }
+	QWidget* baseWidget() const { return m_baseWidget; }
+	PropertyPageWidgetType widgetType() const { return m_widgetType; }
 
-	OptionPage					m_page = OptionPage::NoOptionPage;
-	QTreeWidgetItem*			m_pTreeWidgetItem = nullptr;
+	PropertyPageType pageType() const { return m_pageType; }
+	void setPageType(PropertyPageType pageType) { m_pageType = pageType; }
 
-	QtTreePropertyBrowser*		treeEditor() { return m_pEditor; }
+	QTreeWidgetItem* pageTreeItem() const { return m_pageTreeItem; }
+	void setPageTreeItem(QTreeWidgetItem* pageTreeItem) { m_pageTreeItem = pageTreeItem; }
+
+	QtTreePropertyBrowser* treeEditor() { return m_pEditor; }
 
 private:
 
-	PropertyPageType			m_type = PropertyPageType::NoPageType;
+	QWidget* m_baseWidget = nullptr;
+	PropertyPageWidgetType m_widgetType = PropertyPageWidgetType::NoWidgetType;
 
-	QWidget*					m_pWidget = nullptr;
+	PropertyPageType m_pageType = PropertyPageType::NoPageType;
+	QTreeWidgetItem* m_pageTreeItem = nullptr;
 
-	// PropertyPageType::List
+
+	// PropertyPageWidgetType::List
 	//
-	QtVariantPropertyManager*	m_pManager = nullptr;
-	QtVariantEditorFactory*		m_pFactory = nullptr;
-	QtTreePropertyBrowser*		m_pEditor = nullptr;
+	QtVariantPropertyManager* m_pManager = nullptr;
+	QtVariantEditorFactory* m_pFactory = nullptr;
+	QtTreePropertyBrowser* m_pEditor = nullptr;
 
-	// PropertyPageType::Dialog
+	// PropertyPageWidgetType::Dialog
 	//
-	QDialog*					m_pDialog = nullptr;
+	QDialog* m_pDialog = nullptr;
 };
 
 // ==============================================================================================
@@ -131,65 +140,86 @@ public:
 
 public:
 
-	Options&					options() { return m_options; }
+	Options& options() { return m_options; }
 
 private:
 
-	Options						m_options;
+	//
+	//
+	Options m_options;
 
-	static OptionPage			m_activePage;
-	bool						setActivePage(OptionPage page);
+	//
+	//
+	static PropertyPageType m_activePage;
+	bool setActivePage(PropertyPageType pageType);
 
-	void						createInterface();
+	//
+	//
+	void createInterface();
 
-	QTreeWidget*				m_pPageTree = nullptr;
-	QHBoxLayout*				m_pagesLayout = nullptr;
-	QHBoxLayout*				m_buttonsLayout = nullptr;
+	QTreeWidget* m_pagesTree = nullptr;
+	QHBoxLayout* m_pagesLayout = nullptr;
 
-	QHBoxLayout*				createPages();
-	void						removePages();
+	ExtWidgets::PropertyEditor*	m_pPropertyEditor = nullptr;
 
-	QHBoxLayout*				createButtons();
+	//
+	//
+	std::vector<std::shared_ptr<PropertyPage>> m_pagesList;
 
-	std::vector<PropertyPage*>	m_pageList;
+	void createPropertyPages();
+	void removePropertyPages();
 
-	PropertyPage*				createPage(OptionPage page);
-	PropertyPage*				createPropertyList(OptionPage page);
-	PropertyPage*				createPropertyDialog(OptionPage page);
+	//
+	//
+	std::shared_ptr<PropertyPage> createPropertyPage(PropertyPageType pageType);
+	std::shared_ptr<PropertyPage> createPropertyPageList(PropertyPageType pageType);
+	std::shared_ptr<PropertyPage> createPropertyPageDialog(PropertyPageType pageType);
 
+	//
+	//
+	QMap<QtProperty*,int> m_propertyItemList;
+	QMap<QtProperty*,QVariant> m_propertyValueList;
 
-	QMap<QtProperty*,int>		m_propertyItemList;
-	QMap<QtProperty*,QVariant>	m_propertyValueList;
+	void appendProperty(QtProperty* property, PropertyPageType pageType, int param);
+	void expandProperty(QtTreePropertyBrowser* pEditor, PropertyPageType pageType, int param, bool expanded);
+	void clearProperty();
 
-	void						appendProperty(QtProperty* property, OptionPage page, int param);
-	void						expandProperty(QtTreePropertyBrowser* pEditor, OptionPage page, int param, bool expanded);
-	void						clearProperty();
+	QtProperty* m_currentPropertyItem = nullptr;
+	QVariant m_currentPropertyValue = 0;
 
-	QtProperty*					m_currentPropertyItem = nullptr;
-	QVariant					m_currentPropertyValue = 0;
+	void restoreProperty();
+	void applyProperty();
 
-	void						restoreProperty();
-	void						applyProperty();
-
-	void						loadSettings();
-	void						saveSettings();
+	//
+	//
+	void loadSettings();
+	void saveSettings();
 
 protected:
 
-	bool						event(QEvent* e) override;
+	bool event(QEvent* e) override;
 
 private slots:
 
-	void						onPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
-	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
+	//
+	//
+	void onPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+	void onPropertyValueChanged(QtProperty* property, const QVariant &value);
+	void onPropertyValueChanged_1(QList<std::shared_ptr<PropertyObject>> objects);
 
-	void						onBrowserItem(QtBrowserItem* pItem);
+	//
+	//
+	void onBrowserItem(QtBrowserItem* pItem);
 
-	void						updateServerPage();
-	void						updateLinearityPage(bool isDialog);
-	void						updateMeasureViewPage(bool isDialog);
+	//
+	//
+	void updateServerPage();
+	void updateLinearityPage(bool isDialog);
+	void updateMeasureViewPage(bool isDialog);
 
-	void						onOk();
+	//
+	//
+	void onOk();
 };
 
 // ==============================================================================================

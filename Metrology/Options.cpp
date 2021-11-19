@@ -18,7 +18,7 @@ CalibratorOption::CalibratorOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorOption::CalibratorOption(const QString& port, int type) :
+CalibratorOption::CalibratorOption(const QString& port, CalibratorType type) :
 	m_port(port),
 	m_type(type)
 {
@@ -102,7 +102,7 @@ void CalibratorsOption::load()
 		QString defaultPort = QString("COM%1").arg(QString::number(c+1));
 
 		QString port = s.value(QString("%1Calibrator%2/Port").arg(CALIBRATOR_OPTIONS_KEY).arg(c), defaultPort).toString();
-		int type = s.value(QString("%1Calibrator%2/Type").arg(CALIBRATOR_OPTIONS_KEY).arg(c), CalibratorType::Calys75).toInt();
+		CalibratorType type = static_cast<CalibratorType>(s.value(QString("%1Calibrator%2/Type").arg(CALIBRATOR_OPTIONS_KEY).arg(c), CalibratorType::Calys75).toInt());
 
 		if (ERR_CALIBRATOR_TYPE(type) == true)
 		{
@@ -149,9 +149,9 @@ SocketClientOption::SocketClientOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SocketClientOption::equipmentID(int serverType) const
+QString SocketClientOption::equipmentID(ServerType serverType) const
 {
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	if (ERR_SERVER_TYPE(serverType) == true)
 	{
 		assert(0);
 		return QString();
@@ -162,9 +162,9 @@ QString SocketClientOption::equipmentID(int serverType) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SocketClientOption::setEquipmentID(int serverType, const QString& equipmentID)
+void SocketClientOption::setEquipmentID(ServerType serverType, const QString& equipmentID)
 {
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	if (ERR_SERVER_TYPE(serverType) == true)
 	{
 		assert(0);
 		return;
@@ -175,9 +175,9 @@ void SocketClientOption::setEquipmentID(int serverType, const QString& equipment
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SocketClientOption::serverIP(int serverType) const
+QString SocketClientOption::serverIP(ServerType serverType) const
 {
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	if (ERR_SERVER_TYPE(serverType) == true)
 	{
 		assert(0);
 		return QString();
@@ -188,9 +188,9 @@ QString SocketClientOption::serverIP(int serverType) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SocketClientOption::setServerIP(int serverType, const QString& ip)
+void SocketClientOption::setServerIP(ServerType serverType, const QString& ip)
 {
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	if (ERR_SERVER_TYPE(serverType) == true)
 	{
 		assert(0);
 		return;
@@ -201,9 +201,9 @@ void SocketClientOption::setServerIP(int serverType, const QString& ip)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SocketClientOption::serverPort(int serverType) const
+int SocketClientOption::serverPort(ServerType serverType) const
 {
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	if (ERR_SERVER_TYPE(serverType) == true)
 	{
 		assert(0);
 		return 0;
@@ -214,9 +214,9 @@ int SocketClientOption::serverPort(int serverType) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SocketClientOption::setServerPort(int serverType, int port)
+void SocketClientOption::setServerPort(ServerType serverType, int port)
 {
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	if (ERR_SERVER_TYPE(serverType) == true)
 	{
 		assert(0);
 		return;
@@ -227,9 +227,9 @@ void SocketClientOption::setServerPort(int serverType, int port)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-HostAddressPort SocketClientOption::address(int serverType) const
+HostAddressPort SocketClientOption::address(ServerType serverType) const
 {
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	if (ERR_SERVER_TYPE(serverType) == true)
 	{
 		assert(0);
 		return HostAddressPort();
@@ -242,21 +242,21 @@ HostAddressPort SocketClientOption::address(int serverType) const
 
 void SocketClientOption::load()
 {
-	if (m_type < 0 || m_type >= SOCKET_TYPE_COUNT)
+	if (ERR_SOCKET_TYPE(m_type) == true)
 	{
 		return;
 	}
 
 	QSettings s;
 
-	QString key = SOCKET_OPTIONS_KEY + QString(SocketType[m_type]) + "/";
+	QString key = SOCKET_OPTIONS_KEY + socketCaption(m_type) + "/";
 
-	for(int t = 0; t < SOCKET_SERVER_TYPE_COUNT; t++)
+	for(int serverType = 0; serverType < ServerTypeCount; serverType++)
 	{
-		m_connectOption[t].equipmentID = s.value(QString("%1EquipmentID%2").arg(key).arg(t), "SYSTEM_RACKID_WS00" + QString(SocketDefaultID[m_type])).toString();
+		m_connectOption[serverType].equipmentID = s.value(QString("%1EquipmentID%2").arg(key).arg(serverType), "SYSTEM_RACKID_WS00" + socketDefaultID(m_type)).toString();
 
-		m_connectOption[t].serverIP = s.value(QString("%1ServerIP%2").arg(key).arg(t), "127.0.0.1").toString();
-		m_connectOption[t].serverPort = s.value(QString("%1ServerPort%2").arg(key).arg(t), SocketDefaultPort[m_type]).toInt();
+		m_connectOption[serverType].serverIP = s.value(QString("%1ServerIP%2").arg(key).arg(serverType), "127.0.0.1").toString();
+		m_connectOption[serverType].serverPort = s.value(QString("%1ServerPort%2").arg(key).arg(serverType), socketDefaultPort(m_type)).toInt();
 	}
 }
 
@@ -264,21 +264,21 @@ void SocketClientOption::load()
 
 void SocketClientOption::save()
 {
-	if (m_type < 0 || m_type >= SOCKET_TYPE_COUNT)
+	if (ERR_SOCKET_TYPE(m_type) == true)
 	{
 		return;
 	}
 
 	QSettings s;
 
-	QString key = SOCKET_OPTIONS_KEY + QString(SocketType[m_type]) + "/";
+	QString key = SOCKET_OPTIONS_KEY + socketCaption(m_type) + "/";
 
-	for(int t = 0; t < SOCKET_SERVER_TYPE_COUNT; t++)
+	for(int serverType = 0; serverType < ServerTypeCount; serverType++)
 	{
-		s.setValue(QString("%1EquipmentID%2").arg(key).arg(t), m_connectOption[t].equipmentID);
+		s.setValue(QString("%1EquipmentID%2").arg(key).arg(serverType), m_connectOption[serverType].equipmentID);
 
-		s.setValue(QString("%1ServerIP%2").arg(key).arg(t), m_connectOption[t].serverIP);
-		s.setValue(QString("%1ServerPort%2").arg(key).arg(t), m_connectOption[t].serverPort);
+		s.setValue(QString("%1ServerIP%2").arg(key).arg(serverType), m_connectOption[serverType].serverIP);
+		s.setValue(QString("%1ServerPort%2").arg(key).arg(serverType), m_connectOption[serverType].serverPort);
 	}
 }
 
@@ -286,7 +286,7 @@ void SocketClientOption::save()
 
 bool SocketClientOption::init(const MetrologySettings& settings)
 {
-	if (m_type < 0 || m_type >= SOCKET_TYPE_COUNT)
+	if (ERR_SOCKET_TYPE(m_type) == true)
 	{
 		return false;
 	}
@@ -295,16 +295,16 @@ bool SocketClientOption::init(const MetrologySettings& settings)
 
 	switch(m_type)
 	{
-		case SOCKET_TYPE_SIGNAL:
+		case SocketType::AppDataSrv:
 			{
-				CONNECTION_OPTION& primary = m_connectOption[SOCKET_SERVER_TYPE_PRIMARY];
+				CONNECTION_OPTION& primary = m_connectOption[ServerType::Primary];
 
 				primary.isValid = settings.appDataServicePropertyIsValid1;
 				primary.equipmentID = settings.appDataServiceID1;
 				primary.serverIP = settings.appDataServiceIP1;
 				primary.serverPort = settings.appDataServicePort1;
 
-				CONNECTION_OPTION& reserve = m_connectOption[SOCKET_SERVER_TYPE_RESERVE];
+				CONNECTION_OPTION& reserve = m_connectOption[ServerType::Reserve];
 
 				reserve.isValid = settings.appDataServicePropertyIsValid2;
 				reserve.equipmentID = settings.appDataServiceID2;
@@ -316,9 +316,9 @@ bool SocketClientOption::init(const MetrologySettings& settings)
 
 			break;
 
-		case SOCKET_TYPE_TUNING:
+		case SocketType::TuningSrv:
 			{
-				CONNECTION_OPTION& primary = m_connectOption[SOCKET_SERVER_TYPE_PRIMARY];
+				CONNECTION_OPTION& primary = m_connectOption[ServerType::Primary];
 
 				primary.isValid = settings.tuningServicePropertyIsValid;
 				primary.equipmentID = settings.softwareMetrologyID;
@@ -336,6 +336,85 @@ bool SocketClientOption::init(const MetrologySettings& settings)
 	}
 
 	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString serverCaption(ServerType type)
+{
+	QString caption;
+
+	switch (type)
+	{
+		case ServerType::Primary:	caption = QT_TRANSLATE_NOOP("Options", "Primary");	break;
+		case ServerType::Reserve:	caption = QT_TRANSLATE_NOOP("Options", "Reserve");	break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return qApp->translate("Options", caption.toUtf8());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString socketCaption(SocketType type)
+{
+	QString caption;
+
+	switch (type)
+	{
+		case SocketType::CfgSrv:		caption = QT_TRANSLATE_NOOP("Options", "CfgSrv");		break;
+		case SocketType::AppDataSrv:	caption = QT_TRANSLATE_NOOP("Options", "AppDataSrv");	break;
+		case SocketType::TuningSrv:		caption = QT_TRANSLATE_NOOP("Options", "TuningSrv");	break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return qApp->translate("Options", caption.toUtf8());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString socketDefaultID(SocketType type)
+{
+	QString caption;
+
+	switch (type)
+	{
+		case SocketType::CfgSrv:		caption = "_METROLOGY";	break;
+		case SocketType::AppDataSrv:	caption = "_ADS";		break;
+		case SocketType::TuningSrv:		caption = "_METROLOGY";	break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("Options", "_ID");
+	}
+
+	return qApp->translate("Options", caption.toUtf8());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int socketDefaultPort(SocketType type)
+{
+	int port;
+
+	switch (type)
+	{
+		case SocketType::CfgSrv:		port = PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST;	break;
+		case SocketType::AppDataSrv:	port = PORT_APP_DATA_SERVICE_CLIENT_REQUEST;		break;
+		case SocketType::TuningSrv:		port = PORT_TUNING_SERVICE_CLIENT_REQUEST;			break;
+
+		default:
+			assert(0);
+			port = Socket::PORT_LOWEST;
+	}
+
+	return port;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -364,9 +443,9 @@ SocketOption::~SocketOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SocketClientOption SocketOption::client(int socketType) const
+SocketClientOption SocketOption::client(SocketType socketType) const
 {
-	if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
+	if (ERR_SOCKET_TYPE(socketType) == true)
 	{
 		assert(0);
 		return SocketClientOption();
@@ -378,9 +457,9 @@ SocketClientOption SocketOption::client(int socketType) const
 // -------------------------------------------------------------------------------------------------------------------
 
 
-void SocketOption::setClient(int socketType, const SocketClientOption& socketClient)
+void SocketOption::setClient(SocketType socketType, const SocketClientOption& socketClient)
 {
-	if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
+	if (ERR_SOCKET_TYPE(socketType) == true)
 	{
 		assert(0);
 		return;
@@ -393,10 +472,10 @@ void SocketOption::setClient(int socketType, const SocketClientOption& socketCli
 
 void SocketOption::load()
 {
-	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
+	for(int socketType = 0; socketType < SocketTypeCount; socketType++)
 	{
-		m_client[t].setSocketType(t);
-		m_client[t].load();
+		m_client[socketType].setSocketType(static_cast<SocketType>(socketType));
+		m_client[socketType].load();
 	}
 }
 
@@ -404,9 +483,9 @@ void SocketOption::load()
 
 void SocketOption::save()
 {
-	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
+	for(int socketType = 0; socketType < SocketTypeCount; socketType++)
 	{
-		m_client[t].save();
+		m_client[socketType].save();
 	}
 }
 
@@ -414,9 +493,9 @@ void SocketOption::save()
 
 SocketOption& SocketOption::operator=(const SocketOption& from)
 {
-	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
+	for(int socketType = 0; socketType < SocketTypeCount; socketType++)
 	{
-		m_client[t] = from.m_client[t];
+		m_client[socketType] = from.m_client[socketType];
 	}
 
 	return *this;
@@ -1616,14 +1695,20 @@ bool Options::readFromXml(const QByteArray& fileData)
 		return false;
 	}
 
-	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
+	for(int type = 0; type < SocketTypeCount; type++)
 	{
-		if (t == SOCKET_TYPE_CONFIG)
+		SocketType socketType = static_cast<SocketType>(type);
+		if (ERR_SOCKET_TYPE(socketType) == true)
 		{
 			continue;
 		}
 
-		SocketClientOption sco = m_socket.client(t);
+		if (socketType == SocketType::CfgSrv)
+		{
+			continue;
+		}
+
+		SocketClientOption sco = m_socket.client(socketType);
 
 		result &= sco.init(m_settings);
 
@@ -1632,7 +1717,7 @@ bool Options::readFromXml(const QByteArray& fileData)
 			continue;
 		}
 
-		m_socket.setClient(t, sco);
+		m_socket.setClient(socketType, sco);
 	}
 
 	return result;

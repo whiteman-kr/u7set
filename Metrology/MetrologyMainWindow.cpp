@@ -1933,8 +1933,8 @@ void MainWindow::showOptions()
 	//
 	bool reconnectCS = false;
 
-	if (options.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) ||
-		options.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY))
+	if (options.socket().client(SocketType::CfgSrv).equipmentID(ServerType::Primary) != theOptions.socket().client(SocketType::CfgSrv).equipmentID(ServerType::Primary) ||
+		options.socket().client(SocketType::CfgSrv).address(ServerType::Primary) != theOptions.socket().client(SocketType::CfgSrv).address(ServerType::Primary))
 	{
 		reconnectCS = true;
 	}
@@ -1951,8 +1951,8 @@ void MainWindow::showOptions()
 
 		if (m_pConfigSocket != nullptr)
 		{
-			m_pConfigSocket->reconncect(theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY),
-										theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY));
+			m_pConfigSocket->reconncect(theOptions.socket().client(SocketType::CfgSrv).equipmentID(ServerType::Primary),
+										theOptions.socket().client(SocketType::CfgSrv).address(ServerType::Primary));
 		}
 	}
 
@@ -2699,7 +2699,7 @@ void MainWindow::configSocketUnknownClient()
 	QMessageBox::critical(this,
 						  windowTitle(),
 						  tr("Configuration Service does not recognize EquipmentID \"%1\" for software \"Metrology\"")
-						  .arg(theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY)));
+						  .arg(theOptions.socket().client(SocketType::CfgSrv).equipmentID(ServerType::Primary)));
 	return;
 }
 
@@ -2792,13 +2792,13 @@ void MainWindow::signalSocketConnected()
 		return;
 	}
 
-	int serverType = m_pSignalSocket->selectedServerIndex();
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	ServerType serverType = static_cast<ServerType>(m_pSignalSocket->selectedServerIndex());
+	if (ERR_SERVER_TYPE(serverType) == true)
 	{
 		return;
 	}
 
-	HostAddressPort signalSocketAddress = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(serverType);
+	HostAddressPort signalSocketAddress = theOptions.socket().client(SocketType::AppDataSrv).address(serverType);
 
 	m_statusConnectToAppDataServer->setText(tr(" AppDataService: on "));
 	m_statusConnectToAppDataServer->setStyleSheet("background-color: rgb(0x0, 0x0, 0x0);");
@@ -2833,15 +2833,16 @@ QString MainWindow::tuningSocketConnectedStateStr()
 		return QString();
 	}
 
-	int serverType = m_pTuningSocket->selectedServerIndex();
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+
+	ServerType serverType = static_cast<ServerType>(m_pTuningSocket->selectedServerIndex());
+	if (ERR_SERVER_TYPE(serverType) == true)
 	{
 		return QString();
 	}
 
 	QString connectedState;
 
-	HostAddressPort tuningSocketAddress = theOptions.socket().client(SOCKET_TYPE_TUNING).address(serverType);
+	HostAddressPort tuningSocketAddress = theOptions.socket().client(SocketType::TuningSrv).address(serverType);
 
 	connectedState = tr("Connected: %1 : %2\n").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port());
 
@@ -3227,8 +3228,8 @@ void MainWindow::runConfigSocket()
 {
 	// init config socket thread
 	//
-	HostAddressPort configSocketAddress = theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY);
-	m_softwareInfo.setEquipmentID(theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY));
+	HostAddressPort configSocketAddress = theOptions.socket().client(SocketType::CfgSrv).address(ServerType::Primary);
+	m_softwareInfo.setEquipmentID(theOptions.socket().client(SocketType::CfgSrv).equipmentID(ServerType::Primary));
 	m_pConfigSocket = new ConfigSocket(m_softwareInfo, configSocketAddress);
 
 	connect(m_pConfigSocket, &ConfigSocket::socketConnected, this, &MainWindow::configSocketConnected, Qt::QueuedConnection);
@@ -3265,9 +3266,9 @@ void MainWindow::runSignalSocket()
 {
 	// init signal socket thread
 	//
-	HostAddressPort signalSocketAddress1 = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(SOCKET_SERVER_TYPE_PRIMARY);
-	HostAddressPort signalSocketAddress2 = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(SOCKET_SERVER_TYPE_RESERVE);
-	m_softwareInfo.setEquipmentID(theOptions.socket().client(SOCKET_TYPE_SIGNAL).equipmentID(SOCKET_SERVER_TYPE_PRIMARY));
+	HostAddressPort signalSocketAddress1 = theOptions.socket().client(SocketType::AppDataSrv).address(ServerType::Primary);
+	HostAddressPort signalSocketAddress2 = theOptions.socket().client(SocketType::AppDataSrv).address(ServerType::Reserve);
+	m_softwareInfo.setEquipmentID(theOptions.socket().client(SocketType::AppDataSrv).equipmentID(ServerType::Primary));
 
 	m_pSignalSocket = new SignalSocket(m_softwareInfo, signalSocketAddress1, signalSocketAddress2);
 	m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
@@ -3301,8 +3302,8 @@ void MainWindow::runTuningSocket()
 {
 	// init tuning socket thread
 	//
-	HostAddressPort tuningSocketAddress = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_PRIMARY);
-	m_softwareInfo.setEquipmentID(theOptions.socket().client(SOCKET_TYPE_TUNING).equipmentID(SOCKET_SERVER_TYPE_PRIMARY));
+	HostAddressPort tuningSocketAddress = theOptions.socket().client(SocketType::TuningSrv).address(ServerType::Primary);
+	m_softwareInfo.setEquipmentID(theOptions.socket().client(SocketType::TuningSrv).equipmentID(ServerType::Primary));
 
 	m_pTuningSocket = new TuningSocket(m_softwareInfo, tuningSocketAddress);
 	m_pTuningSocketThread = new SimpleThread(m_pTuningSocket);

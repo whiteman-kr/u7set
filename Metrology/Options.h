@@ -32,23 +32,23 @@ class CalibratorOption
 public:
 
 	CalibratorOption();
-	CalibratorOption(const QString& port, int type);
+	CalibratorOption(const QString& port, CalibratorType type);
 	virtual ~CalibratorOption() {}
 
 public:
 
-	bool				isValid() const;
+	bool isValid() const;
 
-	QString				port() const { return m_port; }
-	void				setPort(const QString& port) { m_port = port; }
+	QString port() const { return m_port; }
+	void setPort(const QString& port) { m_port = port; }
 
-	int					type() const { return m_type; }
-	void				setType(int type) { m_type = type; }
+	CalibratorType type() const { return m_type; }
+	void setType(CalibratorType type) { m_type = type; }
 
 private:
 
-	QString				m_port;
-	int					m_type = CalibratorType::Calys75;
+	QString m_port;
+	CalibratorType m_type = CalibratorType::Calys75;
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -65,21 +65,21 @@ public:
 
 public:
 
-	CalibratorOption	calibrator(int channel) const;
-	void				setCalibrator(int channel, const CalibratorOption& calibrator);
+	CalibratorOption calibrator(int channel) const;
+	void setCalibrator(int channel, const CalibratorOption& calibrator);
 
 	//
 	//
-	void				load();
-	void				save();
+	void load();
+	void save();
 
 	//
 	//
-	CalibratorsOption&	operator=(const CalibratorsOption& from);
+	CalibratorsOption& operator=(const CalibratorsOption& from);
 
 private:
 
-	CalibratorOption	m_calibrator[Metrology::ChannelCount];
+	CalibratorOption m_calibrator[Metrology::ChannelCount];
 };
 
 
@@ -89,17 +89,36 @@ private:
 
 // ----------------------------------------------------------------------------------------------
 
-const char* const		SocketServerType[] =
+enum ServerType
 {
-						QT_TRANSLATE_NOOP("Options.h", "Primary"),
-						QT_TRANSLATE_NOOP("Options.h", "Reserve"),
+	NoServerType = -1,
+	Primary = 0,
+	Reserve = 1,
 };
 
-const int				SOCKET_SERVER_TYPE_COUNT = sizeof(SocketServerType)/sizeof(SocketServerType[0]);
+const int ServerTypeCount = 2;
 
-const int				SOCKET_SERVER_TYPE_UNDEFINED = -1,
-						SOCKET_SERVER_TYPE_PRIMARY = 0,
-						SOCKET_SERVER_TYPE_RESERVE = 1;
+#define ERR_SERVER_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= ServerTypeCount)
+
+QString serverCaption(ServerType type);
+
+// ----------------------------------------------------------------------------------------------
+
+enum SocketType
+{
+	NoSocketType = -1,
+	CfgSrv = 0,
+	AppDataSrv = 1,
+	TuningSrv = 2,
+};
+
+const int SocketTypeCount = 3;
+
+#define ERR_SOCKET_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= SocketTypeCount)
+
+QString socketCaption(SocketType type);
+QString socketDefaultID(SocketType type);
+int socketDefaultPort(SocketType type);
 
 // ----------------------------------------------------------------------------------------------
 
@@ -130,7 +149,7 @@ struct CONNECTION_OPTION
 
 	QString				equipmentID;
 	QString				serverIP;
-	int					serverPort = 0;
+	int					serverPort = Socket::PORT_LOWEST;
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -144,65 +163,37 @@ public:
 
 public:
 
-	int					socketType() const { return m_type; }
-	void				setSocketType(int socketType) { m_type = socketType; }
+	SocketType socketType() const { return m_type; }
+	void setSocketType(SocketType socketType) { m_type = socketType; }
 
-	QString				equipmentID(int serverType) const;
-	void				setEquipmentID(int serverType, const QString& equipmentID);
+	QString equipmentID(ServerType serverType) const;
+	void setEquipmentID(ServerType serverType, const QString& equipmentID);
 
-	QString				serverIP(int serverType) const;
-	void				setServerIP(int serverType, const QString& ip);
+	QString serverIP(ServerType serverType) const;
+	void setServerIP(ServerType serverType, const QString& ip);
 
-	int					serverPort(int serverType) const;
-	void				setServerPort(int serverType, int port);
+	int serverPort(ServerType serverType) const;
+	void setServerPort(ServerType serverType, int port);
 
-	HostAddressPort		address(int serverType) const;
+	HostAddressPort address(ServerType serverType) const;
 
 	//
 	//
-	void				load();
-	void				save();
+	void load();
+	void save();
 
-	bool				init(const MetrologySettings& settings);
+	bool init(const MetrologySettings& settings);
 
 private:
 
-	int					m_type = SOCKET_SERVER_TYPE_UNDEFINED;
+	SocketType m_type = SocketType::NoSocketType;
 
-	CONNECTION_OPTION	m_connectOption[SOCKET_SERVER_TYPE_COUNT];
+	CONNECTION_OPTION m_connectOption[ServerTypeCount];
 };
 
 // ==============================================================================================
 
-const char* const		SocketType[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "ConfigSocket"),
-						QT_TRANSLATE_NOOP("Options.h", "SignalSocket"),
-						QT_TRANSLATE_NOOP("Options.h", "TuningSocket"),
-};
-
-const int				SOCKET_TYPE_COUNT = sizeof(SocketType)/sizeof(SocketType[0]);
-
-const int				SOCKET_TYPE_UNDEFINED = -1,
-						SOCKET_TYPE_CONFIG = 0,
-						SOCKET_TYPE_SIGNAL = 1,
-						SOCKET_TYPE_TUNING = 2;
-
-const char* const		SocketDefaultID[SOCKET_TYPE_COUNT] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "_METROLOGY"),	// for ConfigSocket
-						QT_TRANSLATE_NOOP("Options.h", "_ADS"),			// for SignalSocket
-						QT_TRANSLATE_NOOP("Options.h", "_METROLOGY"),	// for TuningSocket
-};
-
-const int				SocketDefaultPort[SOCKET_TYPE_COUNT] =
-{
-						PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST,		// ConfigSocket
-						PORT_APP_DATA_SERVICE_CLIENT_REQUEST,			// SignalSocket
-						PORT_TUNING_SERVICE_CLIENT_REQUEST,				// TuningSocket
-};
-
-const char* const		SocketClientParamName[SOCKET_TYPE_COUNT][SOCKET_CLIENT_PARAM_COUNT] =
+const char* const		SocketClientParamName[SocketTypeCount][SOCKET_CLIENT_PARAM_COUNT] =
 {
 					{
 						QT_TRANSLATE_NOOP("Options.h", "EquipmentID of software \"Metrology\""),
@@ -244,21 +235,21 @@ public:
 
 public:
 
-	SocketClientOption	client(int socketType) const;
-	void				setClient(int socketType, const SocketClientOption& client);
+	SocketClientOption client(SocketType socketType) const;
+	void setClient(SocketType socketType, const SocketClientOption& client);
 
 	//
 	//
-	void				load();
-	void				save();
+	void load();
+	void save();
 
 	//
 	//
-	SocketOption&		operator=(const SocketOption& from);
+	SocketOption& operator=(const SocketOption& from);
 
 private:
 
-	SocketClientOption	m_client[SOCKET_TYPE_COUNT];
+	SocketClientOption m_client[SocketTypeCount];
 };
 
 // ==============================================================================================

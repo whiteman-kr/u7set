@@ -75,8 +75,6 @@ void DialogProjectProperty::createPropertyList()
 
 	setWindowTitle(tr("Project - %1").arg(m_info.projectName()));
 
-	QVBoxLayout* mainLayout = new QVBoxLayout;
-
 	// create property list
 	//
 	m_pPropertyEditor = new ExtWidgets::PropertyEditor(this);
@@ -90,20 +88,17 @@ void DialogProjectProperty::createPropertyList()
 
 	//
 	//
-	QList<std::shared_ptr<PropertyObject>> projectObjects;
-
+	QList<std::shared_ptr<PropertyObject>> propertyObjects;
 	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_info);
-
-	projectObjects.push_back(property);
-
-	m_pPropertyEditor->setObjects(projectObjects);
+	propertyObjects.push_back(property);
+	m_pPropertyEditor->setObjects(propertyObjects);
 
 	// add layouts
 	//
+	QVBoxLayout* mainLayout = new QVBoxLayout;
+
 	mainLayout->addWidget(m_pPropertyEditor);
 
-	//
-	//
 	setLayout(mainLayout);
 }
 
@@ -256,8 +251,6 @@ void DialogRackProperty::createPropertyList()
 
 	setWindowTitle(tr("Property of rack - %1").arg(m_rack.caption()));
 
-	QVBoxLayout* mainLayout = new QVBoxLayout;
-
 	// create property list
 	//
 	m_pPropertyEditor = new ExtWidgets::PropertyEditor(this);
@@ -269,17 +262,14 @@ void DialogRackProperty::createPropertyList()
 	m_pPropertyEditor->setSplitterPosition(150);
 	m_pPropertyEditor->setReadOnly(true);
 
-	//
-	//
-	QList<std::shared_ptr<PropertyObject>> projectObjects;
-
-	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_rack, &m_rackBase);
-
-	projectObjects.push_back(property);
-
-	m_pPropertyEditor->setObjects(projectObjects);
-
 	connect(m_pPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogRackProperty::onPropertyValueChanged);
+
+	//
+	//
+	QList<std::shared_ptr<PropertyObject>> propertyObjects;
+	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_rack, &m_rackBase);
+	propertyObjects.push_back(property);
+	m_pPropertyEditor->setObjects(propertyObjects);
 
 	// create buttons ok and cancel
 	//
@@ -290,6 +280,8 @@ void DialogRackProperty::createPropertyList()
 
 	// add layouts
 	//
+	QVBoxLayout* mainLayout = new QVBoxLayout;
+
 	mainLayout->addWidget(m_pPropertyEditor);
 	mainLayout->addWidget(m_buttonBox);
 
@@ -531,17 +523,14 @@ void DialogRackGroupProperty::createPropertyList()
 	m_pPropertyEditor->setSplitterPosition(150);
 	m_pPropertyEditor->setReadOnly(false);
 
-	//
-	//
-	QList<std::shared_ptr<PropertyObject>> projectObjects;
-
-	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_rackBase);
-
-	projectObjects.push_back(property);
-
-	m_pPropertyEditor->setObjects(projectObjects);
-
 	connect(m_pPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogRackGroupProperty::onPropertyValueChanged);
+
+	//
+	//
+	QList<std::shared_ptr<PropertyObject>> propertyObjects;
+	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_rackBase);
+	propertyObjects.push_back(property);
+	m_pPropertyEditor->setObjects(propertyObjects);
 
 	// create buttons ok and cancel
 	//
@@ -557,6 +546,8 @@ void DialogRackGroupProperty::createPropertyList()
 	listLayout->addWidget(m_pGroupView);
 	listLayout->addWidget(m_pPropertyEditor);
 
+	//
+	//
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	mainLayout->setMenuBar(m_pMenuBar);
@@ -565,6 +556,8 @@ void DialogRackGroupProperty::createPropertyList()
 
 	setLayout(mainLayout);
 
+	//
+	//
 	updateGroupList();
 	updateRackList();
 }
@@ -1330,21 +1323,8 @@ void DialogSignalProperty::createPropertyList()
 
 	setWindowTitle(tr("Property of signal - %1").arg(m_param.customAppSignalID()));
 
-	//
-	//
-	QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
-	QStringList electricUnitList;
-	for(int u = 0; u < meu.keyCount(); u++)
-	{
-		electricUnitList.append(meu.key(u));
-	}
-
-
-	QVBoxLayout* mainLayout = new QVBoxLayout;
-
 	// create tab
 	//
-
 	m_pTab = new QTabWidget();
 	m_pTab->setTabPosition(QTabWidget::North);
 
@@ -1359,17 +1339,14 @@ void DialogSignalProperty::createPropertyList()
 	m_pPropertyEditor->setSplitterPosition(350);
 	m_pPropertyEditor->setReadOnly(false);
 
-	//
-	//
-	QList<std::shared_ptr<PropertyObject>> projectObjects;
-
-	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_param);
-
-	projectObjects.push_back(property);
-
-	m_pPropertyEditor->setObjects(projectObjects);
-
 	connect(m_pPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogSignalProperty::onPropertyValueChanged);
+
+	//
+	//
+	QList<std::shared_ptr<PropertyObject>> propertyObjects;
+	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_param);
+	propertyObjects.push_back(property);
+	m_pPropertyEditor->setObjects(propertyObjects);
 
 	// create compartor list
 	//
@@ -1500,9 +1477,10 @@ void DialogSignalProperty::createPropertyList()
 
 	// add layouts
 	//
+	QVBoxLayout* mainLayout = new QVBoxLayout;
+
 	mainLayout->addWidget(m_pTab);
 	mainLayout->addWidget(m_buttonBox);
-
 
 	setLayout(mainLayout);
 }
@@ -1554,25 +1532,25 @@ void DialogSignalProperty::onPropertyValueChanged(QList<std::shared_ptr<Property
 //{
 //	Q_UNUSED(item)
 
-////	for qt6
-////
-////	if (item == nullptr)
-////	{
-////		return;
-////	}
+//	for qt6
+//
+//	if (item == nullptr)
+//	{
+//		return;
+//	}
 
-////	if (m_pPropertyEditor == nullptr)
-////	{
-////		return;
-////	}
+//	if (m_pPropertyEditor == nullptr)
+//	{
+//		return;
+//	}
 
-////	for(int g = 0; g < SIGNAL_PROPERTY_CATEGORY_COUNT; g++)
-////	{
-////		if (m_browserItemList[g] == item)
-////		{
-////			m_showGroupHeader[g] = m_pPropertyEditor->isExpanded(item);
-////		}
-////	}
+//	for(int g = 0; g < SIGNAL_PROPERTY_CATEGORY_COUNT; g++)
+//	{
+//		if (m_browserItemList[g] == item)
+//		{
+//			m_showGroupHeader[g] = m_pPropertyEditor->isExpanded(item);
+//		}
+//	}
 //}
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2028,19 +2006,6 @@ void DialogComparatorProperty::createPropertyList()
 
 	setWindowTitle(tr("Property of comparator"));
 
-	//
-	//
-	UnitsConvertor uc;
-
-	QMetaEnum meu = QMetaEnum::fromType<E::CmpType>();
-	QStringList cmpTypeList;
-	for(int u = 0; u < meu.keyCount(); u++)
-	{
-		cmpTypeList.append(meu.key(u));
-	}
-
-	QVBoxLayout* mainLayout = new QVBoxLayout;
-
 	// create property list
 	//
 	m_pPropertyEditor = new ExtWidgets::PropertyEditor(this);
@@ -2052,17 +2017,14 @@ void DialogComparatorProperty::createPropertyList()
 	m_pPropertyEditor->setSplitterPosition(250);
 	m_pPropertyEditor->setReadOnly(false);
 
-	//
-	//
-	QList<std::shared_ptr<PropertyObject>> projectObjects;
-
-	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_comparatorEx);
-
-	projectObjects.push_back(property);
-
-	m_pPropertyEditor->setObjects(projectObjects);
-
 	connect(m_pPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogComparatorProperty::onPropertyValueChanged);
+
+	//
+	//
+	QList<std::shared_ptr<PropertyObject>> propertyObjects;
+	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(&m_comparatorEx);
+	propertyObjects.push_back(property);
+	m_pPropertyEditor->setObjects(propertyObjects);
 
 	// show or hide property categories for qt6
 	//
@@ -2100,6 +2062,8 @@ void DialogComparatorProperty::createPropertyList()
 
 	// add layouts
 	//
+	QVBoxLayout* mainLayout = new QVBoxLayout;
+
 	mainLayout->addWidget(m_pPropertyEditor);
 	mainLayout->addWidget(m_buttonBox);
 
@@ -2363,18 +2327,6 @@ void DialogMeasureProperty::createPropertyList()
 
 	setWindowTitle(tr("Property of measurement - %1").arg(m_pMeasurement->customAppSignalID()));
 
-	//
-	//
-	QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
-	QStringList electricUnitList;
-	for(int u = 0; u < meu.keyCount(); u++)
-	{
-		electricUnitList.append(meu.key(u));
-	}
-
-
-	QVBoxLayout* mainLayout = new QVBoxLayout;
-
 	// create property list
 	//
 	m_pPropertyEditor = new ExtWidgets::PropertyEditor(this);
@@ -2386,17 +2338,14 @@ void DialogMeasureProperty::createPropertyList()
 	m_pPropertyEditor->setSplitterPosition(300);
 	m_pPropertyEditor->setReadOnly(false);
 
-	//
-	//
-	QList<std::shared_ptr<PropertyObject>> projectObjects;
-
-	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(m_pMeasurement);
-
-	projectObjects.push_back(property);
-
-	m_pPropertyEditor->setObjects(projectObjects);
-
 	connect(m_pPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogMeasureProperty::onPropertyValueChanged);
+
+	//
+	//
+	QList<std::shared_ptr<PropertyObject>> propertyObjects;
+	std::shared_ptr<PropertyPattern> property = std::make_shared<PropertyPattern>(m_pMeasurement);
+	propertyObjects.push_back(property);
+	m_pPropertyEditor->setObjects(propertyObjects);
 
 	// create buttons ok and cancel
 	//
@@ -2407,6 +2356,8 @@ void DialogMeasureProperty::createPropertyList()
 
 	// add layouts
 	//
+	QVBoxLayout* mainLayout = new QVBoxLayout;
+
 	mainLayout->addWidget(m_pPropertyEditor);
 	mainLayout->addWidget(m_buttonBox);
 
