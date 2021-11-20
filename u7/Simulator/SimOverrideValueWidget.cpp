@@ -122,15 +122,35 @@ namespace SimOverrideUI
 
 		// Save script to user settings
 		//
-		switch (method)
+		if (db()->isProjectOpened() == true)	// Project can be closed
 		{
-		case Sim::OverrideSignalMethod::Value:
-			db()->setUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), "Value", this);
-			break;
-		case Sim::OverrideSignalMethod::Script:
-			db()->setUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), "Script", this);
-			db()->setUserProperty(QString("Sim::OverrideScript::%1").arg(m_signal.appSignalId()), value.toString(), this);
-			break;
+			switch (method)
+			{
+			case Sim::OverrideSignalMethod::Value:
+				db()->setUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), "Value", this);
+				break;
+			case Sim::OverrideSignalMethod::Script:
+				db()->setUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), "Script", this);
+				db()->setUserProperty(QString("Sim::OverrideScript::%1").arg(m_signal.appSignalId()), value.toString(), this);
+				break;
+			}
+		}
+		else
+		{
+			// Project is closed, save to regular QSettings
+			//
+			QString key = QString("OverrideMethodWidget/%1/%2/").arg(m_simulator->projectName(), m_signal.appSignalId());
+
+			switch (method)
+			{
+			case Sim::OverrideSignalMethod::Value:
+				QSettings{}.setValue(key + "OverrideMethod", "Value");
+				break;
+			case Sim::OverrideSignalMethod::Script:
+				QSettings{}.setValue(key + "OverrideMethod", "Script");
+				QSettings{}.setValue(key + "OverrideScript", value.toString());
+				break;
+			}
 		}
 
 		return;
@@ -376,7 +396,15 @@ namespace SimOverrideUI
 		m_scriptEdit->setModified(false);
 
 		QString lastScript;
-		db()->getUserProperty(QString("Sim::OverrideScript::%1").arg(m_signal.appSignalId()), &lastScript, this);
+		if (db()->isProjectOpened() == true)
+		{
+			db()->getUserProperty(QString("Sim::OverrideScript::%1").arg(m_signal.appSignalId()), &lastScript, this);
+		}
+		else
+		{
+			QString key = QString("OverrideMethodWidget/%1/%2/").arg(m_simulator->projectName(), m_signal.appSignalId());
+			lastScript = QSettings{}.value(key + "OverrideScript").toString();
+		}
 
 		if (lastScript.isEmpty() == false)
 		{
@@ -835,7 +863,16 @@ namespace SimOverrideUI
 		// Select last selected method
 		//
 		QString lastMethod;
-		db()->getUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), &lastMethod, this);
+
+		if (db()->isProjectOpened() == true)
+		{
+			db()->getUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), &lastMethod, this);
+		}
+		else
+		{
+			QString key = QString("OverrideMethodWidget/%1/%2/").arg(m_simulator->projectName(), m_signal.appSignalId());
+			lastMethod = QSettings{}.value(key + "OverrideMethod", "Value").toString();
+		}
 
 		if (lastMethod == "Value")
 		{
