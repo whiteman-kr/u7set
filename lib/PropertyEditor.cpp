@@ -12,6 +12,8 @@
 #include <QDesktopServices>
 #include <QScrollBar>
 
+#include <algorithm>
+
 #ifdef _MSC_VER
 	#pragma warning(push)
 	#pragma warning(disable : 4244)
@@ -94,7 +96,7 @@ namespace ExtWidgets
 		return QString("QVector<QColor> [%1 items]").arg(static_cast<int>(v.size()));
 	}
 
-	QString PropertyTools::propertyValueText(Property* p, int row)
+	QString PropertyTools::propertyValueText(Property* p, int row, int maxDecimalPlaces)
 	{
 		QVariant value = p->value();
 
@@ -140,7 +142,7 @@ namespace ExtWidgets
 			return value.toString();
 		}
 
-		char numberFormat = p->precision() > 5 ? 'g' : 'f';
+		char numberFormat = p->precision() > maxDecimalPlaces ? 'g' : 'f';
 
 		if (type == qMetaTypeId<Afb::AfbParamValue>())
 		{
@@ -318,6 +320,16 @@ namespace ExtWidgets
 	void PropertyEditorBase::setReadOnly(bool readOnly)
 	{
 		m_readOnly = readOnly;
+	}
+
+	int PropertyEditorBase::maxDecimaplPlaces() const
+	{
+		return m_maxDecimaplPlaces;
+	}
+
+	void PropertyEditorBase::setMaxDecimaplPlaces(int value)
+	{
+		m_maxDecimaplPlaces = std::clamp<int>(value, 0, std::numeric_limits<int>::max());
 	}
 
 	QString PropertyEditorBase::defaultSpecificPropertyCategory() const
@@ -2603,7 +2615,7 @@ namespace ExtWidgets
 
 		m_lineEdit->setReadOnly(readOnly == true);
 
-		char numberFormat = property->precision() > 5 ? 'g' : 'f';
+		char numberFormat = property->precision() > m_propertyEditorBase->maxDecimaplPlaces() ? 'g' : 'f';
 
 		switch (m_userType)
 		{
@@ -3673,7 +3685,7 @@ namespace ExtWidgets
 
 		if (po.sameValue == true)
 		{
-			text = PropertyTools::propertyValueText(po.property.get(), -1);
+			text = PropertyTools::propertyValueText(po.property.get(), -1, maxDecimaplPlaces());
 		}
 		else
 		{

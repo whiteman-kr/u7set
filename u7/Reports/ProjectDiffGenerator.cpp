@@ -2258,6 +2258,8 @@ void ProjectDiffGenerator::comparePropertyObjects(const PropertyObject& sourceOb
 		return;
 	}
 
+	const int maxDecimalPlaces = 5;
+
 	std::vector<std::shared_ptr<Property>> sourceProperties = sourceObject.properties();
 	std::vector<std::shared_ptr<Property>> targetProperties = targetObject.properties();
 
@@ -2332,7 +2334,7 @@ void ProjectDiffGenerator::comparePropertyObjects(const PropertyObject& sourceOb
 			}
 
 			diff.newValue = tp->value();
-			diff.newValueText = ExtWidgets::PropertyTools::propertyValueText(tp.get(), -1);
+			diff.newValueText = ExtWidgets::PropertyTools::propertyValueText(tp.get(), -1, maxDecimalPlaces);
 
 			result->push_back(diff);
 			continue;
@@ -2357,8 +2359,8 @@ void ProjectDiffGenerator::comparePropertyObjects(const PropertyObject& sourceOb
 		diff.oldValue = sp->value();
 		diff.newValue = tp->value();
 
-		diff.oldValueText = ExtWidgets::PropertyTools::propertyValueText(sp.get(), -1);
-		diff.newValueText = ExtWidgets::PropertyTools::propertyValueText(tp.get(), -1);
+		diff.oldValueText = ExtWidgets::PropertyTools::propertyValueText(sp.get(), -1, maxDecimalPlaces);
+		diff.newValueText = ExtWidgets::PropertyTools::propertyValueText(tp.get(), -1, maxDecimalPlaces);
 
 		// Both are enums
 		//

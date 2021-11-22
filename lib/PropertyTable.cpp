@@ -569,7 +569,7 @@ namespace ExtWidgets
 				return QVariant();
 			}
 
-			return PropertyTools::propertyValueText(p.get(), row);
+			return PropertyTools::propertyValueText(p.get(), row, m_propertyTable->maxDecimaplPlaces());
 		}
 
 		return QVariant();
@@ -1096,7 +1096,7 @@ namespace ExtWidgets
 				continue;
 			}
 
-			result += PropertyTools::propertyValueText(p.get(), row);
+			result += PropertyTools::propertyValueText(p.get(), row, maxDecimaplPlaces());
 		}
 
 		QClipboard* clipboard = QApplication::clipboard();

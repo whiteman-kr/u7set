@@ -67,7 +67,7 @@ namespace ExtWidgets
 		static QString propertyVectorText(QVariant& value);
 		static QString stringListText(const QVariant& value);
 		static QString colorVectorText(QVariant& value);
-		static QString propertyValueText(Property* p, int row);	// row is used for StringList
+		static QString propertyValueText(Property* p, int row, int maxDecimalPlaces);	// row is used for StringList
 
 	};
 
@@ -93,6 +93,9 @@ namespace ExtWidgets
 
 		[[nodiscard]] bool isReadOnly() const;
 		void setReadOnly(bool readOnly);
+
+		[[nodiscard]] int maxDecimaplPlaces() const;		// If decimal places is less or equal then 'f' format is used, otherwise 'g' is used
+		void setMaxDecimaplPlaces(int value);
 
 		[[nodiscard]] QString defaultSpecificPropertyCategory() const;
 		void setDefaultSpecificPropertyCategory(QString value);
@@ -128,6 +131,7 @@ namespace ExtWidgets
 
 		bool m_expertMode = false;
 		bool m_readOnly = false;
+		int m_maxDecimaplPlaces = 5;
 
 		QString m_scriptHelpFile;
 		QPoint m_scriptHelpWindowPos = QPoint(-1, -1);
