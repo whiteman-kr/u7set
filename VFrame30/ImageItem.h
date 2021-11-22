@@ -6,7 +6,6 @@
 
 namespace VFrame30
 {
-
 	class ImageItem : public PropertyObject
 	{
 		Q_OBJECT
@@ -60,6 +59,51 @@ namespace VFrame30
 
 		// Class has COPY constructor, keep in mind when adding new members!!!
 		//
+	};
+
+	/*! \class ScriptImageItem
+		\ingroup dynamicSchemaItems
+		\brief This class is used to describe images for \ref VFrame30::SchemaItemImageValue "SchemaItemImageValue".
+	*/
+	class ScriptImageItem : public QObject
+	{
+		Q_OBJECT
+
+		/// \brief Scale image to the size of object.
+		Q_PROPERTY(bool AllowScale READ allowScale WRITE setAllowScale)
+		Q_PROPERTY(bool allowScale READ allowScale WRITE setAllowScale)
+
+		/// \brief Keep apect ration of the image.
+		Q_PROPERTY(bool KeepAspectRatio READ keepAspectRatio WRITE setKeepAspectRatio)
+		Q_PROPERTY(bool keepAspectRatio READ keepAspectRatio WRITE setKeepAspectRatio)
+
+		/// \brief Image identifier, use it to get image item from \ref VFrame30::SchemaItemImageValue "SchemaItemImageValue".
+		Q_PROPERTY(QString ImageId READ imageId WRITE setImageId)
+		Q_PROPERTY(QString imageId READ imageId WRITE setImageId)
+
+		/// \brief Svg file data.
+		Q_PROPERTY(QString Svg READ svgData WRITE setSvgData)
+		Q_PROPERTY(QString svg READ svgData WRITE setSvgData)
+
+	public:
+		ScriptImageItem(std::shared_ptr<VFrame30::ImageItem> imageItem);
+		virtual ~ScriptImageItem();
+
+	public:
+		bool allowScale() const;
+		void setAllowScale(bool value);
+
+		bool keepAspectRatio() const;
+		void setKeepAspectRatio(bool value);
+
+		const QString& imageId() const;
+		void setImageId(const QString& value);
+
+		const QString& svgData() const;
+		void setSvgData(const QString& data);
+
+	private:
+		std::shared_ptr<VFrame30::ImageItem> m_imageItem;
 	};
 
 }

@@ -122,15 +122,35 @@ namespace SimOverrideUI
 
 		// Save script to user settings
 		//
-		switch (method)
+		if (db()->isProjectOpened() == true)	// Project can be closed
 		{
-		case Sim::OverrideSignalMethod::Value:
-			db()->setUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), "Value", this);
-			break;
-		case Sim::OverrideSignalMethod::Script:
-			db()->setUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), "Script", this);
-			db()->setUserProperty(QString("Sim::OverrideScript::%1").arg(m_signal.appSignalId()), value.toString(), this);
-			break;
+			switch (method)
+			{
+			case Sim::OverrideSignalMethod::Value:
+				db()->setUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), "Value", this);
+				break;
+			case Sim::OverrideSignalMethod::Script:
+				db()->setUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), "Script", this);
+				db()->setUserProperty(QString("Sim::OverrideScript::%1").arg(m_signal.appSignalId()), value.toString(), this);
+				break;
+			}
+		}
+		else
+		{
+			// Project is closed, save to regular QSettings
+			//
+			QString key = QString("OverrideMethodWidget/%1/%2/").arg(m_simulator->projectName(), m_signal.appSignalId());
+
+			switch (method)
+			{
+			case Sim::OverrideSignalMethod::Value:
+				QSettings{}.setValue(key + "OverrideMethod", "Value");
+				break;
+			case Sim::OverrideSignalMethod::Script:
+				QSettings{}.setValue(key + "OverrideMethod", "Script");
+				QSettings{}.setValue(key + "OverrideScript", value.toString());
+				break;
+			}
 		}
 
 		return;
@@ -376,7 +396,15 @@ namespace SimOverrideUI
 		m_scriptEdit->setModified(false);
 
 		QString lastScript;
-		db()->getUserProperty(QString("Sim::OverrideScript::%1").arg(m_signal.appSignalId()), &lastScript, this);
+		if (db()->isProjectOpened() == true)
+		{
+			db()->getUserProperty(QString("Sim::OverrideScript::%1").arg(m_signal.appSignalId()), &lastScript, this);
+		}
+		else
+		{
+			QString key = QString("OverrideMethodWidget/%1/%2/").arg(m_simulator->projectName(), m_signal.appSignalId());
+			lastScript = QSettings{}.value(key + "OverrideScript").toString();
+		}
 
 		if (lastScript.isEmpty() == false)
 		{
@@ -560,42 +588,45 @@ namespace SimOverrideUI
 
 	void ScriptMethodWidget::loadScript()
 	{
-		QStringList savedProperties;
-		dbc()->getUserPropertyList(saveProperty + "%", &savedProperties, this);
-
-		savedProperties.replaceInStrings(saveProperty, "");
-
 		QMenu m;
 
-		for (const QString& s : savedProperties)
+		if (dbc()->isProjectOpened() == true)
 		{
-			m.addAction(s,
-						[s, this]()
-						{
-							int r = QMessageBox::question(this,
-														  qAppName(),
-														  tr("All current changes will be lost."),
-														  QMessageBox::StandardButton::Ok,
-														  QMessageBox::StandardButton::Cancel | QMessageBox::Default | QMessageBox::Escape);
+			QStringList savedProperties;
 
-							if (r != QMessageBox::StandardButton::Ok)
+			dbc()->getUserPropertyList(saveProperty + "%", &savedProperties, this);
+			savedProperties.replaceInStrings(saveProperty, "");
+
+			for (const QString& s : savedProperties)
+			{
+				m.addAction(s,
+							[s, this]()
 							{
-								return;
-							}
+								int r = QMessageBox::question(this,
+															  qAppName(),
+															  tr("All current changes will be lost."),
+															  QMessageBox::StandardButton::Ok,
+															  QMessageBox::StandardButton::Cancel | QMessageBox::Default | QMessageBox::Escape);
 
-							QString script;
-							bool ok = this->dbc()->getUserProperty(saveProperty + s, &script, this);
+								if (r != QMessageBox::StandardButton::Ok)
+								{
+									return;
+								}
 
-							if (ok == true)
-							{
-								m_scriptEdit->setText(script);
-							}
-						});
-		}
+								QString script;
+								bool ok = this->dbc()->getUserProperty(saveProperty + s, &script, this);
 
-		if (savedProperties.isEmpty() == false)
-		{
-			m.addSeparator();
+								if (ok == true)
+								{
+									m_scriptEdit->setText(script);
+								}
+							});
+			}
+
+			if (savedProperties.isEmpty() == false)
+			{
+				m.addSeparator();
+			}
 		}
 
 		m.addAction(tr("Load from File..."),
@@ -635,53 +666,25 @@ namespace SimOverrideUI
 
 	void ScriptMethodWidget::saveScript()
 	{
-		QStringList savesProperties;
-		bool ok = dbc()->getUserPropertyList(saveProperty + "%", &savesProperties, this);
-
-		savesProperties.replaceInStrings(saveProperty, "");
-
 		QMenu m;
 
-		if (ok == true && savesProperties.isEmpty() == false)
+		if (dbc()->isProjectOpened() == true)
 		{
-			for (const QString& s : savesProperties)
+			QStringList savesProperties;
+			bool ok = dbc()->getUserPropertyList(saveProperty + "%", &savesProperties, this);
+
+			savesProperties.replaceInStrings(saveProperty, "");
+
+			if (ok == true && savesProperties.isEmpty() == false)
 			{
-				m.addAction(s,
-					[savePropertyName = s, this]()
-					{
-						int r = QMessageBox::question(this,
-													  qAppName(),
-													  tr("Record %1 already exists. Do you want to overwite it?").arg(savePropertyName),
-													  QMessageBox::StandardButton::Yes,
-													  QMessageBox::StandardButton::No | QMessageBox::Default | QMessageBox::Escape);
-
-						if (r == QMessageBox::StandardButton::No)
-						{
-							return;
-						}
-
-						dbc()->setUserProperty(saveProperty + savePropertyName, this->m_scriptEdit->text(), this);
-					});
-			}
-		}
-
-		m.addAction(tr("Save as..."),
-					[this, &savesProperties]()
-					{
-						static int rn = 1;
-						bool ok = false;
-						QString text = QInputDialog::getText(this, qAppName(), tr("Name:"), QLineEdit::EchoMode::Normal, QString("New Record %1").arg(savesProperties.size() + (rn++)), &ok);
-
-						if (ok == false || text.isEmpty() == true)
-						{
-							return;
-						}
-
-						if (savesProperties.contains(text) == true)
+				for (const QString& s : savesProperties)
+				{
+					m.addAction(s,
+						[savePropertyName = s, this]()
 						{
 							int r = QMessageBox::question(this,
 														  qAppName(),
-														  tr("Record %1 already exists. Do you want to overwite it?").arg(text),
+														  tr("Record %1 already exists. Do you want to overwite it?").arg(savePropertyName),
 														  QMessageBox::StandardButton::Yes,
 														  QMessageBox::StandardButton::No | QMessageBox::Default | QMessageBox::Escape);
 
@@ -689,40 +692,72 @@ namespace SimOverrideUI
 							{
 								return;
 							}
-						}
 
-						dbc()->setUserProperty(saveProperty + text, this->m_scriptEdit->text(), this);
-					});
+							dbc()->setUserProperty(saveProperty + savePropertyName, this->m_scriptEdit->text(), this);
+						});
+				}
+			}
 
-		if (savesProperties.isEmpty() == false)
-		{
-			m.addSeparator();
-			QMenu* removeMenu = m.addMenu(tr("Remove Saves"));
+			m.addAction(tr("Save as..."),
+						[this, &savesProperties]()
+						{
+							static int rn = 1;
+							bool ok = false;
+							QString text = QInputDialog::getText(this, qAppName(), tr("Name:"), QLineEdit::EchoMode::Normal, QString("New Record %1").arg(savesProperties.size() + (rn++)), &ok);
 
-			for (const QString&s : savesProperties)
+							if (ok == false || text.isEmpty() == true)
+							{
+								return;
+							}
+
+							if (savesProperties.contains(text) == true)
+							{
+								int r = QMessageBox::question(this,
+															  qAppName(),
+															  tr("Record %1 already exists. Do you want to overwite it?").arg(text),
+															  QMessageBox::StandardButton::Yes,
+															  QMessageBox::StandardButton::No | QMessageBox::Default | QMessageBox::Escape);
+
+								if (r == QMessageBox::StandardButton::No)
+								{
+									return;
+								}
+							}
+
+							dbc()->setUserProperty(saveProperty + text, this->m_scriptEdit->text(), this);
+						});
+
+			if (savesProperties.isEmpty() == false)
 			{
-				removeMenu->addAction(tr("Remove %1").arg(s),
-									  [this, s]()
-									  {
-										int r = QMessageBox::question(this,
-																	  qAppName(),
-																	  tr("Record %1 will be removed.").arg(s),
-																	  QMessageBox::StandardButton::Ok,
-																	  QMessageBox::StandardButton::Cancel | QMessageBox::Default | QMessageBox::Escape);
+				m.addSeparator();
+				QMenu* removeMenu = m.addMenu(tr("Remove Saves"));
 
-										if (r != QMessageBox::StandardButton::Ok)
-										{
-											return;
-										}
+				for (const QString&s : savesProperties)
+				{
+					removeMenu->addAction(tr("Remove %1").arg(s),
+										  [this, s]()
+										  {
+											int r = QMessageBox::question(this,
+																		  qAppName(),
+																		  tr("Record %1 will be removed.").arg(s),
+																		  QMessageBox::StandardButton::Ok,
+																		  QMessageBox::StandardButton::Cancel | QMessageBox::Default | QMessageBox::Escape);
 
-										this->dbc()->removeUserProperty(saveProperty + s, this);
-									  });
+											if (r != QMessageBox::StandardButton::Ok)
+											{
+												return;
+											}
+
+											this->dbc()->removeUserProperty(saveProperty + s, this);
+										  });
+
+				}
 
 			}
 
+			m.addSeparator();
 		}
 
-		m.addSeparator();
 		m.addAction(tr("Save to File..."),
 					[this]()
 					{
@@ -835,7 +870,16 @@ namespace SimOverrideUI
 		// Select last selected method
 		//
 		QString lastMethod;
-		db()->getUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), &lastMethod, this);
+
+		if (db()->isProjectOpened() == true)
+		{
+			db()->getUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), &lastMethod, this);
+		}
+		else
+		{
+			QString key = QString("OverrideMethodWidget/%1/%2/").arg(m_simulator->projectName(), m_signal.appSignalId());
+			lastMethod = QSettings{}.value(key + "OverrideMethod", "Value").toString();
+		}
 
 		if (lastMethod == "Value")
 		{

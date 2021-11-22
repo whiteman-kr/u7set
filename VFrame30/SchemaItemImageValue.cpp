@@ -264,6 +264,19 @@ namespace VFrame30
 		return gridSize;
 	}
 
+	QObject* SchemaItemImageValue::imageItem(QString imageId)
+	{
+		for (std::shared_ptr<VFrame30::ImageItem>& i : m_images)
+		{
+			if (i->imageId() == imageId)
+			{
+				return new ScriptImageItem{i};
+			}
+		}
+
+		return nullptr;
+	}
+
 	QString SchemaItemImageValue::signalIdsString() const
 	{
 		QStringList resultList = m_signalIds;

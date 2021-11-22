@@ -200,6 +200,9 @@ namespace VFrame30
 		// Java Script invocables specific for SchemaItemImageValue
 		//
 	public slots:
+		/// \brief Returns \ref VFrame30::ScriptImageItem "ScriptImageItem" specified by <b>imageId</b>.
+		///
+		QObject* imageItem(QString imageId);
 
 		// Properties and Data
 		//
