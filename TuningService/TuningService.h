@@ -117,7 +117,7 @@ namespace Tuning
 
 		CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-		TcpTuningServerThread* m_tcpTuningServerThread;
+		TcpTuningServerThread* m_tcpTuningServerThread = nullptr;
 
 		mutable QMutex m_mainMutex;
 

@@ -532,6 +532,7 @@ namespace Builder
 		void errEQP6203(QString tuningSourceId, QString tuningClientMonitorId, QString tuningServiceId);	// Source %1 specified in %2.TuningSourceEquipmentID is not processed by service %3 which the client is connected to.
 		void errEQP6204(QString tuningClientId);					// %1.TuningSourceEquipmentID property can't be empty in Safety Project. Specify tuning sources which are processed by this client.
 		void errEQP6205(QString tuningClientMonitorId);				// No tuning sources found for %1.
+		void errEQP6206(QString tuningClientID);					// Property %1.TuningServiceID can't be empty if tuning enabled.
 
 		void errEQP6210(QString behaviorId, QString softwareObjectStrId);	// Client behavior (%1) specified in %2.BehaviorID does not exist.
 

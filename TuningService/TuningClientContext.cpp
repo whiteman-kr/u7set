@@ -125,14 +125,12 @@ namespace Tuning
 	// ----------------------------------------------------------------------------------------------
 
 	TuningClientContext::TuningClientContext(const QString &clientID,
-											 const std::vector<TuningServiceSettings::TuningSource>& drivenSources,
+											 const QStringList& drivenSourcesIDs,
 											 const TuningSources& sources) :
 		m_clientID(clientID)
 	{
-		for(const TuningServiceSettings::TuningSource& src : drivenSources)
+		for(const QString& sourceID : drivenSourcesIDs)
 		{
-			const QString& sourceID = src.lmEquipmentID;
-
 			if (m_sourceContextMap.contains(sourceID) == true)
 			{
 				assert(false);
@@ -451,11 +449,9 @@ namespace Tuning
 
 	void TuningClientContextMap::init(const TuningServiceSettings& tss, const TuningSources& sources)
 	{
-		std::vector<TuningServiceSettings::TuningClient> clients = tss.getAllUniqueClients();
-
-		for(const auto& client : clients)
+		for(const auto& client : tss.clients)
 		{
-			TuningClientContext* clientContext = new TuningClientContext(client.equipmentID, client.drivenSources, sources);
+			TuningClientContext* clientContext = new TuningClientContext(client.equipmentID, client.uniqueSourcesIDs(), sources);
 
 			insert(client.equipmentID, clientContext);
 		}

@@ -639,7 +639,6 @@ bool TuningServiceSettingsGetter::readFromDevice(const Builder::Context* context
 	for(int channel = CHANNEL_1; channel < CHANNELS_COUNT; channel++)
 	{
 		channelSettings[channel].sources.clear();
-		channelSettings[channel].clients.clear();
 
 		if (channelSettings[channel].enable == false)
 		{
@@ -647,9 +646,9 @@ bool TuningServiceSettingsGetter::readFromDevice(const Builder::Context* context
 		}
 
 		result &= fillTuningSourcesInfo(context, channel);
-
-		result &= fillTuningClientsInfo(context, software, singleLmControl, channel);
 	}
+
+	result &= fillTuningClientsInfo(context, software, singleLmControl);
 
 	if (context->m_projectProperties.safetyProject() == true && singleLmControl == false)
 	{
@@ -736,145 +735,146 @@ bool TuningServiceSettingsGetter::fillTuningSourcesInfo(const Builder::Context* 
 
 bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* context,
 														const Hardware::Software* software,
-														bool singleLmControlEnabled,
-														int channel)
+														bool singleLmControlEnabled)
 {
-	Q_ASSERT(channel >=0 && channel < CHANNELS_COUNT);
-
 	Builder::IssueLogger* log = context->m_log;
+
+	TEST_PTR_RETURN_FALSE(log);
+
+	clients.clear();
 
 	bool result = true;
 
-	Hardware::DeviceRoot* root = const_cast<Hardware::DeviceRoot*>(software->getParentRoot());
+	QString thisTuningServiceID = equipmentID;
 
-	if (root == nullptr)
+	for(const auto& p : context->m_software)
 	{
-		assert(false);
-		return false;
-	}
+		const Hardware::Software* tuningClient = p.second;
 
-	QString controllerEquipmentID = channelSettings[channel].serviceControllerEquipmentID;
+		TEST_PTR_CONTINUE(tuningClient);
 
-	Hardware::equipmentWalker(root,
-		[this, &context, &software, controllerEquipmentID, channel, &result, &singleLmControlEnabled, &log]
-							  (Hardware::DeviceObject* currentDevice)
+		if (tuningClient->softwareType() != E::SoftwareType::TuningClient &&
+			tuningClient->softwareType() != E::SoftwareType::Metrology &&
+			tuningClient->softwareType() != E::SoftwareType::Monitor &&
+			tuningClient->softwareType() != E::SoftwareType::TestClient)
 		{
-			if (currentDevice->isSoftware() == false)
-			{
-				return;
-			}
+			continue;
+		}
 
-			Hardware::Software* tuningClient = dynamic_cast<Hardware::Software*>(currentDevice);
+		QString tuningServicesIDs;
 
-			if (tuningClient == nullptr)
-			{
-				assert(false);
-				result = false;
-				return;
-			}
+		result &= DeviceHelper::getStrProperty(tuningClient, EquipmentPropNames::TUNING_SERVICE_ID, &tuningServicesIDs, log);
 
-			if (tuningClient->softwareType() != E::SoftwareType::TuningClient &&
-				tuningClient->softwareType() != E::SoftwareType::Metrology &&
-				tuningClient->softwareType() != E::SoftwareType::Monitor &&
-				tuningClient->softwareType() != E::SoftwareType::TestClient)
-			{
-				return;
-			}
+		if (result == false)
+		{
+			continue;
+		}
 
-			// sw is TuningClient or Metrology
-			//
-			QString tuningServiceID;
 
-			result &= DeviceHelper::getStrProperty(tuningClient, EquipmentPropNames::TUNING_SERVICE_ID, &tuningServiceID, log);
+
+		if (isStringListContainsString(tuningServicesIDs, thisTuningServiceID) == false)
+		{
+			continue;
+		}
+
+		bool tuningEnable = true;			// by default tuning is enabled for known clients without property "TuningEnable"
+
+		if (DeviceHelper::isPropertyExists(tuningClient, EquipmentPropNames::TUNING_ENABLE) == true)
+		{
+			result &= DeviceHelper::getBoolProperty(tuningClient, EquipmentPropNames::TUNING_ENABLE, &tuningEnable, log);
 
 			if (result == false)
 			{
-				return;
+				continue;
 			}
 
-			if (tuningServiceID != controllerEquipmentID)
+			if (tuningEnable == false)
 			{
-				return;
+				continue;
 			}
 
-			bool tuningEnable = true;			// by default tuning is enabled for known clients without property "TuningEnable"
-
-			if (DeviceHelper::isPropertyExists(tuningClient, EquipmentPropNames::TUNING_ENABLE) == true)
+			if (tuningClient->softwareType() == E::SoftwareType::Monitor && singleLmControlEnabled == true)
 			{
-				result &= DeviceHelper::getBoolProperty(tuningClient, EquipmentPropNames::TUNING_ENABLE, &tuningEnable, log);
-
-				if (result == false)
-				{
-					return;
-				}
-
-				if (tuningEnable == false)
-				{
-					return;
-				}
-
-				if (tuningClient->softwareType() == E::SoftwareType::Monitor && singleLmControlEnabled == true)
-				{
-					// Monitor %1 cannot be connected to TuningService %2 with enabled SingleLmControl mode.
-					//
-					log->errALC5150(tuningClient->equipmentIdTemplate(), controllerEquipmentID);
-					result = false;
-				}
+				// Monitor %1 cannot be connected to TuningService %2 with enabled SingleLmControl mode.
+				//
+				log->errALC5150(tuningClient->equipmentIdTemplate(), thisTuningServiceID);
+				result = false;
+				continue;
 			}
+		}
 
-			// TuningClient is linked to this TuningService
+		// TuningClient is linked to this TuningService
 
-			TuningClient tunClient;
+		TuningClient tunClient;
 
-			tunClient.equipmentID = tuningClient->equipmentIdTemplate();
+		tunClient.equipmentID = tuningClient->equipmentIdTemplate();
 
-			QStringList sourcesIDs;
+		QStringList sourcesIDs;
 
-			result &= DeviceHelper::getStrListProperty(tuningClient, EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID,
-													   &sourcesIDs, log);
+		result &= DeviceHelper::getStrListProperty(tuningClient, EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID,
+												   &sourcesIDs, log);
 
-			if (sourcesIDs.isEmpty() == true)
+		if (sourcesIDs.isEmpty() == true)
+		{
+			if (context->m_projectProperties.safetyProject() == true)
 			{
-				if (context->m_projectProperties.safetyProject() == true)
-				{
-					// %1.TuningSourceEquipmentID property can't be empty in Safety Project. Specify tuning sources which are processed by this client.
-					//
-					log->errEQP6204(tuningClient->equipmentIdTemplate());
-					result = false;
-				}
-				else
-				{
-					tunClient.drivenSources = channelSettings[channel].sources;
-				}
+				// %1.TuningSourceEquipmentID property can't be empty in Safety Project. Specify tuning sources which are processed by this client.
+				//
+				log->errEQP6204(tuningClient->equipmentIdTemplate());
+				result = false;
 			}
 			else
 			{
-				for(const QString& sourceID : sourcesIDs)
+				for(int ch = CHANNEL_1; ch < CHANNELS_COUNT; ch++)
 				{
-					TuningSource drivenSource = channelSettings[channel].getTuningSource(sourceID);
-
-					if (drivenSource.isValid() == false)
-					{
-						// Source %1 specified in %2.TuningSourceEquipmentID is not processed by service %3 which the client is connected to.
-						//
-						log-> errEQP6203(sourceID,
-										 tuningClient->equipmentIdTemplate(),
-										 software->equipmentIdTemplate());
-						result = false;
-					}
-					else
-					{
-						tunClient.drivenSources.push_back(drivenSource);
-					}
+					tunClient.drivenSources.insert(tunClient.drivenSources.end(),
+												   channelSettings[ch].sources.begin(),
+												   channelSettings[ch].sources.end());
 				}
 			}
-
-			channelSettings[channel].clients.push_back(tunClient);
 		}
-	);
+		else
+		{
+			for(const QString& sourceID : sourcesIDs)
+			{
+				bool sourceFound = false;
+
+				for(int ch = CHANNEL_1; ch < CHANNELS_COUNT; ch++)
+				{
+					TuningSource drivenSource = channelSettings[ch].getTuningSource(sourceID);
+
+					if (drivenSource.isValid() == true)
+					{
+						tunClient.drivenSources.push_back(drivenSource);
+
+						sourceFound = true;
+					}
+
+				}
+
+				if (sourceFound == false)
+				{
+					// Source %1 specified in %2.TuningSourceEquipmentID is not processed by service %3 which the client is connected to.
+					//
+					log-> errEQP6203(sourceID,
+									 tuningClient->equipmentIdTemplate(),
+									 software->equipmentIdTemplate());
+					result = false;
+				}
+			}
+		}
+
+		clients.push_back(tunClient);
+	}
 
 	return result;
 }
+
+bool TuningServiceSettingsGetter::isStringListContainsString(const QString& stringList, const QString stringToFind)
+{
+
+}
+
 
 // -------------------------------------------------------------------------------------
 //

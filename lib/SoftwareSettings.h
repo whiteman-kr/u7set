@@ -218,7 +218,7 @@ public:
 		QString equipmentID;
 		std::vector<TuningSource> drivenSources;
 
-		QStringList sourcesIDs() const;
+		QStringList uniqueSourcesIDs() const;
 	};
 
 	struct ChannelSettings
@@ -233,7 +233,6 @@ public:
 		HostAddressPort tuningSimIP;
 
 		std::vector<TuningSource> sources;
-		std::vector<TuningClient> clients;
 
 		TuningSource getTuningSource(const QString& sourceEquipmentID) const;
 	};
@@ -256,9 +255,10 @@ public:
 	bool singleLmControl = true;
 	bool disableModulesTypeChecking = false;
 
+	std::vector<TuningClient> clients;
+
 	ChannelSettings channelSettings[CHANNELS_COUNT];
 
-	std::vector<TuningClient> getAllUniqueClients() const;
 	bool isSourceExists(const QString& moduleEquipmentID) const;
 
 private:

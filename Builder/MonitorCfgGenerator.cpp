@@ -138,13 +138,13 @@ namespace Builder
 
 		if (settings->tuningServiceID.isEmpty() == true)
 		{
-			errrrrrrr
-			wdqw';,d'qw;d,q'wd,qwl;d
+			// Property %1.TuningServiceID can't be empty if tuning enabled.
+			//
+			m_log-> errEQP6206(equipmentID());
+			return false;
 		}
 
-		// Fill list with LAN controller IDs which are connected to the TuningService this client is connected to
-
-		QStringList serviceTuningSourcesList;
+		m_tuningSources.clear();
 
 		std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(settings->tuningServiceID);
 		if (tuningServiceObject == nullptr)
@@ -166,18 +166,16 @@ namespace Builder
 			return false;
 		}
 
-		for (int c = 0; c < tsg.channelCount; c++)
+		for (const TuningServiceSettings::TuningClient& tc : tsg.clients)
 		{
-			for (const TuningServiceSettings::TuningClient& tc : tsg.channelSettings[c].clients)
+			if (tc.equipmentID == m_software->equipmentId())
 			{
-				if (tc.equipmentID == m_software->equipmentId())
-				{
-					serviceTuningSourcesList = tc.sourcesIDs();
-					break;
-				}
+				m_tuningSources = tc.uniqueSourcesIDs();
+				break;
 			}
 		}
 
+/*
 		// Read TuningSourceEquipmentID property from Monitor. If is is filled, check if all strings are present in tuningSourcesList
 
 		QStringList localTuningSourcesList = settings->getTuningSources();
@@ -212,7 +210,7 @@ namespace Builder
 		else
 		{
 			m_tuningSources = serviceTuningSourcesList;
-		}
+		} */
 
 		if (m_tuningSources.isEmpty() == true)
 		{

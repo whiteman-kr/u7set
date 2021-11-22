@@ -84,8 +84,9 @@ private:
 
 	bool fillTuningClientsInfo(const Builder::Context* context,
 							   const Hardware::Software* software,
-							   bool singleLmControlEnabled,
-							   int channel);
+							   bool singleLmControlEnabled);
+
+	static bool isStringListContainsString(const QString& stringList, const QString stringToFind);
 };
 
 // -------------------------------------------------------------------------------------------

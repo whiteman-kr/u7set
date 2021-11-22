@@ -547,13 +547,19 @@ bool DiagDataServiceSettings::readFromXml(XmlReadHelper& xml)
 //
 // -------------------------------------------------------------------------------------
 
-QStringList TuningServiceSettings::TuningClient::sourcesIDs() const
+QStringList TuningServiceSettings::TuningClient::uniqueSourcesIDs() const
 {
 	QStringList ids;
 
+	std::set<QString> existIDs;
+
 	for(const TuningSource& ts : drivenSources)
 	{
-		ids.append(ts.lmEquipmentID);
+		if (existIDs.contains(ts.lmEquipmentID) == false)
+		{
+			ids.append(ts.lmEquipmentID);
+			existIDs.insert(ts.lmEquipmentID);
+		}
 	}
 
 	return ids;
@@ -571,32 +577,6 @@ TuningServiceSettings::TuningSource TuningServiceSettings::ChannelSettings::getT
 	}
 
 	return TuningSource();
-}
-
-std::vector<TuningServiceSettings::TuningClient> TuningServiceSettings::getAllUniqueClients() const
-{
-	std::vector<TuningClient> allUniqueClients;
-
-	std::set<QString> addedClients;
-
-	for(int ch = 0; ch < CHANNELS_COUNT; ch++)
-	{
-		const auto& channelClients = channelSettings[ch].clients;
-
-		for(const TuningClient& client : channelClients)
-		{
-			if (addedClients.contains(client.equipmentID))
-			{
-				continue;
-			}
-
-			allUniqueClients.push_back(client);
-
-			addedClients.insert(client.equipmentID);
-		}
-	}
-
-	return allUniqueClients;
 }
 
 bool TuningServiceSettings::isSourceExists(const QString& moduleEquipmentID) const
@@ -649,6 +629,23 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeBoolElement(EquipmentPropNames::SINGLE_LM_CONTROL, singleLmControl);
 	xml.writeBoolElement(EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, disableModulesTypeChecking);
 
+	// write tuning clients info
+	//
+	xml.writeStartElement(XmlElement::TUNING_CLIENTS);
+	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(clients.size()));
+
+	for(const TuningClient& tc : clients)
+	{
+		xml.writeStartElement(XmlElement::TUNING_CLIENT);
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tc.equipmentID);
+
+		writeTuningSourcesToXml(xml, tc.drivenSources);
+
+		xml.writeEndElement();		// TUNING_CLIENT
+	}
+
+	xml.writeEndElement();			// TUNING_CLIENTS
+
 	for(int channel = CHANNEL_1; channel < channelCount; channel++)
 	{
 		const ChannelSettings& ch = channelSettings[channel];
@@ -667,27 +664,6 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 			// write tuning sources info
 			//
 			writeTuningSourcesToXml(xml, ch.sources);
-
-			// write tuning clients info
-			//
-			const std::vector<TuningClient>& clnts = ch.clients;
-
-			xml.writeStartElement(XmlElement::TUNING_CLIENTS);
-			xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(clnts.size()));
-
-			for(uint i = 0; i < clnts.size(); i++)
-			{
-				const TuningClient& tc = clnts[i];
-
-				xml.writeStartElement(XmlElement::TUNING_CLIENT);
-				xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tc.equipmentID);
-
-				writeTuningSourcesToXml(xml, tc.drivenSources);
-
-				xml.writeEndElement();		// TUNING_CLIENT
-			}
-
-			xml.writeEndElement();			// TUNING_CLIENTS
 		}
 
 		xml.writeEndElement();			// </Channel>
@@ -728,6 +704,32 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readBoolElement(EquipmentPropNames::SINGLE_LM_CONTROL, &singleLmControl, true);
 	result &= xml.readBoolElement(EquipmentPropNames::DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, true);
 
+	// read tuning clients info
+	//
+	clients.clear();
+
+	result = xml.findElement(XmlElement::TUNING_CLIENTS);
+
+	RETURN_IF_FALSE(result);
+
+	int clientsCount = 0;
+
+	result = xml.readIntAttribute(XmlAttribute::COUNT, &clientsCount);
+
+	RETURN_IF_FALSE(result);
+
+	for(int i = 0; i < clientsCount; i++)
+	{
+		TuningClient tc;
+
+		result &= xml.findElement(XmlElement::TUNING_CLIENT);
+		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tc.equipmentID);
+
+		result &= readTuningSourcesFromXml(xml, &tc.drivenSources);
+
+		clients.push_back(tc);
+	}
+
 	for(int channel = CHANNEL_1; channel < channelCount; channel++)
 	{
 		result &= xml.findElement(XmlElement::TUNING_CHANNEL_TEMPLATE.arg(channel + 1));
@@ -748,35 +750,6 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 			result &= readTuningSourcesFromXml(xml, &ch.sources);
 
 			RETURN_IF_FALSE(result);
-
-			// read tuning clients info
-			//
-
-			std::vector<TuningClient>& clnts = ch.clients;
-
-			clnts.clear();
-
-			result = xml.findElement(XmlElement::TUNING_CLIENTS);
-
-			RETURN_IF_FALSE(result);
-
-			int clientsCount = 0;
-
-			result = xml.readIntAttribute(XmlAttribute::COUNT, &clientsCount);
-
-			RETURN_IF_FALSE(result);
-
-			for(int i = 0; i < clientsCount; i++)
-			{
-				TuningClient tc;
-
-				result &= xml.findElement(XmlElement::TUNING_CLIENT);
-				result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tc.equipmentID);
-
-				result &= readTuningSourcesFromXml(xml, &tc.drivenSources);
-
-				clnts.push_back(tc);
-			}
 		}
 		else
 		{
@@ -786,7 +759,6 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 			ch.tuningSimIP = HostAddressPort();
 
 			ch.sources.clear();
-			ch.clients.clear();
 		}
 	}
 

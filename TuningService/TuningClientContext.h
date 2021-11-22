@@ -52,7 +52,7 @@ namespace Tuning
 	{
 	public:
 		TuningClientContext(const QString& clientID,
-							const std::vector<TuningServiceSettings::TuningSource>& drivenSources,
+							const QStringList& drivenSourcesIDs,
 							const TuningSources& sources);
 		~TuningClientContext();
 

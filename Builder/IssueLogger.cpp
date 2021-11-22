@@ -8484,6 +8484,27 @@ namespace Builder
 				  arg(tuningClientMonitorId));
 	}
 
+	/// IssueCode: EQP6206
+	///
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1.TuningServiceID can't be empty if tuning enabled.
+	///
+	/// Parameters:
+	///		%1 Client EquipmentID
+	///
+	/// Description:
+	///		TuningServiceID is not specified while tuning enabled. Check client settings.
+	///
+	void IssueLogger::errEQP6206(QString tuningClientID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6206,
+				  QString(tr("Property %1.TuningServiceID can't be empty if tuning enabled.")).
+				  arg(tuningClientID));
+	}
+
 	/// IssueCode: EQP6210
 	///
 	/// IssueType: Error

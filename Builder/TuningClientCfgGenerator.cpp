@@ -185,10 +185,6 @@ namespace Builder
 
 		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningClientSettings>();
 
-		// Fill list with LAN controller IDs which are connected to the TuningService this client is connected to
-
-		QStringList serviceTuningSourcesList;
-
 		std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(settings->tuningServiceID);
 		if (tuningServiceObject == nullptr)
 		{
@@ -209,81 +205,20 @@ namespace Builder
 			return false;
 		}
 
-		for (int c = 0; c < tsg.channelCount; c++)
+		for (const TuningServiceSettings::TuningClient& tc : tsg.clients)
 		{
-			for (const TuningServiceSettings::TuningClient& tc : tsg.channelSettings[c].clients)
+			if (tc.equipmentID == m_software->equipmentId())
 			{
-				if (tc.equipmentID == m_software->equipmentId())
-				{
-					serviceTuningSourcesList = tc.sourcesIDs();
-					break;
-				}
+				*equipmentList = tc.uniqueSourcesIDs();
+				return true;
 			}
 		}
 
-		// Read TuningSourceEquipmentID property from TuningClient. If is is filled, check if all strings are present in tuningSourcesList
+		Q_ASSERT(false);
 
-		QString localTuningSourcesListString;
-
-		bool ok = false;
-
-		localTuningSourcesListString = getObjectProperty<QString>(m_software->equipmentIdTemplate(), EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID, &ok).trimmed();
-		if (ok == false)
-		{
-			return false;
-		}
-
-		if (localTuningSourcesListString.isEmpty() == false)
-		{
-			// Parse equipmentList
-			//
-			localTuningSourcesListString.replace(' ', ';');
-			localTuningSourcesListString.replace('\n', ';');
-			localTuningSourcesListString.remove('\r');
-
-			*equipmentList = localTuningSourcesListString.split(';');
-
-			// Check for valid EquipmentIds
-			//
-			for (const QString& localTuningSourceId : *equipmentList)
-			{
-				if (m_equipment->deviceObject(localTuningSourceId) == nullptr)
-				{
-					// This source does not exist
-					//
-					m_log->errEQP6109(localTuningSourceId, m_software->equipmentIdTemplate());
-					return false;
-				}
-
-				if (serviceTuningSourcesList.contains(localTuningSourceId) == false)
-				{
-					// This source is for TuningService which is not connected to this TuningClient
-					//
-					m_log->errEQP6203(localTuningSourceId, m_software->equipmentId(), settings->tuningServiceID);
-					return false;
-				}
-			}
-		}
-		else
-		{
-			// Safety projects does not allow TuningSourceEquipmentID property to be empty
-			//
-			if (m_context->m_projectProperties.safetyProject() == true)
-			{
-				m_log->errEQP6204(m_software->equipmentId());
-				return false;
-			}
-
-			*equipmentList = serviceTuningSourcesList;
-		}
-
-		if (equipmentList->isEmpty() == true)
-		{
-			m_log->errEQP6205(m_software->equipmentId());
-			return false;
-		}
-
-		return true;
+		LOG_INTERNAL_ERROR_MSG(m_log, QString("TuningClient %1 isn't found in clients list of TuningService %2").
+									arg(equipmentID()).arg(settings->tuningServiceID));
+		return false;
 	}
 
 	bool TuningClientCfgGenerator::createObjectFilters(const QStringList& equipmentList)
