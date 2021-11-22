@@ -123,6 +123,7 @@ bool DeviceHelper::getStrListProperty(const Hardware::DeviceObject* device, cons
 	result &= DeviceHelper::getStrProperty(device, name, &str, log);
 
 	str.replace(' ', ';');
+	str.replace(',', ';');
 	str.replace('\n', ';');
 	str.remove('\r');
 

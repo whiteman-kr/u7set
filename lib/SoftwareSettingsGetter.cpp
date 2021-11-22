@@ -60,7 +60,47 @@ bool SoftwareSettingsGetter::getSoftwareConnection(const Hardware::EquipmentSet*
 
 	*connectedSoftwareID = connectedSoftwareID->trimmed();
 
-	if (connectedSoftwareID->isEmpty() == true)
+	if (connectedSoftwareID->isEmpty() == true &&
+		emptyAllowed == false)
+	{
+		//  Property '%1.%2' is empty.
+		//
+		log->errCFG3022(thisSoftware->equipmentIdTemplate(), propConnectedSoftwareID);
+
+		return false;
+	}
+
+	return getSoftwareConnectionBySoftwareID(equipment,
+											 thisSoftware,
+											 *connectedSoftwareID,
+											 propConnectedSoftwareID,
+											 propConnectedSoftwareIP,
+											 propConnectedSoftwarePort,
+											 connectedSoftwareIP,
+											 emptyAllowed,
+											 defaultIP,
+											 defaultPort,
+											 requiredSoftwareType,
+											 log);
+}
+
+
+bool SoftwareSettingsGetter::getSoftwareConnectionBySoftwareID(const Hardware::EquipmentSet* equipment,
+											const Hardware::Software* thisSoftware,
+											const QString& connectedSoftwareID,
+											const QString& propConnectedSoftwareID,
+											const QString& propConnectedSoftwareIP,
+											const QString& propConnectedSoftwarePort,
+											HostAddressPort* connectedSoftwareIP,
+											bool emptyAllowed,
+											const QString& defaultIP,
+											int defaultPort,
+											E::SoftwareType requiredSoftwareType,
+											Builder::IssueLogger* log)
+{
+	bool result = true;
+
+	if (connectedSoftwareID.isEmpty() == true)
 	{
 		if (emptyAllowed == true)
 		{
@@ -82,13 +122,13 @@ bool SoftwareSettingsGetter::getSoftwareConnection(const Hardware::EquipmentSet*
 
 	const Hardware::Software* connectedSoftware = nullptr;
 
-	const std::shared_ptr<Hardware::DeviceObject> sharedConnectedObject = equipment->deviceObject(*connectedSoftwareID);
+	const std::shared_ptr<Hardware::DeviceObject> sharedConnectedObject = equipment->deviceObject(connectedSoftwareID);
 
 	if (sharedConnectedObject == nullptr)
 	{
 		// Property '%1.%2' is linked to undefined software ID '%3'.
 		//
-		log->errCFG3021(thisSoftware->equipmentIdTemplate(), propConnectedSoftwareID, *connectedSoftwareID);
+		log->errCFG3021(thisSoftware->equipmentIdTemplate(), propConnectedSoftwareID, connectedSoftwareID);
 		return false;
 	}
 
@@ -117,7 +157,7 @@ bool SoftwareSettingsGetter::getSoftwareConnection(const Hardware::EquipmentSet*
 	{
 		// Property '%1.%2' is linked to undefined software ID '%3'.
 		//
-		log->errCFG3021(thisSoftware->equipmentIdTemplate(), propConnectedSoftwareID, *connectedSoftwareID);
+		log->errCFG3021(thisSoftware->equipmentIdTemplate(), propConnectedSoftwareID, connectedSoftwareID);
 		return false;
 	}
 
@@ -761,18 +801,17 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 			continue;
 		}
 
-		QString tuningServicesIDs;
+		QStringList tuningServicesIDs;
 
-		result &= DeviceHelper::getStrProperty(tuningClient, EquipmentPropNames::TUNING_SERVICE_ID, &tuningServicesIDs, log);
+		result &= DeviceHelper::getStrListProperty(tuningClient, EquipmentPropNames::TUNING_SERVICE_ID,
+												   &tuningServicesIDs, log);
 
 		if (result == false)
 		{
 			continue;
 		}
 
-
-
-		if (isStringListContainsString(tuningServicesIDs, thisTuningServiceID) == false)
+		if (tuningServicesIDs.contains(thisTuningServiceID) == false)
 		{
 			continue;
 		}
@@ -849,7 +888,6 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 
 						sourceFound = true;
 					}
-
 				}
 
 				if (sourceFound == false)
@@ -869,12 +907,6 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 
 	return result;
 }
-
-bool TuningServiceSettingsGetter::isStringListContainsString(const QString& stringList, const QString stringToFind)
-{
-
-}
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -1607,30 +1639,49 @@ bool TuningClientSettingsGetter::readFromDevice(const Builder::Context* context,
 										&cfgServiceID1, &cfgServiceIP1,
 										&cfgServiceID2, &cfgServiceIP2,
 										log);
-
 	RETURN_IF_FALSE(result);
 
 	//
 
-	HostAddressPort tuningServiceClientIP;
+	QStringList tuninfServicesIDs;
 
-	result &= getSoftwareConnection(equipment,
-								   software,
-								   EquipmentPropNames::TUNING_SERVICE_ID,
-								   EquipmentPropNames::CLIENT_REQUEST_IP,
-								   EquipmentPropNames::CLIENT_REQUEST_PORT,
-								   &tuningServiceID,
-								   &tuningServiceClientIP,
-								   false,
-								   Socket::IP_NULL,
-								   PORT_TUNING_SERVICE_CLIENT_REQUEST,
-								   E::SoftwareType::TuningService,
-								   log);
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::TUNING_SERVICE_ID, &tuninfServicesIDs, log);
 
 	RETURN_IF_FALSE(result);
 
-	tuningServiceIP = tuningServiceClientIP.addressStr();
-	tuningServicePort = tuningServiceClientIP.port();
+	tuningServices.clear();
+
+	for(const QString& tuningServiceID : tuninfServicesIDs)
+	{
+		HostAddressPort tuningServiceClientIP;
+
+		result &= getSoftwareConnectionBySoftwareID(equipment,
+									   software,
+									   tuningServiceID,
+									   EquipmentPropNames::TUNING_SERVICE_ID,
+									   EquipmentPropNames::CLIENT_REQUEST_IP,
+									   EquipmentPropNames::CLIENT_REQUEST_PORT,
+									   &tuningServiceClientIP,
+									   false,
+									   Socket::IP_NULL,
+									   PORT_TUNING_SERVICE_CLIENT_REQUEST,
+									   E::SoftwareType::TuningService,
+									   log);
+		if (result == false)
+		{
+			break;
+		}
+
+		TuningServiceConnection tsc;
+
+		tsc.tuningServiceID = tuningServiceID;
+		tsc.clientRequestIP = tuningServiceClientIP.addressStr();
+		tsc.clientRequestPort = tuningServiceClientIP.port();
+
+		tuningServices.push_back(tsc);
+	}
+
+	RETURN_IF_FALSE(result);
 
 	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::AUTO_APPLAY, &autoApply, log);
 	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::SHOW_SIGNALS, &showSignals, log);

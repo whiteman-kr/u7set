@@ -1373,13 +1373,21 @@ bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 
 	//
 
-	xml.writeStartElement(XmlElement::TUNING_SERVICE);
+	xml.writeStartElement(XmlElement::TUNING_SERVICES);
+	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(tuningServices.size()));
 
-	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tuningServiceID);
-	xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tuningServiceIP);
-	xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tuningServicePort);
+	for(const auto& tsc : tuningServices)
+	{
+		xml.writeStartElement(XmlElement::TUNING_SERVICE);
 
-	xml.writeEndElement();		// </TuningService>
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tsc.tuningServiceID);
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestIP);
+		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestPort);
+
+		xml.writeEndElement();		// </TuningService>
+	}
+
+	xml.writeEndElement();		// </TuningServices>
 
 	xml.writeStartElement(XmlElement::APPEARANCE);
 
@@ -1425,11 +1433,28 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddressPort(EquipmentPropNames::CFG_SERVICE_IP2,
 									  EquipmentPropNames::CFG_SERVICE_PORT2, &cfgServiceIP2);
 
-	result &= xml.findElement(XmlElement::TUNING_SERVICE);
+	result &= xml.findElement(XmlElement::TUNING_SERVICES);
 
-	result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tuningServiceID);
-	result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &tuningServiceIP);
-	result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &tuningServicePort);
+	RETURN_IF_FALSE(result);
+
+	int count = 0;
+
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &count);
+
+	tuningServices.clear();
+
+	for(int i = 0; i < count; i++)
+	{
+		TuningServiceConnection tsc;
+
+		result &= xml.findElement(XmlElement::TUNING_SERVICE);
+
+		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tsc.tuningServiceID);
+		result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &tsc.clientRequestIP);
+		result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &tsc.clientRequestPort);
+
+		tuningServices.push_back(tsc);
+	}
 
 	result &= xml.findElement(XmlElement::APPEARANCE);
 
@@ -1496,12 +1521,10 @@ QStringList TuningClientSettings::getUsersAccounts() const
 {
 	return  tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
 }
-
+/*
 const TuningClientSettings& TuningClientSettings::operator = (const TuningClientSettings& src)
 {
-	tuningServiceID = src.tuningServiceID;
-	tuningServiceIP = src.tuningServiceIP;
-	tuningServicePort = src.tuningServicePort;
+	tuningServices = src.tuningServices;
 
 	autoApply = src.autoApply;
 
@@ -1524,7 +1547,7 @@ const TuningClientSettings& TuningClientSettings::operator = (const TuningClient
 	schemaTags = src.schemaTags;
 
 	return *this;
-}
+}*/
 
 bool TuningClientSettings::appearanceChanged(const TuningClientSettings& src) const
 {
@@ -1549,15 +1572,32 @@ bool TuningClientSettings::appearanceChanged(const TuningClientSettings& src) co
 
 bool TuningClientSettings::connectionChanged(const TuningClientSettings& src) const
 {
-	if (tuningServiceID != src.tuningServiceID ||
-		tuningServiceIP != src.tuningServiceIP ||
-		tuningServicePort != src.tuningServicePort ||
+	if (tuningServices.size() != src.tuningServices.size() ||
 		autoApply != src.autoApply ||
 		statusFlagFunction != src.statusFlagFunction)
 	{
 		return true;
 	}
 
+	// tuningServices.size() and src.tuningServices.size() are equal!
+	//
+	for(const auto& tsc : tuningServices)
+	{
+		if (std::find(src.tuningServices.begin(), src.tuningServices.end(), tsc) == src.tuningServices.end())
+		{
+			return true;
+		}
+	}
+
 	return false;
 }
+
+bool operator == (const TuningClientSettings::TuningServiceConnection& left,
+				  const TuningClientSettings::TuningServiceConnection& right)
+{
+	return left.tuningServiceID == right.tuningServiceID &&
+			left.clientRequestIP == right.clientRequestIP &&
+			left.clientRequestPort == right.clientRequestPort;
+}
+
 

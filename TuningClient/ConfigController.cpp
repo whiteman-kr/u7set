@@ -635,9 +635,25 @@ bool ConfigController::applyCurSettingsProfile(std::shared_ptr<const SoftwareSet
 
 	outSetting->clientSettings = *typedSettingsPtr;
 
-	outSetting->serviceAddress = ConfigConnection(outSetting->clientSettings.tuningServiceID,
-														outSetting->clientSettings.tuningServiceIP,
-														outSetting->clientSettings.tuningServicePort);
+	//
+
+	int check_next_code;
+	int several_connections_should_be_run;
+
+	if (outSetting->clientSettings.tuningServices.size() < 1)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	TuningClientSettings::TuningServiceConnection tsc = outSetting->clientSettings.tuningServices[0];
+
+	// class ConfigConnection is equal to TuningClientSettings::TuningServiceConnection!!!
+	//				 |
+	//				 V
+	outSetting->serviceAddress = ConfigConnection(	tsc.tuningServiceID,
+													tsc.clientRequestIP,
+													tsc.clientRequestPort);
 
 	return true;
 }

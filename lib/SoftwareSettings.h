@@ -438,15 +438,21 @@ public:
 class TuningClientSettings : public SoftwareSettings
 {
 public:
+	struct TuningServiceConnection
+	{
+		QString tuningServiceID;
+		QString clientRequestIP;
+		int clientRequestPort = 0;
+	};
+
+public:
 	QString cfgServiceID1;
 	HostAddressPort cfgServiceIP1;
 
 	QString cfgServiceID2;
 	HostAddressPort cfgServiceIP2;
 
-	QString tuningServiceID;
-	QString tuningServiceIP;
-	int tuningServicePort = 0;
+	std::vector<TuningServiceConnection> tuningServices;
 
 	bool autoApply = true;
 
@@ -480,9 +486,12 @@ public:
 	QStringList getSchemaTags() const;
 	QStringList getUsersAccounts() const;
 
-	const TuningClientSettings& operator = (const TuningClientSettings& src);
+	//const TuningClientSettings& operator = (const TuningClientSettings& src);
 
 	bool appearanceChanged(const TuningClientSettings& src) const;
 	bool connectionChanged(const TuningClientSettings& src) const;
 };
+
+bool operator == (const TuningClientSettings::TuningServiceConnection& left,
+				  const TuningClientSettings::TuningServiceConnection& right);
 

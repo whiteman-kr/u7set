@@ -183,42 +183,58 @@ namespace Builder
 			return false;
 		}
 
+		bool result = true;
+
+		equipmentList->clear();
+
 		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningClientSettings>();
 
-		std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(settings->tuningServiceID);
-		if (tuningServiceObject == nullptr)
+		for(const TuningClientSettings::TuningServiceConnection& tsc : settings->tuningServices)
 		{
-			m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, settings->tuningServiceID);
-			return false;
-		}
-
-		std::shared_ptr<Hardware::Software> tuningServiceSoftware = tuningServiceObject->toSoftware();
-		if (tuningServiceSoftware == nullptr)
-		{
-			m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, settings->tuningServiceID);
-			return false;
-		}
-
-		TuningServiceSettingsGetter tsg;
-		if (tsg.readFromDevice(m_context, tuningServiceSoftware.get()) == false)
-		{
-			return false;
-		}
-
-		for (const TuningServiceSettings::TuningClient& tc : tsg.clients)
-		{
-			if (tc.equipmentID == m_software->equipmentId())
+			std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(tsc.tuningServiceID);
+			if (tuningServiceObject == nullptr)
 			{
-				*equipmentList = tc.uniqueSourcesIDs();
-				return true;
+				m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, tsc.tuningServiceID);
+				result = false;
+				continue;
+			}
+
+			std::shared_ptr<Hardware::Software> tuningServiceSoftware = tuningServiceObject->toSoftware();
+			if (tuningServiceSoftware == nullptr)
+			{
+				m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, tsc.tuningServiceID);
+				result = false;
+				continue;
+			}
+
+			TuningServiceSettingsGetter tsg;
+			if (tsg.readFromDevice(m_context, tuningServiceSoftware.get()) == false)
+			{
+				result = false;
+				continue;
+			}
+
+			bool find = false;
+
+			for (const TuningServiceSettings::TuningClient& tc : tsg.clients)
+			{
+				if (tc.equipmentID == m_software->equipmentId())
+				{
+					equipmentList->append(tc.uniqueSourcesIDs());
+					find = true;
+					break;
+				}
+			}
+
+			if (find == false)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("TuningClient %1 isn't found in clients list of TuningService %2").
+											arg(equipmentID()).arg(tsc.tuningServiceID));
+				result = false;
 			}
 		}
 
-		Q_ASSERT(false);
-
-		LOG_INTERNAL_ERROR_MSG(m_log, QString("TuningClient %1 isn't found in clients list of TuningService %2").
-									arg(equipmentID()).arg(settings->tuningServiceID));
-		return false;
+		return result;
 	}
 
 	bool TuningClientCfgGenerator::createObjectFilters(const QStringList& equipmentList)

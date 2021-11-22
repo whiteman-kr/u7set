@@ -185,6 +185,7 @@ namespace XmlElement
 	inline const QString ARCHIVE_SERVICE2("ArchiveService2");
 
 	inline const QString DIAG_DATA_SERVICE("DiagDataService");
+	inline const QString TUNING_SERVICES("TuningServices");
 	inline const QString TUNING_SERVICE("TuningService");
 
 	inline const QString APPEARANCE("Appearance");

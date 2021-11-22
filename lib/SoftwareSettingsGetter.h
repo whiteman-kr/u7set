@@ -15,10 +15,22 @@ public:
 
 	static bool getSoftwareConnection(const Hardware::EquipmentSet* equipment,
 										const Hardware::Software* thisSoftware,
-										const QString& propConnectedSoBftwareID,
+										const QString& propConnectedSoftwareID,
 										const QString& propConnectedSoftwareIP,
 										const QString& propConnectedSoftwarePort,
 										QString* connectedSoftwareID,
+										HostAddressPort* connectedSoftwareIP,
+										bool emptyAllowed,
+										const QString &defaultIP,
+										int defaultPort,
+										E::SoftwareType requiredSoftwareType,
+										Builder::IssueLogger* log);
+
+	static bool getSoftwareConnectionBySoftwareID(const Hardware::EquipmentSet* equipment,
+										const Hardware::Software* thisSoftware,
+										const QString& connectedSoftwareID, const QString &propConnectedSoftwareID,
+										const QString& propConnectedSoftwareIP,
+										const QString& propConnectedSoftwarePort,
 										HostAddressPort* connectedSoftwareIP,
 										bool emptyAllowed,
 										const QString &defaultIP,
@@ -85,8 +97,6 @@ private:
 	bool fillTuningClientsInfo(const Builder::Context* context,
 							   const Hardware::Software* software,
 							   bool singleLmControlEnabled);
-
-	static bool isStringListContainsString(const QString& stringList, const QString stringToFind);
 };
 
 // -------------------------------------------------------------------------------------------
