@@ -116,7 +116,7 @@ namespace ExtWidgets
 			{
 				if (i.first == v)
 				{
-					return i.second;
+					return QObject::tr(i.second.toUtf8());
 				}
 			}
 			return QString();
@@ -180,7 +180,7 @@ namespace ExtWidgets
 			break;
 		case QMetaType::Bool:
 		{
-			return value.toBool() == true ? "True" : "False";
+			return value.toBool() == true ? QObject::tr("True") : QObject::tr("False");
 		}
 			break;
 		case QMetaType::QString:
@@ -1937,7 +1937,7 @@ namespace ExtWidgets
 
 		for (std::pair<int, QString> i : p->enumValues())
 		{
-			m_combo->addItem(i.second, i.first);
+			m_combo->addItem(tr(i.second.toUtf8()), i.first);
 		}
 		m_combo->setCurrentIndex(-1);
 
@@ -2912,7 +2912,7 @@ namespace ExtWidgets
 			auto pv = variantToPropertyVector(m_currentValue);
 			pv->clear();
 
-			m_lineEdit->setText("<PropertyVector>");
+			m_lineEdit->setText(tr("<PropertyVector>"));
 		}
 
 		if (variantIsPropertyList(m_currentValue) == true)
@@ -2920,17 +2920,17 @@ namespace ExtWidgets
 			auto pl = variantToPropertyList(m_currentValue);
 			pl->clear();
 
-			m_lineEdit->setText("<PropertyList>");
+			m_lineEdit->setText(tr("<PropertyList>"));
 		}
 
 		if (m_currentValue.userType() == QMetaType::QStringList)
 		{
-			m_lineEdit->setText("<StringList>");
+			m_lineEdit->setText(tr("<StringList>"));
 		}
 
 		if (m_currentValue.userType() == qMetaTypeId<QVector<QColor>>())
 		{
-			m_lineEdit->setText("QColor [0 items]");
+			m_lineEdit->setText(tr("QColor [0 items]"));
 		}
 
 		m_button = new QToolButton(parent);
@@ -3198,9 +3198,9 @@ namespace ExtWidgets
 
 		switch (m_checkBox->checkState())
 		{
-			case Qt::Checked:           m_checkBox->setText("True");                break;
-			case Qt::Unchecked:         m_checkBox->setText("False");               break;
-			case Qt::PartiallyChecked:  m_checkBox->setText("<Different values>");  break;
+			case Qt::Checked:           m_checkBox->setText(tr("True"));                break;
+			case Qt::Unchecked:         m_checkBox->setText(tr("False"));               break;
+			case Qt::PartiallyChecked:  m_checkBox->setText(tr("<Different values>"));  break;
 			default:
 				Q_ASSERT(false);
 		}
@@ -3709,7 +3709,7 @@ namespace ExtWidgets
 
 			if (value.typeId() == QMetaType::Bool)
 			{
-				text = "<Different values>";
+				text = tr("<Different values>");
 			}
 
 			if (value.typeId() == qMetaTypeId<Afb::AfbParamValue>())
@@ -3718,7 +3718,7 @@ namespace ExtWidgets
 
 				if (v.value().userType() == QMetaType::Bool)
 				{
-					text = "<Different values>";
+					text = tr("<Different values>");
 				}
 			}
 		}
@@ -3759,7 +3759,7 @@ namespace ExtWidgets
 
 			if (oldValue == newValue && errorString.isEmpty() == true)
 			{
-				errorString = QString("Property: %1 - incorrect input value")
+				errorString = tr("Property: %1 - incorrect input value")
 							  .arg(propertyName);
 			}
 
@@ -3880,7 +3880,7 @@ namespace ExtWidgets
 
 	void PropertyEditor::onShowErrorMessage(QString message)
 	{
-		QMessageBox::warning(this, "Error", message);
+		QMessageBox::warning(this, tr("Error"), message);
 	}
 
 	void PropertyEditor::fillProperties()
@@ -4025,7 +4025,7 @@ namespace ExtWidgets
 
 			if (p->readOnly() == true || isReadOnly() == true)
 			{
-				description = QString("[ReadOnly] ") + description;
+				description = tr("[ReadOnly] ") + description;
 			}
 
 			if (p->specific() && p->value().userType() == QMetaType::Float)
