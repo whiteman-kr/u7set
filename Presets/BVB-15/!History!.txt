@@ -1,0 +1,2 @@
+BVB-15
+	08.11.2021	Version: 1	BVB-15_v1.u7devp		RPCT-3015:  CustomModuleFamily was specified for BVB-15 preset

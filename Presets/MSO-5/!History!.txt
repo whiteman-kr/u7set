@@ -1,0 +1,2 @@
+MSO-5
+	18.11.2021	Version: 1	MSO-5_v1.u7devp			RPCT-3199:  MAC address calculation improvements
