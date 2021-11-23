@@ -266,6 +266,7 @@ namespace XmlAttribute
 	inline const QString TUNING_SERVICE_IP("TuningServiceIP");
 	inline const QString TUNING_SERVICE_PORT("TuningServicePort");
 	inline const QString CONTROLLER_EQUIPMENT_ID("ControllerEquipmentID");
+	inline const QString DRIVEN_SOURCES("DrivenSources");
 
 	inline const QString SOFTWARE_METROLOGY_ID("SoftwareMetrologyID");
 

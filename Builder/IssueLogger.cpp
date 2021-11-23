@@ -7719,7 +7719,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Device Object %1 not found.
+	/// Title: Device object %1 not found.
 	///
 	/// Parameters:
 	///		%1 DeviceObject EquipmentID
@@ -7731,7 +7731,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6010,
-				  tr("Device Object %1 not found.")
+				  tr("Device object %1 not found.")
 				  .arg(equipmemtId));
 	}
 
@@ -7739,7 +7739,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Device Object %1 not found on %2.
+	/// Title: Device object %1 not found on %2.
 	///
 	/// Parameters:
 	///		%1 DeviceObject EquipmentID
@@ -7752,7 +7752,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6011,
-				  tr("Device Object %1 not found on %2.")
+				  tr("Device object %1 not found on %2.")
 				  .arg(equipmemtId)
 				  .arg(buildStep));
 	}

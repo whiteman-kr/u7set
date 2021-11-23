@@ -219,6 +219,8 @@ public:
 		std::vector<TuningSource> drivenSources;
 
 		QStringList uniqueSourcesIDs() const;
+
+		bool isValid() { return equipmentID.isEmpty() == false; }
 	};
 
 	struct ChannelSettings
@@ -260,6 +262,8 @@ public:
 	ChannelSettings channelSettings[CHANNELS_COUNT];
 
 	bool isSourceExists(const QString& moduleEquipmentID) const;
+
+	TuningClient getTuningClient(const QString& clientEquipmentID) const;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only
@@ -438,11 +442,12 @@ public:
 class TuningClientSettings : public SoftwareSettings
 {
 public:
-	struct TuningServiceConnection
+	struct TuningService
 	{
 		QString tuningServiceID;
 		QString clientRequestIP;
 		int clientRequestPort = 0;
+		QStringList drivenSources;
 	};
 
 public:
@@ -452,7 +457,7 @@ public:
 	QString cfgServiceID2;
 	HostAddressPort cfgServiceIP2;
 
-	std::vector<TuningServiceConnection> tuningServices;
+	std::vector<TuningService> tuningServices;
 
 	bool autoApply = true;
 
@@ -492,6 +497,6 @@ public:
 	bool connectionChanged(const TuningClientSettings& src) const;
 };
 
-bool operator == (const TuningClientSettings::TuningServiceConnection& left,
-				  const TuningClientSettings::TuningServiceConnection& right);
+bool operator == (const TuningClientSettings::TuningService& left,
+				  const TuningClientSettings::TuningService& right);
 

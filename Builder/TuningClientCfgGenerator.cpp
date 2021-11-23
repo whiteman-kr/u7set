@@ -58,7 +58,7 @@ namespace Builder
 		// Check tuning users list
 		//
 		if (settings->tuningLogin == true &&
-			settings->tuningUserAccounts.split(';', Qt::SkipEmptyParts).isEmpty() == true)
+			settings->tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts).isEmpty() == true)
 		{
 			m_log->errEQP6202(m_software->equipmentIdTemplate());
 			return false;
@@ -74,7 +74,6 @@ namespace Builder
 
 		// Generate tuning signals
 		//
-
 		result &= createTuningSignals(equipmentList, m_signalSet, &m_tuningSet);
 		if (result == false)
 		{
@@ -189,7 +188,7 @@ namespace Builder
 
 		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningClientSettings>();
 
-		for(const TuningClientSettings::TuningServiceConnection& tsc : settings->tuningServices)
+		for(const TuningClientSettings::TuningService& tsc : settings->tuningServices)
 		{
 			std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(tsc.tuningServiceID);
 			if (tuningServiceObject == nullptr)
@@ -214,19 +213,13 @@ namespace Builder
 				continue;
 			}
 
-			bool find = false;
+			TuningServiceSettingsGetter::TuningClient tunClient = tsg.getTuningClient(equipmentID());
 
-			for (const TuningServiceSettings::TuningClient& tc : tsg.clients)
+			if (tunClient.isValid() == true)
 			{
-				if (tc.equipmentID == m_software->equipmentId())
-				{
-					equipmentList->append(tc.uniqueSourcesIDs());
-					find = true;
-					break;
-				}
+				equipmentList->append(tunClient.uniqueSourcesIDs());
 			}
-
-			if (find == false)
+			else
 			{
 				LOG_INTERNAL_ERROR_MSG(m_log, QString("TuningClient %1 isn't found in clients list of TuningService %2").
 											arg(equipmentID()).arg(tsc.tuningServiceID));

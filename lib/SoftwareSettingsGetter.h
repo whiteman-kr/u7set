@@ -51,6 +51,10 @@ public:
 
 	virtual bool readFromDevice(const Builder::Context* context,
 								const Hardware::Software* software) = 0;
+
+	bool readFromDeviceByEquipmentID(const Builder::Context* context,
+									const QString& softwareID,
+									E::SoftwareType requiredSoftwareType = E::SoftwareType::Unknown);
 };
 
 // -------------------------------------------------------------------------------------------

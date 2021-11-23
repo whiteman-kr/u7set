@@ -122,19 +122,33 @@ bool DeviceHelper::getStrListProperty(const Hardware::DeviceObject* device, cons
 
 	result &= DeviceHelper::getStrProperty(device, name, &str, log);
 
-	str.replace(' ', ';');
-	str.replace(',', ';');
-	str.replace('\n', ';');
-	str.remove('\r');
+	str.replace(QChar(QChar::Space), Separator::SEMICOLON);
+	str.replace(QChar(QChar::LineFeed), Separator::SEMICOLON);
+	str.replace(QChar(QChar::CarriageReturn), Separator::SEMICOLON);
+	str.replace(QChar(QChar::Tabulation), Separator::SEMICOLON);
+	str.replace(Separator::COMMA, Separator::SEMICOLON);
 
-	*strList = str.split(";", Qt::SkipEmptyParts);
-
-	for (QString& s : *strList)
-	{
-		s = s.trimmed();
-	}
+	*strList = str.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
 
 	return result;
+}
+
+bool DeviceHelper::getStrListPropertyAsString(const Hardware::DeviceObject* device, const QString& name, QString* str, Builder::IssueLogger* log)
+{
+	TEST_PTR_RETURN_FALSE(log);
+	TEST_PTR_RETURN_FALSE(device);
+	TEST_PTR_RETURN_FALSE(str);
+
+	QStringList list;
+
+	if (getStrListProperty(device, name, &list, log) == false)
+	{
+		return false;
+	}
+
+	*str = list.join(Separator::SEMICOLON);
+
+	return true;
 }
 
 bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, Builder::IssueLogger *log)

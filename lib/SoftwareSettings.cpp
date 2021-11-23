@@ -604,6 +604,19 @@ bool TuningServiceSettings::isSourceExists(const QString& moduleEquipmentID) con
 	return false;
 }
 
+TuningServiceSettings::TuningClient TuningServiceSettings::getTuningClient(const QString& clientEquipmentID) const
+{
+	for(const TuningClient& tc : clients)
+	{
+		if (tc.equipmentID == clientEquipmentID)
+		{
+			return tc;
+		}
+	}
+
+	return TuningClient();
+}
+
 bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
@@ -1383,6 +1396,7 @@ bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tsc.tuningServiceID);
 		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, tsc.clientRequestIP);
 		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, tsc.clientRequestPort);
+		xml.writeStringListAttribute(XmlAttribute::DRIVEN_SOURCES, tsc.drivenSources);
 
 		xml.writeEndElement();		// </TuningService>
 	}
@@ -1445,13 +1459,14 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 
 	for(int i = 0; i < count; i++)
 	{
-		TuningServiceConnection tsc;
+		TuningService tsc;
 
 		result &= xml.findElement(XmlElement::TUNING_SERVICE);
 
 		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tsc.tuningServiceID);
 		result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &tsc.clientRequestIP);
 		result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &tsc.clientRequestPort);
+		result &= xml.readStringListAttribute(XmlAttribute::DRIVEN_SOURCES, &tsc.drivenSources);
 
 		tuningServices.push_back(tsc);
 	}
@@ -1592,8 +1607,8 @@ bool TuningClientSettings::connectionChanged(const TuningClientSettings& src) co
 	return false;
 }
 
-bool operator == (const TuningClientSettings::TuningServiceConnection& left,
-				  const TuningClientSettings::TuningServiceConnection& right)
+bool operator == (const TuningClientSettings::TuningService& left,
+				  const TuningClientSettings::TuningService& right)
 {
 	return left.tuningServiceID == right.tuningServiceID &&
 			left.clientRequestIP == right.clientRequestIP &&

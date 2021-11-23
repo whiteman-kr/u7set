@@ -646,7 +646,7 @@ bool ConfigController::applyCurSettingsProfile(std::shared_ptr<const SoftwareSet
 		return false;
 	}
 
-	TuningClientSettings::TuningServiceConnection tsc = outSetting->clientSettings.tuningServices[0];
+	TuningClientSettings::TuningService tsc = outSetting->clientSettings.tuningServices[0];
 
 	// class ConfigConnection is equal to TuningClientSettings::TuningServiceConnection!!!
 	//				 |
