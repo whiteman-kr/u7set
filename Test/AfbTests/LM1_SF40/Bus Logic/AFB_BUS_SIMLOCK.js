@@ -62,18 +62,24 @@ function test_BUS_SIMLOCK_block_1_sim_1_in_1(sim)
 {
 	// Schema AFB_BUS_SIMLOCK
 	
+	// set all INPUTS to 1
+	//
 	sim.overrideSignalValue("#TUN_DSCR_BUS_01_INP01", 1);
 	sim.overrideSignalValue("#TUN_DSCR_BUS_02_INP01", 1);
 	sim.overrideSignalValue("#TUN_DSCR_BUS_03_INP01", 1);
 	sim.overrideSignalValue("#TUN_DSCR_BUS_04_INP01", 1);
 	sim.overrideSignalValue("#TUN_DSCR_BUS_05_INP01", 1);
-	
+
+	// set all SIMs to 1
+	//
 	sim.overrideSignalValue("#TUN_DSCR_BUS_01_INP02", 1);
 	sim.overrideSignalValue("#TUN_DSCR_BUS_02_INP02", 1);
 	sim.overrideSignalValue("#TUN_DSCR_BUS_03_INP02", 1);
 	sim.overrideSignalValue("#TUN_DSCR_BUS_04_INP02", 1);
 	sim.overrideSignalValue("#TUN_DSCR_BUS_05_INP02", 1);
 	
+	// set all BLOCKSs to 1
+	//
 	sim.overrideSignalValue("#TUN_DSCR_BUS_01_INP03", 1);
 	sim.overrideSignalValue("#TUN_DSCR_BUS_02_INP03", 1);
 	sim.overrideSignalValue("#TUN_DSCR_BUS_03_INP03", 1);
@@ -82,11 +88,75 @@ function test_BUS_SIMLOCK_block_1_sim_1_in_1(sim)
 	
 	sim.startForMs(5);
 	
+	// check OUTPUTS
+	//
 	assert(sim.signalValue("#OUT_BUS_SIMLOCK_01") === 0);
 	assert(sim.signalValue("#OUT_BUS_SIMLOCK_02") === 0);
 	assert(sim.signalValue("#OUT_BUS_SIMLOCK_03") === 0);
 	assert(sim.signalValue("#OUT_BUS_SIMLOCK_04") === 0);
 	assert(sim.signalValue("#OUT_BUS_SIMLOCK_05") === 0);
+	
+	// set all INPUTS to different values
+	//
+	sim.overrideSignalValue("#TUN_DSCR_BUS_01_INP01", 1);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_02_INP01", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_03_INP01", 1);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_04_INP01", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_05_INP01", 1);
+	
+	sim.startForMs(5);
+
+	// check OUTPUTS
+	//
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_01") === 0);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_02") === 0);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_03") === 0);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_04") === 0);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_05") === 0);
+	
+	// set all SIMs to different values
+	//
+	sim.overrideSignalValue("#TUN_DSCR_BUS_01_INP02", 1);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_02_INP02", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_03_INP02", 1);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_04_INP02", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_05_INP02", 1);
+	
+	sim.startForMs(5);
+	
+	// check OUTPUTS
+	//
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_01") === 0);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_02") === 0);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_03") === 0);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_04") === 0);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_05") === 0);
+	
+	// reset all BLOCKs to 0
+	//
+	sim.overrideSignalValue("#TUN_DSCR_BUS_01_INP03", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_02_INP03", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_03_INP03", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_04_INP03", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_05_INP03", 0);
+	
+	// reset all SIMs to 0 here
+	//
+	sim.overrideSignalValue("#TUN_DSCR_BUS_01_INP02", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_02_INP02", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_03_INP02", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_04_INP02", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_05_INP02", 0);
+	
+	sim.startForMs(5);
+	
+	// now sim == 0, block == 0, what should be on output ???
+	
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_01") === 1);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_02") === 0);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_03") === 1);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_04") === 0);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_05") === 1);
 	
 }
 
@@ -119,6 +189,21 @@ function test_BUS_SIMLOCK_block_0_sim_0_in_1(sim)
 	assert(sim.signalValue("#OUT_BUS_SIMLOCK_03") === 1);
 	assert(sim.signalValue("#OUT_BUS_SIMLOCK_04") === 1);
 	assert(sim.signalValue("#OUT_BUS_SIMLOCK_05") === 1);
+	
+	//
+	sim.overrideSignalValue("#TUN_DSCR_BUS_01_INP01", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_02_INP01", 1);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_03_INP01", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_04_INP01", 1);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_05_INP01", 0);
+	
+	sim.startForMs(5);
+	
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_01") === 0);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_02") === 1);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_03") === 0);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_04") === 1);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_05") === 0);
 
 }
 
@@ -150,6 +235,37 @@ function test_BUS_SIMLOCK_block_0_sim_1_in_0(sim)
 	assert(sim.signalValue("#OUT_BUS_SIMLOCK_02") === 1);
 	assert(sim.signalValue("#OUT_BUS_SIMLOCK_03") === 1);
 	assert(sim.signalValue("#OUT_BUS_SIMLOCK_04") === 1);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_05") === 1);
+	
+	//
+	sim.overrideSignalValue("#TUN_DSCR_BUS_01_INP01", 1);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_02_INP01", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_03_INP01", 1);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_04_INP01", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_05_INP01", 1);
+	
+	sim.startForMs(5);
+	
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_01") === 1);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_02") === 1);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_03") === 1);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_04") === 1);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_05") === 1);
+	
+	
+	//
+	sim.overrideSignalValue("#TUN_DSCR_BUS_01_INP02", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_02_INP02", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_03_INP02", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_04_INP02", 0);
+	sim.overrideSignalValue("#TUN_DSCR_BUS_05_INP02", 0);
+	
+	sim.startForMs(5);
+	
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_01") === 1);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_02") === 0);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_03") === 1);
+	assert(sim.signalValue("#OUT_BUS_SIMLOCK_04") === 0);
 	assert(sim.signalValue("#OUT_BUS_SIMLOCK_05") === 1);
 	
 }
