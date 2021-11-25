@@ -4,10 +4,6 @@
 		
 function generate_mps36(confFirmware, module, LMNumber, frame, log, signalSet, opticModuleStorage)
 {
-	var Mode_420mA = 1;
-	var Mode_020mA = 4;
-	var Mode_024mA = 5;
-	
     var ptr = 0;
     
     let inControllerObject = module.childByEquipmentId(module.equipmentId + "_CTRLIN");
@@ -247,22 +243,17 @@ function generate_mps36(confFirmware, module, LMNumber, frame, log, signalSet, o
 				flags |= (connectionType << 1);
 				
 				var sensorTypeCode = 0;
-					
-				var NoSensor=0;
-				var Ohm_Pt50_W1385=3;
-				var Ohm_Pt100_W1385=4;
-				var Ohm_Cu_50_W1428=5;
-				var Ohm_Cu_50_W1426=7;
-				var Ohm_Cu23=10;
-					
+		
 				switch (sensorType)
 				{
-					case NoSensor:			sensorTypeCode = 0;	break;
-					case Ohm_Pt50_W1385:	sensorTypeCode = 2;	break;
-					case Ohm_Pt100_W1385:	sensorTypeCode = 1;	break;
-					case Ohm_Cu_50_W1428:	sensorTypeCode = 3;	break;
-					case Ohm_Cu23:			sensorTypeCode = 4;	break;
-					case Ohm_Cu_50_W1426:	sensorTypeCode = 5;	break;
+					case SensorType.NoSensor:			sensorTypeCode = 0;	break;
+					case SensorType.Ohm_Pt100_W1385:	sensorTypeCode = 1;	break;
+					case SensorType.Ohm_Pt50_W1385:		sensorTypeCode = 2;	break;
+					case SensorType.Ohm_Cu_50_W1428:	sensorTypeCode = 3;	break;
+					case SensorType.Ohm_Cu23:			sensorTypeCode = 4;	break;
+					case SensorType.Ohm_Cu_50_W1426:	sensorTypeCode = 5;	break;
+					case SensorType.Ohm_Pt100_W1391:	sensorTypeCode = 6;	break;
+					case SensorType.Ohm_Pt50_W1391:		sensorTypeCode = 7;	break;
 					default:
 							log.errINT1001("Unknown R sensor type " + sensorType + " in " + signalStrId);
 							return false;
@@ -285,9 +276,9 @@ function generate_mps36(confFirmware, module, LMNumber, frame, log, signalSet, o
 				
 				switch (outputMode)
 				{
-					case Mode_420mA:	outputModeCode = 5;	break;
-					case Mode_020mA:	outputModeCode = 6;	break;
-					case Mode_024mA:	outputModeCode = 7;	break;
+					case OutputMode.Plus4_Plus20_mA:	outputModeCode = 5;	break;
+					case OutputMode.Plus0_Plus20_mA:	outputModeCode = 6;	break;
+					case OutputMode.Plus0_Plus24_mA:	outputModeCode = 7;	break;
 					default:
 					{
 						log.errINT1001("Unknown OutputMode type " + outputMode + " in " + signalStrId);
