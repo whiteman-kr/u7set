@@ -19,6 +19,7 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QLineEdit>
+#include <array>
 #include "./Ui/UiTools.h"
 #include "../CommonLib/Hash.h"
 
@@ -29,26 +30,20 @@ namespace Log
 	//
 	// LogFileRecord
 	//
-
-	const char* messageTypeTextShort[] = {"ALL", "ERR", "WRN", "MSG", "ALERT", "TXT", "DATA"};
-
-	const char* messageTypeTextLong[] = {"All", "Error", "Warning", "Message", "Alert", "Text", "DataInvisible"};
-
-	const int messageTypeCount = sizeof(messageTypeTextShort) / sizeof(messageTypeTextShort[0]);
-
-	const int messageTypeLongCount = sizeof(messageTypeTextLong) / sizeof(messageTypeTextLong[0]);
+	const std::array<QString, 7> messageTypeTextShort{"ALL", "ERR", "WRN", "MSG", "ALERT", "TXT", "DATA"};
+	const std::array<QString, 7> messageTypeTextLong{"All", "Error", "Warning", "Message", "Alert", "Text", "DataInvisible"};
 
 	const char* messageTimeFormat = {"dd.MM.yyyy hh:mm:ss.zzz"};
 
-	QString LogFileRecord::toString(const QString& sessionHashString)
+	QString LogFileRecord::toString(const QString& sessionHashString) const
 	{
 		if (type == MessageType::Text)
 		{
 			return QString("%1\t%2\r\n").arg(sessionHashString).arg(text);
 		}
 
-		int intType = static_cast<int>(type);
-		if (intType < 0 || intType >= messageTypeCount)
+		size_t intType = static_cast<int>(type);
+		if (intType >= messageTypeTextShort.size())
 		{
 			assert(false);
 			return QString();
@@ -66,11 +61,10 @@ namespace Log
 
 	bool LogFileRecord::loadFromString(const QString& source, quint64 currentSessionHash)
 	{
-
 		QString str = source;
 
 		// Session Hash
-
+		//
 		int tabPos = str.indexOf('\t');
 		if (tabPos == -1)
 		{
@@ -81,18 +75,19 @@ namespace Log
 		str.remove(0, tabPos + 1);
 		str = str.trimmed();
 
-		sessionHash = s.toULongLong();
+		sessionHash = s.toULongLong(nullptr, 16);
 
 		if (currentSessionHash != 0 && sessionHash != currentSessionHash)
 		{
 			// Wrong session
+			//
 			return false;
 		}
 
 		type = MessageType::Text;
 
 		// Time
-
+		//
 		tabPos = str.indexOf('\t');
 		if (tabPos == -1)
 		{
@@ -108,11 +103,12 @@ namespace Log
 		time = QDateTime::fromString(s, messageTimeFormat);
 
 		// Type
-
+		//
 		tabPos = str.indexOf('\t');
 		if (tabPos == -1)
 		{
 			// This is simple text
+			//
 			text = str;
 			return true;
 		}
@@ -121,31 +117,31 @@ namespace Log
 		str.remove(0, tabPos + 1);
 		str = str.trimmed();
 
-		if (s == messageTypeTextShort[static_cast<int>(MessageType::Error)])
+		if (s == messageTypeTextShort[static_cast<size_t>(MessageType::Error)])
 		{
 			type = MessageType::Error;
 		}
 		else
 		{
-			if (s == messageTypeTextShort[static_cast<int>(MessageType::Warning)])
+			if (s == messageTypeTextShort[static_cast<size_t>(MessageType::Warning)])
 			{
 				type = MessageType::Warning;
 			}
 			else
 			{
-				if (s == messageTypeTextShort[static_cast<int>(MessageType::Message)])
+				if (s == messageTypeTextShort[static_cast<size_t>(MessageType::Message)])
 				{
 					type = MessageType::Message;
 				}
 				else
 				{
-					if (s == messageTypeTextShort[static_cast<int>(MessageType::Alert)])
+					if (s == messageTypeTextShort[static_cast<size_t>(MessageType::Alert)])
 					{
 						type = MessageType::Alert;
 					}
 					else
 					{
-						if (s == messageTypeTextShort[static_cast<int>(MessageType::Data)])
+						if (s == messageTypeTextShort[static_cast<size_t>(MessageType::Data)])
 						{
 							type = MessageType::Data;
 						}
@@ -162,7 +158,7 @@ namespace Log
 		}
 
 		// Text
-
+		//
 		if (type == MessageType::Data)
 		{
 			textArray = str.split('\t');
@@ -178,27 +174,25 @@ namespace Log
 	//
 	// LogFileWorker
 	//
-
 	LogFileWorker::LogFileWorker(const QString& logName, const QString& path, int maxFileSize, int maxFilesCount, quint64 sessionHash)
 		:m_logName(logName),
 		  m_path(path),
 		  m_maxFileSize(maxFileSize),
 		  m_maxFilesCount(maxFilesCount),
 		  m_sessionHash(sessionHash),
-		  m_sessionHashString(QString::number(sessionHash).leftJustified(21, ' '))
+		  m_sessionHashString(QString::number(sessionHash, 16).rightJustified(16, '0'))
 	{
-		assert(messageTypeCount == static_cast<int>(MessageType::Count));
-		assert(messageTypeLongCount == static_cast<int>(MessageType::Count));
+		static_assert(messageTypeTextShort.size() == static_cast<size_t>(MessageType::Count));
+		static_assert(messageTypeTextLong.size() == static_cast<size_t>(MessageType::Count));
 	}
 
 	LogFileWorker::~LogFileWorker()
 	{
+		qDebug() << "LogFileWorker::~LogFileWorker, ThreadId " << QThread::currentThreadId();
 	}
 
 	bool LogFileWorker::write(MessageType type, const QString& text)
 	{
-		QMutexLocker l(&m_queueMutex);
-
 		LogFileRecord r;
 
 		r.time = QDateTime::currentDateTime();
@@ -206,17 +200,18 @@ namespace Log
 		r.sessionHash = m_sessionHash;
 		r.text = text;
 
-		emit recordArrived(r);
+		{
+			QMutexLocker l(&m_queueMutex);
+			m_queue.push_back(r);
+		}
 
-		m_queue.push_back(r);
+		emit recordArrived(r);
 
 		return true;
 	}
 
 	bool LogFileWorker::writeArray(const QStringList& textArray)
 	{
-		QMutexLocker l(&m_queueMutex);
-
 		LogFileRecord r;
 
 		r.time = QDateTime::currentDateTime();
@@ -224,9 +219,12 @@ namespace Log
 		r.sessionHash = m_sessionHash;
 		r.textArray = textArray;
 
-		emit recordArrived(r);
+		{
+			QMutexLocker l(&m_queueMutex);
+			m_queue.push_back(r);
+		}
 
-		m_queue.push_back(r);
+		emit recordArrived(r);
 
 		return true;
 	}
@@ -236,9 +234,9 @@ namespace Log
 		emit readStart(currentSessionOnly);
 	}
 
-	void LogFileWorker::getLoadedData(std::vector<LogFileRecord> *result)
+	void LogFileWorker::getLoadedData(std::vector<LogFileRecord>* result)
 	{
-		QMutexLocker l(&m_readMutex);
+		QMutexLocker l(&m_readLogMutex);
 		result->swap(m_readResult);
 	}
 
@@ -250,7 +248,7 @@ namespace Log
 	void LogFileWorker::onThreadStarted()
 	{
 		// Initialize path
-
+		//
 		if (m_path.isEmpty() == true)
 		{
 			QString localAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -267,14 +265,14 @@ namespace Log
 		}
 
 		// Start timer
-
+		//
 		m_timer = new QTimer(this);
 
 		connect(m_timer, &QTimer::timeout, this, &LogFileWorker::slot_onTimer);
 		m_timer->start(500);
 
 		// Get the number of last log file
-
+		//
 		QDir dir(m_path);
 
 		QStringList filters;
@@ -306,7 +304,8 @@ namespace Log
 		connect(this, &LogFileWorker::readStart, this, &LogFileWorker::slot_load);
 
 		// Create shared memory to lock file writing
-
+		//
+		qDebug() << "LogFileWorker::onThreadStarted, ThreadId " << QThread::currentThreadId();
 		m_sharedMemory = std::make_unique<QSharedMemory>();
 		m_sharedMemory->setKey(qAppName() + m_logName);
 
@@ -487,41 +486,30 @@ namespace Log
 		QString str;
 
 		str = str.leftJustified(m_serviceStringLength, '-').append("\r\n");
-
 		file.write(str.toLocal8Bit());
 
 		str = tr("Application:\t%1").arg(qAppName());
-
 		str = str.leftJustified(m_serviceStringLength, ' ').append("\r\n");
-
 		file.write(str.toLocal8Bit());
 
 		str = tr("Start Time:\t%1").arg(startTime.toString("dd.MM.yyyy hh:mm:ss"));
-
 		str = str.leftJustified(m_serviceStringLength, ' ').append("\r\n");
-
 		file.write(str.toLocal8Bit());
 
 		str = tr("End Time:\t%1").arg(endTime.toString("dd.MM.yyyy hh:mm:ss"));
-
 		str = str.leftJustified(m_serviceStringLength, ' ').append("\r\n");
-
 		file.write(str.toLocal8Bit());
 
 		str = tr("Records Count:\t%1").arg(recordsCount);
-
 		str = str.leftJustified(m_serviceStringLength, ' ').append("\r\n");
-
 		file.write(str.toLocal8Bit());
 
 		str.clear();
 
 		str = str.leftJustified(m_serviceStringLength, '-').append("\r\n");
-
 		file.write(str.toLocal8Bit());
 
 		str = "\r\n";
-
 		file.write(str.toLocal8Bit());
 
 		// Seek to the end of the file
@@ -538,8 +526,8 @@ namespace Log
 
 	bool LogFileWorker::lockShared(bool lock, bool* alreadyLocked)
 	{
-		// read currentLocked
-
+		// Read currentLocked
+		//
 		bool currentLocked = false;
 
 		bool lok = m_sharedMemory->lock();
@@ -563,15 +551,15 @@ namespace Log
 			*alreadyLocked = currentLocked;
 		}
 
-		// if already locked or unlocked, return true
-
+		// If already locked or unlocked, return true
+		//
 		if (lock == currentLocked)
 		{
 			return true;
 		}
 
-		// write lock
-
+		// Write lock
+		//
 		lok = m_sharedMemory->lock();
 		if (lok == false)
 		{
@@ -601,9 +589,14 @@ namespace Log
 
 		errorString->clear();
 
-		QMutexLocker l(&m_queueMutex);
 
-		if (m_queue.size() == 0)
+		m_queueMutex.lock();
+		std::vector<LogFileRecord> queueCopy{std::move(m_queue)};
+		m_queue = {};
+		m_queue.reserve(64);
+		m_queueMutex.unlock();
+
+		if (queueCopy.empty() == true)
 		{
 			return true;
 		}
@@ -611,7 +604,7 @@ namespace Log
 		QString fileName = getLogFileName(m_currentFileNumber);
 
 		// Try to lock log file for writing
-
+		//
 		bool alreadyLocked = false;
 
 		bool lok = lockShared(true, &alreadyLocked);
@@ -619,9 +612,6 @@ namespace Log
 		if (lok == false)
 		{
 			*errorString = tr("Error locking log file %1 by QSharedMemory.").arg(fileName);
-
-			m_queue.clear();
-
 			return false;
 		}
 
@@ -629,12 +619,9 @@ namespace Log
 		{
 			const int maxLogQueueSize = 1000;
 
-			if (m_queue.size() > maxLogQueueSize)
+			if (queueCopy.size() > maxLogQueueSize)
 			{
 				*errorString = tr("Log file %1 is locked by another instance and queue size exceeds maximum, queue cleared.").arg(fileName);
-
-				m_queue.clear();
-
 				return false;
 			}
 			else
@@ -644,10 +631,11 @@ namespace Log
 		}
 
 		// Create unlocker pointer
-
-		std::shared_ptr<int> unlockerPtr(NULL, [&](int *) { lockShared(false, nullptr); });
+		//
+		std::shared_ptr<int> unlockerPtr(nullptr, [&](int *) { lockShared(false, nullptr); });
 
 		// Check current file size and switch to the next file if needed
+		//
 		{
 			QFile file(fileName);
 
@@ -655,8 +643,6 @@ namespace Log
 			{
 				if (switchToNextLogFile(errorString) == false)
 				{
-					m_queue.clear();
-
 					return false;
 				}
 
@@ -686,9 +672,6 @@ namespace Log
 		if (file.open(QIODevice::Append | QIODevice::Text ) == false)
 		{
 			*errorString = tr("Log file %1 open error: %2").arg(fileName).arg(file.errorString());
-
-			m_queue.clear();
-
 			return false;
 		}
 
@@ -697,30 +680,24 @@ namespace Log
 #ifdef LOGFILE_USE_HEADER
 		endTime = QDateTime::currentDateTime();
 
-		recordsCount += static_cast<int>(m_queue.size());
+		recordsCount += static_cast<int>(queueCopy.size());
 
 		writeLogFileInfo(file, startTime, endTime, recordsCount);
 #endif
 
 		// Write records
-
-		for (LogFileRecord& record : m_queue)
+		//
+		for (const LogFileRecord& record : queueCopy)
 		{
 			if (file.write(record.toString(m_sessionHashString).toLocal8Bit()) == -1)
 			{
 				*errorString = tr("Log file %1 write error: %2").arg(fileName).arg(file.errorString());
-
 				file.close();
-
-				m_queue.clear();
-
 				return false;
 			}
 		}
 
 		file.close();
-
-		m_queue.clear();
 
 		return true;
 	}
@@ -734,7 +711,7 @@ namespace Log
 		}
 
 		// If current file is less than max count, switch to the next file
-
+		//
 		if (m_currentFileNumber < m_maxFilesCount - 1)
 		{
 			m_currentFileNumber++;
@@ -742,7 +719,7 @@ namespace Log
 		}
 
 		// Delete file number 0
-
+		//
 		{
 			QString fileName = getLogFileName(0);
 
@@ -804,7 +781,7 @@ namespace Log
 
 #ifdef LOGFILE_USE_HEADER
 		// Read and skip header
-
+		//
 		const int headerLinesCount = 7;
 
 		for (int i = 0; i < headerLinesCount; i++)
@@ -817,7 +794,6 @@ namespace Log
 #endif
 
 		QString str;
-
 		LogFileRecord record;
 
 		while (true)
@@ -834,16 +810,14 @@ namespace Log
 			}
 		}
 
-
 		return true;
-
 	}
 
 
 	void LogFileWorker::slot_load(bool currentSessionOnly)
 	{
 		// Try to lock the log
-
+		//
 		bool lockSuccess = false;
 
 		for (int i = 0; i < 100; i++)
@@ -878,12 +852,13 @@ namespace Log
 		}
 
 		// Create unlocker pointer
-
-		std::shared_ptr<int> unlockerPtr(NULL, [&](int *) { lockShared(false, nullptr); });
+		//
+		std::shared_ptr<int> unlockerPtr(nullptr, [&](int*) { lockShared(false, nullptr); });
 
 		// Read the log
-
+		//
 		std::vector<LogFileRecord> readResult;
+		readResult.reserve(32000);
 
 		for (int i = 0; i < m_maxFilesCount; i++)
 		{
@@ -891,8 +866,8 @@ namespace Log
 		}
 
 		{
-			QMutexLocker l(&m_readMutex);
-			readResult.swap(m_readResult);
+			QMutexLocker l(&m_readLogMutex);
+			m_readResult = std::move(readResult);
 		}
 
 		emit readComplete();
@@ -958,12 +933,11 @@ namespace Log
 
 	LogRecordModel::~LogRecordModel()
 	{
-
 	}
 
 	void LogRecordModel::setRecords(std::vector<LogFileRecord>* records)
 	{
-		m_records.swap(*records);
+		m_records = std::move(*records);
 
 		fillRecords();
 	}
@@ -984,7 +958,6 @@ namespace Log
 
 			endInsertRows();
 		}
-
 	}
 
 	void LogRecordModel::setFilter(MessageType messageType, const QString& text)
@@ -998,20 +971,18 @@ namespace Log
 	void LogRecordModel::fillRecords()
 	{
 		// Remove data from the model
-
+		//
 		if (rowCount() > 0)
 		{
 			beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
 
 			removeRows(0, rowCount());
-
 			m_filteredRecordsIndex.clear();
-
 			endRemoveRows();
 		}
 
 		// Process filters
-
+		//
 		int count = static_cast<int>(m_records.size());
 
 		m_filteredRecordsIndex.reserve(count);
@@ -1027,7 +998,7 @@ namespace Log
 		}
 
 		// Set data to the model
-
+		//
 		if (m_filteredRecordsIndex.empty() == false)
 		{
 			int filterRecordsCount = static_cast<int>(m_filteredRecordsIndex.size());
@@ -1109,39 +1080,41 @@ namespace Log
 
 	QVariant LogRecordModel::data(const QModelIndex& index, int role) const
 	{
+		size_t column = index.column();
+		if (column < 0 || column >= m_columnsNames.size())
+		{
+			assert(false);
+			return {};
+		}
+
+		size_t row = index.row();
+		if (row >= m_filteredRecordsIndex.size())
+		{
+			assert(false);
+			return QVariant();
+		}
+
+		size_t recordIndex = m_filteredRecordsIndex[row];
+		if (recordIndex >= m_records.size())
+		{
+			Q_ASSERT(recordIndex < m_records.size());
+			return {};
+		}
+
+		const LogFileRecord& record = m_records[recordIndex];
+
 		if (role == Qt::DisplayRole)
 		{
-
-			int col = index.column();
-
-			if (col < 0 || col >= m_columnsNames.size())
-			{
-				assert(false);
-				return QVariant();
-			}
-
-			int row = index.row();
-			if (row >= m_filteredRecordsIndex.size())
-			{
-				assert(false);
-				return QVariant();
-			}
-
-			int recordIndex = m_filteredRecordsIndex[row];
-
-			const LogFileRecord& rec = m_records[recordIndex];
-
-			int displayIndex = col;
-
+			int displayIndex = column;
 			if (displayIndex == m_columnTime)
 			{
-				return rec.time.toString(messageTimeFormat);
+				return record.time.toString(messageTimeFormat);
 			}
 
 			if (displayIndex == m_columnType)
 			{
-				int intType = static_cast<int>(rec.type);
-				if (intType < 0 || intType >= messageTypeCount)
+				size_t intType = static_cast<size_t>(record.type);
+				if (intType >= messageTypeTextShort.size())
 				{
 					assert(false);
 					return QString();
@@ -1152,7 +1125,7 @@ namespace Log
 
 			if (displayIndex >= m_columnText)
 			{
-				if (rec.type == MessageType::Data)
+				if (record.type == MessageType::Data)
 				{
 					int textColumnNo = displayIndex - m_columnText;
 
@@ -1162,17 +1135,33 @@ namespace Log
 						return QVariant();
 					}
 
-					if (textColumnNo < rec.textArray.size())
+					if (textColumnNo < record.textArray.size())
 					{
-						return rec.textArray[textColumnNo];
+						return record.textArray[textColumnNo];
 					}
 				}
 				else
 				{
-					return rec.text;
+					return record.text;
 				}
 			}
 		}
+
+		if (role == Qt::ForegroundRole)
+		{
+			switch (record.type)
+			{
+			case MessageType::Error:
+				return QBrush{qRgb(0xE0, 0x33, 0x33)};
+			case MessageType::Alert:
+				return QBrush{qRgb(0xE0, 0x33, 0x33)};
+			case MessageType::Warning:
+				return QBrush{qRgb(0xF8, 0x72, 0x17)};
+			default:
+				return {};
+			}
+		}
+
 		return QVariant();
 	}
 
@@ -1196,10 +1185,10 @@ namespace Log
 	// LogFileDialog
 	//
 
-	LogFileDialog::LogFileDialog(LogFileWorker* worker, QWidget* parent, bool showType, std::vector<std::pair<QString, double>> headerTitles)
-		:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-		  m_worker(worker),
-		  m_model(showType, headerTitles)
+	LogFileDialog::LogFileDialog(LogFileWorker* worker, QWidget* parent, bool showType, const std::vector<std::pair<QString, double>>& headerTitles) :
+		QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+		m_worker(worker),
+		m_model(showType, headerTitles)
 	{
 		setAttribute(Qt::WA_DeleteOnClose);
 
@@ -1211,13 +1200,9 @@ namespace Log
 		QHBoxLayout* topLayout = new QHBoxLayout();
 		mainLayout->addLayout(topLayout);
 
-		//
-
 		if (showType == true)
 		{
 			topLayout->addWidget(new QLabel("Type:"));
-
-			//
 
 			m_typeCombo = new QComboBox();
 
@@ -1225,33 +1210,34 @@ namespace Log
 
 			connect(m_typeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &LogFileDialog::onTypeComboIndexChanged);
 
-			for (int i = 0; i < messageTypeCount; i++)
+			for (const QString& text : messageTypeTextLong)
 			{
-				if (QString(messageTypeTextLong[i]).contains("Invisible") == false)
+				if (text.contains("Invisible") == false)
 				{
-					m_typeCombo->addItem(messageTypeTextLong[i]);
+					m_typeCombo->addItem(text);
 				}
 			}
+
 			m_typeCombo->setCurrentIndex(0);
 
-			m_typeCombo->blockSignals(false);
+			m_typeCombo->blockSignals(false);	// For disabling emitting signal QComboBox::currentIndexChanged and calling LogFileDialog::onTypeComboIndexChanged
 
 			topLayout->addWidget(m_typeCombo);
 
+			// --
 			//
-
 			topLayout->addStretch();
 		}
 
+		// --
 		//
-
 		m_filterLineEdit = new QLineEdit();
 		topLayout->addWidget(m_filterLineEdit);
 
 		connect(m_filterLineEdit, &QLineEdit::returnPressed, this, &LogFileDialog::onFilter);
 
+		// --
 		//
-
 		QPushButton* b = new QPushButton(tr("Filter"));
 		topLayout->addWidget(b);
 
@@ -1259,22 +1245,22 @@ namespace Log
 
 		topLayout->addStretch();
 
+		// --
 		//
-
 		m_allSessions = new QPushButton(tr("All Sessions"));
 		m_allSessions->setCheckable(true);
 		m_allSessions->setChecked(false);
 		topLayout->addWidget(m_allSessions);
 		connect(m_allSessions, &QPushButton::clicked, this, &LogFileDialog::onAllSessionsClicked);
 
+		// --
 		//
-
 		m_autoScroll = new QPushButton(tr("Auto Scroll"));
 		m_autoScroll->setCheckable(true);
 		topLayout->addWidget(m_autoScroll);
 
+		// --
 		//
-
 		m_table = new QTableView();
 		m_table->setModel(&m_model);
 		m_table->verticalHeader()->hide();
@@ -1283,12 +1269,12 @@ namespace Log
 		m_table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 		m_table->setSortingEnabled(false);
 
+		// --
 		//
-
 		mainLayout->addWidget(m_table);
 
+		// --
 		//
-
 		m_counterLabel = new QLabel();
 
 		m_export = new QPushButton(tr("Export"));
@@ -1305,17 +1291,16 @@ namespace Log
 
 		setMinimumSize(defaultSize);
 
+		// --
 		//
-
 		connect(m_worker, &LogFileWorker::readComplete, this, &LogFileDialog::onReadComplete);
-
-		connect(m_worker, &LogFileWorker::recordArrived, this, &LogFileDialog::onRecordArrived);
+		connect(m_worker, &LogFileWorker::recordArrived, this, &LogFileDialog::onRecordArrived, Qt::QueuedConnection);
 
 		m_worker->read(true);
 		enableControls(false);
 
 		// Restore settings
-
+		//
 		QSettings s;
 
 		QPoint windowPos = s.value("LogFileDialog/windowPos", QPoint(-1, -1)).toPoint();
@@ -1364,9 +1349,8 @@ namespace Log
 		}
 	}
 
-	void LogFileDialog::resizeEvent(QResizeEvent *event)
+	void LogFileDialog::resizeEvent(QResizeEvent* event)
 	{
-
 		Q_UNUSED(event);
 
 		if (m_table == nullptr)
@@ -1418,7 +1402,7 @@ namespace Log
 		{
 			int typeComboIndex = m_typeCombo->currentIndex();
 
-			if (typeComboIndex < 0 || typeComboIndex >= messageTypeCount)
+			if (typeComboIndex >= static_cast<int>(messageTypeTextShort.size()))
 			{
 				assert(false);
 				return;
@@ -1443,7 +1427,6 @@ namespace Log
 	void LogFileDialog::onReadComplete()
 	{
 		std::vector<LogFileRecord> loadResult;
-
 		m_worker->getLoadedData(&loadResult);
 
 		m_model.setRecords(&loadResult);
@@ -1528,7 +1511,6 @@ namespace Log
 	//
 	// LogFile
 	//
-
 	LogFile::LogFile(const QString& logName, const QString& path, int maxFileSize, int maxFilesCount)
 	{
 		QUuid uuid = QUuid::createUuid();
@@ -1542,7 +1524,6 @@ namespace Log
 		m_logThread.addWorker(m_logFileWorker);
 		m_logThread.start();
 
-
 		// Register LogFileRecord meta type
 		//
 		static int regLogFileRecordMetaType = false;
@@ -1552,6 +1533,36 @@ namespace Log
 			regLogFileRecordMetaType = true;
 			qRegisterMetaType<LogFileRecord>();
 		}
+
+		// --
+		//
+		LogFile::writeText("---");
+		LogFile::writeMessage(tr("Logging started:"));
+		LogFile::writeMessage(tr("-- SessionHash: %1").arg(m_sessionHash, 16, 16, QChar('0')));
+
+		if (qApp != nullptr)
+		{
+			LogFile::writeMessage(QString("-- Application: %1 v%2").arg(qApp->applicationName(), qApp->applicationVersion()));
+			LogFile::writeMessage(QString("-- Path: %1").arg(qApp->applicationFilePath()));
+			LogFile::writeMessage(QString("-- CommandLine: %1").arg(qApp->arguments().join(" ")));
+			LogFile::writeMessage(QString("-- ProcessID: %1 (0x%2)").arg(qApp->applicationPid()).arg(qApp->applicationPid(), 8, 16, QChar('0')));
+		}
+
+		QOperatingSystemVersion os = QOperatingSystemVersion::current();
+		LogFile::writeMessage(QString("-- OS: %1 v%2.%3.%4").arg(os.name()).arg(os.majorVersion()).arg(os.minorVersion()).arg(os.microVersion()));
+
+#ifdef Q_OS_WINDOWS
+		char *usernameBuffer;
+		size_t userNameLength;
+		errno_t err = _dupenv_s(&usernameBuffer, &userNameLength, "USERNAME");
+		QString userName = err == 0 ? usernameBuffer : nullptr;
+#endif
+#if defined(Q_OS_MACOS) or defined(Q_OS_LINUX)
+		QString userName{getenv("USER")};			// For Mac or Linux
+#endif
+		LogFile::writeMessage(QString("-- User: %1").arg(userName));
+
+		return;
 	}
 
 	LogFile::~LogFile()
@@ -1566,6 +1577,7 @@ namespace Log
 			assert(ok);
 		}
 
+		return;
 	}
 
 	bool LogFile::writeMessage(const QString& text)

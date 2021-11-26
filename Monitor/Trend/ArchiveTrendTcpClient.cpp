@@ -1,14 +1,17 @@
 #include "ArchiveTrendTcpClient.h"
 #include "MonitorAppSettings.h"
 
-ArchiveTrendTcpClient::ArchiveTrendTcpClient(MonitorConfigController* configController) :
+ArchiveTrendTcpClient::ArchiveTrendTcpClient(MonitorConfigController* configController, ILogFile* logFile) :
 	Tcp::Client(configController->softwareInfo(),
 				configController->configuration().archiveService1.address(),
 				configController->configuration().archiveService2.address(),
 				"ArchiveTrendTcpClient"),
 	TcpClientStatistics(this),
-	m_cfgController(configController)
+	m_cfgController(configController),
+	m_logFile(logFile, "ArchiveTrendTcpClient")
 {
+	Q_ASSERT(logFile);
+
 	qDebug() << "ArchiveTrendTcpClient::ArchiveTrendTcpClient(...)";
 
 	setObjectName("ArchiveTrendTcpClient");
@@ -53,6 +56,7 @@ void ArchiveTrendTcpClient::timerEvent(QTimerEvent* event)
 void ArchiveTrendTcpClient::onClientThreadStarted()
 {
 	qDebug() << "ArchiveTrendTcpClient::onClientThreadStarted()";
+	m_logFile.writeMessage("onClientThreadStarted()");
 
 	connect(m_cfgController, &MonitorConfigController::configurationArrived,
 			this, &ArchiveTrendTcpClient::slot_configurationArrived,
@@ -66,11 +70,14 @@ void ArchiveTrendTcpClient::onClientThreadStarted()
 void ArchiveTrendTcpClient::onClientThreadFinished()
 {
 	qDebug() << "ArchiveTrendTcpClient::onClientThreadFinished()";
+	m_logFile.writeMessage("onClientThreadFinished()");
 }
 
 void ArchiveTrendTcpClient::onConnection()
 {
 	qDebug() << "ArchiveTrendTcpClient::onConnection()";
+	m_logFile.writeMessage("onConnection()");
+
 	Q_ASSERT(isClearToSendRequest() == true);
 
 	return;
@@ -79,13 +86,21 @@ void ArchiveTrendTcpClient::onConnection()
 void ArchiveTrendTcpClient::onDisconnection()
 {
 	qDebug() << "ArchiveTrendTcpClient::onDisconnection";
+	m_logFile.writeMessage("onDisconnection()");
+
 	requestInProgress = false;
+
+	return;
 }
 
 void ArchiveTrendTcpClient::onReplyTimeout()
 {
 	qDebug() << "ArchiveTrendTcpClient::onReplyTimeout()";
+	m_logFile.writeWarning("onReplyTimeout()");
+
 	requestInProgress = false;
+
+	return;
 }
 
 void ArchiveTrendTcpClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
@@ -112,7 +127,9 @@ void ArchiveTrendTcpClient::processReply(quint32 requestID, const char* replyDat
 
 	default:
 		Q_ASSERT(false);
+
 		qDebug() << "Wrong requestID in TrendTcpClient::processReply() " << requestID;
+		m_logFile.writeError(QString("processReply(), Wrong requestId %1").arg(requestID));
 
 		resetRequestCycle();
 	}
@@ -169,12 +186,16 @@ void ArchiveTrendTcpClient::requestStart()
 
 	m_receivedData = std::make_shared<TrendLib::OneHourData>();
 
+	m_logFile.writeMessage(QString("requestStart(), sendRequest(ARCHS_GET_APP_SIGNALS_STATES_START...), %1").arg(m_currentRequest.toString()));
 	return;
 }
 
 void ArchiveTrendTcpClient::processStart(const QByteArray& data)
 {
 	qDebug() << "ARCHS_GET_APP_SIGNALS_STATES_START Reqest->Reply time: " << m_startRequestTime.elapsed();
+	m_logFile.writeMessage(QString("processStart(), ARCHS_GET_APP_SIGNALS_STATES_START Reqest->Reply time: %1 ms, m_currentRequest %2")
+							.arg(m_startRequestTime.elapsed())
+							.arg(m_currentRequest.toString()));
 
 	bool ok = m_startReply.ParseFromArray(data.constData(), data.size());
 
@@ -200,6 +221,10 @@ void ArchiveTrendTcpClient::processStart(const QByteArray& data)
 		qDebug() << "RECEIVED ERROR:   TrendTcpClient::processStart, error = " << error
 				 << ", archError = " << archError
 				 << ", RequestID = " << m_currentRequestId;
+
+		m_logFile.writeError(QString("processStart(), error: %1, m_currentRequest %2")
+								.arg(archError)
+								.arg(m_currentRequest.toString()));
 
 		resetRequestCycle();
 		return;
@@ -252,6 +277,10 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 		qDebug() << "TrendTcpClient::processNext, wrong RequestID, expected " << m_currentRequestId
 				 << ", received " << m_nextReply.requestid();
 
+		m_logFile.writeError(QString("processNext(), wrong RequestId, expected %1, received %2")
+								.arg(m_currentRequestId)
+								.arg(m_nextReply.requestid()));
+
 		resetRequestCycle();
 		return;
 	}
@@ -266,6 +295,11 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 				 << ", archError = " << archError
 				 << ", RequestID = " << m_currentRequestId
 				 << ", requestedTime = " << m_currentRequest.hourToRequest.toDateTime();
+
+		m_logFile.writeError(QString("processNext(), error: %1, archError: %2, request: %3")
+								.arg(error)
+								.arg(archError)
+								.arg(m_currentRequest.toString()));
 
 		resetRequestCycle();
 		return;
@@ -338,6 +372,10 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 	if (m_nextReply.islastpart() == true)
 	{
 		qDebug() << "ARCHS_GET_APP_SIGNALS_STATES_NEXT Reqest->Reply time: " << m_startRequestTime.elapsed();
+		m_logFile.writeMessage(QString("processNext(), Requested completed, time: %1 ms, request: %2")
+									.arg(m_startRequestTime.elapsed())
+									.arg(m_currentRequest.toString()));
+
 		Q_ASSERT(m_receivedData);
 
 		m_receivedData->state = TrendLib::OneHourData::State::Received;
@@ -383,6 +421,7 @@ void ArchiveTrendTcpClient::slot_requestData(QString appSignalId, TimeStamp hour
 	//
 	m_queue.push_back(request);
 
+	m_logFile.writeMessage(QString("slot_requestData(), %1").arg(request.toString()));
 	return;
 }
 

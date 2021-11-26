@@ -37,7 +37,7 @@ SignalsDelegate::SignalsDelegate(AppSignalSetProvider* signalSetProvider, Signal
 	connect(this, &QAbstractItemDelegate::closeEditor, this, &SignalsDelegate::onCloseEditorEvent);
 }
 
-QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+QWidget* SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
 	int col = index.column();
 	int row = m_proxyModel->mapToSource(index).row();
@@ -645,6 +645,7 @@ SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbContro
 	m_signalIdFieldCombo->addItem(tr("CustomAppSignalID"), FI_CUSTOM_APP_SIGNAL_ID);
 	m_signalIdFieldCombo->addItem(tr("EquipmentID"), FI_EQUIPMENT_ID);
 	m_signalIdFieldCombo->addItem(tr("Caption"), FI_CAPTION);
+	m_signalIdFieldCombo->addItem(tr("Tags"), FI_TAGS);
 
 	QToolBar* toolBar = new QToolBar(this);
 
@@ -2277,16 +2278,18 @@ SignalsProxyModel::SignalsProxyModel(SignalsModel *sourceModel, QObject *parent)
 bool SignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) const
 {
 	const AppSignal& currentSignal = m_signalSetProvider->getLoadedSignal(source_row);
+
 	if (!(m_signalType == ST_ANY || m_signalType == TO_INT(currentSignal.signalType())))
 	{
 		return false;
 	}
+
 	if (m_strIdMasks.isEmpty())
 	{
 		return true;
 	}
 
-	for (QString idMask : m_strIdMasks)
+	for (const QString& idMask : m_strIdMasks)
 	{
 		QRegExp rx(idMask.trimmed());
 		rx.setPatternSyntax(QRegExp::Wildcard);
@@ -2298,29 +2301,41 @@ bool SignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) co
 				result = rx.exactMatch(currentSignal.appSignalID().trimmed()) ||
 						rx.exactMatch(currentSignal.customAppSignalID().trimmed()) ||
 						rx.exactMatch(currentSignal.equipmentID().trimmed()) ||
-						rx.exactMatch(currentSignal.caption().trimmed());
+						rx.exactMatch(currentSignal.caption().trimmed()) ||
+						rx.exactMatch(currentSignal.tagsStr().trimmed());
 				break;
+
 			case FI_APP_SIGNAL_ID:
 				result = rx.exactMatch(currentSignal.appSignalID().trimmed());
 				break;
+
 			case FI_CUSTOM_APP_SIGNAL_ID:
 				result = rx.exactMatch(currentSignal.customAppSignalID().trimmed());
 				break;
+
 			case FI_EQUIPMENT_ID:
 				result = rx.exactMatch(currentSignal.equipmentID().trimmed());
 				break;
+
 			case FI_CAPTION:
 				result = rx.exactMatch(currentSignal.caption().trimmed());
 				break;
+
+			case FI_TAGS:
+				result = rx.exactMatch(currentSignal.tagsStr().trimmed());
+				break;
+
 			default:
 				assert(false);
 				return false;
 		}
+
 		if (result == true)
 		{
 			return true;
 		}
 	}
+
 	return false;
 }
 

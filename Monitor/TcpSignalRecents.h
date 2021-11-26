@@ -43,7 +43,7 @@ class TcpSignalRecents : public Tcp::Client, public TcpClientStatistics
 	Q_OBJECT
 
 public:
-	TcpSignalRecents(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+	TcpSignalRecents(MonitorConfigController* configController, ILogFile* logFile);
 	virtual ~TcpSignalRecents();
 
 public:
@@ -68,6 +68,7 @@ protected slots:
 
 private:
 	MonitorConfigController* m_cfgController = nullptr;
+	HasLogFile m_logFile;
 	RecentUsed m_recents = RecentUsed(ADS_GET_APP_SIGNAL_STATE_MAX);
 
 private:

@@ -15,32 +15,6 @@
 #	include "../gitlabci_version.h"
 #endif
 
-//
-// JsVariantList
-//
-
-JsVariantList::JsVariantList(QObject* parent):
-	QObject(parent)
-{
-
-}
-
-void JsVariantList::append(QVariant v)
-{
-	m_list.append(v);
-}
-
-int JsVariantList::jsSize()
-{
-	return m_list.size();
-}
-
-QVariant JsVariantList::jsAt(int i)
-{
-	return m_list.at(i);
-}
-
-
 namespace Hardware
 {
 
@@ -874,20 +848,19 @@ namespace Hardware
 		return reverseFloat(data);
 	}
 
-	JsVariantList* ModuleFirmwareWriter::calcHash64(QString dataString)
+	QList<int> ModuleFirmwareWriter::calcHash64(QString dataString)
 	{
-
 		QByteArray bytes = dataString.toUtf8();
 
-		quint64 result = ::calcHash(bytes.data(), bytes.size());
+		quint64 hash = ::calcHash(bytes.data(), bytes.size());
 
-		quint32 h = (result >> 32) & 0xffffffff;
-		quint32 l = result & 0xffffffff;
+		quint32 h = (hash >> 32) & 0xffffffff;
+		quint32 l = hash & 0xffffffff;
 
-		JsVariantList* vl = new JsVariantList(this);
-		vl->append(QVariant(h));
-		vl->append(QVariant(l));
-		return vl;
+		QList<int> result;
+		result.push_back(h);
+		result.push_back(l);
+		return result;
 	}
 
 	QString ModuleFirmwareWriter::storeCrc64(int frameIndex, int start, int count, int offset)
@@ -1043,6 +1016,21 @@ namespace Hardware
 	{
 		QQmlEngine::setObjectOwnership(&m_unitsConvertor, QQmlEngine::ObjectOwnership::CppOwnership);
 		return &m_unitsConvertor;
+	}
+
+	bool ModuleFirmwareWriter::checkMacForUnique(quint16 m1, quint16 m2, quint16 m3)
+	{
+		qulonglong mac = static_cast<qulonglong>(m1) << 32;
+		mac |= static_cast<qulonglong>(m2) << 16;
+		mac |= static_cast<qulonglong>(m3);
+
+		if (m_macMap.find(mac) != m_macMap.end())
+		{
+			return false;
+		}
+
+		m_macMap.insert(mac);
+		return true;
 	}
 
 

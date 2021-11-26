@@ -266,6 +266,11 @@ CircularLogger::CircularLogger()
 {
 }
 
+CircularLogger::CircularLogger(ILogFile* externalLog, QString context) :
+	m_externalLogger({externalLog, context})
+{
+	Q_ASSERT(externalLog);
+}
 
 CircularLogger::~CircularLogger()
 {
@@ -274,6 +279,11 @@ CircularLogger::~CircularLogger()
 
 bool CircularLogger::init(QString logName, QString instanceID, int fileCount, int fileSizeInMB)
 {
+	if (m_externalLogger.has_value() == true)
+	{
+		return false;
+	}
+
 	if (m_loggerInitialized == true)
 	{
 		assert(false);				// Logger object is already initialized.
@@ -331,6 +341,11 @@ bool CircularLogger::isInitialized() const
 
 void CircularLogger::shutdown()
 {
+	if (m_externalLogger.has_value() == true)
+	{
+		return;
+	}
+
 	quitAndWait(500);
 }
 
@@ -415,6 +430,27 @@ QString CircularLogger::getCurrentDateTimeStr()
 
 void CircularLogger::composeAndWriteRecord(RecordType type, const QString& message, const char* function, const char* file, int line, bool debugEcho)
 {
+	if (m_externalLogger.has_value() == true)
+	{
+		switch (type)
+		{
+		case RecordType::Error:
+			m_externalLogger->writeError(message);
+			break;
+		case RecordType::Warning:
+			m_externalLogger->writeWarning(message);
+			break;
+		case RecordType::Message:
+			m_externalLogger->writeMessage(message);
+			break;
+		case RecordType::Config:
+			m_externalLogger->writeText(message);
+			break;
+		}
+
+		return;
+	}
+
 	if (m_loggerInitialized == false)
 	{
 		assert(false);		// Logger object isn't initialized. Call CircularLogger::init at first.

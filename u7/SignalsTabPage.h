@@ -40,7 +40,8 @@ const int	FI_ANY = 0,
 			FI_APP_SIGNAL_ID = 1,
 			FI_CUSTOM_APP_SIGNAL_ID = 2,
 			FI_EQUIPMENT_ID = 3,
-			FI_CAPTION = 4;
+			FI_CAPTION = 4,
+			FI_TAGS = 5;
 
 
 struct CreatingSignalOptions

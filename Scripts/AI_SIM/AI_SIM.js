@@ -549,54 +549,60 @@ function generate_ai_sim(confFirmware, module, LMNumber, frame, log, signalSet, 
 
 				// Write configuration
 
-				let ptr = unitPtr + (2 /*word of flags*/ + c * 2 /*channel offset*/) * 2;
+				let ftPtr = unitPtr + (2 + c * 2 /*channel size*/) * 2;
+
+				let rPtr = unitPtr + (8 + c * 2 /*r size*/) * 2;
+
+				let kPtr = unitPtr + (14 + c * 4 /*k1 and k2 size*/) * 2;
+
+				let rangePtr = unitPtr + (26 + c * 4 /*bounds size*/) * 2;
 
 				confFirmware.writeLog("    unit " + (i + 1) + " channel " + channelNames[c] + " (" + unitsConvertor.electricUnitName(electricUnit) +
-					"): [ " + frame + ":" + ptr + "] Tf = " + filteringTime +
-					"; [" + frame + ":" + (ptr + 6 * 2) + "] " + resistorNames[c] + " = " + r +
-					"; [" + frame + ":" + (ptr + 12 * 2) + "] K1 = " + k1 +
-					"; [" + frame + ":" + (ptr + 18 * 2) + "] K2 = " + k2 +
-					"; [" + frame + ":" + (ptr + 24 * 2) + "] HighValidRange = " + highValidRange +
-					"; [" + frame + ":" + (ptr + 30 * 2) + "] LowValidRange = " + lowValidRange + "\r\n");
+					"): [ " + frame + ":" + ftPtr + "] Tf = " + filteringTime +
+					"; [" + frame + ":" + rPtr + "] " + resistorNames[c] + " = " + r +
+					"; [" + frame + ":" + kPtr + "] K1 = " + k1 +
+					"; [" + frame + ":" + (kPtr + 2 * 2) + "] K2 = " + k2 +
+					"; [" + frame + ":" + rangePtr + "] HighValidRange = " + highValidRange +
+					"; [" + frame + ":" + (rangePtr + 2 * 2) + "] LowValidRange = " + lowValidRange + "\r\n");
 
-
-				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "Tf", filteringTime) == false)          // Filtering time constant
+				
+				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ftPtr, "Tf", filteringTime) == false)          // Filtering time constant
 				{
 					return false;
 				}
-				ptr += 6 * 2;
 
-				if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, resistorNames[c], r) == false)      // R
+				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, rPtr, resistorNames[c], r) == false)      // R
 				{
 					return false;
 				}
-				ptr += 12 * 2;
+
+				let ptr = kPtr;
 
 				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K1", k1) == false)         // K1
 				{
 					return false;
 				}
-				ptr += 18 * 2;
-
+				
+				ptr += 2 * 2;
 
 				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K2", k2) == false)         // K2
 				{
 					return false;
 				}
-				ptr += 24 * 2;
 
+				ptr = rangePtr;
 
 				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "HighValidRange", highValidRange) == false)         // In High bound
 				{
 					return false;
 				}
-				ptr += 30 * 2;
+
+				ptr += 2 * 2;
 
 				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LowValidRange", lowValidRange) == false)          // In Low Bound
 				{
 					return false;
 				}
-				ptr += 36 * 2;
 			}
 
 		} // channelsCount

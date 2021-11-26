@@ -105,12 +105,17 @@ const ::Network::AppDataSourceState& AppDataSourceState::previousState() const
 //
 //
 
-TcpAppSourcesState::TcpAppSourcesState(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
-	Tcp::Client(configController->softwareInfo(), serverAddressPort1, serverAddressPort2, "TcpAppSourcesState"),
+TcpAppSourcesState::TcpAppSourcesState(MonitorConfigController* configController, ILogFile* logFile) :
+	Tcp::Client(configController->softwareInfo(),
+				configController->configuration().appDataService1.address(),
+				configController->configuration().appDataService2.address(),
+				"TcpAppSourcesState"),
 	TcpClientStatistics(this),
-	m_cfgController(configController)
+	m_cfgController(configController),
+	m_logFile(logFile, "TcpAppSourcesState")
 {
-	assert(m_cfgController);
+	Q_ASSERT(m_cfgController);
+	Q_ASSERT(logFile);
 
 	setObjectName("TcpSourcesStateClient");
 
@@ -183,6 +188,7 @@ int TcpAppSourcesState::sourceErrorCount()
 void TcpAppSourcesState::onClientThreadStarted()
 {
 	qDebug() << "TcpSourcesStateClient::onClientThreadStarted()";
+	m_logFile.writeMessage("onClientThreadStarted()");
 
 	connect(m_cfgController, &MonitorConfigController::configurationArrived,
 			this, &TcpAppSourcesState::slot_configurationArrived,
@@ -194,11 +200,13 @@ void TcpAppSourcesState::onClientThreadStarted()
 void TcpAppSourcesState::onClientThreadFinished()
 {
 	qDebug() << "TcpSourcesStateClient::onClientThreadFinished()";
+	m_logFile.writeMessage("onClientThreadFinished()");
 }
 
 void TcpAppSourcesState::onConnection()
 {
 	qDebug() << "TcpSourcesStateClient::onConnection()";
+	m_logFile.writeMessage("onConnection()");
 
 	assert(isClearToSendRequest() == true);
 
@@ -214,6 +222,7 @@ void TcpAppSourcesState::onConnection()
 void TcpAppSourcesState::onDisconnection()
 {
 	qDebug() << "TcpSourcesStateClient::onDisconnection";
+	m_logFile.writeMessage("onDisconnection()");
 
 	{
 		QMutexLocker l(&m_appDataSourceStatesMutex);
@@ -231,6 +240,7 @@ void TcpAppSourcesState::onDisconnection()
 void TcpAppSourcesState::onReplyTimeout()
 {
 	qDebug() << "TcpSourcesStateClient::onReplyTimeout()";
+	m_logFile.writeWarning("onReplyTimeout()");
 }
 
 void TcpAppSourcesState::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
@@ -255,7 +265,9 @@ void TcpAppSourcesState::processReply(quint32 requestID, const char* replyData, 
 
 	default:
 		assert(false);
+
 		qDebug() << "Wrong requestID in TcpAppDataSourcesStateClient::processReply()";
+		m_logFile.writeError(QString("Wrong requestId in processReply(), requestId %1").arg(requestID));
 
 		resetToGetAppDataSourcesInfo();
 	}
@@ -287,6 +299,7 @@ void TcpAppSourcesState::requestAppDataSourcesInfo()
 	if (isClearToSendRequest() == false)
 	{
 		qDebug() << tr("TcpAppDataSourcesStateClient::requestTuningSourcesInfo, isClearToSendRequest() == false, reconnecting.");
+		m_logFile.writeError(QString("requestTuningSourcesInfo, isClearToSendRequest() == false, reconnecting."));
 		closeConnection();
 		return;
 	}
@@ -313,6 +326,9 @@ void TcpAppSourcesState::processAppDataSourcesInfo(const QByteArray& data)
 	{
 		qDebug() << tr("TcpAppDataSourcesStateClient::m_getDataSourcesInfoReply, error received: %1")
 					  .arg(getNetworkErrorStr(static_cast<NetworkError>(m_getDataSourcesInfoReply.error())));
+
+		m_logFile.writeError(QString("m_getDataSourcesInfoReply, error received: %1")
+								.arg(getNetworkErrorStr(static_cast<NetworkError>(m_getDataSourcesInfoReply.error()))));
 
 		resetToGetAppDataSourcesInfo();
 		return;
@@ -361,6 +377,8 @@ void TcpAppSourcesState::processAppDataSourcesState(const QByteArray& data)
 	if (m_getAppDataSourcesStateReply.error() != static_cast<int>(NetworkError::Success))
 	{
 		qDebug() << "TcpSourcesStateClient::processAppDataSourcesState, error received: " << m_getAppDataSourcesStateReply.error();
+		m_logFile.writeError(QString("processAppDataSourcesState, error received: %1").arg(m_getAppDataSourcesStateReply.error()));
+
 		assert(m_getAppDataSourcesStateReply.error() != static_cast<int>(NetworkError::Success));
 
 		resetToGetAppDataSourcesState();
