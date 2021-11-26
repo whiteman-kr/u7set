@@ -429,10 +429,6 @@ unix {
     CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
 }
 
-# QtPropertyBrowser
-#
-include(../qtpropertybrowser/src/qtpropertybrowser.pri)
-
 # Add curent dir to a list of library directory paths
 #
 unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
