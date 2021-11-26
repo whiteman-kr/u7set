@@ -453,21 +453,19 @@ namespace Builder
 				continue;
 			}
 
+			const QString subsystemId = m->propertyValue("SubsystemID").toString();
 			int ssKey = m_subsystems->ssKey(m->propertyValue("SubsystemID").toString());
 			int lmNumber = m->propertyValue("LMNumber").toInt();
 			int channel = m->propertyValue("SubsystemChannel").toInt();
-
-			Q_ASSERT(ssKey >= 0 && ssKey <= std::numeric_limits<quint16>::max());
 
 			lmReport << "\r\n";
 			lmReport << "Equipment ID: " + m->equipmentIdTemplate();
 			lmReport << "Caption: " + m->caption();
 			lmReport << "Place: " + QString::number(m->place());
-			lmReport << "Subsystem ID: " + m->propertyValue("SubsystemID").toString();
+			lmReport << "Subsystem ID: " + subsystemId;
 			lmReport << "Subsystem Code: " + QString::number(ssKey);
 			lmReport << "Subsystem Channel: " + E::valueToString<E::Channel>(channel);
 			lmReport << "LM Number: " + QString::number(lmNumber);
-
 
 			quint16 jumpers = static_cast<quint16>(ssKey) << 6;
 			jumpers |= lmNumber;
@@ -475,17 +473,45 @@ namespace Builder
 			quint16 crc4 = Crc::crc4(jumpers);
 			jumpers |= (crc4 << 12);
 
-			lmReport << "Jumpers configuration (HEX): 0x" + QString::number(jumpers, 16);
-
 			QString jumpersHex = QString::number(jumpers, 2).rightJustified(16, '0');
 			jumpersHex.insert(4, ' ');
 			jumpersHex.insert(9, ' ');
 			jumpersHex.insert(14, ' ');
-			lmReport << "Jumpers configuration (BIN): " + jumpersHex;
+
+			const int MODULE_LM11_VERSION = 0x90;
+
+			if (m->moduleFamily() == static_cast<int>(Hardware::DeviceModule::FamilyType::LM) &&
+				m->moduleVersion() == MODULE_LM11_VERSION)
+			{
+				// LM-11 has rotary switches, so check if subsystem key and channel number have range 0..f and print their positions
+				//
+				if ((ssKey < 0) || (ssKey > 15))
+				{
+					m_log->errCFG3060(subsystemId, ssKey, 0, 15);
+				}
+
+				lmReport << "Internal Configuration Code (HEX): 0x" + QString::number(jumpers, 16);
+				lmReport << "Internal Configuration Code (BIN): " + jumpersHex;
+
+				lmReport << tr("Lower Rotary Switch Value: '%1'").arg(QString::number(ssKey, 16));
+				lmReport << tr("Upper Rotary Switch Value: '%1'").arg(QString::number(lmNumber, 16));
+			}
+			else
+			{
+				// All other LMs use jumpers
+				//
+				if ((ssKey < 0) || (ssKey > std::numeric_limits<quint16>::max()))
+				{
+					m_log->errCFG3060(subsystemId, ssKey, 0, std::numeric_limits<quint16>::max());
+				}
+
+				lmReport << "Jumpers Configuration (HEX): 0x" + QString::number(jumpers, 16);
+				lmReport << "Jumpers Configuration (BIN): " + jumpersHex;
+			}
 		}
 
 		QByteArray lmReportData;
-		for (QString s : lmReport)
+		for (const QString& s : lmReport)
 		{
 			lmReportData.append(s.toUtf8());
 			lmReportData.append(QChar::LineFeed);
