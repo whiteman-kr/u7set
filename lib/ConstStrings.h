@@ -345,6 +345,7 @@ namespace Directory
 	inline const QString RUN_SERVICE_SCRIPTS_LINUX("RunServiceScripts/Linux");
 
 	inline const QString BIN("Bin");
+	inline const QString SUBSYSTEMS("Subsystems");
 }
 
 namespace File

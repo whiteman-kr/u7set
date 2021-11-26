@@ -502,6 +502,8 @@ namespace Builder
 
 	bool ConfigurationBuilder::writeDataFiles()
 	{
+		TEST_PTR_RETURN_FALSE(m_buildResultWriter);
+
 		QStringList subsystemsList = m_buildResultWriter->firmwareWriter()->subsystems();
 
 		// Save confCollection items to binary files
@@ -512,7 +514,8 @@ namespace Builder
 
 			if (log.isEmpty() == false)
 			{
-				if (m_buildResultWriter->addFile(ss, ss.toLower() + ".mct", log) == nullptr)
+				if (m_buildResultWriter->addFile(m_buildResultWriter->subsystemDirectory(ss),
+												 ss.toLower() + ".mct", log) == nullptr)
 				{
 					return false;
 				}
