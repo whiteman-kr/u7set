@@ -1607,6 +1607,33 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
+	/// Title: Subsystem %1 key has wrong value (%2), valid range is %3..%4.
+	///
+	/// Parameters:
+	///         %1 Subsystem ID
+	///         %2 Subsystem key value
+	///			%3 Key low range
+	///			%4 Key high range
+	///
+	/// Description:
+	///			For ceratin types of LMs there are additional limitations to subsystem key value
+	///
+	void IssueLogger::errCFG3060(QString subsystemId, int value, int max, int min)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3060,
+				  QString("Subsystem %1 key has wrong value (%2), valid range is %3..%4.")
+					.arg(subsystemId)
+					.arg(value)
+					.arg(max)
+					.arg(min)
+				  );
+	}
+
+	/// IssueCode: CFG3100
+	///
+	/// IssueType: Error
+	///
 	/// Title: Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). To update presets select 'Update from Preset' in Equipmemt Editor.
 	///
 	/// Parameters:

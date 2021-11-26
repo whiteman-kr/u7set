@@ -1,0 +1,2 @@
+AI_SIM
+	18.11.2021	Version: 0	AIM-SIM_v0.u7devp		CMCASETASK-545:  Added AI-SIM preset

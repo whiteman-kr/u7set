@@ -4,35 +4,34 @@ CONFIG += ordered
 
 SUBDIRS += Protobuf \
     	QScintilla/src/qscintilla.pro \
-#        qtpropertybrowser \
         TrendView \
-		AppSignalLib \
-		UtilsLib \
-		OnlineLib \
-		ServiceLib \
-		HardwareLib \
-		CommonLib \
-		VFrame30 \
-		DbLib \
-		Simulator \
-		SimulatorConsole \
-		Builder \
-		BuilderConsole \
-		u7 \
+	AppSignalLib \
+	UtilsLib \
+	OnlineLib \
+	ServiceLib \
+	HardwareLib \
+	CommonLib \
+	VFrame30 \
+	DbLib \
+	Simulator \
+	SimulatorConsole \
+	Builder \
+	BuilderConsole \
+	u7 \
 #        Metrology \
 #        BaseService \
         ServiceControlManager \
-		ConfigurationService \
+	ConfigurationService \
         ArchivingService \
         Monitor \
-		TuningService \
+	TuningService \
         AppDataService \
-		DiagDataService \
+	DiagDataService \
         TuningClient \
         mconf \
-		PacketSource \
-		PacketViewer \
-		UalTester \
+	PacketSource \
+	PacketViewer \
+	UalTester \
         SimulatorTests \
         u7databaseTests
 

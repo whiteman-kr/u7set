@@ -84,6 +84,7 @@ private:
 
 public slots:
 
+	void loadRacks();
 	void updateList() override;	// slots for updating
 
 private slots:

@@ -315,7 +315,7 @@ namespace VFrame30
 
 	void ImageItem::setImage(QImage image)
 	{
-		m_image = image;
+		m_image = std::move(image);
 		m_imageData.clear();
 		m_svgData.clear();
 		m_svgRenderer.reset();
@@ -328,9 +328,65 @@ namespace VFrame30
 
 	void ImageItem::setSvgData(const QString& data)
 	{
-		m_svgData = data;
-		m_image = {};
-		m_imageData.clear();
-		m_svgRenderer.reset();
+		if (m_svgData != data)
+		{
+			m_svgData = data;
+			m_image = {};
+			m_imageData.clear();
+			m_svgRenderer.reset();
+		}
+
+		return;
+	}
+
+	ScriptImageItem::ScriptImageItem(std::shared_ptr<VFrame30::ImageItem> imageItem) :
+		m_imageItem(std::move(imageItem))
+	{
+		Q_ASSERT(m_imageItem);
+	}
+
+	ScriptImageItem::~ScriptImageItem()
+	{
+		qDebug() << Q_FUNC_INFO;
+	}
+
+	bool ScriptImageItem::allowScale() const
+	{
+		return m_imageItem->allowScale();
+	}
+
+	void ScriptImageItem::setAllowScale(bool value)
+	{
+		m_imageItem->setAllowScale(value);
+	}
+
+	bool ScriptImageItem::keepAspectRatio() const
+	{
+		return m_imageItem->keepAspectRatio();
+	}
+
+	void ScriptImageItem::setKeepAspectRatio(bool value)
+	{
+		m_imageItem->setKeepAspectRatio(value);
+	}
+
+	const QString& ScriptImageItem::imageId() const
+	{
+		return m_imageItem->imageId();
+	}
+
+	void ScriptImageItem::setImageId(const QString& value)
+	{
+		m_imageItem->setImageId(value);
+	}
+
+	const QString& ScriptImageItem::svgData() const
+	{
+		return m_imageItem->svgData();
+	}
+
+	void ScriptImageItem::setSvgData(const QString& data)
+	{
+		m_imageItem->setSvgData(data);
 	}
 }

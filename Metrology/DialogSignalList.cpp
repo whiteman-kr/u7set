@@ -170,7 +170,7 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 		case SIGNAL_LIST_COLUMN_RACK:				result = param.location().rack().caption();		break;
 		case SIGNAL_LIST_COLUMN_CHASSIS:			result = param.location().chassisStr();			break;
 		case SIGNAL_LIST_COLUMN_MODULE:				result = param.location().moduleStr();			break;
-		case SIGNAL_LIST_COLUMN_PLACE:				result = param.location().placeStr();			break;
+		case SIGNAL_LIST_COLUMN_PLACE:				result = param.placeStr();						break;
 		case SIGNAL_LIST_COLUMN_MODULE_TYPE:		result = param.location().moduleCaption();		break;
 		case SIGNAL_LIST_COLUMN_ADC_RANGE:			result = param.adcRangeStr(true);				break;
 		case SIGNAL_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();			break;
@@ -178,9 +178,9 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 		case SIGNAL_LIST_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();			break;
 		case SIGNAL_LIST_COLUMN_PH_RANGE:			result = param.physicalRangeStr();				break;
 		case SIGNAL_LIST_COLUMN_TUN_SIGNAL:			result = param.enableTuningStr();				break;
-		case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:	result = qApp->translate("MetrologySignal", param.tuningDefaultValueStr().toUtf8());break;
+		case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:	result = param.tuningDefaultValueStr();			break;
 		case SIGNAL_LIST_COLUMN_TUN_RANGE:			result = param.tuningRangeStr();				break;
-		case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:	result = qApp->translate("MetrologySignal", param.location().shownOnSchemasStr().toUtf8());	break;
+		case SIGNAL_LIST_COLUMN_SHOWN_ON_SCHEMS:	result = param.location().shownOnSchemasStr();	break;
 
 		default:
 			assert(0);
@@ -334,6 +334,8 @@ void DialogSignalList::updateVisibleColunm()
 
 				case E::SignalInOutType::Internal:
 					hideColumn(SIGNAL_LIST_COLUMN_ADC_RANGE, true);
+					hideColumn(SIGNAL_LIST_COLUMN_MODULE, true);
+					hideColumn(SIGNAL_LIST_COLUMN_PLACE, true);
 					hideColumn(SIGNAL_LIST_COLUMN_EL_RANGE, true);
 					hideColumn(SIGNAL_LIST_COLUMN_EL_SENSOR, true);
 					hideColumn(SIGNAL_LIST_COLUMN_PH_RANGE, true);

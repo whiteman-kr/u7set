@@ -50,8 +50,18 @@ public:
 	QString moduleCaption() const { return m_moduleCaption; }
 	void setModuleCaption(const QString& lmCaption) { m_moduleCaption = lmCaption; }
 
-	int appDataFramesQuantity() const { return m_appDataFramesQuantity; }
-	quint32 appDataUID() const { return m_appDataUID; }
+	int appDataFramesQuantity() const;
+	int diagDataFramesQuantity() const;
+
+	int appDataSizeBytes() const;
+	int diagDataSizeBytes() const;
+
+	int overrideAppDataWordCount() const;
+	int overrideDiagDataWordCount() const;
+
+	quint32 appDataUID() const;
+	quint32 diagDataUID() const;
+	quint64 tuningDataUID() const;
 
 	quint64 ID() const { return m_id; }
 	void setID(quint64 id) { m_id = id; }
@@ -99,18 +109,6 @@ private:
 	int m_subsystemKey = 0;
 	int m_lmNumber = 0;
 	QString m_subsystemChannel;				// A, B, C...
-
-	quint32 m_appDataUID = 0;
-	int m_appDataSizeBytes = 0;
-	int m_appDataFramesQuantity = 0;
-	int m_overrideAppDataWordCount = -1;
-
-	quint64 m_tuningDataUID = 0;
-
-	quint32 m_diagDataUID = 0;
-	int m_diagDataSizeBytes = 0;
-	int m_diagDataFramesQuantity = 0;
-	int m_overrideDiagDataWordCount = -1;
 
 	LanControllersInfo m_lanControllersInfo;		// array of LanControllerInfo!
 

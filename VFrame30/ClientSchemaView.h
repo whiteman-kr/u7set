@@ -266,6 +266,7 @@ namespace VFrame30
 	protected:
 		virtual void paintEvent(QPaintEvent* event) override;
 		virtual void timerEvent(QTimerEvent* event) override;
+		virtual void mouseMoveEvent(QMouseEvent* event) override;
 		virtual void mousePressEvent(QMouseEvent* event) override;
 		virtual void mouseReleaseEvent(QMouseEvent* event) override;
 

@@ -2,6 +2,7 @@
 
 #include <QFile>
 #include <QTextStream>
+#include <optional>
 
 #include "../UtilsLib/ILogFile.h"
 #include "../UtilsLib/SimpleThread.h"

@@ -34,7 +34,7 @@ DialogOptionsMeasureViewHeader::DialogOptionsMeasureViewHeader(const MeasureView
 	measureTypeLayout->addWidget(m_pDefaultButton);
 	m_pDefaultButton->hide();
 
-	m_languageType = static_cast<LanguageType>(theOptions.language().languageType());
+	m_languageType = static_cast<OT::LanguageType>(theOptions.language().languageType());
 
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 
@@ -164,7 +164,7 @@ void DialogOptionsMeasureViewHeader::updateList()
 	m_pColumnList->setVerticalHeaderLabels(verticalHeaderLabels);
 	m_updatingList = false;
 
-	emit updateMeasureViewPage(true);
+	emit dataUpdated();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -210,7 +210,7 @@ void DialogOptionsMeasureViewHeader::onDefault()
 		return;
 	}
 
-//	int languageType = theOptions.language().languageType();
+//	O::LanguageType languageType = theOptions.language().languageType();
 //	if (ERR_LANGUAGE_TYPE(languageType) == true)
 //	{
 //		return;

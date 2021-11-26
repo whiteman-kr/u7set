@@ -416,7 +416,6 @@ DISTFILES += \
     LogicModuleDescription/LM1_SR03.xml \
     LogicModuleDescription/LM1_SF40.xml
 
-
 # Add curent dir to a list of library directory paths
 #
 unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''

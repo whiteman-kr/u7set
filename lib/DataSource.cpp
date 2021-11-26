@@ -18,6 +18,114 @@ DataSource::~DataSource()
 {
 }
 
+int DataSource::appDataFramesQuantity() const
+{
+	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::AppData);
+
+	if (lci.isValid() == true)
+	{
+		return lci.appDataFramesQuantity;
+	}
+
+	return 0;
+}
+
+int DataSource::diagDataFramesQuantity() const
+{
+	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::DiagData);
+
+	if (lci.isValid() == true)
+	{
+		return lci.diagDataFramesQuantity;
+	}
+
+	return 0;
+}
+
+int DataSource::appDataSizeBytes() const
+{
+	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::AppData);
+
+	if (lci.isValid() == true)
+	{
+		return lci.appDataSizeBytes;
+	}
+
+	return 0;
+}
+
+int DataSource::diagDataSizeBytes() const
+{
+	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::DiagData);
+
+	if (lci.isValid() == true)
+	{
+		return lci.diagDataFramesQuantity;
+	}
+
+	return 0;
+}
+
+int DataSource::overrideAppDataWordCount() const
+{
+	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::AppData);
+
+	if (lci.isValid() == true)
+	{
+		return lci.overrideAppDataWordCount;
+	}
+
+	return 0;
+}
+
+int DataSource::overrideDiagDataWordCount() const
+{
+	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::DiagData);
+
+	if (lci.isValid() == true)
+	{
+		return lci.overrideDiagDataWordCount;
+	}
+
+	return 0;
+}
+
+quint32 DataSource::appDataUID() const
+{
+	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::AppData);
+
+	if (lci.isValid() == true)
+	{
+		return lci.appDataUID;
+	}
+
+	return 0;
+}
+
+quint32 DataSource::diagDataUID() const
+{
+	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::DiagData);
+
+	if (lci.isValid() == true)
+	{
+		return lci.diagDataUID;
+	}
+
+	return 0;
+}
+
+quint64 DataSource::tuningDataUID() const
+{
+	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::Tuning);
+
+	if (lci.isValid() == true)
+	{
+		return lci.tuningDataUID;
+	}
+
+	return 0;
+}
+
 void DataSource::appendAssociatedSignal(E::LanControllerType lanType, const QString& signalID)
 {
 	bool app = false;
@@ -135,19 +243,19 @@ void DataSource::writeToXml(XmlWriteHelper& xml) const
 	xml.writeStringAttribute(XmlAttribute::CAPTION, m_moduleCaption);
 	xml.writeUInt64Attribute(XmlAttribute::MODULE_UNIQUE_ID, m_moduleUniqueID, true);
 
-	xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, m_appDataSizeBytes);
-	xml.writeUInt32Attribute(EquipmentPropNames::APP_DATA_UID, m_appDataUID, false);
-	xml.writeUInt32Attribute(EquipmentPropNames::HEX_APP_DATA_UID, m_appDataUID, true);
-	xml.writeIntAttribute(EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, m_appDataFramesQuantity);
-	xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, m_overrideAppDataWordCount);
+	xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, appDataSizeBytes());
+	xml.writeUInt32Attribute(EquipmentPropNames::APP_DATA_UID, appDataUID(), false);
+	xml.writeUInt32Attribute(EquipmentPropNames::HEX_APP_DATA_UID, appDataUID(), true);
+	xml.writeIntAttribute(EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, appDataFramesQuantity());
+	xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, overrideAppDataWordCount());
 
-	xml.writeUInt64Attribute(EquipmentPropNames::TUNING_DATA_UID, m_tuningDataUID, true);
+	xml.writeUInt64Attribute(EquipmentPropNames::TUNING_DATA_UID, tuningDataUID(), true);
 
-	xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, m_diagDataSizeBytes);
-	xml.writeUInt32Attribute(EquipmentPropNames::DIAG_DATA_UID, m_diagDataUID, false);
-	xml.writeUInt32Attribute(EquipmentPropNames::HEX_DIAG_DATA_UID, m_diagDataUID, true);
-	xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, m_diagDataFramesQuantity);
-	xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, m_overrideDiagDataWordCount);
+	xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, diagDataSizeBytes());
+	xml.writeUInt32Attribute(EquipmentPropNames::DIAG_DATA_UID, diagDataUID(), false);
+	xml.writeUInt32Attribute(EquipmentPropNames::HEX_DIAG_DATA_UID, diagDataUID(), true);
+	xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, diagDataFramesQuantity());
+	xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, overrideDiagDataWordCount());
 
 	m_lanControllersInfo.writeToXml(xml);
 

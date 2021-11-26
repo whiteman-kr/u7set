@@ -90,11 +90,6 @@ interface ScriptDeviceSoftware extends ScriptDeviceObject {
 	softwareType: SoftwareType;
 }
 
-interface JsVariantList {
-	jsSize(): number;
-	jsAt(index: number): number;
-}
-
 interface ModuleFirmware {
 	setData8(frameIndex: number, offset: number, data: number): boolean;
 	setData16(frameIndex: number, offset: number, data: number): boolean;
@@ -108,7 +103,7 @@ interface ModuleFirmware {
 	storeHash64(frameIndex: number, offset: number, dataString: string): string;
 
 	calcCrc32(frameIndex: number, start: number, count: number): number;
-	calcHash64(dataString: string): JsVariantList;
+	calcHash64(dataString: string): any;
 
 	jsSetDescriptionFields(descriptionVersion: number, description: string): void;
 	jsAddDescription(channel: number, description: string): void;
@@ -116,6 +111,8 @@ interface ModuleFirmware {
 
 	writeLog(message: string): void;
 	buildNumber(): number;
+
+	checkMacForUnique(m1: number, m2: number, m3: number): boolean;
 }
 
 interface IssueLogger {
@@ -123,6 +120,8 @@ interface IssueLogger {
 	writeWarning(message: string): void;
 	writeError(message: string): void;
 
+	errINT1001(message: string): void;
+	
 	errCFG3000(propertyName: string, equipmentID: string): void;
 	errCFG3001(subSysID: string, module: string): void;
 	errCFG3002(name: string, value: number, min: number, max: number, module: string): void;
@@ -783,19 +782,22 @@ function generate_LANConfiguration(confFirmware: ModuleFirmware, log: IssueLogge
 	//mac
 	//
 	let hashName: string = "S" + regIP + diagIP + moduleEquipmentID + regServiceIP + diagServiceIP;
-	let hashList: JsVariantList = confFirmware.calcHash64(hashName);
-	let size: number = hashList.jsSize();
+	let hashList: any = confFirmware.calcHash64(hashName);
+	let size: number = hashList.length;
 	if (size != 2) {
 		log.writeError("Hash is not 2 32-bitwords in function generate_LANConfiguration!");
 		return false;
 	}
 
-	let h0: number = hashList.jsAt(0);
-	let h1: number = hashList.jsAt(1);
+	let h: number = (hashList[0] + hashList[1]);
 
 	let m1: number = 0x4200;
-	let m2: number = h0 & 0x7fff;
-	let m3: number = (h0 >> 16) & 0x7fff;
+	let m2: number = h & 0x7fff;
+	let m3: number = (h >> 16) & 0x7fff;
+
+	if (confFirmware.checkMacForUnique(m1, m2, m3) == false) {
+		log.errINT1001("MAC address " + m1.toString(16) + ":" + m2.toString(16) + ":" + m3.toString(16) + " of " + controllerEquipmentID + " is not unique!");
+	}
 
 	confFirmware.writeLog("    [" + frame + ":" + ptr + "] : MAC address of LM = " + m1.toString(16) + ":" + m2.toString(16) + ":" + m3.toString(16) + "\r\n");
 	if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "MAC1", m1) == false) {

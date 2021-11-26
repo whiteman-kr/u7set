@@ -803,7 +803,7 @@ namespace Builder
 			items.append(itemStr);
 		}
 
-		return m_resultWriter->addFile(m_lmSubsystemID, lmEquipmentID() + ".uil", "", "", items, false);
+		return m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID), lmEquipmentID() + ".uil", "", "", items, false);
 	}
 
 
@@ -3435,7 +3435,8 @@ namespace Builder
 			file.append(str);
 		}
 
-		m_resultWriter->addFile(lmSubsystemEquipmentIdPath(), "SignalsWithFlags.csv", file);
+		m_resultWriter->addFile(m_resultWriter->subsystemDirectory(lmSubsystemEquipmentIdPath()),
+								QString("SignalsWithFlags.csv"), file);
 	}
 
 	bool ModuleLogicCompiler::sortUalSignals()
@@ -14344,7 +14345,8 @@ namespace Builder
 
 		m_code.getMifCode(mifCode);
 
-		BuildFile* buildFile = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.mif").arg(m_lm->caption()).arg(m_lmNumber), mifCode);
+		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+														QString("%1-%2.mif").arg(m_lm->caption()).arg(m_lmNumber), mifCode);
 
 		if (buildFile == nullptr)
 		{
@@ -14355,8 +14357,8 @@ namespace Builder
 
 		m_code.getAsmCode(&asmCode);
 
-		BuildFile* buildFile = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.asm").
-													   arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), asmCode);
+		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+													   QString("%1-%2.asm").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), asmCode);
 
 		if (buildFile == nullptr)
 		{
@@ -14369,8 +14371,8 @@ namespace Builder
 							m_ualSignals.discreteSignalsHeap().getHeapItemsLog(),
 							m_ualSignals.analogAndBusSignalsHeap().getHeapItemsLog());
 
-		buildFile = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.mem").
-											arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), memFile);
+		buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+												QString("%1-%2.mem").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), memFile);
 
 		if (buildFile == nullptr)
 		{
@@ -14716,8 +14718,8 @@ namespace Builder
 			}
 		}
 */
-		bool result = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.tun").
-										 arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file);
+		bool result = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+											  QString("%1-%2.tun").arg(m_lmSubsystemID.toLower()).arg(m_lmNumber), file);
 		return result;
 	}
 
@@ -14852,7 +14854,8 @@ namespace Builder
 
 		m_loopbacks.writeReport(&file);
 
-		BuildFile* bf = m_resultWriter->addFile(lmSubsystemEquipmentIdPath(), "Loopbacks.csv", file);
+		BuildFile* bf = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(lmSubsystemEquipmentIdPath()),
+												QString("Loopbacks.csv"), file);
 
 		return bf != nullptr;
 	}
@@ -14868,7 +14871,8 @@ namespace Builder
 
 		m_ualSignals.getHeapsLog(&file);
 
-		BuildFile* bf = m_resultWriter->addFile(lmSubsystemEquipmentIdPath(), "HeapsLog.txt", file);
+		BuildFile* bf = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(lmSubsystemEquipmentIdPath()),
+												QString("HeapsLog.txt"), file);
 
 		return bf != nullptr;
 	}
@@ -15450,8 +15454,8 @@ namespace Builder
 						   arg(ualSignal->regValueAddr().offset()).arg(ualSignal->regValueAddr().bit()));
 		}
 
-		m_resultWriter->addFile(QString("%1/%2").arg(m_lmSubsystemID).arg(lmEquipmentID()),
-								QString("sl_%1.csv").arg(listName), "", "", strList);
+		m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID + Separator::DIR + lmEquipmentID()),
+									QString("sl_%1.csv").arg(listName), "", "", strList);
 		return result;
 	}
 
@@ -15461,7 +15465,8 @@ namespace Builder
 
 		m_ualSignals.getReport(report);
 
-		BuildFile* buildFile = m_resultWriter->addFile(QString("%1/%2").arg(m_lmSubsystemID).arg(m_lm->equipmentId()), "ualSignals.csv", "", "", report, false);
+		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID + Separator::DIR + lmEquipmentID()),
+															"ualSignals.csv", "", "", report, false);
 
 		return buildFile != nullptr;
 	}

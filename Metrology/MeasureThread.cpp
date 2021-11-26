@@ -689,7 +689,7 @@ void MeasureThread::measureCompratorsInSeries()
 
 		// starting from startComparatorIndex
 		//
-		int startComparatorIndex = m_comparatorOption.startComparatorIndex();
+		int startComparatorIndex = m_comparatorOption.startFromComparator() - 1;
 
 		// iterate over all the comparators from one to maxComparatorCount
 		//
@@ -1180,7 +1180,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 	// starting from startComparatorIndex
 	//
-	int startComparatorIndex = m_comparatorOption.startComparatorIndex();
+	int startComparatorIndex = m_comparatorOption.startFromComparator() - 1;
 
 	// iterate over all the comparators from one to maxComparatorCount
 	//

@@ -56,7 +56,7 @@ public:
 private:
 
 	Measure::Type m_measureType = Measure::Type::Linearity;
-	LanguageType m_languageType = LanguageType::English;
+	OT::LanguageType m_languageType = OT::LanguageType::English;
 
 	MeasureViewOption m_header;
 
@@ -81,7 +81,7 @@ protected:
 
 signals:
 
-	void updateMeasureViewPage(bool isDialog);
+	void dataUpdated();
 
 private slots:
 

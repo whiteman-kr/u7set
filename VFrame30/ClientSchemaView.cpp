@@ -348,6 +348,40 @@ namespace VFrame30
 		return;
 	}
 
+	void ClientSchemaView::mouseMoveEvent(QMouseEvent* event)
+	{
+		if (event->buttons().testFlag(Qt::LeftButton) == true &&
+			m_leftClickOverItem != nullptr)
+		{
+			QPointF docPoint;
+
+			bool convertResult = MousePosToDocPoint(event->pos(), &docPoint);
+			if (convertResult == false)
+			{
+				event->ignore();
+				return;
+			}
+
+			double x = docPoint.x();
+			double y = docPoint.y();
+
+			if (m_leftClickOverItem->isIntersectPoint(x, y) == true)
+			{
+				setCursor(Qt::PointingHandCursor);
+			}
+			else
+			{
+				unsetCursor();
+			}
+		}
+		else
+		{
+			VFrame30::SchemaView::mouseMoveEvent(event);	// This will set mouse cursor
+		}
+
+		return;
+	}
+
 	void ClientSchemaView::mousePressEvent(QMouseEvent* event)
 	{
 		if (event->buttons().testFlag(Qt::RightButton) == true)
@@ -362,6 +396,7 @@ namespace VFrame30
 		{
 			// It is scrolling by midbutton, let scroll view process it
 			//
+			VFrame30::SchemaView::mouseMoveEvent(event);	// This will set mouse cursor
 			VFrame30::SchemaView::mousePressEvent(event);
 			return;
 		}
@@ -416,10 +451,11 @@ namespace VFrame30
 
 	void ClientSchemaView::mouseReleaseEvent(QMouseEvent* event)
 	{
-		if (event->buttons().testFlag(Qt::MiddleButton) == true)
+		if (event->button() == Qt::MiddleButton)
 		{
 			// It is scrolling by midbutton, let scroll view process it
 			//
+			VFrame30::SchemaView::mouseMoveEvent(event);	// This will set mouse cursor
 			VFrame30::SchemaView::mouseReleaseEvent(event);
 			return;
 		}
@@ -465,9 +501,10 @@ namespace VFrame30
 						// --
 						//
 						update();		// Repaint screen
-						unsetCursor();
 						m_leftClickOverItem.reset();
 						event->accept();
+
+						VFrame30::SchemaView::mouseMoveEvent(event);	// This will set mouse cursor
 						return;
 					}
 				}
@@ -476,10 +513,8 @@ namespace VFrame30
 			m_leftClickOverItem.reset();
 		}
 
-		// Ignore event
-		//
-		unsetCursor();
-		event->ignore();
+		VFrame30::SchemaView::mouseMoveEvent(event);	// This will set mouse cursor
+
 		return;
 	}
 

@@ -19,10 +19,6 @@
 #include "../lib/PropertyEditor.h"
 #include "../CommonLib/Hash.h"
 
-#include "../qtpropertybrowser/src/qtpropertymanager.h"
-#include "../qtpropertybrowser/src/qtvariantproperty.h"
-#include "../qtpropertybrowser/src/qttreepropertybrowser.h"
-
 #include "MetrologySignal.h"
 #include "DialogList.h"
 #include "Options.h"
@@ -33,18 +29,18 @@
 //
 // ==============================================================================================
 
-const char* const				ProjectPropertyGroup[] =
+enum ProjectPropertyCategory
 {
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "1 Project"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "2 Host"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "3 File version"),
+	Info = 0,
+	Host = 1,
+	Version = 2,
 };
 
-const int						PROJECT_PROPERTY_GROUP_COUNT			= sizeof(ProjectPropertyGroup)/sizeof(ProjectPropertyGroup[0]);
+const int ProjectPropertyCategoryCount = 3;
 
-const int						PROJECT_PROPERTY_GROUP_INFO				= 0,
-								PROJECT_PROPERTY_GROUP_HOST				= 1,
-								PROJECT_PROPERTY_GROUP_VERSION			= 2;
+#define ERR_PROJECT_PROPERTY_CATEGORY(category) (static_cast<int>(category) < 0 || static_cast<int>(category) >= ProjectPropertyCategoryCount)
+
+QString ProjectPropertyCategoryCaption(ProjectPropertyCategory category);
 
 // ----------------------------------------------------------------------------------------------
 
@@ -62,7 +58,11 @@ private:
 	class PropertyPattern: public PropertyObject
 	{
 	public:
+
 		explicit PropertyPattern(ProjectInfo* pObject);
+
+	private:
+
 		ProjectInfo* m_pObject = nullptr;
 	};
 
@@ -78,15 +78,6 @@ private:
 //
 // ==============================================================================================
 
-const int						RACK_PROPERTY_ITEM_ID		= 0,
-								RACK_PROPERTY_ITEM_CAPTION	= 1,
-								RACK_PROPERTY_ITEM_GROUP	= 2,
-								RACK_PROPERTY_ITEM_CHANNEL	= 3;
-
-const int						RACK_PROPERTY_ITEM_COUNT	= 4;
-
-// ----------------------------------------------------------------------------------------------
-
 class DialogRackProperty : public QDialog
 {
 	Q_OBJECT
@@ -98,34 +89,38 @@ public:
 
 public:
 
-	Metrology::RackParam		rack() const { return m_rack; }
+	Metrology::RackParam rack() const { return m_rack; }
 
 private:
 
-	Metrology::RackParam		m_rack;
-	RackBase					m_rackBase;
+	class PropertyPattern: public PropertyObject
+	{
+	public:
 
-	// Property list
+		explicit PropertyPattern(Metrology::RackParam* pObject, RackBase* pRackBase);
+
+	private:
+
+		Metrology::RackParam* m_pObject = nullptr;
+	};
+
+	Metrology::RackParam m_rack;
+	RackBase m_rackBase;
+
 	//
-	QtVariantPropertyManager*	m_pManager = nullptr;
-	QtVariantEditorFactory*		m_pFactory = nullptr;
-	QtTreePropertyBrowser*		m_pEditor = nullptr;
-
-	// buttons
 	//
-	QDialogButtonBox*			m_buttonBox = nullptr;
+	ExtWidgets::PropertyEditor* m_pPropertyEditor = nullptr;
+	QDialogButtonBox* m_buttonBox = nullptr;
 
-	QMap<QtProperty*,int>		m_propertyMap;
+	void createPropertyList();
 
-	void						createPropertyList();
-
-	bool						foundDuplicateGroups();
+	bool foundDuplicateGroups();
 
 private slots:
 
-	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
+	void onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects);
 
-	void						onOk();
+	void onOk();
 };
 
 // ==============================================================================================
@@ -134,7 +129,7 @@ private slots:
 //
 // ==============================================================================================
 
-const int						RACK_GROUP_COLUMN_CAPTION = 0;
+const int RACK_GROUP_COLUMN_CAPTION = 0;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -149,71 +144,74 @@ public:
 
 public:
 
-	RackBase&					racks() { return m_rackBase; }
-	RackGroupBase&				rackGroups() { return m_groupBase; }
+	RackBase& racks() { return m_rackBase; }
+	RackGroupBase& rackGroups() { return m_groupBase; }
 
 private:
 
-	RackBase					m_rackBase;
-	RackGroupBase				m_groupBase;
+	class PropertyPattern: public PropertyObject
+	{
+	public:
+
+		explicit PropertyPattern(RackBase* pObject);
+
+	private:
+
+		RackBase* m_pObject = nullptr;
+	};
+
+	RackBase m_rackBase;
+	RackGroupBase m_groupBase;
 
 	//
 	//
-	QMenuBar*					m_pMenuBar = nullptr;
-	QMenu*						m_pGroupMenu = nullptr;
-	QMenu*						m_pContextMenu = nullptr;
+	QMenuBar* m_pMenuBar = nullptr;
+	QMenu* m_pGroupMenu = nullptr;
+	QMenu* m_pContextMenu = nullptr;
 
-	QAction*					m_pAppendGroupAction = nullptr;
-	QAction*					m_pRemoveGroupAction = nullptr;
+	QAction* m_pAppendGroupAction = nullptr;
+	QAction* m_pRemoveGroupAction = nullptr;
 
-	// Group list
+
 	//
-	QTableWidget*				m_pGroupView = nullptr;
-
-	void						updateGroupList(const Hash& hash = UNDEFINED_HASH);
-
-	// Property list
 	//
-	QtVariantPropertyManager*	m_pManager = nullptr;
-	QtVariantEditorFactory*		m_pFactory = nullptr;
-	QtTreePropertyBrowser*		m_pEditor = nullptr;
+	QTableWidget* m_pGroupView = nullptr;
+	ExtWidgets::PropertyEditor* m_pPropertyEditor = nullptr;
+	QDialogButtonBox* m_buttonBox = nullptr;
 
-	void						createPropertyList();
-
-	void						updateRackList();
-
-	// buttons
 	//
-	QDialogButtonBox*			m_buttonBox = nullptr;
+	//
+	void createPropertyList();
 
-	QMap<QtProperty*,int>		m_propertyMap;
+	void updateGroupList(const Hash& hash = UNDEFINED_HASH);
+	void updateRackList();
 
-	bool						foundDuplicateRacks();
+	bool foundDuplicateRacks();
 
 protected:
 
-	bool						event(QEvent* e) override;
+	bool event(QEvent* e) override;
 
 private slots:
 
 	// slots of menu
 	//
-	void						appendGroup();
-	void						removeGroup();
+	void appendGroup();
+	void removeGroup();
 
 	// slots of property list
 	//
-	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
+	void onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects);
 
 	// slot of view
 	//
-	void						onContextMenu(QPoint);
-	void						captionGroupChanged(int row, int column);
-	void						groupSelected();
+	void onContextMenu(QPoint);
+	void captionGroupChanged(int row, int column);
+	void groupSelected();
 
 	// slots of buttons
 	//
-	void						onOk();
+	void onOk();
 };
 
 // ==============================================================================================
@@ -264,40 +262,19 @@ private:
 
 // ==============================================================================================
 
-const char* const				SignalPropertyGroup[] =
+enum SignalPropertyCategory
 {
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Signal ID"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Position"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Electric range: "),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Engineering range: "),
+	SignalID = 0,
+	SignalPosition = 1,
+	ElectricLimit = 2,
+	EngineeringLimit = 3,
 };
 
-const int						SIGNAL_PROPERTY_GROUP_COUNT				= sizeof(SignalPropertyGroup)/sizeof(SignalPropertyGroup[0]);
+const int SignalPropertyCategoryCount = 4;
 
-const int						SIGNAL_PROPERTY_GROUP_ID				= 0,
-								SIGNAL_PROPERTY_GROUP_POSITION			= 1,
-								SIGNAL_PROPERTY_GROUP_EL_RANGE			= 2,
-								SIGNAL_PROPERTY_GROUP_EN_RANGE			= 3;
+#define ERR_SIGNAL_PROPERTY_CATEGORY(category) (static_cast<int>(category) < 0 || static_cast<int>(category) >= SignalPropertyCategoryCount)
 
-// ----------------------------------------------------------------------------------------------
-
-const int						SIGNAL_PROPERTY_ITEM_CUSTOM_ID			= 0,
-								SIGNAL_PROPERTY_ITEM_CAPTION			= 1,
-
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_LOW		= 2,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_HIGH		= 3,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT		= 4,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR	= 5,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_RLOAD		= 6,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_R0		= 7,
-								SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION	= 8,
-
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW		= 9,
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH		= 10,
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_UNIT		= 11,
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_PRECISION	= 12;
-
-const int						SIGNAL_PROPERTY_ITEM_COUNT				= 13;
+QString SignalPropertyCategoryCaption(SignalPropertyCategory category);
 
 // ----------------------------------------------------------------------------------------------
 
@@ -312,81 +289,85 @@ public:
 
 public:
 
-	Metrology::SignalParam		param() const { return m_param; }
+	Metrology::SignalParam param() const { return m_param; }
 
 private:
 
-	Metrology::SignalParam		m_param;
+	class PropertyPattern: public PropertyObject
+	{
+	public:
+
+		explicit PropertyPattern(Metrology::SignalParam* pObject);
+
+	private:
+
+		Metrology::SignalParam* m_pObject = nullptr;
+	};
+
+	Metrology::SignalParam m_param;
 
 	//
 	//
-	QTabWidget*					m_pTab = nullptr;
-
-	// Property list
-	//
-	QtVariantPropertyManager*	m_pManager = nullptr;
-	QtVariantEditorFactory*		m_pFactory = nullptr;
-	QtTreePropertyBrowser*		m_pEditor = nullptr;
+	QTabWidget* m_pTab = nullptr;
 
 	//
 	//
-	QMenu*						m_pContextMenu = nullptr;
-	QAction*					m_pCopyAction = nullptr;
-	QAction*					m_pCopyCellAction = nullptr;
-	QAction*					m_pComparatorPropertyAction = nullptr;
+	ExtWidgets::PropertyEditor* m_pPropertyEditor = nullptr;
 
-	QTableView*					m_pComparatorView = nullptr;
-	PrComparatorListTable		m_comparatorTable;
-	std::set<Hash>				m_requestStateList;
+	//
+	//
+	QMenu* m_pContextMenu = nullptr;
+	QAction* m_pCopyAction = nullptr;
+	QAction* m_pCopyCellAction = nullptr;
+	QAction* m_pComparatorPropertyAction = nullptr;
+
+	QTableView* m_pComparatorView = nullptr;
+	PrComparatorListTable m_comparatorTable;
+	std::set<Hash> m_requestStateList;
 
 	// buttons
 	//
-	QDialogButtonBox*			m_buttonBox = nullptr;
+	QDialogButtonBox* m_buttonBox = nullptr;
 
 	// timer
 	//
-	QTimer*						m_updateComparatorStateTimer = nullptr;
+	QTimer* m_updateComparatorStateTimer = nullptr;
 
+	// for qt 6
 	//
-	//
-	static bool					m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT];
-	QtBrowserItem*				m_browserItemList[SIGNAL_PROPERTY_GROUP_COUNT];
+	static bool m_showGroupHeader[SignalPropertyCategoryCount];
+	//QtBrowserItem* m_browserItemList[SIGNAL_PROPERTY_CATEGORY_COUNT];
+	//QtProperty* m_propertyGroupList[SIGNAL_PROPERTY_CATEGORY_COUNT];
 
-	QMap<QtProperty*,int>		m_propertyMap;
-
-	QtProperty*					m_propertyGroupList[SIGNAL_PROPERTY_GROUP_COUNT];
-
-	void						createContextMenu();
-	void						createPropertyList();
-
-	void						updateGroupHeader(int index);
+	void createContextMenu();
+	void createPropertyList();
 
 protected:
 
-	void						closeEvent(QCloseEvent* e) override;
+	void closeEvent(QCloseEvent* e) override;
 
 private slots:
 
-	// slots of editor
+	// slots of property editor
 	//
-	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
-	void						onPropertyExpanded(QtBrowserItem* item);
+	void onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects);
+	//void onPropertyExpanded(QtBrowserItem* item);
 
 	// slots of menu
 	//
-	void						onContextMenu(QPoint);
-	void						onCopy();
-	void						onCopyCell();
-	void						onComparatorProperty();
+	void onContextMenu(QPoint);
+	void onCopy();
+	void onCopyCell();
+	void onComparatorProperty();
 
 	// slots of timer
 	//
-	void						updateComparatorState();
+	void updateComparatorState();
 
 	// slots of dialog
 	//
-	void						onOk();
-	void						onCancel();
+	void onOk();
+	void onCancel();
 };
 
 // ==============================================================================================
@@ -395,35 +376,20 @@ private slots:
 //
 // ==============================================================================================
 
-const char* const				ComparatorPropertyGroup[] =
+enum ComparatorPropertyCategory
 {
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Schema"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Signal ID"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Position"),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Electric range: "),
-								QT_TRANSLATE_NOOP("DialogObjectProperty", "Engineering range: "),
+	Schema = 0,
+	Input = 1,
+	Comapre = 2,
+	Hysteresis	= 3,
+	Output = 4,
 };
 
-const int						COMPARATOR_PROPERTY_GROUP_COUNT				= sizeof(ComparatorPropertyGroup)/sizeof(ComparatorPropertyGroup[0]);
+const int ComparatorPropertyCategoryCount = 5;
 
-const int						COMPARATOR_PROPERTY_GROUP_SCHEMA			= 0,
-								COMPARATOR_PROPERTY_GROUP_INPUT				= 1,
-								COMPARATOR_PROPERTY_GROUP_COMPARE			= 2,
-								COMPARATOR_PROPERTY_GROUP_HYSTERESIS		= 3,
-								COMPARATOR_PROPERTY_GROUP_OUTPUT			= 4;
+#define ERR_COMPARATOR_PROPERTY_CATEGORY(category) (static_cast<int>(category) < 0 || static_cast<int>(category) >= ComparatorPropertyCategoryCount)
 
-// ----------------------------------------------------------------------------------------------
-
-const int						COMPARATOR_PROPERTY_ITEM_CMP_TYPE			= 0,
-
-								COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE		= 1,
-								COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE		= 2,
-								COMPARATOR_PROPERTY_ITEM_CMP_PRECESION		= 3,
-
-								COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE		= 4,
-								COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE		= 5;
-
-const int						COMPARATOR_PROPERTY_ITEM_COUNT				= 6;
+QString ComparatorPropertyCategoryCaption(ComparatorPropertyCategory category);
 
 // ----------------------------------------------------------------------------------------------
 
@@ -438,37 +404,47 @@ public:
 
 public:
 
-	Metrology::ComparatorEx		comparator() const { return m_comparatorEx; }
+	Metrology::ComparatorEx comparator() const { return m_comparatorEx; }
 
 private:
 
-	Metrology::ComparatorEx		m_comparatorEx;
+	class PropertyPattern: public PropertyObject
+	{
+	public:
 
-	// Property list
+		explicit PropertyPattern(Metrology::ComparatorEx* pObject);
+
+		QString comapreTo();
+		double electricConstValue();
+
+	private:
+
+		Metrology::ComparatorEx* m_pObject = nullptr;
+	};
+
+	Metrology::ComparatorEx m_comparatorEx;
+
 	//
-	QtVariantPropertyManager*	m_pManager = nullptr;
-	QtVariantEditorFactory*		m_pFactory = nullptr;
-	QtTreePropertyBrowser*		m_pEditor = nullptr;
-
-	// buttons
 	//
-	QDialogButtonBox*			m_buttonBox = nullptr;
+	ExtWidgets::PropertyEditor* m_pPropertyEditor = nullptr;
+	QDialogButtonBox* m_buttonBox = nullptr;
 
-	static bool					m_showGroupHeader[COMPARATOR_PROPERTY_GROUP_COUNT];
-	QtBrowserItem*				m_browserItemList[COMPARATOR_PROPERTY_GROUP_COUNT];
+	// // for qt 6
+	//
+	static bool m_showGroupHeader[ComparatorPropertyCategoryCount];
+	//QtBrowserItem* m_browserItemList[COMPARATOR_PROPERTY_CATEGORY_COUNT];
+	//QtProperty* m_propertyGroupList[COMPARATOR_PROPERTY_CATEGORY_COUNT];
 
-	QMap<QtProperty*,int>		m_propertyMap;
-
-	QtProperty*					m_propertyGroupList[COMPARATOR_PROPERTY_GROUP_COUNT];
-
-	void						createPropertyList();
+	void createPropertyList();
 
 private slots:
 
-	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
-	void						onPropertyExpanded(QtBrowserItem* item);
+	// slots of property editor
+	//
+	void onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects);
+	//void onPropertyExpanded(QtBrowserItem* item);
 
-	void						onOk();
+	void onOk();
 };
 
 // ==============================================================================================
@@ -477,7 +453,19 @@ private slots:
 //
 // ==============================================================================================
 
-const int						MEASURE_PROPERTY_ITEM_ERROR_LIMIT		= 0;
+enum MeasurePropertyCategory
+{
+	MeasureID = 0,
+	MeasurePosition = 1,
+	Limits = 2,
+	Errors = 3,
+};
+
+const int MeasurePropertyCategoryCount = 4;
+
+#define ERR_MEASURE_PROPERTY_CATEGORY(category) (static_cast<int>(category) < 0 || static_cast<int>(category) >= MeasurePropertyCategoryCount)
+
+QString MeasurePropertyCategoryCaption(MeasurePropertyCategory category);
 
 // ----------------------------------------------------------------------------------------------
 
@@ -492,25 +480,37 @@ public:
 
 private:
 
-	Measure::Item*				m_pMeasurement = nullptr;
+	class PropertyPattern: public PropertyObject
+	{
+	public:
 
-	// Property list
+		explicit PropertyPattern(Measure::Item* pObject);
+
+	private:
+
+		Measure::Item* m_pObject = nullptr;
+
+		QString engineeringLimitStr();
+		QString electricLimitStr();
+
+		double errorLimit();
+		void setErrorLimit(double value);
+	};
+
+	Measure::Item* m_pMeasurement = nullptr;
+
 	//
-	QtVariantPropertyManager*	m_pManager = nullptr;
-	QtVariantEditorFactory*		m_pFactory = nullptr;
-	QtTreePropertyBrowser*		m_pEditor = nullptr;
-
-	// buttons
 	//
-	QDialogButtonBox*			m_buttonBox = nullptr;
+	ExtWidgets::PropertyEditor*	m_pPropertyEditor = nullptr;
+	QDialogButtonBox* m_buttonBox = nullptr;
 
-	QMap<QtProperty*,int>		m_propertyMap;
-
-	void						createPropertyList();
+	//
+	//
+	void createPropertyList();
 
 private slots:
 
-	void						onPropertyValueChanged(QtProperty* property, const QVariant &value);
+	void onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects);
 };
 
 // ==============================================================================================

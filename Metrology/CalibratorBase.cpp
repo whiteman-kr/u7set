@@ -443,7 +443,7 @@ void CalibratorBase::onInitialization()
 	}
 
 	emit calibratorClose();									// close all calibratirs serial port
-	QThread::msleep(Metrology::ChannelCount * 100);			// wait, until all the serial ports will be closed
+	QThread::msleep(Metrology::ChannelCount * 100);		// wait, until all the serial ports will be closed
 	emit calibratorOpen();									// open all calibratirs
 
 	m_timeout = 0;
@@ -657,7 +657,13 @@ void CalibratorBase::onSettings(int row, int)
 		return;
 	}
 
-	int type = typeCombo->currentIndex();
+	int typeIndex = typeCombo->currentIndex();
+	if (typeIndex == -1)
+	{
+		return;
+	}
+
+	CalibratorType type = static_cast<CalibratorType>(typeIndex);
 	if (ERR_CALIBRATOR_TYPE(type) == true)
 	{
 		return;
@@ -666,7 +672,7 @@ void CalibratorBase::onSettings(int row, int)
 	//
 	//
 	calibrator->setPortName(port);
-	calibrator->setType(typeCombo->currentIndex());
+	calibrator->setType(type);
 
 	//
 	//
