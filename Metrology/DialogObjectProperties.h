@@ -333,7 +333,7 @@ private:
 	//
 	QTimer* m_updateComparatorStateTimer = nullptr;
 
-	//
+	// for qt 6
 	//
 	static bool m_showGroupHeader[SignalPropertyCategoryCount];
 	//QtBrowserItem* m_browserItemList[SIGNAL_PROPERTY_CATEGORY_COUNT];
@@ -429,6 +429,8 @@ private:
 	ExtWidgets::PropertyEditor* m_pPropertyEditor = nullptr;
 	QDialogButtonBox* m_buttonBox = nullptr;
 
+	// // for qt 6
+	//
 	static bool m_showGroupHeader[ComparatorPropertyCategoryCount];
 	//QtBrowserItem* m_browserItemList[COMPARATOR_PROPERTY_CATEGORY_COUNT];
 	//QtProperty* m_propertyGroupList[COMPARATOR_PROPERTY_CATEGORY_COUNT];

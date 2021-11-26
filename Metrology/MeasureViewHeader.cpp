@@ -246,7 +246,7 @@ namespace Measure
 			return;
 		}
 
-		int languageType = theOptions.language().languageType();
+		OT::LanguageType languageType = theOptions.language().languageType();
 		if (ERR_LANGUAGE_TYPE(languageType) == true)
 		{
 			return;
@@ -318,7 +318,7 @@ namespace Measure
 					//
 					switch(theOptions.linearity().viewType())
 					{
-						case LinearityViewType::Simple:
+						case OT::LinearityViewType::Simple:
 
 							setColumnVisible(MVC_CMN_L_PERCENT, false);
 							setColumnVisible(MVC_CMN_L_SYSTEM_DEVIATION, false);
@@ -339,7 +339,7 @@ namespace Measure
 
 							break;
 
-						case LinearityViewType::Extended:
+						case OT::LinearityViewType::Extended:
 
 							setColumnVisible(MVC_CMN_L_PERCENT, true);
 							setColumnVisible(MVC_CMN_L_SYSTEM_DEVIATION, true);
@@ -360,8 +360,8 @@ namespace Measure
 
 							break;
 
-						case LinearityViewType::DetailElectric:
-						case LinearityViewType::DetailEngineering:
+						case OT::LinearityViewType::Detail_Electric:
+						case OT::LinearityViewType::Detail_Engineering:
 
 							setColumnVisible(MVC_CMN_L_PERCENT, false);
 							setColumnVisible(MVC_CMN_L_SYSTEM_DEVIATION, false);

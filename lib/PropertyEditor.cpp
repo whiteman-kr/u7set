@@ -104,7 +104,7 @@ namespace ExtWidgets
 			{
 				if (i.first == v)
 				{
-					return i.second;
+					return QObject::tr(i.second.toUtf8());
 				}
 			}
 			return QString();
@@ -174,7 +174,7 @@ namespace ExtWidgets
 			break;
 		case QVariant::Bool:
 		{
-			return value.toBool() == true ? "True" : "False";
+			return value.toBool() == true ? QObject::tr("True") : QObject::tr("False");
 		}
 			break;
 		case QVariant::String:
@@ -2009,7 +2009,7 @@ namespace ExtWidgets
 
 		for (std::pair<int, QString> i : p->enumValues())
 		{
-			m_combo->addItem(i.second, i.first);
+			m_combo->addItem(QObject::tr(i.second.toUtf8()), i.first);
 		}
 		m_combo->setCurrentIndex(-1);
 
@@ -3188,8 +3188,8 @@ namespace ExtWidgets
 
 		switch (m_checkBox->checkState())
 		{
-			case Qt::Checked:           m_checkBox->setText("True");                break;
-			case Qt::Unchecked:         m_checkBox->setText("False");               break;
+			case Qt::Checked:           m_checkBox->setText(QObject::tr("True"));	break;
+			case Qt::Unchecked:         m_checkBox->setText(QObject::tr("False"));	break;
 			case Qt::PartiallyChecked:  m_checkBox->setText("<Different values>");  break;
 			default:
 				Q_ASSERT(false);

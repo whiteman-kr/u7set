@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 	//
 	QTranslator translator;
 
-	if (theOptions.language().languageType() == LanguageType::Russian)
+	if (theOptions.language().languageType() == OT::LanguageType::Russian)
 	{
 		if (translator.load(QString(":%1/%2").arg(LANGUAGE_OPTIONS_DIR, LANGUAGE_OPTIONS_FILE_RU)) == true)
 		{
@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 		{
 			QString languageFilePath = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/" + LANGUAGE_OPTIONS_FILE_RU;
 			QMessageBox::critical(nullptr, "Russian language", QString("Didn't load russian language:\n%1").arg(languageFilePath));
-			theOptions.language().setLanguageType(LanguageType::English);
+			theOptions.language().setLanguageType(OT::LanguageType::English);
 		}
 	}
 
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
 	//
 	SoftwareInfo si;
 
-	QString equipmentID = theOptions.socket().client(SocketType::CfgSrv).equipmentID(ServerType::Primary);
+	QString equipmentID = theOptions.socket().server(OT::ServerType::ConfigurationService).equipmentID(OT::ServerPriority::Primary);
 	si.init(E::SoftwareType::Metrology, equipmentID, 1, 0);
 
 	// in order to keep the dumpMemoryLeaks() list clean, the MainWindow is created using "new".

@@ -9,10 +9,6 @@
 #include <QLabel>
 #include <QLineEdit>
 
-#include "../qtpropertybrowser/src/qtpropertymanager.h"
-#include "../qtpropertybrowser/src/qtvariantproperty.h"
-#include "../qtpropertybrowser/src/qttreepropertybrowser.h"
-
 #include "../lib/PropertyEditor.h"
 #include "../CommonLib/PropertyObject.h"
 
@@ -23,7 +19,7 @@
 enum PropertyGroupType
 {
 	NoGroupType = -1,
-	Server = 0,
+	Service = 0,
 	Module = 1,
 	Linearity = 2,
 	Comparator = 3,
@@ -45,23 +41,22 @@ QString groupCaption(PropertyGroupType groupType);
 enum PropertyPageType
 {
 	NoPageType = -1,
-	Socket_CfgSrv = 0,
-	Socket_AppDataSrv = 1,
-	Socket_TuningSrv = 2,
-	Module_Measure = 3,
-	Linearity_Measure = 4,
-	Linearity_Point = 5,
-	Comparator_Measure = 6,
-	MeasureView_Text = 7,
-	MeasureView_Column = 8,
-	Panel_SignalInfo = 9,
-	Panel_ComparatorInfo = 10,
-	Database_Location = 11,
-	Database_Backup = 12,
-	Language_App = 13,
+	Service_Connection = 0,
+	Module_Measure = 1,
+	Linearity_Measure = 2,
+	Linearity_Point = 3,
+	Comparator_Measure = 4,
+	MeasureView_Text = 5,
+	MeasureView_Column = 6,
+	Panel_SignalInfo = 7,
+	Panel_ComparatorInfo = 8,
+	Database_Location = 9,
+	Database_Backup = 10,
+	Language_App = 11,
 };
+Q_DECLARE_METATYPE(PropertyPageType)
 
-const int PropertyPageTypeCount = 14;
+const int PropertyPageTypeCount = 12;
 
 #define ERR_PROPERTY_PAGE_TYPE(pageType) (static_cast<int>(pageType) < 0 || static_cast<int>(pageType) >= PropertyPageTypeCount)
 
@@ -77,6 +72,7 @@ enum PropertyPageWidgetType
 	List = 0,
 	Dialog = 1,
 };
+Q_DECLARE_METATYPE(PropertyPageWidgetType)
 
 const int PropertyPageWidgetTypeCount = 2;
 
@@ -90,8 +86,8 @@ class PropertyPage : public PropertyObject
 
 public:
 
-	PropertyPage(PropertyPageType pageType, QtVariantPropertyManager* manager, QtVariantEditorFactory* factory, QtTreePropertyBrowser* editor);
-	explicit PropertyPage(PropertyPageType pageType, QDialog* dialog);
+	PropertyPage(Options* options, PropertyPageType pageType, ExtWidgets::PropertyEditor* pPropertyEditor);
+	explicit PropertyPage(Options* options, PropertyPageType pageType);
 	virtual ~PropertyPage() override;
 
 public:
@@ -105,9 +101,11 @@ public:
 	QTreeWidgetItem* pageTreeItem() const { return m_pageTreeItem; }
 	void setPageTreeItem(QTreeWidgetItem* pageTreeItem) { m_pageTreeItem = pageTreeItem; }
 
-	QtTreePropertyBrowser* treeEditor() { return m_pEditor; }
-
 private:
+
+	void clear();
+
+	Options* m_options = nullptr;
 
 	QWidget* m_baseWidget = nullptr;
 	PropertyPageWidgetType m_widgetType = PropertyPageWidgetType::NoWidgetType;
@@ -116,15 +114,13 @@ private:
 	QTreeWidgetItem* m_pageTreeItem = nullptr;
 
 
-	// PropertyPageWidgetType::List
-	//
-	QtVariantPropertyManager* m_pManager = nullptr;
-	QtVariantEditorFactory* m_pFactory = nullptr;
-	QtTreePropertyBrowser* m_pEditor = nullptr;
+signals:
 
-	// PropertyPageWidgetType::Dialog
-	//
-	QDialog* m_pDialog = nullptr;
+	void dataUpdated(PropertyPageType pageType);
+
+private slots:
+
+	void dialogDataUpdated();
 };
 
 // ==============================================================================================
@@ -150,17 +146,11 @@ private:
 
 	//
 	//
-	static PropertyPageType m_activePage;
-	bool setActivePage(PropertyPageType pageType);
-
-	//
-	//
-	void createInterface();
-
 	QTreeWidget* m_pagesTree = nullptr;
 	QHBoxLayout* m_pagesLayout = nullptr;
-
 	ExtWidgets::PropertyEditor*	m_pPropertyEditor = nullptr;
+
+	void createInterface();
 
 	//
 	//
@@ -169,26 +159,16 @@ private:
 	void createPropertyPages();
 	void removePropertyPages();
 
-	//
-	//
 	std::shared_ptr<PropertyPage> createPropertyPage(PropertyPageType pageType);
-	std::shared_ptr<PropertyPage> createPropertyPageList(PropertyPageType pageType);
-	std::shared_ptr<PropertyPage> createPropertyPageDialog(PropertyPageType pageType);
 
 	//
 	//
-	QMap<QtProperty*,int> m_propertyItemList;
-	QMap<QtProperty*,QVariant> m_propertyValueList;
+	static PropertyPageType m_currentPage;
 
-	void appendProperty(QtProperty* property, PropertyPageType pageType, int param);
-	void expandProperty(QtTreePropertyBrowser* pEditor, PropertyPageType pageType, int param, bool expanded);
-	void clearProperty();
-
-	QtProperty* m_currentPropertyItem = nullptr;
-	QVariant m_currentPropertyValue = 0;
-
-	void restoreProperty();
-	void applyProperty();
+	bool pageTypeIsValid(PropertyPageType pageType);
+	bool setCurrentPage(PropertyPageType pageType);
+	bool hidePage(PropertyPageType pageType);
+	bool showPage(PropertyPageType pageType);
 
 	//
 	//
@@ -204,18 +184,11 @@ private slots:
 	//
 	//
 	void onPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
-	void onPropertyValueChanged(QtProperty* property, const QVariant &value);
-	void onPropertyValueChanged_1(QList<std::shared_ptr<PropertyObject>> objects);
+	void onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects);
 
 	//
 	//
-	void onBrowserItem(QtBrowserItem* pItem);
-
-	//
-	//
-	void updateServerPage();
-	void updateLinearityPage(bool isDialog);
-	void updateMeasureViewPage(bool isDialog);
+	void dialogDataUpdated(PropertyPageType pageType);	// load data from dialog to options
 
 	//
 	//

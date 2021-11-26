@@ -198,7 +198,7 @@ DialogRackProperty::PropertyPattern::PropertyPattern(Metrology::RackParam* pObje
 
 	QString strDefaultChannel;
 	int defaultChannel = m_pObject->channel();
-	if (defaultChannel >= 0 && defaultChannel < Metrology::ChannelCount)
+	if (ERR_CHANNEL(defaultChannel) == false)
 	{
 		strDefaultChannel = QString::number(defaultChannel + 1);
 	}
@@ -211,18 +211,15 @@ DialogRackProperty::PropertyPattern::PropertyPattern(Metrology::RackParam* pObje
 		->setCategory(categoryInfo)
 		.setViewOrder(0)
 		.setReadOnly(true);
-
 	ADD_PROPERTY_GETTER(QString, DialogRackProperty::tr("EquipmentID"), true, m_pObject->Metrology::RackParam::equipmentID)
 		->setCategory(categoryInfo)
 		.setViewOrder(1)
 		.setReadOnly(true);
-
 	addDynamicEnumProperty(DialogRackProperty::tr("Group"), enumGroups, true)
 		->setCategory(categoryInfo)
 		.setViewOrder(2)
 		.setReadOnly(true)
 		.setValue(strDefaultGroup);
-
 	addDynamicEnumProperty(DialogRackProperty::tr("Channel"), enumChannels, true)
 		->setCategory(categoryInfo)
 		.setViewOrder(3)
@@ -292,6 +289,11 @@ void DialogRackProperty::createPropertyList()
 
 void DialogRackProperty::onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
+	if (m_pPropertyEditor == nullptr)
+	{
+		return;
+	}
+
 	for (const std::shared_ptr<PropertyObject>& modifiedFilter : objects)
 	{
 		auto properties = modifiedFilter.get();
@@ -1194,77 +1196,83 @@ DialogSignalProperty::PropertyPattern::PropertyPattern(Metrology::SignalParam* p
 		.setReadOnly(true);
 
 
-	QString categoryElectricLimit = SignalPropertyCategoryCaption(SignalPropertyCategory::ElectricLimit);
-
-	ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Electric low limit"), true, m_pObject->Metrology::SignalParam::electricLowLimit, m_pObject->Metrology::SignalParam::setElectricLowLimit)
-		->setCategory(categoryElectricLimit)
-		.setViewOrder(0)
-		.setPrecision(m_pObject->electricPrecision());
-	ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Electric high limit"), true, m_pObject->Metrology::SignalParam::electricHighLimit, m_pObject->Metrology::SignalParam::setElectricHighLimit)
-		->setCategory(categoryElectricLimit)
-		.setViewOrder(1)
-		.setPrecision(m_pObject->electricPrecision());
-	ADD_PROPERTY_GETTER_SETTER(E::ElectricUnit, DialogSignalProperty::tr("Electric unit"), true, m_pObject->Metrology::SignalParam::electricUnitID, m_pObject->Metrology::SignalParam::setElectricUnitID)
-		->setCategory(categoryElectricLimit)
-		.setViewOrder(2);
-	ADD_PROPERTY_GETTER_SETTER(E::SensorType, DialogSignalProperty::tr("Electric sensor type"), true, m_pObject->Metrology::SignalParam::electricSensorType, m_pObject->Metrology::SignalParam::setElectricSensorType)
-		->setCategory(categoryElectricLimit)
-		.setViewOrder(3);
-
-	switch (m_pObject->electricUnitID())
+	if (pObject->isAnalog() == true)
 	{
-		case E::ElectricUnit::mA:
+		if (pObject->isInput() == true || pObject->isOutput() == true)
+		{
+			QString categoryElectricLimit = SignalPropertyCategoryCaption(SignalPropertyCategory::ElectricLimit);
 
-			if (m_pObject->sensorType() != E::SensorType::V_0_5 && m_pObject->sensorType() != E::SensorType::V_m10_p10)
+			ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Electric low limit"), true, m_pObject->Metrology::SignalParam::electricLowLimit, m_pObject->Metrology::SignalParam::setElectricLowLimit)
+				->setCategory(categoryElectricLimit)
+				.setViewOrder(0)
+				.setPrecision(m_pObject->electricPrecision());
+			ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Electric high limit"), true, m_pObject->Metrology::SignalParam::electricHighLimit, m_pObject->Metrology::SignalParam::setElectricHighLimit)
+				->setCategory(categoryElectricLimit)
+				.setViewOrder(1)
+				.setPrecision(m_pObject->electricPrecision());
+			ADD_PROPERTY_GETTER_SETTER(E::ElectricUnit, DialogSignalProperty::tr("Electric unit"), true, m_pObject->Metrology::SignalParam::electricUnitID, m_pObject->Metrology::SignalParam::setElectricUnitID)
+				->setCategory(categoryElectricLimit)
+				.setViewOrder(2);
+			ADD_PROPERTY_GETTER_SETTER(E::SensorType, DialogSignalProperty::tr("Electric sensor type"), true, m_pObject->Metrology::SignalParam::electricSensorType, m_pObject->Metrology::SignalParam::setElectricSensorType)
+				->setCategory(categoryElectricLimit)
+				.setViewOrder(3);
+
+			switch (m_pObject->electricUnitID())
 			{
-				break;
+				case E::ElectricUnit::mA:
+
+					if (m_pObject->sensorType() != E::SensorType::V_0_5 && m_pObject->sensorType() != E::SensorType::V_m10_p10)
+					{
+						break;
+					}
+
+					ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Electric RLoad"), true, m_pObject->Metrology::SignalParam::electricRLoad, m_pObject->Metrology::SignalParam::setElectricRLoad)
+							->setCategory(categoryElectricLimit)
+							.setViewOrder(4)
+							.setPrecision(0);
+					break;
+
+				case E::ElectricUnit::Ohm:
+
+					if (m_pObject->sensorType() == E::SensorType::NoSensor || m_pObject->sensorType() == E::SensorType::Ohm_Raw ||
+						m_pObject->sensorType() == E::SensorType::Ohm_Pt21 || m_pObject->sensorType() == E::SensorType::Ohm_Cu23)
+					{
+						break;
+					}
+
+					ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Electric R0"), true, m_pObject->Metrology::SignalParam::electricR0, m_pObject->Metrology::SignalParam::setElectricR0)
+							->setCategory(categoryElectricLimit)
+							.setViewOrder(4)
+							.setPrecision(0);
+					break;
+
+				default:
+					break;
 			}
 
-			ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Electric RLoad"), true, m_pObject->Metrology::SignalParam::electricRLoad, m_pObject->Metrology::SignalParam::setElectricRLoad)
-					->setCategory(categoryElectricLimit)
-					.setViewOrder(4)
-					.setPrecision(0);
-			break;
+			ADD_PROPERTY_GETTER_SETTER(int, DialogSignalProperty::tr("Electric precision"), true, m_pObject->Metrology::SignalParam::electricPrecision, m_pObject->Metrology::SignalParam::setElectricPrecision)
+				->setCategory(categoryElectricLimit)
+				.setViewOrder(5);
+		}
 
-		case E::ElectricUnit::Ohm:
 
-			if (m_pObject->sensorType() == E::SensorType::NoSensor || m_pObject->sensorType() == E::SensorType::Ohm_Raw ||
-				m_pObject->sensorType() == E::SensorType::Ohm_Pt21 || m_pObject->sensorType() == E::SensorType::Ohm_Cu23)
-			{
-				break;
-			}
+		QString categoryEngineeringLimit = SignalPropertyCategoryCaption(SignalPropertyCategory::EngineeringLimit);
 
-			ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Electric R0"), true, m_pObject->Metrology::SignalParam::electricR0, m_pObject->Metrology::SignalParam::setElectricR0)
-					->setCategory(categoryElectricLimit)
-					.setViewOrder(4)
-					.setPrecision(0);
-			break;
-
-		default:
-			break;
+		ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Engineering low limit"), true, m_pObject->Metrology::SignalParam::lowEngineeringUnits, m_pObject->Metrology::SignalParam::setLowEngineeringUnits)
+			->setCategory(categoryEngineeringLimit)
+			.setViewOrder(0)
+			.setPrecision(m_pObject->decimalPlaces());
+		ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Engineering high limit"), true, m_pObject->Metrology::SignalParam::highEngineeringUnits, m_pObject->Metrology::SignalParam::setHighEngineeringUnits)
+			->setCategory(categoryEngineeringLimit)
+			.setViewOrder(1)
+			.setPrecision(m_pObject->decimalPlaces());
+		ADD_PROPERTY_GETTER_SETTER(QString, DialogSignalProperty::tr("Engineering unit"), true, m_pObject->Metrology::SignalParam::unit, m_pObject->Metrology::SignalParam::setUnit)
+			->setCategory(categoryEngineeringLimit)
+			.setViewOrder(2);
+		ADD_PROPERTY_GETTER_SETTER(int, DialogSignalProperty::tr("Engineering precision"), true, m_pObject->Metrology::SignalParam::decimalPlaces, m_pObject->Metrology::SignalParam::setDecimalPlaces)
+			->setCategory(categoryEngineeringLimit)
+			.setViewOrder(3);
 	}
-
-	ADD_PROPERTY_GETTER_SETTER(int, DialogSignalProperty::tr("Electric precision"), true, m_pObject->Metrology::SignalParam::electricPrecision, m_pObject->Metrology::SignalParam::setElectricPrecision)
-		->setCategory(categoryElectricLimit)
-		.setViewOrder(5);
-
-
-	QString categoryEngineeringLimit = SignalPropertyCategoryCaption(SignalPropertyCategory::EngineeringLimit);
-
-	ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Engineering low limit"), true, m_pObject->Metrology::SignalParam::lowEngineeringUnits, m_pObject->Metrology::SignalParam::setLowEngineeringUnits)
-		->setCategory(categoryEngineeringLimit)
-		.setViewOrder(0)
-		.setPrecision(m_pObject->decimalPlaces());
-	ADD_PROPERTY_GETTER_SETTER(double, DialogSignalProperty::tr("Engineering high limit"), true, m_pObject->Metrology::SignalParam::highEngineeringUnits, m_pObject->Metrology::SignalParam::setHighEngineeringUnits)
-		->setCategory(categoryEngineeringLimit)
-		.setViewOrder(1)
-		.setPrecision(m_pObject->decimalPlaces());
-	ADD_PROPERTY_GETTER_SETTER(QString, DialogSignalProperty::tr("Engineering unit"), true, m_pObject->Metrology::SignalParam::unit, m_pObject->Metrology::SignalParam::setUnit)
-		->setCategory(categoryEngineeringLimit)
-		.setViewOrder(2);
-	ADD_PROPERTY_GETTER_SETTER(int, DialogSignalProperty::tr("Engineering precision"), true, m_pObject->Metrology::SignalParam::decimalPlaces, m_pObject->Metrology::SignalParam::setDecimalPlaces)
-		->setCategory(categoryEngineeringLimit)
-		.setViewOrder(3);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1489,6 +1497,11 @@ void DialogSignalProperty::createPropertyList()
 
 void DialogSignalProperty::onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
+	if (m_pPropertyEditor == nullptr)
+	{
+		return;
+	}
+
 	for (const std::shared_ptr<PropertyObject>& modifiedFilter : objects)
 	{
 		auto properties = modifiedFilter.get();
@@ -2074,6 +2087,11 @@ void DialogComparatorProperty::createPropertyList()
 
 void DialogComparatorProperty::onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
+	if (m_pPropertyEditor == nullptr)
+	{
+		return;
+	}
+
 	QString strEngineeringvalue = DialogSignalProperty::tr("Engineering value");
 
 	if (m_comparatorEx.inputSignal() != nullptr && m_comparatorEx.inputSignal()->param().isValid() == true)
@@ -2293,7 +2311,7 @@ double DialogMeasureProperty::PropertyPattern::errorLimit()
 		return 0;
 	}
 
-	return m_pObject->errorLimit(Measure::LimitType::Electric, Measure::ErrorType::Reduce);
+	return m_pObject->errorLimit(Measure::LimitType::Electric, Measure::MT::ErrorType::Reduce);
 }
 
 void DialogMeasureProperty::PropertyPattern::setErrorLimit(double value)
@@ -2368,6 +2386,11 @@ void DialogMeasureProperty::createPropertyList()
 
 void DialogMeasureProperty::onPropertyValueChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
+	if (m_pPropertyEditor == nullptr)
+	{
+		return;
+	}
+
 	for (const std::shared_ptr<PropertyObject>& modifiedFilter : objects)
 	{
 		if (modifiedFilter.get() == nullptr)
@@ -2376,6 +2399,8 @@ void DialogMeasureProperty::onPropertyValueChanged(QList<std::shared_ptr<Propert
 			continue;
 		}
 	}
+
+	m_pPropertyEditor->updatePropertiesValues();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

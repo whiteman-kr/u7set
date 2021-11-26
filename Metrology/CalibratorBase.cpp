@@ -443,7 +443,7 @@ void CalibratorBase::onInitialization()
 	}
 
 	emit calibratorClose();									// close all calibratirs serial port
-	QThread::msleep(Metrology::ChannelCount * 100);			// wait, until all the serial ports will be closed
+	QThread::msleep(Metrology::ChannelCount * 100);		// wait, until all the serial ports will be closed
 	emit calibratorOpen();									// open all calibratirs
 
 	m_timeout = 0;

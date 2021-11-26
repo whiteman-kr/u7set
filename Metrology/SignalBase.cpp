@@ -895,10 +895,9 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 				case E::SignalInOutType::Input:
 				case E::SignalInOutType::Output:
 
-					m_signalID = QString::asprintf("CH %02d _ MD %02d _ IN %02d",
-												   m_location.chassis(),
-												   m_location.module(),
-												   m_location.place());
+					m_signalID =	"CH " +	QString::number(m_location.chassis()).rightJustified(2, '0') + " _ " +
+									"MD " +	QString::number(m_location.module()).rightJustified(2, '0') + " _ " +
+									"IN " +	QString::number(m_location.place()).rightJustified(2, '0');
 
 					// m_signalID.append("(" + m_location.contact() + ")");
 
@@ -908,16 +907,13 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 
 					if (param.enableTuning() == true)
 					{
-						m_signalID = QString::asprintf("CH %02d _ MD %02d _ IN %02d",
-													   m_location.chassis(),
-													   m_location.module(),
-													   m_location.place());
+						m_signalID =	"CH " +	QString::number(m_location.chassis()).rightJustified(2, '0') + " _ " +
+										"MD " +	QString::number(m_location.module()).rightJustified(2, '0') + " _ " +
+										"IN " +	QString::number(m_location.place()).rightJustified(2, '0');
 					}
 					else
 					{
-						m_signalID = QString::asprintf("CH %02d _ MD %02d",
-													   m_location.chassis(),
-													   m_location.module());
+						m_signalID =	"CH " +	QString::number(m_location.chassis()).rightJustified(2, '0');
 					}
 
 					break;

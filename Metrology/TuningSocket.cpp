@@ -101,13 +101,13 @@ void TuningSocket::requestTuningSourcesInfo()
 
 	theSignalBase.tuning().sourceBase().clear();
 
-	ServerType serverType = static_cast<ServerType>(selectedServerIndex());
-	if (ERR_SERVER_TYPE(serverType) == true)
+	OT::ServerPriority serverPriority = static_cast<OT::ServerPriority>(selectedServerIndex());
+	if (ERR_SERVER_PRIORITY(serverPriority) == true)
 	{
 		return;
 	}
 
-	QString equipmentID = theOptions.socket().client(SocketType::TuningSrv).equipmentID(serverType);
+	QString equipmentID = theOptions.socket().server(OT::ServerType::TuningService).equipmentID(serverPriority);
 	if (equipmentID.isEmpty() == true)
 	{
 		assert(0);
@@ -176,13 +176,13 @@ void TuningSocket::requestTuningSourcesState()
 
 	QThread::msleep(TUNING_SOCKET_TIMEOUT_STATE);
 
-	ServerType serverType = static_cast<ServerType>(selectedServerIndex());
-	if (ERR_SERVER_TYPE(serverType) == true)
+	OT::ServerPriority serverPriority = static_cast<OT::ServerPriority>(selectedServerIndex());
+	if (ERR_SERVER_PRIORITY(serverPriority) == true)
 	{
 		return;
 	}
 
-	QString equipmentID = theOptions.socket().client(SocketType::TuningSrv).equipmentID(serverType);
+	QString equipmentID = theOptions.socket().server(OT::ServerType::TuningService).equipmentID(serverPriority);
 	if (equipmentID.isEmpty() == true)
 	{
 		assert(0);
@@ -239,13 +239,13 @@ void TuningSocket::requestReadTuningSignals()
 {
 	assert(isClearToSendRequest());
 
-	ServerType serverType = static_cast<ServerType>(selectedServerIndex());
-	if (ERR_SERVER_TYPE(serverType) == true)
+	OT::ServerPriority serverPriority = static_cast<OT::ServerPriority>(selectedServerIndex());
+	if (ERR_SERVER_PRIORITY(serverPriority) == true)
 	{
 		return;
 	}
 
-	QString equipmentID = theOptions.socket().client(SocketType::TuningSrv).equipmentID(serverType);
+	QString equipmentID = theOptions.socket().server(OT::ServerType::TuningService).equipmentID(serverPriority);
 	if (equipmentID.isEmpty() == true)
 	{
 		assert(0);
@@ -337,13 +337,13 @@ void TuningSocket::requestWriteTuningSignals()
 {
 	assert(isClearToSendRequest());
 
-	ServerType serverType = static_cast<ServerType>(selectedServerIndex());
-	if (ERR_SERVER_TYPE(serverType) == true)
+	OT::ServerPriority serverPriority = static_cast<OT::ServerPriority>(selectedServerIndex());
+	if (ERR_SERVER_PRIORITY(serverPriority) == true)
 	{
 		return;
 	}
 
-	QString equipmentID = theOptions.socket().client(SocketType::TuningSrv).equipmentID(serverType);
+	QString equipmentID = theOptions.socket().server(OT::ServerType::TuningService).equipmentID(serverPriority);
 	if (equipmentID.isEmpty() == true)
 	{
 		assert(0);
@@ -443,11 +443,11 @@ void TuningSocket::replyWriteTuningSignals(const char* replyData, quint32 replyD
 
 void TuningSocket::configurationLoaded()
 {
-	HostAddressPort addr1 = theOptions.socket().client(SocketType::TuningSrv).address(ServerType::Primary);
-	HostAddressPort addr2 = theOptions.socket().client(SocketType::TuningSrv).address(ServerType::Reserve);
+	HostAddressPort addr1 = theOptions.socket().server(OT::ServerType::TuningService).address(OT::ServerPriority::Primary);
+	HostAddressPort addr2 = theOptions.socket().server(OT::ServerType::TuningService).address(OT::ServerPriority::Reserve);
 
-	HostAddressPort currAddr1 = serverAddressPort(ServerType::Primary);
-	HostAddressPort currAddr2 = serverAddressPort(ServerType::Reserve);
+	HostAddressPort currAddr1 = serverAddressPort(OT::ServerPriority::Primary);
+	HostAddressPort currAddr2 = serverAddressPort(OT::ServerPriority::Reserve);
 
 	if (	addr1.address32() == currAddr1.address32() && addr1.port() == currAddr1.port() &&
 			addr2.address32() == currAddr2.address32() && addr2.port() == currAddr2.port())

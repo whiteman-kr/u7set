@@ -35,7 +35,7 @@ private:
 	int m_index = -1;
 
 	Hash m_hash = UNDEFINED_HASH;			// hash calcHash from rack group caption
-	QString m_caption;							// rack group caption
+	QString m_caption;						// rack group caption
 
 	QString m_rackEquipmentID[Metrology::ChannelCount];
 };

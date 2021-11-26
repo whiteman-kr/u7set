@@ -74,7 +74,7 @@ protected:
 
 signals:
 
-	void				updateLinearityPage(bool isDialog);
+	void				dataUpdated();
 
 private slots:
 
