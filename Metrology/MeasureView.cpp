@@ -339,10 +339,10 @@ namespace Measure
 
 		switch (theOptions.linearity().viewType())
 		{
-			case LinearityViewType::Simple:
-			case LinearityViewType::Extended:			limitType = m->limitTypeByRange(theOptions.linearity().calcErrorByRange());		break;
-			case LinearityViewType::DetailElectric:		limitType = Measure::LimitType::Electric;										break;
-			case LinearityViewType::DetailEngineering:	limitType = Measure::LimitType::Engineering;									break;
+			case OT::LinearityViewType::Simple:
+			case OT::LinearityViewType::Extended:			limitType = m->limitTypeByRange(theOptions.linearity().calcErrorByRange());		break;
+			case OT::LinearityViewType::Detail_Electric:		limitType = Measure::LimitType::Electric;										break;
+			case OT::LinearityViewType::Detail_Engineering:	limitType = Measure::LimitType::Engineering;									break;
 
 			default:
 				assert(0);
@@ -928,7 +928,7 @@ namespace Measure
 			return;
 		}
 
-		double errorLimit = pMeasurement->errorLimit(Measure::LimitType::Electric, Measure::ErrorType::Reduce);
+		double errorLimit = pMeasurement->errorLimit(Measure::LimitType::Electric, MT::ErrorType::Reduce);
 
 		DialogMeasureProperty dialog(pMeasurement, this);
 		if (dialog.exec() != QDialog::Accepted)
@@ -936,12 +936,12 @@ namespace Measure
 			return;
 		}
 
-		if (compareDouble(errorLimit, pMeasurement->errorLimit(Measure::LimitType::Electric, Measure::ErrorType::Reduce)) == true)
+		if (compareDouble(errorLimit, pMeasurement->errorLimit(Measure::LimitType::Electric, MT::ErrorType::Reduce)) == true)
 		{
 			return;
 		}
 
-		errorLimit = pMeasurement->errorLimit(Measure::LimitType::Electric, Measure::ErrorType::Reduce);
+		errorLimit = pMeasurement->errorLimit(Measure::LimitType::Electric, MT::ErrorType::Reduce);
 
 		std::vector<Measure::Item*> measurementList;
 
@@ -1103,18 +1103,18 @@ namespace Measure
 
 						if (pLinearityMeasurement->nominal(limitType) >= 0)
 						{
-							QPointF pLL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) + pLinearityMeasurementI->errorLimit(limitType, Measure::ErrorType::Absolute));
+							QPointF pLL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) + pLinearityMeasurementI->errorLimit(limitType, MT::ErrorType::Absolute));
 							*pLowLimitlSeries << pLL;
 
-							QPointF pHL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) - pLinearityMeasurementI->errorLimit(limitType, Measure::ErrorType::Absolute));
+							QPointF pHL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) - pLinearityMeasurementI->errorLimit(limitType, MT::ErrorType::Absolute));
 							*pHighLimitSeries << pHL;
 						}
 						else
 						{
-							QPointF pLL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) - pLinearityMeasurementI->errorLimit(limitType, Measure::ErrorType::Absolute));
+							QPointF pLL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) - pLinearityMeasurementI->errorLimit(limitType, MT::ErrorType::Absolute));
 							*pLowLimitlSeries << pLL;
 
-							QPointF pHL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) + pLinearityMeasurementI->errorLimit(limitType, Measure::ErrorType::Absolute));
+							QPointF pHL(pointCount + 1, pLinearityMeasurementI->nominal(limitType) + pLinearityMeasurementI->errorLimit(limitType, MT::ErrorType::Absolute));
 							*pHighLimitSeries << pHL;
 						}
 

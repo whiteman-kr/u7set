@@ -194,8 +194,8 @@ windows build job:
     - "cd $Env:CI_PROJECT_DIR/u7setinstall"
     - "&./createinstall.bat"
     - "popd"	
-    - "&$SIGNTOOL sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $K8S_SECRET_DIGITAL_SIGN_CERT bin\\*.exe"
-    - "$K8S_SECRET_DIGITAL_SIGN_CERT="
+#    - "&$SIGNTOOL sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $K8S_SECRET_DIGITAL_SIGN_CERT bin\\*.exe"
+#    - "$K8S_SECRET_DIGITAL_SIGN_CERT="
 
   artifacts:
     name: "u7set_0.8.$Env:CI_PIPELINE_ID $Env:CI_BUILD_REF_SLUG $Env:CI_COMMIT_SHA"

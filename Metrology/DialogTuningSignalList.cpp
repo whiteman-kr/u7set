@@ -156,9 +156,7 @@ QString TuningSignalTable::signalStateStr(Metrology::Signal* pSignal) const
 	{
 		case E::SignalType::Analog:
 
-			formatStr = QString::asprintf("%%.%df", param.decimalPlaces());
-
-			stateStr = QString::asprintf(formatStr.toAscii(), pSignal->state().value());
+			stateStr = QString::number(pSignal->state().value(), 'f', param.decimalPlaces());
 
 			break;
 
@@ -416,7 +414,7 @@ void DialogTuningSignalList::onProperties()
 		return;
 	}
 
-	DialogTuningSignalState* dialog = new DialogTuningSignalState(param);
+	DialogTuningSignalState* dialog = new DialogTuningSignalState(param, this);
 	dialog->exec();
 }
 
@@ -486,25 +484,25 @@ void DialogTuningSignalState::createInterface()
 	{
 		case E::SignalType::Analog:
 			{
-				QLabel* stateLabel = new QLabel(tr("Please, input new state of analog signal:"));
+				QLabel* stateLabel = new QLabel(tr("Please, input new state of analog signal:"), this);
 				stateLabel->setAlignment(Qt::AlignHCenter);
 
 				QRegExp rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
 				QValidator* validator = new QRegExpValidator(rx, this);
 
-				m_stateEdit = new QLineEdit(QString::number(theSignalBase.signalState(m_param.hash()).value() ));
+				m_stateEdit = new QLineEdit(QString::number(theSignalBase.signalState(m_param.hash()).value() ), this);
 				m_stateEdit->setAlignment(Qt::AlignHCenter);
 				m_stateEdit->setValidator(validator);
 
-				QLabel* rangeLabel = new QLabel(m_param.tuningRangeStr());
+				QLabel* rangeLabel = new QLabel(m_param.tuningRangeStr(), this);
 				rangeLabel->setAlignment(Qt::AlignHCenter);
 
 				// buttons
 				//
-				QHBoxLayout* buttonLayout = new QHBoxLayout ;
+				QHBoxLayout* buttonLayout = new QHBoxLayout;
 
-				QPushButton* okButton = new QPushButton(tr("Ok"));
-				QPushButton* cancelButton = new QPushButton(tr("Cancel"));
+				QPushButton* okButton = new QPushButton(tr("Ok"), this);
+				QPushButton* cancelButton = new QPushButton(tr("Cancel"), this);
 
 				connect(okButton, &QPushButton::clicked, this, &DialogTuningSignalState::onOk);
 				connect(cancelButton, &QPushButton::clicked, this, &DialogTuningSignalState::reject);
@@ -524,14 +522,14 @@ void DialogTuningSignalState::createInterface()
 
 		case E::SignalType::Discrete:
 			{
-				QLabel* stateLabel = new QLabel(tr("Please, select new state of discrete signal:"));
+				QLabel* stateLabel = new QLabel(tr("Please, select new state of discrete signal:"), this);
 
 				// buttons
 				//
 				QHBoxLayout* buttonLayout = new QHBoxLayout ;
 
-				QPushButton* yesButton = new QPushButton(tr("Yes"));
-				QPushButton* noButton = new QPushButton(tr("No"));
+				QPushButton* yesButton = new QPushButton(tr("Yes"), this);
+				QPushButton* noButton = new QPushButton(tr("No"), this);
 
 				connect(yesButton, &QPushButton::clicked, this, &DialogTuningSignalState::onYes);
 				connect(noButton, &QPushButton::clicked, this, &DialogTuningSignalState::onNo);
@@ -559,16 +557,15 @@ void DialogTuningSignalState::onOk()
 {
 	double state = m_stateEdit->text().toDouble();
 
-	if (state < m_param.tuningLowBound().toDouble()|| state > m_param.tuningHighBound().toDouble())
+	if (state < m_param.tuningLowBound().toDouble() || state > m_param.tuningHighBound().toDouble())
 	{
-		QString str, formatStr;
+		QString str;
 
-		formatStr = QString::asprintf("%%.%df", m_param.decimalPlaces());
-
-		str = tr("Failed input value: %1").arg(QString::asprintf(formatStr.toAscii(), state));
+		str = tr("Failed input value: %1").arg(QString::number(state, 'f', m_param.decimalPlaces()));
 		str += tr("\nRange of signal: %1").arg(m_param.tuningRangeStr());
 
 		QMessageBox::critical(this, windowTitle(), str);
+
 		return;
 	}
 

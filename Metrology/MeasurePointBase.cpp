@@ -8,6 +8,23 @@ namespace Measure
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
+
+	Point::Point()
+	{
+		setIndex(0);
+		setPercent(0);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	Point::Point(int index, double percent)
+	{
+		setIndex(index);
+		setPercent(percent);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	void Point::setPercent(double value)
 	{
 		for(int sensor = 0; sensor < PointSensorCount; sensor++)
@@ -171,7 +188,7 @@ namespace Measure
 		quint64 pointCount = m_pointList.size();
 		if (pointCount == 0)
 		{
-			result = QT_TRANSLATE_NOOP("MeasurePointBase.cpp", "The measurement points are not set");
+			result = QT_TRANSLATE_NOOP("MeasurePointBase", "The measurement points are not set");
 		}
 		else
 		{
@@ -186,7 +203,7 @@ namespace Measure
 			}
 		}
 
-		return result;
+		return qApp->translate("MeasurePointBase", result.toUtf8());
 	}
 
 
@@ -316,23 +333,23 @@ namespace Measure
 				caption = QT_TRANSLATE_NOOP("MeasurePointBase", "Unknown");
 		}
 
-		return caption;
+		return qApp->translate("MeasurePointBase", caption.toUtf8());
 	};
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString LinearityDivisionCaption(int division)
+	QString LT::LinearityDivisionCaption(Measure::LT::LinearityDivision division)
 	{
 		QString caption;
 
 		switch (division)
 		{
-			case LinearityDivision::Manual:		caption = QT_TRANSLATE_NOOP("MeasurePointBase", "Manual division of the measure range");	break;
-			case LinearityDivision::Automatic:	caption = QT_TRANSLATE_NOOP("MeasurePointBase", "Automatic division of the measure range");	break;
+			case LT::Manual:	caption = QObject::tr("Manual");	break;
+			case LT::Automatic:	caption = QObject::tr("Automatic");	break;
 
 			default:
 				Q_ASSERT(0);
-				caption = QT_TRANSLATE_NOOP("MeasurePointBase", "Unknown");
+				caption = QObject::tr("Unknown");
 		}
 
 		return caption;

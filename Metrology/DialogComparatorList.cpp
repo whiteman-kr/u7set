@@ -189,7 +189,7 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 		case COMPARATOR_LIST_COLUMN_CMP_NO:				result = comparatorEx->indexStr();												break;
 		case COMPARATOR_LIST_COLUMN_SETPOINT:			result = comparatorEx->compareDefaultValueStr(m_idType);						break;
 		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = qApp->translate("MetrologySignal", comparatorEx->hysteresisDefaultValueStr(m_idType).toUtf8());	break;
-		case COMPARATOR_LIST_COLUMN_TYPE:				result = qApp->translate("MetrologySignal", param.signalTypeStr().toUtf8());	break;
+		case COMPARATOR_LIST_COLUMN_TYPE:				result = param.signalTypeStr();													break;
 		case COMPARATOR_LIST_COLUMN_EL_RANGE:			result = param.electricRangeStr();												break;
 		case COMPARATOR_LIST_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();											break;
 		case COMPARATOR_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();											break;

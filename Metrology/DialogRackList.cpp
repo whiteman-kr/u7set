@@ -118,9 +118,7 @@ QString RackListTable::text(int row, int column, const Metrology::RackParam* pRa
 DialogRackList::DialogRackList(QWidget* parent) :
 	DialogList(0.35, 0.4, true, parent)
 {
-	m_rackBase = theSignalBase.racks();
-	m_rackTable.setRackGroups(m_rackBase.groups());
-
+	loadRacks();
 	createInterface();
 	DialogRackList::updateList();
 }
@@ -182,6 +180,14 @@ void DialogRackList::createContextMenu()
 	addContextAction(m_pCopyCellAction);
 	addContextSeparator();
 	addContextAction(m_pPropertyAction);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DialogRackList::loadRacks()
+{
+	m_rackBase = theSignalBase.racks();
+	m_rackTable.setRackGroups(m_rackBase.groups());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -267,7 +273,7 @@ void DialogRackList::onProperties()
 	}
 
 	int channel = dialog.rack().channel();
-	if (channel < 0 || channel >= Metrology::ChannelCount)
+	if (ERR_CHANNEL(channel) == true)
 	{
 		return;
 	}
