@@ -353,8 +353,9 @@ let LMNumberCount: number = 0;
 //let configScriptVersion: number = 42;		// DiagDataSize is written for i/o module frame for LM8_SR10, LM1_SR03 and LM1_SR04
 //let configScriptVersion: number = 43;		// Tuning LAN configuration is placed in LAN2 and LAN3 for LM1_SR04 LAN 
 //let configScriptVersion: number = 44;		// Tuning LAN configuration is placed in LAN1 or LAN2/LAN3 depending on LAN description
-//let configScriptVersion = 45; 			// Added mV_Type_L, mV_Type_M and mV_Raw_m1200_p1200 sensor types
-let configScriptVersion: number = 46;		// MAC address is checkind for uniqueness, LAN values are set to 0 if LAN is switched off
+//let configScriptVersion: number = 45; 	// Added mV_Type_L, mV_Type_M and mV_Raw_m1200_p1200 sensor types
+//let configScriptVersion: number = 46;		// MAC address is checkind for uniqueness, LAN values are set to 0 if LAN is switched off
+let configScriptVersion: number = 47;		// LAN configuration is dynamically generated
 
 //
 
@@ -530,9 +531,11 @@ function generate_lm(builder: Builder, root: ScriptDeviceObject, module: ScriptD
 	const MODULEID_LM1_SR02: number = 0x11A1;
 	const MODULEID_LM1_SR03: number = 0x11A2;
 	const MODULEID_LM1_SR04: number = 0x11B0;
+
 	const MODULEID_LM1_SR20: number = 0x11A3;
 	const MODULEID_LM1_SR05: number = 0x11B2;
 	const MODULEID_LM8_SR10: number = 0x11D0;
+	const MODULEID_LM11_SR90: number = 0x1190;
 
 	// Variables
 	//
@@ -735,15 +738,18 @@ function generate_lm(builder: Builder, root: ScriptDeviceObject, module: ScriptD
 			return false;
 		}
 
-		if (moduleId == MODULEID_LM1_SR20 ||
-			moduleId == MODULEID_LM1_SR05 ||
-			moduleId == MODULEID_LM8_SR10) {
+		if ((diagWordsIoCount & 1) != 0) {
+			diagWordsIoCount++;	// Align to words
+		}
 
-			if ((diagWordsIoCount & 1) != 0) {
-				diagWordsIoCount++;	// Align to word
-			}
+		if (moduleId != MODULEID_LM1_SF00 &&
+			moduleId != MODULEID_LM1_SF01 &&
+			moduleId != MODULEID_LM1_SR01 &&
+			moduleId != MODULEID_LM1_SR02 &&
+			moduleId != MODULEID_LM1_SR03 && 
+			moduleId != MODULEID_LM1_SR04) {
 
-			// I/o module diag data size
+			// I/o module diag data size are written in new LMs
 			//
 			ptr = 1006;
 			if (setData16(confFirmware, log, LMNumber, ioModule.equipmentId, frame, ptr, "DiagDataSize", diagWordsIoCount) == false) {
@@ -761,39 +767,34 @@ function generate_lm(builder: Builder, root: ScriptDeviceObject, module: ScriptD
 	//
 	confFirmware.writeLog("Writing LAN configuration.\r\n");
 
-	let lanFrame: number = lanConfigFrame;
+	const maxLanControllerCount: number = 3;
 
 	let lanControllerCount: number = logicModuleDescription.Lan_ControllerCount;
 
-	if (lanControllerCount != 2 && lanControllerCount != 3) {
-		log.writeError(module.equipmentId + ": wrong LAN controllers count (" + lanControllerCount + "), expected 2 or 3.");
+	if (lanControllerCount < 1 || lanControllerCount > maxLanControllerCount) {
+		log.writeError(module.equipmentId + ": wrong LAN controllers count (" + lanControllerCount + "), expected 1.." + maxLanControllerCount);
 		return false;
 	}
 
-	let doubleTuningConfiguration: boolean = false;
+	let appAndDiagChannel: number = 0;
 
-	if (lanControllerCount == 3 &&
-		logicModuleDescription.jsLanControllerType(0) == LanControllerType.Tuning) {
+	for (let i: number = 0; i < lanControllerCount; i++) {
 
-		doubleTuningConfiguration = false;
-	}
-	else {
-		if (lanControllerCount == 2 &&
-			logicModuleDescription.jsLanControllerType(0) == LanControllerType.TuningAndAppAndDiagData &&
-			logicModuleDescription.jsLanControllerType(1) == LanControllerType.TuningAndAppAndDiagData) {
+		let lanPlace: number = logicModuleDescription.jsLanControllerPlace(i);
 
-			doubleTuningConfiguration = true;
-		}
-		else {
-			log.writeError(module.equipmentId + ": invalid LAN controllers configuration, expected Tuning/2xAppAndDiagData or 2xTuningAndAppAndDiagData");
+		if (lanPlace < 1 || lanPlace > maxLanControllerCount)
+		{
+			log.writeError(module.equipmentId + ": wrong LAN controller place in LM description (" + lanPlace + "), expected 1.." + maxLanControllerCount);
 			return false;
 		}
-	}
 
-	if (doubleTuningConfiguration == false) {
+		let lanType: LanControllerType = logicModuleDescription.jsLanControllerType(i);
 
-		// Tuning Controller is in LAN 1
-		//
+		let ethernetcontrollerId: string = "_ETHERNET0" + lanPlace;
+
+		let lanFrame: number = lanConfigFrame +  (lanPlace - 1);
+
+		confFirmware.writeLog("    Ethernet Controller " + module.equipmentId + ethernetcontrollerId + "\r\n");
 
 		let tuningLan: LanConfig = {
 			flags: 0,
@@ -812,36 +813,6 @@ function generate_lm(builder: Builder, root: ScriptDeviceObject, module: ScriptD
 			serviceIP: 0,
 			servicePort: 0,
 			wordsCount: 0,
-			dataID: 0
-		};
-
-		let ethernetcontrollerId: string = "_ETHERNET01";
-
-		confFirmware.writeLog("    Ethernet Controller " + module.equipmentId + ethernetcontrollerId + "\r\n");
-
-		if (fillLanServiceData(confFirmware, SoftwareType.TuningService, root, module, ethernetcontrollerId, tuningLan, log) == false) {
-			return false;
-		}
-
-		if (generate_LANConfiguration_v1(confFirmware, lanFrame, module, ethernetcontrollerId, tuningLan, emptyLan, log) == false)	//LAN 2 is not used
-		{
-			return false;
-		}
-	}
-
-	lanFrame++;
-
-	// REG / DIAG
-	//
-	for (let i: number = 0; i < 2; i++) {
-
-		let tuningLan: LanConfig = {
-			flags: 0,
-			ip: 0,
-			port: 0,
-			serviceIP: 0,
-			servicePort: 0,
-			wordsCount: 716,
 			dataID: 0
 		};
 
@@ -865,8 +836,8 @@ function generate_lm(builder: Builder, root: ScriptDeviceObject, module: ScriptD
 			dataID: 0
 		};
 
-		if (i == 0) {
-			// Set default values for LAN 1
+		if (appAndDiagChannel == 0) {
+			// Set default values for first App and Diag channel
 
 			appLan.serviceIP = 0xc0a80bfe;	//	192.168.11.254
 			appLan.servicePort = 13322;
@@ -874,52 +845,62 @@ function generate_lm(builder: Builder, root: ScriptDeviceObject, module: ScriptD
 			diagLan.serviceIP = 0xc0a815fe;	//	192.168.21.254
 			diagLan.servicePort = 13352;
 		}
+		
 
-		let ethernetcontrollerId: string = "_ETHERNET0" + (i + 2);
-
-		confFirmware.writeLog("    Ethernet Controller " + module.equipmentId + ethernetcontrollerId + "\r\n");
-
-		if (doubleTuningConfiguration == true) {
-
-			// Tuning Controller is in LAN 2 and LAN 3
+		if (lanType == LanControllerType.Tuning) {
 
 			if (fillLanServiceData(confFirmware, SoftwareType.TuningService, root, module, ethernetcontrollerId, tuningLan, log) == false) {
 				return false;
 			}
+
+			if (generate_LANConfiguration_v0(confFirmware, lanFrame, module, ethernetcontrollerId, tuningLan, emptyLan, log) == false)	//Channel is not used
+			{
+				return false;
+			}
 		}
 
-		if (fillLanServiceData(confFirmware, SoftwareType.AppDataService, root, module, ethernetcontrollerId, appLan, log) == false) {
-			return false;
-		}
+		if (lanType == LanControllerType.AppAndDiagData) {
 
-		if (fillLanServiceData(confFirmware, SoftwareType.DiagDataService, root, module, ethernetcontrollerId, diagLan, log) == false) {
-			return false;
-		}
-
-		if (doubleTuningConfiguration == false) {
-
-			// Tuning Controller is in LAN 1
-
-			if (generate_LANConfiguration_v1(confFirmware, lanFrame, module, ethernetcontrollerId, appLan, diagLan, log) == false) {
+			if (fillLanServiceData(confFirmware, SoftwareType.AppDataService, root, module, ethernetcontrollerId, appLan, log) == false) {
 				return false;
 			}
 
-		}
-		else {
+			if (fillLanServiceData(confFirmware, SoftwareType.DiagDataService, root, module, ethernetcontrollerId, diagLan, log) == false) {
+				return false;
+			}
 
-			// Tuning Controller is in LAN 2 and LAN 3
+			if (generate_LANConfiguration_v0(confFirmware, lanFrame, module, ethernetcontrollerId, appLan, diagLan, log) == false) {
+				return false;
+			}
+
+			appAndDiagChannel++;
+		}
+
+		if (lanType == LanControllerType.TuningAndAppAndDiagData) {
+
+			if (fillLanServiceData(confFirmware, SoftwareType.TuningService, root, module, ethernetcontrollerId, tuningLan, log) == false) {
+				return false;
+			}
+			
+			if (fillLanServiceData(confFirmware, SoftwareType.AppDataService, root, module, ethernetcontrollerId, appLan, log) == false) {
+				return false;
+			}
+
+			if (fillLanServiceData(confFirmware, SoftwareType.DiagDataService, root, module, ethernetcontrollerId, diagLan, log) == false) {
+				return false;
+			}
 
 			let lans: LanConfig[] = [];
 			lans.push(appLan);
 			lans.push(diagLan);
 			lans.push(tuningLan);
 
-			if (generate_LANConfiguration_v2(confFirmware, lanFrame, module, ethernetcontrollerId, lans, log) == false) {
+			if (generate_LANConfiguration_v1(confFirmware, lanFrame, module, ethernetcontrollerId, lans, log) == false) {
 				return false;
 			}
-		}
 
-		lanFrame++;
+			appAndDiagChannel++;
+		}
 	}
 
 	// Create TX/RX configuration
@@ -1075,7 +1056,7 @@ function fillLanServiceData(
 	return true;
 }
 
-function generate_LANConfiguration_v1(confFirmware: ModuleFirmware, frame: number, module: ScriptDeviceModule, ethernetControllerId: string, lan1: LanConfig, lan2: LanConfig, log: IssueLogger): boolean {
+function generate_LANConfiguration_v0(confFirmware: ModuleFirmware, frame: number, module: ScriptDeviceModule, ethernetControllerId: string, lan1: LanConfig, lan2: LanConfig, log: IssueLogger): boolean {
 
 	let lan: LanConfig[] = [];
 
@@ -1224,7 +1205,7 @@ function generate_LANConfiguration_v1(confFirmware: ModuleFirmware, frame: numbe
 	return true;
 }
 
-function generate_LANConfiguration_v2(confFirmware: ModuleFirmware, frame: number, module: ScriptDeviceModule, ethernetControllerId: string,
+function generate_LANConfiguration_v1(confFirmware: ModuleFirmware, frame: number, module: ScriptDeviceModule, ethernetControllerId: string,
 	lan: LanConfig[], log: IssueLogger): boolean {
 	let ptr: number = 0;
 
@@ -1247,17 +1228,17 @@ function generate_LANConfiguration_v2(confFirmware: ModuleFirmware, frame: numbe
 	let m1: number = 0;
 	let m2: number = 0;
 	let m3: number = 0;
-	
+
 	let macIsEmpty: boolean = true;
 
 	for (let i: number = 0; i < lan.length; i++) {
-		if (lan[i].ip != 0 || lan[i].serviceIP != 0){
+		if (lan[i].ip != 0 || lan[i].serviceIP != 0) {
 			macIsEmpty = false;
 			break;
 		}
 	}
 
-	if (macIsEmpty == true)	{
+	if (macIsEmpty == true) {
 		// mac is empty
 		//
 	}

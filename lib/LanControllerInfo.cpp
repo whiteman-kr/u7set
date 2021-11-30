@@ -117,7 +117,7 @@ void LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::TUNING_SERVICE_NETMASK, tuningServiceNetmask);
 
 		xml.writeUInt64Attribute(EquipmentPropNames::TUNING_DATA_UID, tuningDataUID);
-		xml.writeUInt64Attribute(EquipmentPropNames::HEX_TUNING_DATA_UID, tuningDataUID);
+		xml.writeUInt64Attribute(EquipmentPropNames::HEX_TUNING_DATA_UID, tuningDataUID, true);
 	}
 
 	xml.writeEndElement();	//	/XmlElement::TUNING_PARAMS
@@ -564,7 +564,7 @@ const LanControllerInfo& LanControllersInfo::getFirstCompatibleController(E::Lan
 {
 	for(const LanControllerInfo& lci : m_lans)
 	{
-		if (TO_INT(lci.lanControllerType) && TO_INT(type) != 0)
+		if ((TO_INT(lci.lanControllerType) & TO_INT(type)) != 0)
 		{
 			return lci;
 		}
@@ -616,7 +616,6 @@ std::vector<HostAddressPort> LanControllersInfo::appDataHostAddressPorts() const
 	}
 
 	return addresses;
-
 }
 
 LanControllerInfo& LanControllersInfo::operator[](int index)

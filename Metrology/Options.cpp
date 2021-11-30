@@ -18,7 +18,7 @@ CalibratorOption::CalibratorOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorOption::CalibratorOption(const QString& port, int type) :
+CalibratorOption::CalibratorOption(const QString& port, CalibratorType type) :
 	m_port(port),
 	m_type(type)
 {
@@ -68,7 +68,7 @@ CalibratorsOption::~CalibratorsOption()
 
 CalibratorOption CalibratorsOption::calibrator(int channel) const
 {
-	if (channel < 0 || channel >= Metrology::ChannelCount)
+	if (ERR_CHANNEL(channel) == true)
 	{
 		assert(0);
 		return CalibratorOption();
@@ -82,7 +82,7 @@ CalibratorOption CalibratorsOption::calibrator(int channel) const
 
 void CalibratorsOption::setCalibrator(int channel, const CalibratorOption& сalibrator)
 {
-	if (channel < 0 || channel >= Metrology::ChannelCount)
+	if (ERR_CHANNEL(channel) == true)
 	{
 		assert(0);
 		return;
@@ -102,7 +102,7 @@ void CalibratorsOption::load()
 		QString defaultPort = QString("COM%1").arg(QString::number(c+1));
 
 		QString port = s.value(QString("%1Calibrator%2/Port").arg(CALIBRATOR_OPTIONS_KEY).arg(c), defaultPort).toString();
-		int type = s.value(QString("%1Calibrator%2/Type").arg(CALIBRATOR_OPTIONS_KEY).arg(c), CalibratorType::Calys75).toInt();
+		CalibratorType type = static_cast<CalibratorType>(s.value(QString("%1Calibrator%2/Type").arg(CALIBRATOR_OPTIONS_KEY).arg(c), CalibratorType::Calys75).toInt());
 
 		if (ERR_CALIBRATOR_TYPE(type) == true)
 		{
@@ -143,150 +143,206 @@ CalibratorsOption& CalibratorsOption::operator=(const CalibratorsOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SocketClientOption::SocketClientOption()
+ServerConnection::ServerConnection()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SocketClientOption::equipmentID(int serverType) const
+void ServerConnection::load(OT::ServerType serverType)
 {
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	if (ERR_SERVER_TYPE(serverType) == true)
+	{
+		return;
+	}
+
+	if (ERR_SERVER_PRIORITY(m_priority) == true)
+	{
+		return;
+	}
+
+	QSettings s;
+
+	QString key = SOCKET_OPTIONS_KEY + OT::serverCaption(serverType) + "/";
+
+	m_equipmentID = s.value(QString("%1EquipmentID%2").arg(key).arg(m_priority), "SYSTEM_RACKID_WS00" + OT::serverDefaultID(serverType)).toString();
+
+	m_serverIP = s.value(QString("%1ServerIP%2").arg(key).arg(m_priority), "127.0.0.1").toString();
+	m_serverPort = s.value(QString("%1ServerPort%2").arg(key).arg(m_priority), OT::serverDefaultPort(serverType)).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ServerConnection::save(OT::ServerType serverType)
+{
+	if (ERR_SERVER_TYPE(serverType) == true)
+	{
+		return;
+	}
+
+	if (ERR_SERVER_PRIORITY(m_priority) == true)
+	{
+		return;
+	}
+
+	QSettings s;
+
+	QString key = SOCKET_OPTIONS_KEY + OT::serverCaption(serverType) + "/";
+
+	s.setValue(QString("%1EquipmentID%2").arg(key).arg(m_priority), m_equipmentID);
+
+	s.setValue(QString("%1ServerIP%2").arg(key).arg(m_priority), m_serverIP);
+	s.setValue(QString("%1ServerPort%2").arg(key).arg(m_priority), m_serverPort);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+ServerOption::ServerOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString ServerOption::equipmentID(OT::ServerPriority priority) const
+{
+	if (ERR_SERVER_PRIORITY(priority) == true)
 	{
 		assert(0);
 		return QString();
 	}
 
-	return m_connectOption[serverType].equipmentID;
+	return m_connection[priority].equipmentID();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SocketClientOption::setEquipmentID(int serverType, const QString& equipmentID)
+void ServerOption::setEquipmentID(OT::ServerPriority priority, const QString& equipmentID)
 {
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	if (ERR_SERVER_PRIORITY(priority) == true)
 	{
 		assert(0);
 		return;
 	}
 
-	m_connectOption[serverType].equipmentID = equipmentID;
+	m_connection[priority].setEquipmentID(equipmentID);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SocketClientOption::serverIP(int serverType) const
+QString ServerOption::serverIP(OT::ServerPriority priority) const
 {
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	if (ERR_SERVER_PRIORITY(priority) == true)
 	{
 		assert(0);
 		return QString();
 	}
 
-	return m_connectOption[serverType].serverIP;
+	return m_connection[priority].serverIP();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SocketClientOption::setServerIP(int serverType, const QString& ip)
+void ServerOption::setServerIP(OT::ServerPriority priority, const QString& ip)
 {
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	if (ERR_SERVER_PRIORITY(priority) == true)
 	{
 		assert(0);
 		return;
 	}
 
-	m_connectOption[serverType].serverIP = ip;
+	m_connection[priority].setServerIP(ip);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SocketClientOption::serverPort(int serverType) const
+int ServerOption::serverPort(OT::ServerPriority priority) const
 {
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	if (ERR_SERVER_PRIORITY(priority) == true)
 	{
 		assert(0);
 		return 0;
 	}
 
-	return m_connectOption[serverType].serverPort;
+	return m_connection[priority].serverPort();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SocketClientOption::setServerPort(int serverType, int port)
+void ServerOption::setServerPort(OT::ServerPriority priority, int port)
 {
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	if (ERR_SERVER_PRIORITY(priority) == true)
 	{
 		assert(0);
 		return;
 	}
 
-	m_connectOption[serverType].serverPort = port;
+	m_connection[priority].setServerPort(port);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-HostAddressPort SocketClientOption::address(int serverType) const
+HostAddressPort ServerOption::address(OT::ServerPriority priority) const
 {
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	if (ERR_SERVER_PRIORITY(priority) == true)
 	{
 		assert(0);
 		return HostAddressPort();
 	}
 
-	return HostAddressPort(m_connectOption[serverType].serverIP, m_connectOption[serverType].serverPort);
+	return HostAddressPort(m_connection[priority].serverIP(), m_connection[priority].serverPort());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SocketClientOption::load()
+ServerConnection* ServerOption::connection(OT::ServerPriority priority) const
 {
-	if (m_type < 0 || m_type >= SOCKET_TYPE_COUNT)
+	if (ERR_SERVER_PRIORITY(priority) == true)
+	{
+		assert(0);
+		return nullptr;
+	}
+
+	return const_cast<ServerConnection*>(&m_connection[priority]);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ServerOption::load()
+{
+	if (ERR_SERVER_TYPE(m_type) == true)
 	{
 		return;
 	}
 
-	QSettings s;
-
-	QString key = SOCKET_OPTIONS_KEY + QString(SocketType[m_type]) + "/";
-
-	for(int t = 0; t < SOCKET_SERVER_TYPE_COUNT; t++)
+	for(int priority = 0; priority < OT::ServerPriorityCount; priority++)
 	{
-		m_connectOption[t].equipmentID = s.value(QString("%1EquipmentID%2").arg(key).arg(t), "SYSTEM_RACKID_WS00" + QString(SocketDefaultID[m_type])).toString();
-
-		m_connectOption[t].serverIP = s.value(QString("%1ServerIP%2").arg(key).arg(t), "127.0.0.1").toString();
-		m_connectOption[t].serverPort = s.value(QString("%1ServerPort%2").arg(key).arg(t), SocketDefaultPort[m_type]).toInt();
+		m_connection[priority].setServerPriority(static_cast<OT::ServerPriority>(priority));
+		m_connection[priority].load(m_type);
 	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SocketClientOption::save()
+void ServerOption::save()
 {
-	if (m_type < 0 || m_type >= SOCKET_TYPE_COUNT)
+	if (ERR_SERVER_TYPE(m_type) == true)
 	{
 		return;
 	}
 
-	QSettings s;
-
-	QString key = SOCKET_OPTIONS_KEY + QString(SocketType[m_type]) + "/";
-
-	for(int t = 0; t < SOCKET_SERVER_TYPE_COUNT; t++)
+	for(int priority = 0; priority < OT::ServerPriorityCount; priority++)
 	{
-		s.setValue(QString("%1EquipmentID%2").arg(key).arg(t), m_connectOption[t].equipmentID);
-
-		s.setValue(QString("%1ServerIP%2").arg(key).arg(t), m_connectOption[t].serverIP);
-		s.setValue(QString("%1ServerPort%2").arg(key).arg(t), m_connectOption[t].serverPort);
+		m_connection[priority].save(m_type);
 	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SocketClientOption::init(const MetrologySettings& settings)
+bool ServerOption::init(const MetrologySettings& settings)
 {
-	if (m_type < 0 || m_type >= SOCKET_TYPE_COUNT)
+	if (ERR_SERVER_TYPE(m_type) == true)
 	{
 		return false;
 	}
@@ -295,35 +351,35 @@ bool SocketClientOption::init(const MetrologySettings& settings)
 
 	switch(m_type)
 	{
-		case SOCKET_TYPE_SIGNAL:
+		case OT::ServerType::AppDataService:
 			{
-				CONNECTION_OPTION& primary = m_connectOption[SOCKET_SERVER_TYPE_PRIMARY];
+				ServerConnection& primary = m_connection[OT::ServerPriority::Primary];
 
-				primary.isValid = settings.appDataServicePropertyIsValid1;
-				primary.equipmentID = settings.appDataServiceID1;
-				primary.serverIP = settings.appDataServiceIP1;
-				primary.serverPort = settings.appDataServicePort1;
+				primary.setIsValid(settings.appDataServicePropertyIsValid1);
+				primary.setEquipmentID(settings.appDataServiceID1);
+				primary.setServerIP(settings.appDataServiceIP1);
+				primary.setServerPort(settings.appDataServicePort1);
 
-				CONNECTION_OPTION& reserve = m_connectOption[SOCKET_SERVER_TYPE_RESERVE];
+				ServerConnection& reserve = m_connection[OT::ServerPriority::Reserve];
 
-				reserve.isValid = settings.appDataServicePropertyIsValid2;
-				reserve.equipmentID = settings.appDataServiceID2;
-				reserve.serverIP = settings.appDataServiceIP2;
-				reserve.serverPort = settings.appDataServicePort2;
+				reserve.setIsValid(settings.appDataServicePropertyIsValid2);
+				reserve.setEquipmentID(settings.appDataServiceID2);
+				reserve.setServerIP(settings.appDataServiceIP2);
+				reserve.setServerPort(settings.appDataServicePort2);
 
 				save();
 			}
 
 			break;
 
-		case SOCKET_TYPE_TUNING:
+		case OT::ServerType::TuningService:
 			{
-				CONNECTION_OPTION& primary = m_connectOption[SOCKET_SERVER_TYPE_PRIMARY];
+				ServerConnection& primary = m_connection[OT::ServerPriority::Primary];
 
-				primary.isValid = settings.tuningServicePropertyIsValid;
-				primary.equipmentID = settings.softwareMetrologyID;
-				primary.serverIP = settings.tuningServiceIP;
-				primary.serverPort = settings.tuningServicePort;
+				primary.setIsValid(settings.tuningServicePropertyIsValid);
+				primary.setEquipmentID(settings.softwareMetrologyID);
+				primary.setServerIP(settings.tuningServiceIP);
+				primary.setServerPort(settings.tuningServicePort);
 
 				save();
 			}
@@ -336,6 +392,107 @@ bool SocketClientOption::init(const MetrologySettings& settings)
 	}
 
 	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString OT::serverCaption(OT::ServerType type)
+{
+	QString caption;
+
+	switch (type)
+	{
+		case OT::ServerType::ConfigurationService:	caption = "ConfigurationService";	break;
+		case OT::ServerType::AppDataService:		caption = "AppDataService";			break;
+		case OT::ServerType::TuningService:			caption = "TuningService";			break;
+
+		default:
+			assert(0);
+			caption = QObject::tr("Unknown");
+	}
+
+	return caption;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString OT::serverDefaultID(OT::ServerType type)
+{
+	QString caption;
+
+	switch (type)
+	{
+		case OT::ServerType::ConfigurationService:	caption = "_METROLOGY";	break;
+		case OT::ServerType::AppDataService:		caption = "_ADS";		break;
+		case OT::ServerType::TuningService:			caption = "_METROLOGY";	break;
+
+		default:
+			assert(0);
+			caption = "_ID";
+	}
+
+	return caption;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int OT::serverDefaultPort(OT::ServerType type)
+{
+	int port;
+
+	switch (type)
+	{
+		case OT::ServerType::ConfigurationService:	port = PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST;	break;
+		case OT::ServerType::AppDataService:		port = PORT_APP_DATA_SERVICE_CLIENT_REQUEST;		break;
+		case OT::ServerType::TuningService:			port = PORT_TUNING_SERVICE_CLIENT_REQUEST;			break;
+
+		default:
+			assert(0);
+			port = Socket::PORT_LOWEST;
+	}
+
+	return port;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString OT::serverPriorityCaption(OT::ServerPriority priority)
+{
+	QString caption;
+
+	switch (priority)
+	{
+		case OT::ServerPriority::Primary:	caption = QObject::tr("Primary");	break;
+		case OT::ServerPriority::Reserve:	caption = QObject::tr("Reserve");	break;
+
+		default:
+			assert(0);
+			caption = QObject::tr("Unknown");
+	}
+
+	return caption;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString OT::serverConnectionParamCaption(OT::ServerConnectionParam param)
+{
+	QString caption;
+
+	switch (param)
+	{
+		case OT::sco_Type:			caption = QT_TRANSLATE_NOOP("Options", "Service type");			break;
+		case OT::sco_Priority:		caption = QT_TRANSLATE_NOOP("Options", "Server type");			break;
+		case OT::sco_EquipmentID:	caption = QT_TRANSLATE_NOOP("Options", "Software EquipmentID");	break;
+		case OT::sco_ServerIP:		caption = QT_TRANSLATE_NOOP("Options", "Server IP addres");		break;
+		case OT::sco_ServerPort:	caption = QT_TRANSLATE_NOOP("Options", "Server port");			break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return qApp->translate("Options", caption.toUtf8());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -364,39 +521,176 @@ SocketOption::~SocketOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SocketClientOption SocketOption::client(int socketType) const
+ServerOption SocketOption::server(OT::ServerType serverType) const
 {
-	if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
+	if (ERR_SERVER_TYPE(serverType) == true)
 	{
 		assert(0);
-		return SocketClientOption();
+		return ServerOption();
 	}
 
-	return m_client[socketType];
+	return m_server[serverType];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-
-void SocketOption::setClient(int socketType, const SocketClientOption& socketClient)
+void SocketOption::setServer(OT::ServerType serverType, const ServerOption& server)
 {
-	if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
+	if (ERR_SERVER_TYPE(serverType) == true)
 	{
 		assert(0);
 		return;
 	}
 
-	m_client[socketType] = socketClient;
+	m_server[serverType] = server;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString SocketOption::equipmentID() const
+{
+	if (ERR_SERVER_TYPE(m_type) == true)
+	{
+		return QString();
+	}
+
+	if (ERR_SERVER_PRIORITY(m_priority) == true)
+	{
+		return QString();
+	}
+
+	ServerConnection* pConnection = m_server[m_type].connection(m_priority);
+	if (pConnection == nullptr)
+	{
+		return QString();
+	}
+
+	return pConnection->equipmentID();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SocketOption::setEquipmentID(const QString& equipmentID)
+{
+	if (ERR_SERVER_TYPE(m_type) == true)
+	{
+		return;
+	}
+
+	if (ERR_SERVER_PRIORITY(m_priority) == true)
+	{
+		return;
+	}
+
+	ServerConnection* pConnection = m_server[m_type].connection(m_priority);
+	if (pConnection == nullptr)
+	{
+		return;
+	}
+
+	pConnection->setEquipmentID(equipmentID);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString SocketOption::serverIP() const
+{
+	if (ERR_SERVER_TYPE(m_type) == true)
+	{
+		return QString();
+	}
+
+	if (ERR_SERVER_PRIORITY(m_priority) == true)
+	{
+		return QString();
+	}
+
+	ServerConnection* pConnection = m_server[m_type].connection(m_priority);
+	if (pConnection == nullptr)
+	{
+		return QString();
+	}
+
+	return pConnection->serverIP();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SocketOption::setServerIP(const QString& ip)
+{
+	if (ERR_SERVER_TYPE(m_type) == true)
+	{
+		return;
+	}
+
+	if (ERR_SERVER_PRIORITY(m_priority) == true)
+	{
+		return;
+	}
+
+	ServerConnection* pConnection = m_server[m_type].connection(m_priority);
+	if (pConnection == nullptr)
+	{
+		return;
+	}
+
+	pConnection->setServerIP(ip);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int SocketOption::serverPort() const
+{
+	if (ERR_SERVER_TYPE(m_type) == true)
+	{
+		return Socket::PORT_LOWEST;
+	}
+
+	if (ERR_SERVER_PRIORITY(m_priority) == true)
+	{
+		return Socket::PORT_LOWEST;
+	}
+
+	ServerConnection* pConnection = m_server[m_type].connection(m_priority);
+	if (pConnection == nullptr)
+	{
+		return Socket::PORT_LOWEST;
+	}
+
+	return pConnection->serverPort();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SocketOption::setServerPort(int port)
+{
+	if (ERR_SERVER_TYPE(m_type) == true)
+	{
+		return;
+	}
+
+	if (ERR_SERVER_PRIORITY(m_priority) == true)
+	{
+		return;
+	}
+
+	ServerConnection* pConnection = m_server[m_type].connection(m_priority);
+	if (pConnection == nullptr)
+	{
+		return;
+	}
+
+	pConnection->setServerPort(port);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SocketOption::load()
 {
-	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
+	for(int serverType = 0; serverType < OT::ServerTypeCount; serverType++)
 	{
-		m_client[t].setSocketType(t);
-		m_client[t].load();
+		m_server[serverType].setServerType(static_cast<OT::ServerType>(serverType));
+		m_server[serverType].load();
 	}
 }
 
@@ -404,9 +698,9 @@ void SocketOption::load()
 
 void SocketOption::save()
 {
-	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
+	for(int serverType = 0; serverType < OT::ServerTypeCount; serverType++)
 	{
-		m_client[t].save();
+		m_server[serverType].save();
 	}
 }
 
@@ -414,9 +708,9 @@ void SocketOption::save()
 
 SocketOption& SocketOption::operator=(const SocketOption& from)
 {
-	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
+	for(int serverType = 0; serverType < OT::ServerTypeCount; serverType++)
 	{
-		m_client[t] = from.m_client[t];
+		m_server[serverType] = from.m_server[serverType];
 	}
 
 	return *this;
@@ -549,7 +843,7 @@ ModuleOption::~ModuleOption()
 
 void ModuleOption::setMaxInputCount(int count)
 {
-	if (count == 0)
+	if (count <= 0)
 	{
 		count = 1;
 	}
@@ -606,6 +900,30 @@ ModuleOption& ModuleOption::operator=(const ModuleOption& from)
 	m_maxInputCount = from.m_maxInputCount;
 
 	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString OT::ModuleParamCaption(OT::ModuleParam param)
+{
+	QString caption;
+
+	switch (param)
+	{
+		case OT::mo_SuffixSN:				caption = QT_TRANSLATE_NOOP("Options", "Suffix to identify signal of module serial number");	break;
+		case OT::mo_MeasureInterInsteadIn:	caption = QT_TRANSLATE_NOOP("Options", "Measure Internal signal instead Input signal");			break;
+		case OT::mo_MeasureLinAdnCmp:		caption = QT_TRANSLATE_NOOP("Options", "Measure linearity and comparators together");			break;
+		case OT::mo_MeasureEntireModule:	caption = QT_TRANSLATE_NOOP("Options", "Measure all signals of module in series");				break;
+		case OT::mo_ShowOnSchemas:			caption = QT_TRANSLATE_NOOP("Options", "Measure only signals that are displayed in schemas");	break;
+		case OT::mo_WarningIfMeasured:		caption = QT_TRANSLATE_NOOP("Options", "Show warning if signal is already measured");			break;
+		case OT::mo_MaxInputs:				caption = QT_TRANSLATE_NOOP("Options", "Maximum number of inputs for input module");			break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return qApp->translate("Options", caption.toUtf8());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -668,9 +986,33 @@ void LinearityOption::setMeasureCountInPoint(int measureCount)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityOption::recalcPoints(int count)
+void LinearityOption::setLowLimitRange(double lowLimit, bool updateMeasurePoints)
 {
-	if (m_divisionType != Measure::LinearityDivision::Automatic)
+	m_lowLimitRange = lowLimit;
+
+	if (updateMeasurePoints == true)
+	{
+		setMeasurePointsCount();
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void LinearityOption::setHighLimitRange(double highLimit, bool updateMeasurePoints)
+{
+	m_highLimitRange = highLimit;
+
+	if (updateMeasurePoints == true)
+	{
+		setMeasurePointsCount();
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void LinearityOption::setMeasurePointsCount(int count)
+{
+	if (m_divisionType != Measure::LT::LinearityDivision::Automatic)
 	{
 		return;
 	}
@@ -689,7 +1031,7 @@ void LinearityOption::recalcPoints(int count)
 
 	if (count == 1)
 	{
-		m_pointBase.append(Measure::Point((m_lowLimitRange + m_highLimitRange) / 2));
+		m_pointBase.append(Measure::Point(0, (m_lowLimitRange + m_highLimitRange) / 2));
 	}
 	else
 	{
@@ -697,7 +1039,7 @@ void LinearityOption::recalcPoints(int count)
 
 		for (int p = 0; p < count ; p++)
 		{
-			m_pointBase.append(Measure::Point(m_lowLimitRange + (p * value)));
+			m_pointBase.append(Measure::Point(p, m_lowLimitRange + (p * value)));
 		}
 	}
 }
@@ -709,17 +1051,17 @@ void LinearityOption::load()
 	QSettings s;
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), 0.1).toDouble();
-	m_errorType = s.value(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), Measure::ErrorType::Reduce).toInt();
-	m_calcErrorByRange = s.value(QString("%1CalcErrorByRange").arg(LINEARITY_OPTIONS_KEY), Measure::CalcErrorRange::ByElectricRange).toInt();
+	m_errorType = static_cast<Measure::MT::ErrorType>(s.value(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), Measure::MT::ErrorType::Reduce).toInt());
+	m_calcErrorByRange = static_cast<Measure::MT::CalcErrorRange>(s.value(QString("%1CalcErrorByRange").arg(LINEARITY_OPTIONS_KEY), Measure::MT::CalcErrorRange::By_Electric_Range).toInt());
 
 	m_measureTimeInPoint = s.value(QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
 	m_measureCountInPoint = s.value(QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), Measure::MaxMeasurementInPoint).toInt();
 
-	m_divisionType = s.value(QString("%1RangeType").arg(LINEARITY_OPTIONS_KEY), Measure::LinearityDivision::Manual).toInt();
+	m_divisionType = static_cast<Measure::LT::LinearityDivision>(s.value(QString("%1RangeType").arg(LINEARITY_OPTIONS_KEY), Measure::LT::LinearityDivision::Manual).toInt());
 	m_lowLimitRange = s.value(QString("%1LowLimitRange").arg(LINEARITY_OPTIONS_KEY), Measure::LinearityRangeLow).toDouble();
 	m_highLimitRange = s.value(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), Measure::LinearityRangeHigh).toDouble();
 
-	m_viewType = s.value(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), LinearityViewType::Simple).toInt();
+	m_viewType = static_cast<OT::LinearityViewType>(s.value(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), OT::LinearityViewType::Simple).toInt());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -764,22 +1106,72 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 	return *this;
 }
 
+
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LinearityViewTypeCaption(int type)
+QString OT::LinearityParamCaption(OT::LinearityParam param)
+{
+	QString caption;
+
+	switch (param)
+	{
+		case OT::lo_ErrorLimit:			caption = QT_TRANSLATE_NOOP("Options", "Limit of error, %");					break;
+		case OT::lo_ErrorType:			caption = QT_TRANSLATE_NOOP("Options", "Error type");							break;
+		case OT::lo_CalcErrorByRange:	caption = QT_TRANSLATE_NOOP("Options", "Error is calculated by the range");		break;
+		case OT::lo_MeasureTime:		caption = QT_TRANSLATE_NOOP("Options", "Measure time in a point, sec");			break;
+		case OT::lo_MeasuresInPoint:	caption = QT_TRANSLATE_NOOP("Options", "Count of measurements in a point");		break;
+		case OT::lo_DivisionType:		caption = QT_TRANSLATE_NOOP("Options", "Division of the measure range");		break;
+		case OT::lo_PointCount:			caption = QT_TRANSLATE_NOOP("Options", "Count of points");						break;
+		case OT::lo_LowLimit:			caption = QT_TRANSLATE_NOOP("Options", "Lower limit of the measure range, %");	break;
+		case OT::lo_HighLimit:			caption = QT_TRANSLATE_NOOP("Options", "High limit of the measure range, %");	break;
+		case OT::lo_ValuesOfPoints:		caption = QT_TRANSLATE_NOOP("Options", "Points of range");						break;
+		case OT::lo_ViewType:			caption = QT_TRANSLATE_NOOP("Options", "Type of measurements list");			break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return qApp->translate("Options", caption.toUtf8());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString OT::LinearityViewTypeCaption(OT::LinearityViewType type)
 {
 	QString caption;
 
 	switch (type)
 	{
-		case LinearityViewType::Simple:				caption = QT_TRANSLATE_NOOP("Options", "Simple");													break;
-		case LinearityViewType::Extended:			caption = QT_TRANSLATE_NOOP("Options", "Extended (show columns for metrological certification)");	break;
-		case LinearityViewType::DetailElectric:		caption = QT_TRANSLATE_NOOP("Options", "Detail electric (show all measurements at one point)");		break;
-		case LinearityViewType::DetailEngineering:	caption = QT_TRANSLATE_NOOP("Options", "Detail engineering (show all measurements at one point)");	break;
+		case OT::LinearityViewType::Simple:				caption = QT_TRANSLATE_NOOP("Options", "Simple");				break;
+		case OT::LinearityViewType::Extended:			caption = QT_TRANSLATE_NOOP("Options", "Extended");				break;
+		case OT::LinearityViewType::Detail_Electric:	caption = QT_TRANSLATE_NOOP("Options", "Detail electric");		break;
+		case OT::LinearityViewType::Detail_Engineering:	caption = QT_TRANSLATE_NOOP("Options", "Detail engineering");	break;
 
 		default:
 			Q_ASSERT(0);
 			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return qApp->translate("Options", caption.toUtf8());
+};
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString OT::LinearityViewTypeCaptionTr(OT::LinearityViewType type)
+{
+	QString caption;
+
+	switch (type)
+	{
+		case OT::LinearityViewType::Simple:				caption = QObject::tr("Simple");				break;
+		case OT::LinearityViewType::Extended:			caption = QObject::tr("Extended");				break;
+		case OT::LinearityViewType::Detail_Electric:	caption = QObject::tr("Detail_Electric");		break;
+		case OT::LinearityViewType::Detail_Engineering:	caption = QObject::tr("Detail_Engineering");	break;
+
+		default:
+			Q_ASSERT(0);
+			caption = QObject::tr("Unknown");
 	}
 
 	return caption;
@@ -811,16 +1203,28 @@ ComparatorOption::~ComparatorOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void ComparatorOption::setStartFromComparator(int index)
+{
+	if (index <= 0)
+	{
+		index = 1;
+	}
+
+	m_startFromComparator = index - 1;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void ComparatorOption::load()
 {
 	QSettings s;
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
-	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), Measure::ErrorType::Reduce).toInt();
-	m_calcErrorByRange = s.value(QString("%1CalcErrorByRange").arg(COMPARATOR_OPTIONS_KEY), Measure::CalcErrorRange::ByElectricRange).toInt();
+	m_errorType = static_cast<Measure::MT::ErrorType>(s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), Measure::MT::ErrorType::Reduce).toInt());
+	m_calcErrorByRange = static_cast<Measure::MT::CalcErrorRange>(s.value(QString("%1CalcErrorByRange").arg(COMPARATOR_OPTIONS_KEY), Measure::MT::CalcErrorRange::By_Electric_Range).toInt());
 	m_startValueForCompare = s.value(QString("%1StartValueForCompare").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
 
-	m_startComparatorIndex = s.value(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
+	m_startFromComparator = s.value(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
 	m_enableMeasureHysteresis = s.value(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
 }
 
@@ -835,7 +1239,7 @@ void ComparatorOption::save()
 	s.setValue(QString("%1CalcErrorByRange").arg(COMPARATOR_OPTIONS_KEY), m_calcErrorByRange);
 	s.setValue(QString("%1StartValueForCompare").arg(COMPARATOR_OPTIONS_KEY), m_startValueForCompare);
 
-	s.setValue(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), m_startComparatorIndex);
+	s.setValue(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), m_startFromComparator);
 	s.setValue(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), m_enableMeasureHysteresis);
 }
 
@@ -848,10 +1252,33 @@ ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
 	m_calcErrorByRange = from.m_calcErrorByRange;
 	m_startValueForCompare = from.m_startValueForCompare;
 
-	m_startComparatorIndex = from.m_startComparatorIndex;
+	m_startFromComparator = from.m_startFromComparator;
 	m_enableMeasureHysteresis = from.m_enableMeasureHysteresis;
 
 	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString OT::ComparatorParamCaption(OT::ComparatorParam param)
+{
+	QString caption;
+
+	switch (param)
+	{
+		case OT::co_ErrorLimit:				caption = QT_TRANSLATE_NOOP("Options", "Limit of error, %");							break;
+		case OT::co_ErrorType:				caption = QT_TRANSLATE_NOOP("Options", "Error type");									break;
+		case OT::co_CalcErrorByRange:		caption = QT_TRANSLATE_NOOP("Options", "Error is calculated by the range");				break;
+		case OT::co_StartValue:				caption = QT_TRANSLATE_NOOP("Options", "Start value, %");								break;
+		case OT::co_StartFromComparator:	caption = QT_TRANSLATE_NOOP("Options", "Start measurement from the сomparator");		break;
+		case OT::co_MeasureHysteresis:		caption = QT_TRANSLATE_NOOP("Options", "Enable to measure hysteresis of comparators");	break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return qApp->translate("Options", caption.toUtf8());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -976,10 +1403,10 @@ void MeasureViewOption::load()
 
 	// properties of columns
 	//
-	int languageType = theOptions.language().languageType();
+	OT::LanguageType languageType = theOptions.language().languageType();
 	if (ERR_LANGUAGE_TYPE(languageType) == false)
 	{
-		QString language = LanguageTypeCaption(static_cast<LanguageType>(languageType));
+		QString language = LanguageTypeCaptionEn(static_cast<OT::LanguageType>(languageType));
 
 		// init
 		//
@@ -1045,10 +1472,10 @@ void MeasureViewOption::save()
 
 	// properties of columns
 	//
-	int languageType = theOptions.language().languageType();
+	OT::LanguageType languageType = theOptions.language().languageType();
 	if (ERR_LANGUAGE_TYPE(languageType) == false)
 	{
-		QString language = LanguageTypeCaption(static_cast<LanguageType>(languageType));
+		QString language = LanguageTypeCaptionEn(static_cast<OT::LanguageType>(languageType));
 
 		for(int measureType = 0; measureType < Measure::TypeCount; measureType ++)
 		{
@@ -1092,7 +1519,7 @@ void MeasureViewOption::saveColumnWidth(Measure::Type measureType, const Measure
 
 	s.setValue(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY, caption, c.uniqueTitle()), c.width());
 
-	int languageType = theOptions.language().languageType();
+	OT::LanguageType languageType = theOptions.language().languageType();
 	if (ERR_LANGUAGE_TYPE(languageType) == true)
 	{
 		return;
@@ -1115,7 +1542,7 @@ MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 	{
 		m_updateColumnView[measureType] = from.m_updateColumnView[measureType];
 
-		for(int languageType = 0; languageType < LanguageTypeCount; languageType ++)
+		for(int languageType = 0; languageType < OT::LanguageTypeCount; languageType ++)
 		{
 			for(int column = 0; column < Measure::MaxColumnCount; column++)
 			{
@@ -1136,6 +1563,29 @@ MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 	m_precesionByCalibrator = from.m_precesionByCalibrator;
 
 	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString OT::MeasureViewParamCaption(OT::MeasureViewParam param)
+{
+	QString caption;
+
+	switch (param)
+	{
+		case OT::mwo_Font:					caption = QT_TRANSLATE_NOOP("Options", "Font of measurements list");											break;
+		case OT::mwo_ColorNoError:			caption = QT_TRANSLATE_NOOP("Options", "Color measurement that has not error");									break;
+		case OT::mwo_ColorErrorOfLimit:		caption = QT_TRANSLATE_NOOP("Options", "Color measurement over limit error");									break;
+		case OT::mwo_ColorErrorOfControl:	caption = QT_TRANSLATE_NOOP("Options", "Color measurement over control error");									break;
+		case OT::mwo_ShowNoValid:			caption = QT_TRANSLATE_NOOP("Options", "Show measuring value if signal is not valid");							break;
+		case OT::mwo_PrecesionByCalibrator:	caption = QT_TRANSLATE_NOOP("Options", "Show accuracy for measure value and nominal value from calibrator");	break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return qApp->translate("Options", caption.toUtf8());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1247,6 +1697,32 @@ SignalInfoOption& SignalInfoOption::operator=(const SignalInfoOption& from)
 }
 
 // -------------------------------------------------------------------------------------------------------------------
+
+QString OT::SignalInfoParamCaption(OT::SignalInfoParam param)
+{
+	QString caption;
+
+	switch (param)
+	{
+		case OT::sio_Font:					caption = QT_TRANSLATE_NOOP("Options", "Font of signal information list");				break;
+		case OT::sio_ShowNoValid:			caption = QT_TRANSLATE_NOOP("Options", "Show measuring value, if signal is not valid");	break;
+		case OT::sio_ShowElectricState:		caption = QT_TRANSLATE_NOOP("Options", "Show electric state");							break;
+		case OT::sio_ColorFlagNoValid:		caption = QT_TRANSLATE_NOOP("Options", "Color, if signal has flag \"No validity\"");	break;
+		case OT::sio_ColorFlagSim:			caption = QT_TRANSLATE_NOOP("Options", "Color, if signal has flag \"Simulation\"");		break;
+		case OT::sio_ColorFlagLock:			caption = QT_TRANSLATE_NOOP("Options", "Color, if signal has flag \"Lock\"");			break;
+		case OT::sio_ColorFlagOverflow:		caption = QT_TRANSLATE_NOOP("Options", "Color, if signal has flag \"Overflow\"");		break;
+		case OT::sio_ColorFlagUnderflow:	caption = QT_TRANSLATE_NOOP("Options", "Color, if signal has flag \"Underflow\"");		break;
+		case OT::sio_TimeForUpdate:			caption = QT_TRANSLATE_NOOP("Options", "Time for updating state of signal, ms");		break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return qApp->translate("Options", caption.toUtf8());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -1319,6 +1795,29 @@ ComparatorInfoOption& ComparatorInfoOption::operator=(const ComparatorInfoOption
 	m_timeForUpdate = from.m_timeForUpdate;
 
 	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString OT::ComparatorInfoParamCaption(OT::ComparatorInfoParam param)
+{
+	QString caption;
+
+	switch (param)
+	{
+		case OT::cio_Font:				caption = QT_TRANSLATE_NOOP("Options", "Font of comparator information list");				break;
+		case OT::cio_ColorFlagSim:		caption = QT_TRANSLATE_NOOP("Options", "Color, if comparator in the mode \"Simulated\"");	break;
+		case OT::cio_ColorFlagLock:		caption = QT_TRANSLATE_NOOP("Options", "Color, if comparator in the mode \"Blocked\"");		break;
+		case OT::cio_ColorStateFalse:	caption = QT_TRANSLATE_NOOP("Options", "Color, if comparator has state \"logical 0\"");		break;
+		case OT::cio_ColorStateTrue:	caption = QT_TRANSLATE_NOOP("Options", "Color, if comparator has state \"logical 1\"");		break;
+		case OT::cio_TimeForUpdate:		caption = QT_TRANSLATE_NOOP("Options", "Time for updating state of comparator, ms");		break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return qApp->translate("Options", caption.toUtf8());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1402,7 +1901,7 @@ void DatabaseOption::load()
 	QSettings s;
 
 	m_locationPath = s.value(QString("%1LocationPath").arg(DATABASE_OPTIONS_REG_KEY), QDir::currentPath()).toString();
-	m_type = s.value(QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), DATABASE_TYPE_SQLITE).toInt();
+	m_type = static_cast<OT::DatabaseType>(s.value(QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), OT::SQLite).toInt());
 
 	m_onStart = s.value(QString("%1OnStart").arg(DATABASE_OPTIONS_REG_KEY), false).toBool();
 	m_onExit = s.value(QString("%1OnExit").arg(DATABASE_OPTIONS_REG_KEY), true).toBool();
@@ -1438,6 +1937,46 @@ DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
 }
 
 // -------------------------------------------------------------------------------------------------------------------
+
+QString OT::DatabaseParamCaption(OT::DatabaseParam param)
+{
+	QString caption;
+
+	switch (param)
+	{
+		case OT::dbo_LocationPath:	caption = QT_TRANSLATE_NOOP("Options", "Location path");		break;
+		case OT::dbo_Type:			caption = QT_TRANSLATE_NOOP("Options", "Type");					break;
+		case OT::dbo_OnStart:		caption = QT_TRANSLATE_NOOP("Options", "On start application"); break;
+		case OT::dbo_OnExit:		caption = QT_TRANSLATE_NOOP("Options", "On exit application");	break;
+		case OT::dbo_CopyPath:		caption = QT_TRANSLATE_NOOP("Options", "Path for backup");		break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return qApp->translate("Options", caption.toUtf8());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString OT::DatabaseTypeCaption(OT::DatabaseType type)
+{
+	QString caption;
+
+	switch (type)
+	{
+		case OT::SQLite: caption = "SQLite"; break;
+
+		default:
+			assert(0);
+			caption = QObject::tr("Unknown");
+	}
+
+	return caption;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -1466,7 +2005,7 @@ void LanguageOption::load()
 {
 	QSettings s;
 
-	m_languageType = s.value(QString("%1Language").arg(LANGUAGE_OPTIONS_REG_KEY), LanguageType::English).toInt();
+	m_languageType = static_cast<OT::LanguageType>(s.value(QString("%1Language").arg(LANGUAGE_OPTIONS_REG_KEY), OT::English).toInt());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1489,22 +2028,59 @@ LanguageOption& LanguageOption::operator=(const LanguageOption& from)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LanguageTypeCaption(LanguageType type)
+QString OT::LanguageTypeCaptionEn(OT::LanguageType type)
 {
 	QString caption;
 
 	switch (type)
 	{
-		case LanguageType::English:	caption = QT_TRANSLATE_NOOP("Options", "English");	break;
-		case LanguageType::Russian:	caption = QT_TRANSLATE_NOOP("Options", "Russian");	break;
+		case OT::English:	caption = "English";	break;
+		case OT::Russian:	caption = "Russian";	break;
 
 		default:
 			Q_ASSERT(0);
-			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+			caption = "Unknown";
 	}
 
 	return caption;
 };
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString OT::LanguageTypeCaptionTr(OT::LanguageType type)
+{
+	QString caption;
+
+	switch (type)
+	{
+		case OT::English:	caption = QObject::tr("English");	break;
+		case OT::Russian:	caption = QObject::tr("Russian");	break;
+
+		default:
+			Q_ASSERT(0);
+			caption = QObject::tr("Unknown");
+	}
+
+	return caption;
+};
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString OT::LanguageParamCaption(OT::LanguageParam param)
+{
+	QString caption;
+
+	switch (param)
+	{
+		case OT::lno_LanguageType:	caption = QT_TRANSLATE_NOOP("Options", "Language");		break;
+
+		default:
+			assert(0);
+			caption = QT_TRANSLATE_NOOP("Options", "Unknown");
+	}
+
+	return qApp->translate("Options", caption.toUtf8());
+}
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -1616,14 +2192,20 @@ bool Options::readFromXml(const QByteArray& fileData)
 		return false;
 	}
 
-	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
+	for(int type = 0; type < OT::ServerTypeCount; type++)
 	{
-		if (t == SOCKET_TYPE_CONFIG)
+		OT::ServerType serverType = static_cast<OT::ServerType>(type);
+		if (ERR_SERVER_TYPE(serverType) == true)
 		{
 			continue;
 		}
 
-		SocketClientOption sco = m_socket.client(t);
+		if (serverType == OT::ServerType::ConfigurationService)
+		{
+			continue;
+		}
+
+		ServerOption sco = m_socket.server(serverType);
 
 		result &= sco.init(m_settings);
 
@@ -1632,7 +2214,7 @@ bool Options::readFromXml(const QByteArray& fileData)
 			continue;
 		}
 
-		m_socket.setClient(t, sco);
+		m_socket.setServer(serverType, sco);
 	}
 
 	return result;

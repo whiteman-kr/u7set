@@ -43,19 +43,23 @@ namespace Measure
 
 	// ==============================================================================================
 
-	enum LinearityDivision
+	namespace LT
 	{
-		NoLinearityDivision	= -1,
+		Q_NAMESPACE
 
-		Manual				= 0,
-		Automatic			= 1,
-	};
+		enum LinearityDivision
+		{
+			Manual = 0,
+			Automatic = 1,
+		};
+		Q_ENUM_NS(LinearityDivision)
 
-	const int LinearityDivisionCount = 2;
+		const int LinearityDivisionCount = 2;
 
-	#define ERR_LINEARITY_DIVISION(division) (TO_INT(division) < 0 || TO_INT(division) >= Measure::LinearityDivisionCount)
+		#define ERR_LINEARITY_DIVISION(division) (static_cast<int>(division) < 0 || static_cast<int>(division) >= Measure::LT::LinearityDivisionCount)
 
-	QString LinearityDivisionCaption(int division);
+		QString LinearityDivisionCaption(LinearityDivision division);
+	}
 
 	// ==============================================================================================
 
@@ -68,8 +72,8 @@ namespace Measure
 	{
 	public:
 
-		Point() { setPercent(0); }
-		explicit Point(double percent) { setPercent(percent); }
+		Point();
+		explicit Point(int index, double percent);
 		virtual ~Point() {}
 
 	public:

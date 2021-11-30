@@ -274,7 +274,7 @@ void CalibratorManager::setWindowCaption()
 	}
 
 	int channel = m_pCalibrator->channel();
-	if (channel < 0 || channel >= Metrology::ChannelCount)
+	if (ERR_CHANNEL(channel) == true)
 	{
 		setWindowTitle(QString());
 		return;

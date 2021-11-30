@@ -4,7 +4,6 @@ CONFIG += ordered
 
 SUBDIRS += Protobuf \
     	QScintilla/src/qscintilla.pro \
-        qtpropertybrowser \
         TrendView \
 	AppSignalLib \
         UtilsLib \

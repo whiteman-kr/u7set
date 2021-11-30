@@ -17,9 +17,9 @@ DialogMeasurePoint::DialogMeasurePoint(const LinearityOption& linearity, QWidget
 
 	m_rangeTypeList = new QComboBox;
 
-	for(int t = 0; t < Measure::LinearityDivisionCount; t++)
+	for(int t = 0; t < Measure::LT::LinearityDivisionCount; t++)
 	{
-		m_rangeTypeList->addItem(qApp->translate("MeasurePointBase", Measure::LinearityDivisionCaption(t).toUtf8()));
+		m_rangeTypeList->addItem(LinearityDivisionCaption(static_cast<Measure::LT::LinearityDivision>(t)));
 	}
 
 	m_pointCountLabel = new QLabel;
@@ -112,7 +112,7 @@ void DialogMeasurePoint::setHeaderList()
 
 	for(int sensor = 0; sensor < Measure::PointSensorCount; sensor++)
 	{
-		horizontalHeaderLabels.append(qApp->translate("MeasurePointBase", Measure::PointSensorCaption(sensor).toUtf8()));
+		horizontalHeaderLabels.append(Measure::PointSensorCaption(sensor));
 	}
 
 	m_pointList->setColumnCount(horizontalHeaderLabels.count());
@@ -149,7 +149,7 @@ void DialogMeasurePoint::setHeaderList()
 			continue;
 		}
 
-		m_pColumnAction[sensor] = m_headerContextMenu->addAction(qApp->translate("MeasurePointBase", Measure::PointSensorCaption(sensor).toUtf8()));
+		m_pColumnAction[sensor] = m_headerContextMenu->addAction(Measure::PointSensorCaption(sensor));
 		if (m_pColumnAction[sensor] != nullptr)
 		{
 			m_pColumnAction[sensor]->setCheckable(true);
@@ -169,7 +169,7 @@ void DialogMeasurePoint::updateRangeType()
 {
 	switch(m_linearity.divisionType())
 	{
-		case Measure::LinearityDivision::Manual:
+		case Measure::LT::LinearityDivision::Manual:
 
 			m_pointCountLabel->hide();
 			m_pointCountEdit->hide();
@@ -186,7 +186,7 @@ void DialogMeasurePoint::updateRangeType()
 
 			break;
 
-		case Measure::LinearityDivision::Automatic:
+		case Measure::LT::LinearityDivision::Automatic:
 
 			m_pointCountLabel->show();
 			m_pointCountEdit->show();
@@ -271,7 +271,7 @@ void DialogMeasurePoint::updateList()
 
 	m_pointList->selectRow(selectedRow);
 
-	emit updateLinearityPage(true);
+	emit dataUpdated();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -498,12 +498,18 @@ void DialogMeasurePoint::onDownPoint()
 
 void DialogMeasurePoint::onRangeType(int type)
 {
-	if (type < 0 || type >= Measure::LinearityDivisionCount)
+	if (type < 0 || type >= Measure::LT::LinearityDivisionCount)
 	{
 		return;
 	}
 
-	m_linearity.setDivisionType(type);
+	Measure::LT::LinearityDivision divisionType = static_cast<Measure::LT::LinearityDivision>(type);
+	if (ERR_LINEARITY_DIVISION(divisionType) == true)
+	{
+		return;
+	}
+
+	m_linearity.setDivisionType(divisionType);
 
 	updateRangeType();
 
@@ -514,7 +520,7 @@ void DialogMeasurePoint::onRangeType(int type)
 
 void DialogMeasurePoint::onAutomaticCalculatePoints()
 {
-	if (m_linearity.divisionType() != Measure::LinearityDivision::Automatic)
+	if (m_linearity.divisionType() != Measure::LT::LinearityDivision::Automatic)
 	{
 		return;
 	}
@@ -551,10 +557,10 @@ void DialogMeasurePoint::onAutomaticCalculatePoints()
 		return;
 	}
 
-	m_linearity.setLowLimitRange(low.toDouble());
-	m_linearity.setHighLimitRange(high.toDouble());
+	m_linearity.setLowLimitRange(low.toDouble(), false);
+	m_linearity.setHighLimitRange(high.toDouble(), false);
 
-	m_linearity.recalcPoints(value.toInt());
+	m_linearity.setMeasurePointsCount(value.toInt());
 
 	updateList();
 

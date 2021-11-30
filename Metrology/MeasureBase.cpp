@@ -64,7 +64,7 @@ namespace Measure
 			m_unit[t].clear();
 			m_limitPrecision[t] = 0;
 
-			for(int e = 0; e < Measure::ErrorTypeCount; e++)
+			for(int e = 0; e < MT::ErrorTypeCount; e++)
 			{
 				m_error[t][e] = 0;
 				m_errorLimit[t][e] = 0;
@@ -134,20 +134,20 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	Measure::LimitType Item::limitTypeByRange(int byRange) const
-	{
-		return limitTypeByRange(static_cast<Measure::CalcErrorRange>(byRange));
-	}
+//	Measure::LimitType Item::limitTypeByRange(int byRange) const
+//	{
+//		return limitTypeByRange(static_cast<MT::CalcErrorRange>(byRange));
+//	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	Measure::LimitType Item::limitTypeByRange(Measure::CalcErrorRange byRange) const
+	Measure::LimitType Item::limitTypeByRange(MT::CalcErrorRange byRange) const
 	{
 		Measure::LimitType limitType = Measure::LimitType::NoLimitType;
 
 		switch (byRange)
 		{
-			case BySignalType:
+			case MT::By_Signal_Type:
 
 				switch (m_connectionType)
 				{
@@ -172,12 +172,12 @@ namespace Measure
 				}
 				break;
 
-			case ByElectricRange:
+			case MT::By_Electric_Range:
 
 				limitType = Measure::LimitType::Electric;
 				break;
 
-			case ByEngineeringRange:
+			case MT::By_Engineering_Range:
 
 				limitType = Measure::LimitType::Engineering;
 				break;
@@ -542,9 +542,9 @@ namespace Measure
 		{
 			LimitType limitType = static_cast<LimitType>(type);
 
-			setError(limitType, Measure::ErrorType::Absolute,		std::abs(nominal(limitType)-measure(limitType)));
-			setError(limitType, Measure::ErrorType::Reduce,			std::abs(((nominal(limitType)-measure(limitType)) / (highLimit(limitType) - lowLimit(limitType))) * 100.0));
-			setError(limitType, Measure::ErrorType::Relative,		std::abs(((nominal(limitType)-measure(limitType)) / nominal(limitType)) * 100.0));
+			setError(limitType, MT::ErrorType::Absolute,	std::abs(nominal(limitType)-measure(limitType)));
+			setError(limitType, MT::ErrorType::Reduce,		std::abs(((nominal(limitType)-measure(limitType)) / (highLimit(limitType) - lowLimit(limitType))) * 100.0));
+			setError(limitType, MT::ErrorType::Relative,	std::abs(((nominal(limitType)-measure(limitType)) / nominal(limitType)) * 100.0));
 		}
 
 		// calc error limits vlue
@@ -578,15 +578,15 @@ namespace Measure
 		{
 			LimitType limitType = static_cast<LimitType>(type);
 
-			setErrorLimit(limitType, Measure::ErrorType::Absolute,	std::abs((highLimit(limitType) - lowLimit(limitType)) * errorLimit / 100.0));
-			setErrorLimit(limitType, Measure::ErrorType::Reduce,	errorLimit);
-			setErrorLimit(limitType, Measure::ErrorType::Relative,	errorLimit);
+			setErrorLimit(limitType, MT::ErrorType::Absolute,	std::abs((highLimit(limitType) - lowLimit(limitType)) * errorLimit / 100.0));
+			setErrorLimit(limitType, MT::ErrorType::Reduce,		errorLimit);
+			setErrorLimit(limitType, MT::ErrorType::Relative,	errorLimit);
 		}
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double Item::error(LimitType limitType, ErrorType errorType) const
+	double Item::error(LimitType limitType, MT::ErrorType errorType) const
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -651,12 +651,12 @@ namespace Measure
 			}
 		}
 
-		ErrorType errorType = ErrorType::NoErrorType;
+		MT::ErrorType errorType = MT::ErrorType::Reduce;
 
 		switch (measureType)
 		{
-			case Measure::Type::Linearity:		errorType = static_cast<ErrorType>(theOptions.linearity().errorType());		break;
-			case Measure::Type::Comparators:	errorType = static_cast<ErrorType>(theOptions.comparator().errorType());	break;
+			case Measure::Type::Linearity:		errorType = theOptions.linearity().errorType();		break;
+			case Measure::Type::Comparators:	errorType = theOptions.comparator().errorType();	break;
 
 			default:
 				assert(0);
@@ -673,9 +673,9 @@ namespace Measure
 
 		switch(errorType)
 		{
-			case Measure::ErrorType::Absolute:	str = QString::number(m_error[limitType][errorType], 'f', precision) + " " + m_unit[limitType];	break;
-			case Measure::ErrorType::Reduce:
-			case Measure::ErrorType::Relative:	str = QString::number(m_error[limitType][errorType], 'f', 3) + " %" ;							break;
+			case MT::ErrorType::Absolute:	str = QString::number(m_error[limitType][errorType], 'f', precision) + " " + m_unit[limitType];	break;
+			case MT::ErrorType::Reduce:
+			case MT::ErrorType::Relative:	str = QString::number(m_error[limitType][errorType], 'f', 3) + " %" ;							break;
 
 			default:
 				assert(0);
@@ -686,7 +686,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Item::setError(LimitType limitType, ErrorType errorType, double value)
+	void Item::setError(LimitType limitType, MT::ErrorType errorType, double value)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -705,7 +705,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	double Item::errorLimit(LimitType limitType, ErrorType errorType) const
+	double Item::errorLimit(LimitType limitType, MT::ErrorType errorType) const
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -750,12 +750,12 @@ namespace Measure
 			return QString();
 		}
 
-		ErrorType errorType = ErrorType::NoErrorType;
+		MT::ErrorType errorType = MT::ErrorType::Reduce;
 
 		switch (measureType)
 		{
-			case Measure::Type::Linearity:		errorType = static_cast<ErrorType>(theOptions.linearity().errorType());		break;
-			case Measure::Type::Comparators:	errorType = static_cast<ErrorType>(theOptions.comparator().errorType());	break;
+			case Measure::Type::Linearity:		errorType = theOptions.linearity().errorType();		break;
+			case Measure::Type::Comparators:	errorType = theOptions.comparator().errorType();	break;
 
 			default:
 				assert(0);
@@ -772,9 +772,9 @@ namespace Measure
 
 		switch(errorType)
 		{
-			case Measure::ErrorType::Absolute:	str = QString::number(m_errorLimit[limitType][errorType], 'f', m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
-			case Measure::ErrorType::Reduce:
-			case Measure::ErrorType::Relative:	str = QString::number(m_errorLimit[limitType][errorType], 'f', 3) + " %";												break;
+			case MT::ErrorType::Absolute:	str = QString::number(m_errorLimit[limitType][errorType], 'f', m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
+			case MT::ErrorType::Reduce:
+			case MT::ErrorType::Relative:	str = QString::number(m_errorLimit[limitType][errorType], 'f', 3) + " %";												break;
 
 			default:
 				assert(0);
@@ -785,7 +785,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Item::setErrorLimit(LimitType limitType, ErrorType errorType, double value)
+	void Item::setErrorLimit(LimitType limitType, MT::ErrorType errorType, double value)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -830,12 +830,12 @@ namespace Measure
 			return Measure::ErrorResult::NoErrorResult;
 		}
 
-		ErrorType errorType = ErrorType::NoErrorType;
+		MT::ErrorType errorType = MT::ErrorType::Reduce;
 
 		switch (measureType)
 		{
-			case Measure::Type::Linearity:		errorType = static_cast<ErrorType>(theOptions.linearity().errorType());		break;
-			case Measure::Type::Comparators:	errorType = static_cast<ErrorType>(theOptions.comparator().errorType());	break;
+			case Measure::Type::Linearity:		errorType = theOptions.linearity().errorType();		break;
+			case Measure::Type::Comparators:	errorType = theOptions.comparator().errorType();	break;
 
 			default:
 				assert(0);
@@ -1048,7 +1048,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Item::updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si)
+	void Item::updateStatisticsItem(LimitType limitType, MT::ErrorType errorType, StatisticsItem& si)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -1104,7 +1104,7 @@ namespace Measure
 			m_unit[l] = from.m_unit[l];
 			m_limitPrecision[l] = from.m_limitPrecision[l];
 
-			for(int e = 0; e < Measure::ErrorTypeCount; e++)
+			for(int e = 0; e < MT::ErrorTypeCount; e++)
 			{
 				m_error[l][e] = from.m_error[l][e];
 				m_errorLimit[l][e] = from.m_errorLimit[l][e];
@@ -2205,7 +2205,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void LinearityItem::updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si)
+	void LinearityItem::updateStatisticsItem(LimitType limitType, MT::ErrorType errorType, StatisticsItem& si)
 	{
 		Item::updateStatisticsItem(limitType, errorType, si);
 	}
@@ -2682,7 +2682,7 @@ namespace Measure
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void ComparatorItem::updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si)
+	void ComparatorItem::updateStatisticsItem(LimitType limitType, MT::ErrorType errorType, StatisticsItem& si)
 	{
 		if (ERR_MEASURE_LIMIT_TYPE(limitType) == true)
 		{
@@ -3243,12 +3243,12 @@ namespace Measure
 			return;
 		}
 
-		ErrorType errorType = ErrorType::NoErrorType;
+		MT::ErrorType errorType = MT::ErrorType::Reduce;
 
 		switch (measureType)
 		{
-			case Measure::Type::Linearity:		errorType = static_cast<ErrorType>(theOptions.linearity().errorType());		break;
-			case Measure::Type::Comparators:	errorType = static_cast<ErrorType>(theOptions.comparator().errorType());	break;
+			case Measure::Type::Linearity:		errorType = theOptions.linearity().errorType();		break;
+			case Measure::Type::Comparators:	errorType = theOptions.comparator().errorType();	break;
 
 			default:
 				assert(0);
@@ -3577,37 +3577,73 @@ namespace Measure
 		return caption;
 	};
 
-	QString CalcErrorRangeCaption(Measure::CalcErrorRange byRange)
+	QString MT::CalcErrorRangeCaption(CalcErrorRange byRange)
 	{
 		QString caption;
 
 		switch (byRange)
 		{
-			case Measure::CalcErrorRange::ByElectricRange:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Electric range");				break;
-			case Measure::CalcErrorRange::ByEngineeringRange:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Engineering range");			break;
-			case Measure::CalcErrorRange::BySignalType:			caption = QT_TRANSLATE_NOOP("MeasureBase", "Depended from signal type");	break;
+			case By_Electric_Range:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Electric range");				break;
+			case By_Engineering_Range:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Engineering range");			break;
+			case By_Signal_Type:		caption = QT_TRANSLATE_NOOP("MeasureBase", "Depended from signal type");	break;
 
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
 		}
 
+		return qApp->translate("MeasureBase", caption.toUtf8());
+	};
+
+	QString MT::CalcErrorRangeCaptionTr(CalcErrorRange byRange)
+	{
+		QString caption;
+
+		switch (byRange)
+		{
+			case By_Electric_Range:		caption = QObject::tr("By_Electric_Range");		break;
+			case By_Engineering_Range:	caption = QObject::tr("By_Engineering_Range");	break;
+			case By_Signal_Type:		caption = QObject::tr("By_Signal_Type");		break;
+
+			default:
+				Q_ASSERT(0);
+				caption = QObject::tr("Unknown");
+		}
+
 		return caption;
 	};
 
-	QString ErrorTypeCaption(Measure::ErrorType errorType)
+	QString MT::ErrorTypeCaption(ErrorType errorType)
 	{
 		QString caption;
 
 		switch (errorType)
 		{
-			case Measure::ErrorType::Absolute:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Absolute");	break;
-			case Measure::ErrorType::Reduce:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Reduce");	break;
-			case Measure::ErrorType::Relative:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Relative");	break;
+			case Absolute:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Absolute");	break;
+			case Reduce:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Reduce");	break;
+			case Relative:	caption = QT_TRANSLATE_NOOP("MeasureBase", "Relative");	break;
 
 			default:
 				Q_ASSERT(0);
 				caption = QT_TRANSLATE_NOOP("MeasureBase", "Unknown");
+		}
+
+		return qApp->translate("MeasureBase", caption.toUtf8());
+	};
+
+	QString MT::ErrorTypeCaptionTr(ErrorType errorType)
+	{
+		QString caption;
+
+		switch (errorType)
+		{
+			case Absolute:	caption = QObject::tr("Absolute");	break;
+			case Reduce:	caption = QObject::tr("Reduce");	break;
+			case Relative:	caption = QObject::tr("Relative");	break;
+
+			default:
+				Q_ASSERT(0);
+				caption = QObject::tr("Unknown");
 		}
 
 		return caption;
@@ -3681,7 +3717,6 @@ double conversionByConnection(double val, const IoSignalParam &ioParam, Conversi
 	double retVal = uc.conversionByConnection(val, connectionType, inParam, outParam, directType);
 	return retVal;
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------

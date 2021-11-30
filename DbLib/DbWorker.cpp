@@ -386,6 +386,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0364.sql", "Upgrade to version 364, 2-Tuning LAN Configuration support, Added mV_Type_L, mV_Type_M and mV_Raw_m1200_p1200 sensor types"},
 	{":/DatabaseUpgrade/Upgrade0365.sql", "Upgrade to version 365, MAC addresses are checked for uniqueness on configuration building, unused LANs filled with zeroes"},
 	{":/DatabaseUpgrade/Upgrade0366.sql", "Upgrade to version 366, Monitor preset default tags are applogic and monitor"},
+	{":/DatabaseUpgrade/Upgrade0367.sql", "Upgrade to version 367, LAN configuration is build based on LM description LAN types and places"},
+	{":/DatabaseUpgrade/Upgrade0368.sql", "Upgrade to version 368, Added LM11-SR90 preset and LM description"},
 };
 
 int DbWorker::counter = 0;

@@ -50,7 +50,7 @@ void RackGroup::setCaption(const QString& caption)
 
 QString RackGroup::rackID(int channel) const
 {
-	if (channel < 0 || channel >= Metrology::ChannelCount)
+	if (ERR_CHANNEL(channel) == true)
 	{
 		return QString();
 	}
@@ -62,7 +62,7 @@ QString RackGroup::rackID(int channel) const
 
 void RackGroup::setRackID(int channel, const QString& rackID)
 {
-	if (channel < 0 || channel >= Metrology::ChannelCount)
+	if (ERR_CHANNEL(channel) == true)
 	{
 		return;
 	}
