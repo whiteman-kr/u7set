@@ -500,13 +500,13 @@ void DialogCalculator::conversionTr()
 	double r0 = m_pTrR0Edit->text().toDouble();
 	if (r0 == 0.0)
 	{
-		r0 = 100.0;
+		r0 = m_uc.default_r0(sensorType);
 	}
 
 	if (m_pTrDegreeRadio->isChecked() == true)
 	{
-		double degreeLowLimit = m_uc.conversionDegree(electricLimit.lowLimit*  r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
-		double degreeHighLimit = m_uc.conversionDegree(electricLimit.highLimit*  r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
+		double degreeLowLimit = m_uc.conversionDegree(electricLimit.lowLimit * r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
+		double degreeHighLimit = m_uc.conversionDegree(electricLimit.highLimit * r0 / 100, UnitsConvertType::ElectricToPhysical, unit, sensorType, r0);
 
 		if (degreeVal < degreeLowLimit || degreeVal > degreeHighLimit)
 		{
@@ -529,7 +529,7 @@ void DialogCalculator::conversionTr()
 
 	if (m_pTrElectricRadio->isChecked() == true)
 	{
-		if (electricVal < electricLimit.lowLimit*  r0 / 100 || electricVal > electricLimit.highLimit*  r0 / 100)
+		if (electricVal < electricLimit.lowLimit * r0 / 100 || electricVal > electricLimit.highLimit * r0 / 100)
 		{
 			m_pTrDegreeEdit->setText(	tr("Out of range: %1 .. %2").
 										arg(QString::number(electricLimit.lowLimit, 'f', DefaultElectricUnitPrecesion),

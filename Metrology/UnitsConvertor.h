@@ -204,15 +204,16 @@ public:
 
 	Q_INVOKABLE double conversionByConnection(double val, int connectionType, const AppSignal& sourSignal, const AppSignal& destSignal, ConversionDirection directType);		// conversion for Metrology connections, return converted value
 
-	double r0_from_signal(const AppSignal& signal);																																// for signals of module RIM
-	bool r0_is_use(E::SensorType sensorType);																																	// for signals of module RIM
+	double r0_from_signal(const AppSignal& signal);																																// for signals of module MAI and RIM
+	bool r0_is_use(E::SensorType sensorType);																																	// for signals of module MAI and RIM
+	double default_r0(E::SensorType sensorType);																																// for signals of module MAI and RIM
 
 	SignalElectricLimit getElectricLimit(int unitID, int sensorType);																											// take limit by unit and sensorType
 	UnitsConvertResult electricLimitIsValid(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double r0 = 0);						// test electrical value - out of electrical range?
 
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_Input(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double rload);			// get physical value for blocks of input signals			- module AIM, WAIM, MAIM, FIM
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoCouple(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType);				// get physical value for blocks of thermocouple signals	- module TIM
-	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoResistor(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double r0);	// get physical value for blocks of thermoresistor signals	- module RIM
+	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoResistor(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double r0);	// get physical value for blocks of thermoresistor signals	- module MAI and RIM
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_Output(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int outputMode);						// get physical value for blocks of output signals			- module AOM
 
 	Q_INVOKABLE QString electricUnitName(int electricUnit) const;

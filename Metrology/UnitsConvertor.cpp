@@ -395,11 +395,20 @@ double UnitsConvertor::conversionDegree(double val, UnitsConvertType conversionT
 			{
 				case E::ElectricUnit::Ohm:
 
+					if (r0 == 0.0)
+					{
+						r0 = default_r0(sensorType);
+					}
+
 					switch(sensorType)
 					{
+						//
+						//
 						case E::SensorType::NoSensor:
 						case E::SensorType::Ohm_Raw:			retVal = val;	break;
 
+						//
+						//
 						case E::SensorType::Ohm_Pt_a_391:		retVal = findConversionVal(val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, true);								break;
 						case E::SensorType::Ohm_Pt_a_385:		retVal = findConversionVal(val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, true);								break;
 						case E::SensorType::Ohm_Cu_a_428:		retVal = findConversionVal(val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, true);								break;
@@ -411,18 +420,18 @@ double UnitsConvertor::conversionDegree(double val, UnitsConvertType conversionT
 
 						// for non ptaform module
 						//
-						case E::SensorType::Ohm_Pt50_W1391:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_391, 50);			break;
-						case E::SensorType::Ohm_Pt100_W1391:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_391, 100);			break;
-						case E::SensorType::Ohm_Pt50_W1385:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_385, 50);			break;
-						case E::SensorType::Ohm_Pt100_W1385:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_385, 100);			break;
+						case E::SensorType::Ohm_Pt50_W1391:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_391, r0);			break;
+						case E::SensorType::Ohm_Pt100_W1391:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_391, r0);			break;
+						case E::SensorType::Ohm_Pt50_W1385:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_385, r0);			break;
+						case E::SensorType::Ohm_Pt100_W1385:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_385, r0);			break;
 
-						case E::SensorType::Ohm_Cu50_W1428:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_428, 50);			break;
-						case E::SensorType::Ohm_Cu100_W1428:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_428, 100);			break;
-						case E::SensorType::Ohm_Cu50_W1426:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_426, 50);			break;
-						case E::SensorType::Ohm_Cu100_W1426:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_426, 100);			break;
+						case E::SensorType::Ohm_Cu50_W1428:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_428, r0);			break;
+						case E::SensorType::Ohm_Cu100_W1428:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_428, r0);			break;
+						case E::SensorType::Ohm_Cu50_W1426:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_426, r0);			break;
+						case E::SensorType::Ohm_Cu100_W1426:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_426, r0);			break;
 
-						case E::SensorType::Ohm_Ni50_W1617:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Ni_a_617, 50);			break;
-						case E::SensorType::Ohm_Ni100_W1617:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Ni_a_617, 100);			break;
+						case E::SensorType::Ohm_Ni50_W1617:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Ni_a_617, r0);			break;
+						case E::SensorType::Ohm_Ni100_W1617:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Ni_a_617, r0);			break;
 
 						default:
 							assert(0);
@@ -430,11 +439,6 @@ double UnitsConvertor::conversionDegree(double val, UnitsConvertType conversionT
 
 					if (r0_is_use(sensorType) == true)
 					{
-						if ( r0 == 0.0)
-						{
-							r0 = 100;
-						}
-
 						retVal = retVal * r0 / 100;
 					}
 
@@ -444,15 +448,21 @@ double UnitsConvertor::conversionDegree(double val, UnitsConvertType conversionT
 
 					switch(sensorType)
 					{
+						//
+						//
 						case E::SensorType::NoSensor:
 						case E::SensorType::mV_Raw_Mul_8:
 						case E::SensorType::mV_Raw_Mul_32:
 						case E::SensorType::mV_Raw_m1200_p1200:	retVal = val;																		break;
 
-						case E::SensorType::mV_K_TXA: 			retVal = findConversionVal(val, &K_TXA[0][0], K_TXA_COUNT, true);					break;
-						case E::SensorType::mV_L_TXK:			retVal = findConversionVal(val, &L_TXK[0][0], L_TXK_COUNT, true);					break;
-						case E::SensorType::mV_N_THH:			retVal = findConversionVal(val, &N_THH[0][0], N_THH_COUNT, true);					break;
+						//
+						//
+						case E::SensorType::mV_K_TXA: 			retVal = findConversionVal(val, &MV_TYPE_K[0][0], MV_TYPE_K_COUNT, true);			break;
+						case E::SensorType::mV_L_TXK:			retVal = findConversionVal(val, &MV_TYPE_L[0][0], MV_TYPE_L_COUNT, true);			break;
+						case E::SensorType::mV_N_THH:			retVal = findConversionVal(val, &MV_TYPE_N[0][0], MV_TYPE_N_COUNT, true);			break;
 
+						//
+						//
 						case E::SensorType::mV_Type_B:			retVal = findConversionVal(val, &MV_TYPE_B[0][0], MV_TYPE_B_COUNT, true);			break;
 						case E::SensorType::mV_Type_E:			retVal = findConversionVal(val, &MV_TYPE_E[0][0], MV_TYPE_E_COUNT, true);			break;
 						case E::SensorType::mV_Type_J:			retVal = findConversionVal(val, &MV_TYPE_J[0][0], MV_TYPE_J_COUNT, true);			break;
@@ -481,21 +491,25 @@ double UnitsConvertor::conversionDegree(double val, UnitsConvertType conversionT
 			{
 				case E::ElectricUnit::Ohm:
 
+					if (r0 == 0.0)
+					{
+						r0 = default_r0(sensorType);
+					}
+
 					if (r0_is_use(sensorType) == true)
 					{
-						if (r0 == 0.0)
-						{
-							 r0 = 100;
-						}
-
 						val = val / r0 * 100;
 					}
 
 					switch(sensorType)
 					{
+						//
+						//
 						case E::SensorType::NoSensor:
 						case E::SensorType::Ohm_Raw:			retVal = val;	break;
 
+						//
+						//
 						case E::SensorType::Ohm_Pt_a_391:		retVal = findConversionVal(val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, false);						break;
 						case E::SensorType::Ohm_Pt_a_385:		retVal = findConversionVal(val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, false);						break;
 						case E::SensorType::Ohm_Cu_a_428:		retVal = findConversionVal(val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, false);						break;
@@ -507,18 +521,18 @@ double UnitsConvertor::conversionDegree(double val, UnitsConvertType conversionT
 
 						// for non ptaform module
 						//
-						case E::SensorType::Ohm_Pt50_W1391:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_391, 50);	break;
-						case E::SensorType::Ohm_Pt100_W1391:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_391, 100); break;
-						case E::SensorType::Ohm_Pt50_W1385:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_385, 50);	break;
-						case E::SensorType::Ohm_Pt100_W1385:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_385, 100); break;
+						case E::SensorType::Ohm_Pt50_W1391:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_391, r0);	break;
+						case E::SensorType::Ohm_Pt100_W1391:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_391, r0);	break;
+						case E::SensorType::Ohm_Pt50_W1385:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_385, r0);	break;
+						case E::SensorType::Ohm_Pt100_W1385:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt_a_385, r0);	break;
 
-						case E::SensorType::Ohm_Cu50_W1428:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_428, 50);	break;
-						case E::SensorType::Ohm_Cu100_W1428:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_428, 100); break;
-						case E::SensorType::Ohm_Cu50_W1426:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_426, 50);	break;
-						case E::SensorType::Ohm_Cu100_W1426:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_426, 100); break;
+						case E::SensorType::Ohm_Cu50_W1428:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_428, r0);	break;
+						case E::SensorType::Ohm_Cu100_W1428:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_428, r0);	break;
+						case E::SensorType::Ohm_Cu50_W1426:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_426, r0);	break;
+						case E::SensorType::Ohm_Cu100_W1426:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Cu_a_426, r0);	break;
 
-						case E::SensorType::Ohm_Ni50_W1617:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Ni_a_617, 50);	break;
-						case E::SensorType::Ohm_Ni100_W1617:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Ni_a_617, 100); break;
+						case E::SensorType::Ohm_Ni50_W1617:		retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Ni_a_617, r0);	break;
+						case E::SensorType::Ohm_Ni100_W1617:	retVal = conversionDegree(val, conversionType, E::ElectricUnit::Ohm, E::SensorType::Ohm_Ni_a_617, r0);	break;
 
 						default:
 							assert(0);
@@ -529,15 +543,21 @@ double UnitsConvertor::conversionDegree(double val, UnitsConvertType conversionT
 
 					switch(sensorType)
 					{
+						//
+						//
 						case E::SensorType::NoSensor:
 						case E::SensorType::mV_Raw_Mul_8:
 						case E::SensorType::mV_Raw_Mul_32:
 						case E::SensorType::mV_Raw_m1200_p1200:	retVal = val;																		break;
 
-						case E::SensorType::mV_K_TXA: 			retVal = findConversionVal(val, &K_TXA[0][0], K_TXA_COUNT, false);					break;
-						case E::SensorType::mV_L_TXK:			retVal = findConversionVal(val, &L_TXK[0][0], L_TXK_COUNT, false);					break;
-						case E::SensorType::mV_N_THH:			retVal = findConversionVal(val, &N_THH[0][0], N_THH_COUNT, false);					break;
+						//
+						//
+						case E::SensorType::mV_K_TXA: 			retVal = findConversionVal(val, &MV_TYPE_K[0][0], MV_TYPE_K_COUNT, false);			break;
+						case E::SensorType::mV_L_TXK:			retVal = findConversionVal(val, &MV_TYPE_L[0][0], MV_TYPE_L_COUNT, false);			break;
+						case E::SensorType::mV_N_THH:			retVal = findConversionVal(val, &MV_TYPE_N[0][0], MV_TYPE_N_COUNT, false);			break;
 
+						//
+						//
 						case E::SensorType::mV_Type_B:			retVal = findConversionVal(val, &MV_TYPE_B[0][0], MV_TYPE_B_COUNT, false);			break;
 						case E::SensorType::mV_Type_E:			retVal = findConversionVal(val, &MV_TYPE_E[0][0], MV_TYPE_E_COUNT, false);			break;
 						case E::SensorType::mV_Type_J:			retVal = findConversionVal(val, &MV_TYPE_J[0][0], MV_TYPE_J_COUNT, false);			break;
@@ -758,24 +778,7 @@ double UnitsConvertor::r0_from_signal(const AppSignal& signal)
 	{
 		if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == true)
 		{
-			switch(signal.sensorType())
-			{
-				case E::SensorType::Ohm_Pt50_W1391:		r0 = 50; break;
-				case E::SensorType::Ohm_Pt100_W1391:	r0 = 100; break;
-				case E::SensorType::Ohm_Pt50_W1385:		r0 = 50; break;
-				case E::SensorType::Ohm_Pt100_W1385:	r0 = 100; break;
-
-				case E::SensorType::Ohm_Cu50_W1428:		r0 = 50; break;
-				case E::SensorType::Ohm_Cu100_W1428:	r0 = 100; break;
-				case E::SensorType::Ohm_Cu50_W1426:		r0 = 50; break;
-				case E::SensorType::Ohm_Cu100_W1426:	r0 = 100; break;
-
-				case E::SensorType::Ohm_Ni50_W1617:		r0 = 50; break;
-				case E::SensorType::Ohm_Ni100_W1617:	r0 = 100; break;
-
-				default:
-					r0 = 0;
-			}
+			r0  = default_r0(signal.sensorType());
 		}
 	}
 
@@ -807,6 +810,50 @@ bool UnitsConvertor::r0_is_use(E::SensorType sensorType)
 	}
 
 	return result;
+}
+
+double UnitsConvertor::default_r0(E::SensorType sensorType)
+{
+	double r0 = 0;
+
+	switch(sensorType)
+	{
+		//
+		//
+		case E::SensorType::NoSensor:
+		case E::SensorType::Ohm_Raw:			r0 = 0;		break;
+
+		//
+		//
+		case E::SensorType::Ohm_Pt_a_391:
+		case E::SensorType::Ohm_Pt_a_385:
+		case E::SensorType::Ohm_Cu_a_428:
+		case E::SensorType::Ohm_Cu_a_426:
+		case E::SensorType::Ohm_Ni_a_617:		r0 = 100;	break;
+
+		case E::SensorType::Ohm_Pt21:			r0 = 46;	break;
+		case E::SensorType::Ohm_Cu23:			r0 = 53;	break;
+
+		// for non ptaform module
+		//
+		case E::SensorType::Ohm_Pt50_W1391:		r0 = 50;	break;
+		case E::SensorType::Ohm_Pt100_W1391:	r0 = 100;	break;
+		case E::SensorType::Ohm_Pt50_W1385:		r0 = 50;	break;
+		case E::SensorType::Ohm_Pt100_W1385:	r0 = 100;	break;
+
+		case E::SensorType::Ohm_Cu50_W1428:		r0 = 50;	break;
+		case E::SensorType::Ohm_Cu100_W1428:	r0 = 100;	break;
+		case E::SensorType::Ohm_Cu50_W1426:		r0 = 50;	break;
+		case E::SensorType::Ohm_Cu100_W1426:	r0 = 100;	break;
+
+		case E::SensorType::Ohm_Ni50_W1617:		r0 = 50;	break;
+		case E::SensorType::Ohm_Ni100_W1617:	r0 = 100;	break;
+
+		default:
+			assert(0);
+	}
+
+	return r0;
 }
 
 SignalElectricLimit UnitsConvertor::getElectricLimit(int unitID, int sensorType)
