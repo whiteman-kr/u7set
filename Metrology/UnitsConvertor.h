@@ -21,7 +21,7 @@ const SignalElectricLimit SignalElectricLimits[] =
 	// V
 	//
 	{   0,		5.1,	E::ElectricUnit::V,		E::SensorType::V_0_5,				},						// module AIM
-	{ -11,		11,		E::ElectricUnit::V,		E::SensorType::V_m10_p10,			},						// module WAIM
+	{ -11,		11,		E::ElectricUnit::V,		E::SensorType::V_m10_p10,			},						// module MAI and WAIM
 
 	// mA
 	//
@@ -32,17 +32,17 @@ const SignalElectricLimit SignalElectricLimits[] =
 	//
 	{   -20,	20,		E::ElectricUnit::uA,	E::SensorType::uA_m20_p20,			},						// module MAIM
 
-	// Ohm - types of thermistors
+	// Ohm - types of thermistors																			// all ohm electric limits and tables for R0=100
 	//
-	{ 17.24,	395.16,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1391,		},	// -200 .. 850		// module non ptaform
-	{ 17.24,	395.16,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt100_W1391,		},	// -200 .. 850		// module non ptaform
-	{ 18.52,	390.48,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1385,		},	// -200 .. 850		// module non ptaform
-	{ 18.52,	390.48,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt100_W1385,		},	// -200 .. 850		// module non ptaform
+	{ 17.24,	395.16,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1391,		},	// -200 .. 850		// non ptaform module from R0=50
+	{ 17.24,	395.16,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt100_W1391,		},	// -200 .. 850		// non ptaform module from R0=100
+	{ 18.52,	390.48,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1385,		},	// -200 .. 850		// non ptaform module from R0=50
+	{ 18.52,	390.48,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt100_W1385,		},	// -200 .. 850		// non ptaform module from R0=100
 
-	{ 20.53,	185.60,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu50_W1428,		},	// -180 .. 200		// module non ptaform
-	{ 20.53,	185.60,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu100_W1428,		},	// -180 .. 200		// module non ptaform
-	{ 78.70,	185.20,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu50_W1426,		},	//  -50 .. 200		// module non ptaform
-	{ 78.70,	185.20,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu100_W1426,		},	//  -50 .. 200		// module non ptaform
+	{ 20.53,	185.60,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu50_W1428,		},	// -180 .. 200		// non ptaform module from R0=50
+	{ 20.53,	185.60,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu100_W1428,		},	// -180 .. 200		// non ptaform module from R0=100
+	{ 78.70,	185.20,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu50_W1426,		},	//  -50 .. 200		// non ptaform module from R0=50
+	{ 78.70,	185.20,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu100_W1426,		},	//  -50 .. 200		// non ptaform module from R0=100
 
 	{ 17.24,	395.16,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt_a_391,		},	// -200 .. 850		// module MAI and RIM from R0
 	{ 18.52,	390.48,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt_a_385,		},	// -200 .. 850		// module MAI and RIM from R0
@@ -50,8 +50,8 @@ const SignalElectricLimit SignalElectricLimits[] =
 	{ 78.70,	185.20,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_a_426,		},	//  -50 .. 200		// module MAI and RIM from R0
 	{ 64.83,	223.21,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Ni_a_617,		},	//  -70 .. 180		// module MAI and RIM from R0
 
-	{ 17.28,	283.80,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt21,			},	// -200 .. 500		// module MAI and non ptaform R0=100
-	{ 78.70,	176.68,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu23,			},	//  -50 .. 180		// module MAI and non ptaform R0=100
+	{ 17.28,	283.80,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt21,			},	// -200 .. 500		// module MAI and non ptaform module from R0
+	{ 78.70,	176.68,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu23,			},	//  -50 .. 180		// module MAI and non ptaform module from R0
 
 	{  0.00,	 10000,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Raw,				},						// module MAI and RIM
 
