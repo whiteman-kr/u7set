@@ -61,14 +61,14 @@ const SignalElectricLimit SignalElectricLimits[] =
 	{ -9.488,	66.466,	E::ElectricUnit::mV,	E::SensorType::mV_L_TXK,			},	// -200 .. 800		// module non ptaform
 	{ -4.345,	47.513,	E::ElectricUnit::mV,	E::SensorType::mV_N_THH,			},	// -270 .. 1300		// module non ptaform
 
-	{  0.304,	13.763,	E::ElectricUnit::mV,	E::SensorType::mV_Type_B,			},	//  255 .. 1815		// module TIM (-+5 C) and MAI
+	{  0.000,	13.763,	E::ElectricUnit::mV,	E::SensorType::mV_Type_B,			},	//    0 .. 1815		// module TIM (-+5 C) and MAI
 	{ -8.696,	75.997,	E::ElectricUnit::mV,	E::SensorType::mV_Type_E,			},	// -195 .. 995		// module TIM (-+5 C) and MAI
 	{ -7.996,	69.267,	E::ElectricUnit::mV,	E::SensorType::mV_Type_J,			},	// -205 .. 1195		// module TIM (-+5 C) and MAI
 	{ -5.813,	54.717,	E::ElectricUnit::mV,	E::SensorType::mV_Type_K,			},	// -195 .. 1367		// module TIM (-+5 C) and MAI
 	{ -3.939,	47.333,	E::ElectricUnit::mV,	E::SensorType::mV_Type_N,			},	// -195 .. 1295		// module TIM (-+5 C) and MAI
 	{ -0.226,	21.040,	E::ElectricUnit::mV,	E::SensorType::mV_Type_R,			},	//  -50 .. 1763		// module TIM (-+5 C) and MAI
 	{ -0.236,	18.641,	E::ElectricUnit::mV,	E::SensorType::mV_Type_S,			},	//  -50 .. 1763		// module TIM (-+5 C) and MAI
-	{ -5.523,	20.563,	E::ElectricUnit::mV,	E::SensorType::mV_Type_T,			},	// -195 .. 395		// module TIM (-+5 C) and MAI
+	{ -5.523,	20.872,	E::ElectricUnit::mV,	E::SensorType::mV_Type_T,			},	// -195 .. 400		// module TIM (-+5 C) and MAI
 	{ -9.488,	66.466,	E::ElectricUnit::mV,	E::SensorType::mV_Type_L,			},	// -200 .. 800		// module MAI
 	{ -6.154,	 4.722,	E::ElectricUnit::mV,	E::SensorType::mV_Type_M,			},	// -200 .. 100		// module MAI
 
