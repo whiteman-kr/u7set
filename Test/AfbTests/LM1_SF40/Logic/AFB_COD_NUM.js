@@ -48,79 +48,165 @@ function cleanup(sim)
 
 function test_AFB_COD_NUM(sim)
 {
+	// Schema AFB_COD_NUM
+	
     sim.overrideSignalValue("#TUN_DSCR1", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI001") === 0);
 	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI001") === 1);
- 
+
     return;
 }
 
 function test_AFB_2COD_NUM(sim)
 {
+	// Schema AFB_COD_NUM
+	
     sim.overrideSignalValue("#TUN_DSCR1", 0);
     sim.overrideSignalValue("#TUN_DSCR2", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI002") === 0);
 
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 1);
     sim.overrideSignalValue("#TUN_DSCR2", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI002") === 1);
- 
+	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 0);
     sim.overrideSignalValue("#TUN_DSCR2", 1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI002") === 2);
-  
-
+	
     return;
 }
 
-function test_AFB_4COD(sim)
+function test_AFB_3COD_NUM(sim)
 {
+	// Schema AFB_COD_NUM
+	
     sim.overrideSignalValue("#TUN_DSCR1", 0);
     sim.overrideSignalValue("#TUN_DSCR2", 0);
     sim.overrideSignalValue("#TUN_DSCR3", 0);
-    sim.overrideSignalValue("#TUN_DSCR4", 0);
-	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_COD_NUM_SI004") === 0);
 	
+	sim.startForMs(5);
+	
+    assert(sim.signalValue("#OUT_COD_NUM_SI003") === 0);
+	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 1);
     sim.overrideSignalValue("#TUN_DSCR2", 0);
     sim.overrideSignalValue("#TUN_DSCR3", 0);
-    sim.overrideSignalValue("#TUN_DSCR4", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI004") === 1);
-
+	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 0);
     sim.overrideSignalValue("#TUN_DSCR2", 0);
     sim.overrideSignalValue("#TUN_DSCR3", 1);
-    sim.overrideSignalValue("#TUN_DSCR4", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI004") === 4);
-
+	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 0);
-    sim.overrideSignalValue("#TUN_DSCR2", 0);
+    sim.overrideSignalValue("#TUN_DSCR2", 1);
     sim.overrideSignalValue("#TUN_DSCR3", 0);
-    sim.overrideSignalValue("#TUN_DSCR4", 1);
+	
 	sim.startForMs(5);
-    assert(sim.signalValue("#OUT_COD_NUM_SI004") === 8);
-
+	
+    assert(sim.signalValue("#OUT_COD_NUM_SI004") === 2);
+	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 1);
     sim.overrideSignalValue("#TUN_DSCR2", 1);
     sim.overrideSignalValue("#TUN_DSCR3", 0);
-    sim.overrideSignalValue("#TUN_DSCR4", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI004") === 3);
 
     return;
 }
-function test_AFB_9COD(sim)
+
+function test_AFB_4COD_NUM(sim)
 {
+	// Schema AFB_COD_NUM
+	
+    sim.overrideSignalValue("#TUN_DSCR1", 0);
+    sim.overrideSignalValue("#TUN_DSCR2", 0);
+    sim.overrideSignalValue("#TUN_DSCR3", 0);
+    sim.overrideSignalValue("#TUN_DSCR4", 0);
+	
+	sim.startForMs(5);
+	
+    assert(sim.signalValue("#OUT_COD_NUM_SI004") === 0);
+	
+	//
+    sim.overrideSignalValue("#TUN_DSCR1", 1);
+    sim.overrideSignalValue("#TUN_DSCR2", 0);
+    sim.overrideSignalValue("#TUN_DSCR3", 0);
+    sim.overrideSignalValue("#TUN_DSCR4", 0);
+	
+	sim.startForMs(5);
+	
+    assert(sim.signalValue("#OUT_COD_NUM_SI004") === 1);
+	
+	//
+    sim.overrideSignalValue("#TUN_DSCR1", 0);
+    sim.overrideSignalValue("#TUN_DSCR2", 0);
+    sim.overrideSignalValue("#TUN_DSCR3", 1);
+    sim.overrideSignalValue("#TUN_DSCR4", 0);
+	
+	sim.startForMs(5);
+	
+    assert(sim.signalValue("#OUT_COD_NUM_SI004") === 4);
+	
+	//
+    sim.overrideSignalValue("#TUN_DSCR1", 0);
+    sim.overrideSignalValue("#TUN_DSCR2", 0);
+    sim.overrideSignalValue("#TUN_DSCR3", 0);
+    sim.overrideSignalValue("#TUN_DSCR4", 1);
+	
+	sim.startForMs(5);
+	
+    assert(sim.signalValue("#OUT_COD_NUM_SI004") === 8);
+	
+	//
+    sim.overrideSignalValue("#TUN_DSCR1", 1);
+    sim.overrideSignalValue("#TUN_DSCR2", 1);
+    sim.overrideSignalValue("#TUN_DSCR3", 0);
+    sim.overrideSignalValue("#TUN_DSCR4", 0);
+	
+	sim.startForMs(5);
+	
+    assert(sim.signalValue("#OUT_COD_NUM_SI004") === 3);
+
+    return;
+}
+
+function test_AFB_9COD_NUM(sim)
+{
+	// Schema AFB_COD_NUM
+	
     sim.overrideSignalValue("#TUN_DSCR1", 0);
     sim.overrideSignalValue("#TUN_DSCR2", 0);
     sim.overrideSignalValue("#TUN_DSCR3", 0);
@@ -130,9 +216,12 @@ function test_AFB_9COD(sim)
     sim.overrideSignalValue("#TUN_DSCR7", 0);
     sim.overrideSignalValue("#TUN_DSCR8", 0);
     sim.overrideSignalValue("#TUN_DSCR9", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI009") === 0);
 	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 1);
     sim.overrideSignalValue("#TUN_DSCR2", 0);
     sim.overrideSignalValue("#TUN_DSCR3", 0);
@@ -142,9 +231,12 @@ function test_AFB_9COD(sim)
     sim.overrideSignalValue("#TUN_DSCR7", 0);
     sim.overrideSignalValue("#TUN_DSCR8", 0);
     sim.overrideSignalValue("#TUN_DSCR9", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI009") === 1);
-
+	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 0);
     sim.overrideSignalValue("#TUN_DSCR2", 1);
     sim.overrideSignalValue("#TUN_DSCR3", 0);
@@ -154,9 +246,12 @@ function test_AFB_9COD(sim)
     sim.overrideSignalValue("#TUN_DSCR7", 0);
     sim.overrideSignalValue("#TUN_DSCR8", 0);
     sim.overrideSignalValue("#TUN_DSCR9", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI009") === 2);
-
+	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 0);
     sim.overrideSignalValue("#TUN_DSCR2", 0);
     sim.overrideSignalValue("#TUN_DSCR3", 1);
@@ -166,9 +261,12 @@ function test_AFB_9COD(sim)
     sim.overrideSignalValue("#TUN_DSCR7", 0);
     sim.overrideSignalValue("#TUN_DSCR8", 0);
     sim.overrideSignalValue("#TUN_DSCR9", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI009") === 4);
-
+	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 0);
     sim.overrideSignalValue("#TUN_DSCR2", 0);
     sim.overrideSignalValue("#TUN_DSCR3", 0);
@@ -178,9 +276,12 @@ function test_AFB_9COD(sim)
     sim.overrideSignalValue("#TUN_DSCR7", 1);
     sim.overrideSignalValue("#TUN_DSCR8", 1);
     sim.overrideSignalValue("#TUN_DSCR9", 1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI009") === 480);
-
+	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 1);
     sim.overrideSignalValue("#TUN_DSCR2", 1);
     sim.overrideSignalValue("#TUN_DSCR3", 1);
@@ -190,9 +291,12 @@ function test_AFB_9COD(sim)
     sim.overrideSignalValue("#TUN_DSCR7", 1);
     sim.overrideSignalValue("#TUN_DSCR8", 1);
     sim.overrideSignalValue("#TUN_DSCR9", 1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI009") === 511);
-
+	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 0);
     sim.overrideSignalValue("#TUN_DSCR2", 1);
     sim.overrideSignalValue("#TUN_DSCR3", 0);
@@ -202,13 +306,18 @@ function test_AFB_9COD(sim)
     sim.overrideSignalValue("#TUN_DSCR7", 0);
     sim.overrideSignalValue("#TUN_DSCR8", 1);
     sim.overrideSignalValue("#TUN_DSCR9", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI009") === 170);
-
+	
     return;
 }
-function test_AFB_16COD(sim)
+
+function test_AFB_16COD_NUM(sim)
 {
+	// Schema AFB_COD_NUM
+	
     sim.overrideSignalValue("#TUN_DSCR1", 0);
     sim.overrideSignalValue("#TUN_DSCR2", 0);
     sim.overrideSignalValue("#TUN_DSCR3", 0);
@@ -225,9 +334,12 @@ function test_AFB_16COD(sim)
     sim.overrideSignalValue("#TUN_DSCR14", 0);
     sim.overrideSignalValue("#TUN_DSCR15", 0);
     sim.overrideSignalValue("#TUN_DSCR16", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI0016") === 0);
 
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 1);
     sim.overrideSignalValue("#TUN_DSCR2", 0);
     sim.overrideSignalValue("#TUN_DSCR3", 0);
@@ -244,9 +356,12 @@ function test_AFB_16COD(sim)
     sim.overrideSignalValue("#TUN_DSCR14", 0);
     sim.overrideSignalValue("#TUN_DSCR15", 0);
     sim.overrideSignalValue("#TUN_DSCR16", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI0016") === 1);
-
+	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 1);
     sim.overrideSignalValue("#TUN_DSCR2", 1);
     sim.overrideSignalValue("#TUN_DSCR3", 1);
@@ -263,9 +378,12 @@ function test_AFB_16COD(sim)
     sim.overrideSignalValue("#TUN_DSCR14", 1);
     sim.overrideSignalValue("#TUN_DSCR15", 1);
     sim.overrideSignalValue("#TUN_DSCR16", 1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI0016") === 65535);
-
+	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 1);
     sim.overrideSignalValue("#TUN_DSCR2", 1);
     sim.overrideSignalValue("#TUN_DSCR3", 1);
@@ -282,15 +400,18 @@ function test_AFB_16COD(sim)
     sim.overrideSignalValue("#TUN_DSCR14", 0);
     sim.overrideSignalValue("#TUN_DSCR15", 0);
     sim.overrideSignalValue("#TUN_DSCR16", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI0016") === 255);
 
-    
     return;
 }
 
-function test_AFB_32COD(sim)
+function test_AFB_32COD_NUM(sim)
 {
+	// Schema AFB_COD_NUM
+	
     sim.overrideSignalValue("#TUN_DSCR1", 0);
     sim.overrideSignalValue("#TUN_DSCR2", 0);
     sim.overrideSignalValue("#TUN_DSCR3", 0);
@@ -323,9 +444,12 @@ function test_AFB_32COD(sim)
     sim.overrideSignalValue("#TUN_DSCR30", 0);
     sim.overrideSignalValue("#TUN_DSCR31", 0);
     sim.overrideSignalValue("#TUN_DSCR32", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI_0032") === 0);
-
+	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 1);
     sim.overrideSignalValue("#TUN_DSCR2", 1);
     sim.overrideSignalValue("#TUN_DSCR3", 1);
@@ -358,9 +482,12 @@ function test_AFB_32COD(sim)
     sim.overrideSignalValue("#TUN_DSCR30", 1);
     sim.overrideSignalValue("#TUN_DSCR31", 1);
     sim.overrideSignalValue("#TUN_DSCR32", 1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI_0032") === -1);
-
+	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 1);
     sim.overrideSignalValue("#TUN_DSCR2", 0);
     sim.overrideSignalValue("#TUN_DSCR3", 0);
@@ -393,9 +520,12 @@ function test_AFB_32COD(sim)
     sim.overrideSignalValue("#TUN_DSCR30", 0);
     sim.overrideSignalValue("#TUN_DSCR31", 0);
     sim.overrideSignalValue("#TUN_DSCR32", 1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI_0032") === -2147483647);
-
+	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 0);
     sim.overrideSignalValue("#TUN_DSCR2", 1);
     sim.overrideSignalValue("#TUN_DSCR3", 1);
@@ -428,24 +558,10 @@ function test_AFB_32COD(sim)
     sim.overrideSignalValue("#TUN_DSCR30", 1);
     sim.overrideSignalValue("#TUN_DSCR31", 1);
     sim.overrideSignalValue("#TUN_DSCR32", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_COD_NUM_SI_0032") === 2147483646);
 
     return;
 }
-
-
-	
-	
-    // Start simulation for N msecs:
-    //      sim.startForMs(50);
-
-    // Check signal value:
-    //      assert(sim.signalValue("#TEST_NOT_1") === 1);
-
-    // Override signal value:
-    //      sim.overrideSignalValue("#TEST_NOT_1", 0);
-
-    // Clear override signal list:
-    //      sim.overridesReset();
-
