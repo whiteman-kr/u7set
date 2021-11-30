@@ -1234,8 +1234,7 @@ DialogSignalProperty::PropertyPattern::PropertyPattern(Metrology::SignalParam* p
 
 				case E::ElectricUnit::Ohm:
 
-					if (m_pObject->sensorType() == E::SensorType::NoSensor || m_pObject->sensorType() == E::SensorType::Ohm_Raw ||
-						m_pObject->sensorType() == E::SensorType::Ohm_Pt21 || m_pObject->sensorType() == E::SensorType::Ohm_Cu23)
+					if (m_pObject->sensorType() == E::SensorType::NoSensor || m_pObject->sensorType() == E::SensorType::Ohm_Raw)
 					{
 						break;
 					}
