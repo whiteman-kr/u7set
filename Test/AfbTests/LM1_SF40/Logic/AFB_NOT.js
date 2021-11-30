@@ -46,39 +46,29 @@ function cleanup(sim)
     return;
 }
 
-
-
 function test_AFB_NOT(sim)
 {
+	// Schema AFB_NOT
 	
 	sim.overrideSignalValue("#TUN_DSCR1", 0);
+	
 	sim.startForMs(5);
+	
 	assert(sim.signalValue("#OUT_NOT") === 1);
 	
+	//
     sim.overrideSignalValue("#TUN_DSCR1", 1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_NOT") === 0);
-    
+	
+    //
     sim.overrideSignalValue("#TUN_DSCR1", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_NOT") === 1);
     
     return;
 }
-
-
-
-	
-	
-    // Start simulation for N msecs:
-    //      sim.startForMs(50);
-
-    // Check signal value:
-    //      assert(sim.signalValue("#TEST_NOT_1") === 1);
-
-    // Override signal value:
-    //      sim.overrideSignalValue("#TEST_NOT_1", 0);
-
-    // Clear override signal list:
-    //      sim.overridesReset();
-

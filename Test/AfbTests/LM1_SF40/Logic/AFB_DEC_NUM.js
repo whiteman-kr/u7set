@@ -46,55 +46,80 @@ function cleanup(sim)
     return;
 }
 
-
-
 function test_AFB_DEC_NUM(sim)
 {
+	// Schema AFB_DEC_NUM
 	
 	sim.overrideSignalValue("#TUN_IN_SI1", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_1DEC_NUM001") === 0);
-
+	
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", 1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_1DEC_NUM001") === 1);
-
+	
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", 2);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_1DEC_NUM001") === 0);
-
+	
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", -1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_1DEC_NUM001") === 1);
-    
+	
     return;
 }
 
 function test_AFB_DEC_NUM_2(sim)
 {
+	// Schema AFB_DEC_NUM
 	
 	sim.overrideSignalValue("#TUN_IN_SI1", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_2DEC_NUM001") === 0);
     assert(sim.signalValue("#OUT_2DEC_NUM002") === 0);
-
+		
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", 1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_2DEC_NUM001") === 1);
     assert(sim.signalValue("#OUT_2DEC_NUM002") === 0);
 
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", -1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_2DEC_NUM001") === 1);
     assert(sim.signalValue("#OUT_2DEC_NUM002") === 1);
 
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", 155);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_2DEC_NUM001") === 1);
     assert(sim.signalValue("#OUT_2DEC_NUM002") === 1);
-
+	
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", -128);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_2DEC_NUM001") === 0);
     assert(sim.signalValue("#OUT_2DEC_NUM002") === 0);
 
@@ -103,73 +128,95 @@ function test_AFB_DEC_NUM_2(sim)
 
 function test_AFB_DEC_NUM_5(sim)
 {
+	// Schema AFB_DEC_NUM
 	
 	sim.overrideSignalValue("#TUN_IN_SI1", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_5DEC_NUM001") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM002") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM003") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM004") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM005") === 0);
-
+	
+	//
 	sim.overrideSignalValue("#TUN_IN_SI1", 1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_5DEC_NUM001") === 1);
     assert(sim.signalValue("#OUT_5DEC_NUM002") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM003") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM004") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM005") === 0);
-
+	
+	//
 	sim.overrideSignalValue("#TUN_IN_SI1", -1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_5DEC_NUM001") === 1);
     assert(sim.signalValue("#OUT_5DEC_NUM002") === 1);
     assert(sim.signalValue("#OUT_5DEC_NUM003") === 1);
     assert(sim.signalValue("#OUT_5DEC_NUM004") === 1);
     assert(sim.signalValue("#OUT_5DEC_NUM005") === 1);
-
+	
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", 2);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_5DEC_NUM001") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM002") === 1);
     assert(sim.signalValue("#OUT_5DEC_NUM003") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM004") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM005") === 0);
-
+	
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", 3);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_5DEC_NUM001") === 1);
     assert(sim.signalValue("#OUT_5DEC_NUM002") === 1);
     assert(sim.signalValue("#OUT_5DEC_NUM003") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM004") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM005") === 0);
-
+	
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", 8);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_5DEC_NUM001") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM002") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM003") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM004") === 1);
     assert(sim.signalValue("#OUT_5DEC_NUM005") === 0);
-
+	
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", 16);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_5DEC_NUM001") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM002") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM003") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM004") === 0);
     assert(sim.signalValue("#OUT_5DEC_NUM005") === 1);
-
+	
     return;
 }
     
-
-
 function test_AFB_DEC_NUM_11(sim)
 {
+	// Schema AFB_DEC_NUM
 	
 	sim.overrideSignalValue("#TUN_IN_SI1", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_11DEC_NUM001") === 0);
     assert(sim.signalValue("#OUT_11DEC_NUM002") === 0);
     assert(sim.signalValue("#OUT_11DEC_NUM003") === 0);
@@ -181,9 +228,12 @@ function test_AFB_DEC_NUM_11(sim)
     assert(sim.signalValue("#OUT_11DEC_NUM009") === 0);
     assert(sim.signalValue("#OUT_11DEC_NUM010") === 0);
     assert(sim.signalValue("#OUT_11DEC_NUM011") === 0);
-
+	
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", 1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_11DEC_NUM001") === 1);
     assert(sim.signalValue("#OUT_11DEC_NUM002") === 0);
     assert(sim.signalValue("#OUT_11DEC_NUM003") === 0);
@@ -195,9 +245,12 @@ function test_AFB_DEC_NUM_11(sim)
     assert(sim.signalValue("#OUT_11DEC_NUM009") === 0);
     assert(sim.signalValue("#OUT_11DEC_NUM010") === 0);
     assert(sim.signalValue("#OUT_11DEC_NUM011") === 0); 
-
+	
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", 12);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_11DEC_NUM001") === 0);
     assert(sim.signalValue("#OUT_11DEC_NUM002") === 0);
     assert(sim.signalValue("#OUT_11DEC_NUM003") === 1);
@@ -209,9 +262,12 @@ function test_AFB_DEC_NUM_11(sim)
     assert(sim.signalValue("#OUT_11DEC_NUM009") === 0);
     assert(sim.signalValue("#OUT_11DEC_NUM010") === 0);
     assert(sim.signalValue("#OUT_11DEC_NUM011") === 0);
-
+	
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", 1024);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_11DEC_NUM001") === 0);
     assert(sim.signalValue("#OUT_11DEC_NUM002") === 0);
     assert(sim.signalValue("#OUT_11DEC_NUM003") === 0);
@@ -229,9 +285,12 @@ function test_AFB_DEC_NUM_11(sim)
 
 function test_AFB_DEC_NUM_32(sim)
 {
+	// Schema AFB_DEC_NUM
 	
 	sim.overrideSignalValue("#TUN_IN_SI1", 0);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_32DEC_NUM001") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM002") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM003") === 0);
@@ -265,8 +324,11 @@ function test_AFB_DEC_NUM_32(sim)
     assert(sim.signalValue("#OUT_32DEC_NUM031") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM032") === 0);
 
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", 1);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_32DEC_NUM001") === 1);
     assert(sim.signalValue("#OUT_32DEC_NUM002") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM003") === 0);
@@ -299,10 +361,12 @@ function test_AFB_DEC_NUM_32(sim)
     assert(sim.signalValue("#OUT_32DEC_NUM030") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM031") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM032") === 0);
-    
-
+	
+    //
     sim.overrideSignalValue("#TUN_IN_SI1", 8);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_32DEC_NUM001") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM002") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM003") === 0);
@@ -335,9 +399,12 @@ function test_AFB_DEC_NUM_32(sim)
     assert(sim.signalValue("#OUT_32DEC_NUM030") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM031") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM032") === 0);
-
+	
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", 32);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_32DEC_NUM001") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM002") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM003") === 0);
@@ -370,9 +437,12 @@ function test_AFB_DEC_NUM_32(sim)
     assert(sim.signalValue("#OUT_32DEC_NUM030") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM031") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM032") === 0);
-
+	
+	//
     sim.overrideSignalValue("#TUN_IN_SI1", 128);
+	
 	sim.startForMs(5);
+	
     assert(sim.signalValue("#OUT_32DEC_NUM001") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM002") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM003") === 0);
@@ -406,23 +476,5 @@ function test_AFB_DEC_NUM_32(sim)
     assert(sim.signalValue("#OUT_32DEC_NUM031") === 0);
     assert(sim.signalValue("#OUT_32DEC_NUM032") === 0);
     
-    
-    
     return;
-
-
 }
-
-
-    // Start simulation for N msecs:
-    //      sim.startForMs(50);
-
-    // Check signal value:
-    //      assert(sim.signalValue("#TEST_NOT_1") === 1);
-
-    // Override signal value:
-    //      sim.overrideSignalValue("#TEST_NOT_1", 0);
-
-    // Clear override signal list:
-    //      sim.overridesReset();
-
