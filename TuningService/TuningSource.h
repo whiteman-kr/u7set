@@ -19,8 +19,12 @@ namespace Tuning
 
 		bool hasTuningSignals() const;
 
+		const QStringList& getEnabledLansProvidedTuning() const;
+
 	private:
 		TuningDataShared m_tuningData;
+
+		mutable std::optional<QStringList> m_enabledLansProvidedTuning;
 	};
 
 	class TuningSources : public QVector<TuningSource>

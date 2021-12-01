@@ -12,7 +12,7 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------------------
 
-	class TuningSourceContext
+/*	class TuningSourceContext
 	{
 	public:
 		TuningSourceContext(const QString& sourceID, const TuningSource* source);
@@ -40,7 +40,7 @@ namespace Tuning
 		Network::DataSourceInfo m_sourceInfo;
 		Network::TuningSourceState m_sourceState;
 	};
-
+*/
 
 	// ----------------------------------------------------------------------------------------------
 	//
@@ -56,8 +56,8 @@ namespace Tuning
 							const TuningSources& sources);
 		~TuningClientContext();
 
-		void getSourcesInfo(QVector<Network::DataSourceInfo>& dataSourcesInfo) const;
-		void getSourcesStates(QVector<Network::TuningSourceState>& tuningSourcesStates) const;
+		void getSourcesInfo(std::vector<Network::DataSourceInfo>* dataSourcesInfo) const;
+		void getSourcesStates(std::vector<Network::TuningSourceState>* tuningSourcesStates) const;
 
 		void readSignalStates(const Network::TuningSignalsRead& request, Network::TuningSignalsReadReply* reply) const;
 
@@ -69,12 +69,12 @@ namespace Tuning
 		void applySignalStates(const QString& clientEquipmentID,
 							   const QString &user) const;
 
-		void setSourceThread(TuningSourceThread* thread);
-		void removeSourceThread(TuningSourceThread* thread);
+		void setSourceThread(TuningSourceThreadShared srcThread);
+		void removeSourceThread(const QString& tuningSourceID);
 
 	private:
-		TuningSourceContext* getSourceContext(const QString& sourceID) const;
-		TuningSourceContext* getSourceContextBySignalHash(Hash signalHash) const;
+		TuningSourceThreadShared getSourceThread(const QString& sourceID) const;
+		std::pair<bool, TuningSourceThreadShared> getSourceThreadBySignalHash(Hash signalHash) const;
 
 		void readSignalState(Network::TuningSignalState* tss) const;
 
@@ -82,10 +82,10 @@ namespace Tuning
 
 	private:
 		QString m_clientID;			// TuningClient equipmentID
+		const TuningSources& m_tuningSources;
 
-		QHash<QString, TuningSourceContext*> m_sourceContextMap;
-
-		QHash<Hash, TuningSourceContext*> m_signalToSourceMap;
+		std::map<QString, TuningSourceThreadShared> m_sourceThreadMap;	// source EquipmentID => TuningSourceThreadShared
+		std::map<Hash, QString> m_signalToSourceIdMap;					// signal Hash => source EquipmentID
 	};
 
 

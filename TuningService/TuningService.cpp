@@ -521,7 +521,7 @@ namespace Tuning
 		return result;
 	}
 
-	TuningSourceThread* TuningServiceWorker::createTuningSourceThread(const TuningSource& source)
+	TuningSourceThreadShared TuningServiceWorker::createTuningSourceThread(const TuningSource& source)
 	{
 		auto it = m_sourceThreads.find(source.moduleEquipmentID());
 
@@ -533,11 +533,12 @@ namespace Tuning
 			return nullptr;
 		}
 
-		sourceThread = new TuningSourceThread(m_settings,
-											  source,
-											  sessionParams().softwareRunMode,
-											  m_logger,
-											  m_tuningLog);
+		TuningSourceThreadShared sourceThread =
+				std::make_shared<TuningSourceThread>(	m_settings,
+														source,
+														sessionParams().softwareRunMode,
+														m_logger,
+														m_tuningLog);
 
 		m_sourceThreads.insert({source.moduleEquipmentID(), sourceThread});
 
@@ -644,7 +645,7 @@ namespace Tuning
 		}
 	}
 
-	void TuningServiceWorker::removeSourceThreadFromTuningClientContexts(TuningSourceThread* thread)
+	void TuningServiceWorker::removeSourceThreadFromTuningClientContexts(const QString& tuningSourceID)
 	{
 		TEST_PTR_RETURN(thread);
 
@@ -656,7 +657,7 @@ namespace Tuning
 				continue;
 			}
 
-			clientContext->removeSourceThread(thread);
+			clientContext->removeSourceThread(tuningSourceID);
 		}
 	}
 

@@ -91,8 +91,6 @@ public:
 
 	//
 
-	//
-
 private:
 	quint64 generateID() const;
 

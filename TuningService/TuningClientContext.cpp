@@ -10,7 +10,7 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------------------
 
-	TuningSourceContext::TuningSourceContext(const QString& sourceID, const TuningSource *source) :
+/*	TuningSourceContext::TuningSourceContext(const QString& sourceID, const TuningSource *source) :
 		m_sourceID(sourceID)
 	{
 		if (source == nullptr)
@@ -116,7 +116,7 @@ namespace Tuning
 		}
 
 		return m_sourceThread->applySignalStates(clientEquipmentID, user);
-	}
+	}*/
 
 	// ----------------------------------------------------------------------------------------------
 	//
@@ -127,11 +127,12 @@ namespace Tuning
 	TuningClientContext::TuningClientContext(const QString &clientID,
 											 const QStringList& drivenSourcesIDs,
 											 const TuningSources& sources) :
-		m_clientID(clientID)
+		m_clientID(clientID),
+		m_tuningSources(sources)
 	{
 		for(const QString& sourceID : drivenSourcesIDs)
 		{
-			if (m_sourceContextMap.contains(sourceID) == true)
+			if (m_sourceThreadMap.contains(sourceID) == true)
 			{
 				assert(false);
 				continue;
@@ -145,9 +146,7 @@ namespace Tuning
 				continue;
 			}
 
-			TuningSourceContext* sourceContext = new TuningSourceContext(sourceID, source);
-
-			m_sourceContextMap.insert(sourceID, sourceContext);
+			m_sourceThreadMap.insert({sourceID, nullptr});
 
 			// fill m_signalToSourceMap
 			//
@@ -172,7 +171,7 @@ namespace Tuning
 
 				Hash signalHash = ::calcHash(signal->appSignalID());
 
-				m_signalToSourceMap.insert(signalHash, sourceContext);
+				m_signalToSourceIdMap.insert({signalHash, sourceID});
 			}
 		}
 	}
@@ -182,57 +181,73 @@ namespace Tuning
 		clear();
 	}
 
-	void TuningClientContext::getSourcesInfo(QVector<Network::DataSourceInfo>& dataSourcesInfo) const
+	void TuningClientContext::getSourcesInfo(std::vector<Network::DataSourceInfo>* dataSourcesInfo) const
 	{
-		dataSourcesInfo.clear();
+		TEST_PTR_RETURN(dataSourcesInfo);
 
-		dataSourcesInfo.resize(m_sourceContextMap.count());
+		dataSourcesInfo->clear();
+
+		dataSourcesInfo->resize(m_sourceThreadMap.size());
 
 		int count = 0;
 
-		for(const TuningSourceContext* sourceContext : m_sourceContextMap)
+		for(auto& p : m_sourceThreadMap)
 		{
-			if (sourceContext == nullptr)
+			QString sourceID = p.first;
+
+			const TuningSource* src = m_tuningSources.getSourceByID(sourceID);
+
+			if (src == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
-			sourceContext->getSourceInfo(&dataSourcesInfo[count]);
+			src->saveToProto(&dataSourcesInfo->at(count));
 
 			count++;
 		}
 
-		if (count < dataSourcesInfo.size())
+		if (count < dataSourcesInfo->size())
 		{
-			dataSourcesInfo.resize(count);
+			dataSourcesInfo->resize(count);
 		}
 	}
 
-	void TuningClientContext::getSourcesStates(QVector<Network::TuningSourceState>& tuningSourcesStates) const
+	void TuningClientContext::getSourcesStates(std::vector<Network::TuningSourceState>* tuningSourcesStates) const
 	{
-		tuningSourcesStates.clear();
+		TEST_PTR_RETURN(tuningSourcesStates);
 
-		tuningSourcesStates.resize(m_sourceContextMap.count());
+		tuningSourcesStates->clear();
 
-		int count = 0;
-
-		for(const TuningSourceContext* sourceContext : m_sourceContextMap)
+		for(const auto& p : m_sourceThreadMap)
 		{
-			if (sourceContext == nullptr)
+			QString sourceID = p.first;
+			const TuningSourceThreadShared sourceThread = p.second;
+
+			if (sourceThread == nullptr)
 			{
-				assert(false);
-				continue;
+				const TuningSource* src = m_tuningSources.getSourceByID(sourceID);
+
+				TEST_PTR_CONTINUE(src);
+
+				const QStringList& tuningLans = src->getEnabledLansProvidedTuning();
+
+				for(const QString& lanID : tuningLans)
+				{
+					Network::TuningSourceState s;
+
+					s.set_sourceid(src->ID());
+					s.set_lanequipmentid(lanID.toStdString());
+					s.set_isreply(false);
+
+					tuningSourcesStates->push_back(s);
+				}
 			}
-
-			sourceContext->getSourceState(&tuningSourcesStates[count]);
-
-			count++;
-		}
-
-		if (count < tuningSourcesStates.size())
-		{
-			tuningSourcesStates.resize(count);
+			else
+			{
+				sourceThread->getSourceState(tuningSourcesStates);
+			}
 		}
 	}
 
@@ -278,7 +293,7 @@ namespace Tuning
 
 		reply->clear_writeresult();
 
-		QHash<TuningSourceContext*, TuningSourceContext*> m_usedSrcContexts;
+		std::set<TuningSourceThreadShared> usedSrcThreads;
 
 		bool hasErrors = false;
 
@@ -294,15 +309,23 @@ namespace Tuning
 
 			writeResult->set_signalhash(signalHash);
 
-			TuningSourceContext* sourceContext = getSourceContextBySignalHash(signalHash);
+			std::pair<bool, TuningSourceThreadShared> result = getSourceThreadBySignalHash(signalHash);
 
-			if (sourceContext == nullptr)
+			if (result.first == false)
 			{
 				writeResult->set_error(TO_INT(NetworkError::UnknownSignalHash));
 				continue;
 			}
 
-			NetworkError err = sourceContext->writeSignalState(clientEquipmentID, user, signalHash, TuningValue(writeCmd.value()));
+			TuningSourceThreadShared sourceThread = result.second;
+
+			if (sourceThread == nullptr)
+			{
+				writeResult->set_error(TO_INT(NetworkError::LmControlIsNotActive));
+				continue;
+			}
+
+			NetworkError err = sourceThread->writeSignalState(clientEquipmentID, user, signalHash, TuningValue(writeCmd.value()));
 
 			if (err != NetworkError::Success)
 			{
@@ -312,26 +335,24 @@ namespace Tuning
 			{
 				if (autoApply == true)
 				{
-					m_usedSrcContexts.insert(sourceContext, sourceContext);
+					usedSrcThreads.insert(sourceThread);
 				}
 			}
 		}
 
 		if (autoApply == true && hasErrors == false)
 		{
-			for(TuningSourceContext* usedSrcContext : m_usedSrcContexts)
+			for(const TuningSourceThreadShared& srcThread : usedSrcThreads)
 			{
-				TEST_PTR_CONTINUE(usedSrcContext);
+				TEST_PTR_CONTINUE(srcThread);
 
-				NetworkError err = usedSrcContext->applySignalStates(clientEquipmentID, user);
+				NetworkError err = srcThread->applySignalStates(clientEquipmentID, user);
 
 				if (err != NetworkError::Success)
 				{
 					hasErrors = true;
 				}
 			}
-
-			m_usedSrcContexts.clear();
 		}
 
 		NetworkError result = hasErrors == true ? NetworkError::InternalError : NetworkError::Success;
@@ -341,58 +362,83 @@ namespace Tuning
 
 	void TuningClientContext::applySignalStates(const QString& clientEquipmentID, const QString& user) const
 	{
-		for(TuningSourceContext* srcContext : m_sourceContextMap)
+		for(auto& p : m_sourceThreadMap)
 		{
-			if (srcContext == nullptr)
+			TuningSourceThreadShared srcThread = p.second;
+
+			if (srcThread == nullptr)
 			{
-				assert(false);
-				continue;
+				continue;		// it's Ok
 			}
 
-			srcContext->applySignalStates(clientEquipmentID, user);
+			srcThread->applySignalStates(clientEquipmentID, user);
 		}
 	}
 
-	void TuningClientContext::setSourceThread(TuningSourceThread* thread)
+	void TuningClientContext::setSourceThread(TuningSourceThreadShared srcThread)
 	{
-		TEST_PTR_RETURN(thread);
+		TEST_PTR_RETURN(srcThread);
 
-		TuningSourceContext* sourceContext = getSourceContext(thread->sourceEquipmentID());
-
-		if (sourceContext == nullptr)
+		if (m_sourceThreadMap.contains(srcThread->sourceEquipmentID()) == false)
 		{
-			return;			// its OK
+			return;			// it's OK
 		}
 
-		sourceContext->setSourceThread(thread);
+		m_sourceThreadMap.insert_or_assign(srcThread->sourceEquipmentID(), srcThread);
 	}
 
-	void TuningClientContext::removeSourceThread(TuningSourceThread* thread)
+	void TuningClientContext::removeSourceThread(const QString& tuningSourceID)
 	{
-		TEST_PTR_RETURN(thread);
-
-		TuningSourceContext* sourceContext = getSourceContext(thread->sourceEquipmentID());
-
-		if (sourceContext == nullptr)
+		if (m_sourceThreadMap.contains(tuningSourceID) == false)
 		{
-			return;			// its OK
+			return;			// it's OK
 		}
 
-		sourceContext->removeSourceThread(thread);
+		m_sourceThreadMap.insert_or_assign(tuningSourceID, nullptr);
 	}
 
-	TuningSourceContext* TuningClientContext::getSourceContext(const QString& sourceID) const
+	TuningSourceThreadShared TuningClientContext::getSourceThread(const QString& sourceID) const
 	{
-		TuningSourceContext* srcContext = m_sourceContextMap.value(sourceID, nullptr);
+		auto it = m_sourceThreadMap.find(sourceID);
 
-		return srcContext;
+		if (it == m_sourceThreadMap.end())
+		{
+			return nullptr;
+		}
+		return it->second;
 	}
 
-	TuningSourceContext* TuningClientContext::getSourceContextBySignalHash(Hash signalHash) const
+	std::pair<bool, TuningSourceThreadShared> TuningClientContext::getSourceThreadBySignalHash(Hash signalHash) const
 	{
-		TuningSourceContext* srcContext = m_signalToSourceMap.value(signalHash, nullptr);
+		std::pair<bool, TuningSourceThreadShared> result;
 
-		return srcContext;
+		// result.first - true == signal is exists
+		// result.second - thread ptr, if == nullptr - thread is not started
+
+		result.first = false;
+		result.second = nullptr;
+
+		auto it = m_signalToSourceIdMap.find(signalHash);
+
+		if (it == m_signalToSourceIdMap.end())
+		{
+			return result;
+		}
+
+		result.first = true;	// signal is found
+
+		const QString& tuningSourceID = it->second;
+
+		auto it2 = m_sourceThreadMap.find(tuningSourceID);
+
+		if (it2 == m_sourceThreadMap.end())
+		{
+			return result;
+		}
+
+		result.second = it2->second;	// may be == nullptr!
+
+		return result;
 	}
 
 	void TuningClientContext::readSignalState(Network::TuningSignalState* tss) const
@@ -403,32 +449,31 @@ namespace Tuning
 		//
 		Hash signalHash = tss->signalhash();
 
-		TuningSourceContext* sourceContext = getSourceContextBySignalHash(signalHash);
+		std::pair<bool, TuningSourceThreadShared> result = getSourceThreadBySignalHash(signalHash);
 
-		if (sourceContext == nullptr)
+		if (result.first == false)
 		{
 			tss->set_valid(false);
 			tss->set_error(TO_INT(NetworkError::UnknownSignalHash));
 			return;
 		}
 
-		sourceContext->readSignalState(tss);
+		TuningSourceThreadShared sourceThread = result.second;
+
+		if (sourceThread == nullptr)
+		{
+			tss->set_valid(false);
+			tss->set_error(TO_INT(NetworkError::LmControlIsNotActive));
+			return;
+		}
+
+		sourceThread->readSignalState(tss);
 	}
 
 	void TuningClientContext::clear()
 	{
-		for(TuningSourceContext* sourceContext : m_sourceContextMap)
-		{
-			if (sourceContext == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			delete sourceContext;
-		}
-
-		m_sourceContextMap.clear();
+		m_sourceThreadMap.clear();
+		m_signalToSourceIdMap.clear();
 	}
 
 	// ----------------------------------------------------------------------------------------------

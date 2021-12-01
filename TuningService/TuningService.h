@@ -85,14 +85,14 @@ namespace Tuning
 		bool runTuningSourceThread(bool runSingleSource,
 								   const QString& tuningSourceEquipmentID);
 
-		TuningSourceThread* createTuningSourceThread(const TuningSource& source);
+		TuningSourceThreadShared createTuningSourceThread(const TuningSource& source);
 		void stopTuningSourceThreads();
 
 		void runSourcesListenerThreads();
 		void stopSourcesListenerThreads();
 
 		void setSourceThreadInTuningClientContexts(TuningSourceThread* thread);
-		void removeSourceThreadFromTuningClientContexts(TuningSourceThread* thread);
+		void removeSourceThreadFromTuningClientContexts(const QString& tuningSourceID);
 
 		bool isSimulationMode() const;
 
@@ -110,8 +110,8 @@ namespace Tuning
 
 		TuningServiceSettings m_settings;
 
-		std::map<QString, Tuning::TuningSourceThread*> m_sourceThreads;		// module EquipmentID => TuningSourceThread*
-		std::map<quint32, Tuning::TuningSourceThread*> m_ip2sourceThread;	// LAN ipV4 => TuningSourceThread*
+		std::map<QString, TuningSourceThreadShared> m_sourceThreads;	// module EquipmentID => TuningSourceThreadShared
+		std::map<quint32, TuningSourceThreadShared> m_ip2sourceThread;	// TuningSource LANs ipV4 => TuningSourceThreadShared
 
 		TuningSources m_tuningSources;
 

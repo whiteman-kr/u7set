@@ -156,9 +156,9 @@ namespace Tuning
 
 		for(const TuningClientContext* clientContext : clientContexts)
 		{
-			QVector<Network::DataSourceInfo> dsiArray;
+			std::vector<Network::DataSourceInfo> dsiArray;
 
-			clientContext->getSourcesInfo(dsiArray);
+			clientContext->getSourcesInfo(&dsiArray);
 
 			for(const Network::DataSourceInfo& dsi : dsiArray)
 			{
@@ -213,8 +213,11 @@ namespace Tuning
 
 		QVector<const TuningClientContext*> clientContexts;
 
+		// построить список ID источников
+
 		if (clientEquipmentID == SCM_CLIENT_ID)
 		{
+			// здесь включить ВСЕ
 			m_service.getAllClientContexts(clientContexts);
 		}
 		else
@@ -236,14 +239,15 @@ namespace Tuning
 				return;
 			}
 
+			// здесь ТОЛЬКО ТЕ ЧТО УПРАВЛЯЕТ СЛИЕНТ КОНТЕКСТ
 			clientContexts.append(clntContext);
 		}
-
-		QHash<quint64, quint64> dataSourcesIDs;
+wsergergerg
+		std::set<quint64, quint64> dataSourcesIDs;
 
 		for(const TuningClientContext* clientContext : clientContexts)
 		{
-			QVector<Network::TuningSourceState> tssArray;
+			std::vector<Network::TuningSourceState> tssArray;
 
 			clientContext->getSourcesStates(tssArray);
 

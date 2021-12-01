@@ -11,52 +11,30 @@ namespace Tuning
 {
 	// ----------------------------------------------------------------------------------
 	//
-	// SourceStatistics struct implementation
+	// TuningSourceState struct implementation
 	//
 	// ----------------------------------------------------------------------------------
 
-	void SourceStatistics::get(Network::TuningSourceState* tss)
+	void TuningSourceState::saveToProto(Network::TuningSourceState* tss) const
 	{
 		TEST_PTR_RETURN(tss);
 
-		tss->set_sourceid(dataSourceID);
+		tss->set_sourceid(sourceID);
+		tss->set_lanequipmentid(lanEquipmentID);
+
+		//
 
 		tss->set_isreply(isReply);
-
 		tss->set_requestcount(requestCount);
 		tss->set_replycount(replyCount);
-
 		tss->set_commandqueuesize(commandQueueSize);
+		tss->set_controlisactive(controlIsActive);
+		tss->set_setsor(setSOR);
+		tss->set_writingdisabled(writingDisabled);
+		tss->set_hasunappliedparams(hasUnappliedParams);
 
-		tss->set_erruntimelyreplay(errUntimelyReplay);
-		tss->set_errsent(errSent);
-		tss->set_errpartialsent(errPartialSent);
-		tss->set_errreplysize(errReplySize);
-		tss->set_errnoreply(errNoReply);
-		tss->set_errrupcrc(errRupCRC);
-
-		// errors in reply RupFrameHeader
 		//
-		tss->set_errrupprotocolversion(errRupProtocolVersion);
-		tss->set_errrupframesize(errRupFrameSize);
-		tss->set_errrupnontuningdata(errRupNonTuningData);
-		tss->set_errrupmoduletype(errRupModuleType);
-		tss->set_errrupframesquantity(errRupFramesQuantity);
-		tss->set_errrupframenumber(errRupFrameNumber);
 
-		// errors in reply FotipHeader
-		//
-		tss->set_errfotipprotocolversion(errFotipProtocolVersion);
-		tss->set_errfotipuniqueid(errFotipUniqueID);
-		tss->set_errfotiplmnumber(errFotipLmNumber);
-		tss->set_errfotipsubsystemcode(errFotipSubsystemCode);
-		tss->set_errfotipoperationcode(errFotipOperationCode);
-		tss->set_errfotipframesize(errFotipFrameSize);
-		tss->set_errfotipromsize(errFotipRomSize);
-		tss->set_errfotipromframesize(errFotipRomFrameSize);
-
-		// errors reported by LM in reply FotipHeader.flags
-		//
 		tss->set_fotipflagboundschecksuccess(fotipFlagBoundsCheckSuccess);
 		tss->set_fotipflagwritesuccess(fotipFlagWriteSuccess);
 		tss->set_fotipflagdatatypeerr(fotipFlagDataTypeErr);
@@ -73,15 +51,36 @@ namespace Tuning
 		tss->set_fotipflagsetsor(fotipFlagSetSOR);
 		tss->set_fotipflagwritingdisabled(fotipFlagWritingDisabled);
 
+		//
+
+		tss->set_errrupprotocolversion(errRupProtocolVersion);
+		tss->set_errrupframesize(errRupFrameSize);
+		tss->set_errrupnontuningdata(errRupNonTuningData);
+		tss->set_errrupmoduletype(errRupModuleType);
+		tss->set_errrupframesquantity(errRupFramesQuantity);
+		tss->set_errrupframenumber(errRupFrameNumber);
+		tss->set_errrupcrc(errRupCRC);
+
+		//
+
+		tss->set_errfotipprotocolversion(errFotipProtocolVersion);
+		tss->set_errfotipuniqueid(errFotipUniqueID);
+		tss->set_errfotiplmnumber(errFotipLmNumber);
+		tss->set_errfotipsubsystemcode(errFotipSubsystemCode);
+		tss->set_errfotipoperationcode(errFotipOperationCode);
+		tss->set_errfotipframesize(errFotipFrameSize);
+		tss->set_errfotipromsize(errFotipRomSize);
+		tss->set_errfotipromframesize(errFotipRomFrameSize);
 		tss->set_erranaloglowboundcheck(errAnalogLowBoundCheck);
 		tss->set_erranaloghighboundcheck(errAnalogHighBoundCheck);
 
-		tss->set_controlisactive(controlIsActive);
-		tss->set_setsor(setSOR);
-		tss->set_writingdisabled(writingDisabled);
+		//
 
-		tss->set_hasunappliedparams(hasUnappliedParams);
-
+		tss->set_erruntimelyreplay(errUntimelyReplay);
+		tss->set_errsent(errSent);
+		tss->set_errpartialsent(errPartialSent);
+		tss->set_errreplysize(errReplySize);
+		tss->set_errnoreply(errNoReply);
 		tss->set_errtuningframeupdate(errTuningFrameUpdate);
 	}
 
@@ -245,7 +244,6 @@ namespace Tuning
 												CircularLoggerShared logger,
 												CircularLoggerShared tuningLog) :
 		m_sourceThread(srcThread),
-		m_stat(srcThread.sourceStatistics()),
 		m_channel(channelInfo.channel),
 		m_logger(logger),
 		m_tuningLog(tuningLog),
@@ -282,6 +280,12 @@ namespace Tuning
 		m_tuningDataFramePayloadW = td->tuningDataFramePayloadW();
 
 		m_tuningUsedFramesCount = td->usedFramesCount();
+
+		//
+
+		m_state.sourceID = srcThread.source().ID();
+		m_state.channel = m_channel;
+		m_state.lanEquipmentID = channelInfo.portEquipmentID.toStdString();
 	}
 
 	TuningChannelHandler::~TuningChannelHandler()
@@ -305,7 +309,7 @@ namespace Tuning
 
 	void TuningChannelHandler::startHandler()
 	{
-		m_stat.controlIsActive = true;
+		m_state.controlIsActive = true;
 
 		DEBUG_LOG_MSG(m_logger, QString("Tuning source %1 (%2, channel %3)  handler is started").
 					  arg(m_portEquipmentID).
@@ -317,7 +321,7 @@ namespace Tuning
 
 	void TuningChannelHandler::stopHandler()
 	{
-		m_stat.controlIsActive = false;
+		m_state.controlIsActive = false;
 
 		DEBUG_LOG_MSG(m_logger, QString("Tuning source %1 (%2) handler is stopped").arg(m_portEquipmentID).arg(m_sourceIP.addressPortStr()));
 	}
@@ -329,7 +333,17 @@ namespace Tuning
 
 	bool TuningChannelHandler::isReply() const
 	{
-		return m_isReply;
+		return m_state.isReply;
+	}
+
+	bool TuningChannelHandler::setSOR() const
+	{
+		return m_state.setSOR;
+	}
+
+	bool TuningChannelHandler::writingDisabled() const
+	{
+		return m_state.writingDisabled;
 	}
 
 	void TuningChannelHandler::periodicProcessing()
@@ -365,21 +379,21 @@ namespace Tuning
 
 		if (m_waitReply == false)
 		{
-			m_stat.errUntimelyReplay++;
+			m_state.errUntimelyReplay++;
 			return false;
 		}
 
 		m_waitReplyCounter = 0;
 		m_retryCount = 0;
 
-		m_isReply = true;
+		m_state.isReply = true;
 
-		m_stat.replyCount++;
+		m_state.replyCount++;
 
-		if ((m_stat.replyCount % 100) == 0)
+		if ((m_state.replyCount % 100) == 0)
 		{
 			qDebug() << C_STR(QString("Receive %1 replies from %2, NoReplies = %3").
-							  arg(m_stat.replyCount).arg(m_portEquipmentID).arg(m_stat.errNoReply));
+							  arg(m_state.replyCount).arg(m_portEquipmentID).arg(m_state.errNoReply));
 		}
 
 		processReply(m_reply);
@@ -396,14 +410,14 @@ namespace Tuning
 
 	void TuningChannelHandler::incErrReplySize()
 	{
-		m_stat.errReplySize++;
+		m_state.errReplySize++;
 	}
 
 	void TuningChannelHandler::getState(Network::TuningSourceState* tuningSourceState)
 	{
 		TEST_PTR_RETURN(tuningSourceState);
 
-		m_stat.get(tuningSourceState);
+		m_state.saveToProto(tuningSourceState);
 	}
 
 	bool TuningChannelHandler::processWaitReply()
@@ -421,7 +435,7 @@ namespace Tuning
 
 			// fix replay timeout
 			//
-			m_stat.errNoReply++;
+			m_state.errNoReply++;
 
 			m_waitReply = false;
 
@@ -437,7 +451,7 @@ namespace Tuning
 			{
 				onNoReply();
 
-				m_isReply = false;
+				m_state.isReply = false;
 			}
 			else
 			{
@@ -566,7 +580,7 @@ namespace Tuning
 										  m_tuningSimIP.port());
 		}
 
-		m_stat.requestCount++;
+		m_state.requestCount++;
 
 		// revert headers to LittleEndian
 		//
@@ -587,13 +601,13 @@ namespace Tuning
 
 		if (sent == -1)
 		{
-			m_stat.errSent++;
+			m_state.errSent++;
 			return;
 		}
 
 		if (sent < static_cast<qint64>(sizeof(m_request)))
 		{
-			m_stat.errPartialSent++;
+			m_state.errPartialSent++;
 		}
 
 		// logging
@@ -792,7 +806,7 @@ namespace Tuning
 		if (result == false)
 		{
 			finalizeWriting(NetworkError::TuningNoReply);
-			m_stat.errRupCRC++;
+			m_state.errRupCRC++;
 			return;
 		}
 
@@ -838,12 +852,22 @@ namespace Tuning
 
 	void TuningChannelHandler::processReadReply(RupFotipV2& reply)
 	{
-		m_sourceThread.updateFrameSignalsState(reply);
+		bool res = m_sourceThread.updateFrameSignalsState(reply);
+
+		if (res == false)
+		{
+			m_state.errTuningFrameUpdate++;
+		}
 	}
 
 	void TuningChannelHandler::processWriteReply(RupFotipV2& reply)
 	{
-		m_sourceThread.updateFrameSignalsState(reply);
+		bool res = m_sourceThread.updateFrameSignalsState(reply);
+
+		if (res == false)
+		{
+			m_state.errTuningFrameUpdate++;
+		}
 
 		reply.fotipFrame.analogCmpErrors.all = reverseUint16(reply.fotipFrame.analogCmpErrors.all);
 
@@ -862,7 +886,7 @@ namespace Tuning
 
 				if (reply.fotipFrame.analogCmpErrors.highBoundCheckError == 1)
 				{
-					m_stat.errAnalogHighBoundCheck++;
+					m_state.errAnalogHighBoundCheck++;
 
 					boundCheckStr = QString("HighBoundCheckError == 1 ");
 					errCode = NetworkError::TuningValueOutOfRange;
@@ -871,7 +895,7 @@ namespace Tuning
 
 				if (reply.fotipFrame.analogCmpErrors.lowBoundCheckError == 1)
 				{
-					m_stat.errAnalogLowBoundCheck++;
+					m_state.errAnalogLowBoundCheck++;
 
 					boundCheckStr = QString("LowBoundCheckError == 1 ");
 					errCode = NetworkError::TuningValueOutOfRange;
@@ -937,7 +961,7 @@ namespace Tuning
 		}
 		else
 		{
-			m_stat.hasUnappliedParams = true;
+			m_state.hasUnappliedParams = true;
 		}
 
 		logTuningReply(m_lastProcessedCommand, reply);
@@ -951,7 +975,7 @@ namespace Tuning
 		{
 			result = "Success";
 
-			m_stat.hasUnappliedParams = false;
+			m_state.hasUnappliedParams = false;
 		}
 		else
 		{
@@ -1001,13 +1025,13 @@ namespace Tuning
 
 		if (rupHeader.protocolVersion != Rup::VERSION)
 		{
-			m_stat.errRupProtocolVersion++;
+			m_state.errRupProtocolVersion++;
 			result &= false;
 		}
 
 		if (rupHeader.frameSize != Socket::ENTIRE_UDP_SIZE)
 		{
-			m_stat.errRupFrameSize++;
+			m_state.errRupFrameSize++;
 			result &= false;
 		}
 
@@ -1016,13 +1040,13 @@ namespace Tuning
 			rupHeader.flags.diagData != 0 ||
 			rupHeader.flags.test != 0)
 		{
-			m_stat.errRupNonTuningData++;
+			m_state.errRupNonTuningData++;
 			result &= false;
 		}
 
 		if (m_disableModulesTypeChecking == false && rupHeader.moduleType != m_lmModuleType)
 		{
-			m_stat.errRupModuleType++;
+			m_state.errRupModuleType++;
 			result &= false;
 
 			qDebug() << "Invalid moduleType of" << m_portEquipmentID << "( waiting" << m_lmModuleType << ", receiving" << rupHeader.moduleType << ")";
@@ -1030,13 +1054,13 @@ namespace Tuning
 
 		if (rupHeader.framesQuantity != 1)
 		{
-			m_stat.errRupFramesQuantity++;
+			m_state.errRupFramesQuantity++;
 			result &= false;
 		}
 
 		if (rupHeader.frameNumber != 0)
 		{
-			m_stat.errRupFrameNumber++;
+			m_state.errRupFrameNumber++;
 			result &= false;
 		}
 
@@ -1051,15 +1075,15 @@ namespace Tuning
 
 		if (fotipHeader.protocolVersion != FotipV2::VERSION)
 		{
-			m_stat.errFotipProtocolVersion++;
+			m_state.errFotipProtocolVersion++;
 			result = false;
 		}
 
 		if (fotipHeader.uniqueId != m_sourceUniqueID)
 		{
-			m_stat.errFotipUniqueID++;
+			m_state.errFotipUniqueID++;
 
-			if ((m_stat.errFotipUniqueID % 500) == 0)
+			if ((m_state.errFotipUniqueID % 500) == 0)
 			{
 				DEBUG_LOG_ERR(m_logger, QString("Wrong tuning source UniqueID: %1.").arg(m_sourceIP.addressStr()));
 			}
@@ -1067,42 +1091,42 @@ namespace Tuning
 		}
 		else
 		{
-			m_stat.errFotipUniqueID = 0;		// added by Vintenko 26.12.2017
+			m_state.errFotipUniqueID = 0;		// added by Vintenko 26.12.2017
 		}
 
 		if (fotipHeader.subsystemKey.lmNumber != m_lmNumber)
 		{
-			m_stat.errFotipLmNumber++;
+			m_state.errFotipLmNumber++;
 			result = false;
 		}
 
 		if (fotipHeader.subsystemKey.subsystemCode != m_subsystemCode)
 		{
-			m_stat.errFotipSubsystemCode++;
+			m_state.errFotipSubsystemCode++;
 			result = false;
 		}
 
 		if (fotipHeader.operationCode != m_request.rupFotipV2.fotipFrame.header.operationCode)
 		{
-			m_stat.errFotipOperationCode++;
+			m_state.errFotipOperationCode++;
 			result = false;
 		}
 
 		if (fotipHeader.fotipFrameSizeB != sizeof(FotipV2::Frame))
 		{
-			m_stat.errFotipFrameSize++;
+			m_state.errFotipFrameSize++;
 			result = false;
 		}
 
 		if (fotipHeader.romSizeB !=  static_cast<quint32>(m_tuningFlashSizeB))
 		{
-			m_stat.errFotipRomSize++;
+			m_state.errFotipRomSize++;
 			result = false;
 		}
 
 		if (fotipHeader.romFrameSizeB != m_tuningFlashFramePayloadB)
 		{
-			m_stat.errFotipRomFrameSize++;
+			m_state.errFotipRomFrameSize++;
 			result = false;
 		}
 
@@ -1112,61 +1136,61 @@ namespace Tuning
 		//
 		if (flags.dataTypeError == 1)
 		{
-			m_stat.fotipFlagDataTypeErr++;
+			m_state.fotipFlagDataTypeErr++;
 			result = false;
 		}
 
 		if (flags.operationCodeError == 1)
 		{
-			m_stat.fotipFlagOpCodeErr++;
+			m_state.fotipFlagOpCodeErr++;
 			result = false;
 		}
 
 		if (flags.startAddressError == 1)
 		{
-			m_stat.fotipFlagStartAddrErr++;
+			m_state.fotipFlagStartAddrErr++;
 			result = false;
 		}
 
 		if (flags.romSizeError == 1)
 		{
-			m_stat.fotipFlagRomSizeErr++;
+			m_state.fotipFlagRomSizeErr++;
 			result = false;
 		}
 
 		if (flags.romFrameSizeError == 1)
 		{
-			m_stat.fotipFlagRomFrameSizeErr++;
+			m_state.fotipFlagRomFrameSizeErr++;
 			result = false;
 		}
 
 		if (flags.frameSizeError == 1)
 		{
-			m_stat.fotipFlagFrameSizeErr++;
+			m_state.fotipFlagFrameSizeErr++;
 			result = false;
 		}
 
 		if (flags.versionError == 1)
 		{
-			m_stat.fotipFlagProtocolVersionErr++;
+			m_state.fotipFlagProtocolVersionErr++;
 			result = false;
 		}
 
 		if (flags.subsystemKeyError == 1)
 		{
-			m_stat.fotipFlagSubsystemKeyErr++;
+			m_state.fotipFlagSubsystemKeyErr++;
 			result = false;
 		}
 
 		if (flags.idError == 1)
 		{
-			m_stat.fotipFlagUniueIDErr++;
+			m_state.fotipFlagUniueIDErr++;
 			result = false;
 		}
 
 		if (flags.offsetError == 1)
 		{
-			m_stat.fotipFlagOffsetErr++;
+			m_state.fotipFlagOffsetErr++;
 			result = false;
 		}
 
@@ -1174,34 +1198,34 @@ namespace Tuning
 		//
 		if (flags.successfulCheck == 1)
 		{
-			m_stat.fotipFlagBoundsCheckSuccess++;
+			m_state.fotipFlagBoundsCheckSuccess++;
 		}
 
 		if (flags.successfulWrite == 1)
 		{
-			m_stat.fotipFlagWriteSuccess++;
+			m_state.fotipFlagWriteSuccess++;
 		}
 
 		if (flags.succesfulApply == 1)
 		{
-			m_stat.fotipFlagApplySuccess++;
+			m_state.fotipFlagApplySuccess++;
 		}
 
 		if (flags.setSOR == 1)
 		{
-			m_stat.fotipFlagSetSOR++;					// for platform LMs
-			m_stat.setSOR = true;
+			m_state.fotipFlagSetSOR++;					// for platform LMs
+			m_state.setSOR = true;
 
-			m_stat.fotipFlagWritingDisabled++;			// for non-platform LMs
-			m_stat.writingDisabled = true;
+			m_state.fotipFlagWritingDisabled++;			// for non-platform LMs
+			m_state.writingDisabled = true;
 		}
 		else
 		{
-			m_stat.fotipFlagSetSOR = 0;					// for platform LMs
-			m_stat.setSOR = false;
+			m_state.fotipFlagSetSOR = 0;					// for platform LMs
+			m_state.setSOR = false;
 
-			m_stat.fotipFlagWritingDisabled = 0;		// for non-platform LMs
-			m_stat.writingDisabled = false;
+			m_state.fotipFlagWritingDisabled = 0;		// for non-platform LMs
+			m_state.writingDisabled = false;
 		}
 
 		return result;
@@ -1229,14 +1253,14 @@ namespace Tuning
 				logStr = QString("WRITE request %1 Signal=%2 Type=%3 CurValue=%4 NewValue=%5 SOR=%6").
 							arg(str).arg(ts->appSignalID()).arg(cmd.write.newTuningValue.typeStr()).
 							arg(ts->currentValue().toString()).arg(cmd.write.newTuningValue.toString()).
-							arg(m_stat.setSOR == true ? 1 : 0);
+							arg(m_state.setSOR == true ? 1 : 0);
 
 				*appSignalID = ts->appSignalID();
 			}
 			break;
 
 		case FotipV2::OpCode::Apply:
-			logStr = QString("APPLY request %1 SOR=%2").arg(str).arg(m_stat.setSOR == true ? 1 : 0);
+			logStr = QString("APPLY request %1 SOR=%2").arg(str).arg(m_state.setSOR == true ? 1 : 0);
 			break;
 
 		default:
@@ -1284,7 +1308,7 @@ namespace Tuning
 			logStr = QString("APPLY reply&nbsp;&nbsp;&nbsp;LM=%1 Result=%2 SOR=%3").
 						arg(m_portEquipmentID).
 						arg(reply.fotipFrame.header.flags.succesfulApply == 1 ? "Success" : "Fail").
-						arg(m_stat.setSOR == true ? 1 : 0);
+						arg(m_state.setSOR == true ? 1 : 0);
 			break;
 
 		default:
@@ -1316,7 +1340,7 @@ namespace Tuning
 		m_logger(logger),
 		m_tuningLog(tuningLog)
 	{
-		m_stat.dataSourceID = m_source.ID();		// ID generated by DataSource::generateID()
+		source.saveToProto(&m_protoDataSourceInfo);
 
 		m_disableModulesTypeChecking = settings.disableModulesTypeChecking;
 
@@ -1374,14 +1398,40 @@ namespace Tuning
 		handler->pushReply(reply);
 	}
 
-	void TuningSourceThread::incErrReplySize()
+	void TuningSourceThread::incErrReplySize(quint32 channelIP)
 	{
-		m_stat.errReplySize++;
+		AUTO_LOCK(m_handlersMutex);
+
+		auto it = m_ip2handlers.find(channelIP);
+
+		if (it == m_ip2handlers.end())
+		{
+			return;
+		}
+
+		TuningChannelHandler* handler = it->second;
+
+		TEST_PTR_RETURN(handler);
+
+		handler->incErrReplySize();
 	}
 
-	void TuningSourceThread::getState(Network::TuningSourceState* tuningSourceState)
+	void TuningSourceThread::getSourceState(std::vector<Network::TuningSourceState>* tuningSourcesStates)
 	{
-		m_stat.get(tuningSourceState);
+		TEST_PTR_RETURN(tuningSourcesStates);
+
+		AUTO_LOCK(m_handlersMutex);
+
+		for(auto handler : m_handlers)
+		{
+			TEST_PTR_CONTINUE(handler);
+
+			Network::TuningSourceState s;
+
+			handler->state().saveToProto(&s);
+
+			tuningSourcesStates->push_back(s);
+		}
 	}
 
 	void TuningSourceThread::readSignalState(Network::TuningSignalState* tss) const
@@ -1512,10 +1562,8 @@ namespace Tuning
 
 			bool allInitialized = true;
 
-			for(auto&p : m_handlers)
+			for(const TuningChannelHandler* handler : m_handlers)
 			{
-				const TuningChannelHandler* handler = p.second;
-
 				allInitialized &= handler->isInitialized();
 			}
 
@@ -1541,15 +1589,14 @@ namespace Tuning
 		return const_cast<TuningSignal*>(privateGetTuningSignal(hash));
 	}
 
-	void TuningSourceThread::updateFrameSignalsState(RupFotipV2& reply)
+	bool TuningSourceThread::updateFrameSignalsState(RupFotipV2& reply)
 	{
 		bool updateResult = m_tuningMem.updateFrame(reply.fotipFrame.header.startAddressW,
 													reply.fotipFrame.header.romFrameSizeB,
 													reply.fotipFrame.data);
 		if (updateResult == false)
 		{
-			m_stat.errTuningFrameUpdate++;
-			return;
+			return false;
 		}
 
 		// parse signals values and bounds
@@ -1561,7 +1608,7 @@ namespace Tuning
 		if (arrayIndex < 0 || arrayIndex >= m_frameSignals.size())
 		{
 			assert(false);
-			return;
+			return false;
 		}
 
 		const std::vector<int>& frameSignals = m_frameSignals[arrayIndex];
@@ -1637,6 +1684,8 @@ namespace Tuning
 				assert(false);
 			}
 		}
+
+		return true;
 	}
 
 	bool TuningSourceThread::isSourceHandlerExistsForChannel(int channel) const
@@ -1671,16 +1720,8 @@ namespace Tuning
 				msCount = 0;
 			}
 
-			for(auto& p : m_handlers)
+			for(TuningChannelHandler* handler : m_handlers)
 			{
-				TuningChannelHandler* handler = p.second;
-
-				if (handler == nullptr)
-				{
-					Q_ASSERT(false);
-					continue;
-				}
-
 				bool replyProcessed = handler->processReplyQueue();
 
 				if (tenMsElapsed == true || replyProcessed == true)
@@ -1755,12 +1796,15 @@ namespace Tuning
 
 		Q_ASSERT(m_handlers.size() == 0);
 
-		for(const TuningChannelInfo& tci :m_tuningChannelsInfo)
+		for(const TuningChannelInfo& tci : m_tuningChannelsInfo)
 		{
 			TuningChannelHandler* handler = new TuningChannelHandler(*this, tci, m_disableModulesTypeChecking,
 																	 m_swRunMode, m_logger, m_tuningLog);
 
-			m_handlers.insert({tci.channel, handler});
+			m_handlers.push_back(handler);
+
+			m_ch2handlers.insert({tci.channel, handler});
+			m_ip2handlers.insert({tci.tuningDataIP.address32(), handler});
 
 			handler->startHandler();
 		}
@@ -1770,10 +1814,8 @@ namespace Tuning
 	{
 		AUTO_LOCK(m_handlersMutex);
 
-		for(auto& p : m_handlers)
+		for(TuningChannelHandler* handler : m_handlers)
 		{
-			TuningChannelHandler* handler = p.second;
-
 			if (handler != nullptr)
 			{
 				handler->stopHandler();
@@ -1802,26 +1844,17 @@ namespace Tuning
 	{
 		bool anyChannelReply = false;
 
-		for(auto& p: m_handlers)
+		for(TuningChannelHandler* handler : m_handlers)
 		{
-			const TuningChannelHandler* handler = p.second;
-
-			if (handler != nullptr)
-			{
-				anyChannelReply |= handler->isReply();
-			}
-			else
-			{
-				Q_ASSERT(false);
-			}
+			anyChannelReply |= handler->isReply();
 		}
 
-		if (anyChannelReply == false && m_stat.isReply == true)
+		if (anyChannelReply == false && m_anyChannelReply == true)
 		{
 			invalidateAllSignals();
 		}
 
-		m_stat.isReply = anyChannelReply;
+		m_anyChannelReply = anyChannelReply;
 	}
 
 	void TuningSourceThread::invalidateAllSignals()
@@ -1832,16 +1865,30 @@ namespace Tuning
 		}
 	}
 
+	void TuningSourceThread::checkSetSOR()
+	{
+		bool setSOR = false;
+		bool writingDisabled = false;
+
+		for(TuningChannelHandler* handler : m_handlers)
+		{
+			if (handler->isReply() == true)
+			{
+				setSOR |= handler->setSOR();
+				writingDisabled |= handler->writingDisabled();
+			}
+		}
+
+		m_setSOR = setSOR;
+		m_writingDisabled = writingDisabled;
+	}
+
 	void TuningSourceThread::pushCommandToHandlers(const TuningCommand& cmd, const QString& appSignalID)
 	{
 		AUTO_LOCK(m_handlersMutex);
 
-		for(auto& p : m_handlers)
+		for(TuningChannelHandler* handler : m_handlers)
 		{
-			TuningChannelHandler* handler = p.second;
-
-			TEST_PTR_CONTINUE(handler);
-
 			handler->pushTuningCommand(cmd);
 
 			switch(cmd.opCode)
@@ -1879,9 +1926,9 @@ namespace Tuning
 			return nullptr;
 		}
 
-		auto it = m_handlers.find(channel);
+		auto it = m_ch2handlers.find(channel);
 
-		if (it == m_handlers.end())
+		if (it == m_ch2handlers.end())
 		{
 			return nullptr;
 		}
@@ -1909,6 +1956,9 @@ namespace Tuning
 
 		return &m_tuningSignals[index];
 	}
+
+
+
 
 	// -------------------------------------------------------------------------
 	//
@@ -2125,7 +2175,7 @@ namespace Tuning
 			return;
 		}
 
-		sourceThread->incErrReplySize();
+		sourceThread->incErrReplySize(tuningSourceIP.toIPv4Address());
 	}
 
 	// ----------------------------------------------------------------------------------
