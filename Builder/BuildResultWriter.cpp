@@ -904,6 +904,11 @@ namespace Builder
 		return result;
 	}
 
+	QString BuildResultWriter::subsystemDirectory(const QString& subsystemID)
+	{
+		return Directory::SUBSYSTEMS + Separator::DIR + subsystemID;
+	}
+
 	QString BuildResultWriter::checkOutputPath(QString outputPath)
 	{
 		QString usedPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);

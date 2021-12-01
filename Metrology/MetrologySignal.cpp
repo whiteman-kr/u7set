@@ -144,21 +144,41 @@ namespace Metrology
 
 	QString SignalLocation::chassisStr() const
 	{
-		return m_chassis == -1 ? QString("N/A") : QString::number(m_chassis);
+		if (m_chassis <= 0)
+		{
+			return QString();
+		}
+
+		return QString::number(m_chassis);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	QString SignalLocation::moduleStr() const
 	{
-		return m_module == -1 ? QString("N/A") : QString::number(m_module);
+		if (m_module == 0)
+		{
+			return QObject::tr("LM");
+		}
+
+		if (m_module < 0)
+		{
+			return QString();
+		}
+
+		return QString::number(m_module);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	QString SignalLocation::placeStr() const
 	{
-		return m_place == -1 ? QString("N/A") : QString::number(m_place);
+		if (m_place <= 0)
+		{
+			return QString();
+		}
+
+		return QString::number(m_place);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -176,14 +196,24 @@ namespace Metrology
 
 	QString SignalLocation::shownOnSchemasStr() const
 	{
-		return m_shownOnSchemas == true ? QT_TRANSLATE_NOOP("MetrologySignal", "Yes") : QString();
+		if (m_shownOnSchemas == false)
+		{
+			return QString();
+		}
+
+		return QObject::tr("Yes");
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	QString	SignalLocation::moduleSerialNoStr() const
 	{
-		return m_moduleSerialNo == 0 ? QString("N/A") : QString::number(m_moduleSerialNo);
+		if (m_moduleSerialNo <= 0)
+		{
+			return QObject::tr("N/A");
+		}
+
+		return QString::number(m_moduleSerialNo);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -514,7 +544,27 @@ namespace Metrology
 				typeCaption = QT_TRANSLATE_NOOP("MetrologySignal", "Unknown");
 		}
 
-		return typeCaption;
+		return qApp->translate("MetrologySignal", typeCaption.toUtf8());
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::placeStr()
+	{
+		if (isInternal() == true)
+		{
+			return QString();
+		}
+
+		if (isAnalog() == true)
+		{
+			if (electricRangeIsValid() == false)
+			{
+				return QString();
+			}
+		}
+
+		return m_location.placeStr();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -525,11 +575,12 @@ namespace Metrology
 
 		if (showHex == false)
 		{
-			range = QString::asprintf("%d .. %d", lowADC(), highADC());
+			range =	QString::number(lowADC(), 10) + " .. " + QString::number(highADC(), 10);
 		}
 		else
 		{
-			range = QString::asprintf("0x%04X .. 0x%04X", lowADC(), highADC());
+			range =	"0x" + QString::number(lowADC(), 16).rightJustified(4, '0').toUpper() + " .. " +
+					"0x" +QString::number(highADC(), 16).rightJustified(4, '0').toUpper();
 		}
 
 		return range;
@@ -622,8 +673,7 @@ namespace Metrology
 
 			case E::ElectricUnit::Ohm:
 
-				if (	m_electricSensorType != E::SensorType::NoSensor && m_electricSensorType != E::SensorType::Ohm_Raw &&
-						m_electricSensorType != E::SensorType::Ohm_Pt21 && m_electricSensorType != E::SensorType::Ohm_Cu23)
+				if (m_electricSensorType != E::SensorType::NoSensor && m_electricSensorType != E::SensorType::Ohm_Raw)
 				{
 					typeStr += " " + electricR0Str();
 				}
@@ -656,9 +706,7 @@ namespace Metrology
 
 	QString SignalParam::electricRLoadStr() const
 	{
-		QString r0;
-		r0 = QString::asprintf("R=%0.0f", m_electricRLoad);
-		return r0;
+		return "R=" + QString::number(m_electricRLoad, 'f', 0);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -679,9 +727,7 @@ namespace Metrology
 
 	QString SignalParam::electricR0Str() const
 	{
-		QString r0;
-		r0 = QString::asprintf("R0=%0.2f", m_electricR0);
-		return r0;
+		return "R0=" + QString::number(m_electricR0, 'f', 0);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -710,14 +756,8 @@ namespace Metrology
 			return QString();
 		}
 
-		QString range, formatStr;
-
-		formatStr = QString::asprintf("%%.%df", m_electricPrecision);
-
-		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " +
-								  formatStr.toLocal8Bit(),
-								  m_electricLowLimit,
-								  m_electricHighLimit);
+		QString range =	QString::number(m_electricLowLimit, 'f', m_electricPrecision) + " .. " +
+						QString::number(m_electricHighLimit, 'f', m_electricPrecision);
 
 		QString unit = electricUnitStr();
 
@@ -738,8 +778,7 @@ namespace Metrology
 				 m_electricSensorType != E::SensorType::mV_Raw_Mul_32 &&
 				 m_electricSensorType != E::SensorType::mV_Raw_m1200_p1200) ||
 
-				(m_electricUnitID == E::ElectricUnit::Ohm &&
-				 m_electricSensorType != E::SensorType::Ohm_Raw) )
+				(m_electricUnitID == E::ElectricUnit::Ohm && m_electricSensorType != E::SensorType::Ohm_Raw))
 		{
 			return false;	// for non-linear
 		}
@@ -763,13 +802,8 @@ namespace Metrology
 
 	QString SignalParam::physicalRangeStr() const
 	{
-		QString range, formatStr;
-
-		formatStr = QString::asprintf("%%.%df", decimalPlaces());
-
-		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_physicalLowLimit, m_physicalHighLimit);
-
-		return range;
+		return	QString::number(m_physicalLowLimit, 'f', decimalPlaces()) + " .. " +
+				QString::number(m_physicalHighLimit, 'f', decimalPlaces());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -788,14 +822,8 @@ namespace Metrology
 
 	QString SignalParam::engineeringRangeStr() const
 	{
-		QString range, formatStr;
-
-		formatStr = QString::asprintf("%%.%df", decimalPlaces());
-
-		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " +
-								  formatStr.toLocal8Bit(),
-								  lowEngineeringUnits(),
-								  highEngineeringUnits());
+		QString range =	QString::number(lowEngineeringUnits(), 'f', decimalPlaces()) + " .. " +
+						QString::number(highEngineeringUnits(), 'f', decimalPlaces());
 
 		if (unit().isEmpty() == false)
 		{
@@ -814,7 +842,7 @@ namespace Metrology
 			return QString();
 		}
 
-		return QString("Yes");
+		return QObject::tr("Yes");
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -826,21 +854,20 @@ namespace Metrology
 			return QString();
 		}
 
-		QString stateStr, formatStr;
+		QString stateStr;
 
 		switch (signalType())
 		{
 			case E::SignalType::Analog:
 
-				formatStr = QString::asprintf("%%.%df", decimalPlaces());
 
-				stateStr = QString::asprintf(formatStr.toLocal8Bit(), tuningDefaultValue().toDouble());
+				stateStr = QString::number(tuningDefaultValue().toDouble(), 'f', decimalPlaces());
 
 				break;
 
 			case E::SignalType::Discrete:
 
-				stateStr = tuningDefaultValue().toDouble() == 0.0 ? QT_TRANSLATE_NOOP("MetrologySignal", "No") : QT_TRANSLATE_NOOP("MetrologySignal", "Yes");
+				stateStr = tuningDefaultValue().toDouble() == 0.0 ? QObject::tr("No") : QObject::tr("Yes");
 
 				break;
 
@@ -877,14 +904,8 @@ namespace Metrology
 			return QString();
 		}
 
-		QString range, formatStr;
-
-		formatStr = QString::asprintf("%%.%df", decimalPlaces());
-
-		range = QString::asprintf(formatStr.toLocal8Bit() + " .. " +
-								  formatStr.toLocal8Bit(),
-								  tuningLowBound().toDouble(),
-								  tuningHighBound().toDouble());
+		QString range =	QString::number(tuningLowBound().toDouble(), 'f', decimalPlaces()) + " .. " +
+						QString::number(tuningHighBound().toDouble(), 'f', decimalPlaces());
 
 		return range;
 	}
@@ -1474,8 +1495,7 @@ namespace Metrology
 
 	QString ComparatorEx::outputStateStr() const
 	{
-		return outputStateStr(	QT_TRANSLATE_NOOP("MetrologySignal", "True"),
-								QT_TRANSLATE_NOOP("MetrologySignal", "False"));
+		return outputStateStr(QObject::tr("True"), QObject::tr("False"));
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

@@ -380,12 +380,22 @@ namespace Builder
 					BCOMP_32FP_EQU = 5,
 					BCOMP_32FP_GREAT = 6,
 					BCOMP_32FP_LESS = 7,
-					BCOMP_32FP_NOT_EQU = 8;
+					BCOMP_32FP_NOT_EQU = 8,
+
+					// from LM8-SR10
+					//
+					BCOMP_32SI_GREAT_EQU = 9,
+					BCOMP_32SI_LESS_EQU = 10,
+					BCOMP_32FP_GREAT_EQU = 11,
+					BCOMP_32FP_LESS_EQU = 12;
 
 		if (iConf == BCOMP_32SI_EQU ||
 			iConf == BCOMP_32SI_GREAT ||
 			iConf == BCOMP_32SI_LESS ||
-			iConf == BCOMP_32SI_NOT_EQU)
+			iConf == BCOMP_32SI_NOT_EQU ||
+			(lmDescriptionName() == LmDescriptionName::LM8_SR10 &&
+			 (iConf == BCOMP_32SI_GREAT_EQU ||
+			  iConf == BCOMP_32SI_LESS_EQU)))
 		{
 			// comparison of signed int values
 			//
@@ -412,10 +422,12 @@ namespace Builder
 				break;
 
 			case BCOMP_32SI_GREAT:
+			case BCOMP_32SI_GREAT_EQU:
 				rSettingParam.setSignedIntValue(sSetting - hysteresis);
 				break;
 
 			case BCOMP_32SI_LESS:
+			case BCOMP_32SI_LESS_EQU:
 				rSettingParam.setSignedIntValue(sSetting + hysteresis);
 				break;
 
@@ -434,7 +446,10 @@ namespace Builder
 		if (iConf == BCOMP_32FP_EQU ||
 			iConf == BCOMP_32FP_GREAT ||
 			iConf == BCOMP_32FP_LESS ||
-			iConf == BCOMP_32FP_NOT_EQU)
+			iConf == BCOMP_32FP_NOT_EQU ||
+			(lmDescriptionName() == LmDescriptionName::LM8_SR10 &&
+			 (iConf == BCOMP_32FP_GREAT_EQU ||
+			  iConf == BCOMP_32FP_LESS_EQU)))
 		{
 			// comparison of floating point values
 			//
@@ -468,10 +483,12 @@ namespace Builder
 				break;
 
 			case BCOMP_32FP_GREAT:
+			case BCOMP_32FP_GREAT_EQU:
 				rSettingParam.setFloatValue(sSetting - hysteresis);
 				break;
 
 			case BCOMP_32FP_LESS:
+			case BCOMP_32FP_LESS_EQU:
 				rSettingParam.setFloatValue(sSetting + hysteresis);
 				break;
 
@@ -1300,7 +1317,9 @@ namespace Builder
 		if (caption() == "cmp_dh_fp_eq" ||
 			caption() == "cmp_dh_fp_ne" ||
 			caption() == "cmp_dh_fp_gr" ||
-			caption() == "cmp_dh_fp_ls")
+			caption() == "cmp_dh_fp_gr_eq" ||
+			caption() == "cmp_dh_fp_ls" ||
+			caption() == "cmp_dh_fp_ls_eq")
 		{
 			hasHysteresisParam = false;
 		}
@@ -1327,14 +1346,24 @@ namespace Builder
 					CMP_32FP_EQU = 5,
 					CMP_32FP_GREAT = 6,
 					CMP_32FP_LESS = 7,
-					CMP_32FP_NOT_EQU = 8;
+					CMP_32FP_NOT_EQU = 8,
+
+					// from LM8-SR10
+					//
+					CMP_32SI_GREAT_EQU = 9,
+					CMP_32SI_LESS_EQU = 10,
+					CMP_32FP_GREAT_EQU = 11,
+					CMP_32FP_LESS_EQU = 12;
 
 		m_runTime = 0;
 
 		if (iConf == CMP_32SI_EQU ||
 			iConf == CMP_32SI_GREAT ||
 			iConf == CMP_32SI_LESS ||
-			iConf == CMP_32SI_NOT_EQU)
+			iConf == CMP_32SI_NOT_EQU ||
+			(lmDescriptionName() == LmDescriptionName::LM8_SR10 &&
+			(iConf == CMP_32SI_GREAT_EQU || iConf == CMP_32SI_LESS_EQU))
+			)
 		{
 			m_runTime = 5 + 14;
 
@@ -1364,7 +1393,10 @@ namespace Builder
 		if (iConf == CMP_32FP_EQU ||
 			iConf == CMP_32FP_GREAT ||
 			iConf == CMP_32FP_LESS ||
-			iConf == CMP_32FP_NOT_EQU)
+			iConf == CMP_32FP_NOT_EQU ||
+			(lmDescriptionName() == LmDescriptionName::LM8_SR10 &&
+			(iConf == CMP_32FP_GREAT_EQU || iConf == CMP_32FP_LESS_EQU))
+			)
 		{
 			m_runTime = 16 + 14;
 
@@ -1396,6 +1428,7 @@ namespace Builder
 			}
 
 			return true;
+
 		}
 
 		// Value %1 of parameter '%2' of AFB '%3' is incorrect.
@@ -1527,12 +1560,12 @@ namespace Builder
 
 	bool UalAfb::calculate_DEAD_ZONE_paramValues()
 	{
-		if (lmDescriptionNumber() == 4)
+		if (lmDescriptionName() == LmDescriptionName::LM1_SR04)
 		{
 			return calculate_DEAD_ZONE_paramValues_LM1_SR04();
 		}
 
-		if (lmDescriptionNumber() == 10)
+		if (lmDescriptionName() == LmDescriptionName::LM8_SR10)
 		{
 			return calculate_DEAD_ZONE_paramValues_LM8_SR10();
 		}

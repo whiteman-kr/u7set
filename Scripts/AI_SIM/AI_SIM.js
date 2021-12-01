@@ -31,8 +31,8 @@ function generate_ai_sim(confFirmware, module, LMNumber, frame, log, signalSet, 
 
 	const defaultFlags = 0;
 
-	const defaultHighBound = [12, 12, 2];
-	const defaultLowBound = [12, 12, 2];
+	const defaultHighBound = [12, 12, 2000];
+	const defaultLowBound = [0, 0, 0];
 
 	const defaultK1 = 1.0;
 	const defaultK2 = 0.0;
@@ -365,12 +365,12 @@ function generate_ai_sim(confFirmware, module, LMNumber, frame, log, signalSet, 
 							{
 								switch (electricUnit) {
 									case ElectricUnit.V:
-										highSensorPhysicalRange = 11;
-										lowSensorPhysicalRange = -11;
+										highSensorPhysicalRange = 12;
+										lowSensorPhysicalRange = -12;
 										break;
 									case ElectricUnit.mA:
-										highSensorPhysicalRange = 11;
-										lowSensorPhysicalRange = -11;
+										highSensorPhysicalRange = 12;
+										lowSensorPhysicalRange = -12;
 										break;
 									default:
 										{
@@ -388,71 +388,71 @@ function generate_ai_sim(confFirmware, module, LMNumber, frame, log, signalSet, 
 							lowSensorPhysicalRange = -1200;
 							break;
 						case SensorType.mV_Type_B:
-							highSensorPhysicalRange = 1815;
-							lowSensorPhysicalRange = 255;
+							highSensorPhysicalRange = 500;
+							lowSensorPhysicalRange = 0;
 							break;
 						case SensorType.mV_Type_E:
-							highSensorPhysicalRange = 995;
-							lowSensorPhysicalRange = -195;
+							highSensorPhysicalRange = 500;
+							lowSensorPhysicalRange = -50;
 							break;
 						case SensorType.mV_Type_J:
-							highSensorPhysicalRange = 1195;
-							lowSensorPhysicalRange = -205;
+							highSensorPhysicalRange = 500;
+							lowSensorPhysicalRange = -50;
 							break;
 						case SensorType.mV_Type_K:
-							highSensorPhysicalRange = 1367;
-							lowSensorPhysicalRange = -195;
+							highSensorPhysicalRange = 500;
+							lowSensorPhysicalRange = -50;
 							break;
 						case SensorType.mV_Type_N:
-							highSensorPhysicalRange = 1295;
-							lowSensorPhysicalRange = -195;
+							highSensorPhysicalRange = 500;
+							lowSensorPhysicalRange = -50;
 							break;
 						case SensorType.mV_Type_R:
-							highSensorPhysicalRange = 1763;
-							lowSensorPhysicalRange = -45;
+							highSensorPhysicalRange = 500;
+							lowSensorPhysicalRange = -50;
 							break;
 						case SensorType.mV_Type_S:
-							highSensorPhysicalRange = 1763;
-							lowSensorPhysicalRange = -45;
+							highSensorPhysicalRange = 500;
+							lowSensorPhysicalRange = -50;
 							break;
 						case SensorType.mV_Type_T:
-							highSensorPhysicalRange = 395;
-							lowSensorPhysicalRange = -195;
+							highSensorPhysicalRange = 400;
+							lowSensorPhysicalRange = -50;
 							break;
 						case SensorType.mV_Type_L:
-							highSensorPhysicalRange = 795;
-							lowSensorPhysicalRange = -195;
+							highSensorPhysicalRange = 500;
+							lowSensorPhysicalRange = -50;
 							break;
 						case SensorType.mV_Type_M:
-							highSensorPhysicalRange = 95;
-							lowSensorPhysicalRange = -195;
+							highSensorPhysicalRange = 100;
+							lowSensorPhysicalRange = -50;
 							break;
 
 						// ---------- Ohm ---------------
 
 						case SensorType.Ohm_Raw:
-							highSensorPhysicalRange = 1500;
+							highSensorPhysicalRange = 10000;
 							lowSensorPhysicalRange = 0;
 							break;
 						case SensorType.Ohm_Pt_a_385:
-							highSensorPhysicalRange = 850;
-							lowSensorPhysicalRange = -200;
+							highSensorPhysicalRange = 500;
+							lowSensorPhysicalRange = -50;
 							break;
 						case SensorType.Ohm_Pt_a_391:
-							highSensorPhysicalRange = 850;
-							lowSensorPhysicalRange = -200;
+							highSensorPhysicalRange = 500;
+							lowSensorPhysicalRange = -50;
 							break;
 						case SensorType.Ohm_Cu_a_428:
 							highSensorPhysicalRange = 200;
-							lowSensorPhysicalRange = -180;
+							lowSensorPhysicalRange = -50;
 							break;
 						case SensorType.Ohm_Cu_a_426:
 							highSensorPhysicalRange = 200;
 							lowSensorPhysicalRange = -50;
 							break;
 						case SensorType.Ohm_Pt21:
-							highSensorPhysicalRange = 650;
-							lowSensorPhysicalRange = -200;
+							highSensorPhysicalRange = 500;
+							lowSensorPhysicalRange = -50;
 							break;
 						case SensorType.Ohm_Cu23:
 							highSensorPhysicalRange = 180;
@@ -460,7 +460,7 @@ function generate_ai_sim(confFirmware, module, LMNumber, frame, log, signalSet, 
 							break;
 						case SensorType.Ohm_Ni_a_617:
 							highSensorPhysicalRange = 180;
-							lowSensorPhysicalRange = -70;
+							lowSensorPhysicalRange = -50;
 							break;
 						default:
 							{
@@ -468,6 +468,9 @@ function generate_ai_sim(confFirmware, module, LMNumber, frame, log, signalSet, 
 								return false;
 							}
 					}
+
+					//log.writeMessage(signalStrId + " k1 = " + k1);
+					//log.writeMessage(signalStrId + " k2 = " + k2);
 
 					//log.writeMessage(signalStrId + " lowSensorPhysicalRange = " + lowSensorPhysicalRange);
 					//log.writeMessage(signalStrId + " highSensorPhysicalRange = " + highSensorPhysicalRange);
@@ -547,56 +550,52 @@ function generate_ai_sim(confFirmware, module, LMNumber, frame, log, signalSet, 
 
 				}	// End of ElectricUnit is set
 
+				let channelPtr = unitPtr + (2 + c * 12) * 2;
+
+				let fPtr = channelPtr;
+				let rPtr = channelPtr + 2 * 2;
+				let kPtr = channelPtr + 4 * 2;
+				let rangePtr = channelPtr + 8 * 2;
+
 				// Write configuration
-
-				let ptr = unitPtr + (2 /*word of flags*/ + c * 2 /*channel offset*/) * 2;
-
 				confFirmware.writeLog("    unit " + (i + 1) + " channel " + channelNames[c] + " (" + unitsConvertor.electricUnitName(electricUnit) +
-					"): [ " + frame + ":" + ptr + "] Tf = " + filteringTime +
-					"; [" + frame + ":" + (ptr + 6 * 2) + "] " + resistorNames[c] + " = " + r +
-					"; [" + frame + ":" + (ptr + 12 * 2) + "] K1 = " + k1 +
-					"; [" + frame + ":" + (ptr + 18 * 2) + "] K2 = " + k2 +
-					"; [" + frame + ":" + (ptr + 24 * 2) + "] HighValidRange = " + highValidRange +
-					"; [" + frame + ":" + (ptr + 30 * 2) + "] LowValidRange = " + lowValidRange + "\r\n");
+					"): [ " + frame + ":" + fPtr + "] Tf = " + filteringTime +
+					"; [" + frame + ":" + rPtr + "] " + resistorNames[c] + " = " + r +
+					"; [" + frame + ":" + kPtr + "] K1 = " + k1 +
+					"; [" + frame + ":" + (kPtr + 2 * 2) + "] K2 = " + k2 +
+					"; [" + frame + ":" + rangePtr + "] HighValidRange = " + highValidRange +
+					"; [" + frame + ":" + (rangePtr + 2 * 2) + "] LowValidRange = " + lowValidRange + "\r\n");
 
-
-				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "Tf", filteringTime) == false)          // Filtering time constant
+				
+				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, fPtr, "Tf", filteringTime) == false)          // Filtering time constant
 				{
 					return false;
 				}
-				ptr += 6 * 2;
 
-				if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, resistorNames[c], r) == false)      // R
+				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, rPtr, resistorNames[c], r) == false)      // R
 				{
 					return false;
 				}
-				ptr += 12 * 2;
 
-				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K1", k1) == false)         // K1
+				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, kPtr, "K1", k1) == false)         // K1
 				{
 					return false;
 				}
-				ptr += 18 * 2;
 
-
-				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K2", k2) == false)         // K2
+				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, kPtr + 2 * 2, "K2", k2) == false)         // K2
 				{
 					return false;
 				}
-				ptr += 24 * 2;
 
-
-				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "HighValidRange", highValidRange) == false)         // In High bound
+				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, rangePtr, "HighValidRange", highValidRange) == false)         // In High bound
 				{
 					return false;
 				}
-				ptr += 30 * 2;
 
-				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LowValidRange", lowValidRange) == false)          // In Low Bound
+				if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, rangePtr + 2 * 2, "LowValidRange", lowValidRange) == false)          // In Low Bound
 				{
 					return false;
 				}
-				ptr += 36 * 2;
 			}
 
 		} // channelsCount

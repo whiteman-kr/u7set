@@ -57,35 +57,42 @@ namespace Measure
 
 	// ==============================================================================================
 
-	enum CalcErrorRange
+	namespace MT
 	{
-		NoCalcErrorFrom		= -1,
-		ByElectricRange		= 0,
-		ByEngineeringRange	= 1,
-		BySignalType		= 2,
-	};
+		Q_NAMESPACE
 
-	const int CalcErrorRangeCount = 3;
+		enum CalcErrorRange
+		{
+			By_Electric_Range = 0,
+			By_Engineering_Range = 1,
+			By_Signal_Type = 2,
+		};
+		Q_ENUM_NS(CalcErrorRange)
 
-	#define ERR_MEASURE_CALC_ERROR_RANGE(byRange) (TO_INT(byRange) < 0 || TO_INT(byRange) >= Measure::CalcErrorRangeCount)
+		const int CalcErrorRangeCount = 3;
 
-	QString CalcErrorRangeCaption(Measure::CalcErrorRange byRange);
+		#define ERR_MEASURE_CALC_ERROR_RANGE(byRange) (TO_INT(byRange) < 0 || TO_INT(byRange) >= Measure::MT::CalcErrorRangeCount)
 
-	// ==============================================================================================
+		QString CalcErrorRangeCaption(CalcErrorRange byRange);
+		QString CalcErrorRangeCaptionTr(CalcErrorRange byRange);
 
-	enum ErrorType
-	{
-		NoErrorType	= -1,
-		Absolute	= 0,
-		Reduce		= 1,
-		Relative	= 2,
-	};
+		// ==============================================================================================
 
-	const int ErrorTypeCount	= 3;
+		enum ErrorType
+		{
+			Absolute = 0,
+			Reduce = 1,
+			Relative = 2,
+		};
+		Q_ENUM_NS(ErrorType)
 
-	#define ERR_MEASURE_ERROR_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Measure::ErrorTypeCount)
+		const int ErrorTypeCount = 3;
 
-	QString ErrorTypeCaption(Measure::ErrorType errorType);
+		#define ERR_MEASURE_ERROR_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Measure::MT::ErrorTypeCount)
+
+		QString ErrorTypeCaption(ErrorType errorType);
+		QString ErrorTypeCaptionTr(ErrorType errorType);
+	}
 
 	// ==============================================================================================
 
@@ -182,8 +189,8 @@ namespace Measure
 		void setConnectionType(Metrology::ConnectionType type) { m_connectionType = type; }
 		void setConnectionType(int type) { m_connectionType =  static_cast<Metrology::ConnectionType>(type); }
 
-		Measure::LimitType limitTypeByRange(int byRange) const;
-		Measure::LimitType limitTypeByRange(Measure::CalcErrorRange byRange) const;
+		//Measure::LimitType limitTypeByRange(int byRange) const;
+		Measure::LimitType limitTypeByRange(MT::CalcErrorRange byRange) const;
 
 		QString appSignalID() const { return m_appSignalID; }
 		void setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; setSignalHash(m_appSignalID); }
@@ -230,13 +237,13 @@ namespace Measure
 		void calcError();
 		void calcErrorLimit(double errorLimit);
 
-		double error(LimitType limitType, ErrorType errorType) const;
+		double error(LimitType limitType, MT::ErrorType errorType) const;
 		QString errorStr(Measure::Type measureType) const;
-		void setError(LimitType limitType, ErrorType errorType, double value);
+		void setError(LimitType limitType, MT::ErrorType errorType, double value);
 
-		double errorLimit(LimitType limitType, ErrorType errorType) const;
+		double errorLimit(LimitType limitType, MT::ErrorType errorType) const;
 		QString errorLimitStr(Measure::Type measureType) const;
-		void setErrorLimit(LimitType limitType, ErrorType errorType, double value);
+		void setErrorLimit(LimitType limitType, MT::ErrorType errorType, double value);
 
 		Measure::ErrorResult errorResult(Measure::Type measureType) const;
 		QString errorResultStr(Measure::Type measureType) const;
@@ -263,7 +270,7 @@ namespace Measure
 
 		virtual bool findInStatisticsItem(const StatisticsItem& si);
 		virtual bool rangeIsOkInStatisticsItem(const StatisticsItem& si);
-		virtual void updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si);
+		virtual void updateStatisticsItem(LimitType limitType, MT::ErrorType errorType, StatisticsItem& si);
 
 		Item& operator=(Item& from);
 
@@ -299,8 +306,8 @@ namespace Measure
 
 		double m_adjustment = 0;
 
-		double m_error[LimitTypeCount][ErrorTypeCount];
-		double m_errorLimit[LimitTypeCount][ErrorTypeCount];
+		double m_error[LimitTypeCount][MT::ErrorTypeCount];
+		double m_errorLimit[LimitTypeCount][MT::ErrorTypeCount];
 
 		QDateTime m_measureTime;											// measure time
 		QString m_calibrator;												// calibrator name and calibrator SN
@@ -353,7 +360,7 @@ namespace Measure
 		void updateAdditionalParam(LimitType limitType, Item* pMeasurement);
 
 		bool findInStatisticsItem(const StatisticsItem& si) override;
-		void updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si) override;
+		void updateStatisticsItem(LimitType limitType, MT::ErrorType errorType, StatisticsItem& si) override;
 
 		LinearityItem& operator=(const LinearityItem& from);
 
@@ -405,7 +412,7 @@ namespace Measure
 		void setCmpType(int cmpType) { m_cmpType = static_cast<E::CmpType>(cmpType); }
 
 		bool findInStatisticsItem(const StatisticsItem& si) override;
-		void updateStatisticsItem(LimitType limitType, ErrorType errorType, StatisticsItem& si) override;
+		void updateStatisticsItem(LimitType limitType, MT::ErrorType errorType, StatisticsItem& si) override;
 
 		ComparatorItem& operator=(const ComparatorItem& from);
 

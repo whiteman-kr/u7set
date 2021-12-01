@@ -30,8 +30,6 @@ win32 {
 TARGET = Metrology
 TEMPLATE = app
 
-include(../qtpropertybrowser/src/qtpropertybrowser.pri)
-
 # c++20 support
 #
 unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
@@ -97,7 +95,6 @@ SOURCES += \
 	MeasureViewHeader.cpp \
 	MeasureView.cpp \
 	Delegate.cpp \
-	FolderPropertyManager.cpp \
 	Database.cpp \
 	SignalSocket.cpp \
 	SignalBase.cpp \
@@ -142,7 +139,6 @@ HEADERS  += \
 	MeasureViewHeader.h \
 	MeasureView.h \
 	Delegate.h \
-	FolderPropertyManager.h \
 	Database.h \
 	PanelComparatorInfo.h \
 	PanelFindMeasure.h \

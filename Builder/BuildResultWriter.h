@@ -165,6 +165,8 @@ namespace Builder
 		QString outputPath() const;
 		QStringList fullOutputPathes() const;
 
+		static QString subsystemDirectory(const QString& subsystemID);
+
 	private:
 		QString checkOutputPath(QString outputPath);
 		bool isWritable(const QString& outputPath);

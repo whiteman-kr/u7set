@@ -14,11 +14,11 @@
 
 enum CalibratorType
 {
-	NoCalibratorType	= -1,
-	TrxII				= 0,
-	Calys75				= 1,
-	Ktl6221				= 2,
-	Rgl1062				= 3,
+	NoCalibratorType = -1,
+	TrxII = 0,
+	Calys75 = 1,
+	Ktl6221 = 2,
+	Rgl1062 = 3,
 };
 
 const int CalibratorTypeCount = 4;
@@ -32,9 +32,9 @@ QString CalibratorIdnCaption(int сalibratorType);
 
 enum CalibratorInterface
 {
-	NoCalibratorInterface	= -1,
-	Serial					= 0,
-	USB						= 1,
+	NoCalibratorInterface = -1,
+	Serial = 0,
+	USB = 1,
 };
 
 const int CalibratorInterfaceCount = 2;
@@ -47,9 +47,9 @@ CalibratorInterface getCalibratorInterface(int calibratorType);
 
 enum CalibratorMode
 {
-	NoCalibratorMode	= -1,
-	MeasureMode			= 0,
-	SourceMode			= 1,
+	NoCalibratorMode = -1,
+	MeasureMode = 0,
+	SourceMode = 1,
 };
 
 const int CalibratorModeCount = 2;
@@ -62,15 +62,15 @@ QString CalibratorModeCaption(int сalibratorType);
 
 enum CalibratorUnit
 {
-	NoCalibratorUnit	= -1,
-	mV					= 0,
-	mA					= 1,
-	uA					= 2,
-	nA					= 3,
-	V					= 4,
-	Hz					= 5,
-	OhmLow				= 6,
-	OhmHigh				= 7,
+	NoCalibratorUnit = -1,
+	mV = 0,
+	mA = 1,
+	uA = 2,
+	nA = 3,
+	V = 4,
+	Hz = 5,
+	OhmLow = 6,
+	OhmHigh = 7,
 };
 
 const int CalibratorUnitCount = 8;
@@ -264,7 +264,6 @@ public:
 	CalibratorType type() const { return m_type; }
 	QString typeStr() const;
 	void setType(CalibratorType type) { m_type = type; }
-	void setType(int type) { m_type = static_cast<CalibratorType>(type); }
 
 	QString caption() const { return m_caption; }
 	QString serialNo() const { return m_serialNo; }
