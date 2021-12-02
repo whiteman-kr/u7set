@@ -11,7 +11,7 @@ class TuningModelClient : public TuningModel
 {
 	Q_OBJECT
 public:
-	TuningModelClient(TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
+	TuningModelClient(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
 
 	void blink();
 
@@ -28,7 +28,6 @@ protected:
 
 private:
 	bool m_blink = false;
-	TuningClientTcpClient* m_tuningTcpClient = nullptr;
 
 };
 
@@ -38,7 +37,7 @@ class TuningTableView : public QTableView
 	Q_OBJECT
 
 public:
-	TuningTableView(TuningClientTcpClient* tuningTcpClient);
+	TuningTableView();
 	bool editorActive();
 
 protected:
@@ -87,7 +86,7 @@ public:
 	explicit TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 						std::shared_ptr<TuningFilter> pageFilter,
 						TuningSignalManager* tuningSignalManager,
-						TuningClientTcpClient* tuningTcpClient,
+						std::vector<TuningClientTcpClient*> tuningTcpClients,
 						TuningFilterStorage* tuningFilterStorage,
 						QWidget* parent = 0);
 	~TuningPage();
@@ -167,6 +166,8 @@ private:
 
 	void restoreSignalsFromFilter(TuningFilter* filter);
 
+	static bool takeClientsControl(std::vector<TuningClientTcpClient*> clients, QWidget* parentWidget);
+
 private slots:
 
 	void slot_timerTick500();
@@ -179,7 +180,7 @@ private:
 
 	TuningSignalManager* m_tuningSignalManager = nullptr;
 
-	TuningClientTcpClient* m_tuningTcpClient = nullptr;
+	std::vector<TuningClientTcpClient*> m_tuningTcpClients;
 
 	TuningFilterStorage* m_tuningFilterStorage = nullptr;
 

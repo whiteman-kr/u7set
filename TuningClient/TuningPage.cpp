@@ -11,13 +11,13 @@
 #include <QInputDialog>
 #include <QFileDialog>
 
+int todo_crash_if_modal_dialog_in_reload_config;
 
 //
 // TuningItemModelMain
 //
-TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
-	TuningModel(tuningSignalManager, valueColumnsAppSignalIdSuffixes, parent),
-	m_tuningTcpClient(tuningTcpClient)
+TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
+	TuningModel(tuningSignalManager, valueColumnsAppSignalIdSuffixes, parent)
 {
 }
 
@@ -85,7 +85,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 			return QBrush(color);
 		}
 
-		if (m_tuningTcpClient->writingIsEnabled(state) == false)
+		if (state.writingIsEnabled() == false)
 		{
 			QColor color = theSettings.m_columnDisabledBackColor;
 			return QBrush(color);
@@ -218,7 +218,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 			return QBrush(color);
 		}
 
-        if (m_tuningTcpClient->writingIsEnabled(state) == false)
+		if (state.writingIsEnabled() == false)
         {
 			QColor color = theSettings.m_columnDisabledTextColor;
             return QBrush(color);
@@ -333,7 +333,7 @@ Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
 		{
 			if (asp.isAnalog() == false)
 			{
-				if (m_tuningTcpClient->writingIsEnabled(state) == false)
+				if (state.writingIsEnabled() == false)
 				{
 					f &= ~Qt::ItemIsEnabled;
 				}
@@ -344,7 +344,7 @@ Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
 			}
 			else
 			{
-				if (m_tuningTcpClient->writingIsEnabled(state) == false)
+				if (state.writingIsEnabled() == false)
 				{
 					f &= ~Qt::ItemIsEnabled;
 				}
@@ -456,7 +456,7 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 		if (role == Qt::EditRole &&
 				state.valid() == true &&
 				state.controlIsEnabled() == true &&
-				m_tuningTcpClient->writingIsEnabled(state) == true)
+				state.writingIsEnabled() == true)
 		{
 			ok = false;
 			double v = value.toDouble(&ok);
@@ -472,7 +472,7 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 		if (role == Qt::CheckStateRole &&
 				state.valid() == true &&
 				state.controlIsEnabled() == true &&
-				m_tuningTcpClient->writingIsEnabled(state) == true)
+				state.writingIsEnabled() == true)
 		{
 			if ((Qt::CheckState)value.toInt() == Qt::Checked)
 			{
@@ -495,9 +495,8 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 // TuningTableView
 //
 
-TuningTableView::TuningTableView(TuningClientTcpClient* tuningTcpClient):
-	QTableView(),
-	m_tuningTcpClient(tuningTcpClient)
+TuningTableView::TuningTableView():
+	QTableView()
 {
 
 }
@@ -544,7 +543,7 @@ bool TuningTableView::edit(const QModelIndex&  index, EditTrigger trigger, QEven
 
 			TuningSignalState state = m_model->tuningSignalManager()->state(hash, &ok);
 
-			if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
 				return false;
 			}
@@ -682,11 +681,11 @@ int TuningPage::m_instanceCounter = 0;
 TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 					   std::shared_ptr<TuningFilter> pageFilter,
 					   TuningSignalManager* tuningSignalManager,
-					   TuningClientTcpClient* tuningTcpClient, TuningFilterStorage* tuningFilterStorage,
+					   std::vector<TuningClientTcpClient*> tuningTcpClients, TuningFilterStorage* tuningFilterStorage,
 					   QWidget* parent) :
 	QWidget(parent),
 	m_tuningSignalManager(tuningSignalManager),
-	m_tuningTcpClient(tuningTcpClient),
+	m_tuningTcpClients(tuningTcpClients),
 	m_tuningFilterStorage(tuningFilterStorage),
 	m_treeFilter(treeFilter),
 	m_pageFilter(pageFilter)
@@ -710,7 +709,7 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 
 	// Object List
 	//
-	m_objectList = new TuningTableView(m_tuningTcpClient);
+	m_objectList = new TuningTableView();
     m_objectList->setWordWrap(false);
 
 
@@ -739,7 +738,7 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 
 	std::vector<QString> valueColumnsAppSignalIdSuffixes = tabFilter->valueColumnsAppSignalIdSuffixes();
 
-	m_model = new TuningModelClient(m_tuningSignalManager, m_tuningTcpClient, valueColumnsAppSignalIdSuffixes, this);
+	m_model = new TuningModelClient(m_tuningSignalManager, valueColumnsAppSignalIdSuffixes, this);
 
 	QFont f = m_objectList->font();
 
@@ -1322,22 +1321,17 @@ bool TuningPage::write()
 		return false;
 	}
 
-	if (m_tuningTcpClient->takeClientControl(this) == false)
-	{
-		return false;
-	}
-
 	QString str = tr("New values will be written:") + QString("\n\n");
 	QString strValue;
 
-	bool modifiedFound = false;
-	int modifiedCount = 0;
+	std::vector<Hash> allHashes = m_model->allHashes();
 
-	std::vector<Hash> hashes = m_model->allHashes();
+	std::vector<Hash> modifiedHashes;
+	modifiedHashes.reserve(allHashes.size());
 
 	bool ok = false;
 
-	for (Hash hash : hashes)
+	for (Hash hash : allHashes)
 	{
 		if (m_tuningSignalManager->newValueIsUnapplied(hash) == false)
 		{
@@ -1346,41 +1340,28 @@ bool TuningPage::write()
 
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
+		if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 		{
 			continue;
 		}
 
-		modifiedFound = true;
-		modifiedCount++;
+		modifiedHashes.push_back(hash);
 	}
 
-	if (modifiedFound == false)
+	if (modifiedHashes.empty() == true)
 	{
 		return false;
 	}
 
 	int listCount = 0;
 
-	for (Hash hash : hashes)
+	for (Hash hash : modifiedHashes)
 	{
 		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
 
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (m_tuningSignalManager->newValueIsUnapplied(hash) == false)
-		{
-			continue;
-		}
-
-		if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
-		{
-			continue;
-		}
-
 		if (listCount >= 10)
 		{
-			str += tr("and %1 more values.").arg(modifiedCount - listCount);
+			str += tr("and %1 more values.").arg(modifiedHashes.size() - listCount);
 			break;
 		}
 
@@ -1398,11 +1379,6 @@ bool TuningPage::write()
 		listCount++;
 	}
 
-	if (listCount == 0)
-	{
-		return false;
-	}
-
 	str += QString("\n") + tr("Are you sure you want to continue?");
 
 	if (QMessageBox::warning(this, tr("Write Changes"),
@@ -1413,35 +1389,57 @@ bool TuningPage::write()
 		return false;
 	}
 
-	std::vector<TuningWriteCommand> commands;
-
-	for (Hash hash : hashes)
 	{
-		if (m_tuningSignalManager->newValueIsUnapplied(hash) == false)
+		// Find TCP clients that contain modified signals
+		// and take control of them
+
+		std::vector<TuningClientTcpClient*> clientsToWrite;
+
+		for (TuningClientTcpClient* client : m_tuningTcpClients)
 		{
-			continue;
+			if (client->singleLmControlMode() == true && client->hasTuningSignals(modifiedHashes) == true)
+			{
+				clientsToWrite.push_back(client);
+			}
 		}
 
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
+		if (TuningPage::takeClientsControl(clientsToWrite, this) == false)
 		{
-			continue;
+			return false;
+		}
+	}
+
+	for (TuningClientTcpClient* client : m_tuningTcpClients)
+	{
+		std::vector<TuningWriteCommand> commands;
+
+		std::vector<Hash> clientHashes = client->getProcessedHashes(modifiedHashes);
+
+		for (Hash hash : clientHashes)
+		{
+			if (m_tuningSignalManager->newValueIsUnapplied(hash) == false)
+			{
+				continue;
+			}
+
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
+			{
+				continue;
+			}
+
+			TuningWriteCommand cmd(hash, m_tuningSignalManager->newValue(hash));
+
+			commands.push_back(cmd);
 		}
 
-		TuningWriteCommand cmd(hash, m_tuningSignalManager->newValue(hash));
-
-		commands.push_back(cmd);
+		if (commands.empty() == false)
+		{
+			client->writeLogSignalChange(tr("'Write' button is pressed."));
+			client->writeTuningSignal(commands);
+		}
 	}
-
-	if (commands.empty() == true)
-	{
-		return false;
-	}
-
-	m_tuningTcpClient->writeLogSignalChange(tr("'Write' button is pressed."));
-
-	m_tuningTcpClient->writeTuningSignal(commands);
 
 	return true;
 }
@@ -1453,7 +1451,7 @@ void TuningPage::apply()
 		return;
 	}
 
-	if (m_tuningTcpClient->takeClientControl(this) == false)
+	if (TuningPage::takeClientsControl(m_tuningTcpClients, this) == false)
 	{
 		return;
 	}
@@ -1481,7 +1479,10 @@ void TuningPage::apply()
 		}
 	}
 
-	m_tuningTcpClient->applyTuningSignals();
+	for (TuningClientTcpClient* client : m_tuningTcpClients)
+	{
+		client->applyTuningSignals();
+	}
 
 	return;
 }
@@ -1550,7 +1551,7 @@ void TuningPage::slot_setValue()
 
 			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-			if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
 				continue;
 			}
@@ -1706,9 +1707,20 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 
 			QAction* a = new QAction(tr("%1 - %2").arg(asp.customSignalId()).arg(asp.caption()), &menu);
 
-			auto f = [this, hash]() -> void
+			Hash instanceIdHash = 0;
+
+			for (const TuningClientTcpClient* client : m_tuningTcpClients)
 			{
-				TuningSignalInfo* d = new TuningSignalInfo(hash, m_model->analogFormat(), m_tuningTcpClient->instanceIdHash(), m_tuningSignalManager, this);
+				if (client->hasTuningSignal(asp.hash()) == true)
+				{
+					instanceIdHash = client->instanceIdHash();
+					break;
+				}
+			}
+
+			auto f = [this, hash, instanceIdHash]() -> void
+			{
+				TuningSignalInfo* d = new TuningSignalInfo(hash, m_model->analogFormat(), instanceIdHash, m_tuningSignalManager, this);
 				d->show();
 			};
 
@@ -2085,7 +2097,7 @@ void TuningPage::invertValue()
 
 			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-			if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
 				continue;
 			}
@@ -2233,7 +2245,7 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 					continue;
 				}
 
-				if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
+				if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 				{
 					continue;
 				}
@@ -2255,6 +2267,80 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 	{
 		QMessageBox::warning(this, qAppName(), tr("%1 values were restored from the filter. Check them and apply the changes.").arg(restoredCount));
 	}
+}
+
+bool TuningPage::takeClientsControl(std::vector<TuningClientTcpClient*> clients, QWidget* parentWidget)
+{
+	if (clients.empty() == true)
+	{
+		return true;
+	}
+
+	QStringList clientsWithoutActiveSources;
+
+	for (const TuningClientTcpClient* client : clients)
+	{
+		if (client->singleLmControlMode() == true && client->activeTuningSourceCount() == 0)
+		{
+			clientsWithoutActiveSources.push_back(client->tuningServiceId());
+		}
+	}
+
+	if (clientsWithoutActiveSources.empty() == false)
+	{
+		QMessageBox::critical(parentWidget, qAppName(),	 QObject::tr("No tuning sources with control enabled found for clients %1.").arg(clientsWithoutActiveSources.join(';')));
+		return false;
+	}
+
+	QStringList nonActiveClients;
+	QStringList sourcesToActivate;
+
+	for (const TuningClientTcpClient* client : clients)
+	{
+		if (client->singleLmControlMode() == true && client->clientIsActive() == false)
+		{
+
+			nonActiveClients.push_back(client->tuningServiceId());
+			sourcesToActivate.push_back(client->singleActiveTuningSource());
+		}
+	}
+
+	if (nonActiveClients.empty() == false && sourcesToActivate.empty() == false)
+	{
+		QString question;
+
+		if (nonActiveClients.size() == 1 && sourcesToActivate.size() == 1)
+		{
+			question = QObject::tr("Warning!\n\nClient %1 is not selected as active now.\n\nAre you sure you want to take control and activate the source %2?")
+					   .arg(nonActiveClients[0])
+					.arg(sourcesToActivate[0]);
+		}
+		else
+		{
+			question = QObject::tr("Warning!\n\nClients %1 are not selected as active now.\n\nAre you sure you want to take control and activate sources %2?")
+					   .arg(nonActiveClients.join(';'))
+					   .arg(sourcesToActivate.join(';'));
+		}
+
+		if (QMessageBox::warning(parentWidget, qAppName(),
+								 question,
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return false;
+		}
+	}
+
+
+	for (TuningClientTcpClient* client : clients)
+	{
+		if (client->singleLmControlMode() == true && client->clientIsActive() == false)
+		{
+			client->activateTuningSourceControl(client->singleActiveTuningSource(), true, true);
+		}
+	}
+
+	return true;
 }
 
 void TuningPage::slot_timerTick500()
@@ -2318,7 +2404,7 @@ void TuningPage::slot_setAll()
 
 			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-			if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
 				continue;
 			}
@@ -2349,7 +2435,7 @@ void TuningPage::slot_setAll()
 
 			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-			if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
 				continue;
 			}
@@ -2380,7 +2466,7 @@ void TuningPage::slot_setAll()
 
 			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-			if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
 				continue;
 			}
@@ -2412,7 +2498,7 @@ void TuningPage::slot_setAll()
 
 			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-			if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 			{
 				continue;
 			}
@@ -2460,7 +2546,7 @@ void TuningPage::slot_undo()
 	{
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
+		if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
 		{
 			continue;
 		}

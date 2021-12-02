@@ -1279,7 +1279,7 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 	//
 	if (configuration.tuningEnabled == true)
 	{
-		m_tuningTcpClient = new MonitorTuningTcpClient(m_configController.softwareInfo(), &theTuningSignals, &m_LogFile);
+		m_tuningTcpClient = new MonitorTuningTcpClient(m_configController.softwareInfo(), configuration.tuningService.equipmentId(), &theTuningSignals, &m_LogFile);
 
 		m_tuningTcpClient->setServers(configuration.tuningService.address(),
 									  configuration.tuningService.address(),

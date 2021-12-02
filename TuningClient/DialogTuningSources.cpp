@@ -1,8 +1,8 @@
 #include "DialogTuningSources.h"
 #include "MainWindow.h"
 
-ClientTuningSourcesWidget::ClientTuningSourcesWidget(TuningTcpClient* tcpClient, bool hasActivationControls, bool hasCloseButton, QWidget* parent):
-	TuningSourcesWidget(tcpClient, hasActivationControls, hasCloseButton, parent)
+ClientTuningSourcesWidget::ClientTuningSourcesWidget(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, bool hasCloseButton, QWidget* parent):
+	TuningSourcesWidget(tcpClients, hasActivationControls, hasCloseButton, parent)
 {
 
 }
@@ -26,14 +26,14 @@ bool ClientTuningSourcesWidget::login()
 // ---
 //
 
-DialogTuningSources::DialogTuningSources(TuningTcpClient* tcpClient, bool hasActivationControls, QWidget* parent):
+DialogTuningSources::DialogTuningSources(std::vector<TuningTcpClient*> tcpClients, bool hasActivationControls, QWidget* parent):
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
 	setWindowTitle(tr("Tuning Data Sources"));
 
 	setAttribute(Qt::WA_DeleteOnClose);
 
-	m_tuningSourcesWidget = new ClientTuningSourcesWidget(tcpClient, hasActivationControls, true, this);
+	m_tuningSourcesWidget = new ClientTuningSourcesWidget(tcpClients, hasActivationControls, true, this);
 
 	connect(m_tuningSourcesWidget, &TuningSourcesWidget::closeButtonPressed, this, &DialogTuningSources::reject);
 
@@ -42,6 +42,11 @@ DialogTuningSources::DialogTuningSources(TuningTcpClient* tcpClient, bool hasAct
 	setLayout(l);
 
 	setMinimumSize(1024, 300);
+}
+
+void DialogTuningSources::setTuningSources(std::vector<TuningTcpClient*> tcpClients)
+{
+	m_tuningSourcesWidget->setTuningTcpClients(tcpClients);
 }
 
 DialogTuningSources::~DialogTuningSources()

@@ -42,6 +42,9 @@ DialogDataSources::~DialogDataSources()
 
 void DialogDataSources::setTuningTcpClient(bool showTuningWidget, TuningTcpClient* tcpTuningClient, bool hasActivationControls)
 {
+	std::vector<TuningTcpClient*> clients;
+	clients.push_back(tcpTuningClient);
+
 	if (showTuningWidget == true)
 	{
 		// Show tuning widget
@@ -60,7 +63,7 @@ void DialogDataSources::setTuningTcpClient(bool showTuningWidget, TuningTcpClien
 				return;
 			}
 
-			m_tuningSourcesWidget = new TuningSourcesWidget(tcpTuningClient, hasActivationControls, true, this);
+			m_tuningSourcesWidget = new TuningSourcesWidget(clients, hasActivationControls, true, this);
 
 			connect(m_tuningSourcesWidget, &TuningSourcesWidget::closeButtonPressed, this, &DialogDataSources::reject);
 
@@ -68,7 +71,7 @@ void DialogDataSources::setTuningTcpClient(bool showTuningWidget, TuningTcpClien
 		}
 		else
 		{
-			m_tuningSourcesWidget->setTuningTcpClient(tcpTuningClient);
+			m_tuningSourcesWidget->setTuningTcpClients(clients);
 		}
 	}
 	else

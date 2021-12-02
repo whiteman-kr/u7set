@@ -12,7 +12,7 @@ class TuningClientTcpClient : public TuningTcpClient, public TcpClientStatistics
 {
 	Q_OBJECT
 public:
-	TuningClientTcpClient(const SoftwareInfo& softwareInfo,
+	TuningClientTcpClient(const SoftwareInfo& softwareInfo, const QString& tuningServiceId,
 						  TuningSignalManager* signalManager,
 						  Log::LogFile* log,
 						  TuningLog::TuningLog* tuningLog,
@@ -34,9 +34,7 @@ public:
 
 	QString getStateToolTip() const;
 
-	bool takeClientControl(QWidget* parentWidget);
-
-	bool writingIsEnabled(const TuningSignalState& state) const;
+	std::vector<Hash> getProcessedHashes(const std::vector<Hash>& hashes);	// Returns hashes that are processed by this client among specified hashes
 
 private:
 

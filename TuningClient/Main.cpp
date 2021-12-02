@@ -215,12 +215,6 @@ int main(int argc, char* argv[])
 
 	// A boolean option with simulation (-simulate)
 
-	QCommandLineOption simulationOption("simulate", "Simulate signals values");
-	if (theSettings.m_enableSimulation == true)
-	{
-		parser.addOption(simulationOption);
-	}
-
 	parser.process(*qApp);
 
 	QString clientID = parser.value(idOption);
@@ -228,11 +222,6 @@ int main(int argc, char* argv[])
 	if (clientID.isEmpty() == false)
 	{
 	    theSettings.setInstanceStrId(clientID);
-	}
-
-	if (theSettings.m_enableSimulation == true)
-	{
-		theSettings.m_simulationMode = parser.isSet(simulationOption);
 	}
 
 	//
@@ -317,8 +306,11 @@ int main(int argc, char* argv[])
 		theSharedMemorySingleApp->detach();
 	}
 
-	delete theSharedMemorySingleApp;
-	theSharedMemorySingleApp = nullptr;
+	if (theSharedMemorySingleApp != nullptr)
+	{
+		delete theSharedMemorySingleApp;
+		theSharedMemorySingleApp = nullptr;
+	}
 
 	VFrame30::shutdown();
 	google::protobuf::ShutdownProtobufLibrary();

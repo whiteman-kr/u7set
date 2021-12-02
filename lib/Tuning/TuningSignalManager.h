@@ -30,7 +30,9 @@ public:
 	//
 	int signalsCount() const;
 	std::vector<AppSignalParam> signalList() const;
+
 	std::vector<Hash> signalHashes() const;
+	std::vector<Hash> signalHashes(const std::vector<Hash> lmEquipmentIdHashes) const;
 
 	// Implementation ITuningSignalManager
 	//
@@ -52,7 +54,6 @@ public:
 	// State manipulation
 	//
 public:
-	void validateStates();
 	void invalidateStates();
 
 	void setState(const QString& appSignalId, const TuningSignalState& state);

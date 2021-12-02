@@ -16,7 +16,7 @@ class SchemasWorkspace : public QWidget
 public:
 	SchemasWorkspace(ConfigController* configController,
 					 TuningSignalManager* tuningSignalManager,
-					 TuningClientTcpClient* tuningTcpClient,
+					 std::vector<ITuningTcpClient*> tuningTcpClients,
 					 const QString& caption,
 					 const QStringList& schemasTags,
 					 QString startSchemaId,
@@ -48,7 +48,6 @@ private:
 	TuningClientTuningController m_tuningController;
 	VFrame30::LogController m_logController;
 	TuningSignalManager* m_tuningSignalManager = nullptr;
-	TuningClientTcpClient* m_tuningTcpClient = nullptr;
 	TuningSchemaManager m_schemaManager;
 
 	QString m_caption;

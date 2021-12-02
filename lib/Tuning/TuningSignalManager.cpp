@@ -132,6 +132,27 @@ std::vector<Hash> TuningSignalManager::signalHashes() const
 	return result;
 }
 
+std::vector<Hash> TuningSignalManager::signalHashes(const std::vector<Hash> lmEquipmentIdHashes) const
+{
+	std::vector<Hash> result;
+	result.reserve(m_signals.size());
+
+	QMutexLocker l(&m_signalsMutex);
+
+	for (auto p : m_signals)
+	{
+		const AppSignalParam& param = p.second;
+		Hash signalEquipmentHash = ::calcHash(param.lmEquipmentId());
+
+		if (std::find(lmEquipmentIdHashes.begin(), lmEquipmentIdHashes.end(), signalEquipmentHash) != lmEquipmentIdHashes.end())
+		{
+			result.push_back(p.first);
+		}
+	}
+
+	return result;
+}
+
 bool TuningSignalManager::signalExists(Hash hash) const
 {
 	QMutexLocker l(&m_signalsMutex);
@@ -251,40 +272,6 @@ QStringList TuningSignalManager::signalIdsByTag(const QString& tag) const
 	{
 		return it->second;
 	}
-}
-
-void TuningSignalManager::validateStates()
-{
-	bool ok = false;
-
-	std::vector<Hash> hashes = signalHashes();
-
-	for (Hash hash : hashes)
-	{
-		AppSignalParam asp = signalParam(hash, &ok);
-		if (ok == false)
-		{
-			assert(ok);
-			return;
-		}
-
-		TuningSignalState s = state(hash, &ok);
-
-		s.m_flags.valid = true;
-		s.m_flags.controlIsEnabled = true;
-
-		static bool we_debug = false;
-        s.m_flags.writingIsEnabled = true;//we_debug;
-		we_debug = !we_debug;
-
-		s.m_value = asp.tuningDefaultValue();
-		s.m_flags.tuningDefault = s.value() == asp.tuningDefaultValue();
-		s.m_lowBound = asp.tuningLowBound();
-		s.m_highBound = asp.tuningHighBound();
-		setState(hash, s);
-	}
-
-	return;
 }
 
 void TuningSignalManager::invalidateStates()
