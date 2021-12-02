@@ -1,8 +1,8 @@
-// Generate configuration for module AI_SIM
+// Generate configuration for module AIM-11
 //
 //
 
-function generate_ai_sim(confFirmware, module, LMNumber, frame, log, signalSet, opticModuleStorage) {
+function generate_aim_11(confFirmware, module, LMNumber, frame, log, signalSet, opticModuleStorage) {
 
 	const compareEqual = 0;
 	const compareLess = 1;

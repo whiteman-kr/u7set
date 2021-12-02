@@ -1,0 +1,2 @@
+DIM-7
+	02.12.2021	Version: 0	DIM-7_v0.u7devp		CMCASETASK-551:  Added DIM-7 preset
