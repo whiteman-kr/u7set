@@ -1,6 +1,6 @@
 #include "DialogDataSources.h"
 
-DialogDataSources::DialogDataSources(TcpAppSourcesState* tcpAppSourceState, bool showTuningWidget, TuningTcpClient* tcpTuningClient, bool hasActivationControls, QWidget* parent)
+DialogDataSources::DialogDataSources(TcpAppSourcesState* tcpAppSourceState, bool showTuningWidget, std::vector<TuningTcpClient*> tcpTuningClients, bool hasActivationControls, QWidget* parent)
 	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
 	setWindowTitle(tr("Data Sources"));
@@ -28,7 +28,7 @@ DialogDataSources::DialogDataSources(TcpAppSourcesState* tcpAppSourceState, bool
 
 	// Tuning
 
-	setTuningTcpClient(showTuningWidget, tcpTuningClient, hasActivationControls);
+	setTuningTcpClients(showTuningWidget, tcpTuningClients, hasActivationControls);
 
 	//
 
@@ -40,11 +40,8 @@ DialogDataSources::~DialogDataSources()
 {
 }
 
-void DialogDataSources::setTuningTcpClient(bool showTuningWidget, TuningTcpClient* tcpTuningClient, bool hasActivationControls)
+void DialogDataSources::setTuningTcpClients(bool showTuningWidget, std::vector<TuningTcpClient*> tcpTuningClients, bool hasActivationControls)
 {
-	std::vector<TuningTcpClient*> clients;
-	clients.push_back(tcpTuningClient);
-
 	if (showTuningWidget == true)
 	{
 		// Show tuning widget
@@ -57,13 +54,7 @@ void DialogDataSources::setTuningTcpClient(bool showTuningWidget, TuningTcpClien
 
 		if (m_tuningSourcesWidget == nullptr)
 		{
-			if (tcpTuningClient == nullptr)
-			{
-				Q_ASSERT(tcpTuningClient);
-				return;
-			}
-
-			m_tuningSourcesWidget = new TuningSourcesWidget(clients, hasActivationControls, true, this);
+			m_tuningSourcesWidget = new TuningSourcesWidget(tcpTuningClients, hasActivationControls, true, this);
 
 			connect(m_tuningSourcesWidget, &TuningSourcesWidget::closeButtonPressed, this, &DialogDataSources::reject);
 
@@ -71,7 +62,7 @@ void DialogDataSources::setTuningTcpClient(bool showTuningWidget, TuningTcpClien
 		}
 		else
 		{
-			m_tuningSourcesWidget->setTuningTcpClients(clients);
+			m_tuningSourcesWidget->setTuningTcpClients(tcpTuningClients);
 		}
 	}
 	else

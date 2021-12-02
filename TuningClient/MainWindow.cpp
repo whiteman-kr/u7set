@@ -418,12 +418,7 @@ void MainWindow::runTcpClients()
 
 	if (m_dialogTuningSources != nullptr)
 	{
-		std::vector<TuningTcpClient*> clients;
-		for (const auto& c: m_tcpClients)
-		{
-			clients.push_back(static_cast<TuningTcpClient*>(c));
-		}
-		m_dialogTuningSources->setTuningSources(clients);
+		m_dialogTuningSources->setTuningSources({m_tcpClients.begin(), m_tcpClients.end()});
 	}
 }
 
@@ -755,7 +750,7 @@ void MainWindow::updateStatusBar()
 				str += tr("active");
 			}
 
-			str += "\n\n";
+			str += "\n";
 		}
 
 		str = str.trimmed();
@@ -799,19 +794,26 @@ void MainWindow::updateStatusBar()
 
 	text = tr(" TuningService: ");
 
-	tooltip = tr("Tuning Service\n");
+	tooltip.clear();
 
 	for (const TuningClientTcpClient* client: m_tcpClients)
 	{
 		Tcp::ConnectionState tuningConnState =  client->getConnectionState();
 
-		if (tuningConnState.isConnected == false)
+		if (tuningConnState.isConnected == true)
 		{
-			text += tr(" No /");
+			text += tr(" %1 /").arg(QString::number(tuningConnState.replyCount));
 		}
 		else
 		{
-			text += tr(" %1 /").arg(QString::number(tuningConnState.replyCount));
+			if (m_tcpClients.size() > 1)
+			{
+				text += tr(" No /");
+			}
+			else
+			{
+				text += tr(" No connection");
+			}
 		}
 
 		tooltip += client->getStateToolTip() + "\n\n";
@@ -819,12 +821,12 @@ void MainWindow::updateStatusBar()
 
 	text.remove(text.length() - 1, 1);	// remove last "/"
 
+	tooltip = tooltip.trimmed();
+
 	if (text != m_statusBarTuningConnection->text())
 	{
 		m_statusBarTuningConnection->setText(text);
 	}
-
-	tooltip = tooltip.trimmed();
 
 	if (tooltip != m_statusBarTuningConnection->toolTip())
 	{
@@ -1191,7 +1193,14 @@ void MainWindow::showTuningSources()
 		std::vector<TuningTcpClient*> clients;
 		for (const auto& c: m_tcpClients)
 		{
-			clients.push_back(static_cast<TuningTcpClient*>(c));
+			TuningTcpClient* tc = dynamic_cast<TuningTcpClient*>(c);
+			if (tc == nullptr)
+			{
+				Q_ASSERT(tc);
+				return;
+			}
+
+			clients.push_back(tc);
 		}
 
 		m_dialogTuningSources = new DialogTuningSources(clients, true, this);

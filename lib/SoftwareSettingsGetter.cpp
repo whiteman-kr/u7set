@@ -1378,7 +1378,9 @@ bool MonitorSettingsGetter::readFromDevice(const Builder::Context* context,
 
 	RETURN_IF_FALSE(result);
 
-	result = readTuningSettings(context, software);
+	result = readTuningServiceSettings(context, software);
+
+	RETURN_IF_FALSE(result);
 
 	return result;
 }
@@ -1538,99 +1540,69 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 	return result;
 }
 
-bool MonitorSettingsGetter::readTuningSettings(const Builder::Context* context,
-											   const Hardware::Software* software)
+bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* context,
+										  const Hardware::Software* software)
 {
 	Builder::IssueLogger* log = context->m_log;
 	const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
 
-	bool result = true;
+	QStringList tuningServicesIDs;
 
-	result = DeviceHelper::getBoolProperty(software, EquipmentPropNames::TUNING_ENABLE, &tuningEnabled, log);
-
-	RETURN_IF_FALSE(result);
-
-	if (tuningEnabled == false)
-	{
-		return true;
-	}
-
-	HostAddressPort tuningClientRequestIP;
-
-	result = getSoftwareConnection(equipment,
-									software,
-									EquipmentPropNames::TUNING_SERVICE_ID,
-									EquipmentPropNames::CLIENT_REQUEST_IP,
-									EquipmentPropNames::CLIENT_REQUEST_PORT,
-									&tuningServiceID,
-									&tuningClientRequestIP,
-									false,
-									Socket::IP_NULL,
-									PORT_ARCHIVING_SERVICE_CLIENT_REQUEST,
-									E::SoftwareType::TuningService,
-									log);
-	RETURN_IF_FALSE(result);
-
-	const Hardware::Software* tuningServiceObject = equipment->deviceObject(tuningServiceID)->toSoftware().get();
-
-	if (tuningServiceObject == nullptr)			// WTF?
-	{
-		LOG_INTERNAL_ERROR(log);
-		return false;
-	}
-
-	bool singleLmControl = false;
-
-	result = DeviceHelper::getBoolProperty(tuningServiceObject, EquipmentPropNames::SINGLE_LM_CONTROL, &singleLmControl, log);
+	bool result = DeviceHelper::getBoolProperty(software, EquipmentPropNames::TUNING_ENABLE, &tuningEnabled, log);
 
 	RETURN_IF_FALSE(result);
 
-	if (singleLmControl == true)
-	{
-		// Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.
-		//
-		log->errCFG3040(software->equipmentIdTemplate(), tuningServiceID);
-		return false;
-	}
-
-	tuningServiceIP = tuningClientRequestIP.addressStr();
-	tuningServicePort = tuningClientRequestIP.port();
-
-	//
-
-	result = DeviceHelper::getStrProperty(software, EquipmentPropNames::TUNING_SOURCE_EQUIPMENT_ID, &tuningSources, log);
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::TUNING_SERVICE_ID, &tuningServicesIDs, log);
 
 	RETURN_IF_FALSE(result);
 
-	tuningSources = tuningSources.trimmed();
-	tuningSources = tuningSources.replace(QChar(QChar::LineFeed), QChar(';'));
-	tuningSources = tuningSources.replace(QChar(QChar::CarriageReturn), QChar(';'));
-	tuningSources = tuningSources.replace(QChar(QChar::Tabulation), QChar(';'));
+	tuningServices.clear();
 
-	QStringList tuningSourcesList = tuningSources.split(QChar(';'), Qt::SkipEmptyParts);
-
-	// Check for valid EquipmentIds
-	//
-	for (const QString& tuningEquipmentID : tuningSourcesList)
+	for(const QString& tuningServiceID : tuningServicesIDs)
 	{
-		if (equipment->deviceObject(tuningEquipmentID) == nullptr)
+		HostAddressPort tuningServiceClientIP;
+
+		result &= getSoftwareConnectionBySoftwareID(equipment,
+									   software,
+									   tuningServiceID,
+									   EquipmentPropNames::TUNING_SERVICE_ID,
+									   EquipmentPropNames::CLIENT_REQUEST_IP,
+									   EquipmentPropNames::CLIENT_REQUEST_PORT,
+									   &tuningServiceClientIP,
+									   false,
+									   Socket::IP_NULL,
+									   PORT_TUNING_SERVICE_CLIENT_REQUEST,
+									   E::SoftwareType::TuningService,
+									   log);
+		BREAK_IF_FALSE(result);
+
+		TuningService tsc;
+
+		tsc.tuningServiceID = tuningServiceID;
+		tsc.clientRequestIP = tuningServiceClientIP.addressStr();
+		tsc.clientRequestPort = tuningServiceClientIP.port();
+
+		TuningServiceSettingsGetter tsg;
+
+		result &= tsg.readFromDeviceByEquipmentID(context, tuningServiceID, E::SoftwareType::TuningService);
+
+		BREAK_IF_FALSE(result);
+
+		TuningServiceSettings::TuningClient tc = tsg.getTuningClient(software->equipmentIdTemplate());
+
+		if (tc.isValid() == false)
 		{
-			log->errEQP6109(tuningEquipmentID, software->equipmentIdTemplate());
-			return false;
+			LOG_INTERNAL_ERROR_MSG(log, QString("Tuning Client %1 is not found in clients list of Tuning Service %2").
+										arg(software->equipmentIdTemplate()).
+										arg(tuningServiceID));
+			result = false;
+			break;
 		}
+
+		tsc.drivenSources = tc.uniqueSourcesIDs();
+
+		tuningServices.push_back(tsc);
 	}
-
-	tuningSources = tuningSourcesList.join(Separator::SEMICOLON);
-
-	// Tuning Security
-
-	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::TUNING_LOGIN, &tuningLogin, log);
-
-	result &= DeviceHelper::getStrListPropertyAsString(software, EquipmentPropNames::TUNING_USER_ACCOUNTS, &tuningUserAccounts, log);
-
-	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::TUNING_SESSION_TIMEOUT, &tuningSessionTimeout, log);
-
-	//
 
 	return result;
 }

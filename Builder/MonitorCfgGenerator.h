@@ -39,7 +39,6 @@ namespace Builder
 		bool writeMonitorLogo();
 
 	private:
-//		bool m_tuningEnabled = false;
 		QStringList m_tuningSources;
 
 		QStringList m_schemaTagList;		// Generated in writeMonitorSettings

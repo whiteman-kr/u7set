@@ -2280,7 +2280,9 @@ bool TuningPage::takeClientsControl(std::vector<TuningClientTcpClient*> clients,
 
 	for (const TuningClientTcpClient* client : clients)
 	{
-		if (client->singleLmControlMode() == true && client->activeTuningSourceCount() == 0)
+		if (client->isConnected() == true &&
+			client->singleLmControlMode() == true &&
+			client->activeTuningSourceCount() == 0)
 		{
 			clientsWithoutActiveSources.push_back(client->tuningServiceId());
 		}
@@ -2297,9 +2299,10 @@ bool TuningPage::takeClientsControl(std::vector<TuningClientTcpClient*> clients,
 
 	for (const TuningClientTcpClient* client : clients)
 	{
-		if (client->singleLmControlMode() == true && client->clientIsActive() == false)
+		if (client->isConnected() == true &&
+			client->singleLmControlMode() == true &&
+			client->clientIsActive() == false)
 		{
-
 			nonActiveClients.push_back(client->tuningServiceId());
 			sourcesToActivate.push_back(client->singleActiveTuningSource());
 		}
@@ -2334,7 +2337,9 @@ bool TuningPage::takeClientsControl(std::vector<TuningClientTcpClient*> clients,
 
 	for (TuningClientTcpClient* client : clients)
 	{
-		if (client->singleLmControlMode() == true && client->clientIsActive() == false)
+		if (client->isConnected() == true &&
+			client->singleLmControlMode() == true &&
+			client->clientIsActive() == false)
 		{
 			client->activateTuningSourceControl(client->singleActiveTuningSource(), true, true);
 		}

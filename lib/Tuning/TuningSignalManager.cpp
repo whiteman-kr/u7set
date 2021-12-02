@@ -15,13 +15,13 @@ TuningSignalManager::~TuningSignalManager()
 void TuningSignalManager::reset()
 {
 	{
-		QMutexLocker l(&m_signalsMutex);
+		QWriteLocker l(&m_signalsLock);
 		m_signals.clear();
 		m_tagToAppSignals.clear();
 	}
 
 	{
-		QMutexLocker l(&m_statesMutex);
+		QWriteLocker l(&m_statesLock);
 		m_states.clear();
 	}
 
@@ -85,7 +85,7 @@ bool TuningSignalManager::load(const ::Proto::AppSignalSet& message)
 	}
 
 	{
-		QMutexLocker l(&m_signalsMutex);
+		QWriteLocker l(&m_signalsLock);
 
 		std::swap(loadedSignals, m_signals);
 		std::swap(tagToAppSignals, m_tagToAppSignals);
@@ -98,7 +98,7 @@ bool TuningSignalManager::load(const ::Proto::AppSignalSet& message)
 
 int TuningSignalManager::signalsCount() const
 {
-	QMutexLocker l(&m_signalsMutex);
+	QReadLocker rl(&m_signalsLock);
 	return static_cast<int>(m_signals.size());
 }
 
@@ -107,7 +107,7 @@ std::vector<AppSignalParam> TuningSignalManager::signalList() const
 	std::vector<AppSignalParam> result;
 	result.reserve(m_signals.size());
 
-	QMutexLocker l(&m_signalsMutex);
+	QReadLocker rl(&m_signalsLock);
 
 	for (auto p : m_signals)
 	{
@@ -122,7 +122,7 @@ std::vector<Hash> TuningSignalManager::signalHashes() const
 	std::vector<Hash> result;
 	result.reserve(m_signals.size());
 
-	QMutexLocker l(&m_signalsMutex);
+	QReadLocker rl(&m_signalsLock);
 
 	for (auto p : m_signals)
 	{
@@ -137,7 +137,7 @@ std::vector<Hash> TuningSignalManager::signalHashes(const std::vector<Hash> lmEq
 	std::vector<Hash> result;
 	result.reserve(m_signals.size());
 
-	QMutexLocker l(&m_signalsMutex);
+	QReadLocker rl(&m_signalsLock);
 
 	for (auto p : m_signals)
 	{
@@ -155,7 +155,7 @@ std::vector<Hash> TuningSignalManager::signalHashes(const std::vector<Hash> lmEq
 
 bool TuningSignalManager::signalExists(Hash hash) const
 {
-	QMutexLocker l(&m_signalsMutex);
+	QReadLocker rl(&m_signalsLock);
 	return m_signals.find(hash) != m_signals.end();
 }
 
@@ -167,7 +167,7 @@ bool TuningSignalManager::signalExists(const QString& appSignalId) const
 
 AppSignalParam TuningSignalManager::signalParam(Hash hash, bool* found) const
 {
-	QMutexLocker l(&m_signalsMutex);
+	QReadLocker rl(&m_signalsLock);
 
 	auto result = m_signals.find(hash);
 
@@ -204,7 +204,7 @@ bool TuningSignalManager::signalParam(Hash hash, AppSignalParam* result) const
 		return false;
 	}
 
-	QMutexLocker l(&m_signalsMutex);
+	QReadLocker rl(&m_signalsLock);
 
 	auto it = m_signals.find(hash);
 	if (it == m_signals.end())
@@ -231,7 +231,7 @@ TuningSignalState TuningSignalManager::state(Hash hash, bool* found) const
 		return TuningSignalState();
 	}
 
-	QMutexLocker l(&m_statesMutex);
+	QReadLocker l(&m_statesLock);
 
 	auto foundState = m_states.find(hash);
 
@@ -261,7 +261,7 @@ TuningSignalState TuningSignalManager::state(const QString& appSignalId, bool* f
 
 QStringList TuningSignalManager::signalIdsByTag(const QString& tag) const
 {
-	QMutexLocker rl(&m_signalsMutex);
+	QReadLocker rl(&m_signalsLock);
 
 	auto it = m_tagToAppSignals.find(tag);
 	if (it == m_tagToAppSignals.end())
@@ -276,7 +276,7 @@ QStringList TuningSignalManager::signalIdsByTag(const QString& tag) const
 
 void TuningSignalManager::invalidateStates()
 {
-	QMutexLocker l(&m_statesMutex);
+	QWriteLocker l(&m_statesLock);
 
 	for (auto& p : m_states)
 	{
@@ -300,7 +300,7 @@ void TuningSignalManager::setState(Hash signalHash, const TuningSignalState& sta
 		return;
 	}
 
-	QMutexLocker l(&m_statesMutex);
+	QWriteLocker l(&m_statesLock);
 
 	m_states[signalHash] = state;
 
@@ -309,7 +309,7 @@ void TuningSignalManager::setState(Hash signalHash, const TuningSignalState& sta
 
 void TuningSignalManager::setState(const std::vector<TuningSignalState>& states)
 {
-	QMutexLocker l(&m_statesMutex);
+	QWriteLocker l(&m_statesLock);
 
 	for (const TuningSignalState& state : states)
 	{
@@ -321,7 +321,7 @@ void TuningSignalManager::setState(const std::vector<TuningSignalState>& states)
 
 TuningValue TuningSignalManager::newValue(Hash signalHash) const
 {
-	QMutexLocker l(&m_newValuesMutex);
+	QReadLocker l(&m_newValuesLock);
 
 	auto it = m_newValues.find(signalHash);
 	if (it == m_newValues.end())
@@ -342,7 +342,7 @@ void TuningSignalManager::setNewValue(Hash signalHash, const TuningValue& value)
 
 	// Get the old value
 
-	QMutexLocker ls(&m_statesMutex);
+	QReadLocker ls(&m_statesLock);
 
 	auto foundState = m_states.find(signalHash);
 
@@ -352,13 +352,13 @@ void TuningSignalManager::setNewValue(Hash signalHash, const TuningValue& value)
 		return;
 	}
 
-	TuningSignalState& state = foundState->second;
+	const TuningSignalState state = foundState->second;
 
 	ls.unlock();
 
 	// Compare new value to old value and set unapplied flag
 
-	QMutexLocker ln(&m_newValuesMutex);
+	QWriteLocker l(&m_newValuesLock);
 
 	TuningNewValue tnv;
 	tnv.value = value;
@@ -382,7 +382,7 @@ void TuningSignalManager::setNewValue(Hash signalHash, const TuningValue& value)
 
 bool TuningSignalManager::newValueIsUnapplied(Hash signalHash) const
 {
-	QMutexLocker l(&m_newValuesMutex);
+	QReadLocker l(&m_newValuesLock);
 
 	auto it = m_newValues.find(signalHash);
 	if (it == m_newValues.end())
@@ -395,6 +395,6 @@ bool TuningSignalManager::newValueIsUnapplied(Hash signalHash) const
 
 void TuningSignalManager::setNewValueAsApplied(Hash signalHash)
 {
-	QMutexLocker l(&m_newValuesMutex);
+	QWriteLocker l(&m_newValuesLock);
 	m_newValues[signalHash].isUnapplied = false;
 }

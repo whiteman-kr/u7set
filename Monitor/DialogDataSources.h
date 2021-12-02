@@ -9,10 +9,10 @@ class DialogDataSources : public QDialog
 {
 	Q_OBJECT
 public:
-	explicit DialogDataSources(TcpAppSourcesState* tcpAppSourceState, bool showTuningWidget, TuningTcpClient* tcpTuningClient, bool hasActivationControls, QWidget* parent);
+	explicit DialogDataSources(TcpAppSourcesState* tcpAppSourceState, bool showTuningWidget, std::vector<TuningTcpClient*> tcpTuningClients, bool hasActivationControls, QWidget* parent);
 	virtual ~DialogDataSources();
 
-	void setTuningTcpClient(bool showTuningWidget, TuningTcpClient* tcpTuningClient, bool hasActivationControls);
+	void setTuningTcpClients(bool showTuningWidget, std::vector<TuningTcpClient*> tcpTuningClients, bool hasActivationControls);
 
 protected:
 	virtual void reject() override;

@@ -136,7 +136,7 @@ namespace Builder
 			return true;
 		}
 
-		if (settings->tuningServiceID.isEmpty() == true)
+		if (settings->tuningServices.empty() == true)
 		{
 			// Property %1.TuningServiceID can't be empty if tuning enabled.
 			//
@@ -144,81 +144,50 @@ namespace Builder
 			return false;
 		}
 
+		bool result = true;
+
 		m_tuningSources.clear();
 
-		std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(settings->tuningServiceID);
-		if (tuningServiceObject == nullptr)
+		for(const MonitorSettings::TuningService& tsc : settings->tuningServices)
 		{
-			m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, settings->tuningServiceID);
-			return false;
-		}
-
-		std::shared_ptr<Hardware::Software> tuningServiceSoftware = tuningServiceObject->toSoftware();
-		if (tuningServiceSoftware == nullptr)
-		{
-			m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, settings->tuningServiceID);
-			return false;
-		}
-
-		TuningServiceSettingsGetter tsg;
-		if (tsg.readFromDevice(m_context, tuningServiceSoftware.get()) == false)
-		{
-			return false;
-		}
-
-		for (const TuningServiceSettings::TuningClient& tc : tsg.clients)
-		{
-			if (tc.equipmentID == m_software->equipmentId())
+			std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(tsc.tuningServiceID);
+			if (tuningServiceObject == nullptr)
 			{
-				m_tuningSources = tc.uniqueSourcesIDs();
-				break;
+				m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, tsc.tuningServiceID);
+				result = false;
+				continue;
+			}
+			std::shared_ptr<Hardware::Software> tuningServiceSoftware = tuningServiceObject->toSoftware();
+			if (tuningServiceSoftware == nullptr)
+			{
+				m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::TUNING_SERVICE_ID, tsc.tuningServiceID);
+				result = false;
+				continue;
+			}
+
+			TuningServiceSettingsGetter tsg;
+			if (tsg.readFromDevice(m_context, tuningServiceSoftware.get()) == false)
+			{
+				result = false;
+				continue;
+			}
+
+			TuningServiceSettingsGetter::TuningClient tunClient = tsg.getTuningClient(equipmentID());
+
+			if (tunClient.isValid() == true)
+			{
+				m_tuningSources.append(tunClient.uniqueSourcesIDs());
+			}
+			else
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Monitor %1 isn't found in clients list of TuningService %2").
+											arg(equipmentID()).arg(tsc.tuningServiceID));
+				result = false;
+				continue;
 			}
 		}
 
-/*
-		// Read TuningSourceEquipmentID property from Monitor. If is is filled, check if all strings are present in tuningSourcesList
-
-		QStringList localTuningSourcesList = settings->getTuningSources();
-
-		if (localTuningSourcesList.isEmpty() == false)
-		{
-			// Parse localTuningSourcesList
-			//
-			m_tuningSources = localTuningSourcesList;
-
-			// Check for valid EquipmentIds
-			//
-			for (const QString& localTuningSourceId : localTuningSourcesList)
-			{
-				if (m_equipment->deviceObject(localTuningSourceId) == nullptr)
-				{
-					// This source does not exist
-					//
-					m_log->errEQP6109(localTuningSourceId, m_software->equipmentIdTemplate());
-					return false;
-				}
-
-				if (serviceTuningSourcesList.contains(localTuningSourceId) == false)
-				{
-					// This source is for TuningService which is not connected to this Monitor
-					//
-					m_log->errEQP6203(localTuningSourceId, m_software->equipmentId(), settings->tuningServiceID);
-					return false;
-				}
-			}
-		}
-		else
-		{
-			m_tuningSources = serviceTuningSourcesList;
-		} */
-
-		if (m_tuningSources.isEmpty() == true)
-		{
-			m_log->errEQP6205(m_software->equipmentId());
-			return false;
-		}
-
-		return true;
+		return result;
 	}
 
 
