@@ -217,7 +217,7 @@ public:
 	void setSignalHash(Hash hash) { m_signalHash = hash; }
 
 	TuningValueType type() const { return m_type; }
-	int typeInt() const { return TO_INT(m_type); }
+	int typeInt() const { return static_cast<int>(m_type); }
 	void setType(TuningValueType valueType) { m_type = valueType; }
 
 	QVariant value() const { return m_value; }

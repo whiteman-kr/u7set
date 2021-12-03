@@ -502,7 +502,7 @@ void PanelStatistics::createHeaderContexMenu()
 			{
 				QString columnName = StatisticsColumn[column];
 
-				int pos = columnName.indexOf(QChar::LineFeed);
+				int pos = static_cast<int>(columnName.indexOf(QChar::LineFeed));
 				if (pos != -1)
 				{
 					columnName = columnName.left(pos);
@@ -834,7 +834,7 @@ void PanelStatistics::updateVisibleColunm()
 		{
 			QString columnName = StatisticsColumn[column];
 
-			int pos = columnName.indexOf(QChar::LineFeed);
+			int pos = static_cast<int>(columnName.indexOf(QChar::LineFeed));
 			if (pos != -1)
 			{
 				columnName = columnName.left(pos);
@@ -888,7 +888,7 @@ void PanelStatistics::restoreColumnsWidth()
 	{
 		QString columnName = StatisticsColumn[column];
 
-		int pos = columnName.indexOf(QChar::LineFeed);
+		int pos = static_cast<int>(columnName.indexOf(QChar::LineFeed));
 		if (pos != -1)
 		{
 			columnName = columnName.left(pos);
@@ -926,7 +926,7 @@ void PanelStatistics::saveColumnsWidth()
 	{
 		QString columnName = StatisticsColumn[column];
 
-		int pos = columnName.indexOf(QChar::LineFeed);
+		int pos = static_cast<int>(columnName.indexOf(QChar::LineFeed));
 		if (pos != -1)
 		{
 			columnName = columnName.left(pos);

@@ -168,7 +168,7 @@ void CompleterData::save(const QString& optionsKey)
 
 	QSettings s;
 
-	int count = m_filterCompleterList.count();
+	int count = static_cast<int>(m_filterCompleterList.count());
 	for(int i = 0; i < count; i++)
 	{
 		s.setValue(QString("%1/%2/Text%3").
@@ -550,9 +550,12 @@ void ExportData::createProgressDialog(QTableView* pView)
 	m_pProgressDialog = new QDialog(pView->parentWidget());
 
 	m_pProgressDialog->setWindowFlags(Qt::Drawer);
-	m_pProgressDialog->setFixedSize(300, 70);
 	m_pProgressDialog->setWindowTitle(qApp->translate("ExportData", EXPORT_WINDOW_TITLE));
 	m_pProgressDialog->setWindowIcon(QIcon(":/icons/Export.png"));
+
+	QRect screen = pView->parentWidget()->screen()->availableGeometry();
+	m_pProgressDialog->setFixedSize(static_cast<int>(screen.width() * 0.15), static_cast<int>(screen.height() * 0.07));
+
 
 		m_progress = new QProgressBar;
 		m_progress->setTextVisible(false);
@@ -640,10 +643,11 @@ void ExportData::exec()
 	}
 
 	m_pProgressDialog->show();
-	QtConcurrent::run(ExportData::startExportThread, this, fileName);
 
-	//QFuture<void> result = QtConcurrent::run(ExportData::startExportThread, this, fileName);
-	//result.waitForFinished();
+	//
+	//
+	QFuture<void> resRun = QtConcurrent::run(ExportData::startExportThread, this, fileName);
+	//resRun.waitForFinished();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

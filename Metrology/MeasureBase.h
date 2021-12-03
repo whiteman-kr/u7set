@@ -19,7 +19,7 @@ namespace Measure
 
 	const int TypeCount	= 2;
 
-	#define ERR_MEASURE_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Measure::TypeCount)
+	#define ERR_MEASURE_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Measure::TypeCount)
 
 	QString TypeCaption(Measure::Type measureType);
 
@@ -36,7 +36,7 @@ namespace Measure
 
 	const int KindCount	= 4;
 
-	#define ERR_MEASURE_KIND(kind) (TO_INT(kind) < 0 || TO_INT(kind) >= Measure::KindCount)
+	#define ERR_MEASURE_KIND(kind) (static_cast<int>(kind) < 0 || static_cast<int>(kind) >= Measure::KindCount)
 
 	QString KindCaption(Measure::Kind measureKind);
 
@@ -51,7 +51,7 @@ namespace Measure
 
 	const int LimitTypeCount = 2;
 
-	#define ERR_MEASURE_LIMIT_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Measure::LimitTypeCount)
+	#define ERR_MEASURE_LIMIT_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Measure::LimitTypeCount)
 
 	QString LimitTypeCaption(Measure::LimitType limitType);
 
@@ -71,7 +71,7 @@ namespace Measure
 
 		const int CalcErrorRangeCount = 3;
 
-		#define ERR_MEASURE_CALC_ERROR_RANGE(byRange) (TO_INT(byRange) < 0 || TO_INT(byRange) >= Measure::MT::CalcErrorRangeCount)
+		#define ERR_MEASURE_CALC_ERROR_RANGE(byRange) (static_cast<int>(byRange) < 0 || static_cast<int>(byRange) >= Measure::MT::CalcErrorRangeCount)
 
 		QString CalcErrorRangeCaption(CalcErrorRange byRange);
 		QString CalcErrorRangeCaptionTr(CalcErrorRange byRange);
@@ -88,7 +88,7 @@ namespace Measure
 
 		const int ErrorTypeCount = 3;
 
-		#define ERR_MEASURE_ERROR_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Measure::MT::ErrorTypeCount)
+		#define ERR_MEASURE_ERROR_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Measure::MT::ErrorTypeCount)
 
 		QString ErrorTypeCaption(ErrorType errorType);
 		QString ErrorTypeCaptionTr(ErrorType errorType);
@@ -105,7 +105,7 @@ namespace Measure
 
 	const int ErrorResultCount = 2;
 
-	#define ERR_MEASURE_ERROR_RESULT(result) (TO_INT(result) < 0 || TO_INT(result) >= Measure::ErrorResultCount)
+	#define ERR_MEASURE_ERROR_RESULT(result) (static_cast<int>(result) < 0 || static_cast<int>(result) >= Measure::ErrorResultCount)
 
 	QString ErrorResultCaption(Measure::ErrorResult errorResult);
 
@@ -127,7 +127,7 @@ namespace Measure
 				// now used 6 (1 .. 6)
 				// maximum 16 items (0 .. 15)
 
-	#define ERR_MEASURE_ADDITIONAL_PARAM(param) (TO_INT(param) < 0 || TO_INT(param) >= Measure::AdditionalParamCount)
+	#define ERR_MEASURE_ADDITIONAL_PARAM(param) (static_cast<int>(param) < 0 || static_cast<int>(param) >= Measure::AdditionalParamCount)
 
 	QString AdditionalParamCaption(Measure::AdditionalParam param);
 
@@ -163,7 +163,7 @@ namespace Measure
 		void virtual clear();
 
 		Measure::Type measureType() const { return m_measureType; }
-		int measureTypeInt() const { return TO_INT(m_measureType); }
+		int measureTypeInt() const { return static_cast<int>(m_measureType); }
 		void setMeasureType(Measure::Type type) { m_measureType = type; }
 		void setMeasureType(int type) { m_measureType = static_cast<Measure::Type>(type); }
 
@@ -184,7 +184,7 @@ namespace Measure
 		void setConnectionSignalID(const QString& signalID) { m_connectionSignalID = signalID; }
 
 		Metrology::ConnectionType connectionType() const { return m_connectionType; }
-		int connectionTypeInt() const { return TO_INT(m_connectionType); }
+		int connectionTypeInt() const { return static_cast<int>(m_connectionType); }
 		QString connectionTypeStr() const;
 		void setConnectionType(Metrology::ConnectionType type) { m_connectionType = type; }
 		void setConnectionType(int type) { m_connectionType =  static_cast<Metrology::ConnectionType>(type); }
@@ -400,13 +400,13 @@ namespace Measure
 		void setOutputAppSignalID(const QString& appSignalID) { m_outputAppSignalID = appSignalID; }
 
 		Metrology::CmpValueType cmpValueType() const { return m_cmpValueType; }
-		int	cmpValueTypeInt() const { return TO_INT(m_cmpValueType); }
+		int	cmpValueTypeInt() const { return static_cast<int>(m_cmpValueType); }
 		QString cmpValueTypeStr() const;
 		void setCmpValueType(Metrology::CmpValueType type) { m_cmpValueType = type; }
 		void setCmpValueType(int type) { m_cmpValueType = static_cast<Metrology::CmpValueType>(type); }
 
 		E::CmpType cmpType() const { return m_cmpType; }
-		int cmpTypeInt() const { return TO_INT(m_cmpType); }
+		int cmpTypeInt() const { return static_cast<int>(m_cmpType); }
 		QString cmpTypeStr() const;
 		void setCmpType(Metrology::CmpValueType cmpValueType, E::CmpType cmpType);
 		void setCmpType(int cmpType) { m_cmpType = static_cast<E::CmpType>(cmpType); }

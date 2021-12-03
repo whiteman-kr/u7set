@@ -4,7 +4,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ChartView::ChartView(QtCharts::QChart* chart, QWidget* parent) :
+ChartView::ChartView(QChart* chart, QWidget* parent) :
 	QChartView(chart, parent),
 	m_isTouching(false)
 {
@@ -19,7 +19,7 @@ bool ChartView::viewportEvent(QEvent* event)
 	{
 		m_isTouching = true;
 
-		chart()->setAnimationOptions(QtCharts::QChart::NoAnimation);
+		chart()->setAnimationOptions(QChart::NoAnimation);
 	}
 
 	return QChartView::viewportEvent(event);
@@ -58,7 +58,7 @@ void ChartView::mouseReleaseEvent(QMouseEvent* event)
 		m_isTouching = false;
 	}
 
-	chart()->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
+	chart()->setAnimationOptions(QChart::SeriesAnimations);
 
 	QChartView::mouseReleaseEvent(event);
 }

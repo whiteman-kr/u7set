@@ -382,13 +382,15 @@ void PanelFindMeasure::find()
 				continue;
 			}
 
-			int pos = text.indexOf(m_findText, 0, Qt::CaseInsensitive);
+			int pos = static_cast<int>(text.indexOf(m_findText, 0, Qt::CaseInsensitive));
 			if (pos == -1)
 			{
 				continue;
 			}
 
-			findItemList.push_back(FindItem(row, column, text, pos, pos + m_findText.count()));
+			int len = static_cast<int>(m_findText.count());
+
+			findItemList.push_back(FindItem(row, column, text, pos, pos + len));
 		}
 	}
 

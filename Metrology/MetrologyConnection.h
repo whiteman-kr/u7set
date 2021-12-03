@@ -30,7 +30,7 @@ namespace Metrology
 	};
 	const int ConnectionTypeCount = 8;			// count of ...ConnectionType elements
 
-	#define ERR_METROLOGY_CONNECTION_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Metrology::ConnectionTypeCount)
+	#define ERR_METROLOGY_CONNECTION_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionTypeCount)
 
 	QString ConnectionTypeCaption(ConnectionType type);
 
@@ -43,7 +43,7 @@ namespace Metrology
 	};
 	const int ConnectionIoTypeCount = 2;		// count of ...ConnectionIoType elements
 
-	#define ERR_METROLOGY_CONNECTION_IO_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= Metrology::ConnectionIoTypeCount)
+	#define ERR_METROLOGY_CONNECTION_IO_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= Metrology::ConnectionIoTypeCount)
 
 	// ==============================================================================================
 

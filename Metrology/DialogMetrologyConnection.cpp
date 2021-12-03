@@ -194,8 +194,8 @@ void DialogMetrologyConnectionItem::createInterface()
 {
 	setWindowFlags(Qt::Window | Qt::WindowCloseButtonHint);
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	resize(static_cast<int>(screen.width() * 0.2), static_cast<int>(screen.height() * 0.04));
+	QRect screen = parentWidget()->screen()->availableGeometry();
+	setFixedSize(static_cast<int>(screen.width() * 0.25), static_cast<int>(screen.height() * 0.13));
 	move(screen.center() - rect().center());
 
 	if (m_metrologyConnection == Metrology::Connection())
@@ -669,10 +669,10 @@ void DialogMetrologyConnection::createInterface()
 	m_pConnectionMenu->addSeparator();
 
 	m_pMoveUpAction = m_pConnectionMenu->addAction(tr("Move &Up"));
-	m_pMoveUpAction->setShortcut(Qt::CTRL + Qt::Key_Up);
+	m_pMoveUpAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_Up});
 
 	m_pMoveDownAction = m_pConnectionMenu->addAction(tr("Move &Down"));
-	m_pMoveDownAction->setShortcut(Qt::CTRL + Qt::Key_Down);
+	m_pMoveDownAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_Down});
 
 	m_pConnectionMenu->addSeparator();
 
@@ -684,7 +684,7 @@ void DialogMetrologyConnection::createInterface()
 
 	m_pImportAction = m_pConnectionMenu->addAction(tr("&Import ..."));
 	m_pImportAction->setIcon(QIcon(":/icons/Import.png"));
-	m_pImportAction->setShortcut(Qt::CTRL + Qt::Key_I);
+	m_pImportAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_I});
 
 	m_pEditMenu->addAction(m_pFindAction);
 	m_pEditMenu->addSeparator();
@@ -981,7 +981,7 @@ void DialogMetrologyConnection::onRremove()
 		return;
 	}
 
-	int selectedConnectionCount = pView->selectionModel()->selectedRows().count();
+	int selectedConnectionCount = static_cast<int>(pView->selectionModel()->selectedRows().count());
 	if (selectedConnectionCount == 0)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select connection for remove!"));

@@ -28,7 +28,7 @@ public:
 	int					init(int objectType, int version);
 
 	void				append(const QSqlField& field);
-	void				append(QString name, QVariant::Type type = QVariant::Invalid, int length = 0);
+	void				append(QString name, QMetaType::Type type = QMetaType::UnknownType, int length = 0);
 
 	QString				extFieldName(int index);
 };

@@ -32,7 +32,7 @@ namespace Measure
 		Measure::Type measureType() const { return m_measureType; }
 		void setMeasureType(Measure::Type measureType) { m_measureType = measureType; }
 
-		int count() const { return TO_INT(m_measureCount); }
+		int count() const { return static_cast<int>(m_measureCount); }
 
 		ViewHeader& header() { return m_header; }
 		bool columnIsVisible(int column);

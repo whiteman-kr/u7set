@@ -716,7 +716,7 @@ namespace OT
 
 	const int LanguageTypeCount = 2;
 
-	#define ERR_LANGUAGE_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= OT::LanguageTypeCount)
+	#define ERR_LANGUAGE_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= OT::LanguageTypeCount)
 
 	QString LanguageTypeCaptionEn(OT::LanguageType type);
 	QString LanguageTypeCaptionTr(OT::LanguageType type);

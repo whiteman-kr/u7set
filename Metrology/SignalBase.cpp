@@ -778,7 +778,7 @@ void MultiChannelSignal::clear()
 {
 	QMutexLocker l(&m_mutex);
 
-	int channelCount = m_signalList.count();
+	int channelCount = static_cast<int>(m_signalList.count());
 	for(int ch = 0; ch < channelCount; ch++)
 	{
 		m_signalList[ch] = nullptr;
@@ -796,7 +796,7 @@ bool MultiChannelSignal::isEmpty() const
 
 	bool empty = true;
 
-	int channelCount = m_signalList.count();
+	int channelCount = static_cast<int>(m_signalList.count());
 	for(int ch = 0; ch < channelCount; ch++)
 	{
 		if (m_signalList[ch] != nullptr)
@@ -938,7 +938,7 @@ Metrology::Signal* MultiChannelSignal::firstMetrologySignal() const
 
 	Metrology::Signal* pSignal = nullptr;
 
-	int channelCount = m_signalList.count();
+	int channelCount = static_cast<int>(m_signalList.count());
 	for(int ch = 0; ch < channelCount; ch++ )
 	{
 		if (m_signalList[ch] != nullptr)

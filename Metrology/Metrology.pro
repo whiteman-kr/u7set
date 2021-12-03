@@ -25,16 +25,25 @@ win32 {
     #
 }
 
-#
+# Title
 #
 TARGET = Metrology
 TEMPLATE = app
 
 # c++20 support
 #
-unix:QMAKE_CXXFLAGS += --std=c++20			# CONFIG += c++20 has no effect yet
-win32:QMAKE_CXXFLAGS += /std:c++latest
+win32 {
+    CONFIG -= c++17
+    CONFIG += c++latest
+}
+unix {
+    CONFIG -= c++17
+    CONFIG += c++20
+}
 
+# pri
+#
+greaterThan(QT_MAJOR_VERSION, 6): include(../compiler.pri)
 include(../warnings.pri)
 
 #Application icon

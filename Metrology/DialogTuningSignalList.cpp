@@ -487,8 +487,8 @@ void DialogTuningSignalState::createInterface()
 				QLabel* stateLabel = new QLabel(tr("Please, input new state of analog signal:"), this);
 				stateLabel->setAlignment(Qt::AlignHCenter);
 
-				QRegExp rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
-				QValidator* validator = new QRegExpValidator(rx, this);
+				QRegularExpression rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
+				QValidator* validator = new QRegularExpressionValidator(rx, this);
 
 				m_stateEdit = new QLineEdit(QString::number(theSignalBase.signalState(m_param.hash()).value() ), this);
 				m_stateEdit->setAlignment(Qt::AlignHCenter);

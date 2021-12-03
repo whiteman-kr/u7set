@@ -38,7 +38,8 @@ QWidget* DoubleDelegate::createEditor(QWidget* parent, const QStyleOptionViewIte
 {
 	QLineEdit* editor = new QLineEdit(parent);
 
-	editor->setValidator(new QRegExpValidator(QRegExp("^[-]{0,1}[0-9]*[.]{0,1}[0-9]*$"),editor));
+	QRegularExpression rx("^[-]{0,1}[0-9]*[.]{0,1}[0-9]*$");
+	editor->setValidator(new QRegularExpressionValidator(rx, editor));
 
 	return editor;
 }

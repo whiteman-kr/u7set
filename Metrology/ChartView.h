@@ -1,12 +1,16 @@
 #ifndef CHARTVIEW_H
 #define CHARTVIEW_H
 
-#include <QtCharts/QChart>
-#include <QtCharts/QChartView>
-#include <QtCharts/QLineSeries>
-#include <QtCharts/QValueAxis>
+#include <QChart>
+#include <QChartView>
 
 #include "MeasureBase.h"
+
+// ==============================================================================================
+
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))	// for Qt5
+	using namespace QtCharts;
+#endif
 
 // ==============================================================================================
 
@@ -21,16 +25,16 @@ enum ChartType
 
 const int ChartTypeCount = 4;
 
-#define ERR_GRAPH_TYPE_TYPE(type) (TO_INT(type) < 0 || TO_INT(type) >= ChartTypeCount)
+#define ERR_GRAPH_TYPE_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= ChartTypeCount)
 
 // ==============================================================================================
 
-class ChartView : public QtCharts::QChartView
+class ChartView : public QChartView
 {
 
 public:
 
-	ChartView(QtCharts::QChart* chart, QWidget* parent = nullptr);
+	ChartView(QChart* chart, QWidget* parent = nullptr);
 
 protected:
 

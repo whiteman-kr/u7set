@@ -161,35 +161,49 @@ void CalibratorBase::removeCalibrators()
 
 void CalibratorBase::createInitDialog(QWidget* parent)
 {
+	if (parent == nullptr)
+	{
+		return;
+	}
+
 	m_pInitDialog = new QDialog(parent);
+	if (m_pInitDialog == nullptr)
+	{
+		return;
+	}
+
 	m_pInitDialog->setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
-	m_pInitDialog->setFixedSize(520, 180);
 	m_pInitDialog->setWindowIcon(QIcon(":/icons/Calibrators.png"));
 	m_pInitDialog->setWindowTitle(tr("Calibrators initialization"));
 	m_pInitDialog->installEventFilter(this);
+
+	QRect screen = parent->screen()->availableGeometry();
+
+	m_pInitDialog->setMinimumSize(static_cast<int>(screen.width() * 0.28), static_cast<int>(screen.height() * 0.16));
+	m_pInitDialog->resize(static_cast<int>(screen.width() * 0.28), static_cast<int>(screen.height() * 0.16));
 
 		m_pMenuBar = new QMenuBar(m_pInitDialog);
 		m_pCalibratorMenu = new QMenu(tr("&Calibrators"), m_pInitDialog);
 
 		m_pInitAction = m_pCalibratorMenu->addAction(tr("&Initialization"));
 		m_pInitAction->setIcon(QIcon(":/icons/Calibrators.png"));
-		m_pInitAction->setShortcut(Qt::CTRL + Qt::Key_I);
+		m_pInitAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_I});
 
 		m_pCalibratorMenu->addSeparator();
 
 		m_pManageAction = m_pCalibratorMenu->addAction(tr("&Manage ..."));
 		m_pManageAction->setIcon(QIcon(":/icons/Manage.png"));
-		m_pManageAction->setShortcut(Qt::CTRL + Qt::Key_M);
+		m_pManageAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_M});
 
 		m_pSettingsAction = m_pCalibratorMenu->addAction(tr("&Settings ..."));
 		m_pSettingsAction->setIcon(QIcon(":/icons/Settings.png"));
-		m_pSettingsAction->setShortcut(Qt::CTRL + Qt::Key_S);
+		m_pSettingsAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_S});
 
 		m_pCalibratorMenu->addSeparator();
 
 		m_pCopyAction = m_pCalibratorMenu->addAction(tr("&Copy"));
 		m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
-		m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
+		m_pCopyAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_C});
 
 		m_pCopyCellAction = new QAction(tr("Copy cell"), this);
 		m_pCopyCellAction->setIcon(QIcon(":/icons/Copy.png"));
@@ -249,7 +263,7 @@ void CalibratorBase::setHeaderList()
 
 	m_pCalibratorView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-	int count = horizontalHeaderLabels.count();
+	int count = static_cast<int>(horizontalHeaderLabels.count());
 	for(int column = 0; column < count; column++)
 	{
 		for(int row = 0; row < Metrology::ChannelCount; row++)
@@ -546,9 +560,11 @@ void CalibratorBase::onSettings(int row, int)
 	//
 	QDialog* dialog = new QDialog(m_pInitDialog);
 	dialog->setWindowFlags(Qt::Drawer);
-	dialog->setFixedSize(200, 120);
 	m_pInitDialog->setWindowIcon(QIcon(":/icons/Settings.png"));
 	dialog->setWindowTitle(tr("Settings calibrator %1").arg(manager->calibratorChannel() + 1));
+
+	QRect screen = m_pInitDialog->screen()->availableGeometry();
+	dialog->setFixedSize(static_cast<int>(screen.width() * 0.11), static_cast<int>(screen.height() * 0.1));
 	dialog->move(m_pInitDialog->geometry().center() - dialog->rect().center());
 
 		// Serial ports for calibrators

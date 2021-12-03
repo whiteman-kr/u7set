@@ -24,239 +24,239 @@ int SqlFieldBase::init(int objectType, int)
 	{
 		case SQL_TABLE_DATABASE_INFO:
 
-			append("ID",							QVariant::Int);
-			append("ObjectID",						QVariant::Int);
-			append("Name",							QVariant::String, 256);
-			append("Version",						QVariant::Int);
+			append("ID",							QMetaType::Int);
+			append("ObjectID",						QMetaType::Int);
+			append("Name",							QMetaType::QString, 256);
+			append("Version",						QMetaType::Int);
 
 			break;
 
 		case SQL_TABLE_HISTORY:
 
-			append("ObjectID",						QVariant::Int);
-			append("Version",						QVariant::Int);
-			append("Event",							QVariant::String, 256);
-			append("Time",							QVariant::String, 64);
+			append("ObjectID",						QMetaType::Int);
+			append("Version",						QMetaType::Int);
+			append("Event",							QMetaType::QString, 256);
+			append("Time",							QMetaType::QString, 64);
 
 			break;
 
 		case SQL_TABLE_LINEARITY:
 
-			append("ObjectID",						QVariant::Int);
-			append("MeasureID",						QVariant::Int);
+			append("ObjectID",						QMetaType::Int);
+			append("MeasureID",						QMetaType::Int);
 
-			append("Filter",						QVariant::Bool);
-			append("Valid",							QVariant::Bool);
+			append("Filter",						QMetaType::Bool);
+			append("Valid",							QMetaType::Bool);
 
-			append("ConnectSignalID",				QVariant::String, 64);
-			append("ConnectType",					QVariant::Int);
+			append("ConnectSignalID",				QMetaType::QString, 64);
+			append("ConnectType",					QMetaType::Int);
 
-			append("AppSignalID",					QVariant::String, 64);
-			append("CustomAppSignalID",				QVariant::String, 64);
-			append("EquipmentID",					QVariant::String, 256);
-			append("Caption",						QVariant::String, 256);
+			append("AppSignalID",					QMetaType::QString, 64);
+			append("CustomAppSignalID",				QMetaType::QString, 64);
+			append("EquipmentID",					QMetaType::QString, 256);
+			append("Caption",						QMetaType::QString, 256);
 
-			append("ModuleSN",						QVariant::Int);
-			append("ModuleCaption",					QVariant::String, 64);
-			append("RackIndex",						QVariant::Int);
-			append("RackCaption",					QVariant::String, 64);
-			append("Channel",						QVariant::Int);
-			append("Chassis",						QVariant::Int);
-			append("Module",						QVariant::Int);
-			append("Place",							QVariant::Int);
+			append("ModuleSN",						QMetaType::Int);
+			append("ModuleCaption",					QMetaType::QString, 64);
+			append("RackIndex",						QMetaType::Int);
+			append("RackCaption",					QMetaType::QString, 64);
+			append("Channel",						QMetaType::Int);
+			append("Chassis",						QMetaType::Int);
+			append("Module",						QMetaType::Int);
+			append("Place",							QMetaType::Int);
 
-			append("CalibratorPrecision",			QVariant::Int);
+			append("CalibratorPrecision",			QMetaType::Int);
 
-			append("PrecentFormLimit",				QVariant::Double);
+			append("PrecentFormLimit",				QMetaType::Double);
 
-			append("ElectricNominal",				QVariant::Double);
-			append("ElectricMeasure",				QVariant::Double);
+			append("ElectricNominal",				QMetaType::Double);
+			append("ElectricMeasure",				QMetaType::Double);
 
-			append("EngineeringNominal",			QVariant::Double);
-			append("EngineeringMeasure",			QVariant::Double);
+			append("EngineeringNominal",			QMetaType::Double);
+			append("EngineeringMeasure",			QMetaType::Double);
 
-			append("ElectricLowLimit",				QVariant::Double);
-			append("ElectricHighLimit",				QVariant::Double);
-			append("ElectricUnit",					QVariant::String, 32);
-			append("ElectricPrecision",				QVariant::Int);
+			append("ElectricLowLimit",				QMetaType::Double);
+			append("ElectricHighLimit",				QMetaType::Double);
+			append("ElectricUnit",					QMetaType::QString, 32);
+			append("ElectricPrecision",				QMetaType::Int);
 
-			append("EngineeringLowLimit",			QVariant::Double);
-			append("EngineeringHighLimit",			QVariant::Double);
-			append("EngineeringUnit",				QVariant::String, 32);
-			append("EngineeringPrecision",			QVariant::Int);
+			append("EngineeringLowLimit",			QMetaType::Double);
+			append("EngineeringHighLimit",			QMetaType::Double);
+			append("EngineeringUnit",				QMetaType::QString, 32);
+			append("EngineeringPrecision",			QMetaType::Int);
 
-			append("ElectricErrorAbsolute",			QVariant::Double);
-			append("ElectricErrorReduce",			QVariant::Double);
-			append("ElectricErrorRelative",			QVariant::Double);
-			append("ElectricLimitErrorAbsolute",	QVariant::Double);
-			append("ElectricLimitErrorReduce",		QVariant::Double);
-			append("ElectricLimitErrorRelative",	QVariant::Double);
+			append("ElectricErrorAbsolute",			QMetaType::Double);
+			append("ElectricErrorReduce",			QMetaType::Double);
+			append("ElectricErrorRelative",			QMetaType::Double);
+			append("ElectricLimitErrorAbsolute",	QMetaType::Double);
+			append("ElectricLimitErrorReduce",		QMetaType::Double);
+			append("ElectricLimitErrorRelative",	QMetaType::Double);
 
-			append("EngineeringErrorAbsolute",		QVariant::Double);
-			append("EngineeringErrorReduce",		QVariant::Double);
-			append("EngineeringErrorRelative",		QVariant::Double);
-			append("EngineeringLimitErrorAbsolute",	QVariant::Double);
-			append("EngineeringLimitErrorReduce",	QVariant::Double);
-			append("EngineeringLimitErrorRelative",	QVariant::Double);
+			append("EngineeringErrorAbsolute",		QMetaType::Double);
+			append("EngineeringErrorReduce",		QMetaType::Double);
+			append("EngineeringErrorRelative",		QMetaType::Double);
+			append("EngineeringLimitErrorAbsolute",	QMetaType::Double);
+			append("EngineeringLimitErrorReduce",	QMetaType::Double);
+			append("EngineeringLimitErrorRelative",	QMetaType::Double);
 
-			append("MeasureTime",					QVariant::String, 64);
-			append("Calibrator",					QVariant::String, 64);
+			append("MeasureTime",					QMetaType::QString, 64);
+			append("Calibrator",					QMetaType::QString, 64);
 
 			break;
 
 		case SQL_TABLE_LINEARITY_ADD_VAL_EL:
 		case SQL_TABLE_LINEARITY_ADD_VAL_EN:
 
-			append("ObjectID",						QVariant::Int);
-			append("MeasureID",						QVariant::Int);
+			append("ObjectID",						QMetaType::Int);
+			append("MeasureID",						QMetaType::Int);
 
-			append(QString("ValueCount"),			QVariant::Int);
+			append(QString("ValueCount"),			QMetaType::Int);
 
-			append(QString("Value0"),				QVariant::Double);
-			append(QString("Value1"),				QVariant::Double);
-			append(QString("Value2"),				QVariant::Double);
-			append(QString("Value3"),				QVariant::Double);
-			append(QString("Value4"),				QVariant::Double);
-			append(QString("Value5"),				QVariant::Double);
-			append(QString("Value6"),				QVariant::Double);
-			append(QString("Value7"),				QVariant::Double);
-			append(QString("Value8"),				QVariant::Double);
-			append(QString("Value9"),				QVariant::Double);
-			append(QString("Value10"),				QVariant::Double);
-			append(QString("Value11"),				QVariant::Double);
-			append(QString("Value12"),				QVariant::Double);
-			append(QString("Value13"),				QVariant::Double);
-			append(QString("Value14"),				QVariant::Double);
-			append(QString("Value15"),				QVariant::Double);
+			append(QString("Value0"),				QMetaType::Double);
+			append(QString("Value1"),				QMetaType::Double);
+			append(QString("Value2"),				QMetaType::Double);
+			append(QString("Value3"),				QMetaType::Double);
+			append(QString("Value4"),				QMetaType::Double);
+			append(QString("Value5"),				QMetaType::Double);
+			append(QString("Value6"),				QMetaType::Double);
+			append(QString("Value7"),				QMetaType::Double);
+			append(QString("Value8"),				QMetaType::Double);
+			append(QString("Value9"),				QMetaType::Double);
+			append(QString("Value10"),				QMetaType::Double);
+			append(QString("Value11"),				QMetaType::Double);
+			append(QString("Value12"),				QMetaType::Double);
+			append(QString("Value13"),				QMetaType::Double);
+			append(QString("Value14"),				QMetaType::Double);
+			append(QString("Value15"),				QMetaType::Double);
 
 			break;
 
 		case SQL_TABLE_LINEARITY_20_EL:
 		case SQL_TABLE_LINEARITY_20_EN:
 
-			append("ObjectID",						QVariant::Int);
-			append("MeasureID",						QVariant::Int);
+			append("ObjectID",						QMetaType::Int);
+			append("MeasureID",						QMetaType::Int);
 
-			append(QString("MeasurementCount"),		QVariant::Int);
+			append(QString("MeasurementCount"),		QMetaType::Int);
 
-			append(QString("Measurement0"),			QVariant::Double);
-			append(QString("Measurement1"),			QVariant::Double);
-			append(QString("Measurement2"),			QVariant::Double);
-			append(QString("Measurement3"),			QVariant::Double);
-			append(QString("Measurement4"),			QVariant::Double);
-			append(QString("Measurement5"),			QVariant::Double);
-			append(QString("Measurement6"),			QVariant::Double);
-			append(QString("Measurement7"),			QVariant::Double);
-			append(QString("Measurement8"),			QVariant::Double);
-			append(QString("Measurement9"),			QVariant::Double);
-			append(QString("Measurement10"),		QVariant::Double);
-			append(QString("Measurement11"),		QVariant::Double);
-			append(QString("Measurement12"),		QVariant::Double);
-			append(QString("Measurement13"),		QVariant::Double);
-			append(QString("Measurement14"),		QVariant::Double);
-			append(QString("Measurement15"),		QVariant::Double);
-			append(QString("Measurement16"),		QVariant::Double);
-			append(QString("Measurement17"),		QVariant::Double);
-			append(QString("Measurement18"),		QVariant::Double);
-			append(QString("Measurement19"),		QVariant::Double);
+			append(QString("Measurement0"),			QMetaType::Double);
+			append(QString("Measurement1"),			QMetaType::Double);
+			append(QString("Measurement2"),			QMetaType::Double);
+			append(QString("Measurement3"),			QMetaType::Double);
+			append(QString("Measurement4"),			QMetaType::Double);
+			append(QString("Measurement5"),			QMetaType::Double);
+			append(QString("Measurement6"),			QMetaType::Double);
+			append(QString("Measurement7"),			QMetaType::Double);
+			append(QString("Measurement8"),			QMetaType::Double);
+			append(QString("Measurement9"),			QMetaType::Double);
+			append(QString("Measurement10"),		QMetaType::Double);
+			append(QString("Measurement11"),		QMetaType::Double);
+			append(QString("Measurement12"),		QMetaType::Double);
+			append(QString("Measurement13"),		QMetaType::Double);
+			append(QString("Measurement14"),		QMetaType::Double);
+			append(QString("Measurement15"),		QMetaType::Double);
+			append(QString("Measurement16"),		QMetaType::Double);
+			append(QString("Measurement17"),		QMetaType::Double);
+			append(QString("Measurement18"),		QMetaType::Double);
+			append(QString("Measurement19"),		QMetaType::Double);
 
 			break;
 
 		case SQL_TABLE_LINEARITY_POINT:
 
-			append("ObjectID",						QVariant::Int);
-			append("PointID",						QVariant::Int);
+			append("ObjectID",						QMetaType::Int);
+			append("PointID",						QMetaType::Int);
 
-			append("PercentValue",					QVariant::Double);
+			append("PercentValue",					QMetaType::Double);
 
 			break;
 
 		case SQL_TABLE_COMPARATOR:
 
-			append("ObjectID",						QVariant::Int);
-			append("MeasureID",						QVariant::Int);
+			append("ObjectID",						QMetaType::Int);
+			append("MeasureID",						QMetaType::Int);
 
-			append("Filter",						QVariant::Bool);
-			append("Valid",							QVariant::Bool);
+			append("Filter",						QMetaType::Bool);
+			append("Valid",							QMetaType::Bool);
 
-			append("ConnectSignalID",				QVariant::String, 64);
-			append("ConnectType",					QVariant::Int);
+			append("ConnectSignalID",				QMetaType::QString, 64);
+			append("ConnectType",					QMetaType::Int);
 
-			append("AppSignalID",					QVariant::String, 64);
-			append("CustomAppSignalID",				QVariant::String, 64);
-			append("EquipmentID",					QVariant::String, 256);
-			append("Caption",						QVariant::String, 256);
+			append("AppSignalID",					QMetaType::QString, 64);
+			append("CustomAppSignalID",				QMetaType::QString, 64);
+			append("EquipmentID",					QMetaType::QString, 256);
+			append("Caption",						QMetaType::QString, 256);
 
-			append("ModuleSN",						QVariant::Int);
-			append("ModuleCaption",					QVariant::String, 64);
-			append("RackIndex",						QVariant::Int);
-			append("RackCaption",					QVariant::String, 64);
-			append("Channel",						QVariant::Int);
-			append("Chassis",						QVariant::Int);
-			append("Module",						QVariant::Int);
-			append("Place",							QVariant::Int);
+			append("ModuleSN",						QMetaType::Int);
+			append("ModuleCaption",					QMetaType::QString, 64);
+			append("RackIndex",						QMetaType::Int);
+			append("RackCaption",					QMetaType::QString, 64);
+			append("Channel",						QMetaType::Int);
+			append("Chassis",						QMetaType::Int);
+			append("Module",						QMetaType::Int);
+			append("Place",							QMetaType::Int);
 
-			append("CalibratorPrecision",			QVariant::Int);
+			append("CalibratorPrecision",			QMetaType::Int);
 
-			append("CompareAppSignalID"	,			QVariant::String, 64);
-			append("OutputAppSignalID",				QVariant::String, 64);
+			append("CompareAppSignalID"	,			QMetaType::QString, 64);
+			append("OutputAppSignalID",				QMetaType::QString, 64);
 
-			append("CmpValueType",					QVariant::Int);
-			append("CmpType",						QVariant::Int);
+			append("CmpValueType",					QMetaType::Int);
+			append("CmpType",						QMetaType::Int);
 
-			append("ElectricNominal",				QVariant::Double);
-			append("ElectricMeasure",				QVariant::Double);
+			append("ElectricNominal",				QMetaType::Double);
+			append("ElectricMeasure",				QMetaType::Double);
 
-			append("EngineeringNominal",			QVariant::Double);
-			append("EngineeringMeasure",			QVariant::Double);
+			append("EngineeringNominal",			QMetaType::Double);
+			append("EngineeringMeasure",			QMetaType::Double);
 
-			append("ElectricLowLimit",				QVariant::Double);
-			append("ElectricHighLimit",				QVariant::Double);
-			append("ElectricUnit",					QVariant::String, 32);
-			append("ElectricPrecision",				QVariant::Int);
+			append("ElectricLowLimit",				QMetaType::Double);
+			append("ElectricHighLimit",				QMetaType::Double);
+			append("ElectricUnit",					QMetaType::QString, 32);
+			append("ElectricPrecision",				QMetaType::Int);
 
-			append("EngineeringLowLimit",			QVariant::Double);
-			append("EngineeringHighLimit",			QVariant::Double);
-			append("EngineeringUnit",				QVariant::String, 32);
-			append("EngineeringPrecision",			QVariant::Int);
+			append("EngineeringLowLimit",			QMetaType::Double);
+			append("EngineeringHighLimit",			QMetaType::Double);
+			append("EngineeringUnit",				QMetaType::QString, 32);
+			append("EngineeringPrecision",			QMetaType::Int);
 
-			append("ElectricErrorAbsolute",			QVariant::Double);
-			append("ElectricErrorReduce",			QVariant::Double);
-			append("ElectricErrorRelative",			QVariant::Double);
-			append("ElectricLimitErrorAbsolute",	QVariant::Double);
-			append("ElectricLimitErrorReduce",		QVariant::Double);
-			append("ElectricLimitErrorRelative",	QVariant::Double);
+			append("ElectricErrorAbsolute",			QMetaType::Double);
+			append("ElectricErrorReduce",			QMetaType::Double);
+			append("ElectricErrorRelative",			QMetaType::Double);
+			append("ElectricLimitErrorAbsolute",	QMetaType::Double);
+			append("ElectricLimitErrorReduce",		QMetaType::Double);
+			append("ElectricLimitErrorRelative",	QMetaType::Double);
 
-			append("EngineeringErrorAbsolute",		QVariant::Double);
-			append("EngineeringErrorReduce",		QVariant::Double);
-			append("EngineeringErrorRelative",		QVariant::Double);
-			append("EngineeringLimitErrorAbsolute",	QVariant::Double);
-			append("EngineeringLimitErrorReduce",	QVariant::Double);
-			append("EngineeringLimitErrorRelative",	QVariant::Double);
+			append("EngineeringErrorAbsolute",		QMetaType::Double);
+			append("EngineeringErrorReduce",		QMetaType::Double);
+			append("EngineeringErrorRelative",		QMetaType::Double);
+			append("EngineeringLimitErrorAbsolute",	QMetaType::Double);
+			append("EngineeringLimitErrorReduce",	QMetaType::Double);
+			append("EngineeringLimitErrorRelative",	QMetaType::Double);
 
-			append("MeasureTime",					QVariant::String, 64);
-			append("Calibrator",					QVariant::String, 64);
+			append("MeasureTime",					QMetaType::QString, 64);
+			append("Calibrator",					QMetaType::QString, 64);
 
 			break;
 
 		case SQL_TABLE_REPORT_HEADER:
 
-			append("ObjectID",						QVariant::Int);
-			append("ReportID",						QVariant::Int);
+			append("ObjectID",						QMetaType::Int);
+			append("ReportID",						QMetaType::Int);
 
 			break;
 
 		case SQL_TABLE_RACK_GROUP:
 
-			append("ObjectID",						QVariant::Int);
-			append("GroupIndex",					QVariant::Int);
+			append("ObjectID",						QMetaType::Int);
+			append("GroupIndex",					QMetaType::Int);
 
-			append("Caption",						QVariant::String, 64);
+			append("Caption",						QMetaType::QString, 64);
 
-			append("RackID0",						QVariant::String, 64);
-			append("RackID1",						QVariant::String, 64);
-			append("RackID2",						QVariant::String, 64);
-			append("RackID3",						QVariant::String, 64);
+			append("RackID0",						QMetaType::QString, 64);
+			append("RackID1",						QMetaType::QString, 64);
+			append("RackID2",						QMetaType::QString, 64);
+			append("RackID3",						QMetaType::QString, 64);
 
 			break;
 
@@ -280,26 +280,54 @@ void SqlFieldBase::append(const QSqlField& field)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SqlFieldBase::append(QString name, QVariant::Type type, int length)
+void SqlFieldBase::append(QString name, QMetaType::Type type, int length)
 {
 	if (name.isEmpty() == true)
 	{
 		return;
 	}
 
-	if (type == QVariant::Invalid)
+	if (type == QMetaType::UnknownType)
 	{
 		return;
 	}
 
-	QSqlField field(name, type);
 
-	if (type == QVariant::Double)
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))	// for Qt6
+
+	QSqlField field(name, QMetaType(type));
+
+#else											// for Qt5
+
+	QVariant::Type vtype = QVariant::Invalid;
+
+	switch(type)
+	{
+		case QMetaType::Bool:		vtype = QVariant::Bool;		break;
+		case QMetaType::Int:		vtype = QVariant::Int;		break;
+		case QMetaType::Double:		vtype = QVariant::Double;	break;
+		case QMetaType::QString:	vtype = QVariant::String;	break;
+
+		default:
+			assert(0);
+			vtype = QVariant::Invalid;
+	}
+
+	if (vtype == QVariant::Invalid)
+	{
+		return;
+	}
+
+	QSqlField field(name, vtype);
+
+#endif
+
+	if (type == QMetaType::Double)
 	{
 		field.setPrecision(9);
 	}
 
-	if (type == QVariant::String)
+	if (type == QMetaType::QString)
 	{
 		field.setLength(length);
 	}
@@ -320,6 +348,22 @@ QString SqlFieldBase::extFieldName(int index)
 
 	QString result;
 
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))	// for Qt6
+
+	switch(f.metaType().id())
+	{
+		case QMetaType::Bool:		result = QString("%1 BOOL").arg(f.name());									break;
+		case QMetaType::Int:		result = QString("%1 INTEGER").arg(f.name());								break;
+		case QMetaType::Double:		result = QString("%1 DOUBLE(0, %2)").arg(f.name()).arg(f.precision());		break;
+		case QMetaType::QString:	result = QString("%1 VARCHAR(%2)").arg(f.name()).arg(f.length());			break;
+
+		default:
+			assert(0);
+			result.clear();
+	}
+
+#else											// for Qt5
+
 	switch(f.type())
 	{
 		case QVariant::Bool:	result = QString("%1 BOOL").arg(f.name());									break;
@@ -330,6 +374,8 @@ QString SqlFieldBase::extFieldName(int index)
 		default:
 			result.clear();
 	}
+
+#endif
 
 	return result;
 }
@@ -526,7 +572,7 @@ bool SqlTable::isExist() const
 
 	bool tableIsExist = false;
 
-	int existTableCount = m_pDatabase->tables().count();
+	int existTableCount = static_cast<int>(m_pDatabase->tables().count());
 	for(int et = 0; et < existTableCount; et++)
 	{
 		if (m_pDatabase->tables().at(et).compare(SqlTableName[type]) == 0)

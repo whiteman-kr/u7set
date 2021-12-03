@@ -394,7 +394,7 @@ void PanelSignalInfo::createHeaderContexMenu()
 			{
 				QString columnName = SignalInfoColumn[column];
 
-				int pos = columnName.indexOf(QChar::LineFeed);
+				int pos = static_cast<int>(columnName.indexOf(QChar::LineFeed));
 				if (pos != -1)
 				{
 					columnName = columnName.left(pos);
@@ -614,7 +614,7 @@ void PanelSignalInfo::restoreColumnsWidth()
 	{
 		QString columnName = SignalInfoColumn[column];
 
-		int pos = columnName.indexOf(QChar::LineFeed);
+		int pos = static_cast<int>(columnName.indexOf(QChar::LineFeed));
 		if (pos != -1)
 		{
 			columnName = columnName.left(pos);
@@ -652,7 +652,7 @@ void PanelSignalInfo::saveColumnsWidth()
 	{
 		QString columnName = SignalInfoColumn[column];
 
-		int pos = columnName.indexOf(QChar::LineFeed);
+		int pos = static_cast<int>(columnName.indexOf(QChar::LineFeed));
 		if (pos != -1)
 		{
 			columnName = columnName.left(pos);

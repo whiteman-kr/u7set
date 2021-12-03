@@ -28,7 +28,7 @@ void DialogList::createInterface(double width, double height, bool hasButtons)
 	setWindowIcon(QIcon(":/icons/Signal.png"));
 	setWindowTitle(tr("List"));
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 	resize(static_cast<int>(screen.width() * width), static_cast<int>(screen.height() * height));
 	move(screen.center() - rect().center());
 
@@ -42,22 +42,22 @@ void DialogList::createInterface(double width, double height, bool hasButtons)
 	//
 	m_pExportAction = new QAction(tr("&Export ..."), this);
 	m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
-	m_pExportAction->setShortcut(Qt::CTRL + Qt::Key_E);
+	m_pExportAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_E});
 
 	m_pFindAction = new QAction(tr("&Find ..."), this);
 	m_pFindAction->setIcon(QIcon(":/icons/Find.png"));
-	m_pFindAction->setShortcut(Qt::CTRL + Qt::Key_F);
+	m_pFindAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_F});
 
 	m_pCopyAction = new QAction(tr("&Copy"), this);
 	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
-	//m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
+	//m_pCopyAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_C});
 
 	m_pCopyCellAction = new QAction(tr("Copy cell"), this);
 	m_pCopyCellAction->setIcon(QIcon(":/icons/Copy.png"));
 
 	m_pSelectAllAction = new QAction(tr("Select &All"), this);
 	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
-	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
+	m_pSelectAllAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_A});
 
 	m_pPropertyAction = new QAction(tr("Propertу ..."), this);
 	m_pPropertyAction->setIcon(QIcon(":/icons/Property.png"));

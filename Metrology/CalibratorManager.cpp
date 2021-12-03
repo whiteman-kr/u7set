@@ -8,7 +8,6 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGroupBox>
-#include <QDesktopWidget>
 
 #include "MetrologySignal.h"
 #include "Options.h"
@@ -211,8 +210,8 @@ void CalibratorManager::initDialog()
 	m_pSourceEdit->setFont(*font);
 
 
-	QRegExp rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
-	QValidator* validator = new QRegExpValidator(rx, this);
+	QRegularExpression rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
+	QValidator* validator = new QRegularExpressionValidator(rx, this);
 
 	m_valueCompleter.load(QString("%1Calibrator%2").arg(CALIBRATOR_OPTIONS_KEY).arg(m_pCalibrator->channel()));
 
@@ -229,7 +228,7 @@ void CalibratorManager::initDialog()
 	m_pRemoteControlCheck->setLayoutDirection(Qt::RightToLeft);
 	m_pRemoteControlCheck->setChecked(true);
 
-	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
+	QRect screen = parentWidget()->screen()->availableGeometry();
 	m_pErrorDialog->setMinimumSize(static_cast<int>(screen.width() * 0.4), static_cast<int>(screen.height() * 0.1));
 	m_pErrorDialog->resize(static_cast<int>(screen.width() * 0.4), static_cast<int>(screen.height() * 0.15));
 	m_pErrorDialog->move(screen.center() - rect().center());
