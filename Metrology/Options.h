@@ -775,9 +775,11 @@ public:
 	void setUpdateColumnView(Measure::Type measureType, bool state);
 
 	QFont font() const { return m_font; }
-	void setFont(const QString& fontStr)	{ m_font.fromString(fontStr); }
+	void setFont(const QFont& font)	{ m_font = font; }
+	void setFont(const QString& fontStr) { m_font.fromString(fontStr); }
 
 	QFont fontBold() const { return m_fontBold; }
+	void setFontBold(const QFont& font)	{ m_fontBold = font; }
 	void setFontBold(const QString& fontStr) { m_fontBold.fromString(fontStr); }
 
 	QColor colorNotError() const { return m_colorNotError; }
@@ -878,7 +880,8 @@ public:
 public:
 
 	QFont font() const { return m_font; }
-	void setFont(const QString& fontStr)	{ m_font.fromString(fontStr); }
+	void setFont(const QFont& font)	{ m_font = font; }
+	void setFont(const QString& fontStr) { m_font.fromString(fontStr); }
 
 	bool showNoValid() const { return m_showNoValid; }
 	void setShowNoValid(bool enable) { m_showNoValid = enable; }
@@ -988,7 +991,8 @@ public:
 public:
 
 	QFont font() const { return m_font; }
-	void setFont(const QString& fontStr)	{ m_font.fromString(fontStr); }
+	void setFont(const QFont& font)	{ m_font = font; }
+	void setFont(const QString& fontStr) { m_font.fromString(fontStr); }
 
 	QColor colorFlagSim() const { return m_colorFlagSim; }
 	void setColorFlagSim(QColor color) { m_colorFlagSim = color; }
